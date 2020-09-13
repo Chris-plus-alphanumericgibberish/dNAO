@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mextra.h"
 
 extern const char * const destroy_strings[];	/* from xhityhelpers.c */
 
@@ -1074,12 +1075,12 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		    	if ((trflags & RECURSIVETRAP) != 0)
 			    Sprintf(verbbuf, "and %s fall",
 				x_monnam(u.usteed,
-				    u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+				    M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 				    (char *)0, SUPPRESS_SADDLE, FALSE));
 			else
 			    Sprintf(verbbuf,"lead %s",
 				x_monnam(u.usteed,
-					 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+					 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 				 	 "poor", SUPPRESS_SADDLE, FALSE));
 		    } else
 #endif
@@ -1101,7 +1102,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 				if (u.usteed) {
 				pline("%s lands %s!",
 					upstart(x_monnam(u.usteed,
-						 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+						 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 						 "poor", SUPPRESS_SADDLE, FALSE)),
 					  predicament);
 				} else
@@ -1117,7 +1118,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 				if (u.usteed) {
 				pline("%s lands %s!",
 					upstart(x_monnam(u.usteed,
-						 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+						 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 						 "poor", SUPPRESS_SADDLE, FALSE)),
 					  predicament);
 				} else
@@ -1227,7 +1228,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		    if (u.usteed && !webmaker(u.usteed->data)){
 				Sprintf(verbbuf,"lead %s",
 					x_monnam(u.usteed,
-						 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+						 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 						 "poor", SUPPRESS_SADDLE, FALSE));
 		    } else
 #endif
@@ -1324,7 +1325,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		if (u.usteed)
 			Sprintf(verbbuf, "lead %s",
 				x_monnam(u.usteed,
-					 u.usteed->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+					 M_HAS_NAME(u.usteed) ? ARTICLE_NONE : ARTICLE_THE,
 				 	 (char *)0, SUPPRESS_SADDLE, FALSE));
 		else
 #endif
@@ -1494,7 +1495,7 @@ struct obj *otmp;
 			} else {
 				You("have to adjust yourself in the saddle on %s.",
 					x_monnam(mtmp,
-					 mtmp->mnamelth ? ARTICLE_NONE : ARTICLE_A,
+					 M_HAS_NAME(mtmp) ? ARTICLE_NONE : ARTICLE_A,
 				 	 (char *)0, SUPPRESS_SADDLE, FALSE));
 			}
 				
@@ -3166,68 +3167,31 @@ struct obj *obj;
 boolean force, here, lethe;
 struct monst *owner;
 {
-	/* Dips in the Lethe are a very poor idea Lethe patch*/
+	/* Dips in the Lethe are a very poor idea - Lethe patch*/
 	int luckpenalty = lethe ? 7 : 0;
-	// int luckpenalty = 0;
 	struct obj *otmp;
 	struct obj *obj_original = obj;
 	boolean obj_destroyed = FALSE;
-//	int is_lethe = level.flags.lethe || lethe;
 	int is_lethe = lethe;
 	if(owner == &youmonst){
-		if(u.ufirst_sky || u.sealsActive&SEAL_ENKI || Preservation ||
-		  (ublindf
-			&& (ublindf->otyp == R_LYEHIAN_FACEPLATE || ublindf->oartifact == ART_MASK_OF_TLALOC)
-			&& (!ublindf->cursed || rn2(3))
-		   ) || (
-			uarm
-			&& (uarm->otyp == WHITE_DRAGON_SCALES || uarm->otyp == WHITE_DRAGON_SCALE_MAIL)
-			&& (!uarm->cursed || rn2(3))
-		   ) || (
-			uarms
-			&& uarms->otyp == WHITE_DRAGON_SCALE_SHIELD
-			&& (!uarms->cursed || rn2(3))
-		   )
-		) {
+		if(Waterproof) {
 			return 0;
 		}
-		if(uarmc
-			&& (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased)
-			&& (!uarmc->cursed || rn2(3))
-		) {
-			if(uarmc->greased){
-				if (force || !rn2(uarmc->blessed ? 4 : 2)){
-					uarmc->greased = 0;
-					pline("The layer of grease on your %s dissolves.", xname(uarmc));
-				}
+		if(uarmc && uarmc->greased) {
+			if (force || !rn2(uarmc->blessed ? 4 : 2)){
+				uarmc->greased = 0;
+				pline("The layer of grease on your %s dissolves.", xname(uarmc));
 			}
 			return 0;
 		}
 	} else if(owner){ //Monster
 		struct obj *cloak = which_armor(owner, W_ARMC);
-		struct obj *armor = which_armor(owner, W_ARM);
-		struct obj *shield = which_armor(owner, W_ARMS);
-		// struct obj *blindfold = which_armor(owner, W_ARMC);
-		if((cloak
-			&& (cloak->otyp == OILSKIN_CLOAK || cloak->greased)
-			&& (!cloak->cursed || rn2(3))
-			) || (armor
-			&& (armor->otyp == WHITE_DRAGON_SCALES || armor->otyp == WHITE_DRAGON_SCALE_MAIL)
-			&& (!armor->cursed || rn2(3))
-			) || (shield
-			&& shield->otyp == WHITE_DRAGON_SCALE_SHIELD
-			&& (!shield->cursed || rn2(3))
-		   // ) || (
-			// ublindf
-			// && ublindf->otyp == R_LYEHIAN_FACEPLATE
-			// && (!ublindf->cursed || rn2(3))
-		   )
-		) {
-			if(cloak && cloak->otyp != OILSKIN_CLOAK && cloak->greased){
-				if (force || !rn2(cloak->blessed ? 4 : 2)){
-					cloak->greased = 0;
-					if(canseemon(owner)) pline("The layer of grease on %s's %s dissolves.", mon_nam(owner), xname(cloak));
-				}
+		if(mon_resistance(owner, WATERPROOF)){
+			return 0;
+		} else if (cloak && cloak->greased) {
+			if (force || !rn2(cloak->blessed ? 4 : 2)){
+				cloak->greased = 0;
+				if(canseemon(owner)) pline("The layer of grease on %s's %s dissolves.", mon_nam(owner), xname(cloak));
 			}
 			return 0;
 		}
@@ -3978,6 +3942,42 @@ struct trap *ttmp;
 	return 1;
 }
 
+void
+unshackle_mon(mtmp)
+struct monst * mtmp;
+{
+	if (!mtmp || mtmp->entangled != SHACKLES) {
+		impossible("%s not shackled?", m_monnam(mtmp));
+		return;
+	}
+
+	mtmp->entangled = 0;
+	You("unlock the shackles imprisoning %s.", mon_nam(mtmp));
+	if (mtmp->mtame){
+		verbalize("Thank you for rescuing me!");
+	}
+	else if (rnd(20) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
+		struct monst *newmon;
+		pline("%s is very grateful!", Monnam(mtmp));
+		newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+		if (newmon) mtmp = newmon;
+		if (!mtmp->mtame)
+			pline("But, apparently not grateful enough to join you.");
+	}
+	else if (mtmp->mpeaceful){
+		pline("%s is grateful for the assistance, but makes no move to help you in return.", Monnam(mtmp));
+	}
+	else if (!mtmp->mpeaceful && rnd(10) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
+		mtmp->mpeaceful = 1;
+		pline("%s is thankful enough for the rescue to not attack you, at least.", Monnam(mtmp));
+	}
+	else {
+		mtmp->movement += 12;
+		pline("That might have been a mistake.");
+	}
+	return;
+}
+
 STATIC_OVL int
 disarm_landmine(ttmp) /* Helge Hafting */
 struct trap *ttmp;
@@ -4420,30 +4420,7 @@ struct obj * tool;
 	} /* end if */
 	else if((mtmp = m_at(x,y)) && mtmp->entangled){
 		if(mtmp->entangled == SHACKLES){
-			mtmp->entangled = 0;
-			You("unlock the shackles imprisoning %s.", mon_nam(mtmp));
-			if(mtmp->mtame){
-				verbalize("Thank you for rescuing me!");
-			}
-			else if(rnd(20) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
-				struct monst *newmon;
-				pline("%s is very grateful!", Monnam(mtmp));
-				newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
-				if(newmon) mtmp = newmon;
-				if(!mtmp->mtame)
-					pline("But, apparently not grateful enough to join you.");
-			}
-			else if(mtmp->mpeaceful){
-				pline("%s is grateful for the assistance, but makes no move to help you in return.", Monnam(mtmp));
-			}
-			else if(!mtmp->mpeaceful && rnd(10) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
-				mtmp->mpeaceful = 1;
-				pline("%s is thankful enough for the rescue to not attack you, at least.", Monnam(mtmp));
-			}
-			else {
-				mtmp->movement += 12;
-				pline("That might have been a mistake.");
-			}
+			unshackle_mon(mtmp);
 		}
 		else {
 			struct obj *obj, *nobj;

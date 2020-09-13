@@ -1,4 +1,4 @@
-/*	SCCS Id: @(#)artilist.h 3.4	2003/02/12	*/
+/*	SCCS Id: @(#)artilist.c 3.4	2003/02/12	*/
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 #include "macromagic.h"
@@ -9,7 +9,7 @@
 #define NO_MONS()									 0,   0,   0,   0,   0,   0,   0
 //#define MONS(mt, mfm, mft, mfb, mfg, mfr, mfv)		mt, mfm, mft, mfb, mfg, mfr, mfv
 
-#define MONS(...) SET07(__VA_ARGS__)
+#define MONS(...) SET07(0,0,0,0,0,0,0, __VA_ARGS__)
 #define vsMSYM(x) C01((x))
 #define vsMM(x)   C02((x))
 #define vsMT(x)   C03((x))
@@ -27,11 +27,13 @@
 #ifdef MAKEDEFS_C
 /* in makedefs.c, all we care about is the list of names */
 
-#define A(nam, typ, desc, cost, mat, siz, wgt, aln, cls, rac, val, gen, vsmons, attack, afl, wpr, wfl, cpr, cfl, inv, ifl) nam
+#define A(nam, ...) nam
 
 static const char *artifact_names[] = {
 #else
-/* in artifact.c, set up the actual artifact list structure */
+/* set up the actual artifact list structure */
+#include "hack.h"
+#include "artifact.h"
 
 #define A(nam, typ, desc, cost, mat, siz, wgt, aln, cls, rac, val, gen, vsmons, attack, afl, wpr, wfl, cpr, cfl, inv, ifl) { \
 	 typ, nam, desc, \
@@ -43,7 +45,7 @@ static const char *artifact_names[] = {
 	 cpr, cfl, \
 	 inv, ifl }
 
-STATIC_OVL NEARDATA struct artifact artilist[] = {
+NEARDATA struct artifact artilist[] = {
 #endif	/* MAKEDEFS_C */
 
 /* Artifact cost rationale:
@@ -73,6 +75,16 @@ A("Excalibur",			LONG_SWORD,						(const char *)0,
 	NO_MONS(),
 	ATTK(AD_PHYS, 20, 10), NOFLAG,
 	PROPS(DRAIN_RES, SEARCHING), (ARTP_SEEK),
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+A("Dirge",			LONG_SWORD,						"half-melted %s",
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_INHER|ARTG_MAJOR|ARTG_FXALGN),
+	NO_MONS(),
+	ATTK(AD_ACID, 5, 10), NOFLAG,
+	PROPS(ACID_RES), NOFLAG,
 	PROPS(), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
@@ -313,7 +325,7 @@ A("Peace Keeper",		ATHAME,							(const char *)0,
 /* set str and con to 25, and smashing ogres excercises str and wis <- A-tier */
 A("Ogresmasher",		WAR_HAMMER,						(const char *)0,
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_LAWFUL, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
+	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	MONS(vsMSYM(S_OGRE)),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_VORPAL|ARTA_CANCEL),
 	PROPS(), NOFLAG,
@@ -1586,8 +1598,8 @@ A("The Mask of Tlaloc",				MASK,					(const char *)0,
 	A_LAWFUL, PM_ARCHEOLOGIST, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
-	PROPS(), NOFLAG,
-	PROPS(HALF_SPDAM, ANTIMAGIC, COLD_RES, SHOCK_RES), NOFLAG,	/* missing: waterproofing */
+	PROPS(WATERPROOF), NOFLAG,
+	PROPS(HALF_SPDAM, ANTIMAGIC, COLD_RES, SHOCK_RES), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 /*Arc redesign by Riker*/
@@ -1839,7 +1851,7 @@ A("Liecleaver",						DROVEN_CROSSBOW,	(const char *)0,
 	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, PM_DROW, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
-	ATTK(AD_PHYS, 1, 10), NOFLAG,
+	ATTK(AD_PHYS, 1, 0), NOFLAG,
 	PROPS(SEARCHING, DRAIN_RES), (ARTP_SEEK),
 	PROPS(HALLUC_RES), NOFLAG,
 	CREATE_AMMO, NOFLAG
@@ -2180,6 +2192,17 @@ A("Ritual Ringed Spear",		SPEAR,					"molten-ringed spear",
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	RINGED_SPEAR, (ARTI_PLUSTEN)
+	),
+
+/*Needs encyc entry*/
+A("Velka's Rapier",		RAPIER,					(const char *)0,
+	4000L, METAL, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_MAGM, 20, 0), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
 	),
 
 /*Needs encyc entry*/
@@ -3356,4 +3379,4 @@ A((const char *)0,					STRANGE_OBJECT,		(const char *)0,
 #ifndef MAKEDEFS_C
 #endif
 
-/*artilist.h*/
+/*artilist.c*/

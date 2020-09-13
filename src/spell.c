@@ -5525,8 +5525,10 @@ int spell;
 
 	splcaster = urole.spelbase;
 	special = urole.spelheal;
-	if(uwep->oartifact == ART_RITUAL_RINGED_SPEAR){
+	if(uwep && uwep->oartifact == ART_RITUAL_RINGED_SPEAR){
 		statused = ACURR(A_WIS);
+	} else if(uwep && uwep->oartifact == ART_VELKA_S_RAPIER){
+		statused = ACURR(A_INT);
 	} else if(u.specialSealsActive&SEAL_NUMINA){
 		if(abs(u.wisSpirits - u.intSpirits) <= 1) statused = max(ACURR(A_WIS), ACURR(A_INT));
 	} else if(u.wisSpirits > u.intSpirits){
@@ -5558,7 +5560,6 @@ int spell;
 			|| uwep->oartifact == ART_ARYFAERN_KERYM
 			|| uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC
 			|| uwep->oartifact == ART_PROFANED_GREATSCYTHE
-			|| uwep->oartifact == ART_RITUAL_RINGED_SPEAR
 			|| uwep->oartifact == ART_GARNET_ROD
 		) splcaster -= urole.spelarmr;
 		
@@ -5570,7 +5571,7 @@ int spell;
 			splcaster -= urole.spelarmr;
 		}
 
-		if (uwep->otyp == KHAKKHARA) {	// a priestly channeling tool
+		if (uwep->otyp == KHAKKHARA || uwep->oartifact == ART_RITUAL_RINGED_SPEAR) {	// a priestly channeling tool
 			cast_bon = 0;
 			if(spell_skilltype(spellid(spell)) == P_CLERIC_SPELL
 			 || spell_skilltype(spellid(spell)) == P_HEALING_SPELL
@@ -5582,7 +5583,9 @@ int spell;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 
-		if (uwep->otyp == BELL || uwep->otyp == BELL_OF_OPENING) {	// a priestly channeling tool
+		if (uwep->otyp == BELL || uwep->otyp == BELL_OF_OPENING
+		 || uwep->oartifact == ART_VELKA_S_RAPIER
+		) {	// a priestly channeling tool
 			cast_bon = 0;
 			if(spell_skilltype(spellid(spell)) == P_CLERIC_SPELL
 			 || spell_skilltype(spellid(spell)) == P_HEALING_SPELL
@@ -5611,7 +5614,7 @@ int spell;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 
-		if (uwep->otyp == QUARTERSTAFF) {	// a sorcerous channeling tool
+		if (uwep->otyp == QUARTERSTAFF || uwep->oartifact == ART_RITUAL_RINGED_SPEAR) {	// a sorcerous channeling tool
 			cast_bon = 0;
 			if (spell_skilltype(spellid(spell)) == P_ATTACK_SPELL)
 				cast_bon += 2;

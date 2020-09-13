@@ -3440,13 +3440,13 @@ When you reach the temple, sacrifice the Amulet to %d.
 #	Half-Dragon, Female
 #
 %Cc Hdf 00001
-Home away from home
+You find yourself in a frozen forest.
 %E
 %Cp Hdf 00002
-Home away from home 2
+Once again, you find yourself in a frozen forest.
 %E
 %Cp Hdf 00003
-Home away from home 3
+UNUSED
 %E
 %Cp Hdf 00005
 "Pre"

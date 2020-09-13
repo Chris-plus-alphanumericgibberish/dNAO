@@ -3,10 +3,8 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "eshk.h"
-#include "epri.h"
-#include "ehor.h"
-
+#include "mextra.h"
+#include "horrordata.h"
 /*	These routines provide basic data for any type of monster. */
 STATIC_DCL void FDECL(set_template_data, (struct permonst *, struct permonst *, int));
 STATIC_DCL struct permonst * FDECL(permonst_of, (int, int));
@@ -200,14 +198,17 @@ int faction;
 	int mtyp = base->mtyp;
 	/* copy original */
 	*ptr = *base;
+
+#define MT_ITEMS (MT_GREEDY|MT_JEWELS|MT_COLLECT|MT_MAGIC)
+
 	/* make changes to the permonst as necessary */
 	switch (faction)
 	{
 	case ZOMBIFIED:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -231,8 +232,8 @@ int faction;
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -251,8 +252,8 @@ int faction;
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -272,8 +273,8 @@ int faction;
 	case FRACTURED:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_HOSTILE);
-		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsb |= (MB_NOEYES);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
@@ -281,8 +282,8 @@ int faction;
 	case VAMPIRIC:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_HOSTILE);
-		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD | MA_VAMPIRE);
 		/* resists: */
@@ -338,6 +339,8 @@ int faction;
 		/* attacks only */
 		break;
 	}
+#undef MT_ITEMS
+
 	/* adjust attacks in the permonst */
 	extern struct attack noattack;
 	boolean special = FALSE;
@@ -1680,7 +1683,7 @@ struct monst *mtmp;
 
 	/* stalking types follow, but won't when fleeing unless you hold
 	   the Amulet */
-	return (boolean)(((mtmp->data->mflagst & MT_STALK) || is_derived_undead_mon(mtmp)) &&
+	return (boolean)((mtmp->data->mflagst & MT_STALK) &&
 				(!mtmp->mflee || mtmp->mtyp == PM_BANDERSNATCH || u.uhave.amulet));
 }
 
@@ -1696,6 +1699,9 @@ static const short grownups[][2] = {
 		{PM_LARGE_PSEUDODRAGON, PM_WINGED_PSEUDODRAGON}, {PM_WINGED_PSEUDODRAGON, PM_HUGE_PSEUDODRAGON}, {PM_HUGE_PSEUDODRAGON, PM_GIGANTIC_PSEUDODRAGON},
 	{PM_PONY, PM_HORSE}, {PM_HORSE, PM_WARHORSE},
 	{PM_UNDEAD_KNIGHT, PM_WARRIOR_OF_SUNLIGHT},
+	{PM_UNDEAD_MAIDEN, PM_KNIGHT_OF_THE_PRINCESS_S_GUARD},
+	{PM_BLUE_SENTINEL, PM_DARKMOON_KNIGHT},
+	{PM_UNDEAD_REBEL, PM_OCCULTIST},
 	{PM_KOBOLD, PM_LARGE_KOBOLD}, {PM_LARGE_KOBOLD, PM_KOBOLD_LORD},
 	{PM_GNOME, PM_GNOME_LORD}, {PM_GNOME_LORD, PM_GNOME_KING},
 	{PM_GNOME, PM_GNOME_LADY}, {PM_GNOME_LADY, PM_GNOME_QUEEN},

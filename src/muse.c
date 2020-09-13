@@ -7,7 +7,7 @@
  */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 
 extern const int monstr[];
 
@@ -620,7 +620,8 @@ mon_tele:
 		if (mtmp->isshk || mtmp->isgd || mtmp->ispriest) return 2;
 		m_flee(mtmp);
 		mreadmsg(mtmp, otmp);
-		m_useup(mtmp, otmp);	/* otmp might be free'ed */
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);	/* otmp might be free'ed */
 		how = SCR_TELEPORTATION;
 		if (obj_is_cursed || mtmp->mconf) {
 			int nlev;
@@ -728,7 +729,8 @@ mon_tele:
 		else if (!objects[SCR_CREATE_MONSTER].oc_name_known
 			&& !objects[SCR_CREATE_MONSTER].oc_uname)
 		    docall(otmp);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	    }
 	case MUSE_TRAPDOOR:
@@ -863,7 +865,8 @@ mon_tele:
 		}
 		if (vismon) pline("%s looks better.", Monnam(mtmp));
 		if (oseen) makeknown(POT_HEALING);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	case MUSE_POT_EXTRA_HEALING:
 		mquaffmsg(mtmp, otmp);
@@ -878,7 +881,8 @@ mon_tele:
 		}
 		if (vismon) pline("%s looks much better.", Monnam(mtmp));
 		if (oseen) makeknown(POT_EXTRA_HEALING);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	case MUSE_POT_FULL_HEALING:
 		mquaffmsg(mtmp, otmp);
@@ -892,7 +896,8 @@ mon_tele:
 		}
 		if (vismon) pline("%s looks completely healed.", Monnam(mtmp));
 		if (oseen) makeknown(otmp->otyp);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	case MUSE_LIZARD_CORPSE:
 		/* not actually called for its unstoning effect */
@@ -1550,7 +1555,8 @@ struct monst *mtmp;
 		}
 		/* Preserve the cursedness of the item before freeing it */
 		int cursed = otmp->cursed;
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		/* Attack the player */
 		if (distmin(mmx, mmy, u.ux, u.uy) == 1 && !cursed) {
 		    int dmg;
@@ -2080,7 +2086,8 @@ struct monst *mtmp;
 			      && !objects[POT_GAIN_LEVEL].oc_uname)
 				docall(otmp);
 			}
-			m_useup(mtmp, otmp);
+			if (!otmp->oartifact)
+				m_useup(mtmp, otmp);
 			migrate_to_level(mtmp, ledger_no(&tolevel),
 					 MIGR_RANDOM, (coord *)0);
 			return 2;
@@ -2098,7 +2105,8 @@ skipmsg:
 		}
 		if (vismon) pline("%s seems more experienced.", Monnam(mtmp));
 		if (oseen) makeknown(POT_GAIN_LEVEL);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		if (!grow_up(mtmp,(struct monst *)0)) return 1;
 			/* grew into genocided monster */
 		return 2;
@@ -2156,7 +2164,8 @@ skipmsg:
 				break;
 			}
 		}
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		if (!grow_up(mtmp,(struct monst *)0)) return 1;
 			/* grew into genocided monster */
 		return 2;
@@ -2196,7 +2205,8 @@ skipmsg:
 		   player's character becomes "very fast" temporarily;
 		   monster becomes "one stage faster" permanently */
 		mon_adjust_speed(mtmp, 1, otmp);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	case MUSE_POT_GAIN_ENERGY:
 		mquaffmsg(mtmp, otmp);
@@ -2209,7 +2219,8 @@ skipmsg:
 			mtmp->mcan = 1;
 		}
 		if (oseen) makeknown(POT_GAIN_ENERGY);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	case MUSE_POT_AMNESIA:
 		mquaffmsg(mtmp, otmp);
@@ -2238,7 +2249,8 @@ museamnesia:
 			mtmp->mferal = 0;
 			mtmp->mpeaceful = 0;
 		}
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	case MUSE_WAN_POLYMORPH:
 		mzapmsg(mtmp, otmp, TRUE);
@@ -2251,7 +2263,8 @@ museamnesia:
 		if (vismon) pline("%s suddenly mutates!", Monnam(mtmp));
 		if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, FALSE, FALSE);
 		if (oseen) makeknown(POT_POLYMORPH);
-		m_useup(mtmp, otmp);
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
 		return 2;
 	case MUSE_POLY_TRAP:
 		if (vismon)
@@ -2384,8 +2397,9 @@ museamnesia:
 			}
 		    }
 		}
-		m_useup(mtmp, otmp);
-	        return 0;
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
+	    return 0;
 	case MUSE_MASK:{
 		int pm = otmp->corpsenm;
 		if(canseemon(mtmp))
@@ -2565,7 +2579,7 @@ struct obj *obj;
 					 obj->corpsenm != PM_GREEN_SLIME &&
 					 obj->corpsenm != PM_FLUX_SLIME))));
 	    if (typ == EGG)
-		return (boolean)(touch_petrifies(&mons[obj->corpsenm]));
+		return (boolean)(obj->corpsenm != NON_PM && touch_petrifies(&mons[obj->corpsenm]));
 	    break;
 	case CHAIN_CLASS:
 	    if (typ == IRON_BANDS

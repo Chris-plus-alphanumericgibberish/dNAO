@@ -29,14 +29,13 @@
 #define HFire_resistance	u.uprops[FIRE_RES].intrinsic
 #define EFire_resistance	u.uprops[FIRE_RES].extrinsic
 #define Fire_resistance		(HFire_resistance || EFire_resistance || \
-				 species_resists_fire(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE) ||\
+				 species_resists_fire(&youmonst) || \
 				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA )
 #define InvFire_resistance	(EFire_resistance || Preservation || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
 #define HCold_resistance	u.uprops[COLD_RES].intrinsic
 #define ECold_resistance	u.uprops[COLD_RES].extrinsic
-#define NCold_resistance		((Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_COLD) ||\
-				 species_resists_cold(&youmonst) || \
+#define NCold_resistance		(species_resists_cold(&youmonst) || \
 				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 #define Cold_resistance		(HCold_resistance || ECold_resistance || NCold_resistance)
 #define InvCold_resistance	(ECold_resistance || Preservation || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
@@ -44,7 +43,6 @@
 #define HSleep_resistance	u.uprops[SLEEP_RES].intrinsic
 #define ESleep_resistance	u.uprops[SLEEP_RES].extrinsic
 #define Sleep_resistance	(HSleep_resistance || ESleep_resistance || \
-				 (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_SLEE) || \
 				 species_resists_sleep(&youmonst))
 
 #define HDisint_resistance	u.uprops[DISINT_RES].intrinsic
@@ -55,19 +53,19 @@
 #define HShock_resistance	u.uprops[SHOCK_RES].intrinsic
 #define EShock_resistance	u.uprops[SHOCK_RES].extrinsic
 #define Shock_resistance	(HShock_resistance || EShock_resistance || \
-				 species_resists_elec(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ELEC) ||\
+				 species_resists_elec(&youmonst) || \
 				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL )
 #define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && Race_if(PM_ANDROID)))
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
 #define EPoison_resistance	u.uprops[POISON_RES].extrinsic
 #define Poison_resistance	(HPoison_resistance || EPoison_resistance || GoodHealth || \
-				 species_resists_poison(&youmonst) || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_DRST) ||\
+				 species_resists_poison(&youmonst) || \
 				 (ward_at(u.ux,u.uy) == WINGS_OF_GARUDA && num_wards_at(u.ux, u.uy) > rn2(7)))
 
 #define HAcid_resistance	u.uprops[ACID_RES].intrinsic
 #define EAcid_resistance	u.uprops[ACID_RES].extrinsic
-#define Acid_resistance		(HAcid_resistance || EAcid_resistance || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_ACID) ||\
+#define Acid_resistance		(HAcid_resistance || EAcid_resistance ||\
 							 species_resists_acid(&youmonst))
 #define InvAcid_resistance	(EAcid_resistance || Preservation)
 
@@ -84,7 +82,7 @@
 
 #define HAntimagic		u.uprops[ANTIMAGIC].intrinsic
 #define EAntimagic		u.uprops[ANTIMAGIC].extrinsic
-#define Antimagic		(EAntimagic || HAntimagic || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_MAGM) ||\
+#define Antimagic		(EAntimagic || HAntimagic || \
 						(u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						&& which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
 						Nullmagic ||\
@@ -164,7 +162,7 @@
 /* Those implemented solely as timeouts (we use just intrinsic) */
 #define HStun			u.uprops[STUNNED].intrinsic
 #define Stunned			((HStun || u.umonnum == PM_STALKER || \
-				 youmonst.data->mlet == S_BAT) && !(u.specialSealsActive&SEAL_NUMINA))
+						(Upolyd && youmonst.data->mlet == S_BAT)) && !(u.specialSealsActive&SEAL_NUMINA))
 		/* Note: birds will also be stunned */
 
 #define HConfusion		u.uprops[CONFUSION].intrinsic
@@ -463,6 +461,10 @@
 
 #define Breathless		(HMagical_breathing || EMagical_breathing || \
 				 breathless(youracedata))
+
+#define HWaterproof	u.uprops[WATERPROOF].intrinsic
+#define EWaterproof	u.uprops[WATERPROOF].extrinsic
+#define Waterproof (Preservation || HWaterproof || EWaterproof || u.ufirst_sky)
 
 //define Underwater		(u.uinwater)
 #define Underwater		(u.usubwater || is_3dwater(u.ux,u.uy))

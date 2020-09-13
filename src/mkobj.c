@@ -1407,6 +1407,13 @@ start_corpse_timeout(body)
 	} else if (attchmon && 
 		(body->corpsenm == PM_UNDEAD_KNIGHT
 		|| body->corpsenm == PM_WARRIOR_OF_SUNLIGHT
+		|| body->corpsenm == PM_UNDEAD_MAIDEN
+		|| body->corpsenm == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+		|| body->corpsenm == PM_BLUE_SENTINEL
+		|| body->corpsenm == PM_DARKMOON_KNIGHT
+		|| body->corpsenm == PM_UNDEAD_REBEL
+		|| body->corpsenm == PM_PARDONER
+		|| body->corpsenm == PM_OCCULTIST
 		)
 		&& !body->norevive
 	) {
@@ -1704,6 +1711,17 @@ struct obj* obj;
 	case SHEMAGH:
 	case STUDDED_LEATHER_ARMOR:
 	case BARNACLE_ARMOR:
+	case HEALER_UNIFORM:
+	case NOBLE_S_DRESS:
+	case CONSORT_S_SUIT:
+	case GENTLEMAN_S_SUIT:
+	case BLACK_DRESS:
+	case T_SHIRT:
+	case HAWAIIAN_SHIRT:
+	case STRIPED_SHIRT:
+	case ICHCAHUIPILLI:
+	case RUFFLED_SHIRT:
+	case VICTORIAN_UNDERWEAR:
 	case YA:
 	case ORIHALCYON_GAUNTLETS:
 	case HARMONIUM_HELM:
@@ -2500,12 +2518,30 @@ struct monst *mtmp;
 	struct obj *otmp;
 	int lth, namelth;
 
-	lth = sizeof(struct monst) + mtmp->mxlth + mtmp->mnamelth;
+	void * mextra_bundle;
+	/* if mtmp has an mextra, bundle it */
+	if (mtmp->mextra_p) {
+		void * tmp, * tmp2;
+		mextra_bundle = bundle_mextra(mtmp, &lth);
+		/* realloc_obj actually wants the whole monster */
+		tmp = malloc(lth + sizeof(struct monst));
+		memcpy(tmp, (genericptr_t) mtmp, sizeof(struct monst));
+		tmp2 = ((struct monst *)tmp) + 1;
+		memcpy(tmp2, mextra_bundle, lth);
+		lth += sizeof(struct monst);
+		free(mextra_bundle);	/* free the memory allocated to make the original bundle */
+		mextra_bundle = tmp;	/* mextra_bundle now points to a continuous mtmp+mextra */
+	}
+	else {
+		mextra_bundle = malloc(sizeof(struct monst));
+		memcpy(mextra_bundle, (genericptr_t) mtmp, sizeof(struct monst));
+		lth = sizeof(struct monst);
+	}
 	namelth = obj->onamelth ? strlen(ONAME(obj)) + 1 : 0;
-	otmp = realloc_obj(obj, lth, (genericptr_t) mtmp, namelth, ONAME(obj));
+	otmp = realloc_obj(obj, lth, (genericptr_t) mextra_bundle, namelth, ONAME(obj));
 	if (otmp && otmp->oxlth) {
+		/* it reallocated successfully */
 		struct monst *mtmp2 = (struct monst *)otmp->oextra;
-		if (mtmp->data) mtmp2->mtyp = monsndx(mtmp->data);
 		/* invalidate pointers */
 		/* m_id is needed to know if this is a revived quest leader */
 		/* but m_id must be cleared when loading bones */
@@ -2519,6 +2555,9 @@ struct monst *mtmp;
 
 /* returns a pointer to a new monst structure based on
  * the one contained within the obj.
+ * If obj did not have an oattached monst, returns a
+ * temporary monst pointer which cannot be inserted
+ * into the monst chains.
  */
 struct monst *
 get_mtraits(obj, copyof)
@@ -2528,19 +2567,24 @@ boolean copyof;
 	struct monst *mtmp = (struct monst *)0;
 	struct monst *mnew = (struct monst *)0;
 
-	if (obj->oxlth && obj->oattached == OATTACHED_MONST)
+	if (obj->oxlth && obj->oattached == OATTACHED_MONST) {
 		mtmp = (struct monst *)obj->oextra;
+	}
 	if (mtmp) {
-	    if (copyof) {
-		int lth = mtmp->mxlth + mtmp->mnamelth;
-		mnew = newmonst(lth);
-		lth += sizeof(struct monst);
-		(void) memcpy((genericptr_t)mnew,
-				(genericptr_t)mtmp, lth);
-	    } else {
-	      /* Never insert this returned pointer into mon chains! */
-	    	mnew = mtmp;
-	    }
+		if (copyof) {
+			mnew = malloc(sizeof(struct monst));	/* allocate memory for the monster */
+			memcpy((genericptr_t)mnew, (genericptr_t)mtmp, sizeof(struct monst));
+
+			/* we may also need to copy mextra */
+			if (mnew->mextra_p) {
+				void * mextra_bundle = ((struct monst *)obj->oextra)+1;
+				unbundle_mextra(mnew, mextra_bundle);
+			}
+		}
+		else {
+			/* return a read-only mtmp */
+			mnew = mtmp;
+		}
 	}
 	return mnew;
 }

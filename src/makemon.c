@@ -3,10 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "epri.h"
-#include "emin.h"
-#include "edog.h"
-#include "ehor.h"
+#include "mextra.h"
 #ifdef REINCARNATION
 #include <ctype.h>
 #endif
@@ -135,7 +132,7 @@ register int x, y, n;
 	mndx = monsndx(mtmp->data);
 	if(!(u.uevent.uaxus_foe) || mndx > PM_QUINON || mndx < PM_MONOTON){
 	 while(cnt--) {
-		if (peace_minded(mtmp->data) && !is_derived_undead_mon(mtmp)) continue;
+		if (peace_minded(mtmp->data)) continue;
 		/* Don't create groups of peaceful monsters since they'll get
 		 * in our way.  If the monster has a percentage chance so some
 		 * are peaceful and some are not, the result will just be a
@@ -5223,7 +5220,7 @@ register struct monst *mtmp;
 		}
 		break;
 	    case S_ZOMBIE:
-		if(mm == PM_UNDEAD_KNIGHT || mm == PM_WARRIOR_OF_SUNLIGHT){
+		if(mm == PM_UNDEAD_KNIGHT){
 			otmp = mksobj(LONG_SWORD, FALSE, FALSE);
 			otmp->oeroded = 1;
 			(void) mpickobj(mtmp, otmp);
@@ -5246,6 +5243,248 @@ register struct monst *mtmp;
 			set_material_gm(otmp, IRON);
 			otmp->oeroded = 1;
 			fix_object(otmp);
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_WARRIOR_OF_SUNLIGHT){
+			otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(KITE_SHIELD, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HELMET, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_UNDEAD_MAIDEN){
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(BELL, FALSE, FALSE);
+			set_material_gm(otmp, GOLD);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(LOW_BOOTS, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(ROBE, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GLOVES, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+			
+			otmp = mksobj(WIDE_HAT, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD){
+			otmp = mksobj(SPEAR, FALSE, FALSE);
+			set_material_gm(otmp, SILVER);
+			otmp->objsize = MZ_LARGE;
+			fix_object(otmp);
+			bless(otmp);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(BELL, FALSE, FALSE);
+			set_material_gm(otmp, GOLD);
+			bless(otmp);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HIGH_BOOTS, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(ROBE, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HELMET, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, LEATHER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_BLUE_SENTINEL){
+			otmp = mksobj(SHORT_SWORD, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HALBERD, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ROUNDSHIELD, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->objsize = MZ_SMALL;
+			fix_object(otmp);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->oeroded = 1;
+			fix_object(otmp);
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			otmp->oeroded = 2;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(find_vhelm(), FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, IRON);
+			otmp->oeroded = 1;
+			fix_object(otmp);
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_DARKMOON_KNIGHT){
+			otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(find_vhelm(), FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_UNDEAD_REBEL){
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(CLUB, FALSE, FALSE);
+			add_oprop(otmp, OPROP_OCLTW);
+			otmp->oeroded = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HIGH_BOOTS, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(LEATHER_ARMOR, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GLOVES, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+			
+			otmp = mksobj(LEATHER_HELM, FALSE, FALSE);
+			otmp->oeroded2 = 1;
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_OCCULTIST){
+			otmp = mksobj(CLUB, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			add_oprop(otmp, OPROP_OCLTW);
+			otmp->objsize = MZ_HUGE;
+			fix_object(otmp);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(TOWER_SHIELD, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(ARMORED_BOOTS, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(find_vhelm(), FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GAUNTLETS, FALSE, FALSE);
+			set_material_gm(otmp, DRAGON_HIDE);
+			(void) mpickobj(mtmp,otmp);
+		} else if(mm == PM_PARDONER){
+			otmp = mksobj(RAPIER, FALSE, FALSE);
+			add_oprop(otmp, OPROP_LESSER_MAGCW);
+			set_material_gm(otmp, METAL);
+			otmp->spe = 3;
+			bless(otmp);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(STILETTO, FALSE, FALSE);
+			set_material_gm(otmp, METAL);
+			otmp->spe = 3;
+			bless(otmp);
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HIGH_BOOTS, FALSE, FALSE);
+			otmp->obj_color = CLR_BLACK;
+			otmp->spe = 3;
+			(void) mpickobj(mtmp,otmp);
+
+			otmp = mksobj(JACKET, FALSE, FALSE);
+			otmp->obj_color = CLR_BLACK;
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HELMET, FALSE, FALSE);
+			set_material_gm(otmp, GOLD);
+			otmp->spe = 3;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(GLOVES, FALSE, FALSE);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_BLACK;
+			otmp->spe = 3;
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_PHALANX){
 			(void) mongets(mtmp, SPEAR);
@@ -7370,7 +7609,7 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 		    return (struct monst *)0;
 	    }
 	}
-	m2 = newmonst(0);
+	m2 = malloc(sizeof(struct monst));
 	*m2 = *mon;			/* copy condition of old monster */
 	m2->nmon = fmon;
 	fmon = m2;
@@ -7402,14 +7641,12 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	if (mon->isshk) m2->isshk = FALSE;
 	if (mon->isgd) m2->isgd = FALSE;
 	if (mon->ispriest) m2->ispriest = FALSE;
-	m2->mxlth = 0;
 	place_monster(m2, m2->mx, m2->my);
 	if (emits_light_mon(m2))
 	    new_light_source(m2->mx, m2->my, emits_light_mon(m2),
 			     LS_MONSTER, (genericptr_t)m2);
-	if (m2->mnamelth) {
-	    m2->mnamelth = 0; /* or it won't get allocated */
-	    m2 = christen_monst(m2, NAME(mon));
+	if (M_HAS_NAME(mon)) {
+		cpy_mx(mon, m2, MX_ENAM);
 	} else if (mon->isshk) {
 	    m2 = christen_monst(m2, shkname(mon));
 	}
@@ -7427,35 +7664,23 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	    struct monst *m3;
 
 	    if (mon->isminion) {
-		m3 = newmonst(sizeof(struct epri) + mon->mnamelth);
-		*m3 = *m2;
-		m3->mxlth = sizeof(struct epri);
-		if (m2->mnamelth) Strcpy(NAME(m3), NAME(m2));
-		*(EPRI(m3)) = *(EPRI(mon));
-		replmon(m2, m3);
-		m2 = m3;
+			cpy_mx(mon, m2, MX_EMIN);
 	    } else {
-		/* because m2 is a copy of mon it is tame but not init'ed.
-		 * however, tamedog will not re-tame a tame dog, so m2
-		 * must be made non-tame to get initialized properly.
-		 */
-		m2->mtame = 0;
-		if ((m3 = tamedog(m2, (struct obj *)0)) != 0) {
-		    m2 = m3;
-		    *(EDOG(m2)) = *(EDOG(mon));
-		}
+			/* because m2 is a copy of mon it is tame but not init'ed.
+			* however, tamedog will not re-tame a tame dog, so m2
+			* must be made non-tame to get initialized properly.
+			*/
+			struct monst * m3;
+			m2->mtame = 0;
+			if ((m3 = tamedog(m2, (struct obj *)0)) != 0) {
+				m2 = m3;
+				cpy_mx(mon, m2, MX_EDOG);
+			}
 	    }
 	}
 	/* horrors should keep their extended structure. */
 	if (is_horror(m2->data)) {
-		struct monst *m3;
-		m3 = newmonst(sizeof(struct ehor) + mon->mnamelth);
-		*m3 = *m2;
-		m3->mxlth = sizeof(struct ehor);
-		if (m2->mnamelth) Strcpy(NAME(m3), NAME(m2));
-		*(EHOR(m3)) = *(EHOR(mon));
-		replmon(m2, m3);
-		m2 = m3;
+		cpy_mx(mon, m2, MX_EHOR);
 	}
 	set_malign(m2);
 
@@ -7556,7 +7781,7 @@ register int	x, y;
 register int	mmflags;
 {
 	register struct monst *mtmp, *tmpm;
-	int mndx, mcham, ct, mitem, xlth, num;
+	int mndx, mcham, ct, mitem, num;
 	boolean anymon = (!ptr);
 	boolean givenpos = (x != 0 || y != 0);
 	boolean byyou = (x == u.ux && y == u.uy);
@@ -7570,6 +7795,13 @@ register int	mmflags;
 		(ptr->mtyp == PM_SPROW || ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_CAVE_LIZARD || ptr->mtyp == PM_LARGE_CAVE_LIZARD)
 	)
 		mmflags |= MM_EDOG;
+
+	/* replace desfile Tulani with Gae, and vice versa
+	 * assumes G_NOGEN is used to track which variant you have that game */
+	if (ptr && ptr->mtyp == PM_TULANI_ELADRIN && in_mklev && (mons[PM_TULANI_ELADRIN].geno & G_NOGEN))
+		ptr = &mons[PM_GAE_ELADRIN];
+	else if (ptr && ptr->mtyp == PM_GAE_ELADRIN && in_mklev && (mons[PM_GAE_ELADRIN].geno & G_NOGEN))
+		ptr = &mons[PM_TULANI_ELADRIN];
 
 	/* if caller both a random creature and a random location, try both at once first */
 	if(!ptr && x == 0 && y == 0){
@@ -7713,13 +7945,8 @@ register int	mmflags;
 	}
 	if(allow_minvent) allow_minvent = !(mons[mndx].maligntyp < 0 && Is_illregrd(&u.uz) && in_mklev);
 	(void) propagate(mndx, countbirth, FALSE);
-	xlth = ptr->pxlth;
-	if (mmflags & MM_EDOG) xlth += sizeof(struct edog);
-	else if (mmflags & MM_EMIN) xlth += sizeof(struct emin);
-	else if (is_horror(ptr)) xlth += sizeof(struct ehor);
-	mtmp = newmonst(xlth);
+	mtmp = malloc(sizeof(struct monst));
 	*mtmp = zeromonst;		/* clear all entries in structure */
-	(void)memset((genericptr_t)mtmp->mextra, 0, xlth);
 	mtmp->nmon = fmon;
 	fmon = mtmp;
 	mtmp->m_id = flags.ident++;
@@ -7728,7 +7955,14 @@ register int	mmflags;
 	mtmp->mblinded = mtmp->mfrozen = mtmp->mlaughing = 0;
 	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
 	mtmp->mtyp = mndx;
+	/* might have been called saying to add an mx */
+	if (mmflags & MM_EDOG)
+		add_mx(mtmp, MX_EDOG);
+	if (mmflags & MM_EMIN)
+		add_mx(mtmp, MX_EMIN);
+
 	if (is_horror(ptr)) {
+		add_mx(mtmp, MX_EHOR);
 		if (mndx == PM_NAMELESS_HORROR) {
 			extern char * nameless_horror_name;
 			int plslev = rn2(12);
@@ -7806,7 +8040,6 @@ register int	mmflags;
 	
 	if (ptr->mtyp == urole.ldrnum)
 	    quest_status.leader_m_id = mtmp->m_id;
-	mtmp->mxlth = xlth;
 	mtmp->m_lev = adj_lev(ptr);
 	float sanlev = ((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX));
 	mtmp->m_san_level = max(1, (int)(sanlev*100));
@@ -8115,7 +8348,7 @@ register int	mmflags;
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
 		(ptr->mtyp == PM_SPROW || ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_CAVE_LIZARD || ptr->mtyp == PM_LARGE_CAVE_LIZARD)
 	) mtmp->mpeaceful = TRUE;
-	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : (peace_minded(ptr) && !is_derived_undead_mon(mtmp));
+	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : peace_minded(ptr);
 	
 	if(mndx == PM_CHAOS){
 		mtmp->mhpmax = 15*mtmp->mhpmax;
@@ -9880,6 +10113,9 @@ struct monst *mtmp, *victim;
 	if (is_mplayer(ptr) || ptr->mtyp == PM_BYAKHEE || ptr->mtyp == PM_LILLEND || ptr->mtyp == PM_ERINYS || ptr->mtyp == PM_MAID
 	|| ptr->mtyp == PM_CROW_WINGED_HALF_DRAGON || ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY
 	|| ptr->mtyp == PM_UNDEAD_KNIGHT || ptr->mtyp == PM_WARRIOR_OF_SUNLIGHT
+	|| ptr->mtyp == PM_UNDEAD_MAIDEN || ptr->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+	|| ptr->mtyp == PM_BLUE_SENTINEL || ptr->mtyp == PM_DARKMOON_KNIGHT
+	|| ptr->mtyp == PM_UNDEAD_REBEL || ptr->mtyp == PM_PARDONER || ptr->mtyp == PM_OCCULTIST
 	|| ptr->mtyp == PM_FORMIAN_CRUSHER
 	|| ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_SPROW
 	|| ptr->mtyp == PM_DROW_MATRON || ptr->mtyp == PM_DROW_MATRON_MOTHER
@@ -10041,7 +10277,7 @@ register int otyp;
 			}
 		}
 
-		if (is_lminion(mtmp) || is_nminion(mtmp) || is_cminion(mtmp)) {
+		if (is_minion(mtmp->data)) {
 			/* lawful minions don't get cursed, bad, or rusting objects */
 			otmp->cursed = FALSE;
 			otmp->blessed = TRUE;
@@ -10287,7 +10523,7 @@ struct monst *mtmp;
 			mtmp->malign = max(3,absmal);
 	} else{	/* not coaligned and therefore hostile */
 		//Neutral murder bugfix: neutral murderables should be worth 1 algnment if hostile.
-		if(!mal && is_human(mtmp->data) && !is_derived_undead_mon(mtmp) && !mtmp->mpeaceful)
+		if (!mal && is_human(mtmp->data) && !always_hostile(mtmp->data) && !mtmp->mpeaceful)
 			mtmp->malign = 1;
 		else
 			mtmp->malign = abs(mal);

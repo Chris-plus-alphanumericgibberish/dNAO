@@ -129,6 +129,7 @@ STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(dofightingform);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
+STATIC_PTR int NDECL(doclearinvissyms);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
 STATIC_PTR int NDECL(wiz_wish);
@@ -536,32 +537,26 @@ boolean you_abilities;
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	if (mon_abilities && uarm && uarms &&
 		Is_dragon_armor(uarm) && Is_dragon_shield(uarms) && 
-		Have_same_dragon_armor_and_shield &&
+		(Dragon_armor_matches_mtyp(uarm, Dragon_armor_to_pm(uarms)->mtyp)
+		|| Dragon_armor_matches_mtyp(uarms, Dragon_armor_to_pm(uarm)->mtyp)) &&
 		uarm->age < monstermoves && uarms->age < monstermoves
 	){
-		if (!((Race_if(PM_HALF_DRAGON) &&
-			(((flags.HDbreath == AD_COLD) && (
-				(uarm && (uarm->otyp == WHITE_DRAGON_SCALES || uarm->otyp == WHITE_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == WHITE_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_FIRE) && (
-				(uarm && (uarm->otyp == RED_DRAGON_SCALES || uarm->otyp == RED_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == RED_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_SLEE) && (
-				(uarm && (uarm->otyp == ORANGE_DRAGON_SCALES || uarm->otyp == ORANGE_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == ORANGE_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_ELEC) && (
-				(uarm && (uarm->otyp == BLUE_DRAGON_SCALES || uarm->otyp == BLUE_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == BLUE_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_DRST) && (
-				(uarm && (uarm->otyp == GREEN_DRAGON_SCALES || uarm->otyp == GREEN_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == GREEN_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_ACID) && (
-				(uarm && (uarm->otyp == YELLOW_DRAGON_SCALES || uarm->otyp == YELLOW_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == YELLOW_DRAGON_SCALE_SHIELD))) ||
-			((flags.HDbreath == AD_MAGM) && (
-				(uarm && (uarm->otyp == GRAY_DRAGON_SCALES || uarm->otyp == GRAY_DRAGON_SCALE_MAIL)) ||
-				(uarms && uarms->otyp == GRAY_DRAGON_SCALE_SHIELD))))))
-		){
+		boolean armormatch = FALSE;
+		/* halfdragons combine armor breath with their own; don't list if it matches */
+		if (Race_if(PM_HALF_DRAGON)) {
+			int mtyp;
+			switch (flags.HDbreath) {
+			case AD_FIRE: mtyp = PM_RED_DRAGON;    break;
+			case AD_COLD: mtyp = PM_WHITE_DRAGON;  break;
+			case AD_ELEC: mtyp = PM_BLUE_DRAGON;   break;
+			case AD_DRST: mtyp = PM_GREEN_DRAGON;  break;
+			case AD_SLEE: mtyp = PM_ORANGE_DRAGON; break;
+			case AD_ACID: mtyp = PM_YELLOW_DRAGON; break;
+			}
+			/* note: when shield and armor match despite color differences, it is the shield's color that is used */
+			armormatch = Dragon_shield_to_pm(uarms) == &mons[mtyp];
+		}
+		if (!armormatch) {
 			add_ability('a', "Use your armor's breath weapon", MATTK_DSCALE);
 		}
 	}
@@ -660,6 +655,7 @@ boolean you_abilities;
 		else {
 			pline("You are extraordinary mundane.");
 		}
+		destroy_nhwindow(tmpwin);
 		return 0;
 	}
 	
@@ -1200,6 +1196,19 @@ dooverview_or_wiz_where()
 	return 0;
 }
 
+STATIC_PTR int
+doclearinvissyms()
+{
+	register int x, y;
+	for (x = 0; x < COLNO; x++)
+	for (y = 0; y < ROWNO; y++)
+	if (glyph_is_invisible(levl[x][y].glyph)) {
+		unmap_object(x, y);
+		newsym(x, y);
+	}
+	return 0;
+}
+
 #ifdef WIZARD
 
 STATIC_PTR int
@@ -1712,6 +1721,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly received");
 			putstr(en_win, 0, buf);
+		} else if(u.lastprayresult==PRAY_INPROG){
+			enl_msg("That prayer ", "is ", "was ", "in progress");
 		}
 		if(u.reconciled){
 			if(u.reconciled==REC_REC){
@@ -1792,141 +1803,17 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if(u.spirit[GPREM_SPIRIT]) numBound++;
 		if(u.spirit[ALIGN_SPIRIT]) numBound++;
 		if(u.spirit[OUTER_SPIRIT]) numBound++;
-		if(Role_if(PM_ANACHRONONAUT) && u.specialSealsActive&SEAL_BLACK_WEB) numBound++;
 		Sprintf(prebuf, "Your soul ");
 		Sprintf(buf, " bound to ");
-		for(i=0;i<QUEST_SPIRIT;i++){
-			if(u.spirit[i]) for(j=0;j<32;j++){
-				if((u.spirit[i] >> j) == 1){
-					Strcat(buf,sealNames[j]);
-					numFound++;
-					if(numBound==2 && numFound==1) Strcat(buf," and ");
-					else if(numBound>=3){
-						if(numFound<numBound-1) Strcat(buf,", ");
-						if(numFound==numBound-1) Strcat(buf,", and ");
-					}
-					break;
-				}
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_DAHLVER_NAR){
-			Strcat(buf, sealNames[(DAHLVER_NAR) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_ACERERAK){
-			Strcat(buf, sealNames[(ACERERAK) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_COUNCIL){
-			Strcat(buf, sealNames[(COUNCIL) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.spirit[CROWN_SPIRIT]) for(j=0;j<32;j++){
-			if((u.spirit[CROWN_SPIRIT] >> j) == 1){
-				Strcat(buf,sealNames[j]);
+		for (i = 0; (i<=NUMINA) && (numFound < numBound); i++) {
+			if (((i<QUEST_SPIRITS) ? u.sealsActive : u.specialSealsActive) & (get_sealID(i) & ~SEAL_SPECIAL)) {
+				Strcat(buf, sealNames[i - FIRST_SEAL]);
 				numFound++;
 				if(numBound==2 && numFound==1) Strcat(buf," and ");
 				else if(numBound>=3){
 					if(numFound<numBound-1) Strcat(buf,", ");
 					if(numFound==numBound-1) Strcat(buf,", and ");
 				}
-				break;
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_COSMOS){
-			Strcat(buf, sealNames[(COSMOS) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_LIVING_CRYSTAL){
-			Strcat(buf, sealNames[(LIVING_CRYSTAL) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_TWO_TREES){
-			Strcat(buf, sealNames[(TWO_TREES) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_MISKA){
-			Strcat(buf, sealNames[(MISKA) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_NUDZIRATH){
-			Strcat(buf, sealNames[(NUDZIRATH) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_ALIGNMENT_THING){
-			Strcat(buf, sealNames[(ALIGNMENT_THING) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_UNKNOWN_GOD){
-			Strcat(buf, sealNames[(UNKNOWN_GOD) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_BLACK_WEB){
-			Strcat(buf, sealNames[(BLACK_WEB) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
-			}
-		}
-		if(numFound < numBound && u.specialSealsActive&SEAL_NUMINA){
-			Strcat(buf, sealNames[(NUMINA) - (FIRST_SEAL)]);
-			numFound++;
-			if(numBound==2 && numFound==1) Strcat(buf," and ");
-			else if(numBound>=3){
-				if(numFound<numBound-1) Strcat(buf,", ");
-				if(numFound==numBound-1) Strcat(buf,", and ");
 			}
 		}
 		enl_msg(prebuf, "is", "was", buf);
@@ -1969,6 +1856,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Drain_resistance) you_are("level-drain resistant");
 	if (Antimagic) you_are("magic-protected");
 	if (Nullmagic) you_are("shrouded in anti-magic");
+	if (Waterproof) you_are("waterproof");
 	if (Stone_resistance)
 		you_are("petrification resistant");
 	if (Poison_resistance) you_are("poison resistant");
@@ -2563,6 +2451,9 @@ int final;
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly recieved");
 			dump("", buf);
+		} else if(u.lastprayresult==PRAY_INPROG){
+			Sprintf(buf, "That prayer was in progress");
+			dump("", buf);
 		}
 		if(u.reconciled){
 			if(u.reconciled==REC_REC){
@@ -2797,6 +2688,7 @@ int final;
 	if (Drain_resistance) dump(youwere, "level-drain resistant");
 	if (Antimagic) dump(youwere, "magic-protected");
 	if (Nullmagic) dump(youwere, "shrouded in anti-magic");
+	if (Waterproof) dump(youwere, "waterproof");
 	if (Stone_resistance)
 		dump(youwere, "petrification resistant");
 	if (Poison_resistance) dump(youwere, "poison resistant");
@@ -3253,15 +3145,19 @@ resistances_enlightenment()
 	if (Acid_resistance) putstr(en_win, 0, "Your skin feels leathery.");
 	if (Displaced) putstr(en_win, 0, "Your outline shimmers and shifts.");
 	if (Drain_resistance) putstr(en_win, 0, "You feel especially energetic.");
-	if (u.uinwater){
-		if(ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed)
+	if (u.uinwater && Waterproof){
+		if (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE)
 			putstr(en_win, 0, "Your faceplate wraps you in a waterproof field.");
-		else if(u.ufirst_sky)
+		else if (ublindf && ublindf->oartifact == ART_MASK_OF_TLALOC)
+			putstr(en_win, 0, "Your mask protects you from rain & storms greater than this.");
+		else if (u.ufirst_sky)
 			putstr(en_win, 0, "The water is separated from you.");
-		else if(uarmc && (uarmc->otyp == OILSKIN_CLOAK || uarmc->greased) && !uarmc->cursed)
-			putstr(en_win, 0, "Your waterproof cloak protects your gear.");
-		else if(u.sealsActive&SEAL_ENKI)
+		else if (uarmc && (uarmc->greased || uarmc->otyp == OILSKIN_CLOAK))
+			putstr(en_win, 0, "Your greased cloak protects your gear.");
+		else if (u.sealsActive&SEAL_ENKI)
 			putstr(en_win, 0, "YOU'RE soaked, but the water doesn't wet your gear.");
+		else
+			putstr(en_win, 0, "Your equipment protects you from the water around you.");
 	}
 	
 	if(Nullmagic){
@@ -3445,6 +3341,9 @@ resistances_enlightenment()
 			putstr(en_win, 0, buf);
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly recieved");
+			putstr(en_win, 0, buf);
+		} else if(u.lastprayresult==PRAY_INPROG){
+			Sprintf(buf, "That prayer is in progress");
 			putstr(en_win, 0, buf);
 		}
 		if(u.reconciled){
@@ -5268,6 +5167,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"turn", "turn undead", doturn, IFBURIED, AUTOCOMPLETE},
 	{"tip", "empty a container", dotip, IFBURIED, AUTOCOMPLETE},
 	{"twoweapon", "toggle two-weapon combat", dotwoweapon, !IFBURIED, AUTOCOMPLETE},
+	{"unseeinvis", "forget suspected invisible creatures", doclearinvissyms, IFBURIED, AUTOCOMPLETE},
 	{"untrap", "untrap something", dountrap, !IFBURIED, AUTOCOMPLETE},
 	{"unmaintain", "stop maintaining a spell", dounmaintain, IFBURIED, AUTOCOMPLETE},
 	{"versionext", "list compile time options for this version of NetHack",
@@ -5309,6 +5209,7 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #detect */
 	{(char *)0, (char *)0, donull, TRUE}, /* #map */
 	{(char *)0, (char *)0, donull, TRUE}, /* #genesis */
+	{(char *)0, (char *)0, donull, TRUE}, /* #killall */
 	{(char *)0, (char *)0, donull, TRUE}, /* #identify */
 	{(char *)0, (char *)0, donull, TRUE}, /* #levelport */
 	{(char *)0, (char *)0, donull, TRUE}, /* #wish */
@@ -5348,6 +5249,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"detect", "detect secret doors and traps", wiz_detect, IFBURIED},
 	{"map", "do magic mapping", wiz_map, IFBURIED},
 	{"genesis", "create monster", wiz_genesis, IFBURIED},
+	{"killall", "kill all creatures on level", wiz_kill_all, IFBURIED, AUTOCOMPLETE },
 	{"identify", "identify items in pack", wiz_identify, IFBURIED},
 	{"levelport", "to trans-level teleport", wiz_level_tele, IFBURIED},
 	{"wish", "make wish", wiz_wish, IFBURIED, AUTOCOMPLETE},
@@ -5460,6 +5362,7 @@ init_bind_list(void)
 	bind_key(M('t'), "turn" );
 	/*        'u', 'U' : go ne */
 	bind_key('u',    "untrap" ); /* if number_pad is on */
+	bind_key(C('u'), "unseeinvis");
 	bind_key(M('u'), "untrap" );
 	bind_key('v',    "version" );
 	bind_key('V',    "history" );
@@ -5667,6 +5570,43 @@ dokeylist(void)
 	destroy_nhwindow(datawin);
 }
 
+/* find the 1st command key that binds to the desired command */
+char *
+find_command_key(command_name, buf)
+const char * command_name;
+char * buf;
+{
+	int i;
+	int key;
+	boolean keys_used[256] = { 0 };
+
+	/* kludge: copy from above to find all keys used by non-commands */
+	for (i = 0; i < 10; i++) {
+		key = iflags.num_pad ? ndir[i] : sdir[i];
+		keys_used[key] = TRUE;
+		if (!iflags.num_pad) {
+			keys_used[toupper(key)] = TRUE;
+			keys_used[C(key)] = TRUE;
+		}
+	}
+	for (i = 0; i < MISC_CMD_COUNT; i++) {
+		keys_used[misc_cmds[i]] = TRUE;
+	}
+
+	for (i = 0; i <= 255; i++) {
+		struct ext_func_tab * extcmd;
+		char* mapping;
+		key = i;
+		if (keys_used[i]) continue;
+		if (key == ' ' && !flags.rest_on_space) continue;
+		if ((extcmd = cmdlist[i].bind_cmd)) {
+			if (!strcmpi(extcmd->ef_txt, command_name))
+				return key2txt(key, buf);
+		}
+	}
+	return (char *)0;
+}
+
 static const char template[] = "%-18s %4ld  %6ld";
 static const char count_str[] = "                   count  bytes";
 static const char separator[] = "------------------ -----  ------";
@@ -5795,7 +5735,7 @@ mon_chain(win, src, chain, total_count, total_size)
 
 	for (count = size = 0, mon = chain; mon; mon = mon->nmon) {
 	    count++;
-	    size += sizeof(struct monst) + mon->mxlth + mon->mnamelth;
+	    size += sizeof(struct monst);
 	}
 	*total_count += count;
 	*total_size += size;
@@ -6283,6 +6223,7 @@ register char *cmd;
 	    multi = 0;
 	} else if (*cmd == CMD_TRAVEL && iflags.travelcmd) {
 	  flags.travel = 1;
+	  u.itx = u.ity = 0;
 	  iflags.travel1 = 1;
 	  flags.run = 8;
 	  flags.nopick = 1;
@@ -6412,7 +6353,8 @@ char sym;
 	if(iflags.num_pad) sdp = ndir; else sdp = sdir;	/* DICE workaround */
 
 	u.dz = 0;
-	if(!(dp = index(sdp, sym))) return 0;
+	/* sym defaults to null at game start, causing dp - sdp to be 10, overflowing */
+	if(!sym || !(dp = index(sdp, sym))) return 0;
 	u.dx = xdir[dp-sdp];
 	u.dy = ydir[dp-sdp];
 	u.dz = zdir[dp-sdp];

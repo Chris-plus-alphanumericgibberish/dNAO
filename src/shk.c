@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "eshk.h"
+#include "mextra.h"
 
 /*#define DEBUG*/
 
@@ -30,7 +30,6 @@ STATIC_DCL void FDECL(setpaid, (struct monst *));
 STATIC_DCL long FDECL(addupbill, (struct monst *));
 STATIC_DCL void FDECL(setallstolen, (struct obj *));
 STATIC_DCL void FDECL(setallpaid, (struct obj *));
-STATIC_DCL void FDECL(pacify_shk, (struct monst *));
 STATIC_DCL struct bill_x *FDECL(onbill, (struct obj *, struct monst *, BOOLEAN_P));
 STATIC_DCL struct monst *FDECL(next_shkp, (struct monst *, BOOLEAN_P, BOOLEAN_P));
 STATIC_DCL long FDECL(shop_debt, (struct eshk *));
@@ -267,13 +266,10 @@ register boolean zero_out;
 }
 
 void
-replshk(mtmp,mtmp2)
-register struct monst *mtmp, *mtmp2;
+replshk(mtmp)
+register struct monst *mtmp;
 {
-	rooms[ESHK(mtmp2)->shoproom - ROOMOFFSET].resident = mtmp2;
-	if (inhishop(mtmp) && *u.ushops == ESHK(mtmp)->shoproom) {
-		ESHK(mtmp2)->bill_p = &(ESHK(mtmp2)->bill[0]);
-	}
+	rooms[ESHK(mtmp)->shoproom - ROOMOFFSET].resident = mtmp;
 }
 
 /* do shopkeeper specific structure munging -dlc */
@@ -1135,7 +1131,7 @@ angry_shk_exists()
 }
 
 /* remove previously applied surcharge from all billed items */
-STATIC_OVL void
+void
 pacify_shk(shkp)
 register struct monst *shkp;
 {

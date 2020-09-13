@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 #ifdef USER_SOUNDS
 # ifdef USER_SOUNDS_REGEX
 #include <regex.h>
@@ -220,7 +220,7 @@ int rmtyp;
 {
     int rno = levl[mon->mx][mon->my].roomno;
 
-    return rooms[rno - ROOMOFFSET].rtype == rmtyp;
+    return rno >= ROOMOFFSET && rooms[rno - ROOMOFFSET].rtype == rmtyp;
 }
 
 void
@@ -1482,7 +1482,7 @@ asGuardian:
 						if (!(HFast & INTRINSIC)) {
 							if (!Fast) You("speed up.");
 							else Your("quickness feels more natural.");
-							HFast |= FROMOUTSIDE;
+							HFast |= TIMEOUT_INF;
 						}
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && uwep && uwep->oartifact == ART_SINGING_SWORD){
@@ -1668,8 +1668,8 @@ asGuardian:
 					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
 						pline("Your body feels leaden!");
 						youmonst.movement -= 12;
-						if ((HFast & FROMOUTSIDE)) {
-							HFast &= ~FROMOUTSIDE;
+						if ((HFast & TIMEOUT_INF)) {
+							HFast &= ~TIMEOUT_INF;
 							if (!Fast) You("slow down.");
 							else Your("quickness feels less natural.");
 						}
@@ -4094,7 +4094,7 @@ int tx,ty;
 					 * not a real monster */
 					pline("So this is how you repay loyalty?");
 					adjalign(-3);
-					HAggravate_monster |= FROMOUTSIDE;
+					HAggravate_monster |= TIMEOUT_INF;
 				} else if (is_unicorn(&mons[otmp->corpsenm])) {
 					int unicalign = sgn((&mons[otmp->corpsenm])->maligntyp);
 
@@ -4152,7 +4152,7 @@ int tx,ty;
 		if(u.sealTimeout[MARIONETTE-FIRST_SEAL] < moves){
 			//Spirit requires that her seal be drawn in the Valley of the Dead or in a graveyard.
 			boolean in_a_graveyard = rooms[levl[tx][ty].roomno - ROOMOFFSET].rtype == MORGUE;
-			if(in_a_graveyard || on_level(&valley_level, &u.uz)){
+			if (in_a_graveyard || on_level(&valley_level, &u.uz) || (tomb_dnum == u.uz.dnum)){
 				if(!Blind) You("notice metal wires sticking out of the ground within the seal.");
 				if(u.sealCounts < numSlots){
 					if(!Blind) pline("In fact, there are wires sticking up all around you.");
@@ -4928,6 +4928,7 @@ int floorID;
 		break;
 	case ENKI:
 		propchain[i++] = SWIMMING;
+		propchain[i++] = WATERPROOF;
 		break;
 	case EURYNOME:
 		propchain[i++] = FREE_ACTION;

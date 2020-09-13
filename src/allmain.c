@@ -5,14 +5,9 @@
 /* various code that was replicated in *main.c */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 #include "artifact.h"
 #include "xhity.h"
-#ifdef OVLB
-#include "artilist.h"
-#else
-STATIC_DCL struct artifact artilist[];
-#endif
 
 
 #ifndef NO_SIGNAL
@@ -1280,7 +1275,7 @@ moveloop()
 						mtmp->m_lev = 15;
 						mtmp->mhpmax = d(15, 8);
 						mtmp->mhp = mtmp->mhpmax;
-						if(mtmp->mnamelth) mtmp = christen_monst(mtmp, ""); //Now a different entity
+						if(M_HAS_NAME(mtmp)) mtmp = christen_monst(mtmp, ""); //Now a different entity
 						mtmp->movement = 9;//Don't pause for a turn
 						golds = rnd(golds);
 						
@@ -1369,7 +1364,7 @@ karemade:
 				if(mtmp->mtyp == PM_CLOCKWORK_SOLDIER || mtmp->mtyp == PM_CLOCKWORK_DWARF || 
 				   mtmp->mtyp == PM_FABERGE_SPHERE || mtmp->mtyp == PM_FIREWORK_CART ||
 				   mtmp->mtyp == PM_ID_JUGGERNAUT
-				) if(rn2(2)) mtmp->mvar_vector = ((int)mtmp->mvar_vector + rn2(3)-1)%8;
+				) if(rn2(2)) mtmp->mvar_vector = ((int)mtmp->mvar_vector + rn2(3) + 7)%8;
 				if((mtmp->mtyp == PM_JUGGERNAUT || mtmp->mtyp == PM_ID_JUGGERNAUT) && !rn2(3)){
 					int mdx=0, mdy=0, i;
 					if(mtmp->mux == 0 && mtmp->muy == 0){
@@ -3140,7 +3135,7 @@ struct monst *mon;
 			}
 		}
 		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ) && mons[otmp->corpsenm].pxlth == 0){
+			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
 				for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
 					mtmp2 = mtmp->nmon;
 					if (mtmp == mon) {
@@ -3211,6 +3206,8 @@ struct monst *mon;
 						pline("A few drops of liquid hit your wide helm.");
 					} else if(uarmh && uarmh->otyp == WITCH_HAT) {
 						pline("A few drops of liquid hit your wide conical hat.");
+					} else if(uarmh && uarmh->otyp == WIDE_HAT) {
+						pline("A few drops of liquid hit your wide hat.");
 					} else if(magic_negation(&youmonst)){
 						pline("A few drops of liquid drip onto your clothes.");
 					} else {
@@ -3235,6 +3232,9 @@ struct monst *mon;
 				} else if(which_armor(mtmp, W_ARMH) && which_armor(mtmp, W_ARMH)->otyp == WITCH_HAT) {
 					if(canseemon(mtmp))
 						pline("A few drops of viscous liquid hit %s wide conical hat.", s_suffix(mon_nam(mtmp)));
+				} else if(which_armor(mtmp, W_ARMH) && which_armor(mtmp, W_ARMH)->otyp == WIDE_HAT) {
+					if(canseemon(mtmp))
+						pline("A few drops of viscous liquid hit %s wide hat.", s_suffix(mon_nam(mtmp)));
 				} else if(magic_negation(mtmp)){
 					if(canseemon(mtmp))
 						pline("A few drops of viscous liquid hit %s clothes.", s_suffix(mon_nam(mtmp)));

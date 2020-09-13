@@ -612,6 +612,116 @@ unsigned int type;
 				return CURE_SELF;
 		}
 	break;
+	case PM_UNDEAD_MAIDEN:
+		switch (rn2(mtmp->m_lev/3)) {
+			default:/* 15 -> 19*/
+				return MASS_CURE_CLOSE;
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_PISACA:
+	case PM_KNIGHT_OF_THE_PRINCESS_S_GUARD:
+		switch (rn2(mtmp->m_lev-10)) {
+			default:/* 15 -> 19*/
+				return MASS_CURE_FAR;
+			case 14:
+			case 13:
+			case 12:
+			case 11:
+			case 10:
+				return MON_PROTECTION;
+			case 9:
+			case 8:
+			case 7:
+			case 6:
+			case 5:
+				return MASS_CURE_CLOSE;
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_BLUE_SENTINEL:
+		switch (rn2(mtmp->m_lev/3)) {
+			default:/* 6 up*/
+				return MON_PROTECTION;
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_DARKMOON_KNIGHT:
+		switch (rn2(mtmp->m_lev-10)) {
+			default:/* 15 -> 19*/
+				// return MAGIC_BLADE;
+			case 14:
+			case 13:
+			case 12:
+			case 11:
+			case 10:
+				return PARALYZE;
+			case 9:
+			case 8:
+			case 7:
+			case 6:
+			case 5:
+				return PUNISH;
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_PARDONER:
+		switch (rn2(mtmp->m_lev-10)) {
+			default:/* 15 -> 19*/
+				return VULNERABILITY;
+			case 14:
+			case 13:
+			case 12:
+				return CURSE_ITEMS;
+			case 11:
+			case 10:
+				return EVIL_EYE;
+			case 9:
+			case 8:
+				return AGGRAVATION;
+			case 7:
+			case 6:
+				return PUNISH;
+			case 5:
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
+	case PM_OCCULTIST:
+		switch (rn2((mtmp->m_lev-10)/3)) {
+			default:/* 15 -> 19*/
+				return TURN_TO_STONE;
+			case 5:
+			case 4:
+			case 3:
+			case 2:
+				return MON_PROTECTION;
+			case 1:
+			case 0:
+				return CURE_SELF;
+		}
+	break;
 	case PM_HALF_STONE_DRAGON:
 		switch (rn2(mtmp->m_lev)) {
 			default:/* 10 -> 29*/
@@ -2103,6 +2213,9 @@ int tary;
 				zapdata.unreflectable = ZAP_REFL_NEVER;
 				zapdata.damd = 8;
 			}
+			if (adtyp == AD_DISN) {
+				zapdata.unreflectable = ZAP_REFL_NEVER;
+			}
 
 			/* do the zap */
 			zap(magr, x(magr), y(magr), sgn(tarx - x(magr)), sgn(tary - y(magr)), rn1(7, 7), &zapdata);
@@ -2260,9 +2373,14 @@ int tary;
 	case CONE_OF_COLD:
 	case LIGHTNING_BOLT:
 	case SLEEP:
+	case DISINT_RAY:
 		if (!mdef) {
 			impossible("ray spell with no mdef?");
 			return MM_MISS;
+		}
+		else if (spell == DISINT_RAY && dist2(x(magr), y(magr), tarx, tary) <= 2) {
+			/* disint ray is ranged-only, substitute with psibolt */
+			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
 		}
 		else {
 			struct attack alt_attk = *attk;
@@ -2272,6 +2390,7 @@ int tary;
 			case CONE_OF_COLD:		alt_attk.adtyp = AD_COLD; break;
 			case LIGHTNING_BOLT:	alt_attk.adtyp = AD_ELEC; break;
 			case SLEEP:				alt_attk.adtyp = AD_SLEE; break;
+			case DISINT_RAY:		alt_attk.adtyp = AD_DISN; break;
 			}
 			return elemspell(magr, mdef, &alt_attk, tarx, tary);
 		}
@@ -3590,8 +3709,8 @@ int tary;
 
 	case DISAPPEAR:
 		if (youagr) {
-			if (!(HInvis & INTRINSIC)) {
-				HInvis |= FROMOUTSIDE;
+			if (!(HInvis & (INTRINSIC))) {
+				HInvis |= TIMEOUT_INF;
 				if (!Blind && !BInvis) self_invis_message();
 			}
 		}
@@ -4478,24 +4597,6 @@ int tary;
 			stop_occupation();
 		}
 		return MM_HIT;
-
-    case DISINT_RAY:
-		if (!mdef) {
-			impossible("disintegration with no target?");
-			return MM_MISS;
-		}
-		if(magr){
-			struct attack disintegrate = {AT_BEAM, AD_DISN, 4, 1};
-			//xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
-			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj **)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
-		}
-		else {
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
-		}
-		if(youdef)
-			stop_occupation();
-		return MM_HIT;
-	
 	case VULNERABILITY:
 		if (TRUE) {
 			struct monst *cmon;
@@ -4606,7 +4707,7 @@ int tary;
 		if (youdef && !HSterile && !Drain_resistance) {
 			/* only works vs player, and should fall through to drain life */
 			You_feel("old!");
-			HSterile |= FROMOUTSIDE;
+			HSterile |= TIMEOUT_INF;
 		}
 		else {
 			return cast_spell(magr, mdef, attk, DRAIN_LIFE, tarx, tary);
@@ -4755,6 +4856,7 @@ int spellnum;
 	case CONE_OF_COLD:
 	case LIGHTNING_BOLT:
 	case SLEEP:
+	case DISINT_RAY:
 		return TRUE;
 	default:
 		break;
@@ -4861,8 +4963,17 @@ int tary;
 	struct monst *tmpm;
 	/* Most spells need a target */
 	boolean notarget = (!mdef || (!tarx && !tary));
-	if (notarget && !is_undirected_spell(spellnum))
-		return TRUE;
+	if (notarget) {
+		/* most spells need a target */
+		if (!is_undirected_spell(spellnum) && !is_buff_spell(spellnum)) {
+			return TRUE;
+		}
+		else {
+			/* undirected spells, or directed buff spells with no target, are instead self-targeted */
+			tarx = x(magr);
+			tary = y(magr);
+		}
+	}
 
 	/* Some spells work with a valid line of sight */
 	boolean clearpath = clear_path(x(magr), y(magr), tarx, tary);
@@ -4938,7 +5049,7 @@ int tary;
 //////////////////////////////////////////////////////////////////////////////////////
 
 	/* ray attack when monster isn't lined up */
-	if ((spellnum == MAGIC_MISSILE || spellnum == SLEEP || spellnum == CONE_OF_COLD || spellnum == LIGHTNING_BOLT)
+	if ((spellnum == MAGIC_MISSILE || spellnum == SLEEP || spellnum == CONE_OF_COLD || spellnum == LIGHTNING_BOLT || spellnum == DISINT_RAY)
 		&& !clearline)
 		return TRUE;
 
@@ -4954,12 +5065,12 @@ int tary;
 
 	/* don't cast haste self when already fast */
 	if (spellnum == HASTE_SELF
-		&& (youagr ? (HFast&FROMOUTSIDE) : (magr->permspeed == MFAST)))
+		&& (youagr ? (HFast&(INTRINSIC)) : (magr->permspeed == MFAST)))
 		return TRUE;
 
 	/* don't cast invisibility when already invisible */
 	if (spellnum == DISAPPEAR
-		&& (youagr ? (HInvis&FROMOUTSIDE) : (magr->minvis || magr->invis_blkd)))
+		&& (youagr ? (HInvis&(INTRINSIC)) : (magr->minvis || magr->invis_blkd)))
 		return TRUE;
 	/* peaceful monsters won't cast invisibility if you can't see invisible,
 	 * same as when monsters drink potions of invisibility.  This doesn't

@@ -8,7 +8,7 @@
 #include "hack.h"
 #include "dlb.h"
 #ifdef BARD
-#include "edog.h"
+#include "mextra.h"
 #endif
 
 STATIC_DCL boolean FDECL(is_swallow_sym, (int));
@@ -53,7 +53,7 @@ int c;
 /*
  * Append new_str to the end of buf if new_str doesn't already exist as
  * a substring of buf.  Return 1 if the string was appended, 0 otherwise.
- * It is expected that buf is of size BUFSZ.
+ * This only works on buf of LONGBUFSZ.
  */
 STATIC_OVL int
 append_str(buf, new_str)
@@ -64,7 +64,7 @@ append_str(buf, new_str)
 
     if (strstri(buf, new_str)) return 0;
 
-    space_left = BUFSZ - strlen(buf) - 1;
+    space_left = LONGBUFSZ - strlen(buf) - 1;
     (void) strncat(buf, " or ", space_left);
     (void) strncat(buf, new_str, space_left - 4);
     return 1;
@@ -1046,7 +1046,7 @@ STATIC_OVL int
 do_look(quick)
     boolean quick;	/* use cursor && don't search for "more info" */
 {
-    char    out_str[BUFSZ], look_buf[BUFSZ];
+	char    out_str[LONGBUFSZ], look_buf[BUFSZ];
     const char *x_str, *firstmatch = 0;
     struct permonst *pm = 0;
     struct monst *mtmp = 0;
@@ -1319,9 +1319,9 @@ do_look(quick)
 	 */
 	if (from_screen) {
 	    if (hallu_obj && Hallucination) {
-			char temp_buf[BUFSZ];
+			char temp_buf[LONGBUFSZ];
 			Sprintf(temp_buf, " (%s)", rndobjnam());
-			(void)strncat(out_str, temp_buf, BUFSZ-strlen(out_str)-1);
+			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
 	    } else if (found > 1 || need_to_look) {
 
 		char monbuf[BUFSZ];
@@ -1333,26 +1333,26 @@ do_look(quick)
 		if (*firstmatch) {
 			if(shapebuf[0]){
 				Sprintf(temp_buf, " (%s", firstmatch);
-				(void)strncat(out_str, temp_buf, BUFSZ-strlen(out_str)-1);
+				(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
 				Sprintf(temp_buf, ", %s)", shapebuf);
-				(void)strncat(out_str, temp_buf, BUFSZ-strlen(out_str)-1);
+				(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
 				found = 1;	/* we have something to look up */
 			}
 			else {
 				Sprintf(temp_buf, " (%s)", firstmatch);
-				(void)strncat(out_str, temp_buf, BUFSZ-strlen(out_str)-1);
+				(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
 				found = 1;	/* we have something to look up */
 			}
 		}
 		if (monbuf[0]) {
 		    Sprintf(temp_buf, " [seen: %s]", monbuf);
-		    (void)strncat(out_str, temp_buf, BUFSZ-strlen(out_str)-1);
+			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
 		}
 		if (mtmp != (struct monst *) 0) {
 			strcat(out_str, "\n");
 			temp_buf[0] = '\0';
 			get_description_of_monster_type(mtmp, temp_buf);
-			(void)strncat(out_str, temp_buf, BUFSZ - strlen(out_str) - 1);
+			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
 		}
 		}
 	}

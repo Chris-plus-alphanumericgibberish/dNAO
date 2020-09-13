@@ -2553,9 +2553,11 @@ Gem_nh_poskey(x, y, mod)
 }
 
 void
-Gem_delay_output()
+Gem_delay_output(int delay)
 {
-	Event_Timer(50,0,FALSE);	/* wait 50ms */
+        
+	static int length[] = { 0, 10, 50 };
+	Event_Timer(length[delay],0,FALSE);	/* wait 50ms */
 }
 
 int

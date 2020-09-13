@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 #include "artifact.h"
 
 /* KMH -- Copied from pray.c; this really belongs in a header file */
@@ -780,6 +780,16 @@ learn_word()
 			u.ufirst_know = TRUE;
 			u.ufirst_know_timeout = 0;
 		break;
+	}
+	if (flags.verbose) {
+		char buf[BUFSZ];
+		char buf2[BUFSZ];
+		char * ptr;
+		if (ptr = find_command_key("ability", buf))
+			Sprintf(buf2, "or %s ", ptr);
+		else
+			Strcpy(buf2, "");
+		pline("Use the command #ability %sto speak it.", buf2);
 	}
 	//Note: the word of knowledge can't actually give the mithardir trophy, but it's harmless to check.
 	check_mithardir_trophy();
@@ -2760,6 +2770,22 @@ do_it:
 	vision_full_recalc = 1;	/* delayed vision recalculation */
 }
 
+int
+wiz_kill_all()
+{
+	register struct monst *mtmp, *mtmp2;
+
+	register int gonecnt = 0;
+	for (mtmp = fmon; mtmp; mtmp = mtmp2) {
+		mtmp2 = mtmp->nmon;
+		if (DEADMONSTER(mtmp)) continue;
+		mongone(mtmp);
+		gonecnt++;
+	}
+	pline("Eliminated %d monster%s.", gonecnt, plur(gonecnt));
+	return 0;	/* takes no time, unless caller takes time */
+}
+
 static void
 do_class_genocide()
 {
@@ -2816,18 +2842,9 @@ do_class_genocide()
 	You("aren't permitted to genocide such monsters.");
 			else
 #ifdef WIZARD	/* to aid in topology testing; remove pesky monsters */
-			  if (wizard && buf[0] == '*') {
-			    register struct monst *mtmp, *mtmp2;
-
-			    gonecnt = 0;
-			    for (mtmp = fmon; mtmp; mtmp = mtmp2) {
-					mtmp2 = mtmp->nmon;
-				    	if (DEADMONSTER(mtmp)) continue;
-					mongone(mtmp);
-					gonecnt++;
-			    }
-			pline("Eliminated %d monster%s.", gonecnt, plur(gonecnt));
-			    return;
+			if (wizard && buf[0] == '*') {
+				(void)wiz_kill_all();
+			return;
 			} else
 #endif
 	pline("That symbol does not represent any monster.");

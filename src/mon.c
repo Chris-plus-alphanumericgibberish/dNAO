@@ -12,7 +12,7 @@
 
 #include "hack.h"
 #include "mfndpos.h"
-#include "edog.h"
+#include "mextra.h"
 #include "artifact.h"
 #include <ctype.h>
 #include <stdlib.h>
@@ -234,6 +234,13 @@ STATIC_VAR int cham_to_pm[] = {
 			 ((mon)->zombify) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_KNIGHT) ||			\
 			 ((mon)->mtyp == PM_WARRIOR_OF_SUNLIGHT) ||			\
+			 ((mon)->mtyp == PM_UNDEAD_MAIDEN) ||			\
+			 ((mon)->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD) ||			\
+			 ((mon)->mtyp == PM_BLUE_SENTINEL) ||			\
+			 ((mon)->mtyp == PM_DARKMOON_KNIGHT) ||			\
+			 ((mon)->mtyp == PM_UNDEAD_REBEL) ||			\
+			 ((mon)->mtyp == PM_PARDONER) ||			\
+			 ((mon)->mtyp == PM_OCCULTIST) ||			\
 			 ((mon)->mtyp == PM_LIVING_DOLL) ||			\
 			 ((mon)->mtyp == PM_ANDROID) ||			\
 			 ((mon)->mtyp == PM_GYNOID) ||			\
@@ -550,7 +557,7 @@ register struct monst *mtmp;
 			num = d(2,4);
 			while(num--)
 				obj = mksobj_at(HEAVY_IRON_BALL, x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		    otmp = mksobj(MACE, TRUE, FALSE);
 			otmp = oname(otmp, artiname(ART_FIELD_MARSHAL_S_BATON));
 		    otmp->oerodeproof = TRUE;
@@ -568,31 +575,31 @@ register struct monst *mtmp;
 			} else if(!mtmp->mrevived && !rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		goto default_1;
 	    case PM_CLOCKWORK_DWARF:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_FABERGE_SPHERE:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,3);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_FIREWORK_CART:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLOCKWORK_SOLDIER:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,3);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GOLDEN_HEART:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -601,7 +608,7 @@ register struct monst *mtmp;
 			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = 1;
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_JUGGERNAUT:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -612,7 +619,7 @@ register struct monst *mtmp;
 			} else if(!rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLOCKWORK_FACTORY:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -625,7 +632,7 @@ register struct monst *mtmp;
 			} else if(!rn2(10)){
 				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_ID_JUGGERNAUT:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
@@ -634,13 +641,13 @@ register struct monst *mtmp;
 			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_SCRAP_TITAN:
 			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
 			obj->quan = d(4,4);
 			obj->owt = weight(obj);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			num = d(2,4);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
@@ -679,7 +686,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 				set_material_gm(obj, IRON);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_PARASITIZED_DOLL:
 			num = d(2,4);
@@ -928,7 +935,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
 				set_material_gm(obj, IRON);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CHAIN_GOLEM:
 			num = d(6,6);
@@ -936,7 +943,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
 				set_material_gm(obj, IRON);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_ARGENTUM_GOLEM:
 			num = d(1,3);
@@ -944,18 +951,18 @@ register struct monst *mtmp;
 				obj = mksobj_at(SILVER_SLINGSTONE, x, y, TRUE, FALSE);
 				set_obj_quan(obj, d(10, 5));
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GLASS_GOLEM:
 			num = d(2,4);   /* very low chance of creating all glass gems */
 			while (num--)
 				obj = mksobj_at((LAST_GEM + rnd(9)), x, y, TRUE, FALSE);
-				mtmp->mnamelth = 0;
+				rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLAY_GOLEM:
 			obj = mksobj_at(ROCK, x, y, FALSE, FALSE);
 			set_obj_quan(obj, (rn2(20) + 50));
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_STONE_GOLEM:
 			obj = mkcorpstat(STATUE, (struct monst *)0,
@@ -975,7 +982,7 @@ register struct monst *mtmp;
 				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
 				set_material_gm(obj, WOOD);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GROVE_GUARDIAN:
 			num = d(3,4);
@@ -984,7 +991,7 @@ register struct monst *mtmp;
 				set_material_gm(obj, WOOD);
 				obj->spe = rnd(3);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_LIVING_LECTERN:
 			num = d(2,3);
@@ -993,45 +1000,45 @@ register struct monst *mtmp;
 				set_material_gm(obj, WOOD);
 			}
 			obj = mkobj_at(SPBOOK_CLASS, x, y, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_LEATHER_GOLEM:
 			num = d(2,4);
 			while(num--)
 				obj = mksobj_at(LEATHER_ARMOR, x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GOLD_GOLEM:
 			/* Good luck gives more coins */
 			obj = mkgold((long)(200 - rnl(101)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			break;
 	    case PM_ARA_KAMEREL:
 			/* Ara Kamerel are projecting their images into gold golems */
 			obj = mkgold((long)(200 - rnl(101)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			break;
 		case PM_TREASURY_GOLEM:
 			num = d(2,4); 
 			while (num--)
 				obj = mksobj_at((LAST_GEM - rnd(9)), x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 			/* Good luck gives more coins */
 			obj = mkgold((long)(400 - rnl(101)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 		case PM_PAPER_GOLEM:
 			num = rnd(4);
 			while (num--)
 				obj = mksobj_at(SCR_BLANK_PAPER, x, y, TRUE, FALSE);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_STRAW_GOLEM:
 		if(!rn2(10)) mksobj_at(SEDGE_HAT, x, y, FALSE, FALSE);
 		obj = mksobj_at(SHEAF_OF_HAY, x, y, FALSE, FALSE);
 		obj->quan = (long)(d(2,4));
 		obj->owt = weight(obj);
-		mtmp->mnamelth = 0;
+		rem_mx(mtmp, MX_ENAM);
 		break;
 		case PM_SPELL_GOLEM:{
 			int scrnum = 0;
@@ -1041,7 +1048,7 @@ register struct monst *mtmp;
 				scrnum = d(1, scrrng)-1;
 				obj = mksobj_at(scrnum+SCR_ENCHANT_ARMOR, x, y, TRUE, FALSE);
 			}
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		}
 		break;
 	    case PM_GARO:
@@ -1169,7 +1176,7 @@ register struct monst *mtmp;
 				&& mtmp->m_lev > u.ulevel && !KEEPTRAITS(mtmp)
 		){
 			obj = mkgold((long)(mtmp->m_lev*25 - rnl(mtmp->m_lev*25/2+1)), x, y);
-			mtmp->mnamelth = 0;
+			rem_mx(mtmp, MX_ENAM);
 		} else{	/* preserve the unique traits of some creatures */
 //			pline("preserving unique traits");
 		    obj = mkcorpstat(CORPSE, KEEPTRAITS(mtmp) ? mtmp : 0,
@@ -1187,7 +1194,7 @@ register struct monst *mtmp;
 		   prevent the same attack beam from hitting its corpse */
 		if (flags.bypasses) bypass_obj(obj);
 
-		if (mtmp->mnamelth)
+		if (M_HAS_NAME(mtmp))
 			obj = oname(obj, NAME(mtmp));
 
 		/* Avoid "It was hidden under a green mold corpse!" 
@@ -2542,6 +2549,10 @@ mpickgold(mtmp)
     register struct obj *gold;
     int mat_idx;
 
+	/* prevent dead monsters from picking up anything */
+	if (DEADMONSTER(mtmp))
+		return;
+
     if ((gold = g_at(mtmp->mx, mtmp->my)) != 0) {
 	mat_idx = gold->obj_material;
 #ifndef GOLDOBJ
@@ -2571,6 +2582,10 @@ mpickstuff(mtmp, str)
 
 /*	prevent shopkeepers from leaving the door of their shop */
 	if(mtmp->isshk && inhishop(mtmp)) return FALSE;
+
+	/* prevent dead monsters from picking up anything */
+	if (DEADMONSTER(mtmp))
+		return FALSE;
 
 	for(otmp = level.objects[mtmp->mx][mtmp->my]; otmp; otmp = otmp2) {
 	    otmp2 = otmp->nexthere;
@@ -3354,102 +3369,115 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
    in the absence of Conflict. Incorporates changes from grudge mod */
 long
 mm_aggression(magr, mdef)
-struct monst *magr,	/* monster that is currently deciding where to move */
-	     *mdef;	/* another monster which is next to it */
+struct monst * magr;	/* monster that is currently deciding where to move */
+struct monst * mdef;	/* another monster which is next to it */
 {
-	struct permonst *ma,*md;
-
+	struct permonst *ma, *md;
 	ma = magr->data;
 	md = mdef->data;
-	
-	// if(magr->mpeaceful && mdef->mpeaceful && (magr->mtame || mdef->mtame)) return 0L;
-	
-	//Pets never grudge on pets, a monster you're interacting with, or quest quardians and leaders.
-	if(magr->mtame && (mdef->mtame || mdef->moccupation 
-		|| (mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN))
-	)){
-			return 0L;
-	}
-	
-	if(mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP){
-			return 0L;
-	}
-	if(mdef->entangled == SHACKLES){
-		return 0L;
-	}
-	
-	if(!mon_can_see_mon(magr, mdef)) return 0L;
 
-	if(magr->mstrategy & STRAT_WAITMASK)
+	// Pets don't attack:
+	if(magr->mtame && (
+		/* other pets */
+		(mdef->mtame) ||
+		/* creatures you are interacting with */
+		(mdef->moccupation) ||
+		/* peaceful quest guardians/leaders */
+		(mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN)) ||
+		/* peaceful Axus */
+		(mdef->mpeaceful && !u.uevent.uaxus_foe && md->mtyp == PM_AXUS)
+	)){
 		return 0L;
-	
-	if(magr->mtame && mdef->mpeaceful && !u.uevent.uaxus_foe && md->mtyp == PM_AXUS)
-		return 0L;
-	
-	if(magr->mhp < 100 && attacktype_fordmg(md, AT_BOOM, AD_MAND))
-		return 0L;
-	
-	if((Upolyd ? u.mh < 100 : u.uhp < 100) && magr->mtame && attacktype_fordmg(md, AT_BOOM, AD_MAND))
-		return 0L;
-	
-	if(ma->mtyp == PM_DREADBLOSSOM_SWARM){
-		if(!(is_fey(md) || is_plant(md))) return ALLOW_M|ALLOW_TM;
 	}
-	if(ma->mtyp == PM_GRUE){
-		if(isdark(mdef->mx, mdef->my)) return ALLOW_M|ALLOW_TM;
+	// monsters trapped in vivisection traps are excluded
+	if(mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP){
+		return 0L;
 	}
-	
-	if((ma->mtyp == PM_OONA || ma->mtyp == PM_OONA)
+	// shackled monsters aren't a threat
+	if(mdef->entangled == SHACKLES) {
+		return 0L;
+	}
+	// must be able to see mdef -- note that this has a 1/8 chance when adjacent even when totally blind!
+	if (!mon_can_see_mon(magr, mdef)) {
+		return 0L;
+	}
+	// magr cannot be waiting
+	if (magr->mstrategy & STRAT_WAITMASK) {
+		return 0L;
+	}
+	// Berserked creatures are effectively always conflicted, and aren't careful about anything unnecessary
+	if (magr->mberserk) {
+		return ALLOW_M | ALLOW_TM;
+	}
+	// careful around mandrakes 
+	if (attacktype_fordmg(md, AT_BOOM, AD_MAND) && (
+		(!mindless(magr->data) && magr->mhp < 100) ||
+		(magr->mtame && maybe_polyd(u.mh, u.uhp) < 100)
+	)) {
+		return 0L;
+	}
+	// careful around cockatrices
+	if (touch_petrifies(md) && !resists_ston(magr)
+		&& !mindless(magr->data) && distmin(magr->mx, magr->my, mdef->mx, mdef->my) < 3 && !MON_WEP(magr)
+	) {
+		return 0L;
+	}
+	// dreadblossoms attack almost anything
+	if(ma->mtyp == PM_DREADBLOSSOM_SWARM &&
+		!(is_fey(md) || is_plant(md))
+	) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	// grue attacks anything in the dark
+	if(ma->mtyp == PM_GRUE &&
+		isdark(mdef->mx, mdef->my)
+	) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	// Oona attacks chaotics and vice versa (normal pet-vs-monster logic takes precedence)
+	if ((ma->mtyp == PM_OONA || md->mtyp == PM_OONA)
 		&& sgn(ma->maligntyp) == -1*sgn(md->maligntyp) //"Oona grudges on chaotics, but not on neutrals"
 		&& !(magr->mtame || mdef->mtame) //Normal pet-vs-monster logic should take precedence over this
 	){
 		return ALLOW_M|ALLOW_TM;
 	}
-	
-	
-	/* In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
-		The leader IS in serious danger */
+	// In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
+	// The leader IS in serious danger
+	// However, the imminent doom causes all peacefuls to forget any grudges against each other
+	// (and Illsensine can make her own forces coordinate, of course)
 	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
 		if(magr->mpeaceful != mdef->mpeaceful) return ALLOW_M|ALLOW_TM;
 		else return 0L;
 	}
-	
-	if(magr->mberserk) return ALLOW_M|ALLOW_TM;
-	
-	if(touch_petrifies(md) && !resists_ston(magr) 
-		&& distmin(magr->mx, magr->my, mdef->mx, mdef->my) < 3
-		&& !MON_WEP(magr)
-	)
-		return 0L;
-	
-	if(md->mtyp == PM_MANDRAKE) return 0L;
-	
-	if(is_drow(ma) && is_drow(md) && (magr->mfaction == mdef->mfaction)) return 0L;
-	
+	// While the player is sowing discord (enhanced conflict), almost anything goes 
 	if (u.sowdisc && !mdef->mtame && canseemon(magr) && canseemon(mdef))
 	    return ALLOW_M|ALLOW_TM;
-	/* supposedly purple worms are attracted to shrieking because they
-	   like to eat shriekers, so attack the latter when feasible */
-	if (ma->mtyp == PM_PURPLE_WORM &&
-		md->mtyp == PM_SHRIEKER)
-			return ALLOW_M|ALLOW_TM;
-
+	// drow don't attack their own
+	if (is_drow(ma) && is_drow(md) && (magr->mfaction == mdef->mfaction)) {
+		return 0L;
+	}
+	// Kiaransali drow are friendly to undead
+	if (((is_drow(ma) && magr->mfaction == LOST_HOUSE) && is_undead(md)) ||
+		((is_drow(md) && mdef->mfaction == LOST_HOUSE) && is_undead(ma))) {
+		return 0L;
+	}
+	// supposedly purple worms are attracted to shrieking because they
+	// like to eat shriekers, so attack the latter when feasible
+	if (ma->mtyp == PM_PURPLE_WORM && md->mtyp == PM_SHRIEKER) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	// ghouls attack gugs (who can retaliate, but won't initiate)
+	if (ma->mtyp == PM_GHOUL && md->mtyp == PM_GUG) {
+		return ALLOW_M|ALLOW_TM;
+	}
 #ifdef ATTACK_PETS
-        /* pets attack hostile monsters */
+    // pets attack hostile monsters
 	if (magr->mtame && !mdef->mpeaceful)
 	    return ALLOW_M|ALLOW_TM;
-	
-        /* and vice versa */
+	// and vice versa, with some limitations that will help your pet survive
 	if (mdef->mtame && !magr->mpeaceful && !mdef->meating && mdef != u.usteed && !mdef->mflee)
 	    return ALLOW_M|ALLOW_TM;
 #endif /* ATTACK_PETS */
-
-	/* Gugs and ghouls fight each other. 
-		Gugs are afraid of
-		Ghouls, so they won't attack first. */
-	if (ma->mtyp == PM_GHOUL &&
-		md->mtyp == PM_GUG)
-			return ALLOW_M|ALLOW_TM;
 
 	/* Since the quest guardians are under siege, it makes sense to have 
        them fight hostiles.  (But we don't want the quest leader to be in danger.) */
@@ -3508,7 +3536,7 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 		return ALLOW_M|ALLOW_TM;
 
 	/* undead vs civs */
-	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_rogue_level(&u.uz) || Inhell || Is_astralevel(&u.uz))){
+	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_stronghold(&u.uz) || Is_rogue_level(&u.uz) || Inhell || Is_astralevel(&u.uz))){
 		if(is_undead_mon(magr) && 
 			(!is_witch_mon(mdef) && !always_hostile_mon(mdef) && !is_undead_mon(mdef) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef))
 		)
@@ -3586,11 +3614,11 @@ struct monst *magr,	/* monster that is currently deciding where to move */
 	if(is_gnoll(md) && is_minotaur(ma))
 		return ALLOW_M|ALLOW_TM;
 
-	/* angels vs. demons */
-	if(is_angel(ma) && (is_demon(md) /*|| md->mtyp == PM_FALLEN_ANGEL*/))
+	/* angels vs. demons (excluding Lamashtu) */
+	if (is_angel(ma) && (is_demon(md) /*|| md->mtyp == PM_FALLEN_ANGEL*/) && !(md->mtyp == PM_LAMASHTU))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if(is_angel(md) && (is_demon(ma) /*|| ma->mtyp == PM_FALLEN_ANGEL || ma->mtyp == PM_LUCIFER*/))
+	if (is_angel(md) && (is_demon(ma) /*|| ma->mtyp == PM_FALLEN_ANGEL || ma->mtyp == PM_LUCIFER*/) && !(ma->mtyp == PM_LAMASHTU))
 		return ALLOW_M|ALLOW_TM;
 
 	/* monadics vs. undead */
@@ -3687,8 +3715,8 @@ register int x,y;
 		else if(rn2(2) && mon->mx + xdir[((int)mon->mvar_vector + 1)%8] == x && 
 		   mon->my + ydir[((int)mon->mvar_vector + 1)%8] == y 
 		) return (!rn2(2) && (distance < 3));
-		else if(mon->mx + xdir[((int)mon->mvar_vector - 1)%8] == x && 
-		   mon->my + ydir[((int)mon->mvar_vector - 1)%8] == y 
+		else if(mon->mx + xdir[((int)mon->mvar_vector + 7)%8] == x && 
+		   mon->my + ydir[((int)mon->mvar_vector + 7)%8] == y 
 		) return (!rn2(2) && (distance < 3));
 		else return 0;
 	}
@@ -3706,6 +3734,7 @@ dmonsfree()
 	if ((*mtmp)->mhp <= 0) {
 	    struct monst *freetmp = *mtmp;
 	    *mtmp = (*mtmp)->nmon;
+		rem_all_mx(freetmp);
 	    dealloc_monst(freetmp);
 	    count++;
 	} else
@@ -3738,6 +3767,9 @@ register struct monst *mtmp, *mtmp2;
     }
     mtmp->minvent = 0;
 
+	/* transfer the monster's components */
+	mov_all_mx(mtmp, mtmp2);
+
     /* remove the old monster from the map and from `fmon' list */
     relmon(mtmp);
 
@@ -3762,7 +3794,7 @@ register struct monst *mtmp, *mtmp2;
 #ifdef STEED
     if (u.usteed == mtmp) u.usteed = mtmp2;
 #endif
-    if (mtmp2->isshk) replshk(mtmp,mtmp2);
+    if (mtmp2->isshk) replshk(mtmp2);
 
     /* discard the old monster */
     dealloc_monst(mtmp);
@@ -4855,6 +4887,13 @@ boolean was_swallowed;			/* digestion */
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
 		   || mdat->mtyp == PM_UNDEAD_KNIGHT
 		   || mdat->mtyp == PM_WARRIOR_OF_SUNLIGHT
+		   || mdat->mtyp == PM_UNDEAD_MAIDEN
+		   || mdat->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+		   || mdat->mtyp == PM_BLUE_SENTINEL
+		   || mdat->mtyp == PM_DARKMOON_KNIGHT
+		   || mdat->mtyp == PM_UNDEAD_REBEL
+		   || mdat->mtyp == PM_PARDONER
+		   || mdat->mtyp == PM_OCCULTIST
 		   || mdat->mtyp == PM_CROW_WINGED_HALF_DRAGON
 		   || mdat->mtyp == PM_SEYLL_AUZKOVYN
 		   || mdat->mtyp == PM_DARUTH_XAXOX
@@ -5072,7 +5111,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 		    (void) add_to_container(otmp, obj);
@@ -5167,7 +5206,7 @@ register struct monst *mdef;
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
 		set_material_gm(otmp, GOLD);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 			set_material(obj, GOLD);
@@ -5227,7 +5266,7 @@ register struct monst *mdef;
 		}
 		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
 		set_material(otmp, GOLD);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 	}
 	
 	stackobj(otmp);
@@ -5301,7 +5340,7 @@ register struct monst *mdef;
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
 		set_material_gm(otmp, GLASS);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
 		    (void) add_to_container(otmp, obj);
@@ -5359,7 +5398,7 @@ register struct monst *mdef;
 		}
 		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
 		set_material(otmp, GLASS);
-		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
+		if (M_HAS_NAME(mdef)) otmp = oname(otmp, NAME(mdef));
 	}
 	
 	stackobj(otmp);
@@ -5508,9 +5547,9 @@ xkilled(mtmp, dest)
 		You("%s %s!", verb,
 		    !mtmp->mtame ? mon_nam(mtmp) :
 			x_monnam(mtmp,
-				 mtmp->mnamelth ? ARTICLE_NONE : ARTICLE_THE,
+				 M_HAS_NAME(mtmp) ? ARTICLE_NONE : ARTICLE_THE,
 				 "poor",
-				 mtmp->mnamelth ? SUPPRESS_SADDLE : 0,
+				 M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0,
 				 FALSE));
 	    }
 	}
@@ -5594,7 +5633,7 @@ xkilled(mtmp, dest)
 					&& mdat->mlet != S_PLANT
 					&& !(mtmp->mvanishes >= 0)
 					&& !(mtmp->mclone)
-					&& !(is_derived_undead_mon(mtmp))
+					&& !(has_template(mtmp, ZOMBIFIED))
 					&& !(is_auton(mtmp->data))
 		) {
 			int typ;
@@ -5668,7 +5707,7 @@ cleanup:
 	}
 	if((mtmp->mpeaceful && !rn2(2)) || mtmp->mtame)	change_luck(-1);
 	if (is_unicorn(mdat) &&
-	   !is_derived_undead_mon(mtmp) &&
+		!always_hostile(mdat) &&
 		sgn(u.ualign.type) == sgn(mdat->maligntyp) && 
 		u.ualign.type != A_VOID
 	) {
@@ -5697,7 +5736,7 @@ cleanup:
 	}
 
 	/* adjust alignment points */
-	if (mtmp->m_id == quest_status.leader_m_id && !is_derived_undead_mon(mtmp)) {
+	if (mtmp->m_id == quest_status.leader_m_id && !always_hostile(mtmp->data)) {
 		if(flags.leader_backstab){ /* They attacked you! */
 			adjalign((int)(ALIGNLIM/4));
 			// pline("That was %sa bad idea...",
@@ -5711,12 +5750,12 @@ cleanup:
 	} else if (mdat->msound == MS_NEMESIS){	/* Real good! */
 	    adjalign((int)(ALIGNLIM/4));
 		u.hod = max(u.hod-10,0);
-	} else if (mdat->msound == MS_GUARDIAN && mdat->mtyp != PM_THUG && !is_derived_undead_mon(mtmp)) {	/* Bad *//*nobody cares if you kill thugs*/
+	} else if (mdat->msound == MS_GUARDIAN && mdat->mtyp != PM_THUG && !always_hostile(mdat)) {	/* Bad *//*nobody cares if you kill thugs*/
 	    adjalign(-(int)(ALIGNLIM/8));											/*what's a little murder amongst rogues?*/
 		u.hod += 10;
 	    if (!Hallucination) pline("That was probably a bad idea...");
 	    else pline("Whoopsie-daisy!");
-	}else if (mtmp->ispriest && !is_derived_undead_mon(mtmp)) {
+	}else if (mtmp->ispriest && !always_hostile(mdat)) {
 		adjalign((p_coaligned(mtmp)) ? -2 : 2);
 		/* cancel divine protection for killing your priest */
 		if (p_coaligned(mtmp)) u.ublessed = 0;
@@ -6420,14 +6459,16 @@ struct monst *mon;
 		else mndx = PM_DREAM_QUASIELEMENTAL;
 		break;
 	    case CHAM_ORDINARY:
-	      {
+	    {
 		struct obj *m_armr = which_armor(mon, W_ARM);
 
 		if (m_armr && Is_dragon_scales(m_armr))
 		    mndx = Dragon_scales_to_pm(m_armr) - mons;
 		else if (m_armr && Is_dragon_mail(m_armr))
-		    mndx = Dragon_mail_to_pm(m_armr) - mons;
-	      }
+			mndx = Dragon_mail_to_pm(m_armr) - mons;
+		else if ((m_armr = which_armor(mon, W_ARMC)) && m_armr->otyp == LEO_NEMAEUS_HIDE)
+			mndx = PM_SON_OF_TYPHON;
+	    }
 		break;
 	}
 #ifdef WIZARD
@@ -6512,8 +6553,10 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		 */
 		char *p = index(NAME(mtmp), ' ');
 		if (p) {
+			char nambuf[BUFSZ];
+			Strcpy(nambuf, NAME(mtmp));
 			*p = '\0';
-			mtmp->mnamelth = p - NAME(mtmp) + 1;
+			christen_monst(mtmp, nambuf);
 		}
 	}
 
@@ -6618,12 +6661,20 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	newsym(mtmp->mx,mtmp->my);
 
 	if (msg) {
-	    uchar save_mnamelth = mtmp->mnamelth;
-	    mtmp->mnamelth = 0;
+		char nambuf[BUFSZ];
+		boolean hadname = FALSE;
+		if(M_HAS_NAME(mtmp)) {
+			Strcpy(nambuf, NAME(mtmp));
+	    	rem_mx(mtmp, MX_ENAM);
+			hadname = TRUE;
+		}
 	    pline("%s turns into %s!", oldname,
 			mtyp == PM_GREEN_SLIME ? "slime" :
 		  x_monnam(mtmp, ARTICLE_A, (char*)0, SUPPRESS_SADDLE, FALSE));
-	    mtmp->mnamelth = save_mnamelth;
+
+		if (hadname) {
+			christen_monst(mtmp, nambuf);
+		}
 	}
 
 	possibly_unwield(mtmp, polyspot);	/* might lose use of weapon */

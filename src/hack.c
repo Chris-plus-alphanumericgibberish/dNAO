@@ -811,8 +811,11 @@ boolean guess;
 	}
 	flags.run = 8;
     }
+	if (u.itx == u.ux && u.ity == u.uy)
+		u.itx = u.ity = 0;
     if (u.tx != u.ux || u.ty != u.uy) {
-	xchar travel[COLNO][ROWNO];
+	xchar travel[COLNO][ROWNO];		/* radius to get to this xy coord */
+	xchar suretravel[COLNO][ROWNO];	/* we have a seenv-only path to this coord */
 	xchar travelstepx[2][COLNO*ROWNO];
 	xchar travelstepy[2][COLNO*ROWNO];
 	xchar tx, ty, ux, uy;
@@ -833,9 +836,10 @@ boolean guess;
 
     noguess:
 	(void) memset((genericptr_t)travel, 0, sizeof(travel));
+	(void)memset((genericptr_t)suretravel, 0, sizeof(suretravel));
 	travelstepx[0][0] = tx;
 	travelstepy[0][0] = ty;
-
+	suretravel[tx][ty] = 1;
 	while (n != 0) {
 	    int nn = 0;
 
@@ -851,12 +855,18 @@ boolean guess;
 		    int nx = x+xdir[ordered[dir]];
 		    int ny = y+ydir[ordered[dir]];
 
+			/* don't go out of bounds */
 		    if (!isok(nx, ny)) continue;
+
+			/* don't go through places we know we can't */
+			if (!test_move(x, y, nx-x, ny-y, TEST_TRAV) && levl[nx][ny].seenv)
+				continue;
+
 		    if ((!Passes_walls && !can_ooze(&youmonst) &&
 			closed_door(x, y)) || boulder_at(x, y)) {
 			/* closed doors and boulders usually
 			 * cause a delay, so prefer another path */
-			if (travel[x][y] > radius-3) {
+			if (travel[x][y] > radius - 3) {
 			    travelstepx[1-set][nn] = x;
 			    travelstepy[1-set][nn] = y;
 			    /* don't change travel matrix! */
@@ -864,8 +874,8 @@ boolean guess;
 			    continue;
 			}
 		    }
-		    if (test_move(x, y, nx-x, ny-y, TEST_TRAV) &&
-			(levl[nx][ny].seenv || (!Blind && couldsee(nx, ny)))) {
+			/* travelplus is a bit adventerous, and hopes that unseen locations are pathable */
+			if ((iflags.travelplus && (suretravel[x][y] || radius<iflags.travelplus)) || levl[nx][ny].seenv) {
 			if (nx == ux && ny == uy) {
 			    if (!guess) {
 				u.dx = x-ux;
@@ -878,16 +888,24 @@ boolean guess;
 				}
 				return TRUE;
 			    }
-			} else if (!travel[nx][ny]) {
+			}
+			else if (!suretravel[nx][ny] && levl[nx][ny].seenv && suretravel[x][y]) {
+				/* we are now sure of this step (because the previous step was) */
 			    travelstepx[1-set][nn] = nx;
 			    travelstepy[1-set][nn] = ny;
-			    travel[nx][ny] = radius;
+				travel[nx][ny] = radius;
+				suretravel[nx][ny] = radius;
 			    nn++;
+			}
+			else if (!travel[nx][ny]) {
+				travelstepx[1 - set][nn] = nx;
+				travelstepy[1 - set][nn] = ny;
+				travel[nx][ny] = radius;
+				nn++;
 			}
 		    }
 		}
 	    }
-	    
 	    n = nn;
 	    set = 1-set;
 	    radius++;
@@ -896,22 +914,33 @@ boolean guess;
 	/* if guessing, find best location in travel matrix and go there */
 	if (guess) {
 	    int px = tx, py = ty;	/* pick location */
-	    int dist, nxtdist, d2, nd2;
+	    int dist, idist, nxtdist, d2, id2, nd2;
 
 	    dist = distmin(ux, uy, tx, ty);
 	    d2 = dist2(ux, uy, tx, ty);
+
+		/* we may already have an intermediary location picked out */
+		if (u.itx || u.ity) {
+			idist = distmin(ux, uy, u.itx, u.ity);
+			id2 = dist2(ux, uy, u.itx, u.ity);
+		}
+		else {
+			idist = dist;
+			id2 = d2;
+		}
+
 	    for (tx = 1; tx < COLNO; ++tx)
 		for (ty = 0; ty < ROWNO; ++ty)
 		    if (travel[tx][ty]) {
 			nxtdist = distmin(ux, uy, tx, ty);
-			if (nxtdist == dist && couldsee(tx, ty)) {
+			if (nxtdist == dist && (couldsee(tx, ty) || iflags.travelplus)) {
 			    nd2 = dist2(ux, uy, tx, ty);
 			    if (nd2 < d2) {
 				/* prefer non-zigzag path */
 				px = tx; py = ty;
 				d2 = nd2;
 			    }
-			} else if (nxtdist < dist && couldsee(tx, ty)) {
+			} else if (nxtdist < dist && (couldsee(tx, ty) || iflags.travelplus)) {
 			    px = tx; py = ty;
 			    dist = nxtdist;
 			    d2 = dist2(ux, uy, tx, ty);
@@ -926,6 +955,18 @@ boolean guess;
 		    return TRUE;
 		goto found;
 	    }
+		/* which is better - our best in LoS, or our saved intermediate? */
+		if (!(u.itx || u.ity) ||
+			(dist == idist && d2 < id2) ||
+			(dist < idist)
+			) {
+			u.itx = px;
+			u.ity = py;
+		}
+		else {
+			px = u.itx;
+			py = u.ity;
+		}
 	    tx = px;
 	    ty = py;
 	    ux = u.ux;
@@ -1029,13 +1070,10 @@ domove()
 			    || is_whirly(youracedata))
 			on_ice = FALSE;
 		    else if (!rn2(Cold_resistance ? 3 : 2)) {
-			HFumbling |= FROMOUTSIDE;
 			HFumbling &= ~TIMEOUT;
 			HFumbling += 1;  /* slip on next move */
 		    }
 		}
-		if (!on_ice && (HFumbling & FROMOUTSIDE))
-		    HFumbling &= ~FROMOUTSIDE;
 
 		x = u.ux + u.dx;
 		y = u.uy + u.dy;
@@ -2655,29 +2693,27 @@ weight_cap()
 	else if (!strongmonst(mdat)
 		|| (strongmonst(mdat) && (mdat->cwt > WT_HUMAN)))
 		carrcap = (carrcap * (long)mdat->cwt / WT_HUMAN);
+	if (!u.usteed && Race_if(PM_ORC) && !Upolyd){
+		carrcap = 2 * carrcap / 3 + u.ulevel*carrcap / 30;
+	}
 
 	if (Levitation || Weightless)    /* pugh@cornell */
 		carrcap = maxcap;
 	else {
-		if(!u.usteed){
-			if(u.ucarinc < 0) carrcap += u.ucarinc;
-			if(Race_if(PM_ORC) && !Upolyd){
-				carrcap = 2*carrcap/3 + u.ulevel*carrcap/30;
-			}
-		}
+		if (carrcap > maxcap)
+			carrcap = maxcap;
 
-		if(carrcap > maxcap) carrcap = maxcap;
-		/* note that carinc bonues can push you over the normal limit! */
-		if(!u.usteed && u.ucarinc > 0) carrcap += u.ucarinc;
-
+		/* these carrcap modifiers only make sense if you have feet on the ground */
 		if (boots && boots->otyp == find_hboots()) carrcap += 100;
 		
-		if (!Flying) {
+		if (!u.usteed && !Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;
 			if(EWounded_legs & RIGHT_SIDE) carrcap -= 100;
 		}
 		if (carrcap < 0) carrcap = 0;
 	}
+
+	carrcap += u.ucarinc;
 	if(u.sealsActive&SEAL_FAFNIR) carrcap *= 1+((double) u.ulevel)/100;
 	if(active_glyph(COMMUNION)) carrcap *= 1.25;
 	if(animaloid(mdat) || naoid(mdat)){

@@ -34,13 +34,13 @@ install: all
 
 ##### BINARIES #####
 
-SRCOBJ = allmain.o alloc.o apply.o artifact.o attrib.o ball.o bones.o	\
+SRCOBJ = allmain.o alloc.o apply.o artifact.o artilist.o attrib.o ball.o bones.o	\
          botl.o cmd.o dbridge.o decl.o detect.o dig.o display.o dlb.o	\
          do.o do_name.o do_wear.o dog.o dogmove.o dokick.o dothrow.o	\
          drawing.o dungeon.o eat.o end.o engrave.o exper.o explode.o	\
          extralev.o files.o fountain.o hack.o hacklib.o invent.o	\
          light.o lock.o mail.o makemon.o mapglyph.o mcastu.o 		\
-         minion.o mklev.o mkmap.o mkmaze.o mkobj.o mkroom.o		\
+         mextra.o minion.o mklev.o mkmap.o mkmaze.o mkobj.o mkroom.o	\
          mon.o mondata.o monmove.o monst.o monstr.o mplayer.o		\
          mthrowu.o muse.o music.o o_init.o objects.o objnam.o		\
          options.o pager.o pickup.o pline.o polyself.o potion.o		\

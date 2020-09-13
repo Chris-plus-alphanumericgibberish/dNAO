@@ -127,6 +127,7 @@ enum {
 	GOD_GWYN,
 	GOD_GWYNEVERE,
 	GOD_GWYNDOLIN,
+	GOD_VELKA,
 //Orc noble
 	GOD_ILNEVAL,
 	GOD_LUTHIC,
@@ -209,7 +210,8 @@ extern struct god_details god_list[MAX_GOD]; //defined in decl.c
 #define GA_NODENS	11
 #define GA_FRACTURE	12
 #define GA_SOTHOTH	13
-#define GA_NUM		14
+#define GA_VELKA	14
+#define GA_NUM		15
 
 #define GOAT_EAT_PASSIVE 0
 #define GOAT_EAT_OFFERED 1
@@ -243,6 +245,7 @@ extern struct god_details god_list[MAX_GOD]; //defined in decl.c
 									  on_level(&lethe_temples,&u.uz) ? GA_MOTHER :\
 									  on_level(&lethe_headwaters,&u.uz) ? GA_NODENS :\
 									  In_outlands(&u.uz) ? GA_FRACTURE :\
+									  (In_quest(&u.uz) && Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend) ? GA_VELKA :\
 									  on_level(&rlyeh_level,&u.uz) ? GA_SOTHOTH :\
 									  In_lost_cities(&u.uz) ? GA_OTHER :\
 									   GA_NONE\
@@ -260,6 +263,7 @@ extern struct god_details god_list[MAX_GOD]; //defined in decl.c
 						  on_level(&lethe_temples,&u.uz) ? GA_MOTHER :\
 						  on_level(&lethe_headwaters,&u.uz) ? GA_NODENS :\
 						  In_outlands(&u.uz) ? GA_FRACTURE :\
+						  (In_quest(&u.uz) && Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend) ? GA_VELKA :\
 						  on_level(&rlyeh_level,&u.uz) ? GA_SOTHOTH :\
 						  In_lost_cities(&u.uz) ? GA_OTHER :\
 						  GA_NONE\

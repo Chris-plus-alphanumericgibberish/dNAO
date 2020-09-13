@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "eshk.h"
+#include "mextra.h"
 #include "artifact.h"
 /* #define DEBUG */	/* uncomment to enable new eat code debugging */
 
@@ -669,7 +669,7 @@ boolean allowmsg;
 					You("have a bad feeling deep inside.");
 				You("cannibal!  You will regret this!");
 			}
-			HAggravate_monster |= FROMOUTSIDE;
+			HAggravate_monster |= TIMEOUT_INF;
 			change_luck(-rn1(4,2));		/* -5..-2 */
 		} else if (Role_if(PM_CAVEMAN)) {
 			adjalign(sgn(u.ualign.type));
@@ -715,7 +715,7 @@ BOOLEAN_P bld, nobadeffects;
 		      victual.eating ? "eating" : bld ? "drinking" : "biting",
 		      occupation == opentin ? "tinned " : "", mons[pm].mname,
 			  bld ? " blood" : "");
-		    HAggravate_monster |= FROMOUTSIDE;
+			HAggravate_monster |= TIMEOUT_INF;
 		}
 		break;
 	    case PM_LIZARD:
@@ -929,7 +929,7 @@ give_intrinsic(int type, long duration){
 	boolean nullify = (duration == -2);
 	
 	if (permanent){
-		u.uprops[type].intrinsic |= FROMOUTSIDE;
+		u.uprops[type].intrinsic |= TIMEOUT_INF;
 		return;
 	}
 	
@@ -1034,7 +1034,7 @@ boolean drained;
 		break;
 	    case DISINT_RES:
 			debugpline("Trying to give disintegration resistance");
-			if (!(HDisint_resistance & FROMOUTSIDE)) {
+			if (!(HDisint_resistance & (TIMEOUT_INF | FROMOUTSIDE))) {
 				You_feel(Hallucination ? "totally together, man." : "very firm.");
 				give_intrinsic(DISINT_RES, -1);
 			}
@@ -1059,7 +1059,7 @@ boolean drained;
 		break;
 	    case POISON_RES:
 			debugpline("Trying to give poison resistance");
-			if (!(HPoison_resistance & FROMOUTSIDE)) {
+			if (!(HPoison_resistance & (TIMEOUT_INF | FROMOUTSIDE))) {
 				You_feel(Poison_resistance ? "especially healthy." : "healthy.");
 				give_intrinsic(POISON_RES, -1);
 			}
@@ -1075,21 +1075,21 @@ boolean drained;
 		break;
 	    case TELEPORT:
 			debugpline("Trying to give teleport");
-			if(!(HTeleportation & FROMOUTSIDE)) {
+			if (!(HTeleportation & (TIMEOUT_INF | FROMOUTSIDE))) {
 				You_feel(Hallucination ? "diffuse." : "very jumpy.");
 				give_intrinsic(TELEPORT, -1);
 			}
 		break;
 	    case TELEPORT_CONTROL:
 			debugpline("Trying to give teleport control");
-			if(!(HTeleport_control & FROMOUTSIDE)) {
+			if (!(HTeleport_control & (TIMEOUT_INF | FROMOUTSIDE))) {
 				You_feel(Hallucination ? "centered in your personal space." : "in control of yourself.");
 				give_intrinsic(TELEPORT_CONTROL, -1);
 			}
 		break;
 	    case TELEPAT:
 			debugpline("Trying to give telepathy");
-			if(!(HTelepat & FROMOUTSIDE)) {
+			if (!(HTelepat & (TIMEOUT_INF | FROMOUTSIDE))) {
 				You_feel(Hallucination ? "in touch with the cosmos." : "a strange mental acuity.");
 				give_intrinsic(TELEPAT, -1);
 				if(Hallucination) change_uinsight(1);
@@ -1238,8 +1238,8 @@ BOOLEAN_P tin, nobadeffects, drained;
 					if (!Blind && !BInvis) self_invis_message();
 				} else {
 					if (!(HInvis & INTRINSIC)) You_feel("hidden!");
-					HInvis |= FROMOUTSIDE;
-					HSee_invisible |= FROMOUTSIDE;
+					HInvis |= TIMEOUT_INF;
+					HSee_invisible |= TIMEOUT_INF;
 				}
 				newsym(u.ux, u.uy);
 			}
@@ -2175,7 +2175,7 @@ struct obj *otmp;
 		if (!(u.uprops[objects[typ].oc_oprop].intrinsic & FROMOUTSIDE))
 		    accessory_has_effect(otmp);
 
-		u.uprops[objects[typ].oc_oprop].intrinsic |= FROMOUTSIDE;
+		u.uprops[objects[typ].oc_oprop].intrinsic |= TIMEOUT_INF;
 
 		switch (typ) {
 		  case RIN_SEE_INVISIBLE:
@@ -2205,7 +2205,7 @@ struct obj *otmp;
 		    rescham();
 		    break;
 		  case RIN_LEVITATION:
-		    /* undo the `.intrinsic |= FROMOUTSIDE' done above */
+		    /* undo the `.intrinsic |= TIMEOUT_INF' done above */
 		    u.uprops[LEVITATION].intrinsic = oldprop;
 		    if (!Levitation) {
 			float_up();
@@ -2240,17 +2240,17 @@ struct obj *otmp;
 		break;
 	    case RIN_PROTECTION:
 		accessory_has_effect(otmp);
-		HProtection |= FROMOUTSIDE;
+		HProtection |= TIMEOUT_INF;
 		u.ublessed += otmp->spe;
 		flags.botl = 1;
 		break;
 	    case RIN_FREE_ACTION:
 		/* Give sleep resistance instead */
-		if (!(HSleep_resistance & FROMOUTSIDE))
+		if (!(HSleep_resistance & (FROMOUTSIDE | TIMEOUT_INF)))
 		    accessory_has_effect(otmp);
 		if (!Sleep_resistance)
 		    You_feel("wide awake.");
-		HSleep_resistance |= FROMOUTSIDE;
+		HSleep_resistance |= TIMEOUT_INF;
 		break;
 	    case AMULET_OF_CHANGE:
 		accessory_has_effect(otmp);
@@ -2474,14 +2474,14 @@ register struct obj *otmp;
 		/* This stuff seems to be VERY healthy! */
 		adjattrib(A_DEX, 1, 0);
 		if(!otmp->cursed){
-			if (!(HFast & INTRINSIC)) {
+			if (!(HFast & (INTRINSIC))) {
 				if (!Fast) You("speed up.");
 				else Your("quickness feels more natural.");
-				HFast |= FROMOUTSIDE;
+				HFast |= TIMEOUT_INF;
 			}
 		} else {
-			if ((HFast & FROMOUTSIDE)) {
-				HFast &= ~FROMOUTSIDE;
+			if ((HFast & TIMEOUT_INF)) {
+				HFast &= ~TIMEOUT_INF;
 				if (!Fast) You("slow down.");
 				else Your("quickness feels less natural.");
 			}
@@ -2945,7 +2945,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 					if (carried(otmp)) useup(otmp);
 					else useupf(otmp, 1L);
 				}
-				if(otmp->otyp == TIN) {
+				else if(otmp->otyp == TIN) {
 					start_tin(otmp);
 					return(1);
 				}
@@ -3432,7 +3432,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			return 1;
 		}
 	}
-	if (otmp->otyp == EYEBALL || otmp->otyp == SEVERED_HAND) {
+	if ((otmp->otyp == EYEBALL || otmp->otyp == SEVERED_HAND) && otmp->oartifact) {
 	    Strcpy(qbuf,"Are you sure you want to eat that?");
 	    if ((c = yn_function(qbuf, ynqchars, 'n')) != 'y') return 0;
 	}
@@ -3465,10 +3465,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    victual.eating = TRUE; /* needed for lesshungry() */
 
 	    material = otmp->obj_material;
-	    if (material == LEATHER ||
-		material == EYEBALL || material == SEVERED_HAND ||
-			material == BONE || material == DRAGON_HIDE
-		) {
+	    if (material == LEATHER || material == BONE || material == DRAGON_HIDE) {
 			u.uconduct.unvegan++;
 			violated_vegetarian();
 	    } else {

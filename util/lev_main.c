@@ -17,7 +17,7 @@
 #endif
 /* ALI - We need the list of artifact names for artifact doors */
 #define MAKEDEFS_C      /* We only want the names, not the complete defn */
-#include "artilist.h"
+#include "../src/artilist.c"
 #undef MAKEDEFS_C
 
 #ifdef MAC

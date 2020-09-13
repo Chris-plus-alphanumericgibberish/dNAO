@@ -3,7 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "edog.h"
+#include "mextra.h"
 #include "xhity.h"
 
 /* Disintegration rays have special treatment; corpses are never left.
@@ -28,8 +28,6 @@ STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
 STATIC_DCL boolean FDECL(zap_reflect, (struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zapdamage, (struct monst *, struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zhit, (struct monst *, struct monst *, struct zapdata *));
-STATIC_DCL int FDECL(zhitm, (struct monst *,int,int,int,int,int,struct obj **));
-STATIC_DCL void FDECL(zhitu, (int,int,int,int,const char *,XCHAR_P,XCHAR_P));
 #ifdef STEED
 STATIC_DCL boolean FDECL(zap_steed, (struct obj *));
 #endif
@@ -88,6 +86,7 @@ int adtyp, ztyp;
 		case AD_DRST: return "poison spray";
 		case AD_ACID: return "acid splash";
 		case AD_STAR: return "stream of silver stars";
+		case AD_DISN: return "disintegration ray";
 		default:      impossible("unknown spell damage type in flash_type: %d", adtyp);
 		}
 		break;
@@ -604,8 +603,11 @@ coord *cc;
 		mtmp2 = get_mtraits(obj, TRUE);
 	if (mtmp2) {
 		set_mon_data(mtmp2, mtmp2->mtyp);
-		if (mtmp2->mhpmax <= 0 && !is_rider(mtmp2->data))
+		if (mtmp2->mhpmax <= 0 && !is_rider(mtmp2->data)) {
+			/* no good; free any mx made and return null */
+			rem_all_mx(mtmp2);
 			return (struct monst *)0;
+		}
 		mtmp = makemon(mtmp2->data,
 				cc->x, cc->y, NO_MINVENT|MM_NOWAIT|MM_NOCOUNTBIRTH);
 		if (!mtmp) return mtmp;
@@ -867,8 +869,16 @@ boolean dolls;
 				panic("revive");
 			}
 			if(wasfossil){
-				set_template(mtmp, SKELIFIED);
-				newsym(mtmp->mx,mtmp->my);
+				if (can_undead_mon(mtmp)) {
+					set_template(mtmp, SKELIFIED);
+					newsym(mtmp->mx, mtmp->my);
+				}
+				else {
+					if (cansee(mtmp->mx, mtmp->my)) {
+						pline_The("fossil briefly animates before crumbling into dust.");
+					}
+					mongone(mtmp);
+				}
 			}
 		}
 	}
@@ -1740,11 +1750,10 @@ poly_obj(obj, id)
 		break;
 
 	case GEM_CLASS:
-	    if (otmp->quan > (long) rnd(4) &&
-		    obj->obj_material == MINERAL &&
-		    otmp->obj_material != MINERAL) {
-		otmp->otyp = ROCK;	/* transmutation backfired */
-		otmp->quan /= 2L;	/* some material has been lost */
+	    if (otmp->quan > (long)rnd(4) && obj->obj_material == MINERAL && otmp->obj_material != MINERAL) {
+			otmp->otyp = ROCK;	/* transmutation backfired */
+			set_material_gm(otmp, MINERAL);
+			otmp->quan /= 2L;	/* some material has been lost */
 	    }
 	    break;
 	}
@@ -2092,22 +2101,18 @@ makecorpse:			if (mons[obj->corpsenm].geno &
 
 			    (void) get_obj_location(obj, &oox, &ooy, 0);
 			    refresh_x = oox; refresh_y = ooy;
+				/* Don't corpsify monsters that aren't flesh or have corpses */
 			    if (vegetarian(&mons[obj->corpsenm])||
-					obj->corpsenm == PM_DJINNI) {
-					/* Don't corpsify monsters that aren't flesh */
+					(mons[obj->corpsenm].geno & G_NOCORPSE)) {
 					obj = poly_obj(obj, MEATBALL);
-					if(obj){
-						obj->corpsenm = corpsetype;
-					}
-			    	goto smell;
 			    } else {
 					obj = poly_obj(obj, CORPSE);
 					if(obj){
 						obj->corpsenm = corpsetype;
 						fix_object(obj);
 					}
-			    	goto smell;
 				}
+				goto smell;
 			} else { /* new rock class object... */
 			    /* impossible? */
 			    res = 0;
@@ -2412,9 +2417,7 @@ boolean ordinary;
 				destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 			}
 		    if (!resists_blnd(&youmonst)) {
-			    You(are_blinded_by_the_flash);
-			    make_blinded((long)rnd(100),FALSE);
-			    if (!Blind) Your1(vision_clears);
+				lightning_blind(&youmonst, rnd(50));
 		    }
 		    break;
 		case SPE_FIREBALL:
@@ -2513,7 +2516,7 @@ boolean ordinary;
 		        break;
 		    }
 		    if (ordinary || !rn2(10)) {	/* permanent */
-			HInvis |= FROMOUTSIDE;
+				HInvis |= TIMEOUT_INF;
 		    } else {			/* temporary */
 		    	incr_itimeout(&HInvis, d(obj->spe, 250));
 		    }
@@ -3738,11 +3741,11 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 				/* defender notices */
 				if (youagr && !youdef) mdef->mstrategy &= ~STRAT_WAITMASK;
 				if (youdef)	nomul(0, NULL);
-				/* player is blinded by lightning (but monsters aren't?) */
-				if (youdef && zapdata->adtyp == AD_ELEC && !resists_blnd(&youmonst)) {
-					You(are_blinded_by_the_flash);
-					make_blinded((long)d(zapdata->damn, 50), FALSE);
-					if (!Blind) Your1(vision_clears);
+
+				/* lightning blinds */
+				if (zapdata->adtyp == AD_ELEC && !resists_blnd(mdef)
+					&& !(youagr && u.uswallow && mdef == u.ustuck)) {
+					lightning_blind(mdef, d(zapdata->damn, 25));
 				}
 
 			}/*if mdef*/
@@ -4556,6 +4559,28 @@ boolean phase_armor;
 
 #endif /*OVLB*/
 #ifdef OVL0
+
+/* caller should check !resists_blnd() before calling */
+void
+lightning_blind(mdef, blind_duration)
+struct monst * mdef;
+int blind_duration;
+{
+	if (Half_phys(mdef))
+		blind_duration = (blind_duration + 1) / 2;
+
+	if (mdef == &youmonst) {
+		You(are_blinded_by_the_flash);
+		make_blinded(blind_duration, FALSE);
+		if (!Blind) Your1(vision_clears);
+	}
+	else {
+		mdef->mcansee = 0;
+		mdef->mblinded = min(127, blind_duration);
+	}
+	return;
+}
+
 
 struct monst *
 delouse(mon, type)

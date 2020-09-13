@@ -3,16 +3,15 @@
 
 /* Global declarations for curses interface */
 
-int term_rows, term_cols; /* size of underlying terminal */
+extern int term_rows, term_cols; /* size of underlying terminal */
 
-WINDOW *base_term;    /* underlying terminal window */
+extern WINDOW *base_term;    /* underlying terminal window */
 
-WINDOW *mapwin, *statuswin, *messagewin;    /* Main windows */
+extern WINDOW *mapwin, *statuswin, *messagewin;    /* Main windows */
 
-int orig_cursor;	/* Preserve initial cursor state */
+extern int orig_cursor;	/* Preserve initial cursor state */
 
-boolean counting;   /* Count window is active */
-
+extern boolean counting;   /* Count window is active */
 
 #define TEXTCOLOR   /* Allow color */
 #define NHW_END 19
@@ -130,7 +129,7 @@ extern int curses_get_ext_cmd(void);
 
 extern void curses_number_pad(int state);
 
-extern void curses_delay_output(void);
+extern void curses_delay_output(int);
 
 extern void curses_start_screen(void);
 

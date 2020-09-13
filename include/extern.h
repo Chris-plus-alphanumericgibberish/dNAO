@@ -262,6 +262,7 @@ E void NDECL(add_debug_extended_commands);
 #endif /* WIZARD */
 E void FDECL(rhack, (char *));
 E void NDECL(dokeylist);
+E char * FDECL(find_command_key, (const char *, char *));
 E int NDECL(doextlist);
 E int NDECL(extcmd_via_menu);
 E void FDECL(enlightenment, (int));
@@ -1284,6 +1285,21 @@ E int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int, int))
 E int FDECL(cast_spell, (struct monst *, struct monst *, struct attack *, int, int, int));
 E int FDECL(needs_familiar, (struct monst *));
 
+/* ### mextra.c ### */
+E void FDECL(add_mx, (struct monst *, int));
+E void FDECL(add_mx_l, (struct monst *, int, int));
+E void FDECL(rem_mx, (struct monst *, int));
+E void FDECL(rem_all_mx, (struct monst *));
+E void FDECL(cpy_mx, (struct monst *, struct monst *, int));
+E void FDECL(mov_mx, (struct monst *, struct monst *, int));
+E void FDECL(mov_all_mx, (struct monst *, struct monst *));
+E void * FDECL(get_mx, (struct monst *, int));
+E int FDECL(siz_mx, (struct monst *, int));
+E void * FDECL(bundle_mextra, (struct monst *, int *));
+E void FDECL(unbundle_mextra, (struct monst *, void *));
+E void FDECL(save_mextra, (struct monst *, int, int));
+E void FDECL(rest_mextra, (struct monst *, int, boolean));
+
 /* ### minion.c ### */
 
 E void FDECL(msummon, (struct monst *));
@@ -1334,7 +1350,7 @@ E void NDECL(mkinvokearea);
 /* ### mkmap.c ### */
 
 void FDECL(flood_fill_rm, (int,int,int,BOOLEAN_P,BOOLEAN_P));
-void FDECL(remove_rooms, (int,int,int,int));
+void FDECL(remove_rooms, (int,int,int,int,SCHAR_P));
 void FDECL(remove_room, (unsigned));
 
 /* ### mkmaze.c ### */
@@ -2147,7 +2163,6 @@ E boolean FDECL(in_your_sanctuary, (struct monst *,XCHAR_P,XCHAR_P));
 E void FDECL(ghod_hitsu, (struct monst *));
 E void NDECL(angry_priest);
 E void NDECL(clearpriests);
-E void FDECL(restpriest, (struct monst *,BOOLEAN_P));
 
 /* ### projectile.c ### */
 
@@ -2223,6 +2238,7 @@ E void FDECL(punish, (struct obj *));
 E void NDECL(unpunish);
 E boolean FDECL(cant_create, (int *, BOOLEAN_P));
 #ifdef WIZARD
+E int NDECL(wiz_kill_all);
 E struct monst * FDECL(create_particular, (unsigned long, int, int, unsigned long, unsigned long, int));
 #endif
 
@@ -2405,7 +2421,7 @@ E void FDECL(money2u, (struct monst *, long));
 E char *FDECL(shkname, (struct monst *));
 E void FDECL(shkgone, (struct monst *));
 E void FDECL(set_residency, (struct monst *,BOOLEAN_P));
-E void FDECL(replshk, (struct monst *,struct monst *));
+E void FDECL(replshk, (struct monst *));
 E void FDECL(restshk, (struct monst *,BOOLEAN_P));
 E char FDECL(inside_shop, (XCHAR_P,XCHAR_P));
 E void FDECL(u_left_shop, (char *,BOOLEAN_P));
@@ -2419,6 +2435,7 @@ E boolean FDECL(tended_shop, (struct mkroom *));
 E void FDECL(delete_contents, (struct obj *));
 E void FDECL(obfree, (struct obj *,struct obj *));
 E void FDECL(home_shk, (struct monst *,BOOLEAN_P));
+E void FDECL(pacify_shk, (struct monst *));
 E void FDECL(make_happy_shk, (struct monst *,BOOLEAN_P));
 E void FDECL(hot_pursuit, (struct monst *));
 E void FDECL(make_angry_shk, (struct monst *,XCHAR_P,XCHAR_P));
@@ -2732,6 +2749,7 @@ E boolean NDECL(unconscious);
 E boolean NDECL(lava_effects);
 E void FDECL(blow_up_landmine, (struct trap *));
 E int FDECL(launch_obj, (SHORT_P, struct trap *, int));
+E void FDECL(unshackle_mon, (struct monst *));
 E void FDECL(dowebgush, (int,int,int));
 E void FDECL(webgush, (int,int,genericptr_t));
 E int NDECL(ubreak_entanglement);
@@ -3166,6 +3184,7 @@ E struct monst *FDECL(bhit, (int,int,int,int,int (*)(MONST_P,OBJ_P),
 E int FDECL(flash_hits_mon, (struct monst *, struct obj *));
 E int FDECL(burn_floor_paper, (int,int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(buzz, (int,int,int,int,XCHAR_P,XCHAR_P,int,int,int,int));
+E void FDECL(lightning_blind, (struct monst *, int));
 E struct monst * FDECL(delouse, (struct monst *,int));
 E struct monst * FDECL(delouse_tame, (struct monst *));
 E void FDECL(melt_ice, (XCHAR_P,XCHAR_P));

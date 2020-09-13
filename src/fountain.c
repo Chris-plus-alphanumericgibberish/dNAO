@@ -307,7 +307,7 @@ drinkfountain()
 			   You("see an image of someone stalking you.");
 			   pline("But it disappears.");
 			}
-			HSee_invisible |= FROMOUTSIDE;
+			HSee_invisible |= TIMEOUT_INF;
 			newsym(u.ux,u.uy);
 			exercise(A_WIS, TRUE);
 			break;

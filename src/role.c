@@ -1062,9 +1062,10 @@ const int NHolashner[] = {PM_ROCK_MOLE,PM_MIND_FLAYER,PM_PURPLE_WORM,NON_PM};
 const int NGnome[] = {PM_ARCADIAN_AVENGER,PM_MOVANIC_DEVA,PM_MONADIC_DEVA,PM_ASTRAL_DEVA,PM_GRAHA_DEVA,PM_SURYA_DEVA,PM_MAHADEVA,NON_PM};
 const int CGnome[] = {PM_ROCK_MOLE,PM_LONG_WORM,PM_EARTH_ELEMENTAL,PM_PURPLE_WORM,NON_PM};
 
-const int GwynServants[] = {PM_UNDEAD_KNIGHT,PM_WARRIOR_OF_SUNLIGHT,NON_PM};
-const int GwynevereServants[] = {PM_UNDEAD_KNIGHT,PM_WARRIOR_OF_SUNLIGHT,NON_PM};
-const int GwyndolinServants[] = {PM_SNAKE, PM_PYTHON, PM_GARGOYLE,PM_WINGED_GARGOYLE,NON_PM};
+const int GwynServants[] = {PM_UNDEAD_KNIGHT,PM_GARGOYLE,PM_WINGED_GARGOYLE,PM_WARRIOR_OF_SUNLIGHT,NON_PM};
+const int GwynevereServants[] = {PM_UNDEAD_MAIDEN,PM_UNDEAD_KNIGHT,PM_BLUE_SENTINEL,PM_KNIGHT_OF_THE_PRINCESS_S_GUARD,PM_DEATH_KNIGHT,PM_PISACA,NON_PM};
+const int GwyndolinServants[] = {PM_BLUE_SENTINEL,PM_SNAKE,PM_PYTHON,PM_GARGOYLE,PM_DARKMOON_KNIGHT,NON_PM};
+const int VelkaServants[] = {PM_UNDEAD_REBEL,PM_CROW,PM_RAVEN,PM_TENGU,PM_PARDONER,PM_OCCULTIST,NON_PM};
 
 const int MChaos[] = {PM_GOBLIN,PM_WATER_ELEMENTAL,PM_FIRE_ELEMENTAL,PM_EARTH_ELEMENTAL,PM_AIR_ELEMENTAL,PM_MIND_FLAYER,PM_VAMPIRE,PM_PURPLE_WORM,NON_PM};
 const int MChaosDeep[] = {PM_LICH,PM_MARILITH,PM_KRAKEN,PM_GREEN_DRAGON,NON_PM};
@@ -1229,6 +1230,7 @@ god_minions(gptr)
 	if(gptr == Gwyngod) return GwynServants;
 	if(gptr == Gwyneveregoddess) return GwynevereServants;
 	if(gptr == Gwyndolingod) return GwyndolinServants;
+	if(gptr == Velka) return VelkaServants;
 	
 	if(gptr == Chaos) return MChaos;
 	if(gptr == DeepChaos) return MChaosDeep;

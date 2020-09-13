@@ -5,9 +5,7 @@
 #include "hack.h"
 #include "mfndpos.h"
 #include "artifact.h"
-#include "epri.h"
-#include "edog.h"
-
+#include "mextra.h"
 extern boolean notonhead;
 
 #ifdef OVL0
@@ -1984,7 +1982,7 @@ not_special:
 		    (throws_rocks(youracedata) ? 20 : ACURRSTR/2+1)
 		);
 
-	    if ((appr == 0 || !in_line) && !is_derived_undead_mon(mtmp)) {
+	    if (appr == 0 || !in_line) {
 			/* Monsters in combat or fleeing won't pick stuff up, avoiding the
 			 * situation where you toss arrows at it and it has nothing
 			 * better to do than pick the arrows up.

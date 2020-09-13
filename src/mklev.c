@@ -802,7 +802,7 @@ random_special_room()
 	struct {
 		int type;
 		int prob;
-	} special_rooms[MAXRTYPE];
+	} special_rooms[MAXRTYPE] = {0};
 
 #define mnotgone(x) !(mvitals[(x)].mvflags & G_GONE && !In_quest(&u.uz))
 #define add_rspec_room(t, p, c) if(c) {special_rooms[i].type = (t); special_rooms[i].prob = (p); total_prob += (p); i++;} else
@@ -897,12 +897,10 @@ random_special_room_default_room_and_corridors:
 #undef mnotgone
 
 	/* pick a room */
-	total_prob = rnd(total_prob);
-	while (total_prob > 0)
-	{
-		i--;
+	if (total_prob > 0)
+		total_prob = rnd(total_prob);
+	while (total_prob > 0 && i-- > 0)
 		total_prob -= special_rooms[i].prob;
-	}
 
 	if (i >= 0)
 		return special_rooms[i].type;
@@ -1784,7 +1782,8 @@ boolean
 occupied(x, y)
 register xchar x, y;
 {
-	return((boolean)(t_at(x, y)
+	return(!isok(x, y)
+		|| (boolean)(t_at(x, y)
 		|| IS_FURNITURE(levl[x][y].typ)
 		|| IS_ROCK(levl[x][y].typ)
 		|| is_lava(x,y)
@@ -2205,17 +2204,13 @@ xchar x, y;
 	    source = &br->end1;
 	}
 
-	/* Already set or 2/3 chance of deferring until a later level. */
-	if (source->dnum < n_dgns || (rn2(3)
-#ifdef WIZARD
-				      && !wizard
-#endif
-				      )) return;
+	/* Already set -> nope. */
+	if (source->dnum < n_dgns) return;
 
-	if (! (u.uz.dnum == oracle_level.dnum	    /* in main dungeon */
-		&& !at_dgn_entrance("The Quest")    /* but not Quest's entry */
-		&& (u_depth = depth(&u.uz)) > 10    /* beneath 10 */
-		&& u_depth < depth(&challenge_level))) /* and above Medusa */
+	if (u.uz.dnum != oracle_level.dnum		// not in main dungeon
+		|| (u_depth = depth(&u.uz)) < 10	// not beneath 10
+		|| u_depth > depth(&challenge_level)// not below medusa
+	)
 	    return;
 
 	/* Adjust source to be current level and re-insert branch. */
