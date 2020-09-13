@@ -8149,6 +8149,10 @@ struct monst * mdef;
 struct attack * attk;
 int vis;
 {
+	/* don't attempt to eat your steed out from under you */
+	if (mdef == u.usteed)
+		mdef = &youmonst;
+	
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
@@ -8161,6 +8165,7 @@ int vis;
 	if (youdef) {
 		/* swallows you */
 		if (!u.uswallow) {
+			boolean pluck = FALSE;
 			if ((trap && ((trap->ttyp == PIT) || (trap->ttyp == SPIKED_PIT))) &&
 				boulder_at(u.ux, u.uy))
 				return MM_MISS;
@@ -8168,8 +8173,13 @@ int vis;
 			/* remove ball and chain */
 			if (Punished)
 				unplacebc();
+
+			/* do we move onto player, or pluck them? */
+			if (stationary(pa) || (is_animal(pa) && u.usteed)) {
+				pluck = TRUE;
+			}
 			/* maybe move attacker */
-			if (!stationary(magr->data)) {
+			if (!pluck) {
 				remove_monster(x(magr), y(magr));
 				newsym(x(magr), y(magr));
 				magr->mtrapped = 0;		/* no longer on old trap */
@@ -8180,12 +8190,10 @@ int vis;
 				/* or maybe pluck the player */
 				u.ux0 = u.ux;
 				u.uy0 = u.uy;
-				u.ux = x(magr);
-				u.uy = y(magr);
 			}
 			u.ustuck = magr;
 #ifdef STEED
-			if (is_animal(pa) && u.usteed) {
+			if (pluck && u.usteed) {
 				/* Too many quirks presently if hero and steed
 				* are swallowed. Pretend purple worms don't
 				* like horses for now :-)
@@ -8197,6 +8205,12 @@ int vis;
 			else
 #endif
 				pline("%s engulfs you!", Monnam(magr));
+
+			if (pluck) {
+				/* move player -- this must come after dismount_steed */
+				u.ux = x(magr);
+				u.uy = y(magr);
+			}
 			stop_occupation();
 			reset_occupations();	/* behave as if you had moved */
 
