@@ -43,6 +43,9 @@ register struct monst *mtmp;
 	EDOG(mtmp)->waspeaceful = 0;
 //endif
 	EDOG(mtmp)->loyal = 0;
+
+	if (isok(mtmp->mx, mtmp->my))
+		newsym(mtmp->mx, mtmp->my);
 }
 
 STATIC_OVL int
