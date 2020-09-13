@@ -8178,6 +8178,8 @@ int vis;
 			}
 			else {
 				/* or maybe pluck the player */
+				u.ux0 = u.ux;
+				u.uy0 = u.uy;
 				u.ux = x(magr);
 				u.uy = y(magr);
 			}
