@@ -293,6 +293,7 @@ struct artinstance{
 #define RoSPkills avar1
 #define BoISspell avar1
 #define RRSember avar1
+#define BLactive avar1
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2
@@ -391,6 +392,7 @@ extern struct artifact artilist[];
 #define STONE_DRAGON    (LAST_PROP+78)
 #define MAD_KING        (LAST_PROP+79)
 #define RINGED_SPEAR    (LAST_PROP+80)
+#define BLOODLETTER     (LAST_PROP+81)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

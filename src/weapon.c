@@ -292,6 +292,7 @@ int oartifact;
 		attackmask |= SLASH;
 	}
 	if ((obj && oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
+		|| (oartifact == ART_BLOODLETTER && artinstance[oartifact].BLactive >= moves)
 		|| oartifact == ART_FIRE_BRAND
 		|| oartifact == ART_FROST_BRAND
 		){
