@@ -117,7 +117,7 @@ new_light_source(lstype, owner, range)
     }
 
 	/* check that this is a unique lightsource */
-	if (ls = *owner_ls(lstype, owner))
+	if ((ls = *owner_ls(lstype, owner)))
 		duplicate = TRUE;
 
 	if (duplicate) {

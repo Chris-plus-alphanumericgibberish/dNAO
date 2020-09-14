@@ -785,7 +785,7 @@ learn_word()
 		char buf[BUFSZ];
 		char buf2[BUFSZ];
 		char * ptr;
-		if (ptr = find_command_key("ability", buf))
+		if ((ptr = find_command_key("ability", buf)))
 			Sprintf(buf2, "or %s ", ptr);
 		else
 			Strcpy(buf2, "");

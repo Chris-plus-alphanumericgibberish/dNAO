@@ -40,7 +40,7 @@ long len;
 	}
 
 	/* check that component doesn't already exist */
-	if (ox_p = get_ox(otmp, ox_id)) {
+	if ((ox_p = get_ox(otmp, ox_id))) {
 		impossible("oextra substruct %d already exists on %s", ox_id, xname(otmp));
 		return;
 	}
@@ -119,7 +119,7 @@ int ox_id;
 {
 	void * ox_p1;
 	void * ox_p2;
-	if (ox_p1 = get_ox(obj1, ox_id)) {
+	if ((ox_p1 = get_ox(obj1, ox_id))) {
 		ox_p2 = get_ox(obj2, ox_id);
 		if(!ox_p2)
 			add_ox_l(obj2, ox_id, siz_ox(obj1, ox_id)-sizeof(long));
