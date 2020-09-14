@@ -40,7 +40,7 @@ long len;
 	}
 
 	/* check that component doesn't already exist */
-	if (mx_p = get_mx(mtmp, mx_id)) {
+	if ((mx_p = get_mx(mtmp, mx_id))) {
 		impossible("mextra substruct %d already exists on %s", mx_id, m_monnam(mtmp));
 		return;
 	}
@@ -119,7 +119,7 @@ int mx_id;
 {
 	void * mx_p1;
 	void * mx_p2;
-	if (mx_p1 = get_mx(mon1, mx_id)) {
+	if ((mx_p1 = get_mx(mon1, mx_id))) {
 		mx_p2 = get_mx(mon2, mx_id);
 		if(!mx_p2)
 			add_mx_l(mon2, mx_id, siz_mx(mon1, mx_id)-sizeof(long));
