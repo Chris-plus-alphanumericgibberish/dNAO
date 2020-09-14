@@ -1564,7 +1564,6 @@ register struct monst *mtmp;
 			pline("%s concentrates.", Monnam(mtmp));
 		// if (distu(mtmp->mx, mtmp->my) > BOLT_LIM * BOLT_LIM) {
 			// You("sense a faint wave of psychic energy.");
-			// goto toofar;
 		// }
 		if(!reducedFlayerMessages) pline("A wave of psychic energy pours over you!");
 		if (mtmp->mpeaceful && !mtmp->mberserk &&
@@ -1635,9 +1634,6 @@ register struct monst *mtmp;
 			}
 		}
 	}
-toofar:
-
-	if (TRUE); /* stupid to make the label not label a declaration */
 
 	/* Look for other monsters to fight (at a distance) */
 	struct monst *mtmp2 = mfind_target(mtmp, FALSE);
