@@ -14897,7 +14897,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					}
 					break;
 				case AD_SSEX:
-					result = xmeleehurty(mdef, magr, passive, passive, (struct obj *)0, FALSE, dmg, 0, vis, FALSE);
+					result = xmeleehurty(mdef, magr, passive, passive, (struct obj **)0, FALSE, dmg, 0, vis, FALSE);
 					break;
 				case AD_STUN:
 					if (youdef) {
