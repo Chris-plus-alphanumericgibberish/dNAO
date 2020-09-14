@@ -45,24 +45,4 @@
 /* mondata.h */
 #define is_holy_mon(mon)	(is_uvuudaum((mon)->data) || has_template(mon, ILLUMINATED))
 #define is_unholy_mon(mon)	((mon)->mtyp == PM_UVUUDAUM)
-/* obj. h*/
-
-/* multistriking() is 0-based so that only actual multistriking weapons return multistriking!=0 */
-#define multistriking(otmp)	(!(otmp) ? 0 : \
-	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \
-	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) : \
-	arti_threeHead((otmp)) ? 2 : \
-	arti_tentRod((otmp)) ? 6 : \
-	0)
-#define martial_aid(otmp)	((is_lightsaber((otmp)) && !litsaber((otmp)) && (otmp)->otyp != KAMEREL_VAJRA) || \
-							(valid_weapon((otmp)) && objects[(otmp)->otyp].oc_skill == P_BARE_HANDED_COMBAT))
-#define valid_weapon(otmp)		((otmp)->oclass == WEAPON_CLASS || \
-	is_weptool((otmp)) || \
-	(otmp)->otyp == HEAVY_IRON_BALL || \
-	(otmp)->otyp == CHAIN || \
-	(otmp)->oclass == GEM_CLASS)
-#define throwing_weapon(otmp)	(is_missile(otmp) || is_spear(otmp) || \
-								(is_blade(otmp) && !is_sword(otmp) && \
-								(objects[otmp->otyp].oc_dir & PIERCE)) || \
-								otmp->otyp == WAR_HAMMER || otmp->otyp == AKLYS)
 #endif
