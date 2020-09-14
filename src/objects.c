@@ -723,11 +723,11 @@ DRGN_SCALES(("yellow dragon scales"), 0, ACID_RES,   500, 9, 2, CLR_YELLOW),
 SUIT(("plate mail"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	44, 5, 225, 600,  5, 5, 3, IRON, HI_METAL),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
-	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	0, 5, 110, 	1200,  4, 6, 3, MITHRIL, HI_MITHRIL),
+	0, 0,   MZ_HUGE, ARMSZ_MEDIUM, 0,	0, 5, 110, 	1200,  4, 6, 3, MITHRIL, HI_MITHRIL),
 SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	0, 5, 85, 	2000,  4, 6, 1, SHADOWSTEEL, CLR_BLACK),
 SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/
-	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	 0, 5,	 5,  100,10, 1, 2, CLOTH, CLR_GREEN),
+	1, 0,  MZ_LARGE,  ARMSZ_LIGHT, 0,	 0, 5,	 5,  100,10, 1, 2, CLOTH, CLR_GREEN),
 SUIT(("noble's dress", "armored black dress", "armored dress"), /*Needs encyc entry*/
 	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*Needs tile*/
@@ -735,7 +735,7 @@ SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*
 SUIT(("gentleman's suit", "expensive clothes"), /*Needs encyc entry*/
 	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
 SUIT(("gentlewoman's dress", "expensive dress"), /*Needs encyc entry*/
-	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
+	0, 0,  MZ_LARGE,  ARMSZ_LIGHT, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
 SUIT(("crystal plate mail"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	10, 5, 170, 2000,  7, 3, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
 #ifdef TOURIST
@@ -750,7 +750,7 @@ SUIT(("harmonium plate", "red-lacquered bladed armor", "bladed armor"),
 SUIT(("harmonium scale mail", "red-lacquered spiked scale mail", "spiked scale mail"),
 	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	 0, 5, 125,   1,  8, 2, 3, METAL, CLR_RED),
 SUIT(("plasteel armor", "hard white armor", "armor"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	 0, 5, 100,  500, 7, 3, 3, PLASTIC, CLR_WHITE),
+	0, 0,   MZ_HUGE, ARMSZ_MEDIUM, 0,	 0, 5, 100,  500, 7, 3, 3, PLASTIC, CLR_WHITE),
 // ARMOR(("force armor", "gemstone-adorned clothing"),
 	// 0, 0, 1, 0,	 0, 5,  50, 1000, 9, 3, ARM_SUIT, GEMSTONE, CLR_BRIGHT_GREEN),
 SUIT(("splint mail"),
@@ -758,27 +758,27 @@ SUIT(("splint mail"),
 SUIT(("barnacle armor", "giant shell armor"),
 	0, 1,   MZ_HUGE,  ARMSZ_HEAVY, 0,	0, 10, 150,1000,  7, 3, 1, SHELL_MAT, CLR_GRAY),
 SUIT(("banded mail"),
-	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 175,  90,  7, 3, 0, IRON, HI_METAL),
+	1, 0,   MZ_HUGE, ARMSZ_MEDIUM, 0,	72, 5, 175,  90,  7, 3, 0, IRON, HI_METAL),
 SUIT(("dwarvish mithril-coat"),
-	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	10, 1,  40, 240,   7, 3, 3, MITHRIL, HI_MITHRIL),
+	1, 0,  MZ_LARGE,  ARMSZ_LIGHT, 0,	10, 1,  40, 240,   7, 3, 3, MITHRIL, HI_MITHRIL),
 SUIT(("elven mithril-coat"),
-	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	15, 1,  20, 240,  7, 2, 3, MITHRIL, HI_MITHRIL),
+	1, 0,  MZ_LARGE,  ARMSZ_LIGHT, 0,	15, 1,  20, 240,  7, 2, 3, MITHRIL, HI_MITHRIL),
 SUIT(("chain mail"),
 	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 150,  75,  8, 3, 1, IRON, HI_METAL),
 SUIT(("droven chain mail", "crested black mail", "crested mail"), /*Needs encyc entry*/
 	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	0, 5,   50,  1000,  8, 4, 2, SHADOWSTEEL, CLR_BLACK),
 SUIT(("orcish chain mail", "crude chain mail"),
-	0, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	20, 5, 150,  75,  8, 2, 1, IRON, CLR_BLACK),
+	0, 0,  MZ_LARGE,  ARMSZ_HEAVY, 0,	20, 5, 150,  75,  8, 2, 1, IRON, CLR_BLACK),
 SUIT(("scale mail"),
 	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 125,  45,  8, 2, 0, IRON, HI_METAL),
 SUIT(("studded leather armor"),
-	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
+	1, 0,  MZ_LARGE,  ARMSZ_LIGHT, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
 SUIT(("ring mail"),
 	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 125, 100,  9, 2, 0, IRON, HI_METAL),
 SUIT(("orcish ring mail", "crude ring mail"),
 	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	20, 5, 125,  80,  9, 1, 1, IRON, CLR_BLACK),
 SUIT(("leather armor"),
-	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
+	1, 0,  MZ_LARGE,  ARMSZ_LIGHT, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
 //ARMOR(names,
    //kn,mgc,blk,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c)
 SUIT(("living armor", "giant sea anemone"),
@@ -790,7 +790,7 @@ SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*
 SUIT(("healer uniform","clean white clothes", "clean clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, SICK_RES, 0, 0,  30, 10, 10, 1, 0, CLOTH, CLR_WHITE),
 SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, REFLECTING,0,5,   5,1000,10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
+	0, 0,  MZ_LARGE,  ARMSZ_LIGHT, REFLECTING,0,5,   5,1000,10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
 #ifdef TOURIST
 /* shirts */
 /*ARMOR(("Hawaiian shorts", "flowery shorts and lei"),
