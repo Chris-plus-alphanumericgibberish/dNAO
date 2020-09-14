@@ -7643,8 +7643,7 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	if (mon->ispriest) m2->ispriest = FALSE;
 	place_monster(m2, m2->mx, m2->my);
 	if (emits_light_mon(m2))
-	    new_light_source(m2->mx, m2->my, emits_light_mon(m2),
-			     LS_MONSTER, (genericptr_t)m2);
+	    new_light_source(LS_MONSTER, (genericptr_t)m2, emits_light_mon(m2));
 	if (M_HAS_NAME(mon)) {
 		cpy_mx(mon, m2, MX_ENAM);
 	} else if (mon->isshk) {
@@ -8947,8 +8946,7 @@ register int	mmflags;
 		mtmp->mhp = mtmp->mhpmax;
 	}
 	if ((ct = emits_light_mon(mtmp)) > 0)
-		new_light_source(mtmp->mx, mtmp->my, ct,
-				 LS_MONSTER, (genericptr_t)mtmp);
+		new_light_source(LS_MONSTER, (genericptr_t)mtmp, ct);
 	mitem = 0;	/* extra inventory item for this monster */
 
 	if ((mcham = pm_to_cham(mndx)) != CHAM_ORDINARY) {

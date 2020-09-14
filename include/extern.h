@@ -1147,15 +1147,13 @@ E int NDECL(dosuspend);
 
 /* ### light.c ### */
 
-E void FDECL(new_light_source, (XCHAR_P, XCHAR_P, int, int, genericptr_t));
-E void FDECL(del_light_source, (int, genericptr_t, int));
+E void FDECL(new_light_source, (int, genericptr_t, int));
+E void FDECL(del_light_source, (struct ls_t *));
 E void FDECL(do_light_sources, (char **));
 E boolean NDECL(uswallow_indark);
 E struct monst *FDECL(find_mid, (unsigned, unsigned));
-E void FDECL(save_light_sources, (int, int, int));
-E void FDECL(restore_light_sources, (int));
-E void FDECL(relink_light_sources, (BOOLEAN_P));
-E void FDECL(obj_move_light_source, (struct obj *, struct obj *));
+E void FDECL(save_lightsource, (struct ls_t *, int, int));
+E void FDECL(rest_lightsource, (int, genericptr_t, struct ls_t *, int, boolean));
 E boolean NDECL(any_light_source);
 E void FDECL(snuff_light_source, (int, int));
 E boolean FDECL(obj_sheds_light, (struct obj *));

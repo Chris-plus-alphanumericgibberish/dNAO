@@ -314,7 +314,6 @@ register int fd, mode;
 
 	/* must come before migrating_objs and migrating_mons are freed */
 	save_timers(fd, mode, RANGE_GLOBAL);
-	save_light_sources(fd, mode, RANGE_GLOBAL);
 
 	if (CHAIN_IN_MON) {
 		uchain->nobj = bc_objs;
@@ -583,7 +582,6 @@ int mode;
  skip_lots:
 	/* must be saved before mons, objs, and buried objs */
 	save_timers(fd, mode, RANGE_LEVEL);
-	save_light_sources(fd, mode, RANGE_LEVEL);
 
 	savemonchn(fd, fmon, mode);
 	save_worm(fd, mode);	/* save worm information */
@@ -910,6 +908,9 @@ register struct obj *otmp;
 			if (otmp->oextra_p) {
 				save_oextra(otmp, fd, mode);
 			}
+			if (otmp->light) {
+				save_lightsource(otmp->light, fd, mode);
+			}
 	    }
 	    if (Has_contents(otmp))
 		saveobjchn(fd,otmp->cobj,mode);
@@ -948,6 +949,9 @@ register struct monst *mtmp;
 		if(mtmp->mextra_p)
 			save_mextra(mtmp, fd, mode);
 	    }
+		if (mtmp->light) {
+			save_lightsource(mtmp->light, fd, mode);
+		}
 	    if (mtmp->minvent)
 		saveobjchn(fd,mtmp->minvent,mode);
 	    if (release_data(mode))
@@ -1092,7 +1096,6 @@ freedynamicdata()
 # define free_waterlevel() save_waterlevel(0, FREE_SAVE)
 # define free_worm()	 save_worm(0, FREE_SAVE)
 # define free_timers(R)	 save_timers(0, FREE_SAVE, R)
-# define free_light_sources(R) save_light_sources(0, FREE_SAVE, R);
 # define free_engravings() save_engravings(0, FREE_SAVE)
 # define freedamage()	 savedamage(0, FREE_SAVE)
 # define free_animals()	 mon_animal_list(FALSE)
@@ -1102,7 +1105,6 @@ freedynamicdata()
 
 	/* level-specific data */
 	free_timers(RANGE_LEVEL);
-	free_light_sources(RANGE_LEVEL);
 	freemonchn(fmon);
 	free_worm();		/* release worm segment information */
 	freetrapchn(ftrap);
@@ -1114,7 +1116,6 @@ freedynamicdata()
 
 	/* game-state data */
 	free_timers(RANGE_GLOBAL);
-	free_light_sources(RANGE_GLOBAL);
 	freeobjchn(invent);
 	for(i=0;i<10;i++) freeobjchn(magic_chest_objs[i]);
 	freeobjchn(migrating_objs);

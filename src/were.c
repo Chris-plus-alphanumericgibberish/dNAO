@@ -195,14 +195,10 @@ struct monst *mon;
 	}
 	/* regenerate by 1/4 of the lost hit points */
 	mon->mhp += (mon->mhpmax - mon->mhp) / 4;
-	if (emits_light(olddata) != emits_light_mon(mon)) {
-	    /* used to give light, now doesn't, or vice versa,
-	       or light's range has changed */
-	    if (emits_light(olddata) || has_template(mon, ILLUMINATED))
-		del_light_source(LS_MONSTER, (genericptr_t)mon, FALSE);
-	    if (emits_light_mon(mon))
-		new_light_source(mon->mx, mon->my, emits_light_mon(mon),
-				 LS_MONSTER, (genericptr_t)mon);
+	/* recheck if monster is a lightsource */
+	del_light_source(mon->light);
+	if (emits_light_mon(mon)) {
+		new_light_source(LS_MONSTER, (genericptr_t)mon, emits_light_mon(mon));
 	}
 	newsym(mon->mx,mon->my);
 	if(is_eeladrin(mon->data)){
@@ -229,38 +225,15 @@ struct monst *mon;
 			}
 		}
 		if(mon->mtyp == PM_ANCIENT_TEMPEST){
+			static int elemtypes[] = {PM_WATER_ELEMENTAL, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL, PM_ICE_PARAELEMENTAL};
 			struct monst *ltnt;
-			for(ltnt = fmon; ltnt; ltnt = ltnt->nmon) if(ltnt->mtyp == PM_WIDE_CLUBBED_TENTACLE){
-				switch(rnd(4)){
-					case 1:
-						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, PM_WATER_ELEMENTAL);
-						newsym(ltnt->mx,ltnt->my);
-						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
-								 LS_MONSTER, (genericptr_t)ltnt);
-					break;
-					case 2:
-						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, PM_AIR_ELEMENTAL);
-						newsym(ltnt->mx,ltnt->my);
-						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
-								 LS_MONSTER, (genericptr_t)ltnt);
-					break;
-					case 3:
-						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, PM_LIGHTNING_PARAELEMENTAL);
-						newsym(ltnt->mx,ltnt->my);
-						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
-								 LS_MONSTER, (genericptr_t)ltnt);
-					break;
-					case 4:
-						if (emits_light_mon(ltnt)) del_light_source(LS_MONSTER, (genericptr_t)ltnt, FALSE);
-						set_mon_data(ltnt, PM_ICE_PARAELEMENTAL);
-						newsym(ltnt->mx,ltnt->my);
-						if (emits_light_mon(ltnt)) new_light_source(ltnt->mx, ltnt->my, emits_light_mon(ltnt),
-								 LS_MONSTER, (genericptr_t)ltnt);
-					break;
-				}
+			for(ltnt = fmon; ltnt; ltnt = ltnt->nmon)
+			if(ltnt->mtyp == PM_WIDE_CLUBBED_TENTACLE){
+				del_light_source(ltnt->light);
+				set_mon_data(ltnt, elemtypes[rn2(4)]);
+				newsym(ltnt->mx,ltnt->my);
+				if (emits_light_mon(ltnt))
+					new_light_source(LS_MONSTER, (genericptr_t)ltnt, emits_light_mon(ltnt));
 			}
 		}
 	} else if(is_heladrin(mon->data)){

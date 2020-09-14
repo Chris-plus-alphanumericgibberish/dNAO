@@ -46,25 +46,69 @@
 #define LSF_SHOW	0x1		/* display the light source */
 #define LSF_NEEDS_FIXUP	0x2		/* need oid fixup */
 
-static light_source *light_base = 0;
+static struct ls_t *light_base = 0;
 
-STATIC_DCL void FDECL(write_ls, (int, light_source *));
+STATIC_DCL void FDECL(add_chain_ls, (struct ls_t *));
+STATIC_DCL void FDECL(rem_chain_ls, (struct ls_t *));
+STATIC_DCL void FDECL(write_ls, (int, struct ls_t *));
 STATIC_DCL int FDECL(maybe_write_ls, (int, int, BOOLEAN_P));
 
 /* imported from vision.c, for small circles */
 extern char circle_data[];
 extern char circle_start[];
 
+#define owner_ls(lstype, owner) (\
+	(lstype) == LS_OBJECT  ? &(((struct obj *)(owner))->light) : \
+	(lstype) == LS_MONSTER ? &(((struct monst *)(owner))->light) : \
+	(struct ls_t **)0)
+
+/* adds an existing light source to the processing chain */
+void
+add_chain_ls(ls)
+struct ls_t * ls;
+{
+	struct ls_t * lstmp;
+	/* check for duplicates */
+	for (lstmp = light_base; lstmp; lstmp = lstmp->next) {
+		if (lstmp == ls) {
+			impossible("ls already in processing chain");
+			return;
+		}
+	}
+	ls->next = light_base;
+	light_base = ls;
+	return;
+}
+
+/* removes a light source from the procesing chain */
+void
+rem_chain_ls(ls)
+struct ls_t * ls;
+{
+	struct ls_t * lstmp;
+	if (light_base == ls) {
+		light_base = light_base->next;
+		return;
+	}
+	else for (lstmp = light_base; lstmp; lstmp = lstmp->next) {
+		if (lstmp->next == ls) {
+			lstmp->next = ls->next;
+			return;
+		}
+	}
+	impossible("couldn't find ls in processing chain");
+	return;
+}
 
 /* Create a new light source.  */
 /* If a lightsource is already attached to (type, id), replace it (with a warning) */
 void
-new_light_source(x, y, range, type, id)
-    xchar x, y;
-    int range, type;
-    genericptr_t id;
+new_light_source(lstype, owner, range)
+	int lstype;			/* is it attached to a mon or an obj? */
+    genericptr_t owner;	/* pointer to mon/obj this is attached to */
+	int range;			/* range of ls */
 {
-    light_source *ls;
+    struct ls_t *ls;
 	boolean duplicate = FALSE;
 
     if (range > MAX_RADIUS || range < 0) {
@@ -73,72 +117,57 @@ new_light_source(x, y, range, type, id)
     }
 
 	/* check that this is a unique lightsource */
-	for (ls = light_base; ls; ls = ls->next) {
-		if (ls->type == type && ls->id == id) {
-			/* Duplicate */
-			duplicate = TRUE;
-			impossible("duplicate lightsource attempting to be created, type %d", type);
-			break;
-		}
+	if (ls = *owner_ls(lstype, owner))
+		duplicate = TRUE;
+
+	if (duplicate) {
+		impossible("duplicate lightsource attempting to be created on %s",
+			lstype == LS_OBJECT ? xname(owner) : m_monnam(owner));
 	}
-	if (!duplicate) {
-		ls = (light_source *)alloc(sizeof(light_source));
-		ls->next = light_base;
-		light_base = ls;
+	else {
+		ls = (struct ls_t *)alloc(sizeof(struct ls_t));
 	}
-    ls->x = x;
-    ls->y = y;
+	/* set ls data */
     ls->range = range;
-    ls->type = type;
-    ls->id = id;
+    ls->lstype = lstype;
+    ls->owner = owner;
     ls->flags = 0;
+	/* set initial location of lightsource */
+	switch(lstype) {
+	case LS_OBJECT:
+		get_obj_location((struct obj *) ls->owner, &ls->x, &ls->y, 0);
+		break;
+	case LS_MONSTER:
+		get_mon_location((struct monst *) ls->owner, &ls->x, &ls->y, 0);
+		break;
+	}
+	/* add to owner */
+	*owner_ls(lstype, owner) = ls;
+	/* add to processing chain */
+	if (!duplicate)
+		add_chain_ls(ls);
 
     vision_full_recalc = 1;	/* make the source show up */
 }
 
 /*
- * Delete all light sources attached to (type, id). There *should* only be one.
+ * Delete light source.
  */
 void
-del_light_source(type, id, silent)
-    int type;
-    genericptr_t id;
-	int silent;
+del_light_source(ls)
+struct ls_t * ls;
 {
-    light_source *curr, *prev, *next;
-    genericptr_t tmp_id;
-	boolean found_it = FALSE;
-
-    /* need to be prepared for dealing a with light source which
-       has only been partially restored during a level change
-       (in particular: chameleon vs prot. from shape changers) */
-    switch (type) {
-    case LS_OBJECT:	tmp_id = (genericptr_t)(intptr_t)(((struct obj *)id)->o_id);
-			break;
-    case LS_MONSTER:	tmp_id = (genericptr_t)(intptr_t)(((struct monst *)id)->m_id);
-			break;
-    default:		tmp_id = 0;
-			break;
-    }
-
-	for (prev = 0, curr = light_base; curr; prev = curr, curr = next) {
-		next = curr->next;
-		if (curr->type != type) continue;
-		if (curr->id == ((curr->flags & LSF_NEEDS_FIXUP) ? tmp_id : id)) {
-			if (prev)
-				prev->next = curr->next;
-			else
-				light_base = curr->next;
-
-			free((genericptr_t)curr);
-			curr = prev;	/* retain prev for next loop */
-			vision_full_recalc = 1;
-			if (found_it)
-				impossible("multiple ls attached to type %d", type);
-			found_it = TRUE;
-		}
-	}
-    if(!found_it && !silent) impossible("del_light_source: not found type=%d, id=0x%lx", type, (long)id);
+	/* check it exists */
+	if (!ls) return;
+	/* remove from processing chain */
+	rem_chain_ls(ls);
+	/* need to update vision */
+	vision_full_recalc = 1;
+	/* clean owner */
+	*owner_ls(ls->lstype, ls->owner) = (struct ls_t *)0;
+	/* free it */
+	free(ls);
+	return;
 }
 
 /* Mark locations that are temporarily lit via mobile light sources. */
@@ -149,7 +178,7 @@ do_light_sources(cs_rows)
     int x, y, min_x, max_x, max_y, offset;
     char *limits;
     short at_hero_range = 0;
-    light_source *ls;
+    struct ls_t *ls;
     char *row;
 
     for (ls = light_base; ls; ls = ls->next) {
@@ -161,11 +190,11 @@ do_light_sources(cs_rows)
 	 * the current setup -- we need to recalculate for every
 	 * vision recalc.
 	 */
-	if (ls->type == LS_OBJECT) {
-	    if (get_obj_location((struct obj *) ls->id, &ls->x, &ls->y, 0))
+	if (ls->lstype == LS_OBJECT) {
+	    if (get_obj_location((struct obj *) ls->owner, &ls->x, &ls->y, 0))
 		ls->flags |= LSF_SHOW;
-	} else if (ls->type == LS_MONSTER) {
-	    if (get_mon_location((struct monst *) ls->id, &ls->x, &ls->y, 0))
+	} else if (ls->lstype == LS_MONSTER) {
+	    if (get_mon_location((struct monst *) ls->owner, &ls->x, &ls->y, 0))
 		ls->flags |= LSF_SHOW;
 	}
 
@@ -173,40 +202,40 @@ do_light_sources(cs_rows)
 	/* note: contained objects are not found by get_obj_location()
 	 * without a specific flag set, so they don't need extra handling */
 	if (ls->flags & LSF_SHOW) {
-		if (ls->type == LS_OBJECT && (
+		if (ls->lstype == LS_OBJECT && (
 			(
 			/* lightsource is in the stomach of an engulfer */
-			mcarried((struct obj *)ls->id) &&
-			attacktype(((struct obj *)ls->id)->ocarry->data, AT_ENGL))
+			mcarried((struct obj *)ls->owner) &&
+			attacktype(((struct obj *)ls->owner)->ocarry->data, AT_ENGL))
 			||
 			(
 			/* lightsource carried by player, who is engulfed */
-			carried((struct obj *)ls->id) &&
+			carried((struct obj *)ls->owner) &&
 			u.uswallow)
 			)){
 			ls->flags &= ~LSF_SHOW;
 		}
-		else if (ls->type == LS_MONSTER && (
+		else if (ls->lstype == LS_MONSTER && (
 			(
 			/* lightsource is the player; player is engulfed */
 			u.uswallow &&
-			(((struct monst *)ls->id) == &youmonst))
+			(((struct monst *)ls->owner) == &youmonst))
 			)){
 			ls->flags &= ~LSF_SHOW;
 		}
 	}
 
 	/* Candle ranges need to be recomputed to allow altar effects */
-	if (ls->type == LS_OBJECT) {
-		struct obj *otmp = (struct obj *) ls->id;
+	if (ls->lstype == LS_OBJECT) {
+		struct obj *otmp = (struct obj *) ls->owner;
 		if (Is_candle(otmp)) {
 			ls->range = candle_light_range(otmp);
 		}
     }
 
 	if ((ls->flags & LSF_SHOW) && ls->range > 0) {
-		if((ls->type == LS_OBJECT && Is_darklight_source(((struct obj *)(ls->id)))) ||
-			(ls->type == LS_MONSTER && Is_darklight_monster(((struct monst *)(ls->id))->data))
+		if((ls->lstype == LS_OBJECT && Is_darklight_source(((struct obj *)(ls->owner)))) ||
+			(ls->lstype == LS_MONSTER && Is_darklight_monster(((struct monst *)(ls->owner))->data))
 		){
 			int range = ls->range;
 			/*
@@ -450,14 +479,14 @@ uswallow_indark()
 			tlit = TRUE;
 	}
 	/* your carried lightsources */
-	light_source *ls;
+	struct ls_t *ls;
 	for (ls = light_base; ls; ls = ls->next) {
-		if ((ls->type == LS_OBJECT) &&
+		if ((ls->lstype == LS_OBJECT) &&
 			(ls->x == u.ux) &&
 			(ls->y == u.uy) &&
-			(carried(((struct obj *)ls->id))))
+			(carried(((struct obj *)ls->owner))))
 		{
-			if (Is_darklight_source(((struct obj *)(ls->id))))
+			if (Is_darklight_source(((struct obj *)(ls->owner))))
 				tdark = TRUE;
 			else
 				tlit = TRUE;
@@ -490,211 +519,40 @@ unsigned fmflags;
 	return (struct monst *) 0;
 }
 
-/* Save all light sources of the given range. */
 void
-save_light_sources(fd, mode, range)
-    int fd, mode, range;
+save_lightsource(ls, fd, mode)
+struct ls_t * ls;
+int fd;
+int mode;
 {
-    int count, actual, is_global;
-    light_source **prev, *curr;
-
-    if (perform_bwrite(mode)) {
-	count = maybe_write_ls(fd, range, FALSE);
-	bwrite(fd, (genericptr_t) &count, sizeof count);
-	actual = maybe_write_ls(fd, range, TRUE);
-	if (actual != count)
-	    panic("counted %d light sources, wrote %d! [range=%d]",
-		  count, actual, range);
-    }
-
-    if (release_data(mode)) {
-	for (prev = &light_base; (curr = *prev) != 0; ) {
-	    if (!curr->id) {
-		impossible("save_light_sources: no id! [range=%d]", range);
-		is_global = 0;
-	    } else
-	    switch (curr->type) {
-	    case LS_OBJECT:
-		is_global = !obj_is_local((struct obj *)curr->id);
-		break;
-	    case LS_MONSTER:
-		is_global = !mon_is_local((struct monst *)curr->id);
-		break;
-	    default:
-		is_global = 0;
-		impossible("save_light_sources: bad type (%d) [range=%d]",
-			   curr->type, range);
-		break;
-	    }
-	    /* if global and not doing local, or vice versa, remove it */
-	    if (is_global ^ (range == RANGE_LEVEL)) {
-		*prev = curr->next;
-		free((genericptr_t)curr);
-	    } else {
-		prev = &(*prev)->next;
-	    }
-	}
-    }
+	bwrite(fd, (genericptr_t)ls, sizeof(struct ls_t));
+	if (release_data(mode))
+		del_light_source(ls);
+	return;
 }
 
-/*
- * Pull in the structures from disk, but don't recalculate the object
- * pointers.
- */
 void
-restore_light_sources(fd)
-    int fd;
+rest_lightsource(lstype, owner, ls, fd, ghostly)
+int lstype;
+genericptr_t owner;
+struct ls_t * ls;
+int fd;
+boolean ghostly;	/* unused */
 {
-    int count;
-    light_source *ls;
-
-    /* restore elements */
-    mread(fd, (genericptr_t) &count, sizeof count);
-
-    while (count-- > 0) {
-	ls = (light_source *) alloc(sizeof(light_source));
-	mread(fd, (genericptr_t) ls, sizeof(light_source));
-	ls->next = light_base;
-	light_base = ls;
-    }
-}
-
-/* Relink all lights that are so marked. */
-void
-relink_light_sources(ghostly)
-    boolean ghostly;
-{
-    char which;
-    unsigned nid;
-    light_source *ls;
-
-    for (ls = light_base; ls; ls = ls->next) {
-	if (ls->flags & LSF_NEEDS_FIXUP) {
-	    if (ls->type == LS_OBJECT || ls->type == LS_MONSTER) {
-		if (ghostly) {
-		    if (!lookup_id_mapping((unsigned)(intptr_t)ls->id, &nid))
-			impossible("relink_light_sources: no id mapping");
-		} else
-		    nid = (unsigned)(intptr_t)ls->id;
-		if (ls->type == LS_OBJECT) {
-		    which = 'o';
-		    ls->id = (genericptr_t) find_oid(nid);
-		} else {
-		    which = 'm';
-		    ls->id = (genericptr_t) find_mid(nid, FM_EVERYWHERE);
-		}
-		if (!ls->id)
-		    impossible("relink_light_sources: cant find %c_id %d",
-			       which, nid);
-	    } else
-		impossible("relink_light_sources: bad type (%d)", ls->type);
-
-	    ls->flags &= ~LSF_NEEDS_FIXUP;
-	}
-    }
-}
-
-/*
- * Part of the light source save routine.  Count up the number of light
- * sources that would be written.  If write_it is true, actually write
- * the light source out.
- */
-STATIC_OVL int
-maybe_write_ls(fd, range, write_it)
-    int fd, range;
-    boolean write_it;
-{
-    int count = 0, is_global;
-    light_source *ls;
-
-    for (ls = light_base; ls; ls = ls->next) {
-	if (!ls->id) {
-	    impossible("maybe_write_ls: no id! [range=%d]", range);
-	    continue;
-	}
-	switch (ls->type) {
-	case LS_OBJECT:
-	    is_global = !obj_is_local((struct obj *)ls->id);
-	    break;
-	case LS_MONSTER:
-	    is_global = !mon_is_local((struct monst *)ls->id);
-	    break;
-	default:
-	    is_global = 0;
-	    impossible("maybe_write_ls: bad type (%d) [range=%d]",
-		       ls->type, range);
-	    break;
-	}
-	/* if global and not doing local, or vice versa, count it */
-	if (is_global ^ (range == RANGE_LEVEL)) {
-	    count++;
-	    if (write_it) write_ls(fd, ls);
-	}
-    }
-
-    return count;
-}
-
-/* Write a light source structure to disk. */
-STATIC_OVL void
-write_ls(fd, ls)
-    int fd;
-    light_source *ls;
-{
-    genericptr_t arg_save;
-    struct obj *otmp;
-    struct monst *mtmp;
-
-    if (ls->type == LS_OBJECT || ls->type == LS_MONSTER) {
-	if (ls->flags & LSF_NEEDS_FIXUP)
-	    bwrite(fd, (genericptr_t)ls, sizeof(light_source));
-	else {
-	    /* replace object pointer with id for write, then put back */
-	    arg_save = ls->id;
-	    if (ls->type == LS_OBJECT) {
-		otmp = (struct obj *)ls->id;
-		ls->id = (genericptr_t)(intptr_t)otmp->o_id;
-#ifdef DEBUG
-		if (find_oid((unsigned)(intptr_t)ls->id) != otmp)
-		    panic("write_ls: can't find obj #%u!", (unsigned)(intptr_t)ls->id);
-#endif
-	    } else { /* ls->type == LS_MONSTER */
-		mtmp = (struct monst *)ls->id;
-		ls->id = (genericptr_t)(intptr_t)(intptr_t)mtmp->m_id;
-#ifdef DEBUG
-		if (find_mid((unsigned)(intptr_t)ls->id, FM_EVERYWHERE) != mtmp)
-		    panic("write_ls: can't find mon #%u!", (unsigned)ls->id);
-#endif
-	    }
-	    ls->flags |= LSF_NEEDS_FIXUP;
-	    bwrite(fd, (genericptr_t)ls, sizeof(light_source));
-	    ls->id = arg_save;
-	    ls->flags &= ~LSF_NEEDS_FIXUP;
-	}
-    } else {
-	impossible("write_ls: bad type (%d)", ls->type);
-    }
-}
-
-/* Change light source's ID from src to dest. */
-void
-obj_move_light_source(src, dest)
-    struct obj *src, *dest;
-{
-    light_source *ls;
-
-    for (ls = light_base; ls; ls = ls->next)
-	if (ls->type == LS_OBJECT && ls->id == (genericptr_t) src)
-	    ls->id = (genericptr_t) dest;
-    src->lamplit = 0;
-    dest->lamplit = 1;
+	ls = (struct ls_t *)alloc(sizeof(struct ls_t));
+	mread(fd, (genericptr_t) ls, sizeof(struct ls_t));
+	add_chain_ls(ls);
+	/* relink owner */
+	ls->owner = owner;
+	*owner_ls(lstype, owner) = ls;
+	return;
 }
 
 /* return true if there exist any light sources */
 boolean
 any_light_source()
 {
-    return light_base != (light_source *) 0;
+    return light_base != (struct ls_t *) 0;
 }
 
 /*
@@ -705,7 +563,7 @@ void
 snuff_light_source(x, y)
     int x, y;
 {
-    light_source *ls, *nls;
+    struct ls_t *ls, *nls;
     struct obj *obj;
 
     for (ls = light_base; ls; ls = nls){
@@ -715,8 +573,8 @@ snuff_light_source(x, y)
 		will always be correct because the objects would have been
 		updated with the last vision update?  [Is that recent enough???]
 		*/
-		if (ls->type == LS_OBJECT && ls->x == x && ls->y == y) {
-			obj = (struct obj *) ls->id;
+		if (ls->lstype == LS_OBJECT && ls->x == x && ls->y == y) {
+			obj = (struct obj *) ls->owner;
 			if (obj_is_burning(obj) && !Darkness_cant_snuff(obj)) {
 				// this assumes snuff_light_source is only called on you're making DARKNESS,
 				// never when you're making LIGHT sources to "snuff" darkness sources (shadow torches)
@@ -785,33 +643,27 @@ litsaber(obj)
 	}
 }
 
-/* copy the light source(s) attached to src, and attach it/them to dest */
+/* copy the light source attached to src, and attach it to dest */
 void
 obj_split_light_source(src, dest)
     struct obj *src, *dest;
 {
-    light_source *ls, *new_ls;
+	/* safety check */
+	if (!src->light)
+		return;
 
-    for (ls = light_base; ls; ls = ls->next)
-	if (ls->type == LS_OBJECT && ls->id == (genericptr_t) src) {
-	    /*
-	     * Insert the new source at beginning of list.  This will
-	     * never interfere us walking down the list - we are already
-	     * past the insertion point.
-	     */
-	    new_ls = (light_source *) alloc(sizeof(light_source));
-	    *new_ls = *ls;
-	    if (Is_candle(src)) {
+	/* make a new ls on dest */
+	new_light_source(LS_OBJECT, (genericptr_t)dest, src->light->range);
+	dest->lamplit = 1;		/* now an active light source */
+
+	/* split candles may emit less light than original group */
+	if (Is_candle(src)) {
 		/* split candles may emit less light than original group */
-		ls->range = candle_light_range(src);
-		new_ls->range = candle_light_range(dest);
+		src->light->range = candle_light_range(src);
+		dest->light->range = candle_light_range(dest);
 		vision_full_recalc = 1;	/* in case range changed */
-	    }
-	    new_ls->id = (genericptr_t) dest;
-	    new_ls->next = light_base;
-	    light_base = new_ls;
-	    dest->lamplit = 1;		/* now an active light source */
 	}
+	return;
 }
 
 /* light source `src' has been folded into light source `dest';
@@ -820,17 +672,16 @@ void
 obj_merge_light_sources(src, dest)
 struct obj *src, *dest;
 {
-    light_source *ls;
+    struct ls_t *ls;
 
     /* src == dest implies adding to candelabrum */
     if (src != dest) end_burn(src, TRUE);		/* extinguish candles */
 
-    for (ls = light_base; ls; ls = ls->next)
-	if (ls->type == LS_OBJECT && ls->id == (genericptr_t) dest) {
-	    ls->range = candle_light_range(dest);
-	    vision_full_recalc = 1;	/* in case range changed */
-	    break;
+	if (dest->light) {
+		dest->light->range = candle_light_range(dest);
+		vision_full_recalc = 1;
 	}
+	return;
 }
 
 /* Candlelight is proportional to the number of candles;
@@ -882,7 +733,7 @@ wiz_light_sources()
 {
     winid win;
     char buf[BUFSZ], arg_address[20];
-    light_source *ls;
+    struct ls_t *ls;
 
     win = create_nhwindow(NHW_MENU);	/* corner text window */
     if (win == WIN_ERR) return 0;
@@ -897,13 +748,13 @@ wiz_light_sources()
 	for (ls = light_base; ls; ls = ls->next) {
 	    Sprintf(buf, "  %2d,%2d   %2d   0x%04x  %s  %s",
 		ls->x, ls->y, ls->range, ls->flags,
-		(ls->type == LS_OBJECT ? "obj" :
-		 ls->type == LS_MONSTER ?
-		    (mon_is_local((struct monst *)ls->id) ? "mon" :
-		     ((struct monst *)ls->id == &youmonst) ? "you" :
+		(ls->lstype == LS_OBJECT ? "obj" :
+		 ls->lstype == LS_MONSTER ?
+		    (mon_is_local((struct monst *)ls->owner) ? "mon" :
+		     ((struct monst *)ls->owner == &youmonst) ? "you" :
 		     "<m>") :		/* migrating monster */
 		 "???"),
-		fmt_ptr(ls->id, arg_address));
+		fmt_ptr(ls->owner, arg_address));
 	    putstr(win, 0, buf);
 	}
     } else

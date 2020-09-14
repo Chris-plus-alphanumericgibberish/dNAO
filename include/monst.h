@@ -260,6 +260,8 @@ struct monst {
 	long mvar2;
 	long mvar3;
 
+	struct ls_t * light;
+
 	union mextra * mextra_p;
 };
 

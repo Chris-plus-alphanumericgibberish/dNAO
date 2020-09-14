@@ -391,6 +391,11 @@ long num;
 	    panic("splitobj");	/* can't split containers */
 	otmp = newobj(0);
 	*otmp = *obj;		/* copies whole structure */
+	/* invalidate pointers */
+	otmp->light = (struct ls_t *)0;
+	otmp->oextra_p = (union oextra *)0;
+	otmp->mp = (struct mask_properties *)0;	/* not sure if correct -- these are very unfinished */
+
 	otmp->o_id = flags.ident++;
 	if (!otmp->o_id) otmp->o_id = flags.ident++;	/* ident overflowed */
 	otmp->timed = 0;	/* not timed, yet */
@@ -2534,6 +2539,7 @@ struct monst *mtmp;
 	EMON(obj)->nmon     = (struct monst *)0;
 	EMON(obj)->data     = (struct permonst *)0;
 	EMON(obj)->minvent  = (struct obj *)0;
+	EMON(obj)->light    = (struct ls_t *)0;
 	return obj;
 }
 
@@ -3186,9 +3192,9 @@ dealloc_obj(obj)
 
     /*
      * Free up any light sources attached to the object.
-     *
      */
-	del_light_source(LS_OBJECT, (genericptr_t) obj, TRUE);
+	if (obj->light)
+	del_light_source(obj->light);
 
     //if (obj == thrownobj) thrownobj = (struct obj*)0;
 

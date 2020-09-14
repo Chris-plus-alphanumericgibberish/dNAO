@@ -351,12 +351,10 @@ boolean forcecontrol;
  made_change:
 	new_light = Upolyd ? emits_light(youmonst.data) : 0;
 	if (old_light != new_light) {
-	    if (old_light)
-		del_light_source(LS_MONSTER, (genericptr_t)&youmonst, FALSE);
+	    del_light_source((&youmonst)->light);
 	    if (new_light == 1) ++new_light;  /* otherwise it's undetectable */
 	    if (new_light)
-		new_light_source(u.ux, u.uy, new_light,
-				 LS_MONSTER, (genericptr_t)&youmonst);
+			new_light_source(LS_MONSTER, (genericptr_t)&youmonst, new_light);
 	}
 	if (is_pool(u.ux,u.uy, FALSE) && was_floating && !(Levitation || Flying) &&
 		!breathless(youmonst.data) && !amphibious(youmonst.data) &&
@@ -804,8 +802,9 @@ rehumanize()
 		done(DIED);
 	}
 
-	if (emits_light(youracedata))
-	    del_light_source(LS_MONSTER, (genericptr_t)&youmonst, FALSE);
+	/* delete any ls attached to you */
+	del_light_source((&youmonst)->light);
+
 	polyman("return to %s form!", urace.adj);
 
 	if (u.uhp < 1) {

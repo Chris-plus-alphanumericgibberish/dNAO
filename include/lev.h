@@ -39,13 +39,13 @@ struct bubble {
 };
 
 /* used in light.c */
-typedef struct ls_t {
-    struct ls_t *next;
+struct ls_t {
+    struct ls_t *next;	/* next in global processing chain */
     xchar x, y;		/* source's position */
     short range;	/* source's current range */
     short flags;
-    short type;		/* type of light source */
-    genericptr_t id;	/* source's identifier */
-} light_source;
+    short lstype;		/* type of light source */
+    genericptr_t owner;	/* source's identifier */
+};
 
 #endif /* LEV_H */

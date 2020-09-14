@@ -3782,11 +3782,9 @@ register struct monst *mtmp, *mtmp2;
 	place_wsegs(mtmp2); /* locations to mtmp2 not mtmp. */
     if (emits_light_mon(mtmp2)) {
 	/* since this is so rare, we don't have any `mon_move_light_source' */
-	new_light_source(mtmp2->mx, mtmp2->my,
-			 emits_light_mon(mtmp2),
-			 LS_MONSTER, (genericptr_t)mtmp2);
+	new_light_source(LS_MONSTER, (genericptr_t)mtmp2, emits_light_mon(mtmp2));
 	/* here we rely on the fact that `mtmp' hasn't actually been deleted */
-	del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
+	del_light_source(mtmp->light);
     }
     mtmp2->nmon = fmon;
     fmon = mtmp2;
@@ -3831,8 +3829,7 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	mtmp->mhp = 0; /* simplify some tests: force mhp to 0 */
 	relobj(mtmp, 0, FALSE);
 	remove_monster(mtmp->mx, mtmp->my);
-	if (emits_light_mon(mtmp) || emits_light(mptr))	/* TODO: actually check if the monster has an attached ls */
-	    del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
+	del_light_source(mtmp->light);
 	newsym(mtmp->mx,mtmp->my);
 	unstuck(mtmp);
 	fill_pit(mtmp->mx, mtmp->my);
@@ -4082,10 +4079,9 @@ struct monst *mtmp;
 			/* If marked to do so, remve illuminated status */
 			if (!(lifesavers&LSVD_ILU)){
 				set_template(mtmp, 0);
-				del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
+				del_light_source(mtmp->light);
 				if (emits_light_mon(mtmp))
-					new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
-							 LS_MONSTER, (genericptr_t)mtmp);
+					new_light_source(LS_MONSTER, (genericptr_t)mtmp, emits_light_mon(mtmp));
 			}
 			break;
 		case LSVD_PLY:
@@ -6602,18 +6598,14 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	/* take on the new form... */
 	set_mon_data(mtmp, mtyp);
 
-	if (emits_light(olddata) != emits_light_mon(mtmp)
-		|| olddata->mtyp == PM_MASKED_QUEEN
-	) {
-	    /* used to give light, now doesn't, or vice versa,
-	       or light's range has changed */
-	    if (emits_light(olddata) || has_template(mtmp, ILLUMINATED))
-			del_light_source(LS_MONSTER, (genericptr_t)mtmp, FALSE);
+	/* monster lightsources */
+	del_light_source(mtmp->light);	/* clear old */
+	if (emits_light_mon(mtmp)|| olddata->mtyp == PM_MASKED_QUEEN) {
+		/* masked queen is effectively illuminated, but not -- poly should add illumination */
 		if(olddata->mtyp == PM_MASKED_QUEEN)
 			set_template(mtmp, ILLUMINATED);
-	    if (emits_light_mon(mtmp))
-		new_light_source(mtmp->mx, mtmp->my, emits_light_mon(mtmp),
-				 LS_MONSTER, (genericptr_t)mtmp);
+		/* now add lightsource */
+		new_light_source(LS_MONSTER, (genericptr_t)mtmp, emits_light_mon(mtmp));
 	}
 	if (!mtmp->perminvis || pm_invisible(olddata))
 	    mtmp->perminvis = pm_invisible(mdat);
