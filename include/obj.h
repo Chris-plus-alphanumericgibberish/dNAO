@@ -630,8 +630,8 @@ struct obj {
 								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
 								|| (otmp)->otyp == HARMONIUM_BOOTS)
 
-#define is_light_armor(otmp)	(objects[(otmp)->otyp].oc_size == ARMSZ_LIGHT)
-#define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_size == ARMSZ_MEDIUM)
+#define is_light_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT)
+#define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM)
 
 #define is_elven_armor(otmp)	((otmp)->otyp == ELVEN_HELM\
 				|| (otmp)->otyp == HIGH_ELVEN_HELM\

@@ -43,9 +43,10 @@ struct objclass {
 	Bitfield(oc_nowish,1);	/* cannot wish for this object */
 
 	Bitfield(oc_size, 3);	/* inherent size of the item; modifies size by about half */
-#define ARMSZ_LIGHT MZ_MEDIUM
-#define ARMSZ_MEDIUM MZ_LARGE
-#define ARMSZ_HEAVY MZ_HUGE
+	Bitfield(oc_dexclass, 2);
+#define ARMSZ_LIGHT 1
+#define ARMSZ_MEDIUM 2
+#define ARMSZ_HEAVY 3
 	/* TODO: change all places oc_bimanual is used */
 #define oc_bimanual	oc_size==MZ_HUGE	/* for weapons & tools used as weapons */
 	Bitfield(oc_tough,1);	/* hard gems/rings */

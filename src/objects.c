@@ -12,18 +12,18 @@
 #define O_UNIQ(x)		C07(x)
 #define O_NOWISH(x)		C08(x)
 #define O_SIZE(x)		C09(x)
-#define O_SKILL(x)		C11(x)
-#define O_DRSLOT(x)		C11(x)
-#define O_MAT(x)		C12(x)
-#define O_MATSPEC(x)	C13(x)
-#define O_DTYPE(x)		C14(x)
-#define O_POWER(x)		C15(x)
-#define O_DELAY(x)		C17(x)
-#define O_COLOR(x)		C18(x)
-#define O_PROB(x)		C19(x)
-#define O_WT(x)			C20(x)
-#define O_COST(x)		C21(x)
-#define O_NUT(x)		C27(x)
+#define O_SKILL(x)		C12(x)
+#define O_DRSLOT(x)		C12(x)
+#define O_MAT(x)		C13(x)
+#define O_MATSPEC(x)	C14(x)
+#define O_DTYPE(x)		C15(x)
+#define O_POWER(x)		C16(x)
+#define O_DELAY(x)		C18(x)
+#define O_COLOR(x)		C19(x)
+#define O_PROB(x)		C20(x)
+#define O_WT(x)			C21(x)
+#define O_COST(x)		C22(x)
+#define O_NUT(x)		C28(x)
 
 /* modifying the blindname of an object */
 #define DEF_BLINDNAME(names, blindname) (SETNAMES(names, C03(blindname)))
@@ -98,13 +98,13 @@ NEARDATA struct objdescr obj_descr[] = {
 #else
 /* second pass -- object definitions */
 
-# define BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,size,tuf,dir,sub,mtrl,shwmat) \
+# define BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,size,dexc,tuf,dir,sub,mtrl,shwmat) \
 	nmkn, mrg, uskn, 0, \
 	mgc, chrg, uniq, nwsh, \
-	size, tuf, dir, mtrl, \
-	shwmat, sub
+	size, dexc, tuf, dir, \
+	mtrl, shwmat, sub
 # define OBJECT(names,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color,...) \
-	{0, 0, (char *)0, SET27( \
+	{0, 0, (char *)0, SET28( \
 	bits, \
 	prp, sym, dly, color, \
 	prob, wt, cost, \
@@ -122,34 +122,34 @@ NEARDATA struct objdescr obj_descr[] = {
 NEARDATA struct objclass objects[] = {
 #endif
 /* dummy object[0] -- description [2nd arg] *must* be NULL */
-	OBJECT(("strange object",(char *)0), BITS(1,0,0,0,0,0,0,0,0,0,0,P_NONE,0,0),
+	OBJECT(("strange object",(char *)0), BITS(1,0,0,0,0,0,0,0,0,0,0,0,P_NONE,0,0),
 			0, ILLOBJ_CLASS, 0, 0, 0, 0, {0}, {0}, 0, 0, 0, 0, 0),
 
 /* weapons ... */
 #define WEAPON(names,sdam,ldam,kn,mg,size,prob,wt,cost,hitbon,typ,sub,metal,shwmat,color,...) \
 	OBJECT( \
-		names, BITS(kn,mg,1,0,0,1,0,0,size,0,typ,sub,metal,shwmat), 0, \
+		names, BITS(kn,mg,1,0,0,1,0,0,size,0,0,typ,sub,metal,shwmat), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__ )
 #define PROJECTILE(names,sdam,ldam,kn,prob,wt,cost,hitbon,metal,sub,color,...) \
 	OBJECT( \
 		names, \
-		BITS(kn,1,1,0,0,1,0,0,MZ_TINY,0,PIERCE,sub,metal,0), 0, \
+		BITS(kn,1,1,0,0,1,0,0,MZ_TINY,0,0,PIERCE,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, color, __VA_ARGS__)
 #define BOW(names,kn,size,prob,wt,cost,hitbon,metal,sub,color) \
 	OBJECT( \
-		names, BITS(kn,0,1,0,0,1,0,0,size,0,0,sub,metal,0), 0, \
+		names, BITS(kn,0,1,0,0,1,0,0,size,0,0,0,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, { 0 }, { 0 }, hitbon, WP_GENERIC, 0, wt, color)
 #define BULLET(names,sdam,ldam,kn,size,prob,wt,cost,hitbon,ammotyp,typ,metal,sub,color,...) \
 	OBJECT( \
-		names, BITS(kn,1,1,0,0,1,0,0,size,0,typ,sub,metal,0), 0, \
+		names, BITS(kn,1,1,0,0,1,0,0,size,0,0,typ,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, ammotyp, 0, wt, color, __VA_ARGS__)
 #define GUN(names,kn,size,prob,wt,cost,range,rof,hitbon,ammotyp,metal,sub,color,...) \
 	OBJECT( \
-		names, BITS(kn,0,1,0,0,1,0,0,size,0,0,sub,metal,0), 0, \
+		names, BITS(kn,0,1,0,0,1,0,0,size,0,0,0,sub,metal,0), 0, \
 		WEAPON_CLASS, prob, 0, \
 		wt, cost, DMG(F(range)), DMG(F(rof)), hitbon, ammotyp, 0, wt, color, __VA_ARGS__)
 
@@ -600,26 +600,26 @@ BOW(("atlatl", "notched stick"),                      0, MZ_MEDIUM,  0, 12,  30,
  * Only COPPER (including brass) corrodes.
  * Some creatures are vulnerable to SILVER.
  */
-#define ARMOR(names,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,drslot,sub,metal,c,...) \
+#define ARMOR(names,kn,mgc,size,dexc,power,prob,delay,wt,cost,ac,dr,can,drslot,sub,metal,c,...) \
 	OBJECT( \
-		names, BITS(kn,0,1,0,mgc,1,0,0,size,0,drslot,sub,metal,0), power, \
+		names, BITS(kn,0,1,0,mgc,1,0,0,size,dexc,0,drslot,sub,metal,0), power, \
 		ARMOR_CLASS, prob, delay, wt, cost, \
 		{0}, {0}, 10 - ac, can, dr, wt, c, __VA_ARGS__ )
 
-#define SUIT(names,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(names, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, TORSO_DR, ARM_SUIT, metal, c, __VA_ARGS__)
+#define SUIT(names,kn,mgc,size,dexc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+	ARMOR(names, kn, mgc, size, dexc, power, prob, delay, wt, cost, ac, dr, can, TORSO_DR, ARM_SUIT, metal, c, __VA_ARGS__)
 #define SHIRT(names,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(names, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, UPPER_TORSO_DR, ARM_SHIRT, metal, c, __VA_ARGS__)
+	ARMOR(names, kn, mgc, size, 0, power, prob, delay, wt, cost, ac, dr, can, UPPER_TORSO_DR, ARM_SHIRT, metal, c, __VA_ARGS__)
 #define HELM(names,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(names, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, HEAD_DR, ARM_HELM, metal, c, __VA_ARGS__)
+	ARMOR(names, kn, mgc, MZ_SMALL, 0, power, prob, delay, wt, cost, ac, dr, can, HEAD_DR, ARM_HELM, metal, c, __VA_ARGS__)
 #define CLOAK(names,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(names, kn, mgc, MZ_MEDIUM, power, prob, delay, wt, cost, ac, dr, can, CLOAK_DR, ARM_CLOAK, metal, c, __VA_ARGS__)
+	ARMOR(names, kn, mgc, MZ_MEDIUM, 0, power, prob, delay, wt, cost, ac, dr, can, CLOAK_DR, ARM_CLOAK, metal, c, __VA_ARGS__)
 #define SHIELD(names,kn,mgc,size,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(names, kn, mgc, size, power, prob, delay, wt, cost, ac, dr, can, 0, ARM_SHIELD, metal, c, __VA_ARGS__)
+	ARMOR(names, kn, mgc, size, 0, power, prob, delay, wt, cost, ac, dr, can, 0, ARM_SHIELD, metal, c, __VA_ARGS__)
 #define GLOVES(names,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(names, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, ARM_DR, ARM_GLOVES, metal, c, __VA_ARGS__)
+	ARMOR(names, kn, mgc, MZ_SMALL, 0, power, prob, delay, wt, cost, ac, dr, can, ARM_DR, ARM_GLOVES, metal, c, __VA_ARGS__)
 #define BOOTS(names,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
-	ARMOR(names, kn, mgc, MZ_SMALL, power, prob, delay, wt, cost, ac, dr, can, LEG_DR, ARM_BOOTS, metal, c, __VA_ARGS__)
+	ARMOR(names, kn, mgc, MZ_SMALL, 0, power, prob, delay, wt, cost, ac, dr, can, LEG_DR, ARM_BOOTS, metal, c, __VA_ARGS__)
 
 /* helmets */
 HELM(("sedge hat", "wide conical hat"), /*Needs encyc entry*//*Needs tile*/
@@ -688,7 +688,7 @@ HELM(("helm of drain resistance", "band"), /*diadem of drain resistance*//*Needs
  *	    the same defined in monst.c.
  */
 #define DRGN_MAIL(names,mgc,power,cost,ac,dr,color,...) \
-	SUIT(DEF_BLINDNAME(names, "dragon scale mail"),1,mgc,ARMSZ_MEDIUM,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
+	SUIT(DEF_BLINDNAME(names, "dragon scale mail"),1,mgc, MZ_LARGE, ARMSZ_MEDIUM,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
 /* 3.4.1: dragon scale mail reclassified as "magic" since magic is
    needed to create them */
 DRGN_MAIL(("gray dragon scale mail"),   1, ANTIMAGIC,  1200, 5, 4, CLR_GRAY),
@@ -704,7 +704,7 @@ DRGN_MAIL(("yellow dragon scale mail"), 1, ACID_RES,    900, 5, 4, CLR_YELLOW),
 #undef DRGN_MAIL
 
 #define DRGN_SCALES(names,mgc,power,cost,ac,dr,color,...) \
-	SUIT(DEF_BLINDNAME(names, "dragon scales"),1,mgc,ARMSZ_MEDIUM,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
+	SUIT(DEF_BLINDNAME(names, "dragon scales"),1,mgc, MZ_LARGE, ARMSZ_MEDIUM,power,0,5,150,cost,ac,dr,0,DRAGON_HIDE,color,__VA_ARGS__)
 /* For now, only dragons leave these. */
 /* 3.4.1: dragon scales left classified as "non-magic"; they confer
    magical properties but are produced "naturally" */
@@ -721,76 +721,76 @@ DRGN_SCALES(("yellow dragon scales"), 0, ACID_RES,   500, 9, 2, CLR_YELLOW),
 #undef DRGN_SCALES
 
 SUIT(("plate mail"), /*Needs encyc entry*/
-	1, 0,  ARMSZ_HEAVY, 0,	44, 5, 225, 600,  5, 5, 3, IRON, HI_METAL),
+	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	44, 5, 225, 600,  5, 5, 3, IRON, HI_METAL),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
-	0, 0, ARMSZ_MEDIUM, 0,	0, 5, 110, 	1200,  4, 6, 3, MITHRIL, HI_MITHRIL),
+	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	0, 5, 110, 	1200,  4, 6, 3, MITHRIL, HI_MITHRIL),
 SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/
-	0, 0,  ARMSZ_HEAVY, 0,	0, 5, 85, 	2000,  4, 6, 1, SHADOWSTEEL, CLR_BLACK),
+	0, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	0, 5, 85, 	2000,  4, 6, 1, SHADOWSTEEL, CLR_BLACK),
 SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/
-	1, 0,  ARMSZ_LIGHT, 0,	 0, 5,	 5,  100,10, 1, 2, CLOTH, CLR_GREEN),
+	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	 0, 5,	 5,  100,10, 1, 2, CLOTH, CLR_GREEN),
 SUIT(("noble's dress", "armored black dress", "armored dress"), /*Needs encyc entry*/
-	0, 0, ARMSZ_MEDIUM, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
+	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	0, 5, 40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,  ARMSZ_LIGHT, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
+	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	0, 5, 10, 	1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
 SUIT(("gentleman's suit", "expensive clothes"), /*Needs encyc entry*/
-	0, 0,  ARMSZ_LIGHT, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
+	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	0, 5, 10, 1000,  10, 1, 2, CLOTH, CLR_BLACK),
 SUIT(("gentlewoman's dress", "expensive dress"), /*Needs encyc entry*/
-	0, 0,  ARMSZ_LIGHT, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
+	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	0, 6,100, 1000,  10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
 SUIT(("crystal plate mail"), /*Needs encyc entry*/
-	1, 0,  ARMSZ_HEAVY, 0,	10, 5, 170, 2000,  7, 3, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
+	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	10, 5, 170, 2000,  7, 3, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
 #ifdef TOURIST
 SUIT(("archaic plate mail"), /*Needs encyc entry*/
-	1, 0,  ARMSZ_HEAVY, 0,	20, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
+	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	20, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
 #else
 SUIT(("archaic plate mail"),
-	1, 0,  ARMSZ_HEAVY, 0,	35, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
+	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	35, 5, 200, 400,  6, 4, 3, COPPER, HI_COPPER),
 #endif
 SUIT(("harmonium plate", "red-lacquered bladed armor", "bladed armor"),
-	0, 0,  ARMSZ_HEAVY, 0,	 0, 5, 225,   1,  6, 4, 3, METAL, CLR_RED),
+	0, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	 0, 5, 225,   1,  6, 4, 3, METAL, CLR_RED),
 SUIT(("harmonium scale mail", "red-lacquered spiked scale mail", "spiked scale mail"),
-	0, 0, ARMSZ_MEDIUM, 0,	 0, 5, 125,   1,  8, 2, 3, METAL, CLR_RED),
+	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	 0, 5, 125,   1,  8, 2, 3, METAL, CLR_RED),
 SUIT(("plasteel armor", "hard white armor", "armor"), /*Needs encyc entry*//*Needs tile*/
-	0, 0, ARMSZ_MEDIUM, 0,	 0, 5, 100,  500, 7, 3, 3, PLASTIC, CLR_WHITE),
+	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	 0, 5, 100,  500, 7, 3, 3, PLASTIC, CLR_WHITE),
 // ARMOR(("force armor", "gemstone-adorned clothing"),
 	// 0, 0, 1, 0,	 0, 5,  50, 1000, 9, 3, ARM_SUIT, GEMSTONE, CLR_BRIGHT_GREEN),
 SUIT(("splint mail"),
-	1, 0,  ARMSZ_HEAVY, 0,	62, 5, 200,  80,  7, 3, 1, IRON, HI_METAL),
+	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	62, 5, 200,  80,  7, 3, 1, IRON, HI_METAL),
 SUIT(("barnacle armor", "giant shell armor"),
-	0, 1,  ARMSZ_HEAVY, 0,	0, 10, 150,1000,  7, 3, 1, SHELL_MAT, CLR_GRAY),
+	0, 1,   MZ_HUGE,  ARMSZ_HEAVY, 0,	0, 10, 150,1000,  7, 3, 1, SHELL_MAT, CLR_GRAY),
 SUIT(("banded mail"),
-	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 175,  90,  7, 3, 0, IRON, HI_METAL),
+	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 175,  90,  7, 3, 0, IRON, HI_METAL),
 SUIT(("dwarvish mithril-coat"),
-	1, 0,  ARMSZ_LIGHT, 0,	10, 1,  40, 240,   7, 3, 3, MITHRIL, HI_MITHRIL),
+	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	10, 1,  40, 240,   7, 3, 3, MITHRIL, HI_MITHRIL),
 SUIT(("elven mithril-coat"),
-	1, 0,  ARMSZ_LIGHT, 0,	15, 1,  20, 240,  7, 2, 3, MITHRIL, HI_MITHRIL),
+	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	15, 1,  20, 240,  7, 2, 3, MITHRIL, HI_MITHRIL),
 SUIT(("chain mail"),
-	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 150,  75,  8, 3, 1, IRON, HI_METAL),
+	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 150,  75,  8, 3, 1, IRON, HI_METAL),
 SUIT(("droven chain mail", "crested black mail", "crested mail"), /*Needs encyc entry*/
-	0, 0, ARMSZ_MEDIUM, 0,	0, 5,   50,  1000,  8, 4, 2, SHADOWSTEEL, CLR_BLACK),
+	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	0, 5,   50,  1000,  8, 4, 2, SHADOWSTEEL, CLR_BLACK),
 SUIT(("orcish chain mail", "crude chain mail"),
-	0, 0,  ARMSZ_HEAVY, 0,	20, 5, 150,  75,  8, 2, 1, IRON, CLR_BLACK),
+	0, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,	20, 5, 150,  75,  8, 2, 1, IRON, CLR_BLACK),
 SUIT(("scale mail"),
-	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 125,  45,  8, 2, 0, IRON, HI_METAL),
+	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 125,  45,  8, 2, 0, IRON, HI_METAL),
 SUIT(("studded leather armor"),
-	1, 0,  ARMSZ_LIGHT, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
+	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	72, 3,  50,  15,  9, 2, 1, LEATHER, HI_LEATHER),
 SUIT(("ring mail"),
-	1, 0, ARMSZ_MEDIUM, 0,	72, 5, 125, 100,  9, 2, 0, IRON, HI_METAL),
+	1, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	72, 5, 125, 100,  9, 2, 0, IRON, HI_METAL),
 SUIT(("orcish ring mail", "crude ring mail"),
-	0, 0, ARMSZ_MEDIUM, 0,	20, 5, 125,  80,  9, 1, 1, IRON, CLR_BLACK),
+	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,	20, 5, 125,  80,  9, 1, 1, IRON, CLR_BLACK),
 SUIT(("leather armor"),
-	1, 0,  ARMSZ_LIGHT, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
+	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	82, 3,  40,   5, 10, 2, 0, LEATHER, HI_LEATHER),
 //ARMOR(names,
    //kn,mgc,blk,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c)
 SUIT(("living armor", "giant sea anemone"),
-	0, 1, ARMSZ_MEDIUM, 0,	0, 6,  80,  500, 10, 2, 0, FLESH, CLR_ORANGE),
+	0, 1,  MZ_LARGE, ARMSZ_MEDIUM, 0,	0, 6,  80,  500, 10, 2, 0, FLESH, CLR_ORANGE),
 SUIT(("jacket"),
-	1, 0,  ARMSZ_LIGHT, 0,	12, 0,	20,  10, 10, 1, 2, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
+	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	12, 0,	20,  10, 10, 1, 2, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,  ARMSZ_LIGHT, 0,	0, 0,   15,  10, 10, 1, 2, CLOTH, CLR_WHITE),
+	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,	0, 0,   15,  10, 10, 1, 2, CLOTH, CLR_WHITE),
 SUIT(("healer uniform","clean white clothes", "clean clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,  ARMSZ_LIGHT, SICK_RES, 0, 0,  30, 10, 10, 1, 0, CLOTH, CLR_WHITE),
+	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, SICK_RES, 0, 0,  30, 10, 10, 1, 0, CLOTH, CLR_WHITE),
 SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
-	0, 0,  ARMSZ_LIGHT, REFLECTING,0,5,   5,1000,10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
+	0, 0, MZ_MEDIUM,  ARMSZ_LIGHT, REFLECTING,0,5,   5,1000,10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
 #ifdef TOURIST
 /* shirts */
 /*ARMOR(("Hawaiian shorts", "flowery shorts and lei"),
@@ -978,7 +978,7 @@ BOOTS(("flying boots", "snow boots"),
 /* rings ... */
 #define RING(names,power,cost,mgc,spec,mohs,metal,color,...) OBJECT( \
 		DEF_BLINDNAME(names, "ring"), \
-		BITS(0,0,spec,0,mgc,spec,0,0,MZ_TINY,HARDGEM(mohs),0,P_NONE,metal,0), \
+		BITS(0,0,spec,0,mgc,spec,0,0,MZ_TINY,0,HARDGEM(mohs),0,P_NONE,metal,0), \
 		power, RING_CLASS, 0, 0, 3, cost, {0}, {0}, 0, 0, 0, 15, color,__VA_ARGS__ )
 RING(("wishes", "black"), 0,                              500, 1, 1, 4, PLATINUM, CLR_BLACK, O_NOWISH(1)),
 RING(("adornment", "wooden"), ADORNED,                    100, 1, 1, 2, WOOD, HI_WOOD),
@@ -1015,7 +1015,7 @@ RING(("protection from shape changers", "black signet"), PROT_FROM_SHAPE_CHANGER
 
 /* amulets ... - THE Amulet comes last because it is special */
 #define AMULET(names,power,prob,...) OBJECT( \
-		DEF_BLINDNAME(names, "amulet"), BITS(0,0,0,0,1,0,0,0,0,MZ_TINY,0,P_NONE,IRON,0), power, \
+		DEF_BLINDNAME(names, "amulet"), BITS(0,0,0,0,1,0,0,0,0,MZ_TINY,0,0,P_NONE,IRON,0), power, \
 		AMULET_CLASS, prob, 0, 20, 150, {0}, {0}, 0, 0, 0, 20, HI_METAL, __VA_ARGS__ )
 
 AMULET(("amulet of drain resistance","warped"),   DRAIN_RES,   60),
@@ -1043,17 +1043,17 @@ AMULET(("Amulet of Yendor", "Amulet of Yendor"), 0, 0, /* note: description == n
 /* tools with weapon characteristics come last */
 #define TOOL(names,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( names, \
-		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
+		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, {0}, {0}, 0, 0, 0, wt, color, __VA_ARGS__)
 #define CONTAINER(names,kn,size,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( names, \
-		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,P_NONE,mat,0), \
+		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, {0}, {0}, 0, 0, 0, wt, color, __VA_ARGS__)
 #define WEPTOOL(names,sdam,ldam,kn,size,mgc,chg,prob,wt,cost,hitbon,typ,sub,mat,clr,...) \
 	OBJECT( names, \
-		BITS(kn,0,1,chg,mgc,1,0,0,size,0,typ,sub,mat,0), \
+		BITS(kn,0,1,chg,mgc,1,0,0,size,0,0,typ,sub,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
 /* containers */
@@ -1070,23 +1070,15 @@ CONTAINER(("bag of holding", "bag"),      0, MZ_MEDIUM, 1, 0,  20,  15, 100, CLO
 CONTAINER(("bag of tricks", "bag"),       0, MZ_MEDIUM, 1, 1,  20,  15, 100, CLOTH, HI_CLOTH),
 #define HOSTAGE(names,kn,mgc,chg,prob,ntrtn,wt,cost,mat,color,...) \
 	OBJECT( names, \
-		BITS(kn,0,chg,1,mgc,chg,0,0,MZ_MEDIUM,0,0,P_NONE,mat), \
+		BITS(kn,0,chg,1,mgc,chg,0,0,MZ_MEDIUM,0,0,0,P_NONE,mat), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, {0}, {0}, 0, ntrtn, 0, wt, color, __VA_ARGS__)
 
 //HOSTAGE(("distressed princess"),           1, 0, 0,  0, 350,.9*1450,  1600, CLOTH, CLR_WHITE),
 #undef HOSTAGE
 #undef CONTAINER
-//OBJECT(obj,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color) \
-//	{0, 0, bits, prp, sym, dly, COLOR_FIELD(color) \
-//	 prob, wt, cost, sdam, ldam, oc1, oc2, oc3, nut}
 
 /* lock opening tools */
-//define TOOL(names,kn,mrg,mgc,chg,prob,wt,cost,mat,color) \
-	OBJECT( names, \
-		BITS(kn,mrg,chg,0,mgc,chg,0,0,0,0,0,P_NONE,mat), \
-		0, TOOL_CLASS, prob, 0, \
-		wt, cost, 0, 0, 0, 0, 0, wt, color )
 TOOL(("skeleton key", "key"),              0,   MZ_TINY, 0, 0, 0,  80,  3,  10, IRON,    HI_METAL),
 TOOL(("universal key", "key"),	         0,   MZ_TINY, 0, 0, 0,   0,  3,  10, SILVER,  HI_SILVER, O_MATSPEC(UNIDED)),
 #ifdef TOURIST
@@ -1258,7 +1250,7 @@ TOOL(("Bell of Opening",           "bell"),        0,  MZ_TINY, 0, 1, 1, 0, 10, 
 
 /* Comestibles ... */
 #define FOOD(names,prob,size,delay,wt,unk,tin,nutrition,color,...) OBJECT( \
-		names, BITS(1,1,unk,0,0,0,0,0,size,0,0,P_NONE,tin,0), 0, \
+		names, BITS(1,1,unk,0,0,0,0,0,size,0,0,0,P_NONE,tin,0), 0, \
 		FOOD_CLASS, prob, delay, \
 		wt, nutrition / 20 + 5, {0}, {0}, 0, 0, 0, nutrition, color, __VA_ARGS__)
 /* all types of food (except tins & corpses) must have a delay of at least 1. */
@@ -1327,7 +1319,7 @@ FOOD(("tin"),                    75,   MZ_TINY,  0, 10, 1, METAL,   0, HI_METAL)
 
 /* potions ... */
 #define POTION(names,mgc,power,prob,cost,color,...) OBJECT( \
-		DEF_BLINDNAME(names, "potion"), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,GLASS,0), power, \
+		DEF_BLINDNAME(names, "potion"), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,0,P_NONE,GLASS,0), power, \
 		POTION_CLASS, prob, 0, 20, cost, {0}, {0}, 0, 0, 0, 10, color, __VA_ARGS__)
 POTION(("gain ability", "ruby"),          1, 0,          40, 300, CLR_RED),
 POTION(("restore ability", "pink"),       1, 0,          40, 100, CLR_BRIGHT_MAGENTA),
@@ -1364,7 +1356,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 
 /* scrolls ... */
 #define SCROLL(names,mgc,prob,cost,...) OBJECT( \
-		DEF_BLINDNAME(names, "scroll"), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,P_NONE,PAPER,0), 0, \
+		DEF_BLINDNAME(names, "scroll"), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,0,P_NONE,PAPER,0), 0, \
 		SCROLL_CLASS, prob, 0, 5, cost, {0}, {0}, 0, 0, 0, 6, HI_PAPER, __VA_ARGS__)
 	SCROLL(("enchant armor",         "ZELGO MER"),            1,  59,  80),
 	SCROLL(("destroy armor",         "JUYED AWK YACC"),       1,  35, 100),
@@ -1407,7 +1399,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 #undef SCROLL
 
 #define CERAMIC_TILE(names,prob,...) OBJECT( \
-		DEF_BLINDNAME(names, "shard"), BITS(0,1,0,0,1,0,0,0,MZ_TINY,0,0,P_NONE,MINERAL, IDED|UNIDED), 0, \
+		DEF_BLINDNAME(names, "shard"), BITS(0,1,0,0,1,0,0,0,MZ_TINY,0,0,0,P_NONE,MINERAL, IDED|UNIDED), 0, \
 		TILE_CLASS, prob, 0, 3, 300, {0}, {0}, 0, 0, 0, 6, CLR_WHITE, __VA_ARGS__)
 	/* Randomized descriptions */
 	CERAMIC_TILE(("syllable of strength: Aesh","bipartite glyph"), 167),
@@ -1418,7 +1410,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 	CERAMIC_TILE(("syllable of spirit: Vaul",  "hanging glyph"),   166),
 #undef CERAMIC_TILE
 #define BONE_TILE(names,prob,...) OBJECT( \
-		DEF_BLINDNAME(names, "shard"), BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,P_NONE,BONE, IDED|UNIDED), 0, \
+		DEF_BLINDNAME(names, "shard"), BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,0,P_NONE,BONE, IDED|UNIDED), 0, \
 		TILE_CLASS, prob, 0, 3, 300, {0}, {0}, 0, 0, 0, 6, CLR_GRAY, __VA_ARGS__)
 	BONE_TILE(("anti-clockwise metamorphosis glyph",  "counterclockwise-rotated cross"),   0),	// ANTI_CLOCKWISE_METAMORPHOSIS
 	BONE_TILE(("clockwise metamorphosis glyph",  "clockwise-rotated cross"),   0),				// CLOCKWISE_METAMORPHOSIS
@@ -1442,7 +1434,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 	BONE_TILE(("beast's embrace glyph",  "curling beast's claw"),   0),		// BEASTS_EMBRACE
 #undef BONE_TILE
 #define METALIC_SLAB(names, clr,...) OBJECT( \
-		DEF_BLINDNAME(names, "slab"), BITS(0,0,0,0,1,0,1,1,MZ_TINY,0,0,P_NONE,METAL, IDED|UNIDED), 0, \
+		DEF_BLINDNAME(names, "slab"), BITS(0,0,0,0,1,0,1,1,MZ_TINY,0,0,0,P_NONE,METAL, IDED|UNIDED), 0, \
 		TILE_CLASS, 0, 0, 3, 3000, {0}, {0}, 0, 0, 0, 6, clr, __VA_ARGS__)
 	/* Fixed descriptions (also, artifact base-items only) */
 	METALIC_SLAB(("First Word",  "blinding glyph"), CLR_YELLOW),
@@ -1453,7 +1445,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 
 /* spellbooks ... */
 #define SPELL(names,sub,prob,level,mgc,dir,color,...) OBJECT( \
-		DEF_BLINDNAME(names, "spellbook"), BITS(0,0,0,0,mgc,0,0,0,MZ_LARGE,0,dir,sub,PAPER,0), 0, \
+		DEF_BLINDNAME(names, "spellbook"), BITS(0,0,0,0,mgc,0,0,0,MZ_LARGE,0,0,dir,sub,PAPER,0), 0, \
 		SPBOOK_CLASS, prob, level, \
 		50, level * 100, {0}, {0}, 0, level, 0, 20, color, __VA_ARGS__)
 SPELL(("dig",             "parchment"),   P_MATTER_SPELL,			20, 5, 1, RAY,       HI_PAPER),
@@ -1524,7 +1516,7 @@ SPELL(("secrets", "ragged leather"),      P_NONE,                  0, 7, 1, 0,  
 
 /* wands ... */
 #define WAND(names,prob,cost,mgc,dir,metal,color,...) OBJECT( \
-		DEF_BLINDNAME(names, "wand"), BITS(0,0,1,0,mgc,1,0,0,MZ_TINY,0,dir,P_NONE,metal,0), 0, \
+		DEF_BLINDNAME(names, "wand"), BITS(0,0,1,0,mgc,1,0,0,MZ_TINY,0,0,dir,P_NONE,metal,0), 0, \
 		WAND_CLASS, prob, 0, 7, cost, {0}, {0}, 0, 0, 0, 30, color, __VA_ARGS__)
 WAND(("light",          "glass"),         90, 100, 1, NODIR,     GLASS,       CLR_WHITE),/*Needs tile?*/
 WAND(("darkness",       "obsidian"),      10, 100, 1, NODIR,     OBSIDIAN_MT, CLR_BLACK),/*Needs tile*/
@@ -1560,7 +1552,7 @@ WAND(((char *)0,        "jeweled"),        0, 150, 1, 0,         IRON,        HI
 
 /* coins ... - so far, gold is all there is */
 #define COIN(names,prob,metal,worth,...) OBJECT( \
-		names, BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,P_NONE,metal,0), 0, \
+		names, BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,0,P_NONE,metal,0), 0, \
 		COIN_CLASS, prob, 0, 1, worth, {0}, {0}, 0, 0, 0, 0, HI_GOLD, __VA_ARGS__)
 	COIN(("gold piece"),      1000, GOLD,1),
 #undef COIN
@@ -1568,11 +1560,11 @@ WAND(((char *)0,        "jeweled"),        0, 150, 1, 0,         IRON,        HI
 /* gems ... - includes stones and rocks but not boulders */
 #define GEM(names,prob,wt,gval,nutr,mohs,glass,color,...) OBJECT( \
 	    DEF_BLINDNAME(names, "gem"), \
-	    BITS(0,1,0,0,0,0,0,0,MZ_TINY,HARDGEM(mohs),PIERCE,-P_SLING,glass,0), 0, \
+	    BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,HARDGEM(mohs),PIERCE,-P_SLING,glass,0), 0, \
 		GEM_CLASS, prob, 0, 1, gval, DMG(D(3)), DMG(D(3)), 0, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
 #define ROCK(names,kn,prob,wt,gval,sdam,ldam,hitbon,mgc,nutr,mohs,glass,color,...) OBJECT( \
 	    DEF_BLINDNAME(names, "stone"), \
-	    BITS(kn,1,0,0,mgc,0,0,0,MZ_TINY,HARDGEM(mohs),WHACK,-P_SLING,glass,0), 0, \
+	    BITS(kn,1,0,0,mgc,0,0,0,MZ_TINY,0,HARDGEM(mohs),WHACK,-P_SLING,glass,0), 0, \
 		GEM_CLASS, prob, 0, wt, gval, DMG(D(sdam)), DMG(D(ldam)), hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
 GEM(("magicite crystal","brilliant blue"),1, 1, 9999, 15, 11, GEMSTONE, CLR_BRIGHT_BLUE),/*Needs tile*/
 GEM(("dilithium crystal", "white"),      2,  1, 4500, 15,  5, GEMSTONE, CLR_WHITE),
@@ -1644,11 +1636,11 @@ ROCK(("rock"),		1,100,   1,  0, 6, 6, 0, 0, 10, 7, MINERAL, CLR_GRAY),
  * on a specific type and may act as containers (both affect weight).
  */
 								//BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,big,tuf,dir,sub,mtrl,shwmat)
-OBJECT(("boulder",(char *)0), BITS(1,0,0,0,0,0,0,0,MZ_GIGANTIC,0,0,P_NONE,MINERAL,0), 0,
+OBJECT(("boulder",(char *)0), BITS(1,0,0,0,0,0,0,0,MZ_GIGANTIC,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   100, 0, 6000,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, HI_MINERAL),
-OBJECT(("statue"), BITS(1,0,0,1,0,0,0,0,    MZ_HUGE,0,0,P_NONE,MINERAL,0), 0,
+OBJECT(("statue"), BITS(1,0,0,1,0,0,0,0,    MZ_HUGE,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   800, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_WHITE),
-OBJECT(("fossil"), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,P_NONE,MINERAL,0), 0,
+OBJECT(("fossil"), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   100, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_BROWN),
 /*
 OBJECT(("bed",(char *)0), BITS(1,0,0,0,0,0,0,0,1,0,0,P_NONE,WOOD,0), 0,
@@ -1659,16 +1651,16 @@ OBJECT(("gurney",(char *)0), BITS(1,0,0,0,0,0,0,0,1,0,0,P_NONE,METAL,0), 0,
 		BED_CLASS,     0, 0, 60,  100, 20, 20, 0, 0, 0, 2000, CLR_WHITE),
 */
 #ifdef CONVICT
-OBJECT(("heavy iron ball"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,WHACK,P_FLAIL,IRON,0), 0,
+OBJECT(("heavy iron ball"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,0,WHACK,P_FLAIL,IRON,0), 0,
 #else
-OBJECT(("heavy iron ball"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,WHACK,P_NONE,IRON,0), 0,
+OBJECT(("heavy iron ball"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,0,WHACK,P_NONE,IRON,0), 0,
 #endif /* CONVICT */
 		BALL_CLASS,  1000, 0,  480, 10, DMG(D(25)), DMG(D(25)), 0, 0,  0, 200, HI_METAL),
 						/* +d4 when "very heavy" */
 
 #define CHAIN(names,sdam,ldam,nutr,wt,cost,hitbon,dtyp,mat,color,...) OBJECT( \
 	    names, \
-	    BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,dtyp,P_NONE,mat,0), 0, \
+	    BITS(1,1,0,0,0,0,0,0,MZ_MEDIUM,0,0,dtyp,P_NONE,mat,0), 0, \
 		CHAIN_CLASS, 0, 0, wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, nutr, color, __VA_ARGS__)
 					
 CHAIN(("chain"),
@@ -1713,21 +1705,21 @@ CHAINROPE(("shackles"),             S, IRON,  HI_METAL),
 #undef CHAIN
 
 OBJECT(("blinding venom", "splash of venom"),
-		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
+		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,0,P_NONE,LIQUID,0), 0,
 		VENOM_CLASS,  500, 0,	 1,  0,  {0},  {0}, 0, 0,	 0, 0, CLR_BLACK),
 OBJECT(("acid venom", "splash of venom"),
-		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
+		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,0,P_NONE,LIQUID,0), 0,
 		VENOM_CLASS,  500, 0,	 1,  0,  DMG(D(6)),  DMG(D(6)), 0, 0,	 0, 0, CLR_BRIGHT_GREEN),
 OBJECT(("ball of webbing"),/*Needs tile*/
-		BITS(1,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
+		BITS(1,1,0,0,0,0,0,1,MZ_TINY,0,0,0,P_NONE,LIQUID,0), 0,
 		VENOM_CLASS,  0, 0,	 1,  0,  DMG(D(6)),  DMG(D(6)), 0, 0,	 0, 0, CLR_WHITE),
 //OBJECT(("shoggoth venom", "splash of venom"),
-//		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,P_NONE,LIQUID,0), 0,
+//		BITS(0,1,0,0,0,0,0,1,MZ_TINY,0,0,0,P_NONE,LIQUID,0), 0,
 //		VENOM_CLASS,  500, 0,	 1,  0,  {0},  {0}, 0, 0,	 0, 0, HI_ORGANIC),
 		/* +d6 small or large */
 
 /* fencepost, the deadly Array Terminator -- name [1st arg] *must* be NULL */
-	OBJECT(((char *)0,(char *)0), BITS(0,0,0,0,0,0,0,0,0,0,0,P_NONE,0,0), 0,
+	OBJECT(((char *)0,(char *)0), BITS(0,0,0,0,0,0,0,0,0,0,0,0,P_NONE,0,0), 0,
 		ILLOBJ_CLASS, 0, 0, 0, 0, {0}, {0}, 0, 0, 0, 0, 0)
 }; /* objects[] */
 
