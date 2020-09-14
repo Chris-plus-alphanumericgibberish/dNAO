@@ -11506,7 +11506,8 @@ int vis;						/* True if action is at all visible to the player */
 		sneak_dice++;
 
 	/* check sneak attack conditions -- defender's conditions must allow sneak attacking */
-	if (!noanatomy(pd) &&
+	if (magr &&
+		!noanatomy(pd) &&
 		!(youagr && u.uswallow) &&
 		!(magr == mdef)
 	){
