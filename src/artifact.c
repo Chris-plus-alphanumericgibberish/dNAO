@@ -1684,7 +1684,7 @@ boolean narrow_only;
 				return FALSE;
 		break;
 		case AD_BLUD:
-			if (!has_blood(mdef->data))
+			if (!has_blood_mon(mdef))
 				return FALSE;
 		break;
 		default:
@@ -1942,7 +1942,7 @@ int * truedmgptr;
 		 	int *hpmax = (Upolyd) ? (&u.mhmax) : (&u.uhpmax);
 
 			if (*hp < (*hpmax / 4))
-				multiplier = 4;
+				multiplier = 3;
 			else if (*hp < (*hpmax / 2))
 				multiplier = 2;
 		}
@@ -3618,7 +3618,7 @@ boolean * messaged;
 		}
 		if (otmp->oartifact == ART_BLOODLETTER){
 			if (spec_dbon_applies && artinstance[otmp->oartifact].BLactive >= monstermoves){
-				*truedmgptr += rnd(mlev(mdef));
+				*truedmgptr += rnd(1+mlev(mdef));
 			}
 		}
 	}
@@ -7628,8 +7628,6 @@ arti_invoke(obj)
 		break;
 		case BLOODLETTER:
 			if (artinstance[obj->oartifact].BLactive < monstermoves){
-				obj->age = 0;
-				
 				if (has_blood_mon(&youmonst)){
 					You("plunge Bloodletter into your chest, making an offering of your tainted blood.");
 					losehp(Upolyd ? u.mhmax * 0.2 : u.uhpmax * 0.2, "purging tainted blood", KILLED_BY);
@@ -7638,10 +7636,7 @@ arti_invoke(obj)
 					You("are free of tainted blood, and have none to offer.");
 				}
 			} else {
-				You("slam the bloodied morning star down, releasing a burst of tainted blood.");
-				explode(u.ux, u.uy, AD_BLUD, 0, d(6, 6), EXPL_RED, 1);
-				if (has_blood_mon(&youmonst))
-					losehp(u.ulevel, "splash of tainted blood", KILLED_BY_AN);
+				do_bloodletter(obj);
 			}
 			
 		break;

@@ -3,8 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-
-
+#include "artifact.h"
 #ifdef OVLB
 
 static const char tools[] = { COIN_CLASS, CHAIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
@@ -1429,6 +1428,31 @@ struct obj *obj;
 		return 0;
 	}
 }
+
+int
+do_bloodletter(obj)
+struct obj *obj;
+{
+	if(obj->oartifact != ART_BLOODLETTER || obj != uwep){
+		pline("You must be wielding Bloodletter to do that.");
+		return 0;
+	}
+	if (artinstance[obj->oartifact].BLactive < monstermoves){
+		pline("You must make an offering first.");
+		return 0; // unreachable as of now
+	}
+	
+	You("slam the bloodied morning star down, releasing it of the tainted blood in a burst.");
+	explode(u.ux, u.uy, AD_BLUD, 0, d(6, 6), EXPL_RED, 1);
+	if (has_blood_mon(&youmonst)){
+		losehp(u.ulevel, "splash of tainted blood", KILLED_BY_AN);
+	}
+	
+	artinstance[obj->oartifact].BLactive = 0;
+	
+	return 1;
+}
+
 
 STATIC_OVL int
 use_rakuyo(obj)
@@ -5992,6 +6016,7 @@ doapply()
 	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);
 	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) use_lamp(obj);
+	else if(obj->oartifact == ART_BLOODLETTER && artinstance[obj->oartifact].BLactive >= monstermoves) res = do_bloodletter(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
 	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
 		return use_rakuyo(obj);
