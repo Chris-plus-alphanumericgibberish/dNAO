@@ -46,9 +46,8 @@ struct objclass {
 #define ARMSZ_LIGHT MZ_MEDIUM
 #define ARMSZ_MEDIUM MZ_LARGE
 #define ARMSZ_HEAVY MZ_HUGE
-	/* TODO: change all places oc_bimanual and oc_bulky are used */
+	/* TODO: change all places oc_bimanual is used */
 #define oc_bimanual	oc_size==MZ_HUGE	/* for weapons & tools used as weapons */
-#define oc_bulky	oc_size==MZ_HUGE	/* for armor */
 	Bitfield(oc_tough,1);	/* hard gems/rings */
 
 	Bitfield(oc_dir,5);
