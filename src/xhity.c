@@ -11505,9 +11505,8 @@ int vis;						/* True if action is at all visible to the player */
 	if (weapon && weapon->owornmask && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_ANDROMALIUS)
 		sneak_dice++;
 
-	/* sneak attack -- defender's conditions must allow sneak attacking, and we must have sneak attack dice */
-	if (sneak_dice &&
-		!noanatomy(pd) &&
+	/* check sneak attack conditions -- defender's conditions must allow sneak attacking */
+	if (!noanatomy(pd) &&
 		!(youagr && u.uswallow) &&
 		!(magr == mdef)
 	){
@@ -11555,7 +11554,8 @@ int vis;						/* True if action is at all visible to the player */
 				sneak_attack |= SNEAK_HELPLESS;
 		}
 	}
-	if ((sneak_attack&~SNEAK_JUYO) && sneak_dice && !recursed)	/* do not multiply sneak damage in multihits */
+	/* if we have both a method (attack) and ability (dice) and this isn't a multihit, do the bonus */
+	if ((sneak_attack&~SNEAK_JUYO) && sneak_dice && !recursed)
 	{
 		int snekdie = mlev(magr);
 		/* some things increase sneak attack die size */
@@ -11587,9 +11587,8 @@ int vis;						/* True if action is at all visible to the player */
 		lifehunt_sneak_attacking = (weapon && weapon->oartifact == ART_LIFEHUNT_SCYTHE);
 	}
 	else {
-		/* no sneak attack this time */
-		sneak_attack = 0;
-		sneak_dice = 0;
+		/* no sneak attack this time. We'll keep the info about what kind of sneak attack we might have made, though */
+		snekdmg = 0;
 		lifehunt_sneak_attacking = FALSE;
 	}
 
@@ -11658,7 +11657,7 @@ int vis;						/* True if action is at all visible to the player */
 			(mdef->mattackedu || !rn2(5))) ||	// (odds reduced by 80% when not counterattacking)
 			// Juyo 
 			(ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)) &&
-			(dieroll < min(P_SKILL(P_JUYO), P_SKILL(weapon_type(uwep)))) &&
+			(snekdmg > 0) && (dieroll < min(P_SKILL(P_JUYO), P_SKILL(weapon_type(uwep)))) &&
 			((sneak_attack&SNEAK_JUYO) || (rn2(5) < 2)))	// (odds reduced by 60% when not sneak attacking)
 			)
 		{
@@ -12846,6 +12845,11 @@ int vis;						/* True if action is at all visible to the player */
 						) &&
 						u.lastcast >= monstermoves
 						) use_skill(P_NIMAN, 1);
+					if ((activeFightingForm(FFORM_SHII_CHO) ||
+						(activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
+						) &&
+						(sneak_attack != 0)	/* attacking a disadvantaged target, but might not have sneak dice */
+						) use_skill(FFORM_JUYO, 1);
 				}
 			}
 		}
@@ -13141,7 +13145,7 @@ int vis;						/* True if action is at all visible to the player */
 				!jousting &&
 				!staggering_strike &&
 				!(youagr && lethaldamage) &&
-				!(youagr && sneak_attack))
+				!(youagr && snekdmg))
 			{
 				xyhitmsg(magr, mdef, originalattk);
 			}
@@ -13166,7 +13170,7 @@ int vis;						/* True if action is at all visible to the player */
 
 	/* sneak attack messages only if the player is attacking */
 	if (youagr) {
-		if (sneak_attack & SNEAK_JUYO) {
+		if (snekdmg && (sneak_attack & SNEAK_JUYO)) {
 			/* always message, because... */
 			if (stationary(pd) || sessile(pd))		You("rain blows on the immobile %s%s", l_monnam(mdef), exclam(subtotl));
 			else if (sneak_attack & SNEAK_BEHIND)	You("rain blows on %s from behind%s", mon_nam(mdef), exclam(subtotl));
@@ -13181,7 +13185,7 @@ int vis;						/* True if action is at all visible to the player */
 			case P_EXPERT:	youmonst.movement += NORMAL_SPEED / 2;	break;
 			}
 		}
-		else if (sneak_attack) {
+		else if (snekdmg) {
 			/* don't message if the attack is lethal, or if the attack dealt no damage (excluding X-hating/poison/etc) */
 			if (!lethaldamage && (subtotl > 0)) {
 				if (sneak_attack & SNEAK_HIDDEN)		You("%s the flat-footed %s%s",
@@ -13252,7 +13256,7 @@ int vis;						/* True if action is at all visible to the player */
 					Monnam(mdef),
 					makeplural(stagger(mdef, "stagger")),
 					((weapon && weapon->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) ? "blow" : "strike"),
-					((sneak_attack & SNEAK_JUYO) ? "s" : "")
+					(snekdmg && (sneak_attack & SNEAK_JUYO) ? "s" : "")
 					);
 			}
 		}
