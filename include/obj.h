@@ -614,7 +614,9 @@ struct obj {
 #define throwing_weapon(otmp)	(is_missile((otmp)) || is_spear((otmp)) || \
 	(is_blade((otmp)) && !is_sword((otmp)) && \
 	(objects[(otmp)->otyp].oc_dir & PIERCE)) || \
-	(otmp)->otyp == WAR_HAMMER || (otmp)->otyp == AKLYS || (otmp)->otyp == SICKLE)
+	(otmp)->otyp == WAR_HAMMER || (otmp)->otyp == AKLYS || \
+	(otmp)->oartifact == ART_SICKLE_MOON || \
+	(otmp)->oartifact == ART_HOUCHOU)
 
 /* Armor */
 #define is_shield(otmp) (otmp->oclass == ARMOR_CLASS && \
