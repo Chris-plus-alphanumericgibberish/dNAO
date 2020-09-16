@@ -3076,10 +3076,15 @@ int tary;
 	if (is_pole(thrownobj)) {
 		return FALSE;
 	}
-	/* if we picked a blaster, fix up launcher/thrownobj confusion */
-	if (is_blaster(thrownobj)) {
-		launcher = thrownobj;
-		thrownobj = blaster_ammo(launcher);
+	/* If we picked a blaster, we may need to wield it */
+	if (is_blaster(thrownobj) && thrownobj != MON_WEP(magr) && thrownobj != MON_SWEP(magr)) {
+		if (magr->weapon_check != NO_WEAPON_WANTED) {
+			magr->weapon_check = NEED_RANGED_WEAPON;
+			if (mon_wield_item(magr)) {
+				/* that took time */
+				return TRUE;
+			}
+		}
 	}
 
 	/* If we picked a blaster, or ammo for a wielded launcher, fire all */
@@ -3087,20 +3092,16 @@ int tary;
 		(MON_SWEP(magr) && ((ammo_and_launcher(thrownobj, MON_SWEP(magr))) || (MON_SWEP(magr) == thrownobj && is_blaster(thrownobj))))
 		)
 	{
-		struct obj * launcher;
 		int hand;
 		/* do mainhand, then offhand */
 		for (hand = 0; hand < 2; hand++) {
 			launcher = (!hand ? MON_WEP(magr) : MON_SWEP(magr));
-			if (!launcher || !((ammo_and_launcher(thrownobj, launcher)) || (launcher == thrownobj && is_blaster(launcher))))
+			if (!launcher || !((ammo_and_launcher(thrownobj, launcher)) || is_blaster(launcher)))
 				continue;
 
-			if (ammo_and_launcher(thrownobj, launcher)) {
-				/* simply fire from the launcher */
-				result |= mthrow(magr, thrownobj, launcher, tarx, tary, FALSE);
-			}
-			else if (is_blaster(launcher)) {
-				/* blasters need to generate their ammo on the fly, but that was generated earlier, when fixing launcher/thrownobj confusion */
+			if (is_blaster(launcher)) {
+				/* blasters need to generate their ammo on the fly */
+				struct obj * ammo;
 
 				/* do we have enough charge to fire? */
 				if (!launcher->ovar1) {
@@ -3113,26 +3114,29 @@ int tary;
 					case HAND_BLASTER:
 					case ARM_BLASTER:
 					case MASS_SHADOW_PISTOL:
+						ammo = blaster_ammo(launcher);
 						/* no special changes required */
 						break;
 					case RAYGUN:
 						// TODO: monster raygun function
 						//if (!getdir((char *)0))
 						//	result |= zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
-						obfree(thrownobj, 0);
-						thrownobj = (struct obj *)0;
-						break;
+						/* fall through to error */
 					default:
+						ammo = (struct obj *)0;
 						impossible("Unhandled blaster %d!", launcher->otyp);
 						break;
 					}
-					/* always destroy ammo fired from a blaster */
-					if (thrownobj) {
-						result |= mthrow(magr, thrownobj, launcher, tarx, tary, TRUE);
-						/* and now delete thrownobj, which was generated from a blaster */
-						obfree(thrownobj, 0);
+					if (ammo) {
+						result |= mthrow(magr, ammo, launcher, tarx, tary, TRUE);
+						/* and now delete ammo, which was generated from a blaster */
+						obfree(ammo, 0);
 					}
 				}
+			}
+			else if (ammo_and_launcher(thrownobj, launcher)) {
+				/* simply fire from the launcher */
+				result |= mthrow(magr, thrownobj, launcher, tarx, tary, FALSE);
 			}
 		}
 	}
