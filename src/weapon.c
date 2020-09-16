@@ -1968,11 +1968,29 @@ register struct monst *mon;
 	msw_tmp = MON_SWEP(mon);
 
 	/* possibly wield an off-hand weapon */
-	if (old_weapon_check == NEED_HTH_WEAPON)
+	if (old_weapon_check == NEED_HTH_WEAPON || old_weapon_check == NEED_RANGED_WEAPON)
 	{
 		if (could_twoweap(mon->data) && !which_armor(mon, W_ARMS) && !bimanual(MON_WEP(mon), mon->data))
 		{
 			sobj = select_shwep(mon);
+			/* quick-and-dirty select_srwep() for blasters and guns */
+			if (old_weapon_check == NEED_RANGED_WEAPON) {
+				struct obj * tobj;
+				if (/* fixme: cannot twoweapon 2x arm blasters or 2x hand blasters */
+					((tobj = m_carrying_charged(mon, ARM_BLASTER)) && tobj != MON_WEP(mon)) ||
+					((tobj = m_carrying_charged(mon, HAND_BLASTER)) && tobj != MON_WEP(mon)) ||
+					/* bullets */
+					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET)) &&
+						((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP))) ||
+						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP))) ||
+						((tobj = oselect(mon, PISTOL, W_SWAPWEP)))) ||
+					/* shotgun shells */
+					((m_carrying(mon, SHOTGUN_SHELL)) &&
+						((tobj = oselect(mon, SHOTGUN, W_SWAPWEP))))
+					) {
+					sobj = tobj;
+				}
+			}
 			if (sobj && sobj != &zeroobj) {
 				if (msw_tmp && msw_tmp->otyp == sobj->otyp) {
 					/* already wielding one similar to it */
