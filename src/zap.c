@@ -3480,7 +3480,8 @@ struct zapdata * zapdata;
 			((otmp = youdef ? uarms : which_armor(mdef, W_ARMS)) && (
 			otmp->otyp == SILVER_DRAGON_SCALE_SHIELD ||
 			otmp->oartifact == ART_ITLACHIAYAQUE
-			))
+			)) ||
+			(zapdata->adtyp == AD_DISN)
 			)) {
 			return FALSE;
 		}
