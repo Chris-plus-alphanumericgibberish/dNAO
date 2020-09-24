@@ -2715,8 +2715,9 @@ int tary;
 	basiczap(&zapdata, typ, ZAP_BREATH, 0);
 
 	/* set dragonbreath if applicable*/
-	if (is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14))
+	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ != AD_DISN)
 		zapdata.unreflectable = ZAP_REFL_ADVANCED;
+	
 	/* set damage */
 	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
 	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;
