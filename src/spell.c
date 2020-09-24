@@ -4241,7 +4241,7 @@ int spell;
 				}
 				mon = m_at(sx, sy);
 				if(mon && !mon->mpeaceful){
-					if(!rn2(20) && mon->mhp <= 100){
+					if(!rn2(20) && mon->mhp < 400){
 						pline("%s is bisected!", Monnam(mon));
 						mon->mhp = 0;
 						xkilled(mon, 1);
