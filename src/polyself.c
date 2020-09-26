@@ -247,7 +247,7 @@ boolean forcecontrol;
 	boolean allow_selfrace_poly = (wizard || (u.specialSealsActive&SEAL_ALIGNMENT_THING));
 	boolean allow_nopoly_poly = FALSE;
 
-	if(!Polymorph_control && !forcecontrol && !draconian && !iswere && !isvamp && !hasmask) {
+	if(!Polymorph_control && !forcecontrol && !draconian && !iswere && !isvamp && !hasmask && !uskin) {
 	    if (rn2(20) > ACURR(A_CON)) {
 		You("%s", shudder_for_moment);
 		losehp(rnd(30), "system shock", KILLED_BY_AN);
@@ -280,6 +280,9 @@ boolean forcecontrol;
 		if (leonine &&
 		    (mntmp == PM_SON_OF_TYPHON || tries == 5))
 		    goto do_lion_merge;
+	} else if (uskin) {
+		newman();
+		goto made_change;
 	} else if (draconian || leonine || iswere || hasmask || isvamp) {
 		/* special changes that don't require polyok() */
 		if (draconian) {
