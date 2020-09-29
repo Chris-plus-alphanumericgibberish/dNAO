@@ -438,8 +438,8 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	mons[PM_WANDERING_HORROR].mname = tname;
 	monstr[PM_WANDERING_HORROR] = mstrength(&mons[PM_WANDERING_HORROR]);
 
-	/* all nameless horrors are approx. difficulty 50 */
-	monstr[PM_NAMELESS_HORROR] = 50;
+	/* all nameless horrors are set to difficulty 40 */
+	monstr[PM_NAMELESS_HORROR] = 40;
 	}
 	
 	/* Fix up the highest ranking eladrins */
