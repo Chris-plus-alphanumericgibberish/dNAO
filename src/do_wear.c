@@ -2452,7 +2452,7 @@ find_dr()
 	int udr = 0, i;
 	
 	for(i = 0; i < 5; i++)
-		udr += slot_udr(i,0);
+		udr += slot_udr(1<<i,0);
 	udr += slot_udr(UPPER_TORSO_DR,0);
 	udr += slot_udr(LOWER_TORSO_DR,0);
 	udr += max(slot_udr(UPPER_TORSO_DR,0), slot_udr(ARM_DR,0))*2;
