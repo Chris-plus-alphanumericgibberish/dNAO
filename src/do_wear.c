@@ -453,12 +453,15 @@ Helmet_on()
 	if (uarmh->oartifact == ART_HELM_OF_UNDEATH) {
 		/* kludge to bypass the Helm of Undeath granting unchanging */
 		EUnchanging &= ~W_ARMH;
-		if (Unchanging)
+		boolean areunchanging = Unchanging;
+		/* and reapply unchanging, that we know the Helm of Undeath grants */
+		EUnchanging |= W_ARMH;
+
+		if (areunchanging)
 			You_feel("a shiver run down your %s!", body_part(SPINE));
 		else
 			polymon(PM_DEATH_KNIGHT);
-		/* and reapply unchanging, that we know the Helm of Undeath grants */
-		EUnchanging |= W_ARMH;
+
 	}
 
     return 0;
