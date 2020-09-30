@@ -2522,7 +2522,7 @@ register struct obj *otmp;
 		}
 		break;
 	    case EGG:
-		if (touch_petrifies(&mons[otmp->corpsenm])) {
+		if (otmp->corpsenm != NON_PM && touch_petrifies(&mons[otmp->corpsenm])) {
 		    if (!Stone_resistance &&
 			!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
 			if (!Stoned) Stoned = 5;
@@ -2570,9 +2570,10 @@ struct obj *otmp;
 
 	if (cadaver || otmp->otyp == EGG || otmp->otyp == TIN) {
 		/* These checks must match those in eatcorpse() */
-		stoneorslime = (touch_petrifies(&mons[mtyp]) &&
+		stoneorslime = (mtyp != NON_PM && (
+				touch_petrifies(&mons[mtyp]) &&
 				!Stone_resistance &&
-				!poly_when_stoned(youracedata));
+				!poly_when_stoned(youracedata)));
 
 		if (mtyp == PM_GREEN_SLIME || mtyp == PM_FLUX_SLIME)
 		    stoneorslime = (!Unchanging && !flaming(youracedata) &&
@@ -3621,7 +3622,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	if(otmp->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS,TRUE);
 	if(otmp->otyp == EGG && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA,TRUE);
 	if(otmp->otyp >= APPLE && otmp->otyp <= BANANA && u.sealsActive&SEAL_EVE) unbind(SEAL_EVE,TRUE);
-	if(is_giant(&mons[otmp->corpsenm]) && u.sealsActive&SEAL_YMIR) unbind(SEAL_YMIR,TRUE);
+	if(otmp->corpsenm != NON_PM && is_giant(&mons[otmp->corpsenm]) && u.sealsActive&SEAL_YMIR) unbind(SEAL_YMIR,TRUE);
 
 	victual.piece = otmp = touchfood(otmp);
 	victual.usedtime = 0;
