@@ -1365,6 +1365,7 @@ spiritLets(lets, respect_timeout)
 	if(flags.timeoutOrder){
 		for(s=0; s<NUM_BIND_SPRITS; s++){
 			if(u.spirit[s]) for(i = 0; i<52; i++){
+				if(u.spiritPOrder[i] == -1) continue;
 				if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s] && (u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout)){
 					Sprintf(lets, "%c", i<26 ? 'a'+(char)i : 'A'+(char)(i-26));
 				}
@@ -1372,6 +1373,7 @@ spiritLets(lets, respect_timeout)
 		}
 	} else {
 		for(i = 0; i<52; i++){
+			if(u.spiritPOrder[i] == -1) continue;
 			if(((spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
 				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
 				spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL) &&
@@ -4786,12 +4788,13 @@ int respect_timeout;
 				if (u.spirit[s]){
 					j = 0;
 					place = 1;
-					while (!(spirit_powers[u.spiritPOrder[j]].owner & place)){
+					while ((u.spiritPOrder[j] == -1) || !(spirit_powers[u.spiritPOrder[j]].owner & place)){
 						j++;
 						place = place << 1;
 					}
 					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
 					for (i = 0; i < 52; i++){
+						if (u.spiritPOrder[i] == -1) continue;
 						if (spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
 							if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
 								Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
