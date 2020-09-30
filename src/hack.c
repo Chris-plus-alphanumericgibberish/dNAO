@@ -891,11 +891,14 @@ boolean guess;
 			}
 			else if (!suretravel[nx][ny] && levl[nx][ny].seenv && suretravel[x][y]) {
 				/* we are now sure of this step (because the previous step was) */
-			    travelstepx[1-set][nn] = nx;
-			    travelstepy[1-set][nn] = ny;
-				travel[nx][ny] = radius;
 				suretravel[nx][ny] = radius;
-			    nn++;
+				/* we may have already been able to reach this place by guessing through unexplored area */
+				if (!travel[nx][ny]) {
+					travelstepx[1-set][nn] = nx;
+					travelstepy[1-set][nn] = ny;
+					travel[nx][ny] = radius;
+					nn++;
+				}
 			}
 			else if (!travel[nx][ny]) {
 				travelstepx[1 - set][nn] = nx;
