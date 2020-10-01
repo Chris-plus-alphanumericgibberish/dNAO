@@ -756,7 +756,7 @@ SUIT(("plasteel armor", "hard white armor", "armor"), /*Needs encyc entry*//*Nee
 SUIT(("splint mail"),
 	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,  62,  5, 200,   80,  6, 5, 2, IRON, HI_METAL),
 SUIT(("barnacle armor", "giant shell armor"),
-	0, 1,   MZ_HUGE,  ARMSZ_HEAVY, 0,   0, 10, 150, 1000,  7, 3, 1, SHELL_MAT, CLR_GRAY),
+	0, 1,   MZ_HUGE,  ARMSZ_HEAVY, 0,   0, 10, 150, 1000,  8, 4, 1, SHELL_MAT, CLR_GRAY),
 SUIT(("banded mail"),
 	1, 0,   MZ_HUGE, ARMSZ_MEDIUM, 0,  72,  5, 175,   90,  7, 3, 1, IRON, HI_METAL),
 SUIT(("dwarvish mithril-coat"),
@@ -782,7 +782,7 @@ SUIT(("leather armor"),
 //ARMOR(names,
    //kn,mgc,blk,power,prob,delay,wt,cost,ac,dr,can,sub,metal,c)
 SUIT(("living armor", "giant sea anemone"),
-	0, 1,  MZ_LARGE, ARMSZ_MEDIUM, 0,   0,  6,  80,  500,  9, 2, 0, FLESH, CLR_ORANGE),
+	0, 1,  MZ_LARGE, ARMSZ_MEDIUM, 0,   0,  6,  80,  500, 10, 2, 0, FLESH, CLR_ORANGE),
 SUIT(("jacket"),
 	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,  12,  0,	20,   10, 10, 1, 0, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
