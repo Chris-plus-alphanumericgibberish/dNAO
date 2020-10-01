@@ -860,9 +860,22 @@ int how;
 		pline("But wait...");
 		if(uarmh && uarmh->oartifact == ART_HELM_OF_UNDEATH) {
 			struct obj * otmp = uarmh;
-			You_feel("a curse fall upon your soul!");
-			polymon(PM_DEATH_KNIGHT);
-			HUnchanging |= FROMOUTSIDE;
+			if (!(
+					((mvitals[PM_DEATH_KNIGHT].mvflags & G_GENOD) && !In_quest(&u.uz)) ||/* G_EXTINCT okay */
+					(Unchanging) ||
+					is_undead(youracedata)
+				)) {
+				You_feel("a curse fall upon your soul!");
+				polymon(PM_DEATH_KNIGHT);
+				HUnchanging |= FROMOUTSIDE;
+			}
+			else {
+				You_feel("oddly invigorated, and you %s!",
+					how == DISINTEGRATED ? "reconstitute" :
+					how == OVERWOUND ? "reassemble" :
+					"feel much better"
+					);
+			}
 			Your("helmet crumbles to dust!");
 			useup(otmp);
 		}
