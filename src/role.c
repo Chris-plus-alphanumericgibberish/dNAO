@@ -690,6 +690,17 @@ const char *DnDHumLgod = "Saint Cuthbert",
 		   *DnDHumNgod = "Helm",
 		   *DnDHumCgod = "_Mask"; /* DnD human pantheon */
 
+struct RoleName FemHDNobRanks[9] = {
+	{"Deprived",   		0},
+	{"Forlorn Wanderer",0},
+	{"Forest Hunter",	0},
+	{"Forlorn Warrior", 0},
+	{"Knight Errant",	0},
+	{"Winter Herald",	0},
+	{"Livid Saint",		0},
+	{"Heir of Frost",	0},
+	{"Lord of Rime",	0}};
+	
 //defined in pray.c
 extern const char *Moloch, *Morgoth, *MolochLieutenant, *Silence, *Chaos, *DeepChaos, *tVoid, *Demiurge, *Sophia, *Other, *BlackMother, *Nodens, *DreadFracture, *AllInOne; /*defined in pray*/
 /* The player's role, created at runtime from initial
@@ -2694,6 +2705,16 @@ int newgame;
 			urole.lgod = Gwyngod;
 			urole.ngod = Gwyneveregoddess;
 			urole.cgod = Gwyndolingod;
+			
+			urole.rank[0] = FemHDNobRanks[0];
+			urole.rank[1] = FemHDNobRanks[1];
+			urole.rank[2] = FemHDNobRanks[2];
+			urole.rank[3] = FemHDNobRanks[3];
+			urole.rank[4] = FemHDNobRanks[4];
+			urole.rank[5] = FemHDNobRanks[5];
+			urole.rank[6] = FemHDNobRanks[6];
+			urole.rank[7] = FemHDNobRanks[7];
+			urole.rank[8] = FemHDNobRanks[8];
 			
 			urole.enemy1num = PM_ZOMBIE;
 			urole.enemy2num = PM_CORVIAN_KNIGHT;
