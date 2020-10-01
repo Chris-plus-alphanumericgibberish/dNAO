@@ -737,7 +737,7 @@ SUIT(("gentleman's suit", "expensive clothes"), /*Needs encyc entry*/
 SUIT(("gentlewoman's dress", "expensive dress"), /*Needs encyc entry*/
 	0, 0,  MZ_LARGE,  ARMSZ_HEAVY, 0,   0,  6, 100, 1000, 10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
 SUIT(("crystal plate mail"), /*Needs encyc entry*/
-	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,  10,  5, 170, 2000,  7, 3, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
+	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,  10,  5, 170, 2000,  4, 6, 0, GLASS, HI_GLASS), /*Best armor, AC wise*/
 #ifdef TOURIST
 SUIT(("archaic plate mail"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 0,  20,  5, 200,  400,  5, 5, 3, COPPER, HI_COPPER),
