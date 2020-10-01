@@ -5170,6 +5170,10 @@ int tary;
 	/* if the spell is a buff spell, and therfore can have no target, we can cast it -- all further checks depend on defender */
 	if (is_buff_spell(spellnum))
 		return FALSE;
+	
+	/* if we don't have a defender, we definitely can't cast it now */
+	if (!mdef)
+		return TRUE;
 
 	/* maybe cast the spell now, ignoring the checks in part 3 */
 	/* dependent on magr's level */
