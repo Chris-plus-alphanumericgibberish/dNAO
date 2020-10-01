@@ -449,21 +449,6 @@ Helmet_on()
 		flags.botl = 1;
 	}
 
-	/* artifact that polymorphs you */
-	if (uarmh->oartifact == ART_HELM_OF_UNDEATH) {
-		/* kludge to bypass the Helm of Undeath granting unchanging */
-		EUnchanging &= ~W_ARMH;
-		boolean areunchanging = Unchanging;
-		/* and reapply unchanging, that we know the Helm of Undeath grants */
-		EUnchanging |= W_ARMH;
-
-		if (areunchanging)
-			You_feel("a shiver run down your %s!", body_part(SPINE));
-		else
-			polymon(PM_DEATH_KNIGHT);
-
-	}
-
     return 0;
 }
 
@@ -555,13 +540,6 @@ Helmet_off()
 		vision_full_recalc = 1;	/* recalc vision limits */
 		flags.botl = 1;
 	}
-
-	/* artifact that had polymorphed you */
-	if (otmp && otmp->oartifact == ART_HELM_OF_UNDEATH) {
-		if (Upolyd && !Unchanging && u.umonnum == PM_DEATH_KNIGHT)
-			rehumanize();
-	}
-
     return 0;
 }
 

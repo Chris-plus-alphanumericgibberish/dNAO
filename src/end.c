@@ -663,6 +663,7 @@ int how;
 	u.uswldtim = 0;
 	u.divetimer = ACURR(A_CON)/3;
 	u.uhp = u.uhpmax;
+	u.mh = u.mhmax;
 	if (YouHunger < 500) {
 		if(Race_if(PM_INCANTIFIER)) u.uen = u.uenmax/4;
 		else u.uhunger = 500;
@@ -684,7 +685,6 @@ int how;
 	if(u.utrap && u.utraptype == TT_LAVA) u.utrap = 0;
 	flags.botl = 1;
 	u.ugrave_arise = NON_PM;
-	HUnchanging = 0L;
 	curs_on_u();
 }
 
@@ -858,7 +858,15 @@ int how;
 	if (how < PANICKED) u.umortality++;
 	if (Lifesaved && (how <= GENOCIDED)) {
 		pline("But wait...");
-		if(uamul && uamul->otyp == AMULET_OF_LIFE_SAVING){
+		if(uarmh && uarmh->oartifact == ART_HELM_OF_UNDEATH) {
+			struct obj * otmp = uarmh;
+			You_feel("a curse fall upon your soul!");
+			polymon(PM_DEATH_KNIGHT);
+			HUnchanging |= FROMOUTSIDE;
+			Your("helmet crumbles to dust!");
+			useup(otmp);
+		}
+		else if(uamul && uamul->otyp == AMULET_OF_LIFE_SAVING){
 			makeknown(AMULET_OF_LIFE_SAVING);
 			Your("medallion %s!",
 				  !Blind ? "begins to glow" : "feels warm");
@@ -885,16 +893,16 @@ int how;
 		u.gevurah += 4;//cheated death.
 
 		(void) adjattrib(A_CON, -1, TRUE);
-		if(u.uhpmax < 10){
+		if((Upolyd ? u.mhmax : u.uhpmax) < 10){
 			if(u.uhprolled < 10){
 				u.uhprolled = 10;	/* arbitrary */
 				calc_total_maxhp();
 			}
-			if(u.uhpmax < 10 && u.uhpmod < 0){
+			if((Upolyd ? u.mhmax : u.uhpmax) < 10 && u.uhpmod < 0){
 				u.uhpmod = 0;	/* arbitrary */
 				calc_total_maxhp();
 			}
-			if(u.uhpmax < 10 && u.uhpbonus < 0){
+			if((Upolyd ? u.mhmax : u.uhpmax) < 10 && u.uhpbonus < 0){
 				u.uhpbonus = 0;	/* arbitrary */
 				calc_total_maxhp();
 			}

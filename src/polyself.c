@@ -800,6 +800,7 @@ rehumanize()
 		killer_format = NO_KILLER_PREFIX;
 		killer = "killed while stuck in creature form";
 		done(DIED);
+		return;	/* you do NOT get to rehumanize if you are unchanging and lifesaving */
 	}
 
 	/* delete any ls attached to you */

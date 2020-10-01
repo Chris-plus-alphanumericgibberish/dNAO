@@ -1170,13 +1170,13 @@ A("Godhands",					GAUNTLETS_OF_POWER,				(const char *)0,
 	),
 
 /*Needs encyc entry*/
-/* polymorphs you into a death knight when worn, and rehumanizes you when removed */
+/* permanently polymorphs you into a death knight when you die -- does not work for monsters */
 A("The Helm of Undeath",			WAR_HAT,				(const char *)0,
 	2500L, BONE, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_B, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
-	PROPS(DRAIN_RES, UNCHANGING), NOFLAG,
+	PROPS(DRAIN_RES, LIFESAVED), NOFLAG,
 	PROPS(), NOFLAG,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
