@@ -294,10 +294,12 @@ struct artinstance{
 #define BoISspell avar1
 #define RRSember avar1
 #define BLactive avar1
+#define PlagueDuration avar1
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2
 #define RRSlunar avar2
+#define PlagueDoOnHit avar2
 	long avar3;
 #define SnSd3 avar3
 	long avar4;

@@ -4051,9 +4051,9 @@ boolean * messaged;
 		}
 	} 
 	/* while Plague is invoked, lethal-filth arrows cause victims to virulently explode.
-	 * Not you, though. You just die. It's simpler that way.
-	 * Slightly different from actual Vorpal; the dieroll is hacked in xhity to ==1 if and only if we have lethal filth. */
-	if (oartifact == ART_PLAGUE && (monstermoves < otmp->ovar1) && (dieroll == 1) && !youdef) {
+	 * Not you, though. You just die. It's simpler that way. */
+	if (oartifact == ART_PLAGUE && artinstance[ART_PLAGUE].PlagueDoOnHit && (*hp(mdef) <= currdmg + 100) && !youdef) {
+		artinstance[ART_PLAGUE].PlagueDoOnHit = FALSE;
 		int mx, my;
 		if (vis&VIS_MAGR && vis&VIS_MDEF) {
 			pline_The("tainted %s strikes true!", xname(msgr));
@@ -7602,8 +7602,8 @@ arti_invoke(obj)
 			else {
 				pline("%s vibrates softly.", The(xname(obj)));
 			}
-			/* if time < ovar1, arrows will be filthed (done in xhity.c) */
-			obj->ovar1 = monstermoves + 13;
+			/* while monstermoves < duration, arrows will be filthed (done in xhity.c) */
+			artinstance[ART_PLAGUE].PlagueDuration = monstermoves + 13;
 		break;
 		case INVOKE_DARK:{
           struct obj *wand;

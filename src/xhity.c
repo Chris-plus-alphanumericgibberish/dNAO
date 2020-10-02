@@ -11895,7 +11895,7 @@ int vis;						/* True if action is at all visible to the player */
 			poisons |= OPOISON_ACID;
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
-			if (monstermoves < launcher->ovar1)
+			if (monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
 				poisons |= OPOISON_FILTH;
 			else
 				poisons |= OPOISON_BASIC;
@@ -11959,7 +11959,7 @@ int vis;						/* True if action is at all visible to the player */
 			case OPOISON_FILTH:
 				resists = Sick_res(mdef);
 				majoreff = !rn2(10);
-				if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < launcher->ovar1)
+				if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
 					majoreff = !rn2(5);	/* while invoked, Plague's arrows are twice as likely to instakill (=20%) */
 				break;
 			case OPOISON_SLEEP:
@@ -12020,10 +12020,10 @@ int vis;						/* True if action is at all visible to the player */
 			switch (i)
 			{
 			case OPOISON_BASIC:
-				poisdmg += (major) ? (youdef ? d(3, 6) : 9999) : rnd(6);
+				poisdmg += (major) ? (youdef ? d(3, 6) : 80) : rnd(6);
 				break;
 			case OPOISON_FILTH:
-				poisdmg += (major) ? (youdef ? d(3, 12) : 9999) : rnd(12);
+				poisdmg += (major) ? (youdef ? d(3, 12) : 100) : rnd(12);
 				break;
 			case OPOISON_SLEEP:
 				/* no damage */
@@ -12045,6 +12045,9 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 			}
 		}
+		/* if Plague is being used, note whether or not the current shot is filthed */
+		if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
+			artinstance[ART_PLAGUE].PlagueDoOnHit = !!(poisons_majoreff&OPOISON_FILTH);
 	}
 
 	/* Clockwork heat - player melee only */
@@ -12887,9 +12890,6 @@ int vis;						/* True if action is at all visible to the player */
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp) {
-				/* kludge for Plague: artifact_hit() needs to know if lethal filth occured */
-				if (otmp->oartifact == ART_PLAGUE)
-					dieroll = (poisons_majoreff&OPOISON_FILTH) ? 1 : (dieroll == 1) ? 2 : dieroll;
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
