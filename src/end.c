@@ -805,6 +805,7 @@ int how;
 	struct obj *corpse = (struct obj *)0;
 	long umoney;
 	int i;
+	int lsvd;
 
 	if (how == TRICKED) {
 		abort();
@@ -855,6 +856,11 @@ int how;
 	Strcpy(kilbuf, (!killer || how >= PANICKED ? deaths[how] : killer));
 	killer = kilbuf;
 
+#define LSVD_NONE 0
+#define LSVD_MISC 1
+#define LSVD_JACK 2
+#define LSVD_DTHK 3
+
 	if (how < PANICKED) u.umortality++;
 	if (Lifesaved && (how <= GENOCIDED)) {
 		pline("But wait...");
@@ -868,6 +874,7 @@ int how;
 				You_feel("a curse fall upon your soul!");
 				polymon(PM_DEATH_KNIGHT);
 				HUnchanging |= FROMOUTSIDE;
+				lsvd = LSVD_DTHK;
 			}
 			else {
 				You_feel("oddly invigorated, and you %s!",
@@ -875,6 +882,7 @@ int how;
 					how == OVERWOUND ? "reassemble" :
 					"feel much better"
 					);
+				lsvd = LSVD_MISC;
 			}
 			Your("helmet crumbles to dust!");
 			useup(otmp);
@@ -888,19 +896,24 @@ int how;
 			else if (how == OVERWOUND) You("reassemble!");
 			else You_feel("much better!");
 
+			lsvd = LSVD_MISC;
 			pline_The("medallion crumbles to dust!");
 			if (uamul) useup(uamul);
 		} else if(u.sealsActive&SEAL_JACK){
+			lsvd = LSVD_JACK;
 			unbind_lifesaving(SEAL_JACK);
 		} else if(uleft && uleft->otyp == RIN_WISHES && uleft->spe > 0){
+			lsvd = LSVD_MISC;
 			You("wish that hadn't happened.");
 			pline("A star flares on your left ring-finger!");
 			uleft->spe--;
 		} else if(uright && uright->otyp == RIN_WISHES && uright->spe > 0){
+			lsvd = LSVD_MISC;
 			You("wish that hadn't happened.");
 			pline("A star flares on your right ring-finger!");
 			uright->spe--;
 		} else {
+			lsvd = LSVD_NONE;
 			impossible("Lifesaved with no amulet, ring, or Jack?");
 		}
 		u.gevurah += 4;//cheated death.
@@ -928,10 +941,25 @@ int how;
 		else {
 			killer = 0;
 			killer_format = 0;
-			livelog_write_string("averted death");
+			const char * llogstr;
+			switch (lsvd)
+			{
+			case LSVD_MISC: llogstr = "averted death";
+				break;
+			case LSVD_JACK: llogstr = "averted death";
+				break;
+			case LSVD_DTHK: llogstr = "averted death by becoming a death knight";
+				break;
+			default:
+				impossible("unhandled lsvd");
+				llogstr = "averted death, somehow";
+				break;
+			}
+			livelog_write_string(llogstr);
 			return;
 		}
 	}
+	else lsvd = LSVD_NONE;
 	if ((
 #ifdef WIZARD
 			wizard ||
@@ -960,6 +988,10 @@ int how;
 		killer_format = 0;
 		return;
 	}
+#undef LSVD_NONE
+#undef LSVD_MISC
+#undef LSVD_JACK
+#undef LSVD_DTHK
 
     /*
      *	The game is now over...
