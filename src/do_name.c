@@ -529,6 +529,8 @@ const char *name;
 		}
 	}
 	
+	/* remove old name */
+	rem_ox(obj, OX_ENAM);
 	/* add name */
 	if (lth) {
 		add_ox_l(obj, OX_ENAM, lth);
