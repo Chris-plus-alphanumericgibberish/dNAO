@@ -991,9 +991,9 @@ int level_bonus;
 
 	} while (abs(horror->mlevel - target_level) > 2);
 
-	/* all nameless horrors are approx. difficulty 50 */
+	/* all nameless horrors are set to difficulty 40 */
 	if (horror->mtyp == PM_NAMELESS_HORROR)
-		monstr[PM_NAMELESS_HORROR] = 50;
+		monstr[PM_NAMELESS_HORROR] = 40;
 
 #undef get_random_of
 	return;
