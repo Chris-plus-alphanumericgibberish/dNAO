@@ -383,29 +383,22 @@ boolean incr;	/* true iff via incremental experience growth */
 	if (!incr) You_feel("more experienced.");
 	num = newhp();
 	u.uhprolled += num;
-	calc_total_maxhp();
 	u.uhp += num + conplus(ACURR(A_CON));
 	if((int)(conplus(ACURR(A_CON))) != conplus(ACURR(A_CON))){
 		/* .5 remainder (just give an extra HP)*/
 		u.uhp++;
-		if(u.uhp > u.uhpmax)
-			u.uhp = u.uhpmax;
 	}
 	if (Upolyd) {
 	    num = rnd(8);
 	    u.mhrolled += num;
-		calc_total_maxhp();
 	    u.mh += num + conplus(ACURR(A_CON));
 		if((int)(conplus(ACURR(A_CON))) != conplus(ACURR(A_CON))){
 			/* .5 remainder (just give an extra HP)*/
 			u.mh++;
-			if(u.mh > u.mhmax)
-				u.mh = u.mhmax;
 		}
 	}
 	num = newen();
 	u.uenrolled += num;
-	calc_total_maxen();
 	u.uen += num + ACURR(A_WIS)/4;
 	if (u.ulevel < MAXULEV) {
 	    if (incr) {
@@ -421,6 +414,10 @@ boolean incr;	/* true iff via incremental experience growth */
 	    reset_rndmonst(NON_PM);		/* new monster selection */
 	}
 	if(Role_if(PM_EXILE)) binderup();
+
+	/* recalculate maximums, which also caps over-max hp/pw */
+	calc_total_maxhp();
+	calc_total_maxen();
 	flags.botl = 1;
 }
 
