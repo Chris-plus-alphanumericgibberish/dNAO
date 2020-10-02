@@ -1181,6 +1181,17 @@ A("Stormhelm",						HELM_OF_BRILLIANCE,				(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
+/* non-wizards wearing it get reduced-hunger casting (with a -4 INT penalty) */
+A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
+	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(SEE_INVIS, DRAIN_RES, EXTRAMISSION), NOFLAG,
+	PROPS(), NOFLAG,
+	ENLIGHTENING, (ARTI_PLUSSEV)
+	),
+
 A("Hellrider's Saddle",				SADDLE,					(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_A, NOFLAG,
