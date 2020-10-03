@@ -786,6 +786,10 @@ xchar lx, ly, hx, hy;
 {
 	int x, y;
 
+	/* first check that both corners of the rectangle are inside maze boundaries */
+	if (!maze_inbounds(lx, ly) || !maze_inbounds(hx, hy))
+		return FALSE;
+
 	for (x = lx; x <= hx; x++)
 	for (y = ly; y <= hy; y++)
 	{
