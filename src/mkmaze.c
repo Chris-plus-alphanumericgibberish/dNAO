@@ -1528,7 +1528,7 @@ int x,y,depth;
 			levl[x][y].typ = ROOM;
 #endif
 			move(&x, &y, dir);
-			if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
+			if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
 				maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 			pos++;
 			if (pos > CELLS)
@@ -1565,7 +1565,7 @@ int x,y,depth;
 		if(!q) return;
 		dir = dirs[rn2(q)];
 		move(&x,&y,dir);
-		if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
+		if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
 			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 #ifndef WALLIFIED_MAZE
 		levl[x][y].typ = CORR;
