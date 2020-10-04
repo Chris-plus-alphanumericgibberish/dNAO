@@ -328,11 +328,9 @@ full:
 /*
  * "entity path to"
  *
- * Attempt to find nc good places for the given monster type with the shortest
- * path to (xx,yy).  Where there is more than one valid set of positions, one
- * will be chosen at random.  Return the number of positions found.
- * Warning:  This routine is much slower than enexto and should be used
- * with caution.
+ * Calls function `func(data, x, y)` on a number of locations.
+ * Determines those locations from a starting point (`xx`,`yy`), pathing outwards up `r` moves away
+ * `func` returns 0 if (x,y) is considered accessible (path can continue from that square), 1 otherwise
  */
 
 #define EPATHTO_UNSEEN		0x0
@@ -343,11 +341,6 @@ full:
 #define EPATHTO_XY(x,y)		(((y) + 1) * COLNO + (x))
 #define EPATHTO_Y(xy)		((xy) / COLNO - 1)
 #define EPATHTO_X(xy)		((xy) % COLNO)
-
-/*
- * func should return 1 if the location should be counted as inaccessible
- * (path won't continue through this point) or 0 if it is accessible.
- */
 
 void
 xpathto(r, xx, yy, func, data)
@@ -364,8 +357,8 @@ genericptr_t data;
     static const int dirs[8] =
       /* N, S, E, W, NW, NE, SE, SW */
       { -COLNO, COLNO, 1, -1, -COLNO-1, -COLNO+1, COLNO+1, COLNO-1};
-    map = (unsigned char *)alloc(COLNO * (ROWNO + 2));
-    (void) memset((genericptr_t)map, EPATHTO_INACCESSIBLE, COLNO * (ROWNO + 2));
+    map = (unsigned char *)alloc(COLNO * (ROWNO + 2) + 1);
+    (void) memset((genericptr_t)map, EPATHTO_INACCESSIBLE, COLNO * (ROWNO + 2) + 1);
     for(i = 1; i < COLNO; i++)
 	for(j = 0; j < ROWNO; j++)
 	    map[EPATHTO_XY(i, j)] = EPATHTO_UNSEEN;
@@ -376,6 +369,7 @@ genericptr_t data;
 	nd = n = 0;
     for(path_len = 0; path_len < r; path_len++)
     {
+	/* x >= 1 && x <= COLNO-1 && y >= 0 && y <= ROWNO-1 */
 	first_col = max(1, xx - path_len);
 	last_col = min(COLNO - 1, xx + path_len);
 	for(j = max(0, yy - path_len); j <= min(ROWNO - 1, yy + path_len); j++)
