@@ -3096,6 +3096,8 @@ int tary;
 		int hand;
 		/* do mainhand, then offhand */
 		for (hand = 0; hand < 2; hand++) {
+			/* we need to get thrownobj again on the 2nd hand -- what if had we used up our last arrow? */
+			if (hand == 1) thrownobj = select_rwep(magr);
 			launcher = (!hand ? MON_WEP(magr) : MON_SWEP(magr));
 			if (!launcher || !((ammo_and_launcher(thrownobj, launcher)) || is_blaster(launcher)))
 				continue;
