@@ -1794,6 +1794,20 @@ poly_obj(obj, id)
 		goto no_unwear;
 	    }
 	}
+	else if (obj_location == OBJ_MINVENT) {
+		struct monst * mon = obj->ocarry;
+		/* unwield/unwear */
+		mon->misc_worn_check &= ~obj->owornmask;
+		update_mon_intrinsics(mon, obj, FALSE, FALSE);
+		if (obj->owornmask & W_WEP){
+			setmnotwielded(mon,obj);
+			MON_NOWEP(mon);
+		}
+		if (obj->owornmask & W_SWAPWEP){
+			setmnotwielded(mon,obj);
+			MON_NOSWEP(mon);
+		}
+	}
 
 	/* preserve the mask in case being used by something else */
 	otmp->owornmask = obj->owornmask;
