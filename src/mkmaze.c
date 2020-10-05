@@ -206,7 +206,7 @@ int depth;
 	move(&x,&y,dir);
 	if(!maze_inbounds(x, y))
 		return(FALSE);
-	if((depth < 3) && (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
+	if((depth < 3) && (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
 		return(TRUE);
 	if(levl[x][y].typ != 0)
 		return(FALSE);
@@ -1097,7 +1097,7 @@ int careful;
 				}
 				else
 				{// will only make paths into rooms that were randomly placed prior to mazewalking
-					if (levl[dx2][dy2].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
+					if (levl[dx2][dy2].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
 						dirok[idx++] = dir;
 				}
 				idx2++;
