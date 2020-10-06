@@ -149,7 +149,7 @@ LEVEL:		"out3" "C" @ (4,0)
 LEVEL:		"out4" "D" @ (5,0)
 LEVEL:		"spire" "E" @ (6,0)
 LEVEL:		"sumall" "none" @ (7,0)
-BRANCH:		"The Dispensary" @ (2, 5)
+BRANCH:		"The Dispensary" @ (2, 4)
 BRANCH:		"The Lost Cities" @ (-1, 0)
 
 
