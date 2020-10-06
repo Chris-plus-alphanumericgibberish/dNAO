@@ -2008,7 +2008,6 @@ long timeout;
 				obj->oeroded = 0;
 			} else {
 				useupall(obj);
-				obj->oeroded = 0;
 			}
 	    } else if (obj == uquiver) {
 			uqwepgone();
