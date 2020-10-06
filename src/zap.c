@@ -3772,7 +3772,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 			if (zapdata->adtyp == AD_DISN) {
 				boolean shopdoor, shopwall;
 				if (!isok(sx, sy)) {
-					if (cansee(sx, sy))
+					if (isok(sx-dx, sy-dy) && cansee(sx-dx, sy-dy))
 						pline("The wall glows then fades.");
 					range = 0;
 				}
