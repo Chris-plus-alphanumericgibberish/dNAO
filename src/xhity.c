@@ -8327,6 +8327,8 @@ int vis;
 		}
 		/* deal damage and other effects */
 		result = xengulfhurty(magr, mdef, attk, vis);
+		/* check for this fun case: mdef dies, causing an explosion, which kills magr */
+		if (DEADMONSTER(magr)) result |= MM_AGR_DIED;
 
 		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
 		/* if mdef was your steed, you are still there, so magr can't take your spot! */
@@ -8346,7 +8348,8 @@ int vis;
 			else {
 				remove_monster(x(magr), y(magr));
 				remove_monster(x(mdef), y(mdef));
-				place_monster(magr, x(mdef), y(mdef));
+				if (!(result & MM_AGR_DIED))
+					place_monster(magr, x(mdef), y(mdef));
 			}
 		}
 		/* remap the agressor's old location */
