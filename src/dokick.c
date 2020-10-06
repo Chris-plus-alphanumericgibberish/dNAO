@@ -653,6 +653,7 @@ dokick()
 	if (!isok(x, y))
 	{
 		maploc = &levl[0][0];	/* we need to set this to something for kickstr(); (0,0) is better than out-of-bounds. */
+		kickobj = (struct obj *)0; /* we need to set this so kickobj can't be a potentially freed object */
 		goto ouch;
 	}
 
