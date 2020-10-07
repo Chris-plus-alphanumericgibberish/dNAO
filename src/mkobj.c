@@ -451,6 +451,11 @@ struct obj *otmp;
 	obj->nobj = otmp;
 	extract_nobj(obj, &obj->ocontainer->cobj);
 	break;
+	case OBJ_MAGIC_CHEST:
+	otmp->nobj = obj->nobj;
+	obj->nobj = otmp;
+	extract_magic_chest_nobj(obj);
+	break;
     case OBJ_MINVENT:
 	otmp->nobj = obj->nobj;
 	otmp->ocarry =  obj->ocarry;
@@ -2948,6 +2953,7 @@ void extract_magic_chest_nobj(struct obj *obj)
 	}
     if (!curr) panic("extract_nobj: object lost");
     obj->where = OBJ_FREE;
+	obj->nobj = (struct obj *)0;
 }
 
 
