@@ -8310,11 +8310,10 @@ int vis;
 				mon_nam(mdef));
 		}
 		/* snuff mdef's carried lightsources */
-		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj) {
-			if (!is_whirly(pa)
-				|| (otmp->otyp != TORCH && otmp->otyp != SHADOWLANDER_S_TORCH && otmp->otyp != SUNROD))
+		if (!is_whirly(pa))
+			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
 				(void)snuff_lit(otmp);
-		}
+		
 		/* visually move the agressor over defender */
 		if (youagr ? (!Invisible) : canspotmon(magr)) {
 			map_location(x(magr), y(magr), TRUE);
