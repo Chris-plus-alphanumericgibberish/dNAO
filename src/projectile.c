@@ -1193,8 +1193,12 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 
 	/* Determine if the projectile hits */
 	dieroll = rnd(20);
-	struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
-	accuracy = tohitval(magr, mdef, &dummy, thrownobj, vpointer, hmoncode, 0);
+	static struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack * attkp = &dummy;
+	if (magr && attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS))
+		attkp = attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS);
+
+	accuracy = tohitval(magr, mdef, attkp, thrownobj, vpointer, hmoncode, 0);
 
 	if (accuracy > dieroll)
 	{
@@ -1202,9 +1206,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		/* (player-only) exercise dex */
 		if (youagr)
 			exercise(A_DEX, TRUE);
+		/* (monster-only) calculate monster bonus damage */
+		int dmg = (attkp != &dummy) ? d(attkp->damn, attkp->damd) : 0;
 		/* call hmon to make the projectile hit */
 		/* hmon will do hitmsg */
-		result = hmon_general(magr, mdef, &dummy, &dummy, thrownobj_p, vpointer, hmoncode, 0, 0, TRUE, dieroll, FALSE, vis);
+		result = hmon_general(magr, mdef, attkp, attkp, thrownobj_p, vpointer, hmoncode, 0, dmg, TRUE, dieroll, FALSE, vis);
 		thrownobj = *thrownobj_p;
 		/* wake up defender */
 		wakeup2(mdef, youagr);
