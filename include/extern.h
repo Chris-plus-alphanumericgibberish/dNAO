@@ -135,6 +135,7 @@ E boolean FDECL(artifact_light, (struct obj *));
 E int FDECL(artifact_wet, (struct obj *, BOOLEAN_P));
 E long FDECL(spec_mm, (int));
 E long FDECL(spec_mt, (int));
+E long FDECL(spec_mf, (int));
 E long FDECL(spec_mb, (int));
 E long FDECL(spec_mg, (int));
 E long FDECL(spec_ma, (int));
