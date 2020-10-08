@@ -1344,6 +1344,22 @@ struct obj *obj;		/* aatyp == AT_WEAP, AT_SPIT */
 #endif /* OVLB */
 #ifdef OVL0
 
+int
+m_martial_skill(ptr)
+struct permonst * ptr;
+{
+	switch (ptr->mflagsf & (MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E))
+	{
+	case 0L:           return P_UNSKILLED;
+	case MF_MARTIAL_B: return P_BASIC;
+	case MF_MARTIAL_S: return P_SKILLED;
+	case MF_MARTIAL_E: return P_EXPERT;
+	default:
+		impossible("multiple martial skill flags for %s", ptr->mname);
+		return P_UNSKILLED;
+	}
+}
+
 boolean
 ranged_attk(ptr)	/* returns TRUE if monster can attack at range */
 struct permonst *ptr;

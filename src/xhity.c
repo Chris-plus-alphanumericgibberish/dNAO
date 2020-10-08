@@ -11472,6 +11472,10 @@ int vis;						/* True if action is at all visible to the player */
 		if (youagr) {
 			precision_mult += max(P_SKILL(objects[launcher->otyp].oc_skill) - 2, 0);
 		}
+		else {
+			precision_mult += max(m_martial_skill(magr->data)-2, 0);
+		}
+		
 		/* gnomes get bonus +1 mult */
 		if (magr && (youagr ? Race_if(PM_GNOME) : is_gnome(pa)))
 			precision_mult += 1;

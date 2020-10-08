@@ -1586,6 +1586,7 @@ E boolean FDECL(resists_magm, (struct monst *));
 E boolean FDECL(resists_death, (struct monst *));
 E boolean FDECL(resists_blnd, (struct monst *));
 E boolean FDECL(can_blnd, (struct monst *,struct monst *,UCHAR_P,struct obj *));
+E int FDECL(m_martial_skill, (struct permonst *));
 E boolean FDECL(ranged_attk, (struct permonst *));
 E boolean FDECL(passes_bars, (struct monst *));
 E boolean FDECL(can_track, (struct permonst *));
