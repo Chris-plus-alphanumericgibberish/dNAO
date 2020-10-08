@@ -9,7 +9,7 @@
 #define NO_MONS()									 0,   0,   0,   0,   0,   0,   0,   0
 //#define MONS(mt, mfm, mft, mfb, mfg, mfr, mfv)		mt, mfm, mft, mff, mfb, mfg, mfr, mfv
 
-#define MONS(...) SET07(0,0,0,0,0,0,0, __VA_ARGS__)
+#define MONS(...) SET08(0,0,0,0,0,0,0,0, __VA_ARGS__)
 #define vsMSYM(x) C01((x))
 #define vsMM(x)   C02((x))
 #define vsMT(x)   C03((x))
