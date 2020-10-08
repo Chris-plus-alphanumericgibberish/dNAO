@@ -3011,11 +3011,13 @@ int flat_acc;
 		}
 		/* monster-only accuracy bonuses */
 		else {
-			/* high-rank foes are accurate */
-			if (is_lord(pa))
-				bons_acc += 2;
-			if (is_prince(pa))
-				bons_acc += 5;
+			/* martial-trained foes are accurate */
+			switch(m_martial_skill(pa)) {
+			case P_UNSKILLED: bons_acc += 0; break;
+			case P_BASIC:     bons_acc += 1; break;
+			case P_SKILLED:   bons_acc += 2; break;
+			case P_EXPERT:    bons_acc += 5; break;
+			}
 			/* these guys are extra accurate */
 			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED)
 				bons_acc += 20;
