@@ -67,7 +67,7 @@ boolean restore;
 		if (((otmp->otyp != CORPSE || otmp->corpsenm < SPECIAL_PM)
 			&& otmp->otyp != STATUE)
 			&& (!otmp->oartifact ||
-			   (restore && (exist_artifact(otmp->otyp, ONAME(otmp))
+			   (restore && (art_already_exists(otmp->oartifact)
 					|| (is_quest_artifact(otmp) && !In_quest(&u.uz)))))
 		) {
 			otmp->oartifact = 0;
