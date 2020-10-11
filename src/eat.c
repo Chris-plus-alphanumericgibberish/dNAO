@@ -3785,7 +3785,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	/* Convicts can last twice as long at hungry and below */
 	if(Role_if(PM_CONVICT)){
 		if(u.uhs == HUNGRY) hungermod *= 2;
-		else if(u.uhs < HUNGRY) hungermod *=5;
+		else if(u.uhs > HUNGRY) hungermod *=5;	/* WEAK or hungrier */
 	}
 	
 	//Elder vampires can go for longer without blood
