@@ -8266,11 +8266,9 @@ int vis;
 			swallowed(1);
 
 			/* snuff player's carried lightsources */
-			for (otmp = invent; otmp; otmp = otmp->nobj) {
-				if (!is_whirly(u.ustuck->data)
-					|| (otmp->otyp != TORCH && otmp->otyp != SHADOWLANDER_S_TORCH && otmp->otyp != SUNROD))
-					(void)snuff_lit(otmp);
-			}
+			if (!is_whirly(u.ustuck->data))
+				for (otmp = invent; otmp; otmp = otmp->nobj)
+						(void)snuff_lit(otmp);
 		}
 		/* player should be swallowed now */
 		if (magr != u.ustuck)
@@ -8310,11 +8308,10 @@ int vis;
 				mon_nam(mdef));
 		}
 		/* snuff mdef's carried lightsources */
-		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj) {
-			if (!is_whirly(pa)
-				|| (otmp->otyp != TORCH && otmp->otyp != SHADOWLANDER_S_TORCH && otmp->otyp != SUNROD))
+		if (!is_whirly(pa))
+			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
 				(void)snuff_lit(otmp);
-		}
+		
 		/* visually move the agressor over defender */
 		if (youagr ? (!Invisible) : canspotmon(magr)) {
 			map_location(x(magr), y(magr), TRUE);
