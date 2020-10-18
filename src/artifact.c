@@ -1255,6 +1255,7 @@ long wp_mask;
 				{
 					exist_warntypem |= spec_mm(obj->oartifact);
 					exist_warntypet |= spec_mt(obj->oartifact);
+					exist_warntypet |= spec_mf(obj->oartifact);
 					exist_warntypeb |= spec_mb(obj->oartifact);
 					exist_warntypeg |= spec_mg(obj->oartifact);
 					exist_warntypea |= spec_ma(obj->oartifact);
@@ -1284,6 +1285,7 @@ long wp_mask;
 			/*  flag                 if on  {add to mask     ; add to warning type                   } else {remove from warning type unless another art fills in         } */
 			if (spec_mm(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(oartifact);} else {flags.warntypem &= ~(spec_mm(oartifact)&(~exist_warntypem));}}
 			if (spec_mt(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(oartifact);} else {flags.warntypet &= ~(spec_mt(oartifact)&(~exist_warntypet));}}
+			if (spec_mf(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mf(oartifact);} else {flags.warntypet &= ~(spec_mf(oartifact)&(~exist_warntypet));}}
 			if (spec_mb(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(oartifact);} else {flags.warntypeb &= ~(spec_mb(oartifact)&(~exist_warntypeb));}}
 			if (spec_mg(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(oartifact);} else {flags.warntypeg &= ~(spec_mg(oartifact)&(~exist_warntypeg));}}
 			if (spec_ma(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(oartifact);} else {flags.warntypea &= ~(spec_ma(oartifact)&(~exist_warntypea));}}
@@ -1706,6 +1708,11 @@ boolean narrow_only;
 		}
 		/* thinking */
 		if (weap->mflagst != 0L && ((ptr->mflagst & weap->mflagst) != 0L)) {
+			return 
+			TRUE;
+		}
+		/* fighting */
+		if (weap->mflagsf != 0L && ((ptr->mflagsf & weap->mflagsf) != 0L)) {
 			return TRUE;
 		}
 		/* body */
@@ -1771,6 +1778,17 @@ int oartifact;
 	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagst)
 		return artifact->mflagst;
+	return 0L;
+}
+
+/* return the MF flags of monster that an artifact's special attacks apply against */
+long
+spec_mf(oartifact)
+int oartifact;
+{
+	register const struct artifact *artifact = &artilist[oartifact];
+	if (artifact && artifact->mflagsf)
+		return artifact->mflagsf;
 	return 0L;
 }
 

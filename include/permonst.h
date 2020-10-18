@@ -101,6 +101,7 @@ struct permonst {
 	unsigned int	mconveys;		/* conveyed by eating */
 	unsigned long	mflagsm,		/* Monster Motility boolean bitflags */
 					mflagst,		/* Monster Thoughts and behavior boolean bitflags */
+					mflagsf,		/* Monster Fighting skills bitflags */
 					mflagsb,		/* Monster Body plan boolean bitflags */
 					mflagsg,		/* Monster Game mechanics and bookkeeping boolean bitflags */
 					mflagsa,		/* Monster rAce boolean bitflags */

@@ -135,6 +135,10 @@
 #define MT_COVETOUS		MT_WANTSALL		/* wants something */
 #define MT_WAITMASK		(MT_WAITFORU|MT_CLOSE)	/* waiting... */
 
+//Monster Skills
+#define MF_MARTIAL_B        0x00000001L   /* basic   martial skill -- does nothing yet? */
+#define MF_MARTIAL_S        0x00000002L   /* skilled martial skill */
+#define MF_MARTIAL_E        0x00000004L   /* expert  martial skill */
 
 //Monster Body plan
 #define MB_NOEYES		0x00000001L	/* no eyes to gaze into or blind */

@@ -1664,7 +1664,7 @@ int shotlimit;
 		if (youagr)
 			magr_wepskill = P_SKILL(weapon_type(ammo));
 		else
-			magr_wepskill = is_prince(magr->data) ? P_EXPERT : is_lord(magr->data) ? P_SKILLED : P_BASIC;
+			magr_wepskill = m_martial_skill(magr->data);
 
 		switch (magr_wepskill) {
 		default:
