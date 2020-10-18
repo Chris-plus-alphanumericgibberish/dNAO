@@ -84,9 +84,9 @@ register struct obj *otmp;
 		if(i >= 52) { i = -1; continue; }
 		if(!inuse[i]) break;
 	}
-	otmp->invlet = (inuse[i] ? NOINVSYM :
+	otmp->invlet = ((i >= 52 || inuse[i]) ? NOINVSYM :
 			(i < 26) ? ('a'+i) : ('A'+i-26));
-	lastinvnr = i;
+	lastinvnr = i % 52;
 }
 
 #endif /* OVLB */
@@ -4862,9 +4862,13 @@ reassign()
 	register int i;
 	register struct obj *obj;
 
-	for(obj = invent, i = 0; obj; obj = obj->nobj, i++)
+	for(obj = invent, i = 0; obj && i < 52; obj = obj->nobj, i++)
 		obj->invlet = (i < 26) ? ('a'+i) : ('A'+i-26);
-	lastinvnr = i;
+
+	/* If there are more than 52 items to assign, the rest are NOINVSYM (#) */
+	for(; obj; obj = obj->nobj)
+		obj->invlet = NOINVSYM;
+	lastinvnr = i % 52;
 }
 
 #endif /* OVLB */
