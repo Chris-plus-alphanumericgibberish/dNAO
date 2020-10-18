@@ -811,16 +811,25 @@ short *otyp;
 }
 
 boolean
-exist_artifact(otyp, name)
-register int otyp;
-register const char *name;
+art_already_exists(artinum)
+int artinum;
 {
-	register boolean *arex;
-	int i;
+	if(artinum < 1 || artinum > NROFARTIFACTS) {
+		impossible("bad artifact number %d", artinum);
+		return 0;
+	}
+	return artinstance[artinum].exists;
+}
 
-	if (otyp && *name)
+boolean
+art_already_exists_byname(otyp, artiname)
+int otyp;
+const char * artiname;
+{
+	int i;
+	if (otyp && *artiname)
 	    for (i = 1; artilist[i].otyp; i++)
-			if ((int) artilist[i].otyp == otyp && !strcmp(artilist[i].name, name))
+			if ((int) artilist[i].otyp == otyp && !strcmp(artilist[i].name, artiname))
 				return artinstance[i].exists;
 	return FALSE;
 }
