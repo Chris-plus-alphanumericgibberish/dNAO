@@ -4071,17 +4071,17 @@ aligntyp alignment;
 				flags.botl = 1;
 				break;
 			case 1: // increase weapon enchantment
-				if (uwep && uwep->spe < 7 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
+				if (uwep && uwep->spe < 5 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
 					uwep->spe++;
-				else if (uswapwep && uswapwep->spe < 7 && (uswapwep->oclass == WEAPON_CLASS || is_weptool(uswapwep)))
+				else if (uswapwep && uswapwep->spe < 5 && (uswapwep->oclass == WEAPON_CLASS || is_weptool(uswapwep)))
 					uswapwep->spe++;
 				else if (u.umartial && uarmg && (uarmg->oartifact || !uwep) && uarmg->spe < 5)
 					uarmg->spe++;
 				else if (u.umartial && uarmf && (uarmf->oartifact || !uwep) && uarmf->spe < 5)
 					uarmf->spe++;
-				else if (uleft && objects[uleft->otyp].oc_charged && uleft->spe < 5)
+				else if (uleft && uleft->otyp != RIN_WISHES && objects[uleft->otyp].oc_charged && uleft->spe < 5)
 					uleft->spe++;
-				else if (uright && objects[uright->otyp].oc_charged && uright->spe < 5)
+				else if (uright && uright->otyp != RIN_WISHES && objects[uright->otyp].oc_charged && uright->spe < 5)
 					uright->spe++;
 				break;
 			case 2: // identify an item
