@@ -11959,8 +11959,6 @@ int vis;						/* True if action is at all visible to the player */
 			case OPOISON_FILTH:
 				resists = Sick_res(mdef);
 				majoreff = !rn2(10);
-				if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
-					majoreff = !rn2(5);	/* while invoked, Plague's arrows are twice as likely to instakill (=20%) */
 				break;
 			case OPOISON_SLEEP:
 				resists = Sleep_res(mdef);
@@ -12795,12 +12793,12 @@ int vis;						/* True if action is at all visible to the player */
 				/* precision fired ammo gets skill bonuses, multiplied */
 				if (is_ammo(weapon) && (precision_mult))
 					skill_damage = weapon_dam_bonus(launcher, wtype) * precision_mult;
-				/* spears fired from atlatls also get their skill bonus */
-				else if (launcher->otyp == ATLATL)
-					skill_damage = weapon_dam_bonus(launcher, wtype);
-				/* other fired ammo does not get skill bonuses */
-				else
+				/* non-precision guns (all but the sniper rifle) do not get skill damage */
+				else if (is_firearm(launcher))
 					skill_damage = 0;
+				/* other fired ammo gets normal skill bonus */
+				else
+					skill_damage = weapon_dam_bonus(launcher, wtype);
 			}
 			/* things thrown with no launcher */
 			else if (fired && !launcher) {

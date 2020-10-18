@@ -940,12 +940,12 @@ A("Plague",				BOW,							(const char *)0,
 	),
 
 /*Needs encyc entry*/
-/* all non-artifact arrows fired from it return to your inventory 5 turns later */
+/* all arrows fired from it return to your inventory 5 turns later */
 A("Epoch's Curve",			BOW,							"white ash longbow",
 	4000L, WOOD, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 6), NOFLAG,
+	ATTK(AD_PHYS, 5, 1), NOFLAG,
 	PROPS(TELEPORT_CONTROL), NOFLAG,
 	PROPS(), NOFLAG,
 	TELEPORT_SHOES, NOFLAG
@@ -2279,7 +2279,7 @@ A("The Longbow of Diana",			BOW,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_RANGER, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 0), (ARTA_SILVER),
+	ATTK(AD_PHYS, 5, 6), (ARTA_SILVER),
 	PROPS(REFLECTING), NOFLAG,
 	PROPS(TELEPAT), NOFLAG,
 	CREATE_AMMO, NOFLAG
@@ -2332,7 +2332,7 @@ A("The Moonbow of Sehanine",		ELVEN_BOW,			(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_RANGER, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 0), (ARTA_SILVER),
+	ATTK(AD_PHYS, 5, 6), (ARTA_SILVER),
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	CREATE_AMMO, NOFLAG
@@ -2388,7 +2388,7 @@ A("Belthronding",					ELVEN_BOW,			(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 0), NOFLAG,
+	ATTK(AD_PHYS, 5, 6), NOFLAG,
 	PROPS(STEALTH), NOFLAG,
 	PROPS(DISPLACED), NOFLAG,
 	CREATE_AMMO, NOFLAG
