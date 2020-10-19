@@ -1038,7 +1038,7 @@ makelevel()
 
 			if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend && qstart_level.dnum == u.uz.dnum && qstart_level.dlevel == (u.uz.dlevel-1)){
 				Sprintf(fillname, "%s-home", urole.filecode);
-				pline("%s",fillname);
+				// pline("%s",fillname);
 				makemaz(fillname);
 			} else {
 			    Sprintf(fillname, "%s-loca", urole.filecode);
