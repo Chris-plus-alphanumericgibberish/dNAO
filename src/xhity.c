@@ -3011,11 +3011,13 @@ int flat_acc;
 		}
 		/* monster-only accuracy bonuses */
 		else {
-			/* high-rank foes are accurate */
-			if (is_lord(pa))
-				bons_acc += 2;
-			if (is_prince(pa))
-				bons_acc += 5;
+			/* martial-trained foes are accurate */
+			switch(m_martial_skill(pa)) {
+			case P_UNSKILLED: bons_acc += 0; break;
+			case P_BASIC:     bons_acc += 1; break;
+			case P_SKILLED:   bons_acc += 2; break;
+			case P_EXPERT:    bons_acc += 5; break;
+			}
 			/* these guys are extra accurate */
 			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED)
 				bons_acc += 20;
@@ -8266,11 +8268,9 @@ int vis;
 			swallowed(1);
 
 			/* snuff player's carried lightsources */
-			for (otmp = invent; otmp; otmp = otmp->nobj) {
-				if (!is_whirly(u.ustuck->data)
-					|| (otmp->otyp != TORCH && otmp->otyp != SHADOWLANDER_S_TORCH && otmp->otyp != SUNROD))
-					(void)snuff_lit(otmp);
-			}
+			if (!is_whirly(u.ustuck->data))
+				for (otmp = invent; otmp; otmp = otmp->nobj)
+						(void)snuff_lit(otmp);
 		}
 		/* player should be swallowed now */
 		if (magr != u.ustuck)
@@ -8310,11 +8310,10 @@ int vis;
 				mon_nam(mdef));
 		}
 		/* snuff mdef's carried lightsources */
-		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj) {
-			if (!is_whirly(pa)
-				|| (otmp->otyp != TORCH && otmp->otyp != SHADOWLANDER_S_TORCH && otmp->otyp != SUNROD))
+		if (!is_whirly(pa))
+			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
 				(void)snuff_lit(otmp);
-		}
+		
 		/* visually move the agressor over defender */
 		if (youagr ? (!Invisible) : canspotmon(magr)) {
 			map_location(x(magr), y(magr), TRUE);
@@ -8327,6 +8326,8 @@ int vis;
 		}
 		/* deal damage and other effects */
 		result = xengulfhurty(magr, mdef, attk, vis);
+		/* check for this fun case: mdef dies, causing an explosion, which kills magr */
+		if (DEADMONSTER(magr)) result |= MM_AGR_DIED;
 
 		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
 		/* if mdef was your steed, you are still there, so magr can't take your spot! */
@@ -8346,7 +8347,8 @@ int vis;
 			else {
 				remove_monster(x(magr), y(magr));
 				remove_monster(x(mdef), y(mdef));
-				place_monster(magr, x(mdef), y(mdef));
+				if (!(result & MM_AGR_DIED))
+					place_monster(magr, x(mdef), y(mdef));
 			}
 		}
 		/* remap the agressor's old location */
@@ -11469,6 +11471,10 @@ int vis;						/* True if action is at all visible to the player */
 		if (youagr) {
 			precision_mult += max(P_SKILL(objects[launcher->otyp].oc_skill) - 2, 0);
 		}
+		else {
+			precision_mult += max(m_martial_skill(magr->data)-2, 0);
+		}
+		
 		/* gnomes get bonus +1 mult */
 		if (magr && (youagr ? Race_if(PM_GNOME) : is_gnome(pa)))
 			precision_mult += 1;
@@ -11895,7 +11901,7 @@ int vis;						/* True if action is at all visible to the player */
 			poisons |= OPOISON_ACID;
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
-			if (monstermoves < launcher->ovar1)
+			if (monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
 				poisons |= OPOISON_FILTH;
 			else
 				poisons |= OPOISON_BASIC;
@@ -11959,8 +11965,6 @@ int vis;						/* True if action is at all visible to the player */
 			case OPOISON_FILTH:
 				resists = Sick_res(mdef);
 				majoreff = !rn2(10);
-				if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < launcher->ovar1)
-					majoreff = !rn2(5);	/* while invoked, Plague's arrows are twice as likely to instakill (=20%) */
 				break;
 			case OPOISON_SLEEP:
 				resists = Sleep_res(mdef);
@@ -12020,10 +12024,10 @@ int vis;						/* True if action is at all visible to the player */
 			switch (i)
 			{
 			case OPOISON_BASIC:
-				poisdmg += (major) ? (youdef ? d(3, 6) : 9999) : rnd(6);
+				poisdmg += (major) ? (youdef ? d(3, 6) : 80) : rnd(6);
 				break;
 			case OPOISON_FILTH:
-				poisdmg += (major) ? (youdef ? d(3, 12) : 9999) : rnd(12);
+				poisdmg += (major) ? (youdef ? d(3, 12) : 100) : rnd(12);
 				break;
 			case OPOISON_SLEEP:
 				/* no damage */
@@ -12045,6 +12049,9 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 			}
 		}
+		/* if Plague is being used, note whether or not the current shot is filthed */
+		if (launcher && launcher->oartifact == ART_PLAGUE && monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
+			artinstance[ART_PLAGUE].PlagueDoOnHit = !!(poisons_majoreff&OPOISON_FILTH);
 	}
 
 	/* Clockwork heat - player melee only */
@@ -12792,12 +12799,12 @@ int vis;						/* True if action is at all visible to the player */
 				/* precision fired ammo gets skill bonuses, multiplied */
 				if (is_ammo(weapon) && (precision_mult))
 					skill_damage = weapon_dam_bonus(launcher, wtype) * precision_mult;
-				/* spears fired from atlatls also get their skill bonus */
-				else if (launcher->otyp == ATLATL)
-					skill_damage = weapon_dam_bonus(launcher, wtype);
-				/* other fired ammo does not get skill bonuses */
-				else
+				/* non-precision guns (all but the sniper rifle) do not get skill damage */
+				else if (is_firearm(launcher))
 					skill_damage = 0;
+				/* other fired ammo gets normal skill bonus */
+				else
+					skill_damage = weapon_dam_bonus(launcher, wtype);
 			}
 			/* things thrown with no launcher */
 			else if (fired && !launcher) {
@@ -12887,9 +12894,6 @@ int vis;						/* True if action is at all visible to the player */
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp) {
-				/* kludge for Plague: artifact_hit() needs to know if lethal filth occured */
-				if (otmp->oartifact == ART_PLAGUE)
-					dieroll = (poisons_majoreff&OPOISON_FILTH) ? 1 : (dieroll == 1) ? 2 : dieroll;
 				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;

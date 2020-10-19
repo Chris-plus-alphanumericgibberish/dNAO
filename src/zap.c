@@ -1794,6 +1794,20 @@ poly_obj(obj, id)
 		goto no_unwear;
 	    }
 	}
+	else if (obj_location == OBJ_MINVENT) {
+		struct monst * mon = obj->ocarry;
+		/* unwield/unwear */
+		mon->misc_worn_check &= ~obj->owornmask;
+		update_mon_intrinsics(mon, obj, FALSE, FALSE);
+		if (obj->owornmask & W_WEP){
+			setmnotwielded(mon,obj);
+			MON_NOWEP(mon);
+		}
+		if (obj->owornmask & W_SWAPWEP){
+			setmnotwielded(mon,obj);
+			MON_NOSWEP(mon);
+		}
+	}
 
 	/* preserve the mask in case being used by something else */
 	otmp->owornmask = obj->owornmask;
@@ -3772,7 +3786,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 			if (zapdata->adtyp == AD_DISN) {
 				boolean shopdoor, shopwall;
 				if (!isok(sx, sy)) {
-					if (cansee(sx, sy))
+					if (isok(sx-dx, sy-dy) && cansee(sx-dx, sy-dy))
 						pline("The wall glows then fades.");
 					range = 0;
 				}

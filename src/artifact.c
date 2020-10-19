@@ -811,16 +811,25 @@ short *otyp;
 }
 
 boolean
-exist_artifact(otyp, name)
-register int otyp;
-register const char *name;
+art_already_exists(artinum)
+int artinum;
 {
-	register boolean *arex;
-	int i;
+	if(artinum < 1 || artinum > NROFARTIFACTS) {
+		impossible("bad artifact number %d", artinum);
+		return 0;
+	}
+	return artinstance[artinum].exists;
+}
 
-	if (otyp && *name)
+boolean
+art_already_exists_byname(otyp, artiname)
+int otyp;
+const char * artiname;
+{
+	int i;
+	if (otyp && *artiname)
 	    for (i = 1; artilist[i].otyp; i++)
-			if ((int) artilist[i].otyp == otyp && !strcmp(artilist[i].name, name))
+			if ((int) artilist[i].otyp == otyp && !strcmp(artilist[i].name, artiname))
 				return artinstance[i].exists;
 	return FALSE;
 }
@@ -1255,6 +1264,7 @@ long wp_mask;
 				{
 					exist_warntypem |= spec_mm(obj->oartifact);
 					exist_warntypet |= spec_mt(obj->oartifact);
+					exist_warntypet |= spec_mf(obj->oartifact);
 					exist_warntypeb |= spec_mb(obj->oartifact);
 					exist_warntypeg |= spec_mg(obj->oartifact);
 					exist_warntypea |= spec_ma(obj->oartifact);
@@ -1284,6 +1294,7 @@ long wp_mask;
 			/*  flag                 if on  {add to mask     ; add to warning type                   } else {remove from warning type unless another art fills in         } */
 			if (spec_mm(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(oartifact);} else {flags.warntypem &= ~(spec_mm(oartifact)&(~exist_warntypem));}}
 			if (spec_mt(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(oartifact);} else {flags.warntypet &= ~(spec_mt(oartifact)&(~exist_warntypet));}}
+			if (spec_mf(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mf(oartifact);} else {flags.warntypet &= ~(spec_mf(oartifact)&(~exist_warntypet));}}
 			if (spec_mb(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(oartifact);} else {flags.warntypeb &= ~(spec_mb(oartifact)&(~exist_warntypeb));}}
 			if (spec_mg(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(oartifact);} else {flags.warntypeg &= ~(spec_mg(oartifact)&(~exist_warntypeg));}}
 			if (spec_ma(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(oartifact);} else {flags.warntypea &= ~(spec_ma(oartifact)&(~exist_warntypea));}}
@@ -1706,6 +1717,11 @@ boolean narrow_only;
 		}
 		/* thinking */
 		if (weap->mflagst != 0L && ((ptr->mflagst & weap->mflagst) != 0L)) {
+			return 
+			TRUE;
+		}
+		/* fighting */
+		if (weap->mflagsf != 0L && ((ptr->mflagsf & weap->mflagsf) != 0L)) {
 			return TRUE;
 		}
 		/* body */
@@ -1771,6 +1787,17 @@ int oartifact;
 	register const struct artifact *artifact = &artilist[oartifact];
 	if (artifact && artifact->mflagst)
 		return artifact->mflagst;
+	return 0L;
+}
+
+/* return the MF flags of monster that an artifact's special attacks apply against */
+long
+spec_mf(oartifact)
+int oartifact;
+{
+	register const struct artifact *artifact = &artilist[oartifact];
+	if (artifact && artifact->mflagsf)
+		return artifact->mflagsf;
 	return 0L;
 }
 
@@ -4051,9 +4078,9 @@ boolean * messaged;
 		}
 	} 
 	/* while Plague is invoked, lethal-filth arrows cause victims to virulently explode.
-	 * Not you, though. You just die. It's simpler that way.
-	 * Slightly different from actual Vorpal; the dieroll is hacked in xhity to ==1 if and only if we have lethal filth. */
-	if (oartifact == ART_PLAGUE && (monstermoves < otmp->ovar1) && (dieroll == 1) && !youdef) {
+	 * Not you, though. You just die. It's simpler that way. */
+	if (oartifact == ART_PLAGUE && artinstance[ART_PLAGUE].PlagueDoOnHit && (*hp(mdef) <= currdmg + 100) && !youdef) {
+		artinstance[ART_PLAGUE].PlagueDoOnHit = FALSE;
 		int mx, my;
 		if (vis&VIS_MAGR && vis&VIS_MDEF) {
 			pline_The("tainted %s strikes true!", xname(msgr));
@@ -7602,8 +7629,8 @@ arti_invoke(obj)
 			else {
 				pline("%s vibrates softly.", The(xname(obj)));
 			}
-			/* if time < ovar1, arrows will be filthed (done in xhity.c) */
-			obj->ovar1 = monstermoves + 13;
+			/* while monstermoves < duration, arrows will be filthed (done in xhity.c) */
+			artinstance[ART_PLAGUE].PlagueDuration = monstermoves + 13;
 		break;
 		case INVOKE_DARK:{
           struct obj *wand;

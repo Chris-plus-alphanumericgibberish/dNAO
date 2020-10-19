@@ -991,9 +991,9 @@ int level_bonus;
 
 	} while (abs(horror->mlevel - target_level) > 2);
 
-	/* all nameless horrors are approx. difficulty 50 */
+	/* all nameless horrors are set to difficulty 40 */
 	if (horror->mtyp == PM_NAMELESS_HORROR)
-		monstr[PM_NAMELESS_HORROR] = 50;
+		monstr[PM_NAMELESS_HORROR] = 40;
 
 #undef get_random_of
 	return;
@@ -1343,6 +1343,22 @@ struct obj *obj;		/* aatyp == AT_WEAP, AT_SPIT */
 
 #endif /* OVLB */
 #ifdef OVL0
+
+int
+m_martial_skill(ptr)
+struct permonst * ptr;
+{
+	switch (ptr->mflagsf & (MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E))
+	{
+	case 0L:           return P_UNSKILLED;
+	case MF_MARTIAL_B: return P_BASIC;
+	case MF_MARTIAL_S: return P_SKILLED;
+	case MF_MARTIAL_E: return P_EXPERT;
+	default:
+		impossible("multiple martial skill flags for %s", ptr->mname);
+		return P_UNSKILLED;
+	}
+}
 
 boolean
 ranged_attk(ptr)	/* returns TRUE if monster can attack at range */

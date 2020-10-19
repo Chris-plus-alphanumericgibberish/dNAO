@@ -318,24 +318,11 @@ struct monst * magr;
 		return 8;
 	}
 
-	int skill_equiv = P_BASIC;
-
-	if (magr->data->mlevel >= 6)
-		skill_equiv++;
-	if (magr->data->mlevel >= 12)
-		skill_equiv++;
-	if (is_prince(magr->data))
-		skill_equiv++;
-
-	/* cap at expert */
-	if (skill_equiv > P_EXPERT)
-		skill_equiv = P_EXPERT;
-
-	switch (skill_equiv) {
+	switch (m_martial_skill(magr->data)) {
 		case P_EXPERT:	return 8;
 		case P_SKILLED:	return 5;
 		case P_BASIC:	return 4;		
-		default: return 4; // shouldn't be reached
+		default: return 4;
 	}
 }
 

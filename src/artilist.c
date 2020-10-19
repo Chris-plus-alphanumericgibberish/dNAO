@@ -6,10 +6,10 @@
 #define PROPS(...) {FIRST_EIGHT(dummy, ##__VA_ARGS__, 0,0,0,0,0,0,0,0)}
 #define FIRST_EIGHT(dummy, a1, a2, a3, a4, a5, a6, a7, a8, ...) a1, a2, a3, a4, a5, a6, a7, a8
 
-#define NO_MONS()									 0,   0,   0,   0,   0,   0,   0
-//#define MONS(mt, mfm, mft, mfb, mfg, mfr, mfv)		mt, mfm, mft, mfb, mfg, mfr, mfv
+#define NO_MONS()									 0,   0,   0,   0,   0,   0,   0,   0
+//#define MONS(mt, mfm, mft, mfb, mfg, mfr, mfv)		mt, mfm, mft, mff, mfb, mfg, mfr, mfv
 
-#define MONS(...) SET07(0,0,0,0,0,0,0, __VA_ARGS__)
+#define MONS(...) SET08(0,0,0,0,0,0,0,0, __VA_ARGS__)
 #define vsMSYM(x) C01((x))
 #define vsMM(x)   C02((x))
 #define vsMT(x)   C03((x))
@@ -940,12 +940,12 @@ A("Plague",				BOW,							(const char *)0,
 	),
 
 /*Needs encyc entry*/
-/* all non-artifact arrows fired from it return to your inventory 5 turns later */
+/* all arrows fired from it return to your inventory 5 turns later */
 A("Epoch's Curve",			BOW,							"white ash longbow",
 	4000L, WOOD, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 6), NOFLAG,
+	ATTK(AD_PHYS, 5, 1), NOFLAG,
 	PROPS(TELEPORT_CONTROL), NOFLAG,
 	PROPS(), NOFLAG,
 	TELEPORT_SHOES, NOFLAG
@@ -1170,6 +1170,18 @@ A("Godhands",					GAUNTLETS_OF_POWER,				(const char *)0,
 	),
 
 /*Needs encyc entry*/
+/* permanently polymorphs you into a death knight when you die -- does not work for monsters */
+A("The Helm of Undeath",			WAR_HAT,				(const char *)0,
+	2500L, BONE, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, NON_PM, NON_PM, TIER_B, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(DRAIN_RES, LIFESAVED), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
+/*Needs encyc entry*/
 /* lets the wearer cast Lightning Storm */
 A("Stormhelm",						HELM_OF_BRILLIANCE,				(const char *)0,
 	3000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
@@ -1179,6 +1191,17 @@ A("Stormhelm",						HELM_OF_BRILLIANCE,				(const char *)0,
 	PROPS(COLD_RES), NOFLAG,
 	PROPS(SHOCK_RES), NOFLAG,
 	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
+/* non-wizards wearing it get reduced-hunger casting (with a -4 INT penalty) */
+A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
+	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(SEE_INVIS, DRAIN_RES, EXTRAMISSION), NOFLAG,
+	PROPS(), NOFLAG,
+	ENLIGHTENING, (ARTI_PLUSSEV)
 	),
 
 A("Hellrider's Saddle",				SADDLE,					(const char *)0,
@@ -2256,7 +2279,7 @@ A("The Longbow of Diana",			BOW,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_RANGER, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 0), (ARTA_SILVER),
+	ATTK(AD_PHYS, 5, 6), (ARTA_SILVER),
 	PROPS(REFLECTING), NOFLAG,
 	PROPS(TELEPAT), NOFLAG,
 	CREATE_AMMO, NOFLAG
@@ -2309,7 +2332,7 @@ A("The Moonbow of Sehanine",		ELVEN_BOW,			(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_RANGER, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 0), (ARTA_SILVER),
+	ATTK(AD_PHYS, 5, 6), (ARTA_SILVER),
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	CREATE_AMMO, NOFLAG
@@ -2365,7 +2388,7 @@ A("Belthronding",					ELVEN_BOW,			(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 0), NOFLAG,
+	ATTK(AD_PHYS, 5, 6), NOFLAG,
 	PROPS(STEALTH), NOFLAG,
 	PROPS(DISPLACED), NOFLAG,
 	CREATE_AMMO, NOFLAG

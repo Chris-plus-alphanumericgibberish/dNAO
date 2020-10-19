@@ -182,11 +182,13 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	if (youagr && fired && (
 		thrownobj->oartifact == ART_SUNBEAM ||
 		thrownobj->oartifact == ART_MOONBEAM ||
-		(launcher && launcher->oartifact == ART_EPOCH_S_CURVE && !thrownobj->oartifact)
+		(launcher && launcher->oartifact == ART_EPOCH_S_CURVE)
 		)) {
-		int delay = rnz(20);
-		if (launcher && launcher->oartifact == ART_EPOCH_S_CURVE)	/* accelerates return of sunbeam/moonbeam */
+		int delay = rnd(20)+2;
+		if (launcher && launcher->oartifact == ART_EPOCH_S_CURVE)
 			delay = min(delay, 5);
+		if (thrownobj->oartifact)
+			delay += rnz(10);
 
 		start_timer(delay, TIMER_OBJECT, RETURN_AMMO, (genericptr_t)thrownobj);
 	}
@@ -1193,8 +1195,12 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 
 	/* Determine if the projectile hits */
 	dieroll = rnd(20);
-	struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
-	accuracy = tohitval(magr, mdef, &dummy, thrownobj, vpointer, hmoncode, 0);
+	static struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack * attkp = &dummy;
+	if (magr && attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS))
+		attkp = attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS);
+
+	accuracy = tohitval(magr, mdef, attkp, thrownobj, vpointer, hmoncode, 0);
 
 	if (accuracy > dieroll)
 	{
@@ -1202,9 +1208,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		/* (player-only) exercise dex */
 		if (youagr)
 			exercise(A_DEX, TRUE);
+		/* (monster-only) calculate monster bonus damage */
+		int dmg = (attkp != &dummy) ? d(attkp->damn, attkp->damd) : 0;
 		/* call hmon to make the projectile hit */
 		/* hmon will do hitmsg */
-		result = hmon_general(magr, mdef, &dummy, &dummy, thrownobj_p, vpointer, hmoncode, 0, 0, TRUE, dieroll, FALSE, vis);
+		result = hmon_general(magr, mdef, attkp, attkp, thrownobj_p, vpointer, hmoncode, 0, dmg, TRUE, dieroll, FALSE, vis);
 		thrownobj = *thrownobj_p;
 		/* wake up defender */
 		wakeup2(mdef, youagr);
@@ -1662,7 +1670,7 @@ int shotlimit;
 		if (youagr)
 			magr_wepskill = P_SKILL(weapon_type(ammo));
 		else
-			magr_wepskill = is_prince(magr->data) ? P_EXPERT : is_lord(magr->data) ? P_SKILLED : P_BASIC;
+			magr_wepskill = m_martial_skill(magr->data);
 
 		switch (magr_wepskill) {
 		default:
@@ -2715,8 +2723,9 @@ int tary;
 	basiczap(&zapdata, typ, ZAP_BREATH, 0);
 
 	/* set dragonbreath if applicable*/
-	if (is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14))
+	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ != AD_DISN)
 		zapdata.unreflectable = ZAP_REFL_ADVANCED;
+	
 	/* set damage */
 	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
 	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;
@@ -3095,6 +3104,8 @@ int tary;
 		int hand;
 		/* do mainhand, then offhand */
 		for (hand = 0; hand < 2; hand++) {
+			/* we need to get thrownobj again on the 2nd hand -- what if had we used up our last arrow? */
+			if (hand == 1) thrownobj = select_rwep(magr);
 			launcher = (!hand ? MON_WEP(magr) : MON_SWEP(magr));
 			if (!launcher || !((ammo_and_launcher(thrownobj, launcher)) || is_blaster(launcher)))
 				continue;

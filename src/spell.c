@@ -1365,6 +1365,7 @@ spiritLets(lets, respect_timeout)
 	if(flags.timeoutOrder){
 		for(s=0; s<NUM_BIND_SPRITS; s++){
 			if(u.spirit[s]) for(i = 0; i<52; i++){
+				if(u.spiritPOrder[i] == -1) continue;
 				if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s] && (u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout)){
 					Sprintf(lets, "%c", i<26 ? 'a'+(char)i : 'A'+(char)(i-26));
 				}
@@ -1372,6 +1373,7 @@ spiritLets(lets, respect_timeout)
 		}
 	} else {
 		for(i = 0; i<52; i++){
+			if(u.spiritPOrder[i] == -1) continue;
 			if(((spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
 				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
 				spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL) &&
@@ -1603,7 +1605,8 @@ int energy;
 	 */
 	intell = acurr(A_INT);
 	if (!Role_if(PM_WIZARD)){
-		if(u.sealsActive&SEAL_PAIMON) intell -= 6;
+		if(uarmh && uarmh->oartifact == ART_APOTHEOSIS_VEIL) intell -= 4;
+		else if(u.sealsActive&SEAL_PAIMON) intell -= 6;
 		else intell -= 10;
 	}
 	if(intell < 15);
@@ -4241,7 +4244,7 @@ int spell;
 				}
 				mon = m_at(sx, sy);
 				if(mon && !mon->mpeaceful){
-					if(!rn2(20)){
+					if(!rn2(20) && mon->mhp < 400){
 						pline("%s is bisected!", Monnam(mon));
 						mon->mhp = 0;
 						xkilled(mon, 1);
@@ -4786,12 +4789,13 @@ int respect_timeout;
 				if (u.spirit[s]){
 					j = 0;
 					place = 1;
-					while (!(spirit_powers[u.spiritPOrder[j]].owner & place)){
+					while ((u.spiritPOrder[j] == -1) || !(spirit_powers[u.spiritPOrder[j]].owner & place)){
 						j++;
 						place = place << 1;
 					}
 					add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_BOLD, sealNames[j], MENU_UNSELECTED);
 					for (i = 0; i < 52; i++){
+						if (u.spiritPOrder[i] == -1) continue;
 						if (spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
 							if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
 								Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);

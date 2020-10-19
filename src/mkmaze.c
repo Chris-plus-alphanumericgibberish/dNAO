@@ -206,7 +206,7 @@ int depth;
 	move(&x,&y,dir);
 	if(!maze_inbounds(x, y))
 		return(FALSE);
-	if((depth < 3) && (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
+	if((depth < 3) && (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
 		return(TRUE);
 	if(levl[x][y].typ != 0)
 		return(FALSE);
@@ -786,6 +786,10 @@ xchar lx, ly, hx, hy;
 {
 	int x, y;
 
+	/* first check that both corners of the rectangle are inside maze boundaries */
+	if (!maze_inbounds(lx, ly) || !maze_inbounds(hx, hy))
+		return FALSE;
+
 	for (x = lx; x <= hx; x++)
 	for (y = ly; y <= hy; y++)
 	{
@@ -1097,7 +1101,7 @@ int careful;
 				}
 				else
 				{// will only make paths into rooms that were randomly placed prior to mazewalking
-					if (levl[dx2][dy2].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
+					if (levl[dx2][dy2].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
 						dirok[idx++] = dir;
 				}
 				idx2++;
@@ -1528,7 +1532,7 @@ int x,y,depth;
 			levl[x][y].typ = ROOM;
 #endif
 			move(&x, &y, dir);
-			if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
+			if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
 				maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 			pos++;
 			if (pos > CELLS)
@@ -1565,7 +1569,7 @@ int x,y,depth;
 		if(!q) return;
 		dir = dirs[rn2(q)];
 		move(&x,&y,dir);
-		if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
+		if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
 			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 #ifndef WALLIFIED_MAZE
 		levl[x][y].typ = CORR;

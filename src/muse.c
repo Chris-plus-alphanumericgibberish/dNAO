@@ -2864,13 +2864,15 @@ boolean stoning;
 		pline("%s has a very bad case of stomach acid.",
 			Monnam(mon));
     }
-    m_useup(mon, obj);
-    if (mon->mhp <= 0) {
-	pline("%s dies!", Monnam(mon));
-	if (by_you) xkilled(mon, 0);
-	else mondead(mon);
-	return;
+    
+	if (mon->mhp <= 0) {
+		m_useup(mon, obj);	/* use up now -- we're returning early */
+		pline("%s dies!", Monnam(mon));
+		if (by_you) xkilled(mon, 0);
+		else mondead(mon);
+		return;
     }
+
     if (stoning && canseemon(mon)) {
 	if (Hallucination)
     pline("What a pity - %s just ruined a future piece of art!",
@@ -2891,6 +2893,8 @@ boolean stoning;
 	mon->mconf = 0;
     }
     mon->mlstmv = monstermoves; /* it takes a turn */
+	/* use up obj */
+	m_useup(mon, obj);
 }
 
 int

@@ -261,6 +261,7 @@ struct artifact {
 	unsigned long mtype;	/* monster symbol */
 	unsigned long mflagsm;	/* Monster Motility boolean bitflags */
 	unsigned long mflagst;	/* Monster Thoughts and behavior boolean bitflags */
+    unsigned long mflagsf;	/* Monster Fighting skills boolean bitflags */
 	unsigned long mflagsb;	/* Monster Body plan boolean bitflags */
 	unsigned long mflagsg;	/* Monster Game mechanics and bookkeeping boolean bitflags */
 	unsigned long mflagsa;	/* Monster rAce boolean bitflags */
@@ -294,10 +295,12 @@ struct artinstance{
 #define BoISspell avar1
 #define RRSember avar1
 #define BLactive avar1
+#define PlagueDuration avar1
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2
 #define RRSlunar avar2
+#define PlagueDoOnHit avar2
 	long avar3;
 #define SnSd3 avar3
 	long avar4;
@@ -398,51 +401,51 @@ extern struct artifact artilist[];
 #define MASTERY_ARTIFACT_LEVEL 20
 
 #define has_named_mastery_artifact() (\
-            exist_artifact(BULLWHIP, artilist[ART_TRUSTY_ADVENTURER_S_WHIP].name) ||\
-            exist_artifact(SPE_BLANK_PAPER, artilist[ART_LOG_OF_THE_CURATOR].name) ||\
-            exist_artifact(FORCE_PIKE, artilist[ART_FORCE_PIKE_OF_THE_RED_GUAR].name) ||\
-            exist_artifact(GAUNTLETS, artilist[ART_GAUNTLETS_OF_THE_BERSERKER].name) ||\
-            exist_artifact(SCR_REMOVE_CURSE, artilist[ART_DECLARATION_OF_THE_APOSTAT].name) ||\
-            exist_artifact(LENSES, artilist[ART_SOUL_LENS].name) ||\
-            exist_artifact(SCR_BLANK_PAPER, artilist[ART_SEAL_OF_THE_SPIRITS].name) ||\
-            exist_artifact(WAN_FIRE, artilist[ART_TORCH_OF_ORIGINS].name) ||\
-            exist_artifact(STRIPED_SHIRT, artilist[ART_STRIPED_SHIRT_OF_THE_MURDE].name) ||\
-            exist_artifact(STRIPED_SHIRT, artilist[ART_STRIPED_SHIRT_OF_THE_THIEF].name) ||\
-            exist_artifact(STRIPED_SHIRT, artilist[ART_STRIPED_SHIRT_OF_THE_FALSE].name) ||\
-            exist_artifact(SCALPEL, artilist[ART_SCALPEL_OF_LIFE_AND_DEATH].name) ||\
-            exist_artifact(GAUNTLETS_OF_DEXTERITY, artilist[ART_GAUNTLETS_OF_THE_HEALING_H].name) ||\
-            exist_artifact(RIN_REGENERATION, artilist[ART_RING_OF_HYGIENE_S_DISCIPLE].name) ||\
-            exist_artifact(ROBE, artilist[ART_COPE_OF_THE_ELDRITCH_KNIGH].name) ||\
-            exist_artifact(KITE_SHIELD, artilist[ART_SHIELD_OF_THE_PALADIN].name) ||\
-            exist_artifact(POT_BOOZE, artilist[ART_BOOZE_OF_THE_DRUNKEN_MASTE].name) ||\
-            exist_artifact(GLOVES, artilist[ART_WRAPPINGS_OF_THE_SACRED_FI].name) ||\
-            exist_artifact(KHAKKHARA, artilist[ART_KHAKKHARA_OF_THE_MONKEY].name) ||\
-            exist_artifact(RIN_TELEPORTATION, artilist[ART_MARK_OF_THE_RIGHTFUL_SCION].name) ||\
-            exist_artifact(ORIHALCYON_GAUNTLETS, artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI].name) ||\
-            exist_artifact(MACE, artilist[ART_MACE_OF_THE_EVANGELIST].name) ||\
-            exist_artifact(DART, artilist[ART_DART_OF_THE_ASSASSIN].name) ||\
-            exist_artifact(SHORT_SWORD, artilist[ART_SWORD_OF_THE_KLEPTOMANIAC].name) ||\
-            exist_artifact(LEATHER_HELM, artilist[ART_HELM_OF_THE_ARCANE_ARCHER].name) ||\
-            exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_PYGMALION].name) ||\
-            exist_artifact(FIGURINE, artilist[ART_FIGURINE_OF_GALATEA].name) ||\
-            exist_artifact(HELM_OF_OPPOSITE_ALIGNMENT, artilist[ART_HELM_OF_THE_NINJA].name) ||\
-            exist_artifact(TOWEL, artilist[ART_TOWEL_OF_THE_INTERSTELLAR_].name) ||\
-            exist_artifact(SPE_BLANK_PAPER, artilist[ART_ENCYCLOPEDIA_GALACTICA].name) ||\
-            exist_artifact(WAN_TELEPORTATION, artilist[ART_TWIG_OF_YGGDRASIL].name) ||\
-            exist_artifact(SADDLE, artilist[ART_SADDLE_OF_BRYNHILDR].name) ||\
-            exist_artifact(QUARTERSTAFF, artilist[ART_STAFF_OF_WILD_MAGIC].name) ||\
-            exist_artifact(ROBE, artilist[ART_ROBE_OF_THE_ARCHMAGI].name) ||\
-            exist_artifact(WAR_HAMMER, artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI].name) ||\
-            exist_artifact(RIN_PROTECTION_FROM_SHAPE_CHAN, artilist[ART_RING_OF_LOLTH].name) ||\
-            exist_artifact(DWARVISH_ROUNDSHIELD, artilist[ART_BULWARK_OF_THE_DWARVEN_DEF].name) ||\
-            exist_artifact(RIN_PROTECTION_FROM_SHAPE_CHAN,artilist[ART_RING_OF_LOLTH].name) ||\
-            exist_artifact(RIN_TELEPORT_CONTROL,artilist[ART_NARYA].name) ||\
-            exist_artifact(RIN_TELEPORTATION,artilist[ART_NENYA].name) ||\
-            exist_artifact(RIN_AGGRAVATE_MONSTER,artilist[ART_VILYA].name) ||\
-            exist_artifact(GNOMISH_POINTY_HAT,artilist[ART_HAT_OF_THE_GIANT_KILLER].name) ||\
-            exist_artifact(PLATE_MAIL,artilist[ART_PRISMATIC_DRAGON_PLATE].name) ||\
-            exist_artifact(STAR_SAPPHIRE,artilist[ART_FOOTPRINTS_IN_THE_LABYRINT].name) ||\
-            exist_artifact(AMULET_OF_RESTFUL_SLEEP,artilist[ART_TRAPPINGS_OF_THE_GRAVE].name)\
+            art_already_exists(ART_TRUSTY_ADVENTURER_S_WHIP) ||\
+            art_already_exists(ART_LOG_OF_THE_CURATOR) ||\
+            art_already_exists(ART_FORCE_PIKE_OF_THE_RED_GUAR) ||\
+            art_already_exists(ART_GAUNTLETS_OF_THE_BERSERKER) ||\
+            art_already_exists(ART_DECLARATION_OF_THE_APOSTAT) ||\
+            art_already_exists(ART_SOUL_LENS) ||\
+            art_already_exists(ART_SEAL_OF_THE_SPIRITS) ||\
+            art_already_exists(ART_TORCH_OF_ORIGINS) ||\
+            art_already_exists(ART_STRIPED_SHIRT_OF_THE_MURDE) ||\
+            art_already_exists(ART_STRIPED_SHIRT_OF_THE_THIEF) ||\
+            art_already_exists(ART_STRIPED_SHIRT_OF_THE_FALSE) ||\
+            art_already_exists(ART_SCALPEL_OF_LIFE_AND_DEATH) ||\
+            art_already_exists(ART_GAUNTLETS_OF_THE_HEALING_H) ||\
+            art_already_exists(ART_RING_OF_HYGIENE_S_DISCIPLE) ||\
+            art_already_exists(ART_COPE_OF_THE_ELDRITCH_KNIGH) ||\
+            art_already_exists(ART_SHIELD_OF_THE_PALADIN) ||\
+            art_already_exists(ART_BOOZE_OF_THE_DRUNKEN_MASTE) ||\
+            art_already_exists(ART_WRAPPINGS_OF_THE_SACRED_FI) ||\
+            art_already_exists(ART_KHAKKHARA_OF_THE_MONKEY) ||\
+            art_already_exists(ART_MARK_OF_THE_RIGHTFUL_SCION) ||\
+            art_already_exists(ART_GAUNTLETS_OF_THE_DIVINE_DI) ||\
+            art_already_exists(ART_MACE_OF_THE_EVANGELIST) ||\
+            art_already_exists(ART_DART_OF_THE_ASSASSIN) ||\
+            art_already_exists(ART_SWORD_OF_THE_KLEPTOMANIAC) ||\
+            art_already_exists(ART_HELM_OF_THE_ARCANE_ARCHER) ||\
+            art_already_exists(ART_FIGURINE_OF_PYGMALION) ||\
+            art_already_exists(ART_FIGURINE_OF_GALATEA) ||\
+            art_already_exists(ART_HELM_OF_THE_NINJA) ||\
+            art_already_exists(ART_TOWEL_OF_THE_INTERSTELLAR_) ||\
+            art_already_exists(ART_ENCYCLOPEDIA_GALACTICA) ||\
+            art_already_exists(ART_TWIG_OF_YGGDRASIL) ||\
+            art_already_exists(ART_SADDLE_OF_BRYNHILDR) ||\
+            art_already_exists(ART_STAFF_OF_WILD_MAGIC) ||\
+            art_already_exists(ART_ROBE_OF_THE_ARCHMAGI) ||\
+            art_already_exists(ART_FORGE_HAMMER_OF_THE_ARTIFI) ||\
+            art_already_exists(ART_RING_OF_LOLTH) ||\
+            art_already_exists(ART_BULWARK_OF_THE_DWARVEN_DEF) ||\
+            art_already_exists(ART_RING_OF_LOLTH) ||\
+            art_already_exists(ART_NARYA) ||\
+            art_already_exists(ART_NENYA) ||\
+            art_already_exists(ART_VILYA) ||\
+            art_already_exists(ART_HAT_OF_THE_GIANT_KILLER) ||\
+            art_already_exists(ART_PRISMATIC_DRAGON_PLATE) ||\
+            art_already_exists(ART_FOOTPRINTS_IN_THE_LABYRINT) ||\
+            art_already_exists(ART_TRAPPINGS_OF_THE_GRAVE)\
 )
 
 #define is_nameable_artifact(a) (\
@@ -451,7 +454,7 @@ extern struct artifact artilist[];
 			|| (a == &artilist[ART_KUSANAGI_NO_TSURUGI] && Role_if(PM_SAMURAI) && u.ulevel >= 22 )\
 			|| (a == &artilist[ART_GRANDMASTER_S_ROBE] && P_SKILL(P_MARTIAL_ARTS) >= P_GRAND_MASTER && u.ulevel >= 30 )\
 			|| (a == &artilist[ART_FIRST_KEY_OF_CHAOS] && \
-							(exist_artifact(SKELETON_KEY,artilist[ART_THIRD_KEY_OF_CHAOS].name) \
+							(art_already_exists(ART_THIRD_KEY_OF_CHAOS) \
 							||  u.ualign.type == A_CHAOTIC ) \
 				)\
 			)
@@ -511,7 +514,7 @@ extern struct artifact artilist[];
             /* Nobleman/Noblewoman */\
             /* Priest/Priestess */\
             || ((a) == &artilist[ART_MACE_OF_THE_EVANGELIST] && (Role_if(PM_PRIEST) || Pantheon_if(PM_PRIEST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
-                !exist_artifact(ORIHALCYON_GAUNTLETS, artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI].name))\
+                !art_already_exists(ART_GAUNTLETS_OF_THE_DIVINE_DI))\
             || ((a) == &artilist[ART_GAUNTLETS_OF_THE_DIVINE_DI] && (Role_if(PM_PRIEST) || Pantheon_if(PM_PRIEST)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Pirate */\

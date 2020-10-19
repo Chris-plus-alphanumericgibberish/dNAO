@@ -1503,7 +1503,7 @@ boolean with_price;
 
 	/* finishing up xname stuff, which has a lot of special cases */
 	
-	if (obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc && !getting_obj_base_desc) {
+	if (obj->oartifact && !(is_lightsaber(obj) && obj->cobj && obj->cobj->oartifact == obj->oartifact) && undiscovered_artifact(obj->oartifact) && oart->desc && !getting_obj_base_desc) {
 		if (strstri(oart->desc, "%s")) {
 			getting_obj_base_desc = TRUE;
 			char * buf2 = nextobuf();

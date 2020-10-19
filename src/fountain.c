@@ -368,7 +368,7 @@ register struct obj *obj;
 	if (obj->otyp == LONG_SWORD && obj->quan == 1L
 	    && u.ulevel >= 5 && !rn2(6)
 	    && !obj->oartifact
-	    && !exist_artifact(LONG_SWORD, artiname(ART_EXCALIBUR))) {
+	    && !art_already_exists(ART_EXCALIBUR)) {
 
 		if (u.ualign.type != A_LAWFUL) {
 			/* Ha!  Trying to cheat her. */
