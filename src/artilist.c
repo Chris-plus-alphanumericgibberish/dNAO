@@ -13,10 +13,11 @@
 #define vsMSYM(x) C01((x))
 #define vsMM(x)   C02((x))
 #define vsMT(x)   C03((x))
-#define vsMB(x)   C04((x))
-#define vsMG(x)   C05((x))
-#define vsMA(x)   C06((x))
-#define vsMV(x)   C07((x))
+#define vsMF(x)   C04((x))
+#define vsMB(x)   C05((x))
+#define vsMG(x)   C06((x))
+#define vsMA(x)   C07((x))
+#define vsMV(x)   C08((x))
 
 #define NO_ATTK()									    0,   0,   0
 #define ATTK(adtyp, acc, dam)						adtyp, acc, dam
