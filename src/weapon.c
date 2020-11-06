@@ -1981,9 +1981,9 @@ register struct monst *mon;
 					((tobj = m_carrying_charged(mon, HAND_BLASTER)) && tobj != MON_WEP(mon)) ||
 					/* bullets */
 					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET)) &&
-						((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP))) ||
+						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP))) ||
 						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP))) ||
-						((tobj = oselect(mon, PISTOL, W_SWAPWEP)))) ||
+						((tobj = oselect(mon, PISTOL, W_SWAPWEP))))) ||
 					/* shotgun shells */
 					((m_carrying(mon, SHOTGUN_SHELL)) &&
 						((tobj = oselect(mon, SHOTGUN, W_SWAPWEP))))
