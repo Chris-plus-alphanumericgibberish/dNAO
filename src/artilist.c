@@ -144,8 +144,8 @@ A("The Marauder's Map",	SCR_MAGIC_MAPPING,				"parchment scroll",
 	OBJECT_DET, NOFLAG
 	),
 
-/*//////////Namable Artifacts//////////*/
-/*most namables can be twoweaponed, look in obj.h */
+/*//////////Nameable Artifacts//////////*/
+/*most nameables can be twoweaponed, look in obj.h */
 
 /*
  *	Orcrist and Sting have same alignment as elves.
