@@ -399,24 +399,25 @@ int tary;
 	}
 
 	/*	Special demon/minion handling code */
-	if (youdef && !magr->cham && (is_demon(pa) || is_minion(pa)) && !ranged
-		&& pa->mtyp != PM_OONA
-		&& pa->mtyp != PM_BALROG
-		&& pa->mtyp != PM_DURIN_S_BANE
-		&& pa->mtyp != PM_SUCCUBUS
-		&& pa->mtyp != PM_INCUBUS
-		) {
-		if (!magr->mcan && !rn2(13)) {
-			msummon(magr);
-		}
-	}
-	if (youagr && is_demon(youracedata) && !rn2(13) && !uwep
-		&& u.umonnum != PM_SUCCUBUS
-		&& u.umonnum != PM_INCUBUS
-		&& u.umonnum != PM_BALROG) {
-	    demonpet();
-		return MM_MISS;
-	}
+	/*	This causes a lot of balance problems, and has been commented out pending a rework */
+	// if (youdef && !magr->cham && (is_demon(pa) || is_minion(pa)) && !ranged
+		// && pa->mtyp != PM_OONA
+		// && pa->mtyp != PM_BALROG
+		// && pa->mtyp != PM_DURIN_S_BANE
+		// && pa->mtyp != PM_SUCCUBUS
+		// && pa->mtyp != PM_INCUBUS
+		// ) {
+		// if (!magr->mcan && !rn2(13)) {
+			// msummon(magr);
+		// }
+	// }
+	// if (youagr && is_demon(youracedata) && !rn2(13) && !uwep
+		// && u.umonnum != PM_SUCCUBUS
+		// && u.umonnum != PM_INCUBUS
+		// && u.umonnum != PM_BALROG) {
+	    // demonpet();
+		// return MM_MISS;
+	// }
 	/*	Special lycanthrope handling code */
 	if(youdef && !magr->cham && is_were(pa) && !ranged) {
 
