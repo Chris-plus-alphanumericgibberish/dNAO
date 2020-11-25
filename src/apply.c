@@ -6789,7 +6789,7 @@ dotrephination_menu()
 		incntlet++;
 	}
 	if (u.thoughts&IMPURITY){
-		Sprintf(buf, "Extract the red millipedes");
+		Sprintf(buf, "Extract the red millipedes and their filth");
 		any.a_int = IMPURITY_GLYPH;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,

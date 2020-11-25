@@ -3200,7 +3200,7 @@ resistances_enlightenment()
 	if (active_glyph(EYE_THOUGHT)) putstr(en_win, 0, "Eyes writhe inside your head.");
 	if (active_glyph(FORMLESS_VOICE)) putstr(en_win, 0, "A great voice speaks to you.");
 	if (active_glyph(GUIDANCE)) putstr(en_win, 0, "You see dancing sprites, far away in the dark behind your eyes.");
-	if (active_glyph(IMPURITY)) putstr(en_win, 0, "Red millipedes crawl through your brain.");
+	if (active_glyph(IMPURITY)) putstr(en_win, 0, "Red millipedes crawl through the filth inside your brain.");
 	if (active_glyph(MOON)) putstr(en_win, 0, "You see the face of the sympathetic moon.");
 	if (active_glyph(WRITHE)) putstr(en_win, 0, "A subtle mucus covers your brain.");
 	if (active_glyph(RADIANCE)) putstr(en_win, 0, "Your mind is impaled on a golden pyramid.");
