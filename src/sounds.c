@@ -6030,9 +6030,9 @@ struct monst *dollmaker;
 	for(l = 0x1L, n = EFFIGY; l <= MAX_DOLL_MASK; l=(l<<1), n++){
 		if(dollmaker->mvar_dollTypes&l){
 			if(objects[n].oc_name_known)
-				Sprintf(buf, "%s ($%d)", OBJ_NAME(objects[n]), 8000);
+				Sprintf(buf, "%s ($%d)", OBJ_NAME(objects[n]), 800);
 			else
-				Sprintf(buf, "%s ($%d)", OBJ_DESCR(objects[n]), 8000);
+				Sprintf(buf, "%s ($%d)", OBJ_DESCR(objects[n]), 800);
 			any.a_int = n;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
 				incntlet, 0, ATR_NONE, buf,
@@ -6062,7 +6062,7 @@ boolean
 buy_dolls(dollmaker)
 struct monst *dollmaker;
 {
-	int dollnum, gold, count = 1, cost;
+	int dollnum, gold, count = 1, cost, basecost;
 	struct obj *doll;
 	
 	dollnum = dodollmenu(dollmaker);
@@ -6076,6 +6076,7 @@ struct monst *dollmaker;
 #endif
 	if(dollnum != DOLL_S_TEAR){
 		char inbuf[BUFSZ];
+		basecost = 800;
 		getlin("How many?", inbuf);
 		if (*inbuf == '\033') count = 1;
 		else count = atoi(inbuf);
@@ -6085,8 +6086,10 @@ struct monst *dollmaker;
 		}
 		if(count < 0)
 			count = 1;
+	} else {
+		basecost = 8000;
 	}
-	cost = 8000*count;
+	cost = basecost*count;
 	
 	if(gold < cost){
 		pline("You don't have enough gold!");
