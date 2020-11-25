@@ -2879,13 +2879,13 @@ int tx,ty;
 			if(t && t->ttyp == PIT){
 				pline("The walls of the pit are lifted swiftly away, revealing a vast starry expanse beneath the world.");
 				if(u.sealCounts < numSlots){
-					pline("A voice whispers from bellow:");
+					pline("A voice whispers from below:");
 					pline("\"All shall feed the shattered night.\"");
 					bindspirit(ep->ward_id);
 					u.sealTimeout[AHAZU-FIRST_SEAL] = moves + bindingPeriod;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
-					pline("A voice whispers from bellow:");
+					pline("A voice whispers from below:");
 					pline("\"All shall feed the shattered night.\"");
 					uwep->ovar1 |= SEAL_AHAZU;
 					if(!u.spiritTineA){ 
@@ -2899,7 +2899,7 @@ int tx,ty;
 					u.sealTimeout[AHAZU-FIRST_SEAL] = moves + bindingPeriod;
 				}
 				else{
-					pline("A voice whispers from bellow, but you don't catch what it says.");
+					pline("A voice whispers from below, but you don't catch what it says.");
 					// u.sealTimeout[AHAZU-FIRST_SEAL] = moves + bindingPeriod/10;
 				}
 			} else{

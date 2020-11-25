@@ -1336,7 +1336,7 @@ names that still ring in your ears, the names that drove you
 into exile.
 
 You do not dream now. The wind is filled with a muted tension, 
-as of a scream just bellow the threshold of hearing, and dark
+as of a scream just below the threshold of hearing, and dark
 creatures stalk the wastes around %H.
 %E
 %Cp Bin 00002
@@ -6070,7 +6070,7 @@ Without it, we could not mount a counter-attack.  Now, there are
 barely enough %gP left to keep the undead at bay.
 
 "We need you to find %i, then, from there, travel
-to %ns lair deep bellow the lowest crypts.  
+to %ns lair deep below the lowest crypts.  
 If you can manage to defeat %n and return
 %o here, we can then drive off the legions of
 undead that befoul the land.
