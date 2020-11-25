@@ -1896,6 +1896,14 @@ boolean *prev_loot;
 		    /* the attempt costs you time */
 			return (1);
 		}
+		if (otmp->otyp == STATUE && (otmp->corpsenm == PM_PARASITIC_MIND_FLAYER || otmp->corpsenm == PM_PARASITIC_MASTER_MIND_FLAYER)){
+		    You("can't. It's stuck in %s face.",
+			s_suffix(x_monnam(mtmp, ARTICLE_THE, (char *)0,
+				SUPPRESS_SADDLE, FALSE)));
+			    
+		    /* the attempt costs you time */
+			return (1);
+		}
 		obj_extract_self(otmp);
 		if ((unwornmask = otmp->owornmask) != 0L) {
 		    mtmp->misc_worn_check &= ~unwornmask;
@@ -3688,6 +3696,10 @@ tiphat()
 				pline("%s waves.", Monnam(mtmp));
 			} else if (otmp->cursed && !is_weldproof_mon(mtmp)) {
 				pline("%s grasps %s %s but can't remove it.", Monnam(mtmp),
+					  mhis(mtmp), term);
+				otmp->bknown = 1;
+			} else if (otmp->otyp == STATUE && (otmp->corpsenm == PM_PARASITIC_MIND_FLAYER || otmp->corpsenm == PM_PARASITIC_MASTER_MIND_FLAYER)){
+				pline("%s grasps the statue in %s face but can't remove it.", Monnam(mtmp),
 					  mhis(mtmp), term);
 				otmp->bknown = 1;
 			} else {

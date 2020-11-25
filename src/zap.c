@@ -4604,11 +4604,26 @@ int type;
 {
 	struct monst *mtmp;
 	struct obj *otmp;
-	if(type != AD_DGST){
+	if(type == AD_STON){
+		otmp = mksobj(STATUE, FALSE, FALSE);
+		otmp->corpsenm = mon->mtyp==PM_PARASITIZED_COMMANDER ? PM_PARASITIC_MASTER_MIND_FLAYER : PM_PARASITIC_MIND_FLAYER;
+		fix_object(otmp);
+		mpickobj(mon, otmp);
+		if(which_armor(mon, W_ARMH)){
+			struct obj *hlm = which_armor(mon, W_ARMH);
+			m_lose_armor(mon, hlm);
+		}
+		//Equip it to the head slot
+		mon->misc_worn_check |= W_ARMH;
+		otmp->owornmask |= W_ARMH;
+		update_mon_intrinsics(mon, otmp, TRUE, TRUE);
+	}
+	else if(type != AD_DGST){
 		otmp = mksobj_at(CORPSE, mon->mx, mon->my, FALSE, FALSE);
 		otmp->corpsenm = mon->mtyp==PM_PARASITIZED_COMMANDER ? PM_PARASITIC_MASTER_MIND_FLAYER : PM_PARASITIC_MIND_FLAYER;
 		fix_object(otmp);
 	}
+	
 	if(mon->mtyp == PM_PARASITIZED_ANDROID){
 		newcham(mon, PM_ANDROID, FALSE, FALSE);
 		mon->m_lev = 7;

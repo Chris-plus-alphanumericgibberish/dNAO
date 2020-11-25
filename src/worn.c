@@ -7,7 +7,6 @@
 void FDECL(mon_block_extrinsic, (struct monst *, struct obj *, int, boolean, boolean));
 boolean FDECL(mon_gets_extrinsic, (struct monst *, int, struct obj *));
 STATIC_DCL void FDECL(update_mon_intrinsic, (struct monst *,struct obj *,int,BOOLEAN_P,BOOLEAN_P));
-STATIC_DCL void FDECL(m_lose_armor, (struct monst *,struct obj *));
 STATIC_DCL void FDECL(m_dowear_type, (struct monst *,long, BOOLEAN_P, BOOLEAN_P));
 STATIC_DCL int NDECL(def_beastmastery);
 STATIC_DCL int NDECL(def_mountedCombat);
@@ -1106,12 +1105,13 @@ int *natural_dr_out;
 		slot = UPPER_TORSO_DR;
 
 	/* DR of worn armor */
-	int marmor[] = { W_ARM, W_ARMC, W_ARMF, W_ARMH, W_ARMG, W_ARMS, W_ARMU };
+	int marmor[] = { W_ARM,          				W_ARMC,         					  W_ARMF, W_ARMH,  W_ARMG, W_ARMS, W_ARMU };
+	int adfalt[] = { UPPER_TORSO_DR|LOWER_TORSO_DR, UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR, LEG_DR, HEAD_DR, ARM_DR, 0,     UPPER_TORSO_DR };
 	int i;
 	struct obj * curarm;
 	for (i = 0; i < SIZE(marmor); i++) {
 		curarm = which_armor(mon, marmor[i]);
-		if (curarm && (objects[curarm->otyp].oc_dir & slot)) {
+		if (curarm && ((objects[curarm->otyp].oc_dir & slot) || (!objects[curarm->otyp].oc_dir && (slot&adfalt[i])))) {
 			arm_mdr += arm_dr_bonus(curarm);
 			if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
 		}
@@ -1308,6 +1308,8 @@ boolean racialexception;
 
 	old = which_armor(mon, flag);
 	if (old && old->cursed && !is_weldproof_mon(mon)) return;
+	if (old && old->otyp == STATUE && (old->corpsenm == PM_PARASITIC_MIND_FLAYER || old->corpsenm == PM_PARASITIC_MASTER_MIND_FLAYER))
+		return;
 	if (old && flag == W_AMUL) return; /* no such thing as better amulets */
 	best = old;
 
@@ -1486,7 +1488,7 @@ long flag;
 }
 
 /* remove an item of armor and then drop it */
-STATIC_OVL void
+void
 m_lose_armor(mon, obj)
 struct monst *mon;
 struct obj *obj;

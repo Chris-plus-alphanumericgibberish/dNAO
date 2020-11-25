@@ -5062,6 +5062,15 @@ register struct monst *mdef;
 	xchar x = mdef->mx, y = mdef->my;
 	boolean wasinside = FALSE;
 
+	/* This happens twice because some paths enter monstone() directly instead of through minstapetrify()*/
+	if (poly_when_stoned(mdef->data)) {
+		mon_to_stone(mdef);
+		return;
+	}
+	else if(is_delouseable(mdef->data)){
+		mdef = delouse(mdef, AD_STON);
+		return;
+	}
 	/* we have to make the statue before calling mondead, to be able to
 	 * put inventory in it, and we have to check for lifesaving before
 	 * making the statue....

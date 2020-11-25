@@ -3073,6 +3073,7 @@ E boolean FDECL(worm_known, (struct monst *));
 E boolean FDECL(item_has_property, (struct obj *, int));
 E void FDECL(get_item_property_list, (int *, struct obj*, int));
 E void FDECL(setworn, (struct obj *,long));
+E void FDECL(m_lose_armor, (struct monst *,struct obj *));
 E void FDECL(setnotworn, (struct obj *));
 E void FDECL(mon_set_minvis, (struct monst *));
 E void FDECL(mon_adjust_speed, (struct monst *,int,struct obj *));

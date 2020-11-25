@@ -2545,6 +2545,10 @@ boolean byplayer;
 		mon_to_stone(mon);
 		return;
 	}
+	else if(is_delouseable(mon->data)){
+		mon = delouse(mon, AD_STON);
+		return;
+	}
 
 	/* give a "<mon> is slowing down" message and also remove
 	   intrinsic speed (comparable to similar effect on the hero) */

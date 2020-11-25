@@ -1635,11 +1635,12 @@ ROCK(("rock"),		1,100,   1,  0, 6, 6, 0, 0, 10, 7, MINERAL, CLR_GRAY),
  * Boulders weigh more than MAX_CARR_CAP; statues use corpsenm to take
  * on a specific type and may act as containers (both affect weight).
  */
+//OBJECT(names,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color,...)
 								//BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,big,tuf,dir,sub,mtrl,shwmat)
 OBJECT(("boulder",(char *)0), BITS(1,0,0,0,0,0,0,0,MZ_GIGANTIC,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   100, 0, 6000,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, HI_MINERAL),
 OBJECT(("statue"), BITS(1,0,0,1,0,0,0,0,    MZ_HUGE,0,0,0,P_NONE,MINERAL,0), 0,
-		ROCK_CLASS,   800, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_WHITE),
+		ROCK_CLASS,   800, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 2, 0, 2, 2500, CLR_WHITE),
 OBJECT(("fossil"), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   100, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_BROWN),
 /*

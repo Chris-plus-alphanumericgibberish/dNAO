@@ -2053,6 +2053,19 @@ weapon:
 			else if (obj->owornmask & W_ARMF)
 				Strcat(eos(buf), " (wrapped around legs)");
 			break;
+		case ROCK_CLASS:
+			if (obj->owornmask & W_ARMH){
+				if(obj->corpsenm == PM_PARASITIC_MIND_FLAYER || obj->corpsenm == PM_PARASITIC_MASTER_MIND_FLAYER)
+					Strcat(buf, " (embedded in face)");
+				else if(obj->otyp == BOULDER)
+					Strcat(buf, " (wrapped around head)");
+				else
+					Strcat(buf, " (being worn)");
+			}
+			else if (obj->owornmask & W_ARMOR)
+				Strcat(buf, " (being worn)");
+
+			break;
 		}//end switch(oclass)
 
 		if ((obj->owornmask & W_WEP) && !mrg_to_wielded) {
