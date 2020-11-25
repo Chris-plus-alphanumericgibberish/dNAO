@@ -2935,7 +2935,6 @@ spiriteffects(power, atme)
 			register struct monst *mtmp;
 			int range = BOLT_LIM + dsize;	/* 5 to 14 */
 			range *= range;
-			You("try to turn away or slay animals and humanoids.");
 			pline("A rainbow of unearthly colors dances before your eyes!");
 			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 				if (DEADMONSTER(mtmp)) continue;
