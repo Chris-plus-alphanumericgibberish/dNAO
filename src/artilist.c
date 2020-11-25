@@ -13,10 +13,11 @@
 #define vsMSYM(x) C01((x))
 #define vsMM(x)   C02((x))
 #define vsMT(x)   C03((x))
-#define vsMB(x)   C04((x))
-#define vsMG(x)   C05((x))
-#define vsMA(x)   C06((x))
-#define vsMV(x)   C07((x))
+#define vsMF(x)   C04((x))
+#define vsMB(x)   C05((x))
+#define vsMG(x)   C06((x))
+#define vsMA(x)   C07((x))
+#define vsMV(x)   C08((x))
 
 #define NO_ATTK()									    0,   0,   0
 #define ATTK(adtyp, acc, dam)						adtyp, acc, dam
@@ -143,8 +144,8 @@ A("The Marauder's Map",	SCR_MAGIC_MAPPING,				"parchment scroll",
 	OBJECT_DET, NOFLAG
 	),
 
-/*//////////Namable Artifacts//////////*/
-/*most namables can be twoweaponed, look in obj.h */
+/*//////////Nameable Artifacts//////////*/
+/*most nameables can be twoweaponed, look in obj.h */
 
 /*
  *	Orcrist and Sting have same alignment as elves.
@@ -2423,7 +2424,7 @@ A("The Tsurugi of Muramasa",		TSURUGI,			(const char *)0,
 	ATTK(AD_PHYS, 2, 0), (ARTA_VORPAL|ARTA_SHATTER),
 	PROPS(), (ARTP_SEEK),
 	PROPS(), NOFLAG,
-	NOINVOKE, (ARTI_LUCK)
+	NOINVOKE, (ARTI_LUCK|ARTI_BLOODTHRST)
 	),
 
 #ifdef TOURIST

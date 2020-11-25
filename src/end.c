@@ -941,7 +941,7 @@ int how;
 		else {
 			killer = 0;
 			killer_format = 0;
-			const char * llogstr;
+			char * llogstr;
 			switch (lsvd)
 			{
 			case LSVD_MISC: llogstr = "averted death";
