@@ -497,7 +497,9 @@ struct monst *mtmp;
 
 	mstatusline(mtmp);
 	if (notonhead) return;	/* don't show minvent for long worm tail */
-
+	
+	mdrslotline(mtmp);
+	
 #ifndef GOLDOBJ
 	if (mtmp->minvent || mtmp->mgold) {
 #else

@@ -2068,6 +2068,7 @@ E void VDECL(verbalize, (const char *,...)) PRINTF_F(1,2);
 E void VDECL(raw_printf, (const char *,...)) PRINTF_F(1,2);
 E void VDECL(impossible, (const char *,...)) PRINTF_F(1,2);
 E const char *FDECL(align_str, (ALIGNTYP_P));
+E void FDECL(mdrslotline, (struct monst *));
 E void FDECL(mstatusline, (struct monst *));
 E void NDECL(ustatusline);
 E void NDECL(self_invis_message);

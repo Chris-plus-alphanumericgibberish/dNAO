@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #define NEED_VARARGS /* Uses ... */	/* comment line for pre-compiled headers */
+#include <math.h>
 #include "hack.h"
 
 #ifdef WIZARD
@@ -435,6 +436,68 @@ align_str(alignment)
 		}
 	}
     return "unknown";
+}
+
+#define mslotdrtotal(slot)	\
+	mon_slot_dr(mtmp, (struct monst *) 0, slot, &base, &armac, &nat_dr);\
+	\
+	if(armac > 11) armac = (armac-10)/2 + 10;\
+	\
+	if(nat_dr && armac){\
+		base += sqrt(nat_dr*nat_dr + armac*armac);\
+	} else if(nat_dr){\
+		base += nat_dr;\
+	} else {\
+		base += armac;\
+	}
+
+void
+mdrslotline(mtmp)
+register struct monst *mtmp;
+{
+	int slot;
+	int base, nat_dr, armac;
+	char mbuf[BUFSZ] = {'\0'};
+	struct permonst *mdat = mtmp->data;
+	winid en_win;
+	en_win = create_nhwindow(NHW_MENU);
+	putstr(en_win, 0, "Monster Damage Reduction:");
+	putstr(en_win, 0, "");
+	
+	if(!has_head_mon(mtmp)){
+		Sprintf(mbuf, "No head; shots hit upper body");
+		putstr(en_win, 0, mbuf);
+	} else {
+		mslotdrtotal(HEAD_DR);
+		Sprintf(mbuf, "Head Armor:       %d", base);
+		putstr(en_win, 0, mbuf);
+	}
+	mslotdrtotal(UPPER_TORSO_DR);
+	Sprintf(mbuf, "Upper Body Armor: %d", base);
+	putstr(en_win, 0, mbuf);
+	mslotdrtotal(LOWER_TORSO_DR);
+	Sprintf(mbuf, "Lower Body Armor: %d", base);
+	putstr(en_win, 0, mbuf);
+	if(!can_wear_gloves(mdat)){
+		Sprintf(mbuf, "You have no hands; shots hit upper body");
+		putstr(en_win, 0, mbuf);
+	} else {
+		mslotdrtotal(ARM_DR);
+		Sprintf(mbuf, "Hand Armor:       %d", base);
+		putstr(en_win, 0, mbuf);
+	}
+	if(!can_wear_boots(mdat)){
+		Sprintf(mbuf, "You have no feet; shots hit lower body");
+		putstr(en_win, 0, mbuf);
+	} else {
+		mslotdrtotal(LEG_DR);
+		Sprintf(mbuf, "Foot Armor:       %d", base);
+		putstr(en_win, 0, mbuf);
+	}
+	
+	display_nhwindow(en_win, TRUE);
+	destroy_nhwindow(en_win);
+	return;
 }
 
 void
