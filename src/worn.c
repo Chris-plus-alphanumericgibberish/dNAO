@@ -1200,7 +1200,7 @@ struct monst *mon;
 		sum += base;
 	}
 
-	return sum / 9;
+	return sum / 7;
 }
 
 int
