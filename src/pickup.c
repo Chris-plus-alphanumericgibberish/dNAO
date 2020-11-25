@@ -3692,7 +3692,9 @@ tiphat()
 		mtmp->mstrategy &= ~STRAT_WAITMASK;
 
 		if (vismon && humanoid(mtmp->data) && mtmp->mpeaceful && !Conflict) {
-			if ((otmp = which_armor(mtmp, W_ARMH)) == 0) {
+			otmp = which_armor(mtmp, W_ARMH);
+			term = (otmp && !is_metallic(otmp)) ? "hat" : "helm";
+			if (otmp == 0) {
 				pline("%s waves.", Monnam(mtmp));
 			} else if (otmp->cursed && !is_weldproof_mon(mtmp)) {
 				pline("%s grasps %s %s but can't remove it.", Monnam(mtmp),
