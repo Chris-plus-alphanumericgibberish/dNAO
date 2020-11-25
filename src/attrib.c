@@ -1276,7 +1276,6 @@ int delta;
 			) {
 			change_glyph_active(thought, active_glyph(thought));
 		}
-		pline("[%ld]", thought);
 	}
 }
 
