@@ -3383,7 +3383,7 @@ struct monst *magr;
 			continue;
 		if(youdef && (magr->mpeaceful))
 			continue;
-		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful)))
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
 		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){

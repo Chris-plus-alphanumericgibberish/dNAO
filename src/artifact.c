@@ -9838,6 +9838,10 @@ dogoat_tentacles()
 		dogoat();
 	}
 	
+	if(is_goat_tentacle_mtyp(youracedata)){
+		dogoat();
+	}
+	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
