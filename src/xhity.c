@@ -10142,12 +10142,24 @@ int vis;
 		/* the eye-contact requirement should have been handled already */
 		if ((vis&VIS_MDEF) && (vis&VIS_MAGR)) {
 			/* change message based on expected effectiveness of xstoney() */
+			static long lastwarned = 0L;
 			if (Stone_res(mdef) || (youdef && Stoned)) {
-				pline("%s gaze%s ineffectively at %s.",
-					youagr ? "You" : Monnam(magr),
-					youagr ? "" : "s",
-					youdef ? "you" : mon_nam(mdef)
-					);
+				if(moves - lastwarned > 4){
+					if(pa->mtyp == PM_MEDUSA){
+						pline("%s %s look all that ugly to %s.",
+							youagr ? "You" : Monnam(magr),
+							youagr ? "doesn't" : "don't",
+							youdef ? "you" : mon_nam(mdef)
+							);
+					} else {
+						pline("%s gaze%s ineffectively at %s.",
+							youagr ? "You" : Monnam(magr),
+							youagr ? "" : "s",
+							youdef ? "you" : mon_nam(mdef)
+							);
+					}
+				}
+				lastwarned = moves;
 			}
 			else {
 				pline("%s meet%s %s petrifying gaze!",
