@@ -5444,6 +5444,8 @@ int how;
 	/* no corpses if digested or disintegrated */
 	if(how == AD_DGST || how == -AD_RBRE || how == AD_DISN)
 	    mondead(mdef);
+	else if(how == AD_STON)
+	    monstone(mdef);
 	else
 	    mondied(mdef);
 
