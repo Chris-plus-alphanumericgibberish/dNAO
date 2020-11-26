@@ -2559,6 +2559,7 @@ boolean byplayer;
 	if (byplayer) {
 		stoned = TRUE;
 		xkilled(mon,0);
+		stoned = FALSE;
 	} else monstone(mon);
 }
 

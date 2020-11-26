@@ -10091,6 +10091,7 @@ int vis;
 						killed(magr);
 					else
 						monkilled(magr, "", AD_STON);
+					stoned = FALSE;
 					return (MM_HIT | (*hp(magr) > 0 ? MM_AGR_STOP : MM_AGR_DIED));
 				}
 			}
@@ -14380,6 +14381,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							}
 							stoned = 1;
 							xkilled(magr, 0);
+							stoned = 0;
 							if (*hp(magr) > 0)
 								result |= MM_AGR_STOP;
 							else
