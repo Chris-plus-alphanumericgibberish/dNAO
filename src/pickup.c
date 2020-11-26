@@ -3701,8 +3701,7 @@ tiphat()
 					  mhis(mtmp), term);
 				otmp->bknown = 1;
 			} else if (otmp->otyp == STATUE && (otmp->corpsenm == PM_PARASITIC_MIND_FLAYER || otmp->corpsenm == PM_PARASITIC_MASTER_MIND_FLAYER)){
-				pline("%s grasps the statue in %s face but can't remove it.", Monnam(mtmp),
-					  mhis(mtmp), term);
+				pline("%s grasps the statue in %s face but can't remove it.", Monnam(mtmp), mhis(mtmp));
 				otmp->bknown = 1;
 			} else {
 				pline("%s tips %s %s in response.", Monnam(mtmp),
