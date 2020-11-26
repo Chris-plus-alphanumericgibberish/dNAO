@@ -1499,7 +1499,6 @@ karemade:
 			//The first case overrides the normal half dragon speed penalty for Fem Half-dragon nobles.
 			if(!Upolyd && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend) moveamt = 12;
 			else moveamt = youmonst.data->mmove;
-			pline("%d", moveamt);
 			if(uarmf && uarmf->otyp == STILETTOS && !Flying && !Levitation) moveamt = (moveamt*5)/6;
 			
 			if(u.sealsActive&SEAL_EURYNOME && IS_PUDDLE_OR_POOL(levl[u.ux][u.uy].typ)){
