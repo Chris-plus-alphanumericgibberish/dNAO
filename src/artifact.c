@@ -1982,6 +1982,11 @@ int * truedmgptr;
 		/* lightsabers add 3dX damage (but do not multiply multiplicative bonus damage) */
 		if (damd && (is_lightsaber(otmp) && litsaber(otmp)))
 			multiplier *= 3;
+		/* The profaned flame should do half damage to fire resistant things */
+		if(otmp->oartifact == ART_PROFANED_GREATSCYTHE && Fire_res(mon)){
+			damd = (damd + 1) / 2;
+			dmgtomulti = (dmgtomulti + 1) / 2;
+		}
 		/* some artifacts made it into here despite their spec_dbon not applying -- they have reduced bonus damage */
 		if (!spec_dbon_applies) {
 			damd = (damd + 1) / 2;
