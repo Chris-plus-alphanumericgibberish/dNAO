@@ -7797,7 +7797,7 @@ is a red right hand
 	LVL_NDR(16, 9, -3, 5, 99, -15), (G_HELL|G_NOGEN|G_NOCORPSE|G_UNIQ),
 	A(ATTK(AT_WEAP, AD_PHYS, 4, 4), ATTK(AT_WEAP, AD_PHYS, 4, 4),//Attack routine sometimes replaced by ATTK(AT_MAGC, AD_SPEL, 0, 0)
 	  ATTK(AT_CLAW, AD_SQUE, 4, 4), ATTK(AT_CLAW, AD_SQUE, 4, 4),//33% Blizzaga -> Slowra -> Thundaga -> Curaja -> Haste -> Firaga -> Blizzara -> Flare
-	  NO_ATTK, NO_ATTK), 										 //33% Flame Strike -> Geyser -> Cyclone -> Earthquake
+	  ATTK(AT_MAGC, AD_SPEL, 0, 0)), NO_ATTK), 										 //33% Flame Strike -> Geyser -> Cyclone -> Earthquake
 	SIZ(WT_HUGE, 400, MS_CUSS, MZ_HUGE), MR_ALL, 0,
 	MM_BREATHLESS|MM_FLY /*MM*/, MT_WANTSARTI|MT_HOSTILE|MT_COLLECT /*MT*/, MF_MARTIAL_B /*MF*/,
 	MB_HUMANOID|MB_WINGS|MB_MALE|MB_POIS /*MB*/, MG_NOTAME|MG_NOPOLY|MG_NASTY|MG_PNAME|MG_INFRAVISIBLE|MG_NOSPELLCOOLDOWN /*MG*/,
