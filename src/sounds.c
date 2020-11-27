@@ -2493,12 +2493,12 @@ int dz;
 	if(mtmp && mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD){
 	  if(uwep && offerable_artifact(uwep)) {
 			struct obj *optr;
-			You_feel("%s tug gently on your %s.",mon_nam(mtmp), ONAME(uwep));
+			You_feel("%s tug gently on your %s.",mon_nam(mtmp), xname(uwep));
 			if(yn("Release it?")=='n'){
 				You("hold on tight.");
 			}
 			else{
-				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
+				You("let %s take your %s.",mon_nam(mtmp), xname(uwep));
 				pline_The(Hallucination ? "world pats you on the head." : "world quakes around you.  Perhaps it is the voice of a god?");
 				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 				optr = uwep;
@@ -2530,16 +2530,16 @@ int dz;
 		){
 			struct obj *optr;
 			if(canspotmon(mtmp)){
-				You_feel("that %s desires your %s.",mon_nam(mtmp), ONAME(uwep));
+				You_feel("that %s desires your %s.",mon_nam(mtmp), xname(uwep));
 			} else {
-				You_feel("something desires your %s.",ONAME(uwep));
+				You_feel("something desires your %s.",xname(uwep));
 			}
 			if(yn("Offer it?")=='n'){
 				You("refuse.");
 				return 1;
 			}
 			else{
-				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
+				You("let %s take your %s.",mon_nam(mtmp), xname(uwep));
 				if (!mtyp_to_thought(mtmp->mtyp))
 					return 1;	/* error */
 				else
