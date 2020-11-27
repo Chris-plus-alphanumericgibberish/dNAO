@@ -123,6 +123,16 @@ struct obj * otmp;
 	case ART_PEN_OF_THE_VOID:
 		// Outright forbidden
 		return FALSE;
+	case ART_FLUORITE_OCTAHEDRON:
+		// requires the full set of 8
+		if (otmp->quan < 8)
+			return FALSE;
+		break;
+	case ART_BLADE_SINGER_S_SABER:
+		// cannot be one of the halves
+		if (otmp->otyp == RAKUYO_DAGGER || otmp->otyp == RAKUYO_SABER)
+			return FALSE;
+		break;
 		// otherwise continue
 	}
 
