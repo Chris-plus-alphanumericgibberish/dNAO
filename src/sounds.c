@@ -2491,9 +2491,7 @@ int dz;
 	}
 	
 	if(mtmp && mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD){
-	  if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
-		&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
-	  ){
+	  if(uwep && offerable_artifact(uwep)) {
 			struct obj *optr;
 			You_feel("%s tug gently on your %s.",mon_nam(mtmp), ONAME(uwep));
 			if(yn("Release it?")=='n'){
@@ -2527,8 +2525,7 @@ int dz;
 	}
 	
 	if(mtmp && mtmp->data->msound == MS_GLYPHS){
-		if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
-			&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
+		if(uwep && offerable_artifact(uwep)
 			&& count_glyphs() < 3 && !(u.thoughts & mtyp_to_thought(mtmp->mtyp))
 		){
 			struct obj *optr;
