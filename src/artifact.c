@@ -3552,7 +3552,9 @@ boolean * messaged;
 
 	default:
 		/* try to be as vague as possible */
-		if (msgr->otyp == SET_OF_CROW_TALONS)
+		if (is_axe(msgr))
+			wepdesc = "axe";
+		else if (msgr->otyp == SET_OF_CROW_TALONS)
 			wepdesc = "blades";
 		else if (is_blade(msgr))
 			wepdesc = "blade";
