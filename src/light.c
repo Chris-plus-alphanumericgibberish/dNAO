@@ -525,7 +525,8 @@ struct ls_t * ls;
 int fd;
 int mode;
 {
-	bwrite(fd, (genericptr_t)ls, sizeof(struct ls_t));
+	if (perform_bwrite(mode))
+	    bwrite(fd, (genericptr_t)ls, sizeof(struct ls_t));
 	if (release_data(mode))
 		del_light_source(ls);
 	return;

@@ -26,7 +26,6 @@ extern const struct shclass shtypes[];	/* defined in shknam.c */
 
 STATIC_VAR NEARDATA long int followmsg;	/* last time of follow message */
 
-STATIC_DCL void FDECL(setpaid, (struct monst *));
 STATIC_DCL long FDECL(addupbill, (struct monst *));
 STATIC_DCL void FDECL(setallstolen, (struct obj *));
 STATIC_DCL void FDECL(setallpaid, (struct obj *));
@@ -311,7 +310,7 @@ register struct obj *list;
 #ifdef OVLB
 
 /* either you paid or left the shop or the shopkeeper died */
-STATIC_OVL void
+void
 setpaid(shkp)
 register struct monst *shkp;
 {

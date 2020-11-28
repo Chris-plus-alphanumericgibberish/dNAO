@@ -32,7 +32,7 @@ And I shall endure eternally.\n\
 All hope abandon, ye who enter here!"
 };
 /* at most one of `door' and `box' should be non-null at any given time */
-STATIC_VAR NEARDATA struct xlock_s {
+NEARDATA struct xlock_s {
 	struct rm  *door;
 	struct obj *box;
 	int picktyp, chance, usedtime;
@@ -46,6 +46,11 @@ STATIC_VAR NEARDATA struct xlock_s {
 STATIC_DCL const char *NDECL(lock_action);
 STATIC_DCL boolean FDECL(obstructed,(int,int));
 STATIC_DCL void FDECL(chest_shatter_msg, (struct obj *));
+
+boolean
+is_box_picking_context() {
+	return (!xlock.box || !carried(xlock.box));
+}
 
 boolean
 picking_lock(x, y)

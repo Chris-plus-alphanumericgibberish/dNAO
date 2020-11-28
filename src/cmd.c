@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #include "hack.h"
+#include "lev.h"
 #include "func_tab.h"
 /* #define DEBUG */	/* uncomment for debugging */
 
@@ -135,6 +136,7 @@ STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
 STATIC_PTR int NDECL(wiz_wish);
 STATIC_PTR int NDECL(wiz_identify);
 STATIC_PTR int NDECL(wiz_map);
+STATIC_PTR int NDECL(wiz_makemap);
 STATIC_PTR int NDECL(wiz_genesis);
 STATIC_PTR int NDECL(wiz_where);
 STATIC_PTR int NDECL(wiz_detect);
@@ -1243,6 +1245,74 @@ wiz_identify()
 	if (wizard)	identify_pack(0);
 	else		pline("Unavailable command '^I'.");
 	return 0;
+}
+
+
+/* #wizmakemap - discard current dungeon level and replace with a new one */
+STATIC_PTR int
+wiz_makemap(VOID_ARGS)
+{
+    if (wizard) {
+	struct monst *mtmp;
+
+	rm_mapseen(ledger_no(&u.uz));
+
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+	    if (mtmp->isgd) {
+		mtmp->isgd = 0;
+		mongone(mtmp);
+	    }
+	    if (DEADMONSTER(mtmp))
+		continue;
+	    if (mtmp->isshk)
+		setpaid(mtmp);
+	}
+	if (Punished) {
+	    ballrelease(FALSE);
+	    unplacebc();
+	}
+	if (is_box_picking_context())
+	    reset_pick();
+
+	if (on_level(&digging.level, &u.uz))
+	    (void) memset((genericptr_t) &digging, 0, sizeof (struct dig_info));
+	iflags.travelcc.x = iflags.travelcc.y = 0;
+
+	u.utrap = 0;
+	u.utraptype = 0;
+
+	//float_vs_flight(); /* maybe block Lev and/or Fly */
+
+	check_special_room(TRUE);
+	u.ustuck = (struct monst *) 0;
+	u.uswallow = 0;
+	u.uinwater = 0;
+	u.uundetected = 0;
+	dmonsfree();
+	keepdogs(TRUE);
+
+        savelev(-1, ledger_no(&u.uz), FREE_SAVE);
+        /* create a new level; various things like bestowing a guardian
+           angel on Astral or setting off alarm on Ft.Ludios are handled
+           by goto_level(do.c) so won't occur for replacement levels */
+        mklev();
+
+        vision_reset();
+        vision_full_recalc = 1;
+        cls();
+
+	rnd(2) ? u_on_upstairs() : u_on_dnstairs();
+        losedogs();
+        initrack();
+        if (Punished) {
+            unplacebc();
+            placebc();
+        }
+        docrt();
+        flush_screen(1);
+        check_special_room(FALSE); /* room entry */
+    }
+    return 0;
 }
 
 /* ^F command - reveal the level map and any traps on it */
@@ -5185,6 +5255,7 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #detect */
 	{(char *)0, (char *)0, donull, TRUE}, /* #gcrown */
 	{(char *)0, (char *)0, donull, TRUE}, /* #map level*/
+	{(char *)0, (char *)0, donull, TRUE}, /* #wizmakemap */
 #ifdef DEBUG_MIGRATING_MONS
 	{(char *)0, (char *)0, donull, TRUE}, /* #migratemons */
 #endif
@@ -5225,6 +5296,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"detect", "do wizard detection", wiz_detect, IFBURIED, AUTOCOMPLETE},
 	{"godcrown", "make your god crown you", gcrownu, IFBURIED, AUTOCOMPLETE},
 	{"map", "map the current level", wiz_map, IFBURIED, AUTOCOMPLETE},
+	{"wizmakemap", "recreate the current level", wiz_makemap, IFBURIED},
 #ifdef DEBUG_MIGRATING_MONS
 	{"migratemons", "migrate n random monsters", wiz_migrate_mons, IFBURIED, AUTOCOMPLETE},
 #endif
