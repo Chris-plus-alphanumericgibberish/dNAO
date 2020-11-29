@@ -67,6 +67,7 @@ E void FDECL(add_class, (char *, char));
 /* ### artifact.c ### */
 
 E boolean FDECL(CountsAgainstGifts, (int));
+E boolean FDECL(offerable_artifact, (struct obj *));
 E void NDECL(init_artifacts);
 E void NDECL(hack_artifacts);
 E void FDECL(save_artifacts, (int));

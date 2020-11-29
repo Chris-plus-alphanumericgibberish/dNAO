@@ -2491,16 +2491,14 @@ int dz;
 	}
 	
 	if(mtmp && mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD){
-	  if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
-		&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
-	  ){
+	  if(uwep && offerable_artifact(uwep)) {
 			struct obj *optr;
-			You_feel("%s tug gently on your %s.",mon_nam(mtmp), ONAME(uwep));
+			You_feel("%s tug gently on your %s.",mon_nam(mtmp), xname(uwep));
 			if(yn("Release it?")=='n'){
 				You("hold on tight.");
 			}
 			else{
-				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
+				You("let %s take your %s.",mon_nam(mtmp), xname(uwep));
 				pline_The(Hallucination ? "world pats you on the head." : "world quakes around you.  Perhaps it is the voice of a god?");
 				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 				optr = uwep;
@@ -2527,22 +2525,21 @@ int dz;
 	}
 	
 	if(mtmp && mtmp->data->msound == MS_GLYPHS){
-		if(uwep && uwep->oartifact && uwep->oartifact != ART_SILVER_KEY && uwep->oartifact != ART_ANNULUS
-			&& uwep->oartifact != ART_PEN_OF_THE_VOID && CountsAgainstGifts(uwep->oartifact)
+		if(uwep && offerable_artifact(uwep)
 			&& count_glyphs() < 3 && !(u.thoughts & mtyp_to_thought(mtmp->mtyp))
 		){
 			struct obj *optr;
 			if(canspotmon(mtmp)){
-				You_feel("that %s desires your %s.",mon_nam(mtmp), ONAME(uwep));
+				You_feel("that %s desires your %s.",mon_nam(mtmp), xname(uwep));
 			} else {
-				You_feel("something desires your %s.",ONAME(uwep));
+				You_feel("something desires your %s.",xname(uwep));
 			}
 			if(yn("Offer it?")=='n'){
 				You("refuse.");
 				return 1;
 			}
 			else{
-				You("let %s take your %s.",mon_nam(mtmp), ONAME(uwep));
+				You("let %s take your %s.",mon_nam(mtmp), xname(uwep));
 				if (!mtyp_to_thought(mtmp->mtyp))
 					return 1;	/* error */
 				else
