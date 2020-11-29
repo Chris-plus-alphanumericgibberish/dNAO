@@ -1458,6 +1458,20 @@ int in_sight;
 			seetrap(trap);
 		    }
 		    return 0;
+		} else if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend && In_quest(&u.uz)){
+			int i;
+			extern int n_dgns; /* from dungeon.c */
+			//Look for return info
+			for (i = 0; i < n_dgns; i++)
+				if(dungeons[i].dunlev_ureturn)
+					break;
+			if(i < n_dgns){
+				tolevel.dnum = i;
+				tolevel.dlevel = dungeons[i].dunlev_ureturn;
+			} else {
+				assign_level(&tolevel, &trap->dst);
+				migrate_typ = MIGR_PORTAL;
+			}
 		} else {
 		    assign_level(&tolevel, &trap->dst);
 		    migrate_typ = MIGR_PORTAL;
