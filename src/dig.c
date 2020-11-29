@@ -421,7 +421,7 @@ dig()
 					digtxt = "You splinter the tree.";
 				else
 					digtxt = "You cut down the tree.";
-			    lev->typ = ROOM;
+			    lev->typ = SOIL;
 			    if (!(lev->looted & TREE_LOOTED) && !rn2(5)){
 					if(!In_neu(&u.uz) &&
 						u.uz.dnum != chaos_dnum &&
