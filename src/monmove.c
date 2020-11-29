@@ -918,11 +918,11 @@ register struct monst *mtmp;
 		}
 	}
 	if(mdat->mtyp == PM_FORD_GUARDIAN){
-		if(!rn2(20) && mtmp->mux == u.ux && mtmp->muy == u.uy && !(mtmp->mstrategy&STRAT_WAITFORU)){
+		if(!rn2(8) && distmin(mtmp->mux, mtmp->muy, mtmp->mx, mtmp->my) < 4 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 4 && !(mtmp->mstrategy&STRAT_WAITFORU)){
 			int i = rnd(4);
 			pline("The waters of the ford rise to the aid of the guardian!");
 			for(; i > 0; i--)
-				makemon(&mons[PM_FORD_ELEMENTAL], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
+				makemon(&mons[PM_FORD_ELEMENTAL], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK);
 		}
 	}
 	if(mdat->mtyp == PM_LEGION){
