@@ -3882,15 +3882,15 @@ register struct monst *shkp;
 		}
 		avoid = FALSE;
 	} else {
+		uondoor = (u.ux == eshkp->shd.x && u.uy == eshkp->shd.y);
 #define	GDIST(x,y)	(dist2(x,y,gx,gy))
-		if (Invis
+		if ((Invis && uondoor)
 #ifdef STEED
 			|| u.usteed
 #endif
 			) {
 		    avoid = FALSE;
 		} else {
-		    uondoor = (u.ux == eshkp->shd.x && u.uy == eshkp->shd.y);
 		    if(uondoor) {
 			badinv = (carrying(PICK_AXE) || carrying(DWARVISH_MATTOCK) ||
             eshkp->pbanned || tempbanned ||
