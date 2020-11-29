@@ -3449,7 +3449,8 @@ Once again, you find yourself in a frozen forest.
 UNUSED
 %E
 %Cp Hdf 00005
-"After the High Priestess restored the old cathedral on the plateau monstrous soldiers have began to appear in the catacombs below!"
+"After the High Priestess restored the old cathedral on the plateau
+monstrous soldiers have began to appear in the catacombs below!"
 %E
 %Cp Hdf 00006
 "This was a gentle land! Why are the wolves attacking us?"
