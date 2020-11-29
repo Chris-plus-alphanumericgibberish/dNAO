@@ -479,7 +479,7 @@ register struct monst *mtmp;
 	Sprintf(mbuf, "Lower Body Armor: %d", base);
 	putstr(en_win, 0, mbuf);
 	if(!can_wear_gloves(mdat)){
-		Sprintf(mbuf, "You have no hands; shots hit upper body");
+		Sprintf(mbuf, "No hands; shots hit upper body");
 		putstr(en_win, 0, mbuf);
 	} else {
 		mslotdrtotal(ARM_DR);
@@ -487,7 +487,7 @@ register struct monst *mtmp;
 		putstr(en_win, 0, mbuf);
 	}
 	if(!can_wear_boots(mdat)){
-		Sprintf(mbuf, "You have no feet; shots hit lower body");
+		Sprintf(mbuf, "No feet; shots hit lower body");
 		putstr(en_win, 0, mbuf);
 	} else {
 		mslotdrtotal(LEG_DR);
