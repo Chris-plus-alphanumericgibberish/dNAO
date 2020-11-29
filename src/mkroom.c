@@ -33,6 +33,7 @@ STATIC_DCL void NDECL(mkpluhomestead);
 STATIC_DCL void FDECL(mkelfhut, (int));
 STATIC_DCL void FDECL(mkwraithclearing, (int));
 STATIC_DCL void NDECL(mkstonepillars);
+STATIC_DCL void FDECL(mkmordorfossil, (int));
 STATIC_DCL void NDECL(mklavapool);
 STATIC_DCL void FDECL(mkwell, (int));
 STATIC_DCL void FDECL(mkfishinghut, (int));
@@ -2387,6 +2388,53 @@ mkstonepillars()
 	}
 }
 
+void
+mkmordorfossil(typ)
+int typ;
+{
+	int x, y, tries = 0, good = FALSE;
+	struct obj *otmp;
+	while(!good && tries < 500){
+		x = rn2(COLNO)+1;
+		y = rn2(ROWNO);
+		tries++;
+		if(isok(x,y) && levl[x][y].typ == typ)
+			good = TRUE;
+		else continue;
+		
+		otmp = mksobj(FOSSIL, TRUE, FALSE);
+		switch(rnd(5)){
+			case 1:
+			case 2:
+			otmp->corpsenm = PM_WHITE_DRAGON;
+			mksobj_at(WHITE_DRAGON_SCALES, x, y, FALSE, FALSE);
+			break;
+			case 3:
+			case 4:
+			otmp->corpsenm = PM_GREEN_DRAGON;
+			mksobj_at(GREEN_DRAGON_SCALES, x, y, FALSE, FALSE);
+			break;
+			case 5:
+			switch(rnd(2)){
+				case 1:
+				otmp->corpsenm = PM_RED_DRAGON;
+				mksobj_at(RED_DRAGON_SCALES, x, y, FALSE, FALSE);
+				break;
+				case 2:
+				otmp->corpsenm = PM_BLACK_DRAGON;
+				mksobj_at(BLACK_DRAGON_SCALES, x, y, FALSE, FALSE);
+				break;
+			}
+			break;
+		}
+		fix_object(otmp);
+		place_object(otmp, x, y);
+		if(typ == ROOM || typ == SOIL || typ == GRASS || typ == SAND || typ == CORR){
+			bury_objs(x,y);
+		}
+	}
+}
+	
 STATIC_OVL
 void
 mklavapool()
@@ -3939,6 +3987,18 @@ place_chaos_forest_features()
 		int i = 20+ d(4,10);
 		for(; i > 0; i--)
 			mkstonepillars();
+	}
+	if(In_mordor_depths(&u.uz)){
+		int i = d(3,4);
+		for(;i>0;i--)
+			mkmordorfossil(STONE);
+		i = rn2(8);
+		for(;i>0;i--)
+			mkmordorfossil(ROOM);
+	} else if(In_mordor_borehole(&u.uz)){
+		int i = d(3,6);
+		for(;i>0;i--)
+			mkmordorfossil(STONE);
 	}
 }
 

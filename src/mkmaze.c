@@ -581,7 +581,7 @@ fixup_special()
 			}
 			wallification(1, 0, COLNO - 1, ROWNO - 1);
 		}
-		if(on_level(&u.uz, &mordor_depths_3_level)){
+		else if(In_mordor_depths(&u.uz) || In_mordor_borehole(&u.uz)){
 			place_chaos_forest_features();
 		}
 	}
