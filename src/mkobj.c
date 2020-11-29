@@ -1309,7 +1309,7 @@ boolean artif;
 		otmp->wrathdata = PM_ORC<<2;//wrathful + 1/4 vs orcs
 
 	/* spellbooks of secrets should become a random artifact spellbook */
-	if (otyp == SPE_SECRETS)
+	if (otyp == SPE_SECRETS && init)
 	    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 	
 	/* track words */

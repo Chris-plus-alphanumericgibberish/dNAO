@@ -1595,7 +1595,7 @@ gcrownu()
 				obj->ovar1 = SPE_FINGER_OF_DEATH;
 				discover_artifact(ART_BOOK_OF_INFINITE_SPELLS);
 			}
-		} else{
+		} else {
 			for(obj = invent; obj; obj=obj->nobj)
 				if(obj->oartifact == ART_NECRONOMICON) 
 					obj->ovar1 |= SP_DEATH;
