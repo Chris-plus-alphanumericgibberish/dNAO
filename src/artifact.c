@@ -1508,7 +1508,7 @@ touch_artifact(obj, mon, hypothetical)
     }
     /* weapons which attack specific categories of monsters are
        bad for them even if their alignments happen to match */
-    if (!badalign && (arti_attack_prop(obj, ARTA_HATES) != 0)) {
+    if (!badalign && (arti_attack_prop(obj, ARTA_HATES) != 0) && obj->oartifact != ART_LIFEHUNT_SCYTHE) {
 		/* spec_applies for hateful artifacts should always return FALSE if mon isn't hated. */
 		/* a hateful artifact should never apply to non-hated foes */
 		badalign = spec_applies(obj, mon, TRUE);
@@ -1570,6 +1570,7 @@ touch_artifact(obj, mon, hypothetical)
 		if (!yours) return 0;
 		if(!hypothetical){
 			You("are blasted by %s power!", s_suffix(the(xname(obj))));
+			// pline("class: %d align: %d", badclass, badalign);
 			dmg = d((Antimagic ? 2 : 4), (self_willed ? 10 : 4));
 			Sprintf(buf, "touching %s", oart->name);
 			losehp(dmg, buf, KILLED_BY);
