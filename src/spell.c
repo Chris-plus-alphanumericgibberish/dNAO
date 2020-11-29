@@ -5587,6 +5587,7 @@ int spell;
 		}
 
 		if (uwep->otyp == BELL || uwep->otyp == BELL_OF_OPENING
+		 || uwep->otyp == EFFIGY
 		 || uwep->oartifact == ART_VELKA_S_RAPIER
 		) {	// a priestly channeling tool
 			cast_bon = 0;
