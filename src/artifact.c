@@ -105,6 +105,45 @@ int x;
 									*/
 }
 
+/* returns TRUE if otmp may be offered to an artifact-desiring being */
+boolean
+offerable_artifact(otmp)
+struct obj * otmp;
+{
+	// validate
+	if (!otmp || !otmp->oartifact)
+		return FALSE;
+
+	int oart = otmp->oartifact;
+
+	// Filter out specific artifacts
+	switch (oart) {
+	case ART_SILVER_KEY:
+	case ART_ANNULUS:
+	case ART_PEN_OF_THE_VOID:
+		// Outright forbidden
+		return FALSE;
+	case ART_FLUORITE_OCTAHEDRON:
+		// requires the full set of 8
+		if (otmp->quan < 8)
+			return FALSE;
+		break;
+	case ART_BLADE_SINGER_S_SABER:
+		// cannot be one of the halves
+		if (otmp->otyp == RAKUYO_DAGGER || otmp->otyp == RAKUYO_SABER)
+			return FALSE;
+		break;
+		// otherwise continue
+	}
+
+	// Must not have the ARTG_NOCNT flag
+	if (!CountsAgainstGifts(oart))
+		return FALSE;
+
+	// otherwise, is acceptable
+	return TRUE;
+}
+
 /* handle some special cases; must be called after u_init() 
 	Uh, it isn't, it's called BEFORE u_init. See allmain */
 void
@@ -3553,7 +3592,9 @@ boolean * messaged;
 
 	default:
 		/* try to be as vague as possible */
-		if (msgr->otyp == SET_OF_CROW_TALONS)
+		if (is_axe(msgr))
+			wepdesc = "axe";
+		else if (msgr->otyp == SET_OF_CROW_TALONS)
 			wepdesc = "blades";
 		else if (is_blade(msgr))
 			wepdesc = "blade";
