@@ -3197,13 +3197,13 @@ int gen_restrict;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
-	boolean maketame, makepeaceful, makehostile;
+	boolean maketame, makeloyal, makepeaceful, makehostile;
 	int l = 0;
 
 	tries = 0;
 	do {
 	    which = urole.malenum;	/* an arbitrary index into mons[] */
-	    maketame = makepeaceful = makehostile = FALSE;
+	    maketame = makeloyal = makepeaceful = makehostile = FALSE;
 	    getlin("Create what kind of monster? [type the name or symbol]",
 		   buf);
 	    bufp = mungspaces(buf);
@@ -3214,6 +3214,10 @@ int gen_restrict;
 		{
 			if (!strncmpi(bufp, "tame ", l = 5)){
 				maketame = TRUE && (specify_attitude == -1);
+			}
+			else if (!strncmpi(bufp, "loyal ", l = 6)){
+				maketame = TRUE && (specify_attitude == -1);
+				makeloyal = TRUE && (specify_attitude == -1);
 			}
 			else if (!strncmpi(bufp, "peaceful ", l = 9)){
 				makepeaceful = TRUE && (specify_attitude == -1);
@@ -3410,8 +3414,11 @@ createmon:
 				mtmp = makemon(whichpm, u.ux, u.uy, mm_flags);
 
 			if (mtmp) {
-				if (maketame)
+				if (maketame){
 					initedog(mtmp);
+					if(makeloyal)
+						EDOG(mtmp)->loyal = 1;
+				}
 				else if (makepeaceful)
 					mtmp->mpeaceful = 1;
 				else if (makehostile)
