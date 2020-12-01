@@ -58,17 +58,17 @@
 #define is_lminion(mon)		(is_minion((mon)->data) && \
 				 (mon)->data->maligntyp > A_NEUTRAL && \
 				 ((mon)->mtyp != PM_ANGEL || \
-				  EPRI(mon)->shralign > 0))
+				  (HAS_EPRI(mon) && EPRI(mon)->shralign > 0)))
 
 #define is_nminion(mon)		(is_minion((mon)->data) && \
 				 (mon)->data->maligntyp == A_NEUTRAL && \
 				 ((mon)->mtyp != PM_ANGEL || \
-				  EPRI(mon)->shralign == 0))
+				  (HAS_EPRI(mon) && EPRI(mon)->shralign == 0)))
 
 #define is_cminion(mon)		(is_minion((mon)->data) && \
 				 (mon)->data->maligntyp < A_NEUTRAL && \
 				 ((mon)->mtyp != PM_ANGEL || \
-				  EPRI(mon)->shralign < 0))
+				 (HAS_EPRI(mon) && EPRI(mon)->shralign < 0)))
 
 #define notonline(ptr)			(((ptr)->mflagsm & MM_NOTONL) != 0L)
 #define fleetflee(ptr)			(((ptr)->mflagsm & MM_FLEETFLEE) != 0L)
