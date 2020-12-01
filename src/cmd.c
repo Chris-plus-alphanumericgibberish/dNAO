@@ -1276,7 +1276,7 @@ wiz_makemap(VOID_ARGS)
 
 	if (on_level(&digging.level, &u.uz))
 	    (void) memset((genericptr_t) &digging, 0, sizeof (struct dig_info));
-	iflags.travelcc.x = iflags.travelcc.y = 0;
+	iflags.travelcc.x = iflags.travelcc.y = -1;
 
 	u.utrap = 0;
 	u.utraptype = 0;
