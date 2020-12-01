@@ -2258,6 +2258,10 @@ movemon()
 		}
 	}
 	
+	if(mtmp->mtyp == PM_CROW_WINGED_HALF_DRAGON && mtmp->mtame && !EDOG(mtmp)->loyal && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
+		EDOG(mtmp)->loyal = 1;
+	}
+	
 	if(u.uevent.uaxus_foe && 
 		is_auton(mtmp->data) && 
 		mtmp->mpeaceful
