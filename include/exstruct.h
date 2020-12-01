@@ -74,6 +74,7 @@ struct epri {
 	boolean pbanned;	/* player banned by priest */
 	char signspotted;	/* max number of signs spotted by priest */
 };
+#define HAS_EPRI(mon)	((mon) && (mon)->mextra_p && (mon)->mextra_p->epri_p)
 #define EPRI(mon)	((mon)->mextra_p->epri_p)
 /* A priest without ispriest is a roaming priest without a shrine, so
  * the fields (except shralign, which becomes only the priest alignment)
