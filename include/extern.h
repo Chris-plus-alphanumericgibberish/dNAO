@@ -197,6 +197,7 @@ E int NDECL(uhpmax);
 
 /* ### ball.c ### */
 
+E void FDECL(ballrelease, (boolean));
 E void NDECL(ballfall);
 E void NDECL(placebc);
 E void NDECL(unplacebc);
@@ -715,6 +716,7 @@ E schar FDECL(print_dungeon, (BOOLEAN_P,schar *,int *));
 E int NDECL(donamelevel);
 E int NDECL(dooverview);
 E void FDECL(forget_mapseen, (int));
+E void FDECL(rm_mapseen, (int));
 E void FDECL(init_mapseen, (d_level *));
 E void NDECL(recalc_mapseen);
 E void FDECL(recbranch_mapseen, (d_level *, d_level *));
@@ -1177,6 +1179,7 @@ E int NDECL(wiz_light_sources);
 E int NDECL(forcelock);
 E int NDECL(picklock);
 #endif
+E boolean NDECL(is_box_picking_context);
 E boolean FDECL(picking_lock, (int *,int *));
 E boolean FDECL(picking_at, (int,int));
 E boolean FDECL(forcing_door, (int *, int*));
@@ -2472,6 +2475,7 @@ E void FDECL(subfrombill, (struct obj *,struct monst *));
 E long FDECL(stolen_value, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(sellobj_state, (int));
 E void FDECL(sellobj, (struct obj *,XCHAR_P,XCHAR_P));
+E void FDECL(setpaid, (struct monst *));
 E int FDECL(doinvbill, (int));
 E long FDECL(getprice, (struct obj *, BOOLEAN_P, BOOLEAN_P));
 E struct monst *FDECL(shkcatch, (struct obj *,XCHAR_P,XCHAR_P));

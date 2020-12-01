@@ -1381,15 +1381,7 @@ remake:
 		    You("fall down the %s.", at_ladder ? "ladder" : "stairs");
 		    if (Punished) {
 			drag_down();
-				if (carried(uball)) {
-					if (uwep == uball)
-					setuwep((struct obj *)0);
-					if (uswapwep == uball)
-					setuswapwep((struct obj *)0);
-					if (uquiver == uball)
-					setuqwep((struct obj *)0);
-					freeinv(uball);
-				}
+			ballrelease(FALSE);
 		    }
 			if(((uwep && is_lightsaber(uwep) && litsaber(uwep))) ||
 				(uswapwep && is_lightsaber(uswapwep) && litsaber(uswapwep) && u.twoweap)
