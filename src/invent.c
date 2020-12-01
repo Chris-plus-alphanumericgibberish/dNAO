@@ -2867,6 +2867,11 @@ winid *datawin;
 				Sprintf(buf2, "Deals 1d8 bonus damage to %s.", buf);
 				OBJPUTSTR(buf2);
 			}
+			if (check_oprop(obj, OPROP_OCLTW))
+			{
+				Sprintf(buf2, "Deals bonus magic damage and extra damage to divine minions.");
+				OBJPUTSTR(buf2);
+			}
 			/* other stuff
 			 * commented out because artifacts don't get any behaviours more interesting
 			 * than bonus damage (such as Vorpal Blade being vorpal)

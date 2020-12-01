@@ -3020,6 +3020,12 @@ int * truedmgptr;
 			*truedmgptr += basedmg;
 		if(check_oprop(otmp, OPROP_LESSER_MAGCW))
 			*truedmgptr += d(3, 4);
+		
+		if(check_oprop(otmp, OPROP_OCLTW)){
+			*truedmgptr += d(1, 4);
+			if(otmp->spe > 0)
+				*truedmgptr += d(1, otmp->spe);
+		}
 	}
 	if(check_oprop(otmp, OPROP_GOATW)){
 		switch(goat_weapon_damage_turn(otmp)){
