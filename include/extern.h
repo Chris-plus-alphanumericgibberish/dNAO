@@ -3150,7 +3150,7 @@ E void FDECL(slept_monst, (struct monst *));
 E void FDECL(hurtarmor, (int));
 E void FDECL(hurtmarmor, (struct monst *, int));
 E long FDECL(attk_protection, (int));
-E long FDECL(attk_equip_slot, (int));
+E long FDECL(attk_equip_slot, (struct monst *, int));
 E boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
 E boolean FDECL(safe_attack, (struct monst *, struct monst *, struct attack *, struct obj *, struct permonst *, struct permonst *));
 E int NDECL(beastmastery);

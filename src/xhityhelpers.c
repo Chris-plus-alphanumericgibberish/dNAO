@@ -1127,7 +1127,8 @@ int aatyp;
  *   ex) silver gloves make punches do silver-searing damage
  */
 long
-attk_equip_slot(aatyp)
+attk_equip_slot(mon, aatyp)
+struct monst *mon;
 int aatyp;
 {
 	/* some worn armor may be involved depending on the attack type */
@@ -1137,6 +1138,25 @@ int aatyp;
 		/* gloves */
 		/* caller needs to check for weapons */
 	case AT_CLAW:
+		if(!mon)
+			slot = W_ARMG;
+		else if(nohands(mon->data))
+			slot = W_ARMF;
+		else if(
+			mon->mtyp == PM_CROW_WINGED_HALF_DRAGON
+			|| mon->mtyp == PM_VROCK
+			|| mon->mtyp == PM_AGLAOPE
+		)
+			slot = W_ARMF;
+		else if(
+			mon->mtyp == PM_ARCADIAN_AVENGER
+			|| mon->mtyp == PM_THRONE_ARCHON
+			|| mon->mtyp == PM_LIGHT_ARCHON
+		)
+			slot = 0L; //Wing bash
+		else
+			slot = W_ARMG;
+		break;
 	case AT_HODS:
 	case AT_DEVA:
 	case AT_REND:
@@ -1529,7 +1549,7 @@ struct obj * weapon;
 	if (!weapon) {
 		/* some worn armor may be involved depending on the attack type */
 		struct obj * otmp;
-		long slot = attk_equip_slot(attk ? attk->aatyp : 0);
+		long slot = attk_equip_slot(magr, attk ? attk->aatyp : 0);
 		switch (magr ? slot : 0L)
 		{
 		case W_ARMG:
