@@ -12364,13 +12364,23 @@ int vis;						/* True if action is at all visible to the player */
 						(cnt > 1L) ? "some" : "an";
 
 					if (vis) {
-						pline("%s hit%s %s with %s egg%s.",
-							(youagr ? "You" : Monnam(magr)),
-							(youagr ? "" : "s"),
-							(youdef ? "you" : mon_nam(mdef)),
-							eggp,
-							plur(cnt)
-							);
+						if (magr) {
+							pline("%s hit%s %s with %s egg%s.",
+								(youagr ? "You" : Monnam(magr)),
+								(youagr ? "" : "s"),
+								(youdef ? "you" : mon_nam(mdef)),
+								eggp,
+								plur(cnt)
+								);
+						}
+						else {
+							pline("%s %s hit with %s egg%s.",
+								(youdef ? "You" : Monnam(mdef)),
+								(youdef ? "are" : "is"),
+								(weapon->known ? "the" : (cnt > 1L) ? "some" : "an"),
+								plur(cnt)
+								);
+						}
 						hittxt = TRUE;
 					}
 
