@@ -3775,7 +3775,7 @@ struct obj *wep;
 	}
 	if(youagr)
 		u.ustdy -= 10;
-	else mdef->mstdy -= 10;
+	else magr->mstdy -= 10;
 }
 
 static void
