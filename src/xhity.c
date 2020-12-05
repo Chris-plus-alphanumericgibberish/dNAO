@@ -12691,6 +12691,9 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 
+	/* weapon may have been destroyed at this point e.g. splatted egg */
+	weapon = weapon_p ? *weapon_p : (struct obj *)0;
+
 	/* Set Phasing */
 	phase_armor = (
 		(weapon && arti_shining(weapon)) ||
