@@ -2456,7 +2456,7 @@ int mode;
 				"sand" :
 				"dust");
 	    useup(otmp);
-	    ptext = FALSE;
+	    return(1);
 	}
 
 	if (!ptext) {		/* Early exit for some implements. */
