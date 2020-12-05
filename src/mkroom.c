@@ -4851,10 +4851,12 @@ struct mkroom *croom; /* NULL == choose random room */
 		while ((tried++ < 50) && (i > 0) && somexy(sroom, &pos)) {
 			struct permonst *pmon;
 			if (!MON_AT(pos.x, pos.y)) {
-			struct monst *mtmp = makemon(&mons[PM_WEEPING_ANGEL], pos.x,pos.y, NO_MM_FLAGS);
-			if (mtmp) mtmp->msleeping = 1;
-			mtmp->mvar3 = 1;
-			i--;
+			    struct monst *mtmp = makemon(&mons[PM_WEEPING_ANGEL], pos.x,pos.y, NO_MM_FLAGS);
+			    if (mtmp) {
+				mtmp->msleeping = 1;
+				mtmp->mvar3 = 1;
+			    }
+			    i--;
 			}
 		}
 	}
