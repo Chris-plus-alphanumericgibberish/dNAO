@@ -51,7 +51,7 @@ char circle_data[] = {
  * These are the starting indexes into the circle_data[] array for a
  * circle of a given radius.
  */
-char circle_start[] = {
+int circle_start[] = {
 /*  */	  0,	/* circles of radius zero are not used */
 /* 1*/    0,
 /* 2*/	  2,
