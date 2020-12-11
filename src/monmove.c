@@ -2506,7 +2506,7 @@ postmov:
 					Monnam(mtmp)); 
 				}
 				dissolve_bars(mtmp->mx, mtmp->my);
-				if(mtmp->mtyp == PM_RUST_MONSTER && mtmp->mtame && mtmp->isminion){
+				if(mtmp->mtyp == PM_RUST_MONSTER && mtmp->mtame && !mtmp->isminion){
 					EDOG(mtmp)->hungrytime += 5*objects[BAR].oc_nutrition;
 				}
 			}
