@@ -1238,8 +1238,8 @@ boolean adjective;
 			return "chitin";
 		else
 			return "bone";
-		case SHELL_MAT:
-			return "shell";
+	case SHELL_MAT:
+		return "shell";
 	case DRAGON_HIDE:
 		/* for some reason, this is dragonhide? */
 		if (obj->otyp == LEO_NEMAEUS_HIDE)
