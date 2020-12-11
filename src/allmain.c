@@ -2392,7 +2392,7 @@ karemade:
 
 	if (moves > last_clear_screen + 2000) doredraw();
 
-    }
+    } //END MAIN LOOP
 }
 
 #endif /* OVL0 */
