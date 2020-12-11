@@ -257,7 +257,7 @@ obj_to_glyph(obj)
 
     if (otyp == CORPSE) {
 	int corpsenm = Hallucination ? random_monster() : obj->corpsenm;
-	return corpsenm + GLYPH_MON_OFF;
+	return corpsenm + GLYPH_BODY_OFF;
     }
 
     int ocolor = Hallucination ? rn2(16) : object_color(obj);
