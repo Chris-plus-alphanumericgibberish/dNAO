@@ -27,14 +27,19 @@ check_reseed()
     reseed_count++;
     if (reseed_count > reseed_period) {
 	FILE *fptr = NULL;
-	int rnd[2];
+	int rndbuf[2];
 
 	fptr = fopen("/dev/urandom","r");
-	if (fptr) fread((void *)rnd, sizeof(int),2,fptr);
-	fclose(fptr);
-	srandom((int) (time((time_t *)0)) + rnd[0]);
-	reseed_period = (rnd[1] % 700) + 10;
-	reseed_count = 0;
+	if (fptr) {
+	    fread((void *)rndbuf, sizeof(int),2,fptr);
+	    fclose(fptr);
+	    srandom((int) (time((time_t *)0)) + rndbuf[0]);
+	    reseed_period = (rndbuf[1] % 700) + 10;
+	    reseed_count = 0;
+	} else {
+	    reseed_count = 0;
+	    impossible("check_reseed failed to retrieve data");
+	}
     }
 }
 
