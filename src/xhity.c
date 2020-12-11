@@ -11407,6 +11407,7 @@ int vis;						/* True if action is at all visible to the player */
 #ifdef STEED
 			(youagr && u.usteed) ||
 #endif
+			melee_polearms(pa) ||
 			is_vibropike(weapon) ||
 			weapon->otyp == AKLYS ||
 			weapon->otyp == NAGINATA ||

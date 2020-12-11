@@ -109,6 +109,7 @@ register struct obj *obj;
 #ifdef STEED
 				&& !u.usteed
 #endif
+				&& !melee_polearms(youracedata)
 				&& obj->otyp != AKLYS
 				&& !is_vibropike(obj)
 				&& obj->otyp != NAGINATA

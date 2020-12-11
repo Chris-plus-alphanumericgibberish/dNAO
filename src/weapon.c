@@ -1569,6 +1569,112 @@ static const NEARDATA short hwep[] = {
 	  WORM_TOOTH/*1d2/1d2*/
 	};
 
+static const NEARDATA short hpwep[] = {
+	  CORPSE,  /* cockatrice corpse */
+	  KAMEREL_VAJRA /*quite a lot plus elect plus blindness*/,
+	  GOLD_BLADED_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
+	  WHITE_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
+	  DOUBLE_FORCE_BLADE,/*6d6+12/6d4+8*/
+	  DOUBLE_LIGHTSABER/*6d8*/, 
+	  RED_EYED_VIBROSWORD,/*3d8+8/3d12+12*/
+	  FORCE_SWORD,/*3d8+8/3d6+6*/
+	  FORCE_WHIP,/*3d6+6+3/3d4+6+3d4+4*/
+	  FORCE_PIKE,/*3d6+6/3d8+8*/
+	  FORCE_BLADE,/*3d6+6/3d4+4*/
+	  BEAMSWORD/*3d10*/,
+	  GOLD_BLADED_VIBROSWORD,/*2d8+4/2d12+6*/
+	  WHITE_VIBROSWORD,/*2d8+4/2d12+6*/
+	  GOLD_BLADED_VIBROSPEAR,/*2d6+3/2d8+3*/
+	  WHITE_VIBROSPEAR,/*2d6+3/2d8+3*/
+	  LIGHTSABER/*3d8*/,
+	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
+	  HEAVY_IRON_BALL,/*1d25/1d25*/
+	  VIBROBLADE,/*2d6+3/2d8+4*/
+	  CRYSTAL_SWORD/*2d8/2d12*/,
+	  DROVEN_GREATSWORD/*1d18/1d30*/, 
+	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
+	  TSURUGI/*1d16/1d8+2d6*/, 
+	  MOON_AXE/*variable, 2d6 to 2d12*/,
+	  RUNESWORD/*1d10+1d4/1d10+1*/, 
+	  BATTLE_AXE/*1d8+1d4/1d6+2d4*/,
+	  TWO_HANDED_SWORD/*1d12/3d6*/, 
+	  DROVEN_SPEAR/*1d12/1d12*/,
+	  UNICORN_HORN/*1d12/1d12*/,
+	  DWARVISH_MATTOCK/*1d12/1d8*/, 
+	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
+	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
+	  HALBERD, /*1d10/2d6*/
+	  KATANA/*1d10/1d12*/,
+	  DROVEN_LANCE, /*1d10/1d10*/
+	  HIGH_ELVEN_WARSWORD/*1d10/1d10*/,
+	  CRYSKNIFE/*1d10/1d10*/, 
+	  VIPERWHIP/*2d4/2d3/poison*/,
+	  BARDICHE, /*2d4/3d4*/ 
+	  DROVEN_SHORT_SWORD/*1d9/1d9*/, 
+	  DWARVISH_SPEAR/*1d9/1d9*/, 
+	  CHAKRAM/*1d9/1d9*/, 
+	  BILL_GUISARME, /*2d4/1d10*/
+	  RANSEUR, /*2d4/2d4*/
+	  VOULGE, /*2d4/2d4*/
+	  SCYTHE/*2d4*/, 
+	  GUISARME, /*2d4/1d8*/
+	  BROADSWORD/*2d4/1d6+1*/, 
+	  MORNING_STAR/*2d4/1d6+1*/, 
+	  LUCERN_HAMMER, /*2d4/1d6*/
+	  SPETUM,  /*1d6+1/2d6*/
+	  CROW_QUILL/*1d8/1d8*/,
+	  RAKUYO_SABER/*1d8/1d8*/,
+	  SABER/*1d8/1d8*/,
+	  TRIDENT/*1d6+1/3d4*/, 
+	  NAGINATA, /*1d8/1d10*/
+	  LONG_SWORD/*1d8/1d12*/,
+	  FLAIL/*1d6+1/2d4*/, 
+	  NAGINATA/*1d6+1/2d4*/, 
+	  ELVEN_LANCE, /*1d8/1d8*/
+	  SCIMITAR/*1d8/1d8*/,
+	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
+	  BEC_DE_CORBIN, /*1d8/1d6*/
+	  DROVEN_DAGGER/*1d8/1d6*/, 
+	  MACE/*1d6+1/1d6*/, 
+	  GLAIVE, /*1d6/1d10*/
+	  ELVEN_SHORT_SWORD/*1d7/1d7*/, 
+	  ELVEN_MACE/*1d7/1d7*/, 
+	  ELVEN_SPEAR/*1d7/1d7*/, 
+	  FAUCHARD, /*1d6/1d8*/
+	  LANCE, /*1d6/1d8*/
+	  SPEAR/*1d6/1d8*/,
+	  SHORT_SWORD/*1d6/1d8*/,
+	  PARTISAN, /*1d6/1d6*/
+	  RAPIER/*1d6/1d4*/, 
+	  AXE/*1d6/1d4*/, 
+	  ORCISH_SHORT_SWORD/*1d5/1d10*/, 
+	  ORCISH_SPEAR/*1d5/1d10*/, 
+	  KHAKKHARA/*1d6/1d4*/,
+	  BULLWHIP/*1d2/1d1*/, 
+	  QUARTERSTAFF/*1d6/1d6*/,
+	  JAVELIN/*1d6/1d6*/, 
+	  CHAIN/*1d6/1d6*/, 
+	  WAR_HAMMER/*1d4+1/1d4*/, 
+	  AKLYS/*1d6/1d3*/, 
+	  SUNROD/*1d6/1d3*/, 
+	  SHADOWLANDER_S_TORCH/*1d6/1d3*/, 
+	  TORCH/*1d6/1d3*/, 
+	  CLUB/*1d6/1d3*/, 
+	  PICK_AXE/*1d6/1d3*/,
+	  ELVEN_SICKLE/*1d6/1d3*/,
+	  STILETTO/*1d6/1d2*/, 
+	  ELVEN_DAGGER/*1d5/1d3*/, 
+	  ATHAME/*1d4/1d4*/, 
+	  RAKUYO_DAGGER/*1d4/1d3*/, 
+	  DAGGER/*1d4/1d3*/, 
+	  SICKLE/*1d4/1d1*/, 
+	  ORCISH_DAGGER/*1d3/1d5*/,
+	  KNIFE/*1d3/1d2*/, 
+	  SCALPEL/*1d3/1d1*/, 
+	  WORM_TOOTH/*1d2/1d2*/
+	};
+
+	
 boolean
 would_prefer_hwep(mtmp, otmp)
 struct monst *mtmp;
@@ -1653,8 +1759,14 @@ register struct monst *mtmp;
 
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
 		Oselect(CLUB, W_WEP);
-
-	for (i = 0; i < SIZE(hwep); i++) {
+	
+	if(melee_polearms(mtmp->data)){
+		for (i = 0; i < SIZE(hpwep); i++) {
+			if (hpwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
+				continue;
+			Oselect(hpwep[i], W_WEP);
+		}
+	} else for (i = 0; i < SIZE(hwep); i++) {
 	    if (hwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
 			continue;
 		Oselect(hwep[i], W_WEP);
