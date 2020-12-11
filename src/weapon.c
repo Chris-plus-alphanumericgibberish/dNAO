@@ -2372,12 +2372,12 @@ struct obj *otmp;
 			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
 			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
-			|| otmp->oartifact == ART_FRIEDE_S_SCYTHE
 		)){
 			if(is_rakuyo(otmp))
 				bonus = 0;
 			else bonus /= 2; /*Half strength bonus/penalty*/
 			
+			arm = which_armor(mon, W_ARMG);
 			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
 			else if(arm 
 			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART)
@@ -2389,14 +2389,27 @@ struct obj *otmp;
 		}
 		
 		if(otmp->oartifact == ART_YORSHKA_S_SPEAR){
-			//Int and wis both
+			//Wis and dex both (str bonus is not reduced)
 			arm = which_armor(mon, W_ARMH);
 			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
-				bonus += arm->spe;
+				bonus += (arm->spe)/2;
+			arm = which_armor(mon, W_ARMG);
+			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
+			else if(arm 
+			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART)
+			) bonus += (arm->spe)/2;
 		}
 		
 		if(otmp->oartifact == ART_FRIEDE_S_SCYTHE){
-			//Int only
+			//Int and Dex
+			bonus /= 2; /*Half strength bonus/penalty*/
+			
+			arm = which_armor(mon, W_ARMG);
+			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
+			else if(arm 
+			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART)
+			) bonus += (arm->spe)/2;
+//			else bonus += ; Something with dex ac?  That would be a bad idea.
 			arm = which_armor(mon, W_ARMH);
 			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
 				bonus += (arm->spe)/2;
@@ -2460,7 +2473,6 @@ struct obj *otmp;
 			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
 			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
-			|| otmp->oartifact == ART_FRIEDE_S_SCYTHE
 		)){
 			if(is_rakuyo(otmp))
 				bonus = 0;
@@ -2481,6 +2493,11 @@ struct obj *otmp;
 		}
 		
 		if(otmp->oartifact == ART_FRIEDE_S_SCYTHE){
+			bonus /= 2; /*Half strength bonus/penalty*/
+			
+			if(ACURR(A_DEX) == 25) bonus += 8;
+			else bonus += (ACURR(A_DEX)-10)/2;
+			
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
 		}
@@ -2490,7 +2507,6 @@ struct obj *otmp;
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
 		}
-
 		if(check_oprop(otmp, OPROP_OCLTW)){
 			bonus /= 2;
 			if(ACURR(A_WIS) == 25) bonus += 8;
