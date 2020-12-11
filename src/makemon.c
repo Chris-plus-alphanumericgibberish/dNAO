@@ -470,12 +470,33 @@ register struct monst *mtmp;
 					(void)mongets(mtmp, HIGH_BOOTS);
 				}
 			break;
+			case PM_IMP:
+				if(Inhell){
+					chance = rn2(4);
+					if(chance == 4){
+						(void)mongets(mtmp, KNIFE);
+						(void)mongets(mtmp, FEDORA);
+						(void)mongets(mtmp, JACKET);
+					} else if(chance > 1){
+						(void)mongets(mtmp, SHORT_SWORD);
+						(void)mongets(mtmp, LEATHER_HELM);
+						(void)mongets(mtmp, LEATHER_ARMOR);
+					} else {
+						(void)mongets(mtmp, RAPIER);
+						(void)mongets(mtmp, FEDORA);
+						(void)mongets(mtmp, GENTLEMAN_S_SUIT);
+						(void)mongets(mtmp, RUFFLED_SHIRT);
+					}
+				}
+			break;
 			case PM_LEGION_DEVIL_GRUNT:
 			      w1 = !rn2(4) ? PARTISAN : !rn2(3) ? HALBERD : rn2(2) ? BILL_GUISARME : BEC_DE_CORBIN;
 			      w2 = rn2(2) ? DAGGER : KNIFE;
 				  (void)mongets(mtmp, CROSSBOW);
 				  m_initthrow(mtmp, CROSSBOW_BOLT, 5);
 				  (void)mongets(mtmp, SCALE_MAIL);
+				  (void)mongets(mtmp, GLOVES);
+				  (void)mongets(mtmp, HIGH_BOOTS);
 			break;
 			case PM_LEGION_DEVIL_SOLDIER:
 			      w1 = !rn2(4) ? PARTISAN : !rn2(3) ? HALBERD : rn2(2) ? BILL_GUISARME : BEC_DE_CORBIN;
@@ -484,7 +505,9 @@ register struct monst *mtmp;
 				  m_initthrow(mtmp, CROSSBOW_BOLT, 10);
 				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
 					  otmp->recharged = rnd(7);
-				  (void)mongets(mtmp, SCALE_MAIL);
+				  (void)mongets(mtmp, CHAIN_MAIL);
+				  (void)mongets(mtmp, GLOVES);
+				  (void)mongets(mtmp, HIGH_BOOTS);
 			break;
 			case PM_LEGION_DEVIL_SERGEANT:
 			      w1 = !rn2(4) ? PARTISAN : !rn2(3) ? HALBERD : rn2(2) ? BILL_GUISARME : BEC_DE_CORBIN;
@@ -495,7 +518,9 @@ register struct monst *mtmp;
 					  otmp->recharged = rnd(7);
 				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
 					  otmp->recharged = rnd(7);
-				  (void)mongets(mtmp, SCALE_MAIL);
+				  (void)mongets(mtmp, SPLINT_MAIL);
+				  (void)mongets(mtmp, GAUNTLETS);
+				  (void)mongets(mtmp, HIGH_BOOTS);
 			break;
 			case PM_LEGION_DEVIL_CAPTAIN:
 			      w1 = !rn2(4) ? PARTISAN : !rn2(3) ? HALBERD : rn2(2) ? BILL_GUISARME : BEC_DE_CORBIN;
@@ -508,7 +533,10 @@ register struct monst *mtmp;
 					  otmp->recharged = rnd(7);
 				  if ((otmp = mongets(mtmp, rnd(WAN_LIGHTNING - WAN_CREATE_MONSTER) + WAN_CREATE_MONSTER)))
 					  otmp->recharged = rnd(7);
-				  (void)mongets(mtmp, SCALE_MAIL);
+				  (void)mongets(mtmp, PLATE_MAIL);
+				  (void)mongets(mtmp, GAUNTLETS);
+				  (void)mongets(mtmp, ARMORED_BOOTS);
+				  (void)mongets(mtmp, CLOAK);
 			break;
 			case PM_GLASYA:
 				otmp = mksobj(BULLWHIP, FALSE, FALSE);
@@ -5556,6 +5584,11 @@ register struct monst *mtmp;
 			break;
 		    case PM_HORNED_DEVIL:
 				(void)mongets(mtmp, rn2(4) ? TRIDENT : BULLWHIP);
+				if(Inhell){
+					mongets(mtmp, SPLINT_MAIL);
+					mongets(mtmp, GAUNTLETS);
+					mongets(mtmp, ARMORED_BOOTS);
+				}
 			break;
 		    case PM_ERINYS:{
 				if(In_mordor_quest(&u.uz) 
@@ -5613,8 +5646,32 @@ register struct monst *mtmp;
 					// mongets(mtmp, RAZOR_WIRE);
 				}
 			}break;
+		    case PM_BARBED_DEVIL:
+				(void)mongets(mtmp, SHORT_SWORD);
+				if(Inhell){
+					mongets(mtmp, SPEAR);
+					mongets(mtmp, SPEAR);
+					mongets(mtmp, HELMET);
+					mongets(mtmp, TOWER_SHIELD);
+					mongets(mtmp, SPLINT_MAIL);
+					mongets(mtmp, GAUNTLETS);
+					mongets(mtmp, ARMORED_BOOTS);
+				}
+			break;
 		    case PM_BONE_DEVIL:
 				(void)mongets(mtmp, rn2(4) ? TRIDENT : WAR_HAMMER);
+				if(Inhell){
+					otmp = mongets(mtmp, HELMET);
+					if(otmp) set_material_gm(otmp, BONE);
+					otmp = mongets(mtmp, ROUNDSHIELD);
+					if(otmp) set_material_gm(otmp, BONE);
+					otmp = mongets(mtmp, SPLINT_MAIL);
+					if(otmp) set_material_gm(otmp, BONE);
+					otmp = mongets(mtmp, GAUNTLETS);
+					if(otmp) set_material_gm(otmp, BONE);
+					otmp = mongets(mtmp, ARMORED_BOOTS);
+					if(otmp) set_material_gm(otmp, BONE);
+				}
 			break;
 			case PM_ICE_DEVIL:
 				if (!rn2(4)) {
@@ -5637,7 +5694,7 @@ register struct monst *mtmp;
 					if(chance >= 9) mongets(mtmp, PLATE_MAIL);
 					else if(chance >= 6) mongets(mtmp, CHAIN_MAIL);
 					else if(chance >= 3) mongets(mtmp, STUDDED_LEATHER_ARMOR);
-					else mongets(mtmp, LEATHER_ARMOR);					
+					else mongets(mtmp, LEATHER_ARMOR);
 					switch(rn2(3)){
 						case 0:
 							mongets(mtmp, TRIDENT);
@@ -5713,6 +5770,46 @@ register struct monst *mtmp;
 			break;
 		    case PM_FALLEN_ANGEL:
 				mongets(mtmp, LONG_SWORD);
+				if(Inhell){
+					chance = rnd(6);
+					if(chance == 6){
+						otmp = mongets(mtmp, KITE_SHIELD);
+						if(otmp) set_material_gm(otmp, SILVER);
+						otmp = mongets(mtmp, PLATE_MAIL);
+						if(otmp) set_material_gm(otmp, SILVER);
+						otmp = mongets(mtmp, rn2(10) ? GAUNTLETS : GAUNTLETS_OF_POWER);
+						if(otmp) set_material_gm(otmp, SILVER);
+						otmp = mongets(mtmp, ARMORED_BOOTS);
+						if(otmp) set_material_gm(otmp, SILVER);
+					} else if(chance == 5){
+						otmp = mongets(mtmp, ROBE);
+						if(otmp) set_material_gm(otmp, CLOTH);
+						otmp = mongets(mtmp, GLOVES);
+						if(otmp) set_material_gm(otmp, CLOTH);
+						otmp = mongets(mtmp, SHOES);
+						if(otmp) set_material_gm(otmp, CLOTH);
+					} else if(chance == 4){
+						if(mtmp->female){
+							otmp = mongets(mtmp, GLOVES);
+							if(otmp) set_material_gm(otmp, CLOTH);
+							otmp = mongets(mtmp, GENTLEWOMAN_S_DRESS);
+							if(otmp) set_material_gm(otmp, CLOTH);
+							otmp = mongets(mtmp, VICTORIAN_UNDERWEAR);
+							if(otmp) set_material_gm(otmp, CLOTH);
+							otmp = mongets(mtmp, STILETTOS);
+							if(otmp) set_material_gm(otmp, SILVER);
+						} else {
+							otmp = mongets(mtmp, GLOVES);
+							if(otmp) set_material_gm(otmp, LEATHER);
+							otmp = mongets(mtmp, GENTLEMAN_S_SUIT);
+							if(otmp) set_material_gm(otmp, CLOTH);
+							otmp = mongets(mtmp, RUFFLED_SHIRT);
+							if(otmp) set_material_gm(otmp, CLOTH);
+							otmp = mongets(mtmp, SHOES);
+							if(otmp) set_material_gm(otmp, LEATHER);
+						}
+					}
+				}
 			break;
 		    case PM_ANCIENT_OF_ICE:
 				otmp = mksobj(MACE, FALSE, FALSE);
@@ -10222,6 +10319,13 @@ register int otyp;
 				}
 			}
 		}
+		if (is_demon(mtmp->data) 
+			&& (otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS)
+			&& (otmp->obj_material == COPPER || otmp->obj_material == SILVER)
+		){
+			set_material_gm(otmp, IRON);
+		}
+		
 		if (is_demon(mtmp->data)) {
 			/* demons never get blessed objects */
 			if (otmp->blessed) curse(otmp);
