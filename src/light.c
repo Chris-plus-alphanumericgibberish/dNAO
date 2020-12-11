@@ -55,7 +55,7 @@ STATIC_DCL int FDECL(maybe_write_ls, (int, int, BOOLEAN_P));
 
 /* imported from vision.c, for small circles */
 extern char circle_data[];
-extern char circle_start[];
+extern int circle_start[];
 
 #define owner_ls(lstype, owner) (\
 	(lstype) == LS_OBJECT  ? &(((struct obj *)(owner))->light) : \

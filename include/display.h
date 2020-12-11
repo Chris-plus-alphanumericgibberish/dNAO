@@ -149,7 +149,7 @@
  * known.
  */
 #define canspotmon(mon) \
-	(canseemon(mon) || sensemon(mon))
+	((mon) && (canseemon(mon) || sensemon(mon)))
 
 /* knowninvisible(mon)
  * This one checks to see if you know a monster is both there and invisible.
