@@ -1224,6 +1224,7 @@ register struct monst *mtmp;
 				} else if(is_yochlol(mtmp->data)){
 					/*weapon*/
 					otmp = mksobj(RAPIER, TRUE, FALSE);
+					set_material_gm(otmp, OBSIDIAN_MT);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -1258,6 +1259,14 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					/*Helm*/
 					otmp = mksobj(DROVEN_HELM, TRUE, FALSE);
+					otmp->blessed = TRUE;
+					otmp->cursed = FALSE;
+					otmp->oerodeproof = TRUE;
+					otmp->spe = 0;
+					(void) mpickobj(mtmp, otmp);
+					/*boots*/
+					otmp = mksobj(GAUNTLETS, TRUE, FALSE);
+					set_material_gm(otmp, SHADOWSTEEL);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -5657,6 +5666,25 @@ register struct monst *mtmp;
 					mongets(mtmp, GAUNTLETS);
 					mongets(mtmp, ARMORED_BOOTS);
 				}
+			break;
+		    case PM_VROCK:
+					if (!rn2(2) || Inhell) switch (rn2(12)) {
+						case 0: (void)mongets(mtmp, RANSEUR); break;
+						case 1: (void)mongets(mtmp, PARTISAN); break;
+						case 2: (void)mongets(mtmp, GLAIVE); break;
+						case 3: (void)mongets(mtmp, SPETUM); break;
+						case 4: (void)mongets(mtmp, HALBERD); break;
+						case 5: (void)mongets(mtmp, BARDICHE); break;
+						case 6: (void)mongets(mtmp, VOULGE); break;
+						case 7: (void)mongets(mtmp, FAUCHARD); break;
+						case 8: (void)mongets(mtmp, GUISARME); break;
+						case 9: (void)mongets(mtmp, BILL_GUISARME); break;
+						case 10: (void)mongets(mtmp, LUCERN_HAMMER); break;
+						case 11: (void)mongets(mtmp, BEC_DE_CORBIN); break;
+					}
+					if(Inhell){
+						(void)mongets(mtmp, PLATE_MAIL);
+					}
 			break;
 		    case PM_BONE_DEVIL:
 				(void)mongets(mtmp, rn2(4) ? TRIDENT : WAR_HAMMER);
