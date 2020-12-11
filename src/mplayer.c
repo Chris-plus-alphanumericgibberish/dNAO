@@ -7,7 +7,7 @@
 
 STATIC_DCL const char *NDECL(dev_name);
 STATIC_DCL void FDECL(get_mplname, (struct monst *, char *));
-STATIC_DCL void FDECL(mk_mplayer_armor, (struct monst *, SHORT_P));
+STATIC_DCL void FDECL(mk_mplayer_armor, (struct monst *, int));
 
 /* These are the names of those who
  * contributed to the development of NetHack 3.2/3.3/3.4.
@@ -93,7 +93,7 @@ char *nam;
 STATIC_OVL void
 mk_mplayer_armor(mon, typ)
 struct monst *mon;
-short typ;
+int typ;
 {
 	struct obj *obj;
 
@@ -110,6 +110,274 @@ short typ;
 	obj->spe = rn2(10) ? (rn2(3) ? rn2(5) : rn1(4,4)) : -rnd(3);
 	(void) mpickobj(mon, obj);
 }
+
+void
+init_mplayer_gear(ptr, special, weapon, secweapon, rweapon, rwammo, armor, shirt, cloak, helm, boots, gloves, shield, tool)
+register struct permonst *ptr;
+boolean special;
+int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boots, *gloves, *shield, *tool;
+{
+	//Default to nothing
+	*weapon = STRANGE_OBJECT;
+	*secweapon = STRANGE_OBJECT;
+	*rweapon = STRANGE_OBJECT;
+	*rwammo = STRANGE_OBJECT;
+	*armor = STRANGE_OBJECT;
+	*shirt = STRANGE_OBJECT;
+	*cloak = STRANGE_OBJECT;
+	*helm = STRANGE_OBJECT;
+	*boots = STRANGE_OBJECT;
+	*gloves = STRANGE_OBJECT;
+	*shield = STRANGE_OBJECT;
+	*tool = STRANGE_OBJECT;
+	switch(monsndx(ptr)) {
+	case PM_ARCHEOLOGIST:
+		*weapon = BULLWHIP;
+		*armor = JACKET;
+		*helm = FEDORA;
+		*boots = HIGH_BOOTS;
+		*tool = PICK_AXE;
+	break;
+	case PM_ANACHRONONAUT:
+		if(special){
+			if (!rn2(2)) *weapon = LIGHTSABER;
+			else *weapon = FORCE_PIKE;
+			*rweapon = ARM_BLASTER;
+			*rwammo = FRAG_GRENADE;
+			*shield = CRYSTAL_SHIELD;
+			*armor = CRYSTAL_PLATE_MAIL;
+			*shirt = BODYGLOVE;
+			*helm = CRYSTAL_HELM;
+			*gloves = CRYSTAL_GAUNTLETS;
+			*boots = CRYSTAL_BOOTS;
+		} else {
+			if (!rn2(4)) *weapon = FORCE_PIKE;
+			else *weapon = VIBROBLADE;
+			*rweapon = ASSAULT_RIFLE;
+			*rwammo = BULLET;
+			*shield = CRYSTAL_SHIELD;
+			*armor = PLASTEEL_ARMOR;
+			*helm = FLACK_HELMET;
+			*gloves = PLASTEEL_GAUNTLETS;
+			*boots = HIGH_BOOTS;
+		}
+	break;
+	case PM_BARBARIAN:
+	case PM_HALF_DRAGON:{
+		if (rn2(2)) {
+			*weapon = rn2(2) ? TWO_HANDED_SWORD : BATTLE_AXE;
+		}
+		*helm = HELMET;
+		*armor = CHAIN_MAIL;
+		*boots = GLOVES;
+		*boots = HIGH_BOOTS;
+		*tool = TORCH;
+	}break;
+	case PM_BARD:{
+		static int trotyp[] = {
+			FLUTE, TOOLED_HORN, HARP,
+			BELL, BUGLE, DRUM
+		};
+		*tool = trotyp[rn2(SIZE(trotyp))];
+		*armor = rn2(2) ? ELVEN_MITHRIL_COAT : ELVEN_TOGA;
+		*cloak = rn2(2) ? DWARVISH_CLOAK : CLOAK;
+		*boots = HIGH_BOOTS;
+	}break;
+	case PM_CAVEMAN:
+	case PM_CAVEWOMAN:
+		if (rn2(4)) *weapon = MACE;
+		else *weapon = CLUB;
+		if(special){
+			*cloak = LEO_NEMAEUS_HIDE;
+		} else {
+			*cloak = CLOAK;
+			*rweapon = FLINT;
+			*rwammo = ROCK;
+		}
+	break;
+#ifdef PM_CONVICT
+	case PM_CONVICT:
+		if (rn2(4)) *weapon = FLAIL;
+		else if(rn2(3)) *weapon = HEAVY_IRON_BALL;
+		else *weapon = SPOON;
+		if(special){
+			*helm = find_vhelm();
+			*cloak = find_cope();
+			// OBJECT:'#',"blessed iron +2 magic-resistant visored helmet named Mask of Waterdeep",contained
+			// OBJECT:'#',"blessed +2 ornamental cope named Masked Lord's Cope",contained
+		} else {
+			*shirt = STRIPED_SHIRT;
+		}
+	break;
+#endif
+	case PM_EXILE:
+		if(!special){
+			*weapon = SCYTHE;
+			*rweapon = SLING;
+			*rwammo = ROCK;
+			*cloak = CLOAK;
+		}
+	break;
+	case PM_HEALER:
+		if (rn2(4)){
+			*weapon = QUARTERSTAFF;
+		} else if (rn2(2)) *weapon = rn2(2) ? UNICORN_HORN : SCALPEL;
+		if (special && rn2(4)) *helm = rn2(2) ? HELM_OF_BRILLIANCE : HELM_OF_TELEPATHY;
+		*armor = HEALER_UNIFORM;
+		*boots = LOW_BOOTS;
+		*tool = POT_EXTRA_HEALING;
+	break;
+	case PM_INCANTIFIER:
+		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+			*weapon = rn2(2) ? DOUBLE_LIGHTSABER : LIGHTSABER;
+			*armor = !rn2(3) ? JUMPSUIT : 
+					 rn2(2) ? BODYGLOVE :
+					 PLASTEEL_ARMOR;
+			*helm = HELM_OF_BRILLIANCE;
+			*cloak = rn2(4) ? ROBE : CLOAK_OF_PROTECTION;
+		} else {
+			if (rn2(4)) *weapon = rn2(2) ? QUARTERSTAFF : ATHAME;
+			if(special){
+				*armor = rn2(2) ? BLACK_DRAGON_SCALE_MAIL :
+						SILVER_DRAGON_SCALE_MAIL;
+			}
+			*cloak = ROBE;
+			if (rn2(4)) *helm = HELM_OF_BRILLIANCE;
+		}
+	break;
+	case PM_KNIGHT:
+		*weapon = LONG_SWORD;
+		*rweapon = LANCE;
+		*shield = KITE_SHIELD;
+		*helm = HELMET;
+		*armor = PLATE_MAIL;
+		*gloves = GAUNTLETS;
+		*boots = ARMORED_BOOTS;
+	break;
+	case PM_MONK:
+		*helm = SEDGE_HAT;
+		*gloves = GLOVES;
+		*boots = LOW_BOOTS;
+		*cloak = ROBE;
+	break;
+	case PM_NOBLEMAN:
+		*weapon = special ? LONG_SWORD : RAPIER;
+		*armor = special ? CRYSTAL_PLATE_MAIL : GENTLEMAN_S_SUIT;
+		*shirt = RUFFLED_SHIRT;
+		*cloak = special ? find_opera_cloak() : CLOAK;
+		*gloves = special ? CRYSTAL_GAUNTLETS : GLOVES;
+		*boots = special ? CRYSTAL_BOOTS : HIGH_BOOTS;
+	break;
+	case PM_NOBLEWOMAN:
+		*weapon = special ? RAKUYO : RAPIER;
+		*armor = special ? NOBLE_S_DRESS : GENTLEWOMAN_S_DRESS;
+		*shirt = special ? BLACK_DRESS : VICTORIAN_UNDERWEAR;
+		*cloak = special ? find_opera_cloak() : CLOAK;
+		*gloves = GLOVES;
+		*boots = STILETTOS;
+	break;
+	case PM_PRIEST:
+	case PM_PRIESTESS:
+		*weapon = MACE;
+		if (special && rn2(2)) *armor = PLATE_MAIL;
+		*cloak = ROBE;
+		if (special && rn2(4)) *helm = rn2(2) ? HELM_OF_BRILLIANCE : HELM_OF_TELEPATHY;
+		if (rn2(2)) *shield = BUCKLER;
+		*boots = LOW_BOOTS;
+		*tool = POT_WATER;
+	break;
+	case PM_PIRATE:
+		*weapon = SCIMITAR;
+		*armor = JACKET;
+		*shield = BUCKLER;
+		*rweapon = FLINTLOCK;
+		*rwammo = BULLET;
+		*gloves = GLOVES;
+		*boots = HIGH_BOOTS;
+	break;
+	case PM_RANGER:
+		*weapon = LONG_SWORD;
+		*armor = LEATHER_ARMOR;
+		*helm = LEATHER_HELM;
+		*rweapon = BOW;
+		*rwammo = special ? SILVER_ARROW : ARROW;
+		*gloves = GLOVES;
+		*boots = HIGH_BOOTS;
+	break;
+	case PM_ROGUE:
+		*weapon = SHORT_SWORD;
+		*secweapon = STILETTO;
+		*rwammo = DAGGER;
+		*helm = LEATHER_HELM;
+		*armor = STUDDED_LEATHER_ARMOR;
+		*gloves = GLOVES;
+		*boots = LOW_BOOTS;
+	break;
+	case PM_SAMURAI:
+		*weapon = KATANA;
+		*secweapon = SHORT_SWORD;
+		*rweapon = YUMI;
+		*rwammo = YA;
+		*helm = HELMET;
+		*armor = SPLINT_MAIL;
+		*gloves = GAUNTLETS;
+		*boots = ARMORED_BOOTS;
+		*tool = MASK;
+	break;
+#ifdef TOURIST
+	case PM_TOURIST:
+		if (special && !rn2(4)) *weapon = LIGHTSABER;
+		*rweapon = EXPENSIVE_CAMERA;
+		*rwammo = DART;
+		*shirt = HAWAIIAN_SHIRT;
+		*boots = LOW_BOOTS;
+		*tool = CREDIT_CARD;
+	break;
+#endif
+	case PM_VALKYRIE:
+		if (rn2(2)) *weapon = WAR_HAMMER;
+		else *weapon = SPEAR;
+		*rweapon = BOW;
+		*rwammo = ARROW;
+		if(special){
+			*helm = HELMET;
+			*armor = PLATE_MAIL;
+			*gloves = GAUNTLETS;
+			*boots = ARMORED_BOOTS;
+			*shield = KITE_SHIELD;
+		} else {
+			*armor = LEATHER_ARMOR;
+			*gloves = GLOVES;
+			*boots = HIGH_BOOTS;
+			*shield = BUCKLER;
+		}
+	break;
+	case PM_WORM_THAT_WALKS:
+		*weapon = ATHAME;
+		*armor = ARCHAIC_PLATE_MAIL;
+		*cloak = MUMMY_WRAPPING;
+		*shield = SHIELD_OF_REFLECTION;
+		*boots = ARMORED_BOOTS;
+	break;
+	case PM_WIZARD:
+	   *weapon = rn2(2) ? QUARTERSTAFF : ATHAME;
+		if (special && rn2(2)) {
+			*armor = rn2(2) ? BLACK_DRAGON_SCALE_MAIL :
+					SILVER_DRAGON_SCALE_MAIL;
+		}
+		*cloak = special ? CLOAK_OF_MAGIC_RESISTANCE : CLOAK;
+		if(special){
+			if (rn2(4)) *helm = rn2(2) ? CORNUTHAUM : HELM_OF_BRILLIANCE;
+		}
+	break;
+	default:
+		pline("Received %d.",monsndx(ptr));
+		impossible("bad mplayer monster");
+		weapon = 0;
+		break;
+	}
+}
+
 
 struct monst *
 mk_mplayer(ptr, x, y, special)
@@ -131,7 +399,10 @@ register boolean special;
 	if ((mtmp = makemon(ptr, x, y, NO_MM_FLAGS)) != 0) {
 	    int quan;
 	    struct obj *otmp;
-		short weapon, rweapon, rwammo, armor, cloak, helm, shield;
+		int weapon, secweapon, rweapon, rwammo, armor, shirt, cloak, helm, boots, gloves, shield, tool;
+		
+		init_mplayer_gear(ptr, special, &weapon, &secweapon, &rweapon, &rwammo, &armor, &shirt, &cloak, &helm, &boots, &gloves, &shield, &tool);
+		
 		if(special){
 			static int sweptyp[] = {
 				CRYSKNIFE, MOON_AXE, BATTLE_AXE, HIGH_ELVEN_WARSWORD,
@@ -163,12 +434,10 @@ register boolean special;
 				ELVEN_HELM, HELMET
 			};
 			weapon = weptyp[rn2(SIZE(weptyp))];
-			rweapon = STRANGE_OBJECT;
-			rwammo = STRANGE_OBJECT;
 			armor = armtyp[rn2(SIZE(armtyp))];
-			cloak = rn2(8) ? STRANGE_OBJECT : CLOAK;
-			helm = !rn2(4) ? STRANGE_OBJECT : hlmtyp[rn2(SIZE(hlmtyp))];
-			shield = !rn2(4) ? STRANGE_OBJECT : rnd_class(BUCKLER, CRYSTAL_SHIELD);
+			cloak = rn2(8) ? cloak : CLOAK;
+			helm = !rn2(4) ? helm : hlmtyp[rn2(SIZE(hlmtyp))];
+			shield = !rn2(4) ? shield : rnd_class(BUCKLER, CRYSTAL_SHIELD);
 		}
 
 	    mtmp->m_lev = (special ? rn1(16,15) : rnd(16));
@@ -182,170 +451,6 @@ register boolean special;
 	    }
 	    mtmp->mpeaceful = 0;
 	    set_malign(mtmp); /* peaceful may have changed again */
-
-	    switch(monsndx(ptr)) {
-		case PM_ARCHEOLOGIST:
-		    if (rn2(2)) weapon = BULLWHIP;
-		break;
-		case PM_ANACHRONONAUT:
-		    if (!rn2(2)) weapon = LIGHTSABER;
-		    else weapon = FORCE_PIKE;
-			rweapon = ARM_BLASTER;
-			rwammo = FRAG_GRENADE;
-	    	shield = CRYSTAL_SHIELD;
-			armor = CRYSTAL_PLATE_MAIL;
-			helm = CRYSTAL_HELM;
-		break;
-		case PM_BARBARIAN:
-		case PM_HALF_DRAGON:{
-		    if (rn2(2)) {
-		    	weapon = rn2(2) ? TWO_HANDED_SWORD : BATTLE_AXE;
-		    	shield = STRANGE_OBJECT;
-		    }
-		    // if (rn2(2)) armor = rnd_class(PLATE_MAIL, CHAIN_MAIL);
-		    if (helm == HELM_OF_BRILLIANCE) helm = STRANGE_OBJECT;
-		}break;
-		case PM_BARD:{
-			static int trotyp[] = {
-				FLUTE, TOOLED_HORN, HARP,
-				BELL, BUGLE, DRUM
-			};
-			(void)mongets(mtmp, trotyp[rn2(SIZE(trotyp))]);
-			armor = rn2(2) ? ELVEN_MITHRIL_COAT : ELVEN_TOGA;
-		}break;
-		case PM_CAVEMAN:
-		case PM_CAVEWOMAN:
-		    if (rn2(4)) weapon = MACE;
-		    else weapon = CLUB;
-			if(!special) armor = STRANGE_OBJECT;
-			if(special){
-				if (helm == HELM_OF_BRILLIANCE) helm = STRANGE_OBJECT;
-			} else helm = LEATHER_HELM;
-		break;
-#ifdef PM_CONVICT
-		case PM_CONVICT:
-		    if (rn2(4)) weapon = FLAIL;
-		break;
-#endif
-		case PM_EXILE:
-			weapon = SCYTHE;
-			armor = ELVEN_MITHRIL_COAT;
-			cloak = CLOAK;
-			shield = STRANGE_OBJECT;
-	    break;
-		case PM_HEALER:
-		    if (rn2(4)){
-				weapon = QUARTERSTAFF;
-				shield = STRANGE_OBJECT;
-			} else if (rn2(2)) weapon = rn2(2) ? UNICORN_HORN : SCALPEL;
-		    if (special && rn2(4)) helm = rn2(2) ? HELM_OF_BRILLIANCE : HELM_OF_TELEPATHY;
-		break;
-		case PM_INCANTIFIER:
-			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
-				weapon = rn2(2) ? DOUBLE_LIGHTSABER : LIGHTSABER;
-				armor = !rn2(3) ? JUMPSUIT : 
-						 rn2(2) ? BODYGLOVE :
-						 PLASTEEL_ARMOR;
-				helm = HELM_OF_BRILLIANCE;
-				cloak = rn2(4) ? ROBE : CLOAK_OF_PROTECTION;
-				shield = (rn2(2) && weapon == LIGHTSABER) ? : STRANGE_OBJECT;
-			} else {
-				if (rn2(4)) weapon = rn2(2) ? QUARTERSTAFF : ATHAME;
-				armor = rn2(2) ? BLACK_DRAGON_SCALE_MAIL :
-						SILVER_DRAGON_SCALE_MAIL;
-				cloak = ROBE;
-				if (rn2(4)) helm = HELM_OF_BRILLIANCE;
-				shield = STRANGE_OBJECT;
-			}
-		break;
-		case PM_KNIGHT:
-		    if (rn2(4)) weapon = LONG_SWORD;
-		    if (rn2(2)) armor = PLATE_MAIL;
-		break;
-		case PM_MONK:
-		    weapon = STRANGE_OBJECT;
-		    armor = STRANGE_OBJECT;
-		    cloak = ROBE;
-		    if (rn2(2)) shield = STRANGE_OBJECT;
-		break;
-		case PM_NOBLEMAN:
-		    weapon = special ? LONG_SWORD : RAPIER;
-		    armor = special ? NOBLE_S_DRESS : GENTLEWOMAN_S_DRESS;
-		    cloak = special ? find_opera_cloak() : CLOAK;
-		    shield = STRANGE_OBJECT;
-		break;
-		case PM_NOBLEWOMAN:
-		    weapon = special ? RAKUYO : RAPIER;
-		    armor = special ? CRYSTAL_PLATE_MAIL : GENTLEMAN_S_SUIT;
-		    cloak = special ? find_opera_cloak() : CLOAK;
-		    shield = STRANGE_OBJECT;
-		break;
-		case PM_PRIEST:
-		case PM_PRIESTESS:
-		    if (rn2(2)) weapon = MACE;
-		    if (rn2(2)) armor = PLATE_MAIL;
-		    if (special && rn2(4)) cloak = ROBE;
-		    if (special && rn2(4)) helm = rn2(2) ? HELM_OF_BRILLIANCE : HELM_OF_TELEPATHY;
-		    if (rn2(2)) shield = STRANGE_OBJECT;
-		break;
-		case PM_PIRATE:
-			weapon = SCIMITAR;
-			armor = JACKET;
-			shield = BUCKLER;
-			rweapon = FLINTLOCK;
-			rwammo = BULLET;
-	    break;
-		case PM_RANGER:
-		    if (rn2(2)) weapon = ELVEN_DAGGER;
-			if(!special) armor = LEATHER_ARMOR;
-			if(!special) helm = LEATHER_HELM;
-			rweapon = BOW;
-			rwammo = special ? ANCIENT_ARROW : ARROW;
-		break;
-		case PM_ROGUE:
-		    if (rn2(2)) weapon = SHORT_SWORD;
-			rwammo = DAGGER;
-		break;
-		case PM_SAMURAI:
-		    if (rn2(2)) weapon = KATANA;
-			rweapon = BOW;
-			rwammo = YA;
-		break;
-#ifdef TOURIST
-		case PM_TOURIST:
-		    if (special && !rn2(4)) weapon = LIGHTSABER;
-		break;
-#endif
-		case PM_VALKYRIE:
-		    if (rn2(2)) weapon = WAR_HAMMER;
-		    if (rn2(2)) armor = special ? PLATE_MAIL : LEATHER_ARMOR;
-		break;
-		case PM_WORM_THAT_WALKS:
-		    weapon = ATHAME;
-			armor = ARCHAIC_PLATE_MAIL;
-		    cloak = MUMMY_WRAPPING;
-		    shield = SHIELD_OF_REFLECTION;
-		break;
-		case PM_WIZARD:
-		   weapon = rn2(2) ? QUARTERSTAFF : ATHAME;
-		    if (special && rn2(2)) {
-		    	armor = rn2(2) ? BLACK_DRAGON_SCALE_MAIL :
-		    			SILVER_DRAGON_SCALE_MAIL;
-		    }
-	    	cloak = special ? CLOAK_OF_MAGIC_RESISTANCE : CLOAK;
-			if(special){
-				if (rn2(4)) helm = rn2(2) ? CORNUTHAUM : HELM_OF_BRILLIANCE;
-			} else {
-				helm = STRANGE_OBJECT;
-			}
-		    shield = STRANGE_OBJECT;
-		break;
-		default:
-			pline("Received %d.",monsndx(ptr));
-			impossible("bad mplayer monster");
-		    weapon = 0;
-		    break;
-	    }
 
 	    if (weapon != STRANGE_OBJECT) {
 			otmp = mksobj(weapon, TRUE, FALSE);
