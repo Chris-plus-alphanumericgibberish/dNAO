@@ -1445,6 +1445,11 @@ struct permonst *ptr;
     case PM_MINOTAUR:
     case PM_ASMODEUS:
     case PM_BALROG:
+    case PM_LEGION_DEVIL_GRUNT:
+    case PM_LEGION_DEVIL_SOLDIER:
+    case PM_LEGION_DEVIL_SERGEANT:
+    case PM_LEGION_DEVIL_CAPTAIN:
+    case PM_GLASYA:
 	return 2;
     case PM_WHITE_UNICORN:
     case PM_GRAY_UNICORN:
