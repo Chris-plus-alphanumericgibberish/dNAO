@@ -348,17 +348,6 @@
 #define peace_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_PEACE_OFF)
 #define zombie_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_ZOMBIE_OFF)
 
-/* This has the unfortunate side effect of needing a global variable	*/
-/* to store a result. 'otg_temp' is defined and declared in decl.{ch}.	*/
-#define obj_to_glyph(obj)						      \
-    (Hallucination ?							      \
-	((otg_temp = random_object()) == CORPSE ?			      \
-	    random_monster() + GLYPH_BODY_OFF :				      \
-	    ((otg_temp << 4) + rn2(16)) + GLYPH_OBJ_OFF)	:				      \
-	((obj)->otyp == CORPSE ?					      \
-	    (int) (obj)->corpsenm + GLYPH_BODY_OFF :			      \
-	    (int) ((obj)->otyp << 4) + object_color(obj) + GLYPH_OBJ_OFF))
-
 #define cmap_to_glyph(cmap_idx) ((int) (cmap_idx)   + GLYPH_CMAP_OFF)
 #define explosion_to_glyph(expltype,idx)	\
 		((((expltype) * MAXEXPCHARS) + ((idx) - S_explode1)) + GLYPH_EXPLODE_OFF)
