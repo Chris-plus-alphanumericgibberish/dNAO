@@ -1528,6 +1528,7 @@ static const NEARDATA short hwep[] = {
 	  RAKUYO_SABER/*1d8/1d8*/,
 	  SABER/*1d8/1d8*/,
 	  TRIDENT/*1d6+1/3d4*/, 
+	  NAGINATA, /*1d8/1d10*/
 	  LONG_SWORD/*1d8/1d12*/,
 	  FLAIL/*1d6+1/2d4*/, 
 	  NAGINATA/*1d6+1/2d4*/, 
