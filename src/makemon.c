@@ -1772,6 +1772,8 @@ register struct monst *mtmp;
 					
 					otmp = mksobj(BUCKLER, TRUE, FALSE);
 					otmp->spe = 0;
+					set_material_gm(otmp, PLASTIC);
+					otmp->obj_color = CLR_WHITE;
 					(void) mpickobj(mtmp, otmp);
 					
 					(void)mongets(mtmp, CLOAK);
@@ -1781,8 +1783,9 @@ register struct monst *mtmp;
 					(void)mongets(mtmp, PLASTEEL_GAUNTLETS);
 					(void)mongets(mtmp, PLASTEEL_BOOTS);
 				} else if (mm == PM_CHIEFTAIN){
-					(void)mongets(mtmp, TWO_HANDED_SWORD);
+					(void)mongets(mtmp, rn2(2) ? TWO_HANDED_SWORD : BATTLE_AXE);
 					(void)mongets(mtmp, CHAIN_MAIL);
+					(void)mongets(mtmp, GLOVES);
 					(void)mongets(mtmp, HIGH_BOOTS);
 				} else if (mm == PM_RHYMER){
 					static int trotyp[] = {
@@ -1820,8 +1823,14 @@ register struct monst *mtmp;
 					(void) mpickobj(mtmp, otmp);
 					(void)mongets(mtmp, drgnscl1[rn2(SIZE(drgnscl1))]);
 					(void)mongets(mtmp, drgnscl2[rn2(SIZE(drgnscl2))]);
-					(void)mongets(mtmp, LEATHER_HELM);
-					(void)mongets(mtmp, CLOAK);
+					otmp = mksobj(LEATHER_HELM, FALSE, FALSE);
+					otmp->spe = rn2(4);
+					set_material_gm(otmp, DRAGON_HIDE);
+					(void) mpickobj(mtmp, otmp);
+					otmp = mksobj(CLOAK, FALSE, FALSE);
+					otmp->spe = rn2(4);
+					set_material_gm(otmp, DRAGON_HIDE);
+					(void) mpickobj(mtmp, otmp);
 // ifdef CONVICT
 				} else if (mm == PM_INMATE){
 					(void)mongets(mtmp, rn2(2) ? HEAVY_IRON_BALL : SPOON);
@@ -1840,6 +1849,7 @@ register struct monst *mtmp;
 					(void) mongets(mtmp, BUCKLER);
 					(void) mongets(mtmp, CHAIN_MAIL);
 					(void) mongets(mtmp, HIGH_BOOTS);
+					(void) mongets(mtmp, GLOVES);
 				} else if (mm == PM_ABBOT){
 					(void) mongets(mtmp, CLOAK);
 				} else if (mm == PM_SERVANT){
@@ -5156,11 +5166,31 @@ register struct monst *mtmp;
 			otmp->oward = LAST_BASTION_SYMBOL;
 			(void) mpickobj(mtmp, otmp);
 			
-			(void)mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE);
-			(void)mongets(mtmp, PLASTEEL_HELM);
-			(void)mongets(mtmp, PLASTEEL_ARMOR);
-			(void)mongets(mtmp, BODYGLOVE);
-			(void)mongets(mtmp, GAUNTLETS_OF_POWER);
+			otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE);
+			if(otmp){
+				otmp->obj_color = CLR_RED;
+				otmp->spe = 4;
+			}
+			otmp = mongets(mtmp, PLASTEEL_HELM);
+			if(otmp){
+				otmp->obj_color = CLR_RED;
+				otmp->spe = 4;
+			}
+			otmp = mongets(mtmp, PLASTEEL_ARMOR);
+			if(otmp){
+				otmp->obj_color = CLR_RED;
+				otmp->spe = 4;
+			}
+			otmp = mongets(mtmp, BODYGLOVE);
+			if(otmp){
+				otmp->spe = 4;
+			}
+			otmp = mongets(mtmp, GAUNTLETS_OF_POWER);
+			if(otmp){
+				set_material_gm(otmp, PLASTIC);
+				otmp->obj_color = CLR_RED;
+				otmp->spe = 4;
+			}
 		}
 		if (rn2(2)) {
 		    if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR) {
