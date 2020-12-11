@@ -1266,23 +1266,23 @@ static NEARDATA const int rwep[] =
 };
 
 static NEARDATA const int pwep[] =
-{	HALBERD, 
-	BARDICHE, 
-	SPETUM, 
-	BILL_GUISARME, 
-	VOULGE, 
-	DROVEN_LANCE,
-	RANSEUR, 
-	GUISARME,
-	NAGINATA, 
-	GLAIVE, 
-	LUCERN_HAMMER, 
-	BEC_DE_CORBIN, 
-	FAUCHARD, 
-	ELVEN_LANCE,
-	PARTISAN, 
-	LANCE,
-	AKLYS
+{	HALBERD, /*1d10/2d6*/
+	DROVEN_LANCE, /*1d10/1d10*/
+	BARDICHE, /*2d4/3d4*/ 
+	BILL_GUISARME, /*2d4/1d10*/
+	VOULGE, /*2d4/2d4*/
+	RANSEUR, /*2d4/2d4*/
+	GUISARME, /*2d4/1d8*/
+	LUCERN_HAMMER, /*2d4/1d6*/
+	SPETUM,  /*1d6+1/2d6*/
+	NAGINATA, /*1d8/1d10*/
+	ELVEN_LANCE, /*1d8/1d8*/
+	BEC_DE_CORBIN, /*1d8/1d6*/
+	GLAIVE, /*1d6/1d10*/
+	FAUCHARD, /*1d6/1d8*/
+	LANCE, /*1d6/1d8*/
+	PARTISAN, /*1d6/1d6*/
+	AKLYS /*1d6/1d3*/
 };
 
 boolean
