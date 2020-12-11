@@ -6860,8 +6860,17 @@ register struct	monst	*mtmp;
 			otmp->oerodeproof = TRUE;
 			otmp->spe = 5;
 			(void) mpickobj(mtmp, otmp);
+			/*Gauntlets*/
+			otmp = mksobj(GAUNTLETS_OF_POWER, TRUE, FALSE);
+			set_material_gm(otmp, SHADOWSTEEL);
+			otmp->blessed = TRUE;
+			otmp->cursed = FALSE;
+			otmp->oerodeproof = TRUE;
+			otmp->spe = 5;
+			(void) mpickobj(mtmp, otmp);
 			/*boots*/
-			otmp = mksobj(SHOES, TRUE, FALSE);
+			otmp = mksobj(ARMORED_BOOTS, TRUE, FALSE);
+			set_material_gm(otmp, SHADOWSTEEL);
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			otmp->oerodeproof = TRUE;
