@@ -335,7 +335,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 				ways_seen = 0;
 				if(u.sealsActive&SEAL_PAIMON && is_magical((mtmp)->data)) ways_seen++;
 				if(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mtmp)->data)) ways_seen++;
-				if(u.sealsActive&SEAL_TENEBROUS && !nonliving_mon(mtmp)) ways_seen++;
+				if(u.sealsActive&SEAL_TENEBROUS && !nonliving(mtmp->data)) ways_seen++;
 				if(u.specialSealsActive&SEAL_ACERERAK && is_undead(mtmp->data)) ways_seen++;
 				if(uwep && ((uwep->oward & WARD_THJOFASTAFUR) && 
 					((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data)))) ways_seen++;
@@ -366,7 +366,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(u.sealsActive&SEAL_TENEBROUS && !nonliving_mon(mtmp)){
+					if(u.sealsActive&SEAL_TENEBROUS && !nonliving(mtmp->data)){
 					Sprintf(wbuf, "warned of living beings");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");

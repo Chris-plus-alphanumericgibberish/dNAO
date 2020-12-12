@@ -610,7 +610,7 @@ struct obj * instr;
 	
 	/* Defense level */
 	dlev = (int)mtmp->m_lev*2;
-	if (nonliving_mon(mtmp) && mindless_mon(mtmp)) dlev = 100;
+	if (nonliving(mtmp->data) && mindless_mon(mtmp)) dlev = 100;
 	dlev0 = dlev;
 
 	/* "peaceful" songs */
@@ -1570,9 +1570,9 @@ do_pit:		    chasm = maketrap(x,y,PIT);
 									   if(!cansee(x,y) || mon)
 										   pline("%s is %sed!",
 												   cansee(x,y) ? "It" : Monnam(mtmp),
-												  nonliving_mon(mtmp) ? "destroy" : "kill");
+												  nonliving(mtmp->data) ? "destroy" : "kill");
 						else {
-										   You("%s %s!", nonliving_mon(mtmp) ? "destroy" :
+										   You("%s %s!", nonliving(mtmp->data) ? "destroy" :
 											   "kill", mtmp->mtame ?
 							x_monnam(mtmp, ARTICLE_THE, "poor",
 					M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, FALSE):

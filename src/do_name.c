@@ -780,7 +780,7 @@ maybe_append_injury_desc(mtmp, buf)
 struct monst * mtmp;
 char * buf;
 {
-	if (((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving_mon(mtmp) || has_blood_mon(mtmp))) || (ublindf && ublindf->otyp == ANDROID_VISOR))
+	if (((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood_mon(mtmp))) || (ublindf && ublindf->otyp == ANDROID_VISOR))
 		&& !flags.suppress_hurtness){
 		if (mtmp->mhp >= mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
 		else if (mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");

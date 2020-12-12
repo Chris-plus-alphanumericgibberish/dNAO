@@ -142,7 +142,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define MATCH_WARN_OF_MON(mon)	( MATCH_WARN_OF_MON_STRICT(mon) || \
 					(u.sealsActive&SEAL_PAIMON && is_magical((mon)->data)) || \
 					(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mon)->data)) || \
-					(u.sealsActive&SEAL_TENEBROUS && !nonliving_mon(mon)) || \
+					(u.sealsActive&SEAL_TENEBROUS && !nonliving(mon->data)) || \
 					(Upolyd && youmonst.data->mtyp == PM_SHARK && has_blood((mon)->data) && \
 						(mon)->mhp < (mon)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mon)->mx, (mon)->my, TRUE)) || \
 					(u.specialSealsActive&SEAL_ACERERAK && is_undead(mon->data)) || \

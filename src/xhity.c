@@ -4714,7 +4714,7 @@ boolean ranged;
 		else {
 			if(canseemon(mdef))
 				pline("%s is covered in pollen!", Monnam(mdef));
-			if(!breathless_mon(mdef) && !nonliving_mon(mdef)){
+			if(!breathless_mon(mdef) && !nonliving(mdef->data)){
 				if(canseemon(mdef))
 					pline("%s starts sneezing uncontrollably!", Monnam(mdef));
 				mdef->mcanmove = 0;
@@ -9908,7 +9908,7 @@ int vis;
 			}
 		}
 		else {
-			if (nonliving_mon(mdef) || is_demon(pd)) {
+			if (nonliving(mdef->data) || is_demon(pd)) {
 				if (vis&VIS_MDEF && vis&VIS_MAGR) {
 					pline("%s seems no deader than before.",
 						Monnam(mdef));

@@ -1554,7 +1554,7 @@ mcalcdistress()
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
 					pline("%s %s!", Monnam(tmpm),
-					nonliving_mon(tmpm)
+					nonliving(tmpm->data)
 					? "is destroyed" : "dies");
 				tmpm->mhp = 0;
 				grow_up(mtmp,tmpm);
@@ -1633,7 +1633,7 @@ mcalcdistress()
 			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 				&& tmpm->mpeaceful != mtmp->mpeaceful
 				&& tmpm->mtame != mtmp->mtame
-				&& !nonliving_mon(tmpm)
+				&& !nonliving(tmpm->data)
 				&& !DEADMONSTER(tmpm)
 				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
 			) targets++;
@@ -1648,7 +1648,7 @@ mcalcdistress()
 			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 				&& tmpm->mpeaceful != mtmp->mpeaceful
 				&& tmpm->mtame != mtmp->mtame
-				&& !nonliving_mon(tmpm)
+				&& !nonliving(tmpm->data)
 				&& !DEADMONSTER(tmpm)
 				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
 			) targets--;
@@ -1672,7 +1672,7 @@ mcalcdistress()
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
 					pline("%s %s!", Monnam(tmpm),
-					nonliving_mon(tmpm)
+					nonliving(tmpm->data)
 					? "is destroyed" : "dies");
 				tmpm->mhp = 0;
 				grow_up(mtmp,tmpm);
@@ -1738,7 +1738,7 @@ mcalcdistress()
 					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
-						&& !(nonliving_mon(tmpm) || is_demon(tmpm->data))
+						&& !(nonliving(tmpm->data) || is_demon(tmpm->data))
 						&& !(ward_at(tmpm->mx,tmpm->my) == CIRCLE_OF_ACHERON)
 						&& !(resists_death(tmpm))
 						&& !DEADMONSTER(tmpm)
@@ -1758,7 +1758,7 @@ mcalcdistress()
 						if(targ->mhp < 1){
 							if (canspotmon(targ))
 								pline("%s %s!", Monnam(targ),
-								nonliving_mon(targ)
+								nonliving(targ->data)
 								? "is destroyed" : "dies");
 							targ->mhp = 0;
 							grow_up(mtmp,targ);
@@ -1769,7 +1769,7 @@ mcalcdistress()
 						if(targ->mhp < 1){
 							if (canspotmon(targ))
 								pline("%s %s!", Monnam(targ),
-								nonliving_mon(targ)
+								nonliving(targ->data)
 								? "is destroyed" : "dies");
 							targ->mhp = 0;
 							grow_up(mtmp,targ);
@@ -1778,7 +1778,7 @@ mcalcdistress()
 					} else {
 						if (canspotmon(targ))
 							pline("%s %s!", Monnam(targ),
-							nonliving_mon(targ)
+							nonliving(targ->data)
 							? "is destroyed" : "dies");
 						targ->mhp = 0;
 						grow_up(mtmp,targ);
@@ -3275,7 +3275,7 @@ nexttry:
 			if(flag & NOTONL) continue;
 			info[cnt] |= NOTONL;
 		}
-		if (levl[nx][ny].typ == CLOUD && Is_lolth_level(&u.uz) && !(nonliving_mon(mon) || breathless_mon(mon) || resists_poison(mon))) {
+		if (levl[nx][ny].typ == CLOUD && Is_lolth_level(&u.uz) && !(nonliving(mdat) || breathless_mon(mon) || resists_poison(mon))) {
 			if(!(flag & ALLOW_TRAPS)) continue;
 			info[cnt] |= ALLOW_TRAPS;
 		}
@@ -3848,7 +3848,7 @@ struct obj *
 mlifesaver(mon)
 struct monst *mon;
 {
-	if (!nonliving_mon(mon)) {
+	if (!nonliving(mon->data)) {
 	    struct obj *otmp = which_armor(mon, W_AMUL);
 
 	    if (otmp && otmp->otyp == AMULET_OF_LIFE_SAVING)
@@ -4659,7 +4659,7 @@ boolean was_swallowed;			/* digestion */
 				else pline("%s lets out a terrible shriek!", Monnam(mon));
 				for (mtmp = fmon; mtmp; mtmp = mtmp2){
 					mtmp2 = mtmp->nmon;
-					if(mtmp->data->geno & G_GENO && !nonliving_mon(mon) && !is_demon(mon->data) && !is_keter(mon->data) && mtmp->mhp <= 100){
+					if(mtmp->data->geno & G_GENO && !nonliving(mon->data) && !is_demon(mon->data) && !is_keter(mon->data) && mtmp->mhp <= 100){
 						if (DEADMONSTER(mtmp)) continue;
 						mtmp->mhp = -10;
 						monkilled(mtmp,"",AD_DRLI);
@@ -5550,7 +5550,7 @@ xkilled(mtmp, dest)
 	}
 	
 	if (dest & 1) {
-	    const char *verb = nonliving_mon(mtmp) ? "destroy" : "kill";
+	    const char *verb = nonliving(mtmp->data) ? "destroy" : "kill";
 
 	    if (!wasinside && !canspotmon(mtmp))
 		You("%s it!", verb);
@@ -6228,7 +6228,7 @@ register int x, y, distance;
 					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
-						&& !nonliving_mon(tmpm)
+						&& !nonliving(tmpm->data)
 						&& !resists_drain(tmpm)
 						&& !DEADMONSTER(tmpm)
 						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
@@ -6244,7 +6244,7 @@ register int x, y, distance;
 					if(dist2(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= distance
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
-						&& !nonliving_mon(tmpm)
+						&& !nonliving(tmpm->data)
 						&& !resists_drain(tmpm)
 						&& !DEADMONSTER(tmpm)
 						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)

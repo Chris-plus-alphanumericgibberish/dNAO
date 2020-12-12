@@ -227,7 +227,7 @@
 #define intelligent_mon(mon)	(!mindless_mon(mon) && !is_animal((mon)->data))
 #define murderable_mon(mon)	((mon) && ((intelligent_mon(mon) && always_peaceful((mon)->data) && !always_hostile_mon(mon)) || (mon)->isshk || (mon)->isgd || (mon)->ispriest))
 
-#define mortal_race(mon)	(intelligent_mon(mon) && !nonliving_mon(mon) && !is_minion((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data))
+#define mortal_race(mon)	(intelligent_mon(mon) && !nonliving((mon)->data) && !is_minion((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data))
 #define dark_immune(mon)	(is_unalive((mon)->data) || is_primordial((mon)->data))
 
 #define slithy(ptr)			((ptr)->mflagsb & MB_SLITHY)
@@ -288,7 +288,7 @@
 							 (ptr)->mtyp == PM_MILITANT_CLERIC ||\
 							 (ptr)->mtyp == PM_HALF_ELF_RANGER)
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
-#define	can_undead_mon(mon)	(mon && !nonliving_mon(mon) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
+#define	can_undead_mon(mon)	(mon && !nonliving((mon)->data) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
 								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
 								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
 #define is_weldproof(ptr)		(is_undead(ptr) || is_demon(ptr) || is_were(ptr))
@@ -743,8 +743,6 @@
 #define nonliving(ptr)	(is_unalive(ptr) || is_undead(ptr) || \
 				 (ptr)->mtyp == PM_MANES \
 				)
-
-#define nonliving_mon(mon)	(mon && (nonliving((mon)->data) || is_undead(mon->data)))
 
 #define is_unalive(ptr)		(on_level(&valley_level, &u.uz) || is_naturally_unalive(ptr))
 

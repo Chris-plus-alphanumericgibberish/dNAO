@@ -10303,7 +10303,7 @@ struct monst *mtmp, *victim;
 		if (sensemon(mtmp))
 		    pline("As %s grows up into %s, %s %s!", mon_nam(mtmp),
 			an(ptr->mname), mhe(mtmp),
-			nonliving_mon(mtmp) ? "expires" : "dies");
+			nonliving(ptr) ? "expires" : "dies");
 		set_mon_data(mtmp, newtype);	/* keep mvitals[] accurate */
 		mondied(mtmp);
 		return (struct permonst *)0;

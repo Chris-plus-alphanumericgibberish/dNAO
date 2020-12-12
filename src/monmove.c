@@ -685,7 +685,7 @@ boolean digest_meal;
 	}
 	/* Clouds on Lolth's level deal damage */
 	if(Is_lolth_level(&u.uz) && levl[mon->mx][mon->my].typ == CLOUD){
-		if (!(nonliving_mon(mon) || breathless_mon(mon))){
+		if (!(nonliving(mon->data) || breathless_mon(mon))){
 			if (haseyes(mon->data) && mon->mcansee){
 				mon->mblinded = 1;
 				mon->mcansee = 0;
@@ -714,7 +714,7 @@ boolean digest_meal;
 		mon->mhp += 25; //Fast healing
 	} else {
 		if(mon->mhp < mon->mhpmax && mon_resistance(mon,REGENERATION)) mon->mhp++;
-		if(!nonliving_mon(mon)){
+		if(!nonliving(mon->data)){
 			if (mon->mhp < mon->mhpmax){
 				//recover 1/HEALCYCLEth hp per turn:
 				mon->mhp += (mon->m_lev)/HEALCYCLE;
@@ -1326,7 +1326,7 @@ register struct monst *mtmp;
 				}
 				else {
 					//Note: body armor blocks healing, healing is also reduced by the rolled DR
-					if(nonliving_mon(patient) || patient->mpeaceful != mtmp->mpeaceful || which_armor(patient, W_ARM))
+					if(nonliving(patient->data) || patient->mpeaceful != mtmp->mpeaceful || which_armor(patient, W_ARM))
 						continue;
 					if(patient->mhp < patient->mhpmax){
 						nurse_heal(mtmp, patient, canseemon(mtmp) || canseemon(patient));

@@ -2434,7 +2434,7 @@ spiriteffects(power, atme)
 				mon = m_at(u.ux+u.dx, u.uy+u.dy);
 				if(!mon) break;
 				You("heal %s.", mon_nam(mon));
-				if (nonliving_mon(mon)){	/* match effect on player */
+				if (nonliving(mon->data)){	/* match effect on player */
 					shieldeff(mon->mx, mon->my);
 				} else {
 					mon->mhp += d(5,dsize);
@@ -2488,7 +2488,7 @@ spiriteffects(power, atme)
 			} else if(isok(u.ux+u.dx, u.uy+u.dy)) {
 				mon = m_at(u.ux+u.dx, u.uy+u.dy);
 				if(!mon) break;
-				if (nonliving_mon(mon)){	/* match effect on player */
+				if (nonliving(mon->data)){	/* match effect on player */
 					shieldeff(mon->mx, mon->my);
 				} else {
 					pline("%s recovers.", Monnam(mon));
@@ -2858,7 +2858,7 @@ spiriteffects(power, atme)
 				if(mon && is_golem(mon->data)){
 					mon->mhp = 0;
 					xkilled(mon, 1);
-				} else if(mon && nonliving_mon(mon)){
+				} else if(mon && nonliving(mon->data)){
 					mon->mhp -= d(rnd(5),dsize);
 					if(mon->mhp <= 0){
 						mon->mhp = 0;
@@ -2907,7 +2907,7 @@ spiriteffects(power, atme)
 				if(!mon){
 					pline("\"There's no one there, buddy!\"");
 					return 0;
-				} if(nonliving_mon(mon) || is_anhydrous(mon->data)){
+				} if(nonliving(mon->data) || is_anhydrous(mon->data)){
 					shieldeff(mon->mx, mon->my);
 					break;
 				}
@@ -3693,7 +3693,7 @@ spiriteffects(power, atme)
 			if(!getdir((char *)0) || (!u.dx && !u.dy)) return 0;
 			mon = m_at(u.ux+u.dx,u.uy+u.dy);
 			if(!mon) return 0;
-			if(resists_drli(mon) || nonliving_mon(mon)){
+			if(resists_drli(mon) || nonliving(mon->data)){
 				pline("You can't swallow the soul of %s.", mon_nam(mon));
 				shieldeff(mon->mx, mon->my);
 			} else if(mon->m_lev > u.ulevel){

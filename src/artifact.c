@@ -2355,7 +2355,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		}
 		if(youdefend ? is_golem(youracedata) : is_golem(mdef->data)){
 			*dmgptr += d(2*dnum,4);
-		} else if(youdefend ? nonliving(youracedata) : nonliving_mon(mdef)){
+		} else if(youdefend ? nonliving(youracedata) : nonliving(mdef->data)){
 			*dmgptr += d(dnum,4);
 		}
 	} // nvPh - golem/nonliving
@@ -2380,7 +2380,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			else and ? Strcat(buf, " and thirsty") : Sprintf(buf, "thirsty");
 			and = TRUE;
 		}
-		if(youdefend ? !(nonliving(youracedata) || is_anhydrous(youracedata)) : !(nonliving_mon(mdef) || is_anhydrous(mdef->data))){
+		if(youdefend ? !(nonliving(youracedata) || is_anhydrous(youracedata)) : !(nonliving(mdef->data) || is_anhydrous(mdef->data))){
 			*dmgptr += d(dnum,4);
 		}
 	} // nvPh - hydrous
@@ -2639,7 +2639,7 @@ struct obj *pen;	/* Pen of the Void */
 	if (pen->ovar1&SEAL_FAFNIR){
 		if(youdefend ? is_golem(youracedata) : is_golem(mdef->data)){
 			return TRUE;
-		} else if(youdefend ? nonliving(youracedata) : nonliving_mon(mdef)){
+		} else if(youdefend ? nonliving(youracedata) : nonliving(mdef->data)){
 			return TRUE;
 		}
 	}
@@ -2652,7 +2652,7 @@ struct obj *pen;	/* Pen of the Void */
 		}
 	}
 	if (pen->ovar1&SEAL_IRIS) {
-		if(youdefend ? !(nonliving(youracedata) || is_anhydrous(youracedata)) : !(nonliving_mon(mdef) || is_anhydrous(mdef->data))){
+		if(youdefend ? !(nonliving(youracedata) || is_anhydrous(youracedata)) : !(nonliving(mdef->data) || is_anhydrous(mdef->data))){
 			return TRUE;
 		}
 	}
@@ -3569,7 +3569,7 @@ boolean * messaged;
 				*truedmgptr += basedmg + 1;
 			else if (otmp->osinging == OSING_DEATH && !rn2(4)){
 				if (!resists_death(mdef)){
-					if (!(nonliving_mon(mdef) || is_demon(pd) || is_angel(pd))){
+					if (!(nonliving(mdef->data) || is_demon(pd) || is_angel(pd))){
 						pline("%s withers under the touch of %s.", The(Monnam(mdef)), The(xname(otmp)));
 						mdef->mhp = 1;
 						*truedmgptr += 10;
@@ -4570,7 +4570,7 @@ boolean * messaged;
 				}
 			}
 		}
-		else if (!(thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA) || nonliving_mon(mdef)))
+		else if (!(thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA) || nonliving(mdef->data)))
 		{
 			static long ulastscreamed = 0;
 			static long lastscreamed = 0;
@@ -6286,7 +6286,7 @@ arti_invoke(obj)
 				/* message */
 				pline("You reach out and stab at %s very soul.", s_suffix(mon_nam(mtmp)));
 				/* nonliving, demons, angels are immune */
-				if (nonliving_mon(mtmp) || is_demon(mtmp->data) || is_angel(mtmp->data))
+				if (nonliving(mtmp->data) || is_demon(mtmp->data) || is_angel(mtmp->data))
 					pline("... but %s seems to lack one!", mon_nam(mtmp));
 				/* circle of acheron provides protection */
 				else if (ward_at(mtmp->mx, mtmp->my) == CIRCLE_OF_ACHERON)
@@ -7401,7 +7401,7 @@ arti_invoke(obj)
                 struct monst *mtmp;
                 if((u.dx || u.dy) && (mtmp = m_at(u.ux+u.dx,u.uy+u.dy))){
                   if(!resists_death(mtmp)){
-                    if(!(nonliving_mon(mtmp) || is_demon(mtmp->data) || is_angel(mtmp->data))){
+                    if(!(nonliving(mtmp->data) || is_demon(mtmp->data) || is_angel(mtmp->data))){
                       pline("%s withers under the touch of %s.", The(Monnam(mtmp)), The(xname(obj)));
                       xkilled(mtmp, 1);
                       obj->ovar1 = COMMAND_LIFE;

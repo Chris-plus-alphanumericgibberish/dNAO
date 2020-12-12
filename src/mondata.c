@@ -1218,7 +1218,7 @@ struct monst *mon;
 	
 	if(mon == u.usteed && u.sealsActive&SEAL_BERITH && u.sealsActive&SEAL_OSE) return TRUE;
 	
-	return nonliving_mon(mon) || is_demon(mon->data) || is_angel(mon->data) || is_keter(mon->data);
+	return nonliving(mon->data) || is_demon(mon->data) || is_angel(mon->data) || is_keter(mon->data);
 }
 
 /* TRUE iff monster is resistant to light-induced blindness */
