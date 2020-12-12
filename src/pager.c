@@ -1353,6 +1353,9 @@ do_look(quick)
 			temp_buf[0] = '\0';
 			get_description_of_monster_type(mtmp, temp_buf);
 			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
+			if(uarmh && uarmh->oartifact == ART_ALL_SEEING_EYE_OF_THE_FLY){
+				probe_monster(mtmp);
+			}
 		}
 		}
 	}
