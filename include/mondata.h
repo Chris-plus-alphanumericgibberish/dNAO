@@ -545,10 +545,11 @@
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
 #define hates_iron(ptr)		((ptr->mflagsg&MG_HATESIRON) != 0)
 
-#define melee_polearms(ptr)	((ptr)->mtyp == PM_VROCK ||\
-							 (ptr)->mtyp == PM_MEPHISTOPHELES ||\
-							 (ptr)->mtyp == PM_BAPHOMET \
-							)
+#define melee_polearms(ptr)	((ptr) && ( \
+			(ptr)->mtyp == PM_VROCK ||\
+			(ptr)->mtyp == PM_MEPHISTOPHELES ||\
+			(ptr)->mtyp == PM_BAPHOMET \
+			))
 #define throws_rocks(ptr)	(((ptr)->mflagst & MT_ROCKTHROW) != 0L)
 #define type_is_pname(ptr)	(((ptr)->mflagsg & MG_PNAME) != 0L)
 #define is_thief(ptr)		( dmgtype(ptr, AD_SGLD)  || dmgtype(ptr, AD_SITM) || dmgtype(ptr, AD_SEDU) )
