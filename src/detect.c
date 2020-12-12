@@ -571,11 +571,12 @@ int		class;		/* an object class, 0 for all */
 	/* Allow a mimic to override the detected objects it is carrying. */
 	if (is_cursed && mtmp->m_ap_type == M_AP_OBJECT &&
 		(!class || class == objects[mtmp->mappearance].oc_class)) {
-		struct obj temp;
+		struct obj temp = {0};
 
 		temp.otyp = mtmp->mappearance;	/* needed for obj_to_glyph() */
 		temp.ox = mtmp->mx;
 		temp.oy = mtmp->my;
+		temp.obj_color = objects[mtmp->mappearance].oc_color;
 		temp.corpsenm = PM_TENGU;		/* if mimicing a corpse */
 		map_object(&temp, 1);
 #ifndef GOLDOBJ
@@ -583,11 +584,12 @@ int		class;		/* an object class, 0 for all */
 #else
 	} else if (findgold(mtmp->minvent) && (!class || class == COIN_CLASS)) {
 #endif
-		struct obj gold;
+		struct obj gold = {0};
 
 		gold.otyp = GOLD_PIECE;
 		gold.ox = mtmp->mx;
 		gold.oy = mtmp->my;
+		gold.obj_color = objects[GOLD_PIECE].oc_color;
 		map_object(&gold, 1);
 	}
 	}

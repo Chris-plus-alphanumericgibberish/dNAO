@@ -33,7 +33,6 @@ NEARDATA int nsubroom = 0;
 NEARDATA int occtime = 0;
 
 int x_maze_max, y_maze_max;	/* initialized in main, used in mkmaze.c */
-int otg_temp;			/* used by object_to_glyph() [otg] */
 
 #ifdef REDO
 NEARDATA int in_doagain = 0;
