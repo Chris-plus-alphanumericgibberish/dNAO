@@ -2376,9 +2376,16 @@ find_ac()
 		}
 	}
 	if(Race_if(PM_HALF_DRAGON)){
-		if(carrying_art(ART_DRAGON_S_HEART_STONE))
-			uac -= (u.ulevel+2)/3;
-		else uac -= (u.ulevel+3)/6;
+		//DS half dragons may be more humanoid
+		if(Role_if(PM_NOBLEMAN) && flags.initgend){
+			if(carrying_art(ART_DRAGON_S_HEART_STONE))
+				uac -= (u.ulevel+5)/10;
+			else uac -= (u.ulevel+5)/15; //level 10 and 25
+		} else {
+			if(carrying_art(ART_DRAGON_S_HEART_STONE))
+				uac -= (u.ulevel+2)/3;
+			else uac -= (u.ulevel+3)/6;
+		}
 	}
 	if(u.specialSealsActive&SEAL_COSMOS) uac -= (spiritDsize()/2);
 	if(u.sealsActive&SEAL_ECHIDNA) uac -= max((ACURR(A_CON)-10)/2, 0);
@@ -2403,9 +2410,16 @@ int base_nat_udr()
 	}
 	
 	if(Race_if(PM_HALF_DRAGON)){
-		if(carrying_art(ART_DRAGON_S_HEART_STONE))
-			udr += (u.ulevel)/3;
-		else udr += (u.ulevel)/6;
+		//DS half dragons may be more humanoid
+		if(Role_if(PM_NOBLEMAN) && flags.initgend){
+			if(carrying_art(ART_DRAGON_S_HEART_STONE))
+				udr += (u.ulevel)/10;
+			else udr += (u.ulevel)/15;
+		} else {
+			if(carrying_art(ART_DRAGON_S_HEART_STONE))
+				udr += (u.ulevel)/3;
+			else udr += (u.ulevel)/6;
+		}
 	}
 	
 	if(u.sealsActive&SEAL_ECHIDNA)
