@@ -402,7 +402,7 @@ raise_dead:
 	    mtmp2 = mtmp->nmon;		/* tamedog() changes chain */
 	    if (DEADMONSTER(mtmp)) continue;
 
-	    if (is_undead_mon(mtmp) && cansee(mtmp->mx, mtmp->my)) {
+	    if (is_undead(mtmp->data) && cansee(mtmp->mx, mtmp->my)) {
 		mtmp->mpeaceful = TRUE;
 		if(sgn(mtmp->data->maligntyp) == sgn(u.ualign.type)
 		   && distu(mtmp->mx, mtmp->my) < 4)
@@ -1804,7 +1804,7 @@ genericptr_t val;
 	    snuff_light_source(x, y);
 		newsym(x,y);
 		if(mon){
-			if(is_undead_mon(mon) || resists_drain(mon) || is_demon(mon->data)){
+			if(is_undead(mon->data) || resists_drain(mon) || is_demon(mon->data)){
 				shieldeff(mon->mx, mon->my);
 			} else {
 				setmangry(mon);
@@ -1814,7 +1814,7 @@ genericptr_t val;
 		}
 	} else {
 		if(mon){
-			if(is_undead_mon(mon) || resists_drain(mon) || is_demon(mon->data)){
+			if(is_undead(mon->data) || resists_drain(mon) || is_demon(mon->data)){
 				shieldeff(mon->mx, mon->my);
 			} else {
 				setmangry(mon);
@@ -4169,7 +4169,7 @@ int x, y;
 		newsym(x,y);
 	}
 	if(mon && !mon->mpeaceful){
-		if(is_undead_mon(mon))
+		if(is_undead(mon->data))
 			dmod++;
 		if(is_demon(mon->data))
 			dmod++;
@@ -4279,7 +4279,7 @@ int spell;
 						}
 						if(mon && !mon->mpeaceful){
 							if(is_elemental(mon->data) 
-								|| is_undead_mon(mon) 
+								|| is_undead(mon->data) 
 								|| mon->mtyp == PM_ASPECT_OF_THE_SILENCE 
 								|| mon->mtyp == PM_SENTINEL_OF_MITHARDIR 
 								|| mon->mtyp == PM_STONE_GOLEM 

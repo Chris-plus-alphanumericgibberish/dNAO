@@ -384,7 +384,7 @@ dosounds()
     if (level.flags.has_morgue && !rn2(200)) {
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (DEADMONSTER(mtmp)) continue;
-	    if (is_undead_mon(mtmp) &&
+	    if (is_undead(mtmp->data) &&
 		mon_in_room(mtmp, MORGUE)) {
 		switch (rn2(2)+hallu) {
 		    case 0:
@@ -2745,7 +2745,7 @@ int dz;
 		mtmp = tamedog(mtmp, (struct obj *)0);
 		return 1;
 	}
-	if(is_undead_mon(mtmp) && u.specialSealsActive&SEAL_ACERERAK && u.ulevel > mtmp->m_lev){
+	if(is_undead(mtmp->data) && u.specialSealsActive&SEAL_ACERERAK && u.ulevel > mtmp->m_lev){
 		You("order the lesser dead to stand at ease.");
 		mtmp->mpeaceful = 1;
 		mtmp->mhp = mtmp->mhpmax;

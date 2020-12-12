@@ -1190,7 +1190,7 @@ struct monst *mon;
 	if(!mon) return FALSE;
 	ptr = mon->data;
 
-	return (boolean)(is_undead_mon(mon) || is_demon(ptr) || is_were(ptr) ||
+	return (boolean)(is_undead(ptr) || is_demon(ptr) || is_were(ptr) ||
 			 species_resists_drain(mon) || 
 			 ptr->mtyp == PM_DEATH ||
 			 mon_resistance(mon, DRAIN_RES) ||

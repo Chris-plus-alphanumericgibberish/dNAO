@@ -622,7 +622,7 @@ struct obj * instr;
 		if (your_race(mtmp->data)) dlev -= dlev0/10;
 
 		// undead and demons don't care about 'peaceful' music
-		if (is_undead_mon(mtmp) || is_demon(mtmp->data)) dlev += 50;
+		if (is_undead(mtmp->data) || is_demon(mtmp->data)) dlev += 50;
 		if (always_hostile_mon(mtmp)) dlev += dlev0/10;
 		if (race_peaceful(mtmp->data)) dlev -= dlev0/10;
 
@@ -663,7 +663,7 @@ struct obj * instr;
 		// the Lyre isn't so good to scare people or to sow confusion
 		if (instr->oartifact == ART_LYRE_OF_ORPHEUS) alev /= 2;
 		// undeads and demons like scary music
-		if (song == SNG_FEAR && is_undead_mon(mtmp)) dlev -= dlev0/3;
+		if (song == SNG_FEAR && is_undead(mtmp->data)) dlev -= dlev0/3;
 		if (song == SNG_FEAR && is_demon(mtmp->data)) dlev -= dlev0/5;
 		// monster is scared/confused easily if it can't see you
 		canseeu = m_canseeu(mtmp);
@@ -797,14 +797,14 @@ int distance;
 		if (!DEADMONSTER(mtmp) && distu(mtmp->mx, mtmp->my) < distance &&
 			mon_affected_by_song(mtmp) && r >= 0) {
 
-			if (is_undead_mon(mtmp) || is_demon(mtmp->data)) {
+			if (is_undead(mtmp->data) || is_demon(mtmp->data)) {
 				// small chance of side effect
 				r = r/songs[song_being_played()].turns;
 				// if (wizard) pline("[%i%% side effect]", r);
 			}
 	
 			/* fear song actually can pacify undead */
-			if (is_undead_mon(mtmp)) {
+			if (is_undead(mtmp->data)) {
 				if (rn2(100) < r) {
 					if (canseemon(mtmp))
 						pline((Hallucination ? "%s starts to coreograph a dance!" 

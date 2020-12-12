@@ -145,7 +145,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 					(u.sealsActive&SEAL_TENEBROUS && !nonliving_mon(mon)) || \
 					(Upolyd && youmonst.data->mtyp == PM_SHARK && has_blood((mon)->data) && \
 						(mon)->mhp < (mon)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mon)->mx, (mon)->my, TRUE)) || \
-					(u.specialSealsActive&SEAL_ACERERAK && is_undead_mon(mon)) || \
+					(u.specialSealsActive&SEAL_ACERERAK && is_undead(mon->data)) || \
 					(uwep && uwep->oclass == WEAPON_CLASS && (uwep)->obj_material == WOOD && uwep->otyp != MOON_AXE &&\
 					 (uwep->oward & WARD_THJOFASTAFUR) && ((mon)->data->mlet == S_LEPRECHAUN || (mon)->data->mlet == S_NYMPH || is_thief((mon)->data))) \
 				)
@@ -161,7 +161,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 						(flags.warntypea & (mon)->data->mflagsa)) || \
 					(Warn_of_mon && flags.warntypea && \
 						(flags.warntypea & MA_UNDEAD && \
-						is_undead_mon(mon))) || \
+						is_undead(mon->data))) || \
 					(Warn_of_mon && flags.warntypev && \
 						(flags.warntypev & (mon)->data->mflagsv)) || \
 					(Warn_of_mon && flags.montype && \

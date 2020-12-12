@@ -1782,7 +1782,7 @@ boolean narrow_only;
 		if (weap->mflagsa != 0L){
 			if ((weap->name == artilist[ART_SCOURGE_OF_LOLTH].name) && is_drow(ptr))
 				; // skip; the scourge of lolth hates Elves but not Drow.
-			else if ((weap->mflagsa & MA_UNDEAD) && is_undead_mon(mdef))
+			else if ((weap->mflagsa & MA_UNDEAD) && is_undead(ptr))
 				return TRUE;
 			else if (
 				(ptr->mflagsa & weap->mflagsa) ||
@@ -7168,7 +7168,7 @@ arti_invoke(obj)
 			for (mtmp = fmon; mtmp; mtmp = mtmp2) {
 				mtmp2 = mtmp->nmon;
 				/* The eye is never blind ... */
-				if (couldsee(mtmp->mx, mtmp->my) && !is_undead_mon(mtmp)) {
+				if (couldsee(mtmp->mx, mtmp->my) && !is_undead(mtmp->data)) {
 					pline("%s screams in agony!",Monnam(mtmp));
 					mtmp->mhp /= 4;
 					if (mtmp->mhp < 1) mtmp->mhp = 1;

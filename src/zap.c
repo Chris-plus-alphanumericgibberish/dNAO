@@ -253,7 +253,7 @@ struct obj *otmp;
 	case SPE_TURN_UNDEAD:
 		wake = FALSE;
 		if (unturn_dead(mtmp)) wake = TRUE;
-		if (is_undead_mon(mtmp)) {
+		if (is_undead(mtmp->data)) {
 			reveal_invis = TRUE;
 			wake = TRUE;
 			if(otyp == WAN_UNDEAD_TURNING) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER)),8);

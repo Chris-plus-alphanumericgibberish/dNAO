@@ -1185,7 +1185,7 @@ register struct monst *mtmp;
 		break;
 	}
 	if(obj && obj->otyp == CORPSE){
-		if(is_undead_mon(mtmp)){
+		if(is_undead(mtmp->data)){
 			obj->age -= 100;		/* this is an *OLD* corpse */
 		}
 		/* All special cases should precede the G_NOCORPSE check */
@@ -3489,7 +3489,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		  || (Role_if(PM_NOBLEMAN) && (ma->mtyp == PM_KNIGHT || ma->mtyp == PM_MAID || ma->mtyp == PM_PEASANT) && magr->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_KNIGHT) && ma->mtyp == PM_KNIGHT && magr->mpeaceful && In_quest(&u.uz))
 		  || (Race_if(PM_DROW) && is_drow(ma) && magr->mfaction == u.uhouse)
-		  || (Race_if(PM_GNOME) && (is_gnome(ma) && !is_undead_mon(magr)) && magr->mpeaceful)
+		  || (Race_if(PM_GNOME) && (is_gnome(ma) && !is_undead(ma)) && magr->mpeaceful)
 		)
 		&& !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(md)))
 		&& !(Role_if(PM_EXILE))
@@ -3502,7 +3502,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		  || (Role_if(PM_NOBLEMAN) && (md->mtyp == PM_KNIGHT || md->mtyp == PM_MAID || md->mtyp == PM_PEASANT) && mdef->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_KNIGHT) && md->mtyp == PM_KNIGHT && mdef->mpeaceful && In_quest(&u.uz))
 		  || (Race_if(PM_DROW) && is_drow(md) && mdef->mfaction == u.uhouse)
-		  || (Race_if(PM_GNOME) && (is_gnome(md) && !is_undead_mon(mdef)) && mdef->mpeaceful)
+		  || (Race_if(PM_GNOME) && (is_gnome(md) && !is_undead(md)) && mdef->mpeaceful)
 		)
 		&& !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(ma)))
 		&& !(Role_if(PM_EXILE))
@@ -3513,24 +3513,24 @@ struct monst * mdef;	/* another monster which is next to it */
 
 	/* elves (and Eladrin) vs. (orcs and undead and wargs) */
 	if((is_elf(ma) || is_eladrin(ma) || ma->mtyp == PM_GROVE_GUARDIAN || ma->mtyp == PM_FORD_GUARDIAN || ma->mtyp == PM_FORD_ELEMENTAL)
-		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || is_undead_mon(mdef))
-		&& !(is_orc(ma) || is_ogre(ma) || is_undead_mon(magr))
+		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || is_undead(md))
+		&& !(is_orc(ma) || is_ogre(ma) || is_undead(ma))
 	)
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if((is_elf(md) || is_eladrin(md) || md->mtyp == PM_GROVE_GUARDIAN || md->mtyp == PM_FORD_GUARDIAN || md->mtyp == PM_FORD_ELEMENTAL) 
-		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || is_undead_mon(magr))
-		&& !(is_orc(md) || is_ogre(md) || is_undead_mon(mdef))
+		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || is_undead(ma))
+		&& !(is_orc(md) || is_ogre(md) || is_undead(md))
 	)
 		return ALLOW_M|ALLOW_TM;
 
 	/* dwarves vs. orcs */
 	if(is_dwarf(ma) && (is_orc(md) || is_ogre(md) || is_troll(md))
-					&&!(is_orc(ma) || is_ogre(ma) || is_troll(ma) || is_undead_mon(magr)))
+					&&!(is_orc(ma) || is_ogre(ma) || is_troll(ma) || is_undead(ma)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if(is_dwarf(md) && (is_orc(ma) || is_ogre(ma) || is_troll(ma))
-					&&!(is_orc(md) || is_ogre(md) || is_troll(md) || is_undead_mon(mdef)))
+					&&!(is_orc(md) || is_ogre(md) || is_troll(md) || is_undead(md)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* elves vs. drow */
@@ -3541,12 +3541,12 @@ struct monst * mdef;	/* another monster which is next to it */
 
 	/* undead vs civs */
 	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_stronghold(&u.uz) || Is_rogue_level(&u.uz) || Inhell || Is_astralevel(&u.uz))){
-		if(is_undead_mon(magr) && 
-			(!is_witch_mon(mdef) && !always_hostile_mon(mdef) && !is_undead_mon(mdef) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef))
+		if(is_undead(ma) && 
+			(!is_witch_mon(mdef) && !always_hostile_mon(mdef) && !is_undead(md) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef))
 		)
 			return ALLOW_M|ALLOW_TM;
-		if((!always_hostile_mon(magr) && !is_witch_mon(magr) && !is_undead_mon(magr) && !(is_animal(ma) && !is_domestic(ma)) && !mindless_mon(magr))
-			&& is_undead_mon(mdef)
+		if((!always_hostile_mon(magr) && !is_witch_mon(magr) && !is_undead(ma) && !(is_animal(ma) && !is_domestic(ma)) && !mindless_mon(magr))
+			&& is_undead(md)
 		)
 			return ALLOW_M|ALLOW_TM;
 	}
@@ -3554,12 +3554,12 @@ struct monst * mdef;	/* another monster which is next to it */
 	/* Alabaster elves vs. oozes */
 	if((ma->mtyp == PM_ALABASTER_ELF || ma->mtyp == PM_ALABASTER_ELF_ELDER || ma->mtyp == PM_SENTINEL_OF_MITHARDIR) 
 		&& (md->mlet == S_PUDDING || md->mlet == S_BLOB || md->mlet == S_UMBER)
-				&&	!(is_undead_mon(magr)))
+				&&	!(is_undead(ma)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if((md->mtyp == PM_ALABASTER_ELF || md->mtyp == PM_ALABASTER_ELF_ELDER || md->mtyp == PM_SENTINEL_OF_MITHARDIR)
 		&& (ma->mlet == S_PUDDING || ma->mlet == S_BLOB || ma->mlet == S_UMBER)
-				&&	!(is_undead_mon(mdef)))
+				&&	!(is_undead(md)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* Androids vs. mind flayers */
@@ -3626,10 +3626,10 @@ struct monst * mdef;	/* another monster which is next to it */
 		return ALLOW_M|ALLOW_TM;
 
 	/* monadics vs. undead */
-	if(ma->mtyp == PM_MONADIC_DEVA && (is_undead_mon(mdef)))
+	if(ma->mtyp == PM_MONADIC_DEVA && (is_undead(md)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if(md->mtyp == PM_MONADIC_DEVA && (is_undead_mon(magr)))
+	if(md->mtyp == PM_MONADIC_DEVA && (is_undead(ma)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* woodchucks vs. The Oracle */

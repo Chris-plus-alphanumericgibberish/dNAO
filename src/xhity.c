@@ -2081,9 +2081,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
 	/* zombies deal double damage, and all undead deal double damage at midnight (the midnight multiplier is not shown in the pokedex) */
-	if (!youagr && has_template(magr, ZOMBIFIED) && (is_undead_mon(magr) && midnight() && !by_the_book))
+	if (!youagr && has_template(magr, ZOMBIFIED) && (is_undead(pa) && midnight() && !by_the_book))
 		attk->damn *= 3;
-	else if (!youagr && (has_template(magr, ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
+	else if (!youagr && (has_template(magr, ZOMBIFIED) || (is_undead(pa) && midnight() && !by_the_book)))
 		attk->damn *= 2;
 
 	/* Bandersnatches become frumious instead of fleeing, dealing double damage -- not shown in the pokedex */
@@ -7631,7 +7631,7 @@ boolean ranged;
 				case 7:		hurts = !Stone_res(mdef); break;
 				case 8:		hurts = !Drain_res(mdef); break;
 				case 9:		hurts = !Sick_res(mdef); break;
-				case 10:	hurts = is_undead_mon(mdef); break;
+				case 10:	hurts = is_undead(pd); break;
 				case 11:	hurts = is_fungus(pd); break;
 				case 12:	hurts = infravision(pd); break;
 				case 13:	hurts = opaque(pd); break;
@@ -7679,7 +7679,7 @@ boolean ranged;
 				);
 		}
 		/* undead are immune to the special effect */
-		if (is_undead_mon(mdef) || (youdef && u.sealsActive&SEAL_OSE)) {
+		if (is_undead(pd) || (youdef && u.sealsActive&SEAL_OSE)) {
 			if (youdef) {
 				pline("Was that the touch of death?");
 			}
@@ -9324,7 +9324,7 @@ int vis;
 				dmg = 0;
 			goto expl_common;
 		case AD_DESC:
-			if (is_anhydrous(pd) || is_undead_mon(mdef))
+			if (is_anhydrous(pd) || is_undead(pd))
 				dmg = 0;
 			goto expl_common;
 expl_common:
@@ -12415,7 +12415,7 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 
 			case CLOVE_OF_GARLIC:
-				if (!youdef && is_undead_mon(mdef)) {/* no effect against demons */
+				if (!youdef && is_undead(pd)) {/* no effect against demons */
 					monflee(mdef, d(2, 4), FALSE, TRUE);
 				}
 				basedmg = 1;

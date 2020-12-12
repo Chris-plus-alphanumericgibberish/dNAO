@@ -336,7 +336,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 				if(u.sealsActive&SEAL_PAIMON && is_magical((mtmp)->data)) ways_seen++;
 				if(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mtmp)->data)) ways_seen++;
 				if(u.sealsActive&SEAL_TENEBROUS && !nonliving_mon(mtmp)) ways_seen++;
-				if(u.specialSealsActive&SEAL_ACERERAK && is_undead_mon(mtmp)) ways_seen++;
+				if(u.specialSealsActive&SEAL_ACERERAK && is_undead(mtmp->data)) ways_seen++;
 				if(uwep && ((uwep->oward & WARD_THJOFASTAFUR) && 
 					((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data)))) ways_seen++;
 				if(youracedata->mtyp == PM_SHARK && has_blood_mon(mtmp) &&
@@ -361,7 +361,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(u.specialSealsActive&SEAL_ACERERAK && is_undead_mon(mtmp)){
+					if(u.specialSealsActive&SEAL_ACERERAK && is_undead(mtmp->data)){
 					Sprintf(wbuf, "warned of the undead");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
@@ -1675,7 +1675,7 @@ get_ma_description_of_monster_type(struct monst * mtmp, char * description)
 	struct permonst * ptr = mtmp->data;
 	strcat(description, "Race: ");
 	int many = 0;
-	many = append(description, (is_undead_mon(mtmp))			, "undead"				, many);
+	many = append(description, (ptr->mflagsa & MA_UNDEAD)		, "undead"				, many);
 	many = append(description, (ptr->mflagsa & MA_WERE)			, "lycanthrope"			, many);
 	many = append(description, (ptr->mflagsa & MA_HUMAN)		, "human"				, many);
 	many = append(description, (ptr->mflagsa & MA_ELF)			, "elf"					, many);
