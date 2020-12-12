@@ -12093,14 +12093,14 @@ int vis;						/* True if action is at all visible to the player */
 
 	/* set zombify resulting from melee mvm combat */
 	if (magr && !youagr && !youdef && melee && !recursed) {
-		if ((has_template(magr, ZOMBIFIED) || (has_template(magr, SKELIFIED) && !rn2(20))) && can_undead_mon(mdef)){
+		if ((has_template(magr, ZOMBIFIED) || (has_template(magr, SKELIFIED) && !rn2(20))) && can_undead(mdef->data)){
 			mdef->zombify = 1;
 		}
 
 		if ((magr->mtyp == PM_UNDEAD_KNIGHT
 			|| magr->mtyp == PM_WARRIOR_OF_SUNLIGHT
 			|| magr->mtyp == PM_DREAD_SERAPH
-			) && can_undead_mon(mdef)){
+			) && can_undead(mdef->data)){
 			mdef->zombify = 1;
 		}
 

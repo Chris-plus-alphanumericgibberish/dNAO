@@ -870,7 +870,7 @@ boolean dolls;
 				panic("revive");
 			}
 			if(wasfossil){
-				if (can_undead_mon(mtmp)) {
+				if (can_undead(mtmp->data)) {
 					set_template(mtmp, SKELIFIED);
 					newsym(mtmp->mx, mtmp->my);
 				}

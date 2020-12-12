@@ -288,9 +288,9 @@
 							 (ptr)->mtyp == PM_MILITANT_CLERIC ||\
 							 (ptr)->mtyp == PM_HALF_ELF_RANGER)
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
-#define	can_undead_mon(mon)	(mon && !nonliving((mon)->data) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
-								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
-								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
+#define	can_undead(ptr)	(!nonliving(ptr) && !is_minion(ptr) && ((ptr)->mlet != S_PUDDING) &&\
+								((ptr)->mlet != S_JELLY) && ((ptr)->mlet != S_BLOB) && !is_elemental(ptr) &&\
+								!is_plant(ptr) && !is_demon(ptr) && !is_primordial(ptr) && !(mvitals[monsndx(ptr)].mvflags&G_NOCORPSE))
 #define is_weldproof(ptr)		(is_undead(ptr) || is_demon(ptr) || is_were(ptr))
 #define is_weldproof_mon(mon)		(is_weldproof((mon)->data))
 #define is_were(ptr)		(((ptr)->mflagsa & MA_WERE) != 0L)
