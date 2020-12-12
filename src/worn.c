@@ -1141,11 +1141,11 @@ int *natural_dr_out;
 	if (!mon->mcan) {
 		switch (slot)
 		{
-		case UPPER_TORSO_DR: nat_mdr += mon->data->spe_bdr; break;
-		case LOWER_TORSO_DR: nat_mdr += mon->data->spe_ldr; break;
-		case HEAD_DR:        nat_mdr += mon->data->spe_hdr; break;
-		case LEG_DR:         nat_mdr += mon->data->spe_fdr; break;
-		case ARM_DR:         nat_mdr += mon->data->spe_gdr; break;
+		case UPPER_TORSO_DR: bas_mdr += mon->data->spe_bdr; break;
+		case LOWER_TORSO_DR: bas_mdr += mon->data->spe_ldr; break;
+		case HEAD_DR:        bas_mdr += mon->data->spe_hdr; break;
+		case LEG_DR:         bas_mdr += mon->data->spe_fdr; break;
+		case ARM_DR:         bas_mdr += mon->data->spe_gdr; break;
 		}
 	}
 
