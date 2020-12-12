@@ -249,6 +249,22 @@ map_trap(trap, show)
     if (show) show_glyph(x, y, glyph);
 }
 
+int
+obj_to_glyph(obj)
+    struct obj *obj;
+{
+    int otyp = Hallucination ? random_object() : obj->otyp;
+
+    if (otyp == CORPSE) {
+	int corpsenm = Hallucination ? random_monster() : obj->corpsenm;
+	return corpsenm + GLYPH_BODY_OFF;
+    }
+
+    int ocolor = Hallucination ? rn2(16) : object_color(obj);
+    return (otyp << 4) + ocolor + GLYPH_OBJ_OFF;
+}
+
+
 /*
  * map_object()
  *

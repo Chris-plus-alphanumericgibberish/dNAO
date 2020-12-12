@@ -392,6 +392,7 @@ E struct obj * FDECL(vobj_at, (XCHAR_P,XCHAR_P));
 E void FDECL(magic_map_background, (XCHAR_P,XCHAR_P,int));
 E void FDECL(map_background, (XCHAR_P,XCHAR_P,int));
 E void FDECL(map_trap, (struct trap *,int));
+E int FDECL(obj_to_glyph, (struct obj *));
 E void FDECL(map_object, (struct obj *,int));
 E void FDECL(map_invisible, (XCHAR_P,XCHAR_P));
 E void FDECL(unmap_object, (int,int));
