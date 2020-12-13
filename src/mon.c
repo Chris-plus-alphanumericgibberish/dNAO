@@ -497,7 +497,11 @@ register struct monst *mtmp;
 			}
 		goto default_1;
 		case PM_SCORPION:
-			if (!rn2(20) && !(Role_if(PM_RANGER) && In_quest(&u.uz))) {
+			if (!rn2(20) && !(
+				(Role_if(PM_RANGER) && In_quest(&u.uz)) ||
+				(art_already_exists(ART_SCORPION_CARAPACE)) ||
+				(mtmp->mrevived && rn2(20))
+				)) {
 				otmp = oname(mksobj(SCALE_MAIL, TRUE, FALSE), artiname(ART_SCORPION_CARAPACE));
 				place_object(otmp, x, y);
 			}
