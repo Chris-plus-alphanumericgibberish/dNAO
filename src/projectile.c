@@ -1649,7 +1649,12 @@ int shotlimit;
 {
 	boolean youagr = (magr == &youmonst);
 	int multishot = 1;
-	int skill = objects[ammo->otyp].oc_skill;
+	int skill;
+	
+	if (launcher)
+		skill = objects[launcher->otyp].oc_skill;
+	else
+		skill = abs(objects[ammo->otyp].oc_skill);
 
 	if (youagr ? (Confusion || Stunned) : (magr->mconf))
 	{
@@ -1657,18 +1662,18 @@ int shotlimit;
 		multishot = 1;
 	}
 	else if (
-		(ammo_and_launcher(ammo, launcher) && skill != -P_CROSSBOW) ||
+		(ammo_and_launcher(ammo, launcher) && skill != P_CROSSBOW) ||
 		(skill == P_DAGGER) ||
-		(skill == -P_DART) ||
-		(skill == -P_SHURIKEN) ||
-		(skill == -P_BOOMERANG) ||
+		(skill == P_DART) ||
+		(skill == P_SHURIKEN) ||
+		(skill == P_BOOMERANG) ||
 		(ammo->oartifact == ART_SICKLE_MOON) || 
 		(ammo->oartifact == ART_AMHIMITL)
 		) {
 		/* Skill based bonus */
 		int magr_wepskill;
 		if (youagr)
-			magr_wepskill = P_SKILL(weapon_type(ammo));
+			magr_wepskill = P_SKILL(weapon_type(launcher ? launcher : ammo));
 		else
 			magr_wepskill = m_martial_skill(magr->data);
 
@@ -1694,7 +1699,7 @@ int shotlimit;
 		/* Role-based RoF bonus */
 		switch (youagr ? Role_switch : monsndx(magr->data)) {
 		case PM_CAVEMAN:
-			if (skill == -P_SLING) multishot++;
+			if (skill == P_SLING) multishot++;
 			break;
 		case PM_RANGER:
 			multishot++;
