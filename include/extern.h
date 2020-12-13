@@ -1569,6 +1569,7 @@ E void FDECL(give_mintrinsic, (struct monst *, long));
 E void FDECL(remove_mintrinsic, (struct monst *, long));
 E void FDECL(set_faction, (struct monst *, int));
 E void FDECL(set_template, (struct monst *, int));
+E boolean FDECL(mtemplate_accepts_mtyp, (int, int));
 E struct attack *FDECL(attacktype_fordmg, (struct permonst *,int,int));
 E boolean FDECL(attacktype, (struct permonst *,int));
 E boolean FDECL(noattacks, (struct permonst *));

@@ -6451,57 +6451,76 @@ select_newcham_form(mon)
 struct monst *mon;
 {
 	int mndx = NON_PM;
+	int attempts = 0;
 
-	switch (mon->cham) {
-	    case CHAM_SANDESTIN:
-		if (rn2(7)) mndx = pick_nasty();
-		break;
-	    case CHAM_DOPPELGANGER:
-		if (!rn2(7)) mndx = pick_nasty();
-		else if (rn2(3)) mndx = rn1(PM_WIZARD - PM_ARCHEOLOGIST + 1,
-					    PM_ARCHEOLOGIST);
-		break;
-	    case CHAM_CHAMELEON:
-		if (!rn2(3)) mndx = rndshape(&pick_animal);
-		else mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
-		break;
-	    case CHAM_DREAM:
-		if(rn2(2)) mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
-		else mndx = PM_DREAM_QUASIELEMENTAL;
-		break;
-	    case CHAM_ORDINARY:
-	    {
-		struct obj *m_armr = which_armor(mon, W_ARM);
+	do {
+		switch (mon->cham) {
+			case CHAM_SANDESTIN:
+			if (rn2(7)) mndx = pick_nasty();
+			break;
+			case CHAM_DOPPELGANGER:
+			if (!rn2(7)) mndx = pick_nasty();
+			else if (rn2(3)) mndx = rn1(PM_WIZARD - PM_ARCHEOLOGIST + 1,
+							PM_ARCHEOLOGIST);
+			break;
+			case CHAM_CHAMELEON:
+			if (!rn2(3)) mndx = rndshape(&pick_animal);
+			else mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
+			break;
+			case CHAM_DREAM:
+			if(rn2(2)) mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
+			else mndx = PM_DREAM_QUASIELEMENTAL;
+			break;
+			case CHAM_ORDINARY:
+			if (attempts == 0) {
+				struct obj *m_armr = which_armor(mon, W_ARM);
 
-		if (m_armr && Is_dragon_scales(m_armr))
-		    mndx = Dragon_scales_to_pm(m_armr) - mons;
-		else if (m_armr && Is_dragon_mail(m_armr))
-			mndx = Dragon_mail_to_pm(m_armr) - mons;
-		else if ((m_armr = which_armor(mon, W_ARMC)) && m_armr->otyp == LEO_NEMAEUS_HIDE)
-			mndx = PM_SON_OF_TYPHON;
-	    }
-		break;
-	}
-#ifdef WIZARD
-	/* For debugging only: allow control of polymorphed monster; not saved */
-	if (wizard && iflags.mon_polycontrol) {
-		char pprompt[BUFSZ], buf[BUFSZ];
-		int tries = 0;
-		do {
-			Sprintf(pprompt,
-				"Change %s into what kind of monster? [type the name]",
-				mon_nam(mon));
-			getlin(pprompt,buf);
-			mndx = name_to_mon(buf);
-			if (mndx < LOW_PM)
-				You("cannot polymorph %s into that.", mon_nam(mon));
-			else break;
-		} while(++tries < 5);
-		if (tries==5) pline1(thats_enough_tries);
-	}
-#endif /*WIZARD*/
-	if (mndx == NON_PM) mndx = rndshape((void*)0);//first try to get an in-depth monster
-	if (mndx == NON_PM) mndx = rn1(SPECIAL_PM - LOW_PM, LOW_PM);//double check in case no monst was returned
+				if (m_armr && Is_dragon_scales(m_armr))
+					mndx = Dragon_scales_to_pm(m_armr) - mons;
+				else if (m_armr && Is_dragon_mail(m_armr))
+					mndx = Dragon_mail_to_pm(m_armr) - mons;
+				else if ((m_armr = which_armor(mon, W_ARMC)) && m_armr->otyp == LEO_NEMAEUS_HIDE)
+					mndx = PM_SON_OF_TYPHON;
+			}
+			break;
+		}
+	#ifdef WIZARD
+		/* For debugging only: allow control of polymorphed monster; not saved */
+		if (wizard && iflags.mon_polycontrol && attempts == 0) {
+			char pprompt[BUFSZ], buf[BUFSZ];
+			int tries = 0;
+			do {
+				Sprintf(pprompt,
+					"Change %s into what kind of monster? [type the name]",
+					mon_nam(mon));
+				getlin(pprompt,buf);
+				mndx = name_to_mon(buf);
+				if (mndx < LOW_PM)
+					You("cannot polymorph %s into that.", mon_nam(mon));
+				else break;
+			} while(++tries < 5);
+			if (tries==5) pline1(thats_enough_tries);
+		}
+	#endif /*WIZARD*/
+
+		/* otherwise */
+		if (mndx == NON_PM) mndx = rndshape((void*)0);//first try to get an in-depth monster
+
+		/* special case for mtemplates: "deloused" can be lost via polymorph */
+		if (mon->mtemplate == DELOUSED && !mtemplate_accepts_mtyp(DELOUSED, mndx))
+			mon->mtemplate = 0;
+		else if (!mtemplate_accepts_mtyp(mon->mtemplate, mndx))
+			mndx = NON_PM;
+
+		/* after 50 attempts, try really hard */
+		if (attempts > 50 && mndx == NON_PM)
+			mndx = rn1(SPECIAL_PM - LOW_PM, LOW_PM);
+
+	} while(++attempts < 60 && (mndx == NON_PM || !mtemplate_accepts_mtyp(mon->mtemplate, mndx)));
+
+	if (attempts >= 60)	// failed to find an acceptable new form
+		mndx = mon->mtyp;
+
 	return mndx;
 }
 
