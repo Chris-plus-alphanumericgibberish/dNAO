@@ -286,6 +286,7 @@ gcrownu()
 
 	/* special cases: those that don't get artifact gifts at all */
 	if (!crowndata->crowninggift) {
+		obj = (struct obj *)0;
 		switch(u.uevent.uhand_of_elbereth) {
 			case 19:
 				u.specialSealsKnown |= SEAL_BLACK_WEB;
