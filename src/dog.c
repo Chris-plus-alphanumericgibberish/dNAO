@@ -951,7 +951,6 @@ register struct obj *obj;
 {
 	boolean carni = carnivorous(mon->data);
 	boolean herbi = herbivorous(mon->data);
-	struct permonst *fptr = &mons[obj->corpsenm];
 	boolean starving;
 
 	if (is_quest_artifact(obj) || obj_resists(obj, 0, 95))
@@ -961,7 +960,7 @@ register struct obj *obj;
 	case FOOD_CLASS:
 	    if (obj->otyp == CORPSE &&
 		((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
-		 || is_rider(fptr)))
+		 || is_rider(&mons[obj->corpsenm])))
 		    return TABU;
 
 	    /* Ghouls only eat old corpses... yum! */
@@ -1019,7 +1018,7 @@ rock:
 			 (touch_petrifies(&mons[obj->corpsenm]) &&
 			  !resists_ston(mon)))
 			return POISON;
-		    else if (vegan(fptr))
+		    else if (vegan(&mons[obj->corpsenm]))
 			return (herbi ? CADAVER : MANFOOD);
 		    else return (carni ? CADAVER : MANFOOD);
 		case CLOVE_OF_GARLIC:
