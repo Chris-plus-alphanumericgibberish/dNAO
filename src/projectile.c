@@ -1651,7 +1651,7 @@ int shotlimit;
 	int multishot = 1;
 	int skill;
 	
-	if (launcher)
+	if (launcher && !(launcher->oartifact == ART_PEN_OF_THE_VOID))
 		skill = objects[launcher->otyp].oc_skill;
 	else
 		skill = abs(objects[ammo->otyp].oc_skill);
@@ -1673,7 +1673,7 @@ int shotlimit;
 		/* Skill based bonus */
 		int magr_wepskill;
 		if (youagr)
-			magr_wepskill = P_SKILL(weapon_type(launcher ? launcher : ammo));
+			magr_wepskill = P_SKILL(weapon_type((launcher && launcher->oartifact != ART_PEN_OF_THE_VOID) ? launcher : ammo));
 		else
 			magr_wepskill = m_martial_skill(magr->data);
 
