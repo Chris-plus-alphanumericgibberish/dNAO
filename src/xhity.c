@@ -3071,7 +3071,7 @@ int flat_acc;
 			bons_acc += level_difficulty()/4 + 4;
 			break;
 		case ROLLING_BOULDER_TRAP:
-			bons_acc += level_difficulty()/6;
+			bons_acc += level_difficulty()/2;
 			break;
 		}
 	}
@@ -12796,6 +12796,8 @@ int vis;						/* True if action is at all visible to the player */
 
 			} else if (trap){
 				/* some traps deal increased damage */
+				if (trap->ttyp == ROLLING_BOULDER_TRAP)
+					bonsdmg += d(2, level_difficulty()/3+1);
 				if (trap->ttyp == ARROW_TRAP)
 					bonsdmg += d(2, level_difficulty()/4+1);
 				if (trap->ttyp == DART_TRAP)
@@ -13907,14 +13909,36 @@ int vis;						/* True if action is at all visible to the player */
 	}
 
 	/* hurtle mdef (player-inflicted only for now, as long as staggering strikes and jousting are) */
-	if (staggering_strike || jousting) {
+	if (staggering_strike || jousting || (fired && weapon && is_boulder(weapon))) {
+		int dx, dy;
+		/* in what direction? */
+		if (magr) {
+			dx = sgn(x(mdef)-x(magr));
+			dy = sgn(y(mdef)-y(magr));
+		}
+		else if (fired && weapon && is_boulder(weapon)) {
+			/* assumes that the boulder's ox/oy are accurate to where it started moving from */
+			dx = sgn(x(mdef)-weapon->ox);
+			dy = sgn(y(mdef)-weapon->oy);
+		}
+		else {
+			impossible("hurtle with no direction");
+		}
+
+		/* boulders can knock to the side as well -- 1/3 chance to move out of the way, 2/3 to go straight back */
+		if (fired && weapon && is_boulder(weapon) && !rn2(2)) {
+			int tx = dx, ty = dy;
+			dx = (tx&&!ty) ? tx : (!tx&&ty) ? rn2(3)-1 : tx*(!rn2(3));
+			dy = (ty&&!tx) ? ty : (!ty&&tx) ? rn2(3)-1 : ty*(!rn2(3));
+		}
+
 		if (youdef) {
-			hurtle(sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1, TRUE, TRUE);
+			hurtle(dx, dy, 1, FALSE, TRUE);
 			if (staggering_strike)
 				make_stunned(HStun + rnd(10), TRUE);
 		}
 		else {
-			mhurtle(mdef, sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1);
+			mhurtle(mdef, dx, dy, 1);
 			if (staggering_strike)
 				mdef->mstun = TRUE;
 			pd = mdef->data; /* in case of a polymorph trap */

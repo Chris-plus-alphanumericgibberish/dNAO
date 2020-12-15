@@ -384,10 +384,22 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 			result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);
 
-			if (result)
-			{
-				break;
+			/* stop on hit? */
+			if (!thrownobj)
+				break;	/* projectile was destroyed */
+			else if (is_boulder(thrownobj)) {
+				if (result)
+					range /= 2;	/* continue with less range on hit; keep going on miss */
 			}
+			else if (
+				thrownobj->otyp == BLASTER_BOLT ||
+				thrownobj->otyp == HEAVY_BLASTER_BOLT ||
+				thrownobj->otyp == LASER_BEAM) {
+				if (result)
+					break;	/* stop on hit; keep going on miss */
+			}
+			else
+				break;	/* stop on hit or miss */
 		}
 
 		/* projectile is on a sink (it "sinks" down) or is on a non-allowable square */
@@ -1350,12 +1362,6 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			(!inside_shop(u.ux, u.uy) ||
 			!index(in_rooms(mdef->mx, mdef->my, SHOPBASE), *u.ushops)))
 			hot_pursuit(mdef);
-			
-		/* cause projectile to fall onto the floor -- not for blaster bolts */
-		if (thrownobj->otyp != BLASTER_BOLT &&
-			thrownobj->otyp != HEAVY_BLASTER_BOLT &&
-			thrownobj->otyp != LASER_BEAM)
-			*prange = *prange2 = 0;
 		return MM_MISS;
 	}
 
