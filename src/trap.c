@@ -263,6 +263,13 @@ register int x, y, typ;
 		memset(&ttmp->vl, 0, sizeof(union vlaunchinfo));
 		ttmp->ammo = (struct obj *)0;
 	}
+
+	if (oldplace && ttmp->ttyp != typ && ttmp->ammo) {
+		remove_trap_ammo(ttmp);
+		/* have to re-call maketrap, because remove_trap_ammo() deleted the trap */
+		return maketrap(x, y, typ);
+	}
+
 	ttmp->ttyp = typ;
 	switch(typ) {
 	    case STATUE_TRAP:	    /* create a "living" statue */
