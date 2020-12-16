@@ -13908,7 +13908,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 
-	/* hurtle mdef (player-inflicted only for now, as long as staggering strikes and jousting are) */
+	/* hurtle mdef */
 	if (staggering_strike || jousting || (fired && weapon && is_boulder(weapon))) {
 		int dx, dy;
 		/* in what direction? */
@@ -13933,9 +13933,10 @@ int vis;						/* True if action is at all visible to the player */
 		}
 
 		if (youdef) {
-			hurtle(dx, dy, 1, FALSE, TRUE);
+			hurtle(dx, dy, 1, FALSE, FALSE);
 			if (staggering_strike)
 				make_stunned(HStun + rnd(10), TRUE);
+			nomul(0, "being knocked back");
 		}
 		else {
 			mhurtle(mdef, dx, dy, 1);
