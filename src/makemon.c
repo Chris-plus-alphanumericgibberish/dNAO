@@ -8483,20 +8483,21 @@ register int	mmflags;
 		undeadtemplate = CRANIUM_RAT;
 		unsethouse = TRUE;
 	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && !Is_rogue_level(&u.uz)){
+		int groupsz = max(2, min(12, 3*level_difficulty()/(monstr[mtmp->mtyp]+2)));
 		if(In_mines(&u.uz)){
 			if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(10) <= 5){
 				undeadtemplate = ZOMBIFIED;
 				unsethouse = TRUE;
-				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+				m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 			} else if(!rn2(10)){
 				undeadtemplate = ZOMBIFIED;
 				unsethouse = TRUE;
-				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+				m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 			}
-		} else if(!rn2(100)){
+		} else if(!rn2(10)){
 			undeadtemplate = ZOMBIFIED;
 			unsethouse = TRUE;
-			m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+			m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 		}
 	}
 	if(undeadtemplate){
