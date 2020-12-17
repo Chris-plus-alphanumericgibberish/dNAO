@@ -8494,7 +8494,7 @@ register int	mmflags;
 				unsethouse = TRUE;
 				m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 			}
-		} else if(!rn2(10)){
+		} else if(!rn2(100)){
 			undeadtemplate = ZOMBIFIED;
 			unsethouse = TRUE;
 			m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
