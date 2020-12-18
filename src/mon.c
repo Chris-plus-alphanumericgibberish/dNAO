@@ -6626,7 +6626,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	    mtmp->perminvis = pm_invisible(mdat);
 	mtmp->minvis = mtmp->invis_blkd ? 0 : mtmp->perminvis;
 	if (!(hides_under(mdat) && OBJ_AT(mtmp->mx, mtmp->my)) &&
-			!(mdat->mlet == S_EEL && is_pool(mtmp->mx, mtmp->my, FALSE)))
+			!(is_underswimmer(mdat) && is_pool(mtmp->mx, mtmp->my, FALSE)))
 		mtmp->mundetected = 0;
 	if (u.ustuck == mtmp) {
 		if(u.uswallow) {

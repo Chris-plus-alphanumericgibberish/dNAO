@@ -2581,13 +2581,13 @@ postmov:
 		}
 	    }
 
-	    if(hides_under(ptr) || ptr->mlet == S_EEL) {
+	    if(hides_under(ptr) || is_underswimmer(ptr)) {
 		/* Always set--or reset--mundetected if it's already hidden
 		   (just in case the object it was hiding under went away);
 		   usually set mundetected unless monster can't move.  */
 		if (mtmp->mundetected ||
 			(mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->msleeping && rn2(5)))
-		    mtmp->mundetected = (ptr->mlet != S_EEL) ?
+		    mtmp->mundetected = (!is_underswimmer(ptr)) ?
 			OBJ_AT(mtmp->mx, mtmp->my) :
 			(is_pool(mtmp->mx, mtmp->my, FALSE) && !Is_waterlevel(&u.uz));
 		newsym(mtmp->mx, mtmp->my);

@@ -536,7 +536,7 @@ int	mntmp;
 	drop_weapon(1);
 	if (hides_under(youmonst.data))
 		u.uundetected = OBJ_AT(u.ux, u.uy);
-	else if (youmonst.data->mlet == S_EEL)
+	else if (is_underswimmer(youmonst.data))
 		u.uundetected = is_pool(u.ux, u.uy, FALSE);
 	else
 		u.uundetected = 0;

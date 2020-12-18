@@ -1425,13 +1425,13 @@ boolean youseeit;
 				struct obj *obj = level.objects[u.ux][u.uy];
 
 				if (obj ||
-					(youracedata->mlet == S_EEL && is_pool(u.ux, u.uy, FALSE))) {
+					(is_underswimmer(youracedata) && is_pool(u.ux, u.uy, FALSE))) {
 					int save_spe = 0; /* suppress warning */
 					if (obj) {
 						save_spe = obj->spe;
 						if (obj->otyp == EGG) obj->spe = 0;
 					}
-					if (youracedata->mlet == S_EEL)
+					if (is_underswimmer(youracedata))
 						pline("Wait, %s!  There's a hidden %s named %s there!",
 						m_monnam(mtmp), youracedata->mname, plname);
 					else
@@ -3584,7 +3584,7 @@ boolean ranged;
 	if (mdef->mappearance)
 		seemimic(mdef);
 	/* If the monster is undetected and hits you, you should know where the attack came from. */
-	if (youdef && magr->mundetected && hit && (hides_under(pa) || pa->mlet == S_EEL)) {
+	if (youdef && magr->mundetected && hit && (hides_under(pa) || is_underswimmer(pa))) {
 		magr->mundetected = 0;
 		if (!(Blind ? Blind_telepat : Unblind_telepat)) {
 			struct obj *obj = level.objects[x(magr)][y(magr)];

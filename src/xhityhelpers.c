@@ -217,7 +217,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 	if (mdef->mundetected && !canseemon(mdef) && !sensemon(mdef) &&
 		!glyph_is_warning(glyph_at(u.ux + u.dx, u.uy + u.dy)) &&
 		!MATCH_WARN_OF_MON(mdef) &&
-		(hides_under(mdef->data) || mdef->data->mlet == S_EEL)) {
+		(hides_under(mdef->data) || is_underswimmer(mdef->data))) {
 		mdef->mundetected = mdef->msleeping = 0;
 		newsym(mdef->mx, mdef->my);
 		if (glyph_is_invisible(levl[mdef->mx][mdef->my].glyph)) {

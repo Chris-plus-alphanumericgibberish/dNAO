@@ -92,6 +92,7 @@
 #define insubstantial(ptr)		((ptr)->mlet == S_SHADE || (ptr)->mtyp == PM_SHARAB_KAMEREL)
 #define tunnels(ptr)			(((ptr)->mflagsm & MM_TUNNEL) != 0L)
 #define needspick(ptr)			(((ptr)->mflagsm & MM_NEEDPICK) != 0L)
+#define is_underswimmer(ptr)	((ptr)->mlet == S_EEL || (ptr)->mtyp == PM_CRYSTAL_OOZE)
 #define hides_under(ptr)		(((ptr)->mflagst & MT_CONCEAL) != 0L)
 #define is_hider(ptr)			(((ptr)->mflagst & MT_HIDE) != 0L)
 #define is_backstabber(ptr)		(((ptr)->mflagsg & MG_BACKSTAB) != 0L)

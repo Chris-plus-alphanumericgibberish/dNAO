@@ -8847,6 +8847,10 @@ register int	mmflags;
 				mtmp->mhpmax = 3*mtmp->mhpmax;
 				mtmp->mhp = mtmp->mhpmax;
 			}
+			if (mndx == PM_CRYSTAL_OOZE){
+				if (is_pool(x, y, FALSE))
+					mtmp->mundetected = TRUE;
+			}
 		break;
 	    case S_KETER:
 			if (mndx == PM_CHOKHMAH_SEPHIRAH){

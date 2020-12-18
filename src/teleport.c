@@ -491,7 +491,7 @@ boolean allow_drag;
 
 	if (hides_under(youracedata))
 		u.uundetected = OBJ_AT(nux, nuy);
-	else if (youracedata->mlet == S_EEL)
+	else if (is_underswimmer(youracedata))
 		u.uundetected = is_pool(nux, nuy, FALSE);
 	else {
 		u.uundetected = 0;

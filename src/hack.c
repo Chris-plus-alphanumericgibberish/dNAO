@@ -1215,7 +1215,7 @@ domove()
 			return;
 	    }
 	    if(flags.forcefight || !mtmp->mundetected || sensemon(mtmp) ||
-		    ((hides_under(mtmp->data) || mtmp->data->mlet == S_EEL) &&
+		    ((hides_under(mtmp->data) || is_underswimmer(mtmp->data)) &&
 			!is_safepet(mtmp))){
 		gethungry();
 		if(wtcap >= HVY_ENCUMBER && moves%3) {
@@ -1654,7 +1654,7 @@ domove()
 
 	if (hides_under(youracedata))
 	    u.uundetected = OBJ_AT(u.ux, u.uy);
-	else if (youracedata->mlet == S_EEL)
+	else if (is_underswimmer(youracedata))
 	    u.uundetected = is_pool(u.ux, u.uy, FALSE) && !Is_waterlevel(&u.uz);
 	else if (u.dx || u.dy)
 	    u.uundetected = 0;

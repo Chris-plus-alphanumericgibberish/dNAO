@@ -1436,7 +1436,7 @@ genericptr_t num;
 			(*(int*)num)++;
 		}
 		if (mtmp->mundetected &&
-			(is_hider(mtmp->data) || mtmp->data->mlet == S_EEL)) {
+			(is_hider(mtmp->data) || is_underswimmer(mtmp->data))) {
 			mtmp->mundetected = 0;
 			newsym(zx, zy);
 			(*(int*)num)++;
@@ -1646,7 +1646,7 @@ register int aflag;
 				}
 				if(!canspotmon(mtmp)) {
 				if (mtmp->mundetected &&
-				   (is_hider(mtmp->data) || mtmp->data->mlet == S_EEL))
+				   (is_hider(mtmp->data) || is_underswimmer(mtmp->data)))
 					mtmp->mundetected = 0;
 				newsym(x,y);
 				goto find;
