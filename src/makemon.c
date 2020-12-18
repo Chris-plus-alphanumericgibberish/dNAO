@@ -7582,9 +7582,12 @@ register struct	monst	*mtmp;
 			case PM_ASMODEUS:
 //				(void)mongets(mtmp, WAN_COLD);
 //				(void)mongets(mtmp, WAN_FIRE);
-				(void)mongets(mtmp, ROBE);
-				(void)mongets(mtmp, GENTLEMAN_S_SUIT);
-				(void)mongets(mtmp, SPEED_BOOTS);
+				otmp = mongets(mtmp, ROBE);
+				otmp->obj_color = CLR_BLACK;
+				otmp = mongets(mtmp, GENTLEMAN_S_SUIT);
+				otmp->obj_color = CLR_BLACK;
+				otmp = mongets(mtmp, SPEED_BOOTS);
+				otmp->obj_color = CLR_BLACK;
 				(void)mongets(mtmp, SCR_CHARGING);
 				// (void) mongets(mtmp, POT_FULL_HEALING);
 				// (void) mongets(mtmp, POT_FULL_HEALING);
