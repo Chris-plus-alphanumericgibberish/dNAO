@@ -13,6 +13,11 @@ struct crowning {
 	const char * title;			/* title displayed in enlightenment and dumplog */
 	const char * announcement;	/* godvoice() announcement -- if godvoice is not used, 0 and special-cased */
 	const char * livelogstr;	/* livelog string */
+	int title_mod;				/* what should %s in the title be filled with? */
+#define CRWN_TTL_LORD	1	/* Lord / Lady */
+#define CRWN_TTL_KING	2	/* King / Queen */
+#define CRWN_TTL_PRIE	3	/* Priest / Priestess */
+#define CRWN_TTL_NAME	4	/* playername */
 };
 
 /* helpers to announce your crowning */
@@ -25,6 +30,7 @@ struct crowning {
 /* helpers to livelog your crowning */
 #define became_the			"became the %s"
 
+/* NOTE: the numbering of these must be consistent with choose_crowning() */
 static const struct crowning hand_of_elbereth[] = {
 	/* dummy so all non-zero are interesting */
 /*00*/	{0},
@@ -37,9 +43,9 @@ static const struct crowning hand_of_elbereth[] = {
 /*05*/	{ART_GRANDMASTER_S_ROBE,		"the Grandmaster of Balance",			"Thou shalt be the %s!",				became_the	},
 /*06*/	{ART_ROBE_OF_THE_ARCHMAGI,		"the Glory of Eequor",					chosen("cause dismay in My Name"),		became_the	},
 	/* Noble (human, vampire, incant). Vampires always get Dark Lord regardless of alignment */
-/*07*/	{ART_CROWN_OF_THE_SAINT_KING,	"the Saint %s",							verb_thee_the("crown"),					"received the crown of the Saint King"	},
+/*07*/	{ART_CROWN_OF_THE_SAINT_KING,	"the Saint %s",							verb_thee_the("crown"),					"received the crown of the Saint King",	CRWN_TTL_KING	},
 /*08*/	{ART_CROWN_OF_THE_SAINT_KING,	"the Grey Saint",						verb_thee_the("crown"),					"received the crown of the Saint King"	},
-/*09*/	{ART_HELM_OF_THE_DARK_LORD,		"the Dark %s",							verb_thee_the("crown"),					"received the helm of the Dark Lord"	},
+/*09*/	{ART_HELM_OF_THE_DARK_LORD,		"the Dark %s",							verb_thee_the("crown"),					"received the helm of the Dark Lord",	CRWN_TTL_LORD	},
 	/* Wizard. Artifact is replaced by Book of Infinite Spells if Necronomicon already exists. */
 /*10*/	{ART_NECRONOMICON,				"the Magister of Law",					dub_thee_the,							became_the	},
 /*11*/	{ART_NECRONOMICON,				"the Wizard of Balance",				"Thou shalt be the %s!",				became_the	},
@@ -65,9 +71,9 @@ static const struct crowning hand_of_elbereth[] = {
 /*26*/	{ART_LOLTH_S_FANG,				"the Hand of Keptolo",					dub_thee_the,							became_the	},
 /*27*/	{ART_RUINOUS_DESCENT_OF_STARS,	"the Hammer of Ghaunadaur",				dub_thee_the,							became_the	},
 	/* Ranger */
-/*28*/	{ART_SUNBEAM,					"the High %s of Apollo",				verb_thee_the("anoint"),				"anointed by Apollo"	},
-/*29*/	{ART_VEIL_OF_LATONA,			"the High %s of Latona",				verb_thee_the("anoint"),				"anointed by Latona"	},
-/*30*/	{ART_MOONBEAM,					"the High %s of Diana",					verb_thee_the("anoint"),				"anointed by Diana"	},
+/*28*/	{ART_SUNBEAM,					"the High %s of Apollo",				verb_thee_the("anoint"),				"anointed by Apollo",	CRWN_TTL_PRIE},
+/*29*/	{ART_VEIL_OF_LATONA,			"the High %s of Latona",				verb_thee_the("anoint"),				"anointed by Latona",	CRWN_TTL_PRIE},
+/*30*/	{ART_MOONBEAM,					"the High %s of Diana",					verb_thee_the("anoint"),				"anointed by Diana",	CRWN_TTL_PRIE},
 	/* Gnome Ranger */
 /*31*/	{ART_STEEL_SCALES_OF_KURTULMAK,	"the Great Slave-Vassal of Kurtulmak",	verb_thee("claim"),						"claimed by Kurtulmak"	},
 /*32*/	{ART_GLITTERSTONE,				"the Thane of Garl Glittergold",		dub_thee,								became_the	},
@@ -97,7 +103,7 @@ static const struct crowning hand_of_elbereth[] = {
 	/* Dwarf Noble -- all alignments */
 /*48*/	{ART_DURIN_S_AXE,				"the Lord of Moria",					"Hail, %s!",							became_the	},
 	/* Samurai -- lawful only */
-/*49*/	{ART_YOICHI_NO_YUMI,			"Nasu no %s",							verb_thee("proclaim"),					became_the	}
+/*49*/	{ART_YOICHI_NO_YUMI,			"Nasu no %s",							verb_thee("proclaim"),					became_the,	CRWN_TTL_NAME	}
 };
 
 #undef chosen
@@ -177,24 +183,26 @@ crowning_title()
 
 	static char titlebuf[BUFSZ];	/* shared buffer should be safe -- we should only ever call this function with one unchanging input to get one unchanging output */
 	const char * insert;
-	switch (u.uevent.uhand_of_elbereth) {
-		case 7:
-			insert = flags.female ? "Queen" : "King";
-			break;
-		case 9:
+	switch (hand_of_elbereth[u.uevent.uhand_of_elbereth].title_mod) {
+		case CRWN_TTL_LORD:
 			insert = flags.female ? "Lady" : "Lord";
 			break;
-		case 28:
-		case 29:
-		case 30:
+		case CRWN_TTL_KING:
+			insert = flags.female ? "Queen" : "King";
+			break;
+		case CRWN_TTL_PRIE:
 			insert = flags.female ? "Priestess" : "Priest";
 			break;
-		case 49:
+		case CRWN_TTL_NAME:
 			insert = plname;
-			break;
+			break;			
 		default:
 			insert = (const char *)0;
+			break;
 	}
+	/* safety-check -- we should only have an insert if there's a place to put it (and vice versa) */
+	if (!(strstri(hand_of_elbereth[u.uevent.uhand_of_elbereth].title, "%s")) != !insert)
+		impossible("inserting string does not match crowning title");
 
 	if (insert)
 		Sprintf(titlebuf, hand_of_elbereth[u.uevent.uhand_of_elbereth].title, insert);
@@ -209,6 +217,7 @@ gcrownu()
 {
 	struct obj * obj;
 	char buf[BUFSZ];
+	char * ptr;
 
 	/* set crowning event, and grab appropriate entry from array */
 	u.uevent.uhand_of_elbereth = choose_crowning();
@@ -238,15 +247,15 @@ gcrownu()
 		}
 	}
 	else {
-		/* special case: lawful samurai, which inserts the player's name */
-		if (u.uevent.uhand_of_elbereth == 49) {
-			Sprintf(buf, crowndata->announcement, crowning_title());
+		/* announcement that contains the title */
+		if (strstri(crowndata->announcement, "%s")) {
+			/* get crowning title without any preceding "the" */
+			ptr = crowning_title();
+			if (!strncmpi(ptr, "the ", 4))
+				ptr += 4;
+			Sprintf(buf, crowndata->announcement, ptr);
 		}
-		/* standard announcement that contains the title */
-		else if (strstri(crowndata->announcement, "%s")) {
-			Sprintf(buf, crowndata->announcement, crowning_title()+4);	/* +4 -- cut off "the " */
-		}
-		/* standard announcement that does not contain the title */
+		/* announcement that does not contain the title */
 		else {
 			Strcpy(buf, crowndata->announcement);
 		}
@@ -255,15 +264,15 @@ gcrownu()
 	}
 
 	/* livelog your crowning */
-	/* special case: lawful samurai, which inserts the player's name */
-	if (u.uevent.uhand_of_elbereth == 49) {
-		Sprintf(buf, crowndata->livelogstr, crowning_title());
+	/* livelogstr that contains the title */
+	if (strstri(crowndata->livelogstr, "%s")) {
+		/* get crowning title without any preceding "the" */
+		ptr = crowning_title();
+		if (!strncmpi(ptr, "the ", 4))
+			ptr += 4;
+		Sprintf(buf, crowndata->livelogstr, ptr);
 	}
-	/* standard livelogstr that contains the title */
-	else if (strstri(crowndata->livelogstr, "%s")) {
-		Sprintf(buf, crowndata->livelogstr, crowning_title()+4);	/* +4 -- cut off "the " */
-	}
-	/* standard livelogstr that does not contain the title */
+	/* livelogstr that does not contain the title */
 	else {
 		Strcpy(buf, crowndata->livelogstr);
 	}
