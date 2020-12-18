@@ -5932,7 +5932,7 @@ register struct monst *mtmp;
 			break;
 		    case PM_NESSIAN_PIT_FIEND:
 				otmp = mksobj(rn2(2) ? MACE : BATTLE_AXE, FALSE, FALSE);
-				otmp->objsize = MZ_GIGANTIC;
+				otmp->objsize = MZ_HUGE;
 				otmp->spe = 9;
 				(void) mpickobj(mtmp, otmp);
 			break;
