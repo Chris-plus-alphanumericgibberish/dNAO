@@ -472,6 +472,7 @@
 #define is_neuter(ptr)		(((ptr)->mflagsb & MB_NEUTER) != 0L)
 #define is_wanderer(ptr)	(((ptr)->mflagst & MT_WANDER) != 0L)
 #define	is_goat_tentacle_mtyp(ptr)	((ptr)->mtyp == PM_DARK_YOUNG \
+									|| (ptr)->mtyp == PM_MOTHERING_MASS \
 									|| (ptr)->mtyp == PM_BLESSED \
 									|| (ptr)->mtyp == PM_SWIRLING_MIST \
 									|| (ptr)->mtyp == PM_DUST_STORM \
