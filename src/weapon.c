@@ -157,12 +157,6 @@ STATIC_DCL void FDECL(skill_advance, (int));
 
 #endif	/* OVL1 */
 
-#define P_NAME(type) ((skill_names_indices[type] > 0) ? \
-		      OBJ_NAME(objects[skill_names_indices[type]]) : \
-		      (type == P_BARE_HANDED_COMBAT) ? \
-			barehands_or_martial[martial_bonus()] : \
-			odd_skill_names[-skill_names_indices[type]])
-
 #ifdef OVLB
 static NEARDATA const char kebabable[] = {
 	S_XORN, S_DRAGON, S_JABBERWOCK, S_NAGA, S_GIANT, '\0'
@@ -3640,6 +3634,17 @@ const struct def_skill *class_skill;
 		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
 	    }
 	}
+}
+
+const char *
+P_NAME(type)
+int type;
+{
+	return ((skill_names_indices[type] > 0) ? \
+		      OBJ_NAME(objects[skill_names_indices[type]]) : \
+		      (type == P_BARE_HANDED_COMBAT) ? \
+			barehands_or_martial[martial_bonus()] : \
+			odd_skill_names[-skill_names_indices[type]]);
 }
 
 int
