@@ -858,7 +858,7 @@ boolean ranged;
 		  || (Role_if(PM_NOBLEMAN) && (mtmp->mtyp == PM_KNIGHT || mtmp->mtyp == PM_MAID || mtmp->mtyp == PM_PEASANT) && mtmp->mpeaceful)
 		  || (Race_if(PM_DROW) && is_drow(mtmp->data) && mtmp->mpeaceful)
 		  || (Role_if(PM_KNIGHT) && (mtmp->mtyp == PM_KNIGHT) && mtmp->mpeaceful)
-		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead_mon(mtmp)) && mtmp->mpeaceful)
+		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead(mtmp->data)) && mtmp->mpeaceful)
 		  || always_peaceful(mtmp2->data)) &&
 		 mtmp2->mpeaceful && !(Conflict || mtmp->mberserk)) ||
 	   (!ranged && touch_petrifies(mtmp2->data) &&

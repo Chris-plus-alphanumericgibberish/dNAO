@@ -443,7 +443,7 @@ hurtle_step(arg, x, y)
     		dotrap(ttmp,0);
 		*range = 0;
 		return TRUE;
-    	} else {
+    	} else if (*range > 1) {
 		if (ttmp->tseen)
 		    You("pass right over %s %s.",
 		    	(ttmp->ttyp == ARROW_TRAP) ? "an" : "a",
@@ -538,6 +538,7 @@ hurtle(dx, dy, range, verbose, do_nomul)
     cc.x = u.ux + (dx * range);
     cc.y = u.uy + (dy * range);
     (void) walk_path(&uc, &cc, hurtle_step, (genericptr_t)&range);
+	teleds(u.ux, u.uy, TRUE);
 }
 
 /* Move a monster through the air for a few squares.

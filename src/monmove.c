@@ -309,7 +309,7 @@ struct monst *mtmp;
 			(mtmp->data->mlet == S_LIGHT && complete >= 4) ||
 			(mtmp->data->mlet == S_DRAGON && complete >= 4) ||
 			(mtmp->data->mlet == S_NAGA && complete >= 4) ||
-			(is_undead_mon(mtmp) && complete >= 4) ||
+			(is_undead(mtmp->data) && complete >= 4) ||
 			(mtmp->data->mlet == S_TRAPPER && complete >= 4  && /*This one means "is a metroid", which are being counted as energions for this*/
 				mtmp->mtyp != PM_TRAPPER &&
 				mtmp->mtyp != PM_LURKER_ABOVE) ||
@@ -470,7 +470,7 @@ struct monst *mtmp;
 			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
 			mtmp->mtyp == PM_MAANZECORIAN ||
 			is_rider(mtmp->data)) return FALSE;
-	return mtmp->mtyp == PM_CERBERUS || is_undead_mon(mtmp);
+	return mtmp->mtyp == PM_CERBERUS || is_undead(mtmp->data);
 }
 
 boolean
@@ -519,7 +519,7 @@ struct monst *mtmp;
 		) return FALSE;
 	return( !(is_human(mtmp->data) || is_elf(mtmp->data) || is_dwarf(mtmp->data) ||
 		  is_gnome(mtmp->data) || is_orc(mtmp->data)) || 
-		  is_undead_mon(mtmp) || is_were(mtmp->data));
+		  is_undead(mtmp->data) || is_were(mtmp->data));
 	
 }
 boolean
@@ -535,7 +535,7 @@ struct monst *mtmp;
 		) return FALSE;
 	if((is_human(mtmp->data) || is_elf(mtmp->data) || is_dwarf(mtmp->data) ||
 		  is_gnome(mtmp->data) || is_orc(mtmp->data)) && 
-		  !is_undead_mon(mtmp) && 
+		  !is_undead(mtmp->data) && 
 		  !is_were(mtmp->data)){
 			mtmp->mcrazed = 1;
 			return !rn2(10);
@@ -685,7 +685,7 @@ boolean digest_meal;
 	}
 	/* Clouds on Lolth's level deal damage */
 	if(Is_lolth_level(&u.uz) && levl[mon->mx][mon->my].typ == CLOUD){
-		if (!(nonliving_mon(mon) || breathless_mon(mon))){
+		if (!(nonliving(mon->data) || breathless_mon(mon))){
 			if (haseyes(mon->data) && mon->mcansee){
 				mon->mblinded = 1;
 				mon->mcansee = 0;
@@ -714,7 +714,7 @@ boolean digest_meal;
 		mon->mhp += 25; //Fast healing
 	} else {
 		if(mon->mhp < mon->mhpmax && mon_resistance(mon,REGENERATION)) mon->mhp++;
-		if(!nonliving_mon(mon)){
+		if(!nonliving(mon->data)){
 			if (mon->mhp < mon->mhpmax){
 				//recover 1/HEALCYCLEth hp per turn:
 				mon->mhp += (mon->m_lev)/HEALCYCLE;
@@ -1326,7 +1326,7 @@ register struct monst *mtmp;
 				}
 				else {
 					//Note: body armor blocks healing, healing is also reduced by the rolled DR
-					if(nonliving_mon(patient) || patient->mpeaceful != mtmp->mpeaceful || which_armor(patient, W_ARM))
+					if(nonliving(patient->data) || patient->mpeaceful != mtmp->mpeaceful || which_armor(patient, W_ARM))
 						continue;
 					if(patient->mhp < patient->mhpmax){
 						nurse_heal(mtmp, patient, canseemon(mtmp) || canseemon(patient));
@@ -2129,7 +2129,7 @@ not_special:
 	if (passes_bars(mtmp) && !Is_illregrd(&u.uz) ) flag |= ALLOW_BARS;
 	if (can_tunnel) flag |= ALLOW_DIG;
 	if (is_human(ptr) || ptr->mtyp == PM_MINOTAUR) flag |= ALLOW_SSM;
-	if (is_undead_mon(mtmp) && ptr->mlet != S_GHOST && ptr->mlet != S_SHADE) flag |= NOGARLIC;
+	if (is_undead(ptr) && ptr->mlet != S_GHOST && ptr->mlet != S_SHADE) flag |= NOGARLIC;
 	if (throws_rocks(ptr)) flag |= ALLOW_ROCK;
 	if (can_open) flag |= OPENDOOR;
 	if (can_unlock) flag |= UNLOCKDOOR;

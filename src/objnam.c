@@ -1234,7 +1234,7 @@ boolean adjective;
 			return (adjective ? "wooden" : "wood");
 	case BONE:
 		/* special case */
-		if (obj->oartifact == ART_WEBWEAVER_S_CROOK)
+		if (obj->oartifact == ART_WEBWEAVER_S_CROOK || obj->oartifact == ART_SCORPION_CARAPACE)
 			return "chitin";
 		else
 			return "bone";
@@ -4201,6 +4201,7 @@ int wishflags;
 	if (strncmpi(bp, "bardiche", 8)) /* not the "bard" monster */
 	if (strncmpi(bp, "witch hat", 9)) /* not the "witch" monster */
 	if (strncmpi(bp, "green dragon crescent blade", 27)) /* not the "green dragon" monster */
+	if (strncmpi(bp, "scorpion carapace", 17)) /* not the "scorpion" monster */
 	if (strncmpi(bp, "crow quill", 10)) /* not a "crow" */
 	if (strncmpi(bp, "android visor", 13)) /* not an "android" */
 	if (strncmpi(bp, "Uruk-hai shield", 15)) /* not an "uruk-hai" monster */

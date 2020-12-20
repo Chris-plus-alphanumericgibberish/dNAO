@@ -56,6 +56,20 @@ register xchar omx,omy,gx,gy;
 	if (is_giant(mtmp->data)) allowflags |= BUSTDOOR;
 	cnt = mfndpos(mtmp, poss, info, allowflags);
 
+	/* this function ONLY moves, never attacks -- disallow any occupied squares */
+	register schar j;
+	chcnt = 0;
+	for(i=0; i<cnt; i++) {
+		if (info[i]&(ALLOW_U|ALLOW_M|ALLOW_TM)) {
+			for(j=i+1; j<cnt; j++) {
+				info[j-1] = info[j];
+				poss[j-1] = poss[j];
+			}
+			chcnt++;
+		}
+	}
+	cnt -= chcnt;
+
 	if(mtmp->isshk && avoid && uondoor) { /* perhaps we cannot avoid him */
 		for(i=0; i<cnt; i++)
 		    if(!(info[i] & NOTONL)) goto pick_move;
