@@ -31,7 +31,7 @@ STATIC_DCL void FDECL(m_initinv,(struct monst *));
 
 extern const int monstr[];
 int curhouse = 0;
-int undeadtemplate = 0;
+int mkmon_template = 0;
 int zombiepm = -1;
 int skeletpm = -1;
 
@@ -6090,7 +6090,7 @@ register struct	monst	*mtmp;
 #endif /* CONVICT */
 			ptr->mtyp != PM_WATCHMAN &&
 			ptr->mtyp != PM_WATCH_CAPTAIN) {
-			if(!(level.flags.has_barracks || In_law(&u.uz) || in_mklev || undeadtemplate)){
+			if(!(level.flags.has_barracks || In_law(&u.uz) || in_mklev || mkmon_template)){
 				if (!rn2(3)) (void) mongets(mtmp, K_RATION);
 				if (!rn2(2)) (void) mongets(mtmp, C_RATION);
 			}
@@ -7927,9 +7927,9 @@ register int	mmflags;
 register int	undeadtype;
 {
 	struct monst *mtmp = 0;
-	undeadtemplate = undeadtype;
+	mkmon_template = undeadtype;
 	mtmp = makemon(ptr, x, y, mmflags);
-	undeadtemplate = 0;
+	mkmon_template = 0;
 	return mtmp;
 }
 /*
@@ -8372,6 +8372,7 @@ register int	mmflags;
 	   It needs to be set up here so that everyone created as part of the group gets the same emblem, 
 	   and then unset after this creature's armor is created. */
 	if(is_drow(ptr)){
+		/* these only set FACTION */
 		if(!curhouse){
 			if((ptr->mtyp == urole.ldrnum && ptr->mtyp != PM_ECLAVDRA) || 
 				(ptr->mtyp == urole.guardnum && ptr->mtyp != PM_DROW_MATRON_MOTHER && ptr->mtyp != PM_HEDROW_MASTER_WIZARD)
@@ -8445,69 +8446,102 @@ register int	mmflags;
 			unsethouse = TRUE;
 		}
 		set_faction(mtmp, curhouse);
-	} else if(!undeadtemplate && ((zombiepm >=0 && mtmp->mtyp == zombiepm) || (skeletpm >=0 && mtmp->mtyp == skeletpm))){
-		if(zombiepm >=0 && mtmp->mtyp == zombiepm){
-			undeadtemplate = ZOMBIFIED;
-			unsethouse = TRUE;
-			zombiepm = -1;
-		} else {
-			undeadtemplate = SKELIFIED;
-			unsethouse = TRUE;
-			skeletpm = -1;
-		}
-	} else if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER && mtmp->mtyp == PM_ELF){
-		undeadtemplate = ZOMBIFIED;
+	}
+
+	/* now to set TEMPLATE */
+	/* most general case is at the end of the if-else chain */
+	/* `zombiepm` or `skeletpm` are set to deliberately make a certain pm into zombies/skeletons */
+	if (!mkmon_template && (zombiepm >=0 && mtmp->mtyp == zombiepm)) {
+		mkmon_template = ZOMBIFIED;
+		unsethouse = TRUE;
+		zombiepm = -1;
+	}
+	else if (!mkmon_template && (skeletpm >=0 && mtmp->mtyp == skeletpm)) {
+		mkmon_template = SKELIFIED;
+		unsethouse = TRUE;
+		skeletpm = -1;
+	}
+	/* in the Elf quest against the Necromancer, the "PM_ELF" enemies are meant to be groups of elf zombies. */
+	else if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER && mtmp->mtyp == PM_ELF){
+		mkmon_template = ZOMBIFIED;
 		unsethouse = TRUE;
 		m_initlgrp(mtmp, mtmp->mx, mtmp->my);
-	} else if(mtmp->mtyp == PM_ECHO){
-		undeadtemplate = SKELIFIED;
+	}
+	/* on Echo's level, everything is skeletons??? This seems not right, but it is still a work in progress */
+	else if(mtmp->mtyp == PM_ECHO){
+		mkmon_template = SKELIFIED;
 		unsethouse = TRUE;
-	} else if(!undeadtemplate && (mtmp->data->geno&G_HELL) == 0 && Is_mephisto_level(&u.uz)){
-		undeadtemplate = CRYSTALFIED;
+	}
+	/* in Cania, creatures that aren't native to Gehennom are vitrified */ 
+	else if(!mkmon_template && (mtmp->data->geno&G_HELL) == 0 && Is_mephisto_level(&u.uz)){
+		mkmon_template = CRYSTALFIED;
 		unsethouse = TRUE;
-	} else if(is_kamerel(mtmp->data)){
+	}
+	/* Kamerel tend to be fractured */ 
+	else if(is_kamerel(mtmp->data)){
 		if(level.flags.has_kamerel_towers && (mtmp->mtyp != PM_ARA_KAMEREL || rn2(2))){
-			undeadtemplate = FRACTURED;
+			mkmon_template = FRACTURED;
 			unsethouse = TRUE;
 		} else if(!level.flags.has_minor_spire && mtmp->mtyp != PM_ARA_KAMEREL
 			&& (mtmp->mtyp != PM_HUDOR_KAMEREL || rn2(2))
 			&& (mtmp->mtyp != PM_SHARAB_KAMEREL || !rn2(4))
 		){
-			undeadtemplate = FRACTURED;
+			mkmon_template = FRACTURED;
 			unsethouse = TRUE;
 		}
-	} else if(randmonst && !undeadtemplate && can_undead(mtmp->data) && check_insight()){
-		undeadtemplate = PSEUDONATURAL;
+	}
+	/* insight check: making pseudonatural creatures out of anything reasonable */
+	else if(randmonst && !mkmon_template && can_undead_mon(mtmp) && check_insight()){
+		mkmon_template = PSEUDONATURAL;
 		unsethouse = TRUE;
-	} else if(randmonst && !undeadtemplate && is_rat(mtmp->data) && check_insight()){
-		undeadtemplate = CRANIUM_RAT;
+	}
+	/* insight check: adding brains to rats */
+	else if(randmonst && !mkmon_template && is_rat(mtmp->data) && check_insight()){
+		mkmon_template = CRANIUM_RAT;
 		unsethouse = TRUE;
-	} else if(randmonst && !undeadtemplate && can_undead(mtmp->data) && !Is_rogue_level(&u.uz)){
+	}
+	/* insight check: making yith */
+	else if(randmonst && !mkmon_template && check_insight()){
+		mkmon_template = YITH;
+	}
+	/* most general case at bottom -- creatures randomly being zombified */
+	else if(randmonst && !mkmon_template && can_undead_mon(mtmp) && !Is_rogue_level(&u.uz)){
 		if(In_mines(&u.uz)){
 			if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(10) <= 5){
-				undeadtemplate = ZOMBIFIED;
+				mkmon_template = ZOMBIFIED;
 				unsethouse = TRUE;
 				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 			} else if(!rn2(10)){
-				undeadtemplate = ZOMBIFIED;
+				mkmon_template = ZOMBIFIED;
 				unsethouse = TRUE;
 				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 			}
 		} else if(!rn2(100)){
-			undeadtemplate = ZOMBIFIED;
+			mkmon_template = ZOMBIFIED;
 			unsethouse = TRUE;
 			m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 		}
 	}
-	if(undeadtemplate){
-		set_template(mtmp, undeadtemplate);
-		if(undeadtemplate == FRACTURED){
-			mtmp->m_lev += 4;
-			mtmp->mhpmax += d(4, 8);
+	if(mkmon_template){
+		set_template(mtmp, mkmon_template);
+		/* special case: some templates increase the level of the creatures made */
+		int plslvl = 0;
+		switch (mkmon_template) {
+		case FRACTURED:
+			plslvl = 4; break;
+		case YITH:
+			plslvl = 2; break;
+		}
+		if (plslvl) {
+			mtmp->m_lev += plslvl;
+			mtmp->mhpmax += d(plslvl, 8);
 			mtmp->mhp = mtmp->mhpmax;
 		}
+		/* update symbol */
 		newsym(mtmp->mx,mtmp->my);
-		allow_minvent = rn2(2);
+		/* zombies and other derived undead are much less likely to have their items */
+		if (is_undead(mtmp->data))
+			allow_minvent = rn2(2);
 	}
 	
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
@@ -9102,15 +9136,6 @@ register int	mmflags;
 //			pline("%d\n",mtmp->mhpmax);
 		break;
 	}
-	if(!templated(mtmp) && is_rat(mtmp->data) && check_insight()){
-		set_template(mtmp, CRANIUM_RAT);
-	}
-	if(!templated(mtmp) && check_insight()){
-		set_template(mtmp, YITH);
-		mtmp->m_lev += 2;
-		mtmp->mhpmax += d(2,8);
-		mtmp->mhp = mtmp->mhpmax;
-	}
 	if ((ct = emits_light_mon(mtmp)) > 0)
 		new_light_source(LS_MONSTER, (genericptr_t)mtmp, ct);
 	mitem = 0;	/* extra inventory item for this monster */
@@ -9272,7 +9297,7 @@ register int	mmflags;
 	if(unsethouse){
 		/*At this point, we have FINALLY created the inventory for the initial creature and all its associates, so the globals should be unset now.*/
 		curhouse = 0;
-		undeadtemplate = 0;
+		mkmon_template = 0;
 	}
 	if ((ptr->mflagst & MT_WAITMASK) && !(mmflags & MM_NOWAIT) && !u.uevent.invoked) {
 		if (ptr->mflagst & MT_WAITFORU)
@@ -9471,7 +9496,7 @@ rndmonst()
 	    return &mons[PM_CENTER_OF_ALL]; /*center of all may be created at any time */
 	}
 
-	if (u.uz.dnum == quest_dnum && !undeadtemplate && (ptr = qt_montype()) != 0){
+	if (u.uz.dnum == quest_dnum && !mkmon_template && (ptr = qt_montype()) != 0){
 		if(ptr->mtyp == PM_LONG_WORM_TAIL) return (struct permonst *) 0;
 	    else if(Role_if(PM_ANACHRONONAUT) || rn2(7)) return ptr;
 		//else continue to random generation
@@ -10348,7 +10373,7 @@ register int otyp;
 	register struct obj *otmp;
 	int spe;
 
-	if (undeadtemplate && has_template(mtmp, undeadtemplate) && rn2(2))
+	if (mkmon_template && has_template(mtmp, mkmon_template) && rn2(2))
 		return (struct obj *)0;
 	if (!otyp)
 		return (struct obj *)0;

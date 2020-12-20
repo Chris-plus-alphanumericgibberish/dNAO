@@ -190,10 +190,10 @@ int template;
 }
 
 void
-set_template_data(base, ptr, faction)
+set_template_data(base, ptr, template)
 struct permonst * base;
 struct permonst * ptr;
-int faction;
+int template;
 {
 	int mtyp = base->mtyp;
 	/* copy original */
@@ -202,7 +202,7 @@ int faction;
 #define MT_ITEMS (MT_GREEDY|MT_JEWELS|MT_COLLECT|MT_MAGIC)
 
 	/* make changes to the permonst as necessary */
-	switch (faction)
+	switch (template)
 	{
 	case ZOMBIFIED:
 		/* flags: */
@@ -352,8 +352,8 @@ int faction;
 		attk = &(ptr->mattk[i]);
 		insert = FALSE;
 
-		/* some factions completely skip specific attacks */
-		while ((faction == ZOMBIFIED || faction == SKELIFIED || faction == CRYSTALFIED) &&
+		/* some templates completely skip specific attacks */
+		while ((template == ZOMBIFIED || template == SKELIFIED || template == CRYSTALFIED) &&
 			(
 			attk->aatyp == AT_SPIT ||
 			attk->aatyp == AT_BREA ||
@@ -364,7 +364,7 @@ int faction;
 			attk->aatyp == AT_SRPR ||
 			attk->aatyp == AT_BEAM ||
 			attk->aatyp == AT_MAGC ||
-			(attk->aatyp == AT_TENT && faction == SKELIFIED) ||
+			(attk->aatyp == AT_TENT && template == SKELIFIED) ||
 			attk->aatyp == AT_GAZE ||
 			attk->aatyp == AT_WDGZ ||
 			(attk->aatyp == AT_NONE && attk->adtyp == AD_PLYS)
@@ -392,7 +392,7 @@ int faction;
 			}
 		}
 
-		/* some factions want to adjust existing attacks, or add additional attacks */
+		/* some templates want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || \
 	((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
 	&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
@@ -400,7 +400,7 @@ int faction;
 #define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;i++;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
-		if ((faction == ZOMBIFIED || faction == SKELIFIED) && (
+		if ((template == ZOMBIFIED || template == SKELIFIED) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
 			is_null_attk(attk) ||
 			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
@@ -410,12 +410,12 @@ int faction;
 			maybe_insert()
 				attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
 			attk->adtyp = AD_PHYS;
-			attk->damn = ptr->mlevel / 10 + (faction == ZOMBIFIED ? 1 : 2);
+			attk->damn = ptr->mlevel / 10 + (template == ZOMBIFIED ? 1 : 2);
 			attk->damd = max(ptr->msize * 2, 4);
 		}
 
 		/* skeletons get a paralyzing touch */
-		if (faction == SKELIFIED && (
+		if (template == SKELIFIED && (
 			insert_okay
 			))
 		{
@@ -428,7 +428,7 @@ int faction;
 
 		}
 		/* vitreans get a cold touch */
-		if (faction == CRYSTALFIED && (
+		if (template == CRYSTALFIED && (
 			insert_okay
 			))
 		{
@@ -439,7 +439,7 @@ int faction;
 			attk->damd = 8;
 			special = TRUE;
 		}
-		if (faction == MISTWEAVER && (
+		if (template == MISTWEAVER && (
 			end_insert_okay
 			))
 		{
@@ -451,7 +451,7 @@ int faction;
 			special = TRUE;
 		}
 		/* fractured turn their claws into glass shards */
-		if (faction == FRACTURED && (
+		if (template == FRACTURED && (
 			(attk->aatyp == AT_CLAW && (
 			attk->adtyp == AD_PHYS ||
 			attk->adtyp == AD_SQUE ||
@@ -468,7 +468,7 @@ int faction;
 			special = TRUE;
 		}
 		/* vampires' bites are vampiric */
-		if (faction == VAMPIRIC && (
+		if (template == VAMPIRIC && (
 			(attk->aatyp == AT_BITE)
 			|| insert_okay
 			))
@@ -481,7 +481,7 @@ int faction;
 			special = TRUE;
 		}
 		/* pseudonatural's bites become int-draining tentacles */
-		if (faction == PSEUDONATURAL && (
+		if (template == PSEUDONATURAL && (
 			(attk->aatyp == AT_BITE)
 			|| insert_okay
 			))
@@ -494,7 +494,7 @@ int faction;
 			special = TRUE;
 		}
 		/* tomb herd's attacks are generally stronger */
-		if (faction == TOMB_HERD && (
+		if (template == TOMB_HERD && (
 			!is_null_attk(attk))
 			)
 		{
@@ -504,7 +504,7 @@ int faction;
 				attk->damn++;
 		}
 		/* tomb herd also gets an abduction attack */
-		if (faction == TOMB_HERD && (
+		if (template == TOMB_HERD && (
 			insert_okay
 			))
 		{
@@ -516,7 +516,7 @@ int faction;
 			special = TRUE;
 		}
 		/* yith gain spellcasting */
-		if (faction == YITH && (
+		if (template == YITH && (
 			end_insert_okay
 			))
 		{
@@ -528,7 +528,7 @@ int faction;
 			special = TRUE;
 		}
 		/* cranium rats gain psionic spellcasting */
-		if (faction == CRANIUM_RAT && (
+		if (template == CRANIUM_RAT && (
 			end_insert_okay
 			))
 		{
@@ -540,7 +540,7 @@ int faction;
 			special = TRUE;
 		}
 		/* monsters that have mastered the black web gain shadow blades */
-		if (faction == M_BLACK_WEB && (
+		if (template == M_BLACK_WEB && (
 			insert_okay
 			))
 		{
@@ -551,7 +551,7 @@ int faction;
 			attk->damd = 8;
 			special = TRUE;
 		}
-		if (faction == M_GREAT_WEB && (
+		if (template == M_GREAT_WEB && (
 			insert_okay
 			))
 		{
@@ -631,23 +631,23 @@ int mtyp;
 /* 
  * Returns a pointer to the appropriate permonst structure for the monster parameters given
  * 
- * needs an mtyp; faction optional
+ * needs an mtyp; template optional
  * Do not call with mtyp==NON_PM unless you are intending to get PM_PLAYERMON
  * 
  * This function is responsible for allocating memory for new permonsts!
  */
 struct permonst *
-permonst_of(mtyp, faction)
+permonst_of(mtyp, template)
 int mtyp;
-int faction;
+int template;
 {
-	static struct permonst * monsarrays[NUMMONS][MAXFACTION - FACTION_PADDING] = { 0 };
+	static struct permonst * monsarrays[NUMMONS][MAXTEMPLATE] = { 0 };
 	struct permonst * ptr;
-	int f_index = faction - FACTION_PADDING - 1;	/* first faction is 1-indexed, but we want 0-indexed */
+	int t_index = template - 1;	/* first template is 1-indexed, but we want 0-indexed */
 
 	/* player is special, and has no handling for derived statblocks */
 	if (mtyp == PM_PLAYERMON) {
-		impossible("attempting to find permonst of playermon, faction %d", faction);
+		impossible("attempting to find permonst of playermon, template %d", template);
 		return &upermonst;
 	}
 	
@@ -655,24 +655,19 @@ int faction;
 	if (mtyp > NUMMONS || mtyp < 0) {
 		impossible("Can not get permonst for mtyp=%d!", mtyp);
 	}
-
-	/* filter out drow/misc factions */
-	if (faction <= FACTION_PADDING)
-		faction = 0;	/* equivalent to no faction */
-
 	/* simplest case: return the common mons[] array */
-	if (!faction)
+	if (!template)
 		return &mons[mtyp];
 
 	/* next case: we have already generated that particular statblock */
-	if (monsarrays[mtyp][f_index] != (struct permonst *)0) {
-		return monsarrays[mtyp][f_index];
+	if (monsarrays[mtyp][t_index] != (struct permonst *)0) {
+		return monsarrays[mtyp][t_index];
 	}
 
 	/* final case: we need to generate the statblock */
 	/* allocate memory */
-	monsarrays[mtyp][f_index] = (struct permonst *)malloc(sizeof(struct permonst));
-	ptr = monsarrays[mtyp][f_index];
+	monsarrays[mtyp][t_index] = (struct permonst *)malloc(sizeof(struct permonst));
+	ptr = monsarrays[mtyp][t_index];
 	return ptr;
 }
 

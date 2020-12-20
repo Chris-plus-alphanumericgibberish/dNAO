@@ -193,31 +193,36 @@ struct monst {
 #define	RANGED_MODE	0
 #define HNDHND_MODE	1
 	int meating;		/* monster is eating timeout */
-	int mfaction;		/* faction to which monster belongs */
-	int mtemplate;		/* template applied to monster */
-/*Note: first drow house is 8*/
-#define	FACTION_PADDING	1000
-#define	ZOMBIFIED	FACTION_PADDING+1	/* zombie 'faction' */
-#define	SKELIFIED	FACTION_PADDING+2	/* skeleton 'faction' */
-#define	CRYSTALFIED	FACTION_PADDING+3	/* crystal dead 'faction' */
-#define	FRACTURED	FACTION_PADDING+4	/* witness of the fracture 'faction' */
-#define	VAMPIRIC	FACTION_PADDING+5	/* vampirified 'faction' */
-#define	ILLUMINATED	FACTION_PADDING+6	/* illuminated 'faction' */
-#define	INCUBUS_FACTION	FACTION_PADDING+7	/* male foocubus */
-#define	SUCCUBUS_FACTION	FACTION_PADDING+8	/* female foocubus */
-#define	PSEUDONATURAL	FACTION_PADDING+9	/* tentacled */
-#define	TOMB_HERD	FACTION_PADDING+10	/* possessed statue */
-#define	YITH		FACTION_PADDING+11	/* possessed by the great race of yith */
-#define	CRANIUM_RAT	FACTION_PADDING+12	/* psychic rat */
-#define	MISTWEAVER	FACTION_PADDING+13	/* daughters of shubie */
-#define	DELOUSED	FACTION_PADDING+14	/* android flag: parasite is killed, but not host */
-#define	M_BLACK_WEB	FACTION_PADDING+15	/* Has a shadow blade attack */
-#define	M_GREAT_WEB	FACTION_PADDING+16	/* Has a stronger shadow blade attack */
-#define MAXFACTION	M_GREAT_WEB
-//define	HALF_DEMON	FACTION_PADDING+1	/* half-demon */
-//define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil */
-//define	HALF_DRAGON	FACTION_PADDING+3	/* half-dragon */
-//define	LAMASHTU_FACTION	FACTION_PADDING+6	/* Lamashtu's faction */
+
+/* faction to which monster belongs */
+	int mfaction;
+#define	FACTION_PADDING	1000	/* padding for Drow factions -- first one is 8 */
+#define	INCUBUS_FACTION	FACTION_PADDING+1	/* male foocubus */
+#define	SUCCUBUS_FACTION	FACTION_PADDING+2	/* female foocubus */
+//define	LAMASHTU_FACTION	FACTION_PADDING+3	/* Lamashtu's faction */
+
+/* template applied to monster to create a new-ish monster */
+	int mtemplate;
+#define	ZOMBIFIED		1	/* zombie 'faction' */
+#define	SKELIFIED		2	/* skeleton 'faction' */
+#define	CRYSTALFIED		3	/* crystal dead 'faction' */
+#define	FRACTURED		4	/* witness of the fracture 'faction' */
+#define	VAMPIRIC		5	/* vampirified 'faction' */
+#define	ILLUMINATED		6	/* illuminated 'faction' */
+#define	PSEUDONATURAL	7	/* tentacled */
+#define	TOMB_HERD		8	/* possessed statue */
+#define	YITH			9	/* possessed by the great race of yith */
+#define	CRANIUM_RAT		10	/* psychic rat */
+#define	MISTWEAVER		11	/* daughters of shubie */
+#define	DELOUSED		12	/* android flag: parasite is killed, but not host */
+#define	M_BLACK_WEB		13	/* Has a shadow blade attack */
+#define	M_GREAT_WEB		14	/* Has a stronger shadow blade attack */
+#define MAXTEMPLATE	M_GREAT_WEB
+
+//define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
+//define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */
+//define	HALF_DRAGON	FACTION_PADDING+3	/* half-dragon ??? */
+
 	int mvanishes;
 	//hatching situation
 	//AT_LAYEGG, PM_HATCHLING_NAME, x, d
