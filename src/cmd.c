@@ -1695,87 +1695,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	putstr(en_win, 0, "");
 
 	if (u.uevent.uhand_of_elbereth) {
-	    static const char * const hofe_titles[42] = {
-				/* Default */
-				"the Arm of the Law",		 /*01*/
-				"the Envoy of Balance",		 /*02*/
-				"the Glory of Arioch",		 /*03*/
-				/* Monk */
-				"the Sage of Law",			 /*04*/
-				"the Grandmaster of Balance",/*05*/
-				"the Glory of Eequor",		 /*06*/
-				/* Noble (human, vampire, incant) */
-				"the Saint %s",				 /*07*/
-				"the Grey Saint",			 /*08*/
-				"the Dark %s",				 /*09*/
-				/* Wizard */
-				"the Magister of Law",		 /*10*/
-				"the Wizard of Balance",	 /*11*/
-				"the Glory of Chardros",	 /*12*/
-				/* Elf */
-				"the Hand of Elbereth",		 /*13*/
-				"the Doomspeaker of Vaire",	 /*14*/
-				"the Whisperer of Este",	 /*15*/
-				/* Drow */
-				"the Hand of Eilistraee",	 /*16*/
-				"the Hand of Kiaransali",	 /*17*/
-				"the Hand of Lolth",		 /*18*/
-				/* Hedrow */
-				"the Shepherd of spiders",	 /*19*/
-				"the Sword of Vhaeraun",	 /*20*/
-				"the Fang of Lolth",		 /*21*/
-				/* Drow Noble */
-				"the Blade of Ver'tas",		 /*22*/
-				"the Hand of Kiaransali",	 /*23*/
-				"the Hand of Lolth",		 /*24*/
-				/* Hedrow Noble */
-				"the Sword of Selvetarm",	 /*25*/
-				"the Hand of Keptolo",		 /*26*/
-				"the Hammer of Ghaunadaur",	 /*27*/
-				/* Ranger */
-				"the High %s of Apollo",	 /*28*/
-				"the High %s of Latona",	 /*29*/
-				"the High %s of Diana",	 	 /*30*/
-				/* Gnome Ranger */
-				"the Great Slave-Vassal of Kurtulmak",	 /*31*/
-				"the Thane of Garl Glittergold",	 /*32*/
-				"the Claw of Urdlen",	 	 /*33*/
-				/* Healer */
-				"the Hand of Athena",		 /*34*/
-				"the Messenger of Hermes",	 /*35*/
-				"the Glory of Poseidon",	 /*36*/
-				/*Archeologist*/
-				"the Warrior of Quetzalcoatl",/*37*/
-				"the Champion of Camaxtli",	  /*38*/
-				"the Fire-bearer of Huhetotl",/*39*/
-				/*Female Half Dragon Noble*/
-				"the Dragon-slayer of Gwyn", /*40*/
-				"the Guardian of the Old Lords",/*41*/
-				"the Darkmoon Champion",	 /*42*/
-				
-				/* uhand_of_elbereth max == 63 */
-	    };
-		
-	    if(Role_if(PM_EXILE)) you_are("the Emissary of Elements");
-	    else if(Pantheon_if(PM_PIRATE) || Role_if(PM_PIRATE)) you_are("the Pirate King");
-	    else if((Pantheon_if(PM_VALKYRIE) || Role_if(PM_VALKYRIE)) && flags.initgend) you_are("the Daughter of Skadi");
-	    else if(Race_if(PM_DWARF) && (urole.ldrnum == PM_THORIN_II_OAKENSHIELD || urole.ldrnum == PM_DAIN_II_IRONFOOT)){
-			if(urole.ldrnum == PM_THORIN_II_OAKENSHIELD) you_are("King under the Mountain");
-			else if(urole.ldrnum == PM_DAIN_II_IRONFOOT) you_are("Lord of Moria");
-	    } else if((Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT)) && u.uevent.uhand_of_elbereth == 1) you_are("the King of the Angles");
-	    else if((Pantheon_if(PM_SAMURAI) || Role_if(PM_SAMURAI)) && u.uevent.uhand_of_elbereth == 1){
-			strcpy(buf, "Nasu no ");
-			strcat(buf, plname);
-			you_are(buf);
-		} else if(u.uevent.uhand_of_elbereth >= 28 && u.uevent.uhand_of_elbereth <= 30){
-			Sprintf(buf, hofe_titles[u.uevent.uhand_of_elbereth - 1], flags.female ? "Priestess" : "Priest");
-			enl_msg("You ", "are ", "were ", buf);
-		} else if(Role_if(PM_NOBLEMAN) && !Race_if(PM_DROW)){
-			if(u.uevent.uhand_of_elbereth == 9) Sprintf(buf, hofe_titles[u.uevent.uhand_of_elbereth - 1], flags.female ? "Lady" : "Lord");
-			else if(u.uevent.uhand_of_elbereth == 7) Sprintf(buf, hofe_titles[u.uevent.uhand_of_elbereth - 1], flags.female ? "Queen" : "King");
-			else Sprintf(buf, " %s", hofe_titles[u.uevent.uhand_of_elbereth - 1]);
-			enl_msg("You ", "are ", "were ", buf);
-		} else you_are(hofe_titles[u.uevent.uhand_of_elbereth - 1]);
+	    you_are(crowning_title());
 	}
 	
 	if(u.lastprayed){
@@ -2449,63 +2369,7 @@ int final;
 	dump("", "Final attributes");
 
 	if (u.uevent.uhand_of_elbereth) {
-	    static const char * const hofe_titles[27] = {
-				/* Default */
-				"the Arm of the Law",		 /*01*/
-				"the Envoy of Balance",		 /*02*/
-				"the Glory of Arioch",		 /*03*/
-				/* Monk */
-				"the Sage of Law",			 /*04*/
-				"the Grandmaster of Balance",/*05*/
-				"the Glory of Eequor",		 /*06*/
-				/* Noble (human, vampire, incant) */
-				"the Saint %s",				 /*07*/
-				"the Grey Saint",			 /*08*/
-				"the Dark %s",				 /*09*/
-				/* Wizard */
-				"the Magister of Law",		 /*10*/
-				"the Wizard of Balance",	 /*11*/
-				"the Glory of Chardros",	 /*12*/
-				/* Elf */
-				"the Hand of Elbereth",		 /*13*/
-				"the Doomspeaker of Vaire",	 /*14*/
-				"the Whisperer of Este",	 /*15*/
-				/* Drow */
-				"the Hand of Eilistraee",	 /*16*/
-				"the Hand of Kiaransali",	 /*17*/
-				"the Hand of Lolth",		 /*18*/
-				/* Hedrow */
-				"the Shepherd of spiders",	 /*19*/
-				"the Sword of Vhaeraun",	 /*20*/
-				"the Fang of Lolth",		 /*21*/
-				/* Drow Noble */
-				"the Blade of Ver'tas",		 /*22*/
-				"the Hand of Kiaransali",	 /*23*/
-				"the Hand of Lolth",		 /*24*/
-				/* Hedrow Noble */
-				"the Sword of Selvetarm",	 /*25*/
-				"the Hand of Keptolo",		 /*26*/
-				"the Hammer of Ghaunadaur",	 /*27*/
-				
-				/* uhand_of_elbereth max == 31 */
-	    };
-	    if(Role_if(PM_EXILE)) dump(youwere,"the Emissary of Elements");
-	    else if(Pantheon_if(PM_PIRATE) || Role_if(PM_PIRATE)) dump(youwere,"the Pirate King");
-	    else if((Pantheon_if(PM_VALKYRIE) || Role_if(PM_VALKYRIE)) && flags.initgend) dump(youwere,"the Daughter of Skadi");
-	    else if(Race_if(PM_DWARF) && (urole.ldrnum == PM_THORIN_II_OAKENSHIELD || urole.ldrnum == PM_DAIN_II_IRONFOOT)){
-			if(urole.ldrnum == PM_THORIN_II_OAKENSHIELD) dump(youwere,"King under the Mountain");
-			else if(urole.ldrnum == PM_DAIN_II_IRONFOOT) dump(youwere,"Lord of Moria");
-	    } else if((Pantheon_if(PM_SAMURAI) || Role_if(PM_SAMURAI)) && u.uevent.uhand_of_elbereth == 1){
-			strcpy(buf, "Nasu no ");
-			strcat(buf, plname);
-			dump(youwere,buf);
-		} else if(Role_if(PM_NOBLEMAN) && !Race_if(PM_DROW)){
-			if(u.uevent.uhand_of_elbereth == 9) Sprintf(buf, hofe_titles[u.uevent.uhand_of_elbereth - 1], flags.female ? "Lady" : "Lord");
-			else if(u.uevent.uhand_of_elbereth == 7) Sprintf(buf, hofe_titles[u.uevent.uhand_of_elbereth - 1], flags.female ? "Queen" : "King");
-			else Sprintf(buf, " %s", hofe_titles[u.uevent.uhand_of_elbereth - 1]);
-			dump(youwere, buf);
-		} else dump(youwere,
-		(char *)hofe_titles[u.uevent.uhand_of_elbereth - 1]);
+		dump(youwere, (char *)crowning_title());
 	}
 	
 	if(u.lastprayed){
