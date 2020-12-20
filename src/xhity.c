@@ -4975,6 +4975,7 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
+		ptmp = min(*hp(mdef), d(2, 6));	/* amount of draining damage */
 
 		/* Vampiric attacks drain blood, even if those that aren't bites */
 		if (attk->adtyp == AD_VAMP
@@ -4992,6 +4993,19 @@ boolean ranged;
 				heal(magr, min(dmg, *hp(mdef)));
 			}
 
+			/* Player vampires are smart enough not to feed while
+			   biting if they might have trouble getting it down */
+			if (!Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
+				&& u.uhunger <= 1420 && attk->aatyp == AT_BITE) {
+				/* For the life of a creature is in the blood (Lev 17:11) */
+				if (flags.verbose)
+				    You("feed on the lifeblood.");
+				/* [ALI] Biting monsters does not count against
+				   eating conducts. The draining of life is
+				   considered to be primarily a non-physical
+				   effect */
+				lesshungry(ptmp * 6);
+			}
 			/* tame vampires gain nutrition */
 			if (uncancelled && !youagr && magr->mtame && !magr->isminion)
 				EDOG(magr)->hungrytime += ((int)((mdef->data)->cnutrit / 20) + 1);
@@ -5017,7 +5031,7 @@ boolean ranged;
 			/* metroids gain life (but not the player) */
 			if (!youagr && is_metroid(pa)) {
 				*hpmax(magr) += d(1, 4);
-				heal(magr, d(1, 6));
+				heal(magr, ptmp/2);
 				/* tame metroids gain nutrition (does not stack with for-vampires above, since they have lifedrain instead of bloodsuck attacks) */
 				if (magr->mtame && !magr->isminion){
 					EDOG(magr)->hungrytime += pd->cnutrit / 4;  //400/4 = human nut/4
@@ -5042,11 +5056,8 @@ boolean ranged;
 				if (vis&VIS_MDEF)
 					pline("%s suddenly seems weaker!", Monnam(mdef));
 
-				/* for monsters, we need to make something up -- drain 2d6 maxhp, 1 level */
-				dmg = d(2, 6);
-
 				/* kill if this will level-drain below 0 m_lev, or lifedrain below 1 maxhp */
-				if (mlev(mdef) == 0 || *hpmax(mdef) <= dmg) {
+				if (mlev(mdef) == 0 || *hpmax(mdef) <= ptmp) {
 					/* clean up the maybe-dead monster, return early */
 					if (youagr)
 						killed(mdef);
@@ -5061,7 +5072,7 @@ boolean ranged;
 				else {
 					/* drain stats */
 					mdef->m_lev--;
-					mdef->mhpmax -= dmg;
+					mdef->mhpmax -= ptmp;
 				}
 			}
 		}
