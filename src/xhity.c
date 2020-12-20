@@ -11580,6 +11580,8 @@ int vis;						/* True if action is at all visible to the player */
 	if ((sneak_attack&~SNEAK_JUYO) && sneak_dice && !recursed)
 	{
 		int snekdie = mlev(magr);
+		if(snekdie > 30) snekdie = 30;
+		
 		/* some things increase sneak attack die size */
 		if ((weapon && weapon->oartifact == ART_SILVER_STARLIGHT) ||
 			(pa->mtyp == PM_CUPRILACH_RILMANI))
