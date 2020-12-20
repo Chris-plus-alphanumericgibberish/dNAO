@@ -6031,7 +6031,7 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
-		if (TRUE) {
+		if (!t_at(x(mdef), y(mdef))) {
 			struct trap *ttmp2 = maketrap(x(mdef), y(mdef), WEB);
 			if (ttmp2) {
 				if (youdef) {
@@ -14659,24 +14659,24 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				break;
 
 			case AD_WEBS:
-			{
-				struct trap *ttmp2 = maketrap(x(magr), y(magr), WEB);
-				if (ttmp2) {
-					if (youagr) {
-						pline_The("webbing sticks to you. You're caught!");
-						dotrap(ttmp2, NOWEBMSG);
+				if (!t_at(x(magr), y(magr)) {
+					struct trap *ttmp2 = maketrap(x(magr), y(magr), WEB);
+					if (ttmp2) {
+						if (youagr) {
+							pline_The("webbing sticks to you. You're caught!");
+							dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
-						if (u.usteed && u.utrap) {
-							/* you, not steed, are trapped */
-							dismount_steed(DISMOUNT_FELL);
-						}
+							if (u.usteed && u.utrap) {
+								/* you, not steed, are trapped */
+								dismount_steed(DISMOUNT_FELL);
+							}
 #endif
-					}
-					else {
-						mintrap(magr);
+						}
+						else {
+							mintrap(magr);
+						}
 					}
 				}
-			}
 				break;
 			case AD_HLBD:
 				/* Legion gets many zombies and legionnaires */
