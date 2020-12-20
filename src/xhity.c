@@ -14881,8 +14881,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							mndx = monsndx(mtmp->data);
 							if (mndx <= PM_QUINON && mndx >= PM_MONOTON && mtmp->mpeaceful){
 								pline("%s gets angry...", Amonnam(mtmp));
-								mtmp->mpeaceful = 0;
-								mtmp->mtame = 0;
+								untame(mtmp, 0);
 							}
 						}
 					}

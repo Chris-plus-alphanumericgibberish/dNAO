@@ -10341,8 +10341,7 @@ struct monst *mtmp, *victim;
 			struct monst *baby;
 			int tnum = d(1,6);
 			int i;
-			mtmp->mtame = 0;
-			mtmp->mpeaceful = 1;
+			untame(mtmp, 1);
 			for(i = 0; i < 6; i++){
 				baby = makemon(&mons[PM_METROID], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 				if(tnum-->0) tamedog(baby,(struct obj *) 0);

@@ -884,8 +884,7 @@ register struct monst *mtmp;
 	    pline("%s turns on you!", Monnam(mtmp));
 	else
 	    pline("You feel uneasy about %s.", y_monnam(mtmp));
-	mtmp->mpeaceful = 0;
-	mtmp->mtame = 0;
+	untame(mtmp, 0);
 	mtmp->mtraitor = TRUE;
 
 	/* Do we need to call newsym() here? */

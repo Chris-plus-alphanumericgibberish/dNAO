@@ -722,8 +722,7 @@ int ga_num;
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
 			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)){
-				mtmp->mpeaceful = 0;
-				mtmp->mtame = 0;
+				untame(mtmp, 0);
 				//Does not re-set alignment value (as if you attacked a peaceful)
 			}
 		}

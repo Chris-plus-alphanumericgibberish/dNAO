@@ -2233,21 +2233,19 @@ museamnesia:
 		if(!otmp->cursed){
 			if (vismon) pline("%s looks more tranquil.", Monnam(mtmp));
 			if(!otmp->blessed){
-				mtmp->mtame = 0;
+				untame(mtmp, 1);
 				mtmp->mferal = 0;
-				mtmp->mpeaceful = 1;
 			}
 			mtmp->mcrazed = 0;
 			mtmp->mberserk = 0;
 			mtmp->mdisrobe = 0;
 		} else {
 			if (vismon) pline("%s looks angry and confused!", Monnam(mtmp));
+			untame(mtmp, 0);
 			mtmp->mcrazed = 1;
 			mtmp->mberserk = 1;
 			mtmp->mconf = 1;
-			mtmp->mtame = 0;
 			mtmp->mferal = 0;
-			mtmp->mpeaceful = 0;
 		}
 		if (!otmp->oartifact)
 			m_useup(mtmp, otmp);

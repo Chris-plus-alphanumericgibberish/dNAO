@@ -593,6 +593,7 @@ E void FDECL(migrate_to_level, (struct monst *,int,XCHAR_P,coord *));
 E int FDECL(dogfood, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog_core, (struct monst *,struct obj *, int));
+E void FDECL(untame, (struct monst *, boolean));
 E struct monst *FDECL(make_pet_minion, (int,aligntyp));
 E void FDECL(abuse_dog, (struct monst *));
 E void FDECL(wary_dog, (struct monst *, BOOLEAN_P));

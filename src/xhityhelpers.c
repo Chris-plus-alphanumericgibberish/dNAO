@@ -1927,7 +1927,7 @@ boolean vis;
 				if(mdef->mtame && (mdef->isminion || !(EDOG(mdef)->loyal))){//note: won't check loyal if the target is a minion
 					if(mdef->mtame > dmg)
 						mdef->mtame -= dmg;
-					else mdef->mtame = 0;
+					else untame(mdef, 1);
 				}
 				if(mdef->mcrazed && rnd(20) < dmg){
 					mdef->mcrazed = 0;
