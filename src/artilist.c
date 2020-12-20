@@ -2221,6 +2221,17 @@ A("Crucifix of the Mad King",		HALBERD,					(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("Ringed Brass Armor",		PLATE_MAIL,					"molten-ringed brass %s",
+	4000L, COPPER, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	RINGED_ARMOR, (ARTI_PLUSTEN)
+	),
+
+/*Needs encyc entry*/
 A("Ritual Ringed Spear",		SPEAR,					"molten-ringed spear",
 	4000L, OBSIDIAN_MT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),

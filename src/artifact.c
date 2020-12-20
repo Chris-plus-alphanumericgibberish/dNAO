@@ -7710,6 +7710,10 @@ arti_invoke(obj)
 			You("wake the ringed spear.");
 			doliving_ringed_spear(&youmonst, obj, TRUE);
 		break;
+        case RINGED_ARMOR:
+			You("wake the ringed armor.");
+			doliving_ringed_spear(&youmonst, obj, TRUE);
+		break;
 		case BLOODLETTER:
 			if (artinstance[obj->oartifact].BLactive < monstermoves){
 				if (has_blood_mon(&youmonst)){

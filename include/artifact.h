@@ -395,7 +395,8 @@ extern struct artifact artilist[];
 #define STONE_DRAGON    (LAST_PROP+78)
 #define MAD_KING        (LAST_PROP+79)
 #define RINGED_SPEAR    (LAST_PROP+80)
-#define BLOODLETTER     (LAST_PROP+81)
+#define RINGED_ARMOR    (LAST_PROP+81)
+#define BLOODLETTER     (LAST_PROP+82)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
