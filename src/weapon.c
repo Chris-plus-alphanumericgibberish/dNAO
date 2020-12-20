@@ -2169,7 +2169,7 @@ long slot;
 		if (canseemon(mon))
 			pline("%s %s%s in %s %s!",
 			Tobjnam(obj, (obj->blessed ? "shine" : "glow")),
-			(obj->blessed ? " very" : ""),
+			(obj->blessed ? "very" : ""),
 			(obj->cursed ? "" : " brilliantly"),
 			s_suffix(mon_nam(mon)), mbodypart(mon, HAND));
 	}
