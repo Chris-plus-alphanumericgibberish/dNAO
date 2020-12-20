@@ -217,7 +217,7 @@ gcrownu()
 {
 	struct obj * obj;
 	char buf[BUFSZ];
-	char * ptr;
+	const char * ptr;
 
 	/* set crowning event, and grab appropriate entry from array */
 	u.uevent.uhand_of_elbereth = choose_crowning();

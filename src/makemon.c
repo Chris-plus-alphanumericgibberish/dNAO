@@ -8491,7 +8491,7 @@ register int	mmflags;
 		}
 	}
 	/* insight check: making pseudonatural creatures out of anything reasonable */
-	else if(randmonst && !mkmon_template && can_undead_mon(mtmp) && check_insight()){
+	else if(randmonst && !mkmon_template && can_undead(mtmp->data) && check_insight()){
 		mkmon_template = PSEUDONATURAL;
 		unsethouse = TRUE;
 	}
@@ -8505,7 +8505,8 @@ register int	mmflags;
 		mkmon_template = YITH;
 	}
 	/* most general case at bottom -- creatures randomly being zombified */
-	else if(randmonst && !mkmon_template && can_undead_mon(mtmp) && !Is_rogue_level(&u.uz)){
+	else if(randmonst && !mkmon_template && can_undead(mtmp->data) && !Is_rogue_level(&u.uz)){
+		int groupsz = max(2, min(12, 3*level_difficulty()/(monstr[mtmp->mtyp]+2)));
 		if(In_mines(&u.uz)){
 			if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(10) <= 5){
 				mkmon_template = ZOMBIFIED;
