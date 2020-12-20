@@ -14659,7 +14659,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				break;
 
 			case AD_WEBS:
-				if (!t_at(x(magr), y(magr)) {
+				if (!t_at(x(magr), y(magr))) {
 					struct trap *ttmp2 = maketrap(x(magr), y(magr), WEB);
 					if (ttmp2) {
 						if (youagr) {
