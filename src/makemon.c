@@ -8510,16 +8510,16 @@ register int	mmflags;
 			if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(10) <= 5){
 				mkmon_template = ZOMBIFIED;
 				unsethouse = TRUE;
-				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+				m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 			} else if(!rn2(10)){
 				mkmon_template = ZOMBIFIED;
 				unsethouse = TRUE;
-				m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+				m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 			}
 		} else if(!rn2(100)){
 			mkmon_template = ZOMBIFIED;
 			unsethouse = TRUE;
-			m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+			m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 		}
 	}
 	if(mkmon_template){
