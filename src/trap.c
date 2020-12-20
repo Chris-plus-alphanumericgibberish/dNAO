@@ -263,6 +263,13 @@ register int x, y, typ;
 		memset(&ttmp->vl, 0, sizeof(union vlaunchinfo));
 		ttmp->ammo = (struct obj *)0;
 	}
+
+	if (oldplace && ttmp->ttyp != typ && ttmp->ammo) {
+		remove_trap_ammo(ttmp);
+		/* have to re-call maketrap, because remove_trap_ammo() deleted the trap */
+		return maketrap(x, y, typ);
+	}
+
 	ttmp->ttyp = typ;
 	switch(typ) {
 	    case STATUE_TRAP:	    /* create a "living" statue */
@@ -625,7 +632,7 @@ int *fail_reason;
 	if (mon->m_ap_type) seemimic(mon);
 	else mon->mundetected = FALSE;
 	if ((x == u.ux && y == u.uy) || cause == ANIMATE_SPELL) {
-	    const char *comes_to_life = nonliving_mon(mon) ?
+	    const char *comes_to_life = nonliving(mon->data) ?
 					"moves" : "comes to life"; 
 	    if (cause == ANIMATE_SPELL){
 	    	if(cansee(x,y)) pline("%s %s!", upstart(statuename),
@@ -4408,7 +4415,7 @@ struct obj * tool;
 						reward_untrap(ttmp, mtmp);
 					} else {
 						You("try to free %s from the delicate equipment that imprisons %s.", mon_nam(mtmp), himherit(mtmp));
-						pline("Unfortunately, that equipment was the only thing keeping %s %s.", himherit(mtmp), nonliving_mon(mtmp) ? "intact" : "alive");
+						pline("Unfortunately, that equipment was the only thing keeping %s %s.", himherit(mtmp), nonliving(mtmp->data) ? "intact" : "alive");
 						// xkilled(mtmp,1); //Breaks pacifist
 						mondied(mtmp);
 					}

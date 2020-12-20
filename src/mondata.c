@@ -569,6 +569,65 @@ int template;
 	return;
 }
 
+/* returns TRUE if mtyp and mtemplate are compatible */
+boolean
+mtemplate_accepts_mtyp(mtemplate, mtyp)
+int mtemplate;
+int mtyp;
+{
+	struct permonst * ptr = &mons[mtyp];
+	switch(mtemplate)
+	{
+	case ZOMBIFIED:
+		/* basic undead check */
+		return can_undead(ptr);
+	case SKELIFIED:
+		/* basic undead check */
+		/* we don't have a way to check if a permonst has a skeleton ??? */
+		return can_undead(ptr);
+	case CRYSTALFIED:
+		/* anything goes */
+		return TRUE;
+	case FRACTURED:
+		/* kamerel are particularly vulnerable, but can afflict anything with eyes */
+		return haseyes(ptr);
+	case VAMPIRIC:
+		/* must have blood */
+		return has_blood(ptr);
+	case ILLUMINATED:
+		/* needs a soul -- not nonliving */
+		return !nonliving(ptr);
+	case INCUBUS_FACTION:
+	case SUCCUBUS_FACTION:
+		/* these are actually much more like proper factions -- leave be for now */
+		return TRUE;
+	case PSEUDONATURAL:
+		/* basic undead check; good enough */
+		return can_undead(ptr);
+	case TOMB_HERD:
+		/* anything goes */
+		return TRUE;
+	case YITH:
+		/* must have had a mind for the yith to have swapped with */
+		return !mindless(ptr);
+	case CRANIUM_RAT:
+		/* is a rodent */
+		return is_rat(ptr);
+	case MISTWEAVER:
+		/* could be a worshipper of the Goat */
+		return !(nonliving(ptr) || is_whirly(ptr) || noncorporeal(ptr));
+	case DELOUSED:
+		/* had a louse */
+		return is_delouseable(ptr);
+	case M_BLACK_WEB:
+	case M_GREAT_WEB:
+		/* ??? */
+		return TRUE;
+	}
+	/* default fall through -- allow all */
+	return TRUE;
+}
+
 /* 
  * Returns a pointer to the appropriate permonst structure for the monster parameters given
  * 
@@ -1185,7 +1244,7 @@ struct monst *mon;
 	if(!mon) return FALSE;
 	ptr = mon->data;
 
-	return (boolean)(is_undead_mon(mon) || is_demon(ptr) || is_were(ptr) ||
+	return (boolean)(is_undead(ptr) || is_demon(ptr) || is_were(ptr) ||
 			 species_resists_drain(mon) || 
 			 ptr->mtyp == PM_DEATH ||
 			 mon_resistance(mon, DRAIN_RES) ||
@@ -1213,7 +1272,7 @@ struct monst *mon;
 	
 	if(mon == u.usteed && u.sealsActive&SEAL_BERITH && u.sealsActive&SEAL_OSE) return TRUE;
 	
-	return nonliving_mon(mon) || is_demon(mon->data) || is_angel(mon->data) || is_keter(mon->data);
+	return nonliving(mon->data) || is_demon(mon->data) || is_angel(mon->data) || is_keter(mon->data);
 }
 
 /* TRUE iff monster is resistant to light-induced blindness */

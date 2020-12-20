@@ -496,6 +496,16 @@ register struct monst *mtmp;
 			place_object(otmp, x, y);
 			}
 		goto default_1;
+		case PM_SCORPION:
+			if (!rn2(20) && !(
+				(Role_if(PM_RANGER) && In_quest(&u.uz)) ||
+				(art_already_exists(ART_SCORPION_CARAPACE)) ||
+				(mtmp->mrevived && rn2(20))
+				)) {
+				otmp = oname(mksobj(SCALE_MAIL, TRUE, FALSE), artiname(ART_SCORPION_CARAPACE));
+				place_object(otmp, x, y);
+			}
+		goto default_1;
 	    case PM_LONG_WORM:
 			(void) mksobj_at(WORM_TOOTH, x, y, TRUE, FALSE);
 		goto default_1;
@@ -1185,7 +1195,7 @@ register struct monst *mtmp;
 		break;
 	}
 	if(obj && obj->otyp == CORPSE){
-		if(is_undead_mon(mtmp)){
+		if(is_undead(mtmp->data)){
 			obj->age -= 100;		/* this is an *OLD* corpse */
 		}
 		/* All special cases should precede the G_NOCORPSE check */
@@ -1554,7 +1564,7 @@ mcalcdistress()
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
 					pline("%s %s!", Monnam(tmpm),
-					nonliving_mon(tmpm)
+					nonliving(tmpm->data)
 					? "is destroyed" : "dies");
 				tmpm->mhp = 0;
 				grow_up(mtmp,tmpm);
@@ -1633,7 +1643,7 @@ mcalcdistress()
 			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 				&& tmpm->mpeaceful != mtmp->mpeaceful
 				&& tmpm->mtame != mtmp->mtame
-				&& !nonliving_mon(tmpm)
+				&& !nonliving(tmpm->data)
 				&& !DEADMONSTER(tmpm)
 				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
 			) targets++;
@@ -1648,7 +1658,7 @@ mcalcdistress()
 			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 				&& tmpm->mpeaceful != mtmp->mpeaceful
 				&& tmpm->mtame != mtmp->mtame
-				&& !nonliving_mon(tmpm)
+				&& !nonliving(tmpm->data)
 				&& !DEADMONSTER(tmpm)
 				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
 			) targets--;
@@ -1672,7 +1682,7 @@ mcalcdistress()
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
 					pline("%s %s!", Monnam(tmpm),
-					nonliving_mon(tmpm)
+					nonliving(tmpm->data)
 					? "is destroyed" : "dies");
 				tmpm->mhp = 0;
 				grow_up(mtmp,tmpm);
@@ -1738,7 +1748,7 @@ mcalcdistress()
 					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
-						&& !(nonliving_mon(tmpm) || is_demon(tmpm->data))
+						&& !(nonliving(tmpm->data) || is_demon(tmpm->data))
 						&& !(ward_at(tmpm->mx,tmpm->my) == CIRCLE_OF_ACHERON)
 						&& !(resists_death(tmpm))
 						&& !DEADMONSTER(tmpm)
@@ -1758,7 +1768,7 @@ mcalcdistress()
 						if(targ->mhp < 1){
 							if (canspotmon(targ))
 								pline("%s %s!", Monnam(targ),
-								nonliving_mon(targ)
+								nonliving(targ->data)
 								? "is destroyed" : "dies");
 							targ->mhp = 0;
 							grow_up(mtmp,targ);
@@ -1769,7 +1779,7 @@ mcalcdistress()
 						if(targ->mhp < 1){
 							if (canspotmon(targ))
 								pline("%s %s!", Monnam(targ),
-								nonliving_mon(targ)
+								nonliving(targ->data)
 								? "is destroyed" : "dies");
 							targ->mhp = 0;
 							grow_up(mtmp,targ);
@@ -1778,7 +1788,7 @@ mcalcdistress()
 					} else {
 						if (canspotmon(targ))
 							pline("%s %s!", Monnam(targ),
-							nonliving_mon(targ)
+							nonliving(targ->data)
 							? "is destroyed" : "dies");
 						targ->mhp = 0;
 						grow_up(mtmp,targ);
@@ -3275,7 +3285,7 @@ nexttry:
 			if(flag & NOTONL) continue;
 			info[cnt] |= NOTONL;
 		}
-		if (levl[nx][ny].typ == CLOUD && Is_lolth_level(&u.uz) && !(nonliving_mon(mon) || breathless_mon(mon) || resists_poison(mon))) {
+		if (levl[nx][ny].typ == CLOUD && Is_lolth_level(&u.uz) && !(nonliving(mdat) || breathless_mon(mon) || resists_poison(mon))) {
 			if(!(flag & ALLOW_TRAPS)) continue;
 			info[cnt] |= ALLOW_TRAPS;
 		}
@@ -3489,7 +3499,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		  || (Role_if(PM_NOBLEMAN) && (ma->mtyp == PM_KNIGHT || ma->mtyp == PM_MAID || ma->mtyp == PM_PEASANT) && magr->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_KNIGHT) && ma->mtyp == PM_KNIGHT && magr->mpeaceful && In_quest(&u.uz))
 		  || (Race_if(PM_DROW) && is_drow(ma) && magr->mfaction == u.uhouse)
-		  || (Race_if(PM_GNOME) && (is_gnome(ma) && !is_undead_mon(magr)) && magr->mpeaceful)
+		  || (Race_if(PM_GNOME) && (is_gnome(ma) && !is_undead(ma)) && magr->mpeaceful)
 		)
 		&& !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(md)))
 		&& !(Role_if(PM_EXILE))
@@ -3502,7 +3512,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		  || (Role_if(PM_NOBLEMAN) && (md->mtyp == PM_KNIGHT || md->mtyp == PM_MAID || md->mtyp == PM_PEASANT) && mdef->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_KNIGHT) && md->mtyp == PM_KNIGHT && mdef->mpeaceful && In_quest(&u.uz))
 		  || (Race_if(PM_DROW) && is_drow(md) && mdef->mfaction == u.uhouse)
-		  || (Race_if(PM_GNOME) && (is_gnome(md) && !is_undead_mon(mdef)) && mdef->mpeaceful)
+		  || (Race_if(PM_GNOME) && (is_gnome(md) && !is_undead(md)) && mdef->mpeaceful)
 		)
 		&& !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(ma)))
 		&& !(Role_if(PM_EXILE))
@@ -3513,24 +3523,24 @@ struct monst * mdef;	/* another monster which is next to it */
 
 	/* elves (and Eladrin) vs. (orcs and undead and wargs) */
 	if((is_elf(ma) || is_eladrin(ma) || ma->mtyp == PM_GROVE_GUARDIAN || ma->mtyp == PM_FORD_GUARDIAN || ma->mtyp == PM_FORD_ELEMENTAL)
-		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || is_undead_mon(mdef))
-		&& !(is_orc(ma) || is_ogre(ma) || is_undead_mon(magr))
+		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || is_undead(md))
+		&& !(is_orc(ma) || is_ogre(ma) || is_undead(ma))
 	)
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if((is_elf(md) || is_eladrin(md) || md->mtyp == PM_GROVE_GUARDIAN || md->mtyp == PM_FORD_GUARDIAN || md->mtyp == PM_FORD_ELEMENTAL) 
-		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || is_undead_mon(magr))
-		&& !(is_orc(md) || is_ogre(md) || is_undead_mon(mdef))
+		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || is_undead(ma))
+		&& !(is_orc(md) || is_ogre(md) || is_undead(md))
 	)
 		return ALLOW_M|ALLOW_TM;
 
 	/* dwarves vs. orcs */
 	if(is_dwarf(ma) && (is_orc(md) || is_ogre(md) || is_troll(md))
-					&&!(is_orc(ma) || is_ogre(ma) || is_troll(ma) || is_undead_mon(magr)))
+					&&!(is_orc(ma) || is_ogre(ma) || is_troll(ma) || is_undead(ma)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if(is_dwarf(md) && (is_orc(ma) || is_ogre(ma) || is_troll(ma))
-					&&!(is_orc(md) || is_ogre(md) || is_troll(md) || is_undead_mon(mdef)))
+					&&!(is_orc(md) || is_ogre(md) || is_troll(md) || is_undead(md)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* elves vs. drow */
@@ -3541,12 +3551,12 @@ struct monst * mdef;	/* another monster which is next to it */
 
 	/* undead vs civs */
 	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_stronghold(&u.uz) || Is_rogue_level(&u.uz) || Inhell || Is_astralevel(&u.uz))){
-		if(is_undead_mon(magr) && 
-			(!is_witch_mon(mdef) && !always_hostile_mon(mdef) && !is_undead_mon(mdef) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef))
+		if(is_undead(ma) && 
+			(!is_witch_mon(mdef) && !always_hostile_mon(mdef) && !is_undead(md) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef))
 		)
 			return ALLOW_M|ALLOW_TM;
-		if((!always_hostile_mon(magr) && !is_witch_mon(magr) && !is_undead_mon(magr) && !(is_animal(ma) && !is_domestic(ma)) && !mindless_mon(magr))
-			&& is_undead_mon(mdef)
+		if((!always_hostile_mon(magr) && !is_witch_mon(magr) && !is_undead(ma) && !(is_animal(ma) && !is_domestic(ma)) && !mindless_mon(magr))
+			&& is_undead(md)
 		)
 			return ALLOW_M|ALLOW_TM;
 	}
@@ -3554,12 +3564,12 @@ struct monst * mdef;	/* another monster which is next to it */
 	/* Alabaster elves vs. oozes */
 	if((ma->mtyp == PM_ALABASTER_ELF || ma->mtyp == PM_ALABASTER_ELF_ELDER || ma->mtyp == PM_SENTINEL_OF_MITHARDIR) 
 		&& (md->mlet == S_PUDDING || md->mlet == S_BLOB || md->mlet == S_UMBER)
-				&&	!(is_undead_mon(magr)))
+				&&	!(is_undead(ma)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if((md->mtyp == PM_ALABASTER_ELF || md->mtyp == PM_ALABASTER_ELF_ELDER || md->mtyp == PM_SENTINEL_OF_MITHARDIR)
 		&& (ma->mlet == S_PUDDING || ma->mlet == S_BLOB || ma->mlet == S_UMBER)
-				&&	!(is_undead_mon(mdef)))
+				&&	!(is_undead(md)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* Androids vs. mind flayers */
@@ -3626,10 +3636,10 @@ struct monst * mdef;	/* another monster which is next to it */
 		return ALLOW_M|ALLOW_TM;
 
 	/* monadics vs. undead */
-	if(ma->mtyp == PM_MONADIC_DEVA && (is_undead_mon(mdef)))
+	if(ma->mtyp == PM_MONADIC_DEVA && (is_undead(md)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if(md->mtyp == PM_MONADIC_DEVA && (is_undead_mon(magr)))
+	if(md->mtyp == PM_MONADIC_DEVA && (is_undead(ma)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* woodchucks vs. The Oracle */
@@ -3848,7 +3858,7 @@ struct obj *
 mlifesaver(mon)
 struct monst *mon;
 {
-	if (!nonliving_mon(mon)) {
+	if (!nonliving(mon->data)) {
 	    struct obj *otmp = which_armor(mon, W_AMUL);
 
 	    if (otmp && otmp->otyp == AMULET_OF_LIFE_SAVING)
@@ -4659,7 +4669,7 @@ boolean was_swallowed;			/* digestion */
 				else pline("%s lets out a terrible shriek!", Monnam(mon));
 				for (mtmp = fmon; mtmp; mtmp = mtmp2){
 					mtmp2 = mtmp->nmon;
-					if(mtmp->data->geno & G_GENO && !nonliving_mon(mon) && !is_demon(mon->data) && !is_keter(mon->data) && mtmp->mhp <= 100){
+					if(mtmp->data->geno & G_GENO && !nonliving(mon->data) && !is_demon(mon->data) && !is_keter(mon->data) && mtmp->mhp <= 100){
 						if (DEADMONSTER(mtmp)) continue;
 						mtmp->mhp = -10;
 						monkilled(mtmp,"",AD_DRLI);
@@ -5550,7 +5560,7 @@ xkilled(mtmp, dest)
 	}
 	
 	if (dest & 1) {
-	    const char *verb = nonliving_mon(mtmp) ? "destroy" : "kill";
+	    const char *verb = nonliving(mtmp->data) ? "destroy" : "kill";
 
 	    if (!wasinside && !canspotmon(mtmp))
 		You("%s it!", verb);
@@ -6228,7 +6238,7 @@ register int x, y, distance;
 					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
-						&& !nonliving_mon(tmpm)
+						&& !nonliving(tmpm->data)
 						&& !resists_drain(tmpm)
 						&& !DEADMONSTER(tmpm)
 						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
@@ -6244,7 +6254,7 @@ register int x, y, distance;
 					if(dist2(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= distance
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
-						&& !nonliving_mon(tmpm)
+						&& !nonliving(tmpm->data)
 						&& !resists_drain(tmpm)
 						&& !DEADMONSTER(tmpm)
 						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
@@ -6451,57 +6461,76 @@ select_newcham_form(mon)
 struct monst *mon;
 {
 	int mndx = NON_PM;
+	int attempts = 0;
 
-	switch (mon->cham) {
-	    case CHAM_SANDESTIN:
-		if (rn2(7)) mndx = pick_nasty();
-		break;
-	    case CHAM_DOPPELGANGER:
-		if (!rn2(7)) mndx = pick_nasty();
-		else if (rn2(3)) mndx = rn1(PM_WIZARD - PM_ARCHEOLOGIST + 1,
-					    PM_ARCHEOLOGIST);
-		break;
-	    case CHAM_CHAMELEON:
-		if (!rn2(3)) mndx = rndshape(&pick_animal);
-		else mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
-		break;
-	    case CHAM_DREAM:
-		if(rn2(2)) mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
-		else mndx = PM_DREAM_QUASIELEMENTAL;
-		break;
-	    case CHAM_ORDINARY:
-	    {
-		struct obj *m_armr = which_armor(mon, W_ARM);
+	do {
+		switch (mon->cham) {
+			case CHAM_SANDESTIN:
+			if (rn2(7)) mndx = pick_nasty();
+			break;
+			case CHAM_DOPPELGANGER:
+			if (!rn2(7)) mndx = pick_nasty();
+			else if (rn2(3)) mndx = rn1(PM_WIZARD - PM_ARCHEOLOGIST + 1,
+							PM_ARCHEOLOGIST);
+			break;
+			case CHAM_CHAMELEON:
+			if (!rn2(3)) mndx = rndshape(&pick_animal);
+			else mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
+			break;
+			case CHAM_DREAM:
+			if(rn2(2)) mndx = rndshape((void*)0);//try to get an in-depth monster of any kind
+			else mndx = PM_DREAM_QUASIELEMENTAL;
+			break;
+			case CHAM_ORDINARY:
+			if (attempts == 0) {
+				struct obj *m_armr = which_armor(mon, W_ARM);
 
-		if (m_armr && Is_dragon_scales(m_armr))
-		    mndx = Dragon_scales_to_pm(m_armr) - mons;
-		else if (m_armr && Is_dragon_mail(m_armr))
-			mndx = Dragon_mail_to_pm(m_armr) - mons;
-		else if ((m_armr = which_armor(mon, W_ARMC)) && m_armr->otyp == LEO_NEMAEUS_HIDE)
-			mndx = PM_SON_OF_TYPHON;
-	    }
-		break;
-	}
-#ifdef WIZARD
-	/* For debugging only: allow control of polymorphed monster; not saved */
-	if (wizard && iflags.mon_polycontrol) {
-		char pprompt[BUFSZ], buf[BUFSZ];
-		int tries = 0;
-		do {
-			Sprintf(pprompt,
-				"Change %s into what kind of monster? [type the name]",
-				mon_nam(mon));
-			getlin(pprompt,buf);
-			mndx = name_to_mon(buf);
-			if (mndx < LOW_PM)
-				You("cannot polymorph %s into that.", mon_nam(mon));
-			else break;
-		} while(++tries < 5);
-		if (tries==5) pline1(thats_enough_tries);
-	}
-#endif /*WIZARD*/
-	if (mndx == NON_PM) mndx = rndshape((void*)0);//first try to get an in-depth monster
-	if (mndx == NON_PM) mndx = rn1(SPECIAL_PM - LOW_PM, LOW_PM);//double check in case no monst was returned
+				if (m_armr && Is_dragon_scales(m_armr))
+					mndx = Dragon_scales_to_pm(m_armr) - mons;
+				else if (m_armr && Is_dragon_mail(m_armr))
+					mndx = Dragon_mail_to_pm(m_armr) - mons;
+				else if ((m_armr = which_armor(mon, W_ARMC)) && m_armr->otyp == LEO_NEMAEUS_HIDE)
+					mndx = PM_SON_OF_TYPHON;
+			}
+			break;
+		}
+	#ifdef WIZARD
+		/* For debugging only: allow control of polymorphed monster; not saved */
+		if (wizard && iflags.mon_polycontrol && attempts == 0) {
+			char pprompt[BUFSZ], buf[BUFSZ];
+			int tries = 0;
+			do {
+				Sprintf(pprompt,
+					"Change %s into what kind of monster? [type the name]",
+					mon_nam(mon));
+				getlin(pprompt,buf);
+				mndx = name_to_mon(buf);
+				if (mndx < LOW_PM)
+					You("cannot polymorph %s into that.", mon_nam(mon));
+				else break;
+			} while(++tries < 5);
+			if (tries==5) pline1(thats_enough_tries);
+		}
+	#endif /*WIZARD*/
+
+		/* otherwise */
+		if (mndx == NON_PM) mndx = rndshape((void*)0);//first try to get an in-depth monster
+
+		/* special case for mtemplates: "deloused" can be lost via polymorph */
+		if (mon->mtemplate == DELOUSED && !mtemplate_accepts_mtyp(DELOUSED, mndx))
+			mon->mtemplate = 0;
+		else if (!mtemplate_accepts_mtyp(mon->mtemplate, mndx))
+			mndx = NON_PM;
+
+		/* after 50 attempts, try really hard */
+		if (attempts > 50 && mndx == NON_PM)
+			mndx = rn1(SPECIAL_PM - LOW_PM, LOW_PM);
+
+	} while(++attempts < 60 && (mndx == NON_PM || !mtemplate_accepts_mtyp(mon->mtemplate, mndx)));
+
+	if (attempts >= 60)	// failed to find an acceptable new form
+		mndx = mon->mtyp;
+
 	return mndx;
 }
 

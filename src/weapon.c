@@ -1352,7 +1352,8 @@ register struct monst *mtmp;
 	propellor = &zeroobj;
 	Oselect(EGG, W_QUIVER); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
-	    oselectBoulder(mtmp);
+	if(otmp = oselectBoulder(mtmp))
+		return otmp;
 
 	/* Select polearms first; they do more damage and aren't expendable */
 	/* The limit of 13 here is based on the monster polearm range limit
@@ -2168,7 +2169,7 @@ long slot;
 		if (canseemon(mon))
 			pline("%s %s%s in %s %s!",
 			Tobjnam(obj, (obj->blessed ? "shine" : "glow")),
-			(obj->blessed ? " very" : ""),
+			(obj->blessed ? "very" : ""),
 			(obj->cursed ? "" : " brilliantly"),
 			s_suffix(mon_nam(mon)), mbodypart(mon, HAND));
 	}
