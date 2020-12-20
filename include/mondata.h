@@ -228,7 +228,7 @@
 #define intelligent_mon(mon)	(!mindless_mon(mon) && !is_animal((mon)->data))
 #define murderable_mon(mon)	((mon) && ((intelligent_mon(mon) && always_peaceful((mon)->data) && !always_hostile_mon(mon)) || (mon)->isshk || (mon)->isgd || (mon)->ispriest))
 
-#define mortal_race(mon)	(intelligent_mon(mon) && !nonliving_mon(mon) && !is_minion((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data))
+#define mortal_race(mon)	(intelligent_mon(mon) && !nonliving((mon)->data) && !is_minion((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data))
 #define dark_immune(mon)	(is_unalive((mon)->data) || is_primordial((mon)->data))
 
 #define slithy(ptr)			((ptr)->mflagsb & MB_SLITHY)
@@ -289,10 +289,9 @@
 							 (ptr)->mtyp == PM_MILITANT_CLERIC ||\
 							 (ptr)->mtyp == PM_HALF_ELF_RANGER)
 #define is_undead(ptr)		(((ptr)->mflagsa & MA_UNDEAD) != 0L)
-#define is_undead_mon(mon)	(mon && is_undead((mon)->data))
-#define	can_undead_mon(mon)	(mon && !nonliving_mon(mon) && !is_minion((mon)->data) && ((mon)->data->mlet != S_PUDDING) &&\
-								((mon)->data->mlet != S_JELLY) && ((mon)->data->mlet != S_BLOB) && !is_elemental((mon)->data) &&\
-								!is_plant((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !(mvitals[monsndx((mon)->data)].mvflags&G_NOCORPSE))
+#define	can_undead(ptr)	(!nonliving(ptr) && !is_minion(ptr) && ((ptr)->mlet != S_PUDDING) &&\
+								((ptr)->mlet != S_JELLY) && ((ptr)->mlet != S_BLOB) && !is_elemental(ptr) &&\
+								!is_plant(ptr) && !is_demon(ptr) && !is_primordial(ptr) && !(mvitals[monsndx(ptr)].mvflags&G_NOCORPSE))
 #define is_weldproof(ptr)		(is_undead(ptr) || is_demon(ptr) || is_were(ptr))
 #define is_weldproof_mon(mon)		(is_weldproof((mon)->data))
 #define is_were(ptr)		(((ptr)->mflagsa & MA_WERE) != 0L)
@@ -540,7 +539,7 @@
 #define helm_match(ptr,obj)	(((ptr->mflagsb&MB_HEADMODIMASK) == (obj->bodytypeflag&MB_HEADMODIMASK)))
 /*Note: No-modifier helms are "normal"*/
 
-#define hates_holy_mon(mon)	(is_demon((mon)->data) || is_undead_mon(mon) || (((mon)->data->mflagsg&MG_HATESHOLY) != 0))
+#define hates_holy_mon(mon)	(is_demon((mon)->data) || is_undead(mon->data) || (((mon)->data->mflagsg&MG_HATESHOLY) != 0))
 #define hates_holy(ptr)		(is_demon(ptr) || is_undead(ptr) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
 #define hates_unholy(ptr)	((ptr->mflagsg&MG_HATESUNHOLY) != 0)
 #define hates_unholy_mon(mon)	(hates_unholy((mon)->data))
@@ -746,8 +745,6 @@
 #define nonliving(ptr)	(is_unalive(ptr) || is_undead(ptr) || \
 				 (ptr)->mtyp == PM_MANES \
 				)
-
-#define nonliving_mon(mon)	(mon && (nonliving((mon)->data) || is_undead_mon(mon)))
 
 #define is_unalive(ptr)		(on_level(&valley_level, &u.uz) || is_naturally_unalive(ptr))
 

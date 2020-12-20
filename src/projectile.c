@@ -384,10 +384,22 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 			result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);
 
-			if (result)
-			{
-				break;
+			/* stop on hit? */
+			if (!thrownobj)
+				break;	/* projectile was destroyed */
+			else if (is_boulder(thrownobj)) {
+				if (result)
+					range /= 2;	/* continue with less range on hit; keep going on miss */
 			}
+			else if (
+				thrownobj->otyp == BLASTER_BOLT ||
+				thrownobj->otyp == HEAVY_BLASTER_BOLT ||
+				thrownobj->otyp == LASER_BEAM) {
+				if (result)
+					break;	/* stop on hit; keep going on miss */
+			}
+			else
+				break;	/* stop on hit or miss */
 		}
 
 		/* projectile is on a sink (it "sinks" down) or is on a non-allowable square */
@@ -1350,12 +1362,6 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			(!inside_shop(u.ux, u.uy) ||
 			!index(in_rooms(mdef->mx, mdef->my, SHOPBASE), *u.ushops)))
 			hot_pursuit(mdef);
-			
-		/* cause projectile to fall onto the floor -- not for blaster bolts */
-		if (thrownobj->otyp != BLASTER_BOLT &&
-			thrownobj->otyp != HEAVY_BLASTER_BOLT &&
-			thrownobj->otyp != LASER_BEAM)
-			*prange = *prange2 = 0;
 		return MM_MISS;
 	}
 
@@ -1649,7 +1655,12 @@ int shotlimit;
 {
 	boolean youagr = (magr == &youmonst);
 	int multishot = 1;
-	int skill = objects[ammo->otyp].oc_skill;
+	int skill;
+	
+	if (launcher && !(launcher->oartifact == ART_PEN_OF_THE_VOID))
+		skill = objects[launcher->otyp].oc_skill;
+	else
+		skill = abs(objects[ammo->otyp].oc_skill);
 
 	if (youagr ? (Confusion || Stunned) : (magr->mconf))
 	{
@@ -1657,18 +1668,18 @@ int shotlimit;
 		multishot = 1;
 	}
 	else if (
-		(ammo_and_launcher(ammo, launcher) && skill != -P_CROSSBOW) ||
+		(ammo_and_launcher(ammo, launcher) && skill != P_CROSSBOW) ||
 		(skill == P_DAGGER) ||
-		(skill == -P_DART) ||
-		(skill == -P_SHURIKEN) ||
-		(skill == -P_BOOMERANG) ||
+		(skill == P_DART) ||
+		(skill == P_SHURIKEN) ||
+		(skill == P_BOOMERANG) ||
 		(ammo->oartifact == ART_SICKLE_MOON) || 
 		(ammo->oartifact == ART_AMHIMITL)
 		) {
 		/* Skill based bonus */
 		int magr_wepskill;
 		if (youagr)
-			magr_wepskill = P_SKILL(weapon_type(ammo));
+			magr_wepskill = P_SKILL(weapon_type((launcher && launcher->oartifact != ART_PEN_OF_THE_VOID) ? launcher : ammo));
 		else
 			magr_wepskill = m_martial_skill(magr->data);
 
@@ -1694,7 +1705,7 @@ int shotlimit;
 		/* Role-based RoF bonus */
 		switch (youagr ? Role_switch : monsndx(magr->data)) {
 		case PM_CAVEMAN:
-			if (skill == -P_SLING) multishot++;
+			if (skill == P_SLING) multishot++;
 			break;
 		case PM_RANGER:
 			multishot++;

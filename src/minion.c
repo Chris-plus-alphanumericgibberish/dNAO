@@ -265,7 +265,7 @@ register struct monst *mtmp;
 			|| uwep->oartifact == ART_LANCE_OF_LONGINUS
 		) ) {
 	    pline("%s looks very angry.", Amonnam(mtmp));
-	    mtmp->mpeaceful = mtmp->mtame = 0;
+	    untame(mtmp, 0);
 	    set_malign(mtmp);
 	    newsym(mtmp->mx, mtmp->my);
 	    return 0;

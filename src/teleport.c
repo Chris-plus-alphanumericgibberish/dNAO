@@ -1682,7 +1682,7 @@ boolean give_feedback;
 			aggravate();
 		}
 		if(!DEADMONSTER(mtmp)){
-			if(canspotmon(mtmp)) pline("Unfortunately, that equipment was the only thing keeping %s %s.", himherit(mtmp), nonliving_mon(mtmp) ? "intact" : "alive");
+			if(canspotmon(mtmp)) pline("Unfortunately, that equipment was the only thing keeping %s %s.", himherit(mtmp), nonliving(mtmp->data) ? "intact" : "alive");
 			mondied(mtmp);
 		}
 	}

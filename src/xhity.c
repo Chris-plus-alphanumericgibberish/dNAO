@@ -1661,6 +1661,7 @@ int * subout;					/* records what attacks have been subbed out */
 #define SUBOUT_XWEP		0x0080	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
 #define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
 #define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
+#define SUBOUT_SCORPION	0x0400	/* Scorpion Carapace's sting */
 int * tohitmod;					/* some attacks are made with decreased accuracy */
 {
 	struct attack * attk;
@@ -2055,6 +2056,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 
+	/* creatures wearing the Scorpion Carpace get a scorpion's sting */
+	if (is_null_attk(attk) && !by_the_book && !(*subout&SUBOUT_SCORPION)) {
+		struct obj * otmp = (youagr ? uarm : which_armor(magr, W_ARM));
+		if (otmp && otmp->oartifact == ART_SCORPION_CARAPACE) {
+			*attk = *attacktype_fordmg(&mons[PM_SCORPION], AT_STNG, AD_DRST);
+			*subout |= SUBOUT_SCORPION;
+		}
+	}
+
 	/* players can get a whole host of spirit attacks */
 	if (youagr && is_null_attk(attk) && !by_the_book) {
 		/* this assumes that getattk() will not be interrupted with youagr when already called with youagr */
@@ -2081,9 +2091,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
 	/* zombies deal double damage, and all undead deal double damage at midnight (the midnight multiplier is not shown in the pokedex) */
-	if (!youagr && has_template(magr, ZOMBIFIED) && (is_undead_mon(magr) && midnight() && !by_the_book))
+	if (!youagr && has_template(magr, ZOMBIFIED) && (is_undead(pa) && midnight() && !by_the_book))
 		attk->damn *= 3;
-	else if (!youagr && (has_template(magr, ZOMBIFIED) || (is_undead_mon(magr) && midnight() && !by_the_book)))
+	else if (!youagr && (has_template(magr, ZOMBIFIED) || (is_undead(pa) && midnight() && !by_the_book)))
 		attk->damn *= 2;
 
 	/* Bandersnatches become frumious instead of fleeing, dealing double damage -- not shown in the pokedex */
@@ -3071,7 +3081,7 @@ int flat_acc;
 			bons_acc += level_difficulty()/4 + 4;
 			break;
 		case ROLLING_BOULDER_TRAP:
-			bons_acc += level_difficulty()/6;
+			bons_acc += level_difficulty()/2;
 			break;
 		}
 	}
@@ -4714,7 +4724,7 @@ boolean ranged;
 		else {
 			if(canseemon(mdef))
 				pline("%s is covered in pollen!", Monnam(mdef));
-			if(!breathless_mon(mdef) && !nonliving_mon(mdef)){
+			if(!breathless_mon(mdef) && !nonliving(mdef->data)){
 				if(canseemon(mdef))
 					pline("%s starts sneezing uncontrollably!", Monnam(mdef));
 				mdef->mcanmove = 0;
@@ -4965,6 +4975,7 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
+		ptmp = min(*hp(mdef), d(2, 6));	/* amount of draining damage */
 
 		/* Vampiric attacks drain blood, even if those that aren't bites */
 		if (attk->adtyp == AD_VAMP
@@ -4982,6 +4993,19 @@ boolean ranged;
 				heal(magr, min(dmg, *hp(mdef)));
 			}
 
+			/* Player vampires are smart enough not to feed while
+			   biting if they might have trouble getting it down */
+			if (!Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
+				&& u.uhunger <= 1420 && attk->aatyp == AT_BITE) {
+				/* For the life of a creature is in the blood (Lev 17:11) */
+				if (flags.verbose)
+				    You("feed on the lifeblood.");
+				/* [ALI] Biting monsters does not count against
+				   eating conducts. The draining of life is
+				   considered to be primarily a non-physical
+				   effect */
+				lesshungry(ptmp * 6);
+			}
 			/* tame vampires gain nutrition */
 			if (uncancelled && !youagr && magr->mtame && !magr->isminion)
 				EDOG(magr)->hungrytime += ((int)((mdef->data)->cnutrit / 20) + 1);
@@ -5007,7 +5031,7 @@ boolean ranged;
 			/* metroids gain life (but not the player) */
 			if (!youagr && is_metroid(pa)) {
 				*hpmax(magr) += d(1, 4);
-				heal(magr, d(1, 6));
+				heal(magr, ptmp/2);
 				/* tame metroids gain nutrition (does not stack with for-vampires above, since they have lifedrain instead of bloodsuck attacks) */
 				if (magr->mtame && !magr->isminion){
 					EDOG(magr)->hungrytime += pd->cnutrit / 4;  //400/4 = human nut/4
@@ -5032,11 +5056,8 @@ boolean ranged;
 				if (vis&VIS_MDEF)
 					pline("%s suddenly seems weaker!", Monnam(mdef));
 
-				/* for monsters, we need to make something up -- drain 2d6 maxhp, 1 level */
-				dmg = d(2, 6);
-
 				/* kill if this will level-drain below 0 m_lev, or lifedrain below 1 maxhp */
-				if (mlev(mdef) == 0 || *hpmax(mdef) <= dmg) {
+				if (mlev(mdef) == 0 || *hpmax(mdef) <= ptmp) {
 					/* clean up the maybe-dead monster, return early */
 					if (youagr)
 						killed(mdef);
@@ -5051,7 +5072,7 @@ boolean ranged;
 				else {
 					/* drain stats */
 					mdef->m_lev--;
-					mdef->mhpmax -= dmg;
+					mdef->mhpmax -= ptmp;
 				}
 			}
 		}
@@ -6021,7 +6042,7 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
-		if (TRUE) {
+		if (!t_at(x(mdef), y(mdef))) {
 			struct trap *ttmp2 = maketrap(x(mdef), y(mdef), WEB);
 			if (ttmp2) {
 				if (youdef) {
@@ -7632,7 +7653,7 @@ boolean ranged;
 				case 7:		hurts = !Stone_res(mdef); break;
 				case 8:		hurts = !Drain_res(mdef); break;
 				case 9:		hurts = !Sick_res(mdef); break;
-				case 10:	hurts = is_undead_mon(mdef); break;
+				case 10:	hurts = is_undead(pd); break;
 				case 11:	hurts = is_fungus(pd); break;
 				case 12:	hurts = infravision(pd); break;
 				case 13:	hurts = opaque(pd); break;
@@ -7680,7 +7701,7 @@ boolean ranged;
 				);
 		}
 		/* undead are immune to the special effect */
-		if (is_undead_mon(mdef) || (youdef && u.sealsActive&SEAL_OSE)) {
+		if (is_undead(pd) || (youdef && u.sealsActive&SEAL_OSE)) {
 			if (youdef) {
 				pline("Was that the touch of death?");
 			}
@@ -9325,7 +9346,7 @@ int vis;
 				dmg = 0;
 			goto expl_common;
 		case AD_DESC:
-			if (is_anhydrous(pd) || is_undead_mon(mdef))
+			if (is_anhydrous(pd) || is_undead(pd))
 				dmg = 0;
 			goto expl_common;
 expl_common:
@@ -9909,7 +9930,7 @@ int vis;
 			}
 		}
 		else {
-			if (nonliving_mon(mdef) || is_demon(pd)) {
+			if (nonliving(mdef->data) || is_demon(pd)) {
 				if (vis&VIS_MDEF && vis&VIS_MAGR) {
 					pline("%s seems no deader than before.",
 						Monnam(mdef));
@@ -11225,6 +11246,7 @@ int vis;						/* True if action is at all visible to the player */
 
 	boolean destroy_one_magr_weapon = FALSE;	/* destroy one of magr's weapons */
 	boolean destroy_all_magr_weapon = FALSE;	/* destroy all of magr's weapon */
+	boolean destroy_magr_weapon_nofree = FALSE;	/* destroy the FAKE magr's weapon, do not free() it because it wasn't ever allocated */
 
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
@@ -12096,14 +12118,14 @@ int vis;						/* True if action is at all visible to the player */
 
 	/* set zombify resulting from melee mvm combat */
 	if (magr && !youagr && !youdef && melee && !recursed) {
-		if ((has_template(magr, ZOMBIFIED) || (has_template(magr, SKELIFIED) && !rn2(20))) && can_undead_mon(mdef)){
+		if ((has_template(magr, ZOMBIFIED) || (has_template(magr, SKELIFIED) && !rn2(20))) && can_undead(mdef->data)){
 			mdef->zombify = 1;
 		}
 
 		if ((magr->mtyp == PM_UNDEAD_KNIGHT
 			|| magr->mtyp == PM_WARRIOR_OF_SUNLIGHT
 			|| magr->mtyp == PM_DREAD_SERAPH
-			) && can_undead_mon(mdef)){
+			) && can_undead(mdef->data)){
 			mdef->zombify = 1;
 		}
 
@@ -12142,21 +12164,29 @@ int vis;						/* True if action is at all visible to the player */
 				otmp = splitobj(weapon, 1L);
 			else {
 				otmp = weapon;
-				weapon = (struct obj *)0;
-				*weapon_p = NULL;
 			}
 			if (otmp->where != OBJ_FREE) {
-				if (youagr)
+				if (youagr) {
+					if (otmp == uwep) uwepgone();
 					freeinv(otmp);
-				else
+				}
+				else if (magr) {
+					if (otmp == MON_WEP(magr)) MON_WEP(magr) = (struct obj *)0;
 					m_freeinv(otmp);
+				}
+				else {
+					impossible("how to free potion?");
+					obj_extract_self(otmp);
+				}
 			}
 
-			if (!weapon) {
+			if (otmp == weapon) {
 				/* remember stuff about the potion so weapon can be used for xname() and such
 				 * after potionhit() is called */
 				weapon = &tempwep;
 				*weapon = *otmp;
+				/* tell the weapon-destroying-section to remove references but not free -- this isn't a real object */
+				destroy_magr_weapon_nofree = TRUE;
 			}
 
 			/* do the potion effects */
@@ -12418,7 +12448,7 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 
 			case CLOVE_OF_GARLIC:
-				if (!youdef && is_undead_mon(mdef)) {/* no effect against demons */
+				if (!youdef && is_undead(pd)) {/* no effect against demons */
 					monflee(mdef, d(2, 4), FALSE, TRUE);
 				}
 				basedmg = 1;
@@ -12799,6 +12829,8 @@ int vis;						/* True if action is at all visible to the player */
 
 			} else if (trap){
 				/* some traps deal increased damage */
+				if (trap->ttyp == ROLLING_BOULDER_TRAP)
+					bonsdmg += d(2, level_difficulty()/3+1);
 				if (trap->ttyp == ARROW_TRAP)
 					bonsdmg += d(2, level_difficulty()/4+1);
 				if (trap->ttyp == DART_TRAP)
@@ -13830,42 +13862,44 @@ int vis;						/* True if action is at all visible to the player */
 	}
 
 	/* silently handle destroyed weapons */
-	if (destroy_one_magr_weapon || destroy_all_magr_weapon) {
-		boolean deallocweapon = (weapon->quan == 1L || destroy_all_magr_weapon);
+	if (destroy_one_magr_weapon || destroy_all_magr_weapon || destroy_magr_weapon_nofree) {
+		boolean deallocweapon = (weapon->quan == 1L || destroy_all_magr_weapon || destroy_magr_weapon_nofree);
 
-		if (youagr) {
-			if (deallocweapon) {
-				if (weapon == uwep)
-					uwepgone();
-				else if (weapon == uswapwep)
-					uswapwepgone();
-			}
-			if (weapon->where == OBJ_FREE)
-				obfree(weapon, (struct obj *)0);
-			else if (weapon->where == OBJ_INVENT) {
-				if (destroy_all_magr_weapon)
-					useupall(weapon);
-				else
-					useup(weapon);
-			}
-			else
-				impossible("used up weapon is not in player's inventory or free (%d)", weapon->where);
-		}
-		else {
-			if (weapon->where == OBJ_FREE)
-				obfree(weapon, (struct obj *)0);
-			else if (weapon->where == OBJ_MINVENT)
-			{
-				if (destroy_all_magr_weapon)
-				{
-					m_freeinv(weapon);
+		if (!destroy_magr_weapon_nofree) {
+			if (youagr) {
+				if (deallocweapon) {
+					if (weapon == uwep)
+						uwepgone();
+					else if (weapon == uswapwep)
+						uswapwepgone();
+				}
+				if (weapon->where == OBJ_FREE)
 					obfree(weapon, (struct obj *)0);
+				else if (weapon->where == OBJ_INVENT) {
+					if (destroy_all_magr_weapon)
+						useupall(weapon);
+					else
+						useup(weapon);
 				}
 				else
-					m_useup(magr, weapon);
+					impossible("used up weapon is not in player's inventory or free (%d)", weapon->where);
 			}
-			else
-				impossible("used up weapon is not in monster's inventory or free (%d)", weapon->where);
+			else {
+				if (weapon->where == OBJ_FREE)
+					obfree(weapon, (struct obj *)0);
+				else if (weapon->where == OBJ_MINVENT)
+				{
+					if (destroy_all_magr_weapon)
+					{
+						m_freeinv(weapon);
+						obfree(weapon, (struct obj *)0);
+					}
+					else
+						m_useup(magr, weapon);
+				}
+				else
+					impossible("used up weapon is not in monster's inventory or free (%d)", weapon->where);
+			}
 		}
 		if (deallocweapon) {
 			weapon = (struct obj *)0;
@@ -13909,15 +13943,38 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 
-	/* hurtle mdef (player-inflicted only for now, as long as staggering strikes and jousting are) */
-	if (staggering_strike || jousting) {
-		if (youdef) {
-			hurtle(sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1, TRUE, TRUE);
-			if (staggering_strike)
-				make_stunned(HStun + rnd(10), TRUE);
+	/* hurtle mdef */
+	if (staggering_strike || jousting || (fired && weapon && is_boulder(weapon))) {
+		int dx, dy;
+		/* in what direction? */
+		if (magr) {
+			dx = sgn(x(mdef)-x(magr));
+			dy = sgn(y(mdef)-y(magr));
+		}
+		else if (fired && weapon && is_boulder(weapon)) {
+			/* assumes that the boulder's ox/oy are accurate to where it started moving from */
+			dx = sgn(x(mdef)-weapon->ox);
+			dy = sgn(y(mdef)-weapon->oy);
 		}
 		else {
-			mhurtle(mdef, sgn(x(mdef)-x(magr)), sgn(y(mdef)-y(magr)), 1);
+			impossible("hurtle with no direction");
+		}
+
+		/* boulders can knock to the side as well -- 1/3 chance to move out of the way, 2/3 to go straight back */
+		if (fired && weapon && is_boulder(weapon) && !rn2(2)) {
+			int tx = dx, ty = dy;
+			dx = (tx&&!ty) ? tx : (!tx&&ty) ? rn2(3)-1 : tx*(!rn2(3));
+			dy = (ty&&!tx) ? ty : (!ty&&tx) ? rn2(3)-1 : ty*(!rn2(3));
+		}
+
+		if (youdef) {
+			hurtle(dx, dy, 1, FALSE, FALSE);
+			if (staggering_strike)
+				make_stunned(HStun + rnd(10), TRUE);
+			nomul(0, "being knocked back");
+		}
+		else {
+			mhurtle(mdef, dx, dy, 1);
 			if (staggering_strike)
 				mdef->mstun = TRUE;
 			pd = mdef->data; /* in case of a polymorph trap */
@@ -14652,24 +14709,24 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				break;
 
 			case AD_WEBS:
-			{
-				struct trap *ttmp2 = maketrap(x(magr), y(magr), WEB);
-				if (ttmp2) {
-					if (youagr) {
-						pline_The("webbing sticks to you. You're caught!");
-						dotrap(ttmp2, NOWEBMSG);
+				if (!t_at(x(magr), y(magr))) {
+					struct trap *ttmp2 = maketrap(x(magr), y(magr), WEB);
+					if (ttmp2) {
+						if (youagr) {
+							pline_The("webbing sticks to you. You're caught!");
+							dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
-						if (u.usteed && u.utrap) {
-							/* you, not steed, are trapped */
-							dismount_steed(DISMOUNT_FELL);
-						}
+							if (u.usteed && u.utrap) {
+								/* you, not steed, are trapped */
+								dismount_steed(DISMOUNT_FELL);
+							}
 #endif
-					}
-					else {
-						mintrap(magr);
+						}
+						else {
+							mintrap(magr);
+						}
 					}
 				}
-			}
 				break;
 			case AD_HLBD:
 				/* Legion gets many zombies and legionnaires */
@@ -14835,8 +14892,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							mndx = monsndx(mtmp->data);
 							if (mndx <= PM_QUINON && mndx >= PM_MONOTON && mtmp->mpeaceful){
 								pline("%s gets angry...", Amonnam(mtmp));
-								mtmp->mpeaceful = 0;
-								mtmp->mtame = 0;
+								untame(mtmp, 0);
 							}
 						}
 					}

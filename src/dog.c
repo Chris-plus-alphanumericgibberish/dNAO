@@ -157,7 +157,7 @@ boolean quietly;
 				!(is_animal(mtmp->data) || mindless_mon(mtmp)))
 		) {
 
-		mtmp->mtame = 0;	/* not tame after all */
+		untame(mtmp, 1);	/* not tame after all */
 		if (chance == 2) { /* hostile (cursed figurine) */
 		    if (!quietly)
 		       You("get a bad feeling about this.");
@@ -622,9 +622,9 @@ long nmv;		/* number of moves */
 		    wilder *= 150;
 #endif
 	    if (mtmp->mtame > wilder) mtmp->mtame -= wilder;	/* less tame */
-	    else if (mtmp->mtame > rn2(wilder)) mtmp->mtame = 0;  /* untame */
+	    else if (mtmp->mtame > rn2(wilder)) untame(mtmp, 1);  /* untame, peaceful */
 	    else{
-			mtmp->mtame = mtmp->mpeaceful = 0;		/* hostile! */
+			untame(mtmp, 0);		/* hostile! */
 			mtmp->mferal = 1;
 		}
 	}
@@ -672,7 +672,7 @@ long nmv;		/* number of moves */
 			mtmp->mhp = mtmp->mhpmax;
 		else mtmp->mhp += imv;
 	}
-	if(!nonliving_mon(mtmp)){
+	if(!nonliving(mtmp->data)){
 		imv = imv*(mtmp->m_lev + mtmp->mcon)/30;
 		if (mtmp->mhp + imv >= mtmp->mhpmax)
 			mtmp->mhp = mtmp->mhpmax;
@@ -951,7 +951,6 @@ register struct obj *obj;
 {
 	boolean carni = carnivorous(mon->data);
 	boolean herbi = herbivorous(mon->data);
-	struct permonst *fptr = &mons[obj->corpsenm];
 	boolean starving;
 
 	if (is_quest_artifact(obj) || obj_resists(obj, 0, 95))
@@ -961,7 +960,7 @@ register struct obj *obj;
 	case FOOD_CLASS:
 	    if (obj->otyp == CORPSE &&
 		((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
-		 || is_rider(fptr)))
+		 || is_rider(&mons[obj->corpsenm])))
 		    return TABU;
 
 	    /* Ghouls only eat old corpses... yum! */
@@ -1019,11 +1018,11 @@ rock:
 			 (touch_petrifies(&mons[obj->corpsenm]) &&
 			  !resists_ston(mon)))
 			return POISON;
-		    else if (vegan(fptr))
+		    else if (vegan(&mons[obj->corpsenm]))
 			return (herbi ? CADAVER : MANFOOD);
 		    else return (carni ? CADAVER : MANFOOD);
 		case CLOVE_OF_GARLIC:
-		    return (is_undead_mon(mon) ? TABU :
+		    return (is_undead(mon->data) ? TABU :
 			    ((herbi || starving) ? ACCFOOD : MANFOOD));
 		case TIN:
 		    return (metallivorous(mon->data) ? ACCFOOD : MANFOOD);
@@ -1340,6 +1339,21 @@ int enhanced;
 	return(mtmp);
 }
 
+/* untames mtmp, if it was tame. Sets mtmp->mpeaceful whether or not mtmp was tame */
+void
+untame(mtmp, be_peaceful)
+struct monst * mtmp;
+boolean be_peaceful;
+{
+	if (mtmp->mtame) {
+		rem_mx(mtmp, MX_EDOG);
+		mtmp->mtame = 0;
+	}
+	mtmp->mpeaceful = be_peaceful;
+	newsym(mtmp->mx, mtmp->my);
+	return;
+}
+
 struct monst *
 make_pet_minion(mtyp,alignment)
 int mtyp;
@@ -1390,7 +1404,7 @@ boolean was_dead;
     }
 
     if (edog && (edog->killed_by_u == 1 || edog->abuse > 2)) {
-	mtmp->mpeaceful = mtmp->mtame = 0;
+	untame(mtmp, 0);
 	if (edog->abuse >= 0 && edog->abuse < 10)
 	    if (!rn2(edog->abuse + 1)) mtmp->mpeaceful = 1;
 	if(!quietly && cansee(mtmp->mx, mtmp->my)) {
@@ -1409,7 +1423,7 @@ boolean was_dead;
     } else {
 	/* chance it goes wild anyway - Pet Semetary */
 	if (!(edog && edog->loyal) && !rn2(mtmp->mtame)) {
-	    mtmp->mpeaceful = mtmp->mtame = 0;
+	    untame(mtmp, 0);
 	}
     }
     if (!mtmp->mtame) {

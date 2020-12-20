@@ -2233,21 +2233,19 @@ museamnesia:
 		if(!otmp->cursed){
 			if (vismon) pline("%s looks more tranquil.", Monnam(mtmp));
 			if(!otmp->blessed){
-				mtmp->mtame = 0;
+				untame(mtmp, 1);
 				mtmp->mferal = 0;
-				mtmp->mpeaceful = 1;
 			}
 			mtmp->mcrazed = 0;
 			mtmp->mberserk = 0;
 			mtmp->mdisrobe = 0;
 		} else {
 			if (vismon) pline("%s looks angry and confused!", Monnam(mtmp));
+			untame(mtmp, 0);
 			mtmp->mcrazed = 1;
 			mtmp->mberserk = 1;
 			mtmp->mconf = 1;
-			mtmp->mtame = 0;
 			mtmp->mferal = 0;
-			mtmp->mpeaceful = 0;
 		}
 		if (!otmp->oartifact)
 			m_useup(mtmp, otmp);
@@ -2479,7 +2477,7 @@ struct monst *mtmp;
 	if (difficulty < 6 && !rn2(30))
 	    return rn2(6) ? POT_POLYMORPH : WAN_POLYMORPH;
 	
-	if (!rn2(40) && !nonliving_mon(mtmp)) return AMULET_OF_LIFE_SAVING;
+	if (!rn2(40) && !nonliving(mtmp->data)) return AMULET_OF_LIFE_SAVING;
 
 	if(difficulty > 6 && rn2(50) < difficulty) return rnd_utility_potion(mtmp);
 
@@ -2557,7 +2555,7 @@ struct obj *obj;
 	    break;
 	case AMULET_CLASS:
 	    if (typ == AMULET_OF_LIFE_SAVING)
-		return (boolean)(!nonliving_mon(mon));
+		return (boolean)(!nonliving(mon->data));
 	    if (typ == AMULET_OF_REFLECTION)
 		return TRUE;
 	    break;

@@ -157,12 +157,6 @@ STATIC_DCL void FDECL(skill_advance, (int));
 
 #endif	/* OVL1 */
 
-#define P_NAME(type) ((skill_names_indices[type] > 0) ? \
-		      OBJ_NAME(objects[skill_names_indices[type]]) : \
-		      (type == P_BARE_HANDED_COMBAT) ? \
-			barehands_or_martial[martial_bonus()] : \
-			odd_skill_names[-skill_names_indices[type]])
-
 #ifdef OVLB
 static NEARDATA const char kebabable[] = {
 	S_XORN, S_DRAGON, S_JABBERWOCK, S_NAGA, S_GIANT, '\0'
@@ -1352,7 +1346,8 @@ register struct monst *mtmp;
 	propellor = &zeroobj;
 	Oselect(EGG, W_QUIVER); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
-	    oselectBoulder(mtmp);
+	if(otmp = oselectBoulder(mtmp))
+		return otmp;
 
 	/* Select polearms first; they do more damage and aren't expendable */
 	/* The limit of 13 here is based on the monster polearm range limit
@@ -2168,7 +2163,7 @@ long slot;
 		if (canseemon(mon))
 			pline("%s %s%s in %s %s!",
 			Tobjnam(obj, (obj->blessed ? "shine" : "glow")),
-			(obj->blessed ? " very" : ""),
+			(obj->blessed ? "very" : ""),
 			(obj->cursed ? "" : " brilliantly"),
 			s_suffix(mon_nam(mon)), mbodypart(mon, HAND));
 	}
@@ -3640,6 +3635,17 @@ const struct def_skill *class_skill;
 		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
 	    }
 	}
+}
+
+const char *
+P_NAME(type)
+int type;
+{
+	return ((skill_names_indices[type] > 0) ? \
+		      OBJ_NAME(objects[skill_names_indices[type]]) : \
+		      (type == P_BARE_HANDED_COMBAT) ? \
+			barehands_or_martial[martial_bonus()] : \
+			odd_skill_names[-skill_names_indices[type]]);
 }
 
 int

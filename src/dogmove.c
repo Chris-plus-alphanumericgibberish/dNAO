@@ -858,7 +858,7 @@ boolean ranged;
 		  || (Role_if(PM_NOBLEMAN) && (mtmp->mtyp == PM_KNIGHT || mtmp->mtyp == PM_MAID || mtmp->mtyp == PM_PEASANT) && mtmp->mpeaceful)
 		  || (Race_if(PM_DROW) && is_drow(mtmp->data) && mtmp->mpeaceful)
 		  || (Role_if(PM_KNIGHT) && (mtmp->mtyp == PM_KNIGHT) && mtmp->mpeaceful)
-		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead_mon(mtmp)) && mtmp->mpeaceful)
+		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead(mtmp->data)) && mtmp->mpeaceful)
 		  || always_peaceful(mtmp2->data)) &&
 		 mtmp2->mpeaceful && !(Conflict || mtmp->mberserk)) ||
 	   (!ranged && touch_petrifies(mtmp2->data) &&
@@ -884,8 +884,7 @@ register struct monst *mtmp;
 	    pline("%s turns on you!", Monnam(mtmp));
 	else
 	    pline("You feel uneasy about %s.", y_monnam(mtmp));
-	mtmp->mpeaceful = 0;
-	mtmp->mtame = 0;
+	untame(mtmp, 0);
 	mtmp->mtraitor = TRUE;
 
 	/* Do we need to call newsym() here? */

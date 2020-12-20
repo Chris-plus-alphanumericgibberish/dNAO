@@ -1105,7 +1105,7 @@ boolean ghostly;
 	if (ghostly && get_ox(otmp, OX_EMON)) {
 	    struct monst *mtmp = EMON(otmp);
 	    mtmp->m_id = 0;
-	    mtmp->mpeaceful = mtmp->mtame = 0;	/* pet's owner died! */
+		untame(mtmp, 0);/* pet's owner died! */
 	}
 	if (ghostly && get_ox(otmp, OX_EMID)) {
 		oldid = otmp->oextra_p->emid_p[0];

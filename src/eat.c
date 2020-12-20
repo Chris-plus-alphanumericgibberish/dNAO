@@ -2771,7 +2771,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    You_cant("eat %s you're wearing.", something);
 	    return 0;
 	}
-	if((otmp->otyp == CORPSE || (otmp->otyp == TIN && otmp->spe != 1)) && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
+	if((otmp->otyp == CORPSE || (otmp->otyp == TIN && otmp->spe != 1 && otmp->corpsenm > NON_PM)) && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
 		&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
 	){
 		char buf[BUFSZ];

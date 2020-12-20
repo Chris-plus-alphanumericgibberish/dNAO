@@ -1963,15 +1963,17 @@ int mat;
 	int oldmat = obj->obj_material;
 
 	if(mat == obj->obj_material) return; //Already done!
-	
-	if(obj->where == OBJ_INVENT || obj->where == OBJ_MINVENT){
-		owner = obj->ocarry;
-		mask = obj->owornmask;
+
+
+	if (obj->where == OBJ_INVENT) {
+		owner = &youmonst;
+		if (mask = obj->owornmask)
+			setnotworn(obj);
 	}
-	if(owner == &youmonst && mask){
-		setnotworn(obj);
-	} else if(owner && mask){
-		update_mon_intrinsics(owner, obj, FALSE, TRUE);
+	if (obj->where == OBJ_MINVENT) {
+		owner = obj->ocarry;
+		if (mask = obj->owornmask)
+			update_mon_intrinsics(owner, obj, FALSE, TRUE);
 	}
 	/* change otyp to be appropriate
 	 * does not set material
@@ -2194,12 +2196,15 @@ int mat;
 	}
 	//Silver bell should resist
 	
-	if(owner == &youmonst){
-		setworn(obj, W_ARM);
-	} else if(owner && mask){
-		owner->misc_worn_check |= mask;
-		obj->owornmask |= mask;
-		update_mon_intrinsics(owner, obj, TRUE, TRUE);
+	/* re-equip */
+	if (mask && owner) {
+		if(owner == &youmonst){
+			setworn(obj, mask);
+		} else {
+			owner->misc_worn_check |= mask;
+			obj->owornmask |= mask;
+			update_mon_intrinsics(owner, obj, TRUE, TRUE);
+		}
 	}
 }
 

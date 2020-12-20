@@ -2543,6 +2543,38 @@ winid *datawin;
 		else {
 			Sprintf(buf, "Thrown %smissile.", buf2);
 		}
+		/* special cases */
+		if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovar1 & SEAL_EVE))
+			Strcpy(eos(buf)-1, ", and launcher.");
+		if (oartifact == ART_LIECLEAVER || oartifact == ART_ROGUE_GEAR_SPIRITS)
+			Sprintf(eos(buf)-1, ", and %smelee weapon.", buf2);
+		OBJPUTSTR(buf);
+
+		/* what skill does it use? */
+		if (obj) {
+			Sprintf(buf, "Uses your %s skill", P_NAME(abs(weapon_type(obj))));
+			/* special cases */
+			switch (oartifact) {
+				case ART_LIECLEAVER:
+					Strcpy(buf2, " at range, and your scimitar skill in melee.");
+					break;
+				case ART_ROGUE_GEAR_SPIRITS:
+					Strcpy(buf2, " at range, and your pickaxe skill in melee.");
+					break;
+				case ART_PEN_OF_THE_VOID:
+					if(obj->ovar1 & SEAL_EVE) {
+						Strcpy(buf2, " in melee, and your ammo's skill at range.");
+					}
+					else
+						Strcpy(buf2, ".");
+					break;
+				default:
+					Strcpy(buf2, ".");
+			}
+			Strcat(buf, buf2);
+		} else {
+			Sprintf(buf, "Uses the %s skill.", P_NAME(oc.oc_skill));
+		}
 		OBJPUTSTR(buf);
 
 		/* weapon dice! */

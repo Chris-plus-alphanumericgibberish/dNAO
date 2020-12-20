@@ -790,7 +790,11 @@ Armor_off()
 	boolean checkweight = FALSE;
     takeoff_mask &= ~W_ARM;
 	if(arti_lighten(uarmu, FALSE)) checkweight = TRUE;
-	if((uarm->otyp == NOBLE_S_DRESS || uarm->otyp == BLACK_DRESS) && !cancelled_don) {
+
+	if(!uarm) {
+		impossible("Armor_off called with no uarm");
+	}
+	else if((uarm->otyp == NOBLE_S_DRESS || uarm->otyp == BLACK_DRESS) && !cancelled_don) {
 		ABON(A_CHA) -= (1 + uarm->spe);
 		flags.botl = 1;
 	}

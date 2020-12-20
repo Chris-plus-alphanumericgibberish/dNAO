@@ -300,6 +300,11 @@ E char FDECL(yn_function, (const char *, const char *, CHAR_P));
 E int NDECL(dotravel);
 E void NDECL(udr_enlightenment);
 
+/* ### crown.c ### */
+
+E const char * NDECL(crowning_title);
+E int NDECL(gcrownu);
+
 /* ### dbridge.c ### */
 
 E boolean FDECL(is_pool, (int,int, BOOLEAN_P));
@@ -588,6 +593,7 @@ E void FDECL(migrate_to_level, (struct monst *,int,XCHAR_P,coord *));
 E int FDECL(dogfood, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog_core, (struct monst *,struct obj *, int));
+E void FDECL(untame, (struct monst *, boolean));
 E struct monst *FDECL(make_pet_minion, (int,aligntyp));
 E void FDECL(abuse_dog, (struct monst *));
 E void FDECL(wary_dog, (struct monst *, BOOLEAN_P));
@@ -1570,6 +1576,7 @@ E void FDECL(give_mintrinsic, (struct monst *, long));
 E void FDECL(remove_mintrinsic, (struct monst *, long));
 E void FDECL(set_faction, (struct monst *, int));
 E void FDECL(set_template, (struct monst *, int));
+E boolean FDECL(mtemplate_accepts_mtyp, (int, int));
 E struct attack *FDECL(attacktype_fordmg, (struct permonst *,int,int));
 E boolean FDECL(attacktype, (struct permonst *,int));
 E boolean FDECL(noattacks, (struct permonst *));
@@ -2140,12 +2147,13 @@ E const char * NDECL(getAnachrononautLgodEnd);
 #ifdef USE_TRAMPOLI
 E int NDECL(prayer_done);
 #endif
+E void FDECL(godvoice,(int,const char*));
 E void FDECL(gods_angry,(int));
 E void FDECL(gods_upset,(int));
 E void FDECL(angrygods,(int));
 E boolean NDECL(maybe_god_gives_gift);
 E int NDECL(dosacrifice);
-E int NDECL(gcrownu);
+E void FDECL(at_your_feet, (const char *));
 E int NDECL(pray_goat);
 E boolean FDECL(can_pray, (BOOLEAN_P));
 E int NDECL(dopray);
@@ -2996,6 +3004,7 @@ E int FDECL(weapon_hit_bonus, (struct obj *, int));
 E int FDECL(weapon_dam_bonus, (struct obj *, int));
 E void FDECL(skill_init, (const struct def_skill *));
 E void FDECL(skill_add, (const struct def_skill *));
+E const char * FDECL(P_NAME, (int));
 E int NDECL(aeshbon);
 
 /* ### were.c ### */
