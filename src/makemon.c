@@ -8476,13 +8476,13 @@ register int	mmflags;
 			undeadtemplate = FRACTURED;
 			unsethouse = TRUE;
 		}
-	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && check_insight()){
+	} else if(randmonst && !undeadtemplate && can_undead(mtmp->data) && check_insight()){
 		undeadtemplate = PSEUDONATURAL;
 		unsethouse = TRUE;
 	} else if(randmonst && !undeadtemplate && is_rat(mtmp->data) && check_insight()){
 		undeadtemplate = CRANIUM_RAT;
 		unsethouse = TRUE;
-	} else if(randmonst && !undeadtemplate && can_undead_mon(mtmp) && !Is_rogue_level(&u.uz)){
+	} else if(randmonst && !undeadtemplate && can_undead(mtmp->data) && !Is_rogue_level(&u.uz)){
 		if(In_mines(&u.uz)){
 			if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(10) <= 5){
 				undeadtemplate = ZOMBIFIED;
@@ -10303,7 +10303,7 @@ struct monst *mtmp, *victim;
 		if (sensemon(mtmp))
 		    pline("As %s grows up into %s, %s %s!", mon_nam(mtmp),
 			an(ptr->mname), mhe(mtmp),
-			nonliving_mon(mtmp) ? "expires" : "dies");
+			nonliving(ptr) ? "expires" : "dies");
 		set_mon_data(mtmp, newtype);	/* keep mvitals[] accurate */
 		mondied(mtmp);
 		return (struct permonst *)0;

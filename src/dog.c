@@ -672,7 +672,7 @@ long nmv;		/* number of moves */
 			mtmp->mhp = mtmp->mhpmax;
 		else mtmp->mhp += imv;
 	}
-	if(!nonliving_mon(mtmp)){
+	if(!nonliving(mtmp->data)){
 		imv = imv*(mtmp->m_lev + mtmp->mcon)/30;
 		if (mtmp->mhp + imv >= mtmp->mhpmax)
 			mtmp->mhp = mtmp->mhpmax;
@@ -1023,7 +1023,7 @@ rock:
 			return (herbi ? CADAVER : MANFOOD);
 		    else return (carni ? CADAVER : MANFOOD);
 		case CLOVE_OF_GARLIC:
-		    return (is_undead_mon(mon) ? TABU :
+		    return (is_undead(mon->data) ? TABU :
 			    ((herbi || starving) ? ACCFOOD : MANFOOD));
 		case TIN:
 		    return (metallivorous(mon->data) ? ACCFOOD : MANFOOD);

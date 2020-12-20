@@ -1629,7 +1629,7 @@ struct obj * weapon;
 			))
 			return 1;
 
-		if (is_undead_mon(mdef) && (
+		if (is_undead(pd) && (
 			(weapon->otyp == CLOVE_OF_GARLIC)	/* causes shades to flee */
 			))
 			return 1;

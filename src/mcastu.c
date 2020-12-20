@@ -2758,7 +2758,7 @@ int tary;
 				pline("%s's using the touch of death!", upstart(heshe));
 
 			/* check resistance cases and do effects */
-			if (nonliving_mon(mdef) || is_demon(mdef->data)) {
+			if (nonliving(mdef->data) || is_demon(mdef->data)) {
 				if (youdef || canseemon(mdef)) {
 					pline("%s seem%s no deader than before.",
 						youdef ? "You" : Monnam(mdef),

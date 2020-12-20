@@ -2479,7 +2479,7 @@ struct monst *mtmp;
 	if (difficulty < 6 && !rn2(30))
 	    return rn2(6) ? POT_POLYMORPH : WAN_POLYMORPH;
 	
-	if (!rn2(40) && !nonliving_mon(mtmp)) return AMULET_OF_LIFE_SAVING;
+	if (!rn2(40) && !nonliving(mtmp->data)) return AMULET_OF_LIFE_SAVING;
 
 	if(difficulty > 6 && rn2(50) < difficulty) return rnd_utility_potion(mtmp);
 
@@ -2557,7 +2557,7 @@ struct obj *obj;
 	    break;
 	case AMULET_CLASS:
 	    if (typ == AMULET_OF_LIFE_SAVING)
-		return (boolean)(!nonliving_mon(mon));
+		return (boolean)(!nonliving(mon->data));
 	    if (typ == AMULET_OF_REFLECTION)
 		return TRUE;
 	    break;
