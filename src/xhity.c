@@ -12157,9 +12157,13 @@ int vis;						/* True if action is at all visible to the player */
 					if (otmp == uwep) uwepgone();
 					freeinv(otmp);
 				}
-				else {
+				else if (magr) {
 					if (otmp == MON_WEP(magr)) MON_WEP(magr) = (struct obj *)0;
 					m_freeinv(otmp);
+				}
+				else {
+					impossible("how to free potion?");
+					obj_extract_self(otmp);
 				}
 			}
 
