@@ -12153,10 +12153,14 @@ int vis;						/* True if action is at all visible to the player */
 				*weapon_p = NULL;
 			}
 			if (otmp->where != OBJ_FREE) {
-				if (youagr)
+				if (youagr) {
+					if (otmp == uwep) uwepgone();
 					freeinv(otmp);
-				else
+				}
+				else {
+					if (otmp == MON_WEP(magr)) MON_WEP(magr) = (struct obj *)0;
 					m_freeinv(otmp);
+				}
 			}
 
 			if (!weapon) {
