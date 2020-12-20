@@ -2779,6 +2779,17 @@ A("Wrathful Wind",					CLUB,				(const char *)0,
 	),
 
 /*Needs encyc entry */
+A("Thorns",	BULLWHIP,				"thorned whip",
+	6660L, VEGGY, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
+	NO_MONS(),
+	ATTK(AD_ELEC, 1, 10), (ARTA_POIS),
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+/*Needs encyc entry */
 A("The Sting of the Poison Queen",	FLAIL,				(const char *)0,
 	6660L, MT_DEFAULT, MZ_LARGE, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),

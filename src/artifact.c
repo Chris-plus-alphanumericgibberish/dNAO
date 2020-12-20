@@ -4544,7 +4544,10 @@ boolean * messaged;
 	}
 
 	/* flaying weapons */
-	if (check_oprop(otmp, OPROP_FLAYW) || check_oprop(otmp, OPROP_LESSER_FLAYW)) {
+	if (check_oprop(otmp, OPROP_FLAYW)
+		|| check_oprop(otmp, OPROP_LESSER_FLAYW)
+		|| otmp->oartifact == ART_THORNS //Note: Thorns's damage is not reduced to 0 like flaying weapons.
+	) {
 		struct obj *obj = some_armor(mdef);
 		int i;
 		if (obj){
@@ -4554,6 +4557,7 @@ boolean * messaged;
 				);
 			i = 1;
 			if (check_oprop(otmp, OPROP_FLAYW)) i += rnd(4);
+			else if (otmp->oartifact == ART_THORNS) i += rnd(6);
 			for (; i>0; i--){
 				if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
 					damage_item(obj);

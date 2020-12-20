@@ -7217,11 +7217,11 @@ register struct	monst	*mtmp;
 			break;
 			case PM_MALCANTHET:
 				otmp = mksobj(BULLWHIP, FALSE, FALSE);
-				set_material_gm(otmp, IRON);
-				otmp->cursed = TRUE;
+				otmp = oname(otmp, artiname(ART_THORNS));
+				otmp->obj_color = CLR_RED;
 				otmp->spe = 8;
-				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				otmp->cursed = TRUE;
+				(void) mpickobj(mtmp,otmp);
 				(void) mongets(mtmp, AMULET_OF_DRAIN_RESISTANCE);
 				(void) mongets(mtmp, LEATHER_ARMOR);
 				(void) mongets(mtmp, STILETTOS);
