@@ -1352,7 +1352,8 @@ register struct monst *mtmp;
 	propellor = &zeroobj;
 	Oselect(EGG, W_QUIVER); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
-	    oselectBoulder(mtmp);
+	if(otmp = oselectBoulder(mtmp))
+		return otmp;
 
 	/* Select polearms first; they do more damage and aren't expendable */
 	/* The limit of 13 here is based on the monster polearm range limit
