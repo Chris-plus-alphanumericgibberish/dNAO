@@ -133,7 +133,6 @@ A("Vorpal Blade",		LONG_SWORD,						(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
-/*Needs encyc entry*/
 A("The Marauder's Map",	SCR_MAGIC_MAPPING,				"parchment scroll",
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_PIRATE, NON_PM, TIER_B, (ARTG_INHER),
@@ -905,7 +904,6 @@ A("Sky Render",			KATANA,							(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
-/*Needs encyc entry*/
 /* Crystal sword whose use comes with a price of your sanity */
 A("Callandor",			CRYSTAL_SWORD,					(const char *)0,
 	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT, // there's an opportunity for a sick name here too
@@ -940,7 +938,6 @@ A("Plague",				BOW,							(const char *)0,
 	FILTH_ARROWS, NOFLAG
 	),
 
-/*Needs encyc entry*/
 /* all arrows fired from it return to your inventory 5 turns later */
 A("Epoch's Curve",			BOW,							"white ash longbow",
 	4000L, WOOD, MZ_DEFAULT, WT_DEFAULT,
@@ -1181,7 +1178,6 @@ A("Godhands",					GAUNTLETS_OF_POWER,				(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
-/*Needs encyc entry*/
 /* permanently polymorphs you into a death knight when you die -- does not work for monsters */
 A("The Helm of Undeath",			WAR_HAT,				(const char *)0,
 	2500L, BONE, MZ_DEFAULT, WT_DEFAULT,
@@ -1193,7 +1189,6 @@ A("The Helm of Undeath",			WAR_HAT,				(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
-/*Needs encyc entry*/
 /* lets the wearer cast Lightning Storm */
 A("Stormhelm",						HELM_OF_BRILLIANCE,				(const char *)0,
 	3000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
