@@ -3045,9 +3045,8 @@ struct obj *hypo;
 					if (canseemon(mtarg))
 						pline("%s looks more tranquil.", Monnam(mtarg));
 					if(!amp->blessed){
-						mtarg->mtame = 0;
+						untame(mtarg, 1);
 						mtarg->mferal = 0;
-						mtarg->mpeaceful = 1;
 					}
 					mtarg->mcrazed = 0;
 					mtarg->mdisrobe = 0;
@@ -3055,12 +3054,11 @@ struct obj *hypo;
 				} else {
 					if (canseemon(mtarg))
 						pline("%s looks angry and confused!", Monnam(mtarg));
+					untame(mtarg, 0);
 					mtarg->mcrazed = 1;
 					mtarg->mberserk = 1;
 					mtarg->mconf = 1;
-					mtarg->mtame = 0;
 					mtarg->mferal = 0;
-					mtarg->mpeaceful = 0;
 				}
 			break;
 		}

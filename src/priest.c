@@ -828,7 +828,7 @@ register struct monst *roamer;
 	        return;
 
 	if(EPRI(roamer)->shralign != u.ualign.type) {
-	    roamer->mpeaceful = roamer->mtame = 0;
+		untame(roamer, 0);
 	    set_malign(roamer);
 	}
 	newsym(roamer->mx, roamer->my);

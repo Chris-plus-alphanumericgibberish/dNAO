@@ -567,7 +567,8 @@ nasty(mcast)
 							bypos.x, bypos.y, NO_MM_FLAGS);
 				if(!mtmp) /* makemon still failed, abort */
 					return count;
-				mtmp->msleeping = mtmp->mpeaceful = mtmp->mtame = 0;
+				mtmp->msleeping = 0;
+				untame(mtmp, 0);
 				set_malign(mtmp);
 				count++;
 				break;

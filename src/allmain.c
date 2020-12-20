@@ -1216,7 +1216,7 @@ moveloop()
 							if(blade == nxtmon) nxtmon = nxtmon->nmon;
 							tamedog(blade, (struct obj *) 0);
 						} else if(!mtmp->mtame && blade->mtame){
-							blade->mtame = 0;
+							untame(blade, mtmp->mpeaceful);
 						}
 						if(mtmp->mpeaceful != blade->mpeaceful){
 							mtmp->mpeaceful = blade->mpeaceful;

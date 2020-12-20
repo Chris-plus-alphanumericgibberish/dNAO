@@ -1040,7 +1040,7 @@ asGuardian:
 				mtmp->mnotlaugh = 1; mtmp->mlaughing = 0;
 				mtmp->msleeping = 0;
 				mtmp->mstun = 0; mtmp->mconf = 0;
-				mtmp->mpeaceful = 0; mtmp->mtame = 0;
+				untame(mtmp, 0);
 				
 				u.ustdy = mtmp->m_lev;
 				pline_msg = "ends its prayer.";
@@ -1690,7 +1690,7 @@ asGuardian:
 				if(tmpm->mtame > 10){
 					tmpm->mtame -= 10;
 					tmpm->mflee = 1;
-				} else tmpm->mtame = 0;
+				} else untame(mtmp, 1);
 			}
 		}
 	break;

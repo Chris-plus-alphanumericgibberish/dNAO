@@ -8861,8 +8861,7 @@ read_necro(VOID_ARGS)
 							initedog(mtmp);
 							mtmp->m_lev += d(1,15) - 5;
 							if(u.ulevel < mtmp->m_lev && !rn2(10)){
-								mtmp->mtame = 0;
-								mtmp->mpeaceful = 0;
+								untame(mtmp, 0);
 								mtmp->mtraitor = 1;
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
@@ -8904,8 +8903,7 @@ read_necro(VOID_ARGS)
 							mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 							mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
 							if(u.ulevel < mtmp->m_lev && !rn2(10)){
-								mtmp->mtame = 0;
-								mtmp->mpeaceful = 0;
+								untame(mtmp, 0);
 								mtmp->mtraitor = 1;
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
@@ -8924,8 +8922,7 @@ read_necro(VOID_ARGS)
 						if(!rn2(9)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
 						if(u.ulevel < mtmp->m_lev && !rn2(20)){
-							mtmp->mtame = 0;
-							mtmp->mpeaceful = 0;
+							untame(mtmp, 0);
 							mtmp->mtraitor = 1;
 						}
 					}
@@ -8940,8 +8937,7 @@ read_necro(VOID_ARGS)
 						if(!rn2(6)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
 						if((u.ulevel < mtmp->m_lev || rn2(2)) && !rn2(10)){
-							mtmp->mtame = 0;
-							mtmp->mpeaceful = 0;
+							untame(mtmp, 0);
 							mtmp->mtraitor = 1;
 						}
 					}

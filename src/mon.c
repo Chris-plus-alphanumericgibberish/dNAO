@@ -1849,7 +1849,7 @@ mcalcdistress()
 					pline("%s turns to glass!", Monnam(tmpm));
 				tmpm->mpeaceful = mtmp->mpeaceful;
 				if(tmpm->mtame && tmpm->mtame != mtmp->mtame)
-					tmpm->mtame = 0;
+					untame(tmpm, mtmp->mpeaceful);
 				set_template(tmpm, CRYSTALFIED);
 				newsym(tmpm->mx, tmpm->my);
 				mtmp->mhp += tmpm->mhp;
@@ -2239,8 +2239,7 @@ movemon()
 			struct monst *baby;
 			int tnum = d(1,6);
 			int i;
-			mtmp->mtame = 0;
-			mtmp->mpeaceful = 1;
+			untame(mtmp, 1);
 			for(i = 0; i < 6; i++){
 				baby = makemon(&mons[PM_METROID], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 				if(tnum-- > 0) tamedog(baby,(struct obj *) 0);
@@ -2277,8 +2276,7 @@ movemon()
 		mtmp->mpeaceful
 	){
 		if(canseemon(mtmp)) pline("%s gets angry...", mon_nam(mtmp));
-		mtmp->mpeaceful = 0;
-		mtmp->mtame = 0;
+		untame(mtmp, 0);
 	}
 	if(mtmp->mtyp == PM_UVUUDAUM){
 		if(u.uevent.invoked 
@@ -4048,8 +4046,7 @@ struct monst *mtmp;
 					You_hear("something crack%s!", !is_silent(mtmp->data) ? " with an unearthly scream" : "");
 			}
 			/* make hostile */
-			mtmp->mtame = 0;
-			mtmp->mpeaceful = 0;
+			untame(mtmp, 0);
 			/* boost level */
 			mtmp->m_lev += 4;
 			mtmp->mhpmax += d(4, 8);
@@ -4121,8 +4118,7 @@ struct monst *mtmp;
 			}
 			set_template(mtmp, FRACTURED);
 			/* make hostile */
-			mtmp->mtame = 0;
-			mtmp->mpeaceful = 0;
+			untame(mtmp, 0);
 			/* boost level */
 			mtmp->m_lev += 4;
 			mtmp->mhpmax += d(4, 8);

@@ -4663,8 +4663,7 @@ int type;
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
 	set_template(mon, DELOUSED);
-	mon->mtame = 0;
-	mon->mpeaceful = 1;
+	untame(mtmp, 1);
 	mon->mcanmove = 1;
 	return mon;
 }
