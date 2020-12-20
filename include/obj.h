@@ -858,7 +858,7 @@ struct obj {
 				|| otmp->otyp == LANCE\
 				|| (OBJ_DESCR(objects[otmp->otyp]) != (char *)0 && !strncmp(OBJ_DESCR(objects[otmp->otyp]), "riding ", 7))\
 				)
-#define is_chupodible(otmp) (your_race(&mons[otmp->corpsenm]))
+#define is_chupodible(otmp) ((otmp)->otyp == CORPSE && your_race(&mons[(otmp)->corpsenm]))
 
 #define is_unholy(otmp)		((otmp)->oartifact == ART_STORMBRINGER || (otmp)->cursed)
 
