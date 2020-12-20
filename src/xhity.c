@@ -11245,6 +11245,7 @@ int vis;						/* True if action is at all visible to the player */
 
 	boolean destroy_one_magr_weapon = FALSE;	/* destroy one of magr's weapons */
 	boolean destroy_all_magr_weapon = FALSE;	/* destroy all of magr's weapon */
+	boolean destroy_magr_weapon_nofree = FALSE;	/* destroy the FAKE magr's weapon, do not free() it because it wasn't ever allocated */
 
 	boolean hittxt = FALSE;
 	boolean lethaldamage = FALSE;
@@ -12160,8 +12161,6 @@ int vis;						/* True if action is at all visible to the player */
 				otmp = splitobj(weapon, 1L);
 			else {
 				otmp = weapon;
-				weapon = (struct obj *)0;
-				*weapon_p = NULL;
 			}
 			if (otmp->where != OBJ_FREE) {
 				if (youagr)
@@ -12170,11 +12169,13 @@ int vis;						/* True if action is at all visible to the player */
 					m_freeinv(otmp);
 			}
 
-			if (!weapon) {
+			if (otmp == weapon) {
 				/* remember stuff about the potion so weapon can be used for xname() and such
 				 * after potionhit() is called */
 				weapon = &tempwep;
 				*weapon = *otmp;
+				/* tell the weapon-destroying-section to remove references but not free -- this isn't a real object */
+				destroy_magr_weapon_nofree = TRUE;
 			}
 
 			/* do the potion effects */
@@ -13850,42 +13851,44 @@ int vis;						/* True if action is at all visible to the player */
 	}
 
 	/* silently handle destroyed weapons */
-	if (destroy_one_magr_weapon || destroy_all_magr_weapon) {
-		boolean deallocweapon = (weapon->quan == 1L || destroy_all_magr_weapon);
+	if (destroy_one_magr_weapon || destroy_all_magr_weapon || destroy_magr_weapon_nofree) {
+		boolean deallocweapon = (weapon->quan == 1L || destroy_all_magr_weapon || destroy_magr_weapon_nofree);
 
-		if (youagr) {
-			if (deallocweapon) {
-				if (weapon == uwep)
-					uwepgone();
-				else if (weapon == uswapwep)
-					uswapwepgone();
-			}
-			if (weapon->where == OBJ_FREE)
-				obfree(weapon, (struct obj *)0);
-			else if (weapon->where == OBJ_INVENT) {
-				if (destroy_all_magr_weapon)
-					useupall(weapon);
-				else
-					useup(weapon);
-			}
-			else
-				impossible("used up weapon is not in player's inventory or free (%d)", weapon->where);
-		}
-		else {
-			if (weapon->where == OBJ_FREE)
-				obfree(weapon, (struct obj *)0);
-			else if (weapon->where == OBJ_MINVENT)
-			{
-				if (destroy_all_magr_weapon)
-				{
-					m_freeinv(weapon);
+		if (!destroy_magr_weapon_nofree) {
+			if (youagr) {
+				if (deallocweapon) {
+					if (weapon == uwep)
+						uwepgone();
+					else if (weapon == uswapwep)
+						uswapwepgone();
+				}
+				if (weapon->where == OBJ_FREE)
 					obfree(weapon, (struct obj *)0);
+				else if (weapon->where == OBJ_INVENT) {
+					if (destroy_all_magr_weapon)
+						useupall(weapon);
+					else
+						useup(weapon);
 				}
 				else
-					m_useup(magr, weapon);
+					impossible("used up weapon is not in player's inventory or free (%d)", weapon->where);
 			}
-			else
-				impossible("used up weapon is not in monster's inventory or free (%d)", weapon->where);
+			else {
+				if (weapon->where == OBJ_FREE)
+					obfree(weapon, (struct obj *)0);
+				else if (weapon->where == OBJ_MINVENT)
+				{
+					if (destroy_all_magr_weapon)
+					{
+						m_freeinv(weapon);
+						obfree(weapon, (struct obj *)0);
+					}
+					else
+						m_useup(magr, weapon);
+				}
+				else
+					impossible("used up weapon is not in monster's inventory or free (%d)", weapon->where);
+			}
 		}
 		if (deallocweapon) {
 			weapon = (struct obj *)0;
