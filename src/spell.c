@@ -4637,7 +4637,7 @@ dothrowspell:
 		break;
 	case SPE_CLAIRVOYANCE:
 		if (!BClairvoyant) {
-		    if (role_skill >= P_SKILLED) {
+		    if (role_skill >= P_SKILLED && !level.flags.nommap) {
 			coord cc;
 			pline(where_to_cast);
 			cc.x = u.ux;
