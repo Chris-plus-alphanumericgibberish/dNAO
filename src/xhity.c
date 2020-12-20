@@ -6748,6 +6748,7 @@ boolean ranged;
 		/* entirely unharmed */
 		if (!has_head_mon(mdef)
 			|| (youdef && uclockwork)
+			|| (is_android(pd) && (is_mind_flayer(pd) || attk->aatyp != AT_TENT))
 			/*|| notonhead*/ //damnit what
 			) {
 			if (vis) {
