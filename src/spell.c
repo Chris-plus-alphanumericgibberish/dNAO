@@ -1492,6 +1492,9 @@ check_spirit_let(let)
 	else if(let >= 'A' && let <= 'Z') i = (int)(let - 'A' + 26);
 	else return FALSE; //not a valid letter
 	
+	if (u.spiritPOrder[i] == -1)
+		return FALSE;	// not set
+
 	return u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves && spirit_powers[u.spiritPOrder[i]].owner &&
 			((spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
 			!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
