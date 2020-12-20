@@ -496,6 +496,16 @@ register struct monst *mtmp;
 			place_object(otmp, x, y);
 			}
 		goto default_1;
+		case PM_SCORPION:
+			if (!rn2(20) && !(
+				(Role_if(PM_RANGER) && In_quest(&u.uz)) ||
+				(art_already_exists(ART_SCORPION_CARAPACE)) ||
+				(mtmp->mrevived && rn2(20))
+				)) {
+				otmp = oname(mksobj(SCALE_MAIL, TRUE, FALSE), artiname(ART_SCORPION_CARAPACE));
+				place_object(otmp, x, y);
+			}
+		goto default_1;
 	    case PM_LONG_WORM:
 			(void) mksobj_at(WORM_TOOTH, x, y, TRUE, FALSE);
 		goto default_1;

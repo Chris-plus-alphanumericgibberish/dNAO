@@ -1024,6 +1024,17 @@ A("Soulmirror",						PLATE_MAIL,			(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
+/* wearer gets a 1d4 poison sting */
+A("The Scorpion Carapace",			SCALE_MAIL,			(const char *)0,
+	3000L, BONE, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_D, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(POISON_RES), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
 A("Mirrorbright",					ROUNDSHIELD,		(const char *)0,
 	4000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, NOFLAG,

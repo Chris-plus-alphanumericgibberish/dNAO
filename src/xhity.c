@@ -1661,6 +1661,7 @@ int * subout;					/* records what attacks have been subbed out */
 #define SUBOUT_XWEP		0x0080	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
 #define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
 #define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
+#define SUBOUT_SCORPION	0x0400	/* Scorpion Carapace's sting */
 int * tohitmod;					/* some attacks are made with decreased accuracy */
 {
 	struct attack * attk;
@@ -2052,6 +2053,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			*attk = grapple;
 			attk->damn = youagr ? ((P_SKILL(P_BARE_HANDED_COMBAT) + 1) / 2 + martial_bonus()) : 2;
 			*subout |= SUBOUT_GRAPPLE;
+		}
+	}
+
+	/* creatures wearing the Scorpion Carpace get a scorpion's sting */
+	if (is_null_attk(attk) && !by_the_book && !(*subout&SUBOUT_SCORPION)) {
+		struct obj * otmp = (youagr ? uarm : which_armor(magr, W_ARM));
+		if (otmp && otmp->oartifact == ART_SCORPION_CARAPACE) {
+			*attk = *attacktype_fordmg(&mons[PM_SCORPION], AT_STNG, AD_DRST);
+			*subout |= SUBOUT_SCORPION;
 		}
 	}
 
