@@ -4212,6 +4212,210 @@ boolean invoked;
 	}
 }
 
+void
+dobrass_awaken(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	struct monst *mtmp;
+	
+	//Don't stack multiple
+	if(artinstance[wep->oartifact].RRSember >= moves || artinstance[wep->oartifact].RRSlunar >= moves)
+		return;
+	
+	if(rn2(2)){
+		if(youagr || canseemon(magr))
+			pline("The ringed armor's black tentacles awaken and begin to dance like fire!");
+		artinstance[wep->oartifact].RRSember = moves + 4 + rn2(4) + rn2(4);
+	} else {
+		if(youagr || canseemon(magr))
+			pline("The ringed armor's tattered skirt transforms into gleaming royal blue serpents!");
+		artinstance[wep->oartifact].RRSlunar = moves + 4 + rn2(4) + rn2(4);
+	}
+}
+
+void
+dobrass_attack(magr, armor, atyp, etyp)
+struct monst *magr;
+struct obj *armor;
+char atyp;
+char etyp;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j, lim=0;
+	int striking = 0;
+	struct attack symbiote = { atyp, etyp, 4, 2 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	
+	//2 pips on a die is +1 on average
+	if(armor)
+		symbiote.damd = max(1, 2 + armor->spe);
+	for(j=8;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(!mdef)
+			continue;
+
+		youdef = (mdef == &youmonst);
+		if(!youdef && DEADMONSTER(mdef))
+			continue;
+		
+		if(youagr && (mdef->mpeaceful || !rn2(4)))
+			continue;
+		if(youdef && (magr->mpeaceful || !rn2(4)))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
+			continue;
+		//Note: the armor avoids touching petrifying things even if you're immune
+		if(touch_petrifies(mdef->data)
+		 || mdef->mtyp == PM_MEDUSA
+		 || mdef->mtyp == PM_PALE_NIGHT
+		) continue;
+		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
+			//More than one limb strikes at the same target.
+			symbiote.damn = rnd(3) + rnd(3);
+			symbiote.damn = min(symbiote.damn, 8-lim);
+			
+			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+			if(!youagr && DEADMONSTER(magr))
+				break; //oops!
+			lim+=symbiote.damn;
+			
+			if(lim >= 8) break;
+			//If few enemies are nearby, it may concentrate extra attacks on them.
+			j = 9;
+			i = rnd(8);
+		}
+	}
+}
+
+void
+dobrass_nurture(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	struct monst *mtmp;
+	
+	if(rn2(2)){
+		if(youagr){
+			if(uhp() < uhpmax()){
+				pline("The ring of fire flares, nurturing your body!");
+				healup(min_ints(100, uhpmax()/3+1), 0, FALSE, FALSE);
+			}
+		} else {
+			if(magr->mhp < magr->mhpmax){
+				if(canseemon(magr))
+					pline("The ring of fire flares, nurturing %s body!", s_suffix(mon_nam(magr)));
+				magr->mhp += min(magr->mhpmax/3+1, 100);
+				if(magr->mhp > magr->mhpmax)
+					magr->mhp = magr->mhpmax;
+			}
+		}
+	} else {
+		if(youagr){
+			if(u.uen < u.uenmax){
+				pline("The depths of the dark gleam, nurturing your spirit!");
+				u.uen += min(u.uenmax/3+1, 100);
+				if(u.uen > u.uenmax)
+					u.uen = u.uenmax;
+			}
+		} else {
+			if(magr->mspec_used || magr->mcan){
+				if(canseemon(magr))
+					pline("The depths of the dark gleam, nurturing %s spirit!", s_suffix(mon_nam(magr)));
+				magr->mspec_used = 0;
+				magr->mcan = 0;
+			}
+		}
+	}
+}
+
+void
+dobrass_companions(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = (magr == &youmonst);
+	struct monst *mtmp;
+	int maketame = ((magr->mtame || youagr) ? MM_EDOG : 0);
+	int mid;
+	int i;
+		
+	if(rn2(2)){
+		if(youagr || canseemon(magr))
+			pline("The ring of fire emits a seething orb of flame!");
+		mid = PM_FLAMING_ORB;
+		i = 1;
+	} else {
+		if(youagr || canseemon(magr))
+			pline("Star-eyed pursuers emerge from the darksign!");
+		mid = PM_PURSUER;
+		i = 5;
+	}
+	
+	for(; i > 0; i--){
+		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame);
+		if (mtmp) {
+			/* time out */
+			mtmp->mvanishes = 4 + rn2(4);
+			mtmp->mspec_used = 0;
+			/* can be peaceful */
+			if(magr->mpeaceful)
+				mtmp->mpeaceful = TRUE;
+			/* can be tame */
+			if (maketame) {
+				initedog(mtmp);
+			}
+		}
+	}
+}
+
+void
+doliving_ringed_armor(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	if((invoked
+		|| !rn2(30)
+	) && (
+		nearby_targets(magr)
+		|| (magr == &youmonst && (uhp() < uhpmax() || u.uen < u.uenmax))
+		|| (magr != &youmonst && (magr->mhp < magr->mhpmax || magr->mspec_used || magr->mcan))
+	)){
+		switch(rnd(3)){
+			//awaken
+			case 1:
+				if(nearby_targets(magr) || invoked)
+					dobrass_awaken(magr, wep);
+			break;
+			//nurture
+			case 2:
+				dobrass_nurture(magr, wep);
+			break;
+			//companions
+			case 3:
+				if(nearby_targets(magr) || invoked)
+					dobrass_companions(magr, wep);
+			break;
+		}
+	}
+	
+	if(artinstance[wep->oartifact].RRSember > moves)
+		dobrass_attack(magr, wep, AT_TENT, AD_EFIR);
+	if(artinstance[wep->oartifact].RRSlunar > moves)
+		dobrass_attack(magr, wep, AT_BITE, AD_MAGM);
+}
+
 static void
 doliving_single_attack(magr, wep)
 struct monst *magr;
@@ -4268,6 +4472,8 @@ struct obj *wep;
 		doliving_mad_king(magr, wep, FALSE);
 	else if(wep->oartifact == ART_RITUAL_RINGED_SPEAR)
 		doliving_ringed_spear(magr, wep, FALSE);
+	else if(wep->oartifact == ART_RINGED_BRASS_ARMOR)
+		doliving_ringed_armor(magr, wep, FALSE);
 	else doliving_single_attack(magr, wep);
 }
 

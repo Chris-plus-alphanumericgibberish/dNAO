@@ -4323,6 +4323,7 @@ int wishflags;
 	   strncmpi(bp, "destroy ", 8) &&
 	   strncmpi(bp, "food detection", 14) &&
 	   strncmpi(bp, "ring mail", 9) &&
+	   strncmpi(bp, "ringed brass armor", 18) &&
 	   strncmpi(bp, "studded leather arm", 19) &&
 	   strncmpi(bp, "leather arm", 11) &&
 	   strncmpi(bp, "living arm", 10) &&

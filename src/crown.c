@@ -89,7 +89,7 @@ static const struct crowning hand_of_elbereth[] = {
 	/*Female Half Dragon Noble*/
 /*40*/	{ART_DRAGONHEAD_SHIELD,			"the Dragon-slayer of Gwyn",			dub_thee_the,							became_the	},
 /*41*/	{ART_CRUCIFIX_OF_THE_MAD_KING,	"the Guardian of the Old Lords",		dub_thee_the,							became_the	},
-/*42*/	{ART_RITUAL_RINGED_SPEAR,		"the Darkmoon Champion",				dub_thee_the,							became_the	},
+/*42*/	{ART_RINGED_BRASS_ARMOR,		"the Darkmoon Champion",				dub_thee_the,							became_the	},
 	/* Knight -- lawful only */
 /*43*/	{ART_CLARENT,					"the King of the Angles",				dub_thee,								"crowned %s"	},
 	/* Pirate -- all alignments */

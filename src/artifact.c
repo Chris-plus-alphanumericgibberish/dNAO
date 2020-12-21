@@ -7712,7 +7712,7 @@ arti_invoke(obj)
 		break;
         case RINGED_ARMOR:
 			You("wake the ringed armor.");
-			doliving_ringed_spear(&youmonst, obj, TRUE);
+			doliving_ringed_armor(&youmonst, obj, TRUE);
 		break;
 		case BLOODLETTER:
 			if (artinstance[obj->oartifact].BLactive < monstermoves){
@@ -9859,6 +9859,8 @@ dosymbiotic_equip()
 		doliving(&youmonst, uswapwep);
 	if(uarms && ((check_oprop(uarms, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarms) ))
 		doliving(&youmonst, uarms);
+	if(uarm && ((check_oprop(uarm, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarm) ))
+		doliving(&youmonst, uarm);
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
@@ -9874,6 +9876,9 @@ dosymbiotic_equip()
 		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
 			doliving(mtmp, obj);
 		obj = which_armor(mtmp, W_ARMS);
+		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
+			doliving(mtmp, obj);
+		obj = which_armor(mtmp, W_ARM);
 		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
 			doliving(mtmp, obj);
 	}
