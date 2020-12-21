@@ -3947,7 +3947,7 @@ boolean ranged;
 			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* does it do anything? Nullmagic gives utter and total immunity. MR gives immunity to the damage. */
-		if (uncancelled
+		if (notmcan
 			&& !(youdef && Nullmagic)
 			&& !(!youdef && mon_resistance(mdef, NULLMAGIC))){
 
@@ -3955,7 +3955,7 @@ boolean ranged;
 			if (vis) {
 				pline("%s%s lanced by magic!",
 					(youdef ? "You" : Monnam(mdef)),
-					(youdef ? "'re " : " is "));
+					(youdef ? "'re" : " is"));
 			}
 
 			if (Magic_res(mdef))
