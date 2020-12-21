@@ -12193,8 +12193,10 @@ int vis;						/* True if action is at all visible to the player */
 			/* note: if player is defending, this assumes the potion was thrown */
 			potionhit(mdef, otmp, youagr);
 			/* check if defender was killed */
-			if (*hp(mdef) < 1)
+			if (*hp(mdef) < 1) {
+				*weapon_p = NULL;
 				return (MM_HIT|MM_DEF_DIED);
+			}
 			/* potionhit prints messages */
 			hittxt = TRUE;
 			/* in case potion effect causes transformation */
