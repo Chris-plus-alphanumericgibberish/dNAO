@@ -1134,13 +1134,13 @@ register const char *let,*word;
 		    ((otmp->oclass == FOOD_CLASS && otmp->otyp != MEAT_RING) ||
 		    (otmp->oclass == TOOL_CLASS &&
 		     otyp != BLINDFOLD && otyp != MASK && otyp != R_LYEHIAN_FACEPLATE && 
-			 otyp != TOWEL && otyp != ANDROID_VISOR && otyp != LIVING_MASK && otyp != LENSES) ||
+			 otyp != TOWEL && otyp != ANDROID_VISOR && otyp != LIVING_MASK && otyp != LENSES && otyp != SUNGLASSES) ||
 			 (otmp->oclass == CHAIN_CLASS)
 			))
 		|| (!strcmp(word, "wield") &&
 		    ((otmp->oclass == TOOL_CLASS && !is_weptool(otmp)) ||
 			(otmp->oclass == CHAIN_CLASS && otmp->otyp != CHAIN)))
-		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES))
+		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES || otmp->otyp == SUNGLASSES))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
 		|| (!strcmp(word, "inject") && !(otmp->otyp == HYPOSPRAY_AMPULE && otmp->spe > 0))
 		|| (!strcmp(word, "give the tear to") &&
@@ -1476,7 +1476,7 @@ struct obj *otmp;
 	    what = "that";
 	    /* quantity for armor and accessory objects is always 1,
 	       but some things should be referred to as plural */
-	    if (otyp == LENSES || is_gloves(otmp) || is_boots(otmp))
+	    if (otyp == LENSES || otyp == SUNGLASSES || is_gloves(otmp) || is_boots(otmp))
 		what = "those";
 	    pline("Use the '%s' command to %s %s%s.", s1, s2, what, s3);
 	} else {
@@ -2363,7 +2363,7 @@ struct obj *obj;
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
 				"Use this to blindfold yourself", MENU_UNSELECTED);
-	    } else if (obj->otyp == LENSES) {
+	    } else if (obj->otyp == LENSES || obj->otyp == SUNGLASSES) {
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
 				"Put these lenses on", MENU_UNSELECTED);
@@ -3301,6 +3301,7 @@ winid *datawin;
 		case R_LYEHIAN_FACEPLATE:
 		case MASK:
 		case LENSES:
+		case SUNGLASSES:
 		case LIVING_MASK:
 			subclass = "facial accessory";
 			break;

@@ -1612,6 +1612,7 @@ boolean with_price;
 		else {
 			/* prefixes */
 			if (typ == LENSES ||
+				typ == SUNGLASSES ||
 				is_boots(obj) ||
 				is_gloves(obj)
 				) {
@@ -3112,6 +3113,7 @@ const char *oldstr;
 
 			if (!BSTRCMP(bp, p-6, "gloves") ||
 			    !BSTRCMP(bp, p-6, "lenses") ||
+			    !BSTRCMP(bp, p-10, "sunglasses") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
@@ -5017,7 +5019,7 @@ typfnd:
 	}
 	
 	if(otmp->oclass == WEAPON_CLASS 
-	 || (otmp->oclass == TOOL_CLASS && (is_weptool(otmp) || otmp->otyp == PICK_AXE || otmp->otyp == LENSES))
+	 || (otmp->oclass == TOOL_CLASS && (is_weptool(otmp) || otmp->otyp == PICK_AXE || otmp->otyp == LENSES || otmp->otyp == SUNGLASSES))
 	 || (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp))
 	){
 		otmp->objsize = objsize;

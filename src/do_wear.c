@@ -1843,7 +1843,7 @@ doputon()
 		Your("%s%s are full, and you're already wearing an amulet and %s.",
 			humanoid(youracedata) ? "ring-" : "",
 			makeplural(body_part(FINGER)),
-			ublindf->otyp==LENSES ? "some lenses" : (ublindf->otyp==MASK || ublindf->otyp==LIVING_MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE) ? "a mask" : "a blindfold");
+			(ublindf->otyp==LENSES || ublindf->otyp==SUNGLASSES) ? "some lenses" : (ublindf->otyp==MASK || ublindf->otyp==LIVING_MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE) ? "a mask" : "a blindfold");
 		return(0);
 	}
 	otmp = getobj(accessories, "put on");
@@ -1934,11 +1934,11 @@ doputon()
 				Your("%s is already covered by a towel.",
 					body_part(FACE));
 			else if (ublindf->otyp == BLINDFOLD || ublindf->otyp == LIVING_MASK || ublindf->otyp == ANDROID_VISOR) {
-				if (otmp->otyp == LENSES)
+				if (otmp->otyp == LENSES || otmp->otyp == SUNGLASSES)
 					already_wearing2("lenses", "a blindfold");
 				else
 					already_wearing("a blindfold");
-			} else if (ublindf->otyp == LENSES) {
+			} else if (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES) {
 				if (otmp->otyp == BLINDFOLD || otmp->otyp == LIVING_MASK || otmp->otyp == ANDROID_VISOR)
 					already_wearing2("a blindfold", "some lenses");
 				else
@@ -1949,7 +1949,8 @@ doputon()
 		}
 		if (otmp->otyp != MASK && otmp->otyp != R_LYEHIAN_FACEPLATE && 
 			otmp->otyp != BLINDFOLD && otmp->otyp != ANDROID_VISOR && 
-			otmp->otyp != TOWEL && otmp->otyp != LENSES && otmp->otyp != LIVING_MASK
+			otmp->otyp != TOWEL && otmp->otyp != LENSES && 
+			otmp->otyp != SUNGLASSES && otmp->otyp != LIVING_MASK
 		) {
 			You_cant("wear that!");
 			return(0);
@@ -1961,7 +1962,7 @@ doputon()
 		}
 		if (otmp->oartifact && !touch_artifact(otmp, &youmonst, FALSE))
 		    return 1;
-		if(otmp->otyp == LENSES && otmp->objsize != youracedata->msize){
+		if((otmp->otyp == LENSES || otmp->otyp == SUNGLASSES) && otmp->objsize != youracedata->msize){
 			pline("They don't fit!");
 			return 0;
 		}

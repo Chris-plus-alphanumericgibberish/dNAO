@@ -772,6 +772,7 @@ struct obj *spellbook;
 			if (spellbook->blessed) read_ability += 10;
 			if (spellbook->cursed) read_ability -= 10;
 			if (ublindf && ublindf->otyp == LENSES) read_ability += 2;
+			if (ublindf && ublindf->otyp == SUNGLASSES) read_ability -= 2;
 			for (spell = 0; spell < MAXSPELL; spell++)
 				if (spellid(spell) == booktype)
 					read_ability += 10 * spellknow(booktype)/KEEN; // if you already know it, you're more likely to succeed

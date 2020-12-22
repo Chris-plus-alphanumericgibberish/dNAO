@@ -1046,6 +1046,11 @@ AMULET(("Amulet of Yendor", "Amulet of Yendor"), 0, 0, /* note: description == n
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,0,P_NONE,mat,0), \
 		0, TOOL_CLASS, prob, 0, \
 		wt, cost, {0}, {0}, 0, 0, 0, wt, color, __VA_ARGS__)
+#define TOOL_PROP(names,kn,size,mrg,mgc,chg,power,prob,wt,cost,mat,color,...) \
+	OBJECT( names, \
+		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,0,P_NONE,mat,0), \
+		power, TOOL_CLASS, prob, 0, \
+		wt, cost, {0}, {0}, 0, 0, 0, wt, color, __VA_ARGS__)
 #define CONTAINER(names,kn,size,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( names, \
 		BITS(kn,0,chg,1,mgc,chg,0,0,size,0,0,0,P_NONE,mat,0), \
@@ -1119,6 +1124,8 @@ TOOL(("R'lyehian faceplate", "ebon pane"), /*Needs tile*/
 TOOL(("living mask", "gilled jellyfish"),  
 								0,  MZ_SMALL, 0, 1, 0,   0,  5, 200, FLESH, CLR_BLUE, O_POWER(MAGICAL_BREATHING)),
 TOOL(("lenses"),		1,   MZ_TINY, 0, 0, 0,   5,  3,  80, GLASS, HI_GLASS), /*Needs encyc entry*/
+TOOL_PROP(("sunglasses", "mirrored lenses"),
+					   0,   MZ_TINY, 0, 0, 0,   BLIND_RES, 0,  3, 240, GLASS, CLR_BROWN), /*Needs encyc entry*/
 TOOL(("blindfold"),    1,   MZ_TINY, 0, 0, 0,  45,  2,  20, CLOTH, CLR_GRAY),
 TOOL(("android visor", "black blindfold", "blindfold"),
 								0,   MZ_TINY, 0, 0, 0,   0,  2,  40, CLOTH, CLR_BLACK),

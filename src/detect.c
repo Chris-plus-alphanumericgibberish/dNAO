@@ -1589,6 +1589,8 @@ register int aflag;
 		if(u.sealsActive&SEAL_OTIAX) fund += spiritDsize();
 		if (ublindf && ublindf->otyp == LENSES && !Blind)
 			fund += 2; /* JDS: lenses help searching */
+		if (ublindf && ublindf->otyp == SUNGLASSES && !Blind)
+			fund -= 2; /* wearing sunglasses indoors hinders searching */
 		for(x = u.ux-1; x < u.ux+2; x++)
 		  for(y = u.uy-1; y < u.uy+2; y++) {
 		if(!isok(x,y)) continue;

@@ -373,7 +373,7 @@ use_towel(obj)
 			      (old ? "has more" : "now has"));
 			make_blinded(Blinded + (long)u.ucreamed - old, TRUE);
 		    } else {
-			const char *what = (ublindf->otyp == LENSES) ?
+			const char *what = (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES) ?
 					    "lenses" : (ublindf->otyp == MASK || ublindf->otyp == LIVING_MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE) ? "mask" : "blindfold";
 			if (ublindf->cursed) {
 			    You("push your %s %s.", what,
@@ -6021,6 +6021,7 @@ doapply()
 	case BLINDFOLD:
 	case ANDROID_VISOR:
 	case LENSES:
+	case SUNGLASSES:
 	case LIVING_MASK:
 	case R_LYEHIAN_FACEPLATE:
 	case MASK:
@@ -6032,7 +6033,7 @@ doapply()
 				(ublindf->otyp == MASK || ublindf->otyp == LIVING_MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE ) ? "wearing a mask" :
 				(ublindf->otyp == BLINDFOLD || ublindf->otyp == ANDROID_VISOR) ? "wearing a blindfold" :
 						     "wearing lenses");
-		} else if((obj->otyp == LENSES)
+		} else if((obj->otyp == LENSES || obj->otyp == SUNGLASSES)
 			&& obj->objsize != youracedata->msize
 		){
 			pline("They don't fit!");
