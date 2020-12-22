@@ -4160,7 +4160,7 @@ signs_mirror()
 #undef PUNCTUTATION
 	
 	if(u.sealsActive&SEAL_AHAZU && !NoBInvis){
-		if(!(ublindf && ublindf->otyp==MASK)){
+		if(!(ublindf && (ublindf->otyp==MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE))){
 			putstr(en_win, 0, "There is a starry void in your throat.");
 			message = TRUE;
 		}
@@ -4171,8 +4171,12 @@ signs_mirror()
 		} else putstr(en_win, 0, "Your ram's horns have fused with your helm, taking on a metalic hue.");
 		message = TRUE;
 	}
+	if(u.sealsActive&SEAL_ANDREALPHUS && !Invis && (dimness(u.ux, u.uy) <= 0)) {
+		putstr(en_win, 0, "Your shadow has a strange depth.");
+		message = TRUE;
+	}
 	if(u.sealsActive&SEAL_ANDROMALIUS && !NoBInvis){
-		if((levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3))))
+		if(dimness(u.ux, u.uy) <= 0)
 			putstr(en_win, 0, "Your rigid features can't be seen in the dark.");
 		else if((ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE)) //face-covering mask
 			 || (uarmh && (uarmh->otyp==PLASTEEL_HELM || uarmh->otyp==PONTIFF_S_CROWN)) //face-covering helm
@@ -4186,15 +4190,17 @@ signs_mirror()
 			putstr(en_win, 0, "A black liquid leaks from around your eyes.");
 		else if(ublindf && (ublindf->otyp == MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE))
 			putstr(en_win, 0, "The black liquid leaking from your eyes is hidden by your mask.");
-		else
-			putstr(en_win, 0, "The black liquid leaking from your eyes is soaked up by your blindfold.");
+		else {
+			Sprintf(msgbuf, "The black liquid leaking from your eyes is soaked up by your %s.", xname(ublindf));
+			putstr(en_win, 0, msgbuf);
+		}
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_BALAM && !Invis){
 		if(uarmc || uarm)
-			putstr(en_win, 0, "Freezing water leaks from a gash in you neck, but is hidden by your clothes.");
+			putstr(en_win, 0, "Freezing water leaks from a gash in your neck, but is hidden by your clothes.");
 		else
-			putstr(en_win, 0, "Freezing water leaks from a deep gash in you neck.");
+			putstr(en_win, 0, "Freezing water leaks from a deep gash in your neck.");
 		if(!uarmg)
 			putstr(en_win, 0, "Freezing water leaks from deep holes in your wrists.");
 		if(!uarmf)
@@ -4216,7 +4222,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_CHUPOCLOPS && !NoBInvis){
-		if(!(ublindf && ublindf->otyp==MASK)){
+		if(!(ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE))){
 			putstr(en_win, 0, "You see a pair of chelicerae in your mouth!");
 			message = TRUE;
 		}
@@ -4254,7 +4260,7 @@ signs_mirror()
 			putstr(en_win, 0, "Your serpentine legs are disguised by your clothes.");
 		message = TRUE;
 	}
-	if(u.sealsActive&SEAL_EDEN && !NoBInvis){
+	if(u.sealsActive&SEAL_EDEN && !NoBInvis && !uarmh){
 		putstr(en_win, 0, "You see a garden through the dome of cerulean crystal embedded in your head!");
 		message = TRUE;
 	}
@@ -4282,13 +4288,13 @@ signs_mirror()
 		}
 	}
 	if(u.sealsActive&SEAL_HUGINN_MUNINN && !NoBInvis){
-		if(!(ublindf && ublindf->otyp==MASK)){
+		if(!uarmh){
 			putstr(en_win, 0, "You find a raven nesting in each ear!");
 			message = TRUE;
 		}
 	}
 	if(u.sealsActive&SEAL_IRIS && !NoBInvis){
-		if(moves <= u.irisAttack+1){
+		if(!(((uarm || uarmc) && moves > u.irisAttack+5) || (uarmc && moves > u.irisAttack+1))){
 			putstr(en_win, 0, "Waving, iridescent tentacles sprout from your forearms.");
 			message = TRUE;
 		}
@@ -4302,7 +4308,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_MALPHAS && !NoBInvis){
-		if(!(ublindf && ublindf->otyp==MASK)){
+		if(!(ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE))){
 			putstr(en_win, 0, "There is a whole flock's worth of crows peeking out of your throat!");
 			message = TRUE;
 		}
@@ -4315,14 +4321,14 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_MOTHER && !NoBInvis){
-		if(!uarmg)
+		if(!uarmg && !(uarmc && uarmc->otyp == MUMMY_WRAPPING))
 			putstr(en_win, 0, "The eyes on your fingers and palms stare back at you.");
 		else
 			putstr(en_win, 0, "The eyes on your fingers and palms are covered up.");
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_NABERIUS && !NoBInvis){
-		if(!(ublindf && ublindf->otyp==MASK)){
+		if(!(ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE))){
 			putstr(en_win, 0, "Your tongue is forked!");
 			message = TRUE;
 		}
@@ -4354,12 +4360,18 @@ signs_mirror()
 		if(!uarmg)
 			putstr(en_win, 0, "You have iron claws.");
 		else
-			putstr(en_win, 0, "Your iron claws seem to be part of you gloves.");
+			putstr(en_win, 0, "Your iron claws seem to be part of your gloves.");
 		if(!uarmh)
 			putstr(en_win, 0, "There is a pair of prismatic wings reaching around your head.");
 		else
 			putstr(en_win, 0, "Your helm has a crest of prismatic feathers.");
 		message = TRUE;
+	}
+	if(u.sealsActive&SEAL_TENEBROUS && !Invis){
+		if(dimness(u.ux,u.uy) <= 0) {
+			putstr(en_win, 0, "Your shadow is unnaturally dark and pools close to you.");
+			message = TRUE;
+		}
 	}
 	if(u.sealsActive&SEAL_YMIR && !Invis){
 		if(moves>5000 && moves <= 10000){
@@ -4387,7 +4399,7 @@ signs_mirror()
 				putstr(en_win, 0, "Your rotted form is hidden under your clothes.");
 			message = TRUE;
 		} else if(moves>100000){
-			if(!(uarmc && uarmg && uarmf && uarm && uarmh && ublindf && ublindf->otyp==MASK))
+			if(!(uarmc && uarmg && uarmf && uarm && uarmh && ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE)))
 				putstr(en_win, 0, "Your putrid body is a riot of fungal forms and saprophagous insects.");
 			else
 				putstr(en_win, 0, "Your putrid form is hidden under your clothes.");
@@ -4413,8 +4425,10 @@ signs_mirror()
 			putstr(en_win, 0, "Your star-like eyes are covered by your opaque mask.");
 		else if(ublindf && (ublindf->otyp == SUNGLASSES))
 			putstr(en_win, 0, "Your star-like eyes are covered by your mirrored lenses.");
-		else
-			putstr(en_win, 0, "Your star-like eyes are covered by your blindfold.");
+		else {
+			Sprintf(msgbuf, "Your star-like eyes are covered by your %s.", xname(ublindf));
+			putstr(en_win, 0, msgbuf);
+		}
 		message = TRUE;
 	}
 	if(u.specialSealsActive&SEAL_COSMOS){
@@ -4456,6 +4470,12 @@ signs_mirror()
 	if(u.specialSealsActive&SEAL_ALIGNMENT_THING){
 		putstr(en_win, 0, "You see a small black halo just behind your head. There is an eye in the center, staring at you!");
 		message = TRUE;
+	}
+	if(u.specialSealsActive&SEAL_BLACK_WEB && !Invis){
+		if(dimness(u.ux, u.uy) <= 0) {
+			putstr(en_win, 0, "Your shadow is wrapped in the black web.");
+			message = TRUE;
+		}
 	}
 	
 	if(!message){

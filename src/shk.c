@@ -5822,14 +5822,14 @@ struct monst *mon;
 		if(u.sealsActive&SEAL_OSE && !Blind && !BClairvoyant && !(uarmh && is_metallic(uarmh) && uarmh->otyp != HELM_OF_TELEPATHY)) count++;
 		if(u.sealsActive&SEAL_OTIAX && !Invis && !(moves > u.otiaxAttack+5)) count++;
 		if(u.sealsActive&SEAL_PAIMON && !Invis && !uarmh) count++;
-		if(u.sealsActive&SEAL_SIMURGH && !Invis && !(((uarmg || uarmc) && uarmh))) count++;
+		if(u.sealsActive&SEAL_SIMURGH && !Invis && !(uarmg && uarmh)) count++;
 		if(u.sealsActive&SEAL_TENEBROUS && !Invis && !(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)))) count++;
 		if(u.sealsActive&SEAL_YMIR && !Invis && ((moves>5000 && !(uarm || uarmc)) || (moves>10000 && !(uarmc)) || 
 												 (moves>20000 && !(uarmc && uarmg && uarmf)) || (moves>50000 && !(uarmc && uarmg && uarmf && uarm && uarmh)) || 
 												 (moves>100000 && !(uarmc && uarmg && uarmf && uarm && uarmh && ublindf && (ublindf->otyp==MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE)))
 												)) count++;
 		if(u.specialSealsActive&SEAL_DAHLVER_NAR && !NoBInvis && dahlverNarVis()) count++;
-		if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !ublindf) count++;
+		if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != LIVING_MASK)) count++;
 		// if(u.specialSealsActive&SEAL_COUNCIL) count++;
 		if(u.specialSealsActive&SEAL_COSMOS) count++;
 		if(u.specialSealsActive&SEAL_LIVING_CRYSTAL) count++;
@@ -5850,9 +5850,9 @@ struct monst *mon;
 	if(couldsee(mon->mx, mon->my) && !is_blind(mon)){
 		if(u.sealsActive&SEAL_AHAZU && !(ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE))) count++;
 		// if(u.sealsActive&SEAL_AMON && !Invis && !(uarmh && is_metallic(uarmh))) count ++;
-		if(u.sealsActive&SEAL_ANDREALPHUS && !Invis && !(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)))) count++;
+		if(u.sealsActive&SEAL_ANDREALPHUS && !Invis && (dimness(u.ux, u.uy) <= 0)) count++;
 		if(u.sealsActive&SEAL_ANDROMALIUS && !NoBInvis 
-		  && !((levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3))) //dark square
+		  && !((levl[u.ux][u.uy].lit == 0 && (dimness(u.ux, u.uy) <= 0)) //dark square
 			 || (ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE)) //face-covering mask
 			 || (uarmh && (uarmh->otyp==PLASTEEL_HELM || uarmh->otyp==PONTIFF_S_CROWN)) //face-covering helm
 			 || (uarmc && (uarmc->otyp==WHITE_FACELESS_ROBE || uarmc->otyp==BLACK_FACELESS_ROBE || uarmc->otyp==SMOKY_VIOLET_FACELESS_ROBE))//face-covering robe
@@ -5887,9 +5887,9 @@ struct monst *mon;
 		// if(u.sealsActive&SEAL_YMIR && !Invis && ((moves>5000 && !(uarm || uarmc)) || (moves>10000 && !(uarmc)) || (moves>20000 && !(uarmc && uarmg)))) count++;
 		// if(u.specialSealsActive&SEAL_DAHLVER_NAR && !NoBInvis && dahlverNarVis()) count++;
 		// if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !ublindf) count++;
-		if(u.specialSealsActive&SEAL_COUNCIL && !Blind) count++;
+		if(u.specialSealsActive&SEAL_COUNCIL && !(Blind || (ublindf && !(ublindf->otyp == LENSES || ublindf->otyp == LIVING_MASK)))) count++;
 		if(u.specialSealsActive&SEAL_ALIGNMENT_THING) count++;
-		if(u.sealsActive&SEAL_BLACK_WEB && !Invis && !(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)))) count++;
+		if(u.sealsActive&SEAL_BLACK_WEB && !Invis && (dimness(u.ux, u.uy) <= 0)) count++;
 	}
 	if(u.specialSealsActive&SEAL_NUMINA) count++;
 //	if(u.specialSealsActive&SEAL_UNKNOWN_GOD) count++;
