@@ -834,6 +834,7 @@ static const char * const bogusobjects[] = {
        "vi clone",
        "maximally subsentient emacs mode",
        "bongard diagram",                  /* Intelligence test */
+	   "pair of Joo Janta 200 Super-Chromatic Peril Sensitive Sunglasses",	/* K2 */
 	   
 	   /* Movies etc. */
 	   "overloading phaser", /* Star Trek */
