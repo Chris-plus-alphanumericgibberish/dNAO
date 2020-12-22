@@ -4430,7 +4430,7 @@ flash_hits_mon(mtmp, otmp)
 struct monst *mtmp;
 struct obj *otmp;	/* source of flash */
 {
-	int tmp, amt, res = 0, useeit = canseemon(mtmp);
+	int tmp, amt, res = 0, useeit = canseemon(mtmp) && !(mtmp->mundetected || mtmp->mappearance);
 
 	if (mtmp->msleeping) {
 	    mtmp->msleeping = 0;
@@ -4445,6 +4445,11 @@ struct obj *otmp;	/* source of flash */
 		    pline("%s is blinded by the flash!", Monnam(mtmp));
 		    res = 1;
 		}
+		/* at this point, reveal them */
+		mtmp->mundetected = 0;
+		if (mtmp->m_ap_type)
+			seemimic(mtmp);
+		newsym(mtmp->mx, mtmp->my);
 		if (mtmp->mtyp == PM_GREMLIN) {
 		    /* Rule #1: Keep them out of the light. */
 		    amt = otmp->otyp == WAN_LIGHT ? d(1 + otmp->spe, 4) :
