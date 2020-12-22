@@ -73,7 +73,7 @@ extern char *viz_rmax;			/* max could see indices */
 /*
  *  Circle information
  */
-#define MAX_RADIUS 21	/* this is in points from the source */
+#define MAX_RADIUS 30	/* this is in points from the source */
 
 /* Use this macro to get a list of distances of the edges (see vision.c). */
 #define circle_ptr(z) (&circle_data[(int)circle_start[z]])

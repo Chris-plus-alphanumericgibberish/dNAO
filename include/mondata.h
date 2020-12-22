@@ -624,7 +624,9 @@
 #define is_demihuman(ptr)	((ptr->mflagsa & MA_DEMIHUMAN))
 
 /* this returns the light's range, or 0 if none; if we add more light emitting
-   monsters, we'll likely have to add a new light range field to mons[] */
+   monsters, we'll likely have to add a new light range field to mons[] 
+   KEEP IN SYNC with MAX_RADIUS, circle_data, and circle_start[].
+   Maximum allowable lightsource radius is currently 10 (30 after 3x lowlight modifier) */
 #define emits_light(ptr)	(((ptr)->mlet == S_LIGHT || \
 				  (ptr)->mtyp == PM_BRIGHT_WALKER || \
 				  (ptr)->mtyp == PM_FLAMING_SPHERE || \
