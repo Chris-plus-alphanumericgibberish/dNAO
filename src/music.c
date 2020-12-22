@@ -295,7 +295,16 @@ boolean domsg;
     int r = 0;
 
     if (song_being_played() == SNG_NONE) return 0;
-
+	
+	//Ill-regard specimens are unconscious
+	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
+		return 0;
+	}
+	// So are prisoners
+	if(mtmp->entangled == SHACKLES) {
+		return 0;
+	}
+	
     if ((mtmp->mcanmove) && (!mtmp->msleeping)
 	&& (!mtmp->mconf) && (!mtmp->mflee) && (!mtmp->mcan)
 	&& (distu(mtmp->mx, mtmp->my) <= 25)) {
