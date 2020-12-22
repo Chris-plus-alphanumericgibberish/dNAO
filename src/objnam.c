@@ -303,6 +303,53 @@ struct obj *otmp;
 	return Hallucination ? hcolor(0) : LightsaberColor[((int)otmp->cobj->otyp) - MAGICITE_CRYSTAL].colorText;
 }
 
+int
+lightsaber_colorCLR(otmp)
+struct obj *otmp;
+{
+	if(otmp->oartifact) switch(otmp->oartifact){
+		case ART_ANNULUS: return CLR_BLUE;
+		case ART_INFINITY_S_MIRRORED_ARC: {
+			xchar x, y;
+			int dnm = 0;
+			get_obj_location(otmp, &x, &y, 0);
+			if(levl[x][y].lit && 
+				!(viz_array[y][x]&TEMP_DRK3 && 
+				 !(viz_array[y][x]&TEMP_LIT1)
+				)
+			) dnm += 2;
+			if(viz_array[y][x]&TEMP_LIT1 && 
+				!(viz_array[y][x]&TEMP_DRK3)
+			) dnm += 1;
+			if(dnm == 3){
+				if(In_outdoors(&u.uz)) return CLR_BRIGHT_BLUE;
+				else if(In_W_tower(u.ux, u.uy, &u.uz)) return CLR_BRIGHT_MAGENTA;
+				else if(In_hell(&u.uz)) return CLR_RED;
+				else if(In_cave(&u.uz)) return CLR_YELLOW;
+				return CLR_WHITE;
+			} else if(dnm == 1){
+				if(rn2(2)) return CLR_ORANGE;
+				else return CLR_YELLOW;
+			} else {
+				if(In_outdoors(&u.uz)) return CLR_BLUE;
+				else if(In_W_tower(u.ux, u.uy, &u.uz)) return CLR_MAGENTA;
+				else if(In_hell(&u.uz)) return CLR_RED;
+				else if(In_cave(&u.uz)) return CLR_BROWN;
+				return CLR_GRAY;
+			}
+		} break;
+		case ART_ARKENSTONE: return CLR_WHITE;
+		case ART_FLUORITE_OCTAHEDRON: return rn2(3) ? CLR_BLUE : CLR_BRIGHT_BLUE;
+		case ART_HEART_OF_AHRIMAN: return rn2(3) ? CLR_RED : CLR_YELLOW;
+		case ART_GLITTERSTONE: return rn2(3) ? CLR_YELLOW : CLR_WHITE;
+		
+		default: return otmp->cobj ? LightsaberColor[((int)otmp->cobj->otyp) - MAGICITE_CRYSTAL].colorClr : otmp->obj_color;
+	}
+	if(otmp->otyp == KAMEREL_VAJRA)
+		return CLR_WHITE;
+	return otmp->cobj ? LightsaberColor[((int)otmp->cobj->otyp) - MAGICITE_CRYSTAL].colorClr : otmp->obj_color;
+}
+
 char *
 lightsaber_hiltText(otmp)
 struct obj *otmp;

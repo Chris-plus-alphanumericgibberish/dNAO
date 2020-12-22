@@ -1889,6 +1889,7 @@ E void NDECL(objects_init);
 /* ### objnam.c ### */
 
 E const char *FDECL(lightsaber_colorText, (struct obj *));
+E int FDECL(lightsaber_colorCLR, (struct obj *));
 E char *FDECL(lightsaber_hiltText, (struct obj *));
 E int NDECL(random_saber_hilt);
 E char *FDECL(obj_typename, (int));

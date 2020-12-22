@@ -1408,8 +1408,10 @@ struct obj *otmp;
 	if (otmp->otyp == GOLD_PIECE){
 		return HI_GOLD;
 	}
-
-
+	
+	if(litsaber(otmp))
+		return lightsaber_colorCLR(otmp);
+	
 	/* artifacts with set colors */
 	switch (otmp->oartifact)
 	{
