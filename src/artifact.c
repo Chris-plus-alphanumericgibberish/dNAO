@@ -3615,7 +3615,7 @@ boolean * messaged;
 		break;
 	}
 	
-	if(goatweaponturn && !youdef && youagr)
+	if(goatweaponturn && !youdef && youagr && !is_rider(mdef->data))
 		mdef->mgoatmarked = TRUE;
 	
 	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW) || goatweaponturn == AD_FIRE){

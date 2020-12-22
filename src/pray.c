@@ -3360,16 +3360,23 @@ aligntyp alignment;
 }
 
 STATIC_OVL int
-goat_resurrect(otmp, yours)
+goat_resurrect(otmp, eatflag)
 struct obj *otmp;
-boolean yours;
+int eatflag;
 {
 	struct monst *revived = 0;
 	if(goat_monster(&mons[otmp->corpsenm])){
 		pline("%s twitches.", The(xname(otmp)));
 		revived = revive(otmp, FALSE);
-		if(yours)
+		if(eatflag == GOAT_EAT_OFFERED){
+			//She grows angry at you, and may smite you.
 			gods_upset(GA_MOTHER);
+		}
+		else if(eatflag == GOAT_EAT_MARKED){
+			//She grows angry at you, but doesn't actually smite you.
+			u.ugangr[GA_MOTHER]++;
+			gods_angry(GA_MOTHER);
+		}
 	}
 
 	if(revived)
@@ -3378,17 +3385,24 @@ boolean yours;
 }
 
 STATIC_OVL int
-goat_rider(otmp, yours)
+goat_rider(otmp, eatflag)
 struct obj *otmp;
-boolean yours;
+int eatflag;
 {
 	int cn = otmp->corpsenm;
 	struct monst *revived = 0;
 	if(is_rider(&mons[otmp->corpsenm])){
 		pline("A pulse of darkness radiates from %s!", the(xname(otmp)));
 		revived = revive(otmp, FALSE);
-		if(yours)
+		if(eatflag == GOAT_EAT_OFFERED){
+			//She grows angry at you, and may smite you.
 			gods_upset(GA_MOTHER);
+		}
+		else if(eatflag == GOAT_EAT_MARKED){
+			//She grows angry at you, but doesn't actually smite you.
+			u.ugangr[GA_MOTHER]++;
+			gods_angry(GA_MOTHER);
+		}
 	}
 	if(revived)
 		return TRUE;
@@ -3479,12 +3493,12 @@ int eatflag;
 	
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
 	
-	if(goat_resurrect(otmp, eatflag != GOAT_EAT_PASSIVE)){
+	if(goat_resurrect(otmp, eatflag)){
 		//otmp is now gone, and resurrect may have printed messages
 		return;
 	}
 	
-	if(goat_rider(otmp, eatflag != GOAT_EAT_PASSIVE)){
+	if(goat_rider(otmp, eatflag)){
 		//otmp is now gone, and rider may have printed messages
 		return;
 	}
