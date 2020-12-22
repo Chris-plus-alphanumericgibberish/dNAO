@@ -6359,7 +6359,21 @@ arti_invoke(obj)
 				return(0);
 			}
 			if (is_mind_flayer(pm)){
-				pm = &mons[PM_HUMAN];
+				//Ceremorphosis works on a wide variety of hostes, however, it is typically only done to human-sized creatures.
+				int prob = rnd(100);
+				if(prob > 50){
+					pm = &mons[PM_HUMAN];
+				}
+				else if(prob > 25)
+					pm = &mons[PM_DROW];
+				else if(prob > 15)
+					pm = &mons[PM_GITHYANKI_PIRATE];
+				else if(prob > 5)
+					pm = &mons[PM_ELF];
+				else if(prob > 2)
+					pm = &mons[PM_MORDOR_ORC];
+				else
+					pm = &mons[PM_URUK_HAI];
 			}
 			
 			struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
