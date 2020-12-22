@@ -409,35 +409,17 @@ register boolean special;
 				SABER, CRYSTAL_SWORD, TWO_HANDED_SWORD,
 				KATANA, DWARVISH_MATTOCK, RUNESWORD
 			};
-			weapon = rn2(2) ? LONG_SWORD : sweptyp[rn2(SIZE(sweptyp))];
-			rweapon = STRANGE_OBJECT;
-			rwammo = STRANGE_OBJECT;
+			weapon = rn2(2) ? sweptyp[rn2(SIZE(sweptyp))] : weapon ? weapon : LONG_SWORD;
+			//Why turn off ranged attacks?
+			// rweapon = STRANGE_OBJECT;
+			// rwammo = STRANGE_OBJECT;
 			armor = rnd_class(GRAY_DRAGON_SCALE_MAIL, YELLOW_DRAGON_SCALE_MAIL);
-			cloak = !rn2(8) ? STRANGE_OBJECT :
+			cloak = !rn2(8) ? cloak :
 					rnd_class(OILSKIN_CLOAK, CLOAK_OF_DISPLACEMENT);
-			helm = !rn2(8) ? STRANGE_OBJECT :
+			helm = !rn2(8) ? helm :
 					rnd_class(HELMET, HELM_OF_TELEPATHY);
 			shield = !rn2(2) ? rnd_class(GRAY_DRAGON_SCALE_SHIELD, YELLOW_DRAGON_SCALE_SHIELD) 
-							 : (!rn2(8) ? STRANGE_OBJECT : rnd_class(ELVEN_SHIELD, SHIELD_OF_REFLECTION));
-		} else {
-			static int weptyp[] = {
-				STILETTO, AXE, SHORT_SWORD, SCIMITAR, BROADSWORD,
-				LONG_SWORD, MACE, MORNING_STAR,
-				WAR_HAMMER, QUARTERSTAFF, LEATHER_ARMOR
-			};
-			static int armtyp[] = {
-				PLATE_MAIL, SPLINT_MAIL, BANDED_MAIL, CHAIN_MAIL,
-				STUDDED_LEATHER_ARMOR, RING_MAIL, FLAIL
-			};
-			static int hlmtyp[] = {
-				LEATHER_HELM, ORCISH_HELM, DWARVISH_HELM,
-				ELVEN_HELM, HELMET
-			};
-			weapon = weptyp[rn2(SIZE(weptyp))];
-			armor = armtyp[rn2(SIZE(armtyp))];
-			cloak = rn2(8) ? cloak : CLOAK;
-			helm = !rn2(4) ? helm : hlmtyp[rn2(SIZE(hlmtyp))];
-			shield = !rn2(4) ? shield : rnd_class(BUCKLER, CRYSTAL_SHIELD);
+							 : (!rn2(8) ? shield : rnd_class(ELVEN_SHIELD, SHIELD_OF_REFLECTION));
 		}
 
 	    mtmp->m_lev = (special ? rn1(16,15) : rnd(16));
@@ -446,14 +428,35 @@ register boolean special;
 	    if(special) {
 	        get_mplname(mtmp, nam);
 	        mtmp = christen_monst(mtmp, nam);
-		/* that's why they are "stuck" in the endgame :-) */
-		(void)mongets(mtmp, FAKE_AMULET_OF_YENDOR);
+			/* that's why they are "stuck" in the endgame :-) */
+			(void)mongets(mtmp, FAKE_AMULET_OF_YENDOR);
 	    }
 	    mtmp->mpeaceful = 0;
 	    set_malign(mtmp); /* peaceful may have changed again */
 
 	    if (weapon != STRANGE_OBJECT) {
 			otmp = mksobj(weapon, TRUE, FALSE);
+			otmp->spe = (special ? rn1(5,4) : rn2(4));
+			if(otmp->otyp == RAKUYO && special)
+				otmp->spe = 10;
+			if (!rn2(3)) otmp->oerodeproof = 1;
+			else if (!rn2(2)) otmp->greased = 1;
+			if (special){
+				if(rn2(2)) otmp = mk_artifact(otmp, A_NONE);
+				
+				if(!otmp->oartifact){//mk_artifact can fail, esp for odd base items
+					if(rn2(2)) otmp = mk_special(otmp);
+					else if(rn2(4)) otmp = mk_minor_special(otmp);
+				}
+			}
+			/* mplayers knew better than to overenchant Magicbane */
+			if (otmp->oartifact == ART_MAGICBANE)
+				otmp->spe = rnd(4);
+			(void) mpickobj(mtmp, otmp);
+	    }
+
+	    if (secweapon != STRANGE_OBJECT) {
+			otmp = mksobj(secweapon, TRUE, FALSE);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if(otmp->otyp == RAKUYO && special)
 				otmp->spe = 10;
@@ -491,18 +494,22 @@ register boolean special;
 			(void) mpickobj(mtmp, otmp);
 	    }
 
+		if (tool != STRANGE_OBJECT) {
+			otmp = mksobj(tool, TRUE, FALSE);
+			(void) mpickobj(mtmp, otmp);
+		}
+
 	    if(special) {
 			if (!rn2(10))
 				(void) mongets(mtmp, rn2(3) ? LUCKSTONE : LOADSTONE);
 			mk_mplayer_armor(mtmp, armor);
+			mk_mplayer_armor(mtmp, shirt);
 			mk_mplayer_armor(mtmp, cloak);
 			mk_mplayer_armor(mtmp, helm);
+			mk_mplayer_armor(mtmp, boots);
+			mk_mplayer_armor(mtmp, gloves);
 			mk_mplayer_armor(mtmp, shield);
-			if (rn2(8))
-				mk_mplayer_armor(mtmp, rnd_class(GLOVES,
-							   GAUNTLETS_OF_DEXTERITY));
-			if (rn2(8))
-				mk_mplayer_armor(mtmp, rnd_class(CRYSTAL_BOOTS, FLYING_BOOTS));
+			
 			m_dowear(mtmp, TRUE);
 			init_mon_wield_item(mtmp);
 
@@ -522,12 +529,14 @@ register boolean special;
 				(void) mpickobj(mtmp, mkobj(RANDOM_CLASS, FALSE));
 	    } else {
 			(void) mongets(mtmp, armor);
+			(void) mongets(mtmp, shirt);
 			(void) mongets(mtmp, cloak);
 			(void) mongets(mtmp, helm);
+			(void) mongets(mtmp, helm);
+			(void) mongets(mtmp, boots);
+			(void) mongets(mtmp, gloves);
 			(void) mongets(mtmp, shield);
-			(void) mongets(mtmp, shield);
-			if (rn2(3)) mongets(mtmp, GLOVES);
-			if (rn2(3)) mongets(mtmp, !rn2(2) ? LOW_BOOTS : HIGH_BOOTS);
+			
 			m_dowear(mtmp, TRUE);
 			init_mon_wield_item(mtmp);
 		}
