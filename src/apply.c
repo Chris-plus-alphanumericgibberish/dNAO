@@ -4276,7 +4276,7 @@ use_doll(obj)
 					} else {
 						xchar waspeaceful = mtmp->mpeaceful;
 						mtmp = tamedog(mtmp, obj);
-				if(mtmp){
+						if(mtmp){
 							if (canseemon(mtmp) && flags.verbose && !mtmp->msleeping)
 								pline("%s seems to like the doll's song.", Monnam(mtmp));
 							mtmp->mtame = 9;

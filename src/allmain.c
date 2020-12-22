@@ -1155,6 +1155,9 @@ moveloop()
 					impossible("Re-trapping mon %s in vivi trap",noit_mon_nam(mtmp));
 					mtmp->mtrapped = TRUE;
 				}
+				/* Loyal monsters slowly recover tameness */
+				if(mtmp->mtame && mtmp->mtame < 5 && !mtmp->isminion && !(EDOG(mtmp)->loyal) && (!moves%100))
+					mtmp->mtame++;
 				/* Possibly vanish */
 				if(mtmp->mvanishes>-1){
 					if(--mtmp->mvanishes == 0){
