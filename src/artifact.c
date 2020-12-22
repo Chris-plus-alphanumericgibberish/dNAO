@@ -6359,9 +6359,7 @@ arti_invoke(obj)
 				return(0);
 			}
 			if (is_mind_flayer(pm)){
-				lvl = pm->mlevel;
 				pm = &mons[PM_HUMAN];
-				pm->mlevel = lvl;
 			}
 			
 			struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
