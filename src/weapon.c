@@ -3613,8 +3613,10 @@ const struct def_skill *class_skill;
 	    OLD_P_SKILL(P_BARE_HANDED_COMBAT) = P_BASIC;
 
 	/* Incantifier Anachrononauts start with basic lightsaber skills. */
-	if (Role_if(PM_ANACHRONONAUT) && Race_if(PM_INCANTIFIER))
+	if (Role_if(PM_ANACHRONONAUT) && Race_if(PM_INCANTIFIER)){
 	    OLD_P_SKILL(P_SHII_CHO) = P_BASIC;
+	    OLD_P_MAX_SKILL(P_SHII_CHO) = max(P_BASIC, OLD_P_MAX_SKILL(P_SHII_CHO));
+	}
 
 	/* Roles that start with a horse know how to ride it */
 #ifdef STEED
