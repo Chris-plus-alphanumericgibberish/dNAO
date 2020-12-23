@@ -599,6 +599,7 @@ struct obj {
 /* general "is this a valid weapon" check; there are exceptions to it */
 #define valid_weapon(otmp)		((otmp)->oclass == WEAPON_CLASS || \
 	is_weptool((otmp)) || \
+	(otmp)->otyp == BOULDER || \
 	(otmp)->otyp == HEAVY_IRON_BALL || \
 	(otmp)->otyp == CHAIN || \
 	(otmp)->oclass == GEM_CLASS)
