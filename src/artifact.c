@@ -9117,18 +9117,13 @@ read_necro(VOID_ARGS)
 	}
 		switch(chance){
 			case 0:
-				if(!(artiptr->ovar1 & LAST_PAGE)) {
-					You("fail.");
-				}
-				else {
-					You("find only %s.",
-						!rn2(2) ? "ravings" :
-						!rn2(5) ? "deranged ravings" :
-						!rn2(4) ? "bloodstains" :
-						!rn2(3) ? "writings in Deep Mandaic" :
-						!rn2(2) ? "fever-dreams" :
-						          "names of nameless horrors");
-				}
+				You("find only %s.",
+					!rn2(2) ? "ravings" :
+					!rn2(5) ? "deranged ravings" :
+					!rn2(4) ? "bloodstains" :
+					!rn2(3) ? "writings in Deep Mandaic" :
+					!rn2(2) ? "fever-dreams" :
+							  "names of nameless horrors");
 				exercise(A_WIS, FALSE);
 				exercise(A_WIS, FALSE);
 				exercise(A_INT, FALSE);
