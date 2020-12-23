@@ -729,6 +729,7 @@ turn_stag()
 					tm->housealert = 1;
 					tm->mpeaceful = 1;
 					set_malign(tm);
+					mdrop_special_objs(tm);
 				}
 			}
 		} else {
@@ -740,6 +741,7 @@ turn_stag()
 					tm->housealert = 1;
 					tm->mpeaceful = 1;
 					set_malign(tm);
+					mdrop_special_objs(tm);
 				}
 			}
 		}
