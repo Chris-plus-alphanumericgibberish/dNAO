@@ -510,9 +510,8 @@ merge_adj_rooms()
 			}
 
 			for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
-				lev = &levl[f][max(tmp->ly - 1, 0)];
-				for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
-					lev++->lit = tmp->rlit;
+			for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
+				levl[f][g].lit = tmp->rlit;
 			}
 			// change the room types
 			a->rtype = JOINEDROOM;
