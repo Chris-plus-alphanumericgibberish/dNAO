@@ -11116,8 +11116,8 @@ int dieroll;
 	return hmon_general(
 		(struct monst *)0,	/* no attacker */
 		mdef,				/* mdef is the defender */
-		(struct attack *)0,	/* no attack */
-		(struct attack *)0,	/* no attack */
+		&basicattack,		/* get attack-damage bonuses, etc. Does not use the 1d4. */
+		&basicattack,		/* get attack-damage bonuses, etc. Does not use the 1d4. */
 		obj_p,				/* hitting mdef with obj */
 		trap,				/* trap that did the hitting */
 		HMON_TRAP|type,		/* trap responsible, using given type */
