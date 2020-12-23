@@ -7,6 +7,8 @@
 
 extern const char * const destroy_strings[];	/* from xhityhelpers.c */
 
+static boolean rolling_boulder_in_progress;
+
 STATIC_DCL void FDECL(dofiretrap, (struct obj *));
 STATIC_DCL void NDECL(domagictrap);
 STATIC_DCL boolean FDECL(emergency_disrobe,(boolean *));
@@ -1408,18 +1410,21 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		fill_pit(u.ux, u.uy);
 		break;
 	    }
-	    case ROLLING_BOULDER_TRAP: {
+	    case ROLLING_BOULDER_TRAP: 
+		if (!rolling_boulder_in_progress){
 		int style = ROLL | (trap->tseen ? LAUNCH_KNOWN : 0);
 
 		seetrap(trap);
 		pline("Click! You trigger a rolling boulder trap!");
+		rolling_boulder_in_progress = TRUE;
 		if(!launch_obj(BOULDER, trap, style)) {
 		    deltrap(trap);
 		    newsym(u.ux,u.uy);	/* get rid of trap symbol */
 		    pline("Fortunately for you, no boulder was released.");
 		}
-		break;
+		rolling_boulder_in_progress = FALSE;
 	    }
+		break;
 	    case MAGIC_PORTAL:
 		seetrap(trap);
 		domagicportal(trap);
@@ -2494,7 +2499,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 		    break;
 
 		case ROLLING_BOULDER_TRAP:
-		    if (!mon_resistance(mtmp,FLYING)) {
+		    if (!mon_resistance(mtmp,FLYING) && !rolling_boulder_in_progress) {
 			int style = ROLL | (in_sight ? 0 : LAUNCH_UNSEEN);
 
 		        newsym(mtmp->mx,mtmp->my);
@@ -2503,6 +2508,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				  trap->tseen ?
 				  "a rolling boulder trap" :
 				  something);
+			rolling_boulder_in_progress = TRUE;
 			if (launch_obj(BOULDER, trap, style)) {
 			    if (in_sight) trap->tseen = TRUE;
 			    if (mtmp->mhp <= 0) trapkilled = TRUE;
@@ -2510,6 +2516,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    deltrap(trap);
 			    newsym(mtmp->mx,mtmp->my);
 			}
+			rolling_boulder_in_progress = FALSE;
 		    }
 		    break;
 		case SWITCH_TRAP:
