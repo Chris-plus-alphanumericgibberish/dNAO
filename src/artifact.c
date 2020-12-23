@@ -9104,9 +9104,31 @@ read_necro(VOID_ARGS)
 			if(u.usanity < 100 && rnd(30) < ACURR(A_WIS))
 				change_usanity(1);
 		}
+#define STUDY_NECRONOMICON(flag, msg, refndmsg) \
+	if(!(artiptr->ovar1 & (flag))){\
+			You(msg);\
+			artiptr->ovar1 |= (flag);\
+			artiptr->spestudied++;\
+			if(artiptr->spestudied > rn1(4,6)){\
+				artiptr->ovar1|= LAST_PAGE;\
+			}\
+		}else{\
+			You(refndmsg);\
+	}
 		switch(chance){
 			case 0:
-				You("fail.");
+				if(!(artiptr->ovar1 & LAST_PAGE)) {
+					You("fail.");
+				}
+				else {
+					You("find only %s.",
+						!rn2(2) ? "ravings" :
+						!rn2(5) ? "deranged ravings" :
+						!rn2(4) ? "bloodstains" :
+						!rn2(3) ? "writings in Deep Mandaic" :
+						!rn2(2) ? "fever-dreams" :
+						          "names of nameless horrors");
+				}
 				exercise(A_WIS, FALSE);
 				exercise(A_WIS, FALSE);
 				exercise(A_INT, FALSE);
@@ -9114,359 +9136,144 @@ read_necro(VOID_ARGS)
 					change_usanity(-1);
 			break;
 			case 1:
-				if(!(artiptr->ovar1 & S_OOZE)){
-					You("learn how to bend the myriad amoeboid monsters of earth to your will.");
-					artiptr->ovar1 |= S_OOZE;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another incantation for controling amoeboid monsters.");
-				}
+			STUDY_NECRONOMICON(S_OOZE,
+				"learn how to bend the myriad amoeboid monsters of earth to your will.",
+				"find another incantation for controling amoeboid monsters.");
 			break;
 			case 2:
-				if(!(artiptr->ovar1 & S_SHOGGOTH)){
-					You("find a spell for summoning shoggoths.");
-					artiptr->ovar1 |= S_SHOGGOTH;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another way to summon shoggoths.");
-				}
+			STUDY_NECRONOMICON(S_SHOGGOTH,
+				"find a spell for summoning shoggoths.",
+				"find another way to summon shoggoths.");
 			break;
 			case 3:
-				if(!(artiptr->ovar1 & S_NIGHTGAUNT)){
-					You("learn to invoke the servetors of Nodens.");
-					artiptr->ovar1 |= S_NIGHTGAUNT;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another invocation to Nodens.");
-				}
+			STUDY_NECRONOMICON(S_SHOGGOTH,
+				"learn to invoke the servetors of Nodens.",
+				"find another invocation to Nodens.");
 			break;
 			case 4:
-				if(!(artiptr->ovar1 & S_BYAKHEE)){
-					You("learn to call down byakhees.");
-					artiptr->ovar1 |= S_BYAKHEE;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another way to call down byakhees.");
-				}
+			STUDY_NECRONOMICON(S_BYAKHEE,
+				"learn to call down byakhees.",
+				"find another way to call down byakhees.");
 			break;
 			case 5:
-				if(!(artiptr->ovar1 & SUM_DEMON)){
-					You("learn to call the children of the abyss.");
-					artiptr->ovar1 |= SUM_DEMON;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another way to summon demons.");
-				}
+			STUDY_NECRONOMICON(SUM_DEMON,
+				"learn to call the children of the abyss.",
+				"find another way to summon demons.");
 			break;
 			case 6:
-				if(!(artiptr->ovar1 & S_DEVIL)){
-					You("learn to free the prisoners of hell.");
-					artiptr->ovar1 |= S_DEVIL;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another way to bind devils.");
-				}
+			STUDY_NECRONOMICON(S_DEVIL,
+				"learn to free the prisoners of hell.",
+				"find another way to bind devils.");
 			break;
 			case 7:
-				if(!(artiptr->ovar1 & SP_PROTECTION)){
-					You("find a spell of protection.");
-					artiptr->ovar1 |= SP_PROTECTION;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another spell of protection.");
-				}
+			STUDY_NECRONOMICON(SP_PROTECTION,
+				"find a spell of protection.",
+				"find another spell of protection.");
 			break;
 			case 8:
-				if(!(artiptr->ovar1 & SP_TURN_UNDEAD)){
-					You("find a passage concerning the secrets of life and death.");
-					artiptr->ovar1 |= SP_TURN_UNDEAD;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another passage concerning life and death.");
-				}
+			STUDY_NECRONOMICON(SP_TURN_UNDEAD,
+				"find a passage concerning the secrets of life and death.",
+				"find another passage concerning life and death.");
 			break;
 			case 9:
-				if(!(artiptr->ovar1 & SP_FORCE_BOLT)){
-					You("find a passage detailing the invisible forces.");
-					artiptr->ovar1 |= SP_FORCE_BOLT;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another passage describing the invisible forces.");
-				}
+			STUDY_NECRONOMICON(SP_FORCE_BOLT,
+				"find a passage detailing the invisible forces.",
+				"find another passage describing the invisible forces.");
 			break;
 			case 10:
-				if(!(artiptr->ovar1 & SP_DRAIN_LIFE)){
-					You("find a passage concerning the secrets of time and decay.");
-					artiptr->ovar1 |= SP_DRAIN_LIFE;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another passage concerning time and decay.");
-				}
+			STUDY_NECRONOMICON(SP_DRAIN_LIFE,
+				"find a passage concerning the secrets of time and decay.",
+				"find another passage concerning time and decay.");
 			break;
 			case 11:
-				if(!(artiptr->ovar1 & SP_DEATH)){
-					You("find a passage detailing the arts of the Reaper.");
-					artiptr->ovar1 |= SP_DEATH;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another passage concerning the Reaper's arts.");
-				}
+			STUDY_NECRONOMICON(SP_DEATH,
+				"find a passage detailing the arts of the Reaper.",
+				"find another passage concerning the Reaper's arts.");
 			break;
 			case 12:
-				if(!(artiptr->ovar1 & SP_DETECT_MNSTR)){
-					You("find a passage teaching monster detection.");
-					artiptr->ovar1 |= SP_DETECT_MNSTR;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find an alternative school of monster detection.");
-				}
+			STUDY_NECRONOMICON(SP_DETECT_MNSTR,
+				"find a passage teaching monster detection.",
+				"find an alternative school of monster detection.");
 			break;
 			case 13:
-				if(!(artiptr->ovar1 & SP_CLAIRVOYANCE)){
-					You("learn the secret of clairvoyance.");
-					artiptr->ovar1 |= SP_CLAIRVOYANCE;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another reference to the secret of clairvoyance.");
-				}
+			STUDY_NECRONOMICON(SP_CLAIRVOYANCE,
+				"learn the secret of clairvoyance.",
+				"find another reference to the secret of clairvoyance.");
 			break;
 			case 14:
-				if(!(artiptr->ovar1 & SP_DETECT_UNSN)){
-					You("learn the ways of unseen things.");
-					artiptr->ovar1 |= SP_DETECT_UNSN;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another reference to the ways of unseen things.");
-				}
+			STUDY_NECRONOMICON(SP_DETECT_UNSN,
+				"learn the ways of unseen things.",
+				"find another reference to the ways of unseen things.");
 			break;
 			case 15:
-				if(!(artiptr->ovar1 & SP_IDENTIFY)){
-					You("discover the secret of knowledge without learning.");
-					artiptr->ovar1 |= SP_IDENTIFY;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("already know the secret of knowledge without learning.");
-				}
+			STUDY_NECRONOMICON(SP_IDENTIFY,
+				"discover the secret of knowledge without learning.",
+				"already know the secret of knowledge without learning.");
 			break;
 			case 16:
-				if(!(artiptr->ovar1 & SP_CONFUSE)){
-					You("learn the ways of confusion.");
-					artiptr->ovar1 |= SP_CONFUSE;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("learn more about the ways of confusion.");
-				}
+			STUDY_NECRONOMICON(SP_CONFUSE,
+				"learn the ways of confusion.",
+				"learn more about the ways of confusion.");
 			break;
 			case 17:
-				if(!(artiptr->ovar1 & SP_CAUSE_FEAR)){
-					You("learn the ways of fear.");
-					artiptr->ovar1 |= SP_CAUSE_FEAR;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("learn more about the ways of fear.");
-				}
+			STUDY_NECRONOMICON(SP_CAUSE_FEAR,
+				"learn the ways of fear.",
+				"learn more about the ways of fear.");
 			break;
 			case 18:
-				if(!(artiptr->ovar1 & SP_LEVITATION)){
-					You("learn the true nature of gravity.");
-					artiptr->ovar1 |= SP_LEVITATION;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("already know the true nature of gravity.");
-				}
+			STUDY_NECRONOMICON(SP_LEVITATION,
+				"learn the true nature of gravity.",
+				"already know the true nature of gravity.");
 			break;
 			case 19:
-				if(!(artiptr->ovar1 & SP_STONE_FLESH)){
-					You("learn the true name of the earth mother.");
-					artiptr->ovar1 |= SP_STONE_FLESH;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("already know the true name of the earth mother.");
-				}
+			STUDY_NECRONOMICON(SP_STONE_FLESH,
+				"learn the true name of the earth mother.",
+				"already know the true name of the earth mother.");
 			break;
 			case 20:
-				if(!(artiptr->ovar1 & SP_CANCELLATION)){
-					You("learn the weaknesses of the cosmic weave.");
-					artiptr->ovar1 |= SP_CANCELLATION;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("learn a few more weaknesses of the cosmic weave.");
-				}
+			STUDY_NECRONOMICON(SP_CANCELLATION,
+				"learn the weaknesses of the cosmic weave.",
+				"learn a few more weaknesses of the cosmic weave.");
 			break;
 			case 21:
-				if(!(artiptr->ovar1 & SP_COMBAT)){
-					You("learn the secrets of war and killing.");
-					artiptr->ovar1 |= SP_COMBAT;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("already know the secrets of war and killing.");
-				}
+			STUDY_NECRONOMICON(SP_COMBAT,
+				"learn the secrets of war and killing.",
+				"already know the secrets of war and killing.");
 			break;
 			case 22:
-				if(!(artiptr->ovar1 & SP_HEALTH)){
-					You("learn the secret to health and recovery.");
-					artiptr->ovar1 |= SP_HEALTH;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another secret to health and recovery.");
-				}
+			STUDY_NECRONOMICON(SP_HEALTH,
+				"learn the secret to health and recovery.",
+				"find another secret to health and recovery.");
 			break;
 			case 23:
-				if(!(artiptr->ovar1 & R_Y_SIGN)){
-					You("discover the legends of Lost Carcosa.");
-					artiptr->ovar1 |= R_Y_SIGN;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("find another section on Lost Carcosa.");
-				}
+			STUDY_NECRONOMICON(R_Y_SIGN,
+				"discover the legends of Lost Carcosa.",
+				"find another section on Lost Carcosa.");
 			break;
 			case 24:
-				if(!(artiptr->ovar1 & R_WARDS)){
-					You("discover a treatise on ancient warding signs.");
-					artiptr->ovar1 |= R_WARDS;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("discover another treatise on ancient warding signs.");
-				}
+			STUDY_NECRONOMICON(R_WARDS,
+				"discover a treatise on ancient warding signs.",
+				"discover another treatise on ancient warding signs.");
 			break;
 			case 25:
-				if(!(artiptr->ovar1 & R_ELEMENTS)){
-					You("discover a section detailing the Lords of the Elements.");
-					artiptr->ovar1 |= R_ELEMENTS;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("discover another section on the Lords of the Elements.");
-				}
+			STUDY_NECRONOMICON(R_ELEMENTS,
+				"discover a section detailing the Lords of the Elements.",
+				"discover another section on the Lords of the Elements.");
 			break;
 			case 26:
-				if(!(artiptr->ovar1 & R_NAMES_1)){
-					if(artiptr->ovar1 & R_NAMES_2) You("find the first half of the testament of whispers.");
-					else You("come across the first half of something called 'the testament of whispers.'");
-					artiptr->ovar1 |= R_NAMES_1;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("discover another transcription of the first half of the testament of whispers.");
-				}
+			STUDY_NECRONOMICON(R_NAMES_1,
+				(artiptr->ovar1 & R_NAMES_2) ? "find the first half of the testament of whispers."
+					: "come across the first half of something called 'the testament of whispers.'",
+					"discover another transcription of the first half of the testament of whispers.");
 			break;
 			case 27:
-				if(!(artiptr->ovar1 & R_NAMES_2)){
-					if(artiptr->ovar1 & R_NAMES_1) You("find the second half of the testament of whispers.");
-					else You("come across the latter half of something called 'the testament of whispers.'");
-					artiptr->ovar1 |= R_NAMES_2;
-					artiptr->spestudied++;
-					if(artiptr->spestudied > rn1(4,6)){
-						artiptr->ovar1|= LAST_PAGE;
-					}
-				}
-				else{
-					You("discover another transcription of the latter half of the testament of whispers.");
-				}
+			STUDY_NECRONOMICON(R_NAMES_2,
+				(artiptr->ovar1 & R_NAMES_1) ? "find the second half of the testament of whispers."
+					: "come across the latter half of something called 'the testament of whispers.'",
+				"discover another transcription of the latter half of the testament of whispers.");
 			break;
 		}
+#undef STUDY_NECRONOMICON
 //		artiptr->ovar1 = ~0; //debug
 	}
 	else{
