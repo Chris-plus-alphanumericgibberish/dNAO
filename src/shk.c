@@ -2466,7 +2466,6 @@ register struct monst *shkp;	/* if angry, impose a surcharge */
 	else if (ACURR(A_CHA) < 8)	tmp += tmp / 2L;
 	else if (ACURR(A_CHA) < 11)	tmp += tmp / 3L;
 	if (tmp <= 0L) tmp = 1L;
-	else if (obj->oartifact) tmp *= 4L;
 	/* anger surcharge should match rile_shk's */
 	if (shkp && ESHK(shkp)->surcharge) tmp += (tmp + 2L) / 3L;
 	return tmp;
@@ -3449,11 +3448,6 @@ boolean shk_buying, shk_selling;
 		tmp = tmp * numerator / denominator;
 		if(tmp < 1) tmp = 1;
 	}
-	
-	if (obj->oartifact) {
-	    tmp = arti_cost(obj);
-	    if (shk_buying) tmp /= 4;
-	}
 	switch(obj->oclass) {
 	case FOOD_CLASS:
 		/* simpler hunger check, (2-4)*cost */
@@ -3483,6 +3477,10 @@ boolean shk_buying, shk_selling;
 			obj->age < 20L * (long)objects[obj->otyp].oc_cost)
 		    tmp /= 2L;
 		break;
+	}
+	if (obj->oartifact) {
+	    tmp = arti_cost(obj);
+	    if (shk_buying) tmp /= 4;
 	}
 	return tmp;
 }
