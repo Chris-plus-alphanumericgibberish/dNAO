@@ -12830,7 +12830,7 @@ int vis;						/* True if action is at all visible to the player */
 			} else if (trap){
 				/* some traps deal increased damage */
 				if (trap->ttyp == ROLLING_BOULDER_TRAP)
-					bonsdmg += d(2, level_difficulty()/3+1);
+					bonsdmg += d(2, level_difficulty()/3+1) - 5;	/* can be negative at early depths */
 				if (trap->ttyp == ARROW_TRAP)
 					bonsdmg += d(2, level_difficulty()/4+1);
 				if (trap->ttyp == DART_TRAP)
@@ -13957,8 +13957,8 @@ int vis;						/* True if action is at all visible to the player */
 			impossible("hurtle with no direction");
 		}
 
-		/* boulders can knock to the side as well -- 1/3 chance to move out of the way, 2/3 to go straight back */
-		if (fired && weapon && is_boulder(weapon) && !rn2(2)) {
+		/* boulders can knock to the side as well -- 2/3 chance to move out of the way, 1/3 to go straight back and be struck again*/
+		if (fired && weapon && is_boulder(weapon)) {
 			int tx = dx, ty = dy;
 			dx = (tx&&!ty) ? tx : (!tx&&ty) ? rn2(3)-1 : tx*(!rn2(3));
 			dy = (ty&&!tx) ? ty : (!ty&&tx) ? rn2(3)-1 : ty*(!rn2(3));
