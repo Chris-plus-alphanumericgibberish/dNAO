@@ -815,7 +815,7 @@ const struct Race races[] = {
 	{STR18(50),19, 18, 18, 18, 18 },
 	/* Init   Lower  Higher */
 	{  1, 0,  0, 1,  0, 0 },	/* Hit points */
-	{  2, 0,  2, 0,  2, 0 },	/* Energy */
+	{ 12, 0,  4, 0,  2, 2 },	/* Energy */
 	NIGHTVISION2
 },
 {	"Half-dragon", "Half-dragon", "Half-dragonhood", "Hlf",
