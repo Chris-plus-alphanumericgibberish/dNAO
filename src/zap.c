@@ -4109,27 +4109,30 @@ struct zapdata * zapdata;
 		return xdamagey(magr, mdef, &attk, dmg);
 
 	case AD_SLEE:
-		dmg = zapdata->flat ? zapdata->flat : d(zapdata->damn, 25);
+		/* does not acutally do damage; */
+		dmg = 0;
+		{
+		int sleeptime = zapdata->flat ? zapdata->flat : d(zapdata->damn, 25);
 		/* asymmetric */
 		if (youdef) {
 			if (Sleep_res(mdef)) {
 				doshieldeff = TRUE;
-				dmg = 0;
+				sleeptime = 0;
 				addmsg("don't feel sleepy.");
 			}
 			domsg();
-			if (dmg>0) {
-				fall_asleep(-dmg, TRUE); /* sleep ray */
+			if (sleeptime>0) {
+				fall_asleep(-sleeptime, TRUE); /* sleep ray */
 			}
 		}
 		else {
 			domsg();
-			(void)sleep_monst(mdef, dmg, zapdata->ztyp == ZAP_WAND ? WAND_CLASS : '\0');
+			(void)sleep_monst(mdef, sleeptime, zapdata->ztyp == ZAP_WAND ? WAND_CLASS : '\0');
 		}
 		/* rayguns are stunrays */
 		if (zapdata->ztyp == ZAP_RAYGUN) {
 			if (youdef) {
-				make_stunned(HStun + dmg, TRUE);
+				make_stunned(HStun + sleeptime, TRUE);
 			}
 			else {
 				mdef->mconf = TRUE;
@@ -4139,15 +4142,15 @@ struct zapdata * zapdata;
 		/* dragons' sleep gas is hallucinogenic */
 		if (magr && is_true_dragon(magr->data)) {
 			if (youdef) {
-				make_hallucinated(HHallucination + dmg, TRUE, 0L);
+				make_hallucinated(HHallucination + sleeptime, TRUE, 0L);
 			}
 			else {
 				mdef->mconf = TRUE;
 			}
 		}
-
+		}
 		/* deal no damage */
-		return xdamagey(magr, mdef, &attk, 0);
+		return xdamagey(magr, mdef, &attk, dmg);
 
 	case AD_DRLI:
 		/* check resist */
