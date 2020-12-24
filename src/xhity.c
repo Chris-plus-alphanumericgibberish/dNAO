@@ -12123,6 +12123,13 @@ int vis;						/* True if action is at all visible to the player */
 
 		if ((magr->mtyp == PM_UNDEAD_KNIGHT
 			|| magr->mtyp == PM_WARRIOR_OF_SUNLIGHT
+			|| magr->mtyp == PM_UNDEAD_MAIDEN
+			|| magr->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+			|| magr->mtyp == PM_BLUE_SENTINEL
+			|| magr->mtyp == PM_DARKMOON_KNIGHT
+			|| magr->mtyp == PM_UNDEAD_REBEL
+			|| magr->mtyp == PM_PARDONER
+			|| magr->mtyp == PM_OCCULTIST
 			|| magr->mtyp == PM_DREAD_SERAPH
 			) && can_undead(mdef->data)){
 			mdef->zombify = 1;
