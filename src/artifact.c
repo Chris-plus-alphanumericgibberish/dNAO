@@ -3707,12 +3707,14 @@ boolean * messaged;
 	    /* Magicbane's special attacks (possibly modifies hittee[]) */
 		*messaged = Mb_hit(magr, mdef, otmp, &dmg, dieroll, vis, hittee,
 			oartifact == ART_STAFF_OF_WILD_MAGIC ? "staff" : "blade");
+		dmg -= min(dmg, basedmg);	/* take back the basedmg that was passed to Mb_hit() */
 		/* assumes all bonus damage from Mb_hit should ignore resistances */
 		*truedmgptr += dmg;
 	}
 	if(oartifact == ART_PEN_OF_THE_VOID){
 		int dmg = basedmg;
 		*messaged = voidPen_hit(magr, mdef, otmp, &dmg, dieroll, vis, hittee);
+		dmg -= min(dmg, basedmg);	/* take back the basedmg that was passed to voidPen_hit() */
 		/* assumes all bonus damage from voidPen_hit should ignore resistances */
 		*truedmgptr += dmg;
 	}
