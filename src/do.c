@@ -284,6 +284,7 @@ doaltarobj(obj)  /* obj is an object dropped on an altar */
 		int cursed = 0;
 		struct obj * otmp;
 		for (otmp = obj->cobj; otmp; otmp = otmp->nobj) {
+			if (otmp->oclass == COIN_CLASS) continue;
 			if (otmp->blessed)
 				blessed++;
 			if (otmp->cursed)
@@ -297,6 +298,7 @@ doaltarobj(obj)  /* obj is an object dropped on an altar */
 		* naming them all */
 		if (Hallucination && blessed + cursed == 0) {
 			for (otmp = obj->cobj; otmp; otmp = otmp->nobj) {
+				if (otmp->oclass == COIN_CLASS) continue;
 				otmp->bknown = 1;
 			}
 		}
