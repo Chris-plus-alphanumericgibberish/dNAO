@@ -2640,7 +2640,9 @@ winid *datawin;
 		{
 			register const struct artifact *oart = &artilist[oartifact];
 			/* bonus damage, or double damage? We already checked that oart->attk exists */
-			if (oart->damage)
+			if (oart->damage && !(
+				(obj && oartifact == ART_ANNULUS && !is_lightsaber(obj))	/* annulus is 2x damage if not in lightsaber form */
+			))
 			{// 1dX bonus damage
 				if (oart->damage > 1)
 				{
