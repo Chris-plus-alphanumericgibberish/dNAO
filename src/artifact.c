@@ -9040,18 +9040,43 @@ read_necro(VOID_ARGS)
 	}
 	else if(necro_effect < SELECT_STUDY){/* special effect */
 		switch(necro_effect){
-			case SELECT_COMBAT:
-				if( !uwep ) You("aren't holding a weapon.");
-				else if(!(P_MAX_SKILL(objects[uwep->otyp].oc_skill) < P_EXPERT)) You("already know how to use your weapon.");
+			case SELECT_COMBAT:{
+				int skill = 0;
+				int newmax; 
+				
+				if(!uwep){
+					skill = P_MARTIAL_ARTS;
+					newmax = P_GRAND_MASTER;
+				} else if(is_weptool(uwep) || uwep->oclass == WEAPON_CLASS){
+					skill = weapon_type(uwep);
+					newmax = P_EXPERT;
+				}
+				else {
+					You("aren't holding a weapon.");
+					break;
+				}
+				
+				if((skill <= P_NONE || skill > P_LAST_WEAPON) && skill != P_MUSICALIZE){
+					You("aren't holding a weapon.");
+					break;
+				}
+				
+				if(!(P_MAX_SKILL(skill) < newmax)) You("already know how to use your weapon.");
 				else if(u.uen >= 100){
-					You("grasp the basics of your weapon's use.");
+					if(skill == P_MARTIAL_ARTS){
+						You("grasp the principles of your body's use.");
+						u.umartial = TRUE;
+					}
+					else
+						You("grasp the principles of your weapon's use.");
+						
 					losepw(100);
 					u.uenbonus -= 20;
 					calc_total_maxen();
-					unrestrict_weapon_skill(objects[uwep->otyp].oc_skill);
-					u.weapon_skills[objects[uwep->otyp].oc_skill].max_skill = P_EXPERT;
+					expert_weapon_skill(skill);
+					u.weapon_skills[objects[uwep->otyp].oc_skill].max_skill = newmax;
 				} else You("lack the magical energy to cast this incantation.");
-			break;
+			}break;
 			case SELECT_HEALTH:
 				use_unicorn_horn(artiptr);
 			break;
