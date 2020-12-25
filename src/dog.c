@@ -464,7 +464,7 @@ boolean with_you;
 		}
 		/* find the arrival portal */
 		for (t = ftrap; t; t = t->ntrap)
-		    if (t->ttyp == MAGIC_PORTAL) break;
+		    if (t->ttyp == MAGIC_PORTAL && t->dst.dlevel == mtmp->mtrack[2].x && t->dst.dnum == mtmp->mtrack[2].y) break;
 		if (t) {
 		    xlocale = t->tx,  ylocale = t->ty;
 		    break;
@@ -892,6 +892,10 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	if (In_W_tower(mtmp->mx, mtmp->my, &u.uz)) xyflags |= 2;
 	mtmp->wormno = num_segs;
 	mtmp->mlstmv = monstermoves;
+	if (xyloc == MIGR_PORTAL) {
+		mtmp->mtrack[2].x = u.uz.dlevel;
+		mtmp->mtrack[2].y = u.uz.dnum;
+	}
 	mtmp->mtrack[1].x = cc ? cc->x : mtmp->mx;
 	mtmp->mtrack[1].y = cc ? cc->y : mtmp->my;
 	mtmp->mtrack[0].x = xyloc;
