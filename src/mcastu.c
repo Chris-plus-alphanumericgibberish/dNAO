@@ -3552,6 +3552,7 @@ int tary;
 				if (((cmon != magr) || spell == MASS_CURE_CLOSE) &&	/* curefar doesn't affect self, cureclose does. */
 					(cmon->mhp < cmon->mhpmax) &&
 					(!DEADMONSTER(cmon)) &&
+					(!mm_aggression(magr, cmon)) &&
 					(cmon->mpeaceful == (youagr || magr->mpeaceful)) &&
 					dist2(tarx, tary, cmon->mx, cmon->my) <= 3 * 3 + 1
 					)
@@ -3623,6 +3624,7 @@ int tary;
 			for (cmon = fmon; cmon; cmon = cmon->nmon){
 				if ((!DEADMONSTER(cmon)) &&
 					(cmon->mpeaceful == (youagr || magr->mpeaceful)) &&
+					(!mm_aggression(magr, cmon)) &&
 					dist2(tarx, tary, cmon->mx, cmon->my) <= 3 * 3 + 1
 					)
 				{
@@ -3662,6 +3664,7 @@ int tary;
 				if ((cmon != magr) &&	/* does not affect caster */
 					(!DEADMONSTER(cmon)) &&
 					(cmon->mpeaceful == (youagr || magr->mpeaceful)) &&
+					(!mm_aggression(magr, cmon)) &&
 					dist2(tarx, tary, cmon->mx, cmon->my) <= 3 * 3 + 1
 					)
 				{
