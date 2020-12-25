@@ -1123,6 +1123,7 @@ register struct obj *obj;
 			obj->otyp = POT_WATER;
 			obj->odiluted = 0; /* same as any other water */
 		}
+		set_object_color(obj);
 		break;
 	    }
 	}
@@ -1526,6 +1527,7 @@ poly_obj(obj, id)
 		} else if(obj->otyp == POT_WATER || obj->otyp == POT_AMNESIA){
 			if(obj->otyp == POT_AMNESIA){
 				obj->otyp = POT_WATER;
+				set_object_color(obj);
 			}
 			if(!rn2(3)){
 				obj->blessed = 0;
