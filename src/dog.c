@@ -1345,10 +1345,8 @@ untame(mtmp, be_peaceful)
 struct monst * mtmp;
 boolean be_peaceful;
 {
-	if (mtmp->mtame) {
-		rem_mx(mtmp, MX_EDOG);
-		mtmp->mtame = 0;
-	}
+	rem_mx(mtmp, MX_EDOG);
+	mtmp->mtame = 0;
 	mtmp->mpeaceful = be_peaceful;
 	newsym(mtmp->mx, mtmp->my);
 	return;
