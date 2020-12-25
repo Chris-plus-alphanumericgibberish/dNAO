@@ -1673,6 +1673,7 @@ int tary;
 	struct permonst * pa = (youagr ? youracedata : magr->data);
 	boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
 	boolean notarget = (!mdef || (!tarx && !tary));
+	int result = 0;
 	int spellnum = 0;
 	int chance = 0;
 	char buf[BUFSZ];
@@ -1838,21 +1839,24 @@ int tary;
 		if (youdef && magr->mtyp == PM_AVATAR_OF_LOLTH && !strcmp(urole.cgod, "Lolth") && !is_undirected_spell(spellnum) && !magr->mpeaceful){
 			u.ugangr[Align2gangr(A_CHAOTIC)]++;
 			angrygods(A_CHAOTIC);
-			return MM_HIT;
+			result = MM_HIT;
 		}
 		/* generally: cast the spell */
-		return cast_spell(magr, mdef, attk, spellnum, tarx, tary);
+		result = cast_spell(magr, mdef, attk, spellnum, tarx, tary);
 	}
 	else if (!notarget || youagr) {
 		/* no spell selected; this probably means we have an elemental spell to cast */
 		/* these typically result in either a beam (zaps a cone of cold, etc) or hand-to-hand magic (covered in frost, etc) */
 		/* the player can be prompted to cast in a direction; otherwise, we need a target */
-		return elemspell(magr, mdef, attk, tarx, tary);
+		result = elemspell(magr, mdef, attk, tarx, tary);
 	}
-
-	/* should not be reached */
-	impossible("end of xcasty() reached");
-	return MM_MISS;
+	if (result) {
+		/* if attacking a displacement, monsters figure out you weren't there */
+		if (magr && youdef && (tarx != u.ux || tary != u.uy)) {
+			magr->mux = magr->muy = 0;
+		}
+	}
+	return result;
 }
 
 /* elemspell()
@@ -2270,6 +2274,7 @@ int tary;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	boolean malediction = (youdef && (magr->iswiz || (magr->data->msound == MS_NEMESIS && rn2(2))));
+	boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
 	int result = MM_MISS;	/* to store intermediary xhity-esque returns */
 
 	/* common to all summon spells */
@@ -2290,8 +2295,8 @@ int tary;
 // SINGLE-TARGET OFFENSE
 //////////////////////////////////////////////////////////////////////////////////////
 	case PSI_BOLT:
-		/* needs mdef */
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("No mdef for psibolt");
 			return MM_MISS;
 		}
@@ -2325,8 +2330,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case OPEN_WOUNDS:
-		/* needs mdef */
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("No mdef for open wounds");
 			return MM_MISS;
 		}
@@ -2374,6 +2379,7 @@ int tary;
 	case LIGHTNING_BOLT:
 	case SLEEP:
 	case DISINT_RAY:
+		/* these are allowed to miss */
 		if (!mdef) {
 			impossible("ray spell with no mdef?");
 			return MM_MISS;
@@ -2445,7 +2451,8 @@ int tary;
 		return MM_HIT;
 
 	case ARROW_RAIN:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("arrow rain with no mdef?");
 			return MM_MISS;
 		}
@@ -2482,7 +2489,8 @@ int tary;
 		return MM_HIT;
 
 	case LIGHTNING:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("lightning with no mdef?");
 			return MM_MISS;
 		}
@@ -2527,7 +2535,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case FIRE_PILLAR:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("fire pillar with no mdef?");
 			return MM_MISS;
 		}
@@ -2567,7 +2576,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case GEYSER:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("geyser with no mdef?");
 			return MM_MISS;
 		}
@@ -2635,7 +2645,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case ACID_RAIN: /* as seen in the Lethe patch */
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("acid rain with no mdef?");
 			return MM_MISS;
 		}
@@ -2689,7 +2700,8 @@ int tary;
 	case HAIL_FLURY:
 	case ICE_STORM:
 		/* ice storm is identical to hail flury, except it overrides dmg to 8d8 */
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("ice storm / hail flury with no mdef?");
 			return MM_MISS;
 		}
@@ -2736,7 +2748,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case DEATH_TOUCH:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("death touch with no mdef?");
 			return MM_MISS;
 		}
@@ -2841,7 +2854,8 @@ int tary;
 
 
 	case PLAGUE:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("plague with no mdef?");
 			return MM_MISS;
 		}
@@ -2874,7 +2888,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case FILTH:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("filth with no mdef?");
 			return MM_MISS;
 		}
@@ -2990,7 +3005,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case TURN_TO_STONE:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("turn to stone with no mdef?");
 			return MM_MISS;
 		}
@@ -3014,7 +3030,8 @@ int tary;
 		return result;
 
 	case STRANGLE:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("strangle with no mdef?");
 			return MM_MISS;
 		}
@@ -3056,7 +3073,8 @@ int tary;
 		return MM_HIT;
 
 	case SILVER_RAYS:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("silver rays with no mdef?");
 			return MM_MISS;
 		}
@@ -3166,7 +3184,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case GOLDEN_WAVE:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("golden wave with no mdef?");
 			return MM_MISS;
 		}
@@ -3259,7 +3278,8 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case MON_WARP:
-		if (!mdef) {
+		/* needs direct target */
+		if (!foundem) {
 			impossible("warp with no mdef?");
 			return MM_MISS;
 		}
@@ -3301,23 +3321,31 @@ int tary;
 			otmp->quan = 1;
 			otmp->owt = weight(otmp);
 			if (iron) otmp->owt += 160 * rn2(2);
-			pline("%s drops out of %s and hits you!", An(xname(otmp)),
-				iron ? "nowhere" : the(ceiling(u.ux, u.uy)));
-			dmg = dmgval(otmp, &youmonst, 0);
-			if (uarmh) {
-				if (is_hard(uarmh)) {
-					pline("Fortunately, you are wearing a hard helmet.");
-					if (dmg > 2) dmg = 2;
-				}
-				else if (flags.verbose) {
-					Your("%s does not protect you.",
-						xname(uarmh));
+
+			if (foundem) {
+				pline("%s drops out of %s and hits you!", An(xname(otmp)),
+					iron ? "nowhere" : the(ceiling(tarx, tary)));
+				dmg = dmgval(otmp, &youmonst, 0);
+				if (uarmh) {
+					if (is_hard(uarmh)) {
+						pline("Fortunately, you are wearing a hard helmet.");
+						if (dmg > 2) dmg = 2;
+					}
+					else if (flags.verbose) {
+						Your("%s does not protect you.",
+							xname(uarmh));
+					}
 				}
 			}
-			if (!flooreffects(otmp, u.ux, u.uy, "fall")) {
-				place_object(otmp, u.ux, u.uy);
+			else {
+				if (cansee(tarx, tary))
+					pline("%s drops out of %s!", An(xname(otmp)), iron ? "nowhere" : the(ceiling(tarx, tary)));
+				dmg = 0;
+			}
+			if (!flooreffects(otmp, tarx, tary, "fall")) {
+				place_object(otmp, tarx, tary);
 				stackobj(otmp);
-				newsym(u.ux, u.uy);
+				newsym(tarx, tary);
 			}
 
 			if (Half_phys(mdef))
@@ -3524,6 +3552,7 @@ int tary;
 				if (((cmon != magr) || spell == MASS_CURE_CLOSE) &&	/* curefar doesn't affect self, cureclose does. */
 					(cmon->mhp < cmon->mhpmax) &&
 					(!DEADMONSTER(cmon)) &&
+					(!mm_aggression(magr, cmon)) &&
 					(cmon->mpeaceful == (youagr || magr->mpeaceful)) &&
 					dist2(tarx, tary, cmon->mx, cmon->my) <= 3 * 3 + 1
 					)
@@ -3595,6 +3624,7 @@ int tary;
 			for (cmon = fmon; cmon; cmon = cmon->nmon){
 				if ((!DEADMONSTER(cmon)) &&
 					(cmon->mpeaceful == (youagr || magr->mpeaceful)) &&
+					(!mm_aggression(magr, cmon)) &&
 					dist2(tarx, tary, cmon->mx, cmon->my) <= 3 * 3 + 1
 					)
 				{
@@ -3634,6 +3664,7 @@ int tary;
 				if ((cmon != magr) &&	/* does not affect caster */
 					(!DEADMONSTER(cmon)) &&
 					(cmon->mpeaceful == (youagr || magr->mpeaceful)) &&
+					(!mm_aggression(magr, cmon)) &&
 					dist2(tarx, tary, cmon->mx, cmon->my) <= 3 * 3 + 1
 					)
 				{
@@ -3671,7 +3702,7 @@ int tary;
 		if (u.summonMonster || youagr) {
 			/* only allow one "summoning" spell per turn. This isn't summoning but it's close enough? */
 			/* you don't get to cast this one, either */
-			return cast_spell(magr, mdef, attk, (mdef ? PSI_BOLT : CURE_SELF), tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? PSI_BOLT : CURE_SELF), tarx, tary);
 		}
 		else {
 			int extraturns = d(1, 4) + 1, i;
@@ -3779,7 +3810,7 @@ int tary;
 		}
 		else if (!(youdef || youagr)) {
 			/* only uvm / mvu allowed */
-			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
 		else {
 			/* Try for insects, and if there are none
@@ -3854,7 +3885,7 @@ int tary;
 	case RAISE_DEAD:
 		if (!youdef) {
 			/* only mvu allowed */
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? PSI_BOLT : CURE_SELF), tarx, tary);
 		}
 		else
 		{
@@ -3873,7 +3904,7 @@ int tary;
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			/* disallowed in Anachrononaut quest */
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? PSI_BOLT : CURE_SELF), tarx, tary);
 		}
 		else
 		{
@@ -3904,7 +3935,7 @@ int tary;
 		if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
-			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
 		else if (is_alienist(magr->data)) {
 			/* alienists summon aliens. wowzers. */
@@ -3925,7 +3956,7 @@ int tary;
 					an(Hallucination ? rndmonnam() : "hostile fiend"));
 			}
 			else
-				return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -3934,7 +3965,7 @@ int tary;
 		if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
-			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
 		else if (is_alienist(magr->data)) {
 			/* alienists summon aliens. wowzers. */
@@ -3961,7 +3992,7 @@ int tary;
 					an(Hallucination ? rndmonnam() : "hostile angel"));
 			}
 			else
-				return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -3970,7 +4001,7 @@ int tary;
 		if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
-			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
 		else {
 			struct monst *mtmp;
@@ -4006,7 +4037,7 @@ int tary;
 					an(Hallucination ? rndmonnam() : "alien"));
 			}
 			else
-				return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -4015,7 +4046,7 @@ int tary;
 		if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
-			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
 		else {
 			struct monst *mtmp;
@@ -4050,7 +4081,7 @@ int tary;
 					You("sense the arrival of a monster!");
 			}
 			else
-				return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -4059,7 +4090,7 @@ int tary;
 		if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? PSI_BOLT : CURE_SELF), tarx, tary);
 		}
 		else {
 			struct monst *mtmp;
@@ -4082,7 +4113,7 @@ int tary;
 	case CLONE_WIZ:
 		if (!youdef) {
 			/* only mvu allowed */
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
+			return cast_spell(magr, mdef, attk, (foundem ? PSI_BOLT : CURE_SELF), tarx, tary);
 		}
 		else {
 			if (magr->iswiz && flags.no_of_wizards == 1) {

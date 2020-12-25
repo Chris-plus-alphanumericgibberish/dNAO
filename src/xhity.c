@@ -1709,7 +1709,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 
 		/* if twoweaponing... */
-		if (!by_the_book && *indexnum > 0 && (prev_res[1] != MM_MISS) && u.twoweap) {
+		if (!by_the_book && *indexnum > 0 && u.twoweap) {
 			/* follow weapon attacks with offhand attacks */
 			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP) {
 				fromlist = FALSE;
@@ -2114,8 +2114,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/* Specific cases that prevent attacks */
 	if (!by_the_book && !is_null_attk(attk) && (
-		/* twoweapon symmetry -- if the previous attack missed, do not make an offhand attack*/
-		(*indexnum > 0 && prev_res[1] == MM_MISS && attk->aatyp == AT_XWEP) ||
 		/* If player is the target and is engulfed, only targetable by engulf attacks */
 		(youdef && u.uswallow && (attk->aatyp != AT_ENGL && attk->aatyp != AT_ILUR)) ||
 		/* If player was using 'k' to kick, they are only performing kick attacks (onlykicks is a state variable defined in dokick.c) */
