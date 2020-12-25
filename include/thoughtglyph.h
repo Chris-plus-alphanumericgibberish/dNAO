@@ -38,10 +38,10 @@ struct thoughtglyph {
 
 static struct thoughtglyph thoughtglyphs[] =
 {
-	{ ANTI_CLOCKWISE_METAMORPHOSIS_G, PM_BESTIAL_DERVISH, ANTI_CLOCKWISE_METAMORPHOSIS,
+	{ ANTI_CLOCKWISE_METAMORPHOSIS_G, PM_ETHEREAL_DERVISH, ANTI_CLOCKWISE_METAMORPHOSIS,
 	20, 100, "A anti-clockwise gyre forms in your mind." },
 
-	{ CLOCKWISE_METAMORPHOSIS_GLYPH, PM_ETHEREAL_DERVISH, CLOCKWISE_METAMORPHOSIS,
+	{ CLOCKWISE_METAMORPHOSIS_GLYPH, PM_BESTIAL_DERVISH, CLOCKWISE_METAMORPHOSIS,
 	20, 100, "An clockwise gyre forms in your mind." },
 
 	{ SPARKLING_LAKE_GLYPH, PM_SPARKLING_LAKE, ARCANE_BULWARK,
@@ -57,7 +57,7 @@ static struct thoughtglyph thoughtglyphs[] =
 	12, 100, "A great volume of freezing water pours into your mind." },
 
 	{ RAPTUROUS_EYE_GLYPH, PM_BLOOD_SHOWER, BLOOD_RAPTURE,
-	14, 90, "A rapturous shower of blood drifts through your mind." },
+	14, 90, "A rapturous shower of blood drifts into your mind." },
 
 	{ CLAWMARK_GLYPH, PM_MANY_TALONED_THING, CLAWMARK,
 	16, 90, "A many-taloned clawmark is scoured into your mind." },
