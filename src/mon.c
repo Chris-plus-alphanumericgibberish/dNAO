@@ -1287,6 +1287,9 @@ int
 minliquid(mtmp)
 register struct monst *mtmp;
 {
+	/* mtmp must be alive */
+	if (!mtmp || DEADMONSTER(mtmp))
+		return 1;	/* mon is already dead */
 	boolean inpool, inlava, infountain, inshallow;
 
 	inpool = is_3dwater(mtmp->mx, mtmp->my) || (is_pool(mtmp->mx, mtmp->my, FALSE) &&
