@@ -283,21 +283,32 @@ doaltarobj(obj)  /* obj is an object dropped on an altar */
 		int blessed = 0;
 		int cursed = 0;
 		struct obj * otmp;
-		for (otmp = obj->cobj; otmp; otmp = otmp->nobj) {
+		struct obj * nxto;
+		for (otmp = obj->cobj; otmp; otmp = nxto) {
+			nxto = otmp->nobj;
+			if (otmp->oclass == COIN_CLASS) continue;
 			if (otmp->blessed)
 				blessed++;
 			if (otmp->cursed)
 				cursed++;
-			if (!Hallucination) {
+			if (!Hallucination && !otmp->bknown) {
 				otmp->bknown = 1;
+				obj_extract_self(otmp);
+				add_to_container(obj, otmp);
 			}
 		}
 		/* even when hallucinating, if you get no flashes at all, you know
 		* everything's uncursed, so save the player the trouble of manually
 		* naming them all */
 		if (Hallucination && blessed + cursed == 0) {
-			for (otmp = obj->cobj; otmp; otmp = otmp->nobj) {
-				otmp->bknown = 1;
+			for (otmp = obj->cobj; otmp; otmp = nxto) {
+				nxto = otmp->nobj;
+				if (otmp->oclass == COIN_CLASS) continue;
+				if (!otmp->bknown) {
+					otmp->bknown = 1;
+					obj_extract_self(otmp);
+					add_to_container(obj, otmp);
+				}
 			}
 		}
 		if (blessed + cursed > 0) {
