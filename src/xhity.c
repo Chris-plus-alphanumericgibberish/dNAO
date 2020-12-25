@@ -1065,15 +1065,8 @@ int tary;
 				break;
 			case AT_ARRW:
 				if ((adtyp != AD_SHDW || ranged)) {	// can be used in melee range, except for shadow
-					int n;
-					/* message -- done outside of xfirey to only print 1 message for d(n,d) function calls */
-					/* potential change: pass a domessage variable to xfirey */
-					if (canseemon(magr)) {
-						pline("%s shoots!", Monnam(magr));
-					}
 					/* fire d(n,d) projectiles */
-					for (n = d(attk->damn, attk->damd); n > 0; n--)
-						result |= xfirey(magr, attk, tarx, tary);
+					result |= xfirey(magr, attk, tarx, tary, d(attk->damn, attk->damd));
 					if (result) {
 						/* they did fire at least one projectile */
 						mon_ranged_gazeonly = FALSE;
