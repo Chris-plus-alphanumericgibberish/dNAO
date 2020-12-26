@@ -2198,6 +2198,15 @@ movemon()
 	
 	//Current Movement Loop///////////////////////////////////////////////////
     for(mtmp = fmon; mtmp; mtmp = nmtmp) {
+	/* check that mtmp wasn't migrated by previous mtmp's actions */
+	if (!(mtmp->mx || mtmp->my)) {
+		/* uh oh -- restart loop at fmon. This will let already-handled very fast
+		 * monsters expend movement points to act out of turn, but will not result in anyone gaining
+		 * or losing turns, or worse, this loop affecting anyone in the migrating_mons chain */
+		mtmp = fmon;
+		if (!mtmp)
+			break;	/* exit current movement loop, there is no one left at all */
+	}
 	nmtmp = mtmp->nmon;
 	/* Find a monster that we have not treated yet.	 */
 	if(DEADMONSTER(mtmp))
