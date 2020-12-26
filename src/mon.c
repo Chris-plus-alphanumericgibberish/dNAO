@@ -3412,6 +3412,10 @@ struct monst * mdef;	/* another monster which is next to it */
 	if(mdef->entangled == SHACKLES) {
 		return 0L;
 	}
+	// must be in range to attack mdef
+	if (distmin(magr->mx, magr->my, mdef->mx, mdef->my) > BOLT_LIM) {
+		return 0L;
+	}
 	// must be able to see mdef -- note that this has a 1/8 chance when adjacent even when totally blind!
 	if (!mon_can_see_mon(magr, mdef)) {
 		return 0L;
