@@ -270,9 +270,9 @@ curses_break_str(const char *str, int width, int line_num)
     char *retstr;
     int curline = 0;
     int strsize = strlen(str);
-    char substr[strsize];
-    char curstr[strsize];
-    char tmpstr[strsize];
+    char substr[strsize+1];
+    char curstr[strsize+1];
+    char tmpstr[strsize+1];
 
     strcpy(substr, str);
 
@@ -578,6 +578,8 @@ curses_rtrim(char *str)
     char *s;
 
     for (s = str; *s != '\0'; ++s);
+    if (s == str)
+        return;
     for (--s; isspace(*s) && s > str; --s);
     if (s == str)
         *s = '\0';
