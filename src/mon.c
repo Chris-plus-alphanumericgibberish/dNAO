@@ -2960,7 +2960,7 @@ struct monst *looker;
 		}
 		/* nv range auto-succeeds within its distance */
 		if (nvrange > 0
-			&& dist2(looker->mx, looker->my, u.ux, u.uy) <= nvrange * nvrange) {
+			&& dist2(looker->mx, looker->my, u.ux, u.uy) <= nvrange * nvrange + nvrange) {
 			return TRUE;
 		}
 		/* otherwise, check sight vs how lit/dim the square is */
