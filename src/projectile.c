@@ -206,7 +206,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		) {
 			returning = TRUE;
 		}
-		else if(uandroid && !launcher && youagr && thrownobj->oartifact != ART_FLUORITE_OCTAHEDRON){/* there's no android monster helper? */
+		else if(uandroid && youagr && !(
+			(launcher) || /* no returning fired ammo */
+			(thrownobj->oartifact == ART_FLUORITE_OCTAHEDRON && thrownobj->quan > 1)	/* no multithrown fluorite octet for balance reasons */
+		)){
 			returning = TRUE;
 			range = range/2 + 1;
 			initrange = initrange/2 + 1;
@@ -1092,7 +1095,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 
 	/* unicorns */
-	if (thrownobj->oclass == GEM_CLASS && is_unicorn(pd)) {
+	if (thrownobj->oclass == GEM_CLASS && is_unicorn(pd) && !forcedestroy) {
 		if (youdef)
 		{
 			if (thrownobj->otyp > LAST_GEM) {
@@ -1155,7 +1158,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 
 	/* you throwing to a pet */
-	if (youagr && mdef->mtame) {
+	if (youagr && mdef->mtame && !forcedestroy) {
 		if (mdef->mcanmove &&
 			(!is_animal(mdef->data)) &&
 			(!mindless_mon(mdef) || (mdef->mtyp == PM_CROW_WINGED_HALF_DRAGON && thrownobj->oartifact == ART_YORSHKA_S_SPEAR)) &&
@@ -1182,8 +1185,8 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 
 	/* feeding domestic animals */
-	if (befriend_with_obj(mdef->data, thrownobj) ||
-		(mdef->mtame && dogfood(mdef, thrownobj) <= 2)) {	/* 2 <=> ACCFOOD */
+	if ((befriend_with_obj(mdef->data, thrownobj) || (mdef->mtame && dogfood(mdef, thrownobj) <= 2))	/* 2 <=> ACCFOOD */
+		&& !forcedestroy) {
 		if (tamedog(mdef, thrownobj))
 		{
 			*thrownobj_p = NULL;
@@ -2167,21 +2170,17 @@ dofire()
 
 	if (attacktype(youracedata, AT_ARRW)) {
 		struct attack * attk = attacktype_fordmg(youracedata, AT_ARRW, AD_ANY);
-		int n;
 		if (getdir((char *)0)) {
-			/* actually have to message in this function */
-			You("shoot!");
 			/* fire d(n,d) projectiles */
-			for (n = d(attk->damn, attk->damd); n > 0; n--)
-				result |= xfirey(&youmonst, attk, 0, 0);
+			result |= xfirey(&youmonst, attk, 0, 0, d(attk->damn, attk->damd));
 
 			if (result) {
 				return 1;
 			}
 			else {
 				/* nothing shot, but we messaged, so we have to end here */
-				pline("...or not. Awkward.");
-				return 1;
+				pline("You have nothing to intrinsically shoot!");
+				return 0;
 			}
 		}
 	}
@@ -2852,15 +2851,14 @@ int tary;
  * xfirey()
  *
  * magr is inherently shooting at (tarx, tary)
- *
- * TODO: make 'f'ire use this function
  */
 boolean
-xfirey(magr, attk, tarx, tary)		/* monster fires arrows at you */
+xfirey(magr, attk, tarx, tary, n)		/* monster fires arrows at you */
 struct monst * magr;
 struct attack * attk;
 int tarx;
 int tary;
+int n;	/* number to try to fire */
 {
 	struct obj * qvr = (struct obj *)0;				/* quiver of projectiles to use */
 	boolean youagr = (magr == &youmonst);
@@ -2870,6 +2868,7 @@ int tary;
 	int yadj = 0;
 	int rngmod = 0;
 	boolean portal_projectile = FALSE;		/* if TRUE, teleports projectile directly to target */
+	boolean from_pack = FALSE;
 	int ammo_type;
 	int dx, dy, dz;
 
@@ -2986,6 +2985,14 @@ int tary;
 		/* No ammo of the right type found, nothing happened, took no time */
 		if (!qvr)
 			return FALSE; 
+		else {
+			from_pack = TRUE;
+			n = min(n, qvr->quan);
+		}
+	}
+	else {
+		/* create enough ammo */
+		qvr->quan = n + 1;
 	}
 
 	/* if the player is using this function, tarx/tary don't exist, which is a problem for portal_projectile */
@@ -3011,41 +3018,55 @@ int tary;
 		}
 	}
 
-	/* don't message here , because this function is often called several times :( */
-
-	/* Fire the projectile */
-	if (portal_projectile) {
-		/* start the projectile adjacent to the target */
-		projectile(magr, qvr, (void *)0, HMON_FIRED,
-			tarx-dx, tary-dy, dx, dy, dz,
-			1, TRUE, youagr, FALSE);
-	}
-	else {
-		/* start the projectile at magr's location, modified by xadj and yadj */
-		projectile(magr, qvr, (void *)0, HMON_FIRED,
-			x(magr)+xadj, y(magr)+yadj, dx, dy, dz,
-			BOLT_LIM+rngmod, TRUE, youagr, FALSE);
+	/* print appropriate message */
+	if (youagr || canseemon(magr)) {
+		char buf[BUFSZ];
+		if (n>1)	Sprintf(buf, " %d times", n);
+		else		Strcpy(buf, "");
+		pline("%s shoot%s%s!",
+			(youagr ? "You" : Monnam(magr)),
+			(youagr ? "" : "s"),
+			(buf));
 	}
 
-	/* shadow bolts web the target hit */
-	if (typ == AD_SHDW) {
-		struct trap *ttmp2;
-		ttmp2 = maketrap(bhitpos.x, bhitpos.y, WEB);
-		if (bhitpos.x == u.ux && bhitpos.y == u.uy && ttmp2) {
-			pline_The("webbing sticks to you. You're caught!");
-			dotrap(ttmp2, NOWEBMSG);
+	/* Fire the projectile(s) */
+	while (n-- && qvr->quan > 0) {
+		if (portal_projectile) {
+			/* start the projectile adjacent to the target */
+			projectile(magr, qvr, (void *)0, HMON_FIRED,
+				tarx-dx, tary-dy, dx, dy, dz,
+				1, !from_pack, youagr, FALSE);
+		}
+		else {
+			/* start the projectile at magr's location, modified by xadj and yadj */
+			projectile(magr, qvr, (void *)0, HMON_FIRED,
+				x(magr)+xadj, y(magr)+yadj, dx, dy, dz,
+				BOLT_LIM+rngmod, !from_pack, youagr, FALSE);
+		}
+
+		/* shadow bolts web the target hit */
+		if (typ == AD_SHDW) {
+			struct trap *ttmp2;
+			ttmp2 = maketrap(bhitpos.x, bhitpos.y, WEB);
+			if (bhitpos.x == u.ux && bhitpos.y == u.uy && ttmp2) {
+				pline_The("webbing sticks to you. You're caught!");
+				dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
-			if (u.usteed && u.utrap) {
-				/* you, not steed, are trapped */
-				dismount_steed(DISMOUNT_FELL);
-			}
+				if (u.usteed && u.utrap) {
+					/* you, not steed, are trapped */
+					dismount_steed(DISMOUNT_FELL);
+				}
 #endif
+			}
+			else if (ttmp2) {
+				struct monst * mdef = m_at(bhitpos.x, bhitpos.y);
+				if (mdef)
+					mintrap(mdef);
+			}
 		}
-		else if (ttmp2) {
-			struct monst * mdef = m_at(bhitpos.x, bhitpos.y);
-			if (mdef)
-				mintrap(mdef);
-		}
+	}
+	if (!from_pack) {
+		delobj(qvr);
 	}
 
 	/* interrupt player if they were targetted */

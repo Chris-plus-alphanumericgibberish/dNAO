@@ -2362,6 +2362,7 @@ boolean amnesia;
 			if (obj->otyp == POT_STARLIGHT)
 				end_burn(obj, FALSE);
 			obj->otyp = POT_WATER;
+			set_object_color(obj);
 		} else obj->odiluted++;
 		used = TRUE;
 		break;
@@ -2781,7 +2782,7 @@ dodip()
 			pline_The("mixture looks %s.",
 				hcolor(OBJ_DESCR(objects[obj->otyp])));
 		}
-
+		set_object_color(obj);
 		useup(potion);
 		return(1);
 	}

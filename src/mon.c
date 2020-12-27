@@ -1287,6 +1287,9 @@ int
 minliquid(mtmp)
 register struct monst *mtmp;
 {
+	/* mtmp must be alive */
+	if (!mtmp || DEADMONSTER(mtmp))
+		return 1;	/* mon is already dead */
 	boolean inpool, inlava, infountain, inshallow;
 
 	inpool = is_3dwater(mtmp->mx, mtmp->my) || (is_pool(mtmp->mx, mtmp->my, FALSE) &&
@@ -2195,6 +2198,15 @@ movemon()
 	
 	//Current Movement Loop///////////////////////////////////////////////////
     for(mtmp = fmon; mtmp; mtmp = nmtmp) {
+	/* check that mtmp wasn't migrated by previous mtmp's actions */
+	if (!(mtmp->mx || mtmp->my)) {
+		/* uh oh -- restart loop at fmon. This will let already-handled very fast
+		 * monsters expend movement points to act out of turn, but will not result in anyone gaining
+		 * or losing turns, or worse, this loop affecting anyone in the migrating_mons chain */
+		mtmp = fmon;
+		if (!mtmp)
+			break;	/* exit current movement loop, there is no one left at all */
+	}
 	nmtmp = mtmp->nmon;
 	/* Find a monster that we have not treated yet.	 */
 	if(DEADMONSTER(mtmp))
@@ -2365,7 +2377,7 @@ movemon()
 #ifdef OVLB
 
 #define mstoning(obj)	(ofood(obj) && \
-					(touch_petrifies(&mons[(obj)->corpsenm]) || \
+					((obj)->corpsenm >= LOW_PM && touch_petrifies(&mons[(obj)->corpsenm]) || \
 					(obj)->corpsenm == PM_MEDUSA))
 
 /*
@@ -2944,7 +2956,7 @@ struct monst *looker;
 		}
 		/* nv range auto-succeeds within its distance */
 		if (nvrange > 0
-			&& dist2(looker->mx, looker->my, u.ux, u.uy) <= nvrange * nvrange) {
+			&& dist2(looker->mx, looker->my, u.ux, u.uy) <= nvrange * nvrange + nvrange) {
 			return TRUE;
 		}
 		/* otherwise, check sight vs how lit/dim the square is */
@@ -3399,6 +3411,10 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	// shackled monsters aren't a threat
 	if(mdef->entangled == SHACKLES) {
+		return 0L;
+	}
+	// must be in range to attack mdef
+	if (distmin(magr->mx, magr->my, mdef->mx, mdef->my) > BOLT_LIM) {
 		return 0L;
 	}
 	// must be able to see mdef -- note that this has a 1/8 chance when adjacent even when totally blind!

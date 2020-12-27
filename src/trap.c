@@ -3286,11 +3286,13 @@ struct monst *owner;
 			    else if (obj->otyp != POT_AMNESIA) {
 				obj->otyp = POT_WATER;
 				obj->odiluted = 0;
+				set_object_color(obj);
 			    }
 			} else if (obj->odiluted || obj->otyp == POT_AMNESIA) {
 				obj->otyp = POT_WATER;
 				obj->blessed = obj->cursed = 0;
 				obj->odiluted = 0;
+				set_object_color(obj);
 			} else if (obj->otyp != POT_WATER)
 				obj->odiluted++;
 			break;

@@ -148,7 +148,7 @@ add_colored_text(text, newbot2)
     start_color_option(color_option);
     /* Trim the statusline to always have the end color
      * to have effect. */
-    newbot2[min(MAXCO, CO)-1] = '\0';
+    newbot2[max(0, min(MAXCO, CO)-1)] = '\0';
     putstr(WIN_STATUS, 0, newbot2);
     end_color_option(color_option);
 }
