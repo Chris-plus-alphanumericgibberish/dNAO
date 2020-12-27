@@ -3319,7 +3319,9 @@ int flat_acc;
 		(weapon && arti_shining(weapon)) ||
 		(melee && attk->aatyp == AT_TUCH) ||
 		(melee && attk->aatyp == AT_VINE) ||
-		(melee && attk->aatyp == AT_SRPR)) {
+		(melee && attk->aatyp == AT_SRPR) ||
+		(weapon && !valid_weapon(weapon))	/* potions, cream pies, rubber chickens, eggs, etc. */
+		) {
 		if (youdef) {
 			defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
 		}

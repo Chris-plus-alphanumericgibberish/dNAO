@@ -1095,7 +1095,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 
 	/* unicorns */
-	if (thrownobj->oclass == GEM_CLASS && is_unicorn(pd)) {
+	if (thrownobj->oclass == GEM_CLASS && is_unicorn(pd) && !forcedestroy) {
 		if (youdef)
 		{
 			if (thrownobj->otyp > LAST_GEM) {
@@ -1158,7 +1158,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 
 	/* you throwing to a pet */
-	if (youagr && mdef->mtame) {
+	if (youagr && mdef->mtame && !forcedestroy) {
 		if (mdef->mcanmove &&
 			(!is_animal(mdef->data)) &&
 			(!mindless_mon(mdef) || (mdef->mtyp == PM_CROW_WINGED_HALF_DRAGON && thrownobj->oartifact == ART_YORSHKA_S_SPEAR)) &&
@@ -1185,8 +1185,8 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 
 	/* feeding domestic animals */
-	if (befriend_with_obj(mdef->data, thrownobj) ||
-		(mdef->mtame && dogfood(mdef, thrownobj) <= 2)) {	/* 2 <=> ACCFOOD */
+	if ((befriend_with_obj(mdef->data, thrownobj) || (mdef->mtame && dogfood(mdef, thrownobj) <= 2))	/* 2 <=> ACCFOOD */
+		&& !forcedestroy) {
 		if (tamedog(mdef, thrownobj))
 		{
 			*thrownobj_p = NULL;
