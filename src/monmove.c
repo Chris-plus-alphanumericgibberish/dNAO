@@ -2407,9 +2407,8 @@ not_special:
 			}
 		}
 	} else {
-	    if(is_unicorn(ptr) && rn2(2) && !tele_restrict(mtmp) && 
-			!(mtmp->data->maligntyp < 0 && !(noactions(mtmp)))
-		) {
+	    if(is_unicorn(ptr) && rn2(2) && !tele_restrict(mtmp) && !noactions(mtmp))
+		{
 			(void) rloc(mtmp, FALSE);
 			return(1);
 	    }
