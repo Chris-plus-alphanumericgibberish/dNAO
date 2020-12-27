@@ -2861,14 +2861,10 @@ mon_can_see_mon(looker, lookie)
 	if(goodsmeller(looker->data) && distmin(lookie->mx, lookie->my, looker->mx, looker->my) <= 6){
 	/*sanity check: don't bother trying to path to it if it is farther than a path can possibly exist*/
 		if(clearpath){
-		/*don't running a complicated path function if there is a straight line to you*/
+		/*don't running a complicated path function if there is a straight line to target*/
 			return TRUE;
 		} else {
-			boolean shouldsmell = FALSE;
-			scentgoalx = lookie->mx;
-			scentgoaly = lookie->my;
-			xpathto(6, looker->mx, looker->my, scent_callback, (genericptr_t)&shouldsmell);
-			if(shouldsmell){
+			if(path_exists(looker->mx, looker->my, lookie->mx, lookie->my, 0, 6)){
 				return TRUE;
 			}
 		}
@@ -3000,11 +2996,7 @@ struct monst *looker;
 		/*don't running a complicated path function if there is a straight line to you*/
 			return TRUE;
 		} else {
-			boolean shouldsmell = FALSE;
-			scentgoalx = u.ux;
-			scentgoaly = u.uy;
-			xpathto(6, looker->mx, looker->my, scent_callback, (genericptr_t)&shouldsmell);
-			if(shouldsmell){
+			if(path_exists(looker->mx, looker->my, u.ux, u.uy, 0, 6)){
 				return TRUE;
 			}
 		}

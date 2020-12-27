@@ -154,6 +154,8 @@ E int FDECL(oresist_disintegration, (struct obj *));
 E int FDECL(wrath_target, (struct obj *, struct monst *));
 E int FDECL(goat_weapon_damage_turn, (struct obj *));
 
+/* ### astar.c ### */
+E boolean FDECL(path_exists, (int, int, int, int, long, int));
 /* ### attrib.c ### */
 
 E boolean FDECL(adjattrib, (int,int,int));

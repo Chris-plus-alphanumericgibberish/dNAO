@@ -959,13 +959,7 @@ sense_by_scent(mon)
 		if(clear_path(u.ux, u.uy, mon->mx, mon->my)){
 			return TRUE;
 		} else {
-			struct seekspot smelltarget;
-			smelltarget.x = mon->mx;
-			smelltarget.y = mon->my;
-			smelltarget.found = FALSE;
-			
-			xpathto(6, u.ux, u.uy, you_scent_callback, (genericptr_t)&smelltarget);
-			return smelltarget.found;
+			return path_exists(u.ux, u.uy, mon->mx, mon->my, 0, 6);
 		}
 	}
 	return FALSE;
