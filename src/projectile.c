@@ -206,7 +206,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		) {
 			returning = TRUE;
 		}
-		else if(uandroid && !launcher && youagr && thrownobj->oartifact != ART_FLUORITE_OCTAHEDRON){/* there's no android monster helper? */
+		else if(uandroid && youagr && !(
+			(launcher) || /* no returning fired ammo */
+			(thrownobj->oartifact == ART_FLUORITE_OCTAHEDRON && thrownobj->quan > 1)	/* no multithrown fluorite octet for balance reasons */
+		)){
 			returning = TRUE;
 			range = range/2 + 1;
 			initrange = initrange/2 + 1;
