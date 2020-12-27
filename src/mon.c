@@ -4690,6 +4690,11 @@ boolean was_swallowed;			/* digestion */
 			else{
 			  explode(mon->mx, mon->my, AD_MAGM, MON_EXPLODE, tmp, EXPL_MAGICAL, 1);
 			}
+
+			/* dungeon ferns reproduce this way */
+			if (is_fern_spore(mdat)) {
+				spore_dies(mon);
+			}
 	    	if(mdat->mtyp == PM_GARO_MASTER || mdat->mtyp == PM_GARO) return (TRUE);
 			else return (FALSE);
 	    } //End AT_BOOM != AD_HLBD && != AD_POSN
@@ -5464,9 +5469,6 @@ int how;
 
 	if (be_sad && mdef->mhp <= 0)
 	    You("have a sad feeling for a moment, then it passes.");
-	if (is_fern_spore(mdef->data)) {
-		spore_dies(mdef);
-	}
 }
 
 void
@@ -5613,10 +5615,6 @@ xkilled(mtmp, dest)
 
 	mdat = mtmp->data; /* note: mondead can change mtmp->data */
 	mndx = monsndx(mdat);
-
-	if (is_fern_spore(mdat)) {
-		spore_dies(mtmp);
-	}
 	if (stoned) {
 		stoned = FALSE;
 		goto cleanup;

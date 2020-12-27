@@ -9195,12 +9195,6 @@ int vis;
 	int dmg = d((int)attk->damn, (int)attk->damd);
 	int fulldmg = dmg;			/* original unreduced damage */
 
-	/* message */
-	if (vis)
-		xyhitmsg(magr, mdef, attk);
-	else
-		noises(magr, attk);
-
 	/* directed at player, wild miss */
 	if (youdef && (magr->mux != u.ux || magr->muy != u.uy)) {
 		/* give message regardless of vis -- it was targeting the player */
@@ -9211,25 +9205,33 @@ int vis;
 		/* skip most effects. Go to killing magr */
 	}
 	else {
+		/* message */
+		if (vis)
+			xyhitmsg(magr, mdef, attk);
+		else
+			noises(magr, attk);
+
+		/* effects */
 		switch (attk->adtyp)
 		{
 		case AD_FNEX:
 			/* fern spores are extra special */
-			/* need to die before their explosion, so that a new monster can be placed there */
-			/* they also create real explosions */
-			if(!youagr)
-				mondead(magr);
-			if (pa->mtyp == PM_SWAMP_FERN_SPORE)
-				explode(x(magr), y(magr), AD_DISE, MON_EXPLODE, dmg, EXPL_MAGICAL, 1);
-			else if (pa->mtyp == PM_BURNING_FERN_SPORE)
-				explode(x(magr), y(magr), AD_PHYS, MON_EXPLODE, dmg, EXPL_YELLOW, 1);
-			else
-				explode(x(magr), y(magr), AD_ACID, MON_EXPLODE, dmg, EXPL_NOXIOUS, 1);
-			/* players, on the other hand, shouldn't be rehumanized before the explosion (since it will hurt them too) */
-			if (youagr && Upolyd)
+			/* they are handled in mon.c as part of their deaths */
+			if(!youagr) {
+				mondied(magr);
+				return (*hp(magr) > 0 ? MM_AGR_STOP : MM_AGR_DIED) | (*hp(mdef) > 0 ? MM_HIT : MM_DEF_DIED);
+			}
+			else {
+				/* players, on the other hand, need handling here */
+				if (pa->mtyp == PM_SWAMP_FERN_SPORE)
+					explode(x(magr), y(magr), AD_DISE, MON_EXPLODE, dmg, EXPL_MAGICAL, 1);
+				else if (pa->mtyp == PM_BURNING_FERN_SPORE)
+					explode(x(magr), y(magr), AD_PHYS, MON_EXPLODE, dmg, EXPL_YELLOW, 1);
+				else
+					explode(x(magr), y(magr), AD_ACID, MON_EXPLODE, dmg, EXPL_NOXIOUS, 1);
 				rehumanize();
-			return (*hp(magr) > 0 ? MM_AGR_STOP : MM_AGR_DIED) | (*hp(mdef) > 0 ? MM_HIT : MM_DEF_DIED);
-
+				return (MM_AGR_STOP | (*hp(mdef) > 0 ? MM_HIT : MM_DEF_DIED));
+			}
 			/* special explosions */
 		case AD_BLND:
 			if (!resists_blnd(mdef)) {
@@ -9442,7 +9444,7 @@ expl_common:
 		result |= MM_AGR_STOP;
 	}
 	else {
-		mondead(magr);
+		mondied(magr);
 		if (*hp(magr) > 0)
 			result |= MM_AGR_STOP;
 		else
