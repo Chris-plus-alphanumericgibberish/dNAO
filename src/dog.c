@@ -877,6 +877,7 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 
 	if (mtmp->mleashed) {
 		mtmp->mtame--;
+		if (!mtmp->mtame) untame(mtmp, 1);
 		m_unleash(mtmp, TRUE);
 	}
 	relmon(mtmp);
@@ -917,6 +918,7 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 
 			if (blade->mleashed) {
 				blade->mtame--;
+				if (!blade->mtame) untame(blade, 1);
 				m_unleash(blade, TRUE);
 			}
 			
@@ -1461,7 +1463,7 @@ struct monst *mtmp;
 	if (Aggravate_monster || Conflict) mtmp->mtame /=2;
 	else mtmp->mtame--;
 
-	if (mtmp->mtame && !mtmp->isminion)
+	if (mtmp->mtame && get_mx(mtmp, MX_EDOG))
 	    EDOG(mtmp)->abuse++;
 
 	if (!mtmp->mtame && mtmp->mleashed)
@@ -1472,12 +1474,11 @@ struct monst *mtmp;
 	if (mtmp->mx != 0) {
 	    if (mtmp->mtame && rn2(mtmp->mtame)) yelp(mtmp);
 	    else growl(mtmp);	/* give them a moment's worry */
-	
+		/* Give monster a chance to betray you now */
 	    if (mtmp->mtame) betrayed(mtmp);
-
-	    /* Give monster a chance to betray you now */
-		if (!mtmp->mtame) newsym(mtmp->mx, mtmp->my);
 	}
+	/* untame if mtame = 0 */
+	if (!mtmp->mtame) untame(mtmp, 0);
 }
 
 #endif /* OVLB */
