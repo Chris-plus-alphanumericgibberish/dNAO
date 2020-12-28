@@ -575,6 +575,9 @@ mtemplate_accepts_mtyp(mtemplate, mtyp)
 int mtemplate;
 int mtyp;
 {
+	if (mtyp == NON_PM)
+		return FALSE;
+		
 	struct permonst * ptr = &mons[mtyp];
 	switch(mtemplate)
 	{
