@@ -947,7 +947,14 @@ int maxsize;
 		hy = roompos.y + height;
 
 		/* validate location */
-		if (!rectangle_in_mazewalk_area(lx, ly, hx, hy))	{
+		if (!rectangle_in_mazewalk_area(lx, ly, hx, hy) ||	/* room itself has to fit */
+			(
+			/* a slightly larger room must also fit, to guarantee we can connect it into the larger maze */
+			!rectangle_in_mazewalk_area(lx - 2, ly, hx, hy) &&
+			!rectangle_in_mazewalk_area(lx, ly - 2, hx, hy) &&
+			!rectangle_in_mazewalk_area(lx, ly, hx + 2, hy) &&
+			!rectangle_in_mazewalk_area(lx, ly, hx, hy + 2)
+			))	{
 			/* can't place, out of bounds */
 			continue;
 		}
