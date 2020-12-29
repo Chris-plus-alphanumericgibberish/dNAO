@@ -4547,23 +4547,28 @@ boolean * messaged;
 
 	/* flaying weapons */
 	if (check_oprop(otmp, OPROP_FLAYW)
-		|| check_oprop(otmp, OPROP_LESSER_FLAYW)
+		|| (check_oprop(otmp, OPROP_LESSER_FLAYW) && !rn2(3))
 		|| otmp->oartifact == ART_THORNS //Note: Thorns's damage is not reduced to 0 like flaying weapons.
 	) {
 		struct obj *obj = some_armor(mdef);
 		int i;
 		if (obj){
-			pline("%s slices %s armor!",
-				The(xname(msgr)),
-				(youdef ? "your" : s_suffix(mon_nam(mdef)))
-				);
+			/* message part 1 */
+			if (vis) {
+				pline("%s %s %s armor!",
+					The(xname(msgr)),
+					vtense(xname(msgr), "slice"),
+					(youdef ? "your" : s_suffix(mon_nam(mdef)))
+					);
+			}
 			i = 1;
-			if (check_oprop(otmp, OPROP_FLAYW)) i += rnd(4);
-			else if (otmp->oartifact == ART_THORNS) i += rnd(6);
+			if (otmp->oartifact == ART_THORNS) i += rn2(3);
+
 			for (; i>0; i--){
 				if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
 					damage_item(obj);
-					if (!i) {
+					/* message part 2 -- only if obj wasn't destroyed */
+					if (!i && vis) {
 						pline("%s %s less effective.",
 							(youdef ? "Your" : s_suffix(Monnam(mdef))),
 							aobjnam(obj, "seem")
@@ -4571,6 +4576,7 @@ boolean * messaged;
 					}
 				}
 				else if (!obj->oartifact){
+					/* will message */
 					claws_destroy_marm(mdef, obj);
 					i = 0;
 				}
@@ -4606,10 +4612,8 @@ boolean * messaged;
 							pline("%s writhes in pain!", Monnam(mdef));
 					}
 				}
-				if (check_oprop(otmp, OPROP_FLAYW))
-					mdef->movement = max(mdef->movement - 6, -12);
-				else
-					mdef->movement = max(mdef->movement - 2, -12);
+				
+				mdef->movement = max(mdef->movement - 4, -12);
 			}
 		}
 	}
