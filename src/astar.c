@@ -73,12 +73,12 @@ struct pathNode **path;
 			//Compute next x and y
 			nxtx = curnode->x + i;
 			nxty = curnode->y + j;
-			propagate = ZAP_POS(levl[nxtx][nxty].typ);
 			//If next location is out-of-bounds, continue.
 			if(!isok(nxtx, nxty)){
 				// pline("reject (%d,%d): out of bounds", nxtx, nxty);
 				continue;
 			}
+			propagate = ZAP_POS(levl[nxtx][nxty].typ);
 			//Is this just a longer path to a previous node? if so continue.
 			///Back at start
 			if(nxtx == x && nxty == y){
