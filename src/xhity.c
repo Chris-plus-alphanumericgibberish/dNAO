@@ -12215,6 +12215,7 @@ int vis;						/* True if action is at all visible to the player */
 					/* remember stuff about the mirror so weapon can be used after nudzirath_shatter() is called */
 					otmp = weapon;
 					weapon = &tempwep;
+					*weapon = *otmp;
 					
 					nudzirath_shatter(otmp, bhitpos.x, bhitpos.y);
 					*weapon_p = NULL;
@@ -12378,18 +12379,17 @@ int vis;						/* True if action is at all visible to the player */
 					destroy_all_magr_weapon = TRUE;
 
 					result = xstoney(magr, mdef);
-					/* clean up the eggs right now, if not thrown */
-					/* if they were, thrown, the throwing function will clean them up */
-					if (!thrown) {
-						if (youagr)
-							useupall(weapon);
-						else for (; cnt; cnt--)
-							m_useup(magr, weapon);
-						*weapon_p = NULL;
-					}
 					/* return if we had a significant result from xstoney */
 					if (result&(MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_DIED))
 					{	
+						/* clean up the eggs right now*/
+						if (weapon->where == OBJ_FREE)
+							obfree(weapon, (struct obj *)0);
+						else if (youagr)
+							useupall(weapon);
+						else if (magr) for (; cnt; cnt--)
+							m_useup(magr, weapon);
+						*weapon_p = NULL;
 						return result;
 					}
 				}
@@ -12726,9 +12726,6 @@ int vis;						/* True if action is at all visible to the player */
 			}
 		}
 	}
-
-	/* weapon may have been destroyed at this point e.g. splatted egg */
-	weapon = weapon_p ? *weapon_p : (struct obj *)0;
 
 	/* Set Phasing */
 	phase_armor = (
