@@ -54,7 +54,7 @@ OBJECT:'+',"Book of the Dead",(16,05)
 OBJECT:'(',"magic chest",(16,05)
 # Kinda mean to place these here, since the player may be blindsided by an upgraded wizard,
 # 	but them's the breaks!
-OBJECT[10%]:'+',"secrets",(16,05),"Necronomicon",0
+OBJECT[10%]:'+',"secrets",(16,05)
 OBJECT[5%]:')',"quarterstaff",(16,05), blessed, 7, "The Staff of Wild Magic"
 OBJECT[5%]:'[',"robe",(16,05), blessed, 7, "The Robe of the Archmagi"
 OBJECT[5%]:'[',"cornuthaum",(16,05), blessed, 7, "The Hat of the Archmagi"

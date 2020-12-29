@@ -1601,7 +1601,7 @@ OBJECT:'/',"lightning",(45,11)
 OBJECT:'(',"chest",(48,12)
 MONSTER:'L',"alhoon",(46,14)
 OBJECT:'/',"cancellation",(46,14)
-OBJECT:'+',"secrets",(46,14),"Necronomicon",0
+OBJECT:'+',"secrets",(46,14)
 TRAP[75%]:"magic",(47,14)
 OBJECT:'(',"chest",(48,14)
 MONSTER:'h',"master mind flayer",(45,17),asleep
@@ -1776,7 +1776,7 @@ OBJECT:'/',"lightning",(45,11)
 OBJECT:'(',"chest",(48,12)
 MONSTER:'L',"alhoon",(46,14)
 OBJECT:'/',"cancellation",(46,14)
-OBJECT:'+',"secrets",(46,14),"Necronomicon",0
+OBJECT:'+',"secrets",(46,14)
 TRAP[75%]:"magic",(47,14)
 OBJECT:'(',"chest",(48,14)
 MONSTER:'&',"succubus",(46,13),asleep
