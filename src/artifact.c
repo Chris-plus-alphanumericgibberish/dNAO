@@ -4557,9 +4557,9 @@ boolean * messaged;
 				The(xname(msgr)),
 				(youdef ? "your" : s_suffix(mon_nam(mdef)))
 				);
-			i = 1;
-			if (check_oprop(otmp, OPROP_FLAYW)) i += rnd(4);
-			else if (otmp->oartifact == ART_THORNS) i += rnd(6);
+			if (check_oprop(otmp, OPROP_FLAYW)) i = rnd(4);
+			else if (otmp->oartifact == ART_THORNS) i = rnd(3);
+			else i = 1;
 			for (; i>0; i--){
 				if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
 					damage_item(obj);
