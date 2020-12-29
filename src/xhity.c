@@ -1977,7 +1977,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* Unpolyed player Barbarians get up to 3 bonus attacks (and offhand attacks) */
 	/* Would be shown in pokedex, if you could look up yourself in it. */
 	if (youagr && !Upolyd && Role_if(PM_BARBARIAN) && (is_null_attk(attk) || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP)) {
-		int nattacks = (u.ulevel >= 11) + (u.ulevel >= 21) + (u.ulevel >= 30);
+		int nattacks = (u.ulevel >= 14) + (u.ulevel >= 30);
 		/* note: this code assumes subout_barb1 and barb2 are sequential bits, as it uses them like a tiny int */
 		int attacknum = (*subout&(SUBOUT_BARB1|SUBOUT_BARB2)) / SUBOUT_BARB1;
 
