@@ -1237,7 +1237,17 @@ register struct obj *obj;
 	}
 	if (!invocation_pos(u.ux, u.uy)) {
 		pline_The("%s %s being rapidly consumed!", s, vtense(s, "are"));
-		obj->age /= 2;
+		/* this used to be obj->age /= 2, rounding down; an age of
+		   1 would yield 0, confusing begin_burn() and producing an
+		   unlightable, unrefillable candelabrum; round up instead */
+		obj->age = (obj->age + 1L) / 2L;
+
+		/* to make absolutely sure the game doesn't become unwinnable as
+		   a consequence of a broken candelabrum */
+		if (obj->age == 0) {
+			impossible("Candelabrum with candles but no fuel?");
+			obj->age = 1;
+		}
 	} else {
 		if(obj->spe == 7) {
 		    if (Blind)
@@ -1258,6 +1268,7 @@ struct obj **optr;
 	register struct obj *otmp;
 	const char *s = (obj->quan != 1) ? "candles" : "candle";
 	char qbuf[QBUFSZ];
+	boolean was_lamplit;
 
 	if (u.uswallow){
 		if(!is_whirly(u.ustuck->data)) {
@@ -1293,15 +1304,24 @@ struct obj **optr;
 		if ((long)otmp->spe + obj->quan > 7L)
 		    obj = splitobj(obj, 7L - (long)otmp->spe);
 		else *optr = 0;
+
+		/* The candle's age field doesn't correctly reflect the amount
+		   of fuel in it while it's lit, because the fuel is measured
+		   by the timer. So to get accurate age updating, we need to
+		   end the burn temporarily while attaching the candle. */
+		was_lamplit = obj->lamplit;
+		if (was_lamplit)
+		    end_burn(obj, TRUE);
+
 		You("attach %ld%s %s to %s.",
 		    obj->quan, !otmp->spe ? "" : " more",
 		    s, the(xname(otmp)));
 		if (!otmp->spe || otmp->age > obj->age)
 		    otmp->age = obj->age;
 		otmp->spe += (int)obj->quan;
-		if (otmp->lamplit && !obj->lamplit)
+		if (otmp->lamplit && !was_lamplit)
 		    pline_The("new %s magically %s!", s, vtense(s, "ignite"));
-		else if (!otmp->lamplit && obj->lamplit)
+		else if (!otmp->lamplit && was_lamplit)
 		    pline("%s out.", (obj->quan > 1L) ? "They go" : "It goes");
 		if (obj->unpaid)
 		    verbalize("You %s %s, you bought %s!",
@@ -1314,7 +1334,6 @@ struct obj **optr;
 		/* candelabrum's light range might increase */
 		if (otmp->lamplit) obj_merge_light_sources(otmp, otmp);
 		/* candles are no longer a separate light source */
-		if (obj->lamplit) end_burn(obj, TRUE);
 		/* candles are now gone */
 		useupall(obj);
 	}
