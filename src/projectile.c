@@ -715,7 +715,7 @@ struct obj * thrownobj;			/* Projectile object. Must be free. Will no longer exi
 		else
 			You_hear("an explosion");
 		explode(bhitpos.x, bhitpos.y, AD_FIRE, WEAPON_CLASS,
-			d(3, 8), EXPL_FIERY, youagr);
+			d(3, 8), EXPL_FIERY, 1);
 		obfree(thrownobj, (struct obj *)0);
 		break;
 
@@ -724,7 +724,7 @@ struct obj * thrownobj;			/* Projectile object. Must be free. Will no longer exi
 		explode(bhitpos.x, bhitpos.y, AD_PHYS, 0,
 			(thrownobj->otyp == HEAVY_BLASTER_BOLT ? (d(3, 10))   : (d(3, 6))),
 			(thrownobj->otyp == HEAVY_BLASTER_BOLT ? (EXPL_FIERY) : (EXPL_RED)),
-			youagr);
+			1);
 		obfree(thrownobj, (struct obj *)0);
 		break;
 
@@ -902,7 +902,7 @@ boolean forcedestroy;			/* If TRUE, make sure the projectile is destroyed */
 
 	/* ball-related stuff */
 	if (thrownobj == uball) {
-		thrownobj->owornmask = old_wep_mask;
+		thrownobj->owornmask |= (old_wep_mask&(W_CHAIN|W_BALL));
 		drop_ball(bhitpos.x, bhitpos.y);
 	}
 
