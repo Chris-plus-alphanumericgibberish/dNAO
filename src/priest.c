@@ -630,6 +630,7 @@ register struct monst *priest;
 	    pline("%s doesn't want anything to do with you!",
 				Monnam(priest));
 	    priest->mpeaceful = 0;
+		newsym(priest->mx, priest->my);
 	    return;
 	}
 
