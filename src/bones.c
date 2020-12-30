@@ -14,6 +14,7 @@ STATIC_DCL boolean FDECL(no_bones_level, (d_level *));
 STATIC_DCL void FDECL(goodfruit, (int));
 STATIC_DCL void FDECL(resetobjs,(struct obj *,BOOLEAN_P));
 STATIC_DCL void FDECL(drop_upon_death, (struct monst *, struct obj *, int, int));
+STATIC_DCL void FDECL(sanitize_name, (char *namebuf));
 
 STATIC_OVL boolean
 no_bones_level(lev)
@@ -64,6 +65,9 @@ boolean restore;
 		if (otmp->cobj)
 		    resetobjs(otmp->cobj,restore);
 
+		if (restore && get_ox(otmp, OX_ENAM))
+			sanitize_name(ONAME(otmp));
+		
 		if (((otmp->otyp != CORPSE || otmp->corpsenm < SPECIAL_PM)
 			&& otmp->otyp != STATUE)
 			&& (!otmp->oartifact ||
@@ -158,6 +162,34 @@ boolean restore;
 				// otmp->owt = weight(otmp);
 			}
 		}
+	}
+}
+
+ /* while loading bones, strip out text possibly supplied by old player
+    that might accidentally or maliciously disrupt new player's display */
+void
+sanitize_name(namebuf)
+char *namebuf;
+{
+	int c;
+	boolean strip_8th_bit = (!strcmp(windowprocs.name, "tty")
+						  && !iflags.wc_eight_bit_input);
+
+	/* it's tempting to skip this for single-user platforms, since
+	only the current player could have left these bones--except
+	things like "hearse" and other bones exchange schemes make
+	that assumption false */
+	while (*namebuf) {
+		c = *namebuf & 0177;
+		if (c < ' ' || c == '\177') {
+			/* non-printable or undesirable */
+			*namebuf = '.';
+		} else if (c != *namebuf) {
+			/* expected to be printable if user wants such things */
+			if (strip_8th_bit)
+				*namebuf = '_';
+		}
+		++namebuf;
 	}
 }
 
@@ -645,6 +677,8 @@ getbones()
 			 * set to the magic DEFUNCT_MONSTER cookie value.
 			 */
 			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if (M_HAS_NAME(mtmp))
+					sanitize_name(MNAME(mtmp));
 			    if (mtmp->mhpmax == DEFUNCT_MONSTER) {
 #if defined(DEBUG) && defined(WIZARD)
 				if (wizard)
