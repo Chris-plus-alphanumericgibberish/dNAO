@@ -1571,13 +1571,7 @@ domove()
 	if (is_safepet(mtmp) && !(is_hider(mtmp->data) && mtmp->mundetected)) {
 	    /* if trapped, there's a chance the pet goes wild */
 	    if (mtmp->mtrapped) {
-		if (!rn2(mtmp->mtame)) {
-		    mtmp->mtame = mtmp->mpeaceful = mtmp->msleeping = 0;
-		    if (mtmp->mleashed) m_unleash(mtmp, TRUE);
-		    growl(mtmp);
-		} else {
-		    yelp(mtmp);
-		}
+			abuse_dog(mtmp);
 	    }
 	    mtmp->mundetected = 0;
 	    if (mtmp->m_ap_type) seemimic(mtmp);
