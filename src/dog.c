@@ -602,7 +602,7 @@ long nmv;		/* number of moves */
 	if (mtmp->mtame && !mtmp->isminion && !(EDOG(mtmp)->loyal) 
 	 && !(
 		In_quest(&u.uz) && 
-		((Is_qstart(&u.uz) && !flags.stag) || 
+		((Is_qtown(&u.uz) && !flags.stag) || 
 		 (Is_nemesis(&u.uz) && flags.stag)) &&
 	 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&
 	 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&
@@ -636,7 +636,7 @@ long nmv;		/* number of moves */
 	){
 	    struct edog *edog = EDOG(mtmp);
 		if(!(In_quest(&u.uz) && 
-			 ((Is_qstart(&u.uz) && !flags.stag) || 
+			 ((Is_qtown(&u.uz) && !flags.stag) || 
 				(Is_nemesis(&u.uz) && flags.stag)) &&
 			 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&
 			 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&
