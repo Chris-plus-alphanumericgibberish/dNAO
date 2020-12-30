@@ -152,8 +152,9 @@ struct monst {
 	Bitfield(notame,1);/* can't be tamed */ /*87*/
 	Bitfield(zombify,1);/* should rise as zombie */ /*88*/
 	Bitfield(ispolyp,1);/* is a polypoid being */ /*89*/
-	Bitfield(mdisrobe,1);/* disrobing */ /*91*/
-	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*92*/
+	Bitfield(mdisrobe,1);/* disrobing */ /*90*/
+	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*91*/
+	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 #define BASE_DOG_ENCOURAGED_MAX		7

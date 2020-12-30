@@ -8488,7 +8488,7 @@ register int	mmflags;
 		unsethouse = TRUE;
 		m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 	}
-	/* on Echo's level, everything is skeletons??? This seems not right, but it is still a work in progress */
+	/* Echo is always given the skeleton template */
 	else if(mtmp->mtyp == PM_ECHO){
 		mkmon_template = SKELIFIED;
 		unsethouse = TRUE;
@@ -8544,6 +8544,14 @@ register int	mmflags;
 			m_initgrp(mtmp, mtmp->mx, mtmp->my, groupsz);
 		}
 	}
+	
+	//"Living" creatures generated in heaven or hell are in fact already dead (and should not leave corpses).
+	if((In_hell(&u.uz) || In_endgame(&u.uz)) 
+		&& !is_rider(mtmp->data) 
+		&& !nonliving(mtmp->data)
+	)
+		mtmp->mpetitioner = TRUE;
+	
 	if(mkmon_template){
 		set_template(mtmp, mkmon_template);
 		/* special case: some templates increase the level of the creatures made */
