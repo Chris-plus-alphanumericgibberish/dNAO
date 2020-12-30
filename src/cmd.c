@@ -3161,8 +3161,10 @@ resistances_enlightenment()
 	
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
+		char messaged = 0;
 		if (u.umadness&MAD_DELUSIONS){
 			putstr(en_win, 0, "You have a tendency to hallucinate.");
+			messaged++;
 		}
 		if(u.usanity < 80){
 			if (u.umadness&MAD_REAL_DELUSIONS){
@@ -3170,73 +3172,121 @@ resistances_enlightenment()
 					putstr(en_win, 0, "...at least, you THINK you're hallucinating....");
 				else
 					putstr(en_win, 0, "You have a tendency to hallucinate... you think.");
+				messaged++;
 			}
 		}
 		if (u.umadness&MAD_SANCTITY){
 			putstr(en_win, 0, "You have a tendency to treat women as delicate and holy beings who shouldn't be harmed.");
+			messaged++;
 		}
 		if (u.umadness&MAD_GLUTTONY){
 			putstr(en_win, 0, "You have a mad hunger.");
+			messaged++;
 		}
 		if (u.umadness&MAD_SPORES && !Race_if(PM_ANDROID) && !Race_if(PM_CLOCKWORK_AUTOMATON)){
 			//Note: Race_if is correct because it works on your original brain (because magic)
 			putstr(en_win, 0, "She's eating your brain.");
+			messaged++;
 		}
 		if (u.umadness&MAD_FRIGOPHOBIA){
 			putstr(en_win, 0, "You have an irrational fear of the cold.");
+			messaged++;
 		}
 		if (u.umadness&MAD_CANNIBALISM){
 			putstr(en_win, 0, "You have a mad desire to consume living flesh, even the flesh of your own kind.");
+			messaged++;
 		}
 		if (u.umadness&MAD_RAGE){
 			putstr(en_win, 0, "You have a burning, irrational rage.");
+			messaged++;
 		}
 		if (u.umadness&MAD_ARGENT_SHEEN){
 			putstr(en_win, 0, "The world is full of mirrors, and you can't help but admire yourself.");
+			messaged++;
 		}
 		if (u.umadness&MAD_SUICIDAL){
 			putstr(en_win, 0, "You have a tendency towards suicidal behavior.");
+			messaged++;
 		}
 		if (u.umadness&MAD_NUDIST){
 			putstr(en_win, 0, "You have an irrational dislike of clothing.");
+			messaged++;
 		}
 		if (u.umadness&MAD_OPHIDIOPHOBIA){
 			putstr(en_win, 0, "You have an irrational fear of snakes.");
+			messaged++;
 		}
 		if (u.umadness&MAD_ARACHNOPHOBIA){
 			//Note: Arachnophobia == women and spiders because it's the madness Lolth inflicts.
 			putstr(en_win, 0, "You have an irrational fear of spiders.");
 			putstr(en_win, 0, "You have an irrational fear of women.");
+			messaged++;
 		}
 		if (u.umadness&MAD_ENTOMOPHOBIA){
 			putstr(en_win, 0, "You have an irrational fear of insects.");
+			messaged++;
 		}
 		if (u.umadness&MAD_THALASSOPHOBIA){
 			putstr(en_win, 0, "You have an irrational fear of sea-monsters.");
+			messaged++;
 		}
 		if (u.umadness&MAD_PARANOIA){
 			//Severe because it triggers much more frequently than other madnesses
 			putstr(en_win, 0, "You have a severe tendency towards paranoia.");
+			messaged++;
 		}
 		if (u.umadness&MAD_TALONS){
 			putstr(en_win, 0, "You have an irrational fear of loss.");
+			messaged++;
 		}
 		if (u.umadness&MAD_COLD_NIGHT){
 			putstr(en_win, 0, "It's so cold.");
+			messaged++;
 		}
 		if (u.umadness&MAD_OVERLORD){
 			putstr(en_win, 0, "He can see you.");
+			messaged++;
 		}
 		if (u.umadness&MAD_DREAMS){
 			putstr(en_win, 0, "You dream of strange cities.");
+			messaged++;
 		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
 			putstr(en_win, 0, "You have an irrational fear of squirming things.");
+			messaged++;
 		}
 		if(has_blood(youracedata)){
 			if (u.umadness&MAD_FRENZY){
 				Sprintf(buf, "You feel your %s seethe below your %s.", body_part(BLOOD), body_part(BODY_SKIN));
 				putstr(en_win, 0, buf);
+				messaged++;
+			}
+		}
+		if(messaged){
+			//Clockworks specifically can't get drunk (androids can)
+			if(uclockwork && u.usanity <= 90){
+				putstr(en_win, 0, "Perhaps some sedatives would settle your mind.");
+			}
+			else {
+				//Advice around alcohol differs depending on drunkenness level
+				if(u.udrunken < u.ulevel*3){
+					if(u.usanity <= 45){
+						putstr(en_win, 0, "You need a stiff drink, or some sedatives.");
+					}
+					else if(u.usanity <= 90){
+						putstr(en_win, 0, "You could use a stiff drink, or maybe some sedatives.");
+					}
+					else if(u.usanity <= 95){
+						putstr(en_win, 0, "You could use a drink.");
+					}
+				} else {
+					if(u.usanity <= 45){
+						putstr(en_win, 0, "You need a stiff drink, or some sedatives.");
+					}
+					else if(u.usanity <= 90){
+						putstr(en_win, 0, "Perhaps some sedatives would settle your mind.");
+					}
+				}
 			}
 		}
 	}
