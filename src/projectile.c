@@ -902,7 +902,7 @@ boolean forcedestroy;			/* If TRUE, make sure the projectile is destroyed */
 
 	/* ball-related stuff */
 	if (thrownobj == uball) {
-		thrownobj->owornmask = old_wep_mask;
+		thrownobj->owornmask |= (old_wep_mask&(W_CHAIN|W_BALL));
 		drop_ball(bhitpos.x, bhitpos.y);
 	}
 
