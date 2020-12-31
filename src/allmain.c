@@ -1503,6 +1503,7 @@ karemade:
 			//Override species-based speed penalties in some cases.
 			if(!Upolyd && (
 				Race_if(PM_GNOME)
+				|| Race_if(PM_DWARF)
 				|| (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
 			)) moveamt = 12;
 			else moveamt = youmonst.data->mmove;
