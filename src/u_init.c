@@ -939,6 +939,36 @@ static const struct def_skill Skill_N[] = {
     { P_NONE, 0 }
 };
 
+static const struct def_skill Skill_N_Shepherd[] = {
+	{ P_QUARTERSTAFF, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_N_Hedrow[] = {
+	{ P_POLEARMS, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_N_Drow[] = {
+	{ P_DAGGER, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_N_Dwarf[] = {
+	{ P_AXE, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_N_Elf[] = {
+	{ P_SPEAR, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_N_Vampire[] = {
+	{ P_SABER, P_BASIC },
+    { P_NONE, 0 }
+};
+
 static const struct def_skill Skill_C[] = {
     { P_DAGGER, P_BASIC },		{ P_KNIFE,  P_SKILLED },
     { P_AXE, P_SKILLED },		{ P_PICK_AXE, P_BASIC },
@@ -1875,19 +1905,32 @@ u_init()
 				Binder_Vam[BIN_NOB_SUIT].trotyp = GENTLEWOMAN_S_DRESS;
 			}
 			ini_inv(Binder_Vam);
+			skill_init(Skill_N_Vampire);
 		} else if(Race_if(PM_DROW)){
-			if(flags.female)
+			if(flags.female){
 				ini_inv(Binder_Drow);
-			else ini_inv(Binder_Hedrow);
+				knows_object(FLINT);
+				skill_init(Skill_N_Drow);
+			}
+			else {
+				ini_inv(Binder_Hedrow);
+				skill_init(Skill_N_Hedrow);
+				knows_object(FLINT);
+			}
 		} else if(Race_if(PM_DWARF)){
 			ini_inv(Binder_Dwarf);
+			knows_object(FLINT);
+			skill_init(Skill_N_Dwarf);
 		} else if(Race_if(PM_ELF)){
 			ini_inv(Binder_Elf);
-		} else
-		ini_inv(Binder);
-		skill_init(Skill_N);
-		knows_object(FLINT);
-		knows_object(SHEPHERD_S_CROOK);
+			knows_object(FLINT);
+			skill_init(Skill_N_Elf);
+		} else {
+			ini_inv(Binder);
+			knows_object(SHEPHERD_S_CROOK);
+			knows_object(FLINT);
+			skill_init(Skill_N_Shepherd);
+		}
 		if(Race_if(PM_INCANTIFIER)){
 			knows_object(SPE_HEALING);
 			knows_object(SPE_FORCE_BOLT);

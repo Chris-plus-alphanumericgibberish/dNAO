@@ -5469,9 +5469,9 @@ int p_skill;
 		curskill += 1;
 	}
 	
-	if(roleSkill(p_skill)){
-		curskill = min(curskill+1, P_EXPERT);
-	}
+	// if(roleSkill(p_skill)){
+		// curskill = min(curskill+1, P_EXPERT);
+	// }
 	
 	if(p_skill == P_SHIEN){
 		if(OLD_P_SKILL(P_DJEM_SO) >= P_SKILLED) curskill++;
@@ -5518,33 +5518,6 @@ boolean
 roleSkill(p_skill)
 int p_skill;
 {
-	if(Role_if(PM_EXILE)){
-		if(Race_if(PM_DROW) && flags.initgend){
-			if(p_skill == P_DAGGER)
-				return TRUE;
-						// return (uwep && uwep->otyp == DROVEN_DAGGER); //Note: would cause thrown normal daggers to mysteriously work better while wielding a droven one
-		}
-		else if(Race_if(PM_DROW) && !flags.initgend){
-			if(p_skill == P_POLEARMS)
-				return TRUE;
-		}
-		else if(Race_if(PM_DWARF)){
-			if(p_skill == P_AXE)
-				return TRUE;
-		}
-		else if(Race_if(PM_ELF)){
-			if(p_skill == P_SPEAR)
-				return TRUE;
-		}
-		else if(Race_if(PM_VAMPIRE)){
-			if(p_skill == P_SABER)
-				return TRUE;
-		}
-		//Default case
-		else if(p_skill == P_QUARTERSTAFF){
-			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
