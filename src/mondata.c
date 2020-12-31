@@ -257,6 +257,7 @@ int template;
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		ptr->mflagsb |= (MB_INDIGESTIBLE);
 		/* defense: */
 		ptr->nac += 10;
 		ptr->dac += 6;
@@ -275,7 +276,7 @@ int template;
 		ptr->mflagsm |= (MM_BREATHLESS);
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
 		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
-		ptr->mflagsb |= (MB_NOEYES);
+		ptr->mflagsb |= (MB_NOEYES|MB_INDIGESTIBLE);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
 		break;
@@ -307,6 +308,7 @@ int template;
 		ptr->mflagsm |= (MM_TENGTPORT);
 		ptr->mflagst |= (MT_HOSTILE);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
+		ptr->mflagsb |= (MB_INDIGESTIBLE);
 		/* defense: */
 		ptr->nac += 6;
 		/* resists: */

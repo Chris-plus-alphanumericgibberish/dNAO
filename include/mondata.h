@@ -752,60 +752,62 @@
 
 #define is_naturally_unalive(ptr)		(((ptr)->mflagsa & MA_UNLIVING))
 
-#define is_indigestible(ptr)	((ptr)->mtyp == PM_DANCING_BLADE ||\
-								 (ptr)->mtyp == PM_EARTH_ELEMENTAL ||\
-								 (ptr)->mtyp == PM_TERRACOTTA_SOLDIER ||\
-								 (ptr)->mtyp == PM_CLOCKWORK_SOLDIER ||\
-								 (ptr)->mtyp == PM_CLOCKWORK_DWARF ||\
-								 (ptr)->mtyp == PM_CLOCKWORK_FACTORY ||\
-								 (ptr)->mtyp == PM_GOLDEN_HEART ||\
-								 (ptr)->mtyp == PM_JUGGERNAUT ||\
-								 (ptr)->mtyp == PM_ID_JUGGERNAUT ||\
-								 (ptr)->mtyp == PM_SCRAP_TITAN ||\
-								 (ptr)->mtyp == PM_HELLFIRE_COLOSSUS ||\
-								 (ptr)->mtyp == PM_HELLFIRE_ORB ||\
-								 (ptr)->mtyp == PM_CLOCKWORK_AUTOMATON ||\
-								 (ptr)->mtyp == PM_COLOSSAL_CLOCKWORK_WAR_MACHINE ||\
-								 (ptr)->mtyp == PM_MALKUTH_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_YESOD_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_DAAT_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_HOD_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_NETZACH_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_GEVURAH_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_BINAH_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_CHOKHMAH_SEPHIRAH ||\
-								 (ptr)->mtyp == PM_HALF_STONE_DRAGON ||\
-								 (ptr)->mtyp == PM_HOOLOOVOO ||\
-								 (ptr)->mtyp == PM_GOLD_GOLEM ||\
-								 (ptr)->mtyp == PM_CLAY_GOLEM ||\
-								 (ptr)->mtyp == PM_TREASURY_GOLEM ||\
-								 (ptr)->mtyp == PM_SEMBLANCE ||\
-								 (ptr)->mtyp == PM_STONE_GOLEM ||\
-								 (ptr)->mtyp == PM_GLASS_GOLEM ||\
-								 (ptr)->mtyp == PM_IRON_GOLEM ||\
-								 (ptr)->mtyp == PM_ARGENTUM_GOLEM ||\
-								 (ptr)->mtyp == PM_RETRIEVER ||\
-								 (ptr)->mtyp == PM_LIVING_DOLL ||\
-								 (ptr)->mtyp == PM_ARA_KAMEREL ||\
-								 (ptr)->mtyp == PM_ANCIENT_OF_DEATH ||\
-								 (ptr)->mtyp == PM_PALE_NIGHT ||\
-								 (ptr)->mtyp == PM_BAALPHEGOR ||\
-								 (ptr)->mtyp == PM_ARCADIAN_AVENGER ||\
-								 (ptr)->mtyp == PM_DAMAGED_ARCADIAN_AVENGER ||\
-								 (ptr)->mtyp == PM_MUMMIFIED_ANDROID ||\
-								 (ptr)->mtyp == PM_MUMMIFIED_GYNOID ||\
-								 (ptr)->mtyp == PM_FLAYED_ANDROID ||\
-								 (ptr)->mtyp == PM_FLAYED_GYNOID ||\
-								 (ptr)->mtyp == PM_CRUCIFIED_ANDROID ||\
-								 (ptr)->mtyp == PM_CRUCIFIED_GYNOID ||\
-								 (ptr)->mtyp == PM_ANDROID ||\
-								 (ptr)->mtyp == PM_GYNOID ||\
-								 (ptr)->mtyp == PM_OPERATOR ||\
-								 (ptr)->mtyp == PM_COMMANDER ||\
-								 (ptr)->mtyp == PM_SENTINEL_OF_MITHARDIR ||\
-								 (ptr)->mtyp == PM_CHAIN_GOLEM ||\
-								 is_uvuudaum(ptr) ||\
-								 is_rilmani(ptr))
+#define is_indigestible(ptr)	(((ptr)->mflagsb&MB_INDIGESTIBLE) != 0)
+
+// #define is_indigestible(ptr)	((ptr)->mtyp == PM_DANCING_BLADE ||\
+								 // (ptr)->mtyp == PM_EARTH_ELEMENTAL ||\
+								 // (ptr)->mtyp == PM_TERRACOTTA_SOLDIER ||\
+								 // (ptr)->mtyp == PM_CLOCKWORK_SOLDIER ||\
+								 // (ptr)->mtyp == PM_CLOCKWORK_DWARF ||\
+								 // (ptr)->mtyp == PM_CLOCKWORK_FACTORY ||\
+								 // (ptr)->mtyp == PM_GOLDEN_HEART ||\
+								 // (ptr)->mtyp == PM_JUGGERNAUT ||\
+								 // (ptr)->mtyp == PM_ID_JUGGERNAUT ||\
+								 // (ptr)->mtyp == PM_SCRAP_TITAN ||\
+								 // (ptr)->mtyp == PM_HELLFIRE_COLOSSUS ||\
+								 // (ptr)->mtyp == PM_HELLFIRE_ORB ||\
+								 // (ptr)->mtyp == PM_CLOCKWORK_AUTOMATON ||\
+								 // (ptr)->mtyp == PM_COLOSSAL_CLOCKWORK_WAR_MACHINE ||\
+								 // (ptr)->mtyp == PM_MALKUTH_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_YESOD_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_DAAT_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_HOD_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_NETZACH_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_GEVURAH_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_BINAH_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_CHOKHMAH_SEPHIRAH ||\
+								 // (ptr)->mtyp == PM_HALF_STONE_DRAGON ||\
+								 // (ptr)->mtyp == PM_HOOLOOVOO ||\
+								 // (ptr)->mtyp == PM_GOLD_GOLEM ||\
+								 // (ptr)->mtyp == PM_CLAY_GOLEM ||\
+								 // (ptr)->mtyp == PM_TREASURY_GOLEM ||\
+								 // (ptr)->mtyp == PM_SEMBLANCE ||\
+								 // (ptr)->mtyp == PM_STONE_GOLEM ||\
+								 // (ptr)->mtyp == PM_GLASS_GOLEM ||\
+								 // (ptr)->mtyp == PM_IRON_GOLEM ||\
+								 // (ptr)->mtyp == PM_ARGENTUM_GOLEM ||\
+								 // (ptr)->mtyp == PM_RETRIEVER ||\
+								 // (ptr)->mtyp == PM_LIVING_DOLL ||\
+								 // (ptr)->mtyp == PM_ARA_KAMEREL ||\
+								 // (ptr)->mtyp == PM_ANCIENT_OF_DEATH ||\
+								 // (ptr)->mtyp == PM_PALE_NIGHT ||\
+								 // (ptr)->mtyp == PM_BAALPHEGOR ||\
+								 // (ptr)->mtyp == PM_ARCADIAN_AVENGER ||\
+								 // (ptr)->mtyp == PM_DAMAGED_ARCADIAN_AVENGER ||\
+								 // (ptr)->mtyp == PM_MUMMIFIED_ANDROID ||\
+								 // (ptr)->mtyp == PM_MUMMIFIED_GYNOID ||\
+								 // (ptr)->mtyp == PM_FLAYED_ANDROID ||\
+								 // (ptr)->mtyp == PM_FLAYED_GYNOID ||\
+								 // (ptr)->mtyp == PM_CRUCIFIED_ANDROID ||\
+								 // (ptr)->mtyp == PM_CRUCIFIED_GYNOID ||\
+								 // (ptr)->mtyp == PM_ANDROID ||\
+								 // (ptr)->mtyp == PM_GYNOID ||\
+								 // (ptr)->mtyp == PM_OPERATOR ||\
+								 // (ptr)->mtyp == PM_COMMANDER ||\
+								 // (ptr)->mtyp == PM_SENTINEL_OF_MITHARDIR ||\
+								 // (ptr)->mtyp == PM_CHAIN_GOLEM ||\
+								 // is_uvuudaum(ptr) ||\
+								 // is_rilmani(ptr))
 
 #define is_delouseable(ptr) ((ptr)->mtyp == PM_PARASITIZED_DOLL ||\
 								   (ptr)->mtyp == PM_PARASITIZED_ANDROID ||\
