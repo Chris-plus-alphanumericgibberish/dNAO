@@ -9344,7 +9344,7 @@ read_lost(VOID_ARGS)
 		// for(i=0;i<QUEST_SPIRITS;i++){
 			// pline("#%d:%s",i,sealNames[i]);
 		// }
-		pline("Using the rituals in the book, you attempt to form a bond with %s",sealNames[lostname-FIRST_SEAL]);
+		pline("Using the rituals in the book, you attempt to form a bond with %s.",sealNames[lostname-FIRST_SEAL]);
 		if(u.sealCounts < numSlots){
 			bindspirit(lostname);
 			u.sealsKnown |= (1L << lostname);
