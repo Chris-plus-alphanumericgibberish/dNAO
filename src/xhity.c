@@ -3253,6 +3253,10 @@ int flat_acc;
 				}
 			}
 		}
+		/* gnomes are especially accurate, with weapons or ranged or any other "proper" attacks... not a zombie's claw attack. */
+		if (magr && (youagr ? Race_if(PM_GNOME) : is_gnome(pa)))
+			wepn_acc += 2;
+
 		/* skill bonus (player-only; applies without a weapon as well) */
 		if (youagr) {
 			int wtype;
