@@ -1334,7 +1334,7 @@ struct obj *otmp;
 			if (otmp->otyp == SEDGE_HAT || otmp->otyp == SHEAF_OF_HAY)
 				otmp->obj_color = CLR_YELLOW;
 			else if(otmp->obj_material != objects[otmp->otyp].oc_material){
-				switch(rn2(12)){
+				switch(otmp->o_id%12){
 					case 0:
 						otmp->obj_color = CLR_BROWN;
 					break;
