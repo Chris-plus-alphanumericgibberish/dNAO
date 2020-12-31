@@ -1346,7 +1346,7 @@ register struct monst *mtmp;
 	propellor = &zeroobj;
 	Oselect(EGG, W_QUIVER); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
-	if(otmp = oselectBoulder(mtmp))
+	if((otmp = oselectBoulder(mtmp)))
 		return otmp;
 
 	/* Select polearms first; they do more damage and aren't expendable */
@@ -3121,6 +3121,9 @@ int wep_type;
 			case P_MASTER:			maxweight = 50; break;
 			case P_GRAND_MASTER:	maxweight = 60; break;
 		}
+		if (youracedata->msize > MZ_MEDIUM)
+			maxweight *= 2*(youracedata->msize - MZ_MEDIUM);
+
 		if (wep_type == P_BARE_HANDED_COMBAT) {
 			bonus -= abs(bonus * 2 / 3);
 		}
