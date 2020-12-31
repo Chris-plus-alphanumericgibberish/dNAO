@@ -3929,7 +3929,7 @@ struct obj *wep;
 boolean invoked;
 {
 	if(!invoked){
-		if(rn2(30))
+		if(rn2(20))
 			return;
 		if(!nearby_targets(magr))
 			return;
@@ -4062,7 +4062,7 @@ struct obj *wep;
 boolean invoked;
 {
 	if(!invoked){
-		if(rn2(30))
+		if(rn2(20))
 			return;
 		if(!nearby_targets(magr))
 			return;
@@ -4192,7 +4192,7 @@ struct obj *wep;
 boolean invoked;
 {
 	if(!invoked){
-		if(rn2(30))
+		if(rn2(20))
 			return;
 		if(!nearby_targets(magr))
 			return;
@@ -4387,7 +4387,7 @@ struct obj *wep;
 boolean invoked;
 {
 	if((invoked
-		|| !rn2(30)
+		|| !rn2(20)
 	) && (
 		nearby_targets(magr)
 		|| (magr == &youmonst && (uhp() < uhpmax() || u.uen < u.uenmax))
