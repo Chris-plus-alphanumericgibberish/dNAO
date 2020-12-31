@@ -2309,8 +2309,10 @@ u_init()
 			else if(isSignetRing(pobj->otyp)){
 				pobj->ohaluengr = TRUE;
 				pobj->oward = u.uhouse;
-				pobj->opoisoned = OPOISON_SLEEP;
-				pobj->opoisonchrgs = 30;
+				if(!Role_if(PM_EXILE)){
+					pobj->opoisoned = OPOISON_SLEEP;
+					pobj->opoisonchrgs = 30;
+				}
 			}
 			else if(is_poisonable(pobj)){
 				pobj->opoisoned = OPOISON_SLEEP;
