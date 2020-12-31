@@ -3749,7 +3749,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 					}
 				}
 				/* zap missed */
-				else {
+				else if (cansee(sx, sy)) {
 					miss(fltxt, mdef);
 				}
 
