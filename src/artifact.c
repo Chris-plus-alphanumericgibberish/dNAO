@@ -1592,7 +1592,8 @@ touch_artifact(obj, mon, hypothetical)
 	}
 	
 	if(obj->oartifact == ART_KUSANAGI_NO_TSURUGI && badalign){
-		pline("You have betrayed what you stood for, and are no longer worthy of even bearing the sword.");
+		if (yours && !hypothetical)
+			pline("You have betrayed what you stood for, and are no longer worthy of even bearing the sword.");
 		forceEvade = TRUE;
 	}
 	
