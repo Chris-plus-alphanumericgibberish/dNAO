@@ -123,7 +123,7 @@ int mx_id;
 		mx_p2 = get_mx(mon2, mx_id);
 		if(!mx_p2)
 			add_mx_l(mon2, mx_id, siz_mx(mon1, mx_id)-sizeof(long));
-		memcpy(mx_p1, get_mx(mon2, mx_id), siz_mx(mon1, mx_id));
+		memcpy(get_mx(mon2, mx_id), mx_p1, siz_mx(mon1, mx_id));
 	}
 	return;
 }
