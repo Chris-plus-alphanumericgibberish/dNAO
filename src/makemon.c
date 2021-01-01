@@ -7802,6 +7802,7 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	fmon = m2;
 	m2->m_id = flags.ident++;
 	if (!m2->m_id) m2->m_id = flags.ident++;	/* ident overflowed */
+	m2->mextra_p = (union mextra *)0;	/* needs its own */
 	m2->mx = mm.x;
 	m2->my = mm.y;
 
@@ -7844,32 +7845,18 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	    else if (mon->mpeaceful)
 		m2->mpeaceful = rn2(max(2 + u.uluck, 2)) ? 1 : 0;
 	}
-
-	newsym(m2->mx,m2->my);	/* display the new monster */
+	/* pets and minions copy their extended structures */
 	if (m2->mtame) {
-	    struct monst *m3;
-
-	    if (mon->isminion) {
-			cpy_mx(mon, m2, MX_EMIN);
-	    } else {
-			/* because m2 is a copy of mon it is tame but not init'ed.
-			* however, tamedog will not re-tame a tame dog, so m2
-			* must be made non-tame to get initialized properly.
-			*/
-			struct monst * m3;
-			m2->mtame = 0;
-			if ((m3 = tamedog(m2, (struct obj *)0)) != 0) {
-				m2 = m3;
-				cpy_mx(mon, m2, MX_EDOG);
-			}
-	    }
+		cpy_mx(mon, m2, MX_EDOG);
+		cpy_mx(mon, m2, MX_EMIN);
 	}
-	/* horrors should keep their extended structure. */
+	/* horrors must keep their extended structure. */
 	if (is_horror(m2->data)) {
 		cpy_mx(mon, m2, MX_EHOR);
 	}
 	set_malign(m2);
 
+	newsym(m2->mx,m2->my);	/* display the new monster */
 	return m2;
 }
 
