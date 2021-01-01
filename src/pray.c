@@ -3430,7 +3430,7 @@ goat_gives_benefit()
 			change_luck(2*LUCKMAX);
 			break;
 		case 3:
-			if(uwep && !uwep->oartifact && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_LESSER_ACIDW)){
+			if(uwep && !uwep->oartifact && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_GOATW) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_LESSER_ACIDW)){
 				if(!Blind) pline("Acid drips from your weapon!");
 				add_oprop(uwep, OPROP_LESSER_ACIDW);
 				uwep->oeroded = 0;
