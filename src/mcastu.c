@@ -1759,12 +1759,16 @@ int tary;
 		!is_summon_spell(spellnum) &&
 		!is_aoe_attack_spell(spellnum)) {
 		/* message */
-		if ((youdef || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
+		if ((youagr || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
 			pline("%s cast%s a spell at %s!",
 				youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
 				youagr ? "" : "s",
 				levl[tarx][tary].typ == WATER
 				? "empty water" : "thin air");
+		}
+		/* monsters figure out you aren't there */
+		if (!youagr && youdef) {
+			magr->mux = magr->muy = 0;
 		}
 		return MM_MISS;
 	}
