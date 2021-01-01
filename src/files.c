@@ -2739,6 +2739,11 @@ livelog_write_string(buffer)
 		     moves, (long)u.ubirthday, (long)time(NULL), msgbuf);
 
 	    fprintf(livelogfile, "%s", tmpbuf);
+		//Returns 0 if successful, EOF otherwise
+		if(fflush(livelogfile)){
+			impossible("Warning: fflush failed with error number %d", errno);
+		}
+		//fclose may fail if there's data left in the buffer and the flush fails.
 	    (void) fclose(livelogfile);
 	}
 	unlock_file(LIVELOGFILE);
