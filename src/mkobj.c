@@ -28,6 +28,7 @@ STATIC_DCL int FDECL(maid_clean, (struct monst *, struct obj *));
 						) && (														\
 						otmp->oclass == WEAPON_CLASS								\
 						|| (otmp->oclass == TOOL_CLASS && is_weptool(otmp))			\
+						|| (otmp->oclass == TOOL_CLASS && (otmp->otyp == LENSES || otmp->otyp == SUNGLASSES))	\
 						|| (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp))	\
 						))
 
@@ -1967,12 +1968,12 @@ int mat;
 
 	if (obj->where == OBJ_INVENT) {
 		owner = &youmonst;
-		if (mask = obj->owornmask)
+		if ((mask = obj->owornmask))
 			setnotworn(obj);
 	}
 	if (obj->where == OBJ_MINVENT) {
 		owner = obj->ocarry;
-		if (mask = obj->owornmask)
+		if ((mask = obj->owornmask))
 			update_mon_intrinsics(owner, obj, FALSE, TRUE);
 	}
 	/* change otyp to be appropriate

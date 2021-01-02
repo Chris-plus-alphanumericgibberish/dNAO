@@ -186,6 +186,14 @@ hack_artifacts()
  	    artilist[ART_SINGING_SWORD].role = NON_PM;
 	}
 	
+	if(Role_if(PM_MONK)){
+ 	    artilist[ART_EYES_OF_THE_OVERWORLD].size = youracedata->msize;
+	}
+	
+	if(Role_if(PM_PRIEST)){
+ 	    artilist[ART_MITRE_OF_HOLINESS].size = youracedata->msize;
+	}
+	
 	if(Role_if(PM_ANACHRONONAUT)){
 		artilist[ART_CRESCENT_BLADE].race = NON_PM;
 		artilist[ART_CRESCENT_BLADE].alignment = A_NONE;
