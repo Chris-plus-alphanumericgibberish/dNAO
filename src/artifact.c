@@ -263,9 +263,6 @@ hack_artifacts()
 	
 	/* Fix up the quest artifact */
 	if(Pantheon_if(PM_NOBLEMAN) || Role_if(PM_NOBLEMAN)){
-		artilist[ART_MANTLE_OF_HEAVEN].size = (&mons[urace.malenum])->msize;
-		artilist[ART_VESTMENT_OF_HELL].size = (&mons[urace.malenum])->msize;
-
 		artilist[ART_CROWN_OF_THE_SAINT_KING].size = (&mons[urace.malenum])->msize;
 		artilist[ART_HELM_OF_THE_DARK_LORD].size = (&mons[urace.malenum])->msize;
 
