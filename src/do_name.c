@@ -595,6 +595,8 @@ const char *name;
 		
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
+		else if (Role_if(PM_PRIEST) && obj->oartifact == ART_MITRE_OF_HOLINESS)
+			obj->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
 		else obj->bodytypeflag = MB_HUMANOID;
 		
 		/* viperwhip heads */
