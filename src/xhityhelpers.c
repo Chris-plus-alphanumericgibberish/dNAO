@@ -1413,7 +1413,7 @@ struct obj * otmp;
 		!(is_lightsaber(otmp) && litsaber(otmp))) {
 		/* default: 1d(XL) */
 		ndice = 1;
-		diesize = mlev(mdef);
+		diesize = max(1, mlev(mdef));
 		/* special cases */
 		if (otmp->otyp == KHAKKHARA)
 			ndice = rnd(3);
