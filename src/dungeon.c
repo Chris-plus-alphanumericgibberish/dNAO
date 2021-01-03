@@ -1807,13 +1807,16 @@ d_level *lev;
 int
 level_difficulty()
 {
+	int depth;
 	if (In_endgame(&u.uz))
-		return((int)(depth(&sanctum_level) + u.ulevel/2));
+		depth = ((int)(depth(&sanctum_level) + u.ulevel/2));
 	else
 		if (u.uhave.amulet)
-			return(deepest_lev_reached(FALSE));
+			depth = (deepest_lev_reached(FALSE));
 		else
-			return((int) depth(&u.uz));
+			depth = ((int) depth(&u.uz));
+	
+	return max(1, depth);
 }
 
 /* Take one word and try to match it to a level.
