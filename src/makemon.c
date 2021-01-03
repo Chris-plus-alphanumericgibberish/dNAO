@@ -9245,7 +9245,7 @@ register int	mmflags;
 			makemon(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 		}
 	}
-	if (mitem && allow_minvent) (void) mongets(mtmp, mitem);
+	if (mitem) (void) mongets(mtmp, mitem);
 	
 	if(in_mklev) {
 		if(((is_ndemon(ptr)) ||
