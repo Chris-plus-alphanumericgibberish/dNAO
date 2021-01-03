@@ -118,12 +118,10 @@ register int n, x;
 	register int tmp = n;
     check_reseed();
 
-#ifdef DEBUG
 	if (x < 0 || n < 0 || (x == 0 && n != 0)) {
 		impossible("d(%d,%d) attempted", n, x);
 		return(1);
 	}
-#endif
 	while(n--) tmp += RND(x);
 	return(tmp); /* Alea iacta est. -- J.C. */
 }
