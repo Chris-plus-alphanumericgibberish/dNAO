@@ -8511,6 +8511,7 @@ register int	mmflags;
 	/* insight check: making yith */
 	else if(randmonst && !mkmon_template && check_insight()){
 		mkmon_template = YITH;
+		//NOT unsethouse, Yith are infiltrators and will appear as singletons inside a larger group.
 	}
 	/* most general case at bottom -- creatures randomly being zombified */
 	else if(randmonst && !mkmon_template && can_undead(mtmp->data) && !Is_rogue_level(&u.uz)){
@@ -8559,6 +8560,11 @@ register int	mmflags;
 		/* zombies and other derived undead are much less likely to have their items */
 		if (is_undead(mtmp->data))
 			allow_minvent = rn2(2);
+	}
+	
+	//One-off templates like Yith should be unset immediately after being applied
+	if(mkmon_template && !unsethouse){
+		mkmon_template = 0;
 	}
 	
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
