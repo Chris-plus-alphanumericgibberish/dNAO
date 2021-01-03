@@ -7963,6 +7963,7 @@ register int	mmflags;
 	boolean randmonst = !ptr;
 	unsigned gpflags = (mmflags & MM_IGNOREWATER) ? MM_IGNOREWATER : 0;
 	boolean unsethouse = FALSE;
+	boolean oneOffTemplate = FALSE;
 	
 	if(Race_if(PM_DROW) && in_mklev && Is_qstart(&u.uz) && 
 		(ptr->mtyp == PM_SPROW || ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_CAVE_LIZARD || ptr->mtyp == PM_LARGE_CAVE_LIZARD)
@@ -8512,6 +8513,7 @@ register int	mmflags;
 	else if(randmonst && !mkmon_template && check_insight()){
 		mkmon_template = YITH;
 		//NOT unsethouse, Yith are infiltrators and will appear as singletons inside a larger group.
+		oneOffTemplate = TRUE;
 	}
 	/* most general case at bottom -- creatures randomly being zombified */
 	else if(randmonst && !mkmon_template && can_undead(mtmp->data) && !Is_rogue_level(&u.uz)){
@@ -8563,7 +8565,7 @@ register int	mmflags;
 	}
 	
 	//One-off templates like Yith should be unset immediately after being applied
-	if(mkmon_template && !unsethouse){
+	if(oneOffTemplate){
 		mkmon_template = 0;
 	}
 	
