@@ -1160,8 +1160,8 @@ struct obj *obj;
 boolean while_carried;
 {
 	return (obj && obj->oartifact &&
-		(arti_worn_prop(obj, ARTP_LIGHTEN)
-		|| (while_carried && arti_carry_prop(obj, ARTP_LIGHTEN))));
+		(arti_carry_prop(obj, ARTP_LIGHTEN)
+		|| (!while_carried && arti_worn_prop(obj, ARTP_LIGHTEN))));
 }
 
 boolean
@@ -1170,8 +1170,8 @@ struct obj * obj;
 boolean while_carried;
 {
 	return (obj && obj->oartifact &&
-		(arti_worn_prop(obj, ARTP_WCATRIB)
-		|| (while_carried && arti_carry_prop(obj, ARTP_WCATRIB))));
+		(arti_carry_prop(obj, ARTP_WCATRIB)
+		|| (!while_carried && arti_worn_prop(obj, ARTP_WCATRIB))));
 }
 
 boolean
@@ -1180,8 +1180,8 @@ struct obj * obj;
 boolean while_carried;
 {
 	return (obj && obj->oartifact &&
-		(arti_worn_prop(obj, ARTP_FORCESIGHT)
-		|| (while_carried && arti_carry_prop(obj, ARTP_FORCESIGHT))));
+		(arti_carry_prop(obj, ARTP_FORCESIGHT)
+		|| (!while_carried && arti_worn_prop(obj, ARTP_FORCESIGHT))));
 }
 
 boolean
