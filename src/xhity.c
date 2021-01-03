@@ -6804,10 +6804,11 @@ boolean ranged;
 				Your("helmet blocks the attack to your head.");
 			}
 			else if (vis) {
-				Strcpy(buf, s_suffix(Monnam(mdef)));
 				pline("%s helmet blocks %s attack to %s head.",
-					buf, s_suffix(mon_nam(magr)),
-					mhis(mdef));
+					s_suffix(Monnam(mdef)),
+					(youagr ? "your" : s_suffix(mon_nam(magr))),
+					mhis(mdef)
+					);
 			}
 			/* don't do any further damage or anything, but do trigger retaliation attacks */
 			return MM_HIT;
