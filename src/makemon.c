@@ -7802,7 +7802,6 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	fmon = m2;
 	m2->m_id = flags.ident++;
 	if (!m2->m_id) m2->m_id = flags.ident++;	/* ident overflowed */
-	m2->mextra_p = (union mextra *)0;	/* needs its own */
 	m2->mx = mm.x;
 	m2->my = mm.y;
 
@@ -7821,42 +7820,44 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	m2->mhp = mon->mhp / 2;
 	mon->mhp -= m2->mhp;
 
+	/* place the monster -- we want to do this before any display things happen */
+	place_monster(m2, m2->mx, m2->my);
+
 	/* since shopkeepers and guards will only be cloned if they've been
 	 * polymorphed away from their original forms, the clone doesn't have
 	 * room for the extra information.  we also don't want two shopkeepers
 	 * around for the same shop.
 	 */
-	if (mon->isshk) m2->isshk = FALSE;
-	if (mon->isgd) m2->isgd = FALSE;
-	if (mon->ispriest) m2->ispriest = FALSE;
-	place_monster(m2, m2->mx, m2->my);
+	/* handle all mextra fields */
+	m2->mextra_p = (union mextra *)0;	/* needs its own */
+	/* DO copy these */
+	cpy_mx(mon, m2, MX_EDOG);
+	cpy_mx(mon, m2, MX_EHOR);
+	cpy_mx(mon, m2, MX_EMIN);
+	cpy_mx(mon, m2, MX_ENAM);
+	/* DON'T copy these */
+	m2->isshk = FALSE;		// MX_ESHK
+	m2->ispriest = FALSE;	// MX_EPRI
+	m2->isgd = FALSE;		// MX_EVGD
+
+	/* handle monster lightsources */
 	if (emits_light_mon(m2))
 	    new_light_source(LS_MONSTER, (genericptr_t)m2, emits_light_mon(m2));
-	if (M_HAS_NAME(mon)) {
-		cpy_mx(mon, m2, MX_ENAM);
-	} else if (mon->isshk) {
-	    m2 = christen_monst(m2, shkname(mon));
-	}
 
 	/* not all clones caused by player are tame or peaceful */
 	if (!flags.mon_moving) {
-	    if (mon->mtame)
-		m2->mtame = rn2(max(2 + u.uluck, 2)) ? mon->mtame : 0;
+	    if (mon->mtame) {
+			m2->mtame = rn2(max(2 + u.uluck, 2)) ? mon->mtame : 0;
+			if (!m2->mtame)
+				untame(m2, 1);
+		}
 	    else if (mon->mpeaceful)
-		m2->mpeaceful = rn2(max(2 + u.uluck, 2)) ? 1 : 0;
-	}
-	/* pets and minions copy their extended structures */
-	if (m2->mtame) {
-		cpy_mx(mon, m2, MX_EDOG);
-		cpy_mx(mon, m2, MX_EMIN);
-	}
-	/* horrors must keep their extended structure. */
-	if (is_horror(m2->data)) {
-		cpy_mx(mon, m2, MX_EHOR);
+			m2->mpeaceful = rn2(max(2 + u.uluck, 2)) ? 1 : 0;
 	}
 	set_malign(m2);
 
-	newsym(m2->mx,m2->my);	/* display the new monster */
+	/* display the new monster */
+	newsym(m2->mx,m2->my);
 	return m2;
 }
 
