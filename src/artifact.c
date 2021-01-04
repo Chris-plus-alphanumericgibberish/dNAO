@@ -3346,23 +3346,57 @@ boolean * messaged;
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
-		/* exclusion */
-		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6))
+		/* exclusions below */
+		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6)) /* Tobiume only does the knockback if mdef is nearly dead */
 		))
 	{
-		if(youagr) {
-			pline("%s is thrown backwards by the force of your blow!", Monnam(mdef));
-			mhurtle(mdef, u.dx, u.dy, 10);
-			if (DEADMONSTER(mdef))
-				return MM_DEF_DIED;
-			if (migrating_mons == mdef)
-				return MM_AGR_STOP; //Monster was killed as part of movement OR fell to new level and we should stop.
+		/* determine if we do the full hurtle, or just stun */
+		int hurtledistance;
+		
+		if (!magr)
+			hurtledistance = 0;	/* we can't tell which way to throw mdef! */
+		else if (mdef->data->msize >= MZ_HUGE)
+			hurtledistance = 0;
+		else
+			hurtledistance = min(BOLT_LIM, 3*(20-dieroll)*basedmg/(*hp(mdef)));
+
+		/* message */
+		if (vis) {
+			pline("%s %s %s by %s blow!",
+				(youdef ? "You" : Monnam(mdef)),
+				(youdef ? "are" : "is"),
+				(hurtledistance > 1 ? "thrown" : "stunned"),
+				(youagr ? "your" : (magr && (vis&VIS_MAGR)) ? s_suffix(mon_nam(magr)) : magr ? "a" : "the")
+				);
+			*messaged = TRUE;
 		}
-		else if(youdef) {
-			You("are addled by the force of the blow!");
-			make_stunned((HStun + 3), FALSE);
+		/* do we stun, or do the full hurtle? Based on damage. */
+		if (hurtledistance > 1) {
+			/* hurtle */
+			int dx = x(mdef) - x(magr);
+			int dy = y(mdef) - y(magr);
+			if (youdef) {
+				hurtle(dx, dy, hurtledistance, FALSE, TRUE);
+			}
+			else {
+				mhurtle(mdef, dx, dy, hurtledistance);
+			}
 		}
-		/* no mvm? */
+		else {
+			/* just stun with a small movement slow */
+			if (youdef) {
+				make_stunned((HStun + 3), FALSE);
+				youmonst.movement -= 2;
+			}
+			else {
+				mdef->mstun = 1;
+				mdef->movement -= 2;
+			}
+		}
+		if (!youdef && DEADMONSTER(mdef))
+			return MM_DEF_DIED;
+		if (migrating_mons == mdef)
+			return MM_AGR_STOP; //Monster was killed as part of movement OR fell to new level and we should stop.
 	}
 	/* fire explosions */
 	if (((arti_attack_prop(otmp, ARTA_EXPLFIRE) && !rn2(4)) || arti_attack_prop(otmp, ARTA_EXPLFIREX)) && !(
