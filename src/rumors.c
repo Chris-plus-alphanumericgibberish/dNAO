@@ -327,18 +327,29 @@ outgmaster()
 	}
 }
 
+#define SELECT_MINOR 1
+#define SELECT_MAJOR 2
+#define SELECT_ENLIT 3
+#define SELECT_HINTS 4
+
 int
 doconsult(oracl)
 register struct monst *oracl;
 {
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
 #ifdef GOLDOBJ
-        long umoney = money_cnt(invent);
+	long umoney = money_cnt(invent);
+#else
+	long umoney = u.ugold;
 #endif
-	int u_pay, minor_cost = 50, major_cost = 500 + 50 * u.ulevel;
-	int add_xpts;
-	char qbuf[QBUFSZ];
-
-	multi = 0;
+	int minor_cost = 50;
+	int major_cost = 500 + 50 * u.ulevel;
+	int enl_cost = 200 + 20 * u.ulevel;
+	int hint_cost = 1000;
 
 	if (!oracl) {
 		There("is no one here to consult.");
@@ -346,85 +357,191 @@ register struct monst *oracl;
 	} else if (!oracl->mpeaceful) {
 		pline("%s is in no mood for consultations.", Monnam(oracl));
 		return 0;
-#ifndef GOLDOBJ
-	} else if (!u.ugold) {
-#else
-	} else if (!umoney) {
-#endif
+	} else if (umoney == 0) {
 		You("have no money.");
 		return 0;
 	}
 
-	Sprintf(qbuf,
-		"\"Wilt thou settle for a minor consultation?\" (%d %s)",
-		minor_cost, currency((long)minor_cost));
-	switch (ynq(qbuf)) {
-	    default:
-	    case 'q':
-		return 0;
-	    case 'y':
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "A minor consultation");
+	any.a_int = SELECT_MINOR;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		'm', 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	Sprintf(buf, "A major consultation");
+	any.a_int = SELECT_MAJOR;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		'M', 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	Sprintf(buf, "After enlightenment");
+	any.a_int = SELECT_ENLIT;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		'e', 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	Sprintf(buf, "Glimpses of things to come");
+	any.a_int = SELECT_HINTS;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		'g', 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	end_menu(tmpwin, "What dost thou seek?");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	n = (n > 0) ? selected[0].item.a_int : 0;
+
+	switch (n){
+		case SELECT_MINOR:
+			if (umoney < minor_cost){
+				You("don't have enough money for that!");
+				return 0;
+			} else {
 #ifndef GOLDOBJ
-		if (u.ugold < (long)minor_cost) {
+				u.ugold -= (long)minor_cost;
+				oracl->mgold += (long)minor_cost;
 #else
-		if (umoney < (long)minor_cost) {
+				money2mon(oracl, (long)minor_cost);
 #endif
-		    You("don't even have enough money for that!");
-		    return 0;
-		}
-		u_pay = minor_cost;
+				outrumor(1, BY_ORACLE);
+				if (!u.uevent.minor_oracle){
+					more_experienced(minor_cost / (u.uevent.major_oracle ? 25 : 10), 0);
+					/* 5 pts if very 1st, or 2 pts if major already done */
+					if(!u.uevent.major_oracle) livelog_write_string("consulted the oracle for the first time");
+				}
+				u.uevent.minor_oracle = TRUE;
+			}
 		break;
-	    case 'n':
+		case SELECT_MAJOR:
+			if (umoney < (major_cost / 2)){
+				You("don't have enough money for that!");
+				return 0;
+			} else {
 #ifndef GOLDOBJ
-		if (u.ugold <= (long)minor_cost ||	/* don't even ask */
+				u.ugold -= (long)min(major_cost, umoney);
+				oracl->mgold += (long)min(major_cost, umoney);
 #else
-		if (umoney <= (long)minor_cost ||	/* don't even ask */
+				money2mon(oracl, (long)min(major_cost, umoney));
 #endif
-		    (oracle_cnt == 1 || oracle_flg < 0)) return 0;
-		Sprintf(qbuf,
-			"\"Then dost thou desire a major one?\" (%d %s)",
-			major_cost, currency((long)major_cost));
-		if (yn(qbuf) != 'y') return 0;
+				boolean cheapskate = umoney < major_cost;
+				outoracle(cheapskate, TRUE);
+				if (!cheapskate && !u.uevent.major_oracle){
+					more_experienced(major_cost / (u.uevent.major_oracle ? 25 : 10), 0);
+					/* ~100 pts if very 1st, ~40 pts if minor already done */
+					if(!u.uevent.minor_oracle) livelog_write_string("consulted the oracle for the first time");
+				}
+				u.uevent.major_oracle = TRUE;
+			}
+		break;
+		case SELECT_ENLIT:
+			if (umoney < enl_cost){
+				You("don't have enough money for that!");
+				return 0;
+			} else {
 #ifndef GOLDOBJ
-		u_pay = (u.ugold < (long)major_cost ? (int)u.ugold
-						    : major_cost);
+				u.ugold -= (long)enl_cost;
+				oracl->mgold += (long)enl_cost;
 #else
-		u_pay = (umoney < (long)major_cost ? (int)umoney
-						    : major_cost);
+				money2mon(oracl, (long)enl_cost);
 #endif
+				You_feel("self-knowledgeable...");
+				display_nhwindow(WIN_MESSAGE, FALSE);
+				enlightenment(0);
+				pline_The("feeling subsides.");
+				if (!u.uevent.major_oracle){
+					more_experienced(enl_cost / (u.uevent.major_oracle ? 25 : 10), 0);
+					/* 5 pts if very 1st, or 2 pts if major already done */
+					if(!u.uevent.major_oracle) livelog_write_string("consulted the oracle for the first time");
+				}
+				u.uevent.major_oracle = TRUE;
+			}
+		break;
+		case SELECT_HINTS:
+			if (umoney < hint_cost){
+				You("don't have enough money for that!");
+				return 0;
+			} else {
+#ifndef GOLDOBJ
+				u.ugold -= (long)hint_cost;
+				oracl->mgold += (long)hint_cost;
+#else
+				money2mon(oracl, (long)hint_cost);
+#endif
+				switch (rn2(5)){
+					case 0:
+						if (dungeon_topology.alt_tulani)
+							pline("They say %s spirits roam the land.",
+									!rn2(4) ? "aestival" : (!rn2(3) ? "vernal" :
+										(!rn2(2) ? "hibernal" : "autumnal")));
+						else
+							pline("They say radiant spheres roam the land.");
+					break;
+					case 1:
+						if (dungeon_topology.alt_tower)
+							pline("They say Bahamut's palace has been sighted from afar.");
+						else
+							pline("Rumors of Bahamut's palace have been greatly exaggerated.");
+					break;
+					case 2:
+						if (dungeon_topology.eprecursor_typ == PRE_DRACAE)
+							pline("They say the ancient eladrin mothers have been seen once again.");
+						else if (dungeon_topology.eprecursor_typ == PRE_POLYP){
+							if (dungeon_topology.d_chaos_dvariant == MITHARDIR)
+								pline("There's been rumors of invisible shapeshifters in the deserts.");
+							else
+								pline("There's been rumors of invisible shapeshifters in the forests.");
+						} else
+							pline("I've been considering expanding my statue collection. I hear Oona has quite the variety...");
+					break;
+					case 3:
+						if (dungeon_topology.d_chaos_dvariant == TEMPLE_OF_CHAOS)
+							pline("Some adventurer came through here the other day, all dressed in blue and muttering about 'Materia'?");
+						else if (dungeon_topology.d_chaos_dvariant == MITHARDIR)
+							pline("Some adventurer came through here the other day, wearing the oddest white headscarf.");
+						else if (dungeon_topology.d_chaos_dvariant == MORDOR){
+							if (!rn2(4))
+								pline("A pair of short adventurers came through here just the other day... there was an odd wretched creature following them though.");
+							else
+								pline("A pair of short adventurers came through here the other day, apparently in search of a volcano?");
+						}
+					break;
+					case 4:
+						if (u.oonaenergy == AD_FIRE)
+							pline("They say Oona has a bit of a fiery personality...");
+						else if (u.oonaenergy == AD_COLD)
+							pline("They say Oona can be a bit cold at first...");
+						else if (u.oonaenergy == AD_ELEC)
+							pline("They say meeting Oona can be a bit of a shock...");
+					break;
+				}
+
+				if (!u.uevent.major_oracle){
+					more_experienced(hint_cost / (u.uevent.major_oracle ? 25 : 10), 0);
+					/* 5 pts if very 1st, or 2 pts if major already done */
+					if(!u.uevent.major_oracle) livelog_write_string("consulted the oracle for the first time");
+				}
+				u.uevent.major_oracle = TRUE;
+			}
+		break;
+		default:
+			return 0;
 		break;
 	}
-#ifndef GOLDOBJ
-	u.ugold -= (long)u_pay;
-	oracl->mgold += (long)u_pay;
-#else
-        money2mon(oracl, (long)u_pay);
-#endif
+
 	flags.botl = 1;
-	add_xpts = 0;	/* first oracle of each type gives experience points */
-	if (u_pay == minor_cost) {
-		outrumor(1, BY_ORACLE);
-		if (!u.uevent.minor_oracle){
-		    add_xpts = u_pay / (u.uevent.major_oracle ? 25 : 10);
-		    /* 5 pts if very 1st, or 2 pts if major already done */
-			if(!u.uevent.major_oracle) livelog_write_string("consulted the oracle for the first time");
-		}
-		u.uevent.minor_oracle = TRUE;
-	} else {
-		boolean cheapskate = u_pay < major_cost;
-		outoracle(cheapskate, TRUE);
-		if (!cheapskate && !u.uevent.major_oracle){
-		    add_xpts = u_pay / (u.uevent.minor_oracle ? 25 : 10);
-		    /* ~100 pts if very 1st, ~40 pts if minor already done */
-			if(!u.uevent.minor_oracle) livelog_write_string("consulted the oracle for the first time");
-		}
-		u.uevent.major_oracle = TRUE;
-		exercise(A_WIS, !cheapskate);
-	}
-	if (add_xpts) {
-		more_experienced(add_xpts, u_pay/50);
-		newexplevel();
-	}
+
 	return 1;
 }
+
+#undef SELECT_MINOR
+#undef SELECT_MAJOR
+#undef SELECT_ENLIT
+#undef SELECT_HINTS
 
 /*rumors.c*/
