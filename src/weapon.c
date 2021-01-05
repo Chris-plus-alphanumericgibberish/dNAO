@@ -3420,6 +3420,10 @@ int wep_type;
 			case P_MASTER:		 maxweight = 50; break;	 /* war hammer */
 			case P_GRAND_MASTER: maxweight = 60; break;	 /* axe */
 		}
+
+		if (youracedata->msize > MZ_MEDIUM)
+			maxweight *= 2*(youracedata->msize - MZ_MEDIUM);
+
 		if (wep_type == P_BARE_HANDED_COMBAT) {
 			bonus -= (skill * 2 / 3);
 		}
