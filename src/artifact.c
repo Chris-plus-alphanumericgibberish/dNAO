@@ -1210,6 +1210,61 @@ struct obj *obj;
 #endif /* OVL0 */
 #ifdef OVLB
 
+int
+artifact_weight(obj)
+struct obj *obj;
+{
+	if(!get_artifact(obj))
+		return -1;	// error
+	int baseweight = objects[obj->otyp].oc_weight;
+	int artiweight = get_artifact(obj)->weight;
+	int wt = -1;
+
+	if (artiweight == WT_DEFAULT) {
+		/* use default; take material into consideration */
+		wt = baseweight;
+		if(obj->obj_material != objects[obj->otyp].oc_material)
+			wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
+	}
+	else if (artiweight == WT_SPECIAL) {
+		/* it needs special handling here */
+		switch (obj->oartifact) {
+		case ART_ROD_OF_LORDLY_MIGHT:
+			wt = objects[MACE].oc_weight;
+			break;
+		case ART_ANNULUS:
+			wt = objects[BELL_OF_OPENING].oc_weight;
+			break;
+		case ART_SCEPTRE_OF_LOLTH:
+			wt = 3*objects[MACE].oc_weight;
+			break;
+		case ART_ROD_OF_THE_ELVISH_LORDS:
+			wt = objects[ELVEN_MACE].oc_weight;
+			break;
+		case ART_VAMPIRE_KILLER:
+			wt = 2*objects[BULLWHIP].oc_weight;
+			break;
+		case ART_GOLDEN_SWORD_OF_Y_HA_TALLA:
+			wt = 2*objects[SCIMITAR].oc_weight;
+			break;
+		case ART_AEGIS:
+			wt = objects[CLOAK].oc_weight;
+			break;
+		case ART_HERMES_S_SANDALS:
+			wt = objects[FLYING_BOOTS].oc_weight;
+			break;
+		default:
+			impossible("unhandled special artifact weight for %d", obj->oartifact);
+			break;
+		}
+	}
+	else {
+		/* explicitly set in artilist.c */
+		wt = artiweight;
+	}
+	return wt;
+}
+
 boolean
 restrict_name(otmp, name)  /* returns 1 if name is restricted for otmp->otyp */
 register struct obj *otmp;

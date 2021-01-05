@@ -2223,35 +2223,11 @@ register struct obj *obj;
 {
 	int wt = objects[obj->otyp].oc_weight;
 	if (obj->otyp == MAGIC_CHEST && obj->obolted) wt = 99999;	/* impossibly heavy */
-	else if(obj->oartifact == ART_ROD_OF_LORDLY_MIGHT) wt = objects[MACE].oc_weight;
-	else if(obj->oartifact == ART_ANNULUS) wt = objects[BELL_OF_OPENING].oc_weight;
-	else if(obj->oartifact == ART_SCEPTRE_OF_LOLTH) wt = 3*objects[MACE].oc_weight;
-	else if(obj->oartifact == ART_ROD_OF_THE_ELVISH_LORDS) wt = objects[ELVEN_MACE].oc_weight;
-	else if(obj->oartifact == ART_VAMPIRE_KILLER) wt = 2*objects[BULLWHIP].oc_weight;
-	else if(obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA) wt = 2*objects[SCIMITAR].oc_weight;
-	else if(obj->oartifact == ART_AEGIS) wt = objects[CLOAK].oc_weight;
-	else if(obj->oartifact == ART_HERMES_S_SANDALS) wt = objects[FLYING_BOOTS].oc_weight;
-	else if(obj->oartifact == ART_EARTH_CRYSTAL){
-		wt = 100;
-	}
-	else if(obj->oartifact == ART_WATER_CRYSTAL){
-		wt = 40;
-	}
-	else if(obj->oartifact == ART_FIRE_CRYSTAL){
-		wt = 10;
-	}
-	else if(obj->oartifact == ART_AIR_CRYSTAL){
-		wt = 20;
-	}
-	else if(obj->oartifact == ART_BLACK_CRYSTAL){
-		wt = 30;
-	} //200 total
-	else if(obj->oartifact == ART_DRAGON_PLATE || obj->oartifact == ART_CHROMATIC_DRAGON_SCALES){
-		wt =  (int)(wt * 1.5); //225
-	} else if(obj->oartifact == ART_TREASURY_OF_PROTEUS){
-		wt =  50; /* Same as a crystal ball (ie, the Orb of Weight) */
-	} else if(obj->obj_material != objects[obj->otyp].oc_material){
-	//ie, for normal objects and non-special weight artifacts
+
+	if (obj->oartifact)
+		wt = artifact_weight(obj);
+	else if(obj->obj_material != objects[obj->otyp].oc_material) {
+		/* do not apply this to artifacts; those are handled in artifact_weight() */
 		wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
 	}
 	
