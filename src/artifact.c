@@ -263,6 +263,9 @@ hack_artifacts()
 	
 	/* Fix up the quest artifact */
 	if(Pantheon_if(PM_NOBLEMAN) || Role_if(PM_NOBLEMAN)){
+		artilist[ART_CROWN_OF_THE_SAINT_KING].size = (&mons[urace.malenum])->msize;
+		artilist[ART_HELM_OF_THE_DARK_LORD].size = (&mons[urace.malenum])->msize;
+
 		if(Race_if(PM_VAMPIRE)){
 			urole.questarti = ART_VESTMENT_OF_HELL;
 			artilist[ART_HELM_OF_THE_DARK_LORD].alignment = alignmnt;
@@ -292,7 +295,14 @@ hack_artifacts()
 	    artilist[ART_GRANDMASTER_S_ROBE].alignment = alignmnt;
 	    artilist[ART_ROBE_OF_THE_ARCHMAGI].alignment = A_CHAOTIC;
 	    artilist[ART_ROBE_OF_THE_ARCHMAGI].role = Role_switch;
+
+	    artilist[ART_EYES_OF_THE_OVERWORLD].size = (&mons[urace.malenum])->msize;
 	}
+
+	if(Role_if(PM_PRIEST)){
+		artilist[ART_MITRE_OF_HOLINESS].size = (&mons[urace.malenum])->msize;
+	}
+
 	if (urole.questarti) {
 	    artilist[urole.questarti].alignment = alignmnt;
 	    artilist[urole.questarti].role = Role_switch;
@@ -1209,6 +1219,61 @@ struct obj *obj;
 
 #endif /* OVL0 */
 #ifdef OVLB
+
+int
+artifact_weight(obj)
+struct obj *obj;
+{
+	if(!get_artifact(obj))
+		return -1;	// error
+	int baseweight = objects[obj->otyp].oc_weight;
+	int artiweight = get_artifact(obj)->weight;
+	int wt = -1;
+
+	if (artiweight == WT_DEFAULT) {
+		/* use default; take material into consideration */
+		wt = baseweight;
+		if(obj->obj_material != objects[obj->otyp].oc_material)
+			wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
+	}
+	else if (artiweight == WT_SPECIAL) {
+		/* it needs special handling here */
+		switch (obj->oartifact) {
+		case ART_ROD_OF_LORDLY_MIGHT:
+			wt = objects[MACE].oc_weight;
+			break;
+		case ART_ANNULUS:
+			wt = objects[BELL_OF_OPENING].oc_weight;
+			break;
+		case ART_SCEPTRE_OF_LOLTH:
+			wt = 3*objects[MACE].oc_weight;
+			break;
+		case ART_ROD_OF_THE_ELVISH_LORDS:
+			wt = objects[ELVEN_MACE].oc_weight;
+			break;
+		case ART_VAMPIRE_KILLER:
+			wt = 2*objects[BULLWHIP].oc_weight;
+			break;
+		case ART_GOLDEN_SWORD_OF_Y_HA_TALLA:
+			wt = 2*objects[SCIMITAR].oc_weight;
+			break;
+		case ART_AEGIS:
+			wt = objects[CLOAK].oc_weight;
+			break;
+		case ART_HERMES_S_SANDALS:
+			wt = objects[FLYING_BOOTS].oc_weight;
+			break;
+		default:
+			impossible("unhandled special artifact weight for %d", obj->oartifact);
+			break;
+		}
+	}
+	else {
+		/* explicitly set in artilist.c */
+		wt = artiweight;
+	}
+	return wt;
+}
 
 boolean
 restrict_name(otmp, name)  /* returns 1 if name is restricted for otmp->otyp */
@@ -3346,23 +3411,57 @@ boolean * messaged;
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
-		/* exclusion */
-		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6))
+		/* exclusions below */
+		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6)) /* Tobiume only does the knockback if mdef is nearly dead */
 		))
 	{
-		if(youagr) {
-			pline("%s is thrown backwards by the force of your blow!", Monnam(mdef));
-			mhurtle(mdef, u.dx, u.dy, 10);
-			if (DEADMONSTER(mdef))
-				return MM_DEF_DIED;
-			if (migrating_mons == mdef)
-				return MM_AGR_STOP; //Monster was killed as part of movement OR fell to new level and we should stop.
+		/* determine if we do the full hurtle, or just stun */
+		int hurtledistance;
+		
+		if (!magr)
+			hurtledistance = 0;	/* we can't tell which way to throw mdef! */
+		else if (mdef->data->msize >= MZ_HUGE)
+			hurtledistance = 0;
+		else
+			hurtledistance = min(BOLT_LIM, 3*(20-dieroll)*basedmg/(*hp(mdef)));
+
+		/* message */
+		if (vis) {
+			pline("%s %s %s by %s blow!",
+				(youdef ? "You" : Monnam(mdef)),
+				(youdef ? "are" : "is"),
+				(hurtledistance > 1 ? "thrown" : "stunned"),
+				(youagr ? "your" : (magr && (vis&VIS_MAGR)) ? s_suffix(mon_nam(magr)) : magr ? "a" : "the")
+				);
+			*messaged = TRUE;
 		}
-		else if(youdef) {
-			You("are addled by the force of the blow!");
-			make_stunned((HStun + 3), FALSE);
+		/* do we stun, or do the full hurtle? Based on damage. */
+		if (hurtledistance > 1) {
+			/* hurtle */
+			int dx = x(mdef) - x(magr);
+			int dy = y(mdef) - y(magr);
+			if (youdef) {
+				hurtle(dx, dy, hurtledistance, FALSE, TRUE);
+			}
+			else {
+				mhurtle(mdef, dx, dy, hurtledistance);
+			}
 		}
-		/* no mvm? */
+		else {
+			/* just stun with a small movement slow */
+			if (youdef) {
+				make_stunned((HStun + 3), FALSE);
+				youmonst.movement -= 2;
+			}
+			else {
+				mdef->mstun = 1;
+				mdef->movement -= 2;
+			}
+		}
+		if (!youdef && DEADMONSTER(mdef))
+			return MM_DEF_DIED;
+		if (migrating_mons == mdef)
+			return MM_AGR_STOP; //Monster was killed as part of movement OR fell to new level and we should stop.
 	}
 	/* fire explosions */
 	if (((arti_attack_prop(otmp, ARTA_EXPLFIRE) && !rn2(4)) || arti_attack_prop(otmp, ARTA_EXPLFIREX)) && !(

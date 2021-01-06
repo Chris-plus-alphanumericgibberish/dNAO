@@ -8,6 +8,7 @@
 #define MZ_DEFAULT	-1
 #define MT_DEFAULT	-1
 #define WT_DEFAULT	-1
+#define WT_SPECIAL  -2  /* must be handled in artifact_weight() in artifact.c */
 
 #define TIER_S	8	/* Is somehow superior to all others */
 #define TIER_A	6	/* Preferrable endgame artifact */
