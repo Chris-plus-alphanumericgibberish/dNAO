@@ -2883,6 +2883,12 @@ register struct trobj *trop;
 					set_material_gm(obj, Race_if(PM_DROW) ? OBSIDIAN_MT : MITHRIL);
 				}
 			}
+			if(Role_if(PM_NOBLEMAN) && flags.initgend && Race_if(PM_HALF_DRAGON)){
+				if(obj->otyp == CLOAK){
+					set_material_gm(obj, CLOTH);
+					obj->obj_color = CLR_WHITE;
+				}
+			}
 #ifdef GOLDOBJ
 		}
 #endif
