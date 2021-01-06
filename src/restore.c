@@ -279,6 +279,13 @@ boolean ghostly;
 		if (mtmp->mextra_p) {
 			rest_mextra(mtmp, fd, ghostly);
 		}
+		/* debug code: detect, warn, and fix mismatches between mxtra booleans and structures
+		* Remove this when isminion, etc are deprecated */
+		if(mtmp->mtame    && !get_mx(mtmp, MX_EDOG))	{impossible("tame mon not edog"); mtmp->mtame = 0;}
+		if(mtmp->isminion && !get_mx(mtmp, MX_EMIN))	{impossible("minion mon not emin"); mtmp->isminion = 0;}
+		if(mtmp->ispriest && !get_mx(mtmp, MX_EPRI))	{impossible("priest mon not epri"); mtmp->ispriest = 0;}
+		if(mtmp->isshk    && !get_mx(mtmp, MX_ESHK))	{impossible("shopkeeper mon not eshk"); mtmp->isshk = 0;}
+		
 		if (mtmp->light) {
 			rest_lightsource(LS_MONSTER, mtmp, mtmp->light, fd, ghostly);
 		}
