@@ -5804,13 +5804,11 @@ resizeArmor()
 		}
 		ptr = mtmp->data;
 	}
-	
-	
 	// attempt to find a piece of armor to resize
 	NEARDATA const char clothes[] = { ARMOR_CLASS, TOOL_CLASS, 0 };
 	otmp = getobj(clothes, "resize");
 	if (!otmp) return(0);
-
+	
 	// check that the armor is not currently being worn
 	if (otmp->owornmask){
 		You("are wearing that!");
@@ -5822,12 +5820,34 @@ resizeArmor()
 		return(0);
 	}
 
-	// change size
-	otmp->objsize = ptr->msize;
 	// change shape
-	if (is_shirt(otmp) || otmp->otyp == ELVEN_TOGA) otmp->bodytypeflag = (ptr->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (ptr->mflagsb&MB_BODYTYPEMASK);
-	else if (is_suit(otmp)) otmp->bodytypeflag = (ptr->mflagsb&MB_BODYTYPEMASK);
-	else if (is_helmet(otmp)) otmp->bodytypeflag = (ptr->mflagsb&MB_HEADMODIMASK);
+	if (is_shirt(otmp) || otmp->otyp == ELVEN_TOGA){
+		//Check that the monster can actually have armor that fits it.
+		if(!(ptr->mflagsb&MB_BODYTYPEMASK)){
+			You("can't figure out how to make it fit.");
+			return FALSE;
+		}
+		otmp->bodytypeflag = (ptr->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (ptr->mflagsb&MB_BODYTYPEMASK);
+	}
+	else if (is_suit(otmp)){
+		//Check that the monster can actually have armor that fits it.
+		if(!(ptr->mflagsb&MB_BODYTYPEMASK)){
+			You("can't figure out how to make it fit.");
+			return FALSE;
+		}
+		otmp->bodytypeflag = (ptr->mflagsb&MB_BODYTYPEMASK);
+	}
+	else if (is_helmet(otmp)){
+		//Check that the monster can actually have armor that fits it.
+		if(!has_head(ptr)){
+			pline("No head!");
+			return FALSE;
+		}
+		otmp->bodytypeflag = (ptr->mflagsb&MB_HEADMODIMASK);
+	}
+	
+	// change size (AFTER shape, because this may be aborted during that step.
+	otmp->objsize = ptr->msize;
 	
 	fix_object(otmp);
 	

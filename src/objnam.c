@@ -5075,9 +5075,10 @@ typfnd:
 	if(otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp)){
 		if(bodytype == 0L){
 			if (from_user) {
-				if (is_suit(otmp)) otmp->bodytypeflag = (youracedata->mflagsb&MB_BODYTYPEMASK);
+				if (is_suit(otmp) && (youracedata->mflagsb&MB_BODYTYPEMASK)) otmp->bodytypeflag = (youracedata->mflagsb&MB_BODYTYPEMASK);
 				else if (is_helmet(otmp)) otmp->bodytypeflag = (youracedata->mflagsb&MB_HEADMODIMASK);
-				else if (is_shirt(otmp)) otmp->bodytypeflag = (youracedata->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (youracedata->mflagsb&MB_BODYTYPEMASK);
+				else if (is_shirt(otmp) && (youracedata->mflagsb&MB_BODYTYPEMASK)) otmp->bodytypeflag = (youracedata->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (youracedata->mflagsb&MB_BODYTYPEMASK);
+				else otmp->bodytypeflag = MB_HUMANOID;
 			}
 			else {
 				otmp->bodytypeflag = MB_HUMANOID;
