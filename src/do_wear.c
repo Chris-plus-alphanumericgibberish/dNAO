@@ -2584,10 +2584,16 @@ struct monst *magr;
 	/* Having the Deep Sea glyph increase magical DR by 3 */
 	if (active_glyph(DEEP_SEA))
 		bas_udr += 3;
-
+	
+	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
+	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU)){
+		arm_udr = 0;
+		nat_udr = 0;
+	}
+	
 	/* Combine into total */
 	int total_dr = bas_udr;
-	if(arm_udr >= 0 && nat_udr >= 0) {
+	if(arm_udr > 0 && nat_udr > 0) {
 		total_dr += (int)sqrt(nat_udr*nat_udr + arm_udr*arm_udr);
 	}
 	else {

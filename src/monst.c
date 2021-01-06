@@ -905,7 +905,7 @@ NEARDATA struct permonst mons[] = {
     MON("star spawn", S_HUMANOID,//17
 	LVL_NDR(26, 12, -5, 10, 90, 0), (G_NOGEN),
 	A(ATTK(AT_WEAP, AD_PHYS, 4, 4), ATTK(AT_XWEP, AD_PHYS, 4, 4), 
-	  ATTK(AT_TENT, AD_DRIN, 2, 4),
+	  ATTK(AT_TENT, AD_DRIN, 1, 4),
 	  ATTK(AT_MAGC, AD_PSON, 0, 0),
 	  NO_ATTK, NO_ATTK),
 	SIZ(WT_LARGE, CN_LARGE, MS_HISS, MZ_LARGE), MR_POISON, 0,
