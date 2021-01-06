@@ -263,6 +263,9 @@ hack_artifacts()
 	
 	/* Fix up the quest artifact */
 	if(Pantheon_if(PM_NOBLEMAN) || Role_if(PM_NOBLEMAN)){
+		artilist[ART_CROWN_OF_THE_SAINT_KING].size = (&mons[urace.malenum])->msize;
+		artilist[ART_HELM_OF_THE_DARK_LORD].size = (&mons[urace.malenum])->msize;
+
 		if(Race_if(PM_VAMPIRE)){
 			urole.questarti = ART_VESTMENT_OF_HELL;
 			artilist[ART_HELM_OF_THE_DARK_LORD].alignment = alignmnt;
@@ -292,7 +295,14 @@ hack_artifacts()
 	    artilist[ART_GRANDMASTER_S_ROBE].alignment = alignmnt;
 	    artilist[ART_ROBE_OF_THE_ARCHMAGI].alignment = A_CHAOTIC;
 	    artilist[ART_ROBE_OF_THE_ARCHMAGI].role = Role_switch;
+
+	    artilist[ART_EYES_OF_THE_OVERWORLD].size = (&mons[urace.malenum])->msize;
 	}
+
+	if(Role_if(PM_PRIEST)){
+		artilist[ART_MITRE_OF_HOLINESS].size = (&mons[urace.malenum])->msize;
+	}
+
 	if (urole.questarti) {
 	    artilist[urole.questarti].alignment = alignmnt;
 	    artilist[urole.questarti].role = Role_switch;
