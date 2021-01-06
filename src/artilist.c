@@ -289,7 +289,7 @@ A("Giantslayer",		AXE,							(const char *)0,
 /* effective vs some standard castlevainia enemy types*/
 /*is given extra damage in weapon.c, since whip damage is so low*/
 A("The Vampire Killer",	BULLWHIP,						"bloodstained chain whip",
-	2500L, METAL, MZ_DEFAULT, WT_DEFAULT,
+	2500L, METAL, MZ_DEFAULT, WT_SPECIAL,
 	A_LAWFUL, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	MONS(vsMA(MA_UNDEAD | MA_DEMON | MA_WERE)),
 	ATTK(AD_PHYS, 10, 20), (ARTA_HATES|ARTA_CANCEL),
@@ -438,7 +438,7 @@ A("Rhongomyniad",		LANCE,							(const char *)0,
 
 /*Needs encyc entry*/
 A("The Rod of Lordly Might",		MACE,				(const char *)0,
-	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_SPECIAL,
 	A_LAWFUL, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 3, 0), NOFLAG,
@@ -515,7 +515,7 @@ A("Fuma-itto no Ken",	BROADSWORD,						(const char *)0,
 	),
 
 A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-bladed %s",
-	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
+	3000L, GOLD, MZ_DEFAULT, WT_SPECIAL,
 	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
 	ATTK(AD_DRST, 5, 0), (ARTA_POIS),
@@ -1044,7 +1044,7 @@ A("Mirrorbright",					ROUNDSHIELD,		(const char *)0,
 
 /*Perseus's shield, needs encyc entry*/
 A("Aegis",							ROUNDSHIELD,		"gorgon-emblemed %s",
-	4000L, LEATHER, MZ_DEFAULT, WT_DEFAULT,
+	4000L, LEATHER, MZ_DEFAULT, WT_SPECIAL,
 	A_LAWFUL, NON_PM, NON_PM, TIER_A, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
@@ -1596,7 +1596,7 @@ A("The Veil of Latona",				CLOAK_OF_INVISIBILITY,	(const char *)0,
 	),
 
 A("Hermes's Sandals",				FLYING_BOOTS,			"pair of winged sandals",
-	4000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
+	4000L, GOLD, MZ_DEFAULT, WT_SPECIAL,
 	A_NEUTRAL, PM_HEALER, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_FXALGN),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
@@ -1699,7 +1699,7 @@ A("Itlachiayaque",					ROUNDSHIELD,		(const char *)0,
 
 /*Needs encyc entry*/
 A("The Annulus",					CHAKRAM,			"intricately-featured %s",
-	3000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
+	3000L, SILVER, MZ_DEFAULT, WT_SPECIAL,
 	A_CHAOTIC, PM_ANACHRONONAUT, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	ATTK(AD_PHYS, 5, 1), NOFLAG,	/*Actually Phys(5,0) if not a lightsaber*/
@@ -2109,7 +2109,7 @@ A("The Armor of Erebor",			PLATE_MAIL,			(const char *)0,
 /*Needs encyc entry*/
 /* Drow noble first gift  */
 A("The Sceptre of Lolth",			KHAKKHARA,			(const char *)0,
-	4000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
+	4000L, SILVER, MZ_DEFAULT, WT_SPECIAL,
 	A_CHAOTIC, PM_NOBLEMAN, PM_DROW, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 0), NOFLAG,
@@ -2415,7 +2415,7 @@ A("Belthronding",					ELVEN_BOW,			(const char *)0,
 /*Needs encyc entry*/
 /* Elf noble first gift */
 A("The Rod of the Elvish Lords",	ELVEN_MACE,			(const char *)0,
-	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_SPECIAL,
 	A_CHAOTIC, NON_PM, PM_ELF, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	ATTK(AD_PHYS, 3, 0), NOFLAG,
