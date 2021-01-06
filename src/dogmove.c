@@ -40,9 +40,8 @@ register struct obj *otmp;
 
     if (otmp->oclass != ARMOR_CLASS) return FALSE;
     
-    if (is_suit(otmp) && (!Is_dragon_scales(otmp) && (!arm_match(mtmp->data, otmp) || (otmp->objsize != mtmp->data->msize &&
-				!(is_elven_armor(otmp) && abs(otmp->objsize - mtmp->data->msize) <= 1))))
-	) return FALSE;
+    if (is_suit(otmp) && (!arm_match(mtmp->data, otmp) || !arm_size_fits(mtmp->data, otmp)))
+		return FALSE;
     
     if (is_shirt(otmp) && (otmp->objsize != mtmp->data->msize || !shirt_match(mtmp->data,otmp) || (mtmp->misc_worn_check & W_ARM)))
         return FALSE;

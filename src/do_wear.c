@@ -1732,11 +1732,11 @@ boolean noisy;
 		} else if (uarm) {
 			if (noisy) already_wearing("some armor");
 			err++;
-		} else if(!Is_dragon_scales(otmp) && (youracedata->msize != otmp->objsize) && !(is_elven_armor(otmp) && abs(otmp->objsize - youracedata->msize) <= 1)){
+		} else if(!arm_size_fits(youracedata,otmp)){
 			if (noisy)
 			pline_The("%s is the wrong size for you.", c_armor);
 			err++;
-		} else if(!Is_dragon_scales(otmp) && !arm_match(youracedata,otmp)){
+		} else if(!arm_match(youracedata,otmp)){
 			if (noisy)
 			pline_The("%s is the wrong shape for your body.", c_armor);
 			err++;

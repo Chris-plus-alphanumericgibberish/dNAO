@@ -666,9 +666,7 @@ break_armor()
     register struct obj *otmp;
 
 	if ((otmp = uarm) != 0) {
-		if((otmp->objsize != youracedata->msize && !(is_elven_armor(otmp) && abs(otmp->objsize - youracedata->msize) <= 1))
-				|| !arm_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)
-		){
+		if(!arm_size_fits(youracedata,otmp) || !arm_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)){
 			if (donning(otmp)) cancel_don();
 			if(otmp->oartifact || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)){
 				Your("armor falls around you!");

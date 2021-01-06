@@ -524,6 +524,9 @@
 #define cantwield(ptr)		(nohands(ptr))
 #define could_twoweap(ptr)	attacktype(ptr, AT_XWEP)
 // define cantweararm(ptr)	(breakarm(ptr) || sliparm(ptr))
+#define arm_size_fits(ptr,obj)	(Is_dragon_scales(obj) || \
+								 obj->objsize == (ptr)->msize || \
+								 (is_elven_armor(obj) && abs(obj->objsize - (ptr)->msize) <= 1))
 #define arm_match(ptr,obj)	(Is_dragon_scales(obj) || \
 							((obj->otyp == ELVEN_TOGA || obj->otyp == NOBLE_S_DRESS || obj->otyp == GENTLEWOMAN_S_DRESS) && upper_body_match(ptr,obj)) ||\
 							(full_body_match(ptr,obj)))

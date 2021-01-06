@@ -1360,9 +1360,8 @@ boolean racialexception;
 		case W_ARM:
 			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)
 				break;
-		    if (!is_suit(obj) || (!Is_dragon_scales(obj) && (!arm_match(mon->data, obj) || (obj->objsize != mon->data->msize &&
-				!(is_elven_armor(obj) && abs(obj->objsize - mon->data->msize) <= 1))))
-			) continue;
+		    if (!is_suit(obj) || !arm_match(mon->data, obj) || !arm_size_fits(mon->data, obj))
+				continue;
 		    break;
 	    }
 	    if (obj->owornmask) continue;
@@ -1582,9 +1581,7 @@ boolean polyspot;
 			m_useup(mon, otmp);	/* no message here;
 			   "the dragon merges with his scaly armor" is odd
 			   and the monster's previous form is already gone */
-		else if((otmp->objsize != mon->data->msize && !(is_elven_armor(otmp) && abs(otmp->objsize - mon->data->msize) <= 1))
-				|| !arm_match(mon->data,otmp) || is_whirly(mon->data) || noncorporeal(mon->data)
-		){
+		else if(!arm_size_fits(mon->data, otmp) || !arm_match(mon->data,otmp) || is_whirly(mon->data) || noncorporeal(mon->data)){
 			if (otmp->oartifact || otmp->objsize > mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)) {
 				if (vis)
 					pline("%s armor falls around %s!",

@@ -2753,12 +2753,7 @@ struct monst *mon;
 				addArmorMenuOption
 			} else if(is_boots(otmp) && !(mon->misc_worn_check&W_ARMF) && otmp->objsize == mon->data->msize && can_wear_boots(mon->data)){
 				addArmorMenuOption
-			} else if(is_suit(otmp) && !(mon->misc_worn_check&W_ARM) && (Is_dragon_scales(otmp) || 
-					(arm_match(mon->data, otmp) && (otmp->objsize == mon->data->msize ||
-					(is_elven_armor(otmp) && abs(otmp->objsize - mon->data->msize) <= 1)
-					))
-				)
-			){
+			} else if(is_suit(otmp) && !(mon->misc_worn_check&W_ARM) && arm_match(mon->data, otmp) && arm_size_fits(mon->data, otmp)){
 				addArmorMenuOption
 			}
 		}
