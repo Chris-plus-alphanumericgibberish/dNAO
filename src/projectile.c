@@ -208,6 +208,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		}
 		else if(uandroid && youagr && !(
 			(launcher) || /* no returning fired ammo */
+			(forcedestroy) || /* no temporary ammo */
 			(thrownobj->oartifact == ART_FLUORITE_OCTAHEDRON && thrownobj->quan > 1)	/* no multithrown fluorite octet for balance reasons */
 		)){
 			returning = TRUE;

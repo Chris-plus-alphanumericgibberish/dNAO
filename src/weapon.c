@@ -891,7 +891,10 @@ int spec;
 		}
 		break;
 	case MIRRORBLADE:{
-		struct obj * otmp2 = (youdefend ? uwep : MON_WEP(mon));
+		struct obj *otmp2 = 0;
+		if(mon){
+			otmp2 = (youdefend ? uwep : MON_WEP(mon));
+		}
 		if (otmp2 && otmp2->otyp == MIRRORBLADE)
 		{// clashing mirrorblades are quite deadly
 			// 2 dice, exploding, with a flat explosion bonus of the average of attacker's and defender's weapons
