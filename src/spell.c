@@ -4435,7 +4435,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		flags.botl = 1;
 		exercise(A_WIS, TRUE);
 		if (uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend && rn2(20)){
-			change_usanity(-rnd(spellev(spell)));
+			change_usanity(-rnd(spellev(spell)), FALSE);
 		}
 		/* pseudo is a temporary "false" object containing the spell stats */
 		pseudo = mksobj(spellid(spell), FALSE, FALSE);
@@ -5819,7 +5819,11 @@ int spell;
 	if(u.unaen_duration)
 		chance = 100;
 	
-	if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
+	//
+	if(Babble || Screaming || Strangled || FrozenAir || Drowning){
+		chance = 0;
+	}
+	else if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
 		if(u.uz.dlevel == spire_level.dlevel) chance = 0;
 		else if(u.uz.dlevel == sum_of_all_level.dlevel) chance += 100 - 10*spellev(spell);
 		else if(u.uz.dlevel == spire_level.dlevel-1) chance -= 50*spellev(spell);

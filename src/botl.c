@@ -608,12 +608,44 @@ bot2()
 #else
   Strcat(nb = eos(nb), " Stun");
 #endif
+/** Insanity messages **/
   if(Panicking)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Panic", newbot2);
 #else
   Strcat(nb = eos(nb), " Panic");
 #endif
+  if(StumbleBlind)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Stmblng", newbot2);
+#else
+  Strcat(nb = eos(nb), " Stmblng");
+#endif
+  if(StaggerShock)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Stggrng", newbot2);
+#else
+  Strcat(nb = eos(nb), " Stggrng");
+#endif
+  if(Babble)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Babble", newbot2);
+#else
+  Strcat(nb = eos(nb), " Babble");
+#endif
+  if(Screaming)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Scream", newbot2);
+#else
+  Strcat(nb = eos(nb), " Scream");
+#endif
+  if(FaintingFits)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Faint", newbot2);
+#else
+  Strcat(nb = eos(nb), " Faint");
+#endif
+
   if(Hallucination)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Hallu", newbot2);

@@ -1253,8 +1253,9 @@ int x;
 }
 
 void
-change_usanity(delta)
+change_usanity(delta, check)
 int delta;
+boolean check;
 {
 	if(discover || wizard)
 		pline("Sanity change: %d + %d", u.usanity, delta);
@@ -1275,6 +1276,37 @@ int delta;
 			active_glyph(thought) != was_active_glyph(thought, u.uinsight, u.usanity - delta)
 			) {
 			change_glyph_active(thought, active_glyph(thought));
+		}
+	}
+	
+	if(check && delta < 0 && ((-delta > rn2(ACURR(A_WIS))) || -delta >= u.usanity/10) && rn2(100) >= u.usanity 
+		&& !Panicking && !StumbleBlind && !StaggerShock && !Babble && !Screaming && !FaintingFits
+	){
+		switch(rn2(6)){
+			case 0:
+				You("panic in your insanity!");
+				HPanicking = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+			break;
+			case 1:
+				You("stumble blindly in your insanity!");
+				HStumbleBlind = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+			break;
+			case 2:
+				You("stagger in shock!");
+				HStaggerShock = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+			break;
+			case 3:
+				You("begin babbling incoherently!");
+				HBabble = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+			break;
+			case 4:
+				You("begin screaming in terror and madness!");
+				HScreaming = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+			break;
+			case 5:
+				You(Hallucination ? "have a case of the vapors!" : "feel faint!");
+				HFaintingFits = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+			break;
 		}
 	}
 }

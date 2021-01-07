@@ -111,6 +111,8 @@
 #define EStrangled		u.uprops[STRANGLED].extrinsic
 #define Strangled		(HStrangled || EStrangled)
 
+#define Drowning		(Underwater && !Breathless && !amphibious(youracedata))
+
 #define HChastity		u.uprops[CHASTITY].intrinsic
 #define EChastity		u.uprops[CHASTITY].extrinsic
 #define Chastity		(HChastity || EChastity)
@@ -161,12 +163,12 @@
 
 /* Those implemented solely as timeouts (we use just intrinsic) */
 #define HStun			u.uprops[STUNNED].intrinsic
-#define Stunned			((HStun || u.umonnum == PM_STALKER || \
-						(Upolyd && youmonst.data->mlet == S_BAT)) && !(u.specialSealsActive&SEAL_NUMINA))
+#define Stunned			(((HStun || u.umonnum == PM_STALKER || \
+						(Upolyd && youmonst.data->mlet == S_BAT)) && !(u.specialSealsActive&SEAL_NUMINA)) || StaggerShock)
 		/* Note: birds will also be stunned */
 
 #define HConfusion		u.uprops[CONFUSION].intrinsic
-#define Confusion		(HConfusion && !(u.specialSealsActive&SEAL_NUMINA))
+#define Confusion		((HConfusion && !(u.specialSealsActive&SEAL_NUMINA)) || StumbleBlind)
 
 #define LightBlind		((Darksight && !Is_waterlevel(&u.uz) && !Extramission) &&\
 						(dimness(u.ux,u.uy) <= 0) &&\
@@ -179,15 +181,15 @@
 						(uarmh && uarmh->otyp == PLASTEEL_HELM && uarmh->obj_material != objects[uarmh->otyp].oc_material && is_opaque(uarmh)) ||\
 						(uarmh && uarmh->otyp == CRYSTAL_HELM && is_opaque(uarmh)))
 		/* ...means blind because of a cover */
-#define NoLightBlind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
+#define NoLightBlind	(((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !forcesight)
+		 !forcesight) || StumbleBlind)
 // #define Blind	((Blinded || Blindfolded || !haseyes(youracedata) || LightBlind) && \
 		 // !(u.sealsActive&SEAL_DANTALION && !(uarm && uarm->otyp != CRYSTAL_PLATE_MAIL)) && \
 		 // !Blind_res && !forcesight)
-#define Blind	((Blinded || Blindfolded || !haseyes(youracedata)) && \
+#define Blind	(((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
-		 !forcesight)
+		 !forcesight) || StumbleBlind)
 		/* ...the Eyes operate even when you really are blind
 		    or don't have any eyes */
 
@@ -226,10 +228,31 @@
 #define EHunger			u.uprops[HUNGER].extrinsic
 #define Hunger			(HHunger || EHunger)
 
+/*** Insanity-related ***/
+
 #define HPanicking			u.uprops[PANIC].intrinsic
 #define EPanicking			u.uprops[PANIC].extrinsic
 #define Panicking			((HPanicking || EPanicking) && !ClearThoughts)
 
+#define HStumbleBlind			u.uprops[STUMBLE_BLIND].intrinsic
+#define EStumbleBlind			u.uprops[STUMBLE_BLIND].extrinsic
+#define StumbleBlind			((HStumbleBlind || EStumbleBlind) && !ClearThoughts)
+
+#define HStaggerShock			u.uprops[STAGGER_SHOCK].intrinsic
+#define EStaggerShock			u.uprops[STAGGER_SHOCK].extrinsic
+#define StaggerShock			((HStaggerShock || EStaggerShock) && !ClearThoughts)
+
+#define HBabble			u.uprops[BABBLING].intrinsic
+#define EBabble			u.uprops[BABBLING].extrinsic
+#define Babble			((HBabble || EBabble) && !ClearThoughts)
+
+#define HScreaming			u.uprops[SCREAMING].intrinsic
+#define EScreaming			u.uprops[SCREAMING].extrinsic
+#define Screaming			((HScreaming || EScreaming) && !ClearThoughts)
+
+#define HFaintingFits			u.uprops[FAINTING_FIT].intrinsic
+#define EFaintingFits			u.uprops[FAINTING_FIT].extrinsic
+#define FaintingFits			((HFaintingFits || EFaintingFits) && !ClearThoughts)
 
 /*** Vision and senses ***/
 #define HNormalvision		u.uprops[NORMALVISION].intrinsic

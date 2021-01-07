@@ -2714,6 +2714,49 @@ glibr()
 	}
 }
 
+void
+bumbler()
+{
+	register struct obj *otmp;
+	int xfl = 0;
+	const char *otherwep = 0;
+
+	otmp = uswapwep;
+	if (u.twoweap && otmp && otmp->otyp != ARM_BLASTER) {
+		otherwep = is_sword(otmp) ? c_sword :
+		    makesingular(oclass_names[(int)otmp->oclass]);
+		You("fumble your %s and %s %sslips from your %s.",
+			otherwep,
+			otmp->quan > 1 ? "they" : "it",
+			xfl ? "also " : "",
+			makeplural(body_part(HAND)));
+		setuswapwep((struct obj *)0);
+		xfl++;
+		if (otmp->otyp != LOADSTONE || !otmp->cursed)
+			dropx(otmp);
+	}
+	otmp = uwep;
+	if (otmp && !welded(otmp) && otmp->otyp != ARM_BLASTER) {
+		const char *thiswep;
+
+		/* nice wording if both weapons are the same type */
+		thiswep = is_sword(otmp) ? c_sword :
+		    makesingular(oclass_names[(int)otmp->oclass]);
+		if (otherwep && strcmp(thiswep, otherwep)) otherwep = 0;
+
+		/* changed so cursed weapons don't fall, GAN 10/30/86 */
+		You("%sfumble your %s%s and %s slips from your %s.",
+			xfl ? "also " : "",
+			otherwep ? "other " : "",
+			thiswep,
+			otmp->quan > 1 ? "they" : "it",
+			makeplural(body_part(HAND)));
+		setuwep((struct obj *)0);
+		if (otmp->otyp != LOADSTONE || !otmp->cursed)
+			dropx(otmp);
+	}
+}
+
 struct obj *
 some_armor(victim)
 struct monst *victim;

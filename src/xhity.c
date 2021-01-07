@@ -6031,7 +6031,7 @@ boolean ranged;
 #ifdef SEDUCE
 			dotent(magr, dmg);
 #endif
-			change_usanity(u_sanity_loss(magr));
+			change_usanity(u_sanity_loss(magr), TRUE);
 		}
 		/* Might be technically incorrect to make the player also take an AT_TENT AD_PHYS attack afterwards
 		 * but it really simplifies the flow to use the standard behaviour of [special effects] -> [basic damage]
@@ -9302,7 +9302,7 @@ int vis;
 					You("%s.", chg ? "are freaked out" : "seem unaffected");
 					if (chg && Hallucination && magr->mtyp == PM_DAUGHTER_OF_BEDLAM){
 						u.umadness |= MAD_DELUSIONS;
-						change_usanity(-1*rnd(6)); //Deals sanity damage
+						change_usanity(-1*rnd(6), FALSE); //Deals sanity damage
 					}
 				}
 				else {
@@ -9723,7 +9723,7 @@ int vis;
 				mbodypart(mdef, BODY_SKIN)
 				);
 			if (youdef){
-				change_usanity(-1 * dmg);
+				change_usanity(-1 * dmg, FALSE);
 				exercise(A_CON, FALSE);
 				u.umadness |= MAD_FRENZY;
 			}
@@ -10746,7 +10746,7 @@ int vis;
 			while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
 				dmg--;
 				(void)adjattrib(A_WIS, -1, TRUE);
-				change_usanity(-1);
+				change_usanity(-1, FALSE);
 				forget(10);	/* lose 10% of memory per point lost*/
 				exercise(A_WIS, FALSE);
 				/* Great Cthulhu permanently drains wisdom */
@@ -10755,7 +10755,7 @@ int vis;
 			}
 			if (dmg > 0) {
 				You("tear at yourself in horror!"); //assume always able to damage self
-				change_usanity(-1*dmg);
+				change_usanity(-1*dmg, TRUE);
 				xdamagey(magr, mdef, attk, dmg*10);
 			}
 		}

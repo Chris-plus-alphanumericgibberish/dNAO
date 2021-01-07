@@ -519,6 +519,22 @@ doread()
 	) {
 	    pline(silly_thing_to, "read");
 	    return(0);
+	} else if ((Babble || Strangled || Drowning) 
+		&& (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS || (scroll->oclass == TILE_CLASS && objects[scroll->otyp].oc_magic))
+	){
+		if(Strangled)
+			You_cant("read that aloud, you can't breathe!");
+		else if(Drowning)
+			You_cant("read that aloud, you're drowning!");
+		else if(Babble)
+			You_cant("read that aloud, you're babbling incoherently!");
+		else
+			impossible("You can't read that aloud for some reason?");
+	    return(0);
+		//Note, you CAN scream one syllable
+	} else if (Screaming && (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS)){
+	    You_cant("read that aloud, you're too buisy screaming!");
+	    return(0);
 	} else if (Blind) {
 	    const char *what = 0;
 	    if (scroll->oclass == SPBOOK_CLASS)
@@ -1381,7 +1397,7 @@ losesaninsight(percent)
 	for (i = 0; i < count; i++) {
 		if(discover || wizard)
 			pline("Forgeting %s", mons[indices[i]].mname);
-		change_usanity(-1*mvitals[indices[i]].san_lost);
+		change_usanity(-1*mvitals[indices[i]].san_lost, FALSE);
 	    mvitals[indices[i]].san_lost = 0;
 		change_uinsight(-1*mvitals[indices[i]].insight_gained);
 	    mvitals[indices[i]].insight_gained = 0;

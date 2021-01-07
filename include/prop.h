@@ -54,8 +54,15 @@
 #define JUMPING						1 + FUMBLING
 #define WWALKING					1 + JUMPING
 #define HUNGER						1 + WWALKING
+/* Insanity-related */
 #define PANIC						1 + HUNGER
-#define GLIB						1 + PANIC
+#define STUMBLE_BLIND				1 + PANIC
+#define STAGGER_SHOCK				1 + STUMBLE_BLIND
+#define BABBLING					1 + STAGGER_SHOCK
+#define SCREAMING					1 + BABBLING
+#define FAINTING_FIT				1 + SCREAMING
+/* More Misc. */
+#define GLIB						1 + FAINTING_FIT
 #define LIFESAVED					1 + GLIB
 #define CLAIRVOYANT					1 + LIFESAVED
 #define VOMITING					1 + CLAIRVOYANT

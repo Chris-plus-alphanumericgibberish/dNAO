@@ -2403,6 +2403,14 @@ int dz;
 		You_cant("speak.  You're choking!");
 		return(0);
     }
+    else if (Babble) {
+		You_cant("communicate.  You're babbling unintelligibly!");
+		return(0);
+    }
+    else if (Screaming) {
+		You_cant("communicate.  You're too buisy screaming!");
+		return(0);
+    }
     if (u.uswallow) {
 		pline("They won't hear you out there.");
 		return(0);
@@ -5878,7 +5886,7 @@ struct monst *nurse;
 				fall_asleep(-13*count, TRUE);
 			}
 			//Sedative
-			change_usanity(15*count);
+			change_usanity(15*count, FALSE);
 		break;
 		case NURSE_RESTORE_ABILITY:{
 			int i, lim;
@@ -5956,7 +5964,7 @@ struct monst *nurse;
 				if(ACURR(A_CON)>ATTRMIN(A_CON)){
 					adjattrib(A_CON, -1, FALSE);
 				}
-				change_usanity(-10);
+				change_usanity(-10, TRUE);
 				//Note: this is always the player's HP, not their polyform HP.
 				u.uhp -= u.uhp/2; //Note: chopped, so 0 to 1/2 max-HP lost.
 			} else {

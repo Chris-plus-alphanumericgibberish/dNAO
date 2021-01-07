@@ -178,7 +178,7 @@ E int NDECL(newen);
 E int FDECL(maxhp, (int));
 E int NDECL(maxen);
 E double FDECL(conplus, (int));
-E void FDECL(change_usanity, (int));
+E void FDECL(change_usanity, (int, boolean));
 E void FDECL(change_uinsight, (int));
 E boolean NDECL(check_insight);
 E int FDECL(roll_madness, (long int));
@@ -564,6 +564,7 @@ E void NDECL(find_dr);
 E int FDECL(slot_udr, (int, struct monst *));
 E int FDECL(roll_udr, (struct monst *));
 E void NDECL(glibr);
+E void NDECL(bumbler);
 E struct obj *FDECL(some_armor,(struct monst *));
 E void FDECL(erode_armor, (struct monst *,BOOLEAN_P));
 E struct obj *FDECL(stuck_ring, (struct obj *,int));
@@ -1788,6 +1789,7 @@ E int FDECL(entangle_beatitude, (struct monst *, int));
 
 /* ### music.c ### */
 
+E void FDECL(song_noise,(int));
 E void NDECL(awaken_soldiers);
 E void FDECL(do_earthquake, (int, int, int, int,BOOLEAN_P,struct monst *));
 E int FDECL(do_play_instrument, (struct obj *));

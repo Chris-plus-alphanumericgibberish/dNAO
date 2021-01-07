@@ -487,9 +487,9 @@ peffects(otmp)
 		if(!otmp->cursed){
 			//Restore sanity if blessed or uncursed
 			if(otmp->blessed)
-				change_usanity(20);
+				change_usanity(20, FALSE);
 			else
-				change_usanity(5);
+				change_usanity(5, FALSE);
 		}
 	case SPE_RESTORE_ABILITY:
 		unkn++;
@@ -523,7 +523,7 @@ peffects(otmp)
 		//Bad drugs: inflict brain damage
 		if(otmp->cursed){
 			if(u.usanity > 0)
-				change_usanity(-1);
+				change_usanity(-1, TRUE);
 			if(u.uinsight > 0)
 				change_uinsight(-1);
 			exercise(A_WIS, FALSE);
@@ -686,10 +686,10 @@ peffects(otmp)
 			if(u.udrunken < u.ulevel*3){
 				u.udrunken++;
 				check_drunkard_trophy();
-				change_usanity(5);
+				change_usanity(5, FALSE);
 			} else {
 				if(u.usanity < 50){
-					change_usanity(min(5, 50 - u.usanity));
+					change_usanity(min(5, 50 - u.usanity), FALSE);
 				}
 			}
 			if (!otmp->blessed)
@@ -827,7 +827,7 @@ peffects(otmp)
 		    fall_asleep(-rn1(10, 25 - 12*bcsign(otmp)), TRUE);
 		}
 		//Sedative
-		change_usanity(5 + 10*bcsign(otmp));
+		change_usanity(5 + 10*bcsign(otmp), FALSE);
 		break;
 	case POT_MONSTER_DETECTION:
 	case SPE_DETECT_MONSTERS:
@@ -1077,7 +1077,7 @@ as_extra_healing:
 		exercise(A_STR, TRUE);
 		exercise(A_CON, TRUE);
 		//Makes you crazy
-		change_usanity(-1*rnd(20));
+		change_usanity(-1*rnd(20), FALSE);
 		u.umadness |= MAD_GOAT_RIDDEN;
 		break;
 	case POT_SPACE_MEAD:
@@ -1103,10 +1103,10 @@ as_extra_healing:
 			if(u.udrunken < u.ulevel*3){
 				u.udrunken++;
 				check_drunkard_trophy();
-				change_usanity(5);
+				change_usanity(5, FALSE);
 			} else {
 				if(u.usanity < 50){
-					change_usanity(min(5, 50 - u.usanity));
+					change_usanity(min(5, 50 - u.usanity), FALSE);
 				}
 			}
 			if (!otmp->blessed)

@@ -36,7 +36,6 @@
 #endif
 
 STATIC_DCL void FDECL(awaken_monsters,(int));
-STATIC_DCL void FDECL(song_noise,(int));
 STATIC_DCL void FDECL(put_monsters_to_sleep,(int));
 STATIC_DCL void FDECL(charm_snakes,(int));
 STATIC_DCL void FDECL(calm_nymphs,(int));
@@ -1162,7 +1161,7 @@ int distance;
  * Wake every monster in range...
  */
 
-STATIC_OVL void
+void
 song_noise(distance)
 int distance;
 {

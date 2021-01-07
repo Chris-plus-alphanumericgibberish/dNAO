@@ -4143,7 +4143,7 @@ struct monst *mtmp;
 				int nyar_form = rn2(SIZE(nyar_description));
 				pline("The escaping phantasmal mist condenses into %s.", nyar_description[nyar_form]);
 				pline("%s tears off the right half of %s face before rising through the ceiling!", nyar_name[nyar_form], s_suffix(Monnam(mtmp)));
-				change_usanity(u_sanity_loss_nyar());
+				change_usanity(u_sanity_loss_nyar(), TRUE);
 			}
 			set_mon_data(mtmp, PM_GHOUL_QUEEN_NITOCRIS);
 			//Surprisingly, this is an effective means of life saving!
@@ -4202,7 +4202,7 @@ register struct monst *mtmp;
 		int nyar_form = rn2(SIZE(nyar_description));
 		pline("%s twists and morphs into %s.", Monnam(mtmp), nyar_description[nyar_form]);
 		pline("%s rises through the ceiling!", nyar_name[nyar_form]);
-		change_usanity(u_sanity_loss_nyar());
+		change_usanity(u_sanity_loss_nyar(), TRUE);
 	}
 	
 
@@ -5717,14 +5717,14 @@ cleanup:
 			u.hod += 10;
 			u.ualign.sins += 5;
 			if(u.usanity > 0){
-				change_usanity(-1*rnd(4));
+				change_usanity(-1*rnd(4), FALSE);
 			}
 		}
 		else{
 			u.hod += 5; 
 			u.ualign.sins += 2;
 			if(u.usanity > 0){
-				change_usanity(-1);
+				change_usanity(-1, FALSE);
 			}
 		}
 		if (Blind && !Blind_telepat)
@@ -5756,7 +5756,7 @@ cleanup:
 			uchar insight = u_insight_gain(mtmp);
 			mvitals[monsndx(mtmp->data)].insight_gained += insight;
 			change_uinsight(insight);
-			change_usanity(u_sanity_gain(mtmp));
+			change_usanity(u_sanity_gain(mtmp), FALSE);
 		}
 	}
 

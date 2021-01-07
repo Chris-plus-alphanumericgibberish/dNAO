@@ -598,6 +598,11 @@ you_regen_hp()
 			fall_asleep(-10, FALSE);
 		}
 	}
+	
+	if(FaintingFits && rn2(100) >= u.usanity && multi >= 0){
+		You("suddenly faint!");
+		fall_asleep((u.usanity - 100)/10 - 1, FALSE);
+	}
 
 	if (((perX > 0) && ((*hp) < (*hpmax))) ||			// if regenerating
 		((perX < 0))									// or dying
@@ -943,11 +948,6 @@ moveloop()
 				}
 				if (Blind && Bloodsense && has_blood_mon(mtmp)){
 					newsym(mtmp->mx, mtmp->my);
-				}
-				if(uwep && uwep->oartifact == ART_SINGING_SWORD && !is_deaf(mtmp)){
-					//quite noisy
-					mtmp->mux = u.ux;
-					mtmp->muy = u.uy;
 				}
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1324,7 +1324,7 @@ karemade:
 					if(lastusedmove != moves){
 						pline("%s takes on forms new and terrible!", Monnam(mtmp));
 						lastusedmove = moves;
-						change_usanity(u_sanity_loss(mtmp)/2-1);
+						change_usanity(u_sanity_loss(mtmp)/2-1, TRUE);
 					}
 				}
 				
@@ -1738,7 +1738,7 @@ karemade:
 				u.umadness &= ~MAD_FRENZY;
 				flags.botl = 1;
 			} else if(u.umadness&MAD_FRENZY){
-				change_usanity(-1);
+				change_usanity(-1, FALSE);
 				if(!rn2(20)){
 					u.umadness &= ~MAD_FRENZY;
 				}
@@ -1890,6 +1890,7 @@ karemade:
 			
 		    if (flags.bypasses) clear_bypasses();
 		    if(Glib) glibr();
+		    if(StumbleBlind && rn2(100) >= u.usanity) bumbler();
 		    nh_timeout();
 		    run_regions();
 		    run_maintained_spells();
@@ -2211,6 +2212,34 @@ karemade:
 		if (Blind && Bloodsense && has_blood_mon(mtmp)){
 			newsym(mtmp->mx, mtmp->my);
 		}
+		if (uwep && uwep->oartifact == ART_SINGING_SWORD && !is_deaf(mtmp)){
+			//quite noisy
+			mtmp->mux = u.ux;
+			mtmp->muy = u.uy;
+		}
+		if (Screaming && !Strangled && !FrozenAir && !is_deaf(mtmp)){
+			//quite noisy
+			mtmp->mux = u.ux;
+			mtmp->muy = u.uy;
+			if(distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < (ACURR(A_CON)/3) && sensitive_ears(mtmp->data)){
+				if (!resist(mtmp, TOOL_CLASS, 0, NOTELL)){
+					mtmp->mstun = 1;
+					mtmp->mconf = 1;
+					mtmp->mcanhear = 0;
+					mtmp->mdeafened = ACURR(A_CON)/3 - distmin(u.ux, u.uy, mtmp->mx, mtmp->my);
+				}
+			}
+		}
+		//Noise radius dependent on your lung capacity
+		else if (Babble && !Strangled && !FrozenAir && !is_deaf(mtmp) && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < (ACURR(A_CON)/3)){
+			//quite noisy
+			mtmp->mux = u.ux;
+			mtmp->muy = u.uy;
+		}
+	}
+	if (Screaming && !Strangled && !FrozenAir){
+		//quite noisy
+		song_noise(ACURR(A_CON)*ACURR(A_CON));
 	}
 ////////////////////////////////////////////////////////////////////////////////////////////////
 	if(!flags.mv || Blind || oldBlind != (!!Blind)) {
@@ -3465,10 +3494,10 @@ cthulhu_mind_blast()
 		make_stunned(HStun + dmg*10, TRUE);
 		if (Sleep_resistance){
 			if(!on_level(&rlyeh_level,&u.uz)) fall_asleep(-1*dmg, TRUE);
-			if(!rn2(10)) change_usanity(-1);
+			if(!rn2(10)) change_usanity(-1, FALSE);
 		} else {
 			if(!on_level(&rlyeh_level,&u.uz)) fall_asleep(-100*dmg, TRUE);
-			change_usanity(-1);
+			change_usanity(-1, FALSE);
 		}
 	}
 	for(mon=fmon; mon; mon = nmon) {
@@ -3517,7 +3546,7 @@ see_nearby_monsters()
 							//May have already lost sanity from seeing it from a distance, or wiped the memory with amnesia.
 							if(mvitals[monsndx(mtmp->data)].san_lost == 0 && taxes_sanity(mtmp->data)){
 								mvitals[monsndx(mtmp->data)].san_lost = u_sanity_loss(mtmp);
-								change_usanity(mvitals[monsndx(mtmp->data)].san_lost);
+								change_usanity(mvitals[monsndx(mtmp->data)].san_lost, TRUE);
 							}
 							if(!mvitals[monsndx(mtmp->data)].vis_insight && yields_insight(mtmp->data)){
 								uchar insight;
