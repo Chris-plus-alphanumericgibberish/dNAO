@@ -2200,12 +2200,23 @@ movemon()
     for(mtmp = fmon; mtmp; mtmp = nmtmp) {
 	/* check that mtmp wasn't migrated by previous mtmp's actions */
 	if (!(mtmp->mx || mtmp->my)) {
-		/* uh oh -- restart loop at fmon. This will let already-handled very fast
-		 * monsters expend movement points to act out of turn, but will not result in anyone gaining
-		 * or losing turns, or worse, this loop affecting anyone in the migrating_mons chain */
-		mtmp = fmon;
-		if (!mtmp)
-			break;	/* exit current movement loop, there is no one left at all */
+		/* uh oh -- it looks like mtmp is marked as on migrating_mons. Confirm. */
+		struct monst * m2;
+		for (m2 = migrating_mons; m2 && m2 != mtmp; m2 = m2->nmon);
+		if (m2 == mtmp) {
+			/* extra check -- is mtmp also on the fmon chain? If it is, we've got serious trouble */
+			for (m2 = fmon; m2 && m2 != mtmp; m2 = m2->nmon);
+			if (m2 == mtmp)
+				panic("monster on both fmon and migrating_mons");
+			else {
+				/* restart loop at fmon. This will let already-handled very fast
+				 * monsters expend movement points to act out of turn, but will not result in anyone gaining
+				 * or losing turns, or worse, this loop affecting anyone in the migrating_mons chain */
+				mtmp = fmon;
+				if (!mtmp)
+					break;	/* exit current movement loop, there is no one left at all */
+			}
+		}
 	}
 	nmtmp = mtmp->nmon;
 	/* Find a monster that we have not treated yet.	 */
