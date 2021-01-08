@@ -5520,7 +5520,7 @@ the keep.
 "%r %p!  There has been an uprising amongst the peasantry!"
 %E
 %Cp Nob 00007
-"Greetings, %r.  %lC arived, claiming she will help us put down the
+"Greetings, %r.  %lC arrived, claiming she will help us put down the
 rebellion. She is waiting in the great hall."
 %E
 %Cp Nob 00008
