@@ -7829,6 +7829,11 @@ arti_invoke(obj)
 			doliving_ringed_armor(&youmonst, obj, TRUE);
 		break;
 		case BLOODLETTER:
+			if (!uwep || uwep != obj){
+				You_feel("that you should be wielding %s.", the(xname(obj)));;
+				obj->age = monstermoves;
+				return(0);
+			}
 			if (artinstance[obj->oartifact].BLactive < monstermoves){
 				if (has_blood_mon(&youmonst)){
 					You("plunge Bloodletter into your chest, making an offering of your tainted blood.");
