@@ -837,18 +837,21 @@
 				 (ptr)->mlet == S_VORTEX ||           \
 				 (ptr)->mlet == S_LIGHT ||            \
 				 (ptr)->mlet == S_PLANT ||            \
+				 is_fern_spore(ptr) ||                \
+				 is_elemental_sphere(ptr) ||          \
 				 is_gizmo(ptr) ||                     \
 				 (is_clockwork(ptr) &&                \
 					is_naturally_unalive(ptr)) ||     \
 				((ptr)->mlet == S_ELEMENTAL &&        \
-				 (ptr)->mtyp != PM_STALKER) ||       \
+				 (ptr)->mtyp != PM_STALKER) ||        \
 				((ptr)->mlet == S_GOLEM &&            \
-				 (ptr)->mtyp != PM_FLESH_GOLEM &&    \
-				 (ptr)->mtyp != PM_LEATHER_GOLEM) || \
-				 (ptr)->mtyp == PM_WOOD_TROLL ||     \
+				 (ptr)->mtyp != PM_FLESH_GOLEM &&     \
+				 (ptr)->mtyp != PM_LEATHER_GOLEM) ||  \
+				 (ptr)->mtyp == PM_WOOD_TROLL ||      \
 				 noncorporeal(ptr))
 #define is_burnable(ptr)	((ptr)->mlet == S_PLANT || \
 							((ptr)->mlet == S_FUNGUS && !is_migo(ptr)) || \
+							is_fern_spore(ptr) || \
 							(ptr)->mtyp == PM_WOOD_TROLL)
 #define vegetarian(ptr)		(vegan(ptr) || \
 				((ptr)->mlet == S_PUDDING &&         \
@@ -881,6 +884,12 @@
 				 (ptr)->mtyp == PM_DUNGEON_FERN || \
 				 (ptr)->mtyp == PM_SWAMP_FERN || \
 				 (ptr)->mtyp == PM_BURNING_FERN)
+
+#define is_elemental_sphere(ptr)	((ptr)->mtyp == PM_FREEZING_SPHERE || \
+				 (ptr)->mtyp == PM_FLAMING_SPHERE || \
+				 (ptr)->mtyp == PM_SHOCKING_SPHERE || \
+				 (ptr)->mtyp == PM_VEXING_ORB || \
+				 (ptr)->mtyp == PM_FLAMING_ORB)
 
 #define is_vegetation(ptr)	((ptr)->mlet == S_PLANT || is_fern(ptr))
 
