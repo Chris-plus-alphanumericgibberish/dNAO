@@ -1770,6 +1770,8 @@ boolean with_price;
 			if (typ == STATUE || typ == FIGURINE) {
 				if ((mons[obj->corpsenm].geno & G_UNIQ) && obj->corpsenm != PM_GOD && !type_is_pname(&mons[obj->corpsenm]))
 					Sprintf(eos(buf), " of the %s", mons[obj->corpsenm].mname);
+				else if (type_is_pname(&mons[obj->corpsenm]))
+					Sprintf(eos(buf), " of %s", mons[obj->corpsenm].mname);
 				else
 					Sprintf(eos(buf), " of %s", an(mons[obj->corpsenm].mname));
 			}
