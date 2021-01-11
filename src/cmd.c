@@ -1854,10 +1854,10 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Sick_resistance) you_are("immune to sickness");
 	if (Sleep_resistance) you_are("sleep resistant");
 	if (u.uedibility || u.sealsActive&SEAL_BUER) you_can("recognize detrimental food");
-	if ( (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed) || 
-		 (uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed) ||
-		 (u.sealsActive&SEAL_ENKI) || (u.ufirst_sky)
-	) you_are("waterproof");
+	// if ( (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed) || 
+		 // (uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed) ||
+		 // (u.sealsActive&SEAL_ENKI) || (u.ufirst_sky)
+	// ) you_are("waterproof");
 	Sprintf(buf, "a drunkard score of %d", u.udrunken);
 	if(u.udrunken >= u.ulevel*3) Sprintf(eos(buf), ", the maximum for an adventurer of your level");
 	you_have(buf);
@@ -2630,10 +2630,10 @@ int final;
 	if (Sick_resistance) dump(youwere, "immune to sickness");
 	if (Sleep_resistance) dump(youwere, "sleep resistant");
 	if (u.uedibility || u.sealsActive&SEAL_BUER) dump(youcould, "recognize detrimental food");
-	if ( (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed) || 
-		 (uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed) ||
-		 (u.sealsActive&SEAL_ENKI) || (u.ufirst_sky)
-	) dump(youwere, "waterproof");
+	// if ( (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed) || 
+		 // (uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed) ||
+		 // (u.sealsActive&SEAL_ENKI) || (u.ufirst_sky)
+	// ) dump(youwere, "waterproof");
 
 	/*** Thoughts ***/
 	if (active_glyph(CLOCKWISE_METAMORPHOSIS))
