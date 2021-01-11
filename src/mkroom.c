@@ -468,9 +468,11 @@ mkmivaultlolth()
 				if (rn2(2)) add_to_container(otmp, mkobj(SCROLL_CLASS, FALSE));
 				if (rn2(2)) add_to_container(otmp, mkobj(SCROLL_CLASS, FALSE));
 			}
-			mon->mstrategy |= STRAT_WAITFORU;
-			mon->mpeaceful = FALSE;
-			set_malign(mon);
+			if (mon){
+				mon->mstrategy |= STRAT_WAITFORU;
+				mon->mpeaceful = FALSE;
+				set_malign(mon);
+			}
 		}
 	}
 }
