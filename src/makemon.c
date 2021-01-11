@@ -1927,8 +1927,8 @@ register struct monst *mtmp;
 					(void)mongets(mtmp, CLOAK);
 					(void)mongets(mtmp, LOW_BOOTS);
 				} else if (mm == PM_WARRIOR){
-					(void)mongets(mtmp, !rn2(10) ? LONG_SWORD : SHORT_SWORD);
-					(void)mongets(mtmp, SPEAR);
+					(void)mongets(mtmp, !rn2(10) ? LONG_SWORD : ATGEIR);
+					m_initthrow(mtmp, JAVELIN, d(4,4));
 					(void)mongets(mtmp, BUCKLER);
 					(void)mongets(mtmp, LEATHER_HELM);
 					(void)mongets(mtmp, LEATHER_ARMOR);
