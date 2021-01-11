@@ -208,29 +208,29 @@ WEAPON(("spike"), /*Needs encyc entry*/
 
 /* spears */
 WEAPON(("spear"),
-	DMG(D(6)), DMG(D(8)),
-	1, 0,  MZ_LARGE, 50, 25,  3,  0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
+	DMG(D(8)), DMG(D(10)),
+	1, 0,  MZ_LARGE, 45, 25,  3,  0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
 WEAPON(("atgeir", "bladed spear"),
 	DMG(D(2,4)), DMG(D(12)),
 	0, 0,  MZ_LARGE,  5, 45, 15,  0, P|S, P_SPEAR, IRON, FALSE, HI_METAL),
 WEAPON(("elven spear", "runed spear"),
-	DMG(D(7)), DMG(D(7)),
+	DMG(D(9)), DMG(D(9)),
 	0, 0,  MZ_LARGE, 10, 10,  3,  2, P,   P_SPEAR, WOOD, FALSE, HI_WOOD),
 WEAPON(("droven spear", "long spear"), /*Needs encyc entry*/
 	DMG(D(12)), DMG(D(12)),
 	0, 0,   MZ_HUGE,  0, 15,  3,  2, P,   P_SPEAR, OBSIDIAN_MT, UNIDED, CLR_BLACK),
 WEAPON(("orcish spear", "crude spear"),
-	DMG(D(5)), DMG(D(10)),
+	DMG(D(6)), DMG(D(12)),
 	0, 0,  MZ_LARGE, 13, 25,  3, -1, P,   P_SPEAR, IRON, FALSE, CLR_BLACK),
 WEAPON(("dwarvish spear", "stout spear"),
-	DMG(D(9)), DMG(D(9)),
+	DMG(D(10)), DMG(D(10)),
 	0, 0,  MZ_LARGE, 12, 30,  3,  0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
 WEAPON(("javelin", "throwing spear"),
-	DMG(D(6)), DMG(D(6)),
+	DMG(D(8)), DMG(D(8)),
 	0, 1,  MZ_LARGE, 10, 20,  3,  0, P,   P_SPEAR, IRON, FALSE, HI_METAL),
 
 WEAPON(("trident"), /*Needs encyc entry*/
-	DMG(D(6), F(1)), DMG(D(3, 4)),
+	DMG(D(8), F(1)), DMG(D(3, 6)),
 	1, 0,  MZ_LARGE,  8, 25,  5,  0, P,   P_TRIDENT, IRON, FALSE, HI_METAL),
 
 /* blades */

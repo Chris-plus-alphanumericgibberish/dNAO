@@ -13046,15 +13046,23 @@ int vis;						/* True if action is at all visible to the player */
 	if (insubstantial(pd) && hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
 	}
-
+	
 	/* Apply DR before multiplicative defences/vulnerabilites */
 	if (subtotl > 0){
+		int dr = 0;
 		if (phase_armor){
-			subtotl -= (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
+			dr = (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
 		}
 		else {
-			subtotl -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+			dr = (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
 		}
+		
+		//Give spears a slight advantage vs. armor.
+		if(valid_weapon_attack && weapon && is_spear(weapon) && dr)
+			dr = max(dr-2, 0);
+		
+		subtotl -= dr;
+		
 		/* can only reduce damage to 1 */
 		if (subtotl < 1)
 			subtotl = 1;
