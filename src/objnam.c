@@ -19,6 +19,7 @@ static void FDECL(add_erosion_words, (struct obj *, char *));
 char * doxname(struct obj *, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P);
 #ifdef SORTLOOT
 char * FDECL(xname2, (struct obj *,BOOLEAN_P));
+boolean FDECL(an_bool, (const char *));
 #endif
 
 struct Jitem {
@@ -2161,9 +2162,7 @@ weapon:
 			}
 		}
 		// fix "a" -> "an"
-		if (!strncmp(buf, "a ", 2) &&
-			index(vowels, *(buf + 2)) &&
-			(strncmp(buf + 2, "uranium", 7) && strncmp(buf + 2, "unicorn", 7) && strncmp(buf + 2, "eucalyptus", 10)))
+		if (!strncmp(buf, "a ", 2) && an_bool(buf + 2))
 		{
 			buf = strprepend(buf + 2, "an ");
 		}
@@ -2391,6 +2390,21 @@ char *FDECL((*func), (OBJ_P));
 	return nam;
 }
 
+boolean
+an_bool(str)
+register const char *str;
+{
+	if (index(vowels, *str) &&
+		strncmp(str, "one-", 4) &&
+		strncmp(str, "useful", 6) &&
+		strncmp(str, "unicorn", 7) &&
+		strncmp(str, "uranium", 7) &&
+		strncmp(str, "eucalyptus", 10) &&
+		strncmp(str, "universal key", 13))
+		return TRUE;
+	return FALSE;
+}
+
 char *
 an(str)
 register const char *str;
@@ -2406,12 +2420,7 @@ register const char *str;
 	    strcmp(str, "soil") &&
 	    strcmp(str, "sand") &&
 	    strcmp(str, "ice")) {
-		if (index(vowels, *str) &&
-		    strncmp(str, "one-", 4) &&
-		    strncmp(str, "useful", 6) &&
-		    strncmp(str, "unicorn", 7) &&
-		    strncmp(str, "uranium", 7) &&
-		    strncmp(str, "eucalyptus", 10))
+		if (an_bool(str))
 			Strcpy(buf, "an ");
 		else
 			Strcpy(buf, "a ");
