@@ -265,8 +265,13 @@ mkmivault()
 			otmp = mksobj_at(CHEST, x+3, y+3, TRUE, FALSE);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
 			
-			ptr = mivaultmon();
-			mon = makemon(ptr, x+rnd(2)+1, y+rnd(2)+1, 0);
+
+			for (i = 0; i < 10; i++){
+				ptr = mivaultmon();
+				mon = makemon(ptr, x+rnd(2)+1, y+rnd(2)+1, 0);
+				if (mon) break;
+			}
+
 			// lovecraft monsters
 			if (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_NIGHTGAUNT
 					|| ptr->mtyp == PM_DARK_YOUNG || ptr->mtyp == PM_HUNTING_HORROR || ptr->mtyp == PM_HUNTING_HORROR_TAIL){
@@ -407,8 +412,12 @@ mkmivaultlolth()
 			otmp = mksobj_at(CHEST, x+2, y+2, TRUE, FALSE);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
 			
-			ptr = mivaultmon();
-			mon = makemon(ptr, x+rnd(2), y+rnd(2), 0);
+			for (i = 0; i < 10; i++){
+				ptr = mivaultmon();
+				mon = makemon(ptr, x+rnd(2)+1, y+rnd(2)+1, 0);
+				if (mon) break;
+			}
+
 			// lovecraft monsters
 			if (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_NIGHTGAUNT 
 				|| ptr->mtyp == PM_DARK_YOUNG || ptr->mtyp == PM_HUNTING_HORROR || ptr->mtyp == PM_HUNTING_HORROR_TAIL){
@@ -468,9 +477,11 @@ mkmivaultlolth()
 				if (rn2(2)) add_to_container(otmp, mkobj(SCROLL_CLASS, FALSE));
 				if (rn2(2)) add_to_container(otmp, mkobj(SCROLL_CLASS, FALSE));
 			}
-			mon->mstrategy |= STRAT_WAITFORU;
-			mon->mpeaceful = FALSE;
-			set_malign(mon);
+			if (mon){
+				mon->mstrategy |= STRAT_WAITFORU;
+				mon->mpeaceful = FALSE;
+				set_malign(mon);
+			}
 		}
 	}
 }
