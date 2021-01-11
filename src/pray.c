@@ -896,8 +896,16 @@ pleased(g_align)
        won't be in effect so special handling for it is superfluous */
     if(pat_on_head){
 		//Note: Luck > 10 means that you have a luckitem in open inventory.  To avoid crowning, just drop the luckitem.
-	    if (Luck > 10 && u.ualign.record >= PIOUS && !u.uevent.uhand_of_elbereth && u.uevent.qcompleted) 
+	    if (Luck > 10 && u.ualign.record >= PIOUS && !u.uevent.uhand_of_elbereth && u.uevent.qcompleted){
 			gcrownu();
+		}
+		else if(Pantheon_if(PM_VALKYRIE) && u.ualign.record >= PIOUS 
+			&& uwep && is_spear(uwep) && !uwep->oartifact && uwep->spe >= 5 
+			&& !art_already_exists(ART_GUNGNIR) && (g_align == A_LAWFUL || g_align == A_NEUTRAL)
+		){
+			pline("Secret runes are engraved on your %s", xname(uwep));
+			oname(uwep, artilist[ART_GUNGNIR].name);
+		}
 		else switch(rn2((Luck + 6)>>1)) {
 		case 0:	break;
 		case 1:

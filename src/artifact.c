@@ -989,6 +989,7 @@ unsigned long flag;
 	const struct artifact *arti = get_artifact(otmp);
 	return((boolean)(arti && (arti->gflags & flag)));
 }
+
 boolean
 arti_worn_prop(otmp, flag)
 struct obj *otmp;
@@ -997,6 +998,7 @@ unsigned long flag;
 	const struct artifact *arti = get_artifact(otmp);
 	return((boolean)(arti && (arti->wflags & flag)));
 }
+
 boolean
 arti_carry_prop(otmp, flag)
 struct obj *otmp;
@@ -1005,6 +1007,7 @@ unsigned long flag;
 	const struct artifact *arti = get_artifact(otmp);
 	return((boolean)(arti && (arti->cflags & flag)));
 }
+
 boolean
 arti_attack_prop(otmp, flag)
 struct obj *otmp;
@@ -1013,6 +1016,7 @@ unsigned long flag;
 	const struct artifact *arti = get_artifact(otmp);
 	return((boolean)(arti && (arti->aflags & flag)));
 }
+
 boolean
 arti_is_prop(otmp, flag)
 struct obj *otmp;
@@ -1969,16 +1973,20 @@ struct obj *otmp;
 struct monst *mon;
 {
 	register const struct artifact *weap = get_artifact(otmp);
+	int bonus = 0;
 	/* no need for an extra check for `NO_ATTK' because this will
 	   always return 0 for any artifact which has that attribute */
 	if(otmp->oartifact == ART_BLACK_ARROW){
 		return 1000;
 	}
+	if(otmp->oartifact == ART_GUNGNIR){
+		bonus = 50;
+	}
 	
-	if(Role_if(PM_PRIEST)) return weap->accuracy; //priests always get the maximum to-hit bonus.
+	if(Role_if(PM_PRIEST)) return bonus + weap->accuracy; //priests always get the maximum to-hit bonus.
 	
 	if (weap && weap->accuracy && spec_applies(otmp, mon, FALSE))
-	    return rnd((int)weap->accuracy);
+	    return bonus + rnd((int)weap->accuracy);
 	return 0;
 }
 

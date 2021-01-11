@@ -5415,7 +5415,7 @@ pick_carvee()
 	Sprintf(buf, "Carvable items");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for(otmp = invent; otmp; otmp = otmp->nobj){
-		if(otmp->oclass == WEAPON_CLASS && otmp->obj_material == WOOD && otmp->otyp != MOON_AXE && otmp->oartifact != ART_BOW_OF_SKADI){
+		if(otmp->oclass == WEAPON_CLASS && otmp->obj_material == WOOD && otmp->otyp != MOON_AXE && otmp->oartifact != ART_BOW_OF_SKADI && otmp->oartifact != ART_GUNGNIR){
 			Sprintf1(buf, doname(otmp));
 			any.a_char = otmp->invlet;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,

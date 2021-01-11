@@ -522,7 +522,7 @@ const char *name;
 					if (obj->otyp != u.brand_otyp)
 						obj = poly_obj(obj, u.brand_otyp);
 				}
-				else if (obj->otyp != a->otyp) {
+				else if (obj->otyp != a->otyp && !is_malleable_artifact(a)) {
 					obj = poly_obj(obj, a->otyp);
 				}
 			}
