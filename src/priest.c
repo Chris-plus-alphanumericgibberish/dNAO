@@ -343,7 +343,7 @@ register struct monst *mon;
 char *pname;		/* caller-supplied output buffer */
 {
 	const char *what = Hallucination ? rndmonnam() : mon->data->mname;
-	int align;
+	int align = (mon->ispriest ? EPRI(mon)->shralign : mon->isminion ? EMIN(mon)->min_align : 0);
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
@@ -377,11 +377,10 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, "a whole faith");
 //			Strcat(pname, "?");
 		} else {
-	 		Strcat(pname, halu_gname((int)EPRI(mon)->shralign));
+	 		Strcat(pname, halu_gname(align));
 		}
 		return(pname);
 	}
-	align = (mon->ispriest ? EPRI(mon)->shralign : mon->isminion ? EMIN(mon)->min_align : 0);
 	Strcat(pname, what);
 	Strcat(pname, " of ");
 	Strcat(pname, halu_gname(align));

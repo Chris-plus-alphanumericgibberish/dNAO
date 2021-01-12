@@ -2865,8 +2865,7 @@ int n;	/* number to try to fire */
 	boolean youagr = (magr == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
 	int typ = attk->adtyp;
-	int xadj = 0;
-	int yadj = 0;
+	boolean volley = FALSE;
 	int rngmod = 0;
 	boolean portal_projectile = FALSE;		/* if TRUE, teleports projectile directly to target */
 	boolean from_pack = FALSE;
@@ -2961,17 +2960,7 @@ int n;	/* number to try to fire */
 		ammo_type = HEAVY_IRON_BALL;
 		qvr = mksobj(ammo_type, FALSE, FALSE);
 		rngmod = 8;
-		/* volley -- inaccurate */
-		if		(!dx)
-			yadj = d(1, 3) - 2;
-		else if (!dy)
-			xadj = d(1, 3) - 2;
-		else if (dx == dy*-1) {
-			xadj = d(1, 3) - 2;
-			yadj = -1 * xadj;
-		}
-		else
-			xadj = yadj = d(1, 3) - 2;
+		volley = TRUE;
 		break;
 	default:
 		ammo_type = ARROW;
@@ -3032,18 +3021,26 @@ int n;	/* number to try to fire */
 
 	/* Fire the projectile(s) */
 	while (n-- && qvr->quan > 0) {
+		int sx = x(magr);
+		int sy = y(magr);
 		if (portal_projectile) {
 			/* start the projectile adjacent to the target */
-			projectile(magr, qvr, (void *)0, HMON_FIRED,
-				tarx-dx, tary-dy, dx, dy, dz,
-				1, !from_pack, youagr, FALSE);
+			sx = tarx-dx;
+			sy = tary-dy;
+			rngmod = BOLT_LIM - 1;
 		}
-		else {
-			/* start the projectile at magr's location, modified by xadj and yadj */
-			projectile(magr, qvr, (void *)0, HMON_FIRED,
-				x(magr)+xadj, y(magr)+yadj, dx, dy, dz,
-				BOLT_LIM+rngmod, !from_pack, youagr, FALSE);
+		if (volley) {
+			/* inaccurate */
+			sx += (dx && !dy) ? 0 : (dx && dy) ? dx*!rn2(3) : (!dx && dy) ? rn2(3) - 1 : 0;
+			sy += (dy && !dx) ? 0 : (dy && dx) ? dy*!rn2(3) : (!dy && dx) ? rn2(3) - 1 : 0;
+			if (!isok(sx, sy)) {
+				sx = x(magr);
+				sy = y(magr);
+			}
 		}
+		projectile(magr, qvr, (void *)0, HMON_FIRED,
+			sx, sy, dx, dy, dz,
+			BOLT_LIM+rngmod, !from_pack, youagr, FALSE);
 
 		/* shadow bolts web the target hit */
 		if (typ == AD_SHDW) {
