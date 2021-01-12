@@ -128,6 +128,7 @@ boolean restore;
 				fix_object(otmp);
 			} else if (otmp->otyp == SPE_BOOK_OF_THE_DEAD) {
 			    otmp->otyp = SPE_BLANK_PAPER;
+				otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color
 			    curse(otmp);
 			}
 			if(is_lightsaber(otmp)){

@@ -4437,6 +4437,7 @@ int tx,ty;
 					}
 					pline("\"Your contribution is appreciated. Now don't bother me.\"");
 					o->otyp = SPE_BLANK_PAPER;
+					o->obj_color = objects[SPE_BLANK_PAPER].oc_color
 					newsym(tx,ty);
 					bindspirit(ep->ward_id);
 					u.sealTimeout[PAIMON-FIRST_SEAL] = moves + bindingPeriod;
