@@ -123,7 +123,7 @@ int ox_id;
 		ox_p2 = get_ox(obj2, ox_id);
 		if(!ox_p2)
 			add_ox_l(obj2, ox_id, siz_ox(obj1, ox_id)-sizeof(long));
-		memcpy(ox_p1, get_ox(obj2, ox_id), siz_ox(obj1, ox_id));
+		memcpy(get_ox(obj2, ox_id), ox_p1, siz_ox(obj1, ox_id));
 	}
 	return;
 }
