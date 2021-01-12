@@ -2923,7 +2923,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 				costly_cancel(otmp);
 	    	    if(otmp->spestudied > MAX_SPELL_STUDY){
 					otmp->otyp = SPE_BLANK_PAPER;
-					otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color
+					otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 				}
 				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;

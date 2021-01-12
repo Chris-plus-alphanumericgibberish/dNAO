@@ -473,7 +473,7 @@ learn()
 					pline("It's blank. You guess the author KEPT his secrets.");
 				    book->otyp = booktype = SPE_BLANK_PAPER;
 					book->ovar1 = 0;
-					book->obj_color = objects[SPE_BLANK_PAPER].oc_color
+					book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 				break;
 				case 4:
 					pline("...these metallurgical techniques are 200 years out of date.");
@@ -598,7 +598,7 @@ learn()
 	if (book->spestudied > MAX_SPELL_STUDY) {
 		pline("This spellbook is too faint to be read any more.");
 		book->otyp = booktype = SPE_BLANK_PAPER;
-		book->obj_color = objects[SPE_BLANK_PAPER].oc_color
+		book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 	}
 	
 	if (costly) check_unpaid(book);
@@ -3461,7 +3461,7 @@ spiriteffects(power, atme)
 	    	    // if(uwep->spestudied > MAX_SPELL_STUDY){
 					// pline("The magical energy within %s is exhausted.",the(xname(uwep)));
 					// uwep->otyp = SPE_BLANK_PAPER;
-					// uwep->obj_color = objects[SPE_BLANK_PAPER].oc_color
+					// uwep->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 				// }
 			} else{
 				You("need to be holding a spellbook.");

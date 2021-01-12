@@ -3269,7 +3269,7 @@ struct monst *owner;
 			else if (obj->oartifact) /*do nothing*/;
 			else {
 				obj->otyp = SPE_BLANK_PAPER;
-				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color
+				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 			}
 			break;
 		    case POTION_CLASS:

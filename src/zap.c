@@ -1101,7 +1101,7 @@ register struct obj *obj;
 			obj->otyp != SPE_BOOK_OF_THE_DEAD) {
 		    costly_cancel(obj);
 		    obj->otyp = SPE_BLANK_PAPER;
-			obj->obj_color = objects[SPE_BLANK_PAPER].oc_color
+			obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 			obj->spe = 0;
 			obj->oward = 0;
 		}
@@ -1745,7 +1745,7 @@ poly_obj(obj, id)
 	    /* reduce spellbook abuse */
 		if(otmp->spestudied > MAX_SPELL_STUDY){
 			otmp->otyp = SPE_BLANK_PAPER;
-			otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color
+			otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 		}
 	    else otmp->spestudied = obj->spestudied + 1;
 	    break;
