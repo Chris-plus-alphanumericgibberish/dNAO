@@ -11,6 +11,7 @@ GAMELIBS = -lncurses -lm
 CPPFLAGS += -Wno-knr-promoted-parameter
 CPPFLAGS += -Iinclude
 CPPFLAGS += -DDLB
+CPPFLAGS += -Wall
 
 .DELETE_ON_ERROR:
 
