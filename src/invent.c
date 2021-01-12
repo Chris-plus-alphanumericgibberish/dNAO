@@ -1043,7 +1043,7 @@ register const char *let,*word;
 	boolean prezero = FALSE;
 	long dummymask;
 
-	if(nextgetobj) return nextgetobj;
+	if(nextgetobj) return getnextgetobj();
 
 	if(*let == ALLOW_COUNT) let++, allowcnt = 1;
 #ifndef GOLDOBJ
