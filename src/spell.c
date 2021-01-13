@@ -6023,7 +6023,7 @@ reorder_spirit_powers()
 		if(check_spirit_let(ilet)){
 			if(ilet >= 'a' && ilet <= 'z'){
 				power_indx = (int)ilet-'a';
-			} else if(swaplet >= 'A' && swaplet <= 'Z'){
+			} else if(ilet >= 'A' && ilet <= 'Z'){
 				power_indx = (int)ilet-'A'+26;
 			}
 		} else {
