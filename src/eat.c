@@ -1655,7 +1655,7 @@ opentin()		/* called during each move whilst opening a tin */
 				tin.tin->dknown = tin.tin->known = TRUE;
 				costly_tin((const char*)0);
 				goto use_me;
-			} else if(u.clockworkUpgrades&WOOD_STOVE && (r == DRIED_TIN || is_burnable(&mons[tin.tin->corpsenm]) )){
+			} else if(u.clockworkUpgrades&WOOD_STOVE){
 				/* KMH, conduct */
 				pline("Sadly, the spinach is much too damp to burn.");
 				You("reluctantly discard the spinach.");
