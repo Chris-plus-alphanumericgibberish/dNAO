@@ -3694,7 +3694,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : objects[otmp->otyp].oc_delay;
 	    if (otmp->otyp != FORTUNE_COOKIE && otmp->otyp != PROTEIN_PILL && otmp->otyp != LEMBAS_WAFER &&
 		(otmp->cursed ||
-		 (((monstermoves - otmp->age) > (int) otmp->blessed ? 50:30) &&
+		 (((monstermoves - otmp->age) > (otmp->blessed ? 50:30)) &&
 		(otmp->orotten || !rn2(7))))) {
 
 		if (rottenfood(otmp)) {
