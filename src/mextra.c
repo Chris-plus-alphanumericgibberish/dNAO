@@ -3,8 +3,20 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-
 #include "lev.h"
+
+struct mx_table {
+	int indexnum;
+	int s_size;
+} mx_list[] = {
+	{MX_EDOG, sizeof(struct edog)},
+	{MX_EHOR, sizeof(struct ehor)},
+	{MX_EMIN, sizeof(struct emin)},
+	{MX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
+	{MX_EPRI, sizeof(struct epri)},
+	{MX_ESHK, sizeof(struct eshk)},
+	{MX_EVGD, sizeof(struct evgd)}
+};
 
 /* add one component to mon */
 /* automatically finds size of component */
