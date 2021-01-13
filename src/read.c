@@ -1943,7 +1943,7 @@ struct obj	*sobj;
 		You("have found a scroll of genocide!");
 		known = TRUE;
 		if (sobj->blessed) do_class_genocide();
-		else do_genocide(!sobj->cursed | (2 * !!Confusion));
+		else do_genocide((!sobj->cursed) | (2 * !!Confusion));
 		break;
 	case SCR_LIGHT:
 		if(!Blind) known = TRUE;
