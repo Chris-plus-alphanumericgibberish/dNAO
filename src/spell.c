@@ -2364,6 +2364,7 @@ spiriteffects(power, atme)
 			sy = u.uy;
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
 			if(u.uswallow){
+				mon = u.ustuck;
 				enoughGold = FALSE;
 				reveal_invis = TRUE;
 				dmg = d(5,dsize);
