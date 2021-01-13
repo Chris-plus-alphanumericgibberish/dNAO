@@ -2388,7 +2388,7 @@ movemon()
 #ifdef OVLB
 
 #define mstoning(obj)	(ofood(obj) && \
-					((obj)->corpsenm >= LOW_PM && touch_petrifies(&mons[(obj)->corpsenm]) || \
+					(((obj)->corpsenm >= LOW_PM && touch_petrifies(&mons[(obj)->corpsenm])) || \
 					(obj)->corpsenm == PM_MEDUSA))
 
 /*
@@ -7193,7 +7193,7 @@ struct monst *nurse, *targ;
 boolean verbose;
 {
 	int *hp, *max;
-	int healing;
+	int healing = 0;
 	if(verbose){
 		if(nurse == targ)
 			pline("%s heals %sself.", Monnam(nurse), himherit(targ));

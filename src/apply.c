@@ -1045,8 +1045,8 @@ struct obj *obj;
 	} else if(!mtmp->mcan && !mtmp->minvis && is_weeping(mtmp->data)) {
 		if (vis)
 			pline ("%s stares at its reflection with a stony expression.", Monnam(mtmp));
-			mtmp->mcanmove = 0;
-			mtmp->mfrozen = 1;
+		mtmp->mcanmove = 0;
+		mtmp->mfrozen = 1;
 	} else if (!is_unicorn(mtmp->data) && is_animal(mtmp->data) &&
 			(!mtmp->minvis || mon_resistance(mtmp,SEE_INVIS)) && rn2(5)) {
 		if (vis)
@@ -3002,7 +3002,7 @@ struct obj *hypo;
 					if(mtarg->mhp <= 0) xkilled(mtarg,1);
 					if (canseemon(mtarg))
 						pline("%s looks rather ill.", Monnam(mtarg));
-						break;
+					break;
 				}
 			case POT_GAIN_ABILITY:
 			case POT_RESTORE_ABILITY:
@@ -3431,11 +3431,11 @@ set_trap()
 		add_damage(u.ux, u.uy, 0L);		/* schedule removal */
 	    }
 	    if (!trapinfo.force_bungle)
-		You("finish arming %s.",
-			the(defsyms[trap_to_defsym(what_trap(ttyp))].explanation));
+			You("finish arming %s.",
+				the(defsyms[trap_to_defsym(what_trap(ttyp))].explanation));
 		if (((obj_cursed || Fumbling) && (rnl(100) > 50)) || trapinfo.force_bungle)
-		dotrap(ttmp,
-			(unsigned)(trapinfo.force_bungle ? FORCEBUNGLE : 0));
+			dotrap(ttmp,
+				(unsigned)(trapinfo.force_bungle ? FORCEBUNGLE : 0));
 	} else {
 	    /* this shouldn't happen */
 	    Your("trap setting attempt fails.");

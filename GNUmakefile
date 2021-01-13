@@ -12,6 +12,14 @@ CPPFLAGS += -Wno-knr-promoted-parameter
 CPPFLAGS += -Iinclude
 CPPFLAGS += -DDLB
 CPPFLAGS += -Wall
+CPPFLAGS += -Wno-comment
+CPPFLAGS += -Wno-unused-variable
+CPPFLAGS += -Wno-misleading-indentation
+CPPFLAGS += -Wno-unused-but-set-variable
+CPPFLAGS += -Wno-unused-function
+CPPFLAGS += -Wno-unused-label
+CPPFLAGS += -Wno-unknown-pragmas
+CPPFLAGS += -Wno-missing-braces
 
 .DELETE_ON_ERROR:
 

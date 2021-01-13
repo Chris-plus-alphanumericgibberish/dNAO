@@ -578,7 +578,7 @@ feel_location(x, y)
 
     /* The hero can't feel non pool locations while under water. */
     if (Underwater && !Is_waterlevel(&u.uz) && !is_pool(x,y, TRUE))
-	return;
+		return;
 
     /* Set the seen vector as if the hero had seen it.  It doesn't matter */
     /* if the hero is levitating or not.				  */

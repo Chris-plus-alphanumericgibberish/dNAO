@@ -2763,7 +2763,7 @@ int vis;
 	struct permonst * pa = youagr ? youracedata : magr->data;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
-	int result;
+	int result = 0;
 
 	if (arti_threeHead(weapon)) {
 		/* only has special effects when all 3 heads hit */
