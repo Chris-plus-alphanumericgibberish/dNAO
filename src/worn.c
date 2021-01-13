@@ -2081,8 +2081,9 @@ long timeout;
 			return;
 		}
 	    if (obj == MON_WEP(obj->ocarry)) {
-			setmnotwielded(obj->ocarry,obj);
-			MON_NOWEP(obj->ocarry);
+			mtmp = obj->ocarry;
+			setmnotwielded(mtmp,obj);
+			MON_NOWEP(mtmp);
 			if(obj->otyp == NOBLE_S_DRESS){
 				obj = poly_obj(obj, BLACK_DRESS);
 				obj->oeroded = 0;
@@ -2090,12 +2091,13 @@ long timeout;
 				/* call stackobj() if we ever drop anything that can merge */
 				newsym(mtmp->mx, mtmp->my);
 			} else {
-				m_useup(obj->ocarry, obj);
+				m_useup(mtmp, obj);
 			}
 		}
 	    else if (obj == MON_SWEP(obj->ocarry)) {
-			setmnotwielded(obj->ocarry,obj);
-			MON_NOSWEP(obj->ocarry);
+			mtmp = obj->ocarry;
+			setmnotwielded(mtmp,obj);
+			MON_NOSWEP(mtmp);
 			if(obj->otyp == NOBLE_S_DRESS){
 				obj = poly_obj(obj, BLACK_DRESS);
 				obj->oeroded = 0;
@@ -2103,7 +2105,7 @@ long timeout;
 				/* call stackobj() if we ever drop anything that can merge */
 				newsym(mtmp->mx, mtmp->my);
 			} else {
-				m_useup(obj->ocarry, obj);
+				m_useup(mtmp, obj);
 			}
 		}
 		else if((unwornmask = obj->owornmask) != 0L){
@@ -2119,10 +2121,11 @@ long timeout;
 				/* call stackobj() if we ever drop anything that can merge */
 				newsym(mtmp->mx, mtmp->my);
 			} else {
-				m_useup(obj->ocarry, obj);
+				m_useup(mtmp, obj);
 			}
 		}
 		else{
+			mtmp = obj->ocarry;
 			obj_extract_self(obj);
 			if(obj->otyp == NOBLE_S_DRESS){
 				obj = poly_obj(obj, BLACK_DRESS);
