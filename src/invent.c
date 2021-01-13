@@ -4864,7 +4864,7 @@ boolean showsym;
 	    Strcpy(invbuf, class_name);
 	if (oclass && showsym)
 	    Sprintf(eos(invbuf), ocsymformat,
-		    iflags.menu_tab_sep ? "\t" : "  ", def_oc_syms[let]);
+		    iflags.menu_tab_sep ? "\t" : "  ", def_oc_syms[(int)let]);
 	return invbuf;
 }
 
