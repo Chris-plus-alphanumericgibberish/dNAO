@@ -3,8 +3,16 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "oextra.h"
 #include "lev.h"
+
+struct ox_table {
+	int indexnum;
+	int s_size;
+} ox_list[] = {
+	{OX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
+	{OX_EMON, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
+	{OX_EMID, sizeof(int)}
+};
 
 /* add one component to obj */
 /* automatically finds size of component */

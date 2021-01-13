@@ -30,19 +30,4 @@ union mextra {
 	};
 };
 
-struct mx_table {
-	int indexnum;
-	int s_size;
-};
-
-static struct mx_table mx_list[] = {
-	{MX_EDOG, sizeof(struct edog)},
-	{MX_EHOR, sizeof(struct ehor)},
-	{MX_EMIN, sizeof(struct emin)},
-	{MX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is an int containing size */
-	{MX_EPRI, sizeof(struct epri)},
-	{MX_ESHK, sizeof(struct eshk)},
-	{MX_EVGD, sizeof(struct evgd)}
-};
-
 #endif /* MEXTRA_H */
