@@ -1353,7 +1353,7 @@ register struct monst *mtmp;
 	propellor = &zeroobj;
 	Oselect(EGG, W_QUIVER); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
-	if(otmp = oselectBoulder(mtmp))
+	if((otmp = oselectBoulder(mtmp)))
 		return otmp;
 
 	/* Select polearms first; they do more damage and aren't expendable */
