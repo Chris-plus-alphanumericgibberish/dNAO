@@ -7193,7 +7193,7 @@ struct monst *nurse, *targ;
 boolean verbose;
 {
 	int *hp, *max;
-	int healing;
+	int healing = 0;
 	if(verbose){
 		if(nurse == targ)
 			pline("%s heals %sself.", Monnam(nurse), himherit(targ));
