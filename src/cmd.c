@@ -5604,7 +5604,7 @@ char * buf;
 		}
 	}
 	for (i = 0; i < MISC_CMD_COUNT; i++) {
-		keys_used[misc_cmds[i]] = TRUE;
+		keys_used[(int)misc_cmds[i]] = TRUE;
 	}
 
 	for (i = 0; i <= 255; i++) {
