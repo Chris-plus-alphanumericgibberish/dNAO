@@ -4617,7 +4617,6 @@ delouse(mon, type)
 struct monst *mon;
 int type;
 {
-	struct monst *mtmp;
 	struct obj *otmp;
 	if(type == AD_STON){
 		otmp = mksobj(STATUE, FALSE, FALSE);
@@ -4678,7 +4677,7 @@ int type;
 		mon->mhp = min(mon->mhp, mon->mhpmax);
 	}
 	set_template(mon, DELOUSED);
-	untame(mtmp, 1);
+	untame(mon, 1);
 	mon->mcanmove = 1;
 	return mon;
 }
