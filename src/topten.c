@@ -1367,7 +1367,7 @@ pickentry:
 		otmp = (struct obj *) 0;
 	} else {
 		/* reset timer in case corpse started out as lizard or troll */
-		if (otmp->otyp == CORPSE) obj_stop_timers(otmp);
+		if (otmp->otyp == CORPSE) stop_all_timers(otmp->timed);
 		otmp->corpsenm = classmon(tt->plrole, (tt->plgend[0] == 'F'));
 		otmp->owt = weight(otmp);
 		otmp = oname(otmp, tt->name);

@@ -268,6 +268,8 @@ struct monst {
 
 	struct ls_t * light;
 
+	struct timer * timed;
+
 	union mextra * mextra_p;
 };
 

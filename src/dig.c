@@ -2183,7 +2183,7 @@ int x, y;
 		if (otmp->ox == x && otmp->oy == y) {
 		    obj_extract_self(otmp);
 		    if (otmp->timed)
-			(void) stop_timer(ROT_ORGANIC, (genericptr_t)otmp);
+			(void) stop_timer(ROT_ORGANIC, otmp->timed);
 		    place_object(otmp, x, y);
 		    stackobj(otmp);
 		}

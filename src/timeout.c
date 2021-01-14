@@ -969,7 +969,7 @@ boolean yours;
 	    bill_dummy_object(bomb);
 	}
 
-	expiretime = stop_timer(BOMB_BLOW, (genericptr_t) bomb);
+	expiretime = stop_timer(BOMB_BLOW, bomb->timed);
 	if (expiretime > 0L) fuse = fuse - (expiretime - monstermoves);
 	bomb->yours = yours;
 	bomb->oarmed = TRUE;
@@ -1086,7 +1086,7 @@ struct obj *egg;
 	int i;
 
 	/* stop previous timer, if any */
-	(void) stop_timer(HATCH_EGG, (genericptr_t) egg);
+	(void) stop_timer(HATCH_EGG, egg->timed);
 
 	/*
 	 * Decide if and when to hatch the egg.  The old hatch_it() code tried
@@ -1109,7 +1109,7 @@ kill_egg(egg)
 struct obj *egg;
 {
 	/* stop previous timer, if any */
-	(void) stop_timer(HATCH_EGG, (genericptr_t) egg);
+	(void) stop_timer(HATCH_EGG, egg->timed);
 }
 
 /* timer callback routine: hatch the given egg */
@@ -1270,7 +1270,7 @@ long timeout;
 		attach_egg_hatch_timeout(egg);
 		if (egg->timed) {
 		    /* replace ordinary egg timeout with a short one */
-		    (void) stop_timer(HATCH_EGG, (genericptr_t)egg);
+		    (void) stop_timer(HATCH_EGG, egg->timed);
 		    (void) start_timer((long)rnd(12), TIMER_OBJECT,
 					HATCH_EGG, (genericptr_t)egg);
 		}
@@ -1305,7 +1305,7 @@ struct obj *figurine;
 	int i;
 
 	/* stop previous timer, if any */
-	(void) stop_timer(FIG_TRANSFORM, (genericptr_t) figurine);
+	(void) stop_timer(FIG_TRANSFORM, figurine->timed);
 
 	/*
 	 * Decide when to transform the figurine.
@@ -2365,7 +2365,7 @@ end_burn(obj, timer_attached)
 	    obj->lamplit = 0;
 	    if (obj->where == OBJ_INVENT)
 		update_inventory();
-	} else if (!stop_timer(BURN_OBJECT, (genericptr_t) obj)){
+	} else if (!stop_timer(BURN_OBJECT, obj->timed)){
 		obj->lamplit = 0;
 	    impossible("end_burn: obj %s not timed!", xname(obj));
 	}
@@ -2469,52 +2469,40 @@ do_storms()
  *		timer would have gone off.  If no timer is found, return 0.
  *		If an object, decrement the object's timer count.
  *
+ *	void stop_all_timers(timer_element * tm)
+ *		Stop all timers on the chain.
  *	void run_timers(void)
  *		Call timers that have timed out.
  *
  *
  * Save/Restore:
- *	void save_timers(int fd, int mode, int range)
- *		Save all timers of range 'range'.  Range is either global
- *		or local.  Global timers follow game play, local timers
- *		are saved with a level.  Object and monster timers are
- *		saved using their respective id's instead of pointers.
- *
- *	void restore_timers(int fd, int range, boolean ghostly, long adjust)
- *		Restore timers of range 'range'.  If from a ghost pile,
- *		adjust the timeout by 'adjust'.  The object and monster
- *		ids are not restored until later.
- *
- *	void relink_timers(boolean ghostly)
- *		Relink all object and monster timers that had been saved
- *		using their object's or monster's id number.
+ *	void save_timers(timer_element * tm, int fd, int mode)
+ *		Save chain of timers.
+ * 
+ *	void rest_timers(int tmtype, generic_ptr owner, timer_element * tm, int fd, boolean ghostly, long adjust)
+ *		Restore chain of timers onto owner. If ghostly, adjust timers. 
  *
  * Object Specific:
- *	void obj_move_timers(struct obj *src, struct obj *dest)
- *		Reassign all timers from src to dest.
- *
  *	void obj_split_timers(struct obj *src, struct obj *dest)
  *		Duplicate all timers assigned to src and attach them to dest.
- *
- *	void obj_stop_timers(struct obj *obj)
- *		Stop all timers attached to obj.
  */
 
 #ifdef WIZARD
 STATIC_DCL const char *FDECL(kind_name, (SHORT_P));
 STATIC_DCL void FDECL(print_queue, (winid, timer_element *));
 #endif
-STATIC_DCL void FDECL(insert_timer, (timer_element *));
-STATIC_DCL timer_element *FDECL(remove_timer, (timer_element **, SHORT_P,
-								genericptr_t));
-STATIC_DCL void FDECL(write_timer, (int, timer_element *));
-STATIC_DCL boolean FDECL(mon_is_local, (struct monst *));
-STATIC_DCL boolean FDECL(timer_is_local, (timer_element *));
-STATIC_DCL int FDECL(maybe_write_timer, (int, int, BOOLEAN_P));
+STATIC_DCL void FDECL(add_chain_tm, (timer_element *));
+STATIC_DCL void FDECL(rem_chain_tm, (timer_element *));
 
 /* ordered timer list */
 static timer_element *timer_base;		/* "active" */
 static unsigned long timer_id = 1;
+
+
+#define owner_tm(tmtype, owner) (\
+	(tmtype) == TIMER_OBJECT  ? &(((struct obj *)(owner))->timed) : \
+	(tmtype) == TIMER_MONSTER ? &(((struct monst *)(owner))->timed) : \
+	(struct timer **)0)
 
 /* If defined, then include names when printing out the timer queue */
 #define VERBOSE_TIMER
@@ -2552,11 +2540,11 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 
 STATIC_OVL const char *
 kind_name(kind)
-    short kind;
+short kind;
 {
     switch (kind) {
-	case TIMER_LEVEL: return "level";
-	case TIMER_GLOBAL: return "global";
+	//case TIMER_LEVEL: return "level";
+	//case TIMER_GLOBAL: return "global";
 	case TIMER_OBJECT: return "object";
 	case TIMER_MONSTER: return "monster";
     }
@@ -2565,8 +2553,8 @@ kind_name(kind)
 
 STATIC_OVL void
 print_queue(win, base)
-    winid win;
-    timer_element *base;
+winid win;
+timer_element *base;
 {
     timer_element *curr;
     char buf[BUFSZ], arg_address[20];
@@ -2675,6 +2663,55 @@ timer_sanity_check()
 
 #endif /* WIZARD */
 
+/* adds an existing timer to the processing chain */
+/* does not affect local chain it should go on */
+void
+add_chain_tm(tm)
+timer_element * tm;
+{
+	timer_element *curr, *prev;
+
+	/* check for duplicates */
+	for (curr = timer_base; curr; curr = curr->next) {
+		if (curr == tm) {
+			impossible("tm already in processing chain");
+			return;
+		}
+	}
+	/* insert in ordered place in processing loop */
+    for (prev = 0, curr = timer_base; curr; prev = curr, curr = curr->next)
+	{
+		if (curr->timeout >= tm->timeout) break;
+	}
+    tm->next = curr;
+    if (prev)
+	prev->next = tm;
+    else
+	timer_base = tm;
+	return;
+}
+
+/* removes a timer from the procesing chain */
+/* does not affect local chain it is on */
+void
+rem_chain_tm(tm)
+timer_element * tm;
+{
+	struct timer * tmtmp;
+	if (timer_base == tm) {
+		timer_base = timer_base->next;
+		return;
+	}
+	else for (tmtmp = timer_base; tmtmp; tmtmp = tmtmp->next) {
+		if (tmtmp->next == tm) {
+			tmtmp->next = tm->next;
+			return;
+		}
+	}
+	impossible("couldn't find tm in processing chain");
+	return;
+}
+
 
 /*
  * Pick off timeout elements from the global queue and call their functions.
@@ -2691,440 +2728,150 @@ run_timers()
      * is in the future.
      */
     while (timer_base && timer_base->timeout <= monstermoves) {
-	curr = timer_base;
-	timer_base = curr->next;
-
-	if (curr->kind == TIMER_OBJECT) ((struct obj *)(curr->arg))->timed--;
-	(*timeout_funcs[curr->func_index].f)(curr->arg, curr->timeout);
-	free((genericptr_t) curr);
+		curr = timer_base;
+		timer_base = curr->next;
+		*owner_tm(curr->kind, curr->arg) = curr->tnxt;
+		(*timeout_funcs[curr->func_index].f)(curr->arg, curr->timeout);
+		free((genericptr_t) curr);
     }
 }
-
 
 /*
  * Start a timer.  Return TRUE if successful.
  */
 boolean
-start_timer(when, kind, func_index, arg)
+start_timer(when, tmtype, func_index, owner)
 long when;
-short kind;
+short tmtype;
 short func_index;
-genericptr_t arg;
+genericptr_t owner;
 {
     timer_element *gnu;
 	timer_element *curr;
 
-	/* check that <arg> does not already have a <func_index> timer running; fail if so */
+	/* check that <owner> does not already have a <func_index> timer running via the processing loop; fail if so */
 	for (curr = timer_base; curr; curr = curr->next)
-	if (curr->arg == arg && curr->func_index == func_index) {
+	if (curr->arg == owner && curr->func_index == func_index) {
 		impossible("Attempted to start 2nd %s timer, aborted.",
 			timeout_funcs[func_index].name);
 		return FALSE;
 	}
-
     if (func_index < 0 || func_index >= NUM_TIME_FUNCS)
-	panic("start_timer");
+		panic("start_timer bad func_index");
 
     gnu = (timer_element *) alloc(sizeof(timer_element));
-    gnu->next = 0;
+    gnu->tnxt = *owner_tm(tmtype, owner);	/* local chain */
     gnu->tid = timer_id++;
     gnu->timeout = monstermoves + when;
-    gnu->kind = kind;
+    gnu->kind = tmtype;
     gnu->needs_fixup = 0;
     gnu->func_index = func_index;
-    gnu->arg = arg;
-    insert_timer(gnu);
+    gnu->arg = owner;
 
-    if (kind == TIMER_OBJECT)	/* increment object's timed count */
-	((struct obj *)arg)->timed++;
+	/* add to owner */
+	*owner_tm(tmtype, owner) = gnu;
+	/* add to processing chain */
+	add_chain_tm(gnu);
 
     return TRUE;
 }
-
 
 /*
  * Remove the timer from the current list and free it up.  Return the time
  * it would have gone off, 0 if not found.
  */
 long
-stop_timer(func_index, arg)
+stop_timer(func_index, chain)
 short func_index;
-genericptr_t arg;
+timer_element * chain;
 {
     timer_element *doomed;
     long timeout;
 
-    doomed = remove_timer(&timer_base, func_index, arg);
-
-    if (doomed) {
+	for (doomed = chain; doomed && doomed->func_index != func_index; doomed = doomed->tnxt);
+	if (!doomed) {
+		// couldn't find it
+		return 0;
+	}
 	timeout = doomed->timeout;
-	if (doomed->kind == TIMER_OBJECT)
-	    ((struct obj *)arg)->timed--;
+	/* remove from processing loop */
+	rem_chain_tm(doomed);
+	/* call cleanup function */
 	if (timeout_funcs[doomed->func_index].cleanup)
-	    (*timeout_funcs[doomed->func_index].cleanup)(arg, timeout);
+		(*timeout_funcs[doomed->func_index].cleanup)(doomed->arg, timeout);
+	/* remove from owner */
+	*owner_tm(doomed->kind, doomed->arg) = doomed->tnxt;
 	free((genericptr_t) doomed);
 	return timeout;
-    }
-    return 0;
 }
-
-
-/*
- * Move all object timers from src to dest, leaving src untimed.
- */
 void
-obj_move_timers(src, dest)
-    struct obj *src, *dest;
+stop_all_timers(tm)
+timer_element * tm;
 {
-    int count;
-    timer_element *curr;
-
-    for (count = 0, curr = timer_base; curr; curr = curr->next)
-	if (curr->kind == TIMER_OBJECT && curr->arg == (genericptr_t)src) {
-	    curr->arg = (genericptr_t) dest;
-	    dest->timed++;
-	    count++;
+	timer_element *curr, *next_timer = 0;
+	for (curr = tm; curr; curr = next_timer) {
+		next_timer = curr->tnxt;
+		(void) stop_timer(curr->func_index, curr);
 	}
-    if (count != src->timed)
-	panic("obj_move_timers");
-    src->timed = 0;
 }
 
+void
+save_timers(tm, fd, mode)
+struct timer * tm;
+int fd;
+int mode;
+{
+	struct timer * curr = tm;
+	struct timer * tnxt;
+
+	while (curr) {
+		tnxt = curr->next;
+		if (perform_bwrite(mode))
+			bwrite(fd, (genericptr_t)tm, sizeof(struct timer));
+		if (release_data(mode))
+			stop_timer(tm->func_index, tm);
+		curr = tnxt;
+	}
+	return;
+}
+
+void
+rest_timers(tmtype, owner, tm, fd, ghostly, adjust)
+int tmtype;
+genericptr_t owner;
+struct timer * tm;
+int fd;
+boolean ghostly;
+long adjust;
+{
+	do {
+		tm = (struct timer *)alloc(sizeof(struct timer));
+		mread(fd, (genericptr_t) tm, sizeof(struct timer));
+		add_chain_tm(tm);
+		/* possibly adjust timer */
+		if (ghostly)
+	    	tm->timeout += adjust;
+		/* relink owner */
+		tm->arg = owner;
+		*owner_tm(tmtype, owner) = tm;
+	} while(tm->tnxt);
+	return;
+}
+
+/* Object-specific timer functions */
 
 /*
  * Find all object timers and duplicate them for the new object "dest".
  */
 void
 obj_split_timers(src, dest)
-    struct obj *src, *dest;
+struct obj *src, *dest;
 {
-    timer_element *curr, *next_timer=0;
-
-    for (curr = timer_base; curr; curr = next_timer) {
-	next_timer = curr->next;	/* things may be inserted */
-	if (curr->kind == TIMER_OBJECT && curr->arg == (genericptr_t)src) {
-	    (void) start_timer(curr->timeout-monstermoves, TIMER_OBJECT,
+    timer_element *curr;
+	/* loop over obj's local chain, which is safe as we add to dest's chain and the processing loop */
+    for (curr = src->timed; curr; curr = curr->tnxt) {
+		(void) start_timer(curr->timeout-monstermoves, TIMER_OBJECT,
 					curr->func_index, (genericptr_t)dest);
-	}
-    }
-}
-
-
-/*
- * Stop all timers attached to this object.  We can get away with this because
- * all object pointers are unique.
- */
-void
-obj_stop_timers(obj)
-    struct obj *obj;
-{
-    timer_element *curr, *prev, *next_timer=0;
-
-    for (prev = 0, curr = timer_base; curr; curr = next_timer) {
-	next_timer = curr->next;
-	if (curr->kind == TIMER_OBJECT && curr->arg == (genericptr_t)obj) {
-	    if (prev)
-		prev->next = curr->next;
-	    else
-		timer_base = curr->next;
-	    if (timeout_funcs[curr->func_index].cleanup)
-		(*timeout_funcs[curr->func_index].cleanup)(curr->arg,
-			curr->timeout);
-	    free((genericptr_t) curr);
-	} else {
-	    prev = curr;
-	}
-    }
-    obj->timed = 0;
-}
-
-
-/* Insert timer into the global queue */
-STATIC_OVL void
-insert_timer(gnu)
-    timer_element *gnu;
-{
-    timer_element *curr, *prev;
-
-    for (prev = 0, curr = timer_base; curr; prev = curr, curr = curr->next)
-	if (curr->timeout >= gnu->timeout) break;
-
-    gnu->next = curr;
-    if (prev)
-	prev->next = gnu;
-    else
-	timer_base = gnu;
-}
-
-
-STATIC_OVL timer_element *
-remove_timer(base, func_index, arg)
-timer_element **base;
-short func_index;
-genericptr_t arg;
-{
-    timer_element *prev, *curr;
-
-    for (prev = 0, curr = *base; curr; prev = curr, curr = curr->next)
-	if (curr->func_index == func_index && curr->arg == arg) break;
-
-    if (curr) {
-	if (prev)
-	    prev->next = curr->next;
-	else
-	    *base = curr->next;
-    }
-
-    return curr;
-}
-
-
-STATIC_OVL void
-write_timer(fd, timer)
-    int fd;
-    timer_element *timer;
-{
-    genericptr_t arg_save;
-
-    switch (timer->kind) {
-	case TIMER_GLOBAL:
-	case TIMER_LEVEL:
-	    /* assume no pointers in arg */
-	    bwrite(fd, (genericptr_t) timer, sizeof(timer_element));
-	    break;
-
-	case TIMER_OBJECT:
-	    if (timer->needs_fixup)
-		bwrite(fd, (genericptr_t)timer, sizeof(timer_element));
-	    else {
-		/* replace object pointer with id */
-		arg_save = timer->arg;
-		timer->arg = (genericptr_t)(intptr_t)((struct obj *)timer->arg)->o_id;
-		timer->needs_fixup = 1;
-		bwrite(fd, (genericptr_t)timer, sizeof(timer_element));
-		timer->arg = arg_save;
-		timer->needs_fixup = 0;
-	    }
-	    break;
-
-	case TIMER_MONSTER:
-	    if (timer->needs_fixup)
-		bwrite(fd, (genericptr_t)timer, sizeof(timer_element));
-	    else {
-		/* replace monster pointer with id */
-		arg_save = timer->arg;
-		timer->arg = (genericptr_t)(intptr_t)((struct monst *)timer->arg)->m_id;
-		timer->needs_fixup = 1;
-		bwrite(fd, (genericptr_t)timer, sizeof(timer_element));
-		timer->arg = arg_save;
-		timer->needs_fixup = 0;
-	    }
-	    break;
-
-	default:
-	    panic("write_timer");
-	    break;
-    }
-}
-
-
-/*
- * Return TRUE if the object will stay on the level when the level is
- * saved.
- */
-boolean
-obj_is_local(obj)
-    struct obj *obj;
-{
-    switch (obj->where) {
-	case OBJ_INVENT:
-	case OBJ_MAGIC_CHEST:
-	case OBJ_MIGRATING:	return FALSE;
-	case OBJ_FLOOR:
-	case OBJ_INTRAP:
-	case OBJ_BURIED:	return TRUE;
-	case OBJ_CONTAINED:	return obj_is_local(obj->ocontainer);
-	case OBJ_MINVENT:	return mon_is_local(obj->ocarry);
-    }
-    panic("obj_is_local");
-    return FALSE;
-}
-
-
-/*
- * Return TRUE if the given monster will stay on the level when the
- * level is saved.
- */
-STATIC_OVL boolean
-mon_is_local(mon)
-struct monst *mon;
-{
-    struct monst *curr;
-
-    for (curr = migrating_mons; curr; curr = curr->nmon)
-	if (curr == mon) return FALSE;
-    /* `mydogs' is used during level changes, never saved and restored */
-    for (curr = mydogs; curr; curr = curr->nmon)
-	if (curr == mon) return FALSE;
-    return TRUE;
-}
-
-
-/*
- * Return TRUE if the timer is attached to something that will stay on the
- * level when the level is saved.
- */
-STATIC_OVL boolean
-timer_is_local(timer)
-    timer_element *timer;
-{
-    switch (timer->kind) {
-	case TIMER_LEVEL:	return TRUE;
-	case TIMER_GLOBAL:	return FALSE;
-	case TIMER_OBJECT:	return obj_is_local((struct obj *)timer->arg);
-	case TIMER_MONSTER:	return mon_is_local((struct monst *)timer->arg);
-    }
-    panic("timer_is_local");
-    return FALSE;
-}
-
-
-/*
- * Part of the save routine.  Count up the number of timers that would
- * be written.  If write_it is true, actually write the timer.
- */
-STATIC_OVL int
-maybe_write_timer(fd, range, write_it)
-    int fd, range;
-    boolean write_it;
-{
-    int count = 0;
-    timer_element *curr;
-
-    for (curr = timer_base; curr; curr = curr->next) {
-	if (range == RANGE_GLOBAL) {
-	    /* global timers */
-
-	    if (!timer_is_local(curr)) {
-		count++;
-		if (write_it) write_timer(fd, curr);
-	    }
-
-	} else {
-	    /* local timers */
-
-	    if (timer_is_local(curr)) {
-		count++;
-		if (write_it) write_timer(fd, curr);
-	    }
-
-	}
-    }
-
-    return count;
-}
-
-
-/*
- * Save part of the timer list.  The parameter 'range' specifies either
- * global or level timers to save.  The timer ID is saved with the global
- * timers.
- *
- * Global range:
- *		+ timeouts that follow the hero (global)
- *		+ timeouts that follow obj & monst that are migrating
- *
- * Level range:
- *		+ timeouts that are level specific (e.g. storms)
- *		+ timeouts that stay with the level (obj & monst)
- */
-void
-save_timers(fd, mode, range)
-    int fd, mode, range;
-{
-    timer_element *curr, *prev, *next_timer=0;
-    int count;
-
-    if (perform_bwrite(mode)) {
-	if (range == RANGE_GLOBAL)
-	    bwrite(fd, (genericptr_t) &timer_id, sizeof(timer_id));
-
-	count = maybe_write_timer(fd, range, FALSE);
-	bwrite(fd, (genericptr_t) &count, sizeof count);
-	(void) maybe_write_timer(fd, range, TRUE);
-    }
-
-    if (release_data(mode)) {
-	for (prev = 0, curr = timer_base; curr; curr = next_timer) {
-	    next_timer = curr->next;	/* in case curr is removed */
-
-	    if ( !(!!(range == RANGE_LEVEL) ^ !!timer_is_local(curr)) ) {
-		if (prev)
-		    prev->next = curr->next;
-		else
-		    timer_base = curr->next;
-		free((genericptr_t) curr);
-		/* prev stays the same */
-	    } else {
-		prev = curr;
-	    }
-	}
-    }
-}
-
-
-/*
- * Pull in the structures from disk, but don't recalculate the object and
- * monster pointers.
- */
-void
-restore_timers(fd, range, ghostly, adjust)
-    int fd, range;
-    boolean ghostly;	/* restoring from a ghost level */
-    long adjust;	/* how much to adjust timeout */
-{
-    int count;
-    timer_element *curr;
-
-    if (range == RANGE_GLOBAL)
-	mread(fd, (genericptr_t) &timer_id, sizeof timer_id);
-
-    /* restore elements */
-    mread(fd, (genericptr_t) &count, sizeof count);
-    while (count-- > 0) {
-	curr = (timer_element *) alloc(sizeof(timer_element));
-	mread(fd, (genericptr_t) curr, sizeof(timer_element));
-	if (ghostly)
-	    curr->timeout += adjust;
-	insert_timer(curr);
-    }
-}
-
-
-/* reset all timers that are marked for reseting */
-void
-relink_timers(ghostly)
-    boolean ghostly;
-{
-    timer_element *curr;
-    unsigned nid;
-
-    for (curr = timer_base; curr; curr = curr->next) {
-	if (curr->needs_fixup) {
-	    if (curr->kind == TIMER_OBJECT) {
-		if (ghostly) {
-		    if (!lookup_id_mapping((unsigned)(intptr_t)curr->arg, &nid))
-			panic("relink_timers 1");
-		} else
-		    nid = (unsigned)(intptr_t)curr->arg;
-		curr->arg = (genericptr_t) find_oid(nid);
-		if (!curr->arg) panic("cant find o_id %d", nid);
-		curr->needs_fixup = 0;
-	    } else if (curr->kind == TIMER_MONSTER) {
-		panic("relink_timers: no monster timer implemented");
-	    } else
-		panic("relink_timers 2");
-	}
     }
 }
 

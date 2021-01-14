@@ -3861,6 +3861,7 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	relobj(mtmp, 0, FALSE);
 	remove_monster(mtmp->mx, mtmp->my);
 	del_light_source(mtmp->light);
+	stop_all_timers(mtmp->timed);
 	newsym(mtmp->mx,mtmp->my);
 	unstuck(mtmp);
 	fill_pit(mtmp->mx, mtmp->my);

@@ -2555,7 +2555,7 @@ struct obj **optr;
 		"toss the figurine into the air" :
 		"set the figurine on the ground"));
 	(void) make_familiar(obj, cc.x, cc.y, FALSE);
-	(void) stop_timer(FIG_TRANSFORM, (genericptr_t)obj);
+	(void) stop_timer(FIG_TRANSFORM, obj->timed);
 	useup(obj);
 	*optr = 0;
 }

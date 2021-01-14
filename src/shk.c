@@ -2677,7 +2677,7 @@ add_to_billobjs(obj)
     if (obj->where != OBJ_FREE)
 	panic("add_to_billobjs: obj not free");
     if (obj->timed)
-	obj_stop_timers(obj);
+	stop_all_timers(obj->timed);
 
     obj->nobj = billobjs;
     billobjs = obj;

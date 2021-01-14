@@ -4998,7 +4998,7 @@ typfnd:
 				   !(mvitals[mntmp].mvflags & G_NOCORPSE)) {
 			    /* beware of random troll or lizard corpse,
 			       or of ordinary one being forced to such */
-			    if (otmp->timed) obj_stop_timers(otmp);
+			    if (otmp->timed) stop_all_timers(otmp->timed);
 			    if (mons[mntmp].msound == MS_GUARDIAN)
 			    	otmp->corpsenm = genus(mntmp,1);
 			    else

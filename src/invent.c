@@ -197,7 +197,7 @@ struct obj **potmp, **pobj;
 
 		/* really should merge the timeouts */
 		if (obj->lamplit) obj_merge_light_sources(obj, otmp);
-		if (obj->timed) obj_stop_timers(obj);	/* follows lights */
+		if (obj->timed) stop_all_timers(obj->timed);	/* follows lights */
 
 		/* fixup for `#adjust' merging wielded darts, daggers, &c */
 		if (obj->owornmask && carried(otmp)) {
@@ -608,7 +608,7 @@ struct obj *obj;
 		set_moreluck();
 		flags.botl = 1;
 	} else if (obj->otyp == FIGURINE && obj->timed) {
-		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) obj);
+		(void) stop_timer(FIG_TRANSFORM, obj->timed);
 	}
 }
 

@@ -1069,7 +1069,7 @@ struct mkroom	*croom;
 	if(otmp->otyp == CORPSE && otmp->corpsenm == PM_CROW_WINGED_HALF_DRAGON){
 		otmp->oeroded = 1;
 		if (otmp->timed) {
-			(void) stop_timer(ROT_CORPSE, (genericptr_t)otmp);
+			(void) stop_timer(ROT_CORPSE, otmp->timed);
 			start_corpse_timeout(otmp);
 		}
 	}
