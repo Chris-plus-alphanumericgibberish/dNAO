@@ -5187,10 +5187,14 @@ int tary;
 		return TRUE;
 	}
 
-	/* don't summon anything if caster is peaceful */
-	if (is_summon_spell(spellnum)
-		&& (!youagr && !magr->mtame && magr->mpeaceful))
+	/* don't summon if... */
+	if (is_summon_spell(spellnum) && (
+		(!youagr && !magr->mtame && magr->mpeaceful) || 		/* caster is peaceful */
+		(!youagr && magr->summonpwr >= magr->data->mlevel) || 	/* already summoned lots of things */
+		(u.summonMonster)										/* something's been summoned this turn already */
+		))
 		return TRUE;
+
 
 	/* the wiz won't use the following cleric-specific or otherwise weak spells */
 	if (!youagr && magr->iswiz && (

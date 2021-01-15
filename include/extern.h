@@ -2718,6 +2718,7 @@ E void FDECL(end_burn, (struct obj *, BOOLEAN_P));
 E void FDECL(lightsaber_deactivate, (struct obj *, BOOLEAN_P));
 E void NDECL(do_storms);
 E void FDECL(desummon_mon, (genericptr_t, long));
+E void FDECL(cleanup_msummon, (genericptr_t, long));
 E void FDECL(desummon_obj, (genericptr_t, long));
 E void FDECL(summoner_gone, (struct monst *));
 E boolean FDECL(start_timer, (long, SHORT_P, SHORT_P, genericptr_t));

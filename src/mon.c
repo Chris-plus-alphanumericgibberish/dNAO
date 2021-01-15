@@ -7253,7 +7253,7 @@ int duration;
 	add_mx(mon, MX_ESUM);
 	mon->mextra_p->esum_p->summoner = summoner;
 	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
-	mon->mextra_p->esum_p->summonstr = mon->data->mlevel + 1;
+	mon->mextra_p->esum_p->summonstr = mon->data->mlevel;
 	// add timer to mon
 	start_timer(duration, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
 	if (summoner)

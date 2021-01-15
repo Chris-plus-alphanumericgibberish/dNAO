@@ -2473,6 +2473,16 @@ long timeout;
 	}
 }
 void
+cleanup_msummon(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct monst * mon = (struct monst *)arg;
+	if (get_mx(mon, MX_ESUM)) {
+		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
+	}
+}
+void
 desummon_obj(arg, timeout)
 genericptr_t arg;
 long timeout;
@@ -2572,7 +2582,7 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
     TTAB(shady_corpse,	(timeout_proc)0,	"shady_corpse"),
     TTAB(bomb_blow,     (timeout_proc)0,	"bomb_blow"),
 	TTAB(return_ammo,   (timeout_proc)0,	"return_ammo"),
-	TTAB(desummon_mon,	(timeout_proc)0,	"desummon_mon"),
+	TTAB(desummon_mon,	cleanup_msummon,	"desummon_mon"),
 	TTAB(desummon_obj,	(timeout_proc)0,	"desummon_obj")
 };
 #undef TTAB
