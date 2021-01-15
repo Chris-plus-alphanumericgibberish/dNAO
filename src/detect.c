@@ -887,22 +887,24 @@ int mclass;			/* monster class, 0 for all */
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 		if (DEADMONSTER(mtmp)) continue;
 		if (!mclass || mtmp->data->mlet == mclass ||
-		(mtmp->mtyp == PM_LONG_WORM && mclass == S_WORM_TAIL))
+			(mtmp->mtyp == PM_LONG_WORM && mclass == S_WORM_TAIL)
+		)
 			if (mtmp->mx > 0) {
 				if (mclass && def_monsyms[mclass] == ' ')
-				show_glyph(mtmp->mx,mtmp->my,
-					detected_mon_to_glyph(mtmp));
-			else
-				show_glyph(mtmp->mx,mtmp->my,mon_to_glyph(mtmp));
-			/* don't be stingy - display entire worm */
-			if (mtmp->mtyp == PM_LONG_WORM) detect_wsegs(mtmp,0);
+					show_glyph(mtmp->mx,mtmp->my,
+						detected_mon_to_glyph(mtmp));
+				else
+					show_glyph(mtmp->mx,mtmp->my,mon_to_glyph(mtmp));
+				/* don't be stingy - display entire worm */
+				if (mtmp->mtyp == PM_LONG_WORM) detect_wsegs(mtmp,0);
 			}
 		if (otmp && otmp->cursed &&
-		(mtmp->msleeping || !mtmp->mcanmove)) {
-		mtmp->msleeping = mtmp->mfrozen = 0;
-	  if(mtmp->mtyp!= PM_GIANT_TURTLE || !(mtmp->mflee))
-		mtmp->mcanmove = 1;
-		woken = TRUE;
+			(mtmp->msleeping || !mtmp->mcanmove)
+		){
+			mtmp->msleeping = mtmp->mfrozen = 0;
+			if(mtmp->mtyp != PM_GIANT_TURTLE || !(mtmp->mflee))
+				mtmp->mcanmove = 1;
+			woken = TRUE;
 		}
 	}
 	display_self();

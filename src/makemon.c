@@ -8544,7 +8544,10 @@ register int	mmflags;
 		mtmp->mpetitioner = TRUE;
 	
 	if(mkmon_template){
+		/* apply template */
 		set_template(mtmp, mkmon_template);
+		/* update ptr to mtmp's new data */
+		ptr = mtmp->data;
 		/* special case: some templates increase the level of the creatures made */
 		int plslvl = 0;
 		switch (mkmon_template) {

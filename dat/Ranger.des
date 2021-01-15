@@ -10,7 +10,7 @@
 #
 MAZE: "Ran-strt",'.'
 FLAGS: noteleport,hardfloor,arboreal
-INIT_MAP:'.','.',true,true,lit,false
+INIT_MAP:',',' ',true,true,lit,false
 GEOMETRY:left,center
 ###########1#########2#########3#########4#########5#########6#########7#####
 #0123456789012345678901234567890123456789012345678901234567890123456789012345

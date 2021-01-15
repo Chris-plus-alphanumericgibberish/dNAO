@@ -2388,7 +2388,7 @@ movemon()
 #ifdef OVLB
 
 #define mstoning(obj)	(ofood(obj) && \
-					((obj)->corpsenm >= LOW_PM && touch_petrifies(&mons[(obj)->corpsenm]) || \
+					(((obj)->corpsenm >= LOW_PM && touch_petrifies(&mons[(obj)->corpsenm])) || \
 					(obj)->corpsenm == PM_MEDUSA))
 
 /*
@@ -6655,6 +6655,25 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		if(mtmp->mhpmax < 0) mtmp->mhpmax = hpn;	/* overflow */
 		if (!mtmp->mhpmax) mtmp->mhpmax = 1;
 	} //else just take on new form I think....
+
+	if (is_horror(mdat)) {
+		rem_mx(mtmp, MX_EHOR);	// in case it used to be a horror before
+		add_mx(mtmp, MX_EHOR);
+		if (mtyp == PM_NAMELESS_HORROR) {
+			extern char * nameless_horror_name;
+			int plslev = rn2(12);
+			EHOR(mtmp)->basehorrordata = *mdat;
+			nameless_horror_name = EHOR(mtmp)->randname;
+			make_horror(&(EHOR(mtmp)->basehorrordata), 37 + plslev, 15 + plslev);
+			nameless_horror_name = (char *)0;
+			mdat = &(EHOR(mtmp)->basehorrordata);
+			EHOR(mtmp)->currhorrordata = *mdat;
+		}
+		else {
+			EHOR(mtmp)->basehorrordata = *mdat;
+			EHOR(mtmp)->currhorrordata = *mdat;
+		}
+	}
 	/* take on the new form... */
 	set_mon_data(mtmp, mtyp);
 
@@ -7175,7 +7194,7 @@ struct monst *nurse, *targ;
 boolean verbose;
 {
 	int *hp, *max;
-	int healing;
+	int healing = 0;
 	if(verbose){
 		if(nurse == targ)
 			pline("%s heals %sself.", Monnam(nurse), himherit(targ));

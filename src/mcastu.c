@@ -5166,7 +5166,7 @@ int tary;
 		/* tame: if you're injured and nearby */
 		if (magr->mtame
 			&& (*hp(&youmonst) < *hpmax(&youmonst))
-			&& (dist2(tarx, tary, tmpm->mx, tmpm->my) <= 3 * 3 + 1))
+			&& (dist2(tarx, tary, magr->mx, magr->my) <= 3 * 3 + 1))
 			return FALSE;
 		/* all: if nearby ally injured, or enemy near */
 		for (tmpm = fmon; tmpm; tmpm = tmpm->nmon){

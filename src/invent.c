@@ -1044,7 +1044,7 @@ register const char *let,*word;
 	boolean prezero = FALSE;
 	long dummymask;
 
-	if(nextgetobj) return nextgetobj;
+	if(nextgetobj) return getnextgetobj();
 
 	if(*let == ALLOW_COUNT) let++, allowcnt = 1;
 #ifndef GOLDOBJ
@@ -4868,7 +4868,7 @@ boolean showsym;
 	    Strcpy(invbuf, class_name);
 	if (oclass && showsym)
 	    Sprintf(eos(invbuf), ocsymformat,
-		    iflags.menu_tab_sep ? "\t" : "  ", def_oc_syms[let]);
+		    iflags.menu_tab_sep ? "\t" : "  ", def_oc_syms[(int)let]);
 	return invbuf;
 }
 

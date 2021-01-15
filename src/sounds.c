@@ -1144,12 +1144,13 @@ asGuardian:
 				const char *msg = (const char *)0;
 				const char *dustcloud = "A cloud of dust";
 				const char *quickly_dissipates = "quickly dissipates";
-				int key = artifact_door(ix, iy);		/* ALI - Artifact doors from slash'em */
+				int key;		/* ALI - Artifact doors from slash'em */
 				for(ix = 0; ix < COLNO; ix++){
 					for(iy = 0; iy < ROWNO; iy++){
 						door = &levl[ix][iy];
 						ttmp = t_at(ix, iy); /* trap if there is one */
 						vis = cansee(ix,iy);
+						key = artifact_door(ix, iy);
 						if (levl[ix][iy].typ == DRAWBRIDGE_DOWN)
 							close_drawbridge(ix,iy);
 						if (ttmp && ttmp->ttyp == TRAPDOOR) {
@@ -4445,6 +4446,7 @@ int tx,ty;
 					}
 					pline("\"Your contribution is appreciated. Now don't bother me.\"");
 					o->otyp = SPE_BLANK_PAPER;
+					o->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 					newsym(tx,ty);
 					bindspirit(ep->ward_id);
 					u.sealTimeout[PAIMON-FIRST_SEAL] = moves + bindingPeriod;

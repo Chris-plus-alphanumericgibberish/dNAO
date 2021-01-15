@@ -737,7 +737,7 @@ struct obj *scroll;
 		}
 		u.uvaul_duration += duration;
 		if(!scroll->cursed) u.uvaul++;
-	} else if(scroll->otyp >= CLOCKWISE_METAMORPHOSIS_GLYPH && scroll->otyp <= BEAST_S_EMBRACE_GLYPH) {
+	} else if(scroll->otyp >= ANTI_CLOCKWISE_METAMORPHOSIS_G && scroll->otyp <= BEAST_S_EMBRACE_GLYPH) {
 		thought = otyp_to_thought(scroll->otyp);
 
 		/* maybe_give_thought checks requirements, returns FALSE if it didn't work */
@@ -1988,7 +1988,7 @@ struct obj	*sobj;
 		You("have found a scroll of genocide!");
 		known = TRUE;
 		if (sobj->blessed) do_class_genocide();
-		else do_genocide(!sobj->cursed | (2 * !!Confusion));
+		else do_genocide((!sobj->cursed) | (2 * !!Confusion));
 		break;
 	case SCR_LIGHT:
 		if(!Blind) known = TRUE;

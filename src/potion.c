@@ -2404,6 +2404,7 @@ boolean amnesia;
 			        bill_dummy_object(obj);
 			    }
 			    obj->otyp = SPE_BLANK_PAPER;
+				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 			}
 			used = TRUE;
 		}

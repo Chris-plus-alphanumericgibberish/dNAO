@@ -1031,6 +1031,10 @@ int tary;
 					(aatyp == AT_BREA ? FALSE : TRUE)))	/* breath attacks overpenetrate targets */
 				continue;
 			
+			if (aatyp == AT_BEAM && !(mdef && tarx == x(mdef) && tary == y(mdef)))
+				continue; /* Blast attacks require the target's true location */
+						  /* Other attacks launch an actual ray or projectile that may go sailing past */
+			
 			switch (aatyp) {
 			case AT_BREA:
 				if (ranged && !magr->mspec_used && (distmin(x(magr), y(magr), tarx, tary) <= BOLT_LIM) && rn2(3)) {	// not in melee, 2/3 chance when ready
@@ -2759,7 +2763,7 @@ int vis;
 	struct permonst * pa = youagr ? youracedata : magr->data;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
-	int result;
+	int result = 0;
 
 	if (arti_threeHead(weapon)) {
 		/* only has special effects when all 3 heads hit */

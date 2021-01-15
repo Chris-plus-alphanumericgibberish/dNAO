@@ -1316,9 +1316,9 @@ int x,y;
 			lev->doormask &= ~(D_CLOSED|D_LOCKED);
 			lev->doormask |= D_ISOPEN;
 			if (Blind)
-			feel_location(x,y);	/* the hero knows she opened it  */
+				feel_location(x,y);	/* the hero knows she opened it  */
 			else
-			newsym(x,y);
+				newsym(x,y);
 			unblock_point(x,y);		/* vision: new see through there */
 		}
 	    return TRUE;
@@ -1334,7 +1334,7 @@ badspot:
 			feel_location(x,y);	/* the hero knows she opened it  */
 		else
 			newsym(x,y);
-			unblock_point(x,y);		/* vision: new see through there */
+		unblock_point(x,y);		/* vision: new see through there */
 		return TRUE;
 	}
 	return FALSE;
@@ -1422,9 +1422,9 @@ openrocktrap()
 			lev->doormask &= ~(D_CLOSED|D_LOCKED);
 			lev->doormask |= D_ISOPEN;
 			if (Blind)
-			feel_location(u.ux,u.uy);	/* the hero knows she opened it  */
+				feel_location(u.ux,u.uy);	/* the hero knows she opened it  */
 			else
-			newsym(u.ux,u.uy);
+				newsym(u.ux,u.uy);
 			unblock_point(u.ux,u.uy);		/* vision: new see through there */
 		}
 	    return TRUE;
@@ -1833,18 +1833,18 @@ register struct monst *mtmp;
 	/* Eats away door if present & closed or locked */
 	if (closed_door(mtmp->mx, mtmp->my)) {
 	    if (*in_rooms(mtmp->mx, mtmp->my, SHOPBASE))
-		add_damage(mtmp->mx, mtmp->my, 0L);
+			add_damage(mtmp->mx, mtmp->my, 0L);
 	    unblock_point(mtmp->mx, mtmp->my);	/* vision */
 	    if (here->doormask & D_TRAPPED) {
-		here->doormask = D_NODOOR;
-		if (mb_trapped(mtmp)) {	/* mtmp is killed */
-		    newsym(mtmp->mx, mtmp->my);
-		    return TRUE;
-		}
+			here->doormask = D_NODOOR;
+			if (mb_trapped(mtmp)) {	/* mtmp is killed */
+				newsym(mtmp->mx, mtmp->my);
+				return TRUE;
+			}
 	    } else {
-		if (!rn2(3) && flags.verbose)	/* not too often.. */
-		    You_feel("an unexpected draft.");
-		here->doormask = D_BROKEN;
+			if (!rn2(3) && flags.verbose)	/* not too often.. */
+				You_feel("an unexpected draft.");
+			here->doormask = D_BROKEN;
 	    }
 	    newsym(mtmp->mx, mtmp->my);
 	    return FALSE;
