@@ -8374,7 +8374,6 @@ register int	mmflags;
 	mtmp->mferal  = FALSE;
 	mtmp->mcrazed  = FALSE;
 	mtmp->mclone  = FALSE;
-	mtmp->mvanishes  = -1;
 
 	mtmp->mspec_used = 3;
 	mtmp->encouraged = 0;

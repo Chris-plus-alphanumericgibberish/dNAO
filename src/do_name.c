@@ -945,6 +945,8 @@ boolean called;
 	/* Put the adjectives in the buffer */
 	if (adjective)
 	    Strcat(strcat(buf, adjective), " ");
+	if (get_mx(mtmp, MX_ESUM))
+		Strcat(buf, "summoned ");
 	if (do_invis)
 	    Strcat(buf, "invisible ");
 #ifdef STEED

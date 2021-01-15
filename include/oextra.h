@@ -10,7 +10,8 @@
 #define OX_ENAM 0
 #define OX_EMON 1
 #define OX_EMID 2
-#define NUM_OX 3
+#define OX_ESUM 3
+#define NUM_OX 4
 
 /* container for all oextra */
 union oextra {
@@ -19,6 +20,7 @@ union oextra {
 		struct enam * enam_p;
 		struct emon * emon_p;
 		int * emid_p;
+		struct esum * esum_p;
 	};
 };
 

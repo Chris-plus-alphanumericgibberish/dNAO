@@ -532,8 +532,9 @@ nasty(mcast)
     int count=0;
 
     if(!rn2(10) && Inhell) {
-	msummon((struct monst *) 0);	/* summons like WoY */
-	count++;
+		/* creatures made this way are full monsters gated in, not summons tied to mcast */
+		msummon((struct monst *) 0);	/* summons like WoY */
+		count++;
     } else {
 	tmp = (u.ulevel > 3) ? u.ulevel/3 : 1; /* just in case -- rph */
 	/* if we don't have a casting monster, the nasties appear around you */
@@ -570,6 +571,7 @@ nasty(mcast)
 				mtmp->msleeping = 0;
 				untame(mtmp, 0);
 				set_malign(mtmp);
+				mark_mon_as_summoned(mtmp, mcast, 9999);
 				count++;
 				break;
 			}

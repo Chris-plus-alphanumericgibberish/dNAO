@@ -128,6 +128,12 @@ struct eshk {
 #define NOTANGRY(mon)	((mon)->mpeaceful)
 #define ANGRY(mon)	(!NOTANGRY(mon))
 
+struct esum {
+	struct monst * summoner;	/* monster responsible for this mon/obj -- can be null */
+	unsigned sm_id;				/* m_id of summoner */
+	int summonstr;				/* tax on summoner, who may maintain up to its own HD of summons at a time. */
+};
+
 
 #define FCSIZ	(ROWNO+COLNO)
 struct fakecorridor {

@@ -880,6 +880,17 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 		if (!mtmp->mtame) untame(mtmp, 1);
 		m_unleash(mtmp, TRUE);
 	}
+
+	/* a summoner leaving affects its summons */
+	if (mtmp->summonpwr) {
+		summoner_gone(mtmp);
+	}
+	/* likewise, summons don't persist away from their summoner */
+	if (get_mx(mtmp, MX_ESUM)) {
+		monvanished(mtmp);
+		return;	/* return early -- mtmp is gone. */
+	}
+
 	relmon(mtmp);
 	mtmp->nmon = migrating_mons;
 	migrating_mons = mtmp;
@@ -1100,7 +1111,7 @@ int numdogs;
 	struct monst *curmon = 0, *weakdog = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
 			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
-				&& !curmon->mspiritual && curmon->mvanishes < 0
+				&& !curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)
 			){
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
@@ -1125,7 +1136,7 @@ vanish_dogs()
 		weakdog = (struct monst *)0;
 		numdogs = 0;
 		for(curmon = fmon; curmon; curmon = curmon->nmon){
-			if(curmon->mspiritual && curmon->mvanishes < 0){
+			if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
 				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
@@ -1134,7 +1145,7 @@ vanish_dogs()
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 			}
 		}
-		if(weakdog && numdogs > dog_limit() ) weakdog->mvanishes = 5;
+		if(weakdog && numdogs > dog_limit()) start_timer(5L, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)weakdog);
 	} while(weakdog && numdogs > dog_limit());
 }
 

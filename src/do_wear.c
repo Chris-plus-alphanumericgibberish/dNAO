@@ -4092,8 +4092,8 @@ struct obj *wep;
 	
 	mtmp = makemon(&mons[PM_VEXING_ORB], x(magr), y(magr), MM_ADJACENTOK|maketame);
 	if (mtmp) {
-		/* time out */
-		mtmp->mvanishes = 4 + rn2(4);
+		/* time out, but not tied to magr -- the object summoned them */
+		mark_mon_as_summoned(mtmp, (struct monst *)0, 4 + rn2(4));
 		/* can be peaceful */
 		if(magr->mpeaceful)
 			mtmp->mpeaceful = TRUE;
@@ -4220,8 +4220,8 @@ struct obj *wep;
 	for(; i > 0; i--){
 		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame);
 		if (mtmp) {
-			/* time out */
-			mtmp->mvanishes = 4 + rn2(4);
+			/* time out, but not tied to magr -- the object summoned them */
+			mark_mon_as_summoned(mtmp, (struct monst *)0, 4 + rn2(4));
 			mtmp->mspec_used = 0;
 			/* can be peaceful */
 			if(magr->mpeaceful)
@@ -4415,8 +4415,8 @@ struct obj *wep;
 	for(; i > 0; i--){
 		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame);
 		if (mtmp) {
-			/* time out */
-			mtmp->mvanishes = 4 + rn2(4);
+			/* time out, but not tied to magr -- the object summoned them */
+			mark_mon_as_summoned(mtmp, (struct monst *)0, 4 + rn2(4));
 			mtmp->mspec_used = 0;
 			/* can be peaceful */
 			if(magr->mpeaceful)

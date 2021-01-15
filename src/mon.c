@@ -286,7 +286,7 @@ register struct monst *mtmp;
 	struct obj *otmp;
 	struct monst *mon;
 	
-	if(mtmp->mvanishes > -1){
+	if (get_mx(mtmp, MX_ESUM)) {
 		return (struct obj *)0;
 	}
 	
@@ -3859,6 +3859,7 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	mtmp->mtrapped = 0;
 	mtmp->mhp = 0; /* simplify some tests: force mhp to 0 */
 	relobj(mtmp, 0, FALSE);
+	summoner_gone(mtmp);
 	remove_monster(mtmp->mx, mtmp->my);
 	del_light_source(mtmp->light);
 	stop_all_timers(mtmp->timed);
@@ -5668,7 +5669,7 @@ xkilled(mtmp, dest)
 		if (!rn2(active_glyph(EYE_THOUGHT) ? 3 : 6) && !(mvitals[mndx].mvflags & G_NOCORPSE)
 					&& mdat->mlet != S_KETER
 					&& mdat->mlet != S_PLANT
-					&& !(mtmp->mvanishes >= 0)
+					&& !(get_mx(mtmp, MX_ESUM))
 					&& !(mtmp->mclone)
 					&& !(has_template(mtmp, ZOMBIFIED))
 					&& !(is_auton(mtmp->data))
@@ -7237,6 +7238,53 @@ struct monst *mtmp;
 		mondied(mtmp);
 	} else {
 		migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_EXACT_XY, (coord *)0);
+	}
+}
+
+/* marks `mon` as being summoned by the summoner, which causes it to vanish after duration expires or summoner dies */
+/* its inventory at time of marking is set to vanish when `mon` dies */
+void
+mark_mon_as_summoned(mon, summoner, duration)
+struct monst * mon;
+struct monst * summoner;
+int duration;
+{
+	// add component to mon
+	add_mx(mon, MX_ESUM);
+	mon->mextra_p->esum_p->summoner = summoner;
+	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
+	mon->mextra_p->esum_p->summonstr = mon->data->mlevel + 1;
+	// add timer to mon
+	start_timer(duration, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
+	if (summoner)
+		summoner->summonpwr += mon->mextra_p->esum_p->summonstr;
+	// mark mon's inventory as summoned, including contained objects
+#ifndef GOLDOBJ
+	u.spawnedGold -= mon->mgold;
+	mon->mgold = 0;
+#else
+	{
+		struct obj *mongold = findgold(mon->minvent);
+		if (mongold) {
+			u.spawnedGold -= mongold->quan;
+			obj_extract_self(mongold);
+			obfree(mongold, (struct obj *)0);
+		}
+	}
+#endif
+	struct obj * otmp, * pobj = 0;
+	for (otmp = mon->minvent; otmp || (pobj && pobj->where == OBJ_CONTAINED); otmp = otmp->nobj) {
+		if(otmp)
+			while(otmp->cobj) {pobj = otmp; otmp = otmp->cobj;}
+		else
+			otmp = pobj->ocontainer;
+		// add component to obj
+		add_ox(otmp, OX_ESUM);
+		otmp->oextra_p->esum_p->summoner = mon;
+		otmp->oextra_p->esum_p->sm_id = mon->m_id;
+		otmp->oextra_p->esum_p->summonstr = 0;
+		// add timer to obj
+		start_timer(duration, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
 	}
 }
 

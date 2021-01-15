@@ -40,7 +40,9 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define SHADY_CORPSE	10
 #define BOMB_BLOW	11
 #define RETURN_AMMO	12
-#define NUM_TIME_FUNCS	13
+#define DESUMMON_MON 13
+#define DESUMMON_OBJ 14
+#define NUM_TIME_FUNCS	15
 
 /* used in timeout.c */
 typedef struct timer {
@@ -51,7 +53,6 @@ typedef struct timer {
     short kind;			/* kind of use */
     short func_index;		/* what to call when we time out */
     genericptr_t arg;		/* pointer to timeout argument */
-    Bitfield (needs_fixup,1);	/* does arg need to be patched? */
 } timer_element;
 
 #endif /* TIMEOUT_H */

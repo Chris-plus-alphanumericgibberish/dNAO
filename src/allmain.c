@@ -1168,19 +1168,7 @@ moveloop()
 				/* Loyal monsters slowly recover tameness */
 				if(mtmp->mtame && mtmp->mtame < 5 && !mtmp->isminion && !(EDOG(mtmp)->loyal) && (!moves%100))
 					mtmp->mtame++;
-				/* Possibly vanish */
-				if(mtmp->mvanishes>-1){
-					if(--mtmp->mvanishes == 0){
-						if(mtmp->mtyp == PM_VEXING_ORB){
-							//Need a better system than this :(
-							flags.mon_moving = TRUE;
-							mondied(mtmp);
-							flags.mon_moving = FALSE;
-						} else
-							monvanished(mtmp);
-						continue;
-					}
-				}
+					
 				if(noactions(mtmp)){
 					/* Monsters in a essence trap can't move */
 					if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){

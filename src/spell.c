@@ -2735,10 +2735,10 @@ spiriteffects(power, atme)
 			for(i=dsize; i > 0; i--){
 				do pm = &mons[rn2(PM_LONG_WORM_TAIL)];
 				while( (pm->geno & (G_UNIQ|G_NOGEN)) || pm->mlevel >= u.ulevel+5);
-				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 				if(mon){
 					initedog(mon);
-					mon->mvanishes = 5;
+					mark_mon_as_summoned(mon, &youmonst, 5);
 				}
 			}
 		}break;
@@ -2998,7 +2998,7 @@ spiriteffects(power, atme)
 				mon->mhpmax = (mon->m_lev * 8) - 4;
 				mon->mhp =  mon->mhpmax;
 				for(curmon = fmon; curmon; curmon = curmon->nmon){
-					if(curmon->mspiritual && curmon->mvanishes < 0){
+					if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){
 						numdogs++;
 						if(!weakdog) weakdog = curmon;
 						if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
@@ -3007,7 +3007,7 @@ spiriteffects(power, atme)
 						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 					}
 				}
-				if(weakdog && numdogs > dog_limit()) mon->mvanishes = 5;
+				if(weakdog && numdogs > dog_limit()) start_timer(5L, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
 				mon->mspiritual = TRUE;
 			}
 		}break;
@@ -3725,9 +3725,9 @@ spiriteffects(power, atme)
 			struct monst *mon;
 			struct permonst *pm;
 			pm = choose_crystal_summon();
-			if(pm && (mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT))){
+			if(pm && (mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH))){
 				initedog(mon);
-				mon->mvanishes = 10+u.ulevel/2;
+				mark_mon_as_summoned(mon, &youmonst, 10+u.ulevel/2);
 			} else return 0;
 		}break;
 		case PWR_PSEUDONATURAL_SURGE:

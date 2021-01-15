@@ -11,7 +11,8 @@ struct ox_table {
 } ox_list[] = {
 	{OX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
 	{OX_EMON, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
-	{OX_EMID, sizeof(int)}
+	{OX_EMID, sizeof(int)},
+	{OX_ESUM, sizeof(struct esum)}
 };
 
 /* add one component to obj */

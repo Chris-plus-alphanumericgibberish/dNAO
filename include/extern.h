@@ -1572,6 +1572,10 @@ E int FDECL(u_visible_insight,(struct monst *));
 E void FDECL(repair,(struct monst *, struct monst *, int));
 E void FDECL(nurse_heal,(struct monst *, struct monst *, int));
 E void FDECL(insight_vanish,(struct monst *));
+E long FDECL(timer_duration_remaining,(timer_element *));
+E timer_element * FDECL(get_timer,(timer_element *, short));
+E void FDECL(abjure_summon, (struct monst *, int));
+E void FDECL(mark_mon_as_summoned,(struct monst *, struct monst *, int));
 
 /* ### mondata.c ### */
 
@@ -2713,6 +2717,9 @@ E void FDECL(begin_burn, (struct obj *));
 E void FDECL(end_burn, (struct obj *, BOOLEAN_P));
 E void FDECL(lightsaber_deactivate, (struct obj *, BOOLEAN_P));
 E void NDECL(do_storms);
+E void FDECL(desummon_mon, (genericptr_t, long));
+E void FDECL(desummon_obj, (genericptr_t, long));
+E void FDECL(summoner_gone, (struct monst *));
 E boolean FDECL(start_timer, (long, SHORT_P, SHORT_P, genericptr_t));
 E long FDECL(stop_timer, (SHORT_P, timer_element *));
 E void FDECL(stop_all_timers, (timer_element *));

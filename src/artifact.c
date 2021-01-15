@@ -7642,7 +7642,7 @@ arti_invoke(obj)
 					mtmp = mtmp2;
 					mtmp->mtame = 30;
 					summon_loop--;
-					mtmp->mvanishes = 100;
+					mark_mon_as_summoned(mtmp, &youmonst, 100);
 				} else mongone(mtmp);
 			} while (summon_loop);
 			/* Tsk,tsk.. */
@@ -8991,7 +8991,6 @@ read_necro(VOID_ARGS)
 					losepw(20);
 					for(i=max(1, d(1,20) - 16); i > 0; i--){
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
-						mtmp->mvanishes = 100;
 						if(mtmp){
 							initedog(mtmp);
 							mtmp->m_lev += d(1,15) - 5;
@@ -9001,6 +9000,7 @@ read_necro(VOID_ARGS)
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
 							mtmp->mhp =  mtmp->mhpmax;
+							mark_mon_as_summoned(mtmp, &youmonst, 100);
 						}
 					}
 				}

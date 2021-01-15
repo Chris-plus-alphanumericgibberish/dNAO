@@ -863,7 +863,9 @@ int *inrange, *nearby, *scared;
 			       (!mtmp->mpeaceful &&
 				    in_your_sanctuary(mtmp, 0, 0))));
 	
-	if(*scared && mtmp->mvanishes > 0) mtmp->mvanishes = mtmp->mvanishes/2 + 1;
+	if(*scared && get_mx(mtmp, MX_ESUM)) {
+		abjure_summon(mtmp, timer_duration_remaining(get_timer(mtmp->timed, DESUMMON_MON))/2);
+	}
 	
 	if(mtmp->mtyp == PM_DAUGHTER_OF_BEDLAM && !rn2(20)) *scared = TRUE;
 	else if(*nearby && !mtmp->mflee && fleetflee(mtmp->data) && (mtmp->data->mmove > youracedata->mmove || noattacks(mtmp->data))) *scared = TRUE;

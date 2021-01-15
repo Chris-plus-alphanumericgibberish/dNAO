@@ -4615,8 +4615,8 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 		return FALSE;
 
 	/* for the moment, any additional information is incompatible */
-	if (get_ox(obj, OX_EMON) || get_ox(obj, OX_EMID) ||
-		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID)) return FALSE;
+	if (get_ox(obj,  OX_EMON) || get_ox(obj,  OX_EMID) || get_ox(obj,  OX_ESUM) ||
+		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID) || get_ox(otmp, OX_ESUM)) return FALSE;
 
 	if(obj->oartifact != otmp->oartifact) return FALSE;
 	

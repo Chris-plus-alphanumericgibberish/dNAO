@@ -2446,6 +2446,46 @@ do_storms()
 #endif /* OVL1 */
 
 
+/* callback procs to desummon monsters/objects */
+void
+desummon_mon(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct monst * mon = (struct monst *)arg;
+	if (get_mx(mon, MX_ESUM)) {
+		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
+	}
+
+	/* special case for vexing orbs -- awful */
+	if (mon->mtyp == PM_VEXING_ORB) {
+		boolean monmoving = flags.mon_moving;
+		flags.mon_moving = TRUE;
+		mondied(mon);
+		flags.mon_moving = monmoving;
+	}
+	else
+	{
+		if (timeout == monstermoves && canseemon(mon)) {
+			pline("%s vanishes.", Monnam(mon));
+		}
+		monvanished(mon);
+	}
+}
+void
+desummon_obj(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj * otmp = (struct obj *)arg;
+	if(otmp->oartifact)
+		artifact_exists(otmp, artiname(otmp->oartifact), FALSE);	// allow to generate again
+	obj_extract_self(otmp);
+	newsym(otmp->ox, otmp->oy);
+	obfree(otmp, (struct obj *)0);
+}
+
+
 #ifdef OVL0
 /* ------------------------------------------------------------------------- */
 /*
@@ -2531,7 +2571,9 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(zombie_corpse,	(timeout_proc)0,	"zombie_corpse"),
     TTAB(shady_corpse,	(timeout_proc)0,	"shady_corpse"),
     TTAB(bomb_blow,     (timeout_proc)0,	"bomb_blow"),
-	TTAB(return_ammo,   (timeout_proc)0,	"return_ammo")
+	TTAB(return_ammo,   (timeout_proc)0,	"return_ammo"),
+	TTAB(desummon_mon,	(timeout_proc)0,	"desummon_mon"),
+	TTAB(desummon_obj,	(timeout_proc)0,	"desummon_obj")
 };
 #undef TTAB
 
@@ -2764,7 +2806,6 @@ genericptr_t owner;
     gnu->tid = timer_id++;
     gnu->timeout = monstermoves + when;
     gnu->kind = tmtype;
-    gnu->needs_fixup = 0;
     gnu->func_index = func_index;
     gnu->arg = owner;
 
@@ -2858,7 +2899,24 @@ long adjust;
 	return;
 }
 
-/* Object-specific timer functions */
+long
+timer_duration_remaining(tm)
+timer_element * tm;
+{
+	return tm->timeout - monstermoves;
+}
+
+timer_element *
+get_timer(chain, func)
+timer_element * chain;
+short func;
+{
+	timer_element * tm;
+	for (tm = chain; tm && tm->func_index != func; tm = tm->tnxt);
+	return tm;
+}
+
+/* Specific timer functions */
 
 /*
  * Find all object timers and duplicate them for the new object "dest".
@@ -2873,6 +2931,43 @@ struct obj *src, *dest;
 		(void) start_timer(curr->timeout-monstermoves, TIMER_OBJECT,
 					curr->func_index, (genericptr_t)dest);
     }
+}
+
+
+/* safely reduce remaining time on the summoned monster by amt */
+void
+abjure_summon(mon, amt)
+struct monst * mon;
+int amt;
+{
+	struct esum * esum = get_mx(mon, MX_ESUM);
+	timer_element * tm;
+	if (!esum) return;
+	if (!(tm = get_timer(mon->timed, DESUMMON_MON))) return;
+	rem_chain_tm(tm);
+	tm->timeout -= min(amt, monstermoves - tm->timeout - 1);
+	add_chain_tm(tm);
+}
+/* when a summoner dies or changes levels, all of its summons disappear */
+void
+summoner_gone(mon)
+struct monst * mon;
+{
+	timer_element * tm;
+	for (tm = timer_base; tm; tm = tm->next) {
+		if (tm->timeout > monstermoves + 1 && (
+			(tm->func_index == DESUMMON_MON && mon == ((struct monst *)tm->arg)->mextra_p->esum_p->summoner) ||
+			(tm->func_index == DESUMMON_OBJ && mon == ((struct obj   *)tm->arg)->oextra_p->esum_p->summoner)
+			))
+			{
+			/* have to remove it and re-add it so the list remains ordered */
+			rem_chain_tm(tm);
+			tm->timeout = monstermoves + 1;
+			add_chain_tm(tm);
+			if (tm->func_index == DESUMMON_MON)
+				((struct monst *)tm->arg)->movement = 0;	/* prevent further actions */
+		}
+	}
 }
 
 #endif /* OVL0 */

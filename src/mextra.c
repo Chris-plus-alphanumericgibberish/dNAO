@@ -15,6 +15,7 @@ struct mx_table {
 	{MX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
 	{MX_EPRI, sizeof(struct epri)},
 	{MX_ESHK, sizeof(struct eshk)},
+	{MX_ESUM, sizeof(struct esum)},
 	{MX_EVGD, sizeof(struct evgd)}
 };
 

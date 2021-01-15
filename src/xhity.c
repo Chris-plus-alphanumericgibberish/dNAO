@@ -8524,8 +8524,8 @@ int vis;
 					result |= MM_DEF_DIED;
 					int digest_time = 1 + (pd->cwt >> 8);
 					if (corpse_chance(mdef, &youmonst, TRUE) &&
-						!(mvitals[monsndx(pd)].mvflags &
-						G_NOCORPSE || mdef->mvanishes)) {
+						!((mvitals[monsndx(pd)].mvflags & G_NOCORPSE)
+							|| get_mx(mdef, MX_ESUM))) {
 						/* nutrition only if there can be a corpse */
 						if (Race_if(PM_INCANTIFIER)) u.uen += mlev(mdef);
 						else u.uhunger += (pd->cnutrit + 1) / 2;
@@ -8640,7 +8640,7 @@ int vis;
 				*/
 				int num = monsndx(mdef->data);
 				if (magr->mtame && !magr->isminion &&
-					!(mvitals[num].mvflags & G_NOCORPSE || mdef->mvanishes)) {
+					!((mvitals[num].mvflags & G_NOCORPSE) || get_mx(mdef, MX_ESUM))) {
 					struct obj *virtualcorpse = mksobj(CORPSE, FALSE, FALSE);
 					int nutrit;
 
@@ -11028,7 +11028,7 @@ int vis;
 				mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame);
 				if (mtmp) {
 					/* time out */
-					mtmp->mvanishes = mlev(magr) + rnd(mlev(magr));
+					mark_mon_as_summoned(mtmp, magr, mlev(magr) + rnd(mlev(magr)));
 					/* can be peaceful */
 					if(magr->mpeaceful)
 						mtmp->mpeaceful = TRUE;
@@ -14803,7 +14803,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				}
 				/* Oona's summons time out and vanish */
 				if (mtmp) {
-					mtmp->mvanishes = mlev(mdef) + rnd(mlev(mdef));
+					mark_mon_as_summoned(mtmp, mdef, mlev(mdef) + rnd(mlev(mdef)));
 					/* can be tame */
 					if (maketame) {
 						initedog(mtmp);
