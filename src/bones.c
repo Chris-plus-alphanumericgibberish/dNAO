@@ -62,6 +62,11 @@ boolean restore;
 	struct obj *otmp;
 
 	for (otmp = ochain; otmp; otmp = otmp->nobj) {
+		if (!restore) {
+			while (otmp && get_ox(otmp, OX_ESUM)) otmp = otmp->nobj;
+			if (!otmp) break;
+		}
+
 		if (otmp->cobj)
 		    resetobjs(otmp->cobj,restore);
 
@@ -407,7 +412,8 @@ struct obj *corpse;
 			(mptr->mtyp == PM_WEEPING_ANGEL && angelnum > 0) || 
 			(is_drow(mptr) && mtmp->mfaction == LOST_HOUSE) ||
 			(is_dprince(mptr) && !Inhell) || 
-			(is_dlord(mptr) && !Inhell)
+			(is_dlord(mptr) && !Inhell) ||
+			(get_mx(mtmp, MX_ESUM))
 		) mongone(mtmp);
 		if(mptr->mtyp == PM_WEEPING_ANGEL) angelnum++;
 	}

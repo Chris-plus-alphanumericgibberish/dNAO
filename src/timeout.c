@@ -2963,6 +2963,7 @@ void
 summoner_gone(mon)
 struct monst * mon;
 {
+	boolean done_any = FALSE;
 	timer_element * tm;
 	for (tm = timer_base; tm; tm = tm->next) {
 		if (tm->timeout > monstermoves + 1 && (
@@ -2972,12 +2973,13 @@ struct monst * mon;
 			{
 			/* have to remove it and re-add it so the list remains ordered */
 			rem_chain_tm(tm);
-			tm->timeout = monstermoves + 1;
+			tm->timeout = monstermoves;
 			add_chain_tm(tm);
-			if (tm->func_index == DESUMMON_MON)
-				((struct monst *)tm->arg)->movement = 0;	/* prevent further actions */
+			done_any = TRUE;
 		}
 	}
+	if (done_any)
+		run_timers();
 }
 
 #endif /* OVL0 */

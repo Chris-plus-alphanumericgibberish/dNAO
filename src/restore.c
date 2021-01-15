@@ -30,6 +30,7 @@ STATIC_DCL boolean FDECL(restgamestate, (int, unsigned int *, unsigned int *));
 STATIC_DCL void FDECL(restlevelstate, (unsigned int, unsigned int));
 STATIC_DCL int FDECL(restlevelfile, (int,int));
 STATIC_DCL void FDECL(reset_oattached_mids, (BOOLEAN_P));
+STATIC_DCL void NDECL(relink);
 
 /*
  * Save a mapping of IDs from ghost levels to the current level.  This
@@ -542,6 +543,8 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	mread(fd, (genericptr_t) &realtime_data.realtime, 
 			  sizeof realtime_data.realtime);
 #endif
+	/* must come after all mons & objs are restored */
+	relink();
 #ifdef WHEREIS_FILE
         touch_whereis();
 #endif
@@ -1010,6 +1013,7 @@ boolean ghostly;
 	}
 
 	/* must come after all mons & objs are restored */
+	relink();
 	reset_oattached_mids(ghostly);
 
 	/* regenerate animals while on another level */
@@ -1125,6 +1129,43 @@ boolean ghostly;
     }
 }
 
+/* relink (o/m)extras as needed */
+void
+relink()
+{
+    unsigned nid;
+	/* objects first */
+	struct obj * otmp;
+	int owhere = ((1 << OBJ_FLOOR) |
+			(1 << OBJ_INVENT) |
+			(1 << OBJ_MINVENT) |
+			(1 << OBJ_MIGRATING) |
+			(1 << OBJ_BURIED) |
+			(1 << OBJ_CONTAINED) |
+			(1 << OBJ_MAGIC_CHEST) |
+			(1 << OBJ_INTRAP));
+
+	for (otmp = start_all_items(&owhere); otmp; otmp = next_all_items(&owhere)) {
+		if (get_ox(otmp, OX_ESUM)) {
+			nid = otmp->oextra_p->esum_p->sm_id;
+			if (nid) {
+				otmp->oextra_p->esum_p->summoner = (genericptr_t) find_mid(nid, FM_FMON);
+				if (!otmp->oextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+			}
+		}
+	}
+	/* then monsters -- only checking fmon because MX_ESUM cannot be on migratingmons */
+	struct monst * mtmp;
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+		if (get_mx(mtmp, MX_ESUM)) {
+			nid = mtmp->mextra_p->esum_p->sm_id;
+			if (nid) {
+				mtmp->mextra_p->esum_p->summoner = (genericptr_t) find_mid(nid, FM_FMON);
+				if (!mtmp->mextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+			}
+		}
+	}
+}
 
 #ifdef ZEROCOMP
 #define RLESC '\0'	/* Leading character for run of RLESC's */

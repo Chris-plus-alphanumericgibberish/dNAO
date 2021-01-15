@@ -789,6 +789,7 @@ boolean pets_only;	/* true for ascension or final escape */
 				obj->no_charge = 0;
 			}
 
+			summoner_gone(mtmp);
 			relmon(mtmp);
 			newsym(mtmp->mx,mtmp->my);
 			mtmp->mx = mtmp->my = 0; /* avoid mnexto()/MON_AT() problem */
