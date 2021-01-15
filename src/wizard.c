@@ -520,7 +520,7 @@ pick_nasty()
 }
 
 /* create some nasty monsters, aligned or neutral with the caster */
-/* a null caster defaults to a chaotic caster (e.g. the wizard) */
+/* a null caster is assumed to be Wizard intervention */
 int
 nasty(mcast)
 	struct monst *mcast;
@@ -533,7 +533,7 @@ nasty(mcast)
 
     if(!rn2(10) && Inhell) {
 		/* creatures made this way are full monsters gated in, not summons tied to mcast */
-		msummon((struct monst *) 0);	/* summons like WoY */
+		msummon(mcast, &mons[PM_WIZARD_OF_YENDOR]);	/* summons like WoY */
 		count++;
     } else {
 	tmp = (u.ulevel > 3) ? u.ulevel/3 : 1; /* just in case -- rph */

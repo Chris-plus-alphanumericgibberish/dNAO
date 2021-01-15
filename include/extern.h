@@ -1335,7 +1335,7 @@ E void FDECL(rest_oextra, (struct obj *, int, boolean));
 
 /* ### minion.c ### */
 
-E void FDECL(msummon, (struct monst *));
+E void FDECL(msummon, (struct monst *, struct permonst *));
 E struct monst * FDECL(summon_god_minion, (const char *,ALIGNTYP_P,BOOLEAN_P));
 E struct monst * FDECL(summon_minion, (ALIGNTYP_P,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(demon_talk, (struct monst *));
