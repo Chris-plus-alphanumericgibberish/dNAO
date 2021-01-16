@@ -841,6 +841,8 @@ boolean pets_only;	/* true for ascension or final escape */
 					 MIGR_EXACT_XY, (coord *)0);
 	    }
 	}
+	/* any of your summons that *weren't* kept now disappear */
+	summoner_gone(&youmonst);
 }
 
 #endif /* OVL2 */

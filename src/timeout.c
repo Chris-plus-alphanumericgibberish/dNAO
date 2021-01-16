@@ -2453,7 +2453,7 @@ genericptr_t arg;
 long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
-	if (get_mx(mon, MX_ESUM)) {
+	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
 	}
 
@@ -2478,7 +2478,7 @@ genericptr_t arg;
 long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
-	if (get_mx(mon, MX_ESUM)) {
+	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
 	}
 }
@@ -2876,7 +2876,7 @@ int mode;
 	struct timer * tnxt;
 
 	while (curr) {
-		tnxt = curr->next;
+		tnxt = curr->tnxt;
 		if (perform_bwrite(mode))
 			bwrite(fd, (genericptr_t)tm, sizeof(struct timer));
 		if (release_data(mode))
@@ -2966,11 +2966,19 @@ struct monst * mon;
 	boolean done_any = FALSE;
 	timer_element * tm;
 	for (tm = timer_base; tm; tm = tm->next) {
-		if (tm->timeout > monstermoves + 1 && (
+		if (tm->timeout > monstermoves && (
 			(tm->func_index == DESUMMON_MON && mon == ((struct monst *)tm->arg)->mextra_p->esum_p->summoner) ||
 			(tm->func_index == DESUMMON_OBJ && mon == ((struct obj   *)tm->arg)->oextra_p->esum_p->summoner)
 			))
-			{
+		{
+			/* special exception: summoned pets may follow the player between levels */
+			if ((tm->func_index == DESUMMON_MON) && (mon == &youmonst)) {
+				struct monst * mtmp;
+				for (mtmp = mydogs; mtmp && mtmp != ((struct monst *)tm->arg); mtmp = mtmp->nmon);
+				if (mtmp)
+					continue;	/* don't desummon this monster */
+			}
+
 			/* have to remove it and re-add it so the list remains ordered */
 			rem_chain_tm(tm);
 			tm->timeout = monstermoves;

@@ -410,7 +410,7 @@ int tary;
 			 msummon(magr, (struct permonst *)0);
 		 }
 	 }
-	 if (youagr && is_demon(youracedata) && !rn2(13) && !uwep
+	 if (youagr && is_demon(youracedata) && !rn2(13) && !uwep && (magr->summonpwr < magr->data->mlevel)
 		 && u.umonnum != PM_SUCCUBUS
 		 && u.umonnum != PM_INCUBUS
 		 && u.umonnum != PM_BALROG) {
