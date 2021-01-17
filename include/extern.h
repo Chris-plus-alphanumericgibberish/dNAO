@@ -475,6 +475,7 @@ E int FDECL(drop, (struct obj *));
 /* ### do_name.c ### */
 
 E void FDECL(do_oname, (struct obj *));
+E void NDECL(do_floorname);
 E int FDECL(getpos, (coord *,BOOLEAN_P,const char *));
 E struct monst *FDECL(christen_monst, (struct monst *,const char *));
 E int NDECL(do_mname);
@@ -1983,6 +1984,7 @@ E int NDECL(dowhatis);
 E int NDECL(doquickwhatis);
 E int NDECL(doidtrap);
 E int NDECL(dowhatdoes);
+E boolean FDECL(object_from_map, (int,int,int,struct obj **));
 E const char *NDECL(rndobjnam);
 E char *FDECL(dowhatdoes_core,(CHAR_P, char *));
 E int NDECL(dohelp);
