@@ -2482,8 +2482,6 @@ boolean praying;	/* false means no messages should be given */
 int
 dopray()
 {
-	if(uwep)
-	uwep->ovar1 = ~0L;
 	if(Role_if(PM_ANACHRONONAUT) && flags.questprogress!=2){
 		pline("There is but one God in the future.");
 		pline("And to It, you do not pray.");
