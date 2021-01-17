@@ -8979,6 +8979,7 @@ read_necro(VOID_ARGS)
 		delay = 0;
 	}
 	if(necro_effect < SELECTED_SPELL){/* summoning spell*/
+		boolean summon_failed = TRUE;
 		switch(necro_effect){
 			case 0:
 				Hallucination ? 
@@ -8989,6 +8990,7 @@ read_necro(VOID_ARGS)
 				pm = &mons[PM_BYAKHEE];
 				if(u.uen >= 20){
 					losepw(20);
+					summon_failed = FALSE;
 					for(i=max(1, d(1,20) - 16); i > 0; i--){
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 						if(mtmp){
@@ -9010,6 +9012,7 @@ read_necro(VOID_ARGS)
 				for(i=d(1,4); i > 0; i--){
 					if(u.uen >= 10){
 						losepw(10);
+						summon_failed = FALSE;
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 						if(mtmp){
 							initedog(mtmp);
@@ -9021,6 +9024,8 @@ read_necro(VOID_ARGS)
 			break;
 			case SELECT_SHOGGOTH:
 				if(u.uen > 30){
+					losepw(30);
+					summon_failed = FALSE;
 					pm = &mons[PM_SHOGGOTH];
 					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					if(mtmp){
@@ -9033,6 +9038,7 @@ read_necro(VOID_ARGS)
 			case SELECT_OOZE:
 				if(u.uen >= 20){
 					losepw(20);
+					summon_failed = FALSE;
 					for(i=max(1, d(1,10) - 2); i > 0; i--){
 						mtmp = makemon(&mons[oozes[rn2(11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 						if(mtmp){
@@ -9053,6 +9059,7 @@ read_necro(VOID_ARGS)
 			case SELECT_DEVIL:
 				if(u.uen >= 60){
 					losepw(60);
+					summon_failed = FALSE;
 					mtmp = makemon(&mons[devils[rn2(12)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					if(mtmp){
 						initedog(mtmp);
@@ -9070,6 +9077,7 @@ read_necro(VOID_ARGS)
 			case SELECT_DEMON:
 				if(u.uen >= 45){
 					losepw(45);
+					summon_failed = FALSE;
 					mtmp = makemon(&mons[demons[rn2(15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					if(mtmp){
 						initedog(mtmp);
@@ -9083,6 +9091,9 @@ read_necro(VOID_ARGS)
 					}
 				}
 			break;
+		}
+		if (summon_failed) {
+			pline("You lack the necessary power for the summoning.");
 		}
 	}
 	else if(necro_effect < SELECTED_SPECIAL){ /* spellbook-like */
