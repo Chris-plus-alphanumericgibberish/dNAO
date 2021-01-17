@@ -1316,6 +1316,7 @@ E void * FDECL(bundle_mextra, (struct monst *, long *));
 E void FDECL(unbundle_mextra, (struct monst *, void *));
 E void FDECL(save_mextra, (struct monst *, int, int));
 E void FDECL(rest_mextra, (struct monst *, int, boolean));
+E void FDECL(relink_mx, (struct monst *));
 
 /* out of order, but it makes sense to directly follow mextra */
 /* ### oextra.c ### */
@@ -1332,6 +1333,7 @@ E void * FDECL(bundle_oextra, (struct obj *, long *));
 E void FDECL(unbundle_oextra, (struct obj *, void *));
 E void FDECL(save_oextra, (struct obj *, int, int));
 E void FDECL(rest_oextra, (struct obj *, int, boolean));
+E void FDECL(relink_ox, (struct obj *));
 
 /* ### minion.c ### */
 

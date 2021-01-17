@@ -2098,8 +2098,8 @@ struct obj *obj, *otmp;
 				obj = poly_obj(obj, MEATBALL);
 			    	goto smell;
 			    }
-			    if (!animate_statue(obj, oox, ooy,
-						ANIMATE_SPELL, (int *)0)) {
+				struct monst * mtmp;
+			    if (!(mtmp = animate_statue(obj, oox, ooy, ANIMATE_SPELL, (int *)0))) {
 				struct obj *item;
 makecorpse:			if (mons[obj->corpsenm].geno &
 							(G_NOCORPSE|G_UNIQ)) {
@@ -2117,6 +2117,13 @@ makecorpse:			if (mons[obj->corpsenm].geno &
 				obj = poly_obj(obj, CORPSE);
 				break;
 			    }
+				else {
+					/* creature was created */
+					if (get_mx(mtmp, MX_ESUM)) {
+						/* vanish it */
+						monvanished(mtmp);
+					}
+				}
 			} else if (obj->otyp == FOSSIL) {
 				int corpsetype = obj->corpsenm;
 			    xchar oox, ooy;

@@ -132,6 +132,8 @@ struct esum {
 	struct monst * summoner;	/* monster responsible for this mon/obj -- can be null */
 	unsigned sm_id;				/* m_id of summoner */
 	int summonstr;				/* tax on summoner, who may maintain up to its own HD of summons at a time. */
+	Bitfield(staleptr, 1);		/* denotes if `summoner` is a stale pointer and needs to be updated */
+	Bitfield(unused,7);
 };
 
 

@@ -2455,6 +2455,8 @@ long timeout;
 	struct monst * mon = (struct monst *)arg;
 	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
+		mon->mextra_p->esum_p->summoner = (struct monst *)0;
+		mon->mextra_p->esum_p->sm_id = 0;
 	}
 
 	/* special case for vexing orbs -- awful */
@@ -2478,8 +2480,11 @@ genericptr_t arg;
 long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
-	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
+	/* if we are stopping the timer because mon died or vanished, reduce tax on summoner */
+	if (get_mx(mon, MX_ESUM) && DEADMONSTER(mon) && mon->mextra_p->esum_p->summoner) {
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
+		mon->mextra_p->esum_p->summoner = (struct monst *)0;
+		mon->mextra_p->esum_p->sm_id = 0;
 	}
 }
 void

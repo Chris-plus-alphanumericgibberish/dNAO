@@ -2552,6 +2552,8 @@ boolean copyof;
 			if (mnew->mextra_p) {
 				void * mextra_bundle = mtmp+1;
 				unbundle_mextra(mnew, mextra_bundle);
+				/* relink any stale pointers */
+				relink_mx(mnew);
 			}
 		}
 		else {
