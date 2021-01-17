@@ -1416,7 +1416,7 @@ dogaze()
 				 	if (mtmp3 && (mtmp2 = tamedog(mtmp3, (struct obj *)0)) != 0){
 						mtmp3 = mtmp2;
 						mtmp3->mtame = 30;
-						mark_mon_as_summoned(mtmp3, &youmonst, 10);
+						mark_mon_as_summoned(mtmp3, &youmonst, 10, 0);
 					} else mongone(mtmp3);
 				}
 			 }

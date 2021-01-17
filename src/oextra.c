@@ -381,9 +381,11 @@ struct obj * specific_otmp;
 			if (otmp->oextra_p->esum_p->staleptr) {
 				otmp->oextra_p->esum_p->staleptr = 0;
 				/* restore stale pointer -- id==0 is assumed to be player */
-				nid = otmp->oextra_p->esum_p->sm_id;
-				otmp->oextra_p->esum_p->summoner = (genericptr_t) (nid ? find_mid(nid, FM_FMON) : &youmonst);
-				if (!otmp->oextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+				if (otmp->oextra_p->esum_p->summoner) {
+					nid = otmp->oextra_p->esum_p->sm_id;
+					otmp->oextra_p->esum_p->summoner = (genericptr_t) (nid ? find_mid(nid, FM_EVERYWHERE) : &youmonst);
+					if (!otmp->oextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+				}
 			}
 		}
 	}

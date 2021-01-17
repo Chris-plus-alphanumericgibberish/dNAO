@@ -2453,6 +2453,10 @@ genericptr_t arg;
 long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
+	if(get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->permanent) {
+		start_timer(9999, TIMER_OBJECT, DESUMMON_OBJ, arg);
+		return;
+	}
 	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
 		mon->mextra_p->esum_p->summoner = (struct monst *)0;
@@ -2493,6 +2497,10 @@ genericptr_t arg;
 long timeout;
 {
 	struct obj * otmp = (struct obj *)arg;
+	if(get_ox(otmp, OX_ESUM) && otmp->oextra_p->esum_p->permanent) {
+		start_timer(9999, TIMER_OBJECT, DESUMMON_OBJ, arg);
+		return;
+	}
 	if(otmp->oartifact)
 		artifact_exists(otmp, artiname(otmp->oartifact), FALSE);	// allow to generate again
 	obj_extract_self(otmp);
@@ -2958,6 +2966,7 @@ int amt;
 	struct esum * esum = get_mx(mon, MX_ESUM);
 	timer_element * tm;
 	if (!esum) return;
+	if (esum->permanent) return;
 	if (!(tm = get_timer(mon->timed, DESUMMON_MON))) return;
 	rem_chain_tm(tm);
 	tm->timeout -= min(amt, monstermoves - tm->timeout - 1);
@@ -2968,12 +2977,14 @@ void
 summoner_gone(mon)
 struct monst * mon;
 {
+	if (!mon) return;
 	boolean done_any = FALSE;
 	timer_element * tm;
+	struct esum * esum;
 	for (tm = timer_base; tm; tm = tm->next) {
 		if (tm->timeout > monstermoves && (
-			(tm->func_index == DESUMMON_MON && mon == ((struct monst *)tm->arg)->mextra_p->esum_p->summoner) ||
-			(tm->func_index == DESUMMON_OBJ && mon == ((struct obj   *)tm->arg)->oextra_p->esum_p->summoner)
+			(tm->func_index == DESUMMON_MON && (esum = ((struct monst *)tm->arg)->mextra_p->esum_p) && (mon == esum->summoner)) ||
+			(tm->func_index == DESUMMON_OBJ && (esum = ((struct obj   *)tm->arg)->oextra_p->esum_p) && (mon == esum->summoner))
 			))
 		{
 			/* special exception: summoned pets may follow the player between levels */
@@ -2989,6 +3000,9 @@ struct monst * mon;
 			tm->timeout = monstermoves;
 			add_chain_tm(tm);
 			done_any = TRUE;
+
+			/* remove "permanent" flag from esum so it will despawn */
+			esum->permanent = 0;
 		}
 	}
 	if (done_any)

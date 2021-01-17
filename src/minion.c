@@ -107,7 +107,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 				mtmp->mpeaceful = mon->mpeaceful;
 			}
 			if (!(mons[dtype].geno & G_UNIQ))	/* uniques summoned in this way stick around */
-				mark_mon_as_summoned(mtmp, mon, 9999);
+				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
 	    }
 	    cnt--;
 	}

@@ -2738,7 +2738,7 @@ spiriteffects(power, atme)
 				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 				if(mon){
 					initedog(mon);
-					mark_mon_as_summoned(mon, &youmonst, 5);
+					mark_mon_as_summoned(mon, &youmonst, 5, 0);
 				}
 			}
 		}break;
@@ -3727,7 +3727,7 @@ spiriteffects(power, atme)
 			pm = choose_crystal_summon();
 			if(pm && (mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH))){
 				initedog(mon);
-				mark_mon_as_summoned(mon, &youmonst, 10+u.ulevel/2);
+				mark_mon_as_summoned(mon, &youmonst, 10+u.ulevel/2, 0);
 			} else return 0;
 		}break;
 		case PWR_PSEUDONATURAL_SURGE:

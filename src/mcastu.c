@@ -3798,7 +3798,7 @@ int tary;
 					mtmp->msleeping = 0;
 					set_malign(mtmp);
 					/* all spheres are very temporary */
-					mark_mon_as_summoned(mtmp, magr, d(dmn, 3)+1);
+					mark_mon_as_summoned(mtmp, magr, d(dmn, 3)+1, 0);
 				}
 			}
 		}
@@ -3850,7 +3850,7 @@ int tary;
 						mtmp->mhp = (mtmp->mhpmax += rn1((int)mlev(magr), 20));
 					}
 					set_malign(mtmp);
-					mark_mon_as_summoned(mtmp, magr, 9999);
+					mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 				}
 			}
 
@@ -3955,7 +3955,7 @@ int tary;
 				else
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "hostile fiend"));
-				mark_mon_as_summoned(mtmp, magr, 9999);
+				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
 				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -3992,7 +3992,7 @@ int tary;
 				else
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "hostile angel"));
-				mark_mon_as_summoned(mtmp, magr, 9999);
+				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
 				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -4038,7 +4038,7 @@ int tary;
 				else
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "alien"));
-				mark_mon_as_summoned(mtmp, magr, 9999);
+				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
 				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -4083,7 +4083,7 @@ int tary;
 					pline("A monster appears in a swirl of mist!");
 				else
 					You("sense the arrival of a monster!");
-				mark_mon_as_summoned(mtmp, magr, 9999);
+				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
 				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -4111,7 +4111,7 @@ int tary;
 				u.summonMonster = TRUE;
 				mtmp->mclone = 1;
 				/* does not stick around long */
-				mark_mon_as_summoned(mtmp, magr, d(1, 4) + 1);
+				mark_mon_as_summoned(mtmp, magr, d(1, 4) + 1, 0);
 			}
 		}
 		return MM_HIT;

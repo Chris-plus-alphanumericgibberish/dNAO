@@ -7245,16 +7245,19 @@ struct monst *mtmp;
 /* marks `mon` as being summoned by the summoner, which causes it to vanish after duration expires or summoner dies */
 /* its inventory at time of marking is set to vanish when `mon` dies */
 void
-mark_mon_as_summoned(mon, summoner, duration)
+mark_mon_as_summoned(mon, summoner, duration, flags)
 struct monst * mon;
 struct monst * summoner;
 int duration;
+int flags;
 {
 	// add component to mon
 	add_mx(mon, MX_ESUM);
 	mon->mextra_p->esum_p->summoner = summoner;
 	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
 	mon->mextra_p->esum_p->summonstr = mon->data->mlevel;
+	mon->mextra_p->esum_p->follower = (!summoner || summoner == &youmonst) && !(flags & ESUMMON_NOFOLLOW);
+	mon->mextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
 	// add timer to mon
 	start_timer(duration, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
 	if (summoner)
@@ -7284,6 +7287,8 @@ int duration;
 		otmp->oextra_p->esum_p->summoner = mon;
 		otmp->oextra_p->esum_p->sm_id = mon->m_id;
 		otmp->oextra_p->esum_p->summonstr = 0;
+		otmp->oextra_p->esum_p->follower = 0;
+		otmp->oextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
 		// add timer to obj
 		start_timer(duration, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
 	}

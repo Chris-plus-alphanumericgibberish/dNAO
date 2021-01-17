@@ -387,24 +387,34 @@ boolean ghostly;
 	return;
 }
 
-/* relinks mx. If called with a specific mtmp, only does so for that one, otherwise does all on fmon */
+/* relinks mx. If called with a specific mtmp, only does so for that one, otherwise does all on fmon and migrating_mons */
 void
 relink_mx(specific_mtmp)
 struct monst * specific_mtmp;
 {
     unsigned nid;
+	boolean checked_migrating = FALSE;
 	struct monst * mtmp = (specific_mtmp ? specific_mtmp : fmon);
-	/* only checking fmon because MX_ESUM cannot be on migratingmons */
-	for (; mtmp && (mtmp == specific_mtmp || !specific_mtmp); mtmp = mtmp->nmon) {
+	if (!mtmp) return;
+	do {
+		/* relink mtmp */
 		if (get_mx(mtmp, MX_ESUM)) {
 			if (mtmp->mextra_p->esum_p->staleptr) {
 				mtmp->mextra_p->esum_p->staleptr = 0;
 				/* restore stale pointer -- id==0 is assumed to be player */
-				nid = mtmp->mextra_p->esum_p->sm_id;
-				mtmp->mextra_p->esum_p->summoner = (genericptr_t) (nid ? find_mid(nid, FM_FMON) : &youmonst);
-				if (!mtmp->mextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+				if (mtmp->mextra_p->esum_p->summoner) {
+					nid = mtmp->mextra_p->esum_p->sm_id;
+					mtmp->mextra_p->esum_p->summoner = (genericptr_t) (nid ? find_mid(nid, FM_EVERYWHERE) : &youmonst);
+					if (!mtmp->mextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+				}
 			}
 		}
-	}
+		/* select next mtmp */
+		mtmp = mtmp->nmon;
+		if (!mtmp && !checked_migrating) {
+			mtmp = migrating_mons;
+			checked_migrating = TRUE;
+		}
+	} while (mtmp && !specific_mtmp);
 }
 /*mextra.c*/

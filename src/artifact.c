@@ -7642,7 +7642,7 @@ arti_invoke(obj)
 					mtmp = mtmp2;
 					mtmp->mtame = 30;
 					summon_loop--;
-					mark_mon_as_summoned(mtmp, &youmonst, 100);
+					mark_mon_as_summoned(mtmp, &youmonst, 100, 0);
 				} else mongone(mtmp);
 			} while (summon_loop);
 			/* Tsk,tsk.. */
@@ -9002,7 +9002,7 @@ read_necro(VOID_ARGS)
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
 							mtmp->mhp =  mtmp->mhpmax;
-							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 100);
+							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 100, 0);
 						}
 					}
 				}
@@ -9017,7 +9017,7 @@ read_necro(VOID_ARGS)
 						if(mtmp){
 							initedog(mtmp);
 							EDOG(mtmp)->loyal = 1;
-							mark_mon_as_summoned(mtmp, &youmonst, 9999);
+							mark_mon_as_summoned(mtmp, &youmonst, ESUMMON_PERMANENT, 0);
 						}
 					}
 				}
@@ -9031,7 +9031,7 @@ read_necro(VOID_ARGS)
 					if(mtmp){
 						mtmp->mcrazed = 1;
 						mtmp->msleeping = 1;
-						mark_mon_as_summoned(mtmp, (struct monst *)0, 9999);
+						mark_mon_as_summoned(mtmp, (struct monst *)0, ESUMMON_PERMANENT, 0);
 					}
 				}
 			break;
@@ -9051,7 +9051,7 @@ read_necro(VOID_ARGS)
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
 							mtmp->mhp =  mtmp->mhpmax;
-							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 9999);
+							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, ESUMMON_PERMANENT, 0);
 						}
 					}
 				}
@@ -9070,7 +9070,7 @@ read_necro(VOID_ARGS)
 							untame(mtmp, 0);
 							mtmp->mtraitor = 1;
 						}
-						mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 9999);
+						mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, ESUMMON_PERMANENT, 0);
 					}
 				}
 			break;
@@ -9087,12 +9087,12 @@ read_necro(VOID_ARGS)
 							untame(mtmp, 0);
 							mtmp->mtraitor = 1;
 						}
-						mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 9999);
+						mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, ESUMMON_PERMANENT, 0);
 					}
 				}
 			break;
 		}
-		if (summon_failed) {
+		if (summon_failed && necro_effect) {
 			pline("You lack the necessary power for the summoning.");
 		}
 	}
@@ -9297,7 +9297,7 @@ read_necro(VOID_ARGS)
 				"find another way to summon shoggoths.");
 			break;
 			case 3:
-			STUDY_NECRONOMICON(S_SHOGGOTH,
+			STUDY_NECRONOMICON(S_NIGHTGAUNT,
 				"learn to invoke the servetors of Nodens.",
 				"find another invocation to Nodens.");
 			break;

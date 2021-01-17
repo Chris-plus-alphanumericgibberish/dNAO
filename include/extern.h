@@ -1577,7 +1577,7 @@ E void FDECL(insight_vanish,(struct monst *));
 E long FDECL(timer_duration_remaining,(timer_element *));
 E timer_element * FDECL(get_timer,(timer_element *, short));
 E void FDECL(abjure_summon, (struct monst *, int));
-E void FDECL(mark_mon_as_summoned,(struct monst *, struct monst *, int));
+E void FDECL(mark_mon_as_summoned,(struct monst *, struct monst *, int, int));
 
 /* ### mondata.c ### */
 

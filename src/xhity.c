@@ -11027,7 +11027,7 @@ int vis;
 				mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame);
 				if (mtmp) {
 					/* time out */
-					mark_mon_as_summoned(mtmp, magr, mlev(magr) + rnd(mlev(magr)));
+					mark_mon_as_summoned(mtmp, magr, mlev(magr) + rnd(mlev(magr)), 0);
 					/* can be peaceful */
 					if(magr->mpeaceful)
 						mtmp->mpeaceful = TRUE;
@@ -14802,7 +14802,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				}
 				/* Oona's summons time out and vanish */
 				if (mtmp) {
-					mark_mon_as_summoned(mtmp, mdef, mlev(mdef) + rnd(mlev(mdef)));
+					mark_mon_as_summoned(mtmp, mdef, mlev(mdef) + rnd(mlev(mdef)), 0);
 					/* can be tame */
 					if (maketame) {
 						initedog(mtmp);

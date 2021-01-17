@@ -571,7 +571,7 @@ nasty(mcast)
 				mtmp->msleeping = 0;
 				untame(mtmp, 0);
 				set_malign(mtmp);
-				mark_mon_as_summoned(mtmp, mcast, 9999);
+				mark_mon_as_summoned(mtmp, mcast, ESUMMON_PERMANENT, 0);
 				count++;
 				break;
 			}
