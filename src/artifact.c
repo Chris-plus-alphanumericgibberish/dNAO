@@ -39,17 +39,17 @@ static NEARDATA struct obj *artiptr;/* last/current artifact being used */
 static NEARDATA int necro_effect;	/* necro effect picked */
 static NEARDATA int lostname;	/* spirit # picked */
 
-static NEARDATA	int oozes[12] = {0, PM_ACID_BLOB, PM_QUIVERING_BLOB, 
+static NEARDATA	int oozes[] = {PM_ACID_BLOB, PM_QUIVERING_BLOB, 
 					  PM_GELATINOUS_CUBE, PM_DARKNESS_GIVEN_HUNGER, PM_GRAY_OOZE, 
 					  PM_BROWN_PUDDING, PM_BLACK_PUDDING, PM_GREEN_SLIME,
 					  PM_AOA, PM_BROWN_MOLD, PM_RED_MOLD};
 
-static NEARDATA	int devils[13] = {0, PM_IMP, PM_LEMURE, 
+static NEARDATA	int devils[] = {PM_IMP, PM_LEMURE, 
 					  PM_LEGION_DEVIL_GRUNT, PM_LEGION_DEVIL_SOLDIER, PM_LEGION_DEVIL_SERGEANT, 
 					  PM_HORNED_DEVIL, PM_BARBED_DEVIL, PM_BONE_DEVIL,
 					  PM_ICE_DEVIL, PM_PIT_FIEND, PM_ANCIENT_OF_ICE, PM_ANCIENT_OF_DEATH};
 
-static NEARDATA	int demons[16] = {0, PM_QUASIT, PM_MANES, PM_QUASIT,
+static NEARDATA	int demons[] = {PM_QUASIT, PM_MANES, PM_QUASIT,
 					  PM_MANES, PM_QUASIT, PM_MANES, 
 					  PM_SUCCUBUS, PM_INCUBUS, PM_VROCK, 
 					  PM_HEZROU, PM_NALFESHNEE, PM_MARILITH,
@@ -8990,17 +8990,17 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 20){
 					losepw(20);
 					for(i=max(1, d(1,20) - 16); i > 0; i--){
-						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 						if(mtmp){
 							initedog(mtmp);
 							mtmp->m_lev += d(1,15) - 5;
-							if(u.ulevel < mtmp->m_lev && !rn2(10)){
+							if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1)) {
 								untame(mtmp, 0);
 								mtmp->mtraitor = 1;
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
 							mtmp->mhp =  mtmp->mhpmax;
-							mark_mon_as_summoned(mtmp, &youmonst, 100);
+							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 100);
 						}
 					}
 				}
@@ -9010,10 +9010,11 @@ read_necro(VOID_ARGS)
 				for(i=d(1,4); i > 0; i--){
 					if(u.uen >= 10){
 						losepw(10);
-						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 						if(mtmp){
 							initedog(mtmp);
 							EDOG(mtmp)->loyal = 1;
+							mark_mon_as_summoned(mtmp, &youmonst, 9999);
 						}
 					}
 				}
@@ -9021,10 +9022,11 @@ read_necro(VOID_ARGS)
 			case SELECT_SHOGGOTH:
 				if(u.uen > 30){
 					pm = &mons[PM_SHOGGOTH];
-					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK);
+					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					if(mtmp){
 						mtmp->mcrazed = 1;
 						mtmp->msleeping = 1;
+						mark_mon_as_summoned(mtmp, (struct monst *)0, 9999);
 					}
 				}
 			break;
@@ -9032,17 +9034,18 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 20){
 					losepw(20);
 					for(i=max(1, d(1,10) - 2); i > 0; i--){
-						mtmp = makemon(&mons[oozes[d(1,11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK);
+						mtmp = makemon(&mons[oozes[rn2(11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 						if(mtmp){
 							initedog(mtmp);
 							mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 							mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
-							if(u.ulevel < mtmp->m_lev && !rn2(10)){
+							if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1)) {
 								untame(mtmp, 0);
 								mtmp->mtraitor = 1;
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
 							mtmp->mhp =  mtmp->mhpmax;
+							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 9999);
 						}
 					}
 				}
@@ -9050,31 +9053,33 @@ read_necro(VOID_ARGS)
 			case SELECT_DEVIL:
 				if(u.uen >= 60){
 					losepw(60);
-					mtmp = makemon(&mons[devils[d(1,13)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+					mtmp = makemon(&mons[devils[rn2(12)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					if(mtmp){
 						initedog(mtmp);
 						mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 						if(!rn2(9)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
-						if(u.ulevel < mtmp->m_lev && !rn2(20)){
+						if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1)) {
 							untame(mtmp, 0);
 							mtmp->mtraitor = 1;
 						}
+						mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 9999);
 					}
 				}
 			break;
 			case SELECT_DEMON:
 				if(u.uen >= 45){
 					losepw(45);
-					mtmp = makemon(&mons[demons[d(1,15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+					mtmp = makemon(&mons[demons[rn2(15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					if(mtmp){
 						initedog(mtmp);
 						if(!rn2(6)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
-						if((u.ulevel < mtmp->m_lev || rn2(2)) && !rn2(10)){
+						if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1) || !rn2(10)) {
 							untame(mtmp, 0);
 							mtmp->mtraitor = 1;
 						}
+						mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 9999);
 					}
 				}
 			break;

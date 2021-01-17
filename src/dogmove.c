@@ -885,6 +885,8 @@ register struct monst *mtmp;
 	    pline("You feel uneasy about %s.", y_monnam(mtmp));
 	untame(mtmp, 0);
 	mtmp->mtraitor = TRUE;
+	if (get_mx(mtmp, MX_ESUM))
+		mtmp->mextra_p->esum_p->summoner = (struct monst *)0;
 
 	/* Do we need to call newsym() here? */
 	newsym(mtmp->mx, mtmp->my);
