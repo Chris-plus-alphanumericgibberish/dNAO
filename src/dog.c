@@ -1116,7 +1116,7 @@ int numdogs;
 	struct monst *curmon = 0, *weakdog = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
 			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
-				&& !curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)
+				&& !curmon->mspiritual && !(get_timer(curmon->timed, DESUMMON_MON) && !(get_mx(curmon, MX_ESUM) && curmon->mextra_p->esum_p->permanent))
 			){
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
@@ -1141,7 +1141,7 @@ vanish_dogs()
 		weakdog = (struct monst *)0;
 		numdogs = 0;
 		for(curmon = fmon; curmon; curmon = curmon->nmon){
-			if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){
+			if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){ /* assumes no pets that are both spiritual and permanently summoned */
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
 				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
