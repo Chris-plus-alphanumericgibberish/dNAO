@@ -2929,6 +2929,17 @@ timer_element * tm;
 	return tm->timeout - monstermoves;
 }
 
+void
+adjust_timer_duration(tm, amt)
+timer_element * tm;
+long amt;
+{
+	/* have to remove it and re-add it so the list remains ordered */
+	rem_chain_tm(tm);
+	tm->timeout += amt;
+	add_chain_tm(tm);
+}
+
 timer_element *
 get_timer(chain, func)
 timer_element * chain;
@@ -2968,9 +2979,7 @@ int amt;
 	if (!esum) return;
 	if (esum->permanent) return;
 	if (!(tm = get_timer(mon->timed, DESUMMON_MON))) return;
-	rem_chain_tm(tm);
-	tm->timeout -= min(amt, monstermoves - tm->timeout - 1);
-	add_chain_tm(tm);
+	adjust_timer_duration(tm, -min(amt, monstermoves - tm->timeout - 1));
 }
 /* when a summoner dies or changes levels, all of its summons disappear */
 void
@@ -2994,11 +3003,7 @@ struct monst * mon;
 				if (mtmp)
 					continue;	/* don't desummon this monster */
 			}
-
-			/* have to remove it and re-add it so the list remains ordered */
-			rem_chain_tm(tm);
-			tm->timeout = monstermoves;
-			add_chain_tm(tm);
+			adjust_timer_duration(tm, min(0, monstermoves - tm->timeout));
 			done_any = TRUE;
 
 			/* remove "permanent" flag from esum so it will despawn */

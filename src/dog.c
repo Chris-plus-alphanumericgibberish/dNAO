@@ -718,7 +718,7 @@ boolean pets_only;	/* true for ascension or final escape */
 							// (u.sealsActive&SEAL_MALPHAS && mtmp->mtyp == PM_CROW) || //Allow distant crows to get left behind.
 							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= pet_dist)
 							)
-							&& !(get_mx(mtmp, MX_ESUM) && !mtmp->mextra_p->esum_p->follower)	// cannot be a summon marked as not-a-follower
+							&& !(get_mx(mtmp, MX_ESUM) && !mtmp->mextra_p->esum_p->sticky)	// cannot be a summon marked as not-a-follower
 			) ||
 #ifdef STEED
 			(mtmp == u.usteed) ||
@@ -891,7 +891,7 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	}
 	/* likewise, summons don't persist away from their summoner, or if they're flagged to not be able to follow */
 	/* although your summons can travel between levels with you, they cannot do so independently of you */
-	if (get_mx(mtmp, MX_ESUM) && (!mtmp->mextra_p->esum_p->follower || mtmp->mextra_p->esum_p->summoner)) {
+	if (get_mx(mtmp, MX_ESUM) && (!mtmp->mextra_p->esum_p->sticky || mtmp->mextra_p->esum_p->summoner)) {
 		monvanished(mtmp);
 		return;	/* return early -- mtmp is gone. */
 	}

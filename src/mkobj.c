@@ -531,6 +531,7 @@ int mkflags;
 
 	boolean init =   ((mkflags & MKOBJ_NOINIT) == 0);
 	boolean artif =  ((mkflags & MKOBJ_ARTIF) != 0);
+	boolean summon = ((mkflags & MKOBJ_SUMMON) != 0) && otyp != GOLD_PIECE;
 
 	otmp = newobj(0);
 	*otmp = zeroobj;
@@ -566,6 +567,19 @@ int mkflags;
 	
 	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
 	
+	if (summon) {
+		/* set up otmp as summoned indefinitely
+		   caller is responsible for 1. giving to a monster and 2. setting duration and removing permanence if desired */
+		add_ox(otmp, OX_ESUM);
+		otmp->oextra_p->esum_p->summoner = (struct monst *)0;
+		otmp->oextra_p->esum_p->sm_id = 0;
+		otmp->oextra_p->esum_p->summonstr = 0;
+		otmp->oextra_p->esum_p->staleptr = 0;
+		otmp->oextra_p->esum_p->permanent = 1;
+		otmp->oextra_p->esum_p->sticky = 1; /* mark as unfinished -- add_to_minv will detect this and attach it automatically */
+		start_timer(ESUMMON_PERMANENT, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
+	}
+
 	fix_object(otmp);
 	
 	if (!objects[otyp].oc_uses_known)
@@ -2998,6 +3012,12 @@ add_to_minv(mon, obj)
     obj->ocarry = mon;
     obj->nobj = mon->minvent;
     mon->minvent = obj;
+	/* if it's a summoned obj and "sticky", attach obj to mon */
+	if (get_ox(obj, OX_ESUM) && obj->oextra_p->esum_p->sticky) {
+		obj->oextra_p->esum_p->summoner = mon;
+		otmp->oextra_p->esum_p->sm_id = mon->m_id;
+		obj->oextra_p->esum_p->sticky = 0;
+	}
 	/* apply artifact on-carry properties */
 	update_mon_intrinsics(mon, obj, TRUE, FALSE);
     return 0;	/* obj on mon's inventory chain */

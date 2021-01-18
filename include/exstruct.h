@@ -133,7 +133,8 @@ struct esum {
 	unsigned sm_id;				/* m_id of summoner */
 	int summonstr;				/* tax on summoner, who may maintain up to its own HD of summons at a time. */
 	Bitfield(staleptr, 1);		/* denotes if `summoner` is a stale pointer and needs to be updated */
-	Bitfield(follower,1);		/* if TRUE, mon will attempt to follow you between levels. Overridden by having a non-you summoner */
+	Bitfield(sticky,1);			/* mon: if TRUE, mon will attempt to follow you between levels. Overridden by having a non-you summoner */
+								/* obj: if TRUE, add_to_minv() will set the first monster to grab it as ->summoner */
 	Bitfield(permanent, 1);		/* if TRUE, will not time out naturally */
 	Bitfield(unused, 5);
 #define ESUMMON_PERMANENT 9999	/* duration to mark a permanent summon */

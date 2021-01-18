@@ -214,6 +214,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */
 #define MKOBJ_ARTIF		0x01	/* allow to become a random artifact at standard generation rates */
 #define MKOBJ_NOINIT	0x02	/* skip standard initialization of the object, like randomized enchantment and material */
+#define MKOBJ_SUMMON	0x04	/* attach ox_esum struct to obj */
 
 /* special mhpmax value when loading bones monster to flag as extinct or genocided */
 #define DEFUNCT_MONSTER	(-100)

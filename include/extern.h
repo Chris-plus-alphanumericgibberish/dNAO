@@ -1575,6 +1575,7 @@ E void FDECL(repair,(struct monst *, struct monst *, int));
 E void FDECL(nurse_heal,(struct monst *, struct monst *, int));
 E void FDECL(insight_vanish,(struct monst *));
 E long FDECL(timer_duration_remaining,(timer_element *));
+E void FDECL(adjust_timer_duration, (timer_element *, long));
 E timer_element * FDECL(get_timer,(timer_element *, short));
 E void FDECL(abjure_summon, (struct monst *, int));
 E void FDECL(mark_mon_as_summoned,(struct monst *, struct monst *, int, int));

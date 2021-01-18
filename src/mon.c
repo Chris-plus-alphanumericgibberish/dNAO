@@ -7256,7 +7256,7 @@ int flags;
 	mon->mextra_p->esum_p->summoner = summoner;
 	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
 	mon->mextra_p->esum_p->summonstr = mon->data->mlevel;
-	mon->mextra_p->esum_p->follower = (!summoner || summoner == &youmonst) && !(flags & ESUMMON_NOFOLLOW);
+	mon->mextra_p->esum_p->sticky = (!summoner || summoner == &youmonst) && !(flags & ESUMMON_NOFOLLOW);
 	mon->mextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
 	// add timer to mon
 	start_timer(duration, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
@@ -7282,15 +7282,30 @@ int flags;
 			while(otmp->cobj) {pobj = otmp; otmp = otmp->cobj;}
 		else
 			otmp = pobj->ocontainer;
-		// add component to obj
-		add_ox(otmp, OX_ESUM);
-		otmp->oextra_p->esum_p->summoner = mon;
-		otmp->oextra_p->esum_p->sm_id = mon->m_id;
-		otmp->oextra_p->esum_p->summonstr = 0;
-		otmp->oextra_p->esum_p->follower = 0;
-		otmp->oextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
-		// add timer to obj
-		start_timer(duration, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
+		if (!get_ox(otmp, OX_ESUM)) {
+			/* add component to obj */
+			add_ox(otmp, OX_ESUM);
+			otmp->oextra_p->esum_p->summoner = mon;
+			otmp->oextra_p->esum_p->sm_id = mon->m_id;
+			otmp->oextra_p->esum_p->summonstr = 0;
+			otmp->oextra_p->esum_p->sticky = 0;
+			otmp->oextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
+			/* add timer to obj */
+			start_timer(duration, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
+		}
+		else {
+			/* already marked as summoned -- double-check it's the right mon */
+			if (otmp->oextra_p->esum_p->summoner != mon)
+				impossible("%s already attached to %s, cannot attach to %s",
+					xname(otmp), m_monnam(otmp->oextra_p->esum_p->summoner), m_monnam(mon));
+			else {
+				/* change duration, if applicable */
+				if (duration != ESUMMON_PERMANENT) {
+					otmp->oextra_p->esum_p->permanent = 0;
+					adjust_timer_duration(get_timer(otmp->timed, DESUMMON_OBJ), duration - ESUMMON_PERMANENT);
+				}
+			}
+		}
 	}
 }
 
