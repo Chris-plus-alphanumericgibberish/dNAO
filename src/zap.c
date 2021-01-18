@@ -1522,9 +1522,9 @@ poly_obj(obj, id)
 	    change_luck(-1);	/* Sokoban guilt, boulders only */
 	if (id == STRANGE_OBJECT) { /* preserve symbol */
 		if(obj->otyp == SPE_BLANK_PAPER || obj->otyp == SCR_BLANK_PAPER || obj->otyp == SCR_AMNESIA){
-			otmp = mksobj(rn2(2) ? SPE_BLANK_PAPER : SCR_BLANK_PAPER, FALSE, FALSE);
+			otmp = mksobj(rn2(2) ? SPE_BLANK_PAPER : SCR_BLANK_PAPER, MKOBJ_NOINIT);
 		} else if(obj->otyp == POT_BLOOD){
-			otmp = mksobj(POT_BLOOD, FALSE, FALSE);
+			otmp = mksobj(POT_BLOOD, MKOBJ_NOINIT);
 		} else if(obj->otyp == POT_WATER || obj->otyp == POT_AMNESIA){
 			if(obj->otyp == POT_AMNESIA){
 				obj->otyp = POT_WATER;
@@ -1543,7 +1543,7 @@ poly_obj(obj, id)
 			return obj;
 		} else if(obj->otyp == HYPOSPRAY_AMPULE){
 			int pick;
-			otmp = mksobj(HYPOSPRAY_AMPULE, FALSE, FALSE);
+			otmp = mksobj(HYPOSPRAY_AMPULE, MKOBJ_NOINIT);
 			do{
 				switch(rn2(14)){
 					case 0:
@@ -1605,7 +1605,7 @@ poly_obj(obj, id)
 		}
 	} else {
 	    /* literally replace obj with this new thing */
-	    otmp = mksobj(id, FALSE, FALSE);
+	    otmp = mksobj(id, MKOBJ_NOINIT);
 	/* Actually more things use corpsenm but they polymorph differently */
 #define USES_CORPSENM(typ) ((typ)==CORPSE || (typ)==STATUE || (typ)==FIGURINE)
 	    if (USES_CORPSENM(obj->otyp) && USES_CORPSENM(id))
@@ -1766,7 +1766,7 @@ poly_obj(obj, id)
 
 	/* add focusing gems to lightsabers */
 	if (is_lightsaber(otmp)) {
-		struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, TRUE, FALSE);
+		struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, NO_MKOBJ_FLAGS);
 		gem->quan = 1;
 		gem->owt = weight(gem);
 		add_to_container(otmp, gem);
@@ -2953,7 +2953,7 @@ struct obj *obj;	/* wand or spell */
 		      ceiling(x, y), body_part(HEAD));
 		losehp(rnd((uarmh && is_hard(uarmh)) ? 2 : 6),
 		       "falling rock", KILLED_BY_AN);
-		if ((otmp = mksobj_at(ROCK, x, y, FALSE, FALSE)) != 0) {
+		if ((otmp = mksobj_at(ROCK, x, y, MKOBJ_NOINIT)) != 0) {
 		    (void)xname(otmp);	/* set dknown, maybe bknown */
 		    stackobj(otmp);
 		}
@@ -4626,7 +4626,7 @@ int type;
 {
 	struct obj *otmp;
 	if(type == AD_STON){
-		otmp = mksobj(STATUE, FALSE, FALSE);
+		otmp = mksobj(STATUE, MKOBJ_NOINIT);
 		otmp->corpsenm = mon->mtyp==PM_PARASITIZED_COMMANDER ? PM_PARASITIC_MASTER_MIND_FLAYER : PM_PARASITIC_MIND_FLAYER;
 		fix_object(otmp);
 		mpickobj(mon, otmp);
@@ -4640,7 +4640,7 @@ int type;
 		update_mon_intrinsics(mon, otmp, TRUE, TRUE);
 	}
 	else if(type != AD_DGST){
-		otmp = mksobj_at(CORPSE, mon->mx, mon->my, FALSE, FALSE);
+		otmp = mksobj_at(CORPSE, mon->mx, mon->my, MKOBJ_NOINIT);
 		otmp->corpsenm = mon->mtyp==PM_PARASITIZED_COMMANDER ? PM_PARASITIC_MASTER_MIND_FLAYER : PM_PARASITIC_MIND_FLAYER;
 		fix_object(otmp);
 	}
@@ -4668,7 +4668,7 @@ int type;
 		mon->m_lev = 3;
 		mon->mhpmax = 20+rn2(4);
 		mon->mhp = min(mon->mhp, mon->mhpmax);
-		otmp = mksobj(SHACKLES, FALSE, FALSE);
+		otmp = mksobj(SHACKLES, MKOBJ_NOINIT);
 		set_material_gm(otmp, IRON);
 		add_oprop(otmp, OPROP_ELECW);
 		otmp->oeroded = 1;

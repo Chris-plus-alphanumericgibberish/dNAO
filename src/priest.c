@@ -237,7 +237,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		if(In_mordor_depths(&u.uz)){
 			priest->ispriest = 1;
 			priest->msleeping = 0;
-		    (void) mpickobj(priest, mksobj(SPE_FIREBALL, FALSE, FALSE));
+		    (void) mpickobj(priest, mksobj(SPE_FIREBALL, MKOBJ_NOINIT));
 		} else if(Is_bridge_temple(&u.uz)){
 			priest->ispriest = 1;
 			priest->msleeping = 0;

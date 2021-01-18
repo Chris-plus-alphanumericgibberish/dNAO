@@ -444,7 +444,7 @@ dosit()
 			return 0;
 		}
 
-		uegg = mksobj(EGG, FALSE, FALSE);
+		uegg = mksobj(EGG, MKOBJ_NOINIT);
 		uegg->spe = 1;
 		uegg->quan = 1;
 		uegg->owt = weight(uegg);

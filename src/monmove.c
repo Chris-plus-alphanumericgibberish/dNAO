@@ -1099,23 +1099,23 @@ register struct monst *mtmp;
 				mtmp = makemon(&mons[type], ox, oy, NO_MINVENT);
 				if(mtmp){
 					struct obj *otmp;
-					otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+					otmp = mksobj(LONG_SWORD, MKOBJ_NOINIT);
 					set_material_gm(otmp, DRAGON_HIDE);
 					otmp->objsize = mtmp->data->msize;
 					add_oprop(otmp, OPROP_ACIDW);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(PLATE_MAIL, TRUE, FALSE);
+					otmp = mksobj(PLATE_MAIL, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SHELL_MAT);
 					otmp->objsize = mtmp->data->msize;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(GAUNTLETS, TRUE, FALSE);
+					otmp = mksobj(GAUNTLETS, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SHELL_MAT);
 					otmp->objsize = mtmp->data->msize;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(ARMORED_BOOTS, TRUE, FALSE);
+					otmp = mksobj(ARMORED_BOOTS, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SHELL_MAT);
 					otmp->objsize = mtmp->data->msize;
 					fix_object(otmp);
@@ -1147,23 +1147,23 @@ register struct monst *mtmp;
 				else return 0;
 				if(mtmp){
 					struct obj *otmp;
-					otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+					otmp = mksobj(LONG_SWORD, MKOBJ_NOINIT);
 					set_material_gm(otmp, DRAGON_HIDE);
 					otmp->objsize = mons[type].msize;
 					add_oprop(otmp, OPROP_ACIDW);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(PLATE_MAIL, TRUE, FALSE);
+					otmp = mksobj(PLATE_MAIL, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SHELL_MAT);
 					otmp->objsize = mons[type].msize;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(GAUNTLETS, TRUE, FALSE);
+					otmp = mksobj(GAUNTLETS, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SHELL_MAT);
 					otmp->objsize = mons[type].msize;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(ARMORED_BOOTS, TRUE, FALSE);
+					otmp = mksobj(ARMORED_BOOTS, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SHELL_MAT);
 					otmp->objsize = mons[type].msize;
 					fix_object(otmp);
@@ -2220,7 +2220,7 @@ not_special:
 					for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
 						if(isok(mtmp->mx+i, mtmp->my+j) && IS_WALL(levl[mtmp->mx+i][mtmp->my+j].typ)){
 							if(count-- == 0){
-								breacher = mksobj(STICK_OF_DYNAMITE, FALSE, FALSE);
+								breacher = mksobj(STICK_OF_DYNAMITE, MKOBJ_NOINIT);
 								breacher->quan = 1L;
 								breacher->cursed = 0;
 								breacher->blessed = 0;
@@ -2622,7 +2622,7 @@ boolean heard;		/* print You_hear() message? */
 	levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x, y, 0)) ? ROOM : CORR;
 
 	for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
-		obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+		obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
 		set_material_gm(obj, Is_illregrd(&u.uz) ? METAL : IRON);
 		obj->spe = 0;
 		obj->cursed = obj->blessed = FALSE;

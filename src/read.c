@@ -2200,8 +2200,7 @@ struct obj	*sobj;
 			    register struct monst *mtmp;
 
 	    	    	    /* Make the object(s) */
-	    	    	    otmp2 = mksobj(confused ? ROCK : BOULDER,
-	    	    	    		FALSE, FALSE);
+	    	    	    otmp2 = mksobj(confused ? ROCK : BOULDER, MKOBJ_NOINIT);
 	    	    	    if (!otmp2) continue;  /* Shouldn't happen */
 	    	    	    otmp2->quan = confused ? rn1(5,2) : 1;
 	    	    	    otmp2->owt = weight(otmp2);
@@ -2255,8 +2254,7 @@ struct obj	*sobj;
 		    struct obj *otmp2;
 
 		    /* Okay, _you_ write this without repeating the code */
-		    otmp2 = mksobj(confused ? ROCK : BOULDER,
-				FALSE, FALSE);
+		    otmp2 = mksobj(confused ? ROCK : BOULDER, MKOBJ_NOINIT);
 		    if (!otmp2) break;
 		    otmp2->quan = confused ? rn1(5,2) : 1;
 		    otmp2->owt = weight(otmp2);
@@ -2715,7 +2713,7 @@ int x, y;
 genericptr_t val;
 {
 	if (val) {
-		struct obj *ispe = mksobj(SPE_LIGHT, TRUE, FALSE);
+		struct obj *ispe = mksobj(SPE_LIGHT, NO_MKOBJ_FLAGS);
 		bhitpile(ispe, bhito, x, y);
 	}
 	else {

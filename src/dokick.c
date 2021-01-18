@@ -785,8 +785,7 @@ dokick()
 			i = Luck + 1;
 			if(i > 6) i = 6;
 			while(i--)
-			    (void) mksobj_at(rnd_class(DILITHIUM_CRYSTAL,
-					LUCKSTONE-1), x, y, FALSE, TRUE);
+			    (void) mksobj_at(rnd_class(DILITHIUM_CRYSTAL,LUCKSTONE-1), x, y, MKOBJ_NOINIT|MKOBJ_ARTIF);
 			if (Blind)
 			    You("kick %s loose!", something);
 			else {
@@ -875,7 +874,7 @@ dokick()
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
-					    treefruit = mksobj(frtype, TRUE, FALSE);
+					    treefruit = mksobj(frtype, NO_MKOBJ_FLAGS);
 					    treefruit->quan = nfruit-nfall;
 						treefruit->spe = frtspe;
 					    pline("%ld %s got caught in the branches.",
@@ -929,7 +928,7 @@ dokick()
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
-					    treefruit = mksobj(frtype, TRUE, FALSE);
+					    treefruit = mksobj(frtype, NO_MKOBJ_FLAGS);
 					    treefruit->quan = nfruit-nfall;
 						treefruit->spe = frtspe;
 					    pline("%ld %s got caught in the branches.",
@@ -1017,7 +1016,7 @@ dokick()
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
-					    treefruit = mksobj(frtype, TRUE, FALSE);
+					    treefruit = mksobj(frtype, NO_MKOBJ_FLAGS);
 					    treefruit->quan = nfruit-nfall;
 					    pline("%ld %s got caught in the branches.",
 						nfruit-nfall, xname(treefruit));
@@ -1072,7 +1071,7 @@ dokick()
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
-					    treefruit = mksobj(frtype, TRUE, FALSE);
+					    treefruit = mksobj(frtype, NO_MKOBJ_FLAGS);
 					    treefruit->quan = nfruit-nfall;
 					    pline("%ld %s got caught in the branches.",
 						nfruit-nfall, xname(treefruit));
@@ -1123,7 +1122,7 @@ dokick()
 				maploc->typ = ROOM;
 				maploc->looted = 0; /* don't leave loose ends.. */
 				for(numsticks = d(1,4); numsticks > 0; numsticks--){
-					staff = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, x, y, FALSE, FALSE);
+					staff = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, x, y, MKOBJ_NOINIT);
 					staff->spe = 0;
 					staff->oeroded2 = 1;
 					staff->blessed = FALSE;
@@ -1194,7 +1193,7 @@ dokick()
 			if(!(maploc->looted & S_LRING)) { /* once per sink */
 			    if (!Blind)
 				You("see a ring shining in its midst.");
-			    (void) mkobj_at(RING_CLASS, x, y, TRUE);
+			    (void) mkobj_at(RING_CLASS, x, y, MKOBJ_ARTIF);
 			    newsym(x, y);
 			    exercise(A_DEX, TRUE);
 			    exercise(A_WIS, TRUE);	/* a discovery! */

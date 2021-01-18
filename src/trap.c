@@ -299,7 +299,7 @@ register int x, y, typ;
 
 		case DART_TRAP:
 		case ARROW_TRAP:
-			otmp = mksobj((typ == ARROW_TRAP ? ARROW : DART), TRUE, FALSE);
+			otmp = mksobj((typ == ARROW_TRAP ? ARROW : DART), NO_MKOBJ_FLAGS);
 			otmp->quan = 15 + rnd(20);
 			// material special cases: role quests
 			if (In_quest(&u.uz))
@@ -349,18 +349,18 @@ register int x, y, typ;
 			set_trap_ammo(ttmp, otmp);
 			break;
 		case BEAR_TRAP:
-			set_trap_ammo(ttmp, mksobj(BEARTRAP, TRUE, FALSE));
+			set_trap_ammo(ttmp, mksobj(BEARTRAP, 0));
 			break;
 		case LANDMINE:
-			set_trap_ammo(ttmp, mksobj(LAND_MINE, TRUE, FALSE));
+			set_trap_ammo(ttmp, mksobj(LAND_MINE, 0));
 			break;
 		case FIRE_TRAP:
-			otmp = mksobj(POT_OIL, TRUE, FALSE);
+			otmp = mksobj(POT_OIL, NO_MKOBJ_FLAGS);
 			otmp->quan = rnd(3);
 			set_trap_ammo(ttmp, otmp);
 			break;
 		case ROCKTRAP:
-			otmp = mksobj(ROCK, TRUE, FALSE);
+			otmp = mksobj(ROCK, NO_MKOBJ_FLAGS);
 			otmp->quan = 5 + rnd(10);
 			set_trap_ammo(ttmp, otmp);
 			break;
@@ -1882,7 +1882,7 @@ long ocount;
 		cc.x = bcc.x = x;
 		cc.y = bcc.y = y;
 	} else {
-		otmp = mksobj(otyp, TRUE, FALSE);
+		otmp = mksobj(otyp, NO_MKOBJ_FLAGS);
 		otmp->quan = ocount;
 		otmp->owt = weight(otmp);
 		place_object(otmp, cc.x, cc.y);

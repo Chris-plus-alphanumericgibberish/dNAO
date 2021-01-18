@@ -938,7 +938,7 @@ register long q;
 {
 	register struct obj *otmp;
 
-	otmp = mksobj(GOLD_PIECE, FALSE, FALSE);
+	otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 	u.ugold -= q;
 	otmp->quan = q;
 	otmp->owt = weight(otmp);

@@ -2477,7 +2477,7 @@ int tary;
 				if (weap == TRIDENT) weap = JAVELIN;
 			}
 			/* make them */
-			otmp = mksobj(weap, TRUE, FALSE);
+			otmp = mksobj(weap, NO_MKOBJ_FLAGS);
 			otmp->quan = min(dmn, 16);
 			otmp->owt = weight(otmp);
 			otmp->spe = 0;
@@ -3063,7 +3063,7 @@ int tary;
 						verbalize(rn2(2) ? "Thou desirest the amulet? I'll give thee the amulet!" :
 							"Here is the only amulet you'll need!");
 					}
-					otmp = mksobj(AMULET_OF_STRANGULATION, FALSE, FALSE);
+					otmp = mksobj(AMULET_OF_STRANGULATION, MKOBJ_NOINIT);
 					curse(otmp);
 					(void)addinv(otmp);
 					pline("%s appears around your %s!", An(xname(otmp)), body_part(NECK));
@@ -3320,8 +3320,7 @@ int tary;
 				Is_rogue_level(&u.uz) ||
 #endif
 				(In_endgame(&u.uz) && !Is_earthlevel(&u.uz)));
-			otmp = mksobj(iron ? HEAVY_IRON_BALL : BOULDER,
-				FALSE, FALSE);
+			otmp = mksobj(iron ? HEAVY_IRON_BALL : BOULDER, MKOBJ_NOINIT);
 			otmp->quan = 1;
 			otmp->owt = weight(otmp);
 			if (iron) otmp->owt += 160 * rn2(2);

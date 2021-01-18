@@ -829,7 +829,7 @@ int how;
 	            if (!rn2(10)) {
 	                struct obj *potion = mksobj((u.ulycn > LOW_PM && !rn2(3))
 	                                            ? POT_WATER : POT_RESTORE_ABILITY,
-	                                            TRUE, FALSE);
+	                                            NO_MKOBJ_FLAGS);
 	
 	                bless(potion);
 	                (void) peffects(potion); /* always -1 for restore ability */
@@ -1320,7 +1320,7 @@ die:
 
 		    if (count == 0L) continue;
 		    if (objects[typ].oc_class != GEM_CLASS || typ <= LAST_GEM) {
-			otmp = mksobj(typ, FALSE, FALSE);
+			otmp = mksobj(typ, MKOBJ_NOINIT);
 			makeknown(otmp->otyp);
 			otmp->known = 1;	/* for fake amulets */
 			otmp->dknown = 1;	/* seen it (blindness fix) */

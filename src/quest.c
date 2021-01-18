@@ -350,7 +350,7 @@ chat_with_leader()
 			urole.lgod = getAnachrononautLgod();
 		} else if(Role_if(PM_CONVICT)){
 			struct obj *obj;
-			obj = mksobj(HEAVY_IRON_BALL, TRUE, FALSE);
+			obj = mksobj(HEAVY_IRON_BALL, NO_MKOBJ_FLAGS);
 			obj = oname(obj, artiname(ART_IRON_BALL_OF_LEVITATION));
 			obj->oerodeproof = TRUE;
 			obj->blessed = TRUE;
@@ -749,7 +749,7 @@ turn_stag()
 	/*Give you an appropriate signet ring*/
 	{
 		struct obj *otmp;
-		otmp = mksobj(find_signet_ring(), TRUE, FALSE);
+		otmp = mksobj(find_signet_ring(), NO_MKOBJ_FLAGS);
 		otmp->ohaluengr = TRUE;
 		otmp->oward = flags.initgend ? EILISTRAEE_SYMBOL : EDDER_SYMBOL;
 		pline("\"Take this, to identify you as one of ours!  You should take off any armor with another faction's crest, though.\"");

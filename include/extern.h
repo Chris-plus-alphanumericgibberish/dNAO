@@ -1414,14 +1414,14 @@ E const char *FDECL(waterbody_name, (XCHAR_P,XCHAR_P));
 
 /* ### mkobj.c ### */
 
-E struct obj *FDECL(mkobj_at, (CHAR_P,int,int,BOOLEAN_P));
-E struct obj *FDECL(mksobj_at, (int,int,int,BOOLEAN_P,BOOLEAN_P));
-E struct obj *FDECL(mkobj, (CHAR_P,BOOLEAN_P));
+E struct obj *FDECL(mkobj_at, (CHAR_P,int,int,int));
+E struct obj *FDECL(mksobj_at, (int,int,int,int));
+E struct obj *FDECL(mkobj, (CHAR_P,int));
 E int NDECL(rndmonnum);
 E struct obj *FDECL(splitobj, (struct obj *,long));
 E void FDECL(replace_object, (struct obj *,struct obj *));
 E void FDECL(bill_dummy_object, (struct obj *));
-E struct obj *FDECL(mksobj, (int,BOOLEAN_P,BOOLEAN_P));
+E struct obj *FDECL(mksobj, (int,int));
 E int FDECL(bcsign, (struct obj *));
 E void FDECL(set_obj_size, (struct obj *, int));
 E void FDECL(set_obj_quan, (struct obj *, int));

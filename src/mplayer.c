@@ -98,7 +98,7 @@ int typ;
 	struct obj *obj;
 
 	if (typ == STRANGE_OBJECT) return;
-	obj = mksobj(typ, FALSE, FALSE);
+	obj = mksobj(typ, MKOBJ_NOINIT);
 	if (!rn2(3)) obj->oerodeproof = 1;
 	else if (!rn2(2)) obj->greased = 1;
 	if (!rn2(3)) curse(obj);
@@ -435,7 +435,7 @@ register boolean special;
 	    set_malign(mtmp); /* peaceful may have changed again */
 
 	    if (weapon != STRANGE_OBJECT) {
-			otmp = mksobj(weapon, TRUE, FALSE);
+			otmp = mksobj(weapon, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if(otmp->otyp == RAKUYO && special)
 				otmp->spe = 10;
@@ -456,7 +456,7 @@ register boolean special;
 	    }
 
 	    if (secweapon != STRANGE_OBJECT) {
-			otmp = mksobj(secweapon, TRUE, FALSE);
+			otmp = mksobj(secweapon, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if(otmp->otyp == RAKUYO && special)
 				otmp->spe = 10;
@@ -477,7 +477,7 @@ register boolean special;
 	    }
 
 	    if (rweapon != STRANGE_OBJECT) {
-			otmp = mksobj(rweapon, TRUE, FALSE);
+			otmp = mksobj(rweapon, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if (!rn2(3)) otmp->oerodeproof = 1;
 			else if (!rn2(2)) otmp->greased = 1;
@@ -487,7 +487,7 @@ register boolean special;
 	    }
 
 	    if (rwammo != STRANGE_OBJECT) {
-			otmp = mksobj(rwammo, TRUE, FALSE);
+			otmp = mksobj(rwammo, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if (!rn2(3)) otmp->oerodeproof = 1;
 			otmp->quan += special ? 20 : 10;
@@ -495,7 +495,7 @@ register boolean special;
 	    }
 
 		if (tool != STRANGE_OBJECT) {
-			otmp = mksobj(tool, TRUE, FALSE);
+			otmp = mksobj(tool, NO_MKOBJ_FLAGS);
 			(void) mpickobj(mtmp, otmp);
 		}
 

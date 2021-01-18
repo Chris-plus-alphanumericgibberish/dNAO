@@ -4360,7 +4360,7 @@ int wishflags;
 		*wishreturn = WISH_SUCCESS;
 		return (&zeroobj);
 #else
-                otmp = mksobj(GOLD_PIECE, FALSE, FALSE);
+                otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 		otmp->quan = cnt;
                 otmp->owt = weight(otmp);
 		flags.botl=1;
@@ -4919,7 +4919,7 @@ typfnd:
 	}
 	
 	if(typ) {
-		otmp = mksobj(typ, TRUE, FALSE);
+		otmp = mksobj(typ, NO_MKOBJ_FLAGS);
 	} else {
 		otmp = mkobj(oclass, FALSE);
 		if (otmp) typ = otmp->otyp;

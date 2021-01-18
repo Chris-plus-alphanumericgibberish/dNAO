@@ -228,14 +228,14 @@ static const struct icp bow_materials[] = {
 
 
 struct obj *
-mkobj_at(let, x, y, artif)
+mkobj_at(let, x, y, mkflags)
 char let;
 int x, y;
-boolean artif;
+int mkflags;
 {
 	struct obj *otmp;
 
-	otmp = mkobj(let, artif);
+	otmp = mkobj(let, mkflags);
 	
 	place_object(otmp, x, y);
 	
@@ -243,13 +243,13 @@ boolean artif;
 }
 
 struct obj *
-mksobj_at(otyp, x, y, init, artif)
+mksobj_at(otyp, x, y, mkflags)
 int otyp, x, y;
-boolean init, artif;
+int mkflags;
 {
 	struct obj *otmp;
 
-	otmp = mksobj(otyp, init, artif);
+	otmp = mksobj(otyp, mkflags);
 	
 	place_object(otmp, x, y);
 	
@@ -257,9 +257,9 @@ boolean init, artif;
 }
 
 struct obj *
-mkobj(oclass, artif)
+mkobj(oclass, mkflags)
 char oclass;
-boolean artif;
+int mkflags;
 {
 	int tprob, i, prob = rnd(1000);
 
@@ -284,7 +284,7 @@ boolean artif;
 	if(objects[i].oc_class != oclass || !OBJ_NAME(objects[i]))
 		panic("probtype error, oclass=%d i=%d", (int) oclass, i);
 
-	return(mksobj(i, TRUE, artif));
+	return(mksobj(i, mkflags));
 }
 
 STATIC_OVL void
@@ -313,7 +313,7 @@ struct obj *box;
 
 	for (n = max_ints(rn2(n+1),min); n > 0; n--) {
 	    if (box->otyp == ICE_BOX) {
-			if (!(otmp = mksobj(CORPSE, TRUE, TRUE))) continue;
+			if (!(otmp = mksobj(CORPSE, MKOBJ_ARTIF))) continue;
 			/* Note: setting age to 0 is correct.  Age has a different
 			 * from usual meaning for objects stored in ice boxes. -KAA
 			 */
@@ -521,14 +521,16 @@ register struct obj *otmp;
 #ifdef OVLB
 
 struct obj *
-mksobj(otyp, init, artif)
+mksobj(otyp, mkflags)
 int otyp;
-boolean init;
-boolean artif;
+int mkflags;
 {
 	int mndx, tryct;
 	struct obj *otmp;
 	char let = objects[otyp].oc_class;
+
+	boolean init =   ((mkflags & MKOBJ_NOINIT) == 0);
+	boolean artif =  ((mkflags & MKOBJ_ARTIF) != 0);
 
 	otmp = newobj(0);
 	*otmp = zeroobj;
@@ -605,7 +607,7 @@ boolean artif;
 				otmp->altmode = AD_SLEE;
 			}
 			else if (otmp->otyp == MASS_SHADOW_PISTOL){
-				struct obj *stone = mksobj(ROCK, TRUE, FALSE);
+				struct obj *stone = mksobj(ROCK, NO_MKOBJ_FLAGS);
 				otmp->ovar1 = 800L + rnd(200);
 				stone->quan = 1;
 				stone->owt = weight(stone);
@@ -776,7 +778,7 @@ boolean artif;
 				otmp->age = (long)rn1(50000, 100000);
 				blessorcurse(otmp, 2);
 				{
-					struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, TRUE, FALSE);
+					struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, NO_MKOBJ_FLAGS);
 					gem->quan = 1;
 					gem->owt = weight(gem);
 					add_to_container(otmp, gem);
@@ -2324,49 +2326,49 @@ int x, y;
 {
 	struct obj *otmp;
 	if(Is_zuggtmoy_level(&u.uz)){
-		otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+		otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 		otmp->spe = fruitadd("slime mold");
 		return otmp;
 	} else if(In_quest(&u.uz) && (Race_if(PM_DROW) || (Race_if(PM_DWARF) && Role_if(PM_NOBLEMAN)))){
 		int chance = rn2(50);
 		if(chance < 20){
-			otmp = mksobj_at(EGG, x, y,TRUE,FALSE);
+			otmp = mksobj_at(EGG, x, y,NO_MKOBJ_FLAGS);
 			otmp->corpsenm = PM_CAVE_SPIDER;
 			return otmp;
 		} else if(chance < 45){
-			return mksobj_at(EUCALYPTUS_LEAF, x, y, TRUE, FALSE);
+			return mksobj_at(EUCALYPTUS_LEAF, x, y, NO_MKOBJ_FLAGS);
 		} else {
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("moldy remains");
 			return otmp;
 		}
 	} else if((In_quest(&u.uz) && Role_if(PM_PIRATE)) || Is_paradise(&u.uz)){
 		int chance = rn2(100);
 		if(chance < 10){
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("coconut");
 			return otmp;
 		} else if(chance < 25){
-			return mksobj_at(BANANA, x, y, TRUE, FALSE);
+			return mksobj_at(BANANA, x, y, NO_MKOBJ_FLAGS);
 		} else if(chance < 50){
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("mango");
 			return otmp;
 		} else if(chance < 75){
-			return mksobj_at(ORANGE, x, y, TRUE, FALSE);
+			return mksobj_at(ORANGE, x, y, NO_MKOBJ_FLAGS);
 		} else if(chance < 99){
-			otmp = mksobj_at(EGG, x, y,TRUE,FALSE);
+			otmp = mksobj_at(EGG, x, y,NO_MKOBJ_FLAGS);
 			otmp->corpsenm = PM_PARROT;
 			return otmp;
 		} else{
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("tree squid");
 			return otmp;
 		}
 	} else if(In_quest(&u.uz) && Role_if(PM_KNIGHT)){
-		return mksobj_at(APPLE, x, y, TRUE, FALSE);
+		return mksobj_at(APPLE, x, y, NO_MKOBJ_FLAGS);
 	}
-	return mksobj_at(treefruits[rn2(SIZE(treefruits))], x, y, TRUE, FALSE);
+	return mksobj_at(treefruits[rn2(SIZE(treefruits))], x, y, NO_MKOBJ_FLAGS);
 }
 #endif /* OVL0 */
 #ifdef OVLB
@@ -2384,7 +2386,7 @@ boolean new;
     if (gold) {
 	gold->quan += amount;
     } else {
-	gold = mksobj_at(GOLD_PIECE, x, y, TRUE, FALSE);
+	gold = mksobj_at(GOLD_PIECE, x, y, NO_MKOBJ_FLAGS);
 	gold->quan = amount;
     }
     gold->owt = weight(gold);
@@ -2430,14 +2432,15 @@ int x, y;
 boolean init;
 {
 	register struct obj *otmp;
+	int mkobjflags = (init ? NO_MKOBJ_FLAGS : MKOBJ_NOINIT);
 
 	if (objtype != CORPSE && objtype != STATUE && objtype != BROKEN_ANDROID && objtype != BROKEN_GYNOID && objtype != LIFELESS_DOLL)
 	    impossible("making corpstat type %d", objtype);
 	if (x == 0 && y == 0) {		/* special case - random placement */
-		otmp = mksobj(objtype, init, FALSE);
+		otmp = mksobj(objtype, mkobjflags);
 		if (otmp) rloco(otmp);
 	} else
-		otmp = mksobj_at(objtype, x, y, init, FALSE);
+		otmp = mksobj_at(objtype, x, y, mkobjflags);
 	if (otmp) {
 	    if (mtmp) {
 		struct obj *otmp2;
@@ -2574,11 +2577,12 @@ int objtype; /* CORPSE or STATUE */
 register int x, y;
 {
 	register struct obj *otmp, *otmp2;
-	boolean initialize_it;
+	int mkobjflags = NO_MKOBJ_FLAGS;
 
 	/* player statues never contain books */
-	initialize_it = (objtype != STATUE);
-	if ((otmp = mksobj_at(objtype, x, y, initialize_it, FALSE)) != 0) {
+	if (objtype == STATUE)
+		mkobjflags |= MKOBJ_NOINIT;
+	if ((otmp = mksobj_at(objtype, x, y, mkobjflags)) != 0) {
 	    /* tt_oname will return null if the scoreboard is empty */
 	    if ((otmp2 = tt_oname(otmp)) != 0) otmp = otmp2;
 	}

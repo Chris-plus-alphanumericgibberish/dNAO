@@ -256,13 +256,13 @@ mkmivault()
 			levl[x+1][y+1].typ = TLCORNER;
 			
 			
-			otmp = mksobj_at(CHEST, x+2, y+2, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+2, y+2, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
-			otmp = mksobj_at(CHEST, x+2, y+3, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+2, y+3, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
-			otmp = mksobj_at(CHEST, x+3, y+2, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+3, y+2, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
-			otmp = mksobj_at(CHEST, x+3, y+3, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+3, y+3, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
 			
 
@@ -275,7 +275,7 @@ mkmivault()
 			// lovecraft monsters
 			if (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_NIGHTGAUNT
 					|| ptr->mtyp == PM_DARK_YOUNG || ptr->mtyp == PM_HUNTING_HORROR || ptr->mtyp == PM_HUNTING_HORROR_TAIL){
-				otmp2 = mksobj(FIGURINE, TRUE, FALSE);
+				otmp2 = mksobj(FIGURINE, NO_MKOBJ_FLAGS);
 				switch(rn2(4)){
 					case 0:					
 						otmp2->corpsenm = PM_DARK_YOUNG;
@@ -303,19 +303,19 @@ mkmivault()
 			else if (ptr->mtyp == PM_JUGGERNAUT || ptr->mtyp == PM_ID_JUGGERNAUT 
 					|| ptr->mtyp == PM_SCRAP_TITAN || ptr->mtyp == PM_HELLFIRE_COLOSSUS){
 				if (rn2(2)){
-					add_to_container(otmp, mksobj(ptr->mtyp == PM_ID_JUGGERNAUT ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, TRUE, FALSE));
+					add_to_container(otmp, mksobj(ptr->mtyp == PM_ID_JUGGERNAUT ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, 0));
 				} else {
-					add_to_container(otmp, mksobj(SCRAP, TRUE, FALSE));
+					add_to_container(otmp, mksobj(SCRAP, 0));
 				}
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
 			}
 			// spellcasters
 			else if (ptr->mtyp == PM_TITAN || ptr->mtyp == PM_EYE_OF_DOOM 
@@ -403,13 +403,13 @@ mkmivaultlolth()
 			levl[x][y].typ = TLCORNER;
 			
 			
-			otmp = mksobj_at(CHEST, x+1, y+1, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+1, y+1, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
-			otmp = mksobj_at(CHEST, x+1, y+2, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+1, y+2, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
-			otmp = mksobj_at(CHEST, x+2, y+1, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+2, y+1, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
-			otmp = mksobj_at(CHEST, x+2, y+2, TRUE, FALSE);
+			otmp = mksobj_at(CHEST, x+2, y+2, NO_MKOBJ_FLAGS);
 			for(i = d(2,4);i>0;i--) mkmivaultitem(otmp);
 			
 			for (i = 0; i < 10; i++){
@@ -421,7 +421,7 @@ mkmivaultlolth()
 			// lovecraft monsters
 			if (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_NIGHTGAUNT 
 				|| ptr->mtyp == PM_DARK_YOUNG || ptr->mtyp == PM_HUNTING_HORROR || ptr->mtyp == PM_HUNTING_HORROR_TAIL){
-				otmp2 = mksobj(FIGURINE, TRUE, FALSE);
+				otmp2 = mksobj(FIGURINE, NO_MKOBJ_FLAGS);
 				switch(rn2(4)){
 					case 0:					
 						otmp2->corpsenm = PM_DARK_YOUNG;
@@ -449,19 +449,19 @@ mkmivaultlolth()
 			else if (ptr->mtyp == PM_JUGGERNAUT || ptr->mtyp == PM_ID_JUGGERNAUT 
 					|| ptr->mtyp == PM_SCRAP_TITAN || ptr->mtyp == PM_HELLFIRE_COLOSSUS){
 				if (rn2(2)){
-					add_to_container(otmp, mksobj(ptr->mtyp == PM_ID_JUGGERNAUT ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, TRUE, FALSE));
+					add_to_container(otmp, mksobj(ptr->mtyp == PM_ID_JUGGERNAUT ? SUBETHAIC_COMPONENT : HELLFIRE_COMPONENT, 0));
 				} else {
-					add_to_container(otmp, mksobj(SCRAP, TRUE, FALSE));
+					add_to_container(otmp, mksobj(SCRAP, 0));
 				}
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
-				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
+				add_to_container(otmp, mksobj(CLOCKWORK_COMPONENT, 0));
 			}
 			// spellcasters
 			else if (ptr->mtyp == PM_TITAN || ptr->mtyp == PM_EYE_OF_DOOM 
@@ -968,15 +968,15 @@ mklolthtreasure()
 			makemon(&mons[PM_DROW_MATRON], x+2, y+2, MM_ADJACENTOK);
 			makemon(&mons[PM_DROW_MATRON], x+2, y+2, MM_ADJACENTOK);
 			
-			container = mksobj_at(CHEST, x+2, y+2, TRUE, FALSE);
+			container = mksobj_at(CHEST, x+2, y+2, NO_MKOBJ_FLAGS);
 			container->olocked = 1;
 			container->otrapped = 1;
-			otmp = mksobj(POT_FULL_HEALING, TRUE, FALSE);
+			otmp = mksobj(POT_FULL_HEALING, NO_MKOBJ_FLAGS);
 			(void) add_to_container(container, otmp);
-			otmp = mksobj(POT_FULL_HEALING, TRUE, FALSE);
+			otmp = mksobj(POT_FULL_HEALING, NO_MKOBJ_FLAGS);
 			(void) add_to_container(container, otmp);
 			for(i = d(2,8); i > 0; i--){
-				otmp = mksobj(rn2(LAST_GEM-DILITHIUM_CRYSTAL)+DILITHIUM_CRYSTAL, TRUE, FALSE);
+				otmp = mksobj(rn2(LAST_GEM-DILITHIUM_CRYSTAL)+DILITHIUM_CRYSTAL, NO_MKOBJ_FLAGS);
 				(void) add_to_container(container, otmp);
 			}
 			for(i = d(2,4); i > 0; i--){
@@ -1407,7 +1407,7 @@ mkkamereltowers()
 			for(i=-3;i<=3;i++)
 				for(j=-3;j<=3;j++){
 					if(levl[x+i][y+j].typ == HWALL){
-						otmp = mksobj(MIRROR, FALSE, FALSE);
+						otmp = mksobj(MIRROR, MKOBJ_NOINIT);
 						otmp->objsize = MZ_GIGANTIC;
 						fix_object(otmp);
 						place_object(otmp, x+i, y+j);
@@ -1419,7 +1419,7 @@ mkkamereltowers()
 			otmp = 0;
 			while(!otmp){
 				if(!rn2(3)){
-					otmp = mksobj(DOUBLE_LIGHTSABER, FALSE, FALSE);
+					otmp = mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT);
 					otmp = oname(otmp, artiname(ART_INFINITY_S_MIRRORED_ARC));
 					if(otmp->oartifact){
 						otmp->spe = 1;
@@ -1433,7 +1433,7 @@ mkkamereltowers()
 						continue;
 					}
 				} else if(rn2(2)){
-					otmp = mksobj(MIRRORBLADE, FALSE, FALSE);
+					otmp = mksobj(MIRRORBLADE, MKOBJ_NOINIT);
 					otmp = oname(otmp, artiname(ART_SANSARA_MIRROR));
 					if(otmp->oartifact || tries++ > 10){
 						otmp->spe = 1;
@@ -1446,7 +1446,7 @@ mkkamereltowers()
 						continue;
 					}
 				} else {
-					otmp = mksobj(KHAKKHARA, FALSE, FALSE);
+					otmp = mksobj(KHAKKHARA, MKOBJ_NOINIT);
 					otmp = oname(otmp, artiname(ART_STAFF_OF_TWELVE_MIRRORS));
 					if(otmp->oartifact || tries++ > 10){
 						otmp->spe = 1;
@@ -1522,7 +1522,7 @@ mkkamereltowers()
 			for(i=-3;i<=3;i++)
 				for(j=-3;j<=3;j++){
 					if(levl[x+i][y+j].typ == HWALL){
-						otmp = mksobj(MIRROR, FALSE, FALSE);
+						otmp = mksobj(MIRROR, MKOBJ_NOINIT);
 						otmp->objsize = MZ_GIGANTIC;
 						fix_object(otmp);
 						place_object(otmp, x+i, y+j);
@@ -1533,7 +1533,7 @@ mkkamereltowers()
 			otmp = 0;
 			while(!otmp){
 				if(!rn2(3)){
-					otmp = mksobj(DOUBLE_LIGHTSABER, FALSE, FALSE);
+					otmp = mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT);
 					otmp = oname(otmp, artiname(ART_INFINITY_S_MIRRORED_ARC));
 					if(otmp->oartifact){
 						otmp->spe = 1;
@@ -1547,7 +1547,7 @@ mkkamereltowers()
 						continue;
 					}
 				} else if(rn2(2)){
-					otmp = mksobj(MIRRORBLADE, FALSE, FALSE);
+					otmp = mksobj(MIRRORBLADE, MKOBJ_NOINIT);
 					otmp = oname(otmp, artiname(ART_SANSARA_MIRROR));
 					if(otmp->oartifact || tries++ > 10){
 						otmp->spe = 1;
@@ -1560,7 +1560,7 @@ mkkamereltowers()
 						continue;
 					}
 				} else {
-					otmp = mksobj(KHAKKHARA, FALSE, FALSE);
+					otmp = mksobj(KHAKKHARA, MKOBJ_NOINIT);
 					otmp = oname(otmp, artiname(ART_STAFF_OF_TWELVE_MIRRORS));
 					if(otmp->oartifact || tries++ > 10){
 						otmp->spe = 1;
@@ -1617,7 +1617,7 @@ mkkamereltowers()
 			for(i=-2;i<=2;i++)
 				for(j=-2;j<=2;j++){
 					if(levl[x+i][y+j].typ == HWALL){
-						otmp = mksobj(MIRROR, FALSE, FALSE);
+						otmp = mksobj(MIRROR, MKOBJ_NOINIT);
 						otmp->objsize = MZ_GIGANTIC;
 						fix_object(otmp);
 						place_object(otmp, x+i, y+j);
@@ -1642,12 +1642,12 @@ mkkamereltowers()
 				}
 				break;
 				case 2:
-					otmp = mksobj(!rn2(3) ? MIRRORBLADE : rn2(2) ? KHAKKHARA : KAMEREL_VAJRA, FALSE, FALSE);
+					otmp = mksobj(!rn2(3) ? MIRRORBLADE : rn2(2) ? KHAKKHARA : KAMEREL_VAJRA, MKOBJ_NOINIT);
 					otmp->spe = 1;
 					place_object(otmp, x, y);
 				break;
 				case 3:
-					mksobj_at(MIRROR, x, y, FALSE, FALSE);
+					mksobj_at(MIRROR, x, y, MKOBJ_NOINIT);
 				break;
 				case 4:
 					//Nothing
@@ -1658,13 +1658,13 @@ mkkamereltowers()
 				}break;
 				case 6:
 					levl[x][y].typ = HWALL;
-					otmp = mksobj(MIRROR, FALSE, FALSE);
+					otmp = mksobj(MIRROR, MKOBJ_NOINIT);
 					otmp->objsize = MZ_GIGANTIC;
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				break;
 				case 7:
-					mkobj_at(SPBOOK_CLASS, x, y, FALSE);
+					mkobj_at(SPBOOK_CLASS, x, y, NO_MKOBJ_FLAGS);
 				break;
 			}
 			
@@ -1702,7 +1702,7 @@ mkkamereltowers()
 			for(i=-1;i<=1;i++)
 				for(j=-1;j<=1;j++){
 					if(levl[x+i][y+j].typ == HWALL){
-						otmp = mksobj(MIRROR, FALSE, FALSE);
+						otmp = mksobj(MIRROR, MKOBJ_NOINIT);
 						otmp->objsize = MZ_GIGANTIC;
 						fix_object(otmp);
 						place_object(otmp, x+i, y+j);
@@ -1717,10 +1717,10 @@ mkkamereltowers()
 					}
 				break;
 				case 2:
-					mksobj_at(MIRRORBLADE, x, y, FALSE, FALSE);
+					mksobj_at(MIRRORBLADE, x, y, MKOBJ_NOINIT);
 				break;
 				case 3:
-					mksobj_at(MIRROR, x, y, FALSE, FALSE);
+					mksobj_at(MIRROR, x, y, MKOBJ_NOINIT);
 				break;
 				case 4:
 					//Nothing
@@ -1821,54 +1821,54 @@ mkminorspire()
 		levl[x][y].wall_info |= W_NONDIGGABLE;
 		levl[x][y].lit = 0;
 		
-		mksobj_at(ROBE, x, y, TRUE, FALSE);
+		mksobj_at(ROBE, x, y, NO_MKOBJ_FLAGS);
 		switch(rn2(6)){
 			case 4:
-			    otmp = mksobj(LONG_SWORD, FALSE, FALSE);
+			    otmp = mksobj(LONG_SWORD, MKOBJ_NOINIT);
 				otmp = oname(otmp, artiname(ART_MIRROR_BRAND));
 				if(!otmp->oartifact){
 					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
-					mksobj_at(SHIELD_OF_REFLECTION, x, y, TRUE, FALSE);
+					mksobj_at(SHIELD_OF_REFLECTION, x, y, NO_MKOBJ_FLAGS);
 				}
 				place_object(otmp, x, y);
 			break;
 			case 3:
-			    otmp = mksobj(PLATE_MAIL, FALSE, FALSE);
+			    otmp = mksobj(PLATE_MAIL, MKOBJ_NOINIT);
 				otmp = oname(otmp, artiname(ART_SOULMIRROR));
 				if(!otmp->oartifact){
 					set_material_gm(otmp, MITHRIL);
 					fix_object(otmp);
-					mksobj_at(AMULET_OF_REFLECTION, x, y, FALSE, FALSE);
+					mksobj_at(AMULET_OF_REFLECTION, x, y, MKOBJ_NOINIT);
 				}
 				place_object(otmp, x, y);
 				if(find_sawant()){
-					otmp = mksobj(find_sawant(), FALSE, FALSE);
+					otmp = mksobj(find_sawant(), MKOBJ_NOINIT);
 					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 					
-					otmp = mksobj(BUCKLER, FALSE, FALSE);
+					otmp = mksobj(BUCKLER, MKOBJ_NOINIT);
 					set_material_gm(otmp, MITHRIL);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
-					mksobj_at(KHAKKHARA, x, y, FALSE, FALSE);
+					mksobj_at(KHAKKHARA, x, y, MKOBJ_NOINIT);
 				}
 			break;
 			case 2:
 			case 1:
 				if(find_sawant()){
-					otmp = mksobj(find_sawant(), FALSE, FALSE);
+					otmp = mksobj(find_sawant(), MKOBJ_NOINIT);
 					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					place_object(otmp, x, y);
-					mksobj_at(SHIELD_OF_REFLECTION, x, y, FALSE, FALSE);
+					mksobj_at(SHIELD_OF_REFLECTION, x, y, MKOBJ_NOINIT);
 					break;
 				}
 			default:
-				mksobj_at(KHAKKHARA, x, y, FALSE, FALSE);
-				mksobj_at(AMULET_OF_REFLECTION, x, y, FALSE, FALSE);
+				mksobj_at(KHAKKHARA, x, y, MKOBJ_NOINIT);
+				mksobj_at(AMULET_OF_REFLECTION, x, y, MKOBJ_NOINIT);
 			break;
 		}
 		//Place Kamerel survivors
@@ -2038,16 +2038,16 @@ mkfishinghut(left)
 			for(j=1;j<3;j++){
 				levl[x+i][y+j].typ = CORR;
 				levl[x+i][y+j].lit = 0;
-				if(!rn2(9)) mksobj_at(SPEAR, x+1, y+1, TRUE, FALSE);
+				if(!rn2(9)) mksobj_at(SPEAR, x+1, y+1, NO_MKOBJ_FLAGS);
 				if(!rn2(9)){
-					otmp = mksobj(SLIME_MOLD, TRUE,FALSE);
+					otmp = mksobj(SLIME_MOLD, NO_MKOBJ_FLAGS);
 					otmp->spe = fruitadd("salted fish");
 					otmp->quan = (long) rnd(4);
 					otmp->owt = weight(otmp);
 					place_object(otmp, x+i, y+j);
 				}
-				if(!rn2(9)) mksobj_at(POT_BOOZE, x+1, y+1, TRUE, FALSE);
-				if(!rn2(9)) mksobj_at(CRAM_RATION, x+1, y+1, TRUE, FALSE);
+				if(!rn2(9)) mksobj_at(POT_BOOZE, x+1, y+1, NO_MKOBJ_FLAGS);
+				if(!rn2(9)) mksobj_at(CRAM_RATION, x+1, y+1, NO_MKOBJ_FLAGS);
 				if(!rn2(100)){
 					otmp = mkobj(AMULET_CLASS, TRUE);
 					set_material_gm(otmp, GOLD);
@@ -2055,7 +2055,7 @@ mkfishinghut(left)
 					place_object(otmp, x+i, y+j);
 				}
 				if(!rn2(100)){
-					otmp = mksobj(find_gcirclet(), TRUE, FALSE);
+					otmp = mksobj(find_gcirclet(), NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, GOLD);
 					otmp->owt = weight(otmp);
 					place_object(otmp, x+i, y+j);
@@ -2155,7 +2155,7 @@ mkwell(left)
 		}
 		
 		levl[x][y].typ = POOL;
-		mksobj_at(RAKUYO, x, y, TRUE, FALSE);
+		mksobj_at(RAKUYO, x, y, NO_MKOBJ_FLAGS);
 	}
 }
 
@@ -2196,7 +2196,7 @@ mkpluhomestead()
 		for(i=1;i<4;i++){
 			for(j=1;j<4;j++){
 				levl[x+i][y+j].typ = CORR;
-				if(!rn2(3)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
+				if(!rn2(3)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
 			}
 		}
 		i = rnd(3)+rn2(2);
@@ -2265,14 +2265,14 @@ int left;
 		for(i=1;i<3;i++){
 			for(j=1;j<3;j++){
 				levl[x+i][y+j].typ = ROOM;
-				// if(!rn2(3)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
+				// if(!rn2(3)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
 			}
 		}
 		i = rnd(3);
 		for(;i>0;i--){
 			makemon(&mons[PM_GREEN_ELF], x+rnd(2), y+rnd(2), MM_ADJACENTOK);
 			if(!rn2(3))
-				mkobj_at(RANDOM_CLASS, x+rnd(2), y+rnd(2), TRUE);
+				mkobj_at(RANDOM_CLASS, x+rnd(2), y+rnd(2), MKOBJ_ARTIF);
 		}
 		
 		// wallification(x, y, x+3, y+3);//Can be adjacent, do wallification after all huts placed
@@ -2415,27 +2415,27 @@ int typ;
 			good = TRUE;
 		else continue;
 		
-		otmp = mksobj(FOSSIL, TRUE, FALSE);
+		otmp = mksobj(FOSSIL, NO_MKOBJ_FLAGS);
 		switch(rnd(5)){
 			case 1:
 			case 2:
 			otmp->corpsenm = PM_WHITE_DRAGON;
-			mksobj_at(WHITE_DRAGON_SCALES, x, y, FALSE, FALSE);
+			mksobj_at(WHITE_DRAGON_SCALES, x, y, MKOBJ_NOINIT);
 			break;
 			case 3:
 			case 4:
 			otmp->corpsenm = PM_GREEN_DRAGON;
-			mksobj_at(GREEN_DRAGON_SCALES, x, y, FALSE, FALSE);
+			mksobj_at(GREEN_DRAGON_SCALES, x, y, MKOBJ_NOINIT);
 			break;
 			case 5:
 			switch(rnd(2)){
 				case 1:
 				otmp->corpsenm = PM_RED_DRAGON;
-				mksobj_at(RED_DRAGON_SCALES, x, y, FALSE, FALSE);
+				mksobj_at(RED_DRAGON_SCALES, x, y, MKOBJ_NOINIT);
 				break;
 				case 2:
 				otmp->corpsenm = PM_BLACK_DRAGON;
-				mksobj_at(BLACK_DRAGON_SCALES, x, y, FALSE, FALSE);
+				mksobj_at(BLACK_DRAGON_SCALES, x, y, MKOBJ_NOINIT);
 				break;
 			}
 			break;
@@ -2719,7 +2719,7 @@ mkpluvillage()
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
 							if(rn2(2)) makemon(&mons[PM_PLUMACH_RILMANI], x+i, y+j, 0);
-							if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
+							if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
 						}
 					}
 					flood_fill_rm(x+1, y+5,
@@ -2744,7 +2744,7 @@ mkpluvillage()
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
-							mkobj_at(TOOL_CLASS, x+i, y+j, FALSE);
+							mkobj_at(TOOL_CLASS, x+i, y+j, NO_MKOBJ_FLAGS);
 						}
 					}
 					flood_fill_rm(x+1, y+5,
@@ -2777,7 +2777,7 @@ mkpluvillage()
 						levl[x+i][y+j].typ = CORR;
 						levl[x+i][y+j].lit = 1;
 						if(rn2(2)) makemon(&mons[PM_PLUMACH_RILMANI], x+i, y+j, 0);
-						if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
+						if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
 					}
 				}
 				for(i=1;i<3;i++){
@@ -2806,7 +2806,7 @@ mkpluvillage()
 						levl[x+i][y+7+j].typ = CORR;
 						levl[x+i][y+j].lit = 1;
 						if(rn2(2)) makemon(&mons[PM_PLUMACH_RILMANI], x+i, y+7+j, 0);
-						if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+7+j, FALSE);
+						if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+7+j, NO_MKOBJ_FLAGS);
 					}
 				}
 				for(i=1;i<3;i++){
@@ -2904,7 +2904,7 @@ mkpluvillage()
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
 							if(rn2(2)) makemon(&mons[PM_PLUMACH_RILMANI], x+i, y+j, 0);
-							if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, FALSE);
+							if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
 						}
 					}
 					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
@@ -2929,7 +2929,7 @@ mkpluvillage()
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
-							mkobj_at(TOOL_CLASS, x+i, y+j, FALSE);
+							mkobj_at(TOOL_CLASS, x+i, y+j, NO_MKOBJ_FLAGS);
 						}
 					}
 					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
@@ -3510,15 +3510,15 @@ mkinvertzigg()
 		levl[x+i][y+j].doormask = D_LOCKED;
 		
 		if(rn2(3)){
-			chest = mksobj_at(CHEST, x+size/2, y+size/2, TRUE, TRUE);
+			chest = mksobj_at(CHEST, x+size/2, y+size/2, MKOBJ_ARTIF);
 			set_material_gm(chest, IRON);
 			fix_object(chest);
-			if ((otmp = mksobj(TORCH, TRUE, FALSE)) != 0) {
+			if ((otmp = mksobj(TORCH, 0)) != 0) {
 				otmp->quan = rnd(6);
 				otmp->owt = weight(otmp);
 				add_to_container(chest, otmp);
 			}
-			if ((otmp = mksobj(SHADOWLANDER_S_TORCH, TRUE, FALSE)) != 0) {
+			if ((otmp = mksobj(SHADOWLANDER_S_TORCH, 0)) != 0) {
 				otmp->quan = rnd(6);
 				otmp->spe = rn2(3);
 				otmp->owt = weight(otmp);
@@ -3527,10 +3527,10 @@ mkinvertzigg()
 			/*Chance for beads of force*/
 			/*Chance for rod of force*/
 			/*Chance for wand of striking*/
-			if ((otmp = mksobj(WAN_STRIKING, TRUE, FALSE)) != 0) {
+			if ((otmp = mksobj(WAN_STRIKING, 0)) != 0) {
 				add_to_container(chest, otmp);
 			}
-			if ((otmp = mksobj(POT_WATER, FALSE, FALSE)) != 0) {
+			if ((otmp = mksobj(POT_WATER, MKOBJ_NOINIT)) != 0) {
 				otmp->blessed = 0;
 				otmp->cursed = 1;
 				otmp->quan = rnd(3);
@@ -3571,10 +3571,10 @@ int typ;
 			good = TRUE;
 		else continue;
 		
-		statue = mksobj_at(STATUE, x, y, FALSE, FALSE);
+		statue = mksobj_at(STATUE, x, y, MKOBJ_NOINIT);
 		if(statue){
 			statue->corpsenm = PM_COLOSSAL_CLOCKWORK_WAR_MACHINE;
-			otmp = mksobj(ARCHAIC_PLATE_MAIL, TRUE, FALSE);
+			otmp = mksobj(ARCHAIC_PLATE_MAIL, NO_MKOBJ_FLAGS);
 			if(otmp){
 				otmp->cursed = TRUE;
 				otmp->blessed = FALSE;
@@ -3586,14 +3586,14 @@ int typ;
 			}
 			
 			for(tries = rn1(5,5); tries > 0; tries--){
-				otmp = mksobj(CLOCKWORK_COMPONENT, FALSE, FALSE);
+				otmp = mksobj(CLOCKWORK_COMPONENT, MKOBJ_NOINIT);
 				if(otmp){
 					add_to_container(statue, otmp);
 				}
 			}
 			if(!rn2(4)){
 				for(tries = d(1,4); tries > 0; tries--){
-					otmp = mksobj(HELLFIRE_COMPONENT, FALSE, FALSE);
+					otmp = mksobj(HELLFIRE_COMPONENT, MKOBJ_NOINIT);
 					if(otmp){
 						add_to_container(statue, otmp);
 					}
@@ -3601,48 +3601,48 @@ int typ;
 			}
 			if(!rn2(4)){
 				for(tries = d(1,4); tries > 0; tries--){
-					otmp = mksobj(SUBETHAIC_COMPONENT, FALSE, FALSE);
+					otmp = mksobj(SUBETHAIC_COMPONENT, MKOBJ_NOINIT);
 					if(otmp){
 						add_to_container(statue, otmp);
 					}
 				}
 			}
-			otmp = mksobj(UPGRADE_KIT, FALSE, FALSE);
+			otmp = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
 			if(otmp){
 				add_to_container(statue, otmp);
 			}
 			if(!rn2(20)){
-				otmp = mksobj(WAN_FIRE, TRUE, FALSE);
+				otmp = mksobj(WAN_FIRE, NO_MKOBJ_FLAGS);
 				if(otmp){
 					add_to_container(statue, otmp);
 				}
 				for(tries = d(2,4); tries > 0; tries--){
-					otmp = mksobj(POT_OIL, TRUE, FALSE);
+					otmp = mksobj(POT_OIL, NO_MKOBJ_FLAGS);
 					if(otmp){
 						add_to_container(statue, otmp);
 					}
 				}
 			}
 			if(!rn2(20)){
-				otmp = mksobj(WAN_LIGHTNING, TRUE, FALSE);
+				otmp = mksobj(WAN_LIGHTNING, NO_MKOBJ_FLAGS);
 				if(otmp){
 					add_to_container(statue, otmp);
 				}
 				for(tries = d(2,4); tries > 0; tries--){
-					otmp = mksobj(POT_ACID, TRUE, FALSE);
+					otmp = mksobj(POT_ACID, NO_MKOBJ_FLAGS);
 					if(otmp){
 						add_to_container(statue, otmp);
 					}
 				}
 			}
 			if(!rn2(20)){
-				otmp = mksobj(WAN_STRIKING, TRUE, FALSE);
+				otmp = mksobj(WAN_STRIKING, NO_MKOBJ_FLAGS);
 				if(otmp){
 					add_to_container(statue, otmp);
 				}
 			}
 			if(!rn2(50)){
-				otmp = mksobj(WAN_DEATH, TRUE, FALSE);
+				otmp = mksobj(WAN_DEATH, NO_MKOBJ_FLAGS);
 				if(otmp){
 					add_to_container(statue, otmp);
 				}
@@ -3650,10 +3650,10 @@ int typ;
 			
 			////////////////////
 			for(ncrew = rnd(8); ncrew > 0; ncrew--){
-				smallstatue = mksobj(STATUE, FALSE, FALSE);
+				smallstatue = mksobj(STATUE, MKOBJ_NOINIT);
 				if(smallstatue){
 					smallstatue->corpsenm = PM_CLOCKWORK_AUTOMATON;
-					otmp = mksobj(ARCHAIC_PLATE_MAIL, TRUE, FALSE);
+					otmp = mksobj(ARCHAIC_PLATE_MAIL, NO_MKOBJ_FLAGS);
 					if(otmp){
 						if(rn2(5)){
 							otmp->cursed = TRUE;
@@ -3665,14 +3665,14 @@ int typ;
 						add_to_container(smallstatue, otmp);
 					}
 					for(tries = rn1(2,2); tries > 0; tries--){
-						otmp = mksobj(CLOCKWORK_COMPONENT, FALSE, FALSE);
+						otmp = mksobj(CLOCKWORK_COMPONENT, MKOBJ_NOINIT);
 						if(otmp){
 							add_to_container(smallstatue, otmp);
 						}
 					}
 					if(!rn2(4)){
 						for(tries = rnd(2); tries > 0; tries--){
-							otmp = mksobj(HELLFIRE_COMPONENT, FALSE, FALSE);
+							otmp = mksobj(HELLFIRE_COMPONENT, MKOBJ_NOINIT);
 							if(otmp){
 								add_to_container(smallstatue, otmp);
 							}
@@ -3680,7 +3680,7 @@ int typ;
 					}
 					if(!rn2(4)){
 						for(tries = rnd(2); tries > 0; tries--){
-							otmp = mksobj(SUBETHAIC_COMPONENT, FALSE, FALSE);
+							otmp = mksobj(SUBETHAIC_COMPONENT, MKOBJ_NOINIT);
 							if(otmp){
 								add_to_container(smallstatue, otmp);
 							}
@@ -3692,7 +3692,7 @@ int typ;
 				}
 			}
 			////////////////////
-			otmp = mksobj(SPIKE, FALSE, FALSE);
+			otmp = mksobj(SPIKE, MKOBJ_NOINIT);
 			if(otmp){
 				otmp->cursed = TRUE;
 				otmp->blessed = FALSE;
@@ -3728,154 +3728,154 @@ int typ;
 		if(!rn2(10)){
 			//Six-armed clockwork
 			int nwep;
-			otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+			otmp = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 			for(tries = rn1(3,3); tries > 0; tries--)
-				otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
-			otmp = mksobj_at(ARCHAIC_PLATE_MAIL, x, y, TRUE, FALSE);
+				otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
+			otmp = mksobj_at(ARCHAIC_PLATE_MAIL, x, y, NO_MKOBJ_FLAGS);
 			nwep = rnd(6);
 			for(tries = 0; tries < nwep; tries++){
-				otmp = mksobj_at(SCIMITAR, x, y, TRUE, FALSE);
+				otmp = mksobj_at(SCIMITAR, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			}
 			for(; nwep < 6; nwep++){
-				otmp = mksobj_at(ROUNDSHIELD, x, y, TRUE, FALSE);
+				otmp = mksobj_at(ROUNDSHIELD, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				otmp->objsize = MZ_SMALL;
 				fix_object(otmp);
 			}
 			if(rn2(2)){
-				otmp = mksobj_at(GAUNTLETS, x, y, TRUE, FALSE);
+				otmp = mksobj_at(GAUNTLETS, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
-				otmp = mksobj_at(GAUNTLETS, x, y, TRUE, FALSE);
+				otmp = mksobj_at(GAUNTLETS, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
-				otmp = mksobj_at(GAUNTLETS, x, y, TRUE, FALSE);
+				otmp = mksobj_at(GAUNTLETS, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			} else if(rn2(2)){
-				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, TRUE, FALSE);
+				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
-				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, TRUE, FALSE);
+				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
-				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, TRUE, FALSE);
+				otmp = mksobj_at(GAUNTLETS_OF_POWER, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			} else {
-				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, TRUE, FALSE);
+				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
-				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, TRUE, FALSE);
+				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
-				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, TRUE, FALSE);
+				otmp = mksobj_at(ORIHALCYON_GAUNTLETS, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
 			}
 		} else if(rn2(9)){
 			//Clockwork Horror
 			if(rn2(10)){		//9 out of 10
-				otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+				otmp = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 				for(tries = rn1(3,3); tries > 0; tries--)
-					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
-				otmp = mksobj_at(!rn2(3) ? STILETTO : !rn2(2) ? AXE : WAR_HAMMER, x, y, TRUE, FALSE);
+					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
+				otmp = mksobj_at(!rn2(3) ? STILETTO : !rn2(2) ? AXE : WAR_HAMMER, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, COPPER);
 				fix_object(otmp);
-				mksobj_at(WORTHLESS_PIECE_OF_WHITE_GLASS + rn2(WORTHLESS_PIECE_OF_VIOLET_GLAS - WORTHLESS_PIECE_OF_WHITE_GLASS + 1), x, y, TRUE, FALSE);
+				mksobj_at(WORTHLESS_PIECE_OF_WHITE_GLASS + rn2(WORTHLESS_PIECE_OF_VIOLET_GLAS - WORTHLESS_PIECE_OF_WHITE_GLASS + 1), x, y, NO_MKOBJ_FLAGS);
 			} else if(rn2(10)){	//9 out of 100
-				otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+				otmp = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, SILVER);
 				fix_object(otmp);
 				for(tries = rn1(3,3); tries > 0; tries--){
-					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 				}
 				if(find_sawant()){
-					otmp = mksobj(find_sawant(), TRUE, FALSE);
+					otmp = mksobj(find_sawant(), NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
-					otmp = mksobj_at(PISTOL, x, y, TRUE, FALSE);
+					otmp = mksobj_at(PISTOL, x, y, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SILVER);
 					fix_object(otmp);
-					otmp = mksobj_at(BULLET, x, y, TRUE, FALSE);
+					otmp = mksobj_at(BULLET, x, y, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, SILVER);
 					otmp->quan += rn1(20,20);
 					fix_object(otmp);
 				}
-				otmp = mksobj_at(VIBROBLADE, x, y, TRUE, FALSE);
+				otmp = mksobj_at(VIBROBLADE, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, SILVER);
 				fix_object(otmp);
-				mksobj_at(AMBER + rn2(JADE - AMBER + 1), x, y, TRUE, FALSE);
+				mksobj_at(AMBER + rn2(JADE - AMBER + 1), x, y, NO_MKOBJ_FLAGS);
 			} else if(rn2(10)){	//9 out of 1000
-				otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+				otmp = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
 				for(tries = rn1(3,3); tries > 0; tries--){
-					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, GOLD);
 					fix_object(otmp);
 				}
 				if(find_gawant()){
-					otmp = mksobj(find_gawant(), TRUE, FALSE);
+					otmp = mksobj(find_gawant(), NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, GOLD);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
-					otmp = mksobj_at(ARM_BLASTER, x, y, TRUE, FALSE);
+					otmp = mksobj_at(ARM_BLASTER, x, y, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, GOLD);
 					fix_object(otmp);
 				}
-				otmp = mksobj_at(FORCE_PIKE, x, y, TRUE, FALSE);
+				otmp = mksobj_at(FORCE_PIKE, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
-				mksobj_at(RUBY + rn2(AQUAMARINE - RUBY + 1), x, y, TRUE, FALSE);
+				mksobj_at(RUBY + rn2(AQUAMARINE - RUBY + 1), x, y, NO_MKOBJ_FLAGS);
 			} else {			//1 out of 1000
-				otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+				otmp = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, PLATINUM);
 				fix_object(otmp);
 				for(tries = rn1(3,3); tries > 0; tries--){
-					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 				}
 				if(find_pawant()){
-					otmp = mksobj(find_pawant(), TRUE, FALSE);
+					otmp = mksobj(find_pawant(), NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 					place_object(otmp, x, y);
 				} else {
-					otmp = mksobj_at(BFG, x, y, TRUE, FALSE);
+					otmp = mksobj_at(BFG, x, y, NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 				}
 				//Atma Weapon 1/20000
-				otmp = mksobj_at(BEAMSWORD, x, y, TRUE, TRUE);
+				otmp = mksobj_at(BEAMSWORD, x, y, MKOBJ_ARTIF);
 				set_material_gm(otmp, PLATINUM);
 				fix_object(otmp);
-				mksobj_at(MAGICITE_CRYSTAL + rn2(STAR_SAPPHIRE - MAGICITE_CRYSTAL + 1), x, y, TRUE, FALSE);
+				mksobj_at(MAGICITE_CRYSTAL + rn2(STAR_SAPPHIRE - MAGICITE_CRYSTAL + 1), x, y, NO_MKOBJ_FLAGS);
 			}
 		} else {
 			//Unknown rusted scrap pile
-			otmp = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+			otmp = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 			if(otmp){
 				set_material_gm(otmp, IRON);
 				otmp->oeroded2 = 2;
 				fix_object(otmp);
 			}
 			for(tries = rn1(2,2); tries > 0; tries--){
-				otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+				otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(otmp, IRON);
 				otmp->oeroded2 = 2;
 				fix_object(otmp);
 			}
 			for(tries = rn1(4,4); tries > 0; tries--){
-				otmp = mksobj_at(SCRAP, x, y, TRUE, FALSE);
+				otmp = mksobj_at(SCRAP, x, y, NO_MKOBJ_FLAGS);
 			}
 		}
 	}
@@ -3898,13 +3898,13 @@ int typ;
 		
 		switch(rn2(3)){
 			case 0:
-				mkobj_at(WEAPON_CLASS, x, y, TRUE);
+				mkobj_at(WEAPON_CLASS, x, y, MKOBJ_ARTIF);
 			break;
 			case 1:
-				mkobj_at(ARMOR_CLASS, x, y, TRUE);
+				mkobj_at(ARMOR_CLASS, x, y, MKOBJ_ARTIF);
 			break;
 			case 2:
-				mkobj_at(TOOL_CLASS, x, y, TRUE);
+				mkobj_at(TOOL_CLASS, x, y, MKOBJ_ARTIF);
 			break;
 		}
 	}
@@ -3924,7 +3924,7 @@ int typ;
 			good = TRUE;
 		else continue;
 		
-		otmp = mksobj(FOSSIL, TRUE, FALSE);
+		otmp = mksobj(FOSSIL, NO_MKOBJ_FLAGS);
 		otmp->corpsenm = PM_ANCIENT_NUPPERIBO;
 		fix_object(otmp);
 		place_object(otmp, x, y);
@@ -4565,33 +4565,29 @@ struct mkroom *sroom;
 			if(!rn2(5))
 			    (void) mk_tt_object(CORPSE, sx, sy);
 			if(!rn2(10))	/* lots of treasure buried with dead */
-			    (void) mksobj_at((rn2(3)) ? BOX : CHEST,
-					     sx, sy, TRUE, FALSE);
+			    (void) mksobj_at((rn2(3)) ? BOX : CHEST, sx, sy, NO_MKOBJ_FLAGS);
 			if (!rn2(5))
 			    make_grave(sx, sy, (char *)0);
 			} else if(rn2(2)) make_grave(sx, sy, (char *)0);
 			break;
 		    case BEEHIVE:
 			if(!rn2(3))
-			    (void) mksobj_at(LUMP_OF_ROYAL_JELLY,
-					     sx, sy, TRUE, FALSE);
+			    (void) mksobj_at(LUMP_OF_ROYAL_JELLY, sx, sy, NO_MKOBJ_FLAGS);
 			if(rn2(3))
-			    (void) mksobj_at(HONEYCOMB,
-					     sx, sy, TRUE, FALSE);
+			    (void) mksobj_at(HONEYCOMB,  sx, sy, NO_MKOBJ_FLAGS);
 			break;
 		    case BARRACKS:
 			if(In_outlands(&u.uz)){
 				if(!rn2(10)){
 					int i = 0;
 					struct obj *chest, *otmp;
-					chest = mksobj_at((rn2(3)) ? BOX : CHEST,
-							 sx, sy, TRUE, FALSE);
+					chest = mksobj_at((rn2(3)) ? BOX : CHEST, sx, sy, NO_MKOBJ_FLAGS);
 					set_material_gm(chest, IRON);
 					fix_object(chest);
 					for(i = rnd(4); i > 0; i--) switch(rnd(4)){
 						case 1:
 							if(find_riwant()){
-								otmp = mksobj(find_riwant(), TRUE, FALSE);
+								otmp = mksobj(find_riwant(), NO_MKOBJ_FLAGS);
 								set_material_gm(otmp, IRON);
 								fix_object(otmp);
 								add_to_container(chest, otmp);
@@ -4599,14 +4595,14 @@ struct mkroom *sroom;
 						break;
 						case 2:
 							if(find_iring() > 0){
-								otmp = mksobj(find_iring(), TRUE, FALSE);
+								otmp = mksobj(find_iring(), NO_MKOBJ_FLAGS);
 								set_material_gm(otmp, IRON);
 								fix_object(otmp);
 								add_to_container(chest, otmp);
 							}
 						break;
 						case 3:
-							otmp = mksobj(UPGRADE_KIT, FALSE, FALSE);
+							otmp = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
 							set_material_gm(otmp, IRON);
 							fix_object(otmp);
 							add_to_container(chest, otmp);
@@ -4614,21 +4610,21 @@ struct mkroom *sroom;
 						case 4:
 							switch(rn2(4)){
 								case 0:
-									otmp = mksobj(WHISTLE, FALSE, FALSE);
+									otmp = mksobj(WHISTLE, MKOBJ_NOINIT);
 									fix_object(otmp);
 								break;
 								case 1:
-									otmp = mksobj(MAGIC_WHISTLE, FALSE, FALSE);
+									otmp = mksobj(MAGIC_WHISTLE, MKOBJ_NOINIT);
 									set_material_gm(otmp, IRON);
 									fix_object(otmp);
 								break;
 								case 2:
-									otmp = mksobj(BELL, FALSE, FALSE);
+									otmp = mksobj(BELL, MKOBJ_NOINIT);
 									set_material_gm(otmp, IRON);
 									fix_object(otmp);
 								break;
 								case 3:
-									otmp = mksobj(BUGLE, FALSE, FALSE);
+									otmp = mksobj(BUGLE, MKOBJ_NOINIT);
 									set_material_gm(otmp, IRON);
 									fix_object(otmp);
 								break;
@@ -4641,12 +4637,11 @@ struct mkroom *sroom;
 			} else if(!rn2(20)){
 				/* the payroll and some loot */
 				struct obj *chest, *gold;
-				gold = mksobj(GOLD_PIECE, TRUE, FALSE);
+				gold = mksobj(GOLD_PIECE, NO_MKOBJ_FLAGS);
 				gold->quan = (long) rn1(9 * level_difficulty(), level_difficulty()); //1 - 10
 				u.spawnedGold += gold->quan;
 				gold->owt = weight(gold);
-			    chest = mksobj_at((rn2(3)) ? BOX : CHEST,
-					     sx, sy, TRUE, FALSE);
+			    chest = mksobj_at((rn2(3)) ? BOX : CHEST, sx, sy, NO_MKOBJ_FLAGS);
 				add_to_container(chest, gold);
 				chest->owt = weight(chest);
 			}
@@ -4668,40 +4663,40 @@ struct mkroom *sroom;
 				struct obj *otmp;
 				switch(rn2(5)){
 					case 0:
-						(void) mksobj_at(FOOD_RATION, sx, sy, TRUE, FALSE);
+						(void) mksobj_at(FOOD_RATION, sx, sy, NO_MKOBJ_FLAGS);
 					break;
 					case 1:
 						switch(rn2(6)){
 							case 0:
-								(void) mksobj_at(FORTUNE_COOKIE, sx, sy, TRUE, FALSE);
+								(void) mksobj_at(FORTUNE_COOKIE, sx, sy, NO_MKOBJ_FLAGS);
 							break;
 							case 1:
-								(void) mksobj_at(CANDY_BAR, sx, sy, TRUE, FALSE);
+								(void) mksobj_at(CANDY_BAR, sx, sy, NO_MKOBJ_FLAGS);
 							break;
 							case 2:
-								(void) mksobj_at(APPLE, sx, sy, TRUE, FALSE);
+								(void) mksobj_at(APPLE, sx, sy, NO_MKOBJ_FLAGS);
 							break;
 							case 3:
-								(void) mksobj_at(ORANGE, sx, sy, TRUE, FALSE);
+								(void) mksobj_at(ORANGE, sx, sy, NO_MKOBJ_FLAGS);
 							break;
 							case 4:
-								(void) mksobj_at(PEAR, sx, sy, TRUE, FALSE);
+								(void) mksobj_at(PEAR, sx, sy, NO_MKOBJ_FLAGS);
 							break;
 							case 5:
-								(void) mksobj_at(CREAM_PIE, sx, sy, TRUE, FALSE);
+								(void) mksobj_at(CREAM_PIE, sx, sy, NO_MKOBJ_FLAGS);
 							break;
 						}
 					break;
 					case 2:
-						otmp = mksobj_at(SLIME_MOLD, sx, sy, TRUE, FALSE);
+						otmp = mksobj_at(SLIME_MOLD, sx, sy, NO_MKOBJ_FLAGS);
 						otmp->spe = fruitadd("loaf of baked bread");
 					break;
 					case 3:
-						otmp = mksobj_at(SLIME_MOLD, sx, sy, TRUE, FALSE);
+						otmp = mksobj_at(SLIME_MOLD, sx, sy, NO_MKOBJ_FLAGS);
 						otmp->spe = fruitadd("honey drop");
 					break;
 					case 4:
-						otmp = mksobj_at(TIN, sx, sy, TRUE, FALSE);
+						otmp = mksobj_at(TIN, sx, sy, NO_MKOBJ_FLAGS);
 						switch(rn2(4)){
 							case 0:
 								otmp->corpsenm = PM_LICHEN;
@@ -4720,7 +4715,7 @@ struct mkroom *sroom;
 				}
 			} else {
 				if(!rn2(3))
-					(void) mkobj_at(FOOD_CLASS, sx, sy, FALSE);
+					(void) mkobj_at(FOOD_CLASS, sx, sy, NO_MKOBJ_FLAGS);
 			}
 			break;
 		}
@@ -4730,12 +4725,12 @@ struct mkroom *sroom;
 		{
 		  struct obj *chest, *gold;
 		  (void) somexy(sroom, &mm);
-		  gold = mksobj(GOLD_PIECE, TRUE, FALSE);
+		  gold = mksobj(GOLD_PIECE, NO_MKOBJ_FLAGS);
 		  gold->quan = (long) rn1(50 * level_difficulty(), 10);
 		  u.spawnedGold += gold->quan;
 		  gold->owt = weight(gold);
 		  /* the royal coffers */
-		  chest = mksobj_at(CHEST, mm.x, mm.y, TRUE, FALSE);
+		  chest = mksobj_at(CHEST, mm.x, mm.y, NO_MKOBJ_FLAGS);
 		  chest->spe = 2; /* so it can be found later */
 		  add_to_container(chest, gold);
 		  chest->owt = weight(chest);
@@ -4961,8 +4956,8 @@ struct mkroom *croom; /* NULL == choose random room */
 	for(pos.x=sroom->lx-1; pos.x <= sroom->hx+1; pos.x++){
 		for(pos.y=sroom->ly-1; pos.y <= sroom->hy+1; pos.y++){
 			if(levl[pos.x][pos.y].typ >= STONE && levl[pos.x][pos.y].typ <= DBWALL){
-				if(rn2(6)) mksobj_at(SPE_BLANK_PAPER, pos.x, pos.y, TRUE, FALSE);
-				else mkobj_at(SPBOOK_CLASS, pos.x, pos.y, FALSE);
+				if(rn2(6)) mksobj_at(SPE_BLANK_PAPER, pos.x, pos.y, NO_MKOBJ_FLAGS);
+				else mkobj_at(SPBOOK_CLASS, pos.x, pos.y, NO_MKOBJ_FLAGS);
 			}
 		}
 	}
@@ -5012,7 +5007,7 @@ struct mkroom *croom; /* NULL == choose random room */
 	for(pos.x=sroom->lx; pos.x <= sroom->hx; pos.x++){
 		for(pos.y=sroom->ly; pos.y <= sroom->hy; pos.y++){
 			if(!rn2(8)){
-				otmp = mkobj_at(WEAPON_CLASS, pos.x, pos.y, FALSE);
+				otmp = mkobj_at(WEAPON_CLASS, pos.x, pos.y, NO_MKOBJ_FLAGS);
 				if(rn2(3) && (is_rustprone(otmp) || is_flammable(otmp))){
 					otmp->oeroded = rn2(4);
 				} else if(is_corrodeable(otmp) || is_rottable(otmp)){
@@ -5023,7 +5018,7 @@ struct mkroom *croom; /* NULL == choose random room */
 				}
 			}
 			if(!rn2(8)){
-				otmp = mkobj_at(ARMOR_CLASS, pos.x, pos.y, FALSE);
+				otmp = mkobj_at(ARMOR_CLASS, pos.x, pos.y, NO_MKOBJ_FLAGS);
 				if(rn2(3) && (is_rustprone(otmp) || is_flammable(otmp))){
 					otmp->oeroded = rn2(4);
 				} else if(is_corrodeable(otmp) || is_rottable(otmp)){
@@ -5034,7 +5029,7 @@ struct mkroom *croom; /* NULL == choose random room */
 				}
 			}
 			if(!rn2(4)){
-				otmp = mkobj_at(WEAPON_CLASS, pos.x, pos.y, FALSE);
+				otmp = mkobj_at(WEAPON_CLASS, pos.x, pos.y, NO_MKOBJ_FLAGS);
 				if(rn2(3) && (is_rustprone(otmp) || is_flammable(otmp))){
 					otmp->oeroded = rn2(4);
 				} else if(is_corrodeable(otmp) || is_rottable(otmp)){
@@ -5042,7 +5037,7 @@ struct mkroom *croom; /* NULL == choose random room */
 				}
 			}
 			if(!rn2(4)){
-				otmp = mkobj_at(ARMOR_CLASS, pos.x, pos.y, FALSE);
+				otmp = mkobj_at(ARMOR_CLASS, pos.x, pos.y, NO_MKOBJ_FLAGS);
 				if(rn2(3) && (is_rustprone(otmp) || is_flammable(otmp))){
 					otmp->oeroded = rn2(4);
 				} else if(is_corrodeable(otmp) || is_rottable(otmp)){
@@ -5267,7 +5262,7 @@ register int edge; /* Allows room walls to intrude slightly into river. */
 	/* Leave boulders scattered around, dislodged by erosion.
 		Also, because they are fun to push into water.  Plunk! */
 	if (levl[x][y].typ == ROOM && !rn2(13))
-		(void) mksobj_at(BOULDER, x, y, TRUE, FALSE);
+		(void) mksobj_at(BOULDER, x, y, NO_MKOBJ_FLAGS);
 	/* Sea monsters */
 	if (levl[x][y].typ == POOL){
 		if(!rn2(85-depth(&u.uz))) {
@@ -5278,7 +5273,7 @@ register int edge; /* Allows room walls to intrude slightly into river. */
 			(void) makemon(&mons[monster], x, y, NO_MM_FLAGS);
 		}
 		if(!rn2(140-depth(&u.uz))){
-			mkobj_at(RANDOM_CLASS, x, y, FALSE);
+			mkobj_at(RANDOM_CLASS, x, y, NO_MKOBJ_FLAGS);
 		}
 		else if(!rn2(100-depth(&u.uz))){
 		  (void) mkgold((long) rn1(10 * level_difficulty(),10), x, y);
@@ -5320,7 +5315,7 @@ register int edge; /* Allows room walls to intrude slightly into river. */
 			(void) makemon(&mons[monster], x, y, NO_MM_FLAGS);
 		}
 		if(!rn2(140-depth(&u.uz))){
-			mkobj_at(RANDOM_CLASS, x, y, FALSE);
+			mkobj_at(RANDOM_CLASS, x, y, NO_MKOBJ_FLAGS);
 		}
 		else if(!rn2(100-depth(&u.uz))){
 		  (void) mkgold((long) rn1(10 * level_difficulty(),10), x, y);
@@ -5362,7 +5357,7 @@ register int edge; /* Allows room walls to intrude slightly into river. */
 			(void) makemon(&mons[monster], x, y, NO_MM_FLAGS);
 		}
 		if(!rn2(140-depth(&u.uz))){
-			mkobj_at(RANDOM_CLASS, x, y, FALSE);
+			mkobj_at(RANDOM_CLASS, x, y, NO_MKOBJ_FLAGS);
 		}
 		else if(!rn2(100-depth(&u.uz))){
 		  (void) mkgold((long) rn1(10 * level_difficulty(),10), x, y);
@@ -5474,7 +5469,7 @@ mkisland() /* John Harris, modified from mktemple & mkshop,
 	x = (((sroom->hx - sroom->lx) / 2) + sroom->lx);
 	y = (((sroom->hy - sroom->ly) / 2) + sroom->ly);
 	/* Make the treasure, add gold to it, bury & mark it */
-	otmp = mksobj_at(CHEST, x, y, TRUE, TRUE);
+	otmp = mksobj_at(CHEST, x, y, MKOBJ_ARTIF);
 	set_material_gm(otmp, IRON);
 	fix_object(otmp);
 	ogold = mkgold((long)rn1(u_depth * 100 + 200, 250), x, y);
@@ -5591,11 +5586,11 @@ mkslabroom()
 		if(remaining){
 			remaining = rnd(remaining);
 			if(!flags.made_first && !(--remaining))
-				mksobj_at(FIRST_WORD, x, y, TRUE, FALSE);
+				mksobj_at(FIRST_WORD, x, y, NO_MKOBJ_FLAGS);
 			else if(!flags.made_divide && !(--remaining))
-				mksobj_at(DIVIDING_WORD, x, y, TRUE, FALSE);
+				mksobj_at(DIVIDING_WORD, x, y, NO_MKOBJ_FLAGS);
 			else if(!flags.made_life && !(--remaining))
-				mksobj_at(NURTURING_WORD, x, y, TRUE, FALSE);
+				mksobj_at(NURTURING_WORD, x, y, NO_MKOBJ_FLAGS);
 		}
 	}
 	
@@ -5619,7 +5614,7 @@ mksgardenstatueat(x,y)
 	struct obj *otmp;
 	t = t_at(x, y);
 	if(!t || t->ttyp == STATUE_TRAP){
-		otmp = mksobj_at(STATUE, x, y, TRUE, TRUE);
+		otmp = mksobj_at(STATUE, x, y, MKOBJ_ARTIF);
 		if(otmp){
 			if(t && t->ttyp != MAGIC_PORTAL)
 				deltrap(t);
@@ -5662,12 +5657,12 @@ mksgarden()
 	}
 	
 	for(x = sroom->lx+1; x <= sroom->hx-1; x++) {
-		mksobj_at(FIGURINE, x, sroom->hy-1, TRUE, TRUE);
-		mksobj_at(FIGURINE, x, sroom->ly+1, TRUE, TRUE);
+		mksobj_at(FIGURINE, x, sroom->hy-1, MKOBJ_ARTIF);
+		mksobj_at(FIGURINE, x, sroom->ly+1, MKOBJ_ARTIF);
 	}
 	for(y = (sroom->ly)+2; y <= (sroom->hy)-2; y++) {
-		mksobj_at(FIGURINE, sroom->hx-1, y, TRUE, TRUE);
-		mksobj_at(FIGURINE, sroom->lx+1, y, TRUE, TRUE);
+		mksobj_at(FIGURINE, sroom->hx-1, y, MKOBJ_ARTIF);
+		mksobj_at(FIGURINE, sroom->lx+1, y, MKOBJ_ARTIF);
 	}
 }
 

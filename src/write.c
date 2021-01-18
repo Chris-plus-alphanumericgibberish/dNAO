@@ -275,7 +275,7 @@ found_ward:
 	/* KMH, conduct */
 	u.uconduct.literate++;
 
-	new_obj = mksobj(i, FALSE, FALSE);
+	new_obj = mksobj(i, MKOBJ_NOINIT);
 	new_obj->bknown = (paper->bknown && pen->bknown);
 	if(i==SCR_WARD){
 		new_obj->oward = theward;

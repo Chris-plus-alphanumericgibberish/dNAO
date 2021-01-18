@@ -3696,8 +3696,7 @@ boolean catchup;	/* restoring a level */
 		    return(0);
 	    if (ttmp->ttyp == LANDMINE || ttmp->ttyp == BEAR_TRAP) {
 		/* convert to an object */
-		otmp = mksobj((ttmp->ttyp == LANDMINE) ? LAND_MINE :
-				BEARTRAP, TRUE, FALSE);
+		otmp = mksobj((ttmp->ttyp == LANDMINE) ? LAND_MINE : BEARTRAP, NO_MKOBJ_FLAGS);
 		otmp->quan= 1;
 		otmp->owt = weight(otmp);
 		(void) mpickobj(shkp, otmp);

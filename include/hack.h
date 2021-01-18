@@ -210,6 +210,11 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define MM_ADJACENTOK	  0x100 /* it is acceptable to use adjacent coordinates */
 #define MM_ADJACENTSTRICT 0x200 /* ...but only ONE removed.*/
 
+/* flags to control mksobj() et al */
+#define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */
+#define MKOBJ_ARTIF		0x01	/* allow to become a random artifact at standard generation rates */
+#define MKOBJ_NOINIT	0x02	/* skip standard initialization of the object, like randomized enchantment and material */
+
 /* special mhpmax value when loading bones monster to flag as extinct or genocided */
 #define DEFUNCT_MONSTER	(-100)
 

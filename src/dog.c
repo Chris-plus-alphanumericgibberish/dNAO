@@ -247,7 +247,7 @@ makedog()
 #ifdef STEED
 	/* Horses already wear a saddle */
 	if ((pettype == PM_PONY || pettype == PM_GIANT_SPIDER || pettype == PM_SMALL_CAVE_LIZARD || pettype == PM_RIDING_PSEUDODRAGON)
-		&& !!(otmp = mksobj(SADDLE, TRUE, FALSE))
+		&& !!(otmp = mksobj(SADDLE, 0))
 	) {
 	    if (mpickobj(mtmp, otmp))
 		panic("merged saddle?");

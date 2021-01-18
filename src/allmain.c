@@ -2626,7 +2626,7 @@ newgame()
 		int inherited;
 		struct obj *otmp;
 		do{inherited = do_inheritor_menu();}while(!inherited);
-		otmp = mksobj((int)artilist[inherited].otyp, FALSE, FALSE);
+		otmp = mksobj((int)artilist[inherited].otyp, MKOBJ_NOINIT);
 	    otmp = oname(otmp, artilist[inherited].name);
 		expert_weapon_skill(weapon_type(otmp));
 		discover_artifact(inherited);

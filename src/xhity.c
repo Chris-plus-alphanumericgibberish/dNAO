@@ -225,7 +225,7 @@ struct monst * mdef;
 			for (i = rnd(8); i>0; i--){
 				dx = rn2(3) - 1;
 				dy = rn2(3) - 1;
-				otmp = mksobj(ROCK, TRUE, FALSE);
+				otmp = mksobj(ROCK, NO_MKOBJ_FLAGS);
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				if ((dx || dy) && !DEADMONSTER(mdef)){
@@ -8640,7 +8640,7 @@ int vis;
 				int num = monsndx(mdef->data);
 				if (magr->mtame && !magr->isminion &&
 					!((mvitals[num].mvflags & G_NOCORPSE) || get_mx(mdef, MX_ESUM))) {
-					struct obj *virtualcorpse = mksobj(CORPSE, FALSE, FALSE);
+					struct obj *virtualcorpse = mksobj(CORPSE, MKOBJ_NOINIT);
 					int nutrit;
 
 					virtualcorpse->corpsenm = num;
@@ -10595,7 +10595,7 @@ int vis;
 
 		/* cancellation */
 	case AD_CNCL:
-		if (cancel_monst(mdef, mksobj(SPE_CANCELLATION, FALSE, FALSE), FALSE, TRUE, FALSE, !rn2(4) ? rnd(mlev(magr)) : 0)) {
+		if (cancel_monst(mdef, mksobj(SPE_CANCELLATION, MKOBJ_NOINIT), FALSE, TRUE, FALSE, !rn2(4) ? rnd(mlev(magr)) : 0)) {
 			if (youdef) {
 				if (vis&VIS_MAGR)
 				{

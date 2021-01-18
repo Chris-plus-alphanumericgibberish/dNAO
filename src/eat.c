@@ -527,7 +527,7 @@ register struct obj *otmp;
 				 || otmp->unpaid)) {
 					/* create a dummy duplicate to put on bill */
 					verbalize("Hey, that was really rare!");
-					pseudo = mksobj(POT_GAIN_LEVEL, FALSE, FALSE);
+					pseudo = mksobj(POT_GAIN_LEVEL, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					bill_dummy_object(pseudo);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
@@ -4448,7 +4448,7 @@ floorfood(verb,corpsecheck)	/* get food from floor or pack */
 		if ((c = yn_function(qbuf, ynqchars, 'n')) == 'y') {
 		    u.utrap = u.utraptype = 0;
 		    deltrap(ttmp);
-		    return mksobj(BEARTRAP, TRUE, FALSE);
+		    return mksobj(BEARTRAP, NO_MKOBJ_FLAGS);
 		} else if (c == 'q') {
 		    return (struct obj *)0;
 		}

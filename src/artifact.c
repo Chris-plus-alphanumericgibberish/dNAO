@@ -460,7 +460,7 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 							!rn2(2) ? SHORT_SWORD :
 									  ATHAME;
 			}
-			otmp = mksobj(otyp, TRUE, FALSE);
+			otmp = mksobj(otyp, NO_MKOBJ_FLAGS);
 		}
 		/* christen the artifact */
 	    otmp = oname(otmp, a->name);
@@ -2596,7 +2596,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 	} // nvPh - !cancelled
 	if (pen->ovar1&SEAL_SHIRO){
 		struct obj *otmp;
-		otmp = mksobj((mvitals[PM_ACERERAK].died > 0) ? BOULDER : ROCK, FALSE, FALSE);
+		otmp = mksobj((mvitals[PM_ACERERAK].died > 0) ? BOULDER : ROCK, MKOBJ_NOINIT);
 		projectile(magr, otmp, (void *)0, HMON_FIRED, mdef->mx, mdef->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
 		if(mdef->mhp <= 0) return vis;//Monster was killed by throw and we should stop.
 	} // nvPh potential - invisible?
@@ -5150,8 +5150,8 @@ arti_invoke(obj)
 	break;
 	case CREATE_AMMO: {
 	    struct obj *otmp;
-		if(obj->oartifact == ART_LONGBOW_OF_DIANA) otmp = mksobj(ARROW, TRUE, FALSE);
-		else if(obj->oartifact == ART_FUMA_ITTO_NO_KEN) otmp = mksobj(SHURIKEN, TRUE, FALSE);
+		if(obj->oartifact == ART_LONGBOW_OF_DIANA) otmp = mksobj(ARROW, NO_MKOBJ_FLAGS);
+		else if(obj->oartifact == ART_FUMA_ITTO_NO_KEN) otmp = mksobj(SHURIKEN, NO_MKOBJ_FLAGS);
 		else if(obj->oartifact == ART_SILVER_STARLIGHT){
 			if(cansee(u.ux, u.uy)) pline("Silver starlight shines upon your blade!");
 			obj->cursed = 0;
@@ -5160,12 +5160,12 @@ arti_invoke(obj)
 			obj->oeroded2= 0;
 			obj->oerodeproof = 1;
 			if(obj->spe < 3) obj->spe = 3;
-			otmp = mksobj(SHURIKEN, TRUE, FALSE);
-		} else if(obj->oartifact == ART_YOICHI_NO_YUMI) otmp = mksobj(YA, TRUE, FALSE);
-		else if(obj->oartifact == ART_WRATHFUL_SPIDER) otmp = mksobj(DROVEN_BOLT, TRUE, FALSE);
-		else if(obj->oartifact == ART_LIECLEAVER) otmp = mksobj(DROVEN_BOLT, TRUE, FALSE);
-		else if(obj->oartifact == ART_BELTHRONDING) otmp = mksobj(ELVEN_ARROW, TRUE, FALSE);
-		else otmp = mksobj(ROCK, TRUE, FALSE);
+			otmp = mksobj(SHURIKEN, NO_MKOBJ_FLAGS);
+		} else if(obj->oartifact == ART_YOICHI_NO_YUMI) otmp = mksobj(YA, NO_MKOBJ_FLAGS);
+		else if(obj->oartifact == ART_WRATHFUL_SPIDER) otmp = mksobj(DROVEN_BOLT, NO_MKOBJ_FLAGS);
+		else if(obj->oartifact == ART_LIECLEAVER) otmp = mksobj(DROVEN_BOLT, NO_MKOBJ_FLAGS);
+		else if(obj->oartifact == ART_BELTHRONDING) otmp = mksobj(ELVEN_ARROW, NO_MKOBJ_FLAGS);
+		else otmp = mksobj(ROCK, NO_MKOBJ_FLAGS);
 
 	    if (!otmp) goto nothing_special;
 	    otmp->blessed = obj->blessed;
@@ -5268,7 +5268,7 @@ arti_invoke(obj)
 			}
 			else if(u.dx || u.dy) {
 				pline("Death Reborn Revolution!");
-				pseudo = mksobj(SPE_MAGIC_MISSILE, FALSE, FALSE);
+				pseudo = mksobj(SPE_MAGIC_MISSILE, MKOBJ_NOINIT);
 				pseudo->blessed = pseudo->cursed = 0;
 				pseudo->quan = 20L;			/* do not let useup get it */
 				weffects(pseudo);
@@ -5340,7 +5340,7 @@ arti_invoke(obj)
 			}
 			else if(u.dx || u.dy) {
 				pline("Dead Scream.");
-				pseudo = mksobj(SPE_MAGIC_MISSILE, FALSE, FALSE);
+				pseudo = mksobj(SPE_MAGIC_MISSILE, MKOBJ_NOINIT);
 				pseudo->blessed = pseudo->cursed = 0;
 				pseudo->quan = 20L;			/* do not let useup get it */
 				weffects(pseudo);
@@ -5466,7 +5466,7 @@ arti_invoke(obj)
 				bhitpos.x = u.ux;
 				bhitpos.y = u.uy;
 				pline("Getsuga Tensho!");
-				pseudo = mksobj(SPE_FORCE_BOLT, FALSE, FALSE);
+				pseudo = mksobj(SPE_FORCE_BOLT, MKOBJ_NOINIT);
 				pseudo->blessed = pseudo->cursed = 0;
 				pseudo->quan = 20L;
 				while(range-- > 0) {
@@ -5618,7 +5618,7 @@ arti_invoke(obj)
 				coord cc;
 
 				energy = toosoon ? 25 : 15;
-				pseudo = mksobj(SPE_FIREBALL, FALSE, FALSE);
+				pseudo = mksobj(SPE_FIREBALL, MKOBJ_NOINIT);
 				pseudo->blessed = pseudo->cursed = 0;
 				pseudo->quan = 20L;			/* do not let useup get it */
 				role_skill = max(P_SKILL(uwep_skill_type()), P_SKILL(spell_skilltype(pseudo->otyp)) );
@@ -5793,7 +5793,7 @@ arti_invoke(obj)
 			for(i = 12; i > 0; i--){
 				int xadj=0;
 				int yadj=0;
-				otmp = mksobj(HEAVY_IRON_BALL, TRUE, FALSE);
+				otmp = mksobj(HEAVY_IRON_BALL, NO_MKOBJ_FLAGS);
 			    otmp->blessed = 0;
 			    otmp->cursed = 0;
 				if(u.dy == 0) yadj = d(1,3)-2;
@@ -6105,7 +6105,7 @@ arti_invoke(obj)
 						strcmp(buf, "Fiat!") == 0 ){//Fiat:  Let it be.  Creates food.  One charge.
 				if( (obj->spe > -7)){
 					exercise(A_WIS, TRUE);
-					otmp = mksobj(FOOD_RATION, TRUE, FALSE);
+					otmp = mksobj(FOOD_RATION, NO_MKOBJ_FLAGS);
 					hold_another_object(otmp, "Suddenly %s out.",
 				       aobjnam(otmp, "fall"), (const char *)0);
 					obj->spe--; // lose charge
@@ -6118,7 +6118,7 @@ arti_invoke(obj)
 				if( (obj->spe > -7) ){
 					exercise(A_WIS, TRUE);
 					exercise(A_WIS, TRUE);
-					pseudo = mksobj(SPE_LIGHT, FALSE, FALSE);
+					pseudo = mksobj(SPE_LIGHT, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->quan = 20L;			/* do not let useup get it */
 					litroom(TRUE,pseudo);
@@ -6132,13 +6132,13 @@ arti_invoke(obj)
 						strcmp(buf, "Ecce!") == 0 ){//Ecce:  See.  Casts detect monsters and detect unseen.  Two charges.
 				if( (obj->spe > -6) ){
 					exercise(A_WIS, TRUE);
-					pseudo = mksobj(SPE_DETECT_MONSTERS, FALSE, FALSE);
+					pseudo = mksobj(SPE_DETECT_MONSTERS, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
 					pseudo->quan = 20L;			/* do not let useup get it */
 					(void) peffects(pseudo);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
-					pseudo = mksobj(SPE_DETECT_UNSEEN, FALSE, FALSE);
+					pseudo = mksobj(SPE_DETECT_UNSEEN, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
 					pseudo->quan = 20L;			/* do not let useup get it */
@@ -6166,7 +6166,7 @@ arti_invoke(obj)
 			}
 			else if(strcmp(buf, "Rex") == 0){//Rex:  King.  Grants Levitation.  Three charges.
 				if( (artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights > 0) ){
-					pseudo = mksobj(SPE_LEVITATION, FALSE, FALSE);
+					pseudo = mksobj(SPE_LEVITATION, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
 					pseudo->quan = 23L;			/* do not let useup get it */
@@ -6179,7 +6179,7 @@ arti_invoke(obj)
 				else if( (obj->spe > -5) ){
 					exercise(A_WIS, TRUE);
 					exercise(A_DEX, TRUE);
-					pseudo = mksobj(SPE_LEVITATION, FALSE, FALSE);
+					pseudo = mksobj(SPE_LEVITATION, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
 					pseudo->quan = 23L;			/* do not let useup get it */
@@ -6226,13 +6226,13 @@ arti_invoke(obj)
 						strcmp(buf, "Fiat Justitia!") == 0 ){//Fiat Justitia:  Let justice be done.  Slows, fears and damages target.  Two charges.
 				if( (obj->spe > 1) ){
 					exercise(A_WIS, TRUE);
-					pseudo = mksobj(SPE_SLOW_MONSTER, FALSE, FALSE);
+					pseudo = mksobj(SPE_SLOW_MONSTER, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->quan = 20L;			/* do not let useup get it */
-					pseudo2 = mksobj(SPE_FORCE_BOLT, FALSE, FALSE);
+					pseudo2 = mksobj(SPE_FORCE_BOLT, MKOBJ_NOINIT);
 					pseudo2->blessed = pseudo2->cursed = 0;
 					pseudo2->quan = 20L;			/* do not let useup get it */
-					pseudo3 = mksobj(SPE_CAUSE_FEAR, FALSE, FALSE);
+					pseudo3 = mksobj(SPE_CAUSE_FEAR, MKOBJ_NOINIT);
 					pseudo3->blessed = pseudo3->cursed = 0;
 					pseudo3->quan = 20L;			/* do not let useup get it */
 					if(u.ulevel > 13) pseudo3->blessed = TRUE;
@@ -6266,7 +6266,7 @@ arti_invoke(obj)
 						strcmp(buf, "Lex Rex!") == 0 ){//Lex Rex:  Law is King.  Heals aflictions, removes curses.  Three charges.
 				if( (obj->spe > 2) ){
 					exercise(A_WIS, TRUE);
-					pseudo = mksobj(SPE_REMOVE_CURSE, FALSE, FALSE);
+					pseudo = mksobj(SPE_REMOVE_CURSE, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->quan = 20L;			/* do not let useup get it */
 					if(u.ulevel > 13) pseudo->blessed = TRUE;
@@ -6290,7 +6290,7 @@ arti_invoke(obj)
 						strcmp(buf, "Ecce!  Lex Rex.") == 0 ||
 						strcmp(buf, "Ecce!  Lex Rex!") == 0){//Ecce!  Lex Rex:  See!  Law is King.  Charms monsters.  Five charges.
 				if( (obj->spe > 4) ){
-					pseudo = mksobj(SPE_CHARM_MONSTER, FALSE, FALSE);
+					pseudo = mksobj(SPE_CHARM_MONSTER, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->quan = 20L;			/* do not let useup get it */
 					if(u.ulevel > 13) pseudo->blessed = TRUE;
@@ -6348,7 +6348,7 @@ arti_invoke(obj)
 							mtmp->mhp =  mtmp->mhpmax;
 						}
 					}
-					pseudo = mksobj(SPE_CHARM_MONSTER, FALSE, FALSE);
+					pseudo = mksobj(SPE_CHARM_MONSTER, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->quan = 20L;			/* do not let useup get it */
 					if(u.ulevel > 13) pseudo->blessed = TRUE;
@@ -6505,7 +6505,7 @@ arti_invoke(obj)
 					case 0:
 					break;
 					case SELECT_WHISTLE:
-					otmp = mksobj(MAGIC_WHISTLE, TRUE, FALSE);
+					otmp = mksobj(MAGIC_WHISTLE, NO_MKOBJ_FLAGS);
 					otmp->blessed = obj->blessed;
 					otmp->cursed = obj->cursed;
 					otmp->bknown = obj->bknown;
@@ -6513,7 +6513,7 @@ arti_invoke(obj)
 				       aobjnam(otmp, "fall"), (const char *)0);
 					break;
 					case SELECT_LEASH:
-					otmp = mksobj(LEASH, TRUE, FALSE);
+					otmp = mksobj(LEASH, NO_MKOBJ_FLAGS);
 					otmp->blessed = obj->blessed;
 					otmp->cursed = obj->cursed;
 					otmp->bknown = obj->bknown;
@@ -6521,7 +6521,7 @@ arti_invoke(obj)
 				       aobjnam(otmp, "fall"), (const char *)0);
 					break;
 					case SELECT_SADDLE:
-					otmp = mksobj(SADDLE, TRUE, FALSE);
+					otmp = mksobj(SADDLE, NO_MKOBJ_FLAGS);
 					otmp->blessed = obj->blessed;
 					otmp->cursed = obj->cursed;
 					otmp->bknown = obj->bknown;
@@ -6529,7 +6529,7 @@ arti_invoke(obj)
 				       aobjnam(otmp, "fall"), (const char *)0);
 					break;
 					case SELECT_TRIPE:
-					otmp = mksobj(TRIPE_RATION, TRUE, FALSE);
+					otmp = mksobj(TRIPE_RATION, NO_MKOBJ_FLAGS);
 					otmp->blessed = obj->blessed;
 					otmp->cursed = obj->cursed;
 					otmp->bknown = obj->bknown;
@@ -6537,7 +6537,7 @@ arti_invoke(obj)
 				       aobjnam(otmp, "fall"), (const char *)0);
 					break;
 					case SELECT_APPLE:
-					otmp = mksobj(APPLE, TRUE, FALSE);
+					otmp = mksobj(APPLE, NO_MKOBJ_FLAGS);
 					otmp->blessed = obj->blessed;
 					otmp->cursed = obj->cursed;
 					otmp->bknown = obj->bknown;
@@ -6545,7 +6545,7 @@ arti_invoke(obj)
 				       aobjnam(otmp, "fall"), (const char *)0);
 					break;
 					case SELECT_BANANA:
-					otmp = mksobj(BANANA, TRUE, FALSE);
+					otmp = mksobj(BANANA, NO_MKOBJ_FLAGS);
 					otmp->blessed = obj->blessed;
 					otmp->cursed = obj->cursed;
 					otmp->bknown = obj->bknown;
@@ -6996,7 +6996,7 @@ arti_invoke(obj)
 						}
 					break;
 					case COMMAND_AMMO:
-						otmp = mksobj(JAVELIN, TRUE, FALSE);
+						otmp = mksobj(JAVELIN, NO_MKOBJ_FLAGS);
 						if (!otmp) break;
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
@@ -7123,7 +7123,7 @@ arti_invoke(obj)
 						/* charged BofO */
 					}break;
 					case COMMAND_BULLETS:{
-						otmp = mksobj(SILVER_BULLET, TRUE, FALSE);
+						otmp = mksobj(SILVER_BULLET, NO_MKOBJ_FLAGS);
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
 						otmp->bknown = obj->bknown;
@@ -7140,7 +7140,7 @@ arti_invoke(obj)
 							aobjnam(otmp, "fall"), (const char *)0);
 					}break;
 					case COMMAND_ROCKETS:{
-						otmp = mksobj(ROCKET, TRUE, FALSE);
+						otmp = mksobj(ROCKET, NO_MKOBJ_FLAGS);
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
 						otmp->bknown = obj->bknown;
@@ -7159,7 +7159,7 @@ arti_invoke(obj)
 							annulusFunc = 0;
 							break;
 						}
-						otmp = mksobj(RAYGUN, TRUE, FALSE);
+						otmp = mksobj(RAYGUN, NO_MKOBJ_FLAGS);
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
 						otmp->bknown = obj->bknown;
@@ -7374,7 +7374,7 @@ arti_invoke(obj)
         case BURN_WARD: {
           if(uarms && uarms == obj){
             struct obj *scroll;
-            scroll = mksobj(SCR_WARDING, TRUE, FALSE);
+            scroll = mksobj(SCR_WARDING, NO_MKOBJ_FLAGS);
             scroll->blessed = obj->blessed;
             scroll->cursed = obj->cursed;
             seffects(scroll);
@@ -7387,7 +7387,7 @@ arti_invoke(obj)
               if(!getdir((char *)0))
                 break;
               struct obj *wand;
-              wand = mksobj(WAN_UNDEAD_TURNING, TRUE, FALSE);
+              wand = mksobj(WAN_UNDEAD_TURNING, NO_MKOBJ_FLAGS);
               wand->blessed = obj->blessed;
               wand->cursed = obj->cursed;
               wand->ovar1 = 1;
@@ -7413,7 +7413,7 @@ arti_invoke(obj)
               break;
           }
           struct obj *wand;
-          wand = mksobj(WAN_FIRE, TRUE, FALSE);
+          wand = mksobj(WAN_FIRE, NO_MKOBJ_FLAGS);
           wand->blessed = obj->blessed;
           wand->cursed= obj->cursed;
           wand->ovar1 = 1;
@@ -7463,20 +7463,20 @@ arti_invoke(obj)
             struct obj *otmp;
             switch(rn2(5)){
               case 0:
-                otmp = mksobj(TIN, TRUE, FALSE);
+                otmp = mksobj(TIN, NO_MKOBJ_FLAGS);
                 otmp->corpsenm = PM_LICHEN;
                 break;
               case 1:
-                otmp = mksobj(POT_BOOZE, TRUE, FALSE);
+                otmp = mksobj(POT_BOOZE, NO_MKOBJ_FLAGS);
                 break;
               case 2:
-                otmp = mksobj(SCR_MAGIC_MAPPING, TRUE, FALSE);
+                otmp = mksobj(SCR_MAGIC_MAPPING, NO_MKOBJ_FLAGS);
                 break;
               case 3:
-                otmp = mksobj(OILSKIN_CLOAK, TRUE, FALSE);
+                otmp = mksobj(OILSKIN_CLOAK, NO_MKOBJ_FLAGS);
                 break;
               case 4:
-                otmp = mksobj(CRYSTAL_HELM, TRUE, FALSE);
+                otmp = mksobj(CRYSTAL_HELM, NO_MKOBJ_FLAGS);
                 break;
             }
             otmp->blessed = obj->blessed;
@@ -7497,10 +7497,10 @@ arti_invoke(obj)
               case 0:
                 break;
               case COMMAND_IMPROVE_WEP:
-                scroll = mksobj(SCR_ENCHANT_WEAPON, TRUE, FALSE);
+                scroll = mksobj(SCR_ENCHANT_WEAPON, NO_MKOBJ_FLAGS);
                 break;
               case COMMAND_IMPROVE_ARM:
-                scroll = mksobj(SCR_ENCHANT_ARMOR, TRUE, FALSE);
+                scroll = mksobj(SCR_ENCHANT_ARMOR, NO_MKOBJ_FLAGS);
                 break;
           }
           scroll->blessed = obj->blessed;
@@ -7813,7 +7813,7 @@ arti_invoke(obj)
 		break;
 		case INVOKE_DARK:{
           struct obj *wand;
-		  wand = mksobj(WAN_DARKNESS, FALSE, FALSE);
+		  wand = mksobj(WAN_DARKNESS, MKOBJ_NOINIT);
           wand->spe = 1;
           wand->blessed = 1;
           wand->ovar1 = 1;
