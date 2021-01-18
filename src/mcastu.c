@@ -2282,7 +2282,7 @@ int tary;
 	int result = MM_MISS;	/* to store intermediary xhity-esque returns */
 
 	/* common to all summon spells */
-	int summonflags = (NO_MINVENT | MM_NOCOUNTBIRTH |
+	int summonflags = (NO_MINVENT | MM_NOCOUNTBIRTH | MM_ESUM |
 		((youagr || magr->mtame) ? MM_EDOG : 0) |
 		((!youagr && !magr->mpeaceful) ? MM_ANGRY : 0));
 
@@ -3954,7 +3954,7 @@ int tary;
 				else
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "hostile fiend"));
-				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
+				/* summon_minion marks mtmp as summoned */
 			}
 			else
 				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -3980,8 +3980,12 @@ int tary;
 				tarx = x(magr);
 				tary = y(magr);
 			}
-			mtmp = mk_roamer(&mons[PM_ANGEL], sgn(magr->data->maligntyp), tarx, tary, FALSE);
+			mtmp = makemon(&mons[PM_ANGEL], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
 			if (mtmp) {
+				add_mx(mtmp, MX_EMIN);
+				mtmp->isminion = TRUE;
+				EMIN(mtmp)->min_align = sgn(magr->data->maligntyp);
+
 				u.summonMonster = TRUE;
 				if (canspotmon(mtmp))
 					pline("%s %s!",
@@ -4027,7 +4031,7 @@ int tary;
 			}
 
 			do {
-				mtmp = makemon(aliens[rn2(SIZE(aliens))], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH);
+				mtmp = makemon(aliens[rn2(SIZE(aliens))], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
 			} while (!mtmp && tries++ < 10);
 			if (mtmp) {
 				u.summonMonster = TRUE;
@@ -4074,7 +4078,7 @@ int tary;
 			}
 
 			do {
-				mtmp = makemon(young[rn2(SIZE(young))], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH);
+				mtmp = makemon(young[rn2(SIZE(young))], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
 			} while (!mtmp && tries++ < 10);
 			if (mtmp) {
 				u.summonMonster = TRUE;
@@ -4105,7 +4109,7 @@ int tary;
 				tary = y(magr);
 			}
 
-			mtmp = makemon(magr->data, tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | NO_MINVENT);
+			mtmp = makemon(magr->data, tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | NO_MINVENT | MM_ESUM);
 			if (mtmp){
 				u.summonMonster = TRUE;
 				mtmp->mclone = 1;

@@ -7626,16 +7626,16 @@ arti_invoke(obj)
 			pline("Creatures from the grave surround you!");
 			do {
 			  switch (rn2(6)+1) {
-			case 1: mtmp = makemon(mkclass(S_VAMPIRE,0), u.ux, u.uy, NO_MM_FLAGS);
+			case 1: mtmp = makemon(mkclass(S_VAMPIRE,0), u.ux, u.uy, MM_ESUM);
 			   break;
 			case 2:
-			case 3: mtmp = makemon(mkclass(S_ZOMBIE,0), u.ux, u.uy, NO_MM_FLAGS);
+			case 3: mtmp = makemon(mkclass(S_ZOMBIE,0), u.ux, u.uy, MM_ESUM);
 			   break;
-			case 4: mtmp = makemon(mkclass(S_MUMMY,0), u.ux, u.uy, NO_MM_FLAGS);
+			case 4: mtmp = makemon(mkclass(S_MUMMY,0), u.ux, u.uy, MM_ESUM);
 			   break;
-			case 5: mtmp = makemon(mkclass(S_GHOST,0), u.ux, u.uy, NO_MM_FLAGS);
+			case 5: mtmp = makemon(mkclass(S_GHOST,0), u.ux, u.uy, MM_ESUM);
 			   break;
-				   default: mtmp = makemon(mkclass(S_WRAITH,0), u.ux, u.uy, NO_MM_FLAGS);
+				   default: mtmp = makemon(mkclass(S_WRAITH,0), u.ux, u.uy, MM_ESUM);
 			   break;
 			  }
 			  if ((mtmp2 = tamedog(mtmp, (struct obj *)0)) != 0){
@@ -8992,7 +8992,7 @@ read_necro(VOID_ARGS)
 					losepw(20);
 					summon_failed = FALSE;
 					for(i=max(1, d(1,20) - 16); i > 0; i--){
-						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
 							initedog(mtmp);
 							mtmp->m_lev += d(1,15) - 5;
@@ -9013,7 +9013,7 @@ read_necro(VOID_ARGS)
 					if(u.uen >= 10){
 						losepw(10);
 						summon_failed = FALSE;
-						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
 							initedog(mtmp);
 							EDOG(mtmp)->loyal = 1;
@@ -9027,7 +9027,7 @@ read_necro(VOID_ARGS)
 					losepw(30);
 					summon_failed = FALSE;
 					pm = &mons[PM_SHOGGOTH];
-					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						mtmp->mcrazed = 1;
 						mtmp->msleeping = 1;
@@ -9040,7 +9040,7 @@ read_necro(VOID_ARGS)
 					losepw(20);
 					summon_failed = FALSE;
 					for(i=max(1, d(1,10) - 2); i > 0; i--){
-						mtmp = makemon(&mons[oozes[rn2(11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+						mtmp = makemon(&mons[oozes[rn2(11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
 							initedog(mtmp);
 							mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
@@ -9060,7 +9060,7 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 60){
 					losepw(60);
 					summon_failed = FALSE;
-					mtmp = makemon(&mons[devils[rn2(12)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					mtmp = makemon(&mons[devils[rn2(12)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);
 						mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
@@ -9078,7 +9078,7 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 45){
 					losepw(45);
 					summon_failed = FALSE;
-					mtmp = makemon(&mons[demons[rn2(15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					mtmp = makemon(&mons[demons[rn2(15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);
 						if(!rn2(6)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);

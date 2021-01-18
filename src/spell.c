@@ -2735,7 +2735,7 @@ spiriteffects(power, atme)
 			for(i=dsize; i > 0; i--){
 				do pm = &mons[rn2(PM_LONG_WORM_TAIL)];
 				while( (pm->geno & (G_UNIQ|G_NOGEN)) || pm->mlevel >= u.ulevel+5);
-				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 				if(mon){
 					initedog(mon);
 					mark_mon_as_summoned(mon, &youmonst, 5, 0);
@@ -3725,7 +3725,7 @@ spiriteffects(power, atme)
 			struct monst *mon;
 			struct permonst *pm;
 			pm = choose_crystal_summon();
-			if(pm && (mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH))){
+			if(pm && (mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM))){
 				initedog(mon);
 				mark_mon_as_summoned(mon, &youmonst, 10+u.ulevel/2, 0);
 			} else return 0;

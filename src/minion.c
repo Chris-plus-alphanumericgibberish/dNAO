@@ -97,7 +97,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	}
 	
 	while (cnt > 0) {
-		int mmflags = (mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_NOCOUNTBIRTH;
+		int mmflags = MM_ESUM | ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_NOCOUNTBIRTH);
 	    mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
 	    if (mtmp) {
 			if (dtype == PM_ANGEL) {
@@ -163,8 +163,9 @@ boolean talk;
     if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
     } else {
-		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_EMIN);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
 		if (mon) {
+			add_mx(mon, MX_EMIN);
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
@@ -241,10 +242,12 @@ boolean angels;
     if (mtyp == NON_PM) {
 		mon = 0;
     } else {
-		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_EMIN);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_ESUM);
 		if (mon) {
+			add_mx(mon, MX_EMIN);
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
+			mark_mon_as_summoned(mon, (struct monst *)0, ESUMMON_PERMANENT, 0);
 		}
 	}
     if (mon) {

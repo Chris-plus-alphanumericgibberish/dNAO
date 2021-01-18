@@ -7251,15 +7251,24 @@ struct monst * summoner;
 int duration;
 int flags;
 {
-	// add component to mon
-	add_mx(mon, MX_ESUM);
+	/* check that mon was set up to be a summon */
+	if (!get_mx(mon, MX_ESUM)) {
+		impossible("%s not made as summon, fixing", m_monnam(mon));
+		add_mx(mon, MX_ESUM);
+		start_timer(ESUMMON_PERMANENT, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
+	}
+	/* set data */
 	mon->mextra_p->esum_p->summoner = summoner;
 	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
 	mon->mextra_p->esum_p->summonstr = mon->data->mlevel;
 	mon->mextra_p->esum_p->sticky = (!summoner || summoner == &youmonst) && !(flags & ESUMMON_NOFOLLOW);
 	mon->mextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
-	// add timer to mon
-	start_timer(duration, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
+	mon->mextra_p->esum_p->staleptr = 0;
+	/* change duration, if applicable */
+	if (duration != ESUMMON_PERMANENT) {
+		mon->mextra_p->esum_p->permanent = 0;
+		adjust_timer_duration(get_timer(mon->timed, DESUMMON_MON), duration - ESUMMON_PERMANENT);
+	}
 	if (summoner)
 		summoner->summonpwr += mon->mextra_p->esum_p->summonstr;
 	// mark mon's inventory as summoned, including contained objects
@@ -7290,6 +7299,7 @@ int flags;
 			otmp->oextra_p->esum_p->summonstr = 0;
 			otmp->oextra_p->esum_p->sticky = 0;
 			otmp->oextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
+			otmp->oextra_p->esum_p->staleptr = 0;
 			/* add timer to obj */
 			start_timer(duration, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
 		}

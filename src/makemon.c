@@ -8131,8 +8131,18 @@ register int	mmflags;
 	/* might have been called saying to add an mx */
 	if (mmflags & MM_EDOG)
 		add_mx(mtmp, MX_EDOG);
-	if (mmflags & MM_EMIN)
-		add_mx(mtmp, MX_EMIN);
+	if (mmflags & MM_ESUM) {
+		/* set up mtmp as summoned indefinitely
+		   caller is responsible for setting summoner, duration and removing permanence if desired */
+		add_mx(mtmp, MX_ESUM);
+		mtmp->mextra_p->esum_p->summoner = (struct monst *)0;
+		mtmp->mextra_p->esum_p->sm_id = 0;
+		mtmp->mextra_p->esum_p->summonstr = 0;
+		mtmp->mextra_p->esum_p->staleptr = 0;
+		mtmp->mextra_p->esum_p->permanent = 1;
+		mtmp->mextra_p->esum_p->sticky = 0;
+		start_timer(ESUMMON_PERMANENT, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mtmp);
+	}
 
 	if (is_horror(ptr)) {
 		add_mx(mtmp, MX_EHOR);

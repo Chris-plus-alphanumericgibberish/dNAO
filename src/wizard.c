@@ -561,10 +561,10 @@ nasty(mcast)
 				|| (!rn2(4) && abs(sgn(mons[makeindex].maligntyp) - sgn(castalign)) == 1)
 			){
 				if ((mtmp = makemon(&mons[makeindex],
-							bypos.x, bypos.y, NO_MM_FLAGS)) != 0);
+							bypos.x, bypos.y, MM_ESUM)) != 0);
 				else /* makemon failed for some reason */
 					mtmp = makemon((struct permonst *)0,
-							bypos.x, bypos.y, NO_MM_FLAGS);
+							bypos.x, bypos.y, MM_ESUM);
 				if(!mtmp) /* makemon still failed, abort */
 					return count;
 				mtmp->msleeping = 0;

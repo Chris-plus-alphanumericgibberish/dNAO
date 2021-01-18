@@ -1412,7 +1412,7 @@ dogaze()
 					mndx = PM_FOG_CLOUD;
 				}
 				for(i=0;i<n;i++){
-					mtmp3 = makemon(&mons[mndx], u.ux, u.uy, MM_ADJACENTOK|MM_ADJACENTSTRICT);
+					mtmp3 = makemon(&mons[mndx], u.ux, u.uy, MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_ESUM);
 				 	if (mtmp3 && (mtmp2 = tamedog(mtmp3, (struct obj *)0)) != 0){
 						mtmp3 = mtmp2;
 						mtmp3->mtame = 30;

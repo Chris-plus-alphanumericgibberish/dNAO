@@ -4090,7 +4090,7 @@ struct obj *wep;
 	else if(canseemon(magr))
 		pline("The Mad King curses %s!", mon_nam(magr));
 	
-	mtmp = makemon(&mons[PM_VEXING_ORB], x(magr), y(magr), MM_ADJACENTOK|maketame);
+	mtmp = makemon(&mons[PM_VEXING_ORB], x(magr), y(magr), MM_ADJACENTOK|maketame|MM_ESUM);
 	if (mtmp) {
 		/* time out, but not tied to magr -- the object summoned them */
 		mark_mon_as_summoned(mtmp, (struct monst *)0, 4 + rn2(4), 0);
@@ -4218,7 +4218,7 @@ struct obj *wep;
 	}
 	
 	for(; i > 0; i--){
-		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame);
+		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame|MM_ESUM);
 		if (mtmp) {
 			/* time out, but not tied to magr -- the object summoned them */
 			mark_mon_as_summoned(mtmp, (struct monst *)0, 4 + rn2(4), 0);
@@ -4413,7 +4413,7 @@ struct obj *wep;
 	}
 	
 	for(; i > 0; i--){
-		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame);
+		mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|maketame|MM_ESUM);
 		if (mtmp) {
 			/* time out, but not tied to magr -- the object summoned them */
 			mark_mon_as_summoned(mtmp, (struct monst *)0, 4 + rn2(4), 0);

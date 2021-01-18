@@ -202,7 +202,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define NO_MINVENT	  0x01	/* suppress minvent when creating mon */
 #define MM_NOWAIT	  0x02	/* don't set STRAT_WAITMASK flags */
 #define MM_EDOG		  0x04	/* add edog structure */
-#define MM_EMIN		  0x08	/* add emin structure */
+#define MM_ESUM		  0x08	/* add summon structure, inventory (if any) is marked as summoned. */
 #define MM_ANGRY	  0x10  /* monster is created angry */
 #define MM_NONAME	  0x20  /* monster is not christened */
 #define MM_NOCOUNTBIRTH	  0x40  /* don't increment born counter (for revival) */
