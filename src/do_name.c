@@ -468,7 +468,7 @@ const char *name;
 	 * it (e.g. Excalibur from prayer). In this case the object
 	 * will retain its current name. */
 	
-	if (obj->oartifact || (lth && art_already_exists_byname(obj->otyp, name)))
+	if (obj->oartifact || (!get_ox(obj, OX_ESUM) && lth && art_already_exists_byname(obj->otyp, name)))
 		return obj;
 	
     if(!strcmp((&artilist[ART_SCALPEL_OF_LIFE_AND_DEATH])->name,name) &&

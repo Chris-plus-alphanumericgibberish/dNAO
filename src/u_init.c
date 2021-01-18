@@ -2984,7 +2984,7 @@ scatter_weapons(){
 		if(nlev >= 8){
 			//Landed in poly-trap-land, and found a random CoMR on the ground nearby
 			// Every time! What A Coincidence!
-			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE);
+			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, NO_MKOBJ_FLAGS);
 			m_dowear(mtmp, TRUE);
 		}
 		// pline("going to %d",nlev);
@@ -3007,7 +3007,7 @@ scatter_weapons(){
 		if(nlev >= 8){
 			//Landed in poly-trap-land, and found a random CoMR on the ground nearby
 			// Every time! What A Coincidence!
-			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE);
+			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, NO_MKOBJ_FLAGS);
 		}
 		get_level(&flev, nlev);
 		migrate_to_level(mtmp, ledger_no(&flev), MIGR_RANDOM,

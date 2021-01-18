@@ -1428,7 +1428,7 @@ register struct monst *mtmp;
 				sprcnt++;
 		if(sprcnt < 3){
 			if(canspotmon(mtmp)) pline("%s pulls a spear out of its rotting mass.",Monnam(mtmp));
-			(void) mongets(mtmp, SPEAR);
+			(void) mongets(mtmp, SPEAR, NO_MKOBJ_FLAGS);
 			init_mon_wield_item(mtmp);
 			return 0;
 		}

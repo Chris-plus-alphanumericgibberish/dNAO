@@ -429,7 +429,7 @@ register boolean special;
 	        get_mplname(mtmp, nam);
 	        mtmp = christen_monst(mtmp, nam);
 			/* that's why they are "stuck" in the endgame :-) */
-			(void)mongets(mtmp, FAKE_AMULET_OF_YENDOR);
+			(void)mongets(mtmp, FAKE_AMULET_OF_YENDOR, NO_MKOBJ_FLAGS);
 	    }
 	    mtmp->mpeaceful = 0;
 	    set_malign(mtmp); /* peaceful may have changed again */
@@ -501,7 +501,7 @@ register boolean special;
 
 	    if(special) {
 			if (!rn2(10))
-				(void) mongets(mtmp, rn2(3) ? LUCKSTONE : LOADSTONE);
+				(void) mongets(mtmp, rn2(3) ? LUCKSTONE : LOADSTONE, NO_MKOBJ_FLAGS);
 			mk_mplayer_armor(mtmp, armor);
 			mk_mplayer_armor(mtmp, shirt);
 			mk_mplayer_armor(mtmp, cloak);
@@ -515,7 +515,7 @@ register boolean special;
 
 			quan = rn2(3) ? rn2(3) : rn2(16);
 			while(quan--)
-				(void)mongets(mtmp, rnd_class(DILITHIUM_CRYSTAL, JADE));
+				(void)mongets(mtmp, rnd_class(DILITHIUM_CRYSTAL, JADE), NO_MKOBJ_FLAGS);
 			/* To get the gold "right" would mean a player can double his */
 			/* gold supply by killing one mplayer.  Not good. */
 #ifndef GOLDOBJ
@@ -528,27 +528,27 @@ register boolean special;
 			while(quan--)
 				(void) mpickobj(mtmp, mkobj(RANDOM_CLASS, FALSE));
 	    } else {
-			(void) mongets(mtmp, armor);
-			(void) mongets(mtmp, shirt);
-			(void) mongets(mtmp, cloak);
-			(void) mongets(mtmp, helm);
-			(void) mongets(mtmp, helm);
-			(void) mongets(mtmp, boots);
-			(void) mongets(mtmp, gloves);
-			(void) mongets(mtmp, shield);
+			(void) mongets(mtmp, armor, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, shirt, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, cloak, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, helm, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, helm, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, boots, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, gloves, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, shield, NO_MKOBJ_FLAGS);
 			
 			m_dowear(mtmp, TRUE);
 			init_mon_wield_item(mtmp);
 		}
 	    quan = rnd(3);
 	    while(quan--)
-			(void)mongets(mtmp, rnd_offensive_item(mtmp));
+			(void)mongets(mtmp, rnd_offensive_item(mtmp), NO_MKOBJ_FLAGS);
 	    quan = rnd(3);
 	    while(quan--)
-			(void)mongets(mtmp, rnd_defensive_item(mtmp));
+			(void)mongets(mtmp, rnd_defensive_item(mtmp), NO_MKOBJ_FLAGS);
 	    quan = rnd(3);
 	    while(quan--)
-			(void)mongets(mtmp, rnd_misc_item(mtmp));
+			(void)mongets(mtmp, rnd_misc_item(mtmp), NO_MKOBJ_FLAGS);
 	}
 
 	return(mtmp);

@@ -3015,7 +3015,7 @@ add_to_minv(mon, obj)
 	/* if it's a summoned obj and "sticky", attach obj to mon */
 	if (get_ox(obj, OX_ESUM) && obj->oextra_p->esum_p->sticky) {
 		obj->oextra_p->esum_p->summoner = mon;
-		otmp->oextra_p->esum_p->sm_id = mon->m_id;
+		obj->oextra_p->esum_p->sm_id = mon->m_id;
 		obj->oextra_p->esum_p->sticky = 0;
 	}
 	/* apply artifact on-carry properties */

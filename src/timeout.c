@@ -2501,8 +2501,6 @@ long timeout;
 		start_timer(9999, TIMER_OBJECT, DESUMMON_OBJ, arg);
 		return;
 	}
-	if(otmp->oartifact)
-		artifact_exists(otmp, artiname(otmp->oartifact), FALSE);	// allow to generate again
 	obj_extract_self(otmp);
 	newsym(otmp->ox, otmp->oy);
 	obfree(otmp, (struct obj *)0);

@@ -253,7 +253,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		/* now his/her goodies... */
 		if(sanctum && EPRI(priest)->shralign == A_NONE &&
 		     on_level(&sanctum_level, &u.uz)) {
-			(void) mongets(priest, AMULET_OF_YENDOR);
+			(void) mongets(priest, AMULET_OF_YENDOR, NO_MKOBJ_FLAGS);
 		}
 		/* 2 to 4 spellbooks */
 		for (cnt = rn1(3,2); cnt > 0; --cnt) {

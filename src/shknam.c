@@ -792,7 +792,7 @@ struct mkroom	*sroom;
 	mkmonmoney(shk, 1000L + 30L*(long)rnd(100));	/* initial capital */
 #endif
 	if (shp->shknms == shkrings)
-	    (void) mongets(shk, TOUCHSTONE);
+	    (void) mongets(shk, TOUCHSTONE, NO_MKOBJ_FLAGS);
 	nameshk(shk, shp->shknms);
 	
 	//Note: these two don't have a shopkeeper struct

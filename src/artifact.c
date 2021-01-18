@@ -898,25 +898,22 @@ register boolean mod;
 		    otmp->oartifact = (mod ? m : 0);
 		    otmp->age = 0;
 		    if(otmp->otyp == RIN_INCREASE_DAMAGE) otmp->spe = 0;
-		    artinstance[m].exists = mod;
-			// if(otmp->oartifact == ART_DRAGON_PLATE){
-				// otmp->owt = (int)(otmp->owt * 1.5); //450
-			// }
-			// if(otmp->oartifact == ART_EARTH_CRYSTAL){
-				// otmp->owt = (int)(otmp->owt * 2); //300
-			// }
-			if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS){
-				artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills = 7;//number of hits untill you gain a +
-				artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights = 0;//number of flights remaining
-			}
-			if(otmp->oartifact == ART_TENSA_ZANGETSU){
-				artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = u.ulevel;//turns for which you can use Zangetsu safely
-			}
-			if(otmp->oartifact == ART_SODE_NO_SHIRAYUKI){
-				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd1 = 0;//turn on which you can reuse the first dance
-				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd2 = 0;//turn on which you can reuse the second dance
-				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd3 = 0;//turn on which you can reuse the third dance
-				artinstance[ART_SODE_NO_SHIRAYUKI].SnSd3duration = 0;//turn until which the weapon does full damage
+			/* for "summoned" temporary artifacts, artinstance things are skipped, such as declaring the artifact extant */
+			if (!get_ox(otmp, OX_ESUM)) {
+				artinstance[m].exists = mod;
+				if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS){
+					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills = 7;//number of hits untill you gain a +
+					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights = 0;//number of flights remaining
+				}
+				if(otmp->oartifact == ART_TENSA_ZANGETSU){
+					artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = u.ulevel;//turns for which you can use Zangetsu safely
+				}
+				if(otmp->oartifact == ART_SODE_NO_SHIRAYUKI){
+					artinstance[ART_SODE_NO_SHIRAYUKI].SnSd1 = 0;//turn on which you can reuse the first dance
+					artinstance[ART_SODE_NO_SHIRAYUKI].SnSd2 = 0;//turn on which you can reuse the second dance
+					artinstance[ART_SODE_NO_SHIRAYUKI].SnSd3 = 0;//turn on which you can reuse the third dance
+					artinstance[ART_SODE_NO_SHIRAYUKI].SnSd3duration = 0;//turn until which the weapon does full damage
+				}
 			}
 			if(otmp->oartifact && (get_artifact(otmp)->inv_prop == NECRONOMICON || get_artifact(otmp)->inv_prop == SPIRITNAMES)){
 				otmp->ovar1 = 0;//ovar1 will be used to track special powers, via flags
