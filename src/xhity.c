@@ -12914,7 +12914,7 @@ int vis;						/* True if action is at all visible to the player */
 			bonsdmg += skill_damage;
 
 			/* now, train skills */
-			use_skill(u.twoweap ? P_TWO_WEAPON_COMBAT : wtype, 1);
+			use_skill((melee && u.twoweap) ? P_TWO_WEAPON_COMBAT : wtype, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(P_SHII_CHO, 1);
