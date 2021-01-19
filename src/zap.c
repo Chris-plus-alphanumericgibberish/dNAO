@@ -4125,7 +4125,7 @@ struct zapdata * zapdata;
 			if (Sleep_res(mdef)) {
 				doshieldeff = TRUE;
 				sleeptime = 0;
-				addmsg("don't feel sleepy.");
+				addmsg("You don't feel sleepy.");
 			}
 			domsg();
 			if (sleeptime>0) {
