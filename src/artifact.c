@@ -2261,7 +2261,6 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 	    *dmgptr += d(dnum,4);
 		if(vis) {
 			pline("The blade's shadow catches on %s.", hittee);
-			and = TRUE;
 		}
 		mdef->movement -= 3;
 	}
