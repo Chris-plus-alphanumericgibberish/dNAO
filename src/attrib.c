@@ -1157,6 +1157,10 @@ int x;
 	if (x == A_STR && override_str)
 		return override_str;
 
+	if (tmp < 18 && youracedata && (youracedata->mlet == S_NYMPH ||
+		u.umonnum==PM_SUCCUBUS || u.umonnum == PM_INCUBUS))
+		tmp = 18;
+		
 	if(u.ufirst_light)
 		tmp++;
 	if(u.ufirst_sky)
@@ -1234,9 +1238,6 @@ int x;
 			tmp += u.ulevel/3;
 		}
 	} else if (x == A_CHA) {
-		if (tmp < 18 && youracedata && (youracedata->mlet == S_NYMPH ||
-		    u.umonnum==PM_SUCCUBUS || u.umonnum == PM_INCUBUS))
-		    return 18;
 	} else if (x == A_INT || x == A_WIS) {
 		/* yes, this may raise int/wis if player is sufficiently
 		 * stupid.  there are lower levels of cognition than "dunce".
