@@ -2298,7 +2298,7 @@ movemon()
 		is_auton(mtmp->data) && 
 		mtmp->mpeaceful
 	){
-		if(canseemon(mtmp)) pline("%s gets angry...", mon_nam(mtmp));
+		if(canseemon(mtmp)) pline("%s gets angry...", Monnam(mtmp));
 		untame(mtmp, 0);
 	}
 	if(mtmp->mtyp == PM_UVUUDAUM){
@@ -4784,13 +4784,12 @@ boolean was_swallowed;			/* digestion */
 				}
 			}
 			u.uevent.uaxus_foe = 1;//enemy of the modrons
-		  for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-			mndx = monsndx(mtmp->data);
-			if(mndx <= PM_QUINON && mndx >= PM_MONOTON && mtmp->mpeaceful){
-				if(canseemon(mtmp)) pline("%s gets angry...", mon_nam(mtmp));
-				mtmp->mpeaceful = 0;
+			for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+					if (is_auton(mtmp->data) && mtmp->mpeaceful && mtmp != mon) {
+						if(canseemon(mtmp)) pline("%s gets angry...", Monnam(mtmp));
+						untame(mtmp, 0);
+					}
 			}
-		   }
 //			The dungeon of ill regard, where Axus is found, now spawns only Modrons.  So this is uneeded
 //			for(quincount;quincount<7;quincount++) makemon(&mons[PM_QUINON], mon->mx, mon->my,MM_ADJACENTOK|MM_ANGRY);
 		}
