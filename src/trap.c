@@ -5027,11 +5027,16 @@ lava_effects()
        armor anyway */
 burn_stuff:
     if(uarmf && !uarmf->oerodeproof && is_organic(uarmf)) {
-	/* save uarmf value because Boots_off() sets uarmf to null */
-	obj = uarmf;
-	Your("%s bursts into flame!", xname(obj));
-	(void) Boots_off();
-	useup(obj);
+		if ((uarmf->oeroded<3) || (uarmf->oartifact)) {
+			rust_dmg(uarmf, "boots", 0, FALSE, &youmonst);
+		}
+		else {
+			/* save uarmf value because Boots_off() sets uarmf to null */
+			obj = uarmf;
+			Your("%s bursts into flame!", xname(obj));
+			(void) Boots_off();
+			useup(obj);
+		}
     }
 	if(!(Wwalking || InvFire_resistance)){
 		destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
