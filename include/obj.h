@@ -74,24 +74,14 @@ enum {
 
 #define OPROP_LISTSIZE	((MAX_OPROP-1)/32 + 1)
 
-/* #define obj obj_nh */ /* uncomment for SCO UNIX, which has a conflicting
-			  * typedef for "obj" in <sys/types.h> */
-
-union vptrs {
-	    struct obj *v_nexthere;	/* floor location lists */
-	    struct obj *v_ocontainer;	/* point back to container */
-	    struct monst *v_ocarry;	/* point back to carrying monst */
-		struct trap *v_otrap;	/* point back to trap */
-};
-
 struct obj {
 	struct obj *nobj;
-	union vptrs v;
-#define nexthere	v.v_nexthere
-#define ocontainer	v.v_ocontainer
-#define ocarry		v.v_ocarry
-#define otrap		v.v_otrap
-
+	union {	/* for use with obj->where */
+		struct obj * nexthere;		/* OBJ_FLOOR: next object on this level's xy-coord */
+		struct obj * ocontainer;	/* OBJ_CONTAINED: container this obj is in */
+		struct monst * ocarry;		/* OBJ_MINVENT: monster carrying this obj */
+		struct trap * otrap;		/* OBJ_INTRAP: trap containing this obj */
+	};
 	struct obj *cobj;	/* contents list for containers */
 	unsigned o_id;
 	xchar ox,oy;
@@ -189,14 +179,17 @@ struct obj {
 	/* 19 free bits in this field, I think -CM */
 	
 	int obj_color;
-	long bodytypeflag;	/* MB tag(s) this item goes with. */
-#define wrathdata	bodytypeflag	/* MA flags this item is currently wrathful against. */
-	int	corpsenm;	/* type of corpse is mons[corpsenm] */
-					/* Class of mask */
-#define leashmon	corpsenm	/* gets m_id of attached pet */
-#define spestudied	corpsenm	/* # of times a spellbook has been studied */
-//define fromsink  corpsenm	/* a potion from a sink */
-#define opoisonchrgs corpsenm	/* number of poison doses left */
+	union {
+		long bodytypeflag;	/* MB tag(s) this item goes with. Overloaded with wrathdata */
+		long wrathdata;		/* MA flags this item is currently wrathful against. Overloaded with bodytypeflag; */
+	};
+	union {
+		int	corpsenm;		/* various:       type of corpse is mons[corpsenm] */
+		unsigned leashmon;	/* leash:         m_id of attached pet */
+		int spestudied;		/* spellbooks:    of times a spellbook has been studied */
+		int opoisonchrgs;	/* rings/weapons: number of poison doses left */
+	};
+	
 #ifdef RECORD_ACHIEVE
 #define record_achieve_special corpsenm
 #endif
