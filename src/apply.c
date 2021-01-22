@@ -1045,8 +1045,8 @@ struct obj *obj;
 	} else if(!mtmp->mcan && !mtmp->minvis && is_weeping(mtmp->data)) {
 		if (vis)
 			pline ("%s stares at its reflection with a stony expression.", Monnam(mtmp));
-			mtmp->mcanmove = 0;
-			mtmp->mfrozen = 1;
+		mtmp->mcanmove = 0;
+		mtmp->mfrozen = 1;
 	} else if (!is_unicorn(mtmp->data) && is_animal(mtmp->data) &&
 			(!mtmp->minvis || mon_resistance(mtmp,SEE_INVIS)) && rn2(5)) {
 		if (vis)
@@ -2130,7 +2130,7 @@ register struct obj *obj;
 	if(!otyp)
 		return;
 	
-	glyph = mksobj(otyp, FALSE, FALSE);
+	glyph = mksobj(otyp, MKOBJ_NOINIT);
 	
 	if(glyph){
 		remove_thought(otyp_to_thought(otyp));
@@ -2218,7 +2218,7 @@ register struct obj *obj;
 			umechanoid)
 		|| yn("This corpse does not have blood. Tin it?") == 'y'
 	){
-		if ((can = mksobj(TIN, FALSE, FALSE)) != 0) {
+		if ((can = mksobj(TIN, MKOBJ_NOINIT)) != 0) {
 			static const char you_buy_it[] = "You tin it, you bought it!";
 
 			can->corpsenm = corpse->corpsenm;
@@ -2228,7 +2228,7 @@ register struct obj *obj;
 			can->known = 1;
 			can->spe = -1;  /* Mark tinned tins. No spinach allowed... */
 			if(has_blood(&mons[corpse->corpsenm])){
-				if ((bld = mksobj(POT_BLOOD, FALSE, FALSE)) != 0) {
+				if ((bld = mksobj(POT_BLOOD, MKOBJ_NOINIT)) != 0) {
 					bld->corpsenm = corpse->corpsenm;
 					bld->cursed = obj->cursed;
 					bld->blessed = obj->blessed;
@@ -3002,7 +3002,7 @@ struct obj *hypo;
 					if(mtarg->mhp <= 0) xkilled(mtarg,1);
 					if (canseemon(mtarg))
 						pline("%s looks rather ill.", Monnam(mtarg));
-						break;
+					break;
 				}
 			case POT_GAIN_ABILITY:
 			case POT_RESTORE_ABILITY:
@@ -3431,11 +3431,11 @@ set_trap()
 		add_damage(u.ux, u.uy, 0L);		/* schedule removal */
 	    }
 	    if (!trapinfo.force_bungle)
-		You("finish arming %s.",
-			the(defsyms[trap_to_defsym(what_trap(ttyp))].explanation));
+			You("finish arming %s.",
+				the(defsyms[trap_to_defsym(what_trap(ttyp))].explanation));
 		if (((obj_cursed || Fumbling) && (rnl(100) > 50)) || trapinfo.force_bungle)
-		dotrap(ttmp,
-			(unsigned)(trapinfo.force_bungle ? FORCEBUNGLE : 0));
+			dotrap(ttmp,
+				(unsigned)(trapinfo.force_bungle ? FORCEBUNGLE : 0));
 	} else {
 	    /* this shouldn't happen */
 	    Your("trap setting attempt fails.");
@@ -3876,7 +3876,7 @@ use_pole (obj)
 		}
 	} else if(levl[cc.x][cc.y].typ == GRASS){
 		   levl[cc.x][cc.y].typ = SOIL;
-		   if(!rn2(3)) mksobj_at(SHEAF_OF_HAY,cc.x,cc.y,TRUE,FALSE);
+		   if(!rn2(3)) mksobj_at(SHEAF_OF_HAY,cc.x,cc.y,NO_MKOBJ_FLAGS);
 		   You("cut away the grass!");
 		   newsym(cc.x,cc.y);
 	} else {
@@ -4468,7 +4468,7 @@ use_doll(obj)
 					}
 #ifndef GOLDOBJ
 					if (mtmp->mgold){
-						struct obj *mongold = mksobj(GOLD_PIECE, FALSE, FALSE);
+						struct obj *mongold = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 						mongold->quan = mtmp->mgold;
 						mongold->owt = weight(mongold);
 						mtmp->mgold = 0;
@@ -6292,7 +6292,7 @@ doapply()
 			case SILVER_BULLET:
 			if(otmp->quan >= 10){
 				struct obj *rocket;
-				rocket = mksobj(ROCKET, FALSE, FALSE);
+				rocket = mksobj(ROCKET, MKOBJ_NOINIT);
 				rocket->blessed = otmp->blessed;
 				rocket->cursed = otmp->cursed;
 				rocket->quan = (otmp->quan)/10;
@@ -6318,7 +6318,7 @@ doapply()
 			}break;
 			case ROCKET:{
 				struct obj *bullets;
-				bullets = mksobj(SILVER_BULLET, FALSE, FALSE);
+				bullets = mksobj(SILVER_BULLET, MKOBJ_NOINIT);
 				bullets->blessed = otmp->blessed;
 				bullets->cursed = otmp->cursed;
 				bullets->quan = (otmp->quan)*10;
@@ -6462,7 +6462,7 @@ doapply()
 			int i = rnd(u.umorgul);
 			struct obj *frags;
 			u.umorgul -= i;
-			frags = mksobj(SHURIKEN, FALSE, FALSE);
+			frags = mksobj(SHURIKEN, MKOBJ_NOINIT);
 			if(frags){
 				frags->quan = i;
 				add_oprop(frags, OPROP_LESSER_MORGW);

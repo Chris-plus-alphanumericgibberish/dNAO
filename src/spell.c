@@ -473,13 +473,14 @@ learn()
 					pline("It's blank. You guess the author KEPT his secrets.");
 				    book->otyp = booktype = SPE_BLANK_PAPER;
 					book->ovar1 = 0;
+					book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 				break;
 				case 4:
 					pline("...these metallurgical techniques are 200 years out of date.");
 				break;
 				case 5:{
 					struct obj *otmp;
-					otmp = mksobj(rnd(4) ? ELVEN_DAGGER : DAGGER, TRUE, FALSE);
+					otmp = mksobj(rnd(4) ? ELVEN_DAGGER : DAGGER, NO_MKOBJ_FLAGS);
 					otmp->spe = d(1,4)+1;
 					otmp->quan += d(2,3);
 					if(otmp->otyp == DAGGER) set_material_gm(otmp, SILVER);
@@ -597,6 +598,7 @@ learn()
 	if (book->spestudied > MAX_SPELL_STUDY) {
 		pline("This spellbook is too faint to be read any more.");
 		book->otyp = booktype = SPE_BLANK_PAPER;
+		book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 	}
 	
 	if (costly) check_unpaid(book);
@@ -2208,7 +2210,7 @@ spiriteffects(power, atme)
 					if(rn2(5)) i++;
 					continue;
 				}
-				otmp = mksobj(SHURIKEN, FALSE, FALSE);
+				otmp = mksobj(SHURIKEN, MKOBJ_NOINIT);
 			    otmp->blessed = 0;
 			    otmp->cursed = 0;
 				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux+xadj, u.uy+yadj, u.dx, u.dy, 0, rn1(5,5), TRUE, FALSE, FALSE);
@@ -2362,6 +2364,7 @@ spiriteffects(power, atme)
 			sy = u.uy;
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
 			if(u.uswallow){
+				mon = u.ustuck;
 				enoughGold = FALSE;
 				reveal_invis = TRUE;
 				dmg = d(5,dsize);
@@ -2519,7 +2522,7 @@ spiriteffects(power, atme)
 			if (getdir((char *)0) || !(u.dx || u.dy)){
 				struct obj *otmp;
 				You("throw a ball of webbing.");
-				otmp = mksobj(BALL_OF_WEBBING, TRUE, FALSE);
+				otmp = mksobj(BALL_OF_WEBBING, NO_MKOBJ_FLAGS);
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				otmp->spe = 1; /* to indicate it's yours */
@@ -2567,7 +2570,7 @@ spiriteffects(power, atme)
 				struct obj *otmp;
 				You("ask the earth to open.");
 				digfarhole(TRUE, u.ux+u.dx, u.uy+u.dy);
-				otmp = mksobj(BOULDER, FALSE, FALSE);
+				otmp = mksobj(BOULDER, MKOBJ_NOINIT);
 				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
 				nomul(0, NULL);
 			} else break;
@@ -2575,7 +2578,7 @@ spiriteffects(power, atme)
 		case PWR_ECHIDNA_S_VENOM:{
 			struct obj *otmp;
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return(0);
-			otmp = mksobj(ACID_VENOM, TRUE, FALSE);
+			otmp = mksobj(ACID_VENOM, NO_MKOBJ_FLAGS);
 			otmp->spe = 1; /* to indicate it's yours */
 			otmp->ovar1 = d(5,dsize); /* save the damge this should do */
 			You("spit venom.");
@@ -2732,10 +2735,10 @@ spiriteffects(power, atme)
 			for(i=dsize; i > 0; i--){
 				do pm = &mons[rn2(PM_LONG_WORM_TAIL)];
 				while( (pm->geno & (G_UNIQ|G_NOGEN)) || pm->mlevel >= u.ulevel+5);
-				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 				if(mon){
 					initedog(mon);
-					mon->mvanishes = 5;
+					mark_mon_as_summoned(mon, &youmonst, 5, 0);
 				}
 			}
 		}break;
@@ -2745,52 +2748,52 @@ spiriteffects(power, atme)
 			if(uwep){
 				switch(uwep->otyp){
 					case BOW:
-						otmp = mksobj(ARROW, TRUE, FALSE);
+						otmp = mksobj(ARROW, NO_MKOBJ_FLAGS);
 						otmp->objsize = uwep->objsize;
 					break;
 					case ELVEN_BOW:
-						otmp = mksobj(ELVEN_ARROW, TRUE, FALSE);
+						otmp = mksobj(ELVEN_ARROW, NO_MKOBJ_FLAGS);
 						otmp->objsize = uwep->objsize;
 					break;
 					case ORCISH_BOW:
-						otmp = mksobj(ORCISH_ARROW, TRUE, FALSE);
+						otmp = mksobj(ORCISH_ARROW, NO_MKOBJ_FLAGS);
 						otmp->objsize = uwep->objsize;
 					break;
 					case YUMI:
-						otmp = mksobj(YA, TRUE, FALSE);
+						otmp = mksobj(YA, NO_MKOBJ_FLAGS);
 						otmp->objsize = uwep->objsize;
 					break;
 					case SLING:
-						otmp = mksobj(FLINT, TRUE, FALSE);
+						otmp = mksobj(FLINT, NO_MKOBJ_FLAGS);
 					break;
 					case CROSSBOW:
-						otmp = mksobj(CROSSBOW_BOLT, TRUE, FALSE);
+						otmp = mksobj(CROSSBOW_BOLT, NO_MKOBJ_FLAGS);
 						otmp->objsize = uwep->objsize;
 					break;
 					case DROVEN_CROSSBOW:
-						otmp = mksobj(DROVEN_BOLT, TRUE, FALSE);
+						otmp = mksobj(DROVEN_BOLT, NO_MKOBJ_FLAGS);
 						otmp->objsize = uwep->objsize;
 					break;
 					default:
 						if(!rn2(3)){
-							otmp = mksobj(FLINT, TRUE, FALSE);
+							otmp = mksobj(FLINT, NO_MKOBJ_FLAGS);
 						} else if(!rn2(2)){
-							otmp = mksobj(ARROW, TRUE, FALSE);
+							otmp = mksobj(ARROW, NO_MKOBJ_FLAGS);
 							otmp->objsize = uwep->objsize;
 						} else {
-							otmp = mksobj(CROSSBOW_BOLT, TRUE, FALSE);
+							otmp = mksobj(CROSSBOW_BOLT, NO_MKOBJ_FLAGS);
 							otmp->objsize = uwep->objsize;
 						}
 					break;
 				}
 			} else{
 				if(!rn2(3)){
-					otmp = mksobj(FLINT, TRUE, FALSE);
+					otmp = mksobj(FLINT, NO_MKOBJ_FLAGS);
 				} else if(!rn2(2)){
-					otmp = mksobj(ARROW, TRUE, FALSE);
+					otmp = mksobj(ARROW, NO_MKOBJ_FLAGS);
 					otmp->objsize = youracedata->msize;
 				} else {
-					otmp = mksobj(CROSSBOW_BOLT, TRUE, FALSE);
+					otmp = mksobj(CROSSBOW_BOLT, NO_MKOBJ_FLAGS);
 					otmp->objsize = youracedata->msize;
 				}
 			}
@@ -2995,7 +2998,7 @@ spiriteffects(power, atme)
 				mon->mhpmax = (mon->m_lev * 8) - 4;
 				mon->mhp =  mon->mhpmax;
 				for(curmon = fmon; curmon; curmon = curmon->nmon){
-					if(curmon->mspiritual && curmon->mvanishes < 0){
+					if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){
 						numdogs++;
 						if(!weakdog) weakdog = curmon;
 						if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
@@ -3004,7 +3007,7 @@ spiriteffects(power, atme)
 						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 					}
 				}
-				if(weakdog && numdogs > dog_limit()) mon->mvanishes = 5;
+				if(weakdog && numdogs > dog_limit()) start_timer(5L, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
 				mon->mspiritual = TRUE;
 			}
 		}break;
@@ -3459,6 +3462,7 @@ spiriteffects(power, atme)
 	    	    // if(uwep->spestudied > MAX_SPELL_STUDY){
 					// pline("The magical energy within %s is exhausted.",the(xname(uwep)));
 					// uwep->otyp = SPE_BLANK_PAPER;
+					// uwep->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 				// }
 			} else{
 				You("need to be holding a spellbook.");
@@ -3475,7 +3479,7 @@ spiriteffects(power, atme)
 				struct monst *mon = m_at(u.ux+u.dx, u.uy+u.dy);
 				if(t && (t->ttyp == PIT || t->ttyp == SPIKED_PIT)){
 					pline("Water rains down from above and fills the pit.");
-					mksobj_at(KELP_FROND,u.ux,u.uy,FALSE,FALSE);
+					mksobj_at(KELP_FROND,u.ux,u.uy,MKOBJ_NOINIT);
 					deltrap(t);
 					levl[u.ux+u.dx][u.uy+u.dy].typ = POOL;
 					newsym(u.ux+u.dx, u.uy+u.dy);
@@ -3721,9 +3725,9 @@ spiriteffects(power, atme)
 			struct monst *mon;
 			struct permonst *pm;
 			pm = choose_crystal_summon();
-			if(pm && (mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT))){
+			if(pm && (mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM))){
 				initedog(mon);
-				mon->mvanishes = 10+u.ulevel/2;
+				mark_mon_as_summoned(mon, &youmonst, 10+u.ulevel/2, 0);
 			} else return 0;
 		}break;
 		case PWR_PSEUDONATURAL_SURGE:
@@ -3906,7 +3910,7 @@ spiriteffects(power, atme)
 				} else break;
 			}
 			if(!mon) return 0;
-			qvr = mksobj(SPIKE, TRUE, FALSE);
+			qvr = mksobj(SPIKE, NO_MKOBJ_FLAGS);
 			qvr->blessed = 0;
 			qvr->cursed = 0;
 			qvr->quan = 1;
@@ -4438,7 +4442,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			change_usanity(-rnd(spellev(spell)), FALSE);
 		}
 		/* pseudo is a temporary "false" object containing the spell stats */
-		pseudo = mksobj(spellid(spell), FALSE, FALSE);
+		pseudo = mksobj(spellid(spell), MKOBJ_NOINIT);
 		pseudo->blessed = pseudo->cursed = 0;
 		pseudo->quan = 20L;			/* do not let useup get it */
 		
@@ -4447,7 +4451,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		}
 		
 	} else {
-		pseudo = mksobj(spelltyp, FALSE, FALSE);
+		pseudo = mksobj(spelltyp, MKOBJ_NOINIT);
 		pseudo->blessed = pseudo->cursed = 0;
 		pseudo->quan = 20L;			/* do not let useup get it */
 		
@@ -5150,7 +5154,7 @@ int spellID;
 	char desc3[80] = " ";
 	char desc4[80] = " ";
 
-		pseudo = mksobj(spellid(spellID), FALSE, FALSE);
+		pseudo = mksobj(spellid(spellID), MKOBJ_NOINIT);
 		pseudo->blessed = pseudo->cursed = 0;
 		sprintf(name,  " %s", spellname(spellID));
 		name[1] = name[1] - 32;
@@ -6023,7 +6027,7 @@ reorder_spirit_powers()
 		if(check_spirit_let(ilet)){
 			if(ilet >= 'a' && ilet <= 'z'){
 				power_indx = (int)ilet-'a';
-			} else if(swaplet >= 'A' && swaplet <= 'Z'){
+			} else if(ilet >= 'A' && ilet <= 'Z'){
 				power_indx = (int)ilet-'A'+26;
 			}
 		} else {

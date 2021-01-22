@@ -997,6 +997,7 @@ struct mkroom	*croom;
     char c;
     boolean named;	/* has a name been supplied in level description? */
 	boolean parsed = o->class=='#';
+	int mkobjflags = NO_MKOBJ_FLAGS;
     if (rn2(100) < o->chance) {
 	named = o->name.str ? TRUE : FALSE;
 
@@ -1027,10 +1028,12 @@ struct mkroom	*croom;
 		else
 			c = 0;
 
+		if (!named)
+			mkobjflags |= MKOBJ_ARTIF;
 		if (!c)
-			otmp = mkobj_at(RANDOM_CLASS, x, y, !named);
+			otmp = mkobj_at(RANDOM_CLASS, x, y, mkobjflags);
 		else if (o->id != -1)
-			otmp = mksobj_at(o->id, x, y, TRUE, !named);
+			otmp = mksobj_at(o->id, x, y, mkobjflags);
 		else {
 			/*
 			* The special levels are compiled with the default "text" object
@@ -1511,7 +1514,7 @@ schar ftyp, btyp;
 		if(ftyp != CORR || rn2(100)) {
 			crm->typ = ftyp;
 			if(nxcor && !rn2(50))
-				(void) mksobj_at(BOULDER, xx, yy, TRUE, FALSE);
+				(void) mksobj_at(BOULDER, xx, yy, NO_MKOBJ_FLAGS);
 		} else {
 			crm->typ = SCORR;
 		}
@@ -2952,7 +2955,7 @@ dlb *fd;
 	    }
 	    for(x = rnd((int) (12 * mapfact) / 100); x; x--) {
 		    maze1xy(&mm, DRY);
-		    (void) mksobj_at(BOULDER, mm.x, mm.y, TRUE, FALSE);
+		    (void) mksobj_at(BOULDER, mm.x, mm.y, NO_MKOBJ_FLAGS);
 	    }
 		if(Inhell){
 			for (x = rn2(2); x; x--) {

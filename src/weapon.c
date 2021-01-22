@@ -1353,7 +1353,7 @@ register struct monst *mtmp;
 	propellor = &zeroobj;
 	Oselect(EGG, W_QUIVER); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
-	if(otmp = oselectBoulder(mtmp))
+	if((otmp = oselectBoulder(mtmp)))
 		return otmp;
 
 	/* Select polearms first; they do more damage and aren't expendable */
@@ -2605,7 +2605,7 @@ boolean speedy;
 #endif
 	    (P_ADVANCE(skill) >=
 		(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))
-		&& practice_needed_to_advance(OLD_P_SKILL(skill))
+		&& practice_needed_to_advance(OLD_P_SKILL(skill)) > 0
 	    && u.skills_advanced < P_SKILL_LIMIT
 	    && u.weapon_slots >= slots_required(skill)));
 }
@@ -2619,7 +2619,7 @@ int skill;
 	    && P_SKILL(skill) < P_MAX_SKILL(skill) && (
 	    (P_ADVANCE(skill) >=
 		(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))
-		&& practice_needed_to_advance(OLD_P_SKILL(skill))
+		&& practice_needed_to_advance(OLD_P_SKILL(skill)) > 0
 	    && u.skills_advanced < P_SKILL_LIMIT));
 }
 

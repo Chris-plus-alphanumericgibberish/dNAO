@@ -247,7 +247,7 @@ makedog()
 #ifdef STEED
 	/* Horses already wear a saddle */
 	if ((pettype == PM_PONY || pettype == PM_GIANT_SPIDER || pettype == PM_SMALL_CAVE_LIZARD || pettype == PM_RIDING_PSEUDODRAGON)
-		&& !!(otmp = mksobj(SADDLE, TRUE, FALSE))
+		&& !!(otmp = mksobj(SADDLE, 0))
 	) {
 	    if (mpickobj(mtmp, otmp))
 		panic("merged saddle?");
@@ -718,6 +718,7 @@ boolean pets_only;	/* true for ascension or final escape */
 							// (u.sealsActive&SEAL_MALPHAS && mtmp->mtyp == PM_CROW) || //Allow distant crows to get left behind.
 							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= pet_dist)
 							)
+							&& !(get_mx(mtmp, MX_ESUM) && !mtmp->mextra_p->esum_p->sticky)	// cannot be a summon marked as not-a-follower
 			) ||
 #ifdef STEED
 			(mtmp == u.usteed) ||
@@ -789,6 +790,7 @@ boolean pets_only;	/* true for ascension or final escape */
 				obj->no_charge = 0;
 			}
 
+			summoner_gone(mtmp);
 			relmon(mtmp);
 			newsym(mtmp->mx,mtmp->my);
 			mtmp->mx = mtmp->my = 0; /* avoid mnexto()/MON_AT() problem */
@@ -840,6 +842,8 @@ boolean pets_only;	/* true for ascension or final escape */
 					 MIGR_EXACT_XY, (coord *)0);
 	    }
 	}
+	/* any of your summons that *weren't* kept now disappear */
+	summoner_gone(&youmonst);
 }
 
 #endif /* OVL2 */
@@ -880,6 +884,18 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 		if (!mtmp->mtame) untame(mtmp, 1);
 		m_unleash(mtmp, TRUE);
 	}
+
+	/* a summoner leaving affects its summons */
+	if (mtmp->summonpwr) {
+		summoner_gone(mtmp);
+	}
+	/* likewise, summons don't persist away from their summoner, or if they're flagged to not be able to follow */
+	/* although your summons can travel between levels with you, they cannot do so independently of you */
+	if (get_mx(mtmp, MX_ESUM) && (!mtmp->mextra_p->esum_p->sticky || mtmp->mextra_p->esum_p->summoner)) {
+		monvanished(mtmp);
+		return;	/* return early -- mtmp is gone. */
+	}
+
 	relmon(mtmp);
 	mtmp->nmon = migrating_mons;
 	migrating_mons = mtmp;
@@ -1100,7 +1116,7 @@ int numdogs;
 	struct monst *curmon = 0, *weakdog = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
 			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
-				&& !curmon->mspiritual && curmon->mvanishes < 0
+				&& !curmon->mspiritual && !(get_timer(curmon->timed, DESUMMON_MON) && !(get_mx(curmon, MX_ESUM) && curmon->mextra_p->esum_p->permanent))
 			){
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
@@ -1125,7 +1141,7 @@ vanish_dogs()
 		weakdog = (struct monst *)0;
 		numdogs = 0;
 		for(curmon = fmon; curmon; curmon = curmon->nmon){
-			if(curmon->mspiritual && curmon->mvanishes < 0){
+			if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){ /* assumes no pets that are both spiritual and permanently summoned */
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
 				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
@@ -1134,7 +1150,7 @@ vanish_dogs()
 				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
 			}
 		}
-		if(weakdog && numdogs > dog_limit() ) weakdog->mvanishes = 5;
+		if(weakdog && numdogs > dog_limit()) start_timer(5L, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)weakdog);
 	} while(weakdog && numdogs > dog_limit());
 }
 

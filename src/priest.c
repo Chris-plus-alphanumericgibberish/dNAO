@@ -237,7 +237,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		if(In_mordor_depths(&u.uz)){
 			priest->ispriest = 1;
 			priest->msleeping = 0;
-		    (void) mpickobj(priest, mksobj(SPE_FIREBALL, FALSE, FALSE));
+		    (void) mpickobj(priest, mksobj(SPE_FIREBALL, MKOBJ_NOINIT));
 		} else if(Is_bridge_temple(&u.uz)){
 			priest->ispriest = 1;
 			priest->msleeping = 0;
@@ -253,7 +253,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		/* now his/her goodies... */
 		if(sanctum && EPRI(priest)->shralign == A_NONE &&
 		     on_level(&sanctum_level, &u.uz)) {
-			(void) mongets(priest, AMULET_OF_YENDOR);
+			(void) mongets(priest, AMULET_OF_YENDOR, NO_MKOBJ_FLAGS);
 		}
 		/* 2 to 4 spellbooks */
 		for (cnt = rn1(3,2); cnt > 0; --cnt) {
@@ -343,7 +343,7 @@ register struct monst *mon;
 char *pname;		/* caller-supplied output buffer */
 {
 	const char *what = Hallucination ? rndmonnam() : mon->data->mname;
-	int align;
+	int align = (mon->ispriest ? EPRI(mon)->shralign : mon->isminion ? EMIN(mon)->min_align : 0);
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
@@ -377,11 +377,10 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, "a whole faith");
 //			Strcat(pname, "?");
 		} else {
-	 		Strcat(pname, halu_gname((int)EPRI(mon)->shralign));
+	 		Strcat(pname, halu_gname(align));
 		}
 		return(pname);
 	}
-	align = (mon->ispriest ? EPRI(mon)->shralign : mon->isminion ? EMIN(mon)->min_align : 0);
 	Strcat(pname, what);
 	Strcat(pname, " of ");
 	Strcat(pname, halu_gname(align));

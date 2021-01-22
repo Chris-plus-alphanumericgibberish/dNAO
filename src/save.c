@@ -305,6 +305,7 @@ register int fd, mode;
 	flags.end_around = has_loaded_bones;
 	bwrite(fd, (genericptr_t) &flags, sizeof(struct flag));
 	bwrite(fd, (genericptr_t) &u, sizeof(struct you));
+	bwrite(fd, (genericptr_t) &youmonst, sizeof(struct monst));
 	bwrite(fd, (genericptr_t) &god_list, sizeof(struct god_details)*MAX_GOD);
 	
 	/* save random monsters*/

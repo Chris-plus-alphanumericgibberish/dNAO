@@ -2060,7 +2060,7 @@ u_init()
 		ini_inv(Pirate);
 		if(Race_if(PM_DROW)){
 			struct obj *otmp;
-			otmp = mksobj(CROSSBOW_BOLT, TRUE, FALSE);
+			otmp = mksobj(CROSSBOW_BOLT, NO_MKOBJ_FLAGS);
 			otmp->quan = rn1(12, 16);
 			otmp->spe = otmp->cursed = otmp->blessed = 0;
 			otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
@@ -2605,7 +2605,7 @@ register struct trobj *trop;
 				    break;
 				}
 			}
-			obj = mksobj(otyp, TRUE, FALSE);
+			obj = mksobj(otyp, NO_MKOBJ_FLAGS);
 			set_material_gm(obj, objects[otyp].oc_material);
 
 			if(obj->otyp == POT_BLOOD) 
@@ -2675,7 +2675,7 @@ register struct trobj *trop;
 		 * one will immediately read it and use the iron ball as a
 		 * weapon.)
 		 */
-			if((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && trop->trclass == RING_CLASS) obj = mksobj(find_signet_ring(),TRUE,FALSE);
+			if((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && trop->trclass == RING_CLASS) obj = mksobj(find_signet_ring(), NO_MKOBJ_FLAGS);
 			else obj = mkobj(trop->trclass, FALSE);
 			otyp = obj->otyp;
 			set_material_gm(obj, objects[otyp].oc_material);
@@ -2970,7 +2970,7 @@ scatter_weapons(){
 	struct obj *obj;
 	struct monst *mtmp;
 	if(flags.initgend){
-		// obj = mksobj(GOLD_BLADED_VIBROSWORD, TRUE, FALSE);
+		// obj = mksobj(GOLD_BLADED_VIBROSWORD, NO_MKOBJ_FLAGS);
 		// add_to_migration(obj);
 		// obj->ox = stronghold_level.dnum;
 		// obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
@@ -2984,7 +2984,7 @@ scatter_weapons(){
 		if(nlev >= 8){
 			//Landed in poly-trap-land, and found a random CoMR on the ground nearby
 			// Every time! What A Coincidence!
-			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE);
+			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, NO_MKOBJ_FLAGS);
 			m_dowear(mtmp, TRUE);
 		}
 		// pline("going to %d",nlev);
@@ -2992,7 +2992,7 @@ scatter_weapons(){
 		migrate_to_level(mtmp, ledger_no(&flev), MIGR_RANDOM,
 			(coord *)0);
 	} else {
-		// obj = mksobj(WHITE_VIBROSWORD, TRUE, FALSE);
+		// obj = mksobj(WHITE_VIBROSWORD, NO_MKOBJ_FLAGS);
 		// add_to_migration(obj);
 		// obj->ox = stronghold_level.dnum;
 		// obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
@@ -3007,42 +3007,42 @@ scatter_weapons(){
 		if(nlev >= 8){
 			//Landed in poly-trap-land, and found a random CoMR on the ground nearby
 			// Every time! What A Coincidence!
-			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE);
+			mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, NO_MKOBJ_FLAGS);
 		}
 		get_level(&flev, nlev);
 		migrate_to_level(mtmp, ledger_no(&flev), MIGR_RANDOM,
 			(coord *)0);
 	}
 	
-	obj = mksobj(WHITE_VIBROSPEAR, TRUE, FALSE);
+	obj = mksobj(WHITE_VIBROSPEAR, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(WHITE_VIBROZANBATO, TRUE, FALSE);
+	obj = mksobj(WHITE_VIBROZANBATO, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(GOLD_BLADED_VIBROSPEAR, TRUE, FALSE);
+	obj = mksobj(GOLD_BLADED_VIBROSPEAR, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(GOLD_BLADED_VIBROZANBATO, TRUE, FALSE);
+	obj = mksobj(GOLD_BLADED_VIBROZANBATO, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
+	obj = mksobj(TWO_HANDED_SWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->oeroded = 1;
@@ -3052,7 +3052,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(SHORT_SWORD, TRUE, FALSE);
+	obj = mksobj(SHORT_SWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
@@ -3062,7 +3062,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
+	obj = mksobj(TWO_HANDED_SWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
@@ -3072,7 +3072,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(SPEAR, TRUE, FALSE);
+	obj = mksobj(SPEAR, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
@@ -3082,35 +3082,35 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(RED_EYED_VIBROSWORD, TRUE, FALSE);
+	obj = mksobj(RED_EYED_VIBROSWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(FORCE_PIKE, TRUE, FALSE);
+	obj = mksobj(FORCE_PIKE, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(DOUBLE_FORCE_BLADE, TRUE, FALSE);
+	obj = mksobj(DOUBLE_FORCE_BLADE, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(FORCE_SWORD, TRUE, FALSE);
+	obj = mksobj(FORCE_SWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(TWO_HANDED_SWORD, TRUE, FALSE);
+	obj = mksobj(TWO_HANDED_SWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	obj->objsize = MZ_LARGE;
@@ -3121,7 +3121,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(SPEAR, TRUE, FALSE);
+	obj = mksobj(SPEAR, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	set_material_gm(obj, METAL);
@@ -3131,7 +3131,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(LONG_SWORD, TRUE, FALSE);
+	obj = mksobj(LONG_SWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	set_material_gm(obj, METAL);
@@ -3140,7 +3140,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(SABER, TRUE, FALSE);
+	obj = mksobj(SABER, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	set_material_gm(obj, METAL);
@@ -3149,7 +3149,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(KATANA, TRUE, FALSE);
+	obj = mksobj(KATANA, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	set_material_gm(obj, METAL);
@@ -3159,7 +3159,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(RAPIER, TRUE, FALSE);
+	obj = mksobj(RAPIER, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_oprop(obj, OPROP_FLAYW);
@@ -3167,7 +3167,7 @@ scatter_weapons(){
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
 	
-	obj = mksobj(GLAIVE, TRUE, FALSE);
+	obj = mksobj(GLAIVE, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_oprop(obj, OPROP_FLAYW);

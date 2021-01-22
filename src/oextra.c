@@ -3,8 +3,17 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-#include "oextra.h"
 #include "lev.h"
+
+struct ox_table {
+	int indexnum;
+	int s_size;
+} ox_list[] = {
+	{OX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
+	{OX_EMON, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
+	{OX_EMID, sizeof(int)},
+	{OX_ESUM, sizeof(struct esum)}
+};
 
 /* add one component to obj */
 /* automatically finds size of component */
@@ -123,7 +132,7 @@ int ox_id;
 		ox_p2 = get_ox(obj2, ox_id);
 		if(!ox_p2)
 			add_ox_l(obj2, ox_id, siz_ox(obj1, ox_id)-sizeof(long));
-		memcpy(ox_p1, get_ox(obj2, ox_id), siz_ox(obj1, ox_id));
+		memcpy(get_ox(obj2, ox_id), ox_p1, siz_ox(obj1, ox_id));
 	}
 	return;
 }
@@ -217,8 +226,13 @@ long * len_p;
 	for (i = 0; i < NUM_OX; i++) {
 		if (!(towrite & (1 << i)))
 			continue;
+		/* special handling when we need to mark something as having a stale pointer */
+		if (i == OX_ESUM) otmp->oextra_p->esum_p->staleptr = 1;
 		/* copy memory */
 		memcpy(output_ptr,otmp->oextra_p->eindex[i],siz_ox(otmp, i));
+		/* and remove markers after saving */
+		if (i == OX_ESUM) otmp->oextra_p->esum_p->staleptr = 0;
+
 		/* increment output_ptr (char is 1 byte) */
 		output_ptr = ((char *)output_ptr) + siz_ox(otmp, i);
 	}
@@ -346,4 +360,34 @@ boolean ghostly;
 	return;
 }
 
+/* relinks ox. If called with a specific otmp, only does so for that one, otherwise does all */
+void
+relink_ox(specific_otmp)
+struct obj * specific_otmp;
+{
+    unsigned nid;
+	int owhere = ((1 << OBJ_FLOOR) |
+			(1 << OBJ_INVENT) |
+			(1 << OBJ_MINVENT) |
+			(1 << OBJ_MIGRATING) |
+			(1 << OBJ_BURIED) |
+			(1 << OBJ_CONTAINED) |
+			(1 << OBJ_MAGIC_CHEST) |
+			(1 << OBJ_INTRAP));
+	struct obj * otmp = specific_otmp ? specific_otmp : start_all_items(&owhere);
+
+	for (; otmp && (otmp == specific_otmp || !specific_otmp); otmp = (specific_otmp ? (struct obj *)0 : next_all_items(&owhere))) {
+		if (get_ox(otmp, OX_ESUM)) {
+			if (otmp->oextra_p->esum_p->staleptr) {
+				otmp->oextra_p->esum_p->staleptr = 0;
+				/* restore stale pointer -- id==0 is assumed to be player */
+				if (otmp->oextra_p->esum_p->summoner) {
+					nid = otmp->oextra_p->esum_p->sm_id;
+					otmp->oextra_p->esum_p->summoner = (genericptr_t) (nid ? find_mid(nid, FM_EVERYWHERE) : &youmonst);
+					if (!otmp->oextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+				}
+			}
+		}
+	}
+}
 /*oextra.c*/

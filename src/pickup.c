@@ -2597,7 +2597,7 @@ pick_gemstone()
 	Sprintf(buf, "Gems");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for(otmp = invent; otmp; otmp = otmp->nobj){
-		if(otmp->oclass == GEM_CLASS && (otmp->otyp < LUCKSTONE || otmp->otyp == CHUNK_OF_FOSSIL_DARK)){
+		if(valid_focus_gem(otmp)){
 			Sprintf1(buf, doname(otmp));
 			any.a_char = otmp->invlet;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -2777,7 +2777,7 @@ register struct obj *obj;
 	gemlet = pick_gemstone();
 	
 	for (otmp = invent; otmp; otmp = otmp->nobj) {
-		if(otmp->invlet == gemlet) break;
+		if(otmp->invlet == gemlet && valid_focus_gem(otmp)) break;
 	}
 	if(otmp){
 		current_container = obj;

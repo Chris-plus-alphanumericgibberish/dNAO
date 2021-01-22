@@ -2404,6 +2404,7 @@ boolean amnesia;
 			        bill_dummy_object(obj);
 			    }
 			    obj->otyp = SPE_BLANK_PAPER;
+				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 			}
 			used = TRUE;
 		}
@@ -3251,7 +3252,7 @@ dodip()
 		    if(!objects[old_otyp].oc_uname &&
 			!objects[old_otyp].oc_name_known && old_dknown) {
 			struct obj * fakeobj;
-			fakeobj = mksobj(old_otyp, FALSE, FALSE);
+			fakeobj = mksobj(old_otyp, MKOBJ_NOINIT);
 			fakeobj->dknown = 1;
 			docall(fakeobj);
 			delobj(fakeobj);

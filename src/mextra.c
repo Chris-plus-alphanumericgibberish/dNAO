@@ -3,8 +3,21 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
-
 #include "lev.h"
+
+struct mx_table {
+	int indexnum;
+	int s_size;
+} mx_list[] = {
+	{MX_EDOG, sizeof(struct edog)},
+	{MX_EHOR, sizeof(struct ehor)},
+	{MX_EMIN, sizeof(struct emin)},
+	{MX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is a long containing size */
+	{MX_EPRI, sizeof(struct epri)},
+	{MX_ESHK, sizeof(struct eshk)},
+	{MX_ESUM, sizeof(struct esum)},
+	{MX_EVGD, sizeof(struct evgd)}
+};
 
 /* add one component to mon */
 /* automatically finds size of component */
@@ -217,8 +230,13 @@ long * len_p;
 	for (i = 0; i < NUM_MX; i++) {
 		if (!(towrite & (1 << i)))
 			continue;
+		/* special handling when we need to mark something as having a stale pointer */
+		if (i == MX_ESUM) mtmp->mextra_p->esum_p->staleptr = 1;
 		/* copy memory */
 		memcpy(output_ptr,mtmp->mextra_p->eindex[i],siz_mx(mtmp, i));
+		/* and remove markers after saving */
+		if (i == MX_ESUM) mtmp->mextra_p->esum_p->staleptr = 0;
+
 		/* increment output_ptr (char is 1 byte) */
 		output_ptr = ((char *)output_ptr) + siz_mx(mtmp, i);
 	}
@@ -364,8 +382,39 @@ boolean ghostly;
 				assign_level(&(mtmp->mextra_p->epri_p->shrlevel), &u.uz);
 			}
 		}
+		/* cannot handle esum here -- it needs all monsters to have been restored first -- done in relink_mx() below */
 	}
 	return;
 }
 
+/* relinks mx. If called with a specific mtmp, only does so for that one, otherwise does all on fmon and migrating_mons */
+void
+relink_mx(specific_mtmp)
+struct monst * specific_mtmp;
+{
+    unsigned nid;
+	boolean checked_migrating = FALSE;
+	struct monst * mtmp = (specific_mtmp ? specific_mtmp : fmon);
+	if (!mtmp) return;
+	do {
+		/* relink mtmp */
+		if (get_mx(mtmp, MX_ESUM)) {
+			if (mtmp->mextra_p->esum_p->staleptr) {
+				mtmp->mextra_p->esum_p->staleptr = 0;
+				/* restore stale pointer -- id==0 is assumed to be player */
+				if (mtmp->mextra_p->esum_p->summoner) {
+					nid = mtmp->mextra_p->esum_p->sm_id;
+					mtmp->mextra_p->esum_p->summoner = (genericptr_t) (nid ? find_mid(nid, FM_EVERYWHERE) : &youmonst);
+					if (!mtmp->mextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+				}
+			}
+		}
+		/* select next mtmp */
+		mtmp = mtmp->nmon;
+		if (!mtmp && !checked_migrating) {
+			mtmp = migrating_mons;
+			checked_migrating = TRUE;
+		}
+	} while (mtmp && !specific_mtmp);
+}
 /*mextra.c*/

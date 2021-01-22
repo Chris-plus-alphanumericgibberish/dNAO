@@ -225,7 +225,7 @@ struct monst * mdef;
 			for (i = rnd(8); i>0; i--){
 				dx = rn2(3) - 1;
 				dy = rn2(3) - 1;
-				otmp = mksobj(ROCK, TRUE, FALSE);
+				otmp = mksobj(ROCK, NO_MKOBJ_FLAGS);
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				if ((dx || dy) && !DEADMONSTER(mdef)){
@@ -399,25 +399,24 @@ int tary;
 	}
 
 	/*	Special demon/minion handling code */
-	/*	This causes a lot of balance problems, and has been commented out pending a rework */
-	// if (youdef && !magr->cham && (is_demon(pa) || is_minion(pa)) && !ranged
-		// && pa->mtyp != PM_OONA
-		// && pa->mtyp != PM_BALROG
-		// && pa->mtyp != PM_DURIN_S_BANE
-		// && pa->mtyp != PM_SUCCUBUS
-		// && pa->mtyp != PM_INCUBUS
-		// ) {
-		// if (!magr->mcan && !rn2(13)) {
-			// msummon(magr);
-		// }
-	// }
-	// if (youagr && is_demon(youracedata) && !rn2(13) && !uwep
-		// && u.umonnum != PM_SUCCUBUS
-		// && u.umonnum != PM_INCUBUS
-		// && u.umonnum != PM_BALROG) {
-	    // demonpet();
-		// return MM_MISS;
-	// }
+	 if (youdef && !magr->cham && (is_demon(pa) || is_minion(pa)) && !ranged && (magr->summonpwr < magr->data->mlevel)
+		 && pa->mtyp != PM_OONA
+		 && pa->mtyp != PM_BALROG
+		 && pa->mtyp != PM_DURIN_S_BANE
+		 && pa->mtyp != PM_SUCCUBUS
+		 && pa->mtyp != PM_INCUBUS
+		 ) {
+		 if (!magr->mcan && !rn2(13)) {
+			 msummon(magr, (struct permonst *)0);
+		 }
+	 }
+	 if (youagr && is_demon(youracedata) && !rn2(13) && !uwep && (magr->summonpwr < magr->data->mlevel)
+		 && u.umonnum != PM_SUCCUBUS
+		 && u.umonnum != PM_INCUBUS
+		 && u.umonnum != PM_BALROG) {
+	     demonpet();
+		 return MM_MISS;
+	 }
 	/*	Special lycanthrope handling code */
 	if(youdef && !magr->cham && is_were(pa) && !ranged) {
 
@@ -1030,6 +1029,10 @@ int tary;
 					(magr->mtame && !magr->mconf),		/* pets try to be safe with ranged attacks if they aren't confused */
 					(aatyp == AT_BREA ? FALSE : TRUE)))	/* breath attacks overpenetrate targets */
 				continue;
+			
+			if (aatyp == AT_BEAM && !(mdef && tarx == x(mdef) && tary == y(mdef)))
+				continue; /* Blast attacks require the target's true location */
+						  /* Other attacks launch an actual ray or projectile that may go sailing past */
 			
 			switch (aatyp) {
 			case AT_BREA:
@@ -2759,7 +2762,7 @@ int vis;
 	struct permonst * pa = youagr ? youracedata : magr->data;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
-	int result;
+	int result = 0;
 
 	if (arti_threeHead(weapon)) {
 		/* only has special effects when all 3 heads hit */
@@ -8520,8 +8523,8 @@ int vis;
 					result |= MM_DEF_DIED;
 					int digest_time = 1 + (pd->cwt >> 8);
 					if (corpse_chance(mdef, &youmonst, TRUE) &&
-						!(mvitals[monsndx(pd)].mvflags &
-						G_NOCORPSE || mdef->mvanishes)) {
+						!((mvitals[monsndx(pd)].mvflags & G_NOCORPSE)
+							|| get_mx(mdef, MX_ESUM))) {
 						/* nutrition only if there can be a corpse */
 						if (Race_if(PM_INCANTIFIER)) u.uen += mlev(mdef);
 						else u.uhunger += (pd->cnutrit + 1) / 2;
@@ -8636,8 +8639,8 @@ int vis;
 				*/
 				int num = monsndx(mdef->data);
 				if (magr->mtame && !magr->isminion &&
-					!(mvitals[num].mvflags & G_NOCORPSE || mdef->mvanishes)) {
-					struct obj *virtualcorpse = mksobj(CORPSE, FALSE, FALSE);
+					!((mvitals[num].mvflags & G_NOCORPSE) || get_mx(mdef, MX_ESUM))) {
+					struct obj *virtualcorpse = mksobj(CORPSE, MKOBJ_NOINIT);
 					int nutrit;
 
 					virtualcorpse->corpsenm = num;
@@ -10592,7 +10595,7 @@ int vis;
 
 		/* cancellation */
 	case AD_CNCL:
-		if (cancel_monst(mdef, mksobj(SPE_CANCELLATION, FALSE, FALSE), FALSE, TRUE, FALSE, !rn2(4) ? rnd(mlev(magr)) : 0)) {
+		if (cancel_monst(mdef, mksobj(SPE_CANCELLATION, MKOBJ_NOINIT), FALSE, TRUE, FALSE, !rn2(4) ? rnd(mlev(magr)) : 0)) {
 			if (youdef) {
 				if (vis&VIS_MAGR)
 				{
@@ -11021,10 +11024,10 @@ int vis;
 				}
 			}
 			for(n = dmg; n > 0; n--){
-				mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame);
+				mtmp = makemon(&mons[mid], x(magr), y(magr), MM_ADJACENTOK|MM_ADJACENTSTRICT|maketame|MM_ESUM);
 				if (mtmp) {
 					/* time out */
-					mtmp->mvanishes = mlev(magr) + rnd(mlev(magr));
+					mark_mon_as_summoned(mtmp, magr, mlev(magr) + rnd(mlev(magr)), 0);
 					/* can be peaceful */
 					if(magr->mpeaceful)
 						mtmp->mpeaceful = TRUE;
@@ -14786,20 +14789,20 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 			case AD_OONA:
 				/* */
 				if (u.oonaenergy == AD_FIRE){
-					if (rn2(2)) mtmp = makemon(&mons[PM_FLAMING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
-					else		mtmp = makemon(&mons[PM_FIRE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					if (rn2(2)) mtmp = makemon(&mons[PM_FLAMING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame|MM_ESUM);
+					else		mtmp = makemon(&mons[PM_FIRE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame|MM_ESUM);
 				}
 				else if (u.oonaenergy == AD_COLD){
-					if (rn2(2)) mtmp = makemon(&mons[PM_FREEZING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
-					else		mtmp = makemon(&mons[PM_ICE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					if (rn2(2)) mtmp = makemon(&mons[PM_FREEZING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame|MM_ESUM);
+					else		mtmp = makemon(&mons[PM_ICE_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame|MM_ESUM);
 				}
 				else if (u.oonaenergy == AD_ELEC){
-					if (rn2(2)) mtmp = makemon(&mons[PM_SHOCKING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
-					else		mtmp = makemon(&mons[PM_ENERGY_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame);
+					if (rn2(2)) mtmp = makemon(&mons[PM_SHOCKING_SPHERE], x(mdef), y(mdef), MM_ADJACENTOK|maketame|MM_ESUM);
+					else		mtmp = makemon(&mons[PM_ENERGY_VORTEX], x(mdef), y(mdef), MM_ADJACENTOK|maketame|MM_ESUM);
 				}
 				/* Oona's summons time out and vanish */
 				if (mtmp) {
-					mtmp->mvanishes = mlev(mdef) + rnd(mlev(mdef));
+					mark_mon_as_summoned(mtmp, mdef, mlev(mdef) + rnd(mlev(mdef)), 0);
 					/* can be tame */
 					if (maketame) {
 						initedog(mtmp);

@@ -527,7 +527,7 @@ register struct obj *otmp;
 				 || otmp->unpaid)) {
 					/* create a dummy duplicate to put on bill */
 					verbalize("Hey, that was really rare!");
-					pseudo = mksobj(POT_GAIN_LEVEL, FALSE, FALSE);
+					pseudo = mksobj(POT_GAIN_LEVEL, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
 					bill_dummy_object(pseudo);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
@@ -1655,7 +1655,7 @@ opentin()		/* called during each move whilst opening a tin */
 				tin.tin->dknown = tin.tin->known = TRUE;
 				costly_tin((const char*)0);
 				goto use_me;
-			} else if(u.clockworkUpgrades&WOOD_STOVE && (r == DRIED_TIN || is_burnable(&mons[tin.tin->corpsenm]) )){
+			} else if(u.clockworkUpgrades&WOOD_STOVE){
 				/* KMH, conduct */
 				pline("Sadly, the spinach is much too damp to burn.");
 				You("reluctantly discard the spinach.");
@@ -2921,7 +2921,10 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 					xname(otmp));
 				otmp->spestudied++;
 				costly_cancel(otmp);
-	    	    if(otmp->spestudied > MAX_SPELL_STUDY) otmp->otyp = SPE_BLANK_PAPER;
+	    	    if(otmp->spestudied > MAX_SPELL_STUDY){
+					otmp->otyp = SPE_BLANK_PAPER;
+					otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+				}
 				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;
 			break;
@@ -3691,7 +3694,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : objects[otmp->otyp].oc_delay;
 	    if (otmp->otyp != FORTUNE_COOKIE && otmp->otyp != PROTEIN_PILL && otmp->otyp != LEMBAS_WAFER &&
 		(otmp->cursed ||
-		 (((monstermoves - otmp->age) > (int) otmp->blessed ? 50:30) &&
+		 (((monstermoves - otmp->age) > (otmp->blessed ? 50:30)) &&
 		(otmp->orotten || !rn2(7))))) {
 
 		if (rottenfood(otmp)) {
@@ -4445,7 +4448,7 @@ floorfood(verb,corpsecheck)	/* get food from floor or pack */
 		if ((c = yn_function(qbuf, ynqchars, 'n')) == 'y') {
 		    u.utrap = u.utraptype = 0;
 		    deltrap(ttmp);
-		    return mksobj(BEARTRAP, TRUE, FALSE);
+		    return mksobj(BEARTRAP, NO_MKOBJ_FLAGS);
 		} else if (c == 'q') {
 		    return (struct obj *)0;
 		}

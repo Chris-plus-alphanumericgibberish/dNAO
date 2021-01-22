@@ -389,7 +389,7 @@ struct mail_info *info;
     verbalize("%s, %s!  %s.", Hello(md), plname, info->display_txt);
 
     if (info->message_typ) {
-	struct obj *obj = mksobj(SCR_MAIL, FALSE, FALSE);
+	struct obj *obj = mksobj(SCR_MAIL, MKOBJ_NOINIT);
 	if (distu(md->mx,md->my) > 2)
 	    verbalize("Catch!");
 	display_nhwindow(WIN_MESSAGE, FALSE);

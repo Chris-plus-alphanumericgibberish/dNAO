@@ -1502,8 +1502,7 @@ struct monst *mtmp;
 			    register struct monst *mtmp2;
 
 	    	    	    /* Make the object(s) */
-	    	    	    otmp2 = mksobj(confused ? ROCK : BOULDER,
-	    	    	    		FALSE, FALSE);
+	    	    	    otmp2 = mksobj(confused ? ROCK : BOULDER, MKOBJ_NOINIT);
 	    	    	    if (!otmp2) continue;  /* Shouldn't happen */
 	    	    	    otmp2->quan = confused ? rn1(5,2) : 1;
 	    	    	    otmp2->owt = weight(otmp2);
@@ -1563,8 +1562,7 @@ struct monst *mtmp;
 		    struct obj *otmp2;
 
 		    /* Okay, _you_ write this without repeating the code */
-		    otmp2 = mksobj(confused ? ROCK : BOULDER,
-				FALSE, FALSE);
+		    otmp2 = mksobj(confused ? ROCK : BOULDER, MKOBJ_NOINIT);
 		    if (!otmp2) goto xxx_noobj;  /* Shouldn't happen */
 		    otmp2->quan = confused ? rn1(5,2) : 1;
 		    otmp2->owt = weight(otmp2);

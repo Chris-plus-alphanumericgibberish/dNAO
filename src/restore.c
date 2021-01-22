@@ -431,6 +431,7 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	amii_setpens(amii_numcolors);	/* use colors from save file */
 #endif
 	mread(fd, (genericptr_t) &u, sizeof(struct you));
+	mread(fd, (genericptr_t) &youmonst, sizeof(struct monst));
 	mread(fd, (genericptr_t) &god_list, sizeof(struct god_details)*MAX_GOD);
 	init_uasmon();
 #ifdef CLIPPING
@@ -542,6 +543,9 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	mread(fd, (genericptr_t) &realtime_data.realtime, 
 			  sizeof realtime_data.realtime);
 #endif
+	/* must come after all mons & objs are restored */
+	relink_mx((struct monst *)0);
+	relink_ox((struct obj *)0);
 #ifdef WHEREIS_FILE
         touch_whereis();
 #endif
@@ -1010,6 +1014,8 @@ boolean ghostly;
 	}
 
 	/* must come after all mons & objs are restored */
+	relink_mx((struct monst *)0);
+	relink_ox((struct obj *)0);
 	reset_oattached_mids(ghostly);
 
 	/* regenerate animals while on another level */
@@ -1124,7 +1130,6 @@ boolean ghostly;
 	}
     }
 }
-
 
 #ifdef ZEROCOMP
 #define RLESC '\0'	/* Leading character for run of RLESC's */

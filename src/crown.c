@@ -330,7 +330,7 @@ gcrownu()
 				obj = oname(uwep, artiname(arti));
 			}
 			else {
-				obj = oname(mksobj(artilist[arti].otyp, FALSE, FALSE), artiname(arti));
+				obj = oname(mksobj(artilist[arti].otyp, MKOBJ_NOINIT), artiname(arti));
 			}
 
 			/* enchant, if allowable */

@@ -625,7 +625,7 @@ int dy;							/* */
 			room->doormask = D_NODOOR;
 		}
 		/* create rocks */
-		otmp = mksobj_at(ROCK, newx, newy, TRUE, FALSE);
+		otmp = mksobj_at(ROCK, newx, newy, NO_MKOBJ_FLAGS);
 		otmp->quan = 20L + rnd(20);
 		otmp->owt = weight(otmp);
 		/* update vision */
@@ -652,7 +652,7 @@ int dy;							/* */
 		/* create opening */
 		room->typ = CORR;
 		/* create rocks */
-		otmp = mksobj_at(ROCK, newx, newy, TRUE, FALSE);
+		otmp = mksobj_at(ROCK, newx, newy, NO_MKOBJ_FLAGS);
 		otmp->quan = 20L + rnd(20);
 		otmp->owt = weight(otmp);
 		/* update vision */
@@ -673,7 +673,7 @@ int dy;							/* */
 		room->typ = CORR;
 		/* create iron bars */
 		for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
-			otmp = mksobj_at(BAR, newx, newy, FALSE, FALSE);
+			otmp = mksobj_at(BAR, newx, newy, MKOBJ_NOINIT);
 			set_material_gm(otmp, IRON);
 			otmp->spe = 0;
 			otmp->cursed = otmp->blessed = FALSE;
@@ -1389,7 +1389,7 @@ struct monst * mon;
 				){
 				obfree(obj, (struct obj *)0);
 				*obj_p = NULL;
-				obj = mksobj(ELVEN_BOW, TRUE, FALSE);
+				obj = mksobj(ELVEN_BOW, NO_MKOBJ_FLAGS);
 				obj = oname(obj, artiname(ART_BELTHRONDING));
 				obj->oerodeproof = TRUE;
 				obj->blessed = TRUE;
@@ -1417,7 +1417,7 @@ struct monst * mon;
 				){
 				obfree(obj, (struct obj *)0);
 				*obj_p = NULL;
-				obj = mksobj(DROVEN_CROSSBOW, TRUE, FALSE);
+				obj = mksobj(DROVEN_CROSSBOW, NO_MKOBJ_FLAGS);
 				obj = oname(obj, artiname(ART_WRATHFUL_SPIDER));
 				obj->oerodeproof = TRUE;
 				obj->blessed = TRUE;
@@ -1435,7 +1435,7 @@ struct monst * mon;
 				){
 				obfree(obj, (struct obj *)0);
 				*obj_p = NULL;
-				obj = mksobj(SABER, TRUE, FALSE);
+				obj = mksobj(SABER, NO_MKOBJ_FLAGS);
 				obj = oname(obj, artiname(ART_CRESCENT_BLADE));
 				obj->oerodeproof = TRUE;
 				obj->blessed = TRUE;
@@ -1453,7 +1453,7 @@ struct monst * mon;
 				){
 				obfree(obj, (struct obj *)0);
 				*obj_p = NULL;
-				obj = mksobj(DROVEN_CHAIN_MAIL, TRUE, FALSE);
+				obj = mksobj(DROVEN_CHAIN_MAIL, NO_MKOBJ_FLAGS);
 				obj = oname(obj, artiname(ART_SPIDERSILK));
 				obj->oerodeproof = TRUE;
 				obj->blessed = TRUE;
@@ -1471,7 +1471,7 @@ struct monst * mon;
 				){
 				obfree(obj, (struct obj *)0);
 				*obj_p = NULL;
-				obj = mksobj(FAUCHARD, TRUE, FALSE);
+				obj = mksobj(FAUCHARD, NO_MKOBJ_FLAGS);
 				obj = oname(obj, artiname(ART_WEBWEAVER_S_CROOK));
 				obj->oerodeproof = TRUE;
 				obj->blessed = TRUE;
@@ -2150,7 +2150,7 @@ dofire()
 
 		/* Rogue Gear Spirits' auto-generated ammo -- mainhand only */
 		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact == ART_ROGUE_GEAR_SPIRITS){
-			struct obj *bolt = mksobj(CROSSBOW_BOLT, FALSE, FALSE);
+			struct obj *bolt = mksobj(CROSSBOW_BOLT, MKOBJ_NOINIT);
 			bolt->spe = min(0, uwep->spe);
 			bolt->blessed = uwep->blessed;
 			bolt->cursed = uwep->cursed;
@@ -2270,25 +2270,25 @@ struct obj * blaster;
 
 	switch (blaster->otyp) {
 	case CUTTING_LASER:
-		ammo = mksobj(LASER_BEAM, FALSE, FALSE);
+		ammo = mksobj(LASER_BEAM, MKOBJ_NOINIT);
 		break;
 	case HAND_BLASTER:
-		ammo = mksobj(BLASTER_BOLT, FALSE, FALSE);
+		ammo = mksobj(BLASTER_BOLT, MKOBJ_NOINIT);
 		break;
 	case ARM_BLASTER:
-		ammo = mksobj(HEAVY_BLASTER_BOLT, FALSE, FALSE);
+		ammo = mksobj(HEAVY_BLASTER_BOLT, MKOBJ_NOINIT);
 		break;
 	case MASS_SHADOW_PISTOL:
 		if (blaster->cobj) {
-			ammo = mksobj(blaster->cobj->otyp, FALSE, FALSE);
+			ammo = mksobj(blaster->cobj->otyp, MKOBJ_NOINIT);
 			ammo->oartifact = blaster->cobj->oartifact;
 		}
 		else
-			ammo = mksobj(ROCK, FALSE, FALSE);
+			ammo = mksobj(ROCK, MKOBJ_NOINIT);
 		break;
 	case RAYGUN:
 		/* create fake ammo in order to calculate multishot correctly */
-		ammo = mksobj(LASER_BEAM, FALSE, FALSE);
+		ammo = mksobj(LASER_BEAM, MKOBJ_NOINIT);
 		break;
 	default:
 		impossible("Unhandled blaster %d!", blaster->otyp);
@@ -2809,17 +2809,17 @@ int tary;
 	case AD_WEBS:
 		if (!youagr)
 			magr->mspec_used = d(2, 6);
-		otmp = mksobj(BALL_OF_WEBBING, TRUE, FALSE);
+		otmp = mksobj(BALL_OF_WEBBING, NO_MKOBJ_FLAGS);
 		break;
 	case AD_BLND:
 	case AD_DRST:
-		otmp = mksobj(BLINDING_VENOM, TRUE, FALSE);
+		otmp = mksobj(BLINDING_VENOM, NO_MKOBJ_FLAGS);
 		break;
 	default:
 		impossible("bad attack type in xspity (%d)", typ);
 		/* fall through to acid venom */
 	case AD_ACID:
-		otmp = mksobj(ACID_VENOM, TRUE, FALSE);
+		otmp = mksobj(ACID_VENOM, NO_MKOBJ_FLAGS);
 		if (attk->damn && attk->damd)
 			otmp->ovar1 = d(attk->damn, attk->damd);
 		break;
@@ -2865,8 +2865,7 @@ int n;	/* number to try to fire */
 	boolean youagr = (magr == &youmonst);
 	struct permonst * pa = youagr ? youracedata : magr->data;
 	int typ = attk->adtyp;
-	int xadj = 0;
-	int yadj = 0;
+	boolean volley = FALSE;
 	int rngmod = 0;
 	boolean portal_projectile = FALSE;		/* if TRUE, teleports projectile directly to target */
 	boolean from_pack = FALSE;
@@ -2892,7 +2891,7 @@ int n;	/* number to try to fire */
 		/* special: do not fire at warded squares */
 		if (!youagr && onscary(tarx, tary, magr)) return FALSE; //Warded; did not fire
 		ammo_type = SPIKE;
-		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
 		set_material_gm(qvr, SHADOWSTEEL);
 		qvr->quan = 1;
 		qvr->spe = 8;
@@ -2903,7 +2902,7 @@ int n;	/* number to try to fire */
 		break;
 	case AD_PEST:
 		ammo_type = ARROW;
-		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
 		qvr->quan = 1;
 		qvr->spe = d(7, 8) + 1; //same as touch
 		qvr->opoisoned = OPOISON_FILTH;
@@ -2912,14 +2911,14 @@ int n;	/* number to try to fire */
 		break;
 	case AD_PLYS:
 		ammo_type = SPIKE;
-		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
 		set_material_gm(qvr, BONE);
 		qvr->quan = 1;
 		qvr->opoisoned = (OPOISON_PARAL);
 		break;
 	case AD_SOLR:
 		ammo_type = SILVER_ARROW;
-		qvr = mksobj(ammo_type, TRUE, FALSE);
+		qvr = mksobj(ammo_type, NO_MKOBJ_FLAGS);
 		qvr->blessed = 1;
 		qvr->quan = 1;
 		qvr->spe = 7;
@@ -2929,7 +2928,7 @@ int n;	/* number to try to fire */
 		break;
 	case AD_SURY:
 		ammo_type = SILVER_ARROW;
-		qvr = mksobj(ammo_type, TRUE, FALSE);
+		qvr = mksobj(ammo_type, NO_MKOBJ_FLAGS);
 		// qvr->oartifact = ART_ARROW_OF_SLAYING;
 		qvr->blessed = 1;
 		qvr->quan = 1;
@@ -2943,35 +2942,25 @@ int n;	/* number to try to fire */
 		break;
 	case AD_BALL:
 		ammo_type = HEAVY_IRON_BALL;
-		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
 		rngmod = 8;
 		break;
 	case AD_LOAD:
 		ammo_type = LOADSTONE;
-		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
 		qvr->cursed = 1;
 		rngmod = 8;
 		break;
 	case AD_BLDR:
 		ammo_type = BOULDER;
-		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
 		rngmod = 8;
 		break;
 	case AD_VBLD:
 		ammo_type = HEAVY_IRON_BALL;
-		qvr = mksobj(ammo_type, FALSE, FALSE);
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
 		rngmod = 8;
-		/* volley -- inaccurate */
-		if		(!dx)
-			yadj = d(1, 3) - 2;
-		else if (!dy)
-			xadj = d(1, 3) - 2;
-		else if (dx == dy*-1) {
-			xadj = d(1, 3) - 2;
-			yadj = -1 * xadj;
-		}
-		else
-			xadj = yadj = d(1, 3) - 2;
+		volley = TRUE;
 		break;
 	default:
 		ammo_type = ARROW;
@@ -3032,18 +3021,26 @@ int n;	/* number to try to fire */
 
 	/* Fire the projectile(s) */
 	while (n-- && qvr->quan > 0) {
+		int sx = x(magr);
+		int sy = y(magr);
 		if (portal_projectile) {
 			/* start the projectile adjacent to the target */
-			projectile(magr, qvr, (void *)0, HMON_FIRED,
-				tarx-dx, tary-dy, dx, dy, dz,
-				1, !from_pack, youagr, FALSE);
+			sx = tarx-dx;
+			sy = tary-dy;
+			rngmod = BOLT_LIM - 1;
 		}
-		else {
-			/* start the projectile at magr's location, modified by xadj and yadj */
-			projectile(magr, qvr, (void *)0, HMON_FIRED,
-				x(magr)+xadj, y(magr)+yadj, dx, dy, dz,
-				BOLT_LIM+rngmod, !from_pack, youagr, FALSE);
+		if (volley) {
+			/* inaccurate */
+			sx += (dx && !dy) ? 0 : (dx && dy) ? dx*!rn2(3) : (!dx && dy) ? rn2(3) - 1 : 0;
+			sy += (dy && !dx) ? 0 : (dy && dx) ? dy*!rn2(3) : (!dy && dx) ? rn2(3) - 1 : 0;
+			if (!isok(sx, sy)) {
+				sx = x(magr);
+				sy = y(magr);
+			}
 		}
+		projectile(magr, qvr, (void *)0, HMON_FIRED,
+			sx, sy, dx, dy, dz,
+			BOLT_LIM+rngmod, !from_pack, youagr, FALSE);
 
 		/* shadow bolts web the target hit */
 		if (typ == AD_SHDW) {

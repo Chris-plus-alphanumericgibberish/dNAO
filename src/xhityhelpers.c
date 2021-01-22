@@ -494,8 +494,10 @@ demonpet()
 	if(pm->mtyp == PM_ANCIENT_OF_ICE || pm->mtyp == PM_ANCIENT_OF_DEATH) {
 	    pm = rn2(4) ? &mons[PM_METAMORPHOSED_NUPPERIBO] : &mons[PM_ANCIENT_NUPPERIBO];
 	}
-	if ((dtmp = makemon(pm, u.ux, u.uy, NO_MM_FLAGS)) != 0)
+	if ((dtmp = makemon(pm, u.ux, u.uy, MM_ESUM)) != 0) {
 	    (void)tamedog(dtmp, (struct obj *)0);
+		mark_mon_as_summoned(dtmp, &youmonst, 250, 0);
+	}
 	exercise(A_WIS, TRUE);
 }
 

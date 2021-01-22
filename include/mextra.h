@@ -13,8 +13,9 @@
 #define MX_ENAM 3
 #define MX_EPRI 4
 #define MX_ESHK 5
-#define MX_EVGD 6
-#define NUM_MX 7
+#define MX_ESUM 6
+#define MX_EVGD 7
+#define NUM_MX 8
 
 /* container for all mextra */
 union mextra {
@@ -26,23 +27,9 @@ union mextra {
 		struct enam * enam_p;
 		struct epri * epri_p;
 		struct eshk * eshk_p;
+		struct esum * esum_p;
 		struct evgd * evgd_p;
 	};
-};
-
-struct mx_table {
-	int indexnum;
-	int s_size;
-};
-
-static struct mx_table mx_list[] = {
-	{MX_EDOG, sizeof(struct edog)},
-	{MX_EHOR, sizeof(struct ehor)},
-	{MX_EMIN, sizeof(struct emin)},
-	{MX_ENAM, -1},	/* variable; actual size is stored in structure. 1st item is an int containing size */
-	{MX_EPRI, sizeof(struct epri)},
-	{MX_ESHK, sizeof(struct eshk)},
-	{MX_EVGD, sizeof(struct evgd)}
 };
 
 #endif /* MEXTRA_H */

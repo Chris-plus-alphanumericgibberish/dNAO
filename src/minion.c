@@ -8,31 +8,34 @@
 
 extern const int monstr[];
 
+/* mon summons a monster */
 void
-msummon(mon)		/* mon summons a monster */
-struct monst *mon;
+msummon(mon, ptr)
+struct monst *mon;		/* mon to attribute summons to */
+struct permonst * ptr;	/* summon as though you were <X> */
 {
-	register struct permonst *ptr;
 	register int dtype = NON_PM, cnt = 0;
 	aligntyp atyp;
 	struct monst *mtmp;
 
 	/* Wielded Demonbane prevents demons from gating in others. From Sporkhack*/
-	if (uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && is_demon(mon->data)) {
+	if (uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && mon && is_demon(mon->data)) {
 		pline("%s looks puzzled for a moment.",Monnam(mon));
 		return;
 	}
 
-	if (mon) {
-	    ptr = mon->data;
+	if (mon && !ptr) {
+		ptr = mon->data;
 	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
-	    if (mon->ispriest || mon->mtyp == PM_ALIGNED_PRIEST
-		|| mon->mtyp == PM_ANGEL)
-		atyp = EPRI(mon)->shralign;
+	    if (get_mx(mon, MX_EPRI))
+			atyp = EPRI(mon)->shralign;
+		else if (get_mx(mon, MX_EMIN))
+			atyp = EMIN(mon)->min_align;
 	} else {
-	    ptr = &mons[PM_WIZARD_OF_YENDOR];
+	    if (!ptr) ptr = &mons[PM_WIZARD_OF_YENDOR];
 	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
 	}
+
 	if(ptr->mtyp == PM_SHAKTARI) {
 	    dtype = PM_MARILITH;
 		cnt = d(1,6);
@@ -94,12 +97,17 @@ struct monst *mon;
 	}
 	
 	while (cnt > 0) {
-	    mtmp = makemon(&mons[dtype], u.ux, u.uy, NO_MM_FLAGS);
-	    if (mtmp && (dtype == PM_ANGEL)) {
-			/* alignment should match the summoner */
-			if(mon->isminion) mtmp->isminion = TRUE;
-			EPRI(mtmp)->shralign = atyp;
-			mtmp->mpeaceful = mon->mpeaceful;
+		int mmflags = MM_ESUM | ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_NOCOUNTBIRTH);
+	    mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
+	    if (mtmp) {
+			if (dtype == PM_ANGEL) {
+				/* alignment should match the summoner */
+				if(mon->isminion) mtmp->isminion = TRUE;
+				EPRI(mtmp)->shralign = atyp;
+				mtmp->mpeaceful = mon->mpeaceful;
+			}
+			if (!(mons[dtype].geno & G_UNIQ))	/* uniques summoned in this way stick around */
+				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
 	    }
 	    cnt--;
 	}
@@ -155,8 +163,9 @@ boolean talk;
     if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
     } else {
-		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_EMIN);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
 		if (mon) {
+			add_mx(mon, MX_EMIN);
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
 		}
@@ -233,10 +242,12 @@ boolean angels;
     if (mtyp == NON_PM) {
 		mon = 0;
     } else {
-		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_EMIN);
+		mon = makemon(&mons[mtyp], u.ux, u.uy, MM_ESUM);
 		if (mon) {
+			add_mx(mon, MX_EMIN);
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
+			mark_mon_as_summoned(mon, (struct monst *)0, ESUMMON_PERMANENT, 0);
 		}
 	}
     if (mon) {

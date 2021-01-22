@@ -1275,7 +1275,7 @@ E struct permonst *FDECL(mkclass, (CHAR_P,int));
 E struct permonst *NDECL(mkzombie);
 E int FDECL(adj_lev, (struct permonst *));
 E struct permonst *FDECL(grow_up, (struct monst *,struct monst *));
-E struct obj * FDECL(mongets, (struct monst *,int));
+E struct obj * FDECL(mongets, (struct monst *,int,int));
 E int FDECL(golemhp, (int));
 E boolean FDECL(peace_minded, (struct permonst *));
 E void FDECL(set_malign, (struct monst *));
@@ -1316,6 +1316,7 @@ E void * FDECL(bundle_mextra, (struct monst *, long *));
 E void FDECL(unbundle_mextra, (struct monst *, void *));
 E void FDECL(save_mextra, (struct monst *, int, int));
 E void FDECL(rest_mextra, (struct monst *, int, boolean));
+E void FDECL(relink_mx, (struct monst *));
 
 /* out of order, but it makes sense to directly follow mextra */
 /* ### oextra.c ### */
@@ -1332,10 +1333,11 @@ E void * FDECL(bundle_oextra, (struct obj *, long *));
 E void FDECL(unbundle_oextra, (struct obj *, void *));
 E void FDECL(save_oextra, (struct obj *, int, int));
 E void FDECL(rest_oextra, (struct obj *, int, boolean));
+E void FDECL(relink_ox, (struct obj *));
 
 /* ### minion.c ### */
 
-E void FDECL(msummon, (struct monst *));
+E void FDECL(msummon, (struct monst *, struct permonst *));
 E struct monst * FDECL(summon_god_minion, (const char *,ALIGNTYP_P,BOOLEAN_P));
 E struct monst * FDECL(summon_minion, (ALIGNTYP_P,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(demon_talk, (struct monst *));
@@ -1412,14 +1414,14 @@ E const char *FDECL(waterbody_name, (XCHAR_P,XCHAR_P));
 
 /* ### mkobj.c ### */
 
-E struct obj *FDECL(mkobj_at, (CHAR_P,int,int,BOOLEAN_P));
-E struct obj *FDECL(mksobj_at, (int,int,int,BOOLEAN_P,BOOLEAN_P));
-E struct obj *FDECL(mkobj, (CHAR_P,BOOLEAN_P));
+E struct obj *FDECL(mkobj_at, (CHAR_P,int,int,int));
+E struct obj *FDECL(mksobj_at, (int,int,int,int));
+E struct obj *FDECL(mkobj, (CHAR_P,int));
 E int NDECL(rndmonnum);
 E struct obj *FDECL(splitobj, (struct obj *,long));
 E void FDECL(replace_object, (struct obj *,struct obj *));
 E void FDECL(bill_dummy_object, (struct obj *));
-E struct obj *FDECL(mksobj, (int,BOOLEAN_P,BOOLEAN_P));
+E struct obj *FDECL(mksobj, (int,int));
 E int FDECL(bcsign, (struct obj *));
 E void FDECL(set_obj_size, (struct obj *, int));
 E void FDECL(set_obj_quan, (struct obj *, int));
@@ -1572,6 +1574,11 @@ E int FDECL(u_visible_insight,(struct monst *));
 E void FDECL(repair,(struct monst *, struct monst *, int));
 E void FDECL(nurse_heal,(struct monst *, struct monst *, int));
 E void FDECL(insight_vanish,(struct monst *));
+E long FDECL(timer_duration_remaining,(timer_element *));
+E void FDECL(adjust_timer_duration, (timer_element *, long));
+E timer_element * FDECL(get_timer,(timer_element *, short));
+E void FDECL(abjure_summon, (struct monst *, int));
+E void FDECL(mark_mon_as_summoned,(struct monst *, struct monst *, int, int));
 
 /* ### mondata.c ### */
 
@@ -2713,6 +2720,10 @@ E void FDECL(begin_burn, (struct obj *));
 E void FDECL(end_burn, (struct obj *, BOOLEAN_P));
 E void FDECL(lightsaber_deactivate, (struct obj *, BOOLEAN_P));
 E void NDECL(do_storms);
+E void FDECL(desummon_mon, (genericptr_t, long));
+E void FDECL(cleanup_msummon, (genericptr_t, long));
+E void FDECL(desummon_obj, (genericptr_t, long));
+E void FDECL(summoner_gone, (struct monst *));
 E boolean FDECL(start_timer, (long, SHORT_P, SHORT_P, genericptr_t));
 E long FDECL(stop_timer, (SHORT_P, timer_element *));
 E void FDECL(stop_all_timers, (timer_element *));

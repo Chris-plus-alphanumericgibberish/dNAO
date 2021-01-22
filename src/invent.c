@@ -938,7 +938,7 @@ register long q;
 {
 	register struct obj *otmp;
 
-	otmp = mksobj(GOLD_PIECE, FALSE, FALSE);
+	otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 	u.ugold -= q;
 	otmp->quan = q;
 	otmp->owt = weight(otmp);
@@ -1044,7 +1044,7 @@ register const char *let,*word;
 	boolean prezero = FALSE;
 	long dummymask;
 
-	if(nextgetobj) return nextgetobj;
+	if(nextgetobj) return getnextgetobj();
 
 	if(*let == ALLOW_COUNT) let++, allowcnt = 1;
 #ifndef GOLDOBJ
@@ -4615,8 +4615,8 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 		return FALSE;
 
 	/* for the moment, any additional information is incompatible */
-	if (get_ox(obj, OX_EMON) || get_ox(obj, OX_EMID) ||
-		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID)) return FALSE;
+	if (get_ox(obj,  OX_EMON) || get_ox(obj,  OX_EMID) || get_ox(obj,  OX_ESUM) ||
+		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID) || get_ox(otmp, OX_ESUM)) return FALSE;
 
 	if(obj->oartifact != otmp->oartifact) return FALSE;
 	
@@ -4868,7 +4868,7 @@ boolean showsym;
 	    Strcpy(invbuf, class_name);
 	if (oclass && showsym)
 	    Sprintf(eos(invbuf), ocsymformat,
-		    iflags.menu_tab_sep ? "\t" : "  ", def_oc_syms[let]);
+		    iflags.menu_tab_sep ? "\t" : "  ", def_oc_syms[(int)let]);
 	return invbuf;
 }
 

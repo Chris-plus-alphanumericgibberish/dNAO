@@ -1091,7 +1091,7 @@ asGuardian:
 				}break;
 				case 2:{
 				// pline("unturn dead\n");
-				struct obj *ispe = mksobj(SPE_TURN_UNDEAD,TRUE,FALSE);
+				struct obj *ispe = mksobj(SPE_TURN_UNDEAD, MKOBJ_NOINIT);
 				for(ix = 0; ix < COLNO; ix++){
 					for(iy = 0; iy < ROWNO; iy++){
 						bhitpile(ispe, bhito, ix, iy);
@@ -1136,7 +1136,7 @@ asGuardian:
 				break;
 				case 5:{
 				// pline("locking\n");
-				struct obj *ispe = mksobj(SPE_WIZARD_LOCK,TRUE,FALSE);
+				struct obj *ispe = mksobj(SPE_WIZARD_LOCK, MKOBJ_NOINIT);
 				struct trap *ttmp;
 				struct rm *door;
 				boolean res = TRUE, vis;
@@ -1144,12 +1144,13 @@ asGuardian:
 				const char *msg = (const char *)0;
 				const char *dustcloud = "A cloud of dust";
 				const char *quickly_dissipates = "quickly dissipates";
-				int key = artifact_door(ix, iy);		/* ALI - Artifact doors from slash'em */
+				int key;		/* ALI - Artifact doors from slash'em */
 				for(ix = 0; ix < COLNO; ix++){
 					for(iy = 0; iy < ROWNO; iy++){
 						door = &levl[ix][iy];
 						ttmp = t_at(ix, iy); /* trap if there is one */
 						vis = cansee(ix,iy);
+						key = artifact_door(ix, iy);
 						if (levl[ix][iy].typ == DRAWBRIDGE_DOWN)
 							close_drawbridge(ix,iy);
 						if (ttmp && ttmp->ttyp == TRAPDOOR) {
@@ -1281,14 +1282,14 @@ asGuardian:
 					doredraw();
 				break;
 				case 3:{
-					struct obj *ispe = mksobj(SPE_TURN_UNDEAD,TRUE,FALSE);
+					struct obj *ispe = mksobj(SPE_TURN_UNDEAD, MKOBJ_NOINIT);
 					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity) pline("%s wails deafeningly.", Monnam(mtmp));
 					else pline("%s sings the song of the day of repentance.", Monnam(mtmp));
 					//Rapture invisible creatures
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm) && mtmp->mrevived){
-							if(mtmp->minvis && tmpm->perminvis && !(tmpm->mvanishes)){
-								tmpm->mvanishes = 5;
+							if(mtmp->minvis && tmpm->perminvis && !get_timer(mtmp->timed, DESUMMON_MON)){
+								start_timer(5L, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)tmpm);
 							}
 						}
 					}
@@ -1845,7 +1846,7 @@ humanoid_sound:
 				break;
 			}
 			// start_clockwinding(key, mtmp, turns);
-			comp = mksobj(CLOCKWORK_COMPONENT, TRUE, FALSE);
+			comp = mksobj(CLOCKWORK_COMPONENT, NO_MKOBJ_FLAGS);
 			comp->blessed = FALSE;
 			comp->cursed = FALSE;
 			comp->quan = howmany;
@@ -1864,7 +1865,7 @@ humanoid_sound:
 				break;
 			}
 			// start_clockwinding(key, mtmp, turns);
-			comp = mksobj(SUBETHAIC_COMPONENT, TRUE, FALSE);
+			comp = mksobj(SUBETHAIC_COMPONENT, NO_MKOBJ_FLAGS);
 			comp->blessed = FALSE;
 			comp->cursed = FALSE;
 			comp->quan = howmany;
@@ -3072,21 +3073,21 @@ int tx,ty;
 					/*make object here*/
 					switch(i3){
 						case 0:
-							otmp = mksobj(SACK, TRUE, FALSE);
+							otmp = mksobj(SACK, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 1:
-							otmp = mksobj(UNIVERSAL_KEY, TRUE, FALSE);
+							otmp = mksobj(UNIVERSAL_KEY, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 2:
-							otmp = mksobj(find_gold_ring(), TRUE, FALSE);
+							otmp = mksobj(find_gold_ring(), NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = TRUE;
 							hold_another_object(otmp, "You drop %s!",
@@ -3100,14 +3101,14 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 4:
-							otmp = mksobj(DAGGER, TRUE, FALSE);
+							otmp = mksobj(DAGGER, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 5:
-							otmp = mksobj(APPLE, TRUE, FALSE);
+							otmp = mksobj(APPLE, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
@@ -3121,21 +3122,21 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 7:
-							otmp = mksobj(WHISTLE, TRUE, FALSE);
+							otmp = mksobj(WHISTLE, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 8:
-							otmp = mksobj(MIRROR, TRUE, FALSE);
+							otmp = mksobj(MIRROR, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 9:
-							otmp = mksobj(EGG, TRUE, FALSE);
+							otmp = mksobj(EGG, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
@@ -3149,14 +3150,14 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 11:
-							otmp = mksobj(CORPSE, TRUE, FALSE);
+							otmp = mksobj(CORPSE, NO_MKOBJ_FLAGS);
 							otmp->corpsenm = PM_CAVE_SPIDER;
 							otmp->owt = weight(otmp);
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 12:
-							otmp = mksobj(CORPSE, TRUE, FALSE);
+							otmp = mksobj(CORPSE, NO_MKOBJ_FLAGS);
 							otmp->corpsenm = urace.malenum;
 							otmp->oeaten = mons[otmp->corpsenm].cnutrit;
 							consume_oeaten(otmp, 1);
@@ -3165,7 +3166,7 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 13:
-							otmp = mksobj(CORPSE, TRUE, FALSE);
+							otmp = mksobj(CORPSE, NO_MKOBJ_FLAGS);
 							otmp->corpsenm = androCorpses[rn2(SIZE(androCorpses))];
 							otmp->oeaten = mons[otmp->corpsenm].cnutrit;
 							consume_oeaten(otmp, 1);
@@ -3181,14 +3182,14 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 15:
-							otmp = mksobj(BELL, TRUE, FALSE);
+							otmp = mksobj(BELL, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 16:
-							otmp = mksobj(LOCK_PICK, TRUE, FALSE);
+							otmp = mksobj(LOCK_PICK, NO_MKOBJ_FLAGS);
 							otmp->blessed = FALSE;
 							otmp->cursed = FALSE;
 							hold_another_object(otmp, "You drop %s!",
@@ -4445,6 +4446,7 @@ int tx,ty;
 					}
 					pline("\"Your contribution is appreciated. Now don't bother me.\"");
 					o->otyp = SPE_BLANK_PAPER;
+					o->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 					newsym(tx,ty);
 					bindspirit(ep->ward_id);
 					u.sealTimeout[PAIMON-FIRST_SEAL] = moves + bindingPeriod;
@@ -5907,7 +5909,7 @@ struct monst *nurse;
 			int i = u.umorgul;
 			struct obj *frags;
 			u.umorgul = 0;
-			frags = mksobj(SHURIKEN, FALSE, FALSE);
+			frags = mksobj(SHURIKEN, MKOBJ_NOINIT);
 			pline("%s performs surgery, removing %d metallic shard%s from your body.", Monnam(nurse), i, (i>1) ? "s" : "");
 			if(frags){
 				frags->quan = i;
@@ -5938,7 +5940,7 @@ struct monst *nurse;
 			if(!otyp)
 				break;
 			
-			glyph = mksobj(otyp, FALSE, FALSE);
+			glyph = mksobj(otyp, MKOBJ_NOINIT);
 			
 			if(glyph){
 				remove_thought(otyp_to_thought(otyp));
@@ -6078,7 +6080,7 @@ struct monst *dollmaker;
 			return FALSE;
 	}
 	
-	doll = mksobj(dollnum,FALSE,FALSE);
+	doll = mksobj(dollnum, MKOBJ_NOINIT);
 	if(!doll){
 		impossible("doll creation failed?");
 		return FALSE;
