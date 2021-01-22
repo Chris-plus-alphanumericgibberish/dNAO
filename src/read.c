@@ -2522,7 +2522,12 @@ struct obj	*sobj;
 			whichgod = (aligntyp)(rn2(3) - 1);
 		} else whichgod = u.ualign.type;
 		
-		if(levl[u.ux][u.uy].typ == CORR || levl[u.ux][u.uy].typ == ROOM){
+		if (levl[u.ux][u.uy].typ == CORR ||
+			levl[u.ux][u.uy].typ == ROOM ||
+			levl[u.ux][u.uy].typ == GRASS ||
+			levl[u.ux][u.uy].typ == SOIL ||
+			levl[u.ux][u.uy].typ == SAND)
+		{
 			levl[u.ux][u.uy].typ = ALTAR;
 			levl[u.ux][u.uy].altarmask = Align2amask( whichgod );
 			pline("%s altar appears in front of you!", An(align_str(whichgod)));
