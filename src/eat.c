@@ -565,7 +565,7 @@ food_disappears(obj)
 register struct obj *obj;
 {
 	if (obj == victual.piece) victual.piece = (struct obj *)0;
-	if (obj->timed) obj_stop_timers(obj);
+	if (obj->timed) stop_all_timers(obj->timed);
 }
 
 /* renaming an object usually results in it having a different address;

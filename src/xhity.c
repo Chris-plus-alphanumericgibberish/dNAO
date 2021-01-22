@@ -12446,7 +12446,7 @@ int vis;						/* True if action is at all visible to the player */
 								plur(cnt),
 								(cnt == 1L) ? "isn't" : "aren't");
 						}
-						if (weapon->timed) obj_stop_timers(weapon);
+						if (weapon->timed) stop_all_timers(weapon->timed);
 						weapon = poly_obj(weapon, ROCK);
 						weapon->oartifact = 0;
 						weapon->spe = 0;

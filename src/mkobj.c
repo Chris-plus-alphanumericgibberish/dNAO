@@ -319,8 +319,8 @@ struct obj *box;
 			 */
 			otmp->age = 0L;
 			if (otmp->timed) {
-				(void) stop_timer(ROT_CORPSE, (genericptr_t)otmp);
-				(void) stop_timer(REVIVE_MON, (genericptr_t)otmp);
+				(void) stop_timer(ROT_CORPSE, otmp->timed);
+				(void) stop_timer(REVIVE_MON, otmp->timed);
 			}
 	    } else if(box->otyp == MASSIVE_STONE_CRATE){
 			if (!(otmp = mkobj(FOOD_CLASS, TRUE))) continue;
@@ -394,13 +394,13 @@ long num;
 	*otmp = *obj;		/* copies whole structure */
 	/* invalidate pointers */
 	otmp->light = (struct ls_t *)0;
+	otmp->timed = (struct timer *)0;
 	otmp->oextra_p = (union oextra *)0;
 	otmp->mp = (struct mask_properties *)0;	/* not sure if correct -- these are very unfinished */
 
 	otmp->o_id = flags.ident++;
 	if (!otmp->o_id) otmp->o_id = flags.ident++;	/* ident overflowed */
-	otmp->timed = 0;	/* not timed, yet */
-	otmp->lamplit = 0;	/* ditto */
+	otmp->lamplit = 0;	/* not lit, yet */
 	otmp->owornmask = 0L;	/* new object isn't worn */
 	obj->quan -= num;
 	obj->owt = weight(obj);
@@ -1535,7 +1535,7 @@ register struct obj *otmp;
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
 		begin_burn(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
-		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
+		(void) stop_timer(FIG_TRANSFORM, otmp->timed);
 	return;
 }
 
@@ -1604,7 +1604,7 @@ register struct obj *otmp;
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
-	    (void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
+	    (void) stop_timer(FIG_TRANSFORM, otmp->timed);
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
 		begin_burn(otmp);
 
@@ -1877,7 +1877,7 @@ int oldmat, newmat;
 			LIGHT_DAMAGE, (genericptr_t)obj);
 	}
 	else if (oldmat == SHADOWSTEEL) {/* Or turn it off, if the object used to be made of shadowsteel.*/
-		stop_timer(LIGHT_DAMAGE, (genericptr_t)obj);
+		stop_timer(LIGHT_DAMAGE, obj->timed);
 	}
 	/* set random gemstone type for valid gemstone objects */
 	if (!obj->ovar1 && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
@@ -2457,7 +2457,7 @@ boolean init;
 					// special_corpse(otmp->corpsenm))) {
 			//Between molding and all the special effects, would be best to just reset timers for everything.
 			if (otmp->otyp == CORPSE) {
-				obj_stop_timers(otmp);
+				stop_all_timers(otmp->timed);
 				/* if the monster was cancelled, don't self-revive */
 				if (mtmp && mtmp->mcan && !is_rider(ptr))
 					otmp->norevive = 1;
@@ -2521,6 +2521,7 @@ struct monst *mtmp;
 	EMON(obj)->nmon     = (struct monst *)0;
 	EMON(obj)->data     = (struct permonst *)0;
 	EMON(obj)->minvent  = (struct obj *)0;
+	EMON(obj)->timed    = (struct timer *)0;
 	EMON(obj)->light    = (struct ls_t *)0;
 	return obj;
 }
@@ -2731,10 +2732,10 @@ int force;	/* 0 = no force so do checks, <0 = force off, >0 force on */
 
     /* Check for corpses just placed on or in ice */
     if (otmp->otyp == CORPSE && (on_floor || buried) && is_ice(x,y)) {
-		tleft = stop_timer(action, (genericptr_t)otmp);
+		tleft = stop_timer(action, otmp->timed);
 		if (tleft == 0L) {
 			action = REVIVE_MON;
-			tleft = stop_timer(action, (genericptr_t)otmp);
+			tleft = stop_timer(action, otmp->timed);
 		} 
 		if (tleft != 0L) {
 			long age;
@@ -2757,10 +2758,10 @@ int force;	/* 0 = no force so do checks, <0 = force off, >0 force on */
     else if ((force < 0) ||
 	     (otmp->otyp == CORPSE && ON_ICE(otmp) &&
 	     ((on_floor && !is_ice(x,y)) || !on_floor))) {
-		tleft = stop_timer(action, (genericptr_t)otmp);
+		tleft = stop_timer(action, otmp->timed);
 		if (tleft == 0L) {
 			action = REVIVE_MON;
-			tleft = stop_timer(action, (genericptr_t)otmp);
+			tleft = stop_timer(action, otmp->timed);
 		}
 		if (tleft != 0L) {
 			long age;
@@ -3171,7 +3172,7 @@ dealloc_obj(obj)
 
     /* free up any timers attached to the object */
     if (obj->timed)
-	obj_stop_timers(obj);
+	stop_all_timers(obj->timed);
 
     /*
      * Free up any light sources attached to the object.

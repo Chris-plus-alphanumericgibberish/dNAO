@@ -123,7 +123,6 @@ struct obj {
 #define OBJ_MAGIC_CHEST	8		/* object in shared magic chest */
 #define OBJ_INTRAP 9    /* object is trap ammo */
 #define NOBJ_STATES	10
-	xchar timed;		/* # of fuses (timers) attached to this obj */
 
 	Bitfield(cursed,1);
 	Bitfield(blessed,1);
@@ -338,6 +337,8 @@ struct obj {
 	struct mask_properties *mp;
 
 	struct ls_t * light;
+
+	struct timer * timed;
 
 	union oextra * oextra_p;
 };

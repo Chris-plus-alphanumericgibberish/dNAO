@@ -9,10 +9,8 @@
 typedef void FDECL((*timeout_proc), (genericptr_t, long));
 
 /* kind of timer */
-#define TIMER_LEVEL	0	/* event specific to level */
-#define TIMER_GLOBAL	1	/* event follows current play */
-#define TIMER_OBJECT	2	/* event follows a object */
-#define TIMER_MONSTER	3	/* event follows a monster */
+#define TIMER_OBJECT	1	/* event follows a object */
+#define TIMER_MONSTER	2	/* event follows a monster */
 
 /* save/restore timer ranges */
 #define RANGE_LEVEL  0		/* save/restore timers staying on level */
@@ -45,8 +43,9 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define NUM_TIME_FUNCS	13
 
 /* used in timeout.c */
-typedef struct fe {
-    struct fe *next;		/* next item in chain */
+typedef struct timer {
+    struct timer *next;		/* next item in PROCESSING chain */
+    struct timer *tnxt;     /* next item in LOCAL chain */
     long timeout;		/* when we time out */
     unsigned long tid;		/* timer ID */
     short kind;			/* kind of use */

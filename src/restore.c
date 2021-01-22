@@ -219,6 +219,9 @@ boolean ghostly, frozen;
 		if (otmp->light) {
 			rest_lightsource(LS_OBJECT, otmp, otmp->light, fd, ghostly);
 		}
+		if (otmp->timed) {
+			rest_timers(TIMER_OBJECT, otmp, otmp->timed, fd, ghostly, monstermoves - omoves);
+		}
 		if (ghostly) {
 		    unsigned nid = flags.ident++;
 		    add_id_mapping(otmp->o_id, nid);
@@ -288,6 +291,9 @@ boolean ghostly;
 		
 		if (mtmp->light) {
 			rest_lightsource(LS_MONSTER, mtmp, mtmp->light, fd, ghostly);
+		}
+		if (mtmp->timed) {
+			rest_timers(TIMER_MONSTER, mtmp, mtmp->timed, fd, ghostly, monstermoves - omoves);
 		}
 		if (ghostly) {
 			unsigned nid = flags.ident++;
@@ -478,7 +484,6 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	}
 
 	/* this stuff comes after potential aborted restore attempts */
-	restore_timers(fd, RANGE_GLOBAL, FALSE, 0L);
 	invent = restobjchn(fd, FALSE, FALSE);
 	bc_obj = restobjchn(fd, FALSE, FALSE);
 	while (bc_obj) {
@@ -537,8 +542,6 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	mread(fd, (genericptr_t) &realtime_data.realtime, 
 			  sizeof realtime_data.realtime);
 #endif
-	/* must come after all mons & objs are restored */
-	relink_timers(FALSE);
 #ifdef WHEREIS_FILE
         touch_whereis();
 #endif
@@ -915,7 +918,6 @@ boolean ghostly;
 	else
 	    doorindex = 0;
 
-	restore_timers(fd, RANGE_LEVEL, ghostly, monstermoves - omoves);
 	fmon = restmonchn(fd, ghostly);
 
 	rest_worm(fd);	/* restore worm information */
@@ -1008,7 +1010,6 @@ boolean ghostly;
 	}
 
 	/* must come after all mons & objs are restored */
-	relink_timers(ghostly);
 	reset_oattached_mids(ghostly);
 
 	/* regenerate animals while on another level */
