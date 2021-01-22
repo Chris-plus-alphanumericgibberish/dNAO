@@ -3936,9 +3936,10 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_DEVIL:
-		if (!youdef || u.summonMonster) {
+		if (!youdef || u.summonMonster || !foundem) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
+			/* since it always summons adjacent to player, only allow casting if they've found you */
 			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
 		else if (is_alienist(magr->data)) {
