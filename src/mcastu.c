@@ -1816,17 +1816,17 @@ int tary;
 
 	/* print spell-cast message */
 	if (spellnum) {
-		if ((youagr || (youdef && !is_undirected_spell(spellnum)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
+		if ((youagr || (youdef && !is_undirected_spell(spellnum) && cansee(tarx, tary)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
 			if (is_undirected_spell(spellnum) || notarget)
 				buf[0] = '\0';
 			else
 			{
 				Sprintf(buf, " at %s",
 					youdef
-					? ((Invisible && !mon_resistance(magr, SEE_INVIS) && (!foundem)) ?
-						"a spot near you" :
-						(Displaced && (!foundem)) ?
+					? ( (Displaced && (!foundem)) ?
 						"your displaced image" :
+						(!foundem) ?
+						"a spot near you" :
 						"you")
 					: (canspotmon(mdef) ? mon_nam(mdef) : "something"));
 			}
@@ -5187,6 +5187,10 @@ int tary;
 	/* don't summon anything if caster is peaceful */
 	if (is_summon_spell(spellnum)
 		&& (!youagr && !magr->mtame && magr->mpeaceful))
+		return TRUE;
+
+	/* only cast earthquake on found target, too annoying when spammed */
+	if (spellnum == EARTHQUAKE && !(tarx == x(mdef) && tary == y(mdef)))
 		return TRUE;
 
 	/* the wiz won't use the following cleric-specific or otherwise weak spells */
