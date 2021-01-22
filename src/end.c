@@ -885,7 +885,12 @@ int how;
 				lsvd = LSVD_MISC;
 			}
 			Your("helmet crumbles to dust!");
-			useup(otmp);
+			if (otmp->where == OBJ_INVENT)
+				useup(otmp);
+			else {
+				obj_extract_self(otmp);
+				obfree(otmp, (struct obj *)0);
+			}
 		}
 		else if(uamul && uamul->otyp == AMULET_OF_LIFE_SAVING){
 			makeknown(AMULET_OF_LIFE_SAVING);
