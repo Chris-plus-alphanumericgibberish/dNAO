@@ -262,7 +262,7 @@ register int x, y, typ;
 	    ttmp->ty = y;
 	    ttmp->launch.x = -1;	/* force error if used before set */
 	    ttmp->launch.y = -1;
-		memset(&ttmp->vl, 0, sizeof(union vlaunchinfo));
+		ttmp->statueid = 0;		/* one option of the union */
 		ttmp->ammo = (struct obj *)0;
 	}
 
