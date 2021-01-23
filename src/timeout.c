@@ -2454,7 +2454,7 @@ long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
 	if(get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->permanent) {
-		start_timer(9999, TIMER_OBJECT, DESUMMON_OBJ, arg);
+		start_timer(9999, TIMER_MONSTER, DESUMMON_MON, arg);
 		return;
 	}
 	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
