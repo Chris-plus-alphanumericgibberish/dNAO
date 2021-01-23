@@ -2990,8 +2990,8 @@ struct monst * mon;
 	struct esum * esum;
 	for (tm = timer_base; tm; tm = tm->next) {
 		if (tm->timeout > monstermoves && (
-			(tm->func_index == DESUMMON_MON && (esum = ((struct monst *)tm->arg)->mextra_p->esum_p) && (mon == esum->summoner)) ||
-			(tm->func_index == DESUMMON_OBJ && (esum = ((struct obj   *)tm->arg)->oextra_p->esum_p) && (mon == esum->summoner))
+			(tm->func_index == DESUMMON_MON && (((struct monst *)tm->arg)->mextra_p) && (esum = ((struct monst *)tm->arg)->mextra_p->esum_p) && (mon == esum->summoner)) ||
+			(tm->func_index == DESUMMON_OBJ && (((struct obj   *)tm->arg)->oextra_p) && (esum = ((struct obj   *)tm->arg)->oextra_p->esum_p) && (mon == esum->summoner))
 			))
 		{
 			/* special exception: summoned pets may follow the player between levels */
