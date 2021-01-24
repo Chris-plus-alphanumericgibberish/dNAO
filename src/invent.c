@@ -3196,7 +3196,7 @@ winid *datawin;
 		break;
 		case SYLLABLE_OF_POWER__KRAU:
 			OBJPUTSTR("Read to gain temporary and permanent bonuses.");
-			OBJPUTSTR("Temporarily empower damaging magic to 150%% of normal strength.");
+			OBJPUTSTR("Temporarily empower damaging magic to 150\% of normal strength.");
 			OBJPUTSTR("Permanently increases spell damage bonus by 1/3rd point.");
 		break;
 		case SYLLABLE_OF_LIFE__HOON:
@@ -3211,7 +3211,7 @@ winid *datawin;
 		break;
 		case SYLLABLE_OF_THOUGHT__NAEN:
 			OBJPUTSTR("Read to gain temporary and permanent bonuses.");
-			OBJPUTSTR("Temporarily regenerate an additional 10 power per turn and 0%% spell failure.");
+			OBJPUTSTR("Temporarily regenerate an additional 10 power per turn and 0\% spell failure.");
 			OBJPUTSTR("Permanently increase natural power regeneration by 1 point per 90 turns.");
 		break;
 		case SYLLABLE_OF_SPIRIT__VAUL:
