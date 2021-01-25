@@ -108,6 +108,40 @@ static const char * const bodyStr[] = {
 	" snake-backed animal",
 	" centauroid"
 };
+
+
+/* extracted from lookat(); also used by do_floorname() */
+boolean
+object_from_map(glyph, x, y, obj_p)
+    int glyph, x, y;
+    struct obj **obj_p;
+{
+    boolean fakeobj = FALSE;
+    struct obj *otmp = vobj_at(x,y);
+
+    if (!otmp || otmp->otyp != glyph_to_obj(glyph)) {
+	if (glyph_to_obj(glyph) != STRANGE_OBJECT) {
+	    otmp = mksobj(glyph_to_obj(glyph), MKOBJ_NOINIT);
+	    if (!otmp)
+		return FALSE;
+	    fakeobj = TRUE;
+	    if (otmp->oclass == COIN_CLASS)
+		otmp->quan = 2L; /* to force pluralization */
+	    else if (otmp->otyp == SLIME_MOLD)
+		otmp->spe = current_fruit;	/* give the fruit a type */
+	}
+    }
+
+    /* if located at adajcent spot, mark it as having been seen up close */
+    if (otmp && distu(x, y) <= 2 && !Blind && !Hallucination)
+        otmp->dknown = 1;
+
+    *obj_p = otmp;
+
+    return fakeobj;
+}
+
+
 /*
  * Return the name of the glyph found at (x,y).
  * If not hallucinating and the glyph is a monster, also monster data.
@@ -407,21 +441,16 @@ lookat(x, y, buf, monbuf, shapebuff)
 	}
     }
     else if (glyph_is_object(glyph)) {
-	struct obj *otmp = vobj_at(x,y);
+	struct obj *otmp = 0;
+	boolean fakeobj = object_from_map(glyph, x, y, &otmp);
 
-	if (!otmp || otmp->otyp != glyph_to_obj(glyph)) {
-	    if (glyph_to_obj(glyph) != STRANGE_OBJECT) {
-		otmp = mksobj(glyph_to_obj(glyph), MKOBJ_NOINIT);
-		if (otmp->oclass == COIN_CLASS)
-		    otmp->quan = 2L; /* to force pluralization */
-		else if (otmp->otyp == SLIME_MOLD)
-		    otmp->spe = current_fruit;	/* give the fruit a type */
-		Strcpy(buf, distant_name(otmp, xname));
-		dealloc_obj(otmp);
-	    }
-	} else
-	    Strcpy(buf, distant_name(otmp, xname));
-
+	if (otmp) {
+	    Strcpy(buf, (otmp->otyp != STRANGE_OBJECT)
+		    ? distant_name(otmp, xname)
+		    : obj_descr[STRANGE_OBJECT].oc_name);
+	    if (fakeobj)
+		dealloc_obj(otmp), otmp = 0;
+        }
 	if (levl[x][y].typ == STONE || levl[x][y].typ == SCORR)
 	    Strcat(buf, " embedded in stone");
 	else if (IS_WALL(levl[x][y].typ) || levl[x][y].typ == SDOOR)
@@ -431,7 +460,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 	else if (is_pool(x,y, FALSE))
 	    Strcat(buf, " in water");
 	else if (is_lava(x,y))
-	    Strcat(buf, " in molten lava");	/* [can this ever happen?] */
+	    Strcat(buf, " in molten lava");     /* [can this ever happen?] */
     } else if (glyph_is_trap(glyph)) {
 	int tnum = what_trap(glyph_to_trap(glyph));
 	Strcpy(buf, defsyms[trap_to_defsym(tnum)].explanation);
