@@ -5014,7 +5014,7 @@ boolean ranged;
 				lesshungry(ptmp * 6);
 			}
 			/* tame vampires gain nutrition */
-			if (uncancelled && !youagr && magr->mtame && !magr->isminion)
+			if (uncancelled && !youagr && get_mx(magr, MX_EDOG))
 				EDOG(magr)->hungrytime += ((int)((mdef->data)->cnutrit / 20) + 1);
 		}
 		/* level-draining effect doesn't actually need blood, it drains life force */
@@ -5040,7 +5040,7 @@ boolean ranged;
 				*hpmax(magr) += d(1, 4);
 				heal(magr, ptmp/2);
 				/* tame metroids gain nutrition (does not stack with for-vampires above, since they have lifedrain instead of bloodsuck attacks) */
-				if (magr->mtame && !magr->isminion){
+				if (get_mx(magr, MX_EDOG)){
 					EDOG(magr)->hungrytime += pd->cnutrit / 4;  //400/4 = human nut/4
 				}
 			}
@@ -6976,7 +6976,7 @@ boolean ranged;
 				return MM_HIT;
 			}
 			/* tame creatures get nutrition */
-			if (magr->mtame && !magr->isminion) {
+			if (get_mx(magr, MX_EDOG)) {
 				EDOG(magr)->hungrytime += dmg * 11; /*aprox 60 points of hunger per 1d10*/
 				magr->mconf = 0;
 			}
@@ -7900,7 +7900,7 @@ boolean ranged;
 		}
 		else {
 			/* pets can get hungry */
-			if (mdef->mtame && !mdef->isminion){
+			if (get_mx(mdef, MX_EDOG)){
 				int hungr = rn1(120, 120);
 				EDOG(mdef)->hungrytime -= hungr;
 				//heal by the amount of HP it would heal by resting for that nutr worth of turns
@@ -8639,8 +8639,7 @@ int vis;
 				* DGST monsters don't die from undead corpses
 				*/
 				int num = monsndx(mdef->data);
-				if (magr->mtame && !magr->isminion &&
-					!(mvitals[num].mvflags & G_NOCORPSE || mdef->mvanishes)) {
+				if (get_mx(magr, MX_EDOG) && !(mvitals[num].mvflags & G_NOCORPSE || mdef->mvanishes)) {
 					struct obj *virtualcorpse = mksobj(CORPSE, FALSE, FALSE);
 					int nutrit;
 

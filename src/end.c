@@ -426,7 +426,7 @@ register struct monst *mtmp;
 		killer_format = KILLED_BY;
 		if (templated(mtmp))
 			append_template_desc(mtmp, buf, TRUE);
-	} else if (mtmp->ispriest || mtmp->isminion) {
+	} else if (get_mx(mtmp, MX_EPRI) || get_mx(mtmp, MX_EMIN)) {
 		/* m_monnam() suppresses "the" prefix plus "invisible", and
 		   it overrides the effect of Hallucination on priestname() */
 		killer = m_monnam(mtmp);

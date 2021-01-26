@@ -1811,7 +1811,7 @@ humanoid_sound:
 			verbl_msg = "I'm trapped!";
 	    } else if (mtmp->mhp < mtmp->mhpmax/2)
 		pline_msg = "asks for a potion of healing.";
-	    else if (mtmp->mtame && !mtmp->isminion &&
+	    else if (get_mx(mtmp, MX_EDOG) &&
 						moves > EDOG(mtmp)->hungrytime)
 		verbl_msg = "I'm hungry.";
 	    /* Specific monsters' interests */

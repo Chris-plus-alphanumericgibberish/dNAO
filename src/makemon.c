@@ -10703,11 +10703,11 @@ struct monst *mtmp;
 	schar mal = mtmp->data->maligntyp;
 	boolean coaligned;
 
-	if (mtmp->ispriest || mtmp->isminion) {
+	if (get_mx(mtmp, MX_EPRI) || get_mx(mtmp, MX_EMIN)) {
 		/* some monsters have individual alignments; check them */
-		if (mtmp->ispriest)
+		if (get_mx(mtmp, MX_EPRI))
 			mal = EPRI(mtmp)->shralign;
-		else if (mtmp->isminion)
+		else if (get_mx(mtmp, MX_EMIN))
 			mal = EMIN(mtmp)->min_align;
 		/* unless alignment is none, set mal to -5,0,5 */
 		/* (see align.h for valid aligntyp values)     */

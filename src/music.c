@@ -1074,7 +1074,7 @@ int distance;
 				mtmp->mspec_used = 0;
 				mtmp->mcrazed = 0;
 				mtmp->mdisrobe = 0;
-				if(!mtmp->isminion && EDOG(mtmp)->apport < 10) EDOG(mtmp)->apport++;
+				if(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->apport < 10) EDOG(mtmp)->apport++;
 				if(mtmp->permspeed == 0) mon_adjust_speed(mtmp, 1, (struct obj *) 0);
 			case P_SKILLED:
 				if(!mtmp->mnotlaugh && mtmp->mlaughing){
@@ -1413,7 +1413,7 @@ int distance;
 				if(mtmp->mx == u.ux+u.dx && mtmp->my == u.uy+u.dy && mtmp->moccupation){
 					mtmp->mflee = 0;
 					/* no other effect if monster was already tame by other means */
-					if (mtmp->mtame && !mtmp->isminion && !(EDOG(mtmp)->friend)){
+					if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->friend)){
 						if(mtmp->mtame < P_SKILL(P_MUSICALIZE)*P_SKILL(P_MUSICALIZE)) mtmp->mtame++;
 						return;
 					}

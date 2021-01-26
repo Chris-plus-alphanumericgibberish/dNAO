@@ -1505,7 +1505,7 @@ struct obj * otmp;
 		dmg += vd(1, 20);
 	}
 
-	/* Occult weapons */
+	/* Occult weapons hurt god-sent minions */
 	if (mdef && mdef->isminion){
 		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_VELKA_S_RAPIER || check_oprop(otmp, OPROP_OCLTW))
 			dmg += vd(4, 4) + otmp->spe;
@@ -1924,7 +1924,7 @@ boolean vis;
 			} else {
 				if(youagr)
 					You("smash %s secondary data store!", hisherits(mdef));
-				if(mdef->mtame && (mdef->isminion || !(EDOG(mdef)->loyal))){//note: won't check loyal if the target is a minion
+				if(mdef->mtame && !(get_mx(magr, MX_EDOG) && EDOG(mdef)->loyal)) {
 					if(mdef->mtame > dmg)
 						mdef->mtame -= dmg;
 					else untame(mdef, 1);
