@@ -507,9 +507,10 @@ register struct monst *mtmp;
 	aligntyp alignment;
 	char info[BUFSZ], monnambuf[BUFSZ];
 
-	if (mtmp->ispriest || mtmp->mtyp == PM_ALIGNED_PRIEST
-				|| mtmp->mtyp == PM_ANGEL)
+	if (get_mx(mtmp, MX_EPRI))
 		alignment = EPRI(mtmp)->shralign;
+	else if (get_mx(mtmp, MX_EMIN))
+		alignment = EMIN(mtmp)->min_align;
 	else
 		alignment = mtmp->data->maligntyp;
 	alignment = (alignment > 0) ? A_LAWFUL :
