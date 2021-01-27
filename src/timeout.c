@@ -2501,6 +2501,11 @@ long timeout;
 		start_timer(9999, TIMER_OBJECT, DESUMMON_OBJ, arg);
 		return;
 	}
+	/* clean up some pointers that obj_extract_self and obfree don't catch. UGH. */
+	if (otmp->where == OBJ_MINVENT) {
+		if (otmp == MON_WEP(otmp->ocarry)) MON_NOWEP(otmp->ocarry);
+		if (otmp == MON_SWEP(otmp->ocarry)) MON_NOSWEP(otmp->ocarry);
+	}
 	obj_extract_self(otmp);
 	newsym(otmp->ox, otmp->oy);
 	obfree(otmp, (struct obj *)0);
