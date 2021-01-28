@@ -2406,6 +2406,7 @@ boolean ranged;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	char buf[BUFSZ];
+	char buf2[BUFSZ];
 
 	/* don't make a "You swing" message */
 	if (youagr)
@@ -2434,13 +2435,13 @@ boolean ranged;
 	}
 
 	if (youdef) {
-		Sprintf(buf, "%s!", buf);
+		Sprintf(buf2, "%s!", buf);
 	}
 	else {
-		Sprintf(buf, "%s at %s.", buf, mon_nam(mdef));
+		Sprintf(buf2, "%s at %s.", buf, mon_nam(mdef));
 	}
 
-	pline("%s", buf);
+	pline("%s", buf2);
 	return;
 }
 
@@ -4290,18 +4291,18 @@ boolean ranged;
 			/* print message */
 			if (youdef){
 				if (dmg == 0) {
-					Sprintf(buf, "%s, but it seems harmless.", buf);
+					Strcat(buf, ", but it seems harmless.");
 				}
 				else if (Acid_res(mdef)) {
-					Sprintf(buf, "%s! It stings!", buf);
+					Strcat(buf, "! It stings!");
 				}
 				else {
-					Sprintf(buf, "%s! It burns!", buf);
+					Strcat(buf, "! It burns!");
 				}
 			}
 			else {
 				if (dmg == 0) {
-					Sprintf(buf, "%s, but it seems unharmed.", buf);
+					Strcat(buf, ", but it seems unharmed.");
 				}
 				///* random flavour -- a monster nearly killed by acid will scream */
 				//else if (dmg > mdef->mhp * 2/3 && !is_silent_mon(mdef)){
@@ -4309,7 +4310,7 @@ boolean ranged;
 				//	wake_nearto(x(mdef), y(mdef), combatNoise(pd));
 				//}
 				else
-					Sprintf(buf, "%s!", buf);
+					Strcat(buf, "!");
 			}
 			if (youdef || vis) {
 				pline("%s", buf);
@@ -13504,30 +13505,30 @@ int vis;						/* True if action is at all visible to the player */
 		slot = W_SKIN;
 		if (active_slots & slot) {
 			if (holyobj & slot)
-				Sprintf(buf, "%sglorious ", buf);
+				Strcat(buf, "glorious ");
 			if (unholyobj & slot)
-				Sprintf(buf, "%scursed ", buf);
+				Strcat(buf, "cursed ");
 			/* special cases */
 			if (attk && attk->adtyp == AD_STAR)
 			{
-				Sprintf(buf, "%sstarlight rapier", buf);
+				Strcat(buf, "starlight rapier");
 			}
 			else if (attk && attk->adtyp == AD_GLSS)
 			{
-				Sprintf(buf, "%sshards of broken mirrors", buf);
+				Strcat(buf, "shards of broken mirrors");
 			}
 			else if (youagr && u.sealsActive&SEAL_SIMURGH && u.sealsActive&SEAL_EDEN)
 			{
-				Sprintf(buf, "%scold-iron claws and silver skin", buf);
+				Strcat(buf, "cold-iron claws and silver skin");
 			}
 			else {
 				if (silverobj & slot)
-					Sprintf(buf, "%ssilver ", buf);
+					Strcat(buf, "silver ");
 				if (jadeobj & slot)
-					Sprintf(buf, "%sjade ", buf);
+					Strcat(buf, "jade ");
 				if (ironobj & slot)
-					Sprintf(buf, "%scold-iron ", buf);
-				Sprintf(buf, "%s%s", buf,
+					Strcat(buf, "cold-iron ");
+				Strcat(buf, 
 					(youagr && u.sealsActive&SEAL_SIMURGH) ? "claws"
 					: (youagr ? body_part(BODY_SKIN) : mbodypart(magr, BODY_SKIN)));
 			}
@@ -13539,39 +13540,39 @@ int vis;						/* True if action is at all visible to the player */
 			obuf = xname(otmp);
 
 			if (active_slots & W_SKIN)
-				Sprintf(buf, "%s and ", buf);
+				Strcat(buf, " and ");
 
 			if (holyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 				);
 			if (unholyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 				);
 			/* special cases */
 			if (otmp->oartifact == ART_SUNSWORD && (silverobj&slot)) {
-				Sprintf(buf, "%sburning-white blade", buf);
+				Strcat(buf, "burning-white blade");
 			}
 			else if (otmp->oartifact == ART_GLAMDRING && (silverobj&slot)) {
-				Sprintf(buf, "%swhite-burning blade", buf);
+				Strcat(buf, "white-burning blade");
 			}
 			else {
 				if (silverobj & slot){
 					if (!strstri(obuf, "silver "))
-						Sprintf(buf, "%ssilver%s ", buf, (otmp->obj_material != SILVER ? "ed" : ""));
+						Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
 				}
 				if (jadeobj & slot) {
 					if (!strstri(obuf, "jade "))
-						Sprintf(buf, "%sjade ", buf);
+						Strcat(buf, "jade ");
 				}
 				if (ironobj & slot) {
 					if (!strncmpi(obuf, "iron ", 5))
-						Sprintf(buf, "%scold-", buf);
+						Strcat(buf, "cold-");
 					else if (!strstri(obuf, "iron "))
-						Sprintf(buf, "%scold-iron ", buf);
+						Strcat(buf, "cold-iron ");
 				}
 				if (otherobj & slot) {
 					if (otmp->obj_material == WOOD && otmp->otyp != MOON_AXE &&
@@ -13580,18 +13581,18 @@ int vis;						/* True if action is at all visible to the player */
 					{
 						/* only will specifically modify "carved" */
 						if (!strncmpi(obuf, "carved ", 7))
-							Sprintf(buf, "%sveioistafur-", buf);
+							Strcat(buf, "veioistafur-");
 					}
 						
 				}
-				Sprintf(buf, "%s%s", buf, xname(otmp));
+				Strcat(buf, xname(otmp));
 			}
 		}
 		/* rings -- don't use xname(); "ring" is fine. */
 		slot = rslot;
 		if (active_slots & slot) {
 			if (active_slots & (W_SKIN|W_WEP))
-				Sprintf(buf, "%s and ", buf);
+				Strcat(buf, " and ");
 			/* only the player wears rings */
 			/* get correct ring */
 			otmp = (rslot == W_RINGL) ? uleft
@@ -13601,26 +13602,26 @@ int vis;						/* True if action is at all visible to the player */
 			if (otmp)
 			{
 				if (holyobj & slot)
-					Sprintf(buf, "%s%s", buf,
+					Strcat(buf,
 					(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
 					(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 					);
 				if (unholyobj & slot)
-					Sprintf(buf, "%s%s", buf,
+					Strcat(buf,
 					(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 					(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 					);
 				if (silverobj & slot){
-					Sprintf(buf, "%ssilver%s ", buf, ((jadeobj&slot) || (ironobj&slot) ? "ed" : ""));
+					Strcat(buf, ((jadeobj&slot) || (ironobj&slot) ? "silvered " : "silver "));
 				}
 				if (jadeobj & slot) {
-					Sprintf(buf, "%sjade ", buf);
+					Strcat(buf, "jade ");
 				}
 				if (ironobj & slot) {
-					Sprintf(buf, "%scold-iron ", buf);
+					Strcat(buf, "cold-iron ");
 				}
 
-				Sprintf(buf, "%sring", buf);
+				Strcat(buf, "ring");
 			}
 			else {
 				active_slots &= ~rslot;
@@ -13650,38 +13651,38 @@ int vis;						/* True if action is at all visible to the player */
 		if (otmp && (active_slots & slot)) {
 			obuf = xname(otmp);
 			if (active_slots & (W_SKIN|W_WEP|rslot))
-				Sprintf(buf, "%s and ", buf);
+				Strcat(buf, " and ");
 
 			if (holyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 				);
 			if (unholyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 				);
 			if (silverobj & slot){
 				if (!strstri(obuf, "silver "))
-					Sprintf(buf, "%ssilver%s ", buf, (otmp->obj_material != SILVER ? "ed" : ""));
+					Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
 			}
 			if (jadeobj & slot) {
 				if (!strstri(obuf, "jade "))
-					Sprintf(buf, "%sjade ", buf);
+					Strcat(buf, "jade ");
 			}
 			if (ironobj & slot) {
 				if (!strncmpi(obuf, "iron ", 5))
-					Sprintf(buf, "%scold-", buf);
+					Strcat(buf, "cold-");
 				else if (!strstri(obuf, "iron "))
-					Sprintf(buf, "%scold-iron ", buf);
+					Strcat(buf, "cold-iron ");
 			}
-			Sprintf(buf, "%s%s", buf, obuf);
+			Strcat(buf, obuf);
 		}
 		/* defender */
 		char seared[BUFSZ];
 		if (noncorporeal(pd)) {
-			Sprintf(seared, "%s",
+			Strcat(seared, 
 				youdef ? "you" : mon_nam(mdef));
 		}
 		else {
@@ -13690,9 +13691,7 @@ int vis;						/* True if action is at all visible to the player */
 				(youdef ? body_part(BODY_FLESH) : mbodypart(mdef, BODY_FLESH))
 				);
 		}
-		Sprintf(buf, "%s sears %s", buf, seared);
-
-		pline("%s!", buf);
+		pline("%s sears %s!", buf, seared);
 	}
 
 	/* poison */
