@@ -383,7 +383,7 @@ int template;
 		if ((attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ) && !haseyes(ptr))
 		{
 			boolean needs_magr_eyes;
-			getgazeinfo(attk->aatyp, attk->adtyp, ptr, &needs_magr_eyes, (boolean *)0, (boolean *)0);
+			getgazeinfo(attk->aatyp, attk->adtyp, ptr, (struct monst *) 0, (struct monst *) 0, &needs_magr_eyes, (boolean *)0, (boolean *)0);
 			if (needs_magr_eyes == TRUE)
 			{
 				/* remove attack */

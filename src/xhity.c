@@ -9487,15 +9487,20 @@ expl_common:
 }
 
 void
-getgazeinfo(aatyp, adtyp, pa, needs_magr_eyes, needs_mdef_eyes, needs_uncancelled)
+getgazeinfo(aatyp, adtyp, pa, magr, mdef, needs_magr_eyes, needs_mdef_eyes, needs_uncancelled)
 int aatyp;
 int adtyp;
 struct permonst * pa;
+struct monst * magr;
+struct monst * mdef;
 boolean * needs_magr_eyes;
 boolean * needs_mdef_eyes;
 boolean * needs_uncancelled;
 {
 #define maybeset(b, tf) if(b) {*(b)=tf;}
+	boolean adjacent = FALSE;
+	if(magr && mdef && distmin(magr->mx, magr->my, mdef->mx, mdef->my))
+		adjacent = TRUE;
 	/* figure out if gaze requires eye-contact or not */
 	switch (adtyp)
 	{
@@ -9514,7 +9519,10 @@ boolean * needs_uncancelled;
 				)
 				maybeset(needs_uncancelled, FALSE);
 			maybeset(needs_magr_eyes, FALSE);
-			maybeset(needs_mdef_eyes, TRUE);
+			if(pa->mtyp == PM_GREAT_CTHULHU && adjacent){
+				maybeset(needs_mdef_eyes, TRUE);
+			}
+			else maybeset(needs_mdef_eyes, FALSE);
 			break;
 		}
 		/* else fall through */
@@ -9560,6 +9568,10 @@ boolean * needs_uncancelled;
 		impossible("unhandled gaze type %d", adtyp);
 		break;
 	}
+	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
+		maybeset(needs_mdef_eyes, TRUE);
+		maybeset(needs_uncancelled, FALSE);
+	}
 	return;
 #undef maybeset
 }
@@ -9596,7 +9608,7 @@ int vis;
 	boolean needs_magr_eyes = TRUE;		/* when TRUE, mdef is protected if magr is blind */
 	boolean needs_mdef_eyes = TRUE;		/* when TRUE, mdef is protected by being blind */
 	boolean needs_uncancelled = TRUE;	/* when TRUE, attack cannot happen when cancelled */
-	boolean maybe_not = (!youagr);		/* when TRUE, occasionally doesn't use gaze attack at all */
+	boolean maybe_not = (!youagr && pa->mtyp != PM_DEMOGORGON);		/* when TRUE, occasionally doesn't use gaze attack at all */
 
 	static const int randomgazeattacks[] = { AD_DEAD, AD_CNCL, AD_PLYS, AD_DRLI, AD_ENCH, AD_STON, AD_LUCK,
 		AD_CONF, AD_SLOW, AD_STUN, AD_BLND, AD_FIRE, AD_FIRE,
@@ -9637,7 +9649,7 @@ int vis;
 		break;
 	}
 	/* get eyes, uncancelledness */
-	getgazeinfo(attk->aatyp, adtyp, pa, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
+	getgazeinfo(attk->aatyp, adtyp, pa, magr, mdef, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
 
 	/* widegazes cannot fail */
 	if (attk->aatyp == AT_WDGZ)
@@ -9646,14 +9658,7 @@ int vis;
 	/* these gazes are actually hacks and only work vs the player */
 	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST))
 		return MM_MISS;
-
-	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
-		needs_mdef_eyes = TRUE;
-		needs_uncancelled = FALSE;
-		maybe_not = FALSE;
-	}
-
-
+	
 	if (/* needs_magr_eyes:   magr must have eyes and can actively see mdef */
 		(needs_magr_eyes && !(
 			(haseyes(pa)) &&
