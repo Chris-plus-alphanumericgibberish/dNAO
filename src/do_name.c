@@ -877,7 +877,7 @@ boolean called;
 	}
 
 	/* priests and minions: don't even use this function */
-	if ((mtmp->ispriest || mtmp->isminion) && mtmp->mtyp != PM_BLASPHEMOUS_LURKER) {
+	if ((get_mx(mtmp, MX_EPRI) || get_mx(mtmp, MX_EMIN)) && mtmp->mtyp != PM_BLASPHEMOUS_LURKER) {
 	    char priestnambuf[BUFSZ];
 	    char *name;
 	    long save_prop = EHalluc_resistance;
