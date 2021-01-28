@@ -300,14 +300,14 @@ int mode;
 	if (!otmp->oextra_p)
 		return;
 
-	/* get oextra as one continous bundle of memory */
-	oextra_block = bundle_oextra(otmp, &len);
-
-	/* write it */
-	bwrite(fd, oextra_block, len);
-
-	/* deallocate the block */
-	free(oextra_block);
+	if (perform_bwrite(mode)) {
+		/* get oextra as one continous bundle of memory */
+		oextra_block = bundle_oextra(otmp, &len);
+		/* write it */
+		bwrite(fd, oextra_block, len);
+		/* deallocate the block */
+		free(oextra_block);
+	}
 
 	if (release_data(mode)) {
 		rem_all_ox(otmp);

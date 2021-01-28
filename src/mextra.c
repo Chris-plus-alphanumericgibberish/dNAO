@@ -304,14 +304,14 @@ int mode;
 	if (!mtmp->mextra_p)
 		return;
 
-	/* get mextra as one continous bundle of memory */
-	mextra_block = bundle_mextra(mtmp, &len);
-
-	/* write it */
-	bwrite(fd, mextra_block, len);
-
-	/* deallocate the block */
-	free(mextra_block);
+	if (perform_bwrite(mode)) {
+		/* get mextra as one continous bundle of memory */
+		mextra_block = bundle_mextra(mtmp, &len);
+		/* write it */
+		bwrite(fd, mextra_block, len);
+		/* deallocate the block */
+		free(mextra_block);
+	}
 
 	if (release_data(mode)) {
 		rem_all_mx(mtmp);

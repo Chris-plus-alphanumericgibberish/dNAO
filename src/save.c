@@ -900,16 +900,13 @@ register struct obj *otmp;
 //				bwrite(fd, (genericptr_t) otmp->mp->mskaexe, sizeof(struct attribs));
 //				bwrite(fd, (genericptr_t) otmp->mp->mskamask, sizeof(struct attribs));
 			}
-			if (otmp->oextra_p) {
-				save_oextra(otmp, fd, mode);
-			}
-			if (otmp->light) {
-				save_lightsource(otmp->light, fd, mode);
-			}
-			if (otmp->timed) {
-				save_timers(otmp->timed, fd, mode);
-			}
 	    }
+		if (otmp->oextra_p)
+			save_oextra(otmp, fd, mode);
+		if (otmp->light)
+			save_lightsource(otmp->light, fd, mode);
+		if (otmp->timed)
+			save_timers(otmp->timed, fd, mode);
 	    if (Has_contents(otmp))
 		saveobjchn(fd,otmp->cobj,mode);
 	    if (release_data(mode)) {
@@ -943,15 +940,13 @@ register struct monst *mtmp;
 	    if (perform_bwrite(mode)) {
 		bwrite(fd, (genericptr_t) &zero, sizeof(int));
 		bwrite(fd, (genericptr_t) mtmp, sizeof(struct monst));
+	    }
 		if(mtmp->mextra_p)
 			save_mextra(mtmp, fd, mode);
-	    }
-		if (mtmp->light) {
+		if (mtmp->light)
 			save_lightsource(mtmp->light, fd, mode);
-		}
-		if (mtmp->timed) {
+		if (mtmp->timed)
 			save_timers(mtmp->timed, fd, mode);
-		}
 	    if (mtmp->minvent)
 		saveobjchn(fd,mtmp->minvent,mode);
 	    if (release_data(mode))
