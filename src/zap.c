@@ -788,7 +788,7 @@ boolean dolls;
 			    coord xy;
 			    xy.x = x; xy.y = y;
 				mtmp = montraits(obj, &xy);
-				if (mtmp && mtmp->mtame && !mtmp->isminion)
+				if (mtmp && get_mx(mtmp, MX_EDOG))
 					wary_dog(mtmp, TRUE);
 		    } else
  		            mtmp = makemon(&mons[montype], x, y,
@@ -4125,7 +4125,7 @@ struct zapdata * zapdata;
 			if (Sleep_res(mdef)) {
 				doshieldeff = TRUE;
 				sleeptime = 0;
-				addmsg("don't feel sleepy.");
+				addmsg("You don't feel sleepy.");
 			}
 			domsg();
 			if (sleeptime>0) {

@@ -2883,7 +2883,7 @@ boolean stoning;
 	if (canseemon(mon))
 	    pline("%s seems steadier now.", Monnam(mon));
     }
-    if (mon->mtame && !mon->isminion && nutrit > 0) {
+    if (get_mx(mon, MX_EDOG) && nutrit > 0) {
 	struct edog *edog = EDOG(mon);
 
 	if (edog->hungrytime < monstermoves) edog->hungrytime = monstermoves;

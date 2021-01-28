@@ -343,7 +343,7 @@ register struct monst *mon;
 char *pname;		/* caller-supplied output buffer */
 {
 	const char *what = Hallucination ? rndmonnam() : mon->data->mname;
-	int align = (mon->ispriest ? EPRI(mon)->shralign : mon->isminion ? EMIN(mon)->min_align : 0);
+	int align = (get_mx(mon, MX_EPRI) ? EPRI(mon)->shralign : get_mx(mon, MX_EMIN) ? EMIN(mon)->min_align : 0);
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");

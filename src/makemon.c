@@ -130,13 +130,14 @@ register int x, y, n;
 	mm.x = x;
 	mm.y = y;
 	mndx = monsndx(mtmp->data);
-	if(!(u.uevent.uaxus_foe) || mndx > PM_QUINON || mndx < PM_MONOTON){
-	 while(cnt--) {
-		if (peace_minded(mtmp->data)) continue;
+	while(cnt--) {
+		if (peace_minded(mtmp->data) && 
+			!(is_auton(mtmp->data) && u.uevent.uaxus_foe)) continue;
 		/* Don't create groups of peaceful monsters since they'll get
 		 * in our way.  If the monster has a percentage chance so some
 		 * are peaceful and some are not, the result will just be a
 		 * smaller group.
+		 * Exception: autons that would have been peaceful, except you killed Axus so they're going to be hostile.
 		 */
 		 	/* if caller wants random locations, do one here */
 		if(x == 0 && y == 0) {
@@ -157,37 +158,20 @@ register int x, y, n;
 			    mon->mpeaceful = FALSE;
 			    mon->mavenge = 0;
 			    set_malign(mon);
+
+				/* if auton was going to be peaceful but you killed Axus, make it hostile and worth negative alignment */
+				if (is_auton(mon->data) && peace_minded(mtmp->data) && u.uevent.uaxus_foe) {
+					mon->mpeaceful = 1;
+					mon->mavenge = 0;
+					set_malign(mon);
+					mon->mpeaceful = 0;
+				}
 		    }
 		    /* Undo the second peace_minded() check in makemon(); if the
 		     * monster turned out to be peaceful the first time we
 		     * didn't create it at all; we don't want a second check.
 		     */
 		}
-	 }
-	}
-	else{
-	 while(cnt-- > 0) {
-		 	/* if caller wants random locations, do one here */
-		if(x == 0 && y == 0) {
-			int tryct = 0;	/* careful with bigrooms */
-			struct monst fakemon = {0};
-			set_mon_data_core(&fakemon, mtmp->data); /* set up for goodpos */
-			do {
-				mm.x = rn1(COLNO-3,2);
-				mm.y = rn2(ROWNO);
-			} while(!goodpos(mm.x, mm.y, &fakemon, NO_MM_FLAGS) ||
-				(tryct++ < 150 && ((tryct < 50 && couldsee(mm.x, mm.y)) || (tryct < 100 && cansee(mm.x, mm.y)) || distmin(mm.x,mm.y,u.ux,u.uy) < BOLT_LIM)));
-			if(!goodpos(mm.x, mm.y, &fakemon, NO_MM_FLAGS))
-				return;
-		}
-		if (enexto(&mm, mm.x, mm.y, mtmp->data)) {
-		    mon = makemon(mtmp->data, mm.x, mm.y, NO_MM_FLAGS);
-		    mon->mpeaceful = 1;
-		    mon->mavenge = 0;
-		    set_malign(mon);
-			mtmp->mpeaceful = 0;
-		}
-	 }
 	}
 }
 
@@ -10661,10 +10645,13 @@ register struct permonst *ptr;
 	if(ual == A_VOID) return FALSE;
 	
 	//Law quest uniques
-	if (((mndx <= PM_QUINON && mndx >= PM_MONOTON) || mndx == PM_AXUS) && sgn(mal) == sgn(ual)){
-		if(!(u.uevent.uaxus_foe) && u.ualign.record >= 10){
+	if (is_auton(ptr)){
+		/* u.uevent.uaxus_foe must be checked elsewhere
+		* it will make autons hostile AND penalize alignment as though they had been generated peaceful */
+		if (sgn(mal) == sgn(ual) && (u.ualign.record >= 10 || u.uevent.uaxus_foe))
 			return TRUE;
-		} else return FALSE;
+		else
+			return FALSE;
 	}
 	if (mndx==PM_APOLLYON && u.ualign.record >= 0 && sgn(mal) == sgn(ual)) return TRUE;
 	if (mndx==PM_OONA && u.ualign.record >= 20 && u.ualign.sins < 10 && sgn(mal) == sgn(ual)) return TRUE;
@@ -10716,11 +10703,11 @@ struct monst *mtmp;
 	schar mal = mtmp->data->maligntyp;
 	boolean coaligned;
 
-	if (mtmp->ispriest || mtmp->isminion) {
+	if (get_mx(mtmp, MX_EPRI) || get_mx(mtmp, MX_EMIN)) {
 		/* some monsters have individual alignments; check them */
-		if (mtmp->ispriest)
+		if (get_mx(mtmp, MX_EPRI))
 			mal = EPRI(mtmp)->shralign;
-		else if (mtmp->isminion)
+		else if (get_mx(mtmp, MX_EMIN))
 			mal = EMIN(mtmp)->min_align;
 		/* unless alignment is none, set mal to -5,0,5 */
 		/* (see align.h for valid aligntyp values)     */

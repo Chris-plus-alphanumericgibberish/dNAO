@@ -554,7 +554,7 @@ int *fail_reason;
 	if (get_ox(statue, OX_EMON)) {
 	    cc.x = x,  cc.y = y;
 	    mon = montraits(statue, &cc);
-	    // if (mon && mon->mtame && !mon->isminion)
+	    // if (mon && get_mx(mon, MX_EDOG))
 		// wary_dog(mon, TRUE);
 	} else {
 	    /* statue of any golem hit with stone-to-flesh becomes flesh golem */
@@ -5027,11 +5027,16 @@ lava_effects()
        armor anyway */
 burn_stuff:
     if(uarmf && !uarmf->oerodeproof && is_organic(uarmf)) {
-	/* save uarmf value because Boots_off() sets uarmf to null */
-	obj = uarmf;
-	Your("%s bursts into flame!", xname(obj));
-	(void) Boots_off();
-	useup(obj);
+		if ((uarmf->oeroded<3) || (uarmf->oartifact)) {
+			rust_dmg(uarmf, "boots", 0, FALSE, &youmonst);
+		}
+		else {
+			/* save uarmf value because Boots_off() sets uarmf to null */
+			obj = uarmf;
+			Your("%s bursts into flame!", xname(obj));
+			(void) Boots_off();
+			useup(obj);
+		}
     }
 	if(!(Wwalking || InvFire_resistance)){
 		destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);

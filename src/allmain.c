@@ -1166,7 +1166,7 @@ moveloop()
 					mtmp->mtrapped = TRUE;
 				}
 				/* Loyal monsters slowly recover tameness */
-				if(mtmp->mtame && mtmp->mtame < 5 && !mtmp->isminion && !(EDOG(mtmp)->loyal) && (!moves%100))
+				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && (!moves%100))
 					mtmp->mtame++;
 				/* Possibly vanish */
 				if(mtmp->mvanishes>-1){

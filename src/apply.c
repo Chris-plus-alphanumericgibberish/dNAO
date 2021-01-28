@@ -593,7 +593,7 @@ struct obj *obj;
 	wake_nearby_noisy();
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (!DEADMONSTER(mtmp)) {
-			if (mtmp->mtame && !mtmp->isminion)
+			if (get_mx(mtmp, MX_EDOG))
 				EDOG(mtmp)->whistletime = moves;
 	    }
 	}
@@ -4289,7 +4289,7 @@ use_doll(obj)
 				pline("The doll sings sweetly.");
 				if(mtmp && resist_song(mtmp, SNG_TAME, obj) >= 0){
 					if (mtmp->mtame){
-						if(mtmp->isminion || (EDOG(mtmp)->friend))
+						if(!get_mx(mtmp, MX_EDOG) || (EDOG(mtmp)->friend))
 							break;
 						if(mtmp->mtame < 16) mtmp->mtame++;
 					} else {
