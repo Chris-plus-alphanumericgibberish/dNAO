@@ -554,7 +554,7 @@ int *fail_reason;
 	if (get_ox(statue, OX_EMON)) {
 	    cc.x = x,  cc.y = y;
 	    mon = montraits(statue, &cc);
-	    // if (mon && mon->mtame && !mon->isminion)
+	    // if (mon && get_mx(mon, MX_EDOG))
 		// wary_dog(mon, TRUE);
 	} else {
 	    /* statue of any golem hit with stone-to-flesh becomes flesh golem */

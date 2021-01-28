@@ -521,7 +521,7 @@ register struct monst *mtmp;
 #ifdef WIZARD
 	    if (wizard) {
 		Sprintf(eos(info), " (%d", mtmp->mtame);
-		if (!mtmp->isminion)
+		if (get_mx(mtmp, MX_EDOG))
 		    Sprintf(eos(info), "; hungry %ld; apport %d",
 			EDOG(mtmp)->hungrytime, EDOG(mtmp)->apport);
 		Strcat(info, ")");

@@ -1578,12 +1578,10 @@ touch_artifact(obj, mon, hypothetical)
 				   !(oart == &artilist[ART_EXCALIBUR] || oart == &artilist[ART_CLARENT]))
 				   ||
 				   (oart->race != NON_PM && ((mons[oart->race].mflagsa & mon->data->mflagsa) == 0)));
-			if(mon->isminion && (mon->mtyp == PM_ALIGNED_PRIEST
-				|| mon->mtyp == PM_ANGEL)
-			){
+			if(get_mx(mon, MX_EPRI)){
 				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(EPRI(mon)->shralign));
-			} else if(mon->isminion){
+			} else if(get_mx(mon, MX_EMIN)){
 				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(EMIN(mon)->min_align));
 			} else {
@@ -1593,11 +1591,9 @@ touch_artifact(obj, mon, hypothetical)
 		}
 		else{/* Unicorn horns */
 			badclass = TRUE;
-			if(mon->isminion && (mon->mtyp == PM_ALIGNED_PRIEST
-				|| mon->mtyp == PM_ANGEL)
-			){
+			if(get_mx(mon, MX_EPRI)) {
 				badalign = oart->alignment != A_NONE && (oart->alignment != sgn(EPRI(mon)->shralign));
-			} else if(mon->isminion){
+			} else if(get_mx(mon, MX_EMIN)){
 				badalign = oart->alignment != A_NONE && (oart->alignment != sgn(EMIN(mon)->min_align));
 			} else {
 				badalign = oart->alignment != A_NONE && (oart->alignment != sgn(mon->data->maligntyp));

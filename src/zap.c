@@ -788,7 +788,7 @@ boolean dolls;
 			    coord xy;
 			    xy.x = x; xy.y = y;
 				mtmp = montraits(obj, &xy);
-				if (mtmp && mtmp->mtame && !mtmp->isminion)
+				if (mtmp && get_mx(mtmp, MX_EDOG))
 					wary_dog(mtmp, TRUE);
 		    } else
  		            mtmp = makemon(&mons[montype], x, y,

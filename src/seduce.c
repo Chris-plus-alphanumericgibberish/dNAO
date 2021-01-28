@@ -1935,7 +1935,7 @@ int effect_num;
 				/* Get 1/20th of full corpse value
 				* Therefore 4 bites == 1 drink
 				*/
-				if (mon->mtame && !mon->isminion)
+				if (get_mx(mon, MX_EDOG))
 					EDOG(mon)->hungrytime += ((int)((youracedata)->cnutrit / 20) + 1);
 			}
 			if (!mon->mcan && !rn2(3) && !Drain_resistance) {

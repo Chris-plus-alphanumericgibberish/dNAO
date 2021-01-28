@@ -4163,7 +4163,7 @@ struct monst *mtmp;
 		/* perform common lifesaving effects */
 		mtmp->mcanmove = 1;
 		mtmp->mfrozen = 0;
-		if (mtmp->mtame && !mtmp->isminion) {
+		if (get_mx(mtmp, MX_EDOG)) {
 			wary_dog(mtmp, FALSE);
 		}
 		if (mtmp->mhpmax < 10)
@@ -5605,7 +5605,7 @@ xkilled(mtmp, dest)
 			    */
 
 	/* your pet knows who just killed it...watch out */
-	if (mtmp->mtame && !mtmp->isminion) EDOG(mtmp)->killed_by_u = 1;
+	if (get_mx(mtmp, MX_EDOG)) EDOG(mtmp)->killed_by_u = 1;
 
 	/* dispose of monster and make cadaver */
 	if(stoned) monstone(mtmp);
