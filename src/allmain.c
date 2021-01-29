@@ -1098,7 +1098,8 @@ moveloop()
 				pline("Hey, people might notice me with that!");
 				if (donning(otmp)) cancel_don();
 				(void) Cloak_off();
-				useup(otmp);
+				if (!otmp->oartifact)
+					useup(otmp);
 				unbind(SEAL_SHIRO,TRUE);
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
