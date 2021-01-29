@@ -13697,9 +13697,11 @@ int vis;						/* True if action is at all visible to the player */
 	/* poison */
 	if (poisons_resisted || poisons_majoreff || poisons_minoreff || poisons_wipedoff) {
 		otmp = poisonedobj;
-		int i, n;
+		int i, n, r;
+		char poisons_str[BUFSZ];
 		/* poison resist messages -- should only appear once, as resistivity should be constant between hits */
 		if (poisons_resisted && (vis&VIS_MDEF) && !recursed) {
+			r = 0;	/* # of poisons resisted */
 			for (n = 0; n < NUM_POISONS; n++)
 			{
 				i = (1 << n);
@@ -13710,29 +13712,33 @@ int vis;						/* True if action is at all visible to the player */
 				case OPOISON_BASIC:
 				case OPOISON_BLIND:
 				case OPOISON_PARAL:
-					pline_The("poison doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "poison");
 					break;
 				case OPOISON_FILTH:
-					pline_The("filth doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "filth");
 					break;
 				case OPOISON_SLEEP:
-					pline_The("drug doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "drug");
 					break;
 				case OPOISON_AMNES:
-					pline_The("lethe-rust doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "lethe-rust");
 					break;
 				case OPOISON_ACID:
-					pline_The("acid-coating doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "acid-coating");
 					break;
 				case OPOISON_SILVER:
 					/* no message */
+					r--;
 					break;
 				}
+				r++;
+			}
+			if (r) {
+				pline_The("%s %s seem to affect %s.",
+					((r > 1) ? "coatings" : poisons_str),
+					((r > 1) ? "don't" : "doesn't"),
+					(youdef ? "you" : mon_nam(mdef))
+					);
 			}
 		}
 		/* poison major effects and their messages -- can happen multiple times */
