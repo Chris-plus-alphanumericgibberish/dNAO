@@ -442,6 +442,7 @@ gcrownu()
 				dropy(obj);
 			}
 			u.ugifts++;
+			obj->gifted = Align2gangr(u.ualign.type);
 			discover_artifact(arti);
 		}
 		else if (uwep && uwep->oartifact == arti) {
