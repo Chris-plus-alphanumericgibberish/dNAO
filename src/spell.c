@@ -5786,11 +5786,11 @@ int spell;
 	chance = chance * (20-splcaster) / 15 - splcaster;
 	
 	if(u.umadness&MAD_RAGE && !ClearThoughts){
-		int delta = 100 - u.usanity;
+		int delta = Insanity;
 		chance -= delta;
 	}
 	if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-		int delta = 100 - u.usanity;
+		int delta = Insanity;
 		int discomfort = u_clothing_discomfort();
 		if (discomfort) {
 			chance -= (discomfort * delta)/10;

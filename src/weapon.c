@@ -2455,7 +2455,7 @@ struct obj *otmp;
 	else /*  str ==25*/bonus = 8;
 	
 	if(u.umadness&MAD_RAGE && !ClearThoughts){
-		bonus += (100 - u.usanity)/10;
+		bonus += (Insanity)/10;
 	}
 	if(otmp){
 		if (!uarms && !u.twoweap) {

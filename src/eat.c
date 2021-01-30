@@ -3815,7 +3815,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 		&& !ClearThoughts
 		&& u.umadness&MAD_GLUTTONY
 	){
-		int delta = 100 - u.usanity;
+		int delta = Insanity;
 		if(Race_if(PM_INCANTIFIER)) losepw(delta/25);
 		else u.uhunger -= delta/25;
 		//remainder

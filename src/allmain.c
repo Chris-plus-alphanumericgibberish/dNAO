@@ -1692,7 +1692,7 @@ karemade:
 		    }
 			
 			if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-				int delta = 100 - u.usanity;
+				int delta = Insanity;
 				int discomfort = u_clothing_discomfort();
 				discomfort = (discomfort * delta)/100;
 				if (moveamt - discomfort < NORMAL_SPEED/2) {
