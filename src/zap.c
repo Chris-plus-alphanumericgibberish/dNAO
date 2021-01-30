@@ -4089,6 +4089,7 @@ struct zapdata * zapdata;
 				if (youdef) {
 					domsg();
 					pline_The("poison was deadly...");
+					killer_format = NO_KILLER_PREFIX;
 					done(POISONING);
 					return MM_DEF_LSVD;
 				}
