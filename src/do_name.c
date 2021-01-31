@@ -756,7 +756,7 @@ boolean pname;
 		else if (has_template(mtmp, ILLUMINATED)) Strcat(buf, "the Illuminated");
 		else if (has_template(mtmp, VAMPIRIC)) Strcat(buf, ", vampire");
 		else if (has_template(mtmp, PSEUDONATURAL)) Strcat(buf, "the Pseudonatural");
-		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, "of the Herd");
+		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, " of the Herd");
 		else if (has_template(mtmp, MISTWEAVER)){
 			if (mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
 			else Strcat(buf, ", Child of the Black Goat");
