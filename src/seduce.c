@@ -2211,7 +2211,8 @@ int effect_num;
 					pline1(Never_mind);
 				}
 				else {
-					turns = (.8 + ((double)rn2(5))) * (turns);
+					/* 80% to 120% of asked for, in increments of 10% */
+					turns = turns * (8 + rn2(5)) / 10;
 					lesshungry(turns * 10);
 					You("notice %s wound your clockwork %d times.", noit_mon_nam(mon), turns);
 				}
