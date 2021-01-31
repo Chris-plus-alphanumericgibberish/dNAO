@@ -5280,6 +5280,25 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
+	case AD_LRVA:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* lay an egg */
+		if (notmcan) {
+			/* player */
+			if (youdef) {
+				u.utaneggs++;
+			}
+			else {
+				mdef->mtaneggs++;
+			}
+		}
+		/* make poison/physical attack without hitmsg */
+		alt_attk.adtyp = AD_DRCO;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
 	case AD_CURS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {

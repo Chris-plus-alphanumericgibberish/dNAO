@@ -1427,6 +1427,9 @@ struct monst *mon;
 		case PM_WALKING_DELIRIUM:
 			u.umadness |= MAD_DELUSIONS;
 		break;
+		case PM_AKKABISH_TANNIN:
+			u.umadness |= MAD_FORMICATION;
+		break;
 		case PM_ALDINACH:
 			u.umadness |= MAD_REAL_DELUSIONS;
 		break;

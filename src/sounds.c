@@ -5454,6 +5454,11 @@ int p_skill;
 			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uswapwep)));
 	}
 	
+	if(u.umadness&MAD_FORMICATION && !ClearThoughts && maxskill > P_UNSKILLED){
+		int delta = (Insanity)/20;
+		maxskill = max(maxskill - delta, P_UNSKILLED);
+	}
+	
 	return maxskill;
 }
 
@@ -5504,10 +5509,17 @@ int p_skill;
 	}
 	
 	if(u.sealsActive&SEAL_NABERIUS && (curskill<P_BASIC || maxskill<P_BASIC)){
-		return P_BASIC;
+		curskill = P_BASIC;
 	}
 	
-	return min(curskill, maxskill);
+	if(u.umadness&MAD_FORMICATION && !ClearThoughts && curskill > P_UNSKILLED){
+		int delta = (Insanity)/20;
+		curskill = max(curskill - delta, P_UNSKILLED);
+	}
+	
+	curskill = min(curskill, maxskill);
+	
+	return curskill;
 }
 
 int

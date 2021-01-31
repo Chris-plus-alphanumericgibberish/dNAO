@@ -1929,6 +1929,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	you_have(buf);
 	Sprintf(buf, "%d insight points", u.uinsight);
 	you_have(buf);
+	Sprintf(buf, "%d parasite eggs", u.utaneggs);
+	you_have(buf);
 	
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
@@ -2020,6 +2022,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				Sprintf(buf, "your %s seethe below your %s", body_part(BLOOD), body_part(BODY_SKIN));
 				enl_msg("You ", "feel ", "felt ", buf);
 			}
+		}
+		if (u.umadness&MAD_FORMICATION){
+			enl_msg("You ", "are", "were", " distracted by invisible insects, lowering your skills and increasing spell failure");
 		}
 	}
 	
@@ -2774,6 +2779,9 @@ int final;
 				dump("  ", buf);
 			}
 		}
+		if (u.umadness&MAD_FORMICATION){
+			dump("  ", "You were constantly distracted by the feeling of crawling insects");
+		}
 	}
 	/*** More Troubles ***/
 	if (Halluc_resistance) 	dump("  ", "You resisted hallucinations");
@@ -3261,6 +3269,9 @@ resistances_enlightenment()
 				putstr(en_win, 0, buf);
 				messaged++;
 			}
+		}
+		if (u.umadness&MAD_FORMICATION){
+			putstr(en_win, 0, "You are distracted by the feeling of insects crawling over your body");
 		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)

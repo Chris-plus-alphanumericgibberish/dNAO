@@ -190,10 +190,11 @@
 #define AD_SPHR     127 /* Creates spheres */
 #define AD_DARK     128 /* Does extra damage to mortal races */
 
+#define AD_LRVA     129 /* Implants eggs (tannin special attack) */
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	129
+#define AD_DUNSTAN	138
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

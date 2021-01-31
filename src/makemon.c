@@ -10251,7 +10251,11 @@ struct monst *mtmp, *victim;
 	/* note:  none of the monsters with special hit point calculations
 	   have both little and big forms */
 	oldtype = monsndx(ptr);
-	newtype = little_to_big(oldtype, (boolean)mtmp->female);
+	
+	if(mtmp->mtyp == PM_STRANGE_LARVA && mtmp->mvar_tanninType)
+		newtype = mtmp->mvar_tanninType;
+	else
+		newtype = little_to_big(oldtype, (boolean)mtmp->female);
 
 	/* growth limits differ depending on method of advancement */
 	if (victim) {		/* killed a monster */

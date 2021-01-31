@@ -540,14 +540,25 @@ struct you {
 #define	MAD_COLD_NIGHT		0x0000000000020000L
 #define	MAD_OVERLORD		0x0000000000040000L
 #define	MAD_DREAMS			0x0000000000080000L
-#define	MAD_HELMINTHOPHOBIA	0x0000000000100000L
-#define	MAD_GOAT_RIDDEN		0x0000000000200000L
-#define	MAD_FRENZY			0x0000000000400000L
+#define	MAD_NON_EUCLID		0x0000000000100000L
+#define	MAD_SPIRAL			0x0000000000200000L
+#define	MAD_HELMINTHOPHOBIA	0x0000000000400000L
+#define	MAD_GOAT_RIDDEN		0x0000000000800000L
+#define	MAD_FRENZY			0x0000000001000000L
+#define	MAD_THOUSAND_MASKS	0x0000000002000000L
+#define	MAD_FORMICATION		0x0000000004000000L
+#define	MAD_HOST			0x0000000008000000L
+#define	MAD_SCIAPHILIA		0x0000000010000000L
+#define	MAD_FORGETFUL		0x0000000020000000L
+#define	MAD_TOO_BIG			0x0000000040000000L
+#define	MAD_APOSTASY		0x0000000080000000L
+#define	MAD_ROTTING			0x0000000100000000L
 	int 	uinsight;	/* to record level of insight */
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)
 	uchar 	wimage;		/* to record if you have the image of a Weeping Angel in your mind */
 	int 	umorgul;	/* to record the number of morgul wounds */
+	int 	utaneggs;	/* tannin eggs */
 	int uinvault;
 	struct monst *ustuck;
 	boolean petattacked;

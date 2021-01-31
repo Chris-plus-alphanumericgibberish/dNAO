@@ -1181,6 +1181,23 @@ moveloop()
 						continue;
 					}
 				}
+				/*Tannin eggs may hatch, monster may die*/
+				if(mtmp->mtaneggs){
+					for(int i = mtmp->mtaneggs; i > 0; i--) if(!rn2(6)){
+						mtmp->mtaneggs--;
+						makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+						mtmp->mhp -= rnd(6);
+					}
+					/*Died from the damage*/
+					if(mtmp->mhp <= 0){
+						mondied(mtmp);
+						continue;
+					}
+				}
+				if(mtmp->mtyp == PM_STRANGE_LARVA){
+					grow_up(mtmp, (struct monst *)0);
+				}
+				/*Monsters may have to skip turn*/
 				if(noactions(mtmp)){
 					/* Monsters in a essence trap can't move */
 					if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
@@ -1638,6 +1655,14 @@ karemade:
 					while(n-- > 0){
 						exercise(i, FALSE);
 					}
+				}
+			}
+			
+			if(u.utaneggs){
+				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
+					u.utaneggs--;
+					makemon(&mons[PM_STRANGE_LARVA], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+					losehp(d(1,6), "hatchiing parasite", KILLED_BY_AN);
 				}
 			}
 			
@@ -3419,6 +3444,7 @@ printAttacks(buf, ptr)
 		"[[Blood frenzy]]",		/*126*/
 		"[[Create spheres]]",	/*127*/
 		"[[Dark]]",				/*128*/
+		"[[Implant egg]]",		/*129*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/*129*/
 		"[[water vampire]]",	/*130*/

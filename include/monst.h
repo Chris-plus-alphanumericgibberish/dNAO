@@ -155,6 +155,7 @@ struct monst {
 	Bitfield(mdisrobe,1);/* disrobing */ /*90*/
 	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*91*/
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
+	int mtaneggs;	/* tannin eggs */
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 #define BASE_DOG_ENCOURAGED_MAX		7
@@ -264,6 +265,7 @@ struct monst {
 #define	DOLLMAKER_MIND_BLASTS	0x20000L
 #define	MAX_DOLL_MASK	DOLLMAKER_MIND_BLASTS
 	long mvar2;
+#define	mvar_tanninType	mvar2
 	long mvar3;
 
 	struct ls_t * light;

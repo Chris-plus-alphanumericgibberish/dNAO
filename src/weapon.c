@@ -2599,7 +2599,8 @@ int skill;
 boolean speedy;
 {
     return !P_RESTRICTED(skill)
-	    && P_SKILL(skill) < P_MAX_SKILL(skill) && (
+	    && P_SKILL(skill) < P_MAX_SKILL(skill)
+	    && OLD_P_SKILL(skill) < OLD_P_MAX_SKILL(skill) && (
 #ifdef WIZARD
 	    (wizard && speedy) ||
 #endif
@@ -2806,7 +2807,7 @@ int enhance_skill(boolean want_dump)
 		(void) skill_level_name(i, sklnambuf);
 		(void) max_skill_level_name(i, maxsklnambuf);
 #ifdef WIZARD
-		if (wizard) {
+		if (wizard && speedy) {
 		    if (!iflags.menu_tab_sep)
 			Sprintf(buf, " %s%-*s %-12s %5d(%4d)",
 			    prefix, longest, P_NAME(i), sklnambuf,
