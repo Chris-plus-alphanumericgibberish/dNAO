@@ -6152,6 +6152,7 @@ register struct monst *mtmp;
 	    for (mon = fmon; mon; mon = mon->nmon)
 		if (!DEADMONSTER(mon) && mon->data == q_guardian && mon->mpeaceful) {
 		    mon->mpeaceful = 0;
+			newsym(mon->mx, mon->my);
 		    if (canseemon(mon)) ++got_mad;
 		}
 	    if (got_mad && !Hallucination)

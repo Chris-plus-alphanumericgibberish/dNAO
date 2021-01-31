@@ -129,11 +129,12 @@ int ox_id;
 	void * ox_p2;
 	if ((ox_p1 = get_ox(obj1, ox_id))) {
 		ox_p2 = get_ox(obj2, ox_id);
-		if(!ox_p2)
+		if(!ox_p2) {
 			if (ox_list[ox_id].s_size != -1)
-				add_mx(obj2, ox_id);
+				add_ox(obj2, ox_id);
 			else
 				add_ox_l(obj2, ox_id, siz_ox(obj1, ox_id)-sizeof(long));
+		}
 		memcpy(get_ox(obj2, ox_id), ox_p1, siz_ox(obj1, ox_id));
 	}
 	return;

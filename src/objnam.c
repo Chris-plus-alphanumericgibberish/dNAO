@@ -3123,7 +3123,8 @@ const char *oldstr;
 			/* make a fake string of the start */
 			p[0] = '\0';
 			Strcpy(bp, makesingular(bp));
-			Sprintf(bp, "%s %s", bp, &p[1]);
+			Strcat(bp, " ");
+			Strcat(bp, &p[1]);
 			return bp;
 		}
 	}

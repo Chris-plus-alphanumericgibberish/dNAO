@@ -1018,6 +1018,10 @@ die:
                         (flags.female && urole.name.f)?
                         urole.name.f : urole.name.m);
                 dump("", pbuf);
+				char vbuf[BUFSZ];
+				(void) getversionstring(vbuf);
+				Sprintf(pbuf, "Playing %s", vbuf);
+				dump("", pbuf);
                 /* D: Add a line for clearance from the screen dump */
 	        dump("", "");
 	        dump_screen(0);

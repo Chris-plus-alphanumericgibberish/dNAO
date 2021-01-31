@@ -3007,14 +3007,14 @@ winid *datawin;
 				/* general mash-em-together poison */
 				else {
 					buf[0] = '\0';
-					if (poisons&OPOISON_BASIC)  {Sprintf(buf, "%sharmful "     , buf);}
-					if (poisons&OPOISON_FILTH)  {Sprintf(buf, "%ssickening "   , buf);}
-					if (poisons&OPOISON_SLEEP)  {Sprintf(buf, "%ssleeping "    , buf);}
-					if (poisons&OPOISON_BLIND)  {Sprintf(buf, "%sblinding "    , buf);}
-					if (poisons&OPOISON_PARAL)  {Sprintf(buf, "%sparalytic "   , buf);}
-					if (poisons&OPOISON_AMNES)  {Sprintf(buf, "%samnesiac "    , buf);}
-					if (poisons&OPOISON_ACID)   {Sprintf(buf, "%sacidic "      , buf);}
-					if (poisons&OPOISON_SILVER) {Sprintf(buf, "%ssilver "      , buf);}
+					if (poisons&OPOISON_BASIC)  {Strcat(buf, "harmful "  );}
+					if (poisons&OPOISON_FILTH)  {Strcat(buf, "sickening ");}
+					if (poisons&OPOISON_SLEEP)  {Strcat(buf, "sleeping " );}
+					if (poisons&OPOISON_BLIND)  {Strcat(buf, "blinding " );}
+					if (poisons&OPOISON_PARAL)  {Strcat(buf, "paralytic ");}
+					if (poisons&OPOISON_AMNES)  {Strcat(buf, "amnesiac " );}
+					if (poisons&OPOISON_ACID)   {Strcat(buf, "acidic "   );}
+					if (poisons&OPOISON_SILVER) {Strcat(buf, "silver "   );}
 					
 					Sprintf(buf2, "Coated with %spoison.", an(buf));
 					OBJPUTSTR(buf2);
