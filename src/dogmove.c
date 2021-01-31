@@ -114,6 +114,8 @@ boolean check_if_better;
 	     otmp &&
 	    /* food */
             ((dogfood(mtmp, otmp) < APPORT) ||
+	    /* collect artifacts and oprop items */
+		 (otmp->oartifact || !check_oprop(otmp, OPROP_NONE)) ||
 	    /* chains for some */
 		 ((mtmp->mtyp == PM_CATHEZAR) && otmp->otyp == CHAIN) ||
 	    /* better weapons */
