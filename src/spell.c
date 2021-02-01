@@ -6141,12 +6141,14 @@ doreinforce_binding()
 	menu_item *selected;
 	anything any;
 
+	if (!(u.sealsActive || u.specialSealsActive)) {
+		pline("You have no spirits bound.");
+		return 0;
+	}
+
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
-
-	Sprintf(buf, "Choose binding to refresh:");
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	
 	for(i=0;i<QUEST_SPIRIT && u.spirit[i];i++){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
@@ -6177,9 +6179,17 @@ doreinforce_binding()
 			MENU_UNSELECTED);
 		incntlet++;
 	}
+	end_menu(tmpwin, "Choose binding to refresh:");
 
-	how = PICK_ONE;
-	n = select_menu(tmpwin, how, &selected);
+	/* check that we have at least one spirit that can be refreshed */
+	if (incntlet != 'a') {
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+	}
+	else {
+		pline("You have no spirits whose bindings can be reinforced.");
+		n = 0;
+	}
 	destroy_nhwindow(tmpwin);
 	
 	if(n > 0){
