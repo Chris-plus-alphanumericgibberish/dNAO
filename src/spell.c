@@ -6144,9 +6144,6 @@ doreinforce_binding()
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
-
-	Sprintf(buf, "Choose binding to refresh:");
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	
 	for(i=0;i<QUEST_SPIRIT && u.spirit[i];i++){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
@@ -6177,6 +6174,7 @@ doreinforce_binding()
 			MENU_UNSELECTED);
 		incntlet++;
 	}
+	end_menu(tmpwin, "Choose binding to refresh:");
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
