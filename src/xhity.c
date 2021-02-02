@@ -9520,9 +9520,9 @@ boolean * needs_uncancelled;
 				maybeset(needs_uncancelled, FALSE);
 			maybeset(needs_magr_eyes, FALSE);
 			if(pa->mtyp == PM_GREAT_CTHULHU && adjacent){
-				maybeset(needs_mdef_eyes, TRUE);
+				maybeset(needs_mdef_eyes, FALSE);
 			}
-			else maybeset(needs_mdef_eyes, FALSE);
+			else maybeset(needs_mdef_eyes, TRUE);
 			break;
 		}
 		/* else fall through */
