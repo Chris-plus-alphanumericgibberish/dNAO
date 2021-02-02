@@ -9486,18 +9486,23 @@ expl_common:
 	return result;
 }
 
+/* who needs to see who and how for the gaze to work?
+ * ex -- pyrolisk needs to see you
+ * ex -- you need to see an archon
+ * ex -- you need to meet an umber hulk's gaze
+ * if magr_eyes and mdef_eyes are both FALSE, don't do gaze at all */
 void
 getgazeinfo(aatyp, adtyp, pa, magr, mdef, needs_magr_eyes, needs_mdef_eyes, needs_uncancelled)
 int aatyp;
 int adtyp;
 struct permonst * pa;
-struct monst * magr;
-struct monst * mdef;
-boolean * needs_magr_eyes;
-boolean * needs_mdef_eyes;
-boolean * needs_uncancelled;
+struct monst * magr;		// optional
+struct monst * mdef;		// optional
+boolean * needs_magr_eyes;	// optional
+boolean * needs_mdef_eyes;	// optional
+boolean * needs_uncancelled;// optional
 {
-#define maybeset(b, tf) if(b) {*(b)=tf;}
+#define maybeset(b, tf) do{if(b) {*(b)=tf;}}while(0)
 	boolean adjacent = FALSE;
 	if(magr && mdef && distmin(magr->mx, magr->my, mdef->mx, mdef->my))
 		adjacent = TRUE;
@@ -9519,10 +9524,13 @@ boolean * needs_uncancelled;
 				)
 				maybeset(needs_uncancelled, FALSE);
 			maybeset(needs_magr_eyes, FALSE);
-			if(pa->mtyp == PM_GREAT_CTHULHU && adjacent){
-				maybeset(needs_mdef_eyes, TRUE);
+			/* Great Cthulhu only affects if adjacent */
+			if(pa->mtyp == PM_GREAT_CTHULHU){
+				if (!adjacent)
+					maybeset(needs_mdef_eyes, TRUE);
+				else
+					maybeset(needs_mdef_eyes, FALSE);
 			}
-			else maybeset(needs_mdef_eyes, FALSE);
 			break;
 		}
 		/* else fall through */
@@ -9650,6 +9658,11 @@ int vis;
 	}
 	/* get eyes, uncancelledness */
 	getgazeinfo(attk->aatyp, adtyp, pa, magr, mdef, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
+	/* if getgazeinfo sets magr_eyes and mdef_eyes to FALSE, the gaze should not happen at all
+	 * (instead of happening if mdef and magr in LoS with no care about their sight)
+	 * Only handled exceptions (aka hacky things put in AT_GAZE) are allowed through */
+	if (!needs_magr_eyes && !needs_mdef_eyes && !(adtyp==AD_WTCH || adtyp==AD_MIST || adtyp==AD_SPOR))
+		return MM_MISS;
 
 	/* widegazes cannot fail */
 	if (attk->aatyp == AT_WDGZ)
