@@ -2058,7 +2058,7 @@ struct monst *mtmp;
 			extract_nobj(otmp, &trap->ammo);
 			if (in_sight)
 				seetrap(trap);
-			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE) == MM_DEF_DIED)
+			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE)&MM_DEF_DIED)
 				trapkilled = TRUE;
 			break;
 		case ROCKTRAP:
@@ -2076,7 +2076,7 @@ struct monst *mtmp;
 			extract_nobj(otmp, &trap->ammo);
 			if (in_sight) seetrap(trap);
 
-			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE) == MM_DEF_DIED)
+			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE)&MM_DEF_DIED)
 			    trapkilled = TRUE;
 			break;
 
@@ -2108,7 +2108,7 @@ struct monst *mtmp;
 				    You_hear("the roaring of an angry bear!");
 			    }
 
-				if (hmon_with_trap(mtmp, &(trap->ammo), trap, HMON_WHACK, rnd(20)) == MM_DEF_DIED)
+				if (hmon_with_trap(mtmp, &(trap->ammo), trap, HMON_WHACK, rnd(20))&MM_DEF_DIED)
 					trapkilled = TRUE;
 			}
 			break;
@@ -2123,7 +2123,7 @@ struct monst *mtmp;
 					seetrap(trap);
 			    }
 
-				if (hmon_with_trap(mtmp, &(trap->ammo), trap, HMON_WHACK, rnd(20)) == MM_DEF_DIED)
+				if (hmon_with_trap(mtmp, &(trap->ammo), trap, HMON_WHACK, rnd(20))&MM_DEF_DIED)
 					trapkilled = TRUE;
 			}
 			break;
