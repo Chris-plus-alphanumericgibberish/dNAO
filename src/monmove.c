@@ -1173,7 +1173,11 @@ register struct monst *mtmp;
 	}
 	if(mtmp->mtyp == PM_SHALOSH_TANNAH && !rn2(9)){
 		struct monst *tmpm;
-		for(int i = rnd(3); i > 0; i--){
+		int i = rnd(3);
+		if(canseemon(mtmp))
+			pline("A pustule bursts in a spray of acid and %sstrange larva tumble%s out!", i > 1 ? "" : "a ", i > 1 ? "" : "s");
+		explode(mtmp->mx, mtmp->my, AD_ACID, MON_EXPLODE, d(6,6), EXPL_NOXIOUS, i/3+1);
+		for(; i > 0; i--){
 			tmpm = makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
 			if(tmpm){
 				switch(rn2(4)){
