@@ -225,7 +225,7 @@ struct monst {
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */
 //define	HALF_DRAGON	FACTION_PADDING+3	/* half-dragon ??? */
 
-	int mvanishes;
+	int summonpwr;	/* cumulative HD of summoned creatures */
 	//hatching situation
 	//AT_LAYEGG, PM_HATCHLING_NAME, x, d
 	//timetohatch
@@ -269,6 +269,8 @@ struct monst {
 	long mvar3;
 
 	struct ls_t * light;
+
+	struct timer * timed;
 
 	union mextra * mextra_p;
 };

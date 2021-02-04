@@ -2398,7 +2398,7 @@ dosacrifice()
 				u.umartial = TRUE;
 			} else if(otmp->oartifact == ART_RHONGOMYNIAD){
 				unrestrict_weapon_skill(P_RIDING);
-				mksobj_at(SADDLE, u.ux, u.uy, FALSE, FALSE);
+				mksobj_at(SADDLE, u.ux, u.uy, MKOBJ_NOINIT);
 				u.umartial = TRUE;
 			} else if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA){
 				unrestrict_weapon_skill(P_WHIP);
@@ -3455,7 +3455,7 @@ goat_gives_benefit()
 		case 5:
 		case 6:
 		case 7:
-			optr = mksobj(POT_GOAT_S_MILK, FALSE, FALSE);
+			optr = mksobj(POT_GOAT_S_MILK, MKOBJ_NOINIT);
 			optr->quan = rnd(8);
 			optr->owt = weight(optr);
 			dropy(optr);
@@ -3632,7 +3632,7 @@ int eatflag;
 		if(!has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
 			struct obj *otmp;
 			if(!rn2(10+u.ugifts)){
-				otmp = mksobj(HOLY_SYMBOL_OF_THE_BLACK_MOTHE, FALSE, FALSE);
+				otmp = mksobj(HOLY_SYMBOL_OF_THE_BLACK_MOTHE, MKOBJ_NOINIT);
 				dropy(otmp);
 				at_your_feet("An object");
 				//event: only increment this once.
@@ -3670,7 +3670,7 @@ int eatflag;
 				u.uartisval += TIER_S;
 			}
 			else if(!flags.made_know){
-				otmp = mksobj(WORD_OF_KNOWLEDGE, FALSE, FALSE);
+				otmp = mksobj(WORD_OF_KNOWLEDGE, MKOBJ_NOINIT);
 				dropy(otmp);
 				at_your_feet("An object");
 				u.ugifts++;
@@ -3698,7 +3698,7 @@ int eatflag;
 		u.reconciled = REC_REC;
 	} else { //Off floor
 		if(isok(x,y) && rnl((30 + u.ulevel)*10) < 10){
-			mksobj_at(POT_GOAT_S_MILK, x, y, FALSE, FALSE);
+			mksobj_at(POT_GOAT_S_MILK, x, y, MKOBJ_NOINIT);
 		}
 	}
     }

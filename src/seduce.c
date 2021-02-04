@@ -2024,7 +2024,7 @@ int effect_num;
 			if (!uwep){
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
-				optr = mksobj(BAR, TRUE, FALSE);
+				optr = mksobj(BAR, NO_MKOBJ_FLAGS);
 				curse(optr);
 				optr->spe = -6;
 				verbalize("This will keep you out of trouble.");
@@ -2052,7 +2052,7 @@ int effect_num;
 				verbalize("This should greatly improve your intellect.");
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
-				optr = mksobj(DUNCE_CAP, TRUE, FALSE);
+				optr = mksobj(DUNCE_CAP, NO_MKOBJ_FLAGS);
 				curse(optr);
 				optr->spe = -6;
 				(void)hold_another_object(optr, u.uswallow ?
@@ -2081,7 +2081,7 @@ int effect_num;
 				verbalize("These boots will improve your looks.");
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
-				optr = mksobj(FUMBLE_BOOTS, TRUE, FALSE);
+				optr = mksobj(FUMBLE_BOOTS, NO_MKOBJ_FLAGS);
 				curse(optr);
 				optr->spe = -6;
 				(void)hold_another_object(optr, u.uswallow ?
@@ -2109,7 +2109,7 @@ int effect_num;
 				verbalize("You need to take things more slowly.");
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
-				optr = mksobj(AMULET_OF_RESTFUL_SLEEP, TRUE, FALSE);
+				optr = mksobj(AMULET_OF_RESTFUL_SLEEP, NO_MKOBJ_FLAGS);
 				curse(optr);
 				(void)hold_another_object(optr, u.uswallow ?
 					"Fortunately, you're out of reach! %s away." :
@@ -2332,7 +2332,7 @@ int effect_num;
 		case SEDU_SIXTRUTHS:
 			verbalize("I grant you six truths!");
 			for (tmp = 0; tmp < 6; tmp++) {
-				optr = mksobj(POT_ENLIGHTENMENT, TRUE, FALSE);
+				optr = mksobj(POT_ENLIGHTENMENT, NO_MKOBJ_FLAGS);
 				bless(optr);
 				hold_another_object(optr, u.uswallow ?
 					"Oops!  %s out of your reach!" :
@@ -2352,7 +2352,7 @@ int effect_num;
 		case SEDU_SIXFOLLOWERS:
 			verbalize("I grant you six followers!");
 			for (tmp = 0; tmp < 6; tmp++) {
-				optr = mksobj(FIGURINE, TRUE, FALSE);
+				optr = mksobj(FIGURINE, NO_MKOBJ_FLAGS);
 				bless(optr);
 				hold_another_object(optr, u.uswallow ?
 					"Oops!  %s out of your reach!" :
@@ -2371,7 +2371,7 @@ int effect_num;
 
 		case SEDU_LIFESAVING:
 			verbalize("I grant you life!");
-			optr = mksobj(AMULET_OF_LIFE_SAVING, TRUE, FALSE);
+			optr = mksobj(AMULET_OF_LIFE_SAVING, NO_MKOBJ_FLAGS);
 			bless(optr);
 			(void)hold_another_object(optr, u.uswallow ?
 				"Oops!  %s out of your reach!" :

@@ -2135,7 +2135,7 @@ register struct obj *obj;
 	if(!otyp)
 		return;
 	
-	glyph = mksobj(otyp, FALSE, FALSE);
+	glyph = mksobj(otyp, MKOBJ_NOINIT);
 	
 	if(glyph){
 		remove_thought(otyp_to_thought(otyp));
@@ -2223,7 +2223,7 @@ register struct obj *obj;
 			umechanoid)
 		|| yn("This corpse does not have blood. Tin it?") == 'y'
 	){
-		if ((can = mksobj(TIN, FALSE, FALSE)) != 0) {
+		if ((can = mksobj(TIN, MKOBJ_NOINIT)) != 0) {
 			static const char you_buy_it[] = "You tin it, you bought it!";
 
 			can->corpsenm = corpse->corpsenm;
@@ -2233,7 +2233,7 @@ register struct obj *obj;
 			can->known = 1;
 			can->spe = -1;  /* Mark tinned tins. No spinach allowed... */
 			if(has_blood(&mons[corpse->corpsenm])){
-				if ((bld = mksobj(POT_BLOOD, FALSE, FALSE)) != 0) {
+				if ((bld = mksobj(POT_BLOOD, MKOBJ_NOINIT)) != 0) {
 					bld->corpsenm = corpse->corpsenm;
 					bld->cursed = obj->cursed;
 					bld->blessed = obj->blessed;
@@ -2560,7 +2560,7 @@ struct obj **optr;
 		"toss the figurine into the air" :
 		"set the figurine on the ground"));
 	(void) make_familiar(obj, cc.x, cc.y, FALSE);
-	(void) stop_timer(FIG_TRANSFORM, (genericptr_t)obj);
+	(void) stop_timer(FIG_TRANSFORM, obj->timed);
 	useup(obj);
 	*optr = 0;
 }
@@ -3881,7 +3881,7 @@ use_pole (obj)
 		}
 	} else if(levl[cc.x][cc.y].typ == GRASS){
 		   levl[cc.x][cc.y].typ = SOIL;
-		   if(!rn2(3)) mksobj_at(SHEAF_OF_HAY,cc.x,cc.y,TRUE,FALSE);
+		   if(!rn2(3)) mksobj_at(SHEAF_OF_HAY,cc.x,cc.y,NO_MKOBJ_FLAGS);
 		   You("cut away the grass!");
 		   newsym(cc.x,cc.y);
 	} else {
@@ -4473,7 +4473,7 @@ use_doll(obj)
 					}
 #ifndef GOLDOBJ
 					if (mtmp->mgold){
-						struct obj *mongold = mksobj(GOLD_PIECE, FALSE, FALSE);
+						struct obj *mongold = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 						mongold->quan = mtmp->mgold;
 						mongold->owt = weight(mongold);
 						mtmp->mgold = 0;
@@ -6297,7 +6297,7 @@ doapply()
 			case SILVER_BULLET:
 			if(otmp->quan >= 10){
 				struct obj *rocket;
-				rocket = mksobj(ROCKET, FALSE, FALSE);
+				rocket = mksobj(ROCKET, MKOBJ_NOINIT);
 				rocket->blessed = otmp->blessed;
 				rocket->cursed = otmp->cursed;
 				rocket->quan = (otmp->quan)/10;
@@ -6323,7 +6323,7 @@ doapply()
 			}break;
 			case ROCKET:{
 				struct obj *bullets;
-				bullets = mksobj(SILVER_BULLET, FALSE, FALSE);
+				bullets = mksobj(SILVER_BULLET, MKOBJ_NOINIT);
 				bullets->blessed = otmp->blessed;
 				bullets->cursed = otmp->cursed;
 				bullets->quan = (otmp->quan)*10;
@@ -6467,7 +6467,7 @@ doapply()
 			int i = rnd(u.umorgul);
 			struct obj *frags;
 			u.umorgul -= i;
-			frags = mksobj(SHURIKEN, FALSE, FALSE);
+			frags = mksobj(SHURIKEN, MKOBJ_NOINIT);
 			if(frags){
 				frags->quan = i;
 				add_oprop(frags, OPROP_LESSER_MORGW);

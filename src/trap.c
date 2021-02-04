@@ -263,7 +263,7 @@ register int x, y, typ;
 	    ttmp->ty = y;
 	    ttmp->launch.x = -1;	/* force error if used before set */
 	    ttmp->launch.y = -1;
-		memset(&ttmp->vl, 0, sizeof(union vlaunchinfo));
+		ttmp->statueid = 0;		/* one option of the union */
 		ttmp->ammo = (struct obj *)0;
 	}
 
@@ -300,7 +300,7 @@ register int x, y, typ;
 
 		case DART_TRAP:
 		case ARROW_TRAP:
-			otmp = mksobj((typ == ARROW_TRAP ? ARROW : DART), TRUE, FALSE);
+			otmp = mksobj((typ == ARROW_TRAP ? ARROW : DART), NO_MKOBJ_FLAGS);
 			otmp->quan = 15 + rnd(20);
 			// material special cases: role quests
 			if (In_quest(&u.uz))
@@ -350,21 +350,21 @@ register int x, y, typ;
 			set_trap_ammo(ttmp, otmp);
 			break;
 		case BEAR_TRAP:
-			set_trap_ammo(ttmp, mksobj(BEARTRAP, TRUE, FALSE));
+			set_trap_ammo(ttmp, mksobj(BEARTRAP, 0));
 			break;
 		case FLESH_HOOK:
-			set_trap_ammo(ttmp, mksobj(HOOK, FALSE, FALSE));
+			set_trap_ammo(ttmp, mksobj(HOOK, MKOBJ_NOINIT));
 			break;
 		case LANDMINE:
-			set_trap_ammo(ttmp, mksobj(LAND_MINE, TRUE, FALSE));
+			set_trap_ammo(ttmp, mksobj(LAND_MINE, 0));
 			break;
 		case FIRE_TRAP:
-			otmp = mksobj(POT_OIL, TRUE, FALSE);
+			otmp = mksobj(POT_OIL, NO_MKOBJ_FLAGS);
 			otmp->quan = rnd(3);
 			set_trap_ammo(ttmp, otmp);
 			break;
 		case ROCKTRAP:
-			otmp = mksobj(ROCK, TRUE, FALSE);
+			otmp = mksobj(ROCK, NO_MKOBJ_FLAGS);
 			otmp->quan = 5 + rnd(10);
 			set_trap_ammo(ttmp, otmp);
 			break;
@@ -637,7 +637,11 @@ int *fail_reason;
 	/* mimic statue becomes seen mimic; other hiders won't be hidden */
 	if (mon->m_ap_type) seemimic(mon);
 	else mon->mundetected = FALSE;
-	if ((x == u.ux && y == u.uy) || cause == ANIMATE_SPELL) {
+	if (get_mx(mon, MX_ESUM)) {
+		if (cansee(x,y))
+			pline_The("statue crumbles to dust.");
+	}
+	else if ((x == u.ux && y == u.uy) || cause == ANIMATE_SPELL) {
 	    const char *comes_to_life = nonliving(mon->data) ?
 					"moves" : "comes to life"; 
 	    if (cause == ANIMATE_SPELL){
@@ -1911,7 +1915,7 @@ long ocount;
 		cc.x = bcc.x = x;
 		cc.y = bcc.y = y;
 	} else {
-		otmp = mksobj(otyp, TRUE, FALSE);
+		otmp = mksobj(otyp, NO_MKOBJ_FLAGS);
 		otmp->quan = ocount;
 		otmp->owt = weight(otmp);
 		place_object(otmp, cc.x, cc.y);

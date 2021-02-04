@@ -138,7 +138,7 @@ dofindgem() /* Find a gem in the sparkling waters. */
 	if (!Blind) You("spot a gem in the sparkling waters!");
 	else You_feel("a gem here!");
 	(void) mksobj_at(rnd_class(DILITHIUM_CRYSTAL, LUCKSTONE-1),
-			 u.ux, u.uy, FALSE, FALSE);
+			 u.ux, u.uy, MKOBJ_NOINIT);
 	SET_FOUNTAIN_LOOTED(u.ux,u.uy);
 	newsym(u.ux, u.uy);
 	exercise(A_WIS, TRUE);			/* a discovery! */
@@ -548,9 +548,9 @@ drinksink()
 				/* use Luck here instead of u.uluck */
 				if (!rn2(13) && ((Luck >= 0 && is_vampire(youracedata)) ||
 				    (Luck <= 0 && !is_vampire(youracedata)))) {
-					otmp = mksobj(POT_BLOOD,FALSE,FALSE);
+					otmp = mksobj(POT_BLOOD, MKOBJ_NOINIT);
 				} else {
-					otmp = mkobj(POTION_CLASS,FALSE);
+					otmp = mkobj(POTION_CLASS, NO_MKOBJ_FLAGS);
 					if (otmp->otyp == POT_WATER) {
 						obfree(otmp, (struct obj *)0);
 						otmp = (struct obj *) 0;
@@ -569,7 +569,7 @@ drinksink()
 			break;
 		case 5: if (!(levl[u.ux][u.uy].looted & S_LRING)) {
 			    You("find a ring in the sink!");
-			    (void) mkobj_at(RING_CLASS, u.ux, u.uy, TRUE);
+			    (void) mkobj_at(RING_CLASS, u.ux, u.uy, MKOBJ_ARTIF);
 			    levl[u.ux][u.uy].looted |= S_LRING;
 			    exercise(A_WIS, TRUE);
 			    newsym(u.ux,u.uy);

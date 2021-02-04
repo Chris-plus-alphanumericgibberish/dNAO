@@ -6,15 +6,6 @@
 
 #ifndef TRAP_H
 #define TRAP_H
-
-union vlaunchinfo {
-	/* rolling boulder */
-	short v_launch_otyp;	/* type of object to be triggered */
-	coord v_launch2;	/* secondary launch point (for boulders) */
-	/* statue */
-	unsigned int v_statue_oid;	/* object id of original statue trap on square to activate */
-};
-
 struct trap {
 	struct trap *ntrap;
 	xchar tx,ty;
@@ -30,11 +21,15 @@ struct trap {
 				 when you untrap a monster.  It would be too
 				 easy to make a monster peaceful if you could
 				 set a trap for it and then untrap it. */
-	union vlaunchinfo vl;
-	struct obj* ammo;
-#define launch_otyp	   vl.v_launch_otyp
-#define launch2		   vl.v_launch2
-#define statueid       vl.v_statue_oid
+	
+	union { /* extra data for specific traps */
+		/* rolling boulder */
+		short launch_otyp;	/* type of object to be triggered (unused) */
+		coord launch2;	/* secondary launch point (for boulders) */
+		/* statue */
+		unsigned int statueid;	/* object id of original statue trap on square to activate */
+	};
+	struct obj* ammo;	/* stored ammo */
 };
 
 extern struct trap *ftrap;

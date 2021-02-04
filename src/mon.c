@@ -230,6 +230,7 @@ STATIC_VAR int cham_to_pm[] = {
 			 is_reviver((mon)->data) ||			\
 			 ((mon)->mfaction) ||			\
 			 (templated(mon)) ||			\
+			 (get_mx((mon), MX_ESUM)) ||	\
 			 ((mon)->ispolyp) ||			\
 			 ((mon)->zombify) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_KNIGHT) ||			\
@@ -286,12 +287,12 @@ register struct monst *mtmp;
 	struct obj *otmp;
 	struct monst *mon;
 	
-	if(mtmp->mvanishes > -1){
+	if (get_mx(mtmp, MX_ESUM)) {
 		return (struct obj *)0;
 	}
 	
 	if(u.specialSealsActive&SEAL_NUDZIRATH && !rn2(4)){
-		(void) mksobj_at(MIRROR, x, y, TRUE, FALSE);
+		(void) mksobj_at(MIRROR, x, y, NO_MKOBJ_FLAGS);
 	}
 	
 	if(has_template(mtmp, CRYSTALFIED)){
@@ -304,7 +305,7 @@ register struct monst *mtmp;
 	} else switch(mndx) {
 	    case PM_LICH__THE_FIEND_OF_EARTH:
 			// if(mvitals[PM_GARLAND].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
+				// otmp = mksobj_at(CRYSTAL_BALL, x, y, MKOBJ_NOINIT);
 				// otmp = oname(otmp, artiname(ART_EARTH_CRYSTAL));		
 				// curse(otmp);
 				// otmp->oerodeproof = TRUE;
@@ -313,7 +314,7 @@ register struct monst *mtmp;
 		break;
 	    case PM_KARY__THE_FIEND_OF_FIRE:
 			// if(mvitals[PM_GARLAND].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
+				// otmp = mksobj_at(CRYSTAL_BALL, x, y, MKOBJ_NOINIT);
 				// otmp = oname(otmp, artiname(ART_FIRE_CRYSTAL));		
 				// curse(otmp);
 				// otmp->oerodeproof = TRUE;
@@ -322,7 +323,7 @@ register struct monst *mtmp;
 		break;
 	    case PM_KRAKEN__THE_FIEND_OF_WATER:
 			// if(mvitals[PM_GARLAND].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
+				// otmp = mksobj_at(CRYSTAL_BALL, x, y, MKOBJ_NOINIT);
 				// otmp = oname(otmp, artiname(ART_WATER_CRYSTAL));		
 				// curse(otmp);
 				// otmp->oerodeproof = TRUE;
@@ -331,7 +332,7 @@ register struct monst *mtmp;
 		break;
 	    case PM_TIAMAT__THE_FIEND_OF_WIND:
 			// if(mvitals[PM_GARLAND].died){
-				// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
+				// otmp = mksobj_at(CRYSTAL_BALL, x, y, MKOBJ_NOINIT);
 				// otmp = oname(otmp, artiname(ART_AIR_CRYSTAL));		
 				// curse(otmp);
 				// otmp->oerodeproof = TRUE;
@@ -339,7 +340,7 @@ register struct monst *mtmp;
 		goto default_1;
 		break;
 	    case PM_CHAOS:
-			// otmp = mksobj_at(CRYSTAL_BALL, x, y, FALSE, FALSE);
+			// otmp = mksobj_at(CRYSTAL_BALL, x, y, MKOBJ_NOINIT);
 			// otmp = oname(otmp, artiname(ART_BLACK_CRYSTAL));		
 			// curse(otmp);
 			// otmp->oerodeproof = TRUE;
@@ -359,22 +360,22 @@ register struct monst *mtmp;
 		/* dragons is the same as the order of the scales.	   */
 		if (!rn2(mtmp->mrevived ? 20 : 3)) {
 		    num = GRAY_DRAGON_SCALES + monsndx(mdat) - PM_GRAY_DRAGON;
-		    obj = mksobj_at(num, x, y, FALSE, FALSE);
+		    obj = mksobj_at(num, x, y, MKOBJ_NOINIT);
 		    obj->spe = 0;
 		    obj->cursed = obj->blessed = FALSE;
 		}
 		goto default_1;
 	    case PM_CHROMATIC_DRAGON:
-		    obj = mksobj_at(BLACK_DRAGON_SCALES, x, y, FALSE, FALSE);
+		    obj = mksobj_at(BLACK_DRAGON_SCALES, x, y, MKOBJ_NOINIT);
 			obj = oname(obj, artiname(ART_CHROMATIC_DRAGON_SCALES));
 		goto default_1;
 	    case PM_PLATINUM_DRAGON:
-		    obj = mksobj_at(SILVER_DRAGON_SCALE_MAIL, x, y, FALSE, FALSE);
+		    obj = mksobj_at(SILVER_DRAGON_SCALE_MAIL, x, y, MKOBJ_NOINIT);
 			obj = oname(obj, artiname(ART_DRAGON_PLATE));
 		goto default_1;
 	    case PM_MANTICORE:
 		if (mtmp->mrevived ? !rn2(6) : TRUE) {
-			obj = mksobj_at(SPIKE, x, y, TRUE, FALSE);
+			obj = mksobj_at(SPIKE, x, y, NO_MKOBJ_FLAGS);
 			set_material_gm(obj, BONE);
 			obj->blessed = 0;
 			obj->cursed = 0;
@@ -385,7 +386,7 @@ register struct monst *mtmp;
 		goto default_1;
 	    case PM_SON_OF_TYPHON:
 		if (!rn2(mtmp->mrevived ? 20 : 3)) {
-			obj = mksobj_at(LEO_NEMAEUS_HIDE, x, y, FALSE, FALSE);
+			obj = mksobj_at(LEO_NEMAEUS_HIDE, x, y, MKOBJ_NOINIT);
 		    obj->spe = 0;
 		    obj->cursed = obj->blessed = FALSE;
 		}
@@ -422,7 +423,7 @@ register struct monst *mtmp;
 		goto default_1;
 	    case PM_DIRE_SHEEP:
 		if (!mtmp->mrevived && find_pcloth() > 0 && !rn2(20)) {
-			obj = mksobj_at(find_pcloth(), x, y, FALSE, FALSE);
+			obj = mksobj_at(find_pcloth(), x, y, MKOBJ_NOINIT);
 		    obj->spe = 0;
 		    obj->cursed = obj->blessed = FALSE;
 			add_oprop(obj, OPROP_WOOL);
@@ -437,12 +438,12 @@ register struct monst *mtmp;
 			   pline("%s recently regrown horn crumbles to dust.",
 				s_suffix(Monnam(mtmp)));
 		} else
-			(void) mksobj_at(UNICORN_HORN, x, y, TRUE, FALSE);
+			(void) mksobj_at(UNICORN_HORN, x, y, NO_MKOBJ_FLAGS);
 		goto default_1;
 //		case PM_UNICORN_OF_AMBER:{
 //				int spe2;
 			    /* create special stuff; can't use mongets */
-//			    otmp = mksobj(UNICORN_HORN, TRUE, FALSE);
+//			    otmp = mksobj(UNICORN_HORN, NO_MKOBJ_FLAGS);
 //				otmp = oname(otmp, artiname(ART_AMBER_HORN));		
 //			    curse(otmp);
 //			    otmp->oerodeproof = TRUE;
@@ -454,7 +455,7 @@ register struct monst *mtmp;
 //		case PM_PINK_UNICORN:{
 //			int spe2;
 		    /* create special stuff; can't use mongets */
-//		    otmp = mksobj(UNICORN_HORN, TRUE, FALSE);
+//		    otmp = mksobj(UNICORN_HORN, NO_MKOBJ_FLAGS);
 //			otmp = oname(otmp, artiname(ART_WHITE_PINK_HORN));
 //			
 //		    curse(otmp);
@@ -468,7 +469,7 @@ register struct monst *mtmp;
 			{
 			int spe2;
 		    /* create special stuff; can't use mongets */
-		    otmp = mksobj(UNICORN_HORN, TRUE, FALSE);
+		    otmp = mksobj(UNICORN_HORN, NO_MKOBJ_FLAGS);
 			otmp = oname(otmp, artiname(ART_NIGHTHORN));
 		
 		    curse(otmp);
@@ -482,11 +483,11 @@ register struct monst *mtmp;
 			{
 			if(!rn2(2)){
 				pline("All that remains is a hand...");
-				otmp = oname(mksobj(SEVERED_HAND, TRUE, FALSE),
+				otmp = oname(mksobj(SEVERED_HAND, 0),
 						artiname(ART_HAND_OF_VECNA));
 			} else {
 				pline("All that remains is a single eye...");
-				otmp = oname(mksobj(EYEBALL, TRUE, FALSE),
+				otmp = oname(mksobj(EYEBALL, 0),
 						artiname(ART_EYE_OF_VECNA));
 			}
 		    /* create special stuff; can't use mongets */
@@ -502,12 +503,12 @@ register struct monst *mtmp;
 				(art_already_exists(ART_SCORPION_CARAPACE)) ||
 				(mtmp->mrevived && rn2(20))
 				)) {
-				otmp = oname(mksobj(SCALE_MAIL, TRUE, FALSE), artiname(ART_SCORPION_CARAPACE));
+				otmp = oname(mksobj(SCALE_MAIL, 0), artiname(ART_SCORPION_CARAPACE));
 				place_object(otmp, x, y);
 			}
 		goto default_1;
 	    case PM_LONG_WORM:
-			(void) mksobj_at(WORM_TOOTH, x, y, TRUE, FALSE);
+			(void) mksobj_at(WORM_TOOTH, x, y, NO_MKOBJ_FLAGS);
 		goto default_1;
 	    case PM_VAMPIRE:
 	    case PM_VAMPIRE_LORD:
@@ -544,7 +545,7 @@ register struct monst *mtmp;
 	    // case PM_ETTIN_ZOMBIE:
 	    case PM_ALABASTER_MUMMY:
 		if(is_alabaster_mummy(mtmp->data) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
-			mksobj_at(mtmp->mvar_syllable, x, y, TRUE, FALSE);
+			mksobj_at(mtmp->mvar_syllable, x, y, NO_MKOBJ_FLAGS);
 			if(mtmp->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 				mtmp->mintrinsics[(DISPLACED-1)/32] &= ~(1 << (DISPLACED-1)%32);
 			mtmp->mvar_syllable = 0; //Lose the bonus if resurrected
@@ -560,140 +561,140 @@ register struct monst *mtmp;
 	    case PM_ARSENAL:
 			num = d(3,6);
 			while(num--){
-				obj = mksobj_at(PLATE_MAIL, x, y, TRUE, FALSE);
+				obj = mksobj_at(PLATE_MAIL, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, COPPER);
 				obj->spe = 3;
 			}
 			num = d(2,4);
 			while(num--)
-				obj = mksobj_at(HEAVY_IRON_BALL, x, y, TRUE, FALSE);
+				obj = mksobj_at(HEAVY_IRON_BALL, x, y, NO_MKOBJ_FLAGS);
 			rem_mx(mtmp, MX_ENAM);
-		    otmp = mksobj(MACE, TRUE, FALSE);
+		    otmp = mksobj(MACE, NO_MKOBJ_FLAGS);
 			otmp = oname(otmp, artiname(ART_FIELD_MARSHAL_S_BATON));
 		    otmp->oerodeproof = TRUE;
 		    otmp->spe = -3;
 			place_object(otmp, x, y);
 		break;
 	    case PM_TINKER_GNOME:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
 			if(!mtmp->mrevived && !rn2(20)){
-				obj = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+				obj = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 			} else if(!mtmp->mrevived && !rn2(19)){
-				obj = mksobj_at(TINNING_KIT, x, y, TRUE, FALSE);
+				obj = mksobj_at(TINNING_KIT, x, y, NO_MKOBJ_FLAGS);
 			} else if(!mtmp->mrevived && !rn2(10)){
-				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
+				obj = mksobj_at(CAN_OF_GREASE, x, y, NO_MKOBJ_FLAGS);
 			}
 			rem_mx(mtmp, MX_ENAM);
 		goto default_1;
 	    case PM_CLOCKWORK_DWARF:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_FABERGE_SPHERE:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(1,3);
 			obj->owt = weight(obj);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_FIREWORK_CART:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLOCKWORK_SOLDIER:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(1,3);
 			obj->owt = weight(obj);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GOLDEN_HEART:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
-			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = 1;
 			obj->owt = weight(obj);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_JUGGERNAUT:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(3,4);
 			obj->owt = weight(obj);
 			if(!rn2(20)){
-				obj = mksobj_at(TINNING_KIT, x, y, TRUE, FALSE);
+				obj = mksobj_at(TINNING_KIT, x, y, NO_MKOBJ_FLAGS);
 			} else if(!rn2(10)){
-				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
+				obj = mksobj_at(CAN_OF_GREASE, x, y, NO_MKOBJ_FLAGS);
 			}
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLOCKWORK_FACTORY:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(3,4);
 			obj->owt = weight(obj);
 			if(!rn2(20)){
-				obj = mksobj_at(UPGRADE_KIT, x, y, TRUE, FALSE);
+				obj = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
 			} else if(!rn2(19)){
-				obj = mksobj_at(TINNING_KIT, x, y, TRUE, FALSE);
+				obj = mksobj_at(TINNING_KIT, x, y, NO_MKOBJ_FLAGS);
 			} else if(!rn2(10)){
-				obj = mksobj_at(CAN_OF_GREASE, x, y, TRUE, FALSE);
+				obj = mksobj_at(CAN_OF_GREASE, x, y, NO_MKOBJ_FLAGS);
 			}
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_ID_JUGGERNAUT:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(4,4);
 			obj->owt = weight(obj);
-			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(SUBETHAIC_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(1,4);
 			obj->owt = weight(obj);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_SCRAP_TITAN:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(4,4);
 			obj->owt = weight(obj);
 			rem_mx(mtmp, MX_ENAM);
 			num = d(2,4);
 			while (num--){
-				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
-				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
-				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
+				obj = mksobj_at(BAR, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
-				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
+				obj = mksobj_at(SCRAP, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
-				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
+				obj = mksobj_at(SCRAP, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
-				obj = mksobj_at(SCRAP, x, y, TRUE, FALSE);
+				obj = mksobj_at(SCRAP, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 				obj->oeroded = 3;
 			}
 		break;
 	    case PM_HELLFIRE_COLOSSUS:
-			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(4,4);
 			obj->owt = weight(obj);
-			obj = mksobj_at(HELLFIRE_COMPONENT, x, y, TRUE, FALSE);
+			obj = mksobj_at(HELLFIRE_COMPONENT, x, y, NO_MKOBJ_FLAGS);
 			obj->quan = d(4,4);
 			obj->owt = weight(obj);
 			num = d(2,6);
 			while (num--){
-				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
-				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
-				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
+				obj = mksobj_at(BAR, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 			}
 			rem_mx(mtmp, MX_ENAM);
@@ -701,7 +702,7 @@ register struct monst *mtmp;
 	    case PM_PARASITIZED_DOLL:
 			num = d(2,4);
 			while (num--){
-				obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+				obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 				obj->corpsenm = PM_PARASITIZED_DOLL;
 			}
 			
@@ -728,10 +729,10 @@ register struct monst *mtmp;
 				obj->ovar1 = mtmp->m_insight_level;
 		break;
 	    case PM_CRUCIFIED_ANDROID:
-			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
 			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
-			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
 			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_ANDROID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
@@ -744,7 +745,7 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_ANDROID, x, y, MKOBJ_NOINIT);
 			}
 		break;
 	    case PM_MUMMIFIED_ANDROID:
@@ -758,7 +759,7 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_ANDROID, x, y, MKOBJ_NOINIT);
 			}
 		break;
 	    case PM_FLAYED_ANDROID:
@@ -772,7 +773,7 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_ANDROID, x, y, MKOBJ_NOINIT);
 			}
 		break;
 	    case PM_PARASITIZED_ANDROID:
@@ -786,13 +787,13 @@ register struct monst *mtmp;
 				mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_ANDROID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_ANDROID, x, y, MKOBJ_NOINIT);
 			}
 			if(mtmp->mpetitioner 
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
 				break;
-			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
 			fix_object(obj);
 		break;
@@ -803,10 +804,10 @@ register struct monst *mtmp;
 				obj->ovar1 = mtmp->m_insight_level;
 		break;
 	    case PM_CRUCIFIED_GYNOID:
-			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
 			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
-			obj = mksobj_at(BAR, x, y, FALSE, FALSE);
+			obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
 			set_material_gm(obj, IRON);
 			obj->oeroded = 1;
 			mon = makemon(&mons[PM_GYNOID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
@@ -819,7 +820,7 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_GYNOID, x, y, MKOBJ_NOINIT);
 			}
 		break;
 	    case PM_MUMMIFIED_GYNOID:
@@ -833,7 +834,7 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_GYNOID, x, y, MKOBJ_NOINIT);
 			}
 		break;
 	    case PM_FLAYED_GYNOID:
@@ -847,7 +848,7 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_GYNOID, x, y, MKOBJ_NOINIT);
 			}
 		break;
 	    case PM_PARASITIZED_GYNOID:
@@ -861,13 +862,13 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_GYNOID, x, y, MKOBJ_NOINIT);
 			}
 			if(mtmp->mpetitioner 
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
 				break;
-			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
 			fix_object(obj);
 		break;
@@ -887,13 +888,13 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_GYNOID, x, y, MKOBJ_NOINIT);
 			}
 			if(mtmp->mpetitioner 
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
 				break;
-			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
 			fix_object(obj);
 		break;
@@ -903,7 +904,7 @@ register struct monst *mtmp;
 				obj->ovar1 = mtmp->m_insight_level;
 		break;
 	    case PM_PARASITIZED_COMMANDER:
-			obj = mksobj_at(SHACKLES, x, y, FALSE, FALSE);
+			obj = mksobj_at(SHACKLES, x, y, MKOBJ_NOINIT);
 			set_material_gm(obj, IRON);
 			add_oprop(obj, OPROP_ELECW);
 			obj->oeroded = 1;
@@ -918,17 +919,17 @@ register struct monst *mtmp;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
-				obj = mksobj_at(BROKEN_GYNOID, x, y, FALSE, FALSE);
+				obj = mksobj_at(BROKEN_GYNOID, x, y, MKOBJ_NOINIT);
 			}
 			if(mtmp->mpetitioner 
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
 				break;
-			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
 			fix_object(obj);		break;
 	    case PM_DANCING_BLADE:
-			obj = mksobj_at(TWO_HANDED_SWORD, x, y, FALSE, FALSE);
+			obj = mksobj_at(TWO_HANDED_SWORD, x, y, MKOBJ_NOINIT);
 			obj->blessed = TRUE;
 			obj->cursed = FALSE;
 			obj->spe = 7;
@@ -938,11 +939,11 @@ register struct monst *mtmp;
 	    case PM_IRON_GOLEM:
 			num = d(2,6);
 			while (num--){
-				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
-				obj = mksobj_at(KITE_SHIELD, x, y, TRUE, FALSE);
+				obj = mksobj_at(KITE_SHIELD, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
-				obj = mksobj_at(BAR, x, y, TRUE, FALSE);
+				obj = mksobj_at(BAR, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 			}
 			rem_mx(mtmp, MX_ENAM);
@@ -950,7 +951,7 @@ register struct monst *mtmp;
 	    case PM_CHAIN_GOLEM:
 			num = d(6,6);
 			while (num--){
-				obj = mksobj_at(CHAIN, x, y, TRUE, FALSE);
+				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 			}
 			rem_mx(mtmp, MX_ENAM);
@@ -958,7 +959,7 @@ register struct monst *mtmp;
 	    case PM_ARGENTUM_GOLEM:
 			num = d(1,3);
 			while (num--){
-				obj = mksobj_at(SILVER_SLINGSTONE, x, y, TRUE, FALSE);
+				obj = mksobj_at(SILVER_SLINGSTONE, x, y, NO_MKOBJ_FLAGS);
 				set_obj_quan(obj, d(10, 5));
 			}
 			rem_mx(mtmp, MX_ENAM);
@@ -966,11 +967,11 @@ register struct monst *mtmp;
 	    case PM_GLASS_GOLEM:
 			num = d(2,4);   /* very low chance of creating all glass gems */
 			while (num--)
-				obj = mksobj_at((LAST_GEM + rnd(9)), x, y, TRUE, FALSE);
+				obj = mksobj_at((LAST_GEM + rnd(9)), x, y, NO_MKOBJ_FLAGS);
 				rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_CLAY_GOLEM:
-			obj = mksobj_at(ROCK, x, y, FALSE, FALSE);
+			obj = mksobj_at(ROCK, x, y, MKOBJ_NOINIT);
 			set_obj_quan(obj, (rn2(20) + 50));
 			rem_mx(mtmp, MX_ENAM);
 		break;
@@ -989,7 +990,7 @@ register struct monst *mtmp;
 	    case PM_WOOD_GOLEM:
 			num = d(2,4);
 			while(num--) {
-				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
+				obj = mksobj_at(QUARTERSTAFF, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, WOOD);
 			}
 			rem_mx(mtmp, MX_ENAM);
@@ -997,7 +998,7 @@ register struct monst *mtmp;
 	    case PM_GROVE_GUARDIAN:
 			num = d(3,4);
 			while(num--) {
-				obj = mksobj_at(QUARTERSTAFF, x, y, TRUE, FALSE);
+				obj = mksobj_at(QUARTERSTAFF, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, WOOD);
 				obj->spe = rnd(3);
 			}
@@ -1006,16 +1007,16 @@ register struct monst *mtmp;
 	    case PM_LIVING_LECTERN:
 			num = d(2,3);
 			while(num--) {
-				obj = mksobj_at(CLUB, x, y, TRUE, FALSE);
+				obj = mksobj_at(CLUB, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, WOOD);
 			}
-			obj = mkobj_at(SPBOOK_CLASS, x, y, FALSE);
+			obj = mkobj_at(SPBOOK_CLASS, x, y, NO_MKOBJ_FLAGS);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_LEATHER_GOLEM:
 			num = d(2,4);
 			while(num--)
-				obj = mksobj_at(LEATHER_ARMOR, x, y, TRUE, FALSE);
+				obj = mksobj_at(LEATHER_ARMOR, x, y, NO_MKOBJ_FLAGS);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_GOLD_GOLEM:
@@ -1031,7 +1032,7 @@ register struct monst *mtmp;
 		case PM_TREASURY_GOLEM:
 			num = d(2,4); 
 			while (num--)
-				obj = mksobj_at((LAST_GEM - rnd(9)), x, y, TRUE, FALSE);
+				obj = mksobj_at((LAST_GEM - rnd(9)), x, y, NO_MKOBJ_FLAGS);
 			rem_mx(mtmp, MX_ENAM);
 			/* Good luck gives more coins */
 			obj = mkgold((long)(400 - rnl(101)), x, y);
@@ -1040,12 +1041,12 @@ register struct monst *mtmp;
 		case PM_PAPER_GOLEM:
 			num = rnd(4);
 			while (num--)
-				obj = mksobj_at(SCR_BLANK_PAPER, x, y, TRUE, FALSE);
+				obj = mksobj_at(SCR_BLANK_PAPER, x, y, NO_MKOBJ_FLAGS);
 			rem_mx(mtmp, MX_ENAM);
 		break;
 	    case PM_STRAW_GOLEM:
-		if(!rn2(10)) mksobj_at(SEDGE_HAT, x, y, FALSE, FALSE);
-		obj = mksobj_at(SHEAF_OF_HAY, x, y, FALSE, FALSE);
+		if(!rn2(10)) mksobj_at(SEDGE_HAT, x, y, MKOBJ_NOINIT);
+		obj = mksobj_at(SHEAF_OF_HAY, x, y, MKOBJ_NOINIT);
 		obj->quan = (long)(d(2,4));
 		obj->owt = weight(obj);
 		rem_mx(mtmp, MX_ENAM);
@@ -1056,26 +1057,26 @@ register struct monst *mtmp;
 			num = rnd(8);
 			while (num--){
 				scrnum = d(1, scrrng)-1;
-				obj = mksobj_at(scrnum+SCR_ENCHANT_ARMOR, x, y, TRUE, FALSE);
+				obj = mksobj_at(scrnum+SCR_ENCHANT_ARMOR, x, y, NO_MKOBJ_FLAGS);
 			}
 			rem_mx(mtmp, MX_ENAM);
 		}
 		break;
 	    case PM_GARO:
 			if(!rn2(100)){
-				obj = mksobj_at(MASK, x, y, TRUE, FALSE);
+				obj = mksobj_at(MASK, x, y, NO_MKOBJ_FLAGS);
 				obj->corpsenm = PM_GARO;
 			}
 		goto default_1;
 		break;
 	    case PM_GARO_MASTER:
-			obj = mksobj_at(MASK, x, y, TRUE, FALSE);
+			obj = mksobj_at(MASK, x, y, NO_MKOBJ_FLAGS);
 			obj->corpsenm = PM_GARO_MASTER;
 		goto default_1;
 		break;
 	    case PM_CHANGED:
 			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
-			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
 			obj->quan = 2;
 			obj->owt = weight(obj);
@@ -1085,43 +1086,43 @@ register struct monst *mtmp;
 			create_gas_cloud(x, y, 5, rnd(3)+1, FALSE);
 			num = rn1(10,10);
 			while (num--){
-				obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+				obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 				obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
 			}
 		goto default_1;
 		break;
 	    case PM_TWITCHING_FOUR_ARMED_CHANGED:
 			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
-			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_MYRKALFR;
 			obj->quan = 2;
-			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_ELF;
 			obj->quan = 2;
 			num = rn1(10,10);
 			while (num--){
-				obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+				obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 				obj->corpsenm = humanoid_eyes[rn2(SIZE(humanoid_eyes))];
 			}
 			num = rn1(10,10);
 			while (num--){
-				obj = mksobj_at(WORM_TOOTH, x, y, FALSE, FALSE);
+				obj = mksobj_at(WORM_TOOTH, x, y, MKOBJ_NOINIT);
 				add_oprop(obj, OPROP_LESSER_FLAYW);
 			}
 		goto default_1;
 		break;
 	    case PM_CLAIRVOYANT_CHANGED:
 			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
-			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_HUMAN;
 			obj->quan = 2;
 			obj->owt = weight(obj);
 			obj->oartifact = ART_EYE_OF_THE_ORACLE;
-			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_HUMAN;
 			obj->quan = 14;
 			obj->owt = weight(obj);
-			obj = mksobj_at(EYEBALL, x, y, FALSE, FALSE);
+			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_HUMAN;
 			obj->quan = 4;
 			obj->owt = weight(obj);
@@ -1169,7 +1170,7 @@ register struct monst *mtmp;
 				&& !is_rider(mtmp->data) 
 			) //u.uevent.invoked || 
 				break;
-			obj = mksobj_at(CORPSE, x, y, FALSE, FALSE);
+			obj = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_PARASITIC_MASTER_MIND_FLAYER;
 			fix_object(obj);
 		break;
@@ -2271,7 +2272,7 @@ movemon()
 		}
 		if(!rn2(100)){
 			struct obj *egg;
-			egg = mksobj(EGG, FALSE, FALSE);
+			egg = mksobj(EGG, MKOBJ_NOINIT);
 			egg->spe = 0; //not yours
 			egg->quan = 1;
 			egg->owt = weight(egg);
@@ -2478,7 +2479,7 @@ meatmetal(mtmp)
 		    }
 		    /* Left behind a pile? */
 		    if (rnd(25) < 3)
-			(void)mksobj_at(ROCK, mtmp->mx, mtmp->my, TRUE, FALSE);
+			(void)mksobj_at(ROCK, mtmp->mx, mtmp->my, NO_MKOBJ_FLAGS);
 		    newsym(mtmp->mx, mtmp->my);
 		    return 1;
 		}
@@ -3861,8 +3862,10 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	mtmp->mtrapped = 0;
 	mtmp->mhp = 0; /* simplify some tests: force mhp to 0 */
 	relobj(mtmp, 0, FALSE);
+	summoner_gone(mtmp);
 	remove_monster(mtmp->mx, mtmp->my);
 	del_light_source(mtmp->light);
+	stop_all_timers(mtmp->timed);
 	newsym(mtmp->mx,mtmp->my);
 	unstuck(mtmp);
 	fill_pit(mtmp->mx, mtmp->my);
@@ -4049,7 +4052,7 @@ struct monst *mtmp;
 			/* alabaster-specific effects */
 			mtmp->mspec_used = 0;
 			if(is_alabaster_mummy(mtmp->data) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
-				mksobj_at(mtmp->mvar_syllable, mtmp->mx, mtmp->my, TRUE, FALSE);
+				mksobj_at(mtmp->mvar_syllable, mtmp->mx, mtmp->my, NO_MKOBJ_FLAGS);
 				if(mtmp->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 					mtmp->mintrinsics[(DISPLACED - 1) / 32] &= ~(1 << (DISPLACED - 1) % 32);
 				mtmp->mvar_syllable = 0; //Lose the bonus if resurrected
@@ -4303,12 +4306,12 @@ register struct monst *mtmp;
 	if(mtmp->data->msound == MS_NEMESIS) nemdead();        
 	//Asc items and crucial bookkeeping
 	if(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN) && mtmp->mtyp == urole.neminum && !flags.made_bell){
-		(void) mksobj_at(BELL_OF_OPENING, mtmp->mx, mtmp->my, TRUE, FALSE);
+		(void) mksobj_at(BELL_OF_OPENING, mtmp->mx, mtmp->my, NO_MKOBJ_FLAGS);
 		flags.made_bell = TRUE;
 	}
 	if(mtmp->mtyp == PM_OONA){
 		struct obj *obj;
-		obj = mksobj_at(SKELETON_KEY, mtmp->mx, mtmp->my, FALSE, FALSE);
+		obj = mksobj_at(SKELETON_KEY, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
 		obj = oname(obj, artiname(ART_THIRD_KEY_OF_LAW));
 		obj->spe = 0;
 		obj->cursed = obj->blessed = FALSE;
@@ -4324,11 +4327,11 @@ register struct monst *mtmp;
 		if(remaining){
 			remaining = rnd(remaining);
 			if(!flags.made_first && !(--remaining))
-				mksobj_at(FIRST_WORD, mtmp->mx, mtmp->my, TRUE, FALSE);
+				mksobj_at(FIRST_WORD, mtmp->mx, mtmp->my, NO_MKOBJ_FLAGS);
 			else if(!flags.made_divide && !(--remaining))
-				mksobj_at(DIVIDING_WORD, mtmp->mx, mtmp->my, TRUE, FALSE);
+				mksobj_at(DIVIDING_WORD, mtmp->mx, mtmp->my, NO_MKOBJ_FLAGS);
 			else if(!flags.made_life && !(--remaining))
-				mksobj_at(NURTURING_WORD, mtmp->mx, mtmp->my, TRUE, FALSE);
+				mksobj_at(NURTURING_WORD, mtmp->mx, mtmp->my, NO_MKOBJ_FLAGS);
 		}
 	}
 	if(mtmp->mtyp == PM_GARLAND){
@@ -5155,7 +5158,7 @@ register struct monst *mdef;
 #ifndef GOLDOBJ
 		if (mdef->mgold) {
 			struct obj *au;
-			au = mksobj(GOLD_PIECE, FALSE, FALSE);
+			au = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 			au->quan = mdef->mgold;
 			au->owt = weight(au);
 			(void) add_to_container(otmp, au);
@@ -5169,7 +5172,7 @@ register struct monst *mdef;
 			otmp->spe |= STATUE_FACELESS;
 		otmp->owt = weight(otmp);
 	} else
-		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
+		otmp = mksobj_at(ROCK, x, y, NO_MKOBJ_FLAGS);
 
 	stackobj(otmp);
 	/* mondead() already does this, but we must do it before the newsym */
@@ -5251,7 +5254,7 @@ register struct monst *mdef;
 #ifndef GOLDOBJ
 		if (mdef->mgold) {
 			struct obj *au;
-			au = mksobj(GOLD_PIECE, FALSE, FALSE);
+			au = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 			au->quan = mdef->mgold;
 			au->owt = weight(au);
 			(void) add_to_container(otmp, au);
@@ -5300,7 +5303,7 @@ register struct monst *mdef;
 			place_object(obj, x, y);
 			stackobj(obj);
 		}
-		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
+		otmp = mksobj_at(ROCK, x, y, NO_MKOBJ_FLAGS);
 		set_material(otmp, GOLD);
 		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 	}
@@ -5384,7 +5387,7 @@ register struct monst *mdef;
 #ifndef GOLDOBJ
 		if (mdef->mgold) {
 			struct obj *au;
-			au = mksobj(GOLD_PIECE, FALSE, FALSE);
+			au = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 			au->quan = mdef->mgold;
 			au->owt = weight(au);
 			(void) add_to_container(otmp, au);
@@ -5432,7 +5435,7 @@ register struct monst *mdef;
 			place_object(obj, x, y);
 			stackobj(obj);
 		}
-		otmp = mksobj_at(ROCK, x, y, TRUE, FALSE);
+		otmp = mksobj_at(ROCK, x, y, NO_MKOBJ_FLAGS);
 		set_material(otmp, GLASS);
 		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 	}
@@ -5655,7 +5658,7 @@ xkilled(mtmp, dest)
 
 #ifdef MAIL
 	if(mdat->mtyp == PM_MAIL_DAEMON) {
-		stackobj(mksobj_at(SCR_MAIL, x, y, FALSE, FALSE));
+		stackobj(mksobj_at(SCR_MAIL, x, y, MKOBJ_NOINIT));
 		redisp = TRUE;
 	}
 #endif
@@ -5669,7 +5672,7 @@ xkilled(mtmp, dest)
 		if (!rn2(active_glyph(EYE_THOUGHT) ? 3 : 6) && !(mvitals[mndx].mvflags & G_NOCORPSE)
 					&& mdat->mlet != S_KETER
 					&& mdat->mlet != S_PLANT
-					&& !(mtmp->mvanishes >= 0)
+					&& !(get_mx(mtmp, MX_ESUM))
 					&& !(mtmp->mclone)
 					&& !(has_template(mtmp, ZOMBIFIED))
 					&& !(is_auton(mtmp->data))
@@ -5677,7 +5680,7 @@ xkilled(mtmp, dest)
 			int typ;
 
 			/*Death Drop*/
-			otmp = mkobj_at(RANDOM_CLASS, x, y, TRUE);
+			otmp = mkobj_at(RANDOM_CLASS, x, y, MKOBJ_ARTIF);
 			if(In_quest(&u.uz) && !Role_if(PM_CONVICT)){
 				if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
 				if(otmp->oclass == ARMOR_CLASS){
@@ -7238,6 +7241,83 @@ struct monst *mtmp;
 		mondied(mtmp);
 	} else {
 		migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_EXACT_XY, (coord *)0);
+	}
+}
+
+/* marks `mon` as being summoned by the summoner, which causes it to vanish after duration expires or summoner dies */
+/* its inventory at time of marking is set to vanish when `mon` dies */
+void
+mark_mon_as_summoned(mon, summoner, duration, flags)
+struct monst * mon;
+struct monst * summoner;
+int duration;
+int flags;
+{
+	/* check that mon was set up to be a summon */
+	if (!get_mx(mon, MX_ESUM)) {
+		impossible("%s not made as summon, fixing", m_monnam(mon));
+		add_mx(mon, MX_ESUM);
+		start_timer(ESUMMON_PERMANENT, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
+	}
+	/* set data */
+	mon->mextra_p->esum_p->summoner = summoner;
+	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
+	mon->mextra_p->esum_p->summonstr = mon->data->mlevel;
+	mon->mextra_p->esum_p->sticky = (!summoner || summoner == &youmonst) && !(flags & ESUMMON_NOFOLLOW);
+	mon->mextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
+	mon->mextra_p->esum_p->staleptr = 0;
+	/* change duration, if applicable */
+	if (duration != ESUMMON_PERMANENT) {
+		mon->mextra_p->esum_p->permanent = 0;
+		adjust_timer_duration(get_timer(mon->timed, DESUMMON_MON), duration - ESUMMON_PERMANENT);
+	}
+	if (summoner)
+		summoner->summonpwr += mon->mextra_p->esum_p->summonstr;
+	// mark mon's inventory as summoned, including contained objects
+#ifndef GOLDOBJ
+	u.spawnedGold -= mon->mgold;
+	mon->mgold = 0;
+#else
+	{
+		struct obj *mongold = findgold(mon->minvent);
+		if (mongold) {
+			u.spawnedGold -= mongold->quan;
+			obj_extract_self(mongold);
+			obfree(mongold, (struct obj *)0);
+		}
+	}
+#endif
+	struct obj * otmp, * pobj = 0;
+	for (otmp = mon->minvent; otmp || (pobj && pobj->where == OBJ_CONTAINED); otmp = otmp->nobj) {
+		if(otmp)
+			while(otmp->cobj) {pobj = otmp; otmp = otmp->cobj;}
+		else
+			otmp = pobj->ocontainer;
+		if (!get_ox(otmp, OX_ESUM)) {
+			/* add component to obj */
+			add_ox(otmp, OX_ESUM);
+			otmp->oextra_p->esum_p->summoner = mon;
+			otmp->oextra_p->esum_p->sm_id = mon->m_id;
+			otmp->oextra_p->esum_p->summonstr = 0;
+			otmp->oextra_p->esum_p->sticky = 0;
+			otmp->oextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
+			otmp->oextra_p->esum_p->staleptr = 0;
+			/* add timer to obj */
+			start_timer(duration, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
+		}
+		else {
+			/* already marked as summoned -- double-check it's the right mon */
+			if (otmp->oextra_p->esum_p->summoner != mon)
+				impossible("%s already attached to %s, cannot attach to %s",
+					xname(otmp), m_monnam(otmp->oextra_p->esum_p->summoner), m_monnam(mon));
+			else {
+				/* change duration, if applicable */
+				if (duration != ESUMMON_PERMANENT) {
+					otmp->oextra_p->esum_p->permanent = 0;
+					adjust_timer_duration(get_timer(otmp->timed, DESUMMON_OBJ), duration - ESUMMON_PERMANENT);
+				}
+			}
+		}
 	}
 }
 

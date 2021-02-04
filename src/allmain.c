@@ -1168,36 +1168,7 @@ moveloop()
 				/* Loyal monsters slowly recover tameness */
 				if(mtmp->mtame && mtmp->mtame < 5 && !mtmp->isminion && !(EDOG(mtmp)->loyal) && (!moves%100))
 					mtmp->mtame++;
-				/* Possibly vanish */
-				if(mtmp->mvanishes>-1){
-					if(--mtmp->mvanishes == 0){
-						if(mtmp->mtyp == PM_VEXING_ORB){
-							//Need a better system than this :(
-							flags.mon_moving = TRUE;
-							mondied(mtmp);
-							flags.mon_moving = FALSE;
-						} else
-							monvanished(mtmp);
-						continue;
-					}
-				}
-				/*Tannin eggs may hatch, monster may die*/
-				if(mtmp->mtaneggs){
-					for(int i = mtmp->mtaneggs; i > 0; i--) if(!rn2(6)){
-						mtmp->mtaneggs--;
-						makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
-						mtmp->mhp -= rnd(6);
-					}
-					/*Died from the damage*/
-					if(mtmp->mhp <= 0){
-						mondied(mtmp);
-						continue;
-					}
-				}
-				if(mtmp->mtyp == PM_STRANGE_LARVA){
-					grow_up(mtmp, (struct monst *)0);
-				}
-				/*Monsters may have to skip turn*/
+					
 				if(noactions(mtmp)){
 					/* Monsters in a essence trap can't move */
 					if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
@@ -1658,33 +1629,6 @@ karemade:
 				}
 			}
 			
-			if(mad_turn(MAD_HOST)){
-				if(!Vomiting && roll_madness(MAD_HOST)){
-					static const char *hoststrings[] = {
-						"wiggling",
-						"twitching",
-						"squirming",
-						"kicking",
-						"vibrating",
-						"rumbling",
-						"turning",
-						"quivering",
-						"undulating",
-						"convulsing",
-						"breathing"
-					};
-					You("feel it %s inside your body!", hoststrings[rn2(SIZE(hoststrings))]);
-					make_vomiting(Vomiting+49+d(4,11), TRUE);
-				}
-			}
-			if(u.utaneggs){
-				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
-					u.utaneggs--;
-					makemon(&mons[PM_STRANGE_LARVA], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
-					losehp(d(1,6), "hatching parasite", KILLED_BY_AN);
-				}
-			}
-			
 			if(u.sealsActive&SEAL_ASTAROTH && u.uinwater){
 				losehp(1, "rusting through", KILLED_BY);
 			}
@@ -1736,7 +1680,7 @@ karemade:
 		    }
 			
 			if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-				int delta = Insanity;
+				int delta = 100 - u.usanity;
 				int discomfort = u_clothing_discomfort();
 				discomfort = (discomfort * delta)/100;
 				if (moveamt - discomfort < NORMAL_SPEED/2) {
@@ -1931,7 +1875,7 @@ karemade:
 				if (!(u.uencouraged)) 
 					You_feel("calm again.");
 			}
-
+			
 		    if (flags.bypasses) clear_bypasses();
 		    if(Glib) glibr();
 		    if(StumbleBlind && rn2(100) >= u.usanity) bumbler();
@@ -2682,7 +2626,7 @@ newgame()
 		int inherited;
 		struct obj *otmp;
 		do{inherited = do_inheritor_menu();}while(!inherited);
-		otmp = mksobj((int)artilist[inherited].otyp, FALSE, FALSE);
+		otmp = mksobj((int)artilist[inherited].otyp, MKOBJ_NOINIT);
 	    otmp = oname(otmp, artilist[inherited].name);
 		expert_weapon_skill(weapon_type(otmp));
 		discover_artifact(inherited);
@@ -3463,29 +3407,27 @@ printAttacks(buf, ptr)
 		"[[Blood frenzy]]",		/*126*/
 		"[[Create spheres]]",	/*127*/
 		"[[Dark]]",				/*128*/
-		"[[Implant egg]]",		/*129*/
-		"[[Flesh hook]]",		/*130*/
 		// "[[ahazu abduction]]",	/**/
-		"[[stone choir]]",		/* */
-		"[[water vampire]]",	/* */
-		"[[bloody fangs]]",		/* */
-		"[[item freeing]]",		/* */
-		"[[rainbow feathers]]",	/* */
+		"[[stone choir]]",		/*129*/
+		"[[water vampire]]",	/*130*/
+		"[[bloody fangs]]",		/*131*/
+		"[[item freeing]]",		/*132*/
+		"[[rainbow feathers]]",	/*133*/
 		// "[[Vorlon explosion]]",	/*NA*/
-		"[[cold explosion]]",	/* */
-		"[[fire explosion]]",	/* */
-		"[[shock explosion]]",	/* */
-		"[[physical explosion]]",/* */
+		"[[cold explosion]]",	/*134*/
+		"[[fire explosion]]",	/*135*/
+		"[[shock explosion]]",	/*136*/
+		"[[physical explosion]]",/*137*/
 		// "[[Vorlon missile]]",	/*NA*/
-		"[[Warmachine missile]]",/* */
-		"[[clerical spell]]",	/* */
-		"[[mage spell]]",		/* */
-		"[[random breath type]]",/* */
-		"[[random gaze type]]",	/* */
-		"[[random elemental gaze]]",/* */
-		"[[Amulet theft]]",		/* */
-		"[[Intrinsic theft]]",	/* */
-		"[[Quest Artifact theft]]"/* */
+		"[[Warmachine missile]]",/*138*/
+		"[[clerical spell]]",	/*139*/
+		"[[mage spell]]",		/*140*/
+		"[[random breath type]]",/*141*/
+		"[[random gaze type]]",	/*142*/
+		"[[random elemental gaze]]",/*143*/
+		"[[Amulet theft]]",		/*144*/
+		"[[Intrinsic theft]]",	/*145*/
+		"[[Quest Artifact theft]]"/*146*/
 	};
 	for(i = 0; i<6; i++){
 		attk = &ptr->mattk[i];
@@ -3494,10 +3436,6 @@ printAttacks(buf, ptr)
 			attk->damn == 0 &&
 			attk->damd == 0
 		) return;
-		if(SIZE(attackKey) <= attk->adtyp)
-			impossible("attack key out of range!");
-		if(SIZE(damageKey) <= attk->adtyp)
-			impossible("damage key out of range!");
 		if(!i){
 			Sprintf(buf, "%s %dd%d %s",
 				attk->aatyp == AT_WEAP ? "Weapon" :

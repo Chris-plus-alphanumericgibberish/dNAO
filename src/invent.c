@@ -197,7 +197,7 @@ struct obj **potmp, **pobj;
 
 		/* really should merge the timeouts */
 		if (obj->lamplit) obj_merge_light_sources(obj, otmp);
-		if (obj->timed) obj_stop_timers(obj);	/* follows lights */
+		if (obj->timed) stop_all_timers(obj->timed);	/* follows lights */
 
 		/* fixup for `#adjust' merging wielded darts, daggers, &c */
 		if (obj->owornmask && carried(otmp)) {
@@ -608,7 +608,7 @@ struct obj *obj;
 		set_moreluck();
 		flags.botl = 1;
 	} else if (obj->otyp == FIGURINE && obj->timed) {
-		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) obj);
+		(void) stop_timer(FIG_TRANSFORM, obj->timed);
 	}
 }
 
@@ -938,7 +938,7 @@ register long q;
 {
 	register struct obj *otmp;
 
-	otmp = mksobj(GOLD_PIECE, FALSE, FALSE);
+	otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 	u.ugold -= q;
 	otmp->quan = q;
 	otmp->owt = weight(otmp);
@@ -2730,7 +2730,7 @@ winid *datawin;
 					case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
 					case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, dwarves, and angels.");			break;
 					case ART_CARNWENNAN:				Strcat(buf, "fey and magic-item users.");					break;
-					case ART_SLAVE_TO_ARMOK:			Strcat(buf, "lords, elves, orcs, and the innocent.");		break;
+					case ART_SLAVE_TO_ARMOK:			Strcat(buf, "nobility, elves, orcs, and the innocent.");	break;
 					case ART_CLAIDEAMH:					Strcat(buf, "those bound by iron and ancient laws.");		break;
 					case ART_DRAGONLANCE:				Strcat(buf, "dragons.");									break;
 					case ART_NODENSFORK:				Strcat(buf, "the eldritch, the telepathic, the deep.");		break;
@@ -4615,8 +4615,8 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 		return FALSE;
 
 	/* for the moment, any additional information is incompatible */
-	if (get_ox(obj, OX_EMON) || get_ox(obj, OX_EMID) ||
-		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID)) return FALSE;
+	if (get_ox(obj,  OX_EMON) || get_ox(obj,  OX_EMID) || get_ox(obj,  OX_ESUM) ||
+		get_ox(otmp, OX_EMON) || get_ox(otmp, OX_EMID) || get_ox(otmp, OX_ESUM)) return FALSE;
 
 	if(obj->oartifact != otmp->oartifact) return FALSE;
 	

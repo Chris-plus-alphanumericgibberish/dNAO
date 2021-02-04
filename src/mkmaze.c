@@ -678,17 +678,17 @@ fixup_special()
 				if (y < croom->ly + disty * 1 / 3 && x > croom->lx + distx * 1 / 5 && x < croom->lx + distx * 4 / 5) piled++;
 				if (y < croom->ly + disty * 2 / 3 && x > croom->lx + distx * 2 / 5 && x < croom->lx + distx * 3 / 5) piled++;
 				for (; piled > 0; piled--){
-					if (rn2(2)) mkobj_at(WEAPON_CLASS, x, y, FALSE);
-					if (rn2(2)) mkobj_at(ARMOR_CLASS, x, y, FALSE);
-					if (rn2(6)) mkobj_at(RING_CLASS, x, y, FALSE);
-					if (!rn2(3))mkobj_at(TOOL_CLASS, x, y, FALSE);
-					if (rn2(6)) mkobj_at(SCROLL_CLASS, x, y, FALSE);
-					if (!rn2(4))mkobj_at(GEM_CLASS, x, y, FALSE);
-					if (!rn2(3))mkobj_at(GEM_CLASS, x, y, FALSE);
-					if (!rn2(2))mkobj_at(GEM_CLASS, x, y, FALSE);
-					if (!rn2(4))mksobj_at(SILVER_SLINGSTONE, x, y, TRUE, FALSE);
-					if (rn2(3)) mkobj_at(GEM_CLASS, x, y, FALSE);
-					if (rn2(4)) mkobj_at(GEM_CLASS, x, y, FALSE);
+					if (rn2(2)) mkobj_at(WEAPON_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (rn2(2)) mkobj_at(ARMOR_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (rn2(6)) mkobj_at(RING_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (!rn2(3))mkobj_at(TOOL_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (rn2(6)) mkobj_at(SCROLL_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (!rn2(4))mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (!rn2(3))mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (!rn2(2))mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (!rn2(4))mksobj_at(SILVER_SLINGSTONE, x, y, NO_MKOBJ_FLAGS);
+					if (rn2(3)) mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (rn2(4)) mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
 				}
 				(void)mkgold((long)rn1(1000, 100), x, y);
 			}
@@ -738,7 +738,7 @@ fixup_special()
 			for(x = 0; x<COLNO; x++){
 				for(y = 0; y<ROWNO; y++){
 					if(isok(x,y) && levl[x][y].typ == ALTAR){
-						mksobj_at(CANDLE_OF_INVOCATION, x, y, FALSE, FALSE);
+						mksobj_at(CANDLE_OF_INVOCATION, x, y, MKOBJ_NOINIT);
 					}
 				}
 			}
@@ -1304,7 +1304,7 @@ create_maze()
 	maze_remove_deadends(ROOM, FALSE);
 
 	/* put a boulder at the maze center */
-	(void)mksobj_at(BOULDER, (int)mm.x, (int)mm.y, TRUE, FALSE);
+	(void)mksobj_at(BOULDER, (int)mm.x, (int)mm.y, NO_MKOBJ_FLAGS);
 
 	wallification(2, 2, x_maze_max, y_maze_max);
 
@@ -1473,11 +1473,11 @@ register const char *s;
 
 	for(x = rn1(8,11); x; x--) {
 		mazexy(&mm);
-		(void) mkobj_at(rn2(2) ? GEM_CLASS : 0, mm.x, mm.y, TRUE);
+		(void) mkobj_at(rn2(2) ? GEM_CLASS : 0, mm.x, mm.y, MKOBJ_ARTIF);
 	}
 	for(x = rn1(10,2); x; x--) {
 		mazexy(&mm);
-		(void) mksobj_at(BOULDER, mm.x, mm.y, TRUE, FALSE);
+		(void) mksobj_at(BOULDER, mm.x, mm.y, NO_MKOBJ_FLAGS);
 	}
 	for (x = rn2(3); x; x--) {
 		mazexy(&mm);

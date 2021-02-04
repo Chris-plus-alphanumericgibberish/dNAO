@@ -2677,7 +2677,7 @@ add_to_billobjs(obj)
     if (obj->where != OBJ_FREE)
 	panic("add_to_billobjs: obj not free");
     if (obj->timed)
-	obj_stop_timers(obj);
+	stop_all_timers(obj->timed);
 
     obj->nobj = billobjs;
     billobjs = obj;
@@ -3696,8 +3696,7 @@ boolean catchup;	/* restoring a level */
 		    return(0);
 	    if (ttmp->ttyp == LANDMINE || ttmp->ttyp == BEAR_TRAP) {
 		/* convert to an object */
-		otmp = mksobj((ttmp->ttyp == LANDMINE) ? LAND_MINE :
-				BEARTRAP, TRUE, FALSE);
+		otmp = mksobj((ttmp->ttyp == LANDMINE) ? LAND_MINE : BEARTRAP, NO_MKOBJ_FLAGS);
 		otmp->quan= 1;
 		otmp->owt = weight(otmp);
 		(void) mpickobj(shkp, otmp);

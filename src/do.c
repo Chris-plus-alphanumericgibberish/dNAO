@@ -968,7 +968,7 @@ doup()
 	) {
 		if(uwep && uwep->oartifact == ART_ROD_OF_SEVEN_PARTS && artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights > 0){
 			struct obj *pseudo;
-			pseudo = mksobj(SPE_LEVITATION, FALSE, FALSE);
+			pseudo = mksobj(SPE_LEVITATION, MKOBJ_NOINIT);
 			pseudo->blessed = pseudo->cursed = 0;
 			pseudo->blessed = TRUE;
 			pseudo->quan = 23L;			/* do not let useup get it */
@@ -1690,7 +1690,7 @@ final_level()
 		    mtmp->m_lev = rn1(8,15);
 		    mtmp->mhp = mtmp->mhpmax = 8*mtmp->m_lev - rnd(7);
 		    if ((otmp = select_hwep(mtmp)) == 0) {
-			otmp = mksobj(SABER, FALSE, FALSE);
+			otmp = mksobj(SABER, MKOBJ_NOINIT);
 			if (mpickobj(mtmp, otmp))
 			    panic("merged weapon?");
 		    }
@@ -1698,7 +1698,7 @@ final_level()
 		    if (otmp->spe < 4) otmp->spe += rnd(4);
 		    if ((otmp = which_armor(mtmp, W_ARMS)) == 0 ||
 			    otmp->otyp != SHIELD_OF_REFLECTION) {
-			(void) mongets(mtmp, AMULET_OF_REFLECTION);
+			(void) mongets(mtmp, AMULET_OF_REFLECTION, NO_MKOBJ_FLAGS);
 			m_dowear(mtmp, TRUE);
 			init_mon_wield_item(mtmp);
 		    }

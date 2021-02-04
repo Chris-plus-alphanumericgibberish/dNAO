@@ -4358,7 +4358,7 @@ int wishflags;
 		*wishreturn = WISH_SUCCESS;
 		return (&zeroobj);
 #else
-                otmp = mksobj(GOLD_PIECE, FALSE, FALSE);
+                otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
 		otmp->quan = cnt;
                 otmp->owt = weight(otmp);
 		flags.botl=1;
@@ -4917,7 +4917,7 @@ typfnd:
 	}
 	
 	if(typ) {
-		otmp = mksobj(typ, TRUE, FALSE);
+		otmp = mksobj(typ, NO_MKOBJ_FLAGS);
 	} else {
 		otmp = mkobj(oclass, FALSE);
 		if (otmp) typ = otmp->otyp;
@@ -5007,7 +5007,7 @@ typfnd:
 				   !(mvitals[mntmp].mvflags & G_NOCORPSE)) {
 			    /* beware of random troll or lizard corpse,
 			       or of ordinary one being forced to such */
-			    if (otmp->timed) obj_stop_timers(otmp);
+			    if (otmp->timed) stop_all_timers(otmp->timed);
 			    if (mons[mntmp].msound == MS_GUARDIAN)
 			    	otmp->corpsenm = genus(mntmp,1);
 			    else

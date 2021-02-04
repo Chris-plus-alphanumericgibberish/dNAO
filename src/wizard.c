@@ -496,8 +496,7 @@ clonewiz()
 				u.ux, u.uy, NO_MM_FLAGS)) != 0) {
 	    mtmp2->msleeping = mtmp2->mtame = mtmp2->mpeaceful = 0;
 	    if (!u.uhave.amulet && rn2(2)) {  /* give clone a fake */
-		(void) add_to_minv(mtmp2, mksobj(FAKE_AMULET_OF_YENDOR,
-					TRUE, FALSE));
+		(void) add_to_minv(mtmp2, mksobj(FAKE_AMULET_OF_YENDOR, NO_MKOBJ_FLAGS));
 	    }
 	    mtmp2->m_ap_type = M_AP_MONSTER;
 	    mtmp2->mappearance = wizapp[rn2(SIZE(wizapp))];
@@ -520,7 +519,7 @@ pick_nasty()
 }
 
 /* create some nasty monsters, aligned or neutral with the caster */
-/* a null caster defaults to a chaotic caster (e.g. the wizard) */
+/* a null caster is assumed to be Wizard intervention */
 int
 nasty(mcast)
 	struct monst *mcast;
@@ -532,8 +531,9 @@ nasty(mcast)
     int count=0;
 
     if(!rn2(10) && Inhell) {
-	msummon((struct monst *) 0);	/* summons like WoY */
-	count++;
+		/* creatures made this way are full monsters gated in, not summons tied to mcast */
+		msummon(mcast, &mons[PM_WIZARD_OF_YENDOR]);	/* summons like WoY */
+		count++;
     } else {
 	tmp = (u.ulevel > 3) ? u.ulevel/3 : 1; /* just in case -- rph */
 	/* if we don't have a casting monster, the nasties appear around you */
@@ -561,15 +561,16 @@ nasty(mcast)
 				|| (!rn2(4) && abs(sgn(mons[makeindex].maligntyp) - sgn(castalign)) == 1)
 			){
 				if ((mtmp = makemon(&mons[makeindex],
-							bypos.x, bypos.y, NO_MM_FLAGS)) != 0);
+							bypos.x, bypos.y, MM_ESUM)) != 0);
 				else /* makemon failed for some reason */
 					mtmp = makemon((struct permonst *)0,
-							bypos.x, bypos.y, NO_MM_FLAGS);
+							bypos.x, bypos.y, MM_ESUM);
 				if(!mtmp) /* makemon still failed, abort */
 					return count;
 				mtmp->msleeping = 0;
 				untame(mtmp, 0);
 				set_malign(mtmp);
+				mark_mon_as_summoned(mtmp, mcast, ESUMMON_PERMANENT, 0);
 				count++;
 				break;
 			}

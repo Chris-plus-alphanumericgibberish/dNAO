@@ -228,14 +228,14 @@ static const struct icp bow_materials[] = {
 
 
 struct obj *
-mkobj_at(let, x, y, artif)
+mkobj_at(let, x, y, mkflags)
 char let;
 int x, y;
-boolean artif;
+int mkflags;
 {
 	struct obj *otmp;
 
-	otmp = mkobj(let, artif);
+	otmp = mkobj(let, mkflags);
 	
 	place_object(otmp, x, y);
 	
@@ -243,13 +243,13 @@ boolean artif;
 }
 
 struct obj *
-mksobj_at(otyp, x, y, init, artif)
+mksobj_at(otyp, x, y, mkflags)
 int otyp, x, y;
-boolean init, artif;
+int mkflags;
 {
 	struct obj *otmp;
 
-	otmp = mksobj(otyp, init, artif);
+	otmp = mksobj(otyp, mkflags);
 	
 	place_object(otmp, x, y);
 	
@@ -257,9 +257,9 @@ boolean init, artif;
 }
 
 struct obj *
-mkobj(oclass, artif)
+mkobj(oclass, mkflags)
 char oclass;
-boolean artif;
+int mkflags;
 {
 	int tprob, i, prob = rnd(1000);
 
@@ -284,7 +284,7 @@ boolean artif;
 	if(objects[i].oc_class != oclass || !OBJ_NAME(objects[i]))
 		panic("probtype error, oclass=%d i=%d", (int) oclass, i);
 
-	return(mksobj(i, TRUE, artif));
+	return(mksobj(i, mkflags));
 }
 
 STATIC_OVL void
@@ -313,14 +313,14 @@ struct obj *box;
 
 	for (n = max_ints(rn2(n+1),min); n > 0; n--) {
 	    if (box->otyp == ICE_BOX) {
-			if (!(otmp = mksobj(CORPSE, TRUE, TRUE))) continue;
+			if (!(otmp = mksobj(CORPSE, MKOBJ_ARTIF))) continue;
 			/* Note: setting age to 0 is correct.  Age has a different
 			 * from usual meaning for objects stored in ice boxes. -KAA
 			 */
 			otmp->age = 0L;
 			if (otmp->timed) {
-				(void) stop_timer(ROT_CORPSE, (genericptr_t)otmp);
-				(void) stop_timer(REVIVE_MON, (genericptr_t)otmp);
+				(void) stop_timer(ROT_CORPSE, otmp->timed);
+				(void) stop_timer(REVIVE_MON, otmp->timed);
 			}
 	    } else if(box->otyp == MASSIVE_STONE_CRATE){
 			if (!(otmp = mkobj(FOOD_CLASS, TRUE))) continue;
@@ -394,13 +394,13 @@ long num;
 	*otmp = *obj;		/* copies whole structure */
 	/* invalidate pointers */
 	otmp->light = (struct ls_t *)0;
+	otmp->timed = (struct timer *)0;
 	otmp->oextra_p = (union oextra *)0;
 	otmp->mp = (struct mask_properties *)0;	/* not sure if correct -- these are very unfinished */
 
 	otmp->o_id = flags.ident++;
 	if (!otmp->o_id) otmp->o_id = flags.ident++;	/* ident overflowed */
-	otmp->timed = 0;	/* not timed, yet */
-	otmp->lamplit = 0;	/* ditto */
+	otmp->lamplit = 0;	/* not lit, yet */
 	otmp->owornmask = 0L;	/* new object isn't worn */
 	obj->quan -= num;
 	obj->owt = weight(obj);
@@ -521,14 +521,17 @@ register struct obj *otmp;
 #ifdef OVLB
 
 struct obj *
-mksobj(otyp, init, artif)
+mksobj(otyp, mkflags)
 int otyp;
-boolean init;
-boolean artif;
+int mkflags;
 {
 	int mndx, tryct;
 	struct obj *otmp;
 	char let = objects[otyp].oc_class;
+
+	boolean init =   ((mkflags & MKOBJ_NOINIT) == 0);
+	boolean artif =  ((mkflags & MKOBJ_ARTIF) != 0);
+	boolean summon = ((mkflags & MKOBJ_SUMMON) != 0) && otyp != GOLD_PIECE;
 
 	otmp = newobj(0);
 	*otmp = zeroobj;
@@ -564,6 +567,19 @@ boolean artif;
 	
 	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
 	
+	if (summon) {
+		/* set up otmp as summoned indefinitely
+		   caller is responsible for 1. giving to a monster and 2. setting duration and removing permanence if desired */
+		add_ox(otmp, OX_ESUM);
+		otmp->oextra_p->esum_p->summoner = (struct monst *)0;
+		otmp->oextra_p->esum_p->sm_id = 0;
+		otmp->oextra_p->esum_p->summonstr = 0;
+		otmp->oextra_p->esum_p->staleptr = 0;
+		otmp->oextra_p->esum_p->permanent = 1;
+		otmp->oextra_p->esum_p->sticky = 1; /* mark as unfinished -- add_to_minv will detect this and attach it automatically */
+		start_timer(ESUMMON_PERMANENT, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)otmp);
+	}
+
 	fix_object(otmp);
 	
 	if (!objects[otyp].oc_uses_known)
@@ -605,7 +621,7 @@ boolean artif;
 				otmp->altmode = AD_SLEE;
 			}
 			else if (otmp->otyp == MASS_SHADOW_PISTOL){
-				struct obj *stone = mksobj(ROCK, TRUE, FALSE);
+				struct obj *stone = mksobj(ROCK, NO_MKOBJ_FLAGS);
 				otmp->ovar1 = 800L + rnd(200);
 				stone->quan = 1;
 				stone->owt = weight(stone);
@@ -776,7 +792,7 @@ boolean artif;
 				otmp->age = (long)rn1(50000, 100000);
 				blessorcurse(otmp, 2);
 				{
-					struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, TRUE, FALSE);
+					struct obj *gem = mksobj(rn2(6) ? BLUE_FLUORITE : GREEN_FLUORITE, NO_MKOBJ_FLAGS);
 					gem->quan = 1;
 					gem->owt = weight(gem);
 					add_to_container(otmp, gem);
@@ -1535,7 +1551,7 @@ register struct obj *otmp;
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
 		begin_burn(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
-		(void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
+		(void) stop_timer(FIG_TRANSFORM, otmp->timed);
 	return;
 }
 
@@ -1604,7 +1620,7 @@ register struct obj *otmp;
 	else if (otmp->otyp == BAG_OF_HOLDING)
 	    otmp->owt = weight(otmp);
 	else if (otmp->otyp == FIGURINE && otmp->timed)
-	    (void) stop_timer(FIG_TRANSFORM, (genericptr_t) otmp);
+	    (void) stop_timer(FIG_TRANSFORM, otmp->timed);
 	else if ((artifact_light(otmp)||arti_light(otmp)) && otmp->lamplit)
 		begin_burn(otmp);
 
@@ -1877,7 +1893,7 @@ int oldmat, newmat;
 			LIGHT_DAMAGE, (genericptr_t)obj);
 	}
 	else if (oldmat == SHADOWSTEEL) {/* Or turn it off, if the object used to be made of shadowsteel.*/
-		stop_timer(LIGHT_DAMAGE, (genericptr_t)obj);
+		stop_timer(LIGHT_DAMAGE, obj->timed);
 	}
 	/* set random gemstone type for valid gemstone objects */
 	if (!obj->ovar1 && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
@@ -2324,49 +2340,49 @@ int x, y;
 {
 	struct obj *otmp;
 	if(Is_zuggtmoy_level(&u.uz)){
-		otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+		otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 		otmp->spe = fruitadd("slime mold");
 		return otmp;
 	} else if(In_quest(&u.uz) && (Race_if(PM_DROW) || (Race_if(PM_DWARF) && Role_if(PM_NOBLEMAN)))){
 		int chance = rn2(50);
 		if(chance < 20){
-			otmp = mksobj_at(EGG, x, y,TRUE,FALSE);
+			otmp = mksobj_at(EGG, x, y,NO_MKOBJ_FLAGS);
 			otmp->corpsenm = PM_CAVE_SPIDER;
 			return otmp;
 		} else if(chance < 45){
-			return mksobj_at(EUCALYPTUS_LEAF, x, y, TRUE, FALSE);
+			return mksobj_at(EUCALYPTUS_LEAF, x, y, NO_MKOBJ_FLAGS);
 		} else {
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("moldy remains");
 			return otmp;
 		}
 	} else if((In_quest(&u.uz) && Role_if(PM_PIRATE)) || Is_paradise(&u.uz)){
 		int chance = rn2(100);
 		if(chance < 10){
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("coconut");
 			return otmp;
 		} else if(chance < 25){
-			return mksobj_at(BANANA, x, y, TRUE, FALSE);
+			return mksobj_at(BANANA, x, y, NO_MKOBJ_FLAGS);
 		} else if(chance < 50){
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("mango");
 			return otmp;
 		} else if(chance < 75){
-			return mksobj_at(ORANGE, x, y, TRUE, FALSE);
+			return mksobj_at(ORANGE, x, y, NO_MKOBJ_FLAGS);
 		} else if(chance < 99){
-			otmp = mksobj_at(EGG, x, y,TRUE,FALSE);
+			otmp = mksobj_at(EGG, x, y,NO_MKOBJ_FLAGS);
 			otmp->corpsenm = PM_PARROT;
 			return otmp;
 		} else{
-			otmp = mksobj_at(SLIME_MOLD, x, y,TRUE,FALSE);
+			otmp = mksobj_at(SLIME_MOLD, x, y,NO_MKOBJ_FLAGS);
 			otmp->spe = fruitadd("tree squid");
 			return otmp;
 		}
 	} else if(In_quest(&u.uz) && Role_if(PM_KNIGHT)){
-		return mksobj_at(APPLE, x, y, TRUE, FALSE);
+		return mksobj_at(APPLE, x, y, NO_MKOBJ_FLAGS);
 	}
-	return mksobj_at(treefruits[rn2(SIZE(treefruits))], x, y, TRUE, FALSE);
+	return mksobj_at(treefruits[rn2(SIZE(treefruits))], x, y, NO_MKOBJ_FLAGS);
 }
 #endif /* OVL0 */
 #ifdef OVLB
@@ -2384,7 +2400,7 @@ boolean new;
     if (gold) {
 	gold->quan += amount;
     } else {
-	gold = mksobj_at(GOLD_PIECE, x, y, TRUE, FALSE);
+	gold = mksobj_at(GOLD_PIECE, x, y, NO_MKOBJ_FLAGS);
 	gold->quan = amount;
     }
     gold->owt = weight(gold);
@@ -2430,14 +2446,15 @@ int x, y;
 boolean init;
 {
 	register struct obj *otmp;
+	int mkobjflags = (init ? NO_MKOBJ_FLAGS : MKOBJ_NOINIT);
 
 	if (objtype != CORPSE && objtype != STATUE && objtype != BROKEN_ANDROID && objtype != BROKEN_GYNOID && objtype != LIFELESS_DOLL)
 	    impossible("making corpstat type %d", objtype);
 	if (x == 0 && y == 0) {		/* special case - random placement */
-		otmp = mksobj(objtype, init, FALSE);
+		otmp = mksobj(objtype, mkobjflags);
 		if (otmp) rloco(otmp);
 	} else
-		otmp = mksobj_at(objtype, x, y, init, FALSE);
+		otmp = mksobj_at(objtype, x, y, mkobjflags);
 	if (otmp) {
 	    if (mtmp) {
 		struct obj *otmp2;
@@ -2457,7 +2474,7 @@ boolean init;
 					// special_corpse(otmp->corpsenm))) {
 			//Between molding and all the special effects, would be best to just reset timers for everything.
 			if (otmp->otyp == CORPSE) {
-				obj_stop_timers(otmp);
+				stop_all_timers(otmp->timed);
 				/* if the monster was cancelled, don't self-revive */
 				if (mtmp && mtmp->mcan && !is_rider(ptr))
 					otmp->norevive = 1;
@@ -2521,6 +2538,7 @@ struct monst *mtmp;
 	EMON(obj)->nmon     = (struct monst *)0;
 	EMON(obj)->data     = (struct permonst *)0;
 	EMON(obj)->minvent  = (struct obj *)0;
+	EMON(obj)->timed    = (struct timer *)0;
 	EMON(obj)->light    = (struct ls_t *)0;
 	return obj;
 }
@@ -2551,6 +2569,8 @@ boolean copyof;
 			if (mnew->mextra_p) {
 				void * mextra_bundle = mtmp+1;
 				unbundle_mextra(mnew, mextra_bundle);
+				/* relink any stale pointers */
+				relink_mx(mnew);
 			}
 		}
 		else {
@@ -2571,11 +2591,12 @@ int objtype; /* CORPSE or STATUE */
 register int x, y;
 {
 	register struct obj *otmp, *otmp2;
-	boolean initialize_it;
+	int mkobjflags = NO_MKOBJ_FLAGS;
 
 	/* player statues never contain books */
-	initialize_it = (objtype != STATUE);
-	if ((otmp = mksobj_at(objtype, x, y, initialize_it, FALSE)) != 0) {
+	if (objtype == STATUE)
+		mkobjflags |= MKOBJ_NOINIT;
+	if ((otmp = mksobj_at(objtype, x, y, mkobjflags)) != 0) {
 	    /* tt_oname will return null if the scoreboard is empty */
 	    if ((otmp2 = tt_oname(otmp)) != 0) otmp = otmp2;
 	}
@@ -2731,10 +2752,10 @@ int force;	/* 0 = no force so do checks, <0 = force off, >0 force on */
 
     /* Check for corpses just placed on or in ice */
     if (otmp->otyp == CORPSE && (on_floor || buried) && is_ice(x,y)) {
-		tleft = stop_timer(action, (genericptr_t)otmp);
+		tleft = stop_timer(action, otmp->timed);
 		if (tleft == 0L) {
 			action = REVIVE_MON;
-			tleft = stop_timer(action, (genericptr_t)otmp);
+			tleft = stop_timer(action, otmp->timed);
 		} 
 		if (tleft != 0L) {
 			long age;
@@ -2757,10 +2778,10 @@ int force;	/* 0 = no force so do checks, <0 = force off, >0 force on */
     else if ((force < 0) ||
 	     (otmp->otyp == CORPSE && ON_ICE(otmp) &&
 	     ((on_floor && !is_ice(x,y)) || !on_floor))) {
-		tleft = stop_timer(action, (genericptr_t)otmp);
+		tleft = stop_timer(action, otmp->timed);
 		if (tleft == 0L) {
 			action = REVIVE_MON;
-			tleft = stop_timer(action, (genericptr_t)otmp);
+			tleft = stop_timer(action, otmp->timed);
 		}
 		if (tleft != 0L) {
 			long age;
@@ -2991,6 +3012,12 @@ add_to_minv(mon, obj)
     obj->ocarry = mon;
     obj->nobj = mon->minvent;
     mon->minvent = obj;
+	/* if it's a summoned obj and "sticky", attach obj to mon */
+	if (get_ox(obj, OX_ESUM) && obj->oextra_p->esum_p->sticky) {
+		obj->oextra_p->esum_p->summoner = mon;
+		obj->oextra_p->esum_p->sm_id = mon->m_id;
+		obj->oextra_p->esum_p->sticky = 0;
+	}
 	/* apply artifact on-carry properties */
 	update_mon_intrinsics(mon, obj, TRUE, FALSE);
     return 0;	/* obj on mon's inventory chain */
@@ -3171,7 +3198,7 @@ dealloc_obj(obj)
 
     /* free up any timers attached to the object */
     if (obj->timed)
-	obj_stop_timers(obj);
+	stop_all_timers(obj->timed);
 
     /*
      * Free up any light sources attached to the object.

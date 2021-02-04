@@ -202,13 +202,20 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define NO_MINVENT	  0x01	/* suppress minvent when creating mon */
 #define MM_NOWAIT	  0x02	/* don't set STRAT_WAITMASK flags */
 #define MM_EDOG		  0x04	/* add edog structure */
-#define MM_EMIN		  0x08	/* add emin structure */
+#define MM_ESUM		  0x08	/* add summon structure, inventory (if any) is marked as summoned. */
 #define MM_ANGRY	  0x10  /* monster is created angry */
 #define MM_NONAME	  0x20  /* monster is not christened */
 #define MM_NOCOUNTBIRTH	  0x40  /* don't increment born counter (for revival) */
 #define MM_IGNOREWATER	  0x80	/* ignore water when positioning */
 #define MM_ADJACENTOK	  0x100 /* it is acceptable to use adjacent coordinates */
 #define MM_ADJACENTSTRICT 0x200 /* ...but only ONE removed.*/
+#define MM_NOGROUP		  0x400	/* don't generate its normal accompanying groupmates */
+
+/* flags to control mksobj() et al */
+#define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */
+#define MKOBJ_ARTIF		0x01	/* allow to become a random artifact at standard generation rates */
+#define MKOBJ_NOINIT	0x02	/* skip standard initialization of the object, like randomized enchantment and material */
+#define MKOBJ_SUMMON	0x04	/* attach ox_esum struct to obj */
 
 /* special mhpmax value when loading bones monster to flag as extinct or genocided */
 #define DEFUNCT_MONSTER	(-100)

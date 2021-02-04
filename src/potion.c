@@ -3252,7 +3252,7 @@ dodip()
 		    if(!objects[old_otyp].oc_uname &&
 			!objects[old_otyp].oc_name_known && old_dknown) {
 			struct obj * fakeobj;
-			fakeobj = mksobj(old_otyp, FALSE, FALSE);
+			fakeobj = mksobj(old_otyp, MKOBJ_NOINIT);
 			fakeobj->dknown = 1;
 			docall(fakeobj);
 			delobj(fakeobj);

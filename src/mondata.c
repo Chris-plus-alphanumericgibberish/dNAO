@@ -1758,6 +1758,9 @@ struct monst *mtmp;
 	/* monsters with the Amulet--even pets--won't follow across levels */
 	if (mon_has_amulet(mtmp)) return FALSE;
 
+	/* summons often cannot leave the level they were generated on */
+	if (get_mx(mtmp, MX_ESUM) && !mtmp->mextra_p->esum_p->sticky) return FALSE;
+	
 	/* some monsters will follow even while intending to flee from you */
 	if (mtmp->mtame || mtmp->iswiz || is_fshk(mtmp)) return TRUE;
 

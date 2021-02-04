@@ -49,6 +49,7 @@ extern int NDECL(dowipe); /**/
 extern int NDECL(do_mname); /**/
 extern int NDECL(ddocall); /**/
 extern void FDECL(do_oname, (struct obj *));
+extern void NDECL(do_floorname); /**/
 extern int NDECL(dotakeoff); /**/
 extern int NDECL(doremring); /**/
 extern int NDECL(dowear); /**/
@@ -1258,10 +1259,15 @@ wiz_makemap(VOID_ARGS)
 	rm_mapseen(ledger_no(&u.uz));
 
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+	    int ndx = monsndx(mtmp->data);
 	    if (mtmp->isgd) {
 		mtmp->isgd = 0;
 		mongone(mtmp);
 	    }
+            if (mtmp->data->geno & G_UNIQ)
+                mvitals[ndx].mvflags &= ~(G_EXTINCT);
+            if (mvitals[ndx].born)
+                mvitals[ndx].born--;
 	    if (DEADMONSTER(mtmp))
 		continue;
 	    if (mtmp->isshk)
@@ -4746,6 +4752,9 @@ int typ;
       any.a_int = 4;
       add_menu(win, NO_GLYPH, &any, 'd', 0, ATR_NONE, "View discoveries", MENU_UNSELECTED);
 
+      any.a_int = 5;
+      add_menu(win, NO_GLYPH, &any, 'f', 0, ATR_NONE, "Call an item on the floor a certain type", MENU_UNSELECTED);
+
       any.a_int = 0;
       add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, "", MENU_UNSELECTED);
 
@@ -4785,6 +4794,7 @@ int typ;
 	}
 	break;
     case 3: dodiscovered(); break;
+    case 4: do_floorname(); break;
     }
     return 0;
 }

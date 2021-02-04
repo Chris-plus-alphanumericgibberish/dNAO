@@ -434,7 +434,7 @@ dig()
 					) (void) rnd_treefruit_at(dpx, dpy);
 				}
 				for(numsticks = d(2,4)-1; numsticks > 0; numsticks--){
-					staff = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, dpx, dpy, FALSE, FALSE);
+					staff = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, dpx, dpy, MKOBJ_NOINIT);
 					set_material_gm(staff, WOOD);
 					staff->spe = 0;
 					staff->cursed = staff->blessed = FALSE;
@@ -450,14 +450,14 @@ dig()
 				struct obj *otmp;
 				if(!is_lightsaber(digitem)){
 					if(!Is_belial_level(&u.uz) && !rn2(20)){
-						otmp = mksobj_at(BOULDER, dpx, dpy, FALSE, FALSE);
+						otmp = mksobj_at(BOULDER, dpx, dpy, MKOBJ_NOINIT);
 						otmp->owt = weight(otmp);
 					} else {
 						if(Is_belial_level(&u.uz)){
-							otmp = mksobj_at(DROVEN_DAGGER, dpx, dpy, FALSE, FALSE);
+							otmp = mksobj_at(DROVEN_DAGGER, dpx, dpy, MKOBJ_NOINIT);
 							set_material_gm(otmp, OBSIDIAN_MT);
 						} else {
-							otmp = mksobj_at(ROCK, dpx, dpy, FALSE, FALSE);
+							otmp = mksobj_at(ROCK, dpx, dpy, MKOBJ_NOINIT);
 						}
 						set_obj_quan(otmp, rn1(20, 20));
 					}
@@ -486,10 +486,10 @@ dig()
 			}
 			if(!is_lightsaber(digitem)){
 				if(Is_belial_level(&u.uz)){
-					otmp = mksobj_at(DROVEN_DAGGER, dpx, dpy, FALSE, FALSE);
+					otmp = mksobj_at(DROVEN_DAGGER, dpx, dpy, MKOBJ_NOINIT);
 					set_material_gm(otmp, OBSIDIAN_MT);
 				} else {
-					otmp = mksobj_at(ROCK, dpx, dpy, FALSE, FALSE);
+					otmp = mksobj_at(ROCK, dpx, dpy, MKOBJ_NOINIT);
 				}
 				set_obj_quan(otmp, rn1(20, 20));
 			}
@@ -1347,7 +1347,7 @@ fakerocktrap()
 	int dmg = d(2,6); /* should be std ROCK dmg? */
 	struct obj *otmp;
 
-	otmp = mksobj_at(ROCK, u.ux, u.uy, TRUE, FALSE);
+	otmp = mksobj_at(ROCK, u.ux, u.uy, NO_MKOBJ_FLAGS);
 	set_obj_quan(otmp, 1);
 
 	pline("A trap door in %s opens and %s falls on your %s!",
@@ -1889,30 +1889,30 @@ register struct monst *mtmp;
 			}
 		}
 		if(Is_belial_level(&u.uz)){
-			otmp = mksobj_at(DROVEN_DAGGER, mtmp->mx, mtmp->my, FALSE, FALSE);
+			otmp = mksobj_at(DROVEN_DAGGER, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
 			set_material_gm(otmp, OBSIDIAN_MT);
 		} else {
-			otmp = mksobj_at(ROCK, mtmp->mx, mtmp->my, FALSE, FALSE);
+			otmp = mksobj_at(ROCK, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
 		}
 		set_obj_quan(otmp, rn1(20, 20));
 	} else if (IS_TREE(here->typ)) {
 		int numsticks;
 	    here->typ = ROOM;
 		for(numsticks = d(2,4)-1; numsticks > 0; numsticks--){
-			otmp = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, mtmp->mx, mtmp->my, FALSE, FALSE);
+			otmp = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
 			set_material_gm(otmp, WOOD);
 			otmp->spe = 0;
 			otmp->cursed = otmp->blessed = FALSE;
 		}
 	} else {
 	    here->typ = CORR;
-	    if (!Is_belial_level(&u.uz) && !rn2(20)) mksobj_at(BOULDER, mtmp->mx, mtmp->my, TRUE, FALSE);
+	    if (!Is_belial_level(&u.uz) && !rn2(20)) mksobj_at(BOULDER, mtmp->mx, mtmp->my, NO_MKOBJ_FLAGS);
 		else {
 			if(Is_belial_level(&u.uz)){
-				otmp = mksobj_at(DROVEN_DAGGER, mtmp->mx, mtmp->my, FALSE, FALSE);
+				otmp = mksobj_at(DROVEN_DAGGER, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
 				set_material_gm(otmp, OBSIDIAN_MT);
 			} else {
-				otmp = mksobj_at(ROCK, mtmp->mx, mtmp->my, FALSE, FALSE);
+				otmp = mksobj_at(ROCK, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
 			}
 			set_obj_quan(otmp, rn1(20, 20));
 		}
@@ -1974,7 +1974,7 @@ register int zx, zy, digdepth;
 		    pline("It falls on your %s!", body_part(HEAD));
 		    losehp(rnd((uarmh && is_hard(uarmh)) ? 2 : 6),
 			   "falling rock", KILLED_BY_AN);
-		    otmp = mksobj_at(ROCK, u.ux, u.uy, FALSE, FALSE);
+		    otmp = mksobj_at(ROCK, u.ux, u.uy, MKOBJ_NOINIT);
 		    if (otmp) {
 			(void)xname(otmp);	/* set dknown, maybe bknown */
 			stackobj(otmp);
@@ -2183,7 +2183,7 @@ int x, y;
 		if (otmp->ox == x && otmp->oy == y) {
 		    obj_extract_self(otmp);
 		    if (otmp->timed)
-			(void) stop_timer(ROT_ORGANIC, (genericptr_t)otmp);
+			(void) stop_timer(ROT_ORGANIC, otmp->timed);
 		    place_object(otmp, x, y);
 		    stackobj(otmp);
 		}

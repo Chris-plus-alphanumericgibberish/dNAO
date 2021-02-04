@@ -98,7 +98,7 @@ int typ;
 	struct obj *obj;
 
 	if (typ == STRANGE_OBJECT) return;
-	obj = mksobj(typ, FALSE, FALSE);
+	obj = mksobj(typ, MKOBJ_NOINIT);
 	if (!rn2(3)) obj->oerodeproof = 1;
 	else if (!rn2(2)) obj->greased = 1;
 	if (!rn2(3)) curse(obj);
@@ -429,13 +429,13 @@ register boolean special;
 	        get_mplname(mtmp, nam);
 	        mtmp = christen_monst(mtmp, nam);
 			/* that's why they are "stuck" in the endgame :-) */
-			(void)mongets(mtmp, FAKE_AMULET_OF_YENDOR);
+			(void)mongets(mtmp, FAKE_AMULET_OF_YENDOR, NO_MKOBJ_FLAGS);
 	    }
 	    mtmp->mpeaceful = 0;
 	    set_malign(mtmp); /* peaceful may have changed again */
 
 	    if (weapon != STRANGE_OBJECT) {
-			otmp = mksobj(weapon, TRUE, FALSE);
+			otmp = mksobj(weapon, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if(otmp->otyp == RAKUYO && special)
 				otmp->spe = 10;
@@ -456,7 +456,7 @@ register boolean special;
 	    }
 
 	    if (secweapon != STRANGE_OBJECT) {
-			otmp = mksobj(secweapon, TRUE, FALSE);
+			otmp = mksobj(secweapon, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if(otmp->otyp == RAKUYO && special)
 				otmp->spe = 10;
@@ -477,7 +477,7 @@ register boolean special;
 	    }
 
 	    if (rweapon != STRANGE_OBJECT) {
-			otmp = mksobj(rweapon, TRUE, FALSE);
+			otmp = mksobj(rweapon, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if (!rn2(3)) otmp->oerodeproof = 1;
 			else if (!rn2(2)) otmp->greased = 1;
@@ -487,7 +487,7 @@ register boolean special;
 	    }
 
 	    if (rwammo != STRANGE_OBJECT) {
-			otmp = mksobj(rwammo, TRUE, FALSE);
+			otmp = mksobj(rwammo, NO_MKOBJ_FLAGS);
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if (!rn2(3)) otmp->oerodeproof = 1;
 			otmp->quan += special ? 20 : 10;
@@ -495,13 +495,13 @@ register boolean special;
 	    }
 
 		if (tool != STRANGE_OBJECT) {
-			otmp = mksobj(tool, TRUE, FALSE);
+			otmp = mksobj(tool, NO_MKOBJ_FLAGS);
 			(void) mpickobj(mtmp, otmp);
 		}
 
 	    if(special) {
 			if (!rn2(10))
-				(void) mongets(mtmp, rn2(3) ? LUCKSTONE : LOADSTONE);
+				(void) mongets(mtmp, rn2(3) ? LUCKSTONE : LOADSTONE, NO_MKOBJ_FLAGS);
 			mk_mplayer_armor(mtmp, armor);
 			mk_mplayer_armor(mtmp, shirt);
 			mk_mplayer_armor(mtmp, cloak);
@@ -515,7 +515,7 @@ register boolean special;
 
 			quan = rn2(3) ? rn2(3) : rn2(16);
 			while(quan--)
-				(void)mongets(mtmp, rnd_class(DILITHIUM_CRYSTAL, JADE));
+				(void)mongets(mtmp, rnd_class(DILITHIUM_CRYSTAL, JADE), NO_MKOBJ_FLAGS);
 			/* To get the gold "right" would mean a player can double his */
 			/* gold supply by killing one mplayer.  Not good. */
 #ifndef GOLDOBJ
@@ -528,27 +528,27 @@ register boolean special;
 			while(quan--)
 				(void) mpickobj(mtmp, mkobj(RANDOM_CLASS, FALSE));
 	    } else {
-			(void) mongets(mtmp, armor);
-			(void) mongets(mtmp, shirt);
-			(void) mongets(mtmp, cloak);
-			(void) mongets(mtmp, helm);
-			(void) mongets(mtmp, helm);
-			(void) mongets(mtmp, boots);
-			(void) mongets(mtmp, gloves);
-			(void) mongets(mtmp, shield);
+			(void) mongets(mtmp, armor, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, shirt, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, cloak, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, helm, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, helm, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, boots, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, gloves, NO_MKOBJ_FLAGS);
+			(void) mongets(mtmp, shield, NO_MKOBJ_FLAGS);
 			
 			m_dowear(mtmp, TRUE);
 			init_mon_wield_item(mtmp);
 		}
 	    quan = rnd(3);
 	    while(quan--)
-			(void)mongets(mtmp, rnd_offensive_item(mtmp));
+			(void)mongets(mtmp, rnd_offensive_item(mtmp), NO_MKOBJ_FLAGS);
 	    quan = rnd(3);
 	    while(quan--)
-			(void)mongets(mtmp, rnd_defensive_item(mtmp));
+			(void)mongets(mtmp, rnd_defensive_item(mtmp), NO_MKOBJ_FLAGS);
 	    quan = rnd(3);
 	    while(quan--)
-			(void)mongets(mtmp, rnd_misc_item(mtmp));
+			(void)mongets(mtmp, rnd_misc_item(mtmp), NO_MKOBJ_FLAGS);
 	}
 
 	return(mtmp);

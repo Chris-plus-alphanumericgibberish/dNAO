@@ -863,8 +863,7 @@ level_tele()
 				    "Destination is earth level");
 				if (!u.uhave.amulet) {
 					struct obj *obj;
-					obj = mksobj(AMULET_OF_YENDOR,
-							TRUE, FALSE);
+					obj = mksobj(AMULET_OF_YENDOR, NO_MKOBJ_FLAGS);
 					if (obj) {
 						obj = addinv(obj);
 						Strcat(buf, " with the amulet");
