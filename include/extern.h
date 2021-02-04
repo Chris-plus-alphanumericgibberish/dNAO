@@ -30,6 +30,7 @@ E time_t NDECL(get_realtime);
 #endif
 E void NDECL(dogoat);
 E void FDECL(dogoat_mon, (struct monst *));
+E void FDECL(donachash, (struct monst *));
 
 /* ### apply.c ### */
 
@@ -149,7 +150,7 @@ E long FDECL(arti_cost, (struct obj *));
 E void FDECL(arti_poly_contents, (struct obj *));
 E struct obj * FDECL(minor_artifact, (struct obj *, char *));
 E void NDECL(dosymbiotic_equip);
-E void NDECL(dogoat_tentacles);
+E void NDECL(do_passive_attacks);
 E void NDECL(living_items);
 E int FDECL(oresist_disintegration, (struct obj *));
 E int FDECL(wrath_target, (struct obj *, struct monst *));
@@ -1509,6 +1510,7 @@ E int FDECL(minliquid, (struct monst *));
 E int NDECL(movemon);
 E int FDECL(meatmetal, (struct monst *));
 E int FDECL(meatobj, (struct monst *));
+E void FDECL(mvanishobj, (struct monst *, int, int));
 E void FDECL(mpickgold, (struct monst *));
 E boolean FDECL(mpickstuff, (struct monst *,const char *));
 E int FDECL(curr_mon_load, (struct monst *));

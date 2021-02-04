@@ -2592,6 +2592,10 @@ postmov:
 		if (ptr->mtyp == PM_GELATINOUS_CUBE) {
 		    if (meatobj(mtmp) == 2) return 2;	/* it died */
 		}
+		
+		if(ptr->mtyp == PM_NACHASH_TANNIN){
+			mvanishobj(mtmp, mtmp->mx, mtmp->my);
+		}
 
 		if(!*in_rooms(mtmp->mx, mtmp->my, SHOPBASE) || !rn2(25)) {
 		    boolean picked = FALSE;

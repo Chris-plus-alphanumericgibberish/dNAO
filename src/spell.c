@@ -5799,6 +5799,9 @@ int spell;
 		if(u.umadness&MAD_FORMICATION && !ClearThoughts){
 			chance -= delta/2;
 		}
+		if(u.umadness&MAD_SCIAPHILIA && !ClearThoughts && ((dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0))){
+			chance -= delta;
+		}
 		if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
 			int discomfort = u_clothing_discomfort();
 			if (discomfort) {

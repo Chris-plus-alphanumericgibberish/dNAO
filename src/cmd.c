@@ -2035,6 +2035,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if (u.umadness&MAD_HOST){
 			enl_msg("You ", "are", "were", " nausiated by the thing inside you, which sometimes makes you vomit");
 		}
+		if (u.umadness&MAD_SCIAPHILIA){
+			enl_msg("You ", "wish", "wished", " to stand in partially illuminated areas, suffering reduced accuracy and sometimes failing to cast spells if not");
+		}
 	}
 	
 	/*** More Troubles ***/
@@ -2794,6 +2797,9 @@ int final;
 		if (u.umadness&MAD_HOST){
 			dump("  ", "You were nausiated by the thing inside you");
 		}
+		if (u.umadness&MAD_SCIAPHILIA){
+			dump("  ", "You were fascinated by the dancing flames");
+		}
 	}
 	/*** More Troubles ***/
 	if (Halluc_resistance) 	dump("  ", "You resisted hallucinations");
@@ -3287,6 +3293,9 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_HOST){
 			putstr(en_win, 0, "You are nausiated by the thing inside you");
+		}
+		if (u.umadness&MAD_SCIAPHILIA){
+			putstr(en_win, 0, "You are fascinated by the dancing shadows");
 		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)

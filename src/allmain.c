@@ -1815,7 +1815,7 @@ karemade:
 			dosymbiotic_equip();
 			if(u.spiritPColdowns[PWR_PSEUDONATURAL_SURGE] >= moves+20)
 				dopseudonatural();
-			dogoat_tentacles();
+			do_passive_attacks();
 			if(Destruction)
 				dodestruction();
 			if(Mindblasting)
@@ -4079,14 +4079,69 @@ struct monst *magr;
 				continue;
 		}
 		
-		if(mdef && !mdef->mtame){
-			if(symbiote.aatyp == AT_MAGC)
-				xcasty(magr, mdef, &symbiote, mdef->mx, mdef->my);
-			else if(symbiote.aatyp == AT_GAZE)
-				xgazey(magr, mdef, &symbiote, -1);
-			else
-				xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+		if(symbiote.aatyp == AT_MAGC)
+			xcasty(magr, mdef, &symbiote, mdef->mx, mdef->my);
+		else if(symbiote.aatyp == AT_GAZE)
+			xgazey(magr, mdef, &symbiote, -1);
+		else
+			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+	}
+}
+
+void
+donachash(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j;
+	int x, y;
+	struct attack symbiote = { AT_SRPR, AD_SHDW, 1, 30 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	
+	pa = youagr ? youracedata : magr->data;
+
+	//Attack nearby foe and/or engulf items
+	for(j=8;j>=1;j--){
+		x = x(magr)+clockwisex[(i+j)%8];
+		y = y(magr)+clockwisey[(i+j)%8];
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x, y))
+			continue;
+		else mdef = m_at(x, y);
+		
+		if(u.ux == x && u.uy == y)
+			mdef = &youmonst;
+		
+		if(!mdef && (!level.objects[x][y] || youagr))
+			continue;
+		
+		youdef = (mdef == &youmonst);
+		
+		if(mdef){
+			if(youagr && (mdef->mpeaceful))
+				continue;
+			if(youdef && (magr->mpeaceful))
+				continue;
+			if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+				continue;
+
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+			
+			//Spiritual rapier means that touch petrifies monsters are safe to attack
+			
+			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
 		}
+		if(!youagr)
+			mvanishobj(magr, x, y);
+		
+		//Only send the shadow to one square per turn, if we're here we must have done SOMETHING
+		return;
 	}
 }
 

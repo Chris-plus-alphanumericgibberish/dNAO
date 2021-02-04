@@ -1472,6 +1472,9 @@ struct monst *mon;
 		case PM_SHALOSH_TANNAH:
 			u.umadness |= MAD_HOST;
 		break;
+		case PM_NACHASH_TANNIN:
+			u.umadness |= MAD_SCIAPHILIA;
+		break;
 		case PM_ALDINACH:
 			u.umadness |= MAD_REAL_DELUSIONS;
 		break;

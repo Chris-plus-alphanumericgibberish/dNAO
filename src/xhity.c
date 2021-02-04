@@ -3300,21 +3300,36 @@ int flat_acc;
 				}
 			}
 		}
-		/* nudist accuracy bonus/penalty (player-only) (melee) */
-		if (youagr && melee && u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-			int delta = Insanity;
-			int discomfort = u_clothing_discomfort();
-			static boolean clothmessage = TRUE;
-			if (discomfort) {
-				if (clothmessage) Your("clothing is rather uncomfortable...");
-				clothmessage = FALSE;
-				wepn_acc -= (discomfort * delta) / 10;
-			}
-			else {
-				if (!clothmessage) clothmessage = TRUE;
-				if (!uwep && !uarms) {
-					wepn_acc += delta / 10;
+		/* Some madnesses give accuracy bonus/penalty (player-only) (melee) */
+		if(youagr && melee && u.umadness){
+			/* nudist accuracy bonus/penalty */
+			if (u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
+				int delta = Insanity;
+				int discomfort = u_clothing_discomfort();
+				static boolean clothmessage = TRUE;
+				if (discomfort) {
+					if (clothmessage) Your("clothing is rather uncomfortable...");
+					clothmessage = FALSE;
+					wepn_acc -= (discomfort * delta) / 10;
 				}
+				else {
+					if (!clothmessage) clothmessage = TRUE;
+					if (!uwep && !uarms) {
+						wepn_acc += delta / 10;
+					}
+				}
+			}
+			/* Sciaphilia accuracy bonus/penalty */
+			if (u.umadness&MAD_SCIAPHILIA && !ClearThoughts && u.usanity < 96){
+				int delta = Insanity;
+				boolean discomfort = (dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0);
+				static boolean shadowmessage = TRUE;
+				if (discomfort) {
+					if (shadowmessage) You("long for the flickering shadows!");
+					shadowmessage = FALSE;
+					wepn_acc -= delta / 5;
+				}
+				else if (!shadowmessage) shadowmessage = TRUE;
 			}
 		}
 	}
