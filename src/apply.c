@@ -6454,7 +6454,7 @@ doapply()
 
 		//Share your insanity
 		if(u.usanity < 100){
-			change_usanity((100 - u.usanity)/2, FALSE);
+			change_usanity((Insanity)/2, FALSE);
 		}
 		
 			

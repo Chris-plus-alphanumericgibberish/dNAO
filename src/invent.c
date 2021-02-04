@@ -5222,7 +5222,7 @@ u_healing_penalty()
 		penalty += (4*u_bcu_next_to_skin(1)+1)/2;
 	}
 	if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-		int delta = 100 - u.usanity;
+		int delta = Insanity;
 		penalty += (u_clothing_discomfort() * delta)/10;
 	}
 	return penalty;
