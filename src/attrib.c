@@ -1385,6 +1385,43 @@ long int madness;
 	return 0;
 }
 
+int
+flat_mad_turn(madness)
+long int madness;
+{
+	int sanlevel;
+	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
+	if(ClearThoughts)
+		return 0;
+	
+	if(!(u.umadness&madness))
+		return 0;
+	
+	if(u.usanity <= hashed%100)
+		return 1;
+	return 0;
+}
+
+int
+mad_monster_turn(mon, madness)
+struct monst *mon;
+long int madness;
+{
+	int sanlevel;
+	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness + mon->m_id))); //Offset the different madnesses before hashing
+	if(ClearThoughts)
+		return 0;
+	
+	if(!(u.umadness&madness))
+		return 0;
+	
+	sanlevel = max_ints(1,(int)(((float)hashed/ULONG_MAX) * ((float)hash(hashed)/ULONG_MAX) * 100));
+	
+	if(u.usanity < sanlevel)
+		return 1;
+	return 0;
+}
+
 void
 roll_frigophobia()
 {

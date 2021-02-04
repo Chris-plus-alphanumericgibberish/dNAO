@@ -183,6 +183,8 @@ E void FDECL(change_uinsight, (int));
 E boolean NDECL(check_insight);
 E int FDECL(roll_madness, (long int));
 E int FDECL(mad_turn, (long int));
+E int FDECL(flat_mad_turn, (long int));
+E int FDECL(mad_monster_turn, (struct monst *, long int));
 E void NDECL(roll_av_frigophobia);
 E void NDECL(roll_frigophobia);
 E void FDECL(give_madness, (struct monst *));
