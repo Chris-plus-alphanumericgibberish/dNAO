@@ -3494,6 +3494,10 @@ printAttacks(buf, ptr)
 			attk->damn == 0 &&
 			attk->damd == 0
 		) return;
+		if(SIZE(attackKey) <= attk->adtyp)
+			impossible("attack key out of range!");
+		if(SIZE(damageKey) <= attk->adtyp)
+			impossible("damage key out of range!");
 		if(!i){
 			Sprintf(buf, "%s %dd%d %s",
 				attk->aatyp == AT_WEAP ? "Weapon" :
