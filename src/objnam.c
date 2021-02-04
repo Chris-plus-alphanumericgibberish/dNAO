@@ -3122,6 +3122,9 @@ const char *oldstr;
 			p[0] = '\0';
 			Strcpy(bp, makesingular(bp));
 			Sprintf(bp, "%s %s", bp, &p[1]);
+			// TODO: shush warning *without* breaking this. 
+			//Strcat(bp, " ");
+			//Strcat(bp, &p[1]);
 			return bp;
 		}
 	}

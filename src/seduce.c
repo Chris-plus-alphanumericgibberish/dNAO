@@ -1935,7 +1935,7 @@ int effect_num;
 				/* Get 1/20th of full corpse value
 				* Therefore 4 bites == 1 drink
 				*/
-				if (mon->mtame && !mon->isminion)
+				if (get_mx(mon, MX_EDOG))
 					EDOG(mon)->hungrytime += ((int)((youracedata)->cnutrit / 20) + 1);
 			}
 			if (!mon->mcan && !rn2(3) && !Drain_resistance) {
@@ -2211,7 +2211,8 @@ int effect_num;
 					pline1(Never_mind);
 				}
 				else {
-					turns = (.8 + ((double)rn2(5))) * (turns);
+					/* 80% to 120% of asked for, in increments of 10% */
+					turns = turns * (8 + rn2(5)) / 10;
 					lesshungry(turns * 10);
 					You("notice %s wound your clockwork %d times.", noit_mon_nam(mon), turns);
 				}

@@ -2550,7 +2550,21 @@ struct obj	*sobj;
 	}
 	break;
 	case SCR_CONSECRATION:
-	if(In_endgame(&u.uz)){
+	if (confused) {
+		/* consecrates your weapon */
+		/* NOT valid_weapon(), which also allows non-enchantable things that are effective to hit with */
+		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))) {
+			bless(uwep);
+			if (!check_oprop(uwep, OPROP_HOLYW))
+				add_oprop(uwep, OPROP_LESSER_HOLYW);
+			if(uwep->spe < 3)
+				uwep->spe = 3;
+		}
+		else {
+			goto returnscroll;
+		}
+	}
+	else if(In_endgame(&u.uz)){
 		if(Is_astralevel(&u.uz)) pline("This place is already pretty consecrated.");
 		else pline("It would seem base matter alone cannot be consecrated.");
 		goto returnscroll;
@@ -2561,11 +2575,14 @@ struct obj	*sobj;
 		aligntyp whichgod;
 		if(sobj->cursed || In_hell(&u.uz)){
 			whichgod = A_NONE;
-		} else if(confused){
-			whichgod = (aligntyp)(rn2(3) - 1);
 		} else whichgod = u.ualign.type;
 		
-		if(levl[u.ux][u.uy].typ == CORR || levl[u.ux][u.uy].typ == ROOM){
+		if (levl[u.ux][u.uy].typ == CORR ||
+			levl[u.ux][u.uy].typ == ROOM ||
+			levl[u.ux][u.uy].typ == GRASS ||
+			levl[u.ux][u.uy].typ == SOIL ||
+			levl[u.ux][u.uy].typ == SAND)
+		{
 			levl[u.ux][u.uy].typ = ALTAR;
 			levl[u.ux][u.uy].altarmask = Align2amask( whichgod );
 			pline("%s altar appears in front of you!", An(align_str(whichgod)));

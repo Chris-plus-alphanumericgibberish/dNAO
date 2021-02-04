@@ -426,7 +426,7 @@ register struct monst *mtmp;
 		killer_format = KILLED_BY;
 		if (templated(mtmp))
 			append_template_desc(mtmp, buf, TRUE);
-	} else if (mtmp->ispriest || mtmp->isminion) {
+	} else if (get_mx(mtmp, MX_EPRI) || get_mx(mtmp, MX_EMIN)) {
 		/* m_monnam() suppresses "the" prefix plus "invisible", and
 		   it overrides the effect of Hallucination on priestname() */
 		killer = m_monnam(mtmp);
@@ -885,7 +885,12 @@ int how;
 				lsvd = LSVD_MISC;
 			}
 			Your("helmet crumbles to dust!");
-			useup(otmp);
+			if (otmp->where == OBJ_INVENT)
+				useup(otmp);
+			else {
+				obj_extract_self(otmp);
+				obfree(otmp, (struct obj *)0);
+			}
 		}
 		else if(uamul && uamul->otyp == AMULET_OF_LIFE_SAVING){
 			makeknown(AMULET_OF_LIFE_SAVING);
@@ -1013,6 +1018,10 @@ die:
                         (flags.female && urole.name.f)?
                         urole.name.f : urole.name.m);
                 dump("", pbuf);
+				char vbuf[BUFSZ];
+				(void) getversionstring(vbuf);
+				Sprintf(pbuf, "Playing %s", vbuf);
+				dump("", pbuf);
                 /* D: Add a line for clearance from the screen dump */
 	        dump("", "");
 	        dump_screen(0);

@@ -114,6 +114,8 @@ boolean check_if_better;
 	     otmp &&
 	    /* food */
             ((dogfood(mtmp, otmp) < APPORT) ||
+	    /* collect artifacts and oprop items */
+		 (otmp->oartifact || !check_oprop(otmp, OPROP_NONE)) ||
 	    /* chains for some */
 		 ((mtmp->mtyp == PM_CATHEZAR) && otmp->otyp == CHAIN) ||
 	    /* better weapons */
@@ -868,16 +870,14 @@ boolean
 betrayed(mtmp)
 register struct monst *mtmp;
 {
-    boolean has_edog = !mtmp->isminion;
-    struct edog *edog = EDOG(mtmp);
     int udist = distu(mtmp->mx, mtmp->my);
 //	pline("testing for betrayal");
     if ( (udist < 4 || !rn2(3)) 
-			&& has_edog
+			&& get_mx(mtmp, MX_EDOG)
 		    && (can_betray(mtmp->data) || roll_madness(MAD_PARANOIA))
 		    && mtmp->mhp >= u.uhp	/* Pet is buff enough */
 		    && rn2(22) > mtmp->mtame  - 10	/* Roll against tameness */
-		    && rn2(edog->abuse + 2)) {
+		    && rn2(EDOG(mtmp)->abuse + 2)) {
 	/* Treason */
 	if (canseemon(mtmp))
 	    pline("%s turns on you!", Monnam(mtmp));
@@ -905,7 +905,6 @@ register int after;	/* this is extra fast monster movement */
 	int omx, omy;		/* original mtmp position */
 	int appr, whappr, udist;
 	int i, j, k;
-	register struct edog *edog = EDOG(mtmp);
 	struct obj *obj = (struct obj *) 0;
 	xchar otyp;
 	boolean has_edog, cursemsg[9], do_eat = FALSE;
@@ -924,11 +923,11 @@ register int after;	/* this is extra fast monster movement */
 	 * spend all their energy defending the player.  (They are the only
 	 * monsters with other structures that can be tame.)
 	 */
-	has_edog = !mtmp->isminion;
+	has_edog = !!get_mx(mtmp, MX_EDOG);
 
 	omx = mtmp->mx;
 	omy = mtmp->my;
-	if (has_edog && dog_hunger(mtmp, edog)) return(2);	/* starved */
+	if (has_edog && dog_hunger(mtmp, EDOG(mtmp))) return(2);	/* starved */
 
 	udist = distu(omx,omy);
 #ifdef STEED
@@ -952,15 +951,15 @@ register int after;	/* this is extra fast monster movement */
 	info[0] = 0;		/* ditto */
 
 	if (has_edog) {
-	    j = dog_invent(mtmp, edog, udist);
+	    j = dog_invent(mtmp, EDOG(mtmp), udist);
 	    if (j == 2) return 2;		/* died */
 	    else if (j == 1) goto newdogpos;	/* eating something */
 
-	    whappr = (monstermoves - edog->whistletime < 5) || (uwep && uwep->otyp == SHEPHERD_S_CROOK);
+	    whappr = (monstermoves - EDOG(mtmp)->whistletime < 5) || (uwep && uwep->otyp == SHEPHERD_S_CROOK);
 	} else
 	    whappr = 0;
 
-	appr = dog_goal(mtmp, has_edog ? edog : (struct edog *)0,
+	appr = dog_goal(mtmp, has_edog ? EDOG(mtmp) : (struct edog *)0,
 							after, udist, whappr);
 	if (appr == -2) return(0);
 
@@ -1151,9 +1150,9 @@ register int after;	/* this is extra fast monster movement */
 		    if (obj->cursed) cursemsg[i] = TRUE;
 		    else if ((otyp = dogfood(mtmp, obj)) < MANFOOD &&
 			     (otyp < ACCFOOD
-			     || edog->hungrytime <= monstermoves)
+			     || EDOG(mtmp)->hungrytime <= monstermoves)
 #ifdef PET_SATIATION
-			     && edog->hungrytime < monstermoves + DOG_SATIATED
+			     && EDOG(mtmp)->hungrytime < monstermoves + DOG_SATIATED
 #endif /* PET_SATIATION */
 				 && !((mtmp->misc_worn_check & W_ARMH) && which_armor(mtmp, W_ARMH) && 
 					(((which_armor(mtmp, W_ARMH))->otyp) == PLASTEEL_HELM || ((which_armor(mtmp, W_ARMH))->otyp) == CRYSTAL_HELM || ((which_armor(mtmp, W_ARMH))->otyp) == PONTIFF_S_CROWN) &&

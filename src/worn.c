@@ -312,6 +312,7 @@ long mask;
 	    }
 	}
 	if(!restoring) {
+		vision_full_recalc = 1;
 		see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
 		update_inventory();
 	}

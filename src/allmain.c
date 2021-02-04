@@ -1098,7 +1098,8 @@ moveloop()
 				pline("Hey, people might notice me with that!");
 				if (donning(otmp)) cancel_don();
 				(void) Cloak_off();
-				useup(otmp);
+				if (!otmp->oartifact)
+					useup(otmp);
 				unbind(SEAL_SHIRO,TRUE);
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1166,7 +1167,7 @@ moveloop()
 					mtmp->mtrapped = TRUE;
 				}
 				/* Loyal monsters slowly recover tameness */
-				if(mtmp->mtame && mtmp->mtame < 5 && !mtmp->isminion && !(EDOG(mtmp)->loyal) && (!moves%100))
+				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && (!moves%100))
 					mtmp->mtame++;
 					
 				if(noactions(mtmp)){
@@ -1680,7 +1681,7 @@ karemade:
 		    }
 			
 			if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-				int delta = 100 - u.usanity;
+				int delta = Insanity;
 				int discomfort = u_clothing_discomfort();
 				discomfort = (discomfort * delta)/100;
 				if (moveamt - discomfort < NORMAL_SPEED/2) {

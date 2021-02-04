@@ -599,7 +599,7 @@ long nmv;		/* number of moves */
 	else mtmp->mspec_used -= imv;
 
 	/* reduce tameness for every 150 moves you are separated */
-	if (mtmp->mtame && !mtmp->isminion && !(EDOG(mtmp)->loyal) 
+	if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->loyal)
 	 && !(
 		In_quest(&u.uz) && 
 		((Is_qtown(&u.uz) && !flags.stag) || 
@@ -631,8 +631,7 @@ long nmv;		/* number of moves */
 	/* check to see if it would have died as a pet; if so, go wild instead
 	 * of dying the next time we call dog_move()
 	 */
-	if (mtmp->mtame && !mtmp->isminion &&
-		(carnivorous(mtmp->data) || herbivorous(mtmp->data))
+	if (get_mx(mtmp, MX_EDOG) && (carnivorous(mtmp->data) || herbivorous(mtmp->data))
 	){
 	    struct edog *edog = EDOG(mtmp);
 		if(!(In_quest(&u.uz) && 
@@ -1005,8 +1004,7 @@ register struct obj *obj;
 		    return (obj->cursed ? UNDEF : APPORT);
 
 	    /* a starving pet will eat almost anything */
-	    starving = (mon->mtame && !mon->isminion &&
-			EDOG(mon)->mhpmax_penalty);
+	    starving = (get_mx(mon, MX_EDOG) && EDOG(mon)->mhpmax_penalty);
 
 	    switch (obj->otyp) {
 		case TRIPE_RATION:
@@ -1414,7 +1412,7 @@ boolean was_dead;
 
     mtmp->meating = 0;
     if (!mtmp->mtame) return;
-    edog = !mtmp->isminion ? EDOG(mtmp) : 0;
+    edog = get_mx(mtmp, MX_EDOG) ? EDOG(mtmp) : 0;
 
     /* if monster was starving when it died, undo that now */
     if (edog && edog->mhpmax_penalty) {

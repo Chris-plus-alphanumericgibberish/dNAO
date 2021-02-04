@@ -843,7 +843,7 @@ boolean pname;
 		else if (has_template(mtmp, ILLUMINATED)) Strcat(buf, "the Illuminated");
 		else if (has_template(mtmp, VAMPIRIC)) Strcat(buf, ", vampire");
 		else if (has_template(mtmp, PSEUDONATURAL)) Strcat(buf, "the Pseudonatural");
-		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, "of the Herd");
+		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, " of the Herd");
 		else if (has_template(mtmp, MISTWEAVER)){
 			if (mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
 			else Strcat(buf, ", Child of the Black Goat");
@@ -964,7 +964,7 @@ boolean called;
 	}
 
 	/* priests and minions: don't even use this function */
-	if ((mtmp->ispriest || mtmp->isminion) && mtmp->mtyp != PM_BLASPHEMOUS_LURKER) {
+	if ((get_mx(mtmp, MX_EPRI) || get_mx(mtmp, MX_EMIN)) && mtmp->mtyp != PM_BLASPHEMOUS_LURKER) {
 	    char priestnambuf[BUFSZ];
 	    char *name;
 	    long save_prop = EHalluc_resistance;

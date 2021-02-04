@@ -1816,17 +1816,17 @@ int tary;
 
 	/* print spell-cast message */
 	if (spellnum) {
-		if ((youagr || (youdef && !is_undirected_spell(spellnum)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
+		if ((youagr || (youdef && !is_undirected_spell(spellnum) && cansee(tarx, tary)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
 			if (is_undirected_spell(spellnum) || notarget)
 				buf[0] = '\0';
 			else
 			{
 				Sprintf(buf, " at %s",
 					youdef
-					? ((Invisible && !mon_resistance(magr, SEE_INVIS) && (!foundem)) ?
-						"a spot near you" :
-						(Displaced && (!foundem)) ?
+					? ( (Displaced && (!foundem)) ?
 						"your displaced image" :
+						(!foundem) ?
+						"a spot near you" :
 						"you")
 					: (canspotmon(mdef) ? mon_nam(mdef) : "something"));
 			}
@@ -3932,9 +3932,10 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_DEVIL:
-		if (!youdef || u.summonMonster) {
+		if (!youdef || u.summonMonster || !foundem) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
+			/* since it always summons adjacent to player, only allow casting if they've found you */
 			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
 		else if (is_alienist(magr->data)) {
@@ -5198,6 +5199,9 @@ int tary;
 		))
 		return TRUE;
 
+	/* only cast earthquake on found target, too annoying when spammed */
+	if (spellnum == EARTHQUAKE && !(tarx == x(mdef) && tary == y(mdef)))
+		return TRUE;
 
 	/* the wiz won't use the following cleric-specific or otherwise weak spells */
 	if (!youagr && magr->iswiz && (

@@ -1811,7 +1811,7 @@ humanoid_sound:
 			verbl_msg = "I'm trapped!";
 	    } else if (mtmp->mhp < mtmp->mhpmax/2)
 		pline_msg = "asks for a potion of healing.";
-	    else if (mtmp->mtame && !mtmp->isminion &&
+	    else if (get_mx(mtmp, MX_EDOG) &&
 						moves > EDOG(mtmp)->hungrytime)
 		verbl_msg = "I'm hungry.";
 	    /* Specific monsters' interests */
@@ -3067,9 +3067,9 @@ int tx,ty;
 				
 				pline("Gloved hands reach down and pick up %s and %s from the confines of the seal.", andromaliusItems[t1], andromaliusItems[t2]);
 				pline("The hands begin to juggle. They move faster and faster, adding new objects as they go.");
-				pline("You spot %s and %s before loosing track of the individual objects.",andromaliusItems[i1],andromaliusItems[i2]);
+				pline("You spot %s and %s before losing track of the individual objects.",andromaliusItems[i1],andromaliusItems[i2]);
 				if(u.sealCounts < numSlots){
-					pline("Suddenly, the hands toss one of the whrilling objects to you.");
+					pline("Suddenly, the hands toss one of the whirling objects to you.");
 					/*make object here*/
 					switch(i3){
 						case 0:
@@ -3212,7 +3212,7 @@ int tx,ty;
 					u.sealTimeout[ANDROMALIUS-FIRST_SEAL] = moves + bindingPeriod;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
-					pline("Suddenly, the hands toss one of the whrilling objects to you.");
+					pline("Suddenly, the hands toss one of the whirling objects to you.");
 					pline("It's the Pen of the Void. You didn't notice it had been taken!");
 					uwep->ovar1 |= SEAL_ANDROMALIUS;
 					if(!u.spiritTineA){
@@ -3226,7 +3226,7 @@ int tx,ty;
 					u.sealTimeout[ANDROMALIUS-FIRST_SEAL] = moves + bindingPeriod;
 				}
 				else{
-					pline("Suddenly, the hands toss one of the whrilling objects at you.");
+					pline("Suddenly, the hands toss one of the whirling objects at you.");
 					You("see %s pass far over your %s, out of reach.", andromaliusItems[i3], body_part(HEAD));
 					pline("When your attention returns to the seal, the hands have gone.");
 					// u.sealTimeout[ANDROMALIUS-FIRST_SEAL] = moves + bindingPeriod/10;

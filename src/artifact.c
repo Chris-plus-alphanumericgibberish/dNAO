@@ -1579,12 +1579,10 @@ touch_artifact(obj, mon, hypothetical)
 				   !(oart == &artilist[ART_EXCALIBUR] || oart == &artilist[ART_CLARENT]))
 				   ||
 				   (oart->race != NON_PM && ((mons[oart->race].mflagsa & mon->data->mflagsa) == 0)));
-			if(mon->isminion && (mon->mtyp == PM_ALIGNED_PRIEST
-				|| mon->mtyp == PM_ANGEL)
-			){
+			if(get_mx(mon, MX_EPRI)){
 				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(EPRI(mon)->shralign));
-			} else if(mon->isminion){
+			} else if(get_mx(mon, MX_EMIN)){
 				badalign = !(oart->gflags & ARTG_NAME) && oart->alignment != A_NONE &&
 				   (oart->alignment != sgn(EMIN(mon)->min_align));
 			} else {
@@ -1594,11 +1592,9 @@ touch_artifact(obj, mon, hypothetical)
 		}
 		else{/* Unicorn horns */
 			badclass = TRUE;
-			if(mon->isminion && (mon->mtyp == PM_ALIGNED_PRIEST
-				|| mon->mtyp == PM_ANGEL)
-			){
+			if(get_mx(mon, MX_EPRI)) {
 				badalign = oart->alignment != A_NONE && (oart->alignment != sgn(EPRI(mon)->shralign));
-			} else if(mon->isminion){
+			} else if(get_mx(mon, MX_EMIN)){
 				badalign = oart->alignment != A_NONE && (oart->alignment != sgn(EMIN(mon)->min_align));
 			} else {
 				badalign = oart->alignment != A_NONE && (oart->alignment != sgn(mon->data->maligntyp));
@@ -2266,7 +2262,6 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 	    *dmgptr += d(dnum,4);
 		if(vis) {
 			pline("The blade's shadow catches on %s.", hittee);
-			and = TRUE;
 		}
 		mdef->movement -= 3;
 	}
@@ -2275,9 +2270,11 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			Sprintf(buf, "fiery"); // profane
 			and = TRUE;
 		}
-	    if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
-	    if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
-	    if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+		if (!InvFire_res(mdef)) {
+			if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+		}
 	    if (youdefend && Slimed) burn_away_slime();
 	    if (youdefend && FrozenAir) melt_frozen_air();
 	    // if(youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))){
@@ -2290,8 +2287,10 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and ? Strcat(buf, " and crackling") : Sprintf(buf, "crackling");
 			and = TRUE;
 		}
-	    if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
-	    if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+		if (!InvShock_res(mdef)) {
+			if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
+			if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+		}
 		if(youdefend ? !Shock_resistance : !resists_elec(mdef)){
 			*dmgptr += d(dnum,4);
 		}
@@ -2301,7 +2300,9 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and ? Strcat(buf, " yet freezing") : Sprintf(buf, "freezing");
 			and = TRUE;
 		}
-	    if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
+		if (!InvCold_res(mdef)) {
+	    	if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
+		}
 		if(youdefend ? !Cold_resistance : !resists_cold(mdef)){
 			*dmgptr += d(dnum,4);
 		}
@@ -3756,7 +3757,9 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 			}
-	    if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
+		if (!InvCold_res(mdef)) {
+	    	if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
+		}
 	}
 	if (oartifact == ART_SHADOWLOCK) {
 		if (!Cold_res(mdef)) {
@@ -3765,7 +3768,9 @@ boolean * messaged;
 				*messaged = TRUE;
 			}
 			*truedmgptr += d(2, 6) + otmp->spe;
-			if (!rn2(4)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
+			if (!InvCold_res(mdef)) {
+				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
+			}
 		}
 	}
 	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW) || goatweaponturn == AD_ELEC){
@@ -3776,8 +3781,10 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
-	    if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
-	    if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+		if (!InvShock_res(mdef)) {
+			if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
+			if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+		}
 	}
 	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW) || goatweaponturn == AD_EACD || goatweaponturn == AD_ACID){
 		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR)) {
@@ -3789,9 +3796,11 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
-	    if (!rn2(2)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
-//	    if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
-//	    if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+		if (!InvAcid_res(mdef)) {
+	    	if (!rn2(2)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+//	    	if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+//	    	if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+		}
 	}
 	if (attacks(AD_BLUD, otmp)){
 		if (vis&VIS_MAGR) {

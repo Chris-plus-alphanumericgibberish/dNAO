@@ -2405,6 +2405,7 @@ boolean ranged;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	char buf[BUFSZ];
+	char buf2[BUFSZ];
 
 	/* don't make a "You swing" message */
 	if (youagr)
@@ -2433,13 +2434,13 @@ boolean ranged;
 	}
 
 	if (youdef) {
-		Sprintf(buf, "%s!", buf);
+		Sprintf(buf2, "%s!", buf);
 	}
 	else {
-		Sprintf(buf, "%s at %s.", buf, mon_nam(mdef));
+		Sprintf(buf2, "%s at %s.", buf, mon_nam(mdef));
 	}
 
-	pline("%s", buf);
+	pline("%s", buf2);
 	return;
 }
 
@@ -3301,7 +3302,7 @@ int flat_acc;
 		}
 		/* nudist accuracy bonus/penalty (player-only) (melee) */
 		if (youagr && melee && u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-			int delta = 100 - u.usanity;
+			int delta = Insanity;
 			int discomfort = u_clothing_discomfort();
 			static boolean clothmessage = TRUE;
 			if (discomfort) {
@@ -4289,18 +4290,18 @@ boolean ranged;
 			/* print message */
 			if (youdef){
 				if (dmg == 0) {
-					Sprintf(buf, "%s, but it seems harmless.", buf);
+					Strcat(buf, ", but it seems harmless.");
 				}
 				else if (Acid_res(mdef)) {
-					Sprintf(buf, "%s! It stings!", buf);
+					Strcat(buf, "! It stings!");
 				}
 				else {
-					Sprintf(buf, "%s! It burns!", buf);
+					Strcat(buf, "! It burns!");
 				}
 			}
 			else {
 				if (dmg == 0) {
-					Sprintf(buf, "%s, but it seems unharmed.", buf);
+					Strcat(buf, ", but it seems unharmed.");
 				}
 				///* random flavour -- a monster nearly killed by acid will scream */
 				//else if (dmg > mdef->mhp * 2/3 && !is_silent_mon(mdef)){
@@ -4308,7 +4309,7 @@ boolean ranged;
 				//	wake_nearto(x(mdef), y(mdef), combatNoise(pd));
 				//}
 				else
-					Sprintf(buf, "%s!", buf);
+					Strcat(buf, "!");
 			}
 			if (youdef || vis) {
 				pline("%s", buf);
@@ -5001,7 +5002,7 @@ boolean ranged;
 
 			/* Player vampires are smart enough not to feed while
 			   biting if they might have trouble getting it down */
-			if (!Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
+			if (youagr && !Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
 				&& u.uhunger <= 1420 && attk->aatyp == AT_BITE) {
 				/* For the life of a creature is in the blood (Lev 17:11) */
 				if (flags.verbose)
@@ -5013,7 +5014,7 @@ boolean ranged;
 				lesshungry(ptmp * 6);
 			}
 			/* tame vampires gain nutrition */
-			if (uncancelled && !youagr && magr->mtame && !magr->isminion)
+			if (uncancelled && !youagr && get_mx(magr, MX_EDOG))
 				EDOG(magr)->hungrytime += ((int)((mdef->data)->cnutrit / 20) + 1);
 		}
 		/* level-draining effect doesn't actually need blood, it drains life force */
@@ -5039,7 +5040,7 @@ boolean ranged;
 				*hpmax(magr) += d(1, 4);
 				heal(magr, ptmp/2);
 				/* tame metroids gain nutrition (does not stack with for-vampires above, since they have lifedrain instead of bloodsuck attacks) */
-				if (magr->mtame && !magr->isminion){
+				if (get_mx(magr, MX_EDOG)){
 					EDOG(magr)->hungrytime += pd->cnutrit / 4;  //400/4 = human nut/4
 				}
 			}
@@ -7024,7 +7025,7 @@ boolean ranged;
 				return MM_HIT;
 			}
 			/* tame creatures get nutrition */
-			if (magr->mtame && !magr->isminion) {
+			if (get_mx(magr, MX_EDOG)) {
 				EDOG(magr)->hungrytime += dmg * 11; /*aprox 60 points of hunger per 1d10*/
 				magr->mconf = 0;
 			}
@@ -7948,7 +7949,7 @@ boolean ranged;
 		}
 		else {
 			/* pets can get hungry */
-			if (mdef->mtame && !mdef->isminion){
+			if (get_mx(mdef, MX_EDOG)){
 				int hungr = rn1(120, 120);
 				EDOG(mdef)->hungrytime -= hungr;
 				//heal by the amount of HP it would heal by resting for that nutr worth of turns
@@ -8687,7 +8688,7 @@ int vis;
 				* DGST monsters don't die from undead corpses
 				*/
 				int num = monsndx(mdef->data);
-				if (magr->mtame && !magr->isminion &&
+				if (get_mx(magr, MX_EDOG) && 
 					!((mvitals[num].mvflags & G_NOCORPSE) || get_mx(mdef, MX_ESUM))) {
 					struct obj *virtualcorpse = mksobj(CORPSE, MKOBJ_NOINIT);
 					int nutrit;
@@ -9535,15 +9536,20 @@ expl_common:
 }
 
 void
-getgazeinfo(aatyp, adtyp, pa, needs_magr_eyes, needs_mdef_eyes, needs_uncancelled)
+getgazeinfo(aatyp, adtyp, pa, magr, mdef, needs_magr_eyes, needs_mdef_eyes, needs_uncancelled)
 int aatyp;
 int adtyp;
 struct permonst * pa;
+struct monst * magr;
+struct monst * mdef;
 boolean * needs_magr_eyes;
 boolean * needs_mdef_eyes;
 boolean * needs_uncancelled;
 {
 #define maybeset(b, tf) if(b) {*(b)=tf;}
+	boolean adjacent = FALSE;
+	if(magr && mdef && distmin(magr->mx, magr->my, mdef->mx, mdef->my))
+		adjacent = TRUE;
 	/* figure out if gaze requires eye-contact or not */
 	switch (adtyp)
 	{
@@ -9562,7 +9568,10 @@ boolean * needs_uncancelled;
 				)
 				maybeset(needs_uncancelled, FALSE);
 			maybeset(needs_magr_eyes, FALSE);
-			maybeset(needs_mdef_eyes, TRUE);
+			if(pa->mtyp == PM_GREAT_CTHULHU && adjacent){
+				maybeset(needs_mdef_eyes, FALSE);
+			}
+			else maybeset(needs_mdef_eyes, TRUE);
 			break;
 		}
 		/* else fall through */
@@ -9608,6 +9617,10 @@ boolean * needs_uncancelled;
 		impossible("unhandled gaze type %d", adtyp);
 		break;
 	}
+	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
+		maybeset(needs_mdef_eyes, TRUE);
+		maybeset(needs_uncancelled, FALSE);
+	}
 	return;
 #undef maybeset
 }
@@ -9644,7 +9657,7 @@ int vis;
 	boolean needs_magr_eyes = TRUE;		/* when TRUE, mdef is protected if magr is blind */
 	boolean needs_mdef_eyes = TRUE;		/* when TRUE, mdef is protected by being blind */
 	boolean needs_uncancelled = TRUE;	/* when TRUE, attack cannot happen when cancelled */
-	boolean maybe_not = (!youagr);		/* when TRUE, occasionally doesn't use gaze attack at all */
+	boolean maybe_not = (!youagr && pa->mtyp != PM_DEMOGORGON);		/* when TRUE, occasionally doesn't use gaze attack at all */
 
 	static const int randomgazeattacks[] = { AD_DEAD, AD_CNCL, AD_PLYS, AD_DRLI, AD_ENCH, AD_STON, AD_LUCK,
 		AD_CONF, AD_SLOW, AD_STUN, AD_BLND, AD_FIRE, AD_FIRE,
@@ -9685,7 +9698,7 @@ int vis;
 		break;
 	}
 	/* get eyes, uncancelledness */
-	getgazeinfo(attk->aatyp, adtyp, pa, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
+	getgazeinfo(attk->aatyp, adtyp, pa, magr, mdef, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
 
 	/* widegazes cannot fail */
 	if (attk->aatyp == AT_WDGZ)
@@ -9694,14 +9707,7 @@ int vis;
 	/* these gazes are actually hacks and only work vs the player */
 	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST))
 		return MM_MISS;
-
-	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
-		needs_mdef_eyes = TRUE;
-		needs_uncancelled = FALSE;
-		maybe_not = FALSE;
-	}
-
-
+	
 	if (/* needs_magr_eyes:   magr must have eyes and can actively see mdef */
 		(needs_magr_eyes && !(
 			(haseyes(pa)) &&
@@ -12963,7 +12969,7 @@ int vis;						/* True if action is at all visible to the player */
 			bonsdmg += skill_damage;
 
 			/* now, train skills */
-			use_skill(u.twoweap ? P_TWO_WEAPON_COMBAT : wtype, 1);
+			use_skill((melee && u.twoweap) ? P_TWO_WEAPON_COMBAT : wtype, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(P_SHII_CHO, 1);
@@ -13557,30 +13563,30 @@ int vis;						/* True if action is at all visible to the player */
 		slot = W_SKIN;
 		if (active_slots & slot) {
 			if (holyobj & slot)
-				Sprintf(buf, "%sglorious ", buf);
+				Strcat(buf, "glorious ");
 			if (unholyobj & slot)
-				Sprintf(buf, "%scursed ", buf);
+				Strcat(buf, "cursed ");
 			/* special cases */
 			if (attk && attk->adtyp == AD_STAR)
 			{
-				Sprintf(buf, "%sstarlight rapier", buf);
+				Strcat(buf, "starlight rapier");
 			}
 			else if (attk && attk->adtyp == AD_GLSS)
 			{
-				Sprintf(buf, "%sshards of broken mirrors", buf);
+				Strcat(buf, "shards of broken mirrors");
 			}
 			else if (youagr && u.sealsActive&SEAL_SIMURGH && u.sealsActive&SEAL_EDEN)
 			{
-				Sprintf(buf, "%scold-iron claws and silver skin", buf);
+				Strcat(buf, "cold-iron claws and silver skin");
 			}
 			else {
 				if (silverobj & slot)
-					Sprintf(buf, "%ssilver ", buf);
+					Strcat(buf, "silver ");
 				if (jadeobj & slot)
-					Sprintf(buf, "%sjade ", buf);
+					Strcat(buf, "jade ");
 				if (ironobj & slot)
-					Sprintf(buf, "%scold-iron ", buf);
-				Sprintf(buf, "%s%s", buf,
+					Strcat(buf, "cold-iron ");
+				Strcat(buf, 
 					(youagr && u.sealsActive&SEAL_SIMURGH) ? "claws"
 					: (youagr ? body_part(BODY_SKIN) : mbodypart(magr, BODY_SKIN)));
 			}
@@ -13592,39 +13598,39 @@ int vis;						/* True if action is at all visible to the player */
 			obuf = xname(otmp);
 
 			if (active_slots & W_SKIN)
-				Sprintf(buf, "%s and ", buf);
+				Strcat(buf, " and ");
 
 			if (holyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 				);
 			if (unholyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 				);
 			/* special cases */
 			if (otmp->oartifact == ART_SUNSWORD && (silverobj&slot)) {
-				Sprintf(buf, "%sburning-white blade", buf);
+				Strcat(buf, "burning-white blade");
 			}
 			else if (otmp->oartifact == ART_GLAMDRING && (silverobj&slot)) {
-				Sprintf(buf, "%swhite-burning blade", buf);
+				Strcat(buf, "white-burning blade");
 			}
 			else {
 				if (silverobj & slot){
 					if (!strstri(obuf, "silver "))
-						Sprintf(buf, "%ssilver%s ", buf, (otmp->obj_material != SILVER ? "ed" : ""));
+						Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
 				}
 				if (jadeobj & slot) {
 					if (!strstri(obuf, "jade "))
-						Sprintf(buf, "%sjade ", buf);
+						Strcat(buf, "jade ");
 				}
 				if (ironobj & slot) {
 					if (!strncmpi(obuf, "iron ", 5))
-						Sprintf(buf, "%scold-", buf);
+						Strcat(buf, "cold-");
 					else if (!strstri(obuf, "iron "))
-						Sprintf(buf, "%scold-iron ", buf);
+						Strcat(buf, "cold-iron ");
 				}
 				if (otherobj & slot) {
 					if (otmp->obj_material == WOOD && otmp->otyp != MOON_AXE &&
@@ -13633,18 +13639,18 @@ int vis;						/* True if action is at all visible to the player */
 					{
 						/* only will specifically modify "carved" */
 						if (!strncmpi(obuf, "carved ", 7))
-							Sprintf(buf, "%sveioistafur-", buf);
+							Strcat(buf, "veioistafur-");
 					}
 						
 				}
-				Sprintf(buf, "%s%s", buf, xname(otmp));
+				Strcat(buf, xname(otmp));
 			}
 		}
 		/* rings -- don't use xname(); "ring" is fine. */
 		slot = rslot;
 		if (active_slots & slot) {
 			if (active_slots & (W_SKIN|W_WEP))
-				Sprintf(buf, "%s and ", buf);
+				Strcat(buf, " and ");
 			/* only the player wears rings */
 			/* get correct ring */
 			otmp = (rslot == W_RINGL) ? uleft
@@ -13654,26 +13660,26 @@ int vis;						/* True if action is at all visible to the player */
 			if (otmp)
 			{
 				if (holyobj & slot)
-					Sprintf(buf, "%s%s", buf,
+					Strcat(buf,
 					(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
 					(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 					);
 				if (unholyobj & slot)
-					Sprintf(buf, "%s%s", buf,
+					Strcat(buf,
 					(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 					(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 					);
 				if (silverobj & slot){
-					Sprintf(buf, "%ssilver%s ", buf, ((jadeobj&slot) || (ironobj&slot) ? "ed" : ""));
+					Strcat(buf, ((jadeobj&slot) || (ironobj&slot) ? "silvered " : "silver "));
 				}
 				if (jadeobj & slot) {
-					Sprintf(buf, "%sjade ", buf);
+					Strcat(buf, "jade ");
 				}
 				if (ironobj & slot) {
-					Sprintf(buf, "%scold-iron ", buf);
+					Strcat(buf, "cold-iron ");
 				}
 
-				Sprintf(buf, "%sring", buf);
+				Strcat(buf, "ring");
 			}
 			else {
 				active_slots &= ~rslot;
@@ -13703,38 +13709,38 @@ int vis;						/* True if action is at all visible to the player */
 		if (otmp && (active_slots & slot)) {
 			obuf = xname(otmp);
 			if (active_slots & (W_SKIN|W_WEP|rslot))
-				Sprintf(buf, "%s and ", buf);
+				Strcat(buf, " and ");
 
 			if (holyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_HOLYW)) ? "consecrated " : "blessed "
 				);
 			if (unholyobj & slot)
-				Sprintf(buf, "%s%s", buf,
+				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 				);
 			if (silverobj & slot){
 				if (!strstri(obuf, "silver "))
-					Sprintf(buf, "%ssilver%s ", buf, (otmp->obj_material != SILVER ? "ed" : ""));
+					Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
 			}
 			if (jadeobj & slot) {
 				if (!strstri(obuf, "jade "))
-					Sprintf(buf, "%sjade ", buf);
+					Strcat(buf, "jade ");
 			}
 			if (ironobj & slot) {
 				if (!strncmpi(obuf, "iron ", 5))
-					Sprintf(buf, "%scold-", buf);
+					Strcat(buf, "cold-");
 				else if (!strstri(obuf, "iron "))
-					Sprintf(buf, "%scold-iron ", buf);
+					Strcat(buf, "cold-iron ");
 			}
-			Sprintf(buf, "%s%s", buf, obuf);
+			Strcat(buf, obuf);
 		}
 		/* defender */
 		char seared[BUFSZ];
 		if (noncorporeal(pd)) {
-			Sprintf(seared, "%s",
+			Strcat(seared, 
 				youdef ? "you" : mon_nam(mdef));
 		}
 		else {
@@ -13743,17 +13749,17 @@ int vis;						/* True if action is at all visible to the player */
 				(youdef ? body_part(BODY_FLESH) : mbodypart(mdef, BODY_FLESH))
 				);
 		}
-		Sprintf(buf, "%s sears %s", buf, seared);
-
-		pline("%s!", buf);
+		pline("%s sears %s!", buf, seared);
 	}
 
 	/* poison */
 	if (poisons_resisted || poisons_majoreff || poisons_minoreff || poisons_wipedoff) {
 		otmp = poisonedobj;
-		int i, n;
+		int i, n, r;
+		char poisons_str[BUFSZ];
 		/* poison resist messages -- should only appear once, as resistivity should be constant between hits */
 		if (poisons_resisted && (vis&VIS_MDEF) && !recursed) {
+			r = 0;	/* # of poisons resisted */
 			for (n = 0; n < NUM_POISONS; n++)
 			{
 				i = (1 << n);
@@ -13764,29 +13770,33 @@ int vis;						/* True if action is at all visible to the player */
 				case OPOISON_BASIC:
 				case OPOISON_BLIND:
 				case OPOISON_PARAL:
-					pline_The("poison doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "poison");
 					break;
 				case OPOISON_FILTH:
-					pline_The("filth doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "filth");
 					break;
 				case OPOISON_SLEEP:
-					pline_The("drug doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "drug");
 					break;
 				case OPOISON_AMNES:
-					pline_The("lethe-rust doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "lethe-rust");
 					break;
 				case OPOISON_ACID:
-					pline_The("acid-coating doesn't seem to affect %s.",
-						(youdef ? "you" : mon_nam(mdef)));
+					Sprintf(poisons_str, "acid-coating");
 					break;
 				case OPOISON_SILVER:
 					/* no message */
+					r--;
 					break;
 				}
+				r++;
+			}
+			if (r) {
+				pline_The("%s %s seem to affect %s.",
+					((r > 1) ? "coatings" : poisons_str),
+					((r > 1) ? "don't" : "doesn't"),
+					(youdef ? "you" : mon_nam(mdef))
+					);
 			}
 		}
 		/* poison major effects and their messages -- can happen multiple times */

@@ -593,7 +593,7 @@ struct obj *obj;
 	wake_nearby_noisy();
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    if (!DEADMONSTER(mtmp)) {
-			if (mtmp->mtame && !mtmp->isminion)
+			if (get_mx(mtmp, MX_EDOG))
 				EDOG(mtmp)->whistletime = moves;
 	    }
 	}
@@ -4294,7 +4294,7 @@ use_doll(obj)
 				pline("The doll sings sweetly.");
 				if(mtmp && resist_song(mtmp, SNG_TAME, obj) >= 0){
 					if (mtmp->mtame){
-						if(mtmp->isminion || (EDOG(mtmp)->friend))
+						if(!get_mx(mtmp, MX_EDOG) || (EDOG(mtmp)->friend))
 							break;
 						if(mtmp->mtame < 16) mtmp->mtame++;
 					} else {
@@ -5546,132 +5546,157 @@ struct obj **optr;
 	struct obj *obj = *optr;
 	struct monst *mm;
 	struct permonst *pmm;
-	xchar x, y;
 	coord cc;
 
 	if(!getdir((char *)0)) {
 		flags.move = multi = 0;
 		return 0;
 	}
-	if(u.dx || u.dy || u.dz){
-		if (u.uswallow) {
-			/* can't activate a figurine while swallowed */
-			if (!clockwork_location_checks(obj, (coord *)0, FALSE))
-				return 0;
-		}
-		x = u.ux + u.dx; y = u.uy + u.dy;
-		if((mm = m_at(x,y))){
-			if(is_clockwork(mm->data)){
-				/* check that the part matches the creature's needed type */
-				boolean can_use_obj = FALSE;
-				switch (mm->mtyp) {
-				case PM_GOLDEN_HEART:
-				case PM_ID_JUGGERNAUT:
-					can_use_obj = (obj->otyp == SUBETHAIC_COMPONENT);
-					break;
-				case PM_HELLFIRE_ORB:
-				case PM_HELLFIRE_COLOSSUS:
-					can_use_obj = (obj->otyp == HELLFIRE_COMPONENT);
-					break;
-				case PM_SCRAP_TITAN:
-					can_use_obj = (obj->otyp == CLOCKWORK_COMPONENT
-								|| obj->otyp == SUBETHAIC_COMPONENT
-								|| obj->otyp == HELLFIRE_COMPONENT);
-					break;
-				default:
-					/* all other clockworks need standard clockwork components */
-					can_use_obj = (obj->otyp == CLOCKWORK_COMPONENT);
-					break;
-				}
+	if (u.uswallow && (u.dx || u.dy || u.dz)) {
+		/* can't activate a figurine while swallowed */
+		if (!clockwork_location_checks(obj, (coord *)0, FALSE))
+			return 0;
+	}
 
-				if (can_use_obj) {
-					if (mm->mhp < mm->mhpmax){
-						if (yn("Repair it?") == 'y'){
-							mm->mhp += mm->m_lev;
-							if (mm->mhp > mm->mhpmax)
-								mm->mhp = mm->mhpmax;
-							useup(obj);
-							*optr = 0;
-							return 1;
-						}
-					}
-					else {
-						pline("It doesn't need repairs.");
-						return 0;
-					}
-				}
-				else {
-					pline("This device can't take this part.");
-					return 0;
-				}
-			}
-			else {
-				pline("It isn't made of clockwork.");
-				return 0;
+	if (!(u.dx || u.dy || u.dz))
+		mm = &youmonst;
+	else if (u.dz > 0 && u.usteed)
+		mm = u.usteed;
+	else if (isok(u.ux + u.dx, u.uy + u.dy))
+		mm = m_at(u.ux + u.dx, u.uy + u.dy);
+	
+	if (mm) {
+		/* check that the part matches the creature's needed type */
+		boolean can_use_obj = FALSE;
+		if (is_clockwork(mm->data)) {
+			switch (mm->mtyp) {
+			case PM_GOLDEN_HEART:
+			case PM_ID_JUGGERNAUT:
+				can_use_obj = (obj->otyp == SUBETHAIC_COMPONENT);
+				break;
+			case PM_HELLFIRE_ORB:
+			case PM_HELLFIRE_COLOSSUS:
+				can_use_obj = (obj->otyp == HELLFIRE_COMPONENT);
+				break;
+			case PM_SCRAP_TITAN:
+				can_use_obj = (obj->otyp == CLOCKWORK_COMPONENT
+							|| obj->otyp == SUBETHAIC_COMPONENT
+							|| obj->otyp == HELLFIRE_COMPONENT);
+				break;
+			default:
+				/* androids need the rarer subethaic components */
+				if (is_android(mm->data))
+					can_use_obj = (obj->otyp == SUBETHAIC_COMPONENT);
+				/* all other clockworks need standard clockwork components */
+				else
+					can_use_obj = (obj->otyp == CLOCKWORK_COMPONENT);
+				break;
 			}
 		}
 		else {
-			/* no one there, attempt to make a clockwork servant */
+			if (mm == &youmonst)
+				You("aren't made of clockwork!");
+			else
+				pline("It isn't made of clockwork.");
+			return 0;
+		}
 
-			/* Scrap is useless in making clockworks */
-			if (obj->otyp == SCRAP) return 0;
+		/* check we have the right type of part */
+		if (!can_use_obj) {
+			if (mm == &youmonst)
+				You("can't repair yourself with this kind of part.");
+			else
+				pline("It can't take this kind of part.");
+			return 0;
+		}
 
-			cc.x = x; cc.y = y;
-			/* Passing FALSE arg here will result in messages displayed */
-
-			if (obj->quan < 10 && obj->otyp != SCRAP){
-				You("don't have enough components to build a clockwork servant.");
-				return 0;
-			}
-			pmm = clockworkMenu(obj);
-			if (!pmm) return 0;
-			obj->quan -= 9;
-			if (!clockwork_location_checks(obj, &cc, FALSE)) return 0;
-			You("build a clockwork and %s.",
-				(u.dx || u.dy) ? "set it beside you" :
-				(Weightless || Is_waterlevel(&u.uz) ||
-				is_pool(cc.x, cc.y, TRUE)) ?
-				"release it" :
-				(u.dz < 0 ?
-				"toss it into the air" :
-				"set it on the ground"));
-
-			mm = makemon(pmm, u.ux + u.dx, u.uy + u.dy, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
-			if (mm){
-				initedog(mm);
-				mm->m_lev = u.ulevel / 2 + 1;
-				mm->mhpmax = (mm->m_lev * 8) - 4;
-				mm->mhp = mm->mhpmax;
-				mm->mtame = 10;
-				mm->mpeaceful = 1;
-				if ((u.dx || u.dy) && (mm->mtyp == PM_CLOCKWORK_SOLDIER || mm->mtyp == PM_CLOCKWORK_DWARF ||
-					mm->mtyp == PM_FABERGE_SPHERE || mm->mtyp == PM_FIREWORK_CART ||
-					mm->mtyp == PM_JUGGERNAUT || mm->mtyp == PM_ID_JUGGERNAUT)
-					){
-					mm->mvar_vector = -1;
-					while (xdir[(int)(++mm->mvar_vector)] != u.dx || ydir[(int)mm->mvar_vector] != u.dy);
+		if (mm != &youmonst) {
+			/* repairing monsters */
+			if (mm->mhp < mm->mhpmax){
+				if (yn("Repair it?") == 'y'){
+					mm->mhp += mm->m_lev;
+					if (mm->mhp > mm->mhpmax)
+						mm->mhp = mm->mhpmax;
+					useup(obj);
+					*optr = 0;
+					return 1;
 				}
 			}
-			useup(obj);
-			*optr = 0;
-			return 1;
-		}
-	} else {
-		if(umechanoid){
-			if(Upolyd && u.mh < u.mhmax) u.mh = min(u.mhmax,u.mh+mons[u.umonnum].mlevel);
-			else if(!Upolyd && u.uhp < u.uhpmax) u.uhp = min(u.uhpmax,u.uhp + u.ulevel);
 			else {
+				pline("It doesn't need repairs.");
+				return 0;
+			}
+			/* done */
+		}
+		else {
+			/* repairing yourself */
+			if (uhp() >= uhpmax()) {
 				You("don't need repairs.");
 				return 0;
 			}
-			useup(obj);
-			*optr = 0;
-		} else {
-			You("aren't made of clockwork!");
-			return 0;
+			else {
+				healup(Upolyd ? mons[u.umonnum].mlevel : u.ulevel, 0, FALSE, FALSE);
+				/* subethaic components also restore a small amount of pw */
+				if (obj->otyp == SUBETHAIC_COMPONENT) {
+					u.uen += d(4,2);
+					if (u.uen > u.uenmax)
+						u.uen = u.uenmax;
+				}
+				useup(obj);
+				*optr = 0;
+				return 1;
+			}
+			/* done */
 		}
 	}
-	return 1;
+	else {
+		/* no one there, attempt to make a clockwork servant */
+
+		/* Scrap is useless in making clockworks */
+		if (obj->otyp == SCRAP) return 0;
+
+		cc.x = u.ux + u.dx; cc.y = u.uy + u.dy;
+		/* Passing FALSE arg here will result in messages displayed */
+
+		if (obj->quan < 10 && obj->otyp != SCRAP){
+			You("don't have enough components to build a clockwork servant.");
+			return 0;
+		}
+		pmm = clockworkMenu(obj);
+		if (!pmm) return 0;
+		obj->quan -= 9;
+		if (!clockwork_location_checks(obj, &cc, FALSE)) return 0;
+		You("build a clockwork and %s.",
+			(u.dx || u.dy) ? "set it beside you" :
+			(Weightless || Is_waterlevel(&u.uz) ||
+			is_pool(cc.x, cc.y, TRUE)) ?
+			"release it" :
+			(u.dz < 0 ?
+			"toss it into the air" :
+			"set it on the ground"));
+
+		mm = makemon(pmm, u.ux + u.dx, u.uy + u.dy, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
+		if (mm){
+			initedog(mm);
+			mm->m_lev = u.ulevel / 2 + 1;
+			mm->mhpmax = (mm->m_lev * 8) - 4;
+			mm->mhp = mm->mhpmax;
+			mm->mtame = 10;
+			mm->mpeaceful = 1;
+			if ((u.dx || u.dy) && (mm->mtyp == PM_CLOCKWORK_SOLDIER || mm->mtyp == PM_CLOCKWORK_DWARF ||
+				mm->mtyp == PM_FABERGE_SPHERE || mm->mtyp == PM_FIREWORK_CART ||
+				mm->mtyp == PM_JUGGERNAUT || mm->mtyp == PM_ID_JUGGERNAUT)
+				){
+				mm->mvar_vector = -1;
+				while (xdir[(int)(++mm->mvar_vector)] != u.dx || ydir[(int)mm->mvar_vector] != u.dy);
+			}
+		}
+		useup(obj);
+		*optr = 0;
+		return 1;
+	}
+	/* if we used up the part, this took time */
+	return ((*optr) == 0);
 }
 
 STATIC_OVL long
