@@ -3732,7 +3732,7 @@ boolean ranged;
 	/* madness can make the player take more damage */
 	if (youdef) {
 		if (u.umadness&MAD_SUICIDAL && !ClearThoughts){
-			dmg += ((100 - u.usanity)*u.ulevel) / 200;
+			dmg += ((Insanity)*u.ulevel) / 200;
 		}
 
 		if ((pa->mlet == S_SNAKE
@@ -3751,25 +3751,25 @@ boolean ranged;
 			|| pa->mtyp == PM_KARY__THE_FIEND_OF_FIRE
 			|| pa->mtyp == PM_CATHEZAR
 			) && u.umadness&MAD_OPHIDIOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (100 - u.usanity) / 5;
+			dmg += (Insanity) / 5;
 		}
 
 		if ((pa->mlet == S_WORM
 			|| attacktype(pa, AT_TENT)
 			) && u.umadness&MAD_HELMINTHOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (100 - u.usanity) / 5;
+			dmg += (Insanity) / 5;
 		}
 
 		if (!magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARGENT_SHEEN && !ClearThoughts && u.usanity < 100){
-			dmg += (100 - u.usanity) / 5;
+			dmg += (Insanity) / 5;
 		}
 
 		if ((is_insectoid(pa) || is_arachnid(pa)) && u.umadness&MAD_ENTOMOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (100 - u.usanity) / 5;
+			dmg += (Insanity) / 5;
 		}
 
 		if (is_aquatic(pa) && u.umadness&MAD_THALASSOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (100 - u.usanity) / 5;
+			dmg += (Insanity) / 5;
 		}
 
 		if ((is_spider(pa)
@@ -3778,11 +3778,11 @@ boolean ranged;
 			|| pa->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
 			|| pa->mtyp == PM_AVATAR_OF_LOLTH
 			) && u.umadness&MAD_ARACHNOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (100 - u.usanity) / 5;
+			dmg += (Insanity) / 5;
 		}
 
 		if (magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARACHNOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (100 - u.usanity) / 5;
+			dmg += (Insanity) / 5;
 		}
 	}
 
