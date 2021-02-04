@@ -1681,7 +1681,7 @@ karemade:
 				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
 					u.utaneggs--;
 					makemon(&mons[PM_STRANGE_LARVA], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
-					losehp(d(1,6), "hatchiing parasite", KILLED_BY_AN);
+					losehp(d(1,6), "hatching parasite", KILLED_BY_AN);
 				}
 			}
 			
