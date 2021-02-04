@@ -83,22 +83,23 @@ struct objclass {
 #define LEATHER		7
 #define WOOD		8
 #define BONE		9
-#define SHELL_MAT	10
-#define DRAGON_HIDE	11	/* not leather! */
-#define IRON		12	/* Fe - includes steel */
-#define METAL		13	/* Sn, &c. */
-#define COPPER		14	/* Cu - includes brass and bronze*/
-#define SILVER		15	/* Ag */
-#define GOLD		16	/* Au */
-#define PLATINUM	17	/* Pt */
-#define MITHRIL		18
-#define PLASTIC		19
-#define GLASS		20
-#define GEMSTONE	21
-#define MINERAL		22
-#define OBSIDIAN_MT	23
-#define SALT		24
-#define SHADOWSTEEL	25
+#define CHITIN		10
+#define SHELL_MAT	11
+#define DRAGON_HIDE	12	/* not leather! */
+#define IRON		13	/* Fe - includes steel */
+#define METAL		14	/* Sn, &c. */
+#define COPPER		15	/* Cu - includes brass and bronze*/
+#define SILVER		16	/* Ag */
+#define GOLD		17	/* Au */
+#define PLATINUM	18	/* Pt */
+#define MITHRIL		19
+#define PLASTIC		20
+#define GLASS		21
+#define GEMSTONE	22
+#define MINERAL		23
+#define OBSIDIAN_MT	24
+#define SALT		25
+#define SHADOWSTEEL	26
  //Note: 31 max, coordinate with obj.h
 	Bitfield(oc_showmat,4);
 #define UNIDED	1	/* always show material when base object type is unknown */

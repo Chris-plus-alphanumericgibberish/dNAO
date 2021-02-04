@@ -153,7 +153,7 @@ struct obj *obj;
 	}
 	
 	if(etype == HELLFIRE_FURNACE && !(obj->oartifact)){
-		if(obj->obj_material >= WAX && obj->obj_material <= BONE 
+		if(obj->obj_material >= WAX && obj->obj_material <= CHITIN 
 #ifdef MAIL
 			&& obj->otyp != SCR_MAIL
 #endif
@@ -2655,7 +2655,7 @@ struct obj *otmp;
 	 */
 	 
 	if (!u.uconduct.unvegan && !(Race_if(PM_INCANTIFIER) || magivorous(youracedata)) &&
-	    ((material == LEATHER || material == BONE ||
+	    ((material == LEATHER || material == BONE || material == CHITIN ||
 	      material == EYEBALL || material == SEVERED_HAND ||
 	      material == DRAGON_HIDE || material == WAX) ||
 	     (cadaver && !vegan(&mons[mtyp])))) {
@@ -2665,7 +2665,7 @@ struct obj *otmp;
 		else return 2;
 	}
 	if (!u.uconduct.unvegetarian && !(Race_if(PM_INCANTIFIER) || magivorous(youracedata)) &&
-	    ((material == LEATHER || material == BONE ||
+	    ((material == LEATHER || material == BONE || material == CHITIN ||
 	      material == EYEBALL || material == SEVERED_HAND ||
 	      material == DRAGON_HIDE) ||
 	     (cadaver && !vegetarian(&mons[mtyp])))) {
@@ -3469,7 +3469,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    victual.eating = TRUE; /* needed for lesshungry() */
 
 	    material = otmp->obj_material;
-	    if (material == LEATHER || material == BONE || material == DRAGON_HIDE) {
+	    if (material == LEATHER || material == BONE || material == CHITIN || material == DRAGON_HIDE) {
 			u.uconduct.unvegan++;
 			violated_vegetarian();
 	    } else {
@@ -3662,7 +3662,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    /* if not used up, eatcorpse sets up reqtime and may modify
 	     * oeaten */
 	} else {
-	    /* No checks for WAX, LEATHER, BONE, DRAGON_HIDE.  These are
+	    /* No checks for WAX, LEATHER, BONE, DRAGON_HIDE, etc.  These are
 	     * all handled in the != FOOD_CLASS case, above */
 	    switch (otmp->obj_material) {
 	    case FLESH:

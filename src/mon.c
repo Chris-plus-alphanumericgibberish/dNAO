@@ -3335,6 +3335,8 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 				&& (ttmp->ttyp != BEAR_TRAP ||
 				    (mdat->msize > MZ_SMALL &&
 				     !amorphous(mdat) && !mon_resistance(mon,FLYING)))
+				&& (ttmp->ttyp != FLESH_HOOK ||
+				    !amorphous(mdat))
 				&& (ttmp->ttyp != FIRE_TRAP ||
 				    !resists_fire(mon) || (!no_upos(mon) && distmin(mon->mx, mon->my, mon->mux, mon->muy) > 2)) /*Cuts down on plane of fire message spam*/
 				&& (ttmp->ttyp != SQKY_BOARD || !mon_resistance(mon,FLYING))

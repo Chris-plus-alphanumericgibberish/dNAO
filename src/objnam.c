@@ -1280,12 +1280,10 @@ boolean adjective;
 			return OBJ_DESCR(objects[obj->otyp]);
 		else
 			return (adjective ? "wooden" : "wood");
+	case CHITIN:
+		return "chitin";
 	case BONE:
-		/* special case */
-		if (obj->oartifact == ART_WEBWEAVER_S_CROOK || obj->oartifact == ART_SCORPION_CARAPACE)
-			return "chitin";
-		else
-			return "bone";
+		return "bone";
 	case SHELL_MAT:
 		return "shell";
 	case DRAGON_HIDE:

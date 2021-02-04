@@ -1419,6 +1419,8 @@ create_polymon(obj, okind)
 	    pm_index = PM_ROPE_GOLEM;
 	    material = "cloth ";
 	    break;
+	case SHELL_MAT:
+	case CHITIN:
 	case BONE:
 	    pm_index = PM_SKELETON;     /* nearest thing to "bone golem" */
 	    material = "bony ";

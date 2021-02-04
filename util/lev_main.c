@@ -118,6 +118,7 @@ static struct {
 	{ "falling rock", ROCKTRAP },
 	{ "board",	SQKY_BOARD },
 	{ "bear",	BEAR_TRAP },
+	{ "flesh hook",	FLESH_HOOK },
 	{ "land mine",	LANDMINE },
 	{ "rolling boulder",	ROLLING_BOULDER_TRAP },
 	{ "mummy trap",	MUMMY_TRAP },

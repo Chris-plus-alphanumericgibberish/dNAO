@@ -264,8 +264,8 @@ struct monst {
 #define	DOLLMAKER_CLEAR_THOUGHT	0x10000L
 #define	DOLLMAKER_MIND_BLASTS	0x20000L
 #define	MAX_DOLL_MASK	DOLLMAKER_MIND_BLASTS
+#define	mvar_tanninType	mvar1
 	long mvar2;
-#define	mvar_tanninType	mvar2
 	long mvar3;
 
 	struct ls_t * light;

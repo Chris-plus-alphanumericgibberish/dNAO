@@ -639,11 +639,11 @@ int	mntmp;
 		unpunish();
 	    }
 	}
-	if (u.utrap && (u.utraptype == TT_WEB || u.utraptype == TT_BEARTRAP) &&
+	if (u.utrap && (u.utraptype == TT_WEB || u.utraptype == TT_BEARTRAP || u.utraptype == TT_FLESH_HOOK) &&
 		(amorphous(youmonst.data) || is_whirly(youmonst.data) || unsolid(youmonst.data) ||
 		  (youmonst.data->msize <= MZ_SMALL && u.utraptype == TT_BEARTRAP))) {
 	    You("are no longer stuck in the %s.",
-		    u.utraptype == TT_WEB ? "web" : "bear trap");
+		    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_FLESH_HOOK ? "flesh hook" : "bear trap");
 	    /* probably should burn webs too if PM_FIRE_ELEMENTAL */
 	    u.utrap = 0;
 	}
@@ -1043,6 +1043,7 @@ dospinweb()
 		case ARROW_TRAP:
 		case DART_TRAP:
 		case BEAR_TRAP:
+		case FLESH_HOOK:
 		case ROCKTRAP:
 		case FIRE_TRAP:
 		case LANDMINE:

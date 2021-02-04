@@ -1831,6 +1831,7 @@ coord *tm;
 		switch (kind) {
 		    case VIVI_TRAP:
 		    case SWITCH_TRAP:
+		    case FLESH_HOOK:
 			kind = NO_TRAP; break;
 			case MUMMY_TRAP:
 			if (!(Is_qlocate(&u.uz) && Role_if(PM_ARCHEOLOGIST))) kind = NO_TRAP; 

@@ -2026,6 +2026,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if (u.umadness&MAD_FORMICATION){
 			enl_msg("You ", "are", "were", " distracted by invisible insects, lowering your skills and increasing spell failure");
 		}
+		if (u.umadness&MAD_HOST){
+			enl_msg("You ", "are", "were", " nausiated by the thing inside you, which sometimes makes you vomit");
+		}
 	}
 	
 	/*** More Troubles ***/
@@ -2782,6 +2785,9 @@ int final;
 		if (u.umadness&MAD_FORMICATION){
 			dump("  ", "You were constantly distracted by the feeling of crawling insects");
 		}
+		if (u.umadness&MAD_HOST){
+			dump("  ", "You were nausiated by the thing inside you");
+		}
 	}
 	/*** More Troubles ***/
 	if (Halluc_resistance) 	dump("  ", "You resisted hallucinations");
@@ -3272,6 +3278,9 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_FORMICATION){
 			putstr(en_win, 0, "You are distracted by the feeling of insects crawling over your body");
+		}
+		if (u.umadness&MAD_HOST){
+			putstr(en_win, 0, "You are nausiated by the thing inside you");
 		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)

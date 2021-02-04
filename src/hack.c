@@ -1449,7 +1449,7 @@ domove()
 				u.utrap = 0;
 				pline("The energy blade burns through %s!", the(xname(trap->ammo)));
 				if(is_lightsaber(uwep) && uwep->oartifact != ART_INFINITY_S_MIRRORED_ARC && uwep->otyp != KAMEREL_VAJRA) uwep->age -= 100;
-				if(trap->ttyp == BEAR_TRAP){
+				if(trap->ttyp == BEAR_TRAP || trap->ttyp == FLESH_HOOK){
 					deltrap(trap);
 					newsym(u.ux,u.uy);
 				}

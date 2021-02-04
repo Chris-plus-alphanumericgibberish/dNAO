@@ -253,6 +253,7 @@ register int x, y, typ;
 	    if (u.utrap && (x == u.ux) && (y == u.uy) &&
 	      ((u.utraptype == TT_BEARTRAP && typ != BEAR_TRAP) ||
 	      (u.utraptype == TT_WEB && typ != WEB) ||
+	      (u.utraptype == TT_FLESH_HOOK && typ != FLESH_HOOK) ||
 	      (u.utraptype == TT_PIT && typ != PIT && typ != SPIKED_PIT)))
 		    u.utrap = 0;
 	} else {
@@ -350,6 +351,9 @@ register int x, y, typ;
 			break;
 		case BEAR_TRAP:
 			set_trap_ammo(ttmp, mksobj(BEARTRAP, TRUE, FALSE));
+			break;
+		case FLESH_HOOK:
+			set_trap_ammo(ttmp, mksobj(HOOK, FALSE, FALSE));
 			break;
 		case LANDMINE:
 			set_trap_ammo(ttmp, mksobj(LAND_MINE, TRUE, FALSE));
@@ -940,6 +944,35 @@ unsigned trflags;
 			{
 				if (!(uarmf && uarmf->otyp == find_jboots())) set_wounded_legs(side, rn1(45, 21));
 			}
+		}
+		exercise(A_DEX, FALSE);
+		break;
+
+	    case FLESH_HOOK:
+		seetrap(trap);
+		if(amorphous(youracedata) || is_whirly(youracedata) ||
+						    unsolid(youracedata)) {
+		    pline("%s %s passes harmlessly through you.",
+			    A_Your[trap->madeby_u],
+				xname(trap->ammo));
+		    break;
+		}
+		u.utrap = rn1(4, 4);
+		u.utraptype = TT_FLESH_HOOK;
+#ifdef STEED
+		if (u.usteed) {
+			pline("%s %s grabs %s %s!",
+				A_Your[trap->madeby_u], xname(trap->ammo), s_suffix(mon_nam(u.usteed)),
+				mbodypart(u.usteed, FOOT));
+			hmon_with_trap(u.usteed, &(trap->ammo), trap, HMON_WHACK, rnd(20));
+		}
+		else
+#endif
+		{
+		    pline("%s %s grabs you!",
+				A_Your[trap->madeby_u], xname(trap->ammo));
+
+			hmon_with_trap(&youmonst, &(trap->ammo), trap, HMON_WHACK, rnd(20));
 		}
 		exercise(A_DEX, FALSE);
 		break;
@@ -1934,7 +1967,8 @@ struct monst *mtmp;
 	} else if (mtmp->mtrapped) {	/* is currently in the trap */
 	    if (!trap->tseen &&
 		cansee(mtmp->mx, mtmp->my) && canseemon(mtmp) &&
-		(trap->ttyp == SPIKED_PIT || trap->ttyp == BEAR_TRAP ||
+		(trap->ttyp == SPIKED_PIT || trap->ttyp == BEAR_TRAP || 
+		 trap->ttyp == FLESH_HOOK ||
 		 trap->ttyp == HOLE || trap->ttyp == PIT ||
 		 trap->ttyp == WEB)) {
 		/* If you come upon an obviously trapped monster, then
@@ -2068,6 +2102,21 @@ struct monst *mtmp;
 				    || mptr->mtyp == PM_BUGBEAR)
 				   && flags.soundok)
 				    You_hear("the roaring of an angry bear!");
+			    }
+
+				if (hmon_with_trap(mtmp, &(trap->ammo), trap, HMON_WHACK, rnd(20)) == MM_DEF_DIED)
+					trapkilled = TRUE;
+			}
+			break;
+
+		case FLESH_HOOK:
+			if(	!amorphous(mptr) &&
+				!is_whirly(mptr) && !unsolid(mptr)) {
+			    mtmp->mtrapped = 1;
+			    if(in_sight) {
+					pline("%s is caught by %s %s!",
+						  Monnam(mtmp), a_your[trap->madeby_u], the(xname(trap->ammo)));
+					seetrap(trap);
 			    }
 
 				if (hmon_with_trap(mtmp, &(trap->ammo), trap, HMON_WHACK, rnd(20)) == MM_DEF_DIED)
@@ -2721,7 +2770,7 @@ boolean silently;
 				pline("%s floats up, out of the pit!", Monnam(mon));
 			fill_pit(mon->mx, mon->my);
 		}
-		else if (ttmp->ttyp == BEAR_TRAP || ttmp->ttyp == WEB || ttmp->ttyp == VIVI_TRAP) {
+		else if (ttmp->ttyp == BEAR_TRAP || ttmp->ttyp == FLESH_HOOK || ttmp->ttyp == WEB || ttmp->ttyp == VIVI_TRAP) {
 			if (seen && !silently)
 				pline("%s floats upward, but is still stuck.", Monnam(mon));
 		}
@@ -3836,7 +3885,7 @@ boolean force_failure;
 	struct monst *mtmp = m_at(ttmp->tx,ttmp->ty);
 	int ttype = ttmp->ttyp;
 	boolean under_u = (!u.dx && !u.dy);
-	boolean holdingtrap = (ttype == BEAR_TRAP || ttype == WEB);
+	boolean holdingtrap = (ttype == BEAR_TRAP || ttype == FLESH_HOOK || ttype == WEB);
 	
 	/* Test for monster first, monsters are displayed instead of trap. */
 	if (mtmp && (!mtmp->mtrapped || !holdingtrap)) {
@@ -3879,7 +3928,7 @@ boolean force_failure;
 		if (rnl(100) >= 20) {
 		    pline("Whoops...");
 		    if (mtmp) {		/* must be a trap that holds monsters */
-			if (ttype == BEAR_TRAP) {
+			if (ttype == BEAR_TRAP || ttype == FLESH_HOOK) {
 			    if (mtmp->mtame) abuse_dog(mtmp);
 			    if ((mtmp->mhp -= rnd(4)) <= 0) killed(mtmp);
 			} else if (ttype == WEB) {
@@ -3964,12 +4013,15 @@ struct trap *ttmp;
 	if ((mtmp = m_at(ttmp->tx,ttmp->ty)) != 0) {
 		mtmp->mtrapped = 0;
 		You("remove %s %s from %s.", the_your[ttmp->madeby_u],
-			(ttmp->ttyp == BEAR_TRAP) ? xname(ttmp->ammo) : "webbing",
+			(ttmp->ttyp == BEAR_TRAP || ttmp->ttyp == FLESH_HOOK) ? xname(ttmp->ammo) : "webbing",
 			mon_nam(mtmp));
 		reward_untrap(ttmp, mtmp);
 	} else {
 		if (ttmp->ttyp == BEAR_TRAP) {
 			You("disarm %s %s.", the_your[ttmp->madeby_u], xname(ttmp->ammo));
+			remove_trap_ammo(ttmp);
+		} else if (ttmp->ttyp == FLESH_HOOK) {
+			You("yank out %s %s.", the_your[ttmp->madeby_u], xname(ttmp->ammo));
 			remove_trap_ammo(ttmp);
 		} else if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)) /* if (ttmp->ttyp == WEB) */ {
 			You("succeed in removing %s web.", the_your[ttmp->madeby_u]);
@@ -4395,6 +4447,7 @@ struct obj * tool;
 			return 1;
 		    }
 		    switch(ttmp->ttyp) {
+			case FLESH_HOOK:
 			case BEAR_TRAP:
 			case WEB:
 				return disarm_holdingtrap(ttmp);
@@ -4856,6 +4909,7 @@ register struct trap *ttmp;
 	/* some of these are arbitrary -dlc */
 	if (ttmp && ((ttmp->ttyp == SQKY_BOARD) ||
 		     (ttmp->ttyp == BEAR_TRAP) ||
+		     (ttmp->ttyp == FLESH_HOOK) ||
 		     (ttmp->ttyp == LANDMINE) ||
 		     (ttmp->ttyp == FIRE_TRAP) ||
 		     (ttmp->ttyp == PIT) ||

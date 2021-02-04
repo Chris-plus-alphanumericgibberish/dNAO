@@ -6090,6 +6090,36 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
+	case AD_HOOK:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		if (!t_at(x(mdef), y(mdef)) 
+			&& !(amorphous(pd) || is_whirly(pd) || unsolid(pd))
+			&& levl[x(magr)][y(magr)].typ != AIR
+		) {
+			struct trap *ttmp2 = maketrap(x(mdef), y(mdef), FLESH_HOOK);
+			if (ttmp2) {
+				if (youdef) {
+					pline_The("hook-tip breaks off and attaches to the %s!", surface(x(mdef), y(mdef)));
+					dotrap(ttmp2, 0);
+#ifdef STEED
+					if (u.usteed && u.utrap) {
+						/* you, not steed, are trapped */
+						dismount_steed(DISMOUNT_FELL);
+					}
+#endif
+				}
+				else {
+					mintrap(mdef);
+				}
+			}
+		}
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
 	case AD_STDY:
 		/* study before doing the attack */
 		if (notmcan) {
@@ -11423,6 +11453,7 @@ int vis;						/* True if action is at all visible to the player */
 				killer = killerbuf;
 				break;
 			case BEAR_TRAP:
+			case FLESH_HOOK:
 				Sprintf(killerbuf, "%s", killer_xname(weapon));	/* killer_xname() adds a/an/the */
 				killer = killerbuf;
 				break;

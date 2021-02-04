@@ -2609,7 +2609,7 @@ register struct obj *otmp;
 	if (item_has_property(otmp, FIRE_RES) || otyp == WAN_FIRE)
 		return FALSE;
 
-	return((boolean)((omat <= BONE && omat != LIQUID) || omat == PLASTIC));
+	return((boolean)((omat <= CHITIN && omat != LIQUID) || omat == PLASTIC));
 }
 
 boolean

@@ -851,7 +851,7 @@ newsym(x,y)
 		    int tt = trap ? trap->ttyp : NO_TRAP;
 
 		    /* if monster is in a physical trap, you see the trap too */
-		    if (tt == BEAR_TRAP || tt == PIT ||
+		    if (tt == BEAR_TRAP || tt == FLESH_HOOK || tt == PIT ||
 			tt == SPIKED_PIT ||tt == WEB) {
 			trap->tseen = TRUE;
 		    }

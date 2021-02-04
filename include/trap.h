@@ -84,6 +84,7 @@ extern struct trap *ftrap;
 #define VIVI_TRAP	23
 #define MUMMY_TRAP	24
 #define SWITCH_TRAP	25
-#define TRAPNUM 26
+#define FLESH_HOOK	26
+#define TRAPNUM 27
 
 #endif /* TRAP_H */

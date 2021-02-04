@@ -1920,7 +1920,7 @@ long timeout;
 		/* if dark, continue timer and possibly restore durability */
 		if ((dimness(x, y) > 0)
 			/* only some traps are visible to light */
-			|| !(obj->otrap->ttyp == BEAR_TRAP)
+			|| !(obj->otrap->ttyp == BEAR_TRAP || obj->otrap->ttyp == FLESH_HOOK)
 			){
 			if (obj->oeroded && obj->oerodeproof) obj->oeroded--;
 			start_timer(1, TIMER_OBJECT,

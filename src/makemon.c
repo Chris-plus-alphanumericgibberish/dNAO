@@ -10193,6 +10193,63 @@ register struct permonst *ptr;
 #endif /* OVL1 */
 #ifdef OVLB
 
+void
+give_grown_equipment(mtmp)
+struct monst *mtmp;
+{
+	struct obj *otmp;
+	switch(mtmp->mtyp){
+		case PM_VROCK:
+			switch(rn2(3)){
+				case 0:
+					otmp = mongets(mtmp, HALBERD);
+				break;
+				case 1:
+					otmp = mongets(mtmp, PARTISAN);
+				break;
+				case 2:
+					otmp = mongets(mtmp, FAUCHARD);
+				break;
+			}
+			otmp->opoisoned = OPOISON_ACID;
+			set_material_gm(otmp, CHITIN);
+			fix_object(otmp);
+			otmp->spe = 3;
+			
+			otmp = mongets(mtmp, PLATE_MAIL);
+			set_material_gm(otmp, CHITIN);
+			fix_object(otmp);
+			otmp->spe = 3;
+		break;
+		case PM_MARILITH:
+			otmp = mongets(mtmp, PLATE_MAIL);
+			set_material_gm(otmp, CHITIN);
+			fix_object(otmp);
+			otmp->spe = 3;
+			
+			otmp = mongets(mtmp, HELMET);
+			set_material_gm(otmp, CHITIN);
+			fix_object(otmp);
+			otmp->spe = 3;
+			
+			otmp = mongets(mtmp, GAUNTLETS);
+			set_material_gm(otmp, CHITIN);
+			fix_object(otmp);
+			otmp->spe = 3;
+			
+			for(int i = 0; i < 6; i++){
+				otmp = mksobj(BESTIAL_CLAW, FALSE, FALSE);
+				otmp->opoisoned = OPOISON_ACID;
+				set_material_gm(otmp, CHITIN);
+				fix_object(otmp);
+				otmp->spe = 3;
+				(void) mpickobj(mtmp, otmp);
+			}
+		break;
+	}
+	m_dowear(mtmp, TRUE);
+}
+
 struct permonst *
 grow_up(mtmp, victim)	/* `mtmp' might "grow up" into a bigger version */
 struct monst *mtmp, *victim;
@@ -10373,6 +10430,8 @@ struct monst *mtmp, *victim;
 		return (struct permonst *)0;
 	    }
 		set_mon_data(mtmp, newtype);	/* preserve intrinsics */
+		if(oldtype == PM_STRANGE_LARVA)
+			give_grown_equipment(mtmp);
 	    newsym(mtmp->mx, mtmp->my);		/* color may change */
 	    lev_limit = (int)mtmp->m_lev;	/* never undo increment */
 		if(newtype == PM_METROID_QUEEN && mtmp->mtame){

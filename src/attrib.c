@@ -1228,6 +1228,8 @@ int x;
 			tmp += u.ulevel/3;
 		}
 	} else if (x == A_DEX) {
+		if(mad_turn(MAD_HOST))
+			return 3;
 		if (
 			(uarmg && uarmg->oartifact == ART_GODHANDS)
 		) return(25);
@@ -1429,6 +1431,9 @@ struct monst *mon;
 		break;
 		case PM_AKKABISH_TANNIN:
 			u.umadness |= MAD_FORMICATION;
+		break;
+		case PM_SHALOSH_TANNAH:
+			u.umadness |= MAD_HOST;
 		break;
 		case PM_ALDINACH:
 			u.umadness |= MAD_REAL_DELUSIONS;

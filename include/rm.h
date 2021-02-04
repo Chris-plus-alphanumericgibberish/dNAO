@@ -204,6 +204,7 @@ enum {
     S_essence_trap,
     S_mummy_trap,
     S_switch,
+    S_flesh_hook,
 
 /* end traps, begin special effects */
 

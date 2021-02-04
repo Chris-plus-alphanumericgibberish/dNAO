@@ -421,6 +421,7 @@ const struct material materials[] = {
 	{LEATHER,		HI_LEATHER,		 15,/*old:   9*/		  5, 		3	},
 	{WOOD,			HI_WOOD,		 30,/*old:   5*/		  8, 		4	},
 	{BONE,			CLR_WHITE,		 25,/*old:  17*/		 20,		4	},
+	{CHITIN,		CLR_GREEN,		 25,/*old:  17*/		 20,		4	},
 	{SHELL_MAT,		CLR_WHITE,		 25,/*old:  27*/		 30,		5	},
 	{DRAGON_HIDE,	CLR_WHITE,		 35,/*old:  34*/		200,		8	},	/*note: color variable */
 	{IRON,			HI_METAL,		 80,/*old:  79*/		 10,		5	},

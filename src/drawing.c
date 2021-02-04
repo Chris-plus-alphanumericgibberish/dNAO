@@ -300,6 +300,7 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'^', "essence trap",	C(CLR_GREEN)},	/* "trap" */
 	{'^', "mummy trap",	C(CLR_YELLOW)},	/* trap */
 	{'^', "switch",	C(CLR_MAGENTA)},	/* "trap" */
+	{'^', "flesh hook",	C(CLR_GREEN)},	/* trap */
 	{'|', "wall",		C(CLR_GRAY)},	/* vbeam */
 	{'-', "wall",		C(CLR_GRAY)},	/* hbeam */
 	{'\\',"wall",		C(CLR_GRAY)},	/* lslant */
@@ -426,6 +427,7 @@ static glyph_t ibm_graphics[MAXPCHARS] = {
 	g_FILLER(S_essence_trap),
 	g_FILLER(S_mummy_trap),
 	g_FILLER(S_switch),
+	g_FILLER(S_flesh_hook),
 	0xb3,	/* S_vbeam:	meta-3, vertical rule */
 	0xc4,	/* S_hbeam:	meta-D, horizontal rule */
 	g_FILLER(S_lslant),
@@ -540,6 +542,7 @@ static glyph_t dec_graphics[MAXPCHARS] = {
 	g_FILLER(S_essence_trap),
 	g_FILLER(S_mummy_trap),
 	g_FILLER(S_switch),
+	g_FILLER(S_flesh_hook),
 	0xf8,	/* S_vbeam:	meta-x, vertical rule */
 	0xf1,	/* S_hbeam:	meta-q, horizontal rule */
 	g_FILLER(S_lslant),
@@ -652,6 +655,7 @@ static glyph_t mac_graphics[MAXPCHARS] = {
 	g_FILLER(S_essence_trap),
 	g_FILLER(S_mummy_trap),
 	g_FILLER(S_switch),
+	g_FILLER(S_flesh_hook),
 	g_FILLER(S_vbeam),
 	g_FILLER(S_hbeam),
 	g_FILLER(S_lslant),
@@ -766,6 +770,7 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	g_FILLER(S_essence_trap),
 	g_FILLER(S_mummy_trap),
 	g_FILLER(S_switch),
+	g_FILLER(S_flesh_hook),
 	0x2502,	/* S_vbeam:	BOX DRAWINGS LIGHT VERTICAL */
 	0x2500,	/* S_hbeam:	BOX DRAWINGS LIGHT HORIZONTAL */
 	g_FILLER(S_lslant),
@@ -1123,6 +1128,7 @@ boolean is_rlevel;
 	    showsyms[S_essence_trap] = 0x04;
 	    showsyms[S_mummy_trap] = 0x04;
 	    showsyms[S_switch] = 0x04;
+	    showsyms[S_flesh_hook] = 0x04;
 #endif
 		monsyms[S_GHOST] = showsyms[S_litroom];
 	}

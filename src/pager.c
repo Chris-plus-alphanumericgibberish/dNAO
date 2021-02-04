@@ -221,7 +221,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 		int tt = t ? t->ttyp : NO_TRAP;
 
 		/* newsym lets you know of the trap, so mention it here */
-		if (tt == BEAR_TRAP || tt == PIT ||
+		if (tt == BEAR_TRAP || tt == FLESH_HOOK || tt == PIT ||
 			tt == SPIKED_PIT || tt == WEB)
 		    Sprintf(eos(buf), ", trapped in %s",
 			    an(defsyms[trap_to_defsym(tt)].explanation));
@@ -1987,6 +1987,7 @@ get_description_of_damage_type(uchar id)
 	case AD_SPHR: return "create elemental spheres";
 	case AD_DARK: return "dark";
 	case AD_LRVA: return "implant larva";
+	case AD_HOOK: return "flesh hook";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

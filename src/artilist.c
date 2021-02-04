@@ -1023,7 +1023,7 @@ A("Soulmirror",						PLATE_MAIL,			(const char *)0,
 
 /* wearer gets a 1d4 poison sting */
 A("The Scorpion Carapace",			SCALE_MAIL,			(const char *)0,
-	3000L, BONE, MZ_DEFAULT, WT_DEFAULT,
+	3000L, CHITIN, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_D, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
@@ -1853,7 +1853,7 @@ A("Spidersilk",						DROVEN_CHAIN_MAIL,	(const char *)0,
 
 /* needs encyc entry */
 A("The Webweaver's Crook",			FAUCHARD,			(const char *)0,
-	5000L, BONE, MZ_DEFAULT, WT_DEFAULT,
+	5000L, CHITIN, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, PM_DROW, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 0), (ARTA_POIS),

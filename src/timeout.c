@@ -172,7 +172,7 @@ phasing_dialogue()
 #endif /* CONVICT */
 
 /* He is getting sicker and sicker prior to vomiting */
-static NEARDATA const char * const vomiting_texts[] = {
+static NEARDATA char * const vomiting_texts[] = {
 	"are feeling mildly nauseated.",	/* 14 */
 	"feel slightly confused.",		/* 11 */
 	"can't seem to think straight.",	/* 8 */
@@ -180,14 +180,25 @@ static NEARDATA const char * const vomiting_texts[] = {
 	"suddenly vomit!"			/* 2 */
 };
 
+/* He is getting sicker and sicker prior to vomiting */
+static NEARDATA char * const non_vomiting_texts[] = {
+	"are somehow feeling nauseated.",	/* 14 */
+	"feel slightly confused.",		/* 11 */
+	"can't seem to think straight.",	/* 8 */
+	"feel incredibly sick.",		/* 5 */
+	"suddenly retch!"			/* 2 */
+};
+
 STATIC_OVL void
 vomiting_dialogue()
 {
 	register long i = (Vomiting & TIMEOUT) / 3L;
-
+	
 	if ((((Vomiting & TIMEOUT) % 3L) == 2) && (i >= 0)
 	    && (i < SIZE(vomiting_texts)))
-		You("%s", vomiting_texts[SIZE(vomiting_texts) - i - 1]);
+		You("%s", umechanoid ? 
+				non_vomiting_texts[SIZE(non_vomiting_texts) - i - 1] : 
+				vomiting_texts[SIZE(vomiting_texts) - i - 1] );
 
 	switch ((int) i) {
 	case 0:

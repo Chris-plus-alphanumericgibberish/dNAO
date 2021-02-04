@@ -1658,6 +1658,25 @@ karemade:
 				}
 			}
 			
+			if(mad_turn(MAD_HOST)){
+				if(!Vomiting && roll_madness(MAD_HOST)){
+					static const char *hoststrings[] = {
+						"wiggling",
+						"twitching",
+						"squirming",
+						"kicking",
+						"vibrating",
+						"rumbling",
+						"turning",
+						"quivering",
+						"undulating",
+						"convulsing",
+						"breathing"
+					};
+					You("feel it %s inside your body!", hoststrings[rn2(SIZE(hoststrings))]);
+					make_vomiting(Vomiting+49+d(4,11), TRUE);
+				}
+			}
 			if(u.utaneggs){
 				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
 					u.utaneggs--;
@@ -3445,27 +3464,28 @@ printAttacks(buf, ptr)
 		"[[Create spheres]]",	/*127*/
 		"[[Dark]]",				/*128*/
 		"[[Implant egg]]",		/*129*/
+		"[[Flesh hook]]",		/*130*/
 		// "[[ahazu abduction]]",	/**/
-		"[[stone choir]]",		/*129*/
-		"[[water vampire]]",	/*130*/
-		"[[bloody fangs]]",		/*131*/
-		"[[item freeing]]",		/*132*/
-		"[[rainbow feathers]]",	/*133*/
+		"[[stone choir]]",		/* */
+		"[[water vampire]]",	/* */
+		"[[bloody fangs]]",		/* */
+		"[[item freeing]]",		/* */
+		"[[rainbow feathers]]",	/* */
 		// "[[Vorlon explosion]]",	/*NA*/
-		"[[cold explosion]]",	/*134*/
-		"[[fire explosion]]",	/*135*/
-		"[[shock explosion]]",	/*136*/
-		"[[physical explosion]]",/*137*/
+		"[[cold explosion]]",	/* */
+		"[[fire explosion]]",	/* */
+		"[[shock explosion]]",	/* */
+		"[[physical explosion]]",/* */
 		// "[[Vorlon missile]]",	/*NA*/
-		"[[Warmachine missile]]",/*138*/
-		"[[clerical spell]]",	/*139*/
-		"[[mage spell]]",		/*140*/
-		"[[random breath type]]",/*141*/
-		"[[random gaze type]]",	/*142*/
-		"[[random elemental gaze]]",/*143*/
-		"[[Amulet theft]]",		/*144*/
-		"[[Intrinsic theft]]",	/*145*/
-		"[[Quest Artifact theft]]"/*146*/
+		"[[Warmachine missile]]",/* */
+		"[[clerical spell]]",	/* */
+		"[[mage spell]]",		/* */
+		"[[random breath type]]",/* */
+		"[[random gaze type]]",	/* */
+		"[[random elemental gaze]]",/* */
+		"[[Amulet theft]]",		/* */
+		"[[Intrinsic theft]]",	/* */
+		"[[Quest Artifact theft]]"/* */
 	};
 	for(i = 0; i<6; i++){
 		attk = &ptr->mattk[i];

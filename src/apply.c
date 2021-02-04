@@ -2047,6 +2047,11 @@ int magic; /* 0=Physical, otherwise skill level */
 			}
 		    break;
 		  }
+		case TT_FLESH_HOOK: {
+		    You("rip yourself free of the flesh hook!  Ouch!");
+			losehp(d(13,3), "tearing free from a flesh hook", KILLED_BY);
+		    break;
+		  }
 		case TT_PIT:
 		    You("leap from the pit!");
 		    break;

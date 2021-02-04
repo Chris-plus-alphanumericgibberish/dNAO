@@ -1171,6 +1171,30 @@ register struct monst *mtmp;
 			return 0;
 		}
 	}
+	if(mtmp->mtyp == PM_SHALOSH_TANNAH && !rn2(9)){
+		struct monst *tmpm;
+		for(int i = rnd(3); i > 0; i--){
+			tmpm = makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
+			if(tmpm){
+				switch(rn2(4)){
+					case 0:
+					tmpm->mvar_tanninType = PM_VROCK;
+					break;
+					case 1:
+					tmpm->mvar_tanninType = PM_HEZROU;
+					break;
+					case 2:
+					tmpm->mvar_tanninType = PM_NALFESHNEE;
+					break;
+					case 3:
+					tmpm->mvar_tanninType = PM_MARILITH;
+					tmpm->female = 1;
+					break;
+				}
+			}
+		}
+	}
+	
 	
 	if(mdat->mtyp == PM_OONA && !mtmp->mspec_used){
 		nearby = FALSE;

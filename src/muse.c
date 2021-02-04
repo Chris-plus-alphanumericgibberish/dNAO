@@ -426,7 +426,7 @@ struct monst *mtmp;
 	/* kludge to cut down on trap destruction (particularly portals) */
 	t = t_at(x,y);
 	if (t && (t->ttyp == PIT || t->ttyp == SPIKED_PIT ||
-		  t->ttyp == WEB || t->ttyp == BEAR_TRAP))
+		  t->ttyp == WEB || t->ttyp == BEAR_TRAP || t->ttyp == FLESH_HOOK))
 		t = 0;		/* ok for monster to dig here */
 
 #define nomore(x) if(m.has_defense==x) continue;

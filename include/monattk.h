@@ -191,6 +191,7 @@
 #define AD_DARK     128 /* Does extra damage to mortal races */
 
 #define AD_LRVA     129 /* Implants eggs (tannin special attack) */
+#define AD_HOOK     130 /* Flesh hooks (imobalize target) */
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
