@@ -9839,7 +9839,7 @@ dosymbiotic_equip()
 }
 
 void
-dogoat_tentacles()
+do_passive_attacks()
 {
 	struct monst *mtmp;
 	struct obj *armor;
@@ -9863,6 +9863,9 @@ dogoat_tentacles()
 			continue;
 		if(is_goat_tentacle_mon(mtmp) && !mtmp->mappearance && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK))
 			dogoat_mon(mtmp);
+		if(mtmp->mtyp == PM_NACHASH_TANNIN){
+			donachash(mtmp);
+		}
 	}
 }
 

@@ -2578,6 +2578,48 @@ meatobj(mtmp)		/* for gelatinous cubes */
 }
 
 void
+mvanishobj(mtmp, x, y)		/* for nachash tanninim */
+	register struct monst *mtmp;
+	int x, y;
+{
+	register struct obj *otmp, *otmp2;
+	struct permonst *ptr;
+	int poly, grow, heal, count = 0, ecount = 0;
+	char buf[BUFSZ];
+
+	buf[0] = '\0';
+
+	/* Engulfs everything */
+	for (otmp = level.objects[x][y]; otmp; otmp = otmp2) {
+	    otmp2 = otmp->nexthere;
+		if (!(otmp->otyp == MAGIC_CHEST && otmp->obolted) &&
+				    otmp != uball && otmp != uchain
+		){
+			++ecount;
+			if (ecount == 1) {
+				Sprintf(buf, "%s into %s shadow.", Tobjnam(otmp,"fall"), s_suffix(mon_nam(mtmp)));
+			} else if (ecount == 2){
+				Sprintf(buf, "Some objects fall into %s shadow.", s_suffix(mon_nam(mtmp)));
+			}
+			if(otmp == uball){
+				unpunish();
+			}
+			if(otmp == uchain){
+				unpunish();	/* frees uchain */
+				continue; /* move to next */
+			}
+			obj_extract_self(otmp);
+			(void) mpickobj(mtmp, otmp);	/* slurp */
+	    }
+	    newsym(x, y);
+	}
+	if (ecount > 0) {
+	    if (cansee(mtmp->mx, mtmp->my) && flags.verbose && buf[0])
+			pline("%s", buf);
+	}
+}
+
+void
 mpickgold(mtmp)
 	register struct monst *mtmp;
 {
