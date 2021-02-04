@@ -408,6 +408,18 @@
 #define is_domestic(ptr)	(((ptr)->mflagst & MT_DOMESTIC) != 0L)
 #define is_fey(ptr)			(((ptr)->mflagsa & MA_FEY) != 0L)
 #define is_demon(ptr)		(((ptr)->mflagsa & MA_DEMON) != 0L)
+#define is_ancient(ptr)		((ptr)->mtyp == PM_ANCIENT_OF_VITALITY \
+							|| (ptr)->mtyp == PM_ANCIENT_OF_ICE \
+							|| (ptr)->mtyp == PM_ANCIENT_OF_CORRUPTION \
+							|| (ptr)->mtyp == PM_ANCIENT_OF_DEATH \
+							|| (ptr)->mtyp == PM_BAALPHEGOR \
+							)
+#define is_tannin(ptr)		((ptr)->mtyp >= PM_AKKABISH_TANNIN \
+							|| (ptr)->mtyp <= PM_SARTAN_TANNIN \
+							|| (ptr)->mtyp == PM_PALE_NIGHT \
+							|| (ptr)->mtyp == PM_DAGON \
+							|| (ptr)->mtyp == PM_OBOX_OB \
+							)
 #define is_primordial(ptr)	(((ptr)->mflagsa & MA_PRIMORDIAL) != 0L)
 #define is_keter(ptr)		((ptr)->mlet == S_KETER)
 #define is_angel(ptr)		((((ptr)->mflagsa & MA_MINION) != 0L) && ((ptr)->mlet == S_LAW_ANGEL || (ptr)->mlet == S_NEU_ANGEL || (ptr)->mlet == S_CHA_ANGEL))

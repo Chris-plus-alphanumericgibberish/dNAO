@@ -8336,6 +8336,8 @@ register int	mmflags;
 //	    mtmp->mhpmax = mtmp->mhp = 2*(ptr->mlevel - 6);
 	    mtmp->mhpmax = mtmp->mhp = 8*(ptr->mlevel);
 	    // mtmp->m_lev = mtmp->mhp / 4;	/* approximation */
+	} else if (is_ancient(mtmp) || is_tannin(mtmp)) {
+		mtmp->mhpmax = mtmp->mhp = 8*(ptr->mlevel);
 	} else if (ptr->mlet == S_DRAGON && mndx >= PM_GRAY_DRAGON) {
 	    /* adult dragons */
 	    mtmp->mhpmax = mtmp->mhp = (int) (In_endgame(&u.uz) ?
