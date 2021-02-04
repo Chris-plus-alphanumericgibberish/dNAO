@@ -260,7 +260,7 @@ doread()
 						break;
 					} else if (spellid(i) == NO_SPELL)  {
 						spl_book[i].sp_id = SPE_IDENTIFY;
-						spl_book[i].sp_lev = objects[SPE_CONE_OF_COLD].oc_level;
+						spl_book[i].sp_lev = objects[SPE_IDENTIFY].oc_level;
 						spl_book[i].sp_know = 20000;
 						You("learn to cast Identify!");
 						break;
