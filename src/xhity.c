@@ -3345,6 +3345,7 @@ int flat_acc;
 	/* find defender's AC */
 	/* ignore worn armor? */
 	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && (melee || thrust)) ||
+		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(weapon && arti_shining(weapon)) ||
 		(melee && attk->aatyp == AT_TUCH) ||
 		(melee && attk->aatyp == AT_VINE) ||
@@ -10826,6 +10827,7 @@ int vis;
 				change_usanity(-1*dmg, TRUE);
 				xdamagey(magr, mdef, attk, dmg*10);
 			}
+			u.umadness |= MAD_SPIRAL;
 		}
 		break;
 
@@ -12820,6 +12822,7 @@ int vis;						/* True if action is at all visible to the player */
 	phase_armor = (
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
+		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(attk && attk->aatyp == AT_SRPR && attk->aatyp != AD_BLUD) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
 		);

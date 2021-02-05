@@ -1298,10 +1298,10 @@ register struct monst *mtmp;
 		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
 	) (void) tactics(mtmp);
 	
-	// if(mdat->mtyp == PM_GREAT_CTHULHU && !rn2(20)){
-		// (void) tactics(mtmp);
-		// return 0;
-	// }
+	if(mdat->mtyp == PM_GREAT_CTHULHU && !rn2(20)){
+		if(tactics(mtmp))
+			return 0;
+	}
 	
 	/* check distance and scariness of attacks */
 	distfleeck(mtmp,&inrange,&nearby,&scared);

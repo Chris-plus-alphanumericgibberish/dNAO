@@ -2587,9 +2587,12 @@ struct monst *magr;
 		bas_udr += 3;
 	
 	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
-	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU)){
+	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU || mad_monster_turn(magr, MAD_NON_EUCLID))){
 		arm_udr = 0;
-		nat_udr = 0;
+		if(undiffed_innards(youracedata))
+			nat_udr /= 2;
+		else if(!no_innards(youracedata) && !removed_innards(youracedata))
+			nat_udr = 0;
 	}
 	
 	/* Combine into total */

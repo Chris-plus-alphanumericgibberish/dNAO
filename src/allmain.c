@@ -1658,6 +1658,14 @@ karemade:
 				}
 			}
 			
+			//Spiraling madness: abuse Wis, and lower sanity on double-trigger
+			if(roll_madness(MAD_SPIRAL)){
+				exercise(A_WIS, FALSE);
+				exercise(A_WIS, FALSE);
+				exercise(A_WIS, FALSE);
+				if(roll_madness(MAD_SPIRAL))
+					change_usanity(-1, FALSE);
+			}
 			if(mad_turn(MAD_HOST)){
 				if(!Vomiting && roll_madness(MAD_HOST)){
 					static const char *hoststrings[] = {
