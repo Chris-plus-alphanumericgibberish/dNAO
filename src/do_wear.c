@@ -2366,13 +2366,13 @@ find_ac()
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
 	
 	if(uwep){
-		if((is_rapier(uwep) && !arti_shining(uwep))
-				) uac -= max(
-					min(
-					(ACURR(A_DEX)-13)/4,
-					P_SKILL(weapon_type(uwep))-1
-					)
-				,0);
+		if((is_rapier(uwep) && !arti_shining(uwep)))
+			uac -= max(
+				min(
+				(ACURR(A_DEX)-13)/4,
+				P_SKILL(weapon_type(uwep))-1
+				)
+			,0);
 		if(uwep->oartifact == ART_TOBIUME || uwep->oartifact == ART_MASAMUNE)
 			uac -= max(uwep->spe,0);
 		if(uwep->otyp == NAGINATA && !uarms){
@@ -2588,9 +2588,12 @@ struct monst *magr;
 		bas_udr += 3;
 	
 	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
-	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU)){
+	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU || mad_monster_turn(magr, MAD_NON_EUCLID))){
 		arm_udr = 0;
-		nat_udr = 0;
+		if(undiffed_innards(youracedata))
+			nat_udr /= 2;
+		else if(!no_innards(youracedata) && !removed_innards(youracedata))
+			nat_udr = 0;
 	}
 	
 	/* Combine into total */
@@ -3186,7 +3189,10 @@ register struct obj *atmp;
 	register struct obj *otmp;
 #define DESTROY_ARM(o) ((otmp = (o)) != 0 && \
 			(!atmp || atmp == otmp))
-
+	
+	if(Preservation)
+		return 0;
+	
 	if (DESTROY_ARM(uarmc)) {
 		if((!obj_resists(otmp, 0, 100))){
 			if (donning(otmp)) cancel_don();
@@ -3352,6 +3358,9 @@ register struct obj *atmp;
 			(!atmp || atmp == otmp) && \
 			(!obj_resists(otmp, 0, 90)))
 
+	if(Preservation)
+		return 0;
+	
 	if (DESTROY_ARM(uarmc)) {
 		if (donning(otmp)) cancel_don();
 		Your("%s is torn to shreds!",
@@ -3591,6 +3600,9 @@ register struct obj *atmp;
 			(!atmp || atmp == otmp) && \
 			(!obj_resists(otmp, 0, 90)))
 
+	if(Preservation)
+		return 0;
+	
 	if (DESTROY_ARM(uarmc)) {
 		if (donning(otmp)) cancel_don();
 		pline("The tentacles tear your cloak to shreds!");

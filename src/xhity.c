@@ -3345,6 +3345,7 @@ int flat_acc;
 	/* find defender's AC */
 	/* ignore worn armor? */
 	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && (melee || thrust)) ||
+		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(weapon && arti_shining(weapon)) ||
 		(melee && attk->aatyp == AT_TUCH) ||
 		(melee && attk->aatyp == AT_VINE) ||
@@ -5429,7 +5430,7 @@ boolean ranged;
 					killer_format = NO_KILLER_PREFIX;
 					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 				}
-				else {
+				else if(!Preservation){
 					/* destroy the helmet */
 					if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON)){
 						if (youdef)
@@ -5515,22 +5516,25 @@ boolean ranged;
 					break;
 				}
 			}
+			if(Preservation){
+				pline("But, no harm is done!");
+			} else {
+				int i = 1;
+				if (pa->mtyp == PM_DEMOGORGON)
+					i += rnd(4);
 
-			int i = 1;
-			if (pa->mtyp == PM_DEMOGORGON)
-				i += rnd(4);
-
-			for (; i>0; i--){
-				if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
-					damage_item(otmp);
-				}
-				else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
-					if (youdef)
-						claws_destroy_arm(otmp);
-					else
-						claws_destroy_marm(mdef, otmp);
-					/* exit armor-destroying loop*/
-					break;
+				for (; i>0; i--){
+					if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
+						damage_item(otmp);
+					}
+					else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
+						if (youdef)
+							claws_destroy_arm(otmp);
+						else
+							claws_destroy_marm(mdef, otmp);
+						/* exit armor-destroying loop*/
+						break;
+					}
 				}
 			}
 			/* make a physical attack without hitmsg */
@@ -10831,6 +10835,7 @@ int vis;
 				change_usanity(-1*dmg, TRUE);
 				xdamagey(magr, mdef, attk, dmg*10);
 			}
+			u.umadness |= MAD_SPIRAL;
 		}
 		break;
 
@@ -12825,6 +12830,7 @@ int vis;						/* True if action is at all visible to the player */
 	phase_armor = (
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
+		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(attk && attk->aatyp == AT_SRPR && attk->aatyp != AD_BLUD) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
 		);

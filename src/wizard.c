@@ -264,7 +264,7 @@ strategy(mtmp)
 {
 	long strat, dstrat;
 
-	if (!is_covetous(mtmp->data) ||
+	if (!(is_covetous(mtmp->data) || mtmp->mtyp == PM_GREAT_CTHULHU) ||
 		/* perhaps a shopkeeper has been polymorphed into a master
 		   lich; we don't want it teleporting to the stairs to heal
 		   because that will leave its shop untended */
@@ -288,7 +288,15 @@ strategy(mtmp)
 	    case 3:	dstrat = STRAT_NONE;
 			break;
 	}
-
+	
+	//I don't think the MT_ matters (other than it can't be 0), but the bell is thematic for Cthulhu anyway
+	if(mtmp->mtyp == PM_GREAT_CTHULHU){
+		if(rn2(4) && rn2(mtmp->mhpmax) < mtmp->mhp)
+			return STRAT(STRAT_PLAYER, u.ux, u.uy, MT_WANTSBELL);
+		else
+			return dstrat;
+	}
+	
 	if(flags.made_amulet)
 	    if((strat = target_on(MT_WANTSAMUL, mtmp)) != STRAT_NONE)
 			return(strat);
@@ -328,6 +336,15 @@ tactics(mtmp)
 
 	switch (strat) {
 	    case STRAT_HEAL:	/* hide and recover */
+		if(mtmp->mtyp == PM_GREAT_CTHULHU){
+			if(canseemon(mtmp))
+				pline("Noxious gasses swirl around %s!", mon_nam(mtmp));
+			create_gas_cloud(mtmp->mx, mtmp->my, 2, 30, FALSE);
+			mtmp->mhp = mtmp->mhpmax;
+			mtmp->mflee = 0;
+			mtmp->mfleetim = 0;
+			return 1;
+		}
 		/* if wounded, hole up on or near the stairs (to block them) */
 		/* unless, of course, there are no stairs (e.g. endlevel) */
 		mtmp->mavenge = 1; /* covetous monsters attack while fleeing */
@@ -361,6 +378,17 @@ tactics(mtmp)
 		/* fall through :-) */
 
 	    case STRAT_NONE:	/* harrass */
+		if(mtmp->mtyp == PM_GREAT_CTHULHU){
+			struct monst *spawn;
+			if(!Blind)
+				pline("Noxious gasses swirl around you!");
+			create_gas_cloud(u.ux, u.uy, 2, 30, FALSE);
+			spawn = makemon(&mons[PM_STAR_SPAWN], u.ux, u.uy, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+			if(spawn){
+				mark_mon_as_summoned(spawn, mtmp, ESUMMON_PERMANENT, 0);
+			}
+			return 0;
+		}
 		if (!rn2((!mtmp->mflee || mtmp->mtyp == PM_BANDERSNATCH) ? 5 : 33)){
 			if(mtmp->mtyp == PM_AGLAOPE){
 				coord cc;
@@ -413,9 +441,18 @@ tactics(mtmp)
 					return(0);
 				}
 			} else if(mtmp->mtyp == PM_GREAT_CTHULHU){
-				pline("%s steps through strange angles.",Monnam(mtmp));
+				boolean saw = FALSE;
+				if(sensemon(mtmp) || canseemon(mtmp)){
+					pline("%s steps through strange angles.",Monnam(mtmp));
+					u.umadness |= MAD_NON_EUCLID;
+					saw = TRUE;
+				}
 				mofflin(mtmp);
-				return(0);
+				if(!saw && (sensemon(mtmp) || canseemon(mtmp))){
+					pline("%s steps through strange angles.",Monnam(mtmp));
+					u.umadness |= MAD_NON_EUCLID;
+				}
+				return 1;
 			}
 			if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||

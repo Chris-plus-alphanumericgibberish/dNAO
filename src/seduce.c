@@ -987,7 +987,7 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &bodyblow, -1)){
 					You_feel("the tentacles squirm under your underclothes.");
-					if( d(1,100) > 15){
+					if( d(1,100) > 15 && !Preservation){
 						pline("The tentacles begin to tear at your underclothes!");
 						 if(uarmu->spe > 1){
 							for(i=rn2(4); i>=0; i--)
@@ -1024,7 +1024,7 @@ int dmg;
 			 n--;
 			 if(!slips_free(mon, &youmonst,  &bodyblow, -1)){
 				You_feel("the tentacles squirm under your armor.");
-				if( d(1,100) > 25){
+				if( d(1,100) > 25 && !Preservation){
 					pline("The tentacles begin to tear at your armor!");
 					 if(uarm->spe > 1){
 						for(i=rn2(4); i>=0; i--)
@@ -1056,7 +1056,7 @@ int dmg;
 			n--;
 			if(!slips_free(mon, &youmonst,  &bodyblow, -1)){
 				You_feel("the tentacles work their way under your cloak.");
-				if( d(1,100) > 66){
+				if( d(1,100) > 66 && !Preservation){
 					pline("The tentacles begin to tear at the cloak!");
 					 if(uarmc->spe > 1){
 						for(i=rn2(4); i>=0; i--)
@@ -1094,7 +1094,7 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &legblast, -1)){
 					You_feel("the tentacles squirm into your boots.");
-					if( d(1,100) > 66){
+					if( d(1,100) > 66 && !Preservation){
 						pline("The tentacles begin to tear at your boots!");
 						 if(uarmf->spe > 1){
 							for(i=rn2(4); i>=0; i--)
@@ -1151,7 +1151,7 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &handshit, -1)){
 					You_feel("the tentacles squirm into your gloves.");
-					if( d(1,40) <= ACURR(A_STR) || uwep){
+					if( (d(1,40) <= ACURR(A_STR) || uwep) && !Preservation){
 						pline("The tentacles begin to tear at your gloves!");
 						 if(uarmg->spe > 1){
 							for(i=rn2(4); i>=0; i--)
@@ -1207,7 +1207,7 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &headshot, -1)){
 					You_feel("the tentacles squirm under your helmet.");
-					if( d(1,100) > 90){
+					if( d(1,100) > 90 && !Preservation){
 						pline("The tentacles begin to tear at your helmet!");
 						 if(uarmh->spe > 1){
 							for(i=rn2(4); i>=0; i--)
@@ -1511,7 +1511,10 @@ boolean helpless;
 		Sprintf(qbuf,"She tries to rip open your %s!",
 			str);
 		her_strength -= ACURR(A_STR);
-		for(; her_strength >= 0; her_strength--){
+		if(Preservation){
+			pline("But, no harm is done!");
+		} 
+		else for(; her_strength >= 0; her_strength--){
 			if(obj->spe > -1*a_acdr(objects[(obj)->otyp])){
 				damage_item(obj);
 //				Your("%s less effective.", aobjnam(obj, "seem"));

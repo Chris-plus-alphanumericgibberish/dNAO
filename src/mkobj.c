@@ -1306,9 +1306,12 @@ int mkflags;
 		if (quest_equipment(otmp) && !otmp->oartifact) {
 			otmp->objsize = (&mons[urace.malenum])->msize;
 			if (otmp->oclass == ARMOR_CLASS){
-				if (is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-				else if (is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
-				else if (is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+				if (is_suit(otmp) || otmp->otyp == BODYGLOVE) 
+					otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+				else if (is_helmet(otmp)) 
+					otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+				else if (is_shirt(otmp)) 
+					otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
 			}
 		}
 	}

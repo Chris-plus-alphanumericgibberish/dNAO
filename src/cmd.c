@@ -2019,6 +2019,12 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if (u.umadness&MAD_DREAMS){
 			enl_msg("Sometimes, you ", "pass out", "passed out", " and dream of strange cities, suffering damage, stunning, and reduced sanity");
 		}
+		if (u.umadness&MAD_NON_EUCLID){
+			enl_msg("Sometimes, monsters ", "strike", "struck", " at you from strange angles");
+		}
+		if (u.umadness&MAD_SPIRAL){
+			enl_msg("Your maddness ", "is", "was", " spiraling out of control");
+		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
 			enl_msg("Sometimes, you ", "will fail", "failed", " to attack worms and tentacled monsters");
 			enl_msg("You ", "take", "took", " increased damage from worms and tentacles");
@@ -2782,6 +2788,12 @@ int final;
 		if (u.umadness&MAD_DREAMS){
 			dump("  ", "You dreamt of strange cities");
 		}
+		if (u.umadness&MAD_NON_EUCLID){
+			dump("  ", "Monsters struck at you from strange angles");
+		}
+		if (u.umadness&MAD_SPIRAL){
+			dump("  ", "Your madness spiraled out of control");
+		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
 			dump("  ", "You had an irrational fear of squirming things");
 		}
@@ -3275,6 +3287,14 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_DREAMS){
 			putstr(en_win, 0, "You dream of strange cities.");
+			messaged++;
+		}
+		if (u.umadness&MAD_NON_EUCLID){
+			putstr(en_win, 0, "Sometimes, monsters strike at you from strange angles");
+			messaged++;
+		}
+		if (u.umadness&MAD_SPIRAL){
+			putstr(en_win, 0, "Your maddness is spiraling out of control");
 			messaged++;
 		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){

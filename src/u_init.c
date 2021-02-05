@@ -2498,40 +2498,42 @@ u_init()
 	}
 
 	dungeon_topology.eprecursor_typ = rnd(8);
-	if(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend){
-		if (rn2(2)) {
-			flags.HDbreath = AD_MAGM;
-			HAntimagic |= (FROMRACE|FROMOUTSIDE);
+	if(Race_if(PM_HALF_DRAGON)){
+		if(Role_if(PM_NOBLEMAN) && flags.initgend){
+			if (rn2(2)) {
+				flags.HDbreath = AD_MAGM;
+				HAntimagic |= (FROMRACE|FROMOUTSIDE);
+			}
+			else {
+				flags.HDbreath = AD_COLD;
+				HCold_resistance |= (FROMRACE|FROMOUTSIDE);
+			}
+		} else switch(rnd(6)){
+			case 1:
+				flags.HDbreath = AD_COLD;
+				HCold_resistance |= (FROMRACE|FROMOUTSIDE);
+			break;
+			case 2:
+				flags.HDbreath = AD_FIRE;
+				HFire_resistance |= (FROMRACE|FROMOUTSIDE);
+			break;
+			case 3:
+				flags.HDbreath = AD_SLEE;
+				HSleep_resistance |= (FROMRACE|FROMOUTSIDE);
+			break;
+			case 4:
+				flags.HDbreath = AD_ELEC;
+				HShock_resistance |= (FROMRACE|FROMOUTSIDE);
+			break;
+			case 5:
+				flags.HDbreath = AD_DRST;
+				HPoison_resistance |= (FROMRACE|FROMOUTSIDE);
+			break;
+			case 6:
+				flags.HDbreath = AD_ACID;
+				HAcid_resistance |= (FROMRACE|FROMOUTSIDE);
+			break;
 		}
-		else {
-			flags.HDbreath = AD_COLD;
-			HCold_resistance |= (FROMRACE|FROMOUTSIDE);
-		}
-	} else switch(rnd(6)){
-		case 1:
-			flags.HDbreath = AD_COLD;
-			HCold_resistance |= (FROMRACE|FROMOUTSIDE);
-		break;
-		case 2:
-			flags.HDbreath = AD_FIRE;
-			HFire_resistance |= (FROMRACE|FROMOUTSIDE);
-		break;
-		case 3:
-			flags.HDbreath = AD_SLEE;
-			HSleep_resistance |= (FROMRACE|FROMOUTSIDE);
-		break;
-		case 4:
-			flags.HDbreath = AD_ELEC;
-			HShock_resistance |= (FROMRACE|FROMOUTSIDE);
-		break;
-		case 5:
-			flags.HDbreath = AD_DRST;
-			HPoison_resistance |= (FROMRACE|FROMOUTSIDE);
-		break;
-		case 6:
-			flags.HDbreath = AD_ACID;
-			HAcid_resistance |= (FROMRACE|FROMOUTSIDE);
-		break;
 	}
 	/* Fix up the alignment quest nemesi */
 	mons[PM_OONA].mcolor = (u.oonaenergy == AD_FIRE) ? CLR_RED 

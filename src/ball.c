@@ -704,11 +704,13 @@ xchar x, y;
 				losehp(2, "leg damage from being pulled out of a bear trap",
 						KILLED_BY);
 				set_wounded_legs(side, rn1(100,50));
-				if(bootdamage > uarmf->spe){
-					claws_destroy_arm(uarmf);
-				}else{
-					for(; bootdamage >= 0; bootdamage--) drain_item(uarmf);
-					Your("boots are damaged!");
+				if(!Preservation){
+					if(bootdamage > uarmf->spe){
+						claws_destroy_arm(uarmf);
+					}else{
+						for(; bootdamage >= 0; bootdamage--) drain_item(uarmf);
+						Your("boots are damaged!");
+					}
 				}
 			}
 			else{

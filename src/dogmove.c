@@ -157,8 +157,7 @@ boolean check_if_better;
 	     otmp->otyp == FIRE_HORN ||
 	     otmp->otyp == UNICORN_HORN));
 
-    if (can_use)
-    {
+    if (can_use){
         /* arbitrary - greedy monsters keep any item you can use */
         if (likes_gold(mtmp->data)) return TRUE;
 		
@@ -166,18 +165,15 @@ boolean check_if_better;
 		if(mindless_mon(mtmp))
 			return TRUE;
 
-        if (otmp->oclass == ARMOR_CLASS)
-	{
-	    return !check_if_better || !is_better_armor(&youmonst, otmp);
-	}
-	else if (otmp->oclass == WAND_CLASS &&
-	         otmp->spe <= 0)
+        if (otmp->oclass == ARMOR_CLASS){
+			return !check_if_better || !is_better_armor(&youmonst, otmp);
+		}
+		else if (otmp->oclass == WAND_CLASS && otmp->spe <= 0)
             return FALSE;  /* used charges or was cancelled? */
-	else
-	{
-		/*Hold all useful items.  The player can take with #loot if needed*/
-		return TRUE;
-	}
+		else {
+			/*Hold all useful items.  The player can take with #loot if needed*/
+			return TRUE;
+		}
     }
 
     return FALSE;
