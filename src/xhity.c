@@ -5430,7 +5430,7 @@ boolean ranged;
 					killer_format = NO_KILLER_PREFIX;
 					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 				}
-				else {
+				else if(!Preservation){
 					/* destroy the helmet */
 					if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON)){
 						if (youdef)
@@ -5516,22 +5516,25 @@ boolean ranged;
 					break;
 				}
 			}
+			if(Preservation){
+				pline("But, no harm is done!");
+			} else {
+				int i = 1;
+				if (pa->mtyp == PM_DEMOGORGON)
+					i += rnd(4);
 
-			int i = 1;
-			if (pa->mtyp == PM_DEMOGORGON)
-				i += rnd(4);
-
-			for (; i>0; i--){
-				if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
-					damage_item(otmp);
-				}
-				else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
-					if (youdef)
-						claws_destroy_arm(otmp);
-					else
-						claws_destroy_marm(mdef, otmp);
-					/* exit armor-destroying loop*/
-					break;
+				for (; i>0; i--){
+					if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
+						damage_item(otmp);
+					}
+					else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
+						if (youdef)
+							claws_destroy_arm(otmp);
+						else
+							claws_destroy_marm(mdef, otmp);
+						/* exit armor-destroying loop*/
+						break;
+					}
 				}
 			}
 			/* make a physical attack without hitmsg */

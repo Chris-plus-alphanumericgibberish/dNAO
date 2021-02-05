@@ -3188,7 +3188,10 @@ register struct obj *atmp;
 	register struct obj *otmp;
 #define DESTROY_ARM(o) ((otmp = (o)) != 0 && \
 			(!atmp || atmp == otmp))
-
+	
+	if(Preservation)
+		return 0;
+	
 	if (DESTROY_ARM(uarmc)) {
 		if((!obj_resists(otmp, 0, 100))){
 			if (donning(otmp)) cancel_don();
@@ -3354,6 +3357,9 @@ register struct obj *atmp;
 			(!atmp || atmp == otmp) && \
 			(!obj_resists(otmp, 0, 90)))
 
+	if(Preservation)
+		return 0;
+	
 	if (DESTROY_ARM(uarmc)) {
 		if (donning(otmp)) cancel_don();
 		Your("%s is torn to shreds!",
@@ -3593,6 +3599,9 @@ register struct obj *atmp;
 			(!atmp || atmp == otmp) && \
 			(!obj_resists(otmp, 0, 90)))
 
+	if(Preservation)
+		return 0;
+	
 	if (DESTROY_ARM(uarmc)) {
 		if (donning(otmp)) cancel_don();
 		pline("The tentacles tear your cloak to shreds!");
