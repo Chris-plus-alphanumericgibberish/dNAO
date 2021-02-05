@@ -2365,13 +2365,13 @@ find_ac()
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
 	
 	if(uwep){
-		if((is_rapier(uwep) && !arti_shining(uwep))
-				) uac -= max(
-					min(
-					(ACURR(A_DEX)-13)/4,
-					P_SKILL(weapon_type(uwep))-1
-					)
-				,0);
+		if((is_rapier(uwep) && !arti_shining(uwep)))
+			uac -= max(
+				min(
+				(ACURR(A_DEX)-13)/4,
+				P_SKILL(weapon_type(uwep))-1
+				)
+			,0);
 		if(uwep->oartifact == ART_TOBIUME || uwep->oartifact == ART_MASAMUNE)
 			uac -= max(uwep->spe,0);
 		if(uwep->otyp == NAGINATA && !uarms){
