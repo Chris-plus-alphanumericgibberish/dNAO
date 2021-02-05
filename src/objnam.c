@@ -2884,6 +2884,16 @@ const char *oldstr;
 		Strcpy(spot-1, "oth");
 		goto bottom;
 	}
+	/* Hebrew (plural of tannin is tanninim */
+	if (len >= 6 && !strcmp(spot-5, "tannin")) {
+		Strcpy(spot, "nim");
+		goto bottom;
+	}
+	/* Hebrew (maybe-plural of tannah, which is maybe the feminine form of tan (NOT tannin)) */
+	if (len >= 6 && !strcmp(spot-5, "tannah")) {
+		Strcpy(spot-1, "oth");
+		goto bottom;
+	}
 
 	/* Elves (plural of alfr is alfar) */
 	if (len >= 4 && !strcmp(spot-3, "alfr")) {
