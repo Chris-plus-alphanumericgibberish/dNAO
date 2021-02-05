@@ -5834,7 +5834,10 @@ resizeArmor()
 			You("can't figure out how to make it fit.");
 			return FALSE;
 		}
-		otmp->bodytypeflag = (ptr->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (ptr->mflagsb&MB_BODYTYPEMASK);
+		if(otmp->otyp == BODYGLOVE)
+			otmp->bodytypeflag = (ptr->mflagsb&MB_BODYTYPEMASK);
+		else
+			otmp->bodytypeflag = (ptr->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (ptr->mflagsb&MB_BODYTYPEMASK);
 	}
 	else if (is_suit(otmp)){
 		//Check that the monster can actually have armor that fits it.
