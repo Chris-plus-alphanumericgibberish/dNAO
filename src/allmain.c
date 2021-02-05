@@ -1666,6 +1666,10 @@ karemade:
 				if(roll_madness(MAD_SPIRAL))
 					change_usanity(-1, FALSE);
 			}
+			if (u.usleep && u.usleep < monstermoves && roll_madness(MAD_FORMICATION)) {
+				multi = -1;
+				nomovemsg = "The crawling bugs awaken you.";
+			}
 			if(mad_turn(MAD_HOST)){
 				if(!Vomiting && roll_madness(MAD_HOST)){
 					static const char *hoststrings[] = {
