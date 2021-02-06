@@ -191,11 +191,21 @@
 #define AD_DARK     128 /* Does extra damage to mortal races */
 
 #define AD_LRVA     129 /* Implants eggs (tannin special attack) */
+#define AD_NPDS     133 /* Non-poison-based drain strength */
+#define AD_NPDD     134 /* Non-poison-based drain dexterity */
+#define AD_NPDR     135 /* Non-poison-based drain charisma */
+#define AD_NPDA     136 /* Non-poison-based drain all */
+
 #define AD_HOOK     130 /* Flesh hooks (imobalize target) */
+#define AD_MDWP     131 /* Mindwipe (amnesia-based leveldrain) */
+#define AD_SSTN     132 /* Slow stoning */
+#define AD_DOBT     137 /* Inflict doubt */
+#define AD_APCS     138 /* Revelatory whispers */
+
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	138
+#define AD_DUNSTAN	139
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

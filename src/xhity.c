@@ -330,7 +330,7 @@ int tary;
 		struck = 0,	/* hit at least once */
 		marinum = 0,/* number of AT_MARI weapons used */
 		subout = 0,	/* remembers what attack substitutions have been made for [magr]'s attack chain */
-		res[3];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
 	int attacklimit = 0;
 	int attacksmade = 0;
 	struct attack *attk;
@@ -532,6 +532,7 @@ int tary;
 	res[0] = MM_MISS;
 	res[1] = MM_MISS;
 	res[2] = MM_MISS;
+	res[3] = MM_MISS;
 	/* Now perform all attacks. */
 	do {
 		boolean dopassive_local = FALSE;
@@ -543,7 +544,8 @@ int tary;
 		tohitmod = 0;
 		/* reset result */
 		result = 0;
-		/* cycle res[] -- it should be the results of the previous 2 attacks */
+		/* cycle res[] -- it should be the results of the previous 3 attacks */
+		res[3] = res[2];
 		res[2] = res[1];
 		res[1] = res[0];
 		res[0] = MM_MISS;
@@ -2119,7 +2121,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		/* Illurien can only engulf targets she is stuck to */
 		(youdef && mdef && pa->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES && attk->aatyp == AT_ENGL && (u.ustuck != magr)) ||
 		/* Rend attacks only happen if the previous two attacks hit */
-		(attk->aatyp == AT_REND && (prev_res[1] == MM_MISS || prev_res[2] == MM_MISS)) ||
+		(attk->aatyp == AT_REND && 
+			(prev_res[1] == MM_MISS || prev_res[2] == MM_MISS || 
+			(magr->mtyp == PM_SARTAN_TANNIN && prev_res[3] == MM_MISS))) ||
 		/* Hugs attacks are similar, but will still happen if magr and mdef are stuck together */
 		(attk->aatyp == AT_HUGS && (prev_res[1] == MM_MISS || prev_res[2] == MM_MISS)
 			&& !(mdef && ((youdef && u.ustuck == magr) || (youagr && u.ustuck == mdef)))) ||
@@ -5278,7 +5282,7 @@ boolean ranged;
 			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* maybe drain CON */
-		if (uncancelled) {
+		if (notmcan) {
 			/* player-only */
 			if (youdef && ACURR(A_CON) > 3) {
 				(void)adjattrib(A_CON, -1, FALSE);
@@ -5290,6 +5294,104 @@ boolean ranged;
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 					return result;
 				/* otherwise continue to finish the attack (with physical damage) */
+			}
+		}
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
+	case AD_NPDS:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* maybe drain STR */
+		if (notmcan) {
+			/* player-only */
+			if (youdef && ACURR(A_STR) > 3) {
+				(void)adjattrib(A_STR, -1, FALSE);
+			}
+			/* monsters take d10 damage */
+			else {
+				result = xdamagey(magr, mdef, attk, rnd(10));
+				/* return early if cannot continue the attack */
+				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+					return result;
+				/* otherwise continue to finish the attack (with physical damage) */
+			}
+		}
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
+	case AD_NPDD:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* maybe drain DEX */
+		if (notmcan) {
+			/* player-only */
+			if (youdef && ACURR(A_DEX) > 3) {
+				(void)adjattrib(A_DEX, -1, FALSE);
+			}
+			/* monsters take d10 damage */
+			else {
+				result = xdamagey(magr, mdef, attk, rnd(10));
+				/* return early if cannot continue the attack */
+				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+					return result;
+				/* otherwise continue to finish the attack (with physical damage) */
+			}
+		}
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
+	case AD_NPDR:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* maybe drain CHA */
+		if (notmcan) {
+			/* player-only */
+			if (youdef && ACURR(A_CHA) > 3) {
+				(void)adjattrib(A_CHA, -1, FALSE);
+			}
+			/* monsters take d10 damage */
+			else {
+				result = xdamagey(magr, mdef, attk, rnd(10));
+				/* return early if cannot continue the attack */
+				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+					return result;
+				/* otherwise continue to finish the attack (with physical damage) */
+			}
+		}
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
+	case AD_NPDA:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* maybe drain all */
+		if (notmcan) {
+			for(int i = 0; i < A_MAX; i++){
+				/* player-only */
+				for(int j = 0; j < 2; j++) if(youdef && ACURR(i) > 3){
+					(void)adjattrib(i, -1, j == 1);
+				}
+				/* monsters take d10 damage */
+				else {
+					result = xdamagey(magr, mdef, attk, rnd(10));
+					/* return early if cannot continue the attack */
+					if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+						return result;
+					/* otherwise continue to finish the attack (with physical damage) */
+				}
 			}
 		}
 		/* make physical attack without hitmsg */
@@ -14251,8 +14353,10 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	res[0] = MM_MISS;
 	res[1] = MM_MISS;
 	res[2] = MM_MISS;
+	res[3] = MM_MISS;
 	do {
-		/* cycle res[] -- it should be the results of the previous 2 attacks */
+		/* cycle res[] -- it should be the results of the previous 3 attacks */
+		res[3] = res[2];
 		res[2] = res[1];
 		res[1] = res[0];
 		res[0] = MM_MISS;

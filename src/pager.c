@@ -2017,6 +2017,14 @@ get_description_of_damage_type(uchar id)
 	case AD_DARK: return "dark";
 	case AD_LRVA: return "implant larva";
 	case AD_HOOK: return "flesh hook";
+	case AD_MDWP: return "mindwipe";
+	case AD_SSTN: return "slow stoning";
+	case AD_NPDS: return "non-poison-based drain strength";
+	case AD_NPDD: return "non-poison-based drain dexterity";
+	case AD_NPDR: return "non-poison-based drain charisma";
+	case AD_NPDA: return "non-poison-based all attribute drain";
+	case AD_DOBT: return "agnosis infliction";
+	case AD_APCS: return "revelatory whispers";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";
@@ -2184,7 +2192,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			strcat(description, "\n");
 			struct attack * attk;
 			struct attack prev_attk;
-			int res[3];
+			int res[4];
 			int indexnum = 0;
 			int tohitmod = 0;
 			int subout = 0;
@@ -2192,6 +2200,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			res[0] = MM_MISS;
 			res[1] = MM_MISS;
 			res[2] = MM_MISS;
+			res[3] = MM_MISS;
 			do {
 				/* get next attack */
 				attk = getattk(mtmp, (struct monst *)0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod);

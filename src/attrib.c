@@ -1240,6 +1240,9 @@ int x;
 			tmp += u.ulevel/3;
 		}
 	} else if (x == A_CHA) {
+		if(u.umadness&MAD_ROTTING && !ClearThoughts){
+			tmp -= (Insanity)/5;
+		}
 	} else if (x == A_INT || x == A_WIS) {
 		/* yes, this may raise int/wis if player is sufficiently
 		 * stupid.  there are lower levels of cognition than "dunce".
@@ -1474,6 +1477,9 @@ struct monst *mon;
 		break;
 		case PM_NACHASH_TANNIN:
 			u.umadness |= MAD_SCIAPHILIA;
+		break;
+		case PM_SARTAN_TANNIN:
+			u.umadness |= MAD_ROTTING;
 		break;
 		case PM_ALDINACH:
 			u.umadness |= MAD_REAL_DELUSIONS;

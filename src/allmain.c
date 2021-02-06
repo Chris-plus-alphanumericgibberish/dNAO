@@ -1677,6 +1677,12 @@ karemade:
 					make_vomiting(Vomiting+49+d(4,11), TRUE);
 				}
 			}
+			if(roll_madness(MAD_ROTTING)){
+				if(roll_madness(MAD_ROTTING))
+					create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(6), FALSE); //Longer-lived smoke
+				else
+					create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(3), FALSE);
+			}
 			if(u.utaneggs){
 				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
 					u.utaneggs--;
@@ -3465,6 +3471,14 @@ printAttacks(buf, ptr)
 		"[[Dark]]",				/*128*/
 		"[[Implant egg]]",		/*129*/
 		"[[Flesh hook]]",		/*130*/
+		"[[Mindwipe]]",			/*131*/
+		"Slow [[petrifcation]]",/*132*/
+		"[[strength]] drain",	/*133*/
+		"[[dexterity]] drain",	/*134*/
+		"[[charisma]] drain",	/*135*/
+		"all attribute drain",	/*136*/
+		"inflict [[agnosis]]",	/*137*/
+		"revelatory whispers",	/*138*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */
