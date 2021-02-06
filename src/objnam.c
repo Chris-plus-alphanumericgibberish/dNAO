@@ -4279,7 +4279,7 @@ int wishflags;
 	if (strncmpi(bp, "sparkling lake", 14)) /* not a "sparkling lake" */
 	if (strncmpi(bp, "frosted lake", 12)) /* not a "frosted lake" */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
-	if (strncmpi(bp, "platinum dragon plate", 22)) /* not a "dragon" */
+	if (strncmpi(bp, "platinum dragon plate", 21)) /* not a "dragon" */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
 		int mntmptoo, mntmplen;	/* double check for rank title */
