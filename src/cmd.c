@@ -2035,6 +2035,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 				enl_msg("You ", "feel ", "felt ", buf);
 			}
 		}
+		if (u.umadness&MAD_THOUSAND_MASKS){
+			enl_msg("The God of the Thousand Masks ", "stalks", "stalked", " your every step");
+		}
 		if (u.umadness&MAD_FORMICATION){
 			enl_msg("You ", "are", "were", " distracted by invisible insects, lowering your skills and increasing spell failure");
 		}
@@ -2806,6 +2809,9 @@ int final;
 				dump("  ", buf);
 			}
 		}
+		if (u.umadness&MAD_THOUSAND_MASKS){
+			dump("  ", "The God of the Thousand Masks stalks you still");
+		}
 		if (u.umadness&MAD_FORMICATION){
 			dump("  ", "You were constantly distracted by the feeling of crawling insects");
 		}
@@ -3313,6 +3319,9 @@ resistances_enlightenment()
 				putstr(en_win, 0, buf);
 				messaged++;
 			}
+		}
+		if (u.umadness&MAD_THOUSAND_MASKS){
+			putstr(en_win, 0, "The God of the Thousand Masks stalks your every step");
 		}
 		if (u.umadness&MAD_FORMICATION){
 			putstr(en_win, 0, "You are distracted by the feeling of insects crawling over your body");

@@ -9964,7 +9964,7 @@ int	spc;
 	register int	first, last, num = 0;
 	int maxmlev, mask = (G_PLANES | G_NOHELL | G_HELL | G_NOGEN | G_UNIQ) & ~spc;
 
-	maxmlev = level_difficulty() >> 1;
+	maxmlev = (level_difficulty() + u.ulevel)/2+1;
 	if(class < 1 || class >= MAXMCLASSES) {
 	    impossible("mkclass called with bad class!");
 	    return((struct permonst *) 0);
@@ -10089,7 +10089,7 @@ mkzombie()
 	register int	first, last, num = 0;
 	int maxmlev;
 
-	maxmlev = level_difficulty() >> 1;
+	maxmlev = (u.ulevel + level_difficulty())/2;
 	if(Is_orcus_level(&u.uz)){
 		if(!rn2(2)){
 			skeletpm = orcusSkeletons[rn2(SIZE(orcusSkeletons))];

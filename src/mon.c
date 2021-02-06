@@ -4200,6 +4200,7 @@ struct monst *mtmp;
 				pline("The escaping phantasmal mist condenses into %s.", nyar_description[nyar_form]);
 				pline("%s tears off the right half of %s face before rising through the ceiling!", nyar_name[nyar_form], s_suffix(Monnam(mtmp)));
 				change_usanity(u_sanity_loss_nyar(), TRUE);
+				u.umadness |= MAD_THOUSAND_MASKS;
 			}
 			set_mon_data(mtmp, PM_GHOUL_QUEEN_NITOCRIS);
 			//Surprisingly, this is an effective means of life saving!
@@ -4259,6 +4260,7 @@ register struct monst *mtmp;
 		pline("%s twists and morphs into %s.", Monnam(mtmp), nyar_description[nyar_form]);
 		pline("%s rises through the ceiling!", nyar_name[nyar_form]);
 		change_usanity(u_sanity_loss_nyar(), TRUE);
+		u.umadness |= MAD_THOUSAND_MASKS;
 	}
 	
 
@@ -4608,6 +4610,28 @@ boolean was_swallowed;			/* digestion */
 		mtmp->mhp =  mtmp->mhpmax;
 	}
 	
+	if(!get_mx(mon, MX_ESUM) && roll_madness(MAD_THOUSAND_MASKS)){
+		struct monst *maskmon = makemon(mkclass(S_UMBER, G_NOHELL|G_HELL), mon->mx, mon->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
+		if(maskmon){
+			struct obj *mask;
+			mask = mksobj(MASK, MKOBJ_NOINIT);
+			mask->corpsenm = mon->mtyp;
+			doMaskStats(mask);
+			if(canseemon(maskmon))
+				pline("%s takes off %s %s!", The(mon_nam(maskmon)), mhis(maskmon), xname(mask));
+			if(maskmon->mpeaceful){
+				maskmon->mpeaceful = 0;
+				set_malign(maskmon);
+				newsym(maskmon->mx, maskmon->my);
+			}
+			mark_mon_as_summoned(maskmon, (struct monst *)0, max(Insanity, 10)/5, 0);//2 to 20
+			//Don't hand the monster the mask untill AFTER the summoning is all initialized, so that the mask gets left.
+			mpickobj(maskmon, mask);
+			maskmon->mspec_used = 0;
+			if(youmonst.movement >= 24)
+				maskmon->movement = 12;
+		}
+	}
 	/* Gas spores always explode upon death */
 	for(i = 0; i < NATTK; i++) {
 		if(mdat->mattk[i].aatyp == AT_NONE &&  mdat->mattk[i].adtyp == AD_OONA){
