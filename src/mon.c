@@ -2585,7 +2585,7 @@ mvanishobj(mtmp, x, y)		/* for nachash tanninim */
 {
 	register struct obj *otmp, *otmp2;
 	struct permonst *ptr;
-	int poly, grow, heal, count = 0, ecount = 0;
+	int poly, grow, heal, ecount = 0;
 	char buf[BUFSZ];
 
 	buf[0] = '\0';
@@ -2593,9 +2593,7 @@ mvanishobj(mtmp, x, y)		/* for nachash tanninim */
 	/* Engulfs everything */
 	for (otmp = level.objects[x][y]; otmp; otmp = otmp2) {
 	    otmp2 = otmp->nexthere;
-		if (!(otmp->otyp == MAGIC_CHEST && otmp->obolted) &&
-				    otmp != uball && otmp != uchain
-		){
+		if (!(otmp->otyp == MAGIC_CHEST && otmp->obolted)){
 			++ecount;
 			if (ecount == 1) {
 				Sprintf(buf, "%s into %s shadow.", Tobjnam(otmp,"fall"), s_suffix(mon_nam(mtmp)));
