@@ -4280,6 +4280,14 @@ int wishflags;
 	if (strncmpi(bp, "frosted lake", 12)) /* not a "frosted lake" */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 21)) /* not a "dragon" */
+	if (strncmpi(bp, "thief doll", 10)) /* not the "thief" player monster */
+	if (strncmpi(bp, "bard doll", 9)) /* not the "bard" player monster */
+	if (strncmpi(bp, "priest doll", 11)) /* not the "priest" monster */
+	if (strncmpi(bp, "healer doll", 11)) /* not the "healer" player monster */
+	if (strncmpi(bp, "nurse doll", 10)) /* not the "nurse" monster */
+	if (strncmpi(bp, "heretic doll", 12)) /* not the "heretic" player monster */
+	if (strncmpi(bp, "archaeologist doll", 18)) /* not the "archaeologist" player monster */
+	if (strncmpi(bp, "high priest doll", 16)) /* not the "high priest" monster */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
 		int mntmptoo, mntmplen;	/* double check for rank title */
