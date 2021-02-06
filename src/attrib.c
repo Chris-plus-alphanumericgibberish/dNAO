@@ -1291,27 +1291,27 @@ boolean check;
 		switch(rn2(6)){
 			case 0:
 				You("panic in your insanity!");
-				HPanicking = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+				HPanicking = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 1:
 				You("stumble blindly in your insanity!");
-				HStumbleBlind = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+				HStumbleBlind = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 2:
 				You("stagger in shock!");
-				HStaggerShock = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+				HStaggerShock = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 3:
 				You("begin babbling incoherently!");
-				HBabble = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+				HBabble = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 4:
 				You("begin screaming in terror and madness!");
-				HScreaming = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+				HScreaming = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 5:
 				You(Hallucination ? "have a case of the vapors!" : "feel faint!");
-				HFaintingFits = 1+rnd((u.usanity+1)/10)+rnd((u.usanity+1)/10);
+				HFaintingFits = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 		}
 	}
