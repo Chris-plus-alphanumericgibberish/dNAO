@@ -2144,6 +2144,7 @@ E void FDECL(incr_itimeout, (long *,int));
 E long FDECL(itimeout_incr, (long,int));
 E void FDECL(make_confused, (long,BOOLEAN_P));
 E void FDECL(make_stunned, (long,BOOLEAN_P));
+E void FDECL(make_doubtful, (long,BOOLEAN_P));
 E void FDECL(make_blinded, (long,BOOLEAN_P));
 E void FDECL(make_sick, (long, const char *, BOOLEAN_P,int));
 E void FDECL(make_vomiting, (long,BOOLEAN_P));

@@ -1934,6 +1934,7 @@ boolean vis;
 				if(mdef->mcrazed && rnd(20) < dmg){
 					mdef->mcrazed = 0;
 					mdef->mberserk = 0;
+					mdef->mdoubt = 0;
 				}
 			}
 			extra_damage = d(dmg, 6);

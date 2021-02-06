@@ -2237,6 +2237,7 @@ museamnesia:
 			mtmp->mcrazed = 0;
 			mtmp->mberserk = 0;
 			mtmp->mdisrobe = 0;
+			mtmp->mdoubt = 0;
 		} else {
 			if (vismon) pline("%s looks angry and confused!", Monnam(mtmp));
 			untame(mtmp, 0);

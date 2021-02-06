@@ -170,6 +170,10 @@
 #define HConfusion		u.uprops[CONFUSION].intrinsic
 #define Confusion		((HConfusion && !(u.specialSealsActive&SEAL_NUMINA)) || StumbleBlind)
 
+#define EDoubt		u.uprops[DOUBT].intrinsic
+#define HDoubt		u.uprops[DOUBT].intrinsic
+#define Doubt		(HDoubt || EDoubt)
+
 #define LightBlind		((Darksight && !Is_waterlevel(&u.uz) && !Extramission) &&\
 						(dimness(u.ux,u.uy) <= 0) &&\
 						!(ublindf && !Blindfolded))

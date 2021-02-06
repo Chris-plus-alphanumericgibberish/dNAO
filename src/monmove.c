@@ -1028,6 +1028,7 @@ register struct monst *mtmp;
 	/* berserk monsters calm down with small probability */
 	if (mtmp->mberserk && !rn2(50)) mtmp->mberserk = 0;
 	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
+	if (mtmp->mdoubt && !rn2(300)) mtmp->mdoubt = 0;
 
 	if (mtmp->mcrazed){
 		if(!rn2(4)){

@@ -39,6 +39,7 @@ STATIC_DCL boolean FDECL(spiritLets, (char *, int));
 STATIC_DCL int FDECL(dospiritmenu, (int, int *, int));
 STATIC_DCL boolean FDECL(dospellmenu, (int,int *));
 STATIC_DCL void FDECL(describe_spell, (int));
+STATIC_DCL int NDECL(base_casting_stat);
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
 STATIC_DCL void NDECL(cast_protection);
@@ -5005,8 +5006,12 @@ int *spell_no;
 		else
 			Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 
+		if(Doubt && base_casting_stat() == A_WIS){
+			Sprintf(buf, "You're suffering a crisis of faith!");
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		}
+		else for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 			if (can_maintain_spell(spellid(i))){
 				maintainable += 1;
 			}
@@ -5139,7 +5144,7 @@ int *spell_no;
 		} // menu item was selected
 		/* else end menu, nothing was selected */
 		break;
-	}while (TRUE);
+	} while (TRUE);
 	return FALSE;
 }
 
@@ -5527,6 +5532,37 @@ int val;
 }
 
 STATIC_OVL int
+base_casting_stat()
+{
+	int stat;
+	if(uwep && uwep->oartifact == ART_RITUAL_RINGED_SPEAR){
+		stat = A_WIS;
+	} else if(uwep && uwep->oartifact == ART_VELKA_S_RAPIER){
+		stat = A_INT;
+	} else if(u.specialSealsActive&SEAL_NUMINA && abs(u.wisSpirits - u.intSpirits) <= 1){
+		if(ACURR(A_WIS) > ACURR(A_INT))
+			stat = A_WIS;
+		else stat = A_INT;
+	} else if(u.wisSpirits > u.intSpirits){
+		stat = A_WIS;
+	} else if(u.wisSpirits < u.intSpirits){
+		stat = A_INT;
+	} else if(u.wisSpirits || u.intSpirits){
+		if(ACURR(A_WIS) > ACURR(A_INT))
+			stat = A_WIS;
+		else stat = A_INT;
+	} else {
+		if(Race_if(PM_INCANTIFIER)) stat = A_INT;
+		else if(Role_if(PM_EXILE)){
+			if(ACURR(A_WIS) > ACURR(A_INT))
+				stat = A_INT;
+			else stat = A_WIS;
+		} else stat = urole.spelstat;
+	}
+	return stat;
+}
+
+STATIC_OVL int
 percent_success(spell)
 int spell;
 {
@@ -5543,26 +5579,14 @@ int spell;
 
 	splcaster = urole.spelbase;
 	special = urole.spelheal;
-	if(uwep && uwep->oartifact == ART_RITUAL_RINGED_SPEAR){
-		statused = ACURR(A_WIS);
-	} else if(uwep && uwep->oartifact == ART_VELKA_S_RAPIER){
-		statused = ACURR(A_INT);
-	} else if(u.specialSealsActive&SEAL_NUMINA){
-		if(abs(u.wisSpirits - u.intSpirits) <= 1) statused = max(ACURR(A_WIS), ACURR(A_INT));
-	} else if(u.wisSpirits > u.intSpirits){
-		statused = ACURR(A_WIS);
-	} else if(u.wisSpirits < u.intSpirits){
-		statused = ACURR(A_INT);
-	} else if(u.wisSpirits || u.intSpirits){
-		statused = max(ACURR(A_WIS), ACURR(A_INT));
-	} else {
-		if(Race_if(PM_INCANTIFIER)) statused = ACURR(A_INT);
-		else if(Role_if(PM_EXILE)) statused = min(ACURR(A_WIS), ACURR(A_INT));
-		else if(Role_if(PM_BARD) && spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
-			statused = ACURR(A_CHA);
-		else statused = ACURR(urole.spelstat);
-	}
+	statused = ACURR(base_casting_stat());
+	if(Role_if(PM_BARD) && spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
+		statused = ACURR(A_CHA);
 
+	if((Doubt || flat_mad_turn(MAD_APOSTASY))
+		&& (spell_skilltype(spellid(spell)) == P_HEALING_SPELL || spell_skilltype(spellid(spell)) == P_CLERIC_SPELL)
+	)
+		return 0;
 	/* some artifacts pracically cast the spells on their own */
 	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
 		(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (

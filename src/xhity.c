@@ -5398,6 +5398,25 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
+	case AD_DOBT:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* may inject doubt (blocked by MC or cancelling the monster) */
+		if (uncancelled) {
+			/* player is more detailed */
+			if (youdef) {
+				make_doubtful(itimeout_incr(HDoubt, dmg*50), TRUE);
+			}
+			else {
+				mdef->mdoubt = TRUE;
+			}
+		}
+		/* make poison/physical attack without hitmsg */
+		alt_attk.adtyp = AD_DRST;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
 	case AD_LRVA:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {

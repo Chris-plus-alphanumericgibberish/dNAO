@@ -1085,6 +1085,7 @@ int distance;
 					mtmp->mblinded = 0;
 				}
 				mtmp->mberserk = 0;
+				mtmp->mdoubt = 0;
 				if(mtmp->mhp < mtmp->mhpmax && mtmp->mhp < mtmp->m_lev) mtmp->mhp = min(mtmp->m_lev,mtmp->mhpmax);
 			case P_BASIC:
 				if(!mtmp->mcanmove && mtmp->mfrozen){

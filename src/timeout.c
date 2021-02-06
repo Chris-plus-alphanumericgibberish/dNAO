@@ -36,6 +36,7 @@ const struct propname {
     { STRANGLED, "strangling" },
     { SICK, "fatally sick" },
     { STUNNED, "stunned" },
+    { DOUBT, "agnostic" },
     { CONFUSION, "confused" },
     { HALLUC, "hallucinating" },
     { BLINDED, "blinded" },
@@ -818,6 +819,11 @@ nh_timeout()
 		case STUNNED:
 			HStun = 1;
 			make_stunned(0L, TRUE);
+			stop_occupation();
+			break;
+		case DOUBT:
+			HDoubt = 1;
+			make_doubtful(0L, TRUE);
 			stop_occupation();
 			break;
 		case BLINDED:

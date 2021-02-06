@@ -117,7 +117,8 @@
 #define PRESERVATION				1 + MIND_BLASTS
 #define QUICK_DRAW					1 + PRESERVATION
 #define CLEAR_THOUGHTS				1 + QUICK_DRAW
-#define LAST_PROP		(CLEAR_THOUGHTS)
+#define DOUBT						1 + CLEAR_THOUGHTS
+#define LAST_PROP					(DOUBT)
 
 #define MPROP_SIZE					(LAST_PROP/32 + 1)
 

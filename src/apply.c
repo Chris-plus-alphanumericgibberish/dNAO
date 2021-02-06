@@ -3077,6 +3077,7 @@ struct obj *hypo;
 					mtarg->mcrazed = 0;
 					mtarg->mdisrobe = 0;
 					mtarg->mberserk = 0;
+					mtarg->mdoubt = 0;
 				} else {
 					if (canseemon(mtarg))
 						pline("%s looks angry and confused!", Monnam(mtarg));
@@ -6486,11 +6487,13 @@ doapply()
 		if(u.usanity < 100){
 			change_usanity((Insanity)/2, FALSE);
 		}
-		
-			
+
 		if(u.wimage >= 10){
+			struct monst *mtmp;
 			u.wimage = 0;
-			makemon(&mons[PM_WEEPING_ANGEL], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+			mtmp = makemon(&mons[PM_WEEPING_ANGEL], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+			if(mtmp && HDoubt)
+				mtmp->mdoubt = TRUE;
 			if(Blind) pline("The effigy grows and turns to stone!");
 			else pline("The effigy becomes a weeping angel!");
 		} else if(u.umorgul){
@@ -6517,6 +6520,10 @@ doapply()
 		} else {
 			if(Blind) pline("The effigy bursts into flames!");
 			else pline("The effigy burns with sickly flames!");
+		}
+		
+		if(HDoubt){
+			make_doubtful(0L, TRUE);
 		}
 		
 		u.wimage = 0; //Sub-critical images are removed anyway.

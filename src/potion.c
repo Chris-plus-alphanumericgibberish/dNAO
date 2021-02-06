@@ -106,6 +106,28 @@ boolean talk;
 }
 
 void
+make_doubtful(xtime,talk)
+long xtime;
+boolean talk;
+{
+	long old = HDoubt;
+
+	if (!xtime && old) {
+		if (talk)
+		    You("%s.",
+			Hallucination ? "less wobbly" : "have resolved your crisis of faith");
+	}
+	if (xtime && !old) {
+		if (talk) {
+			You("suddenly suffer a crisis of faith!");
+		}
+	}
+	if ((!xtime && old) || (xtime && !old)) flags.botl = TRUE;
+
+	set_itimeout(&HDoubt, xtime);
+}
+
+void
 make_sick(xtime, cause, talk, type)
 long xtime;
 const char *cause;	/* sickness cause */
@@ -559,6 +581,9 @@ peffects(otmp)
 		    newuhs(FALSE);
 		} else
 		    exercise(A_WIS, FALSE);
+		
+		//All amnesia causes you to (silently) forget your crisis of faith
+		make_doubtful(0L, FALSE);
 		break;
 	case POT_WATER:
 		if(uclockwork){

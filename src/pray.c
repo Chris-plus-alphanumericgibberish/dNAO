@@ -2488,6 +2488,11 @@ dopray()
 		return 0;
 	}
 	
+	if(Doubt){
+		pline("You're suffering a crisis of faith.");
+		return 0;
+	}
+	
     /* Confirm accidental slips of Alt-P */
     if (flags.prayconfirm)
 	if (yn("Are you sure you want to pray?") == 'n')

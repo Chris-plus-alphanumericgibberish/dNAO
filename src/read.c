@@ -1462,7 +1462,12 @@ int howmuch;
 
 	forget_map(howmuch);
 	forget_traps();
-
+	
+	//Silently reduce the doubt timer (itimeout_incr handles negative timeouts)
+	if(HDoubt){
+		make_doubtful(itimeout_incr(HDoubt, -1*howmuch), FALSE);
+	}
+	
 	/* 1 in 3 chance of forgetting some levels */
 	if (howmuch && !rn2(3)) forget_levels(howmuch);
 
