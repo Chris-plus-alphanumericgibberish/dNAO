@@ -83,10 +83,18 @@ boolean restore;
 			rem_ox(otmp, OX_ENAM);
 		} else if (otmp->oartifact && restore)
 			artifact_exists(otmp,ONAME(otmp),TRUE);
+		
 		if (restore) {
-			/* rings and wands' material should always match their description */
-			if (otmp->oclass == RING_CLASS || otmp->oclass == WAND_CLASS)
+			/* rings and wands' material and color should always match their description */
+			if (otmp->oclass == RING_CLASS || otmp->oclass == WAND_CLASS){
 				set_material_gm(otmp, objects[otmp->otyp].oc_material);
+				set_object_color(otmp);
+			}
+			
+			/* books' color should always match their description */
+			if(otmp->oclass == SPBOOK_CLASS){
+				set_object_color(otmp);
+			}
 		}
 		if (!restore) {
 			/* do not zero out o_ids for ghost levels anymore */
