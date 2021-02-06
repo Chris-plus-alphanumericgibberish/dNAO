@@ -4202,6 +4202,14 @@ struct monst *mtmp;
 				change_usanity(u_sanity_loss_nyar(), TRUE);
 				u.umadness |= MAD_THOUSAND_MASKS;
 			}
+			//Gold turns to lead
+			struct obj *nobj;
+			for(struct obj *otmp = mtmp->minvent; otmp; otmp = nobj){
+				nobj = otmp->nobj;
+				if(otmp->obj_material == GOLD && otmp->otyp != GOLD_PIECE){
+					set_material_gm(otmp, METAL);
+				}
+			}
 			set_mon_data(mtmp, PM_GHOUL_QUEEN_NITOCRIS);
 			//Surprisingly, this is an effective means of life saving!
 			break;
