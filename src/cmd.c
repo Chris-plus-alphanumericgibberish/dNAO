@@ -1938,6 +1938,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	Sprintf(buf, "%d parasite eggs", u.utaneggs);
 	you_have(buf);
 	
+	if(Doubt)
+		enl_msg("You ", "can't", "couldn't", " pray or use clerical magic");
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
@@ -2050,6 +2052,11 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if (u.umadness&MAD_ROTTING){
 			enl_msg("Your body ", "is", "was", " rotting from within");
 		}
+	}
+	
+	if(u.utaneggs){
+		Sprintf(buf, " lumps under your %s.", body_part(BODY_SKIN));
+		enl_msg("There ", "are", "were", buf);
 	}
 	
 	/*** More Troubles ***/
@@ -2723,6 +2730,8 @@ int final;
 	else if(u.uinsight > 1)
 		dump("  ", "You occasionally saw things you wished you hadn't");
 	
+	if(Doubt)
+		dump("  ", "You were having a crisis of faith");
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
@@ -3209,6 +3218,8 @@ resistances_enlightenment()
 	else if(u.uinsight > 1)
 		putstr(en_win, 0, "You occasionally see things you wish you hadn't.");
 	
+	if(Doubt)
+		putstr(en_win, 0, "You are having a crisis of faith.");
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
 		char messaged = 0;
@@ -3364,6 +3375,10 @@ resistances_enlightenment()
 		}
 	}
 	/*** More Troubles ***/
+	if(u.utaneggs){
+		Sprintf(buf, "There are lumps under your %s.", body_part(BODY_SKIN));
+		putstr(en_win, 0, buf);
+	}
 	if(u_healing_penalty()) putstr(en_win, 0, "You feel itchy.");
 	if (Wounded_legs
 #ifdef STEED
