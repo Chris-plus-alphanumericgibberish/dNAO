@@ -2599,6 +2599,7 @@ boolean stoponhit;
 		int y = y(magr);
 		int range = BOLT_LIM; /* arbitrary */
 		struct monst * mtmp;
+		boolean mtmp_yourteam;
 
 		/* Check for creatures in the line of fire. */
 		while(--range > 0)
@@ -2608,14 +2609,11 @@ boolean stoponhit;
 			if (!isok(x, y))
 				break;
 
-			/* pets don't hit player */
-			if (x == u.ux && y == u.uy && magr->mtame && safe)
-				return FALSE;
-
 			/* monsters don't hit things of equal tameness (if trying to be safe) */
-			mtmp = m_at(x, y);
+			mtmp = creature_at(x, y);	/* also includes player */
 			if (mtmp)
 			{
+				mtmp_yourteam = (mtmp == &youmonst) || (mtmp->mtame);
 				/* maybe we don't need to check beyond first target hit */
 				if (stoponhit) {
 					if (mdef && mtmp != mdef)
@@ -2625,9 +2623,9 @@ boolean stoponhit;
 				}
 				/* Don't hit friendlies */
 				if (safe && (
-					(mtmp->mtame && magr->mtame) ||
+					(mtmp_yourteam && magr->mtame) ||
 					(always_peaceful(mtmp->data) && magr->mtame) ||
-					(!mtmp->mtame && !magr->mtame)))
+					(!mtmp_yourteam && !magr->mtame)))
 					return FALSE;
 			}
 

@@ -13896,7 +13896,7 @@ int vis;						/* True if action is at all visible to the player */
 		/* defender */
 		char seared[BUFSZ];
 		if (noncorporeal(pd)) {
-			Strcat(seared, 
+			Strcpy(seared, 
 				youdef ? "you" : mon_nam(mdef));
 		}
 		else {
