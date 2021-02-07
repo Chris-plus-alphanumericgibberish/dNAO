@@ -1739,7 +1739,8 @@ int mkobjflags;
 					familliar->mvar_witchID = (long)mtmp->m_id;
 					familliar->mpeaceful = mtmp->mpeaceful;
 				}
-				mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
 				mongets(mtmp, BLACK_DRESS, mkobjflags);
 				mongets(mtmp, WITCH_HAT, mkobjflags);
 				mongets(mtmp, KNIFE, mkobjflags);
@@ -1753,10 +1754,13 @@ int mkobjflags;
 					familliar->mvar_witchID = (long)mtmp->m_id;
 					familliar->mpeaceful = mtmp->mpeaceful;
 				}
-				mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
 				mongets(mtmp, BLACK_DRESS, mkobjflags);
-				mongets(mtmp, CLOAK, mkobjflags);
-				mongets(mtmp, GLOVES, mkobjflags);
+				otmp = mongets(mtmp, CLOAK, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
+				otmp = mongets(mtmp, GLOVES, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
 				mongets(mtmp, WITCH_HAT, mkobjflags);
 				mongets(mtmp, rn2(10) ? STILETTO : ATHAME, mkobjflags);
 			} else if(ptr->mtyp == PM_COVEN_LEADER){
@@ -1769,11 +1773,15 @@ int mkobjflags;
 					familliar->mvar_witchID = (long)mtmp->m_id;
 					familliar->mpeaceful = mtmp->mpeaceful;
 				}
-				mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
 				mongets(mtmp, BLACK_DRESS, mkobjflags);
-				mongets(mtmp, LEATHER_ARMOR, mkobjflags);
-				mongets(mtmp, CLOAK, mkobjflags);
-				mongets(mtmp, GLOVES, mkobjflags);
+				otmp = mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
+				otmp = mongets(mtmp, CLOAK, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
+				otmp = mongets(mtmp, GLOVES, mkobjflags);
+				otmp->obj_color = CLR_BLACK;
 				mongets(mtmp, WITCH_HAT, mkobjflags);
 				mongets(mtmp, QUARTERSTAFF, mkobjflags);
 			} else if(mm >= PM_STUDENT && mm <= PM_APPRENTICE){
