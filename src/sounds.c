@@ -2412,6 +2412,12 @@ int dz;
 		You_cant("communicate.  You're too buisy screaming!");
 		return(0);
     }
+	
+	if(mad_turn(MAD_TOO_BIG)){
+		pline("It's too big!");
+		return 0;
+	}
+	
     if (u.uswallow) {
 		pline("They won't hear you out there.");
 		return(0);

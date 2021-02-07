@@ -1469,6 +1469,11 @@ dospirit()
 {
 	int power_no;
 	
+	if(mad_turn(MAD_TOO_BIG)){
+		pline("It's too big!");
+		return 0;
+	}
+	
 	if(!u.sealsActive && !u.specialSealsActive){
 		if(Role_if(PM_EXILE) && u.ulevel > 1 && u.spiritPColdowns[PWR_GNOSIS_PREMONITION] < monstermoves){
 			if(yn("Use Gnosis Premonition?") == 'y'){
@@ -5007,7 +5012,15 @@ int *spell_no;
 			Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 
-		if(Doubt && base_casting_stat() == A_WIS){
+		// if(splaction == SPELLMENU_CAST && mad_turn(MAD_SCIAPHILIA) && ()(dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0)){
+			// Sprintf(buf, "You long for the flickering shadows!");
+			// add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		// }
+		if(splaction == SPELLMENU_CAST && mad_turn(MAD_TOO_BIG)){
+			Sprintf(buf, "It's too big!");
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		}
+		else if(Doubt && base_casting_stat() == A_WIS){
 			Sprintf(buf, "You're suffering a crisis of faith!");
 			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 		}
