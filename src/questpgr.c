@@ -1058,7 +1058,7 @@ neutral_montype()
 		switch(rn2(5)){
 			case 0:
 				if(rn2(2)) return &mons[PM_HORSE];
-				else return mkclass(S_QUADRUPED, G_NOHELL);
+				else return mkclass(S_UNICORN, G_NOHELL);
 			break;
 			case 1:
 				if(chance < 10 && !toostrong(PM_ARGENACH_RILMANI, diff))
