@@ -751,6 +751,8 @@ struct monst *mon;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;
+		if(u.ustuck == mon)
+			mondodgeac = -5;
 		if ((mondodgeac < 0)						/* penalties have full effect */
 			|| (!armor)								/* no armor = max mobility */
 			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
@@ -915,6 +917,8 @@ struct monst *mon;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;
+		if(u.ustuck == mon)
+			mondodgeac = -5;
 		if ((mondodgeac < 0)						/* penalties have full effect */
 			|| (!armor)								/* no armor = max mobility */
 			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
