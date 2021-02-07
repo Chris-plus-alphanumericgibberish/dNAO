@@ -5761,6 +5761,142 @@ int mkobjflags;
 				}
 				else (void)mongets(mtmp, GLAIVE, mkobjflags);
 			break;
+			case PM_LILITU:
+				if(In_lost_cities(&u.uz)){
+					//Cultist of the Black Goat
+					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
+					otmp->spe = 6;
+					otmp->ovar1 = 4;
+					otmp->opoisoned = OPOISON_ACID;
+					otmp->opoisonchrgs = 3;
+					set_material_gm(otmp, BONE);
+					(void) mpickobj(mtmp, otmp);
+					int threshold = rnd(10)+rn2(11);
+					if(mtmp->female && u.uinsight > threshold){
+						set_template(mtmp, MISTWEAVER);
+						mtmp->m_insight_level = threshold;
+					} else {
+						otmp = mksobj(WAR_HAT, mkobjflags);
+						otmp->spe = 4;
+						set_material_gm(otmp, BONE);
+						fix_object(otmp);
+						(void) mpickobj(mtmp, otmp);
+					}
+					otmp = mksobj(PLATE_MAIL, mkobjflags);
+					otmp->spe = 4;
+					set_material_gm(otmp, BONE);
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					otmp = mksobj(ROUNDSHIELD, mkobjflags);
+					otmp->spe = 4;
+					set_material_gm(otmp, BONE);
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
+				else if(Inhell){
+					int kit = rn2(6);
+					switch(kit){
+						case 0:
+							otmp = mksobj(MACE, mkobjflags|MKOBJ_NOINIT);
+						break;
+						case 1:
+							otmp = mksobj(KHAKKHARA, mkobjflags|MKOBJ_NOINIT);
+							set_material_gm(otmp, IRON);
+						break;
+						case 2:
+							otmp = mksobj(QUARTERSTAFF, mkobjflags|MKOBJ_NOINIT);
+						break;
+						//case 3:
+						//break;
+						case 4:
+							otmp = mksobj(ATHAME, mkobjflags|MKOBJ_NOINIT);
+						break;
+						case 5:
+							otmp = mksobj(SHEPHERD_S_CROOK, mkobjflags|MKOBJ_NOINIT);
+							set_material_gm(otmp, GOLD);
+							otmp->objsize = MZ_SMALL;
+							fix_object(otmp);
+							curse(otmp);
+							otmp->spe = 6;
+							otmp->oerodeproof = TRUE;
+							(void) mpickobj(mtmp, otmp);
+							
+							otmp = mksobj(FLAIL, mkobjflags|MKOBJ_NOINIT);
+							set_material_gm(otmp, GOLD);
+						break;
+					}
+					curse(otmp);
+					otmp->spe = 6;
+					otmp->oerodeproof = TRUE;
+					(void) mpickobj(mtmp, otmp);
+					
+					switch(kit){
+						case 0:
+						case 1:
+							otmp = mongets(mtmp, rn2(7) ? ROBE : rn2(3) ? CLOAK_OF_PROTECTION : CLOAK_OF_MAGIC_RESISTANCE, mkobjflags|MKOBJ_NOINIT);
+							curse(otmp);
+							otmp->spe = 4;
+							if(kit == 3){
+								otmp = mongets(mtmp, SEDGE_HAT, mkobjflags|MKOBJ_NOINIT);
+								curse(otmp);
+								otmp->spe = 4;
+							}
+						break;
+						case 2:
+							otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags|MKOBJ_NOINIT);
+							curse(otmp);
+							otmp->spe = 4;
+							// if(rn2(2)){
+								// mongets(mtmp, POT_EXTRA_HEALING, mkobjflags);
+								// mongets(mtmp, POT_EXTRA_HEALING, mkobjflags);
+								// mongets(mtmp, POT_EXTRA_HEALING, mkobjflags);
+								// mongets(mtmp, POT_EXTRA_HEALING, mkobjflags);
+							// }
+						break;
+						case 3:
+							otmp = mongets(mtmp, ROBE, mkobjflags|MKOBJ_NOINIT);
+							otmp->obj_color = CLR_ORANGE;
+							curse(otmp);
+							otmp->spe = 4;
+							otmp = mongets(mtmp, SEDGE_HAT, mkobjflags|MKOBJ_NOINIT);
+							curse(otmp);
+							otmp->spe = 4;
+						break;
+						case 4:
+							otmp = mongets(mtmp, CLOAK, mkobjflags|MKOBJ_NOINIT);
+							otmp->obj_color = CLR_BLACK;
+							curse(otmp);
+							otmp->spe = 4;
+							otmp = mongets(mtmp, BLACK_DRESS, mkobjflags|MKOBJ_NOINIT);
+							curse(otmp);
+							otmp->spe = 4;
+							otmp = mongets(mtmp, WITCH_HAT, mkobjflags|MKOBJ_NOINIT);
+							curse(otmp);
+							otmp->spe = 4;
+						break;
+						case 5:
+							otmp = mksobj(MASK, mkobjflags);
+							otmp->corpsenm = PM_SUCCUBUS;
+							set_material_gm(otmp, GOLD);
+							fix_object(otmp);
+							curse(otmp);
+							(void) mpickobj(mtmp, otmp);
+							
+							otmp = mksobj(SCALE_MAIL, mkobjflags|MKOBJ_NOINIT);
+							otmp->spe = 4;
+							set_material_gm(otmp, GOLD);
+							curse(otmp);
+							(void) mpickobj(mtmp,otmp);
+							
+							otmp = mksobj(rnd_good_amulet(), mkobjflags);
+							set_material_gm(otmp, GOLD);
+							fix_object(otmp);
+							curse(otmp);
+							(void) mpickobj(mtmp, otmp);
+						break;
+					}
+				}
+			break;
 			case PM_NALFESHNEE:
 				otmp = mksobj(KHAKKHARA, mkobjflags|MKOBJ_NOINIT);
 				curse(otmp);
