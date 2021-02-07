@@ -1791,20 +1791,29 @@ int tary;
 			break;
 		}
 	}
+	/*In some cases, monsters have a 0% success rate*/
+	boolean force_fail = FALSE;
 	if (u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
 		if (u.uz.dlevel == sum_of_all_level.dlevel) chance -= 1;
-		else if (u.uz.dlevel == spire_level.dlevel - 0) chance += 500;
+		else if (u.uz.dlevel == spire_level.dlevel - 0) force_fail = TRUE;
 		else if (u.uz.dlevel == spire_level.dlevel - 1) chance += 10;
 		else if (u.uz.dlevel == spire_level.dlevel - 2) chance += 8;
 		else if (u.uz.dlevel == spire_level.dlevel - 3) chance += 6;
 		else if (u.uz.dlevel == spire_level.dlevel - 4) chance += 4;
 		else if (u.uz.dlevel == spire_level.dlevel - 5) chance += 2;
 	}
+
+	/*This.... may never be reached :( */
+	/* There is code is getattk() that prevents lilitus from attempting to cast vs. invalid targets */
+	if(pa->mtyp == PM_LILITU && attk->adtyp == AD_CLRC){
+		if(youdef && !Doubt)
+			force_fail = TRUE;
+		else if(!youdef && !(mdef && mdef->mdoubt))
+			force_fail = TRUE;
+	}
+
 	/* failure chance determined, check if attack fumbles */
-	if (rn2(mlev(magr) * 2) < chance 
-		|| (!youagr && magr->mdoubt && attk->adtyp == AD_CLRC)
-		|| (youagr && Doubt && attk->adtyp == AD_CLRC)
-	) {
+	if (force_fail || rn2(mlev(magr) * 2) < chance) {
 		if (youagr) {
 			pline_The("air crackles around you.");
 			u.uen += mlev(magr) / 2;
