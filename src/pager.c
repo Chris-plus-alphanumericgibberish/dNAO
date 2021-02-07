@@ -7,9 +7,6 @@
 
 #include "hack.h"
 #include "dlb.h"
-#ifdef BARD
-
-#endif
 
 STATIC_DCL boolean FDECL(is_swallow_sym, (int));
 STATIC_DCL int FDECL(append_str, (char *, const char *));
@@ -38,6 +35,8 @@ extern void NDECL(port_help);
 #endif
 
 extern const int monstr[];
+extern struct attack noattack;
+
 
 /* Returns "true" for characters that could represent a monster's stomach. */
 STATIC_OVL boolean
@@ -2191,7 +2190,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			strcat(description, "Attacks:");
 			strcat(description, "\n");
 			struct attack * attk;
-			struct attack prev_attk;
+			struct attack prev_attk = noattack;
 			int res[4];
 			int indexnum = 0;
 			int tohitmod = 0;

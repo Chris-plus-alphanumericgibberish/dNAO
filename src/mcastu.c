@@ -1801,7 +1801,10 @@ int tary;
 		else if (u.uz.dlevel == spire_level.dlevel - 5) chance += 2;
 	}
 	/* failure chance determined, check if attack fumbles */
-	if (rn2(mlev(magr) * 2) < chance) {
+	if (rn2(mlev(magr) * 2) < chance 
+		|| (!youagr && magr->mdoubt && attk->adtyp == AD_CLRC)
+		|| (youagr && Doubt && attk->adtyp == AD_CLRC)
+	) {
 		if (youagr) {
 			pline_The("air crackles around you.");
 			u.uen += mlev(magr) / 2;

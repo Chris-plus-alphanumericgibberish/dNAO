@@ -1678,20 +1678,34 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		pa = &mons[magr->mvar2];
 	}
 
-	if (*indexnum < NATTK) {
-		/* get the nth attack */
-		attk = &(pa->mattk[*indexnum]);
-		fromlist = TRUE;
-		*prev_and_buf = *attk;
-		attk = prev_and_buf;
-	}
-	else {
-		/* possibly add additional attacks */
-		attk = prev_and_buf;
-		*attk = noattack;
-		fromlist = FALSE;
-	}
-
+#define GETNEXT {(*indexnum)++; continue;}
+	do{
+		//Get next attack
+		if (*indexnum < NATTK) {
+			/* get the nth attack */
+			attk = &(pa->mattk[*indexnum]);
+			fromlist = TRUE;
+			*prev_and_buf = *attk;
+			attk = prev_and_buf;
+		}
+		else {
+			/* possibly add additional attacks */
+			attk = prev_and_buf;
+			*attk = noattack;
+			fromlist = FALSE;
+		}
+		
+		//Decide whether to continue the loop
+		if(pa->mtyp == PM_LILITU && attk->adtyp == AD_CLRC){
+			if(!mdef) GETNEXT
+			else if(youdef && !Doubt) GETNEXT
+			else if(!youdef && !mdef->mdoubt) GETNEXT
+		}
+		//Default is to exit the loop
+		break;
+	} while(TRUE);
+#undef GETNEXT
+	
 	/* unpolymorphed players get changes */
 	if (youagr && !Upolyd && fromlist) {
 		/* do NOT get permonst-inherent attacks, except for: */

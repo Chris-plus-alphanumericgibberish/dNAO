@@ -7,6 +7,7 @@
 #include "artifact.h"
 
 extern boolean notonhead;
+extern struct attack noattack;
 
 #ifdef OVL0
 
@@ -1711,23 +1712,29 @@ register struct monst *mtmp;
 		   or similar spells by the time you reach it */
 		if (dist2(mtmp->mx, mtmp->my, u.ux, u.uy) <= 49 && !mtmp->mspec_used) {
 		    struct attack *a;
-
-		    for (a = &mdat->mattk[0]; a < &mdat->mattk[NATTK]; a++) {
-			if ((a->aatyp == AT_MAGC || a->aatyp == AT_MMGC) && (a->adtyp == AD_SPEL || a->adtyp == AD_CLRC)) {
-			    if (mtmp->mux==u.ux && mtmp->muy==u.uy && couldsee(mtmp->mx, mtmp->my) && !mtmp->mpeaceful && 
-					dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= BOLT_LIM*BOLT_LIM
-				){
-					if (xcasty(mtmp, &youmonst, a, mtmp->mux, mtmp->muy)){
-						tmp = 3;
-						// if(mdat->mtyp != PM_DEMOGORGON) break;
-					}
-			    } else {
-					if (xcasty(mtmp, (struct monst *)0, a, 0, 0)){
-						tmp = 3;
-						// if(mdat->mtyp != PM_DEMOGORGON) break;
+			int index = 0, subout = 0, tohitmod = 0;
+			int prev[4] = {0};
+			struct attack prev_attk = noattack;
+			
+			while(TRUE){
+				a = getattk(mtmp, &youmonst, prev, &index, &prev_attk, FALSE, &subout, &tohitmod);
+				if(a->aatyp == 0 && a->adtyp == 0 && a->damn == 0 && a->damd == 0)
+					break;
+				if ((a->aatyp == AT_MAGC || a->aatyp == AT_MMGC) && (a->adtyp == AD_SPEL || a->adtyp == AD_CLRC)) {
+					if (mtmp->mux==u.ux && mtmp->muy==u.uy && couldsee(mtmp->mx, mtmp->my) && !mtmp->mpeaceful && 
+						dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= BOLT_LIM*BOLT_LIM
+					){
+						if (xcasty(mtmp, &youmonst, a, mtmp->mux, mtmp->muy)){
+							tmp = 3;
+							// if(mdat->mtyp != PM_DEMOGORGON) break;
+						}
+					} else {
+						if (xcasty(mtmp, (struct monst *)0, a, 0, 0)){
+							tmp = 3;
+							// if(mdat->mtyp != PM_DEMOGORGON) break;
+						}
 					}
 				}
-			}
 		    }
 		}
 
