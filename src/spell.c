@@ -1041,15 +1041,20 @@ void
 age_spells()
 {
 	int i;
+	int timeout = 1;
 	/*
 	 * The time relative to the hero (a pass through move
 	 * loop) causes all spell knowledge to be decremented.
 	 * The hero's speed, rest status, conscious status etc.
 	 * does not alter the loss of memory.
 	 */
+	if(roll_madness(MAD_FORGETFUL))
+		timeout += (Insanity);
+		
 	for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++)
-	    if (spellknow(i))
-		decrnknow(i);
+	    if (spellknow(i)){
+			ndecrnknow(i, timeout);
+		}
 	return;
 }
 

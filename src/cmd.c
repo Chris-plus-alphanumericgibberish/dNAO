@@ -2049,6 +2049,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if (u.umadness&MAD_SCIAPHILIA){
 			enl_msg("You ", "wish", "wished", " to stand in partially illuminated areas, suffering reduced accuracy and sometimes failing to cast spells if not");
 		}
+		if (u.umadness&MAD_FORGETFUL){
+			enl_msg("Your mind ", "is", "was", " disolving");
+		}
 		if (u.umadness&MAD_TOO_BIG){
 			enl_msg("", "It's", "It was", " too big");
 		}
@@ -2833,6 +2836,9 @@ int final;
 		if (u.umadness&MAD_SCIAPHILIA){
 			dump("  ", "You were fascinated by the dancing flames");
 		}
+		if (u.umadness&MAD_FORGETFUL){
+			dump("  ", "Your mind has disolved");
+		}
 		if (u.umadness&MAD_TOO_BIG){
 			dump("  ", "Your mind was crowded out by the memory of its size");
 		}
@@ -3348,6 +3354,9 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_SCIAPHILIA){
 			putstr(en_win, 0, "You are fascinated by the dancing shadows");
+		}
+		if (u.umadness&MAD_FORGETFUL){
+			putstr(en_win, 0, "Your mind is disolving");
 		}
 		if (u.umadness&MAD_TOO_BIG){
 			putstr(en_win, 0, "It's too big");

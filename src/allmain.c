@@ -1654,6 +1654,13 @@ karemade:
 				if(roll_madness(MAD_SPIRAL))
 					change_usanity(-1, FALSE);
 			}
+			//Mind dissolution double trigger: lose 1d4 levels
+			if(u.ulevel > 1 && roll_madness(MAD_FORGETFUL) && roll_madness(MAD_FORGETFUL)){
+				int i;
+				for(i = rn2(4); i > 0 && u.ulevel > 2; i--)
+					losexp("mind dissolution",FALSE,TRUE,TRUE);
+				losexp("mind dissolution",TRUE,TRUE,TRUE);
+			}
 			if (u.usleep && u.usleep < monstermoves && roll_madness(MAD_FORMICATION)) {
 				multi = -1;
 				nomovemsg = "The crawling bugs awaken you.";
@@ -3479,6 +3486,7 @@ printAttacks(buf, ptr)
 		"all attribute drain",	/*136*/
 		"inflict [[agnosis]]",	/*137*/
 		"revelatory whispers",	/*138*/
+		"pull closer",			/*139*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */

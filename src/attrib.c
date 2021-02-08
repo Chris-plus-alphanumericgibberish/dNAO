@@ -1478,6 +1478,9 @@ struct monst *mon;
 		case PM_NACHASH_TANNIN:
 			u.umadness |= MAD_SCIAPHILIA;
 		break;
+		case PM_KHAAMNUN_TANNIN:
+			u.umadness |= MAD_FORGETFUL;
+		break;
 		case PM_RAGLAYIM_TANNIN:
 			u.umadness |= MAD_TOO_BIG;
 		break;

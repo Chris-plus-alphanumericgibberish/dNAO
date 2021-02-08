@@ -340,6 +340,7 @@ int tary;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	boolean missedyou = (!youagr && youdef && (tarx != u.ux || tary != u.uy));	/* monster tried to attack you, but it got your location wrong */
+	boolean missedother = (!youagr && !youdef && mdef && (tarx != mdef->mx || tary != mdef->my));	/* monster tried to attack something, but it got the location wrong */
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
@@ -554,17 +555,23 @@ int tary;
 		/* set aatyp, adtyp */
 		aatyp = attk->aatyp;
 		adtyp = attk->adtyp;
-		/* maybe end (mdef may have been forcibly moved!)*/
+		/* maybe end, maybe update target location (mdef may have been forcibly moved!)*/
 		if (
 			(youdef
 #ifdef STEED
 			|| mdef == u.usteed
 #endif
 			) ? (!missedyou && (tarx != u.ux || tary != u.uy))
-			: (m_at(tarx, tary) != mdef)
-			) {
-			result = MM_AGR_STOP;
-			continue;
+			: (!missedother && m_at(tarx, tary) != mdef)
+		){
+			if(youdef || mdef->mx){//Check that it's not off map
+				tarx = x(mdef);
+				tary = y(mdef);
+				ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);
+			} else {
+				result = MM_AGR_STOP;
+				continue;
+			}
 		}
 		/* Some armor completely covers the face and prevents bite attacks*/
 		if (aatyp == AT_BITE || aatyp == AT_LNCK || aatyp == AT_5SBT ||
@@ -1743,6 +1750,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damn = 1;	// unused
 			attk->damd = 4;	// unused
 		}
+	}
+	/* khaamnun tanninim switch to sucking memories after dragging target in close */
+	if (pa->mtyp == PM_KHAAMNUN_TANNIN
+		&& mdef && distmin(x(magr),y(magr), x(mdef),y(mdef)) <= 1
+		&& attk->adtyp == AD_PULL
+	){
+		attk->aatyp = AT_TENT;
+		attk->adtyp = AD_MDWP;
+		attk->damd += 10;
 	}
 	/* Grue does not make its later attacks if its square is lit */
 	if (pa->mtyp == PM_GRUE &&
@@ -5106,6 +5122,7 @@ boolean ranged;
 					/* drain stats */
 					mdef->m_lev--;
 					mdef->mhpmax -= ptmp;
+					mdef->mhp = max(mdef->mhpmax, mdef->mhp);
 				}
 			}
 		}
@@ -5122,6 +5139,54 @@ boolean ranged;
 		/* make attack without hitmsg */
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
+
+	case AD_MDWP:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+
+		/* level-draining effect caused by memory loss */
+		if ((uncancelled || (attk->aatyp == AT_BITE && notmcan))
+			&& !mindless_mon(mdef)
+		){
+			ptmp = min(*hp(mdef), d(2, 6));	/* amount of draining damage */
+			/* drain life! */
+			if (youdef) {
+				/* the player has a handy level-drain function */
+				forget(100/u.ulevel); //drain some proportion of your memory
+				losexp("memory loss", TRUE, TRUE, TRUE);
+			}
+			else {
+				/* print message first -- this should happen before the victim is drained/dies */
+				if (vis&VIS_MDEF)
+					pline("%s suddenly seems confused!", Monnam(mdef));
+
+				/* kill if this will level-drain below 0 m_lev, or lifedrain below 1 maxhp */
+				if (mlev(mdef) == 0 || *hpmax(mdef) <= ptmp) {
+					/* clean up the maybe-dead monster, return early */
+					if (youagr)
+						killed(mdef);
+					else
+						monkilled(mdef, "", attk->adtyp);
+					/* is it dead, or was it lifesaved? */
+					if (mdef->mhp > 0)
+						return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
+					else
+						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+				}
+				else {
+					/* drain stats */
+					mdef->m_lev--;
+					mdef->mhpmax -= ptmp;
+					mdef->mhp = max(mdef->mhpmax, mdef->mhp);
+				}
+			}
+		}
+
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
 	case AD_DESC:
 		/* print a basic hit message */
@@ -6262,6 +6327,23 @@ boolean ranged;
 				}
 			}
 		}
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
+	case AD_PULL:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		int dx = x(magr) - x(mdef);
+		int dy = y(magr) - y(mdef);
+		
+		if(youdef)
+			hurtle(sgn(dx), sgn(dy), 1, FALSE, FALSE);
+		else
+			mhurtle(mdef, sgn(dx), sgn(dy), 1);
+		
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
@@ -14179,8 +14261,12 @@ int vis;						/* True if action is at all visible to the player */
 	}
 
 	/* hurtle mdef */
-	if (staggering_strike || jousting || (fired && weapon && is_boulder(weapon))) {
+	if (staggering_strike || jousting 
+		|| (fired && weapon && is_boulder(weapon))
+		|| pd->mtyp == PM_KHAAMNUN_TANNIN
+	){
 		int dx, dy;
+		int ix = x(mdef), iy = y(mdef);
 		/* in what direction? */
 		if (magr) {
 			dx = sgn(x(mdef)-x(magr));
@@ -14190,6 +14276,13 @@ int vis;						/* True if action is at all visible to the player */
 			/* assumes that the boulder's ox/oy are accurate to where it started moving from */
 			dx = sgn(x(mdef)-weapon->ox);
 			dy = sgn(y(mdef)-weapon->oy);
+		}
+		else if(pd->mtyp == PM_KHAAMNUN_TANNIN){
+			//Evade in a random direction
+			do{
+				dx = rn2(3)-1;
+				dy = rn2(3)-1;
+			} while(!(dx || dy));
 		}
 		else {
 			impossible("hurtle with no direction");
@@ -14203,13 +14296,17 @@ int vis;						/* True if action is at all visible to the player */
 		}
 
 		if (youdef) {
-			hurtle(dx, dy, 1, FALSE, FALSE);
+			hurtle(dx, dy, pd->mtyp == PM_KHAAMNUN_TANNIN ? 4 : 1, FALSE, FALSE);
+			if(pd->mtyp == PM_KHAAMNUN_TANNIN && (ix != x(mdef) || iy != y(mdef)))
+				You("jet away.");
 			if (staggering_strike)
 				make_stunned(HStun + rnd(10), TRUE);
 			nomul(0, "being knocked back");
 		}
 		else {
-			mhurtle(mdef, dx, dy, 1);
+			mhurtle(mdef, dx, dy, pd->mtyp == PM_KHAAMNUN_TANNIN ? 4 : 1);
+			if(pd->mtyp == PM_KHAAMNUN_TANNIN && (ix != x(mdef) || iy != y(mdef)))
+				pline("%s jets away.", Monnam(mdef));
 			if (staggering_strike)
 				mdef->mstun = TRUE;
 			pd = mdef->data; /* in case of a polymorph trap */
@@ -15516,6 +15613,8 @@ android_combo()
 	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
 	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
 
+#define STILLVALID(mdef) (!DEADMONSTER(mdef) && mdef == m_at(u.ux + u.dx, u.uy + u.dy))
+
 	/* unarmed */
 	if (!uwep || (is_lightsaber(uwep) && !litsaber(uwep))){
 		if (!getdir((char *)0))
@@ -15530,7 +15629,7 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
-			if(!DEADMONSTER(mdef))
+			if(STILLVALID(mdef))
 				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
 		}
 		u.uen--;
@@ -15567,11 +15666,11 @@ android_combo()
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
-					if(!DEADMONSTER(mdef))
+					if(STILLVALID(mdef))
 						xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
-					if(!DEADMONSTER(mdef))
+					if(STILLVALID(mdef))
 						xmeleehity(&youmonst, mdef, &kickattack, (struct obj **)0, vis, 0, FALSE);
-					if(!DEADMONSTER(mdef))
+					if(STILLVALID(mdef))
 						xmeleehity(&youmonst, mdef, &kickattack, (struct obj **)0, vis, 0, FALSE);
 				}
 			}
@@ -15613,7 +15712,7 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
-			if(!DEADMONSTER(mdef))
+			if(STILLVALID(mdef))
 				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 		}
 		u.uen--;
@@ -15666,7 +15765,7 @@ android_combo()
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
-					if(!DEADMONSTER(mdef))
+					if(STILLVALID(mdef))
 						xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 				}
 			}
@@ -15702,7 +15801,7 @@ android_combo()
 			else {
 				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
-				if(!DEADMONSTER(mdef))
+				if(STILLVALID(mdef))
 					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 			}
 			//lunge in the direction attacked. 
@@ -15735,7 +15834,7 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
-			if(!DEADMONSTER(mdef))
+			if(STILLVALID(mdef))
 				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 		}
 		u.uen--;
@@ -15780,7 +15879,7 @@ android_combo()
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
-					if(!DEADMONSTER(mdef))
+					if(STILLVALID(mdef))
 						xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 				}
 			}
@@ -15821,7 +15920,7 @@ android_combo()
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
-			if(!DEADMONSTER(mdef))
+			if(STILLVALID(mdef))
 			xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 		}
 		u.uen--;
