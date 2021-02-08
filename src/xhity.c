@@ -5347,123 +5347,46 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
-	case AD_NPDC:
-		/* print a basic hit message */
-		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
-		}
-		/* maybe drain CON */
-		if (notmcan) {
-			/* player-only */
-			if (youdef && ACURR(A_CON) > 3) {
-				(void)adjattrib(A_CON, -1, FALSE);
-			}
-			/* monsters take d10 damage */
-			else {
-				result = xdamagey(magr, mdef, attk, rnd(10));
-				/* return early if cannot continue the attack */
-				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
-					return result;
-				/* otherwise continue to finish the attack (with physical damage) */
-			}
-		}
-		/* make physical attack without hitmsg */
-		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
-
+		/* "not-poison" drain stat attacks */
 	case AD_NPDS:
-		/* print a basic hit message */
-		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
-		}
-		/* maybe drain STR */
-		if (notmcan) {
-			/* player-only */
-			if (youdef && ACURR(A_STR) > 3) {
-				(void)adjattrib(A_STR, -1, FALSE);
-			}
-			/* monsters take d10 damage */
-			else {
-				result = xdamagey(magr, mdef, attk, rnd(10));
-				/* return early if cannot continue the attack */
-				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
-					return result;
-				/* otherwise continue to finish the attack (with physical damage) */
-			}
-		}
-		/* make physical attack without hitmsg */
-		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
-
 	case AD_NPDD:
-		/* print a basic hit message */
-		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
-		}
-		/* maybe drain DEX */
-		if (notmcan) {
-			/* player-only */
-			if (youdef && ACURR(A_DEX) > 3) {
-				(void)adjattrib(A_DEX, -1, FALSE);
-			}
-			/* monsters take d10 damage */
-			else {
-				result = xdamagey(magr, mdef, attk, rnd(10));
-				/* return early if cannot continue the attack */
-				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
-					return result;
-				/* otherwise continue to finish the attack (with physical damage) */
-			}
-		}
-		/* make physical attack without hitmsg */
-		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
-
+	case AD_NPDC:
 	case AD_NPDR:
-		/* print a basic hit message */
-		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
-		}
-		/* maybe drain CHA */
-		if (notmcan) {
-			/* player-only */
-			if (youdef && ACURR(A_CHA) > 3) {
-				(void)adjattrib(A_CHA, -1, FALSE);
-			}
-			/* monsters take d10 damage */
-			else {
-				result = xdamagey(magr, mdef, attk, rnd(10));
-				/* return early if cannot continue the attack */
-				if (result&(MM_DEF_DIED|MM_DEF_LSVD))
-					return result;
-				/* otherwise continue to finish the attack (with physical damage) */
-			}
-		}
-		/* make physical attack without hitmsg */
-		alt_attk.adtyp = AD_PHYS;
-		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
-
 	case AD_NPDA:
+		/* select stat to drain */
+		switch (attk->adtyp)
+		{
+		case AD_NPDS:	ptmp = A_STR; break;
+		case AD_NPDD:	ptmp = A_DEX; break;
+		case AD_NPDC:	ptmp = A_CON; break;
+		case AD_NPDR:	ptmp = A_CHA; break;
+		case AD_NPDA:	ptmp = A_STR; break;	/* Special case: drain ALL stats, by two, starting with STR */
+		}
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
-		/* maybe drain all */
+		/* maybe drain stat */
 		if (notmcan) {
-			for(int i = 0; i < A_MAX; i++){
+			int count = 0;
+			int amnt = (attk->adtyp == AD_NPDA) ? 2 : 1;
+			do {
 				/* player-only */
-				for(int j = 0; j < 2; j++) if(youdef && ACURR(i) > 3){
-					(void)adjattrib(i, -1, j == 1);
+				if (youdef && ACURR(ptmp) > 3) {
+					(void)adjattrib(ptmp, -amnt, FALSE);
 				}
-				/* monsters take d10 damage */
+				/* monsters take (amnt)d10 damage */
 				else {
-					result = xdamagey(magr, mdef, attk, rnd(10));
+					result = xdamagey(magr, mdef, attk, d(amnt, 10));
 					/* return early if cannot continue the attack */
 					if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 						return result;
 					/* otherwise continue to finish the attack (with physical damage) */
 				}
-			}
+
+				/* used only in drain-all: change what ptmp is */
+				ptmp = (ptmp+1)%A_MAX;
+			}while(attk->adtyp == AD_NPDA && count < A_MAX);
 		}
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
