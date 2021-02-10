@@ -5868,7 +5868,7 @@ is a red right hand
 	MB_HUMANOID|MB_WINGS|MB_STRONG /*MB*/, MG_INFRAVISIBLE|MG_NASTY|MG_NOPOLY /*MG*/,
 	0 /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, CLR_WHITE),
     MON("ancient of vitality", S_DEMON,//23
-	LVL_NDR(15, 12,  3, 3, 33, 14), (G_HELL|G_NOCORPSE|G_NOGEN),  /*Needs encyc entry*/
+	LVL_NDR(15, 12,  -3, 3, 33, 14), (G_HELL|G_NOCORPSE|G_NOGEN),  /*Needs encyc entry*/
 	A(ATTK(AT_VINE, AD_DISE, 9, 3),
 	  ATTK(AT_BOOM, AD_DISE, 33, 1), 
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
@@ -5879,7 +5879,7 @@ is a red right hand
 	MA_UNLIVING|MA_DEMON|MA_PRIMORDIAL|MA_PLANT /*MA*/,  
 	MV_EXTRAMISSION|MV_SEE_INVIS|MV_INFRAVISION|MV_OMNI /*MV*/, CLR_BRIGHT_MAGENTA),
     MON("ancient of ice", S_DEMON,//23
-	LVL_NDR(15, 8,  4, 8, 88, 14), (G_HELL|G_NOCORPSE|1),  /*Needs encyc entry*/
+	LVL_NDR(15, 8,  -8, 8, 88, 14), (G_HELL|G_NOCORPSE|1),  /*Needs encyc entry*/
 	A(ATTK(AT_WEAP, AD_PHYS, 8, 8), ATTK(AT_MAGC, AD_COLD, 8, 8),
 	  ATTK(AT_BOOM,AD_COLD, 88, 1), 
 	  NO_ATTK, NO_ATTK, NO_ATTK),
