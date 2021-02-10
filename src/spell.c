@@ -5605,9 +5605,12 @@ int spell;
 		statused = ACURR(A_CHA);
 
 	if((Doubt || flat_mad_turn(MAD_APOSTASY))
-		&& (spell_skilltype(spellid(spell)) == P_HEALING_SPELL || spell_skilltype(spellid(spell)) == P_CLERIC_SPELL)
+		&& (base_casting_stat() == A_WIS || spell_skilltype(spellid(spell)) == P_HEALING_SPELL || spell_skilltype(spellid(spell)) == P_CLERIC_SPELL)
 	)
 		return 0;
+	if(mad_turn(MAD_TOO_BIG))
+		return 0;
+
 	/* some artifacts pracically cast the spells on their own */
 	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
 		(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (
