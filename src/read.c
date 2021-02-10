@@ -562,7 +562,7 @@ doread()
 	    return(0);
 		//Note, you CAN scream one syllable
 	} else if (Screaming && (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS)){
-	    You_cant("read that aloud, you're too buisy screaming!");
+	    You_cant("read that aloud, you're too busy screaming!");
 	    return(0);
 	} else if (Blind) {
 	    const char *what = 0;

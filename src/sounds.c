@@ -2409,7 +2409,7 @@ int dz;
 		return(0);
     }
     else if (Screaming) {
-		You_cant("communicate.  You're too buisy screaming!");
+		You_cant("communicate.  You're too busy screaming!");
 		return(0);
     }
 	
