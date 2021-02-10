@@ -3660,6 +3660,9 @@ boolean * messaged;
 				mdef->mstun = 1;
 				mdef->mberserk = 1;
 			}
+			else if (otmp->osinging == OSING_FEAR) {
+				monflee(mdef, basedmg, TRUE, FALSE);
+			}
 
 			//May be interesting here?
 			else if (otmp->osinging == OSING_FIRE && !resists_fire(mdef))
