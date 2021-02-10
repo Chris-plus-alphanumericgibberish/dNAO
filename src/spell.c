@@ -5016,7 +5016,6 @@ int *spell_no;
 		else
 			Sprintf(buf, "Name\tLevel\tCategory\tFail\tMemory");
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-
 		// if(splaction == SPELLMENU_CAST && mad_turn(MAD_SCIAPHILIA) && ()(dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0)){
 			// Sprintf(buf, "You long for the flickering shadows!");
 			// add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
@@ -5025,8 +5024,12 @@ int *spell_no;
 			Sprintf(buf, "It's too big!");
 			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 		}
-		else if(Doubt && base_casting_stat() == A_WIS){
+		else if(splaction == SPELLMENU_CAST && Doubt && base_casting_stat() == A_WIS){
 			Sprintf(buf, "You're suffering a crisis of faith!");
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		}
+		else if(splaction == SPELLMENU_CAST && base_casting_stat() == A_WIS && flat_mad_turn(MAD_APOSTASY)){
+			Sprintf(buf, "You can't bring yourself to use your magic.");
 			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 		}
 		else for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
