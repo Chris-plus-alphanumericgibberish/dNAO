@@ -344,8 +344,8 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef))) :
-		(magr->mconf || magr->mstun || magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
+	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef)) || Delusion(mdef)) :
+		(magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
