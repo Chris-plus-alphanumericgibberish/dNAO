@@ -737,10 +737,7 @@ BOOLEAN_P bld, nobadeffects;
 		break;
 	    case PM_GREEN_SLIME:
 	    case PM_FLUX_SLIME:
-		if (!nobadeffects && !Slimed && !Unchanging 
-			&& !GoodHealth && !flaming(youracedata) 
-			&& youracedata->mtyp != PM_GREEN_SLIME
-		) {
+		if (!nobadeffects && !Slime_res(&youmonst)) {
 		    You("don't feel very well.");
 		    Slimed = 10L;
 		    flags.botl = 1;
@@ -808,10 +805,7 @@ struct monst *mon;
 
 	case PM_GREEN_SLIME:
 	case PM_FLUX_SLIME:
-	    if (!Unchanging && !GoodHealth &&
-				youracedata->mtyp != PM_FIRE_VORTEX &&
-			    youracedata->mtyp != PM_FIRE_ELEMENTAL &&
-			    youracedata->mtyp != PM_GREEN_SLIME) {
+	    if (!Slime_res(&youmonst)) {
 		You("don't feel very well.");
 		Slimed = 10L;
 	    }
@@ -2576,8 +2570,7 @@ struct obj *otmp;
 				!poly_when_stoned(youracedata)));
 
 		if (mtyp == PM_GREEN_SLIME || mtyp == PM_FLUX_SLIME)
-		    stoneorslime = (!Unchanging && !flaming(youracedata) &&
-			youracedata->mtyp != PM_GREEN_SLIME);
+		    stoneorslime = !Slime_res(&youmonst);
 
 		if (cadaver && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
 		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER ) {

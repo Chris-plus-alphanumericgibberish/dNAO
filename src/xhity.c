@@ -14544,11 +14544,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				}
 				else if (pd->mtyp == PM_GREEN_SLIME || pd->mtyp == PM_FLUX_SLIME) {
 					/* slime it */
-					if (!(Change_res(magr)
-						|| pa->mtyp == PM_GREEN_SLIME
-						|| pa->mtyp == PM_FLUX_SLIME
-						|| is_rider(pa)
-						|| resists_poly(pa))) {
+					if (!Slime_res(magr)) {
 						if (youdef) {
 							Your("%s turns %s into slime.", body_part(BODY_FLESH), mon_nam(mdef));
 							(void)newcham(mdef, PM_GREEN_SLIME, FALSE, FALSE);

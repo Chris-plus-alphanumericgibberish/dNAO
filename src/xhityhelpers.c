@@ -1258,11 +1258,7 @@ struct permonst * pd;
 	/* consuming the defender is fatal */
 	if ((is_deadly(pd) || 
 		((pd->mtyp == PM_GREEN_SLIME || pd->mtyp == PM_FLUX_SLIME) &&
-			!(Change_res(magr)
-			|| pa->mtyp == PM_GREEN_SLIME
-			|| pa->mtyp == PM_FLUX_SLIME
-			|| is_rider(pa)
-			|| resists_poly(pa)))
+			!(Slime_res(magr)))
 		) && (
 		((attk->aatyp == AT_BITE || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT) && is_vampire(pa)) ||
 		(attk->aatyp == AT_ENGL && attk->adtyp == AD_DGST)
