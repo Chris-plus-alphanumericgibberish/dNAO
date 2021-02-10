@@ -492,6 +492,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
 				has_template(mon, ZOMBIFIED) ||
 				has_template(mon, SKELIFIED) ||
 				has_template(mon, CRYSTALFIED) ||
+				has_template(mon, SLIME_REMNANT) ||
 				has_template(mon, FRACTURED)
 			)) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
@@ -1016,7 +1017,7 @@ shieldeff(x,y)
  */
 
 static struct tmp_glyph {
-    coord saved[COLNO];	/* previously updated positions */
+    coord saved[COLNO*ROWNO];	/* previously updated positions */
     int sidx;		/* index of next unused slot in saved[] */
     int style;		/* either DISP_BEAM or DISP_FLASH or DISP_ALWAYS */
     int glyph;		/* glyph to use when printing */

@@ -210,7 +210,7 @@ register struct obj *obj;
 	if (metallivorous(youracedata) && is_metallic(obj) &&
 	    (youracedata->mtyp != PM_RUST_MONSTER || is_rustprone(obj)))
 		return TRUE;
-	if (u.umonnum == PM_GELATINOUS_CUBE && is_organic(obj) &&
+	if ((u.umonnum == PM_GELATINOUS_CUBE || u.umonnum == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj) &&
 		/* [g.cubes can eat containers and retain all contents
 		    as engulfed items, but poly'd player can't do that] */
 	    !Has_contents(obj))

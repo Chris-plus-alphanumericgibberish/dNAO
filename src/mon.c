@@ -1521,18 +1521,135 @@ mcalcdistress()
 			}
 		}
 	}
+#define common_valid_target_inhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4\
+				&& tmpm->mpeaceful != mtmp->mpeaceful\
+				&& tmpm->mtame != mtmp->mtame\
+				&& !is_ancient(tmpm)\
+				&& !DEADMONSTER(tmpm)\
+				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+#define common_valid_target_exhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM\
+				&& tmpm->mpeaceful != mtmp->mpeaceful\
+				&& tmpm->mtame != mtmp->mtame\
+				&& !is_ancient(tmpm)\
+				&& !DEADMONSTER(tmpm)\
+				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
 	
+#define valid_corruption_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
+		&& !(resists_fire(tmpm) && resists_sickness(tmpm))\
+		&& tmpm->mtyp != PM_GREEN_SLIME\
+		&& !has_template(tmpm, SLIME_REMNANT)
+	if(mtmp->mtyp == PM_ANCIENT_OF_CORRUPTION){
+		struct monst *tmpm;
+		int targets = 0, damage = 0;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(valid_corruption_target_inhale(tmpm)) targets++;
+		}
+		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			&& !(Fire_resistance && Sick_resistance)
+		) targets++;
+		targets = rnd(targets);
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(valid_corruption_target_inhale(tmpm)) targets--;
+			if(!targets) break;
+		}
+		if(tmpm){
+			if(canseemon(tmpm) && canseemon(mtmp)){
+				pline("Slime bubbles up from under %s %s.", s_suffix(mon_nam(tmpm)), mbodypart(tmpm, BODY_SKIN));
+				pline("The bursting bubbles' spray is drawn into the oral groove of %s.", mon_nam(mtmp));
+			} else if(canseemon(tmpm)){
+				pline("Slime bubbles up from under %s %s.", s_suffix(mon_nam(tmpm)), mbodypart(tmpm, BODY_SKIN));
+			} else if(canseemon(mtmp)){
+				pline("Shimmering spray is drawn into the oral groove of %s.", mon_nam(mtmp));
+			}
+			damage = d(min(10, (mtmp->m_lev)/3), 6);
+			if(is_wooden(tmpm->data) || (!resists_fire(tmpm) && species_resists_cold(tmpm)))
+				damage *= 2;
+			tmpm->mhp -= damage;
+			if(!resists_sickness(tmpm)){
+				tmpm->mhpmax -= damage;
+				tmpm->mhpmax = max(tmpm->mhpmax, tmpm->m_lev);
+			}
+			if(tmpm->mhp < 1){
+				if (canspotmon(tmpm))
+					pline("%s liquifies!", Monnam(tmpm));
+				set_template(tmpm, SLIME_REMNANT);
+				grow_up(mtmp,tmpm);
+				tmpm->m_lev = max(tmpm->m_lev, tmpm->data->mlevel);
+				tmpm->mhp = tmpm->mhpmax = tmpm->m_lev*8;
+				if(mtmp->mtame){
+					tmpm->mpeaceful = 1;
+				} else {
+					if(tmpm->mtame && !(EDOG(tmpm)->loyal)){
+						tmpm->mtame = 0;
+						tmpm->mpeaceful = 0;
+						set_malign(tmpm);
+					}
+					else if(!tmpm->mtame && tmpm->mpeaceful){
+						tmpm->mpeaceful = 0;
+						set_malign(tmpm);
+					}
+				}
+				newsym(tmpm->mx, tmpm->my);
+			}
+			mtmp->mhp += damage;
+			if(mtmp->mhp > mtmp->mhpmax){
+				mtmp->mhp = mtmp->mhpmax;
+				// grow_up(mtmp,mtmp);
+			}
+			mtmp->mspec_used = 0;
+			mtmp->mcan = 0;
+		} else if(targets > 0
+			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			&& !(Fire_resistance && Sick_resistance)
+		){
+			pline("Slime bubbles up from under your %s.", body_part(BODY_SKIN));
+			if(canseemon(mtmp)){
+				pline("The bursting bubbles' spray is drawn into the oral groove of %s.", mon_nam(mtmp));
+			}
+			damage = d(min(10, (mtmp->m_lev)/3), 6);
+			
+			make_sick(Sick ? Sick / 2L + 1L : (long)rn1(ACURR(A_CON), 20), mtmp->data->mname, TRUE, SICK_NONVOMITABLE);
+			
+			if(is_wooden(youracedata) || (Fire_resistance && species_resists_cold(&youmonst)))
+				damage *= 2;
+			
+			int temparise = u.ugrave_arise;
+			u.ugrave_arise = PM_ANCIENT_OF_CORRUPTION;
+			losehp(damage, "corrupting slime", KILLED_BY);
+			u.ugrave_arise = temparise;
+			
+			mtmp->mhp += damage;
+			if(mtmp->mhp > mtmp->mhpmax){
+				mtmp->mhp = mtmp->mhpmax;
+				// grow_up(mtmp,mtmp);
+			}
+			mtmp->mspec_used = 0;
+			mtmp->mcan = 0;
+			mtmp->mux = u.ux;
+			mtmp->muy = u.uy;
+		}
+		if(damage){
+			if(canseemon(mtmp))
+				pline("%s breathes out a spout of slime!", Monnam(mtmp));
+			damage = d(min(10, (mtmp->m_lev)/3), 12);
+			explode_yours(mtmp->mx, mtmp->my, AD_SLIM, MON_EXPLODE, damage, EXPL_NOXIOUS, 8, FALSE);
+		}
+	}
+
+#define valid_ice_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
+		&& !resists_fire(tmpm)
+#define valid_ice_target_exhale(tmpm) common_valid_target_exhale(tmpm)\
+		&& !resists_cold(tmpm)\
+		&& m_online(mtmp, tmpm, tmpm->mx, tmpm->my, !(mtmp->mtame && !mtmp->mconf), FALSE)
 	if(mtmp->mtyp == PM_ANCIENT_OF_ICE){
 		struct monst *tmpm;
 		int targets = 0, damage = 0;
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
-				&& tmpm->mpeaceful != mtmp->mpeaceful
-				&& tmpm->mtame != mtmp->mtame
-				&& !resists_fire(tmpm)
-				&& !DEADMONSTER(tmpm)
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-			) targets++;
+			if(valid_ice_target_inhale(tmpm)) targets++;
 		}
 		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
 			&& !mtmp->mpeaceful
@@ -1541,13 +1658,7 @@ mcalcdistress()
 		) targets++;
 		targets = rnd(targets);
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
-				&& tmpm->mpeaceful != mtmp->mpeaceful
-				&& tmpm->mtame != mtmp->mtame
-				&& !resists_fire(tmpm)
-				&& !DEADMONSTER(tmpm)
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-			) targets--;
+			if(valid_ice_target_inhale(tmpm)) targets--;
 			if(!targets) break;
 		}
 		if(tmpm){
@@ -1622,14 +1733,7 @@ mcalcdistress()
 				flags.drgn_brth = 0;
 			} else {
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM
-						&& tmpm->mpeaceful != mtmp->mpeaceful
-						&& tmpm->mtame != mtmp->mtame
-						&& !resists_cold(tmpm)
-						&& m_online(mtmp, tmpm, tmpm->mx, tmpm->my, !(mtmp->mtame && !mtmp->mconf), FALSE)
-						&& !DEADMONSTER(tmpm)
-						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-					){
+					if(valid_ice_target_exhale(tmpm)){
 						flags.drgn_brth = 1;
 						xbreathey(mtmp, &mattk, tmpm->mx, tmpm->my);
 						flags.drgn_brth = 0;
@@ -1640,17 +1744,18 @@ mcalcdistress()
 		}
 	}
 	
+#define valid_death_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
+		&& !nonliving(tmpm->data)
+#define valid_death_target_exhale(tmpm) common_valid_target_exhale(tmpm)\
+		&& !(nonliving(tmpm->data) || is_demon(tmpm->data))\
+		&& !(ward_at(tmpm->mx,tmpm->my) == CIRCLE_OF_ACHERON)\
+		&& !(resists_death(tmpm))
+
 	if(mtmp->mtyp == PM_ANCIENT_OF_DEATH){
 		struct monst *tmpm;
 		int targets = 0, damage = 0;
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
-				&& tmpm->mpeaceful != mtmp->mpeaceful
-				&& tmpm->mtame != mtmp->mtame
-				&& !nonliving(tmpm->data)
-				&& !DEADMONSTER(tmpm)
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-			) targets++;
+			if(valid_death_target_inhale(tmpm)) targets++;
 		}
 		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
 			&& !mtmp->mpeaceful
@@ -1659,13 +1764,7 @@ mcalcdistress()
 		) targets++;
 		targets = rnd(targets);
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
-				&& tmpm->mpeaceful != mtmp->mpeaceful
-				&& tmpm->mtame != mtmp->mtame
-				&& !nonliving(tmpm->data)
-				&& !DEADMONSTER(tmpm)
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-			) targets--;
+			if(valid_death_target_inhale(tmpm)) targets--;
 			if(!targets) break;
 		}
 		if(tmpm){
@@ -1749,15 +1848,7 @@ mcalcdistress()
 			} else {
 				struct monst *targ = 0;
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-					if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM
-						&& tmpm->mpeaceful != mtmp->mpeaceful
-						&& tmpm->mtame != mtmp->mtame
-						&& !(nonliving(tmpm->data) || is_demon(tmpm->data))
-						&& !(ward_at(tmpm->mx,tmpm->my) == CIRCLE_OF_ACHERON)
-						&& !(resists_death(tmpm))
-						&& !DEADMONSTER(tmpm)
-						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-					){
+					if(valid_death_target_exhale(tmpm)){
 						if(!targ || (distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) < distmin(targ->mx, targ->my, mtmp->mx, mtmp->my))){
 							targ = tmpm;
 						}
@@ -1802,7 +1893,7 @@ mcalcdistress()
 			}
 		}
 	}
-	
+
 	if(mtmp->mtyp == PM_BAALPHEGOR && mtmp->mhp < mtmp->mhpmax/2){
 		struct monst *tmpm;
 		int targets = 0, damage = 0;
@@ -1862,7 +1953,7 @@ mcalcdistress()
 				tmpm->mhp -= damage;
 				mtmp->mhp += damage;
 			}
-			
+
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
 				// grow_up(mtmp,mtmp);
@@ -2551,7 +2642,7 @@ meatobj(mtmp)		/* for gelatinous cubes */
 		    mtmp->mhp = mtmp->mhpmax;
 		}
 		/* in case it polymorphed or died */
-		if (ptr->mtyp != PM_GELATINOUS_CUBE)
+		if (ptr->mtyp != PM_GELATINOUS_CUBE && ptr->mtyp != PM_ANCIENT_OF_CORRUPTION)
 		    return !ptr ? 2 : 1;
 	    } else if (otmp->oclass != ROCK_CLASS && !(otmp->otyp == MAGIC_CHEST && otmp->obolted) &&
 				    otmp != uball && otmp != uchain) {
@@ -3495,6 +3586,12 @@ struct monst * mdef;	/* another monster which is next to it */
 		&& !mindless(magr->data) && distmin(magr->mx, magr->my, mdef->mx, mdef->my) < 3 && !MON_WEP(magr)
 	) {
 		return 0L;
+	}
+	// Slime remnants attack everything not of the same peacefulness as them
+	if((has_template(magr, SLIME_REMNANT) || has_template(mdef, SLIME_REMNANT)) &&
+		magr->mpeaceful != mdef->mpeaceful
+	) {
+		return ALLOW_M|ALLOW_TM;
 	}
 	// dreadblossoms attack almost anything
 	if(ma->mtyp == PM_DREADBLOSSOM_SWARM &&
@@ -4970,7 +5067,7 @@ boolean was_swallowed;			/* digestion */
 	/* must duplicate this below check in xkilled() since it results in
 	 * creating no objects as well as no corpse
 	 */
-	if (has_template(mon, SKELIFIED))
+	if (has_template(mon, SKELIFIED) || has_template(mon, SLIME_REMNANT))
 		return FALSE;
 
 	if (has_template(mon, CRYSTALFIED))

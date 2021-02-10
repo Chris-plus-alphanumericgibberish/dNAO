@@ -166,6 +166,40 @@ int radius;
 }
 
 void
+explode_yours(x, y, adtyp, olet, dam, color, radius, yours)
+int x, y;
+int adtyp; /* the same as in zap.c */
+int olet;
+int dam;
+int color;
+int radius;
+boolean yours; /* is it your fault (for killing monsters) */
+{
+	ExplodeRegion *area;
+	area = create_explode_region();
+	if (radius == 0)
+	{
+		if (isok(x, y))
+			add_location_to_explode_region(x, y, area);
+	}
+	else if (radius == 1)
+	{	// can use simple method of creating explosions
+		int i, j;
+		for (i = -1; i <= 1; i++)
+		for (j = -1; j <= 1; j++)
+			if (isok(x + i, y + j))
+				add_location_to_explode_region(x + i, y + j, area);
+	}
+	else
+	{	// use circles
+		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
+	}
+
+	do_explode(x, y, area, adtyp, olet, dam, color, 0, yours);
+	free_explode_region(area);
+}
+
+void
 splash(x, y, dx, dy, adtyp, olet, dam, color)
 int x, y, dx, dy;
 int adtyp;
@@ -261,6 +295,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 			break;
 		case AD_ACID: str = "splash of acid";
 			break;
+		case AD_SLIM: str = "spout of acidic slime";
+			break;
 		case AD_PHYS: str = (olet != TOOL_CLASS ? olet != WEAPON_CLASS ? "blast" : "flying shards of obsidian" : "flying shards of mirror");
 			break;
 		case AD_DISE: str = "cloud of spores";
@@ -308,6 +344,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				break;
 			case AD_ACID:
 				explmask = !!Acid_resistance;
+				break;
+			case AD_SLIM:
+				explmask = (Acid_resistance || Slime_res(&youmonst));
 				break;
 			case AD_DISE: /*assumes only swamp ferns have disease explosions*/
 				explmask = !!Sick_resistance;
@@ -363,6 +402,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				break;
 			case AD_ACID:
 				explmask |= resists_acid(mtmp);
+				break;
+			case AD_SLIM:
+				explmask |= resists_acid(mtmp) || Slime_res(mtmp);
 				break;
 			case AD_DISE:
 				explmask |= resists_sickness(mtmp);
@@ -558,8 +600,15 @@ boolean yours; /* is it your fault (for killing monsters) */
 			else if (has_blood_mon(mtmp) && adtyp == AD_BLUD)
 				mdam += mlev(mtmp);
 
-			mtmp->mhp -= mdam;
-			mtmp->mhp -= (idamres + idamnonres);
+			if(adtyp == AD_SLIM && !Slime_res(mtmp) &&
+				(!resists_acid(mtmp) ? (mtmp->mhp <= mdam*2) : (mtmp->mhp <= mdam))
+			){
+				(void)newcham(mtmp, PM_GREEN_SLIME, FALSE, canseemon(mtmp));
+				mtmp->mstrategy &= ~STRAT_WAITFORU;
+			} else {
+				mtmp->mhp -= mdam;
+				mtmp->mhp -= (idamres + idamnonres);
+			}
 		}
 		if (mtmp->mhp <= 0) {
 			/* KMH -- Don't blame the player for pets killing gas spores */
@@ -612,6 +661,11 @@ boolean yours; /* is it your fault (for killing monsters) */
 		ugolemeffects((int) adtyp, damu);
 
 		if (uhurt == 2) {
+			if(adtyp == AD_SLIM && !Slime_res(&youmonst)){
+				You("don't feel very well.");
+				Slimed = 10L;
+				flags.botl = 1;
+			}
 		    if (Upolyd)
 		    	u.mh  -= damu;
 		    else

@@ -1086,7 +1086,7 @@ rock:
 		return(TABU);
 	    if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
 		return CADAVER;
-	    if (mon->mtyp == PM_GELATINOUS_CUBE && is_organic(obj))
+	    if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))
 		return(ACCFOOD);
 	    if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->mtyp != PM_RUST_MONSTER)) {
 		/* Non-rustproofed ferrous based metals are preferred. */

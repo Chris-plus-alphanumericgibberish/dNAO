@@ -3309,6 +3309,9 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "crystalfied ", l = 12)) {
 				undeadtype = CRYSTALFIED;
 			}
+			else if (!strncmpi(bufp, "slimy ", l = 6)) {
+				undeadtype = SLIME_REMNANT;
+			}
 			else if (!strncmpi(bufp, "fractured ", l = 10)) {
 				undeadtype = FRACTURED;
 			}
@@ -3347,6 +3350,8 @@ int gen_restrict;
 				undeadtype = SKELIFIED;
 			else if (!strncmpi(p, "vitrean",	7))
 				undeadtype = CRYSTALFIED;
+			else if (!strncmpi(p, "remnant",	7))
+				undeadtype = SLIME_REMNANT;
 			else if (!strncmpi(p, "witness",	7))
 				undeadtype = FRACTURED;
 			else if (!strncmpi(p, "one", 3) && ((q = rindex(bufp, ' ')) != 0))
@@ -3398,7 +3403,6 @@ int gen_restrict;
 			/* either keep what was set above, or nothing */
 			break;
 		}
-
 		/* possibly allow the derivation of monster to be specified */
 		if (specify_derivation != -1)
 		{

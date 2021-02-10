@@ -836,29 +836,13 @@ char * buf;
 boolean pname;
 {
 	if (pname){
-		if (has_template(mtmp, ZOMBIFIED)) Strcat(buf, "'s zombie");
-		else if (has_template(mtmp, SKELIFIED)) Strcat(buf, "'s skeleton");
-		else if (has_template(mtmp, CRYSTALFIED)) Strcat(buf, "'s vitrean");
-		else if (has_template(mtmp, FRACTURED)) Strcat(buf, ", Witness of the Fracture");
-		else if (has_template(mtmp, ILLUMINATED)) Strcat(buf, "the Illuminated");
-		else if (has_template(mtmp, VAMPIRIC)) Strcat(buf, ", vampire");
-		else if (has_template(mtmp, PSEUDONATURAL)) Strcat(buf, "the Pseudonatural");
-		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, " of the Herd");
-		else if (has_template(mtmp, MISTWEAVER)){
+		if (has_template(mtmp, MISTWEAVER)){
 			if (mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
 			else Strcat(buf, ", Child of the Black Goat");
 		}
 	}
 	else {
-		if (has_template(mtmp, ZOMBIFIED)) Strcat(buf, " zombie");
-		else if (has_template(mtmp, SKELIFIED)) Strcat(buf, " skeleton");
-		else if (has_template(mtmp, CRYSTALFIED)) Strcat(buf, " vitrean");
-		else if (has_template(mtmp, FRACTURED)) Strcat(buf, " witness");
-		else if (has_template(mtmp, ILLUMINATED)) Strcat(buf, " shining one");
-		else if (has_template(mtmp, VAMPIRIC)) Strcat(buf, " vampire");
-		else if (has_template(mtmp, PSEUDONATURAL)) Strcat(buf, " pseudonatural");
-		else if (has_template(mtmp, TOMB_HERD)) Strcat(buf, " herd");
-		else if (has_template(mtmp, MISTWEAVER)){
+		if (has_template(mtmp, MISTWEAVER)){
 			if (mtmp->female) Strcat(buf, " dark daughter");
 			else Strcat(buf, " dark child");
 		}

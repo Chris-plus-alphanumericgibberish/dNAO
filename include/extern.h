@@ -869,6 +869,7 @@ E long FDECL(rndexp, (BOOLEAN_P));
 /* ### explode.c ### */
 
 E void FDECL(explode, (int,int,int,int,int,int,int));
+E void FDECL(explode_yours, (int,int,int,int,int,int,int,boolean));
 E void FDECL(splash, (int,int,int,int,int,int,int,int));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *));
 E void FDECL(splatter_burning_oil, (int, int));
@@ -1611,6 +1612,7 @@ E boolean FDECL(resists_disint, (struct monst *));
 E boolean FDECL(resists_elec, (struct monst *));
 E boolean FDECL(resists_poison, (struct monst *));
 E boolean FDECL(resists_acid, (struct monst *));
+E boolean FDECL(Slime_res, (struct monst *));
 E boolean FDECL(resists_ston, (struct monst *));
 E boolean FDECL(resists_drain, (struct monst *));
 E boolean FDECL(resists_sickness, (struct monst *));

@@ -467,6 +467,8 @@ register struct monst *mtmp;
 			u.ugrave_arise = PM_SKELETON;
 		else if (mtmp->data->mlet == S_ZOMBIE || has_template(mtmp, ZOMBIFIED))
 			u.ugrave_arise = PM_ZOMBIE;
+		else if (mtmp->mtyp == PM_ANCIENT_OF_CORRUPTION || has_template(mtmp, SLIME_REMNANT))
+			u.ugrave_arise = PM_ANCIENT_OF_CORRUPTION;
 		else if (mtmp->mtyp == PM_BAALPHEGOR || has_template(mtmp, CRYSTALFIED))
 			u.ugrave_arise = PM_BAALPHEGOR;
 	} else if(uandroid){

@@ -5280,13 +5280,8 @@ boolean ranged;
 					pline_The("slime burns away!");
 				}
 			}
-			/* unchanging immunity to slime */
-			else if (Change_res(mdef)
-				|| pd->mtyp == PM_GREEN_SLIME
-				|| pd->mtyp == PM_FLUX_SLIME
-				|| is_rider(pd)
-				|| (youdef && GoodHealth)
-				|| resists_poly(pd)) {
+			/* unchanging immunity to slime (retests a few of the above but meh) */
+			else if (Slime_res(mdef)) {
 				/* only message for the player defending */
 				if (youdef) {
 					You("are unaffected.");

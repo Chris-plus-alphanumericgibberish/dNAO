@@ -2107,14 +2107,18 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 
 	char name[BUFSZ] = "";
 	Strcat(name, ptr->mname);
-	if (has_template(mtmp, ZOMBIFIED))		Strcat(name, " zombie");
-	else if (has_template(mtmp, SKELIFIED))	Strcat(name, " skeleton");
-	else if (has_template(mtmp, CRYSTALFIED)) Strcat(name, " vitrean");
-	else if (has_template(mtmp, FRACTURED))	Strcat(name, " witness");
-	else if (has_template(mtmp, ILLUMINATED))	Strcat(name, " shining one");
-	else if (has_template(mtmp, VAMPIRIC))	Strcat(name, " vampire");
-	else if (has_template(mtmp, PSEUDONATURAL))	Strcat(name, " pseudonatural");
-	else if (has_template(mtmp, TOMB_HERD))	Strcat(name, " tomb herd");
+	if (type_is_pname(mtmp->data)){
+		if (has_template(mtmp, MISTWEAVER)){
+			if (mtmp->female) Strcat(name, ", Daughter of the Black Goat");
+			else Strcat(name, ", Child of the Black Goat");
+		}
+	}
+	else {
+		if (has_template(mtmp, MISTWEAVER)){
+			if (mtmp->female) Strcat(name, " dark daughter");
+			else Strcat(name, " dark child");
+		}
+	}
 
 	temp_buf[0] = '\0';
 	if (iflags.pokedex) {

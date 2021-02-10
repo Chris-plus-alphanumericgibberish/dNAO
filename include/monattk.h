@@ -133,7 +133,7 @@
 #define AD_MIST		70 /* Mi-go mist projector.  Works with AT_GAZE */
 #define AD_TELE		71 /* Monster teleports away.  Use for hit and run attacks */
 #define AD_POLY		72	/* Monster alters your DNA (was for the now-defunct genetic enginier Q) */
-#define AD_PSON		73 /* DEFERED psionic attacks.  uses some from cleric and wiz */
+#define AD_PSON		73 /* "Psionic" magic attacks.  uses some from cleric and wiz */
 #define AD_GROW		74 /* Monster causes a child to grow up upon death.  'ton special */
 #define AD_SOUL		75 /* Monster causes like monsters to power up upon death.  Deep One special */
 #define AD_TENT		76	/* extended tentacle invasion (elder priest) */

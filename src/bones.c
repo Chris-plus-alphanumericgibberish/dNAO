@@ -516,6 +516,13 @@ struct obj *corpse;
 			in_mklev = FALSE;
 			if(mtmp)
 				set_template(mtmp, CRYSTALFIED);
+		} else if(u.ugrave_arise == PM_ANCIENT_OF_CORRUPTION){
+			u.ugrave_arise = (u.mfemale && urace.femalenum != NON_PM) ? urace.femalenum : urace.malenum;
+			in_mklev = TRUE;
+			mtmp = makemon(&mons[u.ugrave_arise], x, y, NO_MM_FLAGS);
+			in_mklev = FALSE;
+			if(mtmp)
+				set_template(mtmp, SLIME_REMNANT);
 		} else if(u.ugrave_arise == PM_VAMPIRE){
 			u.ugrave_arise = (u.mfemale && urole.femalenum != NON_PM) ? urole.femalenum : urole.malenum;
 			in_mklev = TRUE;
@@ -539,6 +546,7 @@ struct obj *corpse;
 			has_template(mtmp, ZOMBIFIED) ? " zombie" :
 			has_template(mtmp, SKELIFIED) ? " skeleton" :
 			has_template(mtmp, CRYSTALFIED) ? " vitrean" :
+			has_template(mtmp, SLIME_REMNANT) ? " slimy remnant" :
 			""
 			);
 		display_nhwindow(WIN_MESSAGE, FALSE);
