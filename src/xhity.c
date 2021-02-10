@@ -14438,7 +14438,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	int indexnum = 0;
 	int subout = 0;
 	int tohitmod = 0;
-	int res[3];
+	int res[4];
 	long slot = 0L;
 	struct obj * otmp;
 	boolean usedmask = FALSE;		/* whether a message has been printed about a lillend using a mask to make passive attacks */
