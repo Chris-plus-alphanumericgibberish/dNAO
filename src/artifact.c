@@ -1264,6 +1264,9 @@ struct obj *obj;
 		case ART_HERMES_S_SANDALS:
 			wt = objects[FLYING_BOOTS].oc_weight;
 			break;
+		case ART_LYRE_OF_ORPHEUS:
+			wt = objects[MAGIC_HARP].oc_weight;
+			break;
 		default:
 			impossible("unhandled special artifact weight for %d", obj->oartifact);
 			break;
