@@ -2972,10 +2972,10 @@ struct monst * mdef;	/* another monster which is next to it */
 		return 0L;
 	}
 	// Slime remnants attack everything not of the same peacefulness as them
-	if((has_template(magr, SLIME_REMNANT) || has_template(mdef, SLIME_REMNANT)) &&
-		magr->mpeaceful != mdef->mpeaceful
-	) {
-		return ALLOW_M|ALLOW_TM;
+	if(has_template(magr, SLIME_REMNANT) || has_template(mdef, SLIME_REMNANT)){
+		if(magr->mpeaceful != mdef->mpeaceful)
+			return ALLOW_M|ALLOW_TM;
+		else return 0L;
 	}
 	// dreadblossoms attack almost anything
 	if(ma->mtyp == PM_DREADBLOSSOM_SWARM &&

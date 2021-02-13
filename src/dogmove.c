@@ -835,6 +835,9 @@ boolean ranged;
 	if(mtmp2->mtyp == PM_MANDRAKE)
 		return FALSE;
 	
+	if(has_template(mtmp2, SLIME_REMNANT) && mtmp->mpeaceful == mtmp2->mpeaceful)
+		return FALSE;
+	
     return !((!ranged &&
 #ifdef BARD
                 (int)mtmp2->m_lev >= (int)mtmp->m_lev+2 + (mtmp->encouraged)*2 &&
