@@ -202,11 +202,12 @@
 #define AD_DOBT     137 /* Inflict doubt */
 #define AD_APCS     138 /* Revelatory whispers */
 #define AD_PULL     139 /* Pull target closer */
+#define AD_PAIN     140 /* Crippling pain */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	140
+#define AD_DUNSTAN	141
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

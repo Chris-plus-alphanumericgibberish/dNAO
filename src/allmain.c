@@ -3487,6 +3487,7 @@ printAttacks(buf, ptr)
 		"inflict [[agnosis]]",	/*137*/
 		"revelatory whispers",	/*138*/
 		"pull closer",			/*139*/
+		"crippling pain",		/*140*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */

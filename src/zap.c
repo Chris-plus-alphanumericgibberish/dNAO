@@ -4966,6 +4966,9 @@ boolean *shopdamage;
 		    You("%s of smoke.",
 			!Blind ? "see a puff" : "smell a whiff");
 		}
+	if(OBJ_AT(x, y) && adtyp == AD_WET && !is_lava(x,y))
+		water_damage(level.objects[x][y], FALSE, FALSE, FALSE, 0);
+
 	if ((mon = m_at(x,y)) != 0) {
 		wakeup(mon, FALSE);
 		if(mon->m_ap_type) seemimic(mon);

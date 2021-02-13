@@ -1683,5 +1683,39 @@ uhpmax()
     return (Upolyd ? u.mhmax : u.uhpmax);
 }
 
+void
+check_brainlessness()
+{
+	if (ABASE(A_INT) <= 3) {
+		int lifesaved = 0;
+		struct obj *wore_amulet = uamul;
 
+		while (1) {
+			/* avoid looping on "die(y/n)?" */
+			if (lifesaved && (discover || wizard)) {
+				if (wore_amulet && !uamul) {
+					/* used up AMULET_OF_LIFE_SAVING; still
+					subject to dying from brainlessness */
+					wore_amulet = 0;
+				}
+				else {
+					/* explicitly chose not to die;
+					arbitrarily boost intelligence */
+					ABASE(A_INT) = ATTRMIN(A_INT) + 2;
+					You_feel("like a scarecrow.");
+					/* break deathloop */
+					break;
+				}
+			}
+			if (lifesaved)
+				pline("Unfortunately your brain is still gone.");
+			else
+				Your("last thought fades away.");
+			killer = "brainlessness";
+			killer_format = KILLED_BY;
+			done(DIED);
+			lifesaved++;
+		}
+	}
+}
 /*attrib.c*/

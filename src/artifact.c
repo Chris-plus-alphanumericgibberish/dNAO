@@ -4699,9 +4699,9 @@ boolean * messaged;
 			static long lastscreamed = 0;
 			static struct monst *lastmon = 0;
 
-			if (youdef ? (ulastscreamed < monstermoves) : (lastscreamed < monstermoves || lastmon != mdef))
-			{
-				if (youdef) {
+			//Big picture note: monsters can be stunlocked this way, you can't since it uses Screaming statues
+			if (youdef) {
+				if(ulastscreamed < monstermoves){
 					ulastscreamed = monstermoves;
 					if (!is_silent(pd)){
 						You("%s from the pain!", humanoid_torso(pd) ? "scream" : "shriek");
@@ -4710,7 +4710,13 @@ boolean * messaged;
 						You("writhe in pain!");
 					}
 				}
-				else {
+				if (check_oprop(otmp, OPROP_FLAYW))
+					HScreaming += 2;
+				else
+					HScreaming += 1;
+			}
+			else {
+				if(lastscreamed < monstermoves || lastmon != mdef){
 					lastscreamed = monstermoves;
 					lastmon = mdef;
 					if (!is_silent_mon(mdef)){

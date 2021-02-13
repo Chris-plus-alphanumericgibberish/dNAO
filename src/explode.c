@@ -305,6 +305,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 			break;
 		case AD_BLUD: str = "splash of tainted blood";
 			break;
+		case AD_WET: str = "wall of water";
+			break;
 		default:
 			impossible("unaccounted-for explosion damage type in do_explode: %d", adtyp);
 			str = "404 BLAST NOT FOUND";
@@ -357,6 +359,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 				break;
 			case AD_BLUD:
 				explmask = !has_blood(youracedata);
+				break;
+			case AD_WET:
 				break;
 			default:
 				impossible("explosion type %d?", adtyp);
@@ -414,6 +418,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 				break;
 			case AD_BLUD:
 				explmask |= has_blood_mon(mtmp);
+				break;
+			case AD_WET:
 				break;
 			default:
 				impossible("explosion type %d?", adtyp);
@@ -516,6 +522,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 				      (adtyp == AD_DRST) ? "poisoned" :
 				      (adtyp == AD_DISE) ? "high-yield food poisoning" :
 				      (adtyp == AD_ACID) ? "an upset stomach" :
+				      (adtyp == AD_SLIM) ? "a little green" :
+				      (adtyp == AD_WET) ? "bloated" :
 				      (adtyp == AD_PHYS) ? ((olet == TOOL_CLASS) ?
 				       "perforated" : "a bloated stomach") :
 				       "fried");
@@ -530,6 +538,8 @@ boolean yours; /* is it your fault (for killing monsters) */
 				      (adtyp == AD_DRST) ? "intoxicated" :
 				      (adtyp == AD_DISE) ? "quesy" :
 				      (adtyp == AD_ACID) ? "burned" :
+				      (adtyp == AD_SLIM) ? "green" :
+				      (adtyp == AD_WET) ? "bloated" :
 				      (adtyp == AD_PHYS) ? ((olet == TOOL_CLASS) ?
 				       "perforated" : "blasted open") :
 				       "fried");
@@ -599,7 +609,14 @@ boolean yours; /* is it your fault (for killing monsters) */
 				mdam *= 2;
 			else if (has_blood_mon(mtmp) && adtyp == AD_BLUD)
 				mdam += mlev(mtmp);
-
+			
+			if(adtyp == AD_WET){
+				water_damage(((mtmp == &youmonst) ? 
+					invent : 
+					mtmp->minvent), 
+					FALSE, FALSE, FALSE, mtmp);
+			}
+			
 			if(adtyp == AD_SLIM && !Slime_res(mtmp) &&
 				(!resists_acid(mtmp) ? (mtmp->mhp <= mdam*2) : (mtmp->mhp <= mdam))
 			){

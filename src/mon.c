@@ -6998,6 +6998,154 @@ struct monst *mtmp;
 		}
 	}
 
+#define valid_gray_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
+		&& !mindless_mon(tmpm)
+#define valid_gray_target_exhale(tmpm) common_valid_target_exhale(tmpm)\
+		&& !mindless_mon(tmpm)\
+		&& !nonliving(tmpm->data)
+
+	if(mtmp->mtyp == PM_ANCIENT_OF_THOUGHT){
+		struct monst *tmpm;
+		int targets = 0, damage = 0;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(valid_gray_target_inhale(tmpm)) targets++;
+		}
+		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			/*Note: the player is never mindless*/
+		) targets++;
+		targets = rnd(targets);
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(valid_gray_target_inhale(tmpm)) targets--;
+			if(!targets) break;
+		}
+		if(tmpm){
+			if(canseemon(tmpm) && canseemon(mtmp)){
+				pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+				pline("The light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
+			} else if(canseemon(tmpm)){
+				pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+			} else if(canseemon(mtmp)){
+				pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
+			}
+			damage = d(1, min(10, (mtmp->m_lev)/3));
+			tmpm->mhp -= d(damage, 10);
+			if(tmpm->mhp < 1){
+				if (canseemon(tmpm)) {
+					pline("%s last thought fades away...",
+						s_suffix(Monnam(tmpm)));
+				}
+				tmpm->mhp = 0;
+				grow_up(mtmp,tmpm);
+				mondied(tmpm);
+			}
+			mtmp->mhp += damage*10;
+			if(mtmp->mhp > mtmp->mhpmax){
+				mtmp->mhp = mtmp->mhpmax;
+				// grow_up(mtmp,mtmp);
+			}
+			mtmp->mspec_used = 0;
+			mtmp->mcan = 0;
+		} else if(targets > 0
+			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
+			&& !mtmp->mpeaceful
+			&& !mtmp->mtame
+			/*Note: the player is never mindless*/
+		){
+			if(uarmh && uarmh->otyp == DUNCE_CAP){
+				damage = 0;
+				destroy_arm(uarmh);
+			}
+			else {
+			//Assumes you can't see your own ears
+				if(!Blind)
+					Your("mind goes numb.");
+				if(canseemon(mtmp)){
+					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
+				}
+
+				damage = d(1, min(10, (mtmp->m_lev)/3));
+
+				(void)adjattrib(A_INT, -damage, FALSE);
+				int i = damage;
+				while (i--){
+					forget(10);	/* lose 10% of memory per point lost*/
+					exercise(A_WIS, FALSE);
+				}
+				check_brainlessness();
+
+				mtmp->mhp += damage*10;
+				if(mtmp->mhp > mtmp->mhpmax){
+					mtmp->mhp = mtmp->mhpmax;
+					// grow_up(mtmp,mtmp);
+				}
+				mtmp->mspec_used = 0;
+				mtmp->mcan = 0;
+				mtmp->mux = u.ux;
+				mtmp->muy = u.uy;
+			}
+		}
+		if(damage){
+			if(!mtmp->mtame && !mtmp->mpeaceful && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM
+				&& !nonliving(youracedata)
+			){
+				pline("%s screams into your mind!", Monnam(mtmp));
+				if(Hallucination){
+					You("have an out of body experience.");
+					losehp(15, "a bad trip", KILLED_BY); //you still take damage
+				} else if(maybe_polyd((u.mh >= 100), (u.uhp >= 100))){
+					Your("%s stops!  When it finally beats again, it is weak and thready.", body_part(HEART));
+					losehp(d(damage,15), "the scream of an old one", KILLED_BY); //Same as death's touch attack, sans special effects
+				} else {
+					killer_format = KILLED_BY;
+					killer = "the scream of an old one";
+					done(DIED);
+				}
+			} else {
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon)
+					if(valid_gray_target_exhale(tmpm))
+						targets++;
+
+				if(targets){
+					targets = rnd(targets);
+
+					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+						if(valid_gray_target_exhale(tmpm))
+							targets--;
+						if(!targets) break;
+					}
+				}
+
+				if(tmpm){
+					if(tp_sensemon(mtmp)){
+						pline("%s screams!", Monnam(mtmp));
+					}
+					if(tmpm->mhp >= 100){
+						tmpm->mhp -= d(damage,15);
+						if(tmpm->mhp < 1){
+							if (canspotmon(tmpm))
+								pline("%s %s!", Monnam(tmpm),
+								nonliving(tmpm->data)
+								? "is destroyed" : "dies");
+							tmpm->mhp = 0;
+							grow_up(mtmp,tmpm);
+							mondied(tmpm);
+						}
+					} else {
+						if (canspotmon(tmpm))
+							pline("%s %s!", Monnam(tmpm),
+							nonliving(tmpm->data)
+							? "is destroyed" : "dies");
+						tmpm->mhp = 0;
+						grow_up(mtmp,tmpm);
+						mondied(tmpm);
+					}
+				}
+			}
+		}
+	}
+
 #define valid_ice_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
 		&& !resists_fire(tmpm)
 #define valid_ice_target_exhale(tmpm) common_valid_target_exhale(tmpm)\

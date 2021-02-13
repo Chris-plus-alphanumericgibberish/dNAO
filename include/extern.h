@@ -200,6 +200,7 @@ E int FDECL(getFightingFormSkill, (int));
 E void NDECL(validateLightsaberForm);
 E int NDECL(uhp);
 E int NDECL(uhpmax);
+E void NDECL(check_brainlessness);
 
 /* ### ball.c ### */
 

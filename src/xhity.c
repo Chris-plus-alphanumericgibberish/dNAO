@@ -7062,37 +7062,7 @@ boolean ranged;
 				else
 					Your("brain is eaten!");
 				/* No such thing as mindless players... */
-				if (ABASE(A_INT) <= 3) {
-					int lifesaved = 0;
-					struct obj *wore_amulet = uamul;
-
-					while (1) {
-						/* avoid looping on "die(y/n)?" */
-						if (lifesaved && (discover || wizard)) {
-							if (wore_amulet && !uamul) {
-								/* used up AMULET_OF_LIFE_SAVING; still
-								subject to dying from brainlessness */
-								wore_amulet = 0;
-							}
-							else {
-								/* explicitly chose not to die;
-								arbitrarily boost intelligence */
-								ABASE(A_INT) = ATTRMIN(A_INT) + 2;
-								You_feel("like a scarecrow.");
-								/* break deathloop */
-								break;
-							}
-						}
-						if (lifesaved)
-							pline("Unfortunately your brain is still gone.");
-						else
-							Your("last thought fades away.");
-						killer = "brainlessness";
-						killer_format = KILLED_BY;
-						done(DIED);
-						lifesaved++;
-					}
-				}
+				check_brainlessness();
 				if (youdef && attk->aatyp == AT_TENT && roll_madness(MAD_HELMINTHOPHOBIA)){
 					You("panic from the burrowing tentacles!");
 					HPanicking += 1+rnd(6);
@@ -7617,7 +7587,50 @@ boolean ranged;
 		else
 			return MM_HIT;
 		}
-
+		
+	case AD_PAIN:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* big picture: can stunlock monsters, can't stunlock you because it uses the Screaming status effect */
+		if(!nonliving(pd) || is_android(pd)){
+			static long ulastscreamed = 0;
+			static long lastscreamed = 0;
+			static struct monst *lastmon = 0;
+			//Big picture note: monsters can be stunlocked this way, you can't since it uses Screaming statues
+			if (youdef) {
+				if(ulastscreamed < monstermoves){
+					ulastscreamed = monstermoves;
+					if (!is_silent(pd)){
+						You("%s from the pain!", humanoid_torso(pd) ? "scream" : "shriek");
+					}
+					else {
+						You("writhe in pain!");
+					}
+				}
+				HScreaming += 2;
+			}
+			else {
+				if(lastscreamed < monstermoves || lastmon != mdef){
+					lastscreamed = monstermoves;
+					lastmon = mdef;
+					if (!is_silent_mon(mdef)){
+						if (canseemon(mdef))
+							pline("%s %s in pain!", Monnam(mdef), humanoid_torso(mdef->data) ? "screams" : "shrieks");
+						else You_hear("%s %s in pain!", mdef->mtame ? noit_mon_nam(mdef) : mon_nam(mdef), humanoid_torso(mdef->data) ? "screaming" : "shrieking");
+					}
+					else {
+						if (canseemon(mdef))
+							pline("%s writhes in pain!", Monnam(mdef));
+					}
+				}
+				mdef->movement = max(mdef->movement - 6, -12);
+			}
+		}
+		/* make posion/physical attack without hitmsg */
+		alt_attk.adtyp = AD_DRST;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 //////////////////////////////////////////////////////////////
 // JUST CHANGING THE DAMAGE TYPE
 //////////////////////////////////////////////////////////////
