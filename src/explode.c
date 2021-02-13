@@ -407,7 +407,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 		if (any_shield && flags.sparkle) { /* simulate shield effect */
 		    for (k = 0; k < SHIELD_COUNT; k++) {
 			for(i = 0; i < area->nlocations; i++) {
-			    if (area->locations[i].shielded)
+			    if (area->locations[i].shielded && cansee(area->locations[i].x, area->locations[i].y))
 				/*
 				 * Bypass tmp_at() and send the shield glyphs
 				 * directly to the buffered screen.  tmp_at()
