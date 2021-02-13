@@ -6874,6 +6874,49 @@ int flags;
 	}
 }
 
+STATIC_OVL void
+thought_scream_side_effects(origin, primary, damage)
+struct monst *origin;
+struct monst *primary;
+int damage;
+{
+	struct monst *m2, *nmon;
+	for(m2=fmon; m2; m2 = nmon) {
+		nmon = m2->nmon;
+		if (DEADMONSTER(m2)) continue;
+		if (m2->mpeaceful == origin->mpeaceful) continue;
+		if (mindless_mon(m2)) continue;
+		if (m2 == origin) continue;
+		if (m2 == primary) continue;
+		if (species_is_telepathic(m2->data) ||
+			(is_law_demon(m2->data) && !is_ancient(m2->data) && m2->mtyp != PM_ASMODEUS) ||
+			(mon_resistance(m2,TELEPAT) &&
+			(rn2(2) || m2->mblinded)) || 
+			!rn2(10)
+		) {
+			m2->mhp -= d(damage,7);
+			if (m2->mhp <= 0)
+				monkilled(m2, "", AD_DRIN);
+			else{
+				m2->msleeping = 0;
+				monflee(m2, damage*5, FALSE, TRUE);
+			}
+		}
+	}
+	if(primary != &youmonst && !origin->mpeaceful){
+		if (tp_sensemon(origin) || (Blind_telepat && rn2(2)) || !rn2(10)) {
+			int dmg;
+			//Note: You "hear" it in your mind, not with your ears, so You_hear() is wrong.
+			You("hear a terrible scream!");
+			dmg = d(damage,7);
+			losehp(dmg, "the scream of an old one", KILLED_BY);
+			if(!Panicking)
+				You("panic!");
+			HPanicking += damage*5;
+		}
+	}
+}
+
 void
 do_ancient_breaths(mtmp)
 struct monst *mtmp;
@@ -7102,6 +7145,11 @@ struct monst *mtmp;
 					killer = "the scream of an old one";
 					done(DIED);
 				}
+				if(!Panicking)
+					You("panic!");
+				HPanicking += damage*10;
+				//Handle off-target side effects
+				thought_scream_side_effects(mtmp, &youmonst, damage);
 			} else {
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon)
 					if(valid_gray_target_exhale(tmpm))
@@ -7118,7 +7166,8 @@ struct monst *mtmp;
 				}
 
 				if(tmpm){
-					if(tp_sensemon(mtmp)){
+					/* Note: you may be damaged by the scream in side effects if it's not peaceful */
+					if(tp_sensemon(mtmp) && !mtmp->mpeaceful){
 						pline("%s screams!", Monnam(mtmp));
 					}
 					if(tmpm->mhp >= 100){
@@ -7141,6 +7190,13 @@ struct monst *mtmp;
 						grow_up(mtmp,tmpm);
 						mondied(tmpm);
 					}
+					if(!DEADMONSTER(tmpm))
+						monflee(tmpm, damage*10, FALSE, TRUE);
+					//Handle off-target side effects
+					thought_scream_side_effects(mtmp, tmpm, damage);
+				}
+				else {
+					thought_scream_side_effects(mtmp, 0, damage);
 				}
 			}
 		}

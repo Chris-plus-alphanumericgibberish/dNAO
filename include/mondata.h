@@ -408,6 +408,7 @@
 #define is_domestic(ptr)	(((ptr)->mflagst & MT_DOMESTIC) != 0L)
 #define is_fey(ptr)			(((ptr)->mflagsa & MA_FEY) != 0L)
 #define is_demon(ptr)		(((ptr)->mflagsa & MA_DEMON) != 0L)
+#define is_law_demon(ptr)	(((ptr)->mflagsa & MA_DEMON) != 0L && is_lawful(ptr))
 #define is_ancient(ptr)		((ptr)->mtyp == PM_ANCIENT_OF_VITALITY \
 							|| (ptr)->mtyp == PM_ANCIENT_OF_ICE \
 							|| (ptr)->mtyp == PM_ANCIENT_OF_CORRUPTION \
@@ -657,6 +658,7 @@
 				  (ptr)->mtyp == PM_HOOLOOVOO || \
 				  (ptr)->mtyp == PM_LIGHTNING_PARAELEMENTAL || \
 				  (ptr)->mtyp == PM_FALLEN_ANGEL || \
+				  (ptr)->mtyp == PM_ANCIENT_OF_THOUGHT || \
 				  (ptr)->mtyp == PM_DARK_WORM || \
 				  (ptr)->mtyp == PM_FIRE_VORTEX) ? 1 : \
 				 ((ptr)->mtyp == PM_FIRE_ELEMENTAL ||\
