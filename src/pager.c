@@ -1088,6 +1088,7 @@ do_look(quick)
     boolean force_defsyms;	/* force using glyphs from defsyms[].sym */
     boolean need_to_look;	/* need to get explan. from glyph */
     boolean hit_trap;		/* true if found trap explanation */
+    boolean hit_cloud;		/* true if found cloud explanation */
     int skipped_venom;		/* non-zero if we ignored "splash of venom" */
 	int hallu_obj;		/* non-zero if found hallucinable object */
     static const char *mon_interior = "the interior of a monster";
@@ -1261,7 +1262,7 @@ do_look(quick)
 #define is_cmap_drawbridge(i) ((i) >= S_vodbridge && (i) <= S_hcdbridge)
 
 	/* Now check for graphics symbols */
-	for (hit_trap = FALSE, i = 0; i < MAXPCHARS; i++) {
+	for (hit_trap = FALSE, hit_cloud = FALSE, i = 0; i < MAXPCHARS; i++) {
 	    x_str = defsyms[i].explanation;
 	    if (sym == (force_defsyms ? defsyms[i].sym : (from_screen ? showsyms[i] : defsyms[i].sym)) && *x_str) {
 		/* avoid "an air", "a water", or "a floor of a room" */
@@ -1276,6 +1277,9 @@ do_look(quick)
 			hit_trap = TRUE;
 		    } else if (level.flags.lethe && !strcmp(x_str, "water")) { //Lethe patch
 			Sprintf(out_str, "%c       sparkling water", (uchar)sym); //Lethe patch
+		    } else if (strcmp(x_str, "cloud") >= 0) { //Don't print a bunch of cloud messages
+			Sprintf(out_str, "%c       cloud", (uchar)sym);
+			hit_cloud = TRUE;
 		    } else {
 			Sprintf(out_str, "%c       %s", (uchar)sym,
 				article == 2 ? the(x_str) :
@@ -1283,10 +1287,13 @@ do_look(quick)
 		    }
 		    firstmatch = x_str;
 		    found++;
-		} else if (!u.uswallow && !(hit_trap && is_cmap_trap(i)) &&
+		} else if (!u.uswallow && !(hit_trap && is_cmap_trap(i)) && 
+				!(hit_cloud && (strcmp(x_str, "cloud") >= 0)) &&
 			   !(found >= 3 && is_cmap_drawbridge(i))) {
 		    if (level.flags.lethe && !strcmp(x_str, "water")) //lethe
 			found += append_str(out_str, "sparkling water"); //lethe
+		    else if (strcmp(x_str, "cloud") >= 0) //lethe
+			found += append_str(out_str, "cloud"); //lethe
 		    else //lethe
 		    	found += append_str(out_str,
 					article == 2 ? the(x_str) :
