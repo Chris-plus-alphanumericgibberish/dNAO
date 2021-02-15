@@ -343,8 +343,8 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Confusion || Stunned || Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef))) :
-		(magr->mconf || magr->mstun || magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
+	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef)) || Delusion(mdef)) :
+		(magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
@@ -3008,8 +3008,13 @@ int flat_acc;
 			bons_acc += u.uencouraged;
 			/* Singing Sword */
 			if (uwep && uwep->oartifact == ART_SINGING_SWORD){
-				if (uwep->osinging == OSING_LIFE){
-					bons_acc += uwep->spe + 1;
+				if (uwep->osinging == OSING_LIFE) {
+					if (youagr)
+						bons_acc += uwep->spe + 1;
+				}
+				if (uwep->osinging == OSING_COURAGE){
+					if (!youagr && magr->mtame && !mindless_mon(magr) && !is_deaf(magr))
+						bons_acc += uwep->spe + 1;
 				}
 			}
 			/* carrying too much */
@@ -12789,8 +12794,12 @@ int vis;						/* True if action is at all visible to the player */
 			bonsdmg += magr->encouraged;
 		/* Singing Sword -- only works when the player is wielding it >_> */
 		if (uwep && uwep->oartifact == ART_SINGING_SWORD) {
-			if (uwep->osinging == OSING_LIFE){
-				if (youagr || (magr->mtame && !mindless_mon(magr) && !is_deaf(magr)))
+			if (uwep->osinging == OSING_LIFE) {
+				if (youagr)
+					bonsdmg += (uwep->spe + 1);
+			}
+			if (uwep->osinging == OSING_COURAGE){
+				if (!youagr && (magr->mtame && !mindless_mon(magr) && !is_deaf(magr)))
 					bonsdmg += (uwep->spe + 1);
 			}
 			if (uwep->osinging == OSING_DIRGE) {
@@ -13682,7 +13691,7 @@ int vis;						/* True if action is at all visible to the player */
 		/* defender */
 		char seared[BUFSZ];
 		if (noncorporeal(pd)) {
-			Strcat(seared, 
+			Strcpy(seared, 
 				youdef ? "you" : mon_nam(mdef));
 		}
 		else {

@@ -540,6 +540,7 @@ register struct monst *mtmp;
 	if (mtmp->mcan)		  Strcat(info, ", cancelled");
 	if (mtmp->mconf)	  Strcat(info, ", confused");
 	if (mtmp->mcrazed)	  Strcat(info, ", crazed");
+	if (mtmp->mberserk)	  Strcat(info, ", berserk");
 	if (mtmp->mblinded || !mtmp->mcansee)
 				  Strcat(info, ", blind");
 	else if(is_blind(mtmp)) Strcat(info, ", dazzled");
