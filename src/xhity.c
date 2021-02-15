@@ -9499,7 +9499,7 @@ boolean * needs_uncancelled;
 {
 #define maybeset(b, tf) if(b) {*(b)=tf;}
 	boolean adjacent = FALSE;
-	if(magr && mdef && distmin(magr->mx, magr->my, mdef->mx, mdef->my))
+	if(magr && mdef && distmin(x(magr), y(magr), x(mdef), y(mdef)) <= 1)
 		adjacent = TRUE;
 	/* figure out if gaze requires eye-contact or not */
 	switch (adtyp)
