@@ -2209,7 +2209,7 @@ base_uac()
 	int dexbonus = 0;
 	int uac = 10-mons[u.umonnum].nac;
 	
-	if(multi > 0)
+	if(multi >= 0)
 		dexbonus += mons[u.umonnum].dac;
 	
 	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){

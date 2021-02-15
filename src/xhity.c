@@ -3033,8 +3033,13 @@ int flat_acc;
 			bons_acc += u.uencouraged;
 			/* Singing Sword */
 			if (uwep && uwep->oartifact == ART_SINGING_SWORD){
-				if (uwep->osinging == OSING_LIFE){
-					bons_acc += uwep->spe + 1;
+				if (uwep->osinging == OSING_LIFE) {
+					if (youagr)
+						bons_acc += uwep->spe + 1;
+				}
+				if (uwep->osinging == OSING_COURAGE){
+					if (!youagr && magr->mtame && !mindless_mon(magr) && !is_deaf(magr))
+						bons_acc += uwep->spe + 1;
 				}
 			}
 			/* carrying too much */
@@ -9707,7 +9712,7 @@ boolean * needs_uncancelled;
 {
 #define maybeset(b, tf) if(b) {*(b)=tf;}
 	boolean adjacent = FALSE;
-	if(magr && mdef && distmin(magr->mx, magr->my, mdef->mx, mdef->my))
+	if(magr && mdef && distmin(x(magr), y(magr), x(mdef), y(mdef)) <= 1)
 		adjacent = TRUE;
 	/* figure out if gaze requires eye-contact or not */
 	switch (adtyp)
@@ -13000,8 +13005,12 @@ int vis;						/* True if action is at all visible to the player */
 			bonsdmg += magr->encouraged;
 		/* Singing Sword -- only works when the player is wielding it >_> */
 		if (uwep && uwep->oartifact == ART_SINGING_SWORD) {
-			if (uwep->osinging == OSING_LIFE){
-				if (youagr || (magr->mtame && !mindless_mon(magr) && !is_deaf(magr)))
+			if (uwep->osinging == OSING_LIFE) {
+				if (youagr)
+					bonsdmg += (uwep->spe + 1);
+			}
+			if (uwep->osinging == OSING_COURAGE){
+				if (!youagr && (magr->mtame && !mindless_mon(magr) && !is_deaf(magr)))
 					bonsdmg += (uwep->spe + 1);
 			}
 			if (uwep->osinging == OSING_DIRGE) {
