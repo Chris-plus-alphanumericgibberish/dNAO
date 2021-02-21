@@ -41,7 +41,10 @@
 #define is_blind(mon)		(!((mon)->mcansee) || (darksight((mon)->data) && !(\
 													(!levl[(mon)->mx][(mon)->my].lit && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1)))\
 													|| (levl[(mon)->mx][(mon)->my].lit &&  (viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1))))))
-#define is_deaf(mon)		(!((mon)->mcanhear) || (mon)->mtyp == PM_ALABASTER_ELF || (mon)->mtyp == PM_ALABASTER_ELF_ELDER)
+#define is_deaf(mon)		(!((mon)->mcanhear) ||\
+							  (mon)->mtyp == PM_NUPPERIBO ||\
+							  (mon)->mtyp == PM_ALABASTER_ELF ||\
+							  (mon)->mtyp == PM_ALABASTER_ELF_ELDER)
 
 #define has_template(mon, id)	((mon)->mtemplate == (id))
 #define templated(mon)			((mon)->mtemplate != 0)
