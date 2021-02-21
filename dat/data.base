@@ -195,7 +195,7 @@ amulet of yendor
 	immortality to the adventurer who can deliver it from the
 	depths of Moloch's Sanctum and offer it on the appropriate high
 	altar on the Astral Plane.
-ancient of death
+ancient of transparency
 	Something in this darkened cavern seems to be moving,
 	fluttering in the air.  No - it's your light. The light 
 	is... moving? Something's stealing the light away!
@@ -1486,6 +1486,16 @@ circle of Acheron
 	A circle of acheron takes just two strokes to scribe, making 
 	it the simplest of the wards. It may be reinforced up to
 	4 times.
+clairvoyant changed
+	Agent Smith: Mr. Anderson, welcome back, we've missed you. 
+		You like what I've done with the place?
+
+	Neo: It ends tonight.
+
+	Agent Smith: I know it does, I've seen it. That's why the
+		rest of me is just going to enjoy the show, because we 
+		already know that I'm the one that beats you.
+			[ The Matrix Revolutions ]
 clarent
 	Clarent is the sword which Arthur drew forth from the stone,
 	proving himself a rightful king.  It represents authority
@@ -1813,6 +1823,15 @@ air orb
 	of peace to our
 	world.
 		[ Final Fantasy I ]
+crystal ooze
+	What's worse, the evil residue has spawned a creature.
+	A gigantic crystal ooze lives in the pool and attacks
+	anything that enters the chamber - not out of hunger,
+	but spite. It particularly enjoys attacking sods as
+	soon as they emerge from the bottom of the shaft,
+	trying to grab them and drag them down into the foul,
+	green soup.
+		[ Dead Gods, by Monte Cook ]
 *cthulhu
 *Cthulhu
 *ct*ul*u
@@ -2775,11 +2794,27 @@ electric eel
 	water, and earth.  Some mystics have postulated the necessity
 	for a fifth type, the spirit elemental, but none have ever
 	been encountered, at least on this plane of existence.
+elshava
+	To reach Elshava, [they] need to find a pair of sagging towers
+	in the Clerk's Ward that leaned so heavily toward each other
+	that they now touch at their apexes. [...]
+	
+	The sea-burg's built to resemble a nautilus shell, in that it's
+	an ever-expanding spiral. It floats upon the shallow sea of
+	Ossa and everything about it has a watery feel. The buildings
+	look like shells, octopi, or fish, and most of them seem to be
+	made from mother-of-pearl or coral. [...]
+	
+	The floating city's home to sea elves, selkies, mermen, and the
+	like, but the inhabitants simply call themselves Sea Folk, 
+	making no distinctions among the various races.
+		[ Dead Gods, by Monte Cook ]
 ~human or elf*
 ~elf ??m*
 ~gr?y*elf
 *elf*
 elvenking
+elvenqueen
 	The Elves sat round the fire upon the grass or upon the sawn
 	rings of old trunks.  Some went to and fro bearing cups and
 	pouring drinks; others brought food on heaped plates and
@@ -3936,6 +3971,15 @@ hell hound*
 	form and savage face which broke upon us out of the wall of fog.
 		[ The Hound of the Baskervilles, 
 		  by Sir Arthur Conan Doyle. ]
+hellcat
+	One of the worst things about the hellcat is that it's damned
+	near invisible in *any* kind of light. [...] However, if a 
+	body's smart enough to douse the light when a hellcat's
+	suspected nearby, she'll see a glowing outline of a cat the
+	size of a tiger. She'll also see the thing's malevolently
+	glowing red eyes - 'course, that might also be the *last*
+	thing she sees.
+		[ Planes of Law, TSR ]
 *heptagram
 	The heptagram, a sevenpointed star, is an obvious development 
 	of the pentagram, once it was discovered. The number seven is
@@ -4121,6 +4165,8 @@ hom*nculus
 	And Guenelun answered, contrarious:
 	"That were a lie, in any other mouth."
 		[ The Song of Roland ]
+hooloovoo
+	A super-intelligent shade of the colour blue.
 horn of plenty
 cornucopia
 	The infant Zeus was fed with goat's milk by Amalthea,
@@ -4159,6 +4205,12 @@ horned devil
 	                  Five have I slain to-day instead of him.
 	                  A horse! a horse! my kingdom for a horse!
 		[ King Richard III, by William Shakespeare ]
+hound of Tindalos
+	I saw them for a ghastly moment. For a moment I stood on the
+	other side. I stood on the pale gray shores beyond time and
+	space. In an awful light that was not light, in a silence
+	that shrieked, I saw *them.*
+		[ The Hounds of Tindalos, by Frank Belknap Long ]
 *horsem*
 rider*
 death
@@ -5494,6 +5546,7 @@ malcanthet
 	straps.
 		[ Hordes of the Abyss,
 			by Ed Stark, James Jacobs, and Erik Mona ]
+green pit fiend
 mammon
 	The Viscount bowed low again as he accepted the
 	silver piece. He beamed another huge smile at the Lord
@@ -6203,6 +6256,12 @@ mummy wrapping
 	bandages, project in curious tails and horns, giving him
 	the strangest appearance conceivable.
 		[ The Invisible Man, by H.G. Wells ]
+mouth of the goat
+	Ever Their praises, and abundance to the
+	Black Goat of the Woods. 
+	Ia! Shub-Niggurath! Ia! Shub-Niggurath!
+	The Black Goat of the Woods with a Thousand Young!
+		[ The Whisperer in Darkness, by H.P. Lovecraft ]
 movanic deva
 	Movanic devas have milky white skin and silvery hair and eyes, 
 	and are slender and exceedingly agile. Although they can carry a 
@@ -6454,6 +6513,45 @@ nunchaku
 	Bruce Lee in a number of films, made in both Hollywood and
 	Hong Kong.
 		[ Wikipedia, the free encyclopedia ]
+nupperibo
+	Nupperibos are much like lemures in appearance, but are even
+	less defined than those creatures. Nupperibos are amorphous,
+	vaguely humanoid monsters with no discernible features. 
+	They have appendages that might be construed as arms and head.
+
+	Nupperibos are blind, deaf, and mute.
+
+	There is, however, a unique and curious relationship between
+	the lemures and the nupperibos. The nupperibos are slightly
+	higher in station than the lemures, hut they can never become
+	higher forms of baatezu without first being demoted to lemure
+	status. Doubtless some greater power in Baator has set the
+	advancement path that way for its own fiendish reasons.
+		[ Planescape Monstrous Compendium Appendix, TSR ]
+metamorphosed nupperibo
+	Planewalkers who know a little of the chant regarding 
+	baatezu can recognize that this is no ordinary nupperibo.
+	For one thing, it mewls in pain and frustration at its
+	predicament. Nupperibos are mute. Further, it *looks*
+	at [them] as they enter the room. Nupperibos are blind.
+	
+	[...] Suddenly, the pale, bloated stomach of the disgusting
+	creature bursts open, and dozens of tiny, pinkish tendrils
+	shoot out, attempting to grab [...] anything else in the
+	room.
+		[ Tales from the Infinite Staircase,
+			by Monte Cook ]
+ancient nupperibo
+	There're shapes frozen in the of some of the [Canian] 
+	glaciers. The ice distorts the images so that it's nearly
+	impossible to see what the shapes actually are, but some
+	enterprising Guvners have taken the time to melt passages
+	through the ice to the shapes. They came back shaken,
+	reporting that some of the figures turned out to be
+	frozen devas and archons battling spined creatures of
+	unknown origin. Other shapes were cities crused by the
+	glaciers of Cania. What lived in the cities, none can say.
+		[ Planes of Law, TSR ]
 ~swamp nymph
 *nymph
 dryad
@@ -6493,6 +6591,18 @@ obsidian*
 	peoples for knives, arrowheads, spearheads, and other weapons
 	and tools.
 		[ The Columbia Encyclopedia, Sixth Edition ]
+oceanid
+	The Oceanids' father Oceanus was the great primordial world-
+	encircling river, their mother Tethys was a sea goddess, and
+	their brothers the Potamoi were the personifications of the great
+	rivers of the world. Like the rest of their family, the Oceanid
+	nymphs were associated with water, as the personification of springs.
+	Hesiod says they are "dispersed far and wide" and everywhere "serve 
+	the earth and the deep waters", while in Apollonius of Rhodes' 
+	Argonautica, the Argonauts, stranded in the desert of Libya, beg the
+	"nymphs, sacred of the race of Oceanus" to show them "some spring of
+	water from the rock or some sacred flow gushing from the earth".
+		[ Wikipedia ]
 ochre jelly
 	This monster resembles a giant amoeba, seeping through darkened
 	corridors, through cracks and under doors, searching for flesh or
@@ -7967,6 +8077,30 @@ sea monster
 	for help.  Twenty other arms came rippling out.  The dark
 	water boiled, and there was a hideous stench.
 	   [ The Fellowship of the Ring, by J.R.R. Tolkien ]
+seal
+	Selkie is simply the Orcadian dialect word for "seal".
+
+	So, selkies are a very common sight across Orkney. Heads
+	bobbing above the waves, they are often seen by the shore,
+	watching inquisitively with uncannily human eyes.
+		[ Orkneyjar, by Sigurd Towrie ]
+selkie
+	Unlike the Finfolk, who retained their malicious tendencies
+	throughout the years, the selkie-folk have come to be
+	regarded as gentle creatures, with the ability to transform
+	from seals into beautiful, lithe humans.
+	
+	In the surviving folklore, there is no agreement as to how
+	often the selkie-folk were able to carry out the
+	transformation. Some tales say it was once a year, usually
+	Midsummer's Eve, while others state it could be “every
+	ninth night” or “every seventh stream”.
+
+	Regardless of how often they were able to transform, the
+	folklore tells us that once in human form, the selkie-folk
+	would dance on lonely stretches of moonlit shore, or bask
+	in the sun on outlying skerries.
+		[ Orkneyjar, by Sigurd Towrie ]
 serpent-necked lioness
 	The image generally is classified as a feline, and with 
 	close inspection resembles an unusually long-necked 
@@ -8696,6 +8830,15 @@ tensa zangetsu
 	the blade, however, are far beyond what a mortal can endure.
 	Any living creature that wields this sword will find their
 	body and bones gradually ground into dust.
+thriae
+	The Thriae were nymphs, three virginal sisters, one of a number
+	of such triads in Greek mythology. They were named Melaina 
+	("The Black"), Kleodora ("Famed for her Gift"), and Daphnis 
+	("Laurel") or Corycia. They were the three Naiads (nymphs) of
+	the sacred springs of the Corycian Cave of Mount Parnassus in
+	Phocis, and the patrons of bees. The nymphs had heads like
+	women and lower body with wings like a bee.
+		[ Wikipedia ]
 thorin*
 	Known as 'Thorin Oakenshield' because in the Battle of Azanulbizar
 	he used an oak-branch as a shield and club.  He is the King of
@@ -8951,6 +9094,16 @@ tree
 	Poems are made by fools like me,
 	But only God can make a tree.
 		[ Trees, by Joyce Kilmer ]
+trilobite
+	Trilobite, any member of a group of extinct fossil arthropods
+	easily recognized by their distinctive three-lobed, three-
+	segmented form. Trilobites, exclusively marine animals, first
+	appeared at the beginning of the Cambrian Period, about 542 
+	million years ago, when they dominated the seas. Although 
+	they became less abundant in succeeding geologic periods, a
+	few forms persisted into the Permian Period, which ended
+	about 251 million years ago.
+		[ Encyclopaedia Britannica ]
 tripe
 tripe ration
 	If you start from scratch, cooking tripe is a long-drawn-out
@@ -9173,6 +9326,7 @@ uranium imp
 	TG: youll get better dont worry
 		[ Homestuck Act 5, by Andrew Hussie ]
 uruk*hai
+uruk*captain
 	"What of the dawn?" they jeered. "We are the Uruk-hai: 
 	we do not stop the fight for night or day, for fair 
 	weather or for storm. We come to kill, by sun or moon. 
@@ -9738,6 +9892,14 @@ yeti
 	Japanese leather archery gloves.  Gloves made for use while
 	practicing had thumbs reinforced with horn.  Those worn into
 	battle had thumbs reinforced with a double layer of leather.
+yuki-onna
+	The Yuki Onna is one of Japan’s most well-known and yet 
+	unknown yokai. There is no single story of the Yuki Onna.
+	From dread snow vampire of the mountains to a loving bride
+	and mother, she has played many roles over the centuries;
+	worn many costumes. She is ephemeral as a windblown mist
+	of snow, and as impossible to hold.
+		[ Yuki Onna - The Snow Woman, by Zach Davisoson ]
 yumi
 	The samurai is highly trained with a special type of bow,
 	the yumi.  Like the ya, the yumi is made of bamboo.  With
