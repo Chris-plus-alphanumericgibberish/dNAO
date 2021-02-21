@@ -572,9 +572,6 @@ boolean you_abilities;
 	if (mon_abilities && (Upolyd && can_breathe(youmonst.data) && Race_if(PM_HALF_DRAGON))){
 		add_ability('B', "Use your halfdragon breath weapon", MATTK_HBREATH);
 	}
-	if (mon_abilities && youracedata->mtyp == PM_TOVE){
-		add_ability('B', "Bore a hole", MATTK_HOLE);
-	}
 	if (mon_abilities && uclockwork){
 		add_ability('c', "Adjust your clockspeed", MATTK_CLOCK);
 	}
@@ -595,6 +592,9 @@ boolean you_abilities;
 	}
 	if (mon_abilities && is_hider(youracedata)){
 		add_ability('h', "Hide", MATTK_HIDE);
+	}
+	if (mon_abilities && youracedata->mtyp == PM_TOVE){
+		add_ability('H', "Bore a hole", MATTK_HOLE);
 	}
 	if (mon_abilities && is_drow(youracedata)){
 		add_ability('i', "Invoke the darkness", MATTK_DARK);
