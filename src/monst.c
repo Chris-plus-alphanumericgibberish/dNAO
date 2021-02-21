@@ -5952,7 +5952,7 @@ is a red right hand
 	
 	/* Ancient demons (Note: the PM_ range matters, keep together) */
     MON("strange larva", S_DEMON,// /* Needs encyc entry */
-	LVL(1, 6, 10, 0, -6), (G_HELL|G_NOCORPSE|G_NOGEN),  /*Needs encyc entry*/
+	LVL(1, 6, 10, 0, 0), (G_HELL|G_NOCORPSE|G_NOGEN),  /*Needs encyc entry*/
 	A(ATTK(AT_BITE, AD_PHYS, 1, 4), NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(WT_ANT, CN_ANT, MS_BUZZ, MZ_TINY), MR_COLD|MR_POISON|MR_ACID, 0,
 	0 /*MM*/, MT_HOSTILE /*MT*/, 0 /*MF*/,
