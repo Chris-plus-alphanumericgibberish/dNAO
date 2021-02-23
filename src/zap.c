@@ -2648,7 +2648,7 @@ boolean ordinary;
 		    break;
 		case SPE_HEALING:
 		case SPE_EXTRA_HEALING:
-		    healup(d((uarm && uarm->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H) ?
+		    healup(d((uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H) ?
                   12 : 6, obj->otyp == SPE_EXTRA_HEALING ? 8 : 4),
 			   0, FALSE, (obj->otyp == SPE_EXTRA_HEALING));
 		    You_feel("%sbetter.",
