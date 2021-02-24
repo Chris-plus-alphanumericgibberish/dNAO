@@ -12799,11 +12799,11 @@ int vis;						/* True if action is at all visible to the player */
 					bonsdmg += (uwep->spe + 1);
 			}
 			if (uwep->osinging == OSING_COURAGE){
-				if (!youagr && (magr->mtame && !mindless_mon(magr) && !is_deaf(magr)))
+				if (!youagr && magr && magr->mtame && !mindless_mon(magr) && !is_deaf(magr))
 					bonsdmg += (uwep->spe + 1);
 			}
 			if (uwep->osinging == OSING_DIRGE) {
-				if (!youagr && !magr->mtame && !mindless_mon(magr) && !is_deaf(magr))
+				if (!youagr && magr && !magr->mtame && !mindless_mon(magr) && !is_deaf(magr))
 					bonsdmg -= (uwep->spe + 1);
 			}
 		}
