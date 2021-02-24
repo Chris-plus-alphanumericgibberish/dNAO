@@ -2528,6 +2528,21 @@ long timeout;
 	obfree(otmp, (struct obj *)0);
 }
 
+void
+larvae_die(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj * otmp = (struct obj *)arg;
+	if(otmp->olarva > 0){
+		otmp->olarva--;
+		otmp->odead_larva = min(3, otmp->odead_larva + 1);
+	}
+	if(otmp->olarva > 0) {
+		start_timer(4+d(2,4), TIMER_OBJECT, LARVAE_DIE, arg);
+	}
+}
+
 
 #ifdef OVL0
 /* ------------------------------------------------------------------------- */
@@ -2616,7 +2631,8 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
     TTAB(bomb_blow,     (timeout_proc)0,	"bomb_blow"),
 	TTAB(return_ammo,   (timeout_proc)0,	"return_ammo"),
 	TTAB(desummon_mon,	cleanup_msummon,	"desummon_mon"),
-	TTAB(desummon_obj,	(timeout_proc)0,	"desummon_obj")
+	TTAB(desummon_obj,	(timeout_proc)0,	"desummon_obj"),
+	TTAB(larvae_die,	(timeout_proc)0,	"larvae_die")
 };
 #undef TTAB
 

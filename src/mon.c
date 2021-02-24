@@ -22,6 +22,7 @@ extern int monstr[];
 STATIC_DCL boolean FDECL(restrap,(struct monst *));
 STATIC_DCL int FDECL(scent_callback,(genericptr_t, int, int));
 STATIC_DCL void FDECL(dead_familiar,(long));
+STATIC_DCL void FDECL(clothes_bite_mon,(struct monst *));
 int scentgoalx, scentgoaly;
 
 #ifdef OVL2
@@ -1527,7 +1528,8 @@ mcalcdistress()
 	
 	/* regenerate hit points */
 	mon_regen(mtmp, FALSE);
-	
+	clothes_bite_mon(mtmp);
+
 	timeout_problems(mtmp);
 	
 	/* FIXME: mtmp->mlstmv ought to be updated here */
@@ -2973,6 +2975,12 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	// Slime remnants attack everything not of the same peacefulness as them
 	if(has_template(magr, SLIME_REMNANT) || has_template(mdef, SLIME_REMNANT)){
+		if(magr->mpeaceful != mdef->mpeaceful)
+			return ALLOW_M|ALLOW_TM;
+		else return 0L;
+	}
+	// Beauteous ones attack everything not of the same peacefulness as them
+	if(magr->mtyp == PM_BEAUTEOUS_ONE || mdef->mtyp == PM_BEAUTEOUS_ONE){
 		if(magr->mpeaceful != mdef->mpeaceful)
 			return ALLOW_M|ALLOW_TM;
 		else return 0L;
@@ -6874,6 +6882,332 @@ int flags;
 	}
 }
 
+STATIC_OVL boolean
+has_organic(mtmp)
+struct monst *mtmp;
+{
+	struct obj *otmp;
+	otmp = (mtmp == &youmonst) ? invent : mtmp->minvent;
+	
+	if(!otmp) return FALSE;
+	
+	do{
+		if(is_organic(otmp)) return TRUE;
+	} while((otmp = otmp->nobj));
+	
+	return FALSE;
+}
+
+void
+held_item_bites(mdef, obj)
+struct monst *mdef;
+struct obj *obj;
+{
+	int nslots = 0;
+	long slotvar = 0;
+	long sloti = 0;
+	int nd;
+	int dd;
+	int damage;
+	if(obj->owornmask){
+		/*Count raised bits*/
+		if(objects[obj->otyp].oc_class == ARMOR_CLASS)
+			slotvar = objects[obj->otyp].oc_dir;
+		
+		if(!slotvar)
+			slotvar = default_DR_slot(obj->owornmask);
+		
+		if(obj->owornmask == W_SWAPWEP && mdef == &youmonst && !u.twoweap)
+			slotvar = LOWER_TORSO_DR;
+
+		for(sloti = slotvar; sloti; sloti = sloti >> 1)
+			if(sloti&0x1L)
+				nslots++;
+
+		/*pick a slot*/
+		if(nslots > 1){
+			int i = 0;
+			nslots = rnd(nslots);
+			sloti = slotvar;
+			//In practice, this loop should be broken with break;
+			while(sloti){
+				if(sloti&0x1L)
+					nslots--;
+				if(!nslots)
+					break;
+				i++;
+				sloti = sloti >> 1;
+			}
+			slotvar = 0x1L << i;
+		}
+	}
+	
+	dd = 1 + obj->olarva;
+	nd = max(1, (objects[obj->otyp].oc_size + obj->objsize - MZ_MEDIUM));
+	
+	damage = d(nd,dd);
+	if(mdef == &youmonst){
+		Your("%s bite%s you!", xname(obj), obj->quan == 1 ? "s":"");
+		// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
+		damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+		// pline("damage post DR: %d", damage);
+		if(damage < 1)
+			damage = 1;
+		losehp(damage, "their clothes", KILLED_BY);
+	}
+	else {
+		// pline("damage pre DR: %d", damage);
+		damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+		// pline("damage post DR: %d", damage);
+		if(damage < 1)
+			damage = 1;
+		mdef->mhp -= damage;
+		if(mdef->mhp < 1){
+			mondied(mdef);
+		}
+	}
+}
+
+STATIC_OVL boolean
+obj_vitality_damage(obj)
+struct obj *obj;
+{
+	boolean floor = (obj->where == OBJ_FLOOR), youdef;
+	struct monst *mon;
+	struct monst *mtmp;
+	struct obj *obj2;
+	int nlarvae;
+	int x, y;
+	mon = (obj->where == OBJ_MINVENT) ? obj->ocarry : (obj->where == OBJ_INVENT) ? &youmonst : (struct monst *) 0;
+	youdef = (obj->where == OBJ_INVENT);
+
+	if(!floor && !mon){
+		impossible("unhandled object location in obj_vitality_damage()");
+		return FALSE;
+	}
+
+	if(obj_resists(obj, 5, 95)) return FALSE;
+
+	if(floor){
+		x = obj->ox;
+		y = obj->oy;
+	} else if(youdef){
+		x = u.ux;
+		y = u.uy;
+	} else {
+		x = mon->mx;
+		y = mon->my;
+	}
+
+	nlarvae = max(1, (objects[obj->otyp].oc_size + obj->objsize - MZ_MEDIUM));
+	
+	if(objects[obj->otyp].oc_merge){
+		if(!Blind){
+			if(floor){
+				if(cansee(x, y)) pline("One of %s is riddled with strange larvae!", the(xname(obj)));
+			}
+			else if(obj->owornmask){
+				if(youdef){
+					pline("One of your %s is riddled with strange larvae!", xname(obj));
+				} else {
+					if(canseemon(mon)) pline("One of %s %s is riddled with strange larvae!", s_suffix(mon_nam(mon)), xname(obj));
+				}
+			}
+			else if(youdef){
+				pline(nlarvae > 1 ? "Strange larvae drop out of your pack!" : "A strange larva drops out of your pack!");
+			}
+		}
+		else {
+			if(youdef && obj->owornmask) pline("One of your %s is riddled with squirming things!", xname(obj));
+		}
+		if(obj->quan > 1){
+			obj->quan--;
+			fix_object(obj);
+		}
+		else {
+			obj_extract_and_unequip_self(obj);
+			obfree(obj, (struct obj *)0);
+		}
+	}
+	else {
+		if(!Blind){
+			if(floor && obj->olarva == 3){
+				if(cansee(x, y)) pline("%s disintegrate%s into a mass of strange larvae!", An(xname(obj)), obj->quan == 1 ? "s":"");
+			}
+			else if(obj->owornmask){
+				if(youdef){
+					if(obj->olarva == 3)
+						pline("Your %s disintegrate%s into a mass of strange larvae!", xname(obj), obj->quan == 1 ? "s":"");
+					else if(obj->olarva > 0)
+						pline("The biting mouths in your %s grow more numerous!", xname(obj));
+					else
+						pline("Your %s %s suddenly full of biting mouths!", xname(obj), obj->quan == 1 ? "is":"are");
+				} else {
+					if(canseemon(mon) && obj->olarva == 3) pline("%s %s disintegrate%s into a mass of strange larvae!", s_suffix(Monnam(mon)), xname(obj), obj->quan == 1 ? "s":"");
+				}
+			}
+			else if(youdef && obj->olarva == 3){
+				pline(nlarvae > 1 ? "Strange larvae drop out of your pack!" : "A strange larva drops out of your pack!");
+			}
+		}
+		else {
+			if(youdef && obj->owornmask){
+				if(obj->olarva == 0) pline("Your %s is riddled with biting things!", xname(obj));
+				else if(obj->olarva == 3) pline("Your %s disintegrates into a mass of squirming things!", xname(obj));
+			}
+		}
+		if(obj->olarva < 3){
+			if(!obj->olarva) start_timer(4+d(2,4), TIMER_OBJECT, LARVAE_DIE, (genericptr_t)obj);
+			obj->olarva++;
+			return TRUE;
+		}
+		else {
+			obj_extract_and_unequip_self(obj);
+			while((obj2 = obj->cobj)){
+				obj_extract_self(obj2);
+				/* Compartmentalize tip() */
+				if(floor){
+					place_object(obj2, x, y);
+				} else if(youdef){
+					dropy(obj2);
+				} else {
+					mdrop_obj(mon, obj2, FALSE);
+				}
+			}
+			obfree(obj, (struct obj *)0);
+		}
+	}
+	//May have returned in the previous block
+	for(; nlarvae; nlarvae--){
+		mtmp = makemon(&mons[PM_STRANGE_LARVA], x, y, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+		if(mtmp)
+			mtmp->mvar_tanninType = PM_ANCIENT_NUPPERIBO;
+	}
+	return TRUE;
+}
+
+STATIC_OVL int
+vitality_consume(origin, objchain, owner)
+struct monst *origin;
+struct obj *objchain;
+struct monst *owner;
+{
+	struct obj *otmp, *nobj;
+	int remaining = min(10, (origin->m_lev)/3), damage = min(10, (origin->m_lev)/3), candidates = 0;
+	int damaged = 0;
+	/* Why do we do all integer probabilities again? >_< */
+	const int smoothing_factor = 100000;
+	
+	/* &0x1 means odd */
+	if(remaining > 2)
+		remaining = (remaining&0x1) ? (rnd(remaining/2) + rnd(remaining/2+1)) : d(2, remaining/2);
+	
+	for(otmp = objchain; otmp; otmp = otmp->nobj)
+		if(is_organic(otmp))
+			candidates++;
+	
+	if(remaining > candidates)
+		remaining = candidates;
+
+	if(owner){
+		// Black flecks rise from 
+		if(owner == &youmonst){
+			if(!Blind){
+				pline("Flakes of %s ash rise around you.", hcolor("black"));
+				if(canseemon(origin)){
+					pline("The ash is drawn into %s apical bloom!", s_suffix(mon_nam(origin)));
+				}
+			}
+		}
+		else {
+			if(!Blind){
+				if(canseemon(owner)){
+					pline("Flakes of %s ash rise around %s.", hcolor("black"), mon_nam(owner));
+					if(canseemon(origin)){
+						pline("The ash is drawn into %s apical bloom!", s_suffix(mon_nam(origin)));
+					}
+				}
+				else if(canseemon(origin)){
+					pline("Flakes of %s ash are drawn into %s apical bloom!", hcolor("black"), s_suffix(mon_nam(origin)));
+				}
+			}
+		}
+	}
+
+	if(candidates){
+		int prob = (remaining*smoothing_factor)/candidates;
+		for(otmp = objchain; otmp && remaining; otmp = nobj){
+			// pline("targets: %d candidates: %d prob: %d", remaining, candidates, prob);
+			nobj = otmp->nobj;
+			if(is_organic(otmp)){
+				if(rnd(smoothing_factor) <= prob){
+					if(obj_vitality_damage(otmp)){
+						damaged++;
+					}
+					remaining--;
+				}
+				candidates--;
+				if(!remaining || !candidates)
+					return damaged;
+				prob = (remaining*smoothing_factor)/candidates;
+			}
+		}
+	}
+	return damaged;
+}
+
+STATIC_OVL void
+vitality_overload(magr, mdef, damage)
+struct monst *magr, *mdef;
+int damage;
+{
+	struct monst *mtmp;
+	if(canseemon(magr))
+		pline("Waves of light roll from %s petals!", s_suffix(mon_nam(magr)));
+	if(mdef == &youmonst){
+		if(Blind)
+			You_feel("like you're burning from within!");
+		else
+			Your("%s glows brilliant %s!", body_part(BODY_SKIN), hcolor("white"));
+		for(; damage; damage--){
+			mtmp = makemon(&mons[PM_BEAUTEOUS_ONE], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+			if(mtmp){
+				mtmp->mpeaceful = magr->mpeaceful;
+				set_malign(mtmp);
+				mtmp->m_lev = u.ulevel;
+				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
+				mtmp->mhp = mtmp->mhpmax;
+			}
+			losexp("overflowing vital force",!damage,TRUE,FALSE);
+		}
+	}
+	else{
+		if(canseemon(mdef))
+			pline("%s %s glows brilliant %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BODY_SKIN), hcolor("white"));
+		for(; damage && !DEADMONSTER(mdef); damage--){
+			mtmp = makemon(&mons[PM_BEAUTEOUS_ONE], mdef->mx, mdef->my, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+			if(mtmp){
+				mtmp->mpeaceful = magr->mpeaceful;
+				set_malign(mtmp);
+				mtmp->m_lev = mdef->m_lev;
+				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
+				mtmp->mhp = mtmp->mhpmax;
+			}
+			if(mdef->m_lev){
+				mdef->mhp -= mdef->mhpmax/mdef->m_lev;
+				mdef->mhpmax -= mdef->mhpmax/mdef->m_lev;
+				mdef->m_lev--;
+				mdef->mhp = max(1, mdef->mhp);
+				mdef->mhpmax = max(1, mdef->mhpmax);
+			}
+			else {
+				mdef->mhp = 0;
+				mondied(mdef);
+			}
+		}
+	}
+}
+
 STATIC_OVL void
 thought_scream_side_effects(origin, primary, damage)
 struct monst *origin;
@@ -6922,18 +7256,79 @@ do_ancient_breaths(mtmp)
 struct monst *mtmp;
 {
 #define common_valid_target_inhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4\
-				&& tmpm->mpeaceful != mtmp->mpeaceful\
-				&& tmpm->mtame != mtmp->mtame\
-				&& !is_ancient(tmpm)\
-				&& !DEADMONSTER(tmpm)\
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+	&& tmpm->mpeaceful != mtmp->mpeaceful\
+	&& tmpm->mtame != mtmp->mtame\
+	&& !is_ancient(tmpm)\
+	&& !DEADMONSTER(tmpm)\
+	&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
 #define common_valid_target_exhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM\
-				&& tmpm->mpeaceful != mtmp->mpeaceful\
-				&& tmpm->mtame != mtmp->mtame\
-				&& !is_ancient(tmpm)\
-				&& !DEADMONSTER(tmpm)\
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+	&& tmpm->mpeaceful != mtmp->mpeaceful\
+	&& tmpm->mtame != mtmp->mtame\
+	&& !is_ancient(tmpm)\
+	&& !DEADMONSTER(tmpm)\
+	&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
 
+
+#define common_you_target_inhale() distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4\
+	&& !mtmp->mpeaceful\
+	&& !mtmp->mtame
+#define common_you_target_exhale() !mtmp->mtame && !mtmp->mpeaceful\
+	&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM
+
+#define valid_vitality_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
+		&& has_organic(tmpm)
+#define valid_vitality_target_exhale(tmpm) common_valid_target_exhale(tmpm)\
+		&& !nonliving(tmpm->data)
+
+#define you_vitality_target_inhale() common_you_target_inhale()\
+		&& has_organic(&youmonst)
+#define you_vitality_target_exhale() common_you_target_exhale()\
+		&& !nonliving(youracedata)
+
+	if(mtmp->mtyp == PM_ANCIENT_OF_VITALITY){
+		struct monst *tmpm;
+		int targets = 0, damage = 0;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(valid_vitality_target_inhale(tmpm)) targets++;
+		}
+		if(you_vitality_target_inhale()) targets++;
+
+		if(targets){
+			targets = rnd(targets);
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_vitality_target_inhale(tmpm)) targets--;
+				if(!targets) break;
+			}
+		}
+		if(tmpm){
+			damage = vitality_consume(mtmp, tmpm->minvent, tmpm);
+		}
+		else if(you_vitality_target_inhale()){
+			damage = vitality_consume(mtmp, invent, &youmonst);
+		}
+		
+		/*exhale*/
+		if(damage){
+			targets = 0;
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_vitality_target_exhale(tmpm)) targets++;
+			}
+			if(you_vitality_target_exhale()) targets++;
+			if(targets){
+				targets = rnd(targets);
+				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+					if(valid_vitality_target_exhale(tmpm)) targets--;
+					if(!targets) break;
+				}
+			}
+			if(tmpm){
+				vitality_overload(mtmp, tmpm, damage);
+			}
+			else if(you_vitality_target_exhale()){
+				vitality_overload(mtmp, &youmonst, damage);
+			}
+		}
+	}
 
 #define valid_corruption_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
 		&& !(resists_fire(tmpm) && resists_sickness(tmpm))\
@@ -7702,7 +8097,19 @@ struct monst *mtmp;
 			}
 		}
 	}
-}	
+}
+
+STATIC_OVL void
+clothes_bite_mon(mon)
+struct monst *mon;
+{
+	struct obj *otmp;
+	for(otmp = mon->minvent; otmp && !DEADMONSTER(mon); otmp = otmp->nobj){
+		if(otmp->olarva && otmp->owornmask)
+			held_item_bites(mon, otmp);
+	}
+}
+
 #endif /* OVLB */
 
 /*mon.c*/

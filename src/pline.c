@@ -439,7 +439,7 @@ align_str(alignment)
 }
 
 #define mslotdrtotal(slot)	\
-	mon_slot_dr(mtmp, (struct monst *) 0, slot, &base, &armac, &nat_dr);\
+	mon_slot_dr(mtmp, (struct monst *) 0, slot, &base, &armac, &nat_dr, 0);\
 	\
 	if(armac > 11) armac = (armac-10)/2 + 10;\
 	\

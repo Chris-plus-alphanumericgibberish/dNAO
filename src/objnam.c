@@ -682,6 +682,28 @@ char *buf;
 }
 
 static void
+add_movement_words(obj, buf)
+struct obj *obj;
+char *buf;
+{
+	if (obj->olarva && !is_hard(obj)){
+		if(!obj->owornmask || obj->where != OBJ_INVENT)
+			Strcat(buf, "writhing ");
+	}
+}
+
+static void
+add_biting_words(obj, buf)
+struct obj *obj;
+char *buf;
+{
+	if (obj->olarva && !is_hard(obj)){
+		if(obj->owornmask && obj->where == OBJ_INVENT)
+			Strcat(buf, "gnawing ");
+	}
+}
+
+static void
 add_shape_words(obj, buf, dofull)
 struct obj *obj;
 char *buf;
@@ -782,7 +804,7 @@ char *buf;
 	/* food uses oeroded to determine if it is rotten -- do not show this */
 	if (obj->oclass == FOOD_CLASS)
 		return;
-	
+
 	if (obj->oeroded && !iscrys) {
 		switch (obj->oeroded) {
 		case 2:	Strcat(buf, "very "); break;
@@ -803,18 +825,33 @@ char *buf;
 			"rotted ");
 	}
 	if (obj->oeroded3) {
-		switch (obj->oeroded3) {
+		if(is_hard(obj)){
+			switch (obj->oeroded3) {
+				case 1:	Strcat(buf, "cracked "); break;
+				case 2:	Strcat(buf, "chipped "); break;
+				case 3:	Strcat(buf, "fragmentary "); break;
+			}
+		} else {
+			switch (obj->oeroded3) {
+				case 2:	Strcat(buf, "very "); break;
+				case 3:	Strcat(buf, "thoroughly "); break;
+			}
+			Strcat(buf, "tattered ");
+		}
+	}
+	if (obj->olarva && is_hard(obj)) {
+		switch (obj->oeroded2) {
 		case 2:	Strcat(buf, "very "); break;
 		case 3:	Strcat(buf, "thoroughly "); break;
 		}
-		Strcat(buf, "tattered ");
+		Strcat(buf, "larvae-riddled ");
 	}
-	if (obj->ovar1 && obj->otyp == MASK) {
-		switch (obj->ovar1) {
-		case 1:	Strcat(buf, "cracked "); break;
-		case 2:	Strcat(buf, "chipped "); break;
-		case 3:	Strcat(buf, "fragmentary "); break;
+	if (obj->odead_larva) {
+		switch (obj->oeroded2) {
+		case 2:	Strcat(buf, "very "); break;
+		case 3:	Strcat(buf, "thoroughly "); break;
 		}
+		Strcat(buf, "husk-riddled ");
 	}
 	if (obj->rknown && obj->oerodeproof)
 		Strcat(buf,
@@ -1478,8 +1515,11 @@ char *buf;
 
 /* Supposedly, the order of adjectives in English is: determiner, opinion, size, shape, age, colour, origin, material, purpose, noun
  * We will transfer that over to dNethack as:
- * quantity, stolen, BUC, size, shape, erosion, grease, enchantment, properties, poison, colour, material, object
+ * quantity, stolen, BUC, size, moving, shape, erosion, grease, enchantment, properties, poison, colour, material, object
  * "a stolen uncursed small three-headed rusted rustproof greased +2 flaming poisoned iron viperwhip"
+ * "a uncursed large writhing burnt greased +2 leather cloak"
+ * "a uncursed large burnt greased +2 gnawing leather cloak"
+ * "a blessed large three-headed rotted larvae-riddled +2 flaming wooden viperwhip"
  * "a cursed -1 lightning bladed kamerel vajra"
  */
 char *
@@ -1534,6 +1574,7 @@ boolean with_price;
 		if (dofull) add_stolen_words(obj, buf);
 		if (dofull) add_buc_words(obj, buf);
 		add_size_words(obj, buf);
+		add_movement_words(obj, buf);
 		add_shape_words(obj, buf, dofull);		// Note: more verbose for a number of objects if dofull is true
 		if (dofull) add_erosion_words(obj, buf);
 		if (dofull) add_grease_words(obj, buf);
@@ -1543,6 +1584,7 @@ boolean with_price;
 		add_poison_words(obj, buf);
 		add_insight_words(obj, buf);
 		add_colours_words(obj, buf);
+		add_biting_words(obj, buf);
 		add_material_words(obj, buf);
 		if (dofull) add_type_words(obj, buf);
 	}
@@ -5209,10 +5251,8 @@ typfnd:
 		    otmp->oeroded = eroded;
 	    if (eroded2 && (is_corrodeable(otmp) || is_rottable(otmp)))
 		    otmp->oeroded2 = eroded2;
-	    if (eroded3 && otmp->otyp == DROVEN_CLOAK)
+	    if (eroded3)
 		    otmp->oeroded3 = eroded3;
-		if (eroded3 && otmp->otyp == MASK)
-			otmp->ovar1 = eroded3;
 
 	    /* set erodeproof */
 	    if (erodeproof && !eroded && !eroded2)

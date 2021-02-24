@@ -566,8 +566,9 @@ E void NDECL(find_ac);
 E int NDECL(base_udr);
 E int NDECL(base_nat_udr);
 E void NDECL(find_dr);
-E int FDECL(slot_udr, (int, struct monst *));
+E int FDECL(slot_udr, (int, struct monst *, int));
 E int FDECL(roll_udr, (struct monst *));
+E int FDECL(roll_udr_detail, (struct monst *, int, int));
 E void NDECL(glibr);
 E void NDECL(bumbler);
 E struct obj *FDECL(some_armor,(struct monst *));
@@ -1458,6 +1459,7 @@ E void FDECL(place_object, (struct obj *,int,int));
 E void FDECL(remove_object, (struct obj *));
 E void FDECL(discard_minvent, (struct monst *));
 E void FDECL(obj_extract_self, (struct obj *));
+E void FDECL(obj_extract_and_unequip_self, (struct obj *));
 E void FDECL(extract_magic_chest_nobj, (struct obj *));
 E void FDECL(extract_nobj, (struct obj *, struct obj **));
 E void FDECL(extract_nexthere, (struct obj *, struct obj **));
@@ -1682,6 +1684,7 @@ E boolean FDECL(accessible, (int,int));
 E void FDECL(set_apparxy, (struct monst *));
 E boolean FDECL(can_ooze, (struct monst *));
 E void FDECL(remove_monster, (int, int));
+E void FDECL(held_item_bites, (struct monst *, struct obj *));
 
 /* ### monst.c ### */
 
@@ -3128,7 +3131,8 @@ E int FDECL(full_marmorac, (struct monst *));
 E int FDECL(base_nat_mdr, (struct monst *));
 E int FDECL(base_mdr, (struct monst *));
 E int FDECL(roll_mdr, (struct monst *, struct monst *));
-E void FDECL(mon_slot_dr, (struct monst *, struct monst *, int, int *, int *, int *));
+E int FDECL(roll_mdr_detail, (struct monst *, struct monst *, int, int));
+E void FDECL(mon_slot_dr, (struct monst *, struct monst *, int, int *, int *, int *, int));
 E int FDECL(avg_mdr, (struct monst *)); 
 E int FDECL(mdat_avg_mdr, (struct monst *));
 E void FDECL(m_dowear, (struct monst *,BOOLEAN_P));

@@ -1016,10 +1016,19 @@ roll_mdr(mon, magr)
 struct monst *mon;
 struct monst *magr;
 {
+	return roll_mdr_detail(mon, magr, 0, 0);
+}
+
+int
+roll_mdr_detail(mon, magr, slot, depth)
+struct monst *mon;
+struct monst *magr;
+int slot;
+int depth;
+{
 	int base, nat_dr, armac;
-	int slot;
 	
-	switch(rn2(7)){
+	if(!slot) switch(rn2(7)){
 		case 0:
 		case 1:
 			slot = UPPER_TORSO_DR;
@@ -1039,7 +1048,7 @@ struct monst *magr;
 		break;
 	}
 	
-	mon_slot_dr(mon, magr, slot, &base, &armac, &nat_dr);
+	mon_slot_dr(mon, magr, slot, &base, &armac, &nat_dr, depth);
 
 	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
 	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU || mad_monster_turn(magr, MAD_NON_EUCLID))){
@@ -1070,13 +1079,14 @@ struct monst *magr;
  * Includes effectiveness vs magr (optional)
  */
 void
-mon_slot_dr(mon, magr, slot, base_dr_out, armor_dr_out, natural_dr_out)
+mon_slot_dr(mon, magr, slot, base_dr_out, armor_dr_out, natural_dr_out, depth)
 struct monst *mon;
 struct monst *magr;
 int slot;
 int *base_dr_out;
 int *armor_dr_out;
 int *natural_dr_out;
+int depth;
 {
 	/* DR addition: bas + sqrt(nat^2 + arm^2) (not done in this function) */
 	int bas_mdr; /* base DR:    magical-ish   */
@@ -1126,6 +1136,8 @@ int *natural_dr_out;
 	for (i = 0; i < SIZE(marmor); i++) {
 		curarm = which_armor(mon, marmor[i]);
 		if (curarm && ((objects[curarm->otyp].oc_dir & slot) || (!objects[curarm->otyp].oc_dir && (slot&adfalt[i])))) {
+			if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
+				continue;
 			arm_mdr += arm_dr_bonus(curarm);
 			if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
 		}
@@ -1141,7 +1153,7 @@ int *natural_dr_out;
 	}
 	/* Hod Sephirah OVERRIDE other arm_mdr sources with the player's total DR (regardless of who's attacking them) */
 	if (mon->mtyp == PM_HOD_SEPHIRAH) {
-		arm_mdr = slot_udr(slot, magr);
+		arm_mdr = slot_udr(slot, magr, 0);
 	}
 	/* Natural DR */
 	switch (slot)
@@ -1200,7 +1212,7 @@ struct monst *mon;
 			break;
 		}
 		
-		mon_slot_dr(mon, (struct monst *) 0, slot, &base, &armac, &nat_dr);
+		mon_slot_dr(mon, (struct monst *) 0, slot, &base, &armac, &nat_dr, 0);
 
 		if(armac > 11) armac = (armac-10)/2 + 10; /* high armor dr values act like player ac values */
 		

@@ -2642,7 +2642,7 @@ register struct obj *otmp;
 {
 	int otyp = otmp->otyp;
 
-	return((boolean)(otmp->obj_material <= WOOD &&
+	return((boolean)(otmp->obj_material <= CHITIN &&
 			otmp->obj_material != LIQUID));
 }
 
@@ -2847,6 +2847,41 @@ struct monst *mtmp;
 	obj_extract_self(otmp);
 	obfree(otmp, (struct obj *)0);	/* dealloc_obj() isn't sufficient */
     }
+}
+
+/* Extract self, including from monster or player worn equipment */
+
+void
+obj_extract_and_unequip_self(obj)
+struct obj *obj;
+{
+	struct monst *mon;
+	long unwornmask;
+	if (obj->where == OBJ_MINVENT) {
+		mon = obj->ocarry;
+		obj_extract_self(obj);
+		if ((unwornmask = obj->owornmask) != 0L) {
+			mon->misc_worn_check &= ~unwornmask;
+			if (obj->owornmask & W_WEP) {
+				setmnotwielded(mon,obj);
+				MON_NOWEP(mon);
+			}
+			if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(mon,obj);
+				MON_NOSWEP(mon);
+			}
+			obj->owornmask = 0L;
+			update_mon_intrinsics(mon, obj, FALSE, FALSE);
+		}
+	}
+	else if(obj->where == OBJ_INVENT){
+		if(obj->owornmask) remove_worn_item(obj, TRUE);
+		obj_extract_self(obj);
+	}
+	else obj_extract_self(obj);
+	if (obj->otyp == LEASH && obj->leashmon) o_unleash(obj);
+	if (obj->oclass == FOOD_CLASS) food_disappears(obj);
+	if (obj->oclass == SPBOOK_CLASS) book_disappears(obj);
 }
 
 /*

@@ -71,6 +71,29 @@ struct objclass {
 #define CLOAK_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR)
 #define ALL_DR         (UPPER_TORSO_DR|LOWER_TORSO_DR|HEAD_DR|LEG_DR|ARM_DR)
 
+#define default_DR_slot(mask) (mask == W_ARM ? TORSO_DR :\
+							   mask == W_ARMC ? CLOAK_DR :\
+							   mask == W_ARMS ? ARM_DR :\
+							   mask == W_ARMH ? HEAD_DR :\
+							   mask == W_ARMG ? ARM_DR :\
+							   mask == W_ARMF ? LEG_DR :\
+							   mask == W_WEP ? ARM_DR :\
+							   mask == W_QUIVER ? UPPER_TORSO_DR :\
+							   mask == W_SWAPWEP ? ARM_DR :\
+							   mask == W_ART ? 0 :\
+							   mask == W_ARTI ? 0 :\
+							   mask == W_AMUL ? UPPER_TORSO_DR :\
+							   mask == W_RINGL ? ARM_DR :\
+							   mask == W_RINGR ? ARM_DR :\
+							   mask == W_TOOL ? HEAD_DR :\
+							   mask == W_SADDLE ? LOWER_TORSO_DR :\
+							   mask == W_BALL ? 0 :\
+							   mask == W_CHAIN ? LEG_DR :\
+							   mask == W_SPIRIT ? 0 :\
+							   mask == W_GLYPH ? HEAD_DR :\
+							   mask == W_SKIN ? ALL_DR :\
+							   UPPER_TORSO_DR)
+
 	/*Bitfield(oc_subtyp,3);*/	/* Now too big for a bitfield... see below */
 
 	Bitfield(oc_material,5); //31 max
@@ -107,7 +130,7 @@ struct objclass {
 #define NUNIDED 4	/* never show material when base object type is unknown */
 #define NIDED	8	/* never show material when base object type is known */
 
-#define is_organic(otmp)	((otmp)->obj_material <= WOOD)
+#define is_organic(otmp)	((otmp)->obj_material <= CHITIN)
 #define is_metallic(otmp)	((otmp)->obj_material >= IRON && \
 				 (otmp)->obj_material <= MITHRIL)
 #define is_hard(otmp)	((otmp)->obj_material >= WOOD)
