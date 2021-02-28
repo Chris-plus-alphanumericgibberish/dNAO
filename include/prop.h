@@ -118,7 +118,8 @@
 #define QUICK_DRAW					1 + PRESERVATION
 #define CLEAR_THOUGHTS				1 + QUICK_DRAW
 #define DOUBT						1 + CLEAR_THOUGHTS
-#define LAST_PROP					(DOUBT)
+#define BLOCK_CONFUSION				1 + DOUBT
+#define LAST_PROP					(BLOCK_CONFUSION)
 
 #define MPROP_SIZE					(LAST_PROP/32 + 1)
 

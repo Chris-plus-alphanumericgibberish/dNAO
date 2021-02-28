@@ -164,11 +164,11 @@
 /* Those implemented solely as timeouts (we use just intrinsic) */
 #define HStun			u.uprops[STUNNED].intrinsic
 #define Stunned			(((HStun || u.umonnum == PM_STALKER || \
-						(Upolyd && youmonst.data->mlet == S_BAT)) && !(u.specialSealsActive&SEAL_NUMINA)) || StaggerShock)
+						(Upolyd && youmonst.data->mlet == S_BAT)) && !BConfStun) || StaggerShock)
 		/* Note: birds will also be stunned */
 
 #define HConfusion		u.uprops[CONFUSION].intrinsic
-#define Confusion		((HConfusion && !(u.specialSealsActive&SEAL_NUMINA)) || StumbleBlind)
+#define Confusion		((HConfusion && !BConfStun) || StumbleBlind)
 
 #define EDoubt		u.uprops[DOUBT].intrinsic
 #define HDoubt		u.uprops[DOUBT].intrinsic
@@ -585,5 +585,10 @@
 #define Necrospellboost	(u.uprops[NECROSPELLS].extrinsic)
 
 #define Double_spell_size	(u.sealsActive&SEAL_NABERIUS)
+
+#define EBConfStun	u.uprops[BLOCK_CONFUSION].extrinsic
+#define HBConfStun	u.uprops[BLOCK_CONFUSION].intrinsic
+
+#define BConfStun	(EBConfStun || HBConfStun)
 
 #endif /* YOUPROP_H */

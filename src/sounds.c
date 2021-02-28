@@ -5031,12 +5031,15 @@ int floorID;
 	case BLACK_WEB:
 		break;
 	case NUMINA:
+		propchain[i++] = BLOCK_CONFUSION;
 		propchain[i++] = DETECT_MONSTERS;
 		propchain[i++] = OMNISENSE;
 		break;
 	}
 	/* add termintor */
 	propchain[i] = NO_PROP;
+	if(i > MAXSPIRITPROPS)
+		impossible("Overfloaw in spirit propery chain.");
 	return propchain;
 }
 
