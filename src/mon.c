@@ -5649,6 +5649,9 @@ register struct monst *mtmp;
 	) {
 		domonnoise(mtmp, FALSE);
     }
+	else if(mtmp->data->msound == MS_SHOG){
+		domonnoise(mtmp, FALSE);
+	}
 	for(i = 0; i < NATTK; i++)
 		 if(mtmp->data->mattk[i].aatyp == AT_WDGZ) {
 			 if (!(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD))	// the Eyes of the Overworld protect you from whatever you might see
