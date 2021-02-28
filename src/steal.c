@@ -309,7 +309,7 @@ nothing_to_steal:
 	else if(otmp == uarm && uarmc) otmp = uarmc;
 #ifdef TOURIST
 	else if(otmp == uarmu && uarmc) otmp = uarmc;
-	else if(otmp == uarmu && uarm) otmp = uarm;
+	else if(otmp == uarmu && uarm && arm_blocks_upper_body(uarm->otyp)) otmp = uarm;
 #endif
 gotobj:
 	if(otmp->o_id == stealoid) return(0);

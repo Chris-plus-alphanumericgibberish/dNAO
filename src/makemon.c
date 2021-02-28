@@ -2238,6 +2238,11 @@ int mkobjflags;
 					otmp->spe = 0;
 					(void) mpickobj(mtmp, otmp);
 					
+					otmp = mksobj(HAWAIIAN_SHORTS, mkobjflags|MKOBJ_NOINIT);
+					bless(otmp);
+					otmp->spe = 0;
+					(void) mpickobj(mtmp, otmp);
+					
 					otmp = mksobj(LOW_BOOTS, mkobjflags|MKOBJ_NOINIT);
 					bless(otmp);
 					otmp->spe = 0;
@@ -5097,6 +5102,9 @@ int mkobjflags;
 						otmp->spe = 0+rn2(4);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(HAWAIIAN_SHIRT, mkobjflags|MKOBJ_ARTIF);
+						otmp->spe = 0+rn2(4);
+						(void) mpickobj(mtmp, otmp);
+						otmp = mksobj(HAWAIIAN_SHORTS, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LOW_BOOTS, mkobjflags|MKOBJ_ARTIF);

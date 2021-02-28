@@ -1646,7 +1646,7 @@ struct monst * mon;
 			undressfunc(uarmh, "helmet", helpless);
 #ifdef TOURIST
 		if (!uarmc && !uarm)
-			undressfunc(uarmu, "shirt", helpless);
+			undressfunc(uarmu, "clothes", helpless);
 #endif
 	}
 

@@ -83,7 +83,7 @@ struct monst *victim;
 		return TRUE;
 	    }
 	    item = (victim == &youmonst) ? uarm : which_armor(victim, W_ARM);
-	    if (item) {
+	    if (item && (arm_blocks_upper_body(item->otyp) || !((victim == &youmonst) ? uarmu : which_armor(victim, W_ARMU)) || rn2(2))) {
 		(void) burn_dmg(item, xname(item));
 		return TRUE;
 	    }
@@ -1055,7 +1055,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 			if (uarmc)
 			    (void) rust_dmg(uarmc, cloak_simple_name(uarmc),
 						1, TRUE, &youmonst);
-			else if (uarm)
+			else if (uarm && (arm_blocks_upper_body(uarm->otyp) || rn2(2)))
 			    (void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst);
 #ifdef TOURIST
 			else if (uarmu)
@@ -3461,9 +3461,7 @@ boolean *lostsome;
 			  obj == uamul || obj == uleft || obj == uright ||
 			  obj == ublindf || obj == uarm || obj == uarmc ||
 			  obj == uarmg || obj == uarmf ||
-#ifdef TOURIST
 			  obj == uarmu ||
-#endif
 			  (obj->cursed && !Weldproof && (obj == uarmh || obj == uarms)) ||
 			  welded(obj)))
 			otmp = obj;

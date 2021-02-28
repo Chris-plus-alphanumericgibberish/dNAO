@@ -5726,7 +5726,7 @@ int spell;
 		}
 	}
 
-	if (uarm){
+	if (uarm && arm_blocks_upper_body(uarm->otyp)){
 		if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
 			splcaster += urole.spelarmr;
 

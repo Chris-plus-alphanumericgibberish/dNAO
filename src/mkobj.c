@@ -1746,6 +1746,7 @@ struct obj* obj;
 	case BLACK_DRESS:
 	case T_SHIRT:
 	case HAWAIIAN_SHIRT:
+	case HAWAIIAN_SHORTS:
 	case STRIPED_SHIRT:
 	case ICHCAHUIPILLI:
 	case RUFFLED_SHIRT:

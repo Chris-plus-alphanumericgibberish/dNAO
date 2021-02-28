@@ -1349,7 +1349,7 @@ register struct monst *mtmp;
 					continue;
 				if(patient == &youmonst){
 					//Note: body armor blocks healing, healing is also reduced by the rolled DR
-					if(!mtmp->mpeaceful || nonliving(youracedata) || uarm)
+					if(!mtmp->mpeaceful || nonliving(youracedata) || (uarm && arm_blocks_upper_body(uarm->otyp)))
 						continue;
 					if((Upolyd && u.mh < u.mhmax) || (!Upolyd && u.uhp < u.uhpmax)){
 						nurse_heal(mtmp, patient, TRUE);
@@ -1358,7 +1358,7 @@ register struct monst *mtmp;
 				}
 				else {
 					//Note: body armor blocks healing, healing is also reduced by the rolled DR
-					if(nonliving(patient->data) || patient->mpeaceful != mtmp->mpeaceful || which_armor(patient, W_ARM))
+					if(nonliving(patient->data) || patient->mpeaceful != mtmp->mpeaceful || (which_armor(patient, W_ARM) && arm_blocks_upper_body(which_armor(patient, W_ARM)->otyp)))
 						continue;
 					if(patient->mhp < patient->mhpmax){
 						nurse_heal(mtmp, patient, canseemon(mtmp) || canseemon(patient));

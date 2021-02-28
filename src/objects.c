@@ -799,6 +799,8 @@ SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs til
 /*ARMOR(("Hawaiian shorts", "flowery shorts and lei"),
 	1, 0, 0, 0,	 0, 0,	 5,   3, 10, 0, ARM_SUIT, CLOTH, CLR_MAGENTA),
 */
+SUIT(("Hawaiian shorts", "flowery short pants", "short pants"), /*Needs encyc entry*//*Needs tile*/
+	0, 0, MZ_SMALL,  ARMSZ_LIGHT, 0,   0,  0,  15,   10, 10, 0, 0, CLOTH, CLR_ORANGE, O_DRSLOT(LOWER_TORSO_DR)),
 SHIRT(("Hawaiian shirt", "flowery shirt", "shirt"),
 	0, 0, MZ_MEDIUM, 0,	 10, 0,	 5,   3, 10, 0, 0, CLOTH, CLR_MAGENTA),
 SHIRT(("T-shirt"), /*Needs encyc entry*/

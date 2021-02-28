@@ -1343,14 +1343,14 @@ dotakeoff()
 	if (uarmc) {
 		armorpieces++;
 		otmp = uarmc;
-	} else if (uarm) {
+	}
+	if (uarm && !(uarmc && arm_blocks_upper_body(uarm->otyp))) {
 		armorpieces++;
 		otmp = uarm;
-#ifdef TOURIST
-	} else if (uarmu) {
+	}
+	if (uarmu && !uarmc && !(uarm && arm_blocks_upper_body(uarm->otyp))) {
 		armorpieces++;
 		otmp = uarmu;
-#endif
 	}
 	if (!armorpieces) {
 	     /* assert( GRAY_DRAGON_SCALES > YELLOW_DRAGON_SCALE_MAIL ); */
@@ -1380,11 +1380,9 @@ dotakeoff()
 	}
 	/* note: the `uskin' case shouldn't be able to happen here; dragons
 	   can't wear any armor so will end up with `armorpieces == 0' above */
-	if (otmp == uskin || ((otmp == uarm) && uarmc)
-#ifdef TOURIST
-			  || ((otmp == uarmu) && (uarmc || uarm))
-#endif
-		) {
+	if (otmp == uskin || ((otmp == uarm) && (uarmc && arm_blocks_upper_body(uarm->otyp)))
+	  || ((otmp == uarmu) && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp))))
+	){
 	    You_cant("take that off.");
 	    return 0;
 	}
@@ -1405,6 +1403,11 @@ doremring()
 	register struct obj *otmp = 0;
 	int Accessories = 0;
 
+	if(!freehand()){
+		You("have no free %s to remove accessories with!", body_part(HAND));
+		return(0);
+	}
+
 #define MOREACC(x) if (x) { Accessories++; otmp = x; }
 	MOREACC(uleft);
 	MOREACC(uright);
@@ -1413,10 +1416,7 @@ doremring()
 
 	if(!Accessories) {
 		pline("Not wearing any accessories.%s", (iflags.cmdassist &&
-			    (uarm || uarmc ||
-#ifdef TOURIST
-			     uarmu ||
-#endif
+			    (uarm || uarmc || uarmu ||
 			     uarms || uarmh || uarmg || uarmf)) ?
 		      "  Use 'T' command to take off armor." : "");
 		return(0);
@@ -1698,7 +1698,7 @@ boolean noisy;
 		} else
 			*mask = W_ARMG;
 	} else if (is_shirt(otmp)) {
-		if (uarm || uarmc || uarmu) {
+		if ((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc || uarmu) {
 			if (uarmu) {
 			if (noisy) already_wearing(an(c_shirt));
 			} else {
@@ -1727,7 +1727,7 @@ boolean noisy;
 		} else
 			*mask = W_ARMC;
     } else if (is_suit(otmp)) {
-		if (uarmc) {
+		if (uarmc && arm_blocks_upper_body(otmp->otyp)) {
 			if (noisy) You("cannot wear armor over a %s.", cloak_simple_name(uarmc));
 			err++;
 		} else if (uarm) {
@@ -2315,7 +2315,7 @@ base_uac()
 		if(Race_if(PM_ORC)){
 			dexbonus += (u.ulevel+1)/3;
 		}
-		if(Role_if(PM_MONK) && !uarm){
+		if(Role_if(PM_MONK) && !(uarm && arm_blocks_upper_body(uarm->otyp))){
 			if(dexbonus < 0) dexbonus = (int)(dexbonus / 2);
 			dexbonus += max((int)( (ACURR(A_WIS)-1)/2 - 5 ),0) + (int)(u.ulevel/6 + 1);
 			if(Confusion && u.udrunken>u.ulevel) dexbonus += u.udrunken/9+1;
@@ -2781,8 +2781,11 @@ struct monst *victim;
 	register struct obj *otmph, *otmp;
 
 	otmph = (victim == &youmonst) ? uarmc : which_armor(victim, W_ARMC);
-	if (!otmph)
+	if (!otmph){
 	    otmph = (victim == &youmonst) ? uarm : which_armor(victim, W_ARM);
+		if(otmph && arm_blocks_upper_body(otmph->otyp) && rn2(2))
+			otmph = 0;
+	}
 #ifdef TOURIST
 	if (!otmph)
 	    otmph = (victim == &youmonst) ? uarmu : which_armor(victim, W_ARMU);
@@ -2904,30 +2907,26 @@ register struct obj *otmp;
 	    }
 	}
 	/* special suit and shirt checks */
-	if (otmp == uarm
-#ifdef TOURIST
-			|| otmp == uarmu
-#endif
-		) {
+	if (otmp == uarm || otmp == uarmu) {
 	    why = 0;	/* the item which prevents disrobing */
-	    if (uarmc && uarmc->cursed && !Weldproof) {
-		Sprintf(buf, "remove your %s", cloak_simple_name(uarmc));
-		why = uarmc;
-#ifdef TOURIST
-	    } else if (otmp == uarmu && uarm && uarm->cursed && !Weldproof) {
-		Sprintf(buf, "remove your %s", c_suit);
-		why = uarm;
-#endif
+	    if (uarmc && uarmc->cursed && !Weldproof &&
+			!(otmp == uarm && arm_blocks_upper_body(uarm->otyp))
+		) {
+			Sprintf(buf, "remove your %s", cloak_simple_name(uarmc));
+			why = uarmc;
+	    } else if (otmp == uarmu && uarm && arm_blocks_upper_body(uarm->otyp) && uarm->cursed && !Weldproof) {
+			Sprintf(buf, "remove your %s", c_suit);
+			why = uarm;
 	    } else if (welded(uwep) && bimanual(uwep,youracedata)) {
-		Sprintf(buf, "release your %s",
-			is_sword(uwep) ? c_sword :
-			(uwep->otyp == BATTLE_AXE) ? c_axe : c_weapon);
-		why = uwep;
+			Sprintf(buf, "release your %s",
+				is_sword(uwep) ? c_sword :
+				(uwep->otyp == BATTLE_AXE) ? c_axe : c_weapon);
+			why = uwep;
 	    }
 	    if (why) {
-		You("cannot %s to take off %s.", buf, the(xname(otmp)));
-		why->bknown = TRUE;
-		return 0;
+			You("cannot %s to take off %s.", buf, the(xname(otmp)));
+			why->bknown = TRUE;
+			return 0;
 	    }
 	}
 	/* basic curse check */

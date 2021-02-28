@@ -646,7 +646,7 @@ int ga_num;
 	    		!(EDisint_resistance & W_ARM) && !uarmc)
 		(void) destroy_arm(uarm);
 #ifdef TOURIST
-	    if (uarmu && !uarm && !uarmc) (void) destroy_arm(uarmu);
+	    if (uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc) (void) destroy_arm(uarmu);
 #endif
 	    if (!Disint_resistance)
 		fry_by_god(ga_num);

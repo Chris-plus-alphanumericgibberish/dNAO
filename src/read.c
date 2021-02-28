@@ -499,8 +499,8 @@ doread()
 	    char buf[BUFSZ];
 	    int erosion;
 		if(arti_mandala(scroll)){
-			if(uarmu && uarmu == scroll && uarm){
-				if( uarm->obj_material == GLASS){
+			if(uarmu && uarmu == scroll && uarm && arm_blocks_upper_body(uarm->otyp)){
+				if( !is_opaque(uarm)){
 					You("look at your shirt through your glass armor.");
 				}
 				else{
@@ -519,8 +519,8 @@ doread()
 				You_cant("feel any Braille writing.");
 				return 0;
 			}
-			if(uarmu && uarmu == scroll && uarm){
-				if( uarm->obj_material == GLASS){
+			if(uarmu && uarmu == scroll && uarm && arm_blocks_upper_body(uarm->otyp)){
+				if(!is_opaque(uarm)){
 					You("look at your shirt through your glass armor.");
 				}
 				else{

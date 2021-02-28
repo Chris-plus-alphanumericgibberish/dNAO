@@ -330,6 +330,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		*rweapon = EXPENSIVE_CAMERA;
 		*rwammo = DART;
 		*shirt = HAWAIIAN_SHIRT;
+		if(!special) *armor = HAWAIIAN_SHORTS;
 		*boots = LOW_BOOTS;
 		*tool = CREDIT_CARD;
 	break;

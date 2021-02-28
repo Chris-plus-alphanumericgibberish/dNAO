@@ -1701,6 +1701,7 @@ boolean with_price;
 			/* prefixes */
 			if (typ == LENSES ||
 				typ == SUNGLASSES ||
+				typ == HAWAIIAN_SHORTS ||
 				is_boots(obj) ||
 				is_gloves(obj)
 				) {
