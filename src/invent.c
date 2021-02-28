@@ -5251,7 +5251,7 @@ u_clothing_discomfort()
 	}
 	if(uarmu){
 		count++;
-		if(uarmu->otyp == BLACK_DRESS)
+		if(uarmu->otyp == PLAIN_DRESS)
 			count++;
 		else if(uarmu->otyp == BODYGLOVE || uarmu->otyp == VICTORIAN_UNDERWEAR)
 			count += 2;

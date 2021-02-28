@@ -708,7 +708,7 @@ Shirt_on()
 		ABON(A_CHA) += 2*(1 + uarmu->spe);
 		flags.botl = 1;
 	}
-	else if(uarmu->otyp == BLACK_DRESS) {
+	else if(uarmu->otyp == PLAIN_DRESS) {
 		pline("%s complements your figure nicely.", The(xname(uarmu)));
 		ABON(A_CHA) += 1 + uarmu->spe;
 		flags.botl = 1;
@@ -739,7 +739,7 @@ Shirt_off()
 		ABON(A_CHA) -= 2*(1 + uarmu->spe);
 		flags.botl = 1;
 	}
-	else if(uarmu->otyp == BLACK_DRESS) {
+	else if(uarmu->otyp == PLAIN_DRESS) {
 		ABON(A_CHA) -= (1 + uarmu->spe);
 		flags.botl = 1;
 	}
@@ -756,7 +756,7 @@ Shirt_off()
 int
 Armor_on()
 {
-	if(uarm->otyp == NOBLE_S_DRESS || uarm->otyp == BLACK_DRESS) {
+	if(uarm->otyp == NOBLE_S_DRESS || uarm->otyp == PLAIN_DRESS) {
 		pline("%s complements your figure nicely.", The(xname(uarm)));
 		ABON(A_CHA) += 1 + uarm->spe;
 		flags.botl = 1;
@@ -794,7 +794,7 @@ Armor_off()
 	if(!uarm) {
 		impossible("Armor_off called with no uarm");
 	}
-	else if((uarm->otyp == NOBLE_S_DRESS || uarm->otyp == BLACK_DRESS) && !cancelled_don) {
+	else if((uarm->otyp == NOBLE_S_DRESS || uarm->otyp == PLAIN_DRESS) && !cancelled_don) {
 		ABON(A_CHA) -= (1 + uarm->spe);
 		flags.botl = 1;
 	}
@@ -3720,7 +3720,7 @@ register schar delta;
 		}
 	}
 	if(uarm && uarm == otmp){
-		if(otmp->otyp == BLACK_DRESS){
+		if(otmp->otyp == PLAIN_DRESS){
 			if (delta) {
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;
@@ -3740,7 +3740,7 @@ register schar delta;
 		}
 	}
 	if(uarmu && uarmu == otmp){
-		if(otmp->otyp == BLACK_DRESS){
+		if(otmp->otyp == PLAIN_DRESS){
 			if (delta) {
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;

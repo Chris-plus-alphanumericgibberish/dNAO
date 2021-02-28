@@ -434,7 +434,7 @@ const int fancy_clothes[] = {
 	HAWAIIAN_SHORTS,
 	T_SHIRT,
 	VICTORIAN_UNDERWEAR,
-	BLACK_DRESS
+	PLAIN_DRESS
 };
 
 #if 0
