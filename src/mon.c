@@ -5838,17 +5838,19 @@ register int x, y, distance;
 					&& !mtmp->mtame
 					&& !nonliving(youracedata)
 				) targets++;
-				targets = rnd(targets);
-				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-					if(dist2(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= distance
-						&& tmpm->mpeaceful != mtmp->mpeaceful
-						&& tmpm->mtame != mtmp->mtame
-						&& !nonliving(tmpm->data)
-						&& !resists_drain(tmpm)
-						&& !DEADMONSTER(tmpm)
-						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-					) targets--;
-					if(!targets) break;
+				if(targets){
+					targets = rnd(targets);
+					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+						if(dist2(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= distance
+							&& tmpm->mpeaceful != mtmp->mpeaceful
+							&& tmpm->mtame != mtmp->mtame
+							&& !nonliving(tmpm->data)
+							&& !resists_drain(tmpm)
+							&& !DEADMONSTER(tmpm)
+							&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+						) targets--;
+						if(!targets) break;
+					}
 				}
 				if(tmpm){
 					if(canseemon(tmpm)){
@@ -7342,21 +7344,23 @@ struct monst *mtmp;
 		&& !(resists_fire(tmpm) && resists_sickness(tmpm))\
 		&& tmpm->mtyp != PM_GREEN_SLIME\
 		&& !has_template(tmpm, SLIME_REMNANT)
+#define you_corruption_target_inhale() common_you_target_inhale()\
+		&& youracedata->mtyp != PM_GREEN_SLIME\
+		&& !(Fire_resistance && Sick_resistance)
+
 	if(mtmp->mtyp == PM_ANCIENT_OF_CORRUPTION){
 		struct monst *tmpm;
 		int targets = 0, damage = 0;
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 			if(valid_corruption_target_inhale(tmpm)) targets++;
 		}
-		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
-			&& !mtmp->mpeaceful
-			&& !mtmp->mtame
-			&& !(Fire_resistance && Sick_resistance)
-		) targets++;
-		targets = rnd(targets);
-		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(valid_corruption_target_inhale(tmpm)) targets--;
-			if(!targets) break;
+		if(you_corruption_target_inhale()) targets++;
+		if(targets){
+			targets = rnd(targets);
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_corruption_target_inhale(tmpm)) targets--;
+				if(!targets) break;
+			}
 		}
 		if(tmpm){
 			if(canseemon(tmpm) && canseemon(mtmp)){
@@ -7404,12 +7408,7 @@ struct monst *mtmp;
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
-		} else if(targets > 0
-			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
-			&& !mtmp->mpeaceful
-			&& !mtmp->mtame
-			&& !(Fire_resistance && Sick_resistance)
-		){
+		} else if(targets > 0 && you_corruption_target_inhale()){
 			pline("Slime bubbles up from under your %s.", body_part(BODY_SKIN));
 			if(canseemon(mtmp)){
 				pline("The bursting bubbles' spray is drawn into the oral groove of %s.", mon_nam(mtmp));
@@ -7450,21 +7449,26 @@ struct monst *mtmp;
 		&& !mindless_mon(tmpm)\
 		&& !nonliving(tmpm->data)
 
+/*Note: the player is never mindless*/
+#define you_gray_target_inhale() common_you_target_inhale()
+#define you_gray_target_exhale() common_you_target_exhale()\
+		&& !nonliving(youracedata)
+
 	if(mtmp->mtyp == PM_ANCIENT_OF_THOUGHT){
 		struct monst *tmpm;
 		int targets = 0, damage = 0;
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 			if(valid_gray_target_inhale(tmpm)) targets++;
 		}
-		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
-			&& !mtmp->mpeaceful
-			&& !mtmp->mtame
-			/*Note: the player is never mindless*/
-		) targets++;
-		targets = rnd(targets);
-		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(valid_gray_target_inhale(tmpm)) targets--;
-			if(!targets) break;
+
+		if(you_gray_target_inhale()) targets++;
+
+		if(targets){
+			targets = rnd(targets);
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_gray_target_inhale(tmpm)) targets--;
+				if(!targets) break;
+			}
 		}
 		if(tmpm){
 			if(canseemon(tmpm) && canseemon(mtmp)){
@@ -7493,12 +7497,7 @@ struct monst *mtmp;
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
-		} else if(targets > 0
-			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
-			&& !mtmp->mpeaceful
-			&& !mtmp->mtame
-			/*Note: the player is never mindless*/
-		){
+		} else if(targets > 0 && you_gray_target_inhale()){
 			if(uarmh && uarmh->otyp == DUNCE_CAP){
 				damage = 0;
 				destroy_arm(uarmh);
@@ -7533,9 +7532,7 @@ struct monst *mtmp;
 			}
 		}
 		if(damage){
-			if(!mtmp->mtame && !mtmp->mpeaceful && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM
-				&& !nonliving(youracedata)
-			){
+			if(you_gray_target_exhale()){
 				pline("%s screams into your mind!", Monnam(mtmp));
 				if(Hallucination){
 					You("have an out of body experience.");
@@ -7621,10 +7618,12 @@ struct monst *mtmp;
 			&& !mtmp->mtame
 			&& !Fire_resistance
 		) targets++;
-		targets = rnd(targets);
-		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(valid_ice_target_inhale(tmpm)) targets--;
-			if(!targets) break;
+		if(targets){
+			targets = rnd(targets);
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_ice_target_inhale(tmpm)) targets--;
+				if(!targets) break;
+			}
 		}
 		if(tmpm){
 			if(canseemon(tmpm) && canseemon(mtmp)){
@@ -7727,10 +7726,12 @@ struct monst *mtmp;
 			&& !mtmp->mtame
 			&& !nonliving(youracedata)
 		) targets++;
-		targets = rnd(targets);
-		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(valid_death_target_inhale(tmpm)) targets--;
-			if(!targets) break;
+		if(targets){
+			targets = rnd(targets);
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_death_target_inhale(tmpm)) targets--;
+				if(!targets) break;
+			}
 		}
 		if(tmpm){
 			if(canseemon(tmpm) && canseemon(mtmp)){
@@ -7877,17 +7878,19 @@ struct monst *mtmp;
 			&& !mtmp->mtame
 			&& !is_demon(youracedata)
 		) targets++;
-		targets = rnd(targets);
-		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
-				&& (tmpm->mpeaceful != mtmp->mpeaceful || mtmp->mhp < mtmp->mhpmax/4)
-				&& (tmpm->mtame != mtmp->mtame || mtmp->mhp < mtmp->mhpmax/4)
-				&& !has_template(tmpm, CRYSTALFIED)
-				&& !is_demon(tmpm->data)
-				&& !DEADMONSTER(tmpm)
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-			) targets--;
-			if(!targets) break;
+		if(targets){
+			targets = rnd(targets);
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= 4
+					&& (tmpm->mpeaceful != mtmp->mpeaceful || mtmp->mhp < mtmp->mhpmax/4)
+					&& (tmpm->mtame != mtmp->mtame || mtmp->mhp < mtmp->mhpmax/4)
+					&& !has_template(tmpm, CRYSTALFIED)
+					&& !is_demon(tmpm->data)
+					&& !DEADMONSTER(tmpm)
+					&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+				) targets--;
+				if(!targets) break;
+			}
 		}
 		if(tmpm){
 			if(canseemon(tmpm) && canseemon(mtmp)){
