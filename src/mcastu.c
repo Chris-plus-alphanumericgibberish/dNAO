@@ -3981,7 +3981,7 @@ int tary;
 			/* only one summon spell per global turn allowed */
 			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
 		}
-		else if (is_alienist(magr->data)) {
+		else if (is_alienist(magr->data) || has_template(magr, MAD_TEMPLATE)) {
 			/* alienists summon aliens. wowzers. */
 			return cast_spell(magr, mdef, attk, SUMMON_ALIEN, tarx, tary);
 		}
@@ -4008,6 +4008,9 @@ int tary;
 				else
 					You("sense the arrival of %s.",
 					an(Hallucination ? rndmonnam() : "hostile angel"));
+				//Despite being a demon lord, Lamashtu is  able to summon angels
+				if(magr->mtyp == PM_LAMASHTU || magr->mfaction == LAMASHTU_FACTION)
+					mtmp->mfaction = LAMASHTU_FACTION;
 				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 			}
 			else

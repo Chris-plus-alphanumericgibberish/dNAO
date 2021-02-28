@@ -1991,6 +1991,7 @@ struct obj * otmp;
 	if(otmp->oeroded > greatest) greatest = (int) otmp->oeroded;
 	if(otmp->oeroded2 > greatest) greatest = (int) otmp->oeroded2;
 	if(otmp->oeroded3 > greatest) greatest = (int) otmp->oeroded3;
+	if(otmp->odead_larva > greatest) greatest = (int) otmp->odead_larva;
 	
 	return greatest;
 }
@@ -2473,10 +2474,10 @@ find_dr()
 	int udr = 0, i;
 	
 	for(i = 0; i < 5; i++)
-		udr += slot_udr(1<<i,0);
-	udr += slot_udr(UPPER_TORSO_DR,0);
-	udr += slot_udr(LOWER_TORSO_DR,0);
-	udr += max(slot_udr(UPPER_TORSO_DR,0), slot_udr(ARM_DR,0))*2;
+		udr += slot_udr(1<<i,0, 0);
+	udr += slot_udr(UPPER_TORSO_DR,0, 0);
+	udr += slot_udr(LOWER_TORSO_DR,0, 0);
+	udr += max(slot_udr(UPPER_TORSO_DR,0, 0), slot_udr(ARM_DR,0, 0))*2;
 	udr /= 9;
 	if (udr > 127) udr = 127;	/* u.uac is an schar */
 	if(udr != u.udr){
@@ -2494,9 +2495,10 @@ find_dr()
  * Includes effectiveness vs magr (optional)
  */
 int
-slot_udr(slot, magr)
+slot_udr(slot, magr, depth)
 int slot;
 struct monst *magr;
+int depth;
 {
 	/* DR addition: bas + sqrt(nat^2 + arm^2) */
 	int bas_udr; /* base DR:    magical-ish   */
@@ -2537,10 +2539,12 @@ struct monst *magr;
 		slot = UPPER_TORSO_DR;
 
 	/* DR of worn armor */
-	struct obj * uarmor[] = { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu };
+	struct obj * uarmor[] = ARMOR_SLOTS;
 	int i;
 	for (i = 0; i < SIZE(uarmor); i++) {
 		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dir & slot)) {
+			if(depth && higher_depth(uarmor[i]->owornmask, depth))
+				continue;
 			arm_udr += arm_dr_bonus(uarmor[i]);
 			if (magr) arm_udr += properties_dr(uarmor[i], agralign, agrmoral);
 		}
@@ -2616,10 +2620,18 @@ int
 roll_udr(magr)
 struct monst *magr;
 {
-	int slot;
+	return roll_udr_detail(magr, 0, 0);
+}
+
+int
+roll_udr_detail(magr, slot, depth)
+struct monst *magr;
+int slot;
+int depth;
+{
 	int udr;
 	int cap = 10;
-	switch(rn2(9)){
+	if(!slot) switch(rn2(9)){
 		case 0:
 		case 1:
 			slot = UPPER_TORSO_DR;
@@ -2639,12 +2651,12 @@ struct monst *magr;
 		break;
 		case 7:
 		case 8:
-			if(slot_udr(UPPER_TORSO_DR, magr) > slot_udr(ARM_DR, magr))
+			if(slot_udr(UPPER_TORSO_DR, magr, 0) > slot_udr(ARM_DR, magr, 0))
 				slot = UPPER_TORSO_DR;
 			else slot = ARM_DR;
 		break;
 	}
-	udr = slot_udr(slot, magr);
+	udr = slot_udr(slot, magr, depth);
 	if(active_glyph(DEEP_SEA))
 		cap += 3;
 	//diminishing returns after 10 points of DR.
@@ -4492,21 +4504,21 @@ struct obj *wep;
 	struct attack symbiote = { AT_WEAP, AD_PHYS, 4, 4 };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
-	
+
 	for(j=8;j>=1;j--){
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
 		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
 		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
-		
+
 		if(!mdef)
 			continue;
-		
+
 		youdef = (mdef == &youmonst);
 		if(!youdef && DEADMONSTER(mdef))
 			continue;
-		
+
 		if(youagr && (mdef->mpeaceful || !rn2(4)))
 			continue;
 		if(youdef && (magr->mpeaceful || !rn2(4)))

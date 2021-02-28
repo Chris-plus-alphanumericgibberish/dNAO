@@ -18,6 +18,7 @@
 STATIC_DCL void NDECL(do_positionbar);
 #endif
 
+STATIC_DCL void NDECL(clothes_bite_you);
 STATIC_DCL void NDECL(androidUpkeep);
 STATIC_DCL void NDECL(printMons);
 STATIC_DCL void NDECL(printDPR);
@@ -423,6 +424,25 @@ androidUpkeep()
 		}
 		if(moves > u.nextsleep+1400 && u.uen > 0){
 			if(!(moves%20)) losepw(1);
+		}
+	}
+}
+
+STATIC_OVL
+void
+clothes_bite_you()
+{
+	struct obj * uarmor[] = WORN_SLOTS;
+	int i;
+	for (i = 0; i < SIZE(uarmor); i++) {
+		if (uarmor[i] && (uarmor[i]->olarva)) {
+			held_item_bites(&youmonst, uarmor[i]);
+			if(multi >= 0) {
+				if (occupation)
+					stop_occupation();
+				else
+					nomul(0, NULL);
+			}
 		}
 	}
 }
@@ -1323,8 +1343,8 @@ karemade:
 						set_malign(mtmp);
 					}
 				}
-				
-				if(mtmp->mtyp == PM_WALKING_DELIRIUM && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+
+				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
 					static long lastusedmove = 0;
 					if(lastusedmove != moves){
 						pline("%s takes on forms new and terrible!", Monnam(mtmp));
@@ -1332,7 +1352,23 @@ karemade:
 						change_usanity(u_sanity_loss(mtmp)/2-1, TRUE);
 					}
 				}
-				
+
+				if(has_template(mtmp, MAD_TEMPLATE) && !ClearThoughts && canseemon(mtmp) && dimness(mtmp->mx, mtmp->my) <= 0 && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+					static long lastusedmove = 0;
+					static int lastcost = 0;
+					int sancost = u_sanity_loss(mtmp);
+					if(lastusedmove != moves){
+						lastcost = 0;
+					}
+					if(sancost < lastcost){
+						sancost = sancost - lastcost;
+						lastcost += sancost;
+						pline("%s shadow takes on forms new and terrible!", s_suffix(Monnam(mtmp)));
+						lastusedmove = moves;
+						change_usanity(sancost, TRUE);
+					}
+				}
+
 				if(mtmp->mtyp == PM_DREADBLOSSOM_SWARM){
 					if(canseemon(mtmp) || u.ustuck == mtmp) mtmp->movement += mcalcmove(mtmp);
 					else {
@@ -1585,12 +1621,12 @@ karemade:
 				if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe-- < 1){
 					if(ublindf && ublindf->otyp == MASK && is_undead(&mons[ublindf->corpsenm])){
 						artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = mons[ublindf->corpsenm].mlevel;
-						if(ublindf->ovar1>=3){
+						if(ublindf->oeroded3>=3){
 							Your("mask shatters!");
 							useup(ublindf);
 						} else {
 							Your("mask cracks.");
-							ublindf->ovar1++;
+							ublindf->oeroded3++;
 						}
 					} else {
 						artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = 0;
@@ -2052,6 +2088,7 @@ karemade:
 			you_regen_hp();
 			you_regen_pw();
 			androidUpkeep();
+			clothes_bite_you();
 
 		    if(!(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
 			if(Teleportation && !rn2(85) && !(

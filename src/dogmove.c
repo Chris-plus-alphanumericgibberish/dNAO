@@ -834,8 +834,11 @@ boolean ranged;
 	
 	if(mtmp2->mtyp == PM_MANDRAKE)
 		return FALSE;
-	
+
 	if(has_template(mtmp2, SLIME_REMNANT) && mtmp->mpeaceful == mtmp2->mpeaceful)
+		return FALSE;
+
+	if(mtmp2->mtyp == PM_BEAUTEOUS_ONE && mtmp->mpeaceful == mtmp2->mpeaceful)
 		return FALSE;
 	
     return !((!ranged &&

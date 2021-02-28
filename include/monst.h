@@ -202,7 +202,7 @@ struct monst {
 #define	FACTION_PADDING	1000	/* padding for Drow factions -- first one is 8 */
 #define	INCUBUS_FACTION	FACTION_PADDING+1	/* male foocubus */
 #define	SUCCUBUS_FACTION	FACTION_PADDING+2	/* female foocubus */
-//define	LAMASHTU_FACTION	FACTION_PADDING+3	/* Lamashtu's faction */
+#define	LAMASHTU_FACTION	FACTION_PADDING+3	/* Lamashtu's angels */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
@@ -221,7 +221,8 @@ struct monst {
 #define	M_BLACK_WEB		13	/* Has a shadow blade attack */
 #define	M_GREAT_WEB		14	/* Has a stronger shadow blade attack */
 #define	SLIME_REMNANT	15	/* slimey, like an ancient of corruption */
-#define MAXTEMPLATE	SLIME_REMNANT
+#define	MAD_TEMPLATE	18	/* mad angel template */
+#define MAXTEMPLATE	MAD_TEMPLATE
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */

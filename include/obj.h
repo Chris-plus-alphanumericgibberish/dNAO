@@ -142,6 +142,8 @@ struct obj {
 #define odiluted oeroded	/* diluted potions */
 #define norevive oeroded2
 	Bitfield(oerodeproof,1); /* erodeproof weapon/armor */
+	Bitfield(olarva,2);	/* object has been partially brought to life */
+	Bitfield(odead_larva,2);	/* object was partially brought to life, but died again */
 	Bitfield(olocked,1);	/* object is locked */
 #define oarmed olocked
 #define odrained olocked	/* drained corpse */
@@ -161,11 +163,11 @@ struct obj {
 	Bitfield(greased,1);	/* covered with grease */
 
 	Bitfield(in_use,1);	/* for magic items before useup items */
+	/* 0 free bits */
 	Bitfield(bypass,1);	/* mark this as an object to be skipped by bhito() */
 	Bitfield(lifted,1); /* dipped in potion of levitation */
 	Bitfield(lightened,1);/* dipped in potion of enlightenment */
 	Bitfield(shopOwned,1);	/* owned by a shopkeeper */
-	/* 0 free bits */
 	Bitfield(ostolen,1); 	/* was removed from a shop without being sold */
     Bitfield(was_thrown,1); /* for pickup_thrown */
 	Bitfield(fromsink,1);
@@ -175,7 +177,7 @@ struct obj {
 	Bitfield(obj_material,5); /*Max 31*/
 	//See objclass for values
 	Bitfield(nomerge,1);	/* temporarily block from merging */
-	/* 19 free bits in this field, I think -CM */
+	/* 15 free bits in this field, I think -CM */
 	
 	int obj_color;
 	union {
@@ -878,6 +880,8 @@ struct obj {
 /* misc */
 #define is_boulder(otmp)		((otmp)->otyp == BOULDER || (otmp)->otyp == MASSIVE_STONE_CRATE || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))
 
+#define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == BLACK_DRESS || onum == VICTORIAN_UNDERWEAR)
+
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \
 			 (o)->oartifact == ART_EYES_OF_THE_OVERWORLD)
@@ -886,5 +890,12 @@ struct obj {
 #define CONTAINED_TOO	0x1
 #define BURIED_TOO	0x2
 #define INTRAP_TOO	0x4
+
+#define higher_depth(armdepth, depth)	(armdepth == depth || (\
+		(depth&(W_ARMC|W_GLYPH)) ? FALSE :\
+		(depth&(W_ARMS|W_WEP|W_QUIVER|W_SWAPWEP|W_AMUL|W_SADDLE|W_CHAIN)) ? (armdepth == W_ARMC) :\
+		(depth&(W_ARMH|W_ARMG|W_ARMF|W_ARM|W_RINGL|W_RINGR|W_TOOL)) ? (armdepth != W_ARMU) :\
+		(depth&(W_ARMU|W_SKIN)) ? TRUE :\
+		FALSE))
 
 #endif /* OBJ_H */

@@ -572,9 +572,6 @@ boolean you_abilities;
 	if (mon_abilities && (Upolyd && can_breathe(youmonst.data) && Race_if(PM_HALF_DRAGON))){
 		add_ability('B', "Use your halfdragon breath weapon", MATTK_HBREATH);
 	}
-	if (mon_abilities && youracedata->mtyp == PM_TOVE){
-		add_ability('B', "Bore a hole", MATTK_HOLE);
-	}
 	if (mon_abilities && uclockwork){
 		add_ability('c', "Adjust your clockspeed", MATTK_CLOCK);
 	}
@@ -595,6 +592,9 @@ boolean you_abilities;
 	}
 	if (mon_abilities && is_hider(youracedata)){
 		add_ability('h', "Hide", MATTK_HIDE);
+	}
+	if (mon_abilities && youracedata->mtyp == PM_TOVE){
+		add_ability('H', "Bore a hole", MATTK_HOLE);
 	}
 	if (mon_abilities && is_drow(youracedata)){
 		add_ability('i', "Invoke the darkness", MATTK_DARK);
@@ -3610,13 +3610,13 @@ udr_enlightenment()
 		Sprintf(mbuf, "You have no head; shots hit upper body");
 		putstr(en_win, 0, mbuf);
 	} else {
-		dr = slot_udr(HEAD_DR, (struct monst *)0);
+		dr = slot_udr(HEAD_DR, (struct monst *)0, 0);
 	Sprintf(mbuf, "Head Armor:       %s%d", (dr>11) ? "11-" : "", dr);
 		putstr(en_win, 0, mbuf);
 	}
-	dr = slot_udr(UPPER_TORSO_DR, (struct monst *)0);
+	dr = slot_udr(UPPER_TORSO_DR, (struct monst *)0, 0);
 	Sprintf(mbuf, "Upper Body Armor: %s%d", (dr>11) ? "11-" : "", dr);
-	dr = slot_udr(LOWER_TORSO_DR, (struct monst *)0);
+	dr = slot_udr(LOWER_TORSO_DR, (struct monst *)0, 0);
 	putstr(en_win, 0, mbuf);
 	Sprintf(mbuf, "Lower Body Armor: %s%d", (dr>11) ? "11-" : "", dr);
 	putstr(en_win, 0, mbuf);
@@ -3624,7 +3624,7 @@ udr_enlightenment()
 		Sprintf(mbuf, "You have no hands; shots hit upper body");
 		putstr(en_win, 0, mbuf);
 	} else {
-		dr = slot_udr(ARM_DR, (struct monst *)0);
+		dr = slot_udr(ARM_DR, (struct monst *)0, 0);
 	Sprintf(mbuf, "Hand Armor:       %s%d", (dr>11) ? "11-" : "", dr);
 		putstr(en_win, 0, mbuf);
 	}
@@ -3632,7 +3632,7 @@ udr_enlightenment()
 		Sprintf(mbuf, "You have no feet; shots hit lower body");
 		putstr(en_win, 0, mbuf);
 	} else {
-		dr = slot_udr(LEG_DR, (struct monst *)0);
+		dr = slot_udr(LEG_DR, (struct monst *)0, 0);
 	Sprintf(mbuf, "Foot Armor:       %s%d", (dr>11) ? "11-" : "", dr);
 		putstr(en_win, 0, mbuf);
 	}
