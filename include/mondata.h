@@ -671,6 +671,7 @@
 				  (ptr)->mtyp == PM_COTERIE_OF_MOTES ||\
 				  (ptr)->mtyp == PM_BALL_OF_RADIANCE) ? 2 : \
 				 ((ptr)->mtyp == PM_THRONE_ARCHON ||\
+				  (ptr)->mtyp == PM_BEAUTEOUS_ONE ||\
 				 (ptr)->mtyp == PM_ASPECT_OF_THE_SILENCE) ? 3 : \
 				 ((ptr)->mtyp == PM_BLESSED) ? 4 : \
 				 ((ptr)->mtyp == PM_LIGHT_ARCHON|| \
