@@ -5630,7 +5630,7 @@ register struct monst *mtmp;
 			stop_occupation();
 		}
 		if (!rn2(10)) {
-			if (!rn2(13))
+			if (mtmp->mtyp == PM_SHRIEKER && !rn2(13))
 			(void) makemon(&mons[PM_PURPLE_WORM], 0, 0, NO_MM_FLAGS);
 			else
 			(void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
