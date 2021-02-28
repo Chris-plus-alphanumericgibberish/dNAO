@@ -1157,7 +1157,7 @@ int x;
 	if (x == A_STR && override_str)
 		return override_str;
 
-	if (tmp < 18 && youracedata && (youracedata->mlet == S_NYMPH ||
+	if (x == A_CHA && tmp < 18 && youracedata && (youracedata->mlet == S_NYMPH ||
 		u.umonnum==PM_SUCCUBUS || u.umonnum == PM_INCUBUS))
 		tmp = 18;
 		
