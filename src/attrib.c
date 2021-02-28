@@ -1177,26 +1177,22 @@ int x;
 		tmp += uwep->spe;
 	}
 
-	if(x == A_WIS && uarm && arti_chawis(uarm, FALSE) && uarmc){
+	if(x == A_WIS && (uarm && arm_blocks_upper_body(uarm->otyp)) && arti_chawis(uarm, FALSE) && uarmc){
 		tmp += uarm->spe;
 	}
-#ifdef TOURIST
-	if(x == A_WIS && uarmu && arti_chawis(uarmu, FALSE) && (uarmc || uarm)){
+	if(x == A_WIS && uarmu && arti_chawis(uarmu, FALSE) && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))){
 		tmp += uarmu->spe;
 	}
-#endif	/*TOURIST*/
 
 	if(x == A_CHA && uarmc && arti_chawis(uarmc, FALSE)){
 		tmp += uarmc->spe;
 	}
-	if(x == A_CHA && uarm && arti_chawis(uarm, FALSE) && !uarmc){
+	if(x == A_CHA && (uarm && arm_blocks_upper_body(uarm->otyp)) && arti_chawis(uarm, FALSE) && !uarmc){
 		tmp += uarm->spe;
 	}
-#ifdef TOURIST
-	if(x == A_CHA && uarmu && arti_chawis(uarmu, FALSE) && !uarmc && !uarm){
+	if(x == A_CHA && uarmu && arti_chawis(uarmu, FALSE) && !uarmc && !(uarm && arm_blocks_upper_body(uarm->otyp))){
 		tmp += uarmu->spe;
 	}
-#endif	/*TOURIST*/
 
 	if (x == A_STR) {
 		if(Race_if(PM_ORC)){
