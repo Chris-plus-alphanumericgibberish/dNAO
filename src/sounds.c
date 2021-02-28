@@ -1682,18 +1682,41 @@ asGuardian:
 			}
 		} else goto humanoid_sound;
 	}break;
+	case MS_HOWL:{
+		struct monst *tmpm;
+	    pline_msg = "howls.";
+		(void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(tmpm->mtame > 10){
+				tmpm->mtame -= 10;
+				tmpm->mflee = 1;
+			} else untame(mtmp, 1);
+		}
+	    aggravate();
+	}break;
+	case MS_SCREAM:{
+		struct monst *tmpm;
+		pline("%s screams in madness and fear!", Monnam(mtmp));
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(tmpm != mtmp && !DEADMONSTER(tmpm) && tmpm->mpeaceful != mtmp->mpeaceful){
+				if(!resist(tmpm, 0, 0, FALSE)){
+					tmpm->mflee = 1;
+					if(canseemon(tmpm))
+						pline("%s staggers!", Monnam(tmpm));
+					if(tmpm->mhp < mtmp->mhpmax && !resist(tmpm, 0, 0, FALSE)){
+						tmpm->mcrazed = 1;
+					}
+				}
+			}
+		}
+		if(!mtmp->mpeaceful){
+			change_usanity(u_sanity_loss(mtmp), TRUE);
+		}
+	    aggravate();
+	}break;
 	case MS_SHRIEK:
 	    pline_msg = "shrieks.";
 	    aggravate();
-		if(mtmp->mtyp == PM_LAMASHTU){
-			struct monst *tmpm;
-			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-				if(tmpm->mtame > 10){
-					tmpm->mtame -= 10;
-					tmpm->mflee = 1;
-				} else untame(mtmp, 1);
-			}
-		}
 	break;
 	case MS_SHOG:
 		if(couldsee(mtmp->mx,mtmp->my)){
@@ -1702,6 +1725,15 @@ asGuardian:
 			You_hear("distant piping sounds.");
 		}
 		aggravate();
+	break;
+	case MS_SECRETS:
+		if(mtmp->mtame){
+			pline("%s whispers dire secrets, filling you with zeal.", Monnam(mtmp));
+			u.uencouraged = min_ints(Insanity/5+1, u.uencouraged+rnd(Insanity/5+1));
+		} else if(!mtmp->mpeaceful){
+			aggravate();
+		}
+		mtmp->mspec_used = 5;
 	break;
 	case MS_IMITATE:
 	    pline_msg = "imitates you.";
@@ -5031,12 +5063,15 @@ int floorID;
 	case BLACK_WEB:
 		break;
 	case NUMINA:
+		propchain[i++] = BLOCK_CONFUSION;
 		propchain[i++] = DETECT_MONSTERS;
 		propchain[i++] = OMNISENSE;
 		break;
 	}
 	/* add termintor */
 	propchain[i] = NO_PROP;
+	if(i > MAXSPIRITPROPS)
+		impossible("Overfloaw in spirit propery chain.");
 	return propchain;
 }
 

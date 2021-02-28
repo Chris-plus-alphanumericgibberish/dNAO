@@ -1743,9 +1743,10 @@ struct obj* obj;
 	case NOBLE_S_DRESS:
 	case CONSORT_S_SUIT:
 	case GENTLEMAN_S_SUIT:
-	case BLACK_DRESS:
+	case PLAIN_DRESS:
 	case T_SHIRT:
 	case HAWAIIAN_SHIRT:
+	case HAWAIIAN_SHORTS:
 	case STRIPED_SHIRT:
 	case ICHCAHUIPILLI:
 	case RUFFLED_SHIRT:

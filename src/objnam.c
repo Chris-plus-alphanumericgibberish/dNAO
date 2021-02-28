@@ -1701,6 +1701,7 @@ boolean with_price;
 			/* prefixes */
 			if (typ == LENSES ||
 				typ == SUNGLASSES ||
+				typ == HAWAIIAN_SHORTS ||
 				is_boots(obj) ||
 				is_gloves(obj)
 				) {
@@ -3475,8 +3476,8 @@ struct alt_spellings {
 	{ "helm of drain resistance", HELM_OF_DRAIN_RESISTANCE },
 	{ "diadem of drain resistance", HELM_OF_DRAIN_RESISTANCE },
 	{ "mirror shield", SHIELD_OF_REFLECTION },
-	{ "black dress", BLACK_DRESS },
-	{ "dress", BLACK_DRESS },
+	{ "black dress", PLAIN_DRESS },
+	{ "dress", PLAIN_DRESS },
 	{ "noble's dress", NOBLE_S_DRESS },
 	{ "armored dress", NOBLE_S_DRESS },
 	{ "armored black dress", NOBLE_S_DRESS },

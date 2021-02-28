@@ -970,12 +970,10 @@ int attk;
 		 * means it wasn't a target and though it didn't rust
 		 * something else did.
 		 */
-		if (uarm)
+		if (uarm && (arm_blocks_upper_body(uarm->otyp) || rn2(2)))
 		    (void)rust_dmg(uarm, xname(uarm), hurt, TRUE, &youmonst);
-#ifdef TOURIST
 		else if (uarmu)
 		    (void)rust_dmg(uarmu, xname(uarmu), hurt, TRUE, &youmonst);
-#endif
 		break;
 	    case 2:
 		if (!uarms || !rust_dmg(uarms, xname(uarms), hurt, FALSE, &youmonst))

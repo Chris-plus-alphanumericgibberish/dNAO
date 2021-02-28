@@ -3806,7 +3806,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_BALAM && !Invis){
-		if(uarmc || uarm)
+		if(uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))
 			putstr(en_win, 0, "Freezing water leaks from a gash in you neck, but is hidden by your clothes.");
 		else
 			putstr(en_win, 0, "Freezing water leaks from a deep gash in you neck.");
@@ -3837,7 +3837,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_DANTALION && !NoBInvis){
-		if(!(uarmc || ((uarm && uarm->otyp != CRYSTAL_PLATE_MAIL) || uarmu))){
+		if(!(uarmc || ((uarm && !is_opaque(uarm)) || uarmu))){
 			switch(u.ulevel/10+1){
 				case 1:
 				putstr(en_win, 0, "There is an extra face growing on your chest.");
@@ -3863,7 +3863,7 @@ signs_enlightenment()
 	}
 	// if(u.sealsActive&SEAL_SHIRO);
 	if(u.sealsActive&SEAL_ECHIDNA && !Invis){
-		if(!(uarmf && (uarmc || uarm)))
+		if(!(uarmf && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))))
 			putstr(en_win, 0, "Your hips give rise to twin serpent's tails instead of legs.");
 		else
 			putstr(en_win, 0, "Your serpentine legs are disguised by your clothes.");
@@ -3874,7 +3874,7 @@ signs_enlightenment()
 		message = TRUE;
 	} 
 	if(u.sealsActive&SEAL_ENKI && !Invis){
-		if(!(uarm || uarmc))
+		if(!((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc))
 			putstr(en_win, 0, "Water runs off your body in steady rivulets.");
 		else
 			putstr(en_win, 0, "Your body's runoff is caught by your clothes.");
@@ -3890,7 +3890,7 @@ signs_enlightenment()
 		}
 	}
 	if(u.sealsActive&SEAL_EVE && !NoBInvis){
-		if(!uarm && !uarmc){
+		if(!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc){
 			putstr(en_win, 0, "There is a blood-caked wound on your stomach.");
 			message = TRUE;
 		}
@@ -3916,7 +3916,7 @@ signs_enlightenment()
 		} else if(!uarmc && moves <= u.irisAttack+5){
 			putstr(en_win, 0, "There are iridescent tentacles wrapped around your forearms.");
 			message = TRUE;
-		} else if(!uarm && !uarmc){
+		} else if(!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc){
 			putstr(en_win, 0, "There are iridescent veins just under the skin of your forearms.");
 			message = TRUE;
 		}
@@ -3930,7 +3930,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_MARIONETTE && !NoBInvis){
-		if(!(uarm && is_metallic(uarm)))
+		if(!((uarm && arm_blocks_upper_body(uarm->otyp)) && is_metallic(uarm)))
 			putstr(en_win, 0, "Metal wires protrude from your elbows, knees, and back.");
 		else
 			putstr(en_win, 0, "The metal wires protruding from your body have merged with your armor.");
@@ -3980,7 +3980,7 @@ signs_enlightenment()
 	}
 	if(u.sealsActive&SEAL_YMIR && !Invis){
 		if(moves>5000 && moves <= 10000){
-			if(!(uarm || uarmc))
+			if(!((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc))
 				putstr(en_win, 0, "Your skin color is a bit off.");
 			else
 				putstr(en_win, 0, "Your skin is hidden under your clothes.");
@@ -3998,13 +3998,13 @@ signs_enlightenment()
 				putstr(en_win, 0, "Your rotting is hidden under your clothes.");
 			message = TRUE;
 		} else if(moves>50000 && moves <= 100000){
-			if(!(uarmc && uarmg && uarmf && uarm && uarmh))
+			if(!(uarmc && uarmg && uarmf && (uarm && arm_blocks_upper_body(uarm->otyp)) && uarmh))
 				putstr(en_win, 0, "Your rotted body bristles with fungal sporangia and burrowing vermin.");
 			else
 				putstr(en_win, 0, "Your rotted form is hidden under your clothes.");
 			message = TRUE;
 		} else if(moves>100000){
-			if(!(uarmc && uarmg && uarmf && uarm && uarmh && ublindf && ublindf->otyp==MASK))
+			if(!(uarmc && uarmg && uarmf && (uarm && arm_blocks_upper_body(uarm->otyp)) && uarmh && ublindf && ublindf->otyp==MASK))
 				putstr(en_win, 0, "Your putrid body is a riot of fungal forms and saprophagous insects.");
 			else
 				putstr(en_win, 0, "Your putrid form is hidden under your clothes.");
@@ -4353,7 +4353,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_BALAM && !Invis){
-		if(uarmc || uarm)
+		if(uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))
 			putstr(en_win, 0, "Freezing water leaks from a gash in your neck, but is hidden by your clothes.");
 		else
 			putstr(en_win, 0, "Freezing water leaks from a deep gash in your neck.");
@@ -4364,7 +4364,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_BERITH && !Invis){
-		if(!(uarm && is_metallic(uarm) && uarmg && uarmf && uarmh))
+		if(!(uarm && arm_blocks_upper_body(uarm->otyp) && is_metallic(uarm) && uarmg && uarmf && uarmh))
 			putstr(en_win, 0, "You are drenched in gore.");
 		else
 			putstr(en_win, 0, "Your armor is faced with crimson enamel.");
@@ -4384,7 +4384,7 @@ signs_mirror()
 		}
 	}
 	if(u.sealsActive&SEAL_DANTALION && !NoBInvis){
-		if(!(uarmc || ((uarm && uarm->otyp != CRYSTAL_PLATE_MAIL) || uarmu))){
+		if(!(uarmc || ((uarm && !is_opaque(uarm)) || uarmu))){
 			switch(u.ulevel/10+1){
 				case 1:
 				putstr(en_win, 0, "There is an extra face growing on your chest.");
@@ -4410,7 +4410,7 @@ signs_mirror()
 	}
 	// if(u.sealsActive&SEAL_SHIRO);
 	if(u.sealsActive&SEAL_ECHIDNA && !Invis){
-		if(!(uarmf && (uarmc || uarm)))
+		if(!(uarmf && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))))
 			putstr(en_win, 0, "Your hips give rise to twin serpent's tails instead of legs.");
 		else
 			putstr(en_win, 0, "Your serpentine legs are disguised by your clothes.");
@@ -4421,14 +4421,14 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ENKI && !Invis){
-		if(!(uarm || uarmc))
+		if(!((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc))
 			putstr(en_win, 0, "Water runs off your body in steady rivulets.");
 		else
 			putstr(en_win, 0, "Your body's runoff is caught by your clothes.");
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_EVE && !NoBInvis){
-		if(!uarm && !uarmc){
+		if(!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc){
 			putstr(en_win, 0, "There is a blood-caked wound on your stomach.");
 			message = TRUE;
 		}
@@ -4456,7 +4456,7 @@ signs_mirror()
 		} else if(!uarmc && moves <= u.irisAttack+5){
 			putstr(en_win, 0, "There are iridescent tentacles wrapped around your forearms.");
 			message = TRUE;
-		} else if(!uarm && !uarmc){
+		} else if(!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc){
 			putstr(en_win, 0, "There are iridescent veins just under the skin of your forearms.");
 			message = TRUE;
 		}
@@ -4476,7 +4476,7 @@ signs_mirror()
 		}
 	}
 	if(u.sealsActive&SEAL_MARIONETTE && !NoBInvis){
-		if(!(uarm && is_metallic(uarm)))
+		if(!((uarm && arm_blocks_upper_body(uarm->otyp))&& is_metallic(uarm)))
 			putstr(en_win, 0, "Metal wires protrude from your elbows, knees, and back.");
 		else
 			putstr(en_win, 0, "The metal wires protruding from your body have merged with your armor.");
@@ -4537,7 +4537,7 @@ signs_mirror()
 	}
 	if(u.sealsActive&SEAL_YMIR && !Invis){
 		if(moves>5000 && moves <= 10000){
-			if(!(uarm || uarmc))
+			if(!((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc))
 				putstr(en_win, 0, "Your skin color is a bit off.");
 			else
 				putstr(en_win, 0, "Your skin is hidden under your clothes.");
@@ -4555,13 +4555,13 @@ signs_mirror()
 				putstr(en_win, 0, "Your rot is hidden under your clothes.");
 			message = TRUE;
 		} else if(moves>50000 && moves <= 100000){
-			if(!(uarmc && uarmg && uarmf && uarm && uarmh))
+			if(!(uarmc && uarmg && uarmf && (uarm && arm_blocks_upper_body(uarm->otyp)) && uarmh))
 				putstr(en_win, 0, "Your rotted body bristles with fungal sporangia and burrowing vermin.");
 			else
 				putstr(en_win, 0, "Your rotted form is hidden under your clothes.");
 			message = TRUE;
 		} else if(moves>100000){
-			if(!(uarmc && uarmg && uarmf && uarm && uarmh && ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE)))
+			if(!(uarmc && uarmg && uarmf && (uarm && arm_blocks_upper_body(uarm->otyp)) && uarmh && ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE)))
 				putstr(en_win, 0, "Your putrid body is a riot of fungal forms and saprophagous insects.");
 			else
 				putstr(en_win, 0, "Your putrid form is hidden under your clothes.");

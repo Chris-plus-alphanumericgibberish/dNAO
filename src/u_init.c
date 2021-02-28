@@ -165,7 +165,7 @@ static struct trobj Anachrononaut_Elf[] = {
 static struct trobj Anachrononaut_Fem_Clk[] = {
 	{ WHITE_VIBROSWORD, 0, WEAPON_CLASS, 1, 0 },
 	{ BATTLE_AXE, 0, WEAPON_CLASS, 1, 0 },
-	{ BLACK_DRESS, 0, ARMOR_CLASS, 1, 0 },
+	{ PLAIN_DRESS, 0, ARMOR_CLASS, 1, 0 },
 	{ LONG_GLOVES, 0, ARMOR_CLASS, 1, 0 },
 	{ HEELED_BOOTS, 0, ARMOR_CLASS, 1, 0 },
 	{ ANDROID_VISOR, 0, ARMOR_CLASS, 1, 0 },
@@ -231,7 +231,7 @@ static struct trobj Binder_Hedrow[] = {
 };
 static struct trobj Binder_Drow[] = {
 	{ DROVEN_DAGGER, 0, WEAPON_CLASS, 1, 0 },
-	{ BLACK_DRESS, 0, ARMOR_CLASS, 1, 0 },
+	{ PLAIN_DRESS, 0, ARMOR_CLASS, 1, 0 },
 	{ DROVEN_CLOAK, 0, ARMOR_CLASS, 1, 0 },
 	{ CRAM_RATION, 0, FOOD_CLASS, 1, 0 },
 	{ SLIME_MOLD, UNDEF_SPE, FOOD_CLASS, 4, 0 },
@@ -516,7 +516,7 @@ static struct trobj Tourist[] = {
 	{ POT_EXTRA_HEALING, 0, POTION_CLASS, 2, UNDEF_BLESS },
 	{ SCR_MAGIC_MAPPING, 0, SCROLL_CLASS, 4, UNDEF_BLESS },
 	{ HAWAIIAN_SHIRT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-/*	{ HAWAIIAN_SHORTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },*/
+	{ HAWAIIAN_SHORTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ LOW_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ SUNGLASSES, UNDEF_SPE, TOOL_CLASS, 1, 0 },
 	{ EXPENSIVE_CAMERA, UNDEF_SPE, TOOL_CLASS, 1, 0 },
@@ -2630,7 +2630,7 @@ register struct trobj *trop;
 			if(obj->otyp == HEAVY_MACHINE_GUN && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				set_material_gm(obj, MITHRIL);
 			}
-			if(obj->otyp == BLACK_DRESS && Role_if(PM_ANACHRONONAUT) && Race_if(PM_ANDROID)){
+			if(obj->otyp == PLAIN_DRESS && Role_if(PM_ANACHRONONAUT) && Race_if(PM_ANDROID)){
 				set_material_gm(obj, LEATHER);
 			}
 			if(obj->otyp == BATTLE_AXE && Role_if(PM_ANACHRONONAUT) && Race_if(PM_ANDROID)){
@@ -2790,7 +2790,9 @@ register struct trobj *trop;
 				} else if(Race_if(PM_DROW)){
 					obj->dknown = obj->rknown = obj->sknown = 1;
 					if(flags.female){
-						if(obj->otyp == BLACK_DRESS) obj->ostolen = TRUE;
+						if(obj->otyp == PLAIN_DRESS){
+							obj->ostolen = TRUE;
+						}
 					}
 					if(obj->oclass == FOOD_CLASS){
 						obj->ostolen = TRUE;

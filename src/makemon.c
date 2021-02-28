@@ -1022,7 +1022,7 @@ int mkobjflags;
 						break;
 					}
 				} else if(mm == PM_DROW_NOVICE){
-					otmp = mksobj(BLACK_DRESS, mkobjflags);
+					otmp = mksobj(PLAIN_DRESS, mkobjflags);
 					otmp->spe = 0;
 					// otmp->oeroded2 = 1;
 					otmp->opoisoned = OPOISON_FILTH;
@@ -1096,7 +1096,7 @@ int mkobjflags;
 					otmp->spe = 3;
 					(void) mpickobj(mtmp, otmp);
 					/*Dress*/
-					otmp = mksobj(BLACK_DRESS, mkobjflags);
+					otmp = mksobj(PLAIN_DRESS, mkobjflags);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -1272,7 +1272,7 @@ int mkobjflags;
 					otmp->spe = 2;
 					(void) mpickobj(mtmp, otmp);
 					/*Dress*/
-					otmp = mksobj(BLACK_DRESS, mkobjflags);
+					otmp = mksobj(PLAIN_DRESS, mkobjflags);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->oerodeproof = TRUE;
@@ -1741,7 +1741,7 @@ int mkobjflags;
 				}
 				otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
 				otmp->obj_color = CLR_BLACK;
-				mongets(mtmp, BLACK_DRESS, mkobjflags);
+				mongets(mtmp, PLAIN_DRESS, mkobjflags);
 				mongets(mtmp, WITCH_HAT, mkobjflags);
 				mongets(mtmp, KNIFE, mkobjflags);
 			} else if(ptr->mtyp == PM_WITCH){
@@ -1756,7 +1756,7 @@ int mkobjflags;
 				}
 				otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
 				otmp->obj_color = CLR_BLACK;
-				mongets(mtmp, BLACK_DRESS, mkobjflags);
+				mongets(mtmp, PLAIN_DRESS, mkobjflags);
 				otmp = mongets(mtmp, CLOAK, mkobjflags);
 				otmp->obj_color = CLR_BLACK;
 				otmp = mongets(mtmp, GLOVES, mkobjflags);
@@ -1775,7 +1775,7 @@ int mkobjflags;
 				}
 				otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
 				otmp->obj_color = CLR_BLACK;
-				mongets(mtmp, BLACK_DRESS, mkobjflags);
+				mongets(mtmp, PLAIN_DRESS, mkobjflags);
 				otmp = mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 				otmp->obj_color = CLR_BLACK;
 				otmp = mongets(mtmp, CLOAK, mkobjflags);
@@ -1894,7 +1894,7 @@ int mkobjflags;
 					(void) mongets(mtmp, CLOAK, mkobjflags);
 				} else if (mm == PM_SERVANT){
 					if(mtmp->female){
-						(void) mongets(mtmp, BLACK_DRESS, mkobjflags);
+						(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
 						(void) mongets(mtmp, STILETTOS, mkobjflags);
 					} else{
 						(void) mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
@@ -2234,6 +2234,11 @@ int mkobjflags;
 					(void) mpickobj(mtmp, otmp);
 					
 					otmp = mksobj(HAWAIIAN_SHIRT, mkobjflags|MKOBJ_NOINIT);
+					bless(otmp);
+					otmp->spe = 0;
+					(void) mpickobj(mtmp, otmp);
+					
+					otmp = mksobj(HAWAIIAN_SHORTS, mkobjflags|MKOBJ_NOINIT);
 					bless(otmp);
 					otmp->spe = 0;
 					(void) mpickobj(mtmp, otmp);
@@ -3640,7 +3645,7 @@ int mkobjflags;
 				fully_identify_obj(otmp);
 				otmp->spe = abs(otmp->spe);
 				(void) mpickobj(mtmp, otmp);
-				(void) mongets(mtmp, BLACK_DRESS, mkobjflags);
+				(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
 				(void) mongets(mtmp, LONG_GLOVES, mkobjflags);
 				(void) mongets(mtmp, HEELED_BOOTS, mkobjflags);
 				(void) mongets(mtmp, ANDROID_VISOR, mkobjflags);
@@ -3726,7 +3731,7 @@ int mkobjflags;
 				}
 				switch(rn2(8)){
 					case 0:
-					(void) mongets(mtmp, BLACK_DRESS, mkobjflags);
+					(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
 					(void) mongets(mtmp, LONG_GLOVES, mkobjflags);
 					mongets(mtmp, rn2(2) ? HEELED_BOOTS : rn2(2) ? HIGH_BOOTS : STILETTOS, mkobjflags);
 					break;
@@ -3758,7 +3763,7 @@ int mkobjflags;
 					(void) mongets(mtmp, PLASTEEL_GAUNTLETS, mkobjflags);
 					break;
 					case 6:
-					(void) mongets(mtmp, BLACK_DRESS, mkobjflags);
+					(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
 					(void) mongets(mtmp, ALCHEMY_SMOCK, mkobjflags);
 					(void) mongets(mtmp, LONG_GLOVES, mkobjflags);
 					mongets(mtmp, rn2(2) ? HEELED_BOOTS : STILETTOS, mkobjflags);
@@ -3853,7 +3858,7 @@ int mkobjflags;
 				switch(rn2(6)){
 					case 0:
 					case 1:
-					(void) mongets(mtmp, rn2(2) ? BLACK_DRESS : JACKET, mkobjflags);
+					(void) mongets(mtmp, rn2(2) ? PLAIN_DRESS : JACKET, mkobjflags);
 					(void) mongets(mtmp, rn2(2) ? GLOVES : LONG_GLOVES, mkobjflags);
 					(void) mongets(mtmp, rn2(2) ? HEELED_BOOTS : rn2(2) ? HIGH_BOOTS : STILETTOS, mkobjflags);
 					break;
@@ -3862,7 +3867,7 @@ int mkobjflags;
 					(void) mongets(mtmp, rn2(2) ? JUMPSUIT : BODYGLOVE, mkobjflags);
 					break;
 					case 4:
-					(void) mongets(mtmp, BLACK_DRESS, mkobjflags);
+					(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
 					(void) mongets(mtmp, ALCHEMY_SMOCK, mkobjflags);
 					(void) mongets(mtmp, rn2(2) ? GLOVES : LONG_GLOVES, mkobjflags);
 					(void) mongets(mtmp, rn2(2) ? HEELED_BOOTS : STILETTOS, mkobjflags);
@@ -4932,6 +4937,7 @@ int mkobjflags;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(ROBE, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
+						otmp->obj_color = CLR_ORANGE;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(SEDGE_HAT, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
@@ -5097,6 +5103,9 @@ int mkobjflags;
 						otmp->spe = 0+rn2(4);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(HAWAIIAN_SHIRT, mkobjflags|MKOBJ_ARTIF);
+						otmp->spe = 0+rn2(4);
+						(void) mpickobj(mtmp, otmp);
+						otmp = mksobj(HAWAIIAN_SHORTS, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LOW_BOOTS, mkobjflags|MKOBJ_ARTIF);
@@ -5875,7 +5884,7 @@ int mkobjflags;
 							otmp->obj_color = CLR_BLACK;
 							curse(otmp);
 							otmp->spe = 4;
-							otmp = mongets(mtmp, BLACK_DRESS, mkobjflags|MKOBJ_NOINIT);
+							otmp = mongets(mtmp, PLAIN_DRESS, mkobjflags|MKOBJ_NOINIT);
 							curse(otmp);
 							otmp->spe = 4;
 							otmp = mongets(mtmp, WITCH_HAT, mkobjflags|MKOBJ_NOINIT);
@@ -6389,7 +6398,7 @@ int mkobjflags;
 					if(!rn2(4)){
 						mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 					} else if(!rn2(3)){
-						mongets(mtmp, BLACK_DRESS, mkobjflags);
+						mongets(mtmp, PLAIN_DRESS, mkobjflags);
 					}
 				} else if(mtmp->mtyp == PM_QUEEN_BEE){
 					chance = rnd(10);
@@ -7060,7 +7069,7 @@ int mkobjflags;
 			otmp->oward = curhouse;
 			(void) mpickobj(mtmp, otmp);
 			/*Dress*/
-			otmp = mksobj(BLACK_DRESS, mkobjflags);
+			otmp = mksobj(PLAIN_DRESS, mkobjflags);
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			otmp->oerodeproof = TRUE;
@@ -7802,7 +7811,7 @@ int mkobjflags;
 			break;
 ////////////////////////////////////////
 		    case PM_THE_GOOD_NEIGHBOR:
-				(void)mongets(mtmp, BLACK_DRESS, mkobjflags);
+				(void)mongets(mtmp, PLAIN_DRESS, mkobjflags);
 				(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 				(void)mongets(mtmp, ROBE, mkobjflags);
 				(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);

@@ -4423,6 +4423,8 @@ boolean * messaged;
 			case VORPAL_BISECT:
 			case VORPAL_PIERCE:
 				armor = youdef ? uarm  : which_armor(mdef, W_ARM);
+				if(armor && (armor && arm_blocks_upper_body(armor->otyp)))
+					armor = 0;
 				break;
 			case VORPAL_SMASH:
 				armor = youdef ? uarms : which_armor(mdef, W_ARMS);

@@ -271,7 +271,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	case PM_NOBLEWOMAN:
 		*weapon = special ? RAKUYO : RAPIER;
 		*armor = special ? NOBLE_S_DRESS : GENTLEWOMAN_S_DRESS;
-		*shirt = special ? BLACK_DRESS : VICTORIAN_UNDERWEAR;
+		*shirt = special ? PLAIN_DRESS : VICTORIAN_UNDERWEAR;
 		*cloak = special ? find_opera_cloak() : CLOAK;
 		*gloves = GLOVES;
 		*boots = STILETTOS;
@@ -330,6 +330,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		*rweapon = EXPENSIVE_CAMERA;
 		*rwammo = DART;
 		*shirt = HAWAIIAN_SHIRT;
+		if(!special) *armor = HAWAIIAN_SHORTS;
 		*boots = LOW_BOOTS;
 		*tool = CREDIT_CARD;
 	break;

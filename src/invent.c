@@ -1109,9 +1109,9 @@ register const char *let,*word;
 		/* ugly check: remove inappropriate things */
 		if ((taking_off(word) &&
 		    (!(otmp->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL))
-		     || (otmp==uarm && uarmc)
+		     || (otmp==uarm && uarmc && arm_blocks_upper_body(uarm->otyp))
 #ifdef TOURIST
-		     || (otmp==uarmu && (uarm || uarmc))
+		     || (otmp==uarmu && ((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc))
 #endif
 		    ))
 		|| (putting_on(word) &&
@@ -5251,7 +5251,7 @@ u_clothing_discomfort()
 	}
 	if(uarmu){
 		count++;
-		if(uarmu->otyp == BLACK_DRESS)
+		if(uarmu->otyp == PLAIN_DRESS)
 			count++;
 		else if(uarmu->otyp == BODYGLOVE || uarmu->otyp == VICTORIAN_UNDERWEAR)
 			count += 2;
@@ -5382,11 +5382,11 @@ struct monst *mon;
 {
 	if(mon == &youmonst){
 		if(uarmc) return uarmc;
-		if(uarm) return uarm;
+		if(uarm && !(!arm_blocks_upper_body(uarm->otyp) && uarmu && rn2(2))) return uarm;
 		if(uarmu) return uarmu;
 	} else {
 		if(which_armor(mon, W_ARMC)) return which_armor(mon, W_ARMC);
-		if(which_armor(mon, W_ARM)) return which_armor(mon, W_ARM);
+		if(which_armor(mon, W_ARM) && !(!arm_blocks_upper_body(which_armor(mon, W_ARM)->otyp) && which_armor(mon, W_ARMU) && rn2(2))) return which_armor(mon, W_ARM);
 		if(which_armor(mon, W_ARMU)) return which_armor(mon, W_ARMU);
 	}
 	return (struct obj *) 0;

@@ -731,7 +731,7 @@ SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs
 	0, 0,   MZ_HUGE, ARMSZ_MEDIUM, 0,   0,  5,  85, 2000,  3, 7, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/
 	1, 0,  MZ_LARGE,  ARMSZ_LIGHT, 0,	0,  5,   5,  100, 10, 1, 2, CLOTH, CLR_GREEN),
-SUIT(("noble's dress", "armored black dress", "armored dress"), /*Needs encyc entry*/
+SUIT(("noble's dress", "armored dress"), /*Needs encyc entry*/
 	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,   0,  5,  40, 2000,  6, 4, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM,  ARMSZ_HEAVY, 0,   0,  5,  10, 1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
@@ -799,6 +799,8 @@ SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs til
 /*ARMOR(("Hawaiian shorts", "flowery shorts and lei"),
 	1, 0, 0, 0,	 0, 0,	 5,   3, 10, 0, ARM_SUIT, CLOTH, CLR_MAGENTA),
 */
+SUIT(("Hawaiian shorts", "flowery short pants", "short pants"), /*Needs encyc entry*//*Needs tile*/
+	0, 0, MZ_SMALL,  ARMSZ_LIGHT, 0,   0,  0,  15,   10, 10, 0, 0, CLOTH, CLR_ORANGE, O_DRSLOT(LOWER_TORSO_DR)),
 SHIRT(("Hawaiian shirt", "flowery shirt", "shirt"),
 	0, 0, MZ_MEDIUM, 0,	 10, 0,	 5,   3, 10, 0, 0, CLOTH, CLR_MAGENTA),
 SHIRT(("T-shirt"), /*Needs encyc entry*/
@@ -809,7 +811,7 @@ SHIRT(("ichcahuipilli", "thick undershirt"), /*Needs encyc entry*/
 SHIRT(("striped shirt", (char *)0, "shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_GRAY),
 # endif /* CONVICT */
-SHIRT(("black dress", (char *)0, "dress"), /*Needs encyc entry*/
+SHIRT(("plain dress", "dress"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 5,   5, 500, 10, 0, 2, CLOTH, CLR_BLACK, O_DRSLOT(TORSO_DR)),
 #endif
 /*Ruffled shirts are little different from other shirts*/
@@ -817,7 +819,7 @@ SHIRT(("ruffled shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 /* victorian underwear, on the other hand, inflicts a penalty to AC but grants MC 3 */
 /* needs special case to be 'bulky' */
-SHIRT(("victorian underwear", "white dress", "dress"),
+SHIRT(("victorian underwear", "frilly dress"),
 	0, 0, MZ_MEDIUM, 0,	 0, 5,   5,  10, 10, 2, 3, CLOTH, CLR_WHITE,  O_DRSLOT(TORSO_DR)),
 SHIRT(("bodyglove", "tight black clothes", "tight clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_HUGE, SICK_RES,0,5, 5,1000, 10, 0, 3, PLASTIC, CLR_BLACK, O_DRSLOT(ALL_DR)),

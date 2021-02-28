@@ -383,7 +383,7 @@ tactics(mtmp)
 			if(!Blind)
 				pline("Noxious gasses swirl around you!");
 			create_gas_cloud(u.ux, u.uy, 2, 30, FALSE);
-			spawn = makemon(&mons[PM_STAR_SPAWN], u.ux, u.uy, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+			spawn = makemon(&mons[PM_STAR_SPAWN], u.ux, u.uy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 			if(spawn){
 				mark_mon_as_summoned(spawn, mtmp, ESUMMON_PERMANENT, 0);
 			}

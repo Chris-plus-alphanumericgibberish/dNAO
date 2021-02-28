@@ -1926,7 +1926,7 @@ long timeout;
 			return;
 		}else{
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 			} else {
 				obj_extract_self(obj);
@@ -2019,7 +2019,7 @@ long timeout;
 			stop_occupation();
 			if(flags.run) nomul(0, NULL);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 			} else {
 				useupall(obj);
@@ -2029,7 +2029,7 @@ long timeout;
 			stop_occupation();
 			if(flags.run) nomul(0, NULL);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 			} else {
 				useupall(obj);
@@ -2039,7 +2039,7 @@ long timeout;
 			stop_occupation();
 			if(flags.run) nomul(0, NULL);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 			} else {
 				useupall(obj);
@@ -2050,7 +2050,7 @@ long timeout;
 			if(obj->otyp == NOBLE_S_DRESS){
 				pline("The armored plates on your dress turn to dust and blow away.");
 				remove_worn_item(obj, TRUE);
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 				if(!uarmu){
 					setworn(obj, W_ARMU);
@@ -2064,7 +2064,7 @@ long timeout;
 			stop_occupation();
 			if(flags.run) nomul(0, NULL);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 			} else {
 				useupall(obj);
@@ -2105,7 +2105,7 @@ long timeout;
 			setmnotwielded(mtmp,obj);
 			MON_NOWEP(mtmp);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 				place_object(obj, mtmp->mx, mtmp->my);
 				/* call stackobj() if we ever drop anything that can merge */
@@ -2119,7 +2119,7 @@ long timeout;
 			setmnotwielded(mtmp,obj);
 			MON_NOSWEP(mtmp);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 				place_object(obj, mtmp->mx, mtmp->my);
 				/* call stackobj() if we ever drop anything that can merge */
@@ -2135,7 +2135,7 @@ long timeout;
 			obj->owornmask = 0L;
 			update_mon_intrinsics(mtmp, obj, FALSE, FALSE);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 				place_object(obj, mtmp->mx, mtmp->my);
 				/* call stackobj() if we ever drop anything that can merge */
@@ -2148,7 +2148,7 @@ long timeout;
 			mtmp = obj->ocarry;
 			obj_extract_self(obj);
 			if(obj->otyp == NOBLE_S_DRESS){
-				obj = poly_obj(obj, BLACK_DRESS);
+				obj = poly_obj(obj, PLAIN_DRESS);
 				obj->oeroded = 0;
 				place_object(obj, mtmp->mx, mtmp->my);
 				/* call stackobj() if we ever drop anything that can merge */
