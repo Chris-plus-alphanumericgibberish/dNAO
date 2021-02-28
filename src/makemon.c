@@ -4937,6 +4937,7 @@ int mkobjflags;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(ROBE, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
+						otmp->obj_color = CLR_ORANGE;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(SEDGE_HAT, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
