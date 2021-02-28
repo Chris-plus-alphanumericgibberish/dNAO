@@ -1343,8 +1343,8 @@ karemade:
 						set_malign(mtmp);
 					}
 				}
-				
-				if(mtmp->mtyp == PM_WALKING_DELIRIUM && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+
+				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
 					static long lastusedmove = 0;
 					if(lastusedmove != moves){
 						pline("%s takes on forms new and terrible!", Monnam(mtmp));
@@ -1352,7 +1352,23 @@ karemade:
 						change_usanity(u_sanity_loss(mtmp)/2-1, TRUE);
 					}
 				}
-				
+
+				if(has_template(mtmp, MAD_TEMPLATE) && !ClearThoughts && canseemon(mtmp) && dimness(mtmp->mx, mtmp->my) <= 0 && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+					static long lastusedmove = 0;
+					static int lastcost = 0;
+					int sancost = u_sanity_loss(mtmp);
+					if(lastusedmove != moves){
+						lastcost = 0;
+					}
+					if(sancost < lastcost){
+						sancost = sancost - lastcost;
+						lastcost += sancost;
+						pline("%s shadow takes on forms new and terrible!", s_suffix(Monnam(mtmp)));
+						lastusedmove = moves;
+						change_usanity(sancost, TRUE);
+					}
+				}
+
 				if(mtmp->mtyp == PM_DREADBLOSSOM_SWARM){
 					if(canseemon(mtmp) || u.ustuck == mtmp) mtmp->movement += mcalcmove(mtmp);
 					else {

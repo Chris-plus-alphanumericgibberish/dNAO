@@ -3178,10 +3178,13 @@ struct monst * mdef;	/* another monster which is next to it */
 		return ALLOW_M|ALLOW_TM;
 
 	/* angels vs. demons (excluding Lamashtu) */
-	if (is_angel(ma) && (is_demon(md) /*|| md->mtyp == PM_FALLEN_ANGEL*/) && !(md->mtyp == PM_LAMASHTU))
+#define fallen(mx) (has_template(mx, MAD_TEMPLATE) || mx->mfaction == LAMASHTU_FACTION)
+#define normalAngel(mx) (is_angel(mx->data) && !fallen(mx))
+#define fallenAngel(mx) (is_angel(mx->data) && fallen(mx))
+	if (normalAngel(magr) && (is_demon(md) || fallenAngel(mdef)))
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
-	if (is_angel(md) && (is_demon(ma) /*|| ma->mtyp == PM_FALLEN_ANGEL || ma->mtyp == PM_LUCIFER*/) && !(ma->mtyp == PM_LAMASHTU))
+	if (normalAngel(mdef) && (is_demon(ma) || fallenAngel(magr)))
 		return ALLOW_M|ALLOW_TM;
 
 	/* monadics vs. undead */
@@ -5639,7 +5642,9 @@ register struct monst *mtmp;
 		mtmp->data->msound == MS_JUBJUB || mtmp->data->msound == MS_DREAD || 
 		mtmp->data->msound == MS_SONG || mtmp->data->msound == MS_OONA ||
 		mtmp->data->msound == MS_INTONE || mtmp->data->msound == MS_FLOWER ||
-		mtmp->data->msound == MS_TRUMPET || mtmp->mtyp == PM_RHYMER
+		mtmp->data->msound == MS_TRUMPET || mtmp->mtyp == PM_RHYMER || 
+		mtmp->data->msound == MS_SECRETS || mtmp->data->msound == MS_HOWL || 
+		mtmp->data->msound == MS_SCREAM
 		)
 	) {
 		domonnoise(mtmp, FALSE);

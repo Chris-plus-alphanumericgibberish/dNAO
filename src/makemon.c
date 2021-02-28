@@ -8918,6 +8918,17 @@ register int	mmflags;
 				mtmp->mhpmax = mtmp->m_lev*8 - 4; //Max HP
 				mtmp->mhp = mtmp->mhpmax;
 			}
+
+			if(in_mklev && is_angel(mtmp->data) && Is_demogorgon_level(&u.uz)){
+				set_template(mtmp, MAD_TEMPLATE);
+				mtmp->m_lev += (mtmp->data->mlevel)/2;
+				mtmp->mhpmax = max(4, mtmp->m_lev);
+				mtmp->mhp = mtmp->mhpmax;
+			}
+
+			if(in_mklev && is_angel(mtmp->data) && Is_lamashtu_level(&u.uz)){
+				mtmp->mfaction = LAMASHTU_FACTION;
+			}
 		break;
 	    case S_GIANT:
 			if(!(mmflags & MM_NOGROUP)){

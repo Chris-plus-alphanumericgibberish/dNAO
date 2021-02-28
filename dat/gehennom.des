@@ -3263,9 +3263,9 @@ MONSTER:'y',"black light", place[8], asleep
 MONSTER:'y',"black light", place[8], asleep
 
 
-MONSTER:'7',"Aleax", place[9], hostile
-MONSTER:'7',"Aleax", place[9], hostile
 MONSTER:'7',"Throne Archon", place[9], hostile, asleep
+MONSTER:'7',"Aleax", place[9], hostile
+MONSTER:'7',"Aleax", place[9], hostile
 MONSTER:'7',"Aleax", place[9], hostile
 
 

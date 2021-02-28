@@ -367,6 +367,22 @@ int template;
 		/* misc: */
 		ptr->msound = MS_SILENT;
 		break;
+	case MAD_TEMPLATE:
+		ptr->mmove += 12;
+		ptr->dac = -5;
+		ptr->pac += 4;
+		ptr->spe_hdr += 4;
+		ptr->spe_bdr += 4;
+		ptr->spe_gdr += 4;
+		ptr->spe_ldr += 4;
+		ptr->spe_fdr += 4;
+		ptr->msound = MS_SCREAM;
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		if(!(ptr->mflagst&(MT_ANIMAL|MT_MINDLESS)))
+			ptr->mflagst |= MT_ANIMAL;
+		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
+		ptr->mflagsg |= (MG_DISPLACEMENT);
+		break;
 	}
 #undef MT_ITEMS
 
@@ -657,6 +673,11 @@ int template;
 			attk->damd = 4;
 			special = TRUE;
 		}
+		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN){
+			if(attk->adtyp == AD_PHYS)
+				attk->damn++;
+			attk->damd += 4;
+		}
 	}
 #undef insert_okay
 #undef end_insert_okay
@@ -674,6 +695,7 @@ int template;
 			else if (template == PSEUDONATURAL) Sprintf(nameBuffer, "%s the Pseudonatural", base->mname);
 			else if (template == TOMB_HERD) Sprintf(nameBuffer, "%s of the Herd", base->mname);
 			else if (template == SLIME_REMNANT) Sprintf(nameBuffer, "slimy remnant of %s", base->mname);
+			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "%s the mad", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}
@@ -687,6 +709,7 @@ int template;
 			else if (template == PSEUDONATURAL) Sprintf(nameBuffer, "pseudonatural %s", base->mname);
 			else if (template == TOMB_HERD) Sprintf(nameBuffer, "%s herd", base->mname);
 			else if (template == SLIME_REMNANT) Sprintf(nameBuffer, "slimy remnant of %s", an(base->mname));
+			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "mad %s", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}
