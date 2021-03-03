@@ -169,7 +169,8 @@
 #define MB_NOFEET		0x00400000L	/* no feet to wear boots */
 #define MB_HAS_FEET		0x00800000L	/* does have humanoid feet, even though it has a non-humanoid body plan */
 #define MB_CAN_AMULET	0x01000000L	/* can wear an amulet even if it has no head */
-#define MB_INDIGESTIBLE	0x02000000L	/* can wear an amulet even if it has no head */
+#define MB_INDIGESTIBLE	0x02000000L	/* immune to purple worms */
+#define MB_INSUBSTANTIAL	0x04000000L	/* Weapons pass through the monster */
 
 #define MB_SNAKELEG	(MB_HUMANOID|MB_SLITHY)
 #define MB_CENTAUR	(MB_HUMANOID|MB_ANIMAL)
@@ -234,6 +235,7 @@
 #define MG_INSIGHT		0x08000000L /* Seeing the monster grants insight */
 #define MG_RIDER_HP		0x10000000L /* Has 10d8 HP */
 #define MG_FUTURE_WISH	0x20000000L /* Wishable by tourists only */
+#define MG_HATESUNBLESSED	0x40000000L /* Monster hates neutral holiness objects */
 
 //Monster rAce
 #define MA_UNDEAD		0x00000001L	/* is walking dead */

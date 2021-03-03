@@ -1074,20 +1074,23 @@ rock:
 	default:
 	    if (obj->otyp == AMULET_OF_STRANGULATION ||
 			obj->otyp == RIN_SLOW_DIGESTION)
-		return TABU;
+			return TABU;
 	    if (hates_silver(mon->data) &&
 		obj->obj_material == SILVER)
-		return(TABU);
+			return(TABU);
 	    if (hates_iron(mon->data) &&
 		obj->obj_material == IRON)
-		return(TABU);
+			return(TABU);
 	    if (hates_unholy_mon(mon) &&
 		is_unholy(obj))
-		return(TABU);
+			return(TABU);
+	    if (hates_unblessed_mon(mon) &&
+		(is_unholy(obj) || obj->blessed))
+			return(TABU);
 	    if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
-		return CADAVER;
+			return CADAVER;
 	    if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))
-		return(ACCFOOD);
+			return(ACCFOOD);
 	    if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->mtyp != PM_RUST_MONSTER)) {
 		/* Non-rustproofed ferrous based metals are preferred. */
 		return((is_rustprone(obj) && !obj->oerodeproof) ? DOGFOOD :

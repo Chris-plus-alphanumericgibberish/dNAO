@@ -3324,8 +3324,9 @@ aligntyp alignment;
 			case 5: // bless/curse an item
 #define wrongbuc(obj) ((hates_unholy(youracedata) && hates_holy(youracedata)) ? \
 						(obj->blessed || obj->cursed) : \
+						(hates_unblessed(youracedata) ? (obj->blessed || obj->cursed) : \
 						(hates_unholy(youracedata) ? !obj->blessed : \
-						(hates_holy(youracedata) ? !obj->cursed : !obj->blessed)))
+						(hates_holy(youracedata) ? !obj->cursed : !obj->blessed))))
 
 				/* weapon takes precedence if it interferes with taking off a ring or shield */				
 				if (uwep && wrongbuc(uwep)) otmp = uwep;

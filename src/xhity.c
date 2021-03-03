@@ -11448,6 +11448,7 @@ int vis;						/* True if action is at all visible to the player */
 		ironobj = 0L,
 		holyobj = 0L,
 		unholyobj = 0L,
+		unblessedobj = 0L,
 		uuvuglory = 0L,
 		otherobj = 0L;
 	int poisons_resisted = 0,
@@ -12056,6 +12057,10 @@ int vis;						/* True if action is at all visible to the player */
 			is_unholy(otmp)) {
 			unholyobj |= slot;
 		}
+		if (hates_unblessed_mon(mdef) &&
+			!(is_unholy(otmp) || otmp->blessed)) {
+			unblessedobj |= slot;
+		}
 		/* unusual case: wooden objects carved with the Veioistafur stave deal bonus damage to sea creatures */
 		if (otmp->obj_material == WOOD && otmp->otyp != MOON_AXE &&
 			(otmp->oward & WARD_VEIOISTAFUR) && mdef->data->mlet == S_EEL) {
@@ -12080,21 +12085,33 @@ int vis;						/* True if action is at all visible to the player */
 			seardmg += rnd(mlev(mdef));
 		}
 		if (hates_holy_mon(mdef)){
-			if(is_holy_mon(magr)) {
-				holyobj |= W_SKIN;
-				seardmg += d(3, 7);
-			} else if(magr->mtyp == PM_UVUUDAUM){
+			if(magr->mtyp == PM_UVUUDAUM){
 				uuvuglory |= W_SKIN;
 				seardmg += d(4, 9);
 			}
+			else if(is_holy_mon(magr)) {
+				holyobj |= W_SKIN;
+				seardmg += d(3, 7);
+			} 
 		}
 		if (hates_unholy_mon(mdef)){
-			if(is_unholy_mon(magr)) {
-				unholyobj |= W_SKIN;
-				seardmg += d(4, 9);
-			} else if(magr->mtyp == PM_UVUUDAUM){
+			if(magr->mtyp == PM_UVUUDAUM){
 				uuvuglory |= W_SKIN;
 				seardmg += d(3, 7);
+			} 
+			else if(is_unholy_mon(magr)) {
+				unholyobj |= W_SKIN;
+				seardmg += d(4, 9);
+			}
+		}
+		if (hates_unblessed_mon(mdef)){
+			if(magr->mtyp == PM_UVUUDAUM){
+				uuvuglory |= W_SKIN;
+				seardmg += d(8, 3);
+			}
+			else if(is_unblessed_mon(magr)) {
+				unblessedobj |= W_SKIN;
+				seardmg += d(3, 8);
 			}
 		}
 
@@ -12127,6 +12144,10 @@ int vis;						/* True if action is at all visible to the player */
 					if (hates_unholy_mon(mdef) &&
 						is_unholy(otmp)) {
 						unholyobj |= rslot;
+					}
+					if (hates_unblessed_mon(mdef) &&
+						!(is_unholy(otmp) || otmp->blessed)) {
+						unblessedobj |= rslot;
 					}
 					/* calculate sear damage */
 					seardmg += hatesobjdmg(mdef, otmp);
@@ -13706,8 +13727,8 @@ int vis;						/* True if action is at all visible to the player */
 	}
 	
 	/* Searing messages */
-	if ((silverobj || jadeobj || ironobj || holyobj || unholyobj || otherobj) && (youdef || canseemon(mdef)) && !recursed) {
-		long active_slots = (silverobj | jadeobj | ironobj | holyobj | unholyobj | otherobj);
+	if ((silverobj || jadeobj || ironobj || holyobj || unholyobj || unblessedobj || otherobj) && (youdef || canseemon(mdef)) && !recursed) {
+		long active_slots = (silverobj | jadeobj | ironobj | holyobj | unholyobj | unblessedobj | otherobj);
 		char buf[BUFSZ];
 		char * obuf;
 		/* Examples:
@@ -13727,6 +13748,8 @@ int vis;						/* True if action is at all visible to the player */
 				Strcat(buf, "glorious ");
 			if (unholyobj & slot)
 				Strcat(buf, "cursed ");
+			if (unblessedobj & slot)
+				Strcat(buf, "concordant ");
 			/* special cases */
 			if (attk && attk->adtyp == AD_STAR)
 			{
@@ -13770,6 +13793,11 @@ int vis;						/* True if action is at all visible to the player */
 				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
+				);
+			if (unblessedobj & slot)
+				Strcat(buf,
+				(otmp->known && (check_oprop(otmp, OPROP_CONCW) || check_oprop(otmp, OPROP_CONC))) ? "concordant " : 
+				(otmp->known && check_oprop(otmp, OPROP_LESSER_CONCW)) ? "accordant " : "uncursed "
 				);
 			/* special cases */
 			if (otmp->oartifact == ART_SUNSWORD && (silverobj&slot)) {
@@ -13830,6 +13858,11 @@ int vis;						/* True if action is at all visible to the player */
 					(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 					(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
 					);
+				if (unblessedobj & slot)
+					Strcat(buf,
+					(otmp->known && (check_oprop(otmp, OPROP_CONCW) || check_oprop(otmp, OPROP_CONC))) ? "concordant " : 
+					(otmp->known && check_oprop(otmp, OPROP_LESSER_CONCW)) ? "accordant " : "uncursed "
+					);
 				if (silverobj & slot){
 					Strcat(buf, ((jadeobj&slot) || (ironobj&slot) ? "silvered " : "silver "));
 				}
@@ -13881,6 +13914,11 @@ int vis;						/* True if action is at all visible to the player */
 				Strcat(buf,
 				(otmp->known && (check_oprop(otmp, OPROP_UNHYW) || check_oprop(otmp, OPROP_UNHY))) ? "unholy " : 
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_UNHYW)) ? "desecrated " : "cursed "
+				);
+			if (unblessedobj & slot)
+				Strcat(buf,
+				(otmp->known && (check_oprop(otmp, OPROP_CONCW) || check_oprop(otmp, OPROP_CONC))) ? "concordant " : 
+				(otmp->known && check_oprop(otmp, OPROP_LESSER_CONCW)) ? "accordant " : "uncursed "
 				);
 			if (silverobj & slot){
 				if (!strstri(obuf, "silver "))

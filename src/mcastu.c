@@ -3139,6 +3139,12 @@ int tary;
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
+			else if (hates_unblessed_mon(mdef)){
+				if (youagr || youdef || canseemon(mdef))
+					pline("%s %s seared by %s of concordant light!",
+					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
+				dmg = d(n, 20) + d(n, 8);
+			}
 			else if (hates_unholy_mon(mdef)){
 				if (youagr || youdef || canseemon(mdef))
 					pline("%s %s seared by %s of unholy light!",
@@ -3232,6 +3238,12 @@ int tary;
 					pline("%s %s seared by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12) + d(1, 20);
+			}
+			else if (hates_unblessed_mon(mdef)){
+				if (youagr || youdef || canseemon(mdef))
+					pline("%s %s seared by concordant light!",
+					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
+				dmg = d(2, 12) + d(1, 8);
 			}
 			else if (hates_unholy_mon(mdef)){
 				if (youagr || youdef || canseemon(mdef))

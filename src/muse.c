@@ -2333,6 +2333,10 @@ museamnesia:
 				/* this monster won't want to catch a cursed
 				   weapon; drop it at hero's feet instead */
 				where_to = 2;
+		    } else if (where_to == 3 && hates_unblessed_mon(mtmp) && !is_unholy(obj) && !obj->blessed) {
+				/* this monster won't want to catch an uncursed
+				   weapon; drop it at hero's feet instead */
+				where_to = 2;
 		    } else if (where_to == 3 && hates_holy_mon(mtmp) && obj->blessed) {
 				/* this monster won't want to catch a blessed
 				   weapon; drop it at hero's feet instead */

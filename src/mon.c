@@ -6893,6 +6893,129 @@ int flags;
 }
 
 STATIC_OVL boolean
+has_blessings(mtmp)
+struct monst *mtmp;
+{
+	struct obj *otmp;
+
+	for(otmp = (mtmp == &youmonst) ? invent : mtmp->minvent; otmp; otmp = otmp->nobj){
+		if(otmp->blessed) return TRUE;
+	}
+	//else no blessed items
+
+	if(mtmp == &youmonst){
+		if(u.uluck > -7 || u.ublessed > -7 || u.uhitinc > 0 || u.udaminc > 0 || u.ucarinc > 0)
+			return TRUE;
+	}
+	else {
+		if(mtmp->encouraged > -7)
+			return TRUE;
+	}
+	
+	return FALSE;
+}
+
+STATIC_OVL int
+blessings_consume(magr, mdef)
+struct monst *magr;
+struct monst *mdef;
+{
+	struct obj *otmp, *objchain;
+	int remaining = min(10, (magr->m_lev)/3), damage = min(10, (magr->m_lev)/3), candidates = 0;
+	int damaged = 0;
+	/* Why do we do all integer probabilities again? >_< */
+	const int smoothing_factor = 100000;
+
+	objchain = (mdef == &youmonst) ? invent : mdef->minvent;
+
+	for(otmp = objchain; otmp; otmp = otmp->nobj)
+		if(otmp->blessed)
+			candidates++;
+	//Note: May be more desired targets than actual candidates, this is fine.
+	
+	if(mdef == &youmonst){
+		if(!Blind){
+			pline("Tiny %s sparks rise around you.", hcolor(NH_LIGHT_BLUE));
+			if(canseemon(magr)){
+				pline("The sparks are drawn into %s toothless mouth!", s_suffix(mon_nam(magr)));
+			}
+		}
+	}
+	else {
+		if(!Blind){
+			if(canseemon(mdef)){
+				pline("Tiny %s sparks rise around %s.", hcolor(NH_LIGHT_BLUE), mon_nam(mdef));
+				if(canseemon(magr)){
+					pline("The sparks are drawn into %s toothless mouth!", s_suffix(mon_nam(magr)));
+				}
+			}
+			else if(canseemon(magr)){
+				pline("Tiny %s sparks are drawn into %s toothless mouth!", hcolor(NH_LIGHT_BLUE), s_suffix(mon_nam(magr)));
+			}
+		}
+	}
+
+	if(candidates){
+		int prob = (remaining*smoothing_factor)/candidates;
+		for(otmp = objchain; otmp && remaining; otmp = otmp->nobj){
+			// pline("targets: %d candidates: %d prob: %d", remaining, candidates, prob);
+			if(otmp->blessed){
+				if(rnd(smoothing_factor) <= prob){
+					curse(otmp);
+					damaged++;
+					remaining--;
+				}
+				candidates--;
+				if(!remaining || !candidates)
+					return damaged;
+				prob = (remaining*smoothing_factor)/candidates;
+			}
+		}
+	}
+
+#define otherBlessing(blessing, i)\
+	if(blessing > i){\
+		update = max(-remaining, i - blessing);\
+		blessing += update;\
+		remaining += update;\
+		damaged += -update;\
+		if(remaining < 1)\
+			return damaged;\
+	}
+	
+	if(remaining){
+		char update;
+		if(mdef == &youmonst){
+			// if(u.uluck > -7){
+				// update = max(-remaining, -7 - u.uluck);
+				// u.uluck += update;
+				// remaining += update;
+				// damaged += -update;
+				// if(remaining < 1)
+					// return damaged;
+			// }
+			otherBlessing(u.uluck, -7)
+			otherBlessing(u.ublessed, -7)
+			otherBlessing(u.uhitinc, 0)
+			otherBlessing(u.udaminc, 0)
+			if(u.ucarinc > 0){
+				update = max(-remaining*10, 0 - u.ucarinc);\
+				u.ucarinc += update;
+				remaining += update/10;
+				damaged += -update/10;
+				if(remaining < 1)
+					return damaged;
+			}
+		}
+		else {
+			otherBlessing(mdef->encouraged, -7)
+		}
+	}
+	
+	return damaged;
+}
+
+STATIC_OVL boolean
 has_organic(mtmp)
 struct monst *mtmp;
 {
@@ -7271,19 +7394,71 @@ struct monst *mtmp;
 	&& !is_ancient(tmpm)\
 	&& !DEADMONSTER(tmpm)\
 	&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-#define common_valid_target_exhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM\
-	&& tmpm->mpeaceful != mtmp->mpeaceful\
+#define common_valid_target_exhale_nodistance(tmpm)\
+	tmpm->mpeaceful != mtmp->mpeaceful\
 	&& tmpm->mtame != mtmp->mtame\
 	&& !is_ancient(tmpm)\
 	&& !DEADMONSTER(tmpm)\
 	&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
-
+#define common_valid_target_exhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM\
+	&& common_valid_target_exhale_nodistance(tmpm)
 
 #define common_you_target_inhale() distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4\
 	&& !mtmp->mpeaceful\
 	&& !mtmp->mtame
-#define common_you_target_exhale() !mtmp->mtame && !mtmp->mpeaceful\
+#define common_you_target_exhale_nodistance() !mtmp->mtame && !mtmp->mpeaceful
+#define common_you_target_exhale() common_you_target_exhale_nodistance()\
 	&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM
+
+#define valid_blessings_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
+		&& !is_demon(tmpm->data)\
+		&& has_blessings(tmpm)
+#define valid_blessings_target_exhale(mtmp, tmpm) common_valid_target_exhale_nodistance(tmpm)\
+		&& !(no_innards(tmpm->data) && !has_blood(tmpm->data))\
+		&& clear_path(mtmp->mx, mtmp->my, tmpm->mx, tmpm->my)
+
+#define you_blessings_target_inhale() common_you_target_inhale()\
+		&& !is_demon(youracedata)\
+		&& has_blessings(&youmonst)
+#define you_blessings_target_exhale(mtmp) common_you_target_exhale_nodistance()\
+		&& !(no_innards(youracedata) && !has_blood(youracedata))\
+		&& couldsee(mtmp->mx, mtmp->my)
+
+	if(mtmp->mtyp == PM_ANCIENT_OF_BLESSINGS){
+		struct monst *tmpm;
+		int targets = 0, damage = 0;
+		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(valid_blessings_target_inhale(tmpm)) targets++;
+		}
+		if(you_blessings_target_inhale()) targets++;
+
+		if(targets){
+			targets = rnd(targets);
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_blessings_target_inhale(tmpm)) targets--;
+				if(!targets) break;
+			}
+		}
+		if(tmpm){
+			damage = blessings_consume(mtmp, tmpm);
+		}
+		else if(you_blessings_target_inhale()){
+			damage = blessings_consume(mtmp, &youmonst);
+		}
+		if(damage){
+			struct attack fakespell = { AT_MAGC, AD_CLRC, 0, 7 };
+			if(canseemon(mtmp))
+				pline("%s halo flares and casts blades of light in all directions!", s_suffix(Monnam(mtmp)));
+			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+				if(valid_blessings_target_exhale(mtmp, tmpm)){
+					cast_spell(mtmp, tmpm, &fakespell, OPEN_WOUNDS, tmpm->mx, tmpm->my);
+				}
+			}
+			if(you_blessings_target_exhale(mtmp)){
+				cast_spell(mtmp, &youmonst, &fakespell, OPEN_WOUNDS, u.ux, u.uy);
+			}
+		}
+	}
 
 #define valid_vitality_target_inhale(tmpm) common_valid_target_inhale(tmpm)\
 		&& has_organic(tmpm)

@@ -1888,6 +1888,9 @@ karemade:
 						beat = entangle_beatitude(&youmonst, -1);
 						if(hates_unholy(youracedata) && beat)
 							dmg += beat == 2 ? d(2,9) : rnd(9);
+						beat = entangle_beatitude(&youmonst, 0);
+						if(hates_unblessed(youracedata) && beat)
+							dmg += beat == 2 ? d(2,8) : rnd(8);
 						beat = entangle_beatitude(&youmonst, 1);
 						if(hates_holy(youracedata) && beat)
 							dmg += beat == 2 ? rnd(20) : rnd(4);
