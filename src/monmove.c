@@ -647,6 +647,9 @@ boolean digest_meal;
 		beat = entangle_beatitude(mon, -1);
 		if(hates_unholy_mon(mon) && beat)
 			mon->mhp -= beat == 2 ? d(2,9) : rnd(9);
+		beat = entangle_beatitude(mon, 0);
+		if(hates_unblessed_mon(mon) && beat)
+			mon->mhp -= beat == 2 ? d(2,8) : rnd(8);
 		beat = entangle_beatitude(mon, 1);
 		if(hates_holy_mon(mon) && beat)
 			mon->mhp -= beat == 2 ? rnd(20) : rnd(4);

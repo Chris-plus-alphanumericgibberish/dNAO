@@ -1470,8 +1470,9 @@ struct obj * otmp;
 		{	ndice = 3; diesize = 4; }
 		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
 		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
-		else if (otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
+
+		if (otmp->otyp == KHAKKHARA)
+			ndice *= rnd(3);
 		/* gold has a particular affinity to blessings and curses */
 		if (otmp->obj_material == GOLD &&
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
@@ -1482,11 +1483,44 @@ struct obj * otmp;
 			dmg += vd(ndice, diesize);
 	}
 
+	if (hates_unblessed_mon(mdef) &&
+		!(is_unholy(otmp) || otmp->blessed)
+	) {
+		/* default: 1d8 */
+		ndice = 1;
+		diesize = 8;
+		/* special cases */
+		if (otmp->oartifact == ART_GODHANDS)
+			dmg += 8;
+		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
+			diesize = 20;
+		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
+			diesize = 20;
+		else if (otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS)
+			ndice = 2;
+		else if (otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC)
+			{ ndice = otmp->altmode ? 2 : 1; diesize = 20; }
+		else if (otmp->oartifact == ART_SANSARA_MIRROR)
+			dmg += 8;
+		else if (otmp->oartifact == ART_MIRRORBRIGHT)
+			diesize = 24;
+		else if (otmp->oartifact == ART_MIRROR_BRAND)
+			ndice = 2;
+		else if (otmp->oartifact == ART_GRAYSWANDIR)
+			ndice = 3;
+		
+		if (otmp->otyp == KHAKKHARA)
+			ndice *= rnd(3);
+		/* calculate */
+		if (ndice)
+			dmg += vd(ndice, diesize);
+	}
+
 	/* the Rod of Seven Parts gets a bonus vs holy and unholy when uncursed */
 	if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS
 		&& !otmp->blessed && !otmp->cursed
 		&& (hates_holy_mon(mdef) || hates_unholy_mon(mdef))
-		){
+	){
 		dmg += vd(1, 10);
 	}
 
@@ -1606,6 +1640,14 @@ struct obj * weapon;
 			(otmp && is_unholy(otmp)) ||
 			(youagr && slot == W_ARMG && uright && is_unholy(uright)) ||
 			(youagr && slot == W_ARMG && uleft && is_unholy(uleft))
+			))
+			return 1;
+
+		if (hates_unblessed_mon(mdef) && (
+			(magr && is_unblessed_mon(magr)) ||
+			(otmp && !(is_unholy(otmp) || otmp->blessed)) ||
+			(youagr && slot == W_ARMG && uright && (is_unholy(uright) || uright->blessed)) ||
+			(youagr && slot == W_ARMG && uleft && (is_unholy(uleft) || uleft->blessed))
 			))
 			return 1;
 

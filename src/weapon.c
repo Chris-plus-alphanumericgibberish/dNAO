@@ -1196,7 +1196,8 @@ int spot;
 			/* never a hated weapon */
 			(mtmp->misc_worn_check & W_ARMG || !hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
 			(mtmp->misc_worn_check & W_ARMG || !hates_iron(mtmp->data)   || otmp->obj_material != IRON) &&
-			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp))
+			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp)) &&
+			(mtmp->misc_worn_check & W_ARMG || !hates_unblessed_mon(mtmp) || (is_unholy(otmp) || otmp->blessed))
 		){
 			if (!obest ||
 				(dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0))
@@ -1310,7 +1311,8 @@ struct obj *otmp;
     if (((strongmonst(mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0) || !bimanual(otmp,mtmp->data)) && 
 		(mtmp->misc_worn_check & W_ARMG || otmp->obj_material != SILVER || !hates_silver(mtmp->data)) &&
 		(mtmp->misc_worn_check & W_ARMG || otmp->obj_material != IRON	|| !hates_iron(mtmp->data)) &&
-		(mtmp->misc_worn_check & W_ARMG || is_unholy(otmp)				|| !hates_unholy_mon(mtmp))
+		(mtmp->misc_worn_check & W_ARMG || !is_unholy(otmp)				|| !hates_unholy_mon(mtmp)) &&
+		(mtmp->misc_worn_check & W_ARMG || (is_unholy(otmp) || otmp->blessed) || !hates_unblessed_mon(mtmp))
 	){
         for (i = 0; i < SIZE(pwep); i++)
         {
@@ -1471,7 +1473,7 @@ register struct monst *mtmp;
 					return(otmp);
 			} else for(otmp=mtmp->minvent; otmp; otmp=otmp->nobj) {
 				if (otmp->otyp == LOADSTONE && !otmp->cursed)
-				return otmp;
+					return otmp;
 			}
 	    }
 	}
@@ -1758,7 +1760,8 @@ register struct monst *mtmp;
 			/* never a hated weapon */
 			(mtmp->misc_worn_check & W_ARMG || !hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
 			(mtmp->misc_worn_check & W_ARMG || !hates_iron(mtmp->data) || otmp->obj_material != IRON) &&
-			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp))
+			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp)) &&
+			(mtmp->misc_worn_check & W_ARMG || !hates_unblessed_mon(mtmp) || (is_unholy(otmp) || otmp->blessed))
 			) return otmp;
 	}
 
@@ -1823,10 +1826,11 @@ register struct monst *mtmp;
 			/* never a hated weapon */
 			(mtmp->misc_worn_check & W_ARMG || !hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
 			(mtmp->misc_worn_check & W_ARMG || !hates_iron(mtmp->data) || otmp->obj_material != IRON) &&
-			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp))
+			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp)) &&
+			(mtmp->misc_worn_check & W_ARMG || !hates_unblessed_mon(mtmp) || (is_unholy(otmp) || otmp->blessed))
 			) return otmp;
 	}
-	
+
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
 		Oselect(CLUB, W_SWAPWEP);
 

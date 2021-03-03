@@ -6045,6 +6045,18 @@ int mkobjflags;
 					}
 				}
 			break;
+		    case PM_ANCIENT_OF_BLESSINGS:
+				for(int i = 4; i > 0; i--){
+					otmp = mksobj(SHORT_SWORD, mkobjflags);
+					set_material_gm(otmp, GOLD);
+					if(rn2(2)){
+						bless(otmp);
+					} else {
+						curse(otmp);
+					}
+					(void) mpickobj(mtmp, otmp);
+				}
+			break;
 		    case PM_ANCIENT_OF_ICE:
 				otmp = mksobj(MACE, mkobjflags|MKOBJ_NOINIT);
 				set_material_gm(otmp, METAL);

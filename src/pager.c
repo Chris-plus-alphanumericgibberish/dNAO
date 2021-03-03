@@ -1558,6 +1558,7 @@ get_weakness_description_of_monster_type(struct monst * mtmp, char * description
 
 	many = append(temp_buf, hates_holy_mon(mtmp)	, "holy"		, many);
 	many = append(temp_buf, hates_unholy_mon(mtmp)	, "unholy"		, many);
+	many = append(temp_buf, hates_unblessed_mon(mtmp), "uncursed"	, many);
 	many = append(temp_buf, hates_silver(ptr)		, "silver"		, many);
 	many = append(temp_buf, hates_iron(ptr)			, "iron"		, many);
 

@@ -5218,6 +5218,9 @@ u_healing_penalty()
 	if(hates_unholy(youracedata)){
 		penalty += (9*u_bcu_next_to_skin(-1)+1)/2;
 	}
+	if(hates_unblessed(youracedata)){
+		penalty += (8*u_bcu_next_to_skin(0)+1)/2;
+	}
 	if(is_demon(youracedata) || is_undead(youracedata)){
 		penalty += (4*u_bcu_next_to_skin(1)+1)/2;
 	}

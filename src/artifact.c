@@ -3205,6 +3205,12 @@ int * truedmgptr;
 		if(check_oprop(otmp, OPROP_LESSER_UNHYW))
 			*truedmgptr += d(2, 6);
 	}
+	if((youdef ? (hates_unblessed(youracedata)) : (hates_unblessed_mon(mdef))) && !otmp->cursed && !otmp->blessed){
+		if(check_oprop(otmp, OPROP_CONCW))
+			*truedmgptr += basedmg;
+		if(check_oprop(otmp, OPROP_LESSER_CONCW))
+			*truedmgptr += d(2, 6);
+	}
 	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
 }
 

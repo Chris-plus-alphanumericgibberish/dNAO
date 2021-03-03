@@ -43,6 +43,7 @@
 
 /* TODO: put these in their specified header files */
 /* mondata.h */
-#define is_holy_mon(mon)	(is_uvuudaum((mon)->data) || has_template(mon, ILLUMINATED))
-#define is_unholy_mon(mon)	((mon)->mtyp == PM_UVUUDAUM)
+#define is_holy_mon(mon)	(is_angel((mon)->data) || has_template(mon, ILLUMINATED))
+#define is_unholy_mon(mon)	(is_demon((mon)->data))
+#define is_unblessed_mon(mon)	(is_auton((mon)->data) || is_rilmani((mon)->data) || is_kamerel((mon)->data))
 #endif
