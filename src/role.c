@@ -2344,9 +2344,11 @@ int newgame;
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
 			urace = android;
 			urole.filecode = "And";
-			quest_status.got_quest = TRUE;
-			quest_status.leader_is_dead = TRUE;
-			flags.questprogress = 1;
+			if (newgame) {
+				quest_status.got_quest = TRUE;
+				quest_status.leader_is_dead = TRUE;
+				flags.questprogress = 1;
+			}
 		}
 	}
 
