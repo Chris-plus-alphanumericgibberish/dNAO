@@ -11567,6 +11567,8 @@ int vis;						/* True if action is at all visible to the player */
 			sneak_dice++;
 		if (ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
 			sneak_dice++;
+		if (Role_if(PM_HEALER) && !Upolyd && weapon && weapon->owornmask && weapon->otyp == KNIFE)
+			sneak_dice++;
 	}
 	if (magr && is_backstabber(pa))
 		sneak_dice++;
