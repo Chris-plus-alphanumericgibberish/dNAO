@@ -1584,15 +1584,14 @@ register struct obj *otmp;
 	/* welded two-handed weapon interferes with some armor removal */
 	if (otmp == uwep && bimanual(uwep,youracedata)) reset_remarm();
 	/* rules at top of wield.c state that twoweapon cannot be done
-	   with cursed alternate weapon */
-	if (otmp == uswapwep && u.twoweap)
+	   with cursed alternate weapon (unless you're weldproof) */
+	if (otmp == uswapwep && u.twoweap && !Weldproof)
 	    drop_uswapwep();
 	if (otmp == uarm && otmp->otyp == STRAITJACKET){
-		struct obj *o;
 		reset_remarm();
 		if(u.twoweap && uswapwep) drop_uswapwep();
 		if(uwep){
-			o = uwep;
+			struct obj *o = uwep;
 			setuwep((struct obj *)0);
 			dropx(o);
 		}
