@@ -35,7 +35,7 @@
  *     a convenience to swap with the main weapon.
  * 5.  Never conveys intrinsics.
  * 6.  Cursed items never weld (see #3 for reasons), but they also
- *     prevent two-weapon combat.
+ *     prevent two-weapon combat. (unless you're weldproof)
  *
  * The quiver (uquiver):
  * 1.  Is filled by the (Q)uiver command.
@@ -603,8 +603,6 @@ test_twoweapon()
 int
 starting_twoweapon()
 {
-	struct obj *otmp;
-
 	if (!test_twoweapon())
 		; //NoOp, test_twoweapon prints output :/
 	else if (!uarmg && !Stone_resistance && (uswapwep && uswapwep->otyp == CORPSE &&
@@ -615,8 +613,8 @@ starting_twoweapon()
 		    mons[uswapwep->corpsenm].mname, body_part(HAND));
 		Sprintf(kbuf, "%s corpse", an(mons[uswapwep->corpsenm].mname));
 		instapetrify(kbuf);
-	} else if (uswapwep && (Glib || uswapwep->cursed)) {
-		if (!Glib)
+	} else if (uswapwep && (Glib || (uswapwep->cursed && !Weldproof))) {
+		if (!Glib && !Weldproof)
 			uswapwep->bknown = TRUE;
 		drop_uswapwep();
 	} else
