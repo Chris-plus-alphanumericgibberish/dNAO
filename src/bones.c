@@ -76,8 +76,11 @@ boolean restore;
 		) {
 			otmp->oartifact = 0;
 			rem_ox(otmp, OX_ENAM);
-		} else if (otmp->oartifact && restore)
+		} else if (otmp->oartifact && restore) {
 			artifact_exists(otmp,ONAME(otmp),TRUE);
+			/* otmp was gifted to the deceased adventurer, not you who just found it */
+			otmp->gifted = 0;
+		}
 		if (restore) {
 			/* rings and wands' material should always match their description */
 			if (otmp->oclass == RING_CLASS || otmp->oclass == WAND_CLASS)
