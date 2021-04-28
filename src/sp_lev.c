@@ -2873,7 +2873,7 @@ dlb *fd;
 	    dir = walklist[nwalk].dir;
 
 		/* adding rooms may have placed a room overtop of the wallwalk start */
-		if (levl[x][y].roomno - ROOMOFFSET > level.flags.sp_lev_nroom)
+		if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
 			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 
 	    /* don't use move() - it doesn't use W_NORTH, etc. */
