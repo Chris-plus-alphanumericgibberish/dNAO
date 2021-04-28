@@ -264,6 +264,11 @@ boolean forcecontrol;
 			mntmp = name_to_mon(buf);
 			if (mntmp < LOW_PM)
 				pline("I've never heard of such monsters.");
+			else if (mntmp == (flags.female ? urace.femalenum : urace.malenum)) {
+				/* newman() */
+				newman();
+				goto made_change;
+			}
 			/* Note:  humans are illegal as monsters, but an
 			 * illegal monster forces newman(), which is what we
 			 * want if they specified a human.... */
