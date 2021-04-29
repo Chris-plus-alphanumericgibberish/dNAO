@@ -1182,7 +1182,7 @@ register struct monst *mtmp;
 		struct monst *tmpm;
 		int i = rnd(3);
 		if(canseemon(mtmp))
-			pline("A pustule bursts in a spray of acid and %sstrange larva tumble%s out!", i > 1 ? "" : "a ", i > 1 ? "" : "s");
+			pline(i > 1 ? "A pustule bursts in a spray of acid and strange larvae tumble out!" : "A pustule bursts in a spray of acid and a strange larva tumbles out!");
 		explode(mtmp->mx, mtmp->my, AD_ACID, MON_EXPLODE, d(6,6), EXPL_NOXIOUS, i/3+1);
 		for(; i > 0; i--){
 			tmpm = makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
