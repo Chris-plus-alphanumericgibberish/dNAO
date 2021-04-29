@@ -1075,6 +1075,14 @@ register struct monst *mtmp;
 			obj->corpsenm = PM_GARO_MASTER;
 		goto default_1;
 		break;
+	    case PM_COILING_BRAWN:{
+			num = d(2,4);
+			while (num--){
+				obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
+				obj->corpsenm = PM_HUMAN;
+			}
+		}
+		goto default_1;
 	    case PM_CHANGED:
 			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
 			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);

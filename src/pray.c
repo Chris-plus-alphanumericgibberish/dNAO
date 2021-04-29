@@ -224,6 +224,8 @@ in_trouble()
 	       make sure it's a case that we know how to handle;
 	       otherwise "fix all troubles" would get stuck in a loop */
 	    if (welded(uwep)) return TROUBLE_UNUSEABLE_HANDS;
+	    if (uarm && uarm->otyp == STRAITJACKET && uarm->cursed)
+			return TROUBLE_UNUSEABLE_HANDS;
 	    if (Upolyd && nohands(youracedata) && (!Unchanging ||
 		    ((otmp = unchanger()) != 0 && otmp->cursed)))
 		return TROUBLE_UNUSEABLE_HANDS;

@@ -301,6 +301,7 @@ struct obj *box;
 	case ICE_BOX:		n = 20; break;
 	case CHEST:		n = 5; break;
 	case BOX:		n = 3; break;
+	case WRITING_DESK:	n = 3; break;
 	case MASSIVE_STONE_CRATE: min=1;
 	case SACK:
 	case OILSKIN_SACK:
@@ -324,6 +325,19 @@ struct obj *box;
 			}
 	    } else if(box->otyp == MASSIVE_STONE_CRATE){
 			if (!(otmp = mkobj(FOOD_CLASS, TRUE))) continue;
+	    } else if(box->otyp == WRITING_DESK){
+			if(rn2(4)){
+				if (!(otmp = mkobj(SCROLL_CLASS, TRUE))) continue;
+			}
+			else if(rn2(4)){
+				if (!(otmp = mksobj(SCR_BLANK_PAPER, MKOBJ_NOINIT))) continue;
+			}
+			else {
+				if (!(otmp = mkobj(SPBOOK_CLASS, TRUE))) continue;
+			}
+			if(box->spe == 1){
+				otmp->obj_color = CLR_YELLOW;
+			}
 	    } else {
 		register int tprob;
 		const struct icp *iprobs = boxiprobs;
@@ -353,6 +367,10 @@ struct obj *box;
 		}
 	    }
 	    (void) add_to_container(box, otmp);
+	}
+	if(box->otyp == WRITING_DESK && box->spe == 1){
+		// +1 writing desks are handled by the level loader, switch it off here.
+		box->spe = 0;
 	}
 }
 
@@ -814,6 +832,7 @@ int mkflags;
 			case SACK:
 			case OILSKIN_SACK:
 			case MASSIVE_STONE_CRATE:
+			case WRITING_DESK:
 			case BAG_OF_HOLDING:	mkbox_cnts(otmp);
 				break;
 			case MAGIC_CHEST:
@@ -1286,8 +1305,9 @@ int mkflags;
 			}
 			break;
 		case COIN_CLASS:
-			// case BED_CLASS:
+		case BED_CLASS:
 		case TILE_CLASS:
+		case SCOIN_CLASS:
 			break;	/* do nothing */
 		default:
 			impossible("impossible mkobj %d, sym '%c'.", otmp->otyp,
@@ -1520,6 +1540,17 @@ start_corpse_timeout(body)
 				break;
 			}
 	}
+	chance = (flags.yello_level || (Role_if(PM_MADMAN) && In_quest(&u.uz) && !mvitals[PM_THE_STRANGER].died))
+			 ? TROLL_REVIVE_CHANCE : 
+			 0;
+	if(action == ROT_CORPSE && chance){
+		for (age = TAINT_AGE + 1; age <= ROT_AGE; age++)
+			if (!rn2(chance)) {
+				action = YELLOW_CORPSE;
+				when = age;
+				break;
+			}
+	}
 	chance = (Is_orcus_level(&u.uz) && flags.shade_level) ? FULL_MOLDY_CHANCE : 
 			 (Is_orcus_level(&u.uz) || flags.shade_level) ? HALF_MOLDY_CHANCE : 
 			 0;
@@ -1585,16 +1616,30 @@ register struct obj *otmp;
 	if (otmp == uwep && bimanual(uwep,youracedata)) reset_remarm();
 	/* rules at top of wield.c state that twoweapon cannot be done
 	   with cursed alternate weapon */
-	if (otmp == uswapwep && u.twoweap)
+	if (otmp == uswapwep && u.twoweap && !Weldproof)
 	    drop_uswapwep();
-	if (otmp == uarm && otmp->otyp == STRAITJACKET){
-		struct obj *o;
-		reset_remarm();
-		if(u.twoweap && uswapwep) drop_uswapwep();
-		if(uwep){
-			o = uwep;
-			setuwep((struct obj *)0);
-			dropx(o);
+	if(otmp->otyp == STRAITJACKET){
+		if (otmp == uarm){
+			struct obj *o;
+			reset_remarm();
+			if(u.twoweap && uswapwep) drop_uswapwep();
+			if(uwep){
+				o = uwep;
+				setuwep((struct obj *)0);
+				dropx(o);
+			}
+		}
+		else if(otmp->where == OBJ_MINVENT && otmp->owornmask&W_ARM){
+			struct monst *owner = otmp->ocarry;
+			struct obj *dropit;
+			if((dropit = MON_WEP(owner))){
+				obj_extract_and_unequip_self(dropit);
+				place_object(dropit, owner->mx, owner->my);
+			}
+			if((dropit = MON_SWEP(owner))){
+				obj_extract_and_unequip_self(dropit);
+				place_object(dropit, owner->mx, owner->my);
+			}
 		}
 	}
 	/* some cursed items need immediate updating */
@@ -1762,6 +1807,7 @@ struct obj* obj;
 	case DWARVISH_MITHRIL_COAT:
 	case BROKEN_ANDROID:
 	case BROKEN_GYNOID:
+	case WRITING_DESK:
 		return NULL;
 		/* Any other cases for specific object types go here. */
 	case SHIELD_OF_REFLECTION:

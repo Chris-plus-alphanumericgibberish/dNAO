@@ -23,6 +23,7 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define	GROW_SLIME		3
 #define	REVIVE_ZOMBIE	4
 #define	REVIVE_SHADE	5
+#define	REVIVE_YELLOW	6
 /*
  * Timeout functions.  Add a define here, then put it in the table
  * in timeout.c.  "One more level of indirection will fix everything."
@@ -38,12 +39,13 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define SLIMY_CORPSE	8
 #define ZOMBIE_CORPSE	9
 #define SHADY_CORPSE	10
-#define BOMB_BLOW	11
-#define RETURN_AMMO	12
-#define DESUMMON_MON 13
-#define DESUMMON_OBJ 14
-#define LARVAE_DIE 15
-#define NUM_TIME_FUNCS	16
+#define YELLOW_CORPSE	11
+#define BOMB_BLOW	12
+#define RETURN_AMMO	13
+#define DESUMMON_MON 14
+#define DESUMMON_OBJ 15
+#define LARVAE_DIE 16
+#define NUM_TIME_FUNCS	17
 
 /* used in timeout.c */
 typedef struct timer {

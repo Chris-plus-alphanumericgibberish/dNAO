@@ -1038,7 +1038,13 @@ makelevel()
 				Sprintf(fillname, "%s-home", urole.filecode);
 				// pline("%s",fillname);
 				makemaz(fillname);
-			} else {
+			}
+			else if(Role_if(PM_MADMAN) && qstart_level.dnum == u.uz.dnum && qlocate_level.dlevel == (u.uz.dlevel+1)){
+				Sprintf(fillname, "%s-home", urole.filecode);
+				// pline("%s",fillname);
+				makemaz(fillname);
+			}
+			else {
 			    Sprintf(fillname, "%s-loca", urole.filecode);
 			    loc_lev = find_level(fillname);
 	

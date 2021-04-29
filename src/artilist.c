@@ -2004,6 +2004,16 @@ A("The Eyes of the Overworld",		LENSES,				(const char *)0,
 	ENLIGHTENING, NOFLAG
 	),
 
+A("The Star of Hypernotus",		AMULET_VERSUS_CURSES,	"blue-green star-shaped stone",
+	2500L, GEMSTONE, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_MADMAN, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(CLEAR_THOUGHTS, BLOCK_CONFUSION), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /*Needs encyc entry*/
 /* Also has holy and unholy properties */
 A("Avenger",						LONG_SWORD,			"winged long sword",

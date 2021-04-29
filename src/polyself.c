@@ -602,7 +602,7 @@ int	mntmp;
 		pline(use_thec,monsterc,"multiply in a fountain");
 	    if (is_unicorn(youmonst.data) || youmonst.data->mtyp == PM_KI_RIN)
 		pline(use_thec,monsterc,"use your horn");
-	    if (is_mind_flayer(youmonst.data))
+	    if (is_mind_flayer(youmonst.data) || Role_if(PM_MADMAN))
 		pline(use_thec,monsterc,"emit a mental blast");
 	    if (youmonst.data->msound == MS_SHRIEK || youmonst.data->msound == MS_SHOG) /* worthless, actually */
 		pline(use_thec,monsterc,"shriek");
@@ -877,6 +877,21 @@ struct permonst *mdat;
 
 	/* use xbreathey to do the attack */
 	return xbreathey(&youmonst, &mattk, 0, 0);
+}
+
+int
+domakedog()
+{
+	if (u.uen < (10+min(u.uinsight, 45))) {
+	    You("concentrate but lack the energy to maintain doing so.");
+	    return(0);
+	}
+	u.whisperturn = moves+ACURR(A_CHA)+15;
+	losepw(10+min(u.uinsight, 45));
+	flags.botl = 1;
+	
+	makedog();
+	return 1;
 }
 
 int
@@ -1505,6 +1520,7 @@ int
 domindblast()
 {
 	struct monst *mtmp, *nmon;
+	int dice = 1, mfdmg;
 
 	if (u.uen < 10) {
 	    You("concentrate but lack the energy to maintain doing so.");
@@ -1512,6 +1528,9 @@ domindblast()
 	}
 	losepw(10);
 	flags.botl = 1;
+	
+	if(Role_if(PM_MADMAN))
+		dice += u.ulevel/7;
 
 	You("concentrate.");
 	pline("A wave of psychic energy pours out.");
@@ -1521,21 +1540,32 @@ domindblast()
 		nmon = mtmp->nmon;
 		if (DEADMONSTER(mtmp))
 			continue;
-		if (distu(mtmp->mx, mtmp->my) > BOLT_LIM * BOLT_LIM)
-			continue;
+		// if (distu(mtmp->mx, mtmp->my) > BOLT_LIM * BOLT_LIM)
+			// continue;
 		if(mtmp->mpeaceful)
 			continue;
 		if(mindless_mon(mtmp))
 			continue;
-		u_sen = mon_resistance(mtmp,TELEPAT) && is_blind(mtmp);
+		u_sen = (mon_resistance(mtmp,TELEPAT) && is_blind(mtmp)) || rlyehiansight(mtmp->data);
 		if (u_sen || (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10)) {
 			You("lock in on %s %s.", s_suffix(mon_nam(mtmp)),
 				u_sen ? "telepathy" :
 				mon_resistance(mtmp,TELEPAT) ? "latent telepathy" :
 				"mind");
-			mtmp->mhp -= rnd(15);
+			mfdmg = d(dice, 15);
+			mtmp->mhp -= mfdmg;
 			if (mtmp->mhp <= 0)
 				killed(mtmp);
+			else {
+				if(dice >= 3){
+					mtmp->mstdy = max(mfdmg, mtmp->mstdy);
+					mtmp->encouraged = -max(mfdmg, mtmp->encouraged);
+				}
+				if(dice >= 5){
+					mtmp->mstun = 1;
+					mtmp->mconf = 1;
+				}
+			}
 		}
 	}
 	return 1;
@@ -1558,7 +1588,7 @@ domindblast_strong()
 			continue;
 		if(mindless_mon(mtmp))
 			continue;
-		u_sen = mon_resistance(mtmp,TELEPAT) && is_blind(mtmp);
+		u_sen = (mon_resistance(mtmp,TELEPAT) && is_blind(mtmp)) || rlyehiansight(mtmp->data);
 		if (u_sen || (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10)) {
 			You("lock in on %s %s.", s_suffix(mon_nam(mtmp)),
 				u_sen ? "telepathy" :

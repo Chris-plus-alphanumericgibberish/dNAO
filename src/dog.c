@@ -51,7 +51,10 @@ register struct monst *mtmp;
 STATIC_OVL int
 pet_type()
 {
-	if(Race_if(PM_DROW)){
+	if(Role_if(PM_MADMAN)){
+		return PM_SECRET_WHISPERER;
+	}
+	else if(Race_if(PM_DROW)){
 		if(Role_if(PM_NOBLEMAN)){
 			if(flags.initgend) return (PM_GIANT_SPIDER);
 			else return (PM_SMALL_CAVE_LIZARD);
@@ -202,6 +205,8 @@ makedog()
 		petname = parrotname;
 	else if (pettype == PM_MONKEY)
 		petname = monkeyname;
+	else if (pettype == PM_SECRET_WHISPERER)
+		petname = whisperername;
 	else if(is_spider(&mons[pettype]))
 		petname = spidername;
 	else if(is_dragon(&mons[pettype]))
@@ -235,9 +240,17 @@ makedog()
 	    if(Role_if(PM_CONVICT)) petname = "Nicodemus"; /* Rats of NIMH */
     }
 #endif /* CONVICT */
-	mtmp = makemon(&mons[pettype], u.ux, u.uy, MM_EDOG);
+	mtmp = makemon(&mons[pettype], u.ux, u.uy, pettype == PM_SECRET_WHISPERER ? MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG|MM_ESUM : MM_ADJACENTOK|MM_EDOG);
 
 	if(!mtmp) return((struct monst *) 0); /* pets were genocided */
+	
+	if(pettype == PM_SECRET_WHISPERER){
+		mark_mon_as_summoned(mtmp, &youmonst, ACURR(A_CHA) + 1, 0);
+		for(int i = min(45, (u.uinsight - mtmp->m_lev)); i > 0; i--){
+			grow_up(mtmp, (struct monst *) 0);
+		}
+		mtmp->mspec_used = 0;
+	}
 	
 	if(mtmp->m_lev < mtmp->data->mlevel) mtmp->m_lev = mtmp->data->mlevel;
 	
@@ -824,6 +837,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			mtmp->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES || 
 			mtmp->mtyp == PM_CENTER_OF_ALL || 
 			mtmp->mtyp == PM_HUNGRY_DEAD ||
+			mtmp->mtyp == PM_THE_STRANGER ||
 			mtmp->mtame
 		) {
 			if (mtmp->mleashed) {

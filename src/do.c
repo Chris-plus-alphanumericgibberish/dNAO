@@ -1165,7 +1165,7 @@ int portal;
 	/* Prevent the player from going past the first quest level unless
 	 * (s)he has been given the go-ahead by the leader.
 	 */
-	if ((on_level(&u.uz, &qstart_level) && !newdungeon && !ok_to_quest() && !flags.stag)
+	if ((Is_qhome(&u.uz) && !newdungeon && !ok_to_quest() && !flags.stag)
 	&& !(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
 	) {
 		pline("A mysterious force prevents you from descending.");
@@ -1596,6 +1596,10 @@ misc_levelport:
 		!(u.uevent.qexpelled || u.uevent.qcompleted || quest_status.leader_is_dead)) {
 		if(Role_if(PM_EXILE)){
 			You("sense something reaching out to you....");
+		} else if(Role_if(PM_MADMAN)){
+			You("receive a faint telepathic message from Lady Constance:");
+			pline("Your help is urgently needed at Archer Asylum!  Look for a ...ic transporter.");
+			pline("You couldn't quite make out that last message.");
 		} else {
 			if (u.uevent.qcalled) {
 				com_pager(Role_if(PM_ROGUE) ? 4 : 3);
@@ -1814,6 +1818,13 @@ int different;
 			mtmp->mpeaceful = 0;
 		}
 	}
+	if(different==REVIVE_YELLOW){
+		set_template(mtmp, YELLOW_TEMPLATE);
+		mtmp->zombify = 0;
+		if(mtmp->mpeaceful && !mtmp->mtame){
+			mtmp->mpeaceful = 0;
+		}
+	}
 	switch (where) {
 	    case OBJ_INVENT:
 		if (is_uwep) {
@@ -1825,7 +1836,7 @@ int different;
 				Your("weapon goes slimy.");
 				pline("%s slips out of your grasp!", Monnam(mtmp));
 		    }
-		    else if (different==REVIVE_ZOMBIE) {
+		    else if (different==REVIVE_ZOMBIE || different==REVIVE_YELLOW) {
 				pline_The("%s rises from the dead!", cname);
 				pline("%s writhes out of your grasp!", Monnam(mtmp));
 		    }
@@ -1848,7 +1859,7 @@ int different;
 		    else if (different==GROW_SLIME)
 				pline("%s leaks from a putrefying corpse!",
 				  Amonnam(mtmp));
-		    else if (different==REVIVE_ZOMBIE)
+		    else if (different==REVIVE_ZOMBIE || different==REVIVE_YELLOW)
 				pline("%s rises from the dead!",
 				  Amonnam(mtmp));
 		    else if (different==REVIVE_SHADE)
@@ -1870,6 +1881,7 @@ int different;
 			      different==GROW_MOLD ? "goes moldy" : 
 			      different==GROW_SLIME ? "putrefies" : 
 			      different==REVIVE_ZOMBIE ? "rises from the dead" : 
+			      different==REVIVE_YELLOW ? "rises from the dead" : 
 			      different==REVIVE_SHADE ? "dissolves into shadow" : 
 				  "revives");
 		    else
@@ -2201,30 +2213,95 @@ long timeout;
 		else {
 			body->corpsenm = pmtype;
 
-		/* oeaten isn't used for hp calc here, and zeroing it 
-		 * prevents eaten_stat() from worrying when you've eaten more
-		 * from the corpse than the newly grown mold's nutrition
-		 * value.
-		 */
-		body->oeaten = 0;
+			/* oeaten isn't used for hp calc here, and zeroing it 
+			 * prevents eaten_stat() from worrying when you've eaten more
+			 * from the corpse than the newly grown mold's nutrition
+			 * value.
+			 */
+			body->oeaten = 0;
 
-		/* [ALI] If we allow revive_corpse() to get rid of revived
-		 * corpses from hero's inventory then we run into problems
-		 * with unpaid corpses.
-		 */
-		if (body->where == OBJ_INVENT)
-			body->quan++;
-		oldquan = body->quan;
+			/* [ALI] If we allow revive_corpse() to get rid of revived
+			 * corpses from hero's inventory then we run into problems
+			 * with unpaid corpses.
+			 */
+			if (body->where == OBJ_INVENT)
+				body->quan++;
+			oldquan = body->quan;
 			if (revive_corpse(body, REVIVE_ZOMBIE)) {
-			if (oldquan != 1) {		/* Corpse still valid */
-			if (body->where == OBJ_INVENT) {
-				useup(body);
-				oldquan--;
+				if (oldquan != 1) {		/* Corpse still valid */
+				if (body->where == OBJ_INVENT) {
+					useup(body);
+					oldquan--;
+				}
+				}
+				if (oldquan == 1)
+				body = (struct obj *)0;	/* Corpse gone */
 			}
-			}
-			if (oldquan == 1)
-			body = (struct obj *)0;	/* Corpse gone */
 		}
+	}
+
+	/* If revive_corpse succeeds, it handles the reviving corpse.
+	 * If there was more than one corpse, or the revive failed,
+	 * set the remaining corpse(s) to rot away normally.
+	 * Revive_corpse handles genocides
+	 */
+	if (body) {
+		body->owt = weight(body);
+		(void) start_timer(250L - (monstermoves-peek_at_iced_corpse_age(body)),
+			TIMER_OBJECT, ROT_CORPSE, arg);
+	}
+}
+
+void
+yellow_corpse(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	int pmtype, oldtyp, oldquan;
+	struct obj *body = (struct obj *) arg;
+	
+	pmtype = body->corpsenm;
+	
+	/* [ALI] Molds don't grow in adverse conditions.  If it ever
+	 * becomes possible for molds to grow in containers we should
+	 * check for iceboxes here as well.
+	 */
+	if ((body->where == OBJ_FLOOR || body->where==OBJ_BURIED) &&
+	  (is_pool(body->ox, body->oy, FALSE) || is_lava(body->ox, body->oy) ||
+	  is_ice(body->ox, body->oy)))
+	pmtype = -1;
+	
+	if (pmtype != -1) {
+		/* We don't want special case revivals */
+		if (cant_create(&pmtype, TRUE))
+			pmtype = -1; /* cantcreate might have changed it so change it back */
+		else {
+			body->corpsenm = pmtype;
+
+			/* oeaten isn't used for hp calc here, and zeroing it 
+			 * prevents eaten_stat() from worrying when you've eaten more
+			 * from the corpse than the newly grown mold's nutrition
+			 * value.
+			 */
+			body->oeaten = 0;
+
+			/* [ALI] If we allow revive_corpse() to get rid of revived
+			 * corpses from hero's inventory then we run into problems
+			 * with unpaid corpses.
+			 */
+			if (body->where == OBJ_INVENT)
+				body->quan++;
+			oldquan = body->quan;
+			if (revive_corpse(body, REVIVE_YELLOW)) {
+				if (oldquan != 1) {		/* Corpse still valid */
+				if (body->where == OBJ_INVENT) {
+					useup(body);
+					oldquan--;
+				}
+				}
+				if (oldquan == 1)
+				body = (struct obj *)0;	/* Corpse gone */
+			}
 		}
 	}
 

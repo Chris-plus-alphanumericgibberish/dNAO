@@ -561,8 +561,8 @@ int
 nasty(mcast)
 	struct monst *mcast;
 {
-    register struct monst	*mtmp;
-    register int	i, j, tmp;
+    register struct monst *mtmp;
+    register int i, j, tmp;
     int castalign = (mcast ? mcast->data->maligntyp : -1);
     coord bypos;
     int count=0;
@@ -614,6 +614,65 @@ nasty(mcast)
 	    }
     }
     return count;
+}
+
+/* create some yellow sign monsters */
+void
+yellow_nasty()
+{
+    register struct monst *mtmp;
+    register int i, j, tmp, makeindex, maketemplate;
+    coord bypos;
+	tmp = (u.ulevel > 3) ? u.ulevel/3 : 1; /* just in case -- rph */
+	for(i = rnd(tmp); i > 0; --i){
+		switch(rn2(6)){
+			case 0:
+				makeindex = PM_BYAKHEE;
+				maketemplate = 0;
+				bypos.x = u.ux;
+				bypos.y = u.uy;
+			break;
+			case 1:
+				makeindex = PM_COILING_BRAWN;
+				maketemplate = 0;
+				bypos.x = u.ux;
+				bypos.y = u.uy;
+			break;
+			case 2:
+				makeindex = PM_FUNGAL_BRAIN;
+				maketemplate = 0;
+				bypos.x = 0;
+				bypos.y = 0;
+			break;
+			case 3:
+				makeindex = PM_HUMAN;
+				maketemplate = SKELIFIED;
+				bypos.x = u.ux;
+				bypos.y = u.uy;
+			break;
+			case 4:
+				makeindex = PM_HUMAN;
+				maketemplate = DREAM_LEECH;
+				bypos.x = u.ux;
+				bypos.y = u.uy;
+			break;
+			case 5:
+				makeindex = rn2(2) ? PM_MADMAN : PM_MADWOMAN;
+				maketemplate = YELLOW_TEMPLATE;
+				bypos.x = u.ux;
+				bypos.y = u.uy;
+			break;
+		}
+		if ((mtmp = makemon(&mons[makeindex],
+					bypos.x, bypos.y, 0)) != 0);
+		else /* makemon failed for some reason */
+			continue;
+		if(maketemplate)
+			set_template(mtmp, maketemplate);
+		mtmp->msleeping = 0;
+		untame(mtmp, 0);
+		set_malign(mtmp);
+	}
 }
 
 /*	Let's resurrect the wizard, for some unexpected fun.	*/
@@ -671,10 +730,8 @@ illur_resurrect()
 {
 	struct monst *mtmp, **mmtmp;
 	long elapsed;
-	const char *verb;
 
-	/* look for a migrating Wizard */
-	verb = "elude";
+	/* look for a migrating Illurien */
 	mmtmp = &migrating_mons;
 	while ((mtmp = *mmtmp) != 0) {
 		if (mtmp->mtyp==PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES) {
@@ -705,6 +762,28 @@ illur_resurrect()
 		verbalize("You thought to steal memories from ME, she of the Myriad Glimpses!?");
 	}
 
+}
+
+void
+yello_resurrect()
+{
+	struct monst *mtmp;
+	long elapsed;
+
+	/* look for a migrating Stranger */
+	mtmp = migrating_mons;
+	while (mtmp) {
+		if (mtmp->mtyp==PM_THE_STRANGER)
+			return; /*It's currently making its way over*/
+		mtmp = mtmp->nmon;
+	}
+	
+	if(!mtmp) mtmp = makemon(&mons[PM_THE_STRANGER], 0, 0, MM_NOWAIT|MM_NOCOUNTBIRTH);
+	
+	if (mtmp) {
+		mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;
+		set_malign(mtmp);
+	}
 }
 
 void
@@ -872,6 +951,26 @@ illur_intervene()
 		break;
 	    case 4:
 			illur_resurrect();
+		break;
+	}
+}
+
+void
+yello_intervene()
+{
+	if(Is_astralevel(&u.uz)) return;
+	switch (rnd(4)) {
+	    case 1:	
+			You_feel("vaguely nervous.");
+		break;
+	    case 2:
+			yellow_nasty();
+		break;
+	    case 3:
+			aggravate();
+		break;
+	    case 4:
+			yello_resurrect();
 		break;
 	}
 }

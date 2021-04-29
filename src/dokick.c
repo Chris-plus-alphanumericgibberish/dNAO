@@ -34,7 +34,8 @@ register boolean clumsy;
 {
 	int mdx, mdy;
 	struct permonst *mdat = mon->data;
-	int kick_skill = (martial() ? P_MARTIAL_ARTS : P_NONE);
+	/*Note: currently these are actually the same skill, but....*/
+	int kick_skill = (martial() ? P_MARTIAL_ARTS : P_BARE_HANDED_COMBAT);
 	boolean trapkilled = FALSE;
 	int result;
 
@@ -533,6 +534,13 @@ char *buf;
 int
 dokick()
 {
+	return dokick_core(0,0);
+}
+
+int
+dokick_core(dx,dy)
+int dx, dy;
+{
 	int x, y;
 	int avrg_attrib;
 	register struct monst *mtmp;
@@ -547,11 +555,13 @@ dokick()
 		no_kick = TRUE;
 #ifdef STEED
 	} else if (u.usteed) {
-		if (yn_function("Kick your steed?", ynchars, 'y') == 'y') {
+		if (!dx && !dy && yn_function("Kick your steed?", ynchars, 'y') == 'y') {
 		    You("kick %s.", mon_nam(u.usteed));
 		    kick_steed();
 		    return 1;
 		} else {
+			if(dx || dy)
+				You("can't kick while riding!");
 		    return 0;
 		}
 #endif
@@ -605,11 +615,15 @@ dokick()
 		return 0;
 	}
 
-	if(!getdir((char *)0)) return(0);
-	if(!u.dx && !u.dy) return(0);
+	if(!dx && !dy && !getdir((char *)0)) return(0);
+	if(!dx && !dy){
+		dx = u.dx;
+		dy = u.dy;
+	}
+	if(!dx && !dy) return(0);
 
-	x = u.ux + u.dx;
-	y = u.uy + u.dy;
+	x = u.ux + dx;
+	y = u.uy + dy;
 
 	/* KMH -- Kicking boots always succeed */
 	if (uarmf && uarmf->otyp == KICKING_BOOTS)
@@ -632,8 +646,8 @@ dokick()
 	if (Levitation) {
 		int xx, yy;
 
-		xx = u.ux - u.dx;
-		yy = u.uy - u.dy;
+		xx = u.ux - dx;
+		yy = u.uy - dy;
 		/* doors can be opened while levitating, so they must be
 		 * reachable for bracing purposes
 		 * Possible extension: allow bracing against stuff on the side?
@@ -689,7 +703,7 @@ dokick()
 		    range = (3*(int)mdat->cwt) / range;
 
 		    if(range < 1) range = 1;
-		    hurtle(-u.dx, -u.dy, range, TRUE, TRUE);
+		    hurtle(-dx, -dy, range, TRUE, TRUE);
 		}
 		wake_nearby();
 		return(1);
@@ -712,7 +726,7 @@ dokick()
 		if(kick_object(x, y)) {
 		    if(Weightless){
 				wake_nearby();
-				hurtle(-u.dx, -u.dy, 1, TRUE, TRUE); /* assume it's light */
+				hurtle(-dx, -dy, 1, TRUE, TRUE); /* assume it's light */
 			}
 		    return(1);
 		}
@@ -1227,7 +1241,7 @@ ouch:
 			KILLED_BY);
 		    if(Weightless || Levitation){
 				wake_nearby();
-				hurtle(-u.dx, -u.dy, rn1(2,4), TRUE, TRUE); /* assume it's heavy */
+				hurtle(-dx, -dy, rn1(2,4), TRUE, TRUE); /* assume it's heavy */
 			}
 		    return(1);
 		}
@@ -1248,7 +1262,7 @@ dumb:
 			set_wounded_legs(RIGHT_SIDE, 5 + rnd(5));
 		}
 		if ((Weightless || Levitation) && rn2(2)) {
-		    hurtle(-u.dx, -u.dy, 1, TRUE, TRUE);
+		    hurtle(-dx, -dy, 1, TRUE, TRUE);
 		}
 		return 1;
 	}

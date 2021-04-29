@@ -1840,6 +1840,11 @@ doputon()
 	register struct obj *otmp;
 	long mask = 0L;
 
+	if(!freehand()){
+		You("have no free %s to put on accessories with!", body_part(HAND));
+		return(0);
+	}
+
 	if(uleft && (uright || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) && uamul && ublindf) {
 		Your("%s%s are full, and you're already wearing an amulet and %s.",
 			humanoid(youracedata) ? "ring-" : "",

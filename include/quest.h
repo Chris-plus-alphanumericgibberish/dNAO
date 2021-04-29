@@ -35,7 +35,7 @@ struct q_score {			/* Quest "scorecard" */
 
 #define MAX_QUEST_TRIES  7	/* exceed this and you "fail" */
 #ifdef CONVICT
-#define MIN_QUEST_ALIGN (Role_if(PM_CONVICT) ? 4 : 20)	/* at least this align.record to start */
+#define MIN_QUEST_ALIGN ((Role_if(PM_CONVICT) || Role_if(PM_MADMAN)) ? 4 : 20)	/* at least this align.record to start */
   /* note: align 20 matches "pious" as reported by enlightenment (cmd.c) */
   /* note: align 20 matches "stridently" as reported by enlightenment (cmd.c) */
 #else

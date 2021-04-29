@@ -789,7 +789,7 @@ SUIT(("living armor", "giant sea anemone"),
 SUIT(("jacket"),
 	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,  12,  0,	20,   10, 10, 1, 0, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM,  ARMSZ_HEAVY, 0,   0,  0,  15,   10, 10, 1, 2, CLOTH, CLR_WHITE),
+	0, 0, MZ_MEDIUM,  ARMSZ_HEAVY, 0,   0,  0,  15,   10, 10, 1, 2, CLOTH, CLR_WHITE, O_DRSLOT(UPPER_TORSO_DR|ARM_DR)),
 SUIT(("healer uniform","clean white clothes", "clean clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM, ARMSZ_MEDIUM,SICK_RES,0,0, 30,   10, 10, 1, 2, CLOTH, CLR_WHITE),
 SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
@@ -1068,6 +1068,7 @@ CONTAINER(("massive stone crate"),
 CONTAINER(("chest"),           1,   MZ_HUGE, 0, 0,  30, 600,  16, WOOD, HI_WOOD),
 CONTAINER(("magic chest", "big chest with 10 keyholes"),
 										0,MZ_GIGANTIC,1, 0,  15,1001,7000, METAL, CLR_BRIGHT_MAGENTA),/*Needs tile*/
+CONTAINER(("writing desk"),    1,   MZ_HUGE, 0, 0,   0, 600,  16, WOOD, HI_WOOD),
 CONTAINER(("ice box"),         1,   MZ_HUGE, 0, 0,   5, 250,  42, PLASTIC, CLR_WHITE),
 CONTAINER(("sack", "bag"),                0, MZ_MEDIUM, 0, 0,  20,  15,   2, CLOTH, HI_CLOTH),
 CONTAINER(("oilskin sack", "bag"),        0, MZ_MEDIUM, 0, 0,  20,  15, 100, CLOTH, HI_CLOTH),
@@ -1653,14 +1654,13 @@ OBJECT(("statue"), BITS(1,0,0,1,0,0,0,0,    MZ_HUGE,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   800, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 2, 0, 2, 2500, CLR_WHITE),
 OBJECT(("fossil"), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   100, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_BROWN),
-/*
-OBJECT(("bed",(char *)0), BITS(1,0,0,0,0,0,0,0,1,0,0,P_NONE,WOOD,0), 0,
-		BED_CLASS,   900, 0, 2000,  1000, 20, 20, 0, 0, 0, 2000, HI_WOOD),
-OBJECT(("knapsack",(char *)0), BITS(1,0,0,0,0,0,0,0,1,0,0,P_NONE,PLASTIC,0), 0,
-		BED_CLASS,   100, 0, 60,  100, 20, 20, 0, 0, 0, 2000, CLR_GREEN),
-OBJECT(("gurney",(char *)0), BITS(1,0,0,0,0,0,0,0,1,0,0,P_NONE,METAL,0), 0,
-		BED_CLASS,     0, 0, 60,  100, 20, 20, 0, 0, 0, 2000, CLR_WHITE),
-*/
+OBJECT(("bed"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,1,0,0,P_NONE,WOOD,0), 0,
+		BED_CLASS,   900, 0, 2000,  1000, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, HI_WOOD),
+OBJECT(("bedroll"), BITS(1,0,0,0,0,0,0,0,MZ_SMALL,1,0,0,P_NONE,CLOTH,0), 0,
+		BED_CLASS,   100, 0, 60,  100, DMG(D(2)), DMG(D(2)), 0, 0, 0, 2000, CLR_GREEN),
+OBJECT(("gurney"), BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,1,0,0,P_NONE,METAL,0), 0,
+		BED_CLASS,     0, 0, 60,  100, DMG(D(4)), DMG(D(4)), 0, 0, 0, 2000, CLR_WHITE),
+
 #ifdef CONVICT
 OBJECT(("heavy iron ball"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,0,WHACK,P_FLAIL,IRON,0), 0,
 #else

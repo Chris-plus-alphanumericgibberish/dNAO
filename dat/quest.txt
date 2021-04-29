@@ -4964,6 +4964,269 @@ the Astral Plane.  I suspect that I shall never see you again in this
 life, but I hope to at %ds feet."
 %E
 #
+#	Madman
+#
+%Cc Mad 00001
+For a moment, you feel your grip on reality waver.
+Why are you back in the escape tunnel beneath 
+%H!? Did you ever truely leave? 
+But wait, the portal you went through is still
+here.  You had heard your old savior 
+Lady Constance, who helped you escape the 
+sanitarium, calling for your help.
+Also, %H is not as you had left it.
+An oppressive yellow haze hovers at the edges
+of your thoughts, and you hear mad laughter
+in the distance.
+%E
+%Cp Mad 00002
+You have returned to %H.  Somehow, things are even
+worse now than on your previous visit.
+%E
+%Cp Mad 00003
+The situation seems to degrade, and you wonder how long
+your fellow %gp can hold out against the corrupt
+doctors and virulent yellow taint that pervade
+the formerly tranquil %H.
+%E
+%Cp Mad 00005
+"How did you manage to escape?"
+%E
+%Cp Mad 00006
+"The world is upside down."
+%E
+%Cp Mad 00007
+"It's in my head.  The yellow."
+%E
+%Cp Mad 00008
+"...there was going to be a play?  One of the
+special patients was writing it...."
+%E
+%Cp Mad 00009
+"...I've seen black stars in the sky
+below the Asylum."
+%E
+%Cp Mad 00010
+"Take me with you!  I will be glad to be rid of this
+awful place."
+%E
+%Cp Mad 00011
+"The world is upside down."
+%E
+%Cp Mad 00012
+"Don't forget to come back for us once you have
+completed your quest!"
+%E
+%Cp Mad 00013
+"Who was the playwright? I can't remember...."
+%E
+%Cp Mad 00014
+"...I saw a city on the horizon.  The towers
+rose behind the moons...."
+%E
+%Cc Mad 00015
+You have found a strange figure, encased in
+iron bindings.  Somehow, you know that this
+is the one who can guide you out of the
+madness.
+
+"The yellow dream will swallow the weak minded,
+and they will die in Carcosa. Let me judge your
+strength...."
+%E
+%Cp Mad 00016
+"I dream of you again, %p. Can you stand against
+the yellow dream?"
+%E
+%Cp Mad 00017
+"I dream of you again, %p. Can you stand against
+the yellow dream?"
+%E
+%Cc Mad 00018
+"The King has swallowed you, and you will die
+among the Lost. Begon before you consume your
+former compatriots!"
+%E
+%Cc Mad 00019
+"My soul fears that your are not ready to face
+the yellow. Only %Ra can withstand the shadow
+of Carcosa."
+%E
+%Cc Mad 00020
+"Your soul has strayed from %a.
+
+"Only the pure of heart can face the black
+stars and survive."
+%E
+%Cc Mad 00021
+"%p, your soul is ready.
+
+"The world is upside down, and It is here.
+%n read the Play and invited It in.
+
+"Our only chance against It is to find
+%o, for only the 
+Star can repel the yellow madness. 
+%E
+%Cp Mad 00025
+"Along the shore the cloud waves break."
+%E
+%Cp Mad 00026
+"The twin suns sink behind the lake."
+%E
+%Cp Mad 00027
+"The shadows lengthen in Carcosa."
+%E
+%Cp Mad 00028
+"Strange is the night where black stars rise."
+%E
+%Cp Mad 00029
+"Strange moons circle through the skies."
+%E
+%Cp Mad 00030
+"Song of my soul, my voice is dead."
+%E
+%Cp Mad 00031
+"Die thou, unsung, as tears unshed
+Shall dry and die in 
+    Lost Carcosa."
+%E
+%Cp Mad 00032
+"Songs that the Hyades shall sing,
+Where flap the tatters of the King,
+Must die unheard in
+    Dim Carcosa."
+%E
+%Cp Mad 00033
+"%o will soothe your mind."
+%E
+%Cp Mad 00034
+"You must remain worthy."
+%E
+%Cc Mad 00035
+Somehow, you've reached ground level by decending
+through the Asylum.
+
+There were offices on the second floor, perhaps
+you should decend further in the hopes of
+finding them?
+%E
+%Cp Mad 00036
+Once again, you've reached ground level.
+%E
+%Cc Mad 00040
+You've reached the attic.  You don't know why
+%n would be up here, but you feel him
+nearby.
+%E
+%Cp Mad 00041
+Once again, you descend into the attic.
+%E
+%Cc Mad 00050
+"So, %p.  You have returned.
+Have you come to pay your tuition?
+%E
+%Cp Mad 00051
+"I see that you have returned, %p.  I
+suggest you leave and save yourself while you still
+have a chance."
+%E
+%Cp Mad 00052
+"Back again, %p?  You will certainly die in
+your attempt to murder me."
+%E
+%Cp Mad 00053
+"I will get %o from you!  
+You can not kill me, my allies have seen to that!"
+%E
+%Cp Mad 00060
+"You should never have come back.  You will not 
+escape here alive again!"
+%E
+%Cp Mad 00061
+"Even all of your pathetic lot put together would
+not be enough to defeat me."
+%E
+%Cp Mad 00062
+"You are no more than lowly mad scum.  Go back
+to your cell and await my treatments!"
+%E
+%Cp Mad 00063
+"You have no chance at all. Spare yourself
+the pain!"
+%E
+%Cp Mad 00064
+"Even %o would not be enough to
+make you my equal."
+%E
+%Cp Mad 00065
+"Your delusional devotion to %d 
+will not save you, either."
+%E
+%Cp Mad 00066
+"After I kill you, I will go after 
+Lady Constance next, and any that dare
+to defy me again!"
+%E
+%Cp Mad 00067
+"You will never escape again!"
+%E
+%Cp Mad 00068
+"Once a lunatic, always a lunatic."
+%E
+%Cp Mad 00069
+"How about you find yourself a cosy little cell,
+and hope that I forgive your insolence?"
+%E
+%Cc Mad 00070
+As you pick up %o, you feel its power
+flow through you, protecting you.  You know that
+you need to get it back to %l as soon
+as possible now.
+%E
+%Cc Mad 00080
+You have settled up with your old Doctor,
+but strangely the oppressive yellow taint
+does not fade away.
+
+If anything, the fuvous presure grows stronger
+as the life fades from %n!
+%E
+%Cc Mad 00081
+"You have returned with %o!
+
+"I had feared you would die unsung in your search!
+
+"But, I fear that your struggle is not at an end.
+The King seeks %o, all his power is 
+bent on it.
+
+"You must take it far from here, to the Dungeons
+of Doom. May it aid you in your search for the
+amulet of Yendor.
+
+"Travel swiftly, and beware The Stranger!
+
+"I dream now of other things.... We will not meet
+again."
+%E
+%Cc Mad 00082
+%l looks upon %o
+with fondness.
+"You are its keeper now.  Take it with you back to
+%Z, through the magic portal
+that brought you here.
+
+"I dream now of other things.... We will not meet
+again."
+%E
+%Cc Mad 00090
+UNUSED
+%E
+%Cc Mad 00091
+UNUSED
+%E
+#
 #	Drow Noble quest
 #
 %Cc Ndr 00001

@@ -683,6 +683,12 @@ const char *name;
 		if(tmp)
 			set_material_gm(obj, tmp);
 		
+		if(obj->oartifact == ART_STAR_OF_HYPERNOTUS){
+			obj->ovar1 = STAR_SAPPHIRE;
+			obj->obj_color = CLR_BRIGHT_GREEN;
+			obj->oward = ELDER_SIGN;
+		}
+		
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
 		else if (Role_if(PM_PRIEST) && obj->oartifact == ART_MITRE_OF_HOLINESS)
@@ -694,7 +700,7 @@ const char *name;
 		/* viperwhip heads */
 		if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
 			obj->ovar1 = 8;
-		
+
 		fix_object(obj);
 
 	    /* can't dual-wield with artifact as secondary weapon */

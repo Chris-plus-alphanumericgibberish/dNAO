@@ -2196,6 +2196,7 @@ register struct obj *obj;
 			(void) stop_timer(SLIMY_CORPSE, obj->timed);
 			(void) stop_timer(ZOMBIE_CORPSE, obj->timed);
 			(void) stop_timer(SHADY_CORPSE, obj->timed);
+			(void) stop_timer(YELLOW_CORPSE, obj->timed);
 			(void) stop_timer(REVIVE_MON, obj->timed);
 			/* mark a non-reviving corpse as such */
 			if (rot_alarm) obj->norevive = 1;

@@ -35,6 +35,7 @@ STATIC_DCL void FDECL(good_neighbor, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
 STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
 STATIC_DCL void FDECL(goat_sacrifice, (struct monst *));
+STATIC_DCL void FDECL(palid_stranger, (struct monst *));
 
 #ifdef OVL0
 
@@ -573,6 +574,10 @@ you_regen_hp()
 			|| (u.sealsActive&SEAL_BERITH)
 		))
 			reglevel *= 2;
+		else if(!Upolyd && (
+			Role_if(PM_MADMAN)
+		))
+			reglevel *= 1.5;
 
 		// penalty for being itchy
 		reglevel -= u_healing_penalty();
@@ -665,6 +670,7 @@ you_regen_pw()
 
 		// role bonuses
 		if (Role_if(PM_WIZARD))   reglevel += 10;
+		if (Role_if(PM_MADMAN))   reglevel += 9;
 		if (Role_if(PM_HEALER))   reglevel += 6;
 		if (Role_if(PM_PRIEST))   reglevel += 6;
 		if (Role_if(PM_VALKYRIE)) reglevel += 3;
@@ -1163,6 +1169,7 @@ moveloop()
 			flags.slime_level=0;
 			flags.walky_level=0;
 			flags.shade_level=0;
+			flags.yello_level = 0;
 		    for (mtmp = fmon; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
 				/* check for bad swap weapons */
@@ -1261,10 +1268,51 @@ moveloop()
 						}
 					}
 				}
-				
+				/*Contaminated patients become something else*/
+				if(mtmp->mtyp == PM_CONTAMINATED_PATIENT && !templated(mtmp) &&
+					!mtmp->mpeaceful && rn2(mtmp->mhpmax) > mtmp->mhp && 
+					mon_can_see_you(mtmp)
+				){
+					switch(rn2(6)){
+						case 0:
+							if(canseemon(mtmp))
+								pline("Ghostly leeches burrow out of %s face!", s_suffix(mon_nam(mtmp)));
+							set_mon_data(mtmp, PM_HUMAN);
+							set_template(mtmp, DREAM_LEECH);
+						break;
+						case 1:
+							if(canseemon(mtmp))
+								pline("%s jaundices suddenly!", Monnam(mtmp));
+							set_template(mtmp, YELLOW_TEMPLATE);
+						break;
+						case 2:
+							if(canseemon(mtmp))
+								pline("%s rots down to the bones!", Monnam(mtmp));
+							set_mon_data(mtmp, PM_HUMAN);
+							set_template(mtmp, SKELIFIED);
+						break;
+						case 3:
+							if(canseemon(mtmp))
+								pline("%s screams and writhes. You hear %s bones splintering!", Monnam(mtmp), mhis(mtmp));
+							else You_hear("screaming.");
+							set_mon_data(mtmp, PM_COILING_BRAWN);
+						break;
+						case 4:
+							if(canseemon(mtmp))
+								pline("%s head splits open in a profusion of fungal growthes!", s_suffix(Monnam(mtmp)));
+							set_mon_data(mtmp, PM_FUNGAL_BRAIN);
+						break;
+						case 5:
+							if(canseemon(mtmp))
+								pline("%s skin peels open!", Monnam(mtmp));
+							set_mon_data(mtmp, PM_BYAKHEE);
+						break;
+					}
+				}
+
 				/*Reset fracture flag*/
 				if(mtmp->zombify && is_kamerel(mtmp->data)) mtmp->zombify = 0;
-				
+
 				if(mtmp->mtyp == PM_ARA_KAMEREL) flags.goldka_level=1;
 				if(mtmp->mtyp == PM_ASPECT_OF_THE_SILENCE){
 					flags.silence_level=1;
@@ -1274,6 +1322,7 @@ moveloop()
 				if(mtmp->mtyp == PM_JUIBLEX) flags.slime_level=1;
 				if(mtmp->mtyp == PM_PALE_NIGHT || mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mtyp == PM_LEGION) flags.walky_level=1;
 				if(mtmp->mtyp == PM_ORCUS || mtmp->mtyp == PM_NAZGUL) flags.shade_level=1;
+				if(mtmp->mtyp == PM_THE_STRANGER) flags.yello_level=1;
 				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)))){
 					mtmp->mstrategy &= ~STRAT_WAITMASK;
 					pline_The("entire %s is shaking around you!",
@@ -1392,7 +1441,7 @@ karemade:
 					mtmp->mcanmove = 1;
 				}
 				if(!mtmp->mnotlaugh){
-					if(!is_silent_mon(mtmp)){
+					if(!is_silent_mon(mtmp) && !mtmp->msleeping && !mtmp->mfrozen){
 						wake_nearto_noisy(mtmp->mx, mtmp->my, combatNoise(mtmp->data));
 						if(sensemon(mtmp) || (canseemon(mtmp) && !mtmp->mundetected)){
 							pline("%s is laughing hysterically.", Monnam(mtmp));
@@ -2165,6 +2214,15 @@ karemade:
 				if (!u.ill_cnt) {
 					illur_intervene();
 					u.ill_cnt = rn1(1000, 250);
+				}
+		    }
+		    if ((Role_if(PM_MADMAN) && quest_status.touched_artifact)
+				&& !(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)
+			) {
+				if (u.yel_cnt) u.yel_cnt--;
+				if (!u.yel_cnt) {
+					yello_intervene();
+					u.yel_cnt = rn1(1000, 555);
 				}
 		    }
 		    restore_attrib();
@@ -3691,6 +3749,8 @@ struct monst *mon;
 		polyp_pickup(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_MOUTH_OF_THE_GOAT)
 		goat_sacrifice(mon);
+	else if(mon->mtyp == PM_THE_STRANGER)
+		palid_stranger(mon);
 }
 
 static int goatkids[] = {PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN, 
@@ -4067,6 +4127,75 @@ struct monst *mon;
 				else {
 					You_hear("a viscous liquid dripping onto %s.", the(surface(xlocale, ylocale)));
 				}
+			}
+		}
+	}
+}
+
+STATIC_OVL
+void
+palid_stranger(mon)
+struct monst *mon;
+{
+	struct obj *otmp, *otmp2;
+	register struct monst *mtmp, *mtmp0 = 0, *mtmp2;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	/* Madmen aren't followed untill they've touched the quest artifact (Other roles won't face the stranger except due to very rare bones files) */
+	if(!Role_if(PM_MADMAN) || quest_status.touched_artifact){
+		/* The Stranger will eventually follow between branches */
+		if(mon->mux != u.uz.dnum){
+			if(!rn2(555))
+				mon->mux = u.uz.dnum;
+			return;
+		}
+		/* The Stranger follows between levels */
+		if(mon->muy != u.uz.dlevel){
+			if(!rn2(55)){
+				if(mon->muy > u.uz.dlevel)
+					mon->muy--;
+				else if(mon->muy < u.uz.dlevel)
+					mon->muy++;
+			}
+			return;
+		}
+		/* The Stranger arrives from other levels and appears as soon as you gain enough insight */
+		if(mon->m_insight_level <= u.uinsight){
+			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+				mtmp2 = mtmp->nmon;
+				if (mtmp == mon) {
+					mtmp->mtrack[0].x = MIGR_RANDOM;
+					if(mtmp == migrating_mons)
+						migrating_mons = mtmp->nmon;
+					else
+						mtmp0->nmon = mtmp->nmon;
+					mon_arrive(mtmp, FALSE);
+					break;
+				} else
+					mtmp0 = mtmp;
+			}
+			return;
+		}
+	}
+	/* Otherwise, The Stranger acts against you */
+	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && xyloc == MIGR_EXACT_XY && rn2(5)){ /*Sometimes skip a turn so that it can be evaded*/
+		if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
+			You_feel("a stranger's gaze on your back!");
+			u.ustdy = max_ints(u.ustdy, min_ints(5, u.ustdy+rnd(5)));
+		}
+		else {
+			xlocale += sgn(u.ux - xlocale);
+			ylocale += sgn(u.uy - ylocale);
+			if(isok(xlocale, ylocale) && (
+				(!is_pool(xlocale, ylocale, FALSE) && ZAP_POS(levl[xlocale][ylocale].typ))
+				|| is_pool(mon->mtrack[1].x, mon->mtrack[1].y, FALSE) 
+				|| !ZAP_POS(levl[mon->mtrack[1].x][mon->mtrack[1].y].typ)
+				|| ((!Role_if(PM_MADMAN) || quest_status.touched_artifact) && !rn2(5)) /* Sometimes phases through walls */
+			)){
+				mon->mtrack[1].x = xlocale;
+				mon->mtrack[1].y = ylocale;
 			}
 		}
 	}

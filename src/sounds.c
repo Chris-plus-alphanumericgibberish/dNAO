@@ -1822,10 +1822,11 @@ humanoid_sound:
 		}
 
 	    if (!mtmp->mpeaceful) {
-		if (In_endgame(&u.uz) && is_mplayer(ptr)) {
-		    mplayer_talk(mtmp);
-		    break;
-		} else return 0;	/* no sound */
+			if (In_endgame(&u.uz) && is_mplayer(ptr)) {
+				mplayer_talk(mtmp);
+				break;
+			}
+			else return 0;	/* no sound */
 	    }
 		
 	    if (mtmp->mflee)
@@ -1929,6 +1930,9 @@ humanoid_sound:
 		    verbl_msg = "Aloha.";
 		    break;
 #endif
+		case PM_LADY_CONSTANCE:
+		    verbl_msg = "There's a strange woman in the observation ward. She's asking for you....";
+		    break;
 		default:
 			if(Role_if(PM_RANGER) && Race_if(PM_GNOME) &&
 				mtmp->mtyp == PM_ARCADIAN_AVENGER && 

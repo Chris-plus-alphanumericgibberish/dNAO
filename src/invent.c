@@ -816,6 +816,17 @@ carrying_applyable_ring()
 }
 
 char
+carrying_applyable_amulet()
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->oclass == AMULET_CLASS && otmp->oward)
+			return TRUE;
+	return FALSE;
+}
+
+char
 carrying_readable_weapon()
 {
 	register struct obj *otmp;
@@ -4808,20 +4819,20 @@ STATIC_VAR NEARDATA const char *names[] = { 0,
 	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
-	"Scrap", "Venoms", "Tiles"/*, Beds*/
+	"Scrap", "Venoms", "Tiles", "Beds", "Strange coins"
 };
 
 STATIC_VAR NEARDATA const char *bogusclasses[] = {
 	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
-	"Scrap", "Venoms","Tiles",/*, Beds*/
+	"Scrap", "Venoms","Tiles", "Beds", "Strange coins",
 	"Filler","Useless objects", "Artifacts", "Ascension kit items",
 	"Staves", "Songs", "Drinks", "Grimoires", "Gears", "Cogs",
 	"Marmosets", "Bugs", "Easter Eggs", "Tiny Monuments","Consumables",
 	"Junk", "FOOs", "BARs", "Spoilers", "YANIs", "Splatbooks", 
 	"Chains", "Paperwork", "Pop-culture references", "Dross",
-	"Pokemon","Forgotten escape items",
+	"Pokemon","Forgotten escape items","Useless flavor items",
 	"SCPs"
 };
 

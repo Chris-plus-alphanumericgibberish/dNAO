@@ -1892,6 +1892,46 @@ int mkobjflags;
 					(void) mongets(mtmp, GLOVES, mkobjflags);
 				} else if (mm == PM_ABBOT){
 					(void) mongets(mtmp, CLOAK, mkobjflags);
+				} else if (mm == PM_PATIENT){
+					otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
+					if(otmp) curse(otmp);
+				} else if (mm == PM_CONTAMINATED_PATIENT){
+					switch(rnd(4)){
+						case 1:
+							otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
+							if(otmp){
+								if(otmp->cursed) uncurse(otmp);
+								otmp->oeroded3 = 1;
+								otmp->obj_color = CLR_YELLOW;
+							}
+							otmp = mongets(mtmp, SCALPEL, mkobjflags);
+							otmp->opoisoned = OPOISON_FILTH;
+						break;
+						case 2:
+							otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+							if(otmp){
+								otmp->obj_color = CLR_YELLOW;
+								otmp->opoisoned = OPOISON_FILTH;
+							}
+							otmp = mongets(mtmp, SCALPEL, mkobjflags);
+							otmp->opoisoned = OPOISON_FILTH;
+						break;
+						case 3:
+							otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
+							if(otmp){
+								curse(otmp);
+								otmp->obj_color = CLR_YELLOW;
+							}
+						break;
+						case 4:
+							otmp = mongets(mtmp, ROBE, mkobjflags);
+							if(otmp){
+								otmp->obj_color = CLR_YELLOW;
+							}
+							otmp = mongets(mtmp, STILETTO, mkobjflags);
+							otmp->opoisoned = OPOISON_BASIC;
+						break;
+					}
 				} else if (mm == PM_SERVANT){
 					if(mtmp->female){
 						(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
@@ -2131,6 +2171,73 @@ int mkobjflags;
 					bless(otmp);
 					otmp->spe = 7;
 					(void) mpickobj(mtmp, otmp);
+				} else if (mm == PM_LADY_CONSTANCE){
+					otmp = mongets(mtmp, STILETTO, mkobjflags|MKOBJ_NOINIT);
+					otmp->spe = 7;
+					set_material_gm(otmp, MINERAL);
+					add_oprop(otmp, OPROP_LESSER_WATRW);
+					add_oprop(otmp, OPROP_PSIOW);
+					otmp = mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags|MKOBJ_NOINIT);
+					otmp->spe = 3;
+					otmp = mongets(mtmp, RUFFLED_SHIRT, mkobjflags|MKOBJ_NOINIT);
+					otmp->spe = 3;
+					otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags|MKOBJ_NOINIT);
+				} else if (mm == PM_CASSILDA_THE_IRON_MAIDEN){
+					otmp = mongets(mtmp, CRYSTAL_HELM, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						curse(otmp);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+					}
+					otmp = mongets(mtmp, CLOAK, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						curse(otmp);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+					}
+					otmp = mongets(mtmp, STRAITJACKET, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						curse(otmp);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+					}
+					otmp = mongets(mtmp, VICTORIAN_UNDERWEAR, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						curse(otmp);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+					}
+					otmp = mongets(mtmp, GAUNTLETS_OF_FUMBLING, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						curse(otmp);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+					}
+					otmp = mongets(mtmp, SHACKLES, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						mtmp->misc_worn_check |= W_ARMF;
+						otmp->owornmask |= W_ARMF;
+						curse(otmp);
+						update_mon_intrinsics(mtmp, otmp, TRUE, TRUE);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+					}
+					otmp = mongets(mtmp, CHAIN, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						curse(otmp);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+						add_oprop(otmp, OPROP_LIVEW);
+						add_oprop(otmp, OPROP_PSECW);
+					}
+					otmp = mongets(mtmp, CHAIN, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						curse(otmp);
+						set_material_gm(otmp, IRON);
+						otmp->obj_color = CLR_BLACK;
+						add_oprop(otmp, OPROP_LIVEW);
+						add_oprop(otmp, OPROP_PSECW);
+					}
 				} else if (mm == PM_MAYOR_CUMMERBUND){
 					int spe2;
 					otmp = mksobj(SCIMITAR, mkobjflags|MKOBJ_NOINIT);
@@ -2459,8 +2566,17 @@ int mkobjflags;
 					}
 				break;
 				case PM_NURSE:
-					(void) mongets(mtmp, SCALPEL, mkobjflags);
-					(void) mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+					if(Role_if(PM_MADMAN) && In_quest(&u.uz)){
+						otmp = mongets(mtmp, SCALPEL, mkobjflags);
+						otmp->opoisoned = OPOISON_FILTH;
+
+						otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+						otmp->obj_color = CLR_YELLOW;
+					}
+					else {
+						(void) mongets(mtmp, SCALPEL, mkobjflags);
+						(void) mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+					}
 				return;
 				break;
 				case PM_MAID: //ninja maids
@@ -8558,6 +8674,8 @@ register int	mmflags;
 		mtmp->m_insight_level = 40;
 	else if(mtmp->mtyp == PM_HMNYW_PHARAOH)
 		mtmp->m_insight_level = 40;
+	else if(mtmp->mtyp == PM_THE_STRANGER)
+		mtmp->m_insight_level = 55;
 	
 	else if(mtmp->mtyp == PM_POLYPOID_BEING)
 		mtmp->m_insight_level = 40;
@@ -10563,6 +10681,11 @@ struct monst *mtmp, *victim;
 	mtmp->mhp += cur_increase;
 	if (mtmp->mhpmax <= hp_threshold)
 	    return ptr;		/* doesn't gain a level */
+
+	if(ptr->mtyp == PM_SECRET_WHISPERER || ptr->mtyp == PM_TRUTH_SEER 
+	|| ptr->mtyp == PM_DREAM_EATER || ptr->mtyp == PM_VEIL_RENDER
+	)
+		lev_limit = min(45, u.uinsight);
 
 	if (is_mplayer(ptr) || ptr->mtyp == PM_BYAKHEE || ptr->mtyp == PM_LILLEND || ptr->mtyp == PM_ERINYS || ptr->mtyp == PM_MAID
 	|| ptr->mtyp == PM_CROW_WINGED_HALF_DRAGON || ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY

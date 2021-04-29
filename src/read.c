@@ -51,6 +51,8 @@ doread()
 	Strcpy(class_list, readable);
 	if(carrying_applyable_ring())
 		add_class(class_list, RING_CLASS);
+	if(carrying_applyable_amulet())
+		add_class(class_list, AMULET_CLASS);
 	if(carrying(LIGHTSABER) || carrying(CANDLE_OF_INVOCATION))
 		add_class(class_list, TOOL_CLASS);
 	if(carrying_readable_weapon())
@@ -64,6 +66,7 @@ doread()
 	if((scroll->oartifact 
 			&& !(scroll->oclass == SCROLL_CLASS)
 			&& !(scroll->oclass == SPBOOK_CLASS)
+			&& !(scroll->oclass == AMULET_CLASS)
 			&& !arti_mandala(scroll)
 			&& scroll->oartifact != ART_ROD_OF_THE_ELVISH_LORDS
 		) || scroll->otyp==LIGHTSABER
@@ -357,6 +360,19 @@ doread()
 		}
 		else{
 			pline("There is %s engraved on the ring.",fetchHaluWard((int)scroll->oward));
+		}
+		return(1);
+	}
+	else if(scroll->oclass == AMULET_CLASS && scroll->oward){
+		if(!(scroll->ohaluengr)){
+			pline("A %s is engraved on the amulet.",wardDecode[scroll->oward]);
+			if( !(u.wardsknown & get_wardID(scroll->oward)) ){
+				You("have learned a new warding sign!");
+				u.wardsknown |= get_wardID(scroll->oward);
+			}
+		}
+		else{
+			pline("There is %s engraved on the amulet.",fetchHaluWard((int)scroll->oward));
 		}
 		return(1);
 	}
@@ -3312,6 +3328,9 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "slimy ", l = 6)) {
 				undeadtype = SLIME_REMNANT;
 			}
+			else if (!strncmpi(bufp, "fulvous ", l = 8)) {
+				undeadtype = YELLOW_TEMPLATE;
+			}
 			else if (!strncmpi(bufp, "mad_angel ", l = 10)) {
 				undeadtype = MAD_TEMPLATE;
 			}
@@ -3355,6 +3374,8 @@ int gen_restrict;
 				undeadtype = CRYSTALFIED;
 			else if (!strncmpi(p, "remnant",	7))
 				undeadtype = SLIME_REMNANT;
+			else if (!strncmpi(p, "fulvous",	7))
+				undeadtype = YELLOW_TEMPLATE;
 			else if (!strncmpi(p, "mad_angel",	9))
 				undeadtype = MAD_TEMPLATE;
 			else if (!strncmpi(p, "witness",	7))

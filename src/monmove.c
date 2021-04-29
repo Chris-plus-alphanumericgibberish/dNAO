@@ -962,7 +962,7 @@ register struct monst *mtmp;
 			}
 		}
 	}
-	if (mtmp->mstrategy & STRAT_ARRIVE) {
+	if (mtmp->mstrategy & STRAT_ARRIVE){
 	    int res = m_arrival(mtmp);
 	    if (res >= 0) return res;
 	}
@@ -1593,7 +1593,7 @@ register struct monst *mtmp;
 				digactualhole(mtmp->mx, mtmp->my, mtmp, HOLE, FALSE, TRUE);
 		}
 	}
-	if (has_mind_blast(mdat) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20)) {
+	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20)) {
 		boolean reducedFlayerMessages = (((Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && flags.initgend) || Role_if(PM_ANACHRONONAUT)) && In_quest(&u.uz));
 		struct monst *m2, *nmon = (struct monst *)0;
 		
@@ -1642,6 +1642,11 @@ register struct monst *mtmp;
 						}
 					}
 				}
+				if(has_template(mtmp, DREAM_LEECH)){
+					if (!Sleep_resistance){
+						fall_asleep(-100*dmg, TRUE);
+					}
+				}
 			}
 		}
 		for(m2=fmon; m2; m2 = nmon) {
@@ -1650,8 +1655,11 @@ register struct monst *mtmp;
 			if (m2->mpeaceful == mtmp->mpeaceful) continue;
 			if (mindless_mon(m2)) continue;
 			if (m2 == mtmp) continue;
-			if ((mon_resistance(m2,TELEPAT) &&
-			    (rn2(2) || m2->mblinded)) || !rn2(10)) {
+			if (species_is_telepathic(m2->data) ||
+				(mon_resistance(m2,TELEPAT) &&
+				(rn2(2) || m2->mblinded)) || 
+				!rn2(10)
+			) {
 				if (cansee(m2->mx, m2->my))
 				    pline("It locks on to %s.", mon_nam(m2));
 				if(mdat->mtyp == PM_GREAT_CTHULHU) m2->mconf=TRUE;
@@ -1668,6 +1676,11 @@ register struct monst *mtmp;
 				    monkilled(m2, "", AD_DRIN);
 				else
 				    m2->msleeping = 0;
+				if(has_template(mtmp, DREAM_LEECH)){
+					if (!resists_sleep(m2)){
+						m2->msleeping = 1;
+					}
+				}
 			}
 		}
 	}
@@ -1852,7 +1865,7 @@ register int after;
 	int  omx = mtmp->mx, omy = mtmp->my;
 	struct obj *mw_tmp;
 
-	if (stationary(mtmp->data) || sessile(mtmp->data)) return(0);
+	if (stationary_mon(mtmp) || sessile(mtmp->data)) return(0);
 	if(mtmp->mtrapped) {
 	    int i = mintrap(mtmp);
 	    if(i >= 2) { newsym(mtmp->mx,mtmp->my); return(2); }/* it died */

@@ -2019,7 +2019,7 @@ int mode;
 	    /* Objects too large to engrave with */
 	    case BALL_CLASS:
 	    case ROCK_CLASS:
-/*	    case BED_CLASS:*/
+	    case BED_CLASS:
 		You_cant("%s with such a large object!", word);
 		ptext = FALSE;
 		break;

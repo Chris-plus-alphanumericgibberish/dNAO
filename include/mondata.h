@@ -721,9 +721,14 @@
 								 (ptr)->mtyp == PM_DARUTH_XAXOX ||\
 								 (ptr)->mtyp == PM_EMBRACED_DROWESS\
 								)
-#define has_mind_blast(ptr)	(is_mind_flayer(ptr) || \
-				 (ptr)->mtyp == PM_BRAIN_GOLEM || \
-				 (ptr)->mtyp == PM_SEMBLANCE \
+#define has_mind_blast_mon(mon)	(has_mind_blast((mon)->data) \
+				 || has_template(mon, DREAM_LEECH) \
+				)
+#define has_mind_blast(ptr)	(is_mind_flayer(ptr) \
+				 || (ptr)->mtyp == PM_BRAIN_GOLEM \
+				 || (ptr)->mtyp == PM_SEMBLANCE \
+				 || (ptr)->mtyp == PM_FUNGAL_BRAIN \
+				 || (ptr)->mtyp == PM_LADY_CONSTANCE \
 				)
 
 #define is_mind_flayer(ptr)	((ptr)->mtyp == PM_MIND_FLAYER || \
@@ -845,14 +850,21 @@
 #define likes_swamp(ptr)	((ptr)->mlet == S_PUDDING || \
 				 (ptr)->mlet == S_FUNGUS || \
 				 (ptr)->mtyp == PM_OCHRE_JELLY)
+#define stationary_mon(mon)		(stationary((mon)->data) || \
+	((mon) != &youmonst ? (which_armor((mon), W_ARMF) && which_armor((mon), W_ARMF)->otyp == SHACKLES && which_armor((mon), W_ARMF)->cursed) :\
+	(uarmf && uarmf->otyp == SHACKLES && uarmf->cursed)))
 #define stationary(ptr)		((ptr)->mflagsm & MM_STATIONARY)
 #define sessile(ptr)		((ptr)->mmove == 0)
 
 /* Used for conduct with corpses, tins, and digestion attacks */
 /* G_NOCORPSE monsters might still be swallowed as a purple worm */
 /* Maybe someday this could be in mflags... */
-#define vegan(ptr)		(((ptr)->mlet == S_BLOB && \
-							(ptr)->mtyp != PM_BLOB_OF_PRESERVED_ORGANS) || \
+/** Shogooths are vegan :-/ **/
+#define vegan(ptr)		(((ptr)->mlet == S_BLOB \
+							&& (ptr)->mtyp != PM_BLOB_OF_PRESERVED_ORGANS\
+							&& (ptr)->mtyp != PM_BLOOD_BLOATER\
+							&& (ptr)->mtyp != PM_COILING_BRAWN\
+						 ) || \
 				 (ptr)->mlet == S_JELLY ||            \
 				((ptr)->mlet == S_FUNGUS && 		  \
 					!is_migo(ptr)) ||				  \

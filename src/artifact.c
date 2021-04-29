@@ -10183,7 +10183,7 @@ struct monst *mon;
 		)
 			return 1;
 	} else {
-		if(has_template(mon, ZOMBIFIED)){
+		if(has_template(mon, ZOMBIFIED) || has_template(mon, YELLOW_TEMPLATE)){
 			if((otmp->wrathdata >> 2) == PM_ZOMBIE)
 				return 1;
 		} else if(has_template(mon, SKELIFIED)){

@@ -1618,7 +1618,7 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, species_teleports(ptr), "teleports"			, many);
 	many = append(description, species_controls_teleports(ptr)	, "controls teleports"	, many);
 	many = append(description, mteleport(ptr)			, "teleports often"		, many);
-	many = append(description, stationary(ptr)			, "stationary"			, many);
+	many = append(description, stationary_mon(mtmp)			, "stationary"			, many);
 	many = append(description, (many==0)				, "moves normally"		, many);
 	strcat(description, ". ");
 	return description;
@@ -1820,7 +1820,7 @@ get_speed_description_of_monster_type(struct monst * mtmp, char * description)
 		sprintf(description, "Immobile (%d). ", speed);
 	}
 
-	if (stationary(mtmp->data)) sprintf(description, "Can't move around. Speed %d. ", speed);
+	if (stationary_mon(mtmp)) sprintf(description, "Can't move around. Speed %d. ", speed);
 
 	return description;
 }

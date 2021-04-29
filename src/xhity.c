@@ -141,6 +141,12 @@ struct monst * mdef;
 	if (!(attack_type = attack_checks(mdef, uwep))) {
 		return TRUE;
 	}
+	//If the player can't attack and is wearing a straitjacket, redirect to the kick function
+	if(uarm && uarm->otyp == STRAITJACKET && uarm->cursed && !at_least_one_attack(&youmonst)){
+		dokick_core(u.dx, u.dy);
+		//Dokick can't move you
+		return TRUE;
+	}
 
 	if (u.twoweap && !test_twoweapon())
 		untwoweapon();
@@ -2139,6 +2145,40 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		(youdef && u.uswallow && (attk->aatyp != AT_ENGL && attk->aatyp != AT_ILUR)) ||
 		/* If player was using 'k' to kick, they are only performing kick attacks (onlykicks is a state variable defined in dokick.c) */
 		(youagr && onlykicks && attk->aatyp != AT_KICK) ||
+		/* If player is stuck in a straitjacket */
+		(youagr && 
+			((uarm && uarm->otyp == STRAITJACKET && uarm->cursed) ||
+			 (uarmg && uarmg->otyp == SHACKLES && uarmg->cursed)
+			) && (
+			attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_WHIP
+			|| attk->aatyp == AT_HODS || attk->aatyp == AT_MMGC || attk->aatyp == AT_SRPR
+			|| attk->aatyp == AT_DEVA || attk->aatyp == AT_5SQR || attk->aatyp == AT_MARI
+			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON) ||
+			(humanoid(youracedata) && (
+				attk->aatyp == AT_CLAW
+				|| attk->aatyp == AT_TUCH
+				|| attk->aatyp == AT_HUGS
+				|| attk->aatyp == AT_LRCH
+			))
+		)) ||
+		/* If monster is stuck in a straitjacket */
+		(!youagr && 
+			((which_armor(magr, W_ARM) && which_armor(magr, W_ARM)->otyp == STRAITJACKET && which_armor(magr, W_ARM)->cursed) ||
+			 (which_armor(magr, W_ARMG) && which_armor(magr, W_ARMG)->otyp == SHACKLES && which_armor(magr, W_ARMG)->cursed)
+			) && 
+			!((*subout)&(SUBOUT_BAEL1|SUBOUT_BAEL2)) && (
+			attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_WHIP
+			|| attk->aatyp == AT_HODS || attk->aatyp == AT_MMGC || attk->aatyp == AT_SRPR
+			|| attk->aatyp == AT_DEVA || attk->aatyp == AT_5SQR || attk->aatyp == AT_MARI
+			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON) ||
+			(humanoid(pa) && (
+				attk->aatyp == AT_CLAW
+				/* Note: Dream-leech "touch" attacks are the dream leeches eating your brain like a 'flayer */
+				|| (attk->aatyp == AT_TUCH && !(attk->adtyp == AD_DRIN && has_template(magr, DREAM_LEECH)))
+				|| attk->aatyp == AT_HUGS
+				|| attk->aatyp == AT_LRCH
+			))
+		)) ||
 		/* Illurien can only engulf targets she is stuck to */
 		(youdef && mdef && pa->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES && attk->aatyp == AT_ENGL && (u.ustuck != magr)) ||
 		/* Rend attacks only happen if the previous two attacks hit */
@@ -2362,6 +2402,12 @@ struct attack *attk;
 					ending = " with bladed shadows!";
 					if (youdef)
 						specify_you = TRUE;
+				} else if(has_template(magr, DREAM_LEECH) && attk->adtyp == AD_DRIN){
+					pline("%s ghostly leeches suck %s!",
+						(youagr ? "Your" : s_suffix(Monnam(magr))),
+						((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr))
+						);
+					break;
 				} else {
 					verb = "touch";
 					if (youdef)
@@ -8427,7 +8473,7 @@ int vis;
 				unplacebc();
 
 			/* do we move onto player, or pluck them? */
-			if (stationary(pa) || (is_animal(pa) && u.usteed)) {
+			if (stationary_mon(magr) || (is_animal(pa) && u.usteed)) {
 				pluck = TRUE;
 			}
 			/* maybe move attacker */
@@ -8581,7 +8627,7 @@ int vis;
 
 		/* if defender died and aggressor isn't stationary, move agressor to defender's coord */
 		/* if mdef was your steed, you are still there, so magr can't take your spot! */
-		if (!stationary(magr->data) && result&MM_DEF_DIED
+		if (!stationary_mon(magr) && result&MM_DEF_DIED
 #ifdef STEED
 			&& !(mdef == u.usteed)
 #endif
@@ -12862,8 +12908,13 @@ int vis;						/* True if action is at all visible to the player */
 		/* base unarmed dice */
 		if (youagr && martial_bonus())
 			unarmed_dice.oc_damd = 4 * unarmedMult;
+		else if (youagr && u.umaniac)
+			unarmed_dice.oc_damd = 3 * unarmedMult;
 		else
 			unarmed_dice.oc_damd = 2 * unarmedMult;
+
+		if(youagr && u.umaniac && weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
+			unarmed_dice.oc_damd += weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2;
 		/* Eurynome causes exploding dice, sometimes larger dice */
 		if (youagr && u.sealsActive&SEAL_EURYNOME) {
 			unarmed_dice.exploding = TRUE;
@@ -13508,7 +13559,7 @@ int vis;						/* True if action is at all visible to the player */
 	if (youagr) {
 		if (snekdmg && (sneak_attack & SNEAK_JUYO)) {
 			/* always message, because... */
-			if (stationary(pd) || sessile(pd))		You("rain blows on the immobile %s%s", l_monnam(mdef), exclam(subtotl));
+			if (stationary_mon(mdef) || sessile(pd))		You("rain blows on the immobile %s%s", l_monnam(mdef), exclam(subtotl));
 			else if (sneak_attack & SNEAK_BEHIND)	You("rain blows on %s from behind%s", mon_nam(mdef), exclam(subtotl));
 			else if (sneak_attack & SNEAK_BLINDED)	You("rain blows on the blinded %s%s", l_monnam(mdef), exclam(subtotl));
 			else if (sneak_attack & SNEAK_TRAPPED)	You("rain blows on the trapped %s%s", l_monnam(mdef), exclam(subtotl));
@@ -15571,6 +15622,11 @@ android_combo()
 
 	if (!uandroid) {
 		pline("You aren't an android!");
+		return FALSE;
+	}
+
+	if(uarm && uarm->otyp == STRAITJACKET && uarm->cursed){
+		You("can't do a combo while your arms are bound!");
 		return FALSE;
 	}
 
