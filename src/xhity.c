@@ -3838,8 +3838,9 @@ boolean ranged;
 	if (attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ)
 		armuncancel = TRUE;
 	notmcan = (youagr || !magr->mcan);
-	uncancelled = notmcan && armuncancel;
-	
+	/* if we're called with attk->aatyp==AT_NONE, this is some kind of extra effect of magical origin that will bypass armuncancel */
+	uncancelled = notmcan && (armuncancel || attk->aatyp == AT_NONE);
+
 
 	/* Do stuff based on damage type 
 	 *  

@@ -356,7 +356,8 @@
 #define MAKE_WEB               SUMMON_SPHERE+1
 #define DROP_BOULDER           MAKE_WEB+1
 #define EARTHQUAKE             DROP_BOULDER+1
-#define TURN_TO_STONE          EARTHQUAKE+1
+#define SLIMIFY                EARTHQUAKE+1
+#define TURN_TO_STONE          SLIMIFY+1
        /* unique monster spells */
 #define NIGHTMARE              TURN_TO_STONE+1
 //50

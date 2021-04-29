@@ -1614,38 +1614,39 @@ const char * spellname[] =
 	"DROP_BOULDER",
 	"EARTHQUAKE",
 	"TURN_TO_STONE",
-	"NIGHTMARE",
+	"SLIMIFY",
 	//50
+	"NIGHTMARE",
 	"FILTH",
 	"CLONE_WIZ",
 	"STRANGLE",
 	"MON_FIRA",
-	"MON_FIRAGA",
 	//55
+	"MON_FIRAGA",
 	"MON_BLIZZARA",
 	"MON_BLIZZAGA",
 	"MON_THUNDARA",
 	"MON_THUNDAGA",
-	"MON_FLARE",
 	//60
+	"MON_FLARE",
 	"MON_WARP",
 	"MON_POISON_GAS",
 	"MON_PROTECTION",
 	"SOLID_FOG",
-	"ACID_BLAST",
 	//65
+	"ACID_BLAST",
 	"PRISMATIC_SPRAY",
 	"SILVER_RAYS",
 	"GOLDEN_WAVE",
 	"VULNERABILITY",
-	"MASS_HASTE",
 	//70
+	"MASS_HASTE",
 	"MON_TIME_STOP",
 	"TIME_DUPLICATE",
 	"NAIL_TO_THE_SKY",
 	"STERILITY_CURSE"
-	"DISINT_RAY"
 	//75
+	"DISINT_RAY"
 };
 
 
@@ -3042,6 +3043,23 @@ int tary;
 					else You_feel("a momentary stiffness.");
 				}
 			}
+		}
+		return result;
+
+	case SLIMIFY:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("slimify with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			/* message player */
+			if (youdef && malediction)
+				verbalize(rn2(2) ? "Thou shalt quiver before me!" :
+				"Thy flesh shall be goo!");
+
+			static struct attack slimify = { AT_NONE, AD_SLIM, 0, 0 };
+			result = xmeleehurty(magr, mdef, &slimify, &slimify, (struct obj **)0, FALSE, 0, 0, -1, TRUE);
 		}
 		return result;
 
@@ -4873,6 +4891,7 @@ int spellnum;
 	case PLAGUE:
 	case FILTH:
 	case TURN_TO_STONE:
+	case SLIMIFY:
 	case STRANGLE:
 	case SILVER_RAYS:
 	case GOLDEN_WAVE:
