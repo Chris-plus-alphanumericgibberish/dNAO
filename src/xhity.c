@@ -3288,6 +3288,8 @@ int flat_acc;
 						size_penalty = max(0, size_penalty-1);
 					if (u.sealsActive&SEAL_YMIR)
 						size_penalty = max(0, size_penalty-1);
+					if (check_oprop(weapon, OPROP_CCLAW))
+						size_penalty = max(0, size_penalty-1);
 				}
 				
 				wepn_acc += -4 * max(0, size_penalty);
