@@ -3464,7 +3464,7 @@ boolean * messaged;
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
 		/* exclusions below */
-		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6)) /* Tobiume only does the knockback if mdef is nearly dead */
+		(oartifact == ART_TOBIUME) /* Tobiume only does the knockback if mdef is nearly dead */
 		))
 	{
 		/* determine if we do the full hurtle, or just stun */
@@ -3518,7 +3518,7 @@ boolean * messaged;
 	/* fire explosions */
 	if (((arti_attack_prop(otmp, ARTA_EXPLFIRE) && !rn2(4)) || arti_attack_prop(otmp, ARTA_EXPLFIREX)) && !(
 		/* exclusion */
-		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6))
+		(oartifact == ART_TOBIUME)
 		))
 	{
 		explode(x(mdef), y(mdef),

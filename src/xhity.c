@@ -13482,8 +13482,17 @@ int vis;						/* True if action is at all visible to the player */
 
 	/* Final sum of damage */
 	totldmg = subtotl + seardmg + elemdmg + poisdmg + specdmg;
+	/* Tobiume can adjust this sum */
+	if(weapon && weapon->oartifact == ART_TOBIUME && !Fire_res(mdef)){
+		if((*hp(mdef) - totldmg) <= (6 + weapon->spe)){
+			elemdmg += 6 + weapon->spe;
+			totldmg += 6 + weapon->spe;
+		}
+	}
+	/* Is the damage lethal? */
 	lethaldamage = (totldmg >= *hp(mdef));
 
+	/* Debug mode: report sum components */
 	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
 		pline("dmg = (b:%d + art:%d + bon:%d + mon:%d + s/j:%d - defense) = %d; + add:%d = %d",
 			basedmg,
@@ -13497,6 +13506,29 @@ int vis;						/* True if action is at all visible to the player */
 			);
 	}
 	
+	/* Now that all the damage has FINALLY been calculated, Tobiume should do its thing. Since this prints a message it blocks message printing */
+	if (vis && weapon && weapon->oartifact == ART_TOBIUME && lethaldamage && magr){
+		int dx = x(mdef) - x(magr);
+		int dy = y(mdef) - y(magr);
+		if(youdef || canseemon(mdef)){
+			pline("%s %s %s by %s blow!",
+				(youdef ? "You" : Monnam(mdef)),
+				(youdef ? "are" : "is"),
+				(mdef->data->msize < MZ_HUGE ? "thrown" : "stunned"),
+				(youagr ? "your" : (magr && (vis&VIS_MAGR)) ? s_suffix(mon_nam(magr)) : magr ? "a" : "the")
+				);
+			dohitmsg = FALSE;
+		}
+		if (youdef)
+			hurtle(dx, dy, BOLT_LIM, FALSE, TRUE);
+		else
+			mhurtle(mdef, dx, dy, BOLT_LIM);
+		
+		if(x(mdef)) explode(x(mdef), y(mdef),
+			AD_FIRE, 0,
+			d(6, 6),
+			EXPL_FIERY, 1);
+	}
 	/* PRINT HIT MESSAGE. MAYBE. */
 	if (dohitmsg && vis){
 		if (thrown && !hittxt)
