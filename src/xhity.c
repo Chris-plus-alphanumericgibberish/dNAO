@@ -11138,9 +11138,19 @@ int vis;
 			else
 				magr->mspec_used = 7;
 		}
-		/* only affects the player */
-		if (!youdef)
-			return MM_MISS;
+		/* the player is more detailed */
+		if (!youdef){
+			if(rn2(10)){
+				struct attack fakespell = { AT_MAGC, AD_CLRC, 10, 7 };
+				cast_spell(magr, mdef, &fakespell, LIGHTNING, mdef->mx, mdef->my);
+				return MM_HIT;
+			}
+			else {
+				struct attack alt_attk = {AT_HITS, AD_DISN, 7, 1};
+				
+				return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, (struct obj **) 0, FALSE, 7, 20, vis, TRUE);
+			}
+		}
 		else {
 			int angrygod = A_CHAOTIC + rn2(3); //Note: -1 to +1
 			u.ualign.record -= rnd(20);
