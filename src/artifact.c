@@ -3083,7 +3083,7 @@ int * truedmgptr;
 		if(check_oprop(otmp, OPROP_LESSER_COLDW))
 			*truedmgptr += d(2, 6);
 	}
-	{
+	if(check_oprop(otmp, OPROP_WATRW) || check_oprop(otmp, OPROP_LESSER_WATRW)){
 		struct obj *cloak = which_armor(mdef, W_ARMC);
 		struct obj *armor = which_armor(mdef, W_ARM);
 		struct obj *shield = which_armor(mdef, W_ARMS);
