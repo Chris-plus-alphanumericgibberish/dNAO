@@ -2368,13 +2368,15 @@ int newgame;
 	urace = races[flags.initrace];
 	if(Role_if(PM_ANACHRONONAUT)){
 		if(Race_if(PM_DROW))
-		urace = myrkalfr;
+			urace = myrkalfr;
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
-			urace = android;
 			urole.filecode = "And";
-			quest_status.got_quest = TRUE;
-			quest_status.leader_is_dead = TRUE;
-			flags.questprogress = 1;
+			urace = android;
+			if(newgame){
+				quest_status.got_quest = TRUE;
+				quest_status.leader_is_dead = TRUE;
+				flags.questprogress = 1;
+			}
 		}
 	}
 
