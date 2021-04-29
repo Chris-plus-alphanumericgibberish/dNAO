@@ -140,6 +140,7 @@ rndtrap()
 	     case MUMMY_TRAP:		/* no random generation */
 	     case SWITCH_TRAP:		/* no random generation */
 	     case VIVI_TRAP:		/* scripted only, no random generation */
+	     case FLESH_HOOK:		/* monster attack, no random generation */
 	     case MAGIC_PORTAL:	rtrap = NO_TRAP;
 				break;
 	     case TRAPDOOR:	if (!Can_dig_down(&u.uz)) rtrap = NO_TRAP;
