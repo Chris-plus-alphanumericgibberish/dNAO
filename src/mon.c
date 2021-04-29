@@ -8232,7 +8232,7 @@ struct monst *mtmp;
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
 						&& !has_template(tmpm, CRYSTALFIED)
-						// && !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES))
+						&& !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES) && rn2(40))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_MAGICBANE) && rn2(20))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_TENTACLE_ROD) && rn2(20))
