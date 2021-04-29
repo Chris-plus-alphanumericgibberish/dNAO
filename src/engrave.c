@@ -274,6 +274,7 @@ static const char *haluMesg[] = {
 		"You *must* see the IMMACULATE LAD!!",
 	"You are lost. You can never go home.", /* Gollum's Song */
 	"I am weak. Make... me... ideal.", /* Caress of Phyrexia */
+		"All will be One.", /* Phyrexia */
 	"But now, we dance this grim fandango, and will for years until we rest.", /* Grim Fandango */
 	"Bad Wolf", /* Dr. Who */
 	"It's only the end if you want it to be.", /*Batgirl*/
@@ -381,7 +382,9 @@ static const char *haluMesg[] = {
 		"Three signs of the Monomachy: a smith without a forge; a saint without a cell; a day without a night.",
 	"NOT A Secret Base", /*Gunnerkrigg Court*/
 	"We have the option to definitely die, but I've decided against it.", /*Schlock Mercenary*/
-	"Short to long term memory impaired. Go to Robotics Building. Explain about Bowman's architecture. Write down everything.", /*Freefall*/
+		"We don't run from the end of the world. WE CHARGE!",
+	"So, what IS the minimum safe distance for ignorance?",
+		"Short to long term memory impaired. Go to Robotics Building. Explain about Bowman's architecture. Write down everything.", /*Freefall*/
 	"I SAW THE EYE. Over the horizon, like a rising sun!", /* Dresden Codak */
 		"That's Science, isn't it? The perpetual horizon. But we found a way, haha, we found a way around that!",
 		"What would YOU give up to... to see it through?",
@@ -416,6 +419,13 @@ static const char *haluMesg[] = {
 		"Another world awaits. ...And you're going!",
 		"You have seven days.",
 	"But the future refused to change.", /*Chrono Trigger*/
+	"Oh, can't you see the light is fading?",
+		"And in the night the demons rage and call your name",
+		"No deeper madness than your own making",
+		"Visions lashing blades of shame, but will you take the blame?", /* Control */
+
+		"What's the Bureau's vacation policy?",
+		"I'm interested to hear about your expenditure plan.", /* Awkward Zombie */
 	"WHEN ALL ELSE FAILS USE FIRE", /*Zelda II*/
 	"Don't you see? All of you... YOUR GODS DESTROYED YOU", /*Wind Waker*/
 		"The wind... It is blowing...",
@@ -432,6 +442,7 @@ static const char *haluMesg[] = {
 		"There are horrors.  But also the sun, the grass... And the road I wish to travel.",
 	"Now watch what you say or they'll be calling you a radical!", /* The Logical Song, Supertramp */
 	"I took a walk around the world, to ease my troubled mind.", /* Kryptonite */
+	"It's no better to be safe than sorry.", /* Take On Me */
 	"Do what thou wilt shall be the whole of the Law", /* Aleister Crowley */
 	"Oh, 'great warrior...' Wars not make one great!", /*Star Wars*/
 		"I've got a bad feeling about this...",
@@ -4004,7 +4015,7 @@ static const char *epitaphs[] = {
 	"In death ground, fight.", /* Sun Tzu */
 	
 	"Did you see him passing by?", /* Dark Souls 3 */
-		"The world began without knowledge, and without knowledge will it end.", /* Dark Souls */
+		"The world began without knowledge, and without knowledge will it end.",
 		"Fear not the dark, my friend. And let the feast begin.",
 	
 	"For every hero commemorated, a thousand martyrs die unmourned and unremembered." /*Warhammer 40k*/
