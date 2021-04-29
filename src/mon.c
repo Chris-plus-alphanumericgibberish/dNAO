@@ -6673,7 +6673,7 @@ struct monst *mtmp;
 	){
 		if(mndx == PM_GREAT_CTHULHU)
 			return -1*rnd(10);
-		else return -1*((monstr[mndx]-u.ulevel)/4 + rnd(max(1, (monstr[mndx]-u.ulevel)/4)));
+		else return -1*(max_ints(0, (monstr[mndx]-u.ulevel)/4) + rnd(max(1, (monstr[mndx]-u.ulevel)/4)));
 	} else {
 		if(mndx == PM_GREAT_CTHULHU)
 			return -1*rnd(100);
