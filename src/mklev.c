@@ -856,10 +856,10 @@ random_special_room()
 	}
 	/* -------- DEFAULT -------- */
 	else
-	{	
+	{
 		if (level.flags.is_maze_lev){
 			/* MAZE */
-			add_rspec_room(COURT		, 15, udepth >  4);
+			add_rspec_room(COURT		, 15, udepth >  4 && !Is_stronghold(&u.uz));
 			add_rspec_room(COCKNEST		,  9, udepth > 16 && mnotgone(PM_COCKATRICE));
 			add_rspec_room(POOLROOM		, 30, udepth > 15);
 			add_rspec_room(BARRACKS		, 18, udepth > 14 && mnotgone(PM_SOLDIER));
