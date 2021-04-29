@@ -2328,7 +2328,14 @@ mon_can_see_mon(looker, lookie)
 	/* 1/8 chance to stumble onto adjacent targets. Ish. */
 	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8))
 		return TRUE;
-
+	
+	/* R'lyehian psyichic sight, see minds, blocked by water */
+	if(rlyehiansight(looker->data) && !mindless_mon(lookie)
+		&& !(is_pool(looker->mx, looker->my, FALSE) || mon_resistance(looker,FLYING) || mon_resistance(looker,LEVITATION))
+		&& !(is_pool(lookie->mx, lookie->my, FALSE) || !is_underswimmer(lookie->data) || mon_resistance(lookie,FLYING) || mon_resistance(lookie,LEVITATION))
+	)
+		return TRUE;
+	
 	clearpath = clear_path(looker->mx, looker->my, lookie->mx, lookie->my);
 	hardtosee = (!is_tracker(looker->data) && (
 		(lookie->minvis && !mon_resistance(looker, SEE_INVIS)) ||
@@ -2461,7 +2468,14 @@ struct monst *looker;
 	/* 1/8 chance to stumble onto adjacent targets. Ish. */
 	if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1 && !rn2(8))
 		return TRUE;
-
+	
+	/* Note: the player is never mindless */
+	/* R'lyehian psyichic sight, see minds, blocked by water */
+	if(rlyehiansight(looker->data)
+		&& !(is_pool(looker->mx, looker->my, FALSE) || mon_resistance(looker,FLYING) || mon_resistance(looker,LEVITATION))
+		&& !u.usubwater
+	)
+		return TRUE;
 	clearpath = couldsee(looker->mx, looker->my);
 	hardtosee = (!can_track(looker->data) && (
 		(Invis && !mon_resistance(looker, SEE_INVIS)) ||
