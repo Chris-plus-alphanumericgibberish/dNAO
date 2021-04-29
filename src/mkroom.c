@@ -367,6 +367,41 @@ mkmivaultitem(container)
 	}
 }
 
+void
+mkhellvaultitem(container)
+    struct obj *container;
+{
+	struct obj *otmp;
+	int try_limit = 1000;
+	int type;
+	otmp = (struct obj *)0;
+	if(!rn2(3))
+		type = ARMOR_CLASS;
+	else if(rn2(2))
+		type = WEAPON_CLASS;
+	else
+		type = RANDOM_CLASS;
+	do {
+		if(otmp && !Is_container(otmp)) delobj(otmp);
+		otmp = mkobj(type, TRUE);
+		if(Is_container(otmp)){
+			place_object(otmp, container->ox, container->oy);
+			bury_an_obj(otmp);
+		} else {
+			if(!rn2(10)){
+				mk_special(otmp);
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+			}
+			else if(!rn2(4)){
+				mk_minor_special(otmp);
+				otmp->spe = max_ints(d(1,7), otmp->spe);
+			}
+		}
+	} while (--try_limit > 0 &&
+	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE)));
+	if(!Is_container(otmp)) add_to_container(container, otmp);
+}
+
 STATIC_OVL
 void
 mkmivaultlolth()
@@ -4137,6 +4172,7 @@ int	roomtype;
 	case POOLROOM:	mkpoolroom(); break;
 	case SLABROOM:	mkslabroom(); break;
 	case ELSHAROOM:	mkzoo(ELSHAROOM); break;
+	case HELL_VAULT:	mkhellvaultroom(); break;
 	default:	impossible("Tried to make a room of type %d.", roomtype);
     }
 }
@@ -5602,6 +5638,50 @@ mkslabroom()
 	levl[x][y].typ = DOOR;
 	x = lx+3; y = ly+4;
 	levl[x][y].typ = DOOR;
+	wallification(sroom->lx, sroom->ly, sroom->hx, sroom->hy);
+}
+
+void
+mkhellvaultroom()
+{
+	struct mkroom *sroom;
+	int x, y, lx, ly;
+	
+	for(sroom = &rooms[level.flags.sp_lev_nroom]; ; sroom++){
+		if(sroom->hx < 0) return;  /* from mkshop: Signifies out of rooms? */
+		if(sroom - rooms >= nroom) {
+			pline("rooms not closed by -1?");
+			return;
+		}
+
+		if(sroom->rtype != OROOM || !isspacious(sroom))
+				continue;
+		else break;
+	}
+	
+	sroom->rtype = HELL_VAULT;
+	
+	lx = sroom->lx;
+	ly = sroom->ly;
+	for(x = sroom->lx+1; x < sroom->lx+4; x++) {
+		for(y = (sroom->ly)+1; y < (sroom->ly)+4; y++) {
+			levl[x][y].typ = VWALL;
+		}
+	}
+	x = lx+2; y = ly+2;
+	/* Put a hellish seal at m.x, m.y */
+	levl[x][y].typ = HELLISH_SEAL;
+	/*Pick monster*/
+	if(VN_MAX > VAULT_LIMIT){
+		impossible("Vault exceeded [safe fallback triggered]");
+		levl[x][y].vaulttype = rnd(31);
+	} else {
+		levl[x][y].vaulttype = rnd(VN_MAX-1);
+	}
+	// level.flags.nseals++;
+	/*Create statue on top*/
+	mkHVstatue(x, y, levl[x][y].vaulttype);
+	
 	wallification(sroom->lx, sroom->ly, sroom->hx, sroom->hy);
 }
 

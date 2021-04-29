@@ -4816,6 +4816,20 @@ srch:
 			return &zeroobj;
 		}
 # endif
+		if(!BSTRCMP(bp, p-12, "hellish seal")) {
+			levl[u.ux][u.uy].typ = HELLISH_SEAL;
+			if(VN_MAX > VAULT_LIMIT){
+				impossible("Vault exceeded [safe fallback triggered]");
+				levl[u.ux][u.uy].vaulttype = rnd(31);
+			} else {
+				levl[u.ux][u.uy].vaulttype = rnd(VN_MAX-1);
+			}
+			// level.flags.nseals++;
+			pline("A seal.");
+			newsym(u.ux, u.uy);
+			*wishreturn = WISH_SUCCESS;
+			return &zeroobj;
+		}
 		if(!BSTRCMP(bp, p-4, "pool")) {
 			levl[u.ux][u.uy].typ = POOL;
 			del_engr_ward_at(u.ux, u.uy);

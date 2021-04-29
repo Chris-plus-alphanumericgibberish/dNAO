@@ -77,7 +77,8 @@ extern NEARDATA struct door doors[DOORMAX];
 #define SLABROOM	21	/* Mithardir terminus room.  Special room with a slab */
 #define ELSHAROOM	22	/* Generic Elshava room.  Couple of sea folk */
 #define JOINEDROOM	23  /* is actually 2+ ordinary rooms joined together, and should have fewer corridors leading to it */
-#define SHOPBASE	24	/* everything above this is a shop */
+#define HELL_VAULT	24	/* This room has a hellish seal in it */
+#define SHOPBASE	25	/* everything above this is a shop */
 #define GENERALSHOP	SHOPBASE	/* specific shop defines for level compiler */
 #define ARMORSHOP	SHOPBASE+1	
 #define SCROLLSHOP	SHOPBASE+2

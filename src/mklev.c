@@ -830,6 +830,7 @@ random_special_room()
 			add_rspec_room(STATUEGRDN	,  2, TRUE);
 			add_rspec_room(TEMPLE		,  5, !level.flags.has_temple);
 			add_rspec_room(SHOPBASE		,  1, !rn2(3));
+			add_rspec_room(HELL_VAULT	,100, !level.flags.has_vault);
 			add_rspec_room(0			, 50, TRUE);
 		}
 	}
@@ -2043,6 +2044,42 @@ struct mkroom *croom;
 		break;
 	}
 	return TRUE;
+}
+
+/* make a statue that identifies the boss inside a hellvault */
+void
+mkHVstatue(x, y, hv_id)
+int x, y, hv_id;
+{
+	int mid;
+	struct obj* obj;
+	switch(hv_id){
+		case VN_AKKABISH:
+		case VN_SHALOSH:
+		case VN_NACHASH:
+		case VN_KHAAMNUN:
+		case VN_RAGLAYIM:
+		case VN_TERAPHIM:
+		case VN_SARTAN:
+			mid = PM_STRANGE_LARVA;
+		break;
+		case VN_A_O_BLESSINGS:
+		case VN_A_O_VITALITY:
+		case VN_A_O_CORRUPTION:
+		case VN_A_O_DESERTS:
+		case VN_A_O_THOUGHT:
+		case VN_A_O_DEATH:
+			mid = PM_ANCIENT_NUPPERIBO;
+		break;
+		case VN_APOCALYPSE:
+		case VN_HARROWER:
+		case VN_MAD_ANGEL:
+			mid = PM_ANGEL;
+		break;
+	}
+	obj = mksobj_at(STATUE, x, y, NO_MKOBJ_FLAGS);
+	obj->corpsenm = mid;
+	fix_object(obj);
 }
 
 /* maze levels have slightly different constraints from normal levels */

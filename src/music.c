@@ -1532,6 +1532,11 @@ struct monst *mon;
 			if (cansee(x,y))
 				pline_The("headstone topples into a chasm.");
 			goto do_pit;
+		  case HELLISH_SEAL :
+			if (cansee(x,y))
+				pline_The("seal is broken by a chasm!");
+			break_seal(x, y);
+			break;
 		  case TREE:
 			if (cansee(x,y))
 				pline_The("tree topples into a chasm.");

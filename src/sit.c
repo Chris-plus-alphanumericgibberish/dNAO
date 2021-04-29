@@ -160,6 +160,10 @@ dosit()
 
 	    You(sit_message, defsyms[S_grave].explanation);
 
+	} else if(IS_SEAL(typ)) {
+
+	    You(sit_message, defsyms[S_seal].explanation);
+
 	} else if(typ == STAIRS) {
 
 	    You(sit_message, "stairs");

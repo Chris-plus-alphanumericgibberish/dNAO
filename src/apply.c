@@ -5072,6 +5072,9 @@ do_break_wand(obj)
 		if(IS_GRAVE(levl[x][y].typ)){
 			digactualhole(x, y, BY_OBJECT, PIT, FALSE, TRUE);
 			dig_up_grave(x,y);
+		} else if(IS_SEAL(levl[x][y].typ)){
+			// digactualhole(x, y, BY_OBJECT, PIT, FALSE, TRUE);
+			break_seal(x,y);
 		} else{
 			digactualhole(x, y, BY_OBJECT,
 					  (rn2(obj->spe) < 3 || !Can_dig_down(&u.uz)) ?

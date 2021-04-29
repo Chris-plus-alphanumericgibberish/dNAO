@@ -76,6 +76,8 @@ E void FDECL(restore_artifacts, (int));
 E const char *FDECL(artiname, (int));
 E int FDECL(arti_value, (struct obj *));
 E struct obj *FDECL(mk_artifact, (struct obj *,ALIGNTYP_P));
+E struct obj *FDECL(mk_special, (struct obj *));
+E struct obj *FDECL(mk_minor_special, (struct obj *));
 E void FDECL(add_oprop, (struct obj *, int));
 E void FDECL(remove_oprop, (struct obj *, int));
 E void FDECL(add_oprop_list, (unsigned long int *, int));
@@ -388,6 +390,7 @@ E void FDECL(unearth_objs, (int,int));
 E void FDECL(rot_organic, (genericptr_t, long));
 E void FDECL(rot_corpse, (genericptr_t, long));
 E void FDECL(dig_up_grave, (int, int));
+E void FDECL(break_seal, (int, int));
 #if 0
 E void FDECL(bury_monst, (struct monst *));
 E void NDECL(bury_you);
@@ -1376,6 +1379,7 @@ E int FDECL(add_door, (int,int,struct mkroom *));
 E int NDECL(random_special_room);
 E void NDECL(mkpoolroom);
 E void NDECL(mkslabroom);
+E void NDECL(mkhellvaultroom);
 E void NDECL(mklev);
 #ifdef SPECIALIZATION
 E void FDECL(topologize, (struct mkroom *,BOOLEAN_P));
@@ -1391,6 +1395,7 @@ E struct mkroom *FDECL(room_at, (XCHAR_P, XCHAR_P));
 E void FDECL(mkstairs, (XCHAR_P,XCHAR_P,CHAR_P,struct mkroom *));
 E boolean FDECL(mkfeature, (int, int, struct mkroom *));
 E void NDECL(mkinvokearea);
+E void FDECL(mkHVstatue, (int, int, int));
 
 /* ### mkmap.c ### */
 
@@ -1486,6 +1491,7 @@ E boolean FDECL(isspacious, (struct mkroom *));
 E void NDECL(mksepulcher);
 E void NDECL(mkmivault);
 E void FDECL(mkmivaultitem,(struct obj *));
+E void FDECL(mkhellvaultitem,(struct obj *));
 E void NDECL(place_lolth_vaults);
 E void NDECL(place_chaos_forest_features);
 E void NDECL(place_law_features);

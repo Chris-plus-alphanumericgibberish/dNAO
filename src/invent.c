@@ -4345,6 +4345,8 @@ char *buf;
 	    cmap = S_vcdbridge;			/* "raised drawbridge" */
 	else if (IS_GRAVE(ltyp))
 	    cmap = S_grave;				/* "grave" */
+	else if (IS_SEAL(ltyp))
+	    cmap = S_seal;				/* "seal" */
 	else if (ltyp == TREE)
 	    cmap = S_tree;				/* "tree" */
 	else if (ltyp == IRONBARS)

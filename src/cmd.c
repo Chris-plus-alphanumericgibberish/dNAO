@@ -772,6 +772,7 @@ boolean you_abilities;
 			   (is_drawbridge_wall(u.ux, u.uy) >= 0)) ||
 			(boulder_at(u.ux, u.uy)) ||
 			(IS_GRAVE(lev->typ)) ||
+			(IS_SEAL(lev->typ)) ||
 			(lev->typ == DRAWBRIDGE_UP) ||
 			(IS_THRONE(lev->typ)) ||
 			(IS_ALTAR(lev->typ)) ||
