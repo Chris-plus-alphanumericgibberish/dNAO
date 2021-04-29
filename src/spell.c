@@ -17,7 +17,8 @@ static NEARDATA int RoSbook;		/* Read spell or Study Wards?" */
 #define MAINTAINED_SPELL_PW_MULTIPLIER 3
 #define MAINTAINED_SPELL_HUNGER_MULTIPLIER 1
 #define incrnknow(spell)        spl_book[spell].sp_know = KEEN
-#define ndecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - (KEEN*knw)/100)
+#define ndecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - knw)
+#define percdecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - (KEEN*knw)/100)
 
 #define spellev(spell)		spl_book[spell].sp_lev
 #define spellname(spell)	OBJ_NAME(objects[spellid(spell)])
@@ -3156,7 +3157,7 @@ spiriteffects(power, atme)
 		case PWR_DISGUSTED_GAZE:{
 			struct monst *mon;
 			struct obj *obj;
-			if((!uarmg || !is_opaque(uarmg)) && !(uarmc && uarmc->otyp == MUMMY_WRAPPING)){
+			if((!uarmg || !is_opaque(uarmg)) && !(uarmc && is_mummy_wrap(uarmc))){
 				if(throwgaze()){
 					if((mon = m_at(u.dx,u.dy)) && canseemon(mon)){
 						Your("arms swing up and your hands jerk open in a single, spasmodic motion.");
@@ -4774,7 +4775,7 @@ losespells(howmuch)
 	int  n;
 
 	for (n = 0; n < MAXSPELL && spellid(n) != NO_SPELL; n++){
-		ndecrnknow(n, howmuch);
+		percdecrnknow(n, howmuch);
 	}
 }
 
