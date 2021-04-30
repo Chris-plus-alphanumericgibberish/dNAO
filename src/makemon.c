@@ -8811,16 +8811,16 @@ register int	mmflags;
 	} else if (rider_hp(ptr)) {
 	    /* We want low HP, but a high mlevel so they can attack well */
 	    mtmp->mhpmax = mtmp->mhp = d(10,8);
-	} else if (ptr->mlevel > 49) {
+	} else if (ptr->mlevel > 49 || ptr->geno & G_UNIQ) {
 	    /* "special" fixed hp monster
 	     * the hit points are encoded in the mlevel in a somewhat strange
 	     * way to fit in the 50..127 positive range of a signed character
 	     * above the 1..49 that indicate "normal" monster levels */
 //	    mtmp->mhpmax = mtmp->mhp = 2*(ptr->mlevel - 6);
-	    mtmp->mhpmax = mtmp->mhp = 8*(ptr->mlevel);
+	    mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
 	    // mtmp->m_lev = mtmp->mhp / 4;	/* approximation */
 	} else if (is_ancient(mtmp) || is_tannin(mtmp)) {
-		mtmp->mhpmax = mtmp->mhp = 8*(ptr->mlevel);
+		mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
 	} else if (ptr->mlet == S_DRAGON && mndx >= PM_GRAY_DRAGON) {
 	    /* adult dragons */
 	    mtmp->mhpmax = mtmp->mhp = (int) (In_endgame(&u.uz) ?
