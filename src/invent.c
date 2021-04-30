@@ -4574,6 +4574,7 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	    obj->greased != otmp->greased ||
 	    obj->oeroded != otmp->oeroded ||
 	    obj->oeroded2 != otmp->oeroded2 ||
+	    obj->oeroded3 != otmp->oeroded3 ||
 	    obj->obj_material != otmp->obj_material ||
 	    obj->bypass != otmp->bypass)
 	    return(FALSE);
