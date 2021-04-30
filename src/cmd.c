@@ -563,7 +563,8 @@ boolean you_abilities;
 			add_ability('a', "Use your armor's breath weapon", MATTK_DSCALE);
 		}
 	}
-	if (mon_abilities && is_were(youracedata)){
+	if (mon_abilities && (is_were(youracedata) || gates_in_help(youracedata))){
+		/* shared letter; assumes a polyform will only be one or the other */
 		add_ability('A', "Summon aid", MATTK_SUMM);
 	}
 	if (mon_abilities && (can_breathe(youmonst.data) || Race_if(PM_HALF_DRAGON))){
@@ -705,7 +706,7 @@ boolean you_abilities;
 	case MATTK_REMV: return doremove();
 	case MATTK_GAZE: return dogaze();
 	case MATTK_TNKR: return dotinker();
-	case MATTK_SUMM: return dosummon();
+	case MATTK_SUMM: return (is_were(youracedata) ? dosummon() : dodemonpet());
 	case MATTK_VAMP: return dovampminion();
 	case MATTK_WEBS: return dospinweb();
 	case MATTK_HIDE: return dohide();

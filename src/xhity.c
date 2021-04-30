@@ -400,24 +400,13 @@ int tary;
 	}
 
 	/*	Special demon/minion handling code */
-	 if (youdef && !magr->cham && (is_demon(pa) || is_minion(pa)) && !ranged && (magr->summonpwr < magr->data->mlevel)
-		 && pa->mtyp != PM_OONA
-		 && pa->mtyp != PM_BALROG
-		 && pa->mtyp != PM_DURIN_S_BANE
-		 && pa->mtyp != PM_SUCCUBUS
-		 && pa->mtyp != PM_INCUBUS
-		 ) {
+	/* mvu only; we don't want it mvm and player's is handled as an ability */
+	if (youdef && !magr->cham && gates_in_help(pa)&& !ranged && (magr->summonpwr < magr->data->mlevel)) {
 		 if (!magr->mcan && !rn2(13)) {
 			 msummon(magr, (struct permonst *)0);
 		 }
-	 }
-	 if (youagr && is_demon(youracedata) && !rn2(13) && !uwep && (magr->summonpwr < magr->data->mlevel)
-		 && u.umonnum != PM_SUCCUBUS
-		 && u.umonnum != PM_INCUBUS
-		 && u.umonnum != PM_BALROG) {
-	     demonpet();
-		 return MM_MISS;
-	 }
+	}
+
 	/*	Special lycanthrope handling code */
 	if(youdef && !magr->cham && is_were(pa) && !ranged) {
 

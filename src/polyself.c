@@ -594,7 +594,7 @@ int	mntmp;
 		pline(use_thec,monsterc,"gaze at monsters");
 	    if (is_hider(youmonst.data))
 		pline(use_thec,monsterc,"hide");
-	    if (is_were(youmonst.data))
+	    if (is_were(youmonst.data) || gates_in_help(youmonst.data))
 		pline(use_thec,monsterc,"summon help");
 	    if (webmaker(youmonst.data))
 		pline(use_thec,monsterc,"spin a web");
@@ -1090,6 +1090,42 @@ dosummon()
 	exercise(A_WIS, TRUE);
 	if (!were_summon(youracedata, TRUE, &placeholder, (char *)0))
 		pline("But none arrive.");
+	return(1);
+}
+
+int
+dodemonpet()
+{
+	int i;
+	struct permonst *pm;
+	struct monst *dtmp;
+
+	if (u.uen < 10) {
+		You("lack the energy to call for help!");
+		return(0);
+	}
+	else if (youmonst.summonpwr >= youmonst.data->mlevel) {
+		You("don't have the authority to call for any more help!");
+		return(0);
+	}
+	losepw(10);
+	flags.botl = 1;
+
+	i = (!is_demon(youracedata) || !rn2(6)) 
+	     ? ndemon(u.ualign.type) : NON_PM;
+	pm = i != NON_PM ? &mons[i] : youracedata;
+	if(pm->mtyp == PM_ANCIENT_OF_ICE || pm->mtyp == PM_ANCIENT_OF_DEATH) {
+	    pm = rn2(4) ? &mons[PM_METAMORPHOSED_NUPPERIBO] : &mons[PM_ANCIENT_NUPPERIBO];
+	}
+	if ((dtmp = makemon(pm, u.ux, u.uy, MM_ESUM)) != 0) {
+		pline("Some hell-p has arrived!");
+	    (void)tamedog(dtmp, (struct obj *)0);
+		mark_mon_as_summoned(dtmp, &youmonst, 250, 0);
+		exercise(A_WIS, TRUE);
+	}
+	else {
+		pline("No help arrived.");
+	}
 	return(1);
 }
 

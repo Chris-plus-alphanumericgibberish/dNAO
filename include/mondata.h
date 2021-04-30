@@ -524,6 +524,15 @@
 									|| (ptr)->mtyp == PM_FIRE_STORM \
 									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT \
 								  )
+
+#define gates_in_help(ptr)	((is_demon((ptr)) || is_minion((ptr))) \
+								&& (ptr)->mtyp != PM_OONA \
+								&& (ptr)->mtyp != PM_BALROG \
+								&& (ptr)->mtyp != PM_DURIN_S_BANE \
+								&& (ptr)->mtyp != PM_SUCCUBUS \
+								&& (ptr)->mtyp != PM_INCUBUS \
+								)
+
 #define always_hostile(ptr)	(((ptr)->mflagst & MT_HOSTILE) != 0L)
 #define always_hostile_mon(mon)	(always_hostile((mon)->data))
 #define always_peaceful(ptr)	(((ptr)->mflagst & MT_PEACEFUL) != 0L)
