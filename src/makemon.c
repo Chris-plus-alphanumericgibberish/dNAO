@@ -1892,6 +1892,17 @@ int mkobjflags;
 					(void) mongets(mtmp, GLOVES, mkobjflags);
 				} else if (mm == PM_ABBOT){
 					(void) mongets(mtmp, CLOAK, mkobjflags);
+				} else if (mm == PM_LADY_CONSTANCE){
+					otmp = mongets(mtmp, STILETTO, mkobjflags|MKOBJ_NOINIT);
+					otmp->spe = 7;
+					set_material_gm(otmp, MINERAL);
+					add_oprop(otmp, OPROP_LESSER_WATRW);
+					add_oprop(otmp, OPROP_PSIOW);
+					otmp = mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags|MKOBJ_NOINIT);
+					otmp->spe = 3;
+					otmp = mongets(mtmp, RUFFLED_SHIRT, mkobjflags|MKOBJ_NOINIT);
+					otmp->spe = 3;
+					otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags|MKOBJ_NOINIT);
 				} else if (mm == PM_PATIENT){
 					otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
 					if(otmp) curse(otmp);
@@ -2171,17 +2182,6 @@ int mkobjflags;
 					bless(otmp);
 					otmp->spe = 7;
 					(void) mpickobj(mtmp, otmp);
-				} else if (mm == PM_LADY_CONSTANCE){
-					otmp = mongets(mtmp, STILETTO, mkobjflags|MKOBJ_NOINIT);
-					otmp->spe = 7;
-					set_material_gm(otmp, MINERAL);
-					add_oprop(otmp, OPROP_LESSER_WATRW);
-					add_oprop(otmp, OPROP_PSIOW);
-					otmp = mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags|MKOBJ_NOINIT);
-					otmp->spe = 3;
-					otmp = mongets(mtmp, RUFFLED_SHIRT, mkobjflags|MKOBJ_NOINIT);
-					otmp->spe = 3;
-					otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags|MKOBJ_NOINIT);
 				} else if (mm == PM_CASSILDA_THE_IRON_MAIDEN){
 					otmp = mongets(mtmp, CRYSTAL_HELM, mkobjflags|MKOBJ_NOINIT);
 					if(otmp){
