@@ -7784,8 +7784,12 @@ int mkobjflags;
 				(void) mpickobj(mtmp, otmp);
 				
 				// (void) mongets(mtmp, POT_FULL_HEALING, mkobjflags);
-				(void) mongets(mtmp, GAUNTLETS_OF_POWER, mkobjflags);
-				
+				otmp = mongets(mtmp, GAUNTLETS_OF_POWER, mkobjflags);
+				set_material_gm(otmp, COPPER);
+				otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+				set_material_gm(otmp, COPPER);
+				otmp->spe = 9;
+
 				otmp = mksobj(TWO_HANDED_SWORD, mkobjflags|MKOBJ_NOINIT);
 				otmp = oname(otmp, artiname(ART_GENOCIDE));
 				otmp->spe = 9;
