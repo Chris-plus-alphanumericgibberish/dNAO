@@ -3955,6 +3955,10 @@ boolean ranged;
 	case AD_BLUD:	/* bloodied, phases (blade of blood) */
 	case AD_MERC:	/* poisoned, cold, phases (blade of mercury) */
 	case AD_GLSS:	/* silvered (mirror-shards) */
+
+		/* abort if called with AT_NONE -- the attack was meant to only do special effects of the adtype. */
+		if (attk->aatyp == AT_NONE)
+			return result;
 		
 		/* The Tentacle Rod has a unique hitmessage which will replace the usual hitmsg */
 		if (vis&VIS_MAGR && weapon && arti_tentRod(weapon) && dohitmsg) {
