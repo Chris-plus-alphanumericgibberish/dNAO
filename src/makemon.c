@@ -6183,10 +6183,13 @@ int mkobjflags;
 				(void) mpickobj(mtmp, otmp);
 			break;
 		    case PM_FALLEN_ANGEL:
-				mongets(mtmp, LONG_SWORD, mkobjflags);
+				otmp = mongets(mtmp, LONG_SWORD, mkobjflags);
+				//Note: the kits assume that the sword is otmp
 				if(Inhell){
 					chance = rnd(6);
 					if(chance == 6){
+						//Set sword to silver
+						if(otmp) set_material_gm(otmp, SILVER);
 						otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
 						if(otmp) set_material_gm(otmp, SILVER);
 						otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
@@ -6221,6 +6224,41 @@ int mkobjflags;
 							if(otmp) set_material_gm(otmp, CLOTH);
 							otmp = mongets(mtmp, SHOES, mkobjflags);
 							if(otmp) set_material_gm(otmp, LEATHER);
+						}
+					// chance 3
+					} else if(chance == 2){
+						//Set sword to be filth-crusted
+						if(otmp) otmp->opoisoned = OPOISON_FILTH;
+						otmp = mongets(mtmp, ROBE, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, CLOTH);
+							otmp->oeroded3 = 1;
+						}
+					} else if(chance == 1){
+						//Set sword to black iron
+						if(otmp){
+							set_material_gm(otmp, IRON);
+							otmp->obj_color = CLR_BLACK;
+						}
+						otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, IRON);
+							otmp->obj_color = CLR_BLACK;
+						}
+						otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, IRON);
+							otmp->obj_color = CLR_BLACK;
+						}
+						otmp = mongets(mtmp, rn2(10) ? GAUNTLETS : GAUNTLETS_OF_POWER, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, IRON);
+							otmp->obj_color = CLR_BLACK;
+						}
+						otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, IRON);
+							otmp->obj_color = CLR_BLACK;
 						}
 					}
 				}
