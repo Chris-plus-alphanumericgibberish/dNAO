@@ -389,12 +389,18 @@ mkhellvaultitem(container)
 			bury_an_obj(otmp);
 		} else {
 			if(!rn2(10)){
-				mk_special(otmp);
-				otmp->spe = max_ints(d(3,3), otmp->spe);
+				otmp = mk_special(otmp);
+				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+					otmp->spe = max_ints(d(3,3), otmp->spe);
 			}
 			else if(!rn2(4)){
-				mk_minor_special(otmp);
-				otmp->spe = max_ints(d(1,7), otmp->spe);
+				otmp = mk_minor_special(otmp);
+				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+					otmp->spe = max_ints(d(1,7), otmp->spe);
+			}
+			else {
+				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+					otmp->spe = max_ints(d(2,3), otmp->spe);
 			}
 		}
 	} while (--try_limit > 0 &&
