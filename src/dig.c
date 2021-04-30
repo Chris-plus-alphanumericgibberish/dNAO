@@ -1679,6 +1679,7 @@ int x, y;
 			if(dungeon_topology.eprecursor_typ == PRE_POLYP && rn2(2))
 				mon->ispolyp = TRUE;
 		}
+		mon->mspec_used = 0;
 		mofflin(mon);
 		if(canseemon(mon)){
 			pline("%s appears from the magenta fog!", Monnam(mon));
