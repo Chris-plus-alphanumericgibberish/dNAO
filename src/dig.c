@@ -2402,7 +2402,7 @@ long timeout;	/* unused */
 		}
 		if(cansee(obj->ox, obj->oy))
 			pline_The("%s boils to black mist!", surface(obj->ox, obj->oy));
-		makemon(&mons[PM_MOUTH_OF_THE_GOAT], obj->ox, obj->oy, NO_MM_FLAGS);
+		makemon(&mons[PM_MOUTH_OF_THE_GOAT], obj->ox, obj->oy, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 	}
 	obj_extract_self(obj);
 	obfree(obj, (struct obj *) 0);
