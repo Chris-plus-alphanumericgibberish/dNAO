@@ -2602,15 +2602,13 @@ struct obj *obj;
 			You(need_to_remove_outer_armor, buf, xname(otmp));
 			return;
 		}
-#ifdef TOURIST
-		if ((otmp->owornmask & WORN_SHIRT) && (uarmc || uarm)) {
+		if ((otmp->owornmask & WORN_SHIRT) && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))) {
 			Strcpy(buf, uarmc ? xname(uarmc) : "");
 			if (uarmc && uarm) Strcat(buf, " and ");
 			Strcat(buf, uarm ? xname(uarm) : "");
 			You(need_to_remove_outer_armor, buf, xname(otmp));
 			return;
 		}
-#endif
 		consume_obj_charge(obj, TRUE);
 
 		if (otmp != &zeroobj) {

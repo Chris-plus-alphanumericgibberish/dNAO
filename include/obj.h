@@ -882,7 +882,7 @@ struct obj {
 
 #define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == PLAIN_DRESS || onum == VICTORIAN_UNDERWEAR)
 
-#define arm_blocks_upper_body(onum)		(onum != HAWAIIAN_SHORTS)
+#define arm_blocks_upper_body(onum)		(objects[onum].oc_dir&UPPER_TORSO_DR)
 
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \

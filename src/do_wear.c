@@ -2788,8 +2788,9 @@ struct monst *victim;
 	otmph = (victim == &youmonst) ? uarmc : which_armor(victim, W_ARMC);
 	if (!otmph){
 	    otmph = (victim == &youmonst) ? uarm : which_armor(victim, W_ARM);
-		if(otmph && arm_blocks_upper_body(otmph->otyp) && rn2(2))
-			otmph = 0;
+		//This causes all kinds of things to randomly fail, including enchant armor :(
+		// if(otmph && !arm_blocks_upper_body(otmph->otyp) && rn2(2))
+			// otmph = 0;
 	}
 #ifdef TOURIST
 	if (!otmph)
