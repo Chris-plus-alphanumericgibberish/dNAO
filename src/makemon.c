@@ -6000,8 +6000,9 @@ int mkobjflags;
 						case 2:
 							otmp = mksobj(QUARTERSTAFF, mkobjflags|MKOBJ_NOINIT);
 						break;
-						//case 3:
-						//break;
+						case 3:
+							otmp = 0; //Monk fists
+						break;
 						case 4:
 							otmp = mksobj(ATHAME, mkobjflags|MKOBJ_NOINIT);
 						break;
@@ -6019,10 +6020,12 @@ int mkobjflags;
 							set_material_gm(otmp, GOLD);
 						break;
 					}
-					curse(otmp);
-					otmp->spe = 6;
-					otmp->oerodeproof = TRUE;
-					(void) mpickobj(mtmp, otmp);
+					if(otmp){
+						curse(otmp);
+						otmp->spe = 6;
+						otmp->oerodeproof = TRUE;
+						(void) mpickobj(mtmp, otmp);
+					}
 					
 					switch(kit){
 						case 0:
