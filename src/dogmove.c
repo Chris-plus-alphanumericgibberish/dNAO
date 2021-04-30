@@ -39,7 +39,15 @@ register struct obj *otmp;
     register struct obj *best = (struct obj *)0;
 
     if (otmp->oclass != ARMOR_CLASS) return FALSE;
-    
+
+	//Special case: can't wear most torso armor
+	if (mtmp->mtyp == PM_HARROWER_OF_ZARIEL
+	 && ((is_suit(otmp) && arm_blocks_upper_body(otmp->otyp))
+		|| is_shirt(otmp)
+	)){
+		return FALSE;
+	}
+		
     if (is_suit(otmp) && (!arm_match(mtmp->data, otmp) || !arm_size_fits(mtmp->data, otmp)))
 		return FALSE;
     

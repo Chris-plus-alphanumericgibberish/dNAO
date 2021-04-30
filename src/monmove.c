@@ -1224,20 +1224,21 @@ register struct monst *mtmp;
 
 	if (is_commander(mdat) && mfind_target(mtmp, FALSE))
 		m_command(mtmp);
-	
-	if (((mdat->msound == MS_SHRIEK || mdat->msound == MS_HOWL) && !um_dist(mtmp->mx, mtmp->my, 1)) || 
-		(mdat->msound == MS_SHOG && !rn2(8)) ||
-		(mdat->msound == MS_JUBJUB && !rn2(10) && (!um_dist(mtmp->mx, mtmp->my, 3) || !rn2(10))) ||
-		(mdat->msound == MS_TRUMPET && !rn2(10) && !um_dist(mtmp->mx, mtmp->my, 3)) ||
-		(mdat->msound == MS_DREAD && !rn2(4)) ||
-		(mdat->msound == MS_OONA && (nearby || !rn2(6))) ||
-		(mdat->msound == MS_SONG && !rn2(6)) ||
-		(mdat->mtyp == PM_RHYMER && !mtmp->mspec_used && !rn2(6)) ||
-		(mdat->msound == MS_INTONE && !rn2(6)) ||
-		(mdat->msound == MS_FLOWER && !rn2(6)) ||
-		(mdat->msound == MS_SECRETS && !mtmp->mspec_used && u.uencouraged < Insanity/5+1) ||
-		(mdat->msound == MS_SCREAM && !rn2(7)) ||
-		(mdat->msound == MS_HOWL && !rn2(7))
+
+	if (((mdat->msound == MS_SHRIEK || mdat->msound == MS_HOWL) && !um_dist(mtmp->mx, mtmp->my, 1))
+		|| (mdat->msound == MS_SHOG && !rn2(8))
+		|| (mdat->msound == MS_JUBJUB && !rn2(10) && (!um_dist(mtmp->mx, mtmp->my, 3) || !rn2(10)))
+		|| (mdat->msound == MS_TRUMPET && !rn2(10) && !um_dist(mtmp->mx, mtmp->my, 3))
+		|| (mdat->msound == MS_DREAD && !rn2(4))
+		|| (mdat->msound == MS_OONA && (nearby || !rn2(6)))
+		|| (mdat->msound == MS_SONG && !rn2(6))
+		|| (mdat->mtyp == PM_RHYMER && !mtmp->mspec_used && !rn2(6))
+		|| (mdat->msound == MS_INTONE && !rn2(6))
+		|| (mdat->msound == MS_FLOWER && !rn2(6))
+		|| (mdat->msound == MS_SECRETS && !mtmp->mspec_used && u.uencouraged < Insanity/5+1)
+		|| (mdat->msound == MS_SCREAM && !rn2(7))
+		|| (mdat->msound == MS_HOWL && !rn2(7))
+		|| (mdat->msound == MS_HARROW && !mtmp->mspec_used)
 	) m_respond(mtmp);
 
 	if(!mtmp->mblinded) for (gazemon = fmon; gazemon; gazemon = nxtmon){

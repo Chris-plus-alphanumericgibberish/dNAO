@@ -1340,6 +1340,13 @@ boolean racialexception;
 	best = old;
 
 	for(obj = mon->minvent; obj; obj = obj->nobj) {
+		//Special case: can't wear most torso armor
+		if (mon->mtyp == PM_HARROWER_OF_ZARIEL
+		 && ((is_suit(obj) && arm_blocks_upper_body(obj->otyp))
+			|| is_shirt(obj)
+		)){
+			continue;
+		}
 	    switch(flag) {
 		case W_AMUL:
 		    if (obj->oclass != AMULET_CLASS ||

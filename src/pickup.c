@@ -1975,6 +1975,7 @@ dopetequip()
 		}
 		if(!freehand()){
 			You("have no free %s to dress %s with!", body_part(HAND), mon_nam(mtmp));
+		    return (0);
 		}
 		if(otmp->oclass == AMULET_CLASS){
 			flag = W_AMUL;
@@ -1994,6 +1995,13 @@ dopetequip()
 			flag = W_ARM;
 		} else {
 			pline("Error: Unknown monster armor type!?");
+			return 0;
+		}
+		if(mtmp->mtyp == PM_HARROWER_OF_ZARIEL
+		 && ((flag == W_ARM && arm_blocks_upper_body(otmp->otyp))
+			|| flag == W_ARMU
+		)){
+			You_cant("fit %s on over the thicket of spears stuck through %s chest.", the(xname(otmp)), mhis(mtmp));
 			return 0;
 		}
 		if(otmp->unpaid)  addtobill(otmp, FALSE, FALSE, FALSE);

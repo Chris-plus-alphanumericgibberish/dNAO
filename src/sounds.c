@@ -1018,6 +1018,23 @@ asGuardian:
 			}
 		}
 	}break;
+	case MS_HARROW:{
+		int i;
+		struct monst *tmpm;
+		if(!(mtmp->mspec_used || mtmp->mcan) && !mtmp->mpeaceful){
+			pline("%s screams.", Monnam(mtmp));
+			mtmp->mspec_used = 7;
+			for(i = d(2,3); i; i--){
+				tmpm = makemon(&mons[rn2(2) ? PM_ZARIELITE_ZEALOT : PM_ZARIELITE_HERETIC], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
+				if(tmpm){
+					mark_mon_as_summoned(tmpm, mtmp, 21, 0);
+				}
+			}
+			if(uwep && uwep->oartifact == ART_SINGING_SWORD){
+				uwep->ovar1 |= OHEARD_RALLY;
+			}
+		}
+	}break;
 	case MS_DREAD:{
 		struct monst *tmpm;
 		int ix, iy;

@@ -5439,6 +5439,67 @@ int mkobjflags;
 			if(!rn2(20)) add_oprop(otmp, OPROP_LESSER_HOLYW);
 			curse(otmp);
 			(void) mpickobj(mtmp, otmp);
+		} else if(mm == PM_ZARIELITE_ZEALOT) {
+			otmp = mongets(mtmp, SPEAR, mkobjflags);
+			set_material_gm(otmp, SILVER);
+			add_oprop(otmp, OPROP_LESSER_HOLYW);
+			otmp->spe = 7;
+			bless(otmp);
+			otmp = mongets(mtmp, TOWER_SHIELD, mkobjflags);
+			set_material_gm(otmp, WOOD);
+			otmp->spe = 7;
+			bless(otmp);
+
+			otmp = mongets(mtmp, HELMET, mkobjflags);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 7;
+			bless(otmp);
+			otmp = mongets(mtmp, SCALE_MAIL, mkobjflags);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 7;
+			bless(otmp);
+			otmp = mongets(mtmp, STUDDED_LEATHER_CLOAK, mkobjflags);
+			otmp->spe = 7;
+			bless(otmp);
+			otmp = mongets(mtmp, GLOVES, mkobjflags);
+			set_material_gm(otmp, LEATHER);
+			otmp->spe = 7;
+			bless(otmp);
+			otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
+			set_material_gm(otmp, LEATHER);
+			otmp->spe = 7;
+			bless(otmp);
+		} else if(mm == PM_ZARIELITE_HERETIC) {
+			otmp = mongets(mtmp, SPEAR, mkobjflags);
+			set_material_gm(otmp, IRON);
+			add_oprop(otmp, OPROP_LESSER_UNHYW);
+			otmp->obj_color = CLR_BLACK;
+			otmp->spe = 7;
+			curse(otmp);
+			otmp = mongets(mtmp, TOWER_SHIELD, mkobjflags);
+			set_material_gm(otmp, WOOD);
+			otmp->spe = 7;
+			curse(otmp);
+
+			otmp = mongets(mtmp, HELMET, mkobjflags);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 7;
+			curse(otmp);
+			otmp = mongets(mtmp, SCALE_MAIL, mkobjflags);
+			set_material_gm(otmp, COPPER);
+			otmp->spe = 7;
+			curse(otmp);
+			otmp = mongets(mtmp, STUDDED_LEATHER_CLOAK, mkobjflags);
+			otmp->spe = 7;
+			curse(otmp);
+			otmp = mongets(mtmp, GLOVES, mkobjflags);
+			set_material_gm(otmp, LEATHER);
+			otmp->spe = 7;
+			curse(otmp);
+			otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
+			set_material_gm(otmp, LEATHER);
+			otmp->spe = 7;
+			curse(otmp);
 		}
 		break;
 	    case S_ZOMBIE:
@@ -7461,6 +7522,24 @@ int mkobjflags;
 				bless(otmp);
 				otmp->oerodeproof = TRUE;
 				(void) mpickobj(mtmp, otmp);
+			} else if(ptr->mtyp == PM_HARROWER_OF_ZARIEL){
+				otmp = mksobj(ROBE, mkobjflags|MKOBJ_NOINIT);
+				otmp->oeroded3 = 3;
+				otmp->oeroded = 1;
+				otmp->spe = 7;
+				bless(otmp);
+				otmp->oerodeproof = TRUE;
+				(void) mpickobj(mtmp, otmp);
+
+				otmp = mongets(mtmp, SHACKLES, MKOBJ_NOINIT);
+				mtmp->misc_worn_check |= W_ARMG;
+				otmp->owornmask |= W_ARMG;
+				curse(otmp);
+				otmp = mongets(mtmp, SHACKLES, MKOBJ_NOINIT);
+				mtmp->misc_worn_check |= W_ARMF;
+				otmp->owornmask |= W_ARMF;
+				curse(otmp);
+				update_mon_intrinsics(mtmp, otmp, TRUE, TRUE);
 			}
 		break;
 	    case S_DEMON:
@@ -9052,6 +9131,10 @@ register int	mmflags;
 				}
 			} else if(mndx == PM_KETO || mndx == PM_DRACAE_ELADRIN){ 
 				mtmp->mhpmax = 3*mtmp->mhpmax;
+				mtmp->mhp = mtmp->mhpmax;
+			} else if(ptr->mtyp == PM_HARROWER_OF_ZARIEL){
+				mtmp->m_lev *= 1.5;
+				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
 				mtmp->mhp = mtmp->mhpmax;
 			} else if(mndx == PM_KUKER){ 
 				mtmp->mhpmax = mtmp->m_lev*8 - 4; //Max HP

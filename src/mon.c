@@ -431,6 +431,24 @@ register struct monst *mtmp;
 		}
 		goto default_1;
 
+	    case PM_HARROWER_OF_ZARIEL:
+			for(num = rnd(4); num > 0; num--){
+				otmp = mksobj_at(SPEAR, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(otmp, SILVER);
+				add_oprop(otmp, OPROP_LESSER_HOLYW);
+				otmp->spe = 7;
+				bless(otmp);
+			}
+			for(num = rnd(4); num > 0; num--){
+				otmp = mksobj_at(SPEAR, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(otmp, IRON);
+				add_oprop(otmp, OPROP_LESSER_UNHYW);
+				otmp->obj_color = CLR_BLACK;
+				otmp->spe = 7;
+				curse(otmp);
+			}
+		break;
+
 	    case PM_WHITE_UNICORN:
 	    case PM_GRAY_UNICORN:
 	    case PM_BLACK_UNICORN:
@@ -4500,6 +4518,7 @@ boolean was_swallowed;			/* digestion */
 		   || mon->data->msound == MS_NEMESIS
 		   || is_alabaster_mummy(mon->data)
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
+		   || mdat->mtyp == PM_HARROWER_OF_ZARIEL
 		   || mdat->mtyp == PM_UNDEAD_KNIGHT
 		   || mdat->mtyp == PM_WARRIOR_OF_SUNLIGHT
 		   || mdat->mtyp == PM_UNDEAD_MAIDEN
@@ -5661,12 +5680,12 @@ register struct monst *mtmp;
 		aggravate();
     } else if(!(mtmp->mspec_used) &&
 		(
-		mtmp->data->msound == MS_JUBJUB || mtmp->data->msound == MS_DREAD || 
-		mtmp->data->msound == MS_SONG || mtmp->data->msound == MS_OONA ||
-		mtmp->data->msound == MS_INTONE || mtmp->data->msound == MS_FLOWER ||
-		mtmp->data->msound == MS_TRUMPET || mtmp->mtyp == PM_RHYMER || 
-		mtmp->data->msound == MS_SECRETS || mtmp->data->msound == MS_HOWL || 
-		mtmp->data->msound == MS_SCREAM
+		mtmp->data->msound == MS_JUBJUB || mtmp->data->msound == MS_DREAD
+		|| mtmp->data->msound == MS_SONG || mtmp->data->msound == MS_OONA
+		|| mtmp->data->msound == MS_INTONE || mtmp->data->msound == MS_FLOWER
+		|| mtmp->data->msound == MS_TRUMPET || mtmp->mtyp == PM_RHYMER
+		|| mtmp->data->msound == MS_SECRETS || mtmp->data->msound == MS_HOWL
+		|| mtmp->data->msound == MS_SCREAM || mtmp->data->msound == MS_HARROW
 		)
 	) {
 		domonnoise(mtmp, FALSE);

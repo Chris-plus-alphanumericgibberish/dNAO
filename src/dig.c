@@ -1635,6 +1635,9 @@ int x, y;
 		case VN_A_O_DEATH:
 			mid = PM_ANCIENT_OF_DEATH;
 		break;
+		case VN_HARROWER:
+			mid = PM_HARROWER_OF_ZARIEL;
+		break;
 		case VN_MAD_ANGEL:
 			switch(rn2(6)){
 				case 0:
