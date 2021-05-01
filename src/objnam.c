@@ -404,6 +404,9 @@ register int otyp;
 	case RING_CLASS:
 		Strcpy(buf, "ring");
 		break;
+	case BED_CLASS:
+		Strcpy(buf, "bed");
+		break;
 	case AMULET_CLASS:
 		if(nn)
 			Strcpy(buf,actualn);
@@ -757,6 +760,13 @@ boolean dofull;
 			if (Is_candle(obj) && obj->otyp != CANDLE_OF_INVOCATION &&
 				obj->age < 20L * (long)objects[obj->otyp].oc_cost)
 				Strcat(buf, "partly used ");
+		}
+		break;
+	case AMULET_CLASS:
+		if (dofull)
+		{
+			if (obj->oward)
+				Strcat(buf, "engraved ");
 		}
 		break;
 	case RING_CLASS:
@@ -2807,13 +2817,13 @@ struct obj *obj;
 }
 
 static const char *wrp[] = {
-	"wand", "ring", "potion", "scroll", "shard", "gem", "amulet",
+	"wand", "ring", "potion", "scroll", "shard", "wage", "strange coin", "gem", "amulet",
 	"spellbook", "spell book",
 	/* for non-specific wishes */
 	"weapon", "armor", "armour", "tool", "food", "comestible",
 };
 static const char wrpsym[] = {
-	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS, GEM_CLASS,
+	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS, SCOIN_CLASS, SCOIN_CLASS, GEM_CLASS,
 	AMULET_CLASS, SPBOOK_CLASS, SPBOOK_CLASS,
 	WEAPON_CLASS, ARMOR_CLASS, ARMOR_CLASS, TOOL_CLASS, FOOD_CLASS,
 	FOOD_CLASS
@@ -4806,6 +4816,20 @@ srch:
 			return &zeroobj;
 		}
 # endif
+		if(!BSTRCMP(bp, p-12, "hellish seal")) {
+			levl[u.ux][u.uy].typ = HELLISH_SEAL;
+			if(VN_MAX > VAULT_LIMIT){
+				impossible("Vault exceeded [safe fallback triggered]");
+				levl[u.ux][u.uy].vaulttype = rnd(31);
+			} else {
+				levl[u.ux][u.uy].vaulttype = rnd(VN_MAX-1);
+			}
+			// level.flags.nseals++;
+			pline("A seal.");
+			newsym(u.ux, u.uy);
+			*wishreturn = WISH_SUCCESS;
+			return &zeroobj;
+		}
 		if(!BSTRCMP(bp, p-4, "pool")) {
 			levl[u.ux][u.uy].typ = POOL;
 			del_engr_ward_at(u.ux, u.uy);
@@ -5464,6 +5488,7 @@ struct obj *cloak;
 	switch (cloak->otyp) {
 	case ROBE:
 	    return "robe";
+	case PRAYER_WARDED_WRAPPING:
 	case MUMMY_WRAPPING:
 	    return "wrapping";
 	case ALCHEMY_SMOCK:

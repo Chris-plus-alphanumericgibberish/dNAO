@@ -2040,6 +2040,8 @@ char		*tmp_levels;
 	    (void) strncpy(parrotname, bufp, PL_PSIZ-1);
 	} else if (match_varname(buf, "MONKEYNAME", 3)) {
 	    (void) strncpy(monkeyname, bufp, PL_PSIZ-1);
+	} else if (match_varname(buf, "WHISPERNAME", 3)) {
+	    (void) strncpy(whisperername, bufp, PL_PSIZ-1);
 #ifdef CONVICT
 	} else if (match_varname(buf, "RATNAME", 3)) {
 	    (void) strncpy(catname, bufp, PL_PSIZ-1);

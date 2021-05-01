@@ -156,6 +156,7 @@ struct monst {
 	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*91*/
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*93*/
+	
 	int mtaneggs;	/* tannin eggs */
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
@@ -221,6 +222,8 @@ struct monst {
 #define	M_BLACK_WEB		13	/* Has a shadow blade attack */
 #define	M_GREAT_WEB		14	/* Has a stronger shadow blade attack */
 #define	SLIME_REMNANT	15	/* slimey, like an ancient of corruption */
+#define	YELLOW_TEMPLATE	16	/* causes sleep and damages sanity (unimplemented) */
+#define	DREAM_LEECH		17	/* sucks mental atributes */
 #define	MAD_TEMPLATE	18	/* mad angel template */
 #define MAXTEMPLATE	MAD_TEMPLATE
 

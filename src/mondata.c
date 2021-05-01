@@ -367,6 +367,36 @@ int template;
 		/* misc: */
 		ptr->msound = MS_SILENT;
 		break;
+	case YELLOW_TEMPLATE:
+		ptr->nac += 3;
+		ptr->pac += 3;
+		ptr->hdr += 3;
+		ptr->bdr += 3;
+		ptr->gdr += 3;
+		ptr->ldr += 3;
+		ptr->fdr += 3;
+		ptr->spe_hdr += 3;
+		ptr->spe_bdr += 3;
+		ptr->spe_gdr += 3;
+		ptr->spe_ldr += 3;
+		ptr->spe_fdr += 3;
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
+		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
+		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
+		ptr->mflagsa |= (MA_UNDEAD);
+		/* resists: */
+		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
+		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
+		// ptr->mcolor = CLR_YELLOW;
+		break;
+	case DREAM_LEECH:
+		ptr->pac += 6;
+		ptr->spe_hdr += 6;
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		ptr->mflagsa |= (MA_UNDEAD);
+		// ptr->mcolor = CLR_YELLOW;
+		break;
 	case MAD_TEMPLATE:
 		ptr->mmove += 12;
 		ptr->dac = -5;
@@ -673,10 +703,36 @@ int template;
 			attk->damd = 4;
 			special = TRUE;
 		}
+		if (template == YELLOW_TEMPLATE && !is_null_attk(attk) && attk->adtyp == AD_PHYS){
+			attk->damn++;
+			attk->damd += 2;
+		}
 		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN){
 			if(attk->adtyp == AD_PHYS)
 				attk->damn++;
 			attk->damd += 4;
+		}
+		if (template == YELLOW_TEMPLATE && (
+			end_insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_SLEE;
+			attk->damn = 1;
+			attk->damd = 1;
+			special = TRUE;
+		}
+		if (template == DREAM_LEECH && (
+			end_insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_DRIN;
+			attk->damn = 1;
+			attk->damd = 6;
+			special = TRUE;
 		}
 	}
 #undef insert_okay
@@ -695,6 +751,8 @@ int template;
 			else if (template == PSEUDONATURAL) Sprintf(nameBuffer, "%s the Pseudonatural", base->mname);
 			else if (template == TOMB_HERD) Sprintf(nameBuffer, "%s of the Herd", base->mname);
 			else if (template == SLIME_REMNANT) Sprintf(nameBuffer, "slimy remnant of %s", base->mname);
+			else if (template == YELLOW_TEMPLATE) Sprintf(nameBuffer, "%s of Carcosa", base->mname);
+			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s the Dream-Leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "%s the mad", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
@@ -709,6 +767,8 @@ int template;
 			else if (template == PSEUDONATURAL) Sprintf(nameBuffer, "pseudonatural %s", base->mname);
 			else if (template == TOMB_HERD) Sprintf(nameBuffer, "%s herd", base->mname);
 			else if (template == SLIME_REMNANT) Sprintf(nameBuffer, "slimy remnant of %s", an(base->mname));
+			else if (template == YELLOW_TEMPLATE) Sprintf(nameBuffer, "fulvous %s", base->mname);
+			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s dream-leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "mad %s", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
@@ -778,6 +838,10 @@ int mtyp;
 	case M_BLACK_WEB:
 	case M_GREAT_WEB:
 		/* ??? */
+		return TRUE;
+	case YELLOW_TEMPLATE:
+		return TRUE;
+	case DREAM_LEECH:
 		return TRUE;
 	}
 	/* default fall through -- allow all */
@@ -1229,6 +1293,37 @@ int atyp, dtyp;
 	}
 
     return (struct attack *)0;
+}
+
+boolean
+at_least_one_attack(magr)
+struct monst *magr;
+{
+	struct attack *attk;
+	struct attack prev_attk = {0};
+	int	indexnum = 0,	/* loop counter */
+		subout = 0,	/* remembers what attack substitutions have been made for [magr]'s attack chain */
+		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+
+	/* zero out res[] */
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+	
+	for(attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod)
+	){
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
+		&& attk->aatyp != AT_BOOM && attk->aatyp != AT_GAZE && attk->aatyp != AT_ARRW
+		&& attk->aatyp != AT_TNKR && attk->aatyp != AT_WDGZ && attk->aatyp != AT_REND
+		)
+			return TRUE;
+	}
+
+    return FALSE;
 }
 
 boolean
@@ -2039,6 +2134,7 @@ static const short grownups[][2] = {
 	{PM_PAGE, PM_KNIGHT},
 	{PM_ACOLYTE, PM_PRIEST},
 	{PM_ACOLYTE, PM_PRIESTESS},
+	{PM_SECRET_WHISPERER, PM_TRUTH_SEER}, {PM_TRUTH_SEER, PM_DREAM_EATER}, {PM_DREAM_EATER, PM_VEIL_RENDER},
 	{PM_APPRENTICE, PM_WIZARD},
 	{PM_DUNGEON_FERN_SPROUT, PM_DUNGEON_FERN},
 	{PM_SWAMP_FERN_SPROUT, PM_SWAMP_FERN},

@@ -830,6 +830,7 @@ random_special_room()
 			add_rspec_room(STATUEGRDN	,  2, TRUE);
 			add_rspec_room(TEMPLE		,  5, !level.flags.has_temple);
 			add_rspec_room(SHOPBASE		,  1, !rn2(3));
+			add_rspec_room(HELL_VAULT	,100, !level.flags.has_vault);
 			add_rspec_room(0			, 50, TRUE);
 		}
 	}
@@ -855,10 +856,10 @@ random_special_room()
 	}
 	/* -------- DEFAULT -------- */
 	else
-	{	
+	{
 		if (level.flags.is_maze_lev){
 			/* MAZE */
-			add_rspec_room(COURT		, 15, udepth >  4);
+			add_rspec_room(COURT		, 15, udepth >  4 && !Is_stronghold(&u.uz));
 			add_rspec_room(COCKNEST		,  9, udepth > 16 && mnotgone(PM_COCKATRICE));
 			add_rspec_room(POOLROOM		, 30, udepth > 15);
 			add_rspec_room(BARRACKS		, 18, udepth > 14 && mnotgone(PM_SOLDIER));
@@ -1038,7 +1039,13 @@ makelevel()
 				Sprintf(fillname, "%s-home", urole.filecode);
 				// pline("%s",fillname);
 				makemaz(fillname);
-			} else {
+			}
+			else if(Role_if(PM_MADMAN) && qstart_level.dnum == u.uz.dnum && qlocate_level.dlevel == (u.uz.dlevel+1)){
+				Sprintf(fillname, "%s-home", urole.filecode);
+				// pline("%s",fillname);
+				makemaz(fillname);
+			}
+			else {
 			    Sprintf(fillname, "%s-loca", urole.filecode);
 			    loc_lev = find_level(fillname);
 	
@@ -2037,6 +2044,42 @@ struct mkroom *croom;
 		break;
 	}
 	return TRUE;
+}
+
+/* make a statue that identifies the boss inside a hellvault */
+void
+mkHVstatue(x, y, hv_id)
+int x, y, hv_id;
+{
+	int mid;
+	struct obj* obj;
+	switch(hv_id){
+		case VN_AKKABISH:
+		case VN_SHALOSH:
+		case VN_NACHASH:
+		case VN_KHAAMNUN:
+		case VN_RAGLAYIM:
+		case VN_TERAPHIM:
+		case VN_SARTAN:
+			mid = PM_STRANGE_LARVA;
+		break;
+		case VN_A_O_BLESSINGS:
+		case VN_A_O_VITALITY:
+		case VN_A_O_CORRUPTION:
+		case VN_A_O_DESERTS:
+		case VN_A_O_THOUGHT:
+		case VN_A_O_DEATH:
+			mid = PM_ANCIENT_NUPPERIBO;
+		break;
+		case VN_APOCALYPSE:
+		case VN_HARROWER:
+		case VN_MAD_ANGEL:
+			mid = PM_ANGEL;
+		break;
+	}
+	obj = mksobj_at(STATUE, x, y, NO_MKOBJ_FLAGS);
+	obj->corpsenm = mid;
+	fix_object(obj);
 }
 
 /* maze levels have slightly different constraints from normal levels */

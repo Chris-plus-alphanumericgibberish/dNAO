@@ -112,9 +112,26 @@ dosit()
 	    register struct obj *obj;
 
 	    obj = level.objects[u.ux][u.uy];
-	    You("sit on %s.", the(xname(obj)));
-	    if (!(Is_box(obj) || obj->obj_material == CLOTH))
-		pline("It's not very comfortable...");
+	    if (obj->otyp == WRITING_DESK){
+			You("sit on the desk chair.");
+			pline("It's reasonably comfortable.");
+		}
+	    else if (obj->otyp == BED){
+			You("sit on the bed.");
+			pline("It's comfortable, but you're not tired.");
+		}
+	    else if (obj->otyp == BEDROLL){
+			You("sit on the bedroll.");
+			if(!obj->nexthere)
+				pline("It's reasonably comfortable, but you're not tired.");
+			else 
+				pline("It's not very comfortable...");
+		}
+	    else {
+			You("sit on %s.", the(xname(obj)));
+			if (!(Is_box(obj) || obj->obj_material == CLOTH))
+				pline("It's not very comfortable...");
+		}
 
 	} else if(Underwater || Is_waterlevel(&u.uz)) {
 	    if (Is_waterlevel(&u.uz))
@@ -142,6 +159,10 @@ dosit()
 	} else if(IS_GRAVE(typ)) {
 
 	    You(sit_message, defsyms[S_grave].explanation);
+
+	} else if(IS_SEAL(typ)) {
+
+	    You(sit_message, defsyms[S_seal].explanation);
 
 	} else if(typ == STAIRS) {
 

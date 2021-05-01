@@ -547,7 +547,7 @@ test_twoweapon()
 	else if ((!uwep || !uswapwep) && !(
 		/* exceptions: */
 			/* martial arts training let you use unarmed with either hand, and to supplement weapons */
-			(u.umartial) ||
+			(u.umartial || u.umaniac) ||
 			/* having the black web bound lets you use your shadowblades with either hand, and to supplement weapons */
 			(u.specialSealsActive&SEAL_BLACK_WEB) ||
 			/* wielding a bestial claw lets you replace offhand unarmed with an AT_CLAW attack */
@@ -565,8 +565,8 @@ test_twoweapon()
 	/* not twohanded */
 	else if ((
 		/* twohanded (can be paired with punches) */
-		(uwep && bimanual(uwep,youracedata) && !(u.umartial && !uswapwep)) || 
-		(uswapwep && bimanual(uswapwep,youracedata) && !(u.umartial && !uwep))
+		(uwep && bimanual(uwep,youracedata) && !((u.umartial || u.umaniac) && !uswapwep)) || 
+		(uswapwep && bimanual(uswapwep,youracedata) && !((u.umartial || u.umaniac) && !uwep))
 		) &&
 		/* Exception: Friede's Scythe can be offhanded with the (twohanded) Profaned Greatscythe or Lifehunt Scythe. */
 		!(uwep && uswapwep &&

@@ -377,6 +377,7 @@ struct you {
 #define MATTK_U_STYLE       27
 #define MATTK_U_MONST       28
 #define MATTK_U_ELMENTAL    29
+#define MATTK_WHISPER    	30
 
 	struct attribs	macurr,		/* for monster attribs */
 			mamax;		/* for monster attribs */
@@ -434,15 +435,17 @@ struct you {
 	Bitfield(shambin,2);		/* Whether the shambling horror has normal innards, undifferentiated innards, or solid/nonexistent innards */
 	Bitfield(stumbin,2);		/* Whether the stumbling horror has normal innards, undifferentiated innards, or solid/nonexistent innards */
 	Bitfield(wandein,2);		/* Whether the wandering horror has normal innards, undifferentiated innards, or solid/nonexistent innards */
-	Bitfield(umartial,1);		/* blessed food detection; sense unsafe food */
+	Bitfield(umartial,1);		/* Do you know kung fu? */
+	Bitfield(umaniac,1);		/* Swings wildly */
 	Bitfield(phasengn,1);		/* clockwork phase engine */
-	/* 24 free bits */
+	/* 23 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */
 	char ring_wishes;			/* Record the how many wishes were/should be in the castle ring */
 	unsigned udg_cnt;		/* timer for wizard intervention WRONG?:how long you have been demigod */
 	unsigned ill_cnt;		/* timer for illurien intervention */
+	unsigned yel_cnt;		/* timer for stranger intervention */
 	struct u_event	uevent;		/* certain events have happened */
 	struct u_have	uhave;		/* you're carrying special objects */
 	struct u_conduct uconduct;	/* KMH, conduct */
@@ -491,6 +494,7 @@ struct you {
 	long lastprayed;
 	long lastslept;
 	long nextsleep;
+	long whisperturn;
 	int regen_blocked;
 	uchar lastprayresult, reconciled;
 #define	PRAY_NONE	0

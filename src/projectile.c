@@ -1502,6 +1502,9 @@ struct monst * mon;
 			if (!next2u) sho_obj_return(obj, u.ux, u.uy);
 			obj = addinv(obj);	/* back into your inventory */
 			(void)encumber_msg();
+			if(Role_if(PM_MADMAN) && mon->mtyp == PM_CASSILDA_THE_IRON_MAIDEN){
+				monvanished(mon);
+			}
 		}
 	}
 	else {

@@ -762,7 +762,7 @@ peffects(otmp)
 		break;
 	case SPE_INVISIBILITY:
 		/* spell cannot penetrate mummy wrapping */
-		if (BInvis && uarmc->otyp == MUMMY_WRAPPING) {
+		if (BInvis && is_mummy_wrap(uarmc)) {
 			You_feel("rather itchy under your %s.", xname(uarmc));
 			break;
 		}

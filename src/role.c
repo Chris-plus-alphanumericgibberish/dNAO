@@ -261,6 +261,34 @@ struct Role roles[] = {
 	{  2, 2,  0, 2,  0, 2 },10,	/* Energy */
 	10, 8,-2, 2, 20, A_WIS, SPE_RESTORE_ABILITY, -24
 },
+{	{"Madman", "Madwoman"}, {
+	{"Ward",     0},
+	{"Escapee",   0},
+	{"Drifter",0},
+	{"Derelict",0},
+	{"Raver",    0},
+	{"Lunatic",   0},
+	{"Maniac",     0},
+	{"Psycopath",    0},
+	{"Bedlamite",  0} },
+	"Lobon", "Oukranos", "Zo-Kalar",	/* Dreamlands */
+	"Mad", "Archer Asylum", "the ground floor",
+	PM_MADMAN, PM_MADWOMAN, NON_PM,
+	PM_CASSILDA_THE_IRON_MAIDEN, PM_PATIENT, PM_DOCTOR_ARCHER,
+	PM_ENORMOUS_RAT, PM_CONTAMINATED_PATIENT, S_RODENT, S_BAT,
+	ART_STAR_OF_HYPERNOTUS,
+	MA_HUMAN|MA_DWARF|MA_GNOME|MA_ORC|MA_ELF|MA_VAMPIRE|MA_DRAGON|MA_FEY, ROLE_MALE|ROLE_FEMALE |
+	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
+	/* Str Int Wis Dex Con Cha */
+	{   7, 10, 3, 10,  7, 10 },
+	{  10, 10, 3, 20, 20, 30 },
+	/* Init   Lower  Higher */
+	{ 12, 0,  0, 8,  0, 1 },	/* Hit points */
+	{  4, 3,  0, 1,  2, 4 },14,	/* Energy */
+	10, 8,-2, 2, 20, A_CHA, SPE_CONFUSE_MONSTER, -24
+},
+	// "The Silver Fire", "_The Fury", "The Shadow",	/* Sorta-eberron */
+	// "_The Inheritor", "_The Dawnflower", "_The Everbloom",	/* Sorta-glorion */
 {	{"Nobleman", "Noblewoman"}, {
 	{"Pargar",       0},
 	{"Cneaz",	     0},
@@ -2340,13 +2368,15 @@ int newgame;
 	urace = races[flags.initrace];
 	if(Role_if(PM_ANACHRONONAUT)){
 		if(Race_if(PM_DROW))
-		urace = myrkalfr;
+			urace = myrkalfr;
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
-			urace = android;
 			urole.filecode = "And";
-			quest_status.got_quest = TRUE;
-			quest_status.leader_is_dead = TRUE;
-			flags.questprogress = 1;
+			urace = android;
+			if(newgame){
+				quest_status.got_quest = TRUE;
+				quest_status.leader_is_dead = TRUE;
+				flags.questprogress = 1;
+			}
 		}
 	}
 

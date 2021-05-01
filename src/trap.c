@@ -996,6 +996,10 @@ unsigned trflags;
 
 	    case RUST_TRAP:
 		seetrap(trap);
+		if(Waterproof){
+		    pline("Water gushes around you!");
+			break;
+		}
 		if (u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_CHAIN_GOLEM) {
 		    int dam = u.mhmax;
 
@@ -2147,6 +2151,11 @@ struct monst *mtmp;
 
 			if (in_sight)
 			    seetrap(trap);
+			if(mon_resistance(mtmp, WATERPROOF)){
+			    if (in_sight)
+					pline("Water gushes around %s!", mon_nam(mtmp));
+				break;
+			}
 			switch (rn2(5)) {
 			case 0:
 			    if (in_sight)

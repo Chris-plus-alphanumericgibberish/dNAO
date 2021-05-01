@@ -62,6 +62,7 @@
 #define MS_GLYPHS	51	/* Exchanges glyphs for artifacts */
 #define MS_SECRETS	52	/* Tells secrets */
 #define MS_SCREAM	53	/* Screams in madness */
+#define MS_HARROW	54	/* Summon wraiths */
 
 
 #define MR_FIRE			0x0001	/* 1 resists fire */

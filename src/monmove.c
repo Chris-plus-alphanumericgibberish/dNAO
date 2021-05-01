@@ -962,7 +962,7 @@ register struct monst *mtmp;
 			}
 		}
 	}
-	if (mtmp->mstrategy & STRAT_ARRIVE) {
+	if (mtmp->mstrategy & STRAT_ARRIVE){
 	    int res = m_arrival(mtmp);
 	    if (res >= 0) return res;
 	}
@@ -1182,7 +1182,7 @@ register struct monst *mtmp;
 		struct monst *tmpm;
 		int i = rnd(3);
 		if(canseemon(mtmp))
-			pline("A pustule bursts in a spray of acid and %sstrange larva tumble%s out!", i > 1 ? "" : "a ", i > 1 ? "" : "s");
+			pline(i > 1 ? "A pustule bursts in a spray of acid and strange larvae tumble out!" : "A pustule bursts in a spray of acid and a strange larva tumbles out!");
 		explode(mtmp->mx, mtmp->my, AD_ACID, MON_EXPLODE, d(6,6), EXPL_NOXIOUS, i/3+1);
 		for(; i > 0; i--){
 			tmpm = makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
@@ -1224,20 +1224,21 @@ register struct monst *mtmp;
 
 	if (is_commander(mdat) && mfind_target(mtmp, FALSE))
 		m_command(mtmp);
-	
-	if (((mdat->msound == MS_SHRIEK || mdat->msound == MS_HOWL) && !um_dist(mtmp->mx, mtmp->my, 1)) || 
-		(mdat->msound == MS_SHOG && !rn2(8)) ||
-		(mdat->msound == MS_JUBJUB && !rn2(10) && (!um_dist(mtmp->mx, mtmp->my, 3) || !rn2(10))) ||
-		(mdat->msound == MS_TRUMPET && !rn2(10) && !um_dist(mtmp->mx, mtmp->my, 3)) ||
-		(mdat->msound == MS_DREAD && !rn2(4)) ||
-		(mdat->msound == MS_OONA && (nearby || !rn2(6))) ||
-		(mdat->msound == MS_SONG && !rn2(6)) ||
-		(mdat->mtyp == PM_RHYMER && !mtmp->mspec_used && !rn2(6)) ||
-		(mdat->msound == MS_INTONE && !rn2(6)) ||
-		(mdat->msound == MS_FLOWER && !rn2(6)) ||
-		(mdat->msound == MS_SECRETS && !mtmp->mspec_used && u.uencouraged < Insanity/5+1) ||
-		(mdat->msound == MS_SCREAM && !rn2(7)) ||
-		(mdat->msound == MS_HOWL && !rn2(7))
+
+	if (((mdat->msound == MS_SHRIEK || mdat->msound == MS_HOWL) && !um_dist(mtmp->mx, mtmp->my, 1))
+		|| (mdat->msound == MS_SHOG && !rn2(8))
+		|| (mdat->msound == MS_JUBJUB && !rn2(10) && (!um_dist(mtmp->mx, mtmp->my, 3) || !rn2(10)))
+		|| (mdat->msound == MS_TRUMPET && !rn2(10) && !um_dist(mtmp->mx, mtmp->my, 3))
+		|| (mdat->msound == MS_DREAD && !rn2(4))
+		|| (mdat->msound == MS_OONA && (nearby || !rn2(6)))
+		|| (mdat->msound == MS_SONG && !rn2(6))
+		|| (mdat->mtyp == PM_RHYMER && !mtmp->mspec_used && !rn2(6))
+		|| (mdat->msound == MS_INTONE && !rn2(6))
+		|| (mdat->msound == MS_FLOWER && !rn2(6))
+		|| (mdat->msound == MS_SECRETS && !mtmp->mspec_used && u.uencouraged < Insanity/5+1)
+		|| (mdat->msound == MS_SCREAM && !rn2(7))
+		|| (mdat->msound == MS_HOWL && !rn2(7))
+		|| (mdat->msound == MS_HARROW && !mtmp->mspec_used)
 	) m_respond(mtmp);
 
 	if(!mtmp->mblinded) for (gazemon = fmon; gazemon; gazemon = nxtmon){
@@ -1593,7 +1594,7 @@ register struct monst *mtmp;
 				digactualhole(mtmp->mx, mtmp->my, mtmp, HOLE, FALSE, TRUE);
 		}
 	}
-	if (has_mind_blast(mdat) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20)) {
+	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20)) {
 		boolean reducedFlayerMessages = (((Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && flags.initgend) || Role_if(PM_ANACHRONONAUT)) && In_quest(&u.uz));
 		struct monst *m2, *nmon = (struct monst *)0;
 		
@@ -1642,6 +1643,11 @@ register struct monst *mtmp;
 						}
 					}
 				}
+				if(has_template(mtmp, DREAM_LEECH)){
+					if (!Sleep_resistance){
+						fall_asleep(-100*dmg, TRUE);
+					}
+				}
 			}
 		}
 		for(m2=fmon; m2; m2 = nmon) {
@@ -1650,8 +1656,11 @@ register struct monst *mtmp;
 			if (m2->mpeaceful == mtmp->mpeaceful) continue;
 			if (mindless_mon(m2)) continue;
 			if (m2 == mtmp) continue;
-			if ((mon_resistance(m2,TELEPAT) &&
-			    (rn2(2) || m2->mblinded)) || !rn2(10)) {
+			if (species_is_telepathic(m2->data) ||
+				(mon_resistance(m2,TELEPAT) &&
+				(rn2(2) || m2->mblinded)) || 
+				!rn2(10)
+			) {
 				if (cansee(m2->mx, m2->my))
 				    pline("It locks on to %s.", mon_nam(m2));
 				if(mdat->mtyp == PM_GREAT_CTHULHU) m2->mconf=TRUE;
@@ -1668,6 +1677,11 @@ register struct monst *mtmp;
 				    monkilled(m2, "", AD_DRIN);
 				else
 				    m2->msleeping = 0;
+				if(has_template(mtmp, DREAM_LEECH)){
+					if (!resists_sleep(m2)){
+						m2->msleeping = 1;
+					}
+				}
 			}
 		}
 	}
@@ -1852,7 +1866,7 @@ register int after;
 	int  omx = mtmp->mx, omy = mtmp->my;
 	struct obj *mw_tmp;
 
-	if (stationary(mtmp->data) || sessile(mtmp->data)) return(0);
+	if (stationary_mon(mtmp) || sessile(mtmp->data)) return(0);
 	if(mtmp->mtrapped) {
 	    int i = mintrap(mtmp);
 	    if(i >= 2) { newsym(mtmp->mx,mtmp->my); return(2); }/* it died */

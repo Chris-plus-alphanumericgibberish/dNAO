@@ -602,7 +602,7 @@ boolean you_abilities;
 	if (mon_abilities && youracedata->mlet == S_NYMPH){
 		add_ability('I', "Remove an iron ball", MATTK_REMV);
 	}
-	if (mon_abilities && is_mind_flayer(youracedata)){
+	if (mon_abilities && (is_mind_flayer(youracedata) || Role_if(PM_MADMAN))){
 		add_ability('m', "Emit a mind blast", MATTK_MIND);
 	}
 	if (you_abilities && !mon_abilities){
@@ -640,6 +640,9 @@ boolean you_abilities;
 	}
 	if (mon_abilities && webmaker(youracedata)){
 		add_ability('w', "Spin a web", MATTK_WEBS);
+	}
+	if (Role_if(PM_MADMAN) && u.whisperturn < moves){
+		add_ability('W', "Call your whisperer", MATTK_WHISPER);
 	}
 	if (you_abilities && spellid(0) != NO_SPELL) {
 		add_ability('z', "Cast spells", MATTK_U_SPELLS);
@@ -683,6 +686,7 @@ boolean you_abilities;
 	case MATTK_U_STYLE: return dofightingform();
 	case MATTK_U_MONST: return domonability();
 	case MATTK_U_ELMENTAL: return doelementalbreath();
+	case MATTK_WHISPER: return domakedog();
 
 	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);
@@ -768,6 +772,7 @@ boolean you_abilities;
 			   (is_drawbridge_wall(u.ux, u.uy) >= 0)) ||
 			(boulder_at(u.ux, u.uy)) ||
 			(IS_GRAVE(lev->typ)) ||
+			(IS_SEAL(lev->typ)) ||
 			(lev->typ == DRAWBRIDGE_UP) ||
 			(IS_THRONE(lev->typ)) ||
 			(IS_ALTAR(lev->typ)) ||
@@ -3948,7 +3953,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ORTHOS && !NoBInvis){
-		if(uarmc && uarmc->otyp != MUMMY_WRAPPING){
+		if(uarmc && is_mummy_wrap(uarmc)){
 			putstr(en_win, 0, "Your cloak blows in a nonexistent wind.");
 			message = TRUE;
 		}
@@ -4483,7 +4488,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_MOTHER && !NoBInvis){
-		if(!uarmg && !(uarmc && uarmc->otyp == MUMMY_WRAPPING))
+		if(!uarmg && !(uarmc && is_mummy_wrap(uarmc)))
 			putstr(en_win, 0, "The eyes on your fingers and palms stare back at you.");
 		else
 			putstr(en_win, 0, "The eyes on your fingers and palms are covered up.");
@@ -4496,7 +4501,7 @@ signs_mirror()
 		}
 	}
 	if(u.sealsActive&SEAL_ORTHOS && !NoBInvis){
-		if(uarmc && uarmc->otyp != MUMMY_WRAPPING){
+		if(uarmc && !is_mummy_wrap(uarmc)){
 			putstr(en_win, 0, "Your cloak blows in a nonexistent wind.");
 			message = TRUE;
 		}

@@ -130,7 +130,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	*gloves = STRANGE_OBJECT;
 	*shield = STRANGE_OBJECT;
 	*tool = STRANGE_OBJECT;
-	switch(monsndx(ptr)) {
+	switch(ptr->mtyp) {
 	case PM_ARCHEOLOGIST:
 		*weapon = BULLWHIP;
 		*armor = JACKET;
@@ -260,6 +260,32 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		*boots = LOW_BOOTS;
 		*cloak = ROBE;
 	break;
+	case PM_MADMAN:
+		if(special){
+			*weapon = RAKUYO_SABER;
+			*armor = GENTLEMAN_S_SUIT;
+			*shirt = RUFFLED_SHIRT;
+			*cloak = find_opera_cloak();
+			*gloves = GLOVES;
+			*boots = ARMORED_BOOTS;
+			break;
+		}
+	case PM_MADWOMAN:
+		if(special){
+			*weapon = RAKUYO_DAGGER;
+			*armor = GENTLEWOMAN_S_DRESS;
+			*shirt = VICTORIAN_UNDERWEAR;
+			*cloak = ALCHEMY_SMOCK;
+			*gloves = GLOVES;
+			*boots = STILETTOS;
+			break;
+		}
+		//Else
+		if (rn2(4)) *weapon = KNIFE;
+		else if(rn2(3)) *weapon = STILETTO;
+		else *weapon = BULLWHIP;
+		*armor = STRAITJACKET;
+	break;
 	case PM_NOBLEMAN:
 		*weapon = special ? LONG_SWORD : RAPIER;
 		*armor = special ? CRYSTAL_PLATE_MAIL : GENTLEMAN_S_SUIT;
@@ -278,13 +304,19 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	break;
 	case PM_PRIEST:
 	case PM_PRIESTESS:
-		*weapon = MACE;
-		if (special && rn2(2)) *armor = PLATE_MAIL;
-		*cloak = ROBE;
-		if (special && rn2(4)) *helm = rn2(2) ? HELM_OF_BRILLIANCE : HELM_OF_TELEPATHY;
-		if (rn2(2)) *shield = BUCKLER;
-		*boots = LOW_BOOTS;
-		*tool = POT_WATER;
+		if(Role_if(PM_MADMAN) && In_quest(&u.uz) && ptr->mtyp == PM_PRIESTESS){
+			*armor = STRAITJACKET;
+			*cloak = ROBE;
+		}
+		else {
+			*weapon = MACE;
+			if (special && rn2(2)) *armor = PLATE_MAIL;
+			*cloak = ROBE;
+			if (special && rn2(4)) *helm = rn2(2) ? HELM_OF_BRILLIANCE : HELM_OF_TELEPATHY;
+			if (rn2(2)) *shield = BUCKLER;
+			*boots = LOW_BOOTS;
+			*tool = POT_WATER;
+		}
 	break;
 	case PM_PIRATE:
 		*weapon = SCIMITAR;
@@ -550,6 +582,37 @@ register boolean special;
 	    quan = rnd(3);
 	    while(quan--)
 			(void)mongets(mtmp, rnd_misc_item(mtmp), NO_MKOBJ_FLAGS);
+
+		if((special && (mtmp->mtyp == PM_MADMAN || mtmp->mtyp == PM_MADWOMAN))
+			|| (Role_if(PM_MADMAN) && In_quest(&u.uz) && (mtmp->mtyp == PM_NOBLEMAN || mtmp->mtyp == PM_NOBLEWOMAN || mtmp->mtyp == PM_HEALER))
+		){
+			for(struct obj *otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+				if(is_metal(otmp)){
+					set_material_gm(otmp, GOLD);
+				} else if(otmp->owornmask){
+					otmp->obj_color = CLR_YELLOW;
+				}
+			}
+		}
+
+		if(Role_if(PM_MADMAN) && In_quest(&u.uz) && mtmp->mtyp == PM_PRIESTESS){
+			mtmp->m_lev = 20;
+			mtmp->mhpmax = d(20, 6) + 40;
+			mtmp->mhp = mtmp->mhpmax;
+			mtmp->m_insight_level = 10;
+			set_template(mtmp, MISTWEAVER);
+			for(struct obj *otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+				if(otmp->otyp == STRAITJACKET){
+					curse(otmp);
+				}
+				else if(!is_metal(otmp)){
+					otmp->obj_color = CLR_RED;
+					otmp->oeroded3 = 1;
+				}
+			}
+			(void)mongets(mtmp, SHACKLES, NO_MKOBJ_FLAGS);
+			mtmp->entangled = SHACKLES;
+		}
 	}
 
 	return(mtmp);

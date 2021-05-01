@@ -412,6 +412,7 @@ E NEARDATA char spidername[];
 E NEARDATA char dragonname[];
 E NEARDATA char parrotname[];
 E NEARDATA char monkeyname[];
+E NEARDATA char whisperername[];
 #ifdef CONVICT
 E NEARDATA char ratname[];
 #endif /* CONVICT */

@@ -420,7 +420,7 @@ int whodidit;	/* 1==hero, 0=other, -1==just check whether it'll pass thru */
 	case WAND_CLASS:
 	case BALL_CLASS:
 	case CHAIN_CLASS:
-/*	case BED_CLASS:*/
+	case BED_CLASS:
 		hits = TRUE;
 		break;
 	default:

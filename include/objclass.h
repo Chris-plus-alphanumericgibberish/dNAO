@@ -245,8 +245,9 @@ extern NEARDATA struct colorTextClr LightsaberColor[];
 #define CHAIN_CLASS	16
 #define VENOM_CLASS	17
 #define TILE_CLASS	18
-/*define BED_CLASS	19*/
-#define MAXOCLASSES	19
+#define BED_CLASS	19
+#define SCOIN_CLASS	20
+#define MAXOCLASSES	21
 
 #define ALLOW_COUNT	(MAXOCLASSES+1) /* Can be used in the object class */
 #define ALL_CLASSES	(MAXOCLASSES+2) /* input to getobj().		   */
@@ -280,7 +281,8 @@ extern uchar oc_syms[MAXOCLASSES];		/* current class symbols */
 #define CHAIN_SYM	'_'
 #define VENOM_SYM	'.'
 #define TILE_SYM	'-'
-#define BED_SYM		'#'
+#define BED_SYM		'\\'
+#define SCOIN_SYM	'|'
 
 struct fruit {
 	char fname[PL_FSIZ];

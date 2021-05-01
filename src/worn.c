@@ -38,7 +38,7 @@ const struct worn {
 
 /* This only allows for one blocking item per property */
 #define w_blocks(o,m) \
-		((o->otyp == MUMMY_WRAPPING && ((m) & W_ARMC)) ? INVIS : \
+		((is_mummy_wrap(o) && ((m) & W_ARMC)) ? INVIS : \
 		 (o->otyp == CORNUTHAUM && ((m) & W_ARMH) && \
 			!(Role_if(PM_WIZARD) || Race_if(PM_INCANTIFIER))) ? CLAIRVOYANT : 0)
 		/* note: monsters don't have clairvoyance, so your role
@@ -1340,6 +1340,13 @@ boolean racialexception;
 	best = old;
 
 	for(obj = mon->minvent; obj; obj = obj->nobj) {
+		//Special case: can't wear most torso armor
+		if (mon->mtyp == PM_HARROWER_OF_ZARIEL
+		 && ((is_suit(obj) && arm_blocks_upper_body(obj->otyp))
+			|| is_shirt(obj)
+		)){
+			continue;
+		}
 	    switch(flag) {
 		case W_AMUL:
 		    if (obj->oclass != AMULET_CLASS ||
@@ -1755,6 +1762,7 @@ struct obj *obj;
 			return 5;
 		break;
 	case MUMMY_WRAPPING:
+	case PRAYER_WARDED_WRAPPING:
 		if (mon->data->mlet == S_MUMMY)
 			return 30;
 		else if (mon->mtame && mon->minvis && !See_invisible_old)

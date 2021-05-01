@@ -352,6 +352,12 @@ static struct trobj Monk[] = {
 	{ FORTUNE_COOKIE, 0, FOOD_CLASS, 3, UNDEF_BLESS },
 	{ 0, 0, 0, 0, 0 }
 };
+static struct trobj Madman[] = {
+	{ STRAITJACKET, 0, ARMOR_CLASS, 1, 0 },
+	{ BLINDFOLD, 0, TOOL_CLASS, 1, 0 },
+	{ POT_BOOZE, 0, POTION_CLASS, 2, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj Noble[] = {
 	{ RAPIER, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
 #define NOB_SHIRT	1
@@ -998,6 +1004,24 @@ static const struct def_skill Skill_Con[] = {
     { P_NONE, 0 }
 };
 #endif  /* CONVICT */
+static const struct def_skill Skill_Mad[] = {
+    { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_EXPERT },
+    { P_AXE, P_EXPERT },			{ P_MORNING_STAR, P_SKILLED },
+    { P_CLUB, P_EXPERT },		    { P_MACE, P_BASIC },
+    { P_DART, P_SKILLED },		    { P_FLAIL, P_BASIC },
+    { P_SHORT_SWORD, P_BASIC },
+	{ P_HARVEST, P_SKILLED },		{ P_WHIP, P_SKILLED },
+    { P_ATTACK_SPELL, P_BASIC },	{ P_ESCAPE_SPELL, P_SKILLED },
+    { P_HEALING_SPELL, P_SKILLED }, { P_DIVINATION_SPELL, P_EXPERT },
+	{ P_ENCHANTMENT_SPELL, P_EXPERT },
+    { P_CLERIC_SPELL, P_EXPERT },
+    { P_MATTER_SPELL, P_BASIC },
+    { P_WAND_POWER, P_SKILLED },
+    { P_TWO_WEAPON_COMBAT, P_SKILLED },
+    { P_BARE_HANDED_COMBAT, P_EXPERT },
+    { P_BEAST_MASTERY, P_EXPERT },
+    { P_NONE, 0 }
+};
 
 static const struct def_skill Skill_H[] = {
     { P_DAGGER, P_SKILLED },		{ P_KNIFE, P_EXPERT },
@@ -1557,6 +1581,7 @@ u_init()
 	u.uevent.udemigod = 0;		/* not a demi-god yet... */
 	u.udg_cnt = 0;
 	u.ill_cnt = 0;
+	u.yel_cnt = 0;
 	/*Ensure that the HP and energy fields are zeroed out*/
 	u.uhp = u.uhpmax = u.uhprolled = u.uhpmultiplier = u.uhpbonus = u.uhpmod = 0;
 	u.uen = u.uenmax = u.uenrolled = u.uenmultiplier = u.uenbonus = 0;
@@ -1967,6 +1992,31 @@ u_init()
         urace.lovemask = 0; /* Convicts are pariahs of their race */
         break;
 #endif	/* CONVICT */
+	case PM_MADMAN:
+        ini_inv(Madman);
+        knows_object(SKELETON_KEY);
+        knows_object(POT_BOOZE);
+        knows_object(POT_SLEEPING);
+        knows_object(POT_RESTORE_ABILITY);
+        knows_object(POT_CONFUSION);
+        knows_object(POT_PARALYSIS);
+        knows_object(POT_HALLUCINATION);
+        knows_object(POT_SEE_INVISIBLE);
+        knows_object(POT_ENLIGHTENMENT);
+        knows_object(POT_ACID);
+        knows_object(POT_AMNESIA);
+        skill_init(Skill_Mad);
+		u.ualign.sins += 13; /* You have sinned */
+		for(i=0;i<SIZE(u.ugangr);i++){
+			u.ugangr[i] = 1; /* gods slightly torqued */
+		}
+		u.usanity = 75; /* Your sanity is not so hot */
+		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
+		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
+
+        urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
+        urace.lovemask = 0; /* Madmen are pariahs of their race */
+        break;
 	case PM_HEALER:
 #ifndef GOLDOBJ
 		u.ugold = u.ugold0 = rn1(1000, 1001);
@@ -2267,7 +2317,7 @@ u_init()
 					u.ualign.type = A_NEUTRAL; /* Males are neutral */
 				flags.initalign = 1; // 1 == neutral
 			}
-		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT)){
+		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !Role_if(PM_MADMAN)){
 			ini_inv(DrovenCloak);
 			if(!flags.female){
 				u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
@@ -2293,7 +2343,7 @@ u_init()
 	    knows_object(find_signet_ring());
 		
 		if(Role_if(PM_ANACHRONONAUT)) u.uhouse = LAST_BASTION_SYMBOL;
-		else u.uhouse = !(Role_if(PM_EXILE) || (Role_if(PM_NOBLEMAN) && !flags.initgend) || Role_if(PM_CONVICT) || Role_if(PM_PIRATE)) ?
+		else u.uhouse = !(Role_if(PM_EXILE) || (Role_if(PM_NOBLEMAN) && !flags.initgend) || Role_if(PM_CONVICT) || Role_if(PM_MADMAN) || Role_if(PM_PIRATE)) ?
 				rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE :
 				rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
 		u.start_house = u.uhouse;
@@ -2362,6 +2412,7 @@ u_init()
 #ifdef CONVICT
          && !Role_if(PM_CONVICT)
 #endif /* CONVICT */
+          && !Role_if(PM_MADMAN)
 		) ini_inv(Xtra_food);
 	    /* Orcs can recognize all orcish objects */
 	    knows_object(ORCISH_SHORT_SWORD);
@@ -2568,6 +2619,7 @@ int otyp;
      case PM_HEALER:		skills = Skill_H; break;
      case PM_KNIGHT:		skills = Skill_K; break;
      case PM_MONK:		skills = Skill_Mon; break;
+     case PM_MADMAN:		skills = Skill_Mad; break;
 	 case PM_PIRATE:		skills = Skill_Pir; break;
      case PM_PRIEST:		skills = Skill_P; break;
      case PM_RANGER:		skills = Skill_Ran; break;
@@ -2857,6 +2909,9 @@ register struct trobj *trop;
                 obj->cursed = TRUE;
             }
 #endif /* CONVICT */
+            if (obj->otyp == STRAITJACKET ) {
+                obj->cursed = TRUE;
+            }
 			if (obj->otyp == TINNING_KIT) {
 				obj->spe = rn1(50, 50);	/* more charges than standard generation */
 			}
@@ -3085,28 +3140,28 @@ scatter_weapons(){
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
-	
+
 	obj = mksobj(RED_EYED_VIBROSWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
-	
+
 	obj = mksobj(FORCE_PIKE, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
-	
+
 	obj = mksobj(DOUBLE_FORCE_BLADE, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);
 	add_to_migration(obj);
 	obj->ox = stronghold_level.dnum;
 	obj->oy = rnd(stronghold_level.dlevel-1)+1; //2->castle
-	
+
 	obj = mksobj(FORCE_SWORD, NO_MKOBJ_FLAGS);
 	fully_identify_obj(obj);
 	obj->spe = abs(obj->spe);

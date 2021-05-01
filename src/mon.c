@@ -431,6 +431,24 @@ register struct monst *mtmp;
 		}
 		goto default_1;
 
+	    case PM_HARROWER_OF_ZARIEL:
+			for(num = rnd(4); num > 0; num--){
+				otmp = mksobj_at(SPEAR, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(otmp, SILVER);
+				add_oprop(otmp, OPROP_LESSER_HOLYW);
+				otmp->spe = 7;
+				bless(otmp);
+			}
+			for(num = rnd(4); num > 0; num--){
+				otmp = mksobj_at(SPEAR, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(otmp, IRON);
+				add_oprop(otmp, OPROP_LESSER_UNHYW);
+				otmp->obj_color = CLR_BLACK;
+				otmp->spe = 7;
+				curse(otmp);
+			}
+		break;
+
 	    case PM_WHITE_UNICORN:
 	    case PM_GRAY_UNICORN:
 	    case PM_BLACK_UNICORN:
@@ -1075,6 +1093,14 @@ register struct monst *mtmp;
 			obj->corpsenm = PM_GARO_MASTER;
 		goto default_1;
 		break;
+	    case PM_COILING_BRAWN:{
+			num = d(2,4);
+			while (num--){
+				obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
+				obj->corpsenm = PM_HUMAN;
+			}
+		}
+		goto default_1;
 	    case PM_CHANGED:
 			create_gas_cloud(x, y, 4, rnd(3)+1, FALSE);
 			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
@@ -2320,7 +2346,14 @@ mon_can_see_mon(looker, lookie)
 	/* 1/8 chance to stumble onto adjacent targets. Ish. */
 	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8))
 		return TRUE;
-
+	
+	/* R'lyehian psyichic sight, see minds, blocked by water */
+	if(rlyehiansight(looker->data) && !mindless_mon(lookie)
+		&& !(is_pool(looker->mx, looker->my, FALSE) || mon_resistance(looker,FLYING) || mon_resistance(looker,LEVITATION))
+		&& !(is_pool(lookie->mx, lookie->my, FALSE) || !is_underswimmer(lookie->data) || mon_resistance(lookie,FLYING) || mon_resistance(lookie,LEVITATION))
+	)
+		return TRUE;
+	
 	clearpath = clear_path(looker->mx, looker->my, lookie->mx, lookie->my);
 	hardtosee = (!is_tracker(looker->data) && (
 		(lookie->minvis && !mon_resistance(looker, SEE_INVIS)) ||
@@ -2453,7 +2486,14 @@ struct monst *looker;
 	/* 1/8 chance to stumble onto adjacent targets. Ish. */
 	if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1 && !rn2(8))
 		return TRUE;
-
+	
+	/* Note: the player is never mindless */
+	/* R'lyehian psyichic sight, see minds, blocked by water */
+	if(rlyehiansight(looker->data)
+		&& !(is_pool(looker->mx, looker->my, FALSE) || mon_resistance(looker,FLYING) || mon_resistance(looker,LEVITATION))
+		&& !u.usubwater
+	)
+		return TRUE;
 	clearpath = couldsee(looker->mx, looker->my);
 	hardtosee = (!can_track(looker->data) && (
 		(Invis && !mon_resistance(looker, SEE_INVIS)) ||
@@ -3451,7 +3491,7 @@ struct monst *mtmp;
 		lifesavers |= LSVD_ANA;
 	if(mtmp->mtyp == PM_NITOCRIS
 		&& which_armor(mtmp, W_ARMC)
-		&& which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF
+		&& which_armor(mtmp, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_
 	)
 		lifesavers |= LSVD_NBW;
 	if (mtmp->mspec_used == 0 && (is_uvuudaum(mtmp->data) || mtmp->mtyp == PM_PRAYERFUL_THING))
@@ -4478,6 +4518,7 @@ boolean was_swallowed;			/* digestion */
 		   || mon->data->msound == MS_NEMESIS
 		   || is_alabaster_mummy(mon->data)
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
+		   || mdat->mtyp == PM_HARROWER_OF_ZARIEL
 		   || mdat->mtyp == PM_UNDEAD_KNIGHT
 		   || mdat->mtyp == PM_WARRIOR_OF_SUNLIGHT
 		   || mdat->mtyp == PM_UNDEAD_MAIDEN
@@ -5639,12 +5680,12 @@ register struct monst *mtmp;
 		aggravate();
     } else if(!(mtmp->mspec_used) &&
 		(
-		mtmp->data->msound == MS_JUBJUB || mtmp->data->msound == MS_DREAD || 
-		mtmp->data->msound == MS_SONG || mtmp->data->msound == MS_OONA ||
-		mtmp->data->msound == MS_INTONE || mtmp->data->msound == MS_FLOWER ||
-		mtmp->data->msound == MS_TRUMPET || mtmp->mtyp == PM_RHYMER || 
-		mtmp->data->msound == MS_SECRETS || mtmp->data->msound == MS_HOWL || 
-		mtmp->data->msound == MS_SCREAM
+		mtmp->data->msound == MS_JUBJUB || mtmp->data->msound == MS_DREAD
+		|| mtmp->data->msound == MS_SONG || mtmp->data->msound == MS_OONA
+		|| mtmp->data->msound == MS_INTONE || mtmp->data->msound == MS_FLOWER
+		|| mtmp->data->msound == MS_TRUMPET || mtmp->mtyp == PM_RHYMER
+		|| mtmp->data->msound == MS_SECRETS || mtmp->data->msound == MS_HOWL
+		|| mtmp->data->msound == MS_SCREAM || mtmp->data->msound == MS_HARROW
 		)
 	) {
 		domonnoise(mtmp, FALSE);
@@ -6651,7 +6692,7 @@ struct monst *mtmp;
 	){
 		if(mndx == PM_GREAT_CTHULHU)
 			return -1*rnd(10);
-		else return -1*((monstr[mndx]-u.ulevel)/4 + rnd(max(1, (monstr[mndx]-u.ulevel)/4)));
+		else return -1*(max_ints(0, (monstr[mndx]-u.ulevel)/4) + rnd(max(1, (monstr[mndx]-u.ulevel)/4)));
 	} else {
 		if(mndx == PM_GREAT_CTHULHU)
 			return -1*rnd(100);
@@ -8142,6 +8183,7 @@ struct monst *mtmp;
 					break;
 			if(!mtmp->mtame && !mtmp->mpeaceful && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM
 				&& !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES))
+				&& !(uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING))
 				&& !(uwep && (uwep->oartifact == ART_MAGICBANE) && rn2(20))
 				&& !(uwep && (uwep->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20))
 				&& !(uwep && (uwep->oartifact == ART_TENTACLE_ROD) && rn2(20))
@@ -8210,7 +8252,8 @@ struct monst *mtmp;
 						&& tmpm->mpeaceful != mtmp->mpeaceful
 						&& tmpm->mtame != mtmp->mtame
 						&& !has_template(tmpm, CRYSTALFIED)
-						// && !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES))
+						&& !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES) && rn2(40))
+						&& !(uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING) && rn2(40))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_MAGICBANE) && rn2(20))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_TENTACLE_ROD) && rn2(20))

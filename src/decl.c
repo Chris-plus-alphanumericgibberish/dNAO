@@ -342,6 +342,7 @@ NEARDATA char spidername[PL_PSIZ] = DUMMY;
 NEARDATA char lizardname[PL_PSIZ] = DUMMY;
 NEARDATA char dragonname[PL_PSIZ] = DUMMY;
 NEARDATA char horsename[PL_PSIZ] = DUMMY;
+NEARDATA char whisperername[PL_PSIZ] = DUMMY;
 #ifdef CONVICT
 NEARDATA char ratname[PL_PSIZ] = DUMMY;
 #endif /* CONVICT */

@@ -16,7 +16,7 @@ static const char apply_all[] = { ALL_CLASSES, CHAIN_CLASS, 0 };
 #ifdef TOURIST
 STATIC_DCL int FDECL(use_camera, (struct obj *));
 #endif
-STATIC_DCL int FDECL(do_present_ring, (struct obj *));
+STATIC_DCL int FDECL(do_present_item, (struct obj *));
 STATIC_DCL int FDECL(use_towel, (struct obj *));
 STATIC_DCL boolean FDECL(its_dead, (int,int,int *,struct obj*));
 STATIC_DCL int FDECL(use_stethoscope, (struct obj *));
@@ -106,10 +106,11 @@ use_camera(obj)
 #endif
 
 STATIC_OVL int
-do_present_ring(obj)
+do_present_item(obj)
 	struct obj *obj;
 {
 	register struct monst *mtmp, *tm;
+	const char *word = obj->oclass == RING_CLASS ? "ring" : obj->oclass == AMULET_CLASS ? "amulet" : "item";
 
 	if(!getdir((char *)0)) return 0;
 	
@@ -119,15 +120,15 @@ do_present_ring(obj)
 	}
 	
 	if (u.uswallow) {
-		You("display the ring's engraving to %s %s.", s_suffix(mon_nam(u.ustuck)),
+		You("display the %s engraving to %s %s.", s_suffix(word), s_suffix(mon_nam(u.ustuck)),
 		    mbodypart(u.ustuck, STOMACH));
 		pline("Nothing happens.");
 		exercise(A_WIS, FALSE);
 		return 0;
 	} else if (u.dz) {
-		You("display the ring's engraving to the %s.",
+		You("display the %s engraving to the %s.", s_suffix(word),
 			(u.dz > 0) ? surface(u.ux,u.uy) : ceiling(u.ux,u.uy));
-		if(u.dz < 0){
+		if(u.dz < 0 || obj->oartifact){
 			pline("Nothing happens.");
 			exercise(A_WIS, FALSE);
 			return 0;
@@ -137,7 +138,7 @@ do_present_ring(obj)
 			if(u.ualign.type == A_LAWFUL) exercise(A_WIS, FALSE);
 			return 0;
 		}else{
-			You_feel("as though the engraving on the ring could fall right off!");
+			You_feel("as though the engraving on the %s could fall right off!", word);
 			if(yn("Give it a push?") == 'n'){
 				pline("Nothing happens.");
 				return 0;
@@ -154,13 +155,13 @@ do_present_ring(obj)
 					engrHere = engr_at(u.ux,u.uy); /*note: make_engr_at does not return the engraving it made, it returns void instead*/
 				}
 				if(obj->ohaluengr == engrHere->halu_ward && obj->oward == engrHere->ward_id){
-					pline("the engraving tumbles off the ring to join it's fellows.");
+					pline("the engraving tumbles off the %s to join it's fellows.", word);
 					engrHere->complete_wards += engrHere->halu_ward ? 0 : get_num_wards_added(engrHere->ward_id,engrHere->complete_wards);
 					obj->ohaluengr = FALSE;
 					obj->oward = FALSE;
 				}
 				else{
-					pline("the engraving tumbles off the ring%s.", engrHere->ward_id ? "and covers the existing drawing" : "");
+					pline("the engraving tumbles off the %s%s.", word, engrHere->ward_id ? "and covers the existing drawing" : "");
 					engrHere->ward_id = obj->oward;
 					engrHere->halu_ward = obj->ohaluengr;
 					engrHere->complete_wards = engrHere->halu_ward ? 1 : get_num_wards_added(engrHere->ward_id,0);
@@ -176,20 +177,20 @@ do_present_ring(obj)
 		}
 	} else if (!u.dx && !u.dy) {
 		if(!(obj->ohaluengr)){
-			pline("A %s is engraved on the ring.",wardDecode[obj->oward]);
+			pline("A %s is engraved on the %s.", word, wardDecode[obj->oward]);
 			if( !(u.wardsknown & get_wardID(obj->oward)) ){
 				You("have learned a new warding sign!");
 				u.wardsknown |= get_wardID(obj->oward);
 			}
 		}
 		else{
-			pline("There is %s engraved on the ring.",fetchHaluWard((int)obj->oward));
+			pline("There is %s engraved on the %s.", word, fetchHaluWard((int)obj->oward));
 		}
 		return(1);
 	} else if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0) {
-		You("display the ring's engraving to %s.", mon_nam(mtmp));
+		You("display the %s engraving to %s.", s_suffix(word), mon_nam(mtmp));
 		if (obj->cursed && rn2(3)) {
-			pline("But the ring's engraving is fogged over!");
+			pline("But the %s engraving is fogged over!", s_suffix(word));
 			return 1;
 		}
 		if(!(obj->ohaluengr) || obj->oward == CERULEAN_SIGN){
@@ -2601,15 +2602,13 @@ struct obj *obj;
 			You(need_to_remove_outer_armor, buf, xname(otmp));
 			return;
 		}
-#ifdef TOURIST
-		if ((otmp->owornmask & WORN_SHIRT) && (uarmc || uarm)) {
+		if ((otmp->owornmask & WORN_SHIRT) && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))) {
 			Strcpy(buf, uarmc ? xname(uarmc) : "");
 			if (uarmc && uarm) Strcat(buf, " and ");
 			Strcat(buf, uarm ? xname(uarm) : "");
 			You(need_to_remove_outer_armor, buf, xname(otmp));
 			return;
 		}
-#endif
 		consume_obj_charge(obj, TRUE);
 
 		if (otmp != &zeroobj) {
@@ -5071,6 +5070,9 @@ do_break_wand(obj)
 		if(IS_GRAVE(levl[x][y].typ)){
 			digactualhole(x, y, BY_OBJECT, PIT, FALSE, TRUE);
 			dig_up_grave(x,y);
+		} else if(IS_SEAL(levl[x][y].typ)){
+			// digactualhole(x, y, BY_OBJECT, PIT, FALSE, TRUE);
+			break_seal(x,y);
 		} else{
 			digactualhole(x, y, BY_OBJECT,
 					  (rn2(obj->spe) < 3 || !Can_dig_down(&u.uz)) ?
@@ -6060,6 +6062,9 @@ doapply()
 	if(carrying_applyable_ring()){
 		add_class(class_list, RING_CLASS);
 	}
+	if(carrying_applyable_amulet()){
+		add_class(class_list, AMULET_CLASS);
+	}
 
 
 	obj = getobj(class_list, "use or apply");
@@ -6079,8 +6084,8 @@ doapply()
 	    return do_break_wand(obj);
 	else if (obj->oclass == COIN_CLASS)
 	    return do_flip_coin(obj);
-	else if (obj->oclass == RING_CLASS)
-	    return do_present_ring(obj);
+	else if (obj->oclass == RING_CLASS || obj->oclass == AMULET_CLASS)
+	    return do_present_item(obj);
 	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE)) 
 		return do_carve_obj(obj);
 	

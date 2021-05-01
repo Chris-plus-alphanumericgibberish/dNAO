@@ -91,6 +91,11 @@ const struct innate {
 		     {  30, &(HDrain_resistance), "above earthly concerns","not so above it all" },
 		     {   0, 0, 0, 0 } },
 
+	mad_abil[] = { {  1, &(HTelepat), "", "" },
+			 {  7, &(HSearching), "perceptive", "unaware" },
+		     {	15, &(HWarning), "sensitive", "" },
+		     {	 0, 0, 0, 0 } },
+
 	elnob_abil[] = { {	 7, &(HFast), "quick", "slow" },
 			{	15, &(HWarning), "sensitive", "" },
 		     {  20, &(HFire_resistance), "cool", "warmer" },
@@ -768,6 +773,7 @@ int oldlevel, newlevel;
 #ifdef CONVICT
 	case PM_CONVICT:        abil = con_abil;	break;
 #endif	/* CONVICT */
+	case PM_MADMAN:        abil = mad_abil;	break;
 	case PM_HEALER:         abil = hea_abil;	break;
 	case PM_KNIGHT:         abil = kni_abil;	break;
 	case PM_MONK:           abil = mon_abil;	break;

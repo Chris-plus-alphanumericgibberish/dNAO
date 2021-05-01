@@ -190,6 +190,7 @@ shuffle_all()
 				oclass != TOOL_CLASS &&
 				oclass != WEAPON_CLASS &&
 				oclass != ARMOR_CLASS &&
+				oclass != SCOIN_CLASS &&
 				oclass != GEM_CLASS) {
 			int j = last-1;
 
@@ -1425,7 +1426,7 @@ struct obj *otmp;
 										CLR_BRIGHT_BLUE : CLR_BLUE;
 	case ART_AIR_CRYSTAL:		return  mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died ? 
 										CLR_BRIGHT_GREEN : CLR_GREEN;
-	case ART_PRAYER_WARDED_WRAPPINGS_OF:		return CLR_BLACK;
+	case ART_SPELL_WARDED_WRAPPINGS_OF_:		return CLR_BLACK;
 	}
 	
 	//Use the set color.

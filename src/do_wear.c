@@ -245,6 +245,7 @@ Cloak_on()
 		adj_abon(uarmc, uarmc->spe);
 		break;
 	case MUMMY_WRAPPING:
+	case PRAYER_WARDED_WRAPPING:
 		/* Note: it's already being worn, so we have to cheat here. */
 		if ((HInvis || EInvis || pm_invisible(youracedata)) && !Blind) {
 		    newsym(u.ux,u.uy);
@@ -316,6 +317,7 @@ Cloak_off()
 	case SMOKY_VIOLET_FACELESS_ROBE:
 		break;
 	case MUMMY_WRAPPING:
+	case PRAYER_WARDED_WRAPPING:
 		if (Invis && !Blind) {
 		    newsym(u.ux,u.uy);
 		    You("can %s.",
@@ -1840,6 +1842,11 @@ doputon()
 	register struct obj *otmp;
 	long mask = 0L;
 
+	if(!freehand()){
+		You("have no free %s to put on accessories with!", body_part(HAND));
+		return(0);
+	}
+
 	if(uleft && (uright || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) && uamul && ublindf) {
 		Your("%s%s are full, and you're already wearing an amulet and %s.",
 			humanoid(youracedata) ? "ring-" : "",
@@ -2783,8 +2790,9 @@ struct monst *victim;
 	otmph = (victim == &youmonst) ? uarmc : which_armor(victim, W_ARMC);
 	if (!otmph){
 	    otmph = (victim == &youmonst) ? uarm : which_armor(victim, W_ARM);
-		if(otmph && arm_blocks_upper_body(otmph->otyp) && rn2(2))
-			otmph = 0;
+		//This causes all kinds of things to randomly fail, including enchant armor :(
+		// if(otmph && !arm_blocks_upper_body(otmph->otyp) && rn2(2))
+			// otmph = 0;
 	}
 #ifdef TOURIST
 	if (!otmph)

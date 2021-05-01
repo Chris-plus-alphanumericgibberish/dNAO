@@ -74,6 +74,7 @@ enum {
     FOG,
     DUST_CLOUD,
     PUDDLE,
+    HELLISH_SEAL,
     MAX_TYPE
 };
 #define INVALID_TYPE	127
@@ -103,6 +104,7 @@ enum {
 #define IS_FOUNTAIN(typ) ((typ) == FOUNTAIN)
 #define IS_SINK(typ)	((typ) == SINK)
 #define IS_GRAVE(typ)	((typ) == GRAVE)
+#define IS_SEAL(typ)	((typ) == HELLISH_SEAL)
 #define IS_ALTAR(typ)	((typ) == ALTAR)
 #define IS_DRAWBRIDGE(typ) ((typ) == DRAWBRIDGE_UP || (typ) == DRAWBRIDGE_DOWN)
 #define IS_FURNITURE(typ) ((typ) >= STAIRS && (typ) <= ALTAR)
@@ -113,6 +115,7 @@ enum {
 #define IS_SOFT(typ)	((typ) == AIR || (typ) == CLOUD || IS_POOL(typ))
 #define IS_PUDDLE(typ)	((typ) == PUDDLE)
 #define IS_PUDDLE_OR_POOL(typ)	(IS_PUDDLE(typ) || IS_POOL(typ))
+#define IS_FEATURE(typ)	(IS_FURNITURE(typ) || IS_DRAWBRIDGE(typ))
 
 /*
  * The screen symbols may be the default or defined at game startup time.
@@ -154,6 +157,7 @@ enum {
     S_dnladder,
     S_altar,
     S_grave,
+    S_seal,
     S_throne,
     S_sink,
     S_fountain,
@@ -304,6 +308,31 @@ extern uchar showsymcolors[MAXPCHARS];
 #define NOBLE_KNOW	 4
 #define NOBLE_PETS	 8
 #define NOBLE_WISH	16
+
+/*
+ * ID number for vault type
+ */
+enum {
+/*01*/	VN_AKKABISH = 1,
+/*02*/	VN_SHALOSH,
+/*03*/	VN_NACHASH,
+/*04*/	VN_KHAAMNUN,
+/*05*/	VN_RAGLAYIM,
+/*06*/	VN_TERAPHIM,
+/*07*/	VN_SARTAN,
+/*08*/	VN_A_O_BLESSINGS,
+/*09*/	VN_A_O_VITALITY,
+/*10*/	VN_A_O_CORRUPTION,
+/*11*/	VN_A_O_DESERTS,
+/*12*/	VN_A_O_THOUGHT,
+/*13*/	VN_A_O_DEATH,
+/*14*/	VN_APOCALYPSE,
+/*15*/	VN_HARROWER,
+/*16*/	VN_MAD_ANGEL,
+/*17*/	VN_MAX,
+};
+//if VN_MAX exceeds this limit, we have a problem (Vault IDs should range from 1 to 31).
+#define VAULT_LIMIT	32
 
 /*
  * Trees have more than one kick result.
@@ -494,6 +523,7 @@ struct rm {
 #define drawbridgemask	flags
 #define looted		flags
 #define icedpool	flags
+#define vaulttype	flags
 
 #define blessedftn	horizontal  /* a fountain that grants attribs */
 #define disturbed	horizontal  /* a grave that has been disturbed */

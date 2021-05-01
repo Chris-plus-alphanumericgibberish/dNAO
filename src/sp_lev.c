@@ -140,6 +140,7 @@ rndtrap()
 	     case MUMMY_TRAP:		/* no random generation */
 	     case SWITCH_TRAP:		/* no random generation */
 	     case VIVI_TRAP:		/* scripted only, no random generation */
+	     case FLESH_HOOK:		/* monster attack, no random generation */
 	     case MAGIC_PORTAL:	rtrap = NO_TRAP;
 				break;
 	     case TRAPDOOR:	if (!Can_dig_down(&u.uz)) rtrap = NO_TRAP;
@@ -1076,6 +1077,54 @@ struct mkroom	*croom;
 			start_corpse_timeout(otmp);
 		}
 	}
+	if((otmp->otyp == BEDROLL || otmp->otyp == GURNEY) && otmp->spe == 1 && otmp->where == OBJ_FLOOR){
+		int asylum_types[] = {PM_NOBLEMAN, PM_NOBLEWOMAN, PM_HUMAN, PM_ELF_LORD,
+			PM_ELF_LADY, PM_ELF, PM_DROW_MATRON, PM_HEDROW_BLADEMASTER, PM_DROW, PM_DWARF_LORD,
+			PM_DWARF_CLERIC, PM_DWARF, PM_GNOME_LORD, PM_GNOME_LADY, PM_GNOME, PM_ORC_SHAMAN,
+			PM_ORC, PM_VAMPIRE, PM_VAMPIRE, PM_HALF_DRAGON, PM_HALF_DRAGON,
+			PM_YUKI_ONNA, PM_DEMINYMPH, PM_CONTAMINATED_PATIENT, PM_CONTAMINATED_PATIENT, PM_CONTAMINATED_PATIENT};
+		int skeleton_types[] = {PM_HUMAN, PM_ELF, PM_DROW, PM_DWARF, PM_GNOME, PM_ORC, 
+			PM_HALF_DRAGON, PM_YUKI_ONNA, PM_DEMINYMPH};
+		struct monst *mon;
+		struct obj *tmpo;
+
+		if(otmp->otyp == GURNEY){
+			switch(rn2(4)){
+				case 0:
+					mon = makemon(&mons[PM_COILING_BRAWN], otmp->ox, otmp->oy, NO_MINVENT);
+				break;
+				case 1:
+					mon = makemon(&mons[PM_FUNGAL_BRAIN], otmp->ox, otmp->oy, NO_MINVENT);
+				break;
+				case 2:
+					mon = makemon(&mons[asylum_types[rn2(SIZE(asylum_types))]], otmp->ox, otmp->oy, NO_MM_FLAGS);
+					if(mon){
+						set_template(mon, YELLOW_TEMPLATE);
+					}
+				break;
+				case 3:
+					mon = makemon(&mons[skeleton_types[rn2(SIZE(skeleton_types))]], otmp->ox, otmp->oy, NO_MM_FLAGS);
+					if(mon){
+						set_template(mon, SKELIFIED);
+					}
+				break;
+			}
+		}
+		else {
+			mon = makemon(&mons[asylum_types[rn2(SIZE(asylum_types))]], otmp->ox, otmp->oy, NO_MINVENT);
+			if(mon){
+				mon->mcrazed = 1;
+				mon->msleeping = 1;
+				tmpo = mongets(mon, STRAITJACKET, NO_MKOBJ_FLAGS);
+				if(tmpo){
+					curse(tmpo);
+					m_dowear(mon, TRUE);
+				}
+			}
+		}
+		otmp->spe = 0;
+	}
+
 	if(otmp->otyp == STATUE && (otmp->spe&STATUE_FACELESS) && In_mithardir_quest(&u.uz)){
 		int statuetypes[] = {PM_ELVENKING, PM_ELVENKING, PM_ELVENQUEEN, PM_ELVENQUEEN,
 			PM_ELF_LORD, PM_ELF_LORD, PM_ELF_LADY, PM_ELF_LADY, PM_DOPPELGANGER, PM_DOPPELGANGER,

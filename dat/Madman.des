@@ -1,0 +1,705 @@
+#
+#	The "start" level for the quest.
+#
+#	Here you meet your (besieged) class leader, Robert the Lifer
+#	and receive your quest assignment.
+#
+MAZE:"Mad-strt",' '
+FLAGS:noteleport,hardfloor
+GEOMETRY:center,center
+#0         1         2         3         4         5         6         7        
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0                         -------------------                                
+1                         |..|..|..|..|..|..|                                
+2          ###            |F+|+F|F+|+F|F+|+F|                                
+3          ###############S.................|                                
+4          ### #   #      ||F+|+F|F+|+F|F+|.|                                
+5   ###        #  ###     ||..|..|..|..|..|.|                                
+6  #####       #  ###     |----------------.|                                
+7  #####  ###  #  ###     |..|..|..|..|..|..|                                
+8  #####  ###  #          |F+|+F|F+|+F|F+|..|                                
+9   ###   ###  #   ###    |.................|                                
+0    #     #   #  #####   |..|F+|+F|F+|+F|F+|                                
+1    ##################   |..|..|..|..|..|..|                                
+2      H      #   #####   |.----------------|                                
+3     ###          ###    |.|..|..|..|..|..||                                
+4    #####                |.|F+|+F|F+|+F|F+||                                
+5    #####                |.................|                                
+6     ###                 |F+|+F|F+|+F|F+|..|                                
+7                         |..|..|..|..|..|..|                                
+8                         -------------------                                
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2         3         4         5         6         7        
+# Dungeon Description
+REGION:(25,00,43,18),lit,"ordinary"
+# Stairs
+STAIR:(42,17),down
+# Portal arrival point
+BRANCH:(02,05,06,09),(0,0,0,0)
+
+# Cassilda (real quest leader)
+MONSTER:'@',"Lady Constance",(19,11)
+
+# Patients in cells (+1 bedrolls spawn a random madman monster during level gen).
+OBJECT:'\\', "bedroll",(26,01),uncursed,1
+OBJECT:'\\', "bedroll",(30,01),uncursed,1
+OBJECT:'\\', "bedroll",(32,01),uncursed,1
+OBJECT:'\\', "bedroll",(36,01),uncursed,1
+OBJECT:'\\', "bedroll",(38,01),uncursed,1
+OBJECT:'\\', "bedroll",(42,01),uncursed,1
+
+OBJECT:'\\', "bedroll",(27,05),uncursed,1
+OBJECT:'\\', "bedroll",(31,05),uncursed,1
+OBJECT:'\\', "bedroll",(33,05),uncursed,1
+OBJECT:'\\', "bedroll",(37,05),uncursed,1
+OBJECT:'\\', "bedroll",(39,05),uncursed,1
+
+OBJECT:'\\', "bedroll",(26,07),uncursed,1
+OBJECT:'\\', "bedroll",(30,07),uncursed,1
+OBJECT:'\\', "bedroll",(32,07),uncursed,1
+OBJECT:'\\', "bedroll",(36,07),uncursed,1
+OBJECT:'\\', "bedroll",(38,07),uncursed,1
+
+OBJECT:'\\', "bedroll",(29,11),uncursed,1
+OBJECT:'\\', "bedroll",(33,11),uncursed,1
+OBJECT:'\\', "bedroll",(35,11),uncursed,1
+OBJECT:'\\', "bedroll",(39,11),uncursed,1
+OBJECT:'\\', "bedroll",(41,11),uncursed,1
+
+OBJECT:'\\', "bedroll",(28,13),uncursed,1
+OBJECT:'\\', "bedroll",(32,13),uncursed,1
+OBJECT:'\\', "bedroll",(34,13),uncursed,1
+OBJECT:'\\', "bedroll",(38,13),uncursed,1
+OBJECT:'\\', "bedroll",(40,13),uncursed,1
+
+OBJECT:'\\', "bedroll",(26,17),uncursed,1
+OBJECT:'\\', "bedroll",(30,17),uncursed,1
+OBJECT:'\\', "bedroll",(32,17),uncursed,1
+OBJECT:'\\', "bedroll",(36,17),uncursed,1
+OBJECT:'\\', "bedroll",(38,17),uncursed,1
+
+DOOR:closed,(27,02)
+DOOR:closed,(29,02)
+DOOR:closed,(33,02)
+DOOR:closed,(35,02)
+DOOR:closed,(39,02)
+DOOR:closed,(41,02)
+
+DOOR:closed,(28,04)
+DOOR:closed,(30,04)
+DOOR:closed,(34,04)
+DOOR:closed,(36,04)
+DOOR:closed,(40,04)
+
+DOOR:closed,(27,08)
+DOOR:closed,(29,08)
+DOOR:closed,(33,08)
+DOOR:closed,(35,08)
+DOOR:closed,(39,08)
+
+DOOR:closed,(30,10)
+DOOR:closed,(32,10)
+DOOR:closed,(36,10)
+DOOR:closed,(38,10)
+DOOR:closed,(42,10)
+
+DOOR:closed,(29,14)
+DOOR:closed,(31,14)
+DOOR:closed,(35,14)
+DOOR:closed,(37,14)
+DOOR:closed,(41,14)
+
+DOOR:closed,(27,16)
+DOOR:closed,(29,16)
+DOOR:closed,(33,16)
+DOOR:closed,(35,16)
+DOOR:closed,(39,16)
+
+# Prison debris
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "heavy iron ball", random
+# Non diggable walls
+NON_DIGGABLE:(25,00,43,18)
+
+MAZE: "Mad-home",'T'
+FLAGS: hardfloor
+#INIT_MAP: ' ' , ' ' , false , true , lit , false
+MESSAGE:"You've reached the main observation level."
+GEOMETRY:center,center
+#0         1         2         3         4         5         6         7        
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0                         -------------------                                
+1                        #S...|..|..|..|..|.|                                
+2                         |.F+|F+|+F|F+|+F|.|                                
+3                         |.F.............+.|                                
+4                         |-|.............|-|                                
+5                         |.F..----+----..+.|                                
+6                         |.+..|.......|..F.|                                
+7                         |-|..|.......|..|-|   -----                        
+8                         |.+..|..FFF..|..F.|   |-#-|                        
+9                         |.F..+..F.F..+..+.|   |###|                        
+0                         |-|..|..FFF..|..|-|   |-#-|                        
+1                         |.F..|.......|..+.|   -----                        
+2                         |.+..|.......|..F.|                                
+3                         |-|..----+----..|-|                                
+4                         |.+.............F.|                                
+5                         |.F.............+.|                                
+6                         |-|+|+F|F+|+F|F+|-|                                
+7                         |...|..|..|..|....|                                
+8                         -------------------                                
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2         3         4         5         6         7        
+
+# Stairs
+STAIR:(29,04),down
+STAIR:(39,14),up
+
+# Cassilda (real quest leader)
+MONSTER:'@',"Cassilda the Iron Maiden",(34,09)
+
+# Ladders
+LADDER:(50,09),down
+
+MONSTER:'@',"The Stranger",(48,09)
+OBJECT:'"',"amulet versus curses",(48,09),blessed,0,"The Star of Hypernotus"
+
+MONSTER:'@',"priestess",(42,01)
+OBJECT:'\\', "bedroll",(42,01)
+OBJECT:'(',"writing desk",(26,17),uncursed,1
+OBJECT:'!',"booze",(24,01)
+OBJECT:'!',"booze",(24,01)
+OBJECT:'!',"booze",(24,01)
+OBJECT:'!',"booze",(24,01)
+OBJECT:'!',"booze",(24,01)
+OBJECT:'!',"sleeping",(24,01)
+OBJECT:'!',"sleeping",(24,01)
+OBJECT:'!',"sleeping",(24,01)
+OBJECT:'!',"enlightenment",(24,01), cursed, 0
+OBJECT:'!',"enlightenment",(24,01), cursed, 0
+OBJECT:'!',"hallucination",(24,01), cursed, 0
+OBJECT:'?',"teleportation",(24,01)
+CONTAINER:'(',"chest",(42,17),cursed,6
+OBJECT:'[',"gentlewoman's dress",contained,uncursed, 2
+OBJECT:'[',"victorian underwear",contained,uncursed, 2
+OBJECT:'[',"long gloves",contained,uncursed, 2
+OBJECT:'#',"uncursed +2 silver shoes",contained
+OBJECT:'\\',"bed",(39,17)
+OBJECT:'(',"writing desk",(40,17)
+
+MONSTER:'@',"patient",(26,05)
+MONSTER:'@',"patient",(26,09)
+MONSTER:'@',"patient",(26,11)
+MONSTER:'@',"patient",(26,15)
+
+MONSTER:'@',"patient",(42,06)
+MONSTER:'@',"patient",(42,08)
+MONSTER:'@',"patient",(42,12)
+MONSTER:'@',"patient",(42,14)
+
+MONSTER:'@',"patient",(30,01)
+MONSTER:'@',"patient",(34,01)
+MONSTER:'@',"patient",(36,01)
+MONSTER:'@',"patient",(40,01)
+
+MONSTER:'@',"patient",(31,17)
+MONSTER:'@',"patient",(33,17)
+MONSTER:'@',"patient",(37,17)
+
+# Prison debris
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "heavy iron ball", random
+
+DOOR:locked,(28,02)
+DOOR:locked,(31,02)
+DOOR:locked,(33,02)
+DOOR:locked,(37,02)
+DOOR:locked,(39,02)
+
+DOOR:locked,(41,03)
+DOOR:locked,(41,05)
+DOOR:locked,(41,09)
+DOOR:locked,(41,11)
+DOOR:locked,(41,15)
+
+DOOR:locked,(40,16)
+DOOR:locked,(36,16)
+DOOR:locked,(34,16)
+DOOR:locked,(30,16)
+DOOR:locked,(28,16)
+
+DOOR:locked,(27,14)
+DOOR:locked,(27,12)
+DOOR:locked,(27,08)
+DOOR:locked,(27,06)
+
+#
+#	The "locate" level for the quest.
+#
+#	Here you have to find the exit from the Royal Dungeons
+#	to go further towards your assigned quest.
+#
+
+MAZE:"Mad-loca",' '
+FLAGS:noteleport,hardfloor
+
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7    7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0               ----------------------------------------                     
+1               |,,,,,,,,,|....|.......|....|,,,,,,,,,,|                     
+2               |,,,,,,,,,|....|.......|....+,,,,,,,,,,|                     
+3               |,,,,,,,,,|....----+----....|,,,,,,,,,,|                     
+4               |,,,,,,,,,|---###########---|,,,,,,,,,,|                     
+5               |,,,,,,,,,|..+#----+----#+..|,,,,,,,,,,|                     
+6               |,,,,,,,,,F..|#|e,,,,,e|#|..F,,,-----,,|                     
+7               |,,,,,,,,,|---#|,,,,,,,|#---|,,-------,|                     
+8               |,,,,,,,,,|..|#|,,tPPT,|#|..|,,||   ||,|                     
+9               |,,,,,,,,,F..+#+,TPPt,,+#+..F,,||   ||,|                     
+0               |,,,,,,,,,|..|#|,,PPP,,|#|..|,,||   ||,|                     
+1               |,,,,,,,,,|---#|,,T,,,,|#---|,,-------,|                     
+2               |,,,,,,,,,F..|#|e,,,T,e|#|..F,,,-----,,|                     
+3               |,,,,,,,,,|..+#----+----#+..|,,,,,,,,,,|                     
+4               |,,,,,,,,,|---###########---|,,,,,,,,,,|                     
+5               |T,T,T,T,T|....----+----....|,,,,,,,,,,|                     
+6               |eeeeeeeee+....|.......|....|,,,,,,,,,,|                     
+7               |,,,,,,,,,|....|.......|....|,,,,,,,,,,|                     
+8               ----------------------------------------                     
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#          1         2         3         4         5         6         7    7
+
+MONSTER:'@',"nobleman",random
+MONSTER:'@',"noblewoman",random
+
+MONSTER:'@',"nobleman",random
+MONSTER:'@',"noblewoman",random
+
+MONSTER:'@',"healer",random
+MONSTER:'@',"healer",random
+MONSTER:'@',"healer",random
+MONSTER:'@',"healer",random
+
+MONSTER:'@',"nurse",random
+MONSTER:'@',"nurse",random
+MONSTER:'@',"nurse",random
+MONSTER:'@',"nurse",random
+
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7    7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0               ----------------------------------------                     
+1               |,,,,,,,,,|....|.......|....|,,,,,,,,,,|                     
+2               |,,,,,,,,,|....|.......|....+,,,,,,,,,,|                     
+3               |,,,,,,,,,|....----+----....|,,,,,,,,,,|                     
+4               |,,,,,,,,,|---###########---|,,,,,,,,,,|                     
+5               |,,,,,,,,,|..+#----+----#+..|,,,,,,,,,,|                     
+6               |,,,,,,,,,F..|#|e,,,,,e|#|..F,,,-----,,|                     
+7               |,,,,,,,,,|---#|,,,,,,,|#---|,,-------,|                     
+8               |,,,,,,,,,|..|#|,,tPPT,|#|..|,,||###||,|                     
+9               |,,,,,,,,,F..+#+,TPPt,,+#+..F,,||###||,|                     
+0               |,,,,,,,,,|..|#|,,PPP,,|#|..|,,||###||,|                     
+1               |,,,,,,,,,|---#|,,T,,,,|#---|,,-------,|                     
+2               |,,,,,,,,,F..|#|e,,,T,e|#|..F,,,-----,,|                     
+3               |,,,,,,,,,|..+#----+----#+..|,,,,,,,,,,|                     
+4               |,,,,,,,,,|---###########---|,,,,,,,,,,|                     
+5               |T,T,T,T,T|....----+----....|,,,,,,,,,,|                     
+6               |eeeeeeeee+....|.......|....|,,,,,,,,,,|                     
+7               |,,,,,,,,,|....|.......|....|,,,,,,,,,,|                     
+8               ----------------------------------------                     
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#          1         2         3         4         5         6         7    7
+RANDOM_PLACES:(26,06),(26,09),(26,12),(42,06),(42,09),(42,12)
+# Dungeon Description
+REGION:(00,00,74,19),lit,"ordinary"
+# Stairs
+STAIR:(28,02),down
+STAIR:(40,16),up
+# Ladders
+LADDER:(50,09),down
+LADDER:(48,09),up
+
+# Non diggable walls
+NON_DIGGABLE:(00,00,74,19)
+
+OBJECT:'`',"boulder",(15,16)
+
+#Shared offices
+OBJECT:'(',"writing desk",(31,01)
+OBJECT:'(',"writing desk",(33,01)
+OBJECT:'(',"writing desk",(35,01)
+OBJECT:'(',"writing desk",(37,01)
+OBJECT:'(',"writing desk",(31,17)
+OBJECT:'(',"writing desk",(33,17)
+OBJECT:'(',"writing desk",(35,17)
+OBJECT:'(',"writing desk",(37,17)
+
+#Individual offices (a random one has the resistance scrolls)
+CONTAINER:'(',"writing desk",place[0]
+OBJECT:'?',"resistance",contained
+OBJECT:'?',"resistance",contained
+OBJECT:'?',"resistance",contained
+OBJECT:'?',random,contained
+OBJECT:'?',random,contained
+OBJECT:'?',random,contained
+OBJECT:'(',"writing desk",place[1]
+OBJECT:'(',"writing desk",place[2]
+OBJECT:'(',"writing desk",place[3]
+OBJECT:'(',"writing desk",place[4]
+OBJECT:'(',"writing desk",place[5]
+
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[50%]: '+', "blank paper", random
+OBJECT[50%]: '+', "blank paper", random
+
+DOOR:closed,(34,03)
+DOOR:closed,(34,05)
+DOOR:closed,(34,13)
+DOOR:closed,(34,15)
+
+DOOR:closed,(28,05)
+DOOR:closed,(28,09)
+DOOR:closed,(28,13)
+DOOR:closed,(30,09)
+DOOR:closed,(38,09)
+DOOR:closed,(40,05)
+DOOR:closed,(40,09)
+DOOR:closed,(40,13)
+
+DOOR:closed,(25,16)
+DOOR:closed,(43,02)
+
+#
+#	The "goal" level for the quest.
+#
+#	Here you meet Warden Arianna, your nemesis monster.  You have to
+#	defeat Warden Arianna in combat to gain the artifact you have
+#	been assigned to retrieve.
+#
+
+MAZE:"Mad-goal",' '
+FLAGS:hardfloor
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7    7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0               CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC                     
+1               CAAAAAAAAAAAAAAAA-----AAAAAAAAAAAAAAAAAC                     
+2               CAAAAAAAAAAA------...------AAAAAAAAAAAAC                     
+3               CAAAAAAAAAAA|####+...+####|AAAAAAAAAAAAC                     
+4               CAAAAAAAAAAA|#|---...---|#|AAAAAAAAAAAAC                     
+5               CAAAAAAAAAAA|#|AA-----AA|#|AAAAAFFFFFAAC                     
+6               CAAAAAAAAA|--S-|AAAAAAA|-S--|AAFF...FFAC                     
+7               CAAAAAAAA-|....|-AAAAA-|....|-FF.....FFC                     
+8               CAAAAAAAA|......|AAAAA|......|F.......FC                     
+9               CAAAAAAAAF......|AAAAA|......S........FC                     
+0               CAAAAAAAA|......|AAAAA|......|F.......FC                     
+1               CAAAAAAAA-|....|-AAAAA-|....|-FF.....FFC                     
+2               CAAAAAAAAA|--S-|AAAAAAA|-S--|AAFF...FFAC                     
+3               CAAAAAAAAAAA|#|AA-----AA|#|AAAAAFFFFFAAC                     
+4               CAAAAAAAAAAA|#|---...---|#|AAAAAAAAAAAAC                     
+5               CAAAAAAAAAAA|####+...+####|AAAAAAAAAAAAC                     
+6               CAAAAAAAAAAA------...------AAAAAAAAAAAAC                     
+7               CAAAAAAAAAAAAAAAA-----AAAAAAAAAAAAAAAAAC                     
+8               CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC                     
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#          1         2         3         4         5         6         7    7
+RANDOM_PLACES:(27,09),(41,09)
+# Dungeon Description
+REGION:(00,00,56,19),lit,"ordinary"
+# Stairs
+STAIR:place[0],up
+LADDER:(50,09),up
+# Non diggable walls
+NON_DIGGABLE:(00,00,56,19)
+# Objects
+
+# Magic Chest
+OBJECT:'(',"magic chest",place[1]
+# Boxes in storage
+OBJECT[75%]:'(',"box",(29,07)
+OBJECT[75%]:'(',"box",(27,07)
+OBJECT[75%]:'(',"box",(26,07)
+OBJECT[75%]:'(',"box",(25,08)
+OBJECT[75%]:'(',"box",(25,09)
+OBJECT[75%]:'(',"box",(25,10)
+OBJECT[75%]:'(',"box",(26,11)
+OBJECT[75%]:'(',"box",(27,11)
+OBJECT[75%]:'(',"box",(29,11)
+OBJECT[75%]:'(',"box",(30,08)
+OBJECT[75%]:'(',"box",(30,09)
+OBJECT[75%]:'(',"box",(30,10)
+
+OBJECT[75%]:'(',"box",(42,07)
+OBJECT[75%]:'(',"box",(41,07)
+OBJECT[75%]:'(',"box",(39,07)
+OBJECT[75%]:'(',"box",(38,08)
+OBJECT[75%]:'(',"box",(38,09)
+OBJECT[75%]:'(',"box",(38,10)
+OBJECT[75%]:'(',"box",(39,11)
+OBJECT[75%]:'(',"box",(41,11)
+OBJECT[75%]:'(',"box",(42,11)
+OBJECT[75%]:'(',"box",(43,08)
+OBJECT[75%]:'(',"box",(43,09)
+OBJECT[75%]:'(',"box",(43,10)
+
+OBJECT[50%]:'(',"box",(33,02)
+OBJECT[50%]:'(',"box",(34,02)
+OBJECT[50%]:'(',"box",(35,02)
+OBJECT[50%]:'(',"box",(33,03)
+OBJECT[50%]:'(',"box",(34,03)
+OBJECT[50%]:'(',"box",(35,03)
+OBJECT[50%]:'(',"box",(33,04)
+OBJECT[50%]:'(',"box",(34,04)
+OBJECT[50%]:'(',"box",(35,04)
+
+OBJECT[50%]:'(',"box",(33,14)
+OBJECT[50%]:'(',"box",(34,14)
+OBJECT[50%]:'(',"box",(35,14)
+OBJECT[50%]:'(',"box",(33,15)
+OBJECT[50%]:'(',"box",(34,15)
+OBJECT[50%]:'(',"box",(35,15)
+OBJECT[50%]:'(',"box",(33,16)
+OBJECT[50%]:'(',"box",(34,16)
+OBJECT[50%]:'(',"box",(35,16)
+
+DOOR:closed,(32,03)
+DOOR:closed,(36,03)
+
+DOOR:closed,(32,15)
+DOOR:closed,(36,15)
+# Doctor Archer
+MONSTER:'@',"Doctor Archer",(49,09),hostile
+
+#
+#       The "fill" levels for the quest.
+#
+#       These levels are used to fill out any levels not occupied by specific
+#       levels as defined above. "filla" is the upper filler, between the
+#       start and locate levels, and "fillb" the lower between the locate
+#       and goal levels.
+#
+
+MAZE:"Mad-fila",' '
+FLAGS:hardfloor
+
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7    7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0                         -------------------                                
+1                         |.F.......--|.+...|                                
+2                         |.+...---.F.|F-...|                                
+3                         |--.--|.F.+.|.+...|                                
+4                         |.+.F.|.+.--|F-...|                                
+5                         |.F.+.|--.+.|.+...|                                
+6                         |--.--|.+.F.|F-...|                                
+7                         |.F.+.|.F.--|.+...|                                
+8                         |.+.F.|--.F.|F-...|                                
+9                         |--.--|.F.+.|.+...|                                
+0                         |.+.F.|.+.--|F-...|                                
+1                         |.F.+.|--.+.|.+...|                                
+2                         |--.--|.+.F.|F-...|                                
+3                         |.F.+.|.F.--|.+...|                                
+4                         |.+.F.|--.F.|F-...|                                
+5                         |--+--|.F.+.|.+...|                                
+6                         |.....|.+.---F-...|                                
+7                         |.....|--...+.....|                                
+8                         -------------------                                
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#          1         2         3         4         5         6         7    7
+
+# Random prisoners
+
+# Dungeon Description
+REGION:(00,00,74,19),lit,"ordinary"
+# Stairs
+
+# Non diggable walls
+NON_DIGGABLE:(00,00,74,19)
+
+# Patients in cells (+1 bedrolls spawn a random madman monster during level gen).
+OBJECT:'\\', "bedroll",(26,01),uncursed,1
+OBJECT:'\\', "bedroll",(26,05),uncursed,1
+OBJECT:'\\', "bedroll",(26,07),uncursed,1
+OBJECT:'\\', "bedroll",(26,11),uncursed,1
+OBJECT:'\\', "bedroll",(26,13),uncursed,1
+
+OBJECT:'\\', "bedroll",(30,04),uncursed,1
+OBJECT:'\\', "bedroll",(30,08),uncursed,1
+OBJECT:'\\', "bedroll",(30,10),uncursed,1
+OBJECT:'\\', "bedroll",(30,14),uncursed,1
+
+OBJECT:'\\', "bedroll",(32,03),uncursed,1
+OBJECT:'\\', "bedroll",(32,07),uncursed,1
+OBJECT:'\\', "bedroll",(32,09),uncursed,1
+OBJECT:'\\', "bedroll",(32,13),uncursed,1
+OBJECT:'\\', "bedroll",(32,15),uncursed,1
+
+OBJECT:'\\', "bedroll",(36,02),uncursed,1
+OBJECT:'\\', "bedroll",(36,06),uncursed,1
+OBJECT:'\\', "bedroll",(36,08),uncursed,1
+OBJECT:'\\', "bedroll",(36,12),uncursed,1
+OBJECT:'\\', "bedroll",(36,14),uncursed,1
+
+OBJECT:'\\', "gurney",(38,01),uncursed,1
+OBJECT:'\\', "gurney",(38,03),uncursed,1
+OBJECT:'\\', "gurney",(38,05),uncursed,1
+OBJECT:'\\', "gurney",(38,07),uncursed,1
+OBJECT:'\\', "gurney",(38,09),uncursed,1
+OBJECT:'\\', "gurney",(38,11),uncursed,1
+OBJECT:'\\', "gurney",(38,13),uncursed,1
+OBJECT:'\\', "gurney",(38,15),uncursed,1
+
+# Prison debris
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[75%]: '_', "chain", random
+OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "heavy iron ball", random
+
+DOOR:closed,(27,02)
+DOOR:closed,(27,04)
+DOOR:closed,(27,08)
+DOOR:closed,(27,10)
+DOOR:closed,(27,14)
+
+DOOR:closed,(29,05)
+DOOR:closed,(29,07)
+DOOR:closed,(29,11)
+DOOR:closed,(29,13)
+
+DOOR:closed,(33,04)
+DOOR:closed,(33,06)
+DOOR:closed,(33,10)
+DOOR:closed,(33,12)
+DOOR:closed,(33,16)
+
+DOOR:closed,(35,03)
+DOOR:closed,(35,05)
+DOOR:closed,(35,09)
+DOOR:closed,(35,11)
+DOOR:closed,(35,15)
+
+DOOR:closed,(39,01)
+DOOR:closed,(39,03)
+DOOR:closed,(39,05)
+DOOR:closed,(39,07)
+DOOR:closed,(39,09)
+DOOR:closed,(39,11)
+DOOR:closed,(39,13)
+DOOR:closed,(39,15)
+
+DOOR:closed,(28,15)
+DOOR:closed,(37,17)
+
+MAZE:"Mad-filb",' '
+FLAGS:hardfloor
+#INIT_MAP: ' ' , ' ', false, false, unlit, false
+
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7    7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0               ------------------   -------------------                     
+1               |AAAAAAAAA|......|---|......|AAAAAAAAAA|                     
+2               |AAAAAAAAA|......S###S......|AAAAAAAAAA|                     
+3               |AAAAAAAA----------#----------AAAAAAAAA|                     
+4               |AAAAAAAA|...|...|-S-|...|...|AAAAAAAAA|                     
+5               |AAAAAAAAF...|...+###+...|...FAAAAAAAAA|                     
+6               |AAAAAAAA|...|...-----...|...|AA-----AA|                     
+7               |AAAAAAAA---+--+--AAA--+--+---A-------A|                     
+8               |AAAAAAAAA|-#-|#|AAAAA|#|-#-|AA||###||A|                     
+9               |AAAAAAAAAF###S#|AAAAA|#S###FAA||###||A|                     
+0               |AAAAAAAAA|-#-|#|AAAAA|#|-#-|AA||###||A|                     
+1               |AAAAAAAA---+--+--AAA--+--+---A-------A|                     
+2               |AAAAAAAA|...|...-----...|...|AA-----AA|                     
+3               |AAAAAAAAF...|...+###+...|...FAAAAAAAAA|                     
+4               |AAAAAAAA|...|...|-S-|...|...|AAAAAAAAA|                     
+5               |AAAAAAAA----------#----------AAAAAAAAA|                     
+6               |AAAAAAAAA|......S###S......|AAAAAAAAAA|                     
+7               |AAAAAAAAA|......|---|......|AAAAAAAAAA|                     
+8               ------------------   -------------------                     
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#          1         2         3         4         5         6         7    7
+RANDOM_PLACES:(26,01),(26,17),(42,01),(42,07),(29,14),(43,14),(43,04)
+
+# Stairs
+STAIR:place[1],down
+STAIR:(29,04),up
+# Ladders
+LADDER:(50,09),down
+LADDER:(48,09),up
+
+OBJECT:'(',"writing desk",(25,05)
+MONSTER:'@',"healer",(25,05)
+OBJECT:'(',"writing desk",(25,13)
+MONSTER:'@',"healer",(25,13)
+OBJECT:'(',"writing desk",(43,05)
+MONSTER:'@',"healer",(43,05)
+OBJECT:'(',"writing desk",(43,13)
+MONSTER:'@',"healer",(43,13)
+
+# Random prisoners
+MONSTER:'@',"contaminated patient",random
+
+# Dungeon Description
+REGION:(00,00,74,19),lit,"ordinary"
+
+# Non diggable walls
+NON_DIGGABLE:(00,00,74,19)
+# Debris
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[75%]: '?', "blank paper", random
+OBJECT[50%]: '+', "blank paper", random
+OBJECT[50%]: '+', "blank paper", random
+
+DOOR:locked,(27,07)
+DOOR:locked,(27,11)
+DOOR:locked,(41,07)
+DOOR:locked,(41,11)
+
+DOOR:closed,(32,05)
+DOOR:closed,(30,07)
+DOOR:closed,(30,11)
+DOOR:closed,(32,13)
+
+DOOR:closed,(36,05)
+DOOR:closed,(38,07)
+DOOR:closed,(38,11)
+DOOR:closed,(36,13)

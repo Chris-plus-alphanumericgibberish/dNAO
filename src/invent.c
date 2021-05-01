@@ -816,6 +816,17 @@ carrying_applyable_ring()
 }
 
 char
+carrying_applyable_amulet()
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->oclass == AMULET_CLASS && otmp->oward)
+			return TRUE;
+	return FALSE;
+}
+
+char
 carrying_readable_weapon()
 {
 	register struct obj *otmp;
@@ -3035,6 +3046,8 @@ winid *datawin;
 				size_penalty = max(0, size_penalty - 1);
 			if (u.sealsActive&SEAL_YMIR)
 				size_penalty = max(0, size_penalty - 1);
+			if (check_oprop(obj, OPROP_CCLAW))
+				size_penalty = max(0, size_penalty - 1);
 			
 			if(size_penalty < 0) size_penalty = 0;
 			hitbon -= size_penalty * 4;
@@ -3511,7 +3524,7 @@ winid *datawin;
 	if (oartifact == ART_GODHANDS)		OBJPUTSTR("Greatly increases DEX.");
 	if (oartifact == ART_PREMIUM_HEART)		OBJPUTSTR("Increases DEX.");
 	if (otyp == KICKING_BOOTS)					OBJPUTSTR("Improves kicking.");
-	if (otyp == MUMMY_WRAPPING)				OBJPUTSTR("Prevents invisibility.");
+	if (otyp == MUMMY_WRAPPING || otyp == PRAYER_WARDED_WRAPPING)	OBJPUTSTR("Prevents invisibility.");
 	if (otyp == RIN_GAIN_STRENGTH)				OBJPUTSTR("Increases STR by its enchantment.");
 	if (otyp == GAUNTLETS_OF_DEXTERITY)		OBJPUTSTR("Increases DEX by its enchantment.");
 	if (otyp == RIN_GAIN_CONSTITUTION)			OBJPUTSTR("Increases CON by its enchantment.");
@@ -3519,6 +3532,7 @@ winid *datawin;
 	if (otyp == RIN_INCREASE_DAMAGE)			OBJPUTSTR("Increases your weapon damage.");
 	if (otyp == RIN_INCREASE_ACCURACY)			OBJPUTSTR("Increases your to-hit modifier.");
 	if (otyp == AMULET_VERSUS_CURSES ||
+		otyp == PRAYER_WARDED_WRAPPING ||
 		oartifact == ART_HELPING_HAND ||
 		oartifact == ART_STAFF_OF_NECROMANCY ||
 		oartifact == ART_TREASURY_OF_PROTEUS ||
@@ -4334,6 +4348,8 @@ char *buf;
 	    cmap = S_vcdbridge;			/* "raised drawbridge" */
 	else if (IS_GRAVE(ltyp))
 	    cmap = S_grave;				/* "grave" */
+	else if (IS_SEAL(ltyp))
+	    cmap = S_seal;				/* "seal" */
 	else if (ltyp == TREE)
 	    cmap = S_tree;				/* "tree" */
 	else if (ltyp == IRONBARS)
@@ -4559,6 +4575,7 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	    obj->greased != otmp->greased ||
 	    obj->oeroded != otmp->oeroded ||
 	    obj->oeroded2 != otmp->oeroded2 ||
+	    obj->oeroded3 != otmp->oeroded3 ||
 	    obj->obj_material != otmp->obj_material ||
 	    obj->bypass != otmp->bypass)
 	    return(FALSE);
@@ -4808,20 +4825,20 @@ STATIC_VAR NEARDATA const char *names[] = { 0,
 	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
-	"Scrap", "Venoms", "Tiles"/*, Beds*/
+	"Scrap", "Venoms", "Tiles", "Beds", "Strange coins"
 };
 
 STATIC_VAR NEARDATA const char *bogusclasses[] = {
 	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
-	"Scrap", "Venoms","Tiles",/*, Beds*/
+	"Scrap", "Venoms","Tiles", "Beds", "Strange coins",
 	"Filler","Useless objects", "Artifacts", "Ascension kit items",
 	"Staves", "Songs", "Drinks", "Grimoires", "Gears", "Cogs",
 	"Marmosets", "Bugs", "Easter Eggs", "Tiny Monuments","Consumables",
 	"Junk", "FOOs", "BARs", "Spoilers", "YANIs", "Splatbooks", 
 	"Chains", "Paperwork", "Pop-culture references", "Dross",
-	"Pokemon","Forgotten escape items",
+	"Pokemon","Forgotten escape items","Useless flavor items",
 	"SCPs"
 };
 

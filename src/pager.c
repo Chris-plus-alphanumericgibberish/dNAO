@@ -1277,9 +1277,9 @@ do_look(quick)
 			hit_trap = TRUE;
 		    } else if (level.flags.lethe && !strcmp(x_str, "water")) { //Lethe patch
 			Sprintf(out_str, "%c       sparkling water", (uchar)sym); //Lethe patch
-		    } else if (strcmp(x_str, "cloud") >= 0) { //Don't print a bunch of cloud messages
-			Sprintf(out_str, "%c       cloud", (uchar)sym);
-			hit_cloud = TRUE;
+		    } else if (strstr(x_str, "cloud") != NULL) { //Don't print a bunch of cloud messages
+				Sprintf(out_str, "%c       cloud", (uchar)sym);
+				hit_cloud = TRUE;
 		    } else {
 			Sprintf(out_str, "%c       %s", (uchar)sym,
 				article == 2 ? the(x_str) :
@@ -1288,12 +1288,15 @@ do_look(quick)
 		    firstmatch = x_str;
 		    found++;
 		} else if (!u.uswallow && !(hit_trap && is_cmap_trap(i)) && 
-				!(hit_cloud && (strcmp(x_str, "cloud") >= 0)) &&
-			   !(found >= 3 && is_cmap_drawbridge(i))) {
+				!(hit_cloud && (strstr(x_str, "cloud") != NULL)) &&
+			   !(found >= 3 && is_cmap_drawbridge(i))
+		) {
 		    if (level.flags.lethe && !strcmp(x_str, "water")) //lethe
-			found += append_str(out_str, "sparkling water"); //lethe
-		    else if (strcmp(x_str, "cloud") >= 0) //lethe
-			found += append_str(out_str, "cloud"); //lethe
+				found += append_str(out_str, "sparkling water"); //lethe
+		    else if (strstr(x_str, "cloud") != NULL){ //cloudspam
+				found += append_str(out_str, "cloud"); //cloudspam
+				hit_cloud = TRUE;
+			}
 		    else //lethe
 		    	found += append_str(out_str,
 					article == 2 ? the(x_str) :
@@ -1618,7 +1621,7 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, species_teleports(ptr), "teleports"			, many);
 	many = append(description, species_controls_teleports(ptr)	, "controls teleports"	, many);
 	many = append(description, mteleport(ptr)			, "teleports often"		, many);
-	many = append(description, stationary(ptr)			, "stationary"			, many);
+	many = append(description, stationary_mon(mtmp)			, "stationary"			, many);
 	many = append(description, (many==0)				, "moves normally"		, many);
 	strcat(description, ". ");
 	return description;
@@ -1820,7 +1823,7 @@ get_speed_description_of_monster_type(struct monst * mtmp, char * description)
 		sprintf(description, "Immobile (%d). ", speed);
 	}
 
-	if (stationary(mtmp->data)) sprintf(description, "Can't move around. Speed %d. ", speed);
+	if (stationary_mon(mtmp)) sprintf(description, "Can't move around. Speed %d. ", speed);
 
 	return description;
 }

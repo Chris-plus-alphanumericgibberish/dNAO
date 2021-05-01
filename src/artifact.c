@@ -714,9 +714,10 @@ struct obj *
 mk_special(otmp)
 struct obj *otmp;	/* existing object */
 {
-	int prop = rnd(13);
+	int prop;
 	
 	if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)){
+		prop = rnd(13);
 		switch(prop)
 		{
 		case 1:
@@ -757,6 +758,42 @@ struct obj *otmp;	/* existing object */
 		break;
 		case 13:
 			add_oprop(otmp, OPROP_PSIOW);
+		break;
+		}
+	}
+	else if(otmp->oclass == ARMOR_CLASS){
+		prop = rnd(10);
+		switch(prop)
+		{
+		case 1:
+			add_oprop(otmp, OPROP_FIRE);
+		break;
+		case 2:
+			add_oprop(otmp, OPROP_COLD);
+		break;
+		case 3:
+			add_oprop(otmp, OPROP_ELEC);
+		break;
+		case 4:
+			add_oprop(otmp, OPROP_ACID);
+		break;
+		case 5:
+			add_oprop(otmp, OPROP_MAGC);
+		break;
+		case 6:
+			add_oprop(otmp, OPROP_ANAR);
+		break;
+		case 7:
+			add_oprop(otmp, OPROP_CONC);
+		break;
+		case 8:
+			add_oprop(otmp, OPROP_AXIO);
+		break;
+		case 9:
+			add_oprop(otmp, OPROP_HOLY);
+		break;
+		case 10:
+			add_oprop(otmp, OPROP_UNHY);
 		break;
 		}
 	}
@@ -3046,7 +3083,7 @@ int * truedmgptr;
 		if(check_oprop(otmp, OPROP_LESSER_COLDW))
 			*truedmgptr += d(2, 6);
 	}
-	{
+	if(check_oprop(otmp, OPROP_WATRW) || check_oprop(otmp, OPROP_LESSER_WATRW)){
 		struct obj *cloak = which_armor(mdef, W_ARMC);
 		struct obj *armor = which_armor(mdef, W_ARM);
 		struct obj *shield = which_armor(mdef, W_ARMS);
@@ -3427,7 +3464,7 @@ boolean * messaged;
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
 		/* exclusions below */
-		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6)) /* Tobiume only does the knockback if mdef is nearly dead */
+		(oartifact == ART_TOBIUME) /* Tobiume only does the knockback if mdef is nearly dead */
 		))
 	{
 		/* determine if we do the full hurtle, or just stun */
@@ -3481,7 +3518,7 @@ boolean * messaged;
 	/* fire explosions */
 	if (((arti_attack_prop(otmp, ARTA_EXPLFIRE) && !rn2(4)) || arti_attack_prop(otmp, ARTA_EXPLFIREX)) && !(
 		/* exclusion */
-		(oartifact == ART_TOBIUME && (*hp(mdef) > currdmg + 6))
+		(oartifact == ART_TOBIUME)
 		))
 	{
 		explode(x(mdef), y(mdef),
@@ -10186,7 +10223,7 @@ struct monst *mon;
 		)
 			return 1;
 	} else {
-		if(has_template(mon, ZOMBIFIED)){
+		if(has_template(mon, ZOMBIFIED) || has_template(mon, YELLOW_TEMPLATE)){
 			if((otmp->wrathdata >> 2) == PM_ZOMBIE)
 				return 1;
 		} else if(has_template(mon, SKELIFIED)){

@@ -1783,6 +1783,7 @@ back_to_glyph(x,y)
 	case SINK:		idx = S_sink;     break;
 	case ALTAR:		idx = S_altar;    break;
 	case GRAVE:		idx = S_grave;    break;
+	case HELLISH_SEAL:		idx = S_seal;    break;
 	case THRONE:		idx = S_throne;   break;
 	case LAVAPOOL:		idx = S_lava;	  break;
 	case ICE:		idx = S_ice;      break;

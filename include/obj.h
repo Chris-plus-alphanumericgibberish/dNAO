@@ -502,6 +502,8 @@ struct obj {
 							 (o)->otyp == LIVING_MASK || (o)->otyp == MASK || (o)->otyp == R_LYEHIAN_FACEPLATE)
 #define is_instrument(o)	((o)->otyp >= FLUTE && \
 			 (o)->otyp <= DRUM_OF_EARTHQUAKE)
+#define is_mummy_wrap(o)	((o)->otyp == MUMMY_WRAPPING || \
+			 (o)->otyp == PRAYER_WARDED_WRAPPING)
 #define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
 							 (otmp)->otyp == KAMEREL_VAJRA || \
 							 (otmp)->otyp == BEAMSWORD || \
@@ -882,7 +884,7 @@ struct obj {
 
 #define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == PLAIN_DRESS || onum == VICTORIAN_UNDERWEAR)
 
-#define arm_blocks_upper_body(onum)		(onum != HAWAIIAN_SHORTS)
+#define arm_blocks_upper_body(onum)		(objects[onum].oc_dir&UPPER_TORSO_DR)
 
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \
