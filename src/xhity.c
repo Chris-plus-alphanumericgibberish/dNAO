@@ -244,7 +244,7 @@ struct monst * mdef;
 		}
 
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_AHAZU){
-			if ((*hp(mdef) < .1*(*hpmax(mdef))) && !is_rider(pd)){
+			if ((*hp(mdef) < .1*(*hpmax(mdef))) && !(is_rider(pd) || pd->msound == MS_NEMESIS)){
 #define MAXVALUE 24
 				extern const int monstr[];
 				int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
@@ -3891,8 +3891,9 @@ boolean ranged;
 	if (attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ)
 		armuncancel = TRUE;
 	notmcan = (youagr || !magr->mcan);
-	uncancelled = notmcan && armuncancel;
-	
+	/* if we're called with attk->aatyp==AT_NONE, this is some kind of extra effect of magical origin that will bypass armuncancel */
+	uncancelled = notmcan && (armuncancel || attk->aatyp == AT_NONE);
+
 
 	/* Do stuff based on damage type 
 	 *  
@@ -4007,6 +4008,10 @@ boolean ranged;
 	case AD_BLUD:	/* bloodied, phases (blade of blood) */
 	case AD_MERC:	/* poisoned, cold, phases (blade of mercury) */
 	case AD_GLSS:	/* silvered (mirror-shards) */
+
+		/* abort if called with AT_NONE -- the attack was meant to only do special effects of the adtype. */
+		if (attk->aatyp == AT_NONE)
+			return result;
 		
 		/* The Tentacle Rod has a unique hitmessage which will replace the usual hitmsg */
 		if (vis&VIS_MAGR && weapon && arti_tentRod(weapon) && dohitmsg) {
