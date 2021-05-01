@@ -2032,7 +2032,7 @@ spiriteffects(power, atme)
 					pline("There is no target there.");
 					break;
 				}
-				if(mon->uhurtm && (mon->data->geno&G_GENO || mon->mhp < .1*mon->mhpmax) && !is_rider(mon->data)){
+				if(mon->uhurtm && (mon->data->geno&G_GENO || mon->mhp < .1*mon->mhpmax) && !(is_rider(mon->data) || mon->data->msound == MS_NEMESIS)){
 #define MAXVALUE 24
 					extern const int monstr[];
 					int value = min(monstr[monsndx(mon->data)] + 1,MAXVALUE);
