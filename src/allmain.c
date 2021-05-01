@@ -2892,6 +2892,9 @@ boolean new_game;	/* false => restoring an old game */
 		pline("#chat to a fresh seal to contact the spirit beyond.");
 		pline("Press Ctrl^F or type #power to fire active spirit powers!");
 	}
+	else if(Role_if(PM_MADMAN)){
+		pline("Use the abilities menu to summon your secret whisperer or emit mind blasts!");
+	}
 	if(Race_if(PM_DROW)){
 		pline("Beware, droven armor evaporates in light!");
 		pline("Use #monster to create a patch of darkness.");
