@@ -3201,7 +3201,7 @@ resistances_enlightenment()
 	if (active_glyph(DISSIPATING_BULWARK)) putstr(en_win, 0, "You remember a flashing storm over pure lake-water.");
 	if (active_glyph(SMOLDERING_BULWARK)) putstr(en_win, 0, "You remember embers drowning in still waters.");
 	if (active_glyph(FROSTED_BULWARK)) putstr(en_win, 0, "You remember snowflakes on the surface of a lake.");
-	if (active_glyph(BLOOD_RAPTURE)) putstr(en_win, 0, "You see rainbows in a mists of blood.");
+	if (active_glyph(BLOOD_RAPTURE)) putstr(en_win, 0, "You see rainbows in mists of blood.");
 	if (active_glyph(CLAWMARK)) putstr(en_win, 0, "Every surface you have ever seen was scored by claws.");
 	if (active_glyph(CLEAR_DEEPS)) putstr(en_win, 0, "Your thoughts drift through blue water.");
 	if (active_glyph(DEEP_SEA)) putstr(en_win, 0, "Your fears drown in pitch-black water.");
