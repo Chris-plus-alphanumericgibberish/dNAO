@@ -1919,18 +1919,19 @@ boolean polyspot;
 		if (mw_tmp) {
 			setmnotwielded(mon, mw_tmp);
 			MON_NOWEP(mon);
-			if (obj)
+			if (obj){
 				obj_extract_self(obj);
-			if (cansee(mon->mx, mon->my)) {
-				pline("%s drops %s.", Monnam(mon),
-					distant_name(obj, doname));
-				newsym(mon->mx, mon->my);
-			}
-			/* might be dropping object into water or lava */
-			if (!flooreffects(obj, mon->mx, mon->my, "drop")) {
-				if (polyspot) bypass_obj(obj);
-				place_object(obj, mon->mx, mon->my);
-				stackobj(obj);
+				if (cansee(mon->mx, mon->my)) {
+					pline("%s drops %s.", Monnam(mon),
+						distant_name(obj, doname));
+					newsym(mon->mx, mon->my);
+				}
+				/* might be dropping object into water or lava */
+				if (!flooreffects(obj, mon->mx, mon->my, "drop")) {
+					if (polyspot) bypass_obj(obj);
+					place_object(obj, mon->mx, mon->my);
+					stackobj(obj);
+				}
 			}
 		}
 	}
@@ -1940,18 +1941,19 @@ boolean polyspot;
 		if (msw_tmp) {
 			setmnotwielded(mon, msw_tmp);
 			MON_NOSWEP(mon);
-			if (sobj)
+			if (sobj){
 				obj_extract_self(sobj);
-			if (cansee(mon->mx, mon->my)) {
-				pline("%s drops %s.", Monnam(mon),
-					distant_name(sobj, doname));
-				newsym(mon->mx, mon->my);
-			}
-			/* might be dropping object into water or lava */
-			if (!flooreffects(sobj, mon->mx, mon->my, "drop")) {
-				if (polyspot) bypass_obj(sobj);
-				place_object(sobj, mon->mx, mon->my);
-				stackobj(sobj);
+				if (cansee(mon->mx, mon->my)) {
+					pline("%s drops %s.", Monnam(mon),
+						distant_name(sobj, doname));
+					newsym(mon->mx, mon->my);
+				}
+				/* might be dropping object into water or lava */
+				if (!flooreffects(sobj, mon->mx, mon->my, "drop")) {
+					if (polyspot) bypass_obj(sobj);
+					place_object(sobj, mon->mx, mon->my);
+					stackobj(sobj);
+				}
 			}
 		}
 	}

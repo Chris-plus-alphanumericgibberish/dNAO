@@ -1119,7 +1119,14 @@ boolean ghostly;
 	if (ghostly && get_ox(otmp, OX_EMON)) {
 	    struct monst *mtmp = EMON(otmp);
 	    mtmp->m_id = 0;
-		untame(mtmp, 0);/* pet's owner died! */
+		/* pet's owner died! They are no longer tame. */
+		if (mtmp->mextra_p) {
+			void * mextra_bundle = mtmp+1;
+			unbundle_mextra(mtmp, mextra_bundle);
+			untame(mtmp, 0);
+			rem_ox(otmp, OX_EMON);
+			save_mtraits(otmp, mtmp);
+		}
 	}
 	if (ghostly && get_ox(otmp, OX_EMID)) {
 		oldid = otmp->oextra_p->emid_p[0];
