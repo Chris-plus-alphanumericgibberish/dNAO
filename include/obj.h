@@ -502,6 +502,8 @@ struct obj {
 							 (o)->otyp == LIVING_MASK || (o)->otyp == MASK || (o)->otyp == R_LYEHIAN_FACEPLATE)
 #define is_instrument(o)	((o)->otyp >= FLUTE && \
 			 (o)->otyp <= DRUM_OF_EARTHQUAKE)
+#define is_mummy_wrap(o)	((o)->otyp == MUMMY_WRAPPING || \
+			 (o)->otyp == PRAYER_WARDED_WRAPPING)
 #define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
 							 (otmp)->otyp == KAMEREL_VAJRA || \
 							 (otmp)->otyp == BEAMSWORD || \

@@ -3491,7 +3491,7 @@ struct monst *mtmp;
 		lifesavers |= LSVD_ANA;
 	if(mtmp->mtyp == PM_NITOCRIS
 		&& which_armor(mtmp, W_ARMC)
-		&& which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF
+		&& which_armor(mtmp, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_
 	)
 		lifesavers |= LSVD_NBW;
 	if (mtmp->mspec_used == 0 && (is_uvuudaum(mtmp->data) || mtmp->mtyp == PM_PRAYERFUL_THING))
@@ -8183,6 +8183,7 @@ struct monst *mtmp;
 					break;
 			if(!mtmp->mtame && !mtmp->mpeaceful && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM
 				&& !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES))
+				&& !(uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING))
 				&& !(uwep && (uwep->oartifact == ART_MAGICBANE) && rn2(20))
 				&& !(uwep && (uwep->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20))
 				&& !(uwep && (uwep->oartifact == ART_TENTACLE_ROD) && rn2(20))
@@ -8252,6 +8253,7 @@ struct monst *mtmp;
 						&& tmpm->mtame != mtmp->mtame
 						&& !has_template(tmpm, CRYSTALFIED)
 						&& !(uamul && (uamul->otyp == AMULET_VERSUS_CURSES) && rn2(40))
+						&& !(uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING) && rn2(40))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_MAGICBANE) && rn2(20))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20))
 						&& !(MON_WEP(tmpm) && (MON_WEP(tmpm)->oartifact == ART_TENTACLE_ROD) && rn2(20))

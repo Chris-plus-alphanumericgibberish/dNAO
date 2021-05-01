@@ -1119,7 +1119,7 @@ moveloop()
 			}
 			if(u.sealsActive&SEAL_NABERIUS && u.udrunken < u.ulevel/3) unbind(SEAL_NABERIUS,TRUE);
 			if(u.specialSealsActive&SEAL_NUMINA && u.ulevel<30) unbind(SEAL_SPECIAL|SEAL_NUMINA,TRUE);
-			if(u.sealsActive&SEAL_SHIRO && uarmc && uarmc->otyp == MUMMY_WRAPPING){
+			if(u.sealsActive&SEAL_SHIRO && uarmc && is_mummy_wrap(uarmc)){
 				struct obj *otmp = uarmc;
 				pline("Hey, people might notice me with that!");
 				if (donning(otmp)) cancel_don();
@@ -1228,6 +1228,15 @@ moveloop()
 						}
 						else if(mtmp->entangled == MUMMY_WRAPPING){
 							if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->otyp == MUMMY_WRAPPING){
+								if(canseemon(mtmp)) pline("%s struggles against %s wrappings", Monnam(mtmp), hisherits(mtmp));
+								mtmp->movement = 0;
+								continue;
+							} else {
+								mtmp->entangled = 0;
+							}
+						}
+						else if(mtmp->entangled == PRAYER_WARDED_WRAPPING){
+							if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->otyp == PRAYER_WARDED_WRAPPING){
 								if(canseemon(mtmp)) pline("%s struggles against %s wrappings", Monnam(mtmp), hisherits(mtmp));
 								mtmp->movement = 0;
 								continue;
@@ -1430,12 +1439,12 @@ karemade:
 						}
 					}
 				} else mtmp->movement += mcalcmove(mtmp);
-				
+
 				if(mtmp->mtyp == PM_NITOCRIS){
-					if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF)
+					if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
 						mtmp->mspec_used = 1;
 				}
-				
+
 				if(mtmp->moccupation && !occupation){
 					mtmp->moccupation = 0;
 					mtmp->mcanmove = 1;
@@ -3879,7 +3888,7 @@ struct monst *mon;
 			mon->mtrack[1].y = mtmp->my;
 			xlocale = mon->mtrack[1].x;
 			ylocale = mon->mtrack[1].y;
-			if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF){
+			if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_){
 				//Directed to cast spells on her behalf
 				mtmp->mspec_used = 0;
 			} else if(mtmp->mtyp == PM_NITOCRIS){

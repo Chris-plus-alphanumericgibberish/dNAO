@@ -3524,7 +3524,7 @@ winid *datawin;
 	if (oartifact == ART_GODHANDS)		OBJPUTSTR("Greatly increases DEX.");
 	if (oartifact == ART_PREMIUM_HEART)		OBJPUTSTR("Increases DEX.");
 	if (otyp == KICKING_BOOTS)					OBJPUTSTR("Improves kicking.");
-	if (otyp == MUMMY_WRAPPING)				OBJPUTSTR("Prevents invisibility.");
+	if (otyp == MUMMY_WRAPPING || otyp == PRAYER_WARDED_WRAPPING)	OBJPUTSTR("Prevents invisibility.");
 	if (otyp == RIN_GAIN_STRENGTH)				OBJPUTSTR("Increases STR by its enchantment.");
 	if (otyp == GAUNTLETS_OF_DEXTERITY)		OBJPUTSTR("Increases DEX by its enchantment.");
 	if (otyp == RIN_GAIN_CONSTITUTION)			OBJPUTSTR("Increases CON by its enchantment.");
@@ -3532,6 +3532,7 @@ winid *datawin;
 	if (otyp == RIN_INCREASE_DAMAGE)			OBJPUTSTR("Increases your weapon damage.");
 	if (otyp == RIN_INCREASE_ACCURACY)			OBJPUTSTR("Increases your to-hit modifier.");
 	if (otyp == AMULET_VERSUS_CURSES ||
+		otyp == PRAYER_WARDED_WRAPPING ||
 		oartifact == ART_HELPING_HAND ||
 		oartifact == ART_STAFF_OF_NECROMANCY ||
 		oartifact == ART_TREASURY_OF_PROTEUS ||

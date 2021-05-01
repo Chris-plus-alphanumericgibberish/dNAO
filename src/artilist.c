@@ -1443,7 +1443,7 @@ A("The Sansara Mirror",				MIRRORBLADE,			(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
-A("The Prayer-warded Wrappings of Nitocris",		MUMMY_WRAPPING,			(const char *)0,
+A("The Spell-warded Wrappings of Nitocris",		MUMMY_WRAPPING,			(const char *)0,
 	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),

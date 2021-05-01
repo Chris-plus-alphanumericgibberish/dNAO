@@ -3953,7 +3953,7 @@ signs_enlightenment()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ORTHOS && !NoBInvis){
-		if(uarmc && uarmc->otyp != MUMMY_WRAPPING){
+		if(uarmc && is_mummy_wrap(uarmc)){
 			putstr(en_win, 0, "Your cloak blows in a nonexistent wind.");
 			message = TRUE;
 		}
@@ -4488,7 +4488,7 @@ signs_mirror()
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_MOTHER && !NoBInvis){
-		if(!uarmg && !(uarmc && uarmc->otyp == MUMMY_WRAPPING))
+		if(!uarmg && !(uarmc && is_mummy_wrap(uarmc)))
 			putstr(en_win, 0, "The eyes on your fingers and palms stare back at you.");
 		else
 			putstr(en_win, 0, "The eyes on your fingers and palms are covered up.");
@@ -4501,7 +4501,7 @@ signs_mirror()
 		}
 	}
 	if(u.sealsActive&SEAL_ORTHOS && !NoBInvis){
-		if(uarmc && uarmc->otyp != MUMMY_WRAPPING){
+		if(uarmc && !is_mummy_wrap(uarmc)){
 			putstr(en_win, 0, "Your cloak blows in a nonexistent wind.");
 			message = TRUE;
 		}

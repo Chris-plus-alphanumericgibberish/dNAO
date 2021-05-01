@@ -2541,7 +2541,7 @@ boolean ordinary;
 		     */
 		    int msg = !Invis && !Blind && !BInvis;
 
-		    if (BInvis && uarmc->otyp == MUMMY_WRAPPING) {
+		    if (BInvis && (is_mummy_wrap(uarmc))){
 			/* A mummy wrapping absorbs it and protects you */
 		        You_feel("rather itchy under your %s.", xname(uarmc));
 		        break;

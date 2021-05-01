@@ -1841,10 +1841,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		else if(!youdef && !mdef->mdoubt)
 			GETNEXT
 	}
-	/* Nitocris uses clerical spells while wearing their Prayer-Warded Wrappings */
+	/* Nitocris uses clerical spells while wearing their Wrappings */
 	if(!by_the_book && pa->mtyp == PM_NITOCRIS){
 		if (attk->aatyp == AT_MAGC){
-			if (which_armor(magr, W_ARMC) && which_armor(magr, W_ARMC)->oartifact == ART_PRAYER_WARDED_WRAPPINGS_OF){
+			if (which_armor(magr, W_ARMC) && which_armor(magr, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_){
 				attk->adtyp = AD_CLRC;
 			}
 		}

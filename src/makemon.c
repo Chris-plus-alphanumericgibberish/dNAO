@@ -2404,7 +2404,7 @@ int mkobjflags;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					
-					otmp = mksobj(MUMMY_WRAPPING, mkobjflags|MKOBJ_NOINIT);
+					otmp = mksobj(PRAYER_WARDED_WRAPPING, mkobjflags|MKOBJ_NOINIT);
 					bless(otmp);
 					otmp->spe = 5;
 					set_material_gm(otmp, GOLD);
@@ -7355,12 +7355,14 @@ int mkobjflags;
 			(void) mpickobj(mtmp, otmp);
 		} else if(ptr->mtyp == PM_NITOCRIS){
 			otmp = mksobj(MUMMY_WRAPPING, mkobjflags|MKOBJ_NOINIT);
-			otmp = oname(otmp, artiname(ART_PRAYER_WARDED_WRAPPINGS_OF));		
+			otmp = oname(otmp, artiname(ART_SPELL_WARDED_WRAPPINGS_OF_));		
 			otmp->blessed = FALSE;
 			otmp->cursed = TRUE;
 			otmp->spe = 7;
 			otmp->oerodeproof = TRUE;
 			(void) mpickobj(mtmp, otmp);
+		} else if(ptr->mtyp == PM_PHARAOH){
+			(void)mongets(mtmp, PRAYER_WARDED_WRAPPING, mkobjflags);
 		} else {
 			(void)mongets(mtmp, ptr->mtyp == PM_DROW_MUMMY ? DROVEN_CLOAK : MUMMY_WRAPPING, mkobjflags);
 		}
@@ -7444,7 +7446,7 @@ int mkobjflags;
 			fix_object(otmp);
 			curse(otmp);
 			(void) mpickobj(mtmp, otmp);
-			
+
 			otmp = mksobj(rnd_good_amulet(), mkobjflags);
 			set_material_gm(otmp, GOLD);
 			fix_object(otmp);

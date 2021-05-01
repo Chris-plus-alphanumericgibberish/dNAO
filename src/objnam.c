@@ -5488,6 +5488,7 @@ struct obj *cloak;
 	switch (cloak->otyp) {
 	case ROBE:
 	    return "robe";
+	case PRAYER_WARDED_WRAPPING:
 	case MUMMY_WRAPPING:
 	    return "wrapping";
 	case ALCHEMY_SMOCK:

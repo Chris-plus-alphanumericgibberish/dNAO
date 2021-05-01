@@ -1771,6 +1771,7 @@ struct obj* obj;
 	case SUNROD:
 	case WORM_TOOTH:
 	case MUMMY_WRAPPING:
+	case PRAYER_WARDED_WRAPPING:
 	case ELVEN_CLOAK:
 	case DROVEN_CLOAK:
 	case OILSKIN_CLOAK:

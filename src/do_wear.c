@@ -245,6 +245,7 @@ Cloak_on()
 		adj_abon(uarmc, uarmc->spe);
 		break;
 	case MUMMY_WRAPPING:
+	case PRAYER_WARDED_WRAPPING:
 		/* Note: it's already being worn, so we have to cheat here. */
 		if ((HInvis || EInvis || pm_invisible(youracedata)) && !Blind) {
 		    newsym(u.ux,u.uy);
@@ -316,6 +317,7 @@ Cloak_off()
 	case SMOKY_VIOLET_FACELESS_ROBE:
 		break;
 	case MUMMY_WRAPPING:
+	case PRAYER_WARDED_WRAPPING:
 		if (Invis && !Blind) {
 		    newsym(u.ux,u.uy);
 		    You("can %s.",
