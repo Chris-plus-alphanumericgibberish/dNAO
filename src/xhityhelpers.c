@@ -474,34 +474,6 @@ struct monst *mtmp;
 }
 
 /*
- * Send in a demon pet for the hero.  Exercise wisdom.
- *
- * This function used to be inline to damageum(), but the Metrowerks compiler
- * (DR4 and DR4.5) screws up with an internal error 5 "Expression Too Complex."
- * Pulling it out makes it work.
- */
-extern void
-demonpet()
-{
-	int i;
-	struct permonst *pm;
-	struct monst *dtmp;
-
-	pline("Some hell-p has arrived!");
-	i = (!is_demon(youracedata) || !rn2(6)) 
-	     ? ndemon(u.ualign.type) : NON_PM;
-	pm = i != NON_PM ? &mons[i] : youracedata;
-	if(pm->mtyp == PM_ANCIENT_OF_ICE || pm->mtyp == PM_ANCIENT_OF_DEATH) {
-	    pm = rn2(4) ? &mons[PM_METAMORPHOSED_NUPPERIBO] : &mons[PM_ANCIENT_NUPPERIBO];
-	}
-	if ((dtmp = makemon(pm, u.ux, u.uy, MM_ESUM)) != 0) {
-	    (void)tamedog(dtmp, (struct obj *)0);
-		mark_mon_as_summoned(dtmp, &youmonst, 250, 0);
-	}
-	exercise(A_WIS, TRUE);
-}
-
-/*
  * Player uses theft attack against monster.
  *
  * If the target is wearing body armor, take all of its possessions;
