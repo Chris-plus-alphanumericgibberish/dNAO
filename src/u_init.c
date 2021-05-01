@@ -1009,7 +1009,7 @@ static const struct def_skill Skill_Mad[] = {
     { P_AXE, P_EXPERT },			{ P_MORNING_STAR, P_SKILLED },
     { P_CLUB, P_EXPERT },		    { P_MACE, P_BASIC },
     { P_DART, P_SKILLED },		    { P_FLAIL, P_BASIC },
-    { P_SHORT_SWORD, P_BASIC },
+    { P_SHORT_SWORD, P_BASIC },		{ P_TRIDENT, P_SKILLED },
 	{ P_HARVEST, P_SKILLED },		{ P_WHIP, P_SKILLED },
     { P_ATTACK_SPELL, P_BASIC },	{ P_ESCAPE_SPELL, P_SKILLED },
     { P_HEALING_SPELL, P_SKILLED }, { P_DIVINATION_SPELL, P_EXPERT },
