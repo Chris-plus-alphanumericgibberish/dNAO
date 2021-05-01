@@ -5175,7 +5175,7 @@ boolean ranged;
 					/* drain stats */
 					mdef->m_lev--;
 					mdef->mhpmax -= ptmp;
-					mdef->mhp = max(mdef->mhpmax, mdef->mhp);
+					mdef->mhp = min(mdef->mhpmax, mdef->mhp);
 				}
 			}
 		}
