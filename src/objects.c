@@ -1572,6 +1572,19 @@ WAND(((char *)0,        "jeweled"),        0, 150, 1, 0,         IRON,        HI
 	COIN(("gold piece"),      1000, GOLD,1),
 #undef COIN
 
+/* soul coins */
+#define SCOIN(names, prob, worth, clr,...) OBJECT( \
+		names, BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,0,P_NONE, IRON,0), 0, \
+		SCOIN_CLASS, prob, 0, 1, worth, {0}, {0}, 0, 0, 0, 0, clr, __VA_ARGS__)
+	SCOIN(("wage of sloth", "black-eyed coin", "strange coin"),		270, 99, CLR_BLACK),
+	SCOIN(("wage of lust", "blue-eyed coin", "strange coin"),		243, 99, CLR_BRIGHT_BLUE),
+	SCOIN(("wage of gluttony", "orange-eyed coin", "strange coin"),	223, 99, CLR_ORANGE),
+	SCOIN(("wage of greed", "gold-eyed coin", "strange coin"),		142, 99, HI_GOLD),
+	SCOIN(("wage of wrath", "red-eyed coin", "strange coin"),		61,  99, CLR_RED),
+	SCOIN(("wage of envy", "green-eyed coin", "strange coin"),		41,  99, CLR_BRIGHT_GREEN),
+	SCOIN(("wage of pride", "purple-eyed coin", "strange coin"),	20,  99, CLR_MAGENTA),
+#undef SCOIN
+
 /* gems ... - includes stones and rocks but not boulders */
 #define GEM(names,prob,wt,gval,nutr,mohs,glass,color,...) OBJECT( \
 	    DEF_BLINDNAME(names, "gem"), \
