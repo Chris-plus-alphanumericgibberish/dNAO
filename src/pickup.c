@@ -1082,7 +1082,8 @@ int *wt_before, *wt_after;
     *wt_before = iw;
     *wt_after  = wt;
 
-    if (wt < 0)
+    /* special case the iron ball here, it actually improves carrycap */
+    if (wt < 0 || obj->oartifact == ART_IRON_BALL_OF_LEVITATION)
 	return count;
 
     /* see how many we can lift */
@@ -1237,7 +1238,8 @@ boolean telekinesis;
 	if (prev_encumbr < flags.pickup_burden)
 		prev_encumbr = flags.pickup_burden;
 	next_encumbr = calc_capacity(new_wt - old_wt);
-	if (next_encumbr > prev_encumbr) {
+	/* Special case iron ball because in principle one can always pick it up */
+	if (next_encumbr > prev_encumbr && obj->oartifact != ART_IRON_BALL_OF_LEVITATION) {
 	    if (telekinesis) {
 		result = 0;	/* don't lift */
 	    } else {
