@@ -1667,6 +1667,10 @@ int x, y;
 				break;
 			}
 		break;
+		default:
+			impossible("Unhandled vault number %d.", levl[x][y].vaulttype);
+			mid = PM_LAMB;
+		break;
 	}
 	
 	mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
