@@ -1348,8 +1348,8 @@ int mkflags;
 	if(check_oprop(otmp, OPROP_WRTHW))
 		otmp->wrathdata = PM_ORC<<2;//wrathful + 1/4 vs orcs
 
-	/* spellbooks of secrets should become a random artifact spellbook */
-	if (otyp == SPE_SECRETS && init)
+	/* spellbooks of secrets should become a random artifact spellbook, if it wasn't randomly made one already  */
+	if (otyp == SPE_SECRETS && init && !otmp->oartifact)
 	    otmp = mk_artifact(otmp, (aligntyp)A_NONE);
 	
 	/* track words */
