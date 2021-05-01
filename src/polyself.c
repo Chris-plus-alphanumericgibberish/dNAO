@@ -1188,14 +1188,16 @@ dovampminion()
 		pline("You can't create a minion of that type of monster!");
 		return(0);
 	} else {
-		struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
-		mtmp = tamedog(mtmp, (struct obj *) 0);
-		set_template(mtmp, VAMPIRIC);
-
-		if (onfloor) useupf(corpse, 1);
-		else useup(corpse);
-		losexp("donating blood", TRUE, TRUE, FALSE);
-	}	
+		struct monst * mtmp = revive(corpse, FALSE);
+		if (mtmp) {
+			tamedog_core(mtmp, (struct obj *)0, TRUE);
+			set_template(mtmp, VAMPIRIC);
+			losexp("donating blood", TRUE, TRUE, FALSE);
+		}
+		else {
+			pline1(nothing_happens);
+		}
+	}
 	
 	return(1);
 }
