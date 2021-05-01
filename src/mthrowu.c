@@ -178,6 +178,10 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		if (distmin(magr->mx, magr->my, tarx, tary) < 2)
 			continue;
 
+		/* don't make ranged attacks beyond max-range */
+		if (distmin(magr->mx, magr->my, tarx, tary) > BOLT_LIM)
+			continue;
+
 		/* horrible kludge: Oona doesn't target those resistant to her at range */
 		if (magr->mtyp == PM_OONA && (mdef == &youmonst ? Oona_resistance : resists_oona(mdef)))
 			continue;
