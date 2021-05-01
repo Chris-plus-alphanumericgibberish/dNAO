@@ -9191,7 +9191,7 @@ register int	mmflags;
 			if(in_mklev && is_angel(mtmp->data) && Is_demogorgon_level(&u.uz)){
 				set_template(mtmp, MAD_TEMPLATE);
 				mtmp->m_lev += (mtmp->data->mlevel)/2;
-				mtmp->mhpmax = max(4, mtmp->m_lev);
+				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
 				mtmp->mhp = mtmp->mhpmax;
 			}
 
