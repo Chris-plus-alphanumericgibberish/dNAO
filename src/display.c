@@ -416,9 +416,10 @@ display_monster(x, y, mon, sightflags, worm_tail)
     				/* 2 if detected using Detect_monsters */
     register xchar worm_tail;	/* mon is actually a worm tail */
 {
+	/* we want M_AP_MONSTER to not be revealed by monster dectection */
     register boolean mon_mimic = (mon->m_ap_type != M_AP_NOTHING);
-    register int sensed = mon_mimic &&
-	(Protection_from_shape_changers || sensemon(mon));
+    register int sensed = mon_mimic && (Protection_from_shape_changers || sensemon(mon));
+	register int appear = mon->mtyp;
     /*
      * We must do the mimic check first.  If the mimic is mimicing something,
      * and the location is in sight, we have to change the hero's memory
@@ -464,14 +465,15 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	    }
 
 	    case M_AP_MONSTER:
-		show_glyph(x,y, monnum_to_glyph(what_mon((int)mon->mappearance, mon)));
+		appear = mon->mappearance;
+		//show_glyph(x,y, monnum_to_glyph(what_mon((int)mon->mappearance, mon)));
 		break;
 	}
 	
     }
 
     /* If the mimic is unsucessfully mimicing something, display the monster */
-    if (!mon_mimic || sensed) {
+    if (!mon_mimic || sensed || mon->m_ap_type == M_AP_MONSTER) {
 	int num;
 
 	if (mon->mtame && !Hallucination) {
@@ -479,13 +481,13 @@ display_monster(x, y, mon, sightflags, worm_tail)
 			petnum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			petnum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
-		num = pet_to_glyph(mon);
+		num = petnum_to_glyph(appear);
 	} else if (mon->mpeaceful && !Hallucination) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			peacenum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			peacenum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
-		num = peace_to_glyph(mon);
+		num = peacenum_to_glyph(appear);
 	}
 	else if (!Hallucination && (
 				has_template(mon, VAMPIRIC) ||
@@ -499,7 +501,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
 			zombienum_to_glyph(PM_HUNTING_HORROR_TAIL):
 			zombienum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
-		num = zombie_to_glyph(mon);
+		num = zombienum_to_glyph(appear);
 	/* [ALI] Only use detected glyphs when monster wouldn't be
 	 * visible by any other means.
 	 */
@@ -508,13 +510,13 @@ display_monster(x, y, mon, sightflags, worm_tail)
 			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, mon)):
 			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, mon));
 	    else
-		num = detected_mon_to_glyph(mon);
+		num = detected_monnum_to_glyph(appear);
 	} else {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, mon)):
 			monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, mon));
 	    else
-		num = mon_to_glyph(mon);
+		num = monnum_to_glyph(appear);
 	}
 	show_glyph(x,y,num);
     }

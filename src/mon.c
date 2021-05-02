@@ -5787,7 +5787,7 @@ int anger;
 	mtmp->meating = 0;	/* assume there's no salvagable food left */
 	mtmp->mstrategy &= ~(STRAT_WAITMASK);
 	if(anger) setmangry(mtmp);
-	if(mtmp->m_ap_type) seemimic(mtmp);
+	if(mtmp->m_ap_type) see_passive_mimic(mtmp);
 	else if (flags.forcefight && !flags.mon_moving && mtmp->mundetected) {
 	    mtmp->mundetected = 0;
 	    newsym(mtmp->mx, mtmp->my);
@@ -5932,6 +5932,7 @@ register int x, y, distance;
 	}
 }
 
+/* reveals monster-mimickers as well as passive-mimickers with a surprised message */
 void
 seemimic_ambush(mtmp)
 struct monst *mtmp;
@@ -5941,7 +5942,7 @@ struct monst *mtmp;
 
 	seemimic(mtmp);
 
-	if (canseemon(mtmp) && !sensemon(mtmp)) {
+	if (canseemon(mtmp) && !(sensemon(mtmp) && old_ap_type != M_AP_MONSTER)) {
 		const char * app;
 		switch (old_ap_type)
 		{
@@ -5971,6 +5972,7 @@ struct monst *mtmp;
 
 
 /* NOTE: we must check for mimicry before calling this routine */
+/* reveals monster-mimickers as well as passive-mimickers, with no message */
 void
 seemimic(mtmp)
 register struct monst *mtmp;
@@ -5993,6 +5995,15 @@ register struct monst *mtmp;
 	newsym(mtmp->mx,mtmp->my);
 }
 
+/* seemimic() for furniture and objects only */
+void
+see_passive_mimic(mtmp)
+register struct monst * mtmp;
+{
+	if (mtmp->m_ap_type == M_AP_FURNITURE || mtmp->m_ap_type == M_AP_OBJECT)
+		seemimic(mtmp);	
+}
+
 /* force all chameleons to become normal */
 void
 rescham()
@@ -6010,7 +6021,7 @@ rescham()
 		}
 		if(is_were(mtmp->data) && mtmp->data->mlet != S_HUMAN)
 			new_were(mtmp);
-		if(mtmp->m_ap_type && cansee(mtmp->mx, mtmp->my)) {
+		if(mtmp->m_ap_type && cansee(mtmp->mx, mtmp->my) && mtmp->m_ap_type != M_AP_MONSTER) {
 			seemimic(mtmp);
 			/* we pretend that the mimic doesn't */
 			/* know that it has been unmasked.   */

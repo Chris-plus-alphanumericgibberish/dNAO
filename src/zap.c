@@ -4468,7 +4468,7 @@ struct obj *otmp;	/* source of flash */
 		/* at this point, reveal them */
 		mtmp->mundetected = 0;
 		if (mtmp->m_ap_type)
-			seemimic(mtmp);
+			see_passive_mimic(mtmp);
 		newsym(mtmp->mx, mtmp->my);
 		if (mtmp->mtyp == PM_GREMLIN) {
 		    /* Rule #1: Keep them out of the light. */

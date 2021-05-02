@@ -2117,9 +2117,18 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 	struct permonst * ptr = mtmp->data;
 	int monsternumber = monsndx(ptr);
 
+	/* monsters pretending to be other monsters won't be given away by the pokedex */
+	struct monst fakemon;
+	if (mtmp->m_ap_type == M_AP_MONSTER) {
+		fakemon = *mtmp;
+		monsternumber = fakemon.mtyp = mtmp->mappearance;
+		ptr = fakemon.data = &mons[monsternumber];
+		mtmp = &fakemon;
+	}
+
 	char name[BUFSZ] = "";
 	Strcat(name, ptr->mname);
-	if (type_is_pname(mtmp->data)){
+	if (type_is_pname(ptr)){
 		if (has_template(mtmp, MISTWEAVER)){
 			if (mtmp->female) Strcat(name, ", Daughter of the Black Goat");
 			else Strcat(name, ", Child of the Black Goat");

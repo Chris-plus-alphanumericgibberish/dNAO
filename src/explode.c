@@ -545,7 +545,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 				       "fried");
 			}
 		} else if (!silent && cansee(xi, yi)) {
-		    if(mtmp->m_ap_type) seemimic(mtmp);
+		    if(mtmp->m_ap_type) see_passive_mimic(mtmp);
 		    pline("%s is caught in the %s!", Monnam(mtmp), str);
 		}
 

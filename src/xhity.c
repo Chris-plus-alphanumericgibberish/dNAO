@@ -995,6 +995,7 @@ int tary;
 				continue;
 			}
 			/* make the attack */
+			if ((vis&VIS_MAGR) && magr->mappearance) seemimic_ambush(magr);	// its true form must be revealed
 			result = xengulfhity(magr, mdef, attk, vis);
 			/* increment number of attacks made */
 			attacksmade++;
@@ -2278,9 +2279,6 @@ boolean nearmiss;
 				map_invisible(x(magr), y(magr));
 			if (!(vis&VIS_MDEF))
 				map_invisible(x(mdef), y(mdef));
-
-			if (mdef->m_ap_type) seemimic(mdef);
-			if (magr->m_ap_type) seemimic(magr);
 
 			pline("%s %s %s.",
 				Monnam(magr),
@@ -3679,11 +3677,10 @@ boolean ranged;
 		wake_nearto(x(mdef), y(mdef),										/* call function to wake nearby monsters */
 		combatNoise(pa) / (((youagr || youdef) && Stealth) ? 2 : 1));		/* range is reduced if the player is involved and stealthy */
 
-	/* show mimics */
-	if (magr->mappearance)
-		seemimic_ambush(magr);
-	if (mdef->mappearance)
-		seemimic(mdef);
+	/* show mimics on successful attack */
+	if (mdef->mappearance && hit) {
+		if (youagr) seemimic_ambush(mdef); else seemimic(mdef);
+	}
 	/* If the monster is undetected and hits you, you should know where the attack came from. */
 	if (youdef && magr->mundetected && hit && (hides_under(pa) || is_underswimmer(pa))) {
 		magr->mundetected = 0;

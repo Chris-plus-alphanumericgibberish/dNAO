@@ -1210,7 +1210,7 @@ register struct obj *otmp;
 	boolean reveal_invis = FALSE;
 	if (mtmp != &youmonst) {
 		mtmp->msleeping = 0;
-		if (mtmp->m_ap_type) seemimic(mtmp);
+		if (mtmp->m_ap_type) see_passive_mimic(mtmp);
 	}
 	switch(otmp->otyp) {
 	case WAN_STRIKING:
@@ -1251,7 +1251,7 @@ register struct obj *otmp;
 			    if (cansee(mtmp->mx, mtmp->my))
 				pline("%s resists the magic!", Monnam(mtmp));
 			    mtmp->msleeping = 0;
-			    if(mtmp->m_ap_type) seemimic(mtmp);
+			    if(mtmp->m_ap_type) see_passive_mimic(mtmp);
 			} else if (!tele_restrict(mtmp))
 			    (void) rloc(mtmp, FALSE);
 		}

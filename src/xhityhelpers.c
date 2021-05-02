@@ -199,7 +199,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 		return ATTACKCHECK_NONE;
 	}
 
-	if (mdef->m_ap_type && !Protection_from_shape_changers &&
+	if ((mdef->m_ap_type && mdef->m_ap_type != M_AP_MONSTER) && !Protection_from_shape_changers &&
 		!sensemon(mdef) &&
 		!glyph_is_warning(glyph_at(u.ux + u.dx, u.uy + u.dy))) {
 		/* If a hidden mimic was in a square where a player remembers
@@ -398,6 +398,9 @@ struct monst *mtmp;
 	if(!u.ustuck && !mtmp->mflee && dmgtype(mtmp->data,AD_STCK))
 	    u.ustuck = mtmp;
 
+	/* clear mimicking before generating message to get an accurate a_monnam() */
+	seemimic(mtmp);
+
 	if (Blind) {
 	    if (!Blind_telepat)
 		what = generic;		/* with default fmt */
@@ -423,7 +426,7 @@ struct monst *mtmp;
 	}
 	if (what) pline(fmt, what);
 
-	wakeup(mtmp, TRUE);	/* clears mimicking */
+	wakeup(mtmp, TRUE);
 }
 
 
