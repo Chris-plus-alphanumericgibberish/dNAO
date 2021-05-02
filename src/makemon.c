@@ -9707,6 +9707,13 @@ register int	mmflags;
 	    initworm(mtmp, mndx == PM_HUNTING_HORROR ? 2 : rn2(5));
 	    if (count_wsegs(mtmp)) place_worm_tail_randomly(mtmp, x, y);
 	}
+	if (u.umadness&MAD_DELUSIONS && u.usanity < mtmp->m_san_level && mtmp->m_ap_type == M_AP_NOTHING) {
+		mtmp->m_ap_type = M_AP_MONSTER;
+		mtmp->mappearance = rndmonst()->mtyp;
+		/* less commonly have very out-of-place appearances */
+		while (mtmp->mappearance == mtmp->mtyp || !rn2(20))
+			mtmp->mappearance = rn2(SPECIAL_PM);
+	}
 	set_malign(mtmp);		/* having finished peaceful changes */
 	if(u.uevent.uaxus_foe && (mndx <= PM_QUINON && mndx >= PM_MONOTON)){
 		mtmp->mpeaceful = mtmp->mtame = FALSE;
