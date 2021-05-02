@@ -3679,7 +3679,7 @@ boolean ranged;
 
 	/* show mimics on successful attack */
 	if (mdef->mappearance && hit) {
-		if (youagr) seemimic_ambush(mdef); else seemimic(mdef);
+		if (youagr) seemimic_ambush(mdef); else see_passive_mimic(mdef);
 	}
 	/* If the monster is undetected and hits you, you should know where the attack came from. */
 	if (youdef && magr->mundetected && hit && (hides_under(pa) || is_underswimmer(pa))) {
