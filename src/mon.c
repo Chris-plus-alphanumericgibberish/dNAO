@@ -7690,64 +7690,89 @@ struct monst *mtmp;
 			}
 		}
 		if(tmpm){
-			if(canseemon(tmpm) && canseemon(mtmp)){
-				pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
-				pline("The light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
-			} else if(canseemon(tmpm)){
-				pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
-			} else if(canseemon(mtmp)){
-				pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
+			struct obj *helm;
+			helm = which_armor(tmpm, W_ARMH);
+			if(helm && helm->otyp == DUNCE_CAP){
+				damage = 0;
+				if(helm->oartifact);/*Blocks it*/
+				else if(helm->spe > -5)
+					helm->spe--;
+				else
+					destroy_marm(tmpm, helm);
 			}
-			damage = d(1, min(10, (mtmp->m_lev)/3));
-			tmpm->mhp -= d(damage, 10);
-			if(tmpm->mhp < 1){
-				if (canseemon(tmpm)) {
-					pline("%s last thought fades away...",
-						s_suffix(Monnam(tmpm)));
+			else {
+				if(canseemon(tmpm) && canseemon(mtmp)){
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+					pline("The light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
+				} else if(canseemon(tmpm)){
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+				} else if(canseemon(mtmp)){
+					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
-				tmpm->mhp = 0;
-				grow_up(mtmp,tmpm);
-				mondied(tmpm);
+				damage = d(1, min(10, (mtmp->m_lev)/3));
+				tmpm->mhp -= d(damage, 10);
+				if(tmpm->mhp < 1){
+					if (canseemon(tmpm)) {
+						pline("%s last thought fades away...",
+							s_suffix(Monnam(tmpm)));
+					}
+					tmpm->mhp = 0;
+					grow_up(mtmp,tmpm);
+					mondied(tmpm);
+					//Grow up may have killed mtmp
+					if(DEADMONSTER(mtmp))
+						return;
+				}
+				mtmp->mhp += damage*10;
+				if(mtmp->mhp > mtmp->mhpmax){
+					mtmp->mhp = mtmp->mhpmax;
+				}
+				mtmp->mspec_used = 0;
+				mtmp->mcan = 0;
 			}
-			mtmp->mhp += damage*10;
-			if(mtmp->mhp > mtmp->mhpmax){
-				mtmp->mhp = mtmp->mhpmax;
-				// grow_up(mtmp,mtmp);
-			}
-			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
 		} else if(targets > 0 && you_gray_target_inhale()){
 			if(uarmh && uarmh->otyp == DUNCE_CAP){
 				damage = 0;
-				destroy_arm(uarmh);
+				if(uarmh->oartifact);/*Blocks it*/
+				else if(uarmh->spe > -5)
+					uarmh->spe--;
+				else
+					destroy_arm(uarmh);
 			}
 			else {
-			//Assumes you can't see your own ears
-				if(!Blind)
-					Your("mind goes numb.");
+				//Assumes you can't see your own ears
+				damage = d(1, min(10, (mtmp->m_lev)/3));
+				if(!Blind){
+					if(Fixed_abil){
+						Your("mind goes slightly numb.");
+						damage /= 2;
+					}
+					else Your("mind goes numb.");
+				}
 				if(canseemon(mtmp)){
 					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
-
-				damage = d(1, min(10, (mtmp->m_lev)/3));
-
-				(void)adjattrib(A_INT, -damage, FALSE);
-				int i = damage;
-				while (i--){
-					forget(10);	/* lose 10% of memory per point lost*/
-					exercise(A_WIS, FALSE);
+				
+				if(!Fixed_abil){
+					(void)adjattrib(A_INT, -damage, FALSE);
+					int i = damage;
+					while (i--){
+						forget(10);	/* lose 10% of memory per point lost*/
+						exercise(A_WIS, FALSE);
+					}
+					check_brainlessness();
 				}
-				check_brainlessness();
 
 				mtmp->mhp += damage*10;
 				if(mtmp->mhp > mtmp->mhpmax){
 					mtmp->mhp = mtmp->mhpmax;
-					// grow_up(mtmp,mtmp);
 				}
-				mtmp->mspec_used = 0;
-				mtmp->mcan = 0;
-				mtmp->mux = u.ux;
-				mtmp->muy = u.uy;
+				if(damage){
+					mtmp->mspec_used = 0;
+					mtmp->mcan = 0;
+					mtmp->mux = u.ux;
+					mtmp->muy = u.uy;
+				}
 			}
 		}
 		if(damage){
