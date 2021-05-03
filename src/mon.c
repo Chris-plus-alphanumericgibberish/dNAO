@@ -7637,7 +7637,7 @@ struct monst *mtmp;
 			
 			make_sick(Sick ? Sick / 2L + 1L : (long)rn1(ACURR(A_CON), 20), mtmp->data->mname, TRUE, SICK_NONVOMITABLE);
 			
-			if(is_wooden(youracedata) || (Fire_resistance && species_resists_cold(&youmonst)))
+			if(is_wooden(youracedata) || (!Fire_resistance && species_resists_cold(&youmonst)))
 				damage *= 2;
 			
 			int temparise = u.ugrave_arise;
@@ -7648,7 +7648,6 @@ struct monst *mtmp;
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
