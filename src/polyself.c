@@ -1528,9 +1528,9 @@ domindblast()
 	}
 	losepw(10);
 	flags.botl = 1;
-	
+
 	if(Role_if(PM_MADMAN))
-		dice += u.ulevel/7;
+		dice += u.ulevel/14;
 
 	You("concentrate.");
 	pline("A wave of psychic energy pours out.");
