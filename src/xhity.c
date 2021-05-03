@@ -519,9 +519,9 @@ int tary;
 			pline("%s uses a %s mask!", Monnam(magr), pa->mname);
 	}
 	
-	/* deliriums use random form */
-	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr){
-		magr->mvar2 = select_newcham_form(magr);
+	/* deliriums use their apparent form */
+	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr && magr->mappearance && magr->m_ap_type == M_AP_MONSTER){
+		magr->mvar2 = magr->mappearance;
 	}
 	
 	/* zero out res[] */

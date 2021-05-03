@@ -1402,12 +1402,19 @@ karemade:
 					}
 				}
 
-				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts) {
 					static long lastusedmove = 0;
-					if(lastusedmove != moves){
-						pline("%s takes on forms new and terrible!", Monnam(mtmp));
-						lastusedmove = moves;
-						change_usanity(u_sanity_loss(mtmp)/2-1, TRUE);
+					if (lastusedmove != moves) {
+						if (!mtmp->mappearance || (canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1) && rn2(3)) {
+
+							if(canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1) {
+								pline("%s takes on forms new and terrible!", Monnam(mtmp));
+								change_usanity(u_sanity_loss(mtmp)/2-1, TRUE);
+							}
+							lastusedmove = moves;
+							mtmp->mappearance = select_newcham_form(mtmp);
+							mtmp->m_ap_type = M_AP_MONSTER;
+						}
 					}
 				}
 
