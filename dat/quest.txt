@@ -5098,7 +5098,7 @@ Must die unheard in
     Dim Carcosa."
 %E
 %Cp Mad 00033
-"%o will soothe your mind."
+"%oC will soothe your mind."
 %E
 %Cp Mad 00034
 "You must remain worthy."

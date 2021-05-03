@@ -1735,7 +1735,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			}
 		}
 	}
-
+	
 	/* players sub out monster claw attacks for weapon attacks */
 	if (youagr && !cantwield(pa)) {
 		if ((*indexnum == 0 || (*indexnum == 1 && (pa->mtyp == PM_INCUBUS || pa->mtyp == PM_SUCCUBUS))) &&

@@ -289,6 +289,7 @@ int template;
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
 		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
+		ptr->mflagsg |= (MG_REGEN);
 		ptr->mflagsa |= (MA_UNDEAD | MA_VAMPIRE);
 		/* resists: */
 		ptr->mresists |= (MR_SLEEP | MR_POISON);	/* individual monsters gain cold res at mlev >= 10 */
@@ -398,7 +399,7 @@ int template;
 		// ptr->mcolor = CLR_YELLOW;
 		break;
 	case MAD_TEMPLATE:
-		ptr->mmove += 12;
+		// ptr->mmove += 12;
 		ptr->dac = -5;
 		ptr->pac += 4;
 		ptr->spe_hdr += 4;

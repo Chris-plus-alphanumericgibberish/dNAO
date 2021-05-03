@@ -7213,23 +7213,25 @@ struct obj *obj;
 		else {
 			if(youdef && obj->owornmask) pline("One of your %s is riddled with squirming things!", xname(obj));
 		}
-		if(obj->quan > 1){
-			obj->quan--;
-			fix_object(obj);
-		}
-		else {
-			obj_extract_and_unequip_self(obj);
-			obfree(obj, (struct obj *)0);
+		if(!obj->oartifact){
+			if(obj->quan > 1){
+				obj->quan--;
+				fix_object(obj);
+			}
+			else {
+				obj_extract_and_unequip_self(obj);
+				obfree(obj, (struct obj *)0);
+			}
 		}
 	}
 	else {
 		if(!Blind){
-			if(floor && obj->olarva == 3){
+			if(floor && obj->olarva == 3 && !obj->oartifact){
 				if(cansee(x, y)) pline("%s disintegrate%s into a mass of strange larvae!", An(xname(obj)), obj->quan == 1 ? "s":"");
 			}
 			else if(obj->owornmask){
 				if(youdef){
-					if(obj->olarva == 3)
+					if(obj->olarva == 3 && !obj->oartifact)
 						pline("Your %s disintegrate%s into a mass of strange larvae!", xname(obj), obj->quan == 1 ? "s":"");
 					else if(obj->olarva > 0)
 						pline("The biting mouths in your %s grow more numerous!", xname(obj));
@@ -7239,14 +7241,14 @@ struct obj *obj;
 					if(canseemon(mon) && obj->olarva == 3) pline("%s %s disintegrate%s into a mass of strange larvae!", s_suffix(Monnam(mon)), xname(obj), obj->quan == 1 ? "s":"");
 				}
 			}
-			else if(youdef && obj->olarva == 3){
+			else if(youdef && obj->olarva == 3 && !obj->oartifact){
 				pline(nlarvae > 1 ? "Strange larvae drop out of your pack!" : "A strange larva drops out of your pack!");
 			}
 		}
 		else {
 			if(youdef && obj->owornmask){
 				if(obj->olarva == 0) pline("Your %s is riddled with biting things!", xname(obj));
-				else if(obj->olarva == 3) pline("Your %s disintegrates into a mass of squirming things!", xname(obj));
+				else if(obj->olarva == 3 && !obj->oartifact) pline("Your %s disintegrates into a mass of squirming things!", xname(obj));
 			}
 		}
 		if(obj->olarva < 3){
@@ -7254,6 +7256,8 @@ struct obj *obj;
 			obj->olarva++;
 			return TRUE;
 		}
+		else if(obj->oartifact)
+			return TRUE;
 		else {
 			obj_extract_and_unequip_self(obj);
 			while((obj2 = obj->cobj)){
@@ -7652,7 +7656,7 @@ struct monst *mtmp;
 			
 			make_sick(Sick ? Sick / 2L + 1L : (long)rn1(ACURR(A_CON), 20), mtmp->data->mname, TRUE, SICK_NONVOMITABLE);
 			
-			if(is_wooden(youracedata) || (Fire_resistance && species_resists_cold(&youmonst)))
+			if(is_wooden(youracedata) || (!Fire_resistance && species_resists_cold(&youmonst)))
 				damage *= 2;
 			
 			int temparise = u.ugrave_arise;
@@ -7663,7 +7667,6 @@ struct monst *mtmp;
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
-				// grow_up(mtmp,mtmp);
 			}
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
@@ -7706,64 +7709,89 @@ struct monst *mtmp;
 			}
 		}
 		if(tmpm){
-			if(canseemon(tmpm) && canseemon(mtmp)){
-				pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
-				pline("The light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
-			} else if(canseemon(tmpm)){
-				pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
-			} else if(canseemon(mtmp)){
-				pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
+			struct obj *helm;
+			helm = which_armor(tmpm, W_ARMH);
+			if(helm && helm->otyp == DUNCE_CAP){
+				damage = 0;
+				if(helm->oartifact);/*Blocks it*/
+				else if(helm->spe > -5)
+					helm->spe--;
+				else
+					destroy_marm(tmpm, helm);
 			}
-			damage = d(1, min(10, (mtmp->m_lev)/3));
-			tmpm->mhp -= d(damage, 10);
-			if(tmpm->mhp < 1){
-				if (canseemon(tmpm)) {
-					pline("%s last thought fades away...",
-						s_suffix(Monnam(tmpm)));
+			else {
+				if(canseemon(tmpm) && canseemon(mtmp)){
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+					pline("The light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
+				} else if(canseemon(tmpm)){
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+				} else if(canseemon(mtmp)){
+					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
-				tmpm->mhp = 0;
-				grow_up(mtmp,tmpm);
-				mondied(tmpm);
+				damage = d(1, min(10, (mtmp->m_lev)/3));
+				tmpm->mhp -= d(damage, 10);
+				if(tmpm->mhp < 1){
+					if (canseemon(tmpm)) {
+						pline("%s last thought fades away...",
+							s_suffix(Monnam(tmpm)));
+					}
+					tmpm->mhp = 0;
+					grow_up(mtmp,tmpm);
+					mondied(tmpm);
+					//Grow up may have killed mtmp
+					if(DEADMONSTER(mtmp))
+						return;
+				}
+				mtmp->mhp += damage*10;
+				if(mtmp->mhp > mtmp->mhpmax){
+					mtmp->mhp = mtmp->mhpmax;
+				}
+				mtmp->mspec_used = 0;
+				mtmp->mcan = 0;
 			}
-			mtmp->mhp += damage*10;
-			if(mtmp->mhp > mtmp->mhpmax){
-				mtmp->mhp = mtmp->mhpmax;
-				// grow_up(mtmp,mtmp);
-			}
-			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
 		} else if(targets > 0 && you_gray_target_inhale()){
 			if(uarmh && uarmh->otyp == DUNCE_CAP){
 				damage = 0;
-				destroy_arm(uarmh);
+				if(uarmh->oartifact);/*Blocks it*/
+				else if(uarmh->spe > -5)
+					uarmh->spe--;
+				else
+					destroy_arm(uarmh);
 			}
 			else {
-			//Assumes you can't see your own ears
-				if(!Blind)
-					Your("mind goes numb.");
+				//Assumes you can't see your own ears
+				damage = d(1, min(10, (mtmp->m_lev)/3));
+				if(!Blind){
+					if(Fixed_abil){
+						Your("mind goes slightly numb.");
+						damage /= 2;
+					}
+					else Your("mind goes numb.");
+				}
 				if(canseemon(mtmp)){
 					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
-
-				damage = d(1, min(10, (mtmp->m_lev)/3));
-
-				(void)adjattrib(A_INT, -damage, FALSE);
-				int i = damage;
-				while (i--){
-					forget(10);	/* lose 10% of memory per point lost*/
-					exercise(A_WIS, FALSE);
+				
+				if(!Fixed_abil){
+					(void)adjattrib(A_INT, -damage, FALSE);
+					int i = damage;
+					while (i--){
+						forget(10);	/* lose 10% of memory per point lost*/
+						exercise(A_WIS, FALSE);
+					}
+					check_brainlessness();
 				}
-				check_brainlessness();
 
 				mtmp->mhp += damage*10;
 				if(mtmp->mhp > mtmp->mhpmax){
 					mtmp->mhp = mtmp->mhpmax;
-					// grow_up(mtmp,mtmp);
 				}
-				mtmp->mspec_used = 0;
-				mtmp->mcan = 0;
-				mtmp->mux = u.ux;
-				mtmp->muy = u.uy;
+				if(damage){
+					mtmp->mspec_used = 0;
+					mtmp->mcan = 0;
+					mtmp->mux = u.ux;
+					mtmp->muy = u.uy;
+				}
 			}
 		}
 		if(damage){
