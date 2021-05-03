@@ -977,6 +977,7 @@ boolean called;
 	if ((mtmp->m_ap_type == M_AP_MONSTER) && !(suppress & SUPPRESS_HALLUCINATION)) {
 		appeartype = mtmp->mappearance;
 		appearname = mons[appeartype].mname;
+		mdat = &mons[appeartype];
 	}
 
 	/* Shopkeepers: use shopkeeper name.  For normal shopkeepers, just

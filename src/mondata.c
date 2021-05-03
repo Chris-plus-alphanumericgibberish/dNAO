@@ -2019,11 +2019,19 @@ int
 pronoun_gender(mtmp)
 register struct monst *mtmp;
 {
-	if(is_neuter(mtmp->data) || !canspotmon(mtmp)) return 2;
+	struct permonst * mdat = mtmp->data;
+	if(mtmp->m_ap_type == M_AP_MONSTER) mdat = &mons[mtmp->mappearance];
+
+	if(is_neuter(mdat) || !canspotmon(mtmp)) return 2;
 	if(has_template(mtmp, SKELIFIED) && !Role_if(PM_ARCHEOLOGIST))
 		return 2;
-	return (humanoid_torso(mtmp->data) || (mtmp->data->geno & G_UNIQ) ||
-		type_is_pname(mtmp->data)) ? (int)mtmp->female : 2;
+	if (!(humanoid_torso(mdat) || (mdat->geno & G_UNIQ) ||
+		type_is_pname(mdat)))
+		return 2;
+	if (mtmp->m_ap_type == M_AP_MONSTER) {
+		return is_female(mdat) ? 1 : is_male(mdat) ? 0 : mtmp->female;
+	}
+	return (int)mtmp->female;
 }
 
 #endif /* OVL2 */
