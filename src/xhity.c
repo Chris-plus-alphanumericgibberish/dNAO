@@ -531,7 +531,7 @@ int tary;
 	}
 	
 	/* deliriums use random form */
-	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr){
+	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr && !ClearThoughts){
 		magr->mvar2 = select_newcham_form(magr);
 	}
 	
@@ -1745,7 +1745,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			}
 		}
 	}
-
+	
 	/* players sub out monster claw attacks for weapon attacks */
 	if (youagr && !cantwield(pa)) {
 		if ((*indexnum == 0 || (*indexnum == 1 && (pa->mtyp == PM_INCUBUS || pa->mtyp == PM_SUCCUBUS))) &&
