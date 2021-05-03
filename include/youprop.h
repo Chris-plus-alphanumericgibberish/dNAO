@@ -213,7 +213,7 @@
 				 (Upolyd && dmgtype(youmonst.data, AD_HALU)))
 #define Hallucination		(HHallucination && !Halluc_resistance)
 
-#define Delusion(mon)	((mon) && !ClearThoughts && ((mon)->mtyp == PM_WALKING_DELIRIUM || (u.umadness&MAD_REAL_DELUSIONS && u.usanity < (mon)->m_san_level*0.8)))
+#define Delusion(mon)	((mon) && !ClearThoughts && ((mon)->mtyp == PM_WALKING_DELIRIUM))
 
 /* Timeout, plus a worn mask */
 #define HFumbling		u.uprops[FUMBLING].intrinsic

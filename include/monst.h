@@ -73,7 +73,7 @@ struct monst {
 	int mspec_used;		/* monster's special ability attack timeout */
 	int mstdy;		/* to record extra damage to be delt due to having been studied */
 	int ustdym;		/* to record extra damage to be delt by you due to having been studied by you*/
-	int m_san_level;/* to record sanity level at which this monster will be obscured */
+	int m_san_level;/* DEPRECATED: to record sanity level at which this monster will be obscured */
 	int m_insight_level;/* to record insight level at which this monster will be reveled */
 	
 	short mstr, mdex, mcon, mint, mwis, mcha; /* Monster ability scores */

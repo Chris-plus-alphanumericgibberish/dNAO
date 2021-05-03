@@ -1579,11 +1579,6 @@ struct monst *mtmp;
 	if (mtmp->cham && !rn2(6))
 	    (void) newcham(mtmp, NON_PM, FALSE, FALSE);
 	were_change(mtmp);
-	if(u.umadness&MAD_REAL_DELUSIONS && !ClearThoughts && u.usanity < mtmp->m_san_level*0.8){
-		if(!(mtmp->data->geno&(G_UNIQ|G_NOGEN))){
-			newcham(mtmp, NON_PM, FALSE, FALSE);
-		}
-	}
 	
 	if(!mtmp->mcansee && (mtmp->mtyp == PM_SHOGGOTH || mtmp->mtyp == PM_PRIEST_OF_GHAUNADAUR)){
 		if(canspotmon(mtmp)) pline("%s forms new eyes!",Monnam(mtmp));
@@ -5933,16 +5928,18 @@ register int x, y, distance;
 }
 
 /* reveals monster-mimickers as well as passive-mimickers with a surprised message */
+/* If the player is suffering from the REAL_DELUSIONS madness, this may instead polymorph mtmp to its pretend form */
 void
 seemimic_ambush(mtmp)
 struct monst *mtmp;
 {
 	unsigned old_app = mtmp->mappearance;
 	uchar old_ap_type = mtmp->m_ap_type;
+	boolean couldsense = canseemon(mtmp) && !(sensemon(mtmp) && old_ap_type != M_AP_MONSTER);
 
 	seemimic(mtmp);
 
-	if (canseemon(mtmp) && !(sensemon(mtmp) && old_ap_type != M_AP_MONSTER)) {
+	if (couldsense) {
 		const char * app;
 		switch (old_ap_type)
 		{
@@ -5966,6 +5963,17 @@ struct monst *mtmp;
 			app,
 			a_monnam(mtmp)
 			);
+	}
+	/* if suffering from *real* delusions, and monster was mimicing a monster, it may polymorph! */
+	if (roll_madness(MAD_REAL_DELUSIONS) && old_ap_type == M_AP_MONSTER) {
+		if(!(mtmp->data->geno&(G_UNIQ|G_NOGEN)) // isn't a unique or special monster
+			&& !(mons[old_app].geno&(G_UNIQ|G_NOGEN)) // not pretending to be a unique or special monster
+			&& !(roll_madness(MAD_REAL_DELUSIONS) && (monstr[mtmp->mtyp] > monstr[old_app])) // if a 2nd roll succeeds, only if becoming something nastier
+			){
+			if (couldsense)
+				pline("...or was it?");
+			newcham(mtmp, old_app, FALSE, FALSE);
+		}
 	}
 	return;
 }

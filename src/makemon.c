@@ -8699,12 +8699,7 @@ register int	mmflags;
 	if (ptr->mtyp == urole.ldrnum)
 	    quest_status.leader_m_id = mtmp->m_id;
 	mtmp->m_lev = adj_lev(ptr);
-	float sanlev = ((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX));
-	mtmp->m_san_level = max(1, (int)(sanlev*100));
 	mtmp->m_insight_level = 0;
-	
-	if(mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS)
-		mtmp->m_san_level = 1;
 		
 	if(mtmp->mtyp == PM_LURKING_ONE)
 		mtmp->m_insight_level = 20+rn2(21);
@@ -9707,7 +9702,10 @@ register int	mmflags;
 	    initworm(mtmp, mndx == PM_HUNTING_HORROR ? 2 : rn2(5));
 	    if (count_wsegs(mtmp)) place_worm_tail_randomly(mtmp, x, y);
 	}
-	if (u.umadness&MAD_DELUSIONS && u.usanity < mtmp->m_san_level && mtmp->m_ap_type == M_AP_NOTHING) {
+	/* Delusions madness can hide the appearance of a monster */
+	if (roll_madness(MAD_DELUSIONS) && mtmp->m_ap_type == M_AP_NOTHING && !(
+			mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS))
+	{
 		mtmp->m_ap_type = M_AP_MONSTER;
 		mtmp->mappearance = rndmonst()->mtyp;
 		/* less commonly have very out-of-place appearances */
