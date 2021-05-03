@@ -7194,23 +7194,25 @@ struct obj *obj;
 		else {
 			if(youdef && obj->owornmask) pline("One of your %s is riddled with squirming things!", xname(obj));
 		}
-		if(obj->quan > 1){
-			obj->quan--;
-			fix_object(obj);
-		}
-		else {
-			obj_extract_and_unequip_self(obj);
-			obfree(obj, (struct obj *)0);
+		if(!obj->oartifact){
+			if(obj->quan > 1){
+				obj->quan--;
+				fix_object(obj);
+			}
+			else {
+				obj_extract_and_unequip_self(obj);
+				obfree(obj, (struct obj *)0);
+			}
 		}
 	}
 	else {
 		if(!Blind){
-			if(floor && obj->olarva == 3){
+			if(floor && obj->olarva == 3 && !obj->oartifact){
 				if(cansee(x, y)) pline("%s disintegrate%s into a mass of strange larvae!", An(xname(obj)), obj->quan == 1 ? "s":"");
 			}
 			else if(obj->owornmask){
 				if(youdef){
-					if(obj->olarva == 3)
+					if(obj->olarva == 3 && !obj->oartifact)
 						pline("Your %s disintegrate%s into a mass of strange larvae!", xname(obj), obj->quan == 1 ? "s":"");
 					else if(obj->olarva > 0)
 						pline("The biting mouths in your %s grow more numerous!", xname(obj));
@@ -7220,14 +7222,14 @@ struct obj *obj;
 					if(canseemon(mon) && obj->olarva == 3) pline("%s %s disintegrate%s into a mass of strange larvae!", s_suffix(Monnam(mon)), xname(obj), obj->quan == 1 ? "s":"");
 				}
 			}
-			else if(youdef && obj->olarva == 3){
+			else if(youdef && obj->olarva == 3 && !obj->oartifact){
 				pline(nlarvae > 1 ? "Strange larvae drop out of your pack!" : "A strange larva drops out of your pack!");
 			}
 		}
 		else {
 			if(youdef && obj->owornmask){
 				if(obj->olarva == 0) pline("Your %s is riddled with biting things!", xname(obj));
-				else if(obj->olarva == 3) pline("Your %s disintegrates into a mass of squirming things!", xname(obj));
+				else if(obj->olarva == 3 && !obj->oartifact) pline("Your %s disintegrates into a mass of squirming things!", xname(obj));
 			}
 		}
 		if(obj->olarva < 3){
@@ -7235,6 +7237,8 @@ struct obj *obj;
 			obj->olarva++;
 			return TRUE;
 		}
+		else if(obj->oartifact)
+			return TRUE;
 		else {
 			obj_extract_and_unequip_self(obj);
 			while((obj2 = obj->cobj)){
