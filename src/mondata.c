@@ -399,7 +399,7 @@ int template;
 		// ptr->mcolor = CLR_YELLOW;
 		break;
 	case MAD_TEMPLATE:
-		ptr->mmove += 12;
+		// ptr->mmove += 12;
 		ptr->dac = -5;
 		ptr->pac += 4;
 		ptr->spe_hdr += 4;
