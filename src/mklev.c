@@ -2066,7 +2066,7 @@ int x, y, hv_id;
 		case VN_A_O_BLESSINGS:
 		case VN_A_O_VITALITY:
 		case VN_A_O_CORRUPTION:
-		case VN_A_O_DESERTS:
+		case VN_A_O_BURNING_WASTES:
 		case VN_A_O_THOUGHT:
 		case VN_A_O_DEATH:
 			mid = PM_ANCIENT_NUPPERIBO;

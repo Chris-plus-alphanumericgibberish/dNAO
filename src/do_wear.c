@@ -4081,7 +4081,7 @@ struct obj *wep;
 			if(bigmonst(mdef->data)){
 				mdef->movement -= 12;
 			} else {
-				mhurtle(mdef, clockwisex[(i+j)%8], clockwisey[(i+j)%8], 1);
+				mhurtle(mdef, clockwisex[(i+j)%8], clockwisey[(i+j)%8], 1, FALSE);
 				//Note: mdef may be gone now due to traps
 			}
 		}

@@ -648,7 +648,7 @@ E void FDECL(impact_drop, (struct obj *,XCHAR_P,XCHAR_P,XCHAR_P));
 
 E int FDECL(zap_raygun, (struct obj *,int, int));
 E void FDECL(hurtle, (int,int,int,BOOLEAN_P,BOOLEAN_P));
-E void FDECL(mhurtle, (struct monst *,int,int,int));
+E void FDECL(mhurtle, (struct monst *,int,int,int,boolean));
 E int FDECL(hero_breaks, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E int FDECL(breaks, (struct obj *,XCHAR_P,XCHAR_P));
 E boolean FDECL(breaktest, (struct obj *));
@@ -3186,6 +3186,8 @@ E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, vo
 E void FDECL(weave_black_web, (struct monst *));
 E int NDECL(android_combo);
 E int FDECL(u_pole_pound, (struct monst *));
+E boolean FDECL(Curse_res, (struct monst *, boolean));
+E int FDECL(mummy_curses_x, (struct monst *, struct monst *));
 
 /* ### xhityhelpers.c ### */
 

@@ -1931,7 +1931,7 @@ purifying_blast()
 		if (resists_elec(mon) || resists_disint(mon))
 			shieldeff(mon->mx, mon->my);
 		else {
-			mhurtle(mon, u.dx, u.dy, 25);
+			mhurtle(mon, u.dx, u.dy, 25, TRUE);
 			dmg = d(10, dsize);
 			mon->mhp -= dmg;
 			setmangry(mon);
@@ -3271,7 +3271,7 @@ spiriteffects(power, atme)
 					i++;
 					mon = m_at(sx, sy);
 					if(mon){
-						mhurtle(mon, u.dx, u.dy, range+i);
+						mhurtle(mon, u.dx, u.dy, range+i, TRUE);
 						mon->mhp -= d(5,dsize);
 						setmangry(mon);
 						if (mon->mhp <= 0){
@@ -3286,7 +3286,7 @@ spiriteffects(power, atme)
 						if(isok(sx+1,sy)){
 							mon = m_at(sx+1, sy);
 							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i);
+								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
 								mon->mhp -= d(rnd(5),dsize);
 								if (mon->mhp <= 0){
 									mon->mhp = 0;
@@ -3300,7 +3300,7 @@ spiriteffects(power, atme)
 						if(isok(sx-1,sy)){
 							mon = m_at(sx-1, sy);
 							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i);
+								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
 								mon->mhp -= d(rnd(5),dsize);
 								if (mon->mhp <= 0){
 									mon->mhp = 0;
@@ -3315,7 +3315,7 @@ spiriteffects(power, atme)
 						if(isok(sx,sy+1)){
 							mon = m_at(sx, sy+1);
 							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i);
+								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
 								mon->mhp -= d(rnd(5),dsize);
 								if (mon->mhp <= 0){
 									mon->mhp = 0;
@@ -3329,7 +3329,7 @@ spiriteffects(power, atme)
 						if(isok(sx,sy-1)){
 							mon = m_at(sx, sy-1);
 							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i);
+								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
 								mon->mhp -= d(rnd(5),dsize);
 								if (mon->mhp <= 0){
 									mon->mhp = 0;
@@ -3344,7 +3344,7 @@ spiriteffects(power, atme)
 						if(isok(sx,sy-u.dy)){
 							mon = m_at(sx, sy-u.dy);
 							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i);
+								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
 								mon->mhp -= d(rnd(5),dsize);
 								if (mon->mhp <= 0){
 									mon->mhp = 0;
@@ -3358,7 +3358,7 @@ spiriteffects(power, atme)
 						if(isok(sx-u.dx,sy)){
 							mon = m_at(sx-u.dx, sy);
 							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i);
+								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
 								mon->mhp -= d(rnd(5),dsize);
 								if (mon->mhp <= 0){
 									mon->mhp = 0;
@@ -4280,14 +4280,14 @@ int spell;
 						if (mon->mhp <= 0){
 							mon->mhp = 0;
 							xkilled(mon, 1);
-						} else mhurtle(mon, -1*u.dy, u.dx, 33);
+						} else mhurtle(mon, -1*u.dy, u.dx, 33, TRUE);
 					} else {
 						pline("%s is thrown to the side.", Monnam(mon));
 						mon->mhp -= d(nd,3);
 						if (mon->mhp <= 0){
 							mon->mhp = 0;
 							xkilled(mon, 1);
-						} else mhurtle(mon, u.dy, -1*u.dx, 33);
+						} else mhurtle(mon, u.dy, -1*u.dx, 33, TRUE);
 					}
 				}
 				//Update

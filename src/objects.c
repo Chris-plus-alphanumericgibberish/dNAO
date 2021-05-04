@@ -307,6 +307,9 @@ WEAPON(("dwarvish short sword", "broad short sword"),
 WEAPON(("mirrorblade", "polished short sword"),
 	DMG(D(6)), DMG(D(8)),
 	1, 0,  MZ_SMALL,  0, 40,100,  0, P,   P_SHORT_SWORD, SILVER, FALSE, HI_SILVER),
+WEAPON(("khopesh", "sickle-sword"),
+	DMG(D(8)), DMG(D(6)),
+	1, 0,  MZ_SMALL,  0, 30, 10,  0, S,   P_SHORT_SWORD, COPPER, FALSE, HI_COPPER),
 
 WEAPON(("scimitar", "curved sword"),
 	DMG(D(8)), DMG(D(8)),
@@ -807,6 +810,8 @@ SHIRT(("T-shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 5, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 SHIRT(("ichcahuipilli", "thick undershirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 3,	10,   2, 10, 0, 0, CLOTH, CLR_WHITE),
+SUIT(("waistcloth"), /*Needs encyc entry*//*Needs tile*/
+	0, 0, MZ_SMALL,  ARMSZ_LIGHT, 0,   0,  0,  15,   10, 10, 0, 0, CLOTH, CLR_WHITE, O_DRSLOT(LOWER_TORSO_DR)),
 # ifdef CONVICT
 SHIRT(("striped shirt", (char *)0, "shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_GRAY),

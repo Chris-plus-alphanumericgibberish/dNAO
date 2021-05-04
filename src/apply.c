@@ -6517,8 +6517,14 @@ doapply()
 				frags = hold_another_object(frags, "You drop %s!",
 							  doname(frags), (const char *)0); /*shouldn't merge, but may drop*/
 			}
-			if(Blind) pline("The effigy bursts into flames!");
-			else pline("The effigy burns with sickly flames!");
+			if(u.umummyrot)
+				pline("The effigy crumbles to dust!");
+			else {
+				if(Blind) pline("The effigy bursts into flames!");
+				else pline("The effigy burns with sickly flames!");
+			}
+		} else if (u.umummyrot){
+				pline("The effigy crumbles to dust!");
 		} else if (u.uhpmod < -18){
 			if(Blind) pline("The effigy drips with a sticky liquid!");
 			else pline("The effigy is scored by wounds!");
@@ -6532,6 +6538,8 @@ doapply()
 		}
 		
 		u.wimage = 0; //Sub-critical images are removed anyway.
+		
+		u.umummyrot = 0;
 		
 		if (u.uhpmod < 0){
 			u.uhpmod /= 2; // we only print a message if it's a lot, but fix regardless

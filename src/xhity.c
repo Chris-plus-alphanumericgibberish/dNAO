@@ -6308,7 +6308,7 @@ boolean ranged;
 		if(youdef)
 			hurtle(sgn(dx), sgn(dy), 1, FALSE, FALSE);
 		else
-			mhurtle(mdef, sgn(dx), sgn(dy), 1);
+			mhurtle(mdef, sgn(dx), sgn(dy), 1, FALSE);
 		
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
@@ -7679,6 +7679,19 @@ boolean ranged;
 		/* make posion/physical attack without hitmsg */
 		alt_attk.adtyp = AD_DRST;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+
+	case AD_MROT:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		/* Do the curse */
+		result |= mummy_curses_x(magr, mdef);
+		if(result&MM_DEF_DIED)
+			return result;
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return (result|xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged));
 //////////////////////////////////////////////////////////////
 // JUST CHANGING THE DAMAGE TYPE
 //////////////////////////////////////////////////////////////
@@ -9461,6 +9474,116 @@ int vis;
 		break;
 	}
 	return result;
+}
+
+boolean
+Curse_res(mon, verbose)
+struct monst *mon;
+boolean verbose;
+{
+	struct obj *otmp;
+	static const char mal_aura[] = "feel a malignant aura surround %s.";
+	if(mon == &youmonst){
+		if (uamul && (uamul->otyp == AMULET_VERSUS_CURSES)) {
+			if(verbose) You(mal_aura, "your amulet");
+			return TRUE;
+		} else if (uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING)) {
+			if(verbose) You(mal_aura, "your wrappings");
+			return TRUE;
+		} else if (uwep && (uwep->oartifact == ART_MAGICBANE) && rn2(20)) {
+			if(verbose) You(mal_aura, "the magic-absorbing blade");
+			return TRUE;
+		} else if (uwep && (uwep->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20)) {
+			if(verbose) You(mal_aura, "the skeletal staff");
+			return TRUE;
+		} else if (uwep && (uwep->oartifact == ART_TECPATL_OF_HUHETOTL) && rn2(20)) {
+			if(verbose) You(mal_aura, "the bloodstained dagger");
+			return TRUE;
+		} else if(uwep && (uwep->oartifact == ART_TENTACLE_ROD) && rn2(20)){
+			if(verbose) You(mal_aura, "the languid tentacles");
+			return TRUE;
+		}
+		for(otmp = invent; otmp; otmp=otmp->nobj){
+			if(otmp->oartifact == ART_HELPING_HAND && rn2(20)){
+				if(verbose){
+					You_feel("as if you need some help.");
+					You_feel("something lend you some help!");
+				}
+				return TRUE;
+			}
+		}
+		if(u.ukinghill && rn2(20)){
+			if(verbose) You(mal_aura, "the cursed treasure chest");
+			otmp = 0;
+			for(otmp = invent; otmp; otmp=otmp->nobj)
+				if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)
+					break;
+			if(!otmp) impossible("Treasury not actually in inventory??");
+			else if(otmp->blessed)
+				unbless(otmp);
+			else
+				curse(otmp);
+			update_inventory();		
+			return TRUE;
+		}
+	}
+	else {
+		static const char mons_item_mal_aura[] = "feel a malignant aura surround %s %s.";
+		boolean visible = canseemon(mon);
+		if(has_template(mon, ILLUMINATED)){
+			if(visible && verbose) You("feel a malignant aura burn away in the Light.");
+			return TRUE;
+		}
+		
+		if (which_armor(mon, W_AMUL) && (which_armor(mon, W_AMUL)->otyp == AMULET_VERSUS_CURSES)) {
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "amulet");
+			return TRUE;
+		}
+		if (which_armor(mon, W_ARMC) && (which_armor(mon, W_ARMC)->otyp == PRAYER_WARDED_WRAPPING)) {
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "wrappings");
+			return TRUE;
+		}
+		if (MON_WEP(mon) &&
+			(MON_WEP(mon)->oartifact == ART_MAGICBANE) && rn2(20)) {
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "magic-absorbing blade");
+			return TRUE;
+		}
+		if (MON_WEP(mon) &&
+			(MON_WEP(mon)->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20)) {
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "skeletal staff");
+			return TRUE;
+		}
+		if (MON_WEP(mon) &&
+			(MON_WEP(mon)->oartifact == ART_TECPATL_OF_HUHETOTL) && rn2(20)) {
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "bloodstained dagger");
+			return TRUE;
+		}
+		if (MON_WEP(mon) &&
+			(MON_WEP(mon)->oartifact == ART_TENTACLE_ROD) && rn2(20)) {
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "languid tentacles");
+			return TRUE;
+		}
+		for(otmp = mon->minvent; otmp; otmp=otmp->nobj)
+			if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)
+				break;
+		if(otmp && rn2(20)){
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "cursed treasure chest");
+			if(otmp->blessed)
+				unbless(otmp);
+			else
+				curse(otmp);
+			return TRUE;
+		}
+		for(otmp = mon->minvent; otmp; otmp=otmp->nobj)
+			if(otmp->oartifact == ART_HELPING_HAND)
+				break;
+		if(otmp && rn2(20)){
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "helpful hand");
+			return TRUE;
+		}
+
+	}
+	return FALSE;
 }
 
 int
@@ -13534,7 +13657,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (youdef)
 			hurtle(dx, dy, BOLT_LIM, FALSE, TRUE);
 		else
-			mhurtle(mdef, dx, dy, BOLT_LIM);
+			mhurtle(mdef, dx, dy, BOLT_LIM, FALSE);
 		
 		if(x(mdef)) explode(x(mdef), y(mdef),
 			AD_FIRE, 0,
@@ -14368,7 +14491,7 @@ int vis;						/* True if action is at all visible to the player */
 			nomul(0, "being knocked back");
 		}
 		else {
-			mhurtle(mdef, dx, dy, pd->mtyp == PM_KHAAMNUN_TANNIN ? 4 : 1);
+			mhurtle(mdef, dx, dy, pd->mtyp == PM_KHAAMNUN_TANNIN ? 4 : 1, TRUE);
 			if(pd->mtyp == PM_KHAAMNUN_TANNIN && (ix != x(mdef) || iy != y(mdef)))
 				pline("%s jets away.", Monnam(mdef));
 			if (staggering_strike)
@@ -14955,6 +15078,14 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 		if (passive != &noattack) {
 			switch (passive->adtyp)
 			{
+			case AD_MROT:
+				// Does nothing, this effect is handled in the experience gain functions xkilled and grow_up.
+				// // This effect *only* happens if the defender has died!
+				// if(DEADMONSTER(mdef)){
+					// //This function's defender is the one doing the cursing, so they are passed in as the agressor.
+					// result |= mummy_curses_x(mdef, magr);
+				// }
+			break;
 			case AD_MAGM:
 				/* wrath of gods for attacking Oracle */
 				if (Magic_res(magr)) {
@@ -16133,4 +16264,235 @@ struct monst * mdef;
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	return xmeleehity(&youmonst, mdef, &basicattack, &uwep, vis, 0, TRUE);
+}
+
+/* mummy_curses_x()
+ * 
+ * Mummy curses (for use in various contexts. Returns result flags.
+ */
+int
+mummy_curses_x(magr, mdef)
+struct monst * magr;
+struct monst * mdef;
+{
+	int cnum;
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	boolean visible = (youdef || canseemon(magr));
+	struct permonst *pd, *pa;
+	struct obj *otmp;
+	
+	pd = youdef ? youracedata : mdef->data;
+	pa = youagr ? youracedata : magr->data;
+	// Defender is already dead
+	if(!youdef && DEADMONSTER(mdef))
+		return MM_MISS;
+	//Check curse resistance
+	if(Curse_res(mdef, TRUE))
+		return MM_MISS;
+	//Roll type
+	switch(magr->mtyp){
+		case PM_HMNYW_PHARAOH:
+			cnum = 5 + rnd(3);
+		break;
+		case PM_PHARAOH:
+			cnum = 3 + rnd(3);
+		break;
+		case PM_PRIEST_MUMMY:
+			cnum = rnd(5);
+		break;
+		case PM_ANCIENT_OF_THE_BURNING_WASTES:
+			cnum = 5;
+		break;
+		default:
+			cnum = rnd(3);
+		break;
+	}
+	//Do curse
+	switch(cnum){
+		//Bad Luck
+		case 1:
+			if(youdef){
+				You_feel("an ill fate settle over you.");
+				change_luck(-26);
+			}
+			else {
+				mdef->encouraged = max(-13, mdef->encouraged-26);
+			}
+		break;
+		//Curse Equipment
+		case 2:{
+			boolean messaged = FALSE;
+			for (otmp = youdef ? invent : mdef->minvent; otmp; otmp = otmp->nobj) {
+#ifdef GOLDOBJ
+				if (otmp->oclass == COIN_CLASS) continue;
+#endif
+				if (otmp->cursed || rn2(4)) continue;
+
+				if(otmp->oartifact && arti_gen_prop(otmp, ARTG_MAJOR) &&
+				   rn2(10) < 8) {
+					if (visible) pline("%s!", Tobjnam(otmp, "resist"));
+					continue;
+				}
+				if(!messaged){
+					if(youdef)
+						You_feel("as if you need some help.");
+					else if(youagr && visible)
+						You_feel("as though %s needs some help.", mon_nam(mdef));
+					
+					messaged = TRUE;
+				}
+				if(otmp->blessed)
+					unbless(otmp);
+				else
+					curse(otmp);
+			}
+			update_inventory();
+		}
+		break;
+		//Pain
+		case 3:
+			//Should never kill target
+			*hp(mdef) = *hp(mdef)/2 + 1;
+			if (youdef) {
+				if (!is_silent(pd)){
+					You("%s from the pain!", humanoid_torso(pd) ? "scream" : "shriek");
+				}
+				else {
+					You("writhe in pain!");
+				}
+				HScreaming += 2;
+			}
+			else {
+				if (!is_silent_mon(mdef)){
+					if (canseemon(mdef))
+						pline("%s %s in pain!", Monnam(mdef), humanoid_torso(mdef->data) ? "screams" : "shrieks");
+					else You_hear("%s %s in pain!", mdef->mtame ? noit_mon_nam(mdef) : mon_nam(mdef), humanoid_torso(mdef->data) ? "screaming" : "shrieking");
+				}
+				else {
+					if (canseemon(mdef))
+						pline("%s writhes in pain!", Monnam(mdef));
+				}
+			}
+		break;
+		//Insect (sickness)
+		case 4:
+			if(Sick_res(mdef))
+				break;
+			if(youdef){
+				if (!umechanoid) {
+					You("are stung by a tiny insect!");
+					make_sick(Sick ? Sick / 3L + 1L : (long)rn1(ACURR(A_CON), 20),
+						pa->mname, TRUE, SICK_NONVOMITABLE);
+				}
+			}
+			else {
+				/* 1/10 chance of instakill */
+				if (!rn2(10)){
+					if (youagr) killed(mdef);
+					else monkilled(mdef, "", AD_SPEL);
+					/* instakill */
+					return ((*hp(mdef) > 0 ? MM_DEF_LSVD : MM_DEF_DIED) | MM_HIT);
+				}
+				else {
+					return xdamagey(magr, mdef, (struct attack *)0, rnd(12));
+				}
+			}
+		break;
+		//Mummy Rot
+		case 5:
+			if (youdef) {
+				if(!u.umummyrot){
+					You("begin crumbling to dust!");
+					u.umummyrot = TRUE;
+				}
+				else {
+					if(rn2(2))
+						(void)adjattrib(A_CON, -rnd(6), FALSE);
+					else
+						(void)adjattrib(A_CHA, -rnd(6), FALSE);
+				}
+			}
+			else {
+				if(visible)
+					pline("%s is crumbling to dust!", Monnam(mdef));
+				return xdamagey(magr, mdef, (struct attack *)0, d(d(2,6), 10));
+			}
+		break;
+		//Heart Attack
+		case 6:
+			if (!nonliving(pd) || !has_blood_mon(mdef) || (youdef && (u.sealsActive & SEAL_OSE)) || resists_death(mdef))
+				break;
+			else if (*hp(mdef) >= 100){
+				if(youdef)
+					Your("%s stops!  When it finally beats again, it is weak and thready.", body_part(HEART));
+				*hp(mdef) -= d(10, 8);
+			}
+			else {
+				if(youdef){
+					killer_format = KILLED_BY_AN;
+					killer = "heart attack";
+					done(DIED);
+				}
+				else {
+					if (is_delouseable(pd)){
+						pline("The parasite dies!");
+						delouse(mdef, AD_DEAD);
+					}
+					else {
+						mdef->mhp = -1;
+						if (youagr) killed(mdef);
+						else monkilled(mdef, "", AD_SPEL);
+					}
+					return ((*hp(mdef)>0 ? MM_DEF_LSVD : MM_DEF_DIED) | MM_HIT);
+				}
+			}
+		break;
+		//Remove Protection
+		case 7:
+			if(youdef){
+				You_feel("a dire fate settle over you.");
+				u.uacinc = min(u.uacinc-4, u.uacinc/2);
+				u.ublessed = max(0, min(u.ublessed-4, u.ublessed/2));
+			}
+			else {
+				//Monsters are less detailed, just do luck effect again.
+				mdef->encouraged = max(-13, mdef->encouraged-26);
+			}
+		break;
+		//Remove HP
+		case 8:
+			if(youdef){
+				u.uhpbonus = min(u.uhpbonus-25, u.uhpbonus/2);
+				calc_total_maxhp();
+			}
+			else {
+				mdef->mhpmax = max(mdef->m_lev, max(mdef->mhpmax-25, mdef->mhpmax/2));
+				mdef->mhp = min(mdef->mhp, mdef->mhpmax);
+			}
+			//Should never kill target
+			*hp(mdef) = *hp(mdef)/3 + 1;
+			if (youdef) {
+				if (!is_silent(pd)){
+					You("%s in agony!", humanoid_torso(pd) ? "scream" : "shriek");
+				}
+				else {
+					You("writhe in agony!");
+				}
+				HScreaming += 2;
+			}
+			else {
+				if (!is_silent_mon(mdef)){
+					if (canseemon(mdef))
+						pline("%s %s in agony!", Monnam(mdef), humanoid_torso(mdef->data) ? "screams" : "shrieks");
+					else You_hear("%s %s in agony!", mdef->mtame ? noit_mon_nam(mdef) : mon_nam(mdef), humanoid_torso(mdef->data) ? "screaming" : "shrieking");
+				}
+				else {
+					if (canseemon(mdef))
+						pline("%s writhes in agony!", Monnam(mdef));
+				}
+			}
+		break;
+	}
+	return MM_MISS;
 }

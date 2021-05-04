@@ -506,6 +506,10 @@ peffects(otmp)
 			else
 				You_feel("the chill of death fade away.");
 		}
+		if(otmp->blessed && u.umummyrot){
+			u.umummyrot = 0;
+			You("stop shedding dust.");
+		}
 		if(!otmp->cursed){
 			//Restore sanity if blessed or uncursed
 			if(otmp->blessed)
@@ -1058,6 +1062,10 @@ as_extra_healing:
 			else
 				You_feel("the chill of death fade away.");
 		}
+		if(otmp->blessed && u.umummyrot){
+			u.umummyrot = 0;
+			You("stop shedding dust.");
+		}
 		(void) make_hallucinated(0L,TRUE,0L);
 		exercise(A_STR, TRUE);
 		exercise(A_CON, TRUE);
@@ -1083,10 +1091,14 @@ as_extra_healing:
 				pluslvl(FALSE);
 			}
 		}
-		/* Dissolve one morgul blade shard if blessed*/
+		/* Dissolve all morgul blade shards */
 		if(u.umorgul>0){
 			u.umorgul = 0;
 			You_feel("the chill of death fade away.");
+		}
+		if(otmp->blessed && u.umummyrot){
+			u.umummyrot = 0;
+			You("stop shedding dust.");
 		}
 		for (int i = 0; i < A_MAX; i++) {
 			lim = AMAX(i);

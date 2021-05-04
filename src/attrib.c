@@ -62,7 +62,6 @@ const struct innate {
 		     {  20, &(HSearching), "perceptive", "unaware" },
 		     {	 0, 0, 0, 0 } },
 #endif	/* CONVICT */
-
 	hea_abil[] = { {	 1, &(HPoison_resistance), "", "" },
 		     {	 1, &(HSick_resistance), "", "" },
 		     {	15, &(HWarning), "sensitive", "" },
@@ -233,6 +232,18 @@ adjattrib(ndx, incr, msgflg)
 				killer_format = KILLED_BY;
 				killer = "a shard of a morgul-blade";
 				done(DIED);
+				u.ugrave_arise = temparise;
+			} else if(u.umummyrot
+				&& (ndx == A_CHA || ndx == A_CON)
+				&& ABASE(A_CON) <= ATTRMIN(A_CON)
+				&& ABASE(A_CHA) <= ATTRMIN(A_CHA)
+			){
+				int temparise = u.ugrave_arise;
+				You("crack appart and turn to dust!");
+				u.ugrave_arise = 0;
+				killer_format = KILLED_BY;
+				killer = "mummy rot";
+				done(DISINTEGRATED);
 				u.ugrave_arise = temparise;
 			} else {
 				if (msgflg == 0 && flags.verbose)
@@ -562,7 +573,8 @@ exerchk()
 			break;
 		    case A_CON: You((mod_val >0) ?
 				    "must be leading a healthy life-style." :
-					u.umorgul ? "have the chill of death about you."
+					u.umummyrot ? "are gradually rotting to dust!"
+					: u.umorgul ? "have the chill of death about you."
 				    : "haven't been watching your health.");
 				if(mod_val < 0)	AMAX(i) += mod_val; /* permanent drain */
 			break;
@@ -580,7 +592,8 @@ exerchk()
 			break;
 		    case A_CHA: You((mod_val >0) ?
 				    "must have been very charming lately." :
-					u.umorgul ? "have the chill of death about you."
+					u.umummyrot ? "are gradually rotting to dust!"
+					: u.umorgul ? "have the chill of death about you."
 				    : "haven't been watching your behavior.");
 				if(mod_val < 0)	AMAX(i) += mod_val; /* permanent drain */
 			break;

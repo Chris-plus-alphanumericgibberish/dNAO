@@ -248,6 +248,9 @@ makedog()
 		mark_mon_as_summoned(mtmp, &youmonst, ACURR(A_CHA) + 1, 0);
 		for(int i = min(45, (u.uinsight - mtmp->m_lev)); i > 0; i--){
 			grow_up(mtmp, (struct monst *) 0);
+			//Technically might grow into a genocided form.
+			if(DEADMONSTER(mtmp))
+				return((struct monst *) 0);
 		}
 		mtmp->mspec_used = 0;
 	}

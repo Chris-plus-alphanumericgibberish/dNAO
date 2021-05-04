@@ -2133,6 +2133,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		}
 	}
 	if (u.umorgul) enl_msg("You ", "feel", "felt", " deathly cold");
+	if (u.umummyrot) enl_msg("You ", "are", "were", " gradually rotting to dust");
 
 	/*** Vision and senses ***/
 	if (See_invisible(u.ux,u.uy)) enl_msg(You_, "see", "saw", " invisible");
@@ -3421,6 +3422,10 @@ resistances_enlightenment()
 	}
 	if (u.umorgul){
 		Sprintf(buf, "You feel deathly cold");
+		putstr(en_win, 0, buf);
+	}
+	if (u.umummyrot){
+		Sprintf(buf, "You are gradually rotting to dust");
 		putstr(en_win, 0, buf);
 	}
 	

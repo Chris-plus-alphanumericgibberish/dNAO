@@ -33,6 +33,8 @@ STATIC_DCL void FDECL(unseen_actions, (struct monst *));
 STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
 STATIC_DCL void FDECL(good_neighbor, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
+STATIC_DCL void FDECL(dark_pharaoh_visible, (struct monst *));
+STATIC_DCL void FDECL(good_neighbor_visible, (struct monst *));
 STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
 STATIC_DCL void FDECL(goat_sacrifice, (struct monst *));
 STATIC_DCL void FDECL(palid_stranger, (struct monst *));
@@ -1211,6 +1213,9 @@ moveloop()
 				}
 				if(mtmp->mtyp == PM_STRANGE_LARVA){
 					grow_up(mtmp, (struct monst *)0);
+					//grow up can kill monster.
+					if(DEADMONSTER(mtmp))
+						continue;
 				}
 				/*Monsters may have to skip turn*/
 				if(noactions(mtmp)){
@@ -1332,6 +1337,7 @@ moveloop()
 				if(mtmp->mtyp == PM_PALE_NIGHT || mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mtyp == PM_LEGION) flags.walky_level=1;
 				if(mtmp->mtyp == PM_ORCUS || mtmp->mtyp == PM_NAZGUL) flags.shade_level=1;
 				if(mtmp->mtyp == PM_THE_STRANGER) flags.yello_level=1;
+				if(mtmp->mtyp == PM_HMNYW_PHARAOH) dark_pharaoh_visible(mtmp);
 				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)))){
 					mtmp->mstrategy &= ~STRAT_WAITMASK;
 					pline_The("entire %s is shaking around you!",
@@ -1737,6 +1743,10 @@ karemade:
 					while(n-- > 0){
 						exercise(i, FALSE);
 					}
+				}
+				if(u.umummyrot){
+					exercise(A_CHA, FALSE);
+					exercise(A_CON, FALSE);
 				}
 			}
 			
@@ -3595,6 +3605,7 @@ printAttacks(buf, ptr)
 		"revelatory whispers",	/*138*/
 		"pull closer",			/*139*/
 		"crippling pain",		/*140*/
+		"inflict curses",		/*141*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */
@@ -3817,15 +3828,15 @@ struct monst *mon;
 			){
 				//Heal and fix troubles
 				if(needs_familiar(mtmp)){
-					struct monst *familliar;
-					familliar = makemon(&mons[PM_WITCH_S_FAMILIAR], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
-					if(familliar){
+					struct monst *familiar;
+					familiar = makemon(&mons[PM_WITCH_S_FAMILIAR], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					if(familiar){
 						//Sync new familiar
-						familliar->m_lev = mtmp->m_lev;
-						familliar->mhpmax = mtmp->mhpmax;
-						familliar->mhp = familliar->mhpmax;
-						familliar->mvar_witchID = (long)mtmp->m_id;
-						familliar->mpeaceful = mtmp->mpeaceful;
+						familiar->m_lev = mtmp->m_lev;
+						familiar->mhpmax = mtmp->mhpmax;
+						familiar->mhp = familiar->mhpmax;
+						familiar->mvar_witchID = (long)mtmp->m_id;
+						familiar->mpeaceful = mtmp->mpeaceful;
 						//Stop running
 						if(mtmp->mflee && mtmp->mhp > mtmp->mhpmax/2){
 							mtmp->mflee = 0;
@@ -3833,6 +3844,8 @@ struct monst *mon;
 						}
 					}
 				}
+				if(canseemon(mtmp) && mtmp->mhp < mtmp->mhpmax)
+					pline("%s looks much better!", Monnam(mtmp));
 				mtmp->mhp = mtmp->mhpmax;
 				mtmp->mspec_used = 0;
 				mtmp->mstdy = 0;
@@ -3863,10 +3876,81 @@ struct monst *mon;
 	}
 }
 
+STATIC_OVL
+void
+good_neighbor_visible(mon)
+struct monst *mon;
+{
+	struct monst *mtmp;
+	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+		if(DEADMONSTER(mtmp))
+			continue;
+		if(!(mtmp->mtyp == PM_APPRENTICE_WITCH
+			|| mtmp->mtyp == PM_WITCH
+			|| mtmp->mtyp == PM_COVEN_LEADER
+			|| mtmp->mtyp == PM_WITCH_S_FAMILIAR
+		)) continue;
+
+		//Doesn't always help lower-ranked followers (always helps the coven leader)
+		if(mtmp->mtyp == PM_APPRENTICE_WITCH && rn2(4)) continue;
+		if(mtmp->mtyp == PM_WITCH && rn2(3)) continue;
+		if(mtmp->mtyp == PM_WITCH_S_FAMILIAR && rn2(2)) continue;
+
+		if(distmin(mon->mx, mon->my, mtmp->mx, mtmp->my) < 9){
+			//Heal and fix troubles
+			if(needs_familiar(mtmp)){
+				struct monst *familiar;
+				familiar = makemon(&mons[PM_WITCH_S_FAMILIAR], mon->mx, mon->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+				if(familiar){
+					if(canseemon(familiar))
+						pline("%s creates %s!", Monnam(mon), an(mon_nam(familiar)));
+					//Sync new familiar
+					familiar->m_lev = mtmp->m_lev;
+					familiar->mhpmax = mtmp->mhpmax;
+					familiar->mhp = familiar->mhpmax;
+					familiar->mvar_witchID = (long)mtmp->m_id;
+					familiar->mpeaceful = mtmp->mpeaceful;
+					//Stop running
+					if(mtmp->mflee && mtmp->mhp > mtmp->mhpmax/2){
+						if(canseemon(mtmp))
+							pline("%s stops fleeing!", Monnam(mtmp));
+						mtmp->mflee = 0;
+						mtmp->mfleetim = 0;
+					}
+				}
+			}
+			if(canseemon(mtmp) && mtmp->mhp < mtmp->mhpmax)
+				pline("%s looks much better!", Monnam(mtmp));
+			mtmp->mhp = mtmp->mhpmax;
+			mtmp->mspec_used = 0;
+			mtmp->mstdy = 0;
+			mtmp->ustdym = 0;
+			mtmp->mcan = 0;
+			
+			mtmp->mflee = 0;
+			mtmp->mfleetim = 0;
+			mtmp->mcansee = 1;
+			mtmp->mblinded = 0;
+			mtmp->mcanhear = 1;
+			mtmp->mdeafened = 0;
+			mtmp->mcanmove = 1;
+			mtmp->mfrozen = 0;
+			mtmp->msleeping = 0;
+			mtmp->mstun = 0;
+			mtmp->mconf = 0;
+			mtmp->mtrapped = 0;
+			mtmp->entangled = 0;
+			
+			break; //ends the loop
+		}
+	}
+}
+
 static int pharaohspawns[] = {PM_COBRA, PM_COBRA, PM_COBRA, PM_SERPENT_NECKED_LIONESS, PM_HUNTING_HORROR,
 							  PM_COBRA, PM_COBRA, PM_COBRA, PM_SERPENT_NECKED_LIONESS, PM_HUNTING_HORROR,
 							  PM_HUMAN_MUMMY, PM_HUMAN_MUMMY, PM_HUMAN_MUMMY, PM_GIANT_MUMMY, PM_PHARAOH,
 							  PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_LIGHTNING_PARAELEMENTAL, PM_BLUE_DRAGON};
+
 
 STATIC_OVL
 void
@@ -3899,7 +3983,7 @@ struct monst *mon;
 				}
 				mtmp->mhp = 0;
 				mondied(mtmp);
-			} else if(mtmp->mtyp == PM_GHOUL_QUEEN_NITOCRIS){
+			} else if(mtmp->mtyp == PM_GHOUL_QUEEN_NITOCRIS && !rn2(2)){
 				if(mtmp->mhp < mtmp->mhpmax/2){
 					mtmp->mhp = mtmp->mhpmax;
 					if(canseemon(mtmp)) pline("Dark waters seal %s's wounds!", mon_nam(mtmp));
@@ -3959,7 +4043,7 @@ struct monst *mon;
 				break;
 		}
 	}
-	if(obj){
+	if(obj && !rn2(2)){
 		if(get_obj_location(obj, &xlocale, &ylocale, 0)){
 			mon->mtrack[1].x = xlocale;
 			mon->mtrack[1].y = ylocale;
@@ -3978,6 +4062,109 @@ struct monst *mon;
 			mtmp->mpeaceful = 0;
 			set_malign(mtmp);
 		}
+	}
+}
+
+STATIC_OVL
+void
+dark_pharaoh_visible(mon)
+struct monst *mon;
+{
+	struct monst *mtmp;
+	xchar xlocale, ylocale;
+	struct obj *otmp;
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+		if(mtmp->mtyp != PM_NITOCRIS && mtmp->mtyp != PM_GHOUL_QUEEN_NITOCRIS)
+			continue;
+		//found her
+		if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_){
+			static long nitocastturn = 0L;
+			//Directed to cast spells on her behalf
+			if(canseemon(mtmp) && canseemon(mon)){
+				if((nitocastturn + 10) < monstermoves)
+					pline("%s opens %s %s and a nimbus of dark mist forms around %s.",
+						Monnam(mon), mhis(mon), mbodypart(mon, HAND), mon_nam(mtmp));
+				nitocastturn = monstermoves;
+			}
+			else if(canseemon(mtmp)){
+				if((nitocastturn + 10) < monstermoves)
+					pline("A nimbus of dark mist forms around %s.", mon_nam(mtmp));
+				nitocastturn = monstermoves;
+			}
+			mtmp->mspec_used = 0;
+		} else if(mtmp->mtyp == PM_NITOCRIS){
+			//No longer protected, kill her
+			if(canseemon(mtmp) && canseemon(mon)){
+				pline("%s smirks grotesquely and gestures for the dark waters to rise.", Monnam(mon));
+				pline("The waters pour into %s's mouth and throat!", mon_nam(mtmp));
+				pline("%s drowns!", Monnam(mtmp));
+			}
+			else if(canseemon(mtmp)){
+				pline("Dark waters pour into %s's mouth and throat!", mon_nam(mtmp));
+				pline("%s drowns!", Monnam(mtmp));
+			}
+			else if(canseemon(mon)){
+				pline("%s smirks grotesquely and gestures for the dark waters to rise.", mon_nam(mtmp));
+			}
+			mtmp->mhp = 0;
+			mondied(mtmp);
+		} else if(mtmp->mtyp == PM_GHOUL_QUEEN_NITOCRIS && !rn2(2)){
+			if(mtmp->mhp < mtmp->mhpmax/2){
+				mtmp->mhp = mtmp->mhpmax;
+				if(canseemon(mon) && canseemon(mtmp))
+					pline("Dark waters rise at %s command and seal %s's wounds!", s_suffix(mon_nam(mon)), mon_nam(mtmp));
+				else if(canseemon(mtmp))
+					pline("Dark waters rise at %s command.", s_suffix(mon_nam(mon)));
+				else if(canseemon(mon))
+					pline("Dark waters seal %s's wounds!", mon_nam(mtmp));
+			} else {
+				mtmp->mhp = min(mtmp->mhp+9, mtmp->mhpmax);
+				mtmp->mspec_used = 0;
+				mtmp->mstdy = 0;
+				mtmp->ustdym = 0;
+				mtmp->mcan = 0;
+				
+				mtmp->mflee = 0;
+				mtmp->mfleetim = 0;
+				mtmp->mcansee = 1;
+				mtmp->mblinded = 0;
+				mtmp->mcanhear = 1;
+				mtmp->mdeafened = 0;
+				mtmp->mcanmove = 1;
+				mtmp->mfrozen = 0;
+				mtmp->msleeping = 0;
+				mtmp->mstun = 0;
+				mtmp->mconf = 0;
+				mtmp->mtrapped = 0;
+				mtmp->entangled = 0;
+			}
+		}
+	}
+	struct obj *obj = 0;
+	for (obj = fobj; obj; obj = obj->nobj) {
+		if(obj->otyp == CORPSE && (obj->corpsenm == PM_NITOCRIS || obj->corpsenm == PM_GHOUL_QUEEN_NITOCRIS))
+			break;
+	}
+	if(!obj) for (obj = invent; obj; obj = obj->nobj) {
+		if(obj->otyp == CORPSE && (obj->corpsenm == PM_NITOCRIS || obj->corpsenm == PM_GHOUL_QUEEN_NITOCRIS))
+			break;
+	}
+	if(!obj) for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+		if(obj) break;
+		if (DEADMONSTER(mtmp)) continue;
+		for (obj = mtmp->minvent; obj; obj = obj->nobj) {
+			if(obj->otyp == CORPSE && (obj->corpsenm == PM_NITOCRIS || obj->corpsenm == PM_GHOUL_QUEEN_NITOCRIS))
+				break;
+		}
+	}
+	if(obj && !rn2(2)){
+		if(get_obj_location(obj, &xlocale, &ylocale, 0)){
+			if(cansee(xlocale, ylocale)) pline("Dark waters swallow Nitocris!");
+			mtmp = revive(obj, FALSE);
+			if(mtmp)
+				rloc(mtmp, FALSE);
+		}
+		return;//No further action.
 	}
 }
 

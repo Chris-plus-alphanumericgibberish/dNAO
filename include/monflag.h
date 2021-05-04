@@ -396,8 +396,9 @@
 #define STERILITY_CURSE        NAIL_TO_THE_SKY+1
 #define DISINT_RAY             STERILITY_CURSE+1
 //75
+#define MON_WARP_THROW         DISINT_RAY+1
 
-#define MON_LASTSPELL          DISINT_RAY
+#define MON_LASTSPELL          MON_WARP_THROW
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1
