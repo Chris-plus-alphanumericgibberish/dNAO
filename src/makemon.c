@@ -2385,7 +2385,8 @@ int mkobjflags;
 					otmp->quan = 20;
 					(void) mpickobj(mtmp, otmp);
 					
-					otmp = mksobj(ELVEN_MITHRIL_COAT, mkobjflags|MKOBJ_NOINIT);
+					otmp = mksobj(WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
+					set_material_gm(otmp, MITHRIL);
 					bless(otmp);
 					otmp->spe = 7;
 					(void) mpickobj(mtmp, otmp);
@@ -7361,7 +7362,7 @@ int mkobjflags;
 			otmp->spe = 7;
 			otmp->oerodeproof = TRUE;
 			(void) mpickobj(mtmp, otmp);
-		} else if(ptr->mtyp == PM_PHARAOH){
+		} else if(ptr->mtyp == PM_PHARAOH || ptr->mtyp == PM_PRIEST_MUMMY){
 			(void)mongets(mtmp, PRAYER_WARDED_WRAPPING, mkobjflags);
 		} else {
 			(void)mongets(mtmp, ptr->mtyp == PM_DROW_MUMMY ? DROVEN_CLOAK : MUMMY_WRAPPING, mkobjflags);
@@ -7374,6 +7375,24 @@ int mkobjflags;
 				otmp->oward = mtmp->mfaction;
 				(void) mpickobj(mtmp, otmp);
 			}
+		} else if(ptr->mtyp == PM_SOLDIER_MUMMY){
+			if(rn2(10)){
+				mongets(mtmp, SPEAR, mkobjflags);
+				otmp = mongets(mtmp, TOWER_SHIELD, mkobjflags);
+				set_material_gm(otmp, WOOD);
+			}
+			else {
+				mongets(mtmp, KHOPESH, mkobjflags);
+				otmp = mongets(mtmp, TOWER_SHIELD, mkobjflags);
+				set_material_gm(otmp, WOOD);
+			}
+			mongets(mtmp, WAISTCLOTH, mkobjflags);
+		} else if(ptr->mtyp == PM_PRIEST_MUMMY){
+			otmp = mongets(mtmp, CLOAK, mkobjflags);
+			set_material_gm(otmp, LEATHER);
+			otmp = mongets(mtmp, WAISTCLOTH, mkobjflags);
+			set_material_gm(otmp, CLOTH);
+			otmp->obj_color = CLR_WHITE;
 		} else if(ptr->mtyp == PM_PHARAOH){
 			otmp = mksobj(FLAIL, mkobjflags);
 			if (otmp->spe < 2) otmp->spe = rnd(3);
@@ -8064,7 +8083,7 @@ int mkobjflags;
 				// (void) mongets(mtmp, POT_FULL_HEALING, mkobjflags);
 			break;
 ////////////////////////////////////////
-		    case PM_THE_GOOD_NEIGHBOR:
+		    case PM_GOOD_NEIGHBOR:
 				(void)mongets(mtmp, PLAIN_DRESS, mkobjflags);
 				(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 				(void)mongets(mtmp, ROBE, mkobjflags);
@@ -8796,11 +8815,11 @@ register int	mmflags;
 
 	else if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)
 		mtmp->m_insight_level = 60;
-	else if(mtmp->mtyp == PM_THE_GOOD_NEIGHBOR)
+	else if(mtmp->mtyp == PM_GOOD_NEIGHBOR)
 		mtmp->m_insight_level = 40;
 	else if(mtmp->mtyp == PM_HMNYW_PHARAOH)
 		mtmp->m_insight_level = 40;
-	else if(mtmp->mtyp == PM_THE_STRANGER)
+	else if(mtmp->mtyp == PM_STRANGER)
 		mtmp->m_insight_level = 55;
 	
 	else if(mtmp->mtyp == PM_POLYPOID_BEING)
@@ -10721,6 +10740,13 @@ struct monst *mtmp, *victim;
 				}
 			}
 		}
+		// mtmp killed a mummy and suffers from its curse.
+		if(attacktype_fordmg(victim->data, AT_NONE, AD_MROT)){
+			mummy_curses_x(victim, mtmp);
+			// Mummy curse killed mtmp
+			if(DEADMONSTER(mtmp))
+				return (struct permonst *)0;
+		}
 	}
 	
 	if(mtmp->m_lev > 50 || ptr->mtyp == PM_CHAOS) return ptr;
@@ -10785,6 +10811,7 @@ struct monst *mtmp, *victim;
 			for(bardmon = fmon; bardmon; bardmon = bardmon->nmon){
 				if(is_bardmon(bardmon->data) 
 					&& !is_bardmon(mtmp->data) 
+					&& !DEADMONSTER(bardmon) 
 					&& ((bardmon->mtame > 0) == (mtmp->mtame > 0)) && bardmon->mpeaceful == mtmp->mpeaceful
 					&& mon_can_see_mon(bardmon,mtmp)
 				) grow_up(bardmon, mtmp);

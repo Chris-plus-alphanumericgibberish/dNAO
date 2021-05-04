@@ -1629,6 +1629,9 @@ int x, y;
 		case VN_A_O_CORRUPTION:
 			mid = PM_ANCIENT_OF_CORRUPTION;
 		break;
+		case VN_A_O_BURNING_WASTES:
+			mid = PM_ANCIENT_OF_THE_BURNING_WASTES;
+		break;
 		case VN_A_O_THOUGHT:
 			mid = PM_ANCIENT_OF_THOUGHT;
 		break;

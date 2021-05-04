@@ -269,8 +269,8 @@ struct Role roles[] = {
 	{"Raver",    0},
 	{"Lunatic",   0},
 	{"Maniac",     0},
-	{"Psycopath",    0},
-	{"Bedlamite",  0} },
+	{"Augur",    0},
+	{"Seer",  0} },
 	"Lobon", "Oukranos", "Zo-Kalar",	/* Dreamlands */
 	"Mad", "Archer Asylum", "the ground floor",
 	PM_MADMAN, PM_MADWOMAN, NON_PM,

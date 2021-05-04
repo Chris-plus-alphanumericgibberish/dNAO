@@ -109,6 +109,7 @@ register struct obj *obj;
 #ifdef STEED
 				&& !u.usteed
 #endif
+				&& P_SKILL(objects[obj->otyp].oc_skill) < P_SKILLED
 				&& !melee_polearms(youracedata)
 				&& obj->otyp != AKLYS
 				&& !is_vibropike(obj)

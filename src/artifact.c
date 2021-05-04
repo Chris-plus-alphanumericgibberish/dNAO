@@ -2517,8 +2517,8 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			make_stunned((HStun + 3), FALSE);
 		} else {
 			if(vis) pline("%s is thrown backwards by the gusting winds!",Monnam(mdef));
-			if(bigmonst(mdef->data)) mhurtle(mdef, u.dx, u.dy, 1);
-			else mhurtle(mdef, u.dx, u.dy, 10);
+			if(mdef->data->msize >= MZ_HUGE) mhurtle(mdef, u.dx, u.dy, 1, TRUE);
+			else mhurtle(mdef, u.dx, u.dy, 10, FALSE);
 			if(mdef->mhp <= 0 || migrating_mons == mdef) return vis;//Monster was killed as part of movement OR fell to new level and we should stop.
 		}
 		and = TRUE;
@@ -3496,7 +3496,7 @@ boolean * messaged;
 				hurtle(dx, dy, hurtledistance, FALSE, TRUE);
 			}
 			else {
-				mhurtle(mdef, dx, dy, hurtledistance);
+				mhurtle(mdef, dx, dy, hurtledistance, FALSE);
 			}
 		}
 		else {
@@ -9923,13 +9923,15 @@ do_passive_attacks()
 	struct monst *mtmp;
 	struct obj *armor;
 	if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
-		pline("Lashing tentacles erupt from your brain!");
-		losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
-		morehungry(d(4,4));
-		if(u.usanity < 50)
-			change_usanity(-1, FALSE);
-		else
-			change_usanity(-1*d(4,4), FALSE);
+		if(!ClearThoughts){
+			pline("Lashing tentacles erupt from your brain!");
+			losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
+			morehungry(d(4,4));
+			if(u.usanity < 50)
+				change_usanity(-1, FALSE);
+			else
+				change_usanity(-1*d(4,4), FALSE);
+		}
 		dogoat();
 	}
 	

@@ -248,7 +248,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 	int i, k, damu = dam;
 	boolean starting = 1, silver = FALSE;
 	boolean visible, any_shield;
-	int uhurt = 0; /* 0=unhurt, 1=items damaged, 2=you and items damaged */
+	int uhurt = 0; /* 0=unhurt, 1=items damaged, 2=you and items damaged, 3=half elemental damage */
 	const char *str;
 	int idamres, idamnonres;
 	struct monst *mtmp;
@@ -281,6 +281,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 	else switch (adtyp) {
 		case AD_MAGM: str = "magical blast";
 			break;
+		case AD_EFIR:
 		case AD_FIRE: str = (olet != BURNING_OIL ? olet != SCROLL_CLASS ? "fireball" : "tower of flame" : "burning oil");
 			break;
 		case AD_COLD: str = "ball of cold";
@@ -325,6 +326,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 			case AD_MAGM:
 				explmask = !!Antimagic;
 				break;
+			case AD_EFIR:
 			case AD_FIRE:
 				explmask = !!Fire_resistance;
 				break;
@@ -386,9 +388,11 @@ boolean yours; /* is it your fault (for killing monsters) */
 			case AD_MAGM:
 				explmask |= resists_magm(mtmp);
 				break;
+			case AD_EFIR:
 			case AD_FIRE:
 				explmask |= resists_fire(mtmp);
 				break;
+			case AD_ECLD:
 			case AD_COLD:
 				explmask |= resists_cold(mtmp);
 				break;
@@ -398,12 +402,14 @@ boolean yours; /* is it your fault (for killing monsters) */
 			case AD_DEAD:
 				explmask |= resists_death(mtmp);
 				break;
+			case AD_EELC:
 			case AD_ELEC:
 				explmask |= resists_elec(mtmp);
 				break;
 			case AD_DRST:
 				explmask |= resists_poison(mtmp);
 				break;
+			case AD_EACD:
 			case AD_ACID:
 				explmask |= resists_acid(mtmp);
 				break;
@@ -514,13 +520,17 @@ boolean yours; /* is it your fault (for killing monsters) */
 			if (is_animal(u.ustuck->data)) {
 				if (!silent) pline("%s gets %s!",
 				      Monnam(u.ustuck),
+				      (adtyp == AD_EFIR) ? "heartburn" :
 				      (adtyp == AD_FIRE) ? "heartburn" :
+				      (adtyp == AD_ECLD) ? "chilly" :
 				      (adtyp == AD_COLD) ? "chilly" :
 				      (adtyp == AD_DISN) ? "perforated" :
 					  (adtyp == AD_DEAD) ? "irradiated by pure energy" :
+				      (adtyp == AD_EELC) ? "shocked" :
 				      (adtyp == AD_ELEC) ? "shocked" :
 				      (adtyp == AD_DRST) ? "poisoned" :
 				      (adtyp == AD_DISE) ? "high-yield food poisoning" :
+				      (adtyp == AD_EACD) ? "an upset stomach" :
 				      (adtyp == AD_ACID) ? "an upset stomach" :
 				      (adtyp == AD_SLIM) ? "a little green" :
 				      (adtyp == AD_WET) ? "bloated" :
@@ -530,13 +540,17 @@ boolean yours; /* is it your fault (for killing monsters) */
 			} else {
 				if (!silent) pline("%s gets slightly %s!",
 				      Monnam(u.ustuck),
+				      (adtyp == AD_EFIR) ? "toasted" :
 				      (adtyp == AD_FIRE) ? "toasted" :
+				      (adtyp == AD_ECLD) ? "chilly" :
 				      (adtyp == AD_COLD) ? "chilly" :
 				      (adtyp == AD_DISN) ? "perforated" :
 					  (adtyp == AD_DEAD) ? "overwhelmed by pure energy" :
+				      (adtyp == AD_EELC) ? "shocked" :
 				      (adtyp == AD_ELEC) ? "shocked" :
 				      (adtyp == AD_DRST) ? "intoxicated" :
 				      (adtyp == AD_DISE) ? "quesy" :
+				      (adtyp == AD_EACD) ? "burned" :
 				      (adtyp == AD_ACID) ? "burned" :
 				      (adtyp == AD_SLIM) ? "green" :
 				      (adtyp == AD_WET) ? "bloated" :
@@ -559,8 +573,14 @@ boolean yours; /* is it your fault (for killing monsters) */
 
 		if (area->locations[i].shielded) {
 			golemeffects(mtmp, (int) adtyp, dam + idamres);
+		} 
+		//Golem effects handled for elemental damage effects, now either proceed to damage or do damage from items.
+		if(area->locations[i].shielded && adtyp != AD_EFIR
+		 && adtyp != AD_ECLD && adtyp != AD_EELC && adtyp != AD_EACD
+		){
 			mtmp->mhp -= idamnonres;
-		} else {
+		}
+		else {
 		/* call resist with 0 and do damage manually so 1) we can
 		 * get out the message before doing the damage, and 2) we can
 		 * call mondied, not killed, if it's not your blast
@@ -572,6 +592,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				pline("%s resists the %s!", Monnam(mtmp), str);
 			    mdam = dam/2;
 			}
+			//Elemental damage types continue through.
+			if(area->locations[i].shielded)
+				mdam /= 2;
 			if(yours && mtmp->female && humanoid_torso(mtmp->data) && roll_madness(MAD_SANCTITY)){
 			    mdam /= 4;
 			}
@@ -600,7 +623,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 				pline("The %s sear %s!", str, mon_nam(mtmp));
 				mdam += rnd(20);
 			}
-			//Bugs? youmonst-as-mtmp can show up here?
+
 			if (resists_cold(mtmp) && adtyp == AD_FIRE)
 				mdam *= 2;
 			else if (resists_fire(mtmp) && adtyp == AD_COLD)
@@ -624,7 +647,10 @@ boolean yours; /* is it your fault (for killing monsters) */
 				mtmp->mstrategy &= ~STRAT_WAITFORU;
 			} else {
 				mtmp->mhp -= mdam;
-				mtmp->mhp -= (idamres + idamnonres);
+				//Elemental damage types make it down here.
+				if(!area->locations[i].shielded)
+					mtmp->mhp -= idamres;
+				mtmp->mhp -= idamnonres;
 			}
 		}
 		if (mtmp->mhp <= 0) {
@@ -645,6 +671,14 @@ boolean yours; /* is it your fault (for killing monsters) */
 			/* gas spores */
 				flags.verbose && olet != SCROLL_CLASS)
 			You("are caught in the %s!", str);
+
+		if(uhurt == 1 && 
+			(adtyp == AD_EFIR || adtyp == AD_ECLD || adtyp == AD_EELC || adtyp == AD_EACD)
+		){
+			damu /= 2;
+			uhurt = 3;
+		}
+
 		if(hates_silver(youracedata) && silver){
 			You("are seared by the %s!", str);
 			damu += rnd(20);
@@ -654,7 +688,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 			damu += u.ulevel;
 		}
 		/* do property damage first, in case we end up leaving bones */
-		if (adtyp == AD_FIRE){
+		if (adtyp == AD_FIRE || adtyp == AD_EFIR){
 			burn_away_slime();
 			melt_frozen_air();
 		}
@@ -677,7 +711,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 
 		ugolemeffects((int) adtyp, damu);
 
-		if (uhurt == 2) {
+		if (uhurt == 2 || uhurt == 3) {
 			if(adtyp == AD_SLIM && !Slime_res(&youmonst)){
 				You("don't feel very well.");
 				Slimed = 10L;

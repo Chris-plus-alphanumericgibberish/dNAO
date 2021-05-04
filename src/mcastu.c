@@ -1180,7 +1180,7 @@ unsigned int type;
 				case 8: return DRAIN_LIFE;
 			}
 	   break;
-       case PM_THE_GOOD_NEIGHBOR:
+       case PM_GOOD_NEIGHBOR:
 			switch(rnd(12)){
 				case 1: return PSI_BOLT;
 				case 2: return EVIL_EYE;
@@ -1202,7 +1202,9 @@ unsigned int type;
 				return CURSE_ITEMS;
 				case 2: 
 				//Summon amphibians?
+				return GEYSER;
 				case 3: 
+				//dust to gnats
 				case 4: 
 				return INSECTS;
 				case 5: 
@@ -1341,6 +1343,16 @@ unsigned int type;
 			break;
 			case 4:
 				return PUNISH;
+			break;
+		}
+	break;
+	case PM_ANCIENT_OF_THE_BURNING_WASTES:
+		switch(rn2(2)){
+			case 0:
+				return MON_WARP;
+			break;
+			case 1:
+				return MON_WARP_THROW;
 			break;
 		}
 	break;
@@ -1647,6 +1659,7 @@ const char * spellname[] =
 	"STERILITY_CURSE"
 	//75
 	"DISINT_RAY"
+	"MON_WARP_THROW",
 };
 
 
@@ -3323,10 +3336,41 @@ int tary;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
-	case MON_WARP:
+	case MON_WARP_THROW:
 		/* needs direct target */
 		if (!foundem) {
 			impossible("warp with no mdef?");
+			return MM_MISS;
+		}
+		else
+		{
+			int dx, dy;
+			dmg = 0;
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("Space warps and flings %s away!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+			do{
+				dx = rn2(3) - 1;
+				dy = rn2(3) - 1;
+			} while(
+				!(dx || dy) &&
+				!(dx == x(mdef) - x(magr) && dy == y(mdef) - y(magr))
+			);
+			if(youdef){
+				hurtle(dx, dy, BOLT_LIM, FALSE, TRUE);
+			}
+			else {
+				mhurtle(mdef, dx, dy, BOLT_LIM, TRUE);
+			}
+		}
+		return MM_HIT;
+
+	case MON_WARP:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("warp-throw with no mdef?");
 			return MM_MISS;
 		}
 		else
@@ -4911,6 +4955,7 @@ int spellnum;
 	case SILVER_RAYS:
 	case GOLDEN_WAVE:
 	case MON_WARP:
+	case MON_WARP_THROW:
 	case DROP_BOULDER:
 	case DISINT_RAY:
 		return TRUE;

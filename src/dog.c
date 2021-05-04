@@ -248,6 +248,9 @@ makedog()
 		mark_mon_as_summoned(mtmp, &youmonst, ACURR(A_CHA) + 1, 0);
 		for(int i = min(45, (u.uinsight - mtmp->m_lev)); i > 0; i--){
 			grow_up(mtmp, (struct monst *) 0);
+			//Technically might grow into a genocided form.
+			if(DEADMONSTER(mtmp))
+				return((struct monst *) 0);
 		}
 		mtmp->mspec_used = 0;
 	}
@@ -360,7 +363,10 @@ losedogs()
 
 	for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
 		mtmp2 = mtmp->nmon;
-		if (mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->m_insight_level <= u.uinsight) {
+		if (mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel 
+			&& mtmp->m_insight_level <= u.uinsight
+		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+		) {
 		    if(mtmp == migrating_mons)
 			migrating_mons = mtmp->nmon;
 		    else
@@ -837,7 +843,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			mtmp->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES || 
 			mtmp->mtyp == PM_CENTER_OF_ALL || 
 			mtmp->mtyp == PM_HUNGRY_DEAD ||
-			mtmp->mtyp == PM_THE_STRANGER ||
+			mtmp->mtyp == PM_STRANGER ||
 			mtmp->mtame
 		) {
 			if (mtmp->mleashed) {

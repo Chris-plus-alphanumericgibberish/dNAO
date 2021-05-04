@@ -591,11 +591,18 @@ struct obj {
 
 /* multistriking() is 0-based so that only actual multistriking weapons return multistriking!=0 */
 #define multistriking(otmp)	(!(otmp) ? 0 : \
+	(otmp)->otyp == DOUBLE_SWORD ? 1 : \
 	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \
 	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) : \
 	arti_threeHead((otmp)) ? 2 : \
 	arti_tentRod((otmp)) ? 6 : \
 	0)
+/* like multistriking, but all ends always roll attacks. multi_ended() is 0-based so that only actual multi_ended weapons return multi_ended!=0 */
+#define multi_ended(otmp)	(!(otmp) ? 0 : \
+	(otmp)->otyp == DOUBLE_SWORD ? 1 : \
+	0)
+/*  */
+#define is_multi_hit(otmp)	(multistriking(otmp) || multi_ended(otmp))
 /* if weapon should use unarmed skill */
 #define martial_aid(otmp)	((is_lightsaber((otmp)) && !litsaber((otmp)) && (otmp)->otyp != KAMEREL_VAJRA) || \
 							(valid_weapon((otmp)) && objects[(otmp)->otyp].oc_skill == P_BARE_HANDED_COMBAT))

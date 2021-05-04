@@ -4112,6 +4112,7 @@ static const char *epitaphs[] = {
        	"On the whole, I'd rather be in Minetown",
        	"On vacation",
        	"Oops.",
+       	"...Ouch.",
        	"Out to Lunch",
        	"SOLD",
        	"Someone set us up the bomb!",

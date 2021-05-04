@@ -544,9 +544,10 @@ hurtle(dx, dy, range, verbose, do_nomul)
 /* Move a monster through the air for a few squares.
  */
 void
-mhurtle(mon, dx, dy, range)
+mhurtle(mon, dx, dy, range, huge)
 	struct monst *mon;
 	int dx, dy, range;
+	boolean huge;
 {
     coord mc, cc;
 
@@ -557,8 +558,9 @@ mhurtle(mon, dx, dy, range)
 
 	/* Is the monster stuck or too heavy to push?
 	 * (very large monsters have too much inertia, even floaters and flyers)
+	 * (certain effects are able to move very large monsters)
 	 */
-	if (mon->data->msize >= MZ_HUGE || mon == u.ustuck || mon->mtrapped)
+	if ((!huge && mon->data->msize >= MZ_HUGE) || mon == u.ustuck || mon->mtrapped)
 	    return;
 
     /* Make sure dx and dy are [-1,0,1] */
