@@ -3331,11 +3331,11 @@ resistances_enlightenment()
 			messaged++;
 		}
 		if (u.umadness&MAD_NON_EUCLID){
-			putstr(en_win, 0, "Sometimes, monsters strike at you from strange angles");
+			putstr(en_win, 0, "Sometimes, monsters strike at you from strange angles.");
 			messaged++;
 		}
 		if (u.umadness&MAD_SPIRAL){
-			putstr(en_win, 0, "Your maddness is spiraling out of control");
+			putstr(en_win, 0, "Your maddness is spiraling out of control.");
 			messaged++;
 		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
@@ -3350,25 +3350,25 @@ resistances_enlightenment()
 			}
 		}
 		if (u.umadness&MAD_THOUSAND_MASKS){
-			putstr(en_win, 0, "The God of the Thousand Masks stalks your every step");
+			putstr(en_win, 0, "The God of the Thousand Masks stalks your every step.");
 		}
 		if (u.umadness&MAD_FORMICATION){
-			putstr(en_win, 0, "You are distracted by the feeling of insects crawling over your body");
+			putstr(en_win, 0, "You are distracted by the feeling of insects crawling over your body.");
 		}
 		if (u.umadness&MAD_HOST){
-			putstr(en_win, 0, "You are nausiated by the thing inside you");
+			putstr(en_win, 0, "You are nausiated by the thing inside you.");
 		}
 		if (u.umadness&MAD_SCIAPHILIA){
-			putstr(en_win, 0, "You are fascinated by the dancing shadows");
+			putstr(en_win, 0, "You are fascinated by the dancing shadows.");
 		}
 		if (u.umadness&MAD_FORGETFUL){
-			putstr(en_win, 0, "Your mind is disolving");
+			putstr(en_win, 0, "Your mind is disolving.");
 		}
 		if (u.umadness&MAD_TOO_BIG){
-			putstr(en_win, 0, "It's too big");
+			putstr(en_win, 0, "It's too BIG!");
 		}
 		if (u.umadness&MAD_ROTTING){
-			putstr(en_win, 0, "Your body is rotting from within");
+			putstr(en_win, 0, "Your body is rotting from within.");
 		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)
