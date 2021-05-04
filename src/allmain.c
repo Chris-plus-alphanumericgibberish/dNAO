@@ -3742,7 +3742,7 @@ cthulhu_mind_blast()
 		if(Half_spell_damage) dmg = (dmg+1) / 2;
 		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 		losehp(dmg, "psychic blast", KILLED_BY_AN);
-		make_stunned(HStun + dmg*10, TRUE);
+		make_stunned(itimeout_incr(HStun, dmg*10), TRUE);
 		if (Sleep_resistance){
 			if(!on_level(&rlyeh_level,&u.uz)) fall_asleep(-1*dmg, TRUE);
 			if(!rn2(10)) change_usanity(-1, FALSE);
