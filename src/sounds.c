@@ -982,14 +982,14 @@ asGuardian:
 			pline("%s screams high and shrill.", Monnam(mtmp));
 			mtmp->mspec_used = 10;
 			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-				if(tmpm != mtmp && !DEADMONSTER(tmpm)){
+				if(tmpm != mtmp && !DEADMONSTER(tmpm) && distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) <= BOLT_LIM){
 					if(tmpm->mtame && tmpm->mtame<20) tmpm->mtame++;
 					if(d(1,tmpm->mhp) < mtmp->mhpmax){
 						tmpm->mflee = 1;
 					}
 				}
 			}
-			if(!mtmp->mpeaceful)
+			if(!mtmp->mpeaceful && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) <= BOLT_LIM)
 				make_stunned(HStun + mtmp->mhp/10, TRUE);
 		}
 	}break;
@@ -1340,7 +1340,12 @@ asGuardian:
 					for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm) && mtmp->mpeaceful == tmpm->mpeaceful){
 							if(tmpm->mhp < tmpm->mhpmax){
-								for(i = (tmpm->mhpmax - tmpm->mhp); i > 0; i--) grow_up(tmpm, tmpm);
+								for(i = (tmpm->mhpmax - tmpm->mhp); i > 0; i--){
+									grow_up(tmpm, tmpm);
+									//Grow up may have killed mtmp
+									if(DEADMONSTER(mtmp))
+										break;
+								}
 							}
 						}
 					}
@@ -1713,9 +1718,10 @@ asGuardian:
 	}break;
 	case MS_SCREAM:{
 		struct monst *tmpm;
-		pline("%s screams in madness and fear!", Monnam(mtmp));
+		if(distmin(u.ux, u.uy, mtmp->mx, mtmp->my) <= BOLT_LIM)
+			pline("%s screams in madness and fear!", Monnam(mtmp));
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(tmpm != mtmp && !DEADMONSTER(tmpm) && tmpm->mpeaceful != mtmp->mpeaceful){
+			if(tmpm != mtmp && !DEADMONSTER(tmpm) && tmpm->mpeaceful != mtmp->mpeaceful && distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) <= BOLT_LIM){
 				if(!resist(tmpm, 0, 0, FALSE)){
 					tmpm->mflee = 1;
 					if(canseemon(tmpm))
@@ -1726,7 +1732,7 @@ asGuardian:
 				}
 			}
 		}
-		if(!mtmp->mpeaceful){
+		if(!mtmp->mpeaceful && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) <= BOLT_LIM){
 			change_usanity(u_sanity_loss_minor(mtmp), TRUE);
 		}
 	    aggravate();
