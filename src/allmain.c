@@ -563,8 +563,9 @@ you_regen_hp()
 		// Healer role bonus
 		if (Role_if(PM_HEALER) && !Upolyd)
 			reglevel += 10;
+
 		// Barbarian role bonus
-		else if (Role_if(PM_BARBARIAN) && !Upolyd)
+		if (Role_if(PM_BARBARIAN) && !Upolyd)
 			reglevel *= 3;
 		// Melee roles can be slightly less concerned about taking hits
 		else if(!Upolyd && (
