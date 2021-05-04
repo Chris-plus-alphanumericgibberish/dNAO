@@ -1727,7 +1727,7 @@ CHAIN(("hellfire component"),
 
 CHAINCORPSE(("broken android"), 3000, METAL, CLR_WHITE), /*Needs encyc entry*//*Needs tile*/
 CHAINCORPSE(("broken gynoid"),  3000, METAL, CLR_WHITE), /*Needs encyc entry*//*Needs tile*/
-CHAINCORPSE(("lifeless doll"),   750, PLASTIC, CLR_BRIGHT_MAGENTA), /*Needs encyc entry*//*Needs tile*/
+CHAINCORPSE(("lifeless doll"),   750, WOOD, CLR_BRIGHT_MAGENTA), /*Needs encyc entry*//*Needs tile*/
 
 #undef CHAINCORPSE
 
