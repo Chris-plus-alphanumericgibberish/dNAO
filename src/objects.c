@@ -434,8 +434,11 @@ WEAPON(("droven lance", "lance"), /*Needs encyc entry*//*Needs tile*/
 /* axe-type */
 WEAPON(("halberd", "angled poleaxe"),
 	DMG(D(10)), DMG(D(2, 6)),
-	0, 0,   MZ_HUGE,  8, 75, 10, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
-WEAPON(("bardiche", "long poleaxe"),
+	0, 0,   MZ_HUGE,  6, 75, 10, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
+WEAPON(("poleaxe", "curved poleaxe"),
+	DMG(D(10)), DMG(D(2, 6)),
+	0, 0,   MZ_HUGE,  2, 75, 10, 0, P|S|B, P_POLEARMS, IRON, FALSE, HI_METAL),
+WEAPON(("bardiche", "long-bladed poleaxe"),
 	DMG(D(2, 4)), DMG(D(3, 4)),
 	0, 0,   MZ_HUGE,  4, 80,  7, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON(("voulge", "pole cleaver"),

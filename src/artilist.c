@@ -2794,7 +2794,7 @@ A("The Three-Headed Flail",			FLAIL,				"three-headed %s",
 	),
 
 /*Needs encyc entry */
-A("Heartcleaver",					HALBERD,			(const char *)0,
+A("Heartcleaver",					POLEAXE,			(const char *)0,
 	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),

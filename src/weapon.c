@@ -1278,7 +1278,8 @@ static NEARDATA const int rwep[] =
 };
 
 static NEARDATA const int pwep[] =
-{	HALBERD, /*1d10/2d6*/
+{	POLEAXE, /*1d10/2d6*/
+	HALBERD, /*1d10/2d6*/
 	DROVEN_LANCE, /*1d10/1d10*/
 	BARDICHE, /*2d4/3d4*/ 
 	BILL_GUISARME, /*2d4/1d10*/
@@ -1622,6 +1623,7 @@ static const NEARDATA short hpwep[] = {
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
+	  POLEAXE, /*1d10/2d6*/
 	  HALBERD, /*1d10/2d6*/
 	  KATANA/*1d10/1d12*/,
 	  DROVEN_LANCE, /*1d10/1d10*/
