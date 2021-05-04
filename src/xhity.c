@@ -6963,7 +6963,7 @@ boolean ranged;
 						damage_item(otmp);
 					}
 					else if (!otmp->oartifact){
-						destroy_arm(otmp);
+						youdef ? destroy_arm(otmp) : destroy_marm(mdef, otmp);
 					}
 				}
 			}
