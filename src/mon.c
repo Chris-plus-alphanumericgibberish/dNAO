@@ -6745,6 +6745,46 @@ struct monst *mtmp;
 }
 
 int
+u_sanity_loss_minor(mtmp)
+struct monst *mtmp;
+{
+	int mndx = monsndx(mtmp->data);
+	int diesize, sanloss;
+	
+	if(!monstr[mndx])
+		return 0;
+
+	if(monstr[mndx] <= 3){
+		diesize = monstr[mndx];
+	}
+	else if(monstr[mndx] <= 6){
+		diesize = 4;
+	}
+	else if(monstr[mndx] <= 10){
+		diesize = 6;
+	}
+	else if(monstr[mndx] <= 20){
+		diesize = 8;
+	}
+	else if(monstr[mndx] <= 30){
+		diesize = 10;
+	}
+	else {
+		diesize = 12;
+	}
+	
+	sanloss = rnd(diesize);
+	
+	if((uwep && uwep->oartifact == ART_NODENSFORK)
+	 || (rnd(30) < ACURR(A_WIS))
+	){
+		return -1*sanloss/3;
+	} else {
+		return -1*sanloss;
+	}
+}
+
+int
 u_sanity_loss_nyar()
 {
 	if((uwep && uwep->oartifact == ART_NODENSFORK)

@@ -1727,7 +1727,7 @@ asGuardian:
 			}
 		}
 		if(!mtmp->mpeaceful){
-			change_usanity(u_sanity_loss(mtmp), TRUE);
+			change_usanity(u_sanity_loss_minor(mtmp), TRUE);
 		}
 	    aggravate();
 	}break;

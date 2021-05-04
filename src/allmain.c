@@ -27,7 +27,8 @@ STATIC_DCL void NDECL(printSanAndInsight);
 STATIC_DCL void FDECL(printAttacks, (char *,struct permonst *));
 STATIC_DCL void FDECL(resFlags, (char *,unsigned int));
 STATIC_DCL int NDECL(do_inheritor_menu);
-STATIC_DCL void NDECL(see_nearby_monsters);
+STATIC_DCL void FDECL(spot_monster, (struct monst *));
+STATIC_DCL void NDECL(sense_nearby_monsters);
 STATIC_DCL void NDECL(cthulhu_mind_blast);
 STATIC_DCL void FDECL(unseen_actions, (struct monst *));
 STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
@@ -784,6 +785,60 @@ you_regen_pw()
 	}
 }
 
+/* perform 1 turn's worth of time-dependent power modification, silently */
+void
+you_regen_san()
+{
+	// Threshold levels based on wis.
+	int reglevel = ACURR(A_WIS);
+	int insight = u.uinsight;
+
+	// role bonuses
+	if (Role_if(PM_BARBARIAN))   reglevel += 10;
+	if (Role_if(PM_VALKYRIE)) reglevel += 9;
+	if (Role_if(PM_TOURIST))     reglevel += 8;
+	if (Role_if(PM_MONK))     reglevel += 8;
+	if (Role_if(PM_PRIEST))   reglevel += 7;
+	if (Role_if(PM_ANACHRONONAUT))   reglevel += 5;
+	if (Role_if(PM_TOURIST))   reglevel += 2;
+	if (Role_if(PM_EXILE))    reglevel += spiritDsize();
+	if (Role_if(PM_CONVICT))  reglevel -= 3;
+	if (Role_if(PM_NOBLEMAN))  reglevel -= 5;
+	if (Role_if(PM_MADMAN))   reglevel -= 10;
+
+	if (Race_if(PM_ELF))   reglevel += 3;
+	if (Race_if(PM_ORC))   reglevel -= 3;
+
+	// Unknown God
+	if (u.specialSealsActive&SEAL_ORTHOS){
+		reglevel -= 5;
+	}
+	
+	while((insight = insight/2))
+		reglevel--;
+
+	// penalty for being itchy
+	reglevel -= u_healing_penalty();
+
+	// minimum 0
+	if (reglevel <= 0)
+		return;
+
+	// Fast recover to 1x, slower recovery to 2x, slowest recover to 3x.
+	if(u.usanity < reglevel){
+		if(!(moves%10))
+			change_usanity(1, FALSE);
+	}
+	else if(u.usanity < reglevel*2){
+		if(!(moves%32))
+			change_usanity(1, FALSE);
+	}
+	else if(u.usanity < reglevel*3){
+		if(!(moves%100))
+			change_usanity(1, FALSE);
+	}
+}
+
 void
 moveloop()
 {
@@ -1152,7 +1207,7 @@ moveloop()
 				}
 			}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-			see_nearby_monsters();
+			sense_nearby_monsters();
 ////////////////////////////////////////////////////////////////////////////////////////////////
 		    if (youmonst.movement >= NORMAL_SPEED)
 			break;	/* it's now your turn */
@@ -1195,6 +1250,8 @@ moveloop()
 					impossible("Re-trapping mon %s in vivi trap",noit_mon_nam(mtmp));
 					mtmp->mtrapped = TRUE;
 				}
+				/* Spot the monster for sanity purposes */
+				spot_monster(mtmp);
 				/* Loyal monsters slowly recover tameness */
 				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && (!moves%100))
 					mtmp->mtame++;
@@ -1413,14 +1470,14 @@ karemade:
 					if(lastusedmove != moves){
 						pline("%s takes on forms new and terrible!", Monnam(mtmp));
 						lastusedmove = moves;
-						change_usanity(u_sanity_loss(mtmp)/2-1, TRUE);
+						change_usanity(u_sanity_loss_minor(mtmp), TRUE);
 					}
 				}
 
 				if(has_template(mtmp, MAD_TEMPLATE) && !ClearThoughts && canseemon(mtmp) && dimness(mtmp->mx, mtmp->my) <= 0 && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
 					static long lastusedmove = 0;
 					static int lastcost = 0;
-					int sancost = u_sanity_loss(mtmp);
+					int sancost = u_sanity_loss_minor(mtmp);
 					if(lastusedmove != moves){
 						lastcost = 0;
 					}
@@ -2158,6 +2215,7 @@ karemade:
 		     */
 			you_regen_hp();
 			you_regen_pw();
+			you_regen_san();
 			androidUpkeep();
 			clothes_bite_you();
 
@@ -2316,7 +2374,7 @@ karemade:
 				}
 			}
 	    }
-		see_nearby_monsters();
+		sense_nearby_monsters();
 		if(u.uinwater){//Moving around will also call this, so your stuff degrades faster if you move
 			water_damage(invent, FALSE, FALSE, level.flags.lethe, &youmonst);
 		}
@@ -3709,47 +3767,75 @@ cthulhu_mind_blast()
 	}
 }
 
-STATIC_OVL void
-see_nearby_monsters()
+void
+spot_monster(mon)
+struct monst *mon;
 {
-	if(!Blind){
-		int dx, dy;
-		struct monst *mtmp;
-		
-		for(dx=-1; dx<2; dx++){
-			for(dy=-1; dy<2; dy++){
-				if(isok(u.ux+dx, u.uy+dy)){
-					if((mtmp = m_at(u.ux+dx, u.uy+dy))
-						&& !mtmp->mtame
-						&& canseemon(mtmp)
-						&& (!(mtmp->mappearance || mtmp->mundetected) || sensemon(mtmp))
-						){
-							if(!(mvitals[monsndx(mtmp->data)].seen)){
-								mvitals[monsndx(mtmp->data)].seen = TRUE;
-								if(Role_if(PM_TOURIST)){
-									more_experienced(experience(mtmp,0),0);
-									newexplevel();
-								}
-								//May have already gained madness from an attack, but re-giving it is harmless
-								give_madness(mtmp);
-							}
-							
-							//May have already lost sanity from seeing it from a distance, or wiped the memory with amnesia.
-							if(mvitals[monsndx(mtmp->data)].san_lost == 0 && taxes_sanity(mtmp->data)){
-								mvitals[monsndx(mtmp->data)].san_lost = u_sanity_loss(mtmp);
-								change_usanity(mvitals[monsndx(mtmp->data)].san_lost, TRUE);
-							}
-							if(!mvitals[monsndx(mtmp->data)].vis_insight && yields_insight(mtmp->data)){
-								uchar insight;
-								mvitals[monsndx(mtmp->data)].vis_insight = TRUE;
-								insight = u_visible_insight(mtmp);
-								mvitals[monsndx(mtmp->data)].insight_gained += insight;
-								change_uinsight(insight);
-							}
-						}
-					}
+	if(couldsee(mon->mx, mon->my) &&
+		distmin(mon->mx, mon->my, u.ux, u.uy) <= BOLT_LIM &&
+		((canseemon(mon) && !(mon->mappearance || mon->mundetected)) || sensemon(mon))
+	){
+		//May have already lost sanity from seeing it from a distance, or wiped the memory with amnesia.
+		if(!mon->mtame){
+			if(taxes_sanity(mon->data)){
+				//Acute Sanity loss: Shock of seeing a new monster lowers sanity and may cause temporary breakdown
+				if(mvitals[monsndx(mon->data)].san_lost == 0){
+					mvitals[monsndx(mon->data)].san_lost = u_sanity_loss(mon);
+					change_usanity(mvitals[monsndx(mon->data)].san_lost, TRUE);
+				}
+				//Stress-based Sanity loss: Stress of continuing to see a taxing monster may lower sanity. 
+				else if(u.usanity > (100 - mvitals[monsndx(mon->data)].san_lost)){
+					change_usanity(-1, FALSE);
 				}
 			}
+			//May have already gained madness but re-giving it is harmless
+			give_madness(mon);
+		}
+	}
+}
+
+STATIC_OVL void
+sense_nearby_monsters()
+{
+	int dx, dy;
+	struct monst *mtmp;
+	for(dx=-1; dx<2; dx++) for(dy=-1; dy<2; dy++){
+		if(isok(u.ux+dx, u.uy+dy))
+			continue;
+
+		//Must be able to sense the monster.
+		if((mtmp = m_at(u.ux+dx, u.uy+dy))
+			&& (!(mtmp->mappearance || mtmp->mundetected) || sensemon(mtmp))
+		){
+			//May have already lost sanity from seeing it from a distance, or wiped the memory with amnesia.
+			// Simple proximity is enough to cost sanity and give madnesses, but tame monsters don't.
+			if(!mtmp->mtame){
+				if(mvitals[monsndx(mtmp->data)].san_lost == 0 && taxes_sanity(mtmp->data)){
+					mvitals[monsndx(mtmp->data)].san_lost = u_sanity_loss(mtmp);
+					change_usanity(mvitals[monsndx(mtmp->data)].san_lost, TRUE);
+				}
+				//May have already gained madness but re-giving it is harmless
+				give_madness(mtmp);
+			}
+
+			//Monster is visible.
+			if(canseemon(mtmp)){
+				if(!(mvitals[monsndx(mtmp->data)].seen)){
+					mvitals[monsndx(mtmp->data)].seen = TRUE;
+					if(Role_if(PM_TOURIST)){
+						more_experienced(experience(mtmp,0),0);
+						newexplevel();
+					}
+				}
+				if(!mvitals[monsndx(mtmp->data)].vis_insight && yields_insight(mtmp->data)){
+					uchar insight;
+					mvitals[monsndx(mtmp->data)].vis_insight = TRUE;
+					insight = u_visible_insight(mtmp);
+					mvitals[monsndx(mtmp->data)].insight_gained += insight;
+					change_uinsight(insight);
+				}
+			}
+		}
 	}
 }
 

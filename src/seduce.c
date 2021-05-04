@@ -996,7 +996,7 @@ int dmg;
 						 }
 						 else{
 							tent_destroy_arm(uarmu);
-							if(!uarmu) change_usanity(u_sanity_loss(mon)/2, FALSE); /*Forces a san check*/
+							if(!uarmu) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
 						 }
 					}
 					else{
@@ -1006,7 +1006,7 @@ int dmg;
 						(void) Shirt_off();
 						freeinv(otmp);
 						(void) mpickobj(mon,otmp);
-						change_usanity(u_sanity_loss(mon)/2, FALSE); /*Forces a san check*/
+						change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
 						if(roll_madness(MAD_TALONS)){
 							You("panic after having your underclothes pulled off!");
 							HPanicking += 1+rnd(6);
@@ -1033,7 +1033,7 @@ int dmg;
 					 }
 					 else{
 						tent_destroy_arm(uarm);
-						if(!uarm) change_usanity(u_sanity_loss(mon)/2, FALSE); /*Forces a san check*/
+						if(!uarm) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
 					 }
 				}
 				else{
@@ -1043,7 +1043,7 @@ int dmg;
 					(void) Armor_gone();
 					freeinv(otmp);
 					(void) mpickobj(mon,otmp);
-					change_usanity(u_sanity_loss(mon)/2, FALSE); /*Forces a san check*/
+					change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
 					if(roll_madness(MAD_TALONS)){
 						You("panic after having your armor removed!");
 						HPanicking += 1+rnd(6);
@@ -1216,7 +1216,7 @@ int dmg;
 						 }
 						 else{
 							tent_destroy_arm(uarmh);
-							if(!uarmh) change_usanity(u_sanity_loss(mon)/2, FALSE); /*Forces a san check*/
+							if(!uarmh) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
 						 }
 					}
 					else{
@@ -1226,7 +1226,7 @@ int dmg;
 						(void) Helmet_off();
 						freeinv(otmp);
 						(void) mpickobj(mon,otmp);
-						change_usanity(u_sanity_loss(mon)/2, FALSE); /*Forces a san check*/
+						change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
 						if(roll_madness(MAD_TALONS)){
 							You("panic after having your helmet stolen!");
 							HPanicking += 1+rnd(6);
@@ -1250,7 +1250,7 @@ int dmg;
 				if(Half_physical_damage) u.uenbonus -= (int) max(.1*u.uenmax,5);
 				else u.uenbonus -= (int) max(.2*u.uenmax, 10);
 				calc_total_maxen();
-				change_usanity(u_sanity_loss(mon), FALSE); /*Forces a san check*/
+				change_usanity(u_sanity_loss_minor(mon), FALSE); /*Forces a san check*/
 			break;
 			case 7:
 				if(allreadydone&(0x1<<7)) break;
@@ -1303,7 +1303,7 @@ int dmg;
 					}
 				}
 				losehp(Half_physical_damage ? dmg/2 + 1 : dmg, "head trauma", KILLED_BY);
-				change_usanity(u_sanity_loss(mon), FALSE); /*Forces a san check*/
+				change_usanity(u_sanity_loss_minor(mon), FALSE); /*Forces a san check*/
 				
 			break;
 			case 8:
@@ -1333,7 +1333,7 @@ int dmg;
 					You_feel("a bit fragile, but strangely whole.");
 				}
 				losehp(Half_physical_damage ? dmg/4+1 : dmg/2+1, "drilling tentacles", KILLED_BY);
-				change_usanity(u_sanity_loss(mon), FALSE); /*Forces a san check*/
+				change_usanity(u_sanity_loss_minor(mon), FALSE); /*Forces a san check*/
 			break;
 			case 9:
 				if(allreadydone&(0x1<<9)) break;
@@ -1348,7 +1348,7 @@ int dmg;
 				(void) adjattrib(A_STR, -6, 1);
 				(void) adjattrib(A_CON, -3, 1);
 				You_feel("weak and helpless in their grip!");
-				change_usanity(u_sanity_loss(mon), FALSE); /*Forces a san check*/
+				change_usanity(u_sanity_loss_minor(mon), FALSE); /*Forces a san check*/
 			break;
 			case 10:
 				if(allreadydone&(0x1<<10)) break;

@@ -6231,7 +6231,7 @@ boolean ranged;
 #ifdef SEDUCE
 			dotent(magr, dmg);
 #endif
-			change_usanity(u_sanity_loss(magr), TRUE);
+			change_usanity(u_sanity_loss_minor(magr), TRUE);
 		}
 		/* Might be technically incorrect to make the player also take an AT_TENT AD_PHYS attack afterwards
 		 * but it really simplifies the flow to use the standard behaviour of [special effects] -> [basic damage]
