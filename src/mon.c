@@ -3798,7 +3798,7 @@ register struct monst *mtmp;
 	lifesaved_monster(mtmp);
 	if (mtmp->mhp > 0) return;
 	//Special messages (Nyarlathotep)
-	if(canseemon(mtmp) && (mtmp->mtyp == PM_THE_GOOD_NEIGHBOR || mtmp->mtyp == PM_HMNYW_PHARAOH)){
+	if(canseemon(mtmp) && (mtmp->mtyp == PM_GOOD_NEIGHBOR || mtmp->mtyp == PM_HMNYW_PHARAOH)){
 		int nyar_form = rn2(SIZE(nyar_description));
 		pline("%s twists and morphs into %s.", Monnam(mtmp), nyar_description[nyar_form]);
 		pline("%s rises through the ceiling!", nyar_name[nyar_form]);
@@ -4064,7 +4064,7 @@ register struct monst *mtmp;
 		)
 			give_chaos_temple_trophy();
 	}
-	if(mtmp->mtyp == PM_THE_GOOD_NEIGHBOR
+	if(mtmp->mtyp == PM_GOOD_NEIGHBOR
 	|| mtmp->mtyp == PM_HMNYW_PHARAOH
 	|| mtmp->mtyp == PM_NITOCRIS
 	|| mtmp->mtyp == PM_GHOUL_QUEEN_NITOCRIS
@@ -4072,7 +4072,7 @@ register struct monst *mtmp;
 	|| mtmp->mtyp == PM_BLESSED
 	|| mtmp->mtyp == PM_MOUTH_OF_THE_GOAT
 	){
-		if(mvitals[PM_THE_GOOD_NEIGHBOR].died
+		if(mvitals[PM_GOOD_NEIGHBOR].died
 		&& mvitals[PM_HMNYW_PHARAOH].died
 		&& (mvitals[PM_NITOCRIS].died || mvitals[PM_GHOUL_QUEEN_NITOCRIS].died)
 		&& mvitals[PM_BLASPHEMOUS_LURKER].died

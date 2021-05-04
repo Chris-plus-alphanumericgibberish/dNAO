@@ -1540,7 +1540,7 @@ start_corpse_timeout(body)
 				break;
 			}
 	}
-	chance = (flags.yello_level || (Role_if(PM_MADMAN) && In_quest(&u.uz) && !mvitals[PM_THE_STRANGER].died))
+	chance = (flags.yello_level || (Role_if(PM_MADMAN) && In_quest(&u.uz) && !mvitals[PM_STRANGER].died))
 			 ? TROLL_REVIVE_CHANCE : 
 			 0;
 	if(action == ROT_CORPSE && chance){

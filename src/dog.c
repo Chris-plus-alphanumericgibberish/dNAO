@@ -840,7 +840,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			mtmp->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES || 
 			mtmp->mtyp == PM_CENTER_OF_ALL || 
 			mtmp->mtyp == PM_HUNGRY_DEAD ||
-			mtmp->mtyp == PM_THE_STRANGER ||
+			mtmp->mtyp == PM_STRANGER ||
 			mtmp->mtame
 		) {
 			if (mtmp->mleashed) {

@@ -773,12 +773,12 @@ yello_resurrect()
 	/* look for a migrating Stranger */
 	mtmp = migrating_mons;
 	while (mtmp) {
-		if (mtmp->mtyp==PM_THE_STRANGER)
+		if (mtmp->mtyp==PM_STRANGER)
 			return; /*It's currently making its way over*/
 		mtmp = mtmp->nmon;
 	}
 	
-	if(!mtmp) mtmp = makemon(&mons[PM_THE_STRANGER], 0, 0, MM_NOWAIT|MM_NOCOUNTBIRTH);
+	if(!mtmp) mtmp = makemon(&mons[PM_STRANGER], 0, 0, MM_NOWAIT|MM_NOCOUNTBIRTH);
 	
 	if (mtmp) {
 		mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;

@@ -1393,8 +1393,9 @@ moveloop()
 				if(mtmp->mtyp == PM_JUIBLEX) flags.slime_level=1;
 				if(mtmp->mtyp == PM_PALE_NIGHT || mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mtyp == PM_LEGION) flags.walky_level=1;
 				if(mtmp->mtyp == PM_ORCUS || mtmp->mtyp == PM_NAZGUL) flags.shade_level=1;
-				if(mtmp->mtyp == PM_THE_STRANGER) flags.yello_level=1;
+				if(mtmp->mtyp == PM_STRANGER) flags.yello_level=1;
 				if(mtmp->mtyp == PM_HMNYW_PHARAOH) dark_pharaoh_visible(mtmp);
+				if(mtmp->mtyp == PM_GOOD_NEIGHBOR) good_neighbor_visible(mtmp);
 				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)))){
 					mtmp->mstrategy &= ~STRAT_WAITMASK;
 					pline_The("entire %s is shaking around you!",
@@ -3847,7 +3848,7 @@ struct monst *mon;
 	//Note: May cause mon to change its state, including moving to a different monster chain.
 	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_BLESSED)
 		blessed_spawn(mon);
-	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_THE_GOOD_NEIGHBOR)
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_GOOD_NEIGHBOR)
 		good_neighbor(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_HMNYW_PHARAOH)
 		dark_pharaoh(mon);
@@ -3855,7 +3856,7 @@ struct monst *mon;
 		polyp_pickup(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_MOUTH_OF_THE_GOAT)
 		goat_sacrifice(mon);
-	else if(mon->mtyp == PM_THE_STRANGER)
+	else if(mon->mtyp == PM_STRANGER)
 		palid_stranger(mon);
 }
 
@@ -3989,7 +3990,7 @@ struct monst *mon;
 				familiar = makemon(&mons[PM_WITCH_S_FAMILIAR], mon->mx, mon->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 				if(familiar){
 					if(canseemon(familiar))
-						pline("%s creates %s!", Monnam(mon), an(mon_nam(familiar)));
+						pline("%s creates %s!", Monnam(mon), mon_nam(familiar));
 					//Sync new familiar
 					familiar->m_lev = mtmp->m_lev;
 					familiar->mhpmax = mtmp->mhpmax;

@@ -1180,7 +1180,7 @@ unsigned int type;
 				case 8: return DRAIN_LIFE;
 			}
 	   break;
-       case PM_THE_GOOD_NEIGHBOR:
+       case PM_GOOD_NEIGHBOR:
 			switch(rnd(12)){
 				case 1: return PSI_BOLT;
 				case 2: return EVIL_EYE;

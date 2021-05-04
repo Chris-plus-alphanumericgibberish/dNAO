@@ -8083,7 +8083,7 @@ int mkobjflags;
 				// (void) mongets(mtmp, POT_FULL_HEALING, mkobjflags);
 			break;
 ////////////////////////////////////////
-		    case PM_THE_GOOD_NEIGHBOR:
+		    case PM_GOOD_NEIGHBOR:
 				(void)mongets(mtmp, PLAIN_DRESS, mkobjflags);
 				(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 				(void)mongets(mtmp, ROBE, mkobjflags);
@@ -8815,11 +8815,11 @@ register int	mmflags;
 
 	else if(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)
 		mtmp->m_insight_level = 60;
-	else if(mtmp->mtyp == PM_THE_GOOD_NEIGHBOR)
+	else if(mtmp->mtyp == PM_GOOD_NEIGHBOR)
 		mtmp->m_insight_level = 40;
 	else if(mtmp->mtyp == PM_HMNYW_PHARAOH)
 		mtmp->m_insight_level = 40;
-	else if(mtmp->mtyp == PM_THE_STRANGER)
+	else if(mtmp->mtyp == PM_STRANGER)
 		mtmp->m_insight_level = 55;
 	
 	else if(mtmp->mtyp == PM_POLYPOID_BEING)
