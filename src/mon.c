@@ -1728,7 +1728,9 @@ movemon()
 	    continue;
 	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 		average_dogs();
-	if(mtmp->m_insight_level > u.uinsight){
+	if(mtmp->m_insight_level > u.uinsight
+	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+	){
 		insight_vanish(mtmp);
 		continue;
 	}

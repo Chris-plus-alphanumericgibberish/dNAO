@@ -948,7 +948,9 @@ moveloop()
 		/**************************************************/
 		for (mtmp = fmon; mtmp; mtmp = nxtmon){
 			nxtmon = mtmp->nmon;
-			if(mtmp->m_insight_level > u.uinsight){
+			if(mtmp->m_insight_level > u.uinsight
+			  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+			){
 				insight_vanish(mtmp);
 				continue;
 			}
@@ -1019,7 +1021,9 @@ moveloop()
 						newsym(mtmp->mx,mtmp->my);
 					}
 				}
-				if(mtmp->m_insight_level > u.uinsight){
+				if(mtmp->m_insight_level > u.uinsight
+				  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+				){
 					insight_vanish(mtmp);
 					continue;
 				}
@@ -2432,7 +2436,9 @@ karemade:
 				newsym(mtmp->mx,mtmp->my);
 			}
 		}
-		if(mtmp->m_insight_level > u.uinsight){
+		if(mtmp->m_insight_level > u.uinsight
+		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+		){
 			insight_vanish(mtmp);
 			continue;
 		}
