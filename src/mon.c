@@ -14,6 +14,7 @@
 #include "mfndpos.h"
 
 #include "artifact.h"
+#include "xhity.h"
 #include <ctype.h>
 #include <stdlib.h>
 
@@ -7053,6 +7054,9 @@ struct monst *mdef;
 	/* Why do we do all integer probabilities again? >_< */
 	const int smoothing_factor = 100000;
 
+	if(Half_spel(mdef)) damage = (damage+1)/2;
+	if(mdef == &youmonst && u.uvaul_duration) damage = (damage+1)/2;
+	
 	objchain = (mdef == &youmonst) ? invent : mdef->minvent;
 
 	for(otmp = objchain; otmp; otmp = otmp->nobj)
@@ -7213,6 +7217,10 @@ struct obj *obj;
 		// pline("damage post DR: %d", damage);
 		if(damage < 1)
 			damage = 1;
+
+		if(Half_phys(mdef)) damage = (damage+1)/2;
+		if(u.uvaul_duration) damage = (damage+1)/2;
+	
 		losehp(damage, "their clothes", KILLED_BY);
 	}
 	else {
@@ -7221,6 +7229,9 @@ struct obj *obj;
 		// pline("damage post DR: %d", damage);
 		if(damage < 1)
 			damage = 1;
+
+		if(Half_phys(mdef)) damage = (damage+1)/2;
+	
 		mdef->mhp -= damage;
 		if(mdef->mhp < 1){
 			mondied(mdef);
@@ -7362,6 +7373,9 @@ struct monst *owner;
 	/* Why do we do all integer probabilities again? >_< */
 	const int smoothing_factor = 100000;
 	
+	if(owner && Half_spel(owner)) damage = (damage+1)/2;
+	if(owner == &youmonst && u.uvaul_duration) damage = (damage+1)/2;
+
 	/* &0x1 means odd */
 	if(remaining > 2)
 		remaining = (remaining&0x1) ? (rnd(remaining/2) + rnd(remaining/2+1)) : d(2, remaining/2);
@@ -7508,9 +7522,11 @@ int damage;
 			You("hear a terrible scream!");
 			dmg = d(damage,7);
 			losehp(dmg, "the scream of an old one", KILLED_BY);
-			if(!Panicking)
-				You("panic!");
-			HPanicking += damage*5;
+			if(rn2(100) >= u.usanity){
+				if(!Panicking)
+					You("panic!");
+				HPanicking += damage*2;
+			}
 		}
 	}
 }
@@ -7681,6 +7697,9 @@ struct monst *mtmp;
 			damage = d(min(10, (mtmp->m_lev)/3), 6);
 			if(is_wooden(tmpm->data) || (!resists_fire(tmpm) && species_resists_cold(tmpm)))
 				damage *= 2;
+
+			if(Half_spel(tmpm)) damage = (damage+1)/2;
+
 			tmpm->mhp -= damage;
 			if(!resists_sickness(tmpm)){
 				tmpm->mhpmax -= damage;
@@ -7729,6 +7748,9 @@ struct monst *mtmp;
 			if(is_wooden(youracedata) || (!Fire_resistance && species_resists_cold(&youmonst)))
 				damage *= 2;
 			
+			if(Half_spell_damage) damage = (damage+1)/2;
+			if(u.uvaul_duration) damage = (damage+1)/2;
+
 			int temparise = u.ugrave_arise;
 			u.ugrave_arise = PM_ANCIENT_OF_CORRUPTION;
 			losehp(damage, "corrupting slime", KILLED_BY);
@@ -7788,6 +7810,8 @@ struct monst *mtmp;
 				pline("%s is drawn down to the shifting panes of %s.", has_blood_mon(tmpm) ? "Bloody mist" : "Mist", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 5);
+			if(Half_spel(tmpm)) damage = (damage+1)/2;
+
 			tmpm->mhp -= damage;
 			if(has_blood_mon(tmpm) && resists_drain(tmpm)){
 				tmpm->mhpmax = max(tmpm->mhpmax-8, 1);
@@ -7819,6 +7843,9 @@ struct monst *mtmp;
 				pline("The mist is drawn down to the shifting panes of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 5);
+			if(Half_spell_damage) damage = (damage+1)/2;
+			if(u.uvaul_duration) damage = (damage+1)/2;
+
 
 			xdamagey(mtmp, &youmonst, (struct attack *)0, damage);
 			
@@ -7852,6 +7879,8 @@ struct monst *mtmp;
 				if((!resists_fire(tmpm) && nonliving(tmpm->data))){
 					damage += d(5, 5);
 				}
+				if(Half_spel(tmpm)) damage = (damage+1)/2;
+
 				xdamagey(mtmp, tmpm, (struct attack *)0, damage);
 			}
 			if(you_wastes_target_exhale(mtmp)){
@@ -7859,6 +7888,9 @@ struct monst *mtmp;
 				if(!Fire_resistance && nonliving(youracedata)){
 					damage += d(5, 5);
 				}
+				if(Half_spell_damage) damage = (damage+1)/2;
+				if(u.uvaul_duration) damage = (damage+1)/2;
+
 				xdamagey(mtmp, &youmonst, (struct attack *)0, damage);
 			}
 			if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM){
@@ -7917,6 +7949,8 @@ struct monst *mtmp;
 					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
 				damage = d(1, min(10, (mtmp->m_lev)/3));
+				if(Half_spel(tmpm)) damage = (damage+1)/2;
+
 				tmpm->mhp -= d(damage, 10);
 				if(tmpm->mhp < 1){
 					if (canseemon(tmpm)) {
@@ -7949,6 +7983,10 @@ struct monst *mtmp;
 			else {
 				//Assumes you can't see your own ears
 				damage = d(1, min(10, (mtmp->m_lev)/3));
+
+				if(Half_spell_damage) damage = (damage+1)/2;
+				if(u.uvaul_duration) damage = (damage+1)/2;
+
 				if(!Blind){
 					if(Fixed_abil){
 						Your("mind goes slightly numb.");
@@ -7997,9 +8035,12 @@ struct monst *mtmp;
 					killer = "the scream of an old one";
 					done(DIED);
 				}
-				if(!Panicking)
-					You("panic!");
-				HPanicking += damage*10;
+				//Roll vs. sanity
+				if(rn2(100) >= u.usanity){
+					if(!Panicking)
+						You("panic!");
+					HPanicking = max(damage*5, HPanicking);
+				}
 				//Handle off-target side effects
 				thought_scream_side_effects(mtmp, &youmonst, damage);
 			} else {
@@ -8094,6 +8135,8 @@ struct monst *mtmp;
 				pline("Heat shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
+			if(Half_spel(tmpm)) damage = (damage+1)/2;
+
 			tmpm->mhp -= damage;
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
@@ -8125,6 +8168,9 @@ struct monst *mtmp;
 				pline("The shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
+			if(Half_spell_damage) damage = (damage+1)/2;
+			if(u.uvaul_duration) damage = (damage+1)/2;
+
 			losehp(damage, "heat drain", KILLED_BY);
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
@@ -8204,6 +8250,8 @@ struct monst *mtmp;
 				pline("Motes of light are drawn into the %s of %s.", mtmp->mtyp == PM_BAALPHEGOR ? "open mouth" : "ghostly hood", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 4);
+			if(Half_spel(tmpm)) damage = (damage+1)/2;
+
 			tmpm->mhp -= damage;
 			if(tmpm->mhp < 1){
 				if (canspotmon(tmpm))
@@ -8235,6 +8283,9 @@ struct monst *mtmp;
 				pline("The motes are drawn into the %s of %s.", mtmp->mtyp == PM_BAALPHEGOR ? "open mouth" : "ghostly hood", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 4);
+			if(Half_spell_damage) damage = (damage+1)/2;
+			if(u.uvaul_duration) damage = (damage+1)/2;
+
 			losehp(damage, "life-force theft", KILLED_BY);
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
@@ -8373,7 +8424,7 @@ struct monst *mtmp;
 				pline("Some unseen virtue is sucked into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
-			if(resists_cold(mtmp)) damage /= 2;
+			if(resists_cold(tmpm)) damage /= 2;
 			if(damage >= tmpm->mhp){
 				grow_up(mtmp,tmpm);
 				if (canspotmon(tmpm))
