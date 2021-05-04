@@ -252,8 +252,8 @@ enum {
     MAXPCHARS		/* maximum number of mapped characters */
 };
 #define MAXDCHARS	(S_water+1)	/* maximum of mapped dungeon characters */
-#define MAXTCHARS	(S_switch-S_water)	/* maximum of mapped trap characters */
-#define MAXECHARS	(S_explode9-S_switch)	/* maximum of mapped effects characters */
+#define MAXTCHARS	(S_flesh_hook-S_water)	/* maximum of mapped trap characters */
+#define MAXECHARS	(S_explode9-S_flesh_hook)	/* maximum of mapped effects characters */
 #define MAXEXPCHARS	9	/* number of explosion characters */
 
 struct symdef {

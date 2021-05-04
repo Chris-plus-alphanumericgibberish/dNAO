@@ -1107,6 +1107,9 @@ rock:
 	    if (hates_unblessed_mon(mon) &&
 		(is_unholy(obj) || obj->blessed))
 			return(TABU);
+		if (is_vampire(mon->data) &&
+		obj->otyp == POT_BLOOD && !((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon)) || is_rider(&mons[obj->corpsenm])))
+			return DOGFOOD;
 	    if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
 			return CADAVER;
 	    if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))
