@@ -988,6 +988,16 @@ int spec;
 		if (otmp->ovar1)
 			otmp->ovar1--;
 		break;
+	case QUARTERSTAFF:
+		if(otmp == uwep && martial_bonus() && otmp->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT){
+			// doubled
+			wdice.oc_damn *= 2;
+			wdice.oc_damd *= 2;
+			wdice.bon_damn *= 2;
+			wdice.bon_damd *= 2;
+			spe_mult *= 2;
+		}
+		break;
 	}
 
 	switch (otmp->oartifact)
@@ -1505,6 +1515,7 @@ static const NEARDATA short hwep[] = {
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
+	  DOUBLE_SWORD,/*2d8/2d12*/
 	  CRYSTAL_SWORD/*2d8/2d12*/,
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
@@ -1597,6 +1608,7 @@ static const NEARDATA short hpwep[] = {
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
+	  DOUBLE_SWORD,/*2d8/2d12*/
 	  CRYSTAL_SWORD/*2d8/2d12*/,
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,

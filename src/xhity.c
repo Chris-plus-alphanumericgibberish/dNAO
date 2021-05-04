@@ -201,7 +201,9 @@ struct monst * mdef;
 	}
 	
 	if (uwep
-		&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE)
+		&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || 
+			((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER) && uwep->altmode)
+		)
 		&& !u.twoweap
 		){
 		youmonst.movement -= NORMAL_SPEED / 4;
@@ -1984,10 +1986,11 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		struct obj * otmp = (youagr ? uwep : MON_WEP(magr));
 		/* continue checking conditions */
 		if (otmp && (
-			(otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS) ||
-			(otmp->oartifact == ART_QUICKSILVER && mlev(magr) > 15) ||
-			(youagr && martial_bonus() && otmp->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT)
-			)){
+			(otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS)
+			|| (otmp->oartifact == ART_QUICKSILVER && mlev(magr) > 15)
+			// || (youagr && martial_bonus() && otmp->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT)
+			)
+		){
 			/* make additional attacks */
 			attk->aatyp = (*subout&SUBOUT_XWEP) ? AT_XWEP : AT_WEAP;
 			attk->adtyp = AD_PHYS;
@@ -3600,9 +3603,9 @@ boolean ranged;
 			hit = TRUE;
 		}
 		/* multistriking weapons need to determine how many hit, and set ostriking */
-		if (weapon && multistriking(weapon) && !miss) {
+		if (weapon && is_multi_hit(weapon) && !miss) {
 			weapon->ostriking = 0;
-			int attempts = rn2(multistriking(weapon) + 1);	/* ex: multistriking == 2 for 1-3 hits.*/
+			int attempts = rn2(multistriking(weapon) + 1) + multi_ended(weapon);	/* ex: multistriking == 2 for 1-3 hits.*/
 			for (; attempts && weapon->ostriking < 7; attempts--) {
 				if (accuracy > rnd(20))
 					weapon->ostriking++;
@@ -4018,7 +4021,7 @@ boolean ranged;
 		if (weapon_p) weapon = *weapon_p;
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED))
 			return result;
-		if (weapon && multistriking(weapon) && weapon->ostriking) {
+		if (weapon && is_multi_hit(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; weapon && (i < weapon->ostriking); i++) {
 				result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis);
