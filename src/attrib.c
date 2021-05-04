@@ -1371,7 +1371,7 @@ roll_madness(madness)
 long int madness;
 {
 	int sanlevel;
-	if(ClearThoughts)
+	if(ClearThoughts && madness != MAD_GOAT_RIDDEN)
 		return 0;
 	
 	if(!(u.umadness&madness))
