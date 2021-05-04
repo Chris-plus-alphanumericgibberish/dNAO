@@ -230,7 +230,7 @@ dead: /* we come directly here if their experience level went to 0 or less */
 
 void
 polyself(forcecontrol)
-boolean forcecontrol;     
+boolean forcecontrol;
 {
 	char buf[BUFSZ];
 	int old_light, new_light;
@@ -1554,12 +1554,14 @@ domindblast()
 				"mind");
 			mfdmg = d(dice, 15);
 			mtmp->mhp -= mfdmg;
+			mtmp->mstrategy &= ~STRAT_WAITFORU;
 			if (mtmp->mhp <= 0)
 				killed(mtmp);
 			else {
+				
 				if(dice >= 3){
 					mtmp->mstdy = max(mfdmg, mtmp->mstdy);
-					mtmp->encouraged = -max(mfdmg, mtmp->encouraged);
+					mtmp->encouraged = min(-1*mfdmg, mtmp->encouraged);
 				}
 				if(dice >= 5){
 					mtmp->mstun = 1;
