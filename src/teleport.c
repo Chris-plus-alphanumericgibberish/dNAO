@@ -184,6 +184,48 @@ full:
 }
 
 boolean
+eofflin_close(cc, xx, yy, mdat)
+coord *cc;
+register xchar xx, yy;
+struct permonst *mdat;
+{
+#define COORD_SIZE	8
+    coord good[COORD_SIZE], *good_ptr;
+    int x, y, i;
+    int xmin, xmax, ymin, ymax;
+    struct monst fakemon = {0};	/* dummy monster */
+    int knix[COORD_SIZE] = {2,  2,  1, -1, -2, -2,  1, -1};
+    int kniy[COORD_SIZE] = {1, -1,  2,  2,  1, -1, -2, -2};
+
+    if (!mdat) {
+#ifdef DEBUG
+	pline("enexto() called with mdat==0");
+#endif
+	/* default to player's original monster type */
+	mdat = &mons[u.umonster];
+    }
+    set_mon_data_core(&fakemon, mdat);	/* set up for goodpos */
+    good_ptr = good;
+	
+	for(i = 0; i < COORD_SIZE; i++){
+		x = u.ux + knix[i];
+		y = u.uy + kniy[i];
+		if(goodpos(x, y, &fakemon, 0)){
+			good_ptr->x = x;
+			good_ptr->y = y;
+			good_ptr++;
+		}
+	}
+	//No good spots
+	if(!(good_ptr - good))
+		return FALSE;
+    i = rn2((int)(good_ptr - good));
+    cc->x = good[i].x;
+    cc->y = good[i].y;
+    return TRUE;
+}
+
+boolean
 eonline(cc, xx, yy, mdat)
 coord *cc;
 register xchar xx, yy;

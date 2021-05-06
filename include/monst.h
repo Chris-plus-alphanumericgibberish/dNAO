@@ -225,6 +225,7 @@ struct monst {
 #define	YELLOW_TEMPLATE	16	/* causes sleep and damages sanity (unimplemented) */
 #define	DREAM_LEECH		17	/* sucks mental atributes */
 #define	MAD_TEMPLATE	18	/* mad angel template */
+#define	FALLEN_TEMPLATE	19	/* fallen angel template */
 #define MAXTEMPLATE	MAD_TEMPLATE
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */

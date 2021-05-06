@@ -413,6 +413,17 @@ int template;
 			ptr->mflagst |= MT_ANIMAL;
 		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_DISPLACEMENT);
+		ptr->maligntyp = min(ptr->maligntyp-6, -6);
+		break;
+	case FALLEN_TEMPLATE:
+		ptr->pac = max(9, ptr->pac);
+		ptr->spe_hdr = 9;
+		ptr->msound = MS_CUSS;
+		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
+		ptr->mflagst &= ~(MT_PEACEFUL);
+		ptr->mflagsg &= ~(MG_HATESUNHOLY);
+		ptr->mflagsg |= (MG_HATESHOLY);
+		ptr->maligntyp = max(ptr->maligntyp+9, 9);
 		break;
 	}
 #undef MT_ITEMS
@@ -708,11 +719,6 @@ int template;
 			attk->damn++;
 			attk->damd += 2;
 		}
-		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN){
-			if(attk->adtyp == AD_PHYS)
-				attk->damn++;
-			attk->damd += 4;
-		}
 		if (template == YELLOW_TEMPLATE && (
 			end_insert_okay
 			))
@@ -735,6 +741,22 @@ int template;
 			attk->damd = 6;
 			special = TRUE;
 		}
+		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN){
+			if(attk->adtyp == AD_PHYS)
+				attk->damn++;
+			attk->damd += 4;
+		}
+		if (template == FALLEN_TEMPLATE && (
+			end_insert_okay
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_NONE;
+			attk->adtyp = AD_FIRE;
+			attk->damn = 0;
+			attk->damd = 9;
+			special = TRUE;
+		}
 	}
 #undef insert_okay
 #undef end_insert_okay
@@ -755,6 +777,7 @@ int template;
 			else if (template == YELLOW_TEMPLATE) Sprintf(nameBuffer, "%s of Carcosa", base->mname);
 			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s the Dream-Leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "%s the mad", base->mname);
+			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "%s the fallen", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}
@@ -771,6 +794,7 @@ int template;
 			else if (template == YELLOW_TEMPLATE) Sprintf(nameBuffer, "fulvous %s", base->mname);
 			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s dream-leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "mad %s", base->mname);
+			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "fallen %s", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}

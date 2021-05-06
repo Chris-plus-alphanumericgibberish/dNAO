@@ -82,4 +82,8 @@ extern struct trap *ftrap;
 #define FLESH_HOOK	26
 #define TRAPNUM 27
 
+//Flags for the water damage function.
+#define WD_LETHE 0x1
+#define WD_BLOOD 0x2
+
 #endif /* TRAP_H */

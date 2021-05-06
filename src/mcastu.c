@@ -4059,6 +4059,9 @@ int tary;
 			/* alienists summon aliens. wowzers. */
 			return cast_spell(magr, mdef, attk, SUMMON_ALIEN, tarx, tary);
 		}
+		else if (has_template(magr, FALLEN_TEMPLATE)) {
+			return cast_spell(magr, mdef, attk, SUMMON_DEVIL, tarx, tary);
+		}
 		else
 		{
 			struct monst *mtmp;
