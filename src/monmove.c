@@ -1239,6 +1239,7 @@ register struct monst *mtmp;
 		|| (mdat->msound == MS_SCREAM && !rn2(7))
 		|| (mdat->msound == MS_HOWL && !rn2(7))
 		|| (mdat->msound == MS_HARROW && !mtmp->mspec_used)
+		|| (mdat->msound == MS_APOC && !mtmp->mspec_used)
 	) m_respond(mtmp);
 
 	if(!mtmp->mblinded) for (gazemon = fmon; gazemon; gazemon = nxtmon){

@@ -539,6 +539,7 @@ register struct monst *mtmp;
 	) {
 	case MS_MEW:
 	case MS_HISS:
+	case MS_APOC:
 	    ret = "hiss";
 	    break;
 	case MS_BARK:
@@ -1704,6 +1705,58 @@ asGuardian:
 			}
 		} else goto humanoid_sound;
 	}break;
+	case MS_APOC:
+		if(chatting){
+			if(!mtmp->mpeaceful) pline_msg = "hisses!";
+			else {
+				pline_msg = "does not respond.";
+				return 0;	/* no sound */
+			}
+			break;
+		}
+		else {
+			struct monst *tmpm, *nmon;
+			int atknum = rnd(4);
+			int i, mnum;
+			mtmp->mspec_used = 66;
+			if(canspotmon(mtmp)){
+				pline("%s snake head hisses a prophecy!", s_suffix(Monnam(mtmp)));
+			}
+			switch(atknum){
+				/*Slashing darkness*/
+				case 1:
+					mnum = PM_INVIDIAK;
+					pline("The darkness shifts and forms into blades!");
+				break;
+				/*Falling stars*/
+				case 2:
+					mnum = PM_MOTE_OF_LIGHT;
+					pline("Stars fall from the sky!");
+				break;
+				/*Scream*/
+				case 3:
+					mnum = PM_WALKING_DELIRIUM;
+					pline("The world trembles and crawls!");
+				break;
+				/*Earthquake*/
+				case 4:
+					mnum = PM_EARTH_ELEMENTAL;
+					pline("The entire world is shaking around you!");
+				break;
+			}
+			for(i = Insanity/3; i > 0; i--){
+				tmpm = makemon(&mons[mnum], 0, 0, MM_NOCOUNTBIRTH|MM_ESUM);
+				if(tmpm){
+					mark_mon_as_summoned(tmpm, mtmp, 66, 0);
+					if(mnum == PM_MOTE_OF_LIGHT)
+						set_template(tmpm, FALLEN_TEMPLATE);
+					tmpm->m_lev = 15;
+					tmpm->mhpmax = max(4, 8*tmpm->m_lev);
+					tmpm->mhp = tmpm->mhpmax;
+				}
+			}
+		}
+	break;
 	case MS_HOWL:{
 		struct monst *tmpm;
 	    pline_msg = "howls.";

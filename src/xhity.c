@@ -4,6 +4,8 @@
 
 #include "xhity.h"
 
+extern int monstr[];
+
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
@@ -248,7 +250,6 @@ struct monst * mdef;
 		if (!DEADMONSTER(mdef) && u.sealsActive&SEAL_AHAZU){
 			if ((*hp(mdef) < .1*(*hpmax(mdef))) && !is_rider(pd)){
 #define MAXVALUE 24
-				extern const int monstr[];
 				int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
 				pline("%s sinks into your deep black shadow!", Monnam(mdef));
 				cprefx(monsndx(pd), TRUE, TRUE);
@@ -5457,6 +5458,241 @@ boolean ranged;
 		alt_attk.adtyp = AD_DRST;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
+	case AD_APCS:{
+		boolean hits;
+		/* print a hit message */
+		if(!youdef){
+			if(is_deaf(mdef) || !intelligent_mon(mdef)){
+				return MM_MISS;
+			}
+		}
+		if(!notmcan){
+			if(vis && dohitmsg){
+				if(youagr)
+					pline("You whisper banal platitudes in %s %s.", s_suffix(mon_nam(mdef)), mbodypart(mdef, EAR));
+				else if(youdef)
+					pline("%s whispers banal platitudes in your %s.", Monnam(magr), body_part(EAR));
+				else
+					pline("%s whispers banal platitudes in %s %s.", Monnam(magr), s_suffix(mon_nam(mdef)), mbodypart(mdef, EAR));
+			}
+			return MM_MISS;
+		}
+		if(vis && dohitmsg){
+			if(youagr)
+				pline("You whisper terrible truths in %s %s.", s_suffix(mon_nam(mdef)), mbodypart(mdef, EAR));
+			else if(youdef)
+				pline("%s whispers terrible truths in your %s.", Monnam(magr), body_part(EAR));
+			else
+				pline("%s whispers terrible truths in %s %s.", Monnam(magr), s_suffix(mon_nam(mdef)), mbodypart(mdef, EAR));
+		}
+		/*Check insight*/
+		if(youdef){
+			hits = rn2(u.uinsight) >= 10;
+		}
+		else {
+			//Just do a level check for monsters
+			hits = rn2(mdef->m_lev) >= 10;
+		}
+
+		if(!hits){
+			if(youdef){
+				pline("But you fail to understand!");
+				u.uinsight++;
+				make_confused(HConfusion + 10L, TRUE);
+			}
+			else {
+				if(vis)
+					pline("%s staggers!", Monnam(mdef));
+				mdef->mstun = 1;
+				mdef->mconf = 1;
+			}
+		}
+		else {
+			if(youdef){
+				dmg = Insanity/5;
+				if(Insanity%5 && rn2(Insanity%5))
+					dmg++;
+			}
+			else {
+				if(youagr)
+					dmg = rnd(u.ulevel);
+				else
+					dmg = rnd(monstr[magr->mtyp]);
+				if(resist(mdef, 0, 0, NOTELL))
+					dmg = max(1, dmg/2);
+			}
+			switch(rn2(9)){
+				/*Sow doubt*/
+				case 0:
+					/* player is more detailed */
+					if (!youdef) {
+						if(canseemon(mdef))
+							pline("%s looks doubtful.", Monnam(mdef));
+						mdef->mdoubt = TRUE;
+					}
+					else {
+						pline("Doubt clouds your heart.");
+						make_doubtful(itimeout_incr(HDoubt, dmg*50), TRUE);
+					}
+					return MM_HIT;
+				/*Blaspheme*/
+				case 1:
+					/* player is more detailed */
+					if (!youdef){
+						if(canseemon(mdef))
+							pline("%s looks doubtful.", Monnam(mdef));
+						if(rn2(10)){
+							struct attack fakespell = { AT_MAGC, AD_CLRC, 10, 7 };
+							cast_spell(magr, mdef, &fakespell, LIGHTNING, mdef->mx, mdef->my);
+							return MM_HIT;
+						}
+						else {
+							alt_attk.aatyp = AT_HITS;
+							alt_attk.adtyp = AD_DISN;
+							alt_attk.damn = 7;
+							alt_attk.damd = 1;
+							
+							return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, (struct obj **) 0, FALSE, 7, 20, vis, TRUE);
+						}
+					}
+					else {
+						int angrygod = A_CHAOTIC + rn2(3); //Note: -1 to +1
+						pline("Blasphemous thoughts fill your mind!");
+						u.ualign.record -= rnd(20);
+						u.ualign.sins++;
+						u.hod += rnd(20);
+						u.ugangr[Align2gangr(angrygod)]++;
+						angrygods(angrygod);
+					}
+					return MM_HIT;
+				/*Lower Sanity*/
+				case 2:
+					/* player is more detailed */
+					if (!youdef) {
+						if(canseemon(mdef))
+							pline("%s looks confused!", Monnam(mdef));
+						mdef->mstun = 1;
+						mdef->mconf = 1;
+					}
+					else {
+						pline("The truth shakes the foundations of your mind!");
+						change_usanity(u_sanity_loss_minor(magr), TRUE);
+					}
+					return MM_HIT;
+				/*Tear at self*/
+				case 3:
+					if(!youdef){
+						if(canseemon(mdef))
+							pline("%s tears at %sself.", Monnam(mdef), mhis(mdef));
+						xdamagey(magr, mdef, attk, d(dmg,10));
+					}
+					else {
+						if (u.sealsActive&SEAL_HUGINN_MUNINN){
+							unbind(SEAL_HUGINN_MUNINN, TRUE);
+						}
+						else {
+							pline("The truth tears down the foundations of your mind!");
+							while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
+								dmg--;
+								(void)adjattrib(A_WIS, -1, TRUE);
+								forget(10);	/* lose 10% of memory per point lost*/
+								exercise(A_WIS, FALSE);
+							}
+							if (dmg > 0) {
+								You("tear at yourself in horror!"); //assume always able to damage self
+								xdamagey(magr, mdef, attk, d(dmg,10));
+							}
+						}
+					}
+					return MM_HIT;
+				/*Prophesize doom*/
+				case 4:{
+					int maxDoom = youagr ? u.ulevel : monstr[magr->mtyp];
+					pline("%s shares a prophecy of doom!", Monnam(magr));
+					if(!youdef){
+						if(canseemon(mdef))
+							pline("%s looks despondent.", Monnam(mdef));
+						mdef->encouraged -= dmg;
+						if(mdef->mstdy > -maxDoom){
+							mdef->mstdy = max(mdef->mstdy-dmg, -maxDoom);
+						}
+					}
+					else {
+						You_feel("despondent.");
+						u.uencouraged -= dmg;
+						if(u.ustdy > -maxDoom){
+							u.ustdy = max(u.ustdy-dmg, -maxDoom);
+						}
+					}
+					return MM_HIT;
+				}
+				/*Rider attack*/
+				case 5:
+					switch(rn2(4)){
+						case 0:
+							alt_attk.adtyp = AD_DETH;
+							alt_attk.damn = 8;
+							alt_attk.damd = 8;
+							return xmeleehurty(magr, mdef, &alt_attk, originalattk, (struct obj **) 0, TRUE, 0, 20, vis, TRUE);
+						case 1:
+							alt_attk.adtyp = AD_FAMN;
+							alt_attk.damn = 8;
+							alt_attk.damd = 8;
+							return xmeleehurty(magr, mdef, &alt_attk, originalattk, (struct obj **) 0, TRUE, 0, 20, vis, TRUE);
+						case 2:
+							alt_attk.adtyp = AD_PEST;
+							alt_attk.damn = 8;
+							alt_attk.damd = 8;
+							return xmeleehurty(magr, mdef, &alt_attk, originalattk, (struct obj **) 0, TRUE, 0, 20, vis, TRUE);
+						case 3:
+							alt_attk.adtyp = AD_CNFT;
+							alt_attk.damn = 8;
+							alt_attk.damd = 8;
+							return xmeleehurty(magr, mdef, &alt_attk, originalattk, (struct obj **) 0, TRUE, 0, 20, vis, TRUE);
+					}
+					//Not reached
+					return MM_MISS;
+				/*Lower protection*/
+				case 6:
+					if(youdef){
+						u.uacinc -= dmg;
+						u.ublessed = max(0, u.ublessed-dmg);
+					}
+					else {
+						pline("%s shares a prophecy of your death!", Monnam(magr));
+						if(canseemon(mdef))
+							pline("%s looks fearful.", Monnam(mdef));
+						//Monsters are less detailed, just discourage them.
+						mdef->encouraged = max(-dmg, mdef->encouraged-dmg);
+					}
+					return MM_HIT;
+				/*Lower luck*/
+				case 7:
+					if(youdef){
+						pline("%s shares a prophecy of great misfortune!", Monnam(magr));
+						change_luck(-dmg);
+					}
+					else {
+						if(canseemon(mdef))
+							pline("%s looks fearful.", Monnam(mdef));
+						//Monsters are less detailed, just discourage them.
+						mdef->encouraged = max(-dmg, mdef->encouraged-dmg);
+					}
+					return MM_HIT;
+				/*Water to blood*/
+				case 8:
+					pline("Space bleeds around %s.", youdef ? "you" : mon_nam(mdef));
+					(void) water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, WD_BLOOD, mdef);
+					return MM_HIT;
+			}
+		}
+		if(alt_attk.damn || alt_attk.damd){
+			/* make physical attack without hitmsg */
+			alt_attk.adtyp = AD_PHYS;
+			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+		}
+		else return MM_HIT;
+	}
 	case AD_LRVA:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {

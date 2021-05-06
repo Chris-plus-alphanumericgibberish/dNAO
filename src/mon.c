@@ -3224,7 +3224,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		return ALLOW_M|ALLOW_TM;
 
 	/* angels vs. demons (excluding Lamashtu) */
-#define fallen(mx) (has_template(mx, MAD_TEMPLATE) || mx->mfaction == LAMASHTU_FACTION)
+#define fallen(mx) (has_template(mx, MAD_TEMPLATE) || has_template(mx, FALLEN_TEMPLATE) || mx->mfaction == LAMASHTU_FACTION)
 #define normalAngel(mx) (is_angel(mx->data) && !fallen(mx))
 #define fallenAngel(mx) (is_angel(mx->data) && fallen(mx))
 	if (normalAngel(magr) && (is_demon(md) || fallenAngel(mdef)))
@@ -5543,7 +5543,7 @@ monline(mtmp)	/* Make monster mtmp next to you (if possible) */
 }
 
 void
-mofflin(mtmp)	/* Make monster mtmp next to you (if possible) */
+mofflin(mtmp)	/* Make monster mtmp near to you (if possible) */
 	struct monst *mtmp;
 {
 	coord mm;
@@ -5558,6 +5558,26 @@ mofflin(mtmp)	/* Make monster mtmp next to you (if possible) */
 #endif
 
 	if(!eofflin(&mm, u.ux, u.uy, mtmp->data)) return;
+	rloc_to(mtmp, mm.x, mm.y);
+	return;
+}
+
+void
+mofflin_close(mtmp)	/* Make monster mtmp near to you (if possible) */
+	struct monst *mtmp;
+{
+	coord mm;
+
+#ifdef STEED
+	if (mtmp == u.usteed) {
+		/* Keep your steed in sync with you instead */
+		mtmp->mx = u.ux;
+		mtmp->my = u.uy;
+		return;
+	}
+#endif
+
+	if(!eofflin_close(&mm, u.ux, u.uy, mtmp->data)) return;
 	rloc_to(mtmp, mm.x, mm.y);
 	return;
 }
@@ -5728,6 +5748,7 @@ register struct monst *mtmp;
 		|| mtmp->data->msound == MS_TRUMPET || mtmp->mtyp == PM_RHYMER
 		|| mtmp->data->msound == MS_SECRETS || mtmp->data->msound == MS_HOWL
 		|| mtmp->data->msound == MS_SCREAM || mtmp->data->msound == MS_HARROW
+		|| mtmp->data->msound == MS_APOC
 		)
 	) {
 		domonnoise(mtmp, FALSE);
@@ -7894,7 +7915,7 @@ struct monst *mtmp;
 				xdamagey(mtmp, &youmonst, (struct attack *)0, damage);
 			}
 			if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= BOLT_LIM){
-				mofflin(mtmp);
+				mofflin_close(mtmp);
 			}
 		}
 	}
