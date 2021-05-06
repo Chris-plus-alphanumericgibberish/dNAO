@@ -519,6 +519,38 @@ int template;
 	&& (insert = TRUE))
 #define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;i++;}
+		// /*  */
+		// if((template == SLIME_REMNANT) && (
+			// attk->adtyp == AD_PHYS ||
+			// attk->adtyp == AD_MAGM ||
+			// attk->adtyp == AD_COLD ||
+			// attk->adtyp == AD_ELEC ||
+			// attk->adtyp == AD_LEGS ||
+			// attk->adtyp == AD_SEDU ||
+			// attk->adtyp == AD_TLPT ||
+			// attk->adtyp == AD_CONF ||
+			// attk->adtyp == AD_HEAL ||
+			// attk->adtyp == AD_SSEX ||
+			// attk->adtyp == AD_VORP ||
+			// attk->adtyp == AD_SHRD ||
+			// attk->adtyp == AD_TCKL ||
+			// attk->adtyp == AD_BIST ||
+			// attk->adtyp == AD_MALK ||
+			// attk->adtyp == AD_UVUU ||
+			// attk->adtyp == AD_LSEX ||
+			// attk->adtyp == AD_MIST ||
+			// )
+		// ){
+			// attk->adtyp = AD_ACID;
+		// }
+		// if((template == SLIME_REMNANT) && (
+			// attk->adtyp == AD_PHYS ||
+			// attk->adtyp == AD_COLD
+			// )
+		// ){
+			// attk->adtyp = AD_ACID;
+		// }
+		
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((template == ZOMBIFIED || template == SKELIFIED) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (

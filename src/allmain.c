@@ -810,8 +810,8 @@ you_regen_san()
 	if (Race_if(PM_ELF))   reglevel += 3;
 	if (Race_if(PM_ORC))   reglevel -= 3;
 
-	// Unknown God
-	if (u.specialSealsActive&SEAL_ORTHOS){
+	// Unusually not-sane spirit
+	if (u.sealsActive&SEAL_ORTHOS){
 		reglevel -= 5;
 	}
 	
@@ -1251,10 +1251,10 @@ moveloop()
 					mtmp->mpeaceful = TRUE;
 				}
 				//Remove after testing (can cause "re-trapping" of untrapped monsters)
-				if(!mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP && !DEADMONSTER(mtmp)){
-					impossible("Re-trapping mon %s in vivi trap",noit_mon_nam(mtmp));
-					mtmp->mtrapped = TRUE;
-				}
+				// if(!mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP && !DEADMONSTER(mtmp)){
+					// impossible("Re-trapping mon %s in vivi trap",noit_mon_nam(mtmp));
+					// mtmp->mtrapped = TRUE;
+				// }
 				/* Spot the monster for sanity purposes */
 				spot_monster(mtmp);
 				/* Loyal monsters slowly recover tameness */
@@ -1421,12 +1421,14 @@ moveloop()
 					if(mtmp->m_lev < mons[PM_FATHER_DAGON].mlevel)
 						mtmp->m_lev = mons[PM_FATHER_DAGON].mlevel;
 					set_mon_data(mtmp, PM_FATHER_DAGON);
+					//Summon his equipment
 					u.uevent.ukilled_dagon = 0;
 				}
 				if(mtmp->mtyp == PM_DEEPEST_ONE && mtmp->female && u.uevent.ukilled_hydra && !(In_quest(&u.uz) && Role_if(PM_ANACHRONONAUT))){
 					if(mtmp->m_lev < mons[PM_MOTHER_HYDRA].mlevel)
 						mtmp->m_lev = mons[PM_MOTHER_HYDRA].mlevel;
 					set_mon_data(mtmp, PM_MOTHER_HYDRA);
+					//Summon her equipment
 					u.uevent.ukilled_hydra = 0;
 				}
 				if(mtmp->mtyp == PM_GOLD_GOLEM){
@@ -1625,16 +1627,10 @@ karemade:
 						if(tries >= 0)
 							makemon(ford_montype(-1), x, y, MM_ADJACENTOK);
 					}
-				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && check_insight()){
-					int x, y;
-					for(x = 1; x < COLNO; x++)
-						for(y = 0; y < ROWNO; y++){
-							if(IS_CORNER(levl[x][y].typ) && couldsee(x, y) && rn2(45) < u.ulevel){
-								create_gas_cloud(x, y, 4, 30, FALSE);
-								makemon(&mons[PM_HOUND_OF_TINDALOS], x, y, 0);
-							}
-						}
 				} else {
+					if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && check_insight())
+						maybe_create_hounds();
+					
 					if (u.uevent.invoked && xupstair && rn2(10)) {
 						(void) makemon((struct permonst *)0, xupstair, yupstair, MM_ADJACENTOK);
 					} //TEAM ATTACKS
@@ -1857,6 +1853,17 @@ karemade:
 				else
 					create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(3), FALSE);
 			}
+			if(roll_madness(MAD_APOSTASY)){
+				adjalign(-10);
+				if(u.ualign.record < 0 && roll_madness(MAD_APOSTASY)){
+					if(ALIGNLIM > 10){
+						u.ualign.sins++;
+					} else {
+						gods_upset(Align2gangr(u.ualign.type));
+					}
+				}
+			}
+			
 			if(u.utaneggs){
 				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
 					u.utaneggs--;

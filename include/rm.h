@@ -291,6 +291,7 @@ extern uchar showsymcolors[MAXPCHARS];
 #define D_CLOSED	4
 #define D_LOCKED	8
 #define D_TRAPPED	16
+#define D_IRON		32
 
 /*
  * Some altars are considered as shrines, so we need a flag.

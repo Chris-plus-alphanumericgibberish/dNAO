@@ -5319,6 +5319,7 @@ STATIC_OVL int
 u_material_next_to_skin(material)
 int material;
 {
+	/*Needs a better understanding of what's under what :( */
 	int count = 0;
 	if(uarmu && uarmu->obj_material == material)
 		count++;

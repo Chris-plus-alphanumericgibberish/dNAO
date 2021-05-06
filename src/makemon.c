@@ -11452,6 +11452,19 @@ int *seencount;  /* secondary output */
 	}
 	return moncount;
 }
+
+void
+maybe_create_hounds()
+{
+	int x, y;
+	for(x = 1; x < COLNO; x++)
+		for(y = 0; y < ROWNO; y++){
+			if(IS_CORNER(levl[x][y].typ) && couldsee(x, y) && rn2(45) < u.ulevel){
+				create_gas_cloud(x, y, 4, 30, FALSE);
+				makemon(&mons[PM_HOUND_OF_TINDALOS], x, y, 0);
+			}
+		}
+}
 #endif /* OVLB */
 
 /*makemon.c*/

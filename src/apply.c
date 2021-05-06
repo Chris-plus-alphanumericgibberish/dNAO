@@ -6,9 +6,9 @@
 #include "artifact.h"
 #ifdef OVLB
 
-static const char tools[] = { COIN_CLASS, CHAIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
+static const char tools[] = { COIN_CLASS, CHAIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, SCOIN_CLASS, 0 };
 static const char tools_too[] = { COIN_CLASS, ALL_CLASSES, TOOL_CLASS, POTION_CLASS,
-				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
+				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, SCOIN_CLASS, 0 };
 static const char apply_armor[] = { ARMOR_CLASS, 0 };
 static const char apply_corpse[] = { FOOD_CLASS, 0 };
 static const char apply_all[] = { ALL_CLASSES, CHAIN_CLASS, 0 };
@@ -51,6 +51,7 @@ STATIC_DCL int FDECL(use_doll, (struct obj *));
 STATIC_DCL int FDECL(use_doll_tear, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
+STATIC_DCL int FDECL(do_soul_coin, (struct obj *));
 STATIC_DCL boolean FDECL(figurine_location_checks,
 				(struct obj *, coord *, BOOLEAN_P));
 STATIC_DCL boolean NDECL(uhave_graystone);
@@ -5192,6 +5193,30 @@ struct obj *obj;
     return 1;
 }
 
+STATIC_OVL int
+do_soul_coin(obj)
+struct obj *obj;
+{
+	/*Note: no free hands needed, as long as it's in your inventory you can activate it*/
+	switch(obj->otyp){
+		case WAGE_OF_SLOTH:
+		break;
+		case WAGE_OF_LUST:
+		break;
+		case WAGE_OF_GLUTTONY:
+		break;
+		case WAGE_OF_GREED:
+		break;
+		case WAGE_OF_WRATH:
+		break;
+		case WAGE_OF_ENVY:
+		break;
+		case WAGE_OF_PRIDE:
+		break;
+	}
+    return 1;
+}
+
 void
 add_class(cl, class)
 char *cl;
@@ -6084,6 +6109,8 @@ doapply()
 	    return do_break_wand(obj);
 	else if (obj->oclass == COIN_CLASS)
 	    return do_flip_coin(obj);
+	else if (obj->oclass == SCOIN_CLASS)
+	    return do_soul_coin(obj);
 	else if (obj->oclass == RING_CLASS || obj->oclass == AMULET_CLASS)
 	    return do_present_item(obj);
 	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE)) 

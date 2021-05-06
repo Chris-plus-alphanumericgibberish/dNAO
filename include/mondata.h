@@ -412,13 +412,11 @@
 #define is_fey(ptr)			(((ptr)->mflagsa & MA_FEY) != 0L)
 #define is_demon(ptr)		(((ptr)->mflagsa & MA_DEMON) != 0L)
 #define is_law_demon(ptr)	(((ptr)->mflagsa & MA_DEMON) != 0L && is_lawful(ptr))
-#define is_ancient(ptr)		((ptr)->mtyp == PM_ANCIENT_OF_VITALITY \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_ICE \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_CORRUPTION \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_DEATH \
+#define is_ancient(ptr)		(((ptr)->mtyp >=  PM_ANCIENT_OF_BLESSINGS\
+							&& (ptr)->mtyp <= PM_ANCIENT_OF_DEATH) \
 							|| (ptr)->mtyp == PM_BAALPHEGOR \
 							)
-/*Fierna being used as the boundary is temporary*/
+/**Fierna being used as the boundary is temporary**/
 #define is_tannin(ptr)		(((ptr)->mtyp >= PM_AKKABISH_TANNIN \
 							  && (ptr)->mtyp < PM_FIERNA \
 							 ) \
@@ -569,7 +567,8 @@
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
 #define hates_iron(ptr)		((ptr->mflagsg&MG_HATESIRON) != 0)
 
-#define melee_polearms(ptr)	((ptr)->mtyp == PM_VROCK ||\
+#define melee_polearms(ptr)	(m_martial_skill(ptr) >= P_SKILLED ||\
+							 (ptr)->mtyp == PM_VROCK ||\
 							 (ptr)->mtyp == PM_MEPHISTOPHELES ||\
 							 (ptr)->mtyp == PM_BAPHOMET \
 							)

@@ -2321,6 +2321,8 @@ int
 donull()
 {
 	static long lastreped = -13;//hacky way to tell if the player has recently tried repairing themselves
+	// pline("room type %d", levl[u.ux][u.uy].roomno);
+	// pline("sp_lev_nroom %d", level.flags.sp_lev_nroom);
 	if(uclockwork){
 		if(!Upolyd && u.uhp<u.uhpmax){
 			if(lastreped < monstermoves-13) You("attempt to make repairs.");

@@ -728,6 +728,7 @@ boolean chatting;
 	}
 	
     /* presumably nearness and sleep checks have already been made */
+	//!!!
 	if (!flags.soundok) return(0);
 	if (is_silent_mon(mtmp)){
 		if (chatting) {

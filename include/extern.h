@@ -1303,6 +1303,7 @@ E int FDECL(bagotricks, (struct obj *, boolean, int *));
 E boolean FDECL(propagate, (int, BOOLEAN_P,BOOLEAN_P));
 E boolean FDECL(mon_can_see_you, (struct monst *));
 E boolean FDECL(mon_can_see_mon, (struct monst *, struct monst *));
+E void NDECL(maybe_create_hounds);
 
 /* ### mapglyph.c ### */
 

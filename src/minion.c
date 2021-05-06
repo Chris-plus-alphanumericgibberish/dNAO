@@ -42,7 +42,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	} else if(ptr->mtyp == PM_BAALPHEGOR && rn2(4)) {
 	    dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
 		cnt = d(4,4);
-	} else if(ptr->mtyp == PM_ANCIENT_OF_ICE || ptr->mtyp == PM_ANCIENT_OF_DEATH) {
+	} else if(is_ancient(ptr) && ptr->mtyp != PM_BAALPHEGOR) {
 	    dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
 		cnt = d(1,4);
 	} else if (is_dprince(ptr) || (ptr->mtyp == PM_WIZARD_OF_YENDOR)) {

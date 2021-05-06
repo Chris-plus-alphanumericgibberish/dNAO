@@ -2496,6 +2496,11 @@ dopray()
 		return 0;
 	}
 	
+	if(flat_mad_turn(MAD_APOSTASY)){
+		pline("You can't bring yourself to pray.");
+		return 0;
+	}
+	
 	if(Doubt){
 		pline("You're suffering a crisis of faith.");
 		return 0;

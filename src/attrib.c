@@ -1090,6 +1090,7 @@ calc_total_maxhp()
 		hp = &u.mh;
 		hpmax = &u.mhmax;
 		hprolled = &u.mhrolled;
+		//Should maybe be a u.mlevel field
 		hpcap = 24 + 2*mons[u.umonnum].mlevel*8;
 	} else {
 		ulev = u.ulevel;
