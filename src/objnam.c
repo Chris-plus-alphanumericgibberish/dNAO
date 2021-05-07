@@ -5433,13 +5433,14 @@ typfnd:
 		}
 	}
 	if (isdrained && otmp->otyp == CORPSE) {
-		int amt;
+		int amt = obj_nutrition(otmp);
 		otmp->odrained = 1;
-		amt = obj_nutrition(otmp);
 
 		if (amt < 1){
 			/* do nothing, since that could give us funky oeaten values */
 		} else if (halfdrained) {
+			otmp->oeaten = amt;
+
 			amt -= drainlevel(otmp);
 			amt /= 2;
 			if (amt < 1) amt = 1;
@@ -5447,12 +5448,13 @@ typfnd:
 			/* (do this adjustment before setting up object's weight) */
 			consume_oeaten(otmp, -amt);
 		} else {
+			otmp->oeaten = amt;
+
 			amt -= drainlevel(otmp);
 			if (amt < 1) amt = 1;
 
 			/* (do this adjustment before setting up object's weight) */
 			consume_oeaten(otmp, -amt);
-
 		}
 	}
 	otmp->owt = weight(otmp);
