@@ -784,6 +784,7 @@ E boolean FDECL(bite_monster, (struct monst *));
 E void FDECL(give_intrinsic, (int, long));
 E void NDECL(fix_petrification);
 E void FDECL(consume_oeaten, (struct obj *,int));
+E int FDECL(obj_nutrition, (struct obj *));
 E boolean FDECL(maybe_finished_meal, (BOOLEAN_P));
 E int FDECL(ask_turns, (struct monst *, int, int));
 E int FDECL(ask_cp, (struct monst *, int));
