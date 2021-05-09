@@ -905,9 +905,7 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	}
 
 	/* a summoner leaving affects its summons */
-	if (mtmp->summonpwr) {
-		summoner_gone(mtmp);
-	}
+	summoner_gone(mtmp);
 	/* likewise, summons don't persist away from their summoner, or if they're flagged to not be able to follow */
 	/* although your summons can travel between levels with you, they cannot do so independently of you */
 	if (get_mx(mtmp, MX_ESUM) && (!mtmp->mextra_p->esum_p->sticky || mtmp->mextra_p->esum_p->summoner)) {
