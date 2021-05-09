@@ -4212,6 +4212,8 @@ int x, y;
 		)
 			dmod++;
 		mon->mhp -= d(nd, 3*dmod);
+		if (mon->mtyp == PM_GREMLIN)
+			mon->mhp -= mon->mhp;
 		pline("%s is seared by the Light.", Monnam(mon));
 	}
 	if (mon && mon->mhp <= 0){
