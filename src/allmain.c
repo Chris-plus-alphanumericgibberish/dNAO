@@ -925,6 +925,8 @@ moveloop()
 		if(flags.run != 0){
 			if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				youmonst.movement -= 1;
+			} else if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
+				youmonst.movement -= 2;
 			} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
 				youmonst.movement -= 3;
 			} else if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){

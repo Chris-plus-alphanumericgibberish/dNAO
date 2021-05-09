@@ -7919,8 +7919,12 @@ arti_invoke(obj)
 			} else {
 				do_bloodletter(obj);
 			}
-			
+
 		break;
+		case SEVEN_LEAGUE_STEP:
+			You("click your heels together and take a step... ");
+			jump(15);
+			break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
