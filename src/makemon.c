@@ -9003,6 +9003,11 @@ register int	mmflags;
 			unsethouse = TRUE;
 		}
 	}
+	/* on the Plane of Earth, many foes are Worldshapers, capable of phasing through rock */
+	else if(!mkmon_template && Is_earthlevel(&u.uz) && mtemplate_accepts_mtyp(WORLD_SHAPER, mtmp->mtyp) && (mtmp->data->mlevel > 15+rn2(15))) {
+		mkmon_template = WORLD_SHAPER;
+		unsethouse = TRUE;
+	}
 	/* insight check: making pseudonatural creatures out of anything reasonable */
 	else if(randmonst && !mkmon_template && can_undead(mtmp->data) && check_insight()){
 		mkmon_template = PSEUDONATURAL;

@@ -3410,6 +3410,8 @@ int gen_restrict;
 				undeadtype = CRANIUM_RAT;
 			else if (!strncmpi(p, "mistweaver", 10))
 				undeadtype = MISTWEAVER;
+			else if (!strncmpi(p, "worldshaper", 11))
+				undeadtype = WORLD_SHAPER;
 			else
 			{
 				/* no suffix was used, undo the split made to search for suffixes */

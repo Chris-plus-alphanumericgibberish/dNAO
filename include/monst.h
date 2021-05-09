@@ -226,6 +226,7 @@ struct monst {
 #define	DREAM_LEECH		17	/* sucks mental atributes */
 #define	MAD_TEMPLATE	18	/* mad angel template */
 #define	FALLEN_TEMPLATE	19	/* fallen angel template */
+#define WORLD_SHAPER	20	/* plane-of-earth nastify */
 #define MAXTEMPLATE	MAD_TEMPLATE
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
