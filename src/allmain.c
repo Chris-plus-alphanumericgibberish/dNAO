@@ -1476,7 +1476,7 @@ karemade:
 				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts) {
 					static long lastusedmove = 0;
 					if (lastusedmove != moves) {
-						if (!mtmp->mappearance || (canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1) && rn2(3)) {
+						if (!mtmp->mappearance || (canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1 && rn2(3))) {
 
 							if(canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1) {
 								pline("%s takes on forms new and terrible!", Monnam(mtmp));
