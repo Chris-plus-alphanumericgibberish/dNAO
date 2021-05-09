@@ -63,7 +63,7 @@ STATIC_DCL void FDECL(add_to_billobjs, (struct obj *));
 STATIC_DCL void FDECL(bill_box_content, (struct obj *, BOOLEAN_P, BOOLEAN_P,
 				     struct monst *));
 #ifdef OVL1
-static boolean FDECL(rob_shop, (struct monst *));
+static boolean FDECL(rob_shop, (struct monst *, struct obj *));
 #endif
 
 #ifdef OTHER_SERVICES
@@ -534,7 +534,7 @@ boolean newlev;
 	    return;
 	}
 
-	if (rob_shop(shkp)) {
+	if (rob_shop(shkp, (struct obj *)0)) {
 		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
 			verbalize("Help me, Ilsensine!");
 			makemon(&mons[PM_WARRIOR_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
@@ -554,13 +554,13 @@ boolean newlev;
 
 /* robbery from outside the shop via telekinesis or grappling hook */
 void
-remote_burglary(x, y)
-xchar x, y;
+remote_burglary(otmp)
+struct obj * otmp;
 {
 	struct monst *shkp;
 	struct eshk *eshkp;
 
-	shkp = shop_keeper(*in_rooms(x, y, SHOPBASE));
+	shkp = shop_keeper(*in_rooms(otmp->ox, otmp->oy, SHOPBASE));
 	if (!shkp || !inhishop(shkp))
 	    return;	/* shk died, teleported, changed levels... */
 
@@ -568,7 +568,7 @@ xchar x, y;
 	if (!eshkp->billct && !eshkp->debit)	/* bill is settled */
 	    return;
 
-	if (rob_shop(shkp)) {
+	if (rob_shop(shkp, otmp)) {
 		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
 			verbalize("Help me, Ilsensine!");
 			makemon(&mons[PM_WARRIOR_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
@@ -590,8 +590,9 @@ xchar x, y;
 /* shop merchandise has been taken; pay for it with any credit available;  
    return false if the debt is fully covered by credit, true otherwise */
 static boolean
-rob_shop(shkp)
+rob_shop(shkp, otmp)
 struct monst *shkp;
+struct obj * otmp;	/* optional: item not in your inventory that is being stolen */
 {
 	struct eshk *eshkp;
 	long total;
@@ -605,10 +606,12 @@ struct monst *shkp;
 		 eshkp->credit, currency(eshkp->credit));
 	    total = 0L;		/* credit gets cleared by setpaid() */
 		for(curobj = invent; curobj; curobj = curobj->nobj) setallpaid(curobj);
+		if(otmp) {setallpaid(otmp); clear_unpaid(otmp);}
 	} else {
 	    You("escaped the shop without paying!");
 	    total -= eshkp->credit;
 		for(curobj = invent; curobj; curobj = curobj->nobj) setallstolen(curobj);
+		if(otmp) {setallstolen(otmp); clear_unpaid(otmp);}
 	}
 	setpaid(shkp);
 	if (!total) return FALSE;
