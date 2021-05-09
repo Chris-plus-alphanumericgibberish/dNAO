@@ -3435,7 +3435,7 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	mtmp->mtrapped = 0;
 	mtmp->mhp = 0; /* simplify some tests: force mhp to 0 */
 	relobj(mtmp, 0, FALSE);
-	summoner_gone(mtmp);
+	summoner_gone(mtmp, FALSE);
 	remove_monster(mtmp->mx, mtmp->my);
 	del_light_source(mtmp->light);
 	stop_all_timers(mtmp->timed);
