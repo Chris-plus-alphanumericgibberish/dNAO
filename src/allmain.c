@@ -931,6 +931,8 @@ moveloop()
 				youmonst.movement -= 3;
 			} else if(uwep && uwep->oartifact == ART_TOBIUME){
 				youmonst.movement -= 4;
+			} else if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
+				youmonst.movement -= 2;
 			} else {
 				youmonst.movement -= NORMAL_SPEED;
 			}
