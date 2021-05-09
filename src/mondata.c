@@ -1501,8 +1501,7 @@ struct monst *mon;
 		|| youracedata->mtyp == PM_FLUX_SLIME
 		|| youracedata->mtyp == PM_RED_DRAGON
 		|| is_rider(youracedata)
-		|| (uarm && (uarm->otyp == RED_DRAGON_SCALES || uarm->otyp == RED_DRAGON_SCALE_MAIL))
-		|| (uarms && (uarms->otyp == RED_DRAGON_SCALE_SHIELD))
+		|| wearing_dragon_armor(mon, PM_RED_DRAGON)
 		);
 	//else
 	return (Change_res(mon) || mon_resistance(mon, GOOD_HEALTH) || flaming(mon->data) 
@@ -1512,8 +1511,7 @@ struct monst *mon;
 		|| mon->mtyp == PM_RED_DRAGON
 		|| has_template(mon, SLIME_REMNANT)
 		|| is_rider(mon->data)
-		|| (((otmp = which_armor(mon, W_ARM))) && (otmp->otyp == RED_DRAGON_SCALES || otmp->otyp == RED_DRAGON_SCALE_MAIL))
-		|| (((otmp = which_armor(mon, W_ARMS))) && (otmp->otyp == RED_DRAGON_SCALE_SHIELD))
+		|| wearing_dragon_armor(mon, PM_RED_DRAGON)
 		);
 }
 
