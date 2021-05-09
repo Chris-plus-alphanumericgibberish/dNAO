@@ -2203,3 +2203,27 @@ struct monst *magr;
 	}
 	return FALSE;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+boolean
+wearing_dragon_armor(mtmp, dragontype)
+struct monst * mtmp;
+int dragontype;
+{
+	struct obj * otmp;
+	
+	/* body armor */
+	otmp = (mtmp==&youmonst) ? uarm : which_armor(mtmp, W_ARM);
+	if (otmp && Is_dragon_armor(otmp)) {
+		if (Dragon_armor_matches_mtyp(otmp, dragontype))
+			return TRUE;
+	}
+	/* shield */
+	otmp = (mtmp==&youmonst) ? uarms : which_armor(mtmp, W_ARMS);
+	if (otmp && Is_dragon_armor(otmp)) {
+		if (Dragon_armor_matches_mtyp(otmp, dragontype))
+			return TRUE;
+	}
+	return FALSE;
+}

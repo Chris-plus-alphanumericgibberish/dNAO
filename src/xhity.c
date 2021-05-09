@@ -5323,8 +5323,7 @@ boolean ranged;
 			/* flaming immunity to slime */
 			if (flaming(pd)
 				|| pd->mtyp == PM_RED_DRAGON
-				|| ((otmp = (youdef ? uarm : which_armor(mdef, W_ARM))) && (otmp->otyp == RED_DRAGON_SCALES || otmp->otyp == RED_DRAGON_SCALE_MAIL))
-				|| ((otmp = (youdef ? uarms : which_armor(mdef, W_ARMS))) && (otmp->otyp == RED_DRAGON_SCALE_SHIELD))
+				|| wearing_dragon_armor(mdef, PM_RED_DRAGON)
 				) {
 				/* message if visible */
 				if (vis) {
