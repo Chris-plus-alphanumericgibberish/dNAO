@@ -1915,6 +1915,10 @@ struct obj	*sobj;
 #endif
 		}
 		if(Punished && !confused) unpunish();
+		if(u.umummyrot && !confused){
+			u.umummyrot = 0;
+			You("stop shedding dust.");
+		}
 		update_inventory();
 		break;
 	    }

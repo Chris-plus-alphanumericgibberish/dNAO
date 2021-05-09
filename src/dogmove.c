@@ -300,6 +300,10 @@ struct obj *obj;
 	    if (mtmp->meating < 0) mtmp->meating = 1;
 	    nutrit = (int)(obj->quan/20);
 	    if (nutrit < 0) nutrit = 0;
+	} else if (obj->otyp == POT_BLOOD) {
+		/* 1/5th multiplier applied in dog_eat */
+		nutrit = ((obj->odiluted ? 1 : 2) *
+					(obj->blessed ? mons[(obj)->corpsenm].cnutrit*3/2 : mons[(obj)->corpsenm].cnutrit ));
 	} else {
 	    /* Unusual pet such as gelatinous cube eating odd stuff.
 	     * meating made consistent with wild monsters in mon.c.
@@ -324,7 +328,7 @@ boolean devour;
 	boolean poly = FALSE, grow = FALSE, heal = FALSE;
 	int nutrit;
 	boolean vampiric = is_vampire(mtmp->data);
-	boolean eatonlyone = (obj->oclass == FOOD_CLASS || obj->oclass == CHAIN_CLASS);
+	boolean eatonlyone = (obj->oclass == FOOD_CLASS || obj->oclass == CHAIN_CLASS || obj->oclass == POTION_CLASS);
 
 #ifdef PET_SATIATION
 	// boolean can_choke = (edog->hungrytime >= monstermoves + DOG_SATIATED && !vampiric);
@@ -374,7 +378,7 @@ boolean devour;
 	   sight locations should not. */
 	if (cansee(x, y) || cansee(mtmp->mx, mtmp->my))
 	    pline("%s %s %s.", mon_visible(mtmp) ? noit_Monnam(mtmp) : "It",
-		  vampiric ? "drains" : devour ? "devours" : "eats",
+		  obj->oclass == POTION_CLASS ? "drinks" : vampiric ? "drains" : devour ? "devours" : "eats",
 		  eatonlyone ? singular(obj, doname) : doname(obj));
 	/* It's a reward if it's DOGFOOD and the player dropped/threw it. */
 	/* We know the player had it if invlet is set -dlc */
@@ -393,7 +397,7 @@ boolean devour;
 		pline("%s spits %s out in disgust!",
 		      Monnam(mtmp), distant_name(obj,doname));
 	    }
-	} else if (vampiric) {
+	} else if (vampiric && !(obj->otyp == POT_BLOOD)) {
 		/* Split Object */
 		if (obj->quan > 1L) {
 		    if(!carried(obj)) {

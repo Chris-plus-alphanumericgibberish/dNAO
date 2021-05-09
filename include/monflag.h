@@ -63,6 +63,7 @@
 #define MS_SECRETS	52	/* Tells secrets */
 #define MS_SCREAM	53	/* Screams in madness */
 #define MS_HARROW	54	/* Summon wraiths */
+#define MS_APOC		55	/* Dire Revelations */
 
 
 #define MR_FIRE			0x0001	/* 1 resists fire */
@@ -397,8 +398,9 @@
 #define STERILITY_CURSE        NAIL_TO_THE_SKY+1
 #define DISINT_RAY             STERILITY_CURSE+1
 //75
+#define MON_WARP_THROW         DISINT_RAY+1
 
-#define MON_LASTSPELL          DISINT_RAY
+#define MON_LASTSPELL          MON_WARP_THROW
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

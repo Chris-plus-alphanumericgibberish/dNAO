@@ -3242,12 +3242,15 @@ xchar x, y;
 
 /* returns TRUE if obj is destroyed */
 boolean
-water_damage(obj, force, here, lethe, owner)
+water_damage(obj, force, here, modifiers, owner)
 struct obj *obj;
-boolean force, here, lethe;
+boolean force, here;
+uchar modifiers;
 struct monst *owner;
 {
 	/* Dips in the Lethe are a very poor idea - Lethe patch*/
+	boolean lethe = modifiers|WD_LETHE;
+	boolean blood = modifiers|WD_BLOOD;
 	int luckpenalty = lethe ? 7 : 0;
 	struct obj *otmp;
 	struct obj *obj_original = obj;
@@ -3309,6 +3312,12 @@ struct monst *owner;
 				uncurse(obj);
 				unbless(obj);
 		    }
+			if(blood){
+				if(obj->blessed)
+					unbless(obj);
+				else if(!obj->cursed)
+					curse(obj);
+			}
 
 		    switch (obj->oclass) {
 		    case SCROLL_CLASS:
@@ -3353,6 +3362,13 @@ struct monst *owner;
 				obj->odiluted = 0;
 				set_object_color(obj);
 			    }
+			} else if (blood) {
+			    if (obj->otyp == POT_BLOOD){
+					obj->otyp = POT_BLOOD;
+					otmp->corpsenm = PM_HUMAN;
+					obj->odiluted = 0;
+					set_object_color(obj);
+				}
 			} else if (obj->odiluted || obj->otyp == POT_AMNESIA) {
 				obj->otyp = POT_WATER;
 				obj->blessed = obj->cursed = 0;

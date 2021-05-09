@@ -307,6 +307,9 @@ WEAPON(("dwarvish short sword", "broad short sword"),
 WEAPON(("mirrorblade", "polished short sword"),
 	DMG(D(6)), DMG(D(8)),
 	1, 0,  MZ_SMALL,  0, 40,100,  0, P,   P_SHORT_SWORD, SILVER, FALSE, HI_SILVER),
+WEAPON(("khopesh", "sickle-sword"),
+	DMG(D(8)), DMG(D(6)),
+	1, 0,  MZ_SMALL,  0, 30, 10,  0, S,   P_SHORT_SWORD, COPPER, FALSE, HI_COPPER),
 
 WEAPON(("scimitar", "curved sword"),
 	DMG(D(8)), DMG(D(8)),
@@ -431,8 +434,11 @@ WEAPON(("droven lance", "lance"), /*Needs encyc entry*//*Needs tile*/
 /* axe-type */
 WEAPON(("halberd", "angled poleaxe"),
 	DMG(D(10)), DMG(D(2, 6)),
-	0, 0,   MZ_HUGE,  8, 75, 10, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
-WEAPON(("bardiche", "long poleaxe"),
+	0, 0,   MZ_HUGE,  6, 75, 10, 0, P|S, P_POLEARMS, IRON, FALSE, HI_METAL),
+WEAPON(("poleaxe", "curved poleaxe"),
+	DMG(D(10)), DMG(D(2, 6)),
+	0, 0,   MZ_HUGE,  2, 75, 10, 0, P|S|B, P_POLEARMS, IRON, FALSE, HI_METAL),
+WEAPON(("bardiche", "long-bladed poleaxe"),
 	DMG(D(2, 4)), DMG(D(3, 4)),
 	0, 0,   MZ_HUGE,  4, 80,  7, 0, S,   P_POLEARMS, IRON, FALSE, HI_METAL),
 WEAPON(("voulge", "pole cleaver"),
@@ -488,10 +494,13 @@ WEAPON(("macuahuitl", "obsidian-edged club"),
 	0, 0, MZ_MEDIUM,  0, 40, 10,  0, B|S, P_CLUB, WOOD, FALSE, HI_WOOD),
 WEAPON(("quarterstaff", "staff"),
 	DMG(D(6)), DMG(D(6)),
-	0, 0,   MZ_HUGE, 10, 40,  5,  0, B,   P_QUARTERSTAFF, WOOD, FALSE, HI_WOOD),
+	0, 0,   MZ_HUGE,  9, 40,  5,  0, B,   P_QUARTERSTAFF, WOOD, FALSE, HI_WOOD),
 WEAPON(("khakkhara", "monk's staff"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(6)), DMG(D(4)),
 	0, 0,   MZ_HUGE,  2,120, 50,  0, B|P, P_QUARTERSTAFF, SILVER, IDED, HI_SILVER),
+WEAPON(("double sword"),
+	DMG(D(8)), DMG(D(12)),
+	1, 0,   MZ_HUGE,  1, 80, 30,  0, S|P, P_QUARTERSTAFF, IRON, FALSE, HI_METAL),
 WEAPON(("kamerel vajra", "short mace"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(6)),	/* very different dice for different litness states */
 	0, 0, MZ_MEDIUM,  0, 10,800,  1, S|E, P_MACE, GOLD, UNIDED, HI_GOLD),
@@ -807,6 +816,8 @@ SHIRT(("T-shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 5, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
 SHIRT(("ichcahuipilli", "thick undershirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 3,	10,   2, 10, 0, 0, CLOTH, CLR_WHITE),
+SUIT(("waistcloth"), /*Needs encyc entry*//*Needs tile*/
+	0, 0, MZ_SMALL,  ARMSZ_LIGHT, 0,   0,  0,  15,   10, 10, 0, 0, CLOTH, CLR_WHITE, O_DRSLOT(LOWER_TORSO_DR)),
 # ifdef CONVICT
 SHIRT(("striped shirt", (char *)0, "shirt"), /*Needs encyc entry*/
 	1, 0, MZ_MEDIUM, 0,	 0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_GRAY),
@@ -1716,7 +1727,7 @@ CHAIN(("hellfire component"),
 
 CHAINCORPSE(("broken android"), 3000, METAL, CLR_WHITE), /*Needs encyc entry*//*Needs tile*/
 CHAINCORPSE(("broken gynoid"),  3000, METAL, CLR_WHITE), /*Needs encyc entry*//*Needs tile*/
-CHAINCORPSE(("lifeless doll"),   750, PLASTIC, CLR_BRIGHT_MAGENTA), /*Needs encyc entry*//*Needs tile*/
+CHAINCORPSE(("lifeless doll"),   750, WOOD, CLR_BRIGHT_MAGENTA), /*Needs encyc entry*//*Needs tile*/
 
 #undef CHAINCORPSE
 

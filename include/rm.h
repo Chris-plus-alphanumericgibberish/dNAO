@@ -252,8 +252,8 @@ enum {
     MAXPCHARS		/* maximum number of mapped characters */
 };
 #define MAXDCHARS	(S_water+1)	/* maximum of mapped dungeon characters */
-#define MAXTCHARS	(S_switch-S_water)	/* maximum of mapped trap characters */
-#define MAXECHARS	(S_explode9-S_switch)	/* maximum of mapped effects characters */
+#define MAXTCHARS	(S_flesh_hook-S_water)	/* maximum of mapped trap characters */
+#define MAXECHARS	(S_explode9-S_flesh_hook)	/* maximum of mapped effects characters */
 #define MAXEXPCHARS	9	/* number of explosion characters */
 
 struct symdef {
@@ -323,7 +323,7 @@ enum {
 /*08*/	VN_A_O_BLESSINGS,
 /*09*/	VN_A_O_VITALITY,
 /*10*/	VN_A_O_CORRUPTION,
-/*11*/	VN_A_O_DESERTS,
+/*11*/	VN_A_O_BURNING_WASTES,
 /*12*/	VN_A_O_THOUGHT,
 /*13*/	VN_A_O_DEATH,
 /*14*/	VN_APOCALYPSE,

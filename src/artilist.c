@@ -1087,6 +1087,17 @@ A("Whisperfeet",					SPEED_BOOTS,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("Seven League Boots",				JUMPING_BOOTS,		(const char *)0,
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(FAST), NOFLAG,
+	PROPS(), NOFLAG,
+	SEVEN_LEAGUE_STEP, (ARTI_PLUSSEV)
+	),
+
+/*Needs encyc entry*/
 A("Water Flowers",					WATER_WALKING_BOOTS,(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, NOFLAG,
@@ -2794,7 +2805,7 @@ A("The Three-Headed Flail",			FLAIL,				"three-headed %s",
 	),
 
 /*Needs encyc entry */
-A("Heartcleaver",					HALBERD,			(const char *)0,
+A("Heartcleaver",					POLEAXE,			(const char *)0,
 	6660L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),

@@ -1629,11 +1629,17 @@ int x, y;
 		case VN_A_O_CORRUPTION:
 			mid = PM_ANCIENT_OF_CORRUPTION;
 		break;
+		case VN_A_O_BURNING_WASTES:
+			mid = PM_ANCIENT_OF_THE_BURNING_WASTES;
+		break;
 		case VN_A_O_THOUGHT:
 			mid = PM_ANCIENT_OF_THOUGHT;
 		break;
 		case VN_A_O_DEATH:
 			mid = PM_ANCIENT_OF_DEATH;
+		break;
+		case VN_APOCALYPSE:
+			mid = PM_APOCALYPSE_ANGEL;
 		break;
 		case VN_HARROWER:
 			mid = PM_HARROWER_OF_ZARIEL;
@@ -1678,7 +1684,10 @@ int x, y;
 	if(mon){
 		if(levl[x][y].vaulttype == VN_MAD_ANGEL){
 			set_template(mon, MAD_TEMPLATE);
+			mon->m_lev += (mon->data->mlevel)/2;
 		}
+		mon->mhpmax = max(4, 8*mon->m_lev);
+		mon->mhp = mon->mhpmax;
 		if(mid == PM_TULANI_ELADRIN || mid == PM_GAE_ELADRIN){
 			if(dungeon_topology.eprecursor_typ == PRE_POLYP && rn2(2))
 				mon->ispolyp = TRUE;

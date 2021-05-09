@@ -118,16 +118,17 @@ static int p_type; /* (-1)-3: (-1)=really naughty, 3=really good */
  * order to have the values be meaningful.
  */
 
-#define TROUBLE_STONED			17
-#define TROUBLE_FROZEN_AIR		16
-#define TROUBLE_SLIMED			15
-#define TROUBLE_STRANGLED		14
-#define TROUBLE_LAVA			13
-#define TROUBLE_SICK			12
-#define TROUBLE_STARVING		11
-#define TROUBLE_HIT			 	10
-#define TROUBLE_WIMAGE		 	9
-#define TROUBLE_MORGUL		 	8
+#define TROUBLE_STONED			18
+#define TROUBLE_FROZEN_AIR		17
+#define TROUBLE_SLIMED			16
+#define TROUBLE_STRANGLED		15
+#define TROUBLE_LAVA			14
+#define TROUBLE_SICK			13
+#define TROUBLE_STARVING		12
+#define TROUBLE_HIT			 	11
+#define TROUBLE_WIMAGE		 	10
+#define TROUBLE_MORGUL		 	9
+#define TROUBLE_MROT		 	8
 #define TROUBLE_HPMOD		 	7
 #define TROUBLE_LYCANTHROPE		 6
 #define TROUBLE_COLLAPSING		 5
@@ -202,6 +203,7 @@ in_trouble()
 		(u.uhp <= 5 || u.uhp*2 <= u.uhpmax)) return TROUBLE_HIT;
 	if(u.wimage >= 10 && on_altar()) return(TROUBLE_WIMAGE);
 	if(u.umorgul && on_altar()) return(TROUBLE_MORGUL);
+	if(u.umummyrot && on_altar()) return(TROUBLE_MROT);
 	if(u.uhpmod < -18 && on_altar()) return(TROUBLE_HPMOD);
 	if(u.ulycn >= LOW_PM) return(TROUBLE_LYCANTHROPE);
 	if(near_capacity() >= EXT_ENCUMBER && AMAX(A_STR)-ABASE(A_STR) > 3)
@@ -474,6 +476,10 @@ register int trouble;
 			pline("The chill of death fades away.");
 			//Destroy the blades.
 		    u.umorgul = 0;
+		    break;
+	    case TROUBLE_MROT:
+			pline("You stop shedding dust.");
+		    u.umummyrot = 0;
 		    break;
 	    case TROUBLE_HPMOD:
 			You_feel("restored to health.");

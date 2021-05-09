@@ -988,6 +988,16 @@ int spec;
 		if (otmp->ovar1)
 			otmp->ovar1--;
 		break;
+	case QUARTERSTAFF:
+		if(otmp == uwep && martial_bonus() && otmp->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT){
+			// doubled
+			wdice.oc_damn *= 2;
+			wdice.oc_damd *= 2;
+			wdice.bon_damn *= 2;
+			wdice.bon_damd *= 2;
+			spe_mult *= 2;
+		}
+		break;
 	}
 
 	switch (otmp->oartifact)
@@ -1268,7 +1278,8 @@ static NEARDATA const int rwep[] =
 };
 
 static NEARDATA const int pwep[] =
-{	HALBERD, /*1d10/2d6*/
+{	POLEAXE, /*1d10/2d6*/
+	HALBERD, /*1d10/2d6*/
 	DROVEN_LANCE, /*1d10/1d10*/
 	BARDICHE, /*2d4/3d4*/ 
 	BILL_GUISARME, /*2d4/1d10*/
@@ -1505,6 +1516,7 @@ static const NEARDATA short hwep[] = {
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
+	  DOUBLE_SWORD,/*2d8/2d12*/
 	  CRYSTAL_SWORD/*2d8/2d12*/,
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
@@ -1539,6 +1551,7 @@ static const NEARDATA short hwep[] = {
 	  NAGINATA/*1d6+1/2d4*/, 
 	  SCIMITAR/*1d8/1d8*/,
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
+	  KHOPESH,/*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  MACE/*1d6+1/1d6*/, 
 	  ELVEN_SHORT_SWORD/*1d7/1d7*/, 
@@ -1596,6 +1609,7 @@ static const NEARDATA short hpwep[] = {
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
+	  DOUBLE_SWORD,/*2d8/2d12*/
 	  CRYSTAL_SWORD/*2d8/2d12*/,
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
@@ -1609,6 +1623,7 @@ static const NEARDATA short hpwep[] = {
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
+	  POLEAXE, /*1d10/2d6*/
 	  HALBERD, /*1d10/2d6*/
 	  KATANA/*1d10/1d12*/,
 	  DROVEN_LANCE, /*1d10/1d10*/
@@ -1640,6 +1655,7 @@ static const NEARDATA short hpwep[] = {
 	  ELVEN_LANCE, /*1d8/1d8*/
 	  SCIMITAR/*1d8/1d8*/,
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
+	  KHOPESH,/*1d8/1d6*/
 	  BEC_DE_CORBIN, /*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  MACE/*1d6+1/1d6*/, 

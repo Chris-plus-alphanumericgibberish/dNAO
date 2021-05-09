@@ -407,6 +407,11 @@ tactics(mtmp)
 			){
 				monline(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
+			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
+			){
+				mofflin_close(mtmp);
+				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			} else if((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
 				&& !mtmp->mcan && !mtmp->mspec_used
@@ -462,6 +467,11 @@ tactics(mtmp)
 			){
 				monline(mtmp);
 				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY) ||
+				attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
+			){
+				mofflin_close(mtmp);
+				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			} else if((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
 				&& !mtmp->mcan && !mtmp->mspec_used
@@ -773,12 +783,12 @@ yello_resurrect()
 	/* look for a migrating Stranger */
 	mtmp = migrating_mons;
 	while (mtmp) {
-		if (mtmp->mtyp==PM_THE_STRANGER)
+		if (mtmp->mtyp==PM_STRANGER)
 			return; /*It's currently making its way over*/
 		mtmp = mtmp->nmon;
 	}
 	
-	if(!mtmp) mtmp = makemon(&mons[PM_THE_STRANGER], 0, 0, MM_NOWAIT|MM_NOCOUNTBIRTH);
+	if(!mtmp) mtmp = makemon(&mons[PM_STRANGER], 0, 0, MM_NOWAIT|MM_NOCOUNTBIRTH);
 	
 	if (mtmp) {
 		mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;

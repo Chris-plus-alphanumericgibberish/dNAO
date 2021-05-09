@@ -248,6 +248,9 @@ makedog()
 		mark_mon_as_summoned(mtmp, &youmonst, ACURR(A_CHA) + 1, 0);
 		for(int i = min(45, (u.uinsight - mtmp->m_lev)); i > 0; i--){
 			grow_up(mtmp, (struct monst *) 0);
+			//Technically might grow into a genocided form.
+			if(DEADMONSTER(mtmp))
+				return((struct monst *) 0);
 		}
 		mtmp->mspec_used = 0;
 	}
@@ -360,7 +363,10 @@ losedogs()
 
 	for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
 		mtmp2 = mtmp->nmon;
-		if (mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->m_insight_level <= u.uinsight) {
+		if (mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel 
+			&& mtmp->m_insight_level <= u.uinsight
+		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+		) {
 		    if(mtmp == migrating_mons)
 			migrating_mons = mtmp->nmon;
 		    else
@@ -837,7 +843,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			mtmp->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES || 
 			mtmp->mtyp == PM_CENTER_OF_ALL || 
 			mtmp->mtyp == PM_HUNGRY_DEAD ||
-			mtmp->mtyp == PM_THE_STRANGER ||
+			mtmp->mtyp == PM_STRANGER ||
 			mtmp->mtame
 		) {
 			if (mtmp->mleashed) {
@@ -899,9 +905,7 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	}
 
 	/* a summoner leaving affects its summons */
-	if (mtmp->summonpwr) {
-		summoner_gone(mtmp);
-	}
+	summoner_gone(mtmp);
 	/* likewise, summons don't persist away from their summoner, or if they're flagged to not be able to follow */
 	/* although your summons can travel between levels with you, they cannot do so independently of you */
 	if (get_mx(mtmp, MX_ESUM) && (!mtmp->mextra_p->esum_p->sticky || mtmp->mextra_p->esum_p->summoner)) {
@@ -1101,6 +1105,9 @@ rock:
 	    if (hates_unblessed_mon(mon) &&
 		(is_unholy(obj) || obj->blessed))
 			return(TABU);
+		if (is_vampire(mon->data) &&
+		obj->otyp == POT_BLOOD && !((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon)) || is_rider(&mons[obj->corpsenm])))
+			return DOGFOOD;
 	    if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
 			return CADAVER;
 	    if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))

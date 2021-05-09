@@ -648,7 +648,7 @@ E void FDECL(impact_drop, (struct obj *,XCHAR_P,XCHAR_P,XCHAR_P));
 
 E int FDECL(zap_raygun, (struct obj *,int, int));
 E void FDECL(hurtle, (int,int,int,BOOLEAN_P,BOOLEAN_P));
-E void FDECL(mhurtle, (struct monst *,int,int,int));
+E void FDECL(mhurtle, (struct monst *,int,int,int,boolean));
 E int FDECL(hero_breaks, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E int FDECL(breaks, (struct obj *,XCHAR_P,XCHAR_P));
 E boolean FDECL(breaktest, (struct obj *));
@@ -784,6 +784,7 @@ E boolean FDECL(bite_monster, (struct monst *));
 E void FDECL(give_intrinsic, (int, long));
 E void NDECL(fix_petrification);
 E void FDECL(consume_oeaten, (struct obj *,int));
+E int FDECL(obj_nutrition, (struct obj *));
 E boolean FDECL(maybe_finished_meal, (BOOLEAN_P));
 E int FDECL(ask_turns, (struct monst *, int, int));
 E int FDECL(ask_cp, (struct monst *, int));
@@ -1556,6 +1557,7 @@ E void FDECL(mon_to_gold, (struct monst*));
 E void FDECL(mnexto, (struct monst *));
 E void FDECL(monline, (struct monst *));
 E void FDECL(mofflin, (struct monst *));
+E void FDECL(mofflin_close, (struct monst *));
 E boolean FDECL(mnearto, (struct monst *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E void FDECL(poisontell, (int));
 E void FDECL(poisoned, (const char *,int,const char *,int));
@@ -1586,6 +1588,7 @@ E boolean FDECL(angry_guards, (BOOLEAN_P));
 E void NDECL(pacify_guards);
 E void FDECL(removeMonster,(int,int));
 E int FDECL(u_sanity_loss,(struct monst *));
+E int FDECL(u_sanity_loss_minor,(struct monst *));
 E int NDECL(u_sanity_loss_nyar);
 E int FDECL(u_sanity_gain,(struct monst *));
 E int FDECL(u_insight_gain,(struct monst *));
@@ -2697,6 +2700,7 @@ E boolean FDECL(teleok, (int,int,BOOLEAN_P));
 E boolean FDECL(goodpos, (int,int,struct monst *,unsigned));
 E boolean FDECL(eonline, (coord *,XCHAR_P,XCHAR_P,struct permonst *));
 E boolean FDECL(eofflin, (coord *,XCHAR_P,XCHAR_P,struct permonst *));
+E boolean FDECL(eofflin_close, (coord *,XCHAR_P,XCHAR_P,struct permonst *));
 E boolean FDECL(enexto, (coord *,XCHAR_P,XCHAR_P,struct permonst *));
 E boolean FDECL(enexto_core, (coord *,XCHAR_P,XCHAR_P,struct permonst *,unsigned));
 E void FDECL(xpathto, (int,XCHAR_P,XCHAR_P,int (*)(genericptr_t,int,int),void *));
@@ -2807,7 +2811,7 @@ E void FDECL(fill_pit, (int,int));
 E int FDECL(float_down, (long, long));
 E void FDECL(m_float_down, (struct monst *, boolean));
 E int FDECL(fire_damage, (struct obj *,BOOLEAN_P,BOOLEAN_P,XCHAR_P,XCHAR_P));
-E boolean FDECL(water_damage, (struct obj *,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P, struct monst *));
+E boolean FDECL(water_damage, (struct obj *, BOOLEAN_P, BOOLEAN_P, uchar, struct monst *));
 E boolean NDECL(drown);
 E int NDECL(dodeepswim);
 E void FDECL(drain_en, (int));
@@ -3188,6 +3192,8 @@ E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, vo
 E void FDECL(weave_black_web, (struct monst *));
 E int NDECL(android_combo);
 E int FDECL(u_pole_pound, (struct monst *));
+E boolean FDECL(Curse_res, (struct monst *, boolean));
+E int FDECL(mummy_curses_x, (struct monst *, struct monst *));
 
 /* ### xhityhelpers.c ### */
 

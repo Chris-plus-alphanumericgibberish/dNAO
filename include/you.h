@@ -438,7 +438,8 @@ struct you {
 	Bitfield(umartial,1);		/* Do you know kung fu? */
 	Bitfield(umaniac,1);		/* Swings wildly */
 	Bitfield(phasengn,1);		/* clockwork phase engine */
-	/* 23 free bits */
+	Bitfield(umummyrot,1);		/* you have mummy rot */
+	/* 22 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */
