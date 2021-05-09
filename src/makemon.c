@@ -1916,7 +1916,8 @@ int mkobjflags;
 								otmp->obj_color = CLR_YELLOW;
 							}
 							otmp = mongets(mtmp, SCALPEL, mkobjflags);
-							otmp->opoisoned = OPOISON_FILTH;
+							if (otmp)
+								otmp->opoisoned = OPOISON_FILTH;
 						break;
 						case 2:
 							otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags);
@@ -1925,7 +1926,8 @@ int mkobjflags;
 								otmp->opoisoned = OPOISON_FILTH;
 							}
 							otmp = mongets(mtmp, SCALPEL, mkobjflags);
-							otmp->opoisoned = OPOISON_FILTH;
+							if (otmp)
+								otmp->opoisoned = OPOISON_FILTH;
 						break;
 						case 3:
 							otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
@@ -1940,7 +1942,8 @@ int mkobjflags;
 								otmp->obj_color = CLR_YELLOW;
 							}
 							otmp = mongets(mtmp, STILETTO, mkobjflags);
-							otmp->opoisoned = OPOISON_BASIC;
+							if (otmp)
+								otmp->opoisoned = OPOISON_BASIC;
 						break;
 					}
 				} else if (mm == PM_SERVANT){
