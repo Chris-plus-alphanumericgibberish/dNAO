@@ -775,8 +775,11 @@ struct obj {
 		(mtyp) == PM_WHITE_DRAGON || \
 		(mtyp) == PM_YELLOW_DRAGON || \
 		(mtyp) == PM_GREEN_DRAGON \
-		))\
-	)
+	)) || \
+	((obj)->oartifact == ART_STEEL_SCALES_OF_KURTULMAK && (\
+		(mtyp) == PM_GRAY_DRAGON || \
+		(mtyp) == PM_RED_DRAGON \
+	)))
 
 /* Elven gear */
 #define is_elven_weapon(otmp)	((otmp)->otyp == ELVEN_ARROW\
