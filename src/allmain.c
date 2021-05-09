@@ -2814,13 +2814,14 @@ newgame()
 		scatter_weapons();
 	docrt();
 #ifdef CONVICT
-       if (Role_if(PM_CONVICT)) {
-              setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
-              setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
-              uball->spe = 1;
-              placebc();
-              newsym(u.ux,u.uy);
-       }
+	if (Role_if(PM_CONVICT)) {
+		setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+		setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+		uball->spe = 1;
+		if (Race_if(PM_CHIROPTERAN)) uball->owt = 1600;
+		placebc();
+		newsym(u.ux,u.uy);
+	}
 #endif /* CONVICT */
 
 	if (flags.legacy) {
