@@ -409,7 +409,13 @@ struct monst * specific_mtmp;
 				if (mtmp->mextra_p->esum_p->summoner) {
 					nid = mtmp->mextra_p->esum_p->sm_id;
 					mtmp->mextra_p->esum_p->summoner = (genericptr_t) (nid ? find_mid(nid, FM_EVERYWHERE) : &youmonst);
-					if (!mtmp->mextra_p->esum_p->summoner) panic("cant find m_id %d", nid);
+					if (!mtmp->mextra_p->esum_p->summoner) {
+						/* instead of panicking, just make the monster poof when timers get next run,
+						 * which is the intended behaviour if a summoned monster is separated from its summoner  */
+						//panic("cant find m_id %d", nid);
+						mtmp->mextra_p->esum_p->permanent = 0;
+						adjust_timer_duration(get_timer(mtmp->timed, DESUMMON_MON), -ESUMMON_PERMANENT);
+					}
 				}
 			}
 		}
