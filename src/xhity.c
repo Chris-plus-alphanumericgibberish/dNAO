@@ -353,7 +353,7 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef)) || Delusion(mdef)) :
+	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef))) :
 		(magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 
 	/* set permonst pointers */
@@ -522,9 +522,9 @@ int tary;
 			pline("%s uses a %s mask!", Monnam(magr), pa->mname);
 	}
 	
-	/* deliriums use random form */
-	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr && !ClearThoughts){
-		magr->mvar2 = select_newcham_form(magr);
+	/* deliriums use their apparent form */
+	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr && magr->mappearance && magr->m_ap_type == M_AP_MONSTER){
+		magr->mvar2 = magr->mappearance;
 	}
 	
 	/* zero out res[] */
@@ -998,6 +998,7 @@ int tary;
 				continue;
 			}
 			/* make the attack */
+			if ((vis&VIS_MAGR) && magr->mappearance) seemimic_ambush(magr);	// its true form must be revealed
 			result = xengulfhity(magr, mdef, attk, vis);
 			/* increment number of attacks made */
 			attacksmade++;
@@ -2282,9 +2283,6 @@ boolean nearmiss;
 				map_invisible(x(magr), y(magr));
 			if (!(vis&VIS_MDEF))
 				map_invisible(x(mdef), y(mdef));
-
-			if (mdef->m_ap_type) seemimic(mdef);
-			if (magr->m_ap_type) seemimic(magr);
 
 			pline("%s %s %s.",
 				Monnam(magr),
@@ -3683,11 +3681,10 @@ boolean ranged;
 		wake_nearto(x(mdef), y(mdef),										/* call function to wake nearby monsters */
 		combatNoise(pa) / (((youagr || youdef) && Stealth) ? 2 : 1));		/* range is reduced if the player is involved and stealthy */
 
-	/* show mimics */
-	if (magr->mappearance)
-		seemimic_ambush(magr);
-	if (mdef->mappearance)
-		seemimic(mdef);
+	/* show mimics on successful attack */
+	if (mdef->mappearance && hit) {
+		if (youagr) seemimic_ambush(mdef); else see_passive_mimic(mdef);
+	}
 	/* If the monster is undetected and hits you, you should know where the attack came from. */
 	if (youdef && magr->mundetected && hit && (hides_under(pa) || is_underswimmer(pa))) {
 		magr->mundetected = 0;
@@ -6658,6 +6655,7 @@ boolean ranged;
 					return MM_AGR_STOP;
 				}
 				else if (magr->mcan || engring || Chastity) {
+					if(magr->mappearance) seemimic_ambush(magr);
 					if (!Blind) {
 						pline("%s tries to %s you, but you seem %s.",
 							Adjmonnam(magr, "plain"),
@@ -6671,6 +6669,7 @@ boolean ranged;
 					break;
 				}
 				buf[0] = '\0';
+				if(magr->mappearance) seemimic_ambush(magr);
 				switch (steal(magr, buf, FALSE, FALSE)) {
 				case -1:
 					return MM_AGR_DIED;
@@ -6701,10 +6700,12 @@ boolean ranged;
 				if (pa->mtyp == PM_MOTHER_LILITH && could_seduce(magr, &youmonst, attk) == 1){
 					magr->mcan = 0;	/* Question for Chris: is this intentional? It's different from all others here. */
 					if (!rn2(4)) return MM_HIT;
+					if(magr->mappearance) seemimic_ambush(magr);
 					if (dolilithseduce(magr)) return MM_AGR_STOP;
 				}
 				else if (pa->mtyp == PM_BELIAL && could_seduce(magr, &youmonst, attk) == 1){
 					if (!rn2(4)) return MM_HIT;
+					if(magr->mappearance) seemimic_ambush(magr);
 					if (dobelialseduce(magr)) return MM_AGR_STOP;
 				}
 				//	else if(pa->mtyp == PM_SHAMI_AMOURAE && could_seduce(magr, &youmonst, attk) == 1 
@@ -6722,24 +6723,29 @@ boolean ranged;
 				//	}
 				else if (pa->mtyp == PM_MALCANTHET && could_seduce(magr, &youmonst, attk)
 					&& notmcan){
+					if(magr->mappearance) seemimic_ambush(magr);
 					if (domlcseduce(magr)) return MM_AGR_STOP;
 				}
 				else if (pa->mtyp == PM_GRAZ_ZT && could_seduce(magr, &youmonst, attk)
 					&& notmcan){
+					if(magr->mappearance) seemimic_ambush(magr);
 					if (dograzseduce(magr)) return MM_AGR_STOP;
 				}
 				else if (pa->mtyp == PM_PALE_NIGHT && could_seduce(magr, &youmonst, attk)
 					&& notmcan){
+					if(magr->mappearance) seemimic_ambush(magr);
 					dopaleseduce(magr);
 					return MM_AGR_STOP;
 				}
 				else if (pa->mtyp == PM_AVATAR_OF_LOLTH && could_seduce(magr, &youmonst, attk)
 					&& notmcan){
+					if(magr->mappearance) seemimic_ambush(magr);
 					dololthseduce(magr);
 					return MM_AGR_STOP;
 				}
 				else if (could_seduce(magr, &youmonst, attk) == 1
 					&& notmcan){
+					if(magr->mappearance) seemimic_ambush(magr);
 					if (doseduce(magr))
 						return MM_AGR_STOP;
 				}

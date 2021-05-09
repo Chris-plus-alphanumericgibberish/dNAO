@@ -3797,7 +3797,7 @@ struct obj *obj;
 			}
 			wakeup(mtmp, TRUE);
 		} else {
-			if (mtmp->m_ap_type &&
+			if ((mtmp->m_ap_type && mtmp->m_ap_type != M_AP_MONSTER) &&
 			!Protection_from_shape_changers && !sensemon(mtmp))
 			stumble_onto_mimic(mtmp);
 			else You("flick your whip towards %s.", mon_nam(mtmp));

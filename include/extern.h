@@ -1570,6 +1570,7 @@ E void FDECL(wake_nearto, (int,int,int));
 E void FDECL(wake_nearto_noisy, (int,int,int));
 E void FDECL(seemimic_ambush, (struct monst *));
 E void FDECL(seemimic, (struct monst *));
+E void FDECL(see_passive_mimic, (struct monst *));
 E void NDECL(rescham);
 E void NDECL(restartcham);
 E void FDECL(restore_cham, (struct monst *));
