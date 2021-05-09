@@ -9254,11 +9254,6 @@ register int	mmflags;
 						}
 						tmpm = makemon(&mons[PM_ALABASTER_ELF], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 						if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
-					} else if (mndx == PM_CHIROPTERAN){
-						tmpm = makemon(&mons[PM_WARBAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
-						if(tmpm && !rn2(3)) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
-						tmpm = makemon(&mons[PM_BATTLE_BAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
-						if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
 					}
 				}
 			}
@@ -9490,6 +9485,13 @@ register int	mmflags;
 		case S_BAT:
 			if (Inhell && is_bat(ptr))
 			    mon_adjust_speed(mtmp, 2, (struct obj *)0);
+
+			if (mndx == PM_CHIROPTERAN && anymon && !(mmflags & MM_NOGROUP)) {
+				tmpm = makemon(&mons[PM_WARBAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
+				if(tmpm && !rn2(3)) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
+				tmpm = makemon(&mons[PM_BATTLE_BAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
+				if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
+			}
 		break;
 		case S_GOLEM:
 			if(mndx == PM_GROVE_GUARDIAN){
