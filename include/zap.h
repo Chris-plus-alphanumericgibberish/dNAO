@@ -31,6 +31,7 @@ struct zapdata {
 	Bitfield(affects_floor, 1);	/* does zap-over-floor effects */
 	Bitfield(no_bounce, 1);		/* does not bounce off of walls */
 	Bitfield(no_hit_wall, 1);	/* stops just short of walls */
+	Bitfield(leaves_clouds, 1);	/* leaves a trail of adtyp-appropriate clouds */
 };
 
 
