@@ -2122,7 +2122,7 @@ int oldy;
 	/* dig out around new position */
 	for (tx = max(0, mtmp->mx-1); tx <= min(COLNO, mtmp->mx+1); tx++)
 	for (ty = max(0, mtmp->my-1); ty <= min(ROWNO, mtmp->my+1); ty++)
-		if (levl[tx][ty].typ == STONE)
+		if (levl[tx][ty].typ == STONE && may_dig(tx, ty))
 			levl[tx][ty].typ = CORR;
 }
 
