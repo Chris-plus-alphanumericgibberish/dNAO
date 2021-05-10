@@ -382,6 +382,7 @@ E boolean FDECL(digfarhole, (BOOLEAN_P,int,int));
 E int FDECL(use_pick_axe, (struct obj *));
 E int FDECL(use_pick_axe2, (struct obj *));
 E boolean FDECL(mdig_tunnel, (struct monst *));
+E void FDECL(mworldshape, (struct monst *, int, int));
 E void FDECL(watch_dig, (struct monst *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E void FDECL(zap_dig, (int,int,int));
 E struct obj *FDECL(bury_an_obj, (struct obj *));
