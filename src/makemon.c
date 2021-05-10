@@ -9003,8 +9003,8 @@ register int	mmflags;
 			unsethouse = TRUE;
 		}
 	}
-	/* on the Plane of Earth, many foes are Worldshapers, capable of phasing through rock */
-	else if(!mkmon_template && Is_earthlevel(&u.uz) && mtemplate_accepts_mtyp(WORLD_SHAPER, mtmp->mtyp) && (mtmp->data->mlevel > 15+rn2(15))) {
+	/* on the Plane of Earth, Mahadevae are Worldshapers, capable of travelling through the rock */
+	else if(!mkmon_template && Is_earthlevel(&u.uz) && mtmp->mtyp == PM_MAHADEVA) {
 		mkmon_template = WORLD_SHAPER;
 		unsethouse = TRUE;
 	}
