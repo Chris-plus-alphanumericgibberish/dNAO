@@ -2106,6 +2106,26 @@ register struct monst *mtmp;
 	return FALSE;
 }
 
+/* fill in corridors around previous position, create corridors out of rock around current position */
+void
+mworldshape(mtmp, oldx, oldy)
+struct monst * mtmp;
+int oldx;
+int oldy;
+{
+	int tx, ty;
+	/* fill in around prev position */
+	for (tx = max(0, oldx-1); tx <= min(COLNO, oldx+1); tx++)
+	for (ty = max(0, oldy-1); ty <= min(ROWNO, oldy+1); ty++)
+		if (levl[tx][ty].typ == CORR)
+			levl[tx][ty].typ = STONE;
+	/* dig out around new position */
+	for (tx = max(0, mtmp->mx-1); tx <= min(COLNO, mtmp->mx+1); tx++)
+	for (ty = max(0, mtmp->my-1); ty <= min(ROWNO, mtmp->my+1); ty++)
+		if (levl[tx][ty].typ == STONE && may_dig(tx, ty))
+			levl[tx][ty].typ = CORR;
+}
+
 #endif /* OVL0 */
 #ifdef OVL3
 

@@ -425,6 +425,21 @@ int template;
 		ptr->mflagsg |= (MG_HATESHOLY);
 		ptr->maligntyp = max(ptr->maligntyp+9, 9);
 		break;
+	case WORLD_SHAPER:
+		/* flags */
+		ptr->mflagsm |= MM_WALLWALK;
+		ptr->mflagsv |= (MV_EARTHSENSE | MV_OMNI);
+		/* defense */
+		ptr->mr = min(ptr->mr + 50, 120);
+		ptr->hdr += 5;
+		ptr->bdr += 5;
+		ptr->gdr += 5;
+		ptr->ldr += 5;
+		ptr->fdr += 5;
+		/* resists: */
+		ptr->mresists |= MR_STONE;
+		/* misc: */
+		ptr->mmove = (ptr->mmove+3)/4;
 	}
 #undef MT_ITEMS
 
@@ -778,6 +793,7 @@ int template;
 			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s the Dream-Leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "%s the mad", base->mname);
 			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "%s the fallen", base->mname);
+			else if (template == WORLD_SHAPER) Sprintf(nameBuffer, "%s the Worldshaper", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}
@@ -795,6 +811,7 @@ int template;
 			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s dream-leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "mad %s", base->mname);
 			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "fallen %s", base->mname);
+			else if (template == WORLD_SHAPER) Sprintf(nameBuffer, "%s worldshaper", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}
@@ -868,6 +885,8 @@ int mtyp;
 		return TRUE;
 	case DREAM_LEECH:
 		return TRUE;
+	case WORLD_SHAPER:
+		return (ptr->mtyp != PM_EARTH_ELEMENTAL && ptr->mtyp != PM_WIZARD_OF_YENDOR);
 	}
 	/* default fall through -- allow all */
 	return TRUE;

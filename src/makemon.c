@@ -9003,6 +9003,11 @@ register int	mmflags;
 			unsethouse = TRUE;
 		}
 	}
+	/* on the Plane of Earth, Mahadevae are Worldshapers, capable of travelling through the rock */
+	else if(!mkmon_template && Is_earthlevel(&u.uz) && mtmp->mtyp == PM_MAHADEVA) {
+		mkmon_template = WORLD_SHAPER;
+		unsethouse = TRUE;
+	}
 	/* insight check: making pseudonatural creatures out of anything reasonable */
 	else if(randmonst && !mkmon_template && can_undead(mtmp->data) && check_insight()){
 		mkmon_template = PSEUDONATURAL;
