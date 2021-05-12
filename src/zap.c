@@ -3781,6 +3781,18 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 
 			}/*if mdef*/
 
+			/* some zaps leave clouds behind */
+			if (zapdata->leaves_clouds) {
+				switch(zapdata->adtyp)
+				{
+				case AD_DRST:
+					create_gas_cloud(sx, sy, 1, 8, youagr);
+					break;
+				default:
+					impossible("Unhandled gascloud-leaving zap adtyp %d", zapdata->adtyp);
+				}
+			}
+
 			/* trees are killed by death rays */
 			if (lev->typ == TREE && zapdata->adtyp == AD_DEAD && (range >= 0)) {
 				lev->typ = DEADTREE;

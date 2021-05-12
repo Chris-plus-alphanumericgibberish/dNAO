@@ -3225,6 +3225,7 @@ E boolean FDECL(obj_jade_searing, (struct obj *));
 E int FDECL(hatesobjdmg, (struct monst *, struct obj *));
 E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
 E int FDECL(destroy_item, (struct monst *, int, int));
+E boolean FDECL(wearing_dragon_armor, (struct monst *, int));
 
 /* ### zap.c ### */
 
