@@ -2501,7 +2501,7 @@ E void FDECL(replshk, (struct monst *));
 E void FDECL(restshk, (struct monst *,BOOLEAN_P));
 E char FDECL(inside_shop, (XCHAR_P,XCHAR_P));
 E void FDECL(u_left_shop, (char *,BOOLEAN_P));
-E void FDECL(remote_burglary, (XCHAR_P,XCHAR_P));
+E void FDECL(remote_burglary, (struct obj *));
 E void FDECL(u_entered_shop, (char *));
 E boolean FDECL(same_price, (struct obj *,struct obj *));
 E void NDECL(shopper_financial_report);
