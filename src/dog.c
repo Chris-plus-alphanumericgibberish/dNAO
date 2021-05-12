@@ -807,8 +807,6 @@ boolean pets_only;	/* true for ascension or final escape */
 				picked_container(obj);	/* does the right thing */
 				obj->no_charge = 0;
 			}
-
-			summoner_gone(mtmp);
 			relmon(mtmp);
 			newsym(mtmp->mx,mtmp->my);
 			mtmp->mx = mtmp->my = 0; /* avoid mnexto()/MON_AT() problem */
@@ -816,6 +814,8 @@ boolean pets_only;	/* true for ascension or final escape */
 			mtmp->mlstmv = monstermoves;
 			mtmp->nmon = mydogs;
 			mydogs = mtmp;
+			summoner_gone(mtmp, TRUE);	/* has to be after being added to mydogs */
+
 			if(mtmp->mtyp == PM_SURYA_DEVA){
 				struct monst *blade;
 				for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
@@ -862,7 +862,7 @@ boolean pets_only;	/* true for ascension or final escape */
 	    }
 	}
 	/* any of your summons that *weren't* kept now disappear */
-	summoner_gone(&youmonst);
+	summoner_gone(&youmonst, FALSE);
 }
 
 #endif /* OVL2 */
@@ -904,14 +904,14 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 		m_unleash(mtmp, TRUE);
 	}
 
-	/* a summoner leaving affects its summons */
-	summoner_gone(mtmp);
-	/* likewise, summons don't persist away from their summoner, or if they're flagged to not be able to follow */
+	/* summons don't persist away from their summoner, or if they're flagged to not be able to follow */
 	/* although your summons can travel between levels with you, they cannot do so independently of you */
 	if (get_mx(mtmp, MX_ESUM) && (!mtmp->mextra_p->esum_p->sticky || mtmp->mextra_p->esum_p->summoner)) {
 		monvanished(mtmp);
 		return;	/* return early -- mtmp is gone. */
 	}
+	/* likewise, a summoner leaving affects its summons */
+	summoner_gone(mtmp, TRUE);
 
 	relmon(mtmp);
 	mtmp->nmon = migrating_mons;

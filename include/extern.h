@@ -2754,7 +2754,7 @@ E void NDECL(do_storms);
 E void FDECL(desummon_mon, (genericptr_t, long));
 E void FDECL(cleanup_msummon, (genericptr_t, long));
 E void FDECL(desummon_obj, (genericptr_t, long));
-E void FDECL(summoner_gone, (struct monst *));
+E void FDECL(summoner_gone, (struct monst *, boolean));
 E boolean FDECL(start_timer, (long, SHORT_P, SHORT_P, genericptr_t));
 E long FDECL(stop_timer, (SHORT_P, timer_element *));
 E void FDECL(stop_all_timers, (timer_element *));

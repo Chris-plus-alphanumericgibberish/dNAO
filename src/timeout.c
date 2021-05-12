@@ -3020,8 +3020,9 @@ int amt;
 }
 /* when a summoner dies or changes levels, all of its summons disappear */
 void
-summoner_gone(mon)
+summoner_gone(mon, travelling)
 struct monst * mon;
+boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 {
 	if (!mon) return;
 	boolean done_any = FALSE;
@@ -3033,13 +3034,32 @@ struct monst * mon;
 			(tm->func_index == DESUMMON_OBJ && (((struct obj   *)tm->arg)->oextra_p) && (esum = ((struct obj   *)tm->arg)->oextra_p->esum_p) && (mon == esum->summoner))
 			))
 		{
-			/* special exception: summoned pets may follow the player between levels */
+			/* exception 1: summoned pets may follow the player between levels */
 			if ((tm->func_index == DESUMMON_MON) && (mon == &youmonst)) {
 				struct monst * mtmp;
 				for (mtmp = mydogs; mtmp && mtmp != ((struct monst *)tm->arg); mtmp = mtmp->nmon);
 				if (mtmp)
 					continue;	/* don't desummon this monster */
 			}
+			/* exception 2: a summoner's summoned items should not disappear if they are within its inventory while travelling */
+			if ((tm->func_index == DESUMMON_OBJ) && travelling) {
+				struct obj * otmp = ((struct obj   *)tm->arg);
+				if (otmp->where == OBJ_MINVENT && otmp->ocarry == mon)
+					continue;	/* don't desummon this item */
+				/* exception 2b: if they are a pet travelling with the player and the item is on another pet travelling with player or the player */
+				struct monst * mtmp;
+				for (mtmp = mydogs; mtmp && mtmp != mon; mtmp = mtmp->nmon);
+				if (mtmp) {
+					if (otmp->where == OBJ_INVENT)
+						continue;	/* in player's inventory */
+					if (otmp->where == OBJ_MINVENT) {
+						for (mtmp = mydogs; mtmp && mtmp != otmp->ocarry; mtmp = mtmp->nmon);
+						if (mtmp)
+							continue;	/* in travelling pet's inventory */
+					}
+				}
+			}
+
 			adjust_timer_duration(tm, min(0, monstermoves - tm->timeout));
 			done_any = TRUE;
 
