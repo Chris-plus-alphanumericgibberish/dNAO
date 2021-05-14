@@ -174,7 +174,8 @@ LADDER:(50,09),down
 MONSTER:'@',"The Stranger",(48,09)
 OBJECT:'"',"amulet versus curses",(48,09),blessed,0,"The Star of Hypernotus"
 
-MONSTER:'@',"priestess",(42,01)
+MONSTER:'@',"priestess",(42,01), peaceful
+OBJECT:'(', "doll of mollification",(42,01)
 OBJECT:'(', "holy symbol of the black mother",(42,01)
 OBJECT:'\\', "bedroll",(42,01)
 OBJECT:'(',"writing desk",(26,17),uncursed,1
