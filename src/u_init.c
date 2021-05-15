@@ -1421,7 +1421,7 @@ static const struct def_skill Skill_V[] = {
     { P_DIVINATION_SPELL, P_SKILLED },
     { P_WAND_POWER, P_BASIC },
 #ifdef STEED
-    { P_RIDING, P_SKILLED },
+    { P_RIDING, P_EXPERT },
 #endif
 #ifdef BARD
     { P_MUSICALIZE, P_SKILLED },

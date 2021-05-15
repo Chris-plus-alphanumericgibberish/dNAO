@@ -21,6 +21,10 @@ static NEARDATA const char orc_steeds[] = {
 	S_DOG, S_DEMON, '\0'
 };
 
+static NEARDATA const char valk_steeds[] = {
+	S_DOG,  '\0'
+};
+
 STATIC_DCL boolean FDECL(landing_spot, (coord *, int, int));
 
 /* caller has decided that hero can't reach something while mounted */
@@ -41,6 +45,7 @@ can_saddle(mtmp)
 
 	return ((index(steeds, ptr->mlet) ||
 				(Race_if(PM_ORC) && index(orc_steeds, ptr->mlet)) ||
+				(Role_if(PM_VALKYRIE) && index(valk_steeds, ptr->mlet)) ||
 				((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && index(drow_steeds, ptr->mlet)) ||
 				(ptr->mtyp == PM_BYAKHEE)
 			) && 
