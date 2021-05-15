@@ -2166,7 +2166,9 @@ dofire()
 		}
 	}/* !notake */
 
-	if (attacktype(youracedata, AT_BREA))
+	if (attacktype(youracedata, AT_BREA)
+		|| attacktype(youracedata, AT_BRSH)
+	)
 		return dobreathe(youracedata);
 
 	if (attacktype(youracedata, AT_SPIT))
@@ -2638,6 +2640,60 @@ boolean stoponhit;
 	return TRUE;
 }
 
+/* 
+ * m_insplash()
+ * 
+ * returns TRUE if magr can catch (tarx,tary) in a splash
+ * 
+ * if called with SAFE, tries not to hit friendlies
+ */
+boolean
+m_insplash(magr, mdef, tarx, tary, safe)
+struct monst * magr;
+struct monst * mdef;
+int tarx;
+int tary;
+boolean safe;
+{
+	boolean youagr = (magr == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+
+	/* First -- target must be within 2 squares of magr */
+	if (distmin(x(magr), y(magr), tarx, tary) > 2)
+		return FALSE;
+
+	/* Second -- the points cannot be identical */
+	if (!dx && !dy)
+		return FALSE;
+
+	/* Third -- clear path; can cheat by using couldsee() if player is target or targeter */
+	if ((youagr || (tarx == u.ux && tary == u.uy)) &&
+		(!couldsee(x(magr), y(magr))))
+		return FALSE;
+	else if (!(clear_path(x(magr), y(magr), tarx, tary)))
+		return FALSE;
+	
+	if(safe){
+		int i, j;
+		int x = x(magr)+dx;
+		int y = y(magr)+dy;
+		struct monst *targ;
+		for (i = -1; i <= 1; i++)
+		for (j = -1; j <= 1; j++)
+		if (isok(x + i, y + j) && ((!i && dx) || (!j && dy) || ((!dx || i == dx) & (!dy || j == dy))) && ((ZAP_POS(levl[x][y].typ) || distmin(x - dx, y - dy, x + i, y + j) == 1) || ZAP_POS(levl[x - dx + i][y - dy + j].typ))){ // it looks strange, but it works
+			targ = m_at(x + i,y + j);
+			if(targ && magr->mpeaceful == targ->mpeaceful)
+				return FALSE;
+			if(magr->mpeaceful && u.ux == x + i && u.uy == y + j)
+				return FALSE;
+		}
+	}
+	/* made it through, we're good to go */
+	return TRUE;
+}
+
 /*
  * xbreathey() 
  * 
@@ -2660,6 +2716,7 @@ int tary;
 	static const int platinum_dragon_breaths[] = { AD_FIRE, AD_DISN, AD_SLEE, AD_ELEC };
 	static const int random_breaths[] = { AD_MAGM, AD_FIRE, AD_COLD, AD_SLEE, AD_DISN, AD_ELEC, AD_DRST, AD_ACID };
 	int dx, dy, dz;
+	int range;
 
 	if (tarx || tary) {
 		dx = sgn(tarx - x(magr));
@@ -2737,12 +2794,24 @@ int tary;
 	/* set dragonbreath if applicable*/
 	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ != AD_DISN)
 		zapdata.unreflectable = ZAP_REFL_ADVANCED;
+	/* modify type and set range */
+	if (attk->aatyp == AT_BRSH){
+		zapdata.unreflectable = ZAP_REFL_NEVER;
+		zapdata.splashing = TRUE;
+		zapdata.affects_floor = FALSE;
+		zapdata.no_bounce = TRUE;
+		zapdata.directly_hits = FALSE;
+		range = 1;
+	}
+	/* default range */
+	else 
+		range = rn1(7, 7);
 	
 	/* set damage */
 	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
 	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;
 
-	zap(magr, x(magr), y(magr), dx, dy, rn1(7, 7), &zapdata);
+	zap(magr, x(magr), y(magr), dx, dy, range, &zapdata);
 
 	/* breath runs out sometimes. */ 
 	if (!youagr) {

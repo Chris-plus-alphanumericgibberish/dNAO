@@ -531,15 +531,24 @@ MONSTER:'@',"trooper",(47,09)
 
 MONSTER:'@',"myrkalfar matron",(06,01),peaceful
 MONSTER:'@',"Elvenking",(07,01),peaceful
+OBJECT:'\\',"bed",(07,01),uncursed,0
 MONSTER:'C',"alider",(10,01),peaceful
+OBJECT:'\\',"bed",(10,01),uncursed,0
 MONSTER:'@',"trooper",(12,01),peaceful
+OBJECT:'\\',"bed",(12,01),uncursed,0
 MONSTER:'@',"myrkalfar warrior",(14,01),peaceful
+OBJECT:'\\',"bed",(14,01),uncursed,0
 
 MONSTER:'@',"human",(06,19),peaceful
+OBJECT:'\\',"bed",(06,19),uncursed,0
 MONSTER:'@',"myrkalfr",(08,19),peaceful
+OBJECT:'\\',"bed",(08,19),uncursed,0
 MONSTER:'@',"elf",(10,19),peaceful
+OBJECT:'\\',"bed",(10,19),uncursed,0
 MONSTER:'@',"human",(12,19),peaceful
+OBJECT:'\\',"bed",(12,19),uncursed,0
 MONSTER:'@',"incantifier",(14,19),peaceful
+OBJECT:'\\',"bed",(14,19),uncursed,0
 
 #0         1         2         3         4         5         6         7     
 #0123456789012345678901234567890123456789012345678901234567890123456789012345

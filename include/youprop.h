@@ -227,6 +227,7 @@
 #define HSleeping		u.uprops[SLEEPING].intrinsic
 #define ESleeping		u.uprops[SLEEPING].extrinsic
 #define Sleeping		(HSleeping || ESleeping)
+#define RestfulSleep	(HSleeping&FROMOUTSIDE || ESleeping)
 
 #define HHunger			u.uprops[HUNGER].intrinsic
 #define EHunger			u.uprops[HUNGER].extrinsic

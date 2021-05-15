@@ -1844,6 +1844,7 @@ get_description_of_attack_type(uchar id)
 	case AT_SPIT: return "spit";
 	case AT_ENGL: return "engulf";
 	case AT_BREA: return "breath";
+	case AT_BRSH: return "splashing breath";
 	case AT_EXPL: return "explosion";
 	case AT_BOOM: return "on death";
 	case AT_GAZE: return "targeted gaze";
@@ -1993,7 +1994,7 @@ get_description_of_damage_type(uchar id)
 	case AD_ECLD: return "elemental cold";
 	case AD_EACD: return "elemental acid";
 	case AD_CNFT: return "conflict-inducing touch";
-	case AD_BLUD: return "Sword of Blood";
+	case AD_BLUD: return "blood";
 	case AD_SURY: return "Arrows of Slaying";
 	case AD_NPDC: return "drains constitution";
 	case AD_GLSS: return "silver mirror shards";

@@ -616,7 +616,7 @@ register struct monst *mtmp;
 		else
 			curse(otmp);
 	    }
-	    update_inventory();
+	    update_inventory(); //Is this needed??? Maybe catches cursed saddles?
 		return TRUE;
 	}
 	return FALSE;

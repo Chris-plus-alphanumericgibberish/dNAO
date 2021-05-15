@@ -35,6 +35,7 @@ int atype;
 	case AD_ACID: return "acid";
 	case AD_DRLI: return "dark energy";
 	case AD_GOLD: return "gold";
+	case AD_BLUD: return "spray of blood";
 	default:
 		impossible("unaccounted-for breath type in breathwep: %d", atype);
 		return "404 BREATH NOT FOUND";
@@ -106,6 +107,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		(attacktype(magr->data, AT_WEAP) && mrwep) ||
 		(attacktype(magr->data, AT_DEVA) && mrwep) ||
 		(attacktype(magr->data, AT_BREA) && !magr->mcan) ||
+		(attacktype(magr->data, AT_BRSH) && !magr->mcan) ||
 		(attacktype(magr->data, AT_MAGC) && !magr->mcan) ||
 		(attacktype(magr->data, AT_MMGC) && !magr->mcan) ||
 		(attacktype(magr->data, AT_GAZE) && !magr->mcan) ||
@@ -197,6 +199,11 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 				(attacktype(magr->data, AT_BREA) && !magr->mcan) ||
 				(attacktype(magr->data, AT_MAGC) && !magr->mcan && !real_spell_adtyp((attacktype_fordmg(magr->data, AT_MAGC, AD_ANY))->adtyp)) ||
 				(attacktype(magr->data, AT_MMGC) && !magr->mcan && !real_spell_adtyp((attacktype_fordmg(magr->data, AT_MMGC, AD_ANY))->adtyp))
+			))
+			||
+			/* attacks that splash */
+			(m_insplash(magr, mdef, tarx, tary, dogbesafe) && (
+				(attacktype(magr->data, AT_BRSH) && !magr->mcan)
 			))
 			||
 			/* attacks that are on a line that DO stop on hit */

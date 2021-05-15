@@ -2281,6 +2281,7 @@ A("Velka's Rapier",		RAPIER,					(const char *)0,
 
 /*Needs encyc entry*/
 /* Doubles dragon attributes when carried */
+/* TODO: Invoke to change element? */
 A("The Dragon's Heart-Stone",		FLINT,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_NOBLEMAN, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH),

@@ -880,6 +880,7 @@ E void FDECL(explode_yours, (int,int,int,int,int,int,int,boolean));
 E void FDECL(splash, (int,int,int,int,int,int,int,int));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *));
 E void FDECL(splatter_burning_oil, (int, int));
+E int FDECL(adtyp_expl_color, (int));
 //#ifdef FIREARMS
 E void FDECL(grenade_explode, (struct obj *, int, int, BOOLEAN_P, int));
 E void FDECL(arm_bomb, (struct obj *, BOOLEAN_P));
@@ -2246,6 +2247,7 @@ E boolean FDECL(xbreathey, (struct monst *, struct attack *, int, int));
 E boolean FDECL(xspity, (struct monst *, struct attack *, int, int));
 E boolean FDECL(xfirey, (struct monst *, struct attack *, int, int, int));
 E boolean FDECL(m_online, (struct monst *, struct monst *, int, int, boolean, boolean));
+E boolean FDECL(m_insplash, (struct monst *, struct monst *, int, int, boolean));
 E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 E boolean FDECL(umetgaze, (struct monst *));
 E int NDECL(dothrow);

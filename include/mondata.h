@@ -125,6 +125,15 @@
 #define flaming(ptr)		((ptr)->mtyp == PM_FIRE_VORTEX || \
 				 (ptr)->mtyp == PM_FLAMING_SPHERE || \
 				 (ptr)->mtyp == PM_FIRE_ELEMENTAL || \
+				 (ptr)->mtyp == PM_FIRE_STORM || \
+				 (ptr)->mtyp == PM_FLAMING_ORB || \
+				 (ptr)->mtyp == PM_HELLFIRE_COLOSSUS || \
+				 (ptr)->mtyp == PM_HELLFIRE_ORB || \
+				 (ptr)->mtyp == PM_DANCING_FLAME || \
+				 (ptr)->mtyp == PM_BALL_OF_GOSSAMER_SUNLIGHT || \
+				 (ptr)->mtyp == PM_ANCIENT_OF_THE_BURNING_WASTES || \
+				 (ptr)->mtyp == PM_FIERNA || \
+				 (ptr)->mtyp == PM_MOLEK || \
 				 (ptr)->mtyp == PM_SALAMANDER)
 #define is_gold(ptr)	((ptr)->mtyp == PM_GOLD_GOLEM || \
 				 (ptr)->mtyp == PM_GOLDEN_HEART || \
@@ -412,15 +421,12 @@
 #define is_fey(ptr)			(((ptr)->mflagsa & MA_FEY) != 0L)
 #define is_demon(ptr)		(((ptr)->mflagsa & MA_DEMON) != 0L)
 #define is_law_demon(ptr)	(((ptr)->mflagsa & MA_DEMON) != 0L && is_lawful(ptr))
-#define is_ancient(ptr)		((ptr)->mtyp == PM_ANCIENT_OF_VITALITY \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_ICE \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_CORRUPTION \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_DEATH \
+#define is_ancient(ptr)		(((ptr)->mtyp >=  PM_ANCIENT_OF_BLESSINGS\
+							&& (ptr)->mtyp <= PM_ANCIENT_OF_DEATH) \
 							|| (ptr)->mtyp == PM_BAALPHEGOR \
 							)
-/*Fierna being used as the boundary is temporary*/
 #define is_tannin(ptr)		(((ptr)->mtyp >= PM_AKKABISH_TANNIN \
-							  && (ptr)->mtyp < PM_FIERNA \
+							  && (ptr)->mtyp <= PM_TERAPHIM_TANNAH \
 							 ) \
 							|| (ptr)->mtyp == PM_PALE_NIGHT \
 							|| (ptr)->mtyp == PM_DAGON \
@@ -578,7 +584,8 @@
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
 #define hates_iron(ptr)		((ptr->mflagsg&MG_HATESIRON) != 0)
 
-#define melee_polearms(ptr)	((ptr)->mtyp == PM_VROCK ||\
+#define melee_polearms(ptr)	(m_martial_skill(ptr) >= P_SKILLED ||\
+							 (ptr)->mtyp == PM_VROCK ||\
 							 (ptr)->mtyp == PM_MEPHISTOPHELES ||\
 							 (ptr)->mtyp == PM_BAPHOMET \
 							)
