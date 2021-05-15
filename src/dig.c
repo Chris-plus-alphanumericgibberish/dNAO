@@ -1696,7 +1696,36 @@ int x, y;
 				mon->ispolyp = TRUE;
 		}
 		mon->mspec_used = 0;
-		mofflin(mon);
+		if(is_ancient(mon)) mon->mvar_ancient_breath_cooldown = 1L; //Don't breathe at the end of this turn.
+		switch(levl[x][y].vaulttype){
+			case VN_AKKABISH:
+			case VN_SARTAN:
+			case VN_RAGLAYIM:
+				/* stay adjacent */
+				break;
+
+			case VN_TERAPHIM:
+			case VN_MAD_ANGEL:
+				mofflin_close(mon);
+				break;
+
+			case VN_NACHASH:
+			case VN_KHAAMNUN:
+			case VN_A_O_BLESSINGS:
+			case VN_A_O_VITALITY:
+			case VN_A_O_CORRUPTION:
+			case VN_A_O_BURNING_WASTES:
+			case VN_A_O_THOUGHT:
+			case VN_A_O_DEATH:
+			case VN_HARROWER:
+			case VN_SHALOSH:
+			default:
+				mofflin(mon);
+				break;
+			case VN_APOCALYPSE:
+				rloc(mon, TRUE);
+				break;
+		}
 		if(canseemon(mon)){
 			pline("%s appears from the magenta fog!", Monnam(mon));
 		}

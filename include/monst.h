@@ -273,6 +273,7 @@ struct monst {
 #define	DOLLMAKER_MIND_BLASTS	0x20000L
 #define	MAX_DOLL_MASK	DOLLMAKER_MIND_BLASTS
 #define	mvar_tanninType	mvar1
+#define	mvar_ancient_breath_cooldown	mvar1
 	long mvar2;
 	long mvar3;
 

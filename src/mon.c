@@ -7602,6 +7602,12 @@ struct monst *mtmp;
 		&& !(no_innards(youracedata) && !has_blood(youracedata))\
 		&& couldsee(mtmp->mx, mtmp->my)
 
+	// The breath attack can be on cooldown under very rare circumstances (ex: just created from a hell vault)
+	if(is_ancient(mtmp) && mtmp->mvar_ancient_breath_cooldown > 0){
+		mtmp->mvar_ancient_breath_cooldown--;
+		return;
+	}
+
 	if(mtmp->mtyp == PM_ANCIENT_OF_BLESSINGS){
 		struct monst *tmpm;
 		int targets = 0, damage = 0;
