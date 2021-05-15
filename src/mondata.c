@@ -1123,6 +1123,11 @@ int level_bonus;
 				attkptr->damn += rnd(3);
 				attkptr->damd += 2;
 				break;
+			case AT_BRSH:
+				attkptr->adtyp = get_random_of(randSplashDamageTypes);
+				attkptr->damn += rnd(3);
+				attkptr->damd += 2;
+				break;
 			case AT_BEAM:
 				attkptr->adtyp = get_random_of(randBeamDamageTypes);
 				break;
