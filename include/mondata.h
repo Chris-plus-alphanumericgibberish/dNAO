@@ -125,6 +125,15 @@
 #define flaming(ptr)		((ptr)->mtyp == PM_FIRE_VORTEX || \
 				 (ptr)->mtyp == PM_FLAMING_SPHERE || \
 				 (ptr)->mtyp == PM_FIRE_ELEMENTAL || \
+				 (ptr)->mtyp == PM_FIRE_STORM || \
+				 (ptr)->mtyp == PM_FLAMING_ORB || \
+				 (ptr)->mtyp == PM_HELLFIRE_COLOSSUS || \
+				 (ptr)->mtyp == PM_HELLFIRE_ORB || \
+				 (ptr)->mtyp == PM_DANCING_FLAME || \
+				 (ptr)->mtyp == PM_BALL_OF_GOSSAMER_SUNLIGHT || \
+				 (ptr)->mtyp == PM_ANCIENT_OF_THE_BURNING_WASTES || \
+				 (ptr)->mtyp == PM_FIERNA || \
+				 (ptr)->mtyp == PM_MOLEK || \
 				 (ptr)->mtyp == PM_SALAMANDER)
 #define is_gold(ptr)	((ptr)->mtyp == PM_GOLD_GOLEM || \
 				 (ptr)->mtyp == PM_GOLDEN_HEART || \
