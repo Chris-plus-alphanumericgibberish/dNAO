@@ -847,8 +847,8 @@ you_regen_san()
 	if (Race_if(PM_ELF))   reglevel += 3;
 	if (Race_if(PM_ORC))   reglevel -= 3;
 
-	// Unknown God
-	if (u.specialSealsActive&SEAL_ORTHOS){
+	// Unusually not-sane spirit
+	if (u.sealsActive&SEAL_ORTHOS){
 		reglevel -= 5;
 	}
 	
