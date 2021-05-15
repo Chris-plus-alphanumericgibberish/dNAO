@@ -811,7 +811,12 @@ int tary;
 							)
 						{
 							struct monst *mdef2 = m_u_at(tarx + dx, tary + dy);
-							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)){ //Can hit a worm multiple times
+							if (mdef2 
+								&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+								&& ((mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+									(mdef2 == &youmonst && !magr->mpeaceful) ||
+									(youagr && !mdef2->mpeaceful))
+							){ //Can hit a worm multiple times
 								int vis2 = VIS_NONE;
 								if(youagr || canseemon(magr))
 									vis2 |= VIS_MAGR;
@@ -829,7 +834,12 @@ int tary;
 							ny = sgn(dy-dx);
 							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
 								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
-								if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
+								if (mdef2 
+									&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+									&& ((mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+										(mdef2 == &youmonst && !magr->mpeaceful) ||
+										(youagr && !mdef2->mpeaceful))
+								) { //Can hit a worm multiple times
 									int vis2 = VIS_NONE;
 									if(youagr || canseemon(magr))
 										vis2 |= VIS_MAGR;
@@ -846,7 +856,12 @@ int tary;
 							ny = sgn(dx+dy);
 							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
 								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
-								if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)) { //Can hit a worm multiple times
+								if (mdef2 
+									&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+									&& ((mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+										(mdef2 == &youmonst && !magr->mpeaceful) ||
+										(youagr && !mdef2->mpeaceful))
+								) { //Can hit a worm multiple times
 									int vis2 = VIS_NONE;
 									if(youagr || canseemon(magr))
 										vis2 |= VIS_MAGR;
@@ -878,7 +893,12 @@ int tary;
 							)
 						{
 							struct monst *mdef2 = m_u_at(tarx + dx, tary + dy);
-							if (mdef2 && (!DEADMONSTER(mdef2) || mdef2 == &youmonst)){ //Can hit a worm multiple times
+							if (mdef2 
+								&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+								&& ((mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+									(mdef2 == &youmonst && !magr->mpeaceful) ||
+									(youagr && !mdef2->mpeaceful))
+							) { //Can hit a worm multiple times
 								int vis2 = VIS_NONE;
 								if(youagr || canseemon(magr))
 									vis2 |= VIS_MAGR;
