@@ -421,10 +421,8 @@
 #define is_fey(ptr)			(((ptr)->mflagsa & MA_FEY) != 0L)
 #define is_demon(ptr)		(((ptr)->mflagsa & MA_DEMON) != 0L)
 #define is_law_demon(ptr)	(((ptr)->mflagsa & MA_DEMON) != 0L && is_lawful(ptr))
-#define is_ancient(ptr)		((ptr)->mtyp == PM_ANCIENT_OF_VITALITY \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_ICE \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_CORRUPTION \
-							|| (ptr)->mtyp == PM_ANCIENT_OF_DEATH \
+#define is_ancient(ptr)		(((ptr)->mtyp >=  PM_ANCIENT_OF_BLESSINGS\
+							&& (ptr)->mtyp <= PM_ANCIENT_OF_DEATH) \
 							|| (ptr)->mtyp == PM_BAALPHEGOR \
 							)
 #define is_tannin(ptr)		(((ptr)->mtyp >= PM_AKKABISH_TANNIN \
