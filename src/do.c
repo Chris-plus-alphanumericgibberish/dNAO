@@ -912,7 +912,12 @@ dodown()
 			} else if(uarmg && is_pick(uarmg)){
 				return use_pick_axe2(uarmg);
 			} else {
-				if(levl[u.ux][u.uy].typ == STAIRS) pline("These stairs don't go down!");
+				if(levl[u.ux][u.uy].typ == STAIRS){
+					if (Is_hell3(&u.uz) && !(u.ux == xupstair && u.uy == yupstair)){
+						pline("These stairs are fake!");
+						levl[u.ux][u.uy].typ = ROOM;
+					} else pline("These stairs don't go down!");
+				}
 				else You_cant("go down here.");
 				return(0);
 			}
