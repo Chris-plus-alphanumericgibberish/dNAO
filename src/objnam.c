@@ -5425,23 +5425,37 @@ typfnd:
 	}
 	
 	if (halfeaten && otmp->oclass == FOOD_CLASS) {
-		if (otmp->otyp == CORPSE)
-			otmp->oeaten = mons[otmp->corpsenm].cnutrit;
-		else otmp->oeaten = objects[otmp->otyp].oc_nutrition;
+		int nut = obj_nutrition(otmp);
 		/* (do this adjustment before setting up object's weight) */
-		consume_oeaten(otmp, 1);
+		if (nut > 1){
+			otmp->oeaten = nut;
+			consume_oeaten(otmp, 1);
+		}
 	}
 	if (isdrained && otmp->otyp == CORPSE) {
-		int amt;
+		int amt = obj_nutrition(otmp);
 		otmp->odrained = 1;
-		amt = mons[otmp->corpsenm].cnutrit - drainlevel(otmp);
-		if (halfdrained) {
-		    amt /= 2;
-		    if (amt == 0)
-			amt++;
+
+		if (amt < 1){
+			/* do nothing, since that could give us funky oeaten values */
+		} else if (halfdrained) {
+			otmp->oeaten = amt;
+
+			amt -= drainlevel(otmp);
+			amt /= 2;
+			if (amt < 1) amt = 1;
+
+			/* (do this adjustment before setting up object's weight) */
+			consume_oeaten(otmp, -amt);
+		} else {
+			otmp->oeaten = amt;
+
+			amt -= drainlevel(otmp);
+			if (amt < 1) amt = 1;
+
+			/* (do this adjustment before setting up object's weight) */
+			consume_oeaten(otmp, -amt);
 		}
-		/* (do this adjustment before setting up object's weight) */
-		consume_oeaten(otmp, -amt);
 	}
 	otmp->owt = weight(otmp);
 	if (very && otmp->otyp == HEAVY_IRON_BALL) otmp->owt += 160;

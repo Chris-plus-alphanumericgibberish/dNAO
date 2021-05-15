@@ -996,7 +996,9 @@ genericptr_t p2;
     reg = (NhRegion *) p1;
     dam = (int)(intptr_t)reg->arg;
     if (p2 == NULL) {		/* This means *YOU* Bozo! */
-	if (nonliving(youracedata) || Breathless)
+	if (nonliving(youracedata) || Breathless ||
+		youmonst.mtyp == PM_GREEN_DRAGON || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_DRST) ||
+		wearing_dragon_armor(&youmonst, PM_GREEN_DRAGON))
 	    return FALSE;
 	if (!Blind)
 	    make_blinded(1L, FALSE);

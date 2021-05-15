@@ -1588,11 +1588,6 @@ struct monst *mtmp;
 	if (mtmp->cham && !rn2(6))
 	    (void) newcham(mtmp, NON_PM, FALSE, FALSE);
 	were_change(mtmp);
-	if(u.umadness&MAD_REAL_DELUSIONS && !ClearThoughts && u.usanity < mtmp->m_san_level*0.8){
-		if(!(mtmp->data->geno&(G_UNIQ|G_NOGEN))){
-			newcham(mtmp, NON_PM, FALSE, FALSE);
-		}
-	}
 	
 	if(!mtmp->mcansee && (mtmp->mtyp == PM_SHOGGOTH || mtmp->mtyp == PM_PRIEST_OF_GHAUNADAUR)){
 		if(canspotmon(mtmp)) pline("%s forms new eyes!",Monnam(mtmp));
@@ -3448,7 +3443,7 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	mtmp->mtrapped = 0;
 	mtmp->mhp = 0; /* simplify some tests: force mhp to 0 */
 	relobj(mtmp, 0, FALSE);
-	summoner_gone(mtmp);
+	summoner_gone(mtmp, FALSE);
 	remove_monster(mtmp->mx, mtmp->my);
 	del_light_source(mtmp->light);
 	stop_all_timers(mtmp->timed);
@@ -5841,7 +5836,7 @@ int anger;
 	mtmp->meating = 0;	/* assume there's no salvagable food left */
 	mtmp->mstrategy &= ~(STRAT_WAITMASK);
 	if(anger) setmangry(mtmp);
-	if(mtmp->m_ap_type) seemimic(mtmp);
+	if(mtmp->m_ap_type) see_passive_mimic(mtmp);
 	else if (flags.forcefight && !flags.mon_moving && mtmp->mundetected) {
 	    mtmp->mundetected = 0;
 	    newsym(mtmp->mx, mtmp->my);
@@ -5989,16 +5984,19 @@ register int x, y, distance;
 	}
 }
 
+/* reveals monster-mimickers as well as passive-mimickers with a surprised message */
+/* If the player is suffering from the REAL_DELUSIONS madness, this may instead polymorph mtmp to its pretend form */
 void
 seemimic_ambush(mtmp)
 struct monst *mtmp;
 {
 	unsigned old_app = mtmp->mappearance;
 	uchar old_ap_type = mtmp->m_ap_type;
+	boolean couldsense = canseemon(mtmp) && !(sensemon(mtmp) && old_ap_type != M_AP_MONSTER);
 
 	seemimic(mtmp);
 
-	if (canseemon(mtmp) && !sensemon(mtmp)) {
+	if (couldsense) {
 		const char * app;
 		switch (old_ap_type)
 		{
@@ -6023,11 +6021,23 @@ struct monst *mtmp;
 			a_monnam(mtmp)
 			);
 	}
+	/* if suffering from *real* delusions, and monster was mimicing a monster, it may polymorph! */
+	if (roll_madness(MAD_REAL_DELUSIONS) && old_ap_type == M_AP_MONSTER) {
+		if(!(mtmp->data->geno&(G_UNIQ|G_NOGEN)) // isn't a unique or special monster
+			&& !(mons[old_app].geno&(G_UNIQ|G_NOGEN)) // not pretending to be a unique or special monster
+			&& !(roll_madness(MAD_REAL_DELUSIONS) && (monstr[mtmp->mtyp] > monstr[old_app])) // if a 2nd roll succeeds, only if becoming something nastier
+			){
+			if (couldsense)
+				pline("...or was it?");
+			newcham(mtmp, old_app, FALSE, FALSE);
+		}
+	}
 	return;
 }
 
 
 /* NOTE: we must check for mimicry before calling this routine */
+/* reveals monster-mimickers as well as passive-mimickers, with no message */
 void
 seemimic(mtmp)
 register struct monst *mtmp;
@@ -6050,6 +6060,15 @@ register struct monst *mtmp;
 	newsym(mtmp->mx,mtmp->my);
 }
 
+/* seemimic() for furniture and objects only */
+void
+see_passive_mimic(mtmp)
+register struct monst * mtmp;
+{
+	if (mtmp->m_ap_type == M_AP_FURNITURE || mtmp->m_ap_type == M_AP_OBJECT)
+		seemimic(mtmp);	
+}
+
 /* force all chameleons to become normal */
 void
 rescham()
@@ -6067,7 +6086,7 @@ rescham()
 		}
 		if(is_were(mtmp->data) && mtmp->data->mlet != S_HUMAN)
 			new_were(mtmp);
-		if(mtmp->m_ap_type && cansee(mtmp->mx, mtmp->my)) {
+		if(mtmp->m_ap_type && cansee(mtmp->mx, mtmp->my) && mtmp->m_ap_type != M_AP_MONSTER) {
 			seemimic(mtmp);
 			/* we pretend that the mimic doesn't */
 			/* know that it has been unmasked.   */

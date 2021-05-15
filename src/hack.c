@@ -1205,7 +1205,7 @@ domove()
 	     * different message and makes the player remember the monster.		     */
 	    if(flags.nopick &&
 		  (canspotmon(mtmp) || glyph_is_invisible(levl[x][y].glyph))){
-			if(mtmp->m_ap_type && !Protection_from_shape_changers
+			if((mtmp->m_ap_type && mtmp->m_ap_type != M_AP_MONSTER) && !Protection_from_shape_changers
 								&& !sensemon(mtmp))
 				stumble_onto_mimic(mtmp);
 			else if (mtmp->mpeaceful && !Hallucination)

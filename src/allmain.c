@@ -962,6 +962,8 @@ moveloop()
 		if(flags.run != 0){
 			if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				youmonst.movement -= 1;
+			} else if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
+				youmonst.movement -= 2;
 			} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
 				youmonst.movement -= 3;
 			} else if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
@@ -1508,12 +1510,19 @@ karemade:
 					}
 				}
 
-				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts && canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts) {
 					static long lastusedmove = 0;
-					if(lastusedmove != moves){
-						pline("%s takes on forms new and terrible!", Monnam(mtmp));
-						lastusedmove = moves;
-						change_usanity(u_sanity_loss_minor(mtmp), TRUE);
+					if (lastusedmove != moves) {
+						if (!mtmp->mappearance || (canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1 && rn2(3))) {
+
+							if(canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1) {
+								pline("%s takes on forms new and terrible!", Monnam(mtmp));
+    						change_usanity(u_sanity_loss_minor(mtmp), TRUE);
+							}
+							lastusedmove = moves;
+							mtmp->mappearance = select_newcham_form(mtmp);
+							mtmp->m_ap_type = M_AP_MONSTER;
+						}
 					}
 				}
 
@@ -2853,13 +2862,14 @@ newgame()
 		scatter_weapons();
 	docrt();
 #ifdef CONVICT
-       if (Role_if(PM_CONVICT)) {
-              setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
-              setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
-              uball->spe = 1;
-              placebc();
-              newsym(u.ux,u.uy);
-       }
+	if (Role_if(PM_CONVICT)) {
+		setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+		setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+		uball->spe = 1;
+		if (Race_if(PM_CHIROPTERAN)) uball->owt = 1600;
+		placebc();
+		newsym(u.ux,u.uy);
+	}
 #endif /* CONVICT */
 
 	if (flags.legacy) {

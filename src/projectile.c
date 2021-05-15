@@ -2794,6 +2794,7 @@ int tary;
 	/* set dragonbreath if applicable*/
 	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ != AD_DISN)
 		zapdata.unreflectable = ZAP_REFL_ADVANCED;
+
 	/* modify type and set range */
 	if (attk->aatyp == AT_BRSH){
 		zapdata.unreflectable = ZAP_REFL_NEVER;
@@ -2806,7 +2807,11 @@ int tary;
 	/* default range */
 	else 
 		range = rn1(7, 7);
-	
+
+	/* green dragon breath leaves clouds */
+	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ == AD_DRST)
+		zapdata.leaves_clouds = TRUE;
+
 	/* set damage */
 	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
 	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;

@@ -214,7 +214,7 @@
  * given.
  */
 #define what_obj(obj)	(Hallucination ? random_object()  : obj)
-#define what_mon(mon, mtmp)	((Hallucination || Delusion(mtmp)) ? random_monster() : mon)
+#define what_mon(mon, mtmp)	((Hallucination) ? random_monster() : mon)
 #define what_trap(trp)	(Hallucination ? random_trap()	  : trp)
 
 /*

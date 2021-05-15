@@ -425,6 +425,21 @@ int template;
 		ptr->mflagsg |= (MG_HATESHOLY);
 		ptr->maligntyp = max(ptr->maligntyp+9, 9);
 		break;
+	case WORLD_SHAPER:
+		/* flags */
+		ptr->mflagsm |= MM_WALLWALK;
+		ptr->mflagsv |= (MV_EARTHSENSE | MV_OMNI);
+		/* defense */
+		ptr->mr = min(ptr->mr + 50, 120);
+		ptr->hdr += 5;
+		ptr->bdr += 5;
+		ptr->gdr += 5;
+		ptr->ldr += 5;
+		ptr->fdr += 5;
+		/* resists: */
+		ptr->mresists |= MR_STONE;
+		/* misc: */
+		ptr->mmove = (ptr->mmove+3)/4;
 	}
 #undef MT_ITEMS
 
@@ -779,6 +794,7 @@ int template;
 			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s the Dream-Leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "%s the mad", base->mname);
 			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "%s the fallen", base->mname);
+			else if (template == WORLD_SHAPER) Sprintf(nameBuffer, "%s the Worldshaper", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}
@@ -796,6 +812,7 @@ int template;
 			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s dream-leech", base->mname);
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "mad %s", base->mname);
 			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "fallen %s", base->mname);
+			else if (template == WORLD_SHAPER) Sprintf(nameBuffer, "%s worldshaper", base->mname);
 //			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
 			else Sprintf(nameBuffer, "%s", base->mname);
 		}
@@ -869,6 +886,8 @@ int mtyp;
 		return TRUE;
 	case DREAM_LEECH:
 		return TRUE;
+	case WORLD_SHAPER:
+		return (ptr->mtyp != PM_EARTH_ELEMENTAL && ptr->mtyp != PM_WIZARD_OF_YENDOR);
 	}
 	/* default fall through -- allow all */
 	return TRUE;
@@ -1507,8 +1526,7 @@ struct monst *mon;
 		|| youracedata->mtyp == PM_FLUX_SLIME
 		|| youracedata->mtyp == PM_RED_DRAGON
 		|| is_rider(youracedata)
-		|| (uarm && (uarm->otyp == RED_DRAGON_SCALES || uarm->otyp == RED_DRAGON_SCALE_MAIL))
-		|| (uarms && (uarms->otyp == RED_DRAGON_SCALE_SHIELD))
+		|| wearing_dragon_armor(mon, PM_RED_DRAGON)
 		);
 	//else
 	return (Change_res(mon) || mon_resistance(mon, GOOD_HEALTH) || flaming(mon->data) 
@@ -1518,8 +1536,7 @@ struct monst *mon;
 		|| mon->mtyp == PM_RED_DRAGON
 		|| has_template(mon, SLIME_REMNANT)
 		|| is_rider(mon->data)
-		|| (((otmp = which_armor(mon, W_ARM))) && (otmp->otyp == RED_DRAGON_SCALES || otmp->otyp == RED_DRAGON_SCALE_MAIL))
-		|| (((otmp = which_armor(mon, W_ARMS))) && (otmp->otyp == RED_DRAGON_SCALE_SHIELD))
+		|| wearing_dragon_armor(mon, PM_RED_DRAGON)
 		);
 }
 
@@ -2050,11 +2067,19 @@ int
 pronoun_gender(mtmp)
 register struct monst *mtmp;
 {
-	if(is_neuter(mtmp->data) || !canspotmon(mtmp)) return 2;
+	struct permonst * mdat = mtmp->data;
+	if(mtmp->m_ap_type == M_AP_MONSTER) mdat = &mons[mtmp->mappearance];
+
+	if(is_neuter(mdat) || !canspotmon(mtmp)) return 2;
 	if(has_template(mtmp, SKELIFIED) && !Role_if(PM_ARCHEOLOGIST))
 		return 2;
-	return (humanoid_torso(mtmp->data) || (mtmp->data->geno & G_UNIQ) ||
-		type_is_pname(mtmp->data)) ? (int)mtmp->female : 2;
+	if (!(humanoid_torso(mdat) || (mdat->geno & G_UNIQ) ||
+		type_is_pname(mdat)))
+		return 2;
+	if (mtmp->m_ap_type == M_AP_MONSTER) {
+		return is_female(mdat) ? 1 : is_male(mdat) ? 0 : mtmp->female;
+	}
+	return (int)mtmp->female;
 }
 
 #endif /* OVL2 */

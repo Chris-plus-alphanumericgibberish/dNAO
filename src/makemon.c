@@ -1916,7 +1916,8 @@ int mkobjflags;
 								otmp->obj_color = CLR_YELLOW;
 							}
 							otmp = mongets(mtmp, SCALPEL, mkobjflags);
-							otmp->opoisoned = OPOISON_FILTH;
+							if (otmp)
+								otmp->opoisoned = OPOISON_FILTH;
 						break;
 						case 2:
 							otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags);
@@ -1925,7 +1926,8 @@ int mkobjflags;
 								otmp->opoisoned = OPOISON_FILTH;
 							}
 							otmp = mongets(mtmp, SCALPEL, mkobjflags);
-							otmp->opoisoned = OPOISON_FILTH;
+							if (otmp)
+								otmp->opoisoned = OPOISON_FILTH;
 						break;
 						case 3:
 							otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
@@ -1940,7 +1942,8 @@ int mkobjflags;
 								otmp->obj_color = CLR_YELLOW;
 							}
 							otmp = mongets(mtmp, STILETTO, mkobjflags);
-							otmp->opoisoned = OPOISON_BASIC;
+							if (otmp)
+								otmp->opoisoned = OPOISON_BASIC;
 						break;
 					}
 				} else if (mm == PM_SERVANT){
@@ -8718,12 +8721,7 @@ register int	mmflags;
 	if (ptr->mtyp == urole.ldrnum)
 	    quest_status.leader_m_id = mtmp->m_id;
 	mtmp->m_lev = adj_lev(ptr);
-	float sanlev = ((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX));
-	mtmp->m_san_level = max(1, (int)(sanlev*100));
 	mtmp->m_insight_level = 0;
-	
-	if(mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS)
-		mtmp->m_san_level = 1;
 		
 	if(mtmp->mtyp == PM_LURKING_ONE)
 		mtmp->m_insight_level = 20+rn2(21);
@@ -9005,6 +9003,11 @@ register int	mmflags;
 			unsethouse = TRUE;
 		}
 	}
+	/* on the Plane of Earth, Mahadevae are Worldshapers, capable of travelling through the rock */
+	else if(!mkmon_template && Is_earthlevel(&u.uz) && mtmp->mtyp == PM_MAHADEVA) {
+		mkmon_template = WORLD_SHAPER;
+		unsethouse = TRUE;
+	}
 	/* insight check: making pseudonatural creatures out of anything reasonable */
 	else if(randmonst && !mkmon_template && can_undead(mtmp->data) && check_insight()){
 		mkmon_template = PSEUDONATURAL;
@@ -9251,11 +9254,6 @@ register int	mmflags;
 						}
 						tmpm = makemon(&mons[PM_ALABASTER_ELF], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 						if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
-					} else if (mndx == PM_CHIROPTERAN){
-						tmpm = makemon(&mons[PM_WARBAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
-						if(tmpm && !rn2(3)) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
-						tmpm = makemon(&mons[PM_BATTLE_BAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
-						if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
 					}
 				}
 			}
@@ -9487,6 +9485,13 @@ register int	mmflags;
 		case S_BAT:
 			if (Inhell && is_bat(ptr))
 			    mon_adjust_speed(mtmp, 2, (struct obj *)0);
+
+			if (mndx == PM_CHIROPTERAN && anymon && !(mmflags & MM_NOGROUP)) {
+				tmpm = makemon(&mons[PM_WARBAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
+				if(tmpm && !rn2(3)) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
+				tmpm = makemon(&mons[PM_BATTLE_BAT], mtmp->mx, mtmp->my, MM_ADJACENTOK);
+				if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
+			}
 		break;
 		case S_GOLEM:
 			if(mndx == PM_GROVE_GUARDIAN){
@@ -9635,6 +9640,10 @@ register int	mmflags;
 				}
 			    mtmp->invis_blkd = TRUE;
 			}
+			if(mndx == PM_WALKING_DELIRIUM && !ClearThoughts){
+				mtmp->mappearance = select_newcham_form(mtmp);
+				mtmp->m_ap_type = M_AP_MONSTER;
+			}
 //			pline("%d\n",mtmp->mhpmax);
 		break;
 	}
@@ -9725,6 +9734,16 @@ register int	mmflags;
 	    /* we can now create worms with tails - 11/91 */
 	    initworm(mtmp, mndx == PM_HUNTING_HORROR ? 2 : rn2(5));
 	    if (count_wsegs(mtmp)) place_worm_tail_randomly(mtmp, x, y);
+	}
+	/* Delusions madness can hide the appearance of a monster */
+	if (roll_madness(MAD_DELUSIONS) && mtmp->m_ap_type == M_AP_NOTHING && !(
+			mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS))
+	{
+		mtmp->m_ap_type = M_AP_MONSTER;
+		mtmp->mappearance = rndmonst()->mtyp;
+		/* less commonly have very out-of-place appearances */
+		while (mtmp->mappearance == mtmp->mtyp || !rn2(20))
+			mtmp->mappearance = rn2(SPECIAL_PM);
 	}
 	set_malign(mtmp);		/* having finished peaceful changes */
 	if(u.uevent.uaxus_foe && (mndx <= PM_QUINON && mndx >= PM_MONOTON)){

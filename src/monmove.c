@@ -2573,7 +2573,9 @@ postmov:
 				  makeplural(locomotion(mtmp, "pass")),
 				  mon_resistance(mtmp,PASSES_WALLS) ? "through" : "between");
 		}
-
+		if (mtmp->mtemplate == WORLD_SHAPER) {
+			mworldshape(mtmp, omx, omy);
+		}
 		/* possibly dig */
 		if (can_tunnel && mdig_tunnel(mtmp))
 			return(2);  /* mon died (position already updated) */

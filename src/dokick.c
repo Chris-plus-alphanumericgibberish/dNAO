@@ -39,7 +39,9 @@ register boolean clumsy;
 	boolean trapkilled = FALSE;
 	int result;
 
-	if(mon->m_ap_type) seemimic(mon);
+	if(mon->m_ap_type) {
+		if(mon->m_ap_type == M_AP_MONSTER) seemimic_ambush(mon); else seemimic(mon);
+	}
 	check_caitiff(mon);
 
 	result = xmeleehity(&youmonst, mon, &basickick, (struct obj **)0, -1, 1000, FALSE);

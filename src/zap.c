@@ -3787,6 +3787,18 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 
 			}/*if mdef*/
 
+			/* some zaps leave clouds behind */
+			if (zapdata->leaves_clouds) {
+				switch(zapdata->adtyp)
+				{
+				case AD_DRST:
+					create_gas_cloud(sx, sy, 1, 8, youagr);
+					break;
+				default:
+					impossible("Unhandled gascloud-leaving zap adtyp %d", zapdata->adtyp);
+				}
+			}
+
 			/* trees are killed by death rays */
 			if (lev->typ == TREE && zapdata->adtyp == AD_DEAD && (range >= 0)) {
 				lev->typ = DEADTREE;
@@ -4474,7 +4486,7 @@ struct obj *otmp;	/* source of flash */
 		/* at this point, reveal them */
 		mtmp->mundetected = 0;
 		if (mtmp->m_ap_type)
-			seemimic(mtmp);
+			see_passive_mimic(mtmp);
 		newsym(mtmp->mx, mtmp->my);
 		if (mtmp->mtyp == PM_GREMLIN) {
 		    /* Rule #1: Keep them out of the light. */

@@ -918,6 +918,8 @@ boolean called;
 	static char buffers[XMONNAM_BUFFERS][BUFSZ];
 #endif
 	struct permonst *mdat = mtmp->data;
+	const char * appearname = mdat->mname;
+	int appeartype = mdat->mtyp;
 	boolean do_hallu, do_invis, do_it, do_saddle;
 	boolean name_at_start, has_adjectives;
 	char *bp;
@@ -933,7 +935,7 @@ boolean called;
 	if (article == ARTICLE_YOUR && !mtmp->mtame)
 	    article = ARTICLE_THE;
 
-	do_hallu = (Hallucination || Delusion(mtmp)) && !(suppress & SUPPRESS_HALLUCINATION);
+	do_hallu = (Hallucination) && !(suppress & SUPPRESS_HALLUCINATION);
 	do_invis = mtmp->minvis && !(suppress & SUPPRESS_INVISIBLE);
 	do_it = !canspotmon(mtmp) && 
 	    article != ARTICLE_YOUR &&
@@ -971,6 +973,13 @@ boolean called;
 	    return strcpy(buf, name);
 	}
 
+	/* monsters appearing as other monsters */
+	if ((mtmp->m_ap_type == M_AP_MONSTER) && !(suppress & SUPPRESS_HALLUCINATION)) {
+		appeartype = mtmp->mappearance;
+		appearname = mons[appeartype].mname;
+		mdat = &mons[appeartype];
+	}
+
 	/* Shopkeepers: use shopkeeper name.  For normal shopkeepers, just
 	 * "Asidonhopo"; for unusual ones, "Asidonhopo the invisible
 	 * shopkeeper" or "Asidonhopo the blue dragon".  If hallucinating,
@@ -986,11 +995,11 @@ boolean called;
 		return buf;
 	    }
 	    Strcat(buf, shkname(mtmp));
-	    if (mdat->mtyp == PM_SHOPKEEPER && !do_invis)
+	    if (appeartype == PM_SHOPKEEPER && !do_invis)
 		return buf;
 	    Strcat(buf, " the ");
 	    if (do_invis) Strcat(buf, "invisible ");
-		if (mtmp->mflee && mtmp->mtyp == PM_BANDERSNATCH){
+		if (mtmp->mflee && appeartype == PM_BANDERSNATCH){
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
@@ -1014,7 +1023,7 @@ boolean called;
 			Sprintf(eos(buf), "%sed ", OBJ_DESCR(objects[mtmp->mvar_syllable]));
 			name_at_start = FALSE;
 		}
-	    Strcat(buf, mdat->mname);
+	    Strcat(buf, appearname);
 		append_template_desc(mtmp, buf, TRUE);
 	    return buf;
 	}
@@ -1044,17 +1053,17 @@ boolean called;
 	} else if (M_HAS_NAME(mtmp)) {
 	    char *name = MNAME(mtmp);
 
-	    if (mdat->mtyp == PM_GHOST) {
+	    if (appeartype == PM_GHOST) {
 			Sprintf(eos(buf), "%s ghost", s_suffix(name));
 			name_at_start = TRUE;
-	    } else if (mdat->mtyp == PM_SHADE) {
+	    } else if (appeartype == PM_SHADE) {
 			Sprintf(eos(buf), "%s shade", s_suffix(name));
 			name_at_start = TRUE;
-	    } else if (mdat->mtyp == PM_BROKEN_SHADOW) {
+	    } else if (appeartype == PM_BROKEN_SHADOW) {
 			Sprintf(eos(buf), "%s broken shadow", s_suffix(name));
 			name_at_start = TRUE;
 	    } else if (called) {
-			if (mtmp->mflee && mtmp->mtyp == PM_BANDERSNATCH){
+			if (mtmp->mflee && appeartype == PM_BANDERSNATCH){
 				Sprintf(eos(buf), "frumious ");
 				name_at_start = FALSE;
 			}
@@ -1078,7 +1087,7 @@ boolean called;
 				name_at_start = FALSE;
 			}
 			
-			Sprintf(eos(buf), "%s", mdat->mname);
+			Sprintf(eos(buf), "%s", appearname);
 			append_template_desc(mtmp, buf, type_is_pname(mdat));
 			Sprintf(eos(buf), " called %s", name);
 			
@@ -1109,7 +1118,7 @@ boolean called;
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
-		if (mtmp->mflee && mtmp->mtyp == PM_BANDERSNATCH){
+		if (mtmp->mflee && appeartype == PM_BANDERSNATCH){
 			Strcat(buf, "frumious ");
 			name_at_start = FALSE;
 		}
@@ -1133,16 +1142,16 @@ boolean called;
 			Sprintf(eos(buf), "%sed ", OBJ_DESCR(objects[mtmp->mvar_syllable]));
 			name_at_start = FALSE;
 		}
-	    Strcat(buf, mdat->mname);
+	    Strcat(buf, appearname);
 		append_template_desc(mtmp, buf, type_is_pname(mdat));
 	}
 
 	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {
-	    if (mdat->mtyp == PM_WIZARD_OF_YENDOR)
+	    if (appeartype == PM_WIZARD_OF_YENDOR)
 		article = ARTICLE_THE;
 	    else
 		article = ARTICLE_NONE;
-	} else if ((mdat->geno & G_UNIQ) && article == ARTICLE_A && mdat->mtyp != PM_GOD) {
+	} else if ((mdat->geno & G_UNIQ) && article == ARTICLE_A && appeartype != PM_GOD) {
 	    article = ARTICLE_THE;
 	}
 
@@ -1431,7 +1440,7 @@ char *outbuf;
     /* high priest(ess)'s identity is concealed on the Astral Plane,
        unless you're adjacent (overridden for hallucination which does
        its own obfuscation) */
-    if ( (mon->mtyp == PM_HIGH_PRIEST || mon->mtyp == PM_ELDER_PRIEST) && !(Hallucination || Delusion(mon)) &&
+    if ( (mon->mtyp == PM_HIGH_PRIEST || mon->mtyp == PM_ELDER_PRIEST) && !(Hallucination) &&
 	    Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
 	Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
 	Strcat(outbuf, mon->female ? "high priestess" : "high priest");
