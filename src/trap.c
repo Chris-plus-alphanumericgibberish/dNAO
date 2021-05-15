@@ -3249,8 +3249,8 @@ uchar modifiers;
 struct monst *owner;
 {
 	/* Dips in the Lethe are a very poor idea - Lethe patch*/
-	boolean lethe = modifiers|WD_LETHE;
-	boolean blood = modifiers|WD_BLOOD;
+	boolean lethe = modifiers&WD_LETHE;
+	boolean blood = modifiers&WD_BLOOD;
 	int luckpenalty = lethe ? 7 : 0;
 	struct obj *otmp;
 	struct obj *obj_original = obj;
@@ -3356,19 +3356,23 @@ struct monst *owner;
 			/* Potions turn to water or amnesia... */
 			if (is_lethe) {
 			    if (obj->otyp == POT_WATER)
-				obj->otyp = POT_AMNESIA;
+					obj->otyp = POT_AMNESIA;
 			    else if (obj->otyp != POT_AMNESIA) {
-				obj->otyp = POT_WATER;
+					obj->otyp = POT_WATER;
 				obj->odiluted = 0;
 				set_object_color(obj);
 			    }
 			} else if (blood) {
-			    if (obj->otyp == POT_BLOOD){
-					obj->otyp = POT_BLOOD;
-					otmp->corpsenm = PM_HUMAN;
-					obj->odiluted = 0;
-					set_object_color(obj);
+			    if (obj->otyp != POT_BLOOD){
+					if(obj->odiluted){
+						obj->otyp = POT_BLOOD;
+						otmp->corpsenm = PM_HUMAN;
+						obj->odiluted = 0;
+						set_object_color(obj);
+					}
+					else obj->odiluted = TRUE;
 				}
+				else obj->odiluted = 0;
 			} else if (obj->odiluted || obj->otyp == POT_AMNESIA) {
 				obj->otyp = POT_WATER;
 				obj->blessed = obj->cursed = 0;

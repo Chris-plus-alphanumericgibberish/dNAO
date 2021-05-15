@@ -1617,6 +1617,9 @@ int x, y;
 		case VN_RAGLAYIM:
 			mid = PM_RAGLAYIM_TANNIN;
 		break;
+		case VN_TERAPHIM:
+			mid = PM_TERAPHIM_TANNAH;
+		break;
 		case VN_SARTAN:
 			mid = PM_SARTAN_TANNIN;
 		break;

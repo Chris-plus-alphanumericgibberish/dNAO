@@ -72,6 +72,7 @@ int adtyp, ztyp;
 		case AD_DEAD: return "death ray";
 		case AD_ELEC: return "lightning bolt";
 		default:      impossible("unknown wand damage type in flash_type: %d", adtyp);
+			return "NaN ray";
 		}
 		break;
 	case ZAP_SPELL:
@@ -88,6 +89,7 @@ int adtyp, ztyp;
 		case AD_STAR: return "stream of silver stars";
 		case AD_DISN: return "disintegration ray";
 		default:      impossible("unknown spell damage type in flash_type: %d", adtyp);
+			return "cube of questions";
 		}
 		break;
 
@@ -104,7 +106,9 @@ int adtyp, ztyp;
 		case AD_ACID: return "blast of acid";
 		case AD_DRLI: return "blast of dark energy";
 		case AD_GOLD: return "blast of golden shards";
+		case AD_BLUD: return "spray of blood";
 		default:      impossible("unknown breath damage type in flash_type: %d", adtyp);
+			return "blast of static";
 		}
 	case ZAP_RAYGUN:
 		switch (adtyp)
@@ -116,6 +120,7 @@ int adtyp, ztyp;
 		case AD_DEAD: return "death ray";
 		case AD_DISN: return "disintegration ray";
 		default:      impossible("unknown raygun damage type in flash_type: %d", adtyp);
+			return "barrage of lost packets";
 		}
 	default:
 		impossible("unknown ztyp in flash_type: %d", ztyp);
@@ -133,7 +138,8 @@ int adtyp;
 	case AD_DEAD:
 	case AD_DISN:
 		return CLR_BLACK;
-		//	return CLR_RED;
+	case AD_BLUD:
+		return CLR_RED;
 	case AD_ACID:
 		return CLR_GREEN;
 		//	return CLR_BROWN;
@@ -3928,12 +3934,12 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 	tmp_at(DISP_END, 0);
 
 	/* some zaps have effects at their end */
-	/* TODO: get colours from zapdata */
+	/* TODO: record colours in zapdata? Color currently standardized on AD_type */
 	if (zapdata->explosive) {
-		explode(sx, sy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), EXPL_FIERY, 1 + !!(youagr &&Double_spell_size));
+		explode(sx, sy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), adtyp_expl_color(zapdata->adtyp), 1 + !!(youagr &&Double_spell_size));
 	}
 	if (zapdata->splashing) {
-		splash(sx, sy, dx, dy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), EXPL_NOXIOUS);
+		splash(sx, sy, dx, dy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), adtyp_expl_color(zapdata->adtyp));
 	}
 
 	/* calculate shop damage */

@@ -999,6 +999,14 @@ register struct monst *mtmp;
 			obj = mkcorpstat(STATUE, (struct monst *)0,
 				mdat, x, y, FALSE);
 		break;
+	    case PM_TERAPHIM_TANNAH:
+			obj = mkcorpstat(STATUE, (struct monst *)0,
+				mdat, x, y, FALSE);
+			if(obj){
+				obj->corpsenm = PM_MARILITH;
+				fix_object(obj);
+			}
+		break;
 	    case PM_SENTINEL_OF_MITHARDIR:
 			obj = mkcorpstat(STATUE, (struct monst *)0,
 				mdat, x, y, FALSE);
@@ -4108,24 +4116,7 @@ int adtyp;
 		case PM_FABERGE_SPHERE:
 			return rn2(7);
 	}
-	switch(adtyp){
-		case AD_PHYS:
-			return EXPL_MUDDY;
-		case AD_EFIR:
-		case AD_FIRE:
-			return EXPL_FIERY;
-		case AD_ECLD:
-		case AD_COLD:
-			return EXPL_FROSTY;
-		case AD_EELC:
-		case AD_ELEC:
-			return EXPL_MAGICAL;
-		case AD_DARK:
-			return EXPL_MAGICAL;
-		default:
-			impossible("unhandled explosion color for %d", adtyp);
-			return EXPL_MAGICAL;
-	}
+	return adtyp_expl_color(adtyp);
 }
 
 /* TRUE if corpse might be dropped, magr may die if mon was swallowed */

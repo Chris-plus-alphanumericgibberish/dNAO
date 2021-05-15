@@ -1857,6 +1857,17 @@ karemade:
 				else
 					create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(3), FALSE);
 			}
+			if(roll_madness(MAD_APOSTASY)){
+				adjalign(-10);
+				if(u.ualign.record < 0 && roll_madness(MAD_APOSTASY)){
+					if(ALIGNLIM > 10){
+						u.ualign.sins++;
+					} else {
+						gods_upset(Align2gangr(u.ualign.type));
+					}
+				}
+			}
+			
 			if(u.utaneggs){
 				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
 					u.utaneggs--;

@@ -20,30 +20,31 @@
 #define AT_SPIT		10	/* spits substance - ranged */
 #define AT_ENGL		11	/* engulf (swallow or by a cloud) */
 #define AT_BREA		12	/* breath - ranged */
-#define AT_EXPL		13	/* explodes - proximity */
-#define AT_BOOM		14	/* explodes when killed */
-#define AT_GAZE		15	/* gaze - ranged, active, like pyrolisk */
-#define AT_TENT		16	/* tentacles */
-#define AT_ARRW		17	/* fire silver arrows from internal reservour.  Other ammo created as needed. */
-#define AT_WHIP		18	/* Whips you */
-#define AT_LRCH		19	/* Reach attack */
-#define AT_HODS		20  /* Hod Sephirah's mirror attack */
-#define AT_LNCK		21  /* Bite attack with reach */
-#define AT_MMGC		22	/* uses magic spell(s), but don't allow player spellcasting (Monster-only MaGiC) */
-#define AT_ILUR		23	/* Two stage swallow attack, currently belongs to Illurien only */
-#define AT_HITS		24	/* Automatic hit, no contact */
-#define AT_WISP		25	/* Attack with wisps of mist, no contact */
-#define AT_TNKR		26	/* Tinker attacks */
-#define AT_SRPR		27	/* Phased non-contact attack, "spiritual rapier" */
-#define AT_BEAM		28	/* non-contact ranged beam attack */
-#define AT_DEVA		29	/* million-arm weapon attack */
-#define AT_5SQR		30	/* five square reach touch */
-#define AT_5SBT		31	/* five square reach bite */
-#define AT_WDGZ		32	/* wide gaze - passive, like medusa */
-#define AT_REND		33	/* hits if the previous two attacks hit, otherwise does nothing */
-#define AT_VINE		34	/* Lashing vines */
-#define AT_BKGT		35	/* Black-goat, resolves as a bite, kick, butt, tuch, or gaze */
-#define AT_BKG2		36	/* Black-goat 2, resolves as a butt, tentacle suck, or gaze */
+#define AT_BRSH		13	/* breath - close-ranged splash */
+#define AT_EXPL		14	/* explodes - proximity */
+#define AT_BOOM		15	/* explodes when killed */
+#define AT_GAZE		16	/* gaze - ranged, active, like pyrolisk */
+#define AT_TENT		17	/* tentacles */
+#define AT_ARRW		18	/* fire silver arrows from internal reservour.  Other ammo created as needed. */
+#define AT_WHIP		19	/* Whips you */
+#define AT_LRCH		20	/* Reach attack */
+#define AT_HODS		21  /* Hod Sephirah's mirror attack */
+#define AT_LNCK		22  /* Bite attack with reach */
+#define AT_MMGC		23	/* uses magic spell(s), but don't allow player spellcasting (Monster-only MaGiC) */
+#define AT_ILUR		24 	/* Two stage swallow attack, currently belongs to Illurien only */
+#define AT_HITS		25	/* Automatic hit, no contact */
+#define AT_WISP		26	/* Attack with wisps of mist, no contact */
+#define AT_TNKR		27	/* Tinker attacks */
+#define AT_SRPR		28	/* Phased non-contact attack, "spiritual rapier" */
+#define AT_BEAM		29	/* non-contact ranged beam attack */
+#define AT_DEVA		30	/* million-arm weapon attack */
+#define AT_5SQR		31	/* five square reach touch */
+#define AT_5SBT		32	/* five square reach bite */
+#define AT_WDGZ		33	/* wide gaze - passive, like medusa */
+#define AT_REND		34	/* hits if the previous two attacks hit, otherwise does nothing */
+#define AT_VINE		35	/* Lashing vines */
+#define AT_BKGT		36	/* Black-goat, resolves as a bite, kick, butt, tuch, or gaze */
+#define AT_BKG2		37	/* Black-goat 2, resolves as a butt, tentacle suck, or gaze */
 
 #define AT_WEAP		252	/* uses weapon */
 #define AT_XWEP		253	/* uses offhanded weapon */

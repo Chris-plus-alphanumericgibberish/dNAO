@@ -838,6 +838,7 @@ struct permonst *mdat;
 	{
 		struct attack * aptr;
 		aptr = attacktype_fordmg(mdat, AT_BREA, AD_ANY);
+		if (!aptr) aptr = attacktype_fordmg(mdat, AT_BRSH, AD_ANY);
 		if (!aptr && Race_if(PM_HALF_DRAGON)) aptr = attacktype_fordmg(&mons[PM_HALF_DRAGON], AT_BREA, AD_ANY);
 
 		if (!aptr) {

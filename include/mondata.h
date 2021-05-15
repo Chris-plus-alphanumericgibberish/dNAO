@@ -418,9 +418,8 @@
 							|| (ptr)->mtyp == PM_ANCIENT_OF_DEATH \
 							|| (ptr)->mtyp == PM_BAALPHEGOR \
 							)
-/*Fierna being used as the boundary is temporary*/
 #define is_tannin(ptr)		(((ptr)->mtyp >= PM_AKKABISH_TANNIN \
-							  && (ptr)->mtyp < PM_FIERNA \
+							  && (ptr)->mtyp <= PM_TERAPHIM_TANNAH \
 							 ) \
 							|| (ptr)->mtyp == PM_PALE_NIGHT \
 							|| (ptr)->mtyp == PM_DAGON \

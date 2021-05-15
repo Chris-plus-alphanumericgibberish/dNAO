@@ -304,7 +304,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 			break;
 		case AD_DARK: str = "blast of darkness";
 			break;
-		case AD_BLUD: str = "splash of tainted blood";
+		case AD_BLUD: str = "spray of tainted blood";
 			break;
 		case AD_WET: str = "wall of water";
 			break;
@@ -360,7 +360,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 				explmask = !!Dark_immune;
 				break;
 			case AD_BLUD:
-				explmask = !has_blood(youracedata);
+				// explmask = !has_blood(youracedata);
 				break;
 			case AD_WET:
 				break;
@@ -423,7 +423,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 				explmask |= dark_immune(mtmp);
 				break;
 			case AD_BLUD:
-				explmask |= has_blood_mon(mtmp);
+				// explmask |= has_blood_mon(mtmp);
 				break;
 			case AD_WET:
 				break;
@@ -634,10 +634,13 @@ boolean yours; /* is it your fault (for killing monsters) */
 				mdam += mlev(mtmp);
 			
 			if(adtyp == AD_WET){
-				water_damage(((mtmp == &youmonst) ? 
-					invent : 
-					mtmp->minvent), 
-					FALSE, FALSE, FALSE, mtmp);
+				water_damage(mtmp->minvent, FALSE, FALSE, FALSE, mtmp);
+			}
+			else if (adtyp == AD_BLUD){
+				water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+				mtmp->mcrazed = TRUE;
+				mtmp->mberserk = TRUE;
+				mtmp->mconf = TRUE;
 			}
 			
 			if(adtyp == AD_SLIM && !Slime_res(mtmp) &&
@@ -709,6 +712,14 @@ boolean yours; /* is it your fault (for killing monsters) */
 			destroy_item(&youmonst, WAND_CLASS, (int) adtyp);
 		}
 
+		if(adtyp == AD_WET){
+			water_damage(invent, FALSE, FALSE, FALSE, mtmp);
+		}
+		else if (adtyp == AD_BLUD){
+			water_damage(invent, FALSE, FALSE, WD_BLOOD, mtmp);
+			u.umadness |= MAD_APOSTASY;
+			change_usanity(-rnd(6), FALSE);
+		}
 		ugolemeffects((int) adtyp, damu);
 
 		if (uhurt == 2 || uhurt == 3) {
@@ -1225,6 +1236,40 @@ boolean yours;
 
 #endif /* FIREARMS */
 
+int
+adtyp_expl_color(adtyp)
+int adtyp;
+{
+	switch(adtyp){
+		case AD_PHYS:
+			return EXPL_MUDDY;
+		case AD_EFIR:
+		case AD_FIRE:
+			return EXPL_FIERY;
+		case AD_ECLD:
+		case AD_COLD:
+			return EXPL_FROSTY;
+		case AD_EELC:
+		case AD_ELEC:
+			return EXPL_MAGICAL;
+		case AD_DRST:
+			return EXPL_MAGENTA;
+		case AD_ACID:
+		case AD_EACD:
+		case AD_SLIM:
+			return EXPL_NOXIOUS;
+		case AD_BLND:
+		case AD_DARK:
+			return EXPL_DARK;
+		case AD_WET:
+			return EXPL_WET;
+		case AD_BLUD:
+			return EXPL_RED;
+		default:
+			impossible("unhandled explosion color for attack damage type %d", adtyp);
+			return EXPL_MAGICAL;
+	}
+}
 #endif /* OVL1 */
 
 /*explode.c*/

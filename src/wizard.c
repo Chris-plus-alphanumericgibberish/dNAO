@@ -407,8 +407,9 @@ tactics(mtmp)
 			){
 				monline(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
-			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY) ||
-				attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
+			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY)
+				|| attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
+				|| attacktype_fordmg(mtmp->data, AT_BRSH, AD_ANY)
 			){
 				mofflin_close(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
@@ -467,8 +468,9 @@ tactics(mtmp)
 			){
 				monline(mtmp);
 				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
-			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY) ||
-				attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
+			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY)
+				|| attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
+				|| attacktype_fordmg(mtmp->data, AT_BRSH, AD_ANY)
 			){
 				mofflin_close(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);

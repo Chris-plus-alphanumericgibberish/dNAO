@@ -1081,6 +1081,7 @@ int aatyp;
 	case AT_GAZE:
 	case AT_WDGZ:
 	case AT_BREA:
+	case AT_BRSH:
 	case AT_MAGC:
 	case AT_MMGC:
 	case AT_BEAM:

@@ -444,6 +444,7 @@ int template;
 			(
 			attk->aatyp == AT_SPIT ||
 			attk->aatyp == AT_BREA ||
+			attk->aatyp == AT_BRSH ||
 			attk->aatyp == AT_GAZE ||
 			attk->aatyp == AT_ARRW ||
 			attk->aatyp == AT_MMGC ||
@@ -1728,7 +1729,7 @@ ranged_attk(ptr)	/* returns TRUE if monster can attack at range */
 struct permonst *ptr;
 {
 	register int i, atyp;
-	long atk_mask = (1L << AT_BREA) | (1L << AT_SPIT) | (1L << AT_GAZE) | (1L << AT_LRCH) | (1L << AT_LNCK)
+	long atk_mask = (1L << AT_BREA) | (1L << AT_BRSH) | (1L << AT_SPIT) | (1L << AT_GAZE) | (1L << AT_LRCH) | (1L << AT_LNCK)
 					| (1L << AT_MMGC) | (1L << AT_TNKR) | (1L << AT_ARRW) | (1L << AT_BEAM) | (1L << AT_5SQR)
 					| (1L << AT_5SBT);
 

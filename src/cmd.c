@@ -2060,6 +2060,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		if (u.umadness&MAD_TOO_BIG){
 			enl_msg("", "It's", "It was", " too big");
 		}
+		if (u.umadness&MAD_APOSTASY){
+			enl_msg("You sometimes ", "doubt", "doubted", " the gods, blocking casting and offending them");
+		}
 		if (u.umadness&MAD_ROTTING){
 			enl_msg("Your body ", "is", "was", " rotting from within");
 		}
@@ -2848,6 +2851,9 @@ int final;
 		if (u.umadness&MAD_TOO_BIG){
 			dump("  ", "Your mind was crowded out by the memory of its size");
 		}
+		if (u.umadness&MAD_APOSTASY){
+			dump("  ", "You sometimes doubted the gods");
+		}
 		if (u.umadness&MAD_ROTTING){
 			dump("  ", "Your body was consumed by The Rotting");
 		}
@@ -3366,6 +3372,9 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_TOO_BIG){
 			putstr(en_win, 0, "It's too BIG!");
+		}
+		if (u.umadness&MAD_APOSTASY){
+			putstr(en_win, 0, "You sometimes doubt the gods.");
 		}
 		if (u.umadness&MAD_ROTTING){
 			putstr(en_win, 0, "Your body is rotting from within.");
