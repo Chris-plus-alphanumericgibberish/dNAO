@@ -518,7 +518,7 @@ you_regen_hp()
 		perX -= HEALCYCLE;
 		blockRegen = TRUE;
 	}
-	
+
 	// regeneration 'trinsic
 	if (Regeneration){
 		perX += HEALCYCLE;
@@ -527,7 +527,7 @@ you_regen_hp()
 	if(active_glyph(CORRUPTION) && (*hp < (*hpmax)*.3)){
 		perX += HEALCYCLE;
 	}
-	
+
 	// "Natural" regeneration has stricter limitations
 	if (blockRegen);		// regeneration blocked by inclement conditions this turn.
 	else if (u.regen_blocked > 0) u.regen_blocked--;		// regenration blocked by a curse (NOTE: decremented here)
@@ -559,6 +559,25 @@ you_regen_hp()
 		// minimum 1
 		if (reglevel < 1)
 			reglevel = 1;
+
+		// Sleeping
+		if(u.usleep){
+			// To be comfortable, a bed must be "on top" of any pile of items in the square.
+			struct obj *bed = level.objects[u.ux][u.uy]; 
+			// on a bed
+			if(bed && bed->oclass == BED_CLASS){
+				// A bedroll must be the only object in the square, other beds can have stuff tucked under them
+				if((bed->otyp == BEDROLL && !bed->nexthere) || bed->otyp == GURNEY)
+					reglevel *= 1.5;
+				else if(bed->otyp == BED)
+					reglevel *= 2;
+			}
+			// restfully
+			if(RestfulSleep){
+				perX += HEALCYCLE;
+			}
+		}
+		
 
 		// Healer role bonus
 		if (Role_if(PM_HEALER) && !Upolyd)
@@ -672,6 +691,24 @@ you_regen_pw()
 		if (reglevel < 1)
 			reglevel = 1;
 
+		// Sleeping
+		if(u.usleep){
+			// To be comfortable, a bed must be "on top" of any pile of items in the square.
+			struct obj *bed = level.objects[u.ux][u.uy]; 
+			// on a bed
+			if(bed && bed->oclass == BED_CLASS){
+				// A bedroll must be the only object in the square, other beds can have stuff tucked under them
+				if((bed->otyp == BEDROLL && !bed->nexthere) || bed->otyp == GURNEY)
+					reglevel *= 1.5;
+				else if(bed->otyp == BED)
+					reglevel *= 2;
+			}
+			// restfully
+			if(RestfulSleep){
+				perX += HEALCYCLE;
+			}
+		}
+		
 		// role bonuses
 		if (Role_if(PM_WIZARD))   reglevel += 10;
 		if (Role_if(PM_MADMAN))   reglevel += 9;
