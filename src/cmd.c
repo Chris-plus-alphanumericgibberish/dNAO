@@ -2030,7 +2030,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 			enl_msg("Sometimes, monsters ", "strike", "struck", " at you from strange angles");
 		}
 		if (u.umadness&MAD_SPIRAL){
-			enl_msg("Your maddness ", "is", "was", " spiraling out of control");
+			enl_msg("Your madness ", "is", "was", " spiraling out of control");
 		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
 			enl_msg("Sometimes, you ", "will fail", "failed", " to attack worms and tentacled monsters");
@@ -3341,7 +3341,7 @@ resistances_enlightenment()
 			messaged++;
 		}
 		if (u.umadness&MAD_SPIRAL){
-			putstr(en_win, 0, "Your maddness is spiraling out of control.");
+			putstr(en_win, 0, "Your madness is spiraling out of control.");
 			messaged++;
 		}
 		if (u.umadness&MAD_HELMINTHOPHOBIA){
