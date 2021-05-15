@@ -93,6 +93,7 @@ const struct innate {
 	mad_abil[] = { {  1, &(HTelepat), "", "" },
 			 {  7, &(HSearching), "perceptive", "unaware" },
 		     {	15, &(HWarning), "sensitive", "" },
+		     {	30, &(HClairvoyant), "clairvoyant", "" },
 		     {	 0, 0, 0, 0 } },
 
 	elnob_abil[] = { {	 7, &(HFast), "quick", "slow" },
