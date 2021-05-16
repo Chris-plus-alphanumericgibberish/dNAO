@@ -2174,7 +2174,7 @@ karemade:
 
 		    if (flags.bypasses) clear_bypasses();
 		    if(Glib) glibr();
-		    if(StumbleBlind && rn2(100) >= u.usanity) bumbler();
+		    // if(StumbleBlind && rn2(100) >= u.usanity) bumbler();
 		    nh_timeout();
 		    run_regions();
 		    run_maintained_spells();
