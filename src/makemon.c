@@ -3578,7 +3578,7 @@ int mkobjflags;
 						bless(otmp);
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(QUARTERSTAFF, mkobjflags);
-						set_material_gm(otmp, VEGGY);
+						set_material_gm(otmp, WOOD);
 						add_oprop(otmp, OPROP_ANARW);
 						add_oprop(otmp, OPROP_HOLYW);
 						bless(otmp);
