@@ -7095,28 +7095,6 @@ struct monst *mdef;
 			candidates++;
 	//Note: May be more desired targets than actual candidates, this is fine.
 	
-	if(mdef == &youmonst){
-		if(!Blind){
-			pline("Tiny %s sparks rise around you.", hcolor(NH_LIGHT_BLUE));
-			if(canseemon(magr)){
-				pline("The sparks are drawn into %s toothless mouth!", s_suffix(mon_nam(magr)));
-			}
-		}
-	}
-	else {
-		if(!Blind){
-			if(canseemon(mdef)){
-				pline("Tiny %s sparks rise around %s.", hcolor(NH_LIGHT_BLUE), mon_nam(mdef));
-				if(canseemon(magr)){
-					pline("The sparks are drawn into %s toothless mouth!", s_suffix(mon_nam(magr)));
-				}
-			}
-			else if(canseemon(magr)){
-				pline("Tiny %s sparks are drawn into %s toothless mouth!", hcolor(NH_LIGHT_BLUE), s_suffix(mon_nam(magr)));
-			}
-		}
-	}
-
 	if(candidates){
 		int prob = (remaining*smoothing_factor)/candidates;
 		for(otmp = objchain; otmp && remaining; otmp = otmp->nobj){
@@ -7173,7 +7151,31 @@ struct monst *mdef;
 			otherBlessing(mdef->encouraged, -7)
 		}
 	}
-	
+
+	if(damaged){
+		if(mdef == &youmonst){
+			if(!Blind){
+				pline("Tiny %s sparks rise around you.", hcolor(NH_LIGHT_BLUE));
+				if(canseemon(magr)){
+					pline("The sparks are drawn into %s toothless mouth!", s_suffix(mon_nam(magr)));
+				}
+			}
+		}
+		else {
+			if(!Blind){
+				if(canseemon(mdef)){
+					pline("Tiny %s sparks rise around %s.", hcolor(NH_LIGHT_BLUE), mon_nam(mdef));
+					if(canseemon(magr)){
+						pline("The sparks are drawn into %s toothless mouth!", s_suffix(mon_nam(magr)));
+					}
+				}
+				else if(canseemon(magr)){
+					pline("Tiny %s sparks are drawn into %s toothless mouth!", hcolor(NH_LIGHT_BLUE), s_suffix(mon_nam(magr)));
+				}
+			}
+		}
+	}
+
 	return damaged;
 }
 
