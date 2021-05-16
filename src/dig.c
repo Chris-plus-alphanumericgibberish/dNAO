@@ -1547,6 +1547,8 @@ int x, y, type;
     struct obj *container;
 	container = mksobj_at(CHEST, x, y, MKOBJ_NOINIT);
 	set_material_gm(container, METAL);
+	container->olocked = TRUE;
+	container->otrapped = TRUE;
 	for(int i = d(9,4); i > 0; i--)
 		mkhellvaultitem(container);
 	bury_an_obj(container);
