@@ -5422,6 +5422,7 @@ int floorID;
 		break;
 	}
 
+	lift_veil();
 	vision_full_recalc = 1; //many spirits change what is visible.
 	doredraw();
 	return;

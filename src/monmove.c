@@ -1611,8 +1611,10 @@ register struct monst *mtmp;
 		} else {
 			register boolean m_sen = tp_sensemon(mtmp);
 			
-			if(mdat->mtyp == PM_ELDER_BRAIN) quest_chat(mtmp);
-			
+			if(mdat->mtyp == PM_ELDER_BRAIN){
+				quest_chat(mtmp);
+				lift_veil();
+			}
 			if (m_sen || (Blind_telepat && rn2(2)) || !rn2(10)) {
 				int dmg;
 				pline("It locks on to your %s!",

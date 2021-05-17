@@ -608,6 +608,7 @@ turn_stag()
 		else {
 			pline("The black web enfolds you.");
 			u.uhouse = EDDER_SYMBOL;
+			lift_veil();
 		}
 		if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
 		u.ualignbase[A_CURRENT] = A_LAWFUL;

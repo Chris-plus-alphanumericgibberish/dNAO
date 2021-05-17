@@ -1116,6 +1116,7 @@ as_extra_healing:
 		//Makes you crazy
 		change_usanity(-1*rnd(20), FALSE);
 		u.umadness |= MAD_GOAT_RIDDEN;
+		lift_veil();
 		break;
 	case POT_SPACE_MEAD:
 		unkn++;

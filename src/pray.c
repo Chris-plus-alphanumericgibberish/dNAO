@@ -1587,9 +1587,14 @@ boolean silently;
 		}
 		else if(Blind || (!carried(otmp) && !cansee(x,y)))
 		You_hear("crunching noises.");
-		else if(!carried(otmp) && cansee(x,y))
+		else if(!carried(otmp) && cansee(x,y)){
 			pline("A mouth forms from the mist and eats %s!", an(singular(otmp, xname)));
-		else pline("A mouth forms from the mist and eats your sacrifice!");
+			lift_veil();
+		}
+		else {
+			pline("A mouth forms from the mist and eats your sacrifice!");
+			lift_veil();
+		}
 	}
     if (carried(otmp)){
 		if(u.sealsActive&SEAL_BALAM){

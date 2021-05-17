@@ -440,6 +440,10 @@ struct you {
 	Bitfield(phasengn,1);		/* clockwork phase engine */
 	Bitfield(umummyrot,1);		/* you have mummy rot */
 	Bitfield(veil,1);			/* you have not peaked behind the veil */
+#define lift_veil() if(u.veil){\
+				u.veil = FALSE;\
+				change_uinsight(1);\
+			}
 	/* 21 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
