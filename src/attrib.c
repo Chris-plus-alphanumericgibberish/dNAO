@@ -1337,6 +1337,8 @@ void
 change_uinsight(delta)
 int delta;
 {
+	if(u.veil)
+		return;
 	if(discover || wizard)
 		pline("Insight change: %d + %d", u.uinsight, delta);
 	u.uinsight += delta;

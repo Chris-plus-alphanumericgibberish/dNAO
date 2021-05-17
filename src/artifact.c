@@ -9326,6 +9326,7 @@ read_necro(VOID_ARGS)
 			}
 		}
 		if(chance > 0){
+			u.veil = FALSE;
 			change_uinsight(1);
 			if(u.usanity < 100 && rnd(30) < ACURR(A_WIS))
 				change_usanity(1, FALSE);
@@ -9565,6 +9566,7 @@ read_lost(VOID_ARGS)
 			artiptr->ovar1 |= putativeSeal;
 			You("learn the name \"%s\" while studying the book.",sealNames[i]);
 			artiptr->spestudied++;
+			u.veil = FALSE;
 			change_uinsight(1);
 			if(u.usanity < 100 && rnd(30) < ACURR(A_WIS))
 				change_usanity(1, FALSE);

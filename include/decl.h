@@ -537,7 +537,7 @@ E NEARDATA struct mvitals {
 	int	insight_gained;
 	Bitfield(seen,1);
 	Bitfield(vis_insight,1);
-	Bitfield(onekill,1);
+	Bitfield(insightkill,1);
 } mvitals[NUMMONS];
 
 E NEARDATA struct c_color_names {

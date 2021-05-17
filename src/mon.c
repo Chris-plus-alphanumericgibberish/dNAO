@@ -5398,8 +5398,8 @@ cleanup:
 	tmp = experience(mtmp, (int)mvitals[mndx].died + 1);
 	more_experienced(tmp, 0);
 	newexplevel();		/* will decide if you go up */
-	if(!mvitals[mndx].onekill){
-		mvitals[mndx].onekill = TRUE;
+	if(!u.veil && !mvitals[mndx].insightkill){
+		mvitals[mndx].insightkill = TRUE;
 		if(yields_insight(mtmp->data)){
 			uchar insight = u_insight_gain(mtmp);
 			mvitals[monsndx(mtmp->data)].insight_gained += insight;

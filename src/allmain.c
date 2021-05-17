@@ -831,6 +831,11 @@ you_regen_san()
 	int reglevel = ACURR(A_WIS);
 	int insight = u.uinsight;
 
+	if(u.veil && In_depths(&u.uz)){
+		u.veil = FALSE;
+		change_uinsight(1);
+	}
+
 	// role bonuses
 	if (Role_if(PM_BARBARIAN))   reglevel += 10;
 	if (Role_if(PM_VALKYRIE)) reglevel += 9;
@@ -851,8 +856,10 @@ you_regen_san()
 	if (u.sealsActive&SEAL_ORTHOS){
 		reglevel -= 5;
 	}
-	
-	while((insight = insight/2))
+
+	if(u.veil)
+		reglevel += 10;
+	else while((insight = insight/2))
 		reglevel--;
 
 	// penalty for being itchy
@@ -3896,7 +3903,7 @@ sense_nearby_monsters()
 						newexplevel();
 					}
 				}
-				if(!mvitals[monsndx(mtmp->data)].vis_insight && yields_insight(mtmp->data)){
+				if(!u.veil && !mvitals[monsndx(mtmp->data)].vis_insight && yields_insight(mtmp->data)){
 					uchar insight;
 					mvitals[monsndx(mtmp->data)].vis_insight = TRUE;
 					insight = u_visible_insight(mtmp);

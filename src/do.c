@@ -929,6 +929,15 @@ dodown()
 			"swallowed" : "engulfed");
 		return(1);
 	}
+	if(u.veil && Is_sumall(&u.uz)){
+		You("are standing at the head of a strangely-angled staircase.");
+		You("feel reality threatening to slip away!");
+		if (yn("Are you sure you want to descend?") != 'y')
+			return(0);
+		else pline("So be it.");
+		u.veil = FALSE;
+		change_uinsight(1);
+	}
 	if (on_level(&valley_level, &u.uz) && !u.uevent.gehennom_entered) {
 		You("are standing at the gate to Gehennom.");
 		pline("Unspeakable cruelty and harm lurk down there.");

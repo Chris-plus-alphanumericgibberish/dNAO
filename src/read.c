@@ -1447,7 +1447,7 @@ losesaninsight(percent)
 		change_uinsight(-1*mvitals[indices[i]].insight_gained);
 	    mvitals[indices[i]].insight_gained = 0;
 	    mvitals[indices[i]].vis_insight = FALSE;
-	    mvitals[indices[i]].onekill = FALSE;
+	    mvitals[indices[i]].insightkill = FALSE;
 	}
 }
 

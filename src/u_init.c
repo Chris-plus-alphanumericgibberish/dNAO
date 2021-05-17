@@ -1757,6 +1757,7 @@ u_init()
 	u.usanity = 100;
 	u.umadness = 0L;
 	u.uinsight = 0;
+	u.veil = TRUE;
 	u.sowdisc = 0;
 	u.voidChime = 0;
 	adjabil(0,1);
@@ -1797,6 +1798,7 @@ u_init()
 		skill_init(Skill_A);
 	break;
 	case PM_ANACHRONONAUT:
+		u.veil = FALSE;
 		if(Race_if(PM_MYRKALFR) && !flags.female){
 			ini_inv(Anachrononaut_Dro);
 		} else if(Race_if(PM_MYRKALFR) && flags.female){
@@ -1924,6 +1926,7 @@ u_init()
 	break;
 #endif
 	case PM_EXILE:
+		u.veil = FALSE;
 		if(Race_if(PM_VAMPIRE)){
 			if(flags.female){
 				Binder_Vam[BIN_NOB_SHIRT].trotyp = VICTORIAN_UNDERWEAR;
@@ -1993,6 +1996,7 @@ u_init()
         break;
 #endif	/* CONVICT */
 	case PM_MADMAN:
+		u.veil = FALSE;
         ini_inv(Madman);
         knows_object(SKELETON_KEY);
         knows_object(POT_BOOZE);

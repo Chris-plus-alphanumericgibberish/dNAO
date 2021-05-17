@@ -466,6 +466,8 @@ REGION:(00,00,06,06),lit,"ordinary"
 
 STAIR:  levregion(37,00,75,19), (0,0,8,8), up
 BRANCH:(04,04,04,04),(0,0,0,0)
+OBJECT:'`',"statue",(04,04),"Adamach",1
+OBJECT:'`',"statue",(04,04),"Great Cthulhu",1
 
 WALLIFY
 MONSTER:'\'',"argentum golem",(02,04)
