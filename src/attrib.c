@@ -1306,27 +1306,45 @@ boolean check;
 	){
 		switch(rn2(6)){
 			case 0:
-				You("panic in your insanity!");
+				if(ClearThoughts)
+					You_feel("a little panicky.");
+				else
+					You("panic in your insanity!");
 				HPanicking = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 1:
-				You("stumble blindly in your insanity!");
+				if(ClearThoughts)
+					You_feel("a little off balance.");
+				else
+					You("stumble blindly in your insanity!");
 				HStumbleBlind = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 2:
-				You("stagger in shock!");
+				if(ClearThoughts)
+					You_feel("a little shocked.");
+				else
+					You("stagger in shock!");
 				HStaggerShock = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 3:
-				You("begin babbling incoherently!");
+				if(ClearThoughts)
+					You_feel("a little incoherent.");
+				else
+					You("begin babbling incoherently!");
 				HBabble = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 4:
-				You("begin screaming in terror and madness!");
+				if(ClearThoughts)
+					You_feel("a little frightened.");
+				else
+					You("begin screaming in terror and madness!");
 				HScreaming = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 			case 5:
-				You(Hallucination ? "have a case of the vapors!" : "feel faint!");
+				if(ClearThoughts)
+					You_feel("a little fainting.");
+				else
+					You(Hallucination ? "have a case of the vapors!" : "feel faint!");
 				HFaintingFits = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
 		}
