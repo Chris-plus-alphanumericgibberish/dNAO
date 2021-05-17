@@ -5551,8 +5551,11 @@ boolean ranged;
 			else
 				pline("%s whispers terrible truths in %s %s.", Monnam(magr), s_suffix(mon_nam(mdef)), mbodypart(mdef, EAR));
 		}
+
 		/*Check insight*/
 		if(youdef){
+			//Lifts the veil
+			lift_veil();
 			hits = rn2(u.uinsight) >= 10;
 		}
 		else {
@@ -5563,7 +5566,7 @@ boolean ranged;
 		if(!hits){
 			if(youdef){
 				pline("But you fail to understand!");
-				u.uinsight++;
+				change_uinsight(1);
 				make_confused(HConfusion + 10L, TRUE);
 			}
 			else {
