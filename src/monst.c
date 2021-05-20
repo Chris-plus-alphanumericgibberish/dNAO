@@ -481,7 +481,7 @@ NEARDATA struct permonst mons[] = {
 	  NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK, NO_ATTK),
 	SIZ(WT_DIMINUTIVE, CN_DIMINUTIVE, MS_SILENT, MZ_SMALL), 0, 0,
 	MM_FLY|MM_FLOAT|MM_AMPHIBIOUS /*MM*/, MT_HOSTILE|MT_NOTAKE /*MT*/, 0 /*MF*/,
-	MB_NOLIMBS|MB_NOHEAD|MB_NEUTER /*MB*/, MG_INFRAVISIBLE|MG_SANLOSS /*MG*/,
+	MB_NOLIMBS|MB_NOHEAD|MB_NEUTER /*MB*/, MG_INFRAVISIBLE|MG_SANLOSS|MG_INSIGHT /*MG*/,
 	0 /*MA*/,  MV_INFRAVISION|MV_CATSIGHT|MV_SEE_INVIS|MV_TELEPATHIC /*MV*/, CLR_BLUE),
 	/* growth code in mon.c relies on sequential order of autons, Monoton to Quinon. */
     MON("monoton", S_EYE, //4 //autons need useful entries I think?
