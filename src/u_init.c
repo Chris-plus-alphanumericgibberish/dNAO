@@ -1997,6 +1997,7 @@ u_init()
 #endif	/* CONVICT */
 	case PM_MADMAN:
 		u.veil = FALSE;
+		u.umaniac = TRUE;
         ini_inv(Madman);
         knows_object(SKELETON_KEY);
         knows_object(POT_BOOZE);
