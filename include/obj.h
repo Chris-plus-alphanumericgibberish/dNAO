@@ -591,7 +591,6 @@ struct obj {
 
 /* multistriking() is 0-based so that only actual multistriking weapons return multistriking!=0 */
 #define multistriking(otmp)	(!(otmp) ? 0 : \
-	(otmp)->otyp == DOUBLE_SWORD ? 1 : \
 	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \
 	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) : \
 	arti_threeHead((otmp)) ? 2 : \
