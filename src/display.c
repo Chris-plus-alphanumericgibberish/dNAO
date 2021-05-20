@@ -427,7 +427,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
      * the mimic was mimicing.
      */
 
-    if (mon_mimic && (sightflags == PHYSICALLY_SEEN)) {
+    if (mon_mimic && (sightflags == PHYSICALLY_SEEN || mon->m_ap_type == M_AP_MONSTER)) {
 	switch (mon->m_ap_type) {
 	    default:
 		impossible("display_monster:  bad m_ap_type value [ = %d ]",
