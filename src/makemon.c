@@ -9739,11 +9739,14 @@ register int	mmflags;
 	if (roll_madness(MAD_DELUSIONS) && mtmp->m_ap_type == M_AP_NOTHING && !(
 			mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS))
 	{
-		mtmp->m_ap_type = M_AP_MONSTER;
-		mtmp->mappearance = rndmonst()->mtyp;
-		/* less commonly have very out-of-place appearances */
-		while (mtmp->mappearance == mtmp->mtyp || !rn2(20))
-			mtmp->mappearance = rn2(SPECIAL_PM);
+		struct permonst *delusion = rndmonst();
+		if(delusion){
+			mtmp->m_ap_type = M_AP_MONSTER;
+			mtmp->mappearance = delusion->mtyp;
+			/* less commonly have very out-of-place appearances */
+			while (mtmp->mappearance == mtmp->mtyp || !rn2(20))
+				mtmp->mappearance = rn2(SPECIAL_PM);
+		}
 	}
 	set_malign(mtmp);		/* having finished peaceful changes */
 	if(u.uevent.uaxus_foe && (mndx <= PM_QUINON && mndx >= PM_MONOTON)){
