@@ -145,6 +145,7 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 	xchar	d_neutral_dnum;
 	xchar	d_rlyeh_dnum;
     d_level	d_gatetown_level, d_spire_level, d_sum_of_all_level, d_lethe_headwaters, d_bridge_temple, d_lethe_temples, d_rlyeh_level;
+    d_level	d_nkai_a, d_nkai_b, d_nkai_c, d_nkai_z;
 	/*Chaos Quest*/
 	xchar	d_chaos_dvariant;
 	xchar	d_chaos_dnum;
@@ -253,6 +254,10 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #define lethe_headwaters		(dungeon_topology.d_lethe_headwaters)
 #define bridge_temple		(dungeon_topology.d_bridge_temple)
 #define lethe_temples		(dungeon_topology.d_lethe_temples)
+#define nkai_a_level		(dungeon_topology.d_nkai_a)
+#define nkai_b_level		(dungeon_topology.d_nkai_b)
+#define nkai_c_level		(dungeon_topology.d_nkai_c)
+#define nkai_z_level		(dungeon_topology.d_nkai_z)
 #define rlyeh_level		(dungeon_topology.d_rlyeh_level)
 	/*Chaos Quest*/
 #define chaos_dvariant		(dungeon_topology.d_chaos_dvariant)

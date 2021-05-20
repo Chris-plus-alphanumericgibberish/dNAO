@@ -723,6 +723,10 @@ struct level_map {
 	{ "leth-a",	&lethe_headwaters },
 	{ "lethe-e",	&bridge_temple },
 	{ "lethe-f",	&lethe_temples },
+	{ "nkai-a",	&nkai_a_level },
+	{ "nkai-b",	&nkai_b_level },
+	{ "nkai-c",	&nkai_c_level },
+	{ "nkai-z",	&nkai_z_level },
 	{ "rlyeh",	&rlyeh_level },
 	/*Chaos levels*/
 	{ "chaosf",	&chaosf_level },

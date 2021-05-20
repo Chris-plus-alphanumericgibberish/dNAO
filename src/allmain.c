@@ -857,11 +857,62 @@ you_regen_san()
 		reglevel -= 5;
 	}
 
+	// Bonus/penalty for insight
 	if(u.veil)
 		reglevel += 10;
 	else while((insight = insight/2))
 		reglevel--;
 
+	// penalty for certain areas
+	if(Is_rlyeh(&u.uz)){
+		reglevel -= 30;
+	}
+	else if(In_nkai(&u.uz)){
+		reglevel -= 20;
+	}
+	else if(In_depths(&u.uz)){
+		reglevel -= 10;
+	}
+	
+	if(In_quest(&u.uz)){
+		if(Role_if(PM_ANACHRONONAUT)){
+			if(Race_if(PM_ANDROID)){
+				// The Android PC's actual home is the locate level
+				if(Is_qlocate(&u.uz)){
+					reglevel -= 30; //net -25
+				}
+				else if(Is_qstart(&u.uz)){
+					reglevel -= 15; //net -10
+				}
+				else {
+					reglevel -= 10; //net -5, reversing bonus
+				}
+			}
+			else {
+				if(Is_qstart(&u.uz) && quest_status.leader_is_dead){
+					reglevel -= 30; //net -25
+				}
+				else {
+					reglevel -= 10; //net -5, reversing bonus
+				}
+			}
+		}
+		//Lots of stressful circumstances here!
+		else if(Race_if(PM_DROW)){
+			if(Role_if(PM_NOBLEMAN)){
+				if(Is_nemesis(&u.uz) && flags.initgend){
+					reglevel -= 30;
+				}
+				else if(Is_qstart(&u.uz) && Role_if(PM_NOBLEMAN) && !flags.initgend){
+					reglevel -= 30;
+				}
+			}
+			else if(Is_nemesis(&u.uz) && !flags.initgend && (Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || Role_if(PM_WIZARD))){
+				reglevel -= 30;
+			}
+		}
+	}
+	
 	// penalty for being itchy
 	reglevel -= u_healing_penalty();
 

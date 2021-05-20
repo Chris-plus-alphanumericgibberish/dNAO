@@ -161,7 +161,11 @@ typedef struct branch {
 #define Is_bridge_temple(x)		(on_level(x,&bridge_temple))
 #define Is_sumall(x)		(on_level(x,&sum_of_all_level))
 #define Is_rlyeh(x)			(on_level(x, &rlyeh_level))
-
+#define In_nkai(x)	(on_level(x, &nkai_a_level) ||\
+						 on_level(x, &nkai_b_level) ||\
+						 on_level(x, &nkai_c_level) ||\
+						 on_level(x, &nkai_z_level)\
+						)
 #define Is_valley(x)		(on_level(x, &valley_level))
 
 #define Is_hell1(x)			(on_level(x, &hell1_level))
