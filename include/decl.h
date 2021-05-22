@@ -737,6 +737,7 @@ struct u_achieve {
 #define	SPEED_PHASE		0x1L << 34
 #define	QUITE_MAD		0x1L << 35
 #define	TOTAL_DRUNK		0x1L << 36
+#define	MAD_QUEST		0x1L << 37
 };
 
 E struct u_achieve achieve;

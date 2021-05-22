@@ -3002,6 +3002,8 @@ give_quest_trophy()
 		achieve.trophies |= BRD_QUEST;
 	else if(urole.neminum == PM_GREAT_HIGH_SHAMAN_OF_KURTULMAK)
 		achieve.trophies |= GNO_RAN_QUEST;
+	else if(urole.neminum == PM_DOCTOR_ARCHER)
+		achieve.trophies |= MAD_QUEST;
 	
 	if(quest_status.second_thoughts)
 		achieve.trophies |= SECOND_THOUGHTS;

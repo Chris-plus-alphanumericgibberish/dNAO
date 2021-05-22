@@ -1122,6 +1122,7 @@ char *achieveXbuff;
 	CHECK_ACHIEVE(PIR_QUEST,"pirate_quest")
 	CHECK_ACHIEVE(BRD_QUEST,"bard_quest")
 	CHECK_ACHIEVE(NOB_QUEST,"base_noble_quest")
+	CHECK_ACHIEVE(MAD_QUEST,"madman_quest")
 	CHECK_ACHIEVE(HDR_NOB_QUEST,"hedrow_noble_quest")
 	CHECK_ACHIEVE(HDR_SHR_QUEST,"hedrow_shared_quest")
 	CHECK_ACHIEVE(DRO_NOB_QUEST,"drow_noble_quest")
