@@ -5667,10 +5667,10 @@ mkhellvaultroom()
 	
 	sroom->rtype = HELL_VAULT;
 	
-	lx = sroom->lx;
-	ly = sroom->ly;
-	for(x = sroom->lx+1; x < sroom->lx+4; x++) {
-		for(y = (sroom->ly)+1; y < (sroom->ly)+4; y++) {
+	lx = sroom->lx + rn2((sroom->hx - sroom->lx)+1 - 5);
+	ly = sroom->ly + rn2((sroom->hy - sroom->ly)+1 - 5);
+	for(x = lx+1; x < lx+4; x++) {
+		for(y = ly+1; y < ly+4; y++) {
 			levl[x][y].typ = VWALL;
 		}
 	}
