@@ -687,7 +687,7 @@ boolean you_abilities;
 	case MATTK_U_STYLE: return dofightingform();
 	case MATTK_U_MONST: return domonability();
 	case MATTK_U_ELMENTAL: return doelementalbreath();
-	case MATTK_WHISPER: return domakedog();
+	case MATTK_WHISPER: return domakewhisperer();
 
 	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);

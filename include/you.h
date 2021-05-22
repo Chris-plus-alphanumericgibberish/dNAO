@@ -444,7 +444,8 @@ struct you {
 				u.veil = FALSE;\
 				change_uinsight(1);\
 			}
-	/* 21 free bits */
+	Bitfield(render_thought,1);	/* you got a thought from a veil-render */
+	/* 20 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */

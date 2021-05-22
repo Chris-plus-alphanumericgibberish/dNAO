@@ -987,6 +987,7 @@ E int FDECL(glyph_insight, (long int));
 E boolean FDECL(active_glyph, (long int));
 E boolean FDECL(was_active_glyph, (long int, int, int));
 E void FDECL(change_glyph_active, (long int, boolean));
+E boolean NDECL(dofreethought);
 
 E void FDECL(doguidance, (struct monst *, int));
 
@@ -2140,7 +2141,7 @@ E void FDECL(polyself, (BOOLEAN_P));
 E int FDECL(polymon, (int));
 E void NDECL(rehumanize);
 E int FDECL(dobreathe, (struct permonst *));
-E int NDECL(domakedog);
+E int NDECL(domakewhisperer);
 E int NDECL(doelementalbreath);
 E int NDECL(dospit);
 E int NDECL(doremove);

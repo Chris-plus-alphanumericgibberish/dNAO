@@ -25,6 +25,12 @@
 #define		NURSE_FIX_STERILE		7
 #define		NURSE_BRAIN_SURGERY		8
 
+#define		RENDER_FIX_MORGUL		1
+#define		RENDER_FIX_SICKNESS		2
+#define		RENDER_FIX_SLIME		3
+#define		RENDER_BRAIN_SURGERY	4
+#define		RENDER_THOUGHT			5
+
 //Match order of constants
 const int nurseprices[] = {
 	0,	 //0 (invalid)
@@ -45,8 +51,10 @@ int FDECL(dobinding,(int, int));
 int * FDECL(spirit_skills, (int));
 static int NDECL(doblessmenu);
 static int NDECL(donursemenu);
+static int NDECL(dorendermenu);
 static int FDECL(dodollmenu, (struct monst *));
 static boolean FDECL(nurse_services,(struct monst *));
+static boolean FDECL(render_services,(struct monst *));
 static boolean FDECL(buy_dolls,(struct monst *));
 
 static const char tools[] = { TOOL_CLASS, 0 };
@@ -1803,13 +1811,33 @@ asGuardian:
 		aggravate();
 	break;
 	case MS_SECRETS:
-		if(mtmp->mtame){
-			pline("%s whispers dire secrets, filling you with zeal.", Monnam(mtmp));
-			u.uencouraged = min_ints(Insanity/5+1, u.uencouraged+rnd(Insanity/5+1));
-		} else if(!mtmp->mpeaceful){
-			aggravate();
+		if(chatting){
+			if(mtmp->mtame && mtmp->mtyp == PM_VEIL_RENDER
+			 && (
+				u.umorgul > 0
+				|| Sick
+				|| Slimed
+				|| u.thoughts
+				|| (count_glyphs() < 3 && !u.render_thought)
+			 )
+			){
+				if(render_services(mtmp))
+					break;
+			}
+			else if(mtmp->mspec_used){
+				pline_msg = "whispers.";
+				break;
+			}
 		}
-		mtmp->mspec_used = 5;
+		else {
+			if(mtmp->mtame){
+				pline("%s whispers dire secrets, filling you with zeal.", Monnam(mtmp));
+				u.uencouraged = min_ints(Insanity/5+1, u.uencouraged+rnd(Insanity/5+1));
+			} else if(!mtmp->mpeaceful){
+				aggravate();
+			}
+			mtmp->mspec_used = 5;
+		}
 	break;
 	case MS_IMITATE:
 	    pline_msg = "imitates you.";
@@ -6117,6 +6145,161 @@ struct monst *nurse;
 	if(!nurse->mtame)
 		(void) money2mon(nurse, nurseprices[service]*count/10);
 #endif
+	return TRUE;
+}
+
+int
+dorendermenu()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Ask for aid?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+
+	if(u.umorgul > 0){
+		Sprintf(buf, "Extract morgul shards");
+		any.a_int = RENDER_FIX_MORGUL;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	if(Sick){
+		Sprintf(buf, "Extract pathogen");
+		any.a_int = RENDER_FIX_SICKNESS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	if(Slimed){
+		Sprintf(buf, "Remove slimy green growths");
+		any.a_int = RENDER_FIX_SLIME;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	if(u.thoughts){
+		Sprintf(buf, "Extract thought");
+		any.a_int = RENDER_BRAIN_SURGERY;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	if(count_glyphs() < 3 && !u.render_thought){
+		Sprintf(buf, "Learn thought");
+		any.a_int = RENDER_THOUGHT;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++; //Advance anyway
+	
+	end_menu(tmpwin, "");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (int)selected[0].item.a_int : 0;
+}
+
+boolean
+render_services(render)
+struct monst *render;
+{
+	int service, gold, count = 1, cost;
+		
+	service = dorendermenu();
+	if(!service)
+		return FALSE;
+	
+	switch(service){
+		case RENDER_FIX_MORGUL:{
+			int i = u.umorgul;
+			struct obj *frags;
+			u.umorgul = 0;
+			frags = mksobj(SHURIKEN, MKOBJ_NOINIT);
+			pline("%s reaches into your body, removing %d metallic shard%s.", Monnam(render), i, (i>1) ? "s" : "");
+			change_usanity(-10, TRUE);
+			if(frags){
+				frags->quan = i;
+				add_oprop(frags, OPROP_LESSER_MORGW);
+				set_material_gm(frags, METAL);
+				curse(frags);
+				fix_object(frags);
+				frags = hold_another_object(frags, "You drop %s!",
+							  doname(frags), (const char *)0); /*shouldn't merge, but may drop*/
+			}
+		}break;
+		case RENDER_FIX_SICKNESS:
+			pline("%s reaches into your body, removing some sort of slime!", Monnam(render));
+			healup(0, 0, TRUE, FALSE);
+		break;
+		case RENDER_FIX_SLIME:
+			pline("%s picks off the slimy growths.", Monnam(render));
+			Slimed = 0L;
+		break;
+		case RENDER_BRAIN_SURGERY:{
+			int otyp;
+			struct obj *glyph;
+			otyp = dotrephination_menu();
+			if(!otyp)
+				break;
+			
+			glyph = mksobj(otyp, MKOBJ_NOINIT);
+			
+			if(glyph){
+				remove_thought(otyp_to_thought(otyp));
+				if(Race_if(PM_ANDROID)){
+					set_material_gm(glyph, PLASTIC);
+					fix_object(glyph);
+				}
+				if(Race_if(PM_CLOCKWORK_AUTOMATON)){
+					set_material_gm(glyph, COPPER);
+					fix_object(glyph);
+				}
+				if(Race_if(PM_WORM_THAT_WALKS)){
+					set_material_gm(glyph, SHELL_MAT);
+					fix_object(glyph);
+				}
+				hold_another_object(glyph, "You drop %s!", doname(glyph), (const char *)0);
+				if(ACURR(A_WIS)>ATTRMIN(A_WIS)){
+					adjattrib(A_WIS, -1, FALSE);
+				}
+				if(ACURR(A_INT)>ATTRMIN(A_INT)){
+					adjattrib(A_INT, -1, FALSE);
+				}
+				if(ACURR(A_CON)>ATTRMIN(A_CON)){
+					adjattrib(A_CON, -1, FALSE);
+				}
+				change_usanity(-10, TRUE);
+				//Note: this is always the player's HP, not their polyform HP.
+				u.uhp -= u.uhp/2; //Note: chopped, so 0 to 1/2 max-HP lost.
+			} else {
+				impossible("Shard creation failed during render brain surgery??");
+			}
+		}break;
+		case RENDER_THOUGHT:
+			if(!dofreethought())
+				return FALSE;
+			else {
+				u.render_thought = TRUE;
+			}
+		break;
+	}
 	return TRUE;
 }
 

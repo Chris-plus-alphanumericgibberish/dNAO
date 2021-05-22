@@ -886,17 +886,48 @@ struct permonst *mdat;
 }
 
 int
-domakedog()
+domakewhisperer()
 {
+	const char *petname;
+	struct monst *mtmp;
+	int duration;
 	if (u.uen < (10+min(u.uinsight, 45))) {
 	    You("concentrate but lack the energy to maintain doing so.");
 	    return(0);
 	}
-	u.whisperturn = moves+ACURR(A_CHA)+15;
+	
+	duration = ACURR(A_CHA) + 1;
+	
+	if(u.uinsight >= 20)
+		duration = 2*ACURR(A_CHA);
+	
+	u.whisperturn = moves+duration+14;
 	losepw(10+min(u.uinsight, 45));
 	flags.botl = 1;
 	
-	makedog();
+	// makedog();
+	mtmp = makemon(&mons[PM_SECRET_WHISPERER], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG|MM_ESUM);
+
+	if(!mtmp) return 0; /* pets were genocided */
+
+	mark_mon_as_summoned(mtmp, &youmonst, duration, 0);
+	for(int i = min(45, (u.uinsight - mtmp->m_lev)); i > 0; i--){
+		grow_up(mtmp, (struct monst *) 0);
+		//Technically might grow into a genocided form.
+		if(DEADMONSTER(mtmp))
+			return 0;
+	}
+	mtmp->mspec_used = 0;
+
+	if(mtmp->m_lev) mtmp->mhpmax = 8*(mtmp->m_lev-1)+rnd(8);
+	mtmp->mhp = mtmp->mhpmax;
+
+	petname = whisperername;
+	if (*petname)
+		mtmp = christen_monst(mtmp, petname);
+	
+	initedog(mtmp);
+	EDOG(mtmp)->loyal = TRUE;
 	return 1;
 }
 

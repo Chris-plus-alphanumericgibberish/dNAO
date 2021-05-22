@@ -197,5 +197,205 @@ int dmg;
 	}
 }
 
+int
+dofreethought_menu()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Learn what?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+	
+	if (!(u.thoughts&CLOCKWISE_METAMORPHOSIS)){
+		Sprintf(buf, "Increase HP");
+		any.a_int = CLOCKWISE_METAMORPHOSIS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&ANTI_CLOCKWISE_METAMORPHOSIS)){
+		Sprintf(buf, "Increase speed");
+		any.a_int = ANTI_CLOCKWISE_METAMORPHOSIS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&ARCANE_BULWARK)){
+		Sprintf(buf, "Magic resistance");
+		any.a_int = ARCANE_BULWARK;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&DISSIPATING_BULWARK)){
+		Sprintf(buf, "Shock resistance");
+		any.a_int = DISSIPATING_BULWARK;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&SMOLDERING_BULWARK)){
+		Sprintf(buf, "Fire resistance");
+		any.a_int = SMOLDERING_BULWARK;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&FROSTED_BULWARK)){
+		Sprintf(buf, "Cold resistance");
+		any.a_int = FROSTED_BULWARK;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&BLOOD_RAPTURE)){
+		Sprintf(buf, "Sneak attack healing");
+		any.a_int = BLOOD_RAPTURE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&CLAWMARK)){
+		Sprintf(buf, "Stronger sneak attacks");
+		any.a_int = CLAWMARK;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&CLEAR_DEEPS)){
+		Sprintf(buf, "Poison resistance");
+		any.a_int = CLEAR_DEEPS;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&DEEP_SEA)){
+		Sprintf(buf, "Damage reduction");
+		any.a_int = DEEP_SEA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&COMMUNION)){
+		Sprintf(buf, "Carrying capacity");
+		any.a_int = COMMUNION;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&CORRUPTION)){
+		Sprintf(buf, "Regeneration at low health");
+		any.a_int = CORRUPTION;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&EYE_THOUGHT)){
+		Sprintf(buf, "More battle loot");
+		any.a_int = EYE_THOUGHT;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&FORMLESS_VOICE)){
+		Sprintf(buf, "More magical energy");
+		any.a_int = FORMLESS_VOICE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&GUIDANCE)){
+		Sprintf(buf, "Counterattack healing");
+		any.a_int = GUIDANCE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&IMPURITY)){
+		Sprintf(buf, "Damage reduction for pets");
+		any.a_int = IMPURITY;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&MOON)){
+		Sprintf(buf, "Faster experience gain");
+		any.a_int = MOON;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&WRITHE)){
+		Sprintf(buf, "Recover energy from sneak attacks");
+		any.a_int = WRITHE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	if (!(u.thoughts&RADIANCE)){
+		Sprintf(buf, "More magical healing");
+		any.a_int = RADIANCE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	
+	if (!(u.thoughts&BEASTS_EMBRACE)){
+		Sprintf(buf, "More powerful beast claws");
+		any.a_int = BEASTS_EMBRACE;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	
+	end_menu(tmpwin, "Pick thought to learn");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (int)selected[0].item.a_int : 0;
+}
+
+boolean
+dofreethought()
+{
+	int thoughtID;
+	thoughtID = dofreethought_menu();
+	if(thoughtID){
+		give_thought(thoughtID);
+		return TRUE;
+	}
+	else return FALSE;
+}
 
 /*glyph.c*/
