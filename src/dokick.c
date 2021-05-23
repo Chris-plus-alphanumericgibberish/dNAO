@@ -69,9 +69,6 @@ register boolean clumsy;
 				}
 			}
 		}
-		/* may bring up a dialog, so put this after all messages */
-		if (kick_skill != P_NONE)	/* exercise proficiency */
-			use_skill(kick_skill, 1);
 	}
 }
 

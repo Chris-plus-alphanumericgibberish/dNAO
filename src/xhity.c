@@ -13432,13 +13432,26 @@ int vis;						/* True if action is at all visible to the player */
 		/* If a proper monster-style attack is being used, no stat-based damage! */
 		if (monsdmg == 0) {
 			/* Do monsters ever kick for 0 monsdmg? */
-			if (youagr)
-				basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON)) / 15);
+			if (youagr){
+				real_attack = TRUE;
+				if(u.umaniac){
+					if(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
+						basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON) + ACURR(A_CHA)) / 15 + weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2);
+					else 
+						basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON) + ACURR(A_CHA)) / 15);
+				}
+				else
+					basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON)) / 15);
+			}
 			else
 				basedmg = 1;
 			/* martial players are much better at kicking */
-			if (youagr && (martial_bonus() || (youracedata->mtyp == PM_SASQUATCH) || (uarmf && uarmf->otyp == KICKING_BOOTS)))
-				basedmg += rn2(ACURR(A_DEX)/2 + 1);
+			if (youagr){
+				if(martial_bonus() || (uarmf && uarmf->otyp == KICKING_BOOTS))
+					basedmg += rn2(ACURR(A_DEX)/2 + 1);
+				if(youracedata->mtyp == PM_SASQUATCH)
+					basedmg += rn2(ACURR(A_CON)/2 + 1);
+			}
 		}
 
 		/* boots can increase kicking damage */
@@ -13608,7 +13621,7 @@ int vis;						/* True if action is at all visible to the player */
 			}
 		}
 		/* skill damage bonus */
-		if(youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch)){
+		if(youagr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick)){
 			/* note: unarmed kicks do not get skill bonus damage */
 			int skill_damage = 0;
 			int wtype;
@@ -13616,7 +13629,7 @@ int vis;						/* True if action is at all visible to the player */
 			/* get simple weapon skill associated with the weapon, not including twoweapon */
 			if (fired && launcher)
 				wtype = weapon_type(launcher);
-			else if (unarmed_punch || (weapon && martial_aid(weapon)))
+			else if (unarmed_punch || unarmed_kick || (weapon && martial_aid(weapon)))
 				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
 				wtype = P_SCIMITAR;
