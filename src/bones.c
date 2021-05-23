@@ -273,6 +273,9 @@ int y;
 		} else if(u.thoughts & DEEP_SEA){
 			u.thoughts &= ~DEEP_SEA;
 			otmp = mksobj(DEEP_SEA_GLYPH, MKOBJ_NOINIT);
+		} else if(u.thoughts & TRANSPARENT_SEA){
+			u.thoughts &= ~TRANSPARENT_SEA;
+			otmp = mksobj(HIDDEN_SEA_GLYPH, MKOBJ_NOINIT);
 		} else if(u.thoughts & COMMUNION){
 			u.thoughts &= ~COMMUNION;
 			otmp = mksobj(COMMUNION_GLYPH, MKOBJ_NOINIT);

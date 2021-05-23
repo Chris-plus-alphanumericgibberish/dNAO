@@ -863,6 +863,9 @@ you_regen_san()
 	else while((insight = insight/2))
 		reglevel--;
 
+	if(active_glyph(TRANSPARENT_SEA))
+		reglevel += 30;
+
 	// penalty for certain areas
 	if(Is_rlyeh(&u.uz)){
 		reglevel -= 30;

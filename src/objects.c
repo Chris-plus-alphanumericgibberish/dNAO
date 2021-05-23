@@ -1448,6 +1448,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 	BONE_TILE(("clawmark glyph",  "set of many vertical lines"),   0),				// CLAWMARK
 	BONE_TILE(("clear sea glyph",  "set of coalescing vertical lines"),   0),		// CLEAR_DEEPS
 	BONE_TILE(("deep sea glyph",  "set of coalescing vertical marks"),   0),			// DEEP_SEA
+	BONE_TILE(("hidden sea glyph",  "set of coalescing vertical scratches"),   0),		// TRANSPARENT_SEA
 	BONE_TILE(("communion glyph",  "weeping-eyed leaf"),   0),				// COMMUNION
 	BONE_TILE(("corruption glyph",  "bleeding caduceus"),   0),				// CORRUPTION
 	BONE_TILE(("eye glyph",  "pentagonal eye"),   0),							// EYE_THOUGHT

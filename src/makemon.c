@@ -8783,6 +8783,8 @@ register int	mmflags;
 		mtmp->m_insight_level = 10+rn2(5);
 	else if(mtmp->mtyp == PM_PITCH_BLACK_CUBE)
 		mtmp->m_insight_level = 22+rn2(11);
+	else if(mtmp->mtyp == PM_PERFECTLY_CLEAR_CUBE)
+		mtmp->m_insight_level = 30+rn2(11);
 	else if(mtmp->mtyp == PM_PRAYERFUL_THING)
 		mtmp->m_insight_level = 25+rn2(13);
 	else if(mtmp->mtyp == PM_HEMORRHAGIC_THING)
@@ -9380,6 +9382,10 @@ register int	mmflags;
 			if (mndx == PM_CRYSTAL_OOZE){
 				if (is_pool(x, y, FALSE))
 					mtmp->mundetected = TRUE;
+			}
+			if (mndx == PM_PERFECTLY_CLEAR_CUBE) {
+			    mtmp->perminvis = TRUE;
+			    mtmp->minvis = TRUE;
 			}
 		break;
 	    case S_KETER:

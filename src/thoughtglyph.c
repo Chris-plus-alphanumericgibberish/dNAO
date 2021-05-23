@@ -296,6 +296,14 @@ dofreethought_menu()
 			MENU_UNSELECTED);
 		incntlet++;
 	}
+	if (!(u.thoughts&TRANSPARENT_SEA)){
+		Sprintf(buf, "Sanity recovery");
+		any.a_int = TRANSPARENT_SEA;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
 	if (!(u.thoughts&COMMUNION)){
 		Sprintf(buf, "Carrying capacity");
 		any.a_int = COMMUNION;	/* must be non-zero */

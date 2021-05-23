@@ -6847,6 +6847,14 @@ dotrephination_menu()
 			MENU_UNSELECTED);
 		incntlet++;
 	}
+	if (u.thoughts&TRANSPARENT_SEA){
+		Sprintf(buf, "Extract the perfectly clear sea");
+		any.a_int = HIDDEN_SEA_GLYPH;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
 	if (u.thoughts&COMMUNION){
 		Sprintf(buf, "Extract memory of the strange minister's sermon");
 		any.a_int = COMMUNION_GLYPH;	/* must be non-zero */

@@ -1905,6 +1905,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (active_glyph(DEEP_SEA)){
 		enl_msg("The pitch-black waters ", "reduce", "reduced", " physical damage by 3");
 	}
+	if (active_glyph(TRANSPARENT_SEA)){
+		enl_msg("The perfectly clear sea ", "speed", "sped", " sanity recovery");
+	}
 	if (active_glyph(COMMUNION)){
 		enl_msg("The strange minister's prayer ", "increases", "increased", " your carry capacity by 25%");
 	}
@@ -2708,6 +2711,8 @@ int final;
 		dump("  ", "The deep blue waters protected you from poison");
 	if (active_glyph(DEEP_SEA))
 		dump("  ", "The pitch-black waters reduced physical damage");
+	if (active_glyph(TRANSPARENT_SEA))
+		dump("  ", "The perfectly clear sea sped sanity recovery");
 	if (active_glyph(COMMUNION))
 		dump("  ", "The strange minister lifted your burdens");
 	if (active_glyph(CORRUPTION))
@@ -3213,6 +3218,7 @@ resistances_enlightenment()
 	if (active_glyph(CLAWMARK)) putstr(en_win, 0, "Every surface you have ever seen was scored by claws.");
 	if (active_glyph(CLEAR_DEEPS)) putstr(en_win, 0, "Your thoughts drift through blue water.");
 	if (active_glyph(DEEP_SEA)) putstr(en_win, 0, "Your fears drown in pitch-black water.");
+	if (active_glyph(TRANSPARENT_SEA)) putstr(en_win, 0, "Your mind is bulwarked by the clear deep sea.");
 	if (active_glyph(COMMUNION)) putstr(en_win, 0, "A strange minister preaches continuously in your childhood home.");
 	if (active_glyph(CORRUPTION)) putstr(en_win, 0, "It weeps tears of blood.");
 	if (active_glyph(EYE_THOUGHT)) putstr(en_win, 0, "Eyes writhe inside your head.");

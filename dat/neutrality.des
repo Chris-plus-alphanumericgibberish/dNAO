@@ -1058,6 +1058,8 @@ MONSTER[10%]:'U',"many-taloned thing",random
 MONSTER[10%]:'b',"deep blue cube",random
 MONSTER[10%]:'b',"pitch black cube",random
 
+MONSTER[10%]:'b',"perfectly clear cube",random
+
 MONSTER[10%]:'U',"prayerful thing",random
 MONSTER[10%]:'U',"hemorrhagic thing",random
 MONSTER[10%]:'e',"many-eyed seeker",random
@@ -2829,6 +2831,8 @@ MONSTER[75%]:'P',"frosted lake",random
 MONSTER[75%]:'v',"blood shower",random
 MONSTER[75%]:'U',"many-taloned thing",random
 
+MONSTER[75%]:'b',"perfectly clear cube",random
+
 MONSTER[75%]:'b',"deep blue cube",random
 MONSTER[75%]:'b',"pitch black cube",random
 MONSTER[75%]:'U',"prayerful thing",random
@@ -2972,6 +2976,8 @@ MONSTER[75%]:'P',"smoldering lake",random
 MONSTER[75%]:'P',"frosted lake",random
 MONSTER[75%]:'v',"blood shower",random
 MONSTER[75%]:'U',"many-taloned thing",random
+
+MONSTER[75%]:'b',"perfectly clear cube",random
 
 MONSTER[75%]:'b',"deep blue cube",random
 MONSTER[75%]:'b',"pitch black cube",random
@@ -3156,6 +3162,8 @@ MONSTER[75%]:'P',"frosted lake",random
 MONSTER[75%]:'v',"blood shower",random
 MONSTER[75%]:'U',"many-taloned thing",random
 
+MONSTER[75%]:'b',"perfectly clear cube",random
+
 MONSTER[75%]:'b',"deep blue cube",random
 MONSTER[75%]:'b',"pitch black cube",random
 MONSTER[75%]:'U',"prayerful thing",random
@@ -3325,6 +3333,8 @@ MONSTER[75%]:'P',"frosted lake",random
 MONSTER[75%]:'v',"blood shower",random
 MONSTER[75%]:'U',"many-taloned thing",random
 
+MONSTER[75%]:'b',"perfectly clear cube",random
+
 MONSTER[75%]:'b',"deep blue cube",random
 MONSTER[75%]:'b',"pitch black cube",random
 MONSTER[75%]:'U',"prayerful thing",random
@@ -3472,6 +3482,8 @@ MONSTER[75%]:'P',"smoldering lake",random
 MONSTER[75%]:'P',"frosted lake",random
 MONSTER[75%]:'v',"blood shower",random
 MONSTER[75%]:'U',"many-taloned thing",random
+
+MONSTER[75%]:'b',"perfectly clear cube",random
 
 MONSTER[75%]:'b',"deep blue cube",random
 MONSTER[75%]:'b',"pitch black cube",random
