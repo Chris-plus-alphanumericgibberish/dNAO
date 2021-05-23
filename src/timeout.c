@@ -2945,17 +2945,21 @@ int fd;
 boolean ghostly;
 long adjust;
 {
+	boolean hastnxt;
+	boolean first = TRUE;
 	do {
 		tm = (struct timer *)alloc(sizeof(struct timer));
 		mread(fd, (genericptr_t) tm, sizeof(struct timer));
 		add_chain_tm(tm);
+		hastnxt = tm->tnxt != 0;
 		/* possibly adjust timer */
 		if (ghostly)
 	    	tm->timeout += adjust;
 		/* relink owner */
 		tm->arg = owner;
+		tm->tnxt = first ? (struct timer *)0 : *owner_tm(tmtype, owner);
 		*owner_tm(tmtype, owner) = tm;
-	} while(tm->tnxt);
+	} while(hastnxt);
 	return;
 }
 
