@@ -1361,7 +1361,7 @@ moveloop()
 				if(mtmp->mtaneggs){
 					for(int i = mtmp->mtaneggs; i > 0; i--) if(!rn2(6)){
 						mtmp->mtaneggs--;
-						makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+						makemon(&mons[PM_STRANGE_LARVA], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_ADJACENTSTRICT|NO_MINVENT|MM_NOCOUNTBIRTH);
 						mtmp->mhp -= rnd(6);
 					}
 					/*Died from the damage*/
@@ -1975,7 +1975,7 @@ karemade:
 			if(u.utaneggs){
 				for(int i = u.utaneggs; i > 0; i--) if(!rn2(6)){
 					u.utaneggs--;
-					makemon(&mons[PM_STRANGE_LARVA], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+					makemon(&mons[PM_STRANGE_LARVA], u.ux, u.uy, MM_ADJACENTOK|MM_ADJACENTSTRICT|NO_MINVENT|MM_NOCOUNTBIRTH);
 					losehp(d(1,6), "hatching parasite", KILLED_BY_AN);
 				}
 			}
