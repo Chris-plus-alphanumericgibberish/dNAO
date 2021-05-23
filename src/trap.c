@@ -568,16 +568,16 @@ int *fail_reason;
 			mptr = &mons[statue->corpsenm];
 		
 	    if((mptr->geno & G_UNIQ) || mptr->msound == MS_GUARDIAN){
-		/* Statues of quest guardians or unique monsters
-		 * will not stone-to-flesh as the real thing.
-		 */
-		 if(statue->spe&STATUE_FACELESS){
-			mon = makeundead(&mons[PM_DOPPELGANGER], x, y,
-				NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK, ILLUMINATED);
-		 } else {
-			mon = makemon(&mons[PM_DOPPELGANGER], x, y,
-				NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK);
-		 }
+			/* Statues of quest guardians or unique monsters
+			* will not stone-to-flesh as the real thing.
+			*/
+			if(statue->spe&STATUE_FACELESS){
+				mon = makeundead(&mons[PM_DOPPELGANGER], x, y,
+					NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK, ILLUMINATED);
+			} else {
+				mon = makemon(&mons[PM_DOPPELGANGER], x, y,
+					NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK);
+			}
 			if (mon) {
 				/* makemon() will set mon->cham to
 				 * CHAM_ORDINARY if hero is wearing
