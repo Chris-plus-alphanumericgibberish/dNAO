@@ -3445,7 +3445,7 @@ STATIC_OVL void
 goat_gives_benefit()
 {
 	struct obj *optr;
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_gname_full(A_NONE),A_NONE);
+	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(ga_gname_full(GA_MOTHER),A_NONE);
 	else switch(rnd(7)){
 		case 1:
 			if (Hallucination)
