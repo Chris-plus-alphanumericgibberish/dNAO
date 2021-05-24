@@ -2589,8 +2589,9 @@ long timeout;
 STATIC_DCL const char *FDECL(kind_name, (SHORT_P));
 STATIC_DCL void FDECL(print_queue, (winid, timer_element *));
 #endif
-STATIC_DCL void FDECL(add_chain_tm, (timer_element *));
-STATIC_DCL void FDECL(rem_chain_tm, (timer_element *));
+STATIC_DCL void FDECL(add_procchain_tm, (timer_element *));
+STATIC_DCL void FDECL(rem_procchain_tm, (timer_element *));
+STATIC_DCL void FDECL(rem_locchain_tm, (timer_element *, timer_element **));
 
 /* ordered timer list */
 static timer_element *timer_base;		/* "active" */
@@ -2768,7 +2769,7 @@ timer_sanity_check()
 /* adds an existing timer to the processing chain */
 /* does not affect local chain it should go on */
 void
-add_chain_tm(tm)
+add_procchain_tm(tm)
 timer_element * tm;
 {
 	timer_element *curr, *prev;
@@ -2793,15 +2794,16 @@ timer_element * tm;
 	return;
 }
 
-/* removes a timer from the procesing chain */
+/* removes a timer from the processing chain */
 /* does not affect local chain it is on */
 void
-rem_chain_tm(tm)
+rem_procchain_tm(tm)
 timer_element * tm;
 {
 	struct timer * tmtmp;
+
 	if (timer_base == tm) {
-		timer_base = timer_base->next;
+		timer_base = tm->next;
 		return;
 	}
 	else for (tmtmp = timer_base; tmtmp; tmtmp = tmtmp->next) {
@@ -2814,6 +2816,28 @@ timer_element * tm;
 	return;
 }
 
+/* removes a timer from a local chain */
+void
+rem_locchain_tm(tm, chain_p)
+timer_element * tm;
+timer_element ** chain_p;
+{
+	struct timer * tmtmp;
+	struct timer * chain_base = *chain_p;
+
+	if (chain_base == tm) {
+		*chain_p = tm->tnxt;
+		return;
+	}
+	else for (tmtmp = chain_base; tmtmp; tmtmp = tmtmp->tnxt) {
+		if (tmtmp->tnxt == tm) {
+			tmtmp->tnxt = tm->tnxt;
+			return;
+		}
+	}
+	impossible("couldn't find tm in given chain");
+	return;
+}
 
 /*
  * Pick off timeout elements from the global queue and call their functions.
@@ -2832,7 +2856,7 @@ run_timers()
     while (timer_base && timer_base->timeout <= monstermoves) {
 		curr = timer_base;
 		timer_base = curr->next;
-		*owner_tm(curr->kind, curr->arg) = curr->tnxt;
+		rem_locchain_tm(curr, owner_tm(curr->kind, curr->arg));
 		(*timeout_funcs[curr->func_index].f)(curr->arg, curr->timeout);
 		free((genericptr_t) curr);
     }
@@ -2872,7 +2896,7 @@ genericptr_t owner;
 	/* add to owner */
 	*owner_tm(tmtype, owner) = gnu;
 	/* add to processing chain */
-	add_chain_tm(gnu);
+	add_procchain_tm(gnu);
 
     return TRUE;
 }
@@ -2896,12 +2920,12 @@ timer_element * chain;
 	}
 	timeout = doomed->timeout;
 	/* remove from processing loop */
-	rem_chain_tm(doomed);
+	rem_procchain_tm(doomed);
 	/* call cleanup function */
 	if (timeout_funcs[doomed->func_index].cleanup)
 		(*timeout_funcs[doomed->func_index].cleanup)(doomed->arg, timeout);
 	/* remove from owner */
-	*owner_tm(doomed->kind, doomed->arg) = doomed->tnxt;
+	rem_locchain_tm(doomed, owner_tm(doomed->kind, doomed->arg));
 	free((genericptr_t) doomed);
 	return timeout;
 }
@@ -2922,17 +2946,15 @@ struct timer * tm;
 int fd;
 int mode;
 {
-	struct timer * curr = tm;
-	struct timer * tnxt;
+	struct timer * curr;
 
-	while (curr) {
-		tnxt = curr->tnxt;
+	int count = 0;
+	for (curr = tm; curr; curr = curr->tnxt) {
 		if (perform_bwrite(mode))
-			bwrite(fd, (genericptr_t)tm, sizeof(struct timer));
-		if (release_data(mode))
-			stop_timer(tm->func_index, tm);
-		curr = tnxt;
+			bwrite(fd, (genericptr_t)curr, sizeof(struct timer));
 	}
+	if (release_data(mode))
+		stop_all_timers(tm);
 	return;
 }
 
@@ -2945,17 +2967,22 @@ int fd;
 boolean ghostly;
 long adjust;
 {
+	boolean hastnxt;
+
+	*owner_tm(tmtype, owner) = (struct timer *)0;
 	do {
 		tm = (struct timer *)alloc(sizeof(struct timer));
 		mread(fd, (genericptr_t) tm, sizeof(struct timer));
-		add_chain_tm(tm);
+		add_procchain_tm(tm);
+		hastnxt = tm->tnxt != (struct timer *)0;
 		/* possibly adjust timer */
 		if (ghostly)
 	    	tm->timeout += adjust;
 		/* relink owner */
 		tm->arg = owner;
+		tm->tnxt = *owner_tm(tmtype, owner);
 		*owner_tm(tmtype, owner) = tm;
-	} while(tm->tnxt);
+	} while(hastnxt);
 	return;
 }
 
@@ -2972,9 +2999,9 @@ timer_element * tm;
 long amt;
 {
 	/* have to remove it and re-add it so the list remains ordered */
-	rem_chain_tm(tm);
+	rem_procchain_tm(tm);
 	tm->timeout += amt;
-	add_chain_tm(tm);
+	add_procchain_tm(tm);
 }
 
 timer_element *
