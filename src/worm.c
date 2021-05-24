@@ -500,11 +500,11 @@ detect_wsegs(worm, use_detection_glyph)
 
     while (curr != wheads[worm->wormno]) {
 	if(worm->mtyp == PM_HUNTING_HORROR) num = use_detection_glyph ?
-		detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, worm)) :
-		monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, worm));
+		detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)) :
+		monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL));
 	else num = use_detection_glyph ?
-		detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, worm)) :
-		monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, worm));
+		detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL)) :
+		monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL));
 	show_glyph(curr->wx,curr->wy,num);
 	curr = curr->nseg;
     }

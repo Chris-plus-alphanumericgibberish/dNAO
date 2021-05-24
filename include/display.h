@@ -214,7 +214,7 @@
  * given.
  */
 #define what_obj(obj)	(Hallucination ? random_object()  : obj)
-#define what_mon(mon, mtmp)	((Hallucination) ? random_monster() : mon)
+#define what_mon(mon)	((Hallucination) ? random_monster() : mon)
 #define what_trap(trp)	(Hallucination ? random_trap()	  : trp)
 
 /*
@@ -341,12 +341,12 @@
 #define GLYPH_INVISIBLE GLYPH_INVIS_OFF
 
 #define warning_to_glyph(mwarnlev) ((mwarnlev)+GLYPH_WARNING_OFF)
-#define mon_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_MON_OFF)
-#define detected_mon_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_DETECT_OFF)
-#define ridden_mon_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_RIDDEN_OFF)
-#define pet_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_PET_OFF)
-#define peace_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_PEACE_OFF)
-#define zombie_to_glyph(mon) ((int) what_mon(monsndx((mon)->data), mon)+GLYPH_ZOMBIE_OFF)
+#define mon_to_glyph(mon) ((int) what_mon((mon)->mtyp)+GLYPH_MON_OFF)
+#define detected_mon_to_glyph(mon) ((int) what_mon((mon)->mtyp)+GLYPH_DETECT_OFF)
+#define ridden_mon_to_glyph(mon) ((int) what_mon((mon)->mtyp)+GLYPH_RIDDEN_OFF)
+#define pet_to_glyph(mon) ((int) what_mon((mon)->mtyp)+GLYPH_PET_OFF)
+#define peace_to_glyph(mon) ((int) what_mon((mon)->mtyp)+GLYPH_PEACE_OFF)
+#define zombie_to_glyph(mon) ((int) what_mon((mon)->mtyp)+GLYPH_ZOMBIE_OFF)
 
 #define cmap_to_glyph(cmap_idx) ((int) (cmap_idx)   + GLYPH_CMAP_OFF)
 #define explosion_to_glyph(expltype,idx)	\
