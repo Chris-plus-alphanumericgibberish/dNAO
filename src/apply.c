@@ -3819,6 +3819,67 @@ struct obj *obj;
 }
 
 
+//Used to coordinate polearm_menu and targeting code
+const int pole_dy[16] = {-2,-2,-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2};
+const int pole_dx[16] = { 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2,-2,-2,-2,-1};
+const char pole_dir[16][4] = {"N","NNE","NE",
+						  "ENE","E","ESE","SE",
+						  "SSE","S","SSW","SW",
+						  "WSW","W","WNW","NW",
+						  "NNW"};
+
+STATIC_OVL int
+polearm_menu(pole)
+struct obj *pole;
+{
+	winid tmpwin;
+	int n = 0, how, i, cx, cy;
+	int typ, max_range;
+	struct monst *mtmp;
+	char buf[BUFSZ];
+	char incntlet;
+	menu_item *selected;
+	anything any;
+
+	/* Calculate range */
+	typ = weapon_type(pole);
+	if (typ == P_NONE || P_SKILL(typ) <= P_BASIC) max_range = 4;
+	else if ( P_SKILL(typ) == P_SKILLED) max_range = 5;
+	else max_range = 8;
+	
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+	
+	Sprintf(buf, "Targets");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+	for(i=0; i<16; i++){
+		cx = u.ux + pole_dx[i];
+		cy = u.uy + pole_dy[i];
+		if(isok(cx, cy) && (mtmp = m_at(cx, cy)) 
+			&& cansee(cx, cy)
+			&& canseemon(mtmp)
+			&& distu(cx, cy) <= max_range
+		){
+			Sprintf(buf, "%s (%s)", Monnam(mtmp), pole_dir[i]);
+			any.a_int = i+1;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		incntlet++; /* always increment, so that the same direction is always the same letter*/
+	}
+
+	end_menu(tmpwin, "Choose target:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return ( n > 0 ) ? selected[0].item.a_int : 0;
+}
+
 static const char
 	not_enough_room[] = "There's not enough room here to use that.",
 	where_to_hit[] = "Where do you want to hit?",
@@ -3830,7 +3891,8 @@ STATIC_OVL int
 use_pole (obj)
 	struct obj *obj;
 {
-	int res = 0, typ, max_range = 4, min_range = 4, skillBonus = 0;
+	int res = 0, typ, max_range = 4, min_range = 4;
+	int i;
 	coord cc;
 	struct monst *mtmp;
 
@@ -3847,16 +3909,28 @@ use_pole (obj)
      /* assert(obj == uwep); */
 
 	/* Prompt for a location */
-	pline("%s", where_to_hit);
-	cc.x = u.ux;
-	cc.y = u.uy;
-	if (getpos(&cc, TRUE, "the spot to hit") < 0)
-	    return 0;	/* user pressed ESC */
+	if(flags.standard_polearms){
+		pline("%s", where_to_hit);
+		cc.x = u.ux;
+		cc.y = u.uy;
+		if (getpos(&cc, TRUE, "the spot to hit") < 0)
+			return 0;	/* user pressed ESC */
+	}
+	else {
+		if((i = polearm_menu(uwep))){
+			i--; /*Remove the off-by-one offset used to make all returns from polearm_menu non-zero*/
+			cc.x = u.ux + pole_dx[i];
+			cc.y = u.uy + pole_dy[i];
+		}
+		else {
+			return 0;	/* user pressed ESC */
+		}
+	}
 
 	/* Calculate range */
 	typ = uwep_skill_type();
-	if (typ == P_NONE || (P_SKILL(typ)+skillBonus) <= P_BASIC) max_range = 4;
-	else if ( (P_SKILL(typ)+skillBonus) == P_SKILLED) max_range = 5;
+	if (typ == P_NONE || P_SKILL(typ) <= P_BASIC) max_range = 4;
+	else if ( P_SKILL(typ) == P_SKILLED) max_range = 5;
 	else max_range = 8;
 	if (distu(cc.x, cc.y) > max_range) {
 	    pline("Too far!");

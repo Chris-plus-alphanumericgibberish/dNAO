@@ -109,11 +109,9 @@ register struct obj *obj;
 #ifdef STEED
 				&& !u.usteed
 #endif
-				&& P_SKILL(objects[obj->otyp].oc_skill) < P_SKILLED
 				&& !melee_polearms(youracedata)
 				&& obj->otyp != AKLYS
 				&& !is_vibropike(obj)
-				&& obj->otyp != NAGINATA
 				&& obj->oartifact != ART_WEBWEAVER_S_CROOK
 				&& obj->oartifact != ART_SILENCE_GLAIVE
 				&& obj->oartifact != ART_HEARTCLEAVER

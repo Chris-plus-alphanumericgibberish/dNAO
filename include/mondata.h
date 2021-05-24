@@ -584,8 +584,7 @@
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
 #define hates_iron(ptr)		((ptr->mflagsg&MG_HATESIRON) != 0)
 
-#define melee_polearms(ptr)	(m_martial_skill(ptr) >= P_SKILLED ||\
-							 (ptr)->mtyp == PM_VROCK ||\
+#define melee_polearms(ptr)	((ptr)->mtyp == PM_VROCK ||\
 							 (ptr)->mtyp == PM_MEPHISTOPHELES ||\
 							 (ptr)->mtyp == PM_BAPHOMET \
 							)

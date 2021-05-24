@@ -12162,11 +12162,9 @@ int vis;						/* True if action is at all visible to the player */
 #ifdef STEED
 			(youagr && u.usteed) ||
 #endif
-			(youagr && P_SKILL(objects[weapon->otyp].oc_skill) >= P_SKILLED) ||
 			(pa && melee_polearms(pa)) ||
 			is_vibropike(weapon) ||
 			weapon->otyp == AKLYS ||
-			weapon->otyp == NAGINATA ||
 			weapon->oartifact == ART_WEBWEAVER_S_CROOK ||
 			weapon->oartifact == ART_SILENCE_GLAIVE ||
 			weapon->oartifact == ART_HEARTCLEAVER ||

@@ -260,6 +260,7 @@ static struct Bool_Opt
 	{"sortpack", &flags.sortpack, TRUE, SET_IN_GAME},
 	{"sound", &flags.soundok, TRUE, SET_IN_GAME},
 	{"sparkle", &flags.sparkle, TRUE, SET_IN_GAME},
+	{"standard_polearms", &flags.standard_polearms, FALSE, SET_IN_GAME},
 	{"standout", &flags.standout, FALSE, SET_IN_GAME},
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
         {"statuscolors", &iflags.use_status_colors, TRUE, SET_IN_GAME},
