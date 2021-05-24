@@ -1940,12 +1940,12 @@ struct monst *mtmp;
 		if(!nomouth && obj->otyp == POT_GAIN_ABILITY && (!obj->cursed ||
 			    (!mtmp->isgd && !mtmp->isshk && !mtmp->ispriest))) {
 			m.misc = obj;
-			m.has_misc = MUSE_POT_GAIN_ABILITY;
+			m.has_misc = MUSE_POT_GAIN_ENERGY;
 		}
 		nomore(MUSE_POT_GAIN_ABILITY);
 		if(!nomouth && (mtmp->mcan || (mtmp->mhp <= .5*(mtmp->mhpmax) && mtmp->mspec_used > 2)) && obj->otyp == POT_GAIN_ENERGY) {
 			m.misc = obj;
-			m.has_misc = MUSE_POT_GAIN_ENERGY;
+			m.has_misc = MUSE_POT_GAIN_ABILITY;
 		}
 		nomore(MUSE_BULLWHIP);
 		if((obj->otyp == BULLWHIP || obj->otyp == VIPERWHIP || obj->otyp == FORCE_WHIP) 
@@ -2209,11 +2209,11 @@ skipmsg:
 	case MUSE_POT_GAIN_ENERGY:
 		mquaffmsg(mtmp, otmp);
 		if(!otmp->cursed){
-			if (vismon) pline("%s looks lackluster.", Monnam(mtmp));
+			if (vismon) pline("%s looks full of energy.", Monnam(mtmp));
 			mtmp->mspec_used = 0;
 			mtmp->mcan = 0;
 		} else {
-			if (vismon) pline("%s looks full of energy.", Monnam(mtmp));
+			if (vismon) pline("%s looks lackluster.", Monnam(mtmp));
 			mtmp->mcan = 1;
 		}
 		if (oseen) makeknown(POT_GAIN_ENERGY);
