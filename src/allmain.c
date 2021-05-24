@@ -579,10 +579,6 @@ you_regen_hp()
 		}
 		
 
-		// Healer role bonus
-		if (Role_if(PM_HEALER) && !Upolyd)
-			reglevel += 10;
-
 		// Barbarian role bonus
 		if (Role_if(PM_BARBARIAN) && !Upolyd)
 			reglevel *= 3;
@@ -602,6 +598,16 @@ you_regen_hp()
 		))
 			reglevel *= 1.5;
 
+		//Additive bonuses
+		// Elf bonus
+		if (Race_if(PM_ELF) && !Upolyd)
+			reglevel += 7;
+		if (Race_if(PM_DROW) && !Upolyd)
+			reglevel += 8;
+		// Healer role bonus
+		if (Role_if(PM_HEALER) && !Upolyd)
+			reglevel += 10;
+		
 		// penalty for being itchy
 		reglevel -= u_healing_penalty();
 
@@ -721,6 +727,12 @@ you_regen_pw()
 		if (u.uen < u.uenmax && (Role_if(PM_WIZARD)) && uarmh && uarmh->otyp == CORNUTHAUM){
 			reglevel += uarmh->spe;
 		}
+		//Additive bonuses
+		// Elf bonus
+		if (Race_if(PM_ELF) && !Upolyd)
+			reglevel += 7;
+		if (Race_if(PM_DROW) && !Upolyd)
+			reglevel += 8;
 		// penalty for being itchy
 		reglevel -= u_healing_penalty();
 		// penalty from spell protection interfering with natural pw regeneration

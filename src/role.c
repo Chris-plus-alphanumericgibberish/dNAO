@@ -816,8 +816,8 @@ const struct Race races[] = {
 	{    3,     3,  3,  3,  3,  3 },
 	{   18,    20, 18, 20, 16, 20 },
 	/* Init   Lower  Higher */
-	{  2, 0,  3, 0,  1, 0 },	/* Hit points */
-	{  2, 0,  3, 0,  3, 0 },	/* Energy */
+	{  8, 0,  3, 0,  1, 0 },	/* Hit points */
+	{  8, 0,  3, 0,  3, 0 },	/* Energy */
 	NO_NIGHTVISION
 },
 {	"elf", "elven", "elvenkind", "Elf",
@@ -829,8 +829,8 @@ const struct Race races[] = {
 	{    3,     3,  3,  3,  3,  3 },
 	{   18,    20, 20, 20, 16, 18 },
 	/* Init   Lower  Higher */
-	{  2, 0,  3, 0,  1, 0 },	/* Hit points */
-	{  2, 0,  3, 0,  3, 0 },	/* Energy */
+	{   7, 0,  3, 0,  1, 0 },	/* Hit points */
+	{   7, 0,  3, 0,  3, 0 },	/* Energy */
 	NIGHTVISION3
 },
 {	"gnome", "gnomish", "gnomehood", "Gno",
