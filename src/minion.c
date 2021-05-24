@@ -98,13 +98,24 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	
 	while (cnt > 0) {
 		int mmflags = MM_ESUM | ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_NOCOUNTBIRTH);
-	    mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
+		mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
 	    if (mtmp) {
 			if (dtype == PM_ANGEL) {
 				/* alignment should match the summoner */
-				if(mon->isminion) mtmp->isminion = TRUE;
+				add_mx(mtmp, MX_EPRI);
+				add_mx(mtmp, MX_EMIN);
+				EMIN(mtmp)->min_align = atyp;
 				EPRI(mtmp)->shralign = atyp;
+				if(mon->isminion) mtmp->isminion = TRUE;
 				mtmp->mpeaceful = mon->mpeaceful;
+			}
+			if (is_angel(mtmp->data)){
+				if(mon->mtyp == PM_LAMASHTU || mon->mfaction == LAMASHTU_FACTION)
+					mtmp->mfaction = LAMASHTU_FACTION;
+				if(has_template(mon, MAD_TEMPLATE))
+					set_template(mtmp, MAD_TEMPLATE);
+				if(has_template(mon, FALLEN_TEMPLATE))
+					set_template(mtmp, FALLEN_TEMPLATE);
 			}
 			if (!(mons[dtype].geno & G_UNIQ))	/* uniques summoned in this way stick around */
 				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);

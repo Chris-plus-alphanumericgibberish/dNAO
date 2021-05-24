@@ -4072,9 +4072,11 @@ int tary;
 			}
 			mtmp = makemon(&mons[PM_ANGEL], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
 			if (mtmp) {
+				add_mx(mtmp, MX_EPRI);
 				add_mx(mtmp, MX_EMIN);
 				mtmp->isminion = TRUE;
 				EMIN(mtmp)->min_align = sgn(magr->data->maligntyp);
+ 				EPRI(mtmp)->shralign = sgn(magr->data->maligntyp);
 
 				u.summonMonster = TRUE;
 				if (canspotmon(mtmp))
@@ -4088,6 +4090,11 @@ int tary;
 				//Despite being a demon lord, Lamashtu is  able to summon angels
 				if(magr->mtyp == PM_LAMASHTU || magr->mfaction == LAMASHTU_FACTION)
 					mtmp->mfaction = LAMASHTU_FACTION;
+				//Note: these cases are not currently used, but handled anyway to be safe
+				if(has_template(magr, MAD_TEMPLATE))
+					set_template(mtmp, MAD_TEMPLATE);
+				else if(has_template(magr, FALLEN_TEMPLATE))
+					set_template(mtmp, FALLEN_TEMPLATE);
 				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
