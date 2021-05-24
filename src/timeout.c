@@ -2946,17 +2946,15 @@ struct timer * tm;
 int fd;
 int mode;
 {
-	struct timer * curr = tm;
-	struct timer * tnxt;
+	struct timer * curr;
 
-	while (curr) {
-		tnxt = curr->tnxt;
+	int count = 0;
+	for (curr = tm; curr; curr = curr->tnxt) {
 		if (perform_bwrite(mode))
-			bwrite(fd, (genericptr_t)tm, sizeof(struct timer));
-		if (release_data(mode))
-			stop_timer(tm->func_index, tm);
-		curr = tnxt;
+			bwrite(fd, (genericptr_t)curr, sizeof(struct timer));
 	}
+	if (release_data(mode))
+		stop_all_timers(tm);
 	return;
 }
 
@@ -2970,18 +2968,19 @@ boolean ghostly;
 long adjust;
 {
 	boolean hastnxt;
-	boolean first = TRUE;
+
+	*owner_tm(tmtype, owner) = (struct timer *)0;
 	do {
 		tm = (struct timer *)alloc(sizeof(struct timer));
 		mread(fd, (genericptr_t) tm, sizeof(struct timer));
 		add_procchain_tm(tm);
-		hastnxt = tm->tnxt != 0;
+		hastnxt = tm->tnxt != (struct timer *)0;
 		/* possibly adjust timer */
 		if (ghostly)
 	    	tm->timeout += adjust;
 		/* relink owner */
 		tm->arg = owner;
-		tm->tnxt = first ? (struct timer *)0 : *owner_tm(tmtype, owner);
+		tm->tnxt = *owner_tm(tmtype, owner);
 		*owner_tm(tmtype, owner) = tm;
 	} while(hastnxt);
 	return;
