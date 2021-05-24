@@ -13431,7 +13431,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (monsdmg == 0) {
 			/* Do monsters ever kick for 0 monsdmg? */
 			if (youagr){
-				real_attack = TRUE;
+				real_attack = TRUE; /*Not sure if this should be true for the general case, but it should be for PCs*/
 				if(u.umaniac){
 					if(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
 						basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON) + ACURR(A_CHA)) / 15 + weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2);
