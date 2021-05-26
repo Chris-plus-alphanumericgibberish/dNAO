@@ -330,6 +330,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 			case AD_FIRE:
 				explmask = !!Fire_resistance;
 				break;
+			case AD_ECLD:
 			case AD_COLD:
 				explmask = !!Cold_resistance;
 				roll_frigophobia();
@@ -340,12 +341,14 @@ boolean yours; /* is it your fault (for killing monsters) */
 			case AD_DEAD:
 				explmask = !!(resists_death(&youmonst) || u.sealsActive&SEAL_OSE);
 				break;
+			case AD_EELC:
 			case AD_ELEC:
 				explmask = !!Shock_resistance;
 				break;
 			case AD_DRST:
 				explmask = !!Poison_resistance;
 				break;
+			case AD_EACD:
 			case AD_ACID:
 				explmask = !!Acid_resistance;
 				break;
