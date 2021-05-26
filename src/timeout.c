@@ -2567,6 +2567,9 @@ long timeout;
  *		timer would have gone off.  If no timer is found, return 0.
  *		If an object, decrement the object's timer count.
  *
+ *	void split_timers(struct timer *src_timer, int tmtype, genericptr_t dest)
+ *		Duplicate all timers on src and attach them to dest.
+ *
  *	void stop_all_timers(timer_element * tm)
  *		Stop all timers on the chain.
  *	void run_timers(void)
@@ -2580,9 +2583,6 @@ long timeout;
  *	void rest_timers(int tmtype, generic_ptr owner, timer_element * tm, int fd, boolean ghostly, long adjust)
  *		Restore chain of timers onto owner. If ghostly, adjust timers. 
  *
- * Object Specific:
- *	void obj_split_timers(struct obj *src, struct obj *dest)
- *		Duplicate all timers assigned to src and attach them to dest.
  */
 
 #ifdef WIZARD
@@ -3017,17 +3017,19 @@ short func;
 /* Specific timer functions */
 
 /*
- * Find all object timers and duplicate them for the new object "dest".
+ * Duplicate all timers on the given chain onto dest.
  */
 void
-obj_split_timers(src, dest)
-struct obj *src, *dest;
+split_timers(src_timer, tmtype, dest)
+timer_element *src_timer;
+int tmtype;
+genericptr_t dest;
 {
     timer_element *curr;
-	/* loop over obj's local chain, which is safe as we add to dest's chain and the processing loop */
-    for (curr = src->timed; curr; curr = curr->tnxt) {
-		(void) start_timer(curr->timeout-monstermoves, TIMER_OBJECT,
-					curr->func_index, (genericptr_t)dest);
+	/* loop over src's local chain, which is safe as we add to dest's chain and the processing loop */
+    for (curr = src_timer; curr; curr = curr->tnxt) {
+		(void) start_timer(curr->timeout-monstermoves, tmtype,
+					curr->func_index, dest);
     }
 }
 

@@ -8351,6 +8351,12 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	m2->mhp = mon->mhp / 2;
 	mon->mhp -= m2->mhp;
 
+	/* duplicate timers */
+	if (mon->timed) {
+		m2->timed = (struct timer *) 0;
+		split_timers(mon->timed, TIMER_MONSTER, (genericptr_t)m2);
+	}
+
 	/* place the monster -- we want to do this before any display things happen */
 	place_monster(m2, m2->mx, m2->my);
 
