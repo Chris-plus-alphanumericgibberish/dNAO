@@ -2523,9 +2523,12 @@ long timeout;
 		if (otmp == MON_WEP(otmp->ocarry)) MON_NOWEP(otmp->ocarry);
 		if (otmp == MON_SWEP(otmp->ocarry)) MON_NOSWEP(otmp->ocarry);
 	}
-	obj_extract_self(otmp);
-	newsym(otmp->ox, otmp->oy);
-	obfree(otmp, (struct obj *)0);
+	/* if in_use is set, then we know it'll be used up by the thing currently using it, and we'd be double-deleting it */
+	if (!otmp->in_use) {
+		obj_extract_self(otmp);
+		newsym(otmp->ox, otmp->oy);
+		obfree(otmp, (struct obj *)0);
+	}
 }
 
 void
