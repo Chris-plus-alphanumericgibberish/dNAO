@@ -154,7 +154,6 @@ int adtyp;
 		return CLR_BROWN;
 	case AD_WET:
 		return CLR_BLUE;
-	case AD_DRST:
 	case AD_DISE:
 		return CLR_MAGENTA;
 		//	return CLR_CYAN;
