@@ -2702,7 +2702,7 @@ int dz;
 
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GA_NONE && !Role_if(PM_EXILE)){
+				if(optr->gifted != GA_NONE && optr->gifted != GA_VOID){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
