@@ -190,11 +190,16 @@ static int randBreathDamageTypes[] =
 
 static int randSplashDamageTypes[] =
 					{
+						AD_FIRE,
+						AD_EFIR,
 						AD_ACID,
 						AD_EACD,
 						AD_SLIM,
-						AD_BLND,
+						// AD_BLND,
 						AD_DRST,
+						AD_DARK,
+						AD_PHYS,
+						AD_DISE,
 						AD_WET
 					};
 

@@ -294,6 +294,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 			break;
 		case AD_DRST: str = "poison gas cloud";
 			break;
+		case AD_EACD:
 		case AD_ACID: str = "splash of acid";
 			break;
 		case AD_SLIM: str = "spout of acidic slime";
@@ -1255,13 +1256,13 @@ int adtyp;
 		case AD_EELC:
 		case AD_ELEC:
 			return EXPL_MAGICAL;
+		case AD_DISE:
 		case AD_DRST:
 			return EXPL_MAGENTA;
 		case AD_ACID:
 		case AD_EACD:
 		case AD_SLIM:
 			return EXPL_NOXIOUS;
-		case AD_BLND:
 		case AD_DARK:
 			return EXPL_DARK;
 		case AD_WET:

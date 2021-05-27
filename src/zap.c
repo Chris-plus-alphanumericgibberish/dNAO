@@ -106,7 +106,13 @@ int adtyp, ztyp;
 		case AD_ACID: return "blast of acid";
 		case AD_DRLI: return "blast of dark energy";
 		case AD_GOLD: return "blast of golden shards";
+		// These are provided to deal with spray breaths, and aren't handled for direct hits.
 		case AD_BLUD: return "spray of blood";
+		case AD_SLIM: return "spout of acidic slime";
+		case AD_WET: return "blast of water";
+		case AD_DARK: return "blast of darkness";
+		case AD_PHYS: return "blast";
+		case AD_DISE: return "blast of spores";
 		default:      impossible("unknown breath damage type in flash_type: %d", adtyp);
 			return "blast of static";
 		}
@@ -137,14 +143,20 @@ int adtyp;
 	{
 	case AD_DEAD:
 	case AD_DISN:
+	case AD_DARK:
 		return CLR_BLACK;
 	case AD_BLUD:
 		return CLR_RED;
+	case AD_SLIM:
 	case AD_ACID:
 		return CLR_GREEN;
-		//	return CLR_BROWN;
-		//	return CLR_BLUE;
-		//	return CLR_MAGENTA;
+	case AD_PHYS:
+		return CLR_BROWN;
+	case AD_WET:
+		return CLR_BLUE;
+	case AD_DRST:
+	case AD_DISE:
+		return CLR_MAGENTA;
 		//	return CLR_CYAN;
 		//	return CLR_GRAY;
 		//	return NO_COLOR;
@@ -165,7 +177,6 @@ int adtyp;
 		return CLR_WHITE;
 	case AD_DRLI:
 		return CLR_MAGENTA;
-		//	return CLR_BLACK;
 	default:
 		impossible("unaccounted-for zap type in zap_glyph_color: %d", adtyp);
 		return CLR_WHITE;
