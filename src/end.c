@@ -515,7 +515,7 @@ panic VA_DECL(const char *, str)
 	VA_INIT(str, char *);
 	/*The actual panic code is too prone to shredding games*/
 	/* Just print out the error message and abort.*/
-	raw_print("\r\nIt seems the game has suffered a fatal panic attack.");
+	raw_print("\nIt seems the game has suffered a fatal panic attack.");
 	raw_printf("Report the following error to the developer: %s", str);
 	{
 	    char buf[BUFSZ];
