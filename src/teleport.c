@@ -171,7 +171,7 @@ struct permonst *mdat;
 
 	/* return if we've grown too big (nothing is valid) */
 	if (range > ROWNO && range > COLNO){
-		if(good_ptr == good) goto full;
+		if(good_ptr != good) goto full;
 		else return FALSE;
 	}
     } while (good_ptr < &good[TARGET_GOOD-1]);
@@ -180,6 +180,10 @@ full:
     i = rn2((int)(good_ptr - good));
     cc->x = good[i].x;
     cc->y = good[i].y;
+	if(!isok(cc->x, cc->y)){
+		impossible("eofflin() attempting to return invalid coordinates as valid");
+		return FALSE;
+	}
     return TRUE;
 }
 
@@ -222,6 +226,10 @@ struct permonst *mdat;
     i = rn2((int)(good_ptr - good));
     cc->x = good[i].x;
     cc->y = good[i].y;
+	if(!isok(cc->x, cc->y)){
+		impossible("eofflin_close() attempting to return invalid coordinates as valid");
+		return FALSE;
+	}
     return TRUE;
 }
 
@@ -364,6 +372,10 @@ full:
     i = rn2((int)(good_ptr - good));
     cc->x = good[i].x;
     cc->y = good[i].y;
+	if(!isok(cc->x, cc->y)){
+		impossible("enexto() attempting to return invalid coordinates as valid");
+		return FALSE;
+	}
     return TRUE;
 }
 
