@@ -1594,6 +1594,9 @@ register struct monst *mtmp;
 			else
 				digactualhole(mtmp->mx, mtmp->my, mtmp, HOLE, FALSE, TRUE);
 		}
+		if(DEADMONSTER(mtmp)) //Oops!
+			return 1;
+		else return 0;
 	}
 	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20)) {
 		boolean reducedFlayerMessages = (((Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && flags.initgend) || Role_if(PM_ANACHRONONAUT)) && In_quest(&u.uz));
