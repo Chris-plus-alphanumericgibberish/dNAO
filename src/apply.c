@@ -2112,8 +2112,7 @@ tinnable(corpse)
 struct obj *corpse;
 {
 	if (corpse->otyp != CORPSE) return 0;
-	if (corpse->oeaten) return 0;
-	if (corpse->odrained) return 0;
+	if (corpse->oeaten && !(has_blood(&mons[corpse->corpsenm]) && corpse->odrained && corpse->oeaten == drainlevel(corpse))) return 0;
 	if (!mons[corpse->corpsenm].cnutrit) return 0;
 	return 1;
 }
@@ -2188,7 +2187,7 @@ register struct obj *obj;
 		return;
 	}
 	if (!(corpse = floorfood("tin", 2))) return;
-	if (corpse->otyp == CORPSE && (corpse->oeaten || corpse->odrained)) {
+	if (corpse->otyp == CORPSE && corpse->oeaten && !(has_blood(&mons[corpse->corpsenm]) && corpse->odrained && corpse->oeaten == drainlevel(corpse))) {
 		You("cannot tin %s which is partly eaten.",something);
 		return;
 	}
@@ -2221,7 +2220,7 @@ register struct obj *obj;
 		return;
 	}
 	consume_obj_charge(obj, TRUE);
-	if(has_blood(&mons[corpse->corpsenm])
+	if((has_blood(&mons[corpse->corpsenm]) && !corpse->odrained)
 		|| !(Race_if(PM_VAMPIRE) || Race_if(PM_INCANTIFIER) || 
 			umechanoid)
 		|| yn("This corpse does not have blood. Tin it?") == 'y'
@@ -2235,7 +2234,7 @@ register struct obj *obj;
 			can->owt = weight(can);
 			can->known = 1;
 			can->spe = -1;  /* Mark tinned tins. No spinach allowed... */
-			if(has_blood(&mons[corpse->corpsenm])){
+			if(has_blood(&mons[corpse->corpsenm]) && !corpse->odrained){
 				if ((bld = mksobj(POT_BLOOD, MKOBJ_NOINIT)) != 0) {
 					bld->corpsenm = corpse->corpsenm;
 					bld->cursed = obj->cursed;
