@@ -2010,6 +2010,16 @@ u_init()
         knows_object(POT_ENLIGHTENMENT);
         knows_object(POT_ACID);
         knows_object(POT_AMNESIA);
+        knows_object(POT_POLYMORPH);
+        knows_object(SCR_REMOVE_CURSE);
+        knows_object(SCR_CONFUSE_MONSTER);
+        knows_object(SCR_DESTROY_ARMOR);
+        knows_object(SCR_AMNESIA);
+        knows_object(SPE_REMOVE_CURSE);
+        knows_object(SPE_POLYMORPH);
+        knows_object(WAN_ENLIGHTENMENT);
+        knows_object(WAN_POLYMORPH);
+        knows_object(WAN_PROBING);
         skill_init(Skill_Mad);
 		u.ualign.sins += 13; /* You have sinned */
 		for(i=0;i<SIZE(u.ugangr);i++){

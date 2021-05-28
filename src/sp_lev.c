@@ -1077,14 +1077,14 @@ struct mkroom	*croom;
 			start_corpse_timeout(otmp);
 		}
 	}
+	int skeleton_types[] = {PM_HUMAN, PM_ELF, PM_DROW, PM_DWARF, PM_GNOME, PM_ORC, 
+		PM_HALF_DRAGON, PM_YUKI_ONNA, PM_DEMINYMPH};
 	if((otmp->otyp == BEDROLL || otmp->otyp == GURNEY) && otmp->spe == 1 && otmp->where == OBJ_FLOOR){
 		int asylum_types[] = {PM_NOBLEMAN, PM_NOBLEWOMAN, PM_HUMAN, PM_ELF_LORD,
 			PM_ELF_LADY, PM_ELF, PM_DROW_MATRON, PM_HEDROW_BLADEMASTER, PM_DROW, PM_DWARF_LORD,
 			PM_DWARF_CLERIC, PM_DWARF, PM_GNOME_LORD, PM_GNOME_LADY, PM_GNOME, PM_ORC_SHAMAN,
 			PM_ORC, PM_VAMPIRE, PM_VAMPIRE, PM_HALF_DRAGON, PM_HALF_DRAGON,
 			PM_YUKI_ONNA, PM_DEMINYMPH, PM_CONTAMINATED_PATIENT, PM_CONTAMINATED_PATIENT, PM_CONTAMINATED_PATIENT};
-		int skeleton_types[] = {PM_HUMAN, PM_ELF, PM_DROW, PM_DWARF, PM_GNOME, PM_ORC, 
-			PM_HALF_DRAGON, PM_YUKI_ONNA, PM_DEMINYMPH};
 		struct monst *mon;
 		struct obj *tmpo;
 
@@ -1120,6 +1120,151 @@ struct mkroom	*croom;
 					curse(tmpo);
 					m_dowear(mon, TRUE);
 				}
+			}
+		}
+		otmp->spe = 0;
+	}
+	if(otmp->otyp == GURNEY && otmp->spe == 2 && otmp->where == OBJ_FLOOR){
+		int surgery_types[] = {PM_NOBLEMAN, PM_NOBLEWOMAN, PM_ELF_LORD,
+			PM_ELF_LADY, PM_DROW_MATRON, PM_DWARF_LORD,
+			PM_DWARF_CLERIC, PM_ORC_SHAMAN,
+			PM_VAMPIRE, PM_VAMPIRE, PM_HALF_DRAGON, PM_HALF_DRAGON,
+			PM_YUKI_ONNA, PM_DEMINYMPH, 
+			PM_PRIESTESS, 
+			PM_COILING_BRAWN, PM_FUNGAL_BRAIN
+			};
+		struct monst *mon;
+		struct obj *tmpo;
+
+		if(rn2(10)){
+			mon = makemon(&mons[surgery_types[rn2(SIZE(surgery_types))]], otmp->ox, otmp->oy, NO_MINVENT|MM_NOCOUNTBIRTH);
+			if(mon) switch(mon->mtyp){
+				case PM_PRIESTESS:
+				case PM_DEMINYMPH:
+				case PM_YUKI_ONNA:
+					if(mon->mtyp != PM_PRIESTESS)
+						goto default_case;
+					set_template(mon, MISTWEAVER);
+					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					mon->entangled = SHACKLES;
+					makemon(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
+					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
+					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
+				break;
+				case PM_COILING_BRAWN:
+					mon->msleeping = 1;
+				break;
+				case PM_FUNGAL_BRAIN:
+					//Nothing
+				break;
+default_case:
+				default:
+					switch(rn2(5)){
+						case 0:
+							set_template(mon, YELLOW_TEMPLATE);
+							mon->msleeping = 1;
+						break;
+						case 2:
+							set_template(mon, DREAM_LEECH);
+							mon->msleeping = 1;
+						break;
+						case 3:
+							set_template(mon, DREAM_LEECH);
+							mon->msleeping = 1;
+						break;
+						default:
+							(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+							mon->entangled = SHACKLES;
+							if(!rn2(10)){
+								struct monst *mtmp;
+								struct obj *meqp;
+								int lilitu_items[] = {POT_BOOZE, POT_ENLIGHTENMENT, WAN_ENLIGHTENMENT};
+								mtmp = makemon(&mons[PM_LILITU], otmp->ox, otmp->oy, MM_ADJACENTOK);
+								if(mtmp){
+									set_template(mtmp, YELLOW_TEMPLATE);
+									mongets(mtmp, lilitu_items[rn2(SIZE(lilitu_items))], NO_MKOBJ_FLAGS);
+									
+									meqp = mongets(mtmp, KHAKKHARA, MKOBJ_NOINIT);
+									add_oprop(meqp, OPROP_PSIOW);
+									set_material_gm(meqp, GOLD);
+									curse(meqp);
+									meqp->spe = 5;
+									meqp = mongets(mtmp, CLOAK_OF_PROTECTION, MKOBJ_NOINIT);
+									meqp->obj_color = CLR_YELLOW;
+									meqp->spe = 5;
+									curse(meqp);
+									meqp = mongets(mtmp, PLAIN_DRESS, MKOBJ_NOINIT);
+									set_material_gm(meqp, CLOTH);
+									meqp->obj_color = CLR_YELLOW;
+									meqp->spe = 5;
+									curse(meqp);
+									meqp = mongets(mtmp, GLOVES, MKOBJ_NOINIT);
+									set_material_gm(meqp, CLOTH);
+									meqp->obj_color = CLR_YELLOW;
+									meqp->spe = 5;
+									curse(meqp);
+									meqp = mongets(mtmp, HIGH_BOOTS, MKOBJ_NOINIT);
+									set_material_gm(meqp, CLOTH);
+									meqp->obj_color = CLR_YELLOW;
+									meqp->spe = 5;
+									curse(meqp);
+									meqp = mongets(mtmp, SHEMAGH, MKOBJ_NOINIT);
+									set_material_gm(meqp, CLOTH);
+									meqp->obj_color = CLR_YELLOW;
+									meqp->spe = 5;
+									curse(meqp);
+									
+									m_dowear(mtmp, TRUE);
+								}
+							}
+							else if(!rn2(4)){
+								struct monst *mtmp;
+								struct obj *meqp;
+								int bedlam_items[] = {POT_SLEEPING, POT_CONFUSION, POT_PARALYSIS, 
+													  POT_HALLUCINATION, POT_SEE_INVISIBLE, POT_ACID, POT_AMNESIA,
+													  POT_POLYMORPH, SCR_CONFUSE_MONSTER, SCR_DESTROY_ARMOR, SCR_AMNESIA,
+													  WAN_POLYMORPH, SPE_POLYMORPH};
+								for(int i = 3; i > 0; i--){
+									mtmp = makemon(&mons[PM_DAUGHTER_OF_BEDLAM], otmp->ox, otmp->oy, MM_ADJACENTOK);
+									if(mtmp){
+										set_template(mtmp, YELLOW_TEMPLATE);
+										mongets(mtmp, bedlam_items[rn2(SIZE(bedlam_items))], NO_MKOBJ_FLAGS);
+										meqp = mongets(mtmp, rn2(2) ? HEALER_UNIFORM : STRAITJACKET, NO_MKOBJ_FLAGS);
+										meqp->spe = 5;
+										uncurse(meqp);
+										unbless(meqp);
+										meqp->obj_color = CLR_YELLOW;
+										m_dowear(mtmp, TRUE);
+									}
+								}
+							} else {
+								struct monst *mtmp;
+								int healer_items[] = {POT_SLEEPING, POT_CONFUSION, POT_PARALYSIS, 
+													  POT_HALLUCINATION, POT_SEE_INVISIBLE, POT_ACID, POT_AMNESIA,
+													  POT_RESTORE_ABILITY, SCR_CONFUSE_MONSTER, SCR_DESTROY_ARMOR, SCR_AMNESIA,
+													  WAN_PROBING, SPE_REMOVE_CURSE};
+								int nurse_items[] = {POT_SLEEPING, POT_PARALYSIS, POT_AMNESIA,
+													  SCR_DESTROY_ARMOR, SCR_AMNESIA};
+								mtmp = makemon(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
+								if(mtmp) mongets(mtmp, healer_items[rn2(SIZE(healer_items))], NO_MKOBJ_FLAGS);
+								mtmp = makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
+								if(mtmp) mongets(mtmp, nurse_items[rn2(SIZE(nurse_items))], NO_MKOBJ_FLAGS);
+								mtmp = makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
+								if(mtmp) mongets(mtmp, nurse_items[rn2(SIZE(nurse_items))], NO_MKOBJ_FLAGS);
+							}
+						break;
+					}
+				break;
+			}
+		}
+		else {
+			mon = makemon(&mons[skeleton_types[rn2(SIZE(skeleton_types))]], otmp->ox, otmp->oy, NO_MINVENT|MM_NOCOUNTBIRTH);
+			if(mon){
+				set_template(mon, SKELIFIED);
+				(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+				mon->entangled = SHACKLES;
+				mon->mcrazed = 1;
+				mon->msleeping = 1;
 			}
 		}
 		otmp->spe = 0;

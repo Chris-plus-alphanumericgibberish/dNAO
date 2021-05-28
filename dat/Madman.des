@@ -635,7 +635,7 @@ GEOMETRY:center,center
 MAP
 0               ------------------   -------------------                     
 1               |AAAAAAAAA|......|---|......|AAAAAAAAAA|                     
-2               |AAAAAAAAA|......S###S......|AAAAAAAAAA|                     
+2               |AAAAAAAAAF......S###S......FAAAAAAAAAA|                     
 3               |AAAAAAAA----------#----------AAAAAAAAA|                     
 4               |AAAAAAAA|...|...|-S-|...|...|AAAAAAAAA|                     
 5               |AAAAAAAAF...|...+###+...|...FAAAAAAAAA|                     
@@ -649,7 +649,7 @@ MAP
 3               |AAAAAAAAF...|...+###+...|...FAAAAAAAAA|                     
 4               |AAAAAAAA|...|...|-S-|...|...|AAAAAAAAA|                     
 5               |AAAAAAAA----------#----------AAAAAAAAA|                     
-6               |AAAAAAAAA|......S###S......|AAAAAAAAAA|                     
+6               |AAAAAAAAAF......S###S......FAAAAAAAAAA|                     
 7               |AAAAAAAAA|......|---|......|AAAAAAAAAA|                     
 8               ------------------   -------------------                     
 9                                                                            
@@ -673,6 +673,13 @@ OBJECT:'(',"writing desk",(43,05)
 MONSTER:'@',"healer",(43,05)
 OBJECT:'(',"writing desk",(43,13)
 MONSTER:'@',"healer",(43,13)
+
+# +2 gurneys spawn operating room patients
+OBJECT:'\\', "gurney",(40,02),uncursed,2
+OBJECT:'\\', "gurney",(28,02),uncursed,2
+
+OBJECT:'\\', "gurney",(40,16),uncursed,2
+OBJECT:'\\', "gurney",(28,16),uncursed,2
 
 # Random prisoners
 MONSTER:'@',"contaminated patient",random

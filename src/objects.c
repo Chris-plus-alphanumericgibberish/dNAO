@@ -675,7 +675,7 @@ HELM(("crystal helm", "fish bowl"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 HELM(("pontiff's crown", "filigreed faceless helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, GOLD, HI_GOLD, O_MATSPEC(IDED)),
-HELM(("shemagh", "white headscarf", "headscarf"), /*Needs encyc entry*//*Needs tile*/
+HELM(("shemagh", "headscarf"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH, CLR_WHITE, O_MATSPEC(UNIDED)),
 
 /* With shuffled appearances... */
@@ -799,7 +799,7 @@ SUIT(("jacket"),
 	1, 0, MZ_MEDIUM,  ARMSZ_LIGHT, 0,  12,  0,	20,   10, 10, 1, 0, LEATHER, HI_LEATHER, O_MATSPEC(IDED|UNIDED)),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM,  ARMSZ_HEAVY, 0,   0,  0,  15,   10, 10, 1, 2, CLOTH, CLR_WHITE, O_DRSLOT(UPPER_TORSO_DR|ARM_DR)),
-SUIT(("healer uniform","clean white clothes", "clean clothes"), /*Needs encyc entry*//*Needs tile*/
+SUIT(("healer uniform","clean clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM, ARMSZ_MEDIUM,SICK_RES,0,0, 30,   10, 10, 1, 2, CLOTH, CLR_WHITE),
 SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
 	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, REFLECTING,0,5,5,1000, 10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
