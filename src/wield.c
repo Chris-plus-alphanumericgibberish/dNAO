@@ -111,6 +111,7 @@ register struct obj *obj;
 #endif
 				&& !melee_polearms(youracedata)
 				&& obj->otyp != AKLYS
+				&& !check_oprop(obj, OPROP_CCLAW)
 				&& !is_vibropike(obj)
 				&& obj->oartifact != ART_WEBWEAVER_S_CROOK
 				&& obj->oartifact != ART_SILENCE_GLAIVE

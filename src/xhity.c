@@ -727,7 +727,11 @@ int tary;
 				boolean devaloop = (aatyp == AT_DEVA);
 				do {
 					bhitpos.x = tarx; bhitpos.y = tary;
+					if(ranged && otmp && check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15)
+						otmp->otyp = CLAWED_HAND;
 					result = xmeleehity(magr, mdef, attk, &otmp, vis, tohitmod, ranged);
+					if(ranged && otmp && check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15)
+						otmp->otyp = CLUB;
 					/* Marionette causes an additional weapon strike to a monster behind the original target */
 					/* this can attack peaceful/tame creatures without warning */
 					if (youagr && !ranged && u.sealsActive&SEAL_MARIONETTE && (result != MM_MISS))
@@ -12172,6 +12176,7 @@ int vis;						/* True if action is at all visible to the player */
 			(pa && melee_polearms(pa)) ||
 			is_vibropike(weapon) ||
 			weapon->otyp == AKLYS ||
+			check_oprop(weapon, OPROP_CCLAW) ||
 			weapon->oartifact == ART_WEBWEAVER_S_CROOK ||
 			weapon->oartifact == ART_SILENCE_GLAIVE ||
 			weapon->oartifact == ART_HEARTCLEAVER ||
@@ -16614,8 +16619,14 @@ u_pole_pound(mdef)
 struct monst * mdef;
 {
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+	int res;
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
-	return xmeleehity(&youmonst, mdef, &basicattack, &uwep, vis, 0, TRUE);
+	if(check_oprop(uwep, OPROP_CCLAW))
+		uwep->otyp = CLAWED_HAND;
+	res = xmeleehity(&youmonst, mdef, &basicattack, &uwep, vis, 0, TRUE);
+	if(check_oprop(uwep, OPROP_CCLAW))
+		uwep->otyp = CLUB;
+	return res;
 }
 
 /* mummy_curses_x()

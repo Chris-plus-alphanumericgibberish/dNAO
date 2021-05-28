@@ -460,6 +460,7 @@ struct obj {
 			 (objects[otmp->otyp].oc_skill == P_POLEARMS || \
 			  objects[otmp->otyp].oc_skill == P_LANCE || \
 			  otmp->otyp==AKLYS || \
+			  (check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15) || \
 			  otmp->oartifact==ART_SOL_VALTIVA || \
 			  otmp->oartifact==ART_SHADOWLOCK || \
 			  otmp->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
