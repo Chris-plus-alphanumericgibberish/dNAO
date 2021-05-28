@@ -182,21 +182,21 @@ ENDMAP
 #0         1         2         3         4         5         6         7        
 
 # Monsters on siege duty.
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
 
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
 
 GEOMETRY:center,center
 #0         1         2         3         4         5         6         7        
@@ -477,13 +477,13 @@ MONSTER: 'Z', "zombie", random, hostile
 MONSTER: 'Z', "zombie", random, hostile
 MONSTER: 'Z', random, random, hostile
 
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
 
 GEOMETRY:center,center
 #0         1         2         3         4         5         6         7        
@@ -615,13 +615,13 @@ MONSTER: 'Z', "zombie", random, hostile
 MONSTER: 'Z', "zombie", random, hostile
 MONSTER: 'Z', random, random, hostile
 
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
 
 LEVEL: "Hdf-filb"
 #

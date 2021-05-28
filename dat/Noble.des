@@ -130,13 +130,13 @@ MONSTER:'@',"knight",random,peaceful
 MONSTER: '@',"peasant",random,peaceful
 MONSTER: '@',"peasant",random,peaceful
 MONSTER: '@',"peasant",random,peaceful
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
 #
 #	The "goal" level for the quest.
 #
@@ -276,13 +276,13 @@ MONSTER:'@',"knight",random,peaceful
 MONSTER: '@',"peasant",random,peaceful
 MONSTER: '@',"peasant",random,peaceful
 MONSTER: '@',"peasant",random,peaceful
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
 
 MAZE: "Nob-filb" , ' '
 FLAGS: shortsighted,hardfloor
@@ -310,11 +310,11 @@ TRAP: random, random
 TRAP: random, random
 #
 MONSTER:'@',"knight",random,peaceful
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
-MONSTER: random, random, random, hostile
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
 
