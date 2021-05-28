@@ -2889,6 +2889,8 @@ register int held;
 	    open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 	    used = 1;
 		return used;
+	}else if(obj->spe == 8){
+		// Nothing. Fulvous desk spawns monsters.
 	}
 	/* Count the number of contained objects. Sometimes toss objects if a cursed magic bag. */
 	if (cobj_is_magic_chest(obj))

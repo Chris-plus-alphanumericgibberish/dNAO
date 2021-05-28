@@ -24,6 +24,7 @@ STATIC_DCL void FDECL(awaken_monsters,(int));
 
 STATIC_DCL void FDECL(do_item_blast, (int));
 STATIC_DCL void FDECL(nitocris_sarcophagous, (struct obj *));
+STATIC_DCL void FDECL(fulvous_desk, (struct obj *));
 
 int FDECL(donecromenu, (const char *,struct obj *));
 int FDECL(dopetmenu, (const char *,struct obj *));
@@ -10086,6 +10087,10 @@ living_items()
 		else if(Is_container(obj) && obj->spe == 5){
 			nitocris_sarcophagous(obj);
 		}
+		//Fulvous desk spawns phantoms
+		else if(Is_container(obj) && obj->spe == 8){
+			fulvous_desk(obj);
+		}
 	}
 }
 
@@ -10106,6 +10111,49 @@ struct obj *obj;
 			if(mtmp){
 				mtmp->mpeaceful = 0;
 				set_malign(mtmp);
+			}
+		}
+	}
+}
+
+static int fulvousspawns[] = {PM_GHOST, PM_GHOST, PM_GHOST, PM_GHOST, 
+							  PM_WRAITH, PM_WRAITH, PM_WRAITH, 
+							  PM_SHADE};
+STATIC_OVL void
+fulvous_desk(obj)
+struct obj *obj;
+{
+	struct permonst *pm;
+	struct monst *mtmp;
+	xchar xlocale, ylocale;
+	if(get_obj_location(obj, &xlocale, &ylocale, 0)){
+		if(!rn2(210)){
+			struct permonst *pm;
+			pm = &mons[fulvousspawns[rn2(SIZE(fulvousspawns))]];
+			mtmp = makemon(pm, xlocale, ylocale, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_NONAME);
+			if(!obj->cobj){
+				struct obj *sobj;
+				sobj = mksobj(SCR_BLANK_PAPER, NO_MKOBJ_FLAGS);
+				if(sobj){
+					sobj->obj_color = CLR_YELLOW;
+					add_to_container(obj, sobj);
+				}
+			}
+			if(mtmp){
+				mtmp->mpeaceful = 0;
+				set_malign(mtmp);
+				switch(rn2(4)){
+					case 0:
+					case 1:
+						set_template(mtmp, YELLOW_TEMPLATE);
+					break;
+					case 2:
+						set_template(mtmp, DREAM_LEECH);
+					break;
+					case 3:
+						set_template(mtmp, VAMPIRIC);
+					break;
+				}
 			}
 		}
 	}

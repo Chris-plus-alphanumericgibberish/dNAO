@@ -809,7 +809,11 @@ int template;
 			else if (template == TOMB_HERD) Sprintf(nameBuffer, "%s herd", base->mname);
 			else if (template == SLIME_REMNANT) Sprintf(nameBuffer, "slimy remnant of %s", an(base->mname));
 			else if (template == YELLOW_TEMPLATE) Sprintf(nameBuffer, "fulvous %s", base->mname);
-			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s dream-leech", base->mname);
+			else if (template == DREAM_LEECH){
+				if(base->mtyp == PM_GHOST || base->mtyp == PM_SHADE || base->mtyp == PM_WRAITH)
+					Sprintf(nameBuffer, "dream-leech %s", base->mname);
+				else Sprintf(nameBuffer, "%s dream-leech", base->mname);
+			}
 			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "mad %s", base->mname);
 			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "fallen %s", base->mname);
 			else if (template == WORLD_SHAPER) Sprintf(nameBuffer, "%s worldshaper", base->mname);

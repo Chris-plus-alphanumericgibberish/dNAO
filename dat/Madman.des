@@ -178,7 +178,7 @@ MONSTER:'@',"priestess",(42,01), peaceful
 OBJECT:'(', "doll of mollification",(42,01)
 OBJECT:'(', "holy symbol of the black mother",(42,01)
 OBJECT:'\\', "bedroll",(42,01)
-OBJECT:'(',"writing desk",(26,17),uncursed,1
+OBJECT:'(',"writing desk",(26,17),uncursed,8
 OBJECT:'!',"booze",(24,01)
 OBJECT:'!',"booze",(24,01)
 OBJECT:'!',"booze",(24,01)
