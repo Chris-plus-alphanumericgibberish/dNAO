@@ -675,11 +675,11 @@ OBJECT:'(',"writing desk",(43,13)
 MONSTER:'@',"healer",(43,13)
 
 # +2 gurneys spawn operating room patients
-OBJECT:'\\', "gurney",(40,02),uncursed,2
-OBJECT:'\\', "gurney",(28,02),uncursed,2
+OBJECT:'\\', "gurney",(27,02),uncursed,2
+OBJECT:'\\', "gurney",(41,02),uncursed,2
 
-OBJECT:'\\', "gurney",(40,16),uncursed,2
-OBJECT:'\\', "gurney",(28,16),uncursed,2
+OBJECT:'\\', "gurney",(27,16),uncursed,2
+OBJECT:'\\', "gurney",(41,16),uncursed,2
 
 # Random prisoners
 MONSTER:'@',"contaminated patient",random
