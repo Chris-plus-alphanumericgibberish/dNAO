@@ -821,11 +821,13 @@ noncoalignment(alignment)
 aligntyp alignment;
 {
 	int k;
-
+	
 	k = rn2(2);
+	if(alignment == A_VOID)
+		return(rn2(3) - 1); /* -1 to 1 */
 	if (!alignment)
 		return(k ? -1 : 1);
-	return(k ? -alignment : 0);
+	return(k ? sgn(-alignment) : 0); /* |alignment| might not be 1, so use sign(-alignment) */
 }
 
 STATIC_OVL void
