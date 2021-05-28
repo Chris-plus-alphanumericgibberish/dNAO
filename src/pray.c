@@ -3655,7 +3655,7 @@ int eatflag;
 		//Character needs a holy symbol
 		if(!has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
 			struct obj *otmp;
-			if(!rn2(10+u.ugifts)){
+			if(u.uevent.shubbie_atten ? !rn2(10+u.ugifts) : !rn2(4)){
 				otmp = mksobj(HOLY_SYMBOL_OF_THE_BLACK_MOTHE, MKOBJ_NOINIT);
 				dropy(otmp);
 				at_your_feet("An object");
