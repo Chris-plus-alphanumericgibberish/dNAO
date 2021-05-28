@@ -854,12 +854,18 @@ struct mkroom	*croom;
 
 	if (class == MAXMCLASSES)
 	    panic("create_monster: unknown monster class '%c'", m->class);
-	amask = (m->align == AM_SPLEV_CO) ?
-			Align2amask(u.ualignbase[A_ORIGINAL]) :
-		(m->align == AM_SPLEV_NONCO) ?
-			Align2amask(noncoalignment(u.ualignbase[A_ORIGINAL])) :
-		(m->align <= -11) ? induced_align(80) :
-		(m->align < 0 ? ralign[-m->align-1] : m->align);
+
+	if(m->align == AM_SPLEV_CO)
+		amask = Align2amask(u.ualignbase[A_ORIGINAL]);
+	else if(m->align == AM_SPLEV_NONCO){
+		int tmp = noncoalignment(u.ualignbase[A_ORIGINAL]);
+		amask = Align2amask(tmp);
+	}
+	else if(m->align <= -11) 
+		amask = induced_align(80);
+	else if(m->align < 0)
+		amask = ralign[-m->align-1];
+	else amask = m->align;
 
 	if (!class)
 	    pm = (struct permonst *) 0;
@@ -1515,12 +1521,18 @@ create_altar(a, croom)
 	 * values to avoid conflicting with the rest of the encoding,
 	 * shared by many other parts of the special level code.
 	 */
-	amask = (a->align == AM_SPLEV_CO) ?
-			Align2amask(u.ualignbase[A_ORIGINAL]) :
-		(a->align == AM_SPLEV_NONCO) ?
-			Align2amask(noncoalignment(u.ualignbase[A_ORIGINAL])) :
-		(a->align == -11) ? induced_align(80) :
-		(a->align < 0 ? ralign[-a->align-1] : a->align);
+
+	if(a->align == AM_SPLEV_CO)
+		amask = Align2amask(u.ualignbase[A_ORIGINAL]);
+	else if(a->align == AM_SPLEV_NONCO){
+		int tmp = noncoalignment(u.ualignbase[A_ORIGINAL]);
+		amask = Align2amask(tmp);
+	}
+	else if(a->align == -11)
+		amask = induced_align(80);
+	else if(a->align < 0)
+		amask = ralign[-a->align-1];
+	else amask = a->align;
 
 	levl[x][y].typ = ALTAR;
 	levl[x][y].altarmask = amask;
