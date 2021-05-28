@@ -1651,7 +1651,7 @@ karemade:
 						pline("%s is trembling hysterically.", Monnam(mtmp));
 				}
 //ifdef BARD
-				if (mtmp->encouraged && (!rn2(4))) {
+				if (mtmp->encouraged && (!rn2(8))) {
 					if(mtmp->encouraged > 0) mtmp->encouraged--;
 					else mtmp->encouraged++;
 					if (!(mtmp->encouraged) && canseemon(mtmp) && mtmp->mtame) 
@@ -2238,7 +2238,7 @@ karemade:
 				more_experienced(u.ulevel,0);
 				newexplevel();
 			}
-			if (u.uencouraged && (!rn2(4))) {
+			if (u.uencouraged && (!rn2(8))) {
 				if(u.uencouraged > 0) u.uencouraged--;
 				else u.uencouraged++;
 				if (!(u.uencouraged)) 
