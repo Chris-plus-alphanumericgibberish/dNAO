@@ -442,6 +442,8 @@ LADDER:(50,09),up
 NON_DIGGABLE:(00,00,56,19)
 # Objects
 
+MONSTER:'H',"lurking one",(26,16)
+
 # Magic Chest
 OBJECT:'(',"magic chest",place[1]
 # Boxes in storage
