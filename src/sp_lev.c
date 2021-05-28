@@ -1179,6 +1179,7 @@ default_case:
 								struct monst *mtmp;
 								struct obj *meqp;
 								int lilitu_items[] = {POT_BOOZE, POT_ENLIGHTENMENT, WAN_ENLIGHTENMENT};
+								mon->mdoubt = TRUE;
 								mtmp = makemon(&mons[PM_LILITU], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									set_template(mtmp, YELLOW_TEMPLATE);
@@ -1224,6 +1225,7 @@ default_case:
 													  POT_HALLUCINATION, POT_SEE_INVISIBLE, POT_ACID, POT_AMNESIA,
 													  POT_POLYMORPH, SCR_CONFUSE_MONSTER, SCR_DESTROY_ARMOR, SCR_AMNESIA,
 													  WAN_POLYMORPH, SPE_POLYMORPH};
+								mon->mcrazed = TRUE;
 								for(int i = 3; i > 0; i--){
 									mtmp = makemon(&mons[PM_DAUGHTER_OF_BEDLAM], otmp->ox, otmp->oy, MM_ADJACENTOK);
 									if(mtmp){
