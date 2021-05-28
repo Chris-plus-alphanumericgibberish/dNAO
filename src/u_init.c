@@ -2022,9 +2022,10 @@ u_init()
         knows_object(WAN_PROBING);
         skill_init(Skill_Mad);
 		u.ualign.sins += 13; /* You have sinned */
-		for(i=0;i<SIZE(u.ugangr);i++){
-			u.ugangr[i] = 1; /* gods slightly torqued */
-		}
+		/* gods slightly torqued */
+		u.ugangr[GA_LAWFUL] = 1;
+		u.ugangr[GA_NEUTRAL] = 1;
+		u.ugangr[GA_CHAOTIC] = 1;
 		u.usanity = 75; /* Your sanity is not so hot */
 		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
 		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
