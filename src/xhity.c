@@ -2212,9 +2212,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		)) ||
 		/* If monster is stuck in a straitjacket */
 		(!youagr && 
-			((which_armor(magr, W_ARM) && which_armor(magr, W_ARM)->otyp == STRAITJACKET && which_armor(magr, W_ARM)->cursed) ||
-			 (which_armor(magr, W_ARMG) && which_armor(magr, W_ARMG)->otyp == SHACKLES && which_armor(magr, W_ARMG)->cursed)
-			) && 
+			( straitjacketed_mon(magr) || shackled_arms_mon(magr) ) && 
 			!((*subout)&(SUBOUT_BAEL1|SUBOUT_BAEL2)) && (
 			attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_WHIP
 			|| attk->aatyp == AT_HODS || attk->aatyp == AT_MMGC || attk->aatyp == AT_SRPR

@@ -1904,7 +1904,7 @@ register int after;
 	if (!Is_rogue_level(&u.uz))
 #endif
 	    can_tunnel = tunnels(ptr);
-	can_open = !(nohands(ptr) || verysmall(ptr));
+	can_open = !(nohands(ptr) || verysmall(ptr) || straitjacketed_mon(mtmp));
 	can_unlock = ((can_open && (m_carrying(mtmp, SKELETON_KEY)||m_carrying(mtmp, UNIVERSAL_KEY))) ||
 		      mtmp->iswiz || is_rider(ptr) || ptr->mtyp==PM_DREAD_SERAPH);
 	doorbuster = is_giant(ptr);
@@ -2177,6 +2177,9 @@ not_special:
 	if (can_tunnel && needspick(ptr) &&
 	    ((!mtmp->mpeaceful || Conflict || mtmp->mberserk) && !no_upos(mtmp) && 
 	     dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 8))
+	    can_tunnel = FALSE;
+	/* can't tunnel if stuck in a straitjacket */
+	if (can_tunnel && needspick(ptr) && straitjacketed_mon(mtmp))
 	    can_tunnel = FALSE;
 
 	nix = omx;
