@@ -452,6 +452,9 @@ struct obj {
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
 			 otmp->otyp == RAKUYO_DAGGER)
+#define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
+			 is_rakuyo(otmp) || \
+			 otmp->otyp == BESTIAL_CLAW)
 #define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			otmp->oclass == TOOL_CLASS) && \
 			 (objects[otmp->otyp].oc_skill == P_POLEARMS || \

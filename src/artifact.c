@@ -2001,9 +2001,10 @@ int oartifact;
 
 /* special attack bonus */
 int
-spec_abon(otmp, mon)
+spec_abon(otmp, mon, youagr)
 struct obj *otmp;
 struct monst *mon;
+boolean youagr;
 {
 	register const struct artifact *weap = get_artifact(otmp);
 	int bonus = 0;
@@ -2015,12 +2016,15 @@ struct monst *mon;
 	if(otmp->oartifact == ART_GUNGNIR){
 		bonus = 50;
 	}
+	if(youagr && Role_if(PM_BARD)) //legend lore
+		bonus += 5;
 	
-	if(Role_if(PM_PRIEST)) return bonus + weap->accuracy; //priests always get the maximum to-hit bonus.
+	if(youagr && Role_if(PM_PRIEST)) return bonus + weap->accuracy; //priests always get the maximum to-hit bonus.
 	
 	if (weap && weap->accuracy && spec_applies(otmp, mon, FALSE))
 	    return bonus + rnd((int)weap->accuracy);
-	return 0;
+	
+	return bonus;
 }
 
 int

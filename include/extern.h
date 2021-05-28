@@ -122,7 +122,7 @@ E boolean FDECL(arti_light, (struct obj *));
 E boolean FDECL(restrict_name, (struct obj *,const char *));
 E void FDECL(set_artifact_intrinsic, (struct obj *,BOOLEAN_P,long));
 E int FDECL(touch_artifact, (struct obj *,struct monst *, int));
-E int FDECL(spec_abon, (struct obj *,struct monst *));
+E int FDECL(spec_abon, (struct obj *,struct monst *, boolean));
 E boolean FDECL(spec_dbon, (struct obj *,struct monst *,int,int*,int*));
 E boolean FDECL(oproperty_dbon, (struct obj *, struct monst *, int, int*, int*));
 E int FDECL(spec_applies, (struct obj *,struct monst *, boolean));
@@ -3020,7 +3020,7 @@ E int NDECL(dosuspend);
 
 /* ### weapon.c ### */
 
-E int FDECL(hitval, (struct obj *,struct monst *));
+E int FDECL(hitval, (struct obj *,struct monst *,struct monst *));
 E int FDECL(attack_mask, (struct obj *, int, int));
 E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int));
 E int FDECL(weapon_dmg_roll, (struct weapon_dice *, boolean));

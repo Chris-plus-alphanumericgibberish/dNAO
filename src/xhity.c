@@ -3322,7 +3322,7 @@ int flat_acc;
 	{
 		if (weapon) {
 			/* specific bonuses of weapon vs mdef */
-			wepn_acc += hitval(weapon, mdef);
+			wepn_acc += hitval(weapon, mdef, magr);
 			/* Houchou always hits when thrown */
 			if (weapon->oartifact == ART_HOUCHOU && thrown)
 				wepn_acc += 1000;
@@ -3355,9 +3355,16 @@ int flat_acc;
 				wepn_acc -= greatest_erosion(launcher);
 				/* artifact bonus */
 				if (launcher->oartifact){
-					wepn_acc += spec_abon(launcher, mdef);
-					if (youagr && Role_if(PM_BARD)) //legend lore
-						wepn_acc += 5;
+					wepn_acc += spec_abon(launcher, mdef, youagr);
+				}
+				if (is_insight_weapon(launcher) && (youagr ? Role_switch : monsndx(magr->data)) == PM_MADMAN){
+					if(youagr){
+						if(u.uinsight)
+							wepn_acc += rnd(min(u.uinsight, mlev(magr)));
+					}
+					else {
+						wepn_acc += rnd(mlev(magr));
+					}
 				}
 			}
 			/* mis-used ammo */
@@ -13784,6 +13791,16 @@ int vis;						/* True if action is at all visible to the player */
 		/* priests do extra damage with all artifacts */
 		if (artif_hit && !recursed && magr && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
 			artidmg += d(1, mlev(magr));
+		/* madmen do extra damage with insight weapons */
+		if (valid_weapon_attack && is_insight_weapon(weapon) && !recursed && magr && (youagr ? Role_switch : monsndx(magr->data)) == PM_MADMAN){
+			if(youagr){
+				if(u.uinsight)
+					bonsdmg += d(1, (min(u.uinsight, (bimanual(weapon, youracedata) ? 2 : 1) * mlev(magr))+1)/2);
+			}
+			else {
+				bonsdmg += d(1, mlev(magr)/2+1);
+			}
+		}
 	}
 
 	/* Sum reduceable damage */

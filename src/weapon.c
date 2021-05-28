@@ -9,7 +9,7 @@
  */
 #include "hack.h"
 #include "artifact.h"
-#include "hack.h"
+#include "xhity.h"
 
 #ifdef DUMP_LOG
 STATIC_DCL int FDECL(enhance_skill, (boolean));
@@ -167,13 +167,15 @@ static NEARDATA const char kebabable[] = {
  *	of "otmp" against the monster.
  */
 int
-hitval(otmp, mon)
+hitval(otmp, mon, magr)
 struct obj *otmp;
 struct monst *mon;
+struct monst *magr;
 {
 	int	tmp = 0;
 	struct permonst *ptr = mon->data;
 	boolean Is_weapon = (otmp->oclass == WEAPON_CLASS || is_weptool(otmp));
+	boolean youagr = (magr == &youmonst);
 	
 	if(mon == &youmonst)
 		ptr = youracedata;
@@ -234,9 +236,17 @@ struct monst *mon;
 
 	/* Check specially named weapon "to hit" bonuses */
 	if (otmp->oartifact){
-		tmp += spec_abon(otmp, mon);
-		if(Role_if(PM_BARD)) //legend lore
-			tmp += 5;
+		tmp += spec_abon(otmp, mon, youagr);
+	}
+
+	if (is_insight_weapon(otmp)){
+		if(youagr && Role_if(PM_MADMAN)){
+			if(u.uinsight)
+				tmp += rnd(min(u.uinsight, mlev(magr)));
+		}
+		else if(magr && monsndx(magr->data) == PM_MADMAN){
+			tmp += rnd(mlev(magr));
+		}
 	}
 
 	return tmp;
