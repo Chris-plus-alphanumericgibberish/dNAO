@@ -162,7 +162,7 @@ struct monst * mdef;
 				else You("begin bashing monsters with your %s.",
 					aobjnam(uwep, (char *)0));
 			}
-			else if (!cantwield(youracedata)){
+			else if (!cantwield(youracedata) && !Straitjacketed){
 				if (u.specialSealsActive&SEAL_BLACK_WEB)
 					You("begin slashing monsters with your shadow-blades.");
 				else
