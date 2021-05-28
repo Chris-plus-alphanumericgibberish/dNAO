@@ -1808,7 +1808,7 @@ int x, y;
 int
 freehand()
 {
-	return((!uarm || uarm->otyp != STRAITJACKET || !(uarm->cursed)) && 
+	return(!Straitjacketed && 
 		(!uwep || !welded(uwep) ||
 	   (!bimanual(uwep,youracedata) && (!uarms || !uarms->cursed))));
 /*	if ((uwep && bimanual(uwep)) ||

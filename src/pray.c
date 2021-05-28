@@ -226,7 +226,7 @@ in_trouble()
 	       make sure it's a case that we know how to handle;
 	       otherwise "fix all troubles" would get stuck in a loop */
 	    if (welded(uwep)) return TROUBLE_UNUSEABLE_HANDS;
-	    if (uarm && uarm->otyp == STRAITJACKET && uarm->cursed)
+	    if (Straitjacketed)
 			return TROUBLE_UNUSEABLE_HANDS;
 	    if (Upolyd && nohands(youracedata) && (!Unchanging ||
 		    ((otmp = unchanger()) != 0 && otmp->cursed)))
@@ -445,7 +445,7 @@ register int trouble;
 		    }
 		    goto decurse;
 	    case TROUBLE_UNUSEABLE_HANDS:
-			if(uarm && uarm->otyp == STRAITJACKET && uarm->cursed){
+			if(Straitjacketed){
 				otmp = uarm;
 				goto decurse;
 			}

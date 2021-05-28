@@ -144,7 +144,7 @@ struct monst * mdef;
 		return TRUE;
 	}
 	//If the player can't attack and is wearing a straitjacket, redirect to the kick function
-	if(uarm && uarm->otyp == STRAITJACKET && uarm->cursed && !at_least_one_attack(&youmonst)){
+	if(Straitjacketed && !at_least_one_attack(&youmonst)){
 		dokick_core(u.dx, u.dy);
 		//Dokick can't move you
 		return TRUE;
@@ -2196,7 +2196,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		(youagr && onlykicks && attk->aatyp != AT_KICK) ||
 		/* If player is stuck in a straitjacket */
 		(youagr && 
-			((uarm && uarm->otyp == STRAITJACKET && uarm->cursed) ||
+			((Straitjacketed) ||
 			 (uarmg && uarmg->otyp == SHACKLES && uarmg->cursed)
 			) && (
 			attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_WHIP
@@ -16157,7 +16157,7 @@ android_combo()
 		return FALSE;
 	}
 
-	if(uarm && uarm->otyp == STRAITJACKET && uarm->cursed){
+	if(Straitjacketed){
 		You("can't do a combo while your arms are bound!");
 		return FALSE;
 	}
