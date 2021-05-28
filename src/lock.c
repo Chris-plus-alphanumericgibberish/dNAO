@@ -251,7 +251,7 @@ forcelock()	/* try to force a locked chest */
 			open_coffin(xlock.box, TRUE); //TRUE: use past tense
 		}else if(xlock.box->spe == 5){
 			open_sarcophagus(xlock.box, TRUE); //TRUE: use past tense
-		}else if(xlock.box->spe == 6){
+		}else if(xlock.box->spe == 6){ /*Note: destroying the box always releases the crazy*/
 			open_crazy_box(xlock.box, TRUE); //TRUE: use past tense
 		}else if(xlock.box->spe == 8){
 			// Nothing. 
