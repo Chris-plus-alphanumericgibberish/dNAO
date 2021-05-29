@@ -1159,7 +1159,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 
 	/* you throwing to a pet */
-	if (youagr && mdef->mtame && !forcedestroy) {
+	if (youagr && mdef->mtame && !forcedestroy && thrownobj != uball) {
 		if (mdef->mcanmove &&
 			(!is_animal(mdef->data)) &&
 			(!mindless_mon(mdef) || (mdef->mtyp == PM_CROW_WINGED_HALF_DRAGON && thrownobj->oartifact == ART_YORSHKA_S_SPEAR)) &&
