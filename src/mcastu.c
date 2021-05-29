@@ -3138,7 +3138,7 @@ int tary;
 				if (youagr || youdef || canseemon(mdef))
 					pline("Silver rays whiz past %s!",
 					mon_nam(mdef));
-				break;
+				return MM_MISS;
 			}
 			if (n == 1)
 				rays = "a ray";
