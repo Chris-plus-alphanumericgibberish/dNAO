@@ -831,6 +831,9 @@ boolean forcedestroy;			/* If TRUE, make sure the projectile is destroyed */
 			}
 			/* else go through the rest of the function */
 		}
+		/* It may not be. Possibly as a result of the xhity rework? */
+		if(thrownobj->where != OBJ_FREE)
+			return;
 	}
 
 	/* fragile objects shatter */
