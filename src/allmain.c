@@ -3942,7 +3942,7 @@ sense_nearby_monsters()
 	int dx, dy;
 	struct monst *mtmp;
 	for(dx=-1; dx<2; dx++) for(dy=-1; dy<2; dy++){
-		if(isok(u.ux+dx, u.uy+dy))
+		if(!isok(u.ux+dx, u.uy+dy))
 			continue;
 
 		//Must be able to sense the monster.
