@@ -6158,7 +6158,7 @@ boolean ranged;
 					You_feel("horrible fingers tug at your shihakusho.");
 				}
 				else{
-					if (uswapwep && !u.twoweap){
+					if (uswapwep && !u.twoweap && uswapwep != uball){
 						if (d(1, 100) - ACURR(A_DEX) > 0){
 							You_feel("your %s being stealthily drawn out of your belt.", doname(uswapwep));
 							otmp = uswapwep;
