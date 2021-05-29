@@ -4631,6 +4631,10 @@ struct monst *mon;
 			else return;
 			if (rn2(3)) return;
 		}
+		else {
+			impossible("Unhandled spore type in spore_dies, %d", mon->mtyp);
+			sporetype = 0;
+		}
 	    /* when creating a new fern, 5/6 chance of creating
 	       a fern sprout and 1/6 chance of a fully-grown one */
 	    switch (sporetype) {

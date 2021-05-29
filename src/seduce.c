@@ -273,13 +273,13 @@ register struct monst *mon;
 
 	/* by this point you have discovered mon's identity, blind or not... */
 	if (helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_WIS)) {
-		struct trap *ttmp2 = maketrap(u.ux, u.uy, WEB);
+		struct trap *ttmp2;
 		/* Don't bother with mspec_used here... it didn't get tired! */
 	LolthAttacks:
 		if (Blind) You("suddenly find yourself in the arms of a giant spider!");
 		else pline("She suddenly becomes a giant spider and seizes you with her legs!");
 		//Lolth bad
-		if (ttmp2) {
+		if ((ttmp2 = maketrap(u.ux, u.uy, WEB))) {
 			pline("She wraps you tight in her webs!");
 			dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED

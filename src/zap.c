@@ -1731,46 +1731,47 @@ poly_obj(obj, id)
 
 	case TOOL_CLASS:
 		if (otmp->otyp == CANDLE_OF_INVOCATION) {
-		otmp->otyp = WAX_CANDLE;
-		otmp->age = 400L;
+			otmp->otyp = WAX_CANDLE;
+			otmp->age = 400L;
 		}
 	    else if (otmp->otyp == MAGIC_LAMP) {
-		otmp->otyp = OIL_LAMP;
-		otmp->age = 1500L;	/* "best" oil lamp possible */
+			otmp->otyp = OIL_LAMP;
+			otmp->age = 1500L;	/* "best" oil lamp possible */
 	    } else if (otmp->otyp == MAGIC_MARKER) {
-		otmp->recharged = 1;	/* degraded quality */
+			otmp->recharged = 1;	/* degraded quality */
 	    }
 	    /* don't care about the recharge count of other tools */
 	    break;
 
 	case WAND_CLASS:
 	    while (otmp->otyp == WAN_WISHING || otmp->otyp == WAN_POLYMORPH)
-		otmp->otyp = rnd_class(WAN_LIGHT, WAN_LIGHTNING);
+			otmp->otyp = rnd_class(WAN_LIGHT, WAN_LIGHTNING);
 	    /* altering the object tends to degrade its quality
 	       (analogous to spellbook `read count' handling) */
 	    if ((int)otmp->recharged < rn2(7))	/* recharge_limit */
-		otmp->recharged++;
+			otmp->recharged++;
 	    break;
 
 	case POTION_CLASS:
 	    while (otmp->otyp == POT_POLYMORPH)
-		otmp->otyp = rnd_class(POT_GAIN_ABILITY, POT_WATER);
+			otmp->otyp = rnd_class(POT_GAIN_ABILITY, POT_WATER);
 	    break;
 
 	case SPBOOK_CLASS:
 	    while (otmp->otyp == SPE_POLYMORPH)
-		otmp->otyp = rnd_class(SPE_DIG, SPE_BLANK_PAPER);
+			otmp->otyp = rnd_class(SPE_DIG, SPE_BLANK_PAPER);
 	    /* reduce spellbook abuse */
 		if(otmp->spestudied > MAX_SPELL_STUDY){
 			otmp->otyp = SPE_BLANK_PAPER;
 			otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 		}
-	    else otmp->spestudied = obj->spestudied + 1;
+	    else
+			otmp->spestudied = obj->spestudied + 1;
 	    break;
 
 	case RING_CLASS:
 		while (otmp->otyp == RIN_WISHES)
-		otmp->otyp = rnd_class(RIN_WISHES, RIN_PROTECTION_FROM_SHAPE_CHAN);
+			otmp->otyp = rnd_class(RIN_WISHES, RIN_PROTECTION_FROM_SHAPE_CHAN);
 		break;
 
 	case GEM_CLASS:
@@ -3830,7 +3831,7 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 			/* disintegrate terrain */
 			/* maybe move this to dig.c? it's very very similar to zap_dig. */
 			if (zapdata->adtyp == AD_DISN) {
-				boolean shopdoor, shopwall;
+				boolean shopdoor = FALSE, shopwall = FALSE;
 				if (!isok(sx, sy)) {
 					if (isok(sx-dx, sy-dy) && cansee(sx-dx, sy-dy))
 						pline("The wall glows then fades.");

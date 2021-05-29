@@ -5537,6 +5537,9 @@ shk_charge(slang, shkp)
 		} else if (ESHK(shkp)->services & SHK_SPECIAL_B) {
 			pline ("I only perform complete charging.");
 			type = 'p';
+		} else { /* currently impossible case */
+			pline ("Sorry about that, it seems I can't do any charging.");
+			return;
 		}
  	}
 	else

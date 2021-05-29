@@ -933,6 +933,7 @@ struct obj *obj;
 		    } else if (roll_madness(MAD_ARGENT_SHEEN)) {
 				You("admire your reflection in the mirror.");
 				nomul(-1*rnd(6), "posing in front of a mirror.");
+				vis = FALSE;
 		    } else if (Hallucination) {
 				You(look_str, hcolor((char *)0));
 				vis = TRUE;
@@ -5622,7 +5623,7 @@ doUseComponents(optr)
 struct obj **optr;
 {
 	struct obj *obj = *optr;
-	struct monst *mm;
+	struct monst *mm = (struct monst *)0;
 	struct permonst *pmm;
 	coord cc;
 

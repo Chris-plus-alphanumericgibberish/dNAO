@@ -2539,7 +2539,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		if(youattack){
 			if(dieroll == 1){
 				struct obj *otmp2;
-				long unwornmask;
+				long unwornmask = 0L;
 
 				/* Don't steal worn items, and downweight wielded items */
 				if((otmp2 = mdef->minvent) != 0) {
@@ -4304,7 +4304,7 @@ boolean * messaged;
 	 * Not you, though. You just die. It's simpler that way. */
 	if (oartifact == ART_PLAGUE && artinstance[ART_PLAGUE].PlagueDoOnHit && (*hp(mdef) <= currdmg + 100) && !youdef) {
 		artinstance[ART_PLAGUE].PlagueDoOnHit = FALSE;
-		int mx, my;
+		int mx = x(mdef), my = y(mdef);
 		if (vis&VIS_MAGR && vis&VIS_MDEF) {
 			pline_The("tainted %s strikes true!", xname(msgr));
 		}
@@ -4319,8 +4319,6 @@ boolean * messaged;
 		/* we want to avoid catching mdef in this explosion -- kludge time */
 		/* note: long worms still get caught in the explosion, because of course they do, so don't kludge at all to be on the safe side */
 		if (!is_longworm(mdef->data)) {
-			mx = x(mdef);
-			my = y(mdef);
 			level.monsters[mx][my] = (struct monst *)0;
 		}
 
@@ -7563,7 +7561,7 @@ arti_invoke(obj)
         } break;
         case ARTIFICE:{
           int artificeFunc = doartificemenu("Improve weapon or armor:", obj);
-          struct obj *scroll;
+          struct obj *scroll = (struct obj *)0;
           switch(artificeFunc){
               case 0:
                 break;
@@ -7574,11 +7572,13 @@ arti_invoke(obj)
                 scroll = mksobj(SCR_ENCHANT_ARMOR, NO_MKOBJ_FLAGS);
                 break;
           }
-          scroll->blessed = obj->blessed;
-          scroll->cursed = obj->cursed;
-		  scroll->quan = 20;				/* do not let useup get it */
-          seffects(scroll);
-          obfree(scroll,(struct obj *)0);	/* now, get rid of it */
+		  if (scroll) {
+			scroll->blessed = obj->blessed;
+			scroll->cursed = obj->cursed;
+			scroll->quan = 20;				/* do not let useup get it */
+			seffects(scroll);
+			obfree(scroll,(struct obj *)0);	/* now, get rid of it */
+		  }
         } break;
         case SUMMON_PET:{
           /* TODO */
