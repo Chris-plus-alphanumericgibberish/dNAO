@@ -4044,6 +4044,12 @@ register struct monst *mtmp;
 	else if(mtmp->mtyp == PM_DEMOGORGON){
 		achieve.killed_demogorgon = 1;
 	}
+	else if(mtmp->mtyp == PM_LAMASHTU){
+		give_lamashtu_trophy();
+	}
+	else if(mtmp->mtyp == PM_BAALPHEGOR){
+		give_baalphegor_trophy();
+	}
 	else if (mtmp->mtyp == PM_MEDUSA
 	|| mtmp->mtyp == PM_GRUE
 	|| mtmp->mtyp == PM_ECHO

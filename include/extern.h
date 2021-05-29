@@ -2423,6 +2423,8 @@ E const char *NDECL(getDnDHumCgod);
 #ifdef RECORD_ACHIEVE
 E void NDECL(give_quest_trophy);
 E void NDECL(give_ascension_trophy);
+E void NDECL(give_lamashtu_trophy);
+E void NDECL(give_baalphegor_trophy);
 E void NDECL(give_law_trophy);
 E void NDECL(give_neutral_trophy);
 E void NDECL(give_chaos_temple_trophy);

@@ -3047,6 +3047,22 @@ give_ascension_trophy()
 
 #ifdef RECORD_ACHIEVE
 void
+give_lamashtu_trophy()
+{
+	achieve.trophies |= LAMASHTU_KILL;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_baalphegor_trophy()
+{
+	achieve.trophies |= BAALPHEGOR_KILL;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
 give_law_trophy()
 {
 	achieve.trophies |= LAW_QUEST;

@@ -738,6 +738,9 @@ struct u_achieve {
 #define	QUITE_MAD		0x1L << 35
 #define	TOTAL_DRUNK		0x1L << 36
 #define	MAD_QUEST		0x1L << 37
+#define	LAMASHTU_KILL	0x1L << 38
+#define	BAALPHEGOR_KILL	0x1L << 39
+#define ACHIEVE_NUMBER	40
 };
 
 E struct u_achieve achieve;
