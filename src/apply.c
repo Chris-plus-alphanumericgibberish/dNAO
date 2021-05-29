@@ -3861,6 +3861,8 @@ struct obj *pole;
 			&& cansee(cx, cy)
 			&& canseemon(mtmp)
 			&& distu(cx, cy) <= max_range
+			&& !(flags.peacesafe_polearms && mtmp->mpeaceful)
+			&& !(flags.petsafe_polearms && mtmp->mtame)
 		){
 			Sprintf(buf, "%s (%s)", Monnam(mtmp), pole_dir[i]);
 			any.a_int = i+1;	/* must be non-zero */
@@ -3868,7 +3870,8 @@ struct obj *pole;
 				incntlet, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
-		incntlet++; /* always increment, so that the same direction is always the same letter*/
+		if(!flags.relative_polearms)
+			incntlet++; /* always increment, so that the same direction is always the same letter*/
 	}
 
 	end_menu(tmpwin, "Choose target:");

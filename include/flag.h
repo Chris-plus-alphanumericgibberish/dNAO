@@ -79,6 +79,9 @@ struct flag {
 	boolean  soundok;	/* ok to tell about sounds heard */
 	boolean  sparkle;	/* show "resisting" special FX (Scott Bigham) */
 	boolean  standard_polearms;	/* use the old polearm targeting system */
+	boolean  petsafe_polearms;	/* don't suggest pets as polearm targets */
+	boolean  peacesafe_polearms;	/* don't suggest peacefuls as polearm targets */
+	boolean  relative_polearms;	/* letter targets starting with a, not based on location. */
 	boolean  standout;	/* use standout for --More-- */
 	boolean  suppress_hurtness;	/* hides "uninjured" "bloody" "damaged" monster prefixes */
 	boolean  time;		/* display elapsed 'time' */

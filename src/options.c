@@ -214,6 +214,10 @@ static struct Bool_Opt
 #endif
 	{"perm_invent", &flags.perm_invent, FALSE, SET_IN_GAME},
        {"pickup_thrown", &iflags.pickup_thrown, FALSE, SET_IN_GAME},
+	{"polearm_old_style", &flags.standard_polearms, FALSE, SET_IN_GAME},
+	{"polearm_peace_safe", &flags.peacesafe_polearms, TRUE, SET_IN_GAME},
+	{"polearm_pet_safe", &flags.petsafe_polearms, TRUE, SET_IN_GAME},
+	{"polearm_sequential_letters", &flags.relative_polearms, FALSE, SET_IN_GAME},
 	{"popup_dialog",  &iflags.wc_popup_dialog, FALSE, SET_IN_GAME},	/*WC*/
 	{"prayconfirm", &flags.prayconfirm, TRUE, SET_IN_GAME},
 	{"preload_tiles", &iflags.wc_preload_tiles, TRUE, DISP_IN_GAME},	/*WC*/
@@ -260,7 +264,6 @@ static struct Bool_Opt
 	{"sortpack", &flags.sortpack, TRUE, SET_IN_GAME},
 	{"sound", &flags.soundok, TRUE, SET_IN_GAME},
 	{"sparkle", &flags.sparkle, TRUE, SET_IN_GAME},
-	{"standard_polearms", &flags.standard_polearms, FALSE, SET_IN_GAME},
 	{"standout", &flags.standout, FALSE, SET_IN_GAME},
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
         {"statuscolors", &iflags.use_status_colors, TRUE, SET_IN_GAME},
