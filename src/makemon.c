@@ -2452,6 +2452,23 @@ int mkobjflags;
 				(void) mpickobj(mtmp, otmp);
 				begin_burn(otmp);
 // #endif /* CONVICT */
+			} else if (mm == PM_DOCTOR_ARCHER) {
+				otmp = mksobj(SCALPEL, mkobjflags|MKOBJ_NOINIT);
+				otmp->opoisoned = OPOISON_FILTH;
+				set_material_gm(otmp, SILVER);
+				otmp->spe = 7;
+				(void) mpickobj(mtmp,otmp);
+				otmp = mksobj(SCALPEL, mkobjflags|MKOBJ_NOINIT);
+				otmp->opoisoned = OPOISON_FILTH;
+				set_material_gm(otmp, IRON);
+				otmp->spe = 5;
+				(void) mpickobj(mtmp,otmp);
+				otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+				otmp->obj_color = CLR_YELLOW;
+				otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+				otmp->obj_color = CLR_YELLOW;
+				otmp = mongets(mtmp, LOW_BOOTS, mkobjflags);
+				otmp->obj_color = CLR_YELLOW;
 			} else if (mm == PM_ASHIKAGA_TAKAUJI) {
 					otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 4;
