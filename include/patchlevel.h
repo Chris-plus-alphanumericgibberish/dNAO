@@ -15,7 +15,7 @@
    Incremented to 3.11 with the introduction Anachrononauts.
    Incremented to 3.12 with the introduction Magic chests, scrolls of antimagic, resistance, and consecration, YARevison to chaos quest, beter resistance-from-diet, and lightsaber forms.
 */
-#define VERSION_MINOR	20
+#define VERSION_MINOR	21
 /*
  * PATCHLEVEL is updated for each release.
  *
@@ -44,6 +44,7 @@
  * 3.19.0: xhity and artifact revisions (Nero), sanity and insight
  * 3.19.1: Bugfixes and Junethack handling (trophies, pick chaos quest)
  * 3.20.0: Finish Female Half Dragon Noble, improve property handling and introduce improve goat property gifting, large number of bugfixes.
+ * 3.21.0: Implement hell vaults, minor madnesses, and the Madman role
  */
 #define PATCHLEVEL	0
 /*
