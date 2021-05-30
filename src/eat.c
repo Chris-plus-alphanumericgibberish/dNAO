@@ -1117,7 +1117,8 @@ BOOLEAN_P tin, nobadeffects, drained;
 			else u.uen += amnt;
 			flags.botl = 1;
 			if (u.uen > u.uenmax){
-				u.uenmax++;
+				u.uenbonus++;
+				calc_total_maxen();
 				u.uen = u.uenmax;
 			}
 			if (old_uen != u.uen){

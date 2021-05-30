@@ -2965,7 +2965,8 @@ char *type;			/* blade, staff, etc */
 		    *dmgptr = 0;    /* rehumanized, so no more damage */
 		if (u.uenmax > 0) {
 		    You("lose magical energy!");
-		    u.uenmax--;
+		    u.uenbonus--;
+			calc_total_maxen();
 		    if (u.uen > 0) u.uen--;
 		    flags.botl = 1;
 		}
@@ -2974,8 +2975,9 @@ char *type;			/* blade, staff, etc */
 		    mdef->mhp = 1;	/* cancelled clay golems will die */
 		if (youattack && (attacktype(mdef->data, AT_MAGC) || attacktype(mdef->data, AT_MMGC))) {
 		    You("absorb magical energy!");
-		    u.uenmax++;
+		    u.uenbonus++;
 		    u.uen++;
+			calc_total_maxen();
 		    flags.botl = 1;
 		}
 	    }
