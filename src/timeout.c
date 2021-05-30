@@ -2993,6 +2993,8 @@ long
 timer_duration_remaining(tm)
 timer_element * tm;
 {
+	if (!tm)
+		return 0L;
 	return tm->timeout - monstermoves;
 }
 
@@ -3001,6 +3003,10 @@ adjust_timer_duration(tm, amt)
 timer_element * tm;
 long amt;
 {
+	if (!tm) {
+		impossible("tm doesn't exist to adjust timer");
+		return;
+	}
 	/* have to remove it and re-add it so the list remains ordered */
 	rem_procchain_tm(tm);
 	tm->timeout += amt;

@@ -3870,8 +3870,9 @@ struct obj *pole;
 			add_menu(tmpwin, NO_GLYPH, &any,
 				incntlet, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
+			incntlet++;
 		}
-		if(!flags.relative_polearms)
+		else if(!flags.relative_polearms)
 			incntlet++; /* always increment, so that the same direction is always the same letter*/
 	}
 
