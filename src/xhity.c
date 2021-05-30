@@ -6853,8 +6853,6 @@ boolean ranged;
 					/* make a special x_monnam() call that never omits
 					the saddle, and save it for later messages */
 					Strcpy(mdefnambuf, x_monnam(mdef, ARTICLE_THE, (char *)0, 0, FALSE));
-
-					otmp = otmp;
 #ifdef STEED
 					if (u.usteed == mdef &&
 						otmp == which_armor(mdef, W_SADDLE))
@@ -8162,7 +8160,7 @@ boolean ranged;
 			/* 1/10 chance of stealing items */
 			if (!rn2(10)){
 				struct obj *otmp2, **minvent_ptr;
-				long unwornmask;
+				long unwornmask = 0L;
 
 				/* Don't steal worn items, and downweight wielded items */
 				if ((otmp2 = mdef->minvent) != 0) {
@@ -15285,7 +15283,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 	int newres;
 	int dmg;
 	long slot = 0L;
-	struct monst * mtmp;
+	struct monst * mtmp = (struct monst *)0;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	/* set permonst pointers */
@@ -15766,7 +15764,6 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					}
 					/* anger autons */
 					if (youagr) {
-						struct monst * mtmp;
 						int mndx;
 						for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 							mndx = monsndx(mtmp->data);

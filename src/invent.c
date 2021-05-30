@@ -3743,7 +3743,7 @@ long* out_cnt;
 	struct obj **oarray;
 	int i, j;
 #endif
-	char ilet, ret;
+	char ilet, ret = '\0';
 	char *invlet = flags.inv_order;
 	int n, classcount;
 	winid win;				/* windows being used */
@@ -3808,7 +3808,6 @@ long* out_cnt;
 	    /* when only one item of interest, use pline instead of menus;
 	       we actually use a fake message-line menu in order to allow
 	       the user to perform selection at the --More-- prompt for tty */
-	    ret = '\0';
 	    for (otmp = invent; otmp; otmp = otmp->nobj) {
 		if (otmp->invlet == lets[0]) {
 #ifdef DUMP_LOG

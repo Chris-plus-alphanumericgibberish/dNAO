@@ -557,7 +557,7 @@ clonewiz()
 int
 pick_nasty()
 {
-	int tries;
+	int tries = 0;
 	int mndx;
 	do{
 		mndx = nasties[rn2(SIZE(nasties))];

@@ -2955,10 +2955,10 @@ int ga_num;
 		gnam = Silence;
 	 break;
      case GA_CHAOS_FF:
-		if(In_FF_quest(&u.uz)){
-			if(on_level(&chaose_level,&u.uz)) gnam = DeepChaos;
-			else gnam = Chaos;
-		}
+		if(In_FF_quest(&u.uz) && on_level(&chaose_level,&u.uz))
+			gnam = DeepChaos;
+		else
+			gnam = Chaos;
 	 break;
      case GA_DEMIURGE:
 		gnam = Demiurge;

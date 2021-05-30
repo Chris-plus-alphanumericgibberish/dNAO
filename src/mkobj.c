@@ -3281,19 +3281,21 @@ dealloc_obj(obj)
     struct obj *obj;
 {
     if (obj->where != OBJ_FREE)
-	panic("dealloc_obj: obj not free");
+		panic("dealloc_obj: obj not free");
 
     /* free up any timers attached to the object */
     if (obj->timed)
-	stop_all_timers(obj->timed);
+		stop_all_timers(obj->timed);
 
     /*
      * Free up any light sources attached to the object.
      */
 	if (obj->light)
-	del_light_source(obj->light);
+		del_light_source(obj->light);
 
-    //if (obj == thrownobj) thrownobj = (struct obj*)0;
+	/* Free any oextra attached to the object */
+	if (obj->oextra_p)
+		rem_all_ox(obj);
 
     free((genericptr_t) obj);
 }
