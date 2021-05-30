@@ -3862,8 +3862,8 @@ struct obj *pole;
 			&& cansee(cx, cy)
 			&& canseemon(mtmp)
 			&& distu(cx, cy) <= max_range
-			&& !(flags.peacesafe_polearms && mtmp->mpeaceful)
-			&& !(flags.petsafe_polearms && mtmp->mtame)
+			&& !(flags.peacesafe_polearms && mtmp->mpeaceful && !Hallucination)
+			&& !(flags.petsafe_polearms && mtmp->mtame && !Hallucination)
 		){
 			Sprintf(buf, "%s (%s)", Monnam(mtmp), pole_dir[i]);
 			any.a_int = i+1;	/* must be non-zero */
