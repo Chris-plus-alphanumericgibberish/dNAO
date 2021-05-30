@@ -743,7 +743,9 @@ struct u_achieve {
 #define	ANGEL_VAULT		0x1L << 40
 #define	ANCIENT_VAULT	0x1L << 41
 #define	TANNINIM_VAULT	0x1L << 42
-#define ACHIEVE_NUMBER	43
+#define	CASTLE_WISH		0x1L << 43
+#define	UNKNOWN_WISH	0x1L << 44
+#define ACHIEVE_NUMBER	45
 };
 
 E struct u_achieve achieve;

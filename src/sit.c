@@ -435,6 +435,7 @@ dosit()
 			if (Is_stronghold(&u.uz) && !u.uevent.utook_castle)
 			{
 				u.uevent.utook_castle = 1;
+				give_castle_trophy();
 				You_feel("worthy.");
 				return 1;
 			}

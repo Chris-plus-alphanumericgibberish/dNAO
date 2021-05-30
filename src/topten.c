@@ -1146,6 +1146,8 @@ char *achieveXbuff;
 	CHECK_ACHIEVE(ANGEL_VAULT,"angel_hell_vault")
 	CHECK_ACHIEVE(ANCIENT_VAULT,"ancient_hell_vault")
 	CHECK_ACHIEVE(TANNINIM_VAULT,"tanninim_hell_vault")
+	CHECK_ACHIEVE(UNKNOWN_WISH,"unknown_god_wish")
+	CHECK_ACHIEVE(CASTLE_WISH,"castle_wish")
 	CHECK_ACHIEVE(ILLUMIAN,"illuminated")
 	CHECK_ACHIEVE(RESCUE,"exodus")
 	CHECK_ACHIEVE(FULL_LOADOUT,"fully_upgraded")

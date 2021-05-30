@@ -2425,6 +2425,8 @@ E void NDECL(give_quest_trophy);
 E void NDECL(give_ascension_trophy);
 E void NDECL(give_lamashtu_trophy);
 E void NDECL(give_baalphegor_trophy);
+E void NDECL(give_castle_trophy);
+E void NDECL(give_ugwish_trophy);
 E void NDECL(give_law_trophy);
 E void NDECL(give_angel_vault_trophy);
 E void NDECL(give_ancient_vault_trophy);

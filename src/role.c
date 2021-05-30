@@ -3119,6 +3119,22 @@ int hv_id;
 
 #ifdef RECORD_ACHIEVE
 void
+give_castle_trophy()
+{
+	achieve.trophies |= CASTLE_WISH;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_ugwish_trophy()
+{
+	achieve.trophies |= UNKNOWN_WISH;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
 give_law_trophy()
 {
 	achieve.trophies |= LAW_QUEST;

@@ -2667,6 +2667,7 @@ int dz;
 				mongone(mtmp);
 				if(u.regifted == 5){
 					u.uevent.uunknowngod = 1;
+					give_ugwish_trophy();
 					You_feel("worthy.");
 					if (Role_if(PM_EXILE))
 					{
