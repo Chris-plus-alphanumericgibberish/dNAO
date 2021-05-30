@@ -740,7 +740,10 @@ struct u_achieve {
 #define	MAD_QUEST		0x1L << 37
 #define	LAMASHTU_KILL	0x1L << 38
 #define	BAALPHEGOR_KILL	0x1L << 39
-#define ACHIEVE_NUMBER	40
+#define	ANGEL_VAULT		0x1L << 40
+#define	ANCIENT_VAULT	0x1L << 41
+#define	TANNINIM_VAULT	0x1L << 42
+#define ACHIEVE_NUMBER	43
 };
 
 E struct u_achieve achieve;

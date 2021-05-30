@@ -3063,6 +3063,62 @@ give_baalphegor_trophy()
 
 #ifdef RECORD_ACHIEVE
 void
+give_angel_vault_trophy()
+{
+	achieve.trophies |= ANGEL_VAULT;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_ancient_vault_trophy()
+{
+	achieve.trophies |= ANCIENT_VAULT;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_tannin_vault_trophy()
+{
+	achieve.trophies |= TANNINIM_VAULT;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_hell_vault_trophy(hv_id)
+int hv_id;
+{
+	switch(hv_id){
+		case VN_AKKABISH:
+		case VN_SHALOSH:
+		case VN_NACHASH:
+		case VN_KHAAMNUN:
+		case VN_RAGLAYIM:
+		case VN_TERAPHIM:
+		case VN_SARTAN:
+			give_tannin_vault_trophy();
+		break;
+		case VN_A_O_BLESSINGS:
+		case VN_A_O_VITALITY:
+		case VN_A_O_CORRUPTION:
+		case VN_A_O_BURNING_WASTES:
+		case VN_A_O_THOUGHT:
+		case VN_A_O_DEATH:
+			give_ancient_vault_trophy();
+		break;
+		case VN_APOCALYPSE:
+		case VN_HARROWER:
+		case VN_MAD_ANGEL:
+			give_angel_vault_trophy();
+		break;
+	}
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
 give_law_trophy()
 {
 	achieve.trophies |= LAW_QUEST;

@@ -1687,6 +1687,7 @@ int x, y;
 	mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 	
 	if(mon){
+		give_hell_vault_trophy(levl[x][y].vaulttype);
 		if(levl[x][y].vaulttype == VN_MAD_ANGEL){
 			set_template(mon, MAD_TEMPLATE);
 			mon->m_lev += (mon->data->mlevel)/2;
