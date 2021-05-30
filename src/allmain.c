@@ -1583,14 +1583,14 @@ karemade:
 					}
 				}
 
-				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !ClearThoughts) {
+				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !mtmp->mtame && !ClearThoughts) {
 					static long lastusedmove = 0;
 					if (lastusedmove != moves) {
 						if (!mtmp->mappearance || (canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1 && rn2(3))) {
 
 							if(canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1) {
 								pline("%s takes on forms new and terrible!", Monnam(mtmp));
-    						change_usanity(u_sanity_loss_minor(mtmp), TRUE);
+    						change_usanity(u_sanity_loss_minor(mtmp), !mtmp->mpeaceful);
 							}
 							lastusedmove = moves;
 							mtmp->mappearance = select_newcham_form(mtmp);
@@ -3923,7 +3923,7 @@ struct monst *mon;
 				//Acute Sanity loss: Shock of seeing a new monster lowers sanity and may cause temporary breakdown
 				if(mvitals[monsndx(mon->data)].san_lost == 0){
 					mvitals[monsndx(mon->data)].san_lost = u_sanity_loss(mon);
-					change_usanity(mvitals[monsndx(mon->data)].san_lost, TRUE);
+					change_usanity(mvitals[monsndx(mon->data)].san_lost, !mon->mpeaceful);
 				}
 				//Stress-based Sanity loss: Stress of continuing to see a taxing monster may lower sanity. 
 				else if(u.usanity > (100 - mvitals[monsndx(mon->data)].san_lost)){
@@ -3954,7 +3954,7 @@ sense_nearby_monsters()
 			if(!mtmp->mtame){
 				if(mvitals[monsndx(mtmp->data)].san_lost == 0 && taxes_sanity(mtmp->data)){
 					mvitals[monsndx(mtmp->data)].san_lost = u_sanity_loss(mtmp);
-					change_usanity(mvitals[monsndx(mtmp->data)].san_lost, TRUE);
+					change_usanity(mvitals[monsndx(mtmp->data)].san_lost, !mtmp->mpeaceful);
 				}
 				//May have already gained madness but re-giving it is harmless
 				give_madness(mtmp);
