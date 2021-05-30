@@ -2,7 +2,7 @@ achieveXname,name,description,icon,
 archeologist_quest,Walking international incident,Completed the revised archeologist quest,X,
 caveman_quest,Serpent slayer,Completed the revised caveman quest,X,
 convict_quest,Sentence commuted,Completed the revised convict quest,X,
-knight_quest,,Completed the revised knight quest,X,
+knight_quest,Into the crystal cave,Completed the revised knight quest,X,
 anachrononaut_quest,Back from the future,Completed the anachrononaut quest,X,
 android_quest,Glory to mankind,Completed the android quest,X,
 anachrononaut_ascension,No fate,Ascended an Anachrononaut and saved the future,X,
@@ -17,14 +17,13 @@ drow_noble_quest,Foreshadowing,Completed the drow noble quest,X,
 drow_shared_quest,Old friends,Completed the drow shared quest,,Two @
 dwarf_noble_quest,Durin's Bane's Bane,Completed the dwarf noble quest,,@ and & on a bridge over lava
 dwarf_knight_quest,Battle of (5-4) armies,Completed the dwarf knight quest,,@ facing a bunch of o
-gnome_ranger_quest,,Completed the gnome ranger quest,,Gnome sniping a kobold
-madman_quest,Oh good. I'm not crazy.,Completed the madman quest,,
+gnome_ranger_quest,Strongest of all time,Completed the gnome ranger quest,,Gnome sniping a kobold
 elf_shared_quest,Driven out,Completed the elf shared quest,,
 clockwork_ascension,Deus ex machina,Ascended a clockwork automaton,,
 chiropteran_ascension,Bat outa hell,Ascended a chiropteran,,
 yuki_onna_ascension,Snow in heaven,Ascended a yuki-onna,,
 half_dragon_ascension,Three halves,Ascended a half-dragon,,
-law_quest,,Completed the law quest,,
+law_quest,Ripple-resistant tower,Completed the law quest,,
 neutral_quest,Key to the (corpse) city,Completed the neutral quest,,
 chaos_temple_quest,Asinine paradigm,Completed the chaos temple quest,,
 mithardir_quest,Chasing after the wind,Completed the mithardir quest,,
@@ -37,3 +36,9 @@ hunter_of_nightmares,Hunter of Nightmares,Defeated at least one of each of the s
 two_keys,Two Keys,Ascended having only touched two alignment keys,,Me with a headache
 quite_mad,Quite Mad,Suffered from at least 6 madnesses,,
 booze_hound,Booze Hound,Maxed out your drunkard score by drinking at least 90 potions of booze,,Dog surrounded by booze potions
+New June 2021,,,,
+madman_quest,Oh good. I'm not crazy.,Completed the madman quest,,
+lamashtu_kill,Does this count as a paradox?,Destroyed Lamashtu (Demon Queen of the future),,
+baalphegor_kill,A universe without motion,Destroyed Baalphegor,,
+angel_hell_vault OR ancient_hell_vault OR tanninim_hell_vault,Relics of a bygone era,Opened one type of hellish seal,,
+angel_hell_vault AND ancient_hell_vault AND tanninim_hell_vault,There are a lot of these….,Opened all three types of hellish seal (across all games played),,
