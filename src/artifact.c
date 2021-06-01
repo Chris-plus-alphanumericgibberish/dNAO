@@ -10086,11 +10086,11 @@ living_items()
 				pline("%s its finger.", Tobjnam(obj, "tap"));
 		}
 		//Nitocris's coffin causes Egyptian spawns
-		else if(Is_container(obj) && obj->spe == 5){
+		else if(Is_real_container(obj) && obj->spe == 5){
 			nitocris_sarcophagous(obj);
 		}
 		//Fulvous desk spawns phantoms
-		else if(Is_container(obj) && obj->spe == 8){
+		else if(Is_real_container(obj) && obj->spe == 8){
 			fulvous_desk(obj);
 		}
 	}

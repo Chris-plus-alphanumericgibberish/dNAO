@@ -335,9 +335,6 @@ struct obj *box;
 			else {
 				if (!(otmp = mkobj(SPBOOK_CLASS, TRUE))) continue;
 			}
-			if(box->spe == 1){
-				otmp->obj_color = CLR_YELLOW;
-			}
 	    } else {
 		register int tprob;
 		const struct icp *iprobs = boxiprobs;
@@ -367,10 +364,6 @@ struct obj *box;
 		}
 	    }
 	    (void) add_to_container(box, otmp);
-	}
-	if(box->otyp == WRITING_DESK && box->spe == 1){
-		// +1 writing desks are handled by the level loader, switch it off here.
-		box->spe = 0;
 	}
 }
 
