@@ -2449,8 +2449,8 @@ int typ;
 	int x, y, tries = 0, good = FALSE;
 	struct obj *otmp;
 	while(!good && tries < 500){
-		x = rn2(COLNO)+1;
-		y = rn2(ROWNO);
+		x = rn2(COLNO-4)+3;
+		y = rn2(ROWNO-2)+1;
 		tries++;
 		if(isok(x,y) && levl[x][y].typ == typ)
 			good = TRUE;
@@ -3605,8 +3605,8 @@ int typ;
 	int x, y, tries = 0, ncrew, good = FALSE;
 	struct obj *statue, *smallstatue, *otmp;
 	while(!good && tries < 500){
-		x = rn2(COLNO)+1;
-		y = rn2(ROWNO);
+		x = rn2(COLNO-4)+3;
+		y = rn2(ROWNO-2)+1;
 		tries++;
 		if(isok(x,y) && levl[x][y].typ == typ)
 			good = TRUE;
@@ -3759,8 +3759,8 @@ int typ;
 	int x, y, tries = 0, good = FALSE;
 	struct obj *otmp;
 	while(!good && tries < 500){
-		x = rn2(COLNO)+1;
-		y = rn2(ROWNO);
+		x = rn2(COLNO-4)+3;
+		y = rn2(ROWNO-2)+1;
 		tries++;
 		if(isok(x,y) && levl[x][y].typ == typ)
 			good = TRUE;
@@ -3930,8 +3930,8 @@ int typ;
 	int x, y, tries = 0, good = FALSE;
 	struct obj *otmp;
 	while(!good && tries < 500){
-		x = rn2(COLNO)+1;
-		y = rn2(ROWNO);
+		x = rn2(COLNO-4)+3;
+		y = rn2(ROWNO-2)+1;
 		tries++;
 		if(isok(x,y) && levl[x][y].typ == typ)
 			good = TRUE;
@@ -3958,8 +3958,8 @@ int typ;
 	int x, y, tries = 0, good = FALSE;
 	struct obj *otmp;
 	while(!good && tries < 500){
-		x = rn2(COLNO)+1;
-		y = rn2(ROWNO);
+		x = rn2(COLNO-4)+3;
+		y = rn2(ROWNO-2)+1;
 		tries++;
 		if(isok(x,y) && levl[x][y].typ == typ)
 			good = TRUE;

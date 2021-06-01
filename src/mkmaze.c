@@ -715,8 +715,8 @@ fixup_special()
 	if (Role_if(PM_RANGER) && Race_if(PM_GNOME) && on_level(&u.uz, &minetown_level)){
 		int x, y, good = FALSE;
 		while (!good){
-			x = rn2(COLNO) + 1;
-			y = rn2(ROWNO);
+			x = rn2(COLNO-4)+3;
+			y = rn2(ROWNO-2)+1;
 			if (isok(x, y) && levl[x][y].typ == ROOM && !costly_spot(x, y))
 				good = TRUE;
 			else continue;
