@@ -1170,6 +1170,7 @@ int tary;
 			if (distmin(x(magr), y(magr), tarx, tary) > 
 				((aatyp == AT_5SBT || aatyp == AT_5SQR) ? 5 : 2))
 				continue;
+			mon_ranged_gazeonly = FALSE;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
