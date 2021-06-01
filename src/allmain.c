@@ -3637,30 +3637,31 @@ printAttacks(buf, ptr)
 		"Spit",		/*10*/
 		"Engulf",	/*11*/
 		"Breath weapon",	/*12*/
-		"Suicidal explosion",	/*13*/
-		"Explode on death",	/*14*/
-		"Single-target (active) gaze attack",	/*15*/
-		"Tentacle",	/*16*/
-		"Arrow",	/*17*/
-		"Whip",	/*18*/
-		"Reach",	/*19*/
-		"Your weapon",	/*20*/
-		"Long-necked bite",	/*21*/
-		"Magic",	/*22*/
-		"Droplet storm",	/*23*/
-		"Automatic hit",	/*24*/
-		"Mist tendrils",	/*25*/
-		"Tinker",	/*26*/
-		"Shadow blades",	/*27*/
-		"Beam",	/*28*/
-		"Deva Arms",	/*29*/
-		"Five-square-reach touch",	/*30*/
-		"Five-square-reach bite",	/*31*/
-		"Wide-angle (passive) gaze",/*32*/
-		"Rend",	/*33*/
-		"Lashing vines",	/*34*/
-		"Black goat (mist)",	/*35*/
-		"Black goat (blessed)",	/*36*/
+		"Splashing Breath",	/*13*/
+		"Suicidal explosion",	/*134*/
+		"Explode on death",	/*15*/
+		"Single-target (active) gaze attack",	/*16*/
+		"Tentacle",	/*17*/
+		"Arrow",	/*18*/
+		"Whip",	/*19*/
+		"Reach",	/*20*/
+		"Your weapon",	/*21*/
+		"Long-necked bite",	/*22*/
+		"Magic",	/*23*/
+		"Droplet storm",	/*24*/
+		"Automatic hit",	/*25*/
+		"Mist tendrils",	/*26*/
+		"Tinker",	/*27*/
+		"Shadow blades",	/*28*/
+		"Beam",	/*29*/
+		"Deva Arms",	/*30*/
+		"Five-square-reach touch",	/*31*/
+		"Five-square-reach bite",	/*32*/
+		"Wide-angle (passive) gaze",/*33*/
+		"Rend",	/*34*/
+		"Lashing vines",	/*35*/
+		"Black goat (mist)",	/*36*/
+		"Black goat (blessed)",	/*37*/
 		""
 	};
 	static char *damageKey[] = {
@@ -3828,6 +3829,7 @@ printAttacks(buf, ptr)
 		"[[Intrinsic theft]]",	/* */
 		"[[Quest Artifact theft]]"/* */
 	};
+	buf[0] = '\0';
 	for(i = 0; i<6; i++){
 		attk = &ptr->mattk[i];
 		if(attk->aatyp == 0 &&
@@ -3835,10 +3837,15 @@ printAttacks(buf, ptr)
 			attk->damn == 0 &&
 			attk->damd == 0
 		) return;
-		if(SIZE(attackKey) <= attk->adtyp)
-			impossible("attack key out of range!");
+		if(SIZE(attackKey) <= attk->aatyp 
+			&& attk->aatyp != AT_WEAP 
+			&& attk->aatyp != AT_XWEP
+			&& attk->aatyp != AT_MARI
+			&& attk->aatyp != AT_MAGC
+		)
+			impossible("attack key %d out of range %d!", attk->aatyp, SIZE(attackKey));
 		if(SIZE(damageKey) <= attk->adtyp)
-			impossible("damage key out of range!");
+			impossible("damage key %d out of range!", attk->adtyp);
 		if(!i){
 			Sprintf(buf, "%s %dd%d %s",
 				attk->aatyp == AT_WEAP ? "Weapon" :
