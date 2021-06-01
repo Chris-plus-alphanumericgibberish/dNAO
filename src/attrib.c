@@ -1342,7 +1342,7 @@ boolean check;
 			break;
 			case 5:
 				if(ClearThoughts)
-					You_feel("a little fainting.");
+					You_feel("a little faint.");
 				else
 					You(Hallucination ? "have a case of the vapors!" : "feel faint!");
 				HFaintingFits = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
