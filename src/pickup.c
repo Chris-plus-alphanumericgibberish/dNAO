@@ -2646,6 +2646,9 @@ pick_bullet()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for(otmp = invent; otmp; otmp = otmp->nobj){
 		if((otmp->otyp >= MAGICITE_CRYSTAL && otmp->otyp <= ROCK) || (otmp->otyp >= BULLET && otmp->otyp <= GAS_GRENADE)){
+			if (is_grenade(otmp) && otmp->oarmed)
+				continue;
+
 			Sprintf1(buf, doname(otmp));
 			any.a_char = otmp->invlet;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
