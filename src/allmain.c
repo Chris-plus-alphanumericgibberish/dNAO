@@ -3797,7 +3797,7 @@ printAttacks(buf, ptr)
 		"[[Implant egg]]",		/*129*/
 		"[[Flesh hook]]",		/*130*/
 		"[[Mindwipe]]",			/*131*/
-		"Slow [[petrifcation]]",/*132*/
+		"Slow [[petrification]]",/*132*/
 		"[[strength]] drain",	/*133*/
 		"[[dexterity]] drain",	/*134*/
 		"[[charisma]] drain",	/*135*/
@@ -3830,7 +3830,7 @@ printAttacks(buf, ptr)
 		"[[Quest Artifact theft]]"/* */
 	};
 	buf[0] = '\0';
-	for(i = 0; i<6; i++){
+	for(i = 0; i<10; i++){
 		attk = &ptr->mattk[i];
 		if(attk->aatyp == 0 &&
 			attk->adtyp == 0 &&
