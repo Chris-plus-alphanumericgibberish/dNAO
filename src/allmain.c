@@ -1943,8 +1943,11 @@ karemade:
 			//Mind dissolution double trigger: lose 1d4 levels
 			if(u.ulevel > 1 && roll_madness(MAD_FORGETFUL) && roll_madness(MAD_FORGETFUL)){
 				int i;
-				for(i = rn2(4); i > 0 && u.ulevel > 2; i--)
+				int pre_drain = u.ulevel;
+				for(i = rn2(4); i > 0 && u.ulevel > 2; i--){
 					losexp("mind dissolution",FALSE,TRUE,TRUE);
+				}
+				forget((pre_drain - u.ulevel) * 100/(pre_drain)); //drain some proportion of your memory
 				losexp("mind dissolution",TRUE,TRUE,TRUE);
 			}
 			if (u.usleep && u.usleep < monstermoves && roll_madness(MAD_FORMICATION)) {
