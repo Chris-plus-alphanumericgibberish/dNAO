@@ -1944,8 +1944,10 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	you_have(buf);
 	Sprintf(buf, "%d insight points", u.uinsight);
 	you_have(buf);
-	Sprintf(buf, "%d parasite eggs", u.utaneggs);
-	you_have(buf);
+	if (u.utaneggs > 0) {
+		Sprintf(buf, "%d parasite eggs", u.utaneggs);
+		you_have(buf);
+	}
 	
 	if(Doubt)
 		enl_msg("You ", "can't", "couldn't", " pray or use clerical magic");
