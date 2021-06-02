@@ -4343,7 +4343,7 @@ int tx,ty;
 	case MOTHER:{
 		if(u.sealTimeout[MOTHER-FIRST_SEAL] < moves){
 			//Spirit requires that her seal addressed while blind.
-			if(Blind){
+			if(Blind || LightBlind){
 				Your("Hands itch painfully.");
 				if(u.sealCounts < numSlots){
 					You("feel eyes open in your hands!");
