@@ -752,7 +752,7 @@ vision_recalc(control)
 			||
 			/* or able to see despite/because of dimness */
 			(!darksight 
-				? (dimness(col, row) < nv_range)
+				? (dimness(col, row) < nv_range + !nv_range)	/* +!nvrange -> so normal vision with nv=0 can see in normally lit */
 				: (dimness(col, row) > -nv_range)
 			)
 			||
@@ -779,7 +779,7 @@ vision_recalc(control)
 				||
 				/* or able to see adjacent square despite/because of dimness */
 				(!darksight 
-					? (dimness(col+dx, row+dy) < nv_range)
+					? (dimness(col+dx, row+dy) < nv_range + !nv_range)
 					: (dimness(col+dx, row+dy) > -nv_range)
 				)
 				||
