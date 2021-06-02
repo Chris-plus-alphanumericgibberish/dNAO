@@ -5257,7 +5257,7 @@ boolean ranged;
 
 		/* level-draining effect caused by memory loss */
 		if ((uncancelled || (attk->aatyp == AT_BITE && notmcan))
-			&& !mindless_mon(mdef)
+			&& (youdef || !mindless_mon(mdef)) /* The player is never mindless */
 		){
 			ptmp = min(*hp(mdef), d(2, 6));	/* amount of draining damage */
 			/* drain life! */
