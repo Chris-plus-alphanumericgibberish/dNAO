@@ -102,6 +102,8 @@ artitouch()
 #ifdef RECORD_ACHIEVE
 		if(!Role_if(PM_EXILE)) give_quest_trophy();
 #endif
+		if(Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && !flags.initgend)
+			u.uevent.qcompleted = 1; /* Touching this advances the "plot" and will cause the leader to vanish, so set this now. */
 	    qt_pager(QT_GOTIT + (flags.stag ? QT_TURNEDSTAG : 0));
 	    exercise(A_WIS, TRUE);
 	}
