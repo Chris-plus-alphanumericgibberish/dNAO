@@ -5583,6 +5583,14 @@ int
 P_MAX_SKILL(p_skill)
 int p_skill;
 {
+	return P_MAX_SKILL_CORE(p_skill, TRUE);
+}
+
+int
+P_MAX_SKILL_CORE(p_skill, inc_penalties)
+int p_skill;
+boolean inc_penalties;
+{
 	int maxskill = OLD_P_MAX_SKILL(p_skill);
 	if(p_skill == P_BARE_HANDED_COMBAT){
 		if((u.sealsActive&SEAL_EURYNOME) && (u.sealsActive&SEAL_BUER)) maxskill = max(P_GRAND_MASTER,maxskill);
@@ -5605,7 +5613,7 @@ int p_skill;
 			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uswapwep)));
 	}
 	
-	if(u.umadness&MAD_FORMICATION && !ClearThoughts && maxskill > P_UNSKILLED){
+	if(inc_penalties && u.umadness&MAD_FORMICATION && !ClearThoughts && maxskill > P_UNSKILLED){
 		int delta = (Insanity)/20;
 		maxskill = max(maxskill - delta, P_UNSKILLED);
 	}
@@ -5617,11 +5625,19 @@ int
 P_SKILL(p_skill)
 int p_skill;
 {
+	return P_SKILL_CORE(p_skill, TRUE);
+}
+
+int
+P_SKILL_CORE(p_skill, inc_penalties)
+int p_skill;
+boolean inc_penalties;
+{
 	int curskill = OLD_P_SKILL(p_skill),
 		maxskill = P_MAX_SKILL(p_skill);
 	
 	/* Fine motor control drops to 0 while panicking */
-	if(p_skill == P_WAND_POWER && Panicking){
+	if(inc_penalties && p_skill == P_WAND_POWER && Panicking){
 		return 0;
 	}
 	
@@ -5663,7 +5679,7 @@ int p_skill;
 		curskill = P_BASIC;
 	}
 	
-	if(u.umadness&MAD_FORMICATION && !ClearThoughts && curskill > P_UNSKILLED){
+	if(inc_penalties && u.umadness&MAD_FORMICATION && !ClearThoughts && curskill > P_UNSKILLED){
 		int delta = (Insanity)/20;
 		curskill = max(curskill - delta, P_UNSKILLED);
 	}
