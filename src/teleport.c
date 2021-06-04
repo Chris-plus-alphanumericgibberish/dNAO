@@ -1004,7 +1004,8 @@ level_tele()
 				}
 			}
 #ifdef WIZARD
-			if (wizard) rangeRestricted = FALSE;
+			if (rangeRestricted && wizard && yn("Respect range restrictions?") == 'n')
+				rangeRestricted = FALSE;
 #endif
 			if (rangeRestricted) {
 				if(urlev <= 0){ /*Level 0 is skipped*/
