@@ -13,6 +13,8 @@
 #include <fcntl.h>
 #endif
 
+extern boolean saving_game;
+
 #ifdef MFLOPPY
 long bytes_counted;
 static int count_only;
@@ -129,6 +131,9 @@ dosave0()
 
 	if (!SAVEF[0])
 		return 0;
+	
+	saving_game = TRUE; /*Some deeply buryied code calls curses redraw stuff that will crash.*/
+	
 	fq_save = fqname(SAVEF, SAVEPREFIX, 1);	/* level files take 0 */
 
 #if defined(UNIX) || defined(VMS)
@@ -139,7 +144,10 @@ dosave0()
 #endif
 
 #if defined(MICRO) && defined(MFLOPPY)
-	if (!saveDiskPrompt(0)) return 0;
+	if (!saveDiskPrompt(0)){
+		saving_game = FALSE;
+		return 0;
+	}
 #endif
 
 	HUP if (iflags.window_inited) {
@@ -151,6 +159,7 @@ dosave0()
 		There("seems to be an old save file.");
 		if (yn("Overwrite the old file?") == 'n') {
 		    compress(fq_save);
+			saving_game = FALSE;
 		    return 0;
 		}
 	    }
@@ -162,6 +171,7 @@ dosave0()
 	if(fd < 0) {
 		HUP pline("Cannot open save file.");
 		(void) delete_savefile();	/* ab@unido */
+		saving_game = FALSE;
 		return(0);
 	}
 
@@ -208,6 +218,7 @@ dosave0()
 		flushout();
 		(void) close(fd);
 		(void) delete_savefile();
+		saving_game = FALSE;
 		return 0;
 	    }
 
@@ -263,6 +274,7 @@ dosave0()
 		    (void) delete_savefile();
 		    HUP killer = whynot;
 		    HUP done(TRICKED);
+			saving_game = FALSE;
 		    return(0);
 		}
 		minit();	/* ZEROCOMP */
@@ -283,6 +295,7 @@ dosave0()
         delete_whereis();
 #endif
 	compress(fq_save);
+	saving_game = FALSE;
 	return(1);
 }
 

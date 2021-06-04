@@ -61,6 +61,8 @@ char killer_buf[BUFSZ] = DUMMY;
 
 long killer_flags = 0L;
 
+boolean saving_game = FALSE; /*The game is currently saving, so don't update the windowport inventory sidebar*/
+
 const char *nomovemsg = 0;
 const char nul[40] = DUMMY;			/* contains zeros */
 NEARDATA char plname[PL_NSIZ] = DUMMY;		/* player name */
