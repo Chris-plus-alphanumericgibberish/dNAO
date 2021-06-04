@@ -2051,7 +2051,7 @@ dofire()
 					struct obj * ammo = (struct obj *)0;
 
 					/* do we have enough charge to fire? */
-					if (!launcher->ovar1) {
+					if (!launcher->ovar1 || (launcher->otyp == MASS_SHADOW_PISTOL && !launcher->cobj)) {
 						if (launcher->otyp == RAYGUN) You("push the firing stud, but nothing happens.");
 						else pline("Nothing happens when you pull the trigger.");
 						/* nothing else happens */
@@ -2292,7 +2292,7 @@ struct obj * blaster;
 			ammo->oartifact = blaster->cobj->oartifact;
 		}
 		else
-			ammo = mksobj(ROCK, MKOBJ_NOINIT);
+			ammo = mksobj(ROCK, MKOBJ_NOINIT);	/* should not happen */
 		break;
 	case RAYGUN:
 		/* create fake ammo in order to calculate multishot correctly */
