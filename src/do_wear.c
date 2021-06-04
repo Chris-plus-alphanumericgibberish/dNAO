@@ -3818,6 +3818,12 @@ struct obj *armor;
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
+
+		if(!youdef && (mdef->entangled == SHACKLES
+			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+		))
+			continue;
+
 		//Note: the armor avoids touching petrifying things even if you're immune
 		if(touch_petrifies(mdef->data)
 		 || mdef->mtyp == PM_MEDUSA
@@ -3872,6 +3878,11 @@ struct obj *wep;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 		
+		if(!youdef && (mdef->entangled == SHACKLES
+			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+		))
+			continue;
+
 		mdef->movement -= 12;
 	}
 	if(youagr)
@@ -3912,6 +3923,12 @@ struct obj *wep;
 			continue;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
+
+		if(!youdef && (mdef->entangled == SHACKLES
+			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+		))
+			continue;
+
 		//Note: petrifying targets are safe, it's a weapon attack
 		if(mdef->mtyp == PM_PALE_NIGHT) continue;
 		
@@ -3978,6 +3995,14 @@ struct obj *wep;
 				gooddir = FALSE;
 				break; //break out of inner loop now, we found a bad target.
 			}
+
+			if(!youdef && (mdef->entangled == SHACKLES
+				|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+			)){
+				gooddir = FALSE;
+				break; //break out of inner loop now, we found a bad target.
+			}
+
 			//else found a good target over here, and haven't hit a bad one (yet)
 			gooddir = TRUE;
 		}
@@ -4069,7 +4094,12 @@ struct obj *wep;
 			continue;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
-		
+
+		if(!youdef && (mdef->entangled == SHACKLES
+			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+		))
+			continue;
+
 		if(youdef){
 			mdef->movement -= 12;
 			if(!bigmonst(youracedata)){
@@ -4357,6 +4387,12 @@ char etyp;
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
+
+		if(!youdef && (mdef->entangled == SHACKLES
+			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+		))
+			continue;
+
 		//Note: the armor avoids touching petrifying things even if you're immune
 		if(touch_petrifies(mdef->data)
 		 || mdef->mtyp == PM_MEDUSA
@@ -4532,6 +4568,12 @@ struct obj *wep;
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
+
+		if(!youdef && (mdef->entangled == SHACKLES
+			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+		))
+			continue;
+
 		//Note: petrifying targets are safe, it's a weapon attack
 		if(mdef->mtyp == PM_PALE_NIGHT) continue;
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
