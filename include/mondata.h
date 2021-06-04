@@ -543,6 +543,13 @@
 								&& (ptr)->mtyp != PM_INCUBUS \
 								)
 
+#define template_blocks_gate(magr)	(has_template(magr, ZOMBIFIED)\
+									|| has_template(magr, SKELIFIED)\
+									|| has_template(magr, CRYSTALFIED)\
+									|| has_template(magr, TOMB_HERD)\
+									|| has_template(magr, SLIME_REMNANT)\
+								)
+
 #define always_hostile(ptr)	(((ptr)->mflagst & MT_HOSTILE) != 0L)
 #define always_hostile_mon(mon)	(always_hostile((mon)->data))
 #define always_peaceful(ptr)	(((ptr)->mflagst & MT_PEACEFUL) != 0L)

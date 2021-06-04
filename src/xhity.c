@@ -410,7 +410,7 @@ int tary;
 
 	/*	Special demon/minion handling code */
 	/* mvu only; we don't want it mvm and player's is handled as an ability */
-	if (youdef && !magr->cham && gates_in_help(pa)&& !ranged && (magr->summonpwr < magr->data->mlevel)) {
+	if (youdef && !magr->cham && gates_in_help(pa) && !template_blocks_gate(magr) && !ranged && (magr->summonpwr < magr->data->mlevel)) {
 		 if (!magr->mcan && !rn2(13)) {
 			 msummon(magr, (struct permonst *)0);
 		 }
