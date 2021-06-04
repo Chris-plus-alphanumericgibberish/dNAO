@@ -6152,7 +6152,7 @@ doapply()
 	
 	waslabile |= obj->otyp == DOLL_S_TEAR; //Not mergeable, but still consumable.
 	
-	if (obj->oartifact && !touch_artifact(obj, &youmonst, FALSE))
+	if (obj->oartifact && !(uwep == obj && is_pole(obj)) && !touch_artifact(obj, &youmonst, FALSE))
 	    return 1;	/* evading your grasp costs a turn; just be
 			   grateful that you don't drop it as well */
 
