@@ -2352,8 +2352,8 @@ fill_dungeon_of_ill_regard(){
 					i++;\
 					j++;\
 				} else {\
-					x = COLNO;\
-					y = ROWNO;\
+					x = COLNO/2;\
+					y = ROWNO/2;\
 					break;\
 				}\
 			}
