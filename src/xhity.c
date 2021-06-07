@@ -13977,6 +13977,11 @@ int vis;						/* True if action is at all visible to the player */
 			elemdmg += 6 + weapon->spe;
 			totldmg += 6 + weapon->spe;
 		}
+	} else if(weapon && weapon->oartifact == ART_TOBIUME && !Shock_res(mdef)){
+		if((*hp(mdef) - totldmg) <= (6 + weapon->spe)){
+			elemdmg += 6 + weapon->spe;
+			totldmg += 6 + weapon->spe;
+		}
 	}
 	/* Is the damage lethal? */
 	lethaldamage = (totldmg >= *hp(mdef));
@@ -14012,11 +14017,20 @@ int vis;						/* True if action is at all visible to the player */
 			hurtle(dx, dy, BOLT_LIM, FALSE, TRUE);
 		else
 			mhurtle(mdef, dx, dy, BOLT_LIM, FALSE);
-		
-		if(x(mdef)) explode(x(mdef), y(mdef),
-			AD_FIRE, 0,
-			d(6, 6),
-			EXPL_FIERY, 1);
+
+		// default to a fiery explosion - only use shock if fire is not applicable
+		if (Shock_res(mdef) || (!Fire_res(mdef) && rn2(2))){
+			if(x(mdef)) explode(x(mdef), y(mdef),
+				AD_FIRE, 0,
+				d(6, 6),
+				EXPL_FIERY, 1);
+		} else {
+			if(x(mdef)) explode(x(mdef), y(mdef),
+				AD_ELEC, 0,
+				d(6, 6),
+				EXPL_MAGICAL, 1);
+		}
+
 	}
 	/* PRINT HIT MESSAGE. MAYBE. */
 	if (dohitmsg && vis){

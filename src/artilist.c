@@ -698,9 +698,9 @@ A("Tobiume",			LONG_SWORD,						"three-branched %s",
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_GIFT | ARTG_INHER),
 	NO_MONS(),
 	ATTK(AD_FIRE, 1, 1), (ARTA_DISARM),
-	PROPS(FIRE_RES), NOFLAG,
+	PROPS(FIRE_RES, SHOCK_RES), NOFLAG,
 	PROPS(), NOFLAG,
-	FIRE_SHIKAI, NOFLAG
+	TOBIUME_SHIKAI, NOFLAG
 	),
 
 A("The Lance of Longinus",		SPEAR,					(const char *)0,

@@ -5019,7 +5019,7 @@ arti_invoke(obj)
     if(oart->inv_prop > LAST_PROP) {
 	/* It's a special power, not "just" a property */
 	if(obj->age > monstermoves && 
-		oart->inv_prop != FIRE_SHIKAI && 
+		oart->inv_prop != TOBIUME_SHIKAI &&
 		oart->inv_prop != SEVENFOLD && 
 		oart->inv_prop != ANNUL && 
 		oart->inv_prop != ALTMODE && 
@@ -5041,7 +5041,7 @@ arti_invoke(obj)
 	    return partial_action();
 	}
 	if( /* some properties can be used as often as desired, or track cooldowns in a different way */
-		oart->inv_prop != FIRE_SHIKAI &&
+		oart->inv_prop != TOBIUME_SHIKAI &&
 		oart->inv_prop != ICE_SHIKAI &&
 		oart->inv_prop != NECRONOMICON &&
 		oart->inv_prop != SPIRITNAMES &&
@@ -5675,7 +5675,7 @@ arti_invoke(obj)
 			}
 		}
 	break;
- 	case FIRE_SHIKAI:
+	case TOBIUME_SHIKAI:
 		{
 			boolean toosoon = monstermoves < obj->age;
 			if ( !(uwep && uwep == obj) ) {
@@ -5687,15 +5687,13 @@ arti_invoke(obj)
 				int role_skill;
 				struct obj *pseudo;
 				coord cc;
+				pseudo = mksobj(SPE_FIREBALL, MKOBJ_NOINIT); // create here for the skill check
 
 				energy = toosoon ? 25 : 15;
-				pseudo = mksobj(SPE_FIREBALL, MKOBJ_NOINIT);
-				pseudo->blessed = pseudo->cursed = 0;
-				pseudo->quan = 20L;			/* do not let useup get it */
 				role_skill = max(P_SKILL(uwep_skill_type()), P_SKILL(spell_skilltype(pseudo->otyp)) );
 				if (role_skill >= P_SKILLED && yn("Use advanced technique?") == 'y'){
 					if(energy > u.uen) {
-						You("don't have enough energy to use this technique");
+						You("don't have enough energy to use this technique.");
 						if(!toosoon) obj->age = 0;
 	break;
 					}
@@ -5704,17 +5702,21 @@ arti_invoke(obj)
 					    cc.x=u.dx;cc.y=u.dy;
 					    n=rnd(role_skill*2)+role_skill*2;
 					    while(n--) {
+							pseudo = mksobj((rn2(2)) ? SPE_FIREBALL : SPE_LIGHTNING_BOLT, MKOBJ_NOINIT);
+							pseudo->blessed = pseudo->cursed = 0;
+							pseudo->quan = 20L; /* do not let useup get it */
+
 							if(!u.dx && !u.dy && !u.dz) {
 							    if ((damage = zapyourself(pseudo, TRUE)) != 0) {
 									char buf[BUFSZ];
-									Sprintf(buf, "blasted %sself with a fireball", uhim());
+									Sprintf(buf, "blasted %sself with a %s", uhim(), (pseudo->otyp == SPE_FIREBALL) ? "fireball" : "ball of lightning");
 									losehp(damage + obj->spe, buf, NO_KILLER_PREFIX);
 							    }
 							} else {
 							    explode(u.dx, u.dy,
 								    spell_adtype(pseudo->otyp), 0,
 								    u.ulevel/2 + 10 + obj->spe,
-									EXPL_FIERY, 1);
+									(pseudo->otyp == SPE_FIREBALL) ? EXPL_FIERY : EXPL_MAGICAL, 1);
 							}
 							u.dx = cc.x+rnd(5)-3; u.dy = cc.y+rnd(5)-3;
 							if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -5729,7 +5731,7 @@ arti_invoke(obj)
 				else{
 					if (role_skill >= P_SKILLED) energy = toosoon ? 15 : 5;
 					if(energy > u.uen) {
-						You("don't have enough energy to use this technique");
+						You("don't have enough energy to use this technique.");
 						if(!toosoon) obj->age = 0;
 	break;
 					}
@@ -5739,6 +5741,11 @@ arti_invoke(obj)
 	break;
 					}
 					pline("Snap, %s!", ONAME(obj));
+
+					pseudo = mksobj((rn2(2)) ? SPE_FIREBALL : SPE_LIGHTNING_BOLT, MKOBJ_NOINIT);
+					pseudo->blessed = pseudo->cursed = 0;
+					pseudo->quan = 20L; /* do not let useup get it */
+
 					if(!u.dx && !u.dy && !u.dz) {
 					    if ((damage = zapyourself(pseudo, TRUE)) != 0) {
 							char buf[BUFSZ];
