@@ -7862,7 +7862,7 @@ struct monst *mtmp;
 			if(Half_spel(tmpm)) damage = (damage+1)/2;
 
 			tmpm->mhp -= damage;
-			if(has_blood_mon(tmpm) && resists_drain(tmpm)){
+			if(has_blood_mon(tmpm) && !resists_drain(tmpm)){
 				tmpm->mhpmax = max(tmpm->mhpmax-8, 1);
 				if(tmpm->m_lev){
 					tmpm->m_lev--;
