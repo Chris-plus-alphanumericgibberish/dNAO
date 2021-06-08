@@ -3339,7 +3339,7 @@ int tary;
 	case MON_WARP_THROW:
 		/* needs direct target */
 		if (!foundem) {
-			impossible("warp with no mdef?");
+			impossible("warp-throw with no mdef?");
 			return MM_MISS;
 		}
 		else
@@ -3370,7 +3370,7 @@ int tary;
 	case MON_WARP:
 		/* needs direct target */
 		if (!foundem) {
-			impossible("warp-throw with no mdef?");
+			impossible("warp-blades with no mdef?");
 			return MM_MISS;
 		}
 		else
