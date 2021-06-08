@@ -3359,7 +3359,7 @@ int tary;
 				!(dx == x(mdef) - x(magr) && dy == y(mdef) - y(magr))
 			);
 			if(youdef){
-				hurtle(dx, dy, BOLT_LIM, FALSE, TRUE);
+				hurtle(dx, dy, BOLT_LIM, FALSE, FALSE);
 			}
 			else {
 				mhurtle(mdef, dx, dy, BOLT_LIM, TRUE);
