@@ -73,7 +73,7 @@ static struct thoughtglyph thoughtglyphs[] =
 	30, 100, "You suddenly notice a perfectly clear sea around your mind." },
 
 	{ COMMUNION_GLYPH, PM_PRAYERFUL_THING, COMMUNION,
-	25, 100, "A strange minister's prayer echoes in you mind." },
+	25, 100, "A strange minister's prayer echoes in your mind." },
 
 	{ CORRUPTION_GLYPH, PM_HEMORRHAGIC_THING, CORRUPTION,
 	15, 80, "Thoughts of weeping form in your mind." },
