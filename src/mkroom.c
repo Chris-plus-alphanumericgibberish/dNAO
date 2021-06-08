@@ -2724,11 +2724,11 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					levl[x+1][y+5].typ = ALTAR;
-					levl[x+1][y+5].altarmask = Align2amask( A_NEUTRAL );
+					levl[x+2][y+5].typ = ALTAR;
+					levl[x+2][y+5].altarmask = Align2amask( A_NEUTRAL );
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, TEMPLE, TRUE);
-					priestini(&u.uz, &rooms[nroom - 1], x+1, y+5, FALSE);
-					levl[x+sizetot-2][y+5].altarmask |= AM_SHRINE;
+					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
+					levl[x+2][y+5].altarmask |= AM_SHRINE;
 					level.flags.has_temple = 1;
 				break;
 				case 2: //Garrison
