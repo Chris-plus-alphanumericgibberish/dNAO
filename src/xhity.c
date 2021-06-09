@@ -745,7 +745,9 @@ int tary;
 							u.uy == tary - dy
 							)
 						{
-							struct monst *mdef2 = m_at(tarx + dx, tary + dy);
+							struct monst *mdef2 = u.uswallow ? u.ustuck : 
+													(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+													(struct monst *)0;
 							if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)) {
 								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
 								bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
@@ -777,7 +779,9 @@ int tary;
 						}
 						if (isok(x(magr) + nx, y(magr) + ny))
 						{
-							struct monst *mdef2 = m_at(x(magr) + nx, y(magr) + ny);
+							struct monst *mdef2 = u.uswallow ? u.ustuck : 
+													(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+													(struct monst *)0;
 							if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)
 								&& !((youagr && mdef2->mpeaceful) || (!youagr && magr->mpeaceful == mdef2->mpeaceful))
 							){
@@ -803,7 +807,10 @@ int tary;
 							y(magr) == tary - dy
 							)
 						{
-							struct monst *mdef2 = m_u_at(tarx + dx, tary + dy);
+							struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+													u.uswallow ? u.ustuck : 
+													(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+													(struct monst *)0;
 							if (mdef2 
 								&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
 								&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
@@ -826,7 +833,10 @@ int tary;
 							nx = sgn(dx+dy);
 							ny = sgn(dy-dx);
 							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+								struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+														u.uswallow ? u.ustuck : 
+														(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+														(struct monst *)0;
 								if (mdef2 
 									&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
 									&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
@@ -848,7 +858,10 @@ int tary;
 							nx = sgn(dx-dy);
 							ny = sgn(dx+dy);
 							if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
-								struct monst *mdef2 = m_u_at(x(magr) + nx, y(magr) + ny);
+								struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+														u.uswallow ? u.ustuck : 
+														(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+														(struct monst *)0;
 								if (mdef2 
 									&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
 									&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
@@ -885,7 +898,10 @@ int tary;
 							y(magr) == tary - dy
 							)
 						{
-							struct monst *mdef2 = m_u_at(tarx + dx, tary + dy);
+							struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+													u.uswallow ? u.ustuck : 
+													(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+													(struct monst *)0;
 							if (mdef2 
 								&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
 								&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
