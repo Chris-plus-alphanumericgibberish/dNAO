@@ -558,6 +558,11 @@ void
 priest_talk(priest)
 register struct monst *priest;
 {
+	if (!get_mx(priest, MX_EPRI)) {
+		verbalize("Would thou likest to repent?");
+		return;
+	}
+
 	boolean coaligned = p_coaligned(priest);
 	boolean strayed = (u.ualign.record < 0);
 	char class_list[MAXOCLASSES+2];
