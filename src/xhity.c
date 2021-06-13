@@ -12193,6 +12193,7 @@ int vis;						/* True if action is at all visible to the player */
 			weapon->oartifact == ART_WEBWEAVER_S_CROOK ||
 			weapon->oartifact == ART_SILENCE_GLAIVE ||
 			weapon->oartifact == ART_HEARTCLEAVER ||
+			weapon->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD ||
 			weapon->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING ||
 			weapon->oartifact == ART_SOL_VALTIVA ||
 			weapon->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||
