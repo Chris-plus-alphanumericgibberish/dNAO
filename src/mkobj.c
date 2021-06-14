@@ -168,11 +168,13 @@ static const struct icp droven_materials[] = {
 
 /* for objects of orcish make */
 static const struct icp orcish_materials[] = {
-	{550, 0 }, /* use base material */
+	{549, 0 }, /* use base material */
 	{250, IRON },
-	{180, BONE },
+	{160, BONE },
+	{ 20, LEAD },
 	{ 15, GOLD },
-	{  5, OBSIDIAN_MT }
+	{  5, OBSIDIAN_MT },
+	{  1, GREEN_STEEL }
 };
 
 /* Reflectable items - for the shield of reflection; anything that can hold a

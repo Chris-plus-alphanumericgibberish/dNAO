@@ -2147,8 +2147,10 @@ karemade:
 						int beat;
 						if(hates_silver(youracedata) && entangle_material(&youmonst, SILVER))
 							dmg += rnd(20);
-						if(hates_iron(youracedata) && entangle_material(&youmonst, SILVER))
+						if(hates_iron(youracedata) && (entangle_material(&youmonst, IRON) || entangle_material(&youmonst, GREEN_STEEL)))
 							dmg += rnd(u.ulevel);
+						if(hates_unholy(youracedata) && entangle_material(&youmonst, GREEN_STEEL))
+							dmg += d(2,9);
 						beat = entangle_beatitude(&youmonst, -1);
 						if(hates_unholy(youracedata) && beat)
 							dmg += beat == 2 ? d(2,9) : rnd(9);

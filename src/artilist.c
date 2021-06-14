@@ -2615,7 +2615,7 @@ A("The Hand of Vecna",				SEVERED_HAND,		(const char *)0,
 
 /*Needs encyc entry, somehow*/
 A("Genocide",						TWO_HANDED_SWORD,	(const char *)0,
-	9999L, MT_DEFAULT, MZ_LARGE, WT_DEFAULT,
+	9999L, GREEN_STEEL, MZ_LARGE, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
 	ATTK(AD_FIRE, 9, 9), NOFLAG,
@@ -2626,7 +2626,7 @@ A("Genocide",						TWO_HANDED_SWORD,	(const char *)0,
 
 /*Needs encyc entry */
 A("The Rod of Dis",					MACE,				(const char *)0,
-	9999L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	9999L, GREEN_STEEL, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 10, 8), (ARTA_KNOCKBACK),
@@ -2637,7 +2637,7 @@ A("The Rod of Dis",					MACE,				(const char *)0,
 
 /*Needs encyc entry */
 A("Avarice",						SHORT_SWORD,		(const char *)0,
-	9999L, MT_DEFAULT, MZ_LARGE, WT_DEFAULT,
+	9999L, GOLD, MZ_LARGE, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 10, 1), (ARTA_STEAL),
@@ -2694,7 +2694,7 @@ A("Thunder's Voice",				DAGGER,				(const char *)0,
 
 /*Needs encyc entry */
 A("Serpent's Tooth",				ATHAME,				(const char *)0,
-	3333L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	3333L, GREEN_STEEL, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
 	NO_ATTK(), (ARTA_POIS),
@@ -2750,7 +2750,7 @@ A("The All-seeing Eye of the Fly",	HELM_OF_TELEPATHY,	(const char *)0,
 
 /*Needs encyc entry */
 A("Cold Soul",						RANSEUR,			(const char *)0,
-	9999L, MT_DEFAULT, MZ_LARGE, WT_DEFAULT,
+	9999L, GREEN_STEEL, MZ_LARGE, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
 	NO_ATTK(), (ARTA_EXPLFIRE|ARTA_EXPLELEC|ARTA_EXPLCOLD),
@@ -2772,7 +2772,7 @@ A("The Sceptre of the Frozen Floor of Hell",	QUARTERSTAFF,			(const char *)0,
 
 /*Needs encyc entry */
 A("Caress",							BULLWHIP,			(const char *)0,
-	9999L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	9999L, GOLD, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
 	ATTK(AD_ELEC, 1, 20), NOFLAG,

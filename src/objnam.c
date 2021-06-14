@@ -1357,6 +1357,8 @@ boolean adjective;
 			return "steel";
 		else
 			return "iron";
+	case GREEN_STEEL:
+		return "green-steel";
 	case METAL:
 		/* all metal wands have interesting materials (eg uranium)*/
 		if (obj->oclass == WAND_CLASS)
@@ -1385,6 +1387,8 @@ boolean adjective;
 		return (adjective ? "golden" : "gold");
 	case PLATINUM:
 		return "platinum";
+	case LEAD:
+		return "lead";
 	case MITHRIL:
 		return "mithril";
 	case PLASTIC:
@@ -3902,6 +3906,10 @@ int wishflags;
 			&& strncmpi(bp, "Iron Ball of Levitation", 23) && strncmpi(bp, "Iron Spoon of Liberation", 24)
 			) {
 			mat = IRON;
+		} else if (!strncmpi(bp, "green-steel ", l=12) 
+			|| !strncmpi(bp, "green steel ", l=12)
+		) {
+			mat = GREEN_STEEL;
 		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9) || !strncmpi(bp, "tin whistle", (l=4)?11:0))
 			&& strncmpi(bp, "metal tube", 10) && strncmpi(bp, "metal gauntlets", 15)
 			) {
@@ -3937,6 +3945,10 @@ int wishflags;
 			&& strncmpi(bp, "Platinum Dragon", 15) && strncmpi(bp, "Platinum Dragon Plate", 21)
 		) {
 			mat = PLATINUM;
+		} else if (!strncmpi(bp, "lead ", l=5)
+			&& strncmpi(bp, "lead wand", 9)
+		) {
+			mat = LEAD;
 		} else if (!strncmpi(bp, "mithril ", l=8)) {
 			mat = MITHRIL;
 		} else if (!strncmpi(bp, "plastic ", l=8)

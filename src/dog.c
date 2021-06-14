@@ -1097,10 +1097,13 @@ rock:
 		obj->obj_material == SILVER)
 			return(TABU);
 	    if (hates_iron(mon->data) &&
-		obj->obj_material == IRON)
+		is_iron_obj(obj))
 			return(TABU);
 	    if (hates_unholy_mon(mon) &&
 		is_unholy(obj))
+			return(TABU);
+	    if (hates_unholy_mon(mon) &&
+		obj->obj_material == GREEN_STEEL)
 			return(TABU);
 	    if (hates_unblessed_mon(mon) &&
 		(is_unholy(obj) || obj->blessed))

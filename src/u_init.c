@@ -2791,7 +2791,7 @@ register struct trobj *trop;
 				    (objects[otyp].oc_level > 3 ||
 				    restricted_spell_discipline(otyp)))
 				|| (hates_silver(youracedata) && obj->obj_material == SILVER)
-				|| (hates_iron(youracedata) && obj->obj_material == IRON)
+				|| (hates_iron(youracedata) && is_iron_obj(obj))
 							) {
 				dealloc_obj(obj);
 				obj = mkobj(trop->trclass, FALSE);
@@ -2890,8 +2890,8 @@ register struct trobj *trop;
 			}else{
 				obj->dknown = obj->bknown = obj->rknown = obj->sknown = 1;
 				if (objects[otyp].oc_uses_known) obj->known = 1;
-				if(Role_if(PM_PIRATE) && obj->obj_material == IRON) obj->oerodeproof = 1;
-				if(Role_if(PM_SAMURAI) && obj->oclass == ARMOR_CLASS && obj->obj_material == IRON) obj->oerodeproof = 1;
+				if(Role_if(PM_PIRATE) && is_iron_obj(obj)) obj->oerodeproof = 1;
+				if(Role_if(PM_SAMURAI) && obj->oclass == ARMOR_CLASS && is_iron_obj(obj)) obj->oerodeproof = 1;
 				if(Role_if(PM_SAMURAI) && obj->otyp == MASK){
 					if(hates_iron(youracedata)){
 						set_material_gm(obj, Race_if(PM_DROW) ? OBSIDIAN_MT : MITHRIL);
@@ -2954,7 +2954,7 @@ register struct trobj *trop;
 				&& (obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS)
 				&& !is_ammo(obj)
 			){
-				if(obj->obj_material == IRON){
+				if(is_iron_obj(obj)){
 					set_material_gm(obj, Race_if(PM_DROW) ? OBSIDIAN_MT : MITHRIL);
 				}
 			}

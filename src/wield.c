@@ -218,7 +218,7 @@ boolean quietly;	/* hide the basic message saying what you are now wielding */
 #if 0
 	    /* we'll get back to this someday, but it's not balanced yet */
 	    if (Race_if(PM_ELF) && !wep->oartifact &&
-			    wep->obj_material == IRON) {
+			    is_iron_obj(wep)) {
 		/* Elves are averse to wielding cold iron */
 		You("have an uneasy feeling about wielding cold iron.");
 		change_luck(-1);

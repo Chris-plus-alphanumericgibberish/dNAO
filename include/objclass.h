@@ -110,19 +110,21 @@ struct objclass {
 #define SHELL_MAT	11
 #define DRAGON_HIDE	12	/* not leather! */
 #define IRON		13	/* Fe - includes steel */
-#define METAL		14	/* Sn, &c. */
-#define COPPER		15	/* Cu - includes brass and bronze*/
-#define SILVER		16	/* Ag */
-#define GOLD		17	/* Au */
-#define PLATINUM	18	/* Pt */
-#define MITHRIL		19
-#define PLASTIC		20
-#define GLASS		21
-#define GEMSTONE	22
-#define MINERAL		23
-#define OBSIDIAN_MT	24
-#define SALT		25
-#define SHADOWSTEEL	26
+#define GREEN_STEEL	14	/* special steal */
+#define METAL		15	/* Sn, &c. */
+#define COPPER		16	/* Cu - includes brass and bronze*/
+#define SILVER		17	/* Ag */
+#define GOLD		18	/* Au */
+#define PLATINUM	19	/* Pt */
+#define LEAD		20	/* Pu */
+#define MITHRIL		21
+#define PLASTIC		22
+#define GLASS		23
+#define GEMSTONE	24
+#define MINERAL		25
+#define OBSIDIAN_MT	26
+#define SALT		27
+#define SHADOWSTEEL	28
  //Note: 31 max, coordinate with obj.h
 	Bitfield(oc_showmat,4);
 #define UNIDED	1	/* always show material when base object type is unknown */
@@ -133,14 +135,15 @@ struct objclass {
 #define is_organic(otmp)	((otmp)->obj_material <= CHITIN)
 #define is_metallic(otmp)	((otmp)->obj_material >= IRON && \
 				 (otmp)->obj_material <= MITHRIL)
+#define is_iron_obj(otmp)	((otmp)->obj_material == IRON || (otmp)->obj_material == GREEN_STEEL)
 #define is_hard(otmp)	((otmp)->obj_material >= WOOD)
 
 /* primary damage: fire/rust/--- */
 /* is_flammable(otmp), is_rottable(otmp) in mkobj.c */
-#define is_rustprone(otmp)	((otmp)->obj_material == IRON)
+#define is_rustprone(otmp)	((otmp)->obj_material == IRON || (otmp)->obj_material == GREEN_STEEL)
 
 /* secondary damage: rot/acid/acid */
-#define is_corrodeable(otmp)	((otmp)->obj_material == COPPER || (otmp)->obj_material == IRON)
+#define is_corrodeable(otmp)	((otmp)->obj_material == COPPER || (otmp)->obj_material == IRON || (otmp)->obj_material == GREEN_STEEL)
 
 #define is_evaporable(otmp)	((otmp)->obj_material == SHADOWSTEEL)
 

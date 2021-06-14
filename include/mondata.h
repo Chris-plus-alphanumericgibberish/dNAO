@@ -144,6 +144,7 @@
 				 (ptr)->mtyp == PM_RADIANT_PYRAMID)
 #define is_iron(ptr)	((ptr)->mtyp == PM_IRON_PIERCER || \
 				 (ptr)->mtyp == PM_IRON_GOLEM || \
+				 (ptr)->mtyp == PM_GREEN_STEEL_GOLEM || \
 				 (ptr)->mtyp == PM_CHAIN_GOLEM || \
 				 (ptr)->mtyp == PM_SCRAP_TITAN || \
 				 (ptr)->mtyp == PM_HELLFIRE_COLOSSUS || \
@@ -830,6 +831,7 @@
 								 // (ptr)->mtyp == PM_STONE_GOLEM ||\
 								 // (ptr)->mtyp == PM_GLASS_GOLEM ||\
 								 // (ptr)->mtyp == PM_IRON_GOLEM ||\
+								 // (ptr)->mtyp == PM_GREEN_STEEL_GOLEM ||\
 								 // (ptr)->mtyp == PM_ARGENTUM_GOLEM ||\
 								 // (ptr)->mtyp == PM_RETRIEVER ||\
 								 // (ptr)->mtyp == PM_LIVING_DOLL ||\

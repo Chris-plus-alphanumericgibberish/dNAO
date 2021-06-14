@@ -4911,8 +4911,7 @@ boolean ranged;
 		/* no special effect if cancelled */
 		if (notmcan){
 			/* instakills */
-			if (pd->mtyp == PM_IRON_GOLEM ||
-				pd->mtyp == PM_CHAIN_GOLEM) {
+			if (is_iron(pd)) {
 				if (youdef) {
 					You("rust!");
 					/* KMH -- this is okay with unchanging */
@@ -9387,7 +9386,7 @@ int vis;
 			result = xdamagey(magr, mdef, attk, dmg);
 		}
 		else {
-			if (pd->mtyp == PM_IRON_GOLEM || pd->mtyp == PM_CHAIN_GOLEM) {
+			if (is_iron(pd)) {
 				if (youdef) {
 					You("are laden with moisture and rust away!");
 					/* KMH -- this is okay with unchanging */
@@ -11952,6 +11951,7 @@ int vis;						/* True if action is at all visible to the player */
 	long silverobj = 0L,
 		jadeobj = 0L,
 		ironobj = 0L,
+		grnstlobj = 0L,
 		holyobj = 0L,
 		unholyobj = 0L,
 		unblessedobj = 0L,
@@ -12555,6 +12555,11 @@ int vis;						/* True if action is at all visible to the player */
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			ironobj |= slot;
 		}
+		if ((hates_iron(pd) || hates_unholy_mon(mdef)) &&
+			otmp->obj_material == GREEN_STEEL &&
+			!(is_lightsaber(otmp) && litsaber(otmp))) {
+			grnstlobj |= slot;
+		}
 		
 		if (hates_holy_mon(mdef) &&
 			(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_LESSER_HOLYW) || check_oprop(otmp, OPROP_HOLY))) && /* message requires a particularly holy object */
@@ -12611,6 +12616,10 @@ int vis;						/* True if action is at all visible to the player */
 				unholyobj |= W_SKIN;
 				seardmg += d(4, 9);
 			}
+			else if(magr->mtyp == PM_GREEN_STEEL_GOLEM) {
+				grnstlobj |= W_SKIN;
+				seardmg += d(2, 9);
+			}
 		}
 		if (hates_unblessed_mon(mdef)){
 			if(magr->mtyp == PM_UVUUDAUM){
@@ -12643,6 +12652,10 @@ int vis;						/* True if action is at all visible to the player */
 					if (hates_iron(pd) &&
 						otmp->obj_material == IRON) {
 						ironobj |= rslot;
+					}
+					if ((hates_iron(pd) || hates_unholy_mon(mdef)) &&
+						otmp->obj_material == GREEN_STEEL) {
+						grnstlobj |= rslot;
 					}
 					if (hates_holy_mon(mdef) &&
 						(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_LESSER_HOLYW) || check_oprop(otmp, OPROP_HOLY))) && /* message requires a particularly holy object */
@@ -14299,8 +14312,8 @@ int vis;						/* True if action is at all visible to the player */
 	}
 	
 	/* Searing messages */
-	if ((silverobj || jadeobj || ironobj || holyobj || unholyobj || unblessedobj || otherobj) && (youdef || canseemon(mdef)) && !recursed) {
-		long active_slots = (silverobj | jadeobj | ironobj | holyobj | unholyobj | unblessedobj | otherobj);
+	if ((silverobj || jadeobj || ironobj || grnstlobj || holyobj || unholyobj || unblessedobj || otherobj) && (youdef || canseemon(mdef)) && !recursed) {
+		long active_slots = (silverobj | jadeobj | grnstlobj | ironobj | holyobj | unholyobj | unblessedobj | otherobj);
 		char buf[BUFSZ];
 		char * obuf;
 		/* Examples:
@@ -14342,6 +14355,8 @@ int vis;						/* True if action is at all visible to the player */
 					Strcat(buf, "jade ");
 				if (ironobj & slot)
 					Strcat(buf, "cold-iron ");
+				if (grnstlobj & slot)
+					Strcat(buf, "green-steel ");
 				Strcat(buf, 
 					(youagr && u.sealsActive&SEAL_SIMURGH) ? "claws"
 					: (youagr ? body_part(BODY_SKIN) : mbodypart(magr, BODY_SKIN)));
@@ -14392,6 +14407,10 @@ int vis;						/* True if action is at all visible to the player */
 						Strcat(buf, "cold-");
 					else if (!strstri(obuf, "iron "))
 						Strcat(buf, "cold-iron ");
+				}
+				if (grnstlobj & slot){
+					if (!strstri(obuf, "green-steel "))
+						Strcat(buf, "green-steel ");
 				}
 				if (otherobj & slot) {
 					if (otmp->obj_material == WOOD && otmp->otyp != MOON_AXE &&
@@ -14505,6 +14524,10 @@ int vis;						/* True if action is at all visible to the player */
 					Strcat(buf, "cold-");
 				else if (!strstri(obuf, "iron "))
 					Strcat(buf, "cold-iron ");
+			}
+			if (grnstlobj & slot){
+				if (!strstri(obuf, "green-steel "))
+					Strcat(buf, "green-steel ");
 			}
 			Strcat(buf, obuf);
 		}
@@ -14857,7 +14880,7 @@ int vis;						/* True if action is at all visible to the player */
 	/* pudding division */
 	if ((pd->mtyp == PM_BLACK_PUDDING || pd->mtyp == PM_BROWN_PUDDING || pd->mtyp == PM_DARKNESS_GIVEN_HUNGER)
 		&& weapon && (valid_weapon_attack || invalid_weapon_attack)
-		&& weapon->obj_material == IRON
+		&& is_iron_obj(weapon)
 		&& melee && (youdef || !mdef->mcan)) {
 		if (youdef) {
 			if (totldmg > 1)

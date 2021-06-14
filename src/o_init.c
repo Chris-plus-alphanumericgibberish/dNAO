@@ -1302,12 +1302,12 @@ struct obj *otmp;
 	}
 
 	/* plumed helmets and etched helmets get fancy colors, but only if their material is boring (iron/metal) */
-	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
+	if ((is_iron_obj(otmp) || otmp->obj_material == METAL)
 		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "plumed", 6))){
 		otmp->obj_color = CLR_RED;
 		return;
 	}
-	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
+	if ((is_iron_obj(otmp) || otmp->obj_material == METAL)
 		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "etched", 6))){
 		otmp->obj_color = CLR_BRIGHT_GREEN;
 		return;

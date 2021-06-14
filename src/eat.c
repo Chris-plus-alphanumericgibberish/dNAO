@@ -2353,7 +2353,7 @@ eatspecial() /* called after eating non-food */
 static const char *foodwords[] = {
 	"meal", "liquid", "wax", "food", "meat",
 	"paper", "cloth", "leather", "wood", "bone", "scale",
-	"metal", "metal", "metal", "silver", "gold", "platinum", "mithril",
+	"metal", "metal", "metal", "metal", "silver", "gold", "platinum", "lead", "mithril",
 	"plastic", "glass", "rich food", "stone", "obsidian", "shadow"
 };
 

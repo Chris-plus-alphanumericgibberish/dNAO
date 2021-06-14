@@ -426,11 +426,13 @@ const struct material materials[] = {
 	{SHELL_MAT,		CLR_WHITE,		 25,/*old:  27*/		 30,		5	},
 	{DRAGON_HIDE,	CLR_WHITE,		 35,/*old:  34*/		200,		8	},	/*note: color variable */
 	{IRON,			HI_METAL,		 80,/*old:  79*/		 10,		5	},
+	{GREEN_STEEL,	CLR_BRIGHT_GREEN,70,/*old:  77*/		100,		6	},
 	{METAL,			HI_METAL,		 70,/*old:  77*/		 10,		5	},
 	{COPPER,		HI_COPPER,		 80,/*old:  89*/		 10,		5	},
 	{SILVER,		HI_SILVER,		 90,/*old: 105*/		 30,		5	},
 	{GOLD,			HI_GOLD,		120,/*old: 193*/		 60,		3	},
 	{PLATINUM,		CLR_WHITE,		120,/*old: 214*/		 80,		4	},
+	{LEAD,			CLR_BLACK,		120,/*old: NA */		  5,		3	},
 	{MITHRIL,		HI_MITHRIL,		 40,/*old:  27*/		 50,		6	},
 	{PLASTIC,		CLR_WHITE,		 20,/*old:  13*/		 10,		3	},
 	{GLASS,			HI_GLASS,		 60,/*old:  24*/		 20,		5	},

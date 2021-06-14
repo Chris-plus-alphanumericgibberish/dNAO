@@ -417,6 +417,14 @@ int otyp;
 					if (is_bludgeon(obj))
 						dmod += mod;
 					break;
+				/* lead is heavy but bad at cutting (gold and silver should be too, but magic, basically)
+				 */
+				case LEAD:
+					if (is_bludgeon(obj))
+						dmod += mod;
+					if (is_slashing(obj) || is_stabbing(obj))
+						dmod -= mod;
+					break;
 				/* glass and obsidian have sharp edges and points 
 				 * shadowsteel ??? but gameplay-wise, droven weapons
 				 *   made out of this troublesome-to-maintain material
@@ -425,6 +433,7 @@ int otyp;
 				case GLASS:
 				case OBSIDIAN_MT:
 				case SHADOWSTEEL:
+				case GREEN_STEEL:
 					if (is_slashing(obj) || is_stabbing(obj))
 						dmod += mod;
 					break;
@@ -1851,8 +1860,8 @@ register struct monst *mtmp;
 			(!bimanual(otmp, mtmp->data)) &&
 			/* never a hated weapon */
 			(mtmp->misc_worn_check & W_ARMG || !hates_silver(mtmp->data) || otmp->obj_material != SILVER) &&
-			(mtmp->misc_worn_check & W_ARMG || !hates_iron(mtmp->data) || otmp->obj_material != IRON) &&
-			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !is_unholy(otmp)) &&
+			(mtmp->misc_worn_check & W_ARMG || !hates_iron(mtmp->data) || !is_iron_obj(otmp)) &&
+			(mtmp->misc_worn_check & W_ARMG || !hates_unholy_mon(mtmp) || !(is_unholy(otmp) && otmp->obj_material == GREEN_STEEL)) &&
 			(mtmp->misc_worn_check & W_ARMG || !hates_unblessed_mon(mtmp) || (is_unholy(otmp) || otmp->blessed))
 			) return otmp;
 	}

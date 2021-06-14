@@ -2325,8 +2325,12 @@ museamnesia:
 				/* this monster won't want to catch a silver
 				   weapon; drop it at hero's feet instead */
 				where_to = 2;
-		    } else if (where_to == 3 && hates_iron(mtmp->data) && obj->obj_material == IRON) {
+		    } else if (where_to == 3 && hates_iron(mtmp->data) && is_iron_obj(obj)) {
 				/* this monster won't want to catch an iron
+				   weapon; drop it at hero's feet instead */
+				where_to = 2;
+		    } else if (where_to == 3 && hates_unholy_mon(mtmp) && obj->obj_material == GREEN_STEEL) {
+				/* this monster won't want to catch a green-steel
 				   weapon; drop it at hero's feet instead */
 				where_to = 2;
 		    } else if (where_to == 3 && hates_unholy_mon(mtmp) && is_unholy(obj)) {

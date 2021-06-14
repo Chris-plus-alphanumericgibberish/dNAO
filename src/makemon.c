@@ -298,6 +298,23 @@ int mkobjflags;
 		}
 		return;
 	}
+	if(mm==PM_GREEN_STEEL_GOLEM){
+		switch(rnd(3)){
+			case 1:
+				mongets(mtmp,HALBERD, mkobjflags);
+				mongets(mtmp,WAR_HAMMER, mkobjflags);
+			break;
+			case 2:
+				mongets(mtmp,LUCERN_HAMMER, mkobjflags);
+				mongets(mtmp,BATTLE_AXE, mkobjflags);
+			break;
+			case 3:
+				mongets(mtmp,POLEAXE, mkobjflags);
+				mongets(mtmp,LONG_SWORD, mkobjflags);
+			break;
+		}
+		return;
+	}
 	if(mm==PM_GROVE_GUARDIAN){
 		switch(rnd(6)){
 			case 1:
@@ -2666,15 +2683,14 @@ int mkobjflags;
 				else otmp = mksobj(rn2(3) ? AXE : rn2(3) ? SICKLE : SCYTHE, mkobjflags);
 			    otmp->cursed = 0;
 			    otmp->blessed = 0;
-			    otmp->spe = -1;
-				set_material_gm(otmp, METAL);
+				set_material_gm(otmp, LEAD);
 				fix_object(otmp);
 			    (void) mpickobj(mtmp, otmp);
 				if(otmp->otyp == MACE && !rn2(3)){
 					otmp = mksobj(KITE_SHIELD, mkobjflags);
 					otmp->cursed = 0;
 					otmp->blessed = 0;
-					set_material_gm(otmp, METAL);
+					set_material_gm(otmp, LEAD);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 				}
@@ -11006,6 +11022,9 @@ int mkobjflags;
 				else if (mtmp->mtyp == PM_IRON_GOLEM){
 					set_material_gm(otmp, IRON);
 				}
+				else if (mtmp->mtyp == PM_GREEN_STEEL_GOLEM){
+					set_material_gm(otmp, GREEN_STEEL);
+				}
 				else if (mtmp->mtyp == PM_ARGENTUM_GOLEM){
 					set_material_gm(otmp, SILVER);
 				}
@@ -11146,6 +11165,7 @@ int type;
 		case PM_IRON_GOLEM: return 80;
 		case PM_SEMBLANCE: return 80;
 		case PM_ARSENAL: return 88;
+		case PM_GREEN_STEEL_GOLEM: return 99;
 		case PM_RETRIEVER: return 120;
 		case PM_LIVING_DOLL: return 45+d(5,8);
 		case PM_PARASITIZED_DOLL: return 45+d(20,8);

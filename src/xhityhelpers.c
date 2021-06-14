@@ -1359,6 +1359,7 @@ struct obj * otmp;
 #define vd(n, x)	(vulnerable ? (n*x) : d(n, x))
 	int diesize;
 	int ndice;
+	int khakharadice = rnd(3);
 
 	int dmg = 0;
 
@@ -1376,19 +1377,34 @@ struct obj * otmp;
 		else if (otmp->oartifact == ART_SILVER_STARLIGHT)
 			ndice = 2;
 		else if(otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
+			ndice = khakharadice;
 		/* calculate */
 		dmg += vd(ndice, diesize);
 	}
+
+	if (hates_unholy_mon(mdef) &&
+		otmp->obj_material == GREEN_STEEL &&
+		!(is_lightsaber(otmp) && litsaber(otmp))) {
+		/* default: 2d9 */
+		ndice = 2;
+		diesize = 9;
+		/* special cases */
+		if (otmp->otyp == KHAKKHARA)
+			ndice *= khakharadice;
+		/* calculate */
+		if (ndice)
+			dmg += vd(ndice, diesize);
+	}
+	
 	if (hates_iron(pd) &&
-		otmp->obj_material == IRON &&
+		is_iron_obj(otmp) &&
 		!(is_lightsaber(otmp) && litsaber(otmp))) {
 		/* default: 1d(XL) */
 		ndice = 1;
 		diesize = max(1, mlev(mdef));
 		/* special cases */
 		if (otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
+			ndice = khakharadice;
 		/* calculate */
 		dmg += vd(ndice, diesize);
 	}
@@ -1415,7 +1431,7 @@ struct obj * otmp;
 		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 			diesize = 20;
 		else if (otmp->otyp == KHAKKHARA)
-			ndice = rnd(3);
+			ndice = khakharadice;
 		/* gold has a particular affinity to blessings and curses */
 		if (otmp->obj_material == GOLD &&
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
@@ -1448,7 +1464,42 @@ struct obj * otmp;
 		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
 
 		if (otmp->otyp == KHAKKHARA)
-			ndice *= rnd(3);
+			ndice *= khakharadice;
+		/* gold has a particular affinity to blessings and curses */
+		if (otmp->obj_material == GOLD &&
+			!(is_lightsaber(otmp) && litsaber(otmp))) {
+			ndice *= 2;
+		}
+		/* calculate */
+		if (ndice)
+			dmg += vd(ndice, diesize);
+	}
+
+	if (hates_unholy_mon(mdef) &&
+		is_unholy(otmp)) {
+		/* default: 1d9 */
+		ndice = 1;
+		diesize = 9;
+		/* special cases */
+		if (otmp->oartifact == ART_STORMBRINGER)
+			ndice = 4; //Extra unholy (4d9 vs excal's 3d7)
+		else if (otmp->oartifact == ART_GODHANDS)
+			dmg += 9;
+		else if (otmp->oartifact == ART_DIRGE)
+			dmg += 6;
+		else if (otmp->oartifact == ART_LANCE_OF_LONGINUS)
+			ndice = 3;
+		else if (otmp->oartifact == ART_SCEPTRE_OF_THE_FROZEN_FLOO)
+		{	ndice = 0; dmg += 8; } // add directly; no dice rolled
+		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
+			diesize = 20;
+		else if (otmp->oartifact == ART_AMHIMITL)
+		{	ndice = 3; diesize = 4; }
+		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
+		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
+
+		if (otmp->otyp == KHAKKHARA)
+			ndice *= khakharadice;
 		/* gold has a particular affinity to blessings and curses */
 		if (otmp->obj_material == GOLD &&
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
@@ -1486,7 +1537,7 @@ struct obj * otmp;
 			ndice = 3;
 		
 		if (otmp->otyp == KHAKKHARA)
-			ndice *= rnd(3);
+			ndice *= khakharadice;
 		/* calculate */
 		if (ndice)
 			dmg += vd(ndice, diesize);
@@ -1596,9 +1647,9 @@ struct obj * weapon;
 		if (hates_iron(pd) && (
 			(attk && attk->adtyp == AD_SIMURGH) ||
 			(magr && is_iron_mon(magr)) ||
-			(otmp && otmp->obj_material == IRON) ||
-			(youagr && slot == W_ARMG && uright && uright->obj_material == IRON) ||
-			(youagr && slot == W_ARMG && uleft && uleft->obj_material == IRON)
+			(otmp && is_iron_obj(otmp)) ||
+			(youagr && slot == W_ARMG && uright && is_iron_obj(uright)) ||
+			(youagr && slot == W_ARMG && uleft && is_iron_obj(uleft))
 			))
 			return 1;
 
@@ -1613,6 +1664,7 @@ struct obj * weapon;
 
 		if (hates_unholy_mon(mdef) && (
 			(magr && is_unholy_mon(magr)) ||
+			(otmp && otmp->obj_material == GREEN_STEEL) ||
 			(otmp && is_unholy(otmp)) ||
 			(youagr && slot == W_ARMG && uright && is_unholy(uright)) ||
 			(youagr && slot == W_ARMG && uleft && is_unholy(uleft))

@@ -322,11 +322,12 @@ register int x, y, typ;
 			else if (Is_orcus_level(&u.uz))			set_material(otmp, BONE);
 			else if (Is_night_level(&u.uz))			set_material(otmp, BONE);
 			// material special cases: other
-			if (In_outlands(&u.uz))							set_material(otmp, rn2(3) ? METAL : rn2(2) ? IRON : rn2(2) ? COPPER : rn2(4) ? SILVER : GOLD);
+			if (In_outlands(&u.uz))							set_material(otmp, rn2(3) ? LEAD : rn2(2) ? IRON : rn2(2) ? COPPER : rn2(4) ? SILVER : GOLD);
 			else if (!rn2(3) && Is_sunsea(&u.uz))			set_material(otmp, GOLD);
 			else if (!rn2(3) && Is_knox(&u.uz))				set_material(otmp, !rn2(3) ? GOLD : !rn2(2) ? PLATINUM : SILVER);
 			else if (!rn2(3) && In_moloch_temple(&u.uz))	set_material(otmp, BONE);
 			else if (!rn2(3) && In_mines(&u.uz))			set_material(otmp, MINERAL);
+			else if (!rn2(3) && In_hell(&u.uz))				set_material(otmp, GREEN_STEEL);
 			// poisons
 			if (rn2(level_difficulty()) &&
 				(typ == DART_TRAP || !rn2(5)))
@@ -1000,7 +1001,7 @@ unsigned trflags;
 		    pline("Water gushes around you!");
 			break;
 		}
-		if (u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_CHAIN_GOLEM) {
+		if (is_iron(youracedata)) {
 		    int dam = u.mhmax;
 
 		    pline("%s you!", A_gush_of_water_hits);
@@ -2205,7 +2206,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 #endif
 			    }
 			}
-			if (mptr->mtyp == PM_IRON_GOLEM || mptr->mtyp == PM_CHAIN_GOLEM) {
+			if (is_iron(mptr)) {
 				if (in_sight)
 				    pline("%s falls to pieces!", Monnam(mtmp));
 				else if(mtmp->mtame)
@@ -2470,6 +2471,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				// case PM_VORPAL_JABBERWOCK:
 			    case PM_ARGENTUM_GOLEM:
 			    case PM_IRON_GOLEM:
+			    case PM_GREEN_STEEL_GOLEM:
 			    case PM_CHAIN_GOLEM:
 			    case PM_CENTER_OF_ALL:
 			    case PM_CHAOS:
@@ -3574,7 +3576,7 @@ drown()
 
 	if (u.umonnum == PM_GREMLIN && rn2(3))
 	    (void)split_mon(&youmonst, (struct monst *)0);
-	else if ((u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_CHAIN_GOLEM) && !(u.sealsActive&SEAL_EDEN)) {
+	else if (is_iron(youracedata) && !(u.sealsActive&SEAL_EDEN)) {
 	    You("rust!");
 	    i = d(2,6);
 	    if (u.mhmax > i) u.mhmax -= i;

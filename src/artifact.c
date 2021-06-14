@@ -528,7 +528,10 @@ aligntyp alignment;
 			/* avoid artifacts of materials that hate the player's natural form */
 			skip_if(!(Role_if(a->role) || Pantheon_if(a->role)) && (
 				(hates_iron((&mons[urace.malenum]))
-				&& (a->material == IRON || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == IRON)))
+				&& (
+					(a->material == IRON || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == IRON))
+					|| (a->material == GREEN_STEEL || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == GREEN_STEEL))
+				))
 				||
 				(hates_silver((&mons[urace.malenum]))
 				&& (a->material == SILVER || (a->material == MT_DEFAULT && objects[a->otyp].oc_material == SILVER)))
@@ -2431,11 +2434,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 						pline("The layer of grease on your %s dissolves.", xname(uarmc));
 					}
 				} else {
-					int mult = (flaming(youracedata) ||
-									youracedata->mtyp == PM_EARTH_ELEMENTAL ||
-									youracedata->mtyp == PM_IRON_GOLEM ||
-									youracedata->mtyp == PM_CHAIN_GOLEM
-								) ? 2 : 1;
+					int mult = (flaming(youracedata) || is_iron(youracedata)) ? 2 : 1;
 					
 					*dmgptr += d(dnum,4)*mult;
 					if(youracedata->mtyp == PM_GREMLIN && rn2(3))
@@ -2451,11 +2450,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 						if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
 					}
 				} else {
-					int mult = (flaming(mdef->data) ||
-									mdef->mtyp == PM_EARTH_ELEMENTAL ||
-									mdef->mtyp == PM_IRON_GOLEM ||
-									mdef->mtyp == PM_CHAIN_GOLEM
-								) ? 2 : 1;
+					int mult = (flaming(mdef->data) || is_iron(mdef->data))  ? 2 : 1;
 				
 					*dmgptr += d(dnum,4)*mult;
 					if(mdef->mtyp == PM_GREMLIN && rn2(3)){
@@ -3106,11 +3101,7 @@ int * truedmgptr;
 				if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
 			}
 		} else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))){
-			int mult = (flaming(pd) ||
-							pd->mtyp == PM_EARTH_ELEMENTAL ||
-							pd->mtyp == PM_IRON_GOLEM ||
-							pd->mtyp == PM_CHAIN_GOLEM
-						) ? 2 : 1;
+			int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
 
 			if(check_oprop(otmp, OPROP_WATRW))
 				*truedmgptr += basedmg*mult;

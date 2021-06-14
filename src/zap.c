@@ -1402,7 +1402,12 @@ create_polymon(obj, okind)
 
 	/* some of these choices are arbitrary */
 	switch(okind) {
+	case GREEN_STEEL:
+	    pm_index = PM_GREEN_STEEL_GOLEM;
+	    material = "metal ";
+	    break;
 	case IRON:
+	case LEAD:
 	case METAL:
 	case MITHRIL:
 	    pm_index = PM_IRON_GOLEM;

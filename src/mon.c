@@ -957,6 +957,10 @@ register struct monst *mtmp;
 			fix_object(obj);
 		break;
 	    case PM_IRON_GOLEM:
+			obj = mksobj_at(PLATE_MAIL, x, y, MKOBJ_NOINIT);
+			set_material_gm(obj, IRON);
+			obj->objsize = MZ_LARGE;
+			fix_object(obj);
 			num = d(2,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
@@ -968,10 +972,31 @@ register struct monst *mtmp;
 			}
 			rem_mx(mtmp, MX_ENAM);
 		break;
+	    case PM_GREEN_STEEL_GOLEM:
+			obj = mksobj_at(PLATE_MAIL, x, y, MKOBJ_NOINIT);
+			set_material_gm(obj, GREEN_STEEL);
+			obj->objsize = MZ_LARGE;
+			fix_object(obj);
+			num = d(2,6);
+			while (num--){
+				obj = mksobj_at(rn2(3) ? CHAIN : SHACKLES, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(obj, GREEN_STEEL);
+				obj = mksobj_at(KITE_SHIELD, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(obj, GREEN_STEEL);
+				obj = mksobj_at(BAR, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(obj, GREEN_STEEL);
+			}
+			rem_mx(mtmp, MX_ENAM);
+		break;
 	    case PM_CHAIN_GOLEM:
-			num = d(6,6);
+			num = d(5,6);
 			while (num--){
 				obj = mksobj_at(CHAIN, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(obj, IRON);
+			}
+			num = d(1,6);
+			while (num--){
+				obj = mksobj_at(SHACKLES, x, y, NO_MKOBJ_FLAGS);
 				set_material_gm(obj, IRON);
 			}
 			rem_mx(mtmp, MX_ENAM);
@@ -1367,7 +1392,7 @@ register struct monst *mtmp;
 		if (inpool) water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
 		return (0);	/* gremlins in water */
 	}
-	else if ((mtmp->mtyp == PM_IRON_GOLEM || mtmp->mtyp == PM_CHAIN_GOLEM) && ((inpool && !rn2(5)) || inshallow)) {
+	else if (is_iron(mtmp) && ((inpool && !rn2(5)) || inshallow)) {
 		/* rusting requires oxygen and water, so it's faster for shallow water */
 		int dam = d(2, 6);
 		if (cansee(mtmp->mx, mtmp->my))
@@ -2628,7 +2653,7 @@ struct obj *otmp;
 	if (otmp->obj_material == SILVER && hates_silver(mdat) &&
 		(otyp != BELL_OF_OPENING || !is_covetous(mdat)))
 	    return FALSE;
-	if (otmp->obj_material == IRON && hates_iron(mdat))
+	if (is_iron_obj(otmp) && hates_iron(mdat))
 	    return FALSE;
 
 #ifdef STEED
@@ -2698,7 +2723,7 @@ mfndpos(mon, poss, info, flag)
 	nodiag = (mdat->mtyp == PM_GRID_BUG) || (mdat->mtyp == PM_BEBELITH);
 	wantpool = mdat->mlet == S_EEL;
 	wantdry = !wantpool;
-	puddleispool = (wantpool && mdat->msize == MZ_TINY) || (wantdry && (mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM));
+	puddleispool = (wantpool && mdat->msize == MZ_TINY) || (wantdry && is_iron(mon));
 
 	/* nexttry can reset some of the above booleans, but recalculates the ones below. */
 	/* eels prefer the water, but if there is no water nearby, they will crawl over land */
@@ -2888,6 +2913,7 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 			mwep = MON_WEP(mon);
 			if ((ttmp->ttyp != RUST_TRAP
 					|| mdat->mtyp == PM_IRON_GOLEM
+					|| mdat->mtyp == PM_GREEN_STEEL_GOLEM
 					|| mdat->mtyp == PM_CHAIN_GOLEM)
 				&& ((ttmp->ttyp != PIT
 				    && ttmp->ttyp != SPIKED_PIT
@@ -3748,7 +3774,7 @@ struct monst *mtmp;
 			for(struct obj *otmp = mtmp->minvent; otmp; otmp = nobj){
 				nobj = otmp->nobj;
 				if(otmp->obj_material == GOLD && otmp->otyp != GOLD_PIECE){
-					set_material_gm(otmp, METAL);
+					set_material_gm(otmp, LEAD);
 				}
 			}
 			set_mon_data(mtmp, PM_GHOUL_QUEEN_NITOCRIS);
@@ -6641,7 +6667,7 @@ int damtype, dam;
 	else if (damtype == AD_FIRE || damtype == AD_EFIR 
 		|| damtype == AD_ECLD || damtype == AD_COLD
 	) slow = 1;
-    } else if (mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_CHAIN_GOLEM || mon->mtyp == PM_ARGENTUM_GOLEM || mon->mtyp == PM_CENTER_OF_ALL) {
+    } else if (mon->mtyp == PM_IRON_GOLEM || mon->mtyp == PM_GREEN_STEEL_GOLEM || mon->mtyp == PM_CHAIN_GOLEM || mon->mtyp == PM_ARGENTUM_GOLEM) {
 	if (damtype == AD_ELEC || damtype == AD_EELC) slow = 1;
 	else if (damtype == AD_FIRE || damtype == AD_EFIR) heal = dam;
     } else {
