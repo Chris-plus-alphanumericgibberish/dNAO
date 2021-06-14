@@ -26,13 +26,21 @@ int atype;
 	switch (atype)
 	{
 	case AD_MAGM: return "fragments";
-	case AD_FIRE: return "fire";
-	case AD_COLD: return "frost";
+	case AD_FIRE: 
+	case AD_EFIR: 
+		return "fire";
+	case AD_COLD: 
+	case AD_ECLD: 
+		return "frost";
 	case AD_SLEE: return "sleep gas";
 	case AD_DISN: return "a disintegration blast";
-	case AD_ELEC: return "lightning";
+	case AD_ELEC: 
+	case AD_EELC: 
+		return "lightning";
 	case AD_DRST: return "poison gas";
-	case AD_ACID: return "acid";
+	case AD_ACID: 
+	case AD_EACD: 
+		return "acid";
 	case AD_DRLI: return "dark energy";
 	case AD_GOLD: return "gold";
 	case AD_BLUD: return "spray of blood";

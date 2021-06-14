@@ -97,13 +97,21 @@ int adtyp, ztyp;
 		switch (adtyp)
 		{
 		case AD_MAGM: return "blast of missiles";
-		case AD_FIRE: return "blast of fire";
-		case AD_COLD: return "blast of frost";
+		case AD_EFIR: 
+		case AD_FIRE: 
+			return "blast of fire";
+		case AD_COLD:
+		case AD_ECLD:
+			return "blast of frost";
 		case AD_SLEE: return "blast of sleep gas";
 		case AD_DISN: return "blast of disintegration";
-		case AD_ELEC: return "blast of lightning";
+		case AD_EELC: 
+		case AD_ELEC: 
+			return "blast of lightning";
 		case AD_DRST: return "blast of poison gas";
-		case AD_ACID: return "blast of acid";
+		case AD_ACID:
+		case AD_EACD:
+			return "blast of acid";
 		case AD_DRLI: return "blast of dark energy";
 		case AD_GOLD: return "blast of golden shards";
 		// These are provided to deal with spray breaths, and aren't handled for direct hits.
@@ -149,6 +157,7 @@ int adtyp;
 		return CLR_RED;
 	case AD_SLIM:
 	case AD_ACID:
+	case AD_EACD:
 		return CLR_GREEN;
 	case AD_PHYS:
 		return CLR_BROWN;
@@ -159,6 +168,7 @@ int adtyp;
 		//	return CLR_CYAN;
 		//	return CLR_GRAY;
 		//	return NO_COLOR;
+	case AD_EFIR:
 	case AD_FIRE:
 		return CLR_ORANGE;
 		//	return CLR_BRIGHT_GREEN;
@@ -170,7 +180,9 @@ int adtyp;
 		return CLR_BRIGHT_BLUE;
 		//	return CLR_BRIGHT_MAGENTA;
 		//	return CLR_BRIGHT_CYAN;
+	case AD_ECLD:
 	case AD_COLD:
+	case AD_EELC:
 	case AD_ELEC:
 	case AD_STAR:
 		return CLR_WHITE;
