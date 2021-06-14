@@ -2616,22 +2616,21 @@ MAP
 0                                                      ----------------------
 ENDMAP
 
+MONSTER:'G',"hellfire colossus",random
+MONSTER:'G',"hellfire colossus",random
+MONSTER:'G',"hellfire colossus",random
+MONSTER:'G',"hellfire colossus",random
+
+MONSTER:'G',"hellfire colossus",random
+MONSTER:'G',"hellfire colossus",random
+MONSTER:'G',"hellfire colossus",random
+MONSTER:'G',"hellfire colossus",random
 
 MONSTER:'\'',"iron golem",random
 MONSTER:'\'',"iron golem",random
 MONSTER:'\'',"iron golem",random
 MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
-MONSTER:'\'',"iron golem",random
+
 MONSTER:'\'',"iron golem",random
 MONSTER:'\'',"iron golem",random
 MONSTER:'\'',"iron golem",random
