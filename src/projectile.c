@@ -214,6 +214,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			returning = TRUE;
 			range = range/2 + 1;
 			initrange = initrange/2 + 1;
+			impaired = FALSE; //always catch
 		}
 	}
 
