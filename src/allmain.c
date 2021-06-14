@@ -4757,6 +4757,11 @@ struct monst *magr;
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
+		
+		if(!youdef && (mdef->entangled == SHACKLES
+			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+		))
+			continue;
 
 		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
@@ -4817,6 +4822,11 @@ struct monst *magr;
 			if(youdef && (magr->mpeaceful))
 				continue;
 			if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+				continue;
+
+			if(!youdef && (mdef->entangled == SHACKLES
+				|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
+			))
 				continue;
 
 			if(mdef->mtyp == PM_PALE_NIGHT)

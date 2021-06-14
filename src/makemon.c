@@ -10928,7 +10928,7 @@ struct monst *mtmp, *victim;
 	else if (ptr->mtyp == PM_PLUMACH_RILMANI || ptr->mtyp == PM_FERRUMACH_RILMANI) lev_limit = 20;
 	else if (is_eladrin(ptr) && ptr->mlevel <= 20) lev_limit = 30;
 	else if (ptr->mtyp == PM_OONA) lev_limit = 60;
-	else if (ptr->mtyp == PM_ANCIENT_OF_ICE || ptr->mtyp == PM_ANCIENT_OF_DEATH) lev_limit = 45;
+	else if (is_ancient(ptr)) lev_limit = 45;
 	else if (lev_limit < 5) lev_limit = 5;	/* arbitrary */
 	else if (lev_limit > 49) lev_limit = (ptr->mlevel > 49 ? ptr->mlevel : 49);
 

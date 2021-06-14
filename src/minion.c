@@ -117,6 +117,27 @@ struct permonst * ptr;	/* summon as though you were <X> */
 				if(has_template(mon, FALLEN_TEMPLATE))
 					set_template(mtmp, FALLEN_TEMPLATE);
 			}
+			if(has_template(mon, FRACTURED)){
+				set_template(mtmp, FRACTURED);
+			}
+			if(has_template(mon, VAMPIRIC)){
+				set_template(mtmp, VAMPIRIC);
+			}
+			if(has_template(mon, PSEUDONATURAL)){
+				set_template(mtmp, PSEUDONATURAL);
+			}
+			if(has_template(mon, CRANIUM_RAT)){
+				set_template(mtmp, CRANIUM_RAT);
+			}
+			if(has_template(mon, MISTWEAVER)){
+				set_template(mtmp, MISTWEAVER);
+			}
+			if(has_template(mon, YELLOW_TEMPLATE)){
+				set_template(mtmp, YELLOW_TEMPLATE);
+			}
+			if(has_template(mon, DREAM_LEECH)){
+				set_template(mtmp, DREAM_LEECH);
+			}
 			if (!(mons[dtype].geno & G_UNIQ))	/* uniques summoned in this way stick around */
 				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
 	    }

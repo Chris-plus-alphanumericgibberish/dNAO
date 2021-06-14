@@ -116,6 +116,7 @@ register struct obj *obj;
 				&& obj->oartifact != ART_WEBWEAVER_S_CROOK
 				&& obj->oartifact != ART_SILENCE_GLAIVE
 				&& obj->oartifact != ART_HEARTCLEAVER
+				&& obj->oartifact != ART_GREEN_DRAGON_CRESCENT_BLAD
 				&& obj->oartifact != ART_CRUCIFIX_OF_THE_MAD_KING
 				&& obj->oartifact != ART_SOL_VALTIVA
 				&& obj->oartifact != ART_SHADOWLOCK

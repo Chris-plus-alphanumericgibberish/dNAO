@@ -2642,16 +2642,19 @@ int skill;
 boolean speedy;
 {
     return !P_RESTRICTED(skill)
-	    && P_SKILL(skill) < P_MAX_SKILL(skill)
-	    && OLD_P_SKILL(skill) < OLD_P_MAX_SKILL(skill) && (
+	    && P_SKILL_CORE(skill, FALSE) < P_MAX_SKILL_CORE(skill, FALSE)
+		&& (
 #ifdef WIZARD
-	    (wizard && speedy) ||
+			(wizard && speedy) ||
 #endif
-	    (P_ADVANCE(skill) >=
-		(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))
-		&& practice_needed_to_advance(OLD_P_SKILL(skill)) > 0
-	    && u.skills_advanced < P_SKILL_LIMIT
-	    && u.weapon_slots >= slots_required(skill)));
+			(
+				P_ADVANCE(skill) >=
+				(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))
+				&& practice_needed_to_advance(OLD_P_SKILL(skill)) > 0
+				&& u.skills_advanced < P_SKILL_LIMIT
+				&& u.weapon_slots >= slots_required(skill)
+			)
+		);
 }
 
 /* return true if this skill could be advanced if more slots were available */
@@ -2660,11 +2663,11 @@ could_advance(skill)
 int skill;
 {
     return !P_RESTRICTED(skill)
-	    && P_SKILL(skill) < P_MAX_SKILL(skill) && (
-	    (P_ADVANCE(skill) >=
+	    && P_SKILL(skill) < P_MAX_SKILL(skill) && 
+	    P_ADVANCE(skill) >=
 		(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))
 		&& practice_needed_to_advance(OLD_P_SKILL(skill)) > 0
-	    && u.skills_advanced < P_SKILL_LIMIT));
+	    && u.skills_advanced < P_SKILL_LIMIT;
 }
 
 /* return true if this skill has reached its maximum and there's been enough

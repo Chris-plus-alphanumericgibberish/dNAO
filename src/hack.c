@@ -3039,11 +3039,15 @@ boolean endnow;
 			}
 		}
 
-		/* migratingmons handling */
-		if (!curobj && !did_migratingmons) {
-			/* predecrement curwhere so that we run OBJ_MIGRATING again, but this time not the migrating mons */
-			did_migratingmons = TRUE;
-			curwhere--;
+		/* for the "where"s that can have many chains, we need to stay in that state until all their chains are exhausted */
+		if (!curobj && (
+			(curwhere == OBJ_MINVENT && allow_minvent && curmonst) ||
+			(curwhere == OBJ_MIGRATING && allow_minvent && allow_migrating && curmonst && !did_migratingmons) ||
+			(curwhere == OBJ_MIGRATING && allow_migrating && !curmonst && !did_migratingmons && (did_migratingmons=TRUE)) ||	/* set did_migratingmons to then do migrating objs */
+			(curwhere == OBJ_MAGIC_CHEST && allow_magic && (magic_chest_index < 10)) ||
+			(curwhere == OBJ_INTRAP && allow_intrap && curtrap)
+			)) {
+			curwhere--;	/* predecrement curwhere to stay in current state */
 		}
 
 	} while (!curobj && curwhere++ < NOBJ_STATES);

@@ -134,7 +134,7 @@ doread()
 					static const char *numbers[]={
 						"no", "a single", "two","three","four","five","six","seven"
 					};
-					pline("Around the pommel, there is a crownlike decoration, with %s raised segment%s.",
+					pline("There is a crownlike decoration with %s raised segment%s around the pommel.",
 						numbers[artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights], artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights!=1 ? "s" : "");
 				}
 				return(1);

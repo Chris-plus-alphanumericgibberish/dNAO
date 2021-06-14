@@ -1179,7 +1179,7 @@ int portal;
 	/* Prevent the player from going past the first quest level unless
 	 * (s)he has been given the go-ahead by the leader.
 	 */
-	if ((Is_qhome(&u.uz) && !newdungeon && !ok_to_quest() && !flags.stag)
+	if ((!up && Is_qhome(&u.uz) && !newdungeon && !ok_to_quest() && !flags.stag)
 	&& !(Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
 	) {
 		pline("A mysterious force prevents you from descending.");

@@ -454,6 +454,7 @@ struct obj {
 			 otmp->otyp == RAKUYO_DAGGER)
 #define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
 			 is_rakuyo(otmp) || \
+			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->otyp == BESTIAL_CLAW)
 #define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			otmp->oclass == TOOL_CLASS) && \
@@ -484,7 +485,7 @@ struct obj {
 			  (\
 			   (ltmp->otyp == BFG) ||\
 			   (ltmp->oartifact == ART_PEN_OF_THE_VOID && ltmp->ovar1&SEAL_EVE) ||\
-			   (ltmp->otyp == MASS_SHADOW_PISTOL && (otmp->otyp == ltmp->cobj->otyp)) ||\
+			   (ltmp->otyp == MASS_SHADOW_PISTOL && ltmp->cobj && (otmp->otyp == ltmp->cobj->otyp)) ||\
 			   (ltmp->otyp == ATLATL && is_spear(otmp)) ||\
 			   (\
 			    (otmp->objsize == (ltmp)->objsize || objects[(ltmp)->otyp].oc_skill == P_SLING) &&\

@@ -3827,6 +3827,7 @@ const char pole_dir[16][4] = {"N","NNE","NE",
 						  "SSE","S","SSW","SW",
 						  "WSW","W","WNW","NW",
 						  "NNW"};
+#define N_POLEDIRS 16
 
 STATIC_OVL int
 polearm_menu(pole)
@@ -3862,8 +3863,9 @@ struct obj *pole;
 			&& cansee(cx, cy)
 			&& canseemon(mtmp)
 			&& distu(cx, cy) <= max_range
-			&& !(flags.peacesafe_polearms && mtmp->mpeaceful)
-			&& !(flags.petsafe_polearms && mtmp->mtame)
+			&& !(mtmp->mappearance && mtmp->m_ap_type != M_AP_MONSTER && !sensemon(mtmp))
+			&& !(flags.peacesafe_polearms && mtmp->mpeaceful && !Hallucination)
+			&& !(flags.petsafe_polearms && mtmp->mtame && !Hallucination)
 		){
 			Sprintf(buf, "%s (%s)", Monnam(mtmp), pole_dir[i]);
 			any.a_int = i+1;	/* must be non-zero */
@@ -3875,6 +3877,13 @@ struct obj *pole;
 		else if(!flags.relative_polearms)
 			incntlet++; /* always increment, so that the same direction is always the same letter*/
 	}
+
+	/* add an option to target manually */
+	Sprintf(buf, "(some location)");
+	any.a_int = N_POLEDIRS+1;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		'z', 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
 
 	end_menu(tmpwin, "Choose target:");
 
@@ -3923,8 +3932,17 @@ use_pole (obj)
 	else {
 		if((i = polearm_menu(uwep))){
 			i--; /*Remove the off-by-one offset used to make all returns from polearm_menu non-zero*/
-			cc.x = u.ux + pole_dx[i];
-			cc.y = u.uy + pole_dy[i];
+			if (i<N_POLEDIRS) {
+				cc.x = u.ux + pole_dx[i];
+				cc.y = u.uy + pole_dy[i];
+			}
+			else {
+				/* use standard targeting; save retval to return */
+				flags.standard_polearms = TRUE;
+				int retval = use_pole(obj);
+				flags.standard_polearms = FALSE;
+				return retval;
+			}
 		}
 		else {
 			return 0;	/* user pressed ESC */

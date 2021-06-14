@@ -2395,6 +2395,8 @@ end_burn(obj, timer_attached)
 #endif /* OVL1 */
 #ifdef OVL0
 
+extern boolean saving_game;
+
 /*
  * Cleanup a burning object if timer stopped.
  */
@@ -2415,8 +2417,8 @@ cleanup_burn(arg, expire_time)
 
     obj->lamplit = 0;
 
-    if (obj->where == OBJ_INVENT)
-	update_inventory();
+    if (obj->where == OBJ_INVENT && !saving_game)
+		update_inventory();
 }
 
 #endif /* OVL0 */
