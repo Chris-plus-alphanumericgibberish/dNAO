@@ -643,7 +643,7 @@ fixup_special()
 					angel = makemon(&mons[angelnums[rn2(SIZE(angelnums))]], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 					if (angel){
 						initedog(angel);
-						angel->m_lev = min(30, 3 * (int)(angel->data->mlevel / 2));
+						angel->m_lev = min(30, 3 * (int)(angel->data->mlevel / 2)+1);
 						angel->mhpmax = (angel->m_lev * 8) - 4;
 						angel->mhp = angel->mhpmax;
 						angel->female = TRUE;
