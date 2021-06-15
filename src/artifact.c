@@ -4683,6 +4683,52 @@ boolean * messaged;
 		}
 	}
 
+	/*level drain*/
+	if (check_oprop(otmp, OPROP_DRANW) && !Drain_res(mdef)){
+		int dlife;
+		/* message */
+		if (youdef) {
+			if (Blind)
+				You_feel("an object drain your life!");
+			else
+				pline("%s drains your life!", The(wepdesc));
+			*messaged = TRUE;
+		}
+		else if (vis) {
+				pline("%s draws the life from %s!",
+				The(wepdesc),
+				mon_nam(mdef));
+			*messaged = TRUE;
+		}
+
+		if (youdef) {
+			dlife = *hpmax(mdef);
+			losexp("life drainage", FALSE, FALSE, FALSE);
+			dlife -= *hpmax(mdef);
+		}
+		else {
+			dlife = *hpmax(mdef);
+			*hpmax(mdef) -= min_ints(rnd(8), *hpmax(mdef));
+			if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
+				*hp(mdef) = 1;
+				*hpmax(mdef) = 1;
+			}
+			if (mdef->m_lev > 0)
+				mdef->m_lev--;
+			dlife -= *hpmax(mdef);
+		}
+
+		/* gain from drain */
+		if (magr) {
+			*hp(magr) += dlife / 2;
+			if (*hp(magr) > *hpmax(magr))
+				*hp(magr) = *hpmax(magr);
+		}
+		*truedmgptr += dlife;
+		if (youagr || youdef)
+			flags.botl = 1;
+	}
+
 	/* morgul weapons */
 	if (otmp->cursed && (check_oprop(otmp, OPROP_MORGW) || check_oprop(otmp, OPROP_LESSER_MORGW))){
 		int bonus = 0;
@@ -4907,7 +4953,7 @@ boolean * messaged;
 			}
 			else {
 				dlife = *hpmax(mdef);
-				*hpmax(mdef) -= min(rnd(8), *hpmax(mdef));
+				*hpmax(mdef) -= min_ints(rnd(8), *hpmax(mdef));
 				if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
 					if (youagr && oartifact == ART_STORMBRINGER && dieroll <= 2 && !is_silent_mon(mdef))
 						pline("%s cries out in pain and despair and terror.", Monnam(mdef));

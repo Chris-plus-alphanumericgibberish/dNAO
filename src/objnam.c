@@ -999,6 +999,9 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_LESSER_MAGCW))
 			Strcat(buf, "glittering ");
 		
+		if (check_oprop(obj, OPROP_DRANW) && obj->known)
+			Strcat(buf, "life-drinking ");
+		
 		if (check_oprop(obj, OPROP_VORPW) && obj->known)
 			Strcat(buf, "vorpal ");
 		
@@ -4113,6 +4116,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "desecrated ", l=11)) {
 			iscursed = !(uncursed + blessed);
 			add_oprop_list(oprop_list, OPROP_LESSER_UNHYW);
+
+		} else if (!strncmpi(bp, "life-drinking ", l=14) && strncmpi(bp, "Vorpal Blade", 12)) {
+			add_oprop_list(oprop_list, OPROP_DRANW);
 
 		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)) {
 			add_oprop_list(oprop_list, OPROP_VORPW);
