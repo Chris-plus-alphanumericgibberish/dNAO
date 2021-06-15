@@ -1131,6 +1131,7 @@ char *achieveXbuff;
 	CHECK_ACHIEVE(DWA_KNI_QUEST,"dwarf_knight_quest")
 	CHECK_ACHIEVE(GNO_RAN_QUEST,"gnome_ranger_quest")
 	CHECK_ACHIEVE(ELF_SHR_QUEST,"elf_shared_quest")
+	CHECK_ACHIEVE(FEM_DRA_NOB_QUEST,"painted_quest")
 	CHECK_ACHIEVE(CLOCK_ASC,"clockwork_ascension")
 	CHECK_ACHIEVE(CHIRO_ASC,"chiropteran_ascension")
 	CHECK_ACHIEVE(YUKI_ASC,"yuki_onna_ascension")
