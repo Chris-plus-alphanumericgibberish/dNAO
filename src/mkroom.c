@@ -368,8 +368,9 @@ mkmivaultitem(container)
 }
 
 void
-mkhellvaultitem(container)
-    struct obj *container;
+mkhellvaultitem(container, vn)
+struct obj *container;
+long long int vn;
 {
 	struct obj *otmp;
 	int try_limit = 1000;
@@ -388,8 +389,13 @@ mkhellvaultitem(container)
 			place_object(otmp, container->ox, container->oy);
 			bury_an_obj(otmp);
 		} else {
-			if(!rn2(10) || (otmp->oartifact && !rn2(3))){
+			if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
 				otmp = mk_special(otmp);
+				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+					otmp->spe = max_ints(d(3,3), otmp->spe);
+			}
+			else if(!rn2(4) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(2))){
+				otmp = mk_vault_special(otmp, vn);
 				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
 					otmp->spe = max_ints(d(3,3), otmp->spe);
 			}

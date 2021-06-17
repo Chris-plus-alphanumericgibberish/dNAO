@@ -1550,7 +1550,7 @@ int x, y, type;
 	container->olocked = TRUE;
 	container->otrapped = TRUE;
 	for(int i = d(9,4); i > 0; i--)
-		mkhellvaultitem(container);
+		mkhellvaultitem(container, type);
 	bury_an_obj(container);
 }
 
@@ -1684,7 +1684,24 @@ int x, y;
 		break;
 	}
 	
-	mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+	if(mid == PM_ANCIENT_OF_DEATH){
+		mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+		otmp = mksobj(SCYTHE, MKOBJ_NOINIT);
+		set_material_gm(otmp, GREEN_STEEL);
+		add_oprop(otmp, OPROP_UNHYW);
+		add_oprop(otmp, OPROP_DRANW);
+		add_oprop(otmp, OPROP_VORPW);
+		set_obj_size(otmp, MZ_LARGE);
+		otmp->spe = 8;
+		curse(otmp);
+		
+		(void) mpickobj(mon, otmp);
+	    m_dowear(mon, TRUE);
+		init_mon_wield_item(mon);
+	}
+	else {
+		mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+	}
 	
 	if(mon){
 		give_hell_vault_trophy(levl[x][y].vaulttype);

@@ -714,6 +714,285 @@ unsigned long int *oprop_list;
  * Make a special-but-non-artifact weapon based on otmp
  */
 
+#define ADD_WEAPON_ARMOR_OPROP(otmp, oproptoken) \
+	add_oprop(otmp, OPROP_##oproptoken);\
+	if(is_gloves(otmp) || is_boots(otmp)){\
+		if(rn2(3))\
+			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
+		else\
+			add_oprop(otmp, OPROP_##oproptoken##W);\
+	}
+
+#define ADD_WEAK_OR_STRONG_OPROP(otmp, oproptoken) \
+	if(rn2(4))\
+		add_oprop(otmp, OPROP_##oproptoken##W);\
+	else\
+		add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
+
+
+STATIC_OVL struct obj *
+mk_holy_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	bless(otmp);
+	/* materials */
+	if(rn2(3)){
+		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
+			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
+		){
+			set_material_gm(otmp, rn2(2) ? GOLD : SILVER);
+		}
+		else if(otmp->oclass == ARMOR_CLASS){
+			add_oprop(otmp, OPROP_WOOL);
+			otmp->obj_color = CLR_WHITE;
+		}
+	}
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(rn2(3)) switch(rn2(6)){
+			case 0:
+				add_oprop(otmp, OPROP_WOOL);
+				if(!is_hard(otmp))
+					otmp->obj_color = CLR_WHITE;
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+			break;
+			case 5:
+				add_oprop(otmp, OPROP_REFL);
+				set_material_gm(otmp, rn2(2) ? GOLD : SILVER);
+			break;
+		}
+		else if(rn2(3)){
+			switch(rn2(3)){
+				case 0:
+					ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+				break;
+				case 1:
+					ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
+				break;
+				case 2:
+					ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+				break;
+			}
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
+		if(rn2(3)) switch(rn2(6)){
+			case 0:
+				add_oprop(otmp, OPROP_WRTHW);
+			break;
+			case 1:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
+			break;
+			case 4:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, HOLY);
+			break;
+			case 5:
+				add_oprop(otmp, OPROP_VORPW);
+			break;
+		}
+		else if(rn2(3)){
+			switch(rn2(3)){
+				case 0:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
+				break;
+				case 1:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, CONC);
+				break;
+				case 2:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);
+				break;
+			}
+		}
+	}
+	return otmp;
+}
+
+STATIC_OVL struct obj *
+mk_devil_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	curse(otmp);
+	/* materials */
+	if(rn2(4)){
+		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
+			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
+		){
+			set_material_gm(otmp, rn2(2) ? GOLD : GREEN_STEEL);
+		}
+	}
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+			break;
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
+		if(rn2(4)) switch(rn2(8)){
+			case 0:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ELEC);
+			break;
+			case 1:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FLAY);
+			break;
+			case 6:
+				add_oprop(otmp, OPROP_DRANW);
+			break;
+			case 7:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);
+			break;
+		}
+	}
+	return otmp;
+}
+
+STATIC_OVL struct obj *
+mk_demon_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	curse(otmp);
+	/* materials */
+	if(rn2(4)){
+		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
+			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
+		){
+			set_material_gm(otmp, rn2(2) ? GOLD : IRON);
+		}
+	}
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+			break;
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
+		if(rn2(4)) switch(rn2(8)){
+			case 0:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FLAY);
+			break;
+			case 6:
+				add_oprop(otmp, OPROP_DRANW);
+			break;
+			case 7:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
+			break;
+		}
+	}
+	return otmp;
+}
+
+struct obj *
+mk_vault_special(otmp, vn)
+struct obj *otmp;	/* existing object */
+long long int vn;
+{
+	int type;
+#define VN_TANNIN	0
+#define VN_ANCIENT	1
+#define VN_ANGEL	2
+	if(vn < VN_A_O_BLESSINGS){
+		type = VN_TANNIN;
+	}
+	else if(vn < VN_APOCALYPSE){
+		type = VN_ANCIENT;
+	}
+	else if(vn < VN_MAX){
+		type = VN_ANGEL;
+	}
+	switch(type){
+		case VN_ANGEL:
+			otmp = mk_holy_special(otmp);
+		break;
+		case VN_ANCIENT:
+			otmp = mk_devil_special(otmp);
+		break;
+		case VN_TANNIN:
+			otmp = mk_demon_special(otmp);
+		break;
+	}
+	return otmp;
+}
+
 struct obj *
 mk_special(otmp)
 struct obj *otmp;	/* existing object */
@@ -721,7 +1000,7 @@ struct obj *otmp;	/* existing object */
 	int prop;
 	
 	if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)){
-		prop = rnd(13);
+		prop = rnd(15);
 		switch(prop)
 		{
 		case 1:
@@ -763,6 +1042,15 @@ struct obj *otmp;	/* existing object */
 		case 13:
 			add_oprop(otmp, OPROP_PSIOW);
 		break;
+		case 14:
+			add_oprop(otmp, OPROP_WRTHW);
+		break;
+		case 15:
+			add_oprop(otmp, OPROP_DRANW);
+		break;
+		}
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_LIVEW);
 		}
 	}
 	else if(otmp->oclass == ARMOR_CLASS){
@@ -770,34 +1058,34 @@ struct obj *otmp;	/* existing object */
 		switch(prop)
 		{
 		case 1:
-			add_oprop(otmp, OPROP_FIRE);
+			ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
 		break;
 		case 2:
-			add_oprop(otmp, OPROP_COLD);
+			ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
 		break;
 		case 3:
-			add_oprop(otmp, OPROP_ELEC);
+			ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
 		break;
 		case 4:
-			add_oprop(otmp, OPROP_ACID);
+			ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
 		break;
 		case 5:
-			add_oprop(otmp, OPROP_MAGC);
+			ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
 		break;
 		case 6:
-			add_oprop(otmp, OPROP_ANAR);
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
 		break;
 		case 7:
-			add_oprop(otmp, OPROP_CONC);
+			ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
 		break;
 		case 8:
-			add_oprop(otmp, OPROP_AXIO);
+			ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
 		break;
 		case 9:
-			add_oprop(otmp, OPROP_HOLY);
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
 		break;
 		case 10:
-			add_oprop(otmp, OPROP_UNHY);
+			ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
 		break;
 		}
 	}
