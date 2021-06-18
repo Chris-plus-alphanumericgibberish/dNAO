@@ -2898,6 +2898,8 @@ register int held;
 	    open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 	    used = 1;
 		return used;
+	// }else if(obj->spe == 7){
+		// Madman reclaims their stuff. Handled by the level loader
 	}else if(obj->spe == 8){
 		// Nothing. Fulvous desk spawns monsters.
 	}

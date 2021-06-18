@@ -432,6 +432,38 @@ MAP
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 #          1         2         3         4         5         6         7    7
+RANDOM_PLACES:(34,03),(34,15)
+# 7 == your stuff
+OBJECT:'(',"box",place[0],uncursed,7
+OBJECT:'(',"box",place[1]
+
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7    7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0               CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC                     
+1               CAAAAAAAAAAAAAAAA-----AAAAAAAAAAAAAAAAAC                     
+2               CAAAAAAAAAAA------...------AAAAAAAAAAAAC                     
+3               CAAAAAAAAAAA|####+...+####|AAAAAAAAAAAAC                     
+4               CAAAAAAAAAAA|#|---...---|#|AAAAAAAAAAAAC                     
+5               CAAAAAAAAAAA|#|AA-----AA|#|AAAAAFFFFFAAC                     
+6               CAAAAAAAAA|--S-|AAAAAAA|-S--|AAFF...FFAC                     
+7               CAAAAAAAA-|....|-AAAAA-|....|-FF.....FFC                     
+8               CAAAAAAAA|......|AAAAA|......|F.......FC                     
+9               CAAAAAAAAF......|AAAAA|......S........FC                     
+0               CAAAAAAAA|......|AAAAA|......|F.......FC                     
+1               CAAAAAAAA-|....|-AAAAA-|....|-FF.....FFC                     
+2               CAAAAAAAAA|--S-|AAAAAAA|-S--|AAFF...FFAC                     
+3               CAAAAAAAAAAA|#|AA-----AA|#|AAAAAFFFFFAAC                     
+4               CAAAAAAAAAAA|#|---...---|#|AAAAAAAAAAAAC                     
+5               CAAAAAAAAAAA|####+...+####|AAAAAAAAAAAAC                     
+6               CAAAAAAAAAAA------...------AAAAAAAAAAAAC                     
+7               CAAAAAAAAAAAAAAAA-----AAAAAAAAAAAAAAAAAC                     
+8               CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC                     
+9                                                                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#          1         2         3         4         5         6         7    7
 RANDOM_PLACES:(27,09),(41,09)
 # Dungeon Description
 REGION:(00,00,56,19),lit,"ordinary"
@@ -477,7 +509,7 @@ OBJECT[50%]:'(',"box",(33,02)
 OBJECT[50%]:'(',"box",(34,02)
 OBJECT[50%]:'(',"box",(35,02)
 OBJECT[50%]:'(',"box",(33,03)
-OBJECT[50%]:'(',"box",(34,03)
+
 OBJECT[50%]:'(',"box",(35,03)
 OBJECT[50%]:'(',"box",(33,04)
 OBJECT[50%]:'(',"box",(34,04)
@@ -487,7 +519,7 @@ OBJECT[50%]:'(',"box",(33,14)
 OBJECT[50%]:'(',"box",(34,14)
 OBJECT[50%]:'(',"box",(35,14)
 OBJECT[50%]:'(',"box",(33,15)
-OBJECT[50%]:'(',"box",(34,15)
+
 OBJECT[50%]:'(',"box",(35,15)
 OBJECT[50%]:'(',"box",(33,16)
 OBJECT[50%]:'(',"box",(34,16)

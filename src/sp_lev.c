@@ -1279,6 +1279,15 @@ default_case:
 		}
 		otmp->spe = 0;
 	}
+	// Madman's old stuff
+	if(Is_container(otmp) && otmp->spe == 7){
+		switch(urace.malenum){
+			default:
+			case PM_HUMAN:
+			break;
+		}
+		otmp->spe = 0;
+	}
 
 	if(otmp->otyp == STATUE && (otmp->spe&STATUE_FACELESS) && In_mithardir_quest(&u.uz)){
 		int statuetypes[] = {PM_ELVENKING, PM_ELVENKING, PM_ELVENQUEEN, PM_ELVENQUEEN,
