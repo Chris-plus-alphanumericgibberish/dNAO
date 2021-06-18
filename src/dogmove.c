@@ -73,6 +73,7 @@ register struct obj *otmp;
     
     if (is_helmet(otmp) &&
         !is_flimsy(otmp) &&
+        otmp->otyp != find_gcirclet() &&
 	num_horns(mtmp->data) > 0)
 	return FALSE;
 

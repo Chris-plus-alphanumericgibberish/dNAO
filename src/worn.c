@@ -1369,7 +1369,7 @@ boolean racialexception;
 				break;
 		    if (!is_helmet(obj) || ((!helm_match(mon->data,obj) || !has_head_mon(mon) || obj->objsize != mon->data->msize) && !is_flimsy(obj))) continue;
 		    /* (flimsy exception matches polyself handling) */
-		    if (has_horns(mon->data) && !is_flimsy(obj)) continue;
+		    if (has_horns(mon->data) && obj->otyp != find_gcirclet() && !is_flimsy(obj)) continue;
 		    break;
 		case W_ARMS:
 		    if (cantwield(mon->data) || !is_shield(obj)) continue;
@@ -1681,7 +1681,7 @@ boolean polyspot;
 	}
 	if ((otmp = which_armor(mon, W_ARMH)) != 0 &&
 		/* flimsy test for horns matches polyself handling */
-		(!is_flimsy(otmp) || is_whirly(mon->data) || noncorporeal(mon->data))
+		(!(is_flimsy(otmp) || otmp->otyp == find_gcirclet()) || is_whirly(mon->data) || noncorporeal(mon->data))
 	) {
 		if(!has_head_mon(mon) || mon->data->msize != otmp->objsize || !helm_match(mon->data,otmp) || has_horns(mon->data)
 			 || is_whirly(mon->data) || noncorporeal(mon->data)

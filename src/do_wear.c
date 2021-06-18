@@ -1608,7 +1608,7 @@ boolean noisy;
 		if (uarmh) {
 			if (noisy) already_wearing(an(c_helmet));
 			err++;
-		} else if (!is_flimsy(otmp)) {
+		} else if (!is_flimsy(otmp) && otmp->otyp != find_gcirclet()){
 			/* (flimsy exception matches polyself handling), you can even just set a hat on top of your body (no head requried)*/
 			if(!has_head_mon(&youmonst)){
 				if (noisy)

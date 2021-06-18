@@ -2759,7 +2759,9 @@ struct monst *mon;
 				addArmorMenuOption
 			} else if(is_helmet(otmp) && !(mon->misc_worn_check&W_ARMH) && 
 				((helm_match(mon->data,otmp) && has_head_mon(mon) && otmp->objsize == mon->data->msize && !has_horns(mon->data))
-				|| is_flimsy(otmp))
+				|| is_flimsy(otmp)
+				|| otmp->otyp == find_gcirclet()
+				)
 			){
 				addArmorMenuOption
 			} else if(is_shield(otmp) && !(mon->misc_worn_check&W_ARMS) && !cantwield(mon->data)){
