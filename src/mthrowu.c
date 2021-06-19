@@ -151,7 +151,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 			mdef = mdef->nmon;
 
 		/* validate */
-		if (!mdef)
+		if (!mdef || (mdef != &youmonst && DEADMONSTER(mdef)))
 			continue;
 
 		/* get location of next target */
