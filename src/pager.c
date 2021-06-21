@@ -1862,6 +1862,10 @@ get_description_of_attack_type(uchar id)
 	case AT_WISP: return "mist wisps";
 	case AT_TNKR: return "tinker";
 	case AT_SRPR: return "spiritual blade";
+	case AT_XSPR: return "offhand spiritual blade";
+	case AT_MSPR: return "extra-hand spiritual blade";
+	case AT_DSPR: return "million-arm spiritual blade";
+	case AT_ESPR: return "floating spiritual blade";
 	case AT_BEAM: return "ranged beam";
 	case AT_DEVA: return "million-arm weapon";
 	case AT_5SQR: return "long reach touch";

@@ -4656,6 +4656,8 @@ int blind_duration;
 		blind_duration = (blind_duration + 1) / 2;
 
 	if (mdef == &youmonst) {
+		if (u.uvaul_duration)
+			blind_duration = (blind_duration + 1) / 2;
 		You(are_blinded_by_the_flash);
 		make_blinded(blind_duration, FALSE);
 		if (!Blind) Your1(vision_clears);

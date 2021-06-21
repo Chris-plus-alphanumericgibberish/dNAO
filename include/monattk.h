@@ -45,6 +45,10 @@
 #define AT_VINE		35	/* Lashing vines */
 #define AT_BKGT		36	/* Black-goat, resolves as a bite, kick, butt, tuch, or gaze */
 #define AT_BKG2		37	/* Black-goat 2, resolves as a butt, tentacle suck, or gaze */
+#define AT_XSPR		38	/* Phased non-contact attack, "spiritual rapier" (xweapon offhand version) */
+#define AT_MSPR		39	/* Phased non-contact attack, "spiritual rapier" (marilith offhand version) */
+#define AT_DSPR		40	/* Phased non-contact attack, "spiritual rapier" (million-arm mainhand version) */
+#define AT_ESPR		41	/* Phased non-contact attack, "spiritual rapier" (non-hand floating version) */
 
 #define AT_WEAP		252	/* uses weapon */
 #define AT_XWEP		253	/* uses offhanded weapon */
@@ -59,6 +63,13 @@
 	(aatyp) == AT_HODS \
 	)
 
+#define spirit_rapier_at(aatyp) (\
+	(aatyp) == AT_SRPR || \
+	(aatyp) == AT_XSPR || \
+	(aatyp) == AT_MSPR || \
+	(aatyp) == AT_DSPR || \
+	(aatyp) == AT_ESPR \
+	)
 /*	Add new damage types below.
  *
  *	Note that 1-10 correspond to the types of attack used in buzz().

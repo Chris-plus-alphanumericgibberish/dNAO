@@ -3657,7 +3657,7 @@ printAttacks(buf, ptr)
 		"Automatic hit",	/*25*/
 		"Mist tendrils",	/*26*/
 		"Tinker",	/*27*/
-		"Shadow blades",	/*28*/
+		"Magic blades",	/*28*/
 		"Beam",	/*29*/
 		"Deva Arms",	/*30*/
 		"Five-square-reach touch",	/*31*/
@@ -3667,6 +3667,10 @@ printAttacks(buf, ptr)
 		"Lashing vines",	/*35*/
 		"Black goat (mist)",	/*36*/
 		"Black goat (blessed)",	/*37*/
+		"Magic blades (offhand)",	/*38*/
+		"Magic blades (extra hand)",	/*39*/
+		"Magic blades (deva arms)",	/*40*/
+		"Magic blades (floating)",	/*41*/
 		""
 	};
 	static char *damageKey[] = {
@@ -4791,7 +4795,7 @@ struct monst *magr;
 	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
 	int i = rnd(8),j;
 	int x, y;
-	struct attack symbiote = { AT_SRPR, AD_SHDW, 1, 30 };
+	struct attack symbiote = { AT_ESPR, AD_SHDW, 1, 30 };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;

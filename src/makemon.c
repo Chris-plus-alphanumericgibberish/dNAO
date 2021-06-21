@@ -4540,6 +4540,9 @@ int mkobjflags;
 				(void)mongets(mtmp, ARCHAIC_GAUNTLETS, mkobjflags);
 				(void)mongets(mtmp, ARCHAIC_BOOTS, mkobjflags);
 			}
+		} else if (ptr->mtyp == PM_ELOCATOR) {
+		    otmp = mongets(mtmp, rn2(11) ? ROBE : CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+			otmp->obj_color = CLR_ORANGE;
 		} else if (is_dwarf(ptr)) { //slightly rearanged code so more dwarves get helms -D_E
 			if(In_mordor_quest(&u.uz) 
 				&& !In_mordor_forest(&u.uz)

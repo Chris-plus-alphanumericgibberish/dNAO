@@ -121,6 +121,7 @@ static int randSpecialDamageTypes[] =
 						AD_DRLI,
 						AD_WET, 
 						AD_DESC,
+						AD_PSON,
 						/* poisons */
 						AD_DRST,
 						AD_DRDX,
@@ -212,6 +213,7 @@ static int randBeamDamageTypes[] =
 						AD_SLEE,
 						AD_ELEC,
 						AD_ACID,
+						AD_PSON,
 						AD_BLND,
 						AD_STUN,
 						AD_PLYS,

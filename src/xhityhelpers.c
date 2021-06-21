@@ -823,13 +823,13 @@ struct attack *mattk;
 		it's better than "sting" when not a stinging attack... */
 		return (!mwep || !mwep->opoisoned) ? "attack" : "weapon";
 	}
-	else if(mattk->aatyp == AT_SRPR){
+	else if(spirit_rapier_at(mattk->aatyp)){
 		if (mattk->adtyp == AD_SHDW){
-		return "shadow blade";
-	}
-	else if (mattk->adtyp == AD_STAR){
-		return "starlight rapier";
-	}
+			return "shadow blade";
+		}
+		else if (mattk->adtyp == AD_STAR){
+			return "starlight rapier";
+		}
 		else if (mattk->adtyp == AD_BLUD){
 			return "blade of rotted blood";
 		}
@@ -1061,6 +1061,10 @@ int aatyp;
 	case AT_MMGC:
 	case AT_BEAM:
 	case AT_SRPR:
+	case AT_XSPR:
+	case AT_MSPR:
+	case AT_DSPR:
+	case AT_ESPR:
 	case AT_WISP:
 	case AT_REND:		/* If the previous attacks were OK, this one is too */
 		w_mask = ~0L;		/* special case; no defense needed */

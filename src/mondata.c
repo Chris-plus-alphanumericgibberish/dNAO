@@ -464,7 +464,7 @@ int template;
 			attk->aatyp == AT_ARRW ||
 			attk->aatyp == AT_MMGC ||
 			attk->aatyp == AT_TNKR ||
-			attk->aatyp == AT_SRPR ||
+			spirit_rapier_at(attk->aatyp) ||
 			attk->aatyp == AT_BEAM ||
 			attk->aatyp == AT_MAGC ||
 			(attk->aatyp == AT_TENT && template == SKELIFIED) ||
@@ -681,7 +681,7 @@ int template;
 			))
 		{
 			maybe_insert();
-			attk->aatyp = AT_SRPR;
+			attk->aatyp = !attacktype(ptr, AT_WEAP) ? AT_SRPR : !attacktype(ptr, AT_XWEP) ? AT_XSPR : AT_ESPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 4;
 			attk->damd = 8;
@@ -1058,14 +1058,34 @@ int level_bonus;
 			horrorattacks++;
 
 			/* possibly make more identical attacks */
-			while (!rn2(3) && horrorattacks<6) {
+			while (!rn2(3) && horrorattacks<6 && attkptr->aatyp != AT_DEVA && attkptr->aatyp != AT_DSPR) {
 				attkptr = &horror->mattk[horrorattacks];
 				*attkptr = *(attkptr - 1);
 
-				if (attkptr->aatyp == AT_WEAP)
+				if (rn2(3) && attkptr->aatyp == AT_WEAP)
 					attkptr->aatyp = AT_XWEP;
-				else if (attkptr->aatyp == AT_XWEP)
+				else if (rn2(3) && attkptr->aatyp == AT_XWEP)
 					attkptr->aatyp = AT_MARI;
+				
+				/*Magic blade attacks may transition to normal weapon attacks*/
+				if (rn2(3) && attkptr->aatyp == AT_SRPR){
+					if(rn2(10)){
+						attkptr->aatyp = AT_XSPR;
+					}
+					else {
+						attkptr->aatyp = AT_XWEP;
+						attkptr->adtyp = get_random_of(randWeaponDamageTypes);
+					}
+				}
+				else if (rn2(3) && attkptr->aatyp == AT_XSPR){
+					if(rn2(10)){
+						attkptr->aatyp = AT_MSPR;
+					}
+					else {
+						attkptr->aatyp = AT_MARI;
+						attkptr->adtyp = get_random_of(randWeaponDamageTypes);
+					}
+				}
 
 				horrorattacks++;
 			}
@@ -2396,7 +2416,8 @@ struct permonst *ptr;
 		tmp2 = ptr->mattk[i].aatyp;
 		n += (tmp2 > 0);
 		n += (tmp2 == AT_MAGC || tmp2 == AT_MMGC ||
-			tmp2 == AT_TUCH || tmp2 == AT_SRPR || tmp2 == AT_TNKR);
+			tmp2 == AT_TUCH || tmp2 == AT_TNKR ||
+			spirit_rapier_at(tmp2));
 		n += (tmp2 == AT_WEAP && (ptr->mflagsb & MB_STRONG));
 	}
 

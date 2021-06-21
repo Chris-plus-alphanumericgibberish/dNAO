@@ -1697,6 +1697,8 @@ int tary;
 		return MM_MISS;
 	if (youagr ? Nullmagic : mon_resistance(magr, NULLMAGIC))
 		return MM_MISS;
+	if (attk->adtyp == AD_PSON && !youdef && (!mdef || mindless_mon(mdef)))
+		return MM_MISS;
 
 	/* Attempt to find a spell to cast */
 	if (mlev(magr) > 0 && (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC || attk->adtyp == AD_PSON)) {
@@ -2328,6 +2330,9 @@ int tary;
 		/* needs direct target */
 		if (!foundem) {
 			impossible("No mdef for psibolt");
+			return MM_MISS;
+		}
+		if (!youdef && mindless_mon(mdef)) {
 			return MM_MISS;
 		}
 		/* calculate resistance */
