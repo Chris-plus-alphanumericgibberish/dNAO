@@ -276,7 +276,7 @@ do_light_sources(cs_rows)
 					row[x] |= TEMP_DRK1;
 			}
 			}
-			range = ls->range*2/3;
+			range = max(ls->range*2/3,1);
 			limits = circle_ptr(range);
 			if ((max_y = (ls->y + range)) >= ROWNO) max_y = ROWNO-1;
 			if ((y = (ls->y - range)) < 0) y = 0;
@@ -308,7 +308,7 @@ do_light_sources(cs_rows)
 					row[x] |= TEMP_DRK2;
 			}
 			}
-			range = ls->range*1/3;
+			range = max(ls->range*1/3,1);
 			limits = circle_ptr(range);
 			if ((max_y = (ls->y + range)) >= ROWNO) max_y = ROWNO-1;
 			if ((y = (ls->y - range)) < 0) y = 0;
