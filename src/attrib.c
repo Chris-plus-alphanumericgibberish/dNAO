@@ -1411,7 +1411,7 @@ long int madness;
 {
 	int sanlevel;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
-	if(ClearThoughts)
+	if(ClearThoughts || TimeStop)
 		return 0;
 	
 	if(!(u.umadness&madness))

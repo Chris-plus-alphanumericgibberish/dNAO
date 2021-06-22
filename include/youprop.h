@@ -145,6 +145,14 @@
 #define EClearThoughts		u.uprops[CLEAR_THOUGHTS].extrinsic
 #define ClearThoughts		(HClearThoughts || EClearThoughts)
 
+#define HBlowingWinds		u.uprops[BLOWING_WINDS].intrinsic
+#define EBlowingWinds		u.uprops[BLOWING_WINDS].extrinsic
+#define BlowingWinds		(HBlowingWinds || EBlowingWinds)
+
+#define HTimeStop		u.uprops[TIME_STOP].intrinsic
+#define ETimeStop		u.uprops[TIME_STOP].extrinsic
+#define TimeStop		(HTimeStop || ETimeStop)
+
 /* Intrinsics only */
 #define Invulnerable		u.uprops[INVULNERABLE].intrinsic    /* [Tom] */
 

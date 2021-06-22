@@ -453,6 +453,202 @@ clothes_bite_you()
 
 static long prev_dgl_extrainfo = 0;
 
+void
+you_calc_movement()
+{
+	int moveamt = 0;
+	int nmonsclose,nmonsnear,enkispeedlim;
+	int wtcap = near_capacity();
+	struct monst *mtmp;
+	
+#ifdef STEED
+	if (u.usteed && u.umoved) {
+	/* your speed doesn't augment steed's speed */
+	moveamt = mcalcmove(u.usteed);
+	moveamt += P_SKILL(P_RIDING)-1; /* -1 to +3 */
+	if(uclockwork){
+		if(u.ucspeed == HIGH_CLOCKSPEED){
+			/*You are still burning spring tension, even if it doesn't affect your speed!*/
+			if(u.slowclock < 3) morehungry(3-u.slowclock);
+			else if(!TimeStop && !(moves%(u.slowclock - 2))) morehungry(1);
+		}
+		if(u.phasengn){
+			//Phasing mount as well
+			morehungry(10);
+		}
+	}
+	} else
+#endif
+	{
+	//Override species-based speed penalties in some cases.
+	if(!Upolyd && (
+		Race_if(PM_GNOME)
+		|| Race_if(PM_DWARF)
+		|| Race_if(PM_ORC)
+		|| (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
+	)) moveamt = 12;
+	else moveamt = youmonst.data->mmove;
+	if(uarmf && uarmf->otyp == STILETTOS && !Flying && !Levitation) moveamt = (moveamt*5)/6;
+	
+	if(u.sealsActive&SEAL_EURYNOME && IS_PUDDLE_OR_POOL(levl[u.ux][u.uy].typ)){
+		if (Very_fast) {	/* speed boots or potion */
+			/* average movement is 1.78 times normal */
+			moveamt += 2*NORMAL_SPEED / 3;
+			if (rn2(3) == 0) moveamt += NORMAL_SPEED / 3;
+		} else if (Fast) {
+			/* average movement is 1.56 times normal */
+			moveamt += NORMAL_SPEED / 3;
+			if (rn2(3) != 0) moveamt += NORMAL_SPEED / 3;
+		} else {
+			/* average movement is 1.33 times normal */
+			if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
+		}
+	} else {
+		if (Very_fast) {	/* speed boots or potion */
+			/* average movement is 1.67 times normal */
+			moveamt += NORMAL_SPEED / 2;
+			if (rn2(3) == 0) moveamt += NORMAL_SPEED / 2;
+		} else if (Fast) {
+			/* average movement is 1.33 times normal */
+			if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
+		}
+	}
+	
+	//Run away!
+	if(Panicking){
+		moveamt += 2;
+	}
+	
+	if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HASTE){
+		moveamt += 2;
+	}
+	
+	if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
+		moveamt += 8;
+	
+	if(u.sealsActive&SEAL_ENKI){
+		nmonsclose = nmonsnear = 0;
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(mtmp->mpeaceful) continue;
+			if(distmin(u.ux, u.uy, mtmp->mx,mtmp->my) <= 1){
+				nmonsclose++;
+				nmonsnear++;
+			} else if(distmin(u.ux, u.uy, mtmp->mx,mtmp->my) <= 2){
+				nmonsnear++;
+			}
+		}
+		enkispeedlim = u.ulevel/10+1;
+		if(nmonsclose>1){
+			moveamt += min(enkispeedlim,nmonsclose);
+			nmonsnear -= min(enkispeedlim,nmonsclose);
+		}
+		if(nmonsnear>3) moveamt += min(enkispeedlim,nmonsnear-2);
+	}
+	if (uwep && uwep->oartifact == ART_GARNET_ROD) moveamt += NORMAL_SPEED / 2;
+	if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+		moveamt += NORMAL_SPEED;
+		if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe-- < 1){
+			if(ublindf && ublindf->otyp == MASK && is_undead(&mons[ublindf->corpsenm])){
+				artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = mons[ublindf->corpsenm].mlevel;
+				if(ublindf->oeroded3>=3){
+					Your("mask shatters!");
+					useup(ublindf);
+				} else {
+					Your("mask cracks.");
+					ublindf->oeroded3++;
+				}
+			} else {
+				artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = 0;
+				losehp(5, "inadvisable haste", KILLED_BY);
+				if (Upolyd) {
+					if(!TimeStop && u.mhmax > u.ulevel && moves % 2){
+						u.uhpmod--;
+						calc_total_maxhp();
+					}
+				}
+				else{
+					if(!TimeStop && u.uhpmax > u.ulevel && moves % 2){
+						u.uhpmod--;
+						calc_total_maxhp();
+					}
+				}
+//					if( !(moves % 5) )
+				You_feel("your %s %s!", 
+					body_part(BONES), rnd(6) ? body_part(CREAK) : body_part(CRACK));
+				exercise(A_CON, FALSE);
+				exercise(A_STR, FALSE);
+			}
+		}
+	}
+	else if(!TimeStop && artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe < u.ulevel && !(moves%10)) artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe++;
+	
+	if (u.usleep && u.usleep < monstermoves && roll_madness(MAD_FORMICATION)) {
+		multi = -1;
+		nomovemsg = "The crawling bugs awaken you.";
+	}
+	if(uclockwork && u.ucspeed == HIGH_CLOCKSPEED){
+		int hungerup;
+		moveamt *= 2;
+		hungerup = 2*moveamt/NORMAL_SPEED - 1;
+		if(u.slowclock < hungerup) morehungry(hungerup-u.slowclock);
+		else if(!TimeStop && !(moves%(u.slowclock - hungerup + 1))) morehungry(1);
+	}
+	if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
+		if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
+	}
+	if(active_glyph(ANTI_CLOCKWISE_METAMORPHOSIS))
+		moveamt += 3;
+	if(u.uuur_duration)
+		moveamt += 6;
+	if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+		// switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
+			// case P_BASIC:       moveamt = max(moveamt-6,1); break;
+			// case P_SKILLED:     moveamt = max(moveamt-4,1); break;
+			// case P_EXPERT:      moveamt = max(moveamt-3,1); break;
+		// }
+		moveamt = max(moveamt-6,1);
+	}
+	if(youracedata->mmove){
+		if(moveamt < 1) moveamt = 1;
+	} else {
+		if(moveamt < 0) moveamt = 0;
+	}
+	}
+	
+	if(uclockwork && u.phasengn){
+		morehungry(10);
+	}
+	
+	if(uclockwork && u.ucspeed == SLOW_CLOCKSPEED)
+		moveamt /= 2; /*Even if you are mounted, a slow clockspeed affects how 
+						fast you can issue commands to the mount*/
+	
+	switch (wtcap) {
+	case UNENCUMBERED: break;
+	case SLT_ENCUMBER: moveamt -= (moveamt / 4); break;
+	case MOD_ENCUMBER: moveamt -= (moveamt / 2); break;
+	case HVY_ENCUMBER: moveamt -= ((moveamt * 3) / 4); break;
+	case EXT_ENCUMBER: moveamt -= ((moveamt * 7) / 8); break;
+	default: break;
+	}
+	
+	if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
+		int delta = Insanity;
+		int discomfort = u_clothing_discomfort();
+		discomfort = (discomfort * delta)/100;
+		if (moveamt - discomfort < NORMAL_SPEED/2) {
+			moveamt = min(moveamt, NORMAL_SPEED/2);
+		}
+		else moveamt -= discomfort;
+	}
+	
+	if(In_fog_cloud(&youmonst)) moveamt = max(moveamt/3, 1);
+	youmonst.movement += moveamt;
+	//floor how far into movement-debt you can fall.
+	if (youmonst.movement < -2*NORMAL_SPEED) youmonst.movement = -2*NORMAL_SPEED;
+	
+}
+
 /* perform 1 turn's worth of time-dependent hp modification, mostly silently */
 /* NOTES: can rehumanize(), can print You("pass out from exertion!") if moving when overloaded at 1 hp */
 void
@@ -959,11 +1155,10 @@ moveloop()
 	int abort_lev, i, j;
     struct monst *mtmp, *nxtmon;
 	struct obj *pobj;
-    int moveamt = 0, wtcap = 0, change = 0;
+    int wtcap = 0, change = 0;
     boolean didmove = FALSE, monscanmove = FALSE;
 	int oldspiritAC=0;
 	int tx,ty;
-	int nmonsclose,nmonsnear,enkispeedlim;
 	static boolean oldBlind = 0, oldLightBlind = 0;
 	int healing_penalty = 0;
     int hpDiff;
@@ -1327,10 +1522,15 @@ moveloop()
 			sense_nearby_monsters();
 ////////////////////////////////////////////////////////////////////////////////////////////////
 		    if (youmonst.movement >= NORMAL_SPEED)
-			break;	/* it's now your turn */
+				break;	/* it's now your turn */
+			else if(HTimeStop){
+				you_calc_movement();
+				HTimeStop--;
+				break;	/* it's now your turn */
+			}
 		} while (monscanmove);
 		flags.mon_moving = FALSE;
-
+		
 		if (!monscanmove && youmonst.movement < NORMAL_SPEED) {
 		    /* both you and the monsters are out of steam this round */
 		    /* set up for a new turn */
@@ -1778,127 +1978,7 @@ karemade:
 			if(u.summonMonster) u.summonMonster = FALSE;
 
 		    /* calculate how much time passed. */
-#ifdef STEED
-		    if (u.usteed && u.umoved) {
-			/* your speed doesn't augment steed's speed */
-			moveamt = mcalcmove(u.usteed);
-			moveamt += P_SKILL(P_RIDING)-1; /* -1 to +3 */
-			if(uclockwork){
-				if(u.ucspeed == HIGH_CLOCKSPEED){
-					/*You are still burning spring tension, even if it doesn't affect your speed!*/
-					if(u.slowclock < 3) morehungry(3-u.slowclock);
-					else if(!(moves%(u.slowclock - 2))) morehungry(1);
-				}
-				if(u.phasengn){
-					//Phasing mount as well
-					morehungry(10);
-				}
-			}
-		    } else
-#endif
-		    {
-			//Override species-based speed penalties in some cases.
-			if(!Upolyd && (
-				Race_if(PM_GNOME)
-				|| Race_if(PM_DWARF)
-				|| Race_if(PM_ORC)
-				|| (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
-			)) moveamt = 12;
-			else moveamt = youmonst.data->mmove;
-			if(uarmf && uarmf->otyp == STILETTOS && !Flying && !Levitation) moveamt = (moveamt*5)/6;
-			
-			if(u.sealsActive&SEAL_EURYNOME && IS_PUDDLE_OR_POOL(levl[u.ux][u.uy].typ)){
-				if (Very_fast) {	/* speed boots or potion */
-					/* average movement is 1.78 times normal */
-					moveamt += 2*NORMAL_SPEED / 3;
-					if (rn2(3) == 0) moveamt += NORMAL_SPEED / 3;
-				} else if (Fast) {
-					/* average movement is 1.56 times normal */
-					moveamt += NORMAL_SPEED / 3;
-					if (rn2(3) != 0) moveamt += NORMAL_SPEED / 3;
-				} else {
-					/* average movement is 1.33 times normal */
-					if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
-				}
-			} else {
-				if (Very_fast) {	/* speed boots or potion */
-					/* average movement is 1.67 times normal */
-					moveamt += NORMAL_SPEED / 2;
-					if (rn2(3) == 0) moveamt += NORMAL_SPEED / 2;
-				} else if (Fast) {
-					/* average movement is 1.33 times normal */
-					if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
-				}
-			}
-			
-			//Run away!
-			if(Panicking){
-				moveamt += 2;
-			}
-			
-			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HASTE){
-				moveamt += 2;
-			}
-			
-			if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
-				moveamt += 8;
-			
-			if(u.sealsActive&SEAL_ENKI){
-				nmonsclose = nmonsnear = 0;
-				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-					if(mtmp->mpeaceful) continue;
-					if(distmin(u.ux, u.uy, mtmp->mx,mtmp->my) <= 1){
-						nmonsclose++;
-						nmonsnear++;
-					} else if(distmin(u.ux, u.uy, mtmp->mx,mtmp->my) <= 2){
-						nmonsnear++;
-					}
-				}
-				enkispeedlim = u.ulevel/10+1;
-				if(nmonsclose>1){
-					moveamt += min(enkispeedlim,nmonsclose);
-					nmonsnear -= min(enkispeedlim,nmonsclose);
-				}
-				if(nmonsnear>3) moveamt += min(enkispeedlim,nmonsnear-2);
-			}
-			if (uwep && uwep->oartifact == ART_GARNET_ROD) moveamt += NORMAL_SPEED / 2;
-			if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-				moveamt += NORMAL_SPEED;
-				if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe-- < 1){
-					if(ublindf && ublindf->otyp == MASK && is_undead(&mons[ublindf->corpsenm])){
-						artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = mons[ublindf->corpsenm].mlevel;
-						if(ublindf->oeroded3>=3){
-							Your("mask shatters!");
-							useup(ublindf);
-						} else {
-							Your("mask cracks.");
-							ublindf->oeroded3++;
-						}
-					} else {
-						artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = 0;
-						losehp(5, "inadvisable haste", KILLED_BY);
-						if (Upolyd) {
-							if(u.mhmax > u.ulevel && moves % 2){
-								u.uhpmod--;
-								calc_total_maxhp();
-							}
-						}
-						else{
-							if(u.uhpmax > u.ulevel && moves % 2){
-								u.uhpmod--;
-								calc_total_maxhp();
-							}
-						}
-	//					if( !(moves % 5) )
-						You_feel("your %s %s!", 
-							body_part(BONES), rnd(6) ? body_part(CREAK) : body_part(CRACK));
-						exercise(A_CON, FALSE);
-						exercise(A_STR, FALSE);
-					}
-				}
-			}
-			else if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe < u.ulevel && !(moves%10)) artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe++;
-			
+			you_calc_movement();
 			if(!(moves%10)){
 				if(u.eurycounts) u.eurycounts--;
 				if(u.orthocounts){
@@ -1950,10 +2030,7 @@ karemade:
 				forget((pre_drain - u.ulevel) * 100/(pre_drain)); //drain some proportion of your memory
 				losexp("mind dissolution",TRUE,TRUE,TRUE);
 			}
-			if (u.usleep && u.usleep < monstermoves && roll_madness(MAD_FORMICATION)) {
-				multi = -1;
-				nomovemsg = "The crawling bugs awaken you.";
-			}
+			
 			if(mad_turn(MAD_HOST)){
 				if(!Vomiting && roll_madness(MAD_HOST)){
 					static const char *hoststrings[] = {
@@ -2001,67 +2078,6 @@ karemade:
 			if(u.sealsActive&SEAL_ASTAROTH && u.uinwater){
 				losehp(1, "rusting through", KILLED_BY);
 			}
-			
-			if(uclockwork && u.ucspeed == HIGH_CLOCKSPEED){
-				int hungerup;
-				moveamt *= 2;
-				hungerup = 2*moveamt/NORMAL_SPEED - 1;
-				if(u.slowclock < hungerup) morehungry(hungerup-u.slowclock);
-				else if(!(moves%(u.slowclock - hungerup + 1))) morehungry(1);
-			}
-			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
-				if (rn2(3) != 0) moveamt += NORMAL_SPEED / 2;
-			}
-			if(active_glyph(ANTI_CLOCKWISE_METAMORPHOSIS))
-				moveamt += 3;
-			if(u.uuur_duration)
-				moveamt += 6;
-			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
-				// switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
-					// case P_BASIC:       moveamt = max(moveamt-6,1); break;
-					// case P_SKILLED:     moveamt = max(moveamt-4,1); break;
-					// case P_EXPERT:      moveamt = max(moveamt-3,1); break;
-				// }
-				moveamt = max(moveamt-6,1);
-			}
-			if(youracedata->mmove){
-				if(moveamt < 1) moveamt = 1;
-			} else {
-				if(moveamt < 0) moveamt = 0;
-			}
-			}
-			
-			if(uclockwork && u.phasengn){
-				morehungry(10);
-			}
-			
-			if(uclockwork && u.ucspeed == SLOW_CLOCKSPEED)
-				moveamt /= 2; /*Even if you are mounted, a slow clockspeed affects how 
-								fast you can issue commands to the mount*/
-			
-		    switch (wtcap) {
-			case UNENCUMBERED: break;
-			case SLT_ENCUMBER: moveamt -= (moveamt / 4); break;
-			case MOD_ENCUMBER: moveamt -= (moveamt / 2); break;
-			case HVY_ENCUMBER: moveamt -= ((moveamt * 3) / 4); break;
-			case EXT_ENCUMBER: moveamt -= ((moveamt * 7) / 8); break;
-			default: break;
-		    }
-			
-			if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-				int delta = Insanity;
-				int discomfort = u_clothing_discomfort();
-				discomfort = (discomfort * delta)/100;
-				if (moveamt - discomfort < NORMAL_SPEED/2) {
-					moveamt = min(moveamt, NORMAL_SPEED/2);
-				}
-				else moveamt -= discomfort;
-			}
-			
-		    if(In_fog_cloud(&youmonst)) moveamt = max(moveamt/3, 1);
-		    youmonst.movement += moveamt;
-			//floor how far into movement-debt you can fall.
-		    if (youmonst.movement < -2*NORMAL_SPEED) youmonst.movement = -2*NORMAL_SPEED;
 			
 			//Aprox one check per six monster-gen periods
 			if(!rn2(70*6) && roll_madness(MAD_SPORES)
