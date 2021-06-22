@@ -2783,7 +2783,7 @@ int dz;
 					money2none(cost);
 #endif
 					bless(uwep);
-					if(uwep->spe < 3)
+					if((uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && uwep->spe < 3)
 						uwep->spe++;
 				break;
 				case UNSTERILIZE:
