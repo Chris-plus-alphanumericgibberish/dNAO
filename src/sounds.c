@@ -3106,7 +3106,7 @@ int tx,ty;
 //					struct monst *priest = findpriest(roomno);
 					//invoking Amon inside a temple angers the resident deity
 					altar_wrath(tx, ty);
-					angrygods(a_align(tx,ty));
+					angrygods(Align2gangr(a_align(tx,ty)));
 				}
 				u.sealTimeout[AMON-FIRST_SEAL] = moves + bindingPeriod; // invoking amon on a level with an altar still triggers the binding period.
 			}
@@ -4235,7 +4235,7 @@ int tx,ty;
 						adjalign(-5);
 						u.ugangr[Align2gangr(u.ualign.type)] += 3;
 						if (!Inhell) {
-							angrygods(u.ualign.type);
+							angrygods(Align2gangr(u.ualign.type));
 							change_luck(-5);
 						}
 					}

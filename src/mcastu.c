@@ -1868,9 +1868,10 @@ int tary;
 		/* special case override: the avatar of lolth can ask Lolth to intercede instead of casting a spell */
 		if (youdef && magr->mtyp == PM_AVATAR_OF_LOLTH && !strcmp(urole.cgod, "Lolth") && !is_undirected_spell(spellnum) && !magr->mpeaceful){
 			u.ugangr[Align2gangr(A_CHAOTIC)]++;
-			angrygods(A_CHAOTIC);
+			angrygods(Align2gangr(A_CHAOTIC));
 			result = MM_HIT;
 		}
+		// !!!
 		/* generally: cast the spell */
 		result = cast_spell(magr, mdef, attk, spellnum, tarx, tary);
 	}
