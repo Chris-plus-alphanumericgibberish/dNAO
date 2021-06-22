@@ -1311,6 +1311,7 @@ boolean creation;
 	m_dowear_type(mon, W_ARMG, creation, FALSE);
 	m_dowear_type(mon, W_ARMF, creation, FALSE);
 	m_dowear_type(mon, W_ARM, creation, FALSE);
+	m_dowear_type(mon, W_TOOL, creation, FALSE);
 }
 
 STATIC_OVL void
@@ -1389,6 +1390,10 @@ boolean racialexception;
 				break;
 		    if (!is_suit(obj) || !arm_match(mon->data, obj) || !arm_size_fits(mon->data, obj))
 				continue;
+		    break;
+		case W_TOOL:
+		    if(!can_wear_blindf(mon->data)) continue;
+
 		    break;
 	    }
 	    if (obj->owornmask) continue;
