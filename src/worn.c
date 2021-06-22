@@ -1392,8 +1392,8 @@ boolean racialexception;
 				continue;
 		    break;
 		case W_TOOL:
-		    if(!can_wear_blindf(mon->data)) continue;
-
+		    if(!is_worn_tool(obj)) continue;
+		    if(!can_wear_blindf(mon->data) || (is_opaque_worn_tool(obj) && !(obj->otyp == R_LYEHIAN_FACEPLATE && is_mind_flayer(mon->data))) ) continue;
 		    break;
 	    }
 	    if (obj->owornmask) continue;
@@ -1765,6 +1765,16 @@ struct obj *obj;
 	case ALCHEMY_SMOCK:
 		if (!species_resists_acid(mon) || !species_resists_poison(mon))
 			return 5;
+		break;
+	case LIVING_MASK:
+		return 3;
+		break;
+	case SUNGLASSES:
+		return 2;
+		break;
+	case ANDROID_VISOR:
+		if(is_android(mon)) return 4;
+		return 1;
 		break;
 	case MUMMY_WRAPPING:
 	case PRAYER_WARDED_WRAPPING:

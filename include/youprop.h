@@ -181,7 +181,7 @@
 #define HBlind_res		u.uprops[BLIND_RES].intrinsic
 #define EBlind_res		u.uprops[BLIND_RES].extrinsic
 #define Blind_res		(HBlind_res || EBlind_res)
-#define Blindfolded		((ublindf && ublindf->otyp != LENSES && ublindf->otyp != SUNGLASSES && ublindf->otyp != MASK && ublindf->otyp != ANDROID_VISOR && ublindf->otyp != LIVING_MASK) ||\
+#define Blindfolded		((ublindf && is_opaque_worn_tool(ublindf)) ||\
 						(uarmh && uarmh->otyp == PLASTEEL_HELM && uarmh->obj_material != objects[uarmh->otyp].oc_material && is_opaque(uarmh)) ||\
 						(uarmh && uarmh->otyp == CRYSTAL_HELM && is_opaque(uarmh)))
 		/* ...means blind because of a cover */
