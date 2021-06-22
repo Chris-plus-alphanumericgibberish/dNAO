@@ -505,7 +505,7 @@ struct obj {
 #define is_worn_tool(o)	((o)->otyp == BLINDFOLD || (o)->otyp == ANDROID_VISOR || \
 							 (o)->otyp == TOWEL || (o)->otyp == LENSES || (o)->otyp == SUNGLASSES || \
 							 (o)->otyp == LIVING_MASK || (o)->otyp == MASK || (o)->otyp == R_LYEHIAN_FACEPLATE)
-#define is_opaque_worn_tool(o)	((o)->otyp == BLINDFOLD || (o)->otyp == TOWEL || (o)->otyp == R_LYEHIAN_FACEPLATE)
+#define is_opaque_worn_tool(o)	((o) && ((o)->otyp == BLINDFOLD || (o)->otyp == TOWEL || (o)->otyp == R_LYEHIAN_FACEPLATE))
 #define is_instrument(o)	((o)->otyp >= FLUTE && \
 			 (o)->otyp <= DRUM_OF_EARTHQUAKE)
 #define is_mummy_wrap(o)	((o)->otyp == MUMMY_WRAPPING || \
