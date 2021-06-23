@@ -3508,7 +3508,7 @@ boolean * messaged;
 				mdef->movement -= 2;
 			}
 		}
-		if (!youdef && DEADMONSTER(mdef))
+		if (DEADMONSTER(mdef))
 			return MM_DEF_DIED;
 		if (migrating_mons == mdef)
 			return MM_AGR_STOP; //Monster was killed as part of movement OR fell to new level and we should stop.
