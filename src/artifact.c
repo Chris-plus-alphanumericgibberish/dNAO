@@ -749,6 +749,9 @@ struct obj *otmp;	/* existing object */
 	}
 	/* armor props */
 	if(otmp->oclass == ARMOR_CLASS){
+		if(rn2(2)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		}
 		if(rn2(3)) switch(rn2(6)){
 			case 0:
 				add_oprop(otmp, OPROP_WOOL);
@@ -765,7 +768,7 @@ struct obj *otmp;	/* existing object */
 				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
 			break;
 			case 4:
-				ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+				add_oprop(otmp, OPROP_BCRS);
 			break;
 			case 5:
 				add_oprop(otmp, OPROP_REFL);
@@ -788,7 +791,10 @@ struct obj *otmp;	/* existing object */
 	}
 	/* weapon props */
 	else if(otmp->oclass == WEAPON_CLASS){
-		if(rn2(3)) switch(rn2(6)){
+		if(rn2(2)){
+			ADD_WEAK_OR_STRONG_OPROP(otmp, HOLY);
+		}
+		if(rn2(3)) switch(rn2(5)){
 			case 0:
 				add_oprop(otmp, OPROP_WRTHW);
 			break;
@@ -802,9 +808,6 @@ struct obj *otmp;	/* existing object */
 				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
 			break;
 			case 4:
-				ADD_WEAK_OR_STRONG_OPROP(otmp, HOLY);
-			break;
-			case 5:
 				add_oprop(otmp, OPROP_VORPW);
 			break;
 		}

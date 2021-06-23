@@ -925,6 +925,8 @@ boolean dofull;
 			Strcat(buf, "acidproof ");
 		if(check_oprop(obj, OPROP_DISN) && obj->known)
 			Strcat(buf, "disintegration-proof ");
+		if(check_oprop(obj, OPROP_BCRS) && obj->known)
+			Strcat(buf, "prayer-warded ");
 		
 		if (check_oprop(obj, OPROP_LESSER_ANARW) && obj->known)
 			Strcat(buf, "unruly ");
@@ -3998,7 +4000,10 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "disintegration-proof ", l=21)) {
 			add_oprop_list(oprop_list, OPROP_DISN);
-			
+
+		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping ", 23)) {
+			add_oprop_list(oprop_list, OPROP_BCRS);
+
 		} else if (!strncmpi(bp, "anarchic-armor ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_ANAR);
 

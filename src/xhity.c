@@ -9965,6 +9965,10 @@ boolean verbose;
 				}
 				return TRUE;
 			}
+			else if(check_oprop(otmp, OPROP_BCRS)){
+				if(verbose) You(mal_aura, the(xname(otmp)));
+				return TRUE;
+			}
 		}
 		if(u.ukinghill && rn2(20)){
 			if(verbose) You(mal_aura, "the cursed treasure chest");
