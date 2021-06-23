@@ -960,6 +960,16 @@ struct obj *otmp;	/* existing object */
 				ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
 			break;
 		}
+		/* Living weapons */
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_LIVEW);
+		}
+		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_ASECW);
+		}
+		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_PSECW);
+		}
 	}
 	return otmp;
 }
