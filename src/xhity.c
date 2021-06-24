@@ -9965,7 +9965,7 @@ boolean verbose;
 				}
 				return TRUE;
 			}
-			else if(check_oprop(otmp, OPROP_BCRS)){
+			else if(check_oprop(otmp, OPROP_BCRS) && otmp->owornmask){
 				if(verbose) You(mal_aura, the(xname(otmp)));
 				return TRUE;
 			}
@@ -10032,14 +10032,18 @@ boolean verbose;
 				curse(otmp);
 			return TRUE;
 		}
-		for(otmp = mon->minvent; otmp; otmp=otmp->nobj)
-			if(otmp->oartifact == ART_HELPING_HAND)
-				break;
-		if(otmp && rn2(20)){
-			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "helpful hand");
-			return TRUE;
+		for(otmp = mon->minvent; otmp; otmp=otmp->nobj){
+			if(otmp->oartifact == ART_HELPING_HAND && rn2(20)){
+				if (visible && verbose)
+					You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "helpful hand");
+				return TRUE;
+			}
+			else if(check_oprop(otmp, OPROP_BCRS) && otmp->owornmask){
+				if (visible && verbose)
+					You(mons_item_mal_aura, s_suffix(mon_nam(mon)), the(xname(otmp)));
+				return TRUE;
+			}
 		}
-
 	}
 	return FALSE;
 }
