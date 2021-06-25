@@ -463,10 +463,8 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 			}
 			otmp = mksobj(otyp, NO_MKOBJ_FLAGS);
 		}
-		/* christen the artifact */
+		/* christen the artifact, which also sets its artifactness */
 	    otmp = oname(otmp, a->name);
-		otmp->oartifact = arti;
-		artinstance[arti].exists = TRUE;
 		/* WHY */
 		if (arti == ART_HELM_OF_THE_ARCANE_ARCHER && by_align){
 			unrestrict_weapon_skill(P_ATTACK_SPELL);
