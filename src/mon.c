@@ -567,7 +567,7 @@ register struct monst *mtmp;
 		if(is_alabaster_mummy(mtmp->data) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
 			mksobj_at(mtmp->mvar_syllable, x, y, NO_MKOBJ_FLAGS);
 			if(mtmp->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
-				mtmp->mintrinsics[(DISPLACED-1)/32] &= ~(1 << (DISPLACED-1)%32);
+				remove_mintrinsic(mtmp, DISPLACED);
 			mtmp->mvar_syllable = 0; //Lose the bonus if resurrected
 		}
 		if(mtmp->mpetitioner 

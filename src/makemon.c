@@ -7512,7 +7512,7 @@ int mkobjflags;
 				break;
 				case 4:
 					mtmp->mvar_syllable = SYLLABLE_OF_SPIRIT__VAUL;
-					mtmp->mintrinsics[(DISPLACED-1)/32] |= (1 << (DISPLACED-1)%32);
+					give_mintrinsic(mtmp, DISPLACED);
 				break;
 				case 5:
 					mtmp->mvar_syllable = SYLLABLE_OF_POWER__KRAU;

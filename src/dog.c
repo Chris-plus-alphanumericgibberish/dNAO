@@ -281,59 +281,8 @@ makedog()
 	initedog(mtmp);
 	EDOG(mtmp)->loyal = TRUE;
 	if(is_half_dragon(mtmp->data) && flags.HDbreath){
-		switch(mtmp->mvar_hdBreath){
-			case AD_COLD:
-				mtmp->mintrinsics[(COLD_RES-1)/32] &= ~(1 << (COLD_RES-1)%32);
-			break;
-			case AD_FIRE:
-				mtmp->mintrinsics[(FIRE_RES-1)/32] &= ~(1 << (FIRE_RES-1)%32);
-			break;
-			case AD_SLEE:
-				mtmp->mintrinsics[(SLEEP_RES-1)/32] &= ~(1 << (SLEEP_RES-1)%32);
-			break;
-			case AD_ELEC:
-				mtmp->mintrinsics[(SHOCK_RES-1)/32] &= ~(1 << (SHOCK_RES-1)%32);
-			break;
-			case AD_DRST:
-				mtmp->mintrinsics[(POISON_RES-1)/32] &= ~(1 << (POISON_RES-1)%32);
-			break;
-			case AD_ACID:
-				mtmp->mintrinsics[(ACID_RES-1)/32] &= ~(1 << (ACID_RES-1)%32);
-			break;
-			case AD_MAGM:
-				mtmp->mintrinsics[(ANTIMAGIC-1)/32] &= ~(1 << (ANTIMAGIC-1)%32);
-			break;
-		}
-		switch(flags.HDbreath){
-			case AD_COLD:
-				mtmp->mvar_hdBreath = AD_COLD;
-				mtmp->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
-			break;
-			case AD_FIRE:
-				mtmp->mvar_hdBreath = AD_FIRE;
-				mtmp->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
-			break;
-			case AD_SLEE:
-				mtmp->mvar_hdBreath = AD_SLEE;
-				mtmp->mintrinsics[(SLEEP_RES-1)/32] |= (1 << (SLEEP_RES-1)%32);
-			break;
-			case AD_ELEC:
-				mtmp->mvar_hdBreath = AD_ELEC;
-				mtmp->mintrinsics[(SHOCK_RES-1)/32] |= (1 << (SHOCK_RES-1)%32);
-			break;
-			case AD_DRST:
-				mtmp->mvar_hdBreath = AD_DRST;
-				mtmp->mintrinsics[(POISON_RES-1)/32] |= (1 << (POISON_RES-1)%32);
-			break;
-			case AD_ACID:
-				mtmp->mvar_hdBreath = AD_ACID;
-				mtmp->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
-			break;
-			case AD_MAGM:
-				mtmp->mvar_hdBreath = AD_MAGM;
-				mtmp->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
-			break;
-		}
+		mtmp->mvar_hdBreath = flags.HDbreath;
+		set_mon_data(mtmp, mtmp->mtyp);
 	}
 	return(mtmp);
 }

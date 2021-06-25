@@ -83,6 +83,11 @@ struct permonst * ptr;
 	mon->data = ptr;
 	mon->mtyp = ptr->mtyp;
 
+	/* zero out intrinsics to be set now */
+	for(i = 0; i < MPROP_SIZE; i++){
+		mon->mintrinsics[i] = 0;
+	}
+
 	/* resistances */
 	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
 	if(is_half_dragon(ptr)){
@@ -151,7 +156,7 @@ struct permonst * ptr;
 	set_mintrinsic(species_controls_teleports(mon->data), TELEPORT_CONTROL);
 	set_mintrinsic(species_is_telepathic(mon->data), TELEPAT);
 #undef set_mintrinsic
-	for(int i = 0; i < MPROP_SIZE; i++){
+	for(i = 0; i < MPROP_SIZE; i++){
 		mon->mintrinsics[i] |= mon->acquired_trinsics[i];
 	}
     return;
@@ -162,8 +167,8 @@ give_mintrinsic(mon, intrinsic)
 struct monst * mon;
 long intrinsic;
 {
-	mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
 	mon->acquired_trinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
+	set_mon_data_core(mon, mon->data);
 }
 
 void
@@ -171,8 +176,8 @@ remove_mintrinsic(mon, intrinsic)
 struct monst * mon;
 long intrinsic;
 {
-	mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
 	mon->acquired_trinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
+	set_mon_data_core(mon, mon->data);
 }
 
 //Note: intended to be mental things relating to a faction a monster belongs to
