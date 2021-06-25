@@ -2746,7 +2746,7 @@ spiriteffects(power, atme)
 			You("dance and shape the wind.");
 			for(i=dsize; i > 0; i--){
 				do pm = &mons[rn2(PM_LONG_WORM_TAIL)];
-				while( (pm->geno & (G_UNIQ|G_NOGEN)) || pm->mlevel >= u.ulevel+5);
+				while( (pm->geno & (G_UNIQ|G_NOGEN)) || pm->mlevel >= u.ulevel+5 || (pm->mflagsg & (MG_NOWISH|MG_NOTAME|MG_FUTURE_WISH)));
 				mon = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 				if(mon){
 					initedog(mon);
