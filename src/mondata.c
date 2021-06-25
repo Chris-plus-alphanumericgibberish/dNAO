@@ -15,7 +15,10 @@ char * nameless_horror_name;
 
 #ifdef OVLB
 
-/* saves the index number of each part of the permonst array to itself */
+/* 
+ * saves the index number of each part of the permonst array to itself
+ * is called at gamestart (and after restoring a save)
+ */
 void
 id_permonst()
 {
@@ -27,7 +30,9 @@ id_permonst()
 }
 
 /* 
- * safely sets mon->data from an mtyp
+ * Safely sets mon->data from an mtyp, including mon's template.
+ * Gets and/or allocates (via permonst_of) memory for mon's data field
+ * Calling `set_mon_data(mon, mon->mtyp)` is always ok.
  */
 void
 set_mon_data(mon, mtyp)
@@ -64,7 +69,8 @@ int mtyp;
 }
 
 /*
- * safely sets mon->data from an existing data pointer
+ * Safely sets mon->data from an existing data pointer.
+ * Calling `set_mon_data_core(mon, mon->data)` is always ok.
  */
 void
 set_mon_data_core(mon, ptr)
@@ -191,6 +197,9 @@ int template;
 	return;
 }
 
+/* 
+ * Modifies a base permonst struct for a specific template and saves it to `ptr`
+ */
 void
 set_template_data(base, ptr, template)
 struct permonst * base;
