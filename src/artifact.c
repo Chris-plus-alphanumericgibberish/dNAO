@@ -632,17 +632,68 @@ int oprop;
 }
 
 void
+remove_oprop_and_u_extrinsic(obj, oprop)
+struct obj *obj;
+int oprop;
+{
+	switch(oprop){
+		case OPROP_FIRE:
+			EFire_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_COLD:
+			ECold_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_WOOL:
+			EFire_resistance &= ~(obj->owornmask);
+			ECold_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_ELEC:
+			EShock_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_ACID:
+			EAcid_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_MAGC:
+			EAntimagic &= ~(obj->owornmask);
+		break;
+		case OPROP_REFL:
+			EReflecting &= ~(obj->owornmask);
+		break;
+		case OPROP_DISN:
+			EDisint_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_LIFE:
+			// pline("obj %ld, mask %ld", obj->owornmask, ELifesaved);
+			ELifesaved &= ~(obj->owornmask);
+		break;
+	}
+}
+
+void
 remove_oprop(obj, oprop)
 struct obj *obj;
 int oprop;
 {
 	if(!oprop)
 		return;
-	
+
 	if(oprop >= MAX_OPROP || oprop < 0)
 		impossible("Attempting to remove oprop number %d from %s?", oprop, doname(obj));
-	
-	obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+
+	switch(obj->where){
+		case OBJ_INVENT:
+			remove_oprop_and_u_extrinsic(obj, oprop);
+			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+		break;
+		case OBJ_MINVENT:
+			update_mon_intrinsics(obj->ocarry, obj, FALSE, TRUE); /*remove all intrinsics for now*/
+			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+			update_mon_intrinsics(obj->ocarry, obj, TRUE, TRUE); /*re-set remaining intrinsics for now*/
+		break;
+		default:
+			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+		break;
+	}
 }
 
 void
@@ -787,6 +838,9 @@ struct obj *otmp;	/* existing object */
 					ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
 				break;
 			}
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_LIFE);
 		}
 	}
 	/* weapon props */

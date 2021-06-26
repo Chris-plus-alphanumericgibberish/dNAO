@@ -3489,11 +3489,16 @@ struct obj *
 mlifesaver(mon)
 struct monst *mon;
 {
+	struct obj *otmp;
 	if (!nonliving(mon->data)) {
-	    struct obj *otmp = which_armor(mon, W_AMUL);
+	    otmp = which_armor(mon, W_AMUL);
 
 	    if (otmp && otmp->otyp == AMULET_OF_LIFE_SAVING)
 		return otmp;
+	}
+	for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
+	    if (otmp && otmp->owornmask && check_oprop(otmp, OPROP_LIFE))
+			return otmp;
 	}
 	return (struct obj *)0;
 }
@@ -3639,18 +3644,30 @@ struct monst *mtmp;
 			if (couldsee(mtmp->mx, mtmp->my)) {
 				messaged = TRUE;
 				pline("But wait...");
-				pline("%s medallion begins to glow!",
-					s_suffix(Monnam(mtmp)));
-				makeknown(AMULET_OF_LIFE_SAVING);
+				pline("%s %s begins to glow!",
+					s_suffix(Monnam(mtmp)),
+					lifesave->otyp == AMULET_OF_LIFE_SAVING ? "medallion" : xname(lifesave));
+
+				if(lifesave->otyp == AMULET_OF_LIFE_SAVING && !check_oprop(lifesave, OPROP_LIFE))
+					makeknown(AMULET_OF_LIFE_SAVING);
+
 				if (attacktype(mtmp->data, AT_EXPL)
 				    || attacktype(mtmp->data, AT_BOOM))
 					pline("%s reconstitutes!", Monnam(mtmp));
 				else
 					pline("%s looks much better!", Monnam(mtmp));
-				pline_The("medallion crumbles to dust!");
+				if(lifesave->otyp == AMULET_OF_LIFE_SAVING && !check_oprop(lifesave, OPROP_LIFE))
+					pline_The("medallion crumbles to dust!");
+				else 
+					pline_The("%s fades.", xname(lifesave));
 			}
-			/* use up amulet */
-			m_useup(mtmp, lifesave);
+			if(check_oprop(lifesave, OPROP_LIFE)){
+				remove_oprop(lifesave, OPROP_LIFE);
+			}
+			else {
+				/* use up amulet (or other item, I guess) */
+				m_useup(mtmp, lifesave);
+			}
 			break;
 		case LSVD_ALA:
 			/* message */

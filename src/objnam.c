@@ -948,6 +948,17 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_PHSEW))
 			Strcat(buf, "faded ");
 		
+		if (check_oprop(obj, OPROP_LIFE)){
+			if(obj->known)
+				Strcat(buf, "life-saving ");
+			else if(is_helmet(obj))
+				Strcat(buf, "haloed ");
+			else if(obj->obj_material == SILVER)
+				Strcat(buf, "gold-feather-encrusted ");
+			else
+				Strcat(buf, "silver-feather-encrusted ");
+		}
+		
 		if (check_oprop(obj, OPROP_WATRW))
 			Strcat(buf, "misty ");
 		if (check_oprop(obj, OPROP_LESSER_WATRW))
@@ -4063,6 +4074,11 @@ int wishflags;
 			add_oprop_list(oprop_list, OPROP_OONA_ELECW);
 		} else if (!strncmpi(bp, "sparking ", l=9)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_ELECW);
+
+		} else if ((!strncmpi(bp, "life-saving ", l=12)
+			|| !strncmpi(bp, "life saving ", l=12)) 
+		) {
+			add_oprop_list(oprop_list, OPROP_LIFE);
 
 		} else if (!strncmpi(bp, "misty ", l=6)) {
 			add_oprop_list(oprop_list, OPROP_WATRW);
