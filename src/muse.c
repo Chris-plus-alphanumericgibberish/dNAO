@@ -1680,7 +1680,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))], diesize;
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	if (difficulty > 7 && !rn2(35)) return WAN_DEATH;
@@ -1719,7 +1719,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	if (difficulty > 7 && !rn2(35)) return rnd(20) > 10 ? WAN_DRAINING : WAN_DEATH;
@@ -1769,7 +1769,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(6)) {
@@ -1791,7 +1791,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(6)) {
@@ -1813,7 +1813,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(16)) {

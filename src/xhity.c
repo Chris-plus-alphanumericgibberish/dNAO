@@ -5656,7 +5656,7 @@ boolean ranged;
 						u.ualign.sins++;
 						u.hod += rnd(20);
 						u.ugangr[Align2gangr(angrygod)]++;
-						angrygods(angrygod);
+						angrygods(Align2gangr(angrygod));
 					}
 					return MM_HIT;
 				/*Lower Sanity*/
@@ -11620,7 +11620,7 @@ int vis;
 			u.ualign.sins++;
 			u.hod += rnd(20);
 			u.ugangr[Align2gangr(angrygod)]++;
-			angrygods(angrygod);
+			angrygods(Align2gangr(angrygod));
 		}
 		break;
 

@@ -1081,9 +1081,14 @@ register struct monst *mtmp;
 	if (mtmp->mstun && !rn2(10)) mtmp->mstun = 0;
 
 	/* some monsters teleport */
-	if (mon_resistance(mtmp,TELEPORT) && (mtmp->mflee || !rn2(5)) && !rn2(40) && !mtmp->iswiz &&
-	    !(noactions(mtmp)) &&
-	    !level.flags.noteleport) {
+	if (mon_resistance(mtmp,TELEPORT)
+		&& (mtmp->mflee || !rn2(5))
+		&& (!mtmp->mpeaceful || mtmp->mtame)
+		&& !rn2(40)
+		&& !mtmp->iswiz
+		&& !(noactions(mtmp))
+		&& !level.flags.noteleport
+	) {
 		(void) rloc(mtmp, FALSE);
 		return(0);
 	}

@@ -221,13 +221,15 @@ lookat(x, y, buf, monbuf, shapebuff)
 	if (mtmp != (struct monst *) 0) {
 	    char *name, monnambuf[BUFSZ];
 	    boolean accurate = !do_halu;
+		struct permonst * mdat = mtmp->data;
+		if (mtmp->m_ap_type == M_AP_MONSTER)
+				mdat = &mons[mtmp->mappearance];
 
-	    if (mtmp->mtyp == PM_COYOTE && accurate)
-		name = coyotename(mtmp, monnambuf);
+	    if (mdat->mtyp == PM_COYOTE && accurate)
+			name = coyotename(mtmp, monnambuf);
 	    else
-		name = distant_monnam(mtmp, ARTICLE_NONE, monnambuf);
+			name = distant_monnam(mtmp, ARTICLE_NONE, monnambuf);
 
-	    pm = mtmp->data;
 	    Sprintf(buf, "%s%s%s",
 		    (mtmp->mx != x || mtmp->my != y) ?
 			((mtmp->isshk && accurate)
@@ -366,40 +368,40 @@ lookat(x, y, buf, monbuf, shapebuff)
 			} else {
 				//going to need more detail about how it is seen....
 				ways_seen = 0;
-				if(u.sealsActive&SEAL_PAIMON && is_magical((mtmp)->data)) ways_seen++;
-				if(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mtmp)->data)) ways_seen++;
-				if(u.sealsActive&SEAL_TENEBROUS && !nonliving(mtmp->data)) ways_seen++;
-				if(u.specialSealsActive&SEAL_ACERERAK && is_undead(mtmp->data)) ways_seen++;
+				if(u.sealsActive&SEAL_PAIMON && is_magical(mdat)) ways_seen++;
+				if(u.sealsActive&SEAL_ANDROMALIUS && is_thief(mdat)) ways_seen++;
+				if(u.sealsActive&SEAL_TENEBROUS && !nonliving(mdat)) ways_seen++;
+				if(u.specialSealsActive&SEAL_ACERERAK && is_undead(mdat)) ways_seen++;
 				if(uwep && ((uwep->oward & WARD_THJOFASTAFUR) && 
-					((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data)))) ways_seen++;
+					(mdat->mlet == S_LEPRECHAUN || mdat->mlet == S_NYMPH || is_thief(mdat)))) ways_seen++;
 				if(youracedata->mtyp == PM_SHARK && has_blood_mon(mtmp) &&
 						(mtmp)->mhp < (mtmp)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mtmp)->mx, (mtmp)->my, TRUE)) ways_seen++;
 				if(MATCH_WARN_OF_MON_STRICT(mtmp)){
 					Sprintf(wbuf, "warned of %s",
-						makeplural(mtmp->data->mname));
+						makeplural(mdat->mname));
 					Strcat(monbuf, wbuf);
 				} else {
-					if(u.sealsActive&SEAL_PAIMON && is_magical((mtmp)->data)){
+					if(u.sealsActive&SEAL_PAIMON && is_magical(mdat)){
 					Sprintf(wbuf, "warned of magic users");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mtmp)->data)){
+					if(u.sealsActive&SEAL_ANDROMALIUS && is_thief(mdat)){
 					Sprintf(wbuf, "warned of item thieves");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(uwep && (uwep->oward & WARD_THJOFASTAFUR) && ((mtmp)->data->mlet == S_LEPRECHAUN || (mtmp)->data->mlet == S_NYMPH || is_thief((mtmp)->data))){
+					if(uwep && (uwep->oward & WARD_THJOFASTAFUR) && (mdat->mlet == S_LEPRECHAUN || mdat->mlet == S_NYMPH || is_thief(mdat))){
 					Sprintf(wbuf, "warned of leprechauns, nymphs, and item thieves");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(u.specialSealsActive&SEAL_ACERERAK && is_undead(mtmp->data)){
+					if(u.specialSealsActive&SEAL_ACERERAK && is_undead(mdat)){
 					Sprintf(wbuf, "warned of the undead");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
 					}
-					if(u.sealsActive&SEAL_TENEBROUS && !nonliving(mtmp->data)){
+					if(u.sealsActive&SEAL_TENEBROUS && !nonliving(mdat)){
 					Sprintf(wbuf, "warned of living beings");
 					Strcat(monbuf, wbuf);
 					if (ways_seen-- > 1) Strcat(monbuf, ", ");
@@ -416,23 +418,23 @@ lookat(x, y, buf, monbuf, shapebuff)
 		}
 	    }
 		if(!do_halu){
-			if(mtmp->data->msize == MZ_TINY) Sprintf(shapebuff, "a tiny");
-			else if(mtmp->data->msize == MZ_SMALL) Sprintf(shapebuff, "a small");
-			else if(mtmp->data->msize == MZ_HUMAN) Sprintf(shapebuff, "a human-sized");
-			else if(mtmp->data->msize == MZ_LARGE) Sprintf(shapebuff, "a large");
-			else if(mtmp->data->msize == MZ_HUGE) Sprintf(shapebuff, "a huge");
-			else if(mtmp->data->msize == MZ_GIGANTIC) Sprintf(shapebuff, "a gigantic");
+			if(mdat->msize == MZ_TINY) Sprintf(shapebuff, "a tiny");
+			else if(mdat->msize == MZ_SMALL) Sprintf(shapebuff, "a small");
+			else if(mdat->msize == MZ_HUMAN) Sprintf(shapebuff, "a human-sized");
+			else if(mdat->msize == MZ_LARGE) Sprintf(shapebuff, "a large");
+			else if(mdat->msize == MZ_HUGE) Sprintf(shapebuff, "a huge");
+			else if(mdat->msize == MZ_GIGANTIC) Sprintf(shapebuff, "a gigantic");
 			else Sprintf(shapebuff, "an odd-sized");
 			
-			if((mtmp->data->mflagsb&MB_HEADMODIMASK) == MB_LONGHEAD) Strcat(shapebuff, " snouted");
-			else if((mtmp->data->mflagsb&MB_HEADMODIMASK) == MB_LONGNECK) Strcat(shapebuff, " long-necked");
+			if((mdat->mflagsb&MB_HEADMODIMASK) == MB_LONGHEAD) Strcat(shapebuff, " snouted");
+			else if((mdat->mflagsb&MB_HEADMODIMASK) == MB_LONGNECK) Strcat(shapebuff, " long-necked");
 			
-			if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_ANIMAL) Strcat(shapebuff, " animal");
-			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_SLITHY) Strcat(shapebuff, " ophidian");
-			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == MB_HUMANOID) Strcat(shapebuff, " humanoid");
-			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_ANIMAL)) Strcat(shapebuff, " centauroid");
-			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_SLITHY)) Strcat(shapebuff, " snake-legged humanoid");
-			else if((mtmp->data->mflagsb&MB_BODYTYPEMASK) == (MB_ANIMAL|MB_SLITHY)) Strcat(shapebuff, " snake-backed animal");
+			if((mdat->mflagsb&MB_BODYTYPEMASK) == MB_ANIMAL) Strcat(shapebuff, " animal");
+			else if((mdat->mflagsb&MB_BODYTYPEMASK) == MB_SLITHY) Strcat(shapebuff, " ophidian");
+			else if((mdat->mflagsb&MB_BODYTYPEMASK) == MB_HUMANOID) Strcat(shapebuff, " humanoid");
+			else if((mdat->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_ANIMAL)) Strcat(shapebuff, " centauroid");
+			else if((mdat->mflagsb&MB_BODYTYPEMASK) == (MB_HUMANOID|MB_SLITHY)) Strcat(shapebuff, " snake-legged humanoid");
+			else if((mdat->mflagsb&MB_BODYTYPEMASK) == (MB_ANIMAL|MB_SLITHY)) Strcat(shapebuff, " snake-backed animal");
 			else Strcat(shapebuff, " thing");
 		} else {
 			Sprintf(shapebuff, "%s%s%s", an(sizeStr[rn2(SIZE(sizeStr))]), headStr[rn2(SIZE(headStr))], bodyStr[rn2(SIZE(bodyStr))]);
