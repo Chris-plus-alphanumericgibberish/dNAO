@@ -1023,6 +1023,9 @@ struct obj *otmp;	/* existing object */
 			add_oprop(otmp, OPROP_LIVEW);
 		}
 		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_RETRW);
+		}
+		if(!rn2(20)){
 			add_oprop(otmp, OPROP_ASECW);
 		}
 		else if(!rn2(20)){

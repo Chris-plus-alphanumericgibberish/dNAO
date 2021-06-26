@@ -906,6 +906,8 @@ boolean dofull;
 			u.uinsight < 10 ? Strcat(buf, "self-greasing ") : Strcat(buf, "grease-secreting ");
 		if (check_oprop(obj, OPROP_HEAL) && (obj->known || u.uinsight >= 10))
 			u.uinsight < 10 ? Strcat(buf, "healing ") : Strcat(buf, "angel-haunted ");
+		if (check_oprop(obj, OPROP_RETRW) && (obj->known || u.uinsight >= 10))
+			u.uinsight < 10 ? Strcat(buf, "returning ") : Strcat(buf, "loyal ");
 		
 		if(check_oprop(obj, OPROP_OCLTW) && obj->known)
 			Strcat(buf, "occult ");
@@ -4042,6 +4044,9 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "self-greasing ", l=14) || !strncmpi(bp, "grease-secreting ", l=17)) {
 			add_oprop_list(oprop_list, OPROP_GRES);
+
+		} else if (!strncmpi(bp, "returning ", l=10) || !strncmpi(bp, "loyal ", l=6)) {
+			add_oprop_list(oprop_list, OPROP_RETRW);
 
 		} else if (!strncmpi(bp, "occult ", l=7)) {
 			add_oprop_list(oprop_list, OPROP_OCLTW);
