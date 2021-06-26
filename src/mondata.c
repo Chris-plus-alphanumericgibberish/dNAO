@@ -15,7 +15,10 @@ char * nameless_horror_name;
 
 #ifdef OVLB
 
-/* saves the index number of each part of the permonst array to itself */
+/* 
+ * saves the index number of each part of the permonst array to itself
+ * is called at gamestart (and after restoring a save)
+ */
 void
 id_permonst()
 {
@@ -27,7 +30,9 @@ id_permonst()
 }
 
 /* 
- * safely sets mon->data from an mtyp
+ * Safely sets mon->data from an mtyp, including mon's template.
+ * Gets and/or allocates (via permonst_of) memory for mon's data field
+ * Calling `set_mon_data(mon, mon->mtyp)` is always ok.
  */
 void
 set_mon_data(mon, mtyp)
@@ -64,7 +69,8 @@ int mtyp;
 }
 
 /*
- * safely sets mon->data from an existing data pointer
+ * Safely sets mon->data from an existing data pointer.
+ * Calling `set_mon_data_core(mon, mon->data)` is always ok.
  */
 void
 set_mon_data_core(mon, ptr)
@@ -76,6 +82,11 @@ struct permonst * ptr;
 	/* data and type */
 	mon->data = ptr;
 	mon->mtyp = ptr->mtyp;
+
+	/* zero out intrinsics to be set now */
+	for(i = 0; i < MPROP_SIZE; i++){
+		mon->mintrinsics[i] = 0;
+	}
 
 	/* resistances */
 	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
@@ -145,7 +156,7 @@ struct permonst * ptr;
 	set_mintrinsic(species_controls_teleports(mon->data), TELEPORT_CONTROL);
 	set_mintrinsic(species_is_telepathic(mon->data), TELEPAT);
 #undef set_mintrinsic
-	for(int i = 0; i < MPROP_SIZE; i++){
+	for(i = 0; i < MPROP_SIZE; i++){
 		mon->mintrinsics[i] |= mon->acquired_trinsics[i];
 	}
     return;
@@ -156,8 +167,8 @@ give_mintrinsic(mon, intrinsic)
 struct monst * mon;
 long intrinsic;
 {
-	mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
 	mon->acquired_trinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
+	set_mon_data_core(mon, mon->data);
 }
 
 void
@@ -165,8 +176,8 @@ remove_mintrinsic(mon, intrinsic)
 struct monst * mon;
 long intrinsic;
 {
-	mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
 	mon->acquired_trinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
+	set_mon_data_core(mon, mon->data);
 }
 
 //Note: intended to be mental things relating to a faction a monster belongs to
@@ -191,6 +202,9 @@ int template;
 	return;
 }
 
+/* 
+ * Modifies a base permonst struct for a specific template and saves it to `ptr`
+ */
 void
 set_template_data(base, ptr, template)
 struct permonst * base;
