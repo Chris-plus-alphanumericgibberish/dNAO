@@ -986,6 +986,9 @@ struct obj *otmp;	/* existing object */
 				ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
 			break;
 		}
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_GRES);
+		}
 	}
 	/* weapon props */
 	else if(otmp->oclass == WEAPON_CLASS){
@@ -10423,6 +10426,10 @@ living_items()
 					obj->opoisonchrgs++;
 				}
 			}
+		}
+		/* grease self-greasing objects */
+		if (check_oprop(obj, OPROP_GRES) && !obj->greased && !rn2(40)){
+			obj->greased = TRUE;
 		}
 	}
 
