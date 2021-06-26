@@ -4110,7 +4110,7 @@ struct monst *mon;
 				mtmp->mspec_used = 0;
 				mtmp->mstdy = 0;
 				mtmp->ustdym = 0;
-				mtmp->mcan = 0;
+				set_mcan(mtmp, FALSE);
 				
 				mtmp->mflee = 0;
 				mtmp->mfleetim = 0;
@@ -4185,7 +4185,7 @@ struct monst *mon;
 			mtmp->mspec_used = 0;
 			mtmp->mstdy = 0;
 			mtmp->ustdym = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 			
 			mtmp->mflee = 0;
 			mtmp->mfleetim = 0;
@@ -4252,7 +4252,7 @@ struct monst *mon;
 					mtmp->mspec_used = 0;
 					mtmp->mstdy = 0;
 					mtmp->ustdym = 0;
-					mtmp->mcan = 0;
+					set_mcan(mtmp, FALSE);
 					
 					mtmp->mflee = 0;
 					mtmp->mfleetim = 0;
@@ -4382,7 +4382,7 @@ struct monst *mon;
 				mtmp->mspec_used = 0;
 				mtmp->mstdy = 0;
 				mtmp->ustdym = 0;
-				mtmp->mcan = 0;
+				set_mcan(mtmp, FALSE);
 				
 				mtmp->mflee = 0;
 				mtmp->mfleetim = 0;

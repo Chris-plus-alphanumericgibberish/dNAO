@@ -244,7 +244,7 @@ register struct monst *mon;
 		}
 #endif
 	}
-	if (!rn2(25)) mon->mcan = 1; /* monster is worn out */
+	if (!rn2(25)) set_mcan(mon, TRUE); /* monster is worn out */
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
 	return 1;
 }
@@ -345,7 +345,7 @@ register struct monst *mon;
 		};
 		seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
 	}
-	if (!rn2(25)) mon->mcan = 1; /* monster is worn out */
+	if (!rn2(25)) set_mcan(mon, TRUE); /* monster is worn out */
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
 	return 1;
 }

@@ -2880,7 +2880,7 @@ int mkobjflags;
 			}
 			if(ptr->mtyp == PM_AMM_KAMEREL){
 				if(rn2(10)){//Physical fighter, no magic
-					mtmp->mcan = 1;
+					set_mcan(mtmp, TRUE);
 					if(rn2(10)){//Warrior
 						mongets(mtmp, MIRRORBLADE, mkobjflags);
 						otmp = mksobj(ROUNDSHIELD, mkobjflags);

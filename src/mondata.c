@@ -26,6 +26,21 @@ id_permonst()
 	return;
 }
 
+/*
+ * Some monster intrinsics go away if the monster is cancelled
+ * (and return if uncancelled) so mcan must be set via this
+ * wrapper.
+ */
+
+void
+set_mcan(mon, state)
+struct monst *mon;
+boolean state;
+{
+	mon->mcan = state;
+	set_mon_data_core(mon, mon->data);
+}
+
 /* 
  * safely sets mon->data from an mtyp
  */
@@ -133,18 +148,23 @@ struct permonst * ptr;
 	if ((ptr_condition))	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
 	else					{ mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
 
+#define set_mintrinsic_cancelable(ptr_condition, intrinsic) \
+	if ((ptr_condition) && !mon->mcan)	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
+	else								{ mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
+
 	/* other intrinsics */
-	set_mintrinsic(species_flies(mon->data), FLYING);
-	set_mintrinsic(species_floats(mon->data), LEVITATION);
 	set_mintrinsic(species_swims(mon->data), SWIMMING);
-	set_mintrinsic(species_displaces(mon->data), DISPLACED);
-	set_mintrinsic(species_passes_walls(mon->data), PASSES_WALLS);
-	set_mintrinsic(species_regenerates(mon->data), REGENERATION);
-	set_mintrinsic(species_perceives(mon->data), SEE_INVIS);
-	set_mintrinsic(species_teleports(mon->data), TELEPORT);
-	set_mintrinsic(species_controls_teleports(mon->data), TELEPORT_CONTROL);
-	set_mintrinsic(species_is_telepathic(mon->data), TELEPAT);
+	set_mintrinsic((species_flies(mon->data) && (!mon->mcan || has_wings(mon->data))), FLYING);
+	set_mintrinsic_cancelable(species_floats(mon->data), LEVITATION);
+	set_mintrinsic_cancelable(species_displaces(mon->data), DISPLACED);
+	set_mintrinsic_cancelable(species_passes_walls(mon->data), PASSES_WALLS);
+	set_mintrinsic_cancelable(species_regenerates(mon->data), REGENERATION);
+	set_mintrinsic_cancelable(species_perceives(mon->data), SEE_INVIS);
+	set_mintrinsic_cancelable(species_teleports(mon->data), TELEPORT);
+	set_mintrinsic_cancelable(species_controls_teleports(mon->data), TELEPORT_CONTROL);
+	set_mintrinsic_cancelable(species_is_telepathic(mon->data), TELEPAT);
 #undef set_mintrinsic
+#undef set_mintrinsic_cancelable
 	for(int i = 0; i < MPROP_SIZE; i++){
 		mon->mintrinsics[i] |= mon->acquired_trinsics[i];
 	}

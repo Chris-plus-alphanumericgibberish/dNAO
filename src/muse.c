@@ -2211,10 +2211,10 @@ skipmsg:
 		if(!otmp->cursed){
 			if (vismon) pline("%s looks full of energy.", Monnam(mtmp));
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 		} else {
 			if (vismon) pline("%s looks lackluster.", Monnam(mtmp));
-			mtmp->mcan = 1;
+			set_mcan(mtmp, TRUE);
 		}
 		if (oseen) makeknown(POT_GAIN_ENERGY);
 		if (!otmp->oartifact)

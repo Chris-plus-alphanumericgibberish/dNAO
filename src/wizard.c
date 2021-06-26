@@ -1237,7 +1237,7 @@ aglaopesong(mtmp)
 					if(tmpm != mtmp && !DEADMONSTER(tmpm)){
 						if(!mindless_mon(tmpm)){
 							if ( mtmp->mpeaceful == tmpm->mpeaceful ) {
-								tmpm->mcan = 0;
+								set_mcan(tmpm, FALSE);
 								tmpm->mspec_used = 0;
 								if(!tmpm->mnotlaugh && tmpm->mlaughing){
 									tmpm->mnotlaugh = 1;

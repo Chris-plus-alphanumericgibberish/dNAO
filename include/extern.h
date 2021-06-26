@@ -1607,6 +1607,7 @@ E void FDECL(mark_mon_as_summoned,(struct monst *, struct monst *, int, int));
 /* ### mondata.c ### */
 
 E void NDECL(id_permonst);
+E void FDECL(set_mcan, (struct monst *,boolean));
 E void FDECL(set_mon_data, (struct monst *,int));
 E void FDECL(set_mon_data_core, (struct monst *, struct permonst *));
 E void FDECL(make_horror, (struct permonst *, int, int));

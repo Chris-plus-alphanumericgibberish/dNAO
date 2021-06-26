@@ -3047,12 +3047,12 @@ struct obj *hypo;
 				if(!amp->cursed){
 					if (canseemon(mtarg))
 						pline("%s looks lackluster.", Monnam(mtarg));
-					mtarg->mcan = 1;
+					set_mcan(mtarg, TRUE);
 				} else {
 					if (canseemon(mtarg))
 						pline("%s looks full of energy.", Monnam(mtarg));
 					mtarg->mspec_used = 0;
-					mtarg->mcan = 0;
+					set_mcan(mtarg, FALSE);
 				}
 			break;
 			case POT_SLEEPING:

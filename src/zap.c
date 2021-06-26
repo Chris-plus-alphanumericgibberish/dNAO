@@ -686,7 +686,7 @@ coord *cc;
 #ifdef SEDUCE
 				&& !dmgtype(mtmp2->data, AD_SSEX)
 #endif
-		    ) mtmp2->mcan = 0;
+		    ) set_mcan(mtmp2, FALSE);
 		mtmp2->mcansee = 1;	/* set like in makemon */
 		mtmp2->mblinded = 0;
 		mtmp2->mstun = 0;
@@ -2902,7 +2902,7 @@ int gaze_cancel;
 			calc_total_maxen();
 		}
 	} else {
-	    mdef->mcan = TRUE;
+	    set_mcan(mdef, TRUE);
 
 	    if (is_were(mdef->data) && mdef->data->mlet != S_HUMAN)
 		were_change(mdef);

@@ -1058,7 +1058,7 @@ asGuardian:
 				mtmp->mvar2 = 0;
 				mtmp->mhp = mtmp->mhpmax;
 				mtmp->mspec_used = 0;
-				mtmp->mcan = 0;
+				set_mcan(mtmp, FALSE);
 				mtmp->mflee = 0; mtmp->mfleetim = 0;
 				mtmp->mcrazed = 0; mtmp->mberserk = 0; mtmp->mdisrobe = 0;
 				mtmp->mcansee = 1; mtmp->mblinded = 0;
@@ -1440,7 +1440,7 @@ asGuardian:
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
 							if(!mindless_mon(tmpm)){
 								if ( mtmp->mpeaceful == tmpm->mpeaceful && distmin(mtmp->mx,mtmp->my,tmpm->mx,tmpm->my) < 5) {
-									tmpm->mcan = 0;
+									set_mcan(tmpm, FALSE);
 									tmpm->mspec_used = 0;
 									if(!tmpm->mnotlaugh && tmpm->mlaughing){
 										tmpm->mnotlaugh = 1;

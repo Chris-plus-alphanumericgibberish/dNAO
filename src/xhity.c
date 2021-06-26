@@ -3666,7 +3666,7 @@ boolean ranged;
 		!(youagr && u.uswallow) &&
 		!(has_passthrough_displacement(pd) && hits_insubstantial(magr, mdef, attk, weapon)) &&
 		rn2(2)
-		) {
+	) {
 		if (has_passthrough_displacement(pd)){
 			if (vis&VIS_MAGR) {
 				pline("%s attack passes harmlessly through %s!",
@@ -5948,7 +5948,7 @@ boolean ranged;
 				attrcurse();
 			}
 			else {
-				mdef->mcan = 1;	/* cancelled regardless of lifesave */
+				set_mcan(mdef, TRUE); /* cancelled regardless of lifesave */
 				mdef->mstrategy &= ~STRAT_WAITFORU;
 				if (is_were(pd) && pd->mlet != S_HUMAN)
 					were_change(mdef);
@@ -6907,7 +6907,9 @@ boolean ranged;
 					break;
 
 				if (pa->mtyp == PM_MOTHER_LILITH && could_seduce(magr, &youmonst, attk) == 1){
-					magr->mcan = 0;	/* Question for Chris: is this intentional? It's different from all others here. */
+					set_mcan(magr, FALSE); /* Question for Chris: is this intentional? It's different from all others here. 
+											* Answer: Yes-ish. If memeory serves, this was a very early hack to get around foocubi sometimes cancelling themselves.
+											*/
 					if (!rn2(4)) return MM_HIT;
 					if(magr->mappearance) seemimic_ambush(magr);
 					if (dolilithseduce(magr)) return MM_AGR_STOP;

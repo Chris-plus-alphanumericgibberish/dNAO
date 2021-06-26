@@ -4017,7 +4017,7 @@ boolean * messaged;
 					u.uen += 10;
 				}
 				else {
-					magr->mcan = FALSE;
+					set_mcan(magr, FALSE);
 					magr->mspec_used = 0;
 				}
 			}
