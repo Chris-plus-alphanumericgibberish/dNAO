@@ -1029,7 +1029,8 @@ peffects(otmp)
 		You_feel("better.");
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4),
-		       ((enhanced ? 2 : 1) * (!otmp->cursed ? 1 : 0)), !!otmp->blessed, !otmp->cursed);
+		       !(get_ox(otmp, OX_ESUM)) * ((enhanced ? 2 : 1) * (!otmp->cursed ? 1 : 0)),
+			   !!otmp->blessed, !otmp->cursed);
 		exercise(A_CON, TRUE);
 		break;
 	case POT_EXTRA_HEALING:
@@ -1037,7 +1038,7 @@ as_extra_healing:
 		You_feel("much better.");
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 8),
-		       (enhanced ? 2 : 1) * (otmp->blessed ? 5 : !otmp->cursed ? 2 : 0),
+		       !(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (otmp->blessed ? 5 : !otmp->cursed ? 2 : 0),
 		       !otmp->cursed, TRUE);
 		(void) make_hallucinated(0L,TRUE,0L);
 		exercise(A_CON, TRUE);
@@ -1046,7 +1047,9 @@ as_extra_healing:
 	case POT_FULL_HEALING:
 		You_feel("completely healed.");
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
-		healup(enhanced ? 800 : 400, (enhanced ? 2 : 1) * (4+4*bcsign(otmp)), !otmp->cursed, TRUE);
+		healup(enhanced ? 800 : 400, 
+				!(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (4+4*bcsign(otmp)),
+				!otmp->cursed, TRUE);
 		/* Restore one lost level if blessed */
 		if (otmp->blessed && u.ulevel < u.ulevelmax) {
 		    ///* when multiple levels have been lost, drinking
@@ -1080,7 +1083,9 @@ as_extra_healing:
 				"spoiled milk", TRUE, SICK_VOMITABLE);
 			break;
 		} else {
-			healup(enhanced ? 800 : 400, (enhanced ? 2 : 1) * (4+4*bcsign(otmp)), TRUE, TRUE);
+			healup(enhanced ? 800 : 400, 
+					!(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (4+4*bcsign(otmp)),
+					TRUE, TRUE);
 		}
 		/* Restore lost levels */
 		if (u.ulevel < u.ulevelmax) {
