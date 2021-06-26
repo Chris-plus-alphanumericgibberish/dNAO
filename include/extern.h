@@ -595,6 +595,7 @@ E void FDECL(doliving_dragonhead, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_mad_king, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_spear, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_armor, (struct monst *, struct obj *, boolean));
+E void FDECL(doliving_healing_armor, (struct monst *, struct obj *, boolean));
 
 /* ### dog.c ### */
 

@@ -4535,6 +4535,49 @@ boolean invoked;
 		dobrass_attack(magr, wep, AT_BITE, AD_MAGM);
 }
 
+void
+doliving_healing_armor(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	boolean proc = FALSE;
+	boolean youagr = magr == &youmonst;
+	if(*hp(magr) >= *hpmax(magr))
+		return;
+	if(youagr && (Sick || Slimed)){
+		proc = !rn2(20);
+	}
+	else if(*hp(magr) < *hpmax(magr)/2){
+		if(nearby_targets(magr))
+			proc = !rn2(45);
+		else proc = !rn2(90);
+	}
+	else if(nearby_targets(magr)){
+		proc = !rn2(90);
+	}
+	else {
+		proc = !rn2(180);
+	}
+	
+	if(invoked || proc){
+		int healamt = max_ints((*hpmax(magr) - *hp(magr) + 1) / 2, d(5,8));
+		if(youagr){
+			healup(healamt, 0, TRUE, TRUE);
+			if(Slimed){
+				You_feel("less slimy!");
+				Slimed = 0L;
+			}
+		}
+		else {
+			*hp(magr) = min_ints(*hp(magr) + healamt, *hpmax(magr));
+			magr->mcansee = 1;
+			magr->mblinded = 0;
+		}
+		
+	}
+}
+
 static void
 doliving_single_attack(magr, wep)
 struct monst *magr;

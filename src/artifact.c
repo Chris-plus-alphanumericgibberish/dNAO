@@ -842,6 +842,9 @@ struct obj *otmp;	/* existing object */
 		if(!rn2(7)){
 			add_oprop(otmp, OPROP_LIFE);
 		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_HEAL);
+		}
 	}
 	/* weapon props */
 	else if(otmp->oclass == WEAPON_CLASS){
@@ -10292,6 +10295,10 @@ dosymbiotic_equip()
 {
 	struct monst *mtmp;
 	struct obj *obj;
+	for(obj = invent; obj; obj = obj->nobj){
+		if(obj->owornmask && check_oprop(obj, OPROP_HEAL))
+			doliving_healing_armor(&youmonst, obj, FALSE);
+	}
 	if(uarm && (uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR))
 		dosymbiotic(&youmonst, uarm);
 	if(uwep && ((check_oprop(uwep, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uwep) ))
@@ -10306,6 +10313,10 @@ dosymbiotic_equip()
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
+		for(obj = mtmp->minvent; obj; obj = obj->nobj){
+			if(obj->owornmask && check_oprop(obj, OPROP_HEAL))
+				doliving_healing_armor(mtmp, obj, FALSE);
+		}
 		obj = which_armor(mtmp, W_ARM);
 		if(obj && (obj->otyp == LIVING_ARMOR || obj->otyp == BARNACLE_ARMOR))
 			dosymbiotic(mtmp, obj);

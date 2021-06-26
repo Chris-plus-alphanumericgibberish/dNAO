@@ -902,6 +902,8 @@ boolean dofull;
 			u.uinsight < 10 ? Strcat(buf, "self-acidifying ") : Strcat(buf, "acid-secreting ");
 		if (check_oprop(obj, OPROP_PSECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_BASIC))
 			u.uinsight < 10 ? Strcat(buf, "self-poisoning ") : Strcat(buf, "poison-secreting ");
+		if (check_oprop(obj, OPROP_HEAL) && (obj->known || u.uinsight >= 10))
+			u.uinsight < 10 ? Strcat(buf, "healing ") : Strcat(buf, "angel-haunted ");
 		
 		if(check_oprop(obj, OPROP_OCLTW) && obj->known)
 			Strcat(buf, "occult ");
@@ -4015,6 +4017,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping ", 23)) {
 			add_oprop_list(oprop_list, OPROP_BCRS);
 
+		} else if (!strncmpi(bp, "healing ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_HEAL);
+
 		} else if (!strncmpi(bp, "anarchic-armor ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_ANAR);
 
@@ -4029,7 +4034,7 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "self-acidifying ", l=16) || !strncmpi(bp, "acid-secreting ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_ASECW);
-			
+
 		} else if (!strncmpi(bp, "self-poisoning ", l=15) || !strncmpi(bp, "poison-secreting ", l=17) ) {
 			add_oprop_list(oprop_list, OPROP_PSECW);
 
