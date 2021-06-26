@@ -812,7 +812,7 @@ int tary;
 													(dx || dy) ? m_at(tarx + dx, tary + dy) : 
 													(struct monst *)0;
 							if (mdef2 
-								&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+								&& (!DEADMONSTER(mdef2))
 								&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 									(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 									(youagr && !mdef2->mpeaceful))
@@ -838,7 +838,7 @@ int tary;
 														(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
 														(struct monst *)0;
 								if (mdef2 
-									&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+									&& (!DEADMONSTER(mdef2))
 									&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 										(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 										(youagr && !mdef2->mpeaceful))
@@ -863,7 +863,7 @@ int tary;
 														(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
 														(struct monst *)0;
 								if (mdef2 
-									&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+									&& (!DEADMONSTER(mdef2))
 									&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 										(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 										(youagr && !mdef2->mpeaceful))
@@ -903,7 +903,7 @@ int tary;
 													(dx || dy) ? m_at(tarx + dx, tary + dy) : 
 													(struct monst *)0;
 							if (mdef2 
-								&& (!DEADMONSTER(mdef2) || mdef2 == &youmonst)
+								&& (!DEADMONSTER(mdef2))
 								&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 									(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 									(youagr && !mdef2->mpeaceful))
@@ -7970,7 +7970,7 @@ boolean ranged;
 				rn2(EXPL_MAX),			/* color */
 				1);						/* radius */
 		}
-		if (!youdef && DEADMONSTER(mdef))
+		if (DEADMONSTER(mdef))
 			return (MM_HIT|MM_DEF_DIED);
 		else
 			return MM_HIT;
@@ -15037,7 +15037,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	struct permonst * pa = youagr ? youracedata : magr->data;
 
 	/* check that magr is still alive */
-	if (!youagr && DEADMONSTER(magr))
+	if (DEADMONSTER(magr))
 		return result;
 
 	if (vis == -1)
@@ -16684,7 +16684,7 @@ struct monst * mdef;
 	pd = youdef ? youracedata : mdef->data;
 	pa = youagr ? youracedata : magr->data;
 	// Defender is already dead
-	if(!youdef && DEADMONSTER(mdef))
+	if(DEADMONSTER(mdef))
 		return MM_MISS;
 	//Check curse resistance
 	if(Curse_res(mdef, TRUE))

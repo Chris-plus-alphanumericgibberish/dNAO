@@ -3809,7 +3809,7 @@ struct obj *armor;
 			continue;
 
 		youdef = (mdef == &youmonst);
-		if(!youdef && DEADMONSTER(mdef))
+		if(DEADMONSTER(mdef))
 			continue;
 		
 		if(youagr && (mdef->mpeaceful || !rn2(4)))
@@ -3831,7 +3831,7 @@ struct obj *armor;
 		) continue;
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
 			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
-			if(!youagr && DEADMONSTER(magr))
+			if(DEADMONSTER(magr))
 				break; //oops!
 			if(youagr) morehungry(1);
 			lim++;
@@ -3868,7 +3868,7 @@ struct obj *wep;
 			continue;
 		
 		youdef = (mdef == &youmonst);
-		if(!youdef && DEADMONSTER(mdef))
+		if(DEADMONSTER(mdef))
 			continue;
 		
 		if(youagr && mdef->mpeaceful)
@@ -3914,7 +3914,7 @@ struct obj *wep;
 			continue;
 		
 		youdef = (mdef == &youmonst);
-		if(!youdef && DEADMONSTER(mdef))
+		if(DEADMONSTER(mdef))
 			continue;
 		
 		if(youagr && mdef->mpeaceful)
@@ -3942,7 +3942,7 @@ struct obj *wep;
 		
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
 			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, 0, 0, FALSE);
-			if(!youagr && DEADMONSTER(magr))
+			if(DEADMONSTER(magr))
 				break; //oops!
 			//limit of one attack for weapons
 			break;
@@ -3980,7 +3980,7 @@ struct obj *wep;
 				continue;
 			
 			youdef = (mdef == &youmonst);
-			if(!youdef && DEADMONSTER(mdef))
+			if(DEADMONSTER(mdef))
 				continue;
 			
 			if(youagr && mdef->mpeaceful){
@@ -4085,7 +4085,7 @@ struct obj *wep;
 			continue;
 		
 		youdef = (mdef == &youmonst);
-		if(!youdef && DEADMONSTER(mdef))
+		if(DEADMONSTER(mdef))
 			continue;
 		
 		if(youagr && mdef->mpeaceful)
@@ -4378,7 +4378,7 @@ char etyp;
 			continue;
 
 		youdef = (mdef == &youmonst);
-		if(!youdef && DEADMONSTER(mdef))
+		if(DEADMONSTER(mdef))
 			continue;
 		
 		if(youagr && (mdef->mpeaceful || !rn2(4)))
@@ -4404,7 +4404,7 @@ char etyp;
 			symbiote.damn = min(symbiote.damn, 8-lim);
 			
 			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
-			if(!youagr && DEADMONSTER(magr))
+			if(DEADMONSTER(magr))
 				break; //oops!
 			lim+=symbiote.damn;
 			
@@ -4559,7 +4559,7 @@ struct obj *wep;
 			continue;
 
 		youdef = (mdef == &youmonst);
-		if(!youdef && DEADMONSTER(mdef))
+		if(DEADMONSTER(mdef))
 			continue;
 
 		if(youagr && (mdef->mpeaceful || !rn2(4)))
@@ -4578,7 +4578,7 @@ struct obj *wep;
 		if(mdef->mtyp == PM_PALE_NIGHT) continue;
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
 			xmeleehity(magr, mdef, &symbiote, &wep, -1, 0, FALSE);
-			if(!youagr && DEADMONSTER(magr))
+			if(DEADMONSTER(magr))
 				break; //oops!
 			//limit of one attack for weapons
 			break;

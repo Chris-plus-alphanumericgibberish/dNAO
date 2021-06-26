@@ -3500,7 +3500,7 @@ int tary;
 				explode(tarx + rn2(3) - 1, tary + rn2(3) - 1, adtyp, MON_EXPLODE, dmg, color, 1);
 			}
 		}
-		return MM_HIT | ((mdef && !youdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0);
+		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0);
 
 	case MON_FLARE:
 		if (!(tarx || tary)) {
@@ -3516,7 +3516,7 @@ int tary;
 			explode(tarx, tary, AD_PHYS, MON_EXPLODE, dmg, EXPL_FROSTY, 2);
 			dmg = 0;
 		}
-		return MM_HIT | ((mdef && !youdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0);
+		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0);
 
 	case PRISMATIC_SPRAY:
 		if (!(tarx || tary)) {
