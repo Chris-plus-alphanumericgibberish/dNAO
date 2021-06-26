@@ -1956,7 +1956,7 @@ get_description_of_damage_type(uchar id)
 	case AD_MIST: return "migo mist projector";
 	case AD_TELE: return "monster teleports away";
 	case AD_POLY: return "polymorphs you";
-	case AD_PSON: return "psionic powers";
+	case AD_PSON: return "psionic";
 	case AD_GROW: return "grows brethren on death";
 	case AD_SOUL: return "strengthens brethren on death";
 	case AD_TENT: return "deadly tentacles (LarienTelrunya's bane)";
