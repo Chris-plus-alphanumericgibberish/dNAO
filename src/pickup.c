@@ -1996,6 +1996,8 @@ dopetequip()
 			flag = W_ARMF;
 		} else if(is_suit(otmp)){
 			flag = W_ARM;
+		} else if(is_worn_tool(otmp)){
+			flag = W_TOOL;
 		} else {
 			pline("Error: Unknown monster armor type!?");
 			return 0;
@@ -2769,6 +2771,8 @@ struct monst *mon;
 			} else if(is_boots(otmp) && !(mon->misc_worn_check&W_ARMF) && otmp->objsize == mon->data->msize && can_wear_boots(mon->data)){
 				addArmorMenuOption
 			} else if(is_suit(otmp) && !(mon->misc_worn_check&W_ARM) && arm_match(mon->data, otmp) && arm_size_fits(mon->data, otmp)){
+				addArmorMenuOption
+			} else if(is_worn_tool(otmp) && !(mon->misc_worn_check&W_TOOL) && can_wear_blindf(mon->data)){
 				addArmorMenuOption
 			}
 		}
