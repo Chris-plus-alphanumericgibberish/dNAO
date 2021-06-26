@@ -2873,8 +2873,9 @@ int tary;
 	/* cancelled monsters can't spit */
 	if (!youagr && magr->mcan) {
 		/* except for Zeta metroids, which uncancel themselves */
+		/* Note: this is another case of monsters randomly becoming cancelled */
 		if (magr->mtyp == PM_ZETA_METROID) //|| mtmp->mtyp==PM_CRAZY_CHEMIST) 
-			magr->mcan = FALSE;
+			set_mcan(magr, FALSE);
 		else {
 			if (flags.soundok)
 				pline("A dry rattle comes from %s throat.",

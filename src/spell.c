@@ -2515,7 +2515,7 @@ spiriteffects(power, atme)
 						mon->permspeed = 0;
 						if(mon->mspeed == MSLOW) mon->mspeed = 0;
 					}
-					mon->mcan = 0;
+					set_mcan(mon, FALSE);
 					mon->mcrazed = 0; 
 					mon->mdisrobe = 0; 
 					mon->mcansee = 1;

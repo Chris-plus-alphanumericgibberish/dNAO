@@ -1608,7 +1608,7 @@ boolean noisy;
 		if (uarmh) {
 			if (noisy) already_wearing(an(c_helmet));
 			err++;
-		} else if (!is_flimsy(otmp)) {
+		} else if (!is_flimsy(otmp) && otmp->otyp != find_gcirclet()){
 			/* (flimsy exception matches polyself handling), you can even just set a hat on top of your body (no head requried)*/
 			if(!has_head_mon(&youmonst)){
 				if (noisy)
@@ -4533,6 +4533,49 @@ boolean invoked;
 		dobrass_attack(magr, wep, AT_TENT, AD_EFIR);
 	if(artinstance[wep->oartifact].RRSlunar > moves)
 		dobrass_attack(magr, wep, AT_BITE, AD_MAGM);
+}
+
+void
+doliving_healing_armor(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	boolean proc = FALSE;
+	boolean youagr = magr == &youmonst;
+	if(*hp(magr) >= *hpmax(magr))
+		return;
+	if(youagr && (Sick || Slimed)){
+		proc = !rn2(20);
+	}
+	else if(*hp(magr) < *hpmax(magr)/2){
+		if(nearby_targets(magr))
+			proc = !rn2(45);
+		else proc = !rn2(90);
+	}
+	else if(nearby_targets(magr)){
+		proc = !rn2(90);
+	}
+	else {
+		proc = !rn2(180);
+	}
+	
+	if(invoked || proc){
+		int healamt = max_ints((*hpmax(magr) - *hp(magr) + 1) / 2, d(5,8));
+		if(youagr){
+			healup(healamt, 0, TRUE, TRUE);
+			if(Slimed){
+				You_feel("less slimy!");
+				Slimed = 0L;
+			}
+		}
+		else {
+			*hp(magr) = min_ints(*hp(magr) + healamt, *hpmax(magr));
+			magr->mcansee = 1;
+			magr->mblinded = 0;
+		}
+		
+	}
 }
 
 static void

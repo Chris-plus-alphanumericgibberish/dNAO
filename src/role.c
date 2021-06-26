@@ -2996,6 +2996,8 @@ give_quest_trophy()
 		achieve.trophies |= DRO_NOB_QUEST;
 	else if(urole.neminum == PM_A_SALOM)
 		achieve.trophies |= HDR_NOB_QUEST;
+	else if(urole.neminum == PM_BASTARD_OF_THE_BOREAL_VALLEY)
+		achieve.trophies |= FEM_DRA_NOB_QUEST;
 	else if(urole.neminum == PM_BLACKBEARD_S_GHOST)
 		achieve.trophies |= PIR_QUEST;
 	else if(urole.neminum == PM_AGLAOPE)

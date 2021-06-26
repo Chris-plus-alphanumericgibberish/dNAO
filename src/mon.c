@@ -1684,6 +1684,8 @@ movemon()
 	 *		the angel's AC based on the value from 2, slower speed equals higher AC (Quantum Lock).
 	 */
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+		if(TimeStop && !is_uvuudaum(mtmp))
+			continue;
 		//Weeping angel step 1
 		if(is_weeping(mtmp->data)){
 			if(mtmp->mvar3 && u.uevent.invoked){
@@ -3493,11 +3495,16 @@ struct obj *
 mlifesaver(mon)
 struct monst *mon;
 {
+	struct obj *otmp;
 	if (!nonliving(mon->data)) {
-	    struct obj *otmp = which_armor(mon, W_AMUL);
+	    otmp = which_armor(mon, W_AMUL);
 
 	    if (otmp && otmp->otyp == AMULET_OF_LIFE_SAVING)
 		return otmp;
+	}
+	for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
+	    if (otmp && otmp->owornmask && check_oprop(otmp, OPROP_LIFE))
+			return otmp;
 	}
 	return (struct obj *)0;
 }
@@ -3643,18 +3650,30 @@ struct monst *mtmp;
 			if (couldsee(mtmp->mx, mtmp->my)) {
 				messaged = TRUE;
 				pline("But wait...");
-				pline("%s medallion begins to glow!",
-					s_suffix(Monnam(mtmp)));
-				makeknown(AMULET_OF_LIFE_SAVING);
+				pline("%s %s begins to glow!",
+					s_suffix(Monnam(mtmp)),
+					lifesave->otyp == AMULET_OF_LIFE_SAVING ? "medallion" : xname(lifesave));
+
+				if(lifesave->otyp == AMULET_OF_LIFE_SAVING && !check_oprop(lifesave, OPROP_LIFE))
+					makeknown(AMULET_OF_LIFE_SAVING);
+
 				if (attacktype(mtmp->data, AT_EXPL)
 				    || attacktype(mtmp->data, AT_BOOM))
 					pline("%s reconstitutes!", Monnam(mtmp));
 				else
 					pline("%s looks much better!", Monnam(mtmp));
-				pline_The("medallion crumbles to dust!");
+				if(lifesave->otyp == AMULET_OF_LIFE_SAVING && !check_oprop(lifesave, OPROP_LIFE))
+					pline_The("medallion crumbles to dust!");
+				else 
+					pline_The("%s fades.", xname(lifesave));
 			}
-			/* use up amulet */
-			m_useup(mtmp, lifesave);
+			if(check_oprop(lifesave, OPROP_LIFE)){
+				remove_oprop(lifesave, OPROP_LIFE);
+			}
+			else {
+				/* use up amulet (or other item, I guess) */
+				m_useup(mtmp, lifesave);
+			}
 			break;
 		case LSVD_ALA:
 			/* message */
@@ -7816,7 +7835,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 		} else if(targets > 0 && you_corruption_target_inhale()){
 			pline("Slime bubbles up from under your %s.", body_part(BODY_SKIN));
 			if(canseemon(mtmp)){
@@ -7842,7 +7861,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
 		}
@@ -7916,7 +7935,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 		} else if(targets > 0 && you_wastes_target_inhale()){
 			if(!Blind)
 				pline("%s rises from your %s.", has_blood(youracedata) ? "Bloody mist" : "Mist", body_part(BODY_SKIN));
@@ -7939,7 +7958,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
 		}
@@ -8050,7 +8069,7 @@ struct monst *mtmp;
 					mtmp->mhp = mtmp->mhpmax;
 				}
 				mtmp->mspec_used = 0;
-				mtmp->mcan = 0;
+				set_mcan(mtmp, FALSE);
 			}
 		} else if(targets > 0 && you_gray_target_inhale()){
 			if(uarmh && uarmh->otyp == DUNCE_CAP){
@@ -8095,7 +8114,7 @@ struct monst *mtmp;
 				}
 				if(damage){
 					mtmp->mspec_used = 0;
-					mtmp->mcan = 0;
+					set_mcan(mtmp, FALSE);
 					mtmp->mux = u.ux;
 					mtmp->muy = u.uy;
 				}
@@ -8236,7 +8255,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 		} else if(targets > 0
 			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
 			&& !mtmp->mpeaceful
@@ -8258,7 +8277,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
 		}
@@ -8351,7 +8370,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 		} else if(targets > 0
 			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
 			&& !mtmp->mpeaceful
@@ -8373,7 +8392,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
 		}
@@ -8529,7 +8548,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 		} else if(targets > 0
 			&& distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
 			&& !mtmp->mpeaceful
@@ -8557,7 +8576,7 @@ struct monst *mtmp;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			mtmp->mspec_used = 0;
-			mtmp->mcan = 0;
+			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
 		}

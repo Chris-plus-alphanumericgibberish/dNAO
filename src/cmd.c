@@ -1865,6 +1865,8 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Shock_resistance) you_are("shock resistant");
 	if (Sick_resistance) you_are("immune to sickness");
 	if (Sleep_resistance) you_are("sleep resistant");
+	if (Half_physical_damage) you_are("resistant to physical damage");
+	if (Half_spell_damage) you_are("resistant to magical damage");
 	if (u.uedibility || u.sealsActive&SEAL_BUER) you_can("recognize detrimental food");
 	// if ( (ublindf && ublindf->otyp == R_LYEHIAN_FACEPLATE && !ublindf->cursed) || 
 		 // (uarmc && uarmc->otyp == OILSKIN_CLOAK && !uarmc->cursed) ||

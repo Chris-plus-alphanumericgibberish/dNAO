@@ -1864,6 +1864,10 @@ get_description_of_attack_type(uchar id)
 	case AT_WISP: return "mist wisps";
 	case AT_TNKR: return "tinker";
 	case AT_SRPR: return "spiritual blade";
+	case AT_XSPR: return "offhand spiritual blade";
+	case AT_MSPR: return "extra-hand spiritual blade";
+	case AT_DSPR: return "million-arm spiritual blade";
+	case AT_ESPR: return "floating spiritual blade";
 	case AT_BEAM: return "ranged beam";
 	case AT_DEVA: return "million-arm weapon";
 	case AT_5SQR: return "long reach touch";
@@ -1954,7 +1958,7 @@ get_description_of_damage_type(uchar id)
 	case AD_MIST: return "migo mist projector";
 	case AD_TELE: return "monster teleports away";
 	case AD_POLY: return "polymorphs you";
-	case AD_PSON: return "psionic powers";
+	case AD_PSON: return "psionic";
 	case AD_GROW: return "grows brethren on death";
 	case AD_SOUL: return "strengthens brethren on death";
 	case AD_TENT: return "deadly tentacles (LarienTelrunya's bane)";

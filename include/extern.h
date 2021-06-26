@@ -77,6 +77,7 @@ E const char *FDECL(artiname, (int));
 E int FDECL(arti_value, (struct obj *));
 E struct obj *FDECL(mk_artifact, (struct obj *,ALIGNTYP_P));
 E struct obj *FDECL(mk_special, (struct obj *));
+E struct obj *FDECL(mk_vault_special, (struct obj *, long long));
 E struct obj *FDECL(mk_minor_special, (struct obj *));
 E void FDECL(add_oprop, (struct obj *, int));
 E void FDECL(remove_oprop, (struct obj *, int));
@@ -84,8 +85,6 @@ E void FDECL(add_oprop_list, (unsigned long int *, int));
 E boolean FDECL(check_oprop, (struct obj *, int));
 E boolean FDECL(oprops_match, (struct obj *, struct obj *));
 E void FDECL(copy_oprop_list, (struct obj *, unsigned long int *));
-E struct obj *FDECL(mk_special, (struct obj *));
-E struct obj *FDECL(mk_minor_special, (struct obj *));
 E const char *FDECL(artifact_name, (const char *,short *));
 E boolean FDECL(art_already_exists, (int));
 E boolean FDECL(art_already_exists_byname, (int,const char *));
@@ -596,6 +595,7 @@ E void FDECL(doliving_dragonhead, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_mad_king, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_spear, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_armor, (struct monst *, struct obj *, boolean));
+E void FDECL(doliving_healing_armor, (struct monst *, struct obj *, boolean));
 
 /* ### dog.c ### */
 
@@ -1495,7 +1495,7 @@ E boolean FDECL(isspacious, (struct mkroom *));
 E void NDECL(mksepulcher);
 E void NDECL(mkmivault);
 E void FDECL(mkmivaultitem,(struct obj *));
-E void FDECL(mkhellvaultitem,(struct obj *));
+E void FDECL(mkhellvaultitem,(struct obj *, long long int));
 E void NDECL(place_lolth_vaults);
 E void NDECL(place_chaos_forest_features);
 E void NDECL(place_law_features);
@@ -1608,6 +1608,7 @@ E void FDECL(mark_mon_as_summoned,(struct monst *, struct monst *, int, int));
 /* ### mondata.c ### */
 
 E void NDECL(id_permonst);
+E void FDECL(set_mcan, (struct monst *,boolean));
 E void FDECL(set_mon_data, (struct monst *,int));
 E void FDECL(set_mon_data_core, (struct monst *, struct permonst *));
 E void FDECL(make_horror, (struct permonst *, int, int));

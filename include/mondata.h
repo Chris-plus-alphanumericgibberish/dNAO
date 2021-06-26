@@ -260,6 +260,8 @@
 
 #define noboots(ptr)			((slithy(ptr) || nolimbs(ptr) || nofeet(ptr)) && !humanoid_feet(ptr))
 
+#define has_wings(ptr)			(((ptr)->mflagsb & MB_WINGS) != 0)
+
 #define is_animal(ptr)		(((ptr)->mflagst & MT_ANIMAL) != 0L)
 #define is_plant(ptr)		(((ptr)->mflagsa & MA_PLANT) != 0L)
 #define is_insectoid(ptr)		(((ptr)->mflagsa & MA_INSECTOID) != 0L)

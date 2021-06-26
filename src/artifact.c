@@ -630,17 +630,68 @@ int oprop;
 }
 
 void
+remove_oprop_and_u_extrinsic(obj, oprop)
+struct obj *obj;
+int oprop;
+{
+	switch(oprop){
+		case OPROP_FIRE:
+			EFire_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_COLD:
+			ECold_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_WOOL:
+			EFire_resistance &= ~(obj->owornmask);
+			ECold_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_ELEC:
+			EShock_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_ACID:
+			EAcid_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_MAGC:
+			EAntimagic &= ~(obj->owornmask);
+		break;
+		case OPROP_REFL:
+			EReflecting &= ~(obj->owornmask);
+		break;
+		case OPROP_DISN:
+			EDisint_resistance &= ~(obj->owornmask);
+		break;
+		case OPROP_LIFE:
+			// pline("obj %ld, mask %ld", obj->owornmask, ELifesaved);
+			ELifesaved &= ~(obj->owornmask);
+		break;
+	}
+}
+
+void
 remove_oprop(obj, oprop)
 struct obj *obj;
 int oprop;
 {
 	if(!oprop)
 		return;
-	
+
 	if(oprop >= MAX_OPROP || oprop < 0)
 		impossible("Attempting to remove oprop number %d from %s?", oprop, doname(obj));
-	
-	obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+
+	switch(obj->where){
+		case OBJ_INVENT:
+			remove_oprop_and_u_extrinsic(obj, oprop);
+			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+		break;
+		case OBJ_MINVENT:
+			update_mon_intrinsics(obj->ocarry, obj, FALSE, TRUE); /*remove all intrinsics for now*/
+			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+			update_mon_intrinsics(obj->ocarry, obj, TRUE, TRUE); /*re-set remaining intrinsics for now*/
+		break;
+		default:
+			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
+		break;
+	}
 }
 
 void
@@ -712,6 +763,304 @@ unsigned long int *oprop_list;
  * Make a special-but-non-artifact weapon based on otmp
  */
 
+#define ADD_WEAPON_ARMOR_OPROP(otmp, oproptoken) \
+	add_oprop(otmp, OPROP_##oproptoken);\
+	if(is_gloves(otmp) || is_boots(otmp)){\
+		if(rn2(3))\
+			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
+		else\
+			add_oprop(otmp, OPROP_##oproptoken##W);\
+	}
+
+#define ADD_WEAK_OR_STRONG_OPROP(otmp, oproptoken) \
+	if(rn2(4))\
+		add_oprop(otmp, OPROP_##oproptoken##W);\
+	else\
+		add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
+
+
+STATIC_OVL struct obj *
+mk_holy_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	bless(otmp);
+	/* materials */
+	if(rn2(3)){
+		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
+			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
+		){
+			set_material_gm(otmp, rn2(2) ? GOLD : SILVER);
+		}
+		else if(otmp->oclass == ARMOR_CLASS){
+			add_oprop(otmp, OPROP_WOOL);
+			otmp->obj_color = CLR_WHITE;
+		}
+	}
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(rn2(2)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		}
+		if(rn2(3)) switch(rn2(6)){
+			case 0:
+				add_oprop(otmp, OPROP_WOOL);
+				if(!is_hard(otmp))
+					otmp->obj_color = CLR_WHITE;
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 4:
+				add_oprop(otmp, OPROP_BCRS);
+			break;
+			case 5:
+				add_oprop(otmp, OPROP_REFL);
+				set_material_gm(otmp, rn2(2) ? GOLD : SILVER);
+			break;
+		}
+		else if(rn2(3)){
+			switch(rn2(3)){
+				case 0:
+					ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+				break;
+				case 1:
+					ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
+				break;
+				case 2:
+					ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+				break;
+			}
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_LIFE);
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_HEAL);
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
+		if(rn2(2)){
+			ADD_WEAK_OR_STRONG_OPROP(otmp, HOLY);
+		}
+		if(rn2(3)) switch(rn2(5)){
+			case 0:
+				add_oprop(otmp, OPROP_WRTHW);
+			break;
+			case 1:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
+			break;
+			case 4:
+				add_oprop(otmp, OPROP_VORPW);
+			break;
+		}
+		else if(rn2(3)){
+			switch(rn2(3)){
+				case 0:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
+				break;
+				case 1:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, CONC);
+				break;
+				case 2:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);
+				break;
+			}
+		}
+	}
+	return otmp;
+}
+
+STATIC_OVL struct obj *
+mk_devil_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	curse(otmp);
+	/* materials */
+	if(rn2(4)){
+		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
+			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
+		){
+			set_material_gm(otmp, rn2(2) ? GOLD : GREEN_STEEL);
+		}
+	}
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+			break;
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
+		if(rn2(4)) switch(rn2(8)){
+			case 0:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ELEC);
+			break;
+			case 1:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FLAY);
+			break;
+			case 6:
+				add_oprop(otmp, OPROP_DRANW);
+			break;
+			case 7:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);
+			break;
+		}
+	}
+	return otmp;
+}
+
+STATIC_OVL struct obj *
+mk_demon_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	curse(otmp);
+	/* materials */
+	if(rn2(4)){
+		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
+			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
+		){
+			set_material_gm(otmp, rn2(2) ? GOLD : IRON);
+		}
+	}
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+			break;
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
+		if(rn2(4)) switch(rn2(8)){
+			case 0:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FLAY);
+			break;
+			case 6:
+				add_oprop(otmp, OPROP_DRANW);
+			break;
+			case 7:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
+			break;
+		}
+		/* Living weapons */
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_LIVEW);
+		}
+		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_ASECW);
+		}
+		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_PSECW);
+		}
+	}
+	return otmp;
+}
+
+struct obj *
+mk_vault_special(otmp, vn)
+struct obj *otmp;	/* existing object */
+long long int vn;
+{
+	int type;
+#define VN_TANNIN	0
+#define VN_ANCIENT	1
+#define VN_ANGEL	2
+	if(vn < VN_A_O_BLESSINGS){
+		type = VN_TANNIN;
+	}
+	else if(vn < VN_APOCALYPSE){
+		type = VN_ANCIENT;
+	}
+	else if(vn < VN_MAX){
+		type = VN_ANGEL;
+	}
+	switch(type){
+		case VN_ANGEL:
+			otmp = mk_holy_special(otmp);
+		break;
+		case VN_ANCIENT:
+			otmp = mk_devil_special(otmp);
+		break;
+		case VN_TANNIN:
+			otmp = mk_demon_special(otmp);
+		break;
+	}
+	return otmp;
+}
+
 struct obj *
 mk_special(otmp)
 struct obj *otmp;	/* existing object */
@@ -719,7 +1068,7 @@ struct obj *otmp;	/* existing object */
 	int prop;
 	
 	if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)){
-		prop = rnd(13);
+		prop = rnd(15);
 		switch(prop)
 		{
 		case 1:
@@ -761,6 +1110,15 @@ struct obj *otmp;	/* existing object */
 		case 13:
 			add_oprop(otmp, OPROP_PSIOW);
 		break;
+		case 14:
+			add_oprop(otmp, OPROP_WRTHW);
+		break;
+		case 15:
+			add_oprop(otmp, OPROP_DRANW);
+		break;
+		}
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_LIVEW);
 		}
 	}
 	else if(otmp->oclass == ARMOR_CLASS){
@@ -768,34 +1126,34 @@ struct obj *otmp;	/* existing object */
 		switch(prop)
 		{
 		case 1:
-			add_oprop(otmp, OPROP_FIRE);
+			ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
 		break;
 		case 2:
-			add_oprop(otmp, OPROP_COLD);
+			ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
 		break;
 		case 3:
-			add_oprop(otmp, OPROP_ELEC);
+			ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
 		break;
 		case 4:
-			add_oprop(otmp, OPROP_ACID);
+			ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
 		break;
 		case 5:
-			add_oprop(otmp, OPROP_MAGC);
+			ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
 		break;
 		case 6:
-			add_oprop(otmp, OPROP_ANAR);
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
 		break;
 		case 7:
-			add_oprop(otmp, OPROP_CONC);
+			ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
 		break;
 		case 8:
-			add_oprop(otmp, OPROP_AXIO);
+			ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
 		break;
 		case 9:
-			add_oprop(otmp, OPROP_HOLY);
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
 		break;
 		case 10:
-			add_oprop(otmp, OPROP_UNHY);
+			ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
 		break;
 		}
 	}
@@ -3660,7 +4018,7 @@ boolean * messaged;
 					u.uen += 10;
 				}
 				else {
-					magr->mcan = FALSE;
+					set_mcan(magr, FALSE);
 					magr->mspec_used = 0;
 				}
 			}
@@ -4681,6 +5039,52 @@ boolean * messaged;
 		}
 	}
 
+	/*level drain*/
+	if (check_oprop(otmp, OPROP_DRANW) && !Drain_res(mdef)){
+		int dlife;
+		/* message */
+		if (youdef) {
+			if (Blind)
+				You_feel("an object drain your life!");
+			else
+				pline("%s drains your life!", The(wepdesc));
+			*messaged = TRUE;
+		}
+		else if (vis) {
+				pline("%s draws the life from %s!",
+				The(wepdesc),
+				mon_nam(mdef));
+			*messaged = TRUE;
+		}
+
+		if (youdef) {
+			dlife = *hpmax(mdef);
+			losexp("life drainage", FALSE, FALSE, FALSE);
+			dlife -= *hpmax(mdef);
+		}
+		else {
+			dlife = *hpmax(mdef);
+			*hpmax(mdef) -= min_ints(rnd(8), *hpmax(mdef));
+			if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
+				*hp(mdef) = 1;
+				*hpmax(mdef) = 1;
+			}
+			if (mdef->m_lev > 0)
+				mdef->m_lev--;
+			dlife -= *hpmax(mdef);
+		}
+
+		/* gain from drain */
+		if (magr) {
+			*hp(magr) += dlife / 2;
+			if (*hp(magr) > *hpmax(magr))
+				*hp(magr) = *hpmax(magr);
+		}
+		*truedmgptr += dlife;
+		if (youagr || youdef)
+			flags.botl = 1;
+	}
+
 	/* morgul weapons */
 	if (otmp->cursed && (check_oprop(otmp, OPROP_MORGW) || check_oprop(otmp, OPROP_LESSER_MORGW))){
 		int bonus = 0;
@@ -4905,7 +5309,7 @@ boolean * messaged;
 			}
 			else {
 				dlife = *hpmax(mdef);
-				*hpmax(mdef) -= min(rnd(8), *hpmax(mdef));
+				*hpmax(mdef) -= min_ints(rnd(8), *hpmax(mdef));
 				if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
 					if (youagr && oartifact == ART_STORMBRINGER && dieroll <= 2 && !is_silent_mon(mdef))
 						pline("%s cries out in pain and despair and terror.", Monnam(mdef));
@@ -5409,12 +5813,12 @@ arti_invoke(obj)
 			else if(u.dz < 0 && (yn("This is a forbidden technique.  Do you wish to use it anyway?") == 'y')){
 				struct monst *mtmp;
 				pline("Time Stop!");
-				youmonst.movement += NORMAL_SPEED*10;
 				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 					if(is_uvuudaum(mtmp->data) && !DEADMONSTER(mtmp)){
 						mtmp->movement += NORMAL_SPEED*10;
 					}
 				}
+				HTimeStop += 10;
 				Stoned = 9;
 				delayed_killer = "termination of personal timeline.";
 				killer_format = KILLED_BY;
@@ -9889,6 +10293,10 @@ dosymbiotic_equip()
 {
 	struct monst *mtmp;
 	struct obj *obj;
+	for(obj = invent; obj; obj = obj->nobj){
+		if(obj->owornmask && check_oprop(obj, OPROP_HEAL))
+			doliving_healing_armor(&youmonst, obj, FALSE);
+	}
 	if(uarm && (uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR))
 		dosymbiotic(&youmonst, uarm);
 	if(uwep && ((check_oprop(uwep, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uwep) ))
@@ -9903,6 +10311,10 @@ dosymbiotic_equip()
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
+		for(obj = mtmp->minvent; obj; obj = obj->nobj){
+			if(obj->owornmask && check_oprop(obj, OPROP_HEAL))
+				doliving_healing_armor(mtmp, obj, FALSE);
+		}
 		obj = which_armor(mtmp, W_ARM);
 		if(obj && (obj->otyp == LIVING_ARMOR || obj->otyp == BARNACLE_ARMOR))
 			dosymbiotic(mtmp, obj);

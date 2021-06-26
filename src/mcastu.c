@@ -1697,6 +1697,8 @@ int tary;
 		return MM_MISS;
 	if (youagr ? Nullmagic : mon_resistance(magr, NULLMAGIC))
 		return MM_MISS;
+	if (attk->adtyp == AD_PSON && !youdef && (!mdef || mindless_mon(mdef)))
+		return MM_MISS;
 
 	/* Attempt to find a spell to cast */
 	if (mlev(magr) > 0 && (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC || attk->adtyp == AD_PSON)) {
@@ -2329,6 +2331,9 @@ int tary;
 		/* needs direct target */
 		if (!foundem) {
 			impossible("No mdef for psibolt");
+			return MM_MISS;
+		}
+		if (!youdef && mindless_mon(mdef)) {
 			return MM_MISS;
 		}
 		/* calculate resistance */
@@ -3575,7 +3580,7 @@ int tary;
 		else {
 			create_fog_cloud(tarx, tary, 3, 8, youagr);
 			if (!youagr && magr->mtyp == PM_PLUMACH_RILMANI)
-				magr->mcan = 1;
+				magr->mspec_used += 1000;
 			if (youdef)
 				stop_occupation();
 		}
@@ -3674,7 +3679,7 @@ int tary;
 		else {
 			if (!magr->perminvis) magr->minvis = 0;
 			if (magr->permspeed == MSLOW) magr->permspeed = 0;
-			magr->mcan = 0;
+			set_mcan(magr, FALSE);
 			magr->mcrazed = 0;
 			magr->mdisrobe = 0;
 			magr->mcansee = 1;

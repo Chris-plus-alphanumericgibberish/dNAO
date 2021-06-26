@@ -2880,7 +2880,7 @@ int mkobjflags;
 			}
 			if(ptr->mtyp == PM_AMM_KAMEREL){
 				if(rn2(10)){//Physical fighter, no magic
-					mtmp->mcan = 1;
+					set_mcan(mtmp, TRUE);
 					if(rn2(10)){//Warrior
 						mongets(mtmp, MIRRORBLADE, mkobjflags);
 						otmp = mksobj(ROUNDSHIELD, mkobjflags);
@@ -4540,6 +4540,9 @@ int mkobjflags;
 				(void)mongets(mtmp, ARCHAIC_GAUNTLETS, mkobjflags);
 				(void)mongets(mtmp, ARCHAIC_BOOTS, mkobjflags);
 			}
+		} else if (ptr->mtyp == PM_ELOCATOR) {
+		    otmp = mongets(mtmp, rn2(11) ? ROBE : CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+			otmp->obj_color = CLR_ORANGE;
 		} else if (is_dwarf(ptr)) { //slightly rearanged code so more dwarves get helms -D_E
 			if(In_mordor_quest(&u.uz) 
 				&& !In_mordor_forest(&u.uz)

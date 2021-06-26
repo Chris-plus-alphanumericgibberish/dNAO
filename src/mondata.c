@@ -29,6 +29,21 @@ id_permonst()
 	return;
 }
 
+/*
+ * Some monster intrinsics go away if the monster is cancelled
+ * (and return if uncancelled) so mcan must be set via this
+ * wrapper.
+ */
+
+void
+set_mcan(mon, state)
+struct monst *mon;
+boolean state;
+{
+	mon->mcan = state;
+	set_mon_data_core(mon, mon->data);
+}
+
 /* 
  * Safely sets mon->data from an mtyp, including mon's template.
  * Gets and/or allocates (via permonst_of) memory for mon's data field
@@ -144,18 +159,23 @@ struct permonst * ptr;
 	if ((ptr_condition))	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
 	else					{ mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
 
+#define set_mintrinsic_cancelable(ptr_condition, intrinsic) \
+	if ((ptr_condition) && !mon->mcan)	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
+	else								{ mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
+
 	/* other intrinsics */
-	set_mintrinsic(species_flies(mon->data), FLYING);
-	set_mintrinsic(species_floats(mon->data), LEVITATION);
 	set_mintrinsic(species_swims(mon->data), SWIMMING);
-	set_mintrinsic(species_displaces(mon->data), DISPLACED);
-	set_mintrinsic(species_passes_walls(mon->data), PASSES_WALLS);
-	set_mintrinsic(species_regenerates(mon->data), REGENERATION);
-	set_mintrinsic(species_perceives(mon->data), SEE_INVIS);
-	set_mintrinsic(species_teleports(mon->data), TELEPORT);
-	set_mintrinsic(species_controls_teleports(mon->data), TELEPORT_CONTROL);
-	set_mintrinsic(species_is_telepathic(mon->data), TELEPAT);
+	set_mintrinsic((species_flies(mon->data) && (!mon->mcan || has_wings(mon->data))), FLYING);
+	set_mintrinsic_cancelable(species_floats(mon->data), LEVITATION);
+	set_mintrinsic_cancelable(species_displaces(mon->data), DISPLACED);
+	set_mintrinsic_cancelable(species_passes_walls(mon->data), PASSES_WALLS);
+	set_mintrinsic_cancelable(species_regenerates(mon->data), REGENERATION);
+	set_mintrinsic_cancelable(species_perceives(mon->data), SEE_INVIS);
+	set_mintrinsic_cancelable(species_teleports(mon->data), TELEPORT);
+	set_mintrinsic_cancelable(species_controls_teleports(mon->data), TELEPORT_CONTROL);
+	set_mintrinsic_cancelable(species_is_telepathic(mon->data), TELEPAT);
 #undef set_mintrinsic
+#undef set_mintrinsic_cancelable
 	for(i = 0; i < MPROP_SIZE; i++){
 		mon->mintrinsics[i] |= mon->acquired_trinsics[i];
 	}
@@ -478,7 +498,7 @@ int template;
 			attk->aatyp == AT_ARRW ||
 			attk->aatyp == AT_MMGC ||
 			attk->aatyp == AT_TNKR ||
-			attk->aatyp == AT_SRPR ||
+			spirit_rapier_at(attk->aatyp) ||
 			attk->aatyp == AT_BEAM ||
 			attk->aatyp == AT_MAGC ||
 			(attk->aatyp == AT_TENT && template == SKELIFIED) ||
@@ -695,7 +715,7 @@ int template;
 			))
 		{
 			maybe_insert();
-			attk->aatyp = AT_SRPR;
+			attk->aatyp = !attacktype(ptr, AT_WEAP) ? AT_SRPR : !attacktype(ptr, AT_XWEP) ? AT_XSPR : AT_ESPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 4;
 			attk->damd = 8;
@@ -1072,14 +1092,34 @@ int level_bonus;
 			horrorattacks++;
 
 			/* possibly make more identical attacks */
-			while (!rn2(3) && horrorattacks<6) {
+			while (!rn2(3) && horrorattacks<6 && attkptr->aatyp != AT_DEVA && attkptr->aatyp != AT_DSPR) {
 				attkptr = &horror->mattk[horrorattacks];
 				*attkptr = *(attkptr - 1);
 
-				if (attkptr->aatyp == AT_WEAP)
+				if (rn2(3) && attkptr->aatyp == AT_WEAP)
 					attkptr->aatyp = AT_XWEP;
-				else if (attkptr->aatyp == AT_XWEP)
+				else if (rn2(3) && attkptr->aatyp == AT_XWEP)
 					attkptr->aatyp = AT_MARI;
+				
+				/*Magic blade attacks may transition to normal weapon attacks*/
+				if (rn2(3) && attkptr->aatyp == AT_SRPR){
+					if(rn2(10)){
+						attkptr->aatyp = AT_XSPR;
+					}
+					else {
+						attkptr->aatyp = AT_XWEP;
+						attkptr->adtyp = get_random_of(randWeaponDamageTypes);
+					}
+				}
+				else if (rn2(3) && attkptr->aatyp == AT_XSPR){
+					if(rn2(10)){
+						attkptr->aatyp = AT_MSPR;
+					}
+					else {
+						attkptr->aatyp = AT_MARI;
+						attkptr->adtyp = get_random_of(randWeaponDamageTypes);
+					}
+				}
 
 				horrorattacks++;
 			}
@@ -2410,7 +2450,8 @@ struct permonst *ptr;
 		tmp2 = ptr->mattk[i].aatyp;
 		n += (tmp2 > 0);
 		n += (tmp2 == AT_MAGC || tmp2 == AT_MMGC ||
-			tmp2 == AT_TUCH || tmp2 == AT_SRPR || tmp2 == AT_TNKR);
+			tmp2 == AT_TUCH || tmp2 == AT_TNKR ||
+			spirit_rapier_at(tmp2));
 		n += (tmp2 == AT_WEAP && (ptr->mflagsb & MB_STRONG));
 	}
 

@@ -1073,7 +1073,7 @@ int distance;
 			}
 			switch (P_SKILL(P_MUSICALIZE)) {
 			case P_EXPERT:
-				mtmp->mcan = 0;
+				set_mcan(mtmp, FALSE);
 				mtmp->mspec_used = 0;
 				mtmp->mcrazed = 0;
 				mtmp->mdisrobe = 0;

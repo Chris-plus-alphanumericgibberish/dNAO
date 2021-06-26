@@ -6,8 +6,8 @@
 #include "artifact.h"
 #ifdef OVLB
 
-static const char tools[] = { COIN_CLASS, CHAIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
-static const char tools_too[] = { COIN_CLASS, ALL_CLASSES, TOOL_CLASS, POTION_CLASS,
+static const char tools[] = { COIN_CLASS, CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
+static const char tools_too[] = { COIN_CLASS, ALL_CLASSES, SCOIN_CLASS, TOOL_CLASS, POTION_CLASS,
 				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
 static const char apply_armor[] = { ARMOR_CLASS, 0 };
 static const char apply_corpse[] = { FOOD_CLASS, 0 };
@@ -51,6 +51,7 @@ STATIC_DCL int FDECL(use_doll, (struct obj *));
 STATIC_DCL int FDECL(use_doll_tear, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
+STATIC_DCL int FDECL(do_soul_coin, (struct obj *));
 STATIC_DCL boolean FDECL(figurine_location_checks,
 				(struct obj *, coord *, BOOLEAN_P));
 STATIC_DCL boolean NDECL(uhave_graystone);
@@ -3046,12 +3047,12 @@ struct obj *hypo;
 				if(!amp->cursed){
 					if (canseemon(mtarg))
 						pline("%s looks lackluster.", Monnam(mtarg));
-					mtarg->mcan = 1;
+					set_mcan(mtarg, TRUE);
 				} else {
 					if (canseemon(mtarg))
 						pline("%s looks full of energy.", Monnam(mtarg));
 					mtarg->mspec_used = 0;
-					mtarg->mcan = 0;
+					set_mcan(mtarg, FALSE);
 				}
 			break;
 			case POT_SLEEPING:
@@ -5288,6 +5289,115 @@ struct obj *obj;
     return 1;
 }
 
+#define FREE_SOUL_HANDLING \
+You("release the soul!");\
+u.ublesscnt = 0;\
+if(rn2(100)){\
+	pline("...you feel the soul sink towards Gehennom.");\
+	/* Points for trying */\
+	u.ualign.sins = max(u.ualign.sins-1, 0);\
+	adjalign(7);\
+	if(u.ugangr[Align2gangr(u.ualign.type)]) {\
+		u.ugangr[Align2gangr(u.ualign.type)]--;\
+		if (u.ugangr[Align2gangr(u.ualign.type)]) {\
+			pline("%s seems %s.", u_gname(),\
+			  Hallucination ? "groovy" : "slightly mollified");\
+			if ((int)u.uluck < 0) change_luck(1);\
+		} else {\
+			pline("%s seems %s.", u_gname(), Hallucination ?\
+			  "cosmic (not a new fact)" : "mollified");\
+			if ((int)u.uluck < 0) u.uluck = 0;\
+			u.reconciled = REC_MOL;\
+		}\
+	}\
+}\
+else {\
+	/* Freed someone who wasn't supposed to be there! */\
+	u.ualign.sins = max(u.ualign.sins-7, 0);\
+	u.ualign.record = ALIGNLIM;\
+	if(u.ugangr[Align2gangr(u.ualign.type)]) {\
+		u.ugangr[Align2gangr(u.ualign.type)] = 0;\
+		pline("%s seems %s.", u_gname(), Hallucination ?\
+		  "cosmic (not a new fact)" : "mollified");\
+		if ((int)u.uluck < 0) u.uluck = 0;\
+		u.reconciled = REC_MOL;\
+	}\
+}
+
+#define CURSED_SOUL_HANDLING \
+u.ualign.sins += 9;\
+adjalign(-99);\
+if(!rn2(100)){\
+	You("feel the soul scream as it sinks towards Gehennom under the weight of the curse!");\
+	/* Just sent someone back who shouldn't be there :( */\
+	gods_upset(Align2gangr(u.ualign.type));\
+}
+
+#define UNCURSED_SOUL_HANDLING \
+You("blur with stolen time!");\
+u.ualign.sins++;\
+if(!rn2(100)){\
+	You("feel the soul fly free!");\
+	adjalign(1);\
+	if ((int)u.uluck < 0) change_luck(1);\
+}
+
+
+STATIC_OVL int
+do_soul_coin(obj)
+struct obj *obj;
+{
+	struct monst *mtmp;
+	if(!freehand()){
+		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	switch(obj->otyp){
+		case WAGE_OF_SLOTH:
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(obj->blessed){
+				FREE_SOUL_HANDLING
+			}
+			else if(obj->cursed){
+				You("blur with stolen time!");
+				HTimeStop += 9L;
+ 				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+ 					if(is_uvuudaum(mtmp->data) && !DEADMONSTER(mtmp)){
+ 						mtmp->movement += NORMAL_SPEED*9;
+ 					}
+ 				}
+				CURSED_SOUL_HANDLING
+			}
+			else {
+				You("blur with stolen time!");
+				HTimeStop += 4L;
+ 				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+ 					if(is_uvuudaum(mtmp->data) && !DEADMONSTER(mtmp)){
+ 						mtmp->movement += NORMAL_SPEED*4;
+ 					}
+ 				}
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
+		break;
+		case WAGE_OF_LUST:
+		break;
+		case WAGE_OF_GLUTTONY:
+			if(!getdir((char *)0)) return 0;
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+		break;
+		case WAGE_OF_GREED:
+		break;
+		case WAGE_OF_WRATH:
+		break;
+		case WAGE_OF_ENVY:
+		break;
+		case WAGE_OF_PRIDE:
+		break;
+	}
+    return 1;
+}
+
 void
 add_class(cl, class)
 char *cl;
@@ -6180,6 +6290,8 @@ doapply()
 	    return do_break_wand(obj);
 	else if (obj->oclass == COIN_CLASS)
 	    return do_flip_coin(obj);
+	else if (obj->oclass == SCOIN_CLASS)
+	    return do_soul_coin(obj);
 	else if (obj->oclass == RING_CLASS || obj->oclass == AMULET_CLASS)
 	    return do_present_item(obj);
 	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE)) 

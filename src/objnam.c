@@ -902,6 +902,8 @@ boolean dofull;
 			u.uinsight < 10 ? Strcat(buf, "self-acidifying ") : Strcat(buf, "acid-secreting ");
 		if (check_oprop(obj, OPROP_PSECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_BASIC))
 			u.uinsight < 10 ? Strcat(buf, "self-poisoning ") : Strcat(buf, "poison-secreting ");
+		if (check_oprop(obj, OPROP_HEAL) && (obj->known || u.uinsight >= 10))
+			u.uinsight < 10 ? Strcat(buf, "healing ") : Strcat(buf, "angel-haunted ");
 		
 		if(check_oprop(obj, OPROP_OCLTW) && obj->known)
 			Strcat(buf, "occult ");
@@ -925,6 +927,8 @@ boolean dofull;
 			Strcat(buf, "acidproof ");
 		if(check_oprop(obj, OPROP_DISN) && obj->known)
 			Strcat(buf, "disintegration-proof ");
+		if(check_oprop(obj, OPROP_BCRS) && obj->known)
+			Strcat(buf, "prayer-warded ");
 		
 		if (check_oprop(obj, OPROP_LESSER_ANARW) && obj->known)
 			Strcat(buf, "unruly ");
@@ -945,6 +949,17 @@ boolean dofull;
 		}
 		if (check_oprop(obj, OPROP_PHSEW))
 			Strcat(buf, "faded ");
+		
+		if (check_oprop(obj, OPROP_LIFE)){
+			if(obj->known)
+				Strcat(buf, "life-saving ");
+			else if(is_helmet(obj))
+				Strcat(buf, "haloed ");
+			else if(obj->obj_material == SILVER)
+				Strcat(buf, "gold-feather-encrusted ");
+			else
+				Strcat(buf, "silver-feather-encrusted ");
+		}
 		
 		if (check_oprop(obj, OPROP_WATRW))
 			Strcat(buf, "misty ");
@@ -998,6 +1013,9 @@ boolean dofull;
 			Strcat(buf, "sparkling ");
 		if (check_oprop(obj, OPROP_LESSER_MAGCW))
 			Strcat(buf, "glittering ");
+		
+		if (check_oprop(obj, OPROP_DRANW) && obj->known)
+			Strcat(buf, "life-drinking ");
 		
 		if (check_oprop(obj, OPROP_VORPW) && obj->known)
 			Strcat(buf, "vorpal ");
@@ -3995,7 +4013,13 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "disintegration-proof ", l=21)) {
 			add_oprop_list(oprop_list, OPROP_DISN);
-			
+
+		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping ", 23)) {
+			add_oprop_list(oprop_list, OPROP_BCRS);
+
+		} else if (!strncmpi(bp, "healing ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_HEAL);
+
 		} else if (!strncmpi(bp, "anarchic-armor ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_ANAR);
 
@@ -4010,7 +4034,7 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "self-acidifying ", l=16) || !strncmpi(bp, "acid-secreting ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_ASECW);
-			
+
 		} else if (!strncmpi(bp, "self-poisoning ", l=15) || !strncmpi(bp, "poison-secreting ", l=17) ) {
 			add_oprop_list(oprop_list, OPROP_PSECW);
 
@@ -4055,6 +4079,11 @@ int wishflags;
 			add_oprop_list(oprop_list, OPROP_OONA_ELECW);
 		} else if (!strncmpi(bp, "sparking ", l=9)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_ELECW);
+
+		} else if ((!strncmpi(bp, "life-saving ", l=12)
+			|| !strncmpi(bp, "life saving ", l=12)) 
+		) {
+			add_oprop_list(oprop_list, OPROP_LIFE);
 
 		} else if (!strncmpi(bp, "misty ", l=6)) {
 			add_oprop_list(oprop_list, OPROP_WATRW);
@@ -4113,6 +4142,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "desecrated ", l=11)) {
 			iscursed = !(uncursed + blessed);
 			add_oprop_list(oprop_list, OPROP_LESSER_UNHYW);
+
+		} else if (!strncmpi(bp, "life-drinking ", l=14) && strncmpi(bp, "Vorpal Blade", 12)) {
+			add_oprop_list(oprop_list, OPROP_DRANW);
 
 		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)) {
 			add_oprop_list(oprop_list, OPROP_VORPW);

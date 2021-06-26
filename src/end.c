@@ -791,6 +791,17 @@ winid endwin;
     }
 }
 
+struct obj *
+find_equip_life_oprop()
+{
+	struct obj *otmp;
+	for(otmp = invent; otmp; otmp = otmp->nobj){
+		if(otmp->owornmask && check_oprop(otmp, OPROP_LIFE))
+			return otmp;
+	}
+	return (struct obj *) 0;
+}
+
 /* Be careful not to call panic from here! */
 void
 done(how)
@@ -808,6 +819,7 @@ int how;
 	long umoney;
 	int i;
 	int lsvd;
+	struct obj *otmp;
 
 	if (how == TRICKED) {
 		abort();
@@ -867,7 +879,7 @@ int how;
 	if (Lifesaved && (how <= GENOCIDED)) {
 		pline("But wait...");
 		if(uarmh && uarmh->oartifact == ART_HELM_OF_UNDEATH) {
-			struct obj * otmp = uarmh;
+			otmp = uarmh;
 			if (!(
 					((mvitals[PM_DEATH_KNIGHT].mvflags & G_GENOD) && !In_quest(&u.uz)) ||/* G_EXTINCT okay */
 					(Unchanging) ||
@@ -895,7 +907,9 @@ int how;
 			}
 		}
 		else if(uamul && uamul->otyp == AMULET_OF_LIFE_SAVING){
-			makeknown(AMULET_OF_LIFE_SAVING);
+			if(!check_oprop(uamul, OPROP_LIFE))
+				makeknown(AMULET_OF_LIFE_SAVING);
+
 			Your("medallion %s!",
 				  !Blind ? "begins to glow" : "feels warm");
 			if (how == CHOKING) You("vomit ...");
@@ -904,8 +918,25 @@ int how;
 			else You_feel("much better!");
 
 			lsvd = LSVD_MISC;
-			pline_The("medallion crumbles to dust!");
-			if (uamul) useup(uamul);
+			if(!check_oprop(uamul, OPROP_LIFE)){
+				pline_The("medallion crumbles to dust!");
+				if (uamul) useup(uamul);
+			}
+			else {
+				remove_oprop(uamul, OPROP_LIFE);
+			}
+		}
+		else if((otmp = find_equip_life_oprop())){
+			Your("%s %s!",
+				  xname(otmp),
+				  !Blind ? "begins to glow" : "feels warm");
+			if (how == CHOKING) You("vomit ...");
+			if (how == DISINTEGRATED) You("reconstitute!");
+			else if (how == OVERWOUND) You("reassemble!");
+			else You_feel("much better!");
+
+			lsvd = LSVD_MISC;
+			remove_oprop(otmp, OPROP_LIFE);
 		} else if(u.sealsActive&SEAL_JACK){
 			lsvd = LSVD_JACK;
 			unbind_lifesaving(SEAL_JACK);
