@@ -3334,6 +3334,10 @@ int flat_acc;
 	{
 		vdef_acc += 20;
 	}
+	/* Shades (and other insubstantial creatures) edge-case handler */
+	/* generally, miss_via_insubstantial() should do this, but some edge cases (like rolling boulder traps) are missed */
+	if (insubstantial(pd) && !hits_insubstantial(magr, mdef, attk, weapon))
+		vdef_acc -= 2000;
 
 	/* weapon accuracy -- only applies for a weapon attack OR a properly-thrown object */
 	if ((attk && weapon_aatyp(attk->aatyp))
@@ -3593,47 +3597,9 @@ boolean ranged;
 		vis = getvis(magr, mdef, 0, 0);
 	
 	/* Some things cause immediate misses */
-	/* monster displacement */
-	if (!youdef &&
-		mon_resistance(mdef, DISPLACED) &&
-		!(youagr && u.ustuck && u.ustuck == mdef) &&
-		!(youagr && u.uswallow) &&
-		!(has_passthrough_displacement(pd) && hits_insubstantial(magr, mdef, attk, weapon)) &&
-		rn2(2)
-		) {
-		if (has_passthrough_displacement(pd)){
-			if (vis&VIS_MAGR) {
-				pline("%s attack passes harmlessly through %s!",
-					(youagr ? "Your" : s_suffix(Monnam(magr))),
-					the(mon_nam(mdef)));
-			}
-		}
-		else {
-			if (vis&VIS_MAGR) {
-				pline("%s attack%s %s displaced image!",
-					(youagr ? "You" : Monnam(magr)),
-					(youagr ? "" : "s"),
-					(youagr ? "a" : s_suffix(mon_nam(mdef)))
-					);
-			}
-		}
-		domissmsg = FALSE;
+	if (miss_via_insubstantial(magr, mdef, attk, weapon, vis)) {
 		miss = TRUE;
-	}
-	/* insubstantial (shade-type) immunity to being hit */
-	if (!miss && insubstantial(pd) && !hits_insubstantial(magr, mdef, attk, weapon)) {
-		/* Print message */
-		if (vis&VIS_MAGR) {
-			Sprintf(buf, "%s", ((!weapon || valid_weapon(weapon)) ? "attack" : cxname(weapon)));
-			pline("%s %s %s harmlessly through %s.",
-				(youagr ? "Your" : s_suffix(Monnam(magr))),
-				buf,
-				vtense(buf, "pass"),
-				(youdef ? "you" : mon_nam(mdef))
-				);
-		}
 		domissmsg = FALSE;
-		miss = TRUE;
 	}
 	/* Otiax protects you from being hit (1/5) */
 	if (youdef && u.sealsActive&SEAL_OTIAX && !rn2(5))
