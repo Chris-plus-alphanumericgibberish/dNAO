@@ -1588,7 +1588,7 @@ opentin()		/* called during each move whilst opening a tin */
 	    victual.fullwarn = victual.eating = victual.doreset = FALSE;
 		
 		if(tin.tin->corpsenm == PM_JUBJUB_BIRD && tin.tin->blessed){
-			You("consume symmetrical %s", mons[tin.tin->corpsenm].mname);
+			You("consume symmetrical %s.", mons[tin.tin->corpsenm].mname);
 		} else {
 			You("consume %s %s.", tintxts[r].txt,
 				mons[tin.tin->corpsenm].mname);
