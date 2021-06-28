@@ -2728,7 +2728,8 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		return 0;
 	}
 	
-	if(herbivorous(youracedata) && !carnivorous(youracedata) && levl[u.ux][u.uy].typ == GRASS && can_reach_floor() &&
+	if(herbivorous(youracedata) && !carnivorous(youracedata) && !Race_if(PM_INCANTIFIER)
+		&& levl[u.ux][u.uy].typ == GRASS && can_reach_floor() &&
 		/* if we can't touch floor objects then use invent food only */
 #ifdef STEED
 			!u.usteed /* can't eat off floor while riding */
