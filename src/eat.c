@@ -1561,12 +1561,19 @@ opentin()		/* called during each move whilst opening a tin */
 				costly_tin((const char*)0);
 				goto use_me;
 		}
-	    if (yn("Eat it?") == 'n') {
+
+		char buf[BUFSZ];
+		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && !is_animal(&mons[tin.tin->corpsenm]) && !mindless(&mons[tin.tin->corpsenm])
+			&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM)))
+			Sprintf(buf, "You feel a deep sense of kinship to the tin!  Eat it anyway?");
+		else
+			Sprintf(buf, "Eat it?");
+		if (yn_function(buf,ynchars,'n')=='n') {
 			if (!Hallucination) tin.tin->dknown = tin.tin->known = TRUE;
 			if (flags.verbose) You("discard the open tin.");
 			costly_tin((const char*)0);
 			goto use_me;
-	    }
+		}
 		if(Race_if(PM_INCANTIFIER)){
 			u.uconduct.food++;
 			You("drain energy from %s %s.", tintxts[r].txt,
@@ -2765,7 +2772,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    You_cant("eat %s you're wearing.", something);
 	    return 0;
 	}
-	if((otmp->otyp == CORPSE || (otmp->otyp == TIN && otmp->spe != 1 && otmp->corpsenm > NON_PM)) && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
+	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
 		&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
 	){
 		char buf[BUFSZ];
