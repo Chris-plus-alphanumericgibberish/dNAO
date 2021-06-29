@@ -2735,16 +2735,16 @@ int final;
 		dump("  ", "The golden pyramid increased your healing");
 	
 	/*** Troubles ***/
-	if(u.usanity < 100)
-		dump("  ", "You were a little touched in the head");
-	else if(u.usanity < 50)
-		dump("  ", "You sometimes struggled with insanity");
-	else if(u.usanity < 25)
-		dump("  ", "You frequently struggled with insanity");
+	if(u.usanity == 0)
+		dump("  ", "You were quite insane");
 	else if(u.usanity < 10)
 		dump("  ", "You constantly struggled with insanity");
-	else if(u.usanity == 0)
-		dump("  ", "You were quite insane");
+	else if(u.usanity < 25)
+		dump("  ", "You frequently struggled with insanity");
+	else if(u.usanity < 50)
+		dump("  ", "You sometimes struggled with insanity");
+	else if(u.usanity < 100)
+		dump("  ", "You were a little touched in the head");
 	
 	if(u.uinsight > 40)
 		dump("  ", "You frequently saw things you wished you hadn't");
@@ -3233,16 +3233,16 @@ resistances_enlightenment()
 	if (active_glyph(BEASTS_EMBRACE)) putstr(en_win, 0, "A bestial figure hides inside of you.");
 	
 	/*** Troubles ***/
-	if(u.usanity < 100)
-		putstr(en_win, 0, "You are a little touched in the head.");
-	else if(u.usanity < 50)
-		putstr(en_win, 0, "You sometimes struggle with insanity.");
-	else if(u.usanity < 25)
-		putstr(en_win, 0, "You frequently struggle with insanity.");
+	if(u.usanity == 0)
+		putstr(en_win, 0, "You are quite insane.");
 	else if(u.usanity < 10)
 		putstr(en_win, 0, "You constantly struggle with insanity.");
-	else if(u.usanity == 0)
-		putstr(en_win, 0, "You are quite insane.");
+	else if(u.usanity < 25)
+		putstr(en_win, 0, "You frequently struggle with insanity.");
+	else if(u.usanity < 50)
+		putstr(en_win, 0, "You sometimes struggle with insanity.");
+	else if(u.usanity < 100)
+		putstr(en_win, 0, "You are a little touched in the head.");
 	
 	if(u.uinsight > 40)
 		putstr(en_win, 0, "You frequently see things you wish you hadn't.");
