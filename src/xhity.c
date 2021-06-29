@@ -5860,11 +5860,11 @@ boolean ranged;
 				/*Lower protection*/
 				case 6:
 					if(youdef){
+						pline("%s shares a prophecy of your death!", Monnam(magr));
 						u.uacinc -= dmg;
 						u.ublessed = max(0, u.ublessed-dmg);
 					}
 					else {
-						pline("%s shares a prophecy of your death!", Monnam(magr));
 						if(canseemon(mdef))
 							pline("%s looks fearful.", Monnam(mdef));
 						//Monsters are less detailed, just discourage them.
