@@ -420,8 +420,8 @@ remove_room(roomno)
 	/* since maxroom moved, update affected level roomno values */
 	oroomno = nroom + ROOMOFFSET;
 	roomno += ROOMOFFSET;
-	for (i = croom->lx; i <= croom->hx; ++i)
-	    for (j = croom->ly; j <= croom->hy; ++j) {
+	for (i = croom->lx-1; i <= croom->hx+1; ++i)
+	    for (j = croom->ly-1; j <= croom->hy+1; ++j) {
 		if (levl[i][j].roomno == oroomno)
 		    levl[i][j].roomno = roomno;
 	    }
