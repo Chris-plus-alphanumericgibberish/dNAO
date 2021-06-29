@@ -97,9 +97,11 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	}
 	
 	while (cnt > 0) {
-		int mmflags = MM_ESUM | ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_NOCOUNTBIRTH);
+		int mmflags = ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_ESUM|MM_NOCOUNTBIRTH);
 		mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
 	    if (mtmp) {
+			mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
+			
 			if (dtype == PM_ANGEL) {
 				/* alignment should match the summoner */
 				add_mx(mtmp, MX_EPRI);
@@ -138,8 +140,6 @@ struct permonst * ptr;	/* summon as though you were <X> */
 			if(has_template(mon, DREAM_LEECH)){
 				set_template(mtmp, DREAM_LEECH);
 			}
-			if (!(mons[dtype].geno & G_UNIQ))	/* uniques summoned in this way stick around */
-				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
 	    }
 	    cnt--;
 	}
