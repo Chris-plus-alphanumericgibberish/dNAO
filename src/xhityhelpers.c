@@ -1651,6 +1651,87 @@ struct obj * weapon;
 	return 0;
 }
 
+/* Check things that cause total-no-hit-with-message:
+ *  - monster displacement
+ *  - shade insubstantiality
+ * Returns TRUE if either activated, causing a miss and printing a message
+ */
+boolean
+miss_via_insubstantial(magr, mdef, attk, weapon, vis)
+struct monst * magr;
+struct monst * mdef;
+struct attack * attk;
+struct obj * weapon;
+int vis;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	char buf[BUFSZ];
+	/* monster displacement */
+	if (!youdef &&
+		mon_resistance(mdef, DISPLACED) &&
+		!(youagr && u.ustuck && u.ustuck == mdef) &&
+		!(youagr && u.uswallow) &&
+		!(has_passthrough_displacement(mdef->data) && hits_insubstantial(magr, mdef, attk, weapon)) &&
+		rn2(2)
+		) {
+		if (has_passthrough_displacement(mdef->data)){
+			if (vis&VIS_MAGR) {
+				if (magr) {
+					pline("%s attack passes harmlessly through %s.",
+						(youagr ? "Your" : s_suffix(Monnam(magr))),
+						the(mon_nam(mdef)));
+				}
+				else {
+					pline("%s %s harmlessly through %s.",
+						The(cxname(weapon)),
+						vtense(cxname(weapon), "pass"),
+						the(mon_nam(mdef)));
+				}
+			}
+		}
+		else {
+			if (vis&VIS_MAGR) {
+				if (magr) {
+					pline("%s attack%s %s displaced image.",
+						(youagr ? "You" : Monnam(magr)),
+						(youagr ? "" : "s"),
+						(youagr ? "a" : s_suffix(mon_nam(mdef)))
+						);
+				}
+				else {
+					pline("%s %s a displaced image.",
+						The(cxname(weapon)),
+						vtense(cxname(weapon), "hit"));
+				}
+			}
+		}
+		return TRUE;
+	}
+	else if (insubstantial(mdef->data) && !hits_insubstantial(magr, mdef, attk, weapon)) {
+		/* Print message */
+		if (vis&VIS_MAGR) {
+			Sprintf(buf, "%s", ((!weapon || valid_weapon(weapon)) ? "attack" : cxname(weapon)));
+			if (magr) {
+				pline("%s %s %s harmlessly through %s.",
+					(youagr ? "Your" : s_suffix(Monnam(magr))),
+					buf,
+					vtense(buf, "pass"),
+					(youdef ? "you" : mon_nam(mdef))
+					);
+			}
+			else {
+				pline("%s %s harmlessly through %s.",
+					The(cxname(weapon)),
+					vtense(buf, "pass"),
+					(youdef ? "you" : mon_nam(mdef)));
+			}
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 

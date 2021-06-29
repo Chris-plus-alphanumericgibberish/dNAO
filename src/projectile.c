@@ -1004,7 +1004,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	/* Set up the visibility of action */
 	if (youagr || youdef || ((!magr || cansee(x(magr), y(magr))) && cansee(x(mdef), y(mdef))))
 	{
-		if (youagr || (magr && cansee(x(magr), y(magr)) && canseemon(magr)))
+		if (youagr || (magr && cansee(x(magr), y(magr)) && canseemon(magr)) || (trap && cansee(trap->tx, trap->ty)))
 			vis |= VIS_MAGR;
 		if (youdef || (cansee(x(mdef), y(mdef)) && canseemon(mdef)))
 			vis |= VIS_MDEF;
@@ -1221,7 +1221,10 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 
 	accuracy = tohitval(magr, mdef, attkp, thrownobj, vpointer, hmoncode, 0);
 
-	if (accuracy > dieroll)
+	if (miss_via_insubstantial(magr, mdef, attkp, thrownobj, vis)) {
+		/* message already printed by miss_via_insubstantial */;
+	}
+	else if (accuracy > dieroll)
 	{
 		/* hit */
 		/* (player-only) exercise dex */
