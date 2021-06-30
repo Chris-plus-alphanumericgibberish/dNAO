@@ -5334,7 +5334,6 @@ if(!rn2(100)){\
 }
 
 #define UNCURSED_SOUL_HANDLING \
-You("blur with stolen time!");\
 u.ualign.sins++;\
 if(!rn2(100)){\
 	You("feel the soul fly free!");\
@@ -5381,10 +5380,107 @@ struct obj *obj;
 			useup(obj);
 		break;
 		case WAGE_OF_LUST:
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(obj->blessed){
+				FREE_SOUL_HANDLING
+			}
+			else if(obj->cursed){
+				if(!BlowingWinds){
+					pline("Hurricane-force winds surround you!");
+				}
+				else {
+					pline("The hurricane-force winds intensify!");
+				}
+				HBlowingWinds += 99L;
+				CURSED_SOUL_HANDLING
+			}
+			else {
+				if(!BlowingWinds){
+					pline("Hurricane-force winds surround you!");
+				}
+				else {
+					pline("The hurricane-force winds intensify!");
+				}
+				HBlowingWinds += 9L;
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
 		break;
 		case WAGE_OF_GLUTTONY:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
 			if(!getdir((char *)0)) return 0;
+			if(!isok(u.ux + u.dx, u.uy + u.dy) || !(mtmp = m_u_at(u.ux + u.dx, u.uy + u.dy)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				if(yn("Use the orange-eyed coin on yourself?") == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
 			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(inediate(mtmp->data)){
+				if(mtmp == &youmonst){
+					You("are unbothered.");
+				}
+				else {
+					pline("%s is unbothered.", mon_nam(mtmp));
+				}
+			}
+			else {
+				// Note, blessed was handled above.
+				if(mtmp == &youmonst){
+					if(obj->cursed){
+						morehungry(2000);
+					}
+					else {
+						morehungry(1000);
+					}
+				}
+				else {
+					if(mtmp->mtame && get_mx(mtmp, MX_EDOG)){
+						if(obj->cursed){
+							EDOG(mtmp)->hungrytime = max(EDOG(mtmp)->hungrytime - 2000, monstermoves - 750);
+						}
+						else {
+							EDOG(mtmp)->hungrytime = max(EDOG(mtmp)->hungrytime - 1000, monstermoves - 500);
+						}
+					}
+					else {
+						if(obj->cursed){
+							mtmp->mhp -= min(999, mtmp->mhpmax);
+						}
+						else {
+							mtmp->mhp -= min(99, mtmp->mhpmax/2);
+						}
+						if(mtmp->mhp <= 0){
+							pline("%s starves.", Monnam(mtmp));
+							mondied(mtmp);
+						}
+						else {
+							pline("%s is confused from hunger.", Monnam(mtmp));
+							mtmp->mconf = 1;
+						}
+					}
+				}
+			}
+			// Note, blessed was handled above.
+			if(obj->cursed){
+				CURSED_SOUL_HANDLING
+			}
+			else {
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_GREED:
 		break;

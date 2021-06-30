@@ -313,5 +313,6 @@ struct monst {
 #define MON_NOSWEP(mon)	((mon)->msw = (struct obj *)0)
 
 #define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->mhp < 1)
+#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my)
 
 #endif /* MONST_H */

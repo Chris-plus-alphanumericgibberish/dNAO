@@ -1783,6 +1783,17 @@ karemade:
 					}
 				}
 
+				if(BlowingWinds && !mtmp->mtame){
+					static long lastbwmessage = 0L;
+					if(lastbwmessage != monstermoves && canspotmon(mtmp)){
+						lastbwmessage = monstermoves;
+						pline("Hurricane-force winds surround you!");
+					}
+					mhurtle(mtmp, rn2(3)-1, rn2(3)-1, rnd(9), FALSE);
+				}
+				if(DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
+					continue;
+
 				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !mtmp->mtame && !ClearThoughts) {
 					static long lastusedmove = 0;
 					if (lastusedmove != moves) {
