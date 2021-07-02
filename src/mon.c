@@ -1684,8 +1684,6 @@ movemon()
 	 *		the angel's AC based on the value from 2, slower speed equals higher AC (Quantum Lock).
 	 */
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-		if(TimeStop && !is_uvuudaum(mtmp))
-			continue;
 		//Weeping angel step 1
 		if(is_weeping(mtmp->data)){
 			if(mtmp->mvar3 && u.uevent.invoked){
@@ -1765,6 +1763,8 @@ movemon()
 		insight_vanish(mtmp);
 		continue;
 	}
+	if(TimeStop && !is_uvuudaum(mtmp))
+		continue;
 	if(mtmp->movement < NORMAL_SPEED)
 	    continue;
 	
