@@ -2413,6 +2413,12 @@ get_premium_heart_multiplier()
 	if (Hallucination) multiplier++;
 	if (Fumbling) multiplier++;
 	if (Wounded_legs) multiplier++;
+	if (Panicking) multiplier++;
+	if (StumbleBlind) multiplier++;
+	if (StaggerShock) multiplier++;
+	if (Babble) multiplier++;
+	if (Screaming) multiplier++;
+	if (FaintingFits) multiplier++;
 
 	return multiplier;
 }
