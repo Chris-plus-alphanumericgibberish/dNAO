@@ -279,16 +279,18 @@
 #define MZ_GIGANTIC	7		/* off the scale */
 
 /* for mons[].geno (constant during game) */
-#define G_UNIQ		0x2000		/* generated only once */
-#define G_PLANES	0x1000		/* generated only in planes */
-#define G_NOHELL	0x0800		/* not generated in "hell" */
-#define G_HELL		0x0400		/* generated only in "hell" */
-#define G_NOGEN		0x0200		/* generated only specially */
-#define G_SGROUP	0x0080		/* appear in small groups normally */
-#define G_LGROUP	0x0040		/* appear in large groups normally */
-#define G_GENO		0x0020		/* can be genocided */
-#define G_NOCORPSE	0x0010		/* no corpse left ever */
-#define G_FREQ		0x0007		/* creation frequency mask */
+#define G_INST20	0x00008000		/* generates only if you have 20 insight */
+#define G_INST10	0x00004000		/* generates only if you have 10 insight */
+#define G_UNIQ		0x00002000		/* generated only once */
+#define G_PLANES	0x00001000		/* generated only in planes */
+#define G_NOHELL	0x00000800		/* not generated in "hell" */
+#define G_HELL		0x00000400		/* generated only in "hell" */
+#define G_NOGEN		0x00000200		/* generated only specially */
+#define G_SGROUP	0x00000080		/* appear in small groups normally */
+#define G_LGROUP	0x00000040		/* appear in large groups normally */
+#define G_GENO		0x00000020		/* can be genocided */
+#define G_NOCORPSE	0x00000010		/* no corpse left ever */
+#define G_FREQ		0x00000007		/* creation frequency mask */
 
 /* for mvitals[].mvflags (variant during game), along with G_NOCORPSE */
 #define G_KNOWN		0x0004		/* have been encountered */

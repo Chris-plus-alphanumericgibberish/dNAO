@@ -73,7 +73,7 @@ struct permonst {
 				mmove,			/* move speed */
 				mr;			/* (base) magic resistance */
 	aligntyp	maligntyp;		/* basic monster alignment */
-	unsigned short	geno;			/* creation/geno mask value */
+	unsigned long	geno;			/* creation/geno mask value */
 	schar 	nac,			/* Natural-armor AC */
 			dac,			/* Dodge AC */
 			pac,			/* Protection AC*/

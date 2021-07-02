@@ -1514,7 +1514,7 @@ get_generation_description_of_monster_type(struct monst * mtmp, char * temp_buf)
 	many = append(temp_buf, (ptr->geno & G_LGROUP), " in large groups", many);
 	if ((ptr->geno & G_NOGEN) == 0) {
 		char frequency[BUFSZ] = "";
-		sprintf(frequency, ", with frequency %d.", (ptr->geno & G_FREQ));
+		sprintf(frequency, ", with frequency %ld.", (ptr->geno & G_FREQ));
 		strcat(temp_buf, frequency);
 	}
 	else {
