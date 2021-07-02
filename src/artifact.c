@@ -1394,7 +1394,7 @@ long wp_mask;
 		/* if we are removing the artifact and we are dealing with W_ART,
 		   we need to check if the property is being provided from another source in the same slot
 		   if so, we need to leave the mask alone */
-		if (mask && !on && wp_mask == W_ART)
+		if (mask && !on && (wp_mask == W_ART || this_art_property_list[i] == WARN_OF_MON))
 		{
 			boolean got_prop = FALSE;
 			register struct obj* obj;
