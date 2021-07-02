@@ -1736,7 +1736,7 @@ int * subout;					/* records what attacks have been subbed out */
 #define SUBOUT_BARB1	0x0010	/* 1st bit of barbarian bonus attacks */
 #define SUBOUT_BARB2	0x0020	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
 #define SUBOUT_MAINWEPB	0x0040	/* Bonus attack caused by the wielded *mainhand* weapon */
-#define SUBOUT_XWEP		0x0080	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
+#define SUBOUT_XWEP		0x0080	/* Made an offhand attack */
 #define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
 #define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
 #define SUBOUT_SCORPION	0x0400	/* Scorpion Carapace's sting */
@@ -1786,19 +1786,25 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 
 		/* if twoweaponing... */
+		/* while NOT polymorphed, the player will insert an additional xwep attack while twoweaponing */
+		/* this compensates for some player-role-monsters having AT_WEAP+AT_XWEP and some not. */
+		/* if the player IS polymorphed, they are limited to their polyform's attacks */
+		/* some things give the player additional weapon attacks; they can reset SUBOUT_XWEP to allow another offhand hit if unpoly'd */
 		if (!by_the_book && *indexnum > 0 && u.twoweap) {
-			/* follow weapon attacks with offhand attacks */
-			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP) {
+			/* follow a weapon attack with an offhand attack */
+			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP
+				&& !((*subout) & SUBOUT_XWEP)
+				) {
 				fromlist = FALSE;
 				attk->aatyp = AT_XWEP;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1;
 				attk->damd = 4;
+				(*subout) |= SUBOUT_XWEP;
 			}
 			/* fixup for black web, which replaces AT_WEAP with an AT_SRPR */
-			/* subout is used to tell if we want to add another attack this time */
 			if ((u.specialSealsActive & SEAL_BLACK_WEB)
-				&& ((*subout) & SUBOUT_XWEP)
+				&& !((*subout) & SUBOUT_XWEP)
 				&& prev_attack.aatyp == AT_SRPR && attk->aatyp != AT_XWEP
 				) {
 				fromlist = FALSE;
@@ -1806,7 +1812,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1;
 				attk->damd = 4;
-				(*subout) &= ~SUBOUT_XWEP;
+				(*subout) |= SUBOUT_XWEP;
 			}
 		}
 	}
@@ -2055,46 +2061,38 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			)
 		){
 			/* make additional attacks */
-			attk->aatyp = (*subout&SUBOUT_XWEP) ? AT_XWEP : AT_WEAP;
+			attk->aatyp = AT_WEAP;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
 			if (otmp->oartifact == ART_QUICKSILVER)
 				*tohitmod = -15;
 			fromlist = FALSE;
-			if (*subout&SUBOUT_XWEP) {
-				*subout |= SUBOUT_MAINWEPB;
-				*subout &= ~SUBOUT_XWEP;
-			}
-			else {
-				*subout |= SUBOUT_XWEP;
-			}
+			(*subout) &= ~SUBOUT_XWEP; /* allow another followup offhand attack if twoweaponing (unpoly'd only) */
 		}
 	}
 
-	/* Unpolyed player Barbarians get up to 3 bonus attacks (and offhand attacks) */
+	/* Unpolyed player Barbarians get up to 2 bonus attacks (and offhand attacks) */
 	/* Would be shown in pokedex, if you could look up yourself in it. */
-	if (youagr && !Upolyd && Role_if(PM_BARBARIAN) && (is_null_attk(attk) || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP)) {
+	if (youagr && !Upolyd && Role_if(PM_BARBARIAN) && (*indexnum > 0)
+			&& ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
+			&& (prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP))) {
 		int nattacks = (u.ulevel >= 14) + (u.ulevel >= 30);
 		/* note: this code assumes subout_barb1 and barb2 are sequential bits, as it uses them like a tiny int */
 		int attacknum = (*subout&(SUBOUT_BARB1|SUBOUT_BARB2)) / SUBOUT_BARB1;
 
 		if (attacknum < nattacks)
 		{
-			attk->aatyp = (*subout&SUBOUT_XWEP) ? AT_XWEP : AT_WEAP;
+			attk->aatyp = AT_WEAP;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
 			*tohitmod = -10 * attacknum;
 			fromlist = FALSE;
-			if (*subout&SUBOUT_XWEP) {
-				*subout |= ((SUBOUT_BARB1 & (*subout&SUBOUT_BARB1)) ? SUBOUT_BARB2 : 0);
-				*subout ^= SUBOUT_BARB1;
-				*subout &= ~SUBOUT_XWEP;
-			}
-			else {
-				*subout |= SUBOUT_XWEP;
-			}
+
+			(*subout) |= ((SUBOUT_BARB1 & (*subout&SUBOUT_BARB1)) ? SUBOUT_BARB2 : 0);
+			(*subout) ^= SUBOUT_BARB1;
+			(*subout) &= ~SUBOUT_XWEP;	/* allow another followup offhand attack if twoweaponing */
 		}
 	}
 
@@ -2104,10 +2102,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) ||
 			(attk->aatyp == AT_MARI && !is_android(youracedata))	/* (andr/gyn)oids' mari attacks are psi-held, not actual arms */
 			){
-			/* for mainhand attacks, flag that we want to make an offhand attack next */
-			if (attk->aatyp == AT_WEAP && u.twoweap && !uswapwep)
-				(*subout) |= SUBOUT_XWEP;
-
 			/* replace the attack */
 			attk->aatyp = AT_SRPR;
 			attk->adtyp = AD_SHDW;
