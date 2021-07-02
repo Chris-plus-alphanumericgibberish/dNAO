@@ -690,6 +690,38 @@ boolean is_pet;		/* If true, pet should keep wielded/worn items */
 		newsym(omx, omy);
 }
 
+/* release the objects the creature is carrying */
+void
+relobj_envy(mtmp,show)
+register struct monst *mtmp;
+register int show;
+{
+	register struct obj *otmp;
+	register int omx = mtmp->mx, omy = mtmp->my;
+
+	//THIS IS VERY EFFICIENT!!1!
+	//(It starts over from the beginning of the inventory every time it drops an object)
+	//(Because it's a linked list and it starts dropping from the head, it's still O(n))
+	while((otmp = drop_envy(mtmp))){
+		obj_extract_self(otmp);
+		mdrop_obj(mtmp, otmp, flags.verbose);
+	}
+
+#ifndef GOLDOBJ
+	if (mtmp->mgold) {
+		register long g = mtmp->mgold;
+		(void) mkgold_core(g, omx, omy, FALSE);
+		if (cansee(omx, omy) && flags.verbose)
+			pline("%s drops %ld gold piece%s.", Monnam(mtmp),
+				g, plur(g));
+		mtmp->mgold = 0L;
+	}
+#endif
+	
+	if (show & cansee(omx, omy))
+		newsym(omx, omy);
+}
+
 #endif /* OVL0 */
 
 /*steal.c*/

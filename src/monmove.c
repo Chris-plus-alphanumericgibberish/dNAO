@@ -1034,6 +1034,7 @@ register struct monst *mtmp;
 	/* berserk monsters calm down with small probability */
 	if (mtmp->mberserk && !rn2(50)) mtmp->mberserk = 0;
 	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
+	if (mtmp->menvy && !rn2(999)) mtmp->menvy = 0;
 	if (mtmp->mdoubt && !rn2(300)) mtmp->mdoubt = 0;
 
 	if (mtmp->mcrazed){
@@ -2056,16 +2057,18 @@ not_special:
 			register int pctload = (curr_mon_load(mtmp) * 100) /
 				max_mon_load(mtmp);
 			
-			/* look for gold or jewels nearby */
-			likegold = (likes_gold(ptr) && pctload < 95);
-			likegems = (likes_gems(ptr) && pctload < 85);
-			uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
-				&& pctload < 75);
-			likeobjs = (likes_objs(ptr) && pctload < 75);
-			likemagic = (likes_magic(ptr) && pctload < 85);
-			likerock = (throws_rocks(ptr) && pctload < 50 && !In_sokoban(&u.uz));
-			conceals = hides_under(ptr);
-			setlikes = TRUE;
+			if(!mtmp->menvy){
+				/* look for gold or jewels nearby */
+				likegold = (likes_gold(ptr) && pctload < 95);
+				likegems = (likes_gems(ptr) && pctload < 85);
+				uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
+					&& pctload < 75);
+				likeobjs = (!mtmp->mdisrobe && likes_objs(ptr) && pctload < 75);
+				likemagic = (likes_magic(ptr) && pctload < 85);
+				likerock = (throws_rocks(ptr) && pctload < 50 && !In_sokoban(&u.uz));
+				conceals = hides_under(ptr);
+				setlikes = TRUE;
+			}
 	    }
 	}
 
@@ -2619,7 +2622,7 @@ postmov:
 		    likegems = (likes_gems(ptr) && pctload < 85);
 		    uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
 				  && pctload < 75);
-		    likeobjs = (likes_objs(ptr) && pctload < 75);
+		    likeobjs = (!mtmp->mdisrobe && likes_objs(ptr) && pctload < 75);
 		    likemagic = (likes_magic(ptr) && pctload < 85);
 		    likerock = (throws_rocks(ptr) && pctload < 50 &&
 				!In_sokoban(&u.uz));

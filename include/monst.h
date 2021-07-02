@@ -156,6 +156,7 @@ struct monst {
 	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*91*/
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*93*/
+	Bitfield(menvy,1);/* wants only others stuff */ /*94*/
 	
 	int mtaneggs;	/* tannin eggs */
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */

@@ -615,7 +615,7 @@
 #define likes_gold(ptr)		(((ptr)->mflagst & MT_GREEDY) != 0L)
 #define likes_gems(ptr)		(((ptr)->mflagst & MT_JEWELS) != 0L)
 #define likes_objs(ptr)		(((ptr)->mflagst & MT_COLLECT) != 0L || \
-				 is_armed(ptr))
+				 (is_armed(ptr) && !mindless(ptr)))
 #define likes_magic(ptr)	(((ptr)->mflagst & MT_MAGIC) != 0L)
 #define webmaker(ptr)		((ptr)->mtyp == PM_CAVE_SPIDER || \
 				 (ptr)->mtyp == PM_GIANT_SPIDER || (ptr)->mtyp == PM_PHASE_SPIDER || \

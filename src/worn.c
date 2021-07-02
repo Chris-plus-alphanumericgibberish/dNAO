@@ -1466,10 +1466,11 @@ struct monst *mon;
 	int m_delay = 0;
 	int unseen = !canseemon(mon);
 	int tarx, tary;
+	int tries = 10;
 	
 	if (mon->mfrozen) return FALSE;
 	
-	switch(rnd(7)){
+	do switch(rnd(7)){
 		case 1:
 			flag = W_ARM;
 		break;
@@ -1491,10 +1492,8 @@ struct monst *mon;
 		case 7:
 			flag = W_AMUL;
 		break;
-	}
-	
-	old = which_armor(mon, flag);
-	
+	} while(tries-- && !(old = which_armor(mon, flag)));
+
 	if(!old) return FALSE;
 	
 	if ((flag == W_ARM

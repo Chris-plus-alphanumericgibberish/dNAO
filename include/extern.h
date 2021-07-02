@@ -632,6 +632,7 @@ E int FDECL(dog_move, (struct monst *,int));
 E void FDECL(wantdoor, (int,int,genericptr_t));
 #endif
 E struct obj *FDECL(DROPPABLES, (struct monst *));
+E struct obj *FDECL(drop_envy, (struct monst *));
 
 /* ### dokick.c ### */
 
@@ -2689,6 +2690,7 @@ E void FDECL(stealamulet, (struct monst *));
 E void FDECL(stealquestart, (struct monst *));
 E void FDECL(mdrop_special_objs, (struct monst *));
 E void FDECL(relobj, (struct monst *,int,BOOLEAN_P));
+E void FDECL(relobj_envy, (struct monst *,int));
 E void FDECL(mdrop_obj, (struct monst *,struct obj *,BOOLEAN_P));
 #ifdef GOLDOBJ
 E struct obj *FDECL(findgold, (struct obj *));

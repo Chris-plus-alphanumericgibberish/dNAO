@@ -5657,8 +5657,141 @@ struct obj *obj;
 			return 1;
 		break;
 		case WAGE_OF_ENVY:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(mtmp != &youmonst && mindless_mon(mtmp)){
+				pline("%s is unbothered.", Monnam(mtmp));
+			}
+			if(mtmp == &youmonst){
+				if(!roll_madness(MAD_TALONS)){ /*May refuse to give up things*/
+					struct obj *otmp2;
+					int delay = 0;
+					boolean cursed = obj->cursed;
+					useup(obj); /*Note: Must do this first since you will drop all your stuff!*/
+					if (*u.ushops) sellobj_state(SELL_DELIBERATE);
+					for(otmp = invent; otmp; otmp = otmp2) {
+						if(cursed && otmp->owornmask){
+							if(otmp->oclass == ARMOR_CLASS)
+								delay = max(delay, objects[otmp->otyp].oc_delay);
+							remove_worn_item(otmp, TRUE);
+						}
+						otmp2 = otmp->nobj;
+						drop(otmp);
+					}
+					if (*u.ushops) sellobj_state(SELL_NORMAL);
+					reset_occupations();
+					if(cursed){
+						if(delay)
+							nomul(-delay, "taking off clothes");
+						CURSED_SOUL_HANDLING
+					}
+					/* Blessed handled above */
+					else {
+						UNCURSED_SOUL_HANDLING
+					}
+					return 1; /*Note: Have already used up a coin!*/
+				}
+			}
+			else {
+				relobj_envy(mtmp,canspotmon(mtmp));
+				mtmp->menvy = TRUE;
+				if(obj->cursed){
+					mtmp->mdisrobe = TRUE;
+					CURSED_SOUL_HANDLING
+				}
+				/* Blessed handled above */
+				else {
+					UNCURSED_SOUL_HANDLING
+				}
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_PRIDE:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(mtmp != &youmonst && mindless_mon(mtmp)){
+				pline("%s is unbothered.", Monnam(mtmp));
+			}
+			
+			if(mtmp == &youmonst){
+				u.uencouraged -= 9;
+				if(obj->cursed)
+					u.ustdy += 45;
+			}
+			else {
+				mtmp->encouraged -= 9;
+				if(obj->cursed){
+					mtmp->mstdy += 45;
+				}
+				if(is_minion(mtmp->data) && !(mtmp->data->geno&G_UNIQ)
+				  && (obj->cursed || !resist(mtmp, RING_CLASS, 0, NOTELL))
+				){
+					if(In_endgame(&u.uz)){
+						if(canspotmon(mtmp)){
+							pline("%s plummets through the %s!", Monnam(mtmp), surface(mtmp->mx, mtmp->my));
+						}
+						mongone(mtmp);
+					}
+					else if(!templated(mtmp)){
+						if(canspotmon(mtmp)){
+							pline("%s falls from grace!", Monnam(mtmp));
+						}
+						set_template(mtmp, FALLEN_TEMPLATE);
+					}
+				}
+			}
+			if(obj->cursed){
+				CURSED_SOUL_HANDLING
+			}
+			/* Blessed handled above */
+			else {
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
+			return 1;
 		break;
 	}
     return 1;
