@@ -24,10 +24,11 @@ STATIC_DCL int NDECL(dig);
 #define DIGTYP_STATUE     2
 #define DIGTYP_BOULDER    3
 #define DIGTYP_CRATE      4
-#define DIGTYP_DOOR       5
-#define DIGTYP_TREE       6
-#define DIGTYP_BARS       7
-#define DIGTYP_BRIDGE     8
+#define DIGTYP_MS_O_STF   5
+#define DIGTYP_DOOR       6
+#define DIGTYP_TREE       7
+#define DIGTYP_BARS       8
+#define DIGTYP_BRIDGE     9
 
 
 STATIC_OVL boolean
@@ -146,6 +147,7 @@ xchar x, y;
 	return ((ispick||is_saber||is_seismic) && sobj_at(STATUE, x, y) ? DIGTYP_STATUE :
 		(ispick||is_saber||is_seismic) && sobj_at(BOULDER, x, y) ? DIGTYP_BOULDER :
 		(ispick||is_saber||is_seismic) && sobj_at(MASSIVE_STONE_CRATE, x, y) ? DIGTYP_CRATE :
+		(ispick||is_saber||is_seismic) && sobj_at(MASS_OF_STUFF, x, y) ? DIGTYP_MS_O_STF :
 		(closed_door(x, y) ||
 			levl[x][y].typ == SDOOR) ? DIGTYP_DOOR :
 		IS_TREES(levl[x][y].typ) ?
@@ -376,17 +378,27 @@ dig()
 		} else if ((obj = sobj_at(BOULDER, dpx, dpy)) != 0) {
 			struct obj *bobj;
 
-			fracture_rock(obj);
+			break_boulder(obj);
 			if ((bobj = boulder_at(dpx, dpy)) != 0) {
 			    /* another boulder here, restack it to the top */
 			    obj_extract_self(bobj);
 			    place_object(bobj, dpx, dpy);
 			}
 			digtxt = "The boulder falls apart.";
+		} else if ((obj = sobj_at(MASS_OF_STUFF, dpx, dpy)) != 0) {
+			struct obj *bobj;
+
+			break_boulder(obj);
+			if ((bobj = boulder_at(dpx, dpy)) != 0) {
+			    /* another boulder here, restack it to the top */
+			    obj_extract_self(bobj);
+			    place_object(bobj, dpx, dpy);
+			}
+			digtxt = "The mass of stuff comes unstuck.";
 		} else if ((obj = sobj_at(MASSIVE_STONE_CRATE, dpx, dpy)) != 0) {
 			struct obj *bobj;
 
-			break_crate(obj);
+			break_boulder(obj);
 			if ((bobj = boulder_at(dpx, dpy)) != 0) {
 			    /* another boulder here, restack it to the top */
 			    obj_extract_self(bobj);
@@ -547,8 +559,8 @@ cleanup:
 		digging.level.dlevel = -1;
 		return(0);
 	} else {		/* not enough effort has been spent yet */
-		static const char *const d_target[9] = {
-			"", "rock", "statue", "boulder", "crate", "door", "tree", "bars", "chains"
+		static const char *const d_target[10] = {
+			"", "rock", "statue", "boulder", "crate", "mass", "door", "tree", "bars", "chains"
 		};
 		int dig_target = dig_typ(digitem, dpx, dpy);
 		
@@ -563,7 +575,7 @@ cleanup:
 		} else if (!IS_ROCK(lev->typ) && dig_target == DIGTYP_ROCK)
 		    return(0); /* statue or boulder got taken */
 		if(!did_dig_msg) {
-		    if (is_lightsaber(digitem)) You("burn steadily through %s.",
+		    if (is_lightsaber(digitem)) You("burn steadily through the %s.",
 			d_target[dig_target]);
 		    else
 		    You("hit the %s with all your might.",
@@ -1585,7 +1597,7 @@ int x, y;
 				}
 				//Clear boulders
 				while ((otmp = boulder_at(x+i, y+j)) != 0)
-					fracture_rock(otmp);
+					break_boulder(otmp);
 
 				if(!IS_FEATURE(lev->typ)){
 					/* fake out saved state */
@@ -1909,11 +1921,13 @@ struct obj *obj;
 			    You("need an axe to cut down a tree.");
 			else if (IS_ROCK(lev->typ))
 			    You("need a pick to dig rock.");
-			else if (!ispick && (sobj_at(STATUE, rx, ry) ||
-					     sobj_at(BOULDER, rx, ry))) {
+			else if (!ispick && (sobj_at(STATUE, rx, ry)
+					     || sobj_at(BOULDER, rx, ry)
+					     || sobj_at(MASS_OF_STUFF, rx, ry)
+			)) {
 			    boolean vibrate = !rn2(3);
 			    pline("Sparks fly as you whack the %s.%s",
-				sobj_at(STATUE, rx, ry) ? "statue" : "boulder",
+				sobj_at(STATUE, rx, ry) ? "statue" : sobj_at(MASS_OF_STUFF, rx, ry) ? "mass of stuff" : "boulder",
 				vibrate ? " The axe-handle vibrates violently!" : "");
 			    if (vibrate) losehp(2, "axing a hard object", KILLED_BY);
 			}
@@ -1921,12 +1935,13 @@ struct obj *obj;
 			    You("swing your %s through thin air.",
 				aobjnam(obj, (char *)0));
 		} else {
-			static const char * const d_action[9][4] = {
+			static const char * const d_action[10][4] = {
 			    {"swinging",			"slicing the air",			"swinging",					"swinging"},
 			    {"digging",				"cutting through the wall",	"cutting",					"digging"},
 			    {"chipping the statue",	"cutting the statue",		"chipping the statue",		"smashing the statue"},
 			    {"hitting the boulder",	"cutting through the boulder","hitting the boulder",	"smashing the boulder"},
 			    {"chipping the crate",	"cutting through the crate","chipping the crate",		"smashing the crate"},
+			    {"chipping the mass",	"cutting through the mass", "chipping the mass",			"smashing the mass"},
 			    {"hitting the door",	"burning through the door",	"chopping at the door",		"smashing the door"},
 			    {"hitting the tree",	"razing the tree",			"cutting down the tree",	"smashing the tree"},
 			    {"hitting the bars",	"cutting through the bars",	"chopping the bars",		"smashing the bars"},

@@ -212,6 +212,7 @@
 #define Glib			u.uprops[GLIB].intrinsic
 #define Slimed			u.uprops[SLIMED].intrinsic	/* [Tom] */
 #define FrozenAir		u.uprops[FROZEN_AIR].intrinsic
+#define BloodDrown		u.uprops[BLOOD_DROWN].intrinsic
 
 /* Hallucination is solely a timeout; its resistance is extrinsic */
 #define HHallucination		u.uprops[HALLUC].intrinsic

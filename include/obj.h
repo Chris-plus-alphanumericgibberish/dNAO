@@ -621,6 +621,7 @@ struct obj {
 #define valid_weapon(otmp)		((otmp)->oclass == WEAPON_CLASS || \
 	is_weptool((otmp)) || \
 	(otmp)->otyp == BOULDER || \
+	(otmp)->otyp == MASS_OF_STUFF || \
 	(otmp)->otyp == HEAVY_IRON_BALL || \
 	(otmp)->otyp == CHAIN || \
 	(otmp)->oclass == GEM_CLASS)
@@ -903,7 +904,7 @@ struct obj {
 							 (otmp)->obj_material == IRON)
 
 /* misc */
-#define is_boulder(otmp)		((otmp)->otyp == BOULDER || (otmp)->otyp == MASSIVE_STONE_CRATE || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))
+#define is_boulder(otmp)		((otmp)->otyp == BOULDER || (otmp)->otyp == MASSIVE_STONE_CRATE || (otmp)->otyp == MASS_OF_STUFF || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))
 
 #define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == PLAIN_DRESS || onum == VICTORIAN_UNDERWEAR)
 

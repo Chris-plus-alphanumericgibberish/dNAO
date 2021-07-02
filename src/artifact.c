@@ -2409,6 +2409,7 @@ get_premium_heart_multiplier()
 	if (Vomiting) multiplier++;
 	if (Slimed) multiplier++;
 	if (FrozenAir) multiplier++;
+	if (BloodDrown) multiplier++;
 	if (Hallucination) multiplier++;
 	if (Fumbling) multiplier++;
 	if (Wounded_legs) multiplier++;

@@ -294,7 +294,7 @@ moverock()
 		if(u.sealsActive&SEAL_MARIONETTE){
 			if (yn("Your fingers stretch and grow like roots. Fracture the boulder?") != 'y') return (-1);
 			Your("fingers dig into %s like roots!", the(xname(otmp)));
-			fracture_rock(otmp);
+			break_boulder(otmp);
 			break;
 		} else if (throws_rocks(youracedata) || (u.sealsActive&SEAL_YMIR)) {
 #ifdef STEED

@@ -221,8 +221,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 	/* player exercises STR just be throwing heavy things */
 	if (youagr && !launcher && !(hmoncode & HMON_KICKED) && (
-		thrownobj->otyp == BOULDER ||
-		(thrownobj->otyp == STATUE && is_boulder(thrownobj)) ||
+		is_boulder(thrownobj) ||
 		thrownobj->otyp == HEAVY_IRON_BALL
 		))
 	{

@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "artifact.h"
+#include "xhity.h"
 #ifdef OVLB
 
 static const char tools[] = { COIN_CLASS, CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
@@ -5346,7 +5347,10 @@ STATIC_OVL int
 do_soul_coin(obj)
 struct obj *obj;
 {
+	char coinbuff[50] = {0};
 	struct monst *mtmp;
+	struct obj *otmp;
+	int x, y;
 	if(!freehand()){
 		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
 		return 0;
@@ -5414,12 +5418,15 @@ struct obj *obj;
 				return 1;
 			}
 			if(!getdir((char *)0)) return 0;
-			if(!isok(u.ux + u.dx, u.uy + u.dy) || !(mtmp = m_u_at(u.ux + u.dx, u.uy + u.dy)) || DEADMONSTER(mtmp)){
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
 				You("see no target there!");
 				return 0;
 			}
 			if(mtmp == &youmonst){
-				if(yn("Use the orange-eyed coin on yourself?") == 'n')
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
 					return 0;
 			}
 			else if(!canspotmon(mtmp)){
@@ -5432,11 +5439,11 @@ struct obj *obj;
 					You("are unbothered.");
 				}
 				else {
-					pline("%s is unbothered.", mon_nam(mtmp));
+					pline("%s is unbothered.", Monnam(mtmp));
 				}
 			}
 			else {
-				// Note, blessed was handled above.
+				/* Note, blessed was handled above. */
 				if(mtmp == &youmonst){
 					if(obj->cursed){
 						morehungry(2000);
@@ -5472,7 +5479,7 @@ struct obj *obj;
 					}
 				}
 			}
-			// Note, blessed was handled above.
+			/* Note, blessed was handled above. */
 			if(obj->cursed){
 				CURSED_SOUL_HANDLING
 			}
@@ -5483,8 +5490,171 @@ struct obj *obj;
 			return 1;
 		break;
 		case WAGE_OF_GREED:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y)
+			 || closed_door(x, y)
+			 || IS_ROCK(levl[x][y].typ)
+			){
+				You("can't use that there.");
+				return 0;
+			}
+			mtmp = m_u_at(x,y);
+
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			otmp = mksobj(MASS_OF_STUFF, MKOBJ_NOINIT);
+			if (!otmp) break;  /* Shouldn't happen */
+			curse(otmp);
+
+			/* Note, blessed was handled above. */
+			if(obj->cursed){
+				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
+			}
+			else if(mtmp){
+				int dmg;
+				boolean youdef = mtmp == &youmonst;
+				if(youdef)
+					pline("%s drops out of nowhere and hits you!", An(xname(otmp)));
+				else if (cansee(mtmp->mx, mtmp->my)) {
+					pline("%s is hit by %s!", Monnam(mtmp),
+									doname(otmp));
+					if (mtmp->minvis && !canspotmon(mtmp))
+					map_invisible(mtmp->mx, mtmp->my);
+				}
+
+				dmg = dmgval(otmp, mtmp, 0);
+				struct obj *helmet = youdef ? uarmh : which_armor(mtmp, W_ARMH);
+				if (helmet) {
+					if(is_hard(helmet)) {
+						if(youdef)
+							pline("Fortunately, you are wearing a hard helmet.");
+						else if (canspotmon(mtmp))
+							pline("Fortunately, %s is wearing a hard helmet.", mon_nam(mtmp));
+						else if (flags.soundok)
+							You_hear("a clanging sound.");
+						if (dmg > 2) dmg = 2;
+					}
+					else if (flags.verbose) {
+						if(youdef)
+							Your("%s does not protect you.",
+								xname(helmet));
+						else if(canspotmon(mtmp))
+							pline("%s's %s does not protect %s.",
+							Monnam(mtmp), xname(helmet),
+							mhim(mtmp));
+					}
+				}
+				if (!flooreffects(otmp, x, y, "fall")) {
+					place_object(otmp, x, y);
+					stackobj(otmp);
+					newsym(x, y);
+				}
+
+				if (Half_phys(mtmp))
+					dmg = (dmg + 1) / 2;
+				if (youdef && u.uvaul_duration)
+					dmg = (dmg + 1) / 2;
+				if(youdef)
+					losehp(dmg, "mass of falling stuff", KILLED_BY_AN);
+				else {
+					mtmp->mhp -= dmg;
+					if (mtmp->mhp <= 0)
+						xkilled(mtmp, 1);
+				}
+			}
+			else {
+				if (!flooreffects(otmp, x, y, "fall")) {
+					place_object(otmp, x, y);
+					stackobj(otmp);
+					newsym(x, y);  /* map the rock */
+				}
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_WRATH:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(Breathless_res(mtmp)){
+				if(mtmp == &youmonst){
+					You("are unbothered.");
+				}
+				else {
+					pline("%s is unbothered.", Monnam(mtmp));
+				}
+				water_damage(mtmp == &youmonst ? invent : mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+			}
+			else {
+				/* Note, blessed was handled above. */
+				if(mtmp == &youmonst){
+					if(obj->cursed){
+						BloodDrown += 9;
+					}
+					else {
+						BloodDrown += 4;
+					}
+				}
+				else {
+					water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+					if(obj->cursed){
+						//Note: 2x water damage
+						water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+						mtmp->mhp -= min(999, mtmp->mhpmax);
+					}
+					else {
+						mtmp->mhp -= min(99, mtmp->mhpmax/2);
+					}
+					if(mtmp->mhp <= 0){
+						pline("%s drowns in blood!", Monnam(mtmp));
+						mondied(mtmp);
+					}
+					else if(!resist(mtmp, RING_CLASS, 0, NOTELL)){
+						pline("%s is crazed with anger!", Monnam(mtmp));
+						mtmp->mberserk = 1;
+					}
+				}
+			}
+			/* Note, blessed was handled above. */
+			if(obj->cursed){
+				CURSED_SOUL_HANDLING
+			}
+			else {
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_ENVY:
 		break;
@@ -7037,6 +7207,7 @@ unfixable_trouble_count(is_horn)
 				) unfixable_trbl++;
 	if (Slimed) unfixable_trbl++;
 	if (FrozenAir) unfixable_trbl++;
+	if (BloodDrown) unfixable_trbl++;
 	/* lycanthropy is not desirable, but it doesn't actually make you feel
 	   bad */
 

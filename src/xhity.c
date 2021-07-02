@@ -3359,6 +3359,9 @@ int flat_acc;
 			if (is_boulder(weapon))
 				rang_acc += 6;
 			break;
+		case MASS_OF_STUFF:
+			rang_acc += 9;
+		break;
 		case BALL_OF_WEBBING:
 			/* balls of webbing should always miss */
 			rang_acc -= 2000;

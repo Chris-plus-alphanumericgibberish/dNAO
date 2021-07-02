@@ -1169,7 +1169,7 @@ do_look(quick)
 		sym = showsyms[trap_to_defsym(glyph_to_trap(glyph))];
 	    } else if (glyph_is_object(glyph)) {
 		sym = oc_syms[(int)objects[glyph_to_obj(glyph)].oc_class];
-		if (sym == '`' && iflags.bouldersym && (int)glyph_to_obj(glyph) == BOULDER)
+		if (sym == '`' && iflags.bouldersym && ((int)glyph_to_obj(glyph) == BOULDER || (int)glyph_to_obj(glyph) == MASS_OF_STUFF))
 			sym = iflags.bouldersym;
 	    } else if (glyph_is_monster(glyph)) {
 		/* takes care of pets, detected, ridden, and regular mons */

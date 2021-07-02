@@ -538,7 +538,7 @@ unsigned *ospecial;
 		/* shift out the 4 bits of color to leave the otyp */
 		offset = offset >> 4;
 		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
-		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE) && iflags.bouldersym) ch = iflags.bouldersym;
+		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE || offset == MASS_OF_STUFF) && iflags.bouldersym) ch = iflags.bouldersym;
 		else ch = get_objsym(offset);
 
 		if (offset != BOULDER &&

@@ -2619,7 +2619,7 @@ karemade:
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
 		}
-		if (Screaming && !Strangled && !FrozenAir && !is_deaf(mtmp)){
+		if (Screaming && !Strangled && !BloodDrown && !FrozenAir && !is_deaf(mtmp)){
 			//quite noisy
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
@@ -2639,7 +2639,7 @@ karemade:
 			mtmp->muy = u.uy;
 		}
 	}
-	if (Screaming && !Strangled && !FrozenAir){
+	if (Screaming && !Strangled && !BloodDrown && !FrozenAir){
 		//quite noisy
 		song_noise(ACURR(A_CON)*ACURR(A_CON));
 	}

@@ -121,7 +121,8 @@
 #define BLOCK_CONFUSION				1 + DOUBT
 #define BLOWING_WINDS				1 + BLOCK_CONFUSION
 #define TIME_STOP					1 + BLOWING_WINDS
-#define LAST_PROP					(TIME_STOP)
+#define BLOOD_DROWN					1 + TIME_STOP
+#define LAST_PROP					(BLOOD_DROWN)
 
 #define MPROP_SIZE					(LAST_PROP/32 + 1)
 

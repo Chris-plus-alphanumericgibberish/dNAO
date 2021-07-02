@@ -647,13 +647,18 @@ nh_timeout()
 			}
 		}
 	}
-	if(Strangled || FrozenAir){
+	if(Strangled || FrozenAir || BloodDrown){
+		if(BloodDrown){
+			pline("Your lungs are full of blood!");
+			water_damage(invent, FALSE, FALSE, WD_BLOOD, &youmonst);
+		}
 		if(Breathless);//Do nothing
 		else if(u.divetimer > 1) u.divetimer--;
 		else {
 			killer_format = KILLED_BY;
 			killer = ((HStrangled & TIMEOUT) && delayed_killer) ? delayed_killer
 				: (u.uburied || FrozenAir) ? "suffocation"
+				: BloodDrown ? "drowning in blood"
 				: "strangulation";
 			done(((HStrangled & TIMEOUT) && delayed_killer) ? CHOKING : DIED);
 		}
@@ -666,7 +671,7 @@ nh_timeout()
 		else if(u.divetimer > (ACURR(A_CON))/3) u.divetimer--;
 	}
 	
-	if((Babble || Screaming) && !Strangled && !FrozenAir && u.divetimer > 1)
+	if((Babble || Screaming) && !Strangled && !FrozenAir && !BloodDrown && u.divetimer > 1)
 		u.divetimer--;
 
 	if(u.divetimer<=0){

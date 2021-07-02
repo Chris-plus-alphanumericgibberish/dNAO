@@ -118,7 +118,8 @@ static int p_type; /* (-1)-3: (-1)=really naughty, 3=really good */
  * order to have the values be meaningful.
  */
 
-#define TROUBLE_STONED			18
+#define TROUBLE_STONED			19
+#define TROUBLE_BLOOD_DROWN		18
 #define TROUBLE_FROZEN_AIR		17
 #define TROUBLE_SLIMED			16
 #define TROUBLE_STRANGLED		15
@@ -193,6 +194,7 @@ in_trouble()
 	 */
 	if(Stoned) return(TROUBLE_STONED);
 	if(Golded) return(TROUBLE_STONED);
+	if(BloodDrown) return(TROUBLE_BLOOD_DROWN);
 	if(FrozenAir) return(TROUBLE_FROZEN_AIR);
 	if(Slimed) return(TROUBLE_SLIMED);
 	if(Strangled) return(TROUBLE_STRANGLED);
@@ -353,6 +355,12 @@ register int trouble;
 	    case TROUBLE_SLIMED:
 		    pline_The("slime disappears.");
 		    Slimed = 0;
+		    flags.botl = 1;
+		    delayed_killer = 0;
+		    break;
+	    case TROUBLE_BLOOD_DROWN:
+		    pline_The("blood vanishes from your lungs.");
+		    BloodDrown = 0;
 		    flags.botl = 1;
 		    delayed_killer = 0;
 		    break;

@@ -5890,7 +5890,7 @@ int spell;
 		chance = 100;
 	
 	//
-	if(Babble || Screaming || Strangled || FrozenAir || Drowning){
+	if(Babble || Screaming || Strangled || FrozenAir || BloodDrown || Drowning){
 		chance = 0;
 	}
 	else if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){

@@ -2039,12 +2039,8 @@ struct obj *obj, *otmp;
 		break;
 	case WAN_STRIKING:
 	case SPE_FORCE_BOLT:
-		if (obj->otyp == BOULDER) /*boulders only*/
-			fracture_rock(obj);
-		else if (obj->otyp == STATUE)
-			(void) break_statue(obj);
-		else if (obj->otyp == MASSIVE_STONE_CRATE)
-			(void) break_crate(obj);
+		if (is_boulder(obj))
+			break_boulder(obj);
 		else {
 			if (!flags.mon_moving)
 			    (void)hero_breaks(obj, obj->ox, obj->oy, FALSE);
@@ -5034,14 +5030,42 @@ boolean *shopdamage;
 #endif /*OVL0*/
 #ifdef OVL3
 
+/*
+ * Wrapper function that correctly handles each type of boulder-like object
+ */
+
+void
+break_boulder(obj)
+struct obj *obj;
+{
+	switch(obj->otyp){
+		case BOULDER:
+			fracture_rock(obj);
+		break;
+		case MASSIVE_STONE_CRATE:
+			break_crate(obj);
+		break;
+		case MASS_OF_STUFF:
+			separate_mass_of_stuff(obj, FALSE);
+		break;
+		case STATUE:
+			break_statue(obj);
+		break;
+		default:
+			impossible("unhandled boulder type being broken!");
+			fracture_rock(obj);
+		break;
+	}
+}
+
 void
 fracture_rock(obj)	/* fractured by pick-axe or wand of striking */
 register struct obj *obj;		   /* no texts here! */
 {
 	int mat = obj->obj_material;
 	/* A little Sokoban guilt... */
-	if (obj->otyp == BOULDER && In_sokoban(&u.uz) && !flags.mon_moving)
-	    change_luck(-1); /*boulders only*/
+	if(In_sokoban(&u.uz) && !flags.mon_moving)
+	    change_luck(-1);
 
 	obj->otyp = ROCK;
 	obj->quan = (long) rn1(60, 7);
@@ -5088,7 +5112,7 @@ register struct obj *obj;
 }
 
 /* handle crate hit by striking/force bolt/pick-axe */
-boolean
+void
 break_crate(obj)
 register struct obj *obj;
 {
@@ -5102,7 +5126,64 @@ register struct obj *obj;
 	}
 	obj->spe = 0;
 	fracture_rock(obj);
-	return TRUE;
+}
+
+/* handle mass of stuff being hit by striking/force bolt/pick-axe or burried */
+void
+separate_mass_of_stuff(obj, burial)
+register struct obj *obj;
+boolean burial;
+{
+	/* [obj is assumed to be on floor, so no get_obj_location() needed] */
+	struct obj *item;
+	int x = obj->ox;
+	int y = obj->oy;
+	int i;
+	struct obj *otmp;
+	int mat = obj->obj_material;
+	mkgold(d(100,9)+rn2(100), x, y);
+	
+	for(i = d(9,3); i > 0; i--){
+		otmp = mkobj_at(WEAPON_CLASS, x, y, NO_MKOBJ_FLAGS);
+		if(otmp){
+			if(is_hard(otmp) && rn2(2))
+				set_material(otmp, mat);
+			if(obj->cursed)
+				curse(otmp);
+			if(obj->blessed)
+				bless(otmp);
+			if(burial)
+				bury_an_obj(otmp);
+			stackobj(otmp);
+		}
+	}
+	for(i = d(9,3); i > 0; i--){
+		otmp = mkobj_at(0, x, y, NO_MKOBJ_FLAGS);
+		if(otmp){
+			if((otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS || is_weptool(otmp)) && is_hard(otmp) && rn2(2))
+				set_material(otmp, mat);
+			if(obj->cursed)
+				curse(otmp);
+			if(obj->blessed)
+				bless(otmp);
+			if(burial)
+				bury_an_obj(otmp);
+			stackobj(otmp);
+		}
+	}
+	for(i = d(9,3); i > 0; i--){
+		otmp = mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
+		if(obj->cursed)
+			curse(otmp);
+		if(obj->blessed)
+			bless(otmp);
+		if(otmp && burial)
+			bury_an_obj(otmp);
+		stackobj(otmp);
+	}
+
+	obj->spe = 0;
+	fracture_rock(obj);
 }
 
 #endif /*OVL3*/
