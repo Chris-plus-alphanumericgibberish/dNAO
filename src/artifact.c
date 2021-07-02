@@ -1401,19 +1401,37 @@ long wp_mask;
 			for (obj = invent; (obj && !got_prop); obj = obj->nobj)
 			if (obj != otmp && obj->oartifact) {
 				/* write over tmp_property_list with the carried artifact -- this is why we needed a copy earlier */
-				get_art_property_list(tmp_property_list, obj->oartifact, wp_mask == W_ART);
+				get_art_property_list(tmp_property_list, obj->oartifact, TRUE);
 
 				/* specific-monster warning needs to be specially handled */
 				if (this_art_property_list[i] == WARN_OF_MON)
 				{
-					exist_warntypem |= spec_mm(obj->oartifact);
-					exist_warntypet |= spec_mt(obj->oartifact);
-					exist_warntypet |= spec_mf(obj->oartifact);
-					exist_warntypeb |= spec_mb(obj->oartifact);
-					exist_warntypeg |= spec_mg(obj->oartifact);
-					exist_warntypea |= spec_ma(obj->oartifact);
-					exist_warntypev |= spec_mv(obj->oartifact);
-					exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj->oartifact)));
+					/* check that the artifact is indeed granting WARN_OF_MON -- some artifacts are hateful without granting warning! */
+					for (j = 0; tmp_property_list[j]; j++) {
+						if(tmp_property_list[j] == WARN_OF_MON)
+							got_prop = TRUE;
+					}
+					if (!got_prop && (obj->owornmask & *mask)) {
+						get_art_property_list(tmp_property_list, obj->oartifact, FALSE);
+						for (j = 0; tmp_property_list[j]; j++) {
+							if(tmp_property_list[j] == WARN_OF_MON)
+								got_prop = TRUE;
+						}
+					}
+
+					if (got_prop) {
+						/* add to the types of things we are warned about, to handle later */
+						exist_warntypem |= spec_mm(obj->oartifact);
+						exist_warntypet |= spec_mt(obj->oartifact);
+						exist_warntypet |= spec_mf(obj->oartifact);
+						exist_warntypeb |= spec_mb(obj->oartifact);
+						exist_warntypeg |= spec_mg(obj->oartifact);
+						exist_warntypea |= spec_ma(obj->oartifact);
+						exist_warntypev |= spec_mv(obj->oartifact);
+						exist_montype |= (long long int)((long long int)1 << (int)(spec_s(obj->oartifact)));
+						got_prop = FALSE;	/* continue checking all items */ 
+					}
+
 				}
 				/* everything else is just a standard property */
 				else
@@ -1435,14 +1453,14 @@ long wp_mask;
 		/* specific warning */
 		case WARN_OF_MON:
 			/* most specific flags */
-			/*  flag                 if on  {add to mask     ; add to warning type                   } else {remove from warning type unless another art fills in         } */
-			if (spec_mm(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(oartifact);} else {flags.warntypem &= ~(spec_mm(oartifact)&(~exist_warntypem));}}
-			if (spec_mt(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(oartifact);} else {flags.warntypet &= ~(spec_mt(oartifact)&(~exist_warntypet));}}
-			if (spec_mf(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mf(oartifact);} else {flags.warntypet &= ~(spec_mf(oartifact)&(~exist_warntypet));}}
-			if (spec_mb(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(oartifact);} else {flags.warntypeb &= ~(spec_mb(oartifact)&(~exist_warntypeb));}}
-			if (spec_mg(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(oartifact);} else {flags.warntypeg &= ~(spec_mg(oartifact)&(~exist_warntypeg));}}
-			if (spec_ma(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(oartifact);} else {flags.warntypea &= ~(spec_ma(oartifact)&(~exist_warntypea));}}
-			if (spec_mv(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypev |= spec_mv(oartifact);} else {flags.warntypev &= ~(spec_mv(oartifact)&(~exist_warntypev));}}
+			/*  flag                 if on  {add to mask     ; add to warning type                   } else {remove from warning type unless another art fills in       ; remove from mask           } */
+			if (spec_mm(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypem |= spec_mm(oartifact);} else {flags.warntypem &= ~(spec_mm(oartifact)&(~exist_warntypem)); *mask &= (~wp_mask)|W_ART;}}
+			if (spec_mt(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mt(oartifact);} else {flags.warntypet &= ~(spec_mt(oartifact)&(~exist_warntypet)); *mask &= (~wp_mask)|W_ART;}}
+			if (spec_mf(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypet |= spec_mf(oartifact);} else {flags.warntypet &= ~(spec_mf(oartifact)&(~exist_warntypet)); *mask &= (~wp_mask)|W_ART;}}
+			if (spec_mb(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeb |= spec_mb(oartifact);} else {flags.warntypeb &= ~(spec_mb(oartifact)&(~exist_warntypeb)); *mask &= (~wp_mask)|W_ART;}}
+			if (spec_mg(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypeg |= spec_mg(oartifact);} else {flags.warntypeg &= ~(spec_mg(oartifact)&(~exist_warntypeg)); *mask &= (~wp_mask)|W_ART;}}
+			if (spec_ma(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypea |= spec_ma(oartifact);} else {flags.warntypea &= ~(spec_ma(oartifact)&(~exist_warntypea)); *mask &= (~wp_mask)|W_ART;}}
+			if (spec_mv(oartifact)) {if(on) {*mask |= wp_mask; flags.warntypev |= spec_mv(oartifact);} else {flags.warntypev &= ~(spec_mv(oartifact)&(~exist_warntypev)); *mask &= (~wp_mask)|W_ART;}}
 			/* monster symbol */
 			if (spec_s(oartifact)) {
 				if (on) {
@@ -1450,15 +1468,16 @@ long wp_mask;
 					flags.montype |= (long long int)((long long int)1 << (int)(spec_s(oartifact))); //spec_s(oartifact);
 				}
 				else {
+					*mask &= (~wp_mask)|W_ART;
 					flags.montype &= ~((long long int)((long long int)1 << (int)(spec_s(oartifact)))&(~exist_montype));
 				}
 			}
 			/* update vision */
 			see_monsters();	// it should be fine to run a vision update even if there wasn't a change
 
-			/* if there are no specific warnings remaining, toggle off the extrinsic */
+			/* if there are no specific warnings remaining, toggle off the extrinsic entirely */
 			if (!(flags.warntypem || flags.warntypet || flags.warntypeb || flags.warntypeg || flags.warntypea || flags.warntypev || flags.montype))
-				*mask &= ~wp_mask;
+				*mask = 0L;
 			break;
 		/* hallucination */
 		case HALLUC_RES:
