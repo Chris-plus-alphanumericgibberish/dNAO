@@ -6755,6 +6755,7 @@ boolean ranged;
 
 #ifdef SEDUCE
 			case AD_SSEX:
+				/* see seduce.c */
 				if(Chastity)
 					break;
 
@@ -6762,54 +6763,7 @@ boolean ranged;
 					(uright && uright->otyp == find_engagement_ring()))
 					break;
 
-				if (pa->mtyp == PM_MOTHER_LILITH && could_seduce(magr, &youmonst, attk) == 1){
-					magr->mcan = 0;	/* Question for Chris: is this intentional? It's different from all others here. */
-					if (!rn2(4)) return MM_HIT;
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (dolilithseduce(magr)) return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_BELIAL && could_seduce(magr, &youmonst, attk) == 1){
-					if (!rn2(4)) return MM_HIT;
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (dobelialseduce(magr)) return MM_AGR_STOP;
-				}
-				//	else if(pa->mtyp == PM_SHAMI_AMOURAE && could_seduce(magr, &youmonst, attk) == 1 
-				//		&& notmcan){
-				//		if(dosflseduce(magr)) return MM_AGR_STOP;
-				//	}
-				//	else if(pa->mtyp == PM_THE_DREAMER && could_seduce(magr, &youmonst, attk) == 2 
-				//		&& notmcan){
-				//	}
-				//	else if(pa->mtyp == PM_XINIVRAE && could_seduce(magr, &youmonst, attk) == 2 
-				//		&& notmcan){
-				//	}
-				//	else if(pa->mtyp == PM_LYNKHAB && could_seduce(magr, &youmonst, attk) 
-				//		&& notmcan){
-				//	}
-				else if (pa->mtyp == PM_MALCANTHET && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (domlcseduce(magr)) return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_GRAZ_ZT && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (dograzseduce(magr)) return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_PALE_NIGHT && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					dopaleseduce(magr);
-					return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_AVATAR_OF_LOLTH && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					dololthseduce(magr);
-					return MM_AGR_STOP;
-				}
-				else if (could_seduce(magr, &youmonst, attk) == 1
-					&& notmcan){
+				if (notmcan && could_seduce(magr, &youmonst, attk) == 1) {
 					if(magr->mappearance) seemimic_ambush(magr);
 					if (doseduce(magr))
 						return MM_AGR_STOP;
