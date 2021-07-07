@@ -189,7 +189,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			delay = min(delay, 5);
 		if (thrownobj->oartifact)
 			delay += rnz(10);
-
+		stop_timer(RETURN_AMMO, thrownobj->timed);	// if it's already timed to do so, replace old timer
 		start_timer(delay, TIMER_OBJECT, RETURN_AMMO, (genericptr_t)thrownobj);
 	}
 
