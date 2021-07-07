@@ -3004,7 +3004,8 @@ boolean endnow;
 			else if (curwhere == OBJ_MAGIC_CHEST && allow_magic) {
 				do {
 					curobj = magic_chest_objs[magic_chest_index];
-				} while (!curobj && ++magic_chest_index < 10);
+					magic_chest_index++;
+				} while (!curobj && magic_chest_index < 10);
 				if (wherefrom) *wherefrom = (1 << OBJ_MAGIC_CHEST);
 			}
 			else if (curwhere == OBJ_INTRAP && allow_intrap) {
