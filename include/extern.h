@@ -2486,16 +2486,8 @@ E boolean NDECL(dahlverNarVis);
 E int FDECL(could_seduce, (struct monst *, struct monst *, struct attack *));
 #ifdef SEDUCE
 E int FDECL(doseduce, (struct monst *));
-E int FDECL(dololthseduce, (struct monst *));
-E int FDECL(dolilithseduce, (struct monst *));
-E int FDECL(dobelialseduce, (struct monst *));
-E int FDECL(domlcseduce, (struct monst *));
-E int FDECL(dograzseduce, (struct monst *));
 E int FDECL(dosflseduce, (struct monst *));
 E int FDECL(dopaleseduce, (struct monst *));
-E int FDECL(dololthseduce, (struct monst *));
-E int FDECL(dobelialseduce, (struct monst *));
-E int FDECL(dograzseduce, (struct monst *));
 E int FDECL(dotent, (struct monst *, int));
 #endif
 
