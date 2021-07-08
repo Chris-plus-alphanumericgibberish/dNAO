@@ -4779,11 +4779,12 @@ register struct monst *mdef;
      (obj->otyp == STATUE && mons[obj->corpsenm].msize >= mdef->data->msize) ||
 #endif
 				obj_resists(obj, 0, 0)) {
-			if (flooreffects(obj, x, y, "fall")) continue;
-			place_object(obj, x, y);
+				if (flooreffects(obj, x, y, "fall")) continue;
+				place_object(obj, x, y);
 		    } else {
-			obj->nobj = oldminvent;
-			oldminvent = obj;
+				if (obj_is_burning(obj)) end_burn(obj, TRUE);
+				obj->nobj = oldminvent;
+				oldminvent = obj;
 		    }
 		}
 		/* defer statue creation until after inventory removal
