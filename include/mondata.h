@@ -38,9 +38,16 @@
 
 #define resists_confusion(ptr)	(((ptr)->geno&G_UNIQ) || is_weeping(ptr) || is_yochlol(ptr))
 
-#define is_blind(mon)		(!((mon)->mcansee) || (darksight((mon)->data) && !(\
-													(!levl[(mon)->mx][(mon)->my].lit && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1)))\
-													|| (levl[(mon)->mx][(mon)->my].lit &&  (viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1))))))
+#define is_blindfolded(mon) (mon->misc_worn_check&W_TOOL && is_opaque_worn_tool(which_armor(mon,W_TOOL)))
+
+#define is_blind(mon)		(!((mon)->mcansee) \
+				|| (darksight((mon)->data) && !(\
+									(!levl[(mon)->mx][(mon)->my].lit && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1)))\
+									|| (levl[(mon)->mx][(mon)->my].lit &&  (viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1)))\
+								)\
+				   )\
+				|| is_blindfolded(mon))
+
 #define is_deaf(mon)		(!((mon)->mcanhear) ||\
 							  (mon)->mtyp == PM_NUPPERIBO ||\
 							  (mon)->mtyp == PM_ALABASTER_ELF ||\
