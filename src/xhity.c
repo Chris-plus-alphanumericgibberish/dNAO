@@ -11546,47 +11546,66 @@ int vis;
 		if (maybe_not && rn2(5))
 			return MM_MISS;
 		else {
-			int i = 0;
-			int n = 0;
-			if (pa->mtyp == PM_MIGO_SOLDIER){
-				n = rn2(4);
-				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+			int typ = NON_PM;
+			int quan;
+
+			switch(pa->mtyp)
+			{
+				case PM_MIGO_SOLDIER:
+					quan = rnd(4);
+					typ = PM_FOG_CLOUD;
+					if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+					break;
+				case PM_MIGO_PHILOSOPHER:
+					quan = rnd(4);
+					typ = PM_ICE_VORTEX;
+					if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
+					break;
+				case PM_MIGO_QUEEN:
+					quan = rnd(2);
+					typ = PM_STEAM_VORTEX;
+					if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
+					break;
+				case PM_ANCIENT_TEMPEST:
+					quan = 1;
+					switch(rn2(4)) {
+						case 0:
+							typ = PM_AIR_ELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see a whisp of cloud swirl out from %s.", mon_nam(magr));
+							break;
+						case 1:
+							typ = PM_WATER_ELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see rain coalesce and stride out from %s.", mon_nam(magr));
+							break;
+						case 2:
+							typ = PM_LIGHTNING_PARAELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see lightning coalesce and strike out from %s.", mon_nam(magr));
+							break;
+						case 3:
+							typ = PM_ICE_PARAELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see hail coalesce and stride out from %s.", mon_nam(magr));
+							break;
+					}
+				default:
+					impossible("unexpected pa type for mist projector, %d", pa->mtyp);
+					quan = 1;
+					typ = PM_FOG_CLOUD;
+					if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+					break;
 			}
-			else if (pa->mtyp == PM_MIGO_PHILOSOPHER){
-				n = rn2(4);
-				if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_ICE_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
-			else if (pa->mtyp == PM_MIGO_QUEEN){
-				n = rn2(2);
-				if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_STEAM_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
-			else if (pa->mtyp == PM_ANCIENT_TEMPEST){
-				switch (rnd(4)){
-				case 1:
-					if (cansee(magr->mx, magr->my)) You("see a whisp of cloud swirl out from %s.", mon_nam(magr));
-					makemon(&mons[PM_AIR_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 2:
-					if (cansee(magr->mx, magr->my)) You("see rain coalesce and stride out from %s.", mon_nam(magr));
-					makemon(&mons[PM_WATER_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 3:
-					if (cansee(magr->mx, magr->my)) You("see lightning coalesce and strike out from %s.", mon_nam(magr));
-					makemon(&mons[PM_LIGHTNING_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 4:
-					if (cansee(magr->mx, magr->my)) You("see hail coalesce and stride out from %s.", mon_nam(magr));
-					makemon(&mons[PM_ICE_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
+
+			if (typ != NON_PM) {
+				struct monst * mtmp;
+				int mmflags = MM_ADJACENTOK|MM_ADJACENTSTRICT;
+				if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
+
+				while(quan--) {
+					mtmp = makemon(&mons[typ], magr->mx, magr->my, mmflags);
+					if (mtmp && (mmflags&MM_ESUM))
+						mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 				}
 			}
-			else{
-				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
-				makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
+
 			return MM_AGR_STOP; // if a mi-go fires a mist projector, it can take no further actions that turn
 		}
 		break;
