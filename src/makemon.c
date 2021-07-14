@@ -3378,10 +3378,15 @@ int mkobjflags;
 			    (void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_SURYA_DEVA){
 				struct monst *dancer;
-				dancer = makemon(&mons[PM_DANCING_BLADE], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+				int mmflags = MM_ADJACENTOK|MM_NOCOUNTBIRTH;
+				if (get_mx(mtmp, MX_ESUM))
+					mmflags |= MM_ESUM;
+				dancer = makemon(&mons[PM_DANCING_BLADE], mtmp->mx, mtmp->my, mmflags);
 				if(dancer){
 					dancer->mvar_suryaID = (long)mtmp->m_id;
 					dancer->mpeaceful = mtmp->mpeaceful;
+					if (mmflags&MM_ESUM)
+						mark_mon_as_summoned(dancer, mtmp, ESUMMON_PERMANENT, 0);
 				}
 				
 			    otmp = mksobj(PLATE_MAIL, mkobjflags|MKOBJ_NOINIT);
