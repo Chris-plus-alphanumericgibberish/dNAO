@@ -11595,27 +11595,41 @@ int vis;
 		if (is_fern(pa) && !magr->mcan && 
 			!is_fern_sprout(pa) ? !rn2(2) : !rn2(4)) {
 			coord mm;
-			mm.x = magr->mx; mm.y = magr->my;
-			enexto(&mm, mm.x, mm.y, &mons[PM_DUNGEON_FERN_SPORE]);
-			if (pa->mtyp == PM_DUNGEON_FERN ||
-				pa->mtyp == PM_DUNGEON_FERN_SPROUT
-				) {
-				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			int typ;
+			switch (pa->mtyp) {
+				case PM_DUNGEON_FERN:
+				case PM_DUNGEON_FERN_SPROUT:
+					typ = PM_DUNGEON_FERN_SPORE;
+					break;
+				case PM_SWAMP_FERN:
+				case PM_SWAMP_FERN_SPROUT:
+					typ = PM_SWAMP_FERN_SPORE;
+					break;
+				case PM_BURNING_FERN:
+				case PM_BURNING_FERN_SPROUT:
+					typ = PM_BURNING_FERN_SPORE;
+					break;
+				default:
+					typ = NON_PM;
+					break;
 			}
-			else if (pa->mtyp == PM_SWAMP_FERN ||
-				pa->mtyp == PM_SWAMP_FERN_SPROUT
-				) {
-				makemon(&mons[PM_SWAMP_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			if (typ != NON_PM) {
+				mm.x = magr->mx; mm.y = magr->my;
+				enexto(&mm, mm.x, mm.y, &mons[typ]);
+
+				struct monst * mtmp;
+				boolean summoned = (get_mx(magr, MX_ESUM));
+				int mmflags = summoned ? MM_ESUM : NO_MM_FLAGS;
+
+				mtmp = makemon(&mons[typ], mm.x, mm.y, mmflags);
+
+				if (mtmp) {
+					if (summoned)
+						mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
+					if (canseemon(magr))
+						pline("%s releases a spore!", Monnam(magr));
+				}
 			}
-			else if (pa->mtyp == PM_BURNING_FERN ||
-				pa->mtyp == PM_BURNING_FERN_SPROUT
-				) {
-				makemon(&mons[PM_BURNING_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
-			}
-			else { /* currently these should not be generated */
-				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
-			}
-			if (canseemon(magr)) pline("%s releases a spore!", Monnam(magr));
 		}
 		break;
 	case AD_WTCH:{

@@ -4612,55 +4612,50 @@ void
 spore_dies(mon)
 struct monst *mon;
 {
-	if (mon->mhp <= 0) {
-	    int sporetype;
-	    coord mm; schar ltyp;
-	    mm.x = mon->mx; mm.y = mon->my;
-	    ltyp = levl[mm.x][mm.y].typ;
-	    create_gas_cloud(mm.x, mm.y, rn1(2,1), rnd(8), FALSE);
-	    /* all fern spores have a 2/3 chance of creating nothing, except for
-	       the generic fern spore, which guarantees a terrain-appropriate fern */
-	    if (mon->mtyp == PM_DUNGEON_FERN_SPORE) {
-		/* dungeon ferns cannot reproduce on ice, lava, or water; swamp is okay */
-			if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y) && !is_pool(mm.x, mm.y, FALSE))
-				sporetype = 0;
-			else return;
-			if (rn2(3)) return;
-	    } else if (mon->mtyp == PM_SWAMP_FERN_SPORE) {
-			if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y))
-				sporetype = 2;
-			else return;
-			if (rn2(3)) return;
-	    } else if (mon->mtyp == PM_BURNING_FERN_SPORE) {
-			if (!is_ice(mm.x, mm.y) && !is_pool(mm.x, mm.y, TRUE))
-				sporetype = 3;
-			else return;
-			if (rn2(3)) return;
-		}
-		else {
-			impossible("Unhandled spore type in spore_dies, %d", mon->mtyp);
-			sporetype = 0;
-		}
-	    /* when creating a new fern, 5/6 chance of creating
-	       a fern sprout and 1/6 chance of a fully-grown one */
-	    switch (sporetype) {
-		case 0:
-		    if (!rn2(6)) makemon(&mons[PM_DUNGEON_FERN], mm.x, mm.y, NO_MM_FLAGS);
-		    else makemon(&mons[PM_DUNGEON_FERN_SPROUT], mm.x, mm.y, NO_MM_FLAGS);
-	    break;
-		case 2:
-		    if (!rn2(6)) makemon(&mons[PM_SWAMP_FERN], mm.x, mm.y, NO_MM_FLAGS);
-		    else makemon(&mons[PM_SWAMP_FERN_SPROUT], mm.x, mm.y, NO_MM_FLAGS);
-	    break;
-		case 3:
-		    if (!rn2(6)) makemon(&mons[PM_BURNING_FERN], mm.x, mm.y, NO_MM_FLAGS);
-		    else makemon(&mons[PM_BURNING_FERN_SPROUT], mm.x, mm.y, NO_MM_FLAGS);
-	    break;
-		default:
-		    pline("BUG: Unknown spore type: (%d)", sporetype);
-	    break;
-	    }
+	if (mon->mhp > 0)	/* just in case */
+		return;
+		
+	int ferntype = NON_PM;
+	coord mm;
+	mm.x = mon->mx; mm.y = mon->my;
+	
+	/* based on spore type and terrain, select fern to make */
+	/* note: generic fern spores, if implemented, would choose a fern based on terrain */
+	/* all currently written fern spores have a 2/3 chance of not making a fern even on favoured terrain */
+	if (mon->mtyp == PM_DUNGEON_FERN_SPORE) {
+	/* dungeon ferns cannot reproduce on ice, lava, or water; swamp is okay */
+		if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y) && !is_pool(mm.x, mm.y, FALSE))
+			ferntype = !rn2(3) ? PM_DUNGEON_FERN : NON_PM;
+	} else if (mon->mtyp == PM_SWAMP_FERN_SPORE) {
+		if (!is_ice(mm.x, mm.y) && !is_lava(mm.x, mm.y))
+			ferntype = !rn2(3) ? PM_SWAMP_FERN : NON_PM;
+	} else if (mon->mtyp == PM_BURNING_FERN_SPORE) {
+		if (!is_ice(mm.x, mm.y) && !is_pool(mm.x, mm.y, TRUE))
+			ferntype = !rn2(3) ? PM_BURNING_FERN : NON_PM;
+	}
+	else {
+		impossible("Unhandled spore type in spore_dies, %d", mon->mtyp);
+		ferntype = NON_PM;
+	}
 
+	/* create a gas cloud */
+	create_gas_cloud(mm.x, mm.y, rn1(2,1), rnd(8), FALSE);
+
+	if (ferntype != NON_PM) 
+	{
+		struct monst * mtmp;
+		boolean summoned = !!get_mx(mon, MX_ESUM);
+		int mmflags = summoned ? MM_ESUM : NO_MM_FLAGS;
+		/* when creating a new fern, 5/6 chance of creating a fern sprout and 1/6 chance of a fully-grown one */
+		if (rn2(6))
+			ferntype = big_to_little(ferntype);
+
+		mtmp = makemon(&mons[ferntype], mm.x, mm.y, mmflags);
+
+		if (mtmp) {
+			if (summoned)
+				mark_mon_as_summoned(mtmp, mon->mextra_p->esum_p->summoner, ESUMMON_PERMANENT, 0);
+		}
 	}
 }
 
