@@ -11633,17 +11633,14 @@ int vis;
 					break;
 			}
 			if (typ != NON_PM) {
-				mm.x = magr->mx; mm.y = magr->my;
-				enexto(&mm, mm.x, mm.y, &mons[typ]);
-
 				struct monst * mtmp;
-				boolean summoned = (get_mx(magr, MX_ESUM));
-				int mmflags = summoned ? MM_ESUM : NO_MM_FLAGS;
+				int mmflags = MM_ADJACENTOK|MM_ADJACENTSTRICT;
+				if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
 
 				mtmp = makemon(&mons[typ], mm.x, mm.y, mmflags);
 
 				if (mtmp) {
-					if (summoned)
+					if (mmflags&MM_ESUM)
 						mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 					if (canseemon(magr))
 						pline("%s releases a spore!", Monnam(magr));
