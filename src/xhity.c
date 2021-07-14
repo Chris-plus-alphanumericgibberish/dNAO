@@ -429,7 +429,7 @@ int tary;
 		char buf[BUFSZ], genericwere[BUFSZ];
 
 		Strcpy(genericwere, "creature");
-		numhelp = were_summon(pa, FALSE, &numseen, genericwere);
+		numhelp = were_summon(magr, &numseen, genericwere);
 		if (vis&VIS_MAGR) {
 			pline("%s summons help!", Monnam(magr));
 			if (numhelp > 0) {

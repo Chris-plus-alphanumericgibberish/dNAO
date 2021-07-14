@@ -244,21 +244,22 @@ struct monst *mon;
 }
 
 int
-were_summon(ptr,yours,visible,genbuf)	/* were-creature (even you) summons a horde */
-register struct permonst *ptr;
-register boolean yours;
+were_summon(caller,visible,genbuf)	/* were-creature (even you) summons a horde */
+struct monst * caller;
 int *visible;			/* number of visible helpers created */
 char *genbuf;
 {
-	register int i, typ, pm = monsndx(ptr);
+	register int i, typ;
 	register struct monst *mtmp;
 	int total = 0;
+	boolean yours = (caller == &youmonst);
+	boolean summons = (!yours && get_mx(caller, MX_ESUM));
 
 	*visible = 0;
 	if(Protection_from_shape_changers && !yours)
 		return 0;
 	for(i = rnd(5); i > 0; i--) {
-	   switch(pm) {
+	   switch(caller->mtyp) {
 
 		case PM_WERERAT:
 		case PM_HUMAN_WERERAT:
@@ -282,13 +283,16 @@ char *genbuf;
 		default:
 			continue;
 	    }
-	    mtmp = makemon(&mons[typ], u.ux, u.uy, NO_MM_FLAGS);
+	    mtmp = makemon(&mons[typ], u.ux, u.uy, summons ? MM_ESUM : NO_MM_FLAGS);
 	    if (mtmp) {
-		total++;
-		if (canseemon(mtmp)) *visible += 1;
-	    }
-	    if (yours && mtmp)
-		(void) tamedog(mtmp, (struct obj *) 0);
+			total++;
+			if (canseemon(mtmp))
+				*visible += 1;
+			if (summons)
+				mark_mon_as_summoned(mtmp, caller, ESUMMON_PERMANENT, 0);
+			if (yours)
+				(void) tamedog(mtmp, (struct obj *) 0);
+	    }			
 	}
 	return total;
 }
