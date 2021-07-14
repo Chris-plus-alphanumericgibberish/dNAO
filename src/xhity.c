@@ -8666,6 +8666,8 @@ int vis;
 			struct monst *mlocal;
 			int dx = 0, dy = 0, i;
 			int monid;
+			int mmflags = (MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
+			if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
 
 			/* get dx, dy */
 			if		(tarx - x(magr) < 0) dx = -1;
@@ -8690,7 +8692,7 @@ int vis;
 			mlocal = makemon(&mons[monid],
 				x(magr) + dx,
 				y(magr) + dy,
-				(MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH));
+				mmflags);
 
 			/* set the creation's direction */
 			if (mlocal){
@@ -8699,6 +8701,9 @@ int vis;
 
 				magr->mspec_used = rnd(6);
 				result = MM_HIT;
+
+				if (mmflags&MM_ESUM)
+					mark_mon_as_summoned(mlocal, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
 				result = MM_MISS;
