@@ -6363,6 +6363,16 @@ int mkobjflags;
 				otmp->spe = 9;
 				(void) mpickobj(mtmp, otmp);
 			break;
+		    case PM_SHAYATEEN:
+				otmp = mongets(mtmp, BATTLE_AXE, mkobjflags);
+				otmp->spe = 6;
+				otmp = mongets(mtmp, BATTLE_AXE, mkobjflags);
+				otmp->spe = 6;
+				otmp = mongets(mtmp, BATTLE_AXE, mkobjflags);
+				otmp->spe = 6;
+				otmp = mongets(mtmp, BATTLE_AXE, mkobjflags);
+				otmp->spe = 6;
+			break;
 		}
 		/* prevent djinnis and mail daemons from leaving objects when
 		 * they vanish
@@ -8664,7 +8674,7 @@ register int	mmflags;
 		   already been genocided, return */
 		if (mvitals[mndx].mvflags & G_GENOD && !In_quest(&u.uz)) return((struct monst *) 0);
 #if defined(WIZARD) && defined(DEBUG)
-		if (wizard && (mvitals[mndx].mvflags & G_EXTINCT && !In_quest(&u.uz)))
+		if (wizard && (mvitals[mndx].mvflags & G_EXTINCT && !countbirth))
 		    pline("Explicitly creating extinct monster %s.",
 			mons[mndx].mname);
 #endif

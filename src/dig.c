@@ -1690,6 +1690,12 @@ int x, y;
 				break;
 			}
 		break;
+		case VN_N_PIT_FIEND:
+			mid = PM_NESSIAN_PIT_FIEND;
+		break;
+		case VN_SHAYATEEN:
+			mid = PM_SHAYATEEN;
+		break;
 		default:
 			impossible("Unhandled vault number %d.", levl[x][y].vaulttype);
 			mid = PM_LAMB;
@@ -1698,18 +1704,63 @@ int x, y;
 	
 	if(mid == PM_ANCIENT_OF_DEATH){
 		mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
-		otmp = mksobj(SCYTHE, MKOBJ_NOINIT);
-		set_material_gm(otmp, GREEN_STEEL);
-		add_oprop(otmp, OPROP_UNHYW);
-		add_oprop(otmp, OPROP_DRANW);
-		add_oprop(otmp, OPROP_VORPW);
-		set_obj_size(otmp, MZ_LARGE);
-		otmp->spe = 8;
-		curse(otmp);
-		
-		(void) mpickobj(mon, otmp);
-	    m_dowear(mon, TRUE);
-		init_mon_wield_item(mon);
+		if(mon){
+			otmp = mksobj(SCYTHE, MKOBJ_NOINIT);
+			set_material_gm(otmp, GREEN_STEEL);
+			add_oprop(otmp, OPROP_UNHYW);
+			add_oprop(otmp, OPROP_DRANW);
+			add_oprop(otmp, OPROP_VORPW);
+			set_obj_size(otmp, MZ_LARGE);
+			otmp->spe = 8;
+			curse(otmp);
+			
+			(void) mpickobj(mon, otmp);
+			m_dowear(mon, TRUE);
+			init_mon_wield_item(mon);
+		}
+	}
+	else if(mid == PM_NESSIAN_PIT_FIEND){
+		mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+#define NPF_ARMOR(typ) 	otmp = mongets(mon, typ, MKOBJ_NOINIT);\
+			add_oprop(otmp, OPROP_UNHY);\
+			add_oprop(otmp, OPROP_AXIO);\
+			set_material_gm(otmp, GREEN_STEEL);\
+			otmp->spe = 9;\
+			curse(otmp);
+		if(mon){
+			NPF_ARMOR(SPEED_BOOTS)
+			(void)mongets(mon, CLOAK_OF_MAGIC_RESISTANCE, MKOBJ_NOINIT);
+			NPF_ARMOR(PLATE_MAIL)
+			NPF_ARMOR(GAUNTLETS_OF_POWER)
+			NPF_ARMOR(HELMET)
+			otmp = mongets(mon, MACE, MKOBJ_NOINIT);
+			add_oprop(otmp, OPROP_UNHYW);
+			add_oprop(otmp, OPROP_AXIOW);
+			set_material_gm(otmp, GREEN_STEEL);
+			otmp->spe = 9;
+			curse(otmp);
+			m_dowear(mon, TRUE);
+			init_mon_wield_item(mon);
+		}
+#undef NPF_ARMOR
+	}
+	else if(mid == PM_SHAYATEEN){
+		mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT);
+#define SHAY_WEAPON(typ) 	otmp = mongets(mon, typ, MKOBJ_NOINIT);\
+			add_oprop(otmp, OPROP_UNHYW);\
+			add_oprop(otmp, OPROP_ANARW);\
+			add_oprop(otmp, !rn2(4) ? OPROP_DRANW : !rn2(3) ? OPROP_ACIDW : !rn2(2) ? OPROP_FIREW : OPROP_COLDW);\
+			otmp->spe = 6;\
+			curse(otmp);
+		if(mon){
+			SHAY_WEAPON(BATTLE_AXE)
+			SHAY_WEAPON(BATTLE_AXE)
+			SHAY_WEAPON(BATTLE_AXE)
+			SHAY_WEAPON(BATTLE_AXE)
+			m_dowear(mon, TRUE);
+			init_mon_wield_item(mon);
+		}
+#undef NPF_ARMOR
 	}
 	else {
 		mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
@@ -1733,6 +1784,8 @@ int x, y;
 			case VN_AKKABISH:
 			case VN_SARTAN:
 			case VN_RAGLAYIM:
+			case VN_SHAYATEEN:
+			case VN_N_PIT_FIEND:
 				/* stay adjacent */
 				break;
 

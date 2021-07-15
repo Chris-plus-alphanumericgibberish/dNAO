@@ -3641,6 +3641,22 @@ int wishflags;
 	/* save the [nearly] unmodified choice string */
 	Strcpy(fruitbuf, bp);
 
+	/* special directives (used mostly in the level editor) */
+	if(wizwish){
+		if(!strcmpi(bp, "devil vault loot"))
+			return mkhellvaultitem(VN_N_PIT_FIEND);
+		if(!strcmpi(bp, "demon vault loot"))
+			return mkhellvaultitem(VN_SHAYATEEN);
+		if(!strcmpi(bp, "tannin vault loot"))
+			return mkhellvaultitem(VN_AKKABISH);
+		if(!strcmpi(bp, "ancient vault loot"))
+			return mkhellvaultitem(VN_A_O_BLESSINGS);
+		if(!strcmpi(bp, "angelic vault loot"))
+			return mkhellvaultitem(VN_APOCALYPSE);
+		if(!strcmpi(bp, "lolth vault loot"))
+			return mklolthvaultitem();
+	}
+
 	for(;;) {
 		register int l;
 

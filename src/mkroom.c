@@ -373,6 +373,78 @@ mkmivaultitem(container)
 	}
 }
 
+struct obj *
+mklolthvaultitem()
+{
+	struct obj *otmp;
+	int try_limit = 1000;
+	int type;
+
+	const int lolth_armor[] = {HELMET, ARCHAIC_HELM, HIGH_ELVEN_HELM, DROVEN_HELM, CRYSTAL_HELM, HELM_OF_BRILLIANCE, 
+							   PLATE_MAIL, ARCHAIC_PLATE_MAIL, HIGH_ELVEN_PLATE, DROVEN_PLATE_MAIL, CRYSTAL_PLATE_MAIL,
+							   ELVEN_TOGA, NOBLE_S_DRESS,
+							   PLAIN_DRESS,
+							   ELVEN_CLOAK, DROVEN_CLOAK,
+							   ELVEN_SHIELD, CRYSTAL_SHIELD, SHIELD_OF_REFLECTION,
+							   GAUNTLETS, ARCHAIC_GAUNTLETS, HIGH_ELVEN_GAUNTLETS, CRYSTAL_GAUNTLETS, GAUNTLETS_OF_POWER,
+							   ARMORED_BOOTS, ARCHAIC_BOOTS, HIGH_BOOTS, HEELED_BOOTS, CRYSTAL_BOOTS, 
+							   FLYING_BOOTS, ELVEN_BOOTS, KICKING_BOOTS
+							  };
+	const int lolth_weapons[] = {
+								DROVEN_BOLT, CHAKRAM,
+								ELVEN_SPEAR, DROVEN_SPEAR, 
+								ELVEN_DAGGER, DROVEN_DAGGER, STILETTO, 
+								ELVEN_SICKLE,
+								MOON_AXE,
+								ELVEN_SHORT_SWORD, DROVEN_SHORT_SWORD,
+								SCIMITAR, HIGH_ELVEN_WARSWORD, RAPIER, SABER,
+								ELVEN_BROADSWORD, CRYSTAL_SWORD,
+								DROVEN_GREATSWORD, 
+								ELVEN_LANCE, DROVEN_LANCE,
+								DROVEN_CROSSBOW,
+								KHAKKHARA
+								};
+	otmp = (struct obj *)0;
+	if(!rn2(3))
+		type = lolth_armor[rn2(SIZE(lolth_armor))];
+	else if(rn2(2))
+		type = lolth_weapons[rn2(SIZE(lolth_weapons))];
+	else if(rn2(2))
+		type = SCOIN_CLASS;
+	else if(rn2(2)){
+		type = misc_hell_vault[SIZE(misc_hell_vault)];
+		otmp = mksobj(type, NO_MKOBJ_FLAGS);
+		return otmp;
+	}
+	else
+		type = RANDOM_CLASS;
+	do {
+		if(otmp) delobj(otmp);
+		otmp = mkobj(type, TRUE);
+		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
+			otmp = mk_special(otmp);
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		}
+		else if(!rn2(4) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(2))){
+			otmp = mk_lolth_vault_special(otmp);
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		}
+		else if(!rn2(4) || otmp->oartifact){
+			otmp = mk_minor_special(otmp);
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(1,7), otmp->spe);
+		}
+		else {
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(2,3), otmp->spe);
+		}
+	} while (--try_limit > 0 &&
+	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
+
+	return otmp;
+}
 
 struct obj *
 mkhellvaultitem(vn)

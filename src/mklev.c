@@ -2076,6 +2076,12 @@ int x, y, hv_id;
 		case VN_MAD_ANGEL:
 			mid = PM_ANGEL;
 		break;
+		case VN_N_PIT_FIEND:
+			mid = PM_LEMURE;
+		break;
+		case VN_SHAYATEEN:
+			mid = PM_MANES;
+		break;
 	}
 	obj = mksobj_at(STATUE, x, y, NO_MKOBJ_FLAGS);
 	obj->corpsenm = mid;
