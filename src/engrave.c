@@ -184,6 +184,7 @@ static const char *haluMesg[] = {
 	"If you have time to read this, you should get to the down stairs immediately!", /* Zelda 3 */
 	"Gary was here! Ash is a loser!", /* Pokemon */
 	"Oh, I get it. The real treasure was the people I had executed along the way!", /* A Practical Guide To Evil  */
+	"I don't care if it compiles / Or makes your head explode / I want a messy makefile / I want a billion lines of code", /* Scope Creep by Radiohead by qt */
 	
 	"I see you...",
 		"...do you see me?",
