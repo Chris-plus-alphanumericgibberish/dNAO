@@ -429,7 +429,7 @@ int tary;
 		char buf[BUFSZ], genericwere[BUFSZ];
 
 		Strcpy(genericwere, "creature");
-		numhelp = were_summon(pa, FALSE, &numseen, genericwere);
+		numhelp = were_summon(magr, &numseen, genericwere);
 		if (vis&VIS_MAGR) {
 			pline("%s summons help!", Monnam(magr));
 			if (numhelp > 0) {
@@ -1750,7 +1750,7 @@ int * subout;					/* records what attacks have been subbed out */
 #define SUBOUT_BARB1	0x0010	/* 1st bit of barbarian bonus attacks */
 #define SUBOUT_BARB2	0x0020	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
 #define SUBOUT_MAINWEPB	0x0040	/* Bonus attack caused by the wielded *mainhand* weapon */
-#define SUBOUT_XWEP		0x0080	/* when giving additional attacks, whether or not to use AT_XWEP or AT_WEAP this call */
+#define SUBOUT_XWEP		0x0080	/* Made an offhand attack */
 #define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
 #define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
 #define SUBOUT_SCORPION	0x0400	/* Scorpion Carapace's sting */
@@ -1800,19 +1800,25 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 
 		/* if twoweaponing... */
+		/* while NOT polymorphed, the player will insert an additional xwep attack while twoweaponing */
+		/* this compensates for some player-role-monsters having AT_WEAP+AT_XWEP and some not. */
+		/* if the player IS polymorphed, they are limited to their polyform's attacks */
+		/* some things give the player additional weapon attacks; they can reset SUBOUT_XWEP to allow another offhand hit if unpoly'd */
 		if (!by_the_book && *indexnum > 0 && u.twoweap) {
-			/* follow weapon attacks with offhand attacks */
-			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP) {
+			/* follow a weapon attack with an offhand attack */
+			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP
+				&& !((*subout) & SUBOUT_XWEP)
+				) {
 				fromlist = FALSE;
 				attk->aatyp = AT_XWEP;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1;
 				attk->damd = 4;
+				(*subout) |= SUBOUT_XWEP;
 			}
 			/* fixup for black web, which replaces AT_WEAP with an AT_SRPR */
-			/* subout is used to tell if we want to add another attack this time */
 			if ((u.specialSealsActive & SEAL_BLACK_WEB)
-				&& ((*subout) & SUBOUT_XWEP)
+				&& !((*subout) & SUBOUT_XWEP)
 				&& prev_attack.aatyp == AT_SRPR && attk->aatyp != AT_XWEP
 				) {
 				fromlist = FALSE;
@@ -1820,7 +1826,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1;
 				attk->damd = 4;
-				(*subout) &= ~SUBOUT_XWEP;
+				(*subout) |= SUBOUT_XWEP;
 			}
 		}
 	}
@@ -2112,46 +2118,38 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			)
 		){
 			/* make additional attacks */
-			attk->aatyp = (*subout&SUBOUT_XWEP) ? AT_XWEP : AT_WEAP;
+			attk->aatyp = AT_WEAP;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
 			if (otmp->oartifact == ART_QUICKSILVER)
 				*tohitmod = -15;
 			fromlist = FALSE;
-			if (*subout&SUBOUT_XWEP) {
-				*subout |= SUBOUT_MAINWEPB;
-				*subout &= ~SUBOUT_XWEP;
-			}
-			else {
-				*subout |= SUBOUT_XWEP;
-			}
+			(*subout) &= ~SUBOUT_XWEP; /* allow another followup offhand attack if twoweaponing (unpoly'd only) */
 		}
 	}
 
-	/* Unpolyed player Barbarians get up to 3 bonus attacks (and offhand attacks) */
+	/* Unpolyed player Barbarians get up to 2 bonus attacks (and offhand attacks) */
 	/* Would be shown in pokedex, if you could look up yourself in it. */
-	if (youagr && !Upolyd && Role_if(PM_BARBARIAN) && (is_null_attk(attk) || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP)) {
+	if (youagr && !Upolyd && Role_if(PM_BARBARIAN) && (*indexnum > 0)
+			&& ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
+			&& (prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP))) {
 		int nattacks = (u.ulevel >= 14) + (u.ulevel >= 30);
 		/* note: this code assumes subout_barb1 and barb2 are sequential bits, as it uses them like a tiny int */
 		int attacknum = (*subout&(SUBOUT_BARB1|SUBOUT_BARB2)) / SUBOUT_BARB1;
 
 		if (attacknum < nattacks)
 		{
-			attk->aatyp = (*subout&SUBOUT_XWEP) ? AT_XWEP : AT_WEAP;
+			attk->aatyp = AT_WEAP;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
 			*tohitmod = -10 * attacknum;
 			fromlist = FALSE;
-			if (*subout&SUBOUT_XWEP) {
-				*subout |= ((SUBOUT_BARB1 & (*subout&SUBOUT_BARB1)) ? SUBOUT_BARB2 : 0);
-				*subout ^= SUBOUT_BARB1;
-				*subout &= ~SUBOUT_XWEP;
-			}
-			else {
-				*subout |= SUBOUT_XWEP;
-			}
+
+			(*subout) |= ((SUBOUT_BARB1 & (*subout&SUBOUT_BARB1)) ? SUBOUT_BARB2 : 0);
+			(*subout) ^= SUBOUT_BARB1;
+			(*subout) &= ~SUBOUT_XWEP;	/* allow another followup offhand attack if twoweaponing */
 		}
 	}
 
@@ -2161,10 +2159,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) ||
 			(attk->aatyp == AT_MARI && !is_android(youracedata))	/* (andr/gyn)oids' mari attacks are psi-held, not actual arms */
 			){
-			/* for mainhand attacks, flag that we want to make an offhand attack next */
-			if (attk->aatyp == AT_WEAP && u.twoweap && !uswapwep)
-				(*subout) |= SUBOUT_XWEP;
-
 			/* replace the attack */
 			attk->aatyp = AT_SRPR;
 			attk->adtyp = AD_SHDW;
@@ -3400,6 +3394,10 @@ int flat_acc;
 	{
 		vdef_acc += 20;
 	}
+	/* Shades (and other insubstantial creatures) edge-case handler */
+	/* generally, miss_via_insubstantial() should do this, but some edge cases (like rolling boulder traps) are missed */
+	if (insubstantial(pd) && !hits_insubstantial(magr, mdef, attk, weapon))
+		vdef_acc -= 2000;
 
 	/* weapon accuracy -- only applies for a weapon attack OR a properly-thrown object */
 	if ((attk && weapon_aatyp(attk->aatyp))
@@ -3659,47 +3657,9 @@ boolean ranged;
 		vis = getvis(magr, mdef, 0, 0);
 	
 	/* Some things cause immediate misses */
-	/* monster displacement */
-	if (!youdef &&
-		mon_resistance(mdef, DISPLACED) &&
-		!(youagr && u.ustuck && u.ustuck == mdef) &&
-		!(youagr && u.uswallow) &&
-		!(has_passthrough_displacement(pd) && hits_insubstantial(magr, mdef, attk, weapon)) &&
-		rn2(2)
-	) {
-		if (has_passthrough_displacement(pd)){
-			if (vis&VIS_MAGR) {
-				pline("%s attack passes harmlessly through %s!",
-					(youagr ? "Your" : s_suffix(Monnam(magr))),
-					the(mon_nam(mdef)));
-			}
-		}
-		else {
-			if (vis&VIS_MAGR) {
-				pline("%s attack%s %s displaced image!",
-					(youagr ? "You" : Monnam(magr)),
-					(youagr ? "" : "s"),
-					(youagr ? "a" : s_suffix(mon_nam(mdef)))
-					);
-			}
-		}
-		domissmsg = FALSE;
+	if (miss_via_insubstantial(magr, mdef, attk, weapon, vis)) {
 		miss = TRUE;
-	}
-	/* insubstantial (shade-type) immunity to being hit */
-	if (!miss && insubstantial(pd) && !hits_insubstantial(magr, mdef, attk, weapon)) {
-		/* Print message */
-		if (vis&VIS_MAGR) {
-			Sprintf(buf, "%s", ((!weapon || valid_weapon(weapon)) ? "attack" : cxname(weapon)));
-			pline("%s %s %s harmlessly through %s.",
-				(youagr ? "Your" : s_suffix(Monnam(magr))),
-				buf,
-				vtense(buf, "pass"),
-				(youdef ? "you" : mon_nam(mdef))
-				);
-		}
 		domissmsg = FALSE;
-		miss = TRUE;
 	}
 	/* mindless monsters and soul blades */
 	if (!miss && !youdef && spirit_rapier_at(attk->aatyp) && attk->adtyp == AD_PSON && mindless_mon(mdef)) {
@@ -5860,11 +5820,11 @@ boolean ranged;
 				/*Lower protection*/
 				case 6:
 					if(youdef){
+						pline("%s shares a prophecy of your death!", Monnam(magr));
 						u.uacinc -= dmg;
 						u.ublessed = max(0, u.ublessed-dmg);
 					}
 					else {
-						pline("%s shares a prophecy of your death!", Monnam(magr));
 						if(canseemon(mdef))
 							pline("%s looks fearful.", Monnam(mdef));
 						//Monsters are less detailed, just discourage them.
@@ -6899,6 +6859,7 @@ boolean ranged;
 
 #ifdef SEDUCE
 			case AD_SSEX:
+				/* see seduce.c */
 				if(Chastity)
 					break;
 
@@ -6906,56 +6867,7 @@ boolean ranged;
 					(uright && uright->otyp == find_engagement_ring()))
 					break;
 
-				if (pa->mtyp == PM_MOTHER_LILITH && could_seduce(magr, &youmonst, attk) == 1){
-					set_mcan(magr, FALSE); /* Question for Chris: is this intentional? It's different from all others here. 
-											* Answer: Yes-ish. If memeory serves, this was a very early hack to get around foocubi sometimes cancelling themselves.
-											*/
-					if (!rn2(4)) return MM_HIT;
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (dolilithseduce(magr)) return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_BELIAL && could_seduce(magr, &youmonst, attk) == 1){
-					if (!rn2(4)) return MM_HIT;
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (dobelialseduce(magr)) return MM_AGR_STOP;
-				}
-				//	else if(pa->mtyp == PM_SHAMI_AMOURAE && could_seduce(magr, &youmonst, attk) == 1 
-				//		&& notmcan){
-				//		if(dosflseduce(magr)) return MM_AGR_STOP;
-				//	}
-				//	else if(pa->mtyp == PM_THE_DREAMER && could_seduce(magr, &youmonst, attk) == 2 
-				//		&& notmcan){
-				//	}
-				//	else if(pa->mtyp == PM_XINIVRAE && could_seduce(magr, &youmonst, attk) == 2 
-				//		&& notmcan){
-				//	}
-				//	else if(pa->mtyp == PM_LYNKHAB && could_seduce(magr, &youmonst, attk) 
-				//		&& notmcan){
-				//	}
-				else if (pa->mtyp == PM_MALCANTHET && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (domlcseduce(magr)) return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_GRAZ_ZT && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					if (dograzseduce(magr)) return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_PALE_NIGHT && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					dopaleseduce(magr);
-					return MM_AGR_STOP;
-				}
-				else if (pa->mtyp == PM_AVATAR_OF_LOLTH && could_seduce(magr, &youmonst, attk)
-					&& notmcan){
-					if(magr->mappearance) seemimic_ambush(magr);
-					dololthseduce(magr);
-					return MM_AGR_STOP;
-				}
-				else if (could_seduce(magr, &youmonst, attk) == 1
-					&& notmcan){
+				if (notmcan && could_seduce(magr, &youmonst, attk) == 1) {
 					if(magr->mappearance) seemimic_ambush(magr);
 					if (doseduce(magr))
 						return MM_AGR_STOP;
@@ -8865,6 +8777,8 @@ int vis;
 			struct monst *mlocal;
 			int dx = 0, dy = 0, i;
 			int monid;
+			int mmflags = (MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
+			if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
 
 			/* get dx, dy */
 			if		(tarx - x(magr) < 0) dx = -1;
@@ -8889,7 +8803,7 @@ int vis;
 			mlocal = makemon(&mons[monid],
 				x(magr) + dx,
 				y(magr) + dy,
-				(MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH));
+				mmflags);
 
 			/* set the creation's direction */
 			if (mlocal){
@@ -8898,6 +8812,9 @@ int vis;
 
 				magr->mspec_used = rnd(6);
 				result = MM_HIT;
+
+				if (mmflags&MM_ESUM)
+					mark_mon_as_summoned(mlocal, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
 				result = MM_MISS;
@@ -11757,47 +11674,66 @@ int vis;
 		if (maybe_not && rn2(5))
 			return MM_MISS;
 		else {
-			int i = 0;
-			int n = 0;
-			if (pa->mtyp == PM_MIGO_SOLDIER){
-				n = rn2(4);
-				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+			int typ = NON_PM;
+			int quan;
+
+			switch(pa->mtyp)
+			{
+				case PM_MIGO_SOLDIER:
+					quan = rnd(4);
+					typ = PM_FOG_CLOUD;
+					if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+					break;
+				case PM_MIGO_PHILOSOPHER:
+					quan = rnd(4);
+					typ = PM_ICE_VORTEX;
+					if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
+					break;
+				case PM_MIGO_QUEEN:
+					quan = rnd(2);
+					typ = PM_STEAM_VORTEX;
+					if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
+					break;
+				case PM_ANCIENT_TEMPEST:
+					quan = 1;
+					switch(rn2(4)) {
+						case 0:
+							typ = PM_AIR_ELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see a whisp of cloud swirl out from %s.", mon_nam(magr));
+							break;
+						case 1:
+							typ = PM_WATER_ELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see rain coalesce and stride out from %s.", mon_nam(magr));
+							break;
+						case 2:
+							typ = PM_LIGHTNING_PARAELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see lightning coalesce and strike out from %s.", mon_nam(magr));
+							break;
+						case 3:
+							typ = PM_ICE_PARAELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see hail coalesce and stride out from %s.", mon_nam(magr));
+							break;
+					}
+				default:
+					impossible("unexpected pa type for mist projector, %d", pa->mtyp);
+					quan = 1;
+					typ = PM_FOG_CLOUD;
+					if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+					break;
 			}
-			else if (pa->mtyp == PM_MIGO_PHILOSOPHER){
-				n = rn2(4);
-				if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_ICE_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
-			else if (pa->mtyp == PM_MIGO_QUEEN){
-				n = rn2(2);
-				if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_STEAM_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
-			else if (pa->mtyp == PM_ANCIENT_TEMPEST){
-				switch (rnd(4)){
-				case 1:
-					if (cansee(magr->mx, magr->my)) You("see a whisp of cloud swirl out from %s.", mon_nam(magr));
-					makemon(&mons[PM_AIR_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 2:
-					if (cansee(magr->mx, magr->my)) You("see rain coalesce and stride out from %s.", mon_nam(magr));
-					makemon(&mons[PM_WATER_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 3:
-					if (cansee(magr->mx, magr->my)) You("see lightning coalesce and strike out from %s.", mon_nam(magr));
-					makemon(&mons[PM_LIGHTNING_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 4:
-					if (cansee(magr->mx, magr->my)) You("see hail coalesce and stride out from %s.", mon_nam(magr));
-					makemon(&mons[PM_ICE_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
+
+			if (typ != NON_PM) {
+				struct monst * mtmp;
+				int mmflags = MM_ADJACENTOK|MM_ADJACENTSTRICT;
+				if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
+
+				while(quan--) {
+					mtmp = makemon(&mons[typ], magr->mx, magr->my, mmflags);
+					if (mtmp && (mmflags&MM_ESUM))
+						mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 				}
 			}
-			else{
-				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
-				makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
+
 			return MM_AGR_STOP; // if a mi-go fires a mist projector, it can take no further actions that turn
 		}
 		break;
@@ -11806,27 +11742,38 @@ int vis;
 		if (is_fern(pa) && !magr->mcan && 
 			!is_fern_sprout(pa) ? !rn2(2) : !rn2(4)) {
 			coord mm;
-			mm.x = magr->mx; mm.y = magr->my;
-			enexto(&mm, mm.x, mm.y, &mons[PM_DUNGEON_FERN_SPORE]);
-			if (pa->mtyp == PM_DUNGEON_FERN ||
-				pa->mtyp == PM_DUNGEON_FERN_SPROUT
-				) {
-				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			int typ;
+			switch (pa->mtyp) {
+				case PM_DUNGEON_FERN:
+				case PM_DUNGEON_FERN_SPROUT:
+					typ = PM_DUNGEON_FERN_SPORE;
+					break;
+				case PM_SWAMP_FERN:
+				case PM_SWAMP_FERN_SPROUT:
+					typ = PM_SWAMP_FERN_SPORE;
+					break;
+				case PM_BURNING_FERN:
+				case PM_BURNING_FERN_SPROUT:
+					typ = PM_BURNING_FERN_SPORE;
+					break;
+				default:
+					typ = NON_PM;
+					break;
 			}
-			else if (pa->mtyp == PM_SWAMP_FERN ||
-				pa->mtyp == PM_SWAMP_FERN_SPROUT
-				) {
-				makemon(&mons[PM_SWAMP_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			if (typ != NON_PM) {
+				struct monst * mtmp;
+				int mmflags = MM_ADJACENTOK|MM_ADJACENTSTRICT;
+				if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
+
+				mtmp = makemon(&mons[typ], mm.x, mm.y, mmflags);
+
+				if (mtmp) {
+					if (mmflags&MM_ESUM)
+						mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
+					if (canseemon(magr))
+						pline("%s releases a spore!", Monnam(magr));
+				}
 			}
-			else if (pa->mtyp == PM_BURNING_FERN ||
-				pa->mtyp == PM_BURNING_FERN_SPROUT
-				) {
-				makemon(&mons[PM_BURNING_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
-			}
-			else { /* currently these should not be generated */
-				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
-			}
-			if (canseemon(magr)) pline("%s releases a spore!", Monnam(magr));
 		}
 		break;
 	case AD_WTCH:{

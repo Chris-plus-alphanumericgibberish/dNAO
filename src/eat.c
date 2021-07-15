@@ -1561,12 +1561,19 @@ opentin()		/* called during each move whilst opening a tin */
 				costly_tin((const char*)0);
 				goto use_me;
 		}
-	    if (yn("Eat it?") == 'n') {
+
+		char buf[BUFSZ];
+		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && !is_animal(&mons[tin.tin->corpsenm]) && !mindless(&mons[tin.tin->corpsenm])
+			&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM)))
+			Sprintf(buf, "You feel a deep sense of kinship to the tin!  Eat it anyway?");
+		else
+			Sprintf(buf, "Eat it?");
+		if (yn_function(buf,ynchars,'n')=='n') {
 			if (!Hallucination) tin.tin->dknown = tin.tin->known = TRUE;
 			if (flags.verbose) You("discard the open tin.");
 			costly_tin((const char*)0);
 			goto use_me;
-	    }
+		}
 		if(Race_if(PM_INCANTIFIER)){
 			u.uconduct.food++;
 			You("drain energy from %s %s.", tintxts[r].txt,
@@ -1581,7 +1588,7 @@ opentin()		/* called during each move whilst opening a tin */
 	    victual.fullwarn = victual.eating = victual.doreset = FALSE;
 		
 		if(tin.tin->corpsenm == PM_JUBJUB_BIRD && tin.tin->blessed){
-			You("consume symmetrical %s", mons[tin.tin->corpsenm].mname);
+			You("consume symmetrical %s.", mons[tin.tin->corpsenm].mname);
 		} else {
 			You("consume %s %s.", tintxts[r].txt,
 				mons[tin.tin->corpsenm].mname);
@@ -2728,7 +2735,8 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		return 0;
 	}
 	
-	if(herbivorous(youracedata) && !carnivorous(youracedata) && levl[u.ux][u.uy].typ == GRASS && can_reach_floor() &&
+	if(herbivorous(youracedata) && !carnivorous(youracedata) && !Race_if(PM_INCANTIFIER)
+		&& levl[u.ux][u.uy].typ == GRASS && can_reach_floor() &&
 		/* if we can't touch floor objects then use invent food only */
 #ifdef STEED
 			!u.usteed /* can't eat off floor while riding */
@@ -2764,7 +2772,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    You_cant("eat %s you're wearing.", something);
 	    return 0;
 	}
-	if((otmp->otyp == CORPSE || (otmp->otyp == TIN && otmp->spe != 1 && otmp->corpsenm > NON_PM)) && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
+	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
 		&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
 	){
 		char buf[BUFSZ];

@@ -2487,16 +2487,8 @@ E boolean NDECL(dahlverNarVis);
 E int FDECL(could_seduce, (struct monst *, struct monst *, struct attack *));
 #ifdef SEDUCE
 E int FDECL(doseduce, (struct monst *));
-E int FDECL(dololthseduce, (struct monst *));
-E int FDECL(dolilithseduce, (struct monst *));
-E int FDECL(dobelialseduce, (struct monst *));
-E int FDECL(domlcseduce, (struct monst *));
-E int FDECL(dograzseduce, (struct monst *));
 E int FDECL(dosflseduce, (struct monst *));
 E int FDECL(dopaleseduce, (struct monst *));
-E int FDECL(dololthseduce, (struct monst *));
-E int FDECL(dobelialseduce, (struct monst *));
-E int FDECL(dograzseduce, (struct monst *));
 E int FDECL(dotent, (struct monst *, int));
 #endif
 
@@ -3074,7 +3066,7 @@ E int NDECL(aeshbon);
 E void FDECL(were_change, (struct monst *));
 E int FDECL(counter_were,(int));
 E void FDECL(new_were, (struct monst *));
-E int FDECL(were_summon, (struct permonst *,BOOLEAN_P,int *,char *));
+E int FDECL(were_summon, (struct monst *,int *,char *));
 E void NDECL(you_were);
 E void FDECL(you_unwere, (BOOLEAN_P));
 
@@ -3239,6 +3231,7 @@ E boolean FDECL(obj_silver_searing, (struct obj *));
 E boolean FDECL(obj_jade_searing, (struct obj *));
 E int FDECL(hatesobjdmg, (struct monst *, struct obj *));
 E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
+E boolean FDECL(miss_via_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 E int FDECL(destroy_item, (struct monst *, int, int));
 E boolean FDECL(wearing_dragon_armor, (struct monst *, int));
 

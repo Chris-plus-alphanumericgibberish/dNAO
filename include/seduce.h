@@ -18,21 +18,25 @@
 #define SEDU_SUCKSOUL      -101
 #define SEDU_STEALONE      -102
 #define SEDU_STEALEIGHT    -103
+#define SEDU_DAMAGECLK     -104
 /* Lolth-specific */
-#define SEDU_VAMP            -6
-#define SEDU_POISONBITE      -7
+#define SEDU_LOLTHATTACK	 -6
+#define SEDU_VAMP            -7
+#define SEDU_POISONBITE      -8
 /* Malcanthet-specifc */
-#define SEDU_BURDEN          -8
-#define SEDU_CURSE           -9
-#define SEDU_GREMLIN        -10
-#define SEDU_PARALYZE       -11
+#define SEDU_BURDEN          -9
+#define SEDU_CURSE          -10
+#define SEDU_GREMLIN        -11
+#define SEDU_PARALYZE       -12
 /* Grazzt-specific */
-#define SEDU_STEALSIX       -12
-#define SEDU_BADWEAP        -13
-#define SEDU_BADHAT         -14
-#define SEDU_BADBOOTS       -15
-#define SEDU_BADAMU         -16
-#define SEDU_PUNISH         -17
+#define SEDU_STEALSIX       -13
+#define SEDU_BADWEAP        -14
+#define SEDU_BADHAT         -15
+#define SEDU_BADBOOTS       -16
+#define SEDU_BADAMU         -17
+#define SEDU_PUNISH         -18
+/* shared between Malcanthet and Graz'zt */
+#define SEDU_JEALOUS		-19
 
 /* Good effects are positive */
 /* standard foocubi (enchanced for some uniques) */
@@ -43,6 +47,7 @@
 #define SEDU_RESTOREHP        5
 /* clockwork-only */
 #define SEDU_WIND           101
+#define SEDU_NOTHING        102
 /* uniques-specific */
 #define SEDU_WISH             6
 #define SEDU_BLESS            7

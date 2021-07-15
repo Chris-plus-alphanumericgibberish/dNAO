@@ -1344,6 +1344,9 @@ boolean be_peaceful;
 	rem_mx(mtmp, MX_EDOG);
 	mtmp->mtame = 0;
 	mtmp->mpeaceful = be_peaceful;
+	if (u.usteed == mtmp) {
+		dismount_steed(DISMOUNT_THROWN);
+	}
 	newsym(mtmp->mx, mtmp->my);
 	return;
 }

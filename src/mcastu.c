@@ -2597,10 +2597,12 @@ int tary;
 					dmg = (dmg + 1) / 2;
 			}
 
-			(void)burnarmor(mdef);
-			destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
-			destroy_item(mdef, POTION_CLASS, AD_FIRE);
-			destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			if (!InvFire_res(mdef)) {
+				(void)burnarmor(mdef);
+				destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			}
 
 			if (youdef) {
 				burn_away_slime();

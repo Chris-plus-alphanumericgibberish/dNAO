@@ -6,10 +6,19 @@
 STATIC_DCL void FDECL(mayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(lrdmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(mlcmayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL void FDECL(mayberem_common, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(sflmayberem, (struct obj *, const char *, BOOLEAN_P));
 STATIC_DCL void FDECL(palemayberem, (struct obj *, const char *, BOOLEAN_P));
+STATIC_DCL boolean FDECL(sedu_helpless, (struct monst *));
+STATIC_DCL int FDECL(sedu_refuse, (struct monst *));
+STATIC_DCL boolean FDECL(sedu_roll, (struct monst *, boolean));
+STATIC_DCL void FDECL(sedu_payment, (struct monst *));
 STATIC_DCL void FDECL(sedu_undress, (struct monst *));
 STATIC_DCL void FDECL(sedu_adornment_ring, (struct monst *));
+STATIC_DCL void FDECL(sedu_knife, (struct monst *));
+STATIC_DCL void FDECL(sedu_wornout, (struct monst *, boolean));
+STATIC_DCL void FDECL(sedu_timestandsstill, (struct monst *, boolean));
+STATIC_DCL int FDECL(sedu_select_effect, (struct monst *, boolean));
 STATIC_DCL void FDECL(seduce_effect, (struct monst *, int));
 # endif
 
@@ -92,726 +101,132 @@ struct attack *mattk;
 #ifdef OVLB
 
 #ifdef SEDUCE
-/* Returns 1 if monster teleported */
+
+/* combined seduction function for most creatures */
+/* Pale Night is entirely outsourced to its own function */
+/* returns 1 if monster should stop attacking */
 int
 doseduce(mon)
-register struct monst *mon;
+struct monst * mon;
 {
-	if (mon->mcan || mon->mspec_used) {
-		pline("%s acts as though %s has got a %sheadache.",
-				Monnam(mon), mhe(mon),
-				mon->mcan ? "severe " : "");
-		return 0;
+	boolean helpless;
+	boolean badeffect;
+	int effect;
+
+	/* their identity is revealed! */
+	if(mon->mappearance) {
+		/* the "real delusions" madness could have poly'd foocubus, check that we aren't being seduced by a dragon */
+		int oldmtyp = mon->mtyp;
+		seemimic_ambush(mon);
+		if (oldmtyp != mon->mtyp)
+			return 0;
 	}
 
-	if (unconscious()) {
-		pline("%s seems dismayed at your lack of response.",
-				Monnam(mon));
-		return 0;
-	}
-
-	if (Blind) pline("It caresses you...");
-	else You_feel("very attracted to %s.", mon_nam(mon));
-
-	sedu_adornment_ring(mon);
-
-	sedu_undress(mon);
-
-	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-		verbalize("You're such a %s; I wish...",
-				flags.female ? "sweet lady" : "nice guy");
-		if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
-		if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
+	/* Pale Night is too different to use the common shared seduce, bleh */
+	if (mon->mtyp == PM_PALE_NIGHT) {
+		dopaleseduce(mon);
 		return 1;
 	}
-	if (u.ualign.type == A_CHAOTIC)
-		adjalign(1);
 
-	/* by this point you have discovered mon's identity, blind or not... */
-	if(!uclockwork){
-		pline("Time stands still while you and %s lie in each other's arms...",
-			noit_mon_nam(mon));
-	}
-	else{
-		pline("You and %s lie down together...",
-			noit_mon_nam(mon));
-	}
-	if (Sterile || rn2(35) > ACURR(A_CHA) + ACURR(A_INT)) {
-		/* Don't bother with mspec_used here... it didn't get tired! */
-		if (uclockwork) {
-			/* message */
-			pline("%s looks briefly confused...",
-				noit_Monnam(mon));
-			/* effect */
-			if (!rn2(5) && !Drain_resistance)
-				seduce_effect(mon, SEDU_SUCKSOUL);
-			else
-				seduce_effect(mon, SEDU_STEALONE);
-		}
-		else {
-			/* no setup message */
-			/* just effect */
-			const int bad_sedu_effects[] = {
-				SEDU_DRAINEN,
-				SEDU_DUMPS,
-				SEDU_DULLSENSES,
-				SEDU_DRAINLVL,
-				SEDU_EXHAUSTED
-			};
-			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
-		}
-			
-	} else {
-		mon->mspec_used = rnd(100); /* monster is worn out */
-		if (uclockwork) {
-			/* message */
-			pline("Time stands still while you and %s lie in each other's arms...",
-				noit_mon_nam(mon));
-			/* effect */
-			if (!rn2(5))
-				seduce_effect(mon, SEDU_EDUCATE);
-			else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER))
-				seduce_effect(mon, SEDU_WIND);
-			else {
-				pline("%s looks happy, but confused.",
-					noit_Monnam(mon));
-			}
-		}
-		else {
-			/* message */
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
-			/* effect */
-			const int good_sedu_effects[] = {
-				SEDU_GAINEN,
-				SEDU_GOODENOUGH,
-				SEDU_REMEMBER,
-				SEDU_EDUCATE,
-				SEDU_RESTOREHP
-			};
-			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
-		}
-	}
-
-	if (mon->mtame) /* don't charge */ ;
-	else if (rn2(20) < ACURR(A_CHA)) {
-		pline("%s demands that you pay %s, but you refuse...",
-			noit_Monnam(mon),
-			Blind ? (mon->female ? "her" : "him") : mhim(mon));
-	} else if (u.umonnum == PM_LEPRECHAUN)
-		pline("%s tries to take your money, but fails...",
-				noit_Monnam(mon));
-	else {
-#ifndef GOLDOBJ
-		long cost;
-
-		if (u.ugold > (long)LARGEST_INT - 10L)
-			cost = (long) rnd(LARGEST_INT) + 500L;
-		else
-			cost = (long) rnd((int)u.ugold + 10) + 500L;
-		if (mon->mpeaceful) {
-			cost /= 5L;
-			if (!cost) cost = 1L;
-		}
-		if (cost > u.ugold) cost = u.ugold;
-		if (!cost) verbalize("It's on the house!");
-		else {
-			pline("%s takes %ld %s for services rendered!",
-				noit_Monnam(mon), cost, currency(cost));
-			u.ugold -= cost;
-			mon->mgold += cost;
-			flags.botl = 1;
-		}
-#else
-		long cost;
-				long umoney = money_cnt(invent);
-
-		if (umoney > (long)LARGEST_INT - 10L)
-			cost = (long) rnd(LARGEST_INT) + 500L;
-		else
-			cost = (long) rnd((int)umoney + 10) + 500L;
-		if (mon->mpeaceful) {
-			cost /= 5L;
-			if (!cost) cost = 1L;
-		}
-		if (cost > umoney) cost = umoney;
-		if (!cost) verbalize("It's on the house!");
-		else { 
-			pline("%s takes %ld %s for services rendered!",
-				noit_Monnam(mon), cost, currency(cost));
-					money2mon(mon, cost);
-			flags.botl = 1;
-		}
-#endif
-	}
-	if (!rn2(25)) set_mcan(mon, TRUE); /* monster is worn out */
-	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-	return 1;
-}
-
-int
-dololthseduce(mon)
-register struct monst *mon;
-{
-	boolean helpless = FALSE;
-
-	if (unconscious()) {
-		helpless = TRUE;
-		pline("%s seems pleased at your lack of response.",
-				Monnam(mon));
-	}
-
-	if (Blind) pline("It caresses you...");
-	else You_feel("very attracted to %s.", mon_nam(mon));
-
-	sedu_adornment_ring(mon);
-
-	sedu_undress(mon);
-
-	if (u.ualign.type == A_CHAOTIC)
-		adjalign(1);
-
-	/* by this point you have discovered mon's identity, blind or not... */
-	if (helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_WIS)) {
-		struct trap *ttmp2;
-		/* Don't bother with mspec_used here... it didn't get tired! */
-	LolthAttacks:
-		if (Blind) You("suddenly find yourself in the arms of a giant spider!");
-		else pline("She suddenly becomes a giant spider and seizes you with her legs!");
-		//Lolth bad
-		if ((ttmp2 = maketrap(u.ux, u.uy, WEB))) {
-			pline("She wraps you tight in her webs!");
-			dotrap(ttmp2, NOWEBMSG);
-#ifdef STEED
-			if (u.usteed && u.utrap) {
-				/* you, not steed, are trapped */
-				dismount_steed(DISMOUNT_FELL);
-			}
-#endif
-		}
-		if (uclockwork){
-			pline("%s pauses in momentary confusion...",
-				noit_Monnam(mon));
-			if (rn2(5) && !Drain_resistance){
-				seduce_effect(mon, SEDU_SUCKSOUL);
-			}
-			else {
-				seduce_effect(mon, SEDU_STEALEIGHT);
-			}
-		}
-		else {
-			int tmp;
-			pline("After wrapping you up, she bites into your helpless form!");
-			exercise(A_STR, FALSE);
-			tmp = d(6, 8);
-			if (Half_physical_damage) tmp = (tmp + 1) / 2;
-			losehp(tmp, "Lolth's bite", KILLED_BY);
-
-			seduce_effect(mon, rn2(2) ? SEDU_VAMP : SEDU_POISONBITE);
-		}
-		return 1;
-	} else {
-		//Lolth good
-		if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-			if(flags.female){
-				verbalize("You're such a sweet lady, I wish you were more open to new things...");
-				if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
-				if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-				return 1;
-			} else {
-				verbalize("How dare you refuse me!");
-				goto LolthAttacks;
-			}
-		}
-		mon->mspec_used = rnd(100); /* monster is worn out */
-
+	/* monster may be worn out (with an exception for the avatar of lolth?) */
+	if ((mon->mcan || mon->mspec_used) && !(
+		mon->mtyp == PM_AVATAR_OF_LOLTH
+	)) {
 		/* message */
-		if(Blind) pline("An elf-maid clasps herself to you!");
-		else pline("She becomes a beautiful dark-skinned elf-maid!");
-		if(!uclockwork){
-			pline("Time stands still while you lie in each other's arms...");
-		} else{
-			pline("You and %s lie down together...",
-				noit_mon_nam(mon));
-			pline("Time stands still while you and %s lie in each other's arms...",
-				noit_mon_nam(mon));
-		}
-		/* effect */
-		const int good_sedu_effects[] = {
-			SEDU_WISH,
-			SEDU_BLESS,
-			SEDU_EDUCATE,
-			SEDU_RESTOREHP
-		};
-		seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
-	}
-	if (!rn2(25)) set_mcan(mon, TRUE); /* monster is worn out */
-	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-	return 1;
-}
-
-int
-dolilithseduce(mon)
-struct monst *mon;
-{
-	if (mon->mcan || mon->mspec_used) {
-		pline("%s is uninterested in you.", Monnam(mon));
-		return 0;
-	}
-
-	if (unconscious()) {
-		pline("%s seems bored by your lack of response.",
-			  Monnam(mon));
-		return 0;
-	}
-
-	if (Blind) pline("It caresses you...");
-	else You_feel("very attracted to %s.", mon_nam(mon));
-
-	sedu_adornment_ring(mon);
-
-	sedu_undress(mon);
-
-	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-		verbalize("You're such a %s; I wish...",
-				flags.female ? "sweet lady" : "nice guy");
-		if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-		return 1;
-	}
-	/* by this point you have discovered mon's identity, blind or not... */
-	if(!uclockwork){
-		pline("Time stands still while you and %s lie in each other's arms...",
-			noit_mon_nam(mon));
-	}
-	else{
-		pline("You and %s lie down together...",
-			noit_mon_nam(mon));
-	}
-	if (Sterile || rn2(139) > ACURR(A_CHA) + ACURR(A_INT)) {
-		if (uclockwork){
-			pline("%s looks briefly confused...",
-				noit_Monnam(mon));
-			if (!rn2(5) && !Drain_resistance){
-				seduce_effect(mon, SEDU_SUCKSOUL);
-			}
-			else {
-				seduce_effect(mon, SEDU_STEALONE);
-			}
+		if (mon->mtyp == PM_INCUBUS || mon->mtyp == PM_SUCCUBUS) {
+			pline("%s acts as though %s has got a %sheadache.",
+					Monnam(mon), mhe(mon),
+					mon->mcan ? "severe " : "");
 		}
 		else {
-			/* message */
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-			/* just effect */
-			const int bad_sedu_effects[] = {
-				SEDU_DRAINEN,
-				SEDU_DUMPS,
-				SEDU_DULLSENSES,
-				SEDU_DRAINLVL,
-				SEDU_EXHAUSTED
-			};
-			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
-
+			pline("%s is uninterested in you.", Monnam(mon));
 		}
-		const char * knife = uclockwork ? "knife to the gears" : "knife to the ribs";
-		if (ACURR(A_CHA) + rn1(4, 3) < 24){
-			pline("Before you can get up, %s slips a knife %s!",
-				noit_Monnam(mon), uclockwork ? "into your gears" : "between your ribs");
-			if (Half_physical_damage) losehp(rn1(5, 6), knife, KILLED_BY);
-			else losehp(rn1(10, 6), knife, KILLED_BY);
-		}
-		else{
-			pline("As you get up, %s tries to knife you, but is too distracted to do it properly!",
-			noit_Monnam(mon));
-			if (Half_physical_damage) losehp(rn1(1, 6), knife, KILLED_BY);
-			else losehp(rn1(2, 6), knife, KILLED_BY);
-		}
-		mon->mspec_used = rnd(13)+3;
-		return 0; /* keeps making attacks! */
-	} else {
-		mon->mspec_used = rnd(39)+13;
-		if (uclockwork) {
-			pline("Time stands still while you and %s lie in each other's arms...",
-				noit_mon_nam(mon));
-			if(!rn2(5)){
-				seduce_effect(mon, SEDU_EDUCATE);
-			} else if(u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER)){
-				seduce_effect(mon, SEDU_WIND);
-			} else {
-				pline("%s looks happy, but confused.",
-					noit_Monnam(mon));
-			}
-		}
-		else {
-			/* message */
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
-			/* effect */
-			const int good_sedu_effects[] = {
-				SEDU_GAINEN,
-				SEDU_GOODENOUGH,
-				SEDU_REMEMBER,
-				SEDU_EDUCATE,
-				SEDU_RESTOREHP
-			};
-			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
-		}
-	}
-	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-	return 1;
-}
-
-int
-dobelialseduce(mon)
-struct monst *mon;
-{
-	if (mon->mcan || mon->mspec_used) {
-		pline("%s is uninterested in you.", Monnam(mon));
+		/* return early */
 		return 0;
 	}
 
-	if (unconscious()) {
-		pline("%s seems bored by your lack of response.",
-			  Monnam(mon));
+	/* response to player being unconscious */
+	if ((helpless = unconscious()) && sedu_helpless(mon)) {
 		return 0;
 	}
 
-	if (Blind) pline("It caresses you...");
-	else You_feel("very attracted to %s.", mon_nam(mon));
-
-	sedu_adornment_ring(mon);
-
-	sedu_undress(mon);
-
-	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-		verbalize("You're such a %s; I wish...",
-				flags.female ? "sweet lady" : "nice guy");
-		if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-		return 1;
-	}
-	/* by this point you have discovered mon's identity, blind or not... */
-	if(!uclockwork){
-		pline("Time stands still while you and %s lie in each other's arms...",
-			noit_mon_nam(mon));
-	}
-	else{
-		pline("You and %s lie down together...",
-			noit_mon_nam(mon));
-	}
-	if (Sterile || rn2(139) > ACURR(A_CHA) + ACURR(A_INT)) {
-		if (uclockwork){
-			pline("%s looks briefly confused...",
-				noit_Monnam(mon));
-			if (!rn2(5) && !Drain_resistance){
-				seduce_effect(mon, SEDU_SUCKSOUL);
-			}
-			else {
-				seduce_effect(mon, SEDU_STEALONE);
-			}
-		}
-		else {
-			/* message */
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-			/* just effect */
-			const int bad_sedu_effects[] = {
-				SEDU_DRAINEN,
-				SEDU_DUMPS,
-				SEDU_DULLSENSES,
-				SEDU_DRAINLVL,
-				SEDU_EXHAUSTED
-			};
-			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
-
-		}
-		const char * knife = uclockwork ? "knife to the gears" : "knife to the ribs";
-		if (ACURR(A_CHA) + rn1(4, 3) < 24){
-			pline("Before you can get up, %s slips a knife %s!",
-				noit_Monnam(mon), uclockwork ? "into your gears" : "between your ribs");
-			if (Half_physical_damage) losehp(rn1(5, 6), knife, KILLED_BY);
-			else losehp(rn1(10, 6), knife, KILLED_BY);
-		}
-		else{
-			pline("As you get up, %s tries to knife you, but is too distracted to do it properly!",
-				noit_Monnam(mon));
-			if (Half_physical_damage) losehp(rn1(1, 6), knife, KILLED_BY);
-			else losehp(rn1(2, 6), knife, KILLED_BY);
-		}
-		mon->mspec_used = rnd(13) + 3;
-		return 0; /* keeps making attacks! */
+	/* fluff message */
+	if (TRUE) {
+		if (Blind) pline("It caresses you...");
+		else You_feel("very attracted to %s.", mon_nam(mon));
 	}
 	else {
-		mon->mspec_used = rnd(39) + 13;
-		if (uclockwork) {
-			pline("Time stands still while you and %s lie in each other's arms...",
-				noit_mon_nam(mon));
-			if (!rn2(5)){
-				seduce_effect(mon, SEDU_EDUCATE);
-			}
-			else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER)){
-				seduce_effect(mon, SEDU_WIND);
-			}
-			else {
-				pline("%s looks happy, but confused.",
-					noit_Monnam(mon));
-			}
-		}
-		else {
-			/* message */
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
-			/* effect */
-			const int good_sedu_effects[] = {
-				SEDU_GAINEN,
-				SEDU_GOODENOUGH,
-				SEDU_REMEMBER,
-				SEDU_EDUCATE,
-				SEDU_RESTOREHP
-			};
-			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
-		}
-	}
-	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-	return 1;
-}
-
-int
-domlcseduce(mon)
-register struct monst *mon;
-{
-	boolean helpless = FALSE;
-
-	if (mon->mcan || mon->mspec_used) {
-		pline("%s is uninterested in you.", Monnam(mon));
-		return 0;
+		/* code for unfinished monster, PM_SHAMI_AMOURAE */
+		if (Blind) You_feel("Something grab you...");
+		else pline("%s grabs you.", Monnam(mon));
 	}
 
-	if (unconscious()) {
-//		pline("%s seems annoyed at your lack of response.",
-//			  Monnam(mon));
-			You("are having a strange dream.");
-			helpless = TRUE;
-	}
-
-	if (Blind) pline("It caresses you...");
-	else You_feel("very attracted to %s.", mon_nam(mon));
-
+	/* interact with adornment ring */
 	sedu_adornment_ring(mon);
 
+	/* undress the player */
 	sedu_undress(mon);
 
+	/* roll for good/bad effect */
+	/* happens before sedu_refuse(), as a Lolth bad effect is unrefusable, but a good effect is */
+	badeffect = sedu_roll(mon, helpless);
+
+	/* if the player is still dressed, refuse */	
 	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-		verbalize("How dare you refuse me!");
-		pline("She claws at you!");
-		losehp(d(4, 4), "a jilted paramour", KILLED_BY);
-		if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-		return 1;
+		if (sedu_refuse(mon)) {
+			/* seducer was refused */
+			return 1;
+		}
+		else {
+			/* seducer acts against you */
+			badeffect = TRUE;
+		}
 	}
-	if (u.ualign.type == A_CHAOTIC)
+	else if (u.ualign.type == A_CHAOTIC)
 		adjalign(1);
-	/* by this point you have discovered mon's identity, blind or not... */
-	if(!uclockwork){
-		pline("Time stands still while you and %s lie in each other's arms...",
-			noit_mon_nam(mon));
-	}
-	else{
-		pline("You and %s lie down together...",
-			noit_mon_nam(mon));
-	}
-	if (Sterile || helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_CON) + ACURR(A_INT)) {
-		if (uclockwork) {
-			pline("...but she becomes enraged when she discovers you're mechanical!");
-			verbalize("How dare you trick me!");
-			pline("She attacks your keyhole with her barbed tail!");
-			losehp(d(4, 12), "an enraged demoness", KILLED_BY);
-			morehungry(d(2,12)*10);
-			pline("She claws your face!");
-			losehp(d(4, 4), "an enraged demoness", KILLED_BY);
-			(void) adjattrib(A_CHA, -1*d(2,4), TRUE);
-			AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
-		}
-		else {
-			/* message */
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-			/* effect */
-			const int bad_sedu_effects[] = {
-				SEDU_DRAINEN,
-				SEDU_DUMPS,
-				SEDU_BURDEN,
-				SEDU_DULLSENSES,
-				SEDU_EXHAUSTED,
-				SEDU_CURSE,
-				SEDU_GREMLIN,
-				SEDU_PARALYZE
-			};
-			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
-		}
-		return 1; /* don't rloc, and that was all for our attacks */
-	} else {
-		mon->mspec_used = rnd(39)+13;
-		if (uclockwork) {
-			pline("She becomes very angry when she discovers your mechanical nature.");
-			pline("She claws at you...");
-			losehp(d(4, 4), "an angry paramour", KILLED_BY);
-			pline("...but you manage to distract her before she does serious harm.");
-			
-			/* effect */
-			const int good_sedu_effects[] = {
-				SEDU_PROTECT,
-				SEDU_BLESS,
-				SEDU_LIFEFONT,
-				SEDU_CARRYCAP
-			};
-			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
-		}
-		else {
-			/* message */
-			You("seem to have enjoyed it more than %s...",
-				noit_mon_nam(mon));
 
-			if ((poly_gender()==1) && (ACURR(A_CHA) < rn2(35))){
-				/* jealousy can rob you of a good effect */
-				if (rn2(2) || uarmh){
-					pline("She attacks you with her barbed tail!");
-					losehp(d(4, 12), "a jealous demoness", KILLED_BY);
-				}
-				else{
-					pline("She claws your face!");
-					losehp(d(4, 4), "a jealous demoness", KILLED_BY);
-					(void)adjattrib(A_CHA, -1 * d(2, 4), TRUE);
-					AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
-				}
-			}
-			else {
-				/* good effect */
-				const int good_sedu_effects[] = {
-					SEDU_POISRES,
-					SEDU_ACIDRES,
-					SEDU_SICKRES,
-					SEDU_RAISESTATS,
-					SEDU_PROTECT,
-					SEDU_BLESS,
-					SEDU_LIFEFONT,
-					SEDU_CARRYCAP
-				};
-				seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
-			}
-		}
+	/* select sedu effect */
+	effect = sedu_select_effect(mon, badeffect);
+
+	/* "time stands still" message, or replacement */
+	sedu_timestandsstill(mon, badeffect);
+
+	/* clockworks get a bit harder of a time with Malcanthet */
+	if (mon->mtyp == PM_MALCANTHET && !badeffect && uclockwork) {
+		/* even for a good effect, she attacks you a bit before giving her boon */
+		pline("She becomes very angry when she discovers your mechanical nature.");
+		pline("She claws at you...");
+		losehp(d(4, 4), "an angry paramour", KILLED_BY);
+		pline("...but you manage to distract her before she does serious harm.");
 	}
-	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-	return 1;
-}
 
-int
-dograzseduce(mon)
-register struct monst *mon;
-{
-	boolean helpless = FALSE;
+	/* perform effect */
+	seduce_effect(mon, effect);
 
-	if (mon->mcan || mon->mspec_used) {
-		pline("%s is uninterested in you.", Monnam(mon));
+	/* knife to the ribs -- Belial, Lilith only */
+	if (mon->mtyp == PM_BELIAL || mon->mtyp == PM_MOTHER_LILITH)
+		sedu_knife(mon);
+
+	/* handle payment -- only foocubi */
+	if (mon->mtyp == PM_SUCCUBUS || mon->mtyp == PM_INCUBUS)
+		sedu_payment(mon);
+
+	/* worn out -- set mspec used */
+	sedu_wornout(mon, badeffect);
+
+	/* possibly exit early, skipping teleport and continuing to make attacks! */
+	if (badeffect && (mon->mtyp == PM_BELIAL || mon->mtyp == PM_MOTHER_LILITH))
 		return 0;
-	}
 
-	if (unconscious()) {
-//		pline("%s seems annoyed at your lack of response.",
-//			  Monnam(mon));
-			You("are having a strange dream.");
-			helpless = TRUE;
-	}
-
-	if (Blind) pline("It caresses you...");
-	else You_feel("very attracted to %s.", mon_nam(mon));
-
-	sedu_adornment_ring(mon);
-
-	sedu_undress(mon);
-
-	if (uarm || uarmc || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)) {
-		verbalize("How dare you refuse me!");
-		pline("He punches you!");
-		losehp(d(3, 8), "an enraged paramour", KILLED_BY);
-		if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
-		return 1;
-	}
-	if (u.ualign.type == A_CHAOTIC)
-		adjalign(1);
-	/* by this point you have discovered mon's identity, blind or not... */
-	if(!uclockwork){
-		pline("Time stands still while you and %s lie in each other's arms...",
-			noit_mon_nam(mon));
-	}
-	else{
-		pline("You and %s lie down together...",
-			noit_mon_nam(mon));
-	}
-	if (Sterile || helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_CON) + ACURR(A_INT)) {
-		if (uclockwork) {
-			pline("...he becomes enraged when he discovers you're mechanical!");
-			verbalize("How dare you trick me!");
-			pline("He viciously bites you!");
-			losehp(d(4, 8), "an enraged demon prince", KILLED_BY);
-			(void) adjattrib(A_CHA, -1*d(1,8), TRUE);
-			AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
-			pline("He drips acid into your inner workings!");
-			if(!HAcid_resistance){
-				losehp(d(6, 8), "an enraged demon prince", KILLED_BY);
-				morehungry(d(3,8));
-			}
-		}
-		else {
-			/* message */
-			pline("%s seems to have enjoyed it more than you...",
-				noit_Monnam(mon));
-			/* effect */
-			const int bad_sedu_effects[] = {
-				SEDU_STEALSIX,
-				SEDU_BADWEAP,
-				SEDU_BADHAT,
-				SEDU_BADBOOTS,
-				SEDU_BADAMU,
-				SEDU_PUNISH
-			};
-			seduce_effect(mon, bad_sedu_effects[rn2(SIZE(bad_sedu_effects))]);
-		}
-		return 1; /* don't rloc, that was our only attack */
-	} else {
-		mon->mspec_used = rnd(39)+13;
-		/* message */
-		You("seem to have enjoyed it more than %s...",
-			noit_mon_nam(mon));
-
-		if((poly_gender()==0) && (ACURR(A_CHA) < rn2(35))) {
-			/* jealousy may rob you of a good effect */
-			if(rn2(2) || uarmh || HAcid_resistance){
-				pline("He viciously bites you!");
-				losehp(d(4, 8), "a jealous demon prince", KILLED_BY);
-			}
-			else{
-				pline("He drips acid on your face!");
-				losehp(d(6, 8), "a jealous demon prince", KILLED_BY);
-				(void) adjattrib(A_CHA, -1*d(1,8), TRUE);
-				AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
-			}
-		}
-		else {
-			/* good effect */
-			const int good_sedu_effects[] = {
-				SEDU_WISH,
-				SEDU_GENOCIDE,
-				SEDU_SIXMAGICS,
-				SEDU_SIXTRUTHS,
-				SEDU_SIXFOLLOWERS,
-				SEDU_LIFESAVING
-			};
-			seduce_effect(mon, good_sedu_effects[rn2(SIZE(good_sedu_effects))]);
-		}
-	}
+	/* teleport */
 	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
+
 	return 1;
 }
 
+/* monster that uses this is still unwritten
+ * and so this hasn't been totally integrated into
+ * the reworked combined seduce */
 int
 dosflseduce(mon)
 register struct monst *mon;
@@ -1393,69 +808,17 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	char qbuf[QBUFSZ];
-
-	if (!obj || !obj->owornmask) return;
-
-	if (rn2(20) < ACURR(A_CHA)) {
-		Sprintf(qbuf,"\"Shall I remove your %s, %s?\"",
-			str,
-			(!rn2(2) ? "lover" : !rn2(2) ? "dear" : "sweetheart"));
-		if (yn(qbuf) == 'n') return;
-	} else {
-		char hairbuf[BUFSZ];
-
-		Sprintf(hairbuf, "let me run my fingers through your %s",
-			body_part(HAIR));
-		verbalize("Take off your %s; %s.", str,
-			(obj == uarm)  ? "let's get a little closer" :
-			(obj == uarmc || obj == uarms) ? "it's in the way" :
-			(obj == uarmf) ? "let me rub your feet" :
-			(obj == uarmg) ? "they're too clumsy" :
-#ifdef TOURIST
-			(obj == uarmu) ? "let me massage you" :
-#endif
-			/* obj == uarmh */
-			hairbuf);
-	}
-	remove_worn_item(obj, TRUE);
+	mayberem_common(obj, str, !(rn2(20) < ACURR(A_CHA)));
 }
+
 STATIC_OVL void
 lrdmayberem(obj, str, helpless)
 register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	char qbuf[QBUFSZ];
-
-	if (!obj || !obj->owornmask) return;
-
-	if (rn2(60) < ACURR(A_CHA)) {
-		Sprintf(qbuf,"\"Shall I remove your %s, %s?\"",
-			str,
-			(!rn2(2) ? "lover" : !rn2(2) ? "dear" : "sweetheart"));
-		if (yn(qbuf) == 'n') return;
-	} else {
-		char hairbuf[BUFSZ];
-
-		Sprintf(hairbuf, "let me run my fingers through your %s",
-			body_part(HAIR));
-		verbalize("Take off your %s; %s.", str,
-			(obj == uarm)  ? "let's get a little closer" :
-			(obj == uarmc || obj == uarms) ? "it's in the way" :
-			(obj == uarmf) ? "let me rub your feet" :
-			(obj == uarmg) ? "they're too clumsy" :
-#ifdef TOURIST
-			(obj == uarmu) ? "let me massage you" :
-#endif
-			/* obj == uarmh */
-			hairbuf);
-	}
-	remove_worn_item(obj, TRUE);
+	mayberem_common(obj, str, !(rn2(60) < ACURR(A_CHA)));
 }
-//#endif  /* SEDUCE */
-
-//#endif /* OVLB */
 
 STATIC_OVL void
 mlcmayberem(obj, str, helpless)
@@ -1463,11 +826,20 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
+	mayberem_common(obj, str, helpless || !(rn2(60) < ACURR(A_CHA)));
+}
+
+STATIC_OVL void
+mayberem_common(obj, str, dontask)
+register struct obj *obj;
+const char *str;
+boolean dontask;
+{
 	char qbuf[QBUFSZ];
 
 	if (!obj || !obj->owornmask) return;
 
-	if (!helpless && rn2(60) < ACURR(A_CHA)) {
+	if (!dontask) {
 		Sprintf(qbuf,"\"Shall I remove your %s, %s?\"",
 			str,
 			(!rn2(2) ? "lover" : !rn2(2) ? "dear" : "sweetheart"));
@@ -1552,12 +924,180 @@ boolean helpless;
 	}
 }
 
+
+/* prints a message about the player being unconscious */
+/* returns TRUE if seducer stops */
+boolean
+sedu_helpless(mon)
+struct monst * mon;
+{
+	/* seducers that will return early */
+	if (mon->mtyp == PM_INCUBUS || mon->mtyp == PM_SUCCUBUS) {
+		pline("%s seems dismayed at your lack of response.", Monnam(mon));
+		return 1;
+	}
+	else if (mon->mtyp == PM_MOTHER_LILITH || mon->mtyp == PM_BELIAL) {
+		pline("%s seems bored by your lack of response.", Monnam(mon));
+		return 1;
+	}
+	/* seducers that will continue */
+	else if (mon->mtyp == PM_AVATAR_OF_LOLTH) {
+		pline("%s seems pleased at your lack of response.", Monnam(mon));
+	}
+	else if (mon->mtyp == PM_GRAZ_ZT || mon->mtyp == PM_MALCANTHET) {
+		You("are having a strange dream.");
+	}
+	/*
+	else if (mon->mtyp == PM_SHAMI_AMOURAE) {
+		You("are having a horrible dream.");
+	}
+	*/
+	return 0;
+}
+
+/* returns 1 if mon tried teleporting after being refused, ending sedu */
+/* returns 0 if monster should continue sedu, and give a bad effect */
+int
+sedu_refuse(mon)
+struct monst * mon;
+{
+	switch(mon->mtyp) {
+		case PM_AVATAR_OF_LOLTH:
+				if(flags.female){
+					verbalize("You're such a sweet lady, I wish you were more open to new things...");
+					if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
+				} else {
+					verbalize("How dare you refuse me!");
+					return 0; /* don't fall down to the general "teleport and return 1" case */
+				}
+			break;
+		case PM_MALCANTHET:
+				verbalize("How dare you refuse me!");
+				pline("She claws at you!");
+				losehp(d(4, 4), "a jilted paramour", KILLED_BY);
+			break;
+		case PM_GRAZ_ZT:
+				verbalize("How dare you refuse me!");
+				pline("He punches you!");
+				losehp(d(3, 8), "an enraged paramour", KILLED_BY);
+			break;
+		/*
+		case PM_SHAMI_AMOURAE:
+				verbalize("You can't resist forever!");
+				pline("She claws at you!");
+				losehp(d(4, 10), "a jilted paramour", KILLED_BY);
+			return 1; // don't attempt to teleport
+		*/
+		case PM_INCUBUS:
+		case PM_SUCCUBUS:
+		case PM_MOTHER_LILITH:
+		case PM_BELIAL:
+		default:
+				verbalize("You're such a %s; I wish...",
+					flags.female ? "sweet lady" : "nice guy");
+				/* unbind Enki. (unless you refused a demon lord) */
+				if (!is_ndemon(mon->data))
+					if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
+			break;
+	}
+	
+	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
+	return 1;
+}
+
+/* returns TRUE if your roll doesn't beat the monster and you should get a bad sedu effect */
+boolean
+sedu_roll(mon, helpless)
+struct monst * mon;
+boolean helpless;
+{
+	switch(mon->mtyp) {
+		case PM_AVATAR_OF_LOLTH:
+			return (helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_WIS));
+		case PM_MOTHER_LILITH:
+		case PM_BELIAL:
+			return (Sterile || rn2(139) > ACURR(A_CHA) + ACURR(A_INT));
+		case PM_MALCANTHET:
+		case PM_GRAZ_ZT:
+			return (Sterile || helpless || rn2(120) > ACURR(A_CHA) + ACURR(A_CON) + ACURR(A_INT));
+		/*
+		case PM_SHAMI_AMOURAE:
+			return (helpless || (25 + rn2(100)) > (ACURR(A_CHA) + ACURR(A_STR)));
+		*/
+		case PM_INCUBUS:
+		case PM_SUCCUBUS:
+		default:
+			return (Sterile || rn2(35) > ACURR(A_CHA) + ACURR(A_INT));
+	}
+}
+
+void
+sedu_payment(mon)
+struct monst * mon;
+{
+	if (mon->mtame) {
+		/* don't charge */
+		return;
+	}
+
+	if (rn2(20) < ACURR(A_CHA)) {
+		pline("%s demands that you pay %s, but you refuse...",
+			noit_Monnam(mon),
+			Blind ? (mon->female ? "her" : "him") : mhim(mon));
+	} else if (u.umonnum == PM_LEPRECHAUN)
+		pline("%s tries to take your money, but fails...",
+				noit_Monnam(mon));
+	else {
+#ifndef GOLDOBJ
+		long cost;
+
+		if (u.ugold > (long)LARGEST_INT - 10L)
+			cost = (long) rnd(LARGEST_INT) + 500L;
+		else
+			cost = (long) rnd((int)u.ugold + 10) + 500L;
+		if (mon->mpeaceful) {
+			cost /= 5L;
+			if (!cost) cost = 1L;
+		}
+		if (cost > u.ugold) cost = u.ugold;
+		if (!cost) verbalize("It's on the house!");
+		else {
+			pline("%s takes %ld %s for services rendered!",
+				noit_Monnam(mon), cost, currency(cost));
+			u.ugold -= cost;
+			mon->mgold += cost;
+			flags.botl = 1;
+		}
+#else
+		long cost;
+				long umoney = money_cnt(invent);
+
+		if (umoney > (long)LARGEST_INT - 10L)
+			cost = (long) rnd(LARGEST_INT) + 500L;
+		else
+			cost = (long) rnd((int)umoney + 10) + 500L;
+		if (mon->mpeaceful) {
+			cost /= 5L;
+			if (!cost) cost = 1L;
+		}
+		if (cost > umoney) cost = umoney;
+		if (!cost) verbalize("It's on the house!");
+		else { 
+			pline("%s takes %ld %s for services rendered!",
+				noit_Monnam(mon), cost, currency(cost));
+					money2mon(mon, cost);
+			flags.botl = 1;
+		}
+#endif
+	}
+}
+
 void
 sedu_undress(mon)
 struct monst * mon;
 {
 	/* check no-clothes case */
-	if (!uarmc && !uarmf && !uarmg && !uarms && !uarmh
+	if (!uarm && !uarmc && !uarmf && !uarmg && !uarms && !uarmh
 #ifdef TOURIST
 		&& !uarmu
 #endif
@@ -1792,6 +1332,217 @@ struct monst * mon;
 	return;
 }
 
+/* some monsters try to knife you, how rude */
+void
+sedu_knife(mon)
+struct monst * mon;
+{
+	const char * knife = uclockwork ? "knife to the gears" : "knife to the ribs";
+	if (ACURR(A_CHA) + rn1(4, 3) < 24){
+		pline("Before you can get up, %s slips a knife %s!",
+			noit_Monnam(mon), uclockwork ? "into your gears" : "between your ribs");
+		if (Half_physical_damage) losehp(rn1(5, 6), knife, KILLED_BY);
+		else losehp(rn1(10, 6), knife, KILLED_BY);
+	}
+	else{
+		pline("As you get up, %s tries to knife you, but is too distracted to do it properly!",
+		noit_Monnam(mon));
+		if (Half_physical_damage) losehp(rn1(1, 6), knife, KILLED_BY);
+		else losehp(rn1(2, 6), knife, KILLED_BY);
+	}
+	return;
+}
+
+/* sets mspecused */
+void
+sedu_wornout(mon, badeffect)
+struct monst * mon;
+boolean badeffect;
+{
+	switch(mon->mtyp)
+	{
+		case PM_BELIAL:
+		case PM_MOTHER_LILITH:
+			if (!badeffect)
+				mon->mspec_used = rnd(39) + 13;
+			else
+				mon->mspec_used = rnd(13) + 3;
+			break;
+
+		case PM_MALCANTHET:
+		case PM_GRAZ_ZT:
+			if (!badeffect)
+				mon->mspec_used = rnd(39)+13;
+			break;
+
+		case PM_AVATAR_OF_LOLTH:
+		default:
+			if (!badeffect)
+				mon->mspec_used = rnd(100);
+			if (!rn2(25))
+				mon->mcan = 1;
+			break;
+	}
+	return;
+}
+
+/* prints a message */
+void
+sedu_timestandsstill(mon, badeffect)
+struct monst * mon;
+boolean badeffect;
+{
+
+	/* lolth transforms */
+	if (mon->mtyp == PM_AVATAR_OF_LOLTH) {
+		if (badeffect) {
+			if (Blind) You("suddenly find yourself in the arms of a giant spider!");
+			else pline("She suddenly becomes a giant spider and seizes you with her legs!");
+		}
+		else {
+			if(Blind) pline("An elf-maid clasps herself to you!");
+			else pline("She becomes a beautiful dark-skinned elf-maid!");
+		}
+	}
+	else {
+		/* line 1 */
+		if(!uclockwork){
+			pline("Time stands still while you and %s lie in each other's arms...",
+				noit_mon_nam(mon));
+		}
+		else{
+			pline("You and %s lie down together...",
+				noit_mon_nam(mon));
+		}
+		/* line 2 */
+		if (badeffect) {
+			if (uclockwork) {
+				pline("%s looks briefly confused...",
+					noit_Monnam(mon));
+			}
+		}
+		else {
+			if (uclockwork)
+				pline("Time stands still while you and %s lie in each other's arms...",
+					noit_mon_nam(mon));
+			else
+				You("seem to have enjoyed it more than %s...",
+					noit_mon_nam(mon));
+		}
+	}
+}
+
+int
+sedu_select_effect(mon, badeffect)
+struct monst * mon;
+boolean badeffect;
+{
+	if (badeffect) {
+		switch(mon->mtyp) {
+			case PM_AVATAR_OF_LOLTH:
+				return SEDU_LOLTHATTACK;
+			case PM_MALCANTHET:
+				if(uclockwork)
+					return SEDU_DAMAGECLK;
+				switch(rn2(8)){
+					case 0: return SEDU_DRAINEN;
+					case 1: return SEDU_DUMPS;
+					case 2: return SEDU_BURDEN;
+					case 3: return SEDU_DULLSENSES;
+					case 4: return SEDU_EXHAUSTED;
+					case 5: return SEDU_CURSE;
+					case 6: return SEDU_GREMLIN;
+					case 7: return SEDU_PARALYZE;
+				}
+			case PM_GRAZ_ZT:
+				if(uclockwork)
+					return SEDU_DAMAGECLK;
+				switch(rn2(6)){
+					case 0: return SEDU_STEALSIX;
+					case 1: return SEDU_BADWEAP;
+					case 2: return SEDU_BADHAT;
+					case 3: return SEDU_BADBOOTS;
+					case 4: return SEDU_BADAMU;
+					case 5: return SEDU_PUNISH;
+				}
+			case PM_MOTHER_LILITH:
+			case PM_BELIAL:
+			case PM_INCUBUS:
+			case PM_SUCCUBUS:
+			default:
+				if(uclockwork) {
+					if (!rn2(5) && !Drain_resistance)
+						return SEDU_SUCKSOUL;
+					else
+						return SEDU_STEALONE;
+				}
+				switch(rn2(5)){
+					case 0: return SEDU_DRAINEN;
+					case 1: return SEDU_DUMPS;
+					case 2: return SEDU_DULLSENSES;
+					case 3: return SEDU_DRAINLVL;
+					case 4: return SEDU_EXHAUSTED;
+				}
+		}
+	}
+	else {
+		switch(mon->mtyp) {
+			case PM_AVATAR_OF_LOLTH:
+					switch(rn2(4)){
+						case 0: return SEDU_WISH;
+						case 1: return SEDU_BLESS;
+						case 2: return SEDU_EDUCATE;
+						case 3: return SEDU_RESTOREHP;
+					}
+			case PM_MALCANTHET:
+				if(poly_gender() == 1 && (ACURR(A_CHA) < rn2(35)))
+					return SEDU_JEALOUS;	// bad effect
+				switch(uclockwork ? rn2(4) : rn2(8)){
+					case 0: return SEDU_PROTECT;
+					case 1: return SEDU_BLESS;
+					case 2: return SEDU_LIFEFONT;
+					case 3: return SEDU_CARRYCAP;
+					case 4: return SEDU_POISRES;
+					case 5: return SEDU_ACIDRES;
+					case 6: return SEDU_SICKRES;
+					case 7: return SEDU_RAISESTATS;
+				}
+			case PM_GRAZ_ZT:
+				if(poly_gender() == 0 && (ACURR(A_CHA) < rn2(35)))
+					return SEDU_JEALOUS;	// bad effect
+				switch(rn2(6)){
+					case 0: return SEDU_WISH;
+					case 1: return SEDU_GENOCIDE;
+					case 2: return SEDU_SIXMAGICS;
+					case 3: return SEDU_SIXTRUTHS;
+					case 4: return SEDU_SIXFOLLOWERS;
+					case 5: return SEDU_LIFESAVING;
+				}
+			case PM_MOTHER_LILITH:
+			case PM_BELIAL:
+			case PM_INCUBUS:
+			case PM_SUCCUBUS:
+			default:
+				if (uclockwork) {
+					if (!rn2(5))
+						return SEDU_EDUCATE;
+					else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER))
+						return SEDU_WIND;
+					else
+						return SEDU_NOTHING;
+				}
+				switch(rn2(5)){
+					case 0: return SEDU_GAINEN;
+					case 1: return SEDU_GOODENOUGH;
+					case 2: return SEDU_REMEMBER;
+					case 3: return SEDU_EDUCATE;
+					case 4: return SEDU_RESTOREHP;
+				}
+		}
+	}
+	/* should not be reached */
+	return 0;
+}
 
 void
 seduce_effect(mon, effect_num)
@@ -1811,7 +1562,12 @@ int effect_num;
 	boolean greatest = /* malcanthet/graz'zt seduce */
 		(mon->mtyp == PM_MALCANTHET || mon->mtyp == PM_GRAZ_ZT);
 
-	if (effect_num < 0)
+	if (effect_num == 0) {
+		/* all effects, if any, were to be handled elsewhere */
+		/* probably you were a clockwork */
+		return;
+	}
+	else if (effect_num < 0)
 	{
 		switch (effect_num)
 		{
@@ -1931,6 +1687,71 @@ int effect_num;
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, TRUE);
 			}
+			break;
+		
+		case SEDU_DAMAGECLK:
+			/* flavoured for Malcanthet and Graz'zt */
+			pline("...but %s becomes enraged when %s discovers you're mechanical!",
+				mhe(mon), mhe(mon));
+			verbalize("How dare you trick me!");
+
+			if (mon->female) {
+				pline("She attacks your keyhole with her barbed tail!");
+				losehp(d(4, 12), "an enraged demoness", KILLED_BY);
+				morehungry(d(2,12)*10);
+				pline("She claws your face!");
+				losehp(d(4, 4), "an enraged demoness", KILLED_BY);
+				(void) adjattrib(A_CHA, -1*d(2,4), TRUE);
+				}
+			else {
+				pline("He viciously bites you!");
+				losehp(d(4, 8), "an enraged demon prince", KILLED_BY);
+				(void) adjattrib(A_CHA, -1*d(1,8), TRUE);
+				pline("He drips acid into your inner workings!");
+				if(!HAcid_resistance){
+					losehp(d(6, 8), "an enraged demon prince", KILLED_BY);
+					morehungry(d(3,8));
+				}
+			}
+			AMAX(A_CHA) = ABASE(A_CHA); //stat drain is permanent!
+			break;
+
+		case SEDU_LOLTHATTACK:
+			/* all-in-one lolth bad-sedu effects */
+			if (TRUE) {
+				struct trap *ttmp2 = maketrap(u.ux, u.uy, WEB);
+				if (ttmp2) {
+					pline("She wraps you tight in her webs!");
+					dotrap(ttmp2, NOWEBMSG);
+	#ifdef STEED
+					if (u.usteed && u.utrap) {
+						/* you, not steed, are trapped */
+						dismount_steed(DISMOUNT_FELL);
+					}
+	#endif
+				}
+			}
+			if (uclockwork){
+				pline("%s pauses in momentary confusion...",
+					noit_Monnam(mon));
+				if (rn2(5) && !Drain_resistance){
+					seduce_effect(mon, SEDU_SUCKSOUL);
+				}
+				else {
+					seduce_effect(mon, SEDU_STEALEIGHT);
+				}
+			}
+			else {
+				int tmp;
+				pline("After wrapping you up, she bites into your helpless form!");
+				exercise(A_STR, FALSE);
+				tmp = d(6, 8);
+				if (Half_physical_damage) tmp = (tmp + 1) / 2;
+				losehp(tmp, "Lolth's bite", KILLED_BY);
+
+				seduce_effect(mon, rn2(2) ? SEDU_VAMP : SEDU_POISONBITE);
+			}
+			break;
 
 		case SEDU_VAMP:
 			if (has_blood(youracedata)) {
@@ -1954,7 +1775,10 @@ int effect_num;
 				exercise(A_CON, FALSE);
 				flags.botl = 1;
 				if (!Upolyd || Unchanging){
-					killer = "the poisoned kiss of Lolth's fangs";
+					if (mon->mtyp == PM_AVATAR_OF_LOLTH)
+						killer = "the poisoned kiss of Lolth's fangs";
+					else
+						killer = "a poisoned kiss of fangs";
 					killer_format = KILLED_BY;
 					done(DIED);
 				}
@@ -2137,6 +1961,33 @@ int effect_num;
 			punish((struct obj *)0);
 			verbalize("Stay here.");
 			break;
+		case SEDU_JEALOUS:
+			/* shared between Malcanthet and Graz'zt */
+			if (mon->female) {
+				if (rn2(2) || uarmh){
+					pline("She jealously attacks you with her barbed tail!");
+					losehp(d(4, 12), "a jealous demoness", KILLED_BY);
+				}
+				else{
+					pline("She jealously claws your face!");
+					losehp(d(4, 4), "a jealous demoness", KILLED_BY);
+					(void)adjattrib(A_CHA, -1 * d(2, 4), TRUE);
+					AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
+				}
+			}
+			else {
+				if(rn2(2) || uarmh || HAcid_resistance){
+					pline("He viciously bites you in jealousy!");
+					losehp(d(4, 8), "a jealous demon prince", KILLED_BY);
+				}
+				else{
+					pline("He jealously drips acid on your face!");
+					losehp(d(6, 8), "a jealous demon prince", KILLED_BY);
+					(void) adjattrib(A_CHA, -1*d(1,8), TRUE);
+					AMAX(A_CHA) = ABASE(A_CHA); //permanent drain!
+				}
+			}
+			break;
 		}
 	}
 	else {
@@ -2220,6 +2071,13 @@ int effect_num;
 					You("notice %s wound your clockwork %d times.", noit_mon_nam(mon), turns);
 				}
 			}
+			break;
+
+		case SEDU_NOTHING:
+			pline("%s %s happy, but confused.",
+				noit_Monnam(mon),
+				Blind ? "seems" : "looks"
+				);
 			break;
 
 		case SEDU_WISH:
@@ -2312,7 +2170,7 @@ int effect_num;
 								};
 								int len = SIZE(gear);
 								struct obj * otmp;
-								for (i = 6; i > 0 && len >= 0;) {
+								for (i = 6; i > 0 && len > 0;) {
 									j = rn2(len);
 									otmp = gear[j];
 									if (otmp && (

@@ -3394,10 +3394,15 @@ int mkobjflags;
 			    (void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_SURYA_DEVA){
 				struct monst *dancer;
-				dancer = makemon(&mons[PM_DANCING_BLADE], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+				int mmflags = MM_ADJACENTOK|MM_NOCOUNTBIRTH;
+				if (get_mx(mtmp, MX_ESUM))
+					mmflags |= MM_ESUM;
+				dancer = makemon(&mons[PM_DANCING_BLADE], mtmp->mx, mtmp->my, mmflags);
 				if(dancer){
 					dancer->mvar_suryaID = (long)mtmp->m_id;
 					dancer->mpeaceful = mtmp->mpeaceful;
+					if (mmflags&MM_ESUM)
+						mark_mon_as_summoned(dancer, mtmp, ESUMMON_PERMANENT, 0);
 				}
 				
 			    otmp = mksobj(PLATE_MAIL, mkobjflags|MKOBJ_NOINIT);
@@ -4286,7 +4291,8 @@ int mkobjflags;
 				break;
 				case 2:
 					otmp = mksobj(CHAIN_MAIL, mkobjflags);
-					otmp->oeroded = 2;
+					if (is_rustprone(otmp))
+						otmp->oeroded = 2;
 					(void) mpickobj(mtmp, otmp);
 				break;
 			}
@@ -4295,32 +4301,38 @@ int mkobjflags;
 				switch (rn2(6)) {
 				case 0:
 					otmp = mksobj(TWO_HANDED_SWORD, mkobjflags);
-					otmp->oeroded = 3;
+					if (is_rustprone(otmp))
+						otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
 				break;
 				case 1:
 					otmp = mksobj(SCIMITAR, mkobjflags);
-					otmp->oeroded = 3;
+					if (is_rustprone(otmp))
+						otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
 				break;
 				case 2:
 					otmp = mksobj(TRIDENT, mkobjflags);
-					otmp->oeroded = 3;
+					if (is_rustprone(otmp))
+						otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
 				break;
 				case 3:
 					otmp = mksobj(SHORT_SWORD, mkobjflags);
-					otmp->oeroded = 3;
+					if (is_rustprone(otmp))
+						otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
 				break;
 				case 4:
 					otmp = mksobj(DAGGER, mkobjflags);
-					otmp->oeroded = 3;
+					if (is_rustprone(otmp))
+						otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
 				break;
 				case 5:
 					otmp = mksobj(SPEAR, mkobjflags);
-					otmp->oeroded = 3;
+					if (is_rustprone(otmp))
+						otmp->oeroded = 3;
 					(void)mpickobj(mtmp, otmp);
 				break;
 				}

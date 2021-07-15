@@ -1127,7 +1127,7 @@ int careful;
 			move(&dx2, &dy2, dir);
 			move(&dx2, &dy2, dir);
 			if (levl[dx2][dy2].roomno != NO_ROOM) {
-				dodoor(dx, dy, &rooms[levl[dx2][dy2].roomno]);
+				dodoor(dx, dy, &rooms[levl[dx2][dy2].roomno - ROOMOFFSET]);
 			}
 			else {
 				levl[dx][dy].typ = floortyp;
