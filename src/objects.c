@@ -657,38 +657,38 @@ HELM(("witch hat", "wide-brimmed conical hat"),
 HELM(("dunce cap", "conical hat"),
 		0, 1,  0,	3, 1,  4,   1, 10, 0, 0, CLOTH, CLR_BLUE),
 HELM(("war hat", "wide helm"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	2, 0, 60,  30, 8, 2, 2, IRON, HI_METAL),
+		0, 0,  0,	2, 0, 60,  30, 8, 4, 2, IRON, HI_METAL),
 HELM(("flack helmet", "green bowl", "bowl"), /*Needs encyc entry*/
-		0, 0,  0,	0, 0, 10,  50, 9, 2, 1, PLASTIC, CLR_GREEN),
+		0, 0,  0,	0, 0, 10,  50, 9, 3, 1, PLASTIC, CLR_GREEN),
 HELM(("archaic helm", "helmet"),
-		0, 0,  0,   0, 1, 30,  12, 9, 2, 0, COPPER, HI_COPPER),
+		0, 0,  0,   0, 1, 30,  12, 9, 3, 0, COPPER, HI_COPPER),
 HELM(("harmonium helm", "red-lacquered spined helm", "spined helm"),
-		0, 0,  0,   0, 1, 45,   1, 9, 2, 0, METAL, CLR_RED),
+		0, 0,  0,   0, 1, 45,   1, 9, 4, 0, METAL, CLR_RED),
 HELM(("elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	0, 1, 10,   5, 9, 1, 0, WOOD, HI_WOOD),
+		0, 0,  0,	0, 1, 10,   5, 9, 3, 0, WOOD, HI_WOOD),
 HELM(("high-elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	0, 1, 15,   5, 9, 2, 0, MITHRIL, HI_MITHRIL, O_MATSPEC(UNIDED)),
+		0, 0,  0,	0, 1, 15,   5, 8, 4, 0, MITHRIL, HI_MITHRIL, O_MATSPEC(UNIDED)),
 HELM(("droven helm", "spider-shaped helm"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	0, 1, 20,   5, 8, 2, 0, SHADOWSTEEL, CLR_BLACK),
+		0, 0,  0,	0, 1, 20,   5, 8, 4, 0, SHADOWSTEEL, CLR_BLACK),
 HELM(("plasteel helm", "white skull helm", "skull helm"), /*Needs encyc entry*//*Needs tile*/
-		0, 1,  INFRAVISION,   0, 2, 25,  50, 8, 2, 2, PLASTIC, CLR_WHITE),
+		0, 1,  INFRAVISION,   0, 2, 25,  50, 8, 5, 2, PLASTIC, CLR_WHITE),
 HELM(("crystal helm", "fish bowl"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,   0, 2,150, 300, 9, 1, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
+		0, 0,  0,   0, 2,150, 300, 8, 5, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 HELM(("pontiff's crown", "filigreed faceless helm"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,   0, 2, 90, 300, 8, 3, 0, GOLD, HI_GOLD, O_MATSPEC(IDED)),
+		0, 0,  0,   0, 2, 90, 300, 8, 5, 0, GOLD, HI_GOLD, O_MATSPEC(IDED)),
 HELM(("shemagh", "headscarf"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 0, 5,   5, 10, 0, 0, CLOTH, CLR_WHITE, O_MATSPEC(UNIDED)),
 
 /* With shuffled appearances... */
 HELM(("helmet", "plumed helmet"), /* circlet */
-		0, 0,  0,      8, 1, 30,  10, 9, 2, 0, IRON, HI_METAL),
+		0, 0,  0,         8, 1, 30,  10, 9, 3, 0, IRON, HI_METAL),
 HELM(("helm of brilliance", "etched helmet"), /* crown of cognizance */
-		0, 1,  0,	6, 1, 30,  50, 9, 1, 0, IRON, HI_METAL),
+		0, 1,  0,	      6, 1, 30,  50, 9, 1, 0, IRON, HI_METAL),
 HELM(("helm of opposite alignment", "crested helmet"), /* tiara of treachery */
-		0, 1,  0,	6, 1, 30,  50, 9, 1, 0, IRON, HI_METAL),
-HELM(("helm of telepathy", "visored helmet"), /*tiara of telepathy*/ /*Note: 'visored' appearance gives +1 DR*/
-		0, 1,  TELEPAT, 2, 1, 30,  50, 9, 1, 0, IRON, HI_METAL),
-HELM(("helm of drain resistance", "band"), /*diadem of drain resistance*//*Needs tile*//*Note: 'band' appearance gives -1 DR*/
+		0, 1,  0,	      6, 1, 30,  50, 9, 1, 0, IRON, HI_METAL),
+HELM(("helm of telepathy", "visored helmet"), /*tiara of telepathy*/ /*Note: 'visored' appearance gives +1 AC and DR*/
+		0, 1,  TELEPAT,   2, 1, 30,  50, 9, 1, 0, IRON, HI_METAL),
+HELM(("helm of drain resistance", "band"), /*diadem of drain resistance*//*Needs tile*//*Note: 'band' appearance halves AC and DR after adjustments for errosion and material (rounds down) */
 		0, 1,  DRAIN_RES, 2, 1, 30,  50, 9, 1, 0, GOLD, HI_GOLD),
 
 /* suits of armor */
@@ -925,19 +925,19 @@ SHIELD(("stone dragon shield"),
 //define GLOVES(names,kn,mgc,power,prob,delay,wt,cost,ac,dr,can,metal,c) \
 	ARMOR(names,kn,mgc,0,power,prob,delay,wt,cost,ac,dr,can,ARM_GLOVES,metal,c)
 GLOVES(("crystal gauntlets", "gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 20, 400, 9, 0, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
+		0, 0,  0,	   0, 2, 20, 400, 8, 4, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 GLOVES(("gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		1, 0,  0,	   4, 2, 25, 10, 8, 2, 0, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
+		1, 0,  0,	   4, 2, 25, 10, 8, 4, 0, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
 GLOVES(("archaic gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		1, 0,  0,	   0, 2, 25, 10, 8, 2, 0, COPPER, HI_COPPER),
+		1, 0,  0,	   0, 2, 25, 10, 8, 3, 0, COPPER, HI_COPPER),
 GLOVES(("long gloves"),
 		1, 0,  0,	   0, 1,  5,  8, 10, 2, 1, CLOTH, CLR_WHITE),
 GLOVES(("harmonium gauntlets", "red-lacquered hooked gauntlets", "hooked gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 40,  1, 9, 2, 0, METAL, CLR_RED),
+		0, 0,  0,	   0, 2, 40,  1, 9, 4, 0, METAL, CLR_RED),
 GLOVES(("high-elven gauntlets", "runed gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 15, 50, 8, 2, 0, MITHRIL, HI_MITHRIL),
+		0, 0,  0,	   0, 2, 15, 50, 8, 4, 0, MITHRIL, HI_MITHRIL),
 GLOVES(("plasteel gauntlets", "hard white gauntlets", "gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 15, 50,  8, 2, 0, PLASTIC, CLR_WHITE),
+		0, 0,  0,	   0, 2, 15, 50,  8, 3, 0, PLASTIC, CLR_WHITE),
 GLOVES(("gloves", "old gloves"),
 		0, 0,  0,	   8, 1, 10,  8, 10, 1, 0, LEATHER, HI_LEATHER, O_MATSPEC(IDED)),
 GLOVES(("gauntlets of fumbling", "padded gloves"), /*"padded" should give +1 DR*/
@@ -957,13 +957,13 @@ BOOTS(("low boots", "walking shoes"),
 BOOTS(("shoes", "hard shoes"),
 		0, 0,  0,	   7, 2, 50, 16,  9, 1, 0, IRON, HI_METAL, O_MATSPEC(IDED)),
 BOOTS(("armored boots", "boots"),
-		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
+		0, 0,  0,	   0, 1, 75, 16,  8, 4, 1, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
 BOOTS(("archaic boots", "boots"),
-		0, 0,  0,	   0, 1, 75, 16,  8, 2, 1, COPPER, HI_COPPER,O_MATSPEC(UNIDED)),
+		0, 0,  0,	   0, 1, 75, 16,  8, 3, 1, COPPER, HI_COPPER,O_MATSPEC(UNIDED)),
 BOOTS(("harmonium boots", "red-lacquered boots", "boots"),
-		0, 0,  0,	   0, 1, 95,  1,  8, 2, 1, METAL, CLR_RED),
+		0, 0,  0,	   0, 1, 95,  1,  8, 4, 1, METAL, CLR_RED),
 BOOTS(("plasteel boots", "hard white boots", "boots"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 25, 32,  8, 2, 1, PLASTIC, CLR_WHITE),
+		0, 0,  0,	   0, 2, 25, 32,  8, 3, 1, PLASTIC, CLR_WHITE),
 BOOTS(("stilettos", "high-heeled shoes"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	   0, 1, 10, 60, 10, 0, 0, METAL, HI_METAL),
 BOOTS(("high boots", "jackboots"),
@@ -971,7 +971,7 @@ BOOTS(("high boots", "jackboots"),
 BOOTS(("heeled boots", "tall boots"),
 		1, 0,  0,	   0, 2, 20, 12, 10, 2, 0, LEATHER, CLR_BLACK),
 BOOTS(("crystal boots", "boots"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0,	   0, 2, 60,300,  9, 0, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
+		0, 0,  0,	   0, 2, 60,300,  8, 4, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 /* With shuffled appearances... */
 BOOTS(("speed boots", "combat boots"),
 		0, 1,  FAST,	  12, 2, 20, 50,  9, 0, 0, LEATHER, HI_LEATHER),
