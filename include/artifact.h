@@ -341,7 +341,7 @@ extern struct artifact artilist[];
 #define PLUTO	(LAST_PROP+23)
 #define SPEED_BANKAI	(LAST_PROP+24)
 #define ICE_SHIKAI	(LAST_PROP+25)
-#define FIRE_SHIKAI	(LAST_PROP+26)
+#define TOBIUME_SHIKAI	(LAST_PROP+26)
 #define MANDALA	(LAST_PROP+27)
 #define DRAIN_MEMORIES	(LAST_PROP+28)
 #define SLAY_LIVING	(LAST_PROP+29)
