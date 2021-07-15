@@ -2029,6 +2029,9 @@ struct obj * otmp;
 
 	int def = objects[otmp->otyp].a_ac;
 	
+	// visored helm's bonus IS affected by mat and erosion
+	if (otmp->otyp == find_vhelm()) def += 1;
+	
 	// add material bonus
 	def += material_def_bonus(otmp, def);
 
@@ -2040,6 +2043,8 @@ struct obj * otmp;
 		def += 2;
 	// combat boots
 	if (otmp->otyp == find_cboots()) def += 1;
+	// circlet
+	if (otmp->otyp == find_gcirclet()) def /= 2;
 
 	// add enchantment
 	if (otmp->spe)
@@ -2105,6 +2110,9 @@ struct obj * otmp;
 	if(is_shield(otmp))
 		return 0;
 
+	// visored helm's bonus IS affected by mat and erosion
+	if (otmp->otyp == find_vhelm()) def += 1;
+	
 	// add material bonus
 	def += material_def_bonus(otmp, def);
 
@@ -2117,9 +2125,7 @@ struct obj * otmp;
 	// padded gloves
 	if (otmp->otyp == find_pgloves()) def += 1;
 	// gold circlet
-	if (otmp->otyp == find_gcirclet()) def -= 1;
-	// visored helm
-	if (otmp->otyp == find_vhelm()) def += 1;
+	if (otmp->otyp == find_gcirclet()) def /= 2;
 	// combat boots
 	if (otmp->otyp == find_cboots()) def += 1;
 
@@ -2549,7 +2555,7 @@ int depth;
 	struct obj * uarmor[] = ARMOR_SLOTS;
 	int i;
 	for (i = 0; i < SIZE(uarmor); i++) {
-		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dir & slot)) {
+		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dtyp & slot)) {
 			if(depth && higher_depth(uarmor[i]->owornmask, depth))
 				continue;
 			arm_udr += arm_dr_bonus(uarmor[i]);

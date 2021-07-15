@@ -268,11 +268,7 @@ int oartifact;
 		oartifact = obj->oartifact;
 	}
 
-	int attackmask = objects[otyp].oc_dir;
-
-	/* oc_dir is reused for wands (directionality) and spellbooks (school) -- these are all blunt weapons */
-	if (objects[otyp].oc_class == WAND_CLASS || objects[otyp].oc_class == SPBOOK_CLASS)
-		return WHACK;
+	int attackmask = objects[otyp].oc_dtyp;
 
 	/* catch special cases */
 	if (   oartifact == ART_YORSHKA_S_SPEAR
@@ -648,6 +644,7 @@ int otyp;
 	case LIGHTSABER:			spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ plus(3,3); spe_mult *= 2;} break;	// external special case: lightsaber forms
 	case BEAMSWORD:				spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ plus(3,3); spe_mult *= 2;} break;	// external special case: Atma Weapon, lightsaber forms
 	case DOUBLE_LIGHTSABER:		spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
+	case ROD_OF_FORCE:			spe_mult *= 2; ocn *= 2; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
 	}
 #undef plus_base
 #undef plus
@@ -656,7 +653,7 @@ int otyp;
 #undef chrgd
 	/* more special cases that wouldn't really fit into the switch above */
 	/* override for lightsaber dice if the lightsaber is turned off */
-	if (obj && (otyp == LIGHTSABER || otyp == BEAMSWORD || otyp == DOUBLE_LIGHTSABER) && !litsaber(obj))
+	if (obj && (otyp == LIGHTSABER || otyp == BEAMSWORD || otyp == DOUBLE_LIGHTSABER || otyp == ROD_OF_FORCE) && !litsaber(obj))
 	{
 		spe_mult = 1;
 		ocn = 1;
@@ -957,8 +954,9 @@ int spec;
 	case LIGHTSABER:
 	case BEAMSWORD:
 	case DOUBLE_LIGHTSABER:
+	case ROD_OF_FORCE:
 		// drain charge on lightsabers
-		if (!((otmp->oartifact == ART_ATMA_WEAPON && otmp == uwep && !Drain_resistance) ||
+		if (litsaber(otmp) && !((otmp->oartifact == ART_ATMA_WEAPON && otmp == uwep && !Drain_resistance) ||
 			otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC))
 		{
 			otmp->age -= 100;
@@ -1535,8 +1533,9 @@ static const NEARDATA short hwep[] = {
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
-	  DOUBLE_SWORD,/*2d8/2d12*/
+	  ROD_OF_FORCE/*2d8/2d12*/,
 	  CRYSTAL_SWORD/*2d8/2d12*/,
+	  DOUBLE_SWORD,/*2d8/2d12*/
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
@@ -1628,8 +1627,9 @@ static const NEARDATA short hpwep[] = {
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
 	  HEAVY_IRON_BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
-	  DOUBLE_SWORD,/*2d8/2d12*/
+	  ROD_OF_FORCE/*2d8/2d12*/,
 	  CRYSTAL_SWORD/*2d8/2d12*/,
+	  DOUBLE_SWORD,/*2d8/2d12*/
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
@@ -2505,9 +2505,9 @@ struct obj *otmp;
 			if (bimanual(otmp, youracedata) ||
 				(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0))
 				bonus *= 2;
-			else if (otmp->otyp == FORCE_SWORD)
+			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == ROD_OF_FORCE)
 				bonus *= 2;
-			else if (otmp->otyp == KATANA)
+			else if (otmp->otyp == KATANA || otmp->otyp == LONG_SWORD)
 				bonus *= 1.5;
 			else if (is_vibrosword(otmp))
 				bonus *= 1.5;
@@ -3040,27 +3040,29 @@ struct obj *obj;
 	    obj->oclass != GEM_CLASS)
 		/* Not a weapon, weapon-tool, or ammo */
 		return (P_NONE);
+
+#define CHECK_ALTERNATE_SKILL(alt_skill) \
+			if(P_SKILL(objects[obj->otyp].oc_skill) > P_SKILL(alt_skill))\
+				type = objects[obj->otyp].oc_skill;\
+			else if(P_MAX_SKILL(objects[obj->otyp].oc_skill) >= P_MAX_SKILL(alt_skill))\
+				type = objects[obj->otyp].oc_skill;\
+			else type = alt_skill;
+
 	if(obj){
 		if(obj->oartifact == ART_SUNSWORD){
-			if(P_SKILL(P_LONG_SWORD) > P_SKILL(P_SHORT_SWORD))
-				type = P_LONG_SWORD;
-			else if(P_MAX_SKILL(P_LONG_SWORD) > P_MAX_SKILL(P_SHORT_SWORD))
-				type = P_LONG_SWORD;
-			else type = P_SHORT_SWORD;
+			CHECK_ALTERNATE_SKILL(P_SHORT_SWORD)
 		}
 		else if(obj->oartifact == ART_YORSHKA_S_SPEAR){
-			if(P_SKILL(P_HAMMER) > P_SKILL(P_SPEAR))
-				type = P_HAMMER;
-			else if(P_MAX_SKILL(P_HAMMER) > P_MAX_SKILL(P_SPEAR))
-				type = P_HAMMER;
-			else type = P_SPEAR;
+			CHECK_ALTERNATE_SKILL(P_HAMMER)
 		}
 		else if(obj->otyp == DOUBLE_LIGHTSABER && !obj->altmode){
-			if(P_SKILL(P_TWO_HANDED_SWORD) > P_SKILL(P_QUARTERSTAFF))
-				type = P_TWO_HANDED_SWORD;
-			else if(P_MAX_SKILL(P_TWO_HANDED_SWORD) > P_MAX_SKILL(P_QUARTERSTAFF))
-				type = P_TWO_HANDED_SWORD;
-			else type = P_QUARTERSTAFF;
+			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
+		}
+		else if(obj->otyp == ROD_OF_FORCE){
+			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
+		}
+		else if(obj->otyp == KHOPESH){
+			CHECK_ALTERNATE_SKILL(P_AXE)
 		}
 		else if(obj->oartifact == ART_TORCH_OF_ORIGINS){
 			type = P_CLUB;

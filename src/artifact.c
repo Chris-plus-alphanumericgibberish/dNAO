@@ -630,44 +630,6 @@ int oprop;
 }
 
 void
-remove_oprop_and_u_extrinsic(obj, oprop)
-struct obj *obj;
-int oprop;
-{
-	switch(oprop){
-		case OPROP_FIRE:
-			EFire_resistance &= ~(obj->owornmask);
-		break;
-		case OPROP_COLD:
-			ECold_resistance &= ~(obj->owornmask);
-		break;
-		case OPROP_WOOL:
-			EFire_resistance &= ~(obj->owornmask);
-			ECold_resistance &= ~(obj->owornmask);
-		break;
-		case OPROP_ELEC:
-			EShock_resistance &= ~(obj->owornmask);
-		break;
-		case OPROP_ACID:
-			EAcid_resistance &= ~(obj->owornmask);
-		break;
-		case OPROP_MAGC:
-			EAntimagic &= ~(obj->owornmask);
-		break;
-		case OPROP_REFL:
-			EReflecting &= ~(obj->owornmask);
-		break;
-		case OPROP_DISN:
-			EDisint_resistance &= ~(obj->owornmask);
-		break;
-		case OPROP_LIFE:
-			// pline("obj %ld, mask %ld", obj->owornmask, ELifesaved);
-			ELifesaved &= ~(obj->owornmask);
-		break;
-	}
-}
-
-void
 remove_oprop(obj, oprop)
 struct obj *obj;
 int oprop;
@@ -679,14 +641,16 @@ int oprop;
 		impossible("Attempting to remove oprop number %d from %s?", oprop, doname(obj));
 
 	switch(obj->where){
-		case OBJ_INVENT:
-			remove_oprop_and_u_extrinsic(obj, oprop);
+		case OBJ_INVENT:{
+			long mask = obj->owornmask;
+			setnotworn(obj);
 			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
-		break;
+			setworn(obj, mask);
+		}break;
 		case OBJ_MINVENT:
-			update_mon_intrinsics(obj->ocarry, obj, FALSE, TRUE); /*remove all intrinsics for now*/
+			update_mon_intrinsics(obj->ocarry, obj, FALSE, TRUE); /* remove all intrinsics for now */
 			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
-			update_mon_intrinsics(obj->ocarry, obj, TRUE, TRUE); /*re-set remaining intrinsics for now*/
+			update_mon_intrinsics(obj->ocarry, obj, TRUE, TRUE); /* re-set remaining intrinsics */
 		break;
 		default:
 			obj->oproperties[(oprop-1)/32] &= ~(0x1L << ((oprop-1)%32));
@@ -772,12 +736,140 @@ unsigned long int *oprop_list;
 			add_oprop(otmp, OPROP_##oproptoken##W);\
 	}
 
+#define ADD_WEAPON_ARMOR_OPROPS(otmp, oproptoken1, oproptoken2) \
+	add_oprop(otmp, OPROP_##oproptoken1);\
+	add_oprop(otmp, OPROP_##oproptoken2);\
+	if(is_gloves(otmp) || is_boots(otmp)){\
+		if(rn2(3)){\
+			add_oprop(otmp, OPROP_LESSER_##oproptoken1##W);\
+			add_oprop(otmp, OPROP_LESSER_##oproptoken2##W);\
+		}\
+		else{\
+			add_oprop(otmp, OPROP_##oproptoken1##W);\
+			add_oprop(otmp, OPROP_##oproptoken2##W);\
+		}\
+	}
+
 #define ADD_WEAK_OR_STRONG_OPROP(otmp, oproptoken) \
 	if(rn2(4))\
 		add_oprop(otmp, OPROP_##oproptoken##W);\
 	else\
-		add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
+		add_oprop(otmp, OPROP_LESSER_##oproptoken##W);
 
+#define ADD_WEAK_OR_STRONG_OPROPS(otmp, oproptoken1, oproptoken2) \
+	if(rn2(4)){\
+		add_oprop(otmp, OPROP_##oproptoken1##W);\
+		add_oprop(otmp, OPROP_##oproptoken2##W);\
+	}\
+	else{\
+		add_oprop(otmp, OPROP_LESSER_##oproptoken1##W);\
+		add_oprop(otmp, OPROP_LESSER_##oproptoken2##W);\
+	}
+
+struct obj *
+mk_lolth_vault_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	/* materials */
+	if(rn2(3)){
+		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
+			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
+		){
+			if(objects[otmp->otyp].oc_material == GLASS)
+				set_material_gm(otmp, rn2(2) ? GLASS : rn2(3) ? OBSIDIAN_MT : GEMSTONE);
+			else
+				set_material_gm(otmp, !rn2(7) ? SHADOWSTEEL 
+									: !rn2(6) ? SILVER 
+									: !rn2(5) ? MITHRIL 
+									: !rn2(4) ? GLASS
+									: !rn2(3) ? OBSIDIAN_MT
+									: !rn2(2) ? GEMSTONE
+									: MINERAL
+									);
+		}
+	}
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(!rn2(3)){
+			ADD_WEAPON_ARMOR_OPROPS(otmp, UNHY, HOLY);
+		}
+		if(rn2(3)) switch(rn2(5)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 4:
+				add_oprop(otmp, OPROP_BCRS);
+			break;
+		}
+		else if(rn2(3)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+		}
+		if(!rn2(8)){
+			add_oprop(otmp, OPROP_HEAL);
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
+		if(rn2(2)){
+			ADD_WEAK_OR_STRONG_OPROPS(otmp, UNHY, HOLY);
+		}
+		if(rn2(3)) switch(rn2(5)){
+			case 0:
+				add_oprop(otmp, OPROP_WRTHW);
+			break;
+			case 1:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, COLD);
+			break;
+			case 4:
+				ADD_WEAK_OR_STRONG_OPROP(otmp, ACID);
+			break;
+		}
+		else if(rn2(3)){
+			switch(rn2(3)){
+				case 0:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
+				break;
+				case 1:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, CONC);
+				break;
+				case 2:
+					ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);
+				break;
+			}
+		}
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_VORPW);
+		}
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_LIVEW);
+		}
+		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_RETRW);
+		}
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_ASECW);
+		}
+		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_PSECW);
+		}
+	}
+	return otmp;
+}
 
 STATIC_OVL struct obj *
 mk_holy_special(otmp)
@@ -952,6 +1044,25 @@ struct obj *otmp;	/* existing object */
 }
 
 STATIC_OVL struct obj *
+mk_ancient_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	otmp = mk_devil_special(otmp);
+	/* armor props */
+	/* weapon props */
+	if(otmp->oclass == WEAPON_CLASS){
+		/* Living weapons */
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_LIVEW);
+		}
+		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_RETRW);
+		}
+	}
+	return otmp;
+}
+
+STATIC_OVL struct obj *
 mk_demon_special(otmp)
 struct obj *otmp;	/* existing object */
 {
@@ -1015,11 +1126,31 @@ struct obj *otmp;	/* existing object */
 				ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
 			break;
 		}
+	}
+	return otmp;
+}
+
+STATIC_OVL struct obj *
+mk_tannin_special(otmp)
+struct obj *otmp;	/* existing object */
+{
+	otmp = mk_demon_special(otmp);
+	/* armor props */
+	if(otmp->oclass == ARMOR_CLASS){
+		if(!rn2(20)){
+			add_oprop(otmp, OPROP_GRES);
+		}
+	}
+	/* weapon props */
+	else if(otmp->oclass == WEAPON_CLASS){
 		/* Living weapons */
 		if(!rn2(20)){
 			add_oprop(otmp, OPROP_LIVEW);
 		}
 		else if(!rn2(20)){
+			add_oprop(otmp, OPROP_RETRW);
+		}
+		if(!rn2(20)){
 			add_oprop(otmp, OPROP_ASECW);
 		}
 		else if(!rn2(20)){
@@ -1038,24 +1169,38 @@ long long int vn;
 #define VN_TANNIN	0
 #define VN_ANCIENT	1
 #define VN_ANGEL	2
+#define VN_DEVIL	3
+#define VN_DEMON	4
 	if(vn < VN_A_O_BLESSINGS){
 		type = VN_TANNIN;
 	}
 	else if(vn < VN_APOCALYPSE){
 		type = VN_ANCIENT;
 	}
-	else if(vn < VN_MAX){
+	else if(vn < VN_N_PIT_FIEND){
 		type = VN_ANGEL;
+	}
+	else if(vn < VN_SHAYATEEN){
+		type = VN_DEVIL;
+	}
+	else if(vn < VN_MAX){
+		type = VN_DEMON;
 	}
 	switch(type){
 		case VN_ANGEL:
 			otmp = mk_holy_special(otmp);
 		break;
-		case VN_ANCIENT:
+		case VN_DEVIL:
 			otmp = mk_devil_special(otmp);
 		break;
-		case VN_TANNIN:
+		case VN_ANCIENT:
+			otmp = mk_ancient_special(otmp);
+		break;
+		case VN_DEMON:
 			otmp = mk_demon_special(otmp);
+		break;
+		case VN_TANNIN:
+			otmp = mk_tannin_special(otmp);
 		break;
 	}
 	return otmp;
@@ -2422,9 +2567,16 @@ get_premium_heart_multiplier()
 	if (Vomiting) multiplier++;
 	if (Slimed) multiplier++;
 	if (FrozenAir) multiplier++;
+	if (BloodDrown) multiplier++;
 	if (Hallucination) multiplier++;
 	if (Fumbling) multiplier++;
 	if (Wounded_legs) multiplier++;
+	if (Panicking) multiplier++;
+	if (StumbleBlind) multiplier++;
+	if (StaggerShock) multiplier++;
+	if (Babble) multiplier++;
+	if (Screaming) multiplier++;
+	if (FaintingFits) multiplier++;
 
 	return multiplier;
 }
@@ -2894,7 +3046,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			if(vis) pline("%s is thrown backwards by the gusting winds!",Monnam(mdef));
 			if(mdef->data->msize >= MZ_HUGE) mhurtle(mdef, u.dx, u.dy, 1, TRUE);
 			else mhurtle(mdef, u.dx, u.dy, 10, FALSE);
-			if(mdef->mhp <= 0 || migrating_mons == mdef) return vis;//Monster was killed as part of movement OR fell to new level and we should stop.
+			if(mdef->mhp <= 0 || MIGRATINGMONSTER(mdef)) return vis;//Monster was killed as part of movement OR fell to new level and we should stop.
 		}
 		and = TRUE;
 	}
@@ -7796,6 +7948,7 @@ arti_invoke(obj)
             */
             if(!getdir((char *)0) ||
                 (!u.dx && !u.dy) ||
+                Misotheism ||
                 ((mtmp = m_at(u.ux+u.dx,u.uy+u.dy)) == 0)){
               pline("The %s glows and then fades.", the(xname(obj)));
             } else {
@@ -10015,7 +10168,7 @@ boolean silent;
 {
 	int adtyp = 0;
 
-	if (is_lightsaber(obj) && litsaber(obj))
+	if (is_lightsaber(obj) && litsaber(obj) && obj->otyp != ROD_OF_FORCE)
 		adtyp = (obj->otyp == KAMEREL_VAJRA ? AD_ELEC : AD_FIRE);
 	else if (obj->oartifact)
 		adtyp = artilist[(int)(obj)->oartifact].adtyp;
@@ -10442,6 +10595,10 @@ living_items()
 					obj->opoisonchrgs++;
 				}
 			}
+		}
+		/* grease self-greasing objects */
+		if (check_oprop(obj, OPROP_GRES) && !obj->greased && !rn2(40)){
+			obj->greased = TRUE;
 		}
 	}
 

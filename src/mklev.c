@@ -2076,6 +2076,12 @@ int x, y, hv_id;
 		case VN_MAD_ANGEL:
 			mid = PM_ANGEL;
 		break;
+		case VN_N_PIT_FIEND:
+			mid = PM_LEMURE;
+		break;
+		case VN_SHAYATEEN:
+			mid = PM_MANES;
+		break;
 	}
 	obj = mksobj_at(STATUE, x, y, NO_MKOBJ_FLAGS);
 	obj->corpsenm = mid;
@@ -2170,7 +2176,7 @@ int dist;
     make_rocks = (dist != 1 && dist != 4 && dist != 5) ? TRUE : FALSE;
     while ((otmp = boulder_at(x, y)) != 0) {
 	if (make_rocks) {
-	    fracture_rock(otmp);
+	    break_boulder(otmp);
 	    make_rocks = FALSE;		/* don't bother with more rocks */
 	} else {
 	    obj_extract_self(otmp);

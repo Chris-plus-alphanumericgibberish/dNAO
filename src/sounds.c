@@ -1047,15 +1047,15 @@ asGuardian:
 	case MS_DREAD:{
 		struct monst *tmpm;
 		int ix, iy;
-		if(mtmp->mvar_dreadPrayer >= moves && !mtmp->mdoubt && (
+		if(mtmp->mvar_dreadPrayer_cooldown >= moves && !mtmp->mdoubt && (
 			mtmp->mhp < mtmp->mhpmax/4 || mtmp->mcrazed
 		)){
-			mtmp->mvar_dreadPrayer = moves + rnz(350);
-			mtmp->mvar2 = moves + 5;
+			mtmp->mvar_dreadPrayer_cooldown = moves + rnz(350);
+			mtmp->mvar_dreadPrayer_progress = moves + 5;
 		}
-		if(mtmp->mvar2){
-			if(mtmp->mvar2 < moves){
-				mtmp->mvar2 = 0;
+		if(mtmp->mvar_dreadPrayer_progress){
+			if(mtmp->mvar_dreadPrayer_progress < moves){
+				mtmp->mvar_dreadPrayer_progress = 0;
 				mtmp->mhp = mtmp->mhpmax;
 				mtmp->mspec_used = 0;
 				set_mcan(mtmp, FALSE);
@@ -3106,7 +3106,7 @@ int tx,ty;
 //					struct monst *priest = findpriest(roomno);
 					//invoking Amon inside a temple angers the resident deity
 					altar_wrath(tx, ty);
-					angrygods(Align2gangr(a_align(tx,ty)));
+					angrygods(AltarAlign2gangr(a_align(tx,ty)));
 				}
 				u.sealTimeout[AMON-FIRST_SEAL] = moves + bindingPeriod; // invoking amon on a level with an altar still triggers the binding period.
 			}
@@ -4909,7 +4909,7 @@ int tx,ty;
 	case NUDZIRATH:{
 		struct obj *otmp;
 		if(u.sealTimeout[NUDZIRATH-FIRST_SEAL] < moves){
-			if(Role_if(PM_EXILE)){
+			if(Role_if(PM_EXILE) || (u.specialSealsKnown&SEAL_NUDZIRATH)){
 				for(otmp = level.objects[tx][ty]; otmp; otmp = otmp->nexthere) {
 					if(!otmp->oartifact){
 						if(otmp->otyp == MIRROR){

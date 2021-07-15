@@ -361,6 +361,36 @@ set_moreluck()
 	} else u.moreluck = -LUCKADD;
 }
 
+int
+stone_health()
+{
+	struct obj *otmp;
+	int healthup = 0;
+
+	for (otmp = invent; otmp; otmp = otmp->nobj)
+	    if (otmp->otyp == VITAL_SOULSTONE) {
+			if (otmp->cursed) healthup += otmp->quan * 9;
+			else if (otmp->blessed) healthup += otmp->quan * 7;
+			else healthup += otmp->quan;
+	    }
+	return (int)healthup;
+}
+
+int
+stone_energy()
+{
+	struct obj *otmp;
+	int energyup = 0;
+
+	for (otmp = invent; otmp; otmp = otmp->nobj)
+	    if (otmp->otyp == SPIRITUAL_SOULSTONE) {
+			if (otmp->cursed) energyup += otmp->quan * 9;
+			else if (otmp->blessed) energyup += otmp->quan * 7;
+			else energyup += otmp->quan;
+	    }
+	return (int)energyup;
+}
+
 #endif /* OVLB */
 #ifdef OVL1
 
@@ -1304,7 +1334,7 @@ boolean check;
 	if(check && delta < 0 && ((-delta > rn2(ACURR(A_WIS))) || -delta >= u.usanity/10) && rn2(100) >= u.usanity 
 		&& !Panicking && !StumbleBlind && !StaggerShock && !Babble && !Screaming && !FaintingFits
 	){
-		switch(rn2(6)){
+		switch(rn2(5)){
 			case 0:
 				if(ClearThoughts)
 					You_feel("a little panicky.");
@@ -1340,14 +1370,16 @@ boolean check;
 					You("begin screaming in terror and madness!");
 				HScreaming = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
 			break;
-			case 5:
-				if(ClearThoughts)
-					You_feel("a little faint.");
-				else
-					You(Hallucination ? "have a case of the vapors!" : "feel faint!");
-				HFaintingFits = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
-			break;
+			/*Dummied out for being unusually nasty and non-interactive*/
+			// case 5:
+				// if(ClearThoughts)
+					// You_feel("a little faint.");
+				// else
+					// You(Hallucination ? "have a case of the vapors!" : "feel faint!");
+				// HFaintingFits = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
+			// break;
 		}
+		nomul(0, NULL);
 	}
 }
 

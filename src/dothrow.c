@@ -826,6 +826,10 @@ boolean from_invent;
 		case BALL_OF_WEBBING:
 			dowebgush(x,y, obj->ovar1 ? obj->ovar1 : 2);
 		break;
+		case MISOTHEISTIC_PYRAMID:
+		case MISOTHEISTIC_FRAGMENT:
+			pyramid_effects(obj,x,y);
+		break;
 	}
 
 	/* dump all contents on floor */

@@ -243,6 +243,25 @@ register struct monst *mon;
 	return (struct obj *)0;
 }
 
+struct obj *
+drop_envy(mon)
+register struct monst *mon;
+{
+	register struct obj *obj;
+	if(MON_WEP(mon))
+		return MON_WEP(mon);
+
+	if(MON_SWEP(mon))
+		return MON_SWEP(mon);
+
+	for(obj = mon->minvent; obj; obj = obj->nobj) {
+		if(!obj->owornmask)
+		    return obj;
+	}
+
+	return (struct obj *)0;
+}
+
 static NEARDATA const char nofetch[] = { BALL_CLASS, CHAIN_CLASS, ROCK_CLASS, BED_CLASS, 0 };
 
 #endif /* OVL0 */

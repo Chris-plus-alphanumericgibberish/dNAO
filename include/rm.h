@@ -329,7 +329,9 @@ enum {
 /*14*/	VN_APOCALYPSE,
 /*15*/	VN_HARROWER,
 /*16*/	VN_MAD_ANGEL,
-/*17*/	VN_MAX,
+/*17*/	VN_N_PIT_FIEND,
+/*18*/	VN_SHAYATEEN,
+/*19*/	VN_MAX,
 };
 //if VN_MAX exceeds this limit, we have a problem (Vault IDs should range from 1 to 31).
 #define VAULT_LIMIT	32

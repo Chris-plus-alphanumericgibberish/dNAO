@@ -34,6 +34,8 @@ struct Jitem {
 			   typ != DIAMOND && typ != SAPPHIRE &&		\
 			   typ != MAGICITE_CRYSTAL && 	\
 			   typ != BLACK_OPAL && 	\
+			   typ != ANTIMAGIC_RIFT && 	\
+			   typ != CATAPSI_VORTEX && 	\
 			   typ != EMERALD && typ != OPAL)))
 
 #ifndef OVLB
@@ -902,8 +904,12 @@ boolean dofull;
 			u.uinsight < 10 ? Strcat(buf, "self-acidifying ") : Strcat(buf, "acid-secreting ");
 		if (check_oprop(obj, OPROP_PSECW) && (obj->known || u.uinsight >= 10) && !(obj->opoisoned&OPOISON_BASIC))
 			u.uinsight < 10 ? Strcat(buf, "self-poisoning ") : Strcat(buf, "poison-secreting ");
+		if (check_oprop(obj, OPROP_GRES) && (obj->known || u.uinsight >= 10) && !(obj->greased))
+			u.uinsight < 10 ? Strcat(buf, "self-greasing ") : Strcat(buf, "grease-secreting ");
 		if (check_oprop(obj, OPROP_HEAL) && (obj->known || u.uinsight >= 10))
 			u.uinsight < 10 ? Strcat(buf, "healing ") : Strcat(buf, "angel-haunted ");
+		if (check_oprop(obj, OPROP_RETRW) && (obj->known || u.uinsight >= 10))
+			u.uinsight < 10 ? Strcat(buf, "returning ") : Strcat(buf, "loyal ");
 		
 		if(check_oprop(obj, OPROP_OCLTW) && obj->known)
 			Strcat(buf, "occult ");
@@ -1272,7 +1278,7 @@ char *buf;
 	if (obj->oinvis) Strcat(buf, "invisible ");
 	else
 #endif
-	if (is_lightsaber(obj) && litsaber(obj)){
+	if (is_lightsaber(obj) && litsaber(obj) && obj->otyp != ROD_OF_FORCE){
 		Strcat(buf, lightsaber_colorText(obj));
 		if (!objects[obj->otyp].oc_name_known && strncmpi(eos(buf)-7, " bladed", 7))
 			Strcat(buf, " bladed");
@@ -3635,6 +3641,22 @@ int wishflags;
 	/* save the [nearly] unmodified choice string */
 	Strcpy(fruitbuf, bp);
 
+	/* special directives (used mostly in the level editor) */
+	if(wizwish){
+		if(!strcmpi(bp, "devil vault loot"))
+			return mkhellvaultitem(VN_N_PIT_FIEND);
+		if(!strcmpi(bp, "demon vault loot"))
+			return mkhellvaultitem(VN_SHAYATEEN);
+		if(!strcmpi(bp, "tannin vault loot"))
+			return mkhellvaultitem(VN_AKKABISH);
+		if(!strcmpi(bp, "ancient vault loot"))
+			return mkhellvaultitem(VN_A_O_BLESSINGS);
+		if(!strcmpi(bp, "angelic vault loot"))
+			return mkhellvaultitem(VN_APOCALYPSE);
+		if(!strcmpi(bp, "lolth vault loot"))
+			return mklolthvaultitem();
+	}
+
 	for(;;) {
 		register int l;
 
@@ -4037,6 +4059,12 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "self-poisoning ", l=15) || !strncmpi(bp, "poison-secreting ", l=17) ) {
 			add_oprop_list(oprop_list, OPROP_PSECW);
+
+		} else if (!strncmpi(bp, "self-greasing ", l=14) || !strncmpi(bp, "grease-secreting ", l=17)) {
+			add_oprop_list(oprop_list, OPROP_GRES);
+
+		} else if (!strncmpi(bp, "returning ", l=10) || !strncmpi(bp, "loyal ", l=6)) {
+			add_oprop_list(oprop_list, OPROP_RETRW);
 
 		} else if (!strncmpi(bp, "occult ", l=7)) {
 			add_oprop_list(oprop_list, OPROP_OCLTW);

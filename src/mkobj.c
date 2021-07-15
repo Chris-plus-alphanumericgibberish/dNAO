@@ -800,6 +800,7 @@ int mkflags;
 			case DOUBLE_LIGHTSABER:
 			case LIGHTSABER:
 			case BEAMSWORD:
+			case ROD_OF_FORCE:
 				otmp->altmode = FALSE;
 				otmp->lamplit = 0;
 				otmp->age = (long)rn1(50000, 100000);

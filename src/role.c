@@ -3089,6 +3089,22 @@ give_tannin_vault_trophy()
 
 #ifdef RECORD_ACHIEVE
 void
+give_devil_vault_trophy()
+{
+	achieve.trophies |= DEVIL_VAULT;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
+give_demon_vault_trophy()
+{
+	achieve.trophies |= DEMON_VAULT;
+}
+#endif
+
+#ifdef RECORD_ACHIEVE
+void
 give_hell_vault_trophy(hv_id)
 int hv_id;
 {
@@ -3114,6 +3130,10 @@ int hv_id;
 		case VN_HARROWER:
 		case VN_MAD_ANGEL:
 			give_angel_vault_trophy();
+		case VN_N_PIT_FIEND:
+			give_devil_vault_trophy();
+		case VN_SHAYATEEN:
+			give_demon_vault_trophy();
 		break;
 	}
 }

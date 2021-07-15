@@ -24,9 +24,9 @@ STATIC_DCL int FDECL(precheck, (struct monst *,struct obj *));
 STATIC_DCL void FDECL(mzapmsg, (struct monst *,struct obj *,BOOLEAN_P));
 STATIC_DCL void FDECL(mreadmsg, (struct monst *,struct obj *));
 STATIC_DCL void FDECL(mquaffmsg, (struct monst *,struct obj *));
-STATIC_PTR int FDECL(mbhitm, (struct monst *,struct obj *));
+STATIC_PTR int FDECL(mbhitm, (struct monst *,struct obj *,struct monst *));
 STATIC_DCL void FDECL(mbhit,
-	(struct monst *,int,int FDECL((*),(MONST_P,OBJ_P)),
+	(struct monst *,int,int FDECL((*),(MONST_P,OBJ_P,MONST_P)),
 	int FDECL((*),(OBJ_P,OBJ_P)),struct obj *));
 void FDECL(you_aggravate, (struct monst *));
 STATIC_DCL void FDECL(mon_consume_unstone, (struct monst *,struct obj *,
@@ -1201,9 +1201,10 @@ struct monst *mtmp;
 
 STATIC_PTR
 int
-mbhitm(mtmp, otmp)
+mbhitm(mtmp, otmp, magr)
 register struct monst *mtmp;
 register struct obj *otmp;
+register struct monst *magr;
 {
 	int tmp;
 
@@ -1214,10 +1215,19 @@ register struct obj *otmp;
 	}
 	switch(otmp->otyp) {
 	case WAN_STRIKING:
+	case ROD_OF_FORCE:
 		reveal_invis = TRUE;
 		if (mtmp == &youmonst) {
-			if (zap_oseen) makeknown(WAN_STRIKING);
-			if (Antimagic) {
+			if (zap_oseen) makeknown(otmp->otyp);
+			if (uwep && uwep->otyp == ROD_OF_FORCE) {
+				You_hear("a rushing sound.");
+				uwep->age = min(uwep->age+10000, LIGHTSABER_MAX_CHARGE);
+			}
+			else if (uswapwep && uswapwep->otyp == ROD_OF_FORCE) {
+				You_hear("a rushing sound.");
+				uswapwep->age = min(uswapwep->age+10000, LIGHTSABER_MAX_CHARGE);
+			}
+			else if (Antimagic) {
 			    shieldeff(u.ux, u.uy);
 			    pline("Boing!");
 			} else {
@@ -1226,18 +1236,26 @@ register struct obj *otmp;
 			    if(Half_spell_damage) tmp = (tmp+1) / 2;
 				if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 			    losehp(tmp, "wand", KILLED_BY_AN);
+				hurtle(sgn(u.ux-magr->mx), sgn(u.uy-magr->my), BOLT_LIM, FALSE, TRUE);
 			}
 			stop_occupation();
 			nomul(0, NULL);
+		} else if (MON_WEP(mtmp) && MON_WEP(mtmp)->otyp == ROD_OF_FORCE) {
+			MON_WEP(mtmp)->age = min(MON_WEP(mtmp)->age+10000, LIGHTSABER_MAX_CHARGE);
+		} else if (MON_SWEP(mtmp) && MON_SWEP(mtmp)->otyp == ROD_OF_FORCE) {
+			MON_SWEP(mtmp)->age = min(MON_SWEP(mtmp)->age+10000, LIGHTSABER_MAX_CHARGE);
 		} else if (resists_magm(mtmp)) {
 			shieldeff(mtmp->mx, mtmp->my);
 			pline("Boing!");
 		} else {
 			tmp = d(2,12);
 			hit("wand", mtmp, exclam(tmp));
-			(void) resist(mtmp, otmp->oclass, tmp, TELL);
+			(void) resist(mtmp, otmp->otyp == ROD_OF_FORCE ? WAND_CLASS : otmp->oclass, tmp, TELL);
+			if(otmp->otyp == ROD_OF_FORCE && !DEADMONSTER(mtmp) && u.usteed == mtmp){
+				mhurtle(mtmp, sgn(magr->mx - mtmp->mx), sgn(magr->my - mtmp->my), BOLT_LIM, FALSE);
+			}
 			if (cansee(mtmp->mx, mtmp->my) && zap_oseen)
-				makeknown(WAN_STRIKING);
+				makeknown(otmp->otyp);
 		}
 		break;
 	case WAN_TELEPORTATION:
@@ -1310,7 +1328,7 @@ STATIC_OVL void
 mbhit(mon,range,fhitm,fhito,obj)
 struct monst *mon;			/* monster shooting the wand */
 register int range;			/* direction and range */
-int FDECL((*fhitm),(MONST_P,OBJ_P));
+int FDECL((*fhitm),(MONST_P,OBJ_P,MONST_P));
 int FDECL((*fhito),(OBJ_P,OBJ_P));	/* fns called when mon/obj hit */
 struct obj *obj;			/* 2nd arg to fhitm/fhito */
 {
@@ -1339,16 +1357,17 @@ struct obj *obj;			/* 2nd arg to fhitm/fhito */
 		if (find_drawbridge(&x,&y))
 		    switch (obj->otyp) {
 			case WAN_STRIKING:
+			case ROD_OF_FORCE:
 			    destroy_drawbridge(x,y);
 		    }
 		if(bhitpos.x==u.ux && bhitpos.y==u.uy) {
-			(*fhitm)(&youmonst, obj);
+			(*fhitm)(&youmonst, obj, mon);
 			range -= 3;
 		} else if(MON_AT(bhitpos.x, bhitpos.y)){
 			mtmp = m_at(bhitpos.x,bhitpos.y);
 			if (cansee(bhitpos.x,bhitpos.y) && !canspotmon(mtmp))
 			    map_invisible(bhitpos.x, bhitpos.y);
-			(*fhitm)(mtmp, obj);
+			(*fhitm)(mtmp, obj, mon);
 			range -= 3;
 		}
 		/* modified by GAN to hit all objects */
@@ -1365,7 +1384,7 @@ struct obj *obj;			/* 2nd arg to fhitm/fhito */
 		    if(hitanything)	range--;
 		}
 		typ = levl[bhitpos.x][bhitpos.y].typ;
-		if (typ == IRONBARS && obj->otyp==WAN_STRIKING){
+		if (typ == IRONBARS && (obj->otyp==WAN_STRIKING || obj->otyp==ROD_OF_FORCE)){
 			break_iron_bars(bhitpos.x, bhitpos.y, TRUE);
 		}
 		if(IS_DOOR(typ) || typ == SDOOR) {
@@ -1375,6 +1394,7 @@ struct obj *obj;			/* 2nd arg to fhitm/fhito */
 			case WAN_OPENING:
 			case WAN_LOCKING:
 			case WAN_STRIKING:
+			case ROD_OF_FORCE:
 			    if (doorlock(obj, bhitpos.x, bhitpos.y)) {
 				makeknown(obj->otyp);
 				/* if a shop door gets broken, add it to

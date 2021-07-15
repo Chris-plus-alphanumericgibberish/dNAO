@@ -204,7 +204,7 @@ struct monst * mdef;
 	
 	if (uwep
 		&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || 
-			((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER) && uwep->altmode)
+			((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER || uwep->otyp == ROD_OF_FORCE) && uwep->altmode)
 		)
 		&& !u.twoweap
 		){
@@ -517,14 +517,14 @@ int tary;
 		&& !youagr
 		&& !(has_template(magr, ZOMBIFIED) || has_template(magr, SKELIFIED))
 		&& rn2(2)){
-		magr->mvar2 = monsndx(find_mask(magr));
+		magr->mvar_attack_pm = monsndx(find_mask(magr));
 		if (!Blind && pa->mtyp != PM_LILLEND && canseemon(magr))
 			pline("%s uses a %s mask!", Monnam(magr), pa->mname);
 	}
 	
 	/* deliriums use their apparent form */
 	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr && magr->mappearance && magr->m_ap_type == M_AP_MONSTER){
-		magr->mvar2 = magr->mappearance;
+		magr->mvar_attack_pm = magr->mappearance;
 	}
 	
 	/* zero out res[] */
@@ -574,8 +574,8 @@ int tary;
 		/* Some armor completely covers the face and prevents bite attacks*/
 		if (aatyp == AT_BITE || aatyp == AT_LNCK || aatyp == AT_5SBT ||
 			(aatyp == AT_ENGL && !(youdef && u.uswallow)) ||
-			(aatyp == AT_TENT && is_mind_flayer(magr->data)))
-		{
+			(aatyp == AT_TENT && is_mind_flayer(magr->data))
+		){
 			struct obj * helm = youagr ? uarmh : which_armor(magr, W_ARMH);
 			struct obj * cloak = youagr ? uarmc : which_armor(magr, W_ARMC);
 			if ((helm && (
@@ -1329,9 +1329,9 @@ int tary;
 	
 	/* reset lillend mask usage */
 	if (!youagr && pa->mtyp == PM_LILLEND)
-		magr->mvar2 = 0;
+		magr->mvar_attack_pm = 0;
 	if (!youagr && pa->mtyp == PM_WALKING_DELIRIUM)
-		magr->mvar2 = 0;
+		magr->mvar_attack_pm = 0;
 
 	/* do some things only if attacks were made */
 	if (attacksmade > 0) {
@@ -1766,8 +1766,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 
 	/* lillends are able to use the attacks of another monster */
 	/* modify pa here, but only here (when getting attacks) */
-	if ((pa->mtyp == PM_LILLEND || pa->mtyp == PM_WALKING_DELIRIUM) && magr->mvar2) {
-		pa = &mons[magr->mvar2];
+	if ((pa->mtyp == PM_LILLEND || pa->mtyp == PM_WALKING_DELIRIUM) && magr->mvar_attack_pm) {
+		pa = &mons[magr->mvar_attack_pm];
 	}
 
 	//Get next attack
@@ -2616,7 +2616,7 @@ boolean ranged;
 	if (!ranged) {
 		Sprintf(buf, "%s %s %s %s",
 			Monnam(magr),
-			(objects[otmp->otyp].oc_dir & PIERCE && weapon_type(otmp) != P_PICK_AXE) ? "thrusts" : "swings",
+			(objects[otmp->otyp].oc_dtyp & PIERCE && weapon_type(otmp) != P_PICK_AXE) ? "thrusts" : "swings",
 			mhis(magr),
 			singular(otmp, xname)
 			);
@@ -3353,6 +3353,9 @@ int flat_acc;
 			if (is_boulder(weapon))
 				rang_acc += 6;
 			break;
+		case MASS_OF_STUFF:
+			rang_acc += 9;
+		break;
 		case BALL_OF_WEBBING:
 			/* balls of webbing should always miss */
 			rang_acc -= 2000;
@@ -11363,7 +11366,7 @@ int vis;
 
 		/* cancellation */
 	case AD_CNCL:
-		if (cancel_monst(mdef, mksobj(SPE_CANCELLATION, MKOBJ_NOINIT), FALSE, TRUE, FALSE, !rn2(4) ? rnd(mlev(magr)) : 0)) {
+		if (cancel_monst(mdef, (struct obj *)0, FALSE, TRUE, FALSE, !rn2(4) ? rnd(mlev(magr)) : 0)) {
 			if (youdef) {
 				if (vis&VIS_MAGR)
 				{
@@ -12057,6 +12060,7 @@ int vis;						/* True if action is at all visible to the player */
 	boolean resisted_weapon_attacks = FALSE;
 	boolean resisted_attack_type = FALSE;
 	boolean resisted_thick_skin = FALSE;
+	boolean misotheistic_major = FALSE;
 	int attackmask = 0;
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
@@ -12981,6 +12985,52 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 
+	/* Misotheistic weapon ancelling the divine (and also supressing magic) */
+	if(weapon && weapon->otyp == ROD_OF_FORCE && !recursed && !litsaber(weapon)){
+		int misdamage;
+		if(youdef){
+			if(base_casting_stat() == A_WIS || is_angel(pd)){
+				if(!rn2(10)){
+					misotheistic_major = TRUE;
+					u.uen = max(u.uen - 400, min(u.uen, 0));
+					make_doubtful(itimeout_incr(HDoubt, 13*50), FALSE);
+					make_stunned(itimeout_incr(HStun, 13*50), FALSE);
+					weapon->age = LIGHTSABER_MAX_CHARGE;
+				}
+				else {
+					misdamage = rnd(13);
+					u.uen = max(u.uen - misdamage*10, 0);
+					weapon->age = min(weapon->age+misdamage*100, LIGHTSABER_MAX_CHARGE);
+				}
+			}
+			else {
+				misdamage = rnd(4);
+				u.uen = max(u.uen - misdamage*10, 0);
+				weapon->age = min(weapon->age+misdamage*100, LIGHTSABER_MAX_CHARGE);
+			}
+		}
+		else {
+			if(attacktype_fordmg(pd, AT_MAGC, AD_CLRC) || attacktype_fordmg(pd, AT_MMGC, AD_CLRC) || is_angel(pd)){
+				if(!rn2(10)){
+					misotheistic_major = TRUE;
+					mdef->mdoubt = TRUE;
+					mdef->mconf = TRUE;
+					cancel_monst(mdef, weapon, youagr, FALSE, FALSE,0);
+					weapon->age = LIGHTSABER_MAX_CHARGE;
+				}
+				else {
+					misdamage = rnd(13);
+					mdef->mspec_used = max(misdamage, mdef->mspec_used);
+					weapon->age = min(weapon->age+misdamage*100, LIGHTSABER_MAX_CHARGE);
+				}
+			}
+			else if(attacktype(pd, AT_MAGC) || attacktype(pd, AT_MMGC)){
+				misdamage = rnd(4);
+				mdef->mspec_used = max(misdamage, mdef->mspec_used);
+				weapon->age = min(weapon->age+misdamage*100, LIGHTSABER_MAX_CHARGE);
+			}
+		}
+	}
 	/* set zombify resulting from melee mvm combat */
 	if (magr && !youagr && !youdef && melee && !recursed) {
 		if ((has_template(magr, ZOMBIFIED) || (has_template(magr, SKELIFIED) && !rn2(20))) && can_undead(mdef->data)){
@@ -14838,6 +14888,14 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 
+	if(misotheistic_major && !lethaldamage){
+		if(youdef){
+			You("are stunned by loss and doubt!");
+		}
+		else if(canseemon(mdef) && humanoid_upperbody(mdef->data)){
+			pline("%s looks stunned by doubt and grief!", Monnam(mdef));
+		}
+	}
 	/* silently handle destroyed weapons */
 	if (destroy_one_magr_weapon || destroy_all_magr_weapon) {
 		boolean deallocweapon = (weapon->quan == 1L || destroy_all_magr_weapon );

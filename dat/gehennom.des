@@ -98,6 +98,15 @@ OBJECT:')',random,random
 OBJECT:')',random,random
 OBJECT:')',random,random
 OBJECT:')',random,random
+
+OBJECT:'|', "wage of sloth", random
+OBJECT:'|', "wage of lust", random
+OBJECT:'|', "wage of gluttony", random
+OBJECT:'|', "wage of greed", random
+OBJECT:'|', "wage of wrath", random
+OBJECT:'|', "wage of envy", random
+OBJECT:'|', "wage of pride", random
+
 #
 # Some random loot.
 #
@@ -236,6 +245,27 @@ MONSTER:'m',"giant mimic",place[2],m_feature "fountain"
 MONSTER:'m',"giant mimic",place[3],m_feature "fountain"
 # The demon of the swamp
 MONSTER:'&',"Juiblex",(25,08)
+CONTAINER:'#',"stone chest",(25,08)
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
 # And a couple demons
 MONSTER:'i',"manes",(43,08)
 MONSTER:'i',"manes",(44,08)
@@ -382,6 +412,27 @@ TELEPORT_REGION:levregion(01,00,11,20),(0,0,50,17),up
 TELEPORT_REGION:levregion(69,00,79,20),(0,0,50,17),down
 # The demon of the swamp
 MONSTER:'&',"Zuggtmoy",(25,08)
+CONTAINER:'#',"stone chest",(25,08)
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
 # And a couple demons
 MONSTER:'i',"manes",random
 MONSTER:'i',"manes",random
@@ -566,6 +617,34 @@ OBJECT:random,random,random
 OBJECT:random,random,random
 # The resident nasty
 MONSTER:'&',"Orcus",(33,15)
+CONTAINER:'#',"lead chest",(33,15)
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of sloth",contained
+OBJECT:'|',"wage of sloth",contained
+OBJECT:'|',"wage of sloth",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
 # And its preferred companions
 MONSTER:'Z',random,(32,15)
 MONSTER:' ',"shade",(32,14)
@@ -854,6 +933,49 @@ MAZEWALK:(04,02), east
 MAZEWALK:(00,02), west
 MAZEWALK:(02,04), south
 MONSTER:'&',"Bael",(02,02)
+CONTAINER:'#',"green-steel chest",(02,02)
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
 MONSTER:'&',"pit fiend",(01,01)
 MONSTER:'&',"pit fiend",(02,03)
 
@@ -1183,6 +1305,47 @@ STAIR:(13,10),up
 STAIR:(73,10),down
 
 MONSTER:'&',"Dispater",(47,10)
+CONTAINER:'#',"iron chest",(48,10)
+OBJECT:'|',"wage of greed",contained
+OBJECT:'|',"wage of greed",contained
+OBJECT:'|',"wage of greed",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
 MONSTER:'&',"erinys",(03,13)
 MONSTER:'&',"erinys",(03,07)
 MONSTER:'&',"erinys",(23,13)
@@ -1343,6 +1506,107 @@ MAZE: "hell-3",random
 FLAGS: noteleport,hardfloor,nommap,shortsighted
 
 INIT_MAP:'.','}',false,true,unlit,false
+
+GEOMETRY: right,center
+#          1         2         3
+#0123456789012345678901234567890
+MAP
+0}} }} |----------------------|
+1} } }--                 S    |
+2 }   S                  |    |
+3}}}}---------------------    |
+4    |{          ---------- --|
+5 } F--          |........|   |
+6}  F S          |........|   |
+7 }}F --- ---|---|--.--.--|-| |
+8}----|      |                |
+9}||}}|     {|              | |
+0}||}}|      S             \| |
+1}||}}|     {|              | |
+2}----|      |                |
+3 }}F --- ---|---|--.--.--|-| |
+4} }F S          |........|   |
+5 }}F--          |........|   |
+6}}}}|{          ---------- --|
+7 }}}---------------------    |
+8}} }}S                  |    |
+9 }} }--                 S    |
+0} }}}}|----------------------|
+ENDMAP
+#0123456789012345678901234567890
+
+OBJECT:'|', "wage of greed", (19,13)
+OBJECT:'|', "wage of greed", (22,13)
+
+OBJECT:'|', "wage of greed", (17,15)
+OBJECT:'|', "wage of greed", (18,15)
+OBJECT:'|', "wage of greed", (19,15)
+OBJECT:'|', "wage of greed", (20,15)
+OBJECT:'|', "wage of greed", (21,15)
+OBJECT:'|', "wage of greed", (22,15)
+OBJECT:'|', "wage of greed", (23,15)
+OBJECT:'|', "wage of greed", (24,15)
+
+OBJECT:'|', "wage of greed", (17,14)
+OBJECT:'|', "wage of greed", (18,14)
+OBJECT:'|', "wage of greed", (19,14)
+OBJECT:'|', "wage of greed", (20,14)
+OBJECT:'|', "wage of greed", (21,14)
+OBJECT:'|', "wage of greed", (22,14)
+OBJECT:'|', "wage of greed", (23,14)
+OBJECT:'|', "wage of greed", (24,14)
+
+OBJECT:'|', "wage of greed", (19,07)
+OBJECT:'|', "wage of greed", (22,07)
+
+OBJECT:'|', "wage of greed", (17,06)
+OBJECT:'|', "wage of greed", (18,06)
+OBJECT:'|', "wage of greed", (19,06)
+OBJECT:'|', "wage of greed", (20,06)
+OBJECT:'|', "wage of greed", (21,06)
+OBJECT:'|', "wage of greed", (22,06)
+OBJECT:'|', "wage of greed", (23,06)
+OBJECT:'|', "wage of greed", (24,06)
+
+OBJECT:'|', "wage of greed", (17,05)
+OBJECT:'|', "wage of greed", (18,05)
+OBJECT:'|', "wage of greed", (19,05)
+OBJECT:'|', "wage of greed", (20,05)
+OBJECT:'|', "wage of greed", (21,05)
+OBJECT:'|', "wage of greed", (22,05)
+OBJECT:'|', "wage of greed", (23,05)
+OBJECT:'|', "wage of greed", (24,05)
+
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+OBJECT:'#', "devil vault loot",random
+
 
 GEOMETRY: right,center
 #          1         2         3
@@ -1738,7 +2002,7 @@ MAZE: "hell-4",random
 FLAGS: noteleport,hardfloor,nommap,shortsighted
 
 GEOMETRY: right,center
-#0         1         2   	3	    4		  5		6	    7
+#0         1         2         3         4         5         6         7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
 0LLLLLLLLLLL                 LLLLL...LL LLLLLLLLL       ..........       LLLL
@@ -1763,7 +2027,7 @@ MAP
 9LLLLLLLLLLLLLLL                         LLLLLLLL                        LLLL
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
-#0         1         2   	3	    4		  5		6	    7
+#0         1         2         3         4         5         6         7
 
 STAIR: (02,09), up
 STAIR: (73,09), down
@@ -1775,6 +2039,57 @@ MONSTER:'&', "Belial", (36,09)
 MONSTER:'&', "Fierna", (37,09)
 MONSTER:'&', "pit fiend", (36,10), "Gazra", hostile
 MONSTER:'&', "Naome", (36,08), hostile
+
+CONTAINER:'#',"gold chest",(37,09)
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
 
 REGION:(72,12,75,19),lit,"ordinary"
 REGION:(72,00,75,06),lit,"ordinary"
@@ -2080,6 +2395,37 @@ MONSTER:'&',"pit fiend", (41, 12)
 MONSTER:'L',"master lich", (32, 13), asleep
 MONSTER:'\'',"iron golem", (43, 13)
 
+CONTAINER:'#',"stone chest",(34, 13)
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
 MONSTER:'D',"black dragon", (35, 13), asleep
 MONSTER:'&',"Daughter Lilith", (36, 13)
 MONSTER:'&',"Verier", (37, 13)
@@ -2087,6 +2433,36 @@ MONSTER:'&',"Crone Lilith", (38, 13)
 MONSTER:'L',"arch-lich", (39, 13), asleep
 MONSTER:'&',"Mother Lilith", (40, 13)
 
+CONTAINER:'#',"stone chest",(41, 13)
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
 
 MONSTER:'i',"legion devil sergeant", (30, 12)
 MONSTER:'i',"legion devil sergeant", (30, 08)
@@ -2347,6 +2723,46 @@ DOOR:open,(47,03)
 DOOR:closed,(69,17)
 
 MONSTER:'&',"Baalzebub", (66, 10)
+CONTAINER:'#',"silver chest",(66,10)
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of sloth",contained
+OBJECT:'|',"wage of sloth",contained
+OBJECT:'|',"wage of sloth",contained
+
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
 
 MONSTER:'i',"legion devil soldier", (60, 09)
 MONSTER:'i',"legion devil soldier", (67, 09)
@@ -2681,7 +3097,108 @@ TELEPORT_REGION:(00,00,31,20),(0,0,0,0),down
 TELEPORT_REGION:(33,00,51,20),(0,0,0,0),up
 
 MONSTER:'&',"Mephistopheles", (66, 09)
+CONTAINER:'#',"gold chest",(66,10)
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of greed",contained
+OBJECT:'|',"wage of greed",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+OBJECT[75%]:'#',"devil vault loot",contained
+
 MONSTER:'&',"Baalphegor", (66, 11)
+CONTAINER:'#',"metal chest",(66,10)
+OBJECT:'*',"antimagic rift",contained
+OBJECT:'*',"antimagic rift",contained
+OBJECT:'*',"antimagic rift",contained
+OBJECT:'*',"antimagic rift",contained
+OBJECT:'*',"catapsi vortex",contained
+OBJECT:'*',"catapsi vortex",contained
+OBJECT:'*',"catapsi vortex",contained
+OBJECT:'*',"catapsi vortex",contained
+
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+
+
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+
+
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+
+
+OBJECT[75%]:'#',"ancient vault loot",contained
+OBJECT[75%]:'#',"ancient vault loot",contained
+OBJECT[75%]:'#',"ancient vault loot",contained
+OBJECT[75%]:'#',"ancient vault loot",contained
+OBJECT[75%]:'#',"ancient vault loot",contained
+OBJECT[75%]:'#',"ancient vault loot",contained
+OBJECT[75%]:'#',"ancient vault loot",contained
+OBJECT[75%]:'#',"ancient vault loot",contained
+
+
 MONSTER:'&',"pit fiend",(59,09)
 MONSTER:'&',"pit fiend",(59,08)
 
@@ -2919,6 +3436,107 @@ OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
 
+CONTAINER:'#',"green-steel chest",(39,10)
+OBJECT:'*',"antimagic rift",contained
+OBJECT:'*',"antimagic rift",contained
+OBJECT:'*',"antimagic rift",contained
+OBJECT:'*',"catapsi vortex",contained
+OBJECT:'*',"catapsi vortex",contained
+OBJECT:'*',"catapsi vortex",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+OBJECT[90%]:'#',"devil vault loot",contained
+
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+OBJECT[45%]:'#',"devil vault loot",contained
+
 GEOMETRY: right,center
 
 #0          1         2   	 3	     4	   5		 6	     7
@@ -2971,52 +3589,76 @@ NON_DIGGABLE:(00,00,75,19)
 
 MONSTER:'\'',"treasury golem",(29,05)
 OBJECT:  '$', random, (29,05)
+OBJECT:'|', random, (29,05)
 MONSTER:'\'',"treasury golem",(30,05)
 OBJECT:  '$', random, (30,05)
+OBJECT:'|', random, (30,05)
 MONSTER:'\'',"treasury golem",(31,05)
 OBJECT:  '$', random, (31,05)
+OBJECT:'|', random, (31,05)
 MONSTER:'\'',"treasury golem",(32,05)
 OBJECT:  '$', random, (32,05)
+OBJECT:'|', random, (32,05)
 MONSTER:'\'',"treasury golem",(33,05)
 OBJECT:  '$', random, (33,05)
+OBJECT:'|', random, (33,05)
 MONSTER:'\'',"treasury golem",(34,05)
 OBJECT:  '$', random, (34,05)
+OBJECT:'|', random, (34,05)
 MONSTER:'\'',"treasury golem",(35,05)
 OBJECT:  '$', random, (35,05)
+OBJECT:'|', random, (35,05)
 MONSTER:'\'',"treasury golem",(36,05)
 OBJECT:  '$', random, (36,05)
+OBJECT:'|', random, (36,05)
 MONSTER:'\'',"treasury golem",(37,05)
 OBJECT:  '$', random, (37,05)
+OBJECT:'|', random, (37,05)
 MONSTER:'\'',"treasury golem",(38,05)
 OBJECT:  '$', random, (38,05)
+OBJECT:'|', random, (38,05)
 MONSTER:'\'',"treasury golem",(39,05)
 OBJECT:  '$', random, (39,05)
+OBJECT:'|', random, (39,05)
 MONSTER:'\'',"treasury golem",(40,05)
 OBJECT:  '$', random, (40,05)
+OBJECT:'|', random, (40,05)
 MONSTER:'\'',"treasury golem",(29,06)
 OBJECT:  '$', random, (29,06)
+OBJECT:'|', random, (29,06)
 MONSTER:'\'',"treasury golem",(30,06)
 OBJECT:  '$', random, (30,06)
+OBJECT:'|', random, (30,06)
 MONSTER:'\'',"treasury golem",(31,06)
 OBJECT:  '$', random, (31,06)
+OBJECT:'|', random, (31,06)
 MONSTER:'\'',"treasury golem",(32,06)
 OBJECT:  '$', random, (32,06)
+OBJECT:'|', random, (32,06)
 MONSTER:'\'',"treasury golem",(33,06)
 OBJECT:  '$', random, (33,06)
+OBJECT:'|', random, (33,06)
 MONSTER:'\'',"treasury golem",(34,06)
 OBJECT:  '$', random, (34,06)
+OBJECT:'|', random, (34,06)
 MONSTER:'\'',"treasury golem",(35,06)
 OBJECT:  '$', random, (35,06)
+OBJECT:'|', random, (35,06)
 MONSTER:'\'',"treasury golem",(36,06)
 OBJECT:  '$', random, (36,06)
+OBJECT:'|', random, (36,06)
 MONSTER:'\'',"treasury golem",(37,06)
 OBJECT:  '$', random, (37,06)
+OBJECT:'|', random, (37,06)
 MONSTER:'\'',"treasury golem",(38,06)
 OBJECT:  '$', random, (38,06)
+OBJECT:'|', random, (38,06)
 MONSTER:'\'',"treasury golem",(39,06)
 OBJECT:  '$', random, (39,06)
+OBJECT:'|', random, (39,06)
 MONSTER:'\'',"treasury golem",(40,06)
 OBJECT:  '$', random, (40,06)
+OBJECT:'|', random, (40,06)
 
 #17 18 - 19 19 + 15 19 also treasure
 MONSTER:'\'',"gold golem",(17,18)
@@ -3125,7 +3767,7 @@ MONSTER:'E',"water elemental",random
 
 GEOMETRY: right,center
 
-#0         1         2   	 3	     4	   5		 6	     7
+#0         1         2         3         4         5         6         7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
 0}}..}}.}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}..}}}}}}}}}}}}}}}}}}}}}}}
@@ -3160,6 +3802,56 @@ STAIR: (74,20), down
 NON_DIGGABLE:(00,00,75,20)
 
 MONSTER:'&',"Demogorgon",(60,10)
+CONTAINER:'#',"dragonbone chest",(61,09)
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+OBJECT:'#',"ancient vault loot",contained
+
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+OBJECT:'#',"devil vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
 MONSTER:'&',"nessian pit fiend",(61,10), "traitor pit fiend", asleep
 MONSTER:'&',"shayateen",(61,11), asleep
 MONSTER:'\'',"spell golem", (60,11), asleep
@@ -3296,6 +3988,75 @@ OBJECT:random,random,random
 
 MAZE: "brine-2",random
 FLAGS: noteleport,hardfloor,nommap,shortsighted
+
+GEOMETRY: right,center
+#0         1         2   	 3	     4	   5		 6	     7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0....---------...............................................................
+1....|       |..............................................---..............
+2..---       ---......................................----.||  ||.----.......
+3 .|           |. . . . . . . . . . . . . . . . .....||  |||    |||  || . . .
+4..|           |................................----.|    ||    ||    |.----.
+5 .|-         -|. . . . . . . . . . . . ..... .||  |||    |||  |||    |||  ||
+6...|-|     |-|................................|    |||  ||.-..-.||  |||    |
+7 . ..|-. .-|.. . . . . . . . . . . . . ... . .     | - --..----..- -- |    |
+8..............................................||  ||......||  ||......||  ||
+9 . . . . . . . . . . . . . . . . . . . ... . . - --. ... .     |.. . . - --.
+0...............................................----.......|    |.......----.
+1 . . . . . . . . . . . . . . . . . . ..... . .||  ||.. . .||  ||.. . .||  ||
+2..............................................|    |.----..----..----.|    |
+3 . . . . . . . . . . . . . . . . . . ... . . .     |||  ||.- .-.||  |||    |
+4..............................................||  |||    |||  |||    |||  ||
+5 . . . . . . . . . . . . . . . . . . ... . . . - --.     ||    ||    | - -- 
+6....................................................||  |||    |||  ||...   
+7 . . . . . . . . . . . . . . . . . ..... . . . . . . - - .||   | - - . . . .
+8...........................................................----.............
+9 . . . . . . . . . . . . . . . . ........... . . . . . . ...     . . . .   .
+0.............................................................        .......
+ENDMAP
+
+OBJECT:'#',"tannin vault loot",random
+OBJECT:'#',"tannin vault loot",random
+OBJECT:'#',"tannin vault loot",random
+OBJECT:'#',"tannin vault loot",random
+OBJECT:'#',"tannin vault loot",random
+OBJECT:'#',"tannin vault loot",random
+
+OBJECT[90%]:'#',"tannin vault loot",random
+OBJECT[90%]:'#',"tannin vault loot",random
+OBJECT[90%]:'#',"tannin vault loot",random
+OBJECT[90%]:'#',"tannin vault loot",random
+OBJECT[90%]:'#',"tannin vault loot",random
+OBJECT[90%]:'#',"tannin vault loot",random
+
+OBJECT[75%]:'#',"tannin vault loot",random
+OBJECT[75%]:'#',"tannin vault loot",random
+OBJECT[75%]:'#',"tannin vault loot",random
+OBJECT[75%]:'#',"tannin vault loot",random
+OBJECT[75%]:'#',"tannin vault loot",random
+OBJECT[75%]:'#',"tannin vault loot",random
+
+OBJECT[50%]:'#',"tannin vault loot",random
+OBJECT[50%]:'#',"tannin vault loot",random
+OBJECT[50%]:'#',"tannin vault loot",random
+OBJECT[50%]:'#',"tannin vault loot",random
+OBJECT[50%]:'#',"tannin vault loot",random
+OBJECT[50%]:'#',"tannin vault loot",random
+
+OBJECT[25%]:'#',"tannin vault loot",random
+OBJECT[25%]:'#',"tannin vault loot",random
+OBJECT[25%]:'#',"tannin vault loot",random
+OBJECT[25%]:'#',"tannin vault loot",random
+OBJECT[25%]:'#',"tannin vault loot",random
+OBJECT[25%]:'#',"tannin vault loot",random
+
+OBJECT[10%]:'#',"tannin vault loot",random
+OBJECT[10%]:'#',"tannin vault loot",random
+OBJECT[10%]:'#',"tannin vault loot",random
+OBJECT[10%]:'#',"tannin vault loot",random
+OBJECT[10%]:'#',"tannin vault loot",random
+OBJECT[10%]:'#',"tannin vault loot",random
 
 GEOMETRY: right,center
 #0         1         2   	 3	     4	   5		 6	     7
@@ -3476,6 +4237,234 @@ GEOMETRY: center,center
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
 0############################################################################
+1##########################################################     #############
+2#####################################################    #      #    #######
+3## # # # # # # # # # # # # # ### # # # # # # # # # #                  ######
+4###############################################    #                  #    #
+5#### # # # # # # ### # # # # # # # # # # # # #                              
+6##############################################                              
+7## # # # # # # # # # # # # ### # # # # # # # #                              
+8##############################################                              
+9## # # # # # # # # # # # # # # # # # # # # # #                              
+0###############################################                             
+1## # # # # # # # # # # # ### # # # # # ### # #                              
+2##############################################                              
+3## # # # # # # # # # # # # # # # # # # # # # #                              
+4##############################################                              
+5## # # # # # # # # # # # # # ### # # # # # # #     #                  #     
+6####################################################                  ###   
+7## # # # # # # # # # # # # # # ### # ### # # # # # #     #      #    #####  
+8###########################################################    ############ 
+9## # # # # # # # # # # # # # # # # # # # # # # # # # # # ###   ############ 
+0#############################################################      #########
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2		   3	     4		   5		 6		   7
+
+MONSTER:'&',"marilith",random
+MONSTER:'&',"marilith",random
+MONSTER:'&',"marilith",random
+
+MONSTER:'&',"marilith",random
+MONSTER:'&',"marilith",random
+MONSTER:'&',"marilith",random
+
+MONSTER:'&',"marilith",random
+MONSTER:'&',"marilith",random
+MONSTER:'&',"marilith",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+MONSTER:'&',"vrock",random
+
+MONSTER:'H',"minotaur",random
+MONSTER:'H',"minotaur",random
+MONSTER:'H',"minotaur",random
+
+MONSTER:'H',"minotaur",random
+MONSTER:'H',"minotaur",random
+MONSTER:'H',"minotaur",random
+
+MONSTER:'H',"minotaur",random
+MONSTER:'H',"minotaur",random
+MONSTER:'H',"minotaur",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+MONSTER:'g',"grimlock",random
+
+MONSTER:'h',"anubite",random
+MONSTER:'h',"anubite",random
+MONSTER:'h',"anubite",random
+
+MONSTER:'h',"anubite",random
+MONSTER:'h',"anubite",random
+MONSTER:'h',"anubite",random
+
+MONSTER:'h',"anubite",random
+MONSTER:'h',"anubite",random
+MONSTER:'h',"anubite",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+MONSTER:'h',"gnoll",random
+
+GEOMETRY: center,center
+#0         1         2		   3	     4		   5		 6		   7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0############################################################################
+1##########################################################     #############
+2#####################################################    #      #    #######
+3## # # # # # # # # # # # # # ### # # # # # # # # # #                  ######
+4###############################################    #                  #    #
+5#### # # # # # # ### # # # # # # # # # # # # #                              
+6##############################################                              
+7## # # # # # # # # # # # # ### # # # # # # # #                              
+8##############################################                              
+9## # # # # # # # # # # # # # # # # # # # # # #                              
+0###############################################                             
+1## # # # # # # # # # # # ### # # # # # ### # #                              
+2##############################################                              
+3## # # # # # # # # # # # # # # # # # # # # # #                              
+4##############################################                              
+5## # # # # # # # # # # # # # ### # # # # # # #     #                  #     
+6####################################################                  ###   
+7## # # # # # # # # # # # # # # ### # ### # # # # # #     #      #    #####  
+8###########################################################    ############ 
+9## # # # # # # # # # # # # # # # # # # # # # # # # # # # ###   ############ 
+0#############################################################      #########
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2		   3	     4		   5		 6		   7
+
+MONSTER:'9',"Astral Deva",random
+MONSTER:'9',"Astral Deva",random
+MONSTER:'9',"Monadic Deva",random
+MONSTER:'9',"Monadic Deva",random
+MONSTER:'9',"Movanic Deva",random
+MONSTER:'9',"Movanic Deva",random
+MONSTER:'9',"Graha Deva",random
+MONSTER:'9',"Graha Deva",random
+
+MONSTER:'7',"Justice Archon",random
+MONSTER:'7',"Sword Archon",random
+MONSTER:'7',"Shield Archon",random
+MONSTER:'7',"Trumpet Archon",random
+MONSTER:'7',"Warden Archon",random
+MONSTER:'7',"Throne Archon",random
+MONSTER:'7',"Light Archon",random
+
+MONSTER:'7',"Aleax",random
+MONSTER:'7',"Aleax",random
+MONSTER:'7',"Aleax",random
+
+MONSTER:'A',"lillend",random
+MONSTER:'A',"lillend",random
+# MONSTER:'A',"lillend",random
+# MONSTER:'A',"lillend",random
+
+GEOMETRY: center,center
+#0         1         2		   3	     4		   5		 6		   7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0############################################################################
 1########################################################## ----#############
 2#####################################################-.--#||..||#----#######
 3## # # # # # # # # # # # # # ### # # # # # # # # # #||..|||....|||..||######
@@ -3507,150 +4496,55 @@ STAIR: (74,20), down
 NON_DIGGABLE:(00,00,75,20)
 
 MONSTER:'&',"Lamashtu",(60,10)
+CONTAINER:'#',"bone chest",(60,10)
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of greed",contained
+OBJECT:'|',"wage of greed",contained
+OBJECT:'|',"wage of greed",contained
 
-MONSTER:'&',"marilith",random
-MONSTER:'&',"marilith",random
-MONSTER:'&',"marilith",random
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
 
-MONSTER:'&',"marilith",random
-MONSTER:'&',"marilith",random
-MONSTER:'&',"marilith",random
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
+OBJECT:'#',"angelic vault loot",contained
 
-MONSTER:'&',"marilith",random
-MONSTER:'&',"marilith",random
-MONSTER:'&',"marilith",random
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
 
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
 
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
 
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-MONSTER:'&',"vrock",random
-
-MONSTER:'H',"minotaur",random
-MONSTER:'H',"minotaur",random
-MONSTER:'H',"minotaur",random
-
-MONSTER:'H',"minotaur",random
-MONSTER:'H',"minotaur",random
-MONSTER:'H',"minotaur",random
-
-MONSTER:'H',"minotaur",random
-MONSTER:'H',"minotaur",random
-MONSTER:'H',"minotaur",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-MONSTER:'g',"grimlock",random
-
-MONSTER:'h',"anubite",random
-MONSTER:'h',"anubite",random
-MONSTER:'h',"anubite",random
-
-MONSTER:'h',"anubite",random
-MONSTER:'h',"anubite",random
-MONSTER:'h',"anubite",random
-
-MONSTER:'h',"anubite",random
-MONSTER:'h',"anubite",random
-MONSTER:'h',"anubite",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
-MONSTER:'h',"gnoll",random
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
 
 TELEPORT_REGION:(00,00,46,20),(0,0,0,0),down
 TELEPORT_REGION:(00,00,46,20),(0,0,0,0),up
@@ -3741,6 +4635,27 @@ DOOR:locked,(50,07)
 DOOR:locked,(45,02)
 
 MONSTER:'&',"Yeenoghu",(48,04)
+CONTAINER:'#',"bone chest",(48,04)
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of gluttony",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
 
 MONSTER:'h',"gnoll",random
 MONSTER:'h',"gnoll",random
@@ -3864,6 +4779,28 @@ MONSTER:'H',"minotaur priestess",(48,10)
 MONSTER:'H',"minotaur",(48,11)
 
 MONSTER:'&',"Baphomet",place[1]
+CONTAINER:'#',"iron chest",place[1]
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
 MONSTER:'H',"minotaur priestess",place[1]
 MONSTER:'H',"minotaur priestess",place[1]
 MONSTER:'H',"minotaur priestess",place[1]
@@ -4011,6 +4948,49 @@ REGION:(02,02,12,12),unlit,"morgue",unfilled
 MAZEWALK:(00,00),west
 MAZEWALK:(14,14),east
 MONSTER:'&',"Pale Night",(07,07)
+CONTAINER:'#',"bone chest",(07,07)
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+OBJECT:'#',"tannin vault loot",contained
+
+OBJECT[90%]:'#',"tannin vault loot",contained
+OBJECT[90%]:'#',"tannin vault loot",contained
+OBJECT[90%]:'#',"tannin vault loot",contained
+OBJECT[90%]:'#',"tannin vault loot",contained
+OBJECT[90%]:'#',"tannin vault loot",contained
+OBJECT[90%]:'#',"tannin vault loot",contained
+
+OBJECT[75%]:'#',"tannin vault loot",contained
+OBJECT[75%]:'#',"tannin vault loot",contained
+OBJECT[75%]:'#',"tannin vault loot",contained
+OBJECT[75%]:'#',"tannin vault loot",contained
+OBJECT[75%]:'#',"tannin vault loot",contained
+OBJECT[75%]:'#',"tannin vault loot",contained
+
+OBJECT[50%]:'#',"tannin vault loot",contained
+OBJECT[50%]:'#',"tannin vault loot",contained
+OBJECT[50%]:'#',"tannin vault loot",contained
+OBJECT[50%]:'#',"tannin vault loot",contained
+OBJECT[50%]:'#',"tannin vault loot",contained
+OBJECT[50%]:'#',"tannin vault loot",contained
+
+OBJECT[25%]:'#',"tannin vault loot",contained
+OBJECT[25%]:'#',"tannin vault loot",contained
+OBJECT[25%]:'#',"tannin vault loot",contained
+OBJECT[25%]:'#',"tannin vault loot",contained
+OBJECT[25%]:'#',"tannin vault loot",contained
+OBJECT[25%]:'#',"tannin vault loot",contained
+
+OBJECT[10%]:'#',"tannin vault loot",contained
+OBJECT[10%]:'#',"tannin vault loot",contained
+OBJECT[10%]:'#',"tannin vault loot",contained
+OBJECT[10%]:'#',"tannin vault loot",contained
+OBJECT[10%]:'#',"tannin vault loot",contained
+OBJECT[10%]:'#',"tannin vault loot",contained
+
 STAIR:levregion(01,00,79,20),(01,01,13,13),up
 STAIR:levregion(01,00,79,20),(01,01,13,13),down
 
@@ -4174,6 +5154,29 @@ ENDMAP
 #0         1 
 REGION:(00,00,14,14),lit,"ordinary"
 MONSTER:'&',"Kostchtchie",(07,07)
+CONTAINER:'#',"wood chest",(07,07)
+
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of wrath",contained
+OBJECT:'|',"wage of sloth",contained
+OBJECT:'|',"wage of sloth",contained
+OBJECT:'|',"wage of sloth",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
 STAIR:levregion(01,00,74,19),(00,00,14,14),up
 STAIR:levregion(01,00,74,19),(00,00,14,14),down
 
@@ -4380,6 +5383,36 @@ MAZEWALK:(23,05),west
 
 STAIR:(01,00,75,20),(24,01,51,20),up
 MONSTER:'&',"Malcanthet",place[0]
+CONTAINER:'#',"bone chest",place[0]
+
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
 STAIR:place[1],down
 
 #MAZEWALK:(50,05),east
@@ -4547,6 +5580,36 @@ MAZEWALK:(66,09),east
 
 STAIR:(26,00,75,20),(26,06,75,14),up
 MONSTER:'&',"Graz'zt",place[0]
+CONTAINER:'#',"silver chest",place[0]
+
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+OBJECT:'#',"demon vault loot",contained
+
 STAIR:place[1],down
 
 DOOR:locked,(19,04)
@@ -4595,6 +5658,36 @@ ENDMAP
 
 
 MONSTER:'&',"Avatar of Lolth",(37,10)
+CONTAINER:'#',"obsidian chest",(37,09)
+
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of pride",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of lust",contained
+OBJECT:'|',"wage of envy",contained
+OBJECT:'|',"wage of envy",contained
+
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+OBJECT:'#',"lolth vault loot",contained
+
 MONSTER:'@',"unearthly drow",(38,10)
 MONSTER:'s',"demonic black widow",(38,11)
 MONSTER:'&',"yochlol",(38,09)

@@ -1760,7 +1760,7 @@ int style;
 				del_engr_ward_at(bhitpos.x,bhitpos.y);
 				place_object(singleobj, bhitpos.x, bhitpos.y);
 				singleobj->otrapped = 0;
-				fracture_rock(singleobj);
+				break_boulder(singleobj);
 				(void)scatter(bhitpos.x,bhitpos.y, 4,
 					MAY_DESTROY|MAY_HIT|MAY_FRACTURE|VIS_EFFECTS,
 					(struct obj *)0);

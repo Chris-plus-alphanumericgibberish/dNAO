@@ -1034,6 +1034,7 @@ register struct monst *mtmp;
 	/* berserk monsters calm down with small probability */
 	if (mtmp->mberserk && !rn2(50)) mtmp->mberserk = 0;
 	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
+	if (mtmp->menvy && !rn2(999)) mtmp->menvy = 0;
 	if (mtmp->mdoubt && !rn2(300)) mtmp->mdoubt = 0;
 
 	if (mtmp->mcrazed){
@@ -1099,15 +1100,15 @@ register struct monst *mtmp;
 			if(ptr)
 				mtmp->mvar_dracaePreg = monsndx(ptr);
 		}
-		else if(mtmp->mvar2 < 6){
-			mtmp->mvar2 += rnd(3);
+		else if(mtmp->mvar_dracaePregTimer < 6){
+			mtmp->mvar_dracaePregTimer += rnd(3);
 		} else if(!mtmp->mpeaceful){
 			int ox = mtmp->mx, oy = mtmp->my;
 			rloc(mtmp, FALSE);
 			if(mtmp->mx != ox || mtmp->my != oy){
 				int type = mtmp->mvar_dracaePreg;
 				mtmp->mvar_dracaePreg = 0;
-				mtmp->mvar2 = 0;
+				mtmp->mvar_dracaePregTimer = 0;
 				mtmp = makemon(&mons[type], ox, oy, NO_MINVENT);
 				if(mtmp){
 					struct obj *otmp;
@@ -1144,15 +1145,15 @@ register struct monst *mtmp;
 			if(ptr)
 				mtmp->mvar_dracaePreg = monsndx(ptr);
 		}
-		else if(mtmp->mvar2 < 6){
-			mtmp->mvar2 += rnd(3);
+		else if(mtmp->mvar_dracaePregTimer < 6){
+			mtmp->mvar_dracaePregTimer += rnd(3);
 		} else if(!mtmp->mpeaceful){
 			int i;
 			int ox = mtmp->mx, oy = mtmp->my;
 			int type = mtmp->mvar_dracaePreg;
 			int etyp = counter_were(type);
 			mtmp->mvar_dracaePreg = 0;
-			mtmp->mvar2 = 0;
+			mtmp->mvar_dracaePregTimer = 0;
 			for(i = rnd(4); i; i--){
 				if(etyp)
 					mtmp = makemon(&mons[etyp], ox, oy, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
@@ -1605,10 +1606,10 @@ register struct monst *mtmp;
 			return 1;
 		else return 0;
 	}
-	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20)) {
+	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20) && !Catapsi) {
 		boolean reducedFlayerMessages = (((Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && flags.initgend) || Role_if(PM_ANACHRONONAUT)) && In_quest(&u.uz));
 		struct monst *m2, *nmon = (struct monst *)0;
-		
+
 		if (canseemon(mtmp))
 			pline("%s concentrates.", Monnam(mtmp));
 		// if (distu(mtmp->mx, mtmp->my) > BOLT_LIM * BOLT_LIM) {
@@ -1825,7 +1826,7 @@ register struct monst *mtmp;
 	if (inrange && mtmp->data->msound == MS_CUSS && !mtmp->mpeaceful &&
 		couldsee(mtmp->mx, mtmp->my) && ((!mtmp->minvis && !rn2(5)) || 
 										mtmp->mtyp == PM_SIR_GARLAND || mtmp->mtyp == PM_GARLAND ||
-										(mtmp->mtyp == PM_CHAOS && (mtmp->mvar2 < 5 || !rn2(5)) )|| 
+										(mtmp->mtyp == PM_CHAOS && (mtmp->mvar_conversationTracker < 5 || !rn2(5)) )|| 
 										mtmp->mtyp == PM_APOLLYON
 	) )
 	    cuss(mtmp);
@@ -2056,16 +2057,18 @@ not_special:
 			register int pctload = (curr_mon_load(mtmp) * 100) /
 				max_mon_load(mtmp);
 			
-			/* look for gold or jewels nearby */
-			likegold = (likes_gold(ptr) && pctload < 95);
-			likegems = (likes_gems(ptr) && pctload < 85);
-			uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
-				&& pctload < 75);
-			likeobjs = (likes_objs(ptr) && pctload < 75);
-			likemagic = (likes_magic(ptr) && pctload < 85);
-			likerock = (throws_rocks(ptr) && pctload < 50 && !In_sokoban(&u.uz));
-			conceals = hides_under(ptr);
-			setlikes = TRUE;
+			if(!mtmp->menvy){
+				/* look for gold or jewels nearby */
+				likegold = (likes_gold(ptr) && pctload < 95);
+				likegems = (likes_gems(ptr) && pctload < 85);
+				uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
+					&& pctload < 75);
+				likeobjs = (!mtmp->mdisrobe && likes_objs(ptr) && pctload < 75);
+				likemagic = (likes_magic(ptr) && pctload < 85);
+				likerock = (throws_rocks(ptr) && pctload < 50 && !In_sokoban(&u.uz));
+				conceals = hides_under(ptr);
+				setlikes = TRUE;
+			}
 	    }
 	}
 
@@ -2619,7 +2622,7 @@ postmov:
 		    likegems = (likes_gems(ptr) && pctload < 85);
 		    uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
 				  && pctload < 75);
-		    likeobjs = (likes_objs(ptr) && pctload < 75);
+		    likeobjs = (!mtmp->mdisrobe && likes_objs(ptr) && pctload < 75);
 		    likemagic = (likes_magic(ptr) && pctload < 85);
 		    likerock = (throws_rocks(ptr) && pctload < 50 &&
 				!In_sokoban(&u.uz));

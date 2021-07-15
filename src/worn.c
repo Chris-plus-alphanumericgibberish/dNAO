@@ -1139,7 +1139,7 @@ int depth;
 	struct obj * curarm;
 	for (i = 0; i < SIZE(marmor); i++) {
 		curarm = which_armor(mon, marmor[i]);
-		if (curarm && ((objects[curarm->otyp].oc_dir & slot) || (!objects[curarm->otyp].oc_dir && (slot&adfalt[i])))) {
+		if (curarm && ((objects[curarm->otyp].oc_dtyp & slot) || (!objects[curarm->otyp].oc_dtyp && (slot&adfalt[i])))) {
 			if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
 				continue;
 			arm_mdr += arm_dr_bonus(curarm);
@@ -1466,10 +1466,11 @@ struct monst *mon;
 	int m_delay = 0;
 	int unseen = !canseemon(mon);
 	int tarx, tary;
+	int tries = 10;
 	
 	if (mon->mfrozen) return FALSE;
 	
-	switch(rnd(7)){
+	do switch(rnd(7)){
 		case 1:
 			flag = W_ARM;
 		break;
@@ -1491,10 +1492,8 @@ struct monst *mon;
 		case 7:
 			flag = W_AMUL;
 		break;
-	}
-	
-	old = which_armor(mon, flag);
-	
+	} while(tries-- && !(old = which_armor(mon, flag)));
+
 	if(!old) return FALSE;
 	
 	if ((flag == W_ARM

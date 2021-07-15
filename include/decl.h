@@ -746,7 +746,9 @@ struct u_achieve {
 #define	CASTLE_WISH		0x1L << 43
 #define	UNKNOWN_WISH	0x1L << 44
 #define	FEM_DRA_NOB_QUEST	0x1L << 45
-#define ACHIEVE_NUMBER	46
+#define	DEVIL_VAULT	0x1L << 46
+#define	DEMON_VAULT	0x1L << 47
+#define ACHIEVE_NUMBER	47
 };
 
 E struct u_achieve achieve;
@@ -790,6 +792,8 @@ E glyph_t permonst_unicode_codepoint[NUMMONS];
 
 
 E boolean curses_stupid_hack;
+
+#define LIGHTSABER_MAX_CHARGE 150000
 
 #undef E
 

@@ -2,8 +2,10 @@
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
+#include <math.h>
 #include "hack.h"
 #include "artifact.h"
+#include "xhity.h"
 #ifdef OVLB
 
 static const char tools[] = { COIN_CLASS, CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
@@ -49,6 +51,9 @@ STATIC_DCL int FDECL(use_grapple, (struct obj *));
 STATIC_DCL int FDECL(use_crook, (struct obj *));
 STATIC_DCL int FDECL(use_doll, (struct obj *));
 STATIC_DCL int FDECL(use_doll_tear, (struct obj *));
+STATIC_DCL int FDECL(use_pyramid, (struct obj *));
+STATIC_DCL int FDECL(use_vortex, (struct obj *));
+STATIC_DCL int FDECL(use_rift, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
 STATIC_DCL int FDECL(do_soul_coin, (struct obj *));
@@ -1679,7 +1684,7 @@ struct obj *obj;
 			obj->cursed = FALSE;
 		}
 	}
-	if (obj->cursed && (!rn2(2) || obj->otyp == CANDLE_OF_INVOCATION) && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
+	if (obj->cursed && obj->otyp != ROD_OF_FORCE && (!rn2(2) || obj->otyp == CANDLE_OF_INVOCATION) && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
 		pline("%s for a moment, then %s.",
 		      Tobjnam(obj, "flicker"), otense(obj, "die"));
 	} else {
@@ -4302,6 +4307,134 @@ use_crook (obj)
 }
 
 STATIC_OVL int
+use_rift(obj)
+	struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(!freehand()){
+		You("can't break %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Shatter the gem?") == 'y'){
+		if(!Deadmagic && !Blind){
+			pline("The black flaw tears free, then expands to fill the world!");
+			if(base_casting_stat() == A_INT)
+				pline("The Weave frays and fails!");
+		}
+		//Don't bother doing math if the timeout is already infinite.
+		// It's not EASY to permanently break magic with these, but it is POSSIBLE!
+		if(Deadmagic < TIMEOUT_INF){
+			long increment = (long)(1000 * pow(1.1,u.rift_count));
+			incr_itimeout(&Deadmagic, increment);
+			// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
+			if(increment < TIMEOUT){
+				u.rift_count++;
+			}
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
+STATIC_OVL int
+use_vortex(obj)
+	struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(!freehand()){
+		You("can't break %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Shatter the gem?") == 'y'){
+		if(!Catapsi && !Blind){
+			pline("The silvery-gray flaw spins free, then expands to fill the world!");
+			if(base_casting_stat() == A_CHA)
+				pline("Your mind fills with static!");
+		}
+		//Don't bother doing math if the timeout is already infinite.
+		// It's not EASY to permanently break magic with these, but it is POSSIBLE!
+		if(Catapsi < TIMEOUT_INF){
+			long increment = (long)(1000 * pow(1.1,u.vortex_count));
+			incr_itimeout(&Catapsi, increment);
+			// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
+			if(increment < TIMEOUT){
+				u.vortex_count++;
+			}
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+void
+pyramid_effects(obj,x,y)
+struct obj *obj;
+int x, y;
+{
+	//Don't bother doing math if the timeout is already infinite.
+	// It's not EASY to permanently break magic with these, but it is POSSIBLE!
+	if(Misotheism < TIMEOUT_INF){
+		long increment = (long)(1000 * pow(1.1,u.miso_count));
+		if(!Inhell && !Misotheism && u.ualign.type != A_VOID){
+			u.ugangr[Align2gangr(u.ualign.type)]++;
+			gods_angry(Align2gangr(u.ualign.type));
+		}
+		// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
+		if(increment < TIMEOUT){
+			u.miso_count++;
+		}
+		if(obj->otyp == MISOTHEISTIC_PYRAMID){
+			if(!Blind && cansee(x, y)){
+				if(!DarksightOnly)
+					pline("An impossible darkness pours forth!");
+				else
+					pline("An mighty darkness issues forth!");
+			}
+			incr_itimeout(&HDarksight, increment);
+			incr_itimeout(&DarksightOnly, increment);
+			doredraw();
+		}
+		if(obj->otyp == MISOTHEISTIC_FRAGMENT){
+			if(!Shattering)
+				You_hear("a great fracturing sound!");
+			if(!Blind && cansee(x, y)){
+				if(!(u.specialSealsKnown&SEAL_NUDZIRATH)){
+					/*Note: this is intended to work for any PC, not just Binders */
+					if(!(u.specialSealsKnown&SEAL_NUDZIRATH)){
+						pline("The shattered fragments form part of a seal.");
+						pline("In fact, you realize that all cracked and broken mirrors everywhere together are working towards writing this seal.");
+						pline("With that realization comes knowledge of the seal's final form!");
+						u.specialSealsKnown |= SEAL_NUDZIRATH;
+					}
+				}
+			}
+			incr_itimeout(&Shattering, increment);
+		}
+		if(!Misotheism && base_casting_stat() == A_WIS)
+			pline("You can no longer hear your god!");
+		incr_itimeout(&Misotheism, increment);
+	}
+}
+
+STATIC_OVL int
+use_pyramid(obj)
+struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(!freehand()){
+		You("can't %s %s with no free %s!", obj->otyp == MISOTHEISTIC_PYRAMID ? "open" : "shatter",xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn(obj->otyp == MISOTHEISTIC_PYRAMID ? "Open the pyramid?" : "Further shatter the pyramid?") == 'y'){
+		pyramid_effects(obj, u.ux, u.uy);
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
+STATIC_OVL int
 use_doll_tear(obj)
 	struct obj *obj;
 {
@@ -5334,7 +5467,6 @@ if(!rn2(100)){\
 }
 
 #define UNCURSED_SOUL_HANDLING \
-You("blur with stolen time!");\
 u.ualign.sins++;\
 if(!rn2(100)){\
 	You("feel the soul fly free!");\
@@ -5347,7 +5479,10 @@ STATIC_OVL int
 do_soul_coin(obj)
 struct obj *obj;
 {
+	char coinbuff[50] = {0};
 	struct monst *mtmp;
+	struct obj *otmp;
+	int x, y;
 	if(!freehand()){
 		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
 		return 0;
@@ -5381,21 +5516,473 @@ struct obj *obj;
 			useup(obj);
 		break;
 		case WAGE_OF_LUST:
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(obj->blessed){
+				FREE_SOUL_HANDLING
+			}
+			else if(obj->cursed){
+				if(!BlowingWinds){
+					pline("Hurricane-force winds surround you!");
+				}
+				else {
+					pline("The hurricane-force winds intensify!");
+				}
+				HBlowingWinds += 99L;
+				CURSED_SOUL_HANDLING
+			}
+			else {
+				if(!BlowingWinds){
+					pline("Hurricane-force winds surround you!");
+				}
+				else {
+					pline("The hurricane-force winds intensify!");
+				}
+				HBlowingWinds += 9L;
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
 		break;
 		case WAGE_OF_GLUTTONY:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
 			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
 			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(inediate(mtmp->data)){
+				if(mtmp == &youmonst){
+					You("are unbothered.");
+				}
+				else {
+					pline("%s is unbothered.", Monnam(mtmp));
+				}
+			}
+			else {
+				/* Note, blessed was handled above. */
+				if(mtmp == &youmonst){
+					if(obj->cursed){
+						morehungry(2000);
+					}
+					else {
+						morehungry(1000);
+					}
+				}
+				else {
+					if(mtmp->mtame && get_mx(mtmp, MX_EDOG)){
+						if(obj->cursed){
+							EDOG(mtmp)->hungrytime = max(EDOG(mtmp)->hungrytime - 2000, monstermoves - 750);
+						}
+						else {
+							EDOG(mtmp)->hungrytime = max(EDOG(mtmp)->hungrytime - 1000, monstermoves - 500);
+						}
+					}
+					else {
+						if(obj->cursed){
+							mtmp->mhp -= min(999, mtmp->mhpmax);
+						}
+						else {
+							mtmp->mhp -= min(99, mtmp->mhpmax/2);
+						}
+						if(mtmp->mhp <= 0){
+							pline("%s starves.", Monnam(mtmp));
+							mondied(mtmp);
+						}
+						else {
+							pline("%s is confused from hunger.", Monnam(mtmp));
+							mtmp->mconf = 1;
+						}
+					}
+				}
+			}
+			/* Note, blessed was handled above. */
+			if(obj->cursed){
+				CURSED_SOUL_HANDLING
+			}
+			else {
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_GREED:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y)
+			 || closed_door(x, y)
+			 || IS_ROCK(levl[x][y].typ)
+			){
+				You("can't use that there.");
+				return 0;
+			}
+			mtmp = m_u_at(x,y);
+
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			otmp = mksobj(MASS_OF_STUFF, MKOBJ_NOINIT);
+			if (!otmp) break;  /* Shouldn't happen */
+			curse(otmp);
+
+			/* Note, blessed was handled above. */
+			if(obj->cursed){
+				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
+			}
+			else if(mtmp){
+				int dmg;
+				boolean youdef = mtmp == &youmonst;
+				if(youdef)
+					pline("%s drops out of nowhere and hits you!", An(xname(otmp)));
+				else if (cansee(mtmp->mx, mtmp->my)) {
+					pline("%s is hit by %s!", Monnam(mtmp),
+									doname(otmp));
+					if (mtmp->minvis && !canspotmon(mtmp))
+					map_invisible(mtmp->mx, mtmp->my);
+				}
+
+				dmg = dmgval(otmp, mtmp, 0);
+				struct obj *helmet = youdef ? uarmh : which_armor(mtmp, W_ARMH);
+				if (helmet) {
+					if(is_hard(helmet)) {
+						if(youdef)
+							pline("Fortunately, you are wearing a hard helmet.");
+						else if (canspotmon(mtmp))
+							pline("Fortunately, %s is wearing a hard helmet.", mon_nam(mtmp));
+						else if (flags.soundok)
+							You_hear("a clanging sound.");
+						if (dmg > 2) dmg = 2;
+					}
+					else if (flags.verbose) {
+						if(youdef)
+							Your("%s does not protect you.",
+								xname(helmet));
+						else if(canspotmon(mtmp))
+							pline("%s's %s does not protect %s.",
+							Monnam(mtmp), xname(helmet),
+							mhim(mtmp));
+					}
+				}
+				if (!flooreffects(otmp, x, y, "fall")) {
+					place_object(otmp, x, y);
+					stackobj(otmp);
+					newsym(x, y);
+				}
+
+				if (Half_phys(mtmp))
+					dmg = (dmg + 1) / 2;
+				if (youdef && u.uvaul_duration)
+					dmg = (dmg + 1) / 2;
+				if(youdef)
+					losehp(dmg, "mass of falling stuff", KILLED_BY_AN);
+				else {
+					mtmp->mhp -= dmg;
+					if (mtmp->mhp <= 0)
+						xkilled(mtmp, 1);
+				}
+			}
+			else {
+				if (!flooreffects(otmp, x, y, "fall")) {
+					place_object(otmp, x, y);
+					stackobj(otmp);
+					newsym(x, y);  /* map the rock */
+				}
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_WRATH:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(Breathless_res(mtmp)){
+				if(mtmp == &youmonst){
+					You("are unbothered.");
+				}
+				else {
+					pline("%s is unbothered.", Monnam(mtmp));
+				}
+				water_damage(mtmp == &youmonst ? invent : mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+			}
+			else {
+				/* Note, blessed was handled above. */
+				if(mtmp == &youmonst){
+					if(obj->cursed){
+						BloodDrown += 9;
+					}
+					else {
+						BloodDrown += 4;
+					}
+				}
+				else {
+					water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+					if(obj->cursed){
+						//Note: 2x water damage
+						water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+						mtmp->mhp -= min(999, mtmp->mhpmax);
+					}
+					else {
+						mtmp->mhp -= min(99, mtmp->mhpmax/2);
+					}
+					if(mtmp->mhp <= 0){
+						pline("%s drowns in blood!", Monnam(mtmp));
+						mondied(mtmp);
+					}
+					else if(!resist(mtmp, RING_CLASS, 0, NOTELL)){
+						pline("%s is crazed with anger!", Monnam(mtmp));
+						mtmp->mberserk = 1;
+					}
+				}
+			}
+			/* Note, blessed was handled above. */
+			if(obj->cursed){
+				CURSED_SOUL_HANDLING
+			}
+			else {
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_ENVY:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(mtmp != &youmonst && mindless_mon(mtmp)){
+				pline("%s is unbothered.", Monnam(mtmp));
+			}
+			if(mtmp == &youmonst){
+				if(!roll_madness(MAD_TALONS)){ /*May refuse to give up things*/
+					struct obj *otmp2;
+					int delay = 0;
+					boolean cursed = obj->cursed;
+					useup(obj); /*Note: Must do this first since you will drop all your stuff!*/
+					if (*u.ushops) sellobj_state(SELL_DELIBERATE);
+					for(otmp = invent; otmp; otmp = otmp2) {
+						if(cursed && otmp->owornmask){
+							if(otmp->oclass == ARMOR_CLASS)
+								delay = max(delay, objects[otmp->otyp].oc_delay);
+							remove_worn_item(otmp, TRUE);
+						}
+						otmp2 = otmp->nobj;
+						drop(otmp);
+					}
+					if (*u.ushops) sellobj_state(SELL_NORMAL);
+					reset_occupations();
+					if(cursed){
+						if(delay)
+							nomul(-delay, "taking off clothes");
+						CURSED_SOUL_HANDLING
+					}
+					/* Blessed handled above */
+					else {
+						UNCURSED_SOUL_HANDLING
+					}
+					return 1; /*Note: Have already used up a coin!*/
+				}
+			}
+			else {
+				relobj_envy(mtmp,canspotmon(mtmp));
+				mtmp->menvy = TRUE;
+				if(obj->cursed){
+					mtmp->mdisrobe = TRUE;
+					CURSED_SOUL_HANDLING
+				}
+				/* Blessed handled above */
+				else {
+					UNCURSED_SOUL_HANDLING
+				}
+			}
+			useup(obj);
+			return 1;
 		break;
 		case WAGE_OF_PRIDE:
+			if(obj->blessed){
+				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+				FREE_SOUL_HANDLING
+				useup(obj);
+				return 1;
+			}
+			if(!getdir((char *)0)) return 0;
+			x = u.ux + u.dx;
+			y = u.uy + u.dy;
+			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			if(mtmp == &youmonst){
+				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+				if(yn(coinbuff) == 'n')
+					return 0;
+			}
+			else if(!canspotmon(mtmp)){
+				You("see no target there!");
+				return 0;
+			}
+			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+			if(mtmp != &youmonst && mindless_mon(mtmp)){
+				pline("%s is unbothered.", Monnam(mtmp));
+			}
+			
+			if(mtmp == &youmonst){
+				u.uencouraged -= 9;
+				if(obj->cursed)
+					u.ustdy += 45;
+			}
+			else {
+				mtmp->encouraged -= 9;
+				if(obj->cursed){
+					mtmp->mstdy += 45;
+				}
+				if(is_minion(mtmp->data) && !(mtmp->data->geno&G_UNIQ)
+				  && (obj->cursed || !resist(mtmp, RING_CLASS, 0, NOTELL))
+				){
+					if(In_endgame(&u.uz)){
+						if(canspotmon(mtmp)){
+							pline("%s plummets through the %s!", Monnam(mtmp), surface(mtmp->mx, mtmp->my));
+						}
+						mongone(mtmp);
+					}
+					else if(!templated(mtmp)){
+						if(canspotmon(mtmp)){
+							pline("%s falls from grace!", Monnam(mtmp));
+						}
+						set_template(mtmp, FALLEN_TEMPLATE);
+					}
+				}
+			}
+			if(obj->cursed){
+				CURSED_SOUL_HANDLING
+			}
+			/* Blessed handled above */
+			else {
+				UNCURSED_SOUL_HANDLING
+			}
+			useup(obj);
+			return 1;
 		break;
 	}
     return 1;
+}
+
+int
+use_vital(obj)
+struct obj *obj;
+{
+	if(!freehand()){
+		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Crush the stone?") == 'y'){
+		if(obj->blessed){
+			FREE_SOUL_HANDLING
+		}
+		else if(obj->cursed){
+			You_feel("full of vital energy!");
+			healup(900, 0, FALSE, FALSE);
+			CURSED_SOUL_HANDLING
+		}
+		else {
+			You_feel("full of vital energy!");
+			healup(400, 0, FALSE, FALSE);
+			UNCURSED_SOUL_HANDLING
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
+int
+use_spiritual(obj)
+struct obj *obj;
+{
+	if(!freehand()){
+		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Crush the stone?") == 'y'){
+		if(obj->blessed){
+			FREE_SOUL_HANDLING
+		}
+		else if(obj->cursed){
+			You_feel("deeply spiritual!");
+			u.uen = max(u.uenmax, u.uen+900);
+			CURSED_SOUL_HANDLING
+		}
+		else {
+			You_feel("deeply spiritual!");
+			u.uen = max(u.uenmax, u.uen+400);
+			UNCURSED_SOUL_HANDLING
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
 }
 
 void
@@ -6271,6 +6858,9 @@ doapply()
 	if(carrying_applyable_amulet()){
 		add_class(class_list, AMULET_CLASS);
 	}
+	if(carrying_applyable_gem()){
+		add_class(class_list, GEM_CLASS);
+	}
 
 
 	obj = getobj(class_list, "use or apply");
@@ -6614,6 +7204,7 @@ doapply()
 	case LIGHTSABER:
   	case BEAMSWORD:
 	case DOUBLE_LIGHTSABER:
+	case ROD_OF_FORCE:
 		if (uwep != obj && !(u.twoweap && uswapwep == obj) && !wield_tool(obj, (const char *)0)) break;
 		/* Fall through - activate via use_lamp */
 		    
@@ -6787,6 +7378,22 @@ doapply()
 		case HOLY_SYMBOL_OF_THE_BLACK_MOTHE:
 			res = pray_goat();
 		break;
+	case MISOTHEISTIC_PYRAMID:
+	case MISOTHEISTIC_FRAGMENT:
+		res = use_pyramid(obj);
+	break;
+	case CATAPSI_VORTEX:
+		res = use_vortex(obj);
+	break;
+	case ANTIMAGIC_RIFT:
+		res = use_rift(obj);
+	break;
+	case VITAL_SOULSTONE:
+		res = use_vital(obj);
+	break;
+	case SPIRITUAL_SOULSTONE:
+		res = use_spiritual(obj);
+	break;
 	case UNICORN_HORN:
 		use_unicorn_horn(obj);
 	break;
@@ -6941,6 +7548,7 @@ unfixable_trouble_count(is_horn)
 				) unfixable_trbl++;
 	if (Slimed) unfixable_trbl++;
 	if (FrozenAir) unfixable_trbl++;
+	if (BloodDrown) unfixable_trbl++;
 	/* lycanthropy is not desirable, but it doesn't actually make you feel
 	   bad */
 

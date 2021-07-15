@@ -118,7 +118,8 @@ static int p_type; /* (-1)-3: (-1)=really naughty, 3=really good */
  * order to have the values be meaningful.
  */
 
-#define TROUBLE_STONED			18
+#define TROUBLE_STONED			19
+#define TROUBLE_BLOOD_DROWN		18
 #define TROUBLE_FROZEN_AIR		17
 #define TROUBLE_SLIMED			16
 #define TROUBLE_STRANGLED		15
@@ -193,6 +194,7 @@ in_trouble()
 	 */
 	if(Stoned) return(TROUBLE_STONED);
 	if(Golded) return(TROUBLE_STONED);
+	if(BloodDrown) return(TROUBLE_BLOOD_DROWN);
 	if(FrozenAir) return(TROUBLE_FROZEN_AIR);
 	if(Slimed) return(TROUBLE_SLIMED);
 	if(Strangled) return(TROUBLE_STRANGLED);
@@ -353,6 +355,12 @@ register int trouble;
 	    case TROUBLE_SLIMED:
 		    pline_The("slime disappears.");
 		    Slimed = 0;
+		    flags.botl = 1;
+		    delayed_killer = 0;
+		    break;
+	    case TROUBLE_BLOOD_DROWN:
+		    pline_The("blood vanishes from your lungs.");
+		    BloodDrown = 0;
 		    flags.botl = 1;
 		    delayed_killer = 0;
 		    break;
@@ -1846,6 +1854,13 @@ dosacrifice()
 		return 0;
 	}
 	
+	if(Misotheism && !(otmp->otyp == AMULET_OF_YENDOR && Is_astralevel(&u.uz))){
+		if (otmp->otyp == CORPSE)
+			feel_cockatrice(otmp, TRUE);
+		pline1(nothing_happens);
+		return 1;
+	}
+
 #define MAXVALUE 24 /* Highest corpse value (besides Wiz) */
 
     if (otmp->otyp == CORPSE) {
@@ -2028,7 +2043,7 @@ dosacrifice()
 					give_ascension_trophy();
 #endif
 					pline("An invisible choir sings, and you are bathed in radiance...");
-					godvoice(Align2gangr(altaralign), "Congratulations, mortal!");
+					godvoice(AltarAlign2gangr(altaralign), "Congratulations, mortal!");
 					display_nhwindow(WIN_MESSAGE, FALSE);
 					verbalize("In return for thy service, I grant thee the gift of Immortality!");
 					You("ascend to the status of Demigod%s...",
@@ -2110,11 +2125,11 @@ dosacrifice()
 	 */
 	You_feel("the air around you grow charged...");
 	pline("Suddenly, you realize that %s has noticed you...", a_gname());
-		godvoice(Align2gangr(altaralign), "So, mortal!  You dare desecrate my High Temple!");
+		godvoice(AltarAlign2gangr(altaralign), "So, mortal!  You dare desecrate my High Temple!");
 	/* Throw everything we have at the player */
-	god_zaps_you(Align2gangr(altaralign));
+	god_zaps_you(AltarAlign2gangr(altaralign));
     } else if (value < 0) { /* I don't think the gods are gonna like this... */
-		gods_upset(Align2gangr(altaralign));
+		gods_upset(AltarAlign2gangr(altaralign));
     } else {
 	int saved_anger = u.ugangr[Align2gangr(u.ualign.type)];
 	int saved_cnt = u.ublesscnt;
@@ -2130,7 +2145,7 @@ dosacrifice()
 		    You("have a strong feeling that %s is angry...", u_gname());
 			if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 				pline("A pulse of darkness radiates from your sacrifice!");
-				angrygods(Align2gangr(altaralign));
+				angrygods(AltarAlign2gangr(altaralign));
 				return 1;
 			}
 			consume_offering(otmp);
@@ -2224,7 +2239,7 @@ dosacrifice()
 				u.lastprayresult = PRAY_ANGER;
 				u.reconciled = REC_NONE;
 				pline("%s rejects your sacrifice!", a_gname());
-				godvoice(Align2gangr(altaralign), "Suffer, infidel!");
+				godvoice(AltarAlign2gangr(altaralign), "Suffer, infidel!");
 				change_luck(-5);
 				(void) adjattrib(A_WIS, -2, TRUE);
 				if (!Inhell) angrygods(Align2gangr(u.ualign.type));
@@ -2234,7 +2249,7 @@ dosacrifice()
 	    } else {
 		if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 			pline("A pulse of darkness radiates from your sacrifice!");
-			angrygods(Align2gangr(altaralign));
+			angrygods(AltarAlign2gangr(altaralign));
 			return 1;
 		}
 		consume_offering(otmp);
@@ -2313,7 +2328,7 @@ dosacrifice()
 
 	if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 		pline("A pulse of darkness radiates from your sacrifice!");
-		angrygods(Align2gangr(altaralign));
+		angrygods(AltarAlign2gangr(altaralign));
 		return 1;
 	}
 	consume_offering(otmp);
@@ -2462,6 +2477,12 @@ boolean praying;	/* false means no messages should be given */
 
     if (praying)
 	You("begin praying to %s.", align_gname(p_aligntyp));
+	
+	// Dungeon currently cut off from the divine
+	if(praying && Misotheism){
+		p_type = 1;	
+		return TRUE;
+	}
 
     if (u.ualign.type && u.ualign.type == -p_aligntyp)
 	alignment = -u.ualign.record;		/* Opposite alignment altar */
@@ -2587,7 +2608,7 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 	if(on_altar()){
 		(void) water_prayer(FALSE);
 		change_luck(-3);
-		gods_upset(Align2gangr(alignment));
+		gods_upset(AltarAlign2gangr(alignment));
 	}
 	return(1);
     }
@@ -2651,6 +2672,11 @@ doturn()
 		You("don't know how to turn undead!");
 		return(0);
 	}
+	if(Misotheism){
+		pline("Nothing happens!");
+		return 0;
+	}
+
 	if(!Race_if(PM_VAMPIRE)) u.uconduct.gnostic++;
 
 	if(!Race_if(PM_VAMPIRE) && u.uen >= 30 && yn("Use abbreviated liturgy?") == 'y'){
@@ -3060,7 +3086,7 @@ register int x, y;
     aligntyp altaralign = a_align(x,y);
 
     if(!strcmp(align_gname(altaralign), u_gname())) {
-		godvoice(Align2gangr(altaralign), "How darest thou desecrate my altar!");
+		godvoice(AltarAlign2gangr(altaralign), "How darest thou desecrate my altar!");
 	(void) adjattrib(A_WIS, -1, FALSE);
     } else {
 	pline("A voice (could it be %s?) whispers:",

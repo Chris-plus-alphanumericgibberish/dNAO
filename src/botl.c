@@ -658,7 +658,7 @@ bot2()
 #else
   Strcat(nb = eos(nb), " Slime");
 #endif
-  if(FrozenAir || Strangled)
+  if(FrozenAir || Strangled || BloodDrown)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Sufct", newbot2);
 #else

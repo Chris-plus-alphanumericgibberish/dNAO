@@ -1091,8 +1091,8 @@ unsigned int type;
 				case 3: return MON_FIRA;
 			}
 		} else {
-			if(mtmp->mvar2 > 3) mtmp->mvar2 = 0;
-			switch(mtmp->mvar2++){
+			if(mtmp->mvar_spList_2 > 3) mtmp->mvar_spList_2 = 0;
+			switch(mtmp->mvar_spList_2++){
 				case 0: return LIGHTNING_BOLT;
 				case 1: return MON_POISON_GAS;
 				case 2: return ICE_STORM;
@@ -1114,8 +1114,8 @@ unsigned int type;
 				case 7: return MON_FLARE;
 			}
 		} else {
-			if(mtmp->mvar2 > 3) mtmp->mvar2 = 0;
-			switch(mtmp->mvar2++){
+			if(mtmp->mvar_spList_2 > 3) mtmp->mvar_spList_2 = 0;
+			switch(mtmp->mvar_spList_2++){
 				case 0: return FIRE_PILLAR;
 				case 1: return GEYSER;
 				case 2: return MON_POISON_GAS;
@@ -1363,7 +1363,7 @@ unsigned int type;
 		return spelln;
 	} break;
 	case PM_PALE_NIGHT:
-		switch(rn2(5)){
+		switch(rn2(6)){
 			case 0:
 				return OPEN_WOUNDS;
 			break;
@@ -1378,6 +1378,9 @@ unsigned int type;
 			break;
 			case 4:
 				return DEATH_TOUCH;
+			break;
+			case 5:
+				return rn2(6) ? SUMMON_DEVIL : SUMMON_TANNIN;
 			break;
 		}
 	break;
@@ -1660,6 +1663,7 @@ const char * spellname[] =
 	//75
 	"DISINT_RAY"
 	"MON_WARP_THROW",
+	"SUMMON_TANNIN",
 };
 
 
@@ -1696,6 +1700,12 @@ int tary;
 	if (cantmove(magr))
 		return MM_MISS;
 	if (youagr ? Nullmagic : mon_resistance(magr, NULLMAGIC))
+		return MM_MISS;
+	if (Deadmagic && attk->adtyp != AD_PSON && attk->adtyp != AD_CLRC)
+		return MM_MISS;
+	if (Catapsi && attk->adtyp == AD_PSON)
+		return MM_MISS;
+	if (Misotheism && attk->adtyp == AD_CLRC)
 		return MM_MISS;
 	if (attk->adtyp == AD_PSON && !youdef && (!mdef || mindless_mon(mdef)))
 		return MM_MISS;
@@ -2333,7 +2343,7 @@ int tary;
 			impossible("No mdef for psibolt");
 			return MM_MISS;
 		}
-		if (!youdef && mindless_mon(mdef)) {
+		if ((!youdef && mindless_mon(mdef)) || Catapsi) {
 			return MM_MISS;
 		}
 		/* calculate resistance */
@@ -4057,6 +4067,35 @@ int tary;
 		}
 		return MM_HIT;
 
+	case SUMMON_TANNIN:
+		if (!youdef || u.summonMonster || !foundem) {
+			/* only mvu allowed */
+			/* only one summon spell per global turn allowed */
+			/* since it always summons adjacent to player, only allow casting if they've found you */
+			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
+		}
+		else
+		{
+			struct monst * mtmp;
+			/* summon_minion always appears near the player */
+			mtmp = makemon(&mons[pick_tannin(magr)], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
+			if (mtmp) {
+				// mtmp->mvar_tannintype = pick_tannin(magr);
+				u.summonMonster = TRUE;
+				if (canspotmon(mtmp))
+					pline("%s ascends from below!",
+					An(Hallucination ? rndmonnam() : "fiend"));
+				else
+					You("sense the arrival of %s.",
+					an(Hallucination ? rndmonnam() : "hostile fiend"));
+				mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
+			}
+			else
+				return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
+			stop_occupation();
+		}
+		return MM_HIT;
+
 	case SUMMON_ANGEL:
 		if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
@@ -5052,6 +5091,7 @@ int spellnum;
 	case RAISE_DEAD:
 	case SUMMON_MONS:
 	case SUMMON_DEVIL:
+	case SUMMON_TANNIN:
 	case SUMMON_ANGEL:
 	case SUMMON_ALIEN:
 	case SUMMON_YOUNG:
@@ -5481,6 +5521,24 @@ struct monst *mon;
 		if(mtmp->mtyp == PM_WITCH_S_FAMILIAR && mtmp->mvar_witchID == (long)mon->m_id)
 			return FALSE;
 	return TRUE;
+}
+
+/*
+ * Pick a minion for the given monster
+ */
+
+int
+pick_tannin(mon)
+struct monst *mon;
+{
+	switch(mon->mtyp){
+		case PM_PALE_NIGHT:
+			if(rn2(6))
+				return PM_SHALOSH_TANNAH;
+			else return PM_TERAPHIM_TANNAH;
+		break;
+	}
+	return PM_AKKABISH_TANNIN;
 }
 
 #endif /* OVL0 */

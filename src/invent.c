@@ -827,6 +827,21 @@ carrying_applyable_amulet()
 }
 
 char
+carrying_applyable_gem()
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->otyp == ANTIMAGIC_RIFT
+		|| otmp->otyp == CATAPSI_VORTEX
+		|| otmp->otyp == VITAL_SOULSTONE
+		|| otmp->otyp == SPIRITUAL_SOULSTONE
+		)
+			return TRUE;
+	return FALSE;
+}
+
+char
 carrying_readable_weapon()
 {
 	register struct obj *otmp;
@@ -843,6 +858,21 @@ carrying_readable_weapon()
 				otmp->oartifact == ART_PEN_OF_THE_VOID ||
 				otmp->oartifact == ART_STAFF_OF_NECROMANCY
 			))
+		)
+			return TRUE;
+	return FALSE;
+}
+
+char
+carrying_readable_tool()
+{
+	register struct obj *otmp;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj)
+		if(otmp->otyp == CANDLE_OF_INVOCATION
+			|| otmp->otyp == LIGHTSABER
+			|| otmp->otyp == MISOTHEISTIC_PYRAMID
+			|| otmp->otyp == MISOTHEISTIC_FRAGMENT
 		)
 			return TRUE;
 	return FALSE;
@@ -1050,6 +1080,7 @@ register const char *let,*word;
 	boolean allownone = FALSE;
 	boolean useboulder = FALSE;
 	boolean usethrowing = FALSE;
+	boolean usemirror = FALSE;
 	xchar foox = 0;
 	long cnt;
 	boolean prezero = FALSE;
@@ -1093,6 +1124,9 @@ register const char *let,*word;
 	if(*let == WEAPON_CLASS && !strcmp(word, "throw"))
 	    usethrowing = TRUE;
 
+	if(*let == WEAPON_CLASS && u.specialSealsActive&SEAL_NUDZIRATH)
+	    usemirror = TRUE;
+
 	if(allownone) *bp++ = '-';
 #ifndef GOLDOBJ
 	if(allowgold) *bp++ = def_oc_syms[COIN_CLASS];
@@ -1113,6 +1147,7 @@ register const char *let,*word;
 #endif
 		|| (useboulder && is_boulder(otmp))
 		|| (usethrowing && (otmp->otyp == ROPE_OF_ENTANGLING || otmp->otyp == IRON_BANDS || otmp->otyp == RAZOR_WIRE))
+		|| (usemirror && otmp->otyp == MIRROR)
 		) {
 		register int otyp = otmp->otyp;
 		bp[foo++] = otmp->invlet;
@@ -1154,6 +1189,8 @@ register const char *let,*word;
 			(otmp->oclass == CHAIN_CLASS && otmp->otyp != CHAIN)))
 		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES || otmp->otyp == SUNGLASSES))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
+		|| (!strcmp(word, "zap") &&
+		    (otmp->oclass == TOOL_CLASS && otmp->otyp != ROD_OF_FORCE))
 		|| (!strcmp(word, "inject") && !(otmp->otyp == HYPOSPRAY_AMPULE && otmp->spe > 0))
 		|| (!strcmp(word, "give the tear to") &&
 			!(otmp->otyp == BROKEN_ANDROID && otmp->ovar1 == 0) &&
@@ -1171,6 +1208,7 @@ register const char *let,*word;
 		|| (!strcmp(word, "write with") &&
 		    ((otmp->oclass == TOOL_CLASS &&
 		     otyp != MAGIC_MARKER && otyp != TOWEL 
+		     && otyp != ROD_OF_FORCE
 			 && otyp != LIGHTSABER && otyp != BEAMSWORD && otyp != DOUBLE_LIGHTSABER && otyp != KAMEREL_VAJRA 
 			 && !arti_is_prop(otmp, ARTI_ENGRAVE)) ||
 			(otmp->oclass == CHAIN_CLASS)))
@@ -1228,7 +1266,10 @@ register const char *let,*word;
 			  otyp != GNOMISH_POINTY_HAT &&
 			  otmp->oartifact != ART_AEGIS
 			  ) || 
-		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp))))
+		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)
+				&& otyp != CATAPSI_VORTEX && otyp != ANTIMAGIC_RIFT
+				&& otyp != VITAL_SOULSTONE && otyp != SPIRITUAL_SOULSTONE
+			 )))
 		|| (!strcmp(word, "invoke") &&
 		    (!otmp->oartifact && !objects[otyp].oc_unique &&
 		     (otyp != FAKE_AMULET_OF_YENDOR || otmp->known) &&

@@ -31,6 +31,7 @@ enum {
 	OPROP_BCRS,
 	OPROP_HEAL,
 	OPROP_LIFE,
+	OPROP_GRES,
 	OPROP_FLAYW,
 	OPROP_LESSER_FLAYW,
 	OPROP_PHSEW,
@@ -73,6 +74,7 @@ enum {
 	OPROP_PSECW,
 	OPROP_GOATW,
 	OPROP_OCLTW,
+	OPROP_RETRW,
 	MAX_OPROP
 };
 
@@ -516,6 +518,7 @@ struct obj {
 			 (o)->otyp == PRAYER_WARDED_WRAPPING)
 #define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
 							 (otmp)->otyp == KAMEREL_VAJRA || \
+							 (otmp)->otyp == ROD_OF_FORCE || \
 							 (otmp)->otyp == BEAMSWORD || \
 							 (otmp)->otyp == DOUBLE_LIGHTSABER)
 #define valid_focus_gem(otmp) ((otmp)->oclass == GEM_CLASS && ((otmp)->otyp < LUCKSTONE || (otmp)->otyp == CHUNK_OF_FOSSIL_DARK))
@@ -571,22 +574,22 @@ struct obj {
 			!is_launcher(otmp) &&\
 			!is_lightsaber(otmp) &&\
 			!is_unpoisonable_firearm_ammo(otmp) &&\
-			objects[otmp->otyp].oc_dir &&\
-			objects[otmp->otyp].oc_dir != WHACK)\
+			objects[otmp->otyp].oc_dtyp &&\
+			objects[otmp->otyp].oc_dtyp != WHACK)\
 			|| otmp->otyp == BEARTRAP)
 #define uslinging()	(uwep && objects[uwep->otyp].oc_skill == P_SLING)
 #define is_bludgeon(otmp)	(otmp->oclass == SPBOOK_CLASS || \
 			otmp->oclass == WAND_CLASS || \
-			(objects[otmp->otyp].oc_dir & WHACK)) //Whack == 1
+			(objects[otmp->otyp].oc_dtyp & WHACK)) //Whack == 1
 #define is_stabbing(otmp)	(otmp->oclass != SPBOOK_CLASS && \
 			otmp->oclass != WAND_CLASS && \
-			(objects[otmp->otyp].oc_dir & PIERCE)) //Pierce == 2
+			(objects[otmp->otyp].oc_dtyp & PIERCE)) //Pierce == 2
 #define is_slashing(otmp)	(otmp->oclass != SPBOOK_CLASS && \
 			otmp->oclass != WAND_CLASS && \
-			(objects[otmp->otyp].oc_dir & SLASH)) //Slash == 4
+			(objects[otmp->otyp].oc_dtyp & SLASH)) //Slash == 4
 #define is_blasting(otmp)	(otmp->oclass != SPBOOK_CLASS && \
 			otmp->oclass != WAND_CLASS && \
-			(objects[otmp->otyp].oc_dir & EXPLOSION))
+			(objects[otmp->otyp].oc_dtyp & EXPLOSION))
 //#ifdef FIREARMS
 #define is_blaster(otmp) \
 			((otmp)->oclass == WEAPON_CLASS && \
@@ -619,12 +622,13 @@ struct obj {
 #define valid_weapon(otmp)		((otmp)->oclass == WEAPON_CLASS || \
 	is_weptool((otmp)) || \
 	(otmp)->otyp == BOULDER || \
+	(otmp)->otyp == MASS_OF_STUFF || \
 	(otmp)->otyp == HEAVY_IRON_BALL || \
 	(otmp)->otyp == CHAIN || \
 	(otmp)->oclass == GEM_CLASS)
 #define throwing_weapon(otmp)	(is_missile((otmp)) || is_spear((otmp)) || \
 	(is_blade((otmp)) && !is_sword((otmp)) && \
-	(objects[(otmp)->otyp].oc_dir & PIERCE)) || \
+	(objects[(otmp)->otyp].oc_dtyp & PIERCE)) || \
 	(otmp)->otyp == WAR_HAMMER || (otmp)->otyp == AKLYS || \
 	(otmp)->oartifact == ART_SICKLE_MOON || \
 	(otmp)->oartifact == ART_HOUCHOU)
@@ -853,6 +857,7 @@ struct obj {
 				|| (otmp)->otyp == LIGHTSABER\
 				|| (otmp)->otyp == BEAMSWORD\
 				|| (otmp)->otyp == DOUBLE_LIGHTSABER\
+				|| (otmp)->otyp == ROD_OF_FORCE\
 				|| (otmp)->otyp == GNOMISH_POINTY_HAT\
 				|| (otmp)->otyp == CANDELABRUM_OF_INVOCATION\
 				|| (otmp)->otyp == TALLOW_CANDLE\
@@ -901,11 +906,11 @@ struct obj {
 							 (otmp)->obj_material == IRON)
 
 /* misc */
-#define is_boulder(otmp)		((otmp)->otyp == BOULDER || (otmp)->otyp == MASSIVE_STONE_CRATE || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))
+#define is_boulder(otmp)		((otmp)->otyp == BOULDER || (otmp)->otyp == MASSIVE_STONE_CRATE || (otmp)->otyp == MASS_OF_STUFF || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))
 
 #define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == PLAIN_DRESS || onum == VICTORIAN_UNDERWEAR)
 
-#define arm_blocks_upper_body(onum)		(objects[onum].oc_dir&UPPER_TORSO_DR)
+#define arm_blocks_upper_body(onum)		(objects[onum].oc_dtyp&UPPER_TORSO_DR)
 
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \

@@ -40,7 +40,6 @@ STATIC_DCL boolean FDECL(spiritLets, (char *, int));
 STATIC_DCL int FDECL(dospiritmenu, (int, int *, int));
 STATIC_DCL boolean FDECL(dospellmenu, (int,int *));
 STATIC_DCL void FDECL(describe_spell, (int));
-STATIC_DCL int NDECL(base_casting_stat);
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
 STATIC_DCL void NDECL(cast_protection);
@@ -5555,7 +5554,7 @@ int val;
     return rt;
 }
 
-STATIC_OVL int
+int
 base_casting_stat()
 {
 	int stat;
@@ -5597,6 +5596,9 @@ int spell;
 	int difficulty;
 	int skill;
 	
+	if(Deadmagic && base_casting_stat() == A_INT) return 0;
+	if(Catapsi && base_casting_stat() == A_CHA) return 0;
+	if(Misotheism && base_casting_stat() == A_WIS) return 0;
 	if(Nullmagic && spellid(spell)!=SPE_ANTIMAGIC_SHIELD) return 0;
 	
 	/* Calculate intrinsic ability (splcaster) */
@@ -5890,7 +5892,7 @@ int spell;
 		chance = 100;
 	
 	//
-	if(Babble || Screaming || Strangled || FrozenAir || Drowning){
+	if(Babble || Screaming || Strangled || FrozenAir || BloodDrown || Drowning){
 		chance = 0;
 	}
 	else if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){

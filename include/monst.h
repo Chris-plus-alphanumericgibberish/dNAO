@@ -156,6 +156,7 @@ struct monst {
 	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*91*/
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*93*/
+	Bitfield(menvy,1);/* wants only others stuff */ /*94*/
 	
 	int mtaneggs;	/* tannin eggs */
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
@@ -250,7 +251,7 @@ struct monst {
 #define	mvar_vector	mvar1
 #define	mvar_spList_1	mvar1
 #define	mvar_hdBreath	mvar1
-#define	mvar_dreadPrayer	mvar1
+#define	mvar_dreadPrayer_cooldown	mvar1
 #define	mvar_dracaePreg	mvar1
 #define	mvar_dollTypes	mvar1
 #define	DOLLMAKER_EFFIGY		0x00001L
@@ -275,7 +276,12 @@ struct monst {
 #define	mvar_tanninType	mvar1
 #define	mvar_ancient_breath_cooldown	mvar1
 	long mvar2;
+#define	mvar_dracaePregTimer	mvar2
+#define	mvar_spList_2	mvar2
+#define	mvar_dreadPrayer_progress	mvar2
+#define	mvar_attack_pm	mvar2
 	long mvar3;
+#define	mvar_conversationTracker	mvar3
 
 	struct ls_t * light;
 
@@ -313,5 +319,6 @@ struct monst {
 #define MON_NOSWEP(mon)	((mon)->msw = (struct obj *)0)
 
 #define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->mhp < 1)
+#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my)
 
 #endif /* MONST_H */

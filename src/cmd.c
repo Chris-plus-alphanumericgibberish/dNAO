@@ -603,7 +603,7 @@ boolean you_abilities;
 	if (mon_abilities && youracedata->mlet == S_NYMPH){
 		add_ability('I', "Remove an iron ball", MATTK_REMV);
 	}
-	if (mon_abilities && (is_mind_flayer(youracedata) || Role_if(PM_MADMAN))){
+	if (mon_abilities && (is_mind_flayer(youracedata) || Role_if(PM_MADMAN)) && !Catapsi){
 		add_ability('m', "Emit a mind blast", MATTK_MIND);
 	}
 	if (you_abilities && !mon_abilities){
@@ -642,7 +642,7 @@ boolean you_abilities;
 	if (mon_abilities && webmaker(youracedata)){
 		add_ability('w', "Spin a web", MATTK_WEBS);
 	}
-	if (Role_if(PM_MADMAN) && u.whisperturn < moves){
+	if (Role_if(PM_MADMAN) && u.whisperturn < moves && !Catapsi){
 		add_ability('W', "Call your whisperer", MATTK_WHISPER);
 	}
 	if (you_abilities && spellid(0) != NO_SPELL) {
@@ -1858,6 +1858,9 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Drain_resistance) you_are("level-drain resistant");
 	if (Antimagic) you_are("magic-protected");
 	if (Nullmagic) you_are("shrouded in anti-magic");
+	if (Deadmagic) you_are("in a dead-magic zone");
+	if (Catapsi) you_are("in a psionic storm");
+	if (Misotheism) you_are("in a divine-exclusion zone");
 	if (Waterproof) you_are("waterproof");
 	if (Stone_resistance)
 		you_are("petrification resistant");
@@ -2103,6 +2106,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	if (Golded) you_are("turning to gold");
 	if (Slimed) you_are("turning into slime");
 	if (FrozenAir) you_are("suffocating in the cold night");
+	if (BloodDrown) you_are("drowning in blood");
 	if (Strangled) you_are((u.uburied) ? "buried" : "being strangled");
 	if (Glib) {
 		Sprintf(buf, "slippery %s", makeplural(body_part(FINGER)));
@@ -2681,6 +2685,9 @@ int final;
 	if (Drain_resistance) dump(youwere, "level-drain resistant");
 	if (Antimagic) dump(youwere, "magic-protected");
 	if (Nullmagic) dump(youwere, "shrouded in anti-magic");
+	if (Deadmagic) dump(youwere, "in a dead-magic zone");
+	if (Catapsi) dump(youwere, "in a psionic storm");
+	if (Misotheism) dump(youwere, "in a divine-exclusion");
 	if (Waterproof) dump(youwere, "waterproof");
 	if (Stone_resistance)
 		dump(youwere, "petrification resistant");
@@ -2883,6 +2890,7 @@ int final;
 	if (Stoned) dump(youwere, "turning to stone");
 	if (Golded) dump(youwere, "turning to gold");
 	if (Slimed) dump(youwere, "turning into slime");
+	if (BloodDrown) dump(youwere, "drowning in blood");
 	if (FrozenAir) dump(youwere, "suffocating in the cold night");
 	if (Strangled)
 		dump(youwere, (u.uburied) ? "buried" : "being strangled");
@@ -3187,7 +3195,31 @@ resistances_enlightenment()
 			putstr(en_win, 0, "Your equipment protects you from the water around you.");
 	}
 	
-	if(Nullmagic){
+	if(Deadmagic && base_casting_stat() == A_INT){
+		int i;
+		update_alternate_spells();
+		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
+			putstr(en_win, 0, "Magic is damaged.");
+			break;
+		}
+	}
+	else if(Catapsi && base_casting_stat() == A_CHA){
+		int i;
+		update_alternate_spells();
+		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
+			putstr(en_win, 0, "Your mind is full of static.");
+			break;
+		}
+	}
+	else if(Misotheism && base_casting_stat() == A_WIS){
+		int i;
+		update_alternate_spells();
+		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
+			putstr(en_win, 0, "Your mind is full of static.");
+			break;
+		}
+	}
+	else if(Nullmagic){
 		int i;
 		update_alternate_spells();
 		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {

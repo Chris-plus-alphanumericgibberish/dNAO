@@ -1091,6 +1091,7 @@ int x, y;
 	    case SPE_KNOCK:
 	    case WAN_STRIKING:
 	    case SPE_FORCE_BOLT:
+	    case ROD_OF_FORCE:
 		if (key)	/* Artifact doors are revealed only (slash'em)*/
 		    cvt_sdoor_to_door(door);
 		else{
@@ -1189,6 +1190,7 @@ int x, y;
 	break;
 	case WAN_STRIKING:
 	case SPE_FORCE_BOLT:
+	case ROD_OF_FORCE:
 	    if (!key && door->doormask & (D_LOCKED | D_CLOSED)) {
 		if (door->doormask & D_TRAPPED) {
 		    if (MON_AT(x, y))

@@ -97,7 +97,12 @@ const struct propname {
     { FIXED_ABIL, "fixed abilites" },
     { LIFESAVED, "life will be saved" },
 	{ NULLMAGIC, "magic nullification" },
+	{ DEADMAGIC, "dead magic zone" },
+	{ CATAPSI, "psionic vortex" },
+	{ MISOTHEISM, "divine-exclusion zone" },
     { WATERPROOF, "waterproofing" },
+    { SHATTERING, "fracturing" },
+    { DARKVISION_ONLY, "darksight-override" },
     {  0, 0 },
 };
 
@@ -647,13 +652,18 @@ nh_timeout()
 			}
 		}
 	}
-	if(Strangled || FrozenAir){
+	if(Strangled || FrozenAir || BloodDrown){
+		if(BloodDrown){
+			pline("Your lungs are full of blood!");
+			water_damage(invent, FALSE, FALSE, WD_BLOOD, &youmonst);
+		}
 		if(Breathless);//Do nothing
 		else if(u.divetimer > 1) u.divetimer--;
 		else {
 			killer_format = KILLED_BY;
 			killer = ((HStrangled & TIMEOUT) && delayed_killer) ? delayed_killer
 				: (u.uburied || FrozenAir) ? "suffocation"
+				: BloodDrown ? "drowning in blood"
 				: "strangulation";
 			done(((HStrangled & TIMEOUT) && delayed_killer) ? CHOKING : DIED);
 		}
@@ -666,7 +676,7 @@ nh_timeout()
 		else if(u.divetimer > (ACURR(A_CON))/3) u.divetimer--;
 	}
 	
-	if((Babble || Screaming) && !Strangled && !FrozenAir && u.divetimer > 1)
+	if((Babble || Screaming) && !Strangled && !FrozenAir && !BloodDrown && u.divetimer > 1)
 		u.divetimer--;
 
 	if(u.divetimer<=0){
@@ -890,6 +900,12 @@ nh_timeout()
 			if (Fumbling)
 			    HFumbling += rnd(20);
 			break;
+		case INFRAVISION:
+		case BLOODSENSE:
+		case LIFESENSE:
+		case SENSEALL:
+		case OMNISENSE:
+		case EARTHSENSE:
 		case DETECT_MONSTERS:
 			see_monsters();
 			break;
@@ -930,6 +946,17 @@ nh_timeout()
 			else
 				pline("Your vision recedes.");
 			vision_full_recalc = 1;
+		break;
+		case NORMALVISION:
+		case LOWLIGHTSIGHT:
+		case ELFSIGHT:
+		case DARKSIGHT:
+		case CATSIGHT:
+		case EXTRAMISSION:
+		case ECHOLOCATION:
+		case DARKVISION_ONLY:
+			vision_full_recalc = 1;
+			see_monsters();
 		break;
 		}
 		}
@@ -2014,9 +2041,10 @@ long timeout;
 	    	}
 	    case LIGHTSABER: 
 	    case BEAMSWORD:
+	    case ROD_OF_FORCE:
 	        /* Callback is checked every 1 turns - 
 	        	lightsaber automatically deactivates if not wielded */
-	        if ((obj->cursed && !rn2(250)) ||
+	        if ((obj->cursed && obj->otyp != ROD_OF_FORCE && !rn2(250)) ||
 	            (obj->where == OBJ_FLOOR) || 
 		    (obj->where == OBJ_MINVENT && 
 				((!MON_WEP(obj->ocarry) || MON_WEP(obj->ocarry) != obj)
@@ -2139,6 +2167,9 @@ struct obj * obj;
 			radius = 0; // jet is "mirrored", black opal is "smoke"
 		else radius = 1;
 		break;
+	case ROD_OF_FORCE:
+			radius = 0;
+		break;
 	default:
 		/* [ALI] Support artifact light sources */
 		if (artifact_light(obj) || arti_light(obj)) {
@@ -2162,6 +2193,7 @@ struct obj * obj;
 	case DOUBLE_LIGHTSABER:
 	case LIGHTSABER:
 	case BEAMSWORD:
+	case ROD_OF_FORCE:
 		turns = 1;
 		break;
 
@@ -2237,6 +2269,7 @@ struct obj * obj;
 		(obj->otyp == DOUBLE_LIGHTSABER) ||
 		(obj->otyp == LIGHTSABER) ||
 		(obj->otyp == BEAMSWORD) ||
+		(obj->otyp == ROD_OF_FORCE) ||
 		(obj->otyp == POT_OIL) ||
 		(obj->otyp == STICK_OF_DYNAMITE) ||
 		(obj->otyp == GNOMISH_POINTY_HAT) ||
@@ -2317,6 +2350,7 @@ begin_burn(obj)
 		obj->lamplit = TRUE;
 	/* lightsaber charge and Atma Weapon special */
 	if (obj->otyp == DOUBLE_LIGHTSABER ||
+		obj->otyp == ROD_OF_FORCE ||
 		obj->otyp == LIGHTSABER ||
 		obj->otyp == BEAMSWORD
 		) {

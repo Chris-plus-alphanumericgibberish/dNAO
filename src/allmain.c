@@ -693,12 +693,15 @@ you_regen_hp()
 			(*hp) = (*hpmax);
 	}
 	
-	perX += u.uhoon;
-	
 	//Androids regenerate from active Hoon, but not from other sources unless dormant
 	// Notably, no bonus from passive Hoon
 	if(uandroid && !u.usleep)
 		return;
+	
+	// Previously used hoons
+	perX += u.uhoon;
+	// Carried vital soulstones
+	perX += stone_health();
 	
 	// fish out of water
 	if (youracedata->mlet == S_EEL && !is_pool(u.ux, u.uy, youracedata->msize == MZ_TINY) && !Is_waterlevel(&u.uz)) {
@@ -942,6 +945,9 @@ you_regen_pw()
 		perX += reglevel;
 	}
 
+	// Carried spiritual soulstones
+	perX += stone_energy();
+	
 	// external power regeneration
 	if (Energy_regeneration ||										// energy regeneration 'trinsic
 		(u.umartial && !uarmf && IS_GRASS(levl[u.ux][u.uy].typ))	// or being a bare-foot martial-artist standing on grass
@@ -1783,6 +1789,17 @@ karemade:
 					}
 				}
 
+				if(BlowingWinds && !mtmp->mtame){
+					static long lastbwmessage = 0L;
+					if(lastbwmessage != monstermoves && canspotmon(mtmp)){
+						lastbwmessage = monstermoves;
+						pline("Hurricane-force winds surround you!");
+					}
+					mhurtle(mtmp, rn2(3)-1, rn2(3)-1, rnd(9), FALSE);
+				}
+				if(DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
+					continue;
+
 				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !mtmp->mtame && !ClearThoughts) {
 					static long lastusedmove = 0;
 					if (lastusedmove != moves) {
@@ -2608,7 +2625,7 @@ karemade:
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
 		}
-		if (Screaming && !Strangled && !FrozenAir && !is_deaf(mtmp)){
+		if (Screaming && !Strangled && !BloodDrown && !FrozenAir && !is_deaf(mtmp)){
 			//quite noisy
 			mtmp->mux = u.ux;
 			mtmp->muy = u.uy;
@@ -2628,7 +2645,7 @@ karemade:
 			mtmp->muy = u.uy;
 		}
 	}
-	if (Screaming && !Strangled && !FrozenAir){
+	if (Screaming && !Strangled && !BloodDrown && !FrozenAir){
 		//quite noisy
 		song_noise(ACURR(A_CON)*ACURR(A_CON));
 	}
@@ -3868,9 +3885,9 @@ printAttacks(buf, ptr)
 			&& attk->aatyp != AT_MARI
 			&& attk->aatyp != AT_MAGC
 		)
-			impossible("attack key %d out of range %d!", attk->aatyp, SIZE(attackKey));
+			impossible("attack key %d out of range %d on monster %s!", attk->aatyp, SIZE(attackKey), ptr->mname);
 		if(SIZE(damageKey) <= attk->adtyp)
-			impossible("damage key %d out of range!", attk->adtyp);
+			impossible("damage key %d out of range on monster %s!", attk->adtyp, ptr->mname);
 		if(!i){
 			Sprintf(buf, "%s %dd%d %s",
 				attk->aatyp == AT_WEAP ? "Weapon" :

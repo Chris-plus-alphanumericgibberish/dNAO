@@ -405,7 +405,6 @@ xchar x, y;
 
 	/* Mjollnir is magically too heavy to kick */
 	if(kickobj->oartifact == ART_MJOLLNIR || 
-		kickobj->oartifact == ART_SICKLE_MOON || 
 		kickobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS ||
 		(kickobj->otyp == MAGIC_CHEST && kickobj->obolted)) range = 1;
 

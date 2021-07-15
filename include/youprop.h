@@ -212,6 +212,12 @@
 #define Glib			u.uprops[GLIB].intrinsic
 #define Slimed			u.uprops[SLIMED].intrinsic	/* [Tom] */
 #define FrozenAir		u.uprops[FROZEN_AIR].intrinsic
+#define BloodDrown		u.uprops[BLOOD_DROWN].intrinsic
+#define Deadmagic		u.uprops[DEADMAGIC].intrinsic
+#define Catapsi			u.uprops[CATAPSI].intrinsic
+#define Misotheism		u.uprops[MISOTHEISM].intrinsic
+#define DarksightOnly	u.uprops[DARKVISION_ONLY].intrinsic
+#define Shattering		u.uprops[SHATTERING].intrinsic
 
 /* Hallucination is solely a timeout; its resistance is extrinsic */
 #define HHallucination		u.uprops[HALLUC].intrinsic
@@ -268,18 +274,18 @@
 /*** Vision and senses ***/
 #define HNormalvision		u.uprops[NORMALVISION].intrinsic
 #define ENormalvision		u.uprops[NORMALVISION].extrinsic
-#define Normalvision		(HNormalvision || ENormalvision || \
-				 normalvision(youracedata))
+#define Normalvision		((HNormalvision || ENormalvision || \
+				 normalvision(youracedata)) && !DarksightOnly)
 
 #define HLowlightsight		u.uprops[LOWLIGHTSIGHT].intrinsic
 #define ELowlightsight		u.uprops[LOWLIGHTSIGHT].extrinsic
-#define Lowlightsight		(HLowlightsight || ELowlightsight || \
-				 lowlightsight2(youracedata))
+#define Lowlightsight		((HLowlightsight || ELowlightsight || \
+				 lowlightsight2(youracedata)) && !DarksightOnly)
 
 #define HElfsight		u.uprops[ELFSIGHT].intrinsic
 #define EElfsight		u.uprops[ELFSIGHT].extrinsic
-#define Elfsight		(HElfsight || EElfsight || \
-				 lowlightsight3(youracedata))
+#define Elfsight		((HElfsight || EElfsight || \
+				 lowlightsight3(youracedata)) && !DarksightOnly)
 
 #define HDarksight		u.uprops[DARKSIGHT].intrinsic
 #define EDarksight		u.uprops[DARKSIGHT].extrinsic
@@ -288,13 +294,13 @@
 
 #define HCatsight		u.uprops[CATSIGHT].intrinsic
 #define ECatsight		u.uprops[CATSIGHT].extrinsic
-#define Catsight		(HCatsight || ECatsight || \
-				 catsight(youracedata))
+#define Catsight		((HCatsight || ECatsight || \
+				 catsight(youracedata)) && !DarksightOnly)
 
 #define HExtramission		u.uprops[EXTRAMISSION].intrinsic
 #define EExtramission		u.uprops[EXTRAMISSION].extrinsic
-#define Extramission		(HExtramission || EExtramission || \
-				 extramission(youracedata))
+#define Extramission		((HExtramission || EExtramission || \
+				 extramission(youracedata)) && !DarksightOnly)
 
 #define HXray_vision	u.uprops[XRAY_VISION].intrinsic
 #define EXray_vision	u.uprops[XRAY_VISION].extrinsic
@@ -313,18 +319,18 @@
 
 #define HInfravision		u.uprops[INFRAVISION].intrinsic
 #define EInfravision		u.uprops[INFRAVISION].extrinsic
-#define Infravision		(HInfravision || EInfravision || \
-				  infravision(youracedata))
+#define Infravision		((HInfravision || EInfravision || \
+				  infravision(youracedata)) && !DarksightOnly)
 
 #define HBloodsense		u.uprops[BLOODSENSE].intrinsic
 #define EBloodsense		u.uprops[BLOODSENSE].extrinsic
-#define Bloodsense		(HBloodsense || EBloodsense || \
-				  bloodsense(youracedata))
+#define Bloodsense		((HBloodsense || EBloodsense || \
+				  bloodsense(youracedata)) && !DarksightOnly)
 
 #define HLifesense		u.uprops[LIFESENSE].intrinsic
 #define ELifesense		u.uprops[LIFESENSE].extrinsic
-#define Lifesense		(HLifesense || ELifesense || \
-				  lifesense(youracedata))
+#define Lifesense		((HLifesense || ELifesense || \
+				  lifesense(youracedata)) && !DarksightOnly)
 
 #define HSenseall		u.uprops[SENSEALL].intrinsic
 #define ESenseall		u.uprops[SENSEALL].extrinsic
