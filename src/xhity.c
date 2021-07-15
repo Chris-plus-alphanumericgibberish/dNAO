@@ -429,7 +429,7 @@ int tary;
 		char buf[BUFSZ], genericwere[BUFSZ];
 
 		Strcpy(genericwere, "creature");
-		numhelp = were_summon(pa, FALSE, &numseen, genericwere);
+		numhelp = were_summon(magr, &numseen, genericwere);
 		if (vis&VIS_MAGR) {
 			pline("%s summons help!", Monnam(magr));
 			if (numhelp > 0) {
@@ -8666,6 +8666,8 @@ int vis;
 			struct monst *mlocal;
 			int dx = 0, dy = 0, i;
 			int monid;
+			int mmflags = (MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
+			if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
 
 			/* get dx, dy */
 			if		(tarx - x(magr) < 0) dx = -1;
@@ -8690,7 +8692,7 @@ int vis;
 			mlocal = makemon(&mons[monid],
 				x(magr) + dx,
 				y(magr) + dy,
-				(MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH));
+				mmflags);
 
 			/* set the creation's direction */
 			if (mlocal){
@@ -8699,6 +8701,9 @@ int vis;
 
 				magr->mspec_used = rnd(6);
 				result = MM_HIT;
+
+				if (mmflags&MM_ESUM)
+					mark_mon_as_summoned(mlocal, magr, ESUMMON_PERMANENT, 0);
 			}
 			else
 				result = MM_MISS;
@@ -11546,47 +11551,66 @@ int vis;
 		if (maybe_not && rn2(5))
 			return MM_MISS;
 		else {
-			int i = 0;
-			int n = 0;
-			if (pa->mtyp == PM_MIGO_SOLDIER){
-				n = rn2(4);
-				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
+			int typ = NON_PM;
+			int quan;
+
+			switch(pa->mtyp)
+			{
+				case PM_MIGO_SOLDIER:
+					quan = rnd(4);
+					typ = PM_FOG_CLOUD;
+					if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+					break;
+				case PM_MIGO_PHILOSOPHER:
+					quan = rnd(4);
+					typ = PM_ICE_VORTEX;
+					if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
+					break;
+				case PM_MIGO_QUEEN:
+					quan = rnd(2);
+					typ = PM_STEAM_VORTEX;
+					if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
+					break;
+				case PM_ANCIENT_TEMPEST:
+					quan = 1;
+					switch(rn2(4)) {
+						case 0:
+							typ = PM_AIR_ELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see a whisp of cloud swirl out from %s.", mon_nam(magr));
+							break;
+						case 1:
+							typ = PM_WATER_ELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see rain coalesce and stride out from %s.", mon_nam(magr));
+							break;
+						case 2:
+							typ = PM_LIGHTNING_PARAELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see lightning coalesce and strike out from %s.", mon_nam(magr));
+							break;
+						case 3:
+							typ = PM_ICE_PARAELEMENTAL;
+							if (cansee(magr->mx, magr->my)) You("see hail coalesce and stride out from %s.", mon_nam(magr));
+							break;
+					}
+				default:
+					impossible("unexpected pa type for mist projector, %d", pa->mtyp);
+					quan = 1;
+					typ = PM_FOG_CLOUD;
+					if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
+					break;
 			}
-			else if (pa->mtyp == PM_MIGO_PHILOSOPHER){
-				n = rn2(4);
-				if (cansee(magr->mx, magr->my)) You("see whirling snow swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_ICE_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
-			else if (pa->mtyp == PM_MIGO_QUEEN){
-				n = rn2(2);
-				if (cansee(magr->mx, magr->my)) You("see scalding steam swirl out from around %s.", mon_nam(magr));
-				for (i = 0; i < n; i++) makemon(&mons[PM_STEAM_VORTEX], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
-			else if (pa->mtyp == PM_ANCIENT_TEMPEST){
-				switch (rnd(4)){
-				case 1:
-					if (cansee(magr->mx, magr->my)) You("see a whisp of cloud swirl out from %s.", mon_nam(magr));
-					makemon(&mons[PM_AIR_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 2:
-					if (cansee(magr->mx, magr->my)) You("see rain coalesce and stride out from %s.", mon_nam(magr));
-					makemon(&mons[PM_WATER_ELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 3:
-					if (cansee(magr->mx, magr->my)) You("see lightning coalesce and strike out from %s.", mon_nam(magr));
-					makemon(&mons[PM_LIGHTNING_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
-				case 4:
-					if (cansee(magr->mx, magr->my)) You("see hail coalesce and stride out from %s.", mon_nam(magr));
-					makemon(&mons[PM_ICE_PARAELEMENTAL], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-					break;
+
+			if (typ != NON_PM) {
+				struct monst * mtmp;
+				int mmflags = MM_ADJACENTOK|MM_ADJACENTSTRICT;
+				if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
+
+				while(quan--) {
+					mtmp = makemon(&mons[typ], magr->mx, magr->my, mmflags);
+					if (mtmp && (mmflags&MM_ESUM))
+						mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
 				}
 			}
-			else{
-				if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
-				makemon(&mons[PM_FOG_CLOUD], magr->mx, magr->my, MM_ADJACENTOK | MM_ADJACENTSTRICT);
-			}
+
 			return MM_AGR_STOP; // if a mi-go fires a mist projector, it can take no further actions that turn
 		}
 		break;
@@ -11595,27 +11619,38 @@ int vis;
 		if (is_fern(pa) && !magr->mcan && 
 			!is_fern_sprout(pa) ? !rn2(2) : !rn2(4)) {
 			coord mm;
-			mm.x = magr->mx; mm.y = magr->my;
-			enexto(&mm, mm.x, mm.y, &mons[PM_DUNGEON_FERN_SPORE]);
-			if (pa->mtyp == PM_DUNGEON_FERN ||
-				pa->mtyp == PM_DUNGEON_FERN_SPROUT
-				) {
-				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			int typ;
+			switch (pa->mtyp) {
+				case PM_DUNGEON_FERN:
+				case PM_DUNGEON_FERN_SPROUT:
+					typ = PM_DUNGEON_FERN_SPORE;
+					break;
+				case PM_SWAMP_FERN:
+				case PM_SWAMP_FERN_SPROUT:
+					typ = PM_SWAMP_FERN_SPORE;
+					break;
+				case PM_BURNING_FERN:
+				case PM_BURNING_FERN_SPROUT:
+					typ = PM_BURNING_FERN_SPORE;
+					break;
+				default:
+					typ = NON_PM;
+					break;
 			}
-			else if (pa->mtyp == PM_SWAMP_FERN ||
-				pa->mtyp == PM_SWAMP_FERN_SPROUT
-				) {
-				makemon(&mons[PM_SWAMP_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
+			if (typ != NON_PM) {
+				struct monst * mtmp;
+				int mmflags = MM_ADJACENTOK|MM_ADJACENTSTRICT;
+				if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
+
+				mtmp = makemon(&mons[typ], mm.x, mm.y, mmflags);
+
+				if (mtmp) {
+					if (mmflags&MM_ESUM)
+						mark_mon_as_summoned(mtmp, magr, ESUMMON_PERMANENT, 0);
+					if (canseemon(magr))
+						pline("%s releases a spore!", Monnam(magr));
+				}
 			}
-			else if (pa->mtyp == PM_BURNING_FERN ||
-				pa->mtyp == PM_BURNING_FERN_SPROUT
-				) {
-				makemon(&mons[PM_BURNING_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
-			}
-			else { /* currently these should not be generated */
-				makemon(&mons[PM_DUNGEON_FERN_SPORE], mm.x, mm.y, NO_MM_FLAGS);
-			}
-			if (canseemon(magr)) pline("%s releases a spore!", Monnam(magr));
 		}
 		break;
 	case AD_WTCH:{

@@ -3292,7 +3292,7 @@ int gen_restrict;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
-	boolean maketame, makeloyal, makepeaceful, makehostile;
+	boolean maketame, makeloyal, makepeaceful, makehostile, makesummoned;
 	int l = 0;
 
 	tries = 0;
@@ -3319,6 +3319,9 @@ int gen_restrict;
 			}
 			else if (!strncmpi(bufp, "hostile ", l = 8)) {
 				makehostile = TRUE && (specify_attitude == -1);
+			}
+			else if (!strncmpi(bufp, "summoned ", l = 9)) {
+				makesummoned = TRUE && (specify_attitude == -1);
 			}
 			else if (!strncmpi(bufp, "zombified ", l = 10)) {
 				undeadtype = ZOMBIFIED;
@@ -3518,6 +3521,8 @@ createmon:
 			int mm_flags = NO_MM_FLAGS;
 			if (maketame)
 				mm_flags |= MM_EDOG;
+			if (makesummoned)
+				mm_flags |= MM_ESUM;
 
 			if (undeadtype)
 				mtmp = makeundead(whichpm, u.ux, u.uy, mm_flags, undeadtype);
@@ -3535,6 +3540,9 @@ createmon:
 				else if (makehostile)
 					mtmp->mpeaceful = 0;
 				set_malign(mtmp);
+
+				if (makesummoned)
+					mark_mon_as_summoned(mtmp, (struct monst *)0, ESUMMON_PERMANENT, 0);
 
 				madeany = TRUE;
 				newsym(mtmp->mx, mtmp->my);
