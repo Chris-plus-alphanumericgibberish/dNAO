@@ -3885,9 +3885,9 @@ printAttacks(buf, ptr)
 			&& attk->aatyp != AT_MARI
 			&& attk->aatyp != AT_MAGC
 		)
-			impossible("attack key %d out of range %d!", attk->aatyp, SIZE(attackKey));
+			impossible("attack key %d out of range %d on monster %s!", attk->aatyp, SIZE(attackKey), ptr->mname);
 		if(SIZE(damageKey) <= attk->adtyp)
-			impossible("damage key %d out of range!", attk->adtyp);
+			impossible("damage key %d out of range on monster %s!", attk->adtyp, ptr->mname);
 		if(!i){
 			Sprintf(buf, "%s %dd%d %s",
 				attk->aatyp == AT_WEAP ? "Weapon" :
