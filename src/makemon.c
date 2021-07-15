@@ -3696,27 +3696,62 @@ int mkobjflags;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_LILLEND){
-				(void)mongets(mtmp, MASK, mkobjflags);
-				(void)mongets(mtmp, MASK, mkobjflags);
-				(void)mongets(mtmp, MASK, mkobjflags);
-				(void)mongets(mtmp, MASK, mkobjflags);
-				(void)mongets(mtmp, MASK, mkobjflags);
-				(void)mongets(mtmp, MASK, mkobjflags);
-				
-				otmp = mksobj(ELVEN_BOW, mkobjflags|MKOBJ_NOINIT);
-			    bless(otmp);
-			    otmp->oerodeproof = TRUE;
-				spe2 = 3;
-			    otmp->spe = max(otmp->spe, spe2);
-			    (void) mpickobj(mtmp, otmp);
-					m_initthrow(mtmp, ELVEN_ARROW, 12+rnd(30), mkobjflags);
-				(void)mongets(mtmp, HARP, mkobjflags);
-				otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
-			    bless(otmp);
-			    otmp->oerodeproof = TRUE;
-				spe2 = 3;
-			    otmp->spe = max(otmp->spe, spe2);
-			    (void) mpickobj(mtmp, otmp);
+				static boolean lama_count = 0;
+				if(Is_lamashtu_level(&u.uz) && lama_count < 2){
+					otmp = mongets(mtmp, MASK, mkobjflags);
+					otmp->corpsenm = lama_count == 0 ? PM_DEMOGORGON : PM_DAGON; //PM_OBOX_OB
+					otmp = mongets(mtmp, MASK, mkobjflags);
+					otmp->corpsenm = lama_count == 0 ? PM_NESSIAN_PIT_FIEND : PM_KHAAMNUN_TANNIN; //Occularus
+					otmp = mongets(mtmp, MASK, mkobjflags);
+					otmp->corpsenm = lama_count == 0 ? PM_SHAYATEEN : PM_RAGLAYIM_TANNIN;  //PM_AKKABISH_TANNIN
+					otmp = mongets(mtmp, MASK, mkobjflags);
+					otmp->corpsenm = PM_LETHE_ELEMENTAL;
+					otmp = mongets(mtmp, MASK, mkobjflags);
+					otmp->corpsenm = PM_SHOGGOTH;
+					otmp = mongets(mtmp, MASK, mkobjflags);
+					otmp->corpsenm = lama_count == 0 ? PM_DEATH_KNIGHT : PM_SARTAN_TANNIN;
+
+					otmp = mongets(mtmp, HELMET, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					add_oprop(otmp, OPROP_LIFE);
+					add_oprop(otmp, OPROP_HOLY);
+					otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					add_oprop(otmp, OPROP_REFL);
+					add_oprop(otmp, OPROP_LIFE);
+					add_oprop(otmp, OPROP_HOLY);
+					otmp = mongets(mtmp, GAUNTLETS_OF_POWER, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					add_oprop(otmp, OPROP_HOLY);
+					add_oprop(otmp, OPROP_HOLYW);
+					otmp = mongets(mtmp, CLOAK_OF_PROTECTION, mkobjflags);
+					add_oprop(otmp, OPROP_WOOL);
+					otmp->obj_color = CLR_WHITE;
+					
+					lama_count++;
+				}
+				else {
+					(void)mongets(mtmp, MASK, mkobjflags);
+					(void)mongets(mtmp, MASK, mkobjflags);
+					(void)mongets(mtmp, MASK, mkobjflags);
+					(void)mongets(mtmp, MASK, mkobjflags);
+					(void)mongets(mtmp, MASK, mkobjflags);
+					(void)mongets(mtmp, MASK, mkobjflags);
+					otmp = mksobj(ELVEN_BOW, mkobjflags|MKOBJ_NOINIT);
+					bless(otmp);
+					otmp->oerodeproof = TRUE;
+					spe2 = 3;
+					otmp->spe = max(otmp->spe, spe2);
+					(void) mpickobj(mtmp, otmp);
+						m_initthrow(mtmp, ELVEN_ARROW, 12+rnd(30), mkobjflags);
+					(void)mongets(mtmp, HARP, mkobjflags);
+					otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
+					bless(otmp);
+					otmp->oerodeproof = TRUE;
+					spe2 = 3;
+					otmp->spe = max(otmp->spe, spe2);
+					(void) mpickobj(mtmp, otmp);
+				}
 			} else {
 				int artnum = rn2(8);
 	
