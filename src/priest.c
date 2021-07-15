@@ -625,10 +625,13 @@ register struct monst *priest;
 		verbalize("I do not offer blessings to your kind.");
 		return;
 	}
+	if(Misotheism){
+		pline("%s looks extremely confused, and does not reply.", Monnam(priest));
+		return;
+	}
 	
 	/* KMH, conduct */
 	u.uconduct.gnostic++;
-	
 
 	if(priest->mflee || (!priest->ispriest && coaligned && strayed)) {
 	    pline("%s doesn't want anything to do with you!",

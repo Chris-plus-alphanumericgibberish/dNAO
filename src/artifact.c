@@ -7754,6 +7754,7 @@ arti_invoke(obj)
             */
             if(!getdir((char *)0) ||
                 (!u.dx && !u.dy) ||
+                Misotheism ||
                 ((mtmp = m_at(u.ux+u.dx,u.uy+u.dy)) == 0)){
               pline("The %s glows and then fades.", the(xname(obj)));
             } else {
@@ -9973,7 +9974,7 @@ boolean silent;
 {
 	int adtyp = 0;
 
-	if (is_lightsaber(obj) && litsaber(obj))
+	if (is_lightsaber(obj) && litsaber(obj) && obj->otyp != ROD_OF_FORCE)
 		adtyp = (obj->otyp == KAMEREL_VAJRA ? AD_ELEC : AD_FIRE);
 	else if (obj->oartifact)
 		adtyp = artilist[(int)(obj)->oartifact].adtyp;

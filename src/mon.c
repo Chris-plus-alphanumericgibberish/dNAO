@@ -3559,7 +3559,9 @@ struct monst *mtmp;
 		lifesavers |= LSVD_ILU;
 	if (mtmp->zombify && is_kamerel(mtmp->data))
 		lifesavers |= LSVD_KAM;
-	if(mtmp->mtyp == PM_NITOCRIS)
+	if (Shattering && rn2(2) && !has_template(mtmp, FRACTURED))
+		lifesavers |= LSVD_KAM;
+	if (mtmp->mtyp == PM_NITOCRIS)
 		lifesavers |= LSVD_NIT;
 	if (mtmp->mtyp == PM_BLESSED && !mtmp->mcan && rn2(3))
 		lifesavers |= LSVD_HLO;
@@ -7270,7 +7272,7 @@ struct obj *obj;
 	if(obj->owornmask){
 		/*Count raised bits*/
 		if(objects[obj->otyp].oc_class == ARMOR_CLASS)
-			slotvar = objects[obj->otyp].oc_dir;
+			slotvar = objects[obj->otyp].oc_dtyp;
 		
 		if(!slotvar)
 			slotvar = default_DR_slot(obj->owornmask);

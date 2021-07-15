@@ -1697,6 +1697,12 @@ int tary;
 		return MM_MISS;
 	if (youagr ? Nullmagic : mon_resistance(magr, NULLMAGIC))
 		return MM_MISS;
+	if (Deadmagic && attk->adtyp != AD_PSON && attk->adtyp != AD_CLRC)
+		return MM_MISS;
+	if (Catapsi && attk->adtyp == AD_PSON)
+		return MM_MISS;
+	if (Misotheism && attk->adtyp == AD_CLRC)
+		return MM_MISS;
 	if (attk->adtyp == AD_PSON && !youdef && (!mdef || mindless_mon(mdef)))
 		return MM_MISS;
 
@@ -2333,7 +2339,7 @@ int tary;
 			impossible("No mdef for psibolt");
 			return MM_MISS;
 		}
-		if (!youdef && mindless_mon(mdef)) {
+		if ((!youdef && mindless_mon(mdef)) || Catapsi) {
 			return MM_MISS;
 		}
 		/* calculate resistance */

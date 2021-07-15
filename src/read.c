@@ -53,7 +53,7 @@ doread()
 		add_class(class_list, RING_CLASS);
 	if(carrying_applyable_amulet())
 		add_class(class_list, AMULET_CLASS);
-	if(carrying(LIGHTSABER) || carrying(CANDLE_OF_INVOCATION))
+	if(carrying_readable_tool())
 		add_class(class_list, TOOL_CLASS);
 	if(carrying_readable_weapon())
 		add_class(class_list, WEAPON_CLASS);
@@ -340,6 +340,39 @@ doread()
 			return 0;
 		} else {
 			pline("The candle is carved with many pictographs, including %s.", fetchHaluWard(FIRST_PLANE_SYMBOL+rn2(LAST_PLANE_SYMBOL-FIRST_PLANE_SYMBOL+1)));
+		}
+		return(1);
+	} else if(scroll->otyp == MISOTHEISTIC_PYRAMID){
+		if (Blind) {
+			pline("The density of the pyramid increases towards the tip, painfully so, enabling it to stand tip-downwards.");
+			pline("There are engravings on the square 'roof' of the pyramid, but you can't see them.");
+			return 0;
+		} else {
+			pline("The density of the pyramid increases towards the tip, painfully so, enabling it to stand tip-downwards.");
+			if(Role_if(PM_EXILE) || Role_if(PM_WIZARD) || u.specialSealsKnown&SEAL_NUDZIRATH)
+				pline("The square 'roof' of the pyramid is engraved with curses to the bringers of light.");
+			else
+				pline("There are engravings on the square 'roof' of the pyramid, but you can't read them.");
+			pline("A seam runs around the edges of the roof.");
+		}
+		return(1);
+	} else if(scroll->otyp == MISOTHEISTIC_FRAGMENT){
+		if (Blind) {
+			pline("Some mysterious force holds these mirrored fragments together in a rough aproximation of a pyramid.");
+			You_cant("see the fragments!");
+			return 0;
+		} else {
+			pline("Some mysterious force holds these mirrored fragments together in a rough aproximation of a pyramid.");
+			You("are not reflected in the shards.");
+			You("have the unnerving feeling that there is something inside the pyramid, barely hidden from view.");
+			/*Note: this is intended to work for any PC, not just Binders */
+			if(!(u.specialSealsKnown&SEAL_NUDZIRATH)){
+				pline("The shattered fragments form part of a seal.");
+				pline("In fact, you realize that all cracked and broken mirrors everywhere together are working towards writing this seal.");
+				pline("With that realization comes knowledge of the seal's final form!");
+				u.specialSealsKnown |= SEAL_NUDZIRATH;
+			}
+
 		}
 		return(1);
 	} else if(scroll->oclass == WEAPON_CLASS && (scroll)->obj_material == WOOD && scroll->oward != 0){
@@ -1165,6 +1198,7 @@ int curse_bless;
 	    case LIGHTSABER:
 	    case BEAMSWORD:
 	    case DOUBLE_LIGHTSABER:
+	    case ROD_OF_FORCE:
 		if (is_cursed) {
 		    if (obj->lamplit) {
 			end_burn(obj, TRUE);
@@ -1174,11 +1208,11 @@ int curse_bless;
 		    } else
 			obj->age = 0;
 		} else if (is_blessed) {
-		    obj->age = 150000;
+		    obj->age = LIGHTSABER_MAX_CHARGE;
 		    p_glow2(obj, NH_BLUE);
 		} else {
-		    obj->age += 75000;
-		    if (obj->age > 150000) obj->age = 150000;
+		    obj->age += LIGHTSABER_MAX_CHARGE/2;
+		    if (obj->age > LIGHTSABER_MAX_CHARGE) obj->age = LIGHTSABER_MAX_CHARGE;
 		    p_glow1(obj);
 		}
 		break;

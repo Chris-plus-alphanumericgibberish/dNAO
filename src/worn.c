@@ -1139,7 +1139,7 @@ int depth;
 	struct obj * curarm;
 	for (i = 0; i < SIZE(marmor); i++) {
 		curarm = which_armor(mon, marmor[i]);
-		if (curarm && ((objects[curarm->otyp].oc_dir & slot) || (!objects[curarm->otyp].oc_dir && (slot&adfalt[i])))) {
+		if (curarm && ((objects[curarm->otyp].oc_dtyp & slot) || (!objects[curarm->otyp].oc_dtyp && (slot&adfalt[i])))) {
 			if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
 				continue;
 			arm_mdr += arm_dr_bonus(curarm);

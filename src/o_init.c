@@ -1410,7 +1410,7 @@ struct obj *otmp;
 		return HI_GOLD;
 	}
 	
-	if(litsaber(otmp))
+	if(litsaber(otmp) && otmp->otyp != ROD_OF_FORCE)
 		return lightsaber_colorCLR(otmp);
 	
 	/* artifacts with set colors */

@@ -3106,7 +3106,7 @@ int tx,ty;
 //					struct monst *priest = findpriest(roomno);
 					//invoking Amon inside a temple angers the resident deity
 					altar_wrath(tx, ty);
-					angrygods(Align2gangr(a_align(tx,ty)));
+					angrygods(AltarAlign2gangr(a_align(tx,ty)));
 				}
 				u.sealTimeout[AMON-FIRST_SEAL] = moves + bindingPeriod; // invoking amon on a level with an altar still triggers the binding period.
 			}
@@ -4909,7 +4909,7 @@ int tx,ty;
 	case NUDZIRATH:{
 		struct obj *otmp;
 		if(u.sealTimeout[NUDZIRATH-FIRST_SEAL] < moves){
-			if(Role_if(PM_EXILE)){
+			if(Role_if(PM_EXILE) || (u.specialSealsKnown&SEAL_NUDZIRATH)){
 				for(otmp = level.objects[tx][ty]; otmp; otmp = otmp->nexthere) {
 					if(!otmp->oartifact){
 						if(otmp->otyp == MIRROR){

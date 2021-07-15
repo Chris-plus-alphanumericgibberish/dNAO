@@ -693,12 +693,15 @@ you_regen_hp()
 			(*hp) = (*hpmax);
 	}
 	
-	perX += u.uhoon;
-	
 	//Androids regenerate from active Hoon, but not from other sources unless dormant
 	// Notably, no bonus from passive Hoon
 	if(uandroid && !u.usleep)
 		return;
+	
+	// Previously used hoons
+	perX += u.uhoon;
+	// Carried vital soulstones
+	perX += stone_health();
 	
 	// fish out of water
 	if (youracedata->mlet == S_EEL && !is_pool(u.ux, u.uy, youracedata->msize == MZ_TINY) && !Is_waterlevel(&u.uz)) {
@@ -942,6 +945,9 @@ you_regen_pw()
 		perX += reglevel;
 	}
 
+	// Carried spiritual soulstones
+	perX += stone_energy();
+	
 	// external power regeneration
 	if (Energy_regeneration ||										// energy regeneration 'trinsic
 		(u.umartial && !uarmf && IS_GRASS(levl[u.ux][u.uy].typ))	// or being a bare-foot martial-artist standing on grass

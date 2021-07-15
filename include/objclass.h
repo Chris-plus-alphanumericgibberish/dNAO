@@ -51,11 +51,12 @@ struct objclass {
 #define oc_bimanual	oc_size==MZ_HUGE	/* for weapons & tools used as weapons */
 	Bitfield(oc_tough,1);	/* hard gems/rings */
 
-	Bitfield(oc_dir,5);
+	Bitfield(oc_dir,2);
 #define NODIR		1	/* for wands/spells: non-directional */
 #define IMMEDIATE	2	/*		     directional */
 #define RAY		3	/*		     zap beams */
 
+	Bitfield(oc_dtyp,5);
 #define WHACK		1
 #define PIERCE		2	/* for weapons & tools used as weapons */
 #define SLASH		4	/* (latter includes iron ball & chain) */

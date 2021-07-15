@@ -791,6 +791,8 @@ E glyph_t permonst_unicode_codepoint[NUMMONS];
 
 E boolean curses_stupid_hack;
 
+#define LIGHTSABER_MAX_CHARGE 150000
+
 #undef E
 
 #endif /* DECL_H */

@@ -250,7 +250,7 @@ extern struct god_details god_list[MAX_GOD]; //defined in decl.c
 									  In_lost_cities(&u.uz) ? GA_OTHER :\
 									   GA_NONE\
 									))
-#define Align2gangr(x)	( (x)==A_VOID ? GA_VOID :\
+#define AltarAlign2gangr(x)	( (x)==A_VOID ? GA_VOID :\
 						  ((x)==A_CHAOTIC && Role_if(PM_EXILE) && Is_astralevel(&u.uz)) ? GA_SOPHIA :\
 						  (x)==A_CHAOTIC ? GA_CHAOTIC :\
 						  ((x)==A_NEUTRAL && Role_if(PM_EXILE) && Is_astralevel(&u.uz)) ? GA_VOID :\
@@ -266,6 +266,12 @@ extern struct god_details god_list[MAX_GOD]; //defined in decl.c
 						  (In_quest(&u.uz) && Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend) ? GA_VELKA :\
 						  on_level(&rlyeh_level,&u.uz) ? GA_SOTHOTH :\
 						  In_lost_cities(&u.uz) ? GA_OTHER :\
+						  GA_NONE\
+						)
+#define Align2gangr(x)	( (x)==A_VOID ? GA_VOID :\
+						  (x)==A_CHAOTIC ? GA_CHAOTIC :\
+						  (x)==A_NEUTRAL ? GA_NEUTRAL :\
+						  (x)==A_LAWFUL ? GA_LAWFUL :\
 						  GA_NONE\
 						)
 #define Gangr2align(x)	((aligntyp) ( (x)==GA_NONE ? A_NONE : \

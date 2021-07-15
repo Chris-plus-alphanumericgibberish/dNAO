@@ -340,6 +340,12 @@ mkmivault()
 	}
 }
 
+int misc_hell_vault[] = {
+				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
+				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
+				ANTIMAGIC_RIFT, CATAPSI_VORTEX, MISOTHEISTIC_PYRAMID
+			};
+
 void
 mkmivaultitem(container)
     struct obj *container;
@@ -367,9 +373,9 @@ mkmivaultitem(container)
 	}
 }
 
-void
-mkhellvaultitem(container, vn)
-struct obj *container;
+
+struct obj *
+mkhellvaultitem(vn)
 long long int vn;
 {
 	struct obj *otmp;
@@ -380,38 +386,59 @@ long long int vn;
 		type = ARMOR_CLASS;
 	else if(rn2(2))
 		type = WEAPON_CLASS;
+	else if(!rn2(3))
+		type = SCOIN_CLASS;
+	else if(rn2(2)){
+		type = misc_hell_vault[rn2(SIZE(misc_hell_vault))];
+		otmp = mksobj(type, NO_MKOBJ_FLAGS);
+		if(otmp)
+			return otmp;
+		impossible("special %d obj failed??", type);
+		type = RANDOM_CLASS;
+	}
 	else
 		type = RANDOM_CLASS;
 	do {
-		if(otmp && !Is_container(otmp)) delobj(otmp);
+		if(otmp) delobj(otmp);
 		otmp = mkobj(type, TRUE);
-		if(Is_container(otmp)){
-			place_object(otmp, container->ox, container->oy);
-			bury_an_obj(otmp);
-		} else {
-			if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
-				otmp = mk_special(otmp);
-				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
-					otmp->spe = max_ints(d(3,3), otmp->spe);
-			}
-			else if(!rn2(4) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(2))){
-				otmp = mk_vault_special(otmp, vn);
-				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
-					otmp->spe = max_ints(d(3,3), otmp->spe);
-			}
-			else if(!rn2(4) || otmp->oartifact){
-				otmp = mk_minor_special(otmp);
-				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
-					otmp->spe = max_ints(d(1,7), otmp->spe);
-			}
-			else {
-				if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
-					otmp->spe = max_ints(d(2,3), otmp->spe);
-			}
+		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
+			otmp = mk_special(otmp);
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		}
+		else if(!rn2(4) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(2))){
+			otmp = mk_vault_special(otmp, vn);
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		}
+		else if(!rn2(4) || otmp->oartifact){
+			otmp = mk_minor_special(otmp);
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(1,7), otmp->spe);
+		}
+		else {
+			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(2,3), otmp->spe);
 		}
 	} while (--try_limit > 0 &&
-	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE)));
-	if(!Is_container(otmp)) add_to_container(container, otmp);
+	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
+
+	return otmp;
+}
+
+void
+mkhellvaultitem_cnt(container, vn)
+struct obj *container;
+long long int vn;
+{
+	struct obj *otmp;
+	
+	otmp = mkhellvaultitem(vn);
+	if(Is_container(otmp)){
+		place_object(otmp, container->ox, container->oy);
+		bury_an_obj(otmp);
+	}
+	else add_to_container(container, otmp);
 }
 
 STATIC_OVL
@@ -3572,8 +3599,11 @@ mkinvertzigg()
 				add_to_container(chest, otmp);
 			}
 			/*Chance for beads of force*/
-			/*Chance for rod of force*/
-			/*Chance for wand of striking*/
+			/*Rod of force*/
+			if ((otmp = mksobj(ROD_OF_FORCE, 0)) != 0) {
+				add_to_container(chest, otmp);
+			}
+			/*wand of striking*/
 			if ((otmp = mksobj(WAN_STRIKING, 0)) != 0) {
 				add_to_container(chest, otmp);
 			}
@@ -3588,6 +3618,31 @@ mkinvertzigg()
 		} else {
 			levl[x+size/2][y+size/2].typ = ALTAR;
 			levl[x+size/2][y+size/2].altarmask = Align2amask( A_NONE );
+			if ((otmp = mksobj_at(MISOTHEISTIC_FRAGMENT, x+size/2, y+size/2, MKOBJ_NOINIT)) != 0) {
+				otmp->quan = rnd(3);
+				otmp->owt = weight(otmp);
+			}
+			if(!rn2(4) && (otmp = mksobj_at(ANTIMAGIC_RIFT, x+size/2, y+size/2, MKOBJ_NOINIT)) != 0){
+				otmp->quan = rnd(3);
+				otmp->owt = weight(otmp);
+			}
+			else if(!rn2(3) && (otmp = mksobj_at(CATAPSI_VORTEX, x+size/2, y+size/2, MKOBJ_NOINIT)) != 0){
+				otmp->quan = rnd(3);
+				otmp->owt = weight(otmp);
+			}
+			else if(!rn2(2)){
+				int black_gems[] = {BLACK_OPAL, JET, OBSIDIAN};
+				for(int i = rn2(SIZE(black_gems)); i >= 0; i--){
+					if ((otmp = mksobj_at(black_gems[i], x+size/2, y+size/2, MKOBJ_NOINIT)) != 0) {
+						otmp->quan = rnd(3);
+						otmp->owt = weight(otmp);
+					}
+				}
+			}
+			else if ((otmp = mksobj_at(WORTHLESS_PIECE_OF_BLACK_GLASS, x+size/2, y+size/2, MKOBJ_NOINIT)) != 0) {
+				otmp->quan = d(3,3);
+				otmp->owt = weight(otmp);
+			}
 		}
 		if(!toostrong(PM_SHATTERED_ZIGGURAT_WIZARD, (level_difficulty() + u.ulevel) / 2 + 5)){
 			makemon(&mons[PM_SHATTERED_ZIGGURAT_WIZARD], x+size/2, y+size/2, MM_ADJACENTOK);

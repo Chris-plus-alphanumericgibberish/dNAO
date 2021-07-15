@@ -323,6 +323,9 @@ struct you {
 	int uhouse; /* drow house info */
 	int start_house; /* starting drow house info */
 	struct prop uprops[LAST_PROP+1];
+	int rift_count;
+	int vortex_count;
+	int miso_count;
 	
 	unsigned umconf;
 	char usick_cause[PL_PSIZ+20]; /* sizeof "unicorn horn named "+1 */

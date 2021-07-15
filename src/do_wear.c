@@ -2549,7 +2549,7 @@ int depth;
 	struct obj * uarmor[] = ARMOR_SLOTS;
 	int i;
 	for (i = 0; i < SIZE(uarmor); i++) {
-		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dir & slot)) {
+		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dtyp & slot)) {
 			if(depth && higher_depth(uarmor[i]->owornmask, depth))
 				continue;
 			arm_udr += arm_dr_bonus(uarmor[i]);

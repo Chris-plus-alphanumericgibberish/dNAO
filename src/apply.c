@@ -2,6 +2,7 @@
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
+#include <math.h>
 #include "hack.h"
 #include "artifact.h"
 #include "xhity.h"
@@ -50,6 +51,9 @@ STATIC_DCL int FDECL(use_grapple, (struct obj *));
 STATIC_DCL int FDECL(use_crook, (struct obj *));
 STATIC_DCL int FDECL(use_doll, (struct obj *));
 STATIC_DCL int FDECL(use_doll_tear, (struct obj *));
+STATIC_DCL int FDECL(use_pyramid, (struct obj *));
+STATIC_DCL int FDECL(use_vortex, (struct obj *));
+STATIC_DCL int FDECL(use_rift, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
 STATIC_DCL int FDECL(do_soul_coin, (struct obj *));
@@ -1680,7 +1684,7 @@ struct obj *obj;
 			obj->cursed = FALSE;
 		}
 	}
-	if (obj->cursed && (!rn2(2) || obj->otyp == CANDLE_OF_INVOCATION) && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
+	if (obj->cursed && obj->otyp != ROD_OF_FORCE && (!rn2(2) || obj->otyp == CANDLE_OF_INVOCATION) && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
 		pline("%s for a moment, then %s.",
 		      Tobjnam(obj, "flicker"), otense(obj, "die"));
 	} else {
@@ -4303,6 +4307,134 @@ use_crook (obj)
 }
 
 STATIC_OVL int
+use_rift(obj)
+	struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(!freehand()){
+		You("can't break %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Shatter the gem?") == 'y'){
+		if(!Deadmagic && !Blind){
+			pline("The black flaw tears free, then expands to fill the world!");
+			if(base_casting_stat() == A_INT)
+				pline("The Weave frays and fails!");
+		}
+		//Don't bother doing math if the timeout is already infinite.
+		// It's not EASY to permanently break magic with these, but it is POSSIBLE!
+		if(Deadmagic < TIMEOUT_INF){
+			long increment = (long)(1000 * pow(1.1,u.rift_count));
+			incr_itimeout(&Deadmagic, increment);
+			// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
+			if(increment < TIMEOUT){
+				u.rift_count++;
+			}
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
+STATIC_OVL int
+use_vortex(obj)
+	struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(!freehand()){
+		You("can't break %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Shatter the gem?") == 'y'){
+		if(!Catapsi && !Blind){
+			pline("The silvery-gray flaw spins free, then expands to fill the world!");
+			if(base_casting_stat() == A_CHA)
+				pline("Your mind fills with static!");
+		}
+		//Don't bother doing math if the timeout is already infinite.
+		// It's not EASY to permanently break magic with these, but it is POSSIBLE!
+		if(Catapsi < TIMEOUT_INF){
+			long increment = (long)(1000 * pow(1.1,u.vortex_count));
+			incr_itimeout(&Catapsi, increment);
+			// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
+			if(increment < TIMEOUT){
+				u.vortex_count++;
+			}
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+void
+pyramid_effects(obj,x,y)
+struct obj *obj;
+int x, y;
+{
+	//Don't bother doing math if the timeout is already infinite.
+	// It's not EASY to permanently break magic with these, but it is POSSIBLE!
+	if(Misotheism < TIMEOUT_INF){
+		long increment = (long)(1000 * pow(1.1,u.miso_count));
+		if(!Inhell && !Misotheism && u.ualign.type != A_VOID){
+			u.ugangr[Align2gangr(u.ualign.type)]++;
+			gods_angry(Align2gangr(u.ualign.type));
+		}
+		// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
+		if(increment < TIMEOUT){
+			u.miso_count++;
+		}
+		if(obj->otyp == MISOTHEISTIC_PYRAMID){
+			if(!Blind && cansee(x, y)){
+				if(!DarksightOnly)
+					pline("An impossible darkness pours forth!");
+				else
+					pline("An mighty darkness issues forth!");
+			}
+			incr_itimeout(&HDarksight, increment);
+			incr_itimeout(&DarksightOnly, increment);
+			doredraw();
+		}
+		if(obj->otyp == MISOTHEISTIC_FRAGMENT){
+			if(!Shattering)
+				You_hear("a great fracturing sound!");
+			if(!Blind && cansee(x, y)){
+				if(!(u.specialSealsKnown&SEAL_NUDZIRATH)){
+					/*Note: this is intended to work for any PC, not just Binders */
+					if(!(u.specialSealsKnown&SEAL_NUDZIRATH)){
+						pline("The shattered fragments form part of a seal.");
+						pline("In fact, you realize that all cracked and broken mirrors everywhere together are working towards writing this seal.");
+						pline("With that realization comes knowledge of the seal's final form!");
+						u.specialSealsKnown |= SEAL_NUDZIRATH;
+					}
+				}
+			}
+			incr_itimeout(&Shattering, increment);
+		}
+		if(!Misotheism && base_casting_stat() == A_WIS)
+			pline("You can no longer hear your god!");
+		incr_itimeout(&Misotheism, increment);
+	}
+}
+
+STATIC_OVL int
+use_pyramid(obj)
+struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(!freehand()){
+		You("can't %s %s with no free %s!", obj->otyp == MISOTHEISTIC_PYRAMID ? "open" : "shatter",xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn(obj->otyp == MISOTHEISTIC_PYRAMID ? "Open the pyramid?" : "Further shatter the pyramid?") == 'y'){
+		pyramid_effects(obj, u.ux, u.uy);
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
+STATIC_OVL int
 use_doll_tear(obj)
 	struct obj *obj;
 {
@@ -5797,6 +5929,62 @@ struct obj *obj;
     return 1;
 }
 
+int
+use_vital(obj)
+struct obj *obj;
+{
+	if(!freehand()){
+		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Crush the stone?") == 'y'){
+		if(obj->blessed){
+			FREE_SOUL_HANDLING
+		}
+		else if(obj->cursed){
+			You_feel("full of vital energy!");
+			healup(900, 0, FALSE, FALSE);
+			CURSED_SOUL_HANDLING
+		}
+		else {
+			You_feel("full of vital energy!");
+			healup(400, 0, FALSE, FALSE);
+			UNCURSED_SOUL_HANDLING
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
+int
+use_spiritual(obj)
+struct obj *obj;
+{
+	if(!freehand()){
+		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
+		return 0;
+	}
+	if(yn("Crush the stone?") == 'y'){
+		if(obj->blessed){
+			FREE_SOUL_HANDLING
+		}
+		else if(obj->cursed){
+			You_feel("deeply spiritual!");
+			u.uen = max(u.uenmax, u.uen+900);
+			CURSED_SOUL_HANDLING
+		}
+		else {
+			You_feel("deeply spiritual!");
+			u.uen = max(u.uenmax, u.uen+400);
+			UNCURSED_SOUL_HANDLING
+		}
+		useup(obj);
+		return 1;
+	}
+	return 0;
+}
+
 void
 add_class(cl, class)
 char *cl;
@@ -6670,6 +6858,9 @@ doapply()
 	if(carrying_applyable_amulet()){
 		add_class(class_list, AMULET_CLASS);
 	}
+	if(carrying_applyable_gem()){
+		add_class(class_list, GEM_CLASS);
+	}
 
 
 	obj = getobj(class_list, "use or apply");
@@ -7013,6 +7204,7 @@ doapply()
 	case LIGHTSABER:
   	case BEAMSWORD:
 	case DOUBLE_LIGHTSABER:
+	case ROD_OF_FORCE:
 		if (uwep != obj && !(u.twoweap && uswapwep == obj) && !wield_tool(obj, (const char *)0)) break;
 		/* Fall through - activate via use_lamp */
 		    
@@ -7186,6 +7378,22 @@ doapply()
 		case HOLY_SYMBOL_OF_THE_BLACK_MOTHE:
 			res = pray_goat();
 		break;
+	case MISOTHEISTIC_PYRAMID:
+	case MISOTHEISTIC_FRAGMENT:
+		res = use_pyramid(obj);
+	break;
+	case CATAPSI_VORTEX:
+		res = use_vortex(obj);
+	break;
+	case ANTIMAGIC_RIFT:
+		res = use_rift(obj);
+	break;
+	case VITAL_SOULSTONE:
+		res = use_vital(obj);
+	break;
+	case SPIRITUAL_SOULSTONE:
+		res = use_spiritual(obj);
+	break;
 	case UNICORN_HORN:
 		use_unicorn_horn(obj);
 	break;

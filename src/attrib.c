@@ -361,6 +361,36 @@ set_moreluck()
 	} else u.moreluck = -LUCKADD;
 }
 
+int
+stone_health()
+{
+	struct obj *otmp;
+	int healthup = 0;
+
+	for (otmp = invent; otmp; otmp = otmp->nobj)
+	    if (otmp->otyp == VITAL_SOULSTONE) {
+			if (otmp->cursed) healthup += otmp->quan * 9;
+			else if (otmp->blessed) healthup += otmp->quan * 7;
+			else healthup += otmp->quan;
+	    }
+	return (int)healthup;
+}
+
+int
+stone_energy()
+{
+	struct obj *otmp;
+	int energyup = 0;
+
+	for (otmp = invent; otmp; otmp = otmp->nobj)
+	    if (otmp->otyp == SPIRITUAL_SOULSTONE) {
+			if (otmp->cursed) energyup += otmp->quan * 9;
+			else if (otmp->blessed) energyup += otmp->quan * 7;
+			else energyup += otmp->quan;
+	    }
+	return (int)energyup;
+}
+
 #endif /* OVLB */
 #ifdef OVL1
 

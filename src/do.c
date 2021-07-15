@@ -261,7 +261,7 @@ void
 doaltarobj(obj)  /* obj is an object dropped on an altar */
 	register struct obj *obj;
 {
-	if (Blind)
+	if (Blind || Misotheism)
 		return;
 
 	/* KMH, conduct */

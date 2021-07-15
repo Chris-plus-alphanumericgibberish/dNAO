@@ -1562,7 +1562,7 @@ int x, y, type;
 	container->olocked = TRUE;
 	container->otrapped = TRUE;
 	for(int i = d(9,4); i > 0; i--)
-		mkhellvaultitem(container, type);
+		mkhellvaultitem_cnt(container, type);
 	bury_an_obj(container);
 }
 

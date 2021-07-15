@@ -34,6 +34,8 @@ struct Jitem {
 			   typ != DIAMOND && typ != SAPPHIRE &&		\
 			   typ != MAGICITE_CRYSTAL && 	\
 			   typ != BLACK_OPAL && 	\
+			   typ != ANTIMAGIC_RIFT && 	\
+			   typ != CATAPSI_VORTEX && 	\
 			   typ != EMERALD && typ != OPAL)))
 
 #ifndef OVLB
@@ -1276,7 +1278,7 @@ char *buf;
 	if (obj->oinvis) Strcat(buf, "invisible ");
 	else
 #endif
-	if (is_lightsaber(obj) && litsaber(obj)){
+	if (is_lightsaber(obj) && litsaber(obj) && obj->otyp != ROD_OF_FORCE){
 		Strcat(buf, lightsaber_colorText(obj));
 		if (!objects[obj->otyp].oc_name_known && strncmpi(eos(buf)-7, " bladed", 7))
 			Strcat(buf, " bladed");
