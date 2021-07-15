@@ -535,7 +535,7 @@ register struct monst *mtmp;
 		if(mtmp->mtyp == PM_UVUUDAUM) Strcat(info, ", in contemplative meditation");
 		else Strcat(info, ", peaceful");
 	}
-	else if (mtmp->mtyp==PM_DREAD_SERAPH && mtmp->mvar2)  Strcat(info, ", in prayer");
+	else if (mtmp->mtyp==PM_DREAD_SERAPH && mtmp->mvar_dreadPrayer_progress)  Strcat(info, ", in prayer");
 	else if (mtmp->mtraitor)  Strcat(info, ", traitor");
 	else if (mtmp->mferal)  Strcat(info, ", feral");
 	if (mtmp->meating)	  Strcat(info, ", eating");

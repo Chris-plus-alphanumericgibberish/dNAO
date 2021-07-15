@@ -242,7 +242,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 #endif
 		    (mtmp->mpeaceful && accurate) ? (mtmp->mtyp==PM_UVUUDAUM) ? "meditating " : "peaceful " : "",
 		    name);
-	    if (mtmp->mtyp==PM_DREAD_SERAPH && mtmp->mvar2)
+	    if (mtmp->mtyp==PM_DREAD_SERAPH && mtmp->mvar_dreadPrayer_progress)
 		Strcat(buf, "praying ");
 		
 	    if (u.ustuck == mtmp)

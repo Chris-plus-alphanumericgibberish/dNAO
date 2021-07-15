@@ -8199,7 +8199,6 @@ int mkobjflags;
 			break;
 ////////////////////////////////////////
 			case PM_CHAOS:
-				mtmp->mvar2 = 0;
 				{
 				struct	monst *mlocal;
 				/* create special stuff; can't use mongets */

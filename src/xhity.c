@@ -517,14 +517,14 @@ int tary;
 		&& !youagr
 		&& !(has_template(magr, ZOMBIFIED) || has_template(magr, SKELIFIED))
 		&& rn2(2)){
-		magr->mvar2 = monsndx(find_mask(magr));
+		magr->mvar_attack_pm = monsndx(find_mask(magr));
 		if (!Blind && pa->mtyp != PM_LILLEND && canseemon(magr))
 			pline("%s uses a %s mask!", Monnam(magr), pa->mname);
 	}
 	
 	/* deliriums use their apparent form */
 	if (pa->mtyp == PM_WALKING_DELIRIUM && !youagr && magr->mappearance && magr->m_ap_type == M_AP_MONSTER){
-		magr->mvar2 = magr->mappearance;
+		magr->mvar_attack_pm = magr->mappearance;
 	}
 	
 	/* zero out res[] */
@@ -574,8 +574,8 @@ int tary;
 		/* Some armor completely covers the face and prevents bite attacks*/
 		if (aatyp == AT_BITE || aatyp == AT_LNCK || aatyp == AT_5SBT ||
 			(aatyp == AT_ENGL && !(youdef && u.uswallow)) ||
-			(aatyp == AT_TENT && is_mind_flayer(magr->data)))
-		{
+			(aatyp == AT_TENT && is_mind_flayer(magr->data))
+		){
 			struct obj * helm = youagr ? uarmh : which_armor(magr, W_ARMH);
 			struct obj * cloak = youagr ? uarmc : which_armor(magr, W_ARMC);
 			if ((helm && (
@@ -1329,9 +1329,9 @@ int tary;
 	
 	/* reset lillend mask usage */
 	if (!youagr && pa->mtyp == PM_LILLEND)
-		magr->mvar2 = 0;
+		magr->mvar_attack_pm = 0;
 	if (!youagr && pa->mtyp == PM_WALKING_DELIRIUM)
-		magr->mvar2 = 0;
+		magr->mvar_attack_pm = 0;
 
 	/* do some things only if attacks were made */
 	if (attacksmade > 0) {
@@ -1766,8 +1766,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 
 	/* lillends are able to use the attacks of another monster */
 	/* modify pa here, but only here (when getting attacks) */
-	if ((pa->mtyp == PM_LILLEND || pa->mtyp == PM_WALKING_DELIRIUM) && magr->mvar2) {
-		pa = &mons[magr->mvar2];
+	if ((pa->mtyp == PM_LILLEND || pa->mtyp == PM_WALKING_DELIRIUM) && magr->mvar_attack_pm) {
+		pa = &mons[magr->mvar_attack_pm];
 	}
 
 	//Get next attack

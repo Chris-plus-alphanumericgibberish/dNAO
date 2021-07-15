@@ -1091,8 +1091,8 @@ unsigned int type;
 				case 3: return MON_FIRA;
 			}
 		} else {
-			if(mtmp->mvar2 > 3) mtmp->mvar2 = 0;
-			switch(mtmp->mvar2++){
+			if(mtmp->mvar_spList_2 > 3) mtmp->mvar_spList_2 = 0;
+			switch(mtmp->mvar_spList_2++){
 				case 0: return LIGHTNING_BOLT;
 				case 1: return MON_POISON_GAS;
 				case 2: return ICE_STORM;
@@ -1114,8 +1114,8 @@ unsigned int type;
 				case 7: return MON_FLARE;
 			}
 		} else {
-			if(mtmp->mvar2 > 3) mtmp->mvar2 = 0;
-			switch(mtmp->mvar2++){
+			if(mtmp->mvar_spList_2 > 3) mtmp->mvar_spList_2 = 0;
+			switch(mtmp->mvar_spList_2++){
 				case 0: return FIRE_PILLAR;
 				case 1: return GEYSER;
 				case 2: return MON_POISON_GAS;

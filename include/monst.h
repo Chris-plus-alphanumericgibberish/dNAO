@@ -251,7 +251,7 @@ struct monst {
 #define	mvar_vector	mvar1
 #define	mvar_spList_1	mvar1
 #define	mvar_hdBreath	mvar1
-#define	mvar_dreadPrayer	mvar1
+#define	mvar_dreadPrayer_cooldown	mvar1
 #define	mvar_dracaePreg	mvar1
 #define	mvar_dollTypes	mvar1
 #define	DOLLMAKER_EFFIGY		0x00001L
@@ -276,7 +276,12 @@ struct monst {
 #define	mvar_tanninType	mvar1
 #define	mvar_ancient_breath_cooldown	mvar1
 	long mvar2;
+#define	mvar_dracaePregTimer	mvar2
+#define	mvar_spList_2	mvar2
+#define	mvar_dreadPrayer_progress	mvar2
+#define	mvar_attack_pm	mvar2
 	long mvar3;
+#define	mvar_conversationTracker	mvar3
 
 	struct ls_t * light;
 

@@ -1047,15 +1047,15 @@ asGuardian:
 	case MS_DREAD:{
 		struct monst *tmpm;
 		int ix, iy;
-		if(mtmp->mvar_dreadPrayer >= moves && !mtmp->mdoubt && (
+		if(mtmp->mvar_dreadPrayer_cooldown >= moves && !mtmp->mdoubt && (
 			mtmp->mhp < mtmp->mhpmax/4 || mtmp->mcrazed
 		)){
-			mtmp->mvar_dreadPrayer = moves + rnz(350);
-			mtmp->mvar2 = moves + 5;
+			mtmp->mvar_dreadPrayer_cooldown = moves + rnz(350);
+			mtmp->mvar_dreadPrayer_progress = moves + 5;
 		}
-		if(mtmp->mvar2){
-			if(mtmp->mvar2 < moves){
-				mtmp->mvar2 = 0;
+		if(mtmp->mvar_dreadPrayer_progress){
+			if(mtmp->mvar_dreadPrayer_progress < moves){
+				mtmp->mvar_dreadPrayer_progress = 0;
 				mtmp->mhp = mtmp->mhpmax;
 				mtmp->mspec_used = 0;
 				set_mcan(mtmp, FALSE);

@@ -1100,15 +1100,15 @@ register struct monst *mtmp;
 			if(ptr)
 				mtmp->mvar_dracaePreg = monsndx(ptr);
 		}
-		else if(mtmp->mvar2 < 6){
-			mtmp->mvar2 += rnd(3);
+		else if(mtmp->mvar_dracaePregTimer < 6){
+			mtmp->mvar_dracaePregTimer += rnd(3);
 		} else if(!mtmp->mpeaceful){
 			int ox = mtmp->mx, oy = mtmp->my;
 			rloc(mtmp, FALSE);
 			if(mtmp->mx != ox || mtmp->my != oy){
 				int type = mtmp->mvar_dracaePreg;
 				mtmp->mvar_dracaePreg = 0;
-				mtmp->mvar2 = 0;
+				mtmp->mvar_dracaePregTimer = 0;
 				mtmp = makemon(&mons[type], ox, oy, NO_MINVENT);
 				if(mtmp){
 					struct obj *otmp;
@@ -1145,15 +1145,15 @@ register struct monst *mtmp;
 			if(ptr)
 				mtmp->mvar_dracaePreg = monsndx(ptr);
 		}
-		else if(mtmp->mvar2 < 6){
-			mtmp->mvar2 += rnd(3);
+		else if(mtmp->mvar_dracaePregTimer < 6){
+			mtmp->mvar_dracaePregTimer += rnd(3);
 		} else if(!mtmp->mpeaceful){
 			int i;
 			int ox = mtmp->mx, oy = mtmp->my;
 			int type = mtmp->mvar_dracaePreg;
 			int etyp = counter_were(type);
 			mtmp->mvar_dracaePreg = 0;
-			mtmp->mvar2 = 0;
+			mtmp->mvar_dracaePregTimer = 0;
 			for(i = rnd(4); i; i--){
 				if(etyp)
 					mtmp = makemon(&mons[etyp], ox, oy, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
@@ -1826,7 +1826,7 @@ register struct monst *mtmp;
 	if (inrange && mtmp->data->msound == MS_CUSS && !mtmp->mpeaceful &&
 		couldsee(mtmp->mx, mtmp->my) && ((!mtmp->minvis && !rn2(5)) || 
 										mtmp->mtyp == PM_SIR_GARLAND || mtmp->mtyp == PM_GARLAND ||
-										(mtmp->mtyp == PM_CHAOS && (mtmp->mvar2 < 5 || !rn2(5)) )|| 
+										(mtmp->mtyp == PM_CHAOS && (mtmp->mvar_conversationTracker < 5 || !rn2(5)) )|| 
 										mtmp->mtyp == PM_APOLLYON
 	) )
 	    cuss(mtmp);
