@@ -4375,7 +4375,7 @@ int x, y;
 	//Don't bother doing math if the timeout is already infinite.
 	// It's not EASY to permanently break magic with these, but it is POSSIBLE!
 	if(Misotheism < TIMEOUT_INF){
-		long increment = (long)(1000 * pow(1.1,u.miso_count));
+		long increment = (long)(333 * pow(1.1,u.miso_count));
 		if(!Inhell && !Misotheism && u.ualign.type != A_VOID){
 			u.ugangr[Align2gangr(u.ualign.type)]++;
 			gods_angry(Align2gangr(u.ualign.type));
