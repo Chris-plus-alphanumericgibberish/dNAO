@@ -5483,6 +5483,7 @@ struct obj *obj;
 	struct monst *mtmp;
 	struct obj *otmp;
 	int x, y;
+	coord cc = {u.ux, u.uy};
 	if(!freehand()){
 		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
 		return 0;
@@ -5549,9 +5550,13 @@ struct obj *obj;
 				useup(obj);
 				return 1;
 			}
-			if(!getdir((char *)0)) return 0;
-			x = u.ux + u.dx;
-			y = u.uy + u.dy;
+			if(getpos(&cc, TRUE, "the target") < 0) return 0;
+			x = cc.x;
+			y = cc.y;
+			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
+				pline("Too far!");
+				return 0;
+			}
 			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
 				You("see no target there!");
 				return 0;
@@ -5628,9 +5633,13 @@ struct obj *obj;
 				useup(obj);
 				return 1;
 			}
-			if(!getdir((char *)0)) return 0;
-			x = u.ux + u.dx;
-			y = u.uy + u.dy;
+			if(getpos(&cc, TRUE, "the target") < 0) return 0;
+			x = cc.x;
+			y = cc.y;
+			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
+				pline("Too far!");
+				return 0;
+			}
 			if(!isok(x, y)
 			 || closed_door(x, y)
 			 || IS_ROCK(levl[x][y].typ)
@@ -5722,9 +5731,13 @@ struct obj *obj;
 				useup(obj);
 				return 1;
 			}
-			if(!getdir((char *)0)) return 0;
-			x = u.ux + u.dx;
-			y = u.uy + u.dy;
+			if(getpos(&cc, TRUE, "the target") < 0) return 0;
+			x = cc.x;
+			y = cc.y;
+			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
+				pline("Too far!");
+				return 0;
+			}
 			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
 				You("see no target there!");
 				return 0;
@@ -5795,9 +5808,13 @@ struct obj *obj;
 				useup(obj);
 				return 1;
 			}
-			if(!getdir((char *)0)) return 0;
-			x = u.ux + u.dx;
-			y = u.uy + u.dy;
+			if(getpos(&cc, TRUE, "the target") < 0) return 0;
+			x = cc.x;
+			y = cc.y;
+			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
+				pline("Too far!");
+				return 0;
+			}
 			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
 				You("see no target there!");
 				return 0;
@@ -5867,9 +5884,13 @@ struct obj *obj;
 				useup(obj);
 				return 1;
 			}
-			if(!getdir((char *)0)) return 0;
-			x = u.ux + u.dx;
-			y = u.uy + u.dy;
+			if(getpos(&cc, TRUE, "the target") < 0) return 0;
+			x = cc.x;
+			y = cc.y;
+			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
+				pline("Too far!");
+				return 0;
+			}
 			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
 				You("see no target there!");
 				return 0;
