@@ -100,7 +100,8 @@ struct permonst * ptr;	/* summon as though you were <X> */
 		int mmflags = ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_ESUM|MM_NOCOUNTBIRTH);
 		mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
 	    if (mtmp) {
-			mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
+		    	if (mmflags&MM_ESUM)
+				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
 			
 			if (dtype == PM_ANGEL) {
 				/* alignment should match the summoner */
