@@ -142,9 +142,9 @@ dosit()
  in_water:
 	    You("sit in the water.");
 	    if (!rn2(10) && uarm)
-		(void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst);
+		(void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst, FALSE);
 	    if (!rn2(10) && uarmf && uarmf->otyp != WATER_WALKING_BOOTS)
-		(void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst);
+		(void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst, FALSE);
 #ifdef SINKS
 	} else if(IS_SINK(typ)) {
 

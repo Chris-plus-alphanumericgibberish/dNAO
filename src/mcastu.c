@@ -951,6 +951,20 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_WATERSPOUT:
+		return GEYSER;
+	break;
+	case PM_CAILLEA_ELADRIN:
+			switch(rnd(8)){
+				default:
+				case 1: return ICE_STORM;
+				case 2: return EVIL_EYE;
+				case 3: return RAISE_DEAD;
+				case 4: return MASS_CURE_CLOSE;
+				case 5: return DEATH_TOUCH;
+				case 6: return DRAIN_LIFE;
+			}
+	   break;
 	case PM_KUKER:
 		switch (rnd(6)) {
 			case 6:
@@ -2607,7 +2621,7 @@ int tary;
 					dmg = (dmg + 1) / 2;
 			}
 
-			(void)burnarmor(mdef);
+			(void)burnarmor(mdef, FALSE);
 			destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -3996,7 +4010,7 @@ int tary;
 				pline("%s raised the dead!", Monnam(magr));
 			mm.x = x(magr);
 			mm.y = y(magr);
-			mkundead(&mm, TRUE, NO_MINVENT);
+			mkundead(&mm, TRUE, NO_MINVENT, normalAngel(magr) ? HOLYDEAD_FACTION : magr->mfaction);
 			stop_occupation();
 		}
 		return MM_HIT;

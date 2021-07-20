@@ -180,7 +180,7 @@
 #define AD_SHDW		105 /* Black Web shadow weapons */
 #define AD_STTP		106 /* Steal by Teleportation: Teleports your gear away */
 #define AD_HDRG		107 /* Half-dragon breath weapon */
-#define AD_STAR		108 /* Tulani silver starlight rapier */
+#define AD_STAR		108 /* Silver starlight rapier */
 #define AD_EELC		109	/* Elemental electric */
 #define AD_EFIR		110	/* Elemental fire */
 #define AD_EDRC		111	/* Elemental poison (con) */
@@ -216,11 +216,14 @@
 #define AD_PULL     139 /* Pull target closer */
 #define AD_PAIN     140 /* Crippling pain */
 #define AD_MROT     141 /* Mummy rot/other curses */
+#define AD_LAVA     142 /* Lava effects while stuck */
+#define AD_PYCL     143 /* Fire, poison, phys, or blindness effects */
+#define AD_MOON     144 /* Silver moonlight rapier, depends on phase of moon */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	142
+#define AD_DUNSTAN	145
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

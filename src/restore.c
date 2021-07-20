@@ -463,8 +463,23 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	/* Fix up the highest ranking eladrins */
 	if(dungeon_topology.alt_tulani){
 		unsigned short genotmp = mons[PM_TULANI_ELADRIN].geno;
-		mons[PM_TULANI_ELADRIN].geno = mons[PM_GAE_ELADRIN].geno;
-		mons[PM_GAE_ELADRIN].geno = genotmp;
+		int common_caste;
+		switch(dungeon_topology.alt_tulani){
+			case GAE_CASTE:
+				common_caste = PM_GAE_ELADRIN;
+			break;
+			case BRIGHID_CASTE:
+				common_caste = PM_BRIGHID_ELADRIN;
+			break;
+			case UISCERRE_CASTE:
+				common_caste = PM_UISCERRE_ELADRIN;
+			break;
+			case CAILLEA_CASTE:
+				common_caste = PM_CAILLEA_ELADRIN;
+			break;
+		}
+		mons[PM_TULANI_ELADRIN].geno = mons[common_caste].geno;
+		mons[common_caste].geno = genotmp;
 	}
 	/* Fix up the alignment quest nemesi */
 	mons[PM_OONA].mcolor = (u.oonaenergy == AD_FIRE) ? CLR_RED 

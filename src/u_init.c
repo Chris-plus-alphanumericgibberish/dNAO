@@ -2556,12 +2556,35 @@ u_init()
 	u.oonaenergy = !rn2(3) ? AD_FIRE : rn2(2) ? AD_COLD : AD_ELEC;
 	u.ring_wishes = -1;
 	dungeon_topology.alt_tower = !rn2(8);
-	dungeon_topology.alt_tulani = !rn2(3);
+	int common_caste = 0;
+	switch(rn2(6)){
+		case 0:
+		case 1:
+			dungeon_topology.alt_tulani = TULANI_CASTE;
+			// No change
+		break;
+		case 2:
+			dungeon_topology.alt_tulani = GAE_CASTE;
+			common_caste = PM_GAE_ELADRIN;
+		break;
+		case 3:
+			dungeon_topology.alt_tulani = BRIGHID_CASTE;
+			common_caste = PM_BRIGHID_ELADRIN;
+		break;
+		case 4:
+			dungeon_topology.alt_tulani = UISCERRE_CASTE;
+			common_caste = PM_UISCERRE_ELADRIN;
+		break;
+		case 5:
+			dungeon_topology.alt_tulani = CAILLEA_CASTE;
+			common_caste = PM_CAILLEA_ELADRIN;
+		break;
+	}
 	
-	if(dungeon_topology.alt_tulani){
+	if(common_caste){
 		unsigned short genotmp = mons[PM_TULANI_ELADRIN].geno;
-		mons[PM_TULANI_ELADRIN].geno = mons[PM_GAE_ELADRIN].geno;
-		mons[PM_GAE_ELADRIN].geno = genotmp;
+		mons[PM_TULANI_ELADRIN].geno = mons[common_caste].geno;
+		mons[common_caste].geno = genotmp;
 	}
 
 	dungeon_topology.eprecursor_typ = rnd(8);

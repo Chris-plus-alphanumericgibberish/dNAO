@@ -1764,8 +1764,8 @@ register struct monst *mtmp;
 	boolean wearing_shield = (mtmp->misc_worn_check & W_ARMS) != 0;
 
 	/* needs to be capable of wielding a weapon in the mainhand */
-	if (!attacktype(mtmp->data, AT_WEAP) &&
-		!attacktype(mtmp->data, AT_DEVA))
+	if (!mon_attacktype(mtmp, AT_WEAP) &&
+		!mon_attacktype(mtmp, AT_DEVA))
 		return (struct obj *)0;
 
 	/* if using an artifact or oprop weapon keep using it. */
@@ -1829,7 +1829,7 @@ register struct monst *mtmp;
 	boolean wearing_shield = (mtmp->misc_worn_check & W_ARMS) != 0;
 
 	/* needs to be capable of wielding a weapon in the offhand */
-	if (!attacktype(mtmp->data, AT_XWEP))
+	if (!mon_attacktype(mtmp, AT_XWEP))
 		return (struct obj *)0;
 	
 	/* if using an artifact or oprop weapon keep using it. */
@@ -1945,12 +1945,12 @@ boolean polyspot;
 	}
 
 	/* we don't want weapons if we can't wield any at all */
-	if (!is_armed(mon->data))
+	if (!is_armed_mon(mon))
 		mon->weapon_check = NO_WEAPON_WANTED;
 
 	/* monster can no longer wield any mainhand weapons */
-	if (!attacktype(mon->data, AT_WEAP) &&
-		!attacktype(mon->data, AT_DEVA)) {
+	if (!mon_attacktype(mon, AT_WEAP) &&
+		!mon_attacktype(mon, AT_DEVA)) {
 		if (mw_tmp) {
 			setmnotwielded(mon, mw_tmp);
 			MON_NOWEP(mon);
@@ -1971,7 +1971,7 @@ boolean polyspot;
 		}
 	}
 	/* monster can no longer twoweapon */
-	if (!could_twoweap(mon->data))
+	if (!could_twoweap_mon(mon))
 	{
 		if (msw_tmp) {
 			setmnotwielded(mon, msw_tmp);
@@ -2128,7 +2128,7 @@ register struct monst *mon;
 	/* possibly wield an off-hand weapon */
 	if (old_weapon_check == NEED_HTH_WEAPON || old_weapon_check == NEED_RANGED_WEAPON)
 	{
-		if (could_twoweap(mon->data) && !which_armor(mon, W_ARMS) && !bimanual(MON_WEP(mon), mon->data))
+		if (could_twoweap_mon(mon) && !which_armor(mon, W_ARMS) && !bimanual(MON_WEP(mon), mon->data))
 		{
 			sobj = select_shwep(mon);
 			/* quick-and-dirty select_srwep() for blasters and guns */
@@ -2265,9 +2265,9 @@ register struct monst *mon;
 	struct obj *msw_tmp = MON_SWEP(mon);
 	int toreturn = 0;
 	
-	if (!attacktype(mon->data, AT_WEAP) &&
-		!attacktype(mon->data, AT_DEVA) &&
-		!attacktype(mon->data, AT_XWEP)) return;
+	if (!mon_attacktype(mon, AT_WEAP) &&
+		!mon_attacktype(mon, AT_DEVA) &&
+		!mon_attacktype(mon, AT_XWEP)) return;
 
 	if(needspick(mon->data)){
 		obj = m_carrying(mon, DWARVISH_MATTOCK);
@@ -2294,7 +2294,7 @@ register struct monst *mon;
 		    mon_ignite_lightsaber(obj, mon);
 		toreturn = 1;
 	}
-	if (could_twoweap(mon->data) && !which_armor(mon, W_ARMS) && !bimanual(obj, mon->data))
+	if (could_twoweap_mon(mon) && !which_armor(mon, W_ARMS) && !bimanual(obj, mon->data))
 	{
 		sobj = select_shwep(mon);
 		if (sobj && sobj != &zeroobj) {

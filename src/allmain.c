@@ -1272,7 +1272,7 @@ moveloop()
 				continue;
 			}
 			if (!DEADMONSTER(mtmp)
-				&& attacktype(mtmp->data, AT_WDGZ)
+				&& mon_attacktype(mtmp, AT_WDGZ)
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
 				&& !(hideablewidegaze(mtmp->data) && (rn2(3) < magic_negation(mtmp)))
 				&& couldsee(mtmp->mx, mtmp->my)
@@ -2544,6 +2544,7 @@ karemade:
 					done(DISSOLVED);
 				} else if(didmove && !u.umoved) {
 					Norep("You sink deeper into the lava.");
+					lava_effects(FALSE);
 					u.utrap += rnd(4);
 				}
 			}
@@ -3849,6 +3850,9 @@ printAttacks(buf, ptr)
 		"pull closer",			/*139*/
 		"crippling pain",		/*140*/
 		"inflict curses",		/*141*/
+		"crushing lava",		/*142*/
+		"pyroclastic",			/*143*/
+		"silver moonlight",		/*144*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */

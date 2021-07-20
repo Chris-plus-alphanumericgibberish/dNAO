@@ -397,7 +397,7 @@ raise_dead:
 	/* last place some monsters around you */
 	mm.x = u.ux;
 	mm.y = u.uy;
-	mkundead(&mm, TRUE, NO_MINVENT);
+	mkundead(&mm, TRUE, NO_MINVENT, 0);
     } else if(book2->blessed) {
 	for(mtmp = fmon; mtmp; mtmp = mtmp2) {
 	    mtmp2 = mtmp->nmon;		/* tamedog() changes chain */

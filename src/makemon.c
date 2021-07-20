@@ -3523,17 +3523,60 @@ int mkobjflags;
 				set_material_gm(otmp, COPPER);
 			    (void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_TULANI_ELADRIN){
+#define HOLY_TULANI_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
+			set_material_gm(otmp, mat);\
+			if(stone) otmp->ovar1 = stone;\
+			add_oprop(otmp, OPROP_HOLY);\
+			if(is_gloves(otmp) || is_boots(otmp))\
+				add_oprop(otmp, OPROP_HOLYW);\
+			bless(otmp);
+
+				int mat = 0;
+				int stone = 0;
+				switch(rn2(20)){
+				case 0:
+				mat = !rn2(5) ? GEMSTONE : !rn2(4) ? OBSIDIAN_MT : GLASS;
+				if(mat == GEMSTONE)
+					stone = !rn2(4) ? DIAMOND : !rn2(3) ? STAR_SAPPHIRE : OPAL;
+				HOLY_TULANI_ARMOR(CRYSTAL_BOOTS)
+				(void)mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+				HOLY_TULANI_ARMOR(CRYSTAL_PLATE_MAIL)
+				HOLY_TULANI_ARMOR(CRYSTAL_GAUNTLETS)
+				HOLY_TULANI_ARMOR(HELMET)
+#undef HOLY_TULANI_ARMOR
+				break;
+				case 1:
+					if(!mat) mat = MITHRIL;
+				case 2:
+					if(!mat) mat = COPPER;
+				case 3:
+					if(!mat) mat = SILVER;
+				case 4:
+					if(!mat) mat = GLASS;
+				(void) mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+				(void) mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+				otmp = mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
+				set_material_gm(otmp, mat);
+				otmp = mongets(mtmp, HIGH_ELVEN_GAUNTLETS, mkobjflags);
+				set_material_gm(otmp, mat);
+				otmp = mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
+				set_material_gm(otmp, mat);
+				break;
+				default:
 				(void)mongets(mtmp, CRYSTAL_PLATE_MAIL, mkobjflags);
 				(void)mongets(mtmp, ELVEN_CLOAK, mkobjflags);
 				(void)mongets(mtmp, CRYSTAL_BOOTS, mkobjflags);
 				(void)mongets(mtmp, CRYSTAL_GAUNTLETS, mkobjflags);
 				(void)mongets(mtmp, CRYSTAL_HELM, mkobjflags);
+				break;
+				}
 			} else if(ptr->mtyp == PM_GAE_ELADRIN){
+				int gemstone = rn2(3) ? EMERALD : !rn2(4) ? RUBY : !rn2(3) ? JACINTH : rn2(2) ? TOPAZ : DIAMOND;
 				switch(rnd(6)){
 					case 1:
 					otmp = mksobj(CRYSTAL_PLATE_MAIL, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = EMERALD;
+					otmp->ovar1 = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -3544,14 +3587,14 @@ int mkobjflags;
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(CRYSTAL_GAUNTLETS, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = EMERALD;
+					otmp->ovar1 = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(rn2(4) ? ARCHAIC_HELM : find_gcirclet(), mkobjflags);
-					if(rn2(2)){
+					if(gemstone == EMERALD && rn2(2)){
 						set_material_gm(otmp, GEMSTONE);
-						otmp->ovar1 = EMERALD;
+						otmp->ovar1 = gemstone;
 					} else {
 						set_material_gm(otmp, GOLD);
 					}
@@ -3560,13 +3603,13 @@ int mkobjflags;
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(CRYSTAL_SWORD, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = EMERALD;
+					otmp->ovar1 = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(SICKLE, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = EMERALD;
+					otmp->ovar1 = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -3592,7 +3635,7 @@ int mkobjflags;
 					add_oprop(otmp, OPROP_MAGC);
 					add_oprop(otmp, OPROP_REFL);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = EMERALD;
+					otmp->ovar1 = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -3619,6 +3662,82 @@ int mkobjflags;
 					break;
 					case 6:
 					break;
+				}
+			} else if(ptr->mtyp == PM_BRIGHID_ELADRIN){
+				otmp = mongets(mtmp, CRYSTAL_SWORD, mkobjflags);
+				add_oprop(otmp, OPROP_LESSER_FIREW);
+				set_material_gm(otmp, OBSIDIAN_MT);
+				otmp->oerodeproof = TRUE;
+				int armors[] = {CRYSTAL_SHIELD, CRYSTAL_PLATE_MAIL, CRYSTAL_GAUNTLETS, CRYSTAL_BOOTS};
+				for(int i = 0; i < SIZE(armors); i++){
+					otmp = mongets(mtmp, armors[i], mkobjflags);
+					set_material_gm(otmp, OBSIDIAN_MT);
+					otmp->oerodeproof = TRUE;
+				}
+			} else if(ptr->mtyp == PM_CAILLEA_ELADRIN){
+#define CAILLEA_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
+				otmp->obj_color = CLR_BLACK;\
+				add_oprop(otmp, OPROP_COLD);\
+				add_oprop(otmp, OPROP_LESSER_COLDW);
+				
+				CAILLEA_ARMOR(HIGH_BOOTS)
+				if(mtmp->female){
+					CAILLEA_ARMOR(PLAIN_DRESS)
+					CAILLEA_ARMOR(LONG_GLOVES)
+				}
+				else {
+					CAILLEA_ARMOR(JACKET)
+					CAILLEA_ARMOR(GLOVES)
+				}
+#undef CAILLEA_ARMOR
+				int pom = phase_of_the_moon();
+				if(pom == 4){
+					otmp = mongets(mtmp, MOON_AXE, mkobjflags);
+					otmp->objsize = MZ_SMALL;
+					fix_object(otmp);
+					otmp = mongets(mtmp, MOON_AXE, mkobjflags);
+					otmp->objsize = MZ_SMALL;
+					fix_object(otmp);
+				}
+				else if(pom == 1 || pom == 7){
+					int typ = rn2(4) ? SICKLE : KHOPESH;
+					otmp = mongets(mtmp, typ, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					otmp = mongets(mtmp, typ, mkobjflags);
+					set_material_gm(otmp, SILVER);
+				}
+				else if(pom == 2 || pom == 6) {
+					otmp = mongets(mtmp, AXE, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					otmp = mongets(mtmp, AXE, mkobjflags);
+					set_material_gm(otmp, SILVER);
+				}
+				else if(pom == 3 || pom == 5) {
+					otmp = mongets(mtmp, MOON_AXE, mkobjflags);
+					otmp->objsize = MZ_SMALL;
+					fix_object(otmp);
+					otmp = mongets(mtmp, MOON_AXE, mkobjflags);
+					otmp->objsize = MZ_SMALL;
+					fix_object(otmp);
+				}
+				else { //new moon
+					int moontype = rnd(4);
+					for(int i = 2; i > 0; i--){
+						otmp = mongets(mtmp, MOON_AXE, mkobjflags);
+						switch(moontype){
+							default:
+							break;
+							case 1:
+								set_material_gm(otmp, GOLD);
+							break;
+							case 2:
+								set_material_gm(otmp, OBSIDIAN_MT);
+								otmp->ovar1 = FULL_MOON;
+							break;
+						}
+						otmp->objsize = MZ_SMALL;
+						fix_object(otmp);
+					}
 				}
 			} else if(ptr->mtyp == PM_POLYPOID_BEING){
 				int masktypes[] = {PM_ELVENKING, PM_ELVENQUEEN, PM_ALABASTER_ELF_ELDER, PM_GROVE_GUARDIAN, 
@@ -3696,7 +3815,7 @@ int mkobjflags;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_LILLEND){
-				static boolean lama_count = 0;
+				static char lama_count = 0;
 				if(Is_lamashtu_level(&u.uz) && lama_count < 2){
 					otmp = mongets(mtmp, MASK, mkobjflags);
 					otmp->corpsenm = lama_count == 0 ? PM_DEMOGORGON : PM_DAGON; //PM_OBOX_OB
@@ -3711,6 +3830,22 @@ int mkobjflags;
 					otmp = mongets(mtmp, MASK, mkobjflags);
 					otmp->corpsenm = lama_count == 0 ? PM_DEATH_KNIGHT : PM_SARTAN_TANNIN;
 
+					//WEAPON
+					if(lama_count == 0){
+						otmp = mongets(mtmp, SCYTHE, mkobjflags);
+						set_material_gm(otmp, DRAGON_HIDE);
+						add_oprop(otmp, OPROP_FLAYW);
+						add_oprop(otmp, OPROP_VORPW);
+					}
+					else if(lama_count == 1){
+						otmp = mongets(mtmp, BULLWHIP, mkobjflags);
+						set_material_gm(otmp, SHELL_MAT);
+						add_oprop(otmp, OPROP_FLAYW);
+						otmp = mongets(mtmp, BULLWHIP, mkobjflags);
+						set_material_gm(otmp, SHELL_MAT);
+						add_oprop(otmp, OPROP_FLAYW);
+					}
+					
 					otmp = mongets(mtmp, HELMET, mkobjflags);
 					set_material_gm(otmp, SILVER);
 					add_oprop(otmp, OPROP_LIFE);
@@ -7686,6 +7821,11 @@ int mkobjflags;
 				otmp->owornmask |= W_ARMF;
 				curse(otmp);
 				update_mon_intrinsics(mtmp, otmp, TRUE, TRUE);
+			} else if(ptr->mtyp == PM_UISCERRE_ELADRIN){
+					otmp = mongets(mtmp, BANDED_MAIL, mkobjflags);
+					set_material_gm(otmp, COPPER);
+					otmp = mongets(mtmp, HELMET, mkobjflags);
+					set_material_gm(otmp, COPPER);
 			}
 		break;
 	    case S_DEMON:
@@ -8588,12 +8728,46 @@ register int	mmflags;
 	if (mmflags & (MM_EDOG|MM_ESUM))
 		mmflags |= MM_NOGROUP;
 
-	/* replace desfile Tulani with Gae, and vice versa
-	 * assumes G_NOGEN is used to track which variant you have that game */
-	if (ptr && ptr->mtyp == PM_TULANI_ELADRIN && in_mklev && (mons[PM_TULANI_ELADRIN].geno & G_NOGEN))
-		ptr = &mons[PM_GAE_ELADRIN];
-	else if (ptr && ptr->mtyp == PM_GAE_ELADRIN && in_mklev && (mons[PM_GAE_ELADRIN].geno & G_NOGEN))
-		ptr = &mons[PM_TULANI_ELADRIN];
+	/* handle subs for high-caste tulani  */
+	if(ptr && is_high_caste_eladrin(ptr) && in_mklev){
+		if(Is_lamashtu_level(&u.uz)){
+			if(ptr->mtyp != PM_TULANI_ELADRIN && ptr->mtyp != PM_GAE_ELADRIN){
+				switch(dungeon_topology.alt_tulani){
+					case TULANI_CASTE:
+					case GAE_CASTE:
+						ptr = &mons[!rn2(3) ? PM_BRIGHID_ELADRIN : rn2(2) ? PM_UISCERRE_ELADRIN : PM_CAILLEA_ELADRIN];
+					break;
+					case BRIGHID_CASTE:
+						ptr = &mons[PM_BRIGHID_ELADRIN];
+					break;
+					case UISCERRE_CASTE:
+						ptr = &mons[PM_UISCERRE_ELADRIN];
+					break;
+					case CAILLEA_CASTE:
+						ptr = &mons[PM_CAILLEA_ELADRIN];
+					break;
+				}
+			}
+		} else {
+			switch(dungeon_topology.alt_tulani){
+				case TULANI_CASTE:
+					ptr = &mons[PM_TULANI_ELADRIN];
+				break;
+				case GAE_CASTE:
+					ptr = &mons[PM_GAE_ELADRIN];
+				break;
+				case BRIGHID_CASTE:
+					ptr = &mons[PM_BRIGHID_ELADRIN];
+				break;
+				case UISCERRE_CASTE:
+					ptr = &mons[PM_UISCERRE_ELADRIN];
+				break;
+				case CAILLEA_CASTE:
+					ptr = &mons[PM_CAILLEA_ELADRIN];
+				break;
+			}
+		}
+	}
 
 	/* if caller both a random creature and a random location, try both at once first */
 	if(!ptr && x == 0 && y == 0){
@@ -9307,6 +9481,9 @@ register int	mmflags;
 
 			if(in_mklev && is_angel(mtmp->data) && Is_lamashtu_level(&u.uz)){
 				mtmp->mfaction = LAMASHTU_FACTION;
+				if(is_eladrin(mtmp->data)){
+					set_template(mtmp, ILLUMINATED);
+				}
 			}
 		break;
 	    case S_GIANT:
@@ -9858,7 +10035,7 @@ register int	mmflags;
 	}
 	
 	if (allow_minvent) {
-	    if(is_armed(ptr))
+	    if(is_armed_mon(mtmp))
 			m_initweap(mtmp, mkobjflags);	/* equip with weapons / armor */
 	    m_initinv(mtmp, mkobjflags);  /* add on a few special items incl. more armor */
 	    m_dowear(mtmp, TRUE);
@@ -9869,7 +10046,7 @@ register int	mmflags;
 	    mtmp->minvent = (struct obj *)0;    /* caller expects this */
 	}
 	/* set weaponcheck for weapon-toting monsters */
-	if (is_armed(ptr))
+	if (is_armed_mon(mtmp))
 		mtmp->weapon_check = NEED_WEAPON;
 	if(zombiepm >= 0){
 		//wasn't used

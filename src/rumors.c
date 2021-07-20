@@ -475,12 +475,25 @@ register struct monst *oracl;
 #endif
 				switch (rn2(5)){
 					case 0:
-						if (dungeon_topology.alt_tulani)
-							pline("They say %s spirits roam the land.",
-									!rn2(4) ? "aestival" : (!rn2(3) ? "vernal" :
-										(!rn2(2) ? "hibernal" : "autumnal")));
-						else
-							pline("They say radiant spheres roam the land.");
+						switch(dungeon_topology.alt_tulani){
+							case TULANI_CASTE:
+								pline("They say radiant spheres roam the land.");
+							break;
+							case GAE_CASTE:
+								pline("They say %s spirits roam the land.",
+										!rn2(4) ? "aestival" : (!rn2(3) ? "vernal" :
+											(!rn2(2) ? "hibernal" : "autumnal")));
+							break;
+							case BRIGHID_CASTE:
+								pline("They say the deep nobility has emerged to roam the land.");
+							break;
+							case UISCERRE_CASTE:
+								pline("They say the deep nobility has surfaced to roam the land.");
+							break;
+							case CAILLEA_CASTE:
+								pline("They say the winter witches have come down from the mountains.");
+							break;
+						}
 					break;
 					case 1:
 						if (dungeon_topology.alt_tower)

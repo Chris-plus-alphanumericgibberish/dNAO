@@ -510,9 +510,12 @@ void
 useupall(obj)
 struct obj *obj;
 {
+	boolean gloves = !!(obj->owornmask&W_ARMG);
 	setnotworn(obj);
 	freeinv(obj);
 	obfree(obj, (struct obj *)0);	/* deletes contents also */
+	if(gloves)
+		selftouch("With your hand-protection gone, you");
 }
 
 void

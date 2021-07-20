@@ -178,7 +178,12 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 		d_tower1, d_tower2, d_tower3, d_tower4, d_tower5,
 		d_tower6, d_tower7, d_tower8, d_tower9, d_towertop;
 	char alt_tower;
-	char alt_tulani;
+	char alt_tulani; /*Note: TULANI_CAST == FALSE, i.e. no changes needed. */
+#define TULANI_CASTE	0
+#define GAE_CASTE		1
+#define BRIGHID_CASTE	2
+#define UISCERRE_CASTE	3
+#define CAILLEA_CASTE	4
 	int eprecursor_typ;
 #define	PRE_DRACAE	1
 #define	PRE_POLYP	2

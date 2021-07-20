@@ -205,6 +205,7 @@ struct monst {
 #define	INCUBUS_FACTION	FACTION_PADDING+1	/* male foocubus */
 #define	SUCCUBUS_FACTION	FACTION_PADDING+2	/* female foocubus */
 #define	LAMASHTU_FACTION	FACTION_PADDING+3	/* Lamashtu's angels */
+#define	HOLYDEAD_FACTION	FACTION_PADDING+4	/* Angel-aligned undead */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;

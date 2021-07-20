@@ -1592,7 +1592,7 @@ register struct monst *mtmp;
 						  typ == LAVAPOOL ? "lava" : "water");
 				if (!Levitation && !Flying && mtmp->mx==u.ux && mtmp->my==u.uy) {
 					if (typ == LAVAPOOL)
-					(void) lava_effects();
+					(void) lava_effects(TRUE);
 					else if (!Wwalking)
 					(void) drown();
 				}
@@ -1998,7 +1998,7 @@ not_special:
 	omy = mtmp->my;
 	gx = mtmp->mux;
 	gy = mtmp->muy;
-	appr = (mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH) ? -1 : 1;
+	appr = ((mtmp->mflee && mtmp->mtyp != PM_BANDERSNATCH) || mtmp->mtyp == PM_WATERSPOUT) ? -1 : 1;
 	if (mtmp->mconf || (u.uswallow && mtmp == u.ustuck))
 		appr = 0;
 	else {

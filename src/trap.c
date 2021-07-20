@@ -56,8 +56,9 @@ STATIC_VAR const char * const blindgas[6] =
 
 /* called when you're hit by fire (dofiretrap,buzz,zapyourself,explode) */
 boolean			/* returns TRUE if hit on torso */
-burnarmor(victim)
+burnarmor(victim, candestroy)
 struct monst *victim;
+boolean candestroy;
 {
     struct obj *item;
     char buf[BUFSZ];
@@ -66,47 +67,45 @@ struct monst *victim;
     if (!victim) return 0;
 	if(victim == &youmonst && InvFire_resistance) return 0;
 	if(victim != &youmonst && resists_fire(victim)) return 0;
-#define burn_dmg(obj,descr) rust_dmg(obj, descr, 0, FALSE, victim)
+#define burn_dmg(obj,descr) rust_dmg(obj, descr, 0, FALSE, victim, candestroy)
     while (1) {
-	switch (rn2(5)) {
-	case 0:
-	    item = (victim == &youmonst) ? uarmh : which_armor(victim, W_ARMH);
-	    if (item) {
-	    	Sprintf(buf,"%s helmet", material_name(item, FALSE));
-	    }
-	    if (!burn_dmg(item, item ? buf : "helmet")) continue;
-	    break;
-	case 1:
-	    item = (victim == &youmonst) ? uarmc : which_armor(victim, W_ARMC);
-	    if (item) {
-		(void) burn_dmg(item, cloak_simple_name(item));
-		return TRUE;
-	    }
-	    item = (victim == &youmonst) ? uarm : which_armor(victim, W_ARM);
-	    if (item && (arm_blocks_upper_body(item->otyp) || !((victim == &youmonst) ? uarmu : which_armor(victim, W_ARMU)) || rn2(2))) {
-		(void) burn_dmg(item, xname(item));
-		return TRUE;
-	    }
-#ifdef TOURIST
-	    item = (victim == &youmonst) ? uarmu : which_armor(victim, W_ARMU);
-	    if (item)
-		(void) burn_dmg(item, "shirt");
-#endif
-	    return TRUE;
-	case 2:
-	    item = (victim == &youmonst) ? uarms : which_armor(victim, W_ARMS);
-	    if (!burn_dmg(item, "wooden shield")) continue;
-	    break;
-	case 3:
-	    item = (victim == &youmonst) ? uarmg : which_armor(victim, W_ARMG);
-	    if (!burn_dmg(item, "gloves")) continue;
-	    break;
-	case 4:
-	    item = (victim == &youmonst) ? uarmf : which_armor(victim, W_ARMF);
-	    if (!burn_dmg(item, "boots")) continue;
-	    break;
-	}
-	break; /* Out of while loop */
+		switch (rn2(5)) {
+			case 0:
+				item = (victim == &youmonst) ? uarmh : which_armor(victim, W_ARMH);
+				if (item) {
+					Sprintf(buf,"%s helmet", material_name(item, FALSE));
+				}
+				if (!burn_dmg(item, item ? buf : "helmet")) continue;
+				break;
+			case 1:
+				item = (victim == &youmonst) ? uarmc : which_armor(victim, W_ARMC);
+				if (item) {
+				(void) burn_dmg(item, cloak_simple_name(item));
+				return TRUE;
+				}
+				item = (victim == &youmonst) ? uarm : which_armor(victim, W_ARM);
+				if (item && (arm_blocks_upper_body(item->otyp) || !((victim == &youmonst) ? uarmu : which_armor(victim, W_ARMU)) || rn2(2))) {
+				(void) burn_dmg(item, xname(item));
+				return TRUE;
+				}
+				item = (victim == &youmonst) ? uarmu : which_armor(victim, W_ARMU);
+				if (item)
+				(void) burn_dmg(item, "shirt");
+				return TRUE;
+			case 2:
+				item = (victim == &youmonst) ? uarms : which_armor(victim, W_ARMS);
+				if (!burn_dmg(item, "wooden shield")) continue;
+				break;
+			case 3:
+				item = (victim == &youmonst) ? uarmg : which_armor(victim, W_ARMG);
+				if (!burn_dmg(item, "gloves")) continue;
+				break;
+			case 4:
+				item = (victim == &youmonst) ? uarmf : which_armor(victim, W_ARMF);
+				if (!burn_dmg(item, "boots")) continue;
+				break;
+		}
+		break; /* Out of while loop */
     }
     return FALSE;
 #undef burn_dmg
@@ -118,15 +117,17 @@ struct monst *victim;
  * returned only for rustable items.
  */
 boolean
-rust_dmg(otmp, ostr, type, print, victim)
+rust_dmg(otmp, ostr, type, print, victim, candestroy)
 register struct obj *otmp;
 register const char *ostr;
 int type;
 boolean print;
 struct monst *victim;
+boolean candestroy;
 {
 	static NEARDATA const char * const action[] = { "smolder", "rust", "rot", "corrode" };
 	static NEARDATA const char * const msg[] =  { "burnt", "rusted", "rotten", "corroded" };
+	static NEARDATA const char * const destruction[] = { "burn", "rust", "rot", "corrode" };
 	boolean vulnerable = FALSE;
 	boolean grprot = FALSE;
 	boolean is_primary = TRUE;
@@ -152,7 +153,20 @@ struct monst *victim;
 			break;
 	}
 	erosion = is_primary ? otmp->oeroded : otmp->oeroded2;
-
+	
+	if(vulnerable && !otmp->oerodeproof && !otmp->oartifact && erosion == MAX_ERODE && candestroy){
+		if (victim == &youmonst)
+		    Your("%s %s away!", ostr, vtense(ostr, destruction[type]));
+		else if (vismon)
+		    pline("%s's %s %s away!", Monnam(victim), ostr,
+			  vtense(ostr, destruction[type]));
+		if (victim == &youmonst)
+			useup(otmp);
+		else
+			m_useup(victim, otmp);
+		return TRUE;
+	}
+	
 	if (!print && (!vulnerable || otmp->oerodeproof || erosion == MAX_ERODE))
 		return FALSE;
 
@@ -1034,16 +1048,16 @@ unsigned trflags;
 		    case 0:
 			pline("%s you on the %s!", A_gush_of_water_hits,
 				    body_part(HEAD));
-			(void) rust_dmg(uarmh, "helmet", 1, TRUE, &youmonst);
+			(void) rust_dmg(uarmh, "helmet", 1, TRUE, &youmonst, FALSE);
 			break;
 		    case 1:
 			pline("%s your left %s!", A_gush_of_water_hits,
 				    body_part(ARM));
-			if (rust_dmg(uarms, "shield", 1, TRUE, &youmonst))
+			if (rust_dmg(uarms, "shield", 1, TRUE, &youmonst, FALSE))
 			    break;
 			if (u.twoweap || (uwep && bimanual(uwep,youracedata)))
 			    erode_obj(u.twoweap ? uswapwep : uwep, FALSE, TRUE);
-glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
+glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 			/* Not "metal gauntlets" since it gets called
 			 * even if it's leather for the message
 			 */
@@ -1059,12 +1073,12 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 				    (void) snuff_lit(otmp);
 			if (uarmc)
 			    (void) rust_dmg(uarmc, cloak_simple_name(uarmc),
-						1, TRUE, &youmonst);
+						1, TRUE, &youmonst, FALSE);
 			else if (uarm && (arm_blocks_upper_body(uarm->otyp) || rn2(2)))
-			    (void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst);
+			    (void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst, FALSE);
 #ifdef TOURIST
 			else if (uarmu)
-			    (void) rust_dmg(uarmu, "shirt", 1, TRUE, &youmonst);
+			    (void) rust_dmg(uarmu, "shirt", 1, TRUE, &youmonst, FALSE);
 #endif
 		}
 		update_inventory();
@@ -2163,20 +2177,20 @@ struct monst *mtmp;
 				pline("%s %s on the %s!", A_gush_of_water_hits,
 				    mon_nam(mtmp), mbodypart(mtmp, HEAD));
 			    target = which_armor(mtmp, W_ARMH);
-			    (void) rust_dmg(target, "helmet", 1, TRUE, mtmp);
+			    (void) rust_dmg(target, "helmet", 1, TRUE, mtmp, FALSE);
 			    break;
 			case 1:
 			    if (in_sight)
 				pline("%s %s's left %s!", A_gush_of_water_hits,
 				    mon_nam(mtmp), mbodypart(mtmp, ARM));
 			    target = which_armor(mtmp, W_ARMS);
-			    if (rust_dmg(target, "shield", 1, TRUE, mtmp))
+			    if (rust_dmg(target, "shield", 1, TRUE, mtmp, FALSE))
 				break;
 			    target = MON_WEP(mtmp);
 			    if (target && bimanual(target,mtmp->data))
 				erode_obj(target, FALSE, TRUE);
 glovecheck:		    target = which_armor(mtmp, W_ARMG);
-			    (void) rust_dmg(target, "gauntlets", 1, TRUE, mtmp);
+			    (void) rust_dmg(target, "gauntlets", 1, TRUE, mtmp, FALSE);
 			    break;
 			case 2:
 			    if (in_sight)
@@ -2193,15 +2207,15 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    target = which_armor(mtmp, W_ARMC);
 			    if (target)
 				(void) rust_dmg(target, cloak_simple_name(target),
-						 1, TRUE, mtmp);
+						 1, TRUE, mtmp, FALSE);
 			    else {
 				target = which_armor(mtmp, W_ARM);
 				if (target)
-				    (void) rust_dmg(target, "armor", 1, TRUE, mtmp);
+				    (void) rust_dmg(target, "armor", 1, TRUE, mtmp, FALSE);
 #ifdef TOURIST
 				else {
 				    target = which_armor(mtmp, W_ARMU);
-				    (void) rust_dmg(target, "shirt", 1, TRUE, mtmp);
+				    (void) rust_dmg(target, "shirt", 1, TRUE, mtmp, FALSE);
 				}
 #endif
 			    }
@@ -2306,7 +2320,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				   so no (mhp > mhpmax) check is needed here */
 				mtmp->mhpmax -= rn2(num + 1);
 			}
-			if (burnarmor(mtmp) || rn2(3)) {
+			if (burnarmor(mtmp, FALSE) || rn2(3)) {
 			    (void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
 			    (void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
 			    (void) destroy_item(mtmp, POTION_CLASS, AD_FIRE);
@@ -2868,7 +2882,7 @@ long hmask, emask;     /* might cancel timeout */
 			no_msg = drown();
 
 		if(is_lava(u.ux,u.uy)) {
-			(void) lava_effects();
+			(void) lava_effects(TRUE);
 			no_msg = TRUE;
 		}
 	}
@@ -3037,7 +3051,7 @@ struct obj *box;	/* null for floor trap */
 	burn_away_slime();
 	melt_frozen_air();
 
-	if (burnarmor(&youmonst) || (rn2(3) && !InvFire_resistance)) {
+	if (burnarmor(&youmonst, FALSE) || (rn2(3) && !InvFire_resistance)) {
 	    destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 	    destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 	    destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
@@ -5024,7 +5038,8 @@ unconscious()
 static const char lava_killer[] = "molten lava";
 
 boolean
-lava_effects()
+lava_effects(initialize)
+boolean initialize;
 {
     register struct obj *obj, *obj2;
     int dmg;
@@ -5039,83 +5054,82 @@ lava_effects()
 	}
 
     if (likes_lava(youracedata)) return FALSE;
-
+	
     if (!Fire_resistance) {
-	if(Wwalking) {
-	    dmg = d(6,6);
-	    pline_The("lava here burns you!");
-	    if(dmg < u.uhp) {
-		losehp(dmg, lava_killer, KILLED_BY);
-		goto burn_stuff;
-	    }
-	} else
-	    You("fall into the lava!");
+		if(Wwalking) {
+			dmg = d(6,6);
+			pline_The("lava here burns you!");
+			if(dmg < u.uhp) {
+			losehp(dmg, lava_killer, KILLED_BY);
+			goto burn_stuff;
+			}
+		} else if(initialize)
+			You("fall into the lava!");
 
-	usurvive = Lifesaved || discover;
+		usurvive = Lifesaved || discover;
 #ifdef WIZARD
-	if (wizard) usurvive = TRUE;
+		if (wizard) usurvive = TRUE;
 #endif
-	for(obj = invent; obj; obj = obj2) {
-	    obj2 = obj->nobj;
-	    if(is_organic(obj) && !obj->oerodeproof) {
-	        if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
-		  if (!Blind && usurvive)
-		    pline("%s glows a strange %s, but remains intact.",
-			  The(xname(obj)), hcolor("dark red"));
-		  continue;
-		}
-		if(obj->owornmask) {
-		    if (usurvive)
-			Your("%s into flame!", aobjnam(obj, "burst"));
+		for(obj = invent; obj; obj = obj2) {
+			obj2 = obj->nobj;
+			if(is_organic(obj) && !obj->oerodeproof) {
+				if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
+					if (!Blind && usurvive)
+						pline("%s glows a strange %s, but remains intact.",
+						  The(xname(obj)), hcolor("dark red"));
+					continue;
+				}
+				if(obj->owornmask) {
+					if (usurvive)
+					Your("%s into flame!", aobjnam(obj, "burst"));
 
-		    if(obj == uarm) (void) Armor_gone();
-		    else if(obj == uarmc) (void) Cloak_off();
-		    else if(obj == uarmh) (void) Helmet_off();
-		    else if(obj == uarms) (void) Shield_off();
-		    else if(obj == uarmg) (void) Gloves_off();
-		    else if(obj == uarmf) (void) Boots_off();
-#ifdef TOURIST
-		    else if(obj == uarmu) setnotworn(obj);
-#endif
-		    else if(obj == uleft) Ring_gone(obj);
-		    else if(obj == uright) Ring_gone(obj);
-		    else if(obj == ublindf) Blindf_off(obj);
-		    else if(obj == uamul) Amulet_off();
-		    else if(obj == uwep) uwepgone();
-		    else if (obj == uquiver) uqwepgone();
-		    else if (obj == uswapwep) uswapwepgone();
+					if(obj == uarm) (void) Armor_gone();
+					else if(obj == uarmc) (void) Cloak_off();
+					else if(obj == uarmh) (void) Helmet_off();
+					else if(obj == uarms) (void) Shield_off();
+					else if(obj == uarmg) (void) Gloves_off();
+					else if(obj == uarmf) (void) Boots_off();
+					else if(obj == uarmu) setnotworn(obj);
+					else if(obj == uleft) Ring_gone(obj);
+					else if(obj == uright) Ring_gone(obj);
+					else if(obj == ublindf) Blindf_off(obj);
+					else if(obj == uamul) Amulet_off();
+					else if(obj == uwep) uwepgone();
+					else if (obj == uquiver) uqwepgone();
+					else if (obj == uswapwep) uswapwepgone();
+				}
+				useupall(obj);
+			}
 		}
-		useupall(obj);
-	    }
-	}
-
-	/* s/he died... */
-	u.uhp = -1;
-	killer_format = KILLED_BY;
-	killer = lava_killer;
-	You("burn to a crisp...");
-	done(BURNING);
-	while (!safe_teleds(TRUE)) {
-		pline("You're still burning.");
+		/* s/he died... */
+		u.uhp = -1;
+		killer_format = KILLED_BY;
+		killer = lava_killer;
+		You("burn to a crisp...");
 		done(BURNING);
-	}
-	You("find yourself back on solid %s.", surface(u.ux, u.uy));
-	return(TRUE);
+		while (!safe_teleds(TRUE)) {
+			pline("You're still burning.");
+			done(BURNING);
+		}
+		You("find yourself back on solid %s.", surface(u.ux, u.uy));
+		return(TRUE);
     }
 
     if (!Wwalking) {
-	u.utrap = rn1(4, 4) + (rn1(4, 12) << 8);
-	u.utraptype = TT_LAVA;
-	You("sink into the lava, but it only burns slightly!");
-	if (u.uhp > 1)
-	    losehp(1, lava_killer, KILLED_BY);
+		if(initialize){
+			u.utrap = rn1(4, 4) + (rn1(4, 12) << 8);
+			u.utraptype = TT_LAVA;
+			You("sink into the lava, but it only burns slightly!");
+		}
+		if (u.uhp > 1)
+			losehp(1, lava_killer, KILLED_BY);
     }
     /* just want to burn boots, not all armor; destroy_item doesn't work on
        armor anyway */
 burn_stuff:
     if(uarmf && !uarmf->oerodeproof && is_organic(uarmf)) {
 		if ((uarmf->oeroded<3) || (uarmf->oartifact)) {
-			rust_dmg(uarmf, "boots", 0, FALSE, &youmonst);
+			rust_dmg(uarmf, "boots", 0, FALSE, &youmonst, FALSE);
 		}
 		else {
 			/* save uarmf value because Boots_off() sets uarmf to null */
@@ -5126,9 +5140,11 @@ burn_stuff:
 		}
     }
 	if(!(Wwalking || InvFire_resistance)){
+		burnarmor(&youmonst, TRUE);
 		destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 		destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 		destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+		burnarmor(&youmonst, TRUE);
 	}
     return(FALSE);
 }

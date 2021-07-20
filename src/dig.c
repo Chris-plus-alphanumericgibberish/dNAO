@@ -1060,7 +1060,7 @@ boolean pit_only;
 		      typ == LAVAPOOL ? "lava" : "water");
 		if (!Levitation && !Flying) {
 		    if (typ == LAVAPOOL)
-			(void) lava_effects();
+			(void) lava_effects(TRUE);
 		    else if (!Wwalking)
 			(void) drown();
 		}
@@ -1230,7 +1230,7 @@ boolean pit_only;
 		      typ == LAVAPOOL ? "lava" : "water");
 		if (!Levitation && !Flying) {
 		    if (typ == LAVAPOOL)
-			(void) lava_effects();
+			(void) lava_effects(TRUE);
 		    else if (!Wwalking)
 			(void) drown();
 		}
@@ -1675,18 +1675,18 @@ int x, y;
 				case 3:
 					mid = PM_MAHADEVA;
 				break;
-				//Note: regardless of which one is the "common" variety each has a 50/50 chance of being in the vault
+				//Note: regardless of which one is the "common" variety each has a chance of being in the vault
 				case 4:
-					if(dungeon_topology.eprecursor_typ == PRE_DRACAE){
-						mid = rn2(2) ? PM_DRACAE_ELADRIN : PM_TULANI_ELADRIN;
+					if(dungeon_topology.eprecursor_typ == PRE_DRACAE && rn2(2)){
+						mid = PM_DRACAE_ELADRIN;
 					} else
-						mid = PM_TULANI_ELADRIN;
+						mid = rn2(2) ? PM_GAE_ELADRIN : PM_TULANI_ELADRIN;
 				break;
 				case 5:
-					if(dungeon_topology.eprecursor_typ == PRE_DRACAE){
-						mid = rn2(2) ? PM_DRACAE_ELADRIN : PM_GAE_ELADRIN;
-					} else
-						mid = PM_GAE_ELADRIN;
+					if(dungeon_topology.eprecursor_typ == PRE_DRACAE && rn2(2)){
+						mid = PM_DRACAE_ELADRIN;
+					} else 
+						mid = !rn2(3) ? PM_BRIGHID_ELADRIN : rn2(2) ? PM_UISCERRE_ELADRIN : PM_CAILLEA_ELADRIN;
 				break;
 			}
 		break;
@@ -2705,7 +2705,7 @@ int y;
 			      typ == LAVAPOOL ? "lava" : "water");
 		if (!Levitation && !Flying && x==u.ux && y==u.uy) {
 		    if (typ == LAVAPOOL)
-			(void) lava_effects();
+			(void) lava_effects(TRUE);
 		    else if (!Wwalking)
 			(void) drown();
 		}

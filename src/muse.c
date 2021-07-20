@@ -938,7 +938,7 @@ struct monst *mtmp;
 	int difficulty = monstr[(monsndx(pm))];
 	int trycnt = 0;
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
     try_again:
@@ -1133,7 +1133,7 @@ struct monst *mtmp;
 			m.has_offense = MUSE_POT_PARALYSIS;
 		}
 		nomore(MUSE_POT_BLINDNESS);
-		if(obj->otyp == POT_BLINDNESS && !attacktype(mtmp->data, AT_GAZE)) {
+		if(obj->otyp == POT_BLINDNESS && !mon_attacktype(mtmp, AT_GAZE)) {
 			m.offensive = obj;
 			m.has_offense = MUSE_POT_BLINDNESS;
 		}
@@ -1700,7 +1700,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))], diesize;
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	if (difficulty > 7 && !rn2(35)) return WAN_DEATH;
@@ -1739,7 +1739,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	if (difficulty > 7 && !rn2(35)) return rnd(20) > 10 ? WAN_DRAINING : WAN_DEATH;
@@ -1789,7 +1789,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(6)) {
@@ -1811,7 +1811,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(6)) {
@@ -1833,7 +1833,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(16)) {
@@ -1983,7 +1983,7 @@ struct monst *mtmp;
 		if(obj->otyp == WAN_MAKE_INVISIBLE && obj->spe > 0 &&
 		    !mtmp->minvis && !mtmp->invis_blkd &&
 			(!mtmp->mpeaceful || See_invisible(mtmp->mx, mtmp->my)) &&
-		    (!attacktype(mtmp->data, AT_GAZE) || mtmp->mcan)) {
+		    (!mon_attacktype(mtmp, AT_GAZE) || mtmp->mcan)) {
 			m.misc = obj;
 			m.has_misc = MUSE_WAN_MAKE_INVISIBLE;
 		}
@@ -1991,7 +1991,7 @@ struct monst *mtmp;
 		if(!nomouth && obj->otyp == POT_INVISIBILITY &&
 		    !mtmp->minvis && !mtmp->invis_blkd &&
 			(!mtmp->mpeaceful || See_invisible(mtmp->mx, mtmp->my)) &&
-		    (!attacktype(mtmp->data, AT_GAZE) || mtmp->mcan)) {
+		    (!mon_attacktype(mtmp, AT_GAZE) || mtmp->mcan)) {
 			m.misc = obj;
 			m.has_misc = MUSE_POT_INVISIBILITY;
 		}
@@ -2492,7 +2492,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || attacktype(pm, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp)
 			|| pm->mlet == S_GHOST
 			|| pm->mlet == S_SHADE
 			|| pm->mlet == S_KETER
@@ -2537,7 +2537,7 @@ struct obj *obj;
 	    return FALSE;
 
 	if (typ == WAN_MAKE_INVISIBLE || typ == POT_INVISIBILITY)
-	    return (boolean)(!mon->minvis && !mon->invis_blkd && !attacktype(mon->data, AT_GAZE));
+	    return (boolean)(!mon->minvis && !mon->invis_blkd && !mon_attacktype(mon, AT_GAZE));
 	if (typ == WAN_SPEED_MONSTER || typ == POT_SPEED)
 	    return (boolean)(mon->mspeed != MFAST);
 
@@ -2570,7 +2570,7 @@ struct obj *obj;
 		    typ == POT_AMNESIA ||
 		    typ == POT_CONFUSION)
 		return TRUE;
-	    if (typ == POT_BLINDNESS && !attacktype(mon->data, AT_GAZE))
+	    if (typ == POT_BLINDNESS && !mon_attacktype(mon, AT_GAZE))
 		return TRUE;
 	    break;
 	case SCROLL_CLASS:

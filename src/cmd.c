@@ -792,7 +792,7 @@ boolean you_abilities;
 						  typ == LAVAPOOL ? "lava" : "water");
 				if (!Levitation && !Flying) {
 					if (typ == LAVAPOOL)
-					(void) lava_effects();
+					(void) lava_effects(TRUE);
 					else if (!Wwalking)
 					(void) drown();
 				}

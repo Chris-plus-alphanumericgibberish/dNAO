@@ -707,7 +707,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 		    damu = (damu+1) / 2;
 			if (u.uvaul_duration) damu = (damu + 1) / 2;
 		}
-		if (adtyp == AD_FIRE) (void) burnarmor(&youmonst);
+		if (adtyp == AD_FIRE) (void) burnarmor(&youmonst, FALSE);
 		if(uhurt == 2){
 			destroy_item(&youmonst, SCROLL_CLASS, (int) adtyp);
 			destroy_item(&youmonst, SPBOOK_CLASS, (int) adtyp);

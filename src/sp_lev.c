@@ -1318,7 +1318,20 @@ default_case:
 	}
 	/* Note: fixes the output of the previous two code-blocks, too */
 	if(otmp->corpsenm == PM_TULANI_ELADRIN && dungeon_topology.alt_tulani){
-		otmp->corpsenm = PM_GAE_ELADRIN;
+		switch(dungeon_topology.alt_tulani){
+			case GAE_CASTE:
+				otmp->corpsenm = PM_GAE_ELADRIN;
+			break;
+			case BRIGHID_CASTE:
+				otmp->corpsenm = PM_BRIGHID_ELADRIN;
+			break;
+			case UISCERRE_CASTE:
+				otmp->corpsenm = PM_UISCERRE_ELADRIN;
+			break;
+			case CAILLEA_CASTE:
+				otmp->corpsenm = PM_CAILLEA_ELADRIN;
+			break;
+		}
 		fix_object(otmp);
 	}
 	

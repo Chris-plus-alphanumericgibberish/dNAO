@@ -2534,7 +2534,7 @@ boolean ordinary;
 			}
 		    burn_away_slime();
 		    melt_frozen_air();
-		    (void) burnarmor(&youmonst);
+		    (void) burnarmor(&youmonst, FALSE);
 		    break;
 
 		case WAN_COLD:
@@ -4084,7 +4084,7 @@ struct zapdata * zapdata;
 		golemeffects(mdef, AD_FIRE, svddmg);
 		/* damage inventory */
 		if (!InvFire_res(mdef)) {
-			burnarmor(mdef);
+			burnarmor(mdef, FALSE);
 			if (!rn2(3)) (void)destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(3)) (void)destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			if (!rn2(5)) (void)destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);

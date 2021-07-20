@@ -1174,9 +1174,9 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			}
 			obj_extract_self(thrownobj);
 			(void)mpickobj(mdef, thrownobj);
-			if ((attacktype(mdef->data, AT_WEAP) ||
-				attacktype(mdef->data, AT_DEVA) ||
-				attacktype(mdef->data, AT_XWEP)
+			if ((mon_attacktype(mdef, AT_WEAP) ||
+				mon_attacktype(mdef, AT_DEVA) ||
+				mon_attacktype(mdef, AT_XWEP)
 				) &&
 				mdef->weapon_check == NEED_WEAPON) {
 				mdef->weapon_check = NEED_HTH_WEAPON;

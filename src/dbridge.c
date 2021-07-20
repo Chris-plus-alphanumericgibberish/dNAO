@@ -406,7 +406,7 @@ int dest, how;
 			(void) drown();
 		} else if (how == BURNING) {
 			killer = 0;	/* lava_effects() sets its own killer */
-			(void) lava_effects();
+			(void) lava_effects(TRUE);
 		} else {
 			coord xy;
 
