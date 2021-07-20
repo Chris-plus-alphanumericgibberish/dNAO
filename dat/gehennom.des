@@ -4443,6 +4443,10 @@ MONSTER:'9',"Movanic Deva",random
 MONSTER:'9',"Graha Deva",random
 MONSTER:'9',"Graha Deva",random
 
+MONSTER:'A',"Gae Eladrin",random
+MONSTER:'A',"Tulani Eladrin",random
+MONSTER:'A',"Brighid Eladrin",random
+
 MONSTER:'7',"Justice Archon",random
 MONSTER:'7',"Sword Archon",random
 MONSTER:'7',"Shield Archon",random

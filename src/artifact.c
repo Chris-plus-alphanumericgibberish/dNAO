@@ -7721,7 +7721,7 @@ arti_invoke(obj)
 							mm.x = u.ux;
 							mm.y = u.uy;
 							pline("Graves open around you...");
-							mkundead(&mm, FALSE, NO_MINVENT);
+							mkundead(&mm, FALSE, NO_MINVENT, 0);
 							wake_nearby_noisy();
 
 						} else  if (invoking) {

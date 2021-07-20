@@ -1443,6 +1443,35 @@ int atyp;
 }
 
 boolean
+mon_attacktype(mon, atyp)
+struct monst *mon;
+int atyp;
+{
+	struct attack *attk;
+	struct attack prev_attk = {0};
+	int	indexnum = 0,	/* loop counter */
+		subout = 0,	/* remembers what attack substitutions have been made for [mon]'s attack chain */
+		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+
+	/* zero out res[] */
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+	
+	for(attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod)
+	){
+		if(attk->aatyp == atyp)
+			return TRUE;
+	}
+
+    return FALSE;
+}
+
+boolean
 noattacks(ptr)			/* returns TRUE if monster has no non-passive attacks */
 struct permonst *ptr;
 {
@@ -2461,7 +2490,8 @@ struct permonst *ptr;
 		tmp2 = ptr->mattk[i].adtyp;
 		if ((tmp2 == AD_DRLI) || (tmp2 == AD_STON) || (tmp2 == AD_DRST)
 			|| (tmp2 == AD_DRDX) || (tmp2 == AD_DRCO) || (tmp2 == AD_WERE)
-			|| (tmp2 == AD_SHDW) || (tmp2 == AD_STAR) || (tmp2 == AD_BLUD))
+			|| (tmp2 == AD_SHDW) || (tmp2 == AD_STAR) || (tmp2 == AD_BLUD)
+			|| (tmp2 == AD_MOON))
 			n += 2;
 		else if (strcmp(ptr->mname, "grid bug")) n += (tmp2 != AD_PHYS);
 		n += ((int)(ptr->mattk[i].damd * ptr->mattk[i].damn) > 23);

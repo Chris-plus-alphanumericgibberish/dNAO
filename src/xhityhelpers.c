@@ -378,7 +378,7 @@ struct monst * mon;
 	}
 
 	if ((mon->data->mlet == S_WORM
-		|| attacktype(mon->data, AT_TENT)
+		|| mon_attacktype(mon, AT_TENT)
 		) && roll_madness(MAD_HELMINTHOPHOBIA)){
 		pline("You're afraid to go near that wormy thing!");
 		return TRUE;
@@ -830,8 +830,14 @@ struct attack *mattk;
 		else if (mattk->adtyp == AD_STAR){
 			return "starlight rapier";
 		}
+		else if (mattk->adtyp == AD_MOON){
+			return "moonlight rapier";
+		}
 		else if (mattk->adtyp == AD_BLUD){
 			return "blade of rotted blood";
+		}
+		else if (mattk->adtyp == AD_WET){
+			return "water-jet blade";
 		}
 		else {
 			return "blade";
@@ -911,8 +917,9 @@ struct monst *mon;
  * Monster damages player's armor
  */
 void
-hurtarmor(attk)
+hurtarmor(attk, candestroy)
 int attk;
+boolean candestroy;
 {
 	int	hurt;
 
@@ -932,12 +939,12 @@ int attk;
 	while (1) {
 	    switch(rn2(5)) {
 	    case 0:
-		if (!uarmh || !rust_dmg(uarmh, xname(uarmh), hurt, FALSE, &youmonst))
+		if (!uarmh || !rust_dmg(uarmh, xname(uarmh), hurt, FALSE, &youmonst, candestroy))
 			continue;
 		break;
 	    case 1:
 		if (uarmc) {
-		    (void)rust_dmg(uarmc, xname(uarmc), hurt, TRUE, &youmonst);
+		    (void)rust_dmg(uarmc, xname(uarmc), hurt, TRUE, &youmonst, candestroy);
 		    break;
 		}
 		/* Note the difference between break and continue;
@@ -946,20 +953,20 @@ int attk;
 		 * something else did.
 		 */
 		if (uarm && (arm_blocks_upper_body(uarm->otyp) || rn2(2)))
-		    (void)rust_dmg(uarm, xname(uarm), hurt, TRUE, &youmonst);
+		    (void)rust_dmg(uarm, xname(uarm), hurt, TRUE, &youmonst, candestroy);
 		else if (uarmu)
-		    (void)rust_dmg(uarmu, xname(uarmu), hurt, TRUE, &youmonst);
+		    (void)rust_dmg(uarmu, xname(uarmu), hurt, TRUE, &youmonst, candestroy);
 		break;
 	    case 2:
-		if (!uarms || !rust_dmg(uarms, xname(uarms), hurt, FALSE, &youmonst))
+		if (!uarms || !rust_dmg(uarms, xname(uarms), hurt, FALSE, &youmonst, candestroy))
 		    continue;
 		break;
 	    case 3:
-		if (!uarmg || !rust_dmg(uarmg, xname(uarmg), hurt, FALSE, &youmonst))
+		if (!uarmg || !rust_dmg(uarmg, xname(uarmg), hurt, FALSE, &youmonst, candestroy))
 		    continue;
 		break;
 	    case 4:
-		if (!uarmf || !rust_dmg(uarmf, xname(uarmf), hurt, FALSE, &youmonst))
+		if (!uarmf || !rust_dmg(uarmf, xname(uarmf), hurt, FALSE, &youmonst, candestroy))
 		    continue;
 		break;
 	    }
@@ -973,9 +980,10 @@ int attk;
  * Something (you/monster) daamges a monster's armor
  */
 void
-hurtmarmor(mdef, attk)
+hurtmarmor(mdef, attk, candestroy)
 struct monst *mdef;
 int attk;
+boolean candestroy;
 {
 	int	hurt;
 	struct obj *target;
@@ -996,37 +1004,37 @@ int attk;
 		switch (rn2(5)) {
 		case 0:
 			target = which_armor(mdef, W_ARMH);
-			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef))
+			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef, candestroy))
 				continue;
 			break;
 		case 1:
 			target = which_armor(mdef, W_ARMC);
 			if (target) {
-				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef);
+				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef, candestroy);
 				break;
 			}
 			if ((target = which_armor(mdef, W_ARM)) != (struct obj *)0) {
-				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef);
+				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef, candestroy);
 #ifdef TOURIST
 			}
 			else if ((target = which_armor(mdef, W_ARMU)) != (struct obj *)0) {
-				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef);
+				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef, candestroy);
 #endif
 			}
 			break;
 		case 2:
 			target = which_armor(mdef, W_ARMS);
-			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef))
+			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef, candestroy))
 				continue;
 			break;
 		case 3:
 			target = which_armor(mdef, W_ARMG);
-			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef))
+			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef, candestroy))
 				continue;
 			break;
 		case 4:
 			target = which_armor(mdef, W_ARMF);
-			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef))
+			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef, candestroy))
 				continue;
 			break;
 		}
@@ -1192,10 +1200,11 @@ struct obj * weapon;
 		))
 		/* not a damage type that doesn't actually contact */
 		&& !(
-		attk->adtyp == AD_SHDW ||
-		attk->adtyp == AD_BLUD ||
-		attk->adtyp == AD_MERC ||
-		attk->adtyp == AD_STAR
+		attk->adtyp == AD_SHDW
+		|| attk->adtyp == AD_BLUD
+		|| attk->adtyp == AD_MERC
+		|| attk->adtyp == AD_STAR
+		|| attk->adtyp == AD_MOON
 		)
 		)
 		return TRUE;	// will touch
@@ -1630,7 +1639,7 @@ struct obj * weapon;
 			return 2;
 
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
-			(attk && attk->adtyp == AD_STAR)
+			(attk && (attk->adtyp == AD_STAR || attk->adtyp == AD_MOON))
 			))
 			return 2;
 

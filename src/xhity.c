@@ -1902,6 +1902,53 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		else if(attk->aatyp == AT_BEAM && attk->adtyp != AD_WET)
 				GETNEXT
 	}
+	else if(spirit_rapier_at(attk->aatyp) && attk->adtyp == AD_MOON){
+		int pom = phase_of_the_moon();
+		if(pom < 4){
+			if(attk->aatyp == AT_SRPR){
+				attk->aatyp = humanoid_upperbody(pa) ? AT_WEAP : AT_CLAW;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 6;
+			}
+			else if(attk->aatyp == AT_DSPR){
+				attk->aatyp = AT_DEVA;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 6;
+			}
+			else if((attk->aatyp == AT_MSPR || attk->aatyp == AT_ESPR) && !(*indexnum%2)){
+				if(attk->aatyp == AT_ESPR){
+					GETNEXT
+				}
+				else {
+					attk->aatyp = humanoid_upperbody(pa) ? AT_MARI : AT_CLAW;
+					attk->adtyp = AD_PHYS;
+					attk->damn = 1;
+					attk->damd = 6;
+				}
+			}
+		}
+		if(pom > 4 || !pom){
+			if(attk->aatyp == AT_XSPR){
+				attk->aatyp = humanoid_upperbody(pa) ? AT_XWEP : AT_CLAW;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 6;
+			}
+			else if((attk->aatyp == AT_MSPR || attk->aatyp == AT_ESPR) && (*indexnum%2)){
+				if(attk->aatyp == AT_ESPR){
+					GETNEXT
+				}
+				else {
+					attk->aatyp = humanoid_upperbody(pa) ? AT_MARI : AT_CLAW;
+					attk->adtyp = AD_PHYS;
+					attk->damn = 1;
+					attk->damd = 6;
+				}
+			}
+		}
+	}
 
 	/* Alabaster mummies:
 	 * Spell glyphs result in spellcasting,
@@ -1931,14 +1978,22 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			break;
 		}
 	}
-
-	/* the Five Fiends spellcasting -- not shown in pokedex */
+	
+	/*Waterspouts retreat when not casting*/
+	if(!by_the_book && pa->mtyp == PM_WATERSPOUT && attk->aatyp == AT_MAGC &&
+		(magr->mspec_used || magr->mcan)
+	){
+		GETNEXT
+	}
+	
+	/* the Five Fiends spellcasting */
 	if (!by_the_book && (
 		(pa->mtyp == PM_LICH__THE_FIEND_OF_EARTH) ||
 		(pa->mtyp == PM_KARY__THE_FIEND_OF_FIRE) ||
 		(pa->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) ||
 		(pa->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) ||
 		(pa->mtyp == PM_CHAOS) ||
+		(pa->mtyp == PM_CAILLEA_ELADRIN) ||
 		(pa->mtyp == PM_GAE_ELADRIN)
 		)){
 		// first index -- determine if only using their spellcasting
@@ -1949,7 +2004,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				(pa->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER && rn2(100)<52) ||
 				(pa->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND && !rn2(4)) ||
 				(pa->mtyp == PM_CHAOS && rn2(3)) ||
-				(pa->mtyp == PM_GAE_ELADRIN && !magr->mcan && !magr->mspec_used && !rn2(3))
+				(pa->mtyp == PM_GAE_ELADRIN && !magr->mcan && !magr->mspec_used && !rn2(3)) ||
+				(pa->mtyp == PM_CAILLEA_ELADRIN && !magr->mcan && !magr->mspec_used)
 				){
 				*subout |= SUBOUT_SPELLS;
 			}
@@ -2498,7 +2554,9 @@ struct attack *attk;
 					verb = "slash";
 					ending = (attk->adtyp == AD_SHDW) ? " with bladed shadows!" :
 						(attk->adtyp == AD_STAR) ? " with a starlight rapier!" :
+						(attk->adtyp == AD_MOON) ? " with a moonlight rapier!" :
 						(attk->adtyp == AD_MERC) ? " with a blade of mercury!" :
+						(attk->adtyp == AD_WET) ? " with a water-jet blade!" :
 						(attk->adtyp == AD_PSON) ? " with a soul blade!" :
 						(attk->adtyp == AD_BLUD) ? " with a blade of blood!" : "!";
 					if (youdef)
@@ -3965,7 +4023,7 @@ boolean ranged;
 		}
 
 		if ((pa->mlet == S_WORM
-			|| attacktype(pa, AT_TENT)
+			|| mon_attacktype(magr, AT_TENT)
 			) && u.umadness&MAD_HELMINTHOPHOBIA && !ClearThoughts && u.usanity < 100){
 			dmg += (Insanity) / 5;
 		}
@@ -4121,6 +4179,7 @@ boolean ranged;
 	case AD_HODS:	/* should be deprecated in favour of just physical damage */
 	case AD_SHDW:	/* poisoned, phases (blade of shadow) */
 	case AD_STAR:	/* silvered, phases (silver starlight rapier) */
+	case AD_MOON:	/* silvered, phases (silver moonlight rapier) */
 	case AD_BLUD:	/* bloodied, phases (blade of blood) */
 	case AD_MERC:	/* poisoned, cold, phases (blade of mercury) */
 	case AD_GLSS:	/* silvered (mirror-shards) */
@@ -5027,10 +5086,10 @@ boolean ranged;
 
 			/* rust armor */
 			if (youdef) {
-				hurtarmor(AD_RUST);
+				hurtarmor(AD_RUST, is_dnoble(pa));
 			}
 			else {
-				hurtmarmor(mdef, AD_RUST);
+				hurtmarmor(mdef, AD_RUST, is_dnoble(pa));
 				mdef->mstrategy &= ~STRAT_WAITFORU;
 			}
 		}
@@ -5076,10 +5135,10 @@ boolean ranged;
 
 			/* rot armor */
 			if (youdef) {
-				hurtarmor(AD_DCAY);
+				hurtarmor(AD_DCAY, is_dnoble(pa));
 			}
 			else {
-				hurtmarmor(mdef, AD_DCAY);
+				hurtmarmor(mdef, AD_DCAY, is_dnoble(pa));
 				mdef->mstrategy &= ~STRAT_WAITFORU;
 			}
 		}
@@ -5094,10 +5153,10 @@ boolean ranged;
 		}
 		/* corrode armor */
 		if (youdef) {
-			hurtarmor(AD_CORR);
+			hurtarmor(AD_CORR, is_dnoble(pa));
 		}
 		else {
-			hurtmarmor(mdef, AD_CORR);
+			hurtmarmor(mdef, AD_CORR, is_dnoble(pa));
 			mdef->mstrategy &= ~STRAT_WAITFORU;
 		}
 		/* make physical attack without hitmsg */
@@ -8062,6 +8121,33 @@ boolean ranged;
 		/* make physical attack without hitmsg */
 		alt_attk.adtyp = AD_PHYS;
 		return (result|xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged));
+	case AD_LAVA:
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		if(youdef && distmin(x(mdef), y(mdef), x(magr), y(magr)) <= 1){
+			if(u.ustuck != magr ){
+				pline("%s begins to ooze around you!", Monnam(magr));
+				u.ustuck = magr;
+			}
+			else {
+				pline("%s is crushing you!", Monnam(magr));
+			}
+		}
+		
+		if(!InvFire_res(mdef)){
+			burnarmor(mdef, TRUE);
+			destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			burnarmor(mdef, TRUE);
+		}
+
+		alt_attk.adtyp = AD_EFIR;
+		alt_attk.damn = mlev(magr)/3 + attk->damn;
+		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon_p, FALSE, -1, dieroll, vis, ranged);
+
 //////////////////////////////////////////////////////////////
 // JUST CHANGING THE DAMAGE TYPE
 //////////////////////////////////////////////////////////////
@@ -8090,6 +8176,22 @@ boolean ranged;
 			case 4:
 				//Fall: Withering
 				alt_attk.adtyp = AD_DRLI;
+			break;
+		}
+		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
+
+	case AD_PYCL:
+		/* use random damage type */
+		/* note: replaces originalattk */
+		switch(rnd(3)){
+			case 1:
+				alt_attk.adtyp = AD_FIRE;
+			break;
+			case 2:
+				alt_attk.adtyp = AD_PHYS;
+			break;
+			case 3:
+				alt_attk.adtyp = AD_DRCO;
 			break;
 		}
 		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
@@ -9371,7 +9473,7 @@ int vis;
 			if (youdef) {
 			
 				if (uarmh && uarmh->otyp == SHEMAGH && 
-					(magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND))
+					(magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND || magr->mtyp == PM_PYROCLASTIC_VORTEX))
 				{
 					pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
 				} else if (!Blind) {
@@ -9494,10 +9596,10 @@ int vis;
 		}
 		/* rust armor */
 		if (youdef) {
-			hurtarmor(AD_RUST);
+			hurtarmor(AD_RUST, is_dnoble(pa));
 		}
 		else {
-			hurtmarmor(mdef, AD_RUST);
+			hurtmarmor(mdef, AD_RUST, is_dnoble(pa));
 		}
 		break;
 		/* basic damage engulf types */
@@ -9848,6 +9950,24 @@ int vis;
 			}
 		}
 		break;
+		case AD_PYCL:{	/* Immediately recurse and return */
+			struct attack alt_attk = *attk;
+			switch(rnd(4)){
+				case 1:
+					alt_attk.adtyp = AD_FIRE;
+				break;
+				case 2:
+					alt_attk.adtyp = AD_PHYS;
+				break;
+				case 3:
+					alt_attk.adtyp = AD_DRST;
+				break;
+				case 4:
+					alt_attk.adtyp = AD_BLND;
+				break;
+			}
+			return xengulfhurty(magr, mdef, &alt_attk, vis);
+		}break;
 	}
 	return result;
 }
@@ -12621,8 +12741,10 @@ int vis;						/* True if action is at all visible to the player */
 	}
 	/* fake weapons */
 	if (attk && (
-		attk->adtyp == AD_GLSS ||
-		attk->adtyp == AD_STAR)) {
+		attk->adtyp == AD_GLSS
+		|| attk->adtyp == AD_STAR
+		|| attk->adtyp == AD_MOON
+	)) {
 		if (hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) {
 			silverobj |= W_SKIN;
 			seardmg += rnd(20);
@@ -13024,7 +13146,7 @@ int vis;						/* True if action is at all visible to the player */
 					weapon->age = min(weapon->age+misdamage*100, LIGHTSABER_MAX_CHARGE);
 				}
 			}
-			else if(attacktype(pd, AT_MAGC) || attacktype(pd, AT_MMGC)){
+			else if(mon_attacktype(mdef, AT_MAGC) || mon_attacktype(mdef, AT_MMGC)){
 				misdamage = rnd(4);
 				mdef->mspec_used = max(misdamage, mdef->mspec_used);
 				weapon->age = min(weapon->age+misdamage*100, LIGHTSABER_MAX_CHARGE);
@@ -13671,7 +13793,7 @@ int vis;						/* True if action is at all visible to the player */
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
-		(attk && spirit_rapier_at(attk->aatyp) && attk->aatyp != AD_BLUD) ||
+		(attk && spirit_rapier_at(attk->aatyp) && attk->aatyp != AD_BLUD && attk->aatyp != AD_WET) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
 		);
 
@@ -14482,6 +14604,10 @@ int vis;						/* True if action is at all visible to the player */
 			if (attk && attk->adtyp == AD_STAR)
 			{
 				Strcat(buf, "starlight rapier");
+			}
+			else if (attk && attk->adtyp == AD_MOON)
+			{
+				Strcat(buf, "moonlight rapier");
 			}
 			else if (attk && attk->adtyp == AD_GLSS)
 			{

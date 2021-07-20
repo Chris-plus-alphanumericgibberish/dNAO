@@ -276,6 +276,7 @@
 #define species_controls_teleports(ptr)	(((ptr)->mflagsm & MM_TPORT_CNTRL) != 0L)
 #define species_is_telepathic(ptr)		(((ptr)->mflagsv & MV_TELEPATHIC) != 0L)
 #define is_armed(ptr)		(attacktype(ptr, AT_WEAP) || attacktype(ptr, AT_XWEP) || attacktype(ptr, AT_MARI) || attacktype(ptr, AT_DEVA))
+#define is_armed_mon(mon)	(mon_attacktype(mon, AT_WEAP) || mon_attacktype(mon, AT_XWEP) || mon_attacktype(mon, AT_MARI) || mon_attacktype(mon, AT_DEVA))
 #define crpsdanger(ptr)		(acidic(ptr) || poisonous(ptr) ||\
 							 freezing(ptr) || burning(ptr))
 #define hideablewidegaze(ptr)	((ptr)->mtyp == PM_MEDUSA || \
@@ -319,6 +320,9 @@
 							 (ptr)->mtyp == PM_GHAELE_ELADRIN || \
 							 (ptr)->mtyp == PM_TULANI_ELADRIN || \
 							 (ptr)->mtyp == PM_GAE_ELADRIN || \
+							 (ptr)->mtyp == PM_BRIGHID_ELADRIN || \
+							 (ptr)->mtyp == PM_UISCERRE_ELADRIN || \
+							 (ptr)->mtyp == PM_CAILLEA_ELADRIN || \
 							 (ptr)->mtyp == PM_DRACAE_ELADRIN || \
 							 (ptr)->mtyp == PM_ALRUNES ||\
 							 (ptr)->mtyp == PM_GWYNHARWYF ||\
@@ -337,6 +341,9 @@
 							 (ptr)->mtyp == PM_LUMINOUS_CLOUD || \
 							 (ptr)->mtyp == PM_BALL_OF_RADIANCE || \
 							 (ptr)->mtyp == PM_WARDEN_TREE || \
+							 (ptr)->mtyp == PM_PYROCLASTIC_VORTEX || \
+							 (ptr)->mtyp == PM_WATERSPOUT || \
+							 (ptr)->mtyp == PM_MOONSHADOW || \
 							 (ptr)->mtyp == PM_MOTHERING_MASS || \
 							 (ptr)->mtyp == PM_HATEFUL_WHISPERS ||\
 							 (ptr)->mtyp == PM_FURIOUS_WHIRLWIND ||\
@@ -438,7 +445,17 @@
 #define is_primordial(ptr)	(((ptr)->mflagsa & MA_PRIMORDIAL) != 0L)
 #define is_keter(ptr)		((ptr)->mlet == S_KETER)
 #define is_angel(ptr)		((((ptr)->mflagsa & MA_MINION) != 0L) && ((ptr)->mlet == S_LAW_ANGEL || (ptr)->mlet == S_NEU_ANGEL || (ptr)->mlet == S_CHA_ANGEL))
+#define fallen(mx) 			(has_template(mx, MAD_TEMPLATE) || has_template(mx, FALLEN_TEMPLATE) || mx->mfaction == LAMASHTU_FACTION)
+#define normalAngel(mx) 	((is_angel(mx->data) && !fallen(mx)) || (is_undead(mx->data) && mx->mfaction == HOLYDEAD_FACTION))
+#define fallenAngel(mx) 	(is_angel(mx->data) && fallen(mx))
 #define is_eladrin(ptr)		(is_heladrin(ptr) || is_eeladrin(ptr))
+#define is_high_caste_eladrin(ptr)		(\
+							 (ptr)->mtyp == PM_TULANI_ELADRIN || \
+							 (ptr)->mtyp == PM_GAE_ELADRIN || \
+							 (ptr)->mtyp == PM_BRIGHID_ELADRIN || \
+							 (ptr)->mtyp == PM_UISCERRE_ELADRIN || \
+							 (ptr)->mtyp == PM_CAILLEA_ELADRIN \
+							)
 #define is_archon(ptr)		((ptr)->mlet == S_LAW_ANGEL &&\
 							 !((ptr)->mtyp == PM_COUATL ||\
 							   (ptr)->mtyp == PM_ALEAX ||\
@@ -566,6 +583,7 @@
 
 #define cantwield(ptr)		(nohands(ptr))
 #define could_twoweap(ptr)	attacktype(ptr, AT_XWEP)
+#define could_twoweap_mon(mon)	mon_attacktype(mon, AT_XWEP)
 // define cantweararm(ptr)	(breakarm(ptr) || sliparm(ptr))
 #define arm_size_fits(ptr,obj)	(Is_dragon_scales(obj) || \
 								 obj->objsize == (ptr)->msize || \
@@ -611,6 +629,7 @@
 				 (((ptr)->mflagsg & (MG_LORD|MG_PRINCE)) == 0L))
 #define is_dlord(ptr)		(is_demon(ptr) && is_lord(ptr))
 #define is_dprince(ptr)		(is_demon(ptr) && is_prince(ptr))
+#define is_dnoble(ptr)		(is_demon(ptr) && (is_lord(pa) || is_prince(pa)))
 #define is_minion(ptr)		((ptr)->mflagsa & MA_MINION)
 #define likes_gold(ptr)		(((ptr)->mflagst & MT_GREEDY) != 0L)
 #define likes_gems(ptr)		(((ptr)->mflagst & MT_JEWELS) != 0L)

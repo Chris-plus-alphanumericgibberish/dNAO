@@ -475,7 +475,7 @@ register struct obj *otmp;
 		carry_obj_effects(otmp);
 
 		/* extinguish burning objects -- it isn't strictly necessary to end_burn anymore, though */
-		if (attacktype(mtmp->data, AT_ENGL)) {
+		if (mon_attacktype(mtmp, AT_ENGL)) {
 			/* burning objects should go out; */
 			if (obj_is_burning(otmp) && u.uswallow && mtmp == u.ustuck) {
 				if (!Blind)

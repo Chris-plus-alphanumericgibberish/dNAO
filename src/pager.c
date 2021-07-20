@@ -2045,6 +2045,9 @@ get_description_of_damage_type(uchar id)
 	case AD_PULL: return "pull closer";
 	case AD_PAIN: return "poison (STR) and crippling pain";
 	case AD_MROT: return "inflict curses";
+	case AD_LAVA: return "crushing lava";
+	case AD_PYCL: return "pyroclastic";
+	case AD_MOON: return "silver moonlight";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

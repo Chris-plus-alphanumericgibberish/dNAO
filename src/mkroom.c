@@ -4933,14 +4933,16 @@ struct mkroom *sroom;
 
 /* make a swarm of undead around mm */
 void
-mkundead(mm, revive_corpses, mm_flags)
+mkundead(mm, revive_corpses, mm_flags, mfaction)
 coord *mm;
 boolean revive_corpses;
 int mm_flags;
+long mfaction;
 {
 	int cnt = (level_difficulty() + 1)/10 + rnd(5);
 	struct permonst *mdat;
 	struct obj *otmp;
+	struct monst *mon;
 	coord cc;
 
 	while (cnt--) {
@@ -4948,8 +4950,11 @@ int mm_flags;
 	    if (enexto(&cc, mm->x, mm->y, mdat) &&
 		    (!revive_corpses ||
 		     !(otmp = sobj_at(CORPSE, cc.x, cc.y)) ||
-		     !revive(otmp,FALSE)))
-		(void) makemon(mdat, cc.x, cc.y, mm_flags);
+		     !(mon = revive(otmp,FALSE)))
+		)
+			mon = makemon(mdat, cc.x, cc.y, mm_flags);
+		if(mon)
+			mon->mfaction = mfaction;
 	}
 	level.flags.graveyard = TRUE;	/* reduced chance for undead corpse */
 }

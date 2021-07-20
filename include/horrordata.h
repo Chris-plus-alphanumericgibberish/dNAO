@@ -85,6 +85,7 @@ static int randRapierDamageTypes[] =
 						AD_STAR, AD_STAR,
 						AD_BLUD, AD_BLUD,
 						/* 1x */
+						AD_MOON,
 						AD_EFIR,
 						AD_ECLD,
 						AD_EELC,

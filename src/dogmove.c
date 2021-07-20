@@ -128,7 +128,7 @@ boolean check_if_better;
 	    /* chains for some */
 		 ((mtmp->mtyp == PM_CATHEZAR) && otmp->otyp == CHAIN) ||
 	    /* better weapons */
-	     (is_armed(mtmp->data) &&
+	     (is_armed_mon(mtmp) &&
 	      (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && 
 		   (!check_if_better ||
 		    mtmp->mtyp == PM_MARILITH ||
@@ -195,19 +195,19 @@ register struct monst *mon;
 {
 	register struct obj *obj;
 	struct obj *wep  = MON_WEP(mon),
-                   *hwep = attacktype(mon->data, AT_WEAP)
+                   *hwep = mon_attacktype(mon, AT_WEAP)
 		           ? select_hwep(mon) : (struct obj *)0,
-		   *proj = attacktype(mon->data, AT_WEAP)
+		   *proj = mon_attacktype(mon, AT_WEAP)
 		           ? select_rwep(mon) : (struct obj *)0,
 		   *rwep;
 	boolean item1 = FALSE, item2 = FALSE;
 	boolean intelligent = TRUE;
-	boolean marilith = attacktype(mon->data, AT_MARI);
+	boolean marilith = mon_attacktype(mon, AT_MARI);
 
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
 	
-	rwep = attacktype(mon->data, AT_WEAP) ? propellor : &zeroobj;
+	rwep = mon_attacktype(mon, AT_WEAP) ? propellor : &zeroobj;
 
 	if (is_animal(mon->data) || mindless_mon(mon)) {
 		intelligent = FALSE;
@@ -649,7 +649,7 @@ int udist;
 					obj_extract_self(obj);
 					newsym(omx,omy);
 					(void) mpickobj(mtmp,obj);
-					if (attacktype(mtmp->data, AT_WEAP) &&
+					if (mon_attacktype(mtmp, AT_WEAP) &&
 						mtmp->weapon_check == NEED_WEAPON) {
 					mtmp->weapon_check = NEED_HTH_WEAPON;
 					(void) mon_wield_item(mtmp);
@@ -880,7 +880,7 @@ boolean ranged;
 #else
                 (int)mtmp2->m_lev >= (int)mtmp->m_lev+2 &&
 #endif
-		!(attacktype(mtmp->data, AT_EXPL) || extra_nasty(mtmp->data))) ||
+		!(mon_attacktype(mtmp, AT_EXPL) || extra_nasty(mtmp->data))) ||
 		(!ranged &&
 		 mtmp2->mtyp == PM_FLOATING_EYE && rn2(10) &&
 		 !is_blind(mtmp) && haseyes(mtmp->data) && !is_blind(mtmp2)

@@ -1799,7 +1799,7 @@ stillinwater:;
 		} else
 #endif
 		if (is_lava(u.ux, u.uy)) {
-		    if (lava_effects()) return;
+		    if (lava_effects(TRUE)) return;
 		} else if (!Wwalking && drown())
 		    return;
 	    } else if (IS_PUDDLE(levl[u.ux][u.uy].typ) && !Wwalking) {
@@ -1828,7 +1828,7 @@ stillinwater:;
 #ifdef STEED
 		if (!u.usteed)
 #endif
-			(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst);
+			(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst, FALSE);
 	    }
 		if (uarmf && uarmf->oartifact == ART_FROST_TREADS
 			&& is_pool(u.ux, u.uy, TRUE) && !is_3dwater(u.ux, u.uy) && !Is_waterlevel(&u.uz)) {
@@ -1904,7 +1904,7 @@ stillinwater:;
 					Amonnam(mtmp));
 			break;
 		}
-		if (attacktype(mtmp->data, AT_ENGL)) {
+		if (mon_attacktype(mtmp, AT_ENGL)) {
 			/* engulf the player */
 			(void)xengulfhity(mtmp, &youmonst, attacktype_fordmg(mtmp->data, AT_ENGL, AD_ANY), 6);	/* vis == VIS_MDEF|VIS_NONE */
 		}

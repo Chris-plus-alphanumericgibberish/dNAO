@@ -4927,7 +4927,7 @@ srch:
 			levl[u.ux][u.uy].typ = LAVAPOOL;
 			del_engr_ward_at(u.ux, u.uy);
 			pline("A pool of molten lava.");
-			if (!(Levitation || Flying)) (void) lava_effects();
+			if (!(Levitation || Flying)) (void) lava_effects(TRUE);
 			newsym(u.ux, u.uy);
 			*wishreturn = WISH_SUCCESS;
 			return &zeroobj;
