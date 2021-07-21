@@ -1958,13 +1958,19 @@ struct obj	*sobj;
 	    }
 	case SCR_CREATE_MONSTER:
 	case SPE_CREATE_MONSTER:
-	    if (create_critters(1 + ((confused || sobj->cursed) ? 12 : 0) +
-				((sobj->blessed || rn2(73)) ? 0 : rnd(4)),
-			confused ? &mons[PM_ACID_BLOB] : (struct permonst *)0))
-		known = TRUE;
-	    /* no need to flush monsters; we ask for identification only if the
-	     * monsters are not visible
-	     */
+		if(!DimensionalLock){
+			if (create_critters(1 + ((confused || sobj->cursed) ? 12 : 0) +
+					((sobj->blessed || rn2(73)) ? 0 : rnd(4)),
+				confused ? &mons[PM_ACID_BLOB] : (struct permonst *)0)
+			)
+				known = TRUE;
+			/* no need to flush monsters; we ask for identification only if the
+			 * monsters are not visible
+			 */
+		}
+		else {
+			pline1(nothing_happens);
+		}
 	    break;
 	case SCR_ENCHANT_WEAPON:
 		if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))

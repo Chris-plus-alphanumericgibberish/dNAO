@@ -6924,7 +6924,7 @@ arti_invoke(obj)
 					exercise(A_WIS, TRUE);
 					n=u.ulevel/5 + 1;
 					cast_protection();
-					while(n--) {
+					if(!DimensionalLock) while(n--) {
 						pm = &mons[summons[d(1,7)]];
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
 						if(mtmp){
@@ -6953,7 +6953,7 @@ arti_invoke(obj)
 					 /* flags.botl = 1; -- healup() handles this */
 					}
 					healup(maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp), 0, TRUE, TRUE); //heal spell
-					while(n--) {
+					if(!DimensionalLock) while(n--) {
 						pm = &mons[summons[d(1,6)+3]];
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 						if(mtmp){
@@ -6991,7 +6991,9 @@ arti_invoke(obj)
 			pline("You call upon the minions of Quetzalcoatl!");
 			int n = u.ulevel/5 + 1;
 			if(dog_limit() < n) n = dog_limit();
-			while(n--) {
+			if(DimensionalLock)
+				pline("%s", nothing_happens);
+			else while(n--) {
 				pm = &mons[windpets[d(1,8)]];
 				mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 				if(mtmp){
@@ -9614,6 +9616,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 20){
 					losepw(20);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					for(i=max(1, d(1,20) - 16); i > 0; i--){
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
@@ -9636,6 +9642,10 @@ read_necro(VOID_ARGS)
 					if(u.uen >= 10){
 						losepw(10);
 						summon_failed = FALSE;
+						if(DimensionalLock){
+							pline("%s", nothing_happens);
+							break;
+						}
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
 							initedog(mtmp);
@@ -9649,6 +9659,10 @@ read_necro(VOID_ARGS)
 				if(u.uen > 30){
 					losepw(30);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					pm = &mons[PM_SHOGGOTH];
 					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
@@ -9662,6 +9676,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 20){
 					losepw(20);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					for(i=max(1, d(1,10) - 2); i > 0; i--){
 						mtmp = makemon(&mons[oozes[rn2(11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
@@ -9683,6 +9701,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 60){
 					losepw(60);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					mtmp = makemon(&mons[devils[rn2(12)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);
@@ -9701,6 +9723,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 45){
 					losepw(45);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					mtmp = makemon(&mons[demons[rn2(15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);

@@ -1133,6 +1133,8 @@ TOOL(("misotheistic pyramid", "black-stone pyramid"),
 								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, OBSIDIAN_MT, CLR_BLACK),
 TOOL(("misotheistic fragment", "shattered mirrored pyramid"),
 								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, GLASS, HI_SILVER),
+TOOL(("dimensional lock", "cerulean-willow-engraved disk", "disk"),
+								0,  MZ_SMALL,  1, 1, 0,   0, 10,2000, MINERAL, CLR_BRIGHT_BLUE),
 TOOL(("sensor pack", "rigid box"), /*Needs encyc entry*//*Needs tile*/
 								0,  MZ_SMALL, 0, 1, 1,   0, 15,2000, PLASTIC,CLR_WHITE),
 TOOL(("hypospray", "hammer-shaped device"), /*Needs encyc entry*//*Needs tile*/

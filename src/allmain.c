@@ -1992,7 +1992,7 @@ karemade:
 			}
 
 		    /* reset summon monster block. */
-			if(u.summonMonster) u.summonMonster = FALSE;
+			u.summonMonster = FALSE;
 
 		    /* calculate how much time passed. */
 			you_calc_movement();

@@ -4435,6 +4435,19 @@ struct obj *obj;
 }
 
 STATIC_OVL int
+use_dimensional_lock(obj)
+struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	if(!Blind)
+		pline("The cerulean tree flashes and disapears.");
+	pline("The disk crumbles to dust!");
+	incr_itimeout(&DimensionalLock, 1000L);
+	useup(obj);
+	return 1;
+}
+
+STATIC_OVL int
 use_doll_tear(obj)
 	struct obj *obj;
 {
@@ -5312,7 +5325,8 @@ do_break_wand(obj)
 	    continue;
 	} else if(obj->otyp == WAN_CREATE_MONSTER) {
 	    /* u.ux,u.uy creates it near you--x,y might create it in rock */
-	    (void) makemon((struct permonst *)0, u.ux, u.uy, NO_MM_FLAGS);
+		if(!DimensionalLock)
+			(void) makemon((struct permonst *)0, u.ux, u.uy, NO_MM_FLAGS);
 	    continue;
 	} else {
 	    if (x == u.ux && y == u.uy) {
@@ -7402,6 +7416,9 @@ doapply()
 	case MISOTHEISTIC_PYRAMID:
 	case MISOTHEISTIC_FRAGMENT:
 		res = use_pyramid(obj);
+	break;
+	case DIMENSIONAL_LOCK:
+		res = use_dimensional_lock(obj);
 	break;
 	case CATAPSI_VORTEX:
 		res = use_vortex(obj);

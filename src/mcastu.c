@@ -3818,26 +3818,13 @@ int tary;
 		return MM_HIT;
 
 	case MON_TIME_STOP:
-		if (u.summonMonster || youagr) {
-			/* only allow one "summoning" spell per turn. This isn't summoning but it's close enough? */
+		if (youagr) {
 			/* you don't get to cast this one, either */
 			return cast_spell(magr, mdef, attk, (foundem ? PSI_BOLT : CURE_SELF), tarx, tary);
 		}
 		else {
 			int extraturns = d(1, 4) + 1, i;
 			struct monst *tmpm;
-			// if(canseemon(magr))
-			// pline("%s blurs with speed!", Monnam(magr));
-			// magr->movement += (extraturns)*12;
-			// for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			// if(tmpm->mtyp == PM_UVUUDAUM && tmpm != magr){
-			// tmpm->movement += (extraturns)*12;
-			// if(canseemon(tmpm))
-			// pline("%s blurs with speed!", Monnam(tmpm));
-			// }
-			// }
-			// u.summonMonster = TRUE;//Not exactly a summoning, but don't stack this too aggressively.
-			//Note: 1-4 free turns is too strong.  Just give that much healing instead.
 			if (canseemon(magr))
 				pline("%s blurs with speed!", Monnam(magr));
 			for (i = extraturns; i > 0; i--){
@@ -3924,6 +3911,8 @@ int tary;
 			impossible("summon insects with no target location");
 			return MM_MISS;
 		}
+		else if(DimensionalLock)
+			return MM_MISS;
 		else if (!(youdef || youagr)) {
 			/* only uvm / mvu allowed */
 			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -4026,6 +4015,8 @@ int tary;
 		{
 			int count;
 			u.summonMonster = TRUE;
+			if(DimensionalLock)
+				return MM_MISS;
 			count = nasty(magr);	/* summon something nasty */
 			if (magr->iswiz)
 				verbalize("Destroy the thief, my pet%s!", plur(count));
@@ -4065,6 +4056,8 @@ int tary;
 			mtmp = summon_minion(sgn(magr->data->maligntyp), FALSE, TRUE, FALSE);
 			if (mtmp) {
 				u.summonMonster = TRUE;
+				if(DimensionalLock)
+					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("%s ascends from below!",
 					An(Hallucination ? rndmonnam() : "fiend"));
@@ -4094,6 +4087,8 @@ int tary;
 			if (mtmp) {
 				// mtmp->mvar_tannintype = pick_tannin(magr);
 				u.summonMonster = TRUE;
+				if(DimensionalLock)
+					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("%s ascends from below!",
 					An(Hallucination ? rndmonnam() : "fiend"));
@@ -4138,6 +4133,8 @@ int tary;
  				EPRI(mtmp)->shralign = sgn(magr->data->maligntyp);
 
 				u.summonMonster = TRUE;
+				if(DimensionalLock)
+					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("%s %s!",
 					An(Hallucination ? rndmonnam() : "angel"),
@@ -4194,6 +4191,8 @@ int tary;
 			} while (!mtmp && tries++ < 10);
 			if (mtmp) {
 				u.summonMonster = TRUE;
+				if(DimensionalLock)
+					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("The world tears open, and %s steps through!",
 					an(Hallucination ? rndmonnam() : "alien"));
@@ -4241,6 +4240,8 @@ int tary;
 			} while (!mtmp && tries++ < 10);
 			if (mtmp) {
 				u.summonMonster = TRUE;
+				if(DimensionalLock)
+					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("A monster appears in a swirl of mist!");
 				else
@@ -4271,6 +4272,8 @@ int tary;
 			mtmp = makemon(magr->data, tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | NO_MINVENT | MM_ESUM);
 			if (mtmp){
 				u.summonMonster = TRUE;
+				if(DimensionalLock)
+					return MM_MISS;
 				mtmp->mclone = 1;
 				/* does not stick around long */
 				mark_mon_as_summoned(mtmp, magr, d(1, 4) + 1, 0);

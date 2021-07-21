@@ -23,6 +23,8 @@ struct permonst * ptr;	/* summon as though you were <X> */
 		pline("%s looks puzzled for a moment.",Monnam(mon));
 		return;
 	}
+	if (DimensionalLock)
+		return;
 
 	if (mon && !ptr) {
 		ptr = mon->data;
