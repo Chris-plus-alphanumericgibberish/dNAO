@@ -396,6 +396,7 @@ E void FDECL(unearth_objs, (int,int));
 E void FDECL(rot_organic, (genericptr_t, long));
 E void FDECL(rot_corpse, (genericptr_t, long));
 E void FDECL(dig_up_grave, (int, int));
+E void FDECL(hell_vault_items, (int, int, int, boolean));
 E void FDECL(break_seal, (int, int));
 #if 0
 E void FDECL(bury_monst, (struct monst *));
