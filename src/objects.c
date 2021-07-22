@@ -1135,6 +1135,10 @@ TOOL(("misotheistic fragment", "shattered mirrored pyramid"),
 								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, GLASS, HI_SILVER),
 TOOL(("dimensional lock", "cerulean-willow-engraved disk", "disk"),
 								0,  MZ_SMALL,  1, 1, 0,   0, 10,2000, MINERAL, CLR_BRIGHT_BLUE),
+TOOL(("preservative engine", "infernal contraption"),
+								0,  MZ_SMALL,  0, 1, 1,   0, 50,8000, METAL, CLR_RED),
+TOOL(("armor salve", "strange shell"),
+								0,  MZ_SMALL,  0, 1, 1,   0, 10, 666, SHELL_MAT, CLR_GRAY),
 TOOL(("sensor pack", "rigid box"), /*Needs encyc entry*//*Needs tile*/
 								0,  MZ_SMALL, 0, 1, 1,   0, 15,2000, PLASTIC,CLR_WHITE),
 TOOL(("hypospray", "hammer-shaped device"), /*Needs encyc entry*//*Needs tile*/

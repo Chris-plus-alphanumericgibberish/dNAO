@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "xhity.h"
 
 #include "artifact.h"
 
@@ -1171,7 +1172,7 @@ pray_goat()
 					if (!Blind) Your1(vision_clears);
 				}
 			}
-			if (!InvAcid_resistance) {
+			if (!UseInvAcid_res(&youmonst)) {
 				destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 			}
 			erode_obj(uwep, TRUE, FALSE);

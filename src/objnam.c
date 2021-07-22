@@ -2111,13 +2111,18 @@ weapon:
 			}
 			if (objects[obj->otyp].oc_charged && !is_weptool(obj))
 				goto charges;
-		if(is_weptool(obj))
-			goto weapon;
+			if(is_weptool(obj))
+				goto weapon;
 			break;
 		case WAND_CLASS:
 		charges:
-			if (obj->known || Race_if(PM_ANDROID))
-				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, obj->spe);
+			if (obj->known || Race_if(PM_ANDROID)){
+				if (obj->otyp == PRESERVATIVE_ENGINE) {
+					if(obj->known) Sprintf(eos(buf), " (%s:%d)", obj->altmode == ENG_MODE_OFF ? "off" : obj->altmode == ENG_MODE_PYS ? "low" : obj->altmode == ENG_MODE_ENR ? "high" : "err", obj->spe);
+					else Sprintf(eos(buf), " (%d)", obj->spe);
+				}
+				else Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, obj->spe);
+			}
 			else if (obj->spe <= 0 && Race_if(PM_INCANTIFIER))
 				Sprintf(eos(buf), " (empty)");
 			break;
@@ -4531,6 +4536,7 @@ int wishflags;
 	   strncmpi(bp, "ring mail", 9) &&
 	   strncmpi(bp, "ringed brass armor", 18) &&
 	   strncmpi(bp, "studded leather arm", 19) &&
+	   strncmpi(bp, "armor salve", 11) &&
 	   strncmpi(bp, "leather arm", 11) &&
 	   strncmpi(bp, "living arm", 10) &&
 	   strncmpi(bp, "barnacle arm", 12) &&

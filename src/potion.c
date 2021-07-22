@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "xhity.h"
 
 #ifdef OVLB
 boolean notonhead = FALSE;
@@ -3160,7 +3161,7 @@ dodip()
 		if(!Shock_resistance){
 			losehp(d(3,6) + 3*obj->spe, "discharging sunrod", KILLED_BY_AN);
 		}
-		if(!InvShock_resistance){
+		if(!UseInvShock_res(&youmonst)){
 			if (!rn2(3)) destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
 			if (!rn2(3)) destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 		}

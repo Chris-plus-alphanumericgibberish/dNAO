@@ -1247,6 +1247,34 @@ int curse_bless;
 		    } else pline1(nothing_happens);
 		}
 		break;
+	    case PRESERVATIVE_ENGINE:
+		if (is_cursed){
+		    obj->spe = 8;
+		    p_glow2(obj, NH_RED);
+		}
+		else if (is_blessed) {
+			stripspe(obj);
+		} else {
+		    if (obj->spe < 8) {
+				obj->spe++;
+				p_glow1(obj);
+		    } else pline1(nothing_happens);
+		}
+		break;
+	    case ARMOR_SALVE:
+		if (is_cursed){
+		    obj->spe = 6;
+		    p_glow2(obj, NH_RED);
+		}
+		else if (is_blessed) {
+			stripspe(obj);
+		} else {
+		    if (obj->spe < 6) {
+				obj->spe++;
+				p_glow1(obj);
+		    } else pline1(nothing_happens);
+		}
+		break;
 	    case HORN_OF_PLENTY:
 	    case BAG_OF_TRICKS:
 	    case CAN_OF_GREASE:

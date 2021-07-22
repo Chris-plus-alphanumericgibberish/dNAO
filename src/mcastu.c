@@ -2083,7 +2083,7 @@ int tary;
 				dmg = 0;
 			}
 			/* damage inventory */
-			if (!InvShock_res(mdef)){
+			if (!UseInvShock_res(mdef)){
 				destroy_item(mdef, WAND_CLASS, AD_ELEC);
 			}
 			return xdamagey(magr, mdef, attk, dmg);
@@ -2106,7 +2106,7 @@ int tary;
 				dmg = 0;
 			}
 			/* damage inventory */
-			if (!InvFire_res(mdef)){
+			if (!UseInvFire_res(mdef)){
 				destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				if (!rn2(6)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if (!rn2(10)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -2136,7 +2136,7 @@ int tary;
 				dmg = 0;
 			}
 			/* damage inventory */
-			if (!InvCold_res(mdef)){
+			if (!UseInvCold_res(mdef)){
 				destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			}
 			/* other effects */
@@ -2581,7 +2581,7 @@ int tary;
 			}
 
 			/* destroy items if it hit */
-			if (!(reflects || InvShock_res(mdef))) {
+			if (!(reflects || UseInvShock_res(mdef))) {
 				destroy_item(mdef, WAND_CLASS, AD_ELEC);
 				destroy_item(mdef, RING_CLASS, AD_ELEC);
 			}
@@ -2737,7 +2737,7 @@ int tary;
 					dmg = 0;
 				}
 				/* damage inventory */
-				if (!InvAcid_res(mdef)) {
+				if (!UseInvAcid_res(mdef)) {
 					erode_obj(youdef ? uwep : MON_WEP(mdef), TRUE, FALSE);
 					erode_obj(youdef ? uswapwep : MON_SWEP(mdef), TRUE, FALSE);
 					erode_armor(mdef, TRUE);
@@ -2792,7 +2792,7 @@ int tary;
 				if (Half_spel(mdef))
 					cdmg = (cdmg + 1) / 2;
 			}
-			if (!InvCold_resistance) {
+			if (!UseInvCold_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 
@@ -3185,7 +3185,7 @@ int tary;
 					pline("%s %s burned by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = (d(n, 20) * 3 + 1) / 2;
-				if (!InvFire_res(mdef)) {
+				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -3196,7 +3196,7 @@ int tary;
 					pline("%s %s frozen by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = (d(n, 20) * 3 + 1) / 2;
-				if (!InvCold_res(mdef)) {
+				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
@@ -3223,7 +3223,7 @@ int tary;
 					pline("%s %s burned by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
-				if (!InvFire_res(mdef)) {
+				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -3234,7 +3234,7 @@ int tary;
 					pline("%s %s shocked by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
-				if (!InvShock_res(mdef)) {
+				if (!UseInvShock_res(mdef)) {
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
 				}
@@ -3244,7 +3244,7 @@ int tary;
 					pline("%s %s frozen by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
-				if (!InvCold_res(mdef)) {
+				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
@@ -3253,7 +3253,7 @@ int tary;
 					pline("%s %s burned by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
-				if (!InvAcid_res(mdef)) {
+				if (!UseInvAcid_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				}
 			}
@@ -3279,7 +3279,7 @@ int tary;
 					pline("%s %s burned by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = (d(2, 12) * 3 + 1) / 2;
-				if (!InvFire_res(mdef)) {
+				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -3290,7 +3290,7 @@ int tary;
 					pline("%s %s frozen by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = (d(2, 12) * 3 + 1) / 2;
-				if (!InvCold_res(mdef)) {
+				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
@@ -3323,7 +3323,7 @@ int tary;
 					pline("%s %s burned by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
-				if (!InvFire_res(mdef)) {
+				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -3334,7 +3334,7 @@ int tary;
 					pline("%s %s shocked by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
-				if (!InvShock_res(mdef)) {
+				if (!UseInvShock_res(mdef)) {
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
 				}
@@ -3344,7 +3344,7 @@ int tary;
 					pline("%s %s frozen by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
-				if (!InvCold_res(mdef)) {
+				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
 			}
@@ -3353,7 +3353,7 @@ int tary;
 					pline("%s %s burned by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
-				if (!InvAcid_res(mdef)) {
+				if (!UseInvAcid_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				}
 			}

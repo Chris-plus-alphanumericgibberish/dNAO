@@ -2143,12 +2143,12 @@ karemade:
 					nomul(0, NULL);
 				}
 				roll_av_frigophobia();
-				if(!InvCold_resistance || !rn2(11)){
+				if(!UseInvCold_res(&youmonst) || !rn2(11)){
 					destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 				}
 			} else if(FrozenAir){
 				roll_av_frigophobia();
-				if(!InvCold_resistance || !rn2(11)){
+				if(!UseInvCold_res(&youmonst) || !rn2(11)){
 					destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 				}
 			}
@@ -2156,7 +2156,7 @@ karemade:
 			if(!rn2(9) && roll_madness(MAD_OVERLORD)){
 				You("feel its burning gaze upon you!");
 				u.ustdy += 9;
-				if(!InvFire_resistance || !rn2(11)){
+				if(!UseInvFire_res(&youmonst) || !rn2(11)){
 					destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 					destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 				}

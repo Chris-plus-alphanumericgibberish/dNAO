@@ -4584,6 +4584,31 @@ boolean invoked;
 	}
 }
 
+void
+doliving_armor_salve(mon, salve)
+struct monst *mon;
+struct obj *salve;
+{
+	boolean proc = FALSE;
+	boolean yours = (mon == &youmonst);
+
+	if(rn2(180))
+		return;
+
+	if(u.uinsight >= 18 && salve->spe < 6){
+		salve->spe++;
+	}
+	else if(u.uinsight >= 66 && salve->spe >= 6){
+		for(struct obj *otmp = yours ? invent : mon->minvent; otmp; otmp = otmp->nobj){
+			if(salve_target(otmp) && rn2(2)){
+				if(yours) pline("%s crawls across %s.", Yname2(salve), yname(otmp));
+				salve_effect(otmp);
+				return;
+			}
+		}
+	}
+}
+
 static void
 doliving_single_attack(magr, wep)
 struct monst *magr;

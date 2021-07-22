@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "xhity.h"
 
 
 extern const char * const destroy_strings[];	/* from xhityhelpers.c */
@@ -65,8 +66,7 @@ boolean candestroy;
     int mat_idx;
     
     if (!victim) return 0;
-	if(victim == &youmonst && InvFire_resistance) return 0;
-	if(victim != &youmonst && resists_fire(victim)) return 0;
+	if(UseInvFire_res(victim)) return 0;
 #define burn_dmg(obj,descr) rust_dmg(obj, descr, 0, FALSE, victim, candestroy)
     while (1) {
 		switch (rn2(5)) {
@@ -3051,7 +3051,7 @@ struct obj *box;	/* null for floor trap */
 	burn_away_slime();
 	melt_frozen_air();
 
-	if (burnarmor(&youmonst, FALSE) || (rn2(3) && !InvFire_resistance)) {
+	if (burnarmor(&youmonst, FALSE) || (rn2(3) && !UseInvFire_res(&youmonst))) {
 	    destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 	    destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 	    destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
@@ -4861,7 +4861,7 @@ boolean disarm;
 			} else {
 			    dmg = d(4, 4);
 			}
-			if(!InvShock_resistance){
+			if(!UseInvShock_res(&youmonst)){
 				destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 				destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
 			}
@@ -5139,7 +5139,7 @@ burn_stuff:
 			useup(obj);
 		}
     }
-	if(!(Wwalking || InvFire_resistance)){
+	if(!(Wwalking || UseInvFire_res(&youmonst))){
 		burnarmor(&youmonst, TRUE);
 		destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 		destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);

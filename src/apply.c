@@ -64,6 +64,7 @@ STATIC_DCL int FDECL(do_carve_obj, (struct obj *));
 STATIC_PTR int FDECL(pick_rune, (BOOLEAN_P));
 STATIC_DCL void FDECL(describe_rune, (int));
 STATIC_PTR char NDECL(pick_carvee);
+STATIC_PTR int FDECL(res_engine_menu, (struct obj *));
 
 #ifdef	AMIGA
 void FDECL( amii_speaker, ( struct obj *, char *, int ) );
@@ -4481,7 +4482,11 @@ use_doll_tear(obj)
 		return 0;
 	} else {
 		struct obj *dollobj = 0;
-		dollobj = getobj(apply_all, "give the tear to");
+		// Create an array with all classes explicitly listed in it, 1-MAXOCLASSES :(
+		char all_classes[MAXOCLASSES] = {0};
+		for(int i = 1; i < MAXOCLASSES; i++)
+			all_classes[i-1] = i;
+		dollobj = getobj(all_classes, "give the tear to");
 		if(!dollobj)
 			return 0;
 
@@ -6021,6 +6026,165 @@ struct obj *obj;
 }
 
 void
+salve_effect(otmp)
+struct obj *otmp;
+{
+	int oerodedLevel = 3;
+	int speLevel = -5;
+	
+	for(int i = 0; i < 3; i++){
+		if(otmp->oeroded >= oerodedLevel){
+			otmp->oeroded--;
+			return;
+		}
+		else if(otmp->oeroded2 >= oerodedLevel){
+			otmp->oeroded2--;
+			return;
+		}
+		else if(otmp->oeroded3 >= oerodedLevel){
+			otmp->oeroded3--;
+			return;
+		}
+		else if(otmp->spe <= speLevel){
+			otmp->spe++;
+			return;
+		}
+		oerodedLevel--;
+		speLevel /= 2;
+	}
+}
+
+int
+use_armor_salve(obj)
+struct obj *obj;
+{
+	struct obj *otmp;
+	if(!freehand()){
+		You("can't use salve with no free %s!", body_part(HAND));
+		return 0;
+	}
+	if(obj->spe <= 0){
+		pline("There's no salve left.");
+		return 0;
+	}
+	// Create an array with all classes explicitly listed in it, 1-MAXOCLASSES :(
+	char all_classes[MAXOCLASSES] = {0};
+	for(int i = 1; i < MAXOCLASSES; i++)
+		all_classes[i-1] = i;
+	otmp = getobj(all_classes, "salve");
+	if(otmp){
+		You("spread some salve on %s.", yname(otmp));
+		salve_effect(otmp);
+		obj->spe--;
+		return 1;
+	}
+	return 0;
+}
+
+STATIC_OVL int
+res_engine_menu(obj)
+struct obj *obj;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+	struct obj *otmp;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+	
+	// Sprintf(buf, "Do what?");
+	// add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	if(obj->spe < 8){
+		Sprintf(buf, "Replace component");
+		any.a_int = 1;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(obj->altmode != ENG_MODE_OFF){
+		Sprintf(buf, "Switch off");
+		any.a_int = 2;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(obj->altmode != ENG_MODE_PYS){
+		Sprintf(buf, "Switch to low intensity (physical only)");
+		any.a_int = 3;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	if(obj->altmode != ENG_MODE_ENR){
+		Sprintf(buf, "Switch to high intensity (physical and energy)");
+		any.a_int = 4;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	end_menu(tmpwin, "Do what?");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	if( n <= 0 )
+		return FALSE;
+	
+	switch(selected[0].item.a_int){
+		case 1:
+			otmp = getobj(tools, "replace with");
+			if(!otmp)
+				return FALSE;
+			//else
+			useup(otmp);
+			You("put the new component into the engine.");
+			obj->spe = 8;
+		break;
+		case 2:
+			You("switch the engine off.");
+			obj->altmode = ENG_MODE_OFF;
+		break;
+		case 3:
+			You("switch the engine to low intensity.");
+			obj->altmode = ENG_MODE_PYS;
+		break;
+		case 4:
+			You("switch the engine to high intensity.");
+			obj->altmode = ENG_MODE_ENR;
+		break;
+	}
+	return TRUE;
+}
+
+int
+check_res_engine(mdef, adtyp)
+struct monst *mdef;
+int adtyp;
+{
+	boolean youdef = (mdef == &youmonst);
+	struct obj *engine;
+	boolean vis = youdef;
+	for(engine = youdef ? invent : mdef->minvent; engine; engine = engine->nobj)
+		if(engine->otyp == PRESERVATIVE_ENGINE && engine->spe > 0 && engine->altmode != ENG_MODE_OFF){
+			if(adtyp == AD_VORP || adtyp == AD_SHRD || engine->altmode == ENG_MODE_ENR){
+				if(vis) pline("%s infernal engine whirrs.", youdef ? "Your" : s_suffix(Monnam(mdef)));
+				engine->spe--;
+				return TRUE;
+			}
+		}
+	return FALSE;
+}
+
+void
 add_class(cl, class)
 char *cl;
 char class;
@@ -6728,6 +6892,10 @@ struct obj **optr;
 {
 	struct obj *obj = *optr;
 	struct obj *comp;
+	// Create an array with all classes explicitly listed in it, 1-MAXOCLASSES :(
+	char all_classes[MAXOCLASSES] = {0};
+	for(int i = 1; i < MAXOCLASSES; i++)
+		all_classes[i-1] = i;
 	if(uclockwork)
 		if (yn("Make an upgrade to yourself?") == 'y'){
 			long upgrade = upgradeMenu();
@@ -6788,7 +6956,7 @@ struct obj **optr;
 					return 1;
 				break;
 				case PHASE_ENGINE:
-					comp = getobj(apply_all, "build a phase engine with");
+					comp = getobj(all_classes, "build a phase engine with");
 					if(!comp || comp->otyp != SUBETHAIC_COMPONENT){
 						pline("Never mind.");
 						return 0;
@@ -6814,7 +6982,7 @@ struct obj **optr;
 					return 1;
 				break;
 				case HELLFIRE_FURNACE:
-					comp = getobj(apply_all, "build a hellfire furnace with");
+					comp = getobj(all_classes, "build a hellfire furnace with");
 					if(!comp || comp->otyp != HELLFIRE_COMPONENT){
 						pline("Never mind.");
 						return 0;
@@ -7431,6 +7599,12 @@ doapply()
 	break;
 	case SPIRITUAL_SOULSTONE:
 		res = use_spiritual(obj);
+	break;
+	case PRESERVATIVE_ENGINE:
+		res = res_engine_menu(obj);
+	break;
+	case ARMOR_SALVE:
+		res = use_armor_salve(obj);
 	break;
 	case UNICORN_HORN:
 		use_unicorn_horn(obj);

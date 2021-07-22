@@ -64,7 +64,9 @@ E void FDECL(use_magic_whistle, (struct obj *));
 E int FDECL(unfixable_trouble_count,(BOOLEAN_P));
 E int NDECL(dotrephination_menu);
 E int NDECL(partial_action);
+E int FDECL(check_res_engine, (struct monst *, int));
 E void FDECL(add_class, (char *, char));
+E void FDECL(salve_effect, (struct obj *));
 
 /* ### artifact.c ### */
 
@@ -600,6 +602,7 @@ E void FDECL(doliving_mad_king, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_spear, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_armor, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_healing_armor, (struct monst *, struct obj *, boolean));
+E void FDECL(doliving_armor_salve, (struct monst *, struct obj *));
 
 /* ### dog.c ### */
 
