@@ -642,7 +642,7 @@ boolean you_abilities;
 	if (mon_abilities && webmaker(youracedata)){
 		add_ability('w', "Spin a web", MATTK_WEBS);
 	}
-	if (Role_if(PM_MADMAN) && u.whisperturn < moves && !Catapsi){
+	if (Role_if(PM_MADMAN) && u.whisperturn < moves && !Catapsi && !DimensionalLock){
 		add_ability('W', "Call your whisperer", MATTK_WHISPER);
 	}
 	if (you_abilities && spellid(0) != NO_SPELL) {

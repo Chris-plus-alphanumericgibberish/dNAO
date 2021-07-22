@@ -343,8 +343,62 @@ mkmivault()
 int misc_hell_vault[] = {
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
-				ANTIMAGIC_RIFT, CATAPSI_VORTEX, MISOTHEISTIC_PYRAMID
+				ANTIMAGIC_RIFT, CATAPSI_VORTEX,
+				MISOTHEISTIC_PYRAMID, DIMENSIONAL_LOCK
 			};
+int misc_devil_vault[] = {
+				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
+				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
+				ANTIMAGIC_RIFT, CATAPSI_VORTEX,
+				MISOTHEISTIC_PYRAMID, DIMENSIONAL_LOCK, 
+				PRESERVATIVE_ENGINE
+			};
+int misc_demon_vault[] = {
+				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
+				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
+				ANTIMAGIC_RIFT, CATAPSI_VORTEX,
+				MISOTHEISTIC_PYRAMID, DIMENSIONAL_LOCK, 
+				ARMOR_SALVE
+			};
+int misc_tan_vault[] = {
+				ANTIMAGIC_RIFT, CATAPSI_VORTEX,
+				MISOTHEISTIC_PYRAMID, DIMENSIONAL_LOCK,
+				ARMOR_SALVE
+			};
+int misc_anc_vault[] = {
+				ANTIMAGIC_RIFT, CATAPSI_VORTEX,
+				MISOTHEISTIC_PYRAMID, DIMENSIONAL_LOCK
+			};
+
+int
+get_vault_misc(otmp, vn)
+struct obj *otmp;	/* existing object */
+long long int vn;
+{
+	int type;
+#define ROLL_ARRAY(arrayname) arrayname[rn2(SIZE(arrayname))];
+	if(vn < VN_A_O_BLESSINGS){
+		// Tannin
+		type = ROLL_ARRAY(misc_tan_vault);
+	}
+	else if(vn < VN_APOCALYPSE){
+		// Ancient
+		type = ROLL_ARRAY(misc_anc_vault);
+	}
+	else if(vn < VN_N_PIT_FIEND){
+		// Angel
+		type = ROLL_ARRAY(misc_hell_vault);
+	}
+	else if(vn < VN_SHAYATEEN){
+		// Devil
+		type = ROLL_ARRAY(misc_devil_vault);
+	}
+	else if(vn < VN_MAX){
+		// Demon
+		type = ROLL_ARRAY(misc_demon_vault);
+	}
+	return type;
+}
 
 void
 mkmivaultitem(container)
@@ -412,7 +466,7 @@ mklolthvaultitem()
 	else if(rn2(2))
 		type = SCOIN_CLASS;
 	else if(rn2(2)){
-		type = misc_hell_vault[SIZE(misc_hell_vault)];
+		type = misc_hell_vault[rn2(SIZE(misc_hell_vault))];
 		otmp = mksobj(type, NO_MKOBJ_FLAGS);
 		return otmp;
 	}

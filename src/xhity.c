@@ -4285,7 +4285,7 @@ boolean ranged;
 
 			/* destory items in inventory */
 			/* damage can only kill the player, right now, but it will injure monsters */
-			if (!InvFire_res(mdef)){
+			if (!UseInvFire_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if ((int)mlev(magr) > rn2(20))
@@ -4412,7 +4412,7 @@ boolean ranged;
 				roll_frigophobia();
 			/* destory items in inventory */
 			/* damage can only kill the player, right now, but it will injure monsters */
-			if (!InvCold_res(mdef)){
+			if (!UseInvCold_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
@@ -4487,7 +4487,7 @@ boolean ranged;
 
 			/* destory items in inventory */
 			/* damage can only kill the player, right now, but it will injure monsters */
-			if (!InvShock_res(mdef)){
+			if (!UseInvShock_res(mdef)){
 				if ((int)mlev(magr) > rn2(20))
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 			}
@@ -4593,7 +4593,7 @@ boolean ranged;
 			}
 
 			/* erode armor, if inventory isn't protected */
-			if (!InvAcid_res(mdef)) {
+			if (!UseInvAcid_res(mdef)) {
 				if (!rn2(10) || attk->adtyp == AD_EACD) {
 					erode_armor(mdef, TRUE);
 				}
@@ -6034,7 +6034,7 @@ boolean ranged;
 						);
 				}
 			}
-			else {
+			else if(!check_res_engine(mdef, AD_VORP)){
 				/* find helmet */
 				otmp = (youdef ? uarmh : which_armor(mdef, W_ARMH));
 
@@ -6076,127 +6076,129 @@ boolean ranged;
 		/* get a piece of worn armor */
 		otmp = some_armor(mdef);
 
-		/* armor protects ye */
-		if (otmp){
-			/* print custom message */
-			if (vis && dohitmsg) {
-				switch (attk->aatyp)
-				{
-				case AT_LNCK:
-				case AT_BITE:
-				case AT_5SBT:
-					pline("%s teeth catch on %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				case AT_STNG:
-					pline("%s stinger catches on %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				case AT_BUTT:
-					pline("%s %s catch%s on %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(num_horns(pa) == 0 ? "head" : num_horns(pa) == 1 ? "horn" : "horns"),
-						(num_horns(pa) == 1 ? "es" : ""),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				case AT_TENT:
-					pline("%s tentacles catch on %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				case AT_VINE:
-					pline("%s vines grow into %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				case AT_EXPL:
-				case AT_BOOM:
-					pline("%s shrapnel hits %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				case AT_WEAP:
-				case AT_XWEP:
-				case AT_MARI:
-					pline("%s %s %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(weapon ? "weapon strikes" : "claws catch on"),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				default:
-					pline("%s claws catch on %s armor!",
-						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					break;
-				}
-			}
-			if(Preservation){
-				pline("But, no harm is done!");
-			} else {
-				int i = 1;
-				if (pa->mtyp == PM_DEMOGORGON)
-					i += rnd(4);
-
-				for (; i>0; i--){
-					if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
-						damage_item(otmp);
-					}
-					else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
-						if (youdef)
-							claws_destroy_arm(otmp);
-						else
-							claws_destroy_marm(mdef, otmp);
-						/* exit armor-destroying loop*/
+		if(!check_res_engine(mdef, AD_SHRD)){
+			/* armor protects ye */
+			if (otmp){
+				/* print custom message */
+				if (vis && dohitmsg) {
+					switch (attk->aatyp)
+					{
+					case AT_LNCK:
+					case AT_BITE:
+					case AT_5SBT:
+						pline("%s teeth catch on %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_STNG:
+						pline("%s stinger catches on %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_BUTT:
+						pline("%s %s catch%s on %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(num_horns(pa) == 0 ? "head" : num_horns(pa) == 1 ? "horn" : "horns"),
+							(num_horns(pa) == 1 ? "es" : ""),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_TENT:
+						pline("%s tentacles catch on %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_VINE:
+						pline("%s vines grow into %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_EXPL:
+					case AT_BOOM:
+						pline("%s shrapnel hits %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_WEAP:
+					case AT_XWEP:
+					case AT_MARI:
+						pline("%s %s %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(weapon ? "weapon strikes" : "claws catch on"),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					default:
+						pline("%s claws catch on %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
 						break;
 					}
 				}
-			}
-			/* make a physical attack without hitmsg */
-			alt_attk.adtyp = AD_PHYS;
-			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
-		}
-		/* no armor */
-		else {
-			/* Demogorgon tries to kill */
-			if (pa->mtyp == PM_DEMOGORGON) {
-				if (noncorporeal(pd) || amorphous(pd)) {
-					/* custom hit message */
-					if (vis && dohitmsg) {
-						pline("%s %s to rip %s apart!",
-							(youagr ? "You" : Monnam(magr)),
-							(youagr ? "try" : "tries"),
-							(youdef ? "you" : mon_nam(mdef))
-							);
+				if(Preservation){
+					pline("But, no harm is done!");
+				} else {
+					int i = 1;
+					if (pa->mtyp == PM_DEMOGORGON)
+						i += rnd(4);
+
+					for (; i>0; i--){
+						if (otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
+							damage_item(otmp);
+						}
+						else if (!otmp->oartifact || (pa->mtyp == PM_DEMOGORGON && !rn2(10))){
+							if (youdef)
+								claws_destroy_arm(otmp);
+							else
+								claws_destroy_marm(mdef, otmp);
+							/* exit armor-destroying loop*/
+							break;
+						}
 					}
-					/* Double damage */
-					dmg *= 2;
-					/* make a physical attack without hitmsg */
-					alt_attk.adtyp = AD_PHYS;
-					return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 				}
-				else {
-					/* custom hit message */
-					if (vis && dohitmsg) {
-						pline("%s rip%s %s apart!",
-							(youagr ? "You" : Monnam(magr)),
-							(youagr ? "" : "s"),
-							(youdef ? "you" : mon_nam(mdef))
-							);
+				/* make a physical attack without hitmsg */
+				alt_attk.adtyp = AD_PHYS;
+				return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+			}
+			/* no armor */
+			else {
+				/* Demogorgon tries to kill */
+				if (pa->mtyp == PM_DEMOGORGON) {
+					if (noncorporeal(pd) || amorphous(pd)) {
+						/* custom hit message */
+						if (vis && dohitmsg) {
+							pline("%s %s to rip %s apart!",
+								(youagr ? "You" : Monnam(magr)),
+								(youagr ? "try" : "tries"),
+								(youdef ? "you" : mon_nam(mdef))
+								);
+						}
+						/* Double damage */
+						dmg *= 2;
+						/* make a physical attack without hitmsg */
+						alt_attk.adtyp = AD_PHYS;
+						return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 					}
-					/* kill */
-					killer = "ripped apart by Demogorgon";
-					killer_format = NO_KILLER_PREFIX;
-					return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
+					else {
+						/* custom hit message */
+						if (vis && dohitmsg) {
+							pline("%s rip%s %s apart!",
+								(youagr ? "You" : Monnam(magr)),
+								(youagr ? "" : "s"),
+								(youdef ? "you" : mon_nam(mdef))
+								);
+						}
+						/* kill */
+						killer = "ripped apart by Demogorgon";
+						killer_format = NO_KILLER_PREFIX;
+						return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
+					}
 				}
 			}
 		}
@@ -8135,8 +8137,8 @@ boolean ranged;
 				pline("%s is crushing you!", Monnam(magr));
 			}
 		}
-		
-		if(!InvFire_res(mdef)){
+
+		if(!UseInvFire_res(mdef)){
 			burnarmor(mdef, TRUE);
 			destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -9711,7 +9713,7 @@ int vis;
 				}
 			}
 			/* destroy items */
-			if (!InvShock_res(mdef)){
+			if (!UseInvShock_res(mdef)){
 				if (mlev(magr) > rn2(20))
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 				if (mlev(magr) > rn2(20))
@@ -9757,7 +9759,7 @@ int vis;
 				}
 			}
 			/* destroy items */
-			if (!InvCold_res(mdef)){
+			if (!UseInvCold_res(mdef)){
 				if (mlev(magr) > rn2(20))
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
@@ -9825,7 +9827,7 @@ int vis;
 				}
 			}
 			/* destroy items */
-			if (!InvFire_res(mdef)) {
+			if (!UseInvFire_res(mdef)) {
 				if (mlev(magr) > rn2(20))
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if (mlev(magr) > rn2(20))
@@ -10323,7 +10325,7 @@ expl_common:
 			}
 			/* damage inventory */
 			if (attk->adtyp == AD_FIRE || attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR){
-				if (!InvFire_res(mdef)){
+				if (!UseInvFire_res(mdef)){
 					if (mlev(magr) > rn2(20))
 						destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					if (mlev(magr) > rn2(20))
@@ -10333,7 +10335,7 @@ expl_common:
 				}
 			}
 			else if (attk->adtyp == AD_ELEC || attk->adtyp == AD_EELC){
-				if (!InvShock_res(mdef)){
+				if (!UseInvShock_res(mdef)){
 					if (mlev(magr) > rn2(20))
 						destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					if (mlev(magr) > rn2(20))
@@ -10341,7 +10343,7 @@ expl_common:
 				}
 			}
 			else if (attk->adtyp == AD_COLD || attk->adtyp == AD_ECLD){
-				if (!InvCold_res(mdef)){
+				if (!UseInvCold_res(mdef)){
 					if (mlev(magr) > rn2(20))
 						destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
@@ -10779,7 +10781,7 @@ int vis;
 				dmg = 0;
 		}
 		/* damage inventory */
-		if (!InvFire_res(mdef) && !(youdef ? Reflecting : mon_resistance(mdef, REFLECTING))) {
+		if (!UseInvFire_res(mdef) && !(youdef ? Reflecting : mon_resistance(mdef, REFLECTING))) {
 			if ((int)mlev(magr) > rn2(20))
 				destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			if ((int)mlev(magr) > rn2(20))
@@ -13761,7 +13763,7 @@ int vis;						/* True if action is at all visible to the player */
 	basedmg *= (precision_mult ? precision_mult : 1);
 
 	/* fakewep: Sword of Blood bonus damage */
-	if (attk && spirit_rapier_at(attk->aatyp) && attk->adtyp == AD_BLUD)
+	if (originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp == AD_BLUD)
 	{
 		if (has_blood(pd)) {
 			specdmg += mlev(mdef);
@@ -13793,7 +13795,7 @@ int vis;						/* True if action is at all visible to the player */
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
-		(attk && spirit_rapier_at(attk->aatyp) && attk->aatyp != AD_BLUD && attk->aatyp != AD_WET) ||
+		(originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp != AD_BLUD && originalattk->adtyp != AD_WET) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
 		);
 
@@ -14566,7 +14568,7 @@ int vis;						/* True if action is at all visible to the player */
 			}
 		}
 		/* inventory damage */
-		if (!InvCold_res(mdef)) {
+		if (!UseInvCold_res(mdef)) {
 			if (mlev(magr) > rn2(20))
 				destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}

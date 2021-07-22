@@ -1247,6 +1247,34 @@ int curse_bless;
 		    } else pline1(nothing_happens);
 		}
 		break;
+	    case PRESERVATIVE_ENGINE:
+		if (is_cursed){
+		    obj->spe = 8;
+		    p_glow2(obj, NH_RED);
+		}
+		else if (is_blessed) {
+			stripspe(obj);
+		} else {
+		    if (obj->spe < 8) {
+				obj->spe++;
+				p_glow1(obj);
+		    } else pline1(nothing_happens);
+		}
+		break;
+	    case ARMOR_SALVE:
+		if (is_cursed){
+		    obj->spe = 6;
+		    p_glow2(obj, NH_RED);
+		}
+		else if (is_blessed) {
+			stripspe(obj);
+		} else {
+		    if (obj->spe < 6) {
+				obj->spe++;
+				p_glow1(obj);
+		    } else pline1(nothing_happens);
+		}
+		break;
 	    case HORN_OF_PLENTY:
 	    case BAG_OF_TRICKS:
 	    case CAN_OF_GREASE:
@@ -1958,13 +1986,19 @@ struct obj	*sobj;
 	    }
 	case SCR_CREATE_MONSTER:
 	case SPE_CREATE_MONSTER:
-	    if (create_critters(1 + ((confused || sobj->cursed) ? 12 : 0) +
-				((sobj->blessed || rn2(73)) ? 0 : rnd(4)),
-			confused ? &mons[PM_ACID_BLOB] : (struct permonst *)0))
-		known = TRUE;
-	    /* no need to flush monsters; we ask for identification only if the
-	     * monsters are not visible
-	     */
+		if(!DimensionalLock){
+			if (create_critters(1 + ((confused || sobj->cursed) ? 12 : 0) +
+					((sobj->blessed || rn2(73)) ? 0 : rnd(4)),
+				confused ? &mons[PM_ACID_BLOB] : (struct permonst *)0)
+			)
+				known = TRUE;
+			/* no need to flush monsters; we ask for identification only if the
+			 * monsters are not visible
+			 */
+		}
+		else {
+			pline1(nothing_happens);
+		}
 	    break;
 	case SCR_ENCHANT_WEAPON:
 		if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))

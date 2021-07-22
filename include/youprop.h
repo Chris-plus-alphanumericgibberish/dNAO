@@ -218,6 +218,7 @@
 #define Misotheism		u.uprops[MISOTHEISM].intrinsic
 #define DarksightOnly	u.uprops[DARKVISION_ONLY].intrinsic
 #define Shattering		u.uprops[SHATTERING].intrinsic
+#define DimensionalLock	u.uprops[DIMENSION_LOCK].intrinsic
 
 /* Hallucination is solely a timeout; its resistance is extrinsic */
 #define HHallucination		u.uprops[HALLUC].intrinsic

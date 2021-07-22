@@ -1552,9 +1552,10 @@ int x, y;
 	return;
 }
 
-STATIC_OVL void
-hell_vault_items(x,y,type)
+void
+hell_vault_items(x,y,type, bury)
 int x, y, type;
+boolean bury;
 {
     struct obj *container;
 	container = mksobj_at(CHEST, x, y, MKOBJ_NOINIT);
@@ -1563,7 +1564,7 @@ int x, y, type;
 	container->otrapped = TRUE;
 	for(int i = d(9,4); i > 0; i--)
 		mkhellvaultitem_cnt(container, type);
-	bury_an_obj(container);
+	if(bury) bury_an_obj(container);
 }
 
 void
@@ -1816,7 +1817,7 @@ int x, y;
 		}
 	}
 
-	hell_vault_items(x,y,levl[x][y].vaulttype);
+	hell_vault_items(x,y,levl[x][y].vaulttype, TRUE);
 	levl[x][y].seenv = 0;
 	levl[x][y].lit = TRUE;
 	levl[x][y].horizontal = FALSE;

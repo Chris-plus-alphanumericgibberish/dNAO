@@ -848,6 +848,13 @@ int mkflags;
 			case CRYSTAL_BALL:	otmp->spe = rnd(5);
 				blessorcurse(otmp, 2);
 				break;
+			case PRESERVATIVE_ENGINE:
+				otmp->spe = rn1(4,4);
+				otmp->altmode = ENG_MODE_PYS;
+				break;
+			case ARMOR_SALVE:
+				otmp->spe = rn1(3,3);
+				break;
 			case POWER_PACK:
 				otmp->quan = rnd(5) + 5;
 				otmp->owt = weight(otmp);

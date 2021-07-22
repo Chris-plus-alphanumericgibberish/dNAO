@@ -4066,7 +4066,8 @@ static const char *epitaphs[] = {
 	
 	"...nor the battle to the strong", /*Bible*/
 
-	
+	"You go to war with the weapons you have, not the weapons you want. And *he* had a bag of cotton balls.", /* Eodyne: You go to war with the weapons you got, and he's got a bag of cottonballs. */
+
        	"Alas fair Death, 'twas missed in life - some peace and quiet from my wife",
        	"Applaud, my friends, the comedy is finished.",
        	"At last... a nice long sleep.",

@@ -810,6 +810,8 @@ static const char * const bogusobjects[] = {
        "tuxedo",
        "breath mint",
        "potion of antacid",
+       "potion of wokitoff", /* stjepan sejic */
+       "potion of hull feeling",
        "traffic cone",
        "chainsaw",
 //	   "pair of high-heeled stilettos",    /* the *other* stiletto */

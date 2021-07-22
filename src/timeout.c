@@ -103,6 +103,7 @@ const struct propname {
     { WATERPROOF, "waterproofing" },
     { SHATTERING, "fracturing" },
     { DARKVISION_ONLY, "darksight-override" },
+    { DIMENSION_LOCK, "dimensional lock" },
     {  0, 0 },
 };
 

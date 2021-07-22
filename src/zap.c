@@ -2353,8 +2353,13 @@ register struct obj *obj;
 			if (!Blind) known = TRUE;
 		break;
 		case WAN_CREATE_MONSTER:
-			known = create_critters(rn2(23) ? 1 : rn1(7,2),
-					(struct permonst *)0);
+			if(!DimensionalLock){
+				known = create_critters(rn2(23) ? 1 : rn1(7,2),
+						(struct permonst *)0);
+			}
+			else {
+				pline("Unfortunately, nothing happens.");
+			}
 		break;
 		case WAN_WISHING:
 			known = TRUE;
@@ -2503,7 +2508,7 @@ boolean ordinary;
 				You("zap yourself, but seem unharmed.");
 				ugolemeffects(AD_ELEC, d(12,6));
 		    }
-			if(!InvShock_resistance){
+			if(!UseInvShock_res(&youmonst)){
 				destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
 				destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 			}
@@ -2527,7 +2532,7 @@ boolean ordinary;
 				pline("You've set yourself afire!");
 				damage = d(12,6);
 		    }
-			if(!InvFire_resistance){
+			if(!UseInvFire_res(&youmonst)){
 				destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 				destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 				destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
@@ -2551,7 +2556,7 @@ boolean ordinary;
 				damage = d(12,6);
 		    }
 			roll_frigophobia();
-			if(!InvCold_resistance){
+			if(!UseInvCold_res(&youmonst)){
 				destroy_item(&youmonst, POTION_CLASS, AD_COLD);
 			}
 		    break;
@@ -4083,7 +4088,7 @@ struct zapdata * zapdata;
 		domsg();
 		golemeffects(mdef, AD_FIRE, svddmg);
 		/* damage inventory */
-		if (!InvFire_res(mdef)) {
+		if (!UseInvFire_res(mdef)) {
 			burnarmor(mdef, FALSE);
 			if (!rn2(3)) (void)destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(3)) (void)destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
@@ -4111,7 +4116,7 @@ struct zapdata * zapdata;
 		domsg();
 		golemeffects(mdef, AD_COLD, svddmg);
 		/* damage inventory */
-		if (!InvCold_res(mdef)) {
+		if (!UseInvCold_res(mdef)) {
 			if (!rn2(3)) (void)destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 		/* other */
@@ -4132,7 +4137,7 @@ struct zapdata * zapdata;
 		domsg();
 		golemeffects(mdef, AD_ELEC, svddmg);
 		/* damage inventory */
-		if (!InvShock_res(mdef)) {
+		if (!UseInvShock_res(mdef)) {
 			if (!rn2(3)) (void)destroy_item(mdef, WAND_CLASS, AD_ELEC);
 		}
 		/* deal damage */
@@ -4153,7 +4158,7 @@ struct zapdata * zapdata;
 		}
 		domsg();
 		/* damage inventory */
-		if (!InvAcid_res(mdef)) {
+		if (!UseInvAcid_res(mdef)) {
 			if (!rn2(6)) (void)destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(6)) erode_obj(youdef ? uwep : MON_WEP(mdef), TRUE, TRUE);
 			if (!rn2(6)) erode_armor(mdef, TRUE);

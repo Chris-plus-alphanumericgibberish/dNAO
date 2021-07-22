@@ -116,6 +116,10 @@ struct obj {
 #define WP_MODE_AUTO	0	/* Max firing speed */
 #define WP_MODE_BURST	1	/* 1/3 of max rate */
 #define WP_MODE_SINGLE 	2	/* Single shot */
+				/* ENG_MODEs track how reactive a preservation engine is */
+#define ENG_MODE_OFF	0	/* Engine is off */
+#define ENG_MODE_PYS	1	/* Engine reacts to vorpal and shredding only */
+#define ENG_MODE_ENR	2	/* Engine reacts to energy damage (fire/elec/cold/acid) too */
 
 	xchar where;		/* where the object thinks it is */
 #define OBJ_FREE	0		/* object not attached to anything */
@@ -915,6 +919,13 @@ struct obj {
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \
 			 (o)->oartifact == ART_EYES_OF_THE_OVERWORLD)
+
+#define salve_target(otmp)	(\
+			((otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && otmp->spe < 0)\
+			|| otmp->oeroded > 0\
+			|| otmp->oeroded2 > 0\
+			|| otmp->oeroded3 > 0\
+			)
 
 /* Flags for get_obj_location(). */
 #define CONTAINED_TOO	0x1

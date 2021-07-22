@@ -685,39 +685,47 @@ mon_tele:
 		return 2;
 	    }
 	case MUSE_WAN_CREATE_MONSTER:
-	    {	coord cc;
-		    /* pm: 0 => random, eel => aquatic, croc => amphibious */
-		struct permonst *pm = !is_pool(mtmp->mx, mtmp->my, FALSE) ? 0 :
-			     &mons[u.uinwater ? PM_GIANT_EEL : PM_CROCODILE];
-		struct monst *mon;
+		if(DimensionalLock){
+			mzapmsg(mtmp, otmp, FALSE);
+			otmp->spe--;
+			if (oseen)
+				pline("Nothing happens.");
+			return 2;
+		} else {
+			coord cc;
+				/* pm: 0 => random, eel => aquatic, croc => amphibious */
+			struct permonst *pm = !is_pool(mtmp->mx, mtmp->my, FALSE) ? 0 :
+					 &mons[u.uinwater ? PM_GIANT_EEL : PM_CROCODILE];
+			struct monst *mon;
 
-		if (!enexto(&cc, mtmp->mx, mtmp->my, pm)) return 0;
-		mzapmsg(mtmp, otmp, FALSE);
-		otmp->spe--;
-		mon = makemon((struct permonst *)0, cc.x, cc.y, NO_MM_FLAGS);
-		if (mon && canspotmon(mon) && oseen)
-		    makeknown(WAN_CREATE_MONSTER);
-		return 2;
-	    }
+			if (!enexto(&cc, mtmp->mx, mtmp->my, pm)) return 0;
+			mzapmsg(mtmp, otmp, FALSE);
+			otmp->spe--;
+			mon = makemon((struct permonst *)0, cc.x, cc.y, NO_MM_FLAGS);
+			if (mon && canspotmon(mon) && oseen)
+				makeknown(WAN_CREATE_MONSTER);
+			return 2;
+		}
 	case MUSE_SCR_CREATE_MONSTER:
 	    {	coord cc;
 		struct permonst *pm = 0, *fish = 0;
 		int cnt = 1;
 		struct monst *mon;
 		boolean known = FALSE;
-
-		if (!rn2(73)) cnt += rnd(4);
-		if (mtmp->mconf || otmp->cursed) cnt += 12;
-		if (mtmp->mconf) pm = fish = &mons[PM_ACID_BLOB];
-		else if (is_pool(mtmp->mx, mtmp->my, FALSE))
-		    fish = &mons[u.uinwater ? PM_GIANT_EEL : PM_CROCODILE];
 		mreadmsg(mtmp, otmp);
-		while(cnt--) {
-		    /* `fish' potentially gives bias towards water locations;
-		       `pm' is what to actually create (0 => random) */
-		    if (!enexto(&cc, mtmp->mx, mtmp->my, fish)) break;
-		    mon = makemon(pm, cc.x, cc.y, NO_MM_FLAGS);
-		    if (mon && canspotmon(mon)) known = TRUE;
+		if(!DimensionalLock){
+			if (!rn2(73)) cnt += rnd(4);
+			if (mtmp->mconf || otmp->cursed) cnt += 12;
+			if (mtmp->mconf) pm = fish = &mons[PM_ACID_BLOB];
+			else if (is_pool(mtmp->mx, mtmp->my, FALSE))
+				fish = &mons[u.uinwater ? PM_GIANT_EEL : PM_CROCODILE];
+			while(cnt--) {
+				/* `fish' potentially gives bias towards water locations;
+				   `pm' is what to actually create (0 => random) */
+				if (!enexto(&cc, mtmp->mx, mtmp->my, fish)) break;
+				mon = makemon(pm, cc.x, cc.y, NO_MM_FLAGS);
+				if (mon && canspotmon(mon)) known = TRUE;
+			}
 		}
 		/* The only case where we don't use oseen.  For wands, you
 		 * have to be able to see the monster zap the wand to know

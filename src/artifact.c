@@ -2845,7 +2845,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			Sprintf(buf, "fiery"); // profane
 			and = TRUE;
 		}
-		if (!InvFire_res(mdef)) {
+		if (!UseInvFire_res(mdef)) {
 			if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -2862,7 +2862,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and ? Strcat(buf, " and crackling") : Sprintf(buf, "crackling");
 			and = TRUE;
 		}
-		if (!InvShock_res(mdef)) {
+		if (!UseInvShock_res(mdef)) {
 			if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
 			if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 		}
@@ -2875,7 +2875,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			and ? Strcat(buf, " yet freezing") : Sprintf(buf, "freezing");
 			and = TRUE;
 		}
-		if (!InvCold_res(mdef)) {
+		if (!UseInvCold_res(mdef)) {
 	    	if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 		if(youdefend ? !Cold_resistance : !resists_cold(mdef)){
@@ -3798,7 +3798,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			else
 				(*truedmgptr) += rnd(6) + otmp->spe;
 		}
-		if (!InvFire_res(mdef)){
+		if (!UseInvFire_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			if (!rn2(3)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 			if (!rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -3811,7 +3811,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			else
 				(*truedmgptr) += rnd(6) + otmp->spe;
 		}
-		if (!InvCold_res(mdef)){
+		if (!UseInvCold_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
@@ -3823,11 +3823,11 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			else
 				(*truedmgptr) += rnd(6) + otmp->spe;
 		}
-		if (!InvShock_res(mdef)){
+		if (!UseInvShock_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 			if (!rn2(3)) destroy_item(mdef, RING_CLASS, AD_ELEC);
 		}
-		if (!InvAcid_res(mdef)){
+		if (!UseInvAcid_res(mdef)){
 			if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 		}
 		if (!resists_blnd(mdef)) {
@@ -3853,7 +3853,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			else
 				*truedmgptr += d(2, 6);
 		}
-		if (!InvShock_res(mdef)) {
+		if (!UseInvShock_res(mdef)) {
 			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 			if (!rn2(3)) destroy_item(mdef, RING_CLASS, AD_ELEC);
 		}
@@ -4331,7 +4331,7 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 			}
-		if (!InvCold_res(mdef)) {
+		if (!UseInvCold_res(mdef)) {
 	    	if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
@@ -4342,7 +4342,7 @@ boolean * messaged;
 				*messaged = TRUE;
 			}
 			*truedmgptr += d(2, 6) + otmp->spe;
-			if (!InvCold_res(mdef)) {
+			if (!UseInvCold_res(mdef)) {
 				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 		}
@@ -4355,7 +4355,7 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
-		if (!InvShock_res(mdef)) {
+		if (!UseInvShock_res(mdef)) {
 			if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
 			if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 		}
@@ -4370,7 +4370,7 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
-		if (!InvAcid_res(mdef)) {
+		if (!UseInvAcid_res(mdef)) {
 	    	if (!rn2(2)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 //	    	if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 //	    	if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
@@ -4979,7 +4979,7 @@ boolean * messaged;
 			return xdamagey(magr, mdef, (struct attack *)0, *hp(mdef));	/* instakill */
 		}
 		/* normal vorpal */
-		else if (method != 0) {
+		else if (method != 0 && !check_res_engine(mdef, AD_VORP)) {
 			/* find defender's applicable armor */
 			struct obj * armor = (struct obj *)0;
 			switch (method) {
@@ -5280,9 +5280,10 @@ boolean * messaged;
 	}
 
 	/* flaying weapons */
-	if (check_oprop(otmp, OPROP_FLAYW)
+	if ((check_oprop(otmp, OPROP_FLAYW)
 		|| check_oprop(otmp, OPROP_LESSER_FLAYW)
 		|| otmp->oartifact == ART_THORNS //Note: Thorns's damage is not reduced to 0 like flaying weapons.
+		) && !check_res_engine(mdef, AD_SHRD)
 	) {
 		struct obj *obj = some_armor(mdef);
 		int i;
@@ -6943,7 +6944,7 @@ arti_invoke(obj)
 					exercise(A_WIS, TRUE);
 					n=u.ulevel/5 + 1;
 					cast_protection();
-					while(n--) {
+					if(!DimensionalLock) while(n--) {
 						pm = &mons[summons[d(1,7)]];
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
 						if(mtmp){
@@ -6972,7 +6973,7 @@ arti_invoke(obj)
 					 /* flags.botl = 1; -- healup() handles this */
 					}
 					healup(maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp), 0, TRUE, TRUE); //heal spell
-					while(n--) {
+					if(!DimensionalLock) while(n--) {
 						pm = &mons[summons[d(1,6)+3]];
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 						if(mtmp){
@@ -7010,7 +7011,9 @@ arti_invoke(obj)
 			pline("You call upon the minions of Quetzalcoatl!");
 			int n = u.ulevel/5 + 1;
 			if(dog_limit() < n) n = dog_limit();
-			while(n--) {
+			if(DimensionalLock)
+				pline("%s", nothing_happens);
+			else while(n--) {
 				pm = &mons[windpets[d(1,8)]];
 				mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 				if(mtmp){
@@ -9633,6 +9636,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 20){
 					losepw(20);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					for(i=max(1, d(1,20) - 16); i > 0; i--){
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
@@ -9655,6 +9662,10 @@ read_necro(VOID_ARGS)
 					if(u.uen >= 10){
 						losepw(10);
 						summon_failed = FALSE;
+						if(DimensionalLock){
+							pline("%s", nothing_happens);
+							break;
+						}
 						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
 							initedog(mtmp);
@@ -9668,6 +9679,10 @@ read_necro(VOID_ARGS)
 				if(u.uen > 30){
 					losepw(30);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					pm = &mons[PM_SHOGGOTH];
 					mtmp = makemon(pm, u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
@@ -9681,6 +9696,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 20){
 					losepw(20);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					for(i=max(1, d(1,10) - 2); i > 0; i--){
 						mtmp = makemon(&mons[oozes[rn2(11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
@@ -9702,6 +9721,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 60){
 					losepw(60);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					mtmp = makemon(&mons[devils[rn2(12)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);
@@ -9720,6 +9743,10 @@ read_necro(VOID_ARGS)
 				if(u.uen >= 45){
 					losepw(45);
 					summon_failed = FALSE;
+					if(DimensionalLock){
+						pline("%s", nothing_happens);
+						break;
+					}
 					mtmp = makemon(&mons[demons[rn2(15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);
@@ -10468,6 +10495,8 @@ dosymbiotic_equip()
 	for(obj = invent; obj; obj = obj->nobj){
 		if(obj->owornmask && check_oprop(obj, OPROP_HEAL))
 			doliving_healing_armor(&youmonst, obj, FALSE);
+		if(obj->otyp == ARMOR_SALVE)
+			doliving_armor_salve(&youmonst, obj);
 	}
 	if(uarm && (uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR))
 		dosymbiotic(&youmonst, uarm);
