@@ -13816,7 +13816,7 @@ int vis;						/* True if action is at all visible to the player */
 	basedmg *= (precision_mult ? precision_mult : 1);
 
 	/* fakewep: Sword of Blood bonus damage */
-	if (attk && spirit_rapier_at(attk->aatyp) && attk->adtyp == AD_BLUD)
+	if (originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp == AD_BLUD)
 	{
 		if (has_blood(pd)) {
 			specdmg += mlev(mdef);
@@ -13848,7 +13848,7 @@ int vis;						/* True if action is at all visible to the player */
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
-		(attk && spirit_rapier_at(attk->aatyp) && attk->aatyp != AD_BLUD && attk->aatyp != AD_WET) ||
+		(originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp != AD_BLUD && originalattk->adtyp != AD_WET) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
 		);
 
