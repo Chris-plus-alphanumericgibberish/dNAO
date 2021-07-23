@@ -436,10 +436,7 @@ kick_steed()
 	if (!u.usteed->mtame && u.usteed->mleashed) m_unleash(u.usteed, TRUE);
 	if (!u.usteed->mtame || (u.ulevel+u.usteed->mtame < rnd(MAXULEV/2+5))) {
 	    if (!u.usteed->mtame) untame(u.usteed, 0);
-		else {
-			dismount_steed(DISMOUNT_THROWN);
-			newsym(u.usteed->mx, u.usteed->my);
-		}
+		else dismount_steed(DISMOUNT_THROWN);
 	    return;
 	}
 
