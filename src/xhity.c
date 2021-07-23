@@ -11888,6 +11888,8 @@ int vis;
 			if (typ != NON_PM) {
 				struct monst * mtmp;
 				int mmflags = MM_ADJACENTOK|MM_ADJACENTSTRICT;
+				mm.x = magr->mx; mm.y = magr->my;
+				enexto(&mm, mm.x, mm.y, &mons[typ]);
 				if (get_mx(magr, MX_ESUM)) mmflags |= MM_ESUM;
 
 				mtmp = makemon(&mons[typ], mm.x, mm.y, mmflags);
