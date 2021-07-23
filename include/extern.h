@@ -1509,7 +1509,7 @@ E void NDECL(mkmivault);
 E void FDECL(mkmivaultitem,(struct obj *));
 E struct obj * NDECL(mklolthvaultitem);
 E struct obj * FDECL(mkhellvaultitem,(long long int));
-E void FDECL(mkhellvaultitem_cnt,(struct obj *, long long int));
+E void FDECL(mkhellvaultitem_cnt,(struct obj *, long long int, boolean));
 E void NDECL(place_lolth_vaults);
 E void NDECL(place_chaos_forest_features);
 E void NDECL(place_law_features);

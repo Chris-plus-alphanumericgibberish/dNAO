@@ -553,16 +553,17 @@ long long int vn;
 }
 
 void
-mkhellvaultitem_cnt(container, vn)
+mkhellvaultitem_cnt(container, vn, bury)
 struct obj *container;
 long long int vn;
+boolean bury;
 {
 	struct obj *otmp;
 	
 	otmp = mkhellvaultitem(vn);
 	if(Is_container(otmp)){
 		place_object(otmp, container->ox, container->oy);
-		bury_an_obj(otmp);
+		if(bury) bury_an_obj(otmp);
 	}
 	else add_to_container(container, otmp);
 }
