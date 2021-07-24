@@ -1553,9 +1553,8 @@ int x, y;
 }
 
 void
-hell_vault_items(x,y,type, bury)
+hell_vault_items(x,y,type)
 int x, y, type;
-boolean bury;
 {
     struct obj *container;
 	container = mksobj_at(CHEST, x, y, MKOBJ_NOINIT);
@@ -1563,8 +1562,35 @@ boolean bury;
 	container->olocked = TRUE;
 	container->otrapped = TRUE;
 	for(int i = d(9,4); i > 0; i--)
-		mkhellvaultitem_cnt(container, type, bury);
-	if(bury) bury_an_obj(container);
+		mkhellvaultitem_cnt(container, type, TRUE);
+	bury_an_obj(container);
+}
+
+void
+levi_spawn_items(x,y, levi)
+int x, y;
+struct monst *levi;
+{
+    struct obj *container;
+	struct obj *otmp;
+	container = mksobj(CHEST, MKOBJ_NOINIT);
+	set_material_gm(container, levi->mtyp == PM_LEVIATHAN ? BONE : METAL);
+	container->olocked = TRUE;
+	container->otrapped = TRUE;
+	for(int i = 5; i > 0; i--){
+		otmp = mkobj(levi->mtyp == PM_LEVIATHAN ? WAGE_OF_GLUTTONY : WAGE_OF_ENVY, MKOBJ_NOINIT);
+		add_to_container(container, otmp);
+	}
+	for(int i = 3; i > 0; i--){
+		otmp = mkobj(levi->mtyp == PM_LEVIATHAN ? WAGE_OF_ENVY : WAGE_OF_LUST, MKOBJ_NOINIT);
+		add_to_container(container, otmp);
+	}
+	otmp = mkobj(WAGE_OF_PRIDE, MKOBJ_NOINIT);
+	add_to_container(container, otmp);
+	for(int i = 3*9; i > 0; i--)
+		mkhellvaultitem_cnt(container, VN_N_PIT_FIEND, FALSE);
+	if(levi->mtyp == PM_LEVIATHAN) mpickobj(levi, container);
+	else place_object(container, x, y);
 }
 
 void
@@ -1817,7 +1843,7 @@ int x, y;
 		}
 	}
 
-	hell_vault_items(x,y,levl[x][y].vaulttype, TRUE);
+	hell_vault_items(x,y,levl[x][y].vaulttype);
 	levl[x][y].seenv = 0;
 	levl[x][y].lit = TRUE;
 	levl[x][y].horizontal = FALSE;

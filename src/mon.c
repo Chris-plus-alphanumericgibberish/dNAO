@@ -4344,9 +4344,11 @@ boolean was_swallowed;			/* digestion */
 				tmp=0;
 			}
 			else if(mdat->mattk[i].adtyp == AD_SPNL){
+				struct monst *levi;
 				explode(mon->mx, mon->my, AD_COLD, MON_EXPLODE, tmp, EXPL_WET, 1);
-				makemon(rn2(2) ? &mons[PM_LEVIATHAN] : &mons[PM_LEVISTUS], mon->mx, mon->my, MM_ADJACENTOK);
-				hell_vault_items(mon->mx, mon->my, VN_N_PIT_FIEND, FALSE);
+				levi = makemon(&mons[rn2(2) ? PM_LEVISTUS : PM_LEVIATHAN], mon->mx, mon->my, MM_ADJACENTOK);
+				if(levi)
+					levi_spawn_items(mon->mx, mon->my, levi);
 			}
 			else if(mdat->mattk[i].adtyp == AD_MAND){
 				struct monst *mtmp, *mtmp2;
