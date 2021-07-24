@@ -6045,7 +6045,7 @@ struct obj *otmp;
 			otmp->oeroded3--;
 			return;
 		}
-		else if(otmp->spe <= speLevel){
+		else if((otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && otmp->spe <= speLevel){
 			otmp->spe++;
 			return;
 		}
