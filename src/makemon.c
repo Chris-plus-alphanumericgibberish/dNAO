@@ -1632,6 +1632,7 @@ int mkobjflags;
 					(void)mongets(mtmp, ORIHALCYON_GAUNTLETS, mkobjflags);
 					(void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
 				} else if(mm == PM_MYRKALFAR_MATRON){
+					struct obj *gem;
 					give_mintrinsic(mtmp, TELEPAT);
 					otmp = mksobj(ARM_BLASTER, mkobjflags);
 					otmp->spe = 4;
@@ -1642,9 +1643,12 @@ int mkobjflags;
 					otmp = mksobj(LIGHTSABER, mkobjflags);
 					otmp->spe = 3;
 					otmp->ovar1 = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
-					otmp->cobj->otyp = !rn2(4) ? MORGANITE : !rn2(3) ? RUBY : rn2(2) ? GARNET : JASPER;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
+					gem = otmp->cobj;
+					obj_extract_self(gem);
+					gem = poly_obj(gem,!rn2(4) ? MORGANITE : !rn2(3) ? RUBY : rn2(2) ? GARNET : JASPER);
+					add_to_container(otmp, gem);
 					(void) mpickobj(mtmp, otmp);
 					
 					otmp = mksobj(find_signet_ring(), mkobjflags);
@@ -1659,6 +1663,7 @@ int mkobjflags;
 					(void) mpickobj(mtmp, otmp);
 					(void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
 				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && mm == PM_ELVENKING){ /* Give the elvenking in the quest a special setup */
+					struct obj *gem;
 					mtmp->m_lev += 7;
 					mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
 					
@@ -1666,9 +1671,12 @@ int mkobjflags;
 					otmp = mksobj(LIGHTSABER, mkobjflags);
 					otmp->spe = 3;
 					otmp->ovar1 = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
-					otmp->cobj->otyp = !rn2(3) ? EMERALD : rn2(2) ? GREEN_FLUORITE : JADE;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
+					gem = otmp->cobj;
+					obj_extract_self(gem);
+					gem = poly_obj(gem,!rn2(3) ? EMERALD : rn2(2) ? GREEN_FLUORITE : JADE);
+					add_to_container(otmp, gem);
 					(void) mpickobj(mtmp, otmp);
 					
 					otmp = mksobj(HAND_BLASTER, mkobjflags);
@@ -4311,12 +4319,16 @@ int mkobjflags;
 				(void) mpickobj(mtmp, otmp);
 			}
 		} else if(mm == PM_CLAIRVOYANT_CHANGED) {
+			struct obj *gem;
 			otmp = mksobj(LIGHTSABER, mkobjflags);
 			set_material_gm(otmp, BONE);
 			fix_object(otmp);
 			otmp->spe = 4;
 			otmp->ovar1 = 39L;
-			otmp->cobj->otyp = STAR_SAPPHIRE;
+			gem = otmp->cobj;
+			obj_extract_self(gem);
+			gem = poly_obj(gem,STAR_SAPPHIRE);
+			add_to_container(otmp, gem);
 			add_oprop(otmp, OPROP_PSIOW);
 			add_oprop(otmp, OPROP_LESSER_MAGCW);
 			otmp->blessed = TRUE;
@@ -4629,15 +4641,19 @@ int mkobjflags;
 				if(mm == PM_MASTER_MIND_FLAYER || !rn2(3)) mongets(mtmp, R_LYEHIAN_FACEPLATE, mkobjflags);
 			} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
 				if(mm == PM_MASTER_MIND_FLAYER){
+					struct obj *gem;
 					mtmp->m_lev += 6;
 					mtmp->mhpmax = mtmp->m_lev*8-1;
 					mtmp->mhp = mtmp->mhpmax;
 					otmp = mksobj(DOUBLE_LIGHTSABER, mkobjflags);
 					otmp->oerodeproof = 1;
 					otmp->spe = 4;
-					otmp->cobj->otyp = !rn2(3) ? RUBY : rn2(2) ? GREEN_FLUORITE : JADE+3/*Red glass*/;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
+					gem = otmp->cobj;
+					obj_extract_self(gem);
+					gem = poly_obj(gem,!rn2(3) ? RUBY : rn2(2) ? GREEN_FLUORITE : WORTHLESS_PIECE_OF_RED_GLASS);
+					add_to_container(otmp, gem);
 					(void) mpickobj(mtmp, otmp);
 					
 					otmp = mksobj(ROBE, mkobjflags);
@@ -4656,6 +4672,7 @@ int mkobjflags;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 				} else {
+					struct obj *gem;
 					mtmp->m_lev += 2;
 					mtmp->mhpmax = mtmp->m_lev*8-1;
 					mtmp->mhp = mtmp->mhpmax;
@@ -4663,9 +4680,12 @@ int mkobjflags;
 					otmp->oerodeproof = 1;
 					otmp->spe = 1;
 					otmp->ovar1 = !rn2(4) ? 6L : !rn2(3) ? 10L : rn2(2) ? 35L : 37L;
-					otmp->cobj->otyp = !rn2(3) ? RUBY : rn2(2) ? GREEN_FLUORITE : JADE+3/*Red glass*/;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
+					gem = otmp->cobj;
+					obj_extract_self(gem);
+					gem = poly_obj(gem,!rn2(3) ? RUBY : rn2(2) ? GREEN_FLUORITE : WORTHLESS_PIECE_OF_RED_GLASS);
+					add_to_container(otmp, gem);
 					(void) mpickobj(mtmp, otmp);
 					
 					otmp = mksobj(ROBE, mkobjflags);
@@ -7390,24 +7410,31 @@ int mkobjflags;
 				}
 		 }
 		} else if(monsndx(ptr) == PM_TWITCHING_FOUR_ARMED_CHANGED) {
+			struct obj *gem;
 			otmp = mksobj(LIGHTSABER, mkobjflags);
 			otmp->spe = 3;
 			set_material_gm(otmp, BONE);
 			otmp->ovar1 = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
-			otmp->cobj->otyp = !rn2(4) ? MORGANITE : !rn2(3) ? RUBY : rn2(2) ? GARNET : JASPER;
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			fix_object(otmp);
+			gem = otmp->cobj;
+			obj_extract_self(gem);
+			gem = poly_obj(gem,!rn2(4) ? MORGANITE : !rn2(3) ? RUBY : rn2(2) ? GARNET : JASPER);
+			add_to_container(otmp, gem);
 			(void) mpickobj(mtmp, otmp);
 			
 			otmp = mksobj(LIGHTSABER, mkobjflags);
 			otmp->spe = 3;
 			set_material_gm(otmp, BONE);
 			otmp->ovar1 = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
-			otmp->cobj->otyp = !rn2(3) ? EMERALD : rn2(2) ? GREEN_FLUORITE : JADE;
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			fix_object(otmp);
+			gem = otmp->cobj;
+			obj_extract_self(gem);
+			gem = poly_obj(gem,!rn2(3) ? EMERALD : rn2(2) ? GREEN_FLUORITE : JADE);
+			add_to_container(otmp, gem);
 			(void) mpickobj(mtmp, otmp);
 		} else if(ptr->mtyp == PM_GIANT_GOAT_SPAWN) {
 			int threshold = rnd(10)+rn2(11);
