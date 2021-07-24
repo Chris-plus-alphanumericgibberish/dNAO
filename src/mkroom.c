@@ -397,6 +397,10 @@ int vn;
 		// Demon
 		type = ROLL_ARRAY(misc_demon_vault);
 	}
+	else {
+		impossible("Vault number %d out-of-ramge in get_misc", vn);
+		type = ROLL_ARRAY(misc_hell_vault);
+	}
 	return type;
 }
 
