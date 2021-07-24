@@ -6630,7 +6630,7 @@ arti_invoke(obj)
 		
 		// give you some protection
 		int l = u.ulevel;
-		int loglev;
+		int loglev = 0;
 		int gain;
 
 		while (l) {
