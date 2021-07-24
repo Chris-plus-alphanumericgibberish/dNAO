@@ -3592,10 +3592,7 @@ createmon:
 			if (makesummoned)
 				mm_flags |= MM_ESUM;
 
-			if (undeadtype)
-				mtmp = makeundead(whichpm, u.ux, u.uy, mm_flags, undeadtype);
-			else
-				mtmp = makemon(whichpm, u.ux, u.uy, mm_flags);
+			mtmp = makemon_full(whichpm, u.ux, u.uy, mm_flags, undeadtype ? undeadtype : -1, -1);
 
 			if (mtmp) {
 				if (maketame){
