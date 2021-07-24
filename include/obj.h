@@ -148,9 +148,9 @@ struct obj {
 	Bitfield(oeroded2,2);	/* corroded/rotted/fractured weapon/armor */
 	Bitfield(oeroded3,2);	/* tatteredness */
 #define MAX_ERODE 3
-#define orotten oeroded		/* rotten food */
-#define odiluted oeroded	/* diluted potions */
-#define norevive oeroded2
+	Bitfield(orotten,1);	/* rotten food */
+	Bitfield(odiluted,1);	/* diluted potions */
+	Bitfield(norevive,1);	/* don't revive */
 	Bitfield(oerodeproof,1); /* erodeproof weapon/armor */
 	Bitfield(olarva,2);	/* object has been partially brought to life */
 	Bitfield(odead_larva,2);	/* object was partially brought to life, but died again */
@@ -166,6 +166,7 @@ struct obj {
 
 	Bitfield(recharged,3);	/* number of times it's been recharged */
 #define ostriking recharged	/* extra whip heads striking (imposes cap of +7) */
+	/* 0 free bits */
 	Bitfield(lamplit,1);	/* a light-source -- can be lit */
 #ifdef INVISIBLE_OBJECTS
 	Bitfield(oinvis,1);	/* invisible */
@@ -173,7 +174,6 @@ struct obj {
 	Bitfield(greased,1);	/* covered with grease */
 
 	Bitfield(in_use,1);	/* for magic items before useup items */
-	/* 0 free bits */
 	Bitfield(bypass,1);	/* mark this as an object to be skipped by bhito() */
 	Bitfield(lifted,1); /* dipped in potion of levitation */
 	Bitfield(lightened,1);/* dipped in potion of enlightenment */
@@ -187,7 +187,7 @@ struct obj {
 	Bitfield(obj_material,5); /*Max 31*/
 	//See objclass for values
 	Bitfield(nomerge,1);	/* temporarily block from merging */
-	/* 15 free bits in this field, I think -CM */
+	/* 12 free bits in this field, I think -CM */
 	
 	int obj_color;
 	union {
