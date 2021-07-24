@@ -1163,7 +1163,7 @@ struct obj *otmp;	/* existing object */
 struct obj *
 mk_vault_special(otmp, vn)
 struct obj *otmp;	/* existing object */
-long long int vn;
+int vn;
 {
 	int type;
 #define VN_TANNIN	0

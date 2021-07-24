@@ -373,7 +373,7 @@ int misc_anc_vault[] = {
 int
 get_vault_misc(otmp, vn)
 struct obj *otmp;	/* existing object */
-long long int vn;
+int vn;
 {
 	int type;
 #define ROLL_ARRAY(arrayname) arrayname[rn2(SIZE(arrayname))];
@@ -502,7 +502,7 @@ mklolthvaultitem()
 
 struct obj *
 mkhellvaultitem(vn)
-long long int vn;
+int vn;
 {
 	struct obj *otmp;
 	int try_limit = 1000;
@@ -555,7 +555,7 @@ long long int vn;
 void
 mkhellvaultitem_cnt(container, vn, bury)
 struct obj *container;
-long long int vn;
+int vn;
 boolean bury;
 {
 	struct obj *otmp;
