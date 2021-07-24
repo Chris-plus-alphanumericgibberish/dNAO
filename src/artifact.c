@@ -1165,7 +1165,7 @@ mk_vault_special(otmp, vn)
 struct obj *otmp;	/* existing object */
 long long int vn;
 {
-	int type;
+	int type = -1;
 #define VN_TANNIN	0
 #define VN_ANCIENT	1
 #define VN_ANGEL	2
@@ -1201,6 +1201,9 @@ long long int vn;
 		break;
 		case VN_TANNIN:
 			otmp = mk_tannin_special(otmp);
+		break;
+		default:
+			impossible("Unhandled vault number %d for making loot special.", vn);
 		break;
 	}
 	return otmp;
