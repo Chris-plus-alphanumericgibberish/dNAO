@@ -9047,7 +9047,7 @@ int faction;
 		}
 	} else if (byyou && !in_mklev) {
 		coord bypos;
-		out_template = makemon_set_template(&ptr, template, randmonst);
+		if(ptr) out_template = makemon_set_template(&ptr, template, randmonst);
 		if(enexto_core(&bypos, u.ux, u.uy, ptr, gpflags)) {
 			x = bypos.x;
 			y = bypos.y;
