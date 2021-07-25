@@ -2262,19 +2262,21 @@ tty_end_menu(window, prompt)
 	}
 
 	/* cut off any lines that are too long */
-	len = strlen((curr->str ? curr->str : "")) + 2;	/* extra space at beg & end */
+	short xl = 2; /* extra space at beg & end */
+	len = strlen((curr->str ? curr->str : ""));
 
 	if (curr->selector) {
 	    /* extra space for keyboard accelerator */
-	    len += 4;
+	    xl += 4;
 	    if (curr->glyph != NO_GLYPH && iflags.use_menu_glyphs) {
 		/* extra space for glyph */
-		len += 2;
+		xl += 2;
 	    }
 	}
+	len += xl;
 
 	if (len > (int)ttyDisplay->cols) {
-	    curr->str[ttyDisplay->cols-2] = 0;
+	    curr->str[ttyDisplay->cols-xl] = 0;
 	    len = ttyDisplay->cols;
 	}
 	if (len > cw->cols) cw->cols = len;
