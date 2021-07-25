@@ -8814,15 +8814,11 @@ boolean randmonst;
 			mkmon_template = 0;
 	}
 
-	/* check that the template is appropriate to apply to ptr; if so, apply it to the dereferenced ptrptr */
-	if (mtemplate_accepts_mtyp(mkmon_template, ptr->mtyp) ||
-		(on_level(&valley_level, &u.uz) /* stupid stupid valley of the dead "everything is nonliving" rule */)) {
+	/* Apply template to the dereferenced ptrptr */
+	if (mkmon_template) {
 		*ptrptr = permonst_of(ptr->mtyp, mkmon_template);
 	}
-	else {
-		impossible("Bad template %d attempted for %s", mkmon_template, mons[ptr->mtyp].mname);
-		mkmon_template = 0;
-	}
+
 	return mkmon_template;
 }
 
