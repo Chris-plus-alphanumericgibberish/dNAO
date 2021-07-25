@@ -8813,7 +8813,9 @@ int faction;
 		return faction;
 
 	if(is_drow(ptr)){
-		if((ptr->mtyp == urole.ldrnum && ptr->mtyp != PM_ECLAVDRA) || 
+		if(curhouse) {
+			out_faction = curhouse;
+		} else if((ptr->mtyp == urole.ldrnum && ptr->mtyp != PM_ECLAVDRA) || 
 			(ptr->mtyp == urole.guardnum && ptr->mtyp != PM_DROW_MATRON_MOTHER && ptr->mtyp != PM_HEDROW_MASTER_WIZARD)
 		){
 			if(Race_if(PM_DROW) && !Role_if(PM_EXILE)) out_faction = u.start_house;
