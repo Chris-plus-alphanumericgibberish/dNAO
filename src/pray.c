@@ -22,7 +22,7 @@ STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean));
 STATIC_DCL boolean FDECL(water_prayer,(BOOLEAN_P));
 STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
 static void NDECL(lawful_god_gives_angel);
-static void FDECL(god_gives_pet,(const char *,ALIGNTYP_P));
+static void FDECL(god_gives_pet,(const char *,ALIGNTYP_P,int));
 static void FDECL(god_gives_benefit,(ALIGNTYP_P));
 
 /* simplify a few tests */
@@ -1721,9 +1721,10 @@ register struct obj *otmp;
 }
 
 void
-god_gives_pet(gptr, alignment)
+god_gives_pet(gptr, alignment, ga_num)
 const char *gptr;
 aligntyp alignment;
+int ga_num;
 {
 /*
     register struct monst *mtmp2;
@@ -1771,7 +1772,7 @@ aligntyp alignment;
     if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
     }
-	else mon = make_pet_minion(mtyp,alignment);
+	else mon = make_pet_minion(mtyp,alignment,ga_num);
 	
     if (mon) {
 	switch ((int)alignment) {
@@ -1804,15 +1805,17 @@ lawful_god_gives_angel()
     int mtyp;
     int mon;
 
-    // mtyp = lawful_minion(u.ulevel);
-    // mon = make_pet_minion(mtyp,A_LAWFUL);
-    // pline("%s", Blind ? "You feel the presence of goodness." :
-	 // "There is a puff of white fog!");
-    // if (u.uhp > (u.uhpmax / 10)) godvoice(Align2gangr(u.ualign.type), "My minion shall serve thee!");
-    // else godvoice(Align2gangr(u.ualign.type), "My minion shall save thee!");
-	god_gives_pet(align_gname_full(A_LAWFUL),A_LAWFUL);
+	god_gives_pet(align_gname_full(A_LAWFUL),A_LAWFUL, Align2gangr(A_LAWFUL));
 }
 
+int
+get_ga_mfaction(ga_num)
+int ga_num;
+{
+	if(ga_num == GA_MOTHER)
+		return GOATMOM_FACTION;
+	else return -1;
+}
 
 int
 dosacrifice()
@@ -3160,7 +3163,7 @@ aligntyp alignment;
 	const char *what = (const char *)0;
 	int i, ii, lim, timeout;
 	
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_gname_full(alignment),alignment);
+	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_gname_full(alignment),alignment,Align2gangr(alignment));
 	else {
 		switch (rn2(6)) {
 			case 0: // randomly increment an ability score
@@ -3472,7 +3475,7 @@ STATIC_OVL void
 goat_gives_benefit()
 {
 	struct obj *optr;
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(ga_gname_full(GA_MOTHER),A_NONE);
+	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(ga_gname_full(GA_MOTHER),A_NONE,GA_MOTHER);
 	else switch(rnd(7)){
 		case 1:
 			if (Hallucination)

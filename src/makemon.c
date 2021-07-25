@@ -26,9 +26,9 @@ STATIC_DCL int FDECL(align_shift, (struct permonst *));
 STATIC_DCL struct permonst * NDECL(roguemonst);
 STATIC_DCL boolean FDECL(wrong_elem_type, (struct permonst *));
 STATIC_DCL void FDECL(m_initthrow,(struct monst *, int, int, int));
-STATIC_DCL void FDECL(m_initweap,(struct monst *, int));
+STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int));
 #ifdef OVL1
-STATIC_DCL void FDECL(m_initinv,(struct monst *, int));
+STATIC_DCL void FDECL(m_initinv,(struct monst *, int, int));
 #endif /* OVL1 */
 
 extern const int monstr[];
@@ -216,9 +216,10 @@ static NEARDATA int angelweps[] = {
 };
 
 STATIC_OVL void
-m_initweap(mtmp, mkobjflags)
+m_initweap(mtmp, mkobjflags, faction)
 register struct monst *mtmp;
 int mkobjflags;
+int faction;
 {
 	register struct permonst *ptr = mtmp->data;
 	register int mm = monsndx(ptr);
@@ -641,7 +642,7 @@ int mkobjflags;
 			}
 			else if(mm == PM_GOAT_SPAWN) {
 				int threshold = rnd(10)+rn2(11);
-				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
+				if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
 					set_template(mtmp, MISTWEAVER);
 					mtmp->m_insight_level = threshold;
 				}
@@ -4342,7 +4343,7 @@ int mkobjflags;
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_SMALL_GOAT_SPAWN) {
 			int threshold = rnd(10)+rn2(11);
-			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
+			if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
 				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
@@ -5130,7 +5131,7 @@ int mkobjflags;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_DEMINYMPH){
-				if(In_lost_cities(&u.uz)){
+				if(In_lost_cities(&u.uz) || faction == GOATMOM_FACTION){
 					//Cultist of the Black Goat
 					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 3;
@@ -5520,7 +5521,7 @@ int mkobjflags;
 				}
 			} else {//not shopkeepers, deminymphs, or intoners
 				int threshold = rnd(10)+rn2(11);
-				if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
+				if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
 					set_template(mtmp, MISTWEAVER);
 					mtmp->m_insight_level = threshold;
 				}
@@ -5606,7 +5607,7 @@ int mkobjflags;
 		}
 		if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR){
 			int threshold = rnd(10)+rn2(11);
-			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
+			if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
 				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
@@ -6204,7 +6205,7 @@ int mkobjflags;
 				else (void)mongets(mtmp, GLAIVE, mkobjflags);
 			break;
 			case PM_LILITU:
-				if(In_lost_cities(&u.uz)){
+				if(In_lost_cities(&u.uz) || faction == GOATMOM_FACTION){
 					//Cultist of the Black Goat
 					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 6;
@@ -6654,9 +6655,10 @@ long amount;
 #endif
 
 STATIC_OVL void
-m_initinv(mtmp, mkobjflags)
+m_initinv(mtmp, mkobjflags, faction)
 register struct	monst	*mtmp;
 int mkobjflags;
+int faction;
 {
 	register int cnt;
 	int chance;
@@ -7444,7 +7446,7 @@ int mkobjflags;
 			(void) mpickobj(mtmp, otmp);
 		} else if(ptr->mtyp == PM_GIANT_GOAT_SPAWN) {
 			int threshold = rnd(10)+rn2(11);
-			if(mtmp->female && In_lost_cities(&u.uz) && u.uinsight > threshold){
+			if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
 				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
@@ -10150,8 +10152,8 @@ int faction;
 	
 	if (allow_minvent) {
 	    if(is_armed_mon(mtmp))
-			m_initweap(mtmp, mkobjflags);	/* equip with weapons / armor */
-	    m_initinv(mtmp, mkobjflags);  /* add on a few special items incl. more armor */
+			m_initweap(mtmp, mkobjflags, faction);	/* equip with weapons / armor */
+	    m_initinv(mtmp, mkobjflags, faction);  /* add on a few special items incl. more armor */
 	    m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
 	} else {
