@@ -1352,13 +1352,14 @@ boolean be_peaceful;
 }
 
 struct monst *
-make_pet_minion(mtyp,alignment)
+make_pet_minion(mtyp,alignment,ga_num)
 int mtyp;
 aligntyp alignment;
+int ga_num;
 {
     register struct monst *mon;
     register struct monst *mtmp2;
-	mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
+	mon = makemon_full(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS, -1, get_ga_mfaction(ga_num));
     if (!mon) return 0;
     /* now tame that puppy... */
 	add_mx(mon, MX_EDOG);
