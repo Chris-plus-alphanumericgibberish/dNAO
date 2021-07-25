@@ -587,8 +587,8 @@ int *fail_reason;
 			* will not stone-to-flesh as the real thing.
 			*/
 			if(statue->spe&STATUE_FACELESS){
-				mon = makeundead(&mons[PM_DOPPELGANGER], x, y,
-					NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK, ILLUMINATED);
+				mon = makemon_full(&mons[PM_DOPPELGANGER], x, y,
+					NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK, ILLUMINATED, -1);
 			} else {
 				mon = makemon(&mons[PM_DOPPELGANGER], x, y,
 					NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK);
@@ -607,7 +607,7 @@ int *fail_reason;
 			}
 	    } else {
 			if(statue->spe&STATUE_FACELESS){
-				mon = makeundead(mptr, x, y, NO_MINVENT|MM_ADJACENTOK, ILLUMINATED);
+				mon = makemon_full(mptr, x, y, NO_MINVENT|MM_ADJACENTOK, ILLUMINATED, -1);
 			} else {
 				mon = makemon(mptr, x, y, (NO_MINVENT | MM_ADJACENTOK));
 			}
