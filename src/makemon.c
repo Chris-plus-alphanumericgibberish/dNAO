@@ -9111,7 +9111,8 @@ int faction;
 		    pline("Explicitly creating extinct monster %s.",
 			mons[ptr->mtyp].mname);
 #endif
-		out_template = makemon_set_template(&ptr, template, randmonst);
+		/* set template if it wasn't already set */
+		out_template = makemon_set_template(&ptr, out_template, randmonst);
 	} else {
 		/* make a random (common) monster that can survive here.
 		 * (the special levels ask for random monsters at specific
