@@ -4007,7 +4007,9 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_MONS:
-		if (!youdef || u.summonMonster || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))) {
+		if(DimensionalLock)
+			return MM_MISS;
+		else if (!youdef || u.summonMonster || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			/* disallowed in Anachrononaut quest */
@@ -4017,8 +4019,6 @@ int tary;
 		{
 			int count;
 			u.summonMonster = TRUE;
-			if(DimensionalLock)
-				return MM_MISS;
 			count = nasty(magr);	/* summon something nasty */
 			if (magr->iswiz)
 				verbalize("Destroy the thief, my pet%s!", plur(count));
@@ -4041,7 +4041,9 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_DEVIL:
-		if (!youdef || u.summonMonster || !foundem) {
+		if(DimensionalLock)
+			return MM_MISS;
+		else if (!youdef || u.summonMonster || !foundem) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			/* since it always summons adjacent to player, only allow casting if they've found you */
@@ -4058,8 +4060,6 @@ int tary;
 			mtmp = summon_minion(sgn(magr->data->maligntyp), FALSE, TRUE, FALSE);
 			if (mtmp) {
 				u.summonMonster = TRUE;
-				if(DimensionalLock)
-					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("%s ascends from below!",
 					An(Hallucination ? rndmonnam() : "fiend"));
@@ -4075,7 +4075,9 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_TANNIN:
-		if (!youdef || u.summonMonster || !foundem) {
+		if(DimensionalLock)
+			return MM_MISS;
+		else if (!youdef || u.summonMonster || !foundem) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			/* since it always summons adjacent to player, only allow casting if they've found you */
@@ -4089,8 +4091,6 @@ int tary;
 			if (mtmp) {
 				// mtmp->mvar_tannintype = pick_tannin(magr);
 				u.summonMonster = TRUE;
-				if(DimensionalLock)
-					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("%s ascends from below!",
 					An(Hallucination ? rndmonnam() : "fiend"));
@@ -4106,7 +4106,9 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_ANGEL:
-		if (!youdef || u.summonMonster) {
+		if(DimensionalLock)
+			return MM_MISS;
+		else if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -4135,8 +4137,6 @@ int tary;
  				EPRI(mtmp)->shralign = sgn(magr->data->maligntyp);
 
 				u.summonMonster = TRUE;
-				if(DimensionalLock)
-					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("%s %s!",
 					An(Hallucination ? rndmonnam() : "angel"),
@@ -4162,7 +4162,9 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_ALIEN:
-		if (!youdef || u.summonMonster) {
+		if(DimensionalLock)
+			return MM_MISS;
+		else if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -4193,8 +4195,6 @@ int tary;
 			} while (!mtmp && tries++ < 10);
 			if (mtmp) {
 				u.summonMonster = TRUE;
-				if(DimensionalLock)
-					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("The world tears open, and %s steps through!",
 					an(Hallucination ? rndmonnam() : "alien"));
@@ -4210,7 +4210,9 @@ int tary;
 		return MM_HIT;
 
 	case SUMMON_YOUNG:
-		if (!youdef || u.summonMonster) {
+		if(DimensionalLock)
+			return MM_MISS;
+		else if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
@@ -4242,8 +4244,6 @@ int tary;
 			} while (!mtmp && tries++ < 10);
 			if (mtmp) {
 				u.summonMonster = TRUE;
-				if(DimensionalLock)
-					return MM_MISS;
 				if (canspotmon(mtmp))
 					pline("A monster appears in a swirl of mist!");
 				else
@@ -4257,7 +4257,9 @@ int tary;
 		return MM_HIT;
 
 	case TIME_DUPLICATE:
-		if (!youdef || u.summonMonster) {
+		if(DimensionalLock)
+			return MM_MISS;
+		else if (!youdef || u.summonMonster) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			return cast_spell(magr, mdef, attk, (foundem ? PSI_BOLT : CURE_SELF), tarx, tary);
@@ -4274,8 +4276,6 @@ int tary;
 			mtmp = makemon(magr->data, tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | NO_MINVENT | MM_ESUM);
 			if (mtmp){
 				u.summonMonster = TRUE;
-				if(DimensionalLock)
-					return MM_MISS;
 				mtmp->mclone = 1;
 				/* does not stick around long */
 				mark_mon_as_summoned(mtmp, magr, d(1, 4) + 1, 0);
