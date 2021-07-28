@@ -5312,11 +5312,18 @@ int damage, tell;
 #undef LUCK_MODIFIER
 	/* defense level */
 	dlev = (int)mtmp->m_lev;
+	if(mtmp->mcan)
+		dlev /= 2;
 	if (dlev > 50) dlev = 50;
 	else if (dlev < 1) dlev = 1;
+	
+	int mons_mr = mtmp->data->mr;
+	if(mtmp->mcan){
+			mons_mr /= 2;
+	}
 
 	if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) dlev+=u.chokhmah;
-	resisted = rn2(100 + alev - dlev) < mtmp->data->mr;
+	resisted = rn2(100 + alev - dlev) < mons_mr;
 	if (resisted) {
 	    if (tell) {
 		shieldeff(mtmp->mx, mtmp->my);
