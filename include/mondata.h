@@ -81,6 +81,7 @@
 #define species_displaces(ptr)	(((ptr)->mflagsg & MG_DISPLACEMENT) != 0L)
 #define species_floats(ptr)		(((ptr)->mflagsm & MM_FLOAT) != 0L)
 #define species_swims(ptr)		(((ptr)->mflagsm & MM_SWIM) != 0L)
+#define species_tears_webs(ptr)		(((ptr)->mflagsm & MM_WEBRIP) != 0L)
 #define is_suicidal(ptr)		(is_fern_spore(ptr) || \
 					(ptr)->mtyp == PM_FREEZING_SPHERE || \
 					(ptr)->mtyp == PM_FLAMING_SPHERE || \

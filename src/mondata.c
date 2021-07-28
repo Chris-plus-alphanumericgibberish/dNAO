@@ -287,7 +287,7 @@ int template;
 	case CRYSTALFIED:
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
-		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagsm |= (MM_BREATHLESS|MM_WEBRIP);
 		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
 		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);

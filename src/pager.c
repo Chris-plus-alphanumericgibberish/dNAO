@@ -1622,6 +1622,7 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, amorphous(ptr)			, "squeezes in gaps"	, many);
 	many = append(description, tunnels(ptr)				, "tunnels"				, many);
 	many = append(description, needspick(ptr)			, "digs"				, many);
+	many = append(description, species_tears_webs(ptr)	, "rips webs"			, many);
 	many = append(description, species_teleports(ptr), "teleports"			, many);
 	many = append(description, species_controls_teleports(ptr)	, "controls teleports"	, many);
 	many = append(description, mteleport(ptr)			, "teleports often"		, many);
