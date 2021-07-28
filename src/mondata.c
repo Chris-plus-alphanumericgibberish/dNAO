@@ -39,8 +39,24 @@ set_mcan(mon, state)
 struct monst *mon;
 boolean state;
 {
+	boolean weap_attack, xwep_attack;
 	mon->mcan = state;
 	set_mon_data_core(mon, mon->data);
+	weap_attack = mon_attacktype(mon, AT_WEAP);
+	xwep_attack = mon_attacktype(mon, AT_XWEP);
+	if(weap_attack && !MON_WEP(mon)){
+		mon->weapon_check = NEED_WEAPON;
+	}
+	else if(!weap_attack && MON_WEP(mon)){
+		setmnotwielded(mon, MON_WEP(mon));
+	}
+	
+	if(xwep_attack && !MON_SWEP(mon)){
+		mon->weapon_check = NEED_WEAPON;
+	}
+	else if(!xwep_attack && MON_SWEP(mon)){
+		setmnotwielded(mon, MON_SWEP(mon));
+	}
 }
 
 /* 
@@ -287,7 +303,7 @@ int template;
 	case CRYSTALFIED:
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
-		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagsm |= (MM_BREATHLESS|MM_WEBRIP);
 		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
 		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);

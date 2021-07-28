@@ -290,6 +290,10 @@ MONSTER:'G',"parasitized operator",random
 MONSTER:'G',"parasitized operator",random
 MONSTER:'G',"parasitized operator",random
 
+OBJECT[25%]:'*',"dilithium crystal",random
+OBJECT[25%]:'*',"dilithium crystal",random
+OBJECT[25%]:'*',"dilithium crystal",random
+OBJECT[25%]:'*',"dilithium crystal",random
 
 GEOMETRY:center,center
 #0         1         2         3         4         5         6         7     
@@ -385,6 +389,30 @@ OBJECT:'_',"broken gynoid",random
 OBJECT:'_',"broken android",random
 OBJECT:'_',"broken android",random
 OBJECT:'_',"broken gynoid",random
+
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
+OBJECT[10%]:'*',"dilithium crystal",random
 
 GEOMETRY:center,center
 #0         1         2         3         4         5         6         7     

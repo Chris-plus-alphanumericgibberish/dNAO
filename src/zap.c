@@ -830,9 +830,34 @@ boolean dolls;
 				mtmp = montraits(obj, &xy);
 				if (mtmp && get_mx(mtmp, MX_EDOG))
 					wary_dog(mtmp, TRUE);
-		    } else
+		    } else {
+				/* Generic android corpse */
+				if(is_android(&mons[montype])){
+					if(rn2(2)){
+						if(montype == PM_ANDROID)
+							montype = PM_FLAYED_ANDROID;
+						else 
+							montype = PM_FLAYED_GYNOID;
+						mtmp = makemon(&mons[montype], x, y,
+						   NO_MINVENT|MM_NOWAIT|MM_NOCOUNTBIRTH);
+						if(mtmp && !rn2(4))
+							set_template(mtmp, M_BLACK_WEB);
+					}
+					else {
+						mtmp = makemon(&mons[montype], x, y,
+						   NO_MINVENT|MM_NOWAIT|MM_NOCOUNTBIRTH|MM_EDOG);
+						if(mtmp){
+							initedog(mtmp);
+							if(rn2(2))
+								mtmp->mcrazed = TRUE;
+						}
+					}
+				}
+				else {
  		            mtmp = makemon(&mons[montype], x, y,
 				       NO_MINVENT|MM_NOWAIT|MM_NOCOUNTBIRTH);
+				}
+			}
 		    if (mtmp) {
 				if (get_ox(obj, OX_EMID)) {
 					unsigned m_id;
@@ -5287,11 +5312,18 @@ int damage, tell;
 #undef LUCK_MODIFIER
 	/* defense level */
 	dlev = (int)mtmp->m_lev;
+	if(mtmp->mcan)
+		dlev /= 2;
 	if (dlev > 50) dlev = 50;
 	else if (dlev < 1) dlev = 1;
+	
+	int mons_mr = mtmp->data->mr;
+	if(mtmp->mcan){
+			mons_mr /= 2;
+	}
 
 	if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) dlev+=u.chokhmah;
-	resisted = rn2(100 + alev - dlev) < mtmp->data->mr;
+	resisted = rn2(100 + alev - dlev) < mons_mr;
 	if (resisted) {
 	    if (tell) {
 		shieldeff(mtmp->mx, mtmp->my);

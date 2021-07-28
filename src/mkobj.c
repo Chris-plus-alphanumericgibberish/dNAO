@@ -990,6 +990,18 @@ int mkflags;
 			else	blessorcurse(otmp, 10);
 		case VENOM_CLASS:
 		case CHAIN_CLASS:
+			switch(otmp->otyp){
+				case BROKEN_ANDROID:
+					otmp->corpsenm = PM_ANDROID;
+				break;
+				case BROKEN_GYNOID:
+					otmp->corpsenm = rn2(20) ? PM_GYNOID : PM_OPERATOR;
+				break;
+				case LIFELESS_DOLL:
+					otmp->corpsenm = PM_LIVING_DOLL;
+				break;
+			}
+			break;
 		case BALL_CLASS:
 			break;
 		case POTION_CLASS:

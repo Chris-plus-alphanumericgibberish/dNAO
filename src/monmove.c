@@ -1662,6 +1662,7 @@ register struct monst *mtmp;
 						fall_asleep(-100*dmg, TRUE);
 					}
 				}
+				nomul(0, NULL);
 			}
 		}
 		for(m2=fmon; m2; m2 = nmon) {

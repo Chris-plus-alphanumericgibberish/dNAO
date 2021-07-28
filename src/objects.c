@@ -1761,7 +1761,7 @@ CHAINCORPSE(("lifeless doll"),   750, WOOD, CLR_BRIGHT_MAGENTA), /*Needs encyc e
 CHAINROPE(("rope of entangling"),   B, VEGGY, CLR_BROWN),
 CHAINROPE(("iron bands"),           B, IRON,  HI_METAL),
 CHAINROPE(("razor wire"),           S, METAL, HI_METAL),
-CHAINROPE(("shackles"),             S, IRON,  HI_METAL),
+CHAINROPE(("shackles"),             B, IRON,  HI_METAL),
 
 #undef CHAINROPE
 

@@ -4458,7 +4458,7 @@ struct obj *wep;
 				if(canseemon(magr))
 					pline("The depths of the dark gleam, nurturing %s spirit!", s_suffix(mon_nam(magr)));
 				magr->mspec_used = 0;
-				magr->mcan = 0;
+				set_mcan(magr, FALSE);
 			}
 		}
 	}

@@ -2036,10 +2036,13 @@ struct monst *mtmp;
 				   In_sokoban(&u.uz) && !trap->madeby_u) || tt == STATUE_TRAP);
 	    const char *fallverb;
 
-#ifdef STEED
 	    /* true when called from dotrap, inescapable is not an option */
 	    if (mtmp == u.usteed) inescapable = TRUE;
-#endif
+
+	    /* web-rippers always rip webs */
+		if(species_tears_webs(mtmp->data) && tt == WEB)
+			inescapable = TRUE;
+
 	    if (!inescapable &&
 		    ((mtmp->mtrapseen & (1 << (tt-1))) != 0 ||
 			(tt == HOLE && !mindless_mon(mtmp)))) {
@@ -2453,6 +2456,10 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				}
 			}
 			tear_web = FALSE;
+			/* this list is fairly arbitrary; it deliberately
+			   excludes wumpus & giant/ettin zombies/mummies */
+			if(species_tears_webs(mptr))
+				tear_web = TRUE;
 			switch (monsndx(mptr)) {
 			    case PM_OWLBEAR: /* Eric Backus */
 			    case PM_BUGBEAR:
@@ -2463,10 +2470,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				}
 				/* fall though */
 			    default:
-				if (mptr->mlet == S_GIANT ||
-				    (mptr->mlet == S_DRAGON &&
-					extra_nasty(mptr)) || /* excl. babies */
-				    (mtmp->wormno && count_wsegs(mtmp) > 5)) {
+				if ((mtmp->wormno && count_wsegs(mtmp) > 5)) {
 				    tear_web = TRUE;
 				} else if (in_sight) {
 				    pline("%s is caught in %s spider web.",
@@ -2475,28 +2479,6 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				    seetrap(trap);
 				}
 				mtmp->mtrapped = tear_web ? 0 : 1;
-				break;
-			    /* this list is fairly arbitrary; it deliberately
-			       excludes wumpus & giant/ettin zombies/mummies */
-			    case PM_TITANOTHERE:
-			    case PM_BALUCHITHERIUM:
-			    case PM_PURPLE_WORM:
-			    case PM_JABBERWOCK:
-				// case PM_VORPAL_JABBERWOCK:
-			    case PM_ARGENTUM_GOLEM:
-			    case PM_IRON_GOLEM:
-			    case PM_GREEN_STEEL_GOLEM:
-			    case PM_CHAIN_GOLEM:
-			    case PM_CENTER_OF_ALL:
-			    case PM_CHAOS:
-			    case PM_GREAT_CTHULHU:
-			    case PM_DEMOGORGON:
-			    case PM_LAMASHTU:
-			    case PM_BALROG:
-			    case PM_KRAKEN:
-			    case PM_MASTODON:
-			    case PM_DREAD_SERAPH:
-				tear_web = TRUE;
 				break;
 			}
 			if (tear_web) {

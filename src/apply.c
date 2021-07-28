@@ -49,6 +49,7 @@ STATIC_DCL int FDECL(use_pole, (struct obj *));
 STATIC_DCL int FDECL(use_cream_pie, (struct obj *));
 STATIC_DCL int FDECL(use_grapple, (struct obj *));
 STATIC_DCL int FDECL(use_crook, (struct obj *));
+STATIC_DCL int FDECL(use_dilithium, (struct obj *));
 STATIC_DCL int FDECL(use_doll, (struct obj *));
 STATIC_DCL int FDECL(use_doll_tear, (struct obj *));
 STATIC_DCL int FDECL(use_pyramid, (struct obj *));
@@ -4449,6 +4450,39 @@ struct obj *obj;
 }
 
 STATIC_OVL int
+use_dilithium(obj)
+	struct obj *obj;
+{
+	struct monst *mtmp = 0;
+	struct obj *dollobj = 0;
+	// Create an array with all classes explicitly listed in it, 1-MAXOCLASSES :(
+	char all_classes[MAXOCLASSES] = {0};
+	for(int i = 1; i < MAXOCLASSES; i++)
+		all_classes[i-1] = i;
+	dollobj = getobj(all_classes, "install dilithim in");
+	if(!dollobj)
+		return 0;
+
+	if(dollobj->otyp != BROKEN_ANDROID && dollobj->otyp != BROKEN_GYNOID){
+		pline("That's not a droid.");
+		return 0;
+	}
+
+	mtmp = revive(dollobj, TRUE);
+
+	if(!mtmp){
+		pline("Nothing happens....");
+		return 0;
+	}
+	
+	mtmp->mhp = max(1, mtmp->m_lev);
+	pline("%s comes back online!", Monnam(mtmp));
+	
+	useup(obj);
+	return 1;
+}
+
+STATIC_OVL int
 use_doll_tear(obj)
 	struct obj *obj;
 {
@@ -6578,7 +6612,8 @@ struct obj **optr;
 			case PM_SCRAP_TITAN:
 				can_use_obj = (obj->otyp == CLOCKWORK_COMPONENT
 							|| obj->otyp == SUBETHAIC_COMPONENT
-							|| obj->otyp == HELLFIRE_COMPONENT);
+							|| obj->otyp == HELLFIRE_COMPONENT
+							|| obj->otyp == SCRAP);
 				break;
 			default:
 				/* androids need the rarer subethaic components */
@@ -7577,6 +7612,15 @@ doapply()
 		break;
 		case DOLL_S_TEAR:
 			res = use_doll_tear(obj);
+		break;
+		case DILITHIUM_CRYSTAL:
+			if(Role_if(PM_ANACHRONONAUT) && !obj->oartifact)
+				res = use_dilithium(obj);
+			else {
+				pline("Sorry, I don't know how to use that.");
+				nomul(0, NULL);
+				return 0;
+			}
 		break;
 		case HOLY_SYMBOL_OF_THE_BLACK_MOTHE:
 			res = pray_goat();

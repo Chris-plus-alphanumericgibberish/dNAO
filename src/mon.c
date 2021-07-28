@@ -2937,9 +2937,7 @@ impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 				&& (ttmp->ttyp != SQKY_BOARD || !mon_resistance(mon,FLYING))
 				&& (ttmp->ttyp != WEB || (!amorphous(mdat) &&
 				    !(webmaker(mdat) || (Is_lolth_level(&u.uz) && !mon->mpeaceful)) && !(
-						 mdat->mlet == S_GIANT ||
-						(mdat->mlet == S_DRAGON &&
-						extra_nasty(mdat)) || /* excl. babies */
+						species_tears_webs(mdat) ||
 						(mon->wormno && count_wsegs(mon) > 5)
 					) && 
 					!(mwep && (mwep->oartifact == ART_STING || 

@@ -839,6 +839,7 @@ carrying_applyable_gem()
 		|| otmp->otyp == CATAPSI_VORTEX
 		|| otmp->otyp == VITAL_SOULSTONE
 		|| otmp->otyp == SPIRITUAL_SOULSTONE
+		|| (Role_if(PM_ANACHRONONAUT) && !otmp->oartifact && otmp->otyp == DILITHIUM_CRYSTAL)
 		)
 			return TRUE;
 	return FALSE;
@@ -1200,6 +1201,10 @@ register const char *let,*word;
 			!(otmp->otyp == BROKEN_GYNOID && otmp->ovar1 == 0) &&
 			!(otmp->otyp == LIFELESS_DOLL && otmp->ovar1 == 0)
 		)
+		|| (!strcmp(word, "install dilithim in") &&
+			!(otmp->otyp == BROKEN_ANDROID) &&
+			!(otmp->otyp == BROKEN_GYNOID)
+		)
 		|| (!strcmp(word, "wind with") && ((otmp->oclass == TOOL_CLASS &&
 		     otyp != SKELETON_KEY) ||
 			(otmp->oclass == CHAIN_CLASS)))
@@ -1255,7 +1260,9 @@ register const char *let,*word;
 			  otmp->otyp != DOUBLE_FORCE_BLADE && otmp->otyp != FORCE_BLADE
 			 ) ||
 			 (otmp->oclass == CHAIN_CLASS && 
-				(otyp == CHAIN || otyp == SHEAF_OF_HAY)
+				!(otyp == CLOCKWORK_COMPONENT || otyp == SUBETHAIC_COMPONENT 
+				  || otyp == HELLFIRE_COMPONENT || otyp == SCRAP 
+				  || otyp == LIFELESS_DOLL) /* Note: Joke */
 			 ) ||
 		     (otmp->oclass == POTION_CLASS &&
 		     /* only applicable potion is oil, and it will only
@@ -1275,6 +1282,7 @@ register const char *let,*word;
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)
 				&& otyp != CATAPSI_VORTEX && otyp != ANTIMAGIC_RIFT
 				&& otyp != VITAL_SOULSTONE && otyp != SPIRITUAL_SOULSTONE
+				&& !(otyp == DILITHIUM_CRYSTAL && Role_if(PM_ANACHRONONAUT) && !otmp->oartifact)
 			 )))
 		|| (!strcmp(word, "invoke") &&
 		    (!otmp->oartifact && !objects[otyp].oc_unique &&
