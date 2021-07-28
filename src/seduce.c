@@ -1380,7 +1380,7 @@ boolean badeffect;
 			if (!badeffect)
 				mon->mspec_used = rnd(100);
 			if (!rn2(25))
-				mon->mcan = 1;
+				set_mcan(mon, TRUE);
 			break;
 	}
 	return;

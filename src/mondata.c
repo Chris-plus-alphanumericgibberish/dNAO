@@ -39,8 +39,24 @@ set_mcan(mon, state)
 struct monst *mon;
 boolean state;
 {
+	boolean weap_attack, xwep_attack;
 	mon->mcan = state;
 	set_mon_data_core(mon, mon->data);
+	weap_attack = mon_attacktype(mon, AT_WEAP);
+	xwep_attack = mon_attacktype(mon, AT_XWEP);
+	if(weap_attack && !MON_WEP(mon)){
+		mon->weapon_check = NEED_WEAPON;
+	}
+	else if(!weap_attack && MON_WEP(mon)){
+		setmnotwielded(mon, MON_WEP(mon));
+	}
+	
+	if(xwep_attack && !MON_SWEP(mon)){
+		mon->weapon_check = NEED_WEAPON;
+	}
+	else if(!xwep_attack && MON_SWEP(mon)){
+		setmnotwielded(mon, MON_SWEP(mon));
+	}
 }
 
 /* 
