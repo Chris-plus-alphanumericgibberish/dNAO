@@ -230,6 +230,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	case PM_INCANTIFIER:
 		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
 			*weapon = rn2(2) ? DOUBLE_LIGHTSABER : LIGHTSABER;
+			*rweapon = HAND_BLASTER;
 			*armor = !rn2(3) ? JUMPSUIT : 
 					 rn2(2) ? BODYGLOVE :
 					 PLASTEEL_ARMOR;
