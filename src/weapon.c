@@ -1338,6 +1338,9 @@ struct obj *otmp;
         if (throws_rocks(mtmp->data) && is_boulder(otmp)) return TRUE;
 		
 		if(wep->otyp == otmp->otyp) return dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(wep, 0 /*zeromonst*/, 0);
+		
+		if(wep->otyp == ARM_BLASTER) return FALSE;
+		if(wep->otyp == HAND_BLASTER) return (otmp->otyp == ARM_BLASTER && otmp->ovar1 > 0);
     }
     
     if (((strongmonst(mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0) || !bimanual(otmp,mtmp->data)) && 
