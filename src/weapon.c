@@ -1295,7 +1295,11 @@ static NEARDATA const int rwep[] =
 };
 
 static NEARDATA const int pwep[] =
-{	POLEAXE, /*1d10/2d6*/
+{	
+	FORCE_PIKE,/*3d6+6/3d8+8*/
+	GOLD_BLADED_VIBROSPEAR,/*2d6+3/2d8+3*/
+	WHITE_VIBROSPEAR,/*2d6+3/2d8+3*/
+	POLEAXE, /*1d10/2d6*/
 	HALBERD, /*1d10/2d6*/
 	DROVEN_LANCE, /*1d10/1d10*/
 	BARDICHE, /*2d4/3d4*/ 
