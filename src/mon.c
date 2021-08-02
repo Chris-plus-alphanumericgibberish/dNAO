@@ -4000,12 +4000,19 @@ register struct monst *mtmp;
 		u.chokhmah++;
 		u.keter++;
 	}
-	if (mtmp->mtyp == PM_CHAOS && mvitals[PM_CHAOS].died == 1) {
-	} else if(mtmp->data->geno & G_UNIQ && mvitals[monsndx(mtmp->data)].died == 1){
+	//Livelogs
+	if (mtmp->data->mlet == S_VAMPIRE && mtmp->data->geno & G_UNIQ && mtmp->mtyp != PM_VLAD_THE_IMPALER)
+		/* don't livelog Vlad's wives, too spammy */;
+	else if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH && mvitals[PM_CHOKHMAH_SEPHIRAH].died == 1)
+		livelog_write_string("destroyed a chokhmah sephirah");	/* not unique but worth logging the first */
+	else if (mtmp->mtyp == PM_CHAOS && mvitals[PM_CHAOS].died == 1 && Hallucination)
+		livelog_write_string("perpetuated an asinine paradigm"); /* YAF-livelog if hallucinating */
+	else if(mtmp->data->geno & G_UNIQ && mvitals[mtmp->mtyp].died == 1){
 		char buf[BUFSZ];
 		buf[0]='\0';
 		if(nonliving(mtmp->data)) Sprintf(buf,"destroyed %s",noit_nohalu_mon_nam(mtmp));
 		else Sprintf(buf,"killed %s",noit_nohalu_mon_nam(mtmp));
+		livelog_write_string(buf);
 	}
 	//Remove linked hungry dead
 	if(mtmp->mtyp == PM_BLOB_OF_PRESERVED_ORGANS){
@@ -4179,44 +4186,19 @@ boolean was_swallowed;			/* digestion */
 {
 	struct permonst *mdat = mon->data;
 	int i, tmp;
-	if (mdat->mtyp == PM_VLAD_THE_IMPALER) {
-		if(mvitals[PM_VLAD_THE_IMPALER].died == 1) livelog_write_string("destroyed Vlad the Impaler");
-	    if (cansee(mon->mx, mon->my) && !was_swallowed)
-			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
-	    return FALSE;
-	}
-	else if(mdat->mlet == S_VAMPIRE && mdat->geno & G_UNIQ){
-		//Don't livelog Vlad's wives; livelog spam reduction
+	/* Liches and Vlad and his wives have a fancy death message, and leave no corpse */
+	if ((mdat->mlet == S_LICH) ||
+		(mdat->mlet == S_VAMPIRE && mdat->geno & G_UNIQ)) {
 		if (cansee(mon->mx, mon->my) && !was_swallowed)
 			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
-	    return FALSE;
+	    
+		if(mdat->mtyp != PM_VECNA) return FALSE; /* exception for Vecna, who leaves his hand or eye*/
 	}
-	else if (mdat->mtyp == PM_ACERERAK) {
-		if (mvitals[PM_ACERERAK].died == 1) livelog_write_string("destroyed Acererak");
-		if (cansee(mon->mx, mon->my) && !was_swallowed)
-			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
+	else if(mdat->mtyp == PM_ECLAVDRA)
 		return FALSE;
-	}
-	else if (mdat->mlet == S_LICH && mdat->mtyp != PM_LICH__THE_FIEND_OF_EARTH) {
-	    if (cansee(mon->mx, mon->my) && !was_swallowed)
-			pline("%s body crumbles into dust.", s_suffix(Monnam(mon)));
-	    if(mdat->mtyp != PM_VECNA && mdat->mtyp != PM_LICH__THE_FIEND_OF_EARTH) return FALSE; /*Vecna leaves his hand or eye*/
-	}
-	else if(mdat->mtyp == PM_ECLAVDRA) return FALSE;
-	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH){
-		if(mvitals[PM_CHOKHMAH_SEPHIRAH].died == 1) livelog_write_string("destroyed a chokhmah sephirah");
+	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH)
 		return FALSE;
-	}
-	else if (mdat->mtyp == PM_CHAOS && mvitals[PM_CHAOS].died == 1) {
-		if(Hallucination) livelog_write_string("perpetuated an asinine paradigm");
-		else livelog_write_string("destroyed Chaos");
-	} else if(mdat->geno & G_UNIQ && mvitals[monsndx(mdat)].died == 1){
-		char buf[BUFSZ];
-		buf[0]='\0';
-		if(nonliving(mdat)) Sprintf(buf,"destroyed %s",noit_nohalu_mon_nam(mon));
-		else Sprintf(buf,"killed %s",noit_nohalu_mon_nam(mon));
-		livelog_write_string(buf);
-	}
+	
 	//Must be done here for reasons that are obscure
 	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
 		if(mdat->mtyp == PM_TROOPER){
