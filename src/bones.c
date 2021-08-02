@@ -575,6 +575,10 @@ struct obj *corpse;
 		ttmp->madeby_u = 0;
 		ttmp->tseen = (ttmp->ttyp == HOLE);
 	}
+	if (Role_if(PM_RANGER) && Race_if(PM_GNOME) && on_level(&u.uz, &minetown_level)) {
+		levl[sstairs.sx][sstairs.sy].typ = ROOM;
+		sstairs.sx = sstairs.sy = 0;
+	}
 	resetobjs(fobj,FALSE);
 	resetobjs(level.buriedobjlist, FALSE);
 
