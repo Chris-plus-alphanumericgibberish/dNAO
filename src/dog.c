@@ -1012,7 +1012,7 @@ rock:
 		    return (is_undead(mon->data) ? TABU :
 			    ((herbi || starving) ? ACCFOOD : MANFOOD));
 		case TIN:
-		    return (metallivorous(mon->data) ? ACCFOOD : MANFOOD);
+		    return (metallivorous(mon->data) ? ACCFOOD : TABU);
 		case APPLE:
 		case CARROT:
 		    return (herbi ? DOGFOOD : starving ? ACCFOOD : MANFOOD);
