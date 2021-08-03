@@ -3038,11 +3038,11 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			if(pure_weapon(obj) && obj->spe >= 6){
-				Sprintf(buf2, "Deals an 20%% damage to all targets when the wielder is at full health.");
+				Sprintf(buf2, "Deals 20%% extra damage to all targets when the wielder is at full health.");
 				OBJPUTSTR(buf2);
 			}
 			if(dark_weapon(obj) && obj->spe >= 6){
-				Sprintf(buf2, "Deals an 20%% damage to all targets when the wielder is at 30%% health or lower.");
+				Sprintf(buf2, "Deals 20%% extra damage to all targets when the wielder is at 30%% health or lower.");
 				OBJPUTSTR(buf2);
 			}
 		}
