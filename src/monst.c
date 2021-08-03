@@ -2226,7 +2226,7 @@ then fill new spaces with our spawn!
 	MA_MINION /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, HI_ZAP),
 
     MON("harrower of Zariel", S_LAW_ANGEL,// /* Needs encyc entry */
-	LVL_FULL(14, 17,  SPE_AC(16), SLOT_DETAIL_DR(0,9,7,0,0, 12,9,9,9,9), 77, 7), (G_PLANES|G_NOCORPSE|G_NOGEN),
+	LVL_FULL(14, 17,  SPE_AC(-6), SLOT_DETAIL_DR(0,9,7,0,0, 12,9,9,9,9), 77, 7), (G_PLANES|G_NOCORPSE|G_NOGEN),
 	A(ATTK(AT_CLAW, AD_ACFR, 1, 7), ATTK(AT_CLAW, AD_ACFR, 1, 7),
 	  ATTK(AT_REND, AD_DISN, 3, 1),
 	  NO_ATTK, NO_ATTK, NO_ATTK),
