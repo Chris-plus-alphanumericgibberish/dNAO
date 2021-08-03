@@ -6353,10 +6353,26 @@ int faction;
 		    case PM_MARILITH:{
 				if(Inhell){
 					chance = rnd(10);
-					if(chance >= 9) mongets(mtmp, PLATE_MAIL, mkobjflags);
-					else if(chance >= 6) mongets(mtmp, CHAIN_MAIL, mkobjflags);
-					else if(chance >= 3) mongets(mtmp, STUDDED_LEATHER_ARMOR, mkobjflags);
-					else mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+					if(chance >= 9){
+						mongets(mtmp, PLATE_MAIL, mkobjflags);
+						mongets(mtmp, rn2(20) ? GAUNTLETS : GAUNTLETS_OF_POWER, mkobjflags);
+						mongets(mtmp, HELMET, mkobjflags);
+					}
+					else if(chance >= 6){
+						mongets(mtmp, CHAIN_MAIL, mkobjflags);
+						mongets(mtmp, GAUNTLETS, mkobjflags);
+						mongets(mtmp, HELMET, mkobjflags);
+					}
+					else if(chance >= 3){
+						mongets(mtmp, STUDDED_LEATHER_ARMOR, mkobjflags);
+						mongets(mtmp, GLOVES, mkobjflags);
+						mongets(mtmp, LEATHER_HELM, mkobjflags);
+					}
+					else {
+						mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+						mongets(mtmp, GLOVES, mkobjflags);
+						mongets(mtmp, LEATHER_HELM, mkobjflags);
+					}
 					switch(rn2(3)){
 						case 0:
 							mongets(mtmp, TRIDENT, mkobjflags);
