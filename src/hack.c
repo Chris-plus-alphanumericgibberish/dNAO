@@ -2702,7 +2702,10 @@ weight_cap()
 		}
 		if (carrcap < 0) carrcap = 0;
 	}
-
+	if(u.usteed && P_SKILL(P_RIDING) > P_UNSKILLED){
+		carrcap += 100 * (P_SKILL(P_RIDING) - P_UNSKILLED);
+	}
+	
 	carrcap += u.ucarinc;
 	if(u.sealsActive&SEAL_FAFNIR) carrcap *= 1+((double) u.ulevel)/100;
 	if(active_glyph(COMMUNION)) carrcap *= 1.25;
