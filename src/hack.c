@@ -2648,32 +2648,24 @@ weight_cap()
 	
 	struct permonst *mdat = youracedata;
 	
-	struct obj *gloves = uarmg;
 	struct obj *cloak = uarmc;
 	struct obj *bodyarmor = uarm;
 	struct obj *underarmor = uarmu;
 	struct obj *boots = uarmf;
 	
-#ifdef STEED
 	/*If mounted your steed is doing the carrying, use its data instead*/
 	if(u.usteed && u.usteed->data){
+		long mstr = mon_str(u.usteed);
+		long mcon = mon_con(u.usteed);
 		// carrcap = 25L*(acurrstr((int)(u.usteed->mstr)) + u.usteed->mcon) + 50L;
-		gloves = which_armor(u.usteed, W_ARMG);
 		cloak = which_armor(u.usteed, W_ARMC);
 		bodyarmor = which_armor(u.usteed, W_ARM);
 		underarmor = which_armor(u.usteed, W_ARMU);
 		boots = which_armor(u.usteed, W_ARMF);
 		
-		if(gloves && gloves->otyp == GAUNTLETS_OF_POWER){
-			carrcap = 25L*(25L + 11L) + 50L;
-		} else if(strongmonst(u.usteed->data)){
-			carrcap = 25L*(18L + 11L) + 50L;
-		} else {
-			carrcap = 25L*(11L + 11L) + 50L;
-		}
+		carrcap = 25L*(mstr + mcon) + 50L;
 		mdat = u.usteed->data;
 	}
-#endif
 	if (!mdat->cwt)
 		maxcap = (maxcap * (long)mdat->msize) / MZ_HUMAN;
 	else if (!strongmonst(mdat)
