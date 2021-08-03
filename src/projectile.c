@@ -3130,21 +3130,24 @@ int n;	/* number to try to fire */
 		/* shadow bolts web the target hit */
 		if (typ == AD_SHDW) {
 			struct trap *ttmp2;
-			ttmp2 = maketrap(bhitpos.x, bhitpos.y, WEB);
-			if (bhitpos.x == u.ux && bhitpos.y == u.uy && ttmp2) {
-				pline_The("webbing sticks to you. You're caught!");
-				dotrap(ttmp2, NOWEBMSG);
+			if(!(ttmp2 = t_at(bhitpos.x, bhitpos.y)))
+				ttmp2 = maketrap(bhitpos.x, bhitpos.y, WEB);
+			if (ttmp2 && ttmp2->ttyp == WEB) {
+				if (bhitpos.x == u.ux && bhitpos.y == u.uy && ttmp2 && ttmp2->ttyp == WEB) {
+					pline_The("webbing sticks to you. You're caught!");
+					dotrap(ttmp2, NOWEBMSG);
 #ifdef STEED
-				if (u.usteed && u.utrap) {
-					/* you, not steed, are trapped */
-					dismount_steed(DISMOUNT_FELL);
-				}
+					if (u.usteed && u.utrap) {
+						/* you, not steed, are trapped */
+						dismount_steed(DISMOUNT_FELL);
+					}
 #endif
-			}
-			else if (ttmp2) {
-				struct monst * mdef = m_at(bhitpos.x, bhitpos.y);
-				if (mdef)
-					mintrap(mdef);
+				}
+				else {
+					struct monst * mdef = m_at(bhitpos.x, bhitpos.y);
+					if (mdef)
+						mintrap(mdef);
+				}
 			}
 		}
 	}

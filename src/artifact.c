@@ -7583,7 +7583,9 @@ arti_invoke(obj)
 							} else {
 								mtmp->mhp -= 2*dmg;
 								mtmp->mhpmax -= dmg;
-								mtmp->m_lev -= 2;
+								if(mtmp->m_lev < 2)
+									mtmp->m_lev = 0;
+								else mtmp->m_lev -= 2;
 								if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < 1)
 									xkilled(mtmp, 1);
 								else {
@@ -7612,8 +7614,9 @@ arti_invoke(obj)
 								if(!rn2(10)) dmg += mtmp->mhp;
 								mtmp->mhp -= dmg;
 								mtmp->mhpmax -= dmg;
-								mtmp->m_lev -= (int)(dmg/4.5);
-								if(mtmp->m_lev < 0) mtmp->m_lev = 0; 
+								if(mtmp->m_lev < (int)(dmg/4.5))
+									mtmp->m_lev = 0;
+								else mtmp->m_lev -= (int)(dmg/4.5);
 								if (mtmp->mhp <= 0 || mtmp->mhpmax <= 0 || mtmp->m_lev < 1)
 									xkilled(mtmp, 1);
 								else {

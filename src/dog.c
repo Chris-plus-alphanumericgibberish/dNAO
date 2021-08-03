@@ -569,8 +569,8 @@ long nmv;		/* number of moves */
 	/* reduce tameness for every 150 moves you are separated */
 	if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->loyal)
 	 && !(
-		In_quest(&u.uz) && 
-		((Is_qtown(&u.uz) && !flags.stag) || 
+	  In_quest(&u.uz) 
+	  && ((Is_qtown(&u.uz) && !flags.stag) || 
 		 (Is_nemesis(&u.uz) && flags.stag)) &&
 	 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&
 	 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&
@@ -1012,7 +1012,7 @@ rock:
 		    return (is_undead(mon->data) ? TABU :
 			    ((herbi || starving) ? ACCFOOD : MANFOOD));
 		case TIN:
-		    return (metallivorous(mon->data) ? ACCFOOD : MANFOOD);
+		    return (metallivorous(mon->data) ? ACCFOOD : TABU);
 		case APPLE:
 		case CARROT:
 		    return (herbi ? DOGFOOD : starving ? ACCFOOD : MANFOOD);

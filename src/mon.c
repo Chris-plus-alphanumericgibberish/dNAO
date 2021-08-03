@@ -6011,7 +6011,9 @@ register int x, y, distance;
 					if(damage > 0){
 						tmpm->mhp -= 8*damage;
 						tmpm->mhpmax -= 8*damage;
-						tmpm->m_lev -= damage;
+						if(tmpm->m_lev < damage) 
+							tmpm->m_lev = 0;
+						else tmpm->m_lev -= damage;
 						if(tmpm->mhp < 1
 						|| tmpm->mhpmax < 1
 						|| tmpm->m_lev < 0

@@ -50,7 +50,7 @@ can_saddle(mtmp)
 				(ptr->mtyp == PM_BYAKHEE)
 			) && 
 			(ptr->msize >= MZ_MEDIUM) &&
-			!humanoid(ptr) &&
+			!(humanoid(ptr) && ptr->mtyp != PM_SPROW) &&
 			!amorphous(ptr) && !noncorporeal(ptr) &&
 			!is_whirly(ptr) && !unsolid(ptr));
 }
@@ -432,12 +432,14 @@ kick_steed()
 	}
 
 	/* Make the steed less tame and check if it resists */
-	if (u.usteed->mtame) u.usteed->mtame--;
-	if (!u.usteed->mtame && u.usteed->mleashed) m_unleash(u.usteed, TRUE);
-	if (!u.usteed->mtame || (u.ulevel+u.usteed->mtame < rnd(MAXULEV/2+5))) {
-	    if (!u.usteed->mtame) untame(u.usteed, 0);
-		else dismount_steed(DISMOUNT_THROWN);
-	    return;
+	if(!(get_mx(u.usteed, MX_EDOG) && EDOG(u.usteed)->loyal)){
+		if (u.usteed->mtame) u.usteed->mtame--;
+		if (!u.usteed->mtame && u.usteed->mleashed) m_unleash(u.usteed, TRUE);
+		if (!u.usteed->mtame || (u.ulevel+u.usteed->mtame+P_SKILL(P_RIDING) < rnd(MAXULEV/2+5))) {
+			if (!u.usteed->mtame) untame(u.usteed, 0);
+			else dismount_steed(DISMOUNT_THROWN);
+			return;
+		}
 	}
 
 	pline("%s gallops!", Monnam(u.usteed));
