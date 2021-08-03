@@ -50,7 +50,7 @@ can_saddle(mtmp)
 				(ptr->mtyp == PM_BYAKHEE)
 			) && 
 			(ptr->msize >= MZ_MEDIUM) &&
-			!humanoid(ptr) &&
+			!(humanoid(ptr) && ptr->mtyp != PM_SPROW) &&
 			!amorphous(ptr) && !noncorporeal(ptr) &&
 			!is_whirly(ptr) && !unsolid(ptr));
 }
