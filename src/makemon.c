@@ -6424,6 +6424,25 @@ int faction;
 						
 					}
 				}
+				else if(In_mordor_quest(&u.uz) 
+					&& !In_mordor_forest(&u.uz)
+					&& !Is_ford_level(&u.uz)
+					&& !In_mordor_fields(&u.uz)
+					&& in_mklev
+				){
+					mongets(mtmp, PLAIN_DRESS, mkobjflags);
+					otmp = mongets(mtmp, SCALE_MAIL, mkobjflags);
+					if(otmp) set_material_gm(otmp, GOLD);
+					mongets(mtmp, ARCHAIC_GAUNTLETS, mkobjflags);
+					if(otmp) set_material_gm(otmp, GOLD);
+					
+					mongets(mtmp, STILETTO, mkobjflags);
+					mongets(mtmp, SHORT_SWORD, mkobjflags);
+					mongets(mtmp, ELVEN_SHORT_SWORD, mkobjflags);
+					mongets(mtmp, DWARVISH_SHORT_SWORD, mkobjflags);
+					mongets(mtmp, KHOPESH, mkobjflags);
+					mongets(mtmp, RAPIER, mkobjflags);
+				}
 			}break;
 		    case PM_PIT_FIEND:
 				otmp = mksobj(TRIDENT, mkobjflags|MKOBJ_NOINIT);
