@@ -16038,7 +16038,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 									s_suffix(mon_nam(mdef)));
 								else if (ureflects("%s gaze is only partially reflected by your %s!",
 									s_suffix(Monnam(mdef)))){
-									nomul(-dmg / 2, "frozen by the gaze of Axus");
+									nomul(-1*(dmg / 2+1), "frozen by the gaze of Axus");
 								}
 								else {
 									You("are frozen by %s gaze!",
@@ -16056,7 +16056,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 								if (mon_reflects(magr,
 									canseemon(magr) ? buf : (char *)0)) {
 									magr->mcanmove = 0;
-									magr->mfrozen = dmg / 2;
+									magr->mfrozen = dmg / 2+1;
 								}
 								else {
 									if (canseemon(magr)) {
