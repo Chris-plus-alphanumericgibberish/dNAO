@@ -11352,7 +11352,7 @@ int mkobjflags;
 		if (otmp->otyp == BULLWHIP && is_drow(mtmp->data) && mtmp->female)
 			set_material_gm(otmp, SILVER);
 		if (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp)){
-			if (is_suit(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_BODYTYPEMASK);
+			if (is_suit(otmp) || otmp->otyp == BODYGLOVE) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_BODYTYPEMASK);
 			else if (is_helmet(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HEADMODIMASK);
 			else if (is_shirt(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (mtmp->data->mflagsb&MB_BODYTYPEMASK);
 		}
