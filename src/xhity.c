@@ -16933,7 +16933,7 @@ struct monst * mdef;
 
 /* mummy_curses_x()
  * 
- * Mummy curses (for use in various contexts. Returns result flags.
+ * Mummy curses (for use in various contexts). Returns result flags.
  */
 int
 mummy_curses_x(magr, mdef)
@@ -16969,12 +16969,21 @@ struct monst * mdef;
 		case PM_ANCIENT_OF_THE_BURNING_WASTES:
 			cnum = 5;
 		break;
-		default:
+		case PM_SOLDIER_MUMMY:
 			cnum = rnd(3);
+		default:
+			cnum = 0;
 		break;
 	}
 	//Do curse
 	switch(cnum){
+		//Minor damage
+		case 0:
+			//Should never kill target
+			*hp(mdef) = max_ints(*hp(mdef) - (magr->data->mlevel), *hp(mdef)/2+1);
+			if (youdef) 
+				You_feel("intense pain!");
+		break;
 		//Bad Luck
 		case 1:
 			if(youdef){
