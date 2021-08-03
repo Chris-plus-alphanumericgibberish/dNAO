@@ -227,7 +227,7 @@ register struct monst *mon;
 			item2 = TRUE;
 			continue;
 		}
-		if(marilith && (obj->oclass == WEAPON_CLASS || is_weptool(obj))){
+		if(marilith && (obj->oclass == WEAPON_CLASS || is_weptool(obj)) && objects[obj->otyp].oc_skill > 0){
 			continue; //Keep all weapons
 		}
 		if (!obj->owornmask && obj != wep &&

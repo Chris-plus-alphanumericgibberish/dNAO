@@ -1681,6 +1681,8 @@ E const char *FDECL(stagger, (struct monst *,const char *));
 E const char *FDECL(on_fire, (struct permonst *,struct attack *));
 E const struct permonst *FDECL(raceptr, (struct monst *));
 E int FDECL(mstrength, (struct permonst *));
+E long FDECL(mon_str, (struct monst *));
+E long FDECL(mon_con, (struct monst *));
 E void FDECL(do_ancient_breaths, (struct monst *));
 
 /* ### monmove.c ### */

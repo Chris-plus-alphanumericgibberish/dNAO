@@ -401,7 +401,7 @@ do_mname()
 	/* strip leading and trailing spaces; unnames monster if all spaces */
 	(void)mungspaces(buf);
 
-	if (mtmp->data->geno & G_UNIQ)
+	if (mtmp->data->geno & G_UNIQ && !mtmp->mtame)
 	    pline("%s doesn't like being called names!", Monnam(mtmp));
 	else
 	    (void) christen_monst(mtmp, buf);

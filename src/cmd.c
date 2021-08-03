@@ -2751,6 +2751,8 @@ int final;
 	else if(u.usanity < 25)
 		dump("  ", "You frequently struggled with insanity");
 	else if(u.usanity < 50)
+		dump("  ", "You periodically struggled with insanity");
+	else if(u.usanity < 75)
 		dump("  ", "You sometimes struggled with insanity");
 	else if(u.usanity < 100)
 		dump("  ", "You were a little touched in the head");
@@ -3274,6 +3276,8 @@ resistances_enlightenment()
 	else if(u.usanity < 25)
 		putstr(en_win, 0, "You frequently struggle with insanity.");
 	else if(u.usanity < 50)
+		putstr(en_win, 0, "You periodically struggle with insanity.");
+	else if(u.usanity < 75)
 		putstr(en_win, 0, "You sometimes struggle with insanity.");
 	else if(u.usanity < 100)
 		putstr(en_win, 0, "You are a little touched in the head.");

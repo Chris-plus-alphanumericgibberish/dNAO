@@ -4549,7 +4549,7 @@ boolean invoked;
 {
 	boolean proc = FALSE;
 	boolean youagr = magr == &youmonst;
-	if(*hp(magr) >= *hpmax(magr))
+	if(*hp(magr) >= *hpmax(magr) && !(youagr && (Sick || Slimed)))
 		return;
 	if(youagr && (Sick || Slimed)){
 		proc = !rn2(20);

@@ -2535,6 +2535,76 @@ struct permonst *ptr;
 	return((tmp >= 0) ? tmp : 0);
 }
 
+/*Gets a fake strength score for a monster.
+ * Used for carry cap.
+ */
+long
+mon_str(mon)
+struct monst *mon;
+{
+	struct obj *gloves = which_armor(mon, W_ARMG);
+	struct obj *weap = MON_WEP(mon);
+	struct obj *xweap = MON_SWEP(mon);
+	
+	if(gloves && gloves->otyp == GAUNTLETS_OF_POWER)
+		return 25L;
+	//else
+	if(weap){
+		if(weap->oartifact == ART_SCEPTRE_OF_MIGHT
+		|| (weap->oartifact == ART_PEN_OF_THE_VOID && weap->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0)
+		|| weap->oartifact == ART_STORMBRINGER
+		|| weap->oartifact == ART_OGRESMASHER
+		)
+		return 25L;
+	}
+	//else
+	if(xweap){
+		if(xweap->oartifact == ART_OGRESMASHER)
+			return 25L;
+	}
+	//else
+	if(strongmonst(mon->data))
+		return 18L;
+	//else
+	return 11L;
+}
+
+/*Gets a fake constitution score for a monster.
+ * Used for carry cap.
+ */
+long
+mon_con(mon)
+struct monst *mon;
+{
+	struct obj *gloves = which_armor(mon, W_ARMG);
+	struct obj *weap = MON_WEP(mon);
+	struct obj *xweap = MON_SWEP(mon);
+	
+	if(gloves && gloves->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+		return 25L;
+	//else
+	if(weap){
+		if(weap->oartifact == ART_OGRESMASHER || weap->oartifact == ART_STORMBRINGER)
+			return 25L;
+	}
+	//else
+	if(xweap){
+		if(xweap->oartifact == ART_OGRESMASHER)
+			return 25L;
+	}
+	//else
+	int norm_max_hp = mon->data->mlevel*8;
+	long mcon;
+	if(!norm_max_hp)
+		norm_max_hp = 4;
+	mcon = (18L*mon->mhpmax)/(norm_max_hp);
+	if(mcon > 18L)
+		mcon = 18L;
+	if(mcon < 3L)
+		mcon = 3L;
+	return mcon;
+}
+
 #endif /* OVLB */
 
 /*mondata.c*/

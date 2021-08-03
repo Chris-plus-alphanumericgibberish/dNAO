@@ -16038,7 +16038,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 									s_suffix(mon_nam(mdef)));
 								else if (ureflects("%s gaze is only partially reflected by your %s!",
 									s_suffix(Monnam(mdef)))){
-									nomul(-dmg / 2, "frozen by the gaze of Axus");
+									nomul(-1*(dmg / 2+1), "frozen by the gaze of Axus");
 								}
 								else {
 									You("are frozen by %s gaze!",
@@ -16056,7 +16056,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 								if (mon_reflects(magr,
 									canseemon(magr) ? buf : (char *)0)) {
 									magr->mcanmove = 0;
-									magr->mfrozen = dmg / 2;
+									magr->mfrozen = dmg / 2+1;
 								}
 								else {
 									if (canseemon(magr)) {
@@ -16933,7 +16933,7 @@ struct monst * mdef;
 
 /* mummy_curses_x()
  * 
- * Mummy curses (for use in various contexts. Returns result flags.
+ * Mummy curses (for use in various contexts). Returns result flags.
  */
 int
 mummy_curses_x(magr, mdef)
@@ -16969,12 +16969,21 @@ struct monst * mdef;
 		case PM_ANCIENT_OF_THE_BURNING_WASTES:
 			cnum = 5;
 		break;
-		default:
+		case PM_SOLDIER_MUMMY:
 			cnum = rnd(3);
+		default:
+			cnum = 0;
 		break;
 	}
 	//Do curse
 	switch(cnum){
+		//Minor damage
+		case 0:
+			//Should never kill target
+			*hp(mdef) = max_ints(*hp(mdef) - (magr->data->mlevel), *hp(mdef)/2+1);
+			if (youdef) 
+				You_feel("intense pain!");
+		break;
 		//Bad Luck
 		case 1:
 			if(youdef){

@@ -6353,10 +6353,26 @@ int faction;
 		    case PM_MARILITH:{
 				if(Inhell){
 					chance = rnd(10);
-					if(chance >= 9) mongets(mtmp, PLATE_MAIL, mkobjflags);
-					else if(chance >= 6) mongets(mtmp, CHAIN_MAIL, mkobjflags);
-					else if(chance >= 3) mongets(mtmp, STUDDED_LEATHER_ARMOR, mkobjflags);
-					else mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+					if(chance >= 9){
+						mongets(mtmp, PLATE_MAIL, mkobjflags);
+						mongets(mtmp, rn2(20) ? GAUNTLETS : GAUNTLETS_OF_POWER, mkobjflags);
+						mongets(mtmp, HELMET, mkobjflags);
+					}
+					else if(chance >= 6){
+						mongets(mtmp, CHAIN_MAIL, mkobjflags);
+						mongets(mtmp, GAUNTLETS, mkobjflags);
+						mongets(mtmp, HELMET, mkobjflags);
+					}
+					else if(chance >= 3){
+						mongets(mtmp, STUDDED_LEATHER_ARMOR, mkobjflags);
+						mongets(mtmp, GLOVES, mkobjflags);
+						mongets(mtmp, LEATHER_HELM, mkobjflags);
+					}
+					else {
+						mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+						mongets(mtmp, GLOVES, mkobjflags);
+						mongets(mtmp, LEATHER_HELM, mkobjflags);
+					}
 					switch(rn2(3)){
 						case 0:
 							mongets(mtmp, TRIDENT, mkobjflags);
@@ -6423,6 +6439,25 @@ int faction;
 						break;
 						
 					}
+				}
+				else if(In_mordor_quest(&u.uz) 
+					&& !In_mordor_forest(&u.uz)
+					&& !Is_ford_level(&u.uz)
+					&& !In_mordor_fields(&u.uz)
+					&& in_mklev
+				){
+					mongets(mtmp, PLAIN_DRESS, mkobjflags);
+					otmp = mongets(mtmp, SCALE_MAIL, mkobjflags);
+					if(otmp) set_material_gm(otmp, GOLD);
+					mongets(mtmp, ARCHAIC_GAUNTLETS, mkobjflags);
+					if(otmp) set_material_gm(otmp, GOLD);
+					
+					mongets(mtmp, STILETTO, mkobjflags);
+					mongets(mtmp, SHORT_SWORD, mkobjflags);
+					mongets(mtmp, ELVEN_SHORT_SWORD, mkobjflags);
+					mongets(mtmp, DWARVISH_SHORT_SWORD, mkobjflags);
+					mongets(mtmp, KHOPESH, mkobjflags);
+					mongets(mtmp, RAPIER, mkobjflags);
 				}
 			}break;
 		    case PM_PIT_FIEND:
@@ -11335,7 +11370,7 @@ int mkobjflags;
 		if (otmp->otyp == BULLWHIP && is_drow(mtmp->data) && mtmp->female)
 			set_material_gm(otmp, SILVER);
 		if (otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp)){
-			if (is_suit(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_BODYTYPEMASK);
+			if (is_suit(otmp) || otmp->otyp == BODYGLOVE) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_BODYTYPEMASK);
 			else if (is_helmet(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HEADMODIMASK);
 			else if (is_shirt(otmp)) otmp->bodytypeflag = (mtmp->data->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (mtmp->data->mflagsb&MB_BODYTYPEMASK);
 		}

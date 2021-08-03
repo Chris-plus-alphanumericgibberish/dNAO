@@ -1080,7 +1080,7 @@ OBJECT:'[',"elven toga", contained, blessed, +3
 OBJECT:'[',"high-elven plate", contained
 
 CONTAINER: '(', "chest"  , (25,04)
-OBJECT:'#',"unholy-armor +4 iron gauntlets", contained
+OBJECT:'#',"unholy-armor unholy-weapon +4 iron gauntlets", contained
 OBJECT:'#',"blessed fixed iron gauntlets", contained
 OBJECT:'[',"crystal gauntlets", contained
 OBJECT:'#',"tiny holy-armor holy-weapon +3 silver gauntlets of power", contained
@@ -1110,7 +1110,7 @@ OBJECT:'[',"crystal shield", contained
 OBJECT:'#',"mithril elven shield", contained
 
 CONTAINER: '(', "chest"  , (55,08)
-OBJECT:'#',"unholy-armor +4 iron armored boots", contained
+OBJECT:'#',"unholy-armor unholy-weapon +4 iron armored boots", contained
 OBJECT:'#',"blessed fixed iron armored boots", contained
 OBJECT:'[',"archaic boots", contained
 OBJECT:'#',"tiny holy-armor holy-weapon +3 silver armored boots", contained
