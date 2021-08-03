@@ -2689,7 +2689,7 @@ weight_cap()
 
 	if (Levitation || Weightless)    /* pugh@cornell */
 		carrcap = maxcap;
-	else {
+	if(!Weightless) {
 		if (carrcap > maxcap)
 			carrcap = maxcap;
 
@@ -2725,13 +2725,11 @@ weight_cap()
 		else if(!cloak->cursed) carrcap *= 1.25;
 		else carrcap *= .75;
 	}
-#ifdef TOURIST
 	if(arti_lighten(underarmor, FALSE)){
 		if(underarmor->blessed) carrcap *= 1.5;
 		else if(!underarmor->cursed) carrcap *= 1.25;
 		else carrcap *= .75;
 	}
-#endif	/* TOURIST */
 
 	if (carrcap < 1) carrcap = 1;
 	
