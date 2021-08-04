@@ -548,7 +548,7 @@ you_calc_movement()
 	if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 		moveamt += NORMAL_SPEED;
 		if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe-- < 1){
-			if(ublindf && ublindf->otyp == MASK && is_undead(&mons[ublindf->corpsenm])){
+			if(ublindf && ublindf->otyp == MASK && ublindf->corpsenm != NON_PM && is_undead(&mons[ublindf->corpsenm])){
 				artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = mons[ublindf->corpsenm].mlevel;
 				if(ublindf->oeroded3>=3){
 					Your("mask shatters!");
@@ -4469,7 +4469,7 @@ struct monst *mon;
 			return;
 		for(otmp = level.objects[xlocale][ylocale]; otmp; otmp = otmp2){
 			otmp2 = otmp->nexthere;
-			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
+			if(otmp->otyp == MASK && otmp->corpsenm != NON_PM && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
 				obj_extract_self(otmp);
 				/* unblock point after extract, before pickup */
 				if (is_boulder(otmp)) /*Shouldn't be a boulder, but who knows if a huge mask will get invented*/
@@ -4479,7 +4479,7 @@ struct monst *mon;
 			}
 		}
 		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-			if(otmp->otyp == MASK && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
+			if(otmp->otyp == MASK && otmp->corpsenm != NON_PM && !otmp->oartifact && !(mons[otmp->corpsenm].geno&G_UNIQ)){
 				for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
 					mtmp2 = mtmp->nmon;
 					if (mtmp == mon) {

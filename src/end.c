@@ -886,6 +886,10 @@ int how;
 					is_undead(youracedata)
 				)) {
 				You_feel("a curse fall upon your soul!");
+				if (Upolyd && uskin && uskin->oartifact == ART_MASK_OF_MANY_FACES) {
+					pline("Your mask falls to pieces!");
+					useup(uskin);
+				}
 				polymon(PM_DEATH_KNIGHT);
 				HUnchanging |= FROMOUTSIDE;
 				lsvd = LSVD_DTHK;

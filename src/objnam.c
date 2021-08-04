@@ -1526,9 +1526,14 @@ add_type_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (obj->otyp == MASK){
-		Strcat(buf, mons[obj->corpsenm].mname);
-		Strcat(buf, " ");
+	if (obj->otyp == MASK && obj->oartifact != ART_MASK_OF_MANY_FACES){
+		if (obj->corpsenm != NON_PM) {
+			Strcat(buf, mons[obj->corpsenm].mname);
+			Strcat(buf, " ");
+		}
+		else {
+			Strcat(buf, "blank ");
+		}
 	}
 	if (obj->otyp == CORPSE) {
 		if (!(mons[obj->corpsenm].geno & G_UNIQ)) {
@@ -2073,12 +2078,16 @@ weapon:
 			}
 			break;
 		case TOOL_CLASS:
+			if (obj->oartifact == ART_MASK_OF_MANY_FACES)
+				Sprintf(eos(buf), " (%s)", obj->corpsenm != NON_PM ? mons[obj->corpsenm].mname : "blank");
 			if (obj->owornmask & (W_TOOL /* blindfold */
 #ifdef STEED
 				| W_SADDLE
 #endif
 				)) {
-				Strcat(buf, " (being worn)");
+				Strcat(buf, (obj == uskin) ? " (embedded in your skin)" :
+				" (being worn)");
+
 				break;
 			}
 			if (obj->otyp == LEASH && obj->leashmon != 0) {
