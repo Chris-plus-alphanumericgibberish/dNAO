@@ -905,9 +905,20 @@ Amulet_off()
 	case AMULET_OF_DRAIN_RESISTANCE:
 	case AMULET_OF_REFLECTION:
 	case AMULET_OF_CHANGE:
-	case AMULET_OF_UNCHANGING:
 	case FAKE_AMULET_OF_YENDOR:
 		break;
+	case AMULET_OF_UNCHANGING:
+		setworn((struct obj *)0, W_AMUL);
+		if (!Unchanging && ublindf && ublindf->otyp == MASK && ublindf->oartifact == ART_MASK_OF_MANY_FACES && ublindf->corpsenm != NON_PM) {
+			/* keep consistent with on-invoke code in artifact.c */
+			polymon(ublindf->corpsenm);
+			u.mtimedone = (u.ulevel * 20) / max(1, 10 + mons[ublindf->corpsenm].mlevel - u.ulevel);
+			if (!polyok(&mons[ublindf->corpsenm])) u.mtimedone /= 3;
+			uskin = ublindf;
+			ublindf = (struct obj *)0;
+			uskin->owornmask |= W_SKIN;
+		}
+		return;
 	case AMULET_OF_MAGICAL_BREATHING:
 		if (Underwater) {
 		    /* HMagical_breathing must be set off
@@ -1216,7 +1227,7 @@ register struct obj *otmp;
 	    vision_full_recalc = 1;	/* recalc vision limits */
 	    flags.botl = 1;
 	}
-	if (otmp->otyp == MASK && otmp->oartifact == ART_MASK_OF_MANY_FACES && otmp->corpsenm != NON_PM) {
+	if (!Unchanging && otmp->otyp == MASK && otmp->oartifact == ART_MASK_OF_MANY_FACES && otmp->corpsenm != NON_PM) {
 		/* keep consistent with on-invoke code in artifact.c */
 		polymon(otmp->corpsenm);
 		u.mtimedone = (u.ulevel * 20) / max(1, 10 + mons[otmp->corpsenm].mlevel - u.ulevel);
