@@ -29,7 +29,7 @@
 #define HFire_resistance	u.uprops[FIRE_RES].intrinsic
 #define EFire_resistance	u.uprops[FIRE_RES].extrinsic
 #define Fire_resistance		(HFire_resistance || EFire_resistance || \
-				 species_resists_fire(&youmonst) || \
+				 (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)) || \
 				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA )
 #define InvFire_resistance	(EFire_resistance || Preservation || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
