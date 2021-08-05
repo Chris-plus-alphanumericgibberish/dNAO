@@ -8485,7 +8485,7 @@ arti_invoke(obj)
 		break;
 		case BLOODLETTER:
 			if (!uwep || uwep != obj){
-				You_feel("that you should be wielding %s.", the(xname(obj)));;
+				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = monstermoves;
 				return(0);
 			}
@@ -8503,6 +8503,11 @@ arti_invoke(obj)
 
 		break;
 		case SEVEN_LEAGUE_STEP:
+			if (obj != uarmf) {
+				You_feel("that you should be wearing %s.", the(xname(obj)));
+				obj->age = monstermoves;
+				return(0);
+			}
 			You("click your heels together and take a step... ");
 			jump(15);
 			break;
