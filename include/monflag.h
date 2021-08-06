@@ -268,6 +268,7 @@
 #define MA_MINION		0x01000000L	/* is a minion of a deity */
 #define MA_PRIMORDIAL	0x02000000L	/* is an ancient race */
 #define MA_ET			0x04000000L	/* is an alien race */
+#define MA_G_O_O		0x08000000L	/* is a Great Old One */
 
 #define MZ_TINY		0		/* < 2' */
 #define MZ_SMALL	1		/* 2-4' */
