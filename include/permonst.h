@@ -70,11 +70,13 @@ struct permonst {
 	const char	*mname;			/* full name */
 	char		mlet;			/* symbol */
 	schar		mlevel,			/* base monster level */
-			mmove,			/* move speed */
-			nac,				/* Natural-armor AC */
+				mmove,			/* move speed */
+				mr;			/* (base) magic resistance */
+	aligntyp	maligntyp;		/* basic monster alignment */
+	unsigned short	geno;			/* creation/geno mask value */
+	schar 	nac,			/* Natural-armor AC */
 			dac,			/* Dodge AC */
 			pac,			/* Protection AC*/
-			
 			/* (base) dr values for head/body/gloves/legs/feet */
 			hdr,
 			bdr,
@@ -86,10 +88,7 @@ struct permonst {
 			spe_bdr,
 			spe_gdr,
 			spe_ldr,
-			spe_fdr, 
-			mr;			/* (base) magic resistance */
-	aligntyp	maligntyp;		/* basic monster alignment */
-	unsigned short	geno;			/* creation/geno mask value */
+			spe_fdr;
 	struct	attack	mattk[NATTK];		/* attacks matrix */
 	unsigned short	cwt,			/* weight of corpse */
 					cnutrit;		/* its nutritional value */

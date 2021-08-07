@@ -1008,7 +1008,7 @@ struct permonst *
 find_mask(mtmp)
 struct monst *mtmp;
 {
-#define validmask(obj) ((obj)->otyp == MASK && !is_horror(&mons[(int)((obj)->corpsenm)]))
+#define validmask(obj) ((obj)->otyp == MASK && (obj)->corpsenm != NON_PM && !is_horror(&mons[(int)((obj)->corpsenm)]))
 	register struct obj *obj;
 	int maskno = 0;
 	for(obj = mtmp->minvent; obj; obj = obj->nobj){
@@ -1957,7 +1957,7 @@ struct monst *mtmp;
 			m.has_misc = MUSE_POT_GAIN_LEVEL;
 		}
 		nomore(MUSE_MASK);
-		if(obj->otyp == MASK && mtmp->mtyp == PM_POLYPOID_BEING
+		if(obj->otyp == MASK && obj->corpsenm != NON_PM && mtmp->mtyp == PM_POLYPOID_BEING
 			&& !(mons[obj->corpsenm].geno&G_UNIQ)
 			&& !(is_horror(&mons[obj->corpsenm]))
 			&& !obj->oartifact) {

@@ -399,6 +399,7 @@ extern struct artifact artilist[];
 #define RINGED_ARMOR    (LAST_PROP+81)
 #define BLOODLETTER     (LAST_PROP+82)
 #define SEVEN_LEAGUE_STEP   (LAST_PROP+83)
+#define MANY_FACES      (LAST_PROP+84)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

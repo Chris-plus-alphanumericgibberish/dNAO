@@ -57,6 +57,7 @@ STATIC_DCL int FDECL(use_vortex, (struct obj *));
 STATIC_DCL int FDECL(use_rift, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
+STATIC_DCL void FDECL(soul_crush_consequence, (struct obj *));
 STATIC_DCL int FDECL(do_soul_coin, (struct obj *));
 STATIC_DCL boolean FDECL(figurine_location_checks,
 				(struct obj *, coord *, BOOLEAN_P));
@@ -5475,58 +5476,64 @@ struct obj *obj;
     return 1;
 }
 
-#define FREE_SOUL_HANDLING \
-You("release the soul!");\
-u.ublesscnt = 0;\
-if(rn2(100)){\
-	pline("...you feel the soul sink towards Gehennom.");\
-	/* Points for trying */\
-	u.ualign.sins = max(u.ualign.sins-1, 0);\
-	adjalign(7);\
-	if(u.ugangr[Align2gangr(u.ualign.type)]) {\
-		u.ugangr[Align2gangr(u.ualign.type)]--;\
-		if (u.ugangr[Align2gangr(u.ualign.type)]) {\
-			pline("%s seems %s.", u_gname(),\
-			  Hallucination ? "groovy" : "slightly mollified");\
+STATIC_DCL void
+soul_crush_consequence(obj)
+struct obj * obj;
+{
+	if (obj->blessed) {
+		You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+		You("release the soul!");
+		u.ublesscnt = 0;
+		if(rn2(100)){
+			pline("...you feel the soul sink towards Gehennom.");
+			/* Points for trying */
+			u.ualign.sins = max(u.ualign.sins-1, 0);
+			adjalign(7);
+			if(u.ugangr[Align2gangr(u.ualign.type)]) {
+				u.ugangr[Align2gangr(u.ualign.type)]--;
+				if (u.ugangr[Align2gangr(u.ualign.type)]) {
+					pline("%s seems %s.", u_gname(),
+					Hallucination ? "groovy" : "slightly mollified");
+					if ((int)u.uluck < 0) change_luck(1);
+				} else {
+					pline("%s seems %s.", u_gname(), Hallucination ?
+					"cosmic (not a new fact)" : "mollified");
+					if ((int)u.uluck < 0) u.uluck = 0;
+					u.reconciled = REC_MOL;
+				}
+			}
+		}
+		else {
+			/* Freed someone who wasn't supposed to be there! */
+			u.ualign.sins = max(u.ualign.sins-7, 0);
+			u.ualign.record = ALIGNLIM;
+			if(u.ugangr[Align2gangr(u.ualign.type)]) {
+				u.ugangr[Align2gangr(u.ualign.type)] = 0;
+				pline("%s seems %s.", u_gname(), Hallucination ?
+				"cosmic (not a new fact)" : "mollified");
+				if ((int)u.uluck < 0) u.uluck = 0;
+				u.reconciled = REC_MOL;
+			}
+		}
+	}
+	else if (!obj->cursed) {
+		u.ualign.sins++;\
+		if(!rn2(100)){\
+			You("feel the soul fly free!");\
+			adjalign(1);\
 			if ((int)u.uluck < 0) change_luck(1);\
-		} else {\
-			pline("%s seems %s.", u_gname(), Hallucination ?\
-			  "cosmic (not a new fact)" : "mollified");\
-			if ((int)u.uluck < 0) u.uluck = 0;\
-			u.reconciled = REC_MOL;\
-		}\
-	}\
-}\
-else {\
-	/* Freed someone who wasn't supposed to be there! */\
-	u.ualign.sins = max(u.ualign.sins-7, 0);\
-	u.ualign.record = ALIGNLIM;\
-	if(u.ugangr[Align2gangr(u.ualign.type)]) {\
-		u.ugangr[Align2gangr(u.ualign.type)] = 0;\
-		pline("%s seems %s.", u_gname(), Hallucination ?\
-		  "cosmic (not a new fact)" : "mollified");\
-		if ((int)u.uluck < 0) u.uluck = 0;\
-		u.reconciled = REC_MOL;\
-	}\
+		}
+	}
+	else {
+		u.ualign.sins += 9;\
+		adjalign(-99);\
+		if(!rn2(100)){\
+			You("feel the soul scream as it sinks towards Gehennom under the weight of the curse!");\
+			/* Just sent someone back who shouldn't be there :( */\
+			gods_upset(Align2gangr(u.ualign.type));\
+		}
+	}
 }
-
-#define CURSED_SOUL_HANDLING \
-u.ualign.sins += 9;\
-adjalign(-99);\
-if(!rn2(100)){\
-	You("feel the soul scream as it sinks towards Gehennom under the weight of the curse!");\
-	/* Just sent someone back who shouldn't be there :( */\
-	gods_upset(Align2gangr(u.ualign.type));\
-}
-
-#define UNCURSED_SOUL_HANDLING \
-u.ualign.sins++;\
-if(!rn2(100)){\
-	You("feel the soul fly free!");\
-	adjalign(1);\
-	if ((int)u.uluck < 0) change_luck(1);\
-}
-
 
 STATIC_OVL int
 do_soul_coin(obj)
@@ -5536,470 +5543,284 @@ struct obj *obj;
 	struct monst *mtmp;
 	struct obj *otmp;
 	int x, y;
+	int tmp;
 	coord cc = {u.ux, u.uy};
+
 	if(!freehand()){
-		You("can't crush %s with no free %s!", xname(obj), body_part(HAND));
+		You("can't crush %s with no free %s!", the(xname(obj)), body_part(HAND));
 		return 0;
 	}
-	switch(obj->otyp){
-		case WAGE_OF_SLOTH:
-			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-			if(obj->blessed){
-				FREE_SOUL_HANDLING
-			}
-			else if(obj->cursed){
+
+	/* most wages need a target, or else they abort.
+	 * Blessed wages all have the same non-targeted effect */
+	if (!obj->blessed &&
+		obj->otyp != WAGE_OF_SLOTH &&
+		obj->otyp != WAGE_OF_LUST
+		){
+		boolean needs_mon = (obj->otyp != WAGE_OF_GREED);
+		boolean needs_space = (obj->otyp == WAGE_OF_GREED);
+		/* choose target */
+		if(getpos(&cc, TRUE, "the target") < 0) return 0;
+		x = cc.x;
+		y = cc.y;
+		if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
+			pline("Too far!");
+			return 0;
+		}
+
+		if(needs_space && (closed_door(x, y) ||	IS_ROCK(levl[x][y].typ))){
+			You("can't use that there.");
+			return 0;
+		}
+		mtmp = m_u_at(x, y);
+		if(needs_mon && (!mtmp || DEADMONSTER(mtmp))){
+			You("see no target there!");
+			return 0;
+		}
+		if(mtmp == &youmonst){
+			Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
+			if(yn(coinbuff) == 'n')
+				return 0;
+		}
+		else if(needs_mon && !canspotmon(mtmp)){
+			You("see no target there!");
+			return 0;
+		}
+	}
+	/* did not abort during targeting; activate */
+	You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
+
+	/* main effect -- does not happen with blessed wages. */
+	if (!obj->blessed) {
+		switch(obj->otyp){
+			case WAGE_OF_SLOTH:
+				tmp = obj->cursed ? 9 : 4;
 				You("blur with stolen time!");
-				HTimeStop += 9L;
- 				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
- 					if(is_uvuudaum(mtmp->data) && !DEADMONSTER(mtmp)){
- 						mtmp->movement += NORMAL_SPEED*9;
- 					}
- 				}
-				CURSED_SOUL_HANDLING
-			}
-			else {
-				You("blur with stolen time!");
-				HTimeStop += 4L;
- 				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
- 					if(is_uvuudaum(mtmp->data) && !DEADMONSTER(mtmp)){
- 						mtmp->movement += NORMAL_SPEED*4;
- 					}
- 				}
-				UNCURSED_SOUL_HANDLING
-			}
-			useup(obj);
-		break;
-		case WAGE_OF_LUST:
-			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-			if(obj->blessed){
-				FREE_SOUL_HANDLING
-			}
-			else if(obj->cursed){
+				HTimeStop += (long)tmp;
+				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+					if(is_uvuudaum(mtmp->data) && !DEADMONSTER(mtmp)){
+						mtmp->movement += NORMAL_SPEED*tmp;
+					}
+				}
+			break;
+			case WAGE_OF_LUST:
+				tmp = obj->cursed ? 99 : 9;
+
 				if(!BlowingWinds){
 					pline("Hurricane-force winds surround you!");
 				}
 				else {
 					pline("The hurricane-force winds intensify!");
 				}
-				HBlowingWinds += 99L;
-				CURSED_SOUL_HANDLING
-			}
-			else {
-				if(!BlowingWinds){
-					pline("Hurricane-force winds surround you!");
+				HBlowingWinds += (long)tmp;
+			break;
+			case WAGE_OF_GLUTTONY:
+				if(inediate(mtmp->data)){
+					pline("%s %s unbothered.",
+						(mtmp == &youmonst) ? "You" : Monnam(mtmp),
+						(mtmp == &youmonst) ? "are" : "is");
 				}
 				else {
-					pline("The hurricane-force winds intensify!");
-				}
-				HBlowingWinds += 9L;
-				UNCURSED_SOUL_HANDLING
-			}
-			useup(obj);
-		break;
-		case WAGE_OF_GLUTTONY:
-			if(obj->blessed){
-				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-				FREE_SOUL_HANDLING
-				useup(obj);
-				return 1;
-			}
-			if(getpos(&cc, TRUE, "the target") < 0) return 0;
-			x = cc.x;
-			y = cc.y;
-			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
-				pline("Too far!");
-				return 0;
-			}
-			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			if(mtmp == &youmonst){
-				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
-				if(yn(coinbuff) == 'n')
-					return 0;
-			}
-			else if(!canspotmon(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-			if(inediate(mtmp->data)){
-				if(mtmp == &youmonst){
-					You("are unbothered.");
-				}
-				else {
-					pline("%s is unbothered.", Monnam(mtmp));
-				}
-			}
-			else {
-				/* Note, blessed was handled above. */
-				if(mtmp == &youmonst){
-					if(obj->cursed){
-						morehungry(2000);
+					tmp = obj->cursed ? 2000 : 1000;
+					if(mtmp == &youmonst){
+						morehungry(tmp);
 					}
 					else {
-						morehungry(1000);
-					}
-				}
-				else {
-					if(mtmp->mtame && get_mx(mtmp, MX_EDOG)){
-						if(obj->cursed){
-							EDOG(mtmp)->hungrytime = max(EDOG(mtmp)->hungrytime - 2000, monstermoves - 750);
+						if(mtmp->mtame && get_mx(mtmp, MX_EDOG)){
+							EDOG(mtmp)->hungrytime = max(EDOG(mtmp)->hungrytime - tmp, monstermoves - (500 + 250*obj->cursed));
 						}
 						else {
-							EDOG(mtmp)->hungrytime = max(EDOG(mtmp)->hungrytime - 1000, monstermoves - 500);
+							if(obj->cursed){
+								mtmp->mhp -= min(999, mtmp->mhpmax);
+							}
+							else {
+								mtmp->mhp -= min(99, mtmp->mhpmax/2);
+							}
+							if(mtmp->mhp <= 0){
+								pline("%s starves.", Monnam(mtmp));
+								mondied(mtmp);
+							}
+							else {
+								pline("%s is confused from hunger.", Monnam(mtmp));
+								mtmp->mconf = 1;
+							}
 						}
 					}
+				}
+			break;
+			case WAGE_OF_GREED:
+				otmp = mksobj(MASS_OF_STUFF, MKOBJ_NOINIT);
+				if (!otmp) break;  /* Shouldn't happen */
+				curse(otmp);
+
+				/* Note, blessed was handled above. */
+				if(obj->cursed){
+					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
+				}
+				else if(mtmp){
+					int dmg;
+					boolean youdef = mtmp == &youmonst;
+					if(youdef)
+						pline("%s drops out of nowhere and hits you!", An(xname(otmp)));
+					else if (cansee(mtmp->mx, mtmp->my)) {
+						pline("%s is hit by %s!", Monnam(mtmp),
+										doname(otmp));
+						if (mtmp->minvis && !canspotmon(mtmp))
+						map_invisible(mtmp->mx, mtmp->my);
+					}
+
+					dmg = dmgval(otmp, mtmp, 0);
+					struct obj *helmet = youdef ? uarmh : which_armor(mtmp, W_ARMH);
+					if (helmet) {
+						if(is_hard(helmet)) {
+							if(youdef)
+								pline("Fortunately, you are wearing a hard helmet.");
+							else if (canspotmon(mtmp))
+								pline("Fortunately, %s is wearing a hard helmet.", mon_nam(mtmp));
+							else if (flags.soundok)
+								You_hear("a clanging sound.");
+							if (dmg > 2) dmg = 2;
+						}
+						else if (flags.verbose) {
+							if(youdef)
+								Your("%s does not protect you.",
+									xname(helmet));
+							else if(canspotmon(mtmp))
+								pline("%s's %s does not protect %s.",
+								Monnam(mtmp), xname(helmet),
+								mhim(mtmp));
+						}
+					}
+					if (!flooreffects(otmp, x, y, "fall")) {
+						place_object(otmp, x, y);
+						stackobj(otmp);
+						newsym(x, y);
+					}
+
+					if (Half_phys(mtmp))
+						dmg = (dmg + 1) / 2;
+					if (youdef && u.uvaul_duration)
+						dmg = (dmg + 1) / 2;
+					if(youdef)
+						losehp(dmg, "mass of falling stuff", KILLED_BY_AN);
 					else {
+						mtmp->mhp -= dmg;
+						if (mtmp->mhp <= 0)
+							xkilled(mtmp, 1);
+					}
+				}
+				else {
+					if (!flooreffects(otmp, x, y, "fall")) {
+						place_object(otmp, x, y);
+						stackobj(otmp);
+						newsym(x, y);  /* map the rock */
+					}
+				}
+			break;
+			case WAGE_OF_WRATH:
+				if(Breathless_res(mtmp)){
+					pline("%s %s unbothered.",
+						(mtmp == &youmonst) ? "You" : Monnam(mtmp),
+						(mtmp == &youmonst) ? "are" : "is");
+					water_damage(mtmp == &youmonst ? invent : mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
+				}
+				else {
+					if(mtmp == &youmonst){
+						BloodDrown += obj->cursed ? 9 : 4;
+					}
+					else {
+						water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
 						if(obj->cursed){
+							//Note: 2x water damage
+							water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
 							mtmp->mhp -= min(999, mtmp->mhpmax);
 						}
 						else {
 							mtmp->mhp -= min(99, mtmp->mhpmax/2);
 						}
 						if(mtmp->mhp <= 0){
-							pline("%s starves.", Monnam(mtmp));
+							pline("%s drowns in blood!", Monnam(mtmp));
 							mondied(mtmp);
 						}
-						else {
-							pline("%s is confused from hunger.", Monnam(mtmp));
-							mtmp->mconf = 1;
+						else if(!resist(mtmp, RING_CLASS, 0, NOTELL)){
+							pline("%s is crazed with anger!", Monnam(mtmp));
+							mtmp->mberserk = 1;
 						}
 					}
 				}
-			}
-			/* Note, blessed was handled above. */
-			if(obj->cursed){
-				CURSED_SOUL_HANDLING
-			}
-			else {
-				UNCURSED_SOUL_HANDLING
-			}
-			useup(obj);
-			return 1;
-		break;
-		case WAGE_OF_GREED:
-			if(obj->blessed){
-				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-				FREE_SOUL_HANDLING
-				useup(obj);
-				return 1;
-			}
-			if(getpos(&cc, TRUE, "the target") < 0) return 0;
-			x = cc.x;
-			y = cc.y;
-			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
-				pline("Too far!");
-				return 0;
-			}
-			if(!isok(x, y)
-			 || closed_door(x, y)
-			 || IS_ROCK(levl[x][y].typ)
-			){
-				You("can't use that there.");
-				return 0;
-			}
-			mtmp = m_u_at(x,y);
-
-			if(mtmp == &youmonst){
-				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
-				if(yn(coinbuff) == 'n')
-					return 0;
-			}
-			otmp = mksobj(MASS_OF_STUFF, MKOBJ_NOINIT);
-			if (!otmp) break;  /* Shouldn't happen */
-			curse(otmp);
-
-			/* Note, blessed was handled above. */
-			if(obj->cursed){
-				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
-			}
-			else if(mtmp){
-				int dmg;
-				boolean youdef = mtmp == &youmonst;
-				if(youdef)
-					pline("%s drops out of nowhere and hits you!", An(xname(otmp)));
-				else if (cansee(mtmp->mx, mtmp->my)) {
-					pline("%s is hit by %s!", Monnam(mtmp),
-									doname(otmp));
-					if (mtmp->minvis && !canspotmon(mtmp))
-					map_invisible(mtmp->mx, mtmp->my);
-				}
-
-				dmg = dmgval(otmp, mtmp, 0);
-				struct obj *helmet = youdef ? uarmh : which_armor(mtmp, W_ARMH);
-				if (helmet) {
-					if(is_hard(helmet)) {
-						if(youdef)
-							pline("Fortunately, you are wearing a hard helmet.");
-						else if (canspotmon(mtmp))
-							pline("Fortunately, %s is wearing a hard helmet.", mon_nam(mtmp));
-						else if (flags.soundok)
-							You_hear("a clanging sound.");
-						if (dmg > 2) dmg = 2;
-					}
-					else if (flags.verbose) {
-						if(youdef)
-							Your("%s does not protect you.",
-								xname(helmet));
-						else if(canspotmon(mtmp))
-							pline("%s's %s does not protect %s.",
-							Monnam(mtmp), xname(helmet),
-							mhim(mtmp));
-					}
-				}
-				if (!flooreffects(otmp, x, y, "fall")) {
-					place_object(otmp, x, y);
-					stackobj(otmp);
-					newsym(x, y);
-				}
-
-				if (Half_phys(mtmp))
-					dmg = (dmg + 1) / 2;
-				if (youdef && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
-				if(youdef)
-					losehp(dmg, "mass of falling stuff", KILLED_BY_AN);
-				else {
-					mtmp->mhp -= dmg;
-					if (mtmp->mhp <= 0)
-						xkilled(mtmp, 1);
-				}
-			}
-			else {
-				if (!flooreffects(otmp, x, y, "fall")) {
-					place_object(otmp, x, y);
-					stackobj(otmp);
-					newsym(x, y);  /* map the rock */
-				}
-			}
-			useup(obj);
-			return 1;
-		break;
-		case WAGE_OF_WRATH:
-			if(obj->blessed){
-				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-				FREE_SOUL_HANDLING
-				useup(obj);
-				return 1;
-			}
-			if(getpos(&cc, TRUE, "the target") < 0) return 0;
-			x = cc.x;
-			y = cc.y;
-			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
-				pline("Too far!");
-				return 0;
-			}
-			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			if(mtmp == &youmonst){
-				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
-				if(yn(coinbuff) == 'n')
-					return 0;
-			}
-			else if(!canspotmon(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-			if(Breathless_res(mtmp)){
-				if(mtmp == &youmonst){
-					You("are unbothered.");
-				}
-				else {
+			break;
+			case WAGE_OF_ENVY:
+				if(mtmp != &youmonst && mindless_mon(mtmp)) { /* player is never mindless */
 					pline("%s is unbothered.", Monnam(mtmp));
 				}
-				water_damage(mtmp == &youmonst ? invent : mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
-			}
-			else {
-				/* Note, blessed was handled above. */
 				if(mtmp == &youmonst){
-					if(obj->cursed){
-						BloodDrown += 9;
-					}
-					else {
-						BloodDrown += 4;
-					}
-				}
-				else {
-					water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
-					if(obj->cursed){
-						//Note: 2x water damage
-						water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
-						mtmp->mhp -= min(999, mtmp->mhpmax);
-					}
-					else {
-						mtmp->mhp -= min(99, mtmp->mhpmax/2);
-					}
-					if(mtmp->mhp <= 0){
-						pline("%s drowns in blood!", Monnam(mtmp));
-						mondied(mtmp);
-					}
-					else if(!resist(mtmp, RING_CLASS, 0, NOTELL)){
-						pline("%s is crazed with anger!", Monnam(mtmp));
-						mtmp->mberserk = 1;
-					}
-				}
-			}
-			/* Note, blessed was handled above. */
-			if(obj->cursed){
-				CURSED_SOUL_HANDLING
-			}
-			else {
-				UNCURSED_SOUL_HANDLING
-			}
-			useup(obj);
-			return 1;
-		break;
-		case WAGE_OF_ENVY:
-			if(obj->blessed){
-				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-				FREE_SOUL_HANDLING
-				useup(obj);
-				return 1;
-			}
-			if(getpos(&cc, TRUE, "the target") < 0) return 0;
-			x = cc.x;
-			y = cc.y;
-			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
-				pline("Too far!");
-				return 0;
-			}
-			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			if(mtmp == &youmonst){
-				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
-				if(yn(coinbuff) == 'n')
-					return 0;
-			}
-			else if(!canspotmon(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-			if(mtmp != &youmonst && mindless_mon(mtmp)){
-				pline("%s is unbothered.", Monnam(mtmp));
-			}
-			if(mtmp == &youmonst){
-				if(!roll_madness(MAD_TALONS)){ /*May refuse to give up things*/
-					struct obj *otmp2;
-					int delay = 0;
-					boolean cursed = obj->cursed;
-					useup(obj); /*Note: Must do this first since you will drop all your stuff!*/
-					if (*u.ushops) sellobj_state(SELL_DELIBERATE);
-					for(otmp = invent; otmp; otmp = otmp2) {
-						if(cursed && otmp->owornmask){
-							if(otmp->oclass == ARMOR_CLASS)
-								delay = max(delay, objects[otmp->otyp].oc_delay);
-							remove_worn_item(otmp, TRUE);
+					if(!roll_madness(MAD_TALONS)){ /*May refuse to give up things*/
+						struct obj *otmp2;
+						int delay = 0;
+						if (*u.ushops) sellobj_state(SELL_DELIBERATE);
+						for(otmp = invent; otmp; otmp = otmp2) {
+							if(otmp == obj) {otmp2 = otmp->nobj; continue;}
+							if(obj->cursed && otmp->owornmask){
+								if(otmp->oclass == ARMOR_CLASS)
+									delay = max(delay, objects[otmp->otyp].oc_delay);
+								remove_worn_item(otmp, TRUE);
+							}
+							otmp2 = otmp->nobj;
+							drop(otmp);
 						}
-						otmp2 = otmp->nobj;
-						drop(otmp);
-					}
-					if (*u.ushops) sellobj_state(SELL_NORMAL);
-					reset_occupations();
-					if(cursed){
+						if (*u.ushops) sellobj_state(SELL_NORMAL);
+						reset_occupations();
 						if(delay)
 							nomul(-delay, "taking off clothes");
-						CURSED_SOUL_HANDLING
 					}
-					/* Blessed handled above */
-					else {
-						UNCURSED_SOUL_HANDLING
-					}
-					return 1; /*Note: Have already used up a coin!*/
 				}
-			}
-			else {
-				relobj_envy(mtmp,canspotmon(mtmp));
-				mtmp->menvy = TRUE;
-				if(obj->cursed){
-					mtmp->mdisrobe = TRUE;
-					CURSED_SOUL_HANDLING
-				}
-				/* Blessed handled above */
 				else {
-					UNCURSED_SOUL_HANDLING
-				}
-			}
-			useup(obj);
-			return 1;
-		break;
-		case WAGE_OF_PRIDE:
-			if(obj->blessed){
-				You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-				FREE_SOUL_HANDLING
-				useup(obj);
-				return 1;
-			}
-			if(getpos(&cc, TRUE, "the target") < 0) return 0;
-			x = cc.x;
-			y = cc.y;
-			if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
-				pline("Too far!");
-				return 0;
-			}
-			if(!isok(x, y) || !(mtmp = m_u_at(x, y)) || DEADMONSTER(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			if(mtmp == &youmonst){
-				Sprintf(coinbuff, "Use the %s on yourself?", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin");
-				if(yn(coinbuff) == 'n')
-					return 0;
-			}
-			else if(!canspotmon(mtmp)){
-				You("see no target there!");
-				return 0;
-			}
-			You("crush the %s in your %s.", obj->dknown ? OBJ_DESCR(objects[obj->otyp]) : "coin", body_part(HAND));
-			if(mtmp != &youmonst && mindless_mon(mtmp)){
-				pline("%s is unbothered.", Monnam(mtmp));
-			}
-			
-			if(mtmp == &youmonst){
-				u.uencouraged -= 9;
-				if(obj->cursed)
-					u.ustdy += 45;
-			}
-			else {
-				mtmp->encouraged -= 9;
-				if(obj->cursed){
-					mtmp->mstdy += 45;
-				}
-				if(is_minion(mtmp->data) && !(mtmp->data->geno&G_UNIQ)
-				  && (obj->cursed || !resist(mtmp, RING_CLASS, 0, NOTELL))
-				){
-					if(In_endgame(&u.uz)){
-						if(canspotmon(mtmp)){
-							pline("%s plummets through the %s!", Monnam(mtmp), surface(mtmp->mx, mtmp->my));
-						}
-						mongone(mtmp);
-					}
-					else if(!templated(mtmp)){
-						if(canspotmon(mtmp)){
-							pline("%s falls from grace!", Monnam(mtmp));
-						}
-						set_template(mtmp, FALLEN_TEMPLATE);
+					relobj_envy(mtmp,canspotmon(mtmp));
+					mtmp->menvy = TRUE;
+					if(obj->cursed){
+						mtmp->mdisrobe = TRUE;
 					}
 				}
-			}
-			if(obj->cursed){
-				CURSED_SOUL_HANDLING
-			}
-			/* Blessed handled above */
-			else {
-				UNCURSED_SOUL_HANDLING
-			}
-			useup(obj);
-			return 1;
-		break;
+			break;
+			case WAGE_OF_PRIDE:
+				if(mtmp != &youmonst && mindless_mon(mtmp)){ /* player is never mindless */
+					pline("%s is unbothered.", Monnam(mtmp));
+				}
+				
+				if(mtmp == &youmonst){
+					u.uencouraged -= 9;
+					if(obj->cursed)
+						u.ustdy += 45;
+				}
+				else {
+					mtmp->encouraged -= 9;
+					if(obj->cursed){
+						mtmp->mstdy += 45;
+					}
+					if(is_minion(mtmp->data) && !(mtmp->data->geno&G_UNIQ)
+					&& (obj->cursed || !resist(mtmp, RING_CLASS, 0, NOTELL))
+					){
+						if(In_endgame(&u.uz)){
+							if(canspotmon(mtmp)){
+								pline("%s plummets through the %s!", Monnam(mtmp), surface(mtmp->mx, mtmp->my));
+							}
+							mongone(mtmp);
+						}
+						else if(!templated(mtmp)){
+							if(canspotmon(mtmp)){
+								pline("%s falls from grace!", Monnam(mtmp));
+							}
+							set_template(mtmp, FALLEN_TEMPLATE);
+						}
+					}
+				}
+			break;
+		}
 	}
+	/* handle B/U/C effect of wages */
+	soul_crush_consequence(obj);
+	
+	useup(obj);
     return 1;
 }
 
@@ -6012,19 +5833,11 @@ struct obj *obj;
 		return 0;
 	}
 	if(yn("Crush the stone?") == 'y'){
-		if(obj->blessed){
-			FREE_SOUL_HANDLING
-		}
-		else if(obj->cursed){
+		if(!obj->blessed){
 			You_feel("full of vital energy!");
-			healup(900, 0, FALSE, FALSE);
-			CURSED_SOUL_HANDLING
+			healup((obj->cursed ? 900 : 400), 0, FALSE, FALSE);
 		}
-		else {
-			You_feel("full of vital energy!");
-			healup(400, 0, FALSE, FALSE);
-			UNCURSED_SOUL_HANDLING
-		}
+		soul_crush_consequence(obj);
 		useup(obj);
 		return 1;
 	}
@@ -6040,19 +5853,11 @@ struct obj *obj;
 		return 0;
 	}
 	if(yn("Crush the stone?") == 'y'){
-		if(obj->blessed){
-			FREE_SOUL_HANDLING
-		}
-		else if(obj->cursed){
+		if(!obj->blessed) {
 			You_feel("deeply spiritual!");
-			u.uen = max(u.uenmax, u.uen+900);
-			CURSED_SOUL_HANDLING
+			u.uen = min(u.uenmax, u.uen + (obj->cursed ? 900 : 400));
 		}
-		else {
-			You_feel("deeply spiritual!");
-			u.uen = max(u.uenmax, u.uen+400);
-			UNCURSED_SOUL_HANDLING
-		}
+		soul_crush_consequence(obj);
 		useup(obj);
 		return 1;
 	}
