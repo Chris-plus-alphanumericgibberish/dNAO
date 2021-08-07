@@ -11,7 +11,6 @@
 extern void NDECL(autoquiver);
 extern int FDECL(gem_accept, (struct monst *, struct obj *));
 extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
-extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
 STATIC_DCL boolean FDECL(mhurtle_step, (genericptr_t,int,int));
 extern boolean FDECL(quest_arti_hits_leader, (struct obj *, struct monst *));
