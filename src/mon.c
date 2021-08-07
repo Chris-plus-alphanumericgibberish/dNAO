@@ -4597,6 +4597,7 @@ boolean was_swallowed;			/* digestion */
 		   || is_rider(mdat)
 		   || mon->m_id == quest_status.leader_m_id
 		   || mon->data->msound == MS_NEMESIS
+		   || (mdat->geno & G_UNIQ)
 		   || is_alabaster_mummy(mon->data)
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
 		   || mdat->mtyp == PM_HARROWER_OF_ZARIEL
