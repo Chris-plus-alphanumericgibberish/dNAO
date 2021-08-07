@@ -806,11 +806,13 @@ struct scatter_chain {
 
 /* returns number of scattered objects */
 long
-scatter(sx,sy,blastforce,scflags, obj)
+scatter(sx,sy,blastforce,scflags, obj, loss, shkp)
 int sx,sy;				/* location of objects to scatter */
 int blastforce;				/* force behind the scattering	*/
 unsigned int scflags;
 struct obj *obj;			/* only scatter this obj        */
+long *loss;				/* report $ value of damage caused here if non-null */
+struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 {
 	register struct obj *otmp;
 	register int tmp;
@@ -842,6 +844,11 @@ struct obj *obj;			/* only scatter this obj        */
 			&& rn2(10)) {
 		if (otmp->otyp == BOULDER) {
 		    pline("%s apart.", Tobjnam(otmp, "break"));
+			if(shkp){
+				int loss_cost = stolen_value(otmp, otmp->ox, otmp->oy, (boolean)shkp->mpeaceful, TRUE);
+				if(loss)
+					*loss += loss_cost;
+			}
 		    break_boulder(otmp);
 		    place_object(otmp, sx, sy);
 		    if ((otmp = boulder_at(sx, sy)) != 0) {
@@ -864,8 +871,17 @@ struct obj *obj;			/* only scatter this obj        */
 	    } else if ((scflags & MAY_DESTROY) && (!rn2(10)
 			|| otmp->obj_material == GLASS
 			|| otmp->obj_material == OBSIDIAN_MT
-			|| otmp->otyp == EGG)) {
-		if (breaks(otmp, (xchar)sx, (xchar)sy)) used_up = TRUE;
+			|| otmp->otyp == EGG)
+		){
+			if (breaktest(otmp)){
+				if(shkp){
+					int loss_cost = stolen_value(otmp, sx, sy, (boolean)shkp->mpeaceful, TRUE);
+					if(loss)
+						*loss += loss_cost;
+				}
+				breakobj(otmp, sx, sy, TRUE, FALSE);
+				used_up = TRUE;
+			}
 	    }
 
 	    if (!used_up) {

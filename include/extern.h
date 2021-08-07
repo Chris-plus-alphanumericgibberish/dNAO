@@ -890,7 +890,7 @@ E long FDECL(rndexp, (BOOLEAN_P));
 E void FDECL(explode, (int,int,int,int,int,int,int));
 E void FDECL(explode_yours, (int,int,int,int,int,int,int,boolean));
 E void FDECL(splash, (int,int,int,int,int,int,int,int));
-E long FDECL(scatter, (int, int, int, unsigned int, struct obj *));
+E long FDECL(scatter, (int, int, int, unsigned int, struct obj *, long *, struct monst *));
 E void FDECL(splatter_burning_oil, (int, int));
 E int FDECL(adtyp_expl_color, (int));
 //#ifdef FIREARMS
@@ -3215,6 +3215,7 @@ E void FDECL(getgazeinfo, (int, int, struct permonst *, struct monst *, struct m
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
+E void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 E int FDECL(hmon_with_unowned_obj, (struct monst *, struct obj **, int));
 E int FDECL(hmon_with_trap, (struct monst *, struct obj **, struct trap *, int, int));
 E int FDECL(hmon_general, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int));

@@ -882,7 +882,7 @@ int dx, dy;
 					    pline("Some %s fall from the tree!", xname(treefruit));
 					else
 					    pline("%s falls from the tree!", An(xname(treefruit)));
-					nfall = scatter(x,y,2,MAY_HIT,treefruit);
+					nfall = scatter(x,y,2,MAY_HIT,treefruit, (long *)0, (struct monst *)0);
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
@@ -936,7 +936,7 @@ int dx, dy;
 					    pline("Some %s fall from the tree!", xname(treefruit));
 					else
 					    pline("%s falls from the tree!", An(xname(treefruit)));
-					nfall = scatter(x,y,2,MAY_HIT,treefruit);
+					nfall = scatter(x,y,2,MAY_HIT,treefruit, (long *)0, (struct monst *)0);
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
@@ -1024,7 +1024,7 @@ int dx, dy;
 					    pline("Some %s fall from the tree!", xname(treefruit));
 					else
 					    pline("%s falls from the tree!", An(xname(treefruit)));
-					nfall = scatter(x,y,2,MAY_HIT,treefruit);
+					nfall = scatter(x,y,2,MAY_HIT,treefruit, (long *)0, (struct monst *)0);
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
@@ -1079,7 +1079,7 @@ int dx, dy;
 					    pline("Some %s fall from the tree!", xname(treefruit));
 					else
 					    pline("%s falls from the tree!", An(xname(treefruit)));
-					nfall = scatter(x,y,2,MAY_HIT,treefruit);
+					nfall = scatter(x,y,2,MAY_HIT,treefruit, (long *)0, (struct monst *)0);
 					if (nfall != nfruit) {
 					    /* scatter left some in the tree, but treefruit
 					     * may not refer to the correct object */
@@ -1652,7 +1652,7 @@ obj_delivery()
 	    if (nx > 0) {
 		place_object(otmp, nx, ny);
 		stackobj(otmp);
-		(void)scatter(nx, ny, rnd(2), 0, otmp);
+		(void)scatter(nx, ny, rnd(2), 0, otmp, (long *)0, (struct monst *)0);
 	    } else {		/* random location */
 		/* set dummy coordinates because there's no
 		   current position for rloco() to update */

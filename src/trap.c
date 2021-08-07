@@ -1589,7 +1589,7 @@ struct trap *trap;
 {
 	(void)scatter(trap->tx, trap->ty, 4,
 		MAY_DESTROY | MAY_HIT | MAY_FRACTURE | VIS_EFFECTS,
-		(struct obj *)0);
+		(struct obj *)0, (long *)0, (struct monst *)0);
 	del_engr_ward_at(trap->tx, trap->ty);
 	wake_nearto_noisy(trap->tx, trap->ty, 400);
 	/* ALI - artifact doors from Slash'em */
@@ -1777,7 +1777,7 @@ int style;
 				break_boulder(singleobj);
 				(void)scatter(bhitpos.x,bhitpos.y, 4,
 					MAY_DESTROY|MAY_HIT|MAY_FRACTURE|VIS_EFFECTS,
-					(struct obj *)0);
+					(struct obj *)0, (long *)0, (struct monst *)0);
 				if (cansee(bhitpos.x,bhitpos.y))
 					newsym(bhitpos.x,bhitpos.y);
 			        used_up = TRUE;
@@ -4752,60 +4752,65 @@ boolean disarm;
 		case 22:
 		case 21: 
 			if(!obj->oartifact){
-			  struct monst *shkp = 0;
-			  long loss = 0L;
-			  boolean costly, insider;
-			  register xchar ox = obj->ox, oy = obj->oy;
+				struct monst *shkp = 0;
+				long loss = 0L;
+				boolean costly, insider;
+				register xchar ox = obj->ox, oy = obj->oy;
 
-			  /* the obj location need not be that of player */
-			  costly = (costly_spot(ox, oy) &&
+				/* the obj location need not be that of player */
+				costly = (costly_spot(ox, oy) &&
 				   (shkp = shop_keeper(*in_rooms(ox, oy,
 				    SHOPBASE))) != (struct monst *)0);
-			  insider = (*u.ushops && inside_shop(u.ux, u.uy) &&
+				insider = (*u.ushops && inside_shop(u.ux, u.uy) &&
 				    *in_rooms(ox, oy, SHOPBASE) == *u.ushops);
 
-			  pline("%s!", Tobjnam(obj, "explode"));
-			  Sprintf(buf, "exploding %s", xname(obj));
+				pline("%s!", Tobjnam(obj, "explode"));
+				Sprintf(buf, "exploding %s", xname(obj));
 
-			  if(costly)
-			      loss += stolen_value(obj, ox, oy,
-						(boolean)shkp->mpeaceful, TRUE);
-			  delete_contents(obj);
-			  /* we're about to delete all things at this location,
-			   * which could include the ball & chain.
-			   * If we attempt to call unpunish() in the
-			   * for-loop below we can end up with otmp2
-			   * being invalid once the chain is gone.
-			   * Deal with ball & chain right now instead.
-			   */
-			  if (Punished && !carried(uball) &&
-				((uchain->ox == u.ux && uchain->oy == u.uy) ||
-				 (uball->ox == u.ux && uball->oy == u.uy)))
-				unpunish();
+				struct obj *otmp;
+				while((otmp = obj->cobj)){
+					obj_extract_self(otmp);
+					if(costly && breaktest(otmp)){
+						loss += stolen_value(otmp, ox, oy,
+								(boolean)shkp->mpeaceful, TRUE);
+						breakobj(otmp, ox, oy, TRUE, FALSE);
+					}
+					place_object(otmp, ox, oy);
+					stackobj(otmp);
+				}
+				if(costly)
+					loss += stolen_value(obj, obj->ox,
+						obj->oy, (boolean)shkp->mpeaceful,
+						TRUE);
+				delobj(obj);
+				/* we're about to scatter all things at this location,
+				 * which could include the ball & chain.
+				 * If we attempt to call unpunish() in the
+				 * for-loop below we can end up with otmp2
+				 * being invalid once the chain is gone.
+				 * Deal with ball & chain right now instead.
+				 */
+				if (Punished && !carried(uball) &&
+					((uchain->ox == u.ux && uchain->oy == u.uy) ||
+					 (uball->ox == u.ux && uball->oy == u.uy))
+				)
+					unpunish();
 
-			  for(otmp = level.objects[u.ux][u.uy];
-							otmp; otmp = otmp2) {
-			      otmp2 = otmp->nexthere;
-			      if(costly)
-				  loss += stolen_value(otmp, otmp->ox,
-					  otmp->oy, (boolean)shkp->mpeaceful,
-					  TRUE);
-			      delobj(otmp);
-			  }
-			  wake_nearby_noisy();
-			  losehp(d(6,6), buf, KILLED_BY_AN);
-			  exercise(A_STR, FALSE);
-			  if(costly && loss) {
-			      if(insider)
-			      You("owe %ld %s for objects destroyed.",
+				scatter(ox, oy, 4, VIS_EFFECTS|MAY_HIT|MAY_DESTROY|MAY_FRACTURE, (struct obj *)0, &loss, shkp);
+				wake_nearby_noisy();
+				losehp(d(6,6), buf, KILLED_BY_AN);
+				exercise(A_STR, FALSE);
+				if(costly && loss) {
+					if(insider)
+					You("owe %ld %s for objects destroyed.",
 							loss, currency(loss));
-			      else {
-				  You("caused %ld %s worth of damage!",
+					else {
+					You("caused %ld %s worth of damage!",
 							loss, currency(loss));
-				  make_angry_shk(shkp, ox, oy);
-			      }
-			  }
-			  return TRUE;
+					make_angry_shk(shkp, ox, oy);
+					}
+				}
+				return TRUE;
 			}
 		case 20:
 		case 19:
