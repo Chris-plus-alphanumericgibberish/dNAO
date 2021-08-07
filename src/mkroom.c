@@ -5875,9 +5875,9 @@ mkhellvaultroom()
 	/* Put a hellish seal at m.x, m.y */
 	levl[x][y].typ = HELLISH_SEAL;
 	/*Pick monster*/
-	if(VN_MAX > VAULT_LIMIT){
+	if(VN_MAX >= VAULT_LIMIT){
 		impossible("Vault exceeded [safe fallback triggered]");
-		levl[x][y].vaulttype = rnd(31);
+		levl[x][y].vaulttype = rnd(VAULT_LIMIT-1);
 	} else {
 		levl[x][y].vaulttype = rnd(VN_MAX-1);
 	}
