@@ -5586,12 +5586,13 @@ arti_invoke(obj)
 
     if(oart->inv_prop > LAST_PROP) {
 	/* It's a special power, not "just" a property */
-	if(obj->age > monstermoves && 
-		oart->inv_prop != FIRE_SHIKAI && 
-		oart->inv_prop != SEVENFOLD && 
-		oart->inv_prop != ANNUL && 
-		oart->inv_prop != ALTMODE && 
-		oart->inv_prop != LORDLY
+	if(obj->age > monstermoves && !(
+		oart->inv_prop == FIRE_SHIKAI ||
+		oart->inv_prop == SEVENFOLD ||
+		oart->inv_prop == ANNUL ||
+		oart->inv_prop == ALTMODE || 
+		oart->inv_prop == LORDLY ||
+		(oart->inv_prop == MANY_FACES && obj == uskin))
 	) {
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
@@ -5608,17 +5609,18 @@ arti_invoke(obj)
 		obj->age += Role_if(PM_PRIEST) ? (long) d(1,20) : (long) d(3,10);
 	    return partial_action();
 	}
-	if( /* some properties can be used as often as desired, or track cooldowns in a different way */
-		oart->inv_prop != FIRE_SHIKAI &&
-		oart->inv_prop != ICE_SHIKAI &&
-		oart->inv_prop != NECRONOMICON &&
-		oart->inv_prop != SPIRITNAMES &&
-		oart->inv_prop != ALTMODE &&
-		oart->inv_prop != LORDLY &&
-		oart->inv_prop != ANNUL &&
-		oart->inv_prop != VOID_CHIME &&
-		oart->inv_prop != SEVENFOLD
-	)obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
+	if(!( /* some properties can be used as often as desired, or track cooldowns in a different way */
+		oart->inv_prop == FIRE_SHIKAI ||
+		oart->inv_prop == ICE_SHIKAI ||
+		oart->inv_prop == NECRONOMICON ||
+		oart->inv_prop == SPIRITNAMES ||
+		oart->inv_prop == ALTMODE ||
+		oart->inv_prop == LORDLY ||
+		oart->inv_prop == ANNUL ||
+		oart->inv_prop == VOID_CHIME ||
+		oart->inv_prop == SEVENFOLD
+	))
+		obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
 
 	if(oart->inv_prop == VOID_CHIME) obj->age = monstermoves + 125L;
 
@@ -8510,6 +8512,53 @@ arti_invoke(obj)
 			}
 			You("click your heels together and take a step... ");
 			jump(15);
+			break;
+		case MANY_FACES:
+			if(obj != ublindf && obj != uskin && obj != uwep) {
+				You_feel("that you should be holding %s.", the(xname(obj)));
+				obj->age = monstermoves;
+				return(0);
+			}
+			if(Upolyd && obj == uskin) {
+				/* revert */
+				rehumanize();
+			}
+			else if (Unchanging) {
+				You_feel("the mask's magic be blocked by something.");
+				return partial_action();
+			}
+			else {
+				/* steal a face */
+				if(getdir((char *)0)) {
+					struct monst *mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
+					if (mtmp && !DEADMONSTER(mtmp)) {
+						/* attempt to take monster */
+						int threshold = mtmp->mhpmax / 3 + u.ulevel;
+
+						if (resists_poly(mtmp->data)) threshold /= 2;
+						if (is_rider(mtmp->data)) threshold = 0;
+
+						if (mtmp->mhp < threshold) {
+							/* take the monster */
+							xkilled(mtmp, 3);
+							obj->corpsenm = mtmp->mtyp;
+							/* keep consistent with on-wear code in do_wear.c */
+							if (obj == ublindf) {
+								polymon(obj->corpsenm);
+								u.mtimedone = (u.ulevel * 20) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
+								if (!polyok(&mons[obj->corpsenm])) u.mtimedone /= 3;
+								uskin = obj;
+								ublindf = (struct obj *)0;
+								uskin->owornmask |= W_SKIN;
+							}
+						}
+						else {
+							/* resisted */
+							pline("%s resists!", Monnam(mtmp));
+						}
+					}
+				}
+			}
 			break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
