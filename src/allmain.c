@@ -3968,7 +3968,7 @@ struct monst *mon;
 {
 	if(couldsee(mon->mx, mon->my) &&
 		distmin(mon->mx, mon->my, u.ux, u.uy) <= BOLT_LIM &&
-		((canseemon(mon) && !(mon->mappearance || mon->mundetected)) || sensemon(mon))
+		(canseemon(mon) && (!(mon->mappearance || mon->mundetected) || sensemon(mon)))
 	){
 		//May have already lost sanity from seeing it from a distance, or wiped the memory with amnesia.
 		if(!mon->mtame){
