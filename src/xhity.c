@@ -3650,8 +3650,8 @@ int flat_acc;
 		+ wepn_acc
 		+ defn_acc
 		+ flat_acc;
-	/*
-	if (wizard && !youdef && ublindf && ublindf->otyp == LENSES) {
+
+	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
 		pline("Accuracy = %d+%d+%d+%d+%d+%d+%d+%d=%d",
 			base_acc,
 			rang_acc,
@@ -3664,7 +3664,6 @@ int flat_acc;
 			totl_acc
 			);
 	}
-	*/
 
 	/* return our to-hit -- if this is greater than a d20, it hits */
 	return totl_acc;
@@ -3752,7 +3751,10 @@ boolean ranged;
 
 	/* roll to-hit die */
 	dieroll = rnd(20);
-
+	
+	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
+		pline("accuracy = %d, die roll = %d", accuracy, dieroll);
+	}
 	/* Diverge on aatyp */
 	switch (attk->aatyp)
 	{
