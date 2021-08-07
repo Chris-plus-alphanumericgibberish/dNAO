@@ -3623,9 +3623,9 @@ int flat_acc;
 		(melee && attk->aatyp == AT_VINE) ||
 		(melee && spirit_rapier_at(attk->aatyp)) ||
 		(weapon && !valid_weapon(weapon))	/* potions, cream pies, rubber chickens, eggs, etc. */
-		) {
+	) {
 		if (youdef) {
-			defn_acc += AC_VALUE(base_uac() + u.uspellprot) + 10 - u.uspellprot;
+			defn_acc += AC_VALUE(base_uac() + u.uspellprot) - u.uspellprot;
 		}
 		else {
 			defn_acc += base_mac(mdef);
@@ -3634,7 +3634,7 @@ int flat_acc;
 	/* do not ignore worn armor */
 	else {
 		if (youdef){
-			defn_acc += AC_VALUE(u.uac + u.uspellprot) + 10 - u.uspellprot;
+			defn_acc += AC_VALUE(u.uac + u.uspellprot) - u.uspellprot;
 		}
 		else {
 			defn_acc += find_mac(mdef);
