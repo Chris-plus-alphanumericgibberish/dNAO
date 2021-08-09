@@ -577,6 +577,7 @@ you_calc_movement()
 					body_part(BONES), rnd(6) ? body_part(CREAK) : body_part(CRACK));
 				exercise(A_CON, FALSE);
 				exercise(A_STR, FALSE);
+				nomul(0, NULL);
 			}
 		}
 	}
