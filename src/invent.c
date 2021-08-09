@@ -3367,6 +3367,38 @@ winid *datawin;
 			OBJPUTSTR("Precious gem.");
 		}
 	}
+	if (olet == SCOIN_CLASS) {
+		switch(otyp) {
+		case WAGE_OF_PRIDE:
+			OBJPUTSTR("Apply to crush the coin and harness the trapped soul's weighty ego.");
+			OBJPUTSTR("Weakens a thinking creature, and causes an Angel to fall from grace.");
+			break;
+		case WAGE_OF_ENVY:
+			OBJPUTSTR("Apply to crush the coin and harness the trapped soul's material jealousy.");
+			OBJPUTSTR("Makes a thinking creature discard all its things in desire of others'.");
+			break;
+		case WAGE_OF_LUST:
+			OBJPUTSTR("Apply to crush the coin and harness the trapped soul's aimless bluster.");
+			OBJPUTSTR("Creates a hurricane of wind around you.");
+			break;
+		case WAGE_OF_WRATH:
+			OBJPUTSTR("Apply to crush the coin and harness the trapped soul's spilled blood.");
+			OBJPUTSTR("Fills the lungs of a creature with enraging blood.");
+			break;
+		case WAGE_OF_GLUTTONY:
+			OBJPUTSTR("Apply to crush the coin and harness the trapped soul's endless hunger.");
+			OBJPUTSTR("Causes an ediate creature to starve.");
+			break;
+		case WAGE_OF_GREED:
+			OBJPUTSTR("Apply to crush the coin and harness the trapped soul's hoarded things.");
+			OBJPUTSTR("Creates a mass of random objects to throw at a location.");
+			break;
+		case WAGE_OF_SLOTH:
+			OBJPUTSTR("Apply to crush the coin and harness the trapped soul's wasted time.");
+			OBJPUTSTR("Gives you a brief period of accelerated time.");
+			break;
+		}
+	}
 	if (olet == TOOL_CLASS && !(olet == TOOL_CLASS && oc.oc_skill)) {
 		const char* subclass = "tool";
 		switch (otyp) {
