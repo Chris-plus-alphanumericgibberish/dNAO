@@ -5560,6 +5560,10 @@ struct obj *obj;
 		boolean needs_mon = (obj->otyp != WAGE_OF_GREED);
 		boolean needs_space = (obj->otyp == WAGE_OF_GREED);
 		/* choose target */
+		if (needs_mon)
+			pline("Pick a creature to target.");
+		else
+			pline("Pick a location to target.");
 		if(getpos(&cc, TRUE, "the target") < 0) return 0;
 		x = cc.x;
 		y = cc.y;
