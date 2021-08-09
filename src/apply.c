@@ -3760,7 +3760,7 @@ struct obj *obj;
 				int hitu, hitvalu;
 				int dieroll;
 				hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, otmp, (void *)0, HMON_MISTHROWN, 8);
-				if(hitvalu > (dieroll = rnd(20))) {
+				if(hitvalu > (dieroll = rnd(20)) || dieroll == 1) {
 					boolean wepgone = FALSE;
 					pline_The("%s hits you as you try to snatch it!" the(onambuf));
 					hmon_general((struct monst *)0, &youmonst, (struct attack *)0, &otmp, (void *)0, HMON_MISTHROWN,

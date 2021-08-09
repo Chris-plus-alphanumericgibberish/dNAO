@@ -394,8 +394,7 @@
 #define NoBInvis		(HInvis || EInvis || Underwater || \
 						 pm_invisible(youracedata) || \
 						 (ward_at(u.ux,u.uy) == HAMSA \
-							&& num_wards_at(u.ux, u.uy) == 6 ) || \
-						  (flags.run != 0 && uwep && uwep->oartifact == ART_TOBIUME))
+							&& num_wards_at(u.ux, u.uy) == 6 ))
 #define Invis			(((HInvis || EInvis || \
 						 pm_invisible(youracedata) || \
 						 (ward_at(u.ux,u.uy) == HAMSA \
@@ -413,8 +412,7 @@
 #define HStealth		u.uprops[STEALTH].intrinsic
 #define EStealth		u.uprops[STEALTH].extrinsic
 #define BStealth		(u.uprops[STEALTH].blocked || (uwep && uwep->otyp == KHAKKHARA))
-#define Stealth			((HStealth || EStealth || Underwater || \
-						 (flags.run != 0 && uwep && uwep->oartifact == ART_TOBIUME)) && !BStealth)
+#define Stealth			((HStealth || EStealth || Underwater) && !BStealth)
 
 #define HAggravate_monster	u.uprops[AGGRAVATE_MONSTER].intrinsic
 #define EAggravate_monster	u.uprops[AGGRAVATE_MONSTER].extrinsic

@@ -3257,7 +3257,11 @@ resistances_enlightenment()
 	if (active_glyph(CLEAR_DEEPS)) putstr(en_win, 0, "Your thoughts drift through blue water.");
 	if (active_glyph(DEEP_SEA)) putstr(en_win, 0, "Your fears drown in pitch-black water.");
 	if (active_glyph(TRANSPARENT_SEA)) putstr(en_win, 0, "Your mind is bulwarked by the clear deep sea.");
-	if (active_glyph(COMMUNION)) putstr(en_win, 0, "A strange minister preaches continuously in your childhood home.");
+	if (active_glyph(COMMUNION)) {
+		Race_if(PM_ANDROID) ? putstr(en_win, 0, "A strange minister preaches continuously in the city where you were built and tested.") :
+		Race_if(PM_CLOCKWORK_AUTOMATON) ? putstr(en_win, 0, "A strange minister preaches continuously in your maker's workshop.") :
+		putstr(en_win, 0, "A strange minister preaches continuously in your childhood home.");
+	}
 	if (active_glyph(CORRUPTION)) putstr(en_win, 0, "It weeps tears of blood.");
 	if (active_glyph(EYE_THOUGHT)) putstr(en_win, 0, "Eyes writhe inside your head.");
 	if (active_glyph(FORMLESS_VOICE)) putstr(en_win, 0, "A great voice speaks to you.");
