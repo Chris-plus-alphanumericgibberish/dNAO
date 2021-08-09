@@ -3788,7 +3788,7 @@ boolean ranged;
 			hit = TRUE;
 		}
 		
-		if ((accuracy > dieroll) && !miss) {
+		if ((accuracy > dieroll || dieroll == 1) && !miss) {
 			hit = TRUE;
 		}
 		/* multistriking weapons need to determine how many hit, and set ostriking */
