@@ -2672,9 +2672,24 @@ boolean ranged;
 		return;
 
 	if (!ranged) {
+		char *swingwords[] = {"thrusts", "swings"};
+		int swingindex;
+		
+		if(!(objects[otmp->otyp].oc_dtyp&PIERCE))
+			swingindex = 1;
+		else if(weapon_type(otmp) == P_PICK_AXE || weapon_type(otmp) == P_MORNING_STAR || weapon_type(otmp) == P_FLAIL)
+			swingindex = 1;
+		else if(objects[otmp->otyp].oc_dtyp == PIERCE)
+			swingindex = 0;
+		else if(resist_pierce(mdef->data) && ((objects[otmp->otyp].oc_dtyp&WHACK && !resist_blunt(mdef->data)) || (objects[otmp->otyp].oc_dtyp&SLASH && !resist_slash(mdef->data))))
+			swingindex = 1;
+		else if(!resist_pierce(mdef->data) && !((objects[otmp->otyp].oc_dtyp&WHACK && !resist_blunt(mdef->data)) || (objects[otmp->otyp].oc_dtyp&SLASH && !resist_slash(mdef->data))))
+			swingindex = 0;
+		else
+			swingindex = !rn2(3) ? 0 : 1;
 		Sprintf(buf, "%s %s %s %s",
 			Monnam(magr),
-			(objects[otmp->otyp].oc_dtyp & PIERCE && weapon_type(otmp) != P_PICK_AXE) ? "thrusts" : "swings",
+			swingwords[swingindex],
 			mhis(magr),
 			singular(otmp, xname)
 			);
