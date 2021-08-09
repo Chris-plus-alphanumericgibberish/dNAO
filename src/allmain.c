@@ -1233,7 +1233,7 @@ moveloop()
 	didmove = flags.move;
 	if(didmove) {
 	    /* actual time passed */
-		if(flags.run != 0){
+		if(u.umoved){
 			if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
 				youmonst.movement -= 1;
 			} else if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
@@ -1243,19 +1243,22 @@ moveloop()
 			} else if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
 				youmonst.movement -= 3;
 			} else if(uwep && uwep->oartifact == ART_TOBIUME){
+				if((HStealth&TIMEOUT) < 2)
+					set_itimeout(&HStealth, 2L);
+				if((HInvis&TIMEOUT) < 2){
+					set_itimeout(&HInvis, 2L);
+					newsym(u.ux, u.uy);
+				}
 				youmonst.movement -= 4;
 			} else {
 				youmonst.movement -= NORMAL_SPEED;
 			}
-		} else if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
-			if(u.umoved){
-				youmonst.movement -= 3;
-			} else {
+		} else {
+			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED)
 				u.ucspeed = NORM_CLOCKSPEED;
-				youmonst.movement -= NORMAL_SPEED;
-			}
-		} else youmonst.movement -= NORMAL_SPEED;
-		
+			youmonst.movement -= NORMAL_SPEED;
+		}
+
 		  /**************************************************/
 		 /*monsters that respond to the player turn go here*/
 		/**************************************************/
