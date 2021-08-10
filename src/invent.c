@@ -829,6 +829,7 @@ carrying_applyable_amulet()
 	return FALSE;
 }
 
+/* note: does not include gray stones */
 char
 carrying_applyable_gem()
 {
@@ -837,8 +838,6 @@ carrying_applyable_gem()
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 		if(otmp->otyp == ANTIMAGIC_RIFT
 		|| otmp->otyp == CATAPSI_VORTEX
-		|| otmp->otyp == VITAL_SOULSTONE
-		|| otmp->otyp == SPIRITUAL_SOULSTONE
 		|| (Role_if(PM_ANACHRONONAUT) && !otmp->oartifact && otmp->otyp == DILITHIUM_CRYSTAL)
 		)
 			return TRUE;
@@ -3357,7 +3356,14 @@ winid *datawin;
 		}
 	}
 	if (olet == GEM_CLASS) {
-		if (oc.oc_material == MINERAL) {
+		if (otyp == ANTIMAGIC_RIFT || otyp == CATAPSI_VORTEX) {
+			Sprintf(buf, "Apply to crush the gem and unleash the contained %s.", otyp == ANTIMAGIC_RIFT ? "rift" : "vortex");
+			OBJPUTSTR(buf);
+		}
+		else if (otyp == VITAL_SOULSTONE || otyp == SPIRITUAL_SOULSTONE) {
+			OBJPUTSTR("Apply to crush the stone and expend the trapped soul.");
+		}
+		else if (oc.oc_material == MINERAL) {
 			OBJPUTSTR("Type of stone.");
 		}
 		else if (oc.oc_material == GLASS) {

@@ -884,7 +884,9 @@ struct obj {
 #define is_graystone(obj)	((obj)->otyp == LUCKSTONE || \
 				 (obj)->otyp == LOADSTONE || \
 				 (obj)->otyp == FLINT     || \
-				 (obj)->otyp == TOUCHSTONE)
+				 (obj)->otyp == TOUCHSTONE || \
+				 (obj)->otyp == VITAL_SOULSTONE || \
+				 (obj)->otyp == SPIRITUAL_SOULSTONE)
 
 /* spirit related */
 #define is_berithable(otmp)	(otmp->otyp == SADDLE\

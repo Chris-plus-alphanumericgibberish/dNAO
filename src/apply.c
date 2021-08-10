@@ -7448,10 +7448,16 @@ doapply()
 		res = use_rift(obj);
 	break;
 	case VITAL_SOULSTONE:
-		res = use_vital(obj);
+		if (objects[obj->otyp].oc_name_known)
+			res = use_vital(obj);
+		else
+			use_stone(obj);
 	break;
 	case SPIRITUAL_SOULSTONE:
-		res = use_spiritual(obj);
+		if (objects[obj->otyp].oc_name_known)
+			res = use_spiritual(obj);
+		else
+			use_stone(obj);
 	break;
 	case PRESERVATIVE_ENGINE:
 		res = res_engine_menu(obj);
