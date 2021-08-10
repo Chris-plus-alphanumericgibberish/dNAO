@@ -130,7 +130,8 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		(mon_attacktype(magr, AT_LNCK)) ||
 		(mon_attacktype(magr, AT_5SQR)) ||
 		(mon_attacktype(magr, AT_5SBT)) ||
-		(is_commander(magr->data))
+		(is_commander(magr->data)) ||
+		(find_offensive(magr))
 		))
 		return (struct monst *)0;
 
@@ -222,7 +223,8 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 				(mon_attacktype(magr, AT_SPIT)) ||
 				(mon_attacktype(magr, AT_ARRW)) ||
 				(mon_attacktype(magr, AT_WEAP) && mrwep && !is_pole(mrwep)) ||
-				(mon_attacktype(magr, AT_DEVA) && mrwep && !is_pole(mrwep))
+				(mon_attacktype(magr, AT_DEVA) && mrwep && !is_pole(mrwep)) ||
+				(find_offensive(magr))
 			))
 			||
 			/* attacks that are on a line that are ALWAYS SAFE */
