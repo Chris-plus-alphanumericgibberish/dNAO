@@ -128,7 +128,8 @@ register struct obj *pen;
 	if (!strncmpi(nm, "of ", 3)) nm += 3;
 
 	if ((bp = strstri(nm, " armour")) != 0) {
-		(void)strncpy(bp, " armor ", 7);	/* won't add '\0' */
+		(void)strcpy(bp, " armor ");
+		eos(bp)[0] = ' ';	/* overwrite the '\0', we want the rest of the string */
 		(void)mungspaces(bp + 1);	/* remove the extra space */
 	}
 	if(!strcmpi(nm, "heptagram")){

@@ -3225,13 +3225,14 @@ const char *oldstr;
 			!BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25))
 			return bp;
 		else {
-			/* make a fake string of the start */
+			/* save the string from " of " onwards */
+			char * q = nextobuf();
+			Strcpy(q, p);
+			/* make a fake string of the start to singularize */
 			p[0] = '\0';
 			Strcpy(bp, makesingular(bp));
-			Sprintf(bp, "%s %s", bp, &p[1]);
-			// TODO: shush warning *without* breaking this. 
-			//Strcat(bp, " ");
-			//Strcat(bp, &p[1]);
+			/* reattach " of "... */
+			Strcat(bp, q);
 			return bp;
 		}
 	}
