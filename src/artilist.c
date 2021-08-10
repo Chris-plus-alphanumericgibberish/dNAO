@@ -1089,7 +1089,7 @@ A("Whisperfeet",					SPEED_BOOTS,		(const char *)0,
 /*Needs encyc entry*/
 A("Seven League Boots",				JUMPING_BOOTS,		(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_C, NOFLAG,
+	A_NONE, NON_PM, NON_PM, TIER_B, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(FAST), NOFLAG,
