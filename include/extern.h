@@ -160,6 +160,7 @@ E void NDECL(living_items);
 E int FDECL(oresist_disintegration, (struct obj *));
 E int FDECL(wrath_target, (struct obj *, struct monst *));
 E int FDECL(goat_weapon_damage_turn, (struct obj *));
+E void FDECL(activate_mirrored_mask, (struct obj *));
 
 /* ### astar.c ### */
 E boolean FDECL(path_exists, (int, int, int, int, long, int));

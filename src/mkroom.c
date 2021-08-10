@@ -1623,46 +1623,33 @@ mkkamereltowers()
 			tries = 0;
 			otmp = 0;
 			while(!otmp){
-				if(!rn2(3)){
-					otmp = mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT);
-					otmp = oname(otmp, artiname(ART_INFINITY_S_MIRRORED_ARC));
-					if(otmp->oartifact){
+				switch(rn2(4)) {
+				case 0:
+					otmp = oname(mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT), artiname(ART_INFINITY_S_MIRRORED_ARC));
+					break;
+				case 1:
+					otmp = oname(mksobj(MIRRORBLADE, MKOBJ_NOINIT), artiname(ART_SANSARA_MIRROR));
+					break;
+				case 2:
+					otmp = oname(mksobj(KHAKKHARA, MKOBJ_NOINIT), artiname(ART_STAFF_OF_TWELVE_MIRRORS));
+					break;
+				case 3:
+					otmp = oname(mksobj(MASK, MKOBJ_NOINIT), artiname(ART_MIRRORED_MASK));
+					break;
+				}
+				if (otmp->oartifact) {
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp))
 						otmp->spe = 1;
-						otmp->cursed = 0;
-						otmp->blessed = 0;
+					if (is_lightsaber(otmp))
 						otmp->age = 0;
-						place_object(otmp, x, y);
-					} else {
-						obfree(otmp, (struct obj *)0);
-						otmp = 0;
-						continue;
-					}
-				} else if(rn2(2)){
-					otmp = mksobj(MIRRORBLADE, MKOBJ_NOINIT);
-					otmp = oname(otmp, artiname(ART_SANSARA_MIRROR));
-					if(otmp->oartifact || tries++ > 10){
-						otmp->spe = 1;
-						otmp->cursed = 0;
-						otmp->blessed = 0;
-						place_object(otmp, x, y);
-					} else {
-						obfree(otmp, (struct obj *)0);
-						otmp = 0;
-						continue;
-					}
-				} else {
-					otmp = mksobj(KHAKKHARA, MKOBJ_NOINIT);
-					otmp = oname(otmp, artiname(ART_STAFF_OF_TWELVE_MIRRORS));
-					if(otmp->oartifact || tries++ > 10){
-						otmp->spe = 1;
-						otmp->cursed = 0;
-						otmp->blessed = 0;
-						place_object(otmp, x, y);
-					} else {
-						obfree(otmp, (struct obj *)0);
-						otmp = 0;
-						continue;
-					}
+					place_object(otmp, x, y);
+				}
+				else {
+					obfree(otmp, (struct obj *)0);
+					otmp = 0;
+					continue;
 				}
 			}
 			//record central tower location
@@ -1737,46 +1724,33 @@ mkkamereltowers()
 			tries = 0;
 			otmp = 0;
 			while(!otmp){
-				if(!rn2(3)){
-					otmp = mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT);
-					otmp = oname(otmp, artiname(ART_INFINITY_S_MIRRORED_ARC));
-					if(otmp->oartifact){
+				switch(rn2(4)) {
+				case 0:
+					otmp = oname(mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT), artiname(ART_INFINITY_S_MIRRORED_ARC));
+					break;
+				case 1:
+					otmp = oname(mksobj(MIRRORBLADE, MKOBJ_NOINIT), artiname(ART_SANSARA_MIRROR));
+					break;
+				case 2:
+					otmp = oname(mksobj(KHAKKHARA, MKOBJ_NOINIT), artiname(ART_STAFF_OF_TWELVE_MIRRORS));
+					break;
+				case 3:
+					otmp = oname(mksobj(MASK, MKOBJ_NOINIT), artiname(ART_MIRRORED_MASK));
+					break;
+				}
+				if (otmp->oartifact) {
+					otmp->cursed = 0;
+					otmp->blessed = 0;
+					if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp))
 						otmp->spe = 1;
-						otmp->cursed = 0;
-						otmp->blessed = 0;
+					if (is_lightsaber(otmp))
 						otmp->age = 0;
-						place_object(otmp, x, y);
-					} else {
-						obfree(otmp, (struct obj *)0);
-						otmp = 0;
-						continue;
-					}
-				} else if(rn2(2)){
-					otmp = mksobj(MIRRORBLADE, MKOBJ_NOINIT);
-					otmp = oname(otmp, artiname(ART_SANSARA_MIRROR));
-					if(otmp->oartifact || tries++ > 10){
-						otmp->spe = 1;
-						otmp->cursed = 0;
-						otmp->blessed = 0;
-						place_object(otmp, x, y);
-					} else {
-						obfree(otmp, (struct obj *)0);
-						otmp = 0;
-						continue;
-					}
-				} else {
-					otmp = mksobj(KHAKKHARA, MKOBJ_NOINIT);
-					otmp = oname(otmp, artiname(ART_STAFF_OF_TWELVE_MIRRORS));
-					if(otmp->oartifact || tries++ > 10){
-						otmp->spe = 1;
-						otmp->cursed = 0;
-						otmp->blessed = 0;
-						place_object(otmp, x, y);
-					} else {
-						obfree(otmp, (struct obj *)0);
-						otmp = 0;
-						continue;
-					}
+					place_object(otmp, x, y);
+				}
+				else {
+					obfree(otmp, (struct obj *)0);
+					otmp = 0;
+					continue;
 				}
 			}
 			//record central tower location

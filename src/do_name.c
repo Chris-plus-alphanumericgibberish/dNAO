@@ -648,7 +648,7 @@ const char *name;
 			obj->corpsenm = PM_DWARF;
 		if (obj->oartifact == ART_MASK_OF_TLALOC)
 			obj->corpsenm = PM_GOD;
-		if (obj->oartifact == ART_MASK_OF_MANY_FACES)
+		if (obj->oartifact == ART_MIRRORED_MASK)
 			obj->corpsenm = NON_PM;
 		
 		/* weight */

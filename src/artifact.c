@@ -2110,6 +2110,12 @@ touch_artifact(obj, mon, hypothetical)
 				pline("With that realization comes knowledge of the seal's final form!");
 				u.specialSealsKnown |= SEAL_NUDZIRATH;
 			}
+			else if(obj->oartifact == ART_MIRRORED_MASK && obj->corpsenm == NON_PM && !(u.specialSealsKnown&SEAL_NUDZIRATH)){
+				pline("The cracks on the otherwise-blank silver face form part of a seal.");
+				pline("In fact, you realize that all cracked and broken mirrors everywhere together are working towards writing this seal.");
+				pline("With that realization comes knowledge of the seal's final form!");
+				u.specialSealsKnown |= SEAL_NUDZIRATH;
+			}
 		}
 		if(oart->otyp == UNICORN_HORN){
 			badclass = TRUE; //always get blasted by unicorn horns.  
@@ -5592,7 +5598,7 @@ arti_invoke(obj)
 		oart->inv_prop == ANNUL ||
 		oart->inv_prop == ALTMODE || 
 		oart->inv_prop == LORDLY ||
-		(oart->inv_prop == MANY_FACES && obj == uskin))
+		(oart->inv_prop == CAPTURE_REFLECTION && obj == uskin))
 	) {
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
@@ -8513,7 +8519,7 @@ arti_invoke(obj)
 			You("click your heels together and take a step... ");
 			jump(15);
 			break;
-		case MANY_FACES:
+		case CAPTURE_REFLECTION:
 			if(obj != ublindf && obj != uskin && obj != uwep) {
 				You_feel("that you should be holding %s.", the(xname(obj)));
 				obj->age = monstermoves;
@@ -8544,12 +8550,7 @@ arti_invoke(obj)
 							obj->corpsenm = mtmp->mtyp;
 							/* keep consistent with on-wear code in do_wear.c */
 							if (obj == ublindf) {
-								polymon(obj->corpsenm);
-								u.mtimedone = (u.ulevel * 20) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
-								if (!polyok(&mons[obj->corpsenm])) u.mtimedone /= 3;
-								uskin = obj;
-								ublindf = (struct obj *)0;
-								uskin->owornmask |= W_SKIN;
+								activate_mirrored_mask(obj);
 							}
 						}
 						else {
@@ -10999,6 +11000,18 @@ struct obj *obj;
 			}
 	}
 	return AD_EACD;
+}
+
+void
+activate_mirrored_mask(obj)
+struct obj * obj;
+{
+	polymon(obj->corpsenm);
+	u.mtimedone = (u.ulevel * 30) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
+	if (!polyok(&mons[obj->corpsenm])) u.mtimedone /= 3;
+	uskin = obj;
+	ublindf = (struct obj *)0;
+	uskin->owornmask |= W_SKIN;
 }
 
 /*artifact.c*/

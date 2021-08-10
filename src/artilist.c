@@ -1222,16 +1222,6 @@ A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
 	ENLIGHTENING, (ARTI_PLUSSEV)
 	),
 
-A("The Mask of Many Faces",			MASK,					(const char *)0,
-	2500L, SILVER, MZ_DEFAULT, WT_DEFAULT,
-	A_NEUTRAL, NON_PM, NON_PM, TIER_B, NOFLAG,
-	NO_MONS(),
-	NO_ATTK(), NOFLAG,
-	PROPS(), NOFLAG,
-	PROPS(), NOFLAG,
-	MANY_FACES, NOFLAG
-	),
-
 A("Hellrider's Saddle",				SADDLE,					(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_A, NOFLAG,
@@ -1451,6 +1441,16 @@ A("The Staff of Twelve Mirrors",	KHAKKHARA,				(const char *)0,
 	PROPS(REFLECTING, DISPLACED), NOFLAG,
 	PROPS(), NOFLAG,
 	NOINVOKE, NOFLAG
+	),
+
+A("The Mirrored Mask",				MASK,					(const char *)0,
+	3000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, NON_PM, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	CAPTURE_REFLECTION, NOFLAG
 	),
 
 /* reflects projectiles and counterattacks, and doubles your multishot when carried in swapwep or wielded */
