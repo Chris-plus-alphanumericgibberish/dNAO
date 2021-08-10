@@ -585,25 +585,30 @@ extern struct artifact artilist[];
 )
 
 #define is_monk_safe_artifact(m) (\
-				(m) == ART_TIE_DYE_SHIRT_OF_SHAMBHALA ||\
-				(m) == ART_CLOAK_OF_THE_UNHELD_ONE ||\
-				(m) == ART_WHISPERFEET ||\
-				(m) == ART_WATER_FLOWERS ||\
-				(m) == ART_HAMMERFEET ||\
-				(m) == ART_SHIELD_OF_THE_RESOLUTE_HEA ||\
-				(m) == ART_GRAPPLER_S_GRASP ||\
-				(m) == ART_GAUNTLETS_OF_SPELL_POWER ||\
-				(m) == ART_PREMIUM_HEART ||\
-				(m) == ART_GODHANDS ||\
-				(m) == ART_FIRE_BRAND ||\
-				(m) == ART_FROST_BRAND ||\
-				(m) == ART_STORMHELM ||\
-				(m) == ART_HELPING_HAND ||\
-				(m) == ART_GARNET_ROD ||\
-				(m) == ART_ARKENSTONE ||\
-				(m) == ART_FLUORITE_OCTAHEDRON ||\
-				(m) == ART_MARAUDER_S_MAP\
-			)
+                (m) == ART_TIE_DYE_SHIRT_OF_SHAMBHALA ||\
+                (m) == ART_CLOAK_OF_THE_UNHELD_ONE ||\
+                (m) == ART_WHISPERFEET ||\
+                (m) == ART_WATER_FLOWERS ||\
+                (m) == ART_HAMMERFEET ||\
+                (m) == ART_SEVEN_LEAGUE_BOOTS ||\
+                (m) == ART_FROST_TREADS ||\
+                (m) == ART_SHIELD_OF_THE_RESOLUTE_HEA ||\
+                (m) == ART_GRAPPLER_S_GRASP ||\
+                (m) == ART_GAUNTLETS_OF_SPELL_POWER ||\
+                (m) == ART_PREMIUM_HEART ||\
+                (m) == ART_GODHANDS ||\
+                (m) == ART_FIRE_BRAND ||\
+                (m) == ART_FROST_BRAND ||\
+                (m) == ART_STORMHELM ||\
+                (m) == ART_APOTHEOSIS_VEIL ||\
+                (m) == ART_HELM_OF_UNDEATH ||\
+                (m) == ART_HELPING_HAND ||\
+                (m) == ART_GARNET_ROD ||\
+                (m) == ART_ARKENSTONE ||\
+                (m) == ART_FLUORITE_OCTAHEDRON ||\
+                (m) == ART_WALLET_OF_PERSEUS ||\
+                (m) == ART_MARAUDER_S_MAP\
+            )
 
 #define double_bonus_damage_artifact(m) (\
 	(m) == ART_LIMITED_MOON ||\
