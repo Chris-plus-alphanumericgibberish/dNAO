@@ -1526,7 +1526,7 @@ add_type_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (obj->otyp == MASK && obj->oartifact != ART_MASK_OF_MANY_FACES){
+	if (obj->otyp == MASK && obj->oartifact != ART_MIRRORED_MASK){
 		if (obj->corpsenm != NON_PM) {
 			Strcat(buf, mons[obj->corpsenm].mname);
 			Strcat(buf, " ");
@@ -2078,7 +2078,7 @@ weapon:
 			}
 			break;
 		case TOOL_CLASS:
-			if (obj->oartifact == ART_MASK_OF_MANY_FACES)
+			if (obj->oartifact == ART_MIRRORED_MASK)
 				Sprintf(eos(buf), " (%s)", obj->corpsenm != NON_PM ? mons[obj->corpsenm].mname : "blank");
 			if (obj->owornmask & (W_TOOL /* blindfold */
 #ifdef STEED

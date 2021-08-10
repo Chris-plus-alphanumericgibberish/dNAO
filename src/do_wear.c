@@ -848,7 +848,7 @@ Amulet_on()
 		    Slimed = 0;
 		    flags.botl = 1;
 		}
-		if (Upolyd && uskin && uskin->oartifact == ART_MASK_OF_MANY_FACES) {
+		if (Upolyd && uskin && uskin->oartifact == ART_MIRRORED_MASK) {
 			You("shudder!");
 			rehumanize();
 		}
@@ -909,14 +909,8 @@ Amulet_off()
 		break;
 	case AMULET_OF_UNCHANGING:
 		setworn((struct obj *)0, W_AMUL);
-		if (!Unchanging && ublindf && ublindf->otyp == MASK && ublindf->oartifact == ART_MASK_OF_MANY_FACES && ublindf->corpsenm != NON_PM) {
-			/* keep consistent with on-invoke code in artifact.c */
-			polymon(ublindf->corpsenm);
-			u.mtimedone = (u.ulevel * 20) / max(1, 10 + mons[ublindf->corpsenm].mlevel - u.ulevel);
-			if (!polyok(&mons[ublindf->corpsenm])) u.mtimedone /= 3;
-			uskin = ublindf;
-			ublindf = (struct obj *)0;
-			uskin->owornmask |= W_SKIN;
+		if (!Unchanging && ublindf && ublindf->otyp == MASK && ublindf->oartifact == ART_MIRRORED_MASK && ublindf->corpsenm != NON_PM) {
+			activate_mirrored_mask(ublindf);
 		}
 		return;
 	case AMULET_OF_MAGICAL_BREATHING:
@@ -1227,14 +1221,8 @@ register struct obj *otmp;
 	    vision_full_recalc = 1;	/* recalc vision limits */
 	    flags.botl = 1;
 	}
-	if (!Unchanging && otmp->otyp == MASK && otmp->oartifact == ART_MASK_OF_MANY_FACES && otmp->corpsenm != NON_PM) {
-		/* keep consistent with on-invoke code in artifact.c */
-		polymon(otmp->corpsenm);
-		u.mtimedone = (u.ulevel * 20) / max(1, 10 + mons[otmp->corpsenm].mlevel - u.ulevel);
-		if (!polyok(&mons[otmp->corpsenm])) u.mtimedone /= 3;
-		uskin = otmp;
-		ublindf = (struct obj *)0;
-		uskin->owornmask |= W_SKIN;
+	if (!Unchanging && otmp->otyp == MASK && otmp->oartifact == ART_MIRRORED_MASK && otmp->corpsenm != NON_PM) {
+		activate_mirrored_mask(otmp);
 	}
 }
 
