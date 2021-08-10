@@ -163,6 +163,28 @@ int pm;
 	}
 }
 
+int
+transmitted_were(mtyp)
+int mtyp;
+{
+	switch(mtyp)
+	{
+	case PM_WEREJACKAL:
+	case PM_HUMAN_WEREJACKAL:
+	case PM_ANUBAN_JACKAL:
+	case PM_ANUBITE:
+		return PM_WEREJACKAL;
+	case PM_WEREWOLF:
+	case PM_HUMAN_WEREWOLF:
+		return PM_WEREWOLF;
+	case PM_WERERAT:
+	case PM_HUMAN_WERERAT:
+		return PM_WERERAT;
+	}
+	impossible("Unhandled were-foo transmission %d", mtyp);
+	return mtyp;
+}
+
 void
 new_were(mon)
 struct monst *mon;

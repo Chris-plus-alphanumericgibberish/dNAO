@@ -4975,7 +4975,7 @@ boolean ranged;
 					) {
 					You_feel("feverish.");
 					exercise(A_CON, FALSE);
-					u.ulycn = monsndx(pa);
+					u.ulycn = transmitted_were(pa->mtyp);
 				}
 			}
 			else
