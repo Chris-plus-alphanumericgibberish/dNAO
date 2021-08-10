@@ -1352,7 +1352,14 @@ int tary;
 		/* signify that the attack action was indeed taken, even if no attacks hit */
 		allres |= MM_HIT;
 	}
-	
+	else {
+		/* an attack round was attempted, but no attacks were made */
+		if (youagr) {
+			/* if this happens for the player as magr, probably safe_touch() aborted all attacks
+			 * and it would make sense to print a message explaining why your turn did nothing */
+			pline("That would be unwise.");
+		}
+	}
 	return allres;
 }// xattacky
 
