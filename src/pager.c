@@ -2337,16 +2337,19 @@ char *cbuf;
 		if(ep) *ep = 0;
 		if (ctrl && buf[2] == '\t'){
 			buf = bufr + 1;
-			(void) strncpy(buf, "^?      ", 8);
+			(void) strcpy(buf, "^?      ");
+			eos(buf)[0] = ' ';	/* overwrite the '\0', we want the rest of the string */
 			buf[1] = ctrl;
 		} else if (meta && buf[3] == '\t'){
 			buf = bufr + 2;
-			(void) strncpy(buf, "M-?     ", 8);
+			(void) strcpy(buf, "M-?     ");
+			eos(buf)[0] = ' ';	/* overwrite the '\0', we want the rest of the string */
 			buf[2] = meta;
 		} else if(buf[1] == '\t'){
 			buf = bufr;
 			buf[0] = q;
-			(void) strncpy(buf+1, "       ", 7);
+			(void) strcpy(buf+1, "       ");
+			eos(buf)[0] = ' ';	/* overwrite the '\0', we want the rest of the string */
 		}
 		(void) dlb_fclose(fp);
 		Strcpy(cbuf, buf);
