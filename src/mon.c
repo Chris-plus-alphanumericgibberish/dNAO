@@ -398,6 +398,7 @@ register struct monst *mtmp;
 		if (levl[mtmp->mx][mtmp->my].typ == ROOM) {
 		    levl[mtmp->mx][mtmp->my].typ = PUDDLE;
 		    water_damage(level.objects[mtmp->mx][mtmp->my], FALSE, TRUE, level.flags.lethe, 0);
+			newsym(mtmp->mx, mtmp->my);
 		}
 		goto default_1;
 
