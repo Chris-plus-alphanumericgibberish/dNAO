@@ -450,7 +450,7 @@ NEARDATA struct permonst mons[] = {
     MON("anuban jackal", S_DOG, //21
 	LVL(18, 18, 0, -10), (G_GENO|G_SGROUP|0),
 	DEF(NAT_AC(6), DEX_AC(7)),
-	A(ATTK(AT_BITE, AD_PHYS, 3, 8)),	//must not be AD_WERE, does not have code to handle, will crash game
+	A(ATTK(AT_BITE, AD_WERE, 3, 8)),
 	SIZ(WT_ELF, CN_DWARF, MS_BARK, MZ_MEDIUM), 0, 0,
 	0 /*MM*/, MT_CARNIVORE|MT_HOSTILE|MT_TRAITOR /*MT*/, 0 /*MF*/,
 	MB_ANIMAL|MB_LONGHEAD|MB_NOHANDS /*MB*/, MG_NOPOLY|MG_INFRAVISIBLE|MG_HATESSILVER|MG_TRACKER|MG_HATESHOLY /*MG*/,
