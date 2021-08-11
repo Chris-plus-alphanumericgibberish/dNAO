@@ -3957,8 +3957,10 @@ cthulhu_mind_blast()
 			if (mon->mhp <= 0) mondied(mon);
 			else {
 				mon->mconf = 1;
-				mon->msleeping = 1;
-				slept_monst(mon);
+				if(!resists_sleep(mon)){
+					mon->msleeping = 1;
+					slept_monst(mon);
+				}
 			}
 		}
 		else mon->msleeping = 0;
