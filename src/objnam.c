@@ -1446,6 +1446,9 @@ boolean adjective;
 			else {
 				switch (gemtype)
 				{/* take off "crystal" from the gem name */
+				case ANTIMAGIC_RIFT:
+				case CATAPSI_VORTEX:
+					return (objects[DIAMOND].oc_name_known) ? "diamond" : adjective ? "white gem" : "white gemstone";
 				case MAGICITE_CRYSTAL:
 					return "magicite";
 				case DILITHIUM_CRYSTAL:
@@ -3185,8 +3188,8 @@ STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 	{ "venom",	VENOM_CLASS,  BLINDING_VENOM, ACID_VENOM },
 #endif
 	{ "slab",	TILE_CLASS,    FIRST_WORD,      NURTURING_WORD },
-	{ "gray stone",	GEM_CLASS,    LUCKSTONE,      FLINT },
-	{ "grey stone",	GEM_CLASS,    LUCKSTONE,      FLINT },
+	{ "gray stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
+	{ "grey stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
 };
 
 #define BSTRCMP(base,ptr,string) ((ptr) < base || strcmp((ptr),string))
