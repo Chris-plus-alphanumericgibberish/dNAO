@@ -2753,14 +2753,14 @@ int final;
 	else if(u.usanity < 50)
 		dump("  ", "You periodically struggled with insanity");
 	else if(u.usanity < 75)
-		dump("  ", "You sometimes struggled with insanity");
+		dump("  ", "You occasionally struggled with insanity");
 	else if(u.usanity < 100)
 		dump("  ", "You were a little touched in the head");
 	
 	if(u.uinsight > 40)
 		dump("  ", "You frequently saw things you wished you hadn't");
 	else if(u.uinsight > 20)
-		dump("  ", "You often saw things you wished you hadn't");
+		dump("  ", "You periodically saw things you wished you hadn't");
 	else if(u.uinsight > 1)
 		dump("  ", "You occasionally saw things you wished you hadn't");
 	
@@ -3282,14 +3282,14 @@ resistances_enlightenment()
 	else if(u.usanity < 50)
 		putstr(en_win, 0, "You periodically struggle with insanity.");
 	else if(u.usanity < 75)
-		putstr(en_win, 0, "You sometimes struggle with insanity.");
+		putstr(en_win, 0, "You occasionally struggle with insanity.");
 	else if(u.usanity < 100)
 		putstr(en_win, 0, "You are a little touched in the head.");
 	
 	if(u.uinsight > 40)
 		putstr(en_win, 0, "You frequently see things you wish you hadn't.");
 	else if(u.uinsight > 20)
-		putstr(en_win, 0, "You often see things you wish you hadn't.");
+		putstr(en_win, 0, "You periodically see things you wish you hadn't.");
 	else if(u.uinsight > 1)
 		putstr(en_win, 0, "You occasionally see things you wish you hadn't.");
 	
