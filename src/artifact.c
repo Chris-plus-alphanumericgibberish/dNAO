@@ -1617,16 +1617,11 @@ arti_bright(obj)
 struct obj *obj;
 {
 	if(obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-		xchar x, y;
-		get_obj_location(obj, &x, &y, 0);
-		if(levl[x][y].lit && 
-			!(viz_array[y][x]&TEMP_DRK3 && 
-			 !(viz_array[y][x]&TEMP_LIT1)
-			)
-		) return TRUE;
-		if(viz_array[y][x]&TEMP_LIT1 && 
-			!(viz_array[y][x]&TEMP_DRK3)
-		) return !rn2(10);
+		int str = infinity_s_mirrored_arc_litness(obj);
+		if (str >= 2)
+			return TRUE;
+		else if (str >= 1);
+			return !rn2(10);
 	}
     return (obj && obj->oartifact && (arti_attack_prop(obj, ARTA_BRIGHT) || 
 									  (obj->oartifact == ART_PEN_OF_THE_VOID &&
@@ -11012,6 +11007,35 @@ struct obj * obj;
 	uskin = obj;
 	ublindf = (struct obj *)0;
 	uskin->owornmask |= W_SKIN;
+}
+
+/* returns the current litness of IMA, recalculating it if possible
+ * Returns a value from 0 to 3; 0 being unlit and 3 being most-lit.
+ */
+int
+infinity_s_mirrored_arc_litness(obj)
+struct obj * obj;
+{
+	xchar x, y;
+
+	if (get_obj_location(obj, &x, &y, 0)) {
+		int litness = 0;
+		/* uses its own rules, not dimness(x,y) */
+		if (levl[x][y].lit &&
+			!(viz_array[y][x] & TEMP_DRK3 &&
+			!(viz_array[y][x] & TEMP_LIT1)))
+		{
+			litness += 2;
+		}
+		if (viz_array[y][x] & TEMP_LIT1 &&
+			!(viz_array[y][x] & TEMP_DRK3))
+		{
+			litness += 1;
+		}
+		artinstance[ART_INFINITY_S_MIRRORED_ARC].IMAlitness = litness;
+	}
+
+	return artinstance[ART_INFINITY_S_MIRRORED_ARC].IMAlitness;
 }
 
 /*artifact.c*/
