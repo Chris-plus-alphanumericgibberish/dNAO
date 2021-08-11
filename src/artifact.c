@@ -11018,7 +11018,10 @@ struct obj * obj;
 {
 	xchar x, y;
 
-	if (get_obj_location(obj, &x, &y, 0)) {
+	if (obj->where == OBJ_CONTAINED || obj->where == OBJ_BURIED || obj->where == OBJ_MAGIC_CHEST) {
+		artinstance[ART_INFINITY_S_MIRRORED_ARC].IMAlitness = 0;
+	}
+	else if (get_obj_location(obj, &x, &y, 0)) {
 		int litness = 0;
 		/* uses its own rules, not dimness(x,y) */
 		if (levl[x][y].lit &&
