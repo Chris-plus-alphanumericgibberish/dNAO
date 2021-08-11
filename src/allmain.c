@@ -2037,7 +2037,7 @@ karemade:
 				exercise(A_WIS, FALSE);
 				exercise(A_WIS, FALSE);
 				exercise(A_WIS, FALSE);
-				if(roll_madness(MAD_SPIRAL))
+				if(moves%5 && roll_madness(MAD_SPIRAL))
 					change_usanity(-1, FALSE);
 			}
 			//Mind dissolution double trigger: lose 1d4 levels
