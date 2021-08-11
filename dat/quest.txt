@@ -8465,7 +8465,10 @@ Lamashtu, the Demon Queen, is near!
 # The Silence warning
 #
 %Cc - 00202
-A terrible silence has fallen!
+A terrible silence reigns!
+%E
+%Cc - 00203
+A terrible silence falls!
 %E
 #
 #	Alternate legacy text for Elves
