@@ -3246,15 +3246,19 @@ struct obj *hypo;
 			break;
 			case POT_GAIN_ENERGY:
 			{	register int num;
-				if(amp->cursed)
-					You_feel("lackluster.");
-				else
-					pline("Magical energies course through your body.");
+				num = rnd(2) + 2 * amp->blessed + 1;
+				u.uenbonus += (amp->cursed) ? -num : num;
+				calc_total_maxen();
 				u.uen += (amp->cursed) ? -100 : (amp->blessed) ? 200 : 100;
 				if(u.uen > u.uenmax) u.uen = u.uenmax;
 				if(u.uen <= 0 && !Race_if(PM_INCANTIFIER)) u.uen = 0;
 				flags.botl = 1;
 				if(!amp->cursed) exercise(A_WIS, TRUE);
+				//Doing the print last causes the bottom line update to show the changed energy scores.
+				if(amp->cursed)
+					You_feel("lackluster.");
+				else
+					pline("Magical energies course through your body.");
 			}
 			break;
 			case POT_SLEEPING:
