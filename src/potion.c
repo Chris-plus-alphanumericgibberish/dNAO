@@ -587,7 +587,9 @@ peffects(otmp)
 		} else
 		    exercise(A_WIS, FALSE);
 		
-		//All amnesia causes you to (silently) forget your crisis of faith
+		//All amnesia causes you to forget your crisis of faith
+		if(Doubt)
+			You("forget your doubts.");
 		make_doubtful(0L, FALSE);
 		break;
 	case POT_WATER:
