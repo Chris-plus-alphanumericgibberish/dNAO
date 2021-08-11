@@ -186,14 +186,14 @@ do_present_item(obj)
 		}
 	} else if (!u.dx && !u.dy) {
 		if(!(obj->ohaluengr)){
-			pline("A %s is engraved on the %s.", word, wardDecode[obj->oward]);
+			pline("A %s is engraved on the %s.", wardDecode[obj->oward], word);
 			if( !(u.wardsknown & get_wardID(obj->oward)) ){
 				You("have learned a new warding sign!");
 				u.wardsknown |= get_wardID(obj->oward);
 			}
 		}
 		else{
-			pline("There is %s engraved on the %s.", word, fetchHaluWard((int)obj->oward));
+			pline("There is %s engraved on the %s.", fetchHaluWard((int)obj->oward), word);
 		}
 		return(1);
 	} else if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0) {
