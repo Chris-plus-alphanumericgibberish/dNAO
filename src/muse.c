@@ -1244,7 +1244,8 @@ register struct monst *magr;
 			    if(Half_spell_damage) tmp = (tmp+1) / 2;
 				if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 			    losehp(tmp, "wand", KILLED_BY_AN);
-				hurtle(sgn(u.ux-magr->mx), sgn(u.uy-magr->my), BOLT_LIM, FALSE, TRUE);
+				if(otmp->otyp == ROD_OF_FORCE)
+					hurtle(sgn(u.ux-magr->mx), sgn(u.uy-magr->my), BOLT_LIM, FALSE, TRUE);
 			}
 			stop_occupation();
 			nomul(0, NULL);
@@ -1259,7 +1260,7 @@ register struct monst *magr;
 			tmp = d(2,12);
 			hit("wand", mtmp, exclam(tmp));
 			(void) resist(mtmp, otmp->otyp == ROD_OF_FORCE ? WAND_CLASS : otmp->oclass, tmp, TELL);
-			if(otmp->otyp == ROD_OF_FORCE && !DEADMONSTER(mtmp) && u.usteed == mtmp){
+			if(otmp->otyp == ROD_OF_FORCE && !DEADMONSTER(mtmp) && u.usteed != mtmp){
 				mhurtle(mtmp, sgn(magr->mx - mtmp->mx), sgn(magr->my - mtmp->my), BOLT_LIM, FALSE);
 			}
 			if (cansee(mtmp->mx, mtmp->my) && zap_oseen)

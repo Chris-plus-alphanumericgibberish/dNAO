@@ -1695,6 +1695,7 @@ register struct monst *mtmp;
 				if(has_template(mtmp, DREAM_LEECH)){
 					if (!resists_sleep(m2)){
 						m2->msleeping = 1;
+						slept_monst(m2);
 					}
 				}
 			}

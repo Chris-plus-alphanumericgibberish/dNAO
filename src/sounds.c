@@ -2870,14 +2870,27 @@ int dz;
 	Your("speech is unintelligible underwater.");
 	return(0);
     }
-    /* sleeping monsters won't talk, except priests (who wake up) */
-    if ((!mtmp->mcanmove || mtmp->msleeping) && !mtmp->ispriest) {
+
+    /* paralized monsters won't talk, except priests (who wake up) */
+    if (!mtmp->mcanmove && !mtmp->ispriest) {
 		/* If it is unseen, the player can't tell the difference between
 		   not noticing him and just not existing, so skip the message. */
 		if (canspotmon(mtmp))
 			pline("%s seems not to notice you.", Monnam(mtmp));
 		return(0);
     }
+    /* sleeping monsters won't talk unless they wake up, except priests (who wake up) */
+	if (mtmp->msleeping){
+		if(mtmp->ispriest || !rn2(2)) {
+			pline("%s stirrs in %s slumber, but doesn't wake up.", Monnam(mtmp), mhis(mtmp));
+			return 1;
+		}
+		else {
+			pline("%s wakes from %s slumber.", Monnam(mtmp), mhis(mtmp));
+			mtmp->msleeping = 0;
+		}
+	}
+
 
     /* if this monster is waiting for something, prod it into action */
     mtmp->mstrategy &= ~STRAT_WAITMASK;

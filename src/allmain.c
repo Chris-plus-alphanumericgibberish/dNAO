@@ -2038,7 +2038,7 @@ karemade:
 				exercise(A_WIS, FALSE);
 				exercise(A_WIS, FALSE);
 				exercise(A_WIS, FALSE);
-				if(roll_madness(MAD_SPIRAL))
+				if(moves%5 && roll_madness(MAD_SPIRAL))
 					change_usanity(-1, FALSE);
 			}
 			//Mind dissolution double trigger: lose 1d4 levels
@@ -3958,8 +3958,10 @@ cthulhu_mind_blast()
 			if (mon->mhp <= 0) mondied(mon);
 			else {
 				mon->mconf = 1;
-				mon->msleeping = 1;
-				slept_monst(mon);
+				if(!resists_sleep(mon)){
+					mon->msleeping = 1;
+					slept_monst(mon);
+				}
 			}
 		}
 		else mon->msleeping = 0;
