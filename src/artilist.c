@@ -105,7 +105,7 @@ A("Dirge",			LONG_SWORD,						"half-melted %s",
  *
  *	Stormbringer cuts through any substance (ie, it counts as shining)
  */
- A("Stormbringer",		RUNESWORD,						(const char *)0,
+A("Stormbringer",		RUNESWORD,						(const char *)0,
 	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_A, (ARTG_INHER | ARTG_MAJOR),
 	NO_MONS(),

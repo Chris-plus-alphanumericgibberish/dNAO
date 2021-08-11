@@ -8506,7 +8506,7 @@ arti_invoke(obj)
 			You("click your heels together and take a step... ");
 			jump(15);
 			break;
-		default: pline("Program in dissorder.  Artifact invoke property not recognized");
+		default: pline("Program in disorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
 
