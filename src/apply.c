@@ -4430,7 +4430,7 @@ int x, y;
 				if(!DarksightOnly)
 					pline("An impossible darkness pours forth!");
 				else
-					pline("An mighty darkness issues forth!");
+					pline("A mighty darkness issues forth!");
 			}
 			incr_itimeout(&HDarksight, increment);
 			incr_itimeout(&DarksightOnly, increment);

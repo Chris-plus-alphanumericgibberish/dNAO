@@ -2882,12 +2882,12 @@ int dz;
     /* sleeping monsters won't talk unless they wake up, except priests (who wake up) */
 	if (mtmp->msleeping){
 		if(mtmp->ispriest || !rn2(2)) {
-			pline("%s stirrs in %s slumber, but doesn't wake up.", Monnam(mtmp), mhis(mtmp));
-			return 1;
-		}
-		else {
 			pline("%s wakes from %s slumber.", Monnam(mtmp), mhis(mtmp));
 			mtmp->msleeping = 0;
+		}
+		else {
+			pline("%s stirs in %s slumber, but doesn't wake up.", Monnam(mtmp), mhis(mtmp));
+			return 1;
 		}
 	}
 
