@@ -3124,6 +3124,24 @@ struct obj *hypo;
 				if (amp->blessed && u.ulevel < u.ulevelmax) {
 					pluslvl(FALSE);
 				}
+				if(amp->blessed && u.umorgul>0){
+					u.umorgul--;
+					if(u.umorgul)
+						You_feel("the chill of death lessen.");
+					else
+						You_feel("the chill of death fade away.");
+				}
+				if(amp->blessed && u.umummyrot){
+					u.umummyrot = 0;
+					You("stop shedding dust.");
+				}
+				if(!amp->cursed){
+					//Restore sanity if blessed or uncursed
+					if(amp->blessed)
+						change_usanity(20, FALSE);
+					else
+						change_usanity(5, FALSE);
+				}
 				if(amp->cursed) {
 					pline("Ulch!  This makes you feel mediocre!");
 					break;
@@ -3259,6 +3277,18 @@ struct obj *hypo;
 					// u.ulevelmax -= 1;
 					pluslvl(FALSE);
 				}
+				/* Dissolve one morgul blade shard if blessed*/
+				if(amp->blessed && u.umorgul>0){
+					u.umorgul--;
+					if(u.umorgul)
+						You_feel("the chill of death lessen.");
+					else
+						You_feel("the chill of death fade away.");
+				}
+				if(amp->blessed && u.umummyrot){
+					u.umummyrot = 0;
+					You("stop shedding dust.");
+				}
 				(void) make_hallucinated(0L,TRUE,0L);
 				exercise(A_STR, TRUE);
 				exercise(A_CON, TRUE);
@@ -3292,6 +3322,11 @@ struct obj *hypo;
 					newuhs(FALSE);
 				} else
 					exercise(A_WIS, FALSE);
+
+				//All amnesia causes you to forget your crisis of faith
+				if(Doubt)
+					You("forget your doubts.");
+				make_doubtful(0L, FALSE);
 			break;
 		}
 		if(nothing) {
