@@ -897,6 +897,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 		tmp = blastforce - (otmp->owt/40);
 		if (tmp < 1) tmp = 1;
 		stmp->range = rnd(tmp); /* anywhere up to that determ. by wt */
+		if (otmp == uchain || otmp == uball) stmp->range = 0;
 		if (farthest < stmp->range) farthest = stmp->range;
 		stmp->stopped = FALSE;
 		if (!schain)
