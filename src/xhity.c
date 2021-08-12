@@ -12519,7 +12519,7 @@ int vis;						/* True if action is at all visible to the player */
 			sneak_dice++;
 		if (u.sealsActive&SEAL_ANDROMALIUS)
 			sneak_dice++;
-		if (ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
+		if (ulightsaberhit && activeFightingForm(FFORM_JUYO))
 			sneak_dice++;
 		if (Role_if(PM_HEALER) && !Upolyd && weapon && weapon->owornmask && weapon->otyp == KNIFE)
 			sneak_dice++;
@@ -12555,7 +12555,7 @@ int vis;						/* True if action is at all visible to the player */
 				((weapon && weapon == uwep && uwep->oartifact == ART_LIFEHUNT_SCYTHE && has_head(pd) && !is_unalive(pd))
 				|| distmin(u.ux, u.uy, mdef->mx, mdef->my) > BOLT_LIM)))
 				sneak_attack |= SNEAK_HIDDEN;
-			if (ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
+			if (ulightsaberhit && activeFightingForm(FFORM_JUYO))
 				sneak_attack |= SNEAK_JUYO;	/* modifies a sneak attack; not sufficient on its own */
 		}
 		else if (youdef) {
@@ -12683,11 +12683,11 @@ int vis;						/* True if action is at all visible to the player */
 			(weapon && weapon == uwep && uwep->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD &&
 			(dieroll < P_SKILL(weapon_type(uwep)))) ||
 			// Djem So
-			(ulightsaberhit && activeFightingForm(FFORM_DJEM_SO) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)) &&
+			(ulightsaberhit && activeFightingForm(FFORM_DJEM_SO) &&
 			(dieroll < min(P_SKILL(P_DJEM_SO), P_SKILL(weapon_type(uwep)))) &&
 			(mdef->mattackedu || !rn2(5))) ||	// (odds reduced by 80% when not counterattacking)
 			// Juyo 
-			(ulightsaberhit && activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)) &&
+			(ulightsaberhit && activeFightingForm(FFORM_JUYO) &&
 			(snekdmg > 0) && (dieroll < min(P_SKILL(P_JUYO), P_SKILL(weapon_type(uwep)))) &&
 			((sneak_attack&SNEAK_JUYO) || (rn2(5) < 2)))	// (odds reduced by 60% when not sneak attacking)
 			)
@@ -13990,27 +13990,27 @@ int vis;						/* True if action is at all visible to the player */
 				use_skill(P_SHII_CHO, 1);
 				if (P_SKILL(P_SHII_CHO) >= P_BASIC || weapon->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
-						(activeFightingForm(FFORM_MAKASHI) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+						(activeFightingForm(FFORM_MAKASHI))
 						) &&
 						!uarms && !u.twoweap && wtype == P_SABER
 						) use_skill(P_MAKASHI, 1);
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
-						(activeFightingForm(FFORM_ATARU) && (!uarm || is_light_armor(uarm)))
+						(activeFightingForm(FFORM_ATARU))
 						) &&
 						u.lastmoved + 1 >= monstermoves
 						) use_skill(P_ATARU, 1);
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
-						(activeFightingForm(FFORM_DJEM_SO) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+						(activeFightingForm(FFORM_DJEM_SO))
 						) &&
 						mdef->mattackedu
 						) use_skill(P_DJEM_SO, 1);
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
-						(activeFightingForm(FFORM_NIMAN) && (!uarm || !is_metallic(uarm)))
+						(activeFightingForm(FFORM_NIMAN))
 						) &&
 						u.lastcast >= monstermoves
 						) use_skill(P_NIMAN, 1);
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
-						(activeFightingForm(FFORM_JUYO) && (!uarm || is_light_armor(uarm)))
+						(activeFightingForm(FFORM_JUYO))
 						) &&
 						(sneak_attack != 0)	/* attacking a disadvantaged target, but might not have sneak dice */
 						) use_skill(FFORM_JUYO, 1);
@@ -14020,7 +14020,7 @@ int vis;						/* True if action is at all visible to the player */
 		/* misc: train player's Soresu skill if applicable */
 		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee &&
 			(activeFightingForm(FFORM_SHII_CHO) ||
-			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))
+			(activeFightingForm(FFORM_SORESU))
 			)) use_skill(P_SORESU, 1);
 	}
 	/* ARTIFACT HIT BLOCK */
@@ -15503,8 +15503,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				/* lightsaber forms (per-round) (player-only) */
 				if (youdef &&
 					is_lightsaber(otmp) && litsaber(otmp) &&
-					activeFightingForm(FFORM_SHIEN) &&
-					(!uarm || is_light_armor(uarm)))
+					activeFightingForm(FFORM_SHIEN))
 				{
 					chance += Shien_counterattack[(min(P_SKILL(P_SHIEN), P_SKILL(weapon_type(uwep))) - 2)];
 				}
