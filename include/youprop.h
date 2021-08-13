@@ -581,7 +581,7 @@
 
 #define EReflecting		u.uprops[REFLECTING].extrinsic
 #define Reflecting		(EReflecting || \
-						 (uwep && is_lightsaber(uwep) && uwep->lamplit && ((activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))) || (activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))))) || \
+						 (uwep && is_lightsaber(uwep) && uwep->lamplit && (activeFightingForm(FFORM_SORESU) || activeFightingForm(FFORM_SHIEN))) || \
 						 (u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						 && which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
 						species_reflects(&youmonst))

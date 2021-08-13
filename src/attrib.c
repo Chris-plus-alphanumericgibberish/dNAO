@@ -1668,6 +1668,13 @@ boolean
 activeFightingForm(fform)
 int fform;
 {
+	return (selectedFightingForm(fform) && !blockedFightingForm(fform));
+}
+
+boolean
+selectedFightingForm(fform)
+int fform;
+{
 	int i;
 	if(fform > LAST_FFORM || fform < 0)
 		impossible("Attempting to check fighting form number %d?", fform);
@@ -1721,18 +1728,67 @@ int fform;
 	}
 	return P_NONE; //Never reached
 }
+const char *
+nameOfFightingForm(fform)
+int fform;
+{
+	switch (fform)
+	{
+		case FFORM_SHII_CHO: return "Shii Cho";
+		case FFORM_MAKASHI:  return "Makashi";
+		case FFORM_SORESU:   return "Soresu";
+		case FFORM_ATARU:    return "Ataru";
+		case FFORM_DJEM_SO:  return "Djem So";
+		case FFORM_SHIEN:    return "Shien";
+		case FFORM_JUYO:     return "Juyo";
+		case FFORM_NIMAN:    return "Niman";
+		default:
+			impossible("bad fform %d", fform);
+	}
+	return "None";
+}
 
 void
 validateLightsaberForm()
 {
 	int i;
 	for(i=FFORM_SHII_CHO; i <= FFORM_JUYO; i++)
-		if(activeFightingForm(i) && FightingFormSkillLevel(i) >= P_BASIC)
+		if(selectedFightingForm(i) && FightingFormSkillLevel(i) >= P_BASIC)
 			return;
 
 	if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 		setFightingForm(FFORM_NIMAN);
 	else setFightingForm(FFORM_SHII_CHO);
+}
+
+/* returns TRUE if fform is blocked by currently worn armor */
+boolean
+blockedFightingForm(fform)
+int fform;
+{
+	switch (fform) {
+		/* always available */
+		case NO_FFORM:
+		case FFORM_SHII_CHO:
+			return FALSE;
+		/* blocked by heavy armor */
+		case FFORM_MAKASHI:
+		case FFORM_SORESU:
+		case FFORM_ATARU:
+			return (uarm && !(is_light_armor(uarm) || is_medium_armor(uarm)));
+		/* blocked by medium armor */
+		case FFORM_DJEM_SO:
+		case FFORM_SHIEN:
+		case FFORM_JUYO:
+			return (uarm && !(is_light_armor(uarm)));
+		/* blocked by metal armor */
+		case FFORM_NIMAN:
+			return (uarm && (is_metallic(uarm)));
+		default:
+			impossible("Attempting to get blockage of fighting form number %d?", fform);
+			break;
+	}
+	return FALSE;
 }
 
 #endif /* OVL2 */
