@@ -4366,7 +4366,7 @@ use_rift(obj)
 		//Don't bother doing math if the timeout is already infinite.
 		// It's not EASY to permanently break magic with these, but it is POSSIBLE!
 		if(Deadmagic < TIMEOUT_INF){
-			long increment = (long)(1000 * pow(1.1,u.rift_count));
+			long increment = (long)(50 * pow(1.1,u.rift_count));
 			incr_itimeout(&Deadmagic, increment);
 			// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
 			if(increment < TIMEOUT){
@@ -4397,7 +4397,7 @@ use_vortex(obj)
 		//Don't bother doing math if the timeout is already infinite.
 		// It's not EASY to permanently break magic with these, but it is POSSIBLE!
 		if(Catapsi < TIMEOUT_INF){
-			long increment = (long)(1000 * pow(1.1,u.vortex_count));
+			long increment = (long)(100 * pow(1.1,u.vortex_count));
 			incr_itimeout(&Catapsi, increment);
 			// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
 			if(increment < TIMEOUT){
@@ -4417,7 +4417,7 @@ int x, y;
 	//Don't bother doing math if the timeout is already infinite.
 	// It's not EASY to permanently break magic with these, but it is POSSIBLE!
 	if(Misotheism < TIMEOUT_INF){
-		long increment = (long)(333 * pow(1.1,u.miso_count));
+		long increment = (long)(33 * pow(1.1,u.miso_count));
 		if(!Inhell && !Misotheism && u.ualign.type != A_VOID){
 			u.ugangr[Align2gangr(u.ualign.type)]++;
 			gods_angry(Align2gangr(u.ualign.type));
@@ -4484,7 +4484,7 @@ struct obj *obj;
 	if(!Blind)
 		pline("The cerulean tree flashes and disapears.");
 	pline("The disk crumbles to dust!");
-	incr_itimeout(&DimensionalLock, 1000L);
+	incr_itimeout(&DimensionalLock, 100L);
 	useup(obj);
 	return 1;
 }
