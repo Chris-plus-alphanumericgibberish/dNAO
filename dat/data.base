@@ -49,6 +49,10 @@ abbot
 	manner, "What is God?"  The answer is not recorded but it is
 	probable that the asker went on worrying out answers for himself.
 		[ The Runaway Abbot, by G. K. Chesterton ]
+armor salve
+armour salve
+	This strange shell secretes a viscous slime capable of repairing
+	damaged armor. Perhaps there is more to it than meets the eye?
 # takes 'suit or piece of armor' when specifying '['
 ac
 armor*
@@ -198,7 +202,7 @@ amulet of yendor
 ancient of thought
 	Rumors describe ancient places built underneath the slopes of 
 	Malbolge. Below the hellish rock and stone, creatures older 
-	than  the devils themselves-the ancient baatorians-might still
+	than the devils themselves-the ancient baatorians-might still
 	roam.
 
 	A certain hard-to-find defile leads to a cavern whose walls
@@ -8303,7 +8307,7 @@ silver
 	metals have a reduced or negligible effect on humans, but
 	negativly effect smaller organisms such as bacteria. Silver
 	is perhaps the best known example of this latter class, being
-	used since ancient times to treat external infections. Its
+	used since ancient times to treat external infections. It's
 	well known efficacy in this regard led to the idea that it
 	was effective against many other forms of evil, both seen
 	and unseen.
@@ -8481,12 +8485,16 @@ son of Typhon
 		[ Pseudo-Apollodorus, Bibliotheca 2. 74 - 76 
 			(trans. Aldrich) (Greek mythographer C2nd A.D.)  ]
 * soulstone
-	A soul trapped in a stone, constantly leaking energy. The
-	pietous may wish to sanctify the rock and set the soul free,
-	while the morally flexible may wish to expend the soul's
-	energies for immediate benefit. As with many soul-harnessing
-	devices, curses strengthen the stone's effects, but blessings
-	also work to amplify the passively exuded energy.
+	Though most damned souls are reborn as least fiends, this
+	unfortunate has been shaped into a stone that constantly
+	leaks the energies that dominated its life.
+	
+	The pietous may wish to sanctify the rock and attempt to
+	set the soul free, while the morally flexible may wish to
+	expend the soul's energies for immediate benefit. As with
+	many soul-harnessing devices, curses strengthen the
+	stone's effects, but blessings also work to amplify the
+	passively exuded energy.
 *spear
 javelin
 	- they come together with great random, and a spear is brast,
@@ -9494,11 +9502,17 @@ vrock
 	damage by biting and by using the claws on both its arms and
 	feet.
 wage of *
-	A soul trapped in a coin, marked by sin. The pietous may wish
-	to sanctify the container and set the soul free, while the
-	morally flexible may wish to take up the sin and harness the
-	soul to their own benefit. A doubly-damned coin amplifies both
-	its effects and the moral cost of its use.
+	The economies of the lower planes are ultimately based on the
+	transmigration of souls, however well the fiends use coins of
+	gold. Though most damned souls are reborn as least fiends,
+	those who lived lives dominated by the pure expression of a
+	single sin are instead smelted into soul coins. 
+	
+	The pietous may wish to sanctify the container and attempt to
+	set the soul free, while the morally flexible may wish to take
+	up the sin and harness the soul's energy to their own benefit.
+	A doubly-damned coin amplifies both its effects and the moral
+	cost of its use.
 wakizashi
 	A wakizashi was used as a samurai's weapon when the katana was
 	unavailable. When entering a building, a samurai would leave
