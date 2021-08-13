@@ -350,7 +350,8 @@ static boolean was_waterlevel; /* ugh... this shouldn't be needed */
 static const int angelnums[] = {PM_JUSTICE_ARCHON, PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON, PM_WARDEN_ARCHON, PM_THRONE_ARCHON, PM_LIGHT_ARCHON, 
 						  PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, PM_GRAHA_DEVA, PM_SURYA_DEVA, PM_MAHADEVA, 
 						  PM_LILLEND,
-						  PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, 
+						  PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, 
+							PM_TULANI_ELADRIN, PM_GAE_ELADRIN, PM_BRIGHID_ELADRIN, PM_CAILLEA_ELADRIN, 
 						  PM_DAUGHTER_OF_BEDLAM, PM_MARILITH,
 						  PM_ERINYS, PM_FALLEN_ANGEL, PM_ANCIENT_OF_BLESSINGS, PM_ANCIENT_OF_ICE, PM_ANCIENT_OF_DEATH
 						 };
@@ -643,7 +644,7 @@ fixup_special()
 					angel = makemon(&mons[angelnums[rn2(SIZE(angelnums))]], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 					if (angel){
 						initedog(angel);
-						angel->m_lev = min(30, 3 * (int)(angel->data->mlevel / 2)+1);
+						angel->m_lev = is_eladrin(angel->data) ? 30 : min(30, 3 * (int)(angel->data->mlevel / 2)+1);
 						angel->mhpmax = (angel->m_lev * 8) - 4;
 						angel->mhp = angel->mhpmax;
 						angel->female = TRUE;
