@@ -689,6 +689,19 @@ boolean digest_meal;
 		}
 		return;
 	}
+	if(!DEADMONSTER(mon) && mon->mbdrown > 0){
+		mon->mbdrown--;
+		water_damage(mon->minvent, FALSE, FALSE, WD_BLOOD, mon);
+		mon->mhp -= 99;
+		if(mon->mhp <= 0){
+			pline("%s drowns in blood!", Monnam(mon));
+			mondied(mon);
+		}
+		else if(!resist(mon, RING_CLASS, 0, NOTELL)){
+			mon->mberserk = 1;
+		}
+		return;
+	}
 	/* Clouds on Lolth's level deal damage */
 	if(Is_lolth_level(&u.uz) && levl[mon->mx][mon->my].typ == CLOUD){
 		if (!(nonliving(mon->data) || breathless_mon(mon))){

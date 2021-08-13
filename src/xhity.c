@@ -5959,7 +5959,7 @@ boolean ranged;
 				u.utaneggs++;
 			}
 			else {
-				mdef->mtaneggs++;
+				mdef->mtaneggs = min(100, mdef->mtaneggs+1);
 			}
 		}
 		/* make poison/physical attack without hitmsg */

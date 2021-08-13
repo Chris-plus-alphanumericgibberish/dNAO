@@ -5776,11 +5776,9 @@ struct obj *obj;
 						if(obj->cursed){
 							//Note: 2x water damage
 							water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
-							mtmp->mhp -= min(999, mtmp->mhpmax);
+							mtmp->mbdrown = min(100, mtmp->mbdrown+9);
 						}
-						else {
-							mtmp->mhp -= min(99, mtmp->mhpmax/2);
-						}
+						mtmp->mhp -= min(99, obj->cursed ? mtmp->mhpmax : mtmp->mhpmax/2);
 						if(mtmp->mhp <= 0){
 							pline("%s drowns in blood!", Monnam(mtmp));
 							mondied(mtmp);

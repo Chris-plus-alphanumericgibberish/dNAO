@@ -158,7 +158,8 @@ struct monst {
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*93*/
 	Bitfield(menvy,1);/* wants only others stuff */ /*94*/
 	
-	int mtaneggs;	/* tannin eggs */
+	char mbdrown;	/* drowning in blood */
+	char mtaneggs;	/* tannin eggs */
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 #define BASE_DOG_ENCOURAGED_MAX		7
