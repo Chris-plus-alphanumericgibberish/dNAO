@@ -1587,9 +1587,26 @@ void
 blow_up_landmine(trap)
 struct trap *trap;
 {
+	struct monst * shkp =  (struct monst *)0;
+	boolean costly = trap->madeby_u && costly_spot(trap->tx, trap->ty) &&
+				   ((shkp = shop_keeper(*in_rooms(trap->tx, trap->ty, SHOPBASE))) != (struct monst *)0);
+	boolean insider = (*u.ushops && inside_shop(u.ux, u.uy) && *in_rooms(trap->tx, trap->ty, SHOPBASE) == *u.ushops);
+	long loss = 0L;
+
 	(void)scatter(trap->tx, trap->ty, 4,
 		MAY_DESTROY | MAY_HIT | MAY_FRACTURE | VIS_EFFECTS,
-		(struct obj *)0, (long *)0, (struct monst *)0);
+		(struct obj *)0, &loss, shkp);
+	/* may have caused shk loss */
+	if (costly && loss) {
+		if(insider)
+			You("owe %ld %s for objects destroyed.",
+					loss, currency(loss));
+		else {
+			You("caused %ld %s worth of damage!",
+					loss, currency(loss));
+			make_angry_shk(shkp, trap->tx, trap->ty);
+		}
+	}
 	del_engr_ward_at(trap->tx, trap->ty);
 	wake_nearto_noisy(trap->tx, trap->ty, 400);
 	/* ALI - artifact doors from Slash'em */
