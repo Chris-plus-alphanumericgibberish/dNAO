@@ -704,7 +704,7 @@ boolean pets_only;	/* true for ascension or final escape */
 		/* monster won't follow if it hasn't noticed you yet */
 		&& !(mtmp->mstrategy & STRAT_WAITFORU)) {
 			stay_behind = FALSE;
-			if (mtmp->mtame && mtmp->mwait && (mtmp->mwait+100 > monstermoves)) {
+			if (mtmp->mtame && mtmp->mwait && u.usteed != mtmp && (mtmp->mwait+100 > monstermoves)) {
 				if (canseemon(mtmp))
 					pline("%s obediently waits for you to return.", Monnam(mtmp));
 				stay_behind = TRUE;

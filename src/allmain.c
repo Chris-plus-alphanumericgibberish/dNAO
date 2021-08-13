@@ -1971,7 +1971,7 @@ karemade:
 						for(y = 0; y < ROWNO; y++){
 							if(IS_CORNER(levl[x][y].typ) && couldsee(x, y) && rn2(45) < u.ulevel){
 								create_gas_cloud(x, y, 4, 30, FALSE);
-								makemon(&mons[PM_HOUND_OF_TINDALOS], x, y, 0);
+								makemon(&mons[PM_HOUND_OF_TINDALOS], x, y, MM_ADJACENTOK);
 							}
 						}
 				} else {
@@ -2172,7 +2172,7 @@ karemade:
 			}
 			
 			//Aprox one check per five monster-gen periods, or one per five while sleeping (averages one additional blast per sleep, so it's really bad.
-			if((u.usleep || !rn2(70)) && !rn2(5) && roll_madness(MAD_DREAMS)){
+			if(!Inhell && (u.usleep || !rn2(70)) && !rn2(5) && roll_madness(MAD_DREAMS)){
 				cthulhu_mind_blast();
 			}
 			
