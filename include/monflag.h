@@ -402,8 +402,9 @@
 //75
 #define MON_WARP_THROW         DISINT_RAY+1
 #define SUMMON_TANNIN          MON_WARP_THROW+1
+#define DISINTEGRATION         SUMMON_TANNIN+1
 
-#define MON_LASTSPELL          SUMMON_TANNIN
+#define MON_LASTSPELL          DISINTEGRATION
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

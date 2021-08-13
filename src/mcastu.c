@@ -787,7 +787,7 @@ unsigned int type;
 			return LIGHTNING;
 			break;
 			case 1:
-			return DISINT_RAY;
+			return DISINTEGRATION;
 			break;
 		}
 	break;
@@ -809,7 +809,7 @@ unsigned int type;
 			return LIGHTNING;
 			break;
 			case 1:
-			return DISINT_RAY;
+			return DISINTEGRATION;
 			break;
 		}
 	break;
@@ -1678,6 +1678,7 @@ const char * spellname[] =
 	"DISINT_RAY"
 	"MON_WARP_THROW",
 	"SUMMON_TANNIN",
+	"DISINTEGRATION",
 };
 
 
@@ -2548,6 +2549,28 @@ int tary;
 		}
 		return MM_HIT;
 
+	case DISINTEGRATION:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("disintegration with no mdef?");
+			return MM_MISS;
+		}
+		if(magr){
+			if(youdef || cansee(mdef->mx, mdef->my))
+				pline("A disintegration beam shines down on %s from above!",
+					youdef ? "you" : mon_nam(mdef));
+			struct attack disintegrate = {AT_BEAM, AD_DISN, magr->mtyp == PM_PARASITIZED_EMBRACED_ALIDER ? 4 : 3, 1};
+			//xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
+			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj **)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
+		}
+		else {
+			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
+		}
+		if(youdef)
+			stop_occupation();
+		return MM_HIT;
+
+		break;
 	case LIGHTNING:
 		/* needs direct target */
 		if (!foundem) {
@@ -5014,6 +5037,7 @@ int spellnum;
 	case SLEEP:
 	case DRAIN_LIFE:
 	case ARROW_RAIN:
+	case DISINTEGRATION:
 	case LIGHTNING:
 	case FIRE_PILLAR:
 	case GEYSER:
@@ -5374,7 +5398,7 @@ int tary;
 		spellnum == SUMMON_SPHERE || spellnum == DARKNESS ||
 		spellnum == PUNISH || spellnum == INSECTS ||
 		spellnum == SUMMON_ANGEL || spellnum == DROP_BOULDER ||
-		spellnum == DISINT_RAY
+		spellnum == DISINT_RAY || spellnum == DISINTEGRATION
 		))
 		return TRUE;
 
