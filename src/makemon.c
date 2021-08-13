@@ -1633,7 +1633,7 @@ int faction;
 					(void) mpickobj(mtmp, otmp);
 					
 					(void)mongets(mtmp, DROVEN_CLOAK, mkobjflags);
-					(void)mongets(mtmp, FLACK_HELMET, mkobjflags);
+					(void)mongets(mtmp, CRYSTAL_HELM, mkobjflags);
 					(void)mongets(mtmp, PLASTEEL_ARMOR, mkobjflags);
 					(void)mongets(mtmp, BODYGLOVE, mkobjflags);
 					(void)mongets(mtmp, ORIHALCYON_GAUNTLETS, mkobjflags);
@@ -1648,7 +1648,7 @@ int faction;
 					(void) mpickobj(mtmp, otmp);
 					
 					otmp = mksobj(LIGHTSABER, mkobjflags);
-					otmp->spe = 3;
+					otmp->spe = 4;
 					otmp->ovar1 = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
@@ -1664,17 +1664,38 @@ int faction;
 					(void) mpickobj(mtmp, otmp);
 					
 					(void)mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
-					(void)mongets(mtmp, BODYGLOVE, mkobjflags);
-					otmp = mksobj(GAUNTLETS_OF_DEXTERITY, mkobjflags);
+					
+					otmp = mongets(mtmp, DROVEN_PLATE_MAIL, mkobjflags);
+					otmp->ohaluengr = TRUE;
+					otmp->oward = LAST_BASTION_SYMBOL;
+					set_material_gm(otmp, PLASTIC);
+					otmp->obj_color = CLR_BLACK;
+					otmp->spe = 8;
+					
+					otmp = mongets(mtmp, DROVEN_HELM, mkobjflags);
+					set_material_gm(otmp, PLASTIC);
+					otmp->obj_color = CLR_BLACK;
+					otmp->spe = 8;
+					
+					otmp = mongets(mtmp, BODYGLOVE, mkobjflags);
 					otmp->spe = 4;
+					
+					otmp = mksobj(GAUNTLETS_OF_DEXTERITY, mkobjflags);
+					otmp->obj_color = CLR_BLACK;
+					otmp->spe = 8;
 					(void) mpickobj(mtmp, otmp);
-					(void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+
+					otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+					otmp->obj_color = CLR_BLACK;
+					otmp->spe = 8;
 				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && mm == PM_ELVENKING){ /* Give the elvenking in the quest a special setup */
 					struct obj *gem;
 					mtmp->m_lev += 7;
 					mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
 					
 					give_mintrinsic(mtmp, TELEPAT);
+					give_mintrinsic(mtmp, REGENERATION);
+					give_mintrinsic(mtmp, POISON_RES);
 					otmp = mksobj(LIGHTSABER, mkobjflags);
 					otmp->spe = 3;
 					otmp->ovar1 = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
@@ -1692,14 +1713,26 @@ int faction;
 					otmp->recharged = rnd(4);
 					(void) mpickobj(mtmp, otmp);
 					
+					otmp = mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+					set_material_gm(otmp, MITHRIL);
+					otmp->spe = 7;
+					
 					(void)mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
-					(void)mongets(mtmp, ELVEN_MITHRIL_COAT, mkobjflags);
-					(void)mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
-					(void)mongets(mtmp, BODYGLOVE, mkobjflags);
-					otmp = mksobj(GAUNTLETS_OF_DEXTERITY, mkobjflags);
+					otmp = mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
+					otmp->spe = 7;
+					
+					otmp = mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
+					otmp->spe = 7;
+					
+					otmp = mongets(mtmp, BODYGLOVE, mkobjflags);
 					otmp->spe = 3;
+					
+					otmp = mksobj(GAUNTLETS_OF_DEXTERITY, mkobjflags);
+					otmp->spe = 7;
 					(void) mpickobj(mtmp, otmp);
-					(void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+					
+					otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+					otmp->spe = 7;
 				} else if(In_mordor_quest(&u.uz) 
 					&& !In_mordor_forest(&u.uz)
 					&& !Is_ford_level(&u.uz)
@@ -1844,7 +1877,7 @@ int faction;
 					(void) mpickobj(mtmp, otmp);
 					
 					otmp = mksobj(BUCKLER, mkobjflags);
-					otmp->spe = 0;
+					otmp->spe = rn1(2,2);
 					set_material_gm(otmp, PLASTIC);
 					otmp->obj_color = CLR_WHITE;
 					(void) mpickobj(mtmp, otmp);
@@ -4042,7 +4075,7 @@ int faction;
 				(void) mongets(mtmp, HIGH_BOOTS, mkobjflags);
 				(void) mongets(mtmp, ANDROID_VISOR, mkobjflags);
 			} else if(mm == PM_PARASITIZED_GYNOID){
-				switch(rn2(8)){
+				switch(rn2(9)){
 					case 0:
 					(void) mongets(mtmp, FORCE_PIKE, mkobjflags);
 					(void) mongets(mtmp, VIBROBLADE, mkobjflags);
@@ -4111,8 +4144,17 @@ int faction;
 					(void) mongets(mtmp, FORCE_PIKE, mkobjflags);
 					(void) mongets(mtmp, rn2(2) ? FORCE_WHIP : FORCE_SWORD, mkobjflags);
 					break;
+					case 8:
+					otmp = mongets(mtmp, KATANA, mkobjflags);
+					set_material_gm(otmp, METAL);
+					add_oprop(otmp, OPROP_LESSER_ELECW);
+					fix_object(otmp);
+					otmp = mongets(mtmp, VIBROBLADE, mkobjflags);
+					otmp->objsize = MZ_HUGE;
+					fix_object(otmp);
+					break;
 				}
-				switch(rn2(8)){
+				switch(rn2(9)){
 					case 0:
 					(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
 					(void) mongets(mtmp, LONG_GLOVES, mkobjflags);
@@ -4156,6 +4198,11 @@ int faction;
 					(void) mongets(mtmp, LONG_GLOVES, mkobjflags);
 					mongets(mtmp, rn2(2) ? LOW_BOOTS : rn2(2) ? HIGH_BOOTS : HEELED_BOOTS, mkobjflags);
 					break;
+					case 8:
+					(void) mongets(mtmp, rn2(2) ? HAWAIIAN_SHIRT : T_SHIRT, mkobjflags);
+					(void) mongets(mtmp, rn2(3) ? HAWAIIAN_SHORTS : WAISTCLOTH, mkobjflags);
+					if(rn2(2)) mongets(mtmp, LOW_BOOTS, mkobjflags);
+					break;
 				}
 			} else if(mm == PM_PARASITIZED_ANDROID){
 				switch(rn2(6)){
@@ -4190,12 +4237,16 @@ int faction;
 					(void) mongets(mtmp, DOUBLE_FORCE_BLADE, mkobjflags);
 					break;
 				}
-				switch(rn2(4)){
+				switch(rn2(5)){
 					case 0:
 					(void) mongets(mtmp, JACKET, mkobjflags);
+					(void) mongets(mtmp, GLOVES, mkobjflags);
+					(void) mongets(mtmp, HIGH_BOOTS, mkobjflags);
 					break;
 					case 1:
 					(void) mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags);
+					(void) mongets(mtmp, GLOVES, mkobjflags);
+					(void) mongets(mtmp, HIGH_BOOTS, mkobjflags);
 					break;
 					case 2:
 					(void) mongets(mtmp, BODYGLOVE, mkobjflags);
@@ -4203,9 +4254,12 @@ int faction;
 					case 3:
 					(void) mongets(mtmp, JUMPSUIT, mkobjflags);
 					break;
+					case 4:
+					(void) mongets(mtmp, rn2(2) ? HAWAIIAN_SHIRT : T_SHIRT, mkobjflags);
+					(void) mongets(mtmp, rn2(3) ? HAWAIIAN_SHORTS : WAISTCLOTH, mkobjflags);
+					if(rn2(2)) mongets(mtmp, LOW_BOOTS, mkobjflags);
+					break;
 				}
-				(void) mongets(mtmp, GLOVES, mkobjflags);
-				(void) mongets(mtmp, HIGH_BOOTS, mkobjflags);
 			} else if(mm == PM_PARASITIZED_OPERATOR || mm == PM_OPERATOR){
 				switch(rn2(4)){
 					case 0:
@@ -7618,7 +7672,7 @@ int faction;
 		} else if(monsndx(ptr) == PM_TWITCHING_FOUR_ARMED_CHANGED) {
 			struct obj *gem;
 			otmp = mksobj(LIGHTSABER, mkobjflags);
-			otmp->spe = 3;
+			otmp->spe = 4;
 			set_material_gm(otmp, BONE);
 			otmp->ovar1 = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
 			otmp->blessed = TRUE;
