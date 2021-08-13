@@ -2171,7 +2171,7 @@ karemade:
 			}
 			
 			//Aprox one check per five monster-gen periods, or one per five while sleeping (averages one additional blast per sleep, so it's really bad.
-			if((u.usleep || !rn2(70)) && !rn2(5) && roll_madness(MAD_DREAMS)){
+			if(!Inhell && (u.usleep || !rn2(70)) && !rn2(5) && roll_madness(MAD_DREAMS)){
 				cthulhu_mind_blast();
 			}
 			
