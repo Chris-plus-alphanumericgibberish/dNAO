@@ -5645,6 +5645,75 @@ int faction;
 			(void) mpickobj(mtmp, otmp);
 		}
 		break;
+	    case S_VAMPIRE:
+			switch(ptr->mtyp){
+				case PM_VAMPIRE:
+					(void) mongets(mtmp, rn2(20) ? SPEAR : LONG_SWORD, mkobjflags);
+					(void) mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+					(void) mongets(mtmp, GLOVES, mkobjflags);
+					(void) mongets(mtmp, LOW_BOOTS, mkobjflags);
+				break;
+				case PM_VAMPIRE_LORD:
+					if(mtmp->female){
+						(void) mongets(mtmp, rn2(2) ? STILETTO : RAPIER, mkobjflags);
+						(void) mongets(mtmp, GENTLEWOMAN_S_DRESS, mkobjflags);
+						if(!rn2(20)) mongets(mtmp, VICTORIAN_UNDERWEAR, mkobjflags);
+						if(!rn2(100)) mongets(mtmp, find_opera_cloak(), mkobjflags);
+						(void) mongets(mtmp, GLOVES, mkobjflags);
+						(void) mongets(mtmp, rn2(2) ? STILETTOS : LOW_BOOTS, mkobjflags);
+					}
+					else {
+						/* Knight */
+						if(!rn2(4)){
+							(void) mongets(mtmp, LONG_SWORD, mkobjflags);
+							(void) mongets(mtmp, PLATE_MAIL, mkobjflags);
+							if(!rn2(20)) mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
+							if(!rn2(20)) mongets(mtmp, find_opera_cloak(), mkobjflags);
+							(void) mongets(mtmp, rn2(2) ? GAUNTLETS : GLOVES, mkobjflags);
+							(void) mongets(mtmp, rn2(2) ? ARMORED_BOOTS : HIGH_BOOTS, mkobjflags);
+						}
+						/* Noble */
+						else {
+							(void) mongets(mtmp, rn2(2) ? LONG_SWORD : RAPIER, mkobjflags);
+							(void) mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags);
+							if(!rn2(20)) mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
+							if(!rn2(20)) mongets(mtmp, find_opera_cloak(), mkobjflags);
+							(void) mongets(mtmp, GLOVES, mkobjflags);
+							(void) mongets(mtmp, rn2(2) ? HIGH_BOOTS : LOW_BOOTS, mkobjflags);
+						}
+					}
+				break;
+				case PM_MINA_HARKER:
+					(void) mongets(mtmp, STILETTO, mkobjflags);
+					(void) mongets(mtmp, BOW, mkobjflags);
+					m_initthrow(mtmp, ARROW, 20, mkobjflags);
+					(void) mongets(mtmp, GENTLEWOMAN_S_DRESS, mkobjflags);
+					(void) mongets(mtmp, VICTORIAN_UNDERWEAR, mkobjflags);
+					(void) mongets(mtmp, STILETTOS, mkobjflags);
+				break;
+				case PM_ILONA_SZILAGY:
+					(void) mongets(mtmp, LONG_SWORD, mkobjflags);
+					(void) mongets(mtmp, GENTLEWOMAN_S_DRESS, mkobjflags);
+					(void) mongets(mtmp, LOW_BOOTS, mkobjflags);
+				break;
+				case PM_CARMILLA:
+					(void) mongets(mtmp, RAPIER, mkobjflags);
+					(void) mongets(mtmp, BOW, mkobjflags);
+					m_initthrow(mtmp, ARROW, 20, mkobjflags);
+					(void) mongets(mtmp, VICTORIAN_UNDERWEAR, mkobjflags);
+				break;
+				case PM_VLAD_THE_IMPALER:
+					(void) mongets(mtmp, LONG_SWORD, mkobjflags);
+					(void) mongets(mtmp, KITE_SHIELD, mkobjflags);
+					(void) mongets(mtmp, HELMET, mkobjflags);
+					if(!rn2(8)) mongets(mtmp, find_opera_cloak(), mkobjflags);
+					(void) mongets(mtmp, PLATE_MAIL, mkobjflags);
+					(void) mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
+					(void) mongets(mtmp, GAUNTLETS, mkobjflags);
+					(void) mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+				break;
+			}
+		break;
 	    case S_WRAITH:
 		if(mm == PM_NAZGUL){
 			otmp = mksobj(STILETTO, mkobjflags);
