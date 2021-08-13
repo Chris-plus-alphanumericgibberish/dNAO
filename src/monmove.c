@@ -2334,35 +2334,48 @@ not_special:
 		
 		//Loop to place breaching charge on ana quest home
 		if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
-			if(mtmp->mhp == mtmp->mhpmax && (
+			if(
 				(mtmp->mtyp == PM_DEEP_ONE && !rn2(1000))
 				|| (mtmp->mtyp == PM_DEEPER_ONE && !rn2(500))
 				|| (mtmp->mtyp == PM_DEEPEST_ONE && !rn2(100))
-			)){
-				int i, j, count=0;
-				for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
-					if(isok(mtmp->mx+i, mtmp->my+j) && IS_WALL(levl[mtmp->mx+i][mtmp->my+j].typ)){
-						count++;
-					}
+			){
+				int i, j, count=0, tx = 0, ty = 0;
+				if(leader_target){
+					tx = sgn(gx - mtmp->mx); 
+					ty = sgn(gy - mtmp->my); 
 				}
-				if(count){
-					count = rn2(count);
-					struct obj *breacher;
+				
+				if(!leader_target || !isok(tx,ty) || !IS_WALL(levl[tx][ty].typ)){
+					tx = 0;
+					ty = 0;
 					for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
 						if(isok(mtmp->mx+i, mtmp->my+j) && IS_WALL(levl[mtmp->mx+i][mtmp->my+j].typ)){
-							if(count-- == 0){
-								breacher = mksobj(STICK_OF_DYNAMITE, MKOBJ_NOINIT);
-								breacher->quan = 1L;
-								breacher->cursed = 0;
-								breacher->blessed = 0;
-								breacher->age = rn1(10,10);
-								fix_object(breacher);
-								place_object(breacher, mtmp->mx+i, mtmp->my+j);
-								begin_burn(breacher);
-								if(canseemon(mtmp))
-									pline("%s plants a breaching charge!", Monnam(mtmp));
+							count++;
+						}
+					}
+					if(count){
+						count = rn2(count);
+						for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
+							tx = mtmp->mx+i;
+							ty = mtmp->my+j;
+							if(isok(tx, ty) && IS_WALL(levl[tx][ty].typ)){
+								if(--count == 0)
+									break;
 							}
 						}
+					}
+					if(tx || ty){
+						struct obj *breacher;
+						breacher = mksobj(STICK_OF_DYNAMITE, MKOBJ_NOINIT);
+						breacher->quan = 1L;
+						breacher->cursed = 0;
+						breacher->blessed = 0;
+						breacher->age = rn1(10,10);
+						fix_object(breacher);
+						place_object(breacher, tx, ty);
+						begin_burn(breacher);
+						if(canseemon(mtmp))
+							pline("%s plants a breaching charge!", Monnam(mtmp));
 					}
 				}
 			} else if((mtmp->mtyp == PM_DEEP_ONE && !rn2(20))
@@ -2370,20 +2383,26 @@ not_special:
 				|| (mtmp->mtyp == PM_DEEPEST_ONE)
 			){
 				int i, j, count=0;
+				struct trap *ttmp;
 				for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
-					if(isok(mtmp->mx+i, mtmp->my+j) && t_at(mtmp->mx+i, mtmp->my+j) && t_at(mtmp->mx+i, mtmp->my+j)->ttyp == PIT){
+					if(isok(mtmp->mx+i, mtmp->my+j) && (ttmp = t_at(mtmp->mx+i, mtmp->my+j)) && (ttmp->ttyp == PIT || ttmp->ttyp == WEB)){
 						count++;
 					}
 				}
 				if(count){
 					count = rn2(count);
-					struct obj *breacher;
 					for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
-						if(isok(mtmp->mx+i, mtmp->my+j) && t_at(mtmp->mx+i, mtmp->my+j) && t_at(mtmp->mx+i, mtmp->my+j)->ttyp == PIT){
+						if(isok(mtmp->mx+i, mtmp->my+j)  && (ttmp = t_at(mtmp->mx+i, mtmp->my+j)) && (ttmp->ttyp == PIT || ttmp->ttyp == WEB)){
 							if(count-- == 0){
-								delfloortrap(t_at(mtmp->mx+i, mtmp->my+j));
-								if(canseemon(mtmp))
-									pline("%s fills in a trench!", Monnam(mtmp));
+								if(ttmp->ttyp == PIT){
+									if(canseemon(mtmp))
+										pline("%s fills in a trench!", Monnam(mtmp));
+								}
+								else if(ttmp->ttyp == WEB){
+									if(canseemon(mtmp))
+										pline("%s clears some webbing!", Monnam(mtmp));
+								}
+									delfloortrap(t_at(mtmp->mx+i, mtmp->my+j));
 							}
 						}
 					}
