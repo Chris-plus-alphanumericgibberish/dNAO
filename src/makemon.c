@@ -9893,8 +9893,15 @@ int faction;
 				} else {
 					obfree(otmp, (struct obj *) 0);
 				}
-				pline("A terrible silence falls!");
-				com_pager(202);
+				if (in_mklev) {
+					pline("A terrible silence reigns!");
+					com_pager(202);
+					mtmp->msleeping = 1;
+				}
+				else {
+					pline("A terrible silence falls!");
+					com_pager(203);
+				}
 				nomul(0, NULL);
 			}
 		break;
