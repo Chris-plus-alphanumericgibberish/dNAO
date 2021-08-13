@@ -256,6 +256,12 @@ const char *goal;
 						(IS_DOOR(levl[tx][ty].typ) || /* monsters mimicking a door */
 							glyph_to_cmap(k) == S_drkroom ||
 							glyph_to_cmap(k) == S_litroom ||
+							glyph_to_cmap(k) == S_drkgrass ||
+							glyph_to_cmap(k) == S_litgrass ||
+							glyph_to_cmap(k) == S_drksoil ||
+							glyph_to_cmap(k) == S_litsoil ||
+							glyph_to_cmap(k) == S_drksand ||
+							glyph_to_cmap(k) == S_litsand ||
 							glyph_to_cmap(k) == S_brightrm ||
 							glyph_to_cmap(k) == S_corr ||
 							glyph_to_cmap(k) == S_litcorr)) {
