@@ -1778,15 +1778,17 @@ int tary;
 			magr->mspec_used = 60;
 			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 				if(!DEADMONSTER(mtmp) && (mtmp != magr) && (mtmp->mpeaceful == magr->mpeaceful)
-					&& (mtmp->mtyp == PM_MYRKALFAR_WARRIOR || mtmp->mtyp == PM_MYRKALFAR_MATRON 
+					&& (mtmp->mtyp == PM_MYRKALFR || mtmp->mtyp == PM_MYRKALFAR_WARRIOR || mtmp->mtyp == PM_MYRKALFAR_MATRON 
 						|| (is_drow(mtmp->data) && mtmp->mtame && magr->mtame))
 				) magr->mspec_used /= 2;
 			}
 			if(magr->mtame)
 				magr->mspec_used /= 2;
 		}
-		else magr->mspec_used = 10 - magr->m_lev;
-		if (magr->mspec_used < 2) magr->mspec_used = 2;
+		else {
+			magr->mspec_used = 10 - magr->m_lev;
+			if (magr->mspec_used < 2) magr->mspec_used = 2;
+		}
 	}
 	/* cost pw for players */
 	if (youagr) {

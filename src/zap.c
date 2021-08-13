@@ -5320,6 +5320,9 @@ int damage, tell;
 	
 	int mons_mr = mtmp->data->mr;
 	if(mtmp->mcan){
+		if(mtmp->mtyp == PM_ALIDER)
+			mons_mr = 0;
+		else
 			mons_mr /= 2;
 	}
 

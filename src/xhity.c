@@ -1871,7 +1871,11 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/* Magic blade attacks are changed or lost if the creature is canceled */
 	if (magr->mcan) {
-		if(attk->aatyp == AT_SRPR){
+		if(magr->mtyp == PM_ALIDER && magr->mcan && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP)){
+			attk->damn = 1;
+			attk->damd = 6;
+		}
+		else if(attk->aatyp == AT_SRPR){
 			attk->aatyp = humanoid_upperbody(pa) ? AT_WEAP : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;

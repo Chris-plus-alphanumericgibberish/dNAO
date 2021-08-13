@@ -703,6 +703,35 @@ boolean digest_meal;
 		}
 		return;
 	}
+	if(!DEADMONSTER(mon) && mon->mtyp == PM_ALIDER){
+		struct monst *mtmp;
+		int healup = 0;
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(!DEADMONSTER(mtmp) && (mtmp != mon) && (mtmp->mpeaceful == mon->mpeaceful)){
+				if(mtmp->mtyp == PM_MYRKALFAR_MATRON)
+					healup += 3;
+				else if(mtmp->mtyp == PM_MYRKALFR || mtmp->mtyp == PM_MYRKALFAR_WARRIOR || (mtmp->mtyp == PM_ELVENKING && mtmp->mfaction == LAST_BASTION_SYMBOL) || (is_drow(mtmp->data) && mtmp->mtame && mon->mtame))
+					healup += 2;
+				else if(mtmp->mfaction == LAST_BASTION_SYMBOL || (mtmp->mtame && mon->mtame))
+					healup += 1;
+			}
+		}
+		if(mon->mtame)
+			healup += Race_if(PM_ANDROID) ? 4 : Race_if(PM_DROW) ? 2 : 1;
+		if(mon->mcan) healup /= 2;
+		if(healup){
+			set_mcan(mon, FALSE);
+			mon->mdoubt = FALSE;
+			mon->mhp += healup;
+			mon->mhp = min(mon->mhpmax, mon->mhp);
+		}
+		else {
+			if(!rn2(8)) set_mcan(mon, TRUE);
+			if(mon->mcan) mon->mdoubt = TRUE;
+			if(mon->mhp > mon->mhpmax/2)
+				mon->mhp--;
+		}
+	}
 	/* Clouds on Lolth's level deal damage */
 	if(Is_lolth_level(&u.uz) && levl[mon->mx][mon->my].typ == CLOUD){
 		if (!(nonliving(mon->data) || breathless_mon(mon))){
@@ -1432,7 +1461,7 @@ register struct monst *mtmp;
 		}
 	}
 	
-	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR ||
+	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR || mtmp->mtyp == PM_ALIDER ||
 		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR)
 		&& MON_WEP(mtmp)
 		&& (is_vibroweapon(MON_WEP(mtmp)) || is_blaster(MON_WEP(mtmp)))
@@ -1443,7 +1472,10 @@ register struct monst *mtmp;
 		&& !(mindless_mon(mtmp))
 		&& !rn2(20)
 	){
-		if(canspotmon(mtmp)) pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
+		if(canspotmon(mtmp)){
+			if(mtmp->mtyp == PM_ALIDER) pline("%s performs a ritual of recharging.",Monnam(mtmp));
+			else pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
+		}
 		if(MON_WEP(mtmp)->otyp == MASS_SHADOW_PISTOL){
 			MON_WEP(mtmp)->ovar1 = 800L + rn2(200);
 		} else if(MON_WEP(mtmp)->otyp == RAYGUN){
@@ -1458,7 +1490,7 @@ register struct monst *mtmp;
 		return 0;
 	}
 
-	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR ||
+	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR || mtmp->mtyp == PM_ALIDER ||
 		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR)
 		&& MON_WEP(mtmp)
 		&& (is_lightsaber(MON_WEP(mtmp)) && MON_WEP(mtmp)->oartifact != ART_INFINITY_S_MIRRORED_ARC && MON_WEP(mtmp)->otyp != KAMEREL_VAJRA)
@@ -1469,7 +1501,10 @@ register struct monst *mtmp;
 		&& !(mindless_mon(mtmp))
 		&& !rn2(20)
 	){
-		if(canspotmon(mtmp)) pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
+		if(canspotmon(mtmp)){
+			if(mtmp->mtyp == PM_ALIDER) pline("%s performs a ritual of recharging.",Monnam(mtmp));
+			else pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
+		}
 		MON_WEP(mtmp)->age = 75000;
 		if(MON_WEP(mtmp)->recharged < 7) MON_WEP(mtmp)->recharged++;
 		mtmp->mspec_used = 10;
