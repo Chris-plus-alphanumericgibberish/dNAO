@@ -871,7 +871,8 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 	    } else if ((scflags & MAY_DESTROY) && (!rn2(10)
 			|| otmp->obj_material == GLASS
 			|| otmp->obj_material == OBSIDIAN_MT
-			|| otmp->otyp == EGG)
+			|| otmp->otyp == EGG
+			|| otmp == uchain)
 		){
 			if (breaktest(otmp)){
 				if(shkp){
@@ -880,6 +881,10 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 						*loss += loss_cost;
 				}
 				breakobj(otmp, sx, sy, FALSE, FALSE);
+				used_up = TRUE;
+			}
+			else if (otmp == uchain) {
+				unpunish();
 				used_up = TRUE;
 			}
 	    }
@@ -897,6 +902,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 		tmp = blastforce - (otmp->owt/40);
 		if (tmp < 1) tmp = 1;
 		stmp->range = rnd(tmp); /* anywhere up to that determ. by wt */
+		if (otmp == uchain || otmp == uball) stmp->range = 0;
 		if (farthest < stmp->range) farthest = stmp->range;
 		stmp->stopped = FALSE;
 		if (!schain)
