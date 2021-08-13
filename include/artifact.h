@@ -297,6 +297,7 @@ struct artinstance{
 #define RRSember avar1
 #define BLactive avar1
 #define PlagueDuration avar1
+#define IMAlitness avar1
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2

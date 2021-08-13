@@ -601,7 +601,7 @@ you_calc_movement()
 		moveamt += 3;
 	if(u.uuur_duration)
 		moveamt += 6;
-	if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm))){
+	if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_SORESU)){
 		// switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
 			// case P_BASIC:       moveamt = max(moveamt-6,1); break;
 			// case P_SKILLED:     moveamt = max(moveamt-4,1); break;
@@ -1475,27 +1475,6 @@ moveloop()
 			if(u.sealsActive&SEAL_FAFNIR && money_cnt(invent) == 0) unbind(SEAL_FAFNIR,TRUE);
 #endif
 			if(u.sealsActive&SEAL_JACK && (Is_astralevel(&u.uz) || Inhell)) unbind(SEAL_JACK,TRUE);
-			if (u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
-				&& (!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark()))
-			){
-				if(Elfsight){
-					if(++u.orthocounts>(5*3)) unbind(SEAL_ORTHOS,TRUE);
-				} else if(Lowlightsight){
-					if(++u.orthocounts>(5*2)) unbind(SEAL_ORTHOS,TRUE);
-				} else {
-					if(++u.orthocounts>5) unbind(SEAL_ORTHOS,TRUE);
-				}
-				if(u.sealsActive&SEAL_ORTHOS && Hallucination){ /*Didn't just unbind it*/
-					if(u.orthocounts == 1) pline("It is now pitch black. You are likely to be eaten by a grue.");
-					else pline("You are likely to be eaten by a grue.");
-				} else You_feel("increasingly panicked about being in the dark!");
-			    if (multi >= 0) {
-					if (occupation)
-						stop_occupation();
-					else
-						nomul(0, NULL);
-				}
-			}
 			if(u.sealsActive&SEAL_NABERIUS && u.udrunken < u.ulevel/3) unbind(SEAL_NABERIUS,TRUE);
 			if(u.specialSealsActive&SEAL_NUMINA && u.ulevel<30) unbind(SEAL_SPECIAL|SEAL_NUMINA,TRUE);
 			if(u.sealsActive&SEAL_SHIRO && uarmc && is_mummy_wrap(uarmc)){
@@ -2098,6 +2077,27 @@ karemade:
 			
 			if(u.sealsActive&SEAL_ASTAROTH && u.uinwater){
 				losehp(1, "rusting through", KILLED_BY);
+			}
+			if (u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
+				&& (!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark()))
+			){
+				if(Elfsight){
+					if(++u.orthocounts>(5*3)) unbind(SEAL_ORTHOS,TRUE);
+				} else if(Lowlightsight){
+					if(++u.orthocounts>(5*2)) unbind(SEAL_ORTHOS,TRUE);
+				} else {
+					if(++u.orthocounts>5) unbind(SEAL_ORTHOS,TRUE);
+				}
+				if(u.sealsActive&SEAL_ORTHOS && Hallucination){ /*Didn't just unbind it*/
+					if(u.orthocounts == 1) pline("It is now pitch black. You are likely to be eaten by a grue.");
+					else pline("You are likely to be eaten by a grue.");
+				} else You_feel("increasingly panicked about being in the dark!");
+			    if (multi >= 0) {
+					if (occupation)
+						stop_occupation();
+					else
+						nomul(0, NULL);
+				}
 			}
 			
 			//Aprox one check per six monster-gen periods

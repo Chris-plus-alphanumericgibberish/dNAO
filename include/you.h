@@ -491,6 +491,7 @@ struct you {
 	uchar	sowdisc;		/* sowing discord (spirit special attack) */
 	unsigned long long int spells_maintained;
 	int maintained_en_debt;
+	int quivered_spell;
 	int	uhp, uhpmax, uhprolled, uhpmultiplier, uhpbonus, uhpmod;
 	int	uen, uenmax, uenrolled, uenmultiplier, uenbonus;			/* magical energy - M. Stephenson */
 	/*"Real" numbers for a WtWalk's non-mask-based HP*/

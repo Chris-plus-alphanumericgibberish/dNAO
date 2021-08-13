@@ -3594,8 +3594,8 @@ struct zapdata * zapdata;
 			otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS ||
 			otmp->oartifact == ART_DRAGONLANCE ||
 			(youdef && is_lightsaber(otmp) && (
-			(activeFightingForm(FFORM_SHIEN) && (!uarm || is_light_armor(uarm))) ||
-			(activeFightingForm(FFORM_SORESU) && (!uarm || is_light_armor(uarm) || is_medium_armor(uarm)))))
+			(activeFightingForm(FFORM_SHIEN)) ||
+			(activeFightingForm(FFORM_SORESU))))
 			)) ||
 			/* body armor */
 			((otmp = youdef ? uarm : which_armor(mdef, W_ARM)) && (

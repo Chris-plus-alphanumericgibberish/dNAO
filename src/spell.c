@@ -829,6 +829,20 @@ struct obj *spellbook;
 	return(1);
 }
 
+/* from an SPE_ID get the index of spl_book that casts that spell */
+int
+spellid_to_spellno(spell)
+int spell;
+{
+	int i;
+	for (i = 0; i < MAXSPELL; i++) {
+		if (spellid(i) == spell)
+			return i;
+	}
+	impossible("%s not in spl_book", OBJ_NAME(objects[spell]));
+	return 0;
+}
+
 boolean
 spell_maintained(spell)
 int spell;
@@ -4990,7 +5004,7 @@ int respect_timeout;
 
 STATIC_OVL boolean
 dospellmenu(splaction, spell_no)
-int splaction;	/* SPELLMENU_CAST, SPELLMENU_VIEW, SPELLMENU_DESCRIBE, SPELLMENU_MAINTAIN, SPELLMENU_PICK, or spl_book[] index */
+int splaction;	/* SPELLMENU_CAST, SPELLMENU_VIEW, SPELLMENU_DESCRIBE, SPELLMENU_MAINTAIN, SPELLMENU_PICK, SPELLMENU_QUIVER, or spl_book[] index */
 int *spell_no;
 {
 	winid tmpwin;
@@ -5049,7 +5063,9 @@ int *spell_no;
 				if (splaction == SPELLMENU_MAINTAIN)
 					continue;
 			}
-			Sprintf(buf2, "%s%s", spellname(i), spell_maintained(spellid(i)) ? " [M]" : "");
+			Strcpy(buf2, spellname(i));
+			if (spell_maintained(spellid(i))) Strcat(buf2, " [M]");
+			if (spellid(i) == u.quivered_spell) Strcat(buf2, " [Q]");
 			Sprintf(buf, iflags.menu_tab_sep ?
 				"%s\t%-d%s\t%s\t%-d%%\t%-d%%\t" : "%-20s  %2d%s   %-12s %3d%%     %3d%%",
 				buf2, spellev(i),
@@ -5089,11 +5105,27 @@ int *spell_no;
 				MENU_UNSELECTED);
 		}
 		if (splaction != SPELLMENU_VIEW && splaction != SPELLMENU_PICK && splaction < 0 && spellid(1) != NO_SPELL){
-			// Describe a spell
+			// Rearrange your spellbook
 			Sprintf(buf, "Rearrange spells instead");
 			any.a_int = SPELLMENU_VIEW;
 			add_menu(tmpwin, NO_GLYPH, &any,
 				'+', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction != SPELLMENU_QUIVER && splaction != SPELLMENU_PICK && splaction < 0){
+			// Quiver a spell
+			Sprintf(buf, "Quiver a spell instead");
+			any.a_int = SPELLMENU_QUIVER;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'@', 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if (splaction == SPELLMENU_QUIVER && u.quivered_spell != NO_SPELL) {
+			// Unquiver your currently-quivered spell
+			Sprintf(buf, "Unquiver %s", OBJ_NAME(objects[u.quivered_spell]));
+			any.a_int = SPELLMENU_QUIVER;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				'@', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
 		switch (splaction)
@@ -5113,6 +5145,9 @@ int *spell_no;
 		case SPELLMENU_DESCRIBE:
 			Sprintf(buf, "Choose which spell to describe");
 			break;
+		case SPELLMENU_QUIVER:
+			Sprintf(buf, "Choose which spell to quiver");
+			break;
 		default:
 			Sprintf(buf, "Reordering spells; swap '%c' with", spellet(splaction));
 			break;
@@ -5126,7 +5161,9 @@ int *spell_no;
 		if (n > 0){
 			int s_no = selected[0].item.a_int - 1;
 
-			if (selected[0].item.a_int < 0){
+			if (selected[0].item.a_int < 0
+				&& !(selected[0].item.a_int == splaction && splaction == SPELLMENU_QUIVER)	// special case to unquiver current spell
+			){
 				return dospellmenu(selected[0].item.a_int, spell_no);
 			}
 			else if (!(splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
@@ -5159,7 +5196,12 @@ int *spell_no;
 				case SPELLMENU_DESCRIBE:
 					describe_spell(s_no);
 					continue;
-
+				case SPELLMENU_QUIVER:
+					if (s_no >= 0)
+						u.quivered_spell = spellid(s_no);
+					else
+						u.quivered_spell = NO_SPELL;
+					return FALSE;
 				default:
 					{
 					struct spell spl_tmp;
@@ -5900,6 +5942,14 @@ int spell;
 	
 	//
 	if(Babble || Screaming || Strangled || FrozenAir || BloodDrown || Drowning){
+		chance = 0;
+	}
+	// these effects totally block the spell-choosing menu, but need to be handled here too for quivered spells
+	else if ((mad_turn(MAD_TOO_BIG)) ||
+		(Doubt && base_casting_stat() == A_WIS) ||
+//		(mad_turn(MAD_SCIAPHILIA) && ()(dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0)) ||
+		(base_casting_stat() == A_WIS && flat_mad_turn(MAD_APOSTASY))
+		){
 		chance = 0;
 	}
 	else if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){

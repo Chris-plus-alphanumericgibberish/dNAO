@@ -264,36 +264,30 @@ struct obj *otmp;
 {
 	if(otmp->oartifact) switch(otmp->oartifact){
 		case ART_ANNULUS: return Hallucination ? hcolor(0) : "cerulean";
-		case ART_INFINITY_S_MIRRORED_ARC: {
-			xchar x, y;
-			int dnm = 0;
-			get_obj_location(otmp, &x, &y, 0);
-			if(levl[x][y].lit && 
-				!(viz_array[y][x]&TEMP_DRK3 && 
-				 !(viz_array[y][x]&TEMP_LIT1)
-				)
-			) dnm += 2;
-			if(viz_array[y][x]&TEMP_LIT1 && 
-				!(viz_array[y][x]&TEMP_DRK3)
-			) dnm += 1;
+		case ART_INFINITY_S_MIRRORED_ARC:
 			if(Hallucination) return hcolor(0);
-			if(dnm == 3){
+			switch(infinity_s_mirrored_arc_litness(otmp))
+			{
+			case 3:
 				if(In_outdoors(&u.uz)) return "sky-blue bladed";
 				else if(In_W_tower(u.ux, u.uy, &u.uz)) return "heliotrope bladed";
 				else if(In_hell(&u.uz)) return "scarlet bladed";
 				else if(In_cave(&u.uz)) return "honey bladed";
 				return "sun-white bladed";
-			} else if(dnm == 1){
-				if(rn2(2)) return "faint-orange bladed";
-				else return "faint-yellow bladed";
-			} else {
+			case 2:
 				if(In_outdoors(&u.uz)) return "mottled-blue bladed";
 				else if(In_W_tower(u.ux, u.uy, &u.uz)) return "mottled-magenta bladed";
 				else if(In_hell(&u.uz)) return "mottled-crimson bladed";
 				else if(In_cave(&u.uz)) return "mottled-brown bladed";
 				return "mottled-white bladed";
+			case 1:
+				if(rn2(2)) return "faint-orange bladed";
+				else return "faint-yellow bladed";
+			default:
+				/* should not happen */
+				return "bladeless";
 			}
-		} break;
+			break;
 		case ART_ARKENSTONE: return Hallucination ? hcolor(0) : "rainbow-glinting sparking white";
 		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cobalt";
 		case ART_HEART_OF_AHRIMAN: return Hallucination ? hcolor(0) : "pulsing and shimmering ruby";
@@ -312,35 +306,29 @@ struct obj *otmp;
 {
 	if(otmp->oartifact) switch(otmp->oartifact){
 		case ART_ANNULUS: return CLR_BLUE;
-		case ART_INFINITY_S_MIRRORED_ARC: {
-			xchar x, y;
-			int dnm = 0;
-			get_obj_location(otmp, &x, &y, 0);
-			if(levl[x][y].lit && 
-				!(viz_array[y][x]&TEMP_DRK3 && 
-				 !(viz_array[y][x]&TEMP_LIT1)
-				)
-			) dnm += 2;
-			if(viz_array[y][x]&TEMP_LIT1 && 
-				!(viz_array[y][x]&TEMP_DRK3)
-			) dnm += 1;
-			if(dnm == 3){
+		case ART_INFINITY_S_MIRRORED_ARC:
+			switch (infinity_s_mirrored_arc_litness(otmp))
+			{
+			case 3:
 				if(In_outdoors(&u.uz)) return CLR_BRIGHT_BLUE;
 				else if(In_W_tower(u.ux, u.uy, &u.uz)) return CLR_BRIGHT_MAGENTA;
 				else if(In_hell(&u.uz)) return CLR_RED;
 				else if(In_cave(&u.uz)) return CLR_YELLOW;
 				return CLR_WHITE;
-			} else if(dnm == 1){
-				if(rn2(2)) return CLR_ORANGE;
-				else return CLR_YELLOW;
-			} else {
+			case 2:
 				if(In_outdoors(&u.uz)) return CLR_BLUE;
 				else if(In_W_tower(u.ux, u.uy, &u.uz)) return CLR_MAGENTA;
 				else if(In_hell(&u.uz)) return CLR_RED;
 				else if(In_cave(&u.uz)) return CLR_BROWN;
 				return CLR_GRAY;
+			case 1:
+				if(rn2(2)) return CLR_ORANGE;
+				else return CLR_YELLOW;
+			default:
+				/* should not happen */
+				return CLR_BLACK;
 			}
-		} break;
+			break;
 		case ART_ARKENSTONE: return CLR_WHITE;
 		case ART_FLUORITE_OCTAHEDRON: return rn2(3) ? CLR_BLUE : CLR_BRIGHT_BLUE;
 		case ART_HEART_OF_AHRIMAN: return rn2(3) ? CLR_RED : CLR_YELLOW;
@@ -2006,17 +1994,7 @@ weapon:
 			else if (is_lightsaber(obj)) {
 				if (litsaber(obj)){
 					if (obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-						xchar x, y;
-						int dnm = 0;
-						get_obj_location(obj, &x, &y, 0);
-						if (levl[x][y].lit &&
-							!(viz_array[y][x] & TEMP_DRK3 &&
-							!(viz_array[y][x] & TEMP_LIT1)
-							)
-							) dnm += 2;
-						if (viz_array[y][x] & TEMP_LIT1 &&
-							!(viz_array[y][x] & TEMP_DRK3)
-							) dnm += 1;
+						int dnm = infinity_s_mirrored_arc_litness(obj);
 						if (obj->altmode){
 							if (dnm > 1) Strcat(buf, " (two blades lit)");
 							else Strcat(buf, " (two blades flickering)");
@@ -3190,6 +3168,7 @@ STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 	{ "slab",	TILE_CLASS,    FIRST_WORD,      NURTURING_WORD },
 	{ "gray stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
 	{ "grey stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
+	{ "soulstone",	GEM_CLASS,    VITAL_SOULSTONE,      SPIRITUAL_SOULSTONE },
 };
 
 #define BSTRCMP(base,ptr,string) ((ptr) < base || strcmp((ptr),string))

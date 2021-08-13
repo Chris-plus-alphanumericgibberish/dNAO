@@ -871,7 +871,8 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 	    } else if ((scflags & MAY_DESTROY) && (!rn2(10)
 			|| otmp->obj_material == GLASS
 			|| otmp->obj_material == OBSIDIAN_MT
-			|| otmp->otyp == EGG)
+			|| otmp->otyp == EGG
+			|| otmp == uchain)
 		){
 			if (breaktest(otmp)){
 				if(shkp){
@@ -879,7 +880,11 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 					if(loss)
 						*loss += loss_cost;
 				}
-				breakobj(otmp, sx, sy, TRUE, FALSE);
+				breakobj(otmp, sx, sy, FALSE, FALSE);
+				used_up = TRUE;
+			}
+			else if (otmp == uchain) {
+				unpunish();
 				used_up = TRUE;
 			}
 	    }
@@ -897,6 +902,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 		tmp = blastforce - (otmp->owt/40);
 		if (tmp < 1) tmp = 1;
 		stmp->range = rnd(tmp); /* anywhere up to that determ. by wt */
+		if (otmp == uchain || otmp == uball) stmp->range = 0;
 		if (farthest < stmp->range) farthest = stmp->range;
 		stmp->stopped = FALSE;
 		if (!schain)
@@ -925,13 +931,17 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 			} else if ((mtmp = m_at(bhitpos.x, bhitpos.y)) != 0) {
 				if (scflags & MAY_HITMON) {
 					struct obj ** s_p = &(stmp->obj);
+					int loss_cost;
 				    stmp->range--;
 					int dieroll = rnd(20);
-					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0) > dieroll || dieroll == 1)
+					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0) > dieroll || dieroll == 1) {
+						if (shkp) loss_cost = stolen_value(stmp->obj, sx, sy, TRUE, TRUE);
 						(void)hmon_with_unowned_obj(mtmp, s_p, dieroll);
+					}
 					else
 						miss(xname(stmp->obj), mtmp);
 					if (!(*s_p)) {
+						*loss += loss_cost;
 						stmp->obj = (struct obj *)0;
 						stmp->stopped = TRUE;
 				    }
@@ -939,13 +949,16 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 			} else if (bhitpos.x==u.ux && bhitpos.y==u.uy) {
 				if (scflags & MAY_HITYOU) {
 				    if (multi) nomul(0, NULL);
+					struct obj ** s_p = &(stmp->obj);
+					int loss_cost;
 					int hitu, hitvalu;
 					int dieroll;
 					hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 8);
 					if (hitvalu > (dieroll = rnd(20)) || dieroll == 1) {
+						if (shkp) loss_cost = stolen_value(stmp->obj, sx, sy, TRUE, TRUE);
 						killer = "flying object";
 						killer_format = KILLED_BY_AN;
-						(void)hmon_with_unowned_obj(&youmonst, &(stmp->obj), dieroll);
+						(void)hmon_with_unowned_obj(&youmonst, s_p, dieroll);
 						stmp->range -= 3;
 						stop_occupation();
 					}
@@ -953,6 +966,11 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 						if (Blind || !flags.verbose) pline("It misses.");
 						else You("are almost hit by %s.", the(xname(stmp->obj)));
 					}
+					if (!(*s_p)) {
+						*loss += loss_cost;
+						stmp->obj = (struct obj *)0;
+						stmp->stopped = TRUE;
+				    }
 				}
 			} else {
 				if (scflags & VIS_EFFECTS) {
