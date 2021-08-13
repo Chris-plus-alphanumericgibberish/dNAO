@@ -8580,18 +8580,22 @@ int faction;
 			}
 		break;
 	    case S_VAMPIRE:
-		switch(rn2(6)) {
-			case 1:
-			(void)mongets(mtmp, POT_BLOOD, mkobjflags);
-			case 2:
-			(void)mongets(mtmp, POT_BLOOD, mkobjflags);
-			case 3:
-			(void)mongets(mtmp, POT_BLOOD, mkobjflags);
-			case 4:
-			(void)mongets(mtmp, POT_BLOOD, mkobjflags);
-			default:
-			break;
-		}
+			if(ptr->mtyp == PM_PARAI){
+				mongets(mtmp, PLAIN_DRESS, mkobjflags);
+			}
+			else switch(rn2(6)) {
+				case 1:
+				(void)mongets(mtmp, POT_BLOOD, mkobjflags);
+				case 2:
+				(void)mongets(mtmp, POT_BLOOD, mkobjflags);
+				case 3:
+				(void)mongets(mtmp, POT_BLOOD, mkobjflags);
+				case 4:
+				(void)mongets(mtmp, POT_BLOOD, mkobjflags);
+				default:
+				break;
+			}
+		break;
 		case S_EYE:
 			if(ptr->mtyp == PM_AXUS){
 				struct obj *otmp = mksobj(SKELETON_KEY, mkobjflags);
