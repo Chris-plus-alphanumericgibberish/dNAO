@@ -698,20 +698,7 @@ int otyp;
 	/* Infinity's Mirrored Arc */
 	if (obj && obj->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 	{
-		xchar x, y;
-		ocn = 0;
-		get_obj_location(obj, &x, &y, 0);
-		if (levl[x][y].lit &&
-			!(viz_array[y][x] & TEMP_DRK3 &&
-			!(viz_array[y][x] & TEMP_LIT1)))
-		{
-			ocn += 2;
-		}
-		if (viz_array[y][x] & TEMP_LIT1 &&
-			!(viz_array[y][x] & TEMP_DRK3))
-		{
-			ocn += 1;
-		}
+		ocn = infinity_s_mirrored_arc_litness(obj);
 
 		if (obj->altmode)
 			ocn *= 2;

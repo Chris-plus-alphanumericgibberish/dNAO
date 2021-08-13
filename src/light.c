@@ -629,12 +629,7 @@ litsaber(obj)
 	struct obj *obj;
 {
 	if(obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
-		xchar x, y;
-		if(obj->where == OBJ_CONTAINED || obj->where == OBJ_MAGIC_CHEST)
-			return FALSE;
-		get_obj_location(obj, &x, &y, 0);
-		if(x == 0 && y == 0) return FALSE;
-		return !isdark(x, y);
+		return infinity_s_mirrored_arc_litness(obj);
 	} else if(obj->otyp == KAMEREL_VAJRA){
 		if(u.goldkamcount_tame || level.flags.goldkamcount_peace || level.flags.goldkamcount_hostile || flags.goldka_level)
 			return TRUE;
