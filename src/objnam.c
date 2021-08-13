@@ -3168,6 +3168,7 @@ STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 	{ "slab",	TILE_CLASS,    FIRST_WORD,      NURTURING_WORD },
 	{ "gray stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
 	{ "grey stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
+	{ "soulstone",	GEM_CLASS,    VITAL_SOULSTONE,      SPIRITUAL_SOULSTONE },
 };
 
 #define BSTRCMP(base,ptr,string) ((ptr) < base || strcmp((ptr),string))
