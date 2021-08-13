@@ -3361,6 +3361,8 @@ winid *datawin;
 			OBJPUTSTR(buf);
 		}
 		else if (otyp == VITAL_SOULSTONE || otyp == SPIRITUAL_SOULSTONE) {
+			Sprintf(buf, "Passively increases %s regeneration while carried.", otyp == VITAL_SOULSTONE ? "health" : "magic");
+			OBJPUTSTR(buf);
 			OBJPUTSTR("Apply to crush the stone and expend the trapped soul.");
 		}
 		else if (oc.oc_material == MINERAL) {
