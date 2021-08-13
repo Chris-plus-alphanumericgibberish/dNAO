@@ -5556,20 +5556,20 @@ struct obj * obj;
 		}
 	}
 	else if (!obj->cursed) {
-		u.ualign.sins++;\
-		if(!rn2(100)){\
-			You("feel the soul fly free!");\
-			adjalign(1);\
-			if ((int)u.uluck < 0) change_luck(1);\
+		u.ualign.sins++;
+		if(!rn2(100)){
+			You("feel the soul fly free!");
+			adjalign(1);
+			if ((int)u.uluck < 0) change_luck(1);
 		}
 	}
 	else {
-		u.ualign.sins += 9;\
-		adjalign(-99);\
-		if(!rn2(100)){\
-			You("feel the soul scream as it sinks towards Gehennom under the weight of the curse!");\
-			/* Just sent someone back who shouldn't be there :( */\
-			gods_upset(Align2gangr(u.ualign.type));\
+		u.ualign.sins += 9;
+		adjalign(-99);
+		if(!rn2(100)){
+			You("feel the soul scream as it sinks towards Gehennom under the weight of the curse!");
+			/* Just sent someone back who shouldn't be there :( */
+			gods_upset(Align2gangr(u.ualign.type));
 		}
 	}
 }
