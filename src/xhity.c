@@ -1054,6 +1054,9 @@ int tary;
 			/* make the attack */
 			if ((vis&VIS_MAGR) && magr->mappearance) seemimic_ambush(magr);	// its true form must be revealed
 			result = xengulfhity(magr, mdef, attk, vis);
+			/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
+			if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
+				wakeup2(mdef, youagr);
 			/* increment number of attacks made */
 			attacksmade++;
 			break;
