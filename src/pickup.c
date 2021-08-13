@@ -3614,6 +3614,9 @@ struct obj *box; /* or bag */
 				continue;
 			}
 
+			if (maybeshopgoods && !otmp->no_charge)
+				addtobill(otmp, FALSE, FALSE, TRUE);;
+
 			if (highdrop) {
 				/* might break or fall down stairs; handles altars itself */
 				bhitpos.x = u.ux; bhitpos.y = u.uy;
