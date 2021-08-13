@@ -1551,6 +1551,7 @@ u_init()
 	u.wardsknown = 0;
 	u.spells_maintained = 0;
 	u.maintained_en_debt = 0;
+	u.quivered_spell = 0;
 	//u.wardsknown = ~0; //~0 should be all 1s, and is therefore debug mode.
 
 #if 0	/* documentation of more zero values as desirable */

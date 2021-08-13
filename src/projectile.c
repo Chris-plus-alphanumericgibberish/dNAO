@@ -2025,6 +2025,9 @@ dofire()
 	shotlimit = (multi || save_cm) ? multi + 1 : 0;
 	multi = 0;		/* reset; it's been used up */
 
+	if (u.quivered_spell) {
+		return spelleffects(spellid_to_spellno(u.quivered_spell), FALSE, 0);
+	}
 
 	/* __ You have something ready to fire __ */
 	if (!notake(youracedata)) {
