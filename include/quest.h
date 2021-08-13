@@ -11,25 +11,35 @@ struct q_score {			/* Quest "scorecard" */
 	Bitfield(not_ready,3);		/* rejected due to alignment, etc. */
 	Bitfield(pissed_off,1);		/* got the leader angry */
 	Bitfield(got_quest,1);		/* got the quest assignment */
-
+	/*7*/
 	Bitfield(first_locate,1);	/* only set the first time */
 	Bitfield(met_intermed,1);	/* used if the locate is a person. */
 	Bitfield(got_final,1);		/* got the final quest assignment */
-
+	/*10*/
 	Bitfield(made_goal,3);		/* # of times on goal level */
 	Bitfield(met_nemesis,1);	/* has met the nemesis before */
 	Bitfield(killed_nemesis,1);	/* set when the nemesis is killed */
 	Bitfield(in_battle,1);		/* set when nemesis fighting you */
-
+	/*16*/
 	Bitfield(cheater,1);		/* set if cheating detected */
 	Bitfield(touched_artifact,1);	/* for a special message */
 	Bitfield(offered_artifact,1);	/* offered to leader */
 	Bitfield(got_thanks,1);		/* final message from leader */
+	/*20*/
 
 	/* keep track of leader presence/absence even if leader is
 	   polymorphed, raised from dead, etc */
 	Bitfield(leader_is_dead,1);
 	Bitfield(second_thoughts,1); /*turned stag AFTER completing version 1 of the quest*/
+	/*22*/
+	Bitfield(time_on_home,8);
+#define	MAX_HOME_TIMER 255
+/* Note: should be > 1 (urrent 70->6 */
+#define	ANA_HOME_PROB (70 - (quest_status.time_on_home+1)/4)
+#define ANA_SPAWN_TWO (quest_status.time_on_home > MAX_HOME_TIMER/4)
+#define ANA_SPAWN_THREE (quest_status.time_on_home > MAX_HOME_TIMER/2)
+#define ANA_SPAWN_FOUR (quest_status.time_on_home > MAX_HOME_TIMER*3/4)
+	/*30*/
 	unsigned leader_m_id;
 };
 
