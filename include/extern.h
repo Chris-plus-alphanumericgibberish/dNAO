@@ -77,6 +77,8 @@ E void NDECL(init_artifacts);
 E void NDECL(hack_artifacts);
 E void FDECL(save_artifacts, (int));
 E void FDECL(restore_artifacts, (int));
+E int NDECL(n_artifacts);
+E struct artifact * NDECL(add_artifact);
 E const char *FDECL(artiname, (int));
 E int FDECL(arti_value, (struct obj *));
 E struct obj *FDECL(mk_artifact, (struct obj *,ALIGNTYP_P));

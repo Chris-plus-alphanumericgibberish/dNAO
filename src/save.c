@@ -336,6 +336,7 @@ register int fd, mode;
 		uball->nobj = bc_objs;
 		bc_objs = uball;
 	}
+	save_artifacts(fd);
 	saveobjchn(fd, invent, mode);
 	saveobjchn(fd, bc_objs, mode);
 	for(i=0;i<10;i++){
@@ -373,7 +374,6 @@ register int fd, mode;
 	bwrite(fd, (genericptr_t) &current_fruit, sizeof current_fruit);
 	savefruitchn(fd, mode);
 	savenames(fd, mode);
-	save_artifacts(fd);
 	save_waterlevel(fd, mode);
 #ifdef RECORD_ACHIEVE
 	bwrite(fd, (genericptr_t) &achieve, sizeof achieve);
