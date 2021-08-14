@@ -509,6 +509,61 @@ struct obj * otmp;
 	return artival;
 }
 
+/* WORK IN PROGRESS */
+/* creates a randart out of otmp */
+struct obj *
+mk_randart(otmp)
+struct obj *otmp;	/* existing object; NOT ignored even if alignment specified */
+{
+	if (otmp->oclass != WEAPON_CLASS &&
+		otmp->oclass != ARMOR_CLASS &&
+		!is_weptool(otmp)
+	){
+		impossible("cannot make randart out of %s", xname(otmp));
+		return otmp;
+	}
+	struct artifact * a = add_artifact();
+	int w = 0;
+
+	/* maximum artifact name length is PL_PSIZ */
+	/* randart generation will fail if the name isn't unique */
+	int jr = n_artifacts() - NROFARTIFACTS;
+	Sprintf((char *)a->name, "Randart McRandFace the %d%s", jr, jr==1?"st":jr==2?"nd":jr==3?"rd":"th");
+	a->alignment = rn2(3) ? A_NONE : !rn2(3) ? A_LAWFUL : !rn2(2) ? A_NEUTRAL : A_CHAOTIC;
+	a->otyp = otmp->otyp;
+
+	if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) {
+		/* offensive stuff */
+		do { a->adtyp = rn2(9); }while(a->adtyp == AD_DISN || a->adtyp == AD_SLEE);
+		a->accuracy = max(1, rn2(5)*5);
+		a->damage = rn2(3)*10;
+
+		if (a->adtyp > AD_MAGM && rn2(3))
+			a->wprops[w++] = a->adtyp-1;	//assumes adtyp-1 == x_res, which is true from AD_FIRE to AD_ACID
+		if (!rn2(20) && w<8)
+			a->wprops[w++] = FAST;
+		if (!rn2(40) && w<8)
+			a->wprops[w++] = FREE_ACTION;
+	}
+
+	if (otmp->oclass == ARMOR_CLASS) {
+		/* some resistances */
+		for (; w < rnd(4); w++) {
+			a->wprops[w++] = rnd(18);	/* FIRE_RES to TELEPORT_CONTROL */
+		}
+		if (!rn2(10) && w<8)
+			a->wprops[w++] = TELEPAT;
+		if (!rn2(10) && w<8)
+			a->wprops[w++] = FAST;
+		if (!rn2(20) && w<8)
+			a->wprops[w++] = HALLUC_RES;
+		if (!rn2(20) && w<8)
+			a->wprops[w++] = FREE_ACTION;
+	}
+
+	return oname(otmp, a->name);;
+}
+
 /*
    Make an artifact.  If a specific alignment is specified, then an object of
    the appropriate alignment is created from scratch, or 0 is returned if
