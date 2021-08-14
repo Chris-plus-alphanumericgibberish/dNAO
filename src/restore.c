@@ -500,6 +500,7 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	}
 
 	/* this stuff comes after potential aborted restore attempts */
+	restore_artifacts(fd);
 	invent = restobjchn(fd, FALSE, FALSE);
 	bc_obj = restobjchn(fd, FALSE, FALSE);
 	while (bc_obj) {
@@ -549,7 +550,6 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	ffruit = loadfruitchn(fd);
 
 	restnames(fd);
-	restore_artifacts(fd);
 	restore_waterlevel(fd);
 #ifdef RECORD_ACHIEVE
 	mread(fd, (genericptr_t) &achieve, sizeof achieve);
