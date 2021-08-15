@@ -1715,23 +1715,25 @@ register struct monst *mtmp;
 		}
 	}
 
-	/* Look for other monsters to fight (at a distance) */
-	struct monst *mtmp2 = mfind_target(mtmp, FALSE);
-	if (mtmp2 && 
-	    (mtmp2 != &youmonst || 
-			dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) > 2) &&
-		(mtmp2 != mtmp)
-	){
-	    int res;
-		mon_ranged_gazeonly = 1;//State variable
-		res = (mtmp2 == &youmonst) ? mattacku(mtmp)
-		                        : mattackm(mtmp, mtmp2);
+	if(!mtarget_adjacent(mtmp)){ /* don't fight at range if there's a melee target */
+		/* Look for other monsters to fight (at a distance) */
+		struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+		if (mtmp2 && 
+			(mtmp2 != &youmonst || 
+				dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) > 2) &&
+			(mtmp2 != mtmp)
+		){
+			int res;
+			mon_ranged_gazeonly = 1;//State variable
+			res = (mtmp2 == &youmonst) ? mattacku(mtmp)
+									: mattackm(mtmp, mtmp2);
 
-		if (res & MM_AGR_DIED)
-			return 1; /* Oops. */
+			if (res & MM_AGR_DIED)
+				return 1; /* Oops. */
 
-		if(!(mon_ranged_gazeonly) && (res & MM_HIT))
-			return 0; /* that was our move for the round */
+			if(!(mon_ranged_gazeonly) && (res & MM_HIT))
+				return 0; /* that was our move for the round */
+		}
 	}
 
 /*	Now the actual movement phase	*/

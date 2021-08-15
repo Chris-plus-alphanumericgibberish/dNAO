@@ -1074,25 +1074,26 @@ register int after;	/* this is extra fast monster movement */
 	    if (ret == 1) return 2; /* died */
 	    if (ret == 2) return 1; /* did something */
 	}
-	else
-	if (mtmp->mlstmv != monstermoves)
+	else if (mtmp->mlstmv != monstermoves) /* ?? only do a ranged attack once per turn? */
 	{
-		/* Look for monsters to fight (at a distance) */
-		struct monst *mtmp2 = mfind_target(mtmp, FALSE);
-		if (mtmp2 && (mtmp2 != mtmp)
-			&& (mtmp2 != &youmonst)
-			&& acceptable_pet_target(mtmp, mtmp2, TRUE))
-		{
-			int res;
-			mon_ranged_gazeonly = 1;//State variable
-			res = (mtmp2 == &youmonst) ? mattacku(mtmp)
-				: mattackm(mtmp, mtmp2);
+		if(!mtarget_adjacent(mtmp)){ /* don't fight at range if there's a melee target */
+			/* Look for monsters to fight (at a distance) */
+			struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+			if (mtmp2 && (mtmp2 != mtmp)
+				&& (mtmp2 != &youmonst)
+				&& acceptable_pet_target(mtmp, mtmp2, TRUE))
+			{
+				int res;
+				mon_ranged_gazeonly = 1;//State variable
+				res = (mtmp2 == &youmonst) ? mattacku(mtmp)
+					: mattackm(mtmp, mtmp2);
 
-			if (res & MM_AGR_DIED)
-				return 2; /* Oops, died */
+				if (res & MM_AGR_DIED)
+					return 2; /* Oops, died */
 
-			if (!(mon_ranged_gazeonly) && (res & MM_HIT))
-				return 1; /* that was our move for the round */
+				if (!(mon_ranged_gazeonly) && (res & MM_HIT))
+					return 1; /* that was our move for the round */
+			}
 		}
 	}
 

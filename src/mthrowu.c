@@ -79,6 +79,39 @@ struct obj *obj;
 #endif /* OVLB */
 #ifdef OVL1
 
+boolean
+mtarget_adjacent(magr)
+struct monst *magr;
+{
+	int i,j, ix, jy;
+	int x = magr->mx, y = magr->my;
+	struct monst *mtmp;
+	
+	for(i = -1; i < 2; i++){
+		for(j = -1; j < 2; j++){
+			if(!i && !j)
+				continue;
+			ix = x + i;
+			jy = y + j;
+			if(!isok(ix,jy))
+				continue;
+			if(!(mtmp = m_u_at(ix, jy)))
+				continue;
+			if(mtmp == &youmonst){
+				if(mtmp->mpeaceful)
+					continue;
+				else return TRUE;
+			}
+			if(!mm_aggression(magr, mtmp))
+				continue;
+			if(magr->mtame && !acceptable_pet_target(magr, mtmp, FALSE))
+				continue;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 extern int monstr[];
 
 /* Find a target for a ranged attack. */
