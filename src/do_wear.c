@@ -3904,8 +3904,8 @@ struct obj *wep;
 		mdef->movement -= 12;
 	}
 	if(youagr)
-		u.ustdy -= 10;
-	else magr->mstdy -= 10;
+		u.ustdy -= 10 + shield_skill(wep) + wep->spe;
+	else magr->mstdy -= 10 + wep->spe;
 }
 
 static void
@@ -3920,6 +3920,13 @@ struct obj *wep;
 	struct attack symbiote = { AT_HITS, AD_PHYS, 5, 8 };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
+	
+	if(youagr)
+		symbiote.damd += shield_skill(wep);
+	
+	symbiote.damd += wep->spe;
+	
+	symbiote.damd = max(symbiote.damd, 1);
 	
 	for(j=8;j>=1;j--){
 		if(youagr && u.ustuck && u.uswallow)
@@ -4040,7 +4047,7 @@ struct obj *wep;
 	/* dragonbreath */
 	zapdata.unreflectable = ZAP_REFL_ADVANCED;
 	/* set damage */
-	zapdata.damn = 10;
+	zapdata.damn = 10 + shield_skill(wep);
 	zapdata.damd = 10;
 	zapdata.no_bounce = TRUE;
 
@@ -4093,7 +4100,7 @@ struct obj *wep;
 	
 	if(youagr && u.ustuck && u.uswallow){
 		mdef = u.ustuck;
-		mdef->movement -= 12;
+		mdef->movement -= 12 + wep->spe;
 	} else for(j=8;j>=1;j--){
 		if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
 			continue;
@@ -4119,7 +4126,7 @@ struct obj *wep;
 			continue;
 
 		if(youdef){
-			mdef->movement -= 12;
+			mdef->movement -= 12 + wep->spe;
 			if(!bigmonst(youracedata)){
 				hurtle(clockwisex[(i+j)%8], clockwisey[(i+j)%8], 1, TRUE, FALSE);
 			}
@@ -4127,7 +4134,7 @@ struct obj *wep;
 			// if (!resist(mdef, WEAPON_CLASS, 0, NOTELL))
 				// monflee(mdef, 3, FALSE, FALSE);
 			if(bigmonst(mdef->data)){
-				mdef->movement -= 12;
+				mdef->movement -= 12 + wep->spe;
 			} else {
 				mhurtle(mdef, clockwisex[(i+j)%8], clockwisey[(i+j)%8], 1, FALSE);
 				//Note: mdef may be gone now due to traps
@@ -4149,11 +4156,11 @@ struct obj *wep;
 		pline("The Mad King blesses %s!", mon_nam(magr));
 	
 	if(youagr){
-		u.ustdy -= 8;
-		u.uencouraged += 8;
+		u.ustdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		u.uencouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
 	} else {
-		magr->mstdy -= 8;
-		magr->encouraged += 8;
+		magr->mstdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		magr->encouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
 	}
 }
 
@@ -4356,11 +4363,11 @@ struct obj *wep;
 		return;
 	
 	if(rn2(2)){
-		if(youagr || canseemon(magr))
+		if((youagr || canseemon(magr)) && artinstance[wep->oartifact].RRSember < moves)
 			pline("The ringed armor's black tentacles awaken and begin to dance like fire!");
 		artinstance[wep->oartifact].RRSember = moves + 4 + rn2(4) + rn2(4);
 	} else {
-		if(youagr || canseemon(magr))
+		if((youagr || canseemon(magr)) && artinstance[wep->oartifact].RRSlunar < moves)
 			pline("The ringed armor's tattered skirt transforms into gleaming royal blue serpents!");
 		artinstance[wep->oartifact].RRSlunar = moves + 4 + rn2(4) + rn2(4);
 	}
