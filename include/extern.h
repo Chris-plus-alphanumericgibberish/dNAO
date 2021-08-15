@@ -3087,6 +3087,7 @@ E int FDECL(weapon_type, (struct obj *));
 E int NDECL(uwep_skill_type);
 E int FDECL(weapon_hit_bonus, (struct obj *, int));
 E int FDECL(weapon_dam_bonus, (struct obj *, int));
+E int FDECL(shield_skill, (struct obj *));
 E void FDECL(skill_init, (const struct def_skill *));
 E void FDECL(skill_add, (const struct def_skill *));
 E const char * FDECL(P_NAME, (int));
@@ -3228,7 +3229,7 @@ E int FDECL(hmon_with_trap, (struct monst *, struct obj **, struct trap *, int, 
 E int FDECL(hmon_general, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int));
 E void FDECL(wakeup2, (struct monst *, boolean));
 E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
-E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, void *, int, int);
+E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, void *, int, int, int *);
 E void FDECL(weave_black_web, (struct monst *));
 E int NDECL(android_combo);
 E int FDECL(u_pole_pound, (struct monst *));

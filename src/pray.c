@@ -2437,6 +2437,10 @@ dosacrifice()
 			} else if(otmp->oartifact == ART_HELLRIDER_S_SADDLE){
 				unrestrict_weapon_skill(P_RIDING);
 			}
+			
+			if(is_shield(otmp)){
+				unrestrict_weapon_skill(P_SHIELD);
+			}
 			return(1);
 		}
 	    } else if (rnl((30 + u.ulevel)*10) < 10) {

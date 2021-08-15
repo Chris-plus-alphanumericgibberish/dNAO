@@ -934,7 +934,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 					int loss_cost;
 				    stmp->range--;
 					int dieroll = rnd(20);
-					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0) > dieroll || dieroll == 1) {
+					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0, (int *) 0) > dieroll || dieroll == 1) {
 						if (shkp) loss_cost = stolen_value(stmp->obj, sx, sy, TRUE, TRUE);
 						(void)hmon_with_unowned_obj(mtmp, s_p, dieroll);
 					}
@@ -953,7 +953,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 					int loss_cost;
 					int hitu, hitvalu;
 					int dieroll;
-					hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 8);
+					hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 8, (int *) 0);
 					if (hitvalu > (dieroll = rnd(20)) || dieroll == 1) {
 						if (shkp) loss_cost = stolen_value(stmp->obj, sx, sy, TRUE, TRUE);
 						killer = "flying object";

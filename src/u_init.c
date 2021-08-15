@@ -826,6 +826,7 @@ static const struct def_skill Skill_A[] = {
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
+    { P_SHIELD, P_BASIC },
     { P_WAND_POWER, P_SKILLED },
     { P_TWO_WEAPON_COMBAT, P_BASIC },
     { P_BARE_HANDED_COMBAT, P_EXPERT },
@@ -983,8 +984,9 @@ static const struct def_skill Skill_C[] = {
     { P_HAMMER, P_SKILLED },	{ P_QUARTERSTAFF, P_EXPERT },
     { P_POLEARMS, P_SKILLED },	{ P_SPEAR, P_EXPERT },
     { P_TRIDENT, P_SKILLED },	{ P_BOW, P_SKILLED },
-	{ P_SLING, P_EXPERT },    	{ P_ATTACK_SPELL, P_BASIC },
-	{ P_MATTER_SPELL, P_SKILLED },    { P_BOOMERANG, P_EXPERT },
+	{ P_SLING, P_EXPERT },    	{ P_SHIELD, P_EXPERT },
+	{ P_ATTACK_SPELL, P_BASIC },{ P_MATTER_SPELL, P_SKILLED },    
+	{ P_BOOMERANG, P_EXPERT },
 	{ P_UNICORN_HORN, P_BASIC },{ P_BARE_HANDED_COMBAT, P_MASTER },
     { P_NONE, 0 }
 };
@@ -1103,7 +1105,8 @@ static const struct def_skill Skill_K[] = {
     { P_HAMMER, P_BASIC },		{ P_POLEARMS, P_EXPERT },
     { P_SPEAR, P_SKILLED },    { P_TRIDENT, P_BASIC },
     { P_LANCE, P_EXPERT },		{ P_BOW, P_BASIC },	
-    { P_CROSSBOW, P_SKILLED },	{ P_ATTACK_SPELL, P_SKILLED },
+    { P_CROSSBOW, P_SKILLED },	{ P_SHIELD, P_EXPERT },
+	{ P_ATTACK_SPELL, P_SKILLED },
     { P_HEALING_SPELL, P_SKILLED },	{ P_CLERIC_SPELL, P_SKILLED },
 #ifdef STEED
     { P_RIDING, P_EXPERT },
@@ -1139,7 +1142,8 @@ static const struct def_skill Skill_Nob[] = {
     { P_POLEARMS, P_BASIC },
     { P_SPEAR, P_EXPERT },		{ P_TRIDENT, P_BASIC },
     { P_LANCE, P_SKILLED },		{ P_BOW, P_SKILLED },
-    { P_CROSSBOW, P_BASIC },	{ P_ATTACK_SPELL, P_SKILLED },
+    { P_CROSSBOW, P_BASIC },	{ P_SHIELD, P_SKILLED },
+	{ P_ATTACK_SPELL, P_SKILLED },
     { P_HEALING_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_SKILLED },
     { P_ENCHANTMENT_SPELL, P_SKILLED },
 #ifdef STEED
@@ -1161,7 +1165,8 @@ static const struct def_skill Skill_HD_Female_Nob[] = {
     { P_POLEARMS, P_BASIC },	{ P_HARVEST, P_EXPERT },
     { P_SPEAR, P_EXPERT },		{ P_TRIDENT, P_BASIC },
     { P_LANCE, P_SKILLED },		{ P_BOW, P_SKILLED },
-    { P_CROSSBOW, P_BASIC },	{ P_ATTACK_SPELL, P_SKILLED },
+    { P_CROSSBOW, P_BASIC },	{ P_SHIELD, P_SKILLED },
+	{ P_ATTACK_SPELL, P_SKILLED },
     { P_HEALING_SPELL, P_SKILLED },	{ P_ESCAPE_SPELL, P_SKILLED },
     { P_ENCHANTMENT_SPELL, P_SKILLED },	{ P_BARE_HANDED_COMBAT, P_SKILLED },
     { P_BEAST_MASTERY, P_EXPERT }, { P_TWO_WEAPON_COMBAT, P_EXPERT },
@@ -1179,7 +1184,8 @@ static const struct def_skill Skill_ENob[] = {
     { P_POLEARMS, P_BASIC },
     { P_SPEAR, P_EXPERT },	    { P_TRIDENT, P_BASIC },	
     { P_LANCE, P_SKILLED },		{ P_BOW, P_SKILLED },
-    { P_CROSSBOW, P_BASIC },	{ P_ATTACK_SPELL, P_SKILLED },
+    { P_CROSSBOW, P_BASIC },	{ P_SHIELD, P_SKILLED },
+	{ P_ATTACK_SPELL, P_SKILLED },
     { P_HEALING_SPELL, P_SKILLED }, { P_ESCAPE_SPELL, P_SKILLED },
     { P_ENCHANTMENT_SPELL, P_SKILLED },
 #ifdef STEED
@@ -1223,6 +1229,7 @@ static const struct def_skill Skill_DwaNob[] = {
     { P_HARVEST, P_SKILLED },
     { P_QUARTERSTAFF, P_BASIC },	{ P_SPEAR, P_EXPERT },
     { P_TRIDENT, P_EXPERT },		{ P_BOW, P_SKILLED },
+	{ P_SHIELD, P_BASIC },
 #ifdef STEED
     { P_RIDING, P_BASIC },
 #endif
@@ -1242,6 +1249,7 @@ static const struct def_skill Skill_P[] = {
     { P_SLING, P_BASIC },		{ P_CROSSBOW, P_BASIC },
     { P_DART, P_BASIC },		{ P_SHURIKEN, P_BASIC },
     { P_BOOMERANG, P_BASIC },		{ P_UNICORN_HORN, P_SKILLED },
+	{ P_SHIELD, P_BASIC },
     { P_HEALING_SPELL, P_EXPERT },	{ P_DIVINATION_SPELL, P_EXPERT },
     { P_CLERIC_SPELL, P_EXPERT },
     { P_BARE_HANDED_COMBAT, P_BASIC },
@@ -1384,6 +1392,7 @@ static const struct def_skill Skill_T[] = {
     { P_SPEAR, P_BASIC },
     { P_TRIDENT, P_BASIC },		{ P_LANCE, P_BASIC },
     { P_BOW, P_BASIC },			{ P_SLING, P_BASIC },
+	{ P_SHIELD, P_BASIC },
 //#ifdef FIREARMS
     { P_FIREARM, P_BASIC },
 //#endif
@@ -1417,6 +1426,7 @@ static const struct def_skill Skill_V[] = {
     { P_SPEAR, P_EXPERT },
     { P_TRIDENT, P_BASIC },			{ P_LANCE, P_SKILLED },
     { P_SLING, P_BASIC },			{ P_BOW, P_EXPERT },
+	{ P_SHIELD, P_SKILLED },
     { P_ATTACK_SPELL, P_EXPERT },	{ P_ESCAPE_SPELL, P_BASIC },
     { P_DIVINATION_SPELL, P_SKILLED },
     { P_WAND_POWER, P_BASIC },

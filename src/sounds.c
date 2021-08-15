@@ -5230,6 +5230,7 @@ int floorID;
 		skillchain[i++] = P_SABER;
 		skillchain[i++] = P_LANCE;
 		skillchain[i++] = P_RIDING;
+		skillchain[i++] = P_SHIELD;
 		break;
 	case BUER:
 		skillchain[i++] = P_HEALING_SPELL;

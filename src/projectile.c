@@ -1216,10 +1216,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	dieroll = rnd(20);
 	static struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
 	struct attack * attkp = &dummy;
+	int shield_margin = -1;
 	if (magr && attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS))
 		attkp = attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS);
 
-	accuracy = tohitval(magr, mdef, attkp, thrownobj, vpointer, hmoncode, 0);
+	accuracy = tohitval(magr, mdef, attkp, thrownobj, vpointer, hmoncode, 0, &shield_margin);
 
 	if (miss_via_insubstantial(magr, mdef, attkp, thrownobj, vis)) {
 		/* message already printed by miss_via_insubstantial */;
@@ -1325,6 +1326,9 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	else
 	{
 		/* miss */
+		/* train player's Shield skill if applicable */
+		if (youdef && uarms && (dieroll-accuracy <= shield_margin))
+			use_skill(P_SHIELD, 1);
 		/* print missmsg */
 		if (vis) {
 			if (youdef) {

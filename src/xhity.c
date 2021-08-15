@@ -3183,7 +3183,7 @@ int vis;
  *
  */
 int
-tohitval(magr, mdef, attk, weapon, vpointer, hmoncode, flat_acc)
+tohitval(magr, mdef, attk, weapon, vpointer, hmoncode, flat_acc, shield_margin)
 struct monst * magr;
 struct monst * mdef;
 struct attack * attk;
@@ -3191,6 +3191,7 @@ struct obj * weapon;
 void * vpointer;				/* additional /whatever/, type based on hmoncode. */
 int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
 int flat_acc;
+int *shield_margin;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -3655,14 +3656,23 @@ int flat_acc;
 		else {
 			defn_acc += base_mac(mdef);
 		}
+		if(shield_margin) *shield_margin = -1;
 	}
 	/* do not ignore worn armor */
 	else {
 		if (youdef){
 			defn_acc += AC_VALUE(u.uac + u.uspellprot) - u.uspellprot;
+			if(shield_margin) {
+				if(uarms) *shield_margin = max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize)) + shield_skill(uarms);
+				else *shield_margin = -1;
+			}
 		}
 		else {
 			defn_acc += find_mac(mdef);
+			if(shield_margin) {
+				if(which_armor(mdef, W_ARMS)) *shield_margin = arm_ac_bonus(which_armor(mdef, W_ARMS));
+				else *shield_margin = -1;
+			}
 		}
 	}
 
@@ -3729,6 +3739,7 @@ boolean ranged;
 
 	int dieroll;				/* rolled accuracy */
 	int accuracy;				/* accuracy of attack; if this is less than dieroll, the attack hits */
+	int shield_margin = -1;		/* contribution of shield to AC (-1 means "none") */
 	boolean hit = FALSE;		/* whether or not the attack hit */
 	boolean miss = FALSE;		/* counterpart to hit */
 	boolean domissmsg = TRUE;	/* FALSE if a message has already been printed about a miss */
@@ -3769,10 +3780,12 @@ boolean ranged;
 	}
 
 	/* get accuracy of attack */
-	if (miss)
+	if (miss){
 		accuracy = 0;
+		shield_margin = -1;
+	}
 	else
-		accuracy = tohitval(magr, mdef, attk, weapon, (void *)0, (ranged ? HMON_THRUST : HMON_WHACK), flat_acc);
+		accuracy = tohitval(magr, mdef, attk, weapon, (void *)0, (ranged ? HMON_THRUST : HMON_WHACK), flat_acc, &shield_margin);
 
 	/* roll to-hit die */
 	dieroll = rnd(20);
@@ -3805,9 +3818,11 @@ boolean ranged;
 		if (weapon && is_multi_hit(weapon) && !miss) {
 			weapon->ostriking = 0;
 			int attempts = rn2(multistriking(weapon) + 1) + multi_ended(weapon);	/* ex: multistriking == 2 for 1-3 hits.*/
+			int subroll;
 			for (; attempts && weapon->ostriking < 7; attempts--) {
-				if (accuracy > rnd(20))
+				if (accuracy > (subroll = rnd(20)) || subroll == 1)
 					weapon->ostriking++;
+				dieroll = min(dieroll, subroll);
 			}
 			/* if [dieroll] was not high enough to hit, reduce ostriking by 1 and make [hit] true */
 			if (!hit && weapon->ostriking) {
@@ -3866,8 +3881,12 @@ boolean ranged;
 	}//switch(aatyp)
 
 	/* if we haven't confirmed a hit yet, we missed */
-	if (!hit)
+	if (!hit){
 		miss = TRUE;
+		/* train player's Shield skill if applicable */
+		if (youdef && uarms && (dieroll-accuracy <= shield_margin))
+			use_skill(P_SHIELD, 1);
+	}
 
 	/* AT_DEVA attacks shouldn't print a miss message if it is a subsequent attack that misses */
 	/* Hack this in by knowing that repeated AT_DEVA attacks have a flat_acc penalty */

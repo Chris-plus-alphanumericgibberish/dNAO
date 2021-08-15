@@ -46,6 +46,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_NIMAN				(-25)
 #define PN_JUYO					(-26)
 #define PN_WAND_DAMAGE			(-27)
+#define PN_SHIELD				(-28)
 
 #define holy_damage(mon)	((mon == &youmonst) ? \
 							hates_holy(youracedata) :\
@@ -81,7 +82,7 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 #ifdef BARD
 	PN_MUSICALIZE,
 #endif
-	PN_BARE_HANDED,   PN_TWO_WEAPONS,
+	PN_BARE_HANDED,   PN_TWO_WEAPONS, PN_SHIELD,
 	PN_BEAST_MASTERY,
 	PN_SHII_CHO, PN_MAKASHI, PN_SORESU, PN_ATARU,
 	PN_DJEM_SO, PN_SHIEN, PN_NIMAN, PN_JUYO,
@@ -122,6 +123,7 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
     "form VI: Niman",
     "form VII: Juyo",
     "wand damage",
+    "shield",
 };
 /* indexed vis `is_martial() */
 STATIC_VAR NEARDATA const char * const barehands_or_martial[] = {
@@ -3572,6 +3574,27 @@ int wep_type;
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && type != P_TWO_WEAPON_COMBAT) bonus = max(bonus,0);
 	
 	return bonus;
+}
+
+int
+shield_skill(shield)
+struct obj *shield;
+{
+	if(weight(shield) > (int)objects[BUCKLER].oc_weight){
+		switch(P_SKILL(P_SHIELD)){
+			case P_BASIC:	return 1;
+			case P_SKILLED:	return 2;
+			case P_EXPERT:	return 5;
+			default: return 0;
+		}
+	}
+	else {
+		switch(P_SKILL(P_SHIELD)){
+			case P_SKILLED:	return 1;
+			case P_EXPERT:	return 2;
+			default: return 0;
+		}
+	}
 }
 
 /*

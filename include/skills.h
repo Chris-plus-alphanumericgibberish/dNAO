@@ -89,17 +89,18 @@
 #define P_BARE_HANDED_COMBAT	(P_LAST_SPELL + 1)
 #define P_MARTIAL_ARTS		P_BARE_HANDED_COMBAT	/* Role distinguishes */
 #define P_TWO_WEAPON_COMBAT	(P_LAST_SPELL + 2)	/* Finally implemented */
-#define P_BEAST_MASTERY	(P_LAST_SPELL + 3)	/* Finally implemented */
-#define P_SHII_CHO	(P_LAST_SPELL + 4)
-#define P_MAKASHI	(P_LAST_SPELL + 5)
-#define P_SORESU	(P_LAST_SPELL + 6)
-#define P_ATARU		(P_LAST_SPELL + 7)
-#define P_DJEM_SO	(P_LAST_SPELL + 8)
-#define P_SHIEN		(P_LAST_SPELL + 9)
-#define P_NIMAN		(P_LAST_SPELL +10)
-#define P_JUYO		(P_LAST_SPELL +11)
+#define P_SHIELD	(P_LAST_SPELL + 3)	/* Finally implemented */
+#define P_BEAST_MASTERY	(P_LAST_SPELL + 4)	/* Finally implemented */
+#define P_SHII_CHO	(P_LAST_SPELL + 5)
+#define P_MAKASHI	(P_SHII_CHO + 1)
+#define P_SORESU	(P_SHII_CHO + 2)
+#define P_ATARU		(P_SHII_CHO + 3)
+#define P_DJEM_SO	(P_SHII_CHO + 4)
+#define P_SHIEN		(P_SHII_CHO + 5)
+#define P_NIMAN		(P_SHII_CHO + 6)
+#define P_JUYO		(P_SHII_CHO + 7)
 #ifdef STEED
-#define P_RIDING		(P_LAST_SPELL +12)	/* How well you control your steed */
+#define P_RIDING		(P_SHII_CHO + 8)	/* How well you control your steed */
 #define P_LAST_H_TO_H		P_RIDING
 #else
 #define P_LAST_H_TO_H		P_TWO_WEAPON_COMBAT

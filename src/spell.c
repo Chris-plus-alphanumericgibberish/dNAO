@@ -2343,7 +2343,7 @@ spiriteffects(power, atme)
 				}
 				struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
 				int dieroll = rnd(20);
-				if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0) <= dieroll && dieroll != 1){
+				if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 					You("miss.");
 					break;
 				}
@@ -2692,7 +2692,7 @@ spiriteffects(power, atme)
 					boots = which_armor(mon, W_ARMF);
 					struct attack basichit = { AT_CLAW, AD_PHYS, 0, 0 };
 					int dieroll = rnd(20);
-					if (tohitval(&youmonst, mon, &basichit, (struct obj *)0, (void *)0, HMON_WHACK, 0) <= dieroll && dieroll != 1){
+					if (tohitval(&youmonst, mon, &basichit, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 						if(boots && boots->otyp == WATER_WALKING_BOOTS){
 							pline("A sudden geyser from the abzu washes under %s's feet!", mon_nam(mon));
 							if(canseemon(mon)) makeknown(boots->otyp);
@@ -3441,7 +3441,7 @@ spiriteffects(power, atme)
 					AD_PHYS, 0, 0 };
 				
 				int dieroll = rnd(20);
-				if (tohitval(&youmonst, mon, &basicattack, (struct obj *)0, (void *)0, HMON_WHACK, 0) <= dieroll && dieroll != 1){
+				if (tohitval(&youmonst, mon, &basicattack, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 					You("miss.");
 					break;
 				} else if(unsolid(mon->data)){
@@ -3598,7 +3598,7 @@ spiriteffects(power, atme)
 			}
 			struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
 			int dieroll = rnd(20);
-			if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0) <= dieroll && dieroll != 1){
+			if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 				You("miss.");
 				break;
 			}

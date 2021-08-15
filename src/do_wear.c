@@ -2386,7 +2386,7 @@ find_ac()
 	if (uarmh)	uac -= arm_ac_bonus(uarmh);
 	if (uarmf)	uac -= arm_ac_bonus(uarmf);
 	if(uarms){
-		uac -= max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize));
+		uac -= max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize)) + shield_skill(uarms);
 	}
 	if (uarmg)	uac -= arm_ac_bonus(uarmg);
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);

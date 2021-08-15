@@ -399,6 +399,10 @@ gcrownu()
 					break;
 				case ART_AEGIS:
 					expert_weapon_skill(P_SPEAR);
+					expert_weapon_skill(P_SHIELD);
+					break;
+				case ART_DRAGONHEAD_SHIELD:
+					expert_weapon_skill(P_SHIELD);
 					break;
 			}
 			/* other artifact specials */
