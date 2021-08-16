@@ -3985,7 +3985,7 @@ struct monst *mon;
 					change_usanity(mvitals[monsndx(mon->data)].san_lost, !mon->mpeaceful);
 				}
 				//Stress-based Sanity loss: Stress of continuing to see a taxing monster may lower sanity. 
-				else if(u.usanity > (100 - mvitals[monsndx(mon->data)].san_lost)){
+				else if(u.usanity > (100 + mvitals[monsndx(mon->data)].san_lost) && !save_vs_sanloss()){
 					change_usanity(-1, FALSE);
 				}
 			}
