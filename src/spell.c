@@ -5164,7 +5164,8 @@ int *spell_no;
 			if (selected[0].item.a_int < 0
 				&& !(selected[0].item.a_int == splaction && splaction == SPELLMENU_QUIVER)	// special case to unquiver current spell
 			){
-				return dospellmenu(selected[0].item.a_int, spell_no);
+				splaction = selected[0].item.a_int;
+				continue;
 			}
 			else if (!(splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
 				/* we aren't attempting to rearrange spells with only 1 spell known */
