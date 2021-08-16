@@ -15294,6 +15294,11 @@ struct monst * mexclude;
  *
  * Does not include AT_BOOM effects, which are handled in mon.c for monsters.
  * SCOPECREEP: handle AT_BOOM effects for players somewhere/somehow.
+ * 
+ * Call with [attk] and [weapon] (if applicable) with [endofchain]=FALSE for each indiviudal attack
+ * and then once [attk]=NULL and [endofchain]=TRUE, if there are multiple attacks being made at once
+ * 
+ * Call with [attk] and [endofchain=TRUE] if there is a single attack being made and retaliated against
  */
 int
 xpassivey(magr, mdef, attk, weapon, vis, result, pd, endofchain)
@@ -15377,7 +15382,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	
 	/* passives NOT from a creature's attacks */
 	/* per-attack */
-	if (!endofchain) {
+	if (attk) {
 		/* Iris unbinds on attacking a reflective creature */
 		if (youagr && u.sealsActive&SEAL_IRIS &&
 			!(result&MM_DEF_DIED) &&
@@ -15628,10 +15633,10 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 	else
 		dmg = 0;
 
-	/* These passives specifically happen per attack */
+	/* These passives specifically happen per attack. */
 	/* necessary for passives that interact with [attk] */
 	/* Try not to have passives deal damage like this, because that adds up to a lot quickly. */
-	if (!endofchain) {
+	if (attk) {
 		/* passives from statblock */
 		if (passive != &noattack && result&MM_HIT) {
 			switch (passive->adtyp)
