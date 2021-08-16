@@ -3233,7 +3233,7 @@ int *shield_margin;
 			base_acc = mlev(magr);
 		}
 		else {
-			base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : thrown ? 0.25 : 0.67);
+			base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS : thrown ? 0.67 : 1.0);
 		}
 		if(youagr){
 			static long warnpanic = 0;
