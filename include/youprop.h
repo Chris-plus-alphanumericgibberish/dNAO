@@ -166,6 +166,8 @@
 #define Punished		(uball)
 #define	Insanity	(100 - u.usanity)
 
+#define save_vs_sanloss()	((uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < ACURR(A_WIS)))
+
 #define Mortal_race	(!nonliving(youracedata) && !is_minion(youracedata) && !is_demon(youracedata) && !is_primordial(youracedata))
 #define Dark_immune	(is_unalive(youracedata) || is_primordial(youracedata))
 

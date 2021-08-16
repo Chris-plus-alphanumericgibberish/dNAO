@@ -6809,9 +6809,7 @@ struct monst *mtmp;
 	int mndx = monsndx(mtmp->data);
 	
 	
-	if((uwep && uwep->oartifact == ART_NODENSFORK)
-	 || (rnd(30) < ACURR(A_WIS))
-	){
+	if(save_vs_sanloss()){
 		if(mndx == PM_GREAT_CTHULHU)
 			return -1*rnd(10);
 		else return -1*(max_ints(0, (monstr[mndx]-u.ulevel)/4) + rnd(max(1, (monstr[mndx]-u.ulevel)/4)));
@@ -6853,9 +6851,7 @@ struct monst *mtmp;
 	
 	sanloss = rnd(diesize);
 	
-	if((uwep && uwep->oartifact == ART_NODENSFORK)
-	 || (rnd(30) < ACURR(A_WIS))
-	){
+	if(save_vs_sanloss()){
 		return -1*sanloss/3;
 	} else {
 		return -1*sanloss;
@@ -6865,9 +6861,7 @@ struct monst *mtmp;
 int
 u_sanity_loss_nyar()
 {
-	if((uwep && uwep->oartifact == ART_NODENSFORK)
-	 || (rnd(30) < ACURR(A_WIS))
-	){
+	if(save_vs_sanloss()){
 		return -1*rnd(10);
 	} else {
 		return -1*rnd(100);
