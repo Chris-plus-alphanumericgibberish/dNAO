@@ -4979,6 +4979,7 @@ boolean ranged;
 					&& !Protection_from_shape_changers
 					&& !arti_worn_prop(uwep, ARTP_NOWERE)
 					&& !umechanoid
+					&& is_were(pa)	/* or else Lillends can transmit lycanthropy via mask */
 					) {
 					You_feel("feverish.");
 					exercise(A_CON, FALSE);
