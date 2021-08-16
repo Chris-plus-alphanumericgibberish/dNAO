@@ -2992,19 +2992,46 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			/* other stuff
-			 * commented out because artifacts don't get any behaviours more interesting
-			 * than bonus damage (such as Vorpal Blade being vorpal)
 			 */
-//			buf[0] = '\0';
-//			ADDCLASSPROP((check_oprop(obj, OPROP_DEEPW && obj->spe < 8), "telepathically lashes out");
-//			ADDCLASSPROP((check_oprop(obj, OPROP_VORPW), "beheads creatures");
-//			ADDCLASSPROP((check_oprop(obj, OPROP_MORGW), "inflicts unhealing wounds while cursed");
-//			ADDCLASSPROP((check_oprop(obj, OPROP_FLAYW), "destroys armor");
-//			if (buf[0] != '\0')
-//			{
-//				Sprintf(buf2, "It %s.", buf);
-//				OBJPUTSTR(buf2);
-//			}
+			buf[0] = '\0';
+			ADDCLASSPROP((check_oprop(obj, OPROP_DEEPW && obj->spe < 8)), "telepathically lashes out");
+			ADDCLASSPROP((check_oprop(obj, OPROP_VORPW)), "is vorpal");
+			ADDCLASSPROP((check_oprop(obj, OPROP_MORGW)), "inflicts unhealing wounds while cursed");
+			ADDCLASSPROP((check_oprop(obj, OPROP_FLAYW)), "destroys armor");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "It %s.", buf);
+				OBJPUTSTR(buf2);
+			}
+		}
+		/* other artifact weapon effects */
+		if (oartifact) {
+			register const struct artifact *oart = &artilist[oartifact];
+			buf[0] = '\0';
+			//ADDCLASSPROP((oart->aflags&ARTA_DEXPL), "weapon dice explode");
+			ADDCLASSPROP((oart->aflags&ARTA_DLUCK), "luck-biased");
+			ADDCLASSPROP((oart->aflags&ARTA_POIS), "always poisoned");
+			ADDCLASSPROP((oart->aflags&ARTA_SILVER), "silvered");
+			ADDCLASSPROP((oart->aflags&ARTA_VORPAL), "vorpal");
+			ADDCLASSPROP((oart->aflags&ARTA_CANCEL), "canceling");
+			ADDCLASSPROP((oart->aflags&ARTA_MAGIC), "magic-flourishing");
+			ADDCLASSPROP((oart->aflags&ARTA_DRAIN), "draining");
+			//ADDCLASSPROP((oart->aflags&ARTA_BRIGHT), " /* turns gremlins to dust and trolls to stone */");
+			ADDCLASSPROP((oart->aflags&ARTA_BLIND), "blinding");
+			ADDCLASSPROP((oart->aflags&ARTA_SHINING), "armor-phasing");
+			ADDCLASSPROP((oart->aflags&ARTA_SHATTER), "shattering");
+			ADDCLASSPROP((oart->aflags&ARTA_DISARM), "disarming");
+			ADDCLASSPROP((oart->aflags&ARTA_STEAL), "theiving");
+			//ADDCLASSPROP((oart->aflags&ARTA_HASTE), " /* hitting defender grants movement to attacker */");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), " fire exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), " cold exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), " shock exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_KNOCKBACK|ARTA_KNOCKBACKX)), "kinetic");
+			if (buf[0] != '\0')
+			{
+				Sprintf(buf2, "Attacks are %s.", buf);
+				OBJPUTSTR(buf2);
+			}
 		}
 		/* other weapon special effects */
 		if(obj){
