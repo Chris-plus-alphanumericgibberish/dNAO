@@ -10747,6 +10747,12 @@ living_items()
 			} else if(cansee(ox, oy) && !rn2(20))
 				pline("%s its finger.", Tobjnam(obj, "tap"));
 		}
+		else if(obj->otyp == CORPSE && obj->corpsenm == PM_CROW_WINGED_HALF_DRAGON){
+			xchar ox, oy;
+			get_obj_location(obj, &ox, &oy, 0);
+			if(cansee(ox, oy) && !rn2(20))
+				pline("%s.", Tobjnam(obj, "blink"));
+		}
 		//Nitocris's coffin causes Egyptian spawns
 		else if(Is_real_container(obj) && obj->spe == 5){
 			nitocris_sarcophagous(obj);
