@@ -1256,7 +1256,8 @@ register const char *let,*word;
 			  !is_knife(otmp) && otmp->oartifact != ART_SILVER_STARLIGHT &&
 			  otmp->oartifact != ART_HOLY_MOONLIGHT_SWORD &&
 			  otmp->otyp != RAKUYO && otmp->otyp != RAKUYO_SABER && 
-			  otmp->otyp != DOUBLE_FORCE_BLADE && otmp->otyp != FORCE_BLADE
+			  otmp->otyp != DOUBLE_FORCE_BLADE && otmp->otyp != FORCE_BLADE &&
+			  otmp->otyp != MASS_SHADOW_PISTOL
 			 ) ||
 			 (otmp->oclass == CHAIN_CLASS && 
 				!(otyp == CLOCKWORK_COMPONENT || otyp == SUBETHAIC_COMPONENT 
