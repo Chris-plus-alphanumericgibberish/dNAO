@@ -2089,6 +2089,9 @@ struct obj * otmp;
 	case ART_CLOAK_OF_THE_CONSORT:
 		def *= 2;
 		break;
+	case ART_DRAGON_PLATE:
+		def += 2;
+		break;
 	case ART_ARMOR_OF_EREBOR:
 		def += 5;
 		break;
@@ -2171,6 +2174,9 @@ struct obj * otmp;
 	case ART_WEB_OF_THE_CHOSEN:
 	case ART_CLOAK_OF_THE_CONSORT:
 		def *= 2;
+		break;
+	case ART_DRAGON_PLATE:
+		def += 2;
 		break;
 	case ART_ARMOR_OF_EREBOR:
 		def += 5;
