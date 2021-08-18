@@ -16241,6 +16241,23 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 						magr->mstun = 1;
 					}
 					break;
+				case AD_PHYS:
+					/* no message */
+					/* damage (reduced by DR, half-phys damage, min 1) */
+					dmg -= (youagr ? roll_udr(mdef) : roll_mdr(magr, mdef));
+					if (Half_phys(magr))
+						dmg = (dmg + 1) / 2;
+					if (youagr && u.uvaul_duration)
+						dmg = (dmg + 1) / 2;
+					if (dmg < 1)
+						dmg = 1;
+
+					newres = xdamagey(mdef, magr, &noattack, dmg);
+					if (newres&MM_DEF_DIED)
+						result |= MM_AGR_DIED;	/* attacker died */
+					if (newres&MM_DEF_LSVD)
+						result |= MM_AGR_STOP;	/* attacker lifesaved */
+					break;
 				case AD_COLD:
 					/* resistance */
 					if (Cold_res(magr)) {
