@@ -764,8 +764,6 @@ unsigned trflags;
 	boolean webmsgok = (!(trflags & NOWEBMSG));
 	boolean forcebungle = (trflags & FORCEBUNGLE);
 
-	nomul(0, NULL);
-
 	if(
 		uwep && is_lightsaber(uwep) && litsaber(uwep) && 
 			((activeFightingForm(FFORM_SHIEN) && rnd(3) < FightingFormSkillLevel(FFORM_SHIEN)) || 
@@ -808,6 +806,7 @@ unsigned trflags;
 		    (ttype == ARROW_TRAP && !trap->madeby_u) ? "an" :
 			a_your[trap->madeby_u],
 		    defsyms[trap_to_defsym(ttype)].explanation);
+		nomul(0, NULL);
 		return;
 	    }
 	}
@@ -823,6 +822,7 @@ unsigned trflags;
 			You_hear("a loud click!");
 			deltrap(trap);
 			newsym(u.ux, u.uy);
+			nomul(0, NULL);
 			break;
 		}
 		otmp = trap->ammo;
@@ -842,6 +842,7 @@ unsigned trflags;
 			  the(ceiling(u.ux,u.uy)));
 		    deltrap(trap);
 		    newsym(u.ux,u.uy);
+			nomul(0, NULL);
 			break;
 		}
 		otmp = trap->ammo;
@@ -865,11 +866,14 @@ unsigned trflags;
 				You("notice a crease in the linoleum.");
 			else
 				You("notice a loose board below you.");
+			if (!already_seen)
+				nomul(0, NULL);
 		    }
 		} else {
 		    seetrap(trap);
 		    pline("A board beneath you squeaks loudly.");
 		    wake_nearby_noisy();
+			nomul(0, NULL);
 		}
 		break;
 
@@ -882,7 +886,10 @@ unsigned trflags;
 				nomul(-rnd(2), "frozen by a trap");
 				exercise(A_DEX, FALSE);
 				nomovemsg = You_can_move_again;
-			} else You("are mildly startled.");
+			} else {
+				You("are mildly startled.");
+				nomul(0, NULL);
+			}
 			
 			while(cnt--)
 				(void) makemon(mkclass(S_MUMMY, G_NOHELL), u.ux, u.uy, NO_MM_FLAGS);
@@ -903,6 +910,7 @@ unsigned trflags;
 						}
 					}
 				}
+				nomul(0, NULL);
 			} else {
 				impossible("dotrap: You triggered an unhandled switch trap");
 			}
@@ -915,6 +923,7 @@ unsigned trflags;
 			}
 			deltrap(trap);
 			newsym(u.ux,u.uy);	/* get rid of trap symbol */
+			nomul(0, NULL);
 		break;
 
 	    case BEAR_TRAP:
@@ -925,6 +934,7 @@ unsigned trflags;
 		    pline("%s %s closes harmlessly through you.",
 			    A_Your[trap->madeby_u],
 				xname(trap->ammo));
+			nomul(0, NULL);
 		    break;
 		}
 		if(
@@ -935,6 +945,7 @@ unsigned trflags;
 		    pline("%s %s closes harmlessly over you.",
 			    A_Your[trap->madeby_u],
 				xname(trap->ammo));
+			nomul(0, NULL);
 		    break;
 		}
 		u.utrap = rn1(4, 4);
@@ -965,6 +976,7 @@ unsigned trflags;
 			}
 		}
 		exercise(A_DEX, FALSE);
+		nomul(0, NULL);
 		break;
 
 	    case FLESH_HOOK:
@@ -994,12 +1006,14 @@ unsigned trflags;
 			hmon_with_trap(&youmonst, &(trap->ammo), trap, HMON_WHACK, rnd(20));
 		}
 		exercise(A_DEX, FALSE);
+		nomul(0, NULL);
 		break;
 
 	    case SLP_GAS_TRAP:
 		seetrap(trap);
 		if(Sleep_resistance || breathless(youracedata)) {
 		    You("are enveloped in a cloud of gas!");
+			nomul(0, NULL);
 		    break;
 		}
 		pline("A cloud of gas puts you to sleep!");
@@ -1007,6 +1021,7 @@ unsigned trflags;
 #ifdef STEED
 		(void) steedintrap(trap, (struct obj *)0);
 #endif
+		nomul(0, NULL);
 		break;
 
 	    case RUST_TRAP:
@@ -1023,6 +1038,7 @@ unsigned trflags;
 		    if (Half_physical_damage) dam = (dam+1) / 2;
 			if(u.uvaul_duration) dam = (dam + 1) / 2;
 		    losehp(dam, "rusting away", KILLED_BY);
+			nomul(0, NULL);
 		    break;
 		} else if (u.umonnum == PM_FLAMING_SPHERE) {
 		    int dam = u.mhmax;
@@ -1032,10 +1048,12 @@ unsigned trflags;
 		    if (Half_physical_damage) dam = (dam+1) / 2;
 			if(u.uvaul_duration) dam = (dam + 1) / 2;
 		    losehp(dam, "drenching", KILLED_BY);
+			nomul(0, NULL);
 		    break;
 		} else if (u.umonnum == PM_GREMLIN && rn2(3)) {
 		    pline("%s you!", A_gush_of_water_hits);
 		    (void)split_mon(&youmonst, (struct monst *)0);
+			nomul(0, NULL);
 		    break;
 		}
 
@@ -1082,6 +1100,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 #endif
 		}
 		update_inventory();
+		nomul(0, NULL);
 		break;
 
 	    case FIRE_TRAP:
@@ -1089,6 +1108,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 			You_hear("a soft click!");
 			deltrap(trap);
 			newsym(u.ux, u.uy);
+			nomul(0, NULL);
 			break;
 		}
 		if (!(Is_firelevel(&u.uz)) &&	/* never useup on plane of fire */
@@ -1103,6 +1123,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 		}
 		seetrap(trap);
 		dofiretrap((struct obj *)0);
+		nomul(0, NULL);
 		break;
 
 	    case PIT:
@@ -1130,6 +1151,8 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 					You("don't fall in!");
 				}
 			}
+			if (!already_seen)
+				nomul(0, NULL);
 		    break;
 		}
 		if (!In_sokoban(&u.uz)) {
@@ -1237,6 +1260,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 #ifdef STEED
 		}
 #endif
+		nomul(0, NULL);
 		break;
 	    case HOLE:
 	    case TRAPDOOR:
@@ -1244,19 +1268,24 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 		    seetrap(trap);	/* normally done in fall_through */
 		    impossible("dotrap: %ss cannot exist on this level.",
 			       defsyms[trap_to_defsym(ttype)].explanation);
+			if (!already_seen)
+				nomul(0, NULL);
 		    break;		/* don't activate it after all */
 		}
 		if(u.sealsActive&SEAL_SIMURGH) unbind(SEAL_SIMURGH,TRUE);
 		fall_through(TRUE);
+		nomul(0, NULL);
 		break;
 
 	    case TELEP_TRAP:
 		seetrap(trap);
 		tele_trap(trap);
+		nomul(0, NULL);
 		break;
 	    case LEVEL_TELEP:
 		seetrap(trap);
 		level_tele_trap(trap);
+		nomul(0, NULL);
 		break;
 
 	    case WEB: /* Our luckless player has stumbled into a web. */
@@ -1265,15 +1294,16 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 						    unsolid(youracedata)) {
 		    if (acidic(youracedata) || u.umonnum == PM_GELATINOUS_CUBE ||
 			u.umonnum == PM_FIRE_ELEMENTAL) {
-			if (webmsgok)
-			    You("%s %s spider web!",
-				(u.umonnum == PM_FIRE_ELEMENTAL) ? "burn" : "dissolve",
-				a_your[trap->madeby_u]);
-			if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
-				deltrap(trap);
-				newsym(u.ux,u.uy);
-			}
-			break;
+				if (webmsgok)
+					You("%s %s spider web!",
+					(u.umonnum == PM_FIRE_ELEMENTAL) ? "burn" : "dissolve",
+					a_your[trap->madeby_u]);
+				if(!Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)){
+					deltrap(trap);
+					newsym(u.ux,u.uy);
+				}
+				nomul(0, NULL);
+				break;
 		    }
 		    if (webmsgok) You("flow through %s spider web.",
 			    a_your[trap->madeby_u]);
@@ -1351,10 +1381,12 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 			}
 		    }
 		}
+		nomul(0, NULL);
 		break;
 
 	    case STATUE_TRAP:
-			(void) activate_statue_trap(trap, trap->tx, trap->ty, FALSE);
+		(void) activate_statue_trap(trap, trap->tx, trap->ty, FALSE);
+		nomul(0, NULL);
 		break;
 
 	    case MAGIC_TRAP:	    /* A magic trap. */
@@ -1372,6 +1404,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 #ifdef STEED
 		(void) steedintrap(trap, (struct obj *)0);
 #endif
+		nomul(0, NULL);
 		break;
 
 	    case ANTI_MAGIC:
@@ -1380,6 +1413,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 		    shieldeff(u.ux, u.uy);
 		    You_feel("momentarily lethargic.");
 		} else drain_en(rnd(u.ulevel) + 1);
+		nomul(0, NULL);
 		break;
 
 	    case POLY_TRAP: {
@@ -1410,6 +1444,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 		    You_feel("a change coming over you.");
 		    polyself(FALSE);
 		}
+		nomul(0, NULL);
 		break;
 	    }
 	    case LANDMINE: {
@@ -1464,6 +1499,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 		/* fall recursively into the pit... */
 		if ((trap = t_at(u.ux, u.uy)) != 0) dotrap(trap, RECURSIVETRAP);
 		fill_pit(u.ux, u.uy);
+		nomul(0, NULL);
 		break;
 	    }
 	    case ROLLING_BOULDER_TRAP: 
@@ -1472,6 +1508,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 
 		seetrap(trap);
 		pline("Click! You trigger a rolling boulder trap!");
+		nomul(0, NULL);
 		rolling_boulder_in_progress = TRUE;
 		if(!launch_obj(BOULDER, trap, style)) {
 		    deltrap(trap);
@@ -1484,6 +1521,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 	    case MAGIC_PORTAL:
 		seetrap(trap);
 		domagicportal(trap);
+		nomul(0, NULL);
 		break;
 
 	    default:
