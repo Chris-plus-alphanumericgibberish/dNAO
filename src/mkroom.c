@@ -437,6 +437,7 @@ mklolthvaultitem()
 	struct obj *otmp;
 	int try_limit = 1000;
 	int type;
+	boolean sobj = FALSE;
 
 	const int lolth_armor[] = {HELMET, ARCHAIC_HELM, HIGH_ELVEN_HELM, DROVEN_HELM, CRYSTAL_HELM, HELM_OF_BRILLIANCE, 
 							   PLATE_MAIL, ARCHAIC_PLATE_MAIL, HIGH_ELVEN_PLATE, DROVEN_PLATE_MAIL, CRYSTAL_PLATE_MAIL,
@@ -465,13 +466,11 @@ mklolthvaultitem()
 	otmp = (struct obj *)0;
 	if(!rn2(3)) {
 		type = lolth_armor[rn2(SIZE(lolth_armor))];
-		otmp = mksobj(type, NO_MKOBJ_FLAGS);
-		return otmp;
+		sobj = TRUE;
 	}
 	else if(rn2(2)) {
 		type = lolth_weapons[rn2(SIZE(lolth_weapons))];
-		otmp = mksobj(type, NO_MKOBJ_FLAGS);
-		return otmp;
+		sobj = TRUE;
 	}
 	else if(rn2(2))
 		type = SCOIN_CLASS;
@@ -484,7 +483,7 @@ mklolthvaultitem()
 		type = RANDOM_CLASS;
 	do {
 		if(otmp) delobj(otmp);
-		otmp = mkobj(type, TRUE);
+		otmp = sobj ? mksobj(type, NO_MKOBJ_FLAGS) : mkobj(type, TRUE);
 		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
 			otmp = mk_special(otmp);
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
