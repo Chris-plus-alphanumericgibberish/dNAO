@@ -11864,7 +11864,6 @@ int vis;
 							break;
 					}
 				default:
-					impossible("unexpected pa type for mist projector, %d", pa->mtyp);
 					quan = 1;
 					typ = PM_FOG_CLOUD;
 					if (cansee(magr->mx, magr->my)) You("see fog billow out from around %s.", mon_nam(magr));
