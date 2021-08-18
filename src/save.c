@@ -319,6 +319,8 @@ register int fd, mode;
 	bwrite(fd, (genericptr_t) &flags, sizeof(struct flag));
 	bwrite(fd, (genericptr_t) &u, sizeof(struct you));
 	bwrite(fd, (genericptr_t) &youmonst, sizeof(struct monst));
+	if (youmonst.light)
+		save_lightsource(youmonst.light, fd, mode);
 	bwrite(fd, (genericptr_t) &god_list, sizeof(struct god_details)*MAX_GOD);
 	
 	/* save random monsters*/
