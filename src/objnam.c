@@ -1458,6 +1458,8 @@ boolean adjective;
 			return "enamel";
 		else if (obj->oartifact == ART_LASH_OF_THE_COLD_WASTE)
 			return "onyx";
+		else if (obj->oartifact == ART_DRAGONHEAD_SHIELD)
+			return "stone dragon scales";
 		/* ceramic wand is handled already */
 		else if (obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS || obj->otyp == MASK)
 			return "ceramic";
