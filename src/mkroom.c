@@ -463,10 +463,16 @@ mklolthvaultitem()
 								KHAKKHARA
 								};
 	otmp = (struct obj *)0;
-	if(!rn2(3))
+	if(!rn2(3)) {
 		type = lolth_armor[rn2(SIZE(lolth_armor))];
-	else if(rn2(2))
+		otmp = mksobj(type, NO_MKOBJ_FLAGS);
+		return otmp;
+	}
+	else if(rn2(2)) {
 		type = lolth_weapons[rn2(SIZE(lolth_weapons))];
+		otmp = mksobj(type, NO_MKOBJ_FLAGS);
+		return otmp;
+	}
 	else if(rn2(2))
 		type = SCOIN_CLASS;
 	else if(rn2(2)){
