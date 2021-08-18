@@ -483,7 +483,7 @@ mklolthvaultitem()
 		type = RANDOM_CLASS;
 	do {
 		if(otmp) delobj(otmp);
-		otmp = sobj ? mksobj(type, NO_MKOBJ_FLAGS) : mkobj(type, TRUE);
+		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, TRUE);
 		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
 			otmp = mk_special(otmp);
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
