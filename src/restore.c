@@ -432,6 +432,8 @@ unsigned int *stuckid, *steedid;	/* STEED */
 #endif
 	mread(fd, (genericptr_t) &u, sizeof(struct you));
 	mread(fd, (genericptr_t) &youmonst, sizeof(struct monst));
+	if (youmonst.light)
+		rest_lightsource(LS_MONSTER, &youmonst, youmonst.light, fd, FALSE);
 	mread(fd, (genericptr_t) &god_list, sizeof(struct god_details)*MAX_GOD);
 	init_uasmon();
 #ifdef CLIPPING
