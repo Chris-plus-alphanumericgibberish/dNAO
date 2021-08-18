@@ -4901,10 +4901,12 @@ struct obj *obj;
 		}
 		else
 		{
-			if ((u.uevent.utook_castle & ARTWISH_EARNED) && !(u.uevent.utook_castle & ARTWISH_SPENT))
-				mtmp2 = makemon(&mons[PM_PSYCHOPOMP], u.ux, u.uy, NO_MM_FLAGS);
-			if ((u.uevent.uunknowngod & ARTWISH_EARNED) && !(u.uevent.uunknowngod & ARTWISH_SPENT))
-				mtmp3 = makemon(&mons[PM_PRIEST_OF_AN_UNKNOWN_GOD], u.ux, u.uy, NO_MM_FLAGS);
+			if (!DimensionalLock) {
+				if ((u.uevent.utook_castle & ARTWISH_EARNED) && !(u.uevent.utook_castle & ARTWISH_SPENT))
+					mtmp2 = makemon(&mons[PM_PSYCHOPOMP], u.ux, u.uy, NO_MM_FLAGS);
+				if ((u.uevent.uunknowngod & ARTWISH_EARNED) && !(u.uevent.uunknowngod & ARTWISH_SPENT))
+					mtmp3 = makemon(&mons[PM_PRIEST_OF_AN_UNKNOWN_GOD], u.ux, u.uy, NO_MM_FLAGS);
+			}
 
 			if (!Blind) {
 				pline("%s appears in a cloud of smoke!", Amonnam(mtmp));
@@ -4921,7 +4923,7 @@ struct obj *obj;
 			}
 			verbalize("I am the djinni of the ring.  I will grant one wish!");
 			int artwishes = u.uconduct.wisharti;
-			if (makewish(allow_artwish() | WISH_VERBOSE)) {
+			if (makewish(WISH_VERBOSE | (DimensionalLock ? 0 :allow_artwish()))) {
 				obj->spe--;
 				madewish = TRUE;
 			}
@@ -5055,7 +5057,7 @@ struct obj *obj;
 		impossible("object other than candle of invocation passed to use_candle_of_invocation");
 		return FALSE;
 	}
-	if (!obj->lamplit) {
+	if (!obj->lamplit || DimensionalLock) {
 		pline1(nothing_happens);
 		return FALSE;
 	}

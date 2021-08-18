@@ -3477,12 +3477,17 @@ winid *datawin;
 		case POWER_PACK:
 		case BULLET_FABBER:
 			subclass = "future-tech tool";
+		case DIMENSIONAL_LOCK:
+			subclass = "";
+			OBJPUTSTR("Can be applied to temporarily prevent summoning.");
 			break;
 		}
-		Sprintf(buf, "%s%s.", (oc.oc_charged ? "chargeable " : ""), subclass);
-		/* capitalize first letter of buf */
-		buf[0] -= ('a' - 'A');
-		OBJPUTSTR(buf);
+		if (subclass[0] != '\0') {
+			Sprintf(buf, "%s%s.", (oc.oc_charged ? "chargeable " : ""), subclass);
+			/* capitalize first letter of buf */
+			buf[0] -= ('a' - 'A');
+			OBJPUTSTR(buf);
+		}
 	}
 
 	/* cost, wt should go next */
