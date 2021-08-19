@@ -3205,8 +3205,11 @@ const char *oldstr;
 		(p = strstri(bp, " called ")) != 0) {
 		/* don't singularize these: */
 		if (!BSTRNCMPI(bp, p- 4, "Eyes of the Overworld", 21) ||
-			!BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21) || 
-			!BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25))
+			!BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21) ||
+			!BSTRNCMPI(bp, p- 5, "Claws of the Revenancer", 23) ||
+			!BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25) ||
+			!BSTRNCMPI(bp, p- 9, "Wrappings of the Sacred Fist", 28) ||
+			!BSTRNCMPI(bp, p-22, "Spell-warded Wrappings of Nitocris", 34))
 			return bp;
 		else {
 			/* save the string from " of " onwards */
@@ -3269,7 +3272,7 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
-			    !BSTRCMP(bp, p-6, "scales") ||
+			    !BSTRCMPI(bp, p-6, "scales") ||
 				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
 				!BSTRCMPI(bp, p-10, "Lost Names")) /* book */
 				return bp;
@@ -3290,6 +3293,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
 			   !BSTRCMPI(bp, p-15, "Hawaiian shorts") ||
 			   !BSTRCMPI(bp, p-5, "Chaos") ||
+			   !BSTRCMPI(bp, p-8, "Nitocris") ||
 			   !BSTRCMPI(bp, p-13, "Wand of Orcus") || /* wand */
 			   !BSTRCMPI(bp, p-12, "Gear-spirits") || /* crossbow*/
 			   !BSTRCMPI(bp, p-10, "Rod of Dis") || /* mace */
@@ -3858,7 +3862,7 @@ int wishflags;
 			viperheads = 1;
 		} else if (!strncmpi(bp, "2-headed ", l=9) || !strncmpi(bp, "two-headed ", l=11)) {
 			viperheads = 2;
-		} else if (!strncmpi(bp, "3-headed ", l=9) || !strncmpi(bp, "three-headed ", l=13)) {
+		} else if (!strncmpi(bp, "3-headed ", l=9) || (!strncmpi(bp, "three-headed ", l=13) && strncmpi(bp, "Three-Headed Flail", 18))) {
 			viperheads = 3;
 		} else if (!strncmpi(bp, "4-headed ", l=9) || !strncmpi(bp, "four-headed ", l=12)) {
 			viperheads = 4;
@@ -3872,7 +3876,7 @@ int wishflags;
 			viperheads = 8;
 		} else if (!strncmpi(bp, "eclipse ", l=8)) {
 			moonphase = ECLIPSE_MOON;
-		} else if (!strncmpi(bp, "crescent ", l=9)) {
+		} else if (!strncmpi(bp, "crescent ", l=9) && strncmpi(bp, "Crescent Blade", 14)) {
 			moonphase = CRESCENT_MOON;
 		} else if (!strncmpi(bp, "half ", l=5)) {
 			moonphase = HALF_MOON;
@@ -4174,7 +4178,7 @@ int wishflags;
 			iscursed = !(uncursed + blessed);
 			add_oprop_list(oprop_list, OPROP_LESSER_UNHYW);
 
-		} else if (!strncmpi(bp, "life-drinking ", l=14) && strncmpi(bp, "Vorpal Blade", 12)) {
+		} else if (!strncmpi(bp, "life-drinking ", l=14)) {
 			add_oprop_list(oprop_list, OPROP_DRANW);
 
 		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)) {
@@ -4187,7 +4191,7 @@ int wishflags;
 			iscursed = !(uncursed + blessed);
 			add_oprop_list(oprop_list, OPROP_LESSER_MORGW);
 
-		} else if (!strncmpi(bp, "wrathful ", l=9)) {
+		} else if (!strncmpi(bp, "wrathful ", l=9) && strncmpi(bp, "Wrathful Wind", 13) && strncmpi(bp, "Wrathful Spider", 15)) {
 			add_oprop_list(oprop_list, OPROP_WRTHW);
 
 		} else if (!strncmpi(bp, "flaying ", l=8)) {
@@ -4377,6 +4381,13 @@ int wishflags;
 	if (strncmpi(bp, "scroll of ward", 14))	/* also gets "scroll of warding" */
 	if (strncmpi(bp, "scroll of stinking cloud", 24))
 	if (strncmpi(bp, "set of crow talons", 18))
+	if (strncmpi(bp, "Eye of Vecna", 12))
+	if (strncmpi(bp, "Hand of Vecna", 13))
+	if (strncmpi(bp, "Sword of Erathaol", 17))
+	if (strncmpi(bp, "Wand of Orcus", 13))
+	if (strncmpi(bp, "Rod of Lordly Might", 19))
+	if (strncmpi(bp, "Spell-warded Wrappings of Nitocris", 34))
+	if (!strstri(bp, "Key of Chaos"))	/* prefixed by First, Second, or Third */
 	if (strncmpi(bp, "lump of ", 8) || !strstri(bp, " jelly"))
 	if (strncmpi(bp, "shard of ", 9) || !strstri(bp, " glyph"))
 	if (strncmpi(bp, "potion of ", 10) || !strstri(bp, " blood"))
@@ -4418,6 +4429,7 @@ int wishflags;
 	if (strncmpi(bp, "frosted lake", 12)) /* not a "frosted lake" */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 21)) /* not a "dragon" */
+	if (strncmpi(bp, "Peace Keeper", 12)) /* not "Peace" */
 	if (strncmpi(bp, "thief doll", 10)) /* not the "thief" player monster */
 	if (strncmpi(bp, "bard doll", 9)) /* not the "bard" player monster */
 	if (strncmpi(bp, "priest doll", 11)) /* not the "priest" monster */
