@@ -13,6 +13,7 @@ static const char tools_too[] = { COIN_CLASS, ALL_CLASSES, SCOIN_CLASS, TOOL_CLA
 				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
 static const char apply_armor[] = { ARMOR_CLASS, 0 };
 static const char apply_corpse[] = { FOOD_CLASS, 0 };
+static const char chain_class[] = { CHAIN_CLASS, 0 };
 static const char apply_all[] = { ALL_CLASSES, CHAIN_CLASS, 0 };
 
 #ifdef TOURIST
@@ -4495,11 +4496,7 @@ use_dilithium(obj)
 {
 	struct monst *mtmp = 0;
 	struct obj *dollobj = 0;
-	// Create an array with all classes explicitly listed in it, 1-MAXOCLASSES :(
-	char all_classes[MAXOCLASSES] = {0};
-	for(int i = 1; i < MAXOCLASSES; i++)
-		all_classes[i-1] = i;
-	dollobj = getobj(all_classes, "install dilithim in");
+	dollobj = getobj(chain_class, "install dilithium in");
 	if(!dollobj)
 		return 0;
 
@@ -4556,11 +4553,7 @@ use_doll_tear(obj)
 		return 0;
 	} else {
 		struct obj *dollobj = 0;
-		// Create an array with all classes explicitly listed in it, 1-MAXOCLASSES :(
-		char all_classes[MAXOCLASSES] = {0};
-		for(int i = 1; i < MAXOCLASSES; i++)
-			all_classes[i-1] = i;
-		dollobj = getobj(all_classes, "give the tear to");
+		dollobj = getobj(chain_class, "give the tear to");
 		if(!dollobj)
 			return 0;
 
