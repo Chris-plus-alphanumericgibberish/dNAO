@@ -838,9 +838,9 @@ SHIRT(("bodyglove", "tight black clothes", "tight clothes"), /*Needs encyc entry
 /* cloaks */
 /*  'cope' is not a spelling mistake... leave it be */
 CLOAK(("mummy wrapping"),
-		1, 0,	0,	    0, 0,  3,  2, 10, 0, 1, CLOTH, CLR_GRAY),
+		1, 0,	0,	    0, 0,  3,  2, 10, 0, 1, CLOTH, CLR_GRAY, O_DRSLOT(ALL_DR)),
 CLOAK(("prayer-warded wrapping"),
-		1, 0,	0,	    0, 0,  3, 100, 10, 0, 1, CLOTH, CLR_GRAY),
+		1, 0,	0,	    0, 0,  3, 100, 10, 0, 1, CLOTH, CLR_GRAY, O_DRSLOT(ALL_DR)),
 CLOAK(("elven cloak", "faded pall"),
 		0, 1,	STEALTH,    7, 0, 10, 60,  9, 0, 3, CLOTH, CLR_BLACK),
 CLOAK(("droven cloak", "cobwebbed cloak"), /*Needs encyc entry*/
