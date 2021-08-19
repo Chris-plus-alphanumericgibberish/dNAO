@@ -271,7 +271,7 @@ struct Role roles[] = {
 	{"Maniac",     0},
 	{"Augur",    0},
 	{"Seer",  0} },
-	"Lobon", "Tamash", "Zo-Kalar",	/* Dreamlands */
+	"Zo-Kalar", "Tamash", "Lobon",	/* Dreamlands */
 	"Mad", "Archer Asylum", "the ground floor",
 	PM_MADMAN, PM_MADWOMAN, NON_PM,
 	PM_CASSILDA_THE_IRON_MAIDEN, PM_PATIENT, PM_DOCTOR_ARCHER,
@@ -1175,6 +1175,11 @@ god_minions(gptr)
 			if(galign == A_LAWFUL) return LShanLaiChing;
 			if(galign == A_NEUTRAL) return NSungTzu;
 			return CHuanTi;
+		break;
+		case PM_MADMAN:
+			if(galign == A_LAWFUL) return Langels;
+			if(galign == A_NEUTRAL) return NElemen;
+			return Cangels;
 		break;
 		case PM_NOBLEMAN:
 			if(galign == A_LAWFUL) return Langels;
