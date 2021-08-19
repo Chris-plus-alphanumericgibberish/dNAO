@@ -3492,6 +3492,7 @@ winid *datawin;
 		case POWER_PACK:
 		case BULLET_FABBER:
 			subclass = "future-tech tool";
+			break;
 		case DIMENSIONAL_LOCK:
 			subclass = "";
 			OBJPUTSTR("Can be applied to temporarily prevent summoning.");
