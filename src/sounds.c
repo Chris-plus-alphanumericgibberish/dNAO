@@ -1783,11 +1783,11 @@ asGuardian:
 			pline("%s screams in madness and fear!", Monnam(mtmp));
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 			if(tmpm != mtmp && !DEADMONSTER(tmpm) && tmpm->mpeaceful != mtmp->mpeaceful && distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) <= BOLT_LIM){
-				if(!resist(tmpm, 0, 0, FALSE)){
+				if(!resist(tmpm, TOOL_CLASS, 0, FALSE)){
 					tmpm->mflee = 1;
 					if(canseemon(tmpm))
 						pline("%s staggers!", Monnam(tmpm));
-					if(tmpm->mhp < mtmp->mhpmax && !resist(tmpm, 0, 0, FALSE)){
+					if(tmpm->mhp < mtmp->mhpmax && !resist(tmpm, TOOL_CLASS, 0, FALSE)){
 						tmpm->mcrazed = 1;
 					}
 				}
