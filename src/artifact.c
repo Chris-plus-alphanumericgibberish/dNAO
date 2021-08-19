@@ -4640,7 +4640,7 @@ boolean * messaged;
 		if (youagr){
 			if (mdef->minvent && (Role_if(PM_PIRATE) || !rn2(10))){
 				struct obj *otmp2;
-				long unwornmask;
+				long unwornmask = 0L;
 
 				/* Don't steal worn items, and downweight wielded items */
 				if ((otmp2 = mdef->minvent) != 0) {
@@ -9870,6 +9870,10 @@ read_necro(VOID_ARGS)
 			break;
 			case SELECT_CANCELLATION:
 				booktype = SPE_CANCELLATION;
+			break;
+			default:
+				impossible("bad necro_effect for necronomicon %d", necro_effect);
+				return(0);
 			break;
 		}
 		Sprintf(splname, objects[booktype].oc_name_known ?

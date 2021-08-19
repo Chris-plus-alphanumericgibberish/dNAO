@@ -15177,6 +15177,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 		else {
 			impossible("hurtle with no direction");
+			dx = dy = 0;
 		}
 
 		/* boulders can knock to the side as well -- 2/3 chance to move out of the way, 1/3 to go straight back and be struck again*/
@@ -16608,6 +16609,7 @@ android_combo()
 			if (!mdef || DEADMONSTER(mdef))
 				You("swing wildly!");
 			else {
+				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				xmeleehity(&youmonst, mdef, &finisher, (struct obj **)0, vis, 0, FALSE);
 			}
 		}

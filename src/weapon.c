@@ -2746,7 +2746,7 @@ int enhance_skill(boolean want_dump)
     boolean speedy = FALSE;
 #ifdef DUMP_LOG
     char buf2[BUFSZ];
-    boolean logged;
+    boolean logged = FALSE;
 #endif
 
 #ifdef WIZARD

@@ -931,7 +931,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 			} else if ((mtmp = m_at(bhitpos.x, bhitpos.y)) != 0) {
 				if (scflags & MAY_HITMON) {
 					struct obj ** s_p = &(stmp->obj);
-					int loss_cost;
+					int loss_cost = 0;
 				    stmp->range--;
 					int dieroll = rnd(20);
 					if (tohitval((struct monst *)0, mtmp, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 0, (int *) 0) > dieroll || dieroll == 1) {
@@ -950,7 +950,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 				if (scflags & MAY_HITYOU) {
 				    if (multi) nomul(0, NULL);
 					struct obj ** s_p = &(stmp->obj);
-					int loss_cost;
+					int loss_cost = 0;
 					int hitu, hitvalu;
 					int dieroll;
 					hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, stmp->obj, (void *)0, HMON_FIRED, 8, (int *) 0);
