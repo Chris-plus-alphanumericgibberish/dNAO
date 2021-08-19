@@ -5665,6 +5665,9 @@ int spell;
 		return 0;
 	if(mad_turn(MAD_TOO_BIG))
 		return 0;
+	if(Babble || Screaming || Strangled || FrozenAir || BloodDrown || Drowning) {
+		return 0;
+	}
 
 	/* some artifacts pracically cast the spells on their own */
 	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
@@ -5941,19 +5944,7 @@ int spell;
 	if(u.unaen_duration)
 		chance = 100;
 	
-	//
-	if(Babble || Screaming || Strangled || FrozenAir || BloodDrown || Drowning){
-		chance = 0;
-	}
-	// these effects totally block the spell-choosing menu, but need to be handled here too for quivered spells
-	else if ((mad_turn(MAD_TOO_BIG)) ||
-		(Doubt && base_casting_stat() == A_WIS) ||
-//		(mad_turn(MAD_SCIAPHILIA) && ()(dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0)) ||
-		(base_casting_stat() == A_WIS && flat_mad_turn(MAD_APOSTASY))
-		){
-		chance = 0;
-	}
-	else if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
+	if(u.uz.dnum == neutral_dnum && u.uz.dlevel <= sum_of_all_level.dlevel){
 		if(u.uz.dlevel == spire_level.dlevel) chance = 0;
 		else if(u.uz.dlevel == sum_of_all_level.dlevel) chance += 100 - 10*spellev(spell);
 		else if(u.uz.dlevel == spire_level.dlevel-1) chance -= 50*spellev(spell);
