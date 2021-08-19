@@ -3672,7 +3672,7 @@ int wishflags;
 			while(digit(*bp)) bp++;
 			while(*bp == ' ') bp++;
 			l = 0;
-		} else if (*bp == '+' || *bp == '-') {
+		} else if ((*bp == '+' || *bp == '-') && digit(bp[1])) {
 			spesgn = (*bp++ == '+') ? 1 : -1;
 			spe = atoi(bp);
 			while(digit(*bp)) bp++;
@@ -4516,7 +4516,6 @@ int wishflags;
 	if (strlen(bp) == 1 &&
 	   (i = def_char_to_objclass(*bp)) < MAXOCLASSES && i > ILLOBJ_CLASS
 	    && (wizwish || i != VENOM_CLASS)
-	    && i != VENOM_CLASS
 	    ) {
 		oclass = i;
 		goto any;
