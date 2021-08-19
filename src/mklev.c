@@ -2051,7 +2051,7 @@ void
 mkHVstatue(x, y, hv_id)
 int x, y, hv_id;
 {
-	int mid;
+	int mid = PM_LAMB;
 	struct obj* obj;
 	switch(hv_id){
 		case VN_AKKABISH:

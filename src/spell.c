@@ -2246,7 +2246,7 @@ spiriteffects(power, atme)
 		break;
 		case PWR_ICY_GLARE:{
 			int range = (u.ulevel/2+1),dmg;
-			struct monst *mprime, *mon, *nxtmon;
+			struct monst *mprime = (struct monst *)0, *mon, *nxtmon;
 			xchar sx, sy;
 			boolean gx=FALSE, gy=FALSE;
 			sx = u.ux;

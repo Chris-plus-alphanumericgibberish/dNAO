@@ -3366,7 +3366,7 @@ int gen_restrict;
 	tries = 0;
 	do {
 	    which = urole.malenum;	/* an arbitrary index into mons[] */
-	    maketame = makeloyal = makepeaceful = makehostile = FALSE;
+	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = FALSE;
 	    getlin("Create what kind of monster? [type the name or symbol]",
 		   buf);
 	    bufp = mungspaces(buf);
