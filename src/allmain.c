@@ -1944,7 +1944,7 @@ karemade:
 						if(tries >= 0)
 							makemon(ford_montype(-1), x, y, MM_ADJACENTOK);
 					}
-				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && check_insight()){
+				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && !DimensionalLock && check_insight()){
 					int x, y;
 					for(x = 1; x < COLNO; x++)
 						for(y = 0; y < ROWNO; y++){

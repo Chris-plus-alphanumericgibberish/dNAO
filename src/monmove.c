@@ -170,6 +170,7 @@ struct monst *mtmp;
 			 || (wardAt == HEXAGRAM && scaryHex(num_wards_at(x,y), mtmp))
 			 || (wardAt == HAMSA && scaryHam(num_wards_at(x,y), mtmp))
 			 || (wardAt == ELDER_SIGN && scarySign(num_wards_at(x,y), mtmp))
+			 || (sobj_at(DIMENSIONAL_LOCK, x, y) && scarySign(1, mtmp))
 			 || (wardAt == ELDER_ELEMENTAL_EYE && scaryEye(num_wards_at(x,y), mtmp))
 			 || (wardAt == SIGN_OF_THE_SCION_QUEEN && scaryQueen(num_wards_at(x,y), mtmp))
 			 || (wardAt == CARTOUCHE_OF_THE_CAT_LORD && scaryCat(num_wards_at(x,y), mtmp))

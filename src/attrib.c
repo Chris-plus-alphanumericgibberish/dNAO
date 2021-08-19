@@ -1426,6 +1426,8 @@ long int madness;
 	int sanlevel;
 	if(ClearThoughts && madness != MAD_GOAT_RIDDEN)
 		return 0;
+	if(madness == MAD_NON_EUCLID && DimensionalLock)
+		return 0;
 	
 	if(!(u.umadness&madness))
 		return 0;
@@ -1445,7 +1447,9 @@ long int madness;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
 	if(ClearThoughts || TimeStop)
 		return 0;
-	
+	if(madness == MAD_NON_EUCLID && DimensionalLock)
+		return 0;
+
 	if(!(u.umadness&madness))
 		return 0;
 	
@@ -1462,7 +1466,9 @@ long int madness;
 {
 	int sanlevel;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
-	if(ClearThoughts)
+	if(ClearThoughts || TimeStop)
+		return 0;
+	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
 	
 	if(!(u.umadness&madness))
@@ -1480,7 +1486,9 @@ long int madness;
 {
 	int sanlevel;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness + mon->m_id))); //Offset the different madnesses before hashing
-	if(ClearThoughts)
+	if(ClearThoughts || TimeStop)
+		return 0;
+	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
 	
 	if(!(u.umadness&madness))

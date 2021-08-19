@@ -379,13 +379,15 @@ tactics(mtmp)
 
 	    case STRAT_NONE:	/* harrass */
 		if(mtmp->mtyp == PM_GREAT_CTHULHU){
-			struct monst *spawn;
-			if(!Blind)
-				pline("Noxious gasses swirl around you!");
-			create_gas_cloud(u.ux, u.uy, 2, 30, FALSE);
-			spawn = makemon(&mons[PM_STAR_SPAWN], u.ux, u.uy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
-			if(spawn){
-				mark_mon_as_summoned(spawn, mtmp, ESUMMON_PERMANENT, 0);
+			if(!DimensionalLock){
+				struct monst *spawn;
+				if(!Blind)
+					pline("Noxious gasses swirl around you!");
+				create_gas_cloud(u.ux, u.uy, 2, 30, FALSE);
+				spawn = makemon(&mons[PM_STAR_SPAWN], u.ux, u.uy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
+				if(spawn){
+					mark_mon_as_summoned(spawn, mtmp, ESUMMON_PERMANENT, 0);
+				}
 			}
 			return 0;
 		}
@@ -447,6 +449,8 @@ tactics(mtmp)
 					return(0);
 				}
 			} else if(mtmp->mtyp == PM_GREAT_CTHULHU){
+				if(DimensionalLock) /* Block Cthulhu's relocation */
+					return 0;
 				boolean saw = FALSE;
 				if(sensemon(mtmp) || canseemon(mtmp)){
 					pline("%s steps through strange angles.",Monnam(mtmp));
