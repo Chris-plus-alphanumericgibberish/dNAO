@@ -6325,11 +6325,6 @@ boolean quietly;
 {
 	xchar x,y;
 
-	if (carried(obj) && u.uswallow) {
-		if (!quietly)
-			You("don't have enough room in here to build a clockwork.");
-		return FALSE;
-	}
 	x = cc->x; y = cc->y;
 	if (!isok(x,y)) {
 		if (!quietly)
@@ -6433,8 +6428,8 @@ struct obj **optr;
 	}
 	if (u.uswallow && (u.dx || u.dy || u.dz)) {
 		/* can't activate a figurine while swallowed */
-		if (!clockwork_location_checks(obj, (coord *)0, FALSE))
-			return 0;
+		You("don't have enough room in here to build a clockwork.");
+		return 0;
 	}
 
 	if (!(u.dx || u.dy || u.dz))
@@ -6533,7 +6528,10 @@ struct obj **optr;
 		/* no one there, attempt to make a clockwork servant */
 
 		/* Scrap is useless in making clockworks */
-		if (obj->otyp == SCRAP) return 0;
+		if (obj->otyp == SCRAP) {
+			You("can't build anything with this worthless scrap.");
+			return 0;
+		}
 
 		cc.x = u.ux + u.dx; cc.y = u.uy + u.dy;
 		/* Passing FALSE arg here will result in messages displayed */
@@ -6544,7 +6542,6 @@ struct obj **optr;
 		}
 		pmm = clockworkMenu(obj);
 		if (!pmm) return 0;
-		obj->quan -= 9;
 		if (!clockwork_location_checks(obj, &cc, FALSE)) return 0;
 		You("build a clockwork and %s.",
 			(u.dx || u.dy) ? "set it beside you" :
@@ -6571,6 +6568,7 @@ struct obj **optr;
 				while (xdir[(int)(++mm->mvar_vector)] != u.dx || ydir[(int)mm->mvar_vector] != u.dy);
 			}
 		}
+		obj->quan -= 9;
 		useup(obj);
 		*optr = 0;
 		return 1;
