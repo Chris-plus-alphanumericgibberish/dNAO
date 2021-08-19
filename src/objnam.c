@@ -3265,6 +3265,7 @@ const char *oldstr;
 			if (!BSTRCMP(bp, p-6, "gloves") ||
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-10, "sunglasses") ||
+			    !BSTRCMPI(bp, p-8, "shackles") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
@@ -3274,10 +3275,10 @@ const char *oldstr;
 				return bp;
 
 		} else if (!BSTRCMPI(bp, p-5, "boots") ||
+			   !BSTRCMPI(bp, p-4, "mass") ||
 			   !BSTRCMPI(bp, p-7, "sandals") ||
 			   !BSTRCMPI(bp, p-9, "gauntlets") ||
 			   !BSTRCMPI(bp, p-5, "bands") ||
-			   !BSTRCMPI(bp, p-8, "shackles") ||
 			   !BSTRCMPI(bp, p-6, "tricks") ||
 			   !BSTRCMPI(bp, p-9, "paralysis") ||
 			   !BSTRCMPI(bp, p-5, "glass") ||
@@ -3287,6 +3288,7 @@ const char *oldstr;
 			   !BSTRCMP(bp, p-4, "ness") ||
 			   !BSTRCMPI(bp, p-14, "shape changers") ||
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
+			   !BSTRCMPI(bp, p-15, "Hawaiian shorts") ||
 			   !BSTRCMPI(bp, p-5, "Chaos") ||
 			   !BSTRCMPI(bp, p-13, "Wand of Orcus") || /* wand */
 			   !BSTRCMPI(bp, p-12, "Gear-spirits") || /* crossbow*/
@@ -4037,7 +4039,7 @@ int wishflags;
 		} else if (!strncmpi(bp, "disintegration-proof ", l=21)) {
 			add_oprop_list(oprop_list, OPROP_DISN);
 
-		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping ", 23)) {
+		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping", 22)) {
 			add_oprop_list(oprop_list, OPROP_BCRS);
 
 		} else if (!strncmpi(bp, "healing ", l=8)) {
@@ -4366,20 +4368,30 @@ int wishflags;
 	
 	/*
 	 * Find corpse type using "of" (figurine of an orc, tin of orc meat)
-	 * Don't check if it's a wand or spellbook.
-	 * (avoid "wand/finger of death" confusion).
+	 * (avoid "wand/finger of death" confusion, "scroll of ward").
 	 */
-	if (!strstri(bp, "wand ")
-	 && !strstri(bp, "spellbook ")
-	 && !strstri(bp, "book ")
-	 && !strstri(bp, "lump ")
-	 && !strstri(bp, "rod ")
-	 && !strstri(bp, "finger ")
-	 && !strstri(bp, "set of ")) {
+	if (strncmpi(bp, "finger of death", 15))
+	if (strncmpi(bp, "wand of death", 13))
+	if (strncmpi(bp, "spellbook of wizard lock", 24))
+	if (strncmpi(bp, "spellbook of fire storm", 23))
+	if (strncmpi(bp, "scroll of ward", 14))	/* also gets "scroll of warding" */
+	if (strncmpi(bp, "scroll of stinking cloud", 24))
+	if (strncmpi(bp, "set of crow talons", 18))
+	if (strncmpi(bp, "lump of ", 8) || !strstri(bp, " jelly"))
+	if (strncmpi(bp, "shard of ", 9) || !strstri(bp, " glyph"))
+	if (strncmpi(bp, "potion of ", 10) || !strstri(bp, " blood"))
+	{
 	    if ((p = strstri(bp, " of ")) != 0
 		&& (mntmp = name_to_mon(p+4)) >= LOW_PM)
 		*p = 0;
 	}
+
+	/* we actually do need corpsenm for potions of blood */
+	/* strip off "potion of ", so the corpse type code can then handle "foo blood" */
+	if (!(strncmpi(bp, "potion of ", 10) || !strstri(bp, " blood"))) {
+		bp += 10;
+	}
+
 	/* Find corpse type w/o "of" (red dragon scale mail, yeti corpse) */
 	if (strncmpi(bp, "samurai sword", 13)) /* not the "samurai" monster! */
 	if (strncmpi(bp, "wizard lock", 11)) /* not the "wizard" monster! */
