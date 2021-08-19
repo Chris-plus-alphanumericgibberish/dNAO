@@ -3089,7 +3089,8 @@ int amt;
 	if (!esum) return;
 	if (esum->permanent) return;
 	if (!(tm = get_timer(mon->timed, DESUMMON_MON))) return;
-	adjust_timer_duration(tm, -min(amt, monstermoves - tm->timeout - 1));
+	adjust_timer_duration(tm, -min(amt, tm->timeout - monstermoves));
+	run_timers();
 }
 /* when a summoner dies or changes levels, all of its summons disappear */
 void
