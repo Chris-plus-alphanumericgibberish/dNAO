@@ -43,6 +43,7 @@ STATIC_DCL void FDECL(describe_spell, (int));
 STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
 STATIC_DCL void NDECL(cast_protection);
+STATIC_DCL void NDECL(cast_abjuration);
 STATIC_DCL boolean FDECL(sightwedge, (int,int, int,int, int,int));
 STATIC_DCL void FDECL(spell_backfire, (int));
 STATIC_DCL int FDECL(spellhunger, (int));
@@ -957,7 +958,6 @@ int spell;
 	case SPE_INVISIBILITY:
 	case SPE_DETECT_UNSEEN:
 	case SPE_PROTECTION:
-	case SPE_ANTIMAGIC_SHIELD:
 		return TRUE;
 	}
 	return FALSE;
@@ -1017,12 +1017,6 @@ int spell;
 			cast = TRUE;
 		}
         break;
-	case SPE_ANTIMAGIC_SHIELD:
-		if ((HNullmagic&TIMEOUT) < 10) {
-			incr_itimeout(&HNullmagic, 100);
-			cast = TRUE;
-		}
-		break;
     default:
         impossible("player maintaining an unmaintainable spell? (%d)", spell);
         spell_unmaintain(spell);
@@ -1722,6 +1716,34 @@ cast_protection()
 	    find_ac();
 	} else {
 	    Your("skin feels warm for a moment.");
+	}
+}
+
+/* Attempts to abjure all adjacent summoned creatures 
+ * Monsters may roll to resist.
+ * If they fail, they are immediately dispelled.
+ * If they suceeed, non-permanent summons' durations are halved.
+ */
+STATIC_OVL void
+cast_abjuration()
+{
+	struct monst * mtmp;
+	int i, x, y;
+	boolean resisted;
+	int dur;
+
+	for (i=0; i<8; i++) {
+		x = u.ux + xdir[i];
+		y = u.uy + ydir[i];
+		if ((mtmp = m_at(x, y)) && get_mx(mtmp, MX_ESUM)) {
+			resisted = resist(mtmp, SPBOOK_CLASS, 0, TRUE);
+			dur = timer_duration_remaining(get_timer(mtmp->timed, DESUMMON_MON));
+			if (!resisted)
+				mtmp->mextra_p->esum_p->permanent = 0;
+			else
+				dur /= 2;
+			abjure_summon(mtmp, dur);
+		}
 	}
 }
 
@@ -4650,7 +4672,6 @@ dothrowspell:
 	case SPE_MAGIC_MAPPING:
 	case SPE_CREATE_MONSTER:
 	case SPE_IDENTIFY:
-	case SPE_ANTIMAGIC_SHIELD:
 		(void) seffects(pseudo);
 		break;
 
@@ -4705,6 +4726,9 @@ dothrowspell:
 	case SPE_JUMPING:
 		if (!jump(max(role_skill,1)))
 			pline1(nothing_happens);
+		break;
+	case SPE_ABJURATION:
+		cast_abjuration();
 		break;
 	default:
 		impossible("Unknown spell %d attempted.", spell);
@@ -5518,11 +5542,11 @@ int spellID;
 			strcat(desc3, "");
 			strcat(desc4, "");
 			break;
-		case SPE_ANTIMAGIC_SHIELD:
-			strcat(desc1, "Temporarily protects you from magic.");
-			strcat(desc2, "While active, you cannot cast any spell but this.");
-			strcat(desc3, "Recasting increases the duration of the effect.");
-			strcat(desc4, "Can be maintained.");
+		case SPE_ABJURATION:
+			strcat(desc1, "Attempts to dispel adjacent summoned creatures.");
+			strcat(desc2, "Monsters may resist.");
+			strcat(desc3, "");
+			strcat(desc4, "");
 			break;
 		case SPE_PROTECTION:
 			strcat(desc1, "Temporarily improves your AC. AC from this spell is better than normal.");
@@ -5649,7 +5673,7 @@ int spell;
 	if(Deadmagic && base_casting_stat() == A_INT) return 0;
 	if(Catapsi && base_casting_stat() == A_CHA) return 0;
 	if(Misotheism && base_casting_stat() == A_WIS) return 0;
-	if(Nullmagic && spellid(spell)!=SPE_ANTIMAGIC_SHIELD) return 0;
+	if(Nullmagic) return 0;
 	
 	/* Calculate intrinsic ability (splcaster) */
 

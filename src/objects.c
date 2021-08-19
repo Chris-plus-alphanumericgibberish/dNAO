@@ -1536,7 +1536,7 @@ SPELL(("teleport away",   "gold"),        P_ESCAPE_SPELL,			15, 6, 1, IMMEDIATE,
 SPELL(("create familiar", "glittering"),  P_CLERIC_SPELL,			10, 6, 1, NODIR,     CLR_WHITE),
 SPELL(("cancellation",    "shining"),     P_MATTER_SPELL,			15, 6, 1, IMMEDIATE, CLR_WHITE),
 SPELL(("protection",	     "dull"),        P_CLERIC_SPELL,			18, 1, 1, NODIR,     HI_PAPER),
-SPELL(("antimagic shield","ebony"),		P_CLERIC_SPELL,			10, 5, 1, IMMEDIATE, CLR_BLACK),
+SPELL(("abjuration","ebony"),		P_CLERIC_SPELL,			10, 5, 1, IMMEDIATE, CLR_BLACK),
 SPELL(("jumping",	     "thin"),        P_ESCAPE_SPELL,			20, 1, 1, IMMEDIATE, HI_PAPER),
 SPELL(("stone to flesh",	 "thick"),       P_HEALING_SPELL,		15, 3, 1, IMMEDIATE, HI_PAPER),
 #if 0	/* DEFERRED */
