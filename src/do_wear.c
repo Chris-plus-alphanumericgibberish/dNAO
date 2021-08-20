@@ -4008,14 +4008,18 @@ struct obj *wep;
 			if(!isok(curx, cury))
 				continue;
 			else mdef = m_u_at(curx, cury);
-			
-			if(!mdef)
+
+			if(!mdef){
+				if(!ZAP_POS(levl[curx][cury].typ))
+					break; //Can no longer zap through here
+				//else
 				continue;
-			
+			}
+
 			youdef = (mdef == &youmonst);
 			if(DEADMONSTER(mdef))
 				continue;
-			
+
 			if(youagr && mdef->mpeaceful){
 				gooddir = FALSE;
 				break; //break out of inner loop now, we found a bad target.
@@ -4038,6 +4042,9 @@ struct obj *wep;
 
 			//else found a good target over here, and haven't hit a bad one (yet)
 			gooddir = TRUE;
+
+			if(!ZAP_POS(levl[curx][cury].typ))
+				break; //Can no longer zap through here
 		}
 		//found good direction, break out of outer loop
 		if(gooddir)
