@@ -1542,8 +1542,15 @@ moveloop()
 					for(obj = mtmp->minvent; obj; obj = obj->nobj)
 						if (obj->owornmask & W_SWAPWEP) break;
 					if (!obj || mtmp->msw != obj){
+						struct obj * obj2;
+						int nswapweps = 0;
+						boolean msw_carried_by_mon = FALSE;
+						for(obj2 = mtmp->minvent; obj2; obj2 = obj2->nobj) {
+							if (mtmp->msw == obj2)	msw_carried_by_mon = TRUE;
+							if (obj2->owornmask & W_SWAPWEP) nswapweps++;
+						}
+						impossible("bad monster swap weapon detected (and fixed) (for devs: %d;%d)", msw_carried_by_mon, nswapweps);
 						MON_NOSWEP(mtmp);
-						impossible("bad monster swap weapon detected (and fixed)");
 					}
 				}
 				/* Some bugs cause mtame and mpeaceful to diverge, fix w/ a warning */
