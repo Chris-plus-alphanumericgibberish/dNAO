@@ -3930,10 +3930,11 @@ int wishflags;
 		} else if (!strncmpi(bp, "leather ", l=8) && strncmpi(bp, "leather spellbook", 17)
 			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather armour", 14)
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
+			&& strncmpi(bp, "leather golem", 13)
 			) {
 			mat = LEATHER;
 		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", l=7))
-			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 11)
+			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 10)
 			) {
 			mat = WOOD;
 		} else if ((!strncmpi(bp, "bone ", l=5))
@@ -3953,8 +3954,8 @@ int wishflags;
 			&& strncmpi(bp, "Iron Ball of Levitation", 23) && strncmpi(bp, "Iron Spoon of Liberation", 24)
 			) {
 			mat = IRON;
-		} else if (!strncmpi(bp, "green-steel ", l=12) 
-			|| !strncmpi(bp, "green steel ", l=12)
+		} else if ((!strncmpi(bp, "green-steel ", l=12) || !strncmpi(bp, "green steel ", l=12))
+			&& strncmpi(bp, "green-steel golem", l=17) && strncmpi(bp, "green steel golem", l=17)
 		) {
 			mat = GREEN_STEEL;
 		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9) || !strncmpi(bp, "tin whistle", (l=4)?11:0))
@@ -4012,6 +4013,7 @@ int wishflags;
 			mat = GEMSTONE;
 		} else if ((!strncmpi(bp, "stone ", l=6) || !strncmpi(bp, "ceramic ", l=8))
 			&& strncmpi(bp, "stone to flesh", 14) && strncmpi(bp, "stone dragon shield", 19)
+			&& strncmpi(bp, "stone golem", 11)
 			) {
 			mat = MINERAL;
 		} else if (!strncmpi(bp, "salt ", l=5)) {
@@ -4046,7 +4048,8 @@ int wishflags;
 		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping", 22)) {
 			add_oprop_list(oprop_list, OPROP_BCRS);
 
-		} else if (!strncmpi(bp, "healing ", l=8)) {
+		} else if (!strncmpi(bp, "healing ", l=8)
+			&& strncmpi(bp, "healing potion", 14) && strncmpi(bp, "healing spellbook", 17)) {
 			add_oprop_list(oprop_list, OPROP_HEAL);
 
 		} else if (!strncmpi(bp, "anarchic-armor ", l=15)) {

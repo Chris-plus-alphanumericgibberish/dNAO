@@ -2093,6 +2093,7 @@ const char *in_str;
 #endif
 		{ "olog hai",		PM_OLOG_HAI },
 		{ "arch lich",		PM_ARCH_LICH },
+		{ "green steel golem",		PM_GREEN_STEEL_GOLEM },
 		/* spacing */
 		{ "mindflayer",		PM_MIND_FLAYER },
 		{ "master mindflayer",	PM_MASTER_MIND_FLAYER },
