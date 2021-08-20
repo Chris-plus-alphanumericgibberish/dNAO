@@ -36,6 +36,7 @@ struct Jitem {
 			   typ != BLACK_OPAL && 	\
 			   typ != ANTIMAGIC_RIFT && 	\
 			   typ != CATAPSI_VORTEX && 	\
+			   typ != DOLL_S_TEAR && 	\
 			   typ != EMERALD && typ != OPAL)))
 
 #ifndef OVLB
@@ -393,9 +394,6 @@ register int otyp;
 		break;
 	case RING_CLASS:
 		Strcpy(buf, "ring");
-		break;
-	case BED_CLASS:
-		Strcpy(buf, "bed");
 		break;
 	case AMULET_CLASS:
 		if(nn)
