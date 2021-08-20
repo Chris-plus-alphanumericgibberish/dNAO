@@ -1209,6 +1209,7 @@ int portal;
 	if (Punished) unplacebc();
 	u.utrap = 0;				/* needed in level_tele */
 	fill_pit(u.ux, u.uy);
+	u.ux = u.uy = 0;			/* temporary */
 	u.ustuck = 0;				/* idem */
 	u.uinwater = 0;
 	u.usubwater = 0;

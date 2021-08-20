@@ -4980,7 +4980,7 @@ long mfaction;
 	int cnt = (level_difficulty() + 1)/10 + rnd(5);
 	struct permonst *mdat;
 	struct obj *otmp;
-	struct monst *mon;
+	struct monst *mon = (struct monst *)0;
 	coord cc;
 
 	while (cnt--) {

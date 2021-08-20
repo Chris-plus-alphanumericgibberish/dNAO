@@ -1602,7 +1602,7 @@ int x, y;
     struct obj *otmp;
     struct monst *mon;
     register struct rm *lev;
-	int mid;
+	int mid = PM_LAMB;
 	if(cansee(x, y)){
 		pline("The hellish seal shatters and dissolves into magenta fog!");
 	}

@@ -555,6 +555,8 @@ boolean you_abilities;
 			case AD_DRST: mtyp = PM_GREEN_DRAGON;  break;
 			case AD_SLEE: mtyp = PM_ORANGE_DRAGON; break;
 			case AD_ACID: mtyp = PM_YELLOW_DRAGON; break;
+			case AD_MAGM: mtyp = PM_GRAY_DRAGON;   break;
+			default: impossible("unhandled HD type %d", flags.HDbreath); mtyp = PM_RED_DRAGON; break;
 			}
 			/* note: when shield and armor match despite color differences, it is the shield's color that is used */
 			armormatch = Dragon_shield_to_pm(uarms) == &mons[mtyp];

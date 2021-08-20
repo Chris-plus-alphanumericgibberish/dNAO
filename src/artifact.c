@@ -4640,7 +4640,7 @@ boolean * messaged;
 		if (youagr){
 			if (mdef->minvent && (Role_if(PM_PIRATE) || !rn2(10))){
 				struct obj *otmp2;
-				long unwornmask;
+				long unwornmask = 0L;
 
 				/* Don't steal worn items, and downweight wielded items */
 				if ((otmp2 = mdef->minvent) != 0) {
@@ -8303,13 +8303,19 @@ arti_invoke(obj)
 			if(getdir((char *)0)){
 				struct obj *ocur,*onxt;
 				struct monst *mtmp;
-				for(ocur = level.objects[u.ux+u.dx][u.uy+u.dy]; ocur; ocur = onxt) {
-					onxt = ocur->nexthere;
-					if (ocur->otyp == EGG) revive_egg(ocur);
-					else revive(ocur, FALSE);
+				int tx = u.ux + u.dx;
+				int ty = u.uy + u.dy;
+				if (isok(tx, ty)) {
+					for(ocur = level.objects[tx][ty]; ocur; ocur = onxt) {
+						onxt = ocur->nexthere;
+						if (ocur->otyp == EGG) revive_egg(ocur);
+						else revive(ocur, FALSE);
+					}
 				}
-				if(!(u.dx || u.dy)) unturn_dead(&youmonst);
-				else if((mtmp = m_at(u.ux+u.dx,u.uy+u.dy)) != 0) unturn_dead(mtmp);
+				if(!(u.dx || u.dy))
+					unturn_dead(&youmonst);
+				else if((mtmp = m_at(tx, ty)) != 0)
+					unturn_dead(mtmp);
 			}
 		break;
 		case SINGING:{
@@ -9864,6 +9870,10 @@ read_necro(VOID_ARGS)
 			break;
 			case SELECT_CANCELLATION:
 				booktype = SPE_CANCELLATION;
+			break;
+			default:
+				impossible("bad necro_effect for necronomicon %d", necro_effect);
+				return(0);
 			break;
 		}
 		Sprintf(splname, objects[booktype].oc_name_known ?

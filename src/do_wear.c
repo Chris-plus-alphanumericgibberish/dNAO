@@ -2609,7 +2609,7 @@ int depth;
 	}
 	/* Vaul is not randomized, and contributes to magical DR */
 	if (u.uvaul) {
-		int offset;
+		int offset = 0;
 		switch (slot)
 		{
 		case UPPER_TORSO_DR: offset = 3; break;

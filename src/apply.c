@@ -2842,6 +2842,7 @@ struct obj *sensor;
 			case WAN_PROBING:{
 				struct obj *pobj;
 				if (!getdir((char *)0)) return 0;
+				if (!isok(u.ux+u.dx,u.uy+u.dy)) return 0;
 				if (u.dz < 0) {
 					You("scan the %s thoroughly.  It seems it is %s.", ceiling(u.ux,u.uy), an(ceiling(u.ux,u.uy)));
 				} else if(u.dz > 0) {
@@ -3518,7 +3519,9 @@ struct obj **optr;
     mtmp = m_at(rx, ry);
 	ttmp = t_at(rx, ry);
 
-	if (Stunned)
+	if (!isok(rx, ry))
+		what = "here";
+	else if (Stunned)
 	    what = "while stunned";
 	else if (u.uswallow)
 	    what = is_animal(u.ustuck->data) ? "while swallowed" :
@@ -3635,6 +3638,10 @@ struct obj *obj;
     if (Stunned || (Confusion && !rn2(5))) confdir();
     rx = u.ux + u.dx;
     ry = u.uy + u.dy;
+	if (!isok(rx,ry)) {
+		pline("%s",msg_snap);
+		return 1;
+	}
     mtmp = m_at(rx, ry);
 
     /* fake some proficiency checks */

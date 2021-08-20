@@ -321,7 +321,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 
 	/* set tbx, tby */
 	/* caller has to know to reject tbx==0, tby==0 if called with force_linedup */
-	if (!linedup(tarx, tary, magr->mx, magr->my)) {
+	if (best_target && !linedup(tarx, tary, magr->mx, magr->my)) {
 		tbx = tby = 0;
 	}
 

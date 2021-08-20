@@ -2531,9 +2531,8 @@ struct obj	*sobj;
 		(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj), 8+4*bcsign(sobj), TRUE);
 		break;
 	}
-	case SPE_ANTIMAGIC_SHIELD:
 	case SCR_ANTIMAGIC:{
-		int amt = (sobj->otyp == SPE_ANTIMAGIC_SHIELD) ? 50 : 400;
+		int amt = 400;
 		if(confused && sobj->cursed){
 			//Confused
 			pline("Shimmering sparks shoot into your body!");
@@ -3366,7 +3365,7 @@ int gen_restrict;
 	tries = 0;
 	do {
 	    which = urole.malenum;	/* an arbitrary index into mons[] */
-	    maketame = makeloyal = makepeaceful = makehostile = FALSE;
+	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = FALSE;
 	    getlin("Create what kind of monster? [type the name or symbol]",
 		   buf);
 	    bufp = mungspaces(buf);

@@ -2201,6 +2201,7 @@ def_beastmastery()
 		case P_BASIC:        bm =  2; break;
 		case P_SKILLED:      bm =  5; break;
 		case P_EXPERT:       bm = 10; break;
+		default: impossible(">Expert beast mastery unhandled"); bm = 10; break;
 	}
 	if((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
 		bm *= 2;
@@ -2217,6 +2218,7 @@ def_mountedCombat()
 		case P_BASIC:        bm =  2; break;
 		case P_SKILLED:      bm =  5; break;
 		case P_EXPERT:       bm = 10; break;
+		default: impossible(">Expert riding unhandled"); bm = 10; break;
 	}
 	return bm;
 }
