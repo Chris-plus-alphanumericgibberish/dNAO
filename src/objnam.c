@@ -3205,8 +3205,11 @@ const char *oldstr;
 		(p = strstri(bp, " called ")) != 0) {
 		/* don't singularize these: */
 		if (!BSTRNCMPI(bp, p- 4, "Eyes of the Overworld", 21) ||
-			!BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21) || 
-			!BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25))
+			!BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21) ||
+			!BSTRNCMPI(bp, p- 5, "Claws of the Revenancer", 23) ||
+			!BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25) ||
+			!BSTRNCMPI(bp, p- 9, "Wrappings of the Sacred Fist", 28) ||
+			!BSTRNCMPI(bp, p-22, "Spell-warded Wrappings of Nitocris", 34))
 			return bp;
 		else {
 			/* save the string from " of " onwards */
@@ -3265,19 +3268,20 @@ const char *oldstr;
 			if (!BSTRCMP(bp, p-6, "gloves") ||
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-10, "sunglasses") ||
+			    !BSTRCMPI(bp, p-8, "shackles") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
-			    !BSTRCMP(bp, p-6, "scales") ||
+			    !BSTRCMPI(bp, p-6, "scales") ||
 				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
 				!BSTRCMPI(bp, p-10, "Lost Names")) /* book */
 				return bp;
 
 		} else if (!BSTRCMPI(bp, p-5, "boots") ||
+			   !BSTRCMPI(bp, p-4, "mass") ||
 			   !BSTRCMPI(bp, p-7, "sandals") ||
 			   !BSTRCMPI(bp, p-9, "gauntlets") ||
 			   !BSTRCMPI(bp, p-5, "bands") ||
-			   !BSTRCMPI(bp, p-8, "shackles") ||
 			   !BSTRCMPI(bp, p-6, "tricks") ||
 			   !BSTRCMPI(bp, p-9, "paralysis") ||
 			   !BSTRCMPI(bp, p-5, "glass") ||
@@ -3287,7 +3291,9 @@ const char *oldstr;
 			   !BSTRCMP(bp, p-4, "ness") ||
 			   !BSTRCMPI(bp, p-14, "shape changers") ||
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
+			   !BSTRCMPI(bp, p-15, "Hawaiian shorts") ||
 			   !BSTRCMPI(bp, p-5, "Chaos") ||
+			   !BSTRCMPI(bp, p-8, "Nitocris") ||
 			   !BSTRCMPI(bp, p-13, "Wand of Orcus") || /* wand */
 			   !BSTRCMPI(bp, p-12, "Gear-spirits") || /* crossbow*/
 			   !BSTRCMPI(bp, p-10, "Rod of Dis") || /* mace */
@@ -3856,7 +3862,7 @@ int wishflags;
 			viperheads = 1;
 		} else if (!strncmpi(bp, "2-headed ", l=9) || !strncmpi(bp, "two-headed ", l=11)) {
 			viperheads = 2;
-		} else if (!strncmpi(bp, "3-headed ", l=9) || !strncmpi(bp, "three-headed ", l=13)) {
+		} else if (!strncmpi(bp, "3-headed ", l=9) || (!strncmpi(bp, "three-headed ", l=13) && strncmpi(bp, "Three-Headed Flail", 18))) {
 			viperheads = 3;
 		} else if (!strncmpi(bp, "4-headed ", l=9) || !strncmpi(bp, "four-headed ", l=12)) {
 			viperheads = 4;
@@ -3870,7 +3876,7 @@ int wishflags;
 			viperheads = 8;
 		} else if (!strncmpi(bp, "eclipse ", l=8)) {
 			moonphase = ECLIPSE_MOON;
-		} else if (!strncmpi(bp, "crescent ", l=9)) {
+		} else if (!strncmpi(bp, "crescent ", l=9) && strncmpi(bp, "Crescent Blade", 14)) {
 			moonphase = CRESCENT_MOON;
 		} else if (!strncmpi(bp, "half ", l=5)) {
 			moonphase = HALF_MOON;
@@ -3924,10 +3930,11 @@ int wishflags;
 		} else if (!strncmpi(bp, "leather ", l=8) && strncmpi(bp, "leather spellbook", 17)
 			&& strncmpi(bp, "leather armor", 13) && strncmpi(bp, "leather armour", 14)
 			&& strncmpi(bp, "leather helm", 12) && strncmpi(bp, "leather hat", 11)
+			&& strncmpi(bp, "leather golem", 13)
 			) {
 			mat = LEATHER;
 		} else if ((!strncmpi(bp, "wood ", l=5) || !strncmpi(bp, "wooden ", l=7))
-			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 11)
+			&& strncmpi(bp, "wooden ring", 12) && strncmpi(bp, "wood golem", 10)
 			) {
 			mat = WOOD;
 		} else if ((!strncmpi(bp, "bone ", l=5))
@@ -3947,8 +3954,8 @@ int wishflags;
 			&& strncmpi(bp, "Iron Ball of Levitation", 23) && strncmpi(bp, "Iron Spoon of Liberation", 24)
 			) {
 			mat = IRON;
-		} else if (!strncmpi(bp, "green-steel ", l=12) 
-			|| !strncmpi(bp, "green steel ", l=12)
+		} else if ((!strncmpi(bp, "green-steel ", l=12) || !strncmpi(bp, "green steel ", l=12))
+			&& strncmpi(bp, "green-steel golem", l=17) && strncmpi(bp, "green steel golem", l=17)
 		) {
 			mat = GREEN_STEEL;
 		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9) || !strncmpi(bp, "tin whistle", (l=4)?11:0))
@@ -4006,6 +4013,7 @@ int wishflags;
 			mat = GEMSTONE;
 		} else if ((!strncmpi(bp, "stone ", l=6) || !strncmpi(bp, "ceramic ", l=8))
 			&& strncmpi(bp, "stone to flesh", 14) && strncmpi(bp, "stone dragon shield", 19)
+			&& strncmpi(bp, "stone golem", 11)
 			) {
 			mat = MINERAL;
 		} else if (!strncmpi(bp, "salt ", l=5)) {
@@ -4037,10 +4045,11 @@ int wishflags;
 		} else if (!strncmpi(bp, "disintegration-proof ", l=21)) {
 			add_oprop_list(oprop_list, OPROP_DISN);
 
-		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping ", 23)) {
+		} else if (!strncmpi(bp, "prayer-warded ", l=14) && strncmpi(bp, "prayer-warded wrapping", 22)) {
 			add_oprop_list(oprop_list, OPROP_BCRS);
 
-		} else if (!strncmpi(bp, "healing ", l=8)) {
+		} else if (!strncmpi(bp, "healing ", l=8)
+			&& strncmpi(bp, "healing potion", 14) && strncmpi(bp, "healing spellbook", 17)) {
 			add_oprop_list(oprop_list, OPROP_HEAL);
 
 		} else if (!strncmpi(bp, "anarchic-armor ", l=15)) {
@@ -4172,7 +4181,7 @@ int wishflags;
 			iscursed = !(uncursed + blessed);
 			add_oprop_list(oprop_list, OPROP_LESSER_UNHYW);
 
-		} else if (!strncmpi(bp, "life-drinking ", l=14) && strncmpi(bp, "Vorpal Blade", 12)) {
+		} else if (!strncmpi(bp, "life-drinking ", l=14)) {
 			add_oprop_list(oprop_list, OPROP_DRANW);
 
 		} else if (!strncmpi(bp, "vorpal ", l=7) && strncmpi(bp, "Vorpal Blade", 12)) {
@@ -4185,7 +4194,7 @@ int wishflags;
 			iscursed = !(uncursed + blessed);
 			add_oprop_list(oprop_list, OPROP_LESSER_MORGW);
 
-		} else if (!strncmpi(bp, "wrathful ", l=9)) {
+		} else if (!strncmpi(bp, "wrathful ", l=9) && strncmpi(bp, "Wrathful Wind", 13) && strncmpi(bp, "Wrathful Spider", 15)) {
 			add_oprop_list(oprop_list, OPROP_WRTHW);
 
 		} else if (!strncmpi(bp, "flaying ", l=8)) {
@@ -4366,20 +4375,37 @@ int wishflags;
 	
 	/*
 	 * Find corpse type using "of" (figurine of an orc, tin of orc meat)
-	 * Don't check if it's a wand or spellbook.
-	 * (avoid "wand/finger of death" confusion).
+	 * (avoid "wand/finger of death" confusion, "scroll of ward").
 	 */
-	if (!strstri(bp, "wand ")
-	 && !strstri(bp, "spellbook ")
-	 && !strstri(bp, "book ")
-	 && !strstri(bp, "lump ")
-	 && !strstri(bp, "rod ")
-	 && !strstri(bp, "finger ")
-	 && !strstri(bp, "set of ")) {
+	if (strncmpi(bp, "finger of death", 15))
+	if (strncmpi(bp, "wand of death", 13))
+	if (strncmpi(bp, "spellbook of wizard lock", 24))
+	if (strncmpi(bp, "spellbook of fire storm", 23))
+	if (strncmpi(bp, "scroll of ward", 14))	/* also gets "scroll of warding" */
+	if (strncmpi(bp, "scroll of stinking cloud", 24))
+	if (strncmpi(bp, "set of crow talons", 18))
+	if (strncmpi(bp, "Eye of Vecna", 12))
+	if (strncmpi(bp, "Hand of Vecna", 13))
+	if (strncmpi(bp, "Sword of Erathaol", 17))
+	if (strncmpi(bp, "Wand of Orcus", 13))
+	if (strncmpi(bp, "Rod of Lordly Might", 19))
+	if (strncmpi(bp, "Spell-warded Wrappings of Nitocris", 34))
+	if (!strstri(bp, "Key of Chaos"))	/* prefixed by First, Second, or Third */
+	if (strncmpi(bp, "lump of ", 8) || !strstri(bp, " jelly"))
+	if (strncmpi(bp, "shard of ", 9) || !strstri(bp, " glyph"))
+	if (strncmpi(bp, "potion of ", 10) || !strstri(bp, " blood"))
+	{
 	    if ((p = strstri(bp, " of ")) != 0
 		&& (mntmp = name_to_mon(p+4)) >= LOW_PM)
 		*p = 0;
 	}
+
+	/* we actually do need corpsenm for potions of blood */
+	/* strip off "potion of ", so the corpse type code can then handle "foo blood" */
+	if (!(strncmpi(bp, "potion of ", 10) || !strstri(bp, " blood"))) {
+		bp += 10;
+	}
+
 	/* Find corpse type w/o "of" (red dragon scale mail, yeti corpse) */
 	if (strncmpi(bp, "samurai sword", 13)) /* not the "samurai" monster! */
 	if (strncmpi(bp, "wizard lock", 11)) /* not the "wizard" monster! */
@@ -4406,6 +4432,7 @@ int wishflags;
 	if (strncmpi(bp, "frosted lake", 12)) /* not a "frosted lake" */
 	if (strncmpi(bp, "chromatic dragon scales", 23)) /* not a "dragon" */
 	if (strncmpi(bp, "platinum dragon plate", 21)) /* not a "dragon" */
+	if (strncmpi(bp, "Peace Keeper", 12)) /* not "Peace" */
 	if (strncmpi(bp, "thief doll", 10)) /* not the "thief" player monster */
 	if (strncmpi(bp, "bard doll", 9)) /* not the "bard" player monster */
 	if (strncmpi(bp, "priest doll", 11)) /* not the "priest" monster */
