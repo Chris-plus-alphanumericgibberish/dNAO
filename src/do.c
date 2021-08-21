@@ -1209,7 +1209,6 @@ int portal;
 	if (Punished) unplacebc();
 	u.utrap = 0;				/* needed in level_tele */
 	fill_pit(u.ux, u.uy);
-	u.ux = u.uy = 0;			/* temporary */
 	u.ustuck = 0;				/* idem */
 	u.uinwater = 0;
 	u.usubwater = 0;
@@ -1220,6 +1219,8 @@ int portal;
 			u.uz.flags.mirror = 1;
 	}
 	keepdogs(FALSE);
+	u.ux = u.uy = 0;			/* comes after keepdogs() */
+	
 	if (u.uswallow)				/* idem */
 		u.uswldtim = u.uswallow = 0;
 	recalc_mapseen(); /* recalculate map overview before we leave the level */
