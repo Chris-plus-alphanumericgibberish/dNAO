@@ -1,7 +1,11 @@
 GAMEDIR = dnethackdir
 
+# gprof flags
+# CFLAGS = -pg
 CFLAGS = -g
 
+# gprof flags
+# LDFLAGS += -pg -Wno-knr-promoted-parameter
 LDFLAGS += -Wno-knr-promoted-parameter
 
 GAMELIBS = -lncurses -lm
