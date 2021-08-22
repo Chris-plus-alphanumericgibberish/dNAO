@@ -1259,7 +1259,7 @@ u_on_sstairs() {	/* place you on the special staircase */
 #ifdef DEBUG
 	    pline("u_on_sstairs: picking random spot");
 #endif
-#define badspot(x,y) ((levl[x][y].typ != ROOM && levl[x][y].typ != CORR) || MON_AT(x, y))
+#define badspot(x,y) ((levl[x][y].typ != ROOM && levl[x][y].typ != CORR && levl[x][y].typ != GRASS && levl[x][y].typ != SAND && levl[x][y].typ != SOIL) || MON_AT(x, y))
 	    do {
 		x = rnd(COLNO-1);
 		y = rn2(ROWNO);

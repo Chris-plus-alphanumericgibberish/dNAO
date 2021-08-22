@@ -1177,7 +1177,7 @@ wiz_makemap(VOID_ARGS)
         vision_full_recalc = 1;
         cls();
 
-	rnd(2) ? u_on_upstairs() : u_on_dnstairs();
+	rn2(2) ? u_on_upstairs() : u_on_dnstairs();
         losedogs();
         initrack();
         if (Punished) {
