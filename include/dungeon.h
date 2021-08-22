@@ -187,6 +187,7 @@ typedef struct branch {
 #define Is_yeenoghu_level(x)	(on_level(x, &abyss1_level) && dungeon_topology.abyss_variant == YEENOGHU_LEVEL)
 #define Is_baphomet_level(x)	(on_level(x, &abyss1_level) && dungeon_topology.abyss_variant == BAPHOMET_LEVEL)
 #define Is_night_level(x)	(on_level(x, &abyss1_level) && dungeon_topology.abyss_variant == NIGHT_LEVEL)
+#define Is_kostchtchie_level(x)	(on_level(x, &abyss1_level) && dungeon_topology.abyss_variant == KOSTCH_LEVEL)
 #define Is_abyss2(x)		(on_level(x, &abyss2_level))
 #define Is_malcanthet_level(x)	(on_level(x, &abyss2_level) && dungeon_topology.abys2_variant == MALCANTHET_LEVEL)
 #define Is_grazzt_level(x)	(on_level(x, &abyss2_level) && dungeon_topology.abys2_variant == GRAZ_ZT_LEVEL)

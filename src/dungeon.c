@@ -2724,6 +2724,8 @@ boolean printdun;
 				Sprintf(eos(buf), " [Lyktion]");
 			} else if(Is_night_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Bone Plateau]");
+			} else if(Is_kostchtchie_level(&mptr->lev)){
+				Sprintf(eos(buf), " [Iron Wastes]");
 			} else {
 				Sprintf(eos(buf), " [First Abyss]");
 			}

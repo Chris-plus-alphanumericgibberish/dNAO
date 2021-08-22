@@ -100,6 +100,7 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #define BAPHOMET_LEVEL	4
 #define NIGHT_LEVEL		5
 #define NIGHT_RES		3
+#define KOSTCH_LEVEL	6
 	d_level	d_abys2_level;
 	int		abys2_variant;
 #define ORCUS_LEVEL		1
