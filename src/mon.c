@@ -2995,6 +2995,19 @@ mm_aggression(magr, mdef)
 struct monst * magr;	/* monster that is currently deciding where to move */
 struct monst * mdef;	/* another monster which is next to it */
 {
+	long res = mm_grudge(magr, mdef);
+
+	// must be able to see mdef -- note that this has a 1/8 chance when adjacent even when totally blind!
+	if(res && mon_can_see_mon(magr, mdef))
+		return res;
+	return 0L;
+}
+
+long
+mm_grudge(magr, mdef)
+struct monst * magr;	/* monster that is currently deciding where to move */
+struct monst * mdef;	/* another monster which is next to it */
+{
 	struct permonst *ma, *md;
 	ma = magr->data;
 	md = mdef->data;
@@ -3024,10 +3037,6 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	// must be in range to attack mdef
 	if (distmin(magr->mx, magr->my, mdef->mx, mdef->my) > BOLT_LIM) {
-		return 0L;
-	}
-	// must be able to see mdef -- note that this has a 1/8 chance when adjacent even when totally blind!
-	if (!mon_can_see_mon(magr, mdef)) {
 		return 0L;
 	}
 	// magr cannot be waiting
