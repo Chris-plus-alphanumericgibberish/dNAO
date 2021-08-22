@@ -10482,7 +10482,6 @@ boolean * needs_uncancelled;
 	case AD_DRLI:
 	case AD_CNCL:
 	case AD_ENCH:
-	case AD_SSUN:
 	case AD_STDY:
 	case AD_BLAS:
 	case AD_BDFN:
@@ -10491,6 +10490,7 @@ boolean * needs_uncancelled;
 		maybeset(needs_mdef_eyes, FALSE);
 		break;
 		/* these adtyps are just using gaze as a convenient way of causing something non-gaze-y to happen */
+	case AD_SSUN:
 	case AD_WTCH:
 	case AD_MIST:
 	case AD_SPOR:
