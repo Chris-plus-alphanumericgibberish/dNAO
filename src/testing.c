@@ -79,6 +79,12 @@ test_readobjnam()
 	for (i=1; i < NUM_OBJECTS; i++) {
 		/* skip non-objects that exist just for additional descriptions */
 		if (!obj_descr[(objects[i].oc_name_idx)].oc_name) continue;
+		/* known and acceptable failures */
+		if (i == CLOAK || i == SHOES || i == GAUNTLETS ||	// both a common item and a class; common item wishable with material
+			i == HANDGUN ||	// unused item and synonym for pistol
+			i == GUN ||		// unused item and a class
+			i == GOLD_PIECE)// correctly gives a gold piece, which is not an object
+			continue;
 		/* save old name_known state; set to TRUE so simple_typename() gives real name */
 		savestate = objects[i].oc_name_known;
 		objects[i].oc_name_known = 1;
@@ -90,6 +96,10 @@ test_readobjnam()
 
 	/* blanket test to try to wish for all artifacts */
 	for (i=1; i < NROFARTIFACTS; i++) {
+		/* known and acceptable failures */
+		if (i == ART_GENOCIDE ||	// gives scroll, which is acceptable since it's literally the same name
+			i == ART_NECRONOMICON || i == ART_BOOK_OF_LOST_NAMES || i == ART_BOOK_OF_INFINITE_SPELLS)//gives randomly of the three
+			continue;
 		/* save old artifact-existance state */
 		savestate = artinstance[i].exists;
 		artinstance[i].exists = 0;
@@ -101,9 +111,13 @@ test_readobjnam()
 
 	/* blanket test to try to wish for a statue of every monster */
 	for (i=LOW_PM; i < NUMMONS; i++) {
+		/* known and acceptable failures */
+		if (i == PM_HUMAN_WEREWOLF || i == PM_HUMAN_WERERAT || i == PM_HUMAN_WEREJACKAL ||	//gives animal form (of same name)
+			i == PM_LONG_WORM_TAIL || i == PM_HUNTING_HORROR_TAIL)// gives main creature
+			continue;
 		Sprintf(buf2, "statue of %s",
 			type_is_pname(&mons[i]) ? mons[i].mname : an(mons[i].mname));
-		TEST(buf, otmp->otyp == STATUE && otmp->corpsenm == i);
+		TEST(buf2, otmp->otyp == STATUE && otmp->corpsenm == i);
 	}
 
 	/* tests for specific items */
