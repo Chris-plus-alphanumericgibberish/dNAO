@@ -6,8 +6,10 @@
 #include "artifact.h"
 
 STATIC_DCL void NDECL(test_readobjnam);
+STATIC_DCL void NDECL(test_levelgen);
 
-#define READOBJNAM 1
+#define TEST_READOBJNAM 1
+#define TEST_LEVELGEN 2
 
 int
 wiz_testmenu()
@@ -27,7 +29,14 @@ wiz_testmenu()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	
 	Sprintf(buf, "Test readobjnam()");
-	any.a_int = READOBJNAM;	/* must be non-zero */
+	any.a_int = TEST_READOBJNAM;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet++;
+
+	Sprintf(buf, "Test level generation");
+	any.a_int = TEST_LEVELGEN;	/* must be non-zero */
 	add_menu(tmpwin, NO_GLYPH, &any,
 		incntlet, 0, ATR_NONE, buf,
 		MENU_UNSELECTED);
@@ -41,8 +50,11 @@ wiz_testmenu()
 	
 	if (n > 0) {
 		switch(selected[0].item.a_int) {
-			case READOBJNAM:
+			case TEST_READOBJNAM:
 				test_readobjnam();
+				break;
+			case TEST_LEVELGEN:
+				test_levelgen();
 				break;
 		}
 	}
@@ -126,4 +138,45 @@ test_readobjnam()
 	TEST("healing potion", otmp->otyp == POT_HEALING);
 
 #undef TEST
+}
+
+/* 
+ * attempts to generate every level many times,
+ * to catch segfaults, impossible()s, and panic()s.
+ *   excludes the Endgame
+ *   excludes Ludios if the portal didn't generate
+ */
+void
+test_levelgen()
+{
+	int i, j;
+	struct d_level newlevel;
+	struct d_level curlevel = u.uz;
+	int newlev;
+	boolean inverted;
+	boolean savestate = quest_status.got_quest;
+	quest_status.got_quest = TRUE;
+
+	extern int n_dgns;	// from dungeon.c
+    for (i = 0; i < n_dgns; i++)
+	{
+		newlevel.dnum = i;
+		newlevel.dlevel = 1;
+		goto_level(&newlevel, FALSE, FALSE, FALSE);
+		inverted = (dungeons[u.uz.dnum].entry_lev == dungeons[u.uz.dnum].num_dunlevs);
+		do {
+			for (j=0; j<40; j++)
+				(void)wiz_makemap();
+			if ((!inverted) ? !Is_botlevel(&u.uz) : u.uz.dlevel != 1) {
+				newlev = depth(&u.uz) + ((!inverted) ? 1 : -1);
+				get_level(&newlevel, newlev);
+				goto_level(&newlevel, FALSE, FALSE, FALSE);
+			}
+			else
+				break;
+		}while(TRUE);
+	}
+	quest_status.got_quest = savestate;
+
+	goto_level(&curlevel, FALSE, FALSE, FALSE);
 }
