@@ -214,11 +214,12 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		}
 
 		/* is mdef an acceptable target? */
-		if (!clear_path(magr->mx, magr->my, tarx, tary))
+		if (mdef != &youmonst && !(mm_aggression(magr, mdef) & ALLOW_M) && !conflicted)
 			continue;
 		if (dogbesafe && (mdef == &youmonst))
 			continue;
-		if (mdef != &youmonst && !(mm_aggression(magr, mdef) & ALLOW_M) && !conflicted)
+		/* Note: clear_path is somewhat costly */
+		if (!clear_path(magr->mx, magr->my, tarx, tary))
 			continue;
 
 		/* don't make ranged attacks at melee distance */
