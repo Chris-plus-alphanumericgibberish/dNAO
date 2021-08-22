@@ -2763,6 +2763,9 @@ E void FDECL(rloco, (struct obj *));
 E int NDECL(random_teleport_level);
 E boolean FDECL(u_teleport_mon, (struct monst *,BOOLEAN_P));
 
+/* ### testing.c ### */
+E int NDECL(wiz_testmenu);
+
 /* ### tile.c ### */
 #ifdef USE_TILES
 E void FDECL(substitute_tiles, (d_level *));
