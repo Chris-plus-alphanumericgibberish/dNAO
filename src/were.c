@@ -63,7 +63,7 @@ register struct monst *mon;
 	    }
 	} else if (!rn2(30) || (is_were(mon->data) && Protection_from_shape_changers) 
 		|| (is_yochlol(mon->data) && !Protection_from_shape_changers)
-		|| (is_eeladrin(mon->data) && mon->mhp >= mon->mhpmax)
+		|| (is_eeladrin(mon->data) && mon->mhp >= mon->mhpmax && !Protection_from_shape_changers)
 	) {
 		if(mon->mtyp == PM_BALL_OF_LIGHT){
 			mon->mflee = 0;
