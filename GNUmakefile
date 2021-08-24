@@ -60,10 +60,11 @@ SRCOBJ = allmain.o alloc.o apply.o artifact.o artilist.o astar.o attrib.o ball.o
          pray.o priest.o projectile.o quest.o questpgr.o read.o 	\
          recover.o rect.o region.o restore.o rip.o rnd.o role.o 	\
          rumors.o save.o seduce.o shk.o shknam.o sit.o sounds.o 	\
-         sp_lev.o spell.o steal.o steed.o teleport.o thoughtglyph.o tile.o timeout.o	\
-         topten.o track.o trap.o u_init.o unicode.o vault.o 		\
-         version.o vision.o weapon.o were.o wield.o windows.o 		\
-         wizard.o worm.o worn.o write.o xhity.o xhityhelpers.o zap.o 
+         sp_lev.o spell.o steal.o steed.o teleport.o testing.o 		\
+         thoughtglyph.o tile.o timeout.o topten.o track.o trap.o 	\
+         u_init.o unicode.o vault.o version.o vision.o weapon.o 	\
+         were.o wield.o windows.o wizard.o worm.o worn.o write.o 	\
+         xhity.o xhityhelpers.o zap.o 
 SYSUNIXOBJ = unixmain.o unixres.o unixunix.o
 SYSSHAREOBJ = ioctl.o unixtty.o
 WINTTYOBJ = getline.o termcap.o topl.o wintty.o

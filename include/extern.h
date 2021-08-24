@@ -274,6 +274,7 @@ E int NDECL(wiz_where);
 E int NDECL(wiz_wish);
 # endif /* WIZARD */
 #endif /* USE_TRAMPOLI */
+E int NDECL(wiz_makemap);
 E void NDECL(reset_occupations);
 E void FDECL(set_occupation, (int (*)(void),const char *,int));
 #ifdef REDO
@@ -2762,6 +2763,9 @@ E void FDECL(rlocos_at, (int, int));
 E void FDECL(rloco, (struct obj *));
 E int NDECL(random_teleport_level);
 E boolean FDECL(u_teleport_mon, (struct monst *,BOOLEAN_P));
+
+/* ### testing.c ### */
+E int NDECL(wiz_testmenu);
 
 /* ### tile.c ### */
 #ifdef USE_TILES

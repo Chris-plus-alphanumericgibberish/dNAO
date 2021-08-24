@@ -137,7 +137,7 @@ STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
 STATIC_PTR int NDECL(wiz_wish);
 STATIC_PTR int NDECL(wiz_identify);
 STATIC_PTR int NDECL(wiz_map);
-STATIC_PTR int NDECL(wiz_makemap);
+//STATIC_PTR int NDECL(wiz_makemap);
 STATIC_PTR int NDECL(wiz_genesis);
 STATIC_PTR int NDECL(wiz_where);
 STATIC_PTR int NDECL(wiz_detect);
@@ -1120,7 +1120,7 @@ wiz_identify()
 
 
 /* #wizmakemap - discard current dungeon level and replace with a new one */
-STATIC_PTR int
+int
 wiz_makemap(VOID_ARGS)
 {
     if (wizard) {
@@ -1177,7 +1177,7 @@ wiz_makemap(VOID_ARGS)
         vision_full_recalc = 1;
         cls();
 
-	rnd(2) ? u_on_upstairs() : u_on_dnstairs();
+	rn2(2) ? u_on_upstairs() : u_on_dnstairs();
         losedogs();
         initrack();
         if (Punished) {
@@ -5320,6 +5320,7 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #levelport */
 	{(char *)0, (char *)0, donull, TRUE}, /* #wish */
 	{(char *)0, (char *)0, donull, TRUE}, /* #where */
+	{(char *)0, (char *)0, donull, TRUE}, /* #tests */
 #endif
 	{(char *)0, (char *)0, donull, TRUE}	/* sentinel */
 };
@@ -5361,6 +5362,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"levelport", "to trans-level teleport", wiz_level_tele, IFBURIED},
 	{"wish", "make wish", wiz_wish, IFBURIED, AUTOCOMPLETE},
 	{"where", "tell locations of special levels", dooverview_or_wiz_where, IFBURIED},
+	{"tests", "pull up a menu of regression tests", wiz_testmenu, IFBURIED, AUTOCOMPLETE},
 	{(char *)0, (char *)0, donull, IFBURIED}
 };
 

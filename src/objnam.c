@@ -3953,7 +3953,7 @@ int wishflags;
 			) {
 			mat = IRON;
 		} else if ((!strncmpi(bp, "green-steel ", l=12) || !strncmpi(bp, "green steel ", l=12))
-			&& strncmpi(bp, "green-steel golem", l=17) && strncmpi(bp, "green steel golem", l=17)
+			&& strncmpi(bp, "green-steel golem", 17) && strncmpi(bp, "green steel golem", 17)
 		) {
 			mat = GREEN_STEEL;
 		} else if ((!strncmpi(bp, "metal ", l=6) || !strncmpi(bp, "metallic ", l=9) || !strncmpi(bp, "tin whistle", (l=4)?11:0))
