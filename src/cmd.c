@@ -137,7 +137,7 @@ STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
 STATIC_PTR int NDECL(wiz_wish);
 STATIC_PTR int NDECL(wiz_identify);
 STATIC_PTR int NDECL(wiz_map);
-STATIC_PTR int NDECL(wiz_makemap);
+//STATIC_PTR int NDECL(wiz_makemap);
 STATIC_PTR int NDECL(wiz_genesis);
 STATIC_PTR int NDECL(wiz_where);
 STATIC_PTR int NDECL(wiz_detect);
@@ -1120,7 +1120,7 @@ wiz_identify()
 
 
 /* #wizmakemap - discard current dungeon level and replace with a new one */
-STATIC_PTR int
+int
 wiz_makemap(VOID_ARGS)
 {
     if (wizard) {
