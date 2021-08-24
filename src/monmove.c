@@ -2003,10 +2003,14 @@ register int after;
 	if((mteleport(ptr)) && !rn2(5) && !mtmp->mcan &&
 	   !tele_restrict(mtmp) && !(noactions(mtmp))
 	) {
-	    if(mtmp->mhp < 7 || mtmp->mpeaceful || rn2(2))
-		(void) rloc(mtmp, FALSE);
+	    if(mtmp->mhp < 7 || mtmp->mpeaceful || rn2(2)) {
+			if (!rloc(mtmp, TRUE)) {
+				/* rloc failed, probably due to a full level; don't set mmoved=1 so can still attack later */
+				goto postmov;	
+			}
+		}
 	    else
-		mnexto(mtmp);
+			mnexto(mtmp);
 	    mmoved = 1;
 	    goto postmov;
 	}
