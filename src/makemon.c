@@ -2042,10 +2042,14 @@ int faction;
 					(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 					(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
 				} else if (mm == PM_APPRENTICE){
-					otmp = mksobj(rnd_attack_wand(mtmp), mkobjflags);
-					otmp->blessed = FALSE;
-					otmp->cursed = FALSE;
-					(void) mpickobj(mtmp, otmp);
+					//Note: may be 0 if zombie
+					int itm = rnd_attack_wand(mtmp);
+					if(itm){
+						otmp = mksobj(itm, mkobjflags);
+						otmp->blessed = FALSE;
+						otmp->cursed = FALSE;
+						(void) mpickobj(mtmp, otmp);
+					}
 					(void)mongets(mtmp, CLOAK, mkobjflags);
 					(void)mongets(mtmp, LOW_BOOTS, mkobjflags);
 				}
@@ -4573,11 +4577,15 @@ int faction;
 			(void) mongets(mtmp, rnd_attack_potion(mtmp), mkobjflags);
 			(void) mongets(mtmp, rnd_attack_potion(mtmp), mkobjflags);
 			if(mm == PM_DEEPER_ONE){
-				otmp = mksobj(rnd_attack_wand(mtmp), mkobjflags);
-				otmp->spe = 1;
-				otmp->blessed = FALSE;
-				otmp->cursed = FALSE;
-				(void) mpickobj(mtmp, otmp);
+				//Note: may be 0 if zombie
+				int itm = rnd_attack_wand(mtmp);
+				if(itm){
+					otmp = mksobj(itm, mkobjflags);
+					otmp->spe = 1;
+					otmp->blessed = FALSE;
+					otmp->cursed = FALSE;
+					(void) mpickobj(mtmp, otmp);
+				}
 			}
 		 }
 		}else if((mm == PM_MIND_FLAYER || mm == PM_MASTER_MIND_FLAYER)){
@@ -7421,16 +7429,22 @@ int faction;
 				
 				(void) mongets(mtmp, rnd_attack_potion(mtmp), mkobjflags);
 				(void) mongets(mtmp, rnd_attack_potion(mtmp), mkobjflags);
+				//Note: may be 0 if zombie
+				int itm = rnd_utility_potion(mtmp);
+				if(itm){
+					otmp = mksobj(itm, mkobjflags);
+					otmp->blessed = FALSE;
+					otmp->cursed = FALSE;
+					(void) mpickobj(mtmp, otmp);
+				}
 				
-				otmp = mksobj(rnd_utility_potion(mtmp), mkobjflags);
-				otmp->blessed = FALSE;
-				otmp->cursed = FALSE;
-				(void) mpickobj(mtmp, otmp);
-				
-				otmp = mksobj(rnd_utility_potion(mtmp), mkobjflags);
-				otmp->blessed = FALSE;
-				otmp->cursed = FALSE;
-				(void) mpickobj(mtmp, otmp);
+				itm = rnd_utility_potion(mtmp);
+				if(itm){
+					otmp = mksobj(rnd_utility_potion(mtmp), mkobjflags);
+					otmp->blessed = FALSE;
+					otmp->cursed = FALSE;
+					(void) mpickobj(mtmp, otmp);
+				}
 			} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
 				otmp = mksobj(QUARTERSTAFF, mkobjflags);
 				otmp->spe = 9;
