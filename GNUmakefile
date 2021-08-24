@@ -24,6 +24,7 @@ CPPFLAGS += -Wno-unused-function
 CPPFLAGS += -Wno-unused-label
 CPPFLAGS += -Wno-unknown-pragmas
 CPPFLAGS += -Wno-missing-braces
+CPPFLAGS += -Wno-format-overflow
 
 .DELETE_ON_ERROR:
 
