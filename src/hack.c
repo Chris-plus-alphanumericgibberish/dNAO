@@ -191,8 +191,13 @@ moverock()
 			  (ttmp->ttyp == TRAPDOOR) ? "trap door" : "hole",
 			  surface(rx, ry));
 		    deltrap(ttmp);
+			if(otmp->otyp == MASS_OF_STUFF){
+				place_object(otmp, rx, ry);
+				separate_mass_of_stuff(otmp, FALSE);
+				otmp = (struct obj *) 0;
+			}
 			bury_objs(rx, ry); //Crate handling: Bury everything here (inc boulder item) then free the boulder after
-			if(otmp->otyp == MASSIVE_STONE_CRATE){
+			if(otmp && otmp->otyp == MASSIVE_STONE_CRATE){
 				struct obj *item;
 				if(Blind) pline("Click!");
 				else pline("The crate pops open as it lands.");
@@ -202,7 +207,7 @@ moverock()
 					place_object(item, rx, ry);
 				}
 			}
-		    delobj(otmp);
+		    if(otmp) delobj(otmp);
 		    if (cansee(rx,ry)) newsym(rx,ry);
 		    continue;
 		case LEVEL_TELEP:
