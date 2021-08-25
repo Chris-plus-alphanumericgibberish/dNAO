@@ -642,9 +642,11 @@ boolean yours; /* is it your fault (for killing monsters) */
 			}
 			else if (adtyp == AD_BLUD){
 				water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
-				mtmp->mcrazed = TRUE;
-				mtmp->mberserk = TRUE;
-				mtmp->mconf = TRUE;
+				if(!yours){
+					mtmp->mcrazed = TRUE;
+					mtmp->mberserk = TRUE;
+					mtmp->mconf = TRUE;
+				}
 			}
 			
 			if(adtyp == AD_SLIM && !Slime_res(mtmp) &&
@@ -721,8 +723,10 @@ boolean yours; /* is it your fault (for killing monsters) */
 		}
 		else if (adtyp == AD_BLUD){
 			water_damage(invent, FALSE, FALSE, WD_BLOOD, mtmp);
-			u.umadness |= MAD_APOSTASY;
-			change_usanity(-rnd(6), FALSE);
+			if(!yours){
+				u.umadness |= MAD_APOSTASY;
+				change_usanity(-rnd(6), FALSE);
+			}
 		}
 		ugolemeffects((int) adtyp, damu);
 
