@@ -2192,6 +2192,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				*tohitmod = -15;
 			fromlist = FALSE;
 			(*subout) &= ~SUBOUT_XWEP; /* allow another followup offhand attack if twoweaponing (unpoly'd only) */
+			*subout |= SUBOUT_MAINWEPB;
 		}
 	}
 
