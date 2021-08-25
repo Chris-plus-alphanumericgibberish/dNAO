@@ -5269,8 +5269,9 @@ int damage, tell;
 	switch (oclass) {
 	    case WAND_CLASS:	
 			alev = 12;	 
-			if(!flags.mon_moving && P_SKILL(P_WAND_POWER) > 1){
-				alev += (P_SKILL(P_WAND_POWER)-1)*2;
+			if(!flags.mon_moving){
+				if(P_SKILL(P_WAND_POWER) > 1)
+					alev += (P_SKILL(P_WAND_POWER)-1)*2;
 				LUCK_MODIFIER
 			}
 		break;
