@@ -10277,7 +10277,7 @@ boolean silent;
 	case AD_COLD:
 		if (!silent) {
 			pline("Icicles form and fall from the freezing %s.",
-				the(xname(obj)));
+				xname(obj));
 		}
 		return (AD_COLD);
 	case AD_ELEC:
