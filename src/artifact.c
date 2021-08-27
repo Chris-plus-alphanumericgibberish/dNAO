@@ -6184,7 +6184,7 @@ arti_invoke(obj)
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
 					artinstance[obj->oartifact].SnSd1 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
-				    return 1;
+				    return partial_action();
 				}
 				else if(throweffect()){
 					int dmg;
@@ -6207,7 +6207,7 @@ arti_invoke(obj)
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
 					artinstance[obj->oartifact].SnSd2 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
-				    return 1;
+				    return partial_action();
 				}
 				else if(getdir((char *)0) && (u.dx || u.dy)) {
 					struct zapdata zapdata;
@@ -6227,7 +6227,7 @@ arti_invoke(obj)
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
 					artinstance[obj->oartifact].SnSd3 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
-				    return 1;
+				    return partial_action();
 				}
 				else{
 					pline("San no mai, Shirafune!");
