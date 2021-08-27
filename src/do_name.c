@@ -1113,8 +1113,14 @@ boolean called;
 			article = ARTICLE_NONE;
 			name_at_start = TRUE;
 	    } else {
-			Strcat(buf, name);
 			name_at_start = TRUE;
+			if (maybe_append_injury_desc(mtmp, buf))
+				name_at_start = FALSE;
+			if(mtmp->entangled == SHACKLES){
+				Strcat(buf, "shackled ");
+				name_at_start = FALSE;
+			}
+			Strcat(buf, name);
 	    }
 	} else if (is_mplayer(mdat) && !In_endgame(&u.uz)) {
 	    char pbuf[BUFSZ];
