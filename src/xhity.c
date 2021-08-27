@@ -8951,6 +8951,8 @@ int vis;
 			else {
 				if (mlev(mdef) > 10 && !rn2(10))
 					monid = PM_FIREWORK_CART;
+				else if(Is_minetown_level(&u.uz))
+					monid = rn2(2) ? PM_CLOCKWORK_SOLDIER : PM_FABERGE_SPHERE;
 				else
 					monid = PM_CLOCKWORK_SOLDIER + rn2(3);
 			}
