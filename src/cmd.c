@@ -1839,7 +1839,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 			enl_msg("You ", "will periodically suffer", "periodically suffered", " hallucinations, confusion, stunning, damage, and ability score drain");
 		}
 		if (u.umadness&MAD_FRIGOPHOBIA){
-			enl_msg("Sometimes, you ", "will panic and lose turns", "panicked and lost turns", " after taking cold damage or moving over ice");
+			enl_msg("Sometimes, you ", "will panic", "panicked", " after taking cold damage or moving over ice");
 		}
 		if (u.umadness&MAD_CANNIBALISM){
 			enl_msg("Sometimes, you ", "will vomit", "vomited", " after eating vegetarian or vegan food");
@@ -1849,7 +1849,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 			you_have("reduced AC, reduced spell success, and increased damage");
 		}
 		if (u.umadness&MAD_ARGENT_SHEEN){
-			enl_msg("Sometimes, monsters ", "will panic and lose turns", "panicked and lost turns", " will gain reflection for a turn");
+			enl_msg("Sometimes, monsters ", "will panic", "panicked", " will gain reflection for a turn");
 			enl_msg("Sometimes, monsters ", "will take", "took", " reduced damage from your magic");
 			enl_msg("Sometimes, you ", "will stop", "stopped", " to admire yourself in mirrors, losing turns");
 			enl_msg("You ", "take", "took", " increased damage from male humanoids and centaurs");
@@ -1863,7 +1863,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 		}
 		if (u.umadness&MAD_OPHIDIOPHOBIA){
 			enl_msg("Sometimes, you ", "will fail", "failed", " to attack serpentine monsters");
-			enl_msg("Sometimes, you ", "will panic and lose turns", "panicked and lost turns", " after being poisoned");
+			enl_msg("Sometimes, you ", "will panic", "panicked", " after being poisoned");
 			enl_msg("You ", "take", "took", " increased damage from serpentine monsters");
 		}
 		if (u.umadness&MAD_ARACHNOPHOBIA){
@@ -1881,7 +1881,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 			enl_msg("Sometimes, aquatic monsters ", "will take", "took", " reduced damage from your magic");
 			enl_msg("Sometimes, you ", "will fail", "failed", " to attack aquatic monsters");
 			enl_msg("You ", "take", "took", " increased damage from aquatic monsters");
-			enl_msg("Sometimes, you ", "will panic and lose turns", "panicked and lost turns", " after being attacked by aquatic monsters");
+			enl_msg("Sometimes, you ", "will panic", "panicked", " after being attacked by aquatic monsters");
 		}
 		if (u.umadness&MAD_PARANOIA){
 			//Severe because it triggers much more frequently than other madnesses
@@ -1889,7 +1889,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 			you_have("a hard time discerning the location of unseen monsters");
 		}
 		if (u.umadness&MAD_TALONS){
-			enl_msg("Sometimes, you ", "will panic and lose turns", "panicked and lost turns", " losing or releasing an item");
+			enl_msg("Sometimes, you ", "will panic", "panicked", " after losing or releasing an item");
 		}
 		if (u.umadness&MAD_COLD_NIGHT){
 			enl_msg("Sometimes, you ", "slip", "slipped", " nonexistent ice");
