@@ -3021,7 +3021,10 @@ resistances_enlightenment()
 	en_win = create_nhwindow(NHW_MENU);
 	putstr(en_win, 0, "Current Status:");
 	putstr(en_win, 0, "");
-
+	
+	if(check_partial_action())
+		putstr(en_win, 0, "You have used your partial action this round.");
+	
 	if (uclockwork){
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to high speed.");
 		if(u.ucspeed==NORM_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to normal speed.");

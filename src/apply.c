@@ -7880,6 +7880,14 @@ partial_action()
 	return res;
 }
 
+//Returns 0 if this is the first time its called this round, 1 otherwise.
+int
+check_partial_action()
+{
+	return ((moves == u.last_used_move) &&
+	      (youmonst.movement == u.last_used_movement));
+}
+
 #endif /* OVLB */
 
 /*apply.c*/

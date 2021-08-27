@@ -64,6 +64,7 @@ E void FDECL(use_magic_whistle, (struct obj *));
 E int FDECL(unfixable_trouble_count,(BOOLEAN_P));
 E int NDECL(dotrephination_menu);
 E int NDECL(partial_action);
+E int NDECL(check_partial_action);
 E int FDECL(check_res_engine, (struct monst *, int));
 E void FDECL(add_class, (char *, char));
 E void FDECL(salve_effect, (struct obj *));
