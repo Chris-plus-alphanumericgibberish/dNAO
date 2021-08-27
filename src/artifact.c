@@ -3080,7 +3080,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 					if(otmp2->quan > 1L){
 						otmp2 = splitobj(otmp2, 1L);
 						obj_extract_self(otmp2); //wornmask is cleared by splitobj
-					} else{
+					} else {
 						obj_extract_self(otmp2);
 						if ((unwornmask = otmp2->owornmask) != 0L) {
 							mdef->misc_worn_check &= ~unwornmask;
@@ -5563,7 +5563,7 @@ arti_invoke(obj)
 	int windpets[8] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_ICE_PARAELEMENTAL, PM_ICE_VORTEX,
 					   PM_ENERGY_VORTEX, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL};
 	coord cc;
-	int n, damage;
+	int n, damage, time = 1;
 	struct permonst *pm;
 	struct monst *mtmp = 0;
 	if (!oart || !oart->inv_prop) {
@@ -8479,18 +8479,22 @@ arti_invoke(obj)
         case STONE_DRAGON:
 			You("wake the stone dragonhead.");
 			doliving_dragonhead(&youmonst, obj, TRUE);
+			time = partial_action();
 		break;
         case MAD_KING:
 			You("wake the mad king.");
 			doliving_mad_king(&youmonst, obj, TRUE);
+			time = partial_action();
 		break;
         case RINGED_SPEAR:
 			You("wake the ringed spear.");
 			doliving_ringed_spear(&youmonst, obj, TRUE);
+			time = partial_action();
 		break;
         case RINGED_ARMOR:
 			You("wake the ringed armor.");
 			doliving_ringed_armor(&youmonst, obj, TRUE);
+			time = partial_action();
 		break;
 		case BLOODLETTER:
 			if (!uwep || uwep != obj){
@@ -8665,7 +8669,7 @@ nothing_special:
 		}
 	}
 
-    return 1;
+    return time;
 }
 
 int
