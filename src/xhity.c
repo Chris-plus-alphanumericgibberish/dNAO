@@ -9216,7 +9216,7 @@ int vis;
 	int result = MM_MISS;
 	int dmg = d(attk->damn, attk->damd);
 	int fulldmg = dmg;
-	char buf[BUFSZ];
+	static char buf[BUFSZ]; /* Used to hold variable messages to be displayed later */
 	struct obj * otmp;
 
 	/* apply half-phys */
