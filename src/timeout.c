@@ -2507,6 +2507,10 @@ genericptr_t arg;
 long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
+	if (DEADMONSTER(mon)) {
+		/* already dead, necessary cleanup will be done by cleanup_msummon() */
+		return;
+	}
 	if(get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->permanent) {
 		start_timer(9999, TIMER_MONSTER, DESUMMON_MON, arg);
 		return;
