@@ -3802,7 +3802,7 @@ STAIR: (74,20), down
 NON_DIGGABLE:(00,00,75,20)
 
 MONSTER:'&',"Demogorgon",(60,10)
-CONTAINER:'#',"dragonbone chest",(61,09)
+CONTAINER:'#',"dragonbone chest",(60,10)
 OBJECT:'|',"wage of pride",contained
 OBJECT:'|',"wage of pride",contained
 OBJECT:'|',"wage of pride",contained
