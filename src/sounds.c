@@ -1773,7 +1773,9 @@ asGuardian:
 			if(tmpm->mtame > 10){
 				tmpm->mtame -= 10;
 				tmpm->mflee = 1;
-			} else untame(mtmp, 1);
+			} else if (tmpm->mtame) {
+				untame(tmpm, 1);
+			}
 		}
 	    aggravate();
 	}break;
