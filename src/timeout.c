@@ -1045,6 +1045,10 @@ long timeout;
 			    bomb->owornmask &= ~W_WEP;
 			    MON_NOWEP(mtmp);
 			}
+			if (bomb == MON_SWEP(mtmp)) {
+			    bomb->owornmask &= ~W_SWAPWEP;
+			    MON_NOSWEP(mtmp);
+			}
 			if (!silent) {
 			    if (canseemon(mtmp))
 				You("see %s engulfed in an explosion!", mon_nam(mtmp));
