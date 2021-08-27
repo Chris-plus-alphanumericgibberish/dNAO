@@ -566,7 +566,7 @@ int *fail_reason;
 	struct obj *item;
 	coord cc;
 	boolean historic = (Role_if(PM_ARCHEOLOGIST) && !flags.mon_moving && (statue->spe & STATUE_HISTORIC));
-	char statuename[BUFSZ];
+	char statuename[BUFSZ], grateful = FALSE;
 
 	Strcpy(statuename,the(xname(statue)));
 
@@ -621,12 +621,14 @@ int *fail_reason;
 	    return (struct monst *)0;
 	}
 	
-	if(Role_if(PM_BARD) && mon && cause == ANIMATE_SPELL && rnd(20) < ACURR(A_CHA) && 
+	if(mon && cause == ANIMATE_SPELL && rnd(20) < ACURR(A_CHA) && 
 		!(is_animal(mon->data) || mindless_mon(mon))
 	){
 		struct monst *newmon;
 		newmon = tamedog(mon, (struct obj *)0);
 		if(newmon) mon = newmon;
+		if(canspotmon(mon) && mon->mtame)
+			grateful = TRUE;
 	}
 
 	/* in case statue is wielded and hero zaps stone-to-flesh at self */
@@ -664,6 +666,8 @@ int *fail_reason;
 	    		canspotmon(mon) ? comes_to_life : "disappears");
 	    } else if(cansee(x,y)) pline_The("statue %s!",
 			canspotmon(mon) ? comes_to_life : "disappears");
+		if(grateful)
+			pline("%s is incredibly grateful!", Monnam(mon));
 	    if (historic) {
 		    You_feel("guilty that the historic statue is now gone.");
 		    adjalign(-1);
