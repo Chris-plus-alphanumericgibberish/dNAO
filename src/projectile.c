@@ -815,7 +815,13 @@ boolean forcedestroy;			/* If TRUE, make sure the projectile is destroyed */
 				return;
 			}
 			else {
-				mpickobj(u.ustuck, thrownobj);
+				if (thrownobj != uball)
+					mpickobj(u.ustuck, thrownobj);
+				else {
+					/* ball-related stuff */
+					thrownobj->owornmask |= (old_wep_mask&(W_CHAIN|W_BALL));
+					drop_ball(u.ux, u.uy);
+				}
 				*thrownobj_p = NULL;
 				return;
 			}
