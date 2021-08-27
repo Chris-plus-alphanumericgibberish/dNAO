@@ -1823,7 +1823,7 @@ int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 	/*** Madnesses ***/
 	if(u.usanity < 100 && !ClearThoughts){
 		if (u.umadness&MAD_DELUSIONS){
-			you_have("a tendency to hallucinate, obscuring some monsters true forms");
+			you_have("a tendency to hallucinate, obscuring some monsters' true forms");
 		}
 		if(u.usanity < 80 && u.umadness&MAD_REAL_DELUSIONS){
 			enl_msg("Some monsters ", "will change", "changed", " forms randomly");
