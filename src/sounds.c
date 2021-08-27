@@ -1770,10 +1770,11 @@ asGuardian:
 	    pline_msg = "howls.";
 		(void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(tmpm->mtame > 10){
-				tmpm->mtame -= 10;
-				tmpm->mflee = 1;
-			} else untame(mtmp, 1);
+			if(tmpm->mtame && rn2(tmpm->mtame + 1)){
+				tmpm->mtame--;
+				if (!tmpm->mtame)
+					untame(tmpm, 1);
+			}
 		}
 	    aggravate();
 	}break;
