@@ -2623,8 +2623,12 @@ long timeout;	/* unused */
 	    }
 	} else if (obj->where == OBJ_MINVENT && obj->owornmask) {
 	    if (obj == MON_WEP(obj->ocarry)) {
-		setmnotwielded(obj->ocarry,obj);
-		MON_NOWEP(obj->ocarry);
+			setmnotwielded(obj->ocarry,obj);
+			MON_NOWEP(obj->ocarry);
+	    }
+		if (obj == MON_SWEP(obj->ocarry)) {
+			setmnotwielded(obj->ocarry,obj);
+			MON_NOSWEP(obj->ocarry);
 	    }
 	}
 	// rot_organic(arg, timeout); //This is not for corpses, it is for buried containers.
