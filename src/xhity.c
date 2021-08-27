@@ -6932,7 +6932,7 @@ boolean ranged;
 					pline("%s %s.", Monnam(magr), magr->minvent ?
 						"brags about the goods some dungeon explorer provided" :
 						"makes some remarks about how difficult theft is lately");
-					if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
+					if (!tele_restrict(magr)) (void)rloc(magr, TRUE);
 					return MM_AGR_STOP;
 				}
 				else if (magr->mcan || engring || Chastity) {
@@ -6944,7 +6944,7 @@ boolean ranged;
 							(is_neuter(magr->data) || flags.female == magr->female) ? "unaffected" : "uninterested");
 					}
 					if (rn2(3)) {
-						if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
+						if (!tele_restrict(magr)) (void)rloc(magr, TRUE);
 						return MM_AGR_STOP;
 					}
 					break;
@@ -6962,7 +6962,7 @@ boolean ranged;
 						return MM_AGR_STOP;
 					} else {
 						if (!tele_restrict(magr))
-							(void)rloc(magr, FALSE);
+							(void)rloc(magr, TRUE);
 						monflee(magr, 0, FALSE, FALSE);
 						return MM_AGR_STOP;
 					}
@@ -7039,7 +7039,7 @@ boolean ranged;
 					else if (magr->data->mlet == S_NYMPH &&
 						!tele_restrict(magr)
 					){
-						(void)rloc(magr, FALSE);
+						(void)rloc(magr, TRUE);
 						result |= MM_AGR_STOP;
 						if (vis && !canspotmon(magr))
 							pline("%s suddenly disappears!", buf);
@@ -7119,7 +7119,7 @@ boolean ranged;
 						pline("%s steals some gold from %s.", buf, mon_nam(mdef));
 					}
 					if (!tele_restrict(magr)) {
-						(void)rloc(magr, FALSE);
+						(void)rloc(magr, TRUE);
 						result |= MM_AGR_STOP;
 						if (vis && !canspotmon(magr))
 							pline("%s suddenly disappears!", Monnam(magr));
@@ -7239,7 +7239,7 @@ boolean ranged;
 				we'll get "it" in the suddenly disappears message */
 				if (vis) Strcpy(mdef_Monnam, Monnam(mdef));
 				mdef->mstrategy &= ~STRAT_WAITFORU;
-				(void)rloc(mdef, FALSE);
+				(void)rloc(mdef, TRUE);
 				result |= MM_AGR_STOP;	/* defender moved */
 				if (vis && !canspotmon(mdef)
 #ifdef STEED
@@ -7724,7 +7724,7 @@ boolean ranged;
 				if (!rn2(33)) {
 					/* run/teleport away */
 					if (!tele_restrict(magr))
-						(void)rloc(magr, FALSE);
+						(void)rloc(magr, TRUE);
 					monflee(magr, d(3, 6), TRUE, FALSE);
 					return MM_AGR_STOP;	/* maybe teleported away, definitely not continuing to attack */
 				}
@@ -7998,7 +7998,7 @@ boolean ranged;
 		/* hitter tries to teleport without making an attack */
 		if (!youagr) {
 			if (!tele_restrict(magr)) {
-				(void)rloc(magr, FALSE);
+				(void)rloc(magr, TRUE);
 				return MM_AGR_STOP;
 			}
 		}
@@ -11747,7 +11747,7 @@ int vis;
 				pline("%s %s.", Monnam(magr), magr->minvent ?
 					"brags about the goods some dungeon explorer provided" :
 					"makes some remarks about how difficult theft is lately");
-				if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
+				if (!tele_restrict(magr)) (void)rloc(magr, TRUE);
 				return MM_AGR_STOP;
 			}
 			else if (magr->mcan || engring || Chastity) {
@@ -11758,7 +11758,7 @@ int vis;
 						(is_neuter(pa) || flags.female == magr->female) ? "unaffected" : "uninterested");
 				}
 				if (rn2(3)) {
-					if (!tele_restrict(magr)) (void)rloc(magr, FALSE);
+					if (!tele_restrict(magr)) (void)rloc(magr, TRUE);
 					return MM_AGR_STOP;
 				}
 				break;
@@ -11771,7 +11771,7 @@ int vis;
 				break;
 			default:
 				if (!is_animal(pa) && !tele_restrict(magr))
-					(void)rloc(magr, FALSE);
+					(void)rloc(magr, TRUE);
 				if (is_animal(pa) && *buf) {
 					if (canseemon(magr))
 						pline("%s tries to %s away with %s.",
@@ -15247,7 +15247,7 @@ int vis;						/* True if action is at all visible to the player */
 					tele();
 				}
 				else {
-					rloc(magr, FALSE);
+					rloc(magr, TRUE);
 				}
 				if (enexto(&cc, x(magr), y(magr), &mons[PM_URANIUM_IMP])) {
 					rloc_to(mdef, cc.x, cc.y);
@@ -15255,7 +15255,7 @@ int vis;						/* True if action is at all visible to the player */
 			}
 			else {
 				/* if no attacker, the uranium imp teleports at random */
-				rloc(mdef, FALSE);
+				rloc(mdef, TRUE);
 			}
 			
 			return MM_AGR_STOP;

@@ -1053,7 +1053,7 @@ struct obj *obj;
 		setnotworn(obj); /* in case mirror was wielded */
 		freeinv(obj);
 		(void) mpickobj(mtmp,obj);
-		if (!tele_restrict(mtmp)) (void) rloc(mtmp, FALSE);
+		if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
 	} else if(!mtmp->mcan && !mtmp->minvis && is_weeping(mtmp->data)) {
 		if (vis)
 			pline ("%s stares at its reflection with a stony expression.", Monnam(mtmp));

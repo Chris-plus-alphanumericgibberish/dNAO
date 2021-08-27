@@ -520,7 +520,7 @@ fixup_special()
 				for (y = 0; y<ROWNO; y++){
 					levl[x][y].lit = TRUE;
 					if (m_at(x, y) && !ACCESSIBLE(levl[x][y].typ))
-						rloc(m_at(x, y), FALSE);
+						rloc(m_at(x, y), TRUE);
 					if(OBJ_AT(x, y) && !ACCESSIBLE(levl[x][y].typ))
 						rlocos_at(x, y);
 					if(In_mithardir_desert(&u.uz) && IS_WALL(levl[x][y].typ)){
@@ -600,7 +600,7 @@ fixup_special()
 			for (x = 2; x <= x_maze_max; x++)
 			for (y = 2; y <= y_maze_max; y++){
 				if (m_at(x, y) && !ACCESSIBLE(levl[x][y].typ))
-					rloc(m_at(x, y), FALSE);
+					rloc(m_at(x, y), TRUE);
 			}
 		}
 		if (Is_sumall(&u.uz)){
@@ -608,7 +608,7 @@ fixup_special()
 			for (y = 2; y <= y_maze_max; y++){
 				if (levl[x][y].typ == STONE) levl[x][y].typ = HWALL;
 				if (levl[x][y].typ == ROOM) levl[x][y].lit = TRUE;
-				if (!ZAP_POS(levl[x][y].typ) && m_at(x, y)) rloc(m_at(x, y), FALSE);
+				if (!ZAP_POS(levl[x][y].typ) && m_at(x, y)) rloc(m_at(x, y), TRUE);
 			}
 			wallification(1, 1, COLNO - 1, ROWNO - 1);
 		}

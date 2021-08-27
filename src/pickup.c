@@ -3461,7 +3461,7 @@ tipmonster:
 				mtmp->mpeaceful = TRUE;
 				
 				if (!tele_restrict(mtmp)) {
-					(void)rloc(mtmp, FALSE);
+					(void)rloc(mtmp, TRUE);
 					if (canspotmon(mtmp))
 						pline("%s suddenly disappears!", Monnam(mtmp));
 				}
