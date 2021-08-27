@@ -1309,6 +1309,8 @@ change_usanity(delta, check)
 int delta;
 boolean check;
 {
+	int starting_sanity = u.usanity;
+	int starting_insanity = Insanity;
 	if(discover || wizard)
 		pline("Sanity change: %d + %d", u.usanity, delta);
 	u.usanity += delta;
@@ -1331,7 +1333,7 @@ boolean check;
 		}
 	}
 	
-	if(check && delta < 0 && ((-delta > rn2(ACURR(A_WIS))) || -delta >= u.usanity/10) && rn2(100) >= u.usanity 
+	if(check && delta < 0 && ((-delta > rn2(ACURR(A_WIS))) || -delta >= starting_sanity/10) && rn2(100) >= starting_sanity 
 		&& !Panicking && !StumbleBlind && !StaggerShock && !Babble && !Screaming && !FaintingFits
 	){
 		switch(rn2(5)){
@@ -1340,35 +1342,35 @@ boolean check;
 					You_feel("a little panicky.");
 				else
 					You("panic in your insanity!");
-				HPanicking = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
+				HPanicking = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 1:
 				if(ClearThoughts)
 					You_feel("a little off balance.");
 				else
 					You("stumble blindly in your insanity!");
-				HStumbleBlind = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
+				HStumbleBlind = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 2:
 				if(ClearThoughts)
 					You_feel("a little shocked.");
 				else
 					You("stagger in shock!");
-				HStaggerShock = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
+				HStaggerShock = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 3:
 				if(ClearThoughts)
 					You_feel("a little incoherent.");
 				else
 					You("begin babbling incoherently!");
-				HBabble = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
+				HBabble = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 4:
 				if(ClearThoughts)
 					You_feel("a little frightened.");
 				else
 					You("begin screaming in terror and madness!");
-				HScreaming = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
+				HScreaming = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			/*Dummied out for being unusually nasty and non-interactive*/
 			// case 5:
@@ -1376,7 +1378,7 @@ boolean check;
 					// You_feel("a little faint.");
 				// else
 					// You(Hallucination ? "have a case of the vapors!" : "feel faint!");
-				// HFaintingFits = 1+rnd((Insanity)/10+1)+rnd((Insanity)/10+1);
+				// HFaintingFits = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			// break;
 		}
 		nomul(0, NULL);
