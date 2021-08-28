@@ -876,11 +876,11 @@ E boolean FDECL(allied_faction, (int,int));
 
 E int NDECL(doattributes);
 E int NDECL(doconduct);
-
-E void FDECL(enlightenment, (int, boolean));
-E void FDECL(show_conduct, (int, boolean));
-E void NDECL(signs_mirror);
+E int NDECL(doenlightenment);
 E void NDECL(udr_enlightenment);
+E void NDECL(signs_mirror);
+E void FDECL(show_enlightenment, (int, boolean));
+E void FDECL(show_conduct, (int, boolean));
 
 /* ### exper.c ### */
 

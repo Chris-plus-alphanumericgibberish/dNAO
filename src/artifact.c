@@ -5796,7 +5796,7 @@ arti_invoke(obj)
 				  (char *)0);
 	}break;
 	case ENLIGHTENING:
-	    enlightenment(0, FALSE);
+	    (void)doenlightenment();
 	break;
 	case CREATE_AMMO: {
 	    struct obj *otmp;
@@ -6805,7 +6805,7 @@ arti_invoke(obj)
 				if((obj->spe > -6)){
 					exercise(A_WIS, TRUE);
 					exercise(A_WIS, TRUE);
-					enlightenment(FALSE, FALSE); //not dead yet!
+					doenlightenment(); //not dead yet!
 					unrestrict_weapon_skill(P_SPEAR);
 				    discover_artifact(ART_ROD_OF_SEVEN_PARTS);
 					identify(obj);

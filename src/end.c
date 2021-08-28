@@ -615,12 +615,12 @@ boolean taken;
 	    c = ask ? yn_function("Do you want to see your attributes?",
 				  ynqchars, defquery) : defquery;
 	    if (c == 'y')
-		enlightenment(how >= PANICKED ? 1 : 2, FALSE); /* final */
+		show_enlightenment(how >= PANICKED ? 1 : 2, FALSE); /* final */
 	    if (c == 'q') done_stopprint++;
 	}
 #ifdef DUMP_LOG
 	if (dump_fp) {
-	  enlightenment((int) (how >= PANICKED ? 1 : 2), TRUE);
+	  show_enlightenment((int) (how >= PANICKED ? 1 : 2), TRUE);
 	  dump_spells();
 	}
 #endif

@@ -762,7 +762,7 @@ peffects(otmp)
 			}
 			You_feel("self-knowledgeable...");
 			display_nhwindow(WIN_MESSAGE, FALSE);
-			enlightenment(0, FALSE);
+			doenlightenment();
 			pline_The("feeling subsides.");
 			exercise(A_WIS, TRUE);
 		}

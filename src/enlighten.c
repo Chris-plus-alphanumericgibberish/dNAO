@@ -122,7 +122,7 @@ doattributes()
 			udr_enlightenment();
 			break;
 		case DOATTRIB_ENLIGHTEN:
-			enlightenment(0, FALSE);
+			doenlightenment();
 			break;
 		case DOATTRIB_BINDINGS:
 			signs_enlightenment();
@@ -147,6 +147,12 @@ doconduct()
 	return 0;
 }
 
+int
+doenlightenment()
+{
+	show_enlightenment(0, FALSE);
+	return 0;
+}
 
 /*
  * Courtesy function for non-debug, non-explorer mode players
@@ -275,7 +281,7 @@ minimal_enlightenment()
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'c', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
-		//enlightenment(0);
+		//doenlightenment();
 	}
 	if (u.sealsActive || u.specialSealsActive) {
 		Sprintf(buf, "Describe your binding marks.");
@@ -302,7 +308,7 @@ minimal_enlightenment()
 
 
 void
-enlightenment(final, dumping)
+show_enlightenment(final, dumping)
 int final;	/* 0 => still in progress; 1 => over, survived; 2 => dead */
 boolean dumping;
 {
