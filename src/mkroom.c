@@ -5558,7 +5558,7 @@ register int edge; /* Allows room walls to intrude slightly into river. */
 	
 	if (typ!=TREE || (!edge && rn2(6))){
 		if(m_at(x, y))
-			rloc(m_at(x, y), FALSE);
+			rloc(m_at(x, y), TRUE);
 		levl[x][y].typ = MOAT;
 	}
 	// else if ((typ == SCORR || typ == CORR || IS_DOOR(typ)
