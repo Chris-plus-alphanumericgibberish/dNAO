@@ -130,7 +130,8 @@ int ox_id;
 	void * ox_p2;
 	if ((ox_p1 = get_ox(obj1, ox_id))) {
 		ox_p2 = get_ox(obj2, ox_id);
-		if(!ox_p2) {
+		if(!ox_p2 || ox_list[ox_id].s_size == -1) {
+			rem_ox(obj2, ox_id);
 			if (ox_list[ox_id].s_size != -1)
 				add_ox(obj2, ox_id);
 			else

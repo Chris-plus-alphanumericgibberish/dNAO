@@ -516,6 +516,7 @@ register struct obj *otmp;
 	    subfrombill(otmp, shop_keeper(*u.ushops));
 	dummy = newobj(0);
 	*dummy = *otmp;
+	dummy->oextra_p = NULL;
 	dummy->where = OBJ_FREE;
 	dummy->o_id = flags.ident++;
 	if (!dummy->o_id) dummy->o_id = flags.ident++;	/* ident overflowed */
