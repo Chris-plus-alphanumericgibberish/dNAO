@@ -916,6 +916,17 @@ A("Callandor",			CRYSTAL_SWORD,					(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("The Unstoppable",	CROSSBOW,						(const char *)0,
+	3000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_PHYS, 12, 8), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+/*Needs encyc entry*/
 A("Yoichi no yumi",		YUMI,							(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
