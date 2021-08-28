@@ -5801,8 +5801,8 @@ int faction;
 					(void) mongets(mtmp, VICTORIAN_UNDERWEAR, mkobjflags);
 				break;
 				case PM_VLAD_THE_IMPALER:
-					(void) mongets(mtmp, LONG_SWORD, mkobjflags);
-					(void) mongets(mtmp, KITE_SHIELD, mkobjflags);
+					(void) mongets(mtmp, SCIMITAR, mkobjflags);
+					(void) mongets(mtmp, ROUNDSHIELD, mkobjflags);
 					(void) mongets(mtmp, HELMET, mkobjflags);
 					if(!rn2(8)) mongets(mtmp, find_opera_cloak(), mkobjflags);
 					(void) mongets(mtmp, PLATE_MAIL, mkobjflags);
