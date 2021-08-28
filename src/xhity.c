@@ -17019,7 +17019,7 @@ struct monst * mdef;
 	int cnum;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	boolean visible = (youdef || canseemon(magr));
+	boolean visible = (youdef || canseemon(mdef));
 	struct permonst *pd, *pa;
 	struct obj *otmp;
 	
