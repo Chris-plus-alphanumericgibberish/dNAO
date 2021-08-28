@@ -354,7 +354,7 @@ tactics(mtmp)
 			if(flags.stag && In_quest(&u.uz)){
 				if (In_W_tower(mtmp->mx, mtmp->my, &u.uz) ||
 					(mtmp->iswiz && !xdnstair && !mon_has_amulet(mtmp))) {
-					if (!rn2(3 + mtmp->mhp/10)) (void) rloc(mtmp, FALSE);
+					if (!rn2(3 + mtmp->mhp/10)) (void) rloc(mtmp, TRUE);
 				} else if (xdnstair &&
 					 (mtmp->mx != xdnstair || mtmp->my != ydnstair)) {
 					(void) mnearto(mtmp, xdnstair, ydnstair, TRUE);
@@ -362,7 +362,7 @@ tactics(mtmp)
 			} else {
 				if (In_W_tower(mtmp->mx, mtmp->my, &u.uz) ||
 					(mtmp->iswiz && !xupstair && !mon_has_amulet(mtmp))) {
-					if (!rn2(3 + mtmp->mhp/10)) (void) rloc(mtmp, FALSE);
+					if (!rn2(3 + mtmp->mhp/10)) (void) rloc(mtmp, TRUE);
 				} else if (xupstair &&
 					 (mtmp->mx != xupstair || mtmp->my != yupstair)) {
 					(void) mnearto(mtmp, xupstair, yupstair, TRUE);

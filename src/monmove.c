@@ -1104,8 +1104,8 @@ register struct monst *mtmp;
 		&& !(noactions(mtmp))
 		&& !level.flags.noteleport
 	) {
-		(void) rloc(mtmp, FALSE);
-		return(0);
+		if (rloc(mtmp, TRUE))
+			return(0);
 	}
 	
 	if(mtmp->mtyp == PM_DRACAE_ELADRIN){
@@ -1118,7 +1118,7 @@ register struct monst *mtmp;
 			mtmp->mvar_dracaePregTimer += rnd(3);
 		} else if(!mtmp->mpeaceful){
 			int ox = mtmp->mx, oy = mtmp->my;
-			rloc(mtmp, FALSE);
+			rloc(mtmp, TRUE);
 			if(mtmp->mx != ox || mtmp->my != oy){
 				int type = mtmp->mvar_dracaePreg;
 				mtmp->mvar_dracaePreg = 0;
@@ -1506,7 +1506,7 @@ register struct monst *mtmp;
 
 			if (is_demon(youracedata)) {
 			  /* "Good hunting, brother" */
-			    if (!tele_restrict(mtmp)) (void) rloc(mtmp, FALSE);
+			    if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
 			} else {
 			    mtmp->minvis = mtmp->perminvis = 0;
 			    /* Why?  For the same reason in real demon talk */
@@ -2507,8 +2507,8 @@ not_special:
 	} else {
 	    if(is_unicorn(ptr) && rn2(2) && !tele_restrict(mtmp) && !noactions(mtmp))
 		{
-			(void) rloc(mtmp, FALSE);
-			return(1);
+			if(rloc(mtmp, TRUE))
+				return(1);
 	    }
 	    if(mtmp->wormno) worm_nomove(mtmp);
 	}

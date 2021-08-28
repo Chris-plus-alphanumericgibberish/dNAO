@@ -4345,7 +4345,7 @@ struct monst *mon;
 		if(cansee(xlocale, ylocale)) pline("Dark waters swallow Nitocris!");
 		mtmp = revive(obj, FALSE);
 		if(mtmp)
-			rloc(mtmp, FALSE);
+			rloc(mtmp, TRUE);
 		return;//No further action.
 	}
 	if(!rn2(70)){
@@ -4456,7 +4456,7 @@ struct monst *mon;
 			if(cansee(xlocale, ylocale)) pline("Dark waters swallow Nitocris!");
 			mtmp = revive(obj, FALSE);
 			if(mtmp)
-				rloc(mtmp, FALSE);
+				rloc(mtmp, TRUE);
 		}
 		return;//No further action.
 	}

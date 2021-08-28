@@ -1423,7 +1423,7 @@ struct monst *mtmp;
 		rloc_to(mtmp, c.x, c.y);
 		return;
 	}
-	(void) rloc(mtmp, FALSE);
+	(void) rloc(mtmp, TRUE);
 }
 
 boolean
@@ -1460,7 +1460,7 @@ int in_sight;
 	     * the guard isn't going to come for it...
 	     */
 	    if (trap->once) mvault_tele(mtmp);
-	    else (void) rloc(mtmp, FALSE);
+	    else (void) rloc(mtmp, TRUE);
 
 	    if (in_sight) {
 		if (canseemon(mtmp))

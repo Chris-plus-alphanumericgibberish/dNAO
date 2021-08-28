@@ -326,7 +326,7 @@ register struct monst *mtmp;
 	if (youracedata->mlet == S_DEMON) {	/* Won't blackmail their own. */
 	    pline("%s says, \"Good hunting, %s.\"",
 		  Amonnam(mtmp), flags.female ? "Sister" : "Brother");
-	    if (!tele_restrict(mtmp)) (void) rloc(mtmp, FALSE);
+	    if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
 	    return(1);
 	}
 #ifndef GOLDOBJ

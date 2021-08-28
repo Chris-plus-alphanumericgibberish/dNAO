@@ -600,7 +600,7 @@ mon_tele:
 		    return 2;
 		}
 		if (oseen && how) makeknown(how);
-		(void) rloc(mtmp, FALSE);
+		(void) rloc(mtmp, TRUE);
 		return 2;
 	case MUSE_WAN_TELEPORTATION:
 		zap_oseen = oseen;
@@ -1280,7 +1280,7 @@ register struct monst *magr;
 			    mtmp->msleeping = 0;
 			    if(mtmp->m_ap_type) see_passive_mimic(mtmp);
 			} else if (!tele_restrict(mtmp))
-			    (void) rloc(mtmp, FALSE);
+			    (void) rloc(mtmp, TRUE);
 		}
 		break;
 	case WAN_CANCELLATION:

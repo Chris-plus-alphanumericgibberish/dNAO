@@ -219,7 +219,7 @@ struct monst * mon;
 		return 0;
 
 	/* teleport */
-	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
+	if (!tele_restrict(mon)) (void) rloc(mon, TRUE);
 
 	return 1;
 }
@@ -1001,7 +1001,7 @@ struct monst * mon;
 			break;
 	}
 	
-	if (!tele_restrict(mon)) (void) rloc(mon, FALSE);
+	if (!tele_restrict(mon)) (void) rloc(mon, TRUE);
 	return 1;
 }
 
