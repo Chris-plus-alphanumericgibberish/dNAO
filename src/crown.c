@@ -5,20 +5,9 @@
 
 #include "hack.h"
 #include "artifact.h"
+#include "gods.h"
 
 STATIC_DCL int NDECL(choose_crowning);
-
-struct crowning {
-	int crowninggift;			/* artifact */
-	const char * title;			/* title displayed in enlightenment and dumplog */
-	const char * announcement;	/* godvoice() announcement -- if godvoice is not used, 0 and special-cased */
-	const char * livelogstr;	/* livelog string */
-	int title_mod;				/* what should %s in the title be filled with? */
-#define CRWN_TTL_LORD	1	/* Lord / Lady */
-#define CRWN_TTL_KING	2	/* King / Queen */
-#define CRWN_TTL_PRIE	3	/* Priest / Priestess */
-#define CRWN_TTL_NAME	4	/* playername */
-};
 
 /* helpers to announce your crowning */
 #define chosen(rest)		"Thou art chosen to " rest "!"
@@ -33,77 +22,91 @@ struct crowning {
 /* NOTE: the numbering of these must be consistent with choose_crowning() */
 static const struct crowning hand_of_elbereth[] = {
 	/* dummy so all non-zero are interesting */
-/*00*/	{0},
-	/* Default */
-/*01*/	{ART_EXCALIBUR,					"the Arm of the Law",					dub_thee_the,							became_the	},
-/*02*/	{ART_VORPAL_BLADE,				"the Envoy of Balance",					"Thou shalt be my %s!",					became_the	},
-/*03*/	{ART_STORMBRINGER,				"the Glory of Arioch",					chosen("steal souls for My Glory"),		became_the	},
+{0},
+	/* Default -- must be indices 1-3 */
+{GOD_NONE,                       ART_EXCALIBUR,					"the Arm of the Law",					dub_thee_the,							became_the	},
+{GOD_NONE,                       ART_VORPAL_BLADE,				"the Envoy of Balance",					"Thou shalt be my %s!",					became_the	},
+{GOD_NONE,                       ART_STORMBRINGER,				"the Glory of Arioch",					chosen("steal souls for My Glory"),		became_the	},
 	/* Monk */
-/*04*/	{ART_GRANDMASTER_S_ROBE,		"the Sage of Law",						dub_thee_the,							became_the	},
-/*05*/	{ART_GRANDMASTER_S_ROBE,		"the Grandmaster of Balance",			"Thou shalt be the %s!",				became_the	},
-/*06*/	{ART_ROBE_OF_THE_ARCHMAGI,		"the Glory of Eequor",					chosen("cause dismay in My Name"),		became_the	},
+{GOD_SHAN_LAI_CHING,             ART_GRANDMASTER_S_ROBE,		"the Sage of Law",						dub_thee_the,							became_the	},
+{GOD_CHIH_SUNG_TZU,              ART_GRANDMASTER_S_ROBE,		"the Grandmaster of Balance",			"Thou shalt be the %s!",				became_the	},
+{GOD_HUAN_TI,                    ART_ROBE_OF_THE_ARCHMAGI,		"the Glory of Eequor",					chosen("cause dismay in My Name"),		became_the	},
 	/* Noble (human, vampire, incant). Vampires always get Dark Lord regardless of alignment */
-/*07*/	{ART_CROWN_OF_THE_SAINT_KING,	"the Saint %s",							verb_thee_the("crown"),					"received the crown of the Saint King",	CRWN_TTL_KING	},
-/*08*/	{ART_CROWN_OF_THE_SAINT_KING,	"the Grey Saint",						verb_thee_the("crown"),					"received the crown of the Saint King"	},
-/*09*/	{ART_HELM_OF_THE_DARK_LORD,		"the Dark %s",							verb_thee_the("crown"),					"received the helm of the Dark Lord",	CRWN_TTL_LORD	},
+{GOD_GOD_THE_FATHER,             ART_CROWN_OF_THE_SAINT_KING,	"the Saint %s",							verb_thee_the("crown"),					"received the crown of the Saint King",	CRWN_TTL_KING	},
+{GOD_MOTHER_EARTH,               ART_CROWN_OF_THE_SAINT_KING,	"the Grey Saint",						verb_thee_the("crown"),					"received the crown of the Saint King"	},
+{GOD_THE_SATAN,                  ART_HELM_OF_THE_DARK_LORD,		"the Dark %s",							verb_thee_the("crown"),					"received the helm of the Dark Lord",	CRWN_TTL_LORD	},
 	/* Wizard. Artifact is replaced by Book of Infinite Spells if Necronomicon already exists. */
-/*10*/	{ART_NECRONOMICON,				"the Magister of Law",					dub_thee_the,							became_the	},
-/*11*/	{ART_NECRONOMICON,				"the Wizard of Balance",				"Thou shalt be the %s!",				became_the	},
-/*12*/	{ART_NECRONOMICON,				"the Glory of Chardros",				chosen("take lives for My Glory"),		became_the	},
-	/* Elf */
-/*13*/	{ART_ARCOR_KERYM,				"the Hand of Elbereth",					verb_thee_the("crown"),					became_the	},
-/*14*/	{ART_ARYFAERN_KERYM,			"the Doomspeaker of Vaire",				dub_thee_the,							became_the	},
-/*15*/	{ART_ARYVELAHR_KERYM,			"the Whisperer of Este",				dub_thee_the,							became_the	},
+{GOD_PTAH,                       ART_NECRONOMICON,				"the Magister of Law",					dub_thee_the,							became_the	},
+{GOD_THOTH,                      ART_NECRONOMICON,				"the Wizard of Balance",				"Thou shalt be the %s!",				became_the	},
+{GOD_ANHUR,                      ART_NECRONOMICON,				"the Glory of Chardros",				chosen("take lives for My Glory"),		became_the	},
+	/* Elf. god order is (Ranger/Female/Male), all identical between them */
+{GOD_OROME,                      ART_ARCOR_KERYM,				"the Hand of Elbereth",					verb_thee_the("crown"),					became_the	},
+{GOD_VARDA_ELENTARI,             ART_ARCOR_KERYM,				"the Hand of Elbereth",					verb_thee_the("crown"),					became_the	},
+{GOD_MANWE_SULIMO,               ART_ARCOR_KERYM,				"the Hand of Elbereth",					verb_thee_the("crown"),					became_the	},
+{GOD_YAVANNA,                    ART_ARYFAERN_KERYM,			"the Doomspeaker of Vaire",				dub_thee_the,							became_the	},
+{GOD_MANDOS,                     ART_ARYFAERN_KERYM,			"the Doomspeaker of Vaire",				dub_thee_the,							became_the	},
+{GOD_YAVANNA,                    ART_ARYFAERN_KERYM,			"the Doomspeaker of Vaire",				dub_thee_the,							became_the	},
+{GOD_TULKAS,                     ART_ARYVELAHR_KERYM,			"the Whisperer of Este",				dub_thee_the,							became_the	},
+{GOD_NESSA,                      ART_ARYVELAHR_KERYM,			"the Whisperer of Este",				dub_thee_the,							became_the	},
+{GOD_LORIEN,                     ART_ARYVELAHR_KERYM,			"the Whisperer of Este",				dub_thee_the,							became_the	},
 	/* Drow */
-/*16*/	{ART_SICKLE_MOON,				"the Hand of Eilistraee",				dub_thee_the,							became_the	},
-/*17*/	{ART_CLAWS_OF_THE_REVENANCER,	"the Hand of Kiaransali",				dub_thee_the,							became_the	},
-/*18*/	{ART_WEB_OF_LOLTH,				"the Hand of Lolth",					verb_thee_the("crown"),					became_the	},
+{GOD_EILISTRAEE,                 ART_SICKLE_MOON,				"the Hand of Eilistraee",				dub_thee_the,							became_the	},
+{GOD_KIARANSALI,                 ART_CLAWS_OF_THE_REVENANCER,	"the Hand of Kiaransali",				dub_thee_the,							became_the	},
+{GOD_LOLTH,                      ART_WEB_OF_LOLTH,				"the Hand of Lolth",					verb_thee_the("crown"),					became_the	},
 	/* Hedrow */
-/*19*/	{0,								"the Shepherd of spiders",				(const char *)0,						"became the Shepherd of the Black Web"	},
-/*20*/	{ART_LOLTH_S_FANG,				"the Sword of Vhaeraun",				dub_thee_the,							became_the	},
-/*21*/	{ART_LOLTH_S_FANG,				"the Fang of Lolth",					dub_thee_the,							became_the	},
+{GOD_EDDERGUD,                   0,								"the Shepherd of spiders",				(const char *)0,						"became the Shepherd of the Black Web"	},
+{GOD_VHAERAUN,                   ART_LOLTH_S_FANG,				"the Sword of Vhaeraun",				dub_thee_the,							became_the	},
+{GOD_LOLTH,                      ART_LOLTH_S_FANG,				"the Fang of Lolth",					dub_thee_the,							became_the	},
 	/* Drow Noble */
-/*22*/	{ART_LIECLEAVER,				"the Blade of Ver'tas",					dub_thee_the,							became_the	},
-/*23*/	{ART_CLAWS_OF_THE_REVENANCER,	"the Hand of Kiaransali",				dub_thee_the,							became_the	},
-/*24*/	{ART_WEB_OF_LOLTH,				"the Hand of Lolth",					verb_thee_the("crown"),					became_the	},
+{GOD_VER_TAS,                    ART_LIECLEAVER,				"the Blade of Ver'tas",					dub_thee_the,							became_the	},
+{GOD_KIARANSALI,                 ART_CLAWS_OF_THE_REVENANCER,	"the Hand of Kiaransali",				dub_thee_the,							became_the	},
+{GOD_LOLTH,                      ART_WEB_OF_LOLTH,				"the Hand of Lolth",					verb_thee_the("crown"),					became_the	},
 	/* Hedrow Noble */
-/*25*/	{ART_LIECLEAVER,				"the Blade of Ver'tas",					dub_thee_the,							became_the	},
-/*26*/	{ART_LOLTH_S_FANG,				"the Hand of Keptolo",					dub_thee_the,							became_the	},
-/*27*/	{ART_RUINOUS_DESCENT_OF_STARS,	"the Hammer of Ghaunadaur",				dub_thee_the,							became_the	},
+{GOD_VER_TAS,                    ART_LIECLEAVER,				"the Blade of Ver'tas",					dub_thee_the,							became_the	},
+{GOD_KEPTOLO,                    ART_LOLTH_S_FANG,				"the Hand of Keptolo",					dub_thee_the,							became_the	},
+{GOD_GHAUNADAUR,                 ART_RUINOUS_DESCENT_OF_STARS,	"the Hammer of Ghaunadaur",				dub_thee_the,							became_the	},
 	/* Ranger */
-/*28*/	{ART_SUNBEAM,					"the High %s of Apollo",				verb_thee_the("anoint"),				"anointed by Apollo",	CRWN_TTL_PRIE},
-/*29*/	{ART_VEIL_OF_LATONA,			"the High %s of Latona",				verb_thee_the("anoint"),				"anointed by Latona",	CRWN_TTL_PRIE},
-/*30*/	{ART_MOONBEAM,					"the High %s of Diana",					verb_thee_the("anoint"),				"anointed by Diana",	CRWN_TTL_PRIE},
+{GOD_APOLLO,                     ART_SUNBEAM,					"the High %s of Apollo",				verb_thee_the("anoint"),				"anointed by Apollo",	CRWN_TTL_PRIE},
+{GOD_LATONA,                     ART_VEIL_OF_LATONA,			"the High %s of Latona",				verb_thee_the("anoint"),				"anointed by Latona",	CRWN_TTL_PRIE},
+{GOD_DIANA,                      ART_MOONBEAM,					"the High %s of Diana",					verb_thee_the("anoint"),				"anointed by Diana",	CRWN_TTL_PRIE},
 	/* Gnome Ranger */
-/*31*/	{ART_STEEL_SCALES_OF_KURTULMAK,	"the Great Slave-Vassal of Kurtulmak",	verb_thee("claim"),						"claimed by Kurtulmak"	},
-/*32*/	{ART_GLITTERSTONE,				"the Thane of Garl Glittergold",		dub_thee,								became_the	},
-/*33*/	{ART_GREAT_CLAWS_OF_URDLEN,		"the Claw of Urdlen",					chosen("rend the Earth in My Name"),	"chosen by Urdlen"	},
+{GOD_KURTULMAK,                  ART_STEEL_SCALES_OF_KURTULMAK,	"the Great Slave-Vassal of Kurtulmak",	verb_thee("claim"),						"claimed by Kurtulmak"	},
+{GOD_GARL_GLITTERGOLD,           ART_GLITTERSTONE,				"the Thane of Garl Glittergold",		dub_thee,								became_the	},
+{GOD_URDLEN,                     ART_GREAT_CLAWS_OF_URDLEN,		"the Claw of Urdlen",					chosen("rend the Earth in My Name"),	"chosen by Urdlen"	},
 	/* Healer */
-/*34*/	{ART_AEGIS,						"the Arm of Athena",					dub_thee_the,							became_the	},
-/*35*/	{ART_HERMES_S_SANDALS,			"the Messenger of Hermes",				dub_thee,								became_the	},
-/*36*/	{ART_POSEIDON_S_TRIDENT,		"the Glory of Poseidon",				dub_thee,								became_the	},
+{GOD_ATHENA,                     ART_AEGIS,						"the Arm of Athena",					dub_thee_the,							became_the	},
+{GOD_HERMES,                     ART_HERMES_S_SANDALS,			"the Messenger of Hermes",				dub_thee,								became_the	},
+{GOD_POSEIDON,                   ART_POSEIDON_S_TRIDENT,		"the Glory of Poseidon",				dub_thee,								became_the	},
 	/*Archeologist*/ /* law -- warrior or high priest? */
-/*37*/	{ART_EHECAILACOCOZCATL,			"the Warrior of Quetzalcoatl",			verb_thee_the("proclaim"),				became_the	},
-/*38*/	{ART_AMHIMITL,					"the Champion of Camaxtli",				verb_thee_the("proclaim"),				became_the	},
-/*39*/	{ART_TECPATL_OF_HUHETOTL,		"the Fire-bearer of Huhetotl",			dub_thee_the,							became_the	},
+{GOD_QUETZALCOATL,               ART_EHECAILACOCOZCATL,			"the Warrior of Quetzalcoatl",			verb_thee_the("proclaim"),				became_the	},
+{GOD_CAMAXTLI,                   ART_AMHIMITL,					"the Champion of Camaxtli",				verb_thee_the("proclaim"),				became_the	},
+{GOD_HUHETOTL,                   ART_TECPATL_OF_HUHETOTL,		"the Fire-bearer of Huhetotl",			dub_thee_the,							became_the	},
 	/*Female Half Dragon Noble*/
-/*40*/	{ART_DRAGONHEAD_SHIELD,			"the Dragon-slayer of Gwyn",			dub_thee_the,							became_the	},
-/*41*/	{ART_CRUCIFIX_OF_THE_MAD_KING,	"the Guardian of the Old Lords",		dub_thee_the,							became_the	},
-/*42*/	{ART_RINGED_BRASS_ARMOR,		"the Darkmoon Champion",				dub_thee_the,							became_the	},
+{GOD_GWYN__LORD_OF_SUNLIGHT,     ART_DRAGONHEAD_SHIELD,			"the Dragon-slayer of Gwyn",			dub_thee_the,							became_the	},
+{GOD_GWYNEVERE__PRINCESS_OF_SUN, ART_CRUCIFIX_OF_THE_MAD_KING,	"the Guardian of the Old Lords",		dub_thee_the,							became_the	},
+{GOD_DARK_SUN_GWYNDOLIN,         ART_RINGED_BRASS_ARMOR,		"the Darkmoon Champion",				dub_thee_the,							became_the	},
 	/* Knight -- lawful only */
-/*43*/	{ART_CLARENT,					"the King of the Angles",				dub_thee,								"crowned %s"	},
-	/* Pirate -- all alignments */
-/*44*/	{ART_REAVER,					"the Pirate King",						(const char *)0,						became_the	},
-	/* Valkyrie -- all alignments, female only */
-/*45*/	{ART_BOW_OF_SKADI,				"the Daughter of Skadi",				"I greet you, my daughter.",			"greeted as a daughter of Skadi"	},
+{GOD_LUGH,                       ART_CLARENT,					"the King of the Angles",				dub_thee,								"crowned %s"	},
+	/* Pirate -- all alignments are identical */
+{GOD_THE_LORD,                   ART_REAVER,					"the Pirate King",						(const char *)0,						became_the	},
+{GOD_THE_DEEP_BLUE_SEA,          ART_REAVER,					"the Pirate King",						(const char *)0,						became_the	},
+{GOD_THE_DEVIL,                  ART_REAVER,					"the Pirate King",						(const char *)0,						became_the	},
+	/* Valkyrie -- female by-role-valkyries of all alignments get Skadi instead of their normal god */
+{GOD_SKADI,                      ART_BOW_OF_SKADI,				"the Daughter of Skadi",				"I greet you, my daughter.",			"greeted as a daughter of Skadi"	},
 	/* Binder */
-/*46*/	{0,								"the Emissary of Elements",				(const char *)0,						became_the	},
+{GOD_THE_VOID,                   0,								"the Emissary of Elements",				(const char *)0,						became_the	},
 	/* Dwarf Knight -- all alignments */
-/*47*/	{ART_ARKENSTONE,				"the King under the Mountain",			"Hail, %s!",							became_the	},
+{GOD_MAHAL,                      ART_ARKENSTONE,				"the King under the Mountain",			"Hail, %s!",							became_the	},
+{GOD_HOLASHNER,                  ART_ARKENSTONE,				"the King under the Mountain",			"Hail, %s!",							became_the	},
+{GOD_ARMOK,                      ART_ARKENSTONE,				"the King under the Mountain",			"Hail, %s!",							became_the	},
 	/* Dwarf Noble -- all alignments */
-/*48*/	{ART_DURIN_S_AXE,				"the Lord of Moria",					"Hail, %s!",							became_the	},
+{GOD_MAHAL,                      ART_DURIN_S_AXE,				"the Lord of Moria",					"Hail, %s!",							became_the	},
+{GOD_HOLASHNER,                  ART_DURIN_S_AXE,				"the Lord of Moria",					"Hail, %s!",							became_the	},
+{GOD_ARMOK,                      ART_DURIN_S_AXE,				"the Lord of Moria",					"Hail, %s!",							became_the	},
 	/* Samurai -- lawful only */
-/*49*/	{ART_YOICHI_NO_YUMI,			"Nasu no %s",							verb_thee("proclaim"),					became_the,	CRWN_TTL_NAME	}
+{GOD_AMATERASU_OMIKAMI,          ART_YOICHI_NO_YUMI,			"Nasu no %s",							verb_thee("proclaim"),					became_the,	CRWN_TTL_NAME	},
+	/* Terminator -- (-1) to avoid confusion with GOD_NONE */
+{-1}
 };
 
 #undef chosen
@@ -114,63 +117,93 @@ static const struct crowning hand_of_elbereth[] = {
 #undef became_the
 
 /* returns the appropriate index of hand_of_elbereth[] for your character */
+/* butt-ugly until I write the player to store the INDEX of their current god instead of their name */
 int
 choose_crowning()
 {
-	int align_offset = 1-(u.ualign.type);
+	/* figure out what index your god is */
+	const char * curr_god;
+	int god_index;
+	int specific_arti = -1;
+	int i;
+	int retval = -1;
+	
+	switch(u.ualign.type)
+	{
+		case A_LAWFUL:
+			curr_god = urole.lgod;
+			break;
+		case A_NEUTRAL:
+			curr_god = urole.ngod;
+			break;
+		case A_CHAOTIC:
+			curr_god = urole.cgod;
+			break;
+	}
 
-	/* binder */
-	if (Role_if(PM_EXILE))
-		return 46;
-	/* alignment-spanning */
-	if (Pantheon_if(PM_PIRATE) || Role_if(PM_PIRATE))
-		return 44;
-	if((Pantheon_if(PM_VALKYRIE) || Role_if(PM_VALKYRIE)) && flags.initgend)
-		return 45;
-	if (Race_if(PM_DWARF) && Role_if(PM_KNIGHT))
-		return 47;
-	if (Race_if(PM_DWARF) && Role_if(PM_NOBLEMAN))
-		return 48;
-	/* racial */
-	if (Race_if(PM_DROW))
-		return 16 + align_offset + 3*(!flags.initgend) + 6*(Role_if(PM_NOBLEMAN));
-	if (Race_if(PM_ELF))
-		return 13 + align_offset;
-	/* gnome ranger */
-	if (Race_if(PM_GNOME) && Role_if(PM_RANGER))
-		return 31 + align_offset;
-	/* default ranger */
-	if(Pantheon_if(PM_RANGER) || Role_if(PM_RANGER))
-		return 28 + align_offset;
-	/* female half-dragon noble */
-	if (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
-		return 40 + align_offset;
-	/* vampire noble */
-	if (Race_if(PM_VAMPIRE) && (Pantheon_if(PM_NOBLEMAN) || Role_if(PM_NOBLEMAN)))
-		return 9;
-	/* non-vampire noble */
-	if (Pantheon_if(PM_NOBLEMAN) || Role_if(PM_NOBLEMAN))
-		return 7 + align_offset;
-	/* lawful knight */
-	if ((Pantheon_if(PM_KNIGHT) || Role_if(PM_KNIGHT)) && u.ualign.type == A_LAWFUL)
-		return 43;
-	/* lawful samurai */
-	if ((Pantheon_if(PM_SAMURAI) || Role_if(PM_SAMURAI)) && u.ualign.type == A_LAWFUL)
-		return 49;
-	/* monk */
-	if (Pantheon_if(PM_MONK) || Role_if(PM_MONK))
-		return 4 + align_offset;
-	/* wizard */
-	if (Pantheon_if(PM_WIZARD) || Role_if(PM_WIZARD))
-		return 10 + align_offset;
-	/* healer */
-	if (Pantheon_if(PM_HEALER) || Role_if(PM_HEALER))
-		return 34 + align_offset;
-	/* archeologist */
-	if (Pantheon_if(PM_ARCHEOLOGIST) || Role_if(PM_ARCHEOLOGIST))
-		return 37 + align_offset;
-	/* default */
-	return 1 + align_offset;
+	for (i=1; i<MAX_GOD; i++) {
+		if(!strcmp(curr_god, godlist[i].name)) {
+			god_index = i;
+			break;
+		}
+	}
+	/* actually do what this function should do */
+
+	/* special cases */
+	/* real valkyries get Skadi */
+	if (Role_if(PM_VALKYRIE) && flags.female && (
+		god_index == GOD_TYR ||
+		god_index == GOD_ODIN ||
+		god_index == GOD_LOKI
+	)) {
+		god_index = GOD_SKADI;
+	}
+	/* Vampire nobles get the Satan */
+	if (Race_if(PM_VAMPIRE) && (
+		god_index == GOD_GOD_THE_FATHER ||
+		god_index == GOD_MOTHER_EARTH
+	)) {
+		god_index = GOD_THE_SATAN;
+	}
+	/* Dwarf Pantheon has different crownings between Knight/Noble */
+	if (god_index == GOD_MAHAL ||
+		god_index == GOD_HOLASHNER ||
+		god_index == GOD_ARMOK
+	) {
+		if (Role_if(PM_KNIGHT))
+			specific_arti = ART_ARKENSTONE;
+		else if (Role_if(PM_NOBLEMAN))
+			specific_arti = ART_DURIN_S_AXE;
+	}
+	/* Lolth has different crownings between male/female start-gender */
+	if (god_index == GOD_LOLTH) {
+		if (flags.initgend)
+			specific_arti = ART_WEB_OF_LOLTH;
+		else
+			specific_arti = ART_LOLTH_S_FANG;
+	}
+
+	/* get correct entry from table */
+	for (i=1; hand_of_elbereth[i].godnum != -1; i++) {
+		if (hand_of_elbereth[i].godnum == god_index && (specific_arti == -1 || specific_arti == hand_of_elbereth[i].crowninggift)) {
+			retval = i;
+			break;
+		}
+	}
+	/* default case; retval was not set above */
+	/* requires first three entries of hand_of_elbereth to be the default Law/Neu/Cha crownings */
+	if (retval == -1) {
+		switch(u.ualign.type) {
+			case A_LAWFUL:  retval = 1; break;
+			case A_NEUTRAL: retval = 2; break;
+			case A_CHAOTIC: retval = 3; break;
+			default:
+				impossible("Player alignment is %d?", u.ualign.type);
+				retval = 1;
+				break;
+		}
+	}
+	return retval;
 }
 
 const char *
@@ -226,15 +259,18 @@ gcrownu()
 	/* print the announcement of your crowning */
 	/* special case -- not using godvoice */
 	if (!crowndata->announcement) {
-		switch (u.uevent.uhand_of_elbereth) {
-			case 19:
+		switch (hand_of_elbereth[u.uevent.uhand_of_elbereth].godnum) {
+			case GOD_EDDERGUD:
+				/* question for Chris: should this be godvoice'd? */
 				verbalize("As shadows define the light, so too do webs define the spider.");
 				verbalize("You shall be my shepherd, to wrap the world in webs of shadow!");
 				break;
-			case 44:
+			case GOD_THE_LORD:
+			case GOD_THE_DEEP_BLUE_SEA:
+			case GOD_THE_DEVIL:
 				verbalize("Hurrah for our Pirate King!");
 				break;
-			case 46:
+			case GOD_THE_VOID:
 				You("suddenly perceive 15 pairs of star-like eyes, staring at you from within your head.");
 				pline("<<We are the Council of Elements>>");
 				pline("<<Guardians of the Material world>>");
@@ -260,6 +296,7 @@ gcrownu()
 			Strcpy(buf, crowndata->announcement);
 		}
 		/* speak it! */
+		/* TODO: godvoice based on godnum */
 		godvoice(Align2gangr(u.ualign.type), buf);
 	}
 
@@ -296,11 +333,11 @@ gcrownu()
 	/* special cases: those that don't get artifact gifts at all */
 	if (!crowndata->crowninggift) {
 		obj = (struct obj *)0;
-		switch(u.uevent.uhand_of_elbereth) {
-			case 19:
+		switch(hand_of_elbereth[u.uevent.uhand_of_elbereth].godnum) {
+			case GOD_EDDERGUD:
 				u.specialSealsKnown |= SEAL_BLACK_WEB;
 				break;
-			case 46:
+			case GOD_THE_VOID:
 				bindspirit(COUNCIL);
 				break;
 			default:

@@ -529,6 +529,7 @@ E NEARDATA anything zeroany;   /* init'd and defined in decl.c */
 E NEARDATA struct you u;
 
 #include "onames.h"
+#include "gnames.h"
 #ifndef PM_H		/* (pm.h has already been included via youprop.h) */
 #include "pm.h"
 #endif
