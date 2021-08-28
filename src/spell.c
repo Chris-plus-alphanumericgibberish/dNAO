@@ -3600,7 +3600,7 @@ spiriteffects(power, atme)
 		case PWR_ENLIGHTENMENT:
 			You_feel("self-knowledgeable...");
 			display_nhwindow(WIN_MESSAGE, FALSE);
-			enlightenment(0);
+			enlightenment(0, FALSE);
 			pline_The("feeling subsides.");
 		break;
 		case PWR_DAMNING_DARKNESS:
