@@ -712,20 +712,20 @@ boolean pets_only;	/* true for ascension or final escape */
 		&& !(mtmp->mstrategy & STRAT_WAITFORU)) {
 			stay_behind = FALSE;
 			if (mtmp->mtame && mtmp->mwait && u.usteed != mtmp && (mtmp->mwait+100 > monstermoves)) {
-				if (canseemon(mtmp))
+				if (canspotmon(mtmp))
 					pline("%s obediently waits for you to return.", Monnam(mtmp));
 				stay_behind = TRUE;
 			} else if (mtmp->mtame && mtmp->meating && mtmp != u.usteed) {
-				if (canseemon(mtmp))
+				if (canspotmon(mtmp))
 					pline("%s is still eating.", Monnam(mtmp));
 				stay_behind = TRUE;
 			} else if (mon_has_amulet(mtmp)) {
-				if (canseemon(mtmp))
+				if (canspotmon(mtmp))
 					pline("%s seems very disoriented for a moment.",
 					Monnam(mtmp));
 				stay_behind = TRUE;
 			} else if (mtmp->mtame && mtmp->mtrapped && mtmp != u.usteed) {
-				if (canseemon(mtmp))
+				if (canspotmon(mtmp))
 					pline("%s is still trapped.", Monnam(mtmp));
 				stay_behind = TRUE;
 			}
