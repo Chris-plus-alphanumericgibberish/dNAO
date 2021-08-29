@@ -394,17 +394,20 @@ struct obj *otmp;
 		}
 		break;
 	case SPE_HEALING:
-	case SPE_EXTRA_HEALING:
+	case SPE_EXTRA_HEALING:{
+		int delta = mtmp->mhp;
 		reveal_invis = TRUE;
 	    if (mtmp->mtyp != PM_PESTILENCE) {
 		wake = FALSE;		/* wakeup() makes the target angry */
-		mtmp->mhp += d(6, otyp == SPE_EXTRA_HEALING ? 8 : 4);
+		/* skill adjustment ranges from -6 to + 18 (-6 means 0 hp healed minimum)*/
+		mtmp->mhp += d(6, otyp == SPE_EXTRA_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1);
 		if (mtmp->mhp > mtmp->mhpmax)
 		    mtmp->mhp = mtmp->mhpmax;
 		if (mtmp->mblinded) {
 		    mtmp->mblinded = 0;
 		    mtmp->mcansee = 1;
 		}
+		delta = mtmp->mhp - delta; //Note: final minus initial
 		if (canseemon(mtmp)) {
 		    if (disguised_mimic) {
 			if (mtmp->m_ap_type == M_AP_OBJECT &&
@@ -425,7 +428,7 @@ struct obj *otmp;
 		(void) resist(mtmp, otmp->oclass,
 			      d(3, otyp == SPE_EXTRA_HEALING ? 8 : 4), TELL);
 	    }
-		break;
+	}break;
 	case WAN_LIGHT:	/* (broken wand) */
 	case WAN_DARKNESS:	/* (broken wand) */
 		if (flash_hits_mon(mtmp, otmp)) {
@@ -2738,8 +2741,8 @@ boolean ordinary;
 		    break;
 		case SPE_HEALING:
 		case SPE_EXTRA_HEALING:
-		    healup(d((uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H) ?
-                  12 : 6, obj->otyp == SPE_EXTRA_HEALING ? 8 : 4),
+		    healup((d((uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H) ?
+                  12 : 6, obj->otyp == SPE_EXTRA_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1)),
 			   0, FALSE, (obj->otyp == SPE_EXTRA_HEALING));
 		    You_feel("%sbetter.",
 			obj->otyp == SPE_EXTRA_HEALING ? "much " : "");
