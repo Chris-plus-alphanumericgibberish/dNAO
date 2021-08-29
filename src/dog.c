@@ -257,6 +257,13 @@ makedog()
 	
 	if(mtmp->m_lev < mtmp->data->mlevel) mtmp->m_lev = mtmp->data->mlevel;
 	
+	if(Role_if(PM_HEALER)){
+		grow_up(mtmp, (struct monst *) 0);
+		//Technically might grow into a genocided form.
+		if(DEADMONSTER(mtmp))
+			return((struct monst *) 0);
+	}
+	
 	if(mtmp->m_lev) mtmp->mhpmax = 8*(mtmp->m_lev-1)+rnd(8);
 	mtmp->mhp = mtmp->mhpmax;
 
