@@ -1627,7 +1627,7 @@ mkkamereltowers()
 			
 			tries = 0;
 			otmp = 0;
-			while(!otmp){
+			while(!otmp && tries < 20){
 				switch(rn2(4)) {
 				case 0:
 					otmp = oname(mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT), artiname(ART_INFINITY_S_MIRRORED_ARC));
@@ -1654,6 +1654,7 @@ mkkamereltowers()
 				else {
 					obfree(otmp, (struct obj *)0);
 					otmp = 0;
+					tries++;
 					continue;
 				}
 			}
@@ -1728,7 +1729,7 @@ mkkamereltowers()
 			wallification(x-3, y-3, x+3, y+3);
 			tries = 0;
 			otmp = 0;
-			while(!otmp){
+			while(!otmp && tries < 20){
 				switch(rn2(4)) {
 				case 0:
 					otmp = oname(mksobj(DOUBLE_LIGHTSABER, MKOBJ_NOINIT), artiname(ART_INFINITY_S_MIRRORED_ARC));
@@ -1755,6 +1756,7 @@ mkkamereltowers()
 				else {
 					obfree(otmp, (struct obj *)0);
 					otmp = 0;
+					tries++;
 					continue;
 				}
 			}
