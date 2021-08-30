@@ -301,6 +301,34 @@ doread()
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
 				return 1;
 			}
+		} else if(scroll->oartifact == ART_STAFF_OF_AESCULAPIUS){
+			if (Blind) {
+				You_cant("see the staff!");
+				return 0;
+			} else {
+				int i;
+				You("read the traceries of healing magics inscribed on the staff.");
+				for (i = 0; i < MAXSPELL; i++)  {
+					if (spellid(i) == SPE_MASS_HEALING)  {
+						if (spellknow(i) <= 1000) {
+							Your("knowledge of Mass Healing is keener.");
+							spl_book[i].sp_know = 20000;
+							exercise(A_WIS,TRUE);       /* extra study */
+						} else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+							You("know Mass Healing quite well already.");
+						}
+						break;
+					} else if (spellid(i) == NO_SPELL)  {
+						spl_book[i].sp_id = SPE_MASS_HEALING;
+						spl_book[i].sp_lev = objects[SPE_MASS_HEALING].oc_level;
+						spl_book[i].sp_know = 20000;
+						You("learn to cast Mass Healing!");
+						break;
+					}
+				}
+				if (i == MAXSPELL) impossible("Too many spells memorized!");
+				return 1;
+			}
 		} else if(scroll->otyp == LIGHTSABER){
 			if (Blind) {
 				You_cant("see it!");
