@@ -395,10 +395,11 @@ struct obj *otmp;
 		break;
 	case SPE_HEALING:
 	case SPE_EXTRA_HEALING:
+	case SPE_MASS_HEALING:
 		reveal_invis = TRUE;
 	    if (mtmp->mtyp != PM_PESTILENCE) {
 		wake = FALSE;		/* wakeup() makes the target angry */
-		mtmp->mhp += d(6, otyp == SPE_EXTRA_HEALING ? 8 : 4);
+		mtmp->mhp += d(6, otyp != SPE_HEALING ? 8 : 4);
 		if (mtmp->mhp > mtmp->mhpmax)
 		    mtmp->mhp = mtmp->mhpmax;
 		if (mtmp->mblinded) {
@@ -415,7 +416,7 @@ struct obj *otmp;
 			} else
 			    mimic_hit_msg(mtmp, otyp);
 		    } else pline("%s looks%s better.", Monnam(mtmp),
-				 otyp == SPE_EXTRA_HEALING ? " much" : "" );
+				 otyp != SPE_HEALING ? " much" : "" );
 		}
 		if (mtmp->mtame || mtmp->mpeaceful) {
 		    adjalign(Role_if(PM_HEALER) ? 1 : sgn(u.ualign.type));
@@ -423,7 +424,7 @@ struct obj *otmp;
 	    } else {	/* Pestilence */
 		/* Pestilence will always resist; damage is half of 3d{4,8} */
 		(void) resist(mtmp, otmp->oclass,
-			      d(3, otyp == SPE_EXTRA_HEALING ? 8 : 4), TELL);
+			      d(3, otyp != SPE_HEALING ? 8 : 4), TELL);
 	    }
 		break;
 	case WAN_LIGHT:	/* (broken wand) */
@@ -2738,11 +2739,12 @@ boolean ordinary;
 		    break;
 		case SPE_HEALING:
 		case SPE_EXTRA_HEALING:
+		case SPE_MASS_HEALING:
 		    healup(d((uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H) ?
-                  12 : 6, obj->otyp == SPE_EXTRA_HEALING ? 8 : 4),
-			   0, FALSE, (obj->otyp == SPE_EXTRA_HEALING));
+                  12 : 6, obj->otyp != SPE_HEALING ? 8 : 4),
+			   0, FALSE, (obj->otyp != SPE_HEALING));
 		    You_feel("%sbetter.",
-			obj->otyp == SPE_EXTRA_HEALING ? "much " : "");
+			obj->otyp != SPE_HEALING ? "much " : "");
 		    break;
 		case WAN_DARKNESS:	/* (broken wand) */
 		 /* assert( !ordinary ); */
