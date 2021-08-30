@@ -1457,7 +1457,7 @@ int atyp;
     return attacktype_fordmg(ptr, atyp, AD_ANY) ? TRUE : FALSE;
 }
 
-boolean
+struct attack *
 mon_attacktype(mon, atyp)
 struct monst *mon;
 int atyp;
@@ -1480,10 +1480,10 @@ int atyp;
 		attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod)
 	){
 		if(attk->aatyp == atyp)
-			return TRUE;
+			return attk;
 	}
 
-    return FALSE;
+    return (struct attack *)0;
 }
 
 boolean
