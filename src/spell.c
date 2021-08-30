@@ -1765,7 +1765,7 @@ STATIC_OVL void
 cast_mass_healing(otmp)
 struct obj * otmp;
 {
-	int radius = 3 + P_SKILL(P_HEALING_SPELL)/2 + Spellboost;
+	int radius = 2 + P_SKILL(P_HEALING_SPELL) + Spellboost;
 	do_clear_area(u.ux, u.uy, radius, cast_extra_healing_at, (genericptr_t)otmp);
 }
 
