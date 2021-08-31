@@ -1651,7 +1651,7 @@ E struct permonst * FDECL(permonst_of, (int, int));
 E struct attack *FDECL(attacktype_fordmg, (struct permonst *,int,int));
 E boolean FDECL(at_least_one_attack, (struct monst *));
 E boolean FDECL(attacktype, (struct permonst *,int));
-E boolean FDECL(mon_attacktype, (struct monst *,int));
+E struct attack *FDECL(mon_attacktype, (struct monst *,int));
 E boolean FDECL(noattacks, (struct permonst *));
 E int FDECL(attackindex, (struct permonst *,int,int));
 E boolean FDECL(poly_when_stoned, (struct permonst *));

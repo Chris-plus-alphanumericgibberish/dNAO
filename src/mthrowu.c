@@ -243,8 +243,8 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 			/* attacks that are on a line that do NOT stop on hit */
 			(m_online(magr, mdef, tarx, tary, dogbesafe, FALSE) && (
 				(mon_attacktype(magr, AT_BREA) && !magr->mcan) ||
-				(mon_attacktype(magr, AT_MAGC) && !magr->mcan && !real_spell_adtyp((attacktype_fordmg(magr->data, AT_MAGC, AD_ANY))->adtyp)) ||
-				(mon_attacktype(magr, AT_MMGC) && !magr->mcan && !real_spell_adtyp((attacktype_fordmg(magr->data, AT_MMGC, AD_ANY))->adtyp))
+				(mon_attacktype(magr, AT_MAGC) && !magr->mcan && !real_spell_adtyp(mon_attacktype(magr, AT_MAGC)->adtyp)) ||
+				(mon_attacktype(magr, AT_MMGC) && !magr->mcan && !real_spell_adtyp(mon_attacktype(magr, AT_MMGC)->adtyp))
 			))
 			||
 			/* attacks that splash */
@@ -289,8 +289,8 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 			(distmin(magr->mx, magr->my, tarx, tary) <= 8 && (
 				(is_commander(magr->data) && !rn2(4)) ||	/* !rn2(4) -> reduce command frequency */
 				(mon_attacktype(magr, AT_GAZE) && !magr->mcan) ||
-				(mon_attacktype(magr, AT_MAGC) && !magr->mcan && real_spell_adtyp((attacktype_fordmg(magr->data, AT_MAGC, AD_ANY))->adtyp)) ||
-				(mon_attacktype(magr, AT_MMGC) && !magr->mcan && real_spell_adtyp((attacktype_fordmg(magr->data, AT_MMGC, AD_ANY))->adtyp))
+				(mon_attacktype(magr, AT_MAGC) && !magr->mcan && real_spell_adtyp(mon_attacktype(magr, AT_MAGC)->adtyp)) ||
+				(mon_attacktype(magr, AT_MMGC) && !magr->mcan && real_spell_adtyp(mon_attacktype(magr, AT_MMGC)->adtyp))
 			))
 			))
 		{

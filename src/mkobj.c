@@ -516,10 +516,13 @@ register struct obj *otmp;
 	    subfrombill(otmp, shop_keeper(*u.ushops));
 	dummy = newobj(0);
 	*dummy = *otmp;
+	dummy->oextra_p = NULL;
+	dummy->light = NULL;
+	dummy->timed = NULL;
+	dummy->mp = NULL;
 	dummy->where = OBJ_FREE;
 	dummy->o_id = flags.ident++;
 	if (!dummy->o_id) dummy->o_id = flags.ident++;	/* ident overflowed */
-	dummy->timed = 0;
 	register int ox_id;
 	for (ox_id=0; ox_id<NUM_OX; ox_id++)
 		cpy_ox(otmp, dummy, ox_id);
