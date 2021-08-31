@@ -241,7 +241,7 @@ drinkfountain()
 
 			You_feel("self-knowledgeable...");
 			display_nhwindow(WIN_MESSAGE, FALSE);
-			enlightenment(0);
+			doenlightenment();
 			exercise(A_WIS, TRUE);
 			pline_The("feeling subsides.");
 			break;

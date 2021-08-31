@@ -452,7 +452,7 @@ register struct monst *oracl;
 #endif
 				You_feel("self-knowledgeable...");
 				display_nhwindow(WIN_MESSAGE, FALSE);
-				enlightenment(0);
+				doenlightenment();
 				pline_The("feeling subsides.");
 				if (!u.uevent.major_oracle){
 					more_experienced(enl_cost / (u.uevent.major_oracle ? 25 : 10), 0);
