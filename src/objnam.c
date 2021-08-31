@@ -4370,6 +4370,15 @@ int wishflags;
 	} else if (!strncmpi(bp, "sets of ",8) && strncmpi(bp, "sets of crow talons", 19)) {
 		bp += 8;
 	}
+
+	/* change to singular if necessary */
+	if (*bp) {
+		char *sng = makesingular(bp);
+		if (strcmp(bp, sng)) {
+			if (cnt == 1) cnt = 2;
+			Strcpy(bp, sng);
+		}
+	}
 	
 	/*
 	 * Find corpse type using "of" (figurine of an orc, tin of orc meat)
@@ -4452,15 +4461,6 @@ int wishflags;
 		    /* no referent; they don't really mean a monster type */
 		    bp = obp;
 		    mntmp = NON_PM;
-		}
-	}
-
-	/* first change to singular if necessary */
-	if (*bp) {
-		char *sng = makesingular(bp);
-		if (strcmp(bp, sng)) {
-			if (cnt == 1) cnt = 2;
-			Strcpy(bp, sng);
 		}
 	}
 	
