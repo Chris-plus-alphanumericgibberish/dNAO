@@ -3381,6 +3381,19 @@ int wep_type;
 		}
 	}
 	
+	if(weapon->otyp == SCALPEL && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
+		/* weapon skills and misc skills */
+		switch (P_SKILL(P_HEALING_SPELL)) {
+			default: impossible("scalpel handeling weapon_hit_bonus: bad skill %d", skill);
+				/* fall through */
+			case P_ISRESTRICTED:
+			case P_UNSKILLED:
+			case P_BASIC:        bonus += 0; break;
+			case P_SKILLED:      bonus += 2; break;
+			case P_EXPERT:       bonus += 5; break;
+		}
+	}
+
 	if(wep_type == P_AXE && Race_if(PM_DWARF) && ublindf && ublindf->oartifact == ART_WAR_MASK_OF_DURIN) bonus += 5;
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && type != P_TWO_WEAPON_COMBAT) bonus = max(bonus,0);
 	
@@ -3568,6 +3581,19 @@ int wep_type;
 		// if(activeFightingForm(FFORM_JUYO)){
 			// //no bonus
 		// }
+	}
+	
+	if(weapon->otyp == SCALPEL && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
+		/* weapon skills and misc skills */
+		switch (P_SKILL(P_HEALING_SPELL)) {
+			default: impossible("scalpel handeling weapon_dam_bonus: bad skill %d", skill);
+				/* fall through */
+			case P_ISRESTRICTED:
+			case P_UNSKILLED:
+			case P_BASIC:        bonus += 0; break;
+			case P_SKILLED:      bonus += 2; break;
+			case P_EXPERT:       bonus += 5; break;
+		}
 	}
 	
 	if(wep_type == P_AXE && Race_if(PM_DWARF) && ublindf && ublindf->oartifact == ART_WAR_MASK_OF_DURIN) bonus += 5;
