@@ -538,7 +538,7 @@ struct obj *otmp;	/* existing object; NOT ignored even if alignment specified */
 		a->accuracy = max(1, rn2(5)*5);
 		a->damage = rn2(3)*10;
 
-		if (objects[otmp->otyp].oc_merge)
+		if (is_ammo(otmp) || throwing_weapon(otmp))
 			a->damage /= 2;
 		else {
 			if (a->adtyp > AD_MAGM && rn2(3))
@@ -568,7 +568,7 @@ struct obj *otmp;	/* existing object; NOT ignored even if alignment specified */
 		if (!rn2(60))
 			a->aflags |= ARTA_EXPLELEC;
 		
-		if (!rn2(90) && !(objects[otmp->otyp].oc_merge))
+		if (!rn2(90) && !(is_ammo(otmp) || throwing_weapon(otmp)))
 			a->iflags |= ARTI_BLOODTHRST;
 		if (!rn2(90))
 			a->aflags |= ARTA_VORPAL;
@@ -625,8 +625,8 @@ struct obj *otmp;	/* existing object; NOT ignored even if alignment specified */
 
 	otmp = oname(otmp, a->name);
 
-	if (objects[otmp->otyp].oc_merge) {
-		set_obj_quan(otmp, is_ammo(otmp) ? 20 : 10);
+	if (is_ammo(otmp) || throwing_weapon(otmp)) {
+		set_obj_quan(otmp, 20);
 	}
 
 	return otmp;
