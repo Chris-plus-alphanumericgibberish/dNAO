@@ -2006,35 +2006,6 @@ struct obj* obj;
 	return;
 }
 
-/* attempts to randomly give obj a rare material */
-void
-rand_interesting_obj_material(obj)
-struct obj * obj;
-{
-	const struct icp* random_mat_list;
-	int tries = 0;
-	int original_mat;
-
-	init_obj_material(obj);
-	original_mat = obj->obj_material;
-
-	/* randomized materials */
-	do {
-		random_mat_list = material_list(obj);
-		if (random_mat_list) {
-			int i = rnd(1000);
-			while (i > 0) {
-				if (i <= random_mat_list->iprob)
-					break;
-				i -= random_mat_list->iprob;
-				random_mat_list++;
-			}
-			if (random_mat_list->iclass) /* a 0 indicates to use default material */
-				set_material_gm(obj, random_mat_list->iclass);
-		}
-	} while (obj->obj_material == original_mat && ++tries<40);
-}
-
 /* "Game Master"-facing set material function.
  *  Should do the absolute minimum to make sure that obj is not in an inconsistent state after mat is set.
  *  In particular, it should never change the base object type.

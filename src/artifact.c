@@ -538,62 +538,17 @@ struct obj *otmp;	/* existing object; NOT ignored even if alignment specified */
 		a->accuracy = max(1, rn2(5)*5);
 		a->damage = rn2(3)*10;
 
-		if (is_ammo(otmp) || throwing_weapon(otmp))
-			a->damage /= 2;
-		else {
-			if (a->adtyp > AD_MAGM && rn2(3))
-				a->wprops[w++] = a->adtyp-1;	//assumes adtyp-1 == x_res, which is true from AD_FIRE to AD_ACID
-			if (!rn2(30) && w<8)
-				a->wprops[w++] = FAST;
-			if (!rn2(60) && w<8)
-				a->wprops[w++] = FREE_ACTION;
-		}
-
-		if (!rn2(20))
-			a->aflags |= ARTA_DEXPL;
-		else if (!rn2(20))
-			a->aflags |= ARTA_DLUCK;
-
-		if (!rn2(20) && a->alignment != A_LAWFUL)
-			a->aflags |= ARTA_POIS;
-		if (!rn2(40) && a->alignment == A_LAWFUL)
-			a->aflags |= ARTA_BRIGHT|ARTA_BLIND;
-		if (!rn2(60) && a->alignment != A_LAWFUL)
-			a->aflags |= ARTA_DRAIN;
-
-		if (!rn2(60))
-			a->aflags |= ARTA_EXPLFIRE;
-		if (!rn2(60))
-			a->aflags |= ARTA_EXPLCOLD;
-		if (!rn2(60))
-			a->aflags |= ARTA_EXPLELEC;
-		
-		if (!rn2(90) && !(is_ammo(otmp) || throwing_weapon(otmp)))
-			a->iflags |= ARTI_BLOODTHRST;
-		if (!rn2(90))
-			a->aflags |= ARTA_VORPAL;
+		if (a->adtyp > AD_MAGM && rn2(3))
+			a->wprops[w++] = a->adtyp-1;	//assumes adtyp-1 == x_res, which is true from AD_FIRE to AD_ACID
+		if (!rn2(20) && w<8)
+			a->wprops[w++] = FAST;
+		if (!rn2(40) && w<8)
+			a->wprops[w++] = FREE_ACTION;
 	}
-	else if ((is_gloves(otmp) && rn2(4)) ||	// 3/4 gloves
-			(is_boots(otmp) && !rn2(3))) {	// 1/3 boots
-		/* mix of offense (for unarmed) and defense */
-		a->adtyp = AD_PHYS;
-		a->accuracy = max(1, rn2(5)*3);
-		a->damage = rn2(3)*6;
-		/* some resistances, and maybe re-elementing the damage */
-		for (; w < rnd(3); w++) {
-			a->wprops[w++] = rnd(18);	/* FIRE_RES to TELEPORT_CONTROL */
-			if (a->wprops[w-1] == FIRE_RES || a->wprops[w-1] == COLD_RES ||
-				a->wprops[w-1] == ACID_RES || a->wprops[w-1] == SHOCK_RES) {
-				a->adtyp = a->wprops[w-1] + 1; //assumes x_res+1 == adtyp, which is true from AD_FIRE to AD_ACID
-				if (a->damage) a->damage += 4;
-			}
-		}
-		if (rn2(10))
-			a->iflags |= ARTI_PLUSSEV;
-	}
-	else if (otmp->oclass == ARMOR_CLASS) {
+
+	if (otmp->oclass == ARMOR_CLASS) {
 		/* some resistances */
-		for (; w < (objects[otmp->otyp].oc_magic ? rnd(3) : rnd(4)+1); w++) {
+		for (; w < rnd(4); w++) {
 			a->wprops[w++] = rnd(18);	/* FIRE_RES to TELEPORT_CONTROL */
 		}
 		if (!rn2(10) && w<8)
@@ -604,32 +559,9 @@ struct obj *otmp;	/* existing object; NOT ignored even if alignment specified */
 			a->wprops[w++] = HALLUC_RES;
 		if (!rn2(20) && w<8)
 			a->wprops[w++] = FREE_ACTION;
-		if (!rn2(60) && w<8)
-			a->wprops[w++] = ENERGY_REGENERATION;
-		if (!rn2(60) && w<8)
-			a->wprops[w++] = HALF_SPDAM;
-		if (!rn2(60) && w<8)
-			a->wprops[w++] = HALF_PHDAM;
-
-		if (rn2(20))
-			a->iflags |= ARTI_PLUSSEV;
-
-		if (!rn2(30))
-			a->iflags |= ARTI_LUCK;
 	}
 
-	if (!rn2(3)) {
-		rand_interesting_obj_material(otmp);
-		a->material = otmp->obj_material;
-	}
-
-	otmp = oname(otmp, a->name);
-
-	if (is_ammo(otmp) || throwing_weapon(otmp)) {
-		set_obj_quan(otmp, 20);
-	}
-
-	return otmp;
+	return oname(otmp, a->name);;
 }
 
 /*
