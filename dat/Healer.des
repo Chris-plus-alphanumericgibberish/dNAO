@@ -11,6 +11,8 @@
 MAZE: "Hea-strt",' '
 FLAGS: noteleport,hardfloor
 GEOMETRY:center,center
+#0         1         2         3         4         5         6         7        
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
 0PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 1PPPPeeeeeeeePPPPeeeeePPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPePeePPPPPeeeeeePPPPPPPP
@@ -33,6 +35,8 @@ MAP
 8PPPeeeeeeeeeeeeePPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPeeeePPPPPP
 9PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2         3         4         5         6         7        
 # Dungeon Description
 REGION:(00,00,75,19),lit,"ordinary"
 # Stairs
@@ -58,6 +62,7 @@ DOOR:locked,(50,10)
 MONSTER:'@',"Hippocrates",(37,10)
 # The treasure of Hippocrates
 CONTAINER:'(',"chest",(37,10)
+OBJECT:'"',"amulet of life saving",contained
 OBJECT:'?',"resistance",contained
 OBJECT:'?',"resistance",contained
 OBJECT:'?',"resistance",contained
@@ -117,17 +122,19 @@ FLAGS: hardfloor
 #
 INIT_MAP: 'e' , 'P', true , true , lit , false
 GEOMETRY:center,center
+#          1        2         3
+#012345678901234567901234567890
 MAP
-PPPPPPPPPPPPPeeeeeeePPPPPPPPPPP
-PPPPPPPPeeeeeeeeeeeeeeePPPPPPPP
-PPPPeeeee-------------eeePPPPPP
-PPPPPeeee|.S.........|eeeePPPPP
-PPPeeeeee+.|.........|eeePPPPPP
-PPPeeeeee+.|.........|eePPPPPPP
-PPPPeeeee|.S.........|eePPPPPPP
-PPPPPeeee-------------eeeePPPPP
-PPPPPPPPeeeeeeeeeeeeeeePPPPPPPP
-PPPPPPPPPPPeeeeeeeePPPPPPPPPPPP
+0PPPPPPPPPPPPPeeeeeeePPPPPPPPPPP
+1PPPPPPPPeeeeeeeeeeeeeeePPPPPPPP
+2PPPPeeeee-------------eeePPPPPP
+3PPPPPeeee|.S.........|eeeePPPPP
+4PPPeeeeee+.|.........|eeePPPPPP
+5PPPeeeeee+.|.........|eePPPPPPP
+6PPPPeeeee|.S.........|eePPPPPPP
+7PPPPPeeee-------------eeeePPPPP
+8PPPPPPPPeeeeeeeeeeeeeeePPPPPPPP
+9PPPPPPPPPPPeeeeeeeePPPPPPPPPPPP
 ENDMAP
 # Dungeon Description
 REGION:(00,00,30,09),lit,"ordinary"
@@ -218,6 +225,8 @@ MAZE: "Hea-goal", 'P'
 #
 INIT_MAP: 'e' , 'P' , false , true , lit , false
 GEOMETRY:center,center
+#0         1         2         3         
+#0123456789012345678901234567890123456789
 MAP
 ePeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeePPe
 PPeeeeeeePPPPPPPeeeePPPPPPPeeeePPPPeeePPe
@@ -232,6 +241,8 @@ eePPPPeeePPPPPeePPPPeeePPPPPeeeeePPeeePPe
 PeeeePPPPPeeePPPPeePPPPPeeePPPPPPPeeePPee
 PPPeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeePPPe
 ENDMAP
+#0123456789012345678901234567890123456789
+#0         1         2         3         
 # Dungeon Description
 REGION:(00,00,40,11),lit,"ordinary"
 # Stairs
