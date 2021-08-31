@@ -65,6 +65,7 @@ static nhstat prevscore;
 #endif
 
 extern const char *hu_stat[];   /* from eat.c */
+extern const char *ca_hu_stat[];   /* from eat.c */
 extern const char *enc_stat[];  /* from botl.c */
 
 /* If the statuscolors patch isn't enabled, have some default colors for status problems
@@ -81,6 +82,11 @@ static const struct statcolor default_colors[] = {
     {"Weak", CLR_ORANGE},
     {"Fainted", CLR_BRIGHT_MAGENTA},
     {"Fainting", CLR_BRIGHT_MAGENTA},
+    {"OvrWound", CLR_YELLOW},
+    {"Waning", CLR_YELLOW},
+    {"Unwound", CLR_ORANGE},
+    {"Slipping", CLR_BRIGHT_MAGENTA},
+    {"Slipped", CLR_BRIGHT_MAGENTA},
     {"Burdened", CLR_RED},
     {"Stressed", CLR_RED},
     {"Strained", CLR_ORANGE},
@@ -888,7 +894,7 @@ curses_add_statuses(WINDOW *win, boolean align_right,
     curses_add_status(win, align_right, vertical, x, y, str, trouble)
 
     /* Hunger */
-    statprob(hu_stat[u.uhs], u.uhs != 1); /* 1 is NOT_HUNGRY (not defined here) */
+    statprob(u.uhs[uclockwork ? ca_hu_stat : hu_stat], u.uhs != 1); /* 1 is NOT_HUNGRY (not defined here) */
 
     /* General troubles */
     statprob("Conf",     Confusion);
