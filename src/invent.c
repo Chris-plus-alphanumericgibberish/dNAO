@@ -857,6 +857,7 @@ carrying_readable_weapon()
 				otmp->oartifact == ART_ITLACHIAYAQUE || 
 				otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
 				otmp->oartifact == ART_BOW_OF_SKADI ||
+				otmp->oartifact == ART_STAFF_OF_AESCULAPIUS ||
 				otmp->oartifact == ART_GUNGNIR ||
 				otmp->oartifact == ART_PEN_OF_THE_VOID ||
 				otmp->oartifact == ART_STAFF_OF_NECROMANCY
@@ -2378,6 +2379,9 @@ struct obj *obj;
 	else if (obj->oartifact == ART_STAFF_OF_NECROMANCY)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study the forbidden secrets of necromancy", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_STAFF_OF_AESCULAPIUS)
+				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+				"Study the grand magic of healing", MENU_UNSELECTED);
 	else if (obj->oartifact == ART_PEN_OF_THE_VOID)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				(mvitals[PM_ACERERAK].died > 0) ? "Inspect the twin blades" : "Inspect the blade", MENU_UNSELECTED);

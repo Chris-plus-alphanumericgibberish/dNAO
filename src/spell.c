@@ -44,6 +44,7 @@ STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
 STATIC_DCL void NDECL(cast_protection);
 STATIC_DCL void NDECL(cast_abjuration);
+STATIC_DCL void FDECL(cast_mass_healing, (struct obj *));
 STATIC_DCL boolean FDECL(sightwedge, (int,int, int,int, int,int));
 STATIC_DCL void FDECL(spell_backfire, (int));
 STATIC_DCL int FDECL(spellhunger, (int));
@@ -1745,6 +1746,27 @@ cast_abjuration()
 			abjure_summon(mtmp, dur);
 		}
 	}
+}
+
+
+STATIC_OVL void
+cast_extra_healing_at(x, y, arg)
+int x, y;
+genericptr_t arg;
+{
+	struct monst * mtmp = m_u_at(x, y);
+	if (mtmp == &youmonst)
+		zapyourself((struct obj *)arg, TRUE);
+	else if (mtmp && mtmp->mtame)
+		bhitm(mtmp, (struct obj *)arg);
+}
+
+STATIC_OVL void
+cast_mass_healing(otmp)
+struct obj * otmp;
+{
+	int radius = 2 + P_SKILL(P_HEALING_SPELL) + Spellboost;
+	do_clear_area(u.ux, u.uy, radius, cast_extra_healing_at, (genericptr_t)otmp);
 }
 
 /* attempting to cast a forgotten spell will cause disorientation */
@@ -4730,6 +4752,9 @@ dothrowspell:
 	case SPE_ABJURATION:
 		cast_abjuration();
 		break;
+	case SPE_MASS_HEALING:
+		cast_mass_healing(pseudo);
+		break;
 	default:
 		impossible("Unknown spell %d attempted.", spell);
 		obfree(pseudo, (struct obj *)0);
@@ -5420,6 +5445,12 @@ int spellID;
 			strcat(desc1, "Creates a directed ray of healing magic.");
 			strcat(desc2, "Creatures hit by the ray are healed for a moderate amount.");
 			strcat(desc3, "Blinded creatures hit by the ray can see again.");
+			strcat(desc4, "");
+			break;
+		case SPE_MASS_HEALING:
+			strcat(desc1, "Undirected healing magic that affects you and nearby pets.");
+			strcat(desc2, "Creatures affected are healed for a moderate amount.");
+			strcat(desc3, "Blinded creatures affected can see again.");
 			strcat(desc4, "");
 			break;
 		case SPE_DRAIN_LIFE:
