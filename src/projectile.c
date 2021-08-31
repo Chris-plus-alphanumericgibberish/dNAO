@@ -396,6 +396,9 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 				if (result)
 					range /= 2;	/* continue with less range on hit; keep going on miss */
 			}
+			else if (fired && launcher && launcher->oartifact == ART_UNSTOPPABLE) {
+				range -= 1;	/* bolt pierces, but goes slightly less far */
+			}
 			else if (
 				thrownobj->otyp == BLASTER_BOLT ||
 				thrownobj->otyp == HEAVY_BLASTER_BOLT ||

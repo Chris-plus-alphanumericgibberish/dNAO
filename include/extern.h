@@ -294,13 +294,6 @@ E void NDECL(dokeylist);
 E char * FDECL(find_command_key, (const char *, char *));
 E int NDECL(doextlist);
 E int NDECL(extcmd_via_menu);
-E void FDECL(enlightenment, (int));
-E void NDECL(signs_mirror);
-E void FDECL(show_conduct, (int));
-#ifdef DUMP_LOG
-E void FDECL(dump_enlightenment, (int));
-E void FDECL(dump_conduct, (int));
-#endif
 E int FDECL(xytod, (SCHAR_P,SCHAR_P));
 E void FDECL(dtoxy, (coord *,int));
 E int FDECL(movecmd, (CHAR_P));
@@ -322,7 +315,6 @@ E char* FDECL(key2txt, (CHAR_P, char*));
 E char* FDECL(str2txt, (char*, char*));
 E char FDECL(yn_function, (const char *, const char *, CHAR_P));
 E int NDECL(dotravel);
-E void NDECL(udr_enlightenment);
 
 /* ### crown.c ### */
 
@@ -882,6 +874,16 @@ E void FDECL(del_engr_ward, (struct engr *));
 E void FDECL(rloc_engr, (struct engr *));
 E void FDECL(make_grave, (int,int,const char *));
 E boolean FDECL(allied_faction, (int,int));
+
+/* ### enlighten.c ### */
+
+E int NDECL(doattributes);
+E int NDECL(doconduct);
+E int NDECL(doenlightenment);
+E void NDECL(udr_enlightenment);
+E void NDECL(signs_mirror);
+E void FDECL(show_enlightenment, (int, boolean));
+E void FDECL(show_conduct, (int, boolean));
 
 /* ### exper.c ### */
 
