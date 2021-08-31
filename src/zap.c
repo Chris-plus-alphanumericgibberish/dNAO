@@ -420,6 +420,13 @@ struct obj *otmp;
 		    } else pline("%s looks%s better.", Monnam(mtmp),
 				 otyp == SPE_EXTRA_HEALING ? " much" : "" );
 		}
+
+		if(mtmp->mtame && Role_if(PM_HEALER)){
+			int xp = (experience(mtmp, 0)/10) * delta / mtmp->mhpmax;
+			if(wizard) pline("%d out of %d XP", xp, experience(mtmp, 0));
+			if(xp)
+				more_experienced(xp, 0);
+		}
 		if (mtmp->mtame || mtmp->mpeaceful) {
 		    adjalign(Role_if(PM_HEALER) ? 1 : sgn(u.ualign.type));
 		}
