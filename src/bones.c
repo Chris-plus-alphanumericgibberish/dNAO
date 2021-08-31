@@ -72,6 +72,11 @@ boolean restore;
 
 		if (restore && get_ox(otmp, OX_ENAM))
 			sanitize_name(ONAME(otmp));
+
+		if (!restore && otmp->oartifact > NROFARTIFACTS) {
+			/* randarts get cleared in bonesfiles */
+			otmp->oartifact = 0;
+		}
 		
 		if (((otmp->otyp != CORPSE || otmp->corpsenm < SPECIAL_PM)
 			&& otmp->otyp != STATUE)

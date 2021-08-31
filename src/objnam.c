@@ -2559,7 +2559,7 @@ const char *str;
 
 			// This will catch all artifacts listed in artilist.h whose coded names begin with "The "
 			int i;
-			for (i = 1; i < NROFARTIFACTS && !insert_the; i++)
+			for (i = 1; i < n_artifacts() && !insert_the; i++)
 			{
 				if (!strncmp(artilist[i].name, "The ", 4) &&
 					((l = strlen(str)) >= strlen(artilist[i].name) - 4) &&
