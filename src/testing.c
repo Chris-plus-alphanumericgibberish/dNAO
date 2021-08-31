@@ -134,6 +134,7 @@ test_readobjnam()
 
 	/* tests for specific items */
 	TEST("potion of green dragon blood", otmp->otyp == POT_BLOOD && otmp->corpsenm == PM_GREEN_DRAGON);
+	TEST("2 potions of tengu blood", otmp->otyp == POT_BLOOD && otmp->corpsenm == PM_TENGU && otmp->quan == 2);
 	TEST("tin of spinach", otmp->otyp == TIN && otmp->spe == 1);
 	TEST("healing potion", otmp->otyp == POT_HEALING);
 
