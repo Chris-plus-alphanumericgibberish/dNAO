@@ -6448,15 +6448,22 @@ boolean ranged;
 						mon_nam(magr));
 				}
 				else if (vis && dohitmsg) {
-					xyhitmsg(magr, mdef, originalattk);
+					if(youagr) pline("You try to suck %s extremities off!", s_suffix(mon_nam(mdef)));
+					else pline("%s is trying to suck %s extremities off!", Monnam(magr), s_suffix(mon_nam(mdef)));
 				}
-				/* 1/10 chance to twist legs (player-only) */
-				if (youdef && !rn2(10)) {
-					Your("%s twist from the suction!", makeplural(body_part(LEG)));
-					set_wounded_legs(RIGHT_SIDE, rnd(60 - ACURR(A_DEX)));
-					set_wounded_legs(LEFT_SIDE, rnd(60 - ACURR(A_DEX)));
-					exercise(A_STR, FALSE);
-					exercise(A_DEX, FALSE);
+				/* 1/10 chance to twist legs */
+				if (!rn2(10)) {
+					if(youdef){
+						Your("%s twist from the suction!", makeplural(body_part(LEG)));
+						set_wounded_legs(RIGHT_SIDE, rnd(60 - ACURR(A_DEX)));
+						set_wounded_legs(LEFT_SIDE, rnd(60 - ACURR(A_DEX)));
+						exercise(A_STR, FALSE);
+						exercise(A_DEX, FALSE);
+					}
+					else {
+						if(vis) pline("%s %s twist from the suction!", s_suffix(Monnam(mdef)), makeplural(mbodypart(mdef, LEG)));
+						mdef->movement = max(mdef->movement - 12, -12);
+					}
 				}
 				/* 1/6 chance to disarm */
 				otmp = (youdef ? uwep : MON_WEP(mdef));
