@@ -6424,7 +6424,7 @@ boolean ranged;
 			if (has_head(pd)
 				&& !otmp
 				&& !rn2(20)
-				&& (*hp(mdef)*10 < *hpmax(mdef))
+				&& (*hp(mdef) < 100)
 				){
 				/* message */
 				if (vis) {
