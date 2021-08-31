@@ -78,13 +78,9 @@ STATIC_DCL int artidisco[NROFARTIFACTS];
 STATIC_OVL int spec_dbon_applies = 0;
 
 /* flags including which artifacts have already been created */
-struct artinstance * artinstance;
+struct artinstance artinstance[1+NROFARTIFACTS+1];
 /* and a discovery list for them (no dummy first entry here) */
-STATIC_OVL int * artidisco;
-/* and a counter for how many artifacts we have */
-int nrofartifacts;
-/* and a pointer to space for randarts' names */
-char ** artiextranames;
+STATIC_OVL int artidisco[NROFARTIFACTS];
 
 STATIC_DCL boolean FDECL(attacks, (int,struct obj *));
 
@@ -337,16 +333,8 @@ hack_artifacts()
 void
 init_artifacts()
 {
-	extern struct artifact base_artilist[];
-
-	nrofartifacts = NROFARTIFACTS;
-	artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));
-	artidisco = malloc(sizeof(int) * (nrofartifacts));
-	artilist = malloc(sizeof(struct artifact) * (1+nrofartifacts+1));
-	
-	(void) memset((genericptr_t) artinstance, 0, sizeof(struct artinstance) * (1+nrofartifacts+1));
-	(void) memset((genericptr_t) artidisco, 0, sizeof(int) * (nrofartifacts));
-	memcpy(artilist, base_artilist, sizeof(struct artifact) * (1+nrofartifacts+1));
+	(void) memset((genericptr_t) artinstance, 0, sizeof artinstance);
+	(void) memset((genericptr_t) artidisco, 0, sizeof artidisco);
 	hack_artifacts();
 }
 
@@ -354,103 +342,24 @@ void
 save_artifacts(fd)
 int fd;
 {
-	bwrite(fd, (genericptr_t) &nrofartifacts, sizeof(int));
-	bwrite(fd, (genericptr_t) artinstance, sizeof(struct artinstance) * (1+nrofartifacts+1));
-	bwrite(fd, (genericptr_t) artidisco, sizeof(int) * (nrofartifacts));
-	bwrite(fd, (genericptr_t) artilist, sizeof(struct artifact) * (1+nrofartifacts+1));
-	if(nrofartifacts > NROFARTIFACTS) {
-		bwrite(fd, (genericptr_t) artiextranames, sizeof(char)*PL_PSIZ*(nrofartifacts - NROFARTIFACTS));
-	}
+	bwrite(fd, (genericptr_t) artinstance, sizeof artinstance);
+	bwrite(fd, (genericptr_t) artidisco, sizeof artidisco);
 }
 
 void
 restore_artifacts(fd)
 int fd;
 {
-	mread(fd, (genericptr_t) &nrofartifacts, sizeof(int));
-
-	artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));
-	artidisco = malloc(sizeof(int) * (nrofartifacts));
-	artilist = malloc(sizeof(struct artifact) * (1+nrofartifacts+1));
-	mread(fd, (genericptr_t) artinstance, sizeof(struct artinstance) * (1+nrofartifacts+1));
-	mread(fd, (genericptr_t) artidisco, sizeof(int) * (nrofartifacts));
-	mread(fd, (genericptr_t) artilist, sizeof(struct artifact) * (1+nrofartifacts+1));
-	if(nrofartifacts > NROFARTIFACTS) {
-		artiextranames = malloc(sizeof(char*)*(nrofartifacts - NROFARTIFACTS));
-		int i, j;
-		for(i=NROFARTIFACTS, j=0; i < nrofartifacts; i++, j++) {
-			artiextranames[j] = malloc(sizeof(char)*PL_PSIZ);
-			mread(fd, (genericptr_t) artiextranames[j], sizeof(char)*PL_PSIZ);
-			artilist[i+1].name = artiextranames[j];
-		}
-	}
-}
-
-int
-n_artifacts()
-{
-	return nrofartifacts;
-}
-
-struct artifact *
-add_artifact()
-{
-	int old_narts = nrofartifacts;
-	int i;
-	nrofartifacts++;
-
-	/* allocate new memory, slightly larger */
-	void * tmp_artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));	// same indices as artilist
-	void * tmp_artidisco = malloc(sizeof(int) * (nrofartifacts));						// only need 1 per artifact
-	void * tmp_artilist = malloc(sizeof(struct artifact) * (1+nrofartifacts+1));		// dummy + artifacts + terminator
-	void ** tmp_artiextranames = malloc(sizeof(char*)*(nrofartifacts - NROFARTIFACTS));
-	
-	/* copy old data to new memory */
-	memcpy(tmp_artinstance, artinstance, (sizeof(struct artinstance) * (1+old_narts+1)));
-	memcpy(tmp_artidisco, artidisco, (sizeof(int) * (old_narts)));
-	memcpy(tmp_artilist, artilist, (sizeof(struct artifact) * (old_narts+1)));
-	
-	/* free old memory */
-	free(artinstance);
-	free(artidisco);
-	free(artilist);
-
-	/* reassign pointers */
-	artinstance = tmp_artinstance;
-	artidisco = tmp_artidisco;
-	artilist = tmp_artilist;
-	
-	/* repeat, with loop, for artiextranames */
-	for (i = 0; i < nrofartifacts - NROFARTIFACTS; i++) {
-		tmp_artiextranames[i] = malloc(sizeof(char)*PL_PSIZ);
-		if (i == old_narts - NROFARTIFACTS) continue;	// copy&free 1 fewer than created
-		Strcpy(tmp_artiextranames[i], artiextranames[i]);
-		free(artiextranames[i]);
-	}
-	if (old_narts != NROFARTIFACTS)
-		free(artiextranames);
-	artiextranames = (char **)tmp_artiextranames;
-	for (i = 0; i < nrofartifacts - NROFARTIFACTS; i++) {
-		artilist[i+NROFARTIFACTS+1].name = artiextranames[i];
-	}
-
-	/* fill with default values */
-	memset((genericptr_t) &(artinstance[nrofartifacts]), 0, sizeof(struct artinstance));
-	artidisco[nrofartifacts-1] = 0;
-	memcpy((genericptr_t) &(artilist[nrofartifacts]), (genericptr_t)artilist, sizeof(struct artifact));
-	artilist[nrofartifacts].name = artiextranames[nrofartifacts-NROFARTIFACTS-1];
-	// name will be written front-forwards and we don't have to worry about old data
-	/* re-zero terminator */
-	memset((genericptr_t) &(artilist[nrofartifacts+1]), 0, sizeof(struct artifact));
-
-	return &(artilist[nrofartifacts]);
+	mread(fd, (genericptr_t) artinstance, sizeof artinstance);
+	mread(fd, (genericptr_t) artidisco, sizeof artidisco);
+	hack_artifacts();	/* redo non-saved special cases */
 }
 
 const char *
 artiname(artinum)
 int artinum;
 {
-	if (artinum <= 0 || artinum > nrofartifacts) return("");
+	if (artinum <= 0 || artinum > NROFARTIFACTS) return("");
 	return(artilist[artinum].name);
 }
 
@@ -577,7 +486,7 @@ aligntyp alignment;
 	int n = 0;					/* number of acceptable artifacts, reset every attempt at selecting */
 	int attempts = 0;			/* attempts made creating a list of artifacts */
 	int condition;
-	int eligible[nrofartifacts];
+	int eligible[NROFARTIFACTS];
 
 	/* Pirates quite purposefully can only get the Marauder's Map */
 	if (Role_if(PM_PIRATE))
@@ -666,7 +575,7 @@ struct obj * otmp;
 	const struct artifact * a;	/* artifact pointer, being looped */
 	int m;						/* artifact index, being looped */
 	int n = 0;					/* number of acceptable artifacts, reset every attempt at selecting */
-	int eligible[nrofartifacts];
+	int eligible[NROFARTIFACTS];
 
 	for (m = 1, a = artilist + 1; a->otyp; a++, m++)
 	{
@@ -1499,7 +1408,7 @@ boolean
 art_already_exists(artinum)
 int artinum;
 {
-	if(artinum < 1 || artinum > nrofartifacts) {
+	if(artinum < 1 || artinum > NROFARTIFACTS) {
 		impossible("bad artifact number %d", artinum);
 		return 0;
 	}
@@ -1576,7 +1485,7 @@ int oartifact;
 boolean while_carried;
 {
 	/* quick safety check */
-	if (oartifact < 1 || oartifact > nrofartifacts)
+	if (oartifact < 1 || oartifact > NROFARTIFACTS)
 	{
 		property_list[0] = 0;
 		return;
@@ -2791,7 +2700,7 @@ int m;
 
     /* look for this artifact in the discoveries list;
        if we hit an empty slot then it's not present, so add it */
-    for (i = 0; i < nrofartifacts; i++)
+    for (i = 0; i < NROFARTIFACTS; i++)
 	if (artidisco[i] == 0 || artidisco[i] == m) {
 	    artidisco[i] = m;
 	    return;
@@ -2809,7 +2718,7 @@ int m;
 	boolean found = FALSE;
 	/* look for this artifact in the discoveries list;
        if we hit an empty slot then it's not present, so add it */
-	for (i = 0; i < nrofartifacts - 1 && artidisco[i]; i++) {
+	for (i = 0; i < NROFARTIFACTS - 1 && artidisco[i]; i++) {
 		if (artidisco[i] == m) {
 			found = TRUE;
 		}
@@ -2828,7 +2737,7 @@ int m;
 
     /* look for this artifact in the discoveries list;
        if we hit an empty slot then it's undiscovered */
-    for (i = 0; i < nrofartifacts; i++)
+    for (i = 0; i < NROFARTIFACTS; i++)
 	if (artidisco[i] == m)
 	    return FALSE;
 	else if (artidisco[i] == 0)
@@ -2844,7 +2753,7 @@ winid tmpwin;		/* supplied by dodiscover() */
     int i, m, otyp;
     char buf[BUFSZ];
 
-    for (i = 0; i < nrofartifacts; i++) {
+    for (i = 0; i < NROFARTIFACTS; i++) {
 	if (artidisco[i] == 0) break;	/* empty slot implies end of list */
 	if (i == 0) putstr(tmpwin, iflags.menu_headings, "Artifacts");
 	m = artidisco[i];

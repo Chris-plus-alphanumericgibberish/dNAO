@@ -313,8 +313,8 @@ struct artinstance{
 #define get_artifact(o) \
 		(((o)&&(o)->oartifact) ? &artilist[(o)->oartifact] : 0)
 
-extern struct artinstance * artinstance;
-extern struct artifact * artilist;
+extern struct artinstance artinstance[];
+extern struct artifact artilist[];
 
 /* invoked properties with special powers */
 #define TAMING		(LAST_PROP+1)

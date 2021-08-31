@@ -45,8 +45,8 @@ static const char *artifact_names[] = {
 	 wpr, wfl, \
 	 cpr, cfl, \
 	 inv, ifl }
-struct artifact * artilist;
-NEARDATA struct artifact base_artilist[] = {
+
+NEARDATA struct artifact artilist[] = {
 #endif	/* MAKEDEFS_C */
 
 /* Artifact cost rationale:
