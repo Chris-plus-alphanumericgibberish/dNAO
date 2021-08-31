@@ -6518,7 +6518,7 @@ boolean ranged;
 					else {
 						if (vis) {
 							pline("%s boots are sucked off!",
-								Monnam(mdef));
+								s_suffix(Monnam(mdef)));
 						}
 						obj_extract_self(otmp);
 						otmp->owornmask = 0L;
@@ -6626,7 +6626,7 @@ boolean ranged;
 					else {
 						if (vis) {
 							pline("%s helmet is sucked off!",
-								Monnam(mdef));
+								s_suffix(Monnam(mdef)));
 						}
 						obj_extract_self(otmp);
 						otmp->owornmask = 0L;
