@@ -204,7 +204,7 @@ register struct monst *mon;
 		   *rwep;
 	boolean item1 = FALSE, item2 = FALSE;
 	boolean intelligent = TRUE;
-	boolean marilith = mon_attacktype(mon, AT_MARI);
+	boolean marilith = !!mon_attacktype(mon, AT_MARI);
 
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
