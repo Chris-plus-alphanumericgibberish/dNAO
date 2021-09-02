@@ -502,6 +502,7 @@ E int NDECL(ddocall);
 E void FDECL(docall, (struct obj *));
 E const char *NDECL(rndghostname);
 E void FDECL(append_template_desc, (struct monst *, char *, boolean));
+E const char *FDECL(injury_desc_word, (struct monst *));
 E char *FDECL(x_monnam, (struct monst *,int,const char *,int,BOOLEAN_P));
 E char *FDECL(l_monnam, (struct monst *));
 E char *FDECL(mon_nam, (struct monst *));

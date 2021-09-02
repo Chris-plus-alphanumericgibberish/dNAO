@@ -988,4 +988,10 @@
 				      is_domestic(ptr))
 #endif
 
+#define can_see_hurtnss_of_mon(mon) \
+	((u.sealsActive&SEAL_MOTHER && !is_undead((mon)->data)) || \
+	(Role_if(PM_HEALER) && (!nonliving((mon)->data) || has_blood_mon(mon))) || \
+	(ublindf && ublindf->otyp == ANDROID_VISOR))
+
+
 #endif /* MONDATA_H */
