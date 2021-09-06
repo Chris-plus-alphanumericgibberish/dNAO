@@ -1578,14 +1578,14 @@ struct monst *levi;
 	container->olocked = TRUE;
 	container->otrapped = TRUE;
 	for(int i = 5; i > 0; i--){
-		otmp = mkobj(levi->mtyp == PM_LEVIATHAN ? WAGE_OF_GLUTTONY : WAGE_OF_ENVY, MKOBJ_NOINIT);
+		otmp = mksobj(levi->mtyp == PM_LEVIATHAN ? WAGE_OF_GLUTTONY : WAGE_OF_ENVY, MKOBJ_NOINIT);
 		add_to_container(container, otmp);
 	}
 	for(int i = 3; i > 0; i--){
-		otmp = mkobj(levi->mtyp == PM_LEVIATHAN ? WAGE_OF_ENVY : WAGE_OF_LUST, MKOBJ_NOINIT);
+		otmp = mksobj(levi->mtyp == PM_LEVIATHAN ? WAGE_OF_ENVY : WAGE_OF_LUST, MKOBJ_NOINIT);
 		add_to_container(container, otmp);
 	}
-	otmp = mkobj(WAGE_OF_PRIDE, MKOBJ_NOINIT);
+	otmp = mksobj(WAGE_OF_PRIDE, MKOBJ_NOINIT);
 	add_to_container(container, otmp);
 	for(int i = 3*9; i > 0; i--)
 		mkhellvaultitem_cnt(container, VN_N_PIT_FIEND, FALSE);
