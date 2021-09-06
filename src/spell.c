@@ -5141,7 +5141,7 @@ int *spell_no;
 			Sprintf(buf, "Quiver a spell instead");
 			any.a_int = SPELLMENU_QUIVER;
 			add_menu(tmpwin, NO_GLYPH, &any,
-				'@', 0, ATR_NONE, buf,
+				'&', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
 		if (splaction == SPELLMENU_QUIVER && u.quivered_spell != NO_SPELL) {
