@@ -504,7 +504,7 @@ mklolthvaultitem()
 				otmp->spe = max_ints(d(2,3), otmp->spe);
 		}
 	} while (--try_limit > 0 &&
-	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
+	  (!(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE)) || Is_container(otmp)));
 
 	return otmp;
 }
@@ -556,7 +556,7 @@ int vn;
 				otmp->spe = max_ints(d(2,3), otmp->spe);
 		}
 	} while (--try_limit > 0 &&
-	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
+	  (!(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE)) || Is_container(otmp)));
 
 	return otmp;
 }
