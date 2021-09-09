@@ -6345,7 +6345,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 		if(!rn2(10)) mtmp->female = !mtmp->female;
 	}
 
-	if (In_endgame(&u.uz) && is_mplayer(olddata)) {
+	if (In_endgame(&u.uz) && is_mplayer(olddata) && M_HAS_NAME(mtmp)) {
 		/* mplayers start out as "Foo the Bar", but some of the
 		 * titles are inappropriate when polymorphed, particularly
 		 * into the opposite sex.  players don't use ranks when
