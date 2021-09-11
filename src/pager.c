@@ -1124,7 +1124,7 @@ do_look(quick)
 			strcat(out_str, "\n");
 			temp_buf[0] = '\0';
 			/* create a temporary mtmp to describe */
-			struct monst fake_mon;
+			struct monst fake_mon = {0};
 			set_mon_data(&fake_mon, mntmp);
 			get_description_of_monster_type(&fake_mon, temp_buf);
 			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
