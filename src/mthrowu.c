@@ -6,7 +6,6 @@
 #include "mfndpos.h" /* ALLOW_M */
 
 //STATIC_DCL int FDECL(drop_throw,(struct monst *, struct obj *,BOOLEAN_P,int,int));
-extern char* FDECL(breathwep, (int));
 
 #define URETREATING(x,y) (distmin(u.ux,u.uy,x,y) > distmin(u.ux0,u.uy0,x,y))
 
@@ -15,40 +14,6 @@ extern char* FDECL(breathwep, (int));
 static const int dirx[8] = {0, 1, 1,  1,  0, -1, -1, -1},
 				 diry[8] = {1, 1, 0, -1, -1, -1,  0,  1};
 
-/* 
- * replace the old char*breathwep[] array
- * not dependent on order anymore
- */
-char *
-breathwep(atype)
-int atype;
-{
-	switch (atype)
-	{
-	case AD_MAGM: return "fragments";
-	case AD_FIRE: 
-	case AD_EFIR: 
-		return "fire";
-	case AD_COLD: 
-	case AD_ECLD: 
-		return "frost";
-	case AD_SLEE: return "sleep gas";
-	case AD_DISN: return "a disintegration blast";
-	case AD_ELEC: 
-	case AD_EELC: 
-		return "lightning";
-	case AD_DRST: return "poison gas";
-	case AD_ACID: 
-	case AD_EACD: 
-		return "acid";
-	case AD_DRLI: return "dark energy";
-	case AD_GOLD: return "gold";
-	case AD_BLUD: return "spray of blood";
-	default:
-		impossible("unaccounted-for breath type in breathwep: %d", atype);
-		return "404 BREATH NOT FOUND";
-	}
-}
 
 #ifdef OVLB
 

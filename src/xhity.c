@@ -471,21 +471,22 @@ int tary;
 		if (!rn2(is_orc(magr->data) ? 2 : 4) &&
 			distu(x(magr), y(magr)) <= 2) {
 			/* Attack your steed instead */
-			result = xattacky(magr, u.usteed, u.ux, u.uy);
+			mdef = u.usteed;
+			result = xattacky(magr, mdef, u.ux, u.uy);
 			if (result != MM_MISS) {	/* needs to have made at least 1 attack */
 				if (result & MM_AGR_DIED)
 					return MM_AGR_DIED;
 				if ((result & MM_DEF_DIED) || u.umoved)
 					return MM_AGR_STOP;
 				/* Let your steed maybe retaliate */
-				if (u.usteed->movement >= NORMAL_SPEED) {
-					int res2 = xattacky(u.usteed, magr, x(magr), y(magr));
+				if (mdef->movement >= NORMAL_SPEED) {
+					int res2 = xattacky(mdef, magr, x(magr), y(magr));
 					if (res2) {
 						if (res2 & MM_DEF_DIED)
 							result |= MM_AGR_DIED;
 						if (res2 & MM_AGR_DIED)
 							result |= MM_AGR_STOP;
-						u.usteed->movement -= NORMAL_SPEED;
+						mdef->movement -= NORMAL_SPEED;
 					}
 				}
 			}

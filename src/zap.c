@@ -3980,19 +3980,21 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 							lev->doormask = D_NODOOR;
 						}
 						range -= 2;
+						unblock_point(sx, sy);
 					}
 					else if (IS_TREE(lev->typ)) {
 						lev->typ = ROOM;
 						if (youagr && u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN, TRUE);
 						range -= 1;
+						unblock_point(sx, sy);
 					}
 					else {	/* IS_ROCK but not IS_WALL */
 						lev->typ = CORR;
 						range -= 3;
+						unblock_point(sx, sy);
 					}
 					/* vision */
 					vision_full_recalc = TRUE;
-					unblock_point(sx, sy);
 				}
 				if (shopdoor || shopwall)
 					pay_for_damage(shopdoor ? "destroy" : "dig into", FALSE);

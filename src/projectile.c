@@ -22,8 +22,6 @@ extern void FDECL(check_shop_obj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
 extern void FDECL(breakmsg, (struct obj *, BOOLEAN_P));
 extern void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 extern void NDECL(autoquiver);
-/* from mthrowu.c */
-extern char* FDECL(breathwep, (int));
 
 /* some damn global variables because passing these as parameters would be a lot to add for something so rarely used.
  * The player threw an object, these save what the player's state was just prior to throwing so it can be restored */
@@ -2804,13 +2802,20 @@ int tary;
 	}
 
 	/* message */
-	if (youagr) {
-		You("breathe %s!", breathwep(typ));
+	if (youagr || canseemon(magr)) {
+		char * bofp = flash_type(typ, ZAP_BREATH);
+		char * p = strstri(bofp, " of ")+4;
+		
+		/* some breaths sound better as "a noun of x" */
+		if (typ == AD_DISN || typ == AD_BLUD)
+			p = NULL;
+
+		pline("%s breathe%s %s!",
+			youagr ? "You" : Monnam(magr),
+			youagr ? "" : "s",
+			p ? p : an(bofp)
+			);
 	}
-	else if (canseemon(magr)) {
-		pline("%s breathes %s!", Monnam(magr), breathwep(typ));
-	}
-	
 
 	/* set up zapdata */
 	basiczap(&zapdata, typ, ZAP_BREATH, 0);
