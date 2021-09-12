@@ -2960,6 +2960,10 @@ int tary;
 				}
 			}
 			else if (!Sick_res(mdef)) {
+				/* message */
+				if (youagr || youdef || canseemon(mdef)) {
+					pline("%s is afflicted with disease!", Monnam(mdef));
+				}
 				/* 1/10 chance of instakill */
 				if (!rn2(10)){
 					if (youagr) killed(mdef);
@@ -2967,10 +2971,9 @@ int tary;
 					/* instakill */
 					return ((*hp(mdef) > 0 ? MM_DEF_LSVD : MM_DEF_DIED) | MM_HIT);
 				}
-				else {
-					dmg = rnd(12);
-				}
+				//else damage
 			}
+			else return MM_MISS;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
