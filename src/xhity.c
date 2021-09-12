@@ -14038,7 +14038,7 @@ int vis;						/* True if action is at all visible to the player */
 						(activeFightingForm(FFORM_JUYO))
 						) &&
 						(sneak_attack != 0)	/* attacking a disadvantaged target, but might not have sneak dice */
-						) use_skill(FFORM_JUYO, 1);
+						) use_skill(P_JUYO, 1);
 				}
 			}
 		}
