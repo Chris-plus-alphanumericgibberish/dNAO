@@ -3435,7 +3435,7 @@ int floorID;
 	case ELDER_SIGN:
 		strcpy(name, " Elder Sign");
 		strcpy(strokes, " 6, 12, 8, 8, 8, 8");
-		strcpy(warded, " 1-fold: b, j, m, p, w, l, P, U, ;, mind flayer");
+		strcpy(warded, " 1-fold: b, j, m, p, w, y, P, U, ;, mind flayer");
 		strcpy(warded2,"         deep one, deeper one, byakhee, nightgaunt");
 		strcpy(warded3," 6-fold: deepest one, master mind flayer");
 		strcpy(reinforce, " 6-fold");
