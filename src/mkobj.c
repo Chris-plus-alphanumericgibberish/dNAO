@@ -2360,8 +2360,9 @@ register struct obj *obj;
 			else wt = wt*difsize*difsize;
 		} else {
 			difsize = abs(difsize)+1;
-			if(obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS) wt = wt/(difsize) + 1;
-			else wt = wt/(difsize*difsize) + 1;
+			if(obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS) wt = wt/(difsize);
+			else wt = wt/(difsize*difsize);
+			if (wt < 1) wt = 1;
 		}
 	}
 	
