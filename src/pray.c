@@ -920,7 +920,7 @@ pleased(g_align)
 			&& uwep && is_spear(uwep) && !uwep->oartifact && uwep->spe >= 5 
 			&& !art_already_exists(ART_GUNGNIR) && (g_align == A_LAWFUL || g_align == A_NEUTRAL)
 		){
-			pline("Secret runes are engraved on your %s", xname(uwep));
+			pline("Secret runes are engraved on your %s.", xname(uwep));
 			oname(uwep, artilist[ART_GUNGNIR].name);
 		}
 		else switch(rn2((Luck + 6)>>1)) {
