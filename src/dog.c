@@ -786,6 +786,7 @@ boolean pets_only;	/* true for ascension or final escape */
 			}
 	    } else if (quest_status.touched_artifact && Race_if(PM_DROW) && !flags.initgend && Role_if(PM_NOBLEMAN) && mtmp->m_id == quest_status.leader_m_id) {
 			mongone(mtmp);
+			u.uevent.qcompleted = TRUE;
 	    // } else if(u.uevent.qcompleted && mtmp->mtyp == PM_ORION){
 			// mondied(mtmp);
 	    } else if (mtmp->iswiz || 
