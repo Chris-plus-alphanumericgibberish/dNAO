@@ -2267,6 +2267,13 @@ struct obj *otmp;
 			HSleeping = FROMOUTSIDE | rnd(100);
 		}
 		break;
+	    case AMULET_OF_NULLIFY_MAGIC:
+			debugpline("Trying to give null magic");
+			if (!(HNullmagic))
+				pline("A shimmering film forms around you!");
+			
+			give_intrinsic(NULLMAGIC, 1000L);
+		break;
 	    case AMULET_OF_DRAIN_RESISTANCE:
 			debugpline("Trying to give drain resistance");
 			if (!(HDrain_resistance))
