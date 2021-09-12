@@ -2493,9 +2493,9 @@ struct obj *otmp;
 	if (str < 6) bonus = -6+str;
 	else if (str < 16) bonus = 0;
 	else if (str < 18) bonus = 1;
-	else if (str == 18) bonus = 2;		/* up to 18 */
-	else if (str <= STR18(75)) bonus = 3;		/* up to 18/75 */
-	else if (str <= STR18(90)) bonus = 4;		/* up to 18/90 */
+	else if (str < STR18(25)) bonus = 2;		/* up to 18/25 */
+	else if (str < STR18(50)) bonus = 3;		/* up to 18/50 */
+	else if (str < STR18(75)) bonus = 4;		/* up to 18/75 */
 	else if (str < STR18(100)) bonus = 5;		/* up to 18/99 */
 	else if (str < STR19(22)) bonus = 6;
 	else if (str < STR19(25)) bonus = 7;
