@@ -5583,7 +5583,27 @@ boolean * messaged;
 			}
 		}
 	}
+	if(otmp->oartifact == ART_IBITE_ARM){
+		struct obj *cloak = which_armor(mdef, W_ARMC);
+		struct obj *armor = which_armor(mdef, W_ARM);
+		struct obj *shield = which_armor(mdef, W_ARMS);
 
+		if (youdef && uarmc && uarmc->greased) {
+			if (!rn2(uarmc->blessed ? 4 : 2)){
+				uarmc->greased = 0;
+				pline("The layer of grease on your %s dissolves.", xname(uarmc));
+			}
+		} else if (!youdef && cloak && cloak->greased){
+			if (!rn2(cloak->blessed ? 4 : 2)){
+				cloak->greased = 0;
+				if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
+			}
+		} else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))){
+			int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
+
+			*truedmgptr += d(2, 4)*mult;
+		}
+	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
@@ -8788,6 +8808,11 @@ arti_invoke(obj)
 				}
 			}
 			break;
+        case IBITE_ARM:
+			You("wake the severed arm.");
+			doliving_ibite_arm(&youmonst, obj, TRUE);
+			time = partial_action();
+		break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!

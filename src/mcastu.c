@@ -571,6 +571,25 @@ unsigned int type;
 	case PM_HOUND_OF_TINDALOS:
 		return OPEN_WOUNDS;
 	break;
+	case PM_PRIEST_OF_IB:
+		switch (rnd(6)) {
+			default://5, 6
+			return PSI_BOLT;
+			break;
+			case 4:
+			return OPEN_WOUNDS;
+			break;
+			case 3:
+			return GEYSER;
+			break;
+			case 2:
+			return ACID_RAIN;
+			break;
+			case 1:
+			return PLAGUE;
+			break;
+		}
+	break;
 	case PM_DWARF_CLERIC:
 	case PM_DWARF_QUEEN:
 		switch (rnd(4)) {

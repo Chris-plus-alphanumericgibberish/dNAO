@@ -4576,6 +4576,185 @@ boolean invoked;
 }
 
 void
+doibite_thrash(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	int x = x(magr), y = y(magr);
+	int i, j;
+	struct monst *mdef;
+	struct attack symbiote = { AT_WEAP, AD_PHYS, 0, 0 };
+	boolean youagr = (magr == &youmonst);
+	boolean peaceSafe = youagr || magr->mpeaceful;
+	for(i = x-2; i < x+3; i++)
+		for(j = y-2; j < y+3; j++){
+			if(!isok(i,j))
+				continue;
+			if(i == x && j == y)
+				continue;
+			if(rn2(10))
+				continue;
+			mdef = m_u_at(i,j);
+			if(!mdef || DEADMONSTER(mdef))
+				continue;
+			if(peaceSafe && (mdef == &youmonst || mdef->mpeaceful))
+				continue;
+			if(!peaceSafe && mdef != &youmonst && !mdef->mpeaceful)
+				continue;
+
+			//Note: petrifying targets are safe, it's a weapon attack
+			if(mdef->mtyp == PM_PALE_NIGHT) continue;
+			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
+				wep->otyp = CLAWED_HAND;
+				xmeleehity(magr, mdef, &symbiote, &wep, -1, 0, FALSE);
+				wep->otyp = CLUB;
+				if(DEADMONSTER(magr))
+					return; //oops!
+			}
+		}
+}
+
+void
+doibite_cast(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	int x = x(magr), y = y(magr);
+	int i, j;
+	struct monst *mdef;
+	int	targets = 0;
+	struct attack symbiote = { AT_MAGC, AD_CLRC, 6, 6 };
+	boolean youagr = (magr == &youmonst);
+	boolean peaceSafe = youagr || magr->mpeaceful;
+	
+	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+			if(!isok(i,j))
+				continue;
+			if(i == x && j == y)
+				continue;
+			mdef = m_u_at(i,j);
+			if(!mdef || DEADMONSTER(mdef))
+				continue;
+			if(peaceSafe && (mdef == &youmonst || mdef->mpeaceful))
+				continue;
+			if(!peaceSafe && mdef != &youmonst && !mdef->mpeaceful)
+				continue;
+
+			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
+				targets++;
+			}
+		}
+
+	if(!targets)
+		return;
+	targets = rn2(targets);
+	
+	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+			if(!isok(i,j))
+				continue;
+			if(i == x && j == y)
+				continue;
+			mdef = m_u_at(i,j);
+			if(!mdef || DEADMONSTER(mdef))
+				continue;
+			if(peaceSafe && (mdef == &youmonst || mdef->mpeaceful))
+				continue;
+			if(!peaceSafe && mdef != &youmonst && !mdef->mpeaceful)
+				continue;
+
+			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
+				if(targets)
+					targets--;
+				else
+					goto break_outer_loop;
+			}
+		}
+break_outer_loop:
+	if(!mdef)
+		return; //Shouldn't happen, but....
+	int spelltype;
+	if(youagr || canseemon(magr))
+		pline("The severed arm casts a spell!");
+	switch(rnd(6)){
+		case 1:
+			spelltype = PLAGUE;
+		break;
+		case 2:
+			spelltype = ACID_RAIN;
+		break;
+		case 3:
+			spelltype = GEYSER;
+		break;
+		case 4:
+			spelltype = OPEN_WOUNDS;
+		break;
+		default: //5 and 6
+			spelltype = PSI_BOLT;
+		break;
+	}
+	cast_spell(magr, mdef, &symbiote, spelltype, i, j);
+}
+
+void
+doibite_ghosts(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	boolean youagr = magr == &youmonst;
+	int efcha = youagr ? (ACURR(A_CHA) + 1) : (magr->mcha + 1);
+	int duration = efcha + wep->spe + max(Insanity, 10)/5;
+	struct monst *mtmp;
+	int i, j = 0;
+	int maketame = ((magr->mtame || youagr) ? MM_EDOG : 0);
+	struct permonst *ibites[] = {&mons[PM_BEING_OF_IB], &mons[PM_PRIEST_OF_IB], 0};
+	if(duration < 0)
+		duration = 1;
+	i = d(6,6);
+	while(ibites[j]){
+		for(; i > 0; i--){
+			mtmp = makemon(ibites[j], 0, 0, MM_ADJACENTOK|maketame|MM_ESUM|NO_MINVENT);
+			if(mtmp){
+				mtmp->mspec_used = 0;
+				mark_mon_as_summoned(mtmp, magr, duration, 0);
+				/* can be peaceful */
+				if(magr->mpeaceful)
+					mtmp->mpeaceful = TRUE;
+				/* can be tame */
+				if (maketame) {
+					initedog(mtmp);
+				}
+			}
+		}
+		i = d(3,3);
+		j++;
+	}
+}
+
+void
+doliving_ibite_arm(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	if(u.uinsight >= 60 && !rn2(78)){
+		//summon ghosts
+		doibite_ghosts(magr, wep);
+	}
+	else if(u.uinsight >= 50 && !rn2(20)){
+		//cast spell
+		doibite_cast(magr, wep);
+	}
+	else{
+		//hit targets
+		if(u.uinsight < 40)
+			return;
+		doibite_thrash(magr, wep);
+	}
+}
+
+void
 doliving_healing_armor(magr, wep, invoked)
 struct monst *magr;
 struct obj *wep;
@@ -4707,6 +4886,8 @@ struct obj *wep;
 		doliving_ringed_spear(magr, wep, FALSE);
 	else if(wep->oartifact == ART_RINGED_BRASS_ARMOR)
 		doliving_ringed_armor(magr, wep, FALSE);
+	else if(wep->oartifact == ART_IBITE_ARM)
+		doliving_ibite_arm(magr, wep, FALSE);
 	else doliving_single_attack(magr, wep);
 }
 

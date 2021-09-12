@@ -661,6 +661,10 @@ const char *name;
 		if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD)
 			obj->owt = 150;
 		
+		/* property */
+		if (obj->oartifact == ART_IBITE_ARM)
+				add_oprop(obj, OPROP_CCLAW);
+		
 		/* size */
 		if (obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT)
 			obj->objsize = artilist[obj->oartifact].size;
