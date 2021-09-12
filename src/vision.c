@@ -591,31 +591,29 @@ vision_recalc(control)
 			 * they are also underwater.  This overrides night vision but
 			 * does not override x-ray vision.
 			 */
-			if (nv_range > 0) {
-				nv_range = 0;
-				for (row = u.uy - 1; row <= u.uy + 1; row++)
-				for (col = u.ux - 1; col <= u.ux + 1; col++) {
-					if (!isok(col, row) || !is_pool(col, row, TRUE)) continue;
+			for (row = u.uy - 1; row <= u.uy + 1; row++)
+			for (col = u.ux - 1; col <= u.ux + 1; col++) {
+				if (!isok(col, row) || !is_pool(col, row, TRUE)) continue;
 
-					next_rmin[row] = min(next_rmin[row], col);
-					next_rmax[row] = max(next_rmax[row], col);
-					next_array[row][col] = IN_SIGHT | COULD_SEE;
-				}
+				next_rmin[row] = min(next_rmin[row], col);
+				next_rmax[row] = max(next_rmax[row], col);
+				next_array[row][col] = COULD_SEE;
+				if (nv_range > 0) next_array[row][col] |= IN_SIGHT;
 			}
+			nv_range = 0;
 		}
 		/* if in a pit, just update for immediate locations */
 		else if (u.utrap && u.utraptype == TT_PIT) {
-			if (nv_range > 0) {
-				nv_range = 0;
-				for (row = u.uy - 1; row <= u.uy + 1; row++)
-				for (col = u.ux - 1; col <= u.ux + 1; col++) {
-					if (!isok(col, row)) continue;
+			for (row = u.uy - 1; row <= u.uy + 1; row++)
+			for (col = u.ux - 1; col <= u.ux + 1; col++) {
+				if (!isok(col, row)) continue;
 
-					next_rmin[row] = min(next_rmin[row], col);
-					next_rmax[row] = max(next_rmax[row], col);
-					next_array[row][col] = IN_SIGHT | COULD_SEE;
-				}
+				next_rmin[row] = min(next_rmin[row], col);
+				next_rmax[row] = max(next_rmax[row], col);
+				next_array[row][col] = COULD_SEE;
+				if (nv_range > 0) next_array[row][col] |= IN_SIGHT;
 			}
+			nv_range = 0;
 		} else
 			view_from(u.uy, u.ux, next_array, next_rmin, next_rmax,
 			0, (void FDECL((*),(int,int,genericptr_t)))0, (genericptr_t)0);

@@ -4719,7 +4719,7 @@ int tary;
 							pline("%s %s knocked out of %s %s!",
 								s_suffix(Monnam(mdef)),
 								aobjnam(otmp, "are"),
-								s_suffix(mon_nam(mdef)),
+								hisherits(mdef),
 								hands
 								);
 						}

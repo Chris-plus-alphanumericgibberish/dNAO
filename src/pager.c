@@ -1117,7 +1117,28 @@ do_look(quick)
 
 	if (out_str[1]) {	/* user typed in a complete string */
 		winid datawin = create_nhwindow(NHW_MENU);
-	    if(checkfile(out_str, pm, TRUE, TRUE, &datawin))
+		// check if they specified a monster
+		int mntmp = NON_PM;
+		if ((mntmp = name_to_mon(out_str)) >= LOW_PM && !is_horror(&mons[mntmp])) {
+			char temp_buf[LONGBUFSZ];
+			strcat(out_str, "\n");
+			temp_buf[0] = '\0';
+			/* create a temporary mtmp to describe */
+			struct monst fake_mon = {0};
+			set_mon_data(&fake_mon, mntmp);
+			get_description_of_monster_type(&fake_mon, temp_buf);
+			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
+			pm = &mons[mntmp];
+			char * temp_print;
+			temp_print = strtok(out_str, "\n");
+			while (temp_print != NULL)
+			{
+				putstr(datawin, 0, temp_print);
+				temp_print = strtok(NULL, "\n");
+			}
+		}
+		// check encyclopedia
+	    if(checkfile(out_str, pm, mntmp==NON_PM, TRUE, &datawin) || mntmp != NON_PM)
 			display_nhwindow(datawin, TRUE);
 		destroy_nhwindow(datawin);
 	    return 0;
