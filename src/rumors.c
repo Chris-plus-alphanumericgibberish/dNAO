@@ -332,6 +332,12 @@ outgmaster()
 #define SELECT_ENLIT 3
 #define SELECT_HINTS 4
 
+#define GLIMPSE_ELDRN 1
+#define GLIMPSE_DRAGN 2
+#define GLIMPSE_POLYP 3
+#define GLIPMSE_CHAOS 4
+#define GLIMPSE_OOONA 5
+
 int
 doconsult(oracl)
 register struct monst *oracl;
@@ -349,7 +355,7 @@ register struct monst *oracl;
 	int minor_cost = 50;
 	int major_cost = 500 + 50 * u.ulevel;
 	int enl_cost = 200 + 20 * u.ulevel;
-	int hint_cost = 1000;
+	int hint_cost = 150;
 
 	if (!oracl) {
 		There("is no one here to consult.");
@@ -473,8 +479,48 @@ register struct monst *oracl;
 #else
 				money2mon(oracl, (long)hint_cost);
 #endif
-				switch (rn2(5)){
-					case 0:
+				tmpwin = create_nhwindow(NHW_MENU);
+				start_menu(tmpwin);
+				any.a_void = 0;		/* zero out all bits */
+
+				Sprintf(buf, "Sightings of the eladrin nobility");
+				any.a_int = GLIMPSE_ELDRN;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					's', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
+				Sprintf(buf, "Talk of the castle in the air");
+				any.a_int = GLIMPSE_DRAGN;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					't', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
+				Sprintf(buf, "The location of the primordial ones");
+				any.a_int = GLIMPSE_POLYP;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					'l', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
+				Sprintf(buf, "Knowledge of those who came before");
+				any.a_int = GLIPMSE_CHAOS;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					'k', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
+				Sprintf(buf, "Impressions of the Queen of the Fae");
+				any.a_int = GLIMPSE_OOONA;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					'i', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
+				end_menu(tmpwin, "What glimpses dost thou ask for?");
+
+				how = PICK_ONE;
+				n = select_menu(tmpwin, how, &selected);
+				destroy_nhwindow(tmpwin);
+				n = (n > 0) ? selected[0].item.a_int : rnd(5);
+				switch (n){
+					case 1:
 						switch(dungeon_topology.alt_tulani){
 							case TULANI_CASTE:
 								pline("They say radiant spheres roam the land.");
@@ -495,13 +541,13 @@ register struct monst *oracl;
 							break;
 						}
 					break;
-					case 1:
+					case 2:
 						if (dungeon_topology.alt_tower)
 							pline("They say Bahamut's palace has been sighted from afar.");
 						else
 							pline("Rumors of Bahamut's palace have been greatly exaggerated.");
 					break;
-					case 2:
+					case 3:
 						if (dungeon_topology.eprecursor_typ == PRE_DRACAE)
 							pline("They say the ancient eladrin mothers have been seen once again.");
 						else if (dungeon_topology.eprecursor_typ == PRE_POLYP){
@@ -512,7 +558,7 @@ register struct monst *oracl;
 						} else
 							pline("I've been considering expanding my statue collection. I hear Oona has quite the variety...");
 					break;
-					case 3:
+					case 4:
 						if (dungeon_topology.d_chaos_dvariant == TEMPLE_OF_CHAOS)
 							pline("Some adventurer came through here the other day, all dressed in blue and muttering about 'Materia'?");
 						else if (dungeon_topology.d_chaos_dvariant == MITHARDIR)
@@ -524,7 +570,7 @@ register struct monst *oracl;
 								pline("A pair of short adventurers came through here the other day, apparently in search of a volcano?");
 						}
 					break;
-					case 4:
+					case 5:
 						if (u.oonaenergy == AD_FIRE)
 							pline("They say Oona has a bit of a fiery personality...");
 						else if (u.oonaenergy == AD_COLD)
@@ -556,5 +602,11 @@ register struct monst *oracl;
 #undef SELECT_MAJOR
 #undef SELECT_ENLIT
 #undef SELECT_HINTS
+
+#undef GLIMPSE_ELDRN
+#undef GLIMPSE_DRAGN
+#undef GLIMPSE_POLYP
+#undef GLIPMSE_CHAOS
+#undef GLIMPSE_OOONA
 
 /*rumors.c*/
