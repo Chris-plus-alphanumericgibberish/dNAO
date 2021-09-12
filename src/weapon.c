@@ -3583,7 +3583,7 @@ int wep_type;
 		// }
 	}
 	
-	if(weapon->otyp == SCALPEL && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
+	if(weapon && weapon->otyp == SCALPEL && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
 		/* weapon skills and misc skills */
 		switch (P_SKILL(P_HEALING_SPELL)) {
 			default: impossible("scalpel handeling weapon_dam_bonus: bad skill %d", skill);
