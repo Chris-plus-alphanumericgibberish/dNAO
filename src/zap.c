@@ -399,6 +399,8 @@ struct obj *otmp;
 		int delta = mtmp->mhp;
 		reveal_invis = TRUE;
 	    if (mtmp->mtyp != PM_PESTILENCE) {
+		char hurtmonbuf[BUFSZ];
+		Strcpy(hurtmonbuf, Monnam(mtmp));
 		wake = FALSE;		/* wakeup() makes the target angry */
 		/* skill adjustment ranges from -6 to + 18 (-6 means 0 hp healed minimum)*/
 		mtmp->mhp += d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1);
@@ -418,8 +420,18 @@ struct obj *otmp;
 			    newsym(mtmp->mx, mtmp->my);
 			} else
 			    mimic_hit_msg(mtmp, otyp);
-		    } else pline("%s looks%s better.", Monnam(mtmp),
-				 otyp != SPE_HEALING ? " much" : "" );
+		    } else {
+				if (!can_see_hurtnss_of_mon(mtmp)) {
+					pline("%s looks%s better.", Monnam(mtmp),
+						otyp != SPE_HEALING ? " much" : "" );
+				}
+				else {
+					pline("%s %s %s.",
+						hurtmonbuf, 
+						delta != 0 ? "now looks only" : "looks",
+						injury_desc_word(mtmp));
+				}
+			}
 		}
 
 		if(mtmp->mtame && Role_if(PM_HEALER)){

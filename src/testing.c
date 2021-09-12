@@ -106,6 +106,24 @@ test_readobjnam()
 		objects[i].oc_name_known = savestate;
 	}
 
+	/* blanket test to try to wish for 2 of all mergable objects */
+	for (i=1; i < NUM_OBJECTS; i++) {
+		/* skip non-objects that exist just for additional descriptions */
+		if (!obj_descr[(objects[i].oc_name_idx)].oc_name) continue;
+		/* skip non-mergable objects */
+		if (!objects[i].oc_merge) continue;
+		/* known and acceptable failures */
+		if (i == GOLD_PIECE)// correctly gives 2 gold pieces, which are not an object
+		/* save old name_known state; set to TRUE so simple_typename() gives real name */
+		savestate = objects[i].oc_name_known;
+		objects[i].oc_name_known = 1;
+		/* test */
+		Sprintf(buf2, "2 %s", makeplural(simple_typename(i)));
+		TEST(buf2, otmp->otyp == i && otmp->quan == 2);
+		/* restore old name_known state */
+		objects[i].oc_name_known = savestate;
+	}
+
 	/* blanket test to try to wish for all artifacts */
 	for (i=1; i < NROFARTIFACTS; i++) {
 		/* known and acceptable failures */

@@ -2341,7 +2341,7 @@ mkwell(left)
 		}
 		
 		levl[x][y].typ = POOL;
-		mksobj_at(RAKUYO, x, y, NO_MKOBJ_FLAGS);
+		mksobj_at(RAKUYO, x, y, MKOBJ_ARTIF);
 	}
 }
 

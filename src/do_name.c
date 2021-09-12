@@ -864,20 +864,37 @@ boolean pname;
 	return;
 }
 
+const char *
+injury_desc_word(mtmp)
+struct monst * mtmp;
+{
+	if (mtmp->mhp >= mtmp->mhpmax)
+		return (has_blood_mon(mtmp)) ? "uninjured" : "undamaged";
+	else if (mtmp->mhp >= .9*mtmp->mhpmax)
+		return "scuffed";
+	else if (mtmp->mhp >= .5*mtmp->mhpmax)
+		return (has_blood_mon(mtmp)) ? "bruised" : "dented";
+	else if (mtmp->mhp >= .25*mtmp->mhpmax)
+		return (has_blood_mon(mtmp)) ? "bloodied" : "damaged";
+	else if (mtmp->mhp >= .1*mtmp->mhpmax)
+		return (has_blood_mon(mtmp)) ? "badly bloodied" : "badly damaged";
+	else if (mtmp->mhp > 0)
+		return (has_blood_mon(mtmp)) ? "mortally injured" : "critically damaged";
+	
+	/* deadmonster */
+	return "";
+}
+
 boolean
 maybe_append_injury_desc(mtmp, buf)
 struct monst * mtmp;
 char * buf;
 {
-	if (((u.sealsActive&SEAL_MOTHER && !is_undead(mtmp->data)) || (Role_if(PM_HEALER) && (!nonliving(mtmp->data) || has_blood_mon(mtmp))) || (ublindf && ublindf->otyp == ANDROID_VISOR))
-		&& !flags.suppress_hurtness){
-		if (mtmp->mhp >= mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "uninjured ") : Strcat(buf, "undamaged ");
-		else if (mtmp->mhp >= .9*mtmp->mhpmax) Strcat(buf, "scuffed ");
-		else if (mtmp->mhp >= .5*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "bruised ") : Strcat(buf, "dented ");
-		else if (mtmp->mhp >= .25*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "bloodied ") : Strcat(buf, "damaged ");
-		else if (mtmp->mhp >= .1*mtmp->mhpmax) (has_blood_mon(mtmp)) ? Strcat(buf, "badly bloodied ") : Strcat(buf, "badly damaged ");
-		else if (mtmp->mhp > 0) (has_blood_mon(mtmp)) ? Strcat(buf, "mortally injured ") : Strcat(buf, "critically damaged ");
-		else return FALSE;	/* dead monster */
+	if (DEADMONSTER(mtmp))
+		return FALSE;
+	if (can_see_hurtnss_of_mon(mtmp) && !flags.suppress_hurtness){
+		Strcat(buf, injury_desc_word(mtmp));
+		Strcat(buf, " ");
 		return TRUE;
 	}
 	return FALSE;
