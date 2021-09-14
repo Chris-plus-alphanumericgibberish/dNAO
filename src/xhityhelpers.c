@@ -1605,6 +1605,10 @@ struct obj * weapon;
 		if (otmp && arti_shining(otmp))
 			return 2;
 
+		/* Ghost that thinks it's alive and solid */
+		if (magr->mtyp == PM_BEING_OF_IB || magr->mtyp == PM_PRIEST_OF_IB)
+			return 2;
+
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
 			(attk && (attk->adtyp == AD_STAR || attk->adtyp == AD_MOON))
 			))
@@ -1664,6 +1668,9 @@ struct obj * weapon;
 	/* weapon */
 	else {
 		if (arti_shining(weapon))	/* why is this used for more things than artifacts? >_> */
+			return 2;
+
+		if (weapon->oartifact == ART_IBITE_ARM)	/* Ghost touch, not actually phasing */
 			return 2;
 
 		if (hatesobjdmg(mdef, weapon))
