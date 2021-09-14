@@ -4749,14 +4749,13 @@ boolean invoked;
 		//summon ghosts
 		doibite_ghosts(magr, wep);
 	}
-	else if(u.uinsight >= 50 && !rn2(20)){
+
+	if(u.uinsight >= 50 && !rn2(20)){
 		//cast spell
 		doibite_cast(magr, wep);
 	}
-	else{
+	else if(u.uinsight >= 40){
 		//hit targets
-		if(u.uinsight < 40)
-			return;
 		doibite_thrash(magr, wep);
 	}
 }
