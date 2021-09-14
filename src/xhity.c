@@ -10558,6 +10558,7 @@ int vis;
 	boolean needs_mdef_eyes = TRUE;		/* when TRUE, mdef is protected by being blind */
 	boolean needs_uncancelled = TRUE;	/* when TRUE, attack cannot happen when cancelled */
 	boolean maybe_not = (!youagr && pa->mtyp != PM_DEMOGORGON);		/* when TRUE, occasionally doesn't use gaze attack at all */
+	boolean cooldown = TRUE;			/* when TRUE, attack may set cooldown */
 
 	static const int randomgazeattacks[] = { AD_DEAD, AD_CNCL, AD_PLYS, AD_DRLI, AD_ENCH, AD_STON, AD_LUCK,
 		AD_CONF, AD_SLOW, AD_STUN, AD_BLND, AD_FIRE, AD_FIRE,
@@ -10600,9 +10601,11 @@ int vis;
 	/* get eyes, uncancelledness */
 	getgazeinfo(attk->aatyp, adtyp, pa, magr, mdef, &needs_magr_eyes, &needs_mdef_eyes, &needs_uncancelled);
 
-	/* widegazes cannot fail */
-	if (attk->aatyp == AT_WDGZ)
+	/* widegazes cannot fail, and don't use mspec_used */
+	if (attk->aatyp == AT_WDGZ){
 		maybe_not = FALSE;
+		cooldown = FALSE;
+	}
 
 	/* these gazes are actually hacks and only work vs the player */
 	if (!youdef && (adtyp == AD_WTCH || adtyp == AD_MIST))
@@ -11176,7 +11179,7 @@ int vis;
 		if (!dmg)
 			dmg = d(3, 4);
 		/* put on cooldown */
-		if (!youagr && !(is_uvuudaum(pa) || attk->adtyp == AD_WISD)) {
+		if (!youagr && cooldown) {
 			if (magr->mspec_used)
 				return MM_MISS;
 			else
@@ -11187,7 +11190,7 @@ int vis;
 			if (Confusion) {
 				You("are getting more and more confused.");
 				/* if magr is confusing us every turn, let's not stack confusion too high */
-				if (!magr->mspec_used && (HConfusion > 0))
+				if (!cooldown && (HConfusion > 0))
 					dmg = min(dmg*dmg / HConfusion, dmg);
 			}
 			else {
@@ -11247,7 +11250,7 @@ int vis;
 				maxdmg = 10;
 			}
 			/* put on cooldown */
-			if (!youagr) {
+			if (cooldown && !youagr) {
 				if (magr->mspec_used)
 					return MM_MISS;
 				else
@@ -11325,7 +11328,7 @@ int vis;
 		if (maybe_not && !rn2(5))
 			return MM_MISS;
 		/* set cooldown */
-		if (!youagr) {
+		if (cooldown && !youagr) {
 			if (magr->mspec_used)
 				return MM_MISS;
 			else
@@ -11365,7 +11368,7 @@ int vis;
 		if (!dmg)
 			dmg = d(2, 6);
 		/* put on cooldown */
-		if (!youagr) {
+		if (cooldown && !youagr) {
 			if (magr->mspec_used)
 				return MM_MISS;
 			else
@@ -11437,7 +11440,7 @@ int vis;
 			if (!dmg)
 				dmg = d(2, 6);
 			/* put on cooldown */
-			if (!youagr) {
+			if (cooldown && !youagr) {
 				if (magr->mspec_used)
 					return MM_MISS;
 				else
@@ -11472,7 +11475,7 @@ int vis;
 		if (!dmg)
 			dmg = rnd(12);
 		/* put on cooldown */
-		if (!youagr) {
+		if (cooldown && !youagr) {
 			if (magr->mspec_used)
 				return MM_MISS;
 			else
@@ -11518,7 +11521,7 @@ int vis;
 		if (!dmg)
 			dmg = rnd(10);
 		/* put on cooldown */
-		if (!youagr) {
+		if (cooldown && !youagr) {
 			if (magr->mspec_used)
 				return MM_MISS;
 			else
@@ -11639,7 +11642,7 @@ int vis;
 			return MM_MISS;
 		/* put on cooldown */
 		/* In practice, this will be zeroed when a new movement ration is handed out, and acts to make sure Blink can only be used once per round. */
-		if (!youagr) {
+		if (cooldown && !youagr) {
 			if (magr->mspec_used)
 				return MM_MISS;
 			else
@@ -11825,7 +11828,7 @@ int vis;
 			return MM_MISS;
 		/* put on cooldown */
 		/* In practice, this will be zeroed when a new movement ration is handed out, and acts to make sure it can only be used once per round. */
-		if (!youagr) {
+		if (cooldown && !youagr) {
 			if (magr->mspec_used)
 				return MM_MISS;
 			else
