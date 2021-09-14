@@ -1597,6 +1597,7 @@ E boolean FDECL(mnearto, (struct monst *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E void FDECL(poisontell, (int));
 E void FDECL(poisoned, (const char *,int,const char *,int));
 E void FDECL(m_respond, (struct monst *));
+E void FDECL(m_widegaze, (struct monst *));
 E void FDECL(setmangry, (struct monst *));
 E void FDECL(wakeup, (struct monst *, int));
 E void NDECL(wake_nearby);

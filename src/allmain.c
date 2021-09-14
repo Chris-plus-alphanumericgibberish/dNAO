@@ -1280,7 +1280,7 @@ moveloop()
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
 				&& !(hideablewidegaze(mtmp->data) && (rn2(3) < magic_negation(mtmp)))
 				&& couldsee(mtmp->mx, mtmp->my)
-			) m_respond(mtmp);
+			) m_widegaze(mtmp);
 		}
 		if((is_ice(u.ux, u.uy) || mad_turn(MAD_COLD_NIGHT)) && roll_madness(MAD_FRIGOPHOBIA)){
 			if(!Flying && !Levitation){
