@@ -4582,12 +4582,19 @@ struct obj *wep;
 {
 	int x = x(magr), y = y(magr);
 	int i, j;
+	int delta = 1;
 	struct monst *mdef;
 	struct attack symbiote = { AT_WEAP, AD_PHYS, 0, 0 };
 	boolean youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
-	for(i = x-2; i < x+3; i++)
-		for(j = y-2; j < y+3; j++){
+	if(youagr){
+		if(wep == uwep) delta = 2; 
+	}
+	else {
+		if(wep == MON_WEP(magr)) delta = 2; 
+	}
+	for(i = x-delta; i <= x+delta; i++)
+		for(j = y-delta; j <= y+delta; j++){
 			if(!isok(i,j))
 				continue;
 			if(i == x && j == y)
