@@ -4444,7 +4444,6 @@ spelleffects(int spell, boolean atme, int spelltyp)
 	coord cc;
 	int color = 0;
 	int inacc = 0;
-	boolean miss = FALSE;
 	int dam = 0, dice = 0, flat = 0;
 	int rad = 0;
 	
@@ -4581,41 +4580,43 @@ dothrowspell:
 
 		if (throwspell()) {
 			cc.x = u.dx; cc.y = u.dy;
+			boolean allow_miss;	/* lightning storm attempts to 'randomly' directly hit enemies */
 			while (n--) {
 				// aim
-				miss = FALSE;
+				allow_miss = FALSE;
 				if (u.uswallow){
 					u.dx = cc.x;
 					u.dy = cc.y;
 				}
 				else
 				{
-					boolean once = TRUE;
-					while (once || !isok(u.dx, u.dy) || !cansee(u.dx, u.dy) || IS_STWALL(levl[u.dx][u.dy].typ)) {
-						if (pseudo->otyp == SPE_LIGHTNING_STORM && !rn2(7))
-							miss = TRUE;	//lightning storm is more accurate out in the open
+					do {
+						/* randomize hit location based on spell's inaccuracy */
 						u.dx = cc.x + rnd(1 + inacc * 2) - inacc - 1; u.dy = cc.y + rnd(1 + inacc * 2) - inacc - 1;
-						once = FALSE;
-					}
+						/* when (re)randomizing location of lightning storm strike, chance to relax must-hit requirement */
+						/* the result is that lightning storm is more accurate in an open environment */
+						if (pseudo->otyp == SPE_LIGHTNING_STORM && !rn2(30))
+							allow_miss = TRUE;
+					} while(!isok(u.dx, u.dy) || !cansee(u.dx, u.dy) || IS_STWALL(levl[u.dx][u.dy].typ));
 				}
-				if (pseudo->otyp == SPE_LIGHTNING_STORM && !miss && !(m_at(u.dx, u.dy) || (u.dx == u.ux && u.dy == u.uy && !(uarmh && uarmh->oartifact == ART_STORMHELM) && rn2(7))) && rn2(700))
+
+				if (pseudo->otyp == SPE_LIGHTNING_STORM && !allow_miss && !(m_at(u.dx, u.dy) || (u.dx == u.ux && u.dy == u.uy)))
 				{ //lightning storm prefers to hit creatures (including you)
 					n++;
+					continue;
 				}
-				else
-				{
-					// fire
-					if (!u.dx && !u.dy && !u.dz) {
-						if ((damage = zapyourself(pseudo, TRUE)) != 0) {
-							char buf[BUFSZ];
-							Sprintf(buf, "zapped %sself with a spell", uhim());
-							losehp(damage, buf, NO_KILLER_PREFIX);
-						}
+
+				// fire
+				if (!u.dx && !u.dy && !u.dz) {
+					if ((damage = zapyourself(pseudo, TRUE)) != 0) {
+						char buf[BUFSZ];
+						Sprintf(buf, "zapped %sself with a spell", uhim());
+						losehp(damage, buf, NO_KILLER_PREFIX);
 					}
-					else {
-						dam = d(dice, 6) + flat + rnd(u.ulevel);
-						explode(u.dx, u.dy, spell_adtype(pseudo->otyp), 0, dam, color, rad);
-					}
+				}
+				else {
+					dam = d(dice, 6) + flat + rnd(u.ulevel);
+					explode(u.dx, u.dy, spell_adtype(pseudo->otyp), 0, dam, color, rad);
 				}
 			}
 		}
