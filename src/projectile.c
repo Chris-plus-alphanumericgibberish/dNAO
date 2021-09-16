@@ -903,7 +903,7 @@ boolean forcedestroy;			/* If TRUE, make sure the projectile is destroyed */
 	place_object(thrownobj, bhitpos.x, bhitpos.y);
 
 	/* possibly 'donate' it to a shop */
-	if (*u.ushops && thrownobj != uball)
+	if (youagr && *u.ushops && thrownobj != uball)
 		check_shop_obj(thrownobj, bhitpos.x, bhitpos.y, FALSE);
 
 	/* stack it */
