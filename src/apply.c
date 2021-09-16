@@ -5911,8 +5911,8 @@ void
 salve_effect(otmp)
 struct obj *otmp;
 {
-	int oerodedLevel = 3;
-	int speLevel = -5;
+	int oerodedLevel = 3;//3, 2, 1
+	int speLevel = -5; //-5, -1, +3
 	
 	for(int i = 0; i < 3; i++){
 		if(otmp->oeroded >= oerodedLevel){
@@ -5928,11 +5928,11 @@ struct obj *otmp;
 			return;
 		}
 		else if((otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && otmp->spe <= speLevel){
-			otmp->spe++;
+			otmp->spe = min(3, otmp->spe+2);
 			return;
 		}
 		oerodedLevel--;
-		speLevel /= 2;
+		speLevel += 4;
 	}
 }
 
