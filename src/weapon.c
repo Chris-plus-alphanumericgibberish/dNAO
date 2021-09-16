@@ -3208,10 +3208,11 @@ int wep_type;
 		/* give a warning if your penalty is severe */
 		if (aumpenalty) {
 			if (twowepwarn) {
-				pline("Your %s %sunwieldy. (-%d)",
+				pline("Your %s %sunwieldy.",
 					aobjnam(uswapwep, "seem"),
-					(aumpenalty > 10 ? "very " : ""), aumpenalty
+					(aumpenalty > 10 ? "very " : "")
 					);
+				if (wizard) pline("(%d)", aumpenalty);
 				twowepwarn = FALSE;
 			}
 		}
