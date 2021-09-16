@@ -5700,7 +5700,7 @@ struct obj *obj;
 
 				/* Note, blessed was handled above. */
 				if(obj->cursed){
-					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, (x-u.ux), (y-u.uy), 0, 1, FALSE, FALSE, FALSE);
 				}
 				else if(mtmp){
 					int dmg;
