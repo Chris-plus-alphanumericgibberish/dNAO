@@ -937,7 +937,18 @@ register char rmno;
 	
 	struct monst *shkp = rmno >= ROOMOFFSET ?
 				rooms[rmno - ROOMOFFSET].resident : 0;
-
+	
+	if(shkp){
+		//Weird crash spotted where a room had a stale resident pointer. Read from fmon to double-check :(
+		struct monst *curmon = fmon;
+		for(; curmon; curmon = curmon->nmon)
+			if(curmon == shkp)
+				break;
+		if(!curmon){
+			impossible("Bad resident pointer found on room %d, zeroing it out.", rmno);
+			rooms[rmno - ROOMOFFSET].resident = shkp = (struct monst *)0;
+		}
+	}
 	if (shkp) {
 		if(!get_mx(shkp, MX_ESHK)){
 			impossible("Resident shopkeeper %s the %s with no ESHK struct?", mon_nam(shkp), shkp->data->mname);
