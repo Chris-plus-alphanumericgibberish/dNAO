@@ -926,6 +926,15 @@ struct monst *
 shop_keeper(rmno)
 register char rmno;
 {
+	if(rmno > MAXNROFROOMS+ROOMOFFSET){
+		impossible("Room number %d out of 40?", rmno);
+		return (struct monst *) 0;
+	}
+	if(rmno < 0){
+		impossible("Negative room %d?", rmno);
+		return (struct monst *) 0;
+	}
+	
 	struct monst *shkp = rmno >= ROOMOFFSET ?
 				rooms[rmno - ROOMOFFSET].resident : 0;
 
