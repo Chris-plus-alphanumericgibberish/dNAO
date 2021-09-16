@@ -2731,7 +2731,7 @@ dodip()
 		    obj->otyp == SPE_POLYMORPH ||
 		    obj == uball || obj == uskin ||
 			obj_resists(polypotion(obj) ?
-				potion : obj, 5, 95)) {
+				potion : obj, 0, 95)) {
 			pline1(nothing_happens);
 	    } else {
 	    	boolean was_wep = FALSE, was_swapwep = FALSE, was_quiver = FALSE;
@@ -3067,6 +3067,7 @@ dodip()
 			if (catch_lit(obj)) {
 				/* catch_lit does all the work if true */
 			} else if (obj->oerodeproof || obj_resists(obj, 5, 95) ||
+					(obj->oeroded == MAX_ERODE && obj->oartifact) ||
 				   !is_flammable(obj) || obj->oclass == FOOD_CLASS) {
 				pline("%s %s to burn for a moment.",
 				  Yname2(obj), otense(obj, "seem"));

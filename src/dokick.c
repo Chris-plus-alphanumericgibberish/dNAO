@@ -296,7 +296,7 @@ struct obj *obj;
 	    const char *result = (char *)0;
 
 	    otmp2 = otmp->nobj;
-	    if (is_shatterable(otmp) && !otmp->oerodeproof && !obj_resists(otmp, 33, 100)) {
+	    if (is_shatterable(otmp) && !otmp->oerodeproof && !obj_resists(otmp, 0, 100)) {
 		result = "shatter";
 	    } else if (otmp->otyp == EGG && !rn2(3)) {
 		result = "cracking";

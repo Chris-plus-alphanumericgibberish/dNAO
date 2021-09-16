@@ -1531,7 +1531,7 @@ long timeout;
 			}
 			else if (obj->otyp == SHADOWLANDER_S_TORCH || obj->otyp == TORCH) {
 				/* torches may become burnt clubs */
-				if (obj_resists(obj, 10, 100))
+				if (obj_resists(obj, 0, 90))
 				{
 					obj->otyp = CLUB;
 					obj->oclass = WEAPON_CLASS;
@@ -1868,7 +1868,7 @@ long timeout;
 			end_burn(obj, FALSE);
 
 			/* torches may become burnt clubs */
-			if (obj_resists(obj, 10, 100))
+			if (obj_resists(obj, 0, 90))
 			{
 				obj->otyp = CLUB;
 				obj->oclass = WEAPON_CLASS;
@@ -2010,7 +2010,7 @@ long timeout;
 			end_burn(obj, FALSE);
 
 			/* torches may become burnt clubs */
-			if (obj_resists(obj, 10, 100))
+			if (obj_resists(obj, 0, 90))
 			{
 				obj->otyp = CLUB;
 				obj->oclass = WEAPON_CLASS;
