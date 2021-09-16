@@ -436,7 +436,7 @@ giveback:
 		for(otmp = level.objects[u.ux][u.uy]; otmp; otmp = otmp2) {
 		    otmp2 = otmp->nexthere;
 		    if (otmp != uball && otmp != uchain &&
-			    !obj_resists(otmp, 1, 99)) {
+			    !obj_resists(otmp, 0, 99)) {
 			if (!Blind) {
 			    pline("Suddenly, %s %s from the sink!",
 				  doname(otmp), otense(otmp, "vanish"));
