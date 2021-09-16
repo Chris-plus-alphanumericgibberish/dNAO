@@ -5300,29 +5300,33 @@ boolean * messaged;
 		struct obj *obj = some_armor(mdef);
 		int i;
 		if (obj){
-			if (vis) {
-				pline("%s slices %s armor!",
-					The(xname(msgr)),
-					(youdef ? "your" : s_suffix(mon_nam(mdef)))
-					);
-				*messaged = TRUE;
-			}
-			if (check_oprop(otmp, OPROP_FLAYW)) i = rnd(4);
-			else if (otmp->oartifact == ART_THORNS) i = rnd(3);
-			else i = 1;
-			for (; i>0; i--){
-				if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
-					damage_item(obj);
-					if (!i && vis) {
-						pline("%s %s less effective.",
-							(youdef ? "Your" : s_suffix(Monnam(mdef))),
-							aobjnam(obj, "seem")
-							);
-					}
+			if(!((youdef && Preservation)
+				|| (!youdef && mon_resistance(mdef, PRESERVATION))
+			)){
+				if (vis) {
+					pline("%s slices %s armor!",
+						The(xname(msgr)),
+						(youdef ? "your" : s_suffix(mon_nam(mdef)))
+						);
+					*messaged = TRUE;
 				}
-				else if (!obj->oartifact){
-					claws_destroy_marm(mdef, obj);
-					i = 0;
+				if (check_oprop(otmp, OPROP_FLAYW)) i = rnd(4);
+				else if (otmp->oartifact == ART_THORNS) i = rnd(3);
+				else i = 1;
+				for (; i>0; i--){
+					if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
+						damage_item(obj);
+						if (!i && vis) {
+							pline("%s %s less effective.",
+								(youdef ? "Your" : s_suffix(Monnam(mdef))),
+								aobjnam(obj, "seem")
+								);
+						}
+					}
+					else if (!obj->oartifact){
+						claws_destroy_marm(mdef, obj);
+						i = 0;
+					}
 				}
 			}
 		}
