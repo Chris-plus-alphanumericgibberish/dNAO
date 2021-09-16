@@ -939,6 +939,10 @@ register char rmno;
 				rooms[rmno - ROOMOFFSET].resident : 0;
 
 	if (shkp) {
+		if(!get_mx(shkp, MX_ESHK)){
+			impossible("Resident shopkeeper %s the %s with no ESHK struct?", mon_nam(shkp), shkp->data->mname);
+			return (struct monst *) 0;
+		}
 	    if (NOTANGRY(shkp)) {
 		if (ESHK(shkp)->surcharge) pacify_shk(shkp);
 	    } else {
