@@ -1596,7 +1596,7 @@ boolean noit;
 {
     if (!cobj) return 0;
 
-	if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA){
+	if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA && cobj->otyp != ROD_OF_FORCE){
 		You("carefully open %s...",the(xname(cobj)));
 		return use_lightsaber(cobj);
 	} else if(cobj->otyp == MASS_SHADOW_PISTOL){
