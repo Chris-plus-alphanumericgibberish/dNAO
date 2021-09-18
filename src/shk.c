@@ -926,14 +926,14 @@ struct monst *
 shop_keeper(rmno)
 register char rmno;
 {
-	if(rmno > MAXNROFROOMS+ROOMOFFSET){
-		impossible("Room number %d out of 40?", rmno);
-		return (struct monst *) 0;
-	}
-	if(rmno < 0){
-		impossible("Negative room %d?", rmno);
-		return (struct monst *) 0;
-	}
+	// if(rmno > ((MAXNROFROOMS+1)*2)+ROOMOFFSET){ //Note: rooms[] includes both rooms and subrooms, so it's 2x the size you'd expect based on the constant name :/
+		// impossible("Room number %d out of 40?", rmno);
+		// return (struct monst *) 0;
+	// }
+	// if(rmno < 0){
+		// impossible("Negative room %d?", rmno);
+		// return (struct monst *) 0;
+	// }
 	
 	struct monst *shkp = rmno >= ROOMOFFSET ?
 				rooms[rmno - ROOMOFFSET].resident : 0;
