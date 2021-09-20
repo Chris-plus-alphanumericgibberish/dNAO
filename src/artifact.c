@@ -11031,7 +11031,7 @@ activate_mirrored_mask(obj)
 struct obj * obj;
 {
 	polymon(obj->corpsenm);
-	u.mtimedone = (u.ulevel * 30) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
+	u.mtimedone = 5 + (u.ulevel * 30) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
 	if (!polyok(&mons[obj->corpsenm])) u.mtimedone /= 3;
 	uskin = obj;
 	ublindf = (struct obj *)0;
