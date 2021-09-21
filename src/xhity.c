@@ -2905,6 +2905,7 @@ int dmg;				/* damage to deal */
 		}
 
 		if (*hp(mdef) < 1) {
+			int nocorpse = (attk && (attk->adtyp == AD_DGST || attk->adtyp == AD_DISN)) ? 0x2 : 0;
 			/* killed a pet by accident */
 			if (mdef->mtame && !cansee(mdef->mx, mdef->my)) {
 				You_feel("embarrassed for a moment.");
@@ -2915,11 +2916,11 @@ int dmg;				/* damage to deal */
 				/* non-verbose */
 				if (!flags.verbose) {
 					You("destroy it!");
-					if (dmg) xkilled(mdef, 0);
+					if (dmg) xkilled(mdef, 0|nocorpse);
 				}
 				/* verbose */
 				else {
-					if (dmg) killed(mdef);
+					if (dmg) xkilled(mdef, 1|nocorpse);
 				}
 			}
 			if (*hp(mdef) > 0)
