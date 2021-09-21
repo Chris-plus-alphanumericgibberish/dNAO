@@ -7044,13 +7044,12 @@ arti_invoke(obj)
 			}
 		break;
 		case DEATH_TCH:
-			if ((!uwep && uwep == obj)){
+			if (!(uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
 				return(0);
 			}
 			getdir((char *)0);
-			if (!isok(u.ux + u.dx, u.uy + u.dy)) break;
 			
 			if ((mtmp = m_at(u.ux + u.dx, u.uy + u.dy))) {
 				/* message */
