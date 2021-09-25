@@ -2411,7 +2411,7 @@ touch_artifact(obj, mon, hypothetical)
 		/* a hateful artifact should never apply to non-hated foes */
 		badalign = spec_applies(obj, mon, TRUE);
     }
-	if(badalign && yours){
+	if(badalign && yours && Role_if(PM_EXILE)){
 		if(u.specialSealsActive&SEAL_ALIGNMENT_THING){
 			badalign = FALSE;
 			// badclass = FALSE;
