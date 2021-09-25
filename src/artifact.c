@@ -5604,8 +5604,6 @@ boolean * messaged;
 	}
 	if(otmp->oartifact == ART_IBITE_ARM){
 		struct obj *cloak = which_armor(mdef, W_ARMC);
-		struct obj *armor = which_armor(mdef, W_ARM);
-		struct obj *shield = which_armor(mdef, W_ARMS);
 
 		if (youdef && uarmc && uarmc->greased) {
 			if (!rn2(uarmc->blessed ? 4 : 2)){
