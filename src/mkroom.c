@@ -2445,6 +2445,7 @@ int width;
 		for(i=0;i<width;i++){
 			for(j=0;j<width;j++){
 				levl[x+i][y+j].typ = HWALL;
+				levl[x+i][y+j].lit = 1;
 				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 			}
 		}
@@ -2626,6 +2627,7 @@ int width;
 		for(i=0;i<width;i++){
 			for(j=0;j<width;j++){
 				levl[x+i][y+j].typ = HWALL;
+				levl[x+i][y+j].lit = 1;
 				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 			}
 		}
@@ -3944,6 +3946,7 @@ mkferrubarracks()
 		for(i=0;i<size;i++){
 			for(j=0;j<size;j++){
 				levl[x+i][y+j].typ = ROOM;
+				levl[x+i][y+j].lit = 1;
 			}
 		}
 		for(i=1;i<size-1;i++){
@@ -4087,6 +4090,7 @@ mktimaresh()
 		int tempx, tempy;
 		for(i=0;i<size;i++){
 			for(j=0;j<size;j++){
+				levl[x+i][y+j].lit = 1;
 				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 				if(x < COLNO/2)
 					tempx = (size-1)-i;

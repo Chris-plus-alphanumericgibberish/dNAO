@@ -609,10 +609,13 @@ fixup_special()
 			for (x = 1; x <= COLNO - 1; x++)
 			for (y = 1; y <= ROWNO - 1; y++){
 				if (levl[x][y].typ == STONE) levl[x][y].typ = HWALL;
-				if (levl[x][y].typ == ROOM) levl[x][y].lit = TRUE;
 				if (!ZAP_POS(levl[x][y].typ) && m_at(x, y)) rloc(m_at(x, y), TRUE);
 			}
 			wallification(1, 1, COLNO - 1, ROWNO - 1);
+			for (x = 1; x <= COLNO - 1; x++)
+			for (y = 1; y <= ROWNO - 1; y++){
+				if (levl[x][y].typ != STONE) levl[x][y].lit = TRUE;
+			}
 		}
 	}
 	/* DEMON LAIRS */
