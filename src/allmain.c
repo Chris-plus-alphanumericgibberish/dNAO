@@ -1038,7 +1038,7 @@ you_regen_pw()
 	}
 }
 
-/* perform 1 turn's worth of time-dependent power modification, silently */
+/* perform 1 turn's worth of time-dependent sanity modification, silently */
 void
 you_regen_san()
 {
@@ -3559,7 +3559,7 @@ printMons(){
 			if((!species_regenerates(ptr) && nonliving(ptr)))	Sprintf(eos(pbuf)," |noregen=%s\n", (!species_regenerates(ptr) && nonliving(ptr)) ? "1":"");
 			if(stationary(ptr))	Sprintf(eos(pbuf)," |stationary=%s\n", stationary(ptr) ? "1":"");
 			Sprintf(eos(pbuf)," }}\n");
-			Sprintf(eos(pbuf)," |refline=\n");
+			Sprintf(eos(pbuf)," |reference=\n");
 			Sprintf(eos(pbuf),"}}\n\n");
 			fprintf(rfile, "%s", pbuf);
 			fflush(rfile);
