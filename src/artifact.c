@@ -367,6 +367,7 @@ void
 restore_artifacts(fd)
 int fd;
 {
+	extern struct artifact base_artilist[];
 	mread(fd, (genericptr_t) &nrofartifacts, sizeof(int));
 
 	artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));
@@ -375,6 +376,11 @@ int fd;
 	mread(fd, (genericptr_t) artinstance, sizeof(struct artinstance) * (1+nrofartifacts+1));
 	mread(fd, (genericptr_t) artidisco, sizeof(int) * (nrofartifacts));
 	mread(fd, (genericptr_t) artilist, sizeof(struct artifact) * (1+nrofartifacts+1));
+	/*Fixup name pointers*/
+	for(int i = 0; i <= NROFARTIFACTS; i++){
+		artilist[i].name = base_artilist[i].name;
+		artilist[i].desc = base_artilist[i].desc;
+	}
 	if(nrofartifacts > NROFARTIFACTS) {
 		artiextranames = malloc(sizeof(char*)*(nrofartifacts - NROFARTIFACTS));
 		int i, j;
