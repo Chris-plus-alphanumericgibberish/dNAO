@@ -5639,7 +5639,7 @@ struct obj *obj;
 	if (!obj->blessed) {
 		switch(obj->otyp){
 			case WAGE_OF_SLOTH:
-				tmp = obj->cursed ? 9 : 4;
+				tmp = obj->cursed ? 4 : 2;
 				You("blur with stolen time!");
 				HTimeStop += (long)tmp;
 				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
