@@ -1466,7 +1466,8 @@ register struct monst *mtmp;
 		pline("%s sinks as water rushes in and flushes you out.",
 			Monnam(mtmp));
 	    }
-	    mondead(mtmp);
+		if(!DEADMONSTER(mtmp))
+			mondead(mtmp);
 	    if (mtmp->mhp > 0) {
 		(void) rloc(mtmp, TRUE);
 		water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
