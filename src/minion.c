@@ -112,36 +112,27 @@ struct permonst * ptr;	/* summon as though you were <X> */
 				EMIN(mtmp)->min_align = atyp;
 				EPRI(mtmp)->shralign = atyp;
 				if(mon->isminion) mtmp->isminion = TRUE;
-				mtmp->mpeaceful = mon->mpeaceful;
+				mtmp->mpeaceful = mon && mon->mpeaceful;
 			}
-			if (is_angel(mtmp->data)){
-				if(mon->mtyp == PM_LAMASHTU || mon->mfaction == LAMASHTU_FACTION)
-					mtmp->mfaction = LAMASHTU_FACTION;
-				if(has_template(mon, MAD_TEMPLATE))
-					set_template(mtmp, MAD_TEMPLATE);
-				if(has_template(mon, FALLEN_TEMPLATE))
-					set_template(mtmp, FALLEN_TEMPLATE);
+
+			/* some templates are passed from summoner to summon */
+			if (mon && (
+				get_template(mon) == FRACTURED ||
+				get_template(mon) == VAMPIRIC ||
+				get_template(mon) == PSEUDONATURAL ||
+				get_template(mon) == CRANIUM_RAT ||
+				get_template(mon) == MISTWEAVER ||
+				get_template(mon) == YELLOW_TEMPLATE ||
+				get_template(mon) == DREAM_LEECH ||
+				(get_template(mon) == MAD_TEMPLATE && is_angel(mtmp->data)) ||
+				(get_template(mon) == FALLEN_TEMPLATE && is_angel(mtmp->data))
+			) && mtemplate_accepts_mtyp(get_template(mon), mtmp->mtyp)
+			) {
+				set_template(mtmp, get_template(mon));
 			}
-			if(has_template(mon, FRACTURED)){
-				set_template(mtmp, FRACTURED);
-			}
-			if(has_template(mon, VAMPIRIC)){
-				set_template(mtmp, VAMPIRIC);
-			}
-			if(has_template(mon, PSEUDONATURAL)){
-				set_template(mtmp, PSEUDONATURAL);
-			}
-			if(has_template(mon, CRANIUM_RAT)){
-				set_template(mtmp, CRANIUM_RAT);
-			}
-			if(has_template(mon, MISTWEAVER)){
-				set_template(mtmp, MISTWEAVER);
-			}
-			if(has_template(mon, YELLOW_TEMPLATE)){
-				set_template(mtmp, YELLOW_TEMPLATE);
-			}
-			if(has_template(mon, DREAM_LEECH)){
-				set_template(mtmp, DREAM_LEECH);
+			/* as are some factions */
+			if (mon && (mon->mtyp == PM_LAMASHTU || mon->mfaction == LAMASHTU_FACTION)) {
+				mtmp->mfaction = LAMASHTU_FACTION;
 			}
 	    }
 	    cnt--;
