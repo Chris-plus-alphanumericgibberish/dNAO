@@ -333,6 +333,12 @@ enum {
 /*18*/	VN_SHAYATEEN,
 /*19*/	VN_MAX,
 };
+#define LIMIT_VN_RANGE_1_TANNINIM	(VN_A_O_BLESSINGS)
+#define LIMIT_VN_RANGE_2_ANCIENT	(VN_APOCALYPSE)
+#define LIMIT_VN_RANGE_3_ANGEL		(VN_N_PIT_FIEND)
+#define LIMIT_VN_RANGE_4_DEVIL		(VN_SHAYATEEN)
+#define LIMIT_VN_RANGE_5_DEMON		(VN_MAX)
+
 //if VN_MAX exceeds this limit, we have a problem (Vault IDs should range from 1 to 31).
 #define VAULT_LIMIT	32
 

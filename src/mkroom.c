@@ -373,29 +373,28 @@ int misc_anc_vault[] = {
 			};
 
 int
-get_vault_misc(otmp, vn)
-struct obj *otmp;	/* existing object */
+get_vault_misc(vn)
 int vn;
 {
 	int type;
 #define ROLL_ARRAY(arrayname) arrayname[rn2(SIZE(arrayname))];
-	if(vn < VN_A_O_BLESSINGS){
+	if(vn < LIMIT_VN_RANGE_1_TANNINIM){
 		// Tannin
 		type = ROLL_ARRAY(misc_tan_vault);
 	}
-	else if(vn < VN_APOCALYPSE){
+	else if(vn < LIMIT_VN_RANGE_2_ANCIENT){
 		// Ancient
 		type = ROLL_ARRAY(misc_anc_vault);
 	}
-	else if(vn < VN_N_PIT_FIEND){
+	else if(vn < LIMIT_VN_RANGE_3_ANGEL){
 		// Angel
 		type = ROLL_ARRAY(misc_hell_vault);
 	}
-	else if(vn < VN_SHAYATEEN){
+	else if(vn < LIMIT_VN_RANGE_4_DEVIL){
 		// Devil
 		type = ROLL_ARRAY(misc_devil_vault);
 	}
-	else if(vn < VN_MAX){
+	else if(vn < LIMIT_VN_RANGE_5_DEMON){
 		// Demon
 		type = ROLL_ARRAY(misc_demon_vault);
 	}
@@ -526,7 +525,7 @@ int vn;
 	else if(!rn2(3))
 		type = SCOIN_CLASS;
 	else if(rn2(2)){
-		type = misc_hell_vault[rn2(SIZE(misc_hell_vault))];
+		type = get_vault_misc(vn);
 		otmp = mksobj(type, NO_MKOBJ_FLAGS);
 		if(otmp)
 			return otmp;
