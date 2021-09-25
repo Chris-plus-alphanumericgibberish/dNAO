@@ -97,6 +97,7 @@ E const char *FDECL(artifact_name, (const char *,short *));
 E boolean FDECL(art_already_exists, (int));
 E boolean FDECL(art_already_exists_byname, (int,const char *));
 E void FDECL(artifact_exists, (struct obj *,const char *,BOOLEAN_P));
+E struct obj * FDECL(mksartifact, (int));
 E void FDECL(get_art_property_list, (int *, int, BOOLEAN_P));
 E int NDECL(nartifact_exist);
 E boolean FDECL(arti_gen_prop, (struct obj *, unsigned long));
