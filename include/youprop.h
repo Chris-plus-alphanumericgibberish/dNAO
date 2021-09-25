@@ -164,7 +164,10 @@
 /*** Troubles ***/
 /* Pseudo-property */
 #define Punished		(uball)
-#define	Insanity	(100 - u.usanity)
+#define	Insanity	 (100 - u.usanity)
+#define	FacelessHelm(obj) ((obj)->otyp == PLASTEEL_HELM || (obj)->otyp == CRYSTAL_HELM || (obj)->otyp == PONTIFF_S_CROWN || (obj)->otyp == FACELESS_HELM)
+#define	FacelessCloak(obj) ((obj)->otyp == WHITE_FACELESS_ROBE || (obj)->otyp == BLACK_FACELESS_ROBE || (obj)->otyp == SMOKY_VIOLET_FACELESS_ROBE)
+#define	Faceless(obj) (FacelessHelm(obj) || FacelessCloak(obj))
 
 #define save_vs_sanloss()	((uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < ACURR(A_WIS)))
 

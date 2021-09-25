@@ -2712,16 +2712,12 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		return 0;
 	}
 
-	if (uarmh && (uarmh->otyp == PLASTEEL_HELM || uarmh->otyp == CRYSTAL_HELM || uarmh->otyp == PONTIFF_S_CROWN)){
+	if (uarmh && FacelessHelm(uarmh)){
 		pline("The %s covers your whole face.", xname(uarmh));
 		display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 		return 0;
 	}
-	if (uarmc
-	&& (uarmc->otyp == WHITE_FACELESS_ROBE
-		|| uarmc->otyp == BLACK_FACELESS_ROBE
-		|| uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE
-	)){
+	if (uarmc && FacelessCloak(uarmc)){
 		pline("The %s covers your whole face.", xname(uarmc));
 		display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 		return 0;

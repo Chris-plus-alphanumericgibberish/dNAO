@@ -579,15 +579,8 @@ int tary;
 		){
 			struct obj * helm = youagr ? uarmh : which_armor(magr, W_ARMH);
 			struct obj * cloak = youagr ? uarmc : which_armor(magr, W_ARMC);
-			if ((helm && (
-				helm->otyp == PLASTEEL_HELM ||
-				helm->otyp == CRYSTAL_HELM ||
-				helm->otyp == PONTIFF_S_CROWN)) ||
-				(cloak && (
-				cloak->otyp == WHITE_FACELESS_ROBE ||
-				cloak->otyp == BLACK_FACELESS_ROBE ||
-				cloak->otyp == SMOKY_VIOLET_FACELESS_ROBE))
-				)
+			if ((helm && FacelessHelm(helm)) ||
+				(cloak && FacelessCloak(cloak)))
 				continue;
 		}
 		/* based on the attack type... */
@@ -7542,13 +7535,8 @@ boolean ranged;
 					s_suffix(mon_nam(mdef))
 					);
 			}
-		} else if (otmp && is_hard(otmp) && ((
-			otmp->otyp == PLASTEEL_HELM ||
-			otmp->otyp == CRYSTAL_HELM ||
-			otmp->otyp == PONTIFF_S_CROWN
-			) || (
-			rn2(8)
-			))
+		} else if (otmp && is_hard(otmp) && 
+			(FacelessHelm(otmp) || rn2(8))
 		){
 			if (youdef) {
 				/* not body_part(HEAD) */

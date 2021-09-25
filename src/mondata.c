@@ -1817,7 +1817,7 @@ struct obj *obj;		/* aatyp == AT_WEAP, AT_SPIT */
 	    o = (mdef == &youmonst) ? invent : mdef->minvent;
 	    for ( ; o; o = o->nobj){
 			if ((o->owornmask & W_ARMH) &&
-				(o->otyp == find_vhelm() || o->otyp == CRYSTAL_HELM || o->otyp == PLASTEEL_HELM || o->otyp == PONTIFF_S_CROWN)
+				(o->otyp == find_vhelm() || o->otyp == CRYSTAL_HELM || o->otyp == PLASTEEL_HELM || o->otyp == PONTIFF_S_CROWN || o->otyp == FACELESS_HELM)
 			) return FALSE;
 			if ((o->owornmask & W_ARMC) &&
 				(o->otyp == WHITE_FACELESS_ROBE

@@ -366,6 +366,7 @@ Helmet_on()
 	case PLASTEEL_HELM:
 	case CRYSTAL_HELM:
 	case PONTIFF_S_CROWN:
+	case FACELESS_HELM:
 	case SEDGE_HAT:
 	case WAR_HAT:
 	case WIDE_HAT:
@@ -471,6 +472,7 @@ Helmet_off()
 	case PLASTEEL_HELM:
 	case CRYSTAL_HELM:
 	case PONTIFF_S_CROWN:
+	case FACELESS_HELM:
 	case SEDGE_HAT:
 	case WAR_HAT:
 	case WIDE_HAT:
@@ -1975,8 +1977,13 @@ doputon()
 			You_cant("wear that!");
 			return(0);
 		}
-		if (uarmh && (uarmh->otyp == PLASTEEL_HELM || uarmh->otyp == CRYSTAL_HELM || uarmh->otyp == PONTIFF_S_CROWN) && uarmh->cursed && !Weldproof){
+		if (uarmh && FacelessHelm(uarmh) && uarmh->cursed && !Weldproof){
 			pline("The %s covers your whole face. You need to remove it first.", xname(uarmh));
+			display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
+			return 0;
+		}
+		if (uarmc && FacelessCloak(uarmc) && uarmc->cursed && !Weldproof){
+			pline("The %s covers your whole face. You need to remove it first.", xname(uarmc));
 			display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 			return 0;
 		}

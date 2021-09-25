@@ -3712,6 +3712,7 @@ winid *datawin;
 	else if (otyp == PLASTEEL_HELM ||
 		otyp == CRYSTAL_HELM ||
 		otyp == PONTIFF_S_CROWN ||
+		otyp == FACELESS_HELM ||
 		otyp == WHITE_FACELESS_ROBE ||
 		otyp == BLACK_FACELESS_ROBE ||
 		otyp == SMOKY_VIOLET_FACELESS_ROBE)		OBJPUTSTR("Covers the face entirely.");
@@ -5406,7 +5407,7 @@ u_clothing_discomfort()
 		count++;
 		if(uarmh->otyp ==  find_vhelm())
 			count++;
-		if(uarmh->otyp == PLASTEEL_HELM || uarmh->otyp == CRYSTAL_HELM || uarmh->otyp == PONTIFF_S_CROWN)
+		if(FacelessHelm(uarmh))
 			count+=2;
 	}
 	if(uarm){

@@ -2283,7 +2283,7 @@ signs_mirror()
 		if(dimness(u.ux, u.uy) <= 0)
 			putstr(en_win, 0, "Your rigid features can't be seen in the dark.");
 		else if((ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE)) //face-covering mask
-			 || (uarmh && (uarmh->otyp==PLASTEEL_HELM || uarmh->otyp==PONTIFF_S_CROWN)) //face-covering helm
+			 || (uarmh && (uarmh->otyp==PLASTEEL_HELM || uarmh->otyp==PONTIFF_S_CROWN || uarmh->otyp==FACELESS_HELM)) //opaque face-covering helm
 			 || (uarmc && (uarmc->otyp==WHITE_FACELESS_ROBE || uarmc->otyp==BLACK_FACELESS_ROBE || uarmc->otyp==SMOKY_VIOLET_FACELESS_ROBE))//face-covering robe
 		) putstr(en_win, 0, "Your rigid features can't be seen through your disguise.");
 		else putstr(en_win, 0, "Your features have taken on the rigidity of a cheap disguise.");
