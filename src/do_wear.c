@@ -1612,7 +1612,7 @@ boolean noisy;
     }
 	
 	if(is_whirly(youracedata) || noncorporeal(youracedata)){
-		Your("body can't support clothing.");
+		if(noisy) Your("body can't support clothing.");
 		return 0;
 	}
 
