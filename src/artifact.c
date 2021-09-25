@@ -7143,8 +7143,7 @@ arti_invoke(obj)
 			}
 			
 			struct monst *mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
-			mtmp = tamedog(mtmp, (struct obj *) 0);
-			
+			initedog(mtmp);
 			if (mtmp->mtyp != PM_SKELETON)
 				set_template(mtmp, SKELIFIED);
 

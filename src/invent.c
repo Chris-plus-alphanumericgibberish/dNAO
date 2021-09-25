@@ -1315,7 +1315,7 @@ register const char *let,*word;
 		    (otyp != HELLFIRE_COMPONENT))
 		|| (!strcmp(word, "build a scrap maw with") &&
 		    (otyp != SCRAP))
-		|| (!strcmp(word, "create a skeletal minion of") &&
+		|| (!strcmp(word, "make a skeletal minion of") &&
 		    !(otyp == CORPSE))
 		|| (!strcmp(word, "feed blood to") &&
 		    !(otyp == CORPSE && otmp->odrained && (peek_at_iced_corpse_age(otmp) + 20) >= monstermoves))
