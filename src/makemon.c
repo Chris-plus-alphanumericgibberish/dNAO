@@ -8136,8 +8136,7 @@ int faction;
 				// (void) mongets(mtmp, POT_FULL_HEALING, mkobjflags);
 			break;
 			case PM_BAPHOMET:
-				otmp = mksobj(HALBERD, mkobjflags);
-				otmp = oname(otmp, artiname(ART_HEARTCLEAVER));
+				otmp = mksartifact(ART_HEARTCLEAVER);
 				otmp->blessed = FALSE;
 				otmp->cursed = FALSE;
 				(void) mpickobj(mtmp,otmp);

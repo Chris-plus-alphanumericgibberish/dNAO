@@ -1474,6 +1474,15 @@ register boolean mod;
 	return;
 }
 
+struct obj *
+mksartifact(art_id)
+int art_id;
+{
+	struct obj *otmp = mksobj(artilist[art_id].otyp, MKOBJ_NOINIT);
+	otmp = oname(otmp, artiname(art_id));
+	return otmp;
+}
+
 /*
  * Fills an int array of all the properties (that are in prop.h) an artifact has (either while equiped or while carried)
  * If while_carried == TRUE, do not list properties that require the artifact to be wielded / worn
