@@ -2306,8 +2306,8 @@ dosacrifice()
 				// if (rnl(u.ulevel) > 6 && u.ualign.record > 0 &&
 				   // rnd(u.ualign.record) > (3*ALIGNLIM)/4)
 				if(!Pantheon_if(PM_ELF)){
-					if(u.ulevel > 20) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
-					if(u.ulevel > 10) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
+					if(u.ulevel > 20) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
+					if(u.ulevel >= 14) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
 					(void) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
 				}
 				/* anger priest; test handles bones files */
