@@ -154,7 +154,7 @@ ENDMAP
 # Dungeon Description
 REGION:(00,00,75,20),lit,"ordinary"
 # Portal arrival point
-BRANCH:(05,00,58,20),(24,09,52,11)
+BRANCH:(05,00,58,20),(21,09,53,17)
 # Stairs
 STAIR:(65,10),down
 # Doors
