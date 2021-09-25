@@ -8546,10 +8546,6 @@ arti_invoke(obj)
 				/* revert */
 				rehumanize();
 			}
-			else if (Unchanging) {
-				You_feel("the mask's magic be blocked by something.");
-				return partial_action();
-			}
 			else {
 				/* steal a face */
 				if(getdir((char *)0)) {
@@ -8566,13 +8562,14 @@ arti_invoke(obj)
 							xkilled(mtmp, 3);
 							obj->corpsenm = mtmp->mtyp;
 							/* keep consistent with on-wear code in do_wear.c */
-							if (obj == ublindf) {
+							if (obj == ublindf && !Unchanging) {
 								activate_mirrored_mask(obj);
 							}
 						}
 						else {
 							/* resisted */
 							pline("%s resists!", Monnam(mtmp));
+							obj->age = monstermoves;	// but does use your turn
 						}
 					}
 				}
@@ -11034,7 +11031,7 @@ activate_mirrored_mask(obj)
 struct obj * obj;
 {
 	polymon(obj->corpsenm);
-	u.mtimedone = (u.ulevel * 30) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
+	u.mtimedone = 5 + (u.ulevel * 30) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
 	if (!polyok(&mons[obj->corpsenm])) u.mtimedone /= 3;
 	uskin = obj;
 	ublindf = (struct obj *)0;
