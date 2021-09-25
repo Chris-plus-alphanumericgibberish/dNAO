@@ -4176,6 +4176,11 @@ mktimaresh()
 						if(i == size/2 && j == size/2){
 							mtmp = makemon(&mons[PM_AURUMACH_RILMANI], x+i, y+j, MM_ADJACENTOK);
 							if (mtmp){
+								mtmp = christen_monst(mtmp, "Zenodach, Librarian of Timaresh"); //With apologies to Zenodotus
+								if(mtmp->mpeaceful){
+									mtmp->mpeaceful = FALSE;
+									set_malign(mtmp);
+								}
 								set_template(mtmp, FRACTURED);
 								mtmp->m_lev += 8;
 								mtmp->mhpmax += 8*8;
