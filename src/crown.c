@@ -136,12 +136,12 @@ choose_crowning()
 		return 16 + align_offset + 3*(!flags.initgend) + 6*(Role_if(PM_NOBLEMAN));
 	if (Race_if(PM_ELF))
 		return 13 + align_offset;
-	/* non-racial ranger */
-	if((Race_if(PM_HUMAN) || Race_if(PM_INHERITOR) || Race_if(PM_INCANTIFIER) || Race_if(PM_HALF_DRAGON)) && (Pantheon_if(PM_RANGER) || Role_if(PM_RANGER)))
-		return 28 + align_offset;
 	/* gnome ranger */
 	if (Race_if(PM_GNOME) && Role_if(PM_RANGER))
 		return 31 + align_offset;
+	/* default ranger */
+	if(Pantheon_if(PM_RANGER) || Role_if(PM_RANGER))
+		return 28 + align_offset;
 	/* female half-dragon noble */
 	if (Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend)
 		return 40 + align_offset;
