@@ -6114,11 +6114,10 @@ struct obj *obj;
 		You("chip off the existing rune.");
 		multi-=1;
 		if(carvee->oartifact) pline("The wood heals like the rune was never there.");
-		else carvee->spe -= 1;
-		if(carvee->spe < -1*rn2(8)){
-			You("destroyed the %s in the process.", xname(carvee));
-			useup(carvee);
-			return 0;
+		else if(--carvee->spe < -1*rn2(8)) {
+				You("destroyed the %s in the process.", xname(carvee));
+				useup(carvee);
+				return 0;
 		}
 	}
 	multi -= carveTurns[rune-FIRST_RUNE];
