@@ -3063,7 +3063,9 @@ struct obj *obj;
 			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
 		}
 		else if(obj->otyp == ROD_OF_FORCE){
-			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
+			if(!uarms && !u.twoweap){
+				CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
+			}
 		}
 		else if(obj->otyp == KHOPESH){
 			CHECK_ALTERNATE_SKILL(P_AXE)
