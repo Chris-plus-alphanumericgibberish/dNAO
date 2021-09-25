@@ -605,8 +605,9 @@ fixup_special()
 			}
 		}
 		if (Is_sumall(&u.uz)){
-			for (x = 2; x <= x_maze_max; x++)
-			for (y = 2; y <= y_maze_max; y++){
+			place_sum_all_features();
+			for (x = 1; x <= COLNO - 1; x++)
+			for (y = 1; y <= ROWNO - 1; y++){
 				if (levl[x][y].typ == STONE) levl[x][y].typ = HWALL;
 				if (levl[x][y].typ == ROOM) levl[x][y].lit = TRUE;
 				if (!ZAP_POS(levl[x][y].typ) && m_at(x, y)) rloc(m_at(x, y), TRUE);

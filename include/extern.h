@@ -1531,6 +1531,7 @@ E void NDECL(place_lolth_vaults);
 E void NDECL(place_chaos_forest_features);
 E void NDECL(place_law_features);
 E void NDECL(place_neutral_features);
+E void NDECL(place_sum_all_features);
 E struct mkroom * FDECL(pick_room,(BOOLEAN_P, BOOLEAN_P));
 E boolean FDECL(special_room_requires_full_walls, (int));
 E void FDECL(mkroom, (int));

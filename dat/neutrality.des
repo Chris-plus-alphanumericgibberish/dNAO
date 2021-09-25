@@ -451,33 +451,31 @@ MONSTER:'"', "Argenach Rilmani", random
 GEOMETRY:center,center
 #0123456
 MAP
-0--.....--
-1-...-...-
-2..-...-..
-3.........
-4.-.....-.
-5.........
-6..-...-..
-7-...-...-
-8--.....--
+0...-...
+1.-...-.
+2.......
+3-.....-
+4.......
+5.-...-.
+6...-...
 ENDMAP
 #01234567890
 REGION:(00,00,06,06),lit,"ordinary"
 
-STAIR:  levregion(37,00,75,19), (0,0,8,8), up
-BRANCH:(04,04,04,04),(0,0,0,0)
-OBJECT:'`',"statue",(04,04),"Adamach",1
-OBJECT:'`',"statue",(04,04),"Great Cthulhu",1
+STAIR:  levregion(37,00,75,19), (0,0,6,6), up
+BRANCH:(03,03,03,03),(0,0,0,0)
+OBJECT:'`',"statue",(03,03),"Adamach",1
+OBJECT:'`',"statue",(03,03),"Great Cthulhu",1
 
 WALLIFY
-MONSTER:'\'',"argentum golem",(02,04)
-MONSTER:'\'',"argentum golem",(03,03)
+MONSTER:'\'',"argentum golem",(01,03)
+MONSTER:'\'',"argentum golem",(02,02)
+MONSTER:'\'',"argentum golem",(03,01)
 MONSTER:'\'',"argentum golem",(04,02)
 MONSTER:'\'',"argentum golem",(05,03)
-MONSTER:'\'',"argentum golem",(06,04)
-MONSTER:'\'',"argentum golem",(05,05)
-MONSTER:'\'',"argentum golem",(04,06)
+MONSTER:'\'',"argentum golem",(04,04)
 MONSTER:'\'',"argentum golem",(03,05)
+MONSTER:'\'',"argentum golem",(02,04)
 
 #GEOMETRY:center,center
 #0         1         2   	  3	      4	    5		  6	      7
