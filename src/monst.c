@@ -5245,7 +5245,7 @@ struct permonst _mons2[] = {
 	MA_UNLIVING /*MA*/,  MV_NORMAL /*MV*/, CLR_BRIGHT_MAGENTA),
     MON("parasitized doll", S_GOLEM, //25 /* Needs encyc entry */
 	LVL(30, 10, 75, 0), (G_NOGEN),//needs quote
-	DEF(NAT_AC(10), NAT_DR(2)),
+	DEF(NAT_AC(10), NAT_DR_BODY(2), NAT_DR_GLOV(4), NAT_DR_LEGS(4), NAT_DR_FEET(4)),
 	A(ATTK(AT_CLAW, AD_PHYS, 1, 8), ATTK(AT_CLAW, AD_PHYS, 1, 8), 
 	  ATTK(AT_HUGS, AD_PHYS, 2, 8), ATTK(AT_GAZE, AD_BDFN, 1, 6)),
 	SIZ(WT_HUMAN/2, 0, MS_SONG, MZ_HUMAN), 
