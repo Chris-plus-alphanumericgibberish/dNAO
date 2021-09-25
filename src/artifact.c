@@ -1171,19 +1171,19 @@ int vn;
 #define VN_ANGEL	2
 #define VN_DEVIL	3
 #define VN_DEMON	4
-	if(vn < VN_A_O_BLESSINGS){
+	if(vn < LIMIT_VN_RANGE_1_TANNINIM){
 		type = VN_TANNIN;
 	}
-	else if(vn < VN_APOCALYPSE){
+	else if(vn < LIMIT_VN_RANGE_2_ANCIENT){
 		type = VN_ANCIENT;
 	}
-	else if(vn < VN_N_PIT_FIEND){
+	else if(vn < LIMIT_VN_RANGE_3_ANGEL){
 		type = VN_ANGEL;
 	}
-	else if(vn < VN_SHAYATEEN){
+	else if(vn < LIMIT_VN_RANGE_4_DEVIL){
 		type = VN_DEVIL;
 	}
-	else if(vn < VN_MAX){
+	else if(vn < LIMIT_VN_RANGE_5_DEMON){
 		type = VN_DEMON;
 	}
 	switch(type){
