@@ -2461,17 +2461,6 @@ int width;
 				else if(!rn2(9)) makemon(mkclass(S_GOLEM, G_NOHELL), x+i, y+j, 0);
 			}
 		}
-		if(width > 3){
-			int chance = max(3, 9-width);
-			if(!rn2(chance)){
-				mkobj_at(0, x+rnd(width-1), y+rnd(width-1), MKOBJ_ARTIF);
-			}
-		}
-		else {
-			if(!rn2(9)){
-				mkobj_at(0, x+1, y+1, MKOBJ_ARTIF);
-			}
-		}
 		
 		pathto = rnd(pathto);
 		int extra_door = 10;
@@ -2513,6 +2502,49 @@ int width;
 					pathto = 0;
 					break;
 				}
+			}
+		}
+		if(width > 3){
+			int chance = max(3, 9-width);
+			if(!rn2(chance)){
+				mkobj_at(0, x+rnd(width-2), y+rnd(width-2), MKOBJ_ARTIF);
+			}
+			if(!rn2(60)){
+				tries = 0;
+				while(tries++ < 100){
+					i = rnd(width-2);
+					j = rnd(width-2);
+					if(levl[x+i+1][y+j].typ != DOOR
+					&& levl[x+i-1][y+j].typ != DOOR
+					&& levl[x+i][y+j+1].typ != DOOR
+					&& levl[x+i][y+j-1].typ != DOOR
+					){
+						levl[x+i][y+j].typ = SINK;
+						level.flags.nsinks++;
+						break;
+					}
+				}
+			}
+			else if(!rn2(60)){
+				tries = 0;
+				while(tries++ < 100){
+					i = rnd(width-2);
+					j = rnd(width-2);
+					if(levl[x+i+1][y+j].typ != DOOR
+					&& levl[x+i-1][y+j].typ != DOOR
+					&& levl[x+i][y+j+1].typ != DOOR
+					&& levl[x+i][y+j-1].typ != DOOR
+					){
+						levl[x+i][y+j].typ = ALTAR;
+						levl[x+i][y+j].altarmask = Align2amask( A_NEUTRAL );
+						break;
+					}
+				}
+			}
+		}
+		else {
+			if(!rn2(9)){
+				mkobj_at(0, x+1, y+1, MKOBJ_ARTIF);
 			}
 		}
 	}
@@ -2647,6 +2679,38 @@ int width;
 			int chance = max(3, 9-width);
 			if(!rn2(chance)){
 				mkobj_at(0, x+rnd(width-1), y+rnd(width-1), MKOBJ_ARTIF);
+			}
+			if(!rn2(60)){
+				tries = 0;
+				while(tries++ < 100){
+					i = rnd(width-2);
+					j = rnd(width-2);
+					if(levl[x+i+1][y+j].typ != DOOR
+					&& levl[x+i-1][y+j].typ != DOOR
+					&& levl[x+i][y+j+1].typ != DOOR
+					&& levl[x+i][y+j-1].typ != DOOR
+					){
+						levl[x+i][y+j].typ = SINK;
+						level.flags.nsinks++;
+						break;
+					}
+				}
+			}
+			else if(!rn2(60)){
+				tries = 0;
+				while(tries++ < 100){
+					i = rnd(width-2);
+					j = rnd(width-2);
+					if(levl[x+i+1][y+j].typ != DOOR
+					&& levl[x+i-1][y+j].typ != DOOR
+					&& levl[x+i][y+j+1].typ != DOOR
+					&& levl[x+i][y+j-1].typ != DOOR
+					){
+						levl[x+i][y+j].typ = ALTAR;
+						levl[x+i][y+j].altarmask = Align2amask( A_NEUTRAL );
+						break;
+					}
+				}
 			}
 		}
 		else {
