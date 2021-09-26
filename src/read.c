@@ -945,7 +945,7 @@ struct obj *obj;
 	if (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)
 	    return TRUE;
 //#ifdef FIREARMS
-	if (is_blaster(obj) && (obj->recharged < 4 || (obj->otyp != HAND_BLASTER && obj->otyp != ARM_BLASTER)))
+	if (is_blaster(obj))
 	    return TRUE;
 	if (is_vibroweapon(obj) || obj->otyp == SEISMIC_HAMMER)
 	    return TRUE;
@@ -1150,8 +1150,12 @@ int curse_bless;
 //#ifdef FIREARMS
 	    case HAND_BLASTER:
 	    case ARM_BLASTER:
+            if(obj->recharged == 3)
+                Your("%s is dangerously hot, but doesn't explode.", xname(obj));
 			if(obj->recharged >= 4){
-				obj->recharged = 4;
+				Your("%s can't handle any more energy!", xname(obj));
+				explode_yours(u.ux, u.uy, AD_ELEC, WEAPON_CLASS, d(8,12), EXPL_MAGICAL, 3, 1);
+				useup(obj);
 			} else {
 				if(is_blessed) obj->ovar1 = 100L;
 				else if(is_cursed) obj->ovar1 = 10L;
