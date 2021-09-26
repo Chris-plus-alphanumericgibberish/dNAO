@@ -5708,6 +5708,7 @@ boolean ranged;
 
 				/* used only in drain-all: change what ptmp is */
 				ptmp = (ptmp+1)%A_MAX;
+				count++;
 			}while(attk->adtyp == AD_NPDA && count < A_MAX);
 		}
 		/* make physical attack without hitmsg */
