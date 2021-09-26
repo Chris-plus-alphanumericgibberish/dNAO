@@ -1151,7 +1151,9 @@ int curse_bless;
 	    case HAND_BLASTER:
 	    case ARM_BLASTER:
 			if(obj->recharged >= 4){
-				obj->recharged = 4;
+				explode_yours(u.ux, u.uy, AD_ELEC, WEAPON_CLASS, d(8,12), EXPL_MAGICAL, 3, 1);
+				Your("%s can't handle any more energy!", xname(obj));
+				useup(obj);
 			} else {
 				if(is_blessed) obj->ovar1 = 100L;
 				else if(is_cursed) obj->ovar1 = 10L;
