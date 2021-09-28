@@ -1150,6 +1150,8 @@ int curse_bless;
 //#ifdef FIREARMS
 	    case HAND_BLASTER:
 	    case ARM_BLASTER:
+            if(obj->recharged <= 2)
+                Your("%s warms as energy floods into it.", xname(obj));
             if(obj->recharged == 3)
                 Your("%s is dangerously hot, but doesn't explode.", xname(obj));
 			if(obj->recharged >= 4){
