@@ -5608,8 +5608,8 @@ struct obj *obj;
 		if(getpos(&cc, TRUE, "the target") < 0) return 0;
 		x = cc.x;
 		y = cc.y;
-		if(distmin(u.ux, u.uy, x, y) > BOLT_LIM){
-			pline("Too far!");
+		if(distmin(u.ux, u.uy, x, y) > BOLT_LIM || !clear_path(u.ux, u.uy, x, y)){
+			pline("It can't reach there!");
 			return 0;
 		}
 
