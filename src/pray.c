@@ -3194,18 +3194,32 @@ aligntyp alignment;
 				flags.botl = 1;
 				break;
 			case 1: // increase weapon enchantment
+				otmp = (struct obj *)0;
+				/* select object to enchant */
 				if (uwep && uwep->spe < 5 && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
-					uwep->spe++;
+					otmp = uwep;
 				else if (uswapwep && uswapwep->spe < 5 && (uswapwep->oclass == WEAPON_CLASS || is_weptool(uswapwep)))
-					uswapwep->spe++;
+					otmp = uswapwep;
 				else if (u.umartial && uarmg && (uarmg->oartifact || !uwep) && uarmg->spe < 5)
-					uarmg->spe++;
+					otmp = uarmg;
 				else if (u.umartial && uarmf && (uarmf->oartifact || !uwep) && uarmf->spe < 5)
-					uarmf->spe++;
+					otmp = uarmf;
 				else if (uleft && uleft->otyp != RIN_WISHES && objects[uleft->otyp].oc_charged && uleft->spe < 5)
-					uleft->spe++;
+					otmp = uleft;
 				else if (uright && uright->otyp != RIN_WISHES && objects[uright->otyp].oc_charged && uright->spe < 5)
-					uright->spe++;
+					otmp = uright;
+				/* enchant it */
+				if (otmp) {
+					otmp->spe++;
+					if (!Blind) {
+						Your("%s %s %s for a moment.",
+							xname(otmp),
+							vtense(xname(otmp), "glow"),
+							hcolor(otmp->oclass == ARMOR_CLASS ? NH_SILVER :
+								otmp->oclass == RING_CLASS ? NH_WHITE : NH_BLUE)
+							);
+					}
+				}
 				break;
 			case 2: // identify an item
 				if (uwep && not_fully_identified(uwep)) identify(uwep);
@@ -3260,116 +3274,43 @@ aligntyp alignment;
 					give_intrinsic(SHOCK_RES, timeout);
 				}
 				break;
-			case 4: // repair an item
-				for (i = 3; i >= 0; i--){
-					if (uwep && (uwep->oeroded == i || uwep->oeroded2 == i)){
-						uwep->rknown = TRUE;
-						if (uwep->oeroded == i && i > 0){
-							uwep->oeroded--;
-							break;
-						} else if (uwep->oeroded2 == i && i > 0){
-							uwep->oeroded2--;
-							break;
-						} else if (uwep->oeroded == i && uwep->oeroded2 == i && !(uwep->oerodeproof)){
-							uwep->oerodeproof = TRUE;
-							break;
-						}
-					} if (uswapwep && (uswapwep->oeroded == i || uswapwep->oeroded2 == i)){
-						uswapwep->rknown = TRUE;
-						if (uswapwep->oeroded == i && i > 0){
-							uswapwep->oeroded--;
-							break;
-						} else if (uswapwep->oeroded2 == i && i > 0){
-							uswapwep->oeroded2--;
-							break;
-						} else if (uswapwep->oeroded == i && uswapwep->oeroded2 == i && !(uswapwep->oerodeproof)){
-							uswapwep->oerodeproof = TRUE;
-							break;
-						}
-					} if (uarmc && (uarmc->oeroded == i || uarmc->oeroded2 == i)){
-						uarmc->rknown = TRUE;
-						if (uarmc->oeroded == i && i > 0){
-							uarmc->oeroded--;
-							break;
-						} else if (uarmc->oeroded2 == i && i > 0){
-							uarmc->oeroded2--;
-							break;
-						} else if (uarmc->oeroded == i && uarmc->oeroded2 == i && !(uarmc->oerodeproof)){
-							uarmc->oerodeproof = TRUE;
-							break;
-						}
-					} if (uarm && (uarm->oeroded == i || uarm->oeroded2 == i)){
-						uarm->rknown = TRUE;
-						if (uarm->oeroded == i && i > 0){
-							uarm->oeroded--;
-							break;
-						} else if (uarm->oeroded2 == i && i > 0){
-							uarm->oeroded2--;
-							break;
-						} else if (uarm->oeroded == i && uarm->oeroded2 == i && !(uarm->oerodeproof)){
-							uarm->oerodeproof = TRUE;
-							break;
-						}
-					} if (uarmu && (uarmu->oeroded == i || uarmu->oeroded2 == i)){
-						uarmu->rknown = TRUE;
-						if (uarmu->oeroded == i && i > 0){
-							uarmu->oeroded--;
-							break;
-						} else if (uarmu->oeroded2 == i && i > 0){
-							uarmu->oeroded2--;
-							break;
-						} else if (uarmu->oeroded == i && uarmu->oeroded2 == i && !(uarmu->oerodeproof)){
-							uarmu->oerodeproof = TRUE;
-							break;
-						}
-					} if (uarmh && (uarmh->oeroded == i || uarmh->oeroded2 == i)){
-						uarmh->rknown = TRUE;
-						if (uarmh->oeroded == i && i > 0){
-							uarmh->oeroded--;
-							break;
-						} else if (uarmh->oeroded2 == i && i > 0){
-							uarmh->oeroded2--;
-							break;
-						} else if (uarmh->oeroded == i && uarmh->oeroded2 == i && !(uarmh->oerodeproof)){
-							uarmh->oerodeproof = TRUE;
-							break;
-						}
-					} if (uarmg && (uarmg->oeroded == i || uarmg->oeroded2 == i)){
-						uarmg->rknown = TRUE;
-						if (uarmg->oeroded == i && i > 0){
-							uarmg->oeroded--;
-							break;
-						} else if (uarmg->oeroded2 == i && i > 0){
-							uarmg->oeroded2--;
-							break;
-						} else if (uarmg->oeroded == i && uarmg->oeroded2 == i && !(uarmg->oerodeproof)){
-							uarmg->oerodeproof = TRUE;
-							break;
-						}
-					} if (uarmf && (uarmf->oeroded == i || uarmf->oeroded2 == i)){
-						uarmf->rknown = TRUE;
-						if (uarmf->oeroded == i && i > 0){
-							uarmf->oeroded--;
-							break;
-						} else if (uarmf->oeroded2 == i && i > 0){
-							uarmf->oeroded2--;
-							break;
-						} else if (uarmf->oeroded == i && uarmf->oeroded2 == i && !(uarmf->oerodeproof)){
-							uarmf->oerodeproof = TRUE;
-							break;
-						}
-					} if (uarms && (uarms->oeroded == i || uarms->oeroded2 == i)){
-						uarms->rknown = TRUE;
-						if (uarms->oeroded == i && i > 0){
-							uarms->oeroded--;
-							break;
-						} else if (uarms->oeroded2 == i && i > 0){
-							uarms->oeroded2--;
-							break;
-						} else if (uarms->oeroded == i && uarms->oeroded2 == i && !(uarms->oerodeproof)){
-							uarms->oerodeproof = TRUE;
-							break;
-						}
+			case 4: // repair an item, or make one rustproof
+				otmp = (struct obj *)0;
+				/* select most damaged item */
+				for (i = 3; i >= 0 && !otmp; i--){
+#define select_item_to_repair_or_erodeproof(item) \
+(item && ((i > 0) ? (item->oeroded == i || item->oeroded == i) : (!item->oerodeproof))) otmp = item
+
+					if      select_item_to_repair_or_erodeproof(uwep);
+					else if select_item_to_repair_or_erodeproof(uswapwep);
+					else if select_item_to_repair_or_erodeproof(uarmc);
+					else if select_item_to_repair_or_erodeproof(uarm);
+					else if select_item_to_repair_or_erodeproof(uarmu);
+					else if select_item_to_repair_or_erodeproof(uarmh);
+					else if select_item_to_repair_or_erodeproof(uarmg);
+					else if select_item_to_repair_or_erodeproof(uarmf);
+					else if select_item_to_repair_or_erodeproof(uarms);
+#undef select_item_to_repair_or_erodeproof
+				}
+				/* repair by 1 level, or make erodeproof */
+				if (otmp) {
+					otmp->rknown = TRUE;
+					if (otmp->oeroded > 0){
+						otmp->oeroded--;
+					} else if (otmp->oeroded2 > 0){
+						otmp->oeroded2--;
+					} else if (!otmp->oeroded && !otmp->oeroded2 && !otmp->oerodeproof) {
+						otmp->oerodeproof = TRUE;
+					}
+					/* message */
+					if (!Blind) {
+						Your("%s %s %s!",
+							xname(otmp),
+							vtense(xname(otmp), "look"),
+							(otmp->oeroded || otmp->oeroded2) ? "better" :
+								(!otmp->oerodeproof) ? "as good as new" :
+								"better than ever"
+							);
 					}
 				}
 				break;
