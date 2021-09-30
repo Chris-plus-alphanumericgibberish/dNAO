@@ -5859,6 +5859,10 @@ struct obj *obj;
 				}
 			break;
 		}
+		/* if you targeted a monster, it gets angry, even if it was unaffected */
+		if (mtmp) {
+			wakeup(mtmp, TRUE);
+		}
 	}
 	/* handle B/U/C effect of wages */
 	soul_crush_consequence(obj);
