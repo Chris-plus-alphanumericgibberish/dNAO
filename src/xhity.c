@@ -15216,6 +15216,7 @@ int vis;						/* True if action is at all visible to the player */
 	if ((pd->mtyp == PM_BLACK_PUDDING || pd->mtyp == PM_BROWN_PUDDING || pd->mtyp == PM_DARKNESS_GIVEN_HUNGER)
 		&& weapon && (valid_weapon_attack || invalid_weapon_attack)
 		&& is_iron_obj(weapon)
+		&& !litsaber(weapon)
 		&& melee && (youdef || !mdef->mcan)) {
 		if (youdef) {
 			if (totldmg > 1)
