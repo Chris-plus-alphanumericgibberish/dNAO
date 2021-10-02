@@ -1495,6 +1495,9 @@ char *buf;
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
+	} else if(obj->oartifact == ART_IBITE_ARM && artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material){
+		//Ibite arm descriptor includes "flabby," which is both a material and an appearance :-/
+		return;
 	} else {
 		/*Special case: circlets should always show their material, but oc_showmat is tied to otyp, not appearance */
 		if (obj->otyp == find_gcirclet())
