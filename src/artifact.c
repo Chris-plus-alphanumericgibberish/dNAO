@@ -7064,9 +7064,11 @@ arti_invoke(obj)
 					exercise(A_WIS, TRUE);
 					doenlightenment(); //not dead yet!
 					unrestrict_weapon_skill(P_SPEAR);
-				    discover_artifact(ART_ROD_OF_SEVEN_PARTS);
-					identify(obj);
-					update_inventory();
+					if(!obj->known){
+						discover_artifact(ART_ROD_OF_SEVEN_PARTS);
+						identify(obj);
+						update_inventory();
+					}
 					obj->spe--; obj->spe--; // lose two charge
 					pline("Your weapon has become more flawed!");
 				} else pline("Your weapon rattles faintly.");
@@ -7629,9 +7631,11 @@ arti_invoke(obj)
 				You_cant("feel any Braille writing.");
 		break;
 			}
-			discover_artifact(ART_BOOK_OF_LOST_NAMES);
-			identify(obj);
-			update_inventory();
+			if(!obj->known){
+				discover_artifact(ART_BOOK_OF_LOST_NAMES);
+				identify(obj);
+				update_inventory();
+			}
 			if(obj->ovar1 && yn("Contact a known spirit?") == 'y'){
 				long yourseals = u.sealsKnown;
 				long yourspecial = u.specialSealsKnown;
