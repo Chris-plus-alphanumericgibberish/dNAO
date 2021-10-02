@@ -1894,7 +1894,7 @@ struct monst *mtmp;
 	int xx, yy;
 	boolean immobile = (mdat->mmove == 0);
 	boolean stuck = (mtmp == u.ustuck);
-	boolean nomouth = mdat->mtyp==PM_NIGHTGAUNT
+	boolean nomouth = nomouth(mtmp->mtyp)
 			|| ((mtmp->misc_worn_check & W_ARMH) && which_armor(mtmp, W_ARMH) && FacelessHelm(which_armor(mtmp, W_ARMH)))
 			|| ((mtmp->misc_worn_check & W_ARMC) && which_armor(mtmp, W_ARMC)
 				&& FacelessCloak(which_armor(mtmp, W_ARMC)));

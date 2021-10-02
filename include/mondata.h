@@ -103,6 +103,7 @@
 #define is_commander(ptr)		(((ptr)->mflagsg & MG_COMMANDER) != 0L)
 /*#define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L) when did this get duplicated???*/
 #define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L)
+#define nomouth(mtyp)			(mtyp==PM_NIGHTGAUNT || mtyp==PM_STRANGER)
 #define goodsmeller(ptr)		(((ptr)->mflagsv & MV_SCENT) != 0L)
 #define is_tracker(ptr)			(((ptr)->mflagsg & MG_TRACKER) != 0L)
 #define eyecount(ptr)			(!haseyes(ptr) ? 0 : \
