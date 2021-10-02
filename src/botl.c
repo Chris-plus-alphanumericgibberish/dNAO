@@ -576,7 +576,7 @@ bot2()
 #endif
 	  }
 	}
-  if(Confusion)
+  if(Confusion && !StumbleBlind)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Conf", newbot2);
 #else
@@ -596,13 +596,13 @@ bot2()
       Strcat(nb = eos(nb), " Ill");
 #endif
   }
-  if(Blind)
+  if(Blind && !StumbleBlind)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Blind", newbot2);
 #else
   Strcat(nb = eos(nb), " Blind");
 #endif
-  if(Stunned)
+  if(Stunned && !StaggerShock)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Stun", newbot2);
 #else
