@@ -15,7 +15,6 @@ struct trobj {
 };
 
 STATIC_DCL void FDECL(ini_inv, (struct trobj *));
-STATIC_DCL void FDECL(knows_object,(int));
 STATIC_DCL void FDECL(knows_class,(CHAR_P));
 STATIC_DCL boolean FDECL(restricted_spell_discipline, (int));
 
@@ -991,7 +990,6 @@ static const struct def_skill Skill_C[] = {
     { P_NONE, 0 }
 };
 
-#ifdef CONVICT
 static const struct def_skill Skill_Con[] = {
     { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_EXPERT },
     { P_HAMMER, P_SKILLED },		{ P_PICK_AXE, P_EXPERT },
@@ -1003,25 +1001,6 @@ static const struct def_skill Skill_Con[] = {
     { P_TWO_WEAPON_COMBAT, P_SKILLED },
     { P_BARE_HANDED_COMBAT, P_SKILLED },
     { P_BEAST_MASTERY, P_BASIC },
-    { P_NONE, 0 }
-};
-#endif  /* CONVICT */
-static const struct def_skill Skill_Mad[] = {
-    { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_EXPERT },
-    { P_AXE, P_EXPERT },			{ P_MORNING_STAR, P_SKILLED },
-    { P_CLUB, P_EXPERT },		    { P_MACE, P_BASIC },
-    { P_DART, P_SKILLED },		    { P_FLAIL, P_BASIC },
-    { P_SHORT_SWORD, P_BASIC },		{ P_TRIDENT, P_SKILLED },
-	{ P_HARVEST, P_SKILLED },		{ P_WHIP, P_SKILLED },
-    { P_ATTACK_SPELL, P_BASIC },	{ P_ESCAPE_SPELL, P_SKILLED },
-    { P_HEALING_SPELL, P_SKILLED }, { P_DIVINATION_SPELL, P_EXPERT },
-	{ P_ENCHANTMENT_SPELL, P_EXPERT },
-    { P_CLERIC_SPELL, P_EXPERT },
-    { P_MATTER_SPELL, P_BASIC },
-    { P_WAND_POWER, P_SKILLED },
-    { P_TWO_WEAPON_COMBAT, P_SKILLED },
-    { P_BARE_HANDED_COMBAT, P_EXPERT },
-    { P_BEAST_MASTERY, P_EXPERT },
     { P_NONE, 0 }
 };
 
@@ -1048,12 +1027,12 @@ static const struct def_skill Skill_I[] = {
     { P_MATTER_SPELL, P_EXPERT },
     { P_NONE, 0 }
 };
-#ifdef BARD
+
 static const struct def_skill Skill_Elf_Music[] = {
     { P_MUSICALIZE, P_EXPERT },
     { P_NONE, 0 }
 };
-#endif
+
 static const struct def_skill Skill_Elf_Ana[] = {
     { P_ENCHANTMENT_SPELL, P_EXPERT },
     { P_MARTIAL_ARTS, P_GRAND_MASTER },
@@ -1128,6 +1107,25 @@ static const struct def_skill Skill_Mon[] = {
 #ifdef BARD
     { P_MUSICALIZE, P_BASIC },
 #endif
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_Mad[] = {
+    { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_EXPERT },
+    { P_AXE, P_EXPERT },			{ P_MORNING_STAR, P_SKILLED },
+    { P_CLUB, P_EXPERT },		    { P_MACE, P_BASIC },
+    { P_DART, P_BASIC },		    { P_FLAIL, P_BASIC },
+    { P_SHORT_SWORD, P_BASIC },		{ P_TRIDENT, P_SKILLED },
+	{ P_HARVEST, P_SKILLED },		{ P_WHIP, P_SKILLED },
+    { P_ATTACK_SPELL, P_BASIC },	{ P_ESCAPE_SPELL, P_SKILLED },
+    { P_HEALING_SPELL, P_SKILLED }, { P_DIVINATION_SPELL, P_EXPERT },
+	{ P_ENCHANTMENT_SPELL, P_EXPERT },
+    { P_CLERIC_SPELL, P_EXPERT },
+    { P_MATTER_SPELL, P_BASIC },
+    { P_WAND_POWER, P_SKILLED },
+    { P_TWO_WEAPON_COMBAT, P_SKILLED },
+    { P_BARE_HANDED_COMBAT, P_EXPERT },
+    { P_BEAST_MASTERY, P_BASIC },
     { P_NONE, 0 }
 };
 
@@ -1465,7 +1463,7 @@ static const struct def_skill Skill_W[] = {
 static const char *oseVowels[] = {"a","e","i","o","u","ae","oe","oo","y"};
 static const char *oseConsonants[] = {"b","c","d","f","g","h","j","k","l","m","n","p","q","r","s","t","v","w","x","y","z","ch","ll","sh","th"};
 
-STATIC_OVL void
+void
 knows_object(obj)
 register int obj;
 {
@@ -2308,19 +2306,21 @@ u_init()
 			skill_add(Skill_Elf_Ana);
 		}
 	    /* Elves can recognize all elvish objects */
-	    knows_object(ELVEN_SHORT_SWORD);
-	    knows_object(ELVEN_ARROW);
-	    knows_object(ELVEN_BOW);
-	    knows_object(ELVEN_SPEAR);
-	    knows_object(ELVEN_DAGGER);
-	    knows_object(ELVEN_BROADSWORD);
-	    knows_object(ELVEN_MACE);
-	    knows_object(ELVEN_LANCE);
-	    knows_object(ELVEN_MITHRIL_COAT);
-	    knows_object(ELVEN_HELM);
-	    knows_object(ELVEN_SHIELD);
-	    knows_object(ELVEN_BOOTS);
-	    knows_object(ELVEN_CLOAK);
+		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
+			knows_object(ELVEN_SHORT_SWORD);
+			knows_object(ELVEN_ARROW);
+			knows_object(ELVEN_BOW);
+			knows_object(ELVEN_SPEAR);
+			knows_object(ELVEN_DAGGER);
+			knows_object(ELVEN_BROADSWORD);
+			knows_object(ELVEN_MACE);
+			knows_object(ELVEN_LANCE);
+			knows_object(ELVEN_MITHRIL_COAT);
+			knows_object(ELVEN_HELM);
+			knows_object(ELVEN_SHIELD);
+			knows_object(ELVEN_BOOTS);
+			knows_object(ELVEN_CLOAK);
+		}
 	break;
 
 	case PM_MYRKALFR:
@@ -2332,7 +2332,7 @@ u_init()
 		 * class equipment
 	     */
 		ini_inv(SleepPotions);
-	    if (!Role_if(PM_PIRATE) && !Role_if(PM_WIZARD)) {
+	    if (!Role_if(PM_PIRATE) && !Role_if(PM_WIZARD) && !Role_if(PM_MADMAN)) {
 			ini_inv(RandRing);
 	    }
 		/*Drow can put a lot of practice into using their rings*/
@@ -2355,19 +2355,21 @@ u_init()
 			u.umartial = TRUE;
 		}
 	    /* Drow can recognize all droven objects */
-	    knows_object(DROVEN_SHORT_SWORD);
-	    knows_object(DROVEN_BOLT);
-	    knows_object(DROVEN_CROSSBOW);
-	    knows_object(DROVEN_DAGGER);
-	    knows_object(DROVEN_GREATSWORD);
-	    knows_object(DROVEN_LANCE);
-	    knows_object(DROVEN_SPEAR);
-	    knows_object(DROVEN_CHAIN_MAIL);
-	    knows_object(DROVEN_PLATE_MAIL);
-	    knows_object(NOBLE_S_DRESS);
-	    knows_object(CONSORT_S_SUIT);
-	    knows_object(DROVEN_CLOAK);
-	    knows_object(find_signet_ring());
+		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
+			knows_object(DROVEN_SHORT_SWORD);
+			knows_object(DROVEN_BOLT);
+			knows_object(DROVEN_CROSSBOW);
+			knows_object(DROVEN_DAGGER);
+			knows_object(DROVEN_GREATSWORD);
+			knows_object(DROVEN_LANCE);
+			knows_object(DROVEN_SPEAR);
+			knows_object(DROVEN_CHAIN_MAIL);
+			knows_object(DROVEN_PLATE_MAIL);
+			knows_object(NOBLE_S_DRESS);
+			knows_object(CONSORT_S_SUIT);
+			knows_object(DROVEN_CLOAK);
+			knows_object(find_signet_ring());
+		}
 		
 		if(Role_if(PM_ANACHRONONAUT)) u.uhouse = LAST_BASTION_SYMBOL;
 		else u.uhouse = !(Role_if(PM_EXILE) || (Role_if(PM_NOBLEMAN) && !flags.initgend) || Role_if(PM_CONVICT) || Role_if(PM_MADMAN) || Role_if(PM_PIRATE)) ?
@@ -2403,13 +2405,15 @@ u_init()
 	case PM_DWARF:{
 		struct obj* otmp;
 	    /* Dwarves can recognize all dwarvish objects */
-	    knows_object(DWARVISH_SPEAR);
-	    knows_object(DWARVISH_SHORT_SWORD);
-	    knows_object(DWARVISH_MATTOCK);
-	    knows_object(DWARVISH_HELM);
-	    knows_object(DWARVISH_MITHRIL_COAT);
-	    knows_object(DWARVISH_CLOAK);
-	    knows_object(DWARVISH_ROUNDSHIELD);
+		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
+			knows_object(DWARVISH_SPEAR);
+			knows_object(DWARVISH_SHORT_SWORD);
+			knows_object(DWARVISH_MATTOCK);
+			knows_object(DWARVISH_HELM);
+			knows_object(DWARVISH_MITHRIL_COAT);
+			knows_object(DWARVISH_CLOAK);
+			knows_object(DWARVISH_ROUNDSHIELD);
+		}
 		/* Dwarves know all carved wards */
 		u.wardsknown |= WARD_TOUSTEFNA;
 		u.wardsknown |= WARD_DREPRUN;
@@ -2426,11 +2430,13 @@ u_init()
 		}
 		skill_add(Skill_G);
 		ini_inv(TallowCandles);
-		knows_object(GNOMISH_POINTY_HAT);
-	    knows_object(AKLYS);
-	    knows_object(DWARVISH_HELM);
-	    knows_object(DWARVISH_MATTOCK);
-	    knows_object(DWARVISH_CLOAK);
+		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
+			knows_object(GNOMISH_POINTY_HAT);
+			knows_object(AKLYS);
+			knows_object(DWARVISH_HELM);
+			knows_object(DWARVISH_MATTOCK);
+			knows_object(DWARVISH_CLOAK);
+		}
     break;
 
 	case PM_ORC:
@@ -2442,17 +2448,19 @@ u_init()
           && !Role_if(PM_MADMAN)
 		) ini_inv(Xtra_food);
 	    /* Orcs can recognize all orcish objects */
-	    knows_object(ORCISH_SHORT_SWORD);
-	    knows_object(ORCISH_ARROW);
-	    knows_object(ORCISH_BOW);
-	    knows_object(ORCISH_SPEAR);
-	    knows_object(ORCISH_DAGGER);
-	    knows_object(ORCISH_CHAIN_MAIL);
-	    knows_object(ORCISH_RING_MAIL);
-	    knows_object(ORCISH_HELM);
-	    knows_object(ORCISH_SHIELD);
-	    knows_object(URUK_HAI_SHIELD);
-	    knows_object(ORCISH_CLOAK);
+		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
+			knows_object(ORCISH_SHORT_SWORD);
+			knows_object(ORCISH_ARROW);
+			knows_object(ORCISH_BOW);
+			knows_object(ORCISH_SPEAR);
+			knows_object(ORCISH_DAGGER);
+			knows_object(ORCISH_CHAIN_MAIL);
+			knows_object(ORCISH_RING_MAIL);
+			knows_object(ORCISH_HELM);
+			knows_object(ORCISH_SHIELD);
+			knows_object(URUK_HAI_SHIELD);
+			knows_object(ORCISH_CLOAK);
+		}
 		if(Role_if(PM_BARD)){
 			skill_add(Skill_Orc_Brd);
 			ini_inv(Orc_Brd_equip);

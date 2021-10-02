@@ -1747,6 +1747,9 @@ int shotlimit;
 		default:
 			break;	/* No bonus */
 		}
+		if(youagr && Role_if(PM_MADMAN) && Race_if(PM_YUKI_ONNA)){
+			if (ammo->otyp == YA && launcher && launcher->otyp == YUMI) multishot++;
+		}
 		/* Race-based RoF bonus */
 		if ((youagr ? Race_if(PM_ELF) : is_elf(magr->data)) && (
 			(ammo->otyp == ELVEN_ARROW && launcher && launcher->otyp == ELVEN_BOW) ||

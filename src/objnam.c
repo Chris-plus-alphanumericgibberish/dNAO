@@ -22,6 +22,7 @@ char * FDECL(xname2, (struct obj *,BOOLEAN_P));
 boolean FDECL(an_bool, (const char *));
 #endif
 
+#define useJNames (Role_if(PM_SAMURAI) || (Role_if(PM_MADMAN) && Race_if(PM_YUKI_ONNA)))
 struct Jitem {
 	int item;
 	const char *name;
@@ -367,12 +368,13 @@ register int otyp;
 	register const char *un = ocl->oc_uname;
 	register int nn = ocl->oc_name_known;
 
-	if (Role_if(PM_SAMURAI) && iflags.role_obj_names && Alternate_item_name(otyp,Japanese_items))
+	if (useJNames && iflags.role_obj_names && Alternate_item_name(otyp,Japanese_items))
 		actualn = Alternate_item_name(otyp,Japanese_items);
-	if (Role_if(PM_SAMURAI) && iflags.obscure_role_obj_names && Alternate_item_name(otyp,ObscureJapanese_items))
+	if (useJNames && iflags.obscure_role_obj_names && Alternate_item_name(otyp,ObscureJapanese_items))
 		actualn = Alternate_item_name(otyp,ObscureJapanese_items);
 	if (Role_if(PM_PIRATE) && iflags.role_obj_names && Alternate_item_name(otyp,Pirate_items))
 		actualn = Alternate_item_name(otyp,Pirate_items);
+
 	switch(ocl->oc_class) {
 	case COIN_CLASS:
 		Strcpy(buf, "coin");
@@ -1581,9 +1583,9 @@ boolean with_price;
 	if (obj && obj->oartifact) oart = &artilist[(obj)->oartifact];
 
 	buf = nextobuf() + PREFIX;	/* leave room for "17 -3 " */
-	if (Role_if(PM_SAMURAI) && iflags.role_obj_names && Alternate_item_name(typ, Japanese_items))
+	if (useJNames && iflags.role_obj_names && Alternate_item_name(typ, Japanese_items))
 		actualn = Alternate_item_name(typ, Japanese_items);
-	if (Role_if(PM_SAMURAI) && iflags.obscure_role_obj_names && Alternate_item_name(typ, ObscureJapanese_items))
+	if (useJNames && iflags.obscure_role_obj_names && Alternate_item_name(typ, ObscureJapanese_items))
 		actualn = Alternate_item_name(typ, ObscureJapanese_items);
 	if (Role_if(PM_PIRATE) && iflags.role_obj_names && Alternate_item_name(typ, Pirate_items))
 		actualn = Alternate_item_name(typ, Pirate_items);

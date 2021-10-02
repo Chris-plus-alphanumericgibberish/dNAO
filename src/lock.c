@@ -253,8 +253,9 @@ forcelock()	/* try to force a locked chest */
 			open_sarcophagus(xlock.box, TRUE); //TRUE: use past tense
 		}else if(xlock.box->spe == 6){ /*Note: destroying the box always releases the crazy*/
 			open_crazy_box(xlock.box, TRUE); //TRUE: use past tense
-		// }else if(xlock.box->spe == 7){
-			// Madman reclaims their stuff.
+		}else if(xlock.box->spe == 7){
+			// Madman reclaims their stuff. Contents handled by the level loader.
+			open_madstuff_box(xlock.box, TRUE); //TRUE: use past tense
 		}else if(xlock.box->spe == 8){
 			// Nothing. 
 		}

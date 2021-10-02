@@ -1281,12 +1281,178 @@ default_case:
 	}
 	// Madman's old stuff
 	if(Is_container(otmp) && otmp->spe == 7){
+		struct obj *stuff;
+#define default_add(type) stuff = mksobj(type, MKOBJ_NOINIT);\
+					add_to_container(otmp, stuff);
+#define default_add_2(type) stuff = mksobj(type, MKOBJ_NOINIT);\
+					stuff->spe = 2;\
+					add_to_container(otmp, stuff);
 		switch(urace.malenum){
 			default:
 			case PM_HUMAN:
+			case PM_HALF_DRAGON:
+			case PM_VAMPIRE:
+			case PM_INCANTIFIER:
+			case PM_GNOME:
+				if(flags.initgend){
+					default_add(STILETTOS);
+					default_add(VICTORIAN_UNDERWEAR);
+					default_add(GLOVES);
+					
+					default_add_2(GENTLEWOMAN_S_DRESS);
+					if(Race_if(PM_INCANTIFIER)){
+						set_material_gm(stuff, ROBE);
+						stuff->obj_color = CLR_GRAY;
+						stuff->spe = 2;
+						add_to_container(otmp, stuff);
+					}
+					else if(Race_if(PM_VAMPIRE)){
+						default_add_2(find_opera_cloak());
+					}
+					default_add_2(KNIFE);
+				}
+				else {
+					default_add(HIGH_BOOTS);
+					default_add(RUFFLED_SHIRT);
+					default_add(GLOVES);
+					default_add_2(GENTLEMAN_S_SUIT);
+					default_add_2(RAPIER);
+
+					if(Race_if(PM_INCANTIFIER)){
+						set_material_gm(stuff, ROBE);
+						stuff->obj_color = CLR_GRAY;
+						add_to_container(otmp, stuff);
+					}
+					else if(Race_if(PM_VAMPIRE)){
+						default_add(find_opera_cloak());
+					}
+					else {
+						stuff = mksobj(CLOAK, MKOBJ_NOINIT);
+						set_material_gm(stuff, CLOTH);
+						stuff->obj_color = CLR_BLACK;
+						add_to_container(otmp, stuff);
+					}
+				}
+				if(urace.malenum == PM_GNOME){
+					default_add_2(GNOMISH_POINTY_HAT);
+				}
+			break;
+			case PM_DWARF:
+				default_add(HIGH_BOOTS);
+				stuff = mksobj(RUFFLED_SHIRT, MKOBJ_NOINIT);
+				stuff->obj_color = CLR_BLACK;
+				add_to_container(otmp, stuff);
+				default_add(GLOVES);
+
+				stuff = mksobj(CHAIN_MAIL, MKOBJ_NOINIT);
+				stuff->spe = 2;
+				set_material_gm(stuff, SILVER);
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(DWARVISH_CLOAK, MKOBJ_NOINIT);
+				stuff->obj_color = CLR_BLACK;
+				add_to_container(otmp, stuff);
+
+				default_add_2(BATTLE_AXE);
+			break;
+			case PM_DROW:
+				default_add(find_signet_ring());
+				if(flags.initgend){
+					default_add(STILETTOS);
+					default_add(VICTORIAN_UNDERWEAR);
+					default_add(GLOVES);
+
+					stuff = mksobj(NOBLE_S_DRESS, MKOBJ_NOINIT);
+					stuff->spe = 2;
+					set_material_gm(stuff, SILVER);
+					add_to_container(otmp, stuff);
+
+					default_add_2(DROVEN_DAGGER);
+				}
+				else {
+					default_add(HIGH_BOOTS);
+					default_add(RUFFLED_SHIRT);
+					default_add(GLOVES);
+					default_add_2(GENTLEMAN_S_SUIT);
+					default_add_2(DROVEN_SHORT_SWORD);
+
+					stuff = mksobj(CLOAK, MKOBJ_NOINIT);
+					set_material_gm(stuff, CLOTH);
+					stuff->obj_color = CLR_BLACK;
+					add_to_container(otmp, stuff);
+				}
+			break;
+			case PM_ELF:
+				default_add(ELVEN_BOOTS);
+				if(flags.initgend){
+					stuff = mksobj(PLAIN_DRESS, MKOBJ_NOINIT);
+					stuff->obj_color = rn2(2) ? CLR_YELLOW : CLR_BRIGHT_GREEN;
+					add_to_container(otmp, stuff);
+				}
+				else {
+					stuff = mksobj(RUFFLED_SHIRT, MKOBJ_NOINIT);
+					stuff->obj_color = rn2(2) ? CLR_BROWN : CLR_GREEN;
+					add_to_container(otmp, stuff);
+				}
+				default_add(GLOVES);
+				default_add(HIGH_ELVEN_HELM);
+				default_add_2(ELVEN_MITHRIL_COAT);
+				default_add_2(ELVEN_BOW);
+				
+				stuff = mksobj(ELVEN_ARROW, MKOBJ_NOINIT);
+				stuff->spe = 2;
+				stuff->quan = 30L;
+				fix_object(stuff);
+				add_to_container(otmp, stuff);
+				
+				stuff = mksobj(HIGH_ELVEN_WARSWORD, MKOBJ_NOINIT);
+				set_material_gm(stuff, WOOD);
+				add_to_container(otmp, stuff);
+				
+				default_add(ELVEN_CLOAK);
+			break;
+			case PM_ORC:
+					default_add(LOW_BOOTS);
+					default_add(ORCISH_HELM);
+
+					stuff = mksobj(ORCISH_RING_MAIL, MKOBJ_NOINIT);
+					set_material_gm(stuff, GOLD);
+					stuff->spe = 2;
+					add_to_container(otmp, stuff);
+
+					default_add_2(TWO_HANDED_SWORD);
+			break;
+			case PM_YUKI_ONNA:
+				stuff = mksobj(SHOES, MKOBJ_NOINIT);
+				set_material_gm(stuff, WOOD);
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(SHORT_SWORD, MKOBJ_NOINIT);
+				set_material_gm(stuff, MITHRIL);
+				stuff->spe = 2;
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(KATANA, MKOBJ_NOINIT);
+				set_material_gm(stuff, SILVER);
+				stuff->spe = 2;
+				add_to_container(otmp, stuff);
+
+				default_add(YUMI);
+				stuff = mksobj(YA, MKOBJ_NOINIT);
+				stuff->quan = 30L;
+				fix_object(stuff);
+				add_to_container(otmp, stuff);
+				
+				stuff = mksobj(ROBE, MKOBJ_NOINIT);
+				stuff->obj_color = CLR_BRIGHT_BLUE;
+				stuff->spe = 2;
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(SEDGE_HAT, MKOBJ_NOINIT);
+				stuff->obj_color = CLR_ORANGE;
+				add_to_container(otmp, stuff);
 			break;
 		}
-		otmp->spe = 0;
 	}
 
 	if(otmp->otyp == STATUE && (otmp->spe&STATUE_FACELESS) && In_mithardir_quest(&u.uz)){
@@ -1317,7 +1483,7 @@ default_case:
 	}
 	
 	/* Note: fixes the output of the previous code-block, too */
-	if(otmp->spe&STATUE_EPRE){
+	if(otmp->otyp == STATUE && otmp->spe&STATUE_EPRE){
 		if(dungeon_topology.eprecursor_typ == PRE_DRACAE){
 			otmp->corpsenm = PM_DRACAE_ELADRIN;
 		} else {
@@ -1326,7 +1492,7 @@ default_case:
 		fix_object(otmp);
 	}
 	/* Note: fixes the output of the previous two code-blocks, too */
-	if(otmp->corpsenm == PM_TULANI_ELADRIN && dungeon_topology.alt_tulani){
+	if(otmp->otyp == STATUE && otmp->corpsenm == PM_TULANI_ELADRIN && dungeon_topology.alt_tulani){
 		switch(dungeon_topology.alt_tulani){
 			case GAE_CASTE:
 				otmp->corpsenm = PM_GAE_ELADRIN;

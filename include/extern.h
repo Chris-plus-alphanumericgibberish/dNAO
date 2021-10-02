@@ -2115,6 +2115,7 @@ E void FDECL(observe_quantum_cat, (struct obj *, BOOLEAN_P));
 E void FDECL(open_coffin, (struct obj *, BOOLEAN_P));
 E void FDECL(open_sarcophagus, (struct obj *, BOOLEAN_P));
 E void FDECL(open_crazy_box, (struct obj *, BOOLEAN_P));
+E boolean FDECL(open_madstuff_box, (struct obj *, BOOLEAN_P));
 #ifdef GOLDOBJ
 E int FDECL(collect_obj_classes,
 	(char *,struct obj *,BOOLEAN_P,boolean FDECL((*),(OBJ_P)), int *));
@@ -2892,6 +2893,7 @@ E int NDECL(uescape_entanglement);
 /* ### u_init.c ### */
 
 E void NDECL(u_init);
+E void FDECL(knows_object,(int) );
 E void NDECL(scatter_weapons);
 
 /* ### unixmain.c ### */
@@ -3092,6 +3094,7 @@ E int FDECL(dbon, (struct obj *));
 E int FDECL(m_dbon, (struct monst *, struct obj *));
 E int NDECL(enhance_weapon_skill);
 E void FDECL(expert_weapon_skill, (int));
+E void FDECL(skilled_weapon_skill, (int));
 E int FDECL(skill_dam_bonus, (int));
 E void FDECL(gm_weapon_skill, (int));
 #ifdef DUMP_LOG

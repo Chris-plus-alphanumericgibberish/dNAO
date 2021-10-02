@@ -2592,6 +2592,120 @@ boolean past;
     return;
 }
 
+boolean
+open_madstuff_box(box, past)
+struct obj *box;
+boolean past;
+{
+	You_feel("memories weakly stirring.");
+	struct obj *otmp;
+	for(otmp = box->cobj; otmp; otmp = otmp->nobj)
+		knows_object(otmp->otyp);
+	switch(urace.malenum){
+		default:
+		case PM_HUMAN:
+		case PM_HALF_DRAGON:
+		case PM_VAMPIRE:
+		case PM_INCANTIFIER:
+		case PM_GNOME:
+			if(flags.initgend){
+				expert_weapon_skill(P_BEAST_MASTERY);
+			}
+			else {
+				expert_weapon_skill(P_SABER);
+			}
+			if(Race_if(PM_GNOME)){
+				knows_object(GNOMISH_POINTY_HAT);
+				knows_object(AKLYS);
+				knows_object(DWARVISH_HELM);
+				knows_object(DWARVISH_MATTOCK);
+				knows_object(DWARVISH_CLOAK);
+			}
+		break;
+		case PM_DWARF:
+			expert_weapon_skill(P_PICK_AXE);
+			expert_weapon_skill(P_SHIELD);
+			knows_object(DWARVISH_SPEAR);
+			knows_object(DWARVISH_SHORT_SWORD);
+			knows_object(DWARVISH_MATTOCK);
+			knows_object(DWARVISH_HELM);
+			knows_object(DWARVISH_MITHRIL_COAT);
+			knows_object(DWARVISH_CLOAK);
+			knows_object(DWARVISH_ROUNDSHIELD);
+		break;
+		case PM_ELF:
+			expert_weapon_skill(P_BOW);
+			expert_weapon_skill(P_SCIMITAR);
+			knows_object(ELVEN_SHORT_SWORD);
+			knows_object(ELVEN_ARROW);
+			knows_object(ELVEN_BOW);
+			knows_object(ELVEN_SPEAR);
+			knows_object(ELVEN_DAGGER);
+			knows_object(ELVEN_BROADSWORD);
+			knows_object(ELVEN_MACE);
+			knows_object(ELVEN_LANCE);
+			knows_object(ELVEN_MITHRIL_COAT);
+			knows_object(ELVEN_HELM);
+			knows_object(ELVEN_SHIELD);
+			knows_object(ELVEN_BOOTS);
+			knows_object(ELVEN_CLOAK);
+		break;
+		case PM_DROW:
+			if(flags.initgend){
+				expert_weapon_skill(P_SABER);
+				expert_weapon_skill(P_WHIP);
+				skilled_weapon_skill(P_BEAST_MASTERY);
+			}
+			else {
+				expert_weapon_skill(P_SABER);
+				expert_weapon_skill(P_MORNING_STAR);
+			}
+			knows_object(DROVEN_SHORT_SWORD);
+			knows_object(DROVEN_BOLT);
+			knows_object(DROVEN_CROSSBOW);
+			knows_object(DROVEN_DAGGER);
+			knows_object(DROVEN_GREATSWORD);
+			knows_object(DROVEN_LANCE);
+			knows_object(DROVEN_SPEAR);
+			knows_object(DROVEN_CHAIN_MAIL);
+			knows_object(DROVEN_PLATE_MAIL);
+			knows_object(NOBLE_S_DRESS);
+			knows_object(CONSORT_S_SUIT);
+			knows_object(DROVEN_CLOAK);
+			knows_object(find_signet_ring());
+		break;
+		case PM_ORC:
+			expert_weapon_skill(P_SCIMITAR);
+			skilled_weapon_skill(P_TWO_HANDED_SWORD);
+			skilled_weapon_skill(P_RIDING);
+			knows_object(ORCISH_SHORT_SWORD);
+			knows_object(ORCISH_ARROW);
+			knows_object(ORCISH_BOW);
+			knows_object(ORCISH_SPEAR);
+			knows_object(ORCISH_DAGGER);
+			knows_object(ORCISH_CHAIN_MAIL);
+			knows_object(ORCISH_RING_MAIL);
+			knows_object(ORCISH_HELM);
+			knows_object(ORCISH_SHIELD);
+			knows_object(URUK_HAI_SHIELD);
+			knows_object(ORCISH_CLOAK);
+		break;
+		case PM_YUKI_ONNA:
+			expert_weapon_skill(P_LONG_SWORD);
+			expert_weapon_skill(P_SHORT_SWORD);
+			expert_weapon_skill(P_TWO_WEAPON_COMBAT);
+		break;
+	}
+	if(u.uinsight >= 10){
+		open_crazy_box(box, past);
+		box->spe = 0;
+		return TRUE;
+	}
+	box->spe = 0;
+    return FALSE;
+	
+}
+
 #undef Icebox
 STATIC_OVL
 char
@@ -2898,8 +3012,13 @@ register int held;
 	    open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 	    used = 1;
 		return used;
-	// }else if(obj->spe == 7){
-		// Madman reclaims their stuff. Handled by the level loader
+	}else if(obj->spe == 7){
+		// Madman reclaims their stuff. Contents handled by the level loader.
+		//FALSE: the box was not destroyed. Use present tense.
+	    if(open_madstuff_box(obj, FALSE)){
+			used = 1;
+			return used;
+		}
 	}else if(obj->spe == 8){
 		// Nothing. Fulvous desk spawns monsters.
 	}
