@@ -4748,7 +4748,7 @@ struct monst *magr;
 struct obj *wep;
 boolean invoked;
 {
-	if(u.uinsight >= 60 && !rn2(78)){
+	if(u.uinsight >= 60 && invoked){
 		//summon ghosts
 		doibite_ghosts(magr, wep);
 	}
