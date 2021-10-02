@@ -308,6 +308,10 @@ int oartifact;
 		){
 		attackmask |= EXPLOSION;
 	}
+	if (oartifact == ART_IBITE_ARM){
+		//No claws! Just a flabby hand.
+		attackmask = WHACK;
+	}
 	/* if it's not any of the above, we're just smacking things with it */
 	if (!attackmask)
 		attackmask = WHACK;
