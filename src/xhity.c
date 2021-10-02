@@ -5287,9 +5287,12 @@ boolean ranged;
 			else {
 				/* print message, maybe */
 				if (vis) {
-					pline("%s %s was poisoned!",
+					const char * s = mpoisons_subj(magr, attk);
+					pline("%s %s %s poisoned!",
 						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						mpoisons_subj(magr, attk));
+						s,
+						vtense(s, "were")
+						);
 				}
 				/* resistance */
 				if (Poison_res(mdef)) {
