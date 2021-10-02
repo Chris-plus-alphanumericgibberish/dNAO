@@ -1719,13 +1719,13 @@ int vis;
 				if (magr) {
 					pline("%s attack passes harmlessly through %s.",
 						(youagr ? "Your" : s_suffix(Monnam(magr))),
-						the(mon_nam(mdef)));
+						mon_nam(mdef));
 				}
 				else {
 					pline("%s %s harmlessly through %s.",
 						The(cxname(weapon)),
 						vtense(cxname(weapon), "pass"),
-						the(mon_nam(mdef)));
+						mon_nam(mdef));
 				}
 			}
 		}

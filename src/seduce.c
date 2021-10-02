@@ -1569,6 +1569,7 @@ int effect_num;
 	int tmp;
 	char buf[BUFSZ];
 	struct obj * optr;
+	const char * s;
 
 	boolean greater = /* lilith/belial seduce */
 		(mon->mtyp == PM_MOTHER_LILITH || mon->mtyp == PM_BELIAL);
@@ -1615,7 +1616,8 @@ int effect_num;
 			flags.botl = 1;
 			break;
 		case SEDU_DULLSENSES:
-			Your("%s are dulled.", greatest ? "mind" : "senses");
+			s = greatest ? "mind" : "senses";
+			Your("%s %s dulled.", s, vtense(s, "are"));
 			if (greatest) {
 				if (u.sealsActive&SEAL_HUGINN_MUNINN){
 					unbind(SEAL_HUGINN_MUNINN, TRUE);

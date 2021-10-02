@@ -3081,10 +3081,8 @@ struct obj *obj;
 		else if(obj->otyp == DOUBLE_LIGHTSABER && !obj->altmode){
 			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
 		}
-		else if(obj->otyp == ROD_OF_FORCE){
-			if(!uarms && !u.twoweap){
-				CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
-			}
+		else if(obj->otyp == ROD_OF_FORCE && !uarms && !u.twoweap){
+			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
 		}
 		else if(obj->otyp == KHOPESH){
 			CHECK_ALTERNATE_SKILL(P_AXE)
