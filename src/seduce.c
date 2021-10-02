@@ -391,13 +391,27 @@ int dmg;
 	ln = n;
 	trycount = 0;
 
+	if(check_res_engine(&youmonst, AD_TENT)){
+		if(canspotmon(mon))
+			pline("The tentacles squirm against the forcefield.");
+		if(check_res_engine(&youmonst, AD_TENT)){
+			if(canspotmon(mon))
+				pline("The field holds!");
+			return 1;
+		}
+		else {
+			if(canspotmon(mon))
+				pline("The field fails!");
+			n = 1; //2 actions
+			ln = n;
+		}
+	}
 /* First it makes one attempt to remove body armor.  It starts with the cloak,
  * followed by body armor and then the shirt.  It can only remove one per round.
  * After attempting to remove armor, it chooses random targets for the rest of its attacks.
  * These attacks are likely to be useless untill it gets rid of some armor.
  */
-	#ifdef TOURIST
-		if(!uarmc && !uarm && (!uwep || uwep->oartifact!=ART_TENSA_ZANGETSU))
+		if(!uarmc && !uarm && (!uwep || uwep->oartifact!=ART_TENSA_ZANGETSU)){
 			if(uarmu && n){
 				n--;
 				if(!slips_free(mon, &youmonst,  &bodyblow, -1)){
@@ -429,8 +443,7 @@ int dmg;
 					}
 				}
 			}
-			
-#endif
+		}
 		if(!uarmc){
 		 if(uwep && uwep->oartifact==ART_TENSA_ZANGETSU){
 			You_feel("the tentacles tear uselessly at your regenerating shihakusho.");
@@ -496,7 +509,7 @@ int dmg;
 				}
 			}
 		}
-	  while(n > 0 && trycount++ < 50){
+		while(n > 0 && trycount++ < 50){
 		   if(n < ln && (d(1,100) > 85)){ //it's useless to struggle, but...
 			   yn("Struggle against the tentacles' grasp?");
 			   ln = n;
@@ -793,7 +806,7 @@ int dmg;
 					steal(mon, buf,FALSE, FALSE);
 				}
 			break;
-		}
+		   }
 		}
 	if(roll_madness(MAD_HELMINTHOPHOBIA)){
 		You("panic from the squirming tentacles!");

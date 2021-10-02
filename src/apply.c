@@ -6057,7 +6057,7 @@ int adtyp;
 	boolean vis = youdef;
 	for(engine = youdef ? invent : mdef->minvent; engine; engine = engine->nobj)
 		if(engine->otyp == PRESERVATIVE_ENGINE && engine->spe > 0 && engine->altmode != ENG_MODE_OFF){
-			if(adtyp == AD_VORP || adtyp == AD_SHRD || engine->altmode == ENG_MODE_ENR){
+			if(adtyp == AD_VORP || adtyp == AD_SHRD || adtyp == AD_TENT || engine->altmode == ENG_MODE_ENR){
 				if(vis) pline("%s infernal engine whirrs.", youdef ? "Your" : s_suffix(Monnam(mdef)));
 				engine->spe--;
 				return TRUE;
