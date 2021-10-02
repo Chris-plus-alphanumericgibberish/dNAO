@@ -2489,7 +2489,7 @@ karemade:
 					u.ill_cnt = rn1(1000, 250);
 				}
 		    }
-		    if ((Role_if(PM_MADMAN) && quest_status.touched_artifact)
+		    if ((Role_if(PM_MADMAN) && quest_status.touched_artifact && !mvitals[PM_STRANGER].died)
 				&& !(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)
 			) {
 				if (u.yel_cnt) u.yel_cnt--;
