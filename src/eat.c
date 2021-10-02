@@ -1876,7 +1876,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		boolean cannibal = maybe_cannibal(mtyp, FALSE);
 	    if (u.umonnum == PM_GHOUL) {
 	    	pline("Yum - that %s was well aged%s!",
-		      mons[mtyp].mlet == S_PLANT ? "vegetation" :
+		      (mons[mtyp].mlet == S_PLANT || mtyp == PM_WOOD_TROLL) ? "vegetation" :
 		      mons[mtyp].mlet == S_FUNGUS ? "fungoid vegetation" :
 		      !vegetarian(&mons[mtyp]) ? "meat" : "protoplasm",
 		      cannibal ? ", cannibal" : "");
@@ -1886,6 +1886,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 			cannibal ? ", cannibal" : "");
 		} else {
 		pline("Ulch - that %s was tainted%s!",
+		      (mons[mtyp].mlet == S_PLANT || mtyp == PM_WOOD_TROLL) ? "vegetation" :
 		      mons[mtyp].mlet == S_FUNGUS ? "fungoid vegetation" :
 		      !vegetarian(&mons[mtyp]) ? "meat" : "protoplasm",
 		      cannibal ? ", cannibal" : "");
