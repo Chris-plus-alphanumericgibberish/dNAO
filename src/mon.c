@@ -3029,11 +3029,8 @@ struct monst * mdef;	/* another monster which is next to it */
 		return 0L;
 	}
 	// monsters trapped in vivisection traps are excluded
-	if(mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP){
-		return 0L;
-	}
 	// shackled monsters aren't a threat
-	if(mdef->entangled == SHACKLES) {
+	if(imprisoned(mdef)){
 		return 0L;
 	}
 	// must be in range to attack mdef
@@ -5978,7 +5975,7 @@ register int x, y, distance;
 						&& !nonliving(tmpm->data)
 						&& !resists_drain(tmpm)
 						&& !DEADMONSTER(tmpm)
-						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+						&& !imprisoned(tmpm)
 					) targets++;
 				}
 				if(dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= distance
@@ -5995,7 +5992,7 @@ register int x, y, distance;
 							&& !nonliving(tmpm->data)
 							&& !resists_drain(tmpm)
 							&& !DEADMONSTER(tmpm)
-							&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+							&& !imprisoned(tmpm)
 						) targets--;
 						if(!targets) break;
 					}
@@ -7633,7 +7630,7 @@ struct monst *mtmp;
 	&& tmpm->mtame != mtmp->mtame\
 	&& !is_ancient(tmpm)\
 	&& !DEADMONSTER(tmpm)\
-	&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+	&& !imprisoned(tmpm)
 #define common_valid_target_exhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM\
 	&& common_valid_target_exhale_nodistance(tmpm)
 
@@ -8482,7 +8479,7 @@ struct monst *mtmp;
 				&& !has_template(tmpm, CRYSTALFIED)
 				&& !is_demon(tmpm->data)
 				&& !DEADMONSTER(tmpm)
-				&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+				&& !imprisoned(tmpm)
 			) targets++;
 		}
 		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
@@ -8499,7 +8496,7 @@ struct monst *mtmp;
 					&& !has_template(tmpm, CRYSTALFIED)
 					&& !is_demon(tmpm->data)
 					&& !DEADMONSTER(tmpm)
-					&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+					&& !imprisoned(tmpm)
 				) targets--;
 				if(!targets) break;
 			}
@@ -8648,7 +8645,7 @@ struct monst *mtmp;
 						&& !has_template(tmpm, CRYSTALFIED)
 						&& (!Curse_res(tmpm, FALSE) || !rn2(8))
 						&& !DEADMONSTER(tmpm)
-						&& !(tmpm->mtrapped && t_at(tmpm->mx, tmpm->my) && t_at(tmpm->mx, tmpm->my)->ttyp == VIVI_TRAP)
+						&& !imprisoned(tmpm)
 					){
 						for(otmp = tmpm->minvent; otmp; otmp=otmp->nobj)
 							if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)

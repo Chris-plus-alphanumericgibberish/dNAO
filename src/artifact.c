@@ -10894,7 +10894,7 @@ do_passive_attacks()
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
-		if(is_goat_tentacle_mon(mtmp) && !mtmp->mappearance && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK))
+		if(is_goat_tentacle_mon(mtmp) && !mtmp->mappearance && !imprisoned(mtmp) && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK))
 			dogoat_mon(mtmp);
 		if(mtmp->mtyp == PM_NACHASH_TANNIN){
 			donachash(mtmp);

@@ -4822,10 +4822,8 @@ struct monst *magr;
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
-		
-		if(!youdef && (mdef->entangled == SHACKLES
-			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-		))
+
+		if(!youdef && imprisoned(mdef))
 			continue;
 
 		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
@@ -4889,9 +4887,7 @@ struct monst *magr;
 			if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 				continue;
 
-			if(!youdef && (mdef->entangled == SHACKLES
-				|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-			))
+			if(!youdef && imprisoned(mdef))
 				continue;
 
 			if(mdef->mtyp == PM_PALE_NIGHT)

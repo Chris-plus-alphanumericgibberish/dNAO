@@ -199,7 +199,7 @@ struct monst *mon;
 	    return;
 	}
 	
-	if(is_heladrin(mon->data) && mon->mtrapped && t_at(mon->mx, mon->my) && t_at(mon->mx, mon->my)->ttyp == VIVI_TRAP)
+	if(is_heladrin(mon->data) && imprisoned(mon))
 		return;
 	
 	if(mon == u.ustuck && u.uswallow)

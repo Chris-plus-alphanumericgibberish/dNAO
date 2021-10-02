@@ -296,11 +296,8 @@ boolean domsg;
     if (song_being_played() == SNG_NONE) return 0;
 	
 	//Ill-regard specimens are unconscious
-	if(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP){
-		return 0;
-	}
 	// So are prisoners
-	if(mtmp->entangled == SHACKLES) {
+	if(imprisoned(mtmp)){
 		return 0;
 	}
 	

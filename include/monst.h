@@ -165,7 +165,8 @@ struct monst {
 #define BASE_DOG_ENCOURAGED_MAX		7
 	
 	int entangled;/* The monster is entangled, and in what? */
-#define noactions(mon)	((mon)->entangled || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
+#define imprisoned(mon)	((mon)->entangled == SHACKLES || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
+#define noactions(mon)	((mon)->entangled || imprisoned(mon))
 #define helpless(mon) (mon->msleeping || !(mon->mcanmove) || !(mon->mnotlaugh) || noactions(mon))	
 	long mstrategy;		/* for monsters with mflag3: current strategy */
 #define STRAT_ARRIVE	0x40000000L	/* just arrived on current level */

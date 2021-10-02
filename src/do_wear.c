@@ -3852,9 +3852,7 @@ struct obj *armor;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
 
-		if(!youdef && (mdef->entangled == SHACKLES
-			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-		))
+		if(!youdef && imprisoned(mdef))
 			continue;
 
 		//Note: the armor avoids touching petrifying things even if you're immune
@@ -3911,9 +3909,7 @@ struct obj *wep;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 		
-		if(!youdef && (mdef->entangled == SHACKLES
-			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-		))
+		if(!youdef && imprisoned(mdef))
 			continue;
 
 		mdef->movement -= 12;
@@ -3964,9 +3960,7 @@ struct obj *wep;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 
-		if(!youdef && (mdef->entangled == SHACKLES
-			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-		))
+		if(!youdef && imprisoned(mdef))
 			continue;
 
 		//Note: petrifying targets are safe, it's a weapon attack
@@ -4040,9 +4034,7 @@ struct obj *wep;
 				break; //break out of inner loop now, we found a bad target.
 			}
 
-			if(!youdef && (mdef->entangled == SHACKLES
-				|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-			)){
+			if(!youdef && imprisoned(mdef)){
 				gooddir = FALSE;
 				break; //break out of inner loop now, we found a bad target.
 			}
@@ -4142,9 +4134,7 @@ struct obj *wep;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 
-		if(!youdef && (mdef->entangled == SHACKLES
-			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-		))
+		if(!youdef && imprisoned(mdef))
 			continue;
 
 		if(youdef){
@@ -4435,9 +4425,7 @@ char etyp;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
 
-		if(!youdef && (mdef->entangled == SHACKLES
-			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-		))
+		if(!youdef && imprisoned(mdef))
 			continue;
 
 		//Note: the armor avoids touching petrifying things even if you're immune
@@ -4592,7 +4580,7 @@ struct obj *wep;
 	int delta = 1;
 	struct monst *mdef;
 	struct attack symbiote = { AT_WEAP, AD_PHYS, 0, 0 };
-	boolean youagr = (magr == &youmonst);
+	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	if(youagr){
 		if(wep == uwep) delta = 2; 
@@ -4611,9 +4599,13 @@ struct obj *wep;
 			mdef = m_u_at(i,j);
 			if(!mdef || DEADMONSTER(mdef))
 				continue;
-			if(peaceSafe && (mdef == &youmonst || mdef->mpeaceful))
+			youdef = (mdef == &youmonst);
+			if(peaceSafe && (youdef || mdef->mpeaceful))
 				continue;
-			if(!peaceSafe && mdef != &youmonst && !mdef->mpeaceful)
+			if(!peaceSafe && youdef && !mdef->mpeaceful)
+				continue;
+
+			if(!youdef && imprisoned(mdef))
 				continue;
 
 			//Note: petrifying targets are safe, it's a weapon attack
@@ -4638,7 +4630,7 @@ struct obj *wep;
 	struct monst *mdef;
 	int	targets = 0;
 	struct attack symbiote = { AT_MAGC, AD_CLRC, 6, 6 };
-	boolean youagr = (magr == &youmonst);
+	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	
 	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
@@ -4650,9 +4642,13 @@ struct obj *wep;
 			mdef = m_u_at(i,j);
 			if(!mdef || DEADMONSTER(mdef))
 				continue;
-			if(peaceSafe && (mdef == &youmonst || mdef->mpeaceful))
+			youdef = (mdef == &youmonst);
+			if(peaceSafe && (youdef || mdef->mpeaceful))
 				continue;
-			if(!peaceSafe && mdef != &youmonst && !mdef->mpeaceful)
+			if(!peaceSafe && youdef && !mdef->mpeaceful)
+				continue;
+
+			if(!youdef && imprisoned(mdef))
 				continue;
 
 			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
@@ -4869,9 +4865,7 @@ struct obj *wep;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
 
-		if(!youdef && (mdef->entangled == SHACKLES
-			|| (mdef->mtrapped && t_at(mdef->mx, mdef->my) && t_at(mdef->mx, mdef->my)->ttyp == VIVI_TRAP)
-		))
+		if(!youdef && imprisoned(mdef))
 			continue;
 
 		//Note: petrifying targets are safe, it's a weapon attack
