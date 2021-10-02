@@ -4438,6 +4438,7 @@ int
 spelleffects(int spell, boolean atme, int spelltyp)
 {
 	int energy, damage, chance, n, intell;
+	int casting_stat = base_casting_stat();
 	int skill, role_skill;
 	boolean confused = (Confusion != 0);
 	struct obj *pseudo;
@@ -4475,13 +4476,13 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10 && spellid(spell) != SPE_DETECT_FOOD) {
 			You("are too hungry to cast that spell.");
 			return(0);
-		} else if (ACURR(A_STR) < 4)  {
+		} else if (ACURR(A_STR) < 4 && casting_stat != A_CHA)  {
 			You("lack the strength to cast spells.");
 			return(0);
 		} else if(check_capacity(
 			"Your concentration falters while carrying so much stuff.")) {
 			return (1);
-		} else if (!freehand()) {
+		} else if (!freehand() && casting_stat != A_CHA) {
 			Your("arms are not free to cast!");
 			return (0);
 		}
@@ -5698,25 +5699,25 @@ int spell;
 	/* Intrinsic and learned ability are combined to calculate
 	 * the probability of player's success at cast a given spell.
 	 */
-	int chance, splcaster, special, statused;
+	int chance, splcaster, special, statused, casting_stat = base_casting_stat();
 	int difficulty;
 	int skill;
 	
-	if(Deadmagic && base_casting_stat() == A_INT) return 0;
-	if(Catapsi && base_casting_stat() == A_CHA) return 0;
-	if(Misotheism && base_casting_stat() == A_WIS) return 0;
+	if(Deadmagic && casting_stat == A_INT) return 0;
+	if(Catapsi && casting_stat == A_CHA) return 0;
+	if(Misotheism && casting_stat == A_WIS) return 0;
 	if(Nullmagic) return 0;
 	
 	/* Calculate intrinsic ability (splcaster) */
 
 	splcaster = urole.spelbase;
 	special = urole.spelheal;
-	statused = ACURR(base_casting_stat());
+	statused = ACURR(casting_stat);
 	if(Role_if(PM_BARD) && spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
 		statused = ACURR(A_CHA);
 
 	if((Doubt || flat_mad_turn(MAD_APOSTASY))
-		&& (base_casting_stat() == A_WIS || spell_skilltype(spellid(spell)) == P_HEALING_SPELL || spell_skilltype(spellid(spell)) == P_CLERIC_SPELL)
+		&& (casting_stat == A_WIS || spell_skilltype(spellid(spell)) == P_HEALING_SPELL || spell_skilltype(spellid(spell)) == P_CLERIC_SPELL)
 	)
 		return 0;
 	if(mad_turn(MAD_TOO_BIG))
@@ -5860,12 +5861,12 @@ int spell;
 
 	if (uarmh) {
 		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
-			splcaster += uarmhbon;
+			splcaster += casting_stat == A_CHA ? uarmhbon*3 : uarmhbon;
 	}
 
 	if (uarmg) {
 		if (is_metallic(uarmg))
-			splcaster += uarmgbon;
+			splcaster += casting_stat == A_CHA ? uarmfbon : uarmgbon;
 	}
 
 	if (uarmf) {
@@ -5874,7 +5875,7 @@ int spell;
 	}
 
 	if (uarms) {
-		splcaster += urole.spelshld;
+		splcaster += casting_stat == A_CHA ? 0 : urole.spelshld;
 	}
 
 	if(u.sealsActive&SEAL_PAIMON) splcaster -= urole.spelarmr;
@@ -5998,14 +5999,14 @@ int spell;
 		chance = 100;
 	
 	//
-	if(Babble || Screaming || Strangled || FrozenAir || BloodDrown || Drowning){
+	if(casting_stat != A_CHA && (Babble || Screaming || Strangled || FrozenAir || BloodDrown || Drowning)){
 		chance = 0;
 	}
 	// these effects totally block the spell-choosing menu, but need to be handled here too for quivered spells
 	else if ((mad_turn(MAD_TOO_BIG)) ||
-		(Doubt && base_casting_stat() == A_WIS) ||
+		(Doubt && casting_stat == A_WIS) ||
 //		(mad_turn(MAD_SCIAPHILIA) && ()(dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0)) ||
-		(base_casting_stat() == A_WIS && flat_mad_turn(MAD_APOSTASY))
+		(casting_stat == A_WIS && flat_mad_turn(MAD_APOSTASY))
 		){
 		chance = 0;
 	}
