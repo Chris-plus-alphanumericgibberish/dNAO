@@ -1145,14 +1145,17 @@ struct mkroom	*croom;
 		struct obj *tmpo;
 
 		if(rn2(10)){
+			int insight;
 			mon = makemon(&mons[surgery_types[rn2(SIZE(surgery_types))]], otmp->ox, otmp->oy, NO_MINVENT|MM_NOCOUNTBIRTH);
 			if(mon) switch(mon->mtyp){
 				case PM_PRIESTESS:
 				case PM_DEMINYMPH:
 				case PM_YUKI_ONNA:
-					if(mon->mtyp != PM_PRIESTESS)
+					insight = rn2(20);
+					if(mon->mtyp != PM_PRIESTESS && rn2(20) > u.uinsight)
 						goto default_case;
 					set_template(mon, MISTWEAVER);
+					mon->m_insight_level = min(insight, u.uinsight);
 					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
 					mon->entangled = SHACKLES;
 					makemon(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
