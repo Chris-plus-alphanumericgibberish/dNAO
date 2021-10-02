@@ -4512,6 +4512,12 @@ boolean * messaged;
 	case ART_ARYFAERN_KERYM:			wepdesc = "crackling sword-shaped void";	break;
 	case ART_RAMIEL:					wepdesc = "thundering polearm";				break;
 	case ART_MJOLLNIR:					wepdesc = "massive hammer";					break;
+	case ART_IBITE_ARM:
+		if(otmp->otyp == CLUB)
+			wepdesc = "flabby arm";
+		else
+			wepdesc = "webbed hand";
+	break;
 
 	default:
 		/* try to be as vague as possible */
