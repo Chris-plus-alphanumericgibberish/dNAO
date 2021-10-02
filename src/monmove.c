@@ -345,6 +345,7 @@ struct monst *mtmp;
 			has_template(mtmp, CRANIUM_RAT) ||
 			has_template(mtmp, MISTWEAVER) ||
 			has_template(mtmp, FRACTURED) ||
+			has_template(mtmp, YELLOW_TEMPLATE) ||
 			mtmp->mtyp == PM_GUG ||
 			mtmp->mtyp == PM_MIGO_WORKER ||
 			mtmp->mtyp == PM_MIGO_SOLDIER ||
