@@ -5838,12 +5838,29 @@ int spell;
 		}
 	}
 
-	if (uarm && arm_blocks_upper_body(uarm->otyp)){
-		if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
-			splcaster += urole.spelarmr;
+	if (uarm){
+		if(arm_blocks_upper_body(uarm->otyp)){
+			if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
+				splcaster += urole.spelarmr;
+		}
+		else {
+			if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
+				splcaster += uarmfbon;
+		}
 
 		if (uarm->otyp == DROVEN_CHAIN_MAIL)
 			splcaster -= urole.spelarmr;
+	}
+	
+	if (uarmu){
+		if(arm_blocks_upper_body(uarmu->otyp)){
+			if (is_metallic(uarmu) || uarmu->oartifact == ART_DRAGON_PLATE)
+				splcaster += urole.spelarmr;
+		}
+		else {
+			if (is_metallic(uarmu) || uarmu->oartifact == ART_DRAGON_PLATE)
+				splcaster += uarmfbon;
+		}
 	}
 	
 	if (uarmc){
@@ -5857,6 +5874,8 @@ int spell;
 			splcaster -= (urole.spelarmr
 			* ((uarmc->oartifact) ? 2 : 1)
 			/ ((uarm && (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)) ? 2 : 1));
+		if (is_metallic(uarmc))
+			splcaster += uarmfbon;
 	}
 
 	if (uarmh) {
