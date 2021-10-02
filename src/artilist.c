@@ -1657,7 +1657,7 @@ A("Poseidon's Trident",				TRIDENT,				(const char *)0,
 	WATER, NOFLAG
 	),
 
-A("Ibite arm",				CLUB,				(const char *)0,
+A("Ibite arm",				CLUB,				"flabby green arm",
 	4500L, FLESH, MZ_GIGANTIC, WT_DEFAULT,
 	A_NONE, PM_MADMAN, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_FXALGN),
 	NO_MONS(),
