@@ -534,6 +534,8 @@ struct monst *mtmp;
 	else if(mtmp->isshk || mtmp->isgd || mtmp->iswiz || 
 			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
 			is_rider(mtmp->data) ||
+			(mtmp->mtyp == PM_STRANGER) ||
+			(has_template(mtmp, YELLOW_TEMPLATE)) ||
 			(mtmp->mtyp == PM_ELDER_PRIEST)
 		) return FALSE;
 	if((is_human(mtmp->data) || is_elf(mtmp->data) || is_dwarf(mtmp->data) ||
