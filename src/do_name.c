@@ -700,7 +700,7 @@ const char *name;
 			obj->obj_color = CLR_BRIGHT_GREEN;
 			obj->oward = ELDER_SIGN;
 		}
-		else if(obj->oartifact == obj->oartifact == ART_IBITE_ARM){
+		else if(obj->oartifact == ART_IBITE_ARM){
 			obj->obj_color = CLR_BRIGHT_GREEN;
 		}
 		
