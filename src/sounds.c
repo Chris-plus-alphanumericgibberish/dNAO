@@ -2922,12 +2922,19 @@ int dz;
 		mtmp->mhp = mtmp->mhpmax;
 		return 1;
 	}
+	if(mtmp->mtyp == PM_LADY_CONSTANCE && !mtmp->mtame && mtmp->mpeaceful && Role_if(PM_MADMAN) && u.uevent.qcompleted){
+		verbalize("Let's get out of here!");
+		mtmp->mpeaceful = 1;
+		mtmp = tamedog(mtmp, (struct obj *)0);
+		if(mtmp && mtmp->mtame)
+			EDOG(mtmp)->loyal = TRUE;
+		return 1;
+	}
     /* That is IT. EVERYBODY OUT. You are DEAD SERIOUS. */
     if (mtmp->mtyp == PM_URANIUM_IMP) {
 		monflee(mtmp, rn1(20,10), TRUE, FALSE);
     }
-	
-#ifdef CONVICT
+
     if (Role_if(PM_CONVICT) && is_rat(mtmp->data) && !mtmp->mpeaceful &&
      !mtmp->mtame) {
         You("attempt to soothe the %s with chittering sounds.",
@@ -2945,7 +2952,7 @@ int dz;
         }
         return 0;
     }
-#endif /* CONVICT */
+
     return domonnoise(mtmp, TRUE);
 }
 
