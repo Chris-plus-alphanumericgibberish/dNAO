@@ -786,8 +786,11 @@ winid endwin;
 		putstr(endwin, 0, pbuf);
 	    }
 	}
-	if (Has_contents(otmp))
+	if (Has_contents(otmp) 
+		&& !(is_lightsaber(otmp) && otmp->cobj->oartifact == otmp->oartifact)	/* lightsabers inherit their gem's oartifact */
+		) {
 	    artifact_score(otmp->cobj, counting, endwin);
+	}
     }
 }
 
