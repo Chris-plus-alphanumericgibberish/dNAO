@@ -700,6 +700,9 @@ const char *name;
 			obj->obj_color = CLR_BRIGHT_GREEN;
 			obj->oward = ELDER_SIGN;
 		}
+		else if(obj->oartifact == obj->oartifact == ART_IBITE_ARM){
+			obj->obj_color = CLR_BRIGHT_GREEN;
+		}
 		
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
