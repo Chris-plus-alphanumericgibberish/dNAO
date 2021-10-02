@@ -10503,7 +10503,7 @@ boolean * needs_uncancelled;
 		maybeset(needs_uncancelled, FALSE);
 		break;
 	default:
-		impossible("unhandled gaze type %d", adtyp);
+		impossible("unhandled gaze type %d from %s in getgazeinfo", adtyp, !magr ? "no magr??" : mon_nam(magr));
 		break;
 	}
 	if (pa->mtyp == PM_DEMOGORGON) {					// Demogorgon is special
@@ -12034,7 +12034,7 @@ int vis;
 		}
 		break;
 	default:
-		impossible("unhandled gaze type %d", adtyp);
+		impossible("unhandled gaze type %d from %s in xgazey", adtyp, !magr ? "no magr??" : mon_nam(magr));
 	}
 	/* if we got to the end, we didn't abort early, which means something should have happened */
 	result |= MM_HIT;
