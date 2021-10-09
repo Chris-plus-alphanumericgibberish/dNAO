@@ -665,12 +665,15 @@ MONSTER:'7',"Angel",(63,13),neutral,peaceful
 MONSTER:'L',random,random,hostile
 MONSTER:'L',random,random,hostile
 MONSTER:'L',random,random,hostile
-MONSTER:'V',random,random,hostile
-MONSTER:'V',random,random,hostile
-MONSTER:'V',random,random,hostile
-MONSTER:'D',random,random,hostile
-MONSTER:'D',random,random,hostile
-MONSTER:'D',random,random,hostile
+MONSTER:'A',random,random
+MONSTER:'A',random,random
+MONSTER:'A',random,random
+MONSTER:'9',random,random
+MONSTER:'9',random,random
+MONSTER:'9',random,random
+MONSTER:'7',random,random
+MONSTER:'7',random,random
+MONSTER:'7',random,random
 MONSTER:'9',"Astral Deva",random,hostile
 MONSTER:'9',"Astral Deva",random,hostile
 MONSTER:'9',"Astral Deva",random,hostile
