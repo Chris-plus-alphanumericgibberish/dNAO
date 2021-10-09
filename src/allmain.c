@@ -3878,6 +3878,8 @@ printAttacks(buf, ptr)
 		"crushing lava",		/*142*/
 		"pyroclastic",			/*143*/
 		"silver moonlight",		/*144*/
+		"holy energy",			/*145*/
+		"unholy energy",		/*146*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */

@@ -2185,6 +2185,30 @@ int tary;
 			}
 			return xdamagey(magr, mdef, attk, dmg);
 
+		case AD_HOLY:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s %s hit by a shower of holy missiles!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "are" : "is"
+					);
+			}
+			if(hates_holy_mon(mdef))
+				dmg *= 2;
+			return xdamagey(magr, mdef, attk, dmg);
+
+		case AD_UNHY:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s %s hit by a shower of unholy missiles!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "are" : "is"
+					);
+			}
+			if(hates_unholy_mon(mdef))
+				dmg *= 2;
+			return xdamagey(magr, mdef, attk, dmg);
+
 		case AD_STAR:
 			/* message */
 			if (youdef || canspotmon(mdef)) {
@@ -2295,6 +2319,10 @@ int tary;
 			if (adtyp == AD_STAR) {
 				zapdata.unreflectable = ZAP_REFL_NEVER;
 				zapdata.damd = 8;
+			}
+			if (adtyp == AD_HOLY || adtyp == AD_UNHY) {
+				zapdata.affects_floor = FALSE;
+				zapdata.phase_armor = TRUE;
 			}
 			if (adtyp == AD_DISN) {
 				zapdata.unreflectable = ZAP_REFL_NEVER;

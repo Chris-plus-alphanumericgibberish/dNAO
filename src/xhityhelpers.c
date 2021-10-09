@@ -839,6 +839,12 @@ struct attack *mattk;
 		else if (mattk->adtyp == AD_WET){
 			return "water-jet blade";
 		}
+		else if (mattk->adtyp == AD_HOLY){
+			return "holy light-beam";
+		}
+		else if (mattk->adtyp == AD_UNHY){
+			return "unholy light-blade";
+		}
 		else {
 			return "blade";
 		}
@@ -1205,6 +1211,8 @@ struct obj * weapon;
 		|| attk->adtyp == AD_MERC
 		|| attk->adtyp == AD_STAR
 		|| attk->adtyp == AD_MOON
+		|| attk->adtyp == AD_HOLY
+		|| attk->adtyp == AD_UNHY
 		)
 		)
 		return TRUE;	// will touch

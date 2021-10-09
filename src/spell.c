@@ -1541,6 +1541,8 @@ int atype;
 	case AD_DEAD:
 	case AD_DRLI:
 	case AD_STAR:
+	case AD_HOLY:
+	case AD_UNHY:
 		return P_ATTACK_SPELL;
 	case AD_DRST:
 	case AD_ACID:

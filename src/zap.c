@@ -87,6 +87,8 @@ int adtyp, ztyp;
 		case AD_DRST: return "poison spray";
 		case AD_ACID: return "acid splash";
 		case AD_STAR: return "stream of silver stars";
+		case AD_HOLY: return "holy missile";
+		case AD_UNHY: return "unholy missile";
 		case AD_DISN: return "disintegration ray";
 		default:      impossible("unknown spell damage type in flash_type: %d", adtyp);
 			return "cube of questions";
@@ -152,6 +154,7 @@ int adtyp;
 	case AD_DEAD:
 	case AD_DISN:
 	case AD_DARK:
+	case AD_UNHY:
 		return CLR_BLACK;
 	case AD_BLUD:
 		return CLR_RED;
@@ -185,6 +188,7 @@ int adtyp;
 	case AD_EELC:
 	case AD_ELEC:
 	case AD_STAR:
+	case AD_HOLY:
 		return CLR_WHITE;
 	case AD_DRLI:
 		return CLR_MAGENTA;
@@ -4122,6 +4126,38 @@ struct zapdata * zapdata;
 		domsg();
 		if (youdef && dmg > 0)
 			exercise(A_STR, FALSE);
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_HOLY:
+		/* holy damage */
+		if (hates_holy_mon(mdef)) {
+			if (youdef) {
+				addmsg("The holy missiles sear your flesh!");
+			}
+			dmg *= 2;
+		}
+		else if (hates_unholy_mon(mdef))
+			dmg /= 3;
+		domsg();
+		if (youdef && dmg > 0)
+			exercise(A_WIS, FALSE);
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_UNHY:
+		/* holy damage */
+		if (hates_holy_mon(mdef)) {
+			if (youdef) {
+				addmsg("The unholy missiles sear your flesh!");
+			}
+			dmg *= 2;
+		}
+		else if (hates_unholy_mon(mdef))
+			dmg /= 3;
+		domsg();
+		if (youdef && dmg > 0)
+			exercise(A_WIS, FALSE);
 		/* deal damage */
 		return xdamagey(magr, mdef, &attk, dmg);
 

@@ -2507,7 +2507,8 @@ struct permonst *ptr;
 		if ((tmp2 == AD_DRLI) || (tmp2 == AD_STON) || (tmp2 == AD_DRST)
 			|| (tmp2 == AD_DRDX) || (tmp2 == AD_DRCO) || (tmp2 == AD_WERE)
 			|| (tmp2 == AD_SHDW) || (tmp2 == AD_STAR) || (tmp2 == AD_BLUD)
-			|| (tmp2 == AD_MOON))
+			|| (tmp2 == AD_MOON) || (tmp2 == AD_HOLY) || (tmp2 == AD_UNHY)
+		)
 			n += 2;
 		else if (strcmp(ptr->mname, "grid bug")) n += (tmp2 != AD_PHYS);
 		n += ((int)(ptr->mattk[i].damd * ptr->mattk[i].damn) > 23);

@@ -2565,6 +2565,8 @@ struct attack *attk;
 					ending = (attk->adtyp == AD_SHDW) ? " with bladed shadows!" :
 						(attk->adtyp == AD_STAR) ? " with a starlight rapier!" :
 						(attk->adtyp == AD_MOON) ? " with a moonlight rapier!" :
+						(attk->adtyp == AD_HOLY) ? " with a holy light-beam!" :
+						(attk->adtyp == AD_UNHY) ? " with a unholy light-blade!" :
 						(attk->adtyp == AD_MERC) ? " with a blade of mercury!" :
 						(attk->adtyp == AD_WET) ? " with a water-jet blade!" :
 						(attk->adtyp == AD_PSON) ? " with a soul blade!" :
@@ -8098,6 +8100,58 @@ boolean ranged;
 			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		}
 
+		return result;
+
+	case AD_HOLY:
+		/* make a physical attack */
+		alt_attk.adtyp = AD_PHYS;
+		alt_attk.damn = 1;
+		alt_attk.damd = 1;
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		/* add holy damage */
+		if (hates_holy_mon(mdef)) {
+			if (vis) {
+				pline("The holy light sears %s!",
+					(youdef ? "your flesh" : mon_nam(mdef))
+					);
+			}
+			dmg *= 2;
+		}
+		alt_attk.adtyp = AD_HOLY;
+		/* apply half-magic */
+		if (Half_spel(mdef))
+			dmg /= 2;
+		if (youdef && u.uvaul_duration)
+			dmg /= 2;
+
+		result = xdamagey(magr, mdef, &alt_attk, dmg);
+		return result;
+
+	case AD_UNHY:
+		/* make a physical attack */
+		alt_attk.adtyp = AD_PHYS;
+		alt_attk.damn = 1;
+		alt_attk.damd = 1;
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		/* add unholy damage */
+		if (hates_unholy_mon(mdef)) {
+			if (vis) {
+				pline("The unholy light sears %s!",
+					(youdef ? "your flesh" : mon_nam(mdef))
+					);
+			}
+			dmg *= 2;
+		}
+		alt_attk.adtyp = AD_UNHY;
+		/* apply half-magic */
+		if (Half_spel(mdef))
+			dmg /= 2;
+		if (youdef && u.uvaul_duration)
+			dmg /= 2;
+
+		result = xdamagey(magr, mdef, &alt_attk, dmg);
 		return result;
 
 	case AD_FRWK:
