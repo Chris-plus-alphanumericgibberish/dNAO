@@ -536,7 +536,7 @@ int vn;
 		if(otmp) delobj(otmp);
 		otmp = mkobj(type, TRUE);
 		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
-			otmp = mk_special(otmp);
+			otmp = mk_vault_special(otmp, vn);
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
 				otmp->spe = max_ints(d(3,3), otmp->spe);
 		}
