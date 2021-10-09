@@ -776,6 +776,7 @@ static struct inv_sub { short race_pm, item_otyp, subs_otyp; } inv_subs[] = {
     { PM_INCANTIFIER,	LEATHER_ARMOR,				ROBE  },
     { PM_INCANTIFIER,	JACKET,				ROBE  },
     { PM_INCANTIFIER,	RING_MAIL,					ROBE  },
+    { PM_INCANTIFIER,	CHAIN_MAIL,					ROBE  },
     { PM_INCANTIFIER,	SPLINT_MAIL,				ROBE  },
     { PM_INCANTIFIER,	FOOD_RATION,				SCR_FOOD_DETECTION    	  },
     { PM_INCANTIFIER,	CRAM_RATION,				SCR_FOOD_DETECTION    	  },
