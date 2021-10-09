@@ -832,7 +832,7 @@ coa_arrive()
 	
 	if(!mtmp && mvitals[PM_CENTER_OF_ALL].born == 0) mtmp = makemon(&mons[PM_CENTER_OF_ALL], 0, 0, MM_NOWAIT);
 	
-	if (mtmp) {
+	if (mtmp && (In_endgame(&u.uz) || u.uinsight > 8)) {
 		mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;
 		set_malign(mtmp);
 	}

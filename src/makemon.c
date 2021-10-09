@@ -2,6 +2,7 @@
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
+#include <math.h>
 #include "hack.h"
 
 #ifdef REINCARNATION
@@ -10634,8 +10635,10 @@ rndmonst()
 			else return &mons[PM_SKELETAL_PIRATE];
 		}
 	}
-
-	if(!(mvitals[PM_CENTER_OF_ALL].mvflags & G_EXTINCT) && !rn2(5000)){
+	
+	/*If Center of All hasn't been made yet, he may appear during level gen.
+	  During normal play, he may also arvive on level from elsewhere. */
+	if(in_mklev && !(mvitals[PM_CENTER_OF_ALL].mvflags & G_EXTINCT) && !rn2(COA_PROB)){
 	    return &mons[PM_CENTER_OF_ALL]; /*center of all may be created at any time */
 	}
 

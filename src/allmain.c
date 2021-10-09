@@ -4,8 +4,8 @@
 
 /* various code that was replicated in *main.c */
 
+#include <math.h>
 #include "hack.h"
-
 #include "artifact.h"
 #include "xhity.h"
 
@@ -1939,6 +1939,9 @@ karemade:
 				|| (u.ufirst_sky && u.ufirst_life)
 			)){
 				makemon(&mons[PM_ASPECT_OF_THE_SILENCE], 0, 0, NO_MM_FLAGS);
+			}
+			else if(!(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) && !rn2(COA_PROB)){
+				coa_arrive();
 			}
 		    else if(!(Is_illregrd(&u.uz) && u.ualign.type == A_LAWFUL && !u.uevent.uaxus_foe) && /*Turn off random generation on axus's level if lawful*/
 				!rn2(u.uevent.udemigod ? 25 :
