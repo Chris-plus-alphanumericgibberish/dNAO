@@ -549,7 +549,7 @@ register struct monst *mtmp;
 	if (mtmp->mstun)	  Strcat(info, ", stunned");
 	if (mtmp->msleeping)	  Strcat(info, ", asleep");
 	if (mtmp->mstdy > 0)	  Sprintf(eos(info), ", weakened (%d)", mtmp->mstdy);
-	if (mtmp->encouraged > 0)	  Sprintf(eos(info), ", moral (%d)", mtmp->encouraged);
+	if (mtmp->encouraged > 0)	  Sprintf(eos(info), ", morale (%d)", mtmp->encouraged);
 	else if (mtmp->mstdy < 0)	  Sprintf(eos(info), ", protected (%d)", mtmp->mstdy);
 #if 0	/* unfortunately mfrozen covers temporary sleep and being busy
 	   (donning armor, for instance) as well as paralysis */
@@ -632,7 +632,7 @@ ustatusline()
 	}
 	if (Stunned)		Strcat(info, ", stunned");
 	if (u.ustdy > 0)	  Sprintf(eos(info), ", weakened (%d)", u.ustdy);
-	if (u.uencouraged > 0)	  Sprintf(eos(info), ", moral (%d)", u.uencouraged);
+	if (u.uencouraged > 0)	  Sprintf(eos(info), ", morale (%d)", u.uencouraged);
 #ifdef STEED
 	if (!u.usteed)
 #endif
