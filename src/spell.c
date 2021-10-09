@@ -5671,6 +5671,8 @@ base_casting_stat()
 		stat = A_WIS;
 	} else if(uwep && uwep->oartifact == ART_VELKA_S_RAPIER){
 		stat = A_INT;
+	} else if(u.sealsActive&SEAL_OSE){
+			stat = A_CHA;
 	} else if(u.specialSealsActive&SEAL_NUMINA && abs(u.wisSpirits - u.intSpirits) <= 1){
 		if(ACURR(A_WIS) > ACURR(A_INT))
 			stat = A_WIS;
