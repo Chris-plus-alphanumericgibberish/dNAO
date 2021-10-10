@@ -284,6 +284,9 @@ struct you {
 	d_level utolev;		/* level monster teleported you to, or uz */
 	uchar utotype;		/* bitmask of goto_level() flags for utolev */
 	boolean umoved;		/* changed map location (post-move) */
+	boolean uattked;		/* attacked a target (post-move) */
+	boolean unull;		/* passed a turn (post-move) */
+	coord prev_dir;		/* previous dirction pressed (for monk moves) */
 	int last_str_turn;	/* 0: none, 1: half turn, 2: full turn */
 				/* +: turn right, -: turn left */
 	int ulevel, ulevel_real;		/* 1 to MAXULEV */
@@ -826,6 +829,12 @@ struct you {
 								(u.sealsActive&SEAL_ENKI) || (Blind_telepat && uwep && is_lightsaber(uwep))) ? 0.75 :\
 							 (Role_if(PM_BARD) || Role_if(PM_HEALER) || Role_if(PM_TOURIST) || Role_if(PM_WIZARD) || Role_if(PM_MADMAN)) ? 0.50:\
 							  .5) /* Failsafe */
+
+#define DIVE_KICK 1
+#define AURA_BOLT 2
+#define BIRD_KICK 3
+#define METODRIVE 4
+#define PUMMEL    5
 
 extern long sealKey[34]; /*Defined in u_init.c*/
 extern boolean forcesight; /*Defined in u_init.c*/

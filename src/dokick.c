@@ -160,6 +160,123 @@ doit:
 	kickdmg(mon, clumsy);
 }
 
+void
+dive_kick_monster(mon)
+struct monst *mon;
+{
+	int i = -inv_weight();
+	int j = weight_cap();
+	boolean clumsy = FALSE;
+
+	if(i < (j*3)/10) {
+		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
+			if(martial() && !rn2(2)) goto doit;
+			Your("clumsy kick does no damage.");
+			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			return;
+		}
+		if(i < j/10) clumsy = TRUE;
+		else if(!rn2((i < j/5) ? 2 : 3)) clumsy = TRUE;
+	}
+
+	if(Fumbling) clumsy = TRUE;
+
+	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
+		clumsy = TRUE;
+doit:
+	//You("kick %s.", mon_nam(mon));
+	if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
+	   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
+	   !mon->mstun && !mon->mconf && !mon->msleeping &&
+	   mon->data->mmove >= 12) {
+		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
+		    pline("%s blocks your %skick.", Monnam(mon),
+				clumsy ? "clumsy " : "");
+			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+		    return;
+		}
+	}
+	kickdmg(mon, clumsy);
+	if(!clumsy && !(DEADMONSTER(mon) || MIGRATINGMONSTER(mon)))
+		kickdmg(mon, clumsy);
+}
+
+void
+bird_kick_monsters()
+{
+	struct monst *mon;
+	int i = -inv_weight();
+	int j = weight_cap();
+	boolean clumsy = FALSE;
+	int sdx = u.dx;
+	int sdy = u.dy;
+
+	if(i < (j*3)/10) {
+		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
+			if(martial() && !rn2(2)) goto doit;
+			Your("clumsy sprinning kicks fail to connect.");
+			return;
+		}
+		if(i < j/10) clumsy = TRUE;
+		else if(!rn2((i < j/5) ? 2 : 3)) clumsy = TRUE;
+	}
+
+	if(Fumbling) clumsy = TRUE;
+
+	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
+		clumsy = TRUE;
+doit:
+	{
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int offset = rn2(8);
+	int ix, iy;
+	int j;
+	for(int i = 0; i < 4; i++){
+		for(j = 0; j < 2; j++){
+			//Necessary so that the kicking functions can knock the monster in the right direction.
+			if(j){
+				u.dx = clockwisex[(offset+(4+i))%8];
+				u.dy = clockwisey[(offset+(4+i))%8];
+			}
+			else {
+				u.dx = clockwisex[(offset+i)%8];
+				u.dy = clockwisey[(offset+i)%8];
+			}
+			ix = u.ux + u.dx;
+			iy = u.uy + u.dy;
+			if(!isok(ix, iy))
+				continue;
+			mon = m_at(ix, iy);
+			if(!mon || (mon->mpeaceful && !Hallucination))
+				continue;
+			if((touch_petrifies(mon->data)
+				|| mon->mtyp == PM_MEDUSA)
+			 && !(Stone_resistance || uarmf))
+				continue;
+			//You("kick %s.", mon_nam(mon));
+			if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
+			   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+			   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
+			   !mon->mstun && !mon->mconf && !mon->msleeping &&
+			   mon->data->mmove >= 12) {
+				if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
+					pline("%s blocks your %skick.", Monnam(mon),
+						clumsy ? "clumsy " : "");
+					xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+					continue;
+				}
+			}
+			// You("kick %s", mon_nam(mon));
+			kickdmg(mon, clumsy);
+		}
+	}
+	u.dx = sdx;
+	u.dy = sdy;
+	}
+}
+
 /*
  *  Return TRUE if caught (the gold taken care of), FALSE otherwise.
  *  The gold object is *not* attached to the fobj chain!

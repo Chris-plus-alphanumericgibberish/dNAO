@@ -788,7 +788,6 @@ you_regen_hp()
 			|| Role_if(PM_PIRATE)
 			|| Role_if(PM_SAMURAI)
 			|| Role_if(PM_VALKYRIE)
-			|| Role_if(PM_MONK)
 			|| Role_if(PM_CONVICT)
 			|| (u.sealsActive&SEAL_BERITH)
 		))
@@ -916,12 +915,15 @@ you_regen_pw()
 		}
 		
 		// role bonuses
+		if(Role_if(PM_MONK) && u.unull){
+			reglevel *= 2;
+			reglevel += 8;
+		}
 		if (Role_if(PM_WIZARD))   reglevel += 10;
 		if (Role_if(PM_MADMAN))   reglevel += 9;
 		if (Role_if(PM_HEALER))   reglevel += 6;
 		if (Role_if(PM_PRIEST))   reglevel += 6;
 		if (Role_if(PM_VALKYRIE)) reglevel += 3;
-		if (Role_if(PM_MONK))     reglevel += 3;
 
 		// cornuthaum bonus for wizards (but not incantifiers, since they don't naturally regenerate power at all)
 		if (u.uen < u.uenmax && (Role_if(PM_WIZARD)) && uarmh && uarmh->otyp == CORNUTHAUM){
@@ -1258,6 +1260,23 @@ moveloop()
 			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED)
 				u.ucspeed = NORM_CLOCKSPEED;
 			youmonst.movement -= NORMAL_SPEED;
+		}
+		if(Role_if(PM_MONK) && !Upolyd){
+			if(u.umoved || u.uattked){
+				if((u.prev_dir.x || u.prev_dir.y) && (multi < 0 || monk_moves())){
+					//Did a move: clear previous input.
+					u.prev_dir.x = 0;
+					u.prev_dir.y = 0;
+				}
+				else {
+					u.prev_dir.x = u.dx;
+					u.prev_dir.y = u.dy;
+				}
+			}
+			else {
+				u.prev_dir.x = 0;
+				u.prev_dir.y = 0;
+			}
 		}
 
 		  /**************************************************/
@@ -2833,6 +2852,8 @@ karemade:
 #endif
 
 	u.umoved = FALSE;
+	u.uattked = FALSE;
+	u.unull = FALSE;
 
 	if (multi > 0) {
 	    lookaround();

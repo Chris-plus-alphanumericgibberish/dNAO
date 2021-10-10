@@ -2342,6 +2342,7 @@ int
 donull()
 {
 	static long lastreped = -13;//hacky way to tell if the player has recently tried repairing themselves
+	u.unull = TRUE;
 	if(uclockwork){
 		if(!Upolyd && u.uhp<u.uhpmax){
 			if(lastreped < monstermoves-13) You("attempt to make repairs.");
@@ -2407,7 +2408,12 @@ donull()
 			}
 		} else if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
 	} else {
-		if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
+		if(Role_if(PM_MONK)){
+			if(lastreped < monstermoves-13) You("meditate.");
+			lastreped = monstermoves;
+		}
+		else if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
+		
 		if(Upolyd && u.uhp<u.uhpmax){
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
 				u.mh++;
