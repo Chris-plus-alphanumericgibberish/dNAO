@@ -1244,6 +1244,7 @@ domove()
 		/* try to attack; note that it might evade */
 		/* also, we don't attack tame when _safepet_ */
 		else if (attack2(mtmp)){
+			u.uattked = TRUE;
 			if(uwep && is_lightsaber(uwep) && litsaber(uwep) && activeFightingForm(FFORM_ATARU)){
 				coord cc;
 				if(!u.utrap && tt_findadjacent(&cc, mtmp) && (cc.x != u.ux || cc.y != u.uy)){

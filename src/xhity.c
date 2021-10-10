@@ -17048,6 +17048,332 @@ android_combo()
 	return FALSE;
 }
 
+#define peace_check_monk(mon) (canspotmon(mon) && (Hallucination || !mon->mpeaceful))
+
+struct monst *
+adjacent_monk_target(arm)
+struct obj *arm;
+{
+	struct monst *mon;
+	if(!isok(u.ux+u.dx, u.uy+u.dy))
+		return (struct monst *)0;
+	mon = m_at(u.ux+u.dx, u.uy+u.dy);
+	if(!mon)
+		return (struct monst *)0;
+	if((touch_petrifies(mon->data)
+		|| mon->mtyp == PM_MEDUSA)
+	 && !(Stone_resistance || arm))
+		return (struct monst *)0;
+	if(peace_check_monk(mon))
+		return mon;
+	return (struct monst *)0;
+}
+
+boolean
+circle_monk_target(arm)
+struct obj *arm;
+{
+	struct monst *mon;
+	int i, j;
+	for(i = u.ux-1; i < u.ux+2; i++) for(j = u.uy-1; j < u.uy+2; j++){
+		if(i == u.ux && j == u.uy)
+			continue;
+		if(!isok(i,j))
+			continue;
+		mon = m_at(i, j);
+		if(!mon)
+			continue;
+		if((touch_petrifies(mon->data)
+			|| mon->mtyp == PM_MEDUSA)
+		 && !(Stone_resistance || arm))
+			continue;
+		if(peace_check_monk(mon))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+boolean
+beam_monk_target()
+{
+	struct monst *mon;
+	int i;
+	int ix = u.ux, iy = u.uy;
+	boolean at_least_one = FALSE;
+	for(i = 1; i < BOLT_LIM; i++){
+		ix += u.dx;
+		iy += u.dy;
+		if(!isok(ix,iy))
+			return at_least_one;
+		mon = m_at(ix, iy);
+		if(!mon){
+			if(!ZAP_POS(levl[ix][iy].typ))
+				return at_least_one;
+			continue;
+		}
+		if(!peace_check_monk(mon)){
+			//We'll call this the Monk's "sixth sense" talkning <_<'
+			if(mon->mpeaceful && !Hallucination)
+				return FALSE;
+			else continue;
+		}
+		else at_least_one = TRUE;
+		if(!ZAP_POS(levl[ix][iy].typ))
+			return at_least_one;
+	}
+	return at_least_one;
+}
+
+void
+monk_aura_bolt()
+{
+	struct zapdata zapdat = { 0 };
+	basiczap(&zapdat, u.ualign.record <= -20 ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
+	zapdat.damd = 4;
+	zapdat.affects_floor = FALSE;
+	zapdat.phase_armor = TRUE;
+	//Currently these cook off without the player's explicit say-so
+	zapdat.no_bounce = TRUE;
+	zapdat.unreflectable = ZAP_REFL_NEVER;
+	zap(&youmonst, u.ux, u.uy, u.dx, u.dy, BOLT_LIM, &zapdat);
+}
+
+void
+monk_meteor_drive(mdef)
+struct monst *mdef;
+{
+	int tmp, weight = mdef->data->cwt;
+	struct trap *chasm;
+	static struct attack grab =	{ AT_TUCH, AD_PHYS, 1, 1 };
+	int res;
+	
+	res = xmeleehity(&youmonst, mdef, &grab, (struct obj **)0, FALSE, 0, FALSE);
+	if(res&(MM_MISS|MM_DEF_DIED))
+		return;
+	
+	// if(weight > 2*weight_cap() - inv_weight()){
+		// pline("Too heavy!");
+		// return;
+	// }
+	
+	/* Slam the monster into the ground */
+	if (!mdef || u.uswallow) return;
+
+	You("hurl %s downwards...", mon_nam(mdef));
+	if(!(levl[x(mdef)][y(mdef)].typ == ROOM
+	 ||levl[x(mdef)][y(mdef)].typ == CORR
+	 ||levl[x(mdef)][y(mdef)].typ == SOIL
+	 ||levl[x(mdef)][y(mdef)].typ == SAND
+	 ||levl[x(mdef)][y(mdef)].typ == GRASS
+	 ||levl[x(mdef)][y(mdef)].typ == DOOR
+	))
+		return;
+
+	tmp = weight >= WT_GIGANTIC ? 12 : 
+		  weight >= WT_HUGE ? 10 :
+		  weight >= WT_LARGE ? 8 :
+		  weight >= WT_MEDIUM ? 6 :
+		  weight >= WT_SMALL ? 4 :
+		  weight >= WT_TINY ? 2 :
+		  weight >= WT_DIMINUTIVE ? 1 : 0;
+	chasm = t_at(x(mdef), y(mdef));	
+	if(weight >= WT_MEDIUM && (!chasm || chasm->ttyp == PIT)){
+		pline("%s slams into the %s, creating a crater!", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
+		digfarhole(!chasm, x(mdef), y(mdef));
+		chasm = t_at(x(mdef), y(mdef));
+		if (chasm){
+			if(chasm->ttyp == PIT && !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef)) {
+				if (!mon_resistance(mdef,FLYING) && !is_clinger(mdef->data))
+					mdef->mtrapped = 1;
+			}
+			chasm->tseen = 1;
+			levl[u.ux + u.dx][u.uy + u.dy].doormask = 0;
+			tmp *= 2;
+		}
+	}
+	else {
+		pline("%s slams into the %s!", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
+	}
+
+	mselftouch(mdef, "Falling, ", TRUE);
+	if (!DEADMONSTER(mdef) && tmp) {
+		xdamagey(&youmonst, mdef, (struct attack *)0, d(dbon((struct obj *)0),tmp));
+	}
+
+	return;
+}
+
+#undef peace_check_monk
+
+#define DID_MOVE 			u.uen -= 8;\
+			nomul(0, NULL);\
+			return TRUE;
+
+/* monk_moves()
+ *
+ * Checks if the player has activated a monk martial arts move. Assumes that the move should occur if the function is called, a target is found, and energy is sufficient.
+ *
+ * Returns TRUE if a move goes off.
+ */
+boolean
+monk_moves()
+{
+	int moveID = check_monk_move();
+	struct monst *mdef;
+#define STILLVALID(mdef) (!DEADMONSTER(mdef) && mdef == m_at(u.ux + u.dx, u.uy + u.dy))
+	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	if(!moveID)
+		return FALSE;
+	if(u.uen < 8)
+		return FALSE;
+	switch(moveID){
+		case DIVE_KICK:
+		if(!EWounded_legs && (mdef = adjacent_monk_target(uarmf))){
+			pline("Dive kick!");
+			dive_kick_monster(mdef);
+			DID_MOVE
+		}
+		break;
+		case AURA_BOLT:
+		if(!uwep && !(uswapwep && u.twoweap) && beam_monk_target()){
+			pline("Aura bolt!");
+			monk_aura_bolt();
+			DID_MOVE
+		}
+		break;
+		case BIRD_KICK:
+		if(!EWounded_legs && circle_monk_target(uarmf)){
+			pline("Bird kick!");
+			bird_kick_monsters();
+			DID_MOVE
+		}
+		break;
+		case METODRIVE:
+		if(!uwep && !(uswapwep && u.twoweap) && inv_weight() < 0 && (mdef = adjacent_monk_target(uarmg))){
+			pline("Meteor drive!");
+			monk_meteor_drive(mdef);
+			DID_MOVE
+		}
+		break;
+		case PUMMEL:
+		if(!uwep && !(uswapwep && u.twoweap) && (mdef = adjacent_monk_target(uarmg))){
+			pline("Pummel!");
+			boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+			for(int i = 0; i < 2 && STILLVALID(mdef); i++){
+				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
+			}
+			DID_MOVE
+		}
+		break;
+	}
+	return FALSE;
+}
+
+/* monk_moves()
+ *
+ * Checks if the player has input a monk martial arts move. Assumes that the checks should occur if the function is called.
+ *
+ * Returns the move ID or 0 if no ID can be chosen.
+ */
+int
+check_monk_move()
+{
+	int i;
+	int dx1 = u.prev_dir.x;
+	int dy1 = u.prev_dir.y;
+	int dx2 = u.dx;
+	int dy2 = u.dy;
+	//If there haven't been two inputs for some reason, return false.
+	if(!(dx1 || dy1) || !(dx2 || dy2))
+		return 0;
+	///Adjust first vector to first quadrent (favoring up over right)
+	//Reflect over y axis
+	if(dx1 < 0){
+		dx1 *= -1;
+		dx2 *= -1;
+	}
+	//Reflect over x axis
+	if(dy1 < 0){
+		dy1 *= -1;
+		dy2 *= -1;
+	}
+	//Reflect over y = x
+	if(dx1 == 1 && dy1 == 0){
+		i = dx1;
+		dx1 = dy1;
+		dy1 = i;
+		i = dx2;
+		dx2 = dy2;
+		dy2 = i;
+	}
+	///Mirror to face right
+	//Reflect over first vector
+	if(dx2 < 0){
+		//if vector 1 is diagonal, reflect over x = y
+		if(dx1 == 1 && dy1 == 1){
+			i = dx2;
+			dx2 = dy2;
+			dy2 = i;
+		}
+		//Vector 1 should be verticle, reflect over y axis
+		else {
+			dx2 *= -1;
+		}
+	}
+	if(dx1 == 1 && dy1 == 1 && dx2 == 1 && dy2 == 0){
+		i = dx2;
+		dx2 = dy2;
+		dy2 = i;
+	}
+	//Find move
+	if(dx1 == 1 && dy1 == 1){
+		/*
+			..D
+			.eA
+			PMB
+		 */
+		if(dx2 == 1 && dy2 == 1){
+			return DIVE_KICK;
+		}
+		if(dx2 == 0 && dy2 == 1){
+			return AURA_BOLT;
+		}
+		if(dx2 == 1 && dy2 == -1){
+			return BIRD_KICK;
+		}
+		if(dx2 == 0 && dy2 == -1){
+			return METODRIVE;
+		}
+		if(dx2 == -1 && dy2 == -1){
+			return PUMMEL;
+		}
+	}
+	else {
+		/*
+			DIVE_KICK, AURA_BOLT,
+			error, BIRD_KICK,
+			PUMMEL, METODRIVE
+		 */
+		if(dx2 == 0 && dy2 == 1){
+			return DIVE_KICK;
+		}
+		if(dx2 == 1 && dy2 == 1){
+			return AURA_BOLT;
+		}
+		if(dx2 == 1 && dy2 == 0){
+			return BIRD_KICK;
+		}
+		if(dx2 == 1 && dy2 == -1){
+			return METODRIVE;
+		}
+		if(dx2 == 0 && dy2 == -1){
+			return PUMMEL;
+		}
+	}
+	impossible("Unhandled move inputs (%d, %d)to(%d, %d), (%d, %d)to(%d, %d)", u.prev_dir.x, u.prev_dir.y, u.dx, u.dy, dx1, dy1, dx2, dy2);
+	return 0;
+}
+
 /* u_pole_pound()
  * 
  * hits monster at bhitpos with your (mainhand) polearm

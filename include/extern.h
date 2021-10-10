@@ -651,6 +651,8 @@ E struct obj *FDECL(drop_envy, (struct monst *));
 /* ### dokick.c ### */
 
 E void FDECL(kickdmg, (struct monst *, BOOLEAN_P));
+E void FDECL(dive_kick_monster, (struct monst *));
+E void NDECL(bird_kick_monsters);
 E boolean FDECL(ghitm, (struct monst *,struct obj *));
 E void FDECL(container_impact_dmg, (struct obj *));
 E int NDECL(dokick);
@@ -3253,6 +3255,8 @@ E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct 
 E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, void *, int, int, int *);
 E void FDECL(weave_black_web, (struct monst *));
 E int NDECL(android_combo);
+E boolean NDECL(monk_moves);
+E int NDECL(check_monk_move);
 E int FDECL(u_pole_pound, (struct monst *));
 E boolean FDECL(Curse_res, (struct monst *, boolean));
 E int FDECL(mummy_curses_x, (struct monst *, struct monst *));

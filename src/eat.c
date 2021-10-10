@@ -3775,10 +3775,13 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)) return;
 	
 	if(u.usleep) hungermod *= 10; /* slow metabolic rate while asleep */
-	/* Convicts can last twice as long at hungry and below */
-	if(Role_if(PM_CONVICT)){
+	/* Monks and Convicts can last twice as long at hungry and below */
+	if(Role_if(PM_CONVICT) || Role_if(PM_MONK)){
 		if(u.uhs == HUNGRY) hungermod *= 2;
 		else if(u.uhs > HUNGRY) hungermod *=5;	/* WEAK or hungrier */
+	}
+	if(Role_if(PM_MONK) && u.unull){
+		hungermod *= 2;
 	}
 	
 	//Elder vampires can go for longer without blood
