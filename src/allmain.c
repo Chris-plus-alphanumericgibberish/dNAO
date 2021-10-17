@@ -2952,6 +2952,7 @@ newgame()
 		mvitals[i].mvflags = mons[i].geno & G_NOCORPSE;
 
 	init_objects();		/* must be before u_init() */
+	init_gods();		/* probably will need to be before u_init */
 	id_permonst();		/* must be before u_init() */
 	
 	flags.pantheon = -1;	/* role_init() will reset this */

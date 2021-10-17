@@ -1,6 +1,9 @@
-/*	SCCS Id: @(#)godlist.c	3.4	1995/10/04	*/
+/*	SCCS Id: @(#)godlist.h	3.4	1995/10/04	*/
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
+
+#ifndef GODLIST_H
+#define GODLIST_H
 
 #define MINIONS(...) _MINIONS(__VA_ARGS__)
 #define _MINIONS(...) {FIRST_TWENTY(dummy, ##__VA_ARGS__, \
@@ -34,7 +37,7 @@ static const char *god_names[] = {
 #define Cangels PM_NOVIERE_ELADRIN,PM_BRALANI_ELADRIN,PM_FIRRE_ELADRIN,PM_SHIERE_ELADRIN,PM_ANGEL,PM_GHAELE_ELADRIN,PM_TULANI_ELADRIN
 #define Cdemons PM_MANES,PM_QUASIT,PM_VROCK,PM_HEZROU,PM_NALFESHNEE,PM_MARILITH,PM_BALROG
 
-NEARDATA struct god godlist[] = {
+NEARDATA const struct god base_godlist[] = {
 #endif
 /* dummy so all non-zero elements are interesting */
 GOD_V2((const char *)0, 0, 0, MINIONS()),
@@ -376,4 +379,6 @@ GOD_V2("Yog-Sothoth",            A_NONE, NEUTRAL_HOLINESS,
 /* the great terminator */
 GOD_V2((const char *)0, 0, 0, MINIONS())
 };
-/*godlist.c*/
+
+#endif /*GODLIST_H*/
+/*godlist.h*/

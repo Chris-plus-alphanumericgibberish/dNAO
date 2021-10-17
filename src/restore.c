@@ -501,6 +501,7 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	}
 
 	/* this stuff comes after potential aborted restore attempts */
+	restore_gods(fd);
 	restore_artifacts(fd);
 	invent = restobjchn(fd, FALSE, FALSE);
 	bc_obj = restobjchn(fd, FALSE, FALSE);

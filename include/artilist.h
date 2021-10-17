@@ -1,6 +1,10 @@
-/*	SCCS Id: @(#)artilist.c 3.4	2003/02/12	*/
+/*	SCCS Id: @(#)artilist.h 3.4	2003/02/12	*/
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
+
+#ifndef ARTILIST_H
+#define ARTILIST_H
+
 #include "macromagic.h"
 /* we need to set these *before* makedefs.c or else it won't be getting the right number of arguments */
 #define PROPS(...) {FIRST_EIGHT(dummy, ##__VA_ARGS__, 0,0,0,0,0,0,0,0)}
@@ -45,8 +49,8 @@ static const char *artifact_names[] = {
 	 wpr, wfl, \
 	 cpr, cfl, \
 	 inv, ifl }
-struct artifact * artilist;
-NEARDATA struct artifact base_artilist[] = {
+//struct artifact * artilist;
+NEARDATA const struct artifact base_artilist[] = {
 #endif	/* MAKEDEFS_C */
 
 /* Artifact cost rationale:
@@ -3504,7 +3508,6 @@ A((const char *)0,					STRANGE_OBJECT,		(const char *)0,
 
 #undef	A
 
-#ifndef MAKEDEFS_C
-#endif
+#endif /*ARTILIST_H*/
 
-/*artilist.c*/
+/*artilist.h*/

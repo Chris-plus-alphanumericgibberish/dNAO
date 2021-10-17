@@ -335,6 +335,7 @@ register int fd, mode;
 		uball->nobj = bc_objs;
 		bc_objs = uball;
 	}
+	save_gods(fd);
 	save_artifacts(fd);
 	saveobjchn(fd, invent, mode);
 	saveobjchn(fd, bc_objs, mode);

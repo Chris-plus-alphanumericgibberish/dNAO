@@ -4,7 +4,7 @@
 
 #include "hack.h"
 #include "artifact.h"
-
+#include "artilist.h"
 #include "xhity.h"
 /*
  * Note:  both artilist[] and artinstance[] have a dummy element #0,
@@ -333,11 +333,14 @@ hack_artifacts()
 	return;
 }
 
+/* declare the global artilist pointer */
+struct artifact * artilist;
+
 /* zero out the artifact existence list */
 void
 init_artifacts()
 {
-	extern struct artifact base_artilist[];
+	extern const struct artifact base_artilist[];
 
 	nrofartifacts = NROFARTIFACTS;
 	artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));
@@ -367,7 +370,7 @@ void
 restore_artifacts(fd)
 int fd;
 {
-	extern struct artifact base_artilist[];
+	extern const struct artifact base_artilist[];
 	mread(fd, (genericptr_t) &nrofartifacts, sizeof(int));
 
 	artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));
@@ -2042,7 +2045,7 @@ struct obj *obj;
 		}
 	}
 	else {
-		/* explicitly set in artilist.c */
+		/* explicitly set in artilist.h */
 		wt = artiweight;
 	}
 	return wt;

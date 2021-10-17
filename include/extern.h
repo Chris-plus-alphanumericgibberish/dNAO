@@ -2263,6 +2263,9 @@ E void FDECL(altar_wrath, (int,int));
 E int FDECL(candle_on_altar, (struct obj *));
 E void FDECL(goat_eat, (struct obj *, int));
 E boolean FDECL(goat_mouth_at, (int, int));
+E void NDECL(init_gods);
+E void FDECL(save_gods, (int));
+E void FDECL(restore_gods, (int));
 
 /* ### priest.c ### */
 

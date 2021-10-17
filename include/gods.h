@@ -12,9 +12,10 @@ struct god {
 	aligntyp alignment;
 	int holiness;
 	int minionlist[20];
+	int anger;
 };
 
-extern struct god godlist[];
+extern struct god * godlist;
 
 struct crowning {
 	int godnum;					/* god that grants this crowning */

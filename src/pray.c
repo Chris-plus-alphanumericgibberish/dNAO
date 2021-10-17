@@ -4,7 +4,8 @@
 
 #include "hack.h"
 #include "xhity.h"
-
+#include "gods.h"
+#include "godlist.h"
 #include "artifact.h"
 
 extern const int monstr[];
@@ -3703,6 +3704,38 @@ int eatflag;
 	}
     }
 }
+/* declare the global godlist pointer */
+struct god * godlist;
 
+/* save and restore god list */
+void
+init_gods()
+{
+	extern const struct god base_godlist[];
+
+	godlist = malloc(sizeof(struct god) * (MAX_GOD+1));
+	memcpy(godlist, base_godlist, sizeof(struct god) * (MAX_GOD+1));
+}
+
+void
+save_gods(fd)
+int fd;
+{
+	bwrite(fd, (genericptr_t) godlist, sizeof(struct god) * (MAX_GOD+1));
+}
+
+void
+restore_gods(fd)
+int fd;
+{
+	extern const struct god base_godlist[];
+	int i;
+
+	godlist = malloc(sizeof(struct god) * (MAX_GOD+1));
+	mread(fd, (genericptr_t) godlist, sizeof(struct god) * (MAX_GOD+1));
+	/* fix name pointers -- assumes that god names do NOT get changed during the game */
+	for (i=1; i<MAX_GOD; i++)
+		godlist[i].name = base_godlist[i].name;
+}
 
 /*pray.c*/

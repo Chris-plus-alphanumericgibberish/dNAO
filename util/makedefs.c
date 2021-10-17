@@ -18,8 +18,8 @@
 #include "flag.h"
 #include "dlb.h"
 
-#include "../src/artilist.c"
-#include "../src/godlist.c"
+#include "artilist.h"
+#include "godlist.h"
 
 /* version information */
 #ifdef SHORT_FILENAMES
