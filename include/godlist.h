@@ -181,6 +181,16 @@ GOD_V2("Pan",                   A_NEUTRAL, HOLY_HOLINESS,
 GOD_V2("Dionysus",              A_CHAOTIC, HOLY_HOLINESS,
 	MINIONS(PM_NAIAD,PM_NOVIERE_ELADRIN,PM_DEMINYMPH,PM_TULANI_ELADRIN)
 	),
+/* madman */
+GOD_V2("Zo-Kalar",              A_LAWFUL, HOLY_HOLINESS,
+	MINIONS(Langels)
+	),
+GOD_V2("Tamash",                A_LAWFUL, NEUTRAL_HOLINESS,
+	MINIONS(NElemen)
+	),
+GOD_V2("Lobon",                 A_LAWFUL, HOLY_HOLINESS,
+	MINIONS(Cangels)
+	),
 /* valkyrie, Norse */
 GOD_V2("Tyr",                   A_LAWFUL, HOLY_HOLINESS,
 	MINIONS(PM_ARCADIAN_AVENGER,PM_SHIELD_ARCHON,PM_ANGEL,PM_WARDEN_ARCHON,PM_THRONE_ARCHON)
