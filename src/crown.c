@@ -123,7 +123,7 @@ choose_crowning()
 {
 	/* figure out what index your god is */
 	const char * curr_god;
-	int god_index;
+	int god_index = GOD_NONE;
 	int specific_arti = -1;
 	int i;
 	int retval = -1;
@@ -139,12 +139,17 @@ choose_crowning()
 		case A_CHAOTIC:
 			curr_god = urole.cgod;
 			break;
+		case A_VOID:
+			god_index = GOD_THE_VOID;
+			break;
 	}
 
-	for (i=1; i<MAX_GOD; i++) {
-		if(!strcmp(curr_god, godlist[i].name)) {
-			god_index = i;
-			break;
+	if (god_index == GOD_NONE) {
+		for (i=1; i<MAX_GOD; i++) {
+			if(!strcmp(curr_god, godlist[i].name)) {
+				god_index = i;
+				break;
+			}
 		}
 	}
 	/* actually do what this function should do */
