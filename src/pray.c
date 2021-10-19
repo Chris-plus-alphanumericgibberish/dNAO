@@ -23,7 +23,7 @@ STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean));
 STATIC_DCL boolean FDECL(water_prayer,(BOOLEAN_P));
 STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
 static void NDECL(lawful_god_gives_angel);
-static void FDECL(god_gives_pet,(const char *,ALIGNTYP_P,int));
+static void FDECL(god_gives_pet,(int));
 static void FDECL(god_gives_benefit,(ALIGNTYP_P));
 
 /* simplify a few tests */
@@ -613,6 +613,8 @@ STATIC_OVL void
 god_zaps_you(ga_num)
 int ga_num;
 {
+	int godnum = ga_num_to_godnum(ga_num);
+
 	if (u.uswallow) {
 	    pline("Suddenly a bolt of lightning comes down at you from the heavens!");
 	    pline("It strikes %s!", mon_nam(u.ustuck));
@@ -677,11 +679,11 @@ int ga_num;
 			aligntyp resp_god = Gangr2align(ga_num);
 		/* one more try for high altars */
 			godvoice(ga_num, "Thou cannot escape my wrath, mortal!");
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
 			Sprintf(buf, "Destroy %s, my servants!", uhim());
 			godvoice(ga_num, buf);
 	    }
@@ -692,6 +694,8 @@ STATIC_OVL void
 fry_by_god(ga_num)
 int ga_num;
 {
+	int godnum = ga_num_to_godnum(ga_num);
+
 	char killerbuf[64];
 
 	You("fry to a crisp.");
@@ -705,6 +709,8 @@ void
 angrygods(ga_num)
 int ga_num;
 {
+	int godnum = ga_num_to_godnum(ga_num);
+
 	register int	maxanger;
 	aligntyp resp_god = Gangr2align(ga_num);
 	char buf[BUFSZ];
@@ -797,7 +803,7 @@ int ga_num;
 			      youracedata->mlet == S_HUMAN ? "mortal" : "creature"
 			);
 			godvoice(ga_num, buf);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
 			break;
 
 	    default:	
@@ -1722,16 +1728,14 @@ register struct obj *otmp;
 }
 
 void
-god_gives_pet(gptr, alignment, ga_num)
-const char *gptr;
-aligntyp alignment;
-int ga_num;
+god_gives_pet(godnum)
+int godnum;
 {
 /*
     register struct monst *mtmp2;
     register struct permonst *pm;
  */
-    const int *minions = god_minions(gptr);
+    const int *minions = god_minions(godnum);
     int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon = (struct monst *)0;
 	
@@ -1773,10 +1777,10 @@ int ga_num;
     if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
     }
-	else mon = make_pet_minion(mtyp,alignment,ga_num);
+	else mon = make_pet_minion(mtyp, godnum);
 	
     if (mon) {
-	switch ((int)alignment) {
+	switch (godlist[godnum].alignment) {
 	   case A_LAWFUL:
 		if (u.uhp > (u.uhpmax / 10)) godvoice(Align2gangr(u.ualign.type), "My minion shall serve thee!");
 		else godvoice(Align2gangr(u.ualign.type), "My minion shall save thee!");
@@ -1806,7 +1810,7 @@ lawful_god_gives_angel()
     int mtyp;
     int mon;
 
-	god_gives_pet(align_gname_full(A_LAWFUL),A_LAWFUL, Align2gangr(A_LAWFUL));
+	god_gives_pet(align_to_god(A_LAWFUL));
 }
 
 int
@@ -2309,9 +2313,9 @@ dosacrifice()
 				// if (rnl(u.ulevel) > 6 && u.ualign.record > 0 &&
 				   // rnd(u.ualign.record) > (3*ALIGNLIM)/4)
 				if(!Pantheon_if(PM_ELF)){
-					if(u.ulevel > 20) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
-					if(u.ulevel >= 14) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
-					(void) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
+					if(u.ulevel > 20) summon_god_minion(altaralign_to_godnum(altaralign), FALSE);
+					if(u.ulevel >= 14) summon_god_minion(altaralign_to_godnum(altaralign), FALSE);
+					(void) summon_god_minion(altaralign_to_godnum(altaralign), TRUE);
 				}
 				/* anger priest; test handles bones files */
 				if((pri = findpriest(temple_occupied(u.urooms))) &&
@@ -2323,9 +2327,9 @@ dosacrifice()
 				change_luck(-1);
 				exercise(A_WIS, FALSE);
 				if(!Pantheon_if(PM_ELF)){
-					if(u.ulevel > 20) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
-					if(u.ulevel > 10) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
-					(void) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
+					if(u.ulevel > 20) summon_god_minion(altaralign_to_godnum(altaralign), TRUE);
+					if(u.ulevel > 10) summon_god_minion(altaralign_to_godnum(altaralign), TRUE);
+					(void) summon_god_minion(altaralign_to_godnum(altaralign), TRUE);
 				}
 			}
 		}
@@ -2623,7 +2627,7 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 	}
 	return(1);
     }
-    if (Inhell && u.ualign.type != A_VOID && !(alignment == A_CHAOTIC && strcmp(urole.cgod,"Lolth"))) {
+    if (Inhell && u.ualign.type != A_VOID && !(alignment == A_CHAOTIC && urole.cgod == GOD_LOLTH)) {
 	pline("Since you are in Gehennom, %s won't help you.",
 	      align_gname(alignment));
 	/* haltingly aligned is least likely to anger */
@@ -2978,76 +2982,8 @@ const char *
 ga_gname_full(ga_num)
 int ga_num;
 {
-    const char *gnam;
-
-    switch (ga_num) {
-     case GA_NONE:
-		if(In_mordor_quest(&u.uz)){
-			if(on_level(&u.uz, &borehole_4_level)) gnam = MolochLieutenant;
-			else gnam = Moloch;
-		}
-		else gnam = Moloch;
-	 break;
-     case GA_SILENCE:
-		gnam = Silence;
-	 break;
-     case GA_CHAOS_FF:
-		if(In_FF_quest(&u.uz) && on_level(&chaose_level,&u.uz))
-			gnam = DeepChaos;
-		else
-			gnam = Chaos;
-	 break;
-     case GA_DEMIURGE:
-		gnam = Demiurge;
-	 break;
-     case GA_SOPHIA:
-		gnam = Sophia;
-	 break;
-     case GA_OTHER:
-		gnam = Other;
-	 break;
-     case GA_MOTHER:
-		gnam = BlackMother;
-	 break;
-     case GA_NODENS:
-		gnam = Nodens;
-	 break;
-     case GA_FRACTURE:
-		gnam = DreadFracture;
-	 break;
-     case GA_SOTHOTH:
-		gnam = AllInOne;
-	 break;
-     case GA_VELKA:
-		gnam = Velka;
-	 break;
-     case GA_LAWFUL:
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
-			gnam = "";
-		}
-		else gnam = urole.lgod; 
-	 break;
-     case GA_NEUTRAL:	
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
-			gnam = "";
-		}
-		else gnam = urole.ngod; 
-	 break;
-     case GA_CHAOTIC:
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
-			gnam = "";
-		}
-		else gnam = urole.cgod;
-	 break;
-     case GA_VOID:
-		gnam = tVoid;
-	 break;
-     default:
-		impossible("unknown god anger number.");
-		gnam = "someone";
-	 break;
-    }
-    return gnam;
+    int godnum = ga_num_to_godnum(ga_num);
+	return godname_full(godnum);
 }
 
 /* hallucination handling for priest/minion names: select a random god
@@ -3063,12 +2999,11 @@ aligntyp alignment;
 
     which = randrole(0);
     switch (rn2(3)) {
-     case 0:	gnam = roles[which].lgod; break;
-     case 1:	gnam = roles[which].ngod; break;
-     case 2:	gnam = roles[which].cgod; break;
-     default:	gnam = 0; break;		/* lint suppression */
+     case 0:	gnam = godname_full(roles[which].lgod); break;
+     case 1:	gnam = godname_full(roles[which].ngod); break;
+     case 2:	gnam = godname_full(roles[which].cgod); break;
+     default:	gnam = godname_full(GOD_MOLOCH); break;
     }
-    if (!gnam) gnam = Moloch;
     if (*gnam == '_') ++gnam;
     return gnam;
 }
@@ -3081,10 +3016,10 @@ aligntyp alignment;
     const char *gnam, *result = "god";
 
     switch (alignment) {
-     case A_LAWFUL:	gnam = urole.lgod; break;
-     case A_NEUTRAL:	gnam = urole.ngod; break;
-     case A_CHAOTIC:	gnam = urole.cgod; break;
-     default:		gnam = 0; break;
+     case A_LAWFUL:		gnam = godname_full(urole.lgod); break;
+     case A_NEUTRAL:	gnam = godname_full(urole.ngod); break;
+     case A_CHAOTIC:	gnam = godname_full(urole.cgod); break;
+     default:			gnam = godname_full(GOD_MOLOCH); break;
     }
     if (gnam && *gnam == '_') result = "goddess";
     return result;
@@ -3170,7 +3105,7 @@ aligntyp alignment;
 	const char *what = (const char *)0;
 	int i, ii, lim, timeout;
 	
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_gname_full(alignment),alignment,Align2gangr(alignment));
+	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_to_god(alignment));
 	else {
 		switch (rn2(6)) {
 			case 0: // randomly increment an ability score
@@ -3423,7 +3358,7 @@ STATIC_OVL void
 goat_gives_benefit()
 {
 	struct obj *optr;
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(ga_gname_full(GA_MOTHER),A_NONE,GA_MOTHER);
+	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(GOD_THE_BLACK_MOTHER);
 	else switch(rnd(7)){
 		case 1:
 			if (Hallucination)
@@ -3755,31 +3690,247 @@ aligntyp alignmnt;
 	const char * name;
 	switch(alignmnt) {
 		case A_LAWFUL:
-			name = urole.lgod;
-			break;
+			return urole.lgod;
 		case A_NEUTRAL:
-			name = urole.ngod;
-			break;
+			return urole.ngod;
 		case A_CHAOTIC:
-			name = urole.cgod;
-			break;
+			return urole.cgod;
 		case A_VOID:
 			return GOD_THE_VOID;
 		case A_NONE:
 			return GOD_MOLOCH;
 	}
 	
-	int i;
-	const char * c;
-	for (i=1; i<MAX_GOD; i++) {
-		c = godlist[i].name;
-		if(*c=='_')c++;
-		if(!strcmp(name, c))
-			return i;
+	impossible("no matching god for align %d?", alignmnt);
+	return GOD_NONE;
+}
+
+/* gets god name, with no hallu check */
+const char *
+godname_full(godnum)
+int godnum;
+{
+	/* special cases that give alternative names for particular gods */
+
+	if (godnum == GOD_EDDERGUD && !(
+		Race_if(PM_DROW) &&
+		flags.stag && !flags.initgend
+	))
+		return "the black web";
+
+	if (godnum == GOD_ILSENSINE && (
+		Role_if(PM_ANACHRONONAUT) &&
+		flags.questprogress == 2
+	))
+		return "_Ilsensine the Banished One";
+
+	if (godnum == GOD_CHAOS && (
+		In_FF_quest(&u.uz) && on_level(&chaose_level,&u.uz)
+	))
+		return "Chaos, with Cosmos in chains";
+
+	if (godnum == GOD_MOLOCH && (
+		In_mordor_quest(&u.uz) && on_level(&u.uz, &borehole_4_level)
+	))
+		return "Moloch, lieutenant of Melkor";
+
+	/* general case: give the god's name as per godlist */
+	return godlist[godnum].name;
+}
+
+/* gets god name OR a hallu god if appropriate */
+const char *
+godname(godnum)
+int godnum;
+{
+    const char *gnam;
+
+	if (Hallucination) {
+		gnam = hallu_gods[rn2(SIZE(hallu_gods))];
+		if (*gnam == '_') ++gnam;
+		return gnam;
+	}
+	gnam = godname_full(godnum);
+    if (*gnam == '_') ++gnam;
+    return gnam;
+}
+
+int
+god_faction(godnum)
+int godnum;
+{
+	switch(godnum) {
+		case GOD_EDDERGUD: return EDDER_SYMBOL;
+		case GOD_VHAERAUN: return MAGTHERE;
+		case GOD_LOLTH: return LOLTH_SYMBOL;
+		case GOD_GHAUNADAUR: return GHAUNADAUR_SYMBOL;
+		case GOD_VER_TAS: return VER_TAS_SYMBOL;
+		case GOD_EILISTRAEE: return EILISTRAEE_SYMBOL;
+		case GOD_KIARANSALI: return KIARANSALEE_SYMBOL;
+		case GOD_THE_BLACK_MOTHER: return GOATMOM_FACTION;
+	}
+	return -1;
+}
+
+/* truly ridiculous and temporary */
+int
+ga_num_to_godnum(ga_num)
+int ga_num;
+{
+    const char *gnam;
+
+    switch (ga_num) {
+    case GA_NONE:		return GOD_MOLOCH;
+    case GA_SILENCE:	return GOD_THE_SILENCE;
+	case GA_CHAOS_FF:	return GOD_CHAOS;
+    case GA_DEMIURGE:	return GOD_YALDABAOTH;
+    case GA_SOPHIA:		return GOD_PISTIS_SOPHIA;
+    case GA_OTHER:		return GOD_AN_ALIEN_GOD;
+	case GA_MOTHER:		return GOD_THE_BLACK_MOTHER;
+	case GA_NODENS:		return GOD_NODENS;
+	case GA_FRACTURE:	return GOD_THE_DREAD_FRACTURE;
+	case GA_SOTHOTH:	return GOD_YOG_SOTHOTH;
+	case GA_VELKA:		return GOD_VELKA__GODDESS_OF_SIN;
+	case GA_LAWFUL:		return align_to_god(A_LAWFUL);
+	case GA_NEUTRAL:	return align_to_god(A_NEUTRAL);
+	case GA_CHAOTIC:	return align_to_god(A_CHAOTIC);
+	case GA_VOID:		return GOD_THE_VOID;
+	default:
+						impossible("unknown god anger number.");
+						return GOD_NONE;
+	}
+    return GOD_NONE;
+}
+
+/* yuck */
+int
+altaralign_to_godnum(altaralign)
+aligntyp altaralign;
+{
+	return ga_num_to_godnum(Align2gangr(altaralign));
+}
+
+
+const int *
+god_minions(godnum)
+int godnum;
+{
+	/* special cases */
+	if (godnum == GOD_MOLOCH) {
+		/* randomly between Ldevils and Cdemons (from godlist.h) */
+		static const int LdevilsMinions[] = {Ldevils};
+		static const int CdemonsMinions[] = {Cdemons};
+		return rn2(2) ? LdevilsMinions : CdemonsMinions;
+	}
+
+	if (godnum == GOD_LOLTH && (
+		Race_if(PM_DROW) && flags.initgend
+	)) {
+		/* female drow get gloves-off demon-Lolth minions */
+		static const int NastyLolthMinions[] = {PM_SPROW,PM_YOCHLOL,PM_ANGEL,PM_MARILITH,NON_PM};
+		return NastyLolthMinions;
 	}
 	
-	impossible("no matching god for \"%s\" align %d?", name, alignmnt);
-	return GOD_NONE;
+	return godlist[godnum].minionlist;
+}
+
+struct monst *
+god_priest(godnum, sx, sy, sanctum)
+int godnum;
+int sx, sy;
+int sanctum;   /* is it the seat of the high priest? */
+{
+	struct monst *priest;
+	
+	if(on_level(&sanctum_level, &u.uz)) {
+		/* the Elder Priest guards the only altar in the sanctum */
+		priest = makemon(&mons[PM_ELDER_PRIEST], sx + 1, sy, NO_MM_FLAGS);
+	}
+	else if(Role_if(PM_EXILE) && sanctum) {
+		/* the astral altars are untended for a binder */
+		priest = (struct monst *) 0;
+	}
+	else if(In_mordor_depths(&u.uz)){
+		/* the High Shaman of moloch in Chaos3 */
+		priest = makemon(&mons[PM_HIGH_SHAMAN], sx + 1, sy, NO_MM_FLAGS);
+	}
+	else if(Is_bridge_temple(&u.uz)){
+		/* the Blasphemous Lurker in Neutral */
+		priest = makemon(&mons[PM_BLASPHEMOUS_LURKER], sx, sy, NO_MM_FLAGS);
+	}
+	else {
+		priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
+			sx + 1, sy, NO_MM_FLAGS);
+		
+		/* special cases */
+		switch (godnum) {
+			case GOD_MOLOCH:
+				give_mintrinsic(priest, POISON_RES);
+				break;
+			case GOD_OROME:
+				priest->female = FALSE;
+				break;
+			case GOD_YAVANNA:
+				priest->female = TRUE;
+				break;
+			case GOD_TULKAS:
+				priest->female = FALSE;
+				break;
+			case GOD_VARDA_ELENTARI:
+			case GOD_VAIRE:
+			case GOD_NESSA:
+				priest->female = TRUE;
+				break;
+			case GOD_MANWE_SULIMO:
+			case GOD_MANDOS:
+			case GOD_LORIEN:
+				priest->female = FALSE;
+				break;
+			case GOD_EDDERGUD:
+				priest->female = FALSE;
+				if(!sanctum){
+					newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
+					set_faction(priest, XAXOX);
+				}
+				break;
+			case GOD_VHAERAUN:
+				priest->female = FALSE;
+				if(!sanctum){
+					newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
+					set_faction(priest, LOLTH_SYMBOL);
+				}
+				break;
+			case GOD_LOLTH:
+				if (!flags.initgend){
+					priest->female = FALSE;
+					if(!sanctum){
+						newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
+						set_faction(priest, LOLTH_SYMBOL);
+					}
+				}
+				else {
+					priest->female = TRUE;
+					if(!sanctum) {
+						newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+						set_faction(priest, LOLTH_SYMBOL);
+					}
+				}
+				break;
+			case GOD_EILISTRAEE:
+				priest->female = TRUE;
+				if(!sanctum) newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
+				break;
+			case GOD_VER_TAS:
+				priest->female = TRUE;
+				if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+				break;
+			case GOD_KIARANSALI:
+				priest->female = TRUE;
+				if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+				break;
+		}
+	}
+	return priest;
 }
 
 /*pray.c*/

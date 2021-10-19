@@ -1914,7 +1914,7 @@ int tary;
 	/* do spell */
 	if (spellnum) {
 		/* special case override: the avatar of lolth can ask Lolth to intercede instead of casting a spell */
-		if (youdef && magr->mtyp == PM_AVATAR_OF_LOLTH && !strcmp(urole.cgod, "Lolth") && !is_undirected_spell(spellnum) && !magr->mpeaceful){
+		if (youdef && magr->mtyp == PM_AVATAR_OF_LOLTH && (urole.cgod == GOD_LOLTH) && !is_undirected_spell(spellnum) && !magr->mpeaceful){
 			u.ugangr[Align2gangr(A_CHAOTIC)]++;
 			angrygods(Align2gangr(A_CHAOTIC));
 			result = MM_HIT;

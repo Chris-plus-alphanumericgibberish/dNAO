@@ -78,7 +78,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	    cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
 	} else if (ptr->mtyp == PM_ANGEL) {
 	    if (rn2(6)) {
-			(void) summon_god_minion(align_gname_full(atyp), atyp, FALSE);
+			(void) summon_god_minion(align_to_god(atyp), FALSE);
 	    } else {
 			dtype = PM_ANGEL;
 	    }
@@ -140,12 +140,12 @@ struct permonst * ptr;	/* summon as though you were <X> */
 }
 
 struct monst *
-summon_god_minion(gptr, alignment, talk)
-const char *gptr;
-aligntyp alignment;
+summon_god_minion(godnum, talk)
+int godnum;
 boolean talk;
 {
-    const int *minions = god_minions(gptr);
+	aligntyp alignment = galign(godnum);
+    const int *minions = god_minions(godnum);
     int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon;
 
@@ -211,19 +211,21 @@ boolean talk;
 		
 		/* fix house setting */
 		if(is_drow(mon->data)){
-			int faction = god_faction(gptr);
-			struct obj *otmp;
+			int faction = god_faction(godnum);
+			if (faction != -1) { 
+				struct obj *otmp;
 
-			set_faction(mon, faction);
-			
-			for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-				if(otmp->otyp == find_signet_ring() || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == NOBLE_S_DRESS){
-					otmp->oward = faction;
+				set_faction(mon, faction);
+				
+				for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
+					if(otmp->otyp == find_signet_ring() || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == NOBLE_S_DRESS){
+						otmp->oward = faction;
+					}
 				}
 			}
 		}
 		
-		if(gptr == DreadFracture && !has_template(mon, FRACTURED)){
+		if(godnum == GOD_THE_DREAD_FRACTURE && !has_template(mon, FRACTURED)){
 			set_template(mon, FRACTURED);
 			mon->m_lev += 4;
 			mon->mhpmax = d(mon->m_lev, 8);

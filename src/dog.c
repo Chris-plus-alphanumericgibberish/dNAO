@@ -1359,14 +1359,13 @@ boolean be_peaceful;
 }
 
 struct monst *
-make_pet_minion(mtyp,alignment,ga_num)
+make_pet_minion(mtyp,godnum)
 int mtyp;
-aligntyp alignment;
-int ga_num;
+int godnum;
 {
     register struct monst *mon;
     register struct monst *mtmp2;
-	mon = makemon_full(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS, -1, get_ga_mfaction(ga_num));
+	mon = makemon_full(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS, -1, god_faction(godnum));
     if (!mon) return 0;
     /* now tame that puppy... */
 	add_mx(mon, MX_EDOG);
@@ -1378,7 +1377,7 @@ int ga_num;
     /* this section names the creature "of ______" */
 	add_mx(mon, MX_EMIN);
 	mon->isminion = TRUE;
-	EMIN(mon)->min_align = alignment;
+	EMIN(mon)->min_align = galign(godnum);
     return mon;
 }
 

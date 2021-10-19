@@ -11825,7 +11825,7 @@ register struct permonst *ptr;
 	if(Race_if(PM_DROW) && 
 		((ual == A_CHAOTIC && (!Role_if(PM_NOBLEMAN) || flags.initgend)) || (ual == A_NEUTRAL && !flags.initgend)) && /*Males can be neutral or chaotic, but a chaotic male nobleman converted to a different god*/
 		mndx == PM_AVATAR_OF_LOLTH && 
-		strcmp(urole.cgod,"_Lolth") &&
+		urole.cgod != GOD_LOLTH &&
 		u.ualign.record >= 20
 	) return TRUE;
 	

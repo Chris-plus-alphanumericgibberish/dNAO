@@ -350,7 +350,7 @@ chat_with_leader()
 			u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] = moves + 5000;
 		} else if(Role_if(PM_ANACHRONONAUT)){
 			flags.questprogress = 1;
-			urole.lgod = getAnachrononautLgod();
+			urole.lgod = GOD_ILSENSINE;
 		} else if(Role_if(PM_CONVICT)){
 			struct obj *obj;
 			obj = mksobj(HEAVY_IRON_BALL, NO_MKOBJ_FLAGS);
@@ -660,9 +660,7 @@ turn_stag()
 			urole.enemy2num = PM_DROW_MATRON;
 			urole.enemy1sym = S_IMP;
 			urole.enemy2sym = S_DEMON;
-		} else{
-			urole.lgod = getDrowMaleLgodKnown();
-			
+		} else{			
 			urole.homebase = "Tower Xaxox";
 			urole.intermed = "Menzoberranzan";
 			urole.questarti = ART_TENTACLE_ROD;

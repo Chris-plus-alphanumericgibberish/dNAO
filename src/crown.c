@@ -122,37 +122,10 @@ int
 choose_crowning()
 {
 	/* figure out what index your god is */
-	const char * curr_god;
-	int god_index = GOD_NONE;
+	int god_index = align_to_god(u.ualign.type);
 	int specific_arti = -1;
 	int i;
 	int retval = -1;
-	
-	switch(u.ualign.type)
-	{
-		case A_LAWFUL:
-			curr_god = urole.lgod;
-			break;
-		case A_NEUTRAL:
-			curr_god = urole.ngod;
-			break;
-		case A_CHAOTIC:
-			curr_god = urole.cgod;
-			break;
-		case A_VOID:
-			god_index = GOD_THE_VOID;
-			break;
-	}
-
-	if (god_index == GOD_NONE) {
-		for (i=1; i<MAX_GOD; i++) {
-			if(!strcmp(curr_god, godlist[i].name)) {
-				god_index = i;
-				break;
-			}
-		}
-	}
-	/* actually do what this function should do */
 
 	/* special cases */
 	/* real valkyries get Skadi */

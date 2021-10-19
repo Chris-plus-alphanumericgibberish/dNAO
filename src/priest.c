@@ -225,7 +225,7 @@ int sanctum;   /* is it the seat of the high priest? */
 
 	if(MON_AT(sx+1, sy))
 		(void) rloc(m_at(sx+1, sy), FALSE); /* insurance */
-	priest = god_priest(align_gname_full(Amask2align(levl[sx][sy].altarmask)), sx, sy, sanctum);
+	priest = god_priest(altaralign_to_godnum(Amask2align(levl[sx][sy].altarmask)), sx, sy, sanctum);
 	if (priest) {
 		add_mx(priest, MX_EPRI);
 		EPRI(priest)->shroom = (sroom - rooms) + ROOMOFFSET;
@@ -283,7 +283,7 @@ int sanctum;   /* is it the seat of the high priest? */
 				roles[flags.panLgod].malenum : 
 				roles[flags.panLgod].femalenum;
 			makemon(&mons[qpm], sx, sy, MM_ADJACENTOK);
-			minions = god_minions(align_gname_full(A_LAWFUL));
+			minions = god_minions(align_to_god(A_LAWFUL));
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
@@ -300,7 +300,7 @@ int sanctum;   /* is it the seat of the high priest? */
 				roles[flags.panCgod].malenum : 
 				roles[flags.panCgod].femalenum;
 			makemon(&mons[qpm], sx, sy, MM_ADJACENTOK);
-			minions = god_minions(align_gname_full(A_CHAOTIC));
+			minions = god_minions(align_to_god(A_CHAOTIC));
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
@@ -317,7 +317,7 @@ int sanctum;   /* is it the seat of the high priest? */
 				roles[flags.panNgod].malenum : 
 				roles[flags.panNgod].femalenum;
 			makemon(&mons[qpm], sx, sy, MM_ADJACENTOK);
-			minions = god_minions(align_gname_full(A_NEUTRAL));
+			minions = god_minions(align_to_god(A_NEUTRAL));
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
@@ -593,16 +593,16 @@ register struct monst *priest;
 			coord mm;
 			verbalize("Foul heretic! The Lord's servants shall humble you!");
 			priest->mpeaceful=0;
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
+			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 		} else if(seenSeals >= 6){
 			coord mm;
 			verbalize("Foul heretic! The Lord's servants shall humble you!");
 			priest->mpeaceful=0;
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
+			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
+			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
+			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			/* Create swarm near down staircase (hinders return to level) */

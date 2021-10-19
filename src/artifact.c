@@ -8091,7 +8091,6 @@ arti_invoke(obj)
 							pline("A column of cerulean light blasts through the center of the Annulus, striking the High Altar with intolerable force.");
 							pline("The whole plane shakes, and the Altar and Annulus both explode into a rapidly-fading ring of cerulean light.");
 							flags.questprogress = 2;
-							urole.lgod = getAnachrononautLgodEnd();
 							levl[u.ux][u.uy].typ = CORR;
 							newsym(u.ux, u.uy);
 							useupall(obj);
