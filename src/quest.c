@@ -145,7 +145,7 @@ is_pure(talk)
 boolean talk;
 {
     int purity;
-    aligntyp original_alignment = u.ualignbase[A_ORIGINAL];
+    aligntyp original_alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
 	int racemod = Race_if(PM_VAMPIRE) ? 5 : 0;
 
 #ifdef WIZARD
@@ -153,7 +153,7 @@ boolean talk;
 	if (u.ualign.type != original_alignment) {
 	    You("are currently %s instead of %s.",
 		align_str(u.ualign.type), align_str(original_alignment));
-	} else if (u.ualignbase[A_CURRENT] != original_alignment) {
+	} else if (galign(u.ugodbase[UGOD_ORIGINAL]) != original_alignment) {
 	    You("have converted.");
 	} else if (u.ualign.record < (MIN_QUEST_ALIGN - racemod)) {
 	    You("are currently %d and require %d.",
@@ -167,14 +167,14 @@ boolean talk;
 		purity = (u.ualign.record >= (MIN_QUEST_ALIGN-racemod))  ?  1 : 0;
 	} else if(Role_if(PM_ANACHRONONAUT)){
 		purity = (u.ualign.record >= (MIN_QUEST_ALIGN-racemod) &&
-			  u.ualign.type == u.ualignbase[A_CURRENT] &&
-			  u.ualignbase[A_CURRENT] != A_LAWFUL) ?  1 :
-			 (u.ualignbase[A_CURRENT] == A_LAWFUL) ? -1 : 0;
+			  u.ualign.type == galign(u.ugodbase[UGOD_CURRENT]) &&
+			  galign(u.ugodbase[UGOD_CURRENT]) != A_LAWFUL) ?  1 :
+			 (galign(u.ugodbase[UGOD_CURRENT]) == A_LAWFUL) ? -1 : 0;
 	} else {
 		purity = (u.ualign.record >= (MIN_QUEST_ALIGN-racemod) &&
 			  u.ualign.type == original_alignment &&
-			  u.ualignbase[A_CURRENT] == original_alignment) ?  1 :
-			 (u.ualignbase[A_CURRENT] != original_alignment) ? -1 : 0;
+			  galign(u.ugodbase[UGOD_CURRENT]) == original_alignment) ?  1 :
+			 (galign(u.ugodbase[UGOD_CURRENT]) != original_alignment) ? -1 : 0;
 	}
     return purity;
 }
@@ -599,7 +599,7 @@ turn_stag()
 {
 	flags.stag = TRUE;
 	/*Convert to new alignment (Even if already did once before) */
-	if(u.ualignbase[A_CURRENT] != A_LAWFUL){
+	if(galign(u.ugodbase[UGOD_CURRENT]) != A_LAWFUL){
 		You("have a strong feeling that Lolth is angry...");
 		u.ugangr[Align2gangr(A_CHAOTIC)]+=20;
 		u.ugangr[Align2gangr(A_NEUTRAL)]+=20;
@@ -612,10 +612,12 @@ turn_stag()
 			u.uhouse = EDDER_SYMBOL;
 			lift_veil();
 		}
-		if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
-		u.ualignbase[A_CURRENT] = A_LAWFUL;
-		else
-		u.ualign.type = u.ualignbase[A_CURRENT] = A_LAWFUL;
+		    if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
+				u.ugodbase[UGOD_CURRENT] = align_to_god(A_LAWFUL);
+		    else {
+				u.ugodbase[UGOD_CURRENT] = align_to_god(A_LAWFUL);
+				u.ualign.type = A_LAWFUL;
+			}
 		u.ublessed = 0;
 		flags.botl = 1;
 
@@ -626,7 +628,7 @@ turn_stag()
 		u.lastprayed = moves;
 		u.reconciled = REC_NONE;
 		u.lastprayresult = PRAY_CONV;
-		adjalign((int)(u.ualignbase[A_ORIGINAL] * (ALIGNLIM / 2)));
+		adjalign((int)(galign(u.ugodbase[UGOD_ORIGINAL]) * (ALIGNLIM / 2)));
 	}
 	/*Eliminate old monster tags*/
 	    mons[urole.ldrnum].msound = MS_CUSS;

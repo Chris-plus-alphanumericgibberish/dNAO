@@ -132,7 +132,7 @@ GOD_V2("the Devil",             A_CHAOTIC, UNHOLY_HOLINESS,
 	MINIONS(Cdemons)
 	),
 /* rogue,  Nehwon */
-GOD_V2("Issek of the Jug",      A_LAWFUL, HOLY_HOLINESS,
+GOD_V2("Issek",                 A_LAWFUL, HOLY_HOLINESS,
 	MINIONS(PM_WATER_ELEMENTAL,PM_ANGEL,PM_THRONE_ARCHON)
 	),
 GOD_V2("Mog",                   A_NEUTRAL, NEUTRAL_HOLINESS,

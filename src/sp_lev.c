@@ -856,9 +856,9 @@ struct mkroom	*croom;
 	    panic("create_monster: unknown monster class '%c'", m->class);
 
 	if(m->align == AM_SPLEV_CO)
-		amask = Align2amask(u.ualignbase[A_ORIGINAL]);
+		amask = Align2amask(galign(u.ugodbase[UGOD_ORIGINAL]));
 	else if(m->align == AM_SPLEV_NONCO){
-		int tmp = noncoalignment(u.ualignbase[A_ORIGINAL]);
+		int tmp = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
 		amask = Align2amask(tmp);
 	}
 	else if(m->align <= -11) 
@@ -1714,9 +1714,9 @@ create_altar(a, croom)
 	 */
 
 	if(a->align == AM_SPLEV_CO)
-		amask = Align2amask(u.ualignbase[A_ORIGINAL]);
+		amask = Align2amask(galign(u.ugodbase[UGOD_ORIGINAL]));
 	else if(a->align == AM_SPLEV_NONCO){
-		int tmp = noncoalignment(u.ualignbase[A_ORIGINAL]);
+		int tmp = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
 		amask = Align2amask(tmp);
 	}
 	else if(a->align == -11)

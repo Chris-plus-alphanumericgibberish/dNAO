@@ -195,7 +195,7 @@ minimal_enlightenment()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	/* Starting alignment */
-	Sprintf(buf, fmtstr, "alignment", align_str(u.ualignbase[A_ORIGINAL]));
+	Sprintf(buf, fmtstr, "alignment", align_str(galign(u.ugodbase[UGOD_ORIGINAL])));
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	/* Current name, race, role, gender */
@@ -226,30 +226,31 @@ minimal_enlightenment()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	/* Deity list */
+	/* TODO */
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", FALSE);
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings, "Deities", FALSE);
 	Sprintf(buf2, deity_fmtstr, align_gname(A_CHAOTIC),
-	    (u.ualignbase[A_ORIGINAL] == u.ualign.type
+	    (galign(u.ugodbase[UGOD_ORIGINAL]) == u.ualign.type
 		&& u.ualign.type == A_CHAOTIC) ? " (s,c)" :
-	    (u.ualignbase[A_ORIGINAL] == A_CHAOTIC)       ? " (s)" :
+	    (galign(u.ugodbase[UGOD_ORIGINAL]) == A_CHAOTIC)       ? " (s)" :
 	    (u.ualign.type   == A_CHAOTIC)       ? " (c)" : "");
 	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Xaotic", buf2);
 	else Sprintf(buf, fmtstr, "Chaotic", buf2);
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	Sprintf(buf2, deity_fmtstr, align_gname(A_NEUTRAL),
-	    (u.ualignbase[A_ORIGINAL] == u.ualign.type
+	    (galign(u.ugodbase[UGOD_ORIGINAL]) == u.ualign.type
 		&& u.ualign.type == A_NEUTRAL) ? " (s,c)" :
-	    (u.ualignbase[A_ORIGINAL] == A_NEUTRAL)       ? " (s)" :
+	    (galign(u.ugodbase[UGOD_ORIGINAL]) == A_NEUTRAL)       ? " (s)" :
 	    (u.ualign.type   == A_NEUTRAL)       ? " (c)" : "");
 	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Gnostic", buf2);
 	else Sprintf(buf, fmtstr, "Neutral", buf2);
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	Sprintf(buf2, deity_fmtstr, align_gname(A_LAWFUL),
-	    (u.ualignbase[A_ORIGINAL] == u.ualign.type &&
+	    (galign(u.ugodbase[UGOD_ORIGINAL]) == u.ualign.type &&
 		u.ualign.type == A_LAWFUL)  ? " (s,c)" :
-	    (u.ualignbase[A_ORIGINAL] == A_LAWFUL)        ? " (s)" :
+	    (galign(u.ugodbase[UGOD_ORIGINAL]) == A_LAWFUL)        ? " (s)" :
 	    (u.ualign.type   == A_LAWFUL)        ? " (c)" : "");
 	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Mundane", buf2);
 	else Sprintf(buf, fmtstr, "Lawful", buf2);

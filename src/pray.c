@@ -2145,7 +2145,7 @@ dosacrifice()
 	    /* Is this a conversion ? */
 	    /* An unaligned altar in Gehennom will always elicit rejection. */
 	    if ((ugod_is_angry() && u.ualign.type != A_VOID) || (altaralign == A_NONE && Inhell)) {
-		if(u.ualignbase[A_CURRENT] == u.ualignbase[A_ORIGINAL] &&
+		if(u.ugodbase[UGOD_CURRENT] == u.ugodbase[UGOD_ORIGINAL] &&
 		   altaralign != A_NONE && altaralign != A_VOID && !Role_if(PM_EXILE)) {
 		    You("have a strong feeling that %s is angry...", u_gname());
 			if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
@@ -2158,9 +2158,11 @@ dosacrifice()
 
 		    /* The player wears a helm of opposite alignment? */
 		    if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
-			u.ualignbase[A_CURRENT] = altaralign;
-		    else
-			u.ualign.type = u.ualignbase[A_CURRENT] = altaralign;
+				u.ugodbase[UGOD_CURRENT] = align_to_god(altaralign);
+		    else {
+				u.ugodbase[UGOD_CURRENT] = align_to_god(altaralign);
+				u.ualign.type = altaralign;
+			}
 		    u.ublessed = 0;
 		    flags.botl = 1;
 
@@ -2171,9 +2173,9 @@ dosacrifice()
 		    u.lastprayed = moves;
 			u.reconciled = REC_NONE;
 		    u.lastprayresult = PRAY_CONV;
-		    adjalign((int)(u.ualignbase[A_ORIGINAL] * (ALIGNLIM / 2)));
+		    adjalign((int)(galign(u.ugodbase[UGOD_ORIGINAL]) * (ALIGNLIM / 2)));
 			if(Race_if(PM_DROW)){
-				switch(u.ualignbase[A_CURRENT]){
+				switch(galign(u.ugodbase[UGOD_ORIGINAL])){
 					case A_LAWFUL:
 						if(Role_if(PM_NOBLEMAN)){
 							if(flags.initgend){
@@ -3736,6 +3738,48 @@ int fd;
 	/* fix name pointers -- assumes that god names do NOT get changed during the game */
 	for (i=1; i<MAX_GOD; i++)
 		godlist[i].name = base_godlist[i].name;
+}
+
+aligntyp
+galign(godnum)
+int godnum;
+{
+	return godlist[godnum].alignment;
+}
+
+/* transitory function, hopefully, to convert an alignment into the most likely candidate god */
+int
+align_to_god(alignmnt)
+aligntyp alignmnt;
+{
+	const char * name;
+	switch(alignmnt) {
+		case A_LAWFUL:
+			name = urole.lgod;
+			break;
+		case A_NEUTRAL:
+			name = urole.ngod;
+			break;
+		case A_CHAOTIC:
+			name = urole.cgod;
+			break;
+		case A_VOID:
+			return GOD_THE_VOID;
+		case A_NONE:
+			return GOD_MOLOCH;
+	}
+	
+	int i;
+	const char * c;
+	for (i=1; i<MAX_GOD; i++) {
+		c = godlist[i].name;
+		if(*c=='_')c++;
+		if(!strcmp(name, c))
+			return i;
+	}
+	
+	impossible("no matching god for \"%s\" align %d?", name, alignmnt);
+	return GOD_NONE;
 }
 
 /*pray.c*/

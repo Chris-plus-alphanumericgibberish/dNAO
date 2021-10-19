@@ -2266,6 +2266,8 @@ E boolean FDECL(goat_mouth_at, (int, int));
 E void NDECL(init_gods);
 E void FDECL(save_gods, (int));
 E void FDECL(restore_gods, (int));
+E aligntyp FDECL(galign, (int));
+E int FDECL(align_to_god, (aligntyp));
 
 /* ### priest.c ### */
 

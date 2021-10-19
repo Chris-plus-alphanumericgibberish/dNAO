@@ -467,10 +467,10 @@ struct you {
 			atime;		/* used for loss/gain countdown */
 	long exerchkturn;	/* Stat Excercise: What turn is the next exerchk? */		
 	align	ualign;			/* character alignment */
-#define CONVERT		2
-#define A_ORIGINAL	1
-#define A_CURRENT	0
-	aligntyp ualignbase[CONVERT];	/* for ualign conversion record */
+#define UGOD_CONVERT	2
+#define UGOD_ORIGINAL	1
+#define UGOD_CURRENT	0
+	int ugodbase[UGOD_CONVERT];
 	schar uluck, moreluck;		/* luck and luck bonus */
 	int luckturn;
 #define Luck	(u.uluck + u.moreluck)
@@ -497,7 +497,7 @@ struct you {
 	/*"Real" numbers for a WtWalk's non-mask-based HP*/
 	int uhp_real, uhpmax_real, uhprolled_real, uhpbonus_real, uhpmod_real;
 	int uen_real, uenmax_real, uenrolled_real, uenbonus_real;
-	int ugangr[GA_NUM];			/* if the gods are angry at you */
+	int ugangr[GA_NUM];
 	int ugifts;			/* number of artifacts bestowed */
 	int uartisval;		/* approximate strength of artifacts and gifts bestowed and wished for */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */

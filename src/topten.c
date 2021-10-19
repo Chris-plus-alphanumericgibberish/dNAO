@@ -360,7 +360,7 @@ struct toptenentry *tt;
 
 #ifdef RECORD_ALIGN0
   (void)fprintf(rfile, SEP "align0=%s", 
-          aligns[1 - u.ualignbase[A_ORIGINAL]].filecode);
+          aligns[1 - galign(u.ugodbase[UGOD_ORIGINAL])].filecode);
 #endif
 
   (void)fprintf(rfile, "\n");
