@@ -589,6 +589,8 @@ int mode;
 	bwrite(fd,(genericptr_t) &dndest,sizeof(dest_area));
 	bwrite(fd,(genericptr_t) &level.flags,sizeof(level.flags));
 	bwrite(fd, (genericptr_t) doors, sizeof(doors));
+	bwrite(fd,(genericptr_t) &altarindex, sizeof(int));
+	bwrite(fd, (genericptr_t) altars, sizeof(altars));
 	save_rooms(fd);	/* no dynamic memory to reclaim */
 
 	/* from here on out, saving also involves allocated memory cleanup */

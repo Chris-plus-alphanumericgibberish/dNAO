@@ -18,6 +18,7 @@
 /* ALI - We need the list of artifact names for artifact doors */
 #define MAKEDEFS_C      /* We only want the names, not the complete defn */
 #include "artilist.h"
+#include "godlist.h"
 #undef MAKEDEFS_C
 
 #ifdef MAC
@@ -85,6 +86,7 @@ int FDECL(get_room_type, (char *));
 int FDECL(get_trap_type, (char *));
 int FDECL(get_monster_id, (char *,CHAR_P));
 int FDECL(get_object_id, (char *,CHAR_P));
+int FDECL(get_god_id, (char *));
 boolean FDECL(check_monster_char, (CHAR_P));
 boolean FDECL(check_object_char, (CHAR_P));
 char FDECL(what_map_char, (CHAR_P));
@@ -456,6 +458,24 @@ char c;		/* class */
 	    if (class && objects[i].oc_class != class) break;
 	    objname = obj_descr[i].oc_name;
 	    if (objname && !strcmp(s, objname))
+		return i;
+	}
+	return ERR;
+}
+
+/* 
+ * Find the index of a god in the table, knowing its name.
+ */
+int
+get_god_id(s)
+char * s;
+{
+	int i;
+
+	SpinCursor(3);
+
+	for (i = 1; i < MAX_GOD; i++) {
+	    if (god_names[i] && !strcmp(s, god_names[i]))
 		return i;
 	}
 	return ERR;

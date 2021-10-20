@@ -4478,7 +4478,7 @@ char *buf;
 #endif
 	else if (IS_ALTAR(ltyp)) {
 	    Sprintf(altbuf, "altar to %s (%s)", a_gname(),
-		    align_str(Amask2align(lev->altarmask & ~AM_SHRINE)));
+		    align_str(Amask2align(a_align(x,y))));
 	    dfeature = altbuf;
 	} else if ((x == xupstair && y == yupstair) ||
 		 (x == sstairs.sx && y == sstairs.sy && sstairs.up))

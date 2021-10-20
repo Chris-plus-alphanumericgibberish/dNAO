@@ -1409,6 +1409,7 @@ E void FDECL(add_subroom, (struct mkroom *,int,int,int,int,
 			   BOOLEAN_P,SCHAR_P,BOOLEAN_P));
 E void NDECL(makecorridors);
 E int FDECL(add_door, (int,int,struct mkroom *));
+E void FDECL(add_altar, (int, int, aligntyp, boolean, int));
 E int NDECL(random_special_room);
 E void NDECL(mkpoolroom);
 E void NDECL(mkslabroom);

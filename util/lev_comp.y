@@ -47,6 +47,7 @@ extern int FDECL(get_room_type, (char *));
 extern int FDECL(get_trap_type, (char *));
 extern int FDECL(get_monster_id, (char *,CHAR_P));
 extern int FDECL(get_object_id, (char *,CHAR_P));
+extern int FDECL(get_god_id, (char *));
 extern boolean FDECL(check_monster_char, (CHAR_P));
 extern boolean FDECL(check_object_char, (CHAR_P));
 extern char FDECL(what_map_char, (CHAR_P));
@@ -1465,16 +1466,25 @@ altar_detail	: ALTAR_ID ':' coordinate ',' alignment ',' altar_type
 			tmpaltar[naltar]->y = current_coord.y;
 			tmpaltar[naltar]->align = $<i>5;
 			tmpaltar[naltar]->shrine = $<i>7;
+			tmpaltar[naltar]->god = 0;
 			if (!in_room)
 			    check_coord(current_coord.x, current_coord.y,
 					"Altar");
-			naltar++;
-			if (naltar >= MAX_OF_TYPE) {
+		  }
+		  altar_god_infos
+		  {
+			if (++naltar >= MAX_OF_TYPE) {
 				yyerror("Too many altars in room or mazepart!");
 				naltar--;
 			}
 		  }
 		;
+
+altar_god_infos : /* nothing */
+		 | ',' string
+		  {
+			tmpaltar[naltar]->god = get_god_id($2);
+		  }
 
 gold_detail	: GOLD_ID ':' amount ',' coordinate
 		  {

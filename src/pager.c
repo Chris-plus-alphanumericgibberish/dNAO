@@ -471,7 +471,7 @@ lookat(x, y, buf, monbuf, shapebuff)
     case S_altar:
 	if(!In_endgame(&u.uz))
 	    Sprintf(buf, "%s altar",
-		align_str(Amask2align(levl[x][y].altarmask & ~AM_SHRINE)));
+		align_str(Amask2align(a_align(x, y))));
 	else Sprintf(buf, "aligned altar");
 	break;
     case S_ndoor:

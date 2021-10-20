@@ -2535,8 +2535,7 @@ int width;
 					&& levl[x+i][y+j+1].typ != DOOR
 					&& levl[x+i][y+j-1].typ != DOOR
 					){
-						levl[x+i][y+j].typ = ALTAR;
-						levl[x+i][y+j].altarmask = Align2amask( A_NEUTRAL );
+						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
 						break;
 					}
 				}
@@ -2706,8 +2705,7 @@ int width;
 					&& levl[x+i][y+j+1].typ != DOOR
 					&& levl[x+i][y+j-1].typ != DOOR
 					){
-						levl[x+i][y+j].typ = ALTAR;
-						levl[x+i][y+j].altarmask = Align2amask( A_NEUTRAL );
+						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
 						break;
 					}
 				}
@@ -3228,11 +3226,9 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					levl[x+2][y+5].typ = ALTAR;
-					levl[x+2][y+5].altarmask = Align2amask( A_NEUTRAL );
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, TEMPLE, TRUE);
 					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
-					levl[x+2][y+5].altarmask |= AM_SHRINE;
+					add_altar(x+2, y+5, Align2amask(A_NEUTRAL), TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
 					level.flags.has_temple = 1;
 				break;
 				case 2: //Garrison
@@ -3412,11 +3408,9 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					levl[x+sizetot-2][y+5].typ = ALTAR;
-					levl[x+sizetot-2][y+5].altarmask = Align2amask( A_NEUTRAL );
 					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, TEMPLE, TRUE);
 					priestini(&u.uz, &rooms[nroom - 1], x+sizetot-2, y+5, FALSE);
-					levl[x+sizetot-2][y+5].altarmask |= AM_SHRINE;
+					add_altar(x+sizetot-2, y+5, Align2amask(A_NEUTRAL), TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
 					level.flags.has_temple = 1;
 				break;
 				case 2: //Garrison
@@ -4377,8 +4371,8 @@ mkinvertzigg()
 			}
 			bury_an_obj(chest);
 		} else {
-			levl[x+size/2][y+size/2].typ = ALTAR;
-			levl[x+size/2][y+size/2].altarmask = Align2amask( A_NONE );
+			add_altar(x+size/2, y+size/2, Align2amask(A_NONE), FALSE, GOD_THE_DREAD_FRACTURE);
+
 			if ((otmp = mksobj_at(MISOTHEISTIC_FRAGMENT, x+size/2, y+size/2, MKOBJ_NOINIT)) != 0) {
 				otmp->quan = rnd(3);
 				otmp->owt = weight(otmp);
@@ -6629,7 +6623,7 @@ mktemple()
 {
 	register struct mkroom *sroom;
 	coord *shrine_spot;
-	register struct rm *lev;
+	aligntyp alignment;
 
 	if(!(sroom = pick_room(TRUE, TRUE))) return;
 
@@ -6640,14 +6634,12 @@ mktemple()
 	 * located in the center of the room
 	 */
 	shrine_spot = shrine_pos((sroom - rooms) + ROOMOFFSET);
-	lev = &levl[shrine_spot->x][shrine_spot->y];
-	lev->typ = ALTAR;
 	if (In_hell(&u.uz))
-		lev->altarmask = Align2amask(A_NONE);	/* in gehennom, all altars are to moloch */
+		alignment = Align2amask(A_NONE);	/* in gehennom, all altars are to moloch */
 	else
-		lev->altarmask = induced_align(80);
+		alignment = induced_align(80);
 	priestini(&u.uz, sroom, shrine_spot->x, shrine_spot->y, FALSE);
-	lev->altarmask |= AM_SHRINE;
+	add_altar(shrine_spot->x, shrine_spot->y, Align2amask(alignment), TRUE, ga_num_to_godnum(Align2gangr(alignment)));
 	level.flags.has_temple = 1;
 }
 

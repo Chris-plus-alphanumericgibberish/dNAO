@@ -396,6 +396,7 @@ E const char disclosure_options[];
 
 E NEARDATA int smeq[];
 E NEARDATA int doorindex;
+E NEARDATA int altarindex;
 E NEARDATA char *save_cm;
 #define KILLED_BY_AN	 0
 #define KILLED_BY	 1

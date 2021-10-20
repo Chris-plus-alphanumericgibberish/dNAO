@@ -1713,7 +1713,10 @@ create_altar(a, croom)
 	 * shared by many other parts of the special level code.
 	 */
 
-	if(a->align == AM_SPLEV_CO)
+	if(a->god) {
+		amask = Align2amask(galign(a->god));
+	}
+	else if(a->align == AM_SPLEV_CO)
 		amask = Align2amask(galign(u.ugodbase[UGOD_ORIGINAL]));
 	else if(a->align == AM_SPLEV_NONCO){
 		int tmp = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
@@ -1725,8 +1728,10 @@ create_altar(a, croom)
 		amask = ralign[-a->align-1];
 	else amask = a->align;
 
-	levl[x][y].typ = ALTAR;
-	levl[x][y].altarmask = amask;
+	/* if god wasn't specified, set god based on alignment and dungeon level context */
+	if (!a->god) {
+		a->god = ga_num_to_godnum(Amask2gangr(amask));
+	}
 
 	if (a->shrine < 0) a->shrine = rn2(2);	/* handle random case */
 
@@ -1735,13 +1740,12 @@ create_altar(a, croom)
 	else if (oldtyp == SINK)
 	    level.flags.nsinks--;
 
-	if (!croom_is_temple || !a->shrine) return;
-
-	if (a->shrine) {	/* Is it a shrine  or sanctum? */
+	if (a->shrine && croom_is_temple) {	/* Is it a shrine  or sanctum? */
 	    priestini(&u.uz, croom, x, y, (a->shrine > 1));
-	    levl[x][y].altarmask |= AM_SHRINE;
 	    level.flags.has_temple = TRUE;
 	}
+
+	add_altar(x, y, amask, a->shrine, a->god);
 }
 
 /*

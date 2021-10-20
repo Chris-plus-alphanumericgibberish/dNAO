@@ -173,7 +173,7 @@ but that's really hard.
 
 #define ugod_is_angry() (u.ualign.record < 0)
 #define on_altar()	(IS_ALTAR(levl[u.ux][u.uy].typ) || goat_mouth_at(u.ux, u.uy))
-#define on_shrine()	((levl[u.ux][u.uy].altarmask & AM_SHRINE) != 0)
+#define on_shrine()	(IS_ALTAR(levl[u.ux][u.uy].typ) && altars[levl[u.ux][u.uy].altar_num].shrine)
 
 STATIC_OVL int
 in_trouble()
@@ -798,7 +798,7 @@ int ga_num;
 	    case 8:	
 			Sprintf(buf,"Thou durst %s me? Then die, %s!",
 				  (on_altar() &&
-				   (a_align(u.ux,u.uy) != resp_god)) ?
+				   (Amask2align(a_align(u.ux,u.uy)) != resp_god)) ?
 				  "scorn":"call upon",
 			      youracedata->mlet == S_HUMAN ? "mortal" : "creature"
 			);
@@ -1828,7 +1828,7 @@ dosacrifice()
     register struct obj *otmp;
     int value = 0;
     int pm;
-    aligntyp altaralign = a_align(u.ux,u.uy);
+    aligntyp altaralign = Amask2align(a_align(u.ux,u.uy));
     if (!on_altar() || u.uswallow) {
 	You("are not standing on an altar.");
 	return 0;
@@ -1911,8 +1911,10 @@ dosacrifice()
 				/* curse the lawful/neutral altar */
 				if(Race_if(PM_INCANTIFIER)) pline_The("altar is stained with human blood, the blood of your birth race.");
 				else pline_The("altar is stained with %s blood.", urace.adj);
-				if(!Is_astralevel(&u.uz))
-					levl[u.ux][u.uy].altarmask = AM_CHAOTIC;
+				if(!Is_astralevel(&u.uz)) {
+					a_align(u.ux, u.uy) = AM_CHAOTIC;
+					a_gnum(u.ux, u.uy) = ga_num_to_godnum(Align2gangr(A_CHAOTIC));
+				}
 				angry_priest();
 			} else {
 				struct monst *dmon;
@@ -1925,7 +1927,8 @@ dosacrifice()
 					 "The blood floods the altar, which vanishes in %s cloud!",
 					  an(hcolor(NH_BLACK)));
 					levl[u.ux][u.uy].typ = ROOM;
-					levl[u.ux][u.uy].altarmask = 0;
+					levl[u.ux][u.uy].altar_num = 0;
+					/* todo: notice that the altar is gone in #overview */
 					newsym(u.ux, u.uy);
 					angry_priest();
 					demonless_msg = "cloud dissipates";
@@ -2276,11 +2279,8 @@ dosacrifice()
 				You_feel("the power of %s increase.", u_gname());
 				exercise(A_WIS, TRUE);
 				change_luck(1);
-				/* Yes, this is supposed to be &=, not |= */
-				levl[u.ux][u.uy].altarmask &= AM_SHRINE;
-				/* the following accommodates stupid compilers */
-				levl[u.ux][u.uy].altarmask =
-				levl[u.ux][u.uy].altarmask | (Align2amask(u.ualign.type));
+				a_align(u.ux, u.uy) = Align2amask(u.ualign.type);
+				a_gnum(u.ux, u.uy) = ga_num_to_godnum(Align2gangr(u.ualign.type));
 				if (!Blind)
 				pline_The("altar glows %s.",
 					  hcolor(
@@ -2400,7 +2400,7 @@ dosacrifice()
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
 		if (u.ulevel > 2 && u.uluck >= 0 && maybe_god_gives_gift()) {
-		otmp = mk_artifact((struct obj *)0, a_align(u.ux,u.uy));
+		otmp = mk_artifact((struct obj *)0, Amask2align(a_align(u.ux,u.uy)));
 		if (otmp) {
 		    if (otmp->spe < 0) otmp->spe = 0;
 		    if (otmp->cursed) uncurse(otmp);
@@ -2480,7 +2480,7 @@ boolean praying;	/* false means no messages should be given */
 {
     int alignment;
 
-    p_aligntyp = on_altar() ? a_align(u.ux,u.uy) : u.ualign.type;
+    p_aligntyp = on_altar() ? Amask2align(a_align(u.ux,u.uy)) : u.ualign.type;
     p_trouble = in_trouble();
 
     if (is_demon(youracedata) && (p_aligntyp != A_CHAOTIC)) {
@@ -2794,7 +2794,7 @@ xchar x, y;
 {
     if(!IS_ALTAR(levl[x][y].typ)) return((char *)0);
 
-    return align_gname(a_align(x,y));
+    return godname(a_gnum(x,y));
 }
 
 const char *
@@ -3084,7 +3084,7 @@ struct obj *candle;
 {
   if (candle->where != OBJ_FLOOR 
      || !IS_ALTAR(levl[candle->ox][candle->oy].typ)
-     ||  a_align(candle->ox, candle->oy) != u.ualign.type) {
+     ||  Amask2align(a_align(candle->ox, candle->oy)) != u.ualign.type) {
 
      return 0;
   }

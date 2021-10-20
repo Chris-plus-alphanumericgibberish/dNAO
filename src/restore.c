@@ -933,6 +933,8 @@ boolean ghostly;
 	mread(fd, (genericptr_t)&dndest, sizeof(dest_area));
 	mread(fd, (genericptr_t)&level.flags, sizeof(level.flags));
 	mread(fd, (genericptr_t)doors, sizeof(doors));
+	mread(fd, (genericptr_t)&altarindex, sizeof(int));
+	mread(fd, (genericptr_t)altars, sizeof(altars));
 	rest_rooms(fd);		/* No joke :-) */
 	if (nroom)
 	    doorindex = rooms[nroom - 1].fdoor + rooms[nroom - 1].doorct;

@@ -506,10 +506,10 @@ unsigned *ospecial;
 				// if (Hallucination) color = rn2(CLR_MAX); Redraw cycle doesn't trigger unless something passes over square
 				if (Is_astralevel(&u.uz)) color = CLR_BRIGHT_MAGENTA;
 				else if(Is_sanctum(&u.uz)) color = CLR_MAGENTA;
-				// else switch((aligntyp)Amask2align(levl[x][y].altarmask & AM_MASK)) { Commented out due to hallucination code.
-					// case A_LAWFUL: color = CLR_WHITE; break; 
-					// case A_NEUTRAL: color = CLR_GRAY; break; 
-					// case A_CHAOTIC: color = CLR_BLACK; break; 
+				// else switch(a_align(x, y)) { Commented out due to hallucination code.
+					// case AM_LAWFUL: color = CLR_WHITE; break; 
+					// case AM_NEUTRAL: color = CLR_GRAY; break; 
+					// case AM_CHAOTIC: color = CLR_BLACK; break; 
 					// default: color = CLR_RED; break;
 				// }
 			}

@@ -402,7 +402,7 @@ register int x, y, typ;
 		    add_damage(x, y,		/* schedule repair */
 			       ((IS_DOOR(lev->typ) || IS_WALL(lev->typ))
 				&& !flags.mon_moving) ? 200L : 0L);
-		lev->doormask = 0;	/* subsumes altarmask, icedpool... */
+		lev->doormask = 0;	/* subsumes altar_num, icedpool... */
 		if (IS_ROOM(lev->typ) 
 			&& lev->typ != SAND
 			&& lev->typ != SOIL

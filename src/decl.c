@@ -49,6 +49,7 @@ struct q_score	quest_status = DUMMY;
 
 NEARDATA int smeq[MAXNROFROOMS+1] = DUMMY;
 NEARDATA int doorindex = 0;
+NEARDATA int altarindex = 0;
 
 NEARDATA char *save_cm = 0;
 NEARDATA int killer_format = 0;
@@ -155,6 +156,7 @@ NEARDATA boolean in_steed_dismounting = FALSE;
 
 NEARDATA coord bhitpos = DUMMY;
 NEARDATA struct door doors[DOORMAX] = {DUMMY};
+NEARDATA struct altar altars[ALTARMAX] = {DUMMY};
 
 NEARDATA struct mkroom rooms[(MAXNROFROOMS+1)*2] = {DUMMY};
 NEARDATA struct mkroom* subrooms = &rooms[MAXNROFROOMS+1];

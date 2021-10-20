@@ -671,6 +671,30 @@ register int type;
 	add_door(x,y,aroom);
 }
 
+void
+add_altar(x, y, amask, shrine, godnum)
+int x, y;
+aligntyp amask;
+boolean shrine;
+int godnum;
+{
+	if (altarindex == ALTARMAX) {
+		impossible("Max altar reached!");
+	    return;
+	}
+
+	levl[x][y].typ = ALTAR;
+	levl[x][y].altar_num = altarindex;
+
+	altars[altarindex].x = x;
+	altars[altarindex].y = y;
+	altars[altarindex].align = amask;
+	altars[altarindex].shrine = shrine;
+	altars[altarindex].god = godnum;
+
+	altarindex++;
+}
+
 STATIC_OVL boolean
 place_niche(aroom,dy,xx,yy)
 register struct mkroom *aroom;
@@ -987,6 +1011,7 @@ clear_level_structures()
 	nsubroom = 0;
 	subrooms[0].hx = -1;
 	doorindex = 0;
+	altarindex = 0;
 	init_rect();
 	init_vault();
 	xdnstair = ydnstair = xupstair = yupstair = 0;
@@ -1989,11 +2014,9 @@ struct mkroom *croom;
 		if (croom && croom->rtype != OROOM && croom->rtype != JOINEDROOM)
 			return FALSE;
 		/* Put an altar at m.x, m.y */
-		levl[m.x][m.y].typ = ALTAR;
-
 		/* -1 - A_CHAOTIC, 0 - A_NEUTRAL, 1 - A_LAWFUL */
 		tmp = (Inhell ? A_NONE : rn2(3)-1);
-		levl[m.x][m.y].altarmask = Align2amask(tmp);
+		add_altar(m.x, m.y, Align2amask(tmp), FALSE, ga_num_to_godnum(Align2gangr(tmp)));
 		break;
 	case PUDDLE:
 		tmp = 0;	// number of puddles made

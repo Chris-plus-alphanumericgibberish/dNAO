@@ -525,7 +525,7 @@ struct rm {
 
 
 #define doormask	flags
-#define altarmask	flags
+#define altar_num	flags
 #define wall_info	flags
 #define ladder		flags
 #define drawbridgemask	flags
