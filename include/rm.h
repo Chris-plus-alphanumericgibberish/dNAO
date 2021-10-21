@@ -293,11 +293,6 @@ extern uchar showsymcolors[MAXPCHARS];
 #define D_TRAPPED	16
 
 /*
- * Some altars are considered as shrines, so we need a flag.
- */
-#define AM_SHRINE	16
-
-/*
  * Thrones should only be looted once.
  */
 #define T_LOOTED	 1

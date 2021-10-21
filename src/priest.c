@@ -151,7 +151,7 @@ int roomno;
 	struct rm *lev;
 
 	shrine_spot = shrine_pos(roomno);
-	return Amask2align(a_align(shrine_spot->x, shrine_spot->y));
+	return (a_align(shrine_spot->x, shrine_spot->y));
 }
 #endif /* OVL0 */
 #ifdef OVLB
@@ -269,7 +269,7 @@ int sanctum;   /* is it the seat of the high priest? */
 	if(In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && Role_if(PM_EXILE)){
 		int qpm = NON_PM;
 		const int *minions;
-		if(a_align(sx, sy) == AM_LAWFUL){
+		if(a_align(sx, sy) == A_LAWFUL){
 			makemon(&mons[roles[flags.panLgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panLgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panLgod].guardnum], sx, sy, MM_ADJACENTOK);
@@ -286,7 +286,7 @@ int sanctum;   /* is it the seat of the high priest? */
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
-		} else if(a_align(sx, sy) == AM_CHAOTIC){
+		} else if(a_align(sx, sy) == A_CHAOTIC){
 			makemon(&mons[roles[flags.panCgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panCgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panCgod].guardnum], sx, sy, MM_ADJACENTOK);
@@ -299,7 +299,7 @@ int sanctum;   /* is it the seat of the high priest? */
 				roles[flags.panCgod].malenum : 
 				roles[flags.panCgod].femalenum;
 			makemon(&mons[qpm], sx, sy, MM_ADJACENTOK);
-			minions = god_minions(align_to_god(AM_CHAOTIC));
+			minions = god_minions(align_to_god(A_CHAOTIC));
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);

@@ -2535,7 +2535,7 @@ int width;
 					&& levl[x+i][y+j+1].typ != DOOR
 					&& levl[x+i][y+j-1].typ != DOOR
 					){
-						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, GOD_NONE);
+						add_altar(x+i, y+j, A_NEUTRAL, FALSE, GOD_NONE);
 						break;
 					}
 				}
@@ -2705,7 +2705,7 @@ int width;
 					&& levl[x+i][y+j+1].typ != DOOR
 					&& levl[x+i][y+j-1].typ != DOOR
 					){
-						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, GOD_NONE);
+						add_altar(x+i, y+j, A_NEUTRAL, FALSE, GOD_NONE);
 						break;
 					}
 				}
@@ -3227,7 +3227,7 @@ mkpluvillage()
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, TEMPLE, TRUE);
-					add_altar(x+2, y+5, Align2amask(A_NEUTRAL), TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+					add_altar(x+2, y+5, A_NEUTRAL, TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
 					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
 					level.flags.has_temple = 1;
 				break;
@@ -3409,7 +3409,7 @@ mkpluvillage()
 					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, TEMPLE, TRUE);
-					add_altar(x+sizetot-2, y+5, Align2amask(A_NEUTRAL), TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+					add_altar(x+sizetot-2, y+5, A_NEUTRAL, TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
 					priestini(&u.uz, &rooms[nroom - 1], x+sizetot-2, y+5, FALSE);
 					level.flags.has_temple = 1;
 				break;
@@ -4371,7 +4371,7 @@ mkinvertzigg()
 			}
 			bury_an_obj(chest);
 		} else {
-			add_altar(x+size/2, y+size/2, Align2amask(A_NONE), FALSE, GOD_THE_DREAD_FRACTURE);
+			add_altar(x+size/2, y+size/2, A_NONE, FALSE, GOD_THE_DREAD_FRACTURE);
 
 			if ((otmp = mksobj_at(MISOTHEISTIC_FRAGMENT, x+size/2, y+size/2, MKOBJ_NOINIT)) != 0) {
 				otmp->quan = rnd(3);
@@ -6635,10 +6635,10 @@ mktemple()
 	 */
 	shrine_spot = shrine_pos((sroom - rooms) + ROOMOFFSET);
 	if (In_hell(&u.uz))
-		alignment = Align2amask(A_NONE);	/* in gehennom, all altars are to moloch */
+		alignment = A_NONE;	/* in gehennom, all altars are to moloch */
 	else
 		alignment = induced_align(80);
-	add_altar(shrine_spot->x, shrine_spot->y, Align2amask(alignment), TRUE, ga_num_to_godnum(Align2gangr(alignment)));
+	add_altar(shrine_spot->x, shrine_spot->y, alignment, TRUE, ga_num_to_godnum(Align2gangr(alignment)));
 	priestini(&u.uz, sroom, shrine_spot->x, shrine_spot->y, FALSE);
 	level.flags.has_temple = 1;
 }

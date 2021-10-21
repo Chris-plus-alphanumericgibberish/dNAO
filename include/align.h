@@ -26,18 +26,13 @@ typedef struct	align {		/* alignment & record */
 
 #define A_VOID		 -3 /* chosen to line up with topten and aligns[] (aligns[] is defined in role.c) */
 
-#define A_COALIGNED	 1
-#define A_OPALIGNED	(-1)
-
+/* alignment mask values -- for sp_lev and role */
 #define AM_NONE		 0
 #define AM_CHAOTIC	 1
 #define AM_NEUTRAL	 2
 #define AM_LAWFUL	 4
 #define AM_VOID		 8
-//AM_SHRINE			16 //Note: this is in another .h file, but must be kept in sync
-
 #define AM_MASK		 15
-
 #define AM_SPLEV_CO	 3
 #define AM_SPLEV_NONCO	 7
 

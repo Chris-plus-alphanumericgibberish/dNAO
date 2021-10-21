@@ -4479,10 +4479,10 @@ char *buf;
 	else if (IS_ALTAR(ltyp)) {
 		if(a_gnum(x,y) != GOD_NONE) {
 			Sprintf(altbuf, "altar to %s (%s)", a_gname(),
-				align_str(Amask2align(a_align(x,y))));
+				align_str(a_align(x,y)));
 		}
 		else {
-			Sprintf(altbuf, "%s altar", align_str(Amask2align(a_align(x,y))));
+			Sprintf(altbuf, "%s altar", align_str(a_align(x,y)));
 		}
 	    dfeature = altbuf;
 	} else if ((x == xupstair && y == yupstair) ||

@@ -5006,7 +5006,7 @@ srch:
 			al = A_VOID;
 		    else /* -1 - A_CHAOTIC, 0 - A_NEUTRAL, 1 - A_LAWFUL */
 			al = (!rn2(6)) ? A_NONE : rn2((int)A_LAWFUL+2) - 1;
-			add_altar(u.ux, u.uy, Align2amask(al), FALSE, GOD_NONE);
+			add_altar(u.ux, u.uy, al, FALSE, GOD_NONE);
 		    pline("%s altar.", An(align_str(al)));
 		    newsym(u.ux, u.uy);
 			*wishreturn = WISH_SUCCESS;

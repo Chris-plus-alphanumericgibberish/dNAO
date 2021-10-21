@@ -672,9 +672,9 @@ register int type;
 }
 
 void
-add_altar(x, y, amask, shrine, godnum)
+add_altar(x, y, alignment, shrine, godnum)
 int x, y;
-aligntyp amask;
+aligntyp alignment;
 boolean shrine;
 int godnum;
 {
@@ -688,7 +688,7 @@ int godnum;
 
 	altars[altarindex].x = x;
 	altars[altarindex].y = y;
-	altars[altarindex].align = amask;
+	altars[altarindex].align = alignment;
 	altars[altarindex].shrine = shrine;
 	altars[altarindex].god = godnum;
 
@@ -2016,7 +2016,7 @@ struct mkroom *croom;
 		/* Put an altar at m.x, m.y */
 		/* -1 - A_CHAOTIC, 0 - A_NEUTRAL, 1 - A_LAWFUL */
 		tmp = (Inhell ? A_NONE : rn2(3)-1);
-		add_altar(m.x, m.y, Align2amask(tmp), FALSE, GOD_NONE);
+		add_altar(m.x, m.y, tmp, FALSE, GOD_NONE);
 		break;
 	case PUDDLE:
 		tmp = 0;	// number of puddles made

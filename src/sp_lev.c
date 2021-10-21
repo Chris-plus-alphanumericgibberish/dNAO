@@ -838,7 +838,7 @@ struct mkroom	*croom;
     struct monst *mtmp;
     schar x, y;
     char class;
-    aligntyp amask;
+    aligntyp alignment;
     coord cc;
     struct permonst *pm;
     unsigned g_mvflags;
@@ -856,16 +856,16 @@ struct mkroom	*croom;
 	    panic("create_monster: unknown monster class '%c'", m->class);
 
 	if(m->align == AM_SPLEV_CO)
-		amask = Align2amask(galign(u.ugodbase[UGOD_ORIGINAL]));
+		alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
 	else if(m->align == AM_SPLEV_NONCO){
-		int tmp = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
-		amask = Align2amask(tmp);
+		alignment = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
 	}
 	else if(m->align <= -11) 
-		amask = induced_align(80);
+		alignment = induced_align(80);
 	else if(m->align < 0)
-		amask = ralign[-m->align-1];
-	else amask = m->align;
+		alignment = Amask2align(ralign[-m->align-1]);
+	else
+		alignment = Amask2align(m->align);
 
 	if (!class)
 	    pm = (struct permonst *) 0;
@@ -902,7 +902,7 @@ struct mkroom	*croom;
 	    x = cc.x,  y = cc.y;
 
 	if(m->align != -12)
-	    mtmp = mk_roamer(pm, Amask2align(amask), x, y, m->peaceful);
+	    mtmp = mk_roamer(pm, alignment, x, y, m->peaceful);
 	else if(PM_ARCHEOLOGIST <= m->id && m->id <= PM_WIZARD)
 	         mtmp = mk_mplayer(pm, x, y, FALSE);
 	else mtmp = makemon(pm, x, y, NO_MM_FLAGS);
@@ -1679,7 +1679,7 @@ create_altar(a, croom)
 	struct mkroom	*croom;
 {
 	schar		sproom,x,y;
-	aligntyp	amask;
+	aligntyp	alignment;
 	boolean		croom_is_temple = TRUE;
 	int oldtyp; 
 
@@ -1713,20 +1713,20 @@ create_altar(a, croom)
 	 * shared by many other parts of the special level code.
 	 */
 
-	if(a->god) {
-		amask = Align2amask(galign(a->god));
+	if(a->god != GOD_NONE) {
+		alignment = galign(a->god);
 	}
 	else if(a->align == AM_SPLEV_CO)
-		amask = Align2amask(galign(u.ugodbase[UGOD_ORIGINAL]));
+		alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
 	else if(a->align == AM_SPLEV_NONCO){
-		int tmp = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
-		amask = Align2amask(tmp);
+		alignment = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
 	}
 	else if(a->align == -11)
-		amask = induced_align(80);
+		alignment = induced_align(80);
 	else if(a->align < 0)
-		amask = ralign[-a->align-1];
-	else amask = a->align;
+		alignment = Amask2align(ralign[-a->align-1]);
+	else
+		alignment = Amask2align(a->align);
 
 	if (a->shrine < 0) a->shrine = rn2(2);	/* handle random case */
 
@@ -1737,10 +1737,10 @@ create_altar(a, croom)
 
 	if (a->shrine && !a->god) {
 		/* shrines should be to a god, pick most appropriate god. */
-		a->god = ga_num_to_godnum(Amask2gangr(amask));
+		a->god = ga_num_to_godnum(Align2gangr(alignment));
 	}
 
-	add_altar(x, y, amask, a->shrine, a->god);
+	add_altar(x, y, alignment, a->shrine, a->god);
 
 	if (a->shrine && croom_is_temple) {	/* Is it a shrine  or sanctum? */
 	    priestini(&u.uz, croom, x, y, (a->shrine > 1));

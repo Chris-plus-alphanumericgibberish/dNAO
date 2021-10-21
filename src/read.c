@@ -2704,7 +2704,7 @@ struct obj	*sobj;
 			levl[u.ux][u.uy].typ == SOIL ||
 			levl[u.ux][u.uy].typ == SAND)
 		{
-			add_altar(u.ux, u.uy, Align2amask( whichgod ), FALSE, GOD_NONE);
+			add_altar(u.ux, u.uy, whichgod, FALSE, GOD_NONE);
 			pline("%s altar appears in front of you!", An(align_str(whichgod)));
 			newsym(u.ux, u.uy);
 		}

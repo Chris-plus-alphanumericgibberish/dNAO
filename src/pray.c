@@ -798,7 +798,7 @@ int ga_num;
 	    case 8:	
 			Sprintf(buf,"Thou durst %s me? Then die, %s!",
 				  (on_altar() &&
-				   (Amask2align(a_align(u.ux,u.uy)) != resp_god)) ?
+				   ((a_align(u.ux,u.uy)) != resp_god)) ?
 				  "scorn":"call upon",
 			      youracedata->mlet == S_HUMAN ? "mortal" : "creature"
 			);
@@ -1828,7 +1828,7 @@ dosacrifice()
     register struct obj *otmp;
     int value = 0;
     int pm;
-    aligntyp altaralign = Amask2align(a_align(u.ux,u.uy));
+    aligntyp altaralign = (a_align(u.ux,u.uy));
     if (!on_altar() || u.uswallow) {
 	You("are not standing on an altar.");
 	return 0;
@@ -1912,8 +1912,8 @@ dosacrifice()
 				if(Race_if(PM_INCANTIFIER)) pline_The("altar is stained with human blood, the blood of your birth race.");
 				else pline_The("altar is stained with %s blood.", urace.adj);
 				if(!Is_astralevel(&u.uz)) {
-					a_align(u.ux, u.uy) = AM_CHAOTIC;
-					a_gnum(u.ux, u.uy) = ga_num_to_godnum(Align2gangr(A_CHAOTIC));
+					a_align(u.ux, u.uy) = A_CHAOTIC;
+					a_gnum(u.ux, u.uy) = GOD_NONE;
 				}
 				angry_priest();
 			} else {
@@ -2279,8 +2279,8 @@ dosacrifice()
 				You_feel("the power of %s increase.", u_gname());
 				exercise(A_WIS, TRUE);
 				change_luck(1);
-				a_align(u.ux, u.uy) = Align2amask(u.ualign.type);
-				a_gnum(u.ux, u.uy) = ga_num_to_godnum(Align2gangr(u.ualign.type));
+				a_align(u.ux, u.uy) = u.ualign.type;
+				a_gnum(u.ux, u.uy) = GOD_NONE;
 				if (!Blind)
 				pline_The("altar glows %s.",
 					  hcolor(
@@ -2400,7 +2400,7 @@ dosacrifice()
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
 		if (u.ulevel > 2 && u.uluck >= 0 && maybe_god_gives_gift()) {
-		otmp = mk_artifact((struct obj *)0, Amask2align(a_align(u.ux,u.uy)));
+		otmp = mk_artifact((struct obj *)0, (a_align(u.ux,u.uy)));
 		if (otmp) {
 		    if (otmp->spe < 0) otmp->spe = 0;
 		    if (otmp->cursed) uncurse(otmp);
@@ -2480,7 +2480,7 @@ boolean praying;	/* false means no messages should be given */
 {
     int alignment;
 
-    p_aligntyp = on_altar() ? Amask2align(a_align(u.ux,u.uy)) : u.ualign.type;
+    p_aligntyp = on_altar() ? (a_align(u.ux,u.uy)) : u.ualign.type;
     p_trouble = in_trouble();
 
     if (is_demon(youracedata) && (p_aligntyp != A_CHAOTIC)) {
@@ -2797,7 +2797,7 @@ xchar x, y;
 	if(a_gnum(x,y) != GOD_NONE)
     	return godname(a_gnum(x,y));
 	
-	return godname(align_to_god(Amask2align(a_align(x,y))));
+	return godname(align_to_god((a_align(x,y))));
 }
 
 const char *
@@ -3087,7 +3087,7 @@ struct obj *candle;
 {
   if (candle->where != OBJ_FLOOR 
      || !IS_ALTAR(levl[candle->ox][candle->oy].typ)
-     ||  Amask2align(a_align(candle->ox, candle->oy)) != u.ualign.type) {
+     ||  (a_align(candle->ox, candle->oy)) != u.ualign.type) {
 
      return 0;
   }

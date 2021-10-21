@@ -8086,7 +8086,7 @@ arti_invoke(obj)
 						obfree(otmp,(struct obj *)0);
 					}break;
 					case COMMAND_ANNUL:{
-						if(Is_astralevel(&u.uz) && IS_ALTAR(levl[u.ux][u.uy].typ) && a_align(u.ux, u.uy) == AM_LAWFUL){
+						if(Is_astralevel(&u.uz) && IS_ALTAR(levl[u.ux][u.uy].typ) && a_align(u.ux, u.uy) == A_LAWFUL){
 							struct engr *engrHere = engr_at(u.ux,u.uy);
 							pline("A column of cerulean light blasts through the center of the Annulus, striking the High Altar with intolerable force.");
 							pline("The whole plane shakes, and the Altar and Annulus both explode into a rapidly-fading ring of cerulean light.");
@@ -9584,7 +9584,7 @@ struct obj *obj;
 				'R', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
-	} else if(Is_astralevel(&u.uz) && IS_ALTAR(levl[u.ux][u.uy].typ) && a_align(u.ux, u.uy) == AM_LAWFUL){
+	} else if(Is_astralevel(&u.uz) && IS_ALTAR(levl[u.ux][u.uy].typ) && a_align(u.ux, u.uy) == A_LAWFUL){
 		if(obj->otyp == CHAKRAM){
 			Sprintf(buf, "Annul");
 			any.a_int = COMMAND_ANNUL;	/* must be non-zero */
