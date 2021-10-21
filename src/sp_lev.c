@@ -1728,11 +1728,6 @@ create_altar(a, croom)
 		amask = ralign[-a->align-1];
 	else amask = a->align;
 
-	/* if god wasn't specified, set god based on alignment and dungeon level context */
-	if (!a->god) {
-		a->god = ga_num_to_godnum(Amask2gangr(amask));
-	}
-
 	if (a->shrine < 0) a->shrine = rn2(2);	/* handle random case */
 
 	if (oldtyp == FOUNTAIN)
@@ -1740,12 +1735,17 @@ create_altar(a, croom)
 	else if (oldtyp == SINK)
 	    level.flags.nsinks--;
 
+	if (a->shrine && !a->god) {
+		/* shrines should be to a god, pick most appropriate god. */
+		a->god = ga_num_to_godnum(Amask2gangr(amask));
+	}
+
+	add_altar(x, y, amask, a->shrine, a->god);
+
 	if (a->shrine && croom_is_temple) {	/* Is it a shrine  or sanctum? */
 	    priestini(&u.uz, croom, x, y, (a->shrine > 1));
 	    level.flags.has_temple = TRUE;
 	}
-
-	add_altar(x, y, amask, a->shrine, a->god);
 }
 
 /*

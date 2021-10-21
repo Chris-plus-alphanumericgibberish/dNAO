@@ -2016,7 +2016,7 @@ struct mkroom *croom;
 		/* Put an altar at m.x, m.y */
 		/* -1 - A_CHAOTIC, 0 - A_NEUTRAL, 1 - A_LAWFUL */
 		tmp = (Inhell ? A_NONE : rn2(3)-1);
-		add_altar(m.x, m.y, Align2amask(tmp), FALSE, ga_num_to_godnum(Align2gangr(tmp)));
+		add_altar(m.x, m.y, Align2amask(tmp), FALSE, GOD_NONE);
 		break;
 	case PUDDLE:
 		tmp = 0;	// number of puddles made

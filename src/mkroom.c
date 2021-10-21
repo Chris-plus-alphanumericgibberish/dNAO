@@ -2535,7 +2535,7 @@ int width;
 					&& levl[x+i][y+j+1].typ != DOOR
 					&& levl[x+i][y+j-1].typ != DOOR
 					){
-						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, GOD_NONE);
 						break;
 					}
 				}
@@ -2705,7 +2705,7 @@ int width;
 					&& levl[x+i][y+j+1].typ != DOOR
 					&& levl[x+i][y+j-1].typ != DOOR
 					){
-						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+						add_altar(x+i, y+j, Align2amask(A_NEUTRAL), FALSE, GOD_NONE);
 						break;
 					}
 				}
@@ -3227,8 +3227,8 @@ mkpluvillage()
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, TEMPLE, TRUE);
-					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
 					add_altar(x+2, y+5, Align2amask(A_NEUTRAL), TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
 					level.flags.has_temple = 1;
 				break;
 				case 2: //Garrison
@@ -3409,8 +3409,8 @@ mkpluvillage()
 					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, TEMPLE, TRUE);
-					priestini(&u.uz, &rooms[nroom - 1], x+sizetot-2, y+5, FALSE);
 					add_altar(x+sizetot-2, y+5, Align2amask(A_NEUTRAL), TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+					priestini(&u.uz, &rooms[nroom - 1], x+sizetot-2, y+5, FALSE);
 					level.flags.has_temple = 1;
 				break;
 				case 2: //Garrison
@@ -6638,8 +6638,8 @@ mktemple()
 		alignment = Align2amask(A_NONE);	/* in gehennom, all altars are to moloch */
 	else
 		alignment = induced_align(80);
-	priestini(&u.uz, sroom, shrine_spot->x, shrine_spot->y, FALSE);
 	add_altar(shrine_spot->x, shrine_spot->y, Align2amask(alignment), TRUE, ga_num_to_godnum(Align2gangr(alignment)));
+	priestini(&u.uz, sroom, shrine_spot->x, shrine_spot->y, FALSE);
 	level.flags.has_temple = 1;
 }
 

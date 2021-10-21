@@ -2793,8 +2793,11 @@ a_gname_at(x,y)     /* returns the name of an altar's deity */
 xchar x, y;
 {
     if(!IS_ALTAR(levl[x][y].typ)) return((char *)0);
-
-    return godname(a_gnum(x,y));
+	
+	if(a_gnum(x,y) != GOD_NONE)
+    	return godname(a_gnum(x,y));
+	
+	return godname(align_to_god(Amask2align(a_align(x,y))));
 }
 
 const char *
