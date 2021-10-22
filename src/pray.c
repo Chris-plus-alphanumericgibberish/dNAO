@@ -3715,6 +3715,10 @@ int godnum;
 {
 	/* special cases that give alternative names for particular gods */
 
+	if (godnum == GOD_NONE) {
+		return "no one";
+	}
+	
 	if (godnum == GOD_EDDERGUD && !(
 		Race_if(PM_DROW) &&
 		flags.stag && !flags.initgend

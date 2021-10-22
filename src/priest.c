@@ -210,7 +210,7 @@ register struct monst *priest;
 	return(move_special(priest,FALSE,TRUE,FALSE,avoid,omx,omy,gx,gy));
 }
 
-/* exclusively for mktemple() */
+/* exclusively for when there is an altar to a god */
 void
 priestini(lvl, sroom, sx, sy, sanctum)
 d_level	*lvl;
@@ -229,6 +229,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		add_mx(priest, MX_EPRI);
 		EPRI(priest)->shroom = (sroom - rooms) + ROOMOFFSET;
 		EPRI(priest)->shralign = a_align(sx, sy);
+		EPRI(priest)->godnum = a_gnum(sx, sy);
 		EPRI(priest)->shrpos.x = sx;
 		EPRI(priest)->shrpos.y = sy;
 		assign_level(&(EPRI(priest)->shrlevel), lvl);
@@ -343,12 +344,12 @@ char *pname;		/* caller-supplied output buffer */
 {
 	const char *what = Hallucination ? rndmonnam() : mon->data->mname;
 	int align = (get_mx(mon, MX_EPRI) ? EPRI(mon)->shralign : get_mx(mon, MX_EMIN) ? EMIN(mon)->min_align : 0);
+	int godnum = (get_mx(mon, MX_EPRI) ? EPRI(mon)->godnum : get_mx(mon, MX_EMIN) ? EMIN(mon)->godnum : GOD_NONE);
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
-	if ((mon->ispriest && !&mons[PM_HIGH_SHAMAN]) || mon->mtyp == PM_ALIGNED_PRIEST ||
-					mon->mtyp == PM_ANGEL) {
-		/* use epri */
+	if ((mon->ispriest && !&mons[PM_HIGH_SHAMAN]) || mon->mtyp == PM_ALIGNED_PRIEST || mon->mtyp == PM_ANGEL)
+	{
 		if (mon->mtame && mon->mtyp == PM_ANGEL)
 			Strcat(pname, "guardian ");
 		if (mon->mtyp == PM_ANGEL) {
@@ -356,7 +357,7 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, " ");
 		}
 		if (mon->mtyp != PM_ANGEL) {
-			if (!mon->ispriest && EPRI(mon)->renegade)
+			if (!mon->ispriest && mon->malign > 0 && align == u.ualign.type)
 				Strcat(pname, "renegade ");
 			if (mon->mtyp == PM_HIGH_PRIEST)
 				Strcat(pname, "high ");
@@ -376,13 +377,13 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, "a whole faith");
 //			Strcat(pname, "?");
 		} else {
-	 		Strcat(pname, halu_gname(align));
+	 		Strcat(pname, godname(godnum));
 		}
 		return(pname);
 	}
 	Strcat(pname, what);
 	Strcat(pname, " of ");
-	Strcat(pname, halu_gname(align));
+	Strcat(pname, godname(godnum));
 	return(pname);
 }
 
@@ -593,16 +594,16 @@ register struct monst *priest;
 			coord mm;
 			verbalize("Foul heretic! The Lord's servants shall humble you!");
 			priest->mpeaceful=0;
-			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 		} else if(seenSeals >= 6){
 			coord mm;
 			verbalize("Foul heretic! The Lord's servants shall humble you!");
 			priest->mpeaceful=0;
-			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
-			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
-			summon_god_minion(altaralign_to_godnum(EPRI(priest)->shralign), FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			/* Create swarm near down staircase (hinders return to level) */
@@ -817,12 +818,13 @@ boolean peaceful;
 
 	if (!(roamer = makemon(ptr, x, y, NO_MM_FLAGS)))
 		return((struct monst *)0);
-	add_mx(roamer, MX_EPRI);
+//	add_mx(roamer, MX_EPRI);
 	add_mx(roamer, MX_EMIN);
 	EMIN(roamer)->min_align = alignment;
-	EPRI(roamer)->shralign = alignment;
-	if (coaligned && !peaceful)
-		EPRI(roamer)->renegade = TRUE;
+	EMIN(roamer)->godnum = align_to_god(alignment);
+//	EPRI(roamer)->shralign = alignment;
+//	if (coaligned && !peaceful)
+//		EPRI(roamer)->renegade = TRUE;
 	/* roamer->ispriest == FALSE naturally */
 	roamer->isminion = TRUE;	/* borrowing this bit */
 	roamer->mtrapseen = ~0;		/* traps are known */
@@ -842,7 +844,9 @@ register struct monst *roamer;
 				  roamer->mtyp == PM_ANGEL)))
 	        return;
 
-	if(EPRI(roamer)->shralign != u.ualign.type) {
+	int alignment = (get_mx(roamer, MX_EPRI) ? EPRI(roamer)->shralign : get_mx(roamer, MX_EMIN) ? EMIN(roamer)->min_align : 0);
+
+	if (alignment != u.ualign.type) {
 		untame(roamer, 0);
 	    set_malign(roamer);
 	}

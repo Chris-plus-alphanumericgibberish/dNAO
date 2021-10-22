@@ -1378,6 +1378,7 @@ int godnum;
 	add_mx(mon, MX_EMIN);
 	mon->isminion = TRUE;
 	EMIN(mon)->min_align = galign(godnum);
+	EMIN(mon)->godnum = godnum;
     return mon;
 }
 

@@ -4177,11 +4177,24 @@ int tary;
 			}
 			mtmp = makemon(&mons[PM_ANGEL], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
 			if (mtmp) {
-				add_mx(mtmp, MX_EPRI);
 				add_mx(mtmp, MX_EMIN);
+				int gnum;
+				aligntyp alignment;
+				if (get_mx(magr, MX_EMIN)) {
+					alignment = EMIN(magr)->min_align;
+					gnum = EMIN(magr)->godnum;
+				}
+				else if (get_mx(magr, MX_EPRI)) {
+					alignment = EPRI(magr)->shralign;
+					gnum = EPRI(magr)->godnum;
+				}
+				else {
+					alignment = sgn(magr->data->maligntyp);
+					gnum = align_to_god(alignment);
+				}
 				mtmp->isminion = TRUE;
-				EMIN(mtmp)->min_align = sgn(magr->data->maligntyp);
- 				EPRI(mtmp)->shralign = sgn(magr->data->maligntyp);
+				EMIN(mtmp)->min_align = alignment;
+				EMIN(mtmp)->godnum = gnum;
 
 				u.summonMonster = TRUE;
 				if (canspotmon(mtmp))
