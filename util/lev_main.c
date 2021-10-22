@@ -478,7 +478,12 @@ char * s;
 	    if (god_names[i] && !strcmp(s, god_names[i]))
 		return i;
 	}
-	return ERR;
+
+    char ebuf[60];
+	Sprintf(ebuf, "Bad god name \"%s\"", s);
+	yywarning(ebuf);
+
+	return GOD_NONE;
 }
 
 static void
