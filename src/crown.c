@@ -122,7 +122,7 @@ int
 choose_crowning()
 {
 	/* figure out what index your god is */
-	int god_index = align_to_god(u.ualign.type);
+	int god_index = u.ualign.god;
 	int specific_arti = -1;
 	int i;
 	int retval = -1;

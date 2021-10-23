@@ -85,7 +85,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	    cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
 	} else if (ptr->mtyp == PM_ANGEL) {
 	    if (rn2(6)) {
-			(void) summon_god_minion(align_to_god(atyp), FALSE);
+			(void) summon_god_minion(gnum, FALSE);
 	    } else {
 			dtype = PM_ANGEL;
 	    }

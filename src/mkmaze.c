@@ -1378,6 +1378,14 @@ register const char *s;
 	if(Is_hell1(&u.uz) && !Role_if(PM_CAVEMAN) && dungeon_topology.hell1_variant == BAEL_LEVEL && rn2(2)){
 			Strcpy(protofile, "hell-a");
 	}
+	/* quick hack for Binders entering Astral -- change the gods out before loading the level, so that
+	 * the priests, angels, and altars are all generated to the correct alignment */
+	if (Role_if(PM_EXILE) && In_endgame(&u.uz)) {
+		/* the Deities on Astral are those that stand at the Gate, not the creational ones governing the Dungeon */
+		urole.lgod = GOD_PISTIS_SOPHIA;
+		urole.ngod = GOD_THE_VOID;
+		urole.cgod = GOD_YALDABAOTH;
+	}
 #ifdef WIZARD
 	/* SPLEVTYPE format is "level-choice,level-choice"... */
 	if (wizard && *protofile && sp && sp->rndlevs) {

@@ -2140,8 +2140,8 @@ dosacrifice()
 	int saved_cnt = u.ublesscnt;
 	int saved_luck = u.uluck;
 
-	/* Sacrificing at an altar of a different alignment */
-	if (u.ualign.type != altaralign) {
+	/* Sacrificing at an altar of a different alignment OR a different god */
+	if (u.ualign.type != altaralign || (a_gnum(u.ux, u.uy) != GOD_NONE && a_gnum(u.ux, u.uy) != u.ualign.god)) {
 	    /* Is this a conversion ? */
 	    /* An unaligned altar in Gehennom will always elicit rejection. */
 	    if ((ugod_is_angry() && u.ualign.type != A_VOID) || (altaralign == A_NONE && Inhell)) {

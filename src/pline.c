@@ -438,6 +438,41 @@ align_str(alignment)
     return "unknown";
 }
 
+const char *
+align_str_proper(alignment)
+    aligntyp alignment;
+{
+	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)){
+		switch ((int)alignment) {
+		case A_CHAOTIC: return "Xaotic";
+		case A_NEUTRAL: return "Gnostic";
+		case A_LAWFUL:	return "Mundane";
+		case A_NONE:	return "Unaligned";
+		case A_VOID:	return "Non-aligned";
+//		case A_UNKNOWN:	return "Unknown";
+		}
+    } else if(Role_if(PM_EXILE) && In_quest(&u.uz)){
+		switch ((int)alignment) {
+		case A_CHAOTIC: return "Chaotic";
+		case A_NEUTRAL: return "Neutral";
+		case A_LAWFUL:	return "Lawful";
+		case A_NONE:	return "Mundane";
+		case A_VOID:	return "Non-aligned";
+//		case A_UNKNOWN:	return "Unknown";
+		}
+    } else {
+		switch ((int)alignment) {
+		case A_CHAOTIC: return "Chaotic";
+		case A_NEUTRAL: return "Neutral";
+		case A_LAWFUL:	return "Lawful";
+		case A_NONE:	return "Unaligned";
+		case A_VOID:	return "Non-aligned";
+//		case A_UNKNOWN:	return "Unknown";
+		}
+	}
+    return "Unknown";
+}
+
 #define mslotdrtotal(slot)	\
 	mon_slot_dr(mtmp, (struct monst *) 0, slot, &base, &armac, &nat_dr, 0);\
 	\
