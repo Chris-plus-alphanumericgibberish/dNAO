@@ -961,7 +961,7 @@ angry_priest()
 	     */
 		x = EPRI(priest)->shrpos.x;
 		y = EPRI(priest)->shrpos.y;
-	    if (!IS_ALTAR(levl[x][y].typ) || (a_align(x, y) != EPRI(priest)->shralign)) {
+	    if (!IS_ALTAR(levl[x][y].typ) || (a_gnum(x, y) != EPRI(priest)->godnum)) {
 		priest->ispriest = 0;		/* now a roamer */
 		priest->isminion = 1;		/* but still aligned */
 		/* this overloads the `shroom' field, which is now clobbered */

@@ -1380,7 +1380,7 @@ register const char *s;
 	}
 	/* quick hack for Binders entering Astral -- change the gods out before loading the level, so that
 	 * the priests, angels, and altars are all generated to the correct alignment */
-	if (Role_if(PM_EXILE) && In_endgame(&u.uz)) {
+	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level)) {
 		/* the Deities on Astral are those that stand at the Gate, not the creational ones governing the Dungeon */
 		urole.lgod = GOD_PISTIS_SOPHIA;
 		urole.ngod = GOD_THE_VOID;

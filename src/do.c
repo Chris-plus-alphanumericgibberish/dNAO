@@ -1670,6 +1670,13 @@ final_level()
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
 	    if (!DEADMONSTER(mtmp)) reset_hostility(mtmp);
 
+	/* Binder astral is devoid of priests and angels */
+	if (Role_if(PM_EXILE)) {
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
+			if ((mtmp->mtyp == PM_ALIGNED_PRIEST || mtmp->mtyp == PM_ANGEL) && !DEADMONSTER(mtmp))
+				mongone(mtmp);
+	} 
+
 	/* create some player-monsters */
 	create_mplayers(rn1(4, 3), TRUE);
 

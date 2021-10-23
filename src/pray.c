@@ -3838,7 +3838,7 @@ int sanctum;   /* is it the seat of the high priest? */
 }
 
 /* 
- * returns the god _responsible_ for the altar at x,y
+ * returns the god you will communicate with at the altar at x,y
  * unlike a_gnum(), which is a direct access of altars[].godnum, (and can be used as an lvalue)
  * this comes up with a god for un-dedicated altars
  * 
@@ -3857,6 +3857,9 @@ int x, y;
 	
 	if (a_gnum(x, y) != GOD_NONE)
 		return a_gnum(x, y);
+
+	if (a_align(x, y) == galign(u.ualign.god))
+		return u.ualign.god;
 
 	return align_to_god(a_align(x, y));
 }
