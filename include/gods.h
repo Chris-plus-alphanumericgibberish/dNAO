@@ -15,8 +15,6 @@ struct god {
 	int anger;
 };
 
-extern struct god * godlist;
-
 struct crowning {
 	int godnum;					/* god that grants this crowning */
 	int crowninggift;			/* artifact */

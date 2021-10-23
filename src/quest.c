@@ -601,8 +601,8 @@ turn_stag()
 	/*Convert to new alignment (Even if already did once before) */
 	if(galign(u.ugodbase[UGOD_CURRENT]) != A_LAWFUL){
 		You("have a strong feeling that Lolth is angry...");
-		u.ugangr[Align2gangr(A_CHAOTIC)]+=20;
-		u.ugangr[Align2gangr(A_NEUTRAL)]+=20;
+		godlist[urole.ngod].anger+=20;
+		godlist[urole.cgod].anger+=20;
 		if(flags.initgend){
 			pline("Eilistraee accepts your allegiance.");
 			u.uhouse = EILISTRAEE_SYMBOL;
@@ -615,7 +615,7 @@ turn_stag()
 		    if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
 				u.ugodbase[UGOD_CURRENT] = align_to_god(A_LAWFUL);
 		    else {
-				u.ugodbase[UGOD_CURRENT] = align_to_god(A_LAWFUL);
+				u.ualign.god = u.ugodbase[UGOD_CURRENT] = align_to_god(A_LAWFUL);
 				u.ualign.type = A_LAWFUL;
 			}
 		u.ublessed = 0;

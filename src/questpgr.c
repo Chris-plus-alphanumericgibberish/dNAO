@@ -284,7 +284,7 @@ char c;
 			break;
 	    case 'g':	str = guardname();
 			break;
-	    case 'G':	str = align_gtitle(galign(u.ugodbase[UGOD_ORIGINAL]));
+	    case 'G':	str = gtitle(u.ugodbase[UGOD_ORIGINAL]);
 			break;
 	    case 'h':	str = (flags.female) ?  urace.individual.f : urace.individual.m;
 			break;

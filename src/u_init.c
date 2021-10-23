@@ -1573,9 +1573,6 @@ u_init()
 	uswapwep = uquiver = 0;
 	u.twoweap = 0;
 	u.ublessed = 0;				/* not worthy yet */
-	for(i=0;i<SIZE(u.ugangr);i++){
-		u.ugangr[i] = 0;				/* gods not angry */
-	}
 	u.ugifts   = 0;				/* no divine gifts bestowed */
 	u.uartisval = 0;			/* no artifacts directly acquired */
 	u.ucarinc = 0;
@@ -1779,7 +1776,7 @@ u_init()
 	u.ublesscnt = 300;			/* no prayers just yet */
 	u.ugoatblesscnt = 300;			/* goat counter also starts high */
 	u.ualign.type = aligns[flags.initalign].value;
-	u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
+	u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 	u.ulycn = NON_PM;
 
 #if defined(BSD) && !defined(POSIX_TYPES)
@@ -1876,7 +1873,7 @@ u_init()
 		knows_object(DOUBLE_LIGHTSABER);
 		if(Race_if(PM_DWARF)){
 			u.ualign.type = A_CHAOTIC;
-			u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
+			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 			flags.initalign = 2; // 2 == chaotic
 		}
 		if(Race_if(PM_ANDROID)){
@@ -1915,7 +1912,7 @@ u_init()
 		}
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
 			u.ualign.type = A_LAWFUL;
-			u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
+			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 			flags.initalign = 0; // 0 == lawful
 		}
 		/* This depends on the order in objects.c */
@@ -1977,7 +1974,7 @@ u_init()
 		}
 		/* Override racial alignment */
 		u.ualign.type = A_VOID;
-		u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = GOD_THE_VOID;
+		u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = GOD_THE_VOID;
 		flags.initalign = 4; // 4 == VOID
 		u.hod += 10;  /*One transgression is all it takes*/
 		u.gevurah += 5; /*One resurection or two rehumanizations is all it takes*/
@@ -2003,7 +2000,7 @@ u_init()
 		else u.uhunger = 200;
     	/* Override racial alignment */
 		u.ualign.type = A_CHAOTIC;
-		u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
+		u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 		flags.initalign = 2; // 2 == chaotic
         urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
         urace.lovemask = 0; /* Convicts are pariahs of their race */
@@ -2037,9 +2034,9 @@ u_init()
         skill_init(Skill_Mad);
 		u.ualign.sins += 13; /* You have sinned */
 		/* gods slightly torqued */
-		u.ugangr[GA_LAWFUL] = 1;
-		u.ugangr[GA_NEUTRAL] = 1;
-		u.ugangr[GA_CHAOTIC] = 1;
+		godlist[urole.lgod].anger = 1;
+		godlist[urole.ngod].anger = 1;
+		godlist[urole.cgod].anger = 1;
 		u.usanity = 75; /* Your sanity is not so hot */
 		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
 		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
@@ -2347,7 +2344,7 @@ u_init()
 			if(!flags.female){
 				/* Males are neutral */
 				u.ualign.type = A_NEUTRAL;
-				u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
+				u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 				flags.initalign = 1; // 1 == neutral
 			}
 		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !Role_if(PM_MADMAN)){
@@ -2355,7 +2352,7 @@ u_init()
 			if(!flags.female){
 				/* Males are neutral */
 				u.ualign.type = A_NEUTRAL;
-				u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
+				u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 				flags.initalign = 1; // 1 == neutral
 			}
 		} else if(Role_if(PM_ANACHRONONAUT)){

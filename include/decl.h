@@ -529,6 +529,9 @@ E NEARDATA anything zeroany;   /* init'd and defined in decl.c */
 #include "you.h"
 E NEARDATA struct you u;
 
+#include "gods.h"
+E NEARDATA struct god * godlist;
+
 #include "onames.h"
 #include "gnames.h"
 #ifndef PM_H		/* (pm.h has already been included via youprop.h) */

@@ -3227,7 +3227,7 @@ mkpluvillage()
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, TEMPLE, TRUE);
-					add_altar(x+2, y+5, A_NEUTRAL, TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+					add_altar(x+2, y+5, A_NEUTRAL, TRUE, align_to_god(A_NEUTRAL));
 					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
 					level.flags.has_temple = 1;
 				break;
@@ -3409,7 +3409,7 @@ mkpluvillage()
 					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, TEMPLE, TRUE);
-					add_altar(x+sizetot-2, y+5, A_NEUTRAL, TRUE, ga_num_to_godnum(Align2gangr(A_NEUTRAL)));
+					add_altar(x+sizetot-2, y+5, A_NEUTRAL, TRUE, align_to_god(A_NEUTRAL));
 					priestini(&u.uz, &rooms[nroom - 1], x+sizetot-2, y+5, FALSE);
 					level.flags.has_temple = 1;
 				break;
@@ -6638,7 +6638,7 @@ mktemple()
 		alignment = A_NONE;	/* in gehennom, all altars are to moloch */
 	else
 		alignment = induced_align(80);
-	add_altar(shrine_spot->x, shrine_spot->y, alignment, TRUE, ga_num_to_godnum(Align2gangr(alignment)));
+	add_altar(shrine_spot->x, shrine_spot->y, alignment, TRUE, align_to_god(alignment));
 	priestini(&u.uz, sroom, shrine_spot->x, shrine_spot->y, FALSE);
 	level.flags.has_temple = 1;
 }

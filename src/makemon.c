@@ -11815,7 +11815,7 @@ register struct permonst *ptr;
 	
 	if(mndx == PM_CENTER_OF_ALL && !u.uevent.sum_entered ) return TRUE;
 	
-	if(goat_monster(ptr) && u.uevent.shubbie_atten && !u.ugangr[GA_MOTHER]) return TRUE;
+	if(goat_monster(ptr) && u.uevent.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger) return TRUE;
 	
 	//The painting is normally peaceful
 	if(In_quest(&u.uz) && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){

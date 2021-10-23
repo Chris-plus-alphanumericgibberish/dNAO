@@ -182,7 +182,6 @@ struct mask_properties {
 	schar mskluck;
 	int mskhp,mskhpmax;
 	int msken,mskenmax;
-	int mskgangr[GA_NUM];
 	long mskexp, mskrexp;
 	int	mskweapon_slots;		/* unused skill slots */
 	int	mskskills_advanced;		/* # of advances made so far */
@@ -497,7 +496,6 @@ struct you {
 	/*"Real" numbers for a WtWalk's non-mask-based HP*/
 	int uhp_real, uhpmax_real, uhprolled_real, uhpbonus_real, uhpmod_real;
 	int uen_real, uenmax_real, uenrolled_real, uenbonus_real;
-	int ugangr[GA_NUM];
 	int ugifts;			/* number of artifacts bestowed */
 	int uartisval;		/* approximate strength of artifacts and gifts bestowed and wished for */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */

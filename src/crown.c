@@ -274,8 +274,7 @@ gcrownu()
 			Strcpy(buf, crowndata->announcement);
 		}
 		/* speak it! */
-		/* TODO: godvoice based on godnum */
-		godvoice(Align2gangr(u.ualign.type), buf);
+		godvoice(hand_of_elbereth[u.uevent.uhand_of_elbereth].godnum, buf);
 	}
 
 	/* livelog your crowning */
@@ -461,7 +460,7 @@ gcrownu()
 				dropy(obj);
 			}
 			u.ugifts++;
-			obj->gifted = Align2gangr(u.ualign.type);
+			obj->gifted = u.ualign.god;
 			discover_artifact(arti);
 		}
 		else if (uwep && uwep->oartifact == arti) {

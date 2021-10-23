@@ -2239,7 +2239,6 @@ E void FDECL(godvoice,(int,const char*));
 E void FDECL(gods_angry,(int));
 E void FDECL(gods_upset,(int));
 E void FDECL(angrygods,(int));
-E int FDECL(get_ga_mfaction,(int));
 E boolean NDECL(maybe_god_gives_gift);
 E int NDECL(dosacrifice);
 E void FDECL(at_your_feet, (const char *));
@@ -2251,11 +2250,7 @@ E int NDECL(doturn);
 E const char *NDECL(a_gname);
 E const char *FDECL(a_gname_at, (XCHAR_P x,XCHAR_P y));
 E const char *FDECL(align_gname, (ALIGNTYP_P));
-E const char *FDECL(align_gname_full, (ALIGNTYP_P));
-E const char *FDECL(ga_gname, (int));
-E const char *FDECL(ga_gname_full, (int));
-E const char *FDECL(halu_gname, (ALIGNTYP_P));
-E const char *FDECL(align_gtitle, (ALIGNTYP_P));
+E const char *FDECL(gtitle, (ALIGNTYP_P));
 E void FDECL(altar_wrath, (int,int));
 E int FDECL(candle_on_altar, (struct obj *));
 E void FDECL(goat_eat, (struct obj *, int));
@@ -2264,14 +2259,15 @@ E void NDECL(init_gods);
 E void FDECL(save_gods, (int));
 E void FDECL(restore_gods, (int));
 E aligntyp FDECL(galign, (int));
+E int FDECL(gholiness, (int));
 E int FDECL(align_to_god, (aligntyp));
 E const char * FDECL(godname_full, (int));
 E const char * FDECL(godname, (int));
 E int FDECL(god_faction, (int));
-E int FDECL(ga_num_to_godnum, (int));
 E int FDECL(altaralign_to_godnum, (int));
 E const int * FDECL(god_minions, (int));
 E struct monst * FDECL(god_priest, (int, int, int, int));
+E int FDECL(god_at_altar, (int, int));
 
 /* ### priest.c ### */
 

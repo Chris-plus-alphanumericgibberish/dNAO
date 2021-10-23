@@ -1737,7 +1737,7 @@ create_altar(a, croom)
 
 	if (a->shrine && !a->god) {
 		/* shrines should be to a god, pick most appropriate god. */
-		a->god = ga_num_to_godnum(Align2gangr(alignment));
+		a->god = align_to_god(alignment);
 	}
 
 	add_altar(x, y, alignment, a->shrine, a->god);

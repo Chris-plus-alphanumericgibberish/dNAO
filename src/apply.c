@@ -4427,8 +4427,8 @@ int x, y;
 	if(Misotheism < TIMEOUT_INF){
 		long increment = (long)(33 * pow(1.1,u.miso_count));
 		if(!Inhell && !Misotheism && u.ualign.type != A_VOID){
-			u.ugangr[Align2gangr(u.ualign.type)]++;
-			gods_angry(Align2gangr(u.ualign.type));
+			godlist[u.ualign.god].anger++;
+			gods_angry(u.ualign.god);
 		}
 		// Need to be careful with counts, since exponential math means that we can easily start overflowing stuff.
 		if(increment < TIMEOUT){
@@ -4824,12 +4824,12 @@ use_doll(obj)
 			}
 		break;
 		case DOLL_OF_MOLLIFICATION:
-			if(u.ugangr[Align2gangr(u.ualign.type)]) {
+			if(godlist[u.ualign.god].anger) {
 				if(!Blind)
 					pline("The %s says a prayer.", OBJ_DESCR(objects[obj->otyp]));
 				pline("%s seems %s.", u_gname(),
 				  Hallucination ? "groovy" : "mollified");
-				u.ugangr[Align2gangr(u.ualign.type)] = 0;
+				godlist[u.ualign.god].anger = 0;
 				if ((int)u.uluck < 0) u.uluck = 0;
 				u.reconciled = REC_MOL;
 				res = 1;
@@ -5530,9 +5530,9 @@ struct obj * obj;
 			/* Points for trying */
 			u.ualign.sins = max(u.ualign.sins-1, 0);
 			adjalign(7);
-			if(u.ugangr[Align2gangr(u.ualign.type)]) {
-				u.ugangr[Align2gangr(u.ualign.type)]--;
-				if (u.ugangr[Align2gangr(u.ualign.type)]) {
+			if(godlist[u.ualign.god].anger) {
+				godlist[u.ualign.god].anger--;
+				if (godlist[u.ualign.god].anger) {
 					pline("%s seems %s.", u_gname(),
 					Hallucination ? "groovy" : "slightly mollified");
 					if ((int)u.uluck < 0) change_luck(1);
@@ -5548,8 +5548,8 @@ struct obj * obj;
 			/* Freed someone who wasn't supposed to be there! */
 			u.ualign.sins = max(u.ualign.sins-7, 0);
 			u.ualign.record = ALIGNLIM;
-			if(u.ugangr[Align2gangr(u.ualign.type)]) {
-				u.ugangr[Align2gangr(u.ualign.type)] = 0;
+			if(godlist[u.ualign.god].anger) {
+				godlist[u.ualign.god].anger = 0;
 				pline("%s seems %s.", u_gname(), Hallucination ?
 				"cosmic (not a new fact)" : "mollified");
 				if ((int)u.uluck < 0) u.uluck = 0;
@@ -5571,7 +5571,7 @@ struct obj * obj;
 		if(!rn2(100)){
 			You("feel the soul scream as it sinks towards Gehennom under the weight of the curse!");
 			/* Just sent someone back who shouldn't be there :( */
-			gods_upset(Align2gangr(u.ualign.type));
+			gods_upset(u.ualign.god);
 		}
 	}
 }

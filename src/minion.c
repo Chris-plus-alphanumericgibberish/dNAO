@@ -206,7 +206,7 @@ boolean talk;
 
     if (mon) {
 		if (talk) {
-			pline_The("voice of %s booms:", align_gname(alignment));
+			pline_The("voice of %s booms:", godname(godnum));
 			verbalize("Thou shalt pay for thy indiscretion!");
 			if (!Blind)
 			pline("%s appears before you.", An(Hallucination ? rndmonnam() : mon->data->mname));

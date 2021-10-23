@@ -5046,9 +5046,9 @@ boolean * messaged;
 						{
 							extern const int monstr[];
 							int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
-							if (u.ugangr[Align2gangr(u.ualign.type)]) {
-								u.ugangr[Align2gangr(u.ualign.type)] -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-								if (u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
+							if (godlist[u.ualign.god].anger) {
+								godlist[u.ualign.god].anger -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
+								if (godlist[u.ualign.god].anger < 0) godlist[u.ualign.god].anger = 0;
 							}
 							else if (u.ualign.record < 0) {
 								if (value > MAXVALUE) value = MAXVALUE;

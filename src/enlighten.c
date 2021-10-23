@@ -964,11 +964,11 @@ boolean dumping;
 		enl_msg("Good luck ", "times", "timed", " out slowly for you");
 	}
 
-	if (u.ugangr[Align2gangr(u.ualign.type)]) {
+	if (godlist[u.ualign.god].anger) {
 	    Sprintf(buf, " %sangry with you",
-		    u.ugangr[Align2gangr(u.ualign.type)] > 6 ? "extremely " : u.ugangr[Align2gangr(u.ualign.type)] > 3 ? "very " : "");
+		    godlist[u.ualign.god].anger > 6 ? "extremely " : godlist[u.ualign.god].anger > 3 ? "very " : "");
 #ifdef WIZARD
-	    if (wizard) Sprintf(eos(buf), " (%d)", u.ugangr[Align2gangr(u.ualign.type)]);
+	    if (wizard) Sprintf(eos(buf), " (%d)", godlist[u.ualign.god].anger);
 #endif
 	    enl_msg(u_gname(), " is", " was", buf);
 	} else

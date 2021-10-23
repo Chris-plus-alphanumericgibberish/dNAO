@@ -2078,7 +2078,7 @@ karemade:
 					if(ALIGNLIM > 10){
 						u.ualign.sins++;
 					} else {
-						gods_upset(Align2gangr(u.ualign.type));
+						gods_upset(u.ualign.god);
 					}
 				}
 			}
@@ -2315,7 +2315,7 @@ karemade:
 			move_gliders();
 
 		    if (u.ublesscnt)  u.ublesscnt--;
-		    if (u.ugoatblesscnt && u.uevent.shubbie_atten && !u.ugangr[GA_MOTHER])
+		    if (u.ugoatblesscnt && u.uevent.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger)
 				u.ugoatblesscnt--;
 		    if(flags.time && !flags.run)
 			flags.botl = 1;
