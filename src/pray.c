@@ -2307,7 +2307,7 @@ dosacrifice()
 				}
 				// if (rnl(u.ulevel) > 6 && u.ualign.record > 0 &&
 				   // rnd(u.ualign.record) > (3*ALIGNLIM)/4)
-				if(!Pantheon_if(PM_ELF)){
+				if(!gods_are_friendly(altargod, u.ualign.god)){
 					if(u.ulevel > 20) summon_god_minion(altargod, FALSE);
 					if(u.ulevel >= 14) summon_god_minion(altargod, FALSE);
 					(void) summon_god_minion(altargod, TRUE);
@@ -2319,7 +2319,7 @@ dosacrifice()
 				pline("Unluckily, you feel the power of %s decrease.", u_gname());
 				change_luck(-1);
 				exercise(A_WIS, FALSE);
-				if(!Pantheon_if(PM_ELF)){
+				if(!gods_are_friendly(altargod, u.ualign.god)){
 					if(u.ulevel > 20) summon_god_minion(altargod, TRUE);
 					if(u.ulevel > 10) summon_god_minion(altargod, TRUE);
 					(void) summon_god_minion(altargod, TRUE);
@@ -3878,5 +3878,25 @@ int x, y;
 	return align_to_god(a_align(x, y));
 }
 
+
+/*
+ * Returns TRUE if the two gods are on good terms with each other;
+ * No minions sent if converting an altar from one to another.
+ * Any attending priests will still get upset, though!
+ */
+boolean
+gods_are_friendly(god1, god2)
+int god1, god2;
+{
+	/* elf-gods are friendly with each other */
+	/* NOTE: assumes order of elfgods in godlist.h */
+	if ((GOD_OROME <= god1 && god1 <= GOD_LORIEN)
+		&& (GOD_OROME <= god2 && god2 <= GOD_LORIEN))
+	{
+		return TRUE;
+	}
+
+	return FALSE;
+}
 
 /*pray.c*/

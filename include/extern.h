@@ -2269,6 +2269,7 @@ E int FDECL(altaralign_to_godnum, (int));
 E const int * FDECL(god_minions, (int));
 E struct monst * FDECL(god_priest, (int, int, int, int));
 E int FDECL(god_at_altar, (int, int));
+E boolean FDECL(gods_are_friendly, (int, int));
 
 /* ### priest.c ### */
 
