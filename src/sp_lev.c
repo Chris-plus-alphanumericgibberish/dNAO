@@ -881,9 +881,14 @@ struct mkroom	*croom;
 	    /* if we can't get a specific monster type (pm == 0) then the
 	       class has been genocided, so settle for a random monster */
 	}
+	/* reduce quantity of peacefuls in the Mines */
 	if (In_mines(&u.uz) && pm && your_race(pm) &&
 			(Race_if(PM_DWARF) || Race_if(PM_GNOME)) && rn2(3))
 	    pm = (struct permonst *) 0;
+	/* replace priests with angels on Binder's Astral */
+	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && m->id == PM_ALIGNED_PRIEST) {
+		pm = &mons[PM_ANGEL];
+	}
 
 	x = m->x;
 	y = m->y;
@@ -1713,10 +1718,7 @@ create_altar(a, croom)
 	 * shared by many other parts of the special level code.
 	 */
 
-	if(a->god != GOD_NONE) {
-		alignment = galign(a->god);
-	}
-	else if(a->align == AM_SPLEV_CO)
+	if(a->align == AM_SPLEV_CO)
 		alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
 	else if(a->align == AM_SPLEV_NONCO){
 		alignment = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));

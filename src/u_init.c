@@ -1883,6 +1883,9 @@ u_init()
 			skill_init(Skill_Ana);
 			skill_add(Skill_All_Ana);
 		}
+		/* lawful god is actually Ilsensine */
+		urole.lgod = GOD_ILSENSINE;
+		
 	break;
 	case PM_BARBARIAN:
 		u.role_variant = TWO_HANDED_SWORD;

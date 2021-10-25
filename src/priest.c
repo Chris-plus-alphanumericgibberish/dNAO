@@ -818,15 +818,19 @@ boolean peaceful;
 
 	if (!(roamer = makemon(ptr, x, y, NO_MM_FLAGS)))
 		return((struct monst *)0);
-//	add_mx(roamer, MX_EPRI);
+
 	add_mx(roamer, MX_EMIN);
 	EMIN(roamer)->min_align = alignment;
 	EMIN(roamer)->godnum = align_to_god(alignment);
-//	EPRI(roamer)->shralign = alignment;
-//	if (coaligned && !peaceful)
-//		EPRI(roamer)->renegade = TRUE;
-	/* roamer->ispriest == FALSE naturally */
-	roamer->isminion = TRUE;	/* borrowing this bit */
+
+	/* Binders, on astral, should be beset by a wide variety of gods' angels -- overwrite godnum */
+	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && alignment != A_NONE) {
+		do {
+			EMIN(roamer)->godnum = rnd(MAX_GOD);
+		} while(galign(EMIN(roamer)->godnum) != alignment);
+	}
+
+	roamer->isminion = TRUE;
 	roamer->mtrapseen = ~0;		/* traps are known */
 	roamer->mpeaceful = peaceful;
 	roamer->msleeping = 0;

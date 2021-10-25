@@ -226,44 +226,63 @@ minimal_enlightenment()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	/* Deity list */
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", FALSE);
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings, "Deities", FALSE);
-	/* pantheon Chaotic */
-	Sprintf(buf2, deity_fmtstr, align_gname(A_CHAOTIC),
-	    (u.ugodbase[UGOD_ORIGINAL] == u.ualign.god
-		&& u.ualign.god == align_to_god(A_CHAOTIC)) ? " (s,c)" :
-	    (u.ugodbase[UGOD_ORIGINAL] == align_to_god(A_CHAOTIC))       ? " (s)" :
-	    (u.ualign.god == align_to_god(A_CHAOTIC))       ? " (c)" : "");
-	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Xaotic", buf2);
-	else Sprintf(buf, fmtstr, "Chaotic", buf2);
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
-	/* pantheon Neutral */
-	Sprintf(buf2, deity_fmtstr, align_gname(A_NEUTRAL),
-	    (u.ugodbase[UGOD_ORIGINAL] == u.ualign.god
-		&& u.ualign.god == align_to_god(A_NEUTRAL)) ? " (s,c)" :
-	    (u.ugodbase[UGOD_ORIGINAL] == align_to_god(A_NEUTRAL))       ? " (s)" :
-	    (u.ualign.god == align_to_god(A_NEUTRAL))       ? " (c)" : "");
-	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Gnostic", buf2);
-	else Sprintf(buf, fmtstr, "Neutral", buf2);
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
-	/* pantheon Lawful */
-	Sprintf(buf2, deity_fmtstr, align_gname(A_LAWFUL),
-	    (u.ugodbase[UGOD_ORIGINAL] == u.ualign.god
-		&& u.ualign.god == align_to_god(A_LAWFUL))  ? " (s,c)" :
-	    (u.ugodbase[UGOD_ORIGINAL] == align_to_god(A_LAWFUL))        ? " (s)" :
-	    (u.ualign.god == align_to_god(A_LAWFUL))        ? " (c)" : "");
-	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Mundane", buf2);
-	else Sprintf(buf, fmtstr, "Lawful", buf2);
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
-	/* non-pantheon current (only if applicable) */
-	if (u.ualign.god != align_to_god(A_LAWFUL) &&
-		u.ualign.god != align_to_god(A_NEUTRAL) &&
-		u.ualign.god != align_to_god(A_CHAOTIC)
-	) {
-	Sprintf(buf2, deity_fmtstr, godname(u.ualign.god),
-	    (u.ugodbase[UGOD_ORIGINAL] == u.ualign.god)  ? " (s,c)" : " (c)");
-	Sprintf(buf, fmtstr, align_str_proper(galign(u.ualign.god)), buf2);
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+	if (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) {
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", FALSE);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings, "The God of the Future", FALSE);
+		Sprintf(buf2, deity_fmtstr, godname(GOD_ILSENSINE), "");
+		Sprintf(buf, fmtstr, "Mundane", buf2);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+	}
+	else {
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", FALSE);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings, "Deities", FALSE);
+		/* pantheon Chaotic */
+		Sprintf(buf2, deity_fmtstr, align_gname(A_CHAOTIC),
+			(u.ugodbase[UGOD_ORIGINAL] == u.ualign.god
+			&& u.ualign.god == align_to_god(A_CHAOTIC)) ? " (s,c)" :
+			(u.ugodbase[UGOD_ORIGINAL] == align_to_god(A_CHAOTIC))       ? " (s)" :
+			(u.ualign.god == align_to_god(A_CHAOTIC))       ? " (c)" : "");
+		if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Xaotic", buf2);
+		else Sprintf(buf, fmtstr, "Chaotic", buf2);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+		/* pantheon Neutral */
+		Sprintf(buf2, deity_fmtstr, align_gname(A_NEUTRAL),
+			(u.ugodbase[UGOD_ORIGINAL] == u.ualign.god
+			&& u.ualign.god == align_to_god(A_NEUTRAL)) ? " (s,c)" :
+			(u.ugodbase[UGOD_ORIGINAL] == align_to_god(A_NEUTRAL))       ? " (s)" :
+			(u.ualign.god == align_to_god(A_NEUTRAL))       ? " (c)" : "");
+		if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Gnostic", buf2);
+		else Sprintf(buf, fmtstr, "Neutral", buf2);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+		/* pantheon Lawful */
+		Sprintf(buf2, deity_fmtstr, align_gname(A_LAWFUL),
+			(u.ugodbase[UGOD_ORIGINAL] == u.ualign.god
+			&& u.ualign.god == align_to_god(A_LAWFUL))  ? " (s,c)" :
+			(u.ugodbase[UGOD_ORIGINAL] == align_to_god(A_LAWFUL))        ? " (s)" :
+			(u.ualign.god == align_to_god(A_LAWFUL))        ? " (c)" : "");
+		if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)) Sprintf(buf, fmtstr, "Mundane", buf2);
+		else Sprintf(buf, fmtstr, "Lawful", buf2);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+		/* non-pantheon starting (only if applicable) */
+		if (u.ugodbase[UGOD_ORIGINAL] != align_to_god(A_LAWFUL) &&
+			u.ugodbase[UGOD_ORIGINAL] != align_to_god(A_NEUTRAL) &&
+			u.ugodbase[UGOD_ORIGINAL] != align_to_god(A_CHAOTIC)
+		) {
+		Sprintf(buf2, deity_fmtstr, godname(u.ugodbase[UGOD_ORIGINAL]),
+			(u.ugodbase[UGOD_ORIGINAL] == u.ualign.god)  ? " (s,c)" : " (s)");
+		Sprintf(buf, fmtstr, align_str_proper(galign(u.ualign.god)), buf2);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+		}
+		/* non-pantheon current (only if applicable) */
+		else if (u.ualign.god != align_to_god(A_LAWFUL) &&
+			u.ualign.god != align_to_god(A_NEUTRAL) &&
+			u.ualign.god != align_to_god(A_CHAOTIC)
+		) {
+		Sprintf(buf2, deity_fmtstr, godname(u.ualign.god),
+			(u.ugodbase[UGOD_ORIGINAL] == u.ualign.god)  ? " (s,c)" : " (c)");
+		Sprintf(buf, fmtstr, align_str_proper(galign(u.ualign.god)), buf2);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+		}
 	}
 
 	/* Menu options */

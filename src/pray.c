@@ -2141,7 +2141,9 @@ dosacrifice()
 	int saved_luck = u.uluck;
 
 	/* Sacrificing at an altar of a different alignment OR a different god */
-	if (u.ualign.type != altaralign || (a_gnum(u.ux, u.uy) != GOD_NONE && a_gnum(u.ux, u.uy) != u.ualign.god)) {
+	if ((a_gnum(u.ux, u.uy) != GOD_NONE) ?
+			(a_gnum(u.ux, u.uy) != u.ualign.god) : (u.ualign.type != altaralign)
+		){
 	    /* Is this a conversion ? */
 	    /* An unaligned altar in Gehennom will always elicit rejection. */
 	    if ((ugod_is_angry() && u.ualign.type != A_VOID) || (altaralign == A_NONE && Inhell)) {
@@ -3661,10 +3663,14 @@ int godnum;
 		return "the black web";
 
 	if (godnum == GOD_ILSENSINE && (
-		Role_if(PM_ANACHRONONAUT) &&
-		flags.questprogress == 2
+		Role_if(PM_ANACHRONONAUT)
 	))
-		return "_Ilsensine the Banished One";
+	{
+		if (flags.questprogress == 2)
+			return "_Ilsensine the Banished One";
+		if (flags.questprogress == 0)
+			return godlist[roles[flags.pantheon].lgod].name;
+	}
 
 	if (godnum == GOD_CHAOS && (
 		In_FF_quest(&u.uz) && on_level(&chaose_level,&u.uz)
@@ -3725,6 +3731,14 @@ int godnum;
 		static const int LdevilsMinions[] = {Ldevils};
 		static const int CdemonsMinions[] = {Cdemons};
 		return rn2(2) ? LdevilsMinions : CdemonsMinions;
+	}
+
+	/* Once you know of Ilsensine, Ilsensine knows of you, even in the past.
+	 * Until then, though, you get the standard minions for the god Ilsensine was */
+	if (godnum == GOD_ILSENSINE && (
+		Role_if(PM_ANACHRONONAUT) && flags.questprogress == 0
+	)) {
+		return godlist[roles[flags.pantheon].lgod].minionlist;
 	}
 
 	if (godnum == GOD_LOLTH && (
