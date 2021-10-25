@@ -1379,13 +1379,24 @@ register const char *s;
 			Strcpy(protofile, "hell-a");
 	}
 	/* quick hack for Binders entering Astral -- change the gods out before loading the level, so that
-	 * the priests, angels, and altars are all generated to the correct alignment */
+	 * the altars are all generated to the correct gods */
 	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level)) {
 		/* the Deities on Astral are those that stand at the Gate, not the creational ones governing the Dungeon */
 		urole.lgod = GOD_PISTIS_SOPHIA;
 		urole.ngod = GOD_THE_VOID;
 		urole.cgod = GOD_YALDABAOTH;
 	}
+	/* similarly, swap out the regular pantheon god for your aligned god at this point */
+	if (u.ugodbase[UGOD_CURRENT] != urole.lgod &&
+		u.ugodbase[UGOD_CURRENT] != urole.ngod &&
+		u.ugodbase[UGOD_CURRENT] != urole.cgod ) {
+		switch(galign(u.ugodbase[UGOD_CURRENT])) {
+			case A_LAWFUL:  urole.lgod = u.ugodbase[UGOD_CURRENT]; break;
+			case A_NEUTRAL: urole.ngod = u.ugodbase[UGOD_CURRENT]; break;
+			case A_CHAOTIC: urole.cgod = u.ugodbase[UGOD_CURRENT]; break;
+		}
+	}
+
 #ifdef WIZARD
 	/* SPLEVTYPE format is "level-choice,level-choice"... */
 	if (wizard && *protofile && sp && sp->rndlevs) {
