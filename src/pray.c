@@ -2147,8 +2147,7 @@ dosacrifice()
 	    /* Is this a conversion ? */
 	    /* An unaligned altar in Gehennom will always elicit rejection. */
 	    if ((ugod_is_angry() && u.ualign.type != A_VOID) || (altaralign == A_NONE && Inhell)) {
-		if(u.ugodbase[UGOD_CURRENT] == u.ugodbase[UGOD_ORIGINAL] &&
-		   altaralign != A_NONE && altaralign != A_VOID && !Role_if(PM_EXILE)) {
+		if(u.ugodbase[UGOD_CURRENT] == u.ugodbase[UGOD_ORIGINAL] && god_accepts_you(altargod)) {
 		    You("have a strong feeling that %s is angry...", u_gname());
 			if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 				pline("A pulse of darkness radiates from your sacrifice!");
@@ -3897,6 +3896,31 @@ int god1, god2;
 	}
 
 	return FALSE;
+}
+
+/*
+ * Returns TRUE if god will accept your worship/allegiance
+ */
+boolean
+god_accepts_you(godnum)
+int godnum;
+{
+	if (galign(godnum) == A_NONE)
+		return FALSE;
+	if (galign(godnum) == A_VOID && !Role_if(PM_EXILE))
+		return FALSE;
+	if (godnum == GOD_ILSENSINE)
+		return FALSE;
+	if ((godnum == GOD_LOLTH || godnum == GOD_VHAERAUN || godnum == GOD_VER_TAS || godnum == GOD_KIARANSALI || godnum == GOD_KEPTOLO)
+		&& !Race_if(PM_DROW))
+		return FALSE;
+	if ((godnum == GOD_ILNEVAL || godnum == GOD_LUTHIC || godnum == GOD_GRUUMSH)
+		&& !Race_if(PM_ORC))
+		return FALSE;
+	if (godnum == GOD_VELKA__GODDESS_OF_SIN)
+		return FALSE;
+
+	return TRUE;
 }
 
 /*pray.c*/
