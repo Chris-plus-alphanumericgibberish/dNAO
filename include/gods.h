@@ -13,6 +13,7 @@ struct god {
 	int holiness;
 	int minionlist[20];
 	int anger;
+	int sacrifices;		/* TODO:  how much of a positive balance you have with this god for sac gifts */
 };
 
 struct crowning {
