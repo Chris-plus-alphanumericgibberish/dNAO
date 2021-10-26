@@ -5581,7 +5581,7 @@ do_soul_coin(obj)
 struct obj *obj;
 {
 	char coinbuff[50] = {0};
-	struct monst *mtmp;
+	struct monst *mtmp = (struct monst *)0;
 	struct obj *otmp;
 	int x, y;
 	int tmp;
