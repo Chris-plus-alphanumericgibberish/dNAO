@@ -3703,7 +3703,7 @@ boolean setinitial,setfromfile;
 		}
 		retval = TRUE;
     } else if (!strcmp("pokedex", optname)) {
-		const char *mode_name;
+		char buf[BUFSZ]; 
 		menu_item *mode_pick = (menu_item *)0;
 		boolean done = FALSE;
 
@@ -3711,10 +3711,10 @@ boolean setinitial,setfromfile;
 			tmpwin = create_nhwindow(NHW_MENU);
 			start_menu(tmpwin);
 			for (i = 0; i < SIZE(pokedexsections); i++) {
-				mode_name = pokedexsections[i];
+				Sprintf(buf, "%-11s (%s)",pokedexsections[i], (iflags.pokedex & (1 << i)) ? "on" : "off");
 				any.a_int = i + 1;
 				add_menu(tmpwin, NO_GLYPH, &any, (char)((int)'a' + i), 0,
-					ATR_NONE, mode_name, (iflags.pokedex & (1 << i)) ? MENU_SELECTED : MENU_UNSELECTED);
+					ATR_NONE, buf, MENU_UNSELECTED);
 			}
 			end_menu(tmpwin, "Toggle pokedex sections on/off:");
 			if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
