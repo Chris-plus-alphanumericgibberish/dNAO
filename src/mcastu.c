@@ -1891,7 +1891,7 @@ int tary;
 	/* print spell-cast message */
 	if (spellnum) {
 		if ((youagr || (youdef && !is_undirected_spell(spellnum) && cansee(tarx, tary)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
-			if (is_undirected_spell(spellnum) || notarget)
+			if (is_undirected_spell(spellnum) || notarget || (!foundem && distmin(x(mdef), y(mdef), tarx, tary) > 2))
 				buf[0] = '\0';
 			else
 			{

@@ -3368,7 +3368,7 @@ winid *datawin;
 		{
 			OBJPUTSTR("Ancient tome.");
 		}
-		else if (oartifact)
+		else if (oartifact || otyp == SPE_SECRETS)
 		{
 			OBJPUTSTR("Ancient tome.");
 			switch (oartifact)

@@ -545,18 +545,22 @@ dosinkfall()
 boolean
 may_dig(x,y)
 register xchar x,y;
-/* intended to be called only on ROCKs */
+/* intended to be called only on ROCKs and trees */
 {
-    return (boolean)(!(IS_STWALL(levl[x][y].typ) &&
-			(levl[x][y].wall_info & W_NONDIGGABLE)));
+    return (boolean)!((levl[x][y].wall_info & W_NONDIGGABLE)
+		&&((IS_STWALL(levl[x][y].typ) ||
+			IS_TREE(levl[x][y].typ)
+		)));
 }
 
 boolean
 may_passwall(x,y)
 register xchar x,y;
 {
-   return (boolean)(!(IS_STWALL(levl[x][y].typ) &&
-			(levl[x][y].wall_info & W_NONPASSWALL)));
+   return (boolean)!((levl[x][y].wall_info & W_NONPASSWALL)
+		&&((IS_STWALL(levl[x][y].typ) ||
+			IS_TREE(levl[x][y].typ)
+		)));
 }
 
 #endif /* OVLB */
