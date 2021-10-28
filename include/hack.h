@@ -384,7 +384,10 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 
 #define rn1(x,y)	(rn2(x)+(y))
 
-#define a_align(x,y)	((aligntyp)Amask2align(levl[x][y].altarmask & AM_MASK))
+/* Only use these on an altar */
+#define a_align(x,y)	(altars[levl[x][y].altar_num].align)
+#define a_gnum(x,y)		(altars[levl[x][y].altar_num].god)
+#define a_shrine(x,y)	(altars[levl[x][y].altar_num].shrine)
 
 /* negative armor class is randomly weakened to prevent invulnerability */
 #define ROLL_NEG10(AC)	(-rnd(-(AC+10)) - 10)

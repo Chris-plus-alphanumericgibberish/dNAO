@@ -959,6 +959,7 @@ newhp()
 
 	    /* Initialize alignment stuff */
 	    u.ualign.type = aligns[flags.initalign].value;
+		u.ualign.god = align_to_god(u.ualign.type);
 	    u.ualign.record = urole.initrecord;
 
 		return hp;

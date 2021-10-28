@@ -396,6 +396,7 @@ E const char disclosure_options[];
 
 E NEARDATA int smeq[];
 E NEARDATA int doorindex;
+E NEARDATA int altarindex;
 E NEARDATA char *save_cm;
 #define KILLED_BY_AN	 0
 #define KILLED_BY	 1
@@ -528,7 +529,11 @@ E NEARDATA anything zeroany;   /* init'd and defined in decl.c */
 #include "you.h"
 E NEARDATA struct you u;
 
+#include "gods.h"
+E NEARDATA struct god * godlist;
+
 #include "onames.h"
+#include "gnames.h"
 #ifndef PM_H		/* (pm.h has already been included via youprop.h) */
 #include "pm.h"
 #endif

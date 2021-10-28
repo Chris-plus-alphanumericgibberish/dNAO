@@ -838,7 +838,7 @@ struct mkroom	*croom;
     struct monst *mtmp;
     schar x, y;
     char class;
-    aligntyp amask;
+    aligntyp alignment;
     coord cc;
     struct permonst *pm;
     unsigned g_mvflags;
@@ -856,16 +856,16 @@ struct mkroom	*croom;
 	    panic("create_monster: unknown monster class '%c'", m->class);
 
 	if(m->align == AM_SPLEV_CO)
-		amask = Align2amask(u.ualignbase[A_ORIGINAL]);
+		alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
 	else if(m->align == AM_SPLEV_NONCO){
-		int tmp = noncoalignment(u.ualignbase[A_ORIGINAL]);
-		amask = Align2amask(tmp);
+		alignment = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
 	}
 	else if(m->align <= -11) 
-		amask = induced_align(80);
+		alignment = induced_align(80);
 	else if(m->align < 0)
-		amask = ralign[-m->align-1];
-	else amask = m->align;
+		alignment = Amask2align(ralign[-m->align-1]);
+	else
+		alignment = Amask2align(m->align);
 
 	if (!class)
 	    pm = (struct permonst *) 0;
@@ -881,9 +881,14 @@ struct mkroom	*croom;
 	    /* if we can't get a specific monster type (pm == 0) then the
 	       class has been genocided, so settle for a random monster */
 	}
+	/* reduce quantity of peacefuls in the Mines */
 	if (In_mines(&u.uz) && pm && your_race(pm) &&
 			(Race_if(PM_DWARF) || Race_if(PM_GNOME)) && rn2(3))
 	    pm = (struct permonst *) 0;
+	/* replace priests with angels on Binder's Astral */
+	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && m->id == PM_ALIGNED_PRIEST) {
+		pm = &mons[PM_ANGEL];
+	}
 
 	x = m->x;
 	y = m->y;
@@ -902,7 +907,7 @@ struct mkroom	*croom;
 	    x = cc.x,  y = cc.y;
 
 	if(m->align != -12)
-	    mtmp = mk_roamer(pm, Amask2align(amask), x, y, m->peaceful);
+	    mtmp = mk_roamer(pm, alignment, x, y, m->peaceful);
 	else if(PM_ARCHEOLOGIST <= m->id && m->id <= PM_WIZARD)
 	         mtmp = mk_mplayer(pm, x, y, FALSE);
 	else mtmp = makemon(pm, x, y, NO_MM_FLAGS);
@@ -1679,7 +1684,7 @@ create_altar(a, croom)
 	struct mkroom	*croom;
 {
 	schar		sproom,x,y;
-	aligntyp	amask;
+	aligntyp	alignment;
 	boolean		croom_is_temple = TRUE;
 	int oldtyp; 
 
@@ -1714,19 +1719,16 @@ create_altar(a, croom)
 	 */
 
 	if(a->align == AM_SPLEV_CO)
-		amask = Align2amask(u.ualignbase[A_ORIGINAL]);
+		alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
 	else if(a->align == AM_SPLEV_NONCO){
-		int tmp = noncoalignment(u.ualignbase[A_ORIGINAL]);
-		amask = Align2amask(tmp);
+		alignment = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
 	}
 	else if(a->align == -11)
-		amask = induced_align(80);
+		alignment = induced_align(80);
 	else if(a->align < 0)
-		amask = ralign[-a->align-1];
-	else amask = a->align;
-
-	levl[x][y].typ = ALTAR;
-	levl[x][y].altarmask = amask;
+		alignment = Amask2align(ralign[-a->align-1]);
+	else
+		alignment = Amask2align(a->align);
 
 	if (a->shrine < 0) a->shrine = rn2(2);	/* handle random case */
 
@@ -1735,11 +1737,15 @@ create_altar(a, croom)
 	else if (oldtyp == SINK)
 	    level.flags.nsinks--;
 
-	if (!croom_is_temple || !a->shrine) return;
+	if (a->shrine && !a->god) {
+		/* shrines should be to a god, pick most appropriate god. */
+		a->god = align_to_god(alignment);
+	}
 
-	if (a->shrine) {	/* Is it a shrine  or sanctum? */
+	add_altar(x, y, alignment, a->shrine, a->god);
+
+	if (a->shrine && croom_is_temple) {	/* Is it a shrine  or sanctum? */
 	    priestini(&u.uz, croom, x, y, (a->shrine > 1));
-	    levl[x][y].altarmask |= AM_SHRINE;
 	    level.flags.has_temple = TRUE;
 	}
 }

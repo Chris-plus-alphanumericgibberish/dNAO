@@ -18,7 +18,8 @@
 #include "flag.h"
 #include "dlb.h"
 
-#include "../src/artilist.c"
+#include "artilist.h"
+#include "godlist.h"
 
 /* version information */
 #ifdef SHORT_FILENAMES
@@ -56,6 +57,7 @@ static	const char	SCCS_Id[] = "@(#)makedefs.c\t3.4\t2002/02/03";
 	/* names of files to be generated */
 #define DATE_FILE	"date.h"
 #define MONST_FILE	"pm.h"
+#define GODS_FILE	"gnames.h"
 #define ONAME_FILE	"onames.h"
 #define VERINFO_FILE	"verinfo.h"
 #ifndef OPTIONS_FILE
@@ -165,6 +167,7 @@ void FDECL(do_date, (int));
 void NDECL(do_options);
 void NDECL(do_monstr);
 void NDECL(do_permonst);
+void NDECL(do_gods);
 void NDECL(do_questtxt);
 void NDECL(do_rumors);
 void NDECL(do_oracles);
@@ -220,7 +223,7 @@ extern unsigned _stklen = STKSIZ;
 int
 main(void)
 {
-    const char *def_options = "odemvpqrhz";
+    const char *def_options = "odegmvpqrhz";
     char buf[100];
     int len;
 
@@ -318,6 +321,9 @@ char	*options;
 				break;
 		case 'p':
 		case 'P':	do_permonst();
+				break;
+		case 'g':
+		case 'G':	do_gods();
 				break;
 		case 'q':
 		case 'Q':	do_questtxt();
@@ -516,7 +522,6 @@ make_version()
 	version.entity_count = (version.entity_count << 12) | (unsigned long)i;
 	for (i = 0; mons[i].mlet; i++) continue;
 	version.entity_count = (version.entity_count << 12) | (unsigned long)i;
-	version.entity_count = (version.entity_count << 12) | MAX_GOD;
 	/*
 	 * Value used for compiler (word size/field alignment/padding) check.
 	 */
@@ -1504,6 +1509,45 @@ do_permonst()
 	return;
 }
 
+/*  Start of Gods processing */
+void
+do_gods()
+{
+	int	i;
+	char	*c, *nam;
+
+	filename[0]='\0';
+#ifdef FILE_PREFIX
+	Strcat(filename, file_prefix);
+#endif
+	Sprintf(eos(filename), INCLUDE_TEMPLATE, GODS_FILE);
+	if (!(ofp = fopen(filename, WRTMODE))) {
+		perror(filename);
+		exit(EXIT_FAILURE);
+	}
+	Fprintf(ofp,"/*\tSCCS Id: @(#)gnames.h\t3.4\t2021/10/16 */\n\n");
+	Fprintf(ofp,"%s",Dont_Edit_Code);
+	Fprintf(ofp,"#ifndef GNAMES_H\n#define GNAMES_H\n");
+
+	/* note: godlist starts at 1 so all non-zero indices are interesting */
+	Fprintf(ofp,"\n#define\tGOD_NONE\t(0)");
+	for (i = 1; god_names[i]; i++) {
+		SpinCursor(3);
+
+		Fprintf(ofp,"\n#define\tGOD_");
+		nam = tmpdup(god_names[i]);
+		if (nam[0] == '_')
+			nam++;
+		for (c = nam; *c; c++)
+		    if (*c >= 'a' && *c <= 'z') *c -= (char)('a' - 'A');
+		    else if (*c < 'A' || *c > 'Z') *c = '_';
+		Fprintf(ofp,"%s\t%d", limit(nam, 1), i);
+	}
+	Fprintf(ofp,"\n\n#define\tMAX_GOD\t%d\n", i);
+	Fprintf(ofp,"\n#endif /* GNAMES_H */\n");
+	Fclose(ofp);
+	return;
+}
 
 /*	Start of Quest text file processing. */
 #include "qtext.h"

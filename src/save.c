@@ -321,7 +321,6 @@ register int fd, mode;
 	bwrite(fd, (genericptr_t) &youmonst, sizeof(struct monst));
 	if (youmonst.light)
 		save_lightsource(youmonst.light, fd, mode);
-	bwrite(fd, (genericptr_t) &god_list, sizeof(struct god_details)*MAX_GOD);
 	
 	/* save random monsters*/
 	bwrite(fd, (genericptr_t) &mons[PM_SHAMBLING_HORROR], sizeof(struct permonst));
@@ -336,6 +335,7 @@ register int fd, mode;
 		uball->nobj = bc_objs;
 		bc_objs = uball;
 	}
+	save_gods(fd);
 	save_artifacts(fd);
 	saveobjchn(fd, invent, mode);
 	saveobjchn(fd, bc_objs, mode);
@@ -589,6 +589,8 @@ int mode;
 	bwrite(fd,(genericptr_t) &dndest,sizeof(dest_area));
 	bwrite(fd,(genericptr_t) &level.flags,sizeof(level.flags));
 	bwrite(fd, (genericptr_t) doors, sizeof(doors));
+	bwrite(fd,(genericptr_t) &altarindex, sizeof(int));
+	bwrite(fd, (genericptr_t) altars, sizeof(altars));
 	save_rooms(fd);	/* no dynamic memory to reclaim */
 
 	/* from here on out, saving also involves allocated memory cleanup */

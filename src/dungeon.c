@@ -1776,6 +1776,10 @@ int range;
 #endif /* OVL1 */
 #ifdef OVL0
 
+/* 
+ * pct/100 of the time, returns the alignment of the current level / branch
+ * otherwise, returns randomly between A_LAWFUL/A_NEUTRAL/A_CHAOTIC
+ */
 int
 induced_align(pct)
 int	pct;
@@ -1790,7 +1794,7 @@ int	pct;
 		if(rn2(100) < pct) return(dungeons[u.uz.dnum].flags.align);
 
 	al = rn2(3) - 1;
-	return(Align2amask(al));
+	return(al);
 }
 
 #endif /* OVL0 */
@@ -2489,8 +2493,8 @@ recalc_mapseen()
 				break;
 			case ALTAR:
 				if (!mptr->feat.naltar)
-					mptr->feat.msalign = Amask2msa(levl[x][y].altarmask);
-				else if (mptr->feat.msalign != Amask2msa(levl[x][y].altarmask))
+					mptr->feat.msalign = Align2msa(a_align(x,y));
+				else if (mptr->feat.msalign != Align2msa(a_align(x,y)));
 					mptr->feat.msalign = MSA_MULTI;
 						
 				mptr->feat.naltar = min(mptr->feat.naltar + 1, 3);
@@ -2785,7 +2789,7 @@ boolean printdun;
 			ADDNTOBUF("temple", mptr->feat.ntemple)
 
 		/* only print out altar's god if they are all to your god */
-		if (Amask2align(Msa2amask(mptr->feat.msalign)) == u.ualign.type)
+		if (Msa2align(mptr->feat.msalign) == u.ualign.type)
 			Sprintf(eos(buf), " to %s", align_gname(u.ualign.type));
 
 		ADDNTOBUF("fountain", mptr->feat.nfount)

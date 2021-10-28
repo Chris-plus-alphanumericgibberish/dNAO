@@ -470,8 +470,7 @@ lookat(x, y, buf, monbuf, shapebuff)
     } else switch(glyph_to_cmap(glyph)) {
     case S_altar:
 	if(!In_endgame(&u.uz))
-	    Sprintf(buf, "%s altar",
-		align_str(Amask2align(levl[x][y].altarmask & ~AM_SHRINE)));
+	    Sprintf(buf, "%s altar", align_str(a_align(x, y)));
 	else Sprintf(buf, "aligned altar");
 	break;
     case S_ndoor:

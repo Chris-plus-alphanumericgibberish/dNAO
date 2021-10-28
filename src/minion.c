@@ -16,6 +16,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 {
 	register int dtype = NON_PM, cnt = 0;
 	aligntyp atyp;
+	int gnum;
 	struct monst *mtmp;
 
 	/* Wielded Demonbane prevents demons from gating in others. From Sporkhack*/
@@ -29,13 +30,19 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	if (mon && !ptr) {
 		ptr = mon->data;
 	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
-	    if (get_mx(mon, MX_EPRI))
+		gnum = (ptr->maligntyp==A_NONE) ? GOD_MOLOCH : align_to_god(sgn(ptr->maligntyp));
+	    if (get_mx(mon, MX_EPRI)) {
 			atyp = EPRI(mon)->shralign;
-		else if (get_mx(mon, MX_EMIN))
+			gnum = EPRI(mon)->godnum;
+		}
+		else if (get_mx(mon, MX_EMIN)) {
 			atyp = EMIN(mon)->min_align;
+			gnum = EMIN(mon)->godnum;
+		}
 	} else {
 	    if (!ptr) ptr = &mons[PM_WIZARD_OF_YENDOR];
 	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
+		gnum = (ptr->maligntyp==A_NONE) ? GOD_MOLOCH : align_to_god(sgn(ptr->maligntyp));
 	}
 
 	if(ptr->mtyp == PM_SHAKTARI) {
@@ -78,7 +85,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	    cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
 	} else if (ptr->mtyp == PM_ANGEL) {
 	    if (rn2(6)) {
-			(void) summon_god_minion(align_gname_full(atyp), atyp, FALSE);
+			(void) summon_god_minion(gnum, FALSE);
 	    } else {
 			dtype = PM_ANGEL;
 	    }
@@ -107,10 +114,9 @@ struct permonst * ptr;	/* summon as though you were <X> */
 			
 			if (dtype == PM_ANGEL) {
 				/* alignment should match the summoner */
-				add_mx(mtmp, MX_EPRI);
 				add_mx(mtmp, MX_EMIN);
 				EMIN(mtmp)->min_align = atyp;
-				EPRI(mtmp)->shralign = atyp;
+				EMIN(mtmp)->godnum = gnum;
 				if(mon->isminion) mtmp->isminion = TRUE;
 				mtmp->mpeaceful = mon && mon->mpeaceful;
 			}
@@ -140,12 +146,12 @@ struct permonst * ptr;	/* summon as though you were <X> */
 }
 
 struct monst *
-summon_god_minion(gptr, alignment, talk)
-const char *gptr;
-aligntyp alignment;
+summon_god_minion(godnum, talk)
+int godnum;
 boolean talk;
 {
-    const int *minions = god_minions(gptr);
+	aligntyp alignment = galign(godnum);
+    const int *minions = god_minions(godnum);
     int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon;
 
@@ -194,12 +200,13 @@ boolean talk;
 			add_mx(mon, MX_EMIN);
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
+			EMIN(mon)->godnum = godnum;
 		}
 	}
 
     if (mon) {
 		if (talk) {
-			pline_The("voice of %s booms:", align_gname(alignment));
+			pline_The("voice of %s booms:", godname(godnum));
 			verbalize("Thou shalt pay for thy indiscretion!");
 			if (!Blind)
 			pline("%s appears before you.", An(Hallucination ? rndmonnam() : mon->data->mname));
@@ -211,19 +218,21 @@ boolean talk;
 		
 		/* fix house setting */
 		if(is_drow(mon->data)){
-			int faction = god_faction(gptr);
-			struct obj *otmp;
+			int faction = god_faction(godnum);
+			if (faction != -1) { 
+				struct obj *otmp;
 
-			set_faction(mon, faction);
-			
-			for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-				if(otmp->otyp == find_signet_ring() || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == NOBLE_S_DRESS){
-					otmp->oward = faction;
+				set_faction(mon, faction);
+				
+				for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
+					if(otmp->otyp == find_signet_ring() || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == NOBLE_S_DRESS){
+						otmp->oward = faction;
+					}
 				}
 			}
 		}
 		
-		if(gptr == DreadFracture && !has_template(mon, FRACTURED)){
+		if(godnum == GOD_THE_DREAD_FRACTURE && !has_template(mon, FRACTURED)){
 			set_template(mon, FRACTURED);
 			mon->m_lev += 4;
 			mon->mhpmax = d(mon->m_lev, 8);
@@ -273,6 +282,8 @@ boolean angels;
 			add_mx(mon, MX_EMIN);
 			mon->isminion = TRUE;
 			EMIN(mon)->min_align = alignment;
+			EMIN(mon)->godnum = align_to_god(alignment);
+			
 			mark_mon_as_summoned(mon, (struct monst *)0, ESUMMON_PERMANENT, 0);
 		}
 	}

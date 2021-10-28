@@ -4,7 +4,7 @@
 
 #include "hack.h"
 #include "artifact.h"
-
+#include "artilist.h"
 #include "xhity.h"
 /*
  * Note:  both artilist[] and artinstance[] have a dummy element #0,
@@ -333,11 +333,14 @@ hack_artifacts()
 	return;
 }
 
+/* declare the global artilist pointer */
+struct artifact * artilist;
+
 /* zero out the artifact existence list */
 void
 init_artifacts()
 {
-	extern struct artifact base_artilist[];
+	extern const struct artifact base_artilist[];
 
 	nrofartifacts = NROFARTIFACTS;
 	artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));
@@ -367,7 +370,7 @@ void
 restore_artifacts(fd)
 int fd;
 {
-	extern struct artifact base_artilist[];
+	extern const struct artifact base_artilist[];
 	mread(fd, (genericptr_t) &nrofartifacts, sizeof(int));
 
 	artinstance = malloc(sizeof(struct artinstance) * (1+nrofartifacts+1));
@@ -2042,7 +2045,7 @@ struct obj *obj;
 		}
 	}
 	else {
-		/* explicitly set in artilist.c */
+		/* explicitly set in artilist.h */
 		wt = artiweight;
 	}
 	return wt;
@@ -5043,9 +5046,9 @@ boolean * messaged;
 						{
 							extern const int monstr[];
 							int value = min(monstr[monsndx(pd)] + 1, MAXVALUE);
-							if (u.ugangr[Align2gangr(u.ualign.type)]) {
-								u.ugangr[Align2gangr(u.ualign.type)] -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-								if (u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
+							if (godlist[u.ualign.god].anger) {
+								godlist[u.ualign.god].anger -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
+								if (godlist[u.ualign.god].anger < 0) godlist[u.ualign.god].anger = 0;
 							}
 							else if (u.ualign.record < 0) {
 								if (value > MAXVALUE) value = MAXVALUE;
@@ -8088,7 +8091,6 @@ arti_invoke(obj)
 							pline("A column of cerulean light blasts through the center of the Annulus, striking the High Altar with intolerable force.");
 							pline("The whole plane shakes, and the Altar and Annulus both explode into a rapidly-fading ring of cerulean light.");
 							flags.questprogress = 2;
-							urole.lgod = getAnachrononautLgodEnd();
 							levl[u.ux][u.uy].typ = CORR;
 							newsym(u.ux, u.uy);
 							useupall(obj);

@@ -2096,9 +2096,9 @@ spiriteffects(power, atme)
 					Your("shadow flows under %s, swallowing %s up!",mon_nam(mon),mhim(mon));
 					cprefx(monsndx(mon->data), TRUE, TRUE);
 					cpostfx(monsndx(mon->data), FALSE, TRUE, FALSE);
-					if(u.ugangr[Align2gangr(u.ualign.type)]) {
-						u.ugangr[Align2gangr(u.ualign.type)] -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-						if(u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
+					if(godlist[u.ualign.god].anger) {
+						godlist[u.ualign.god].anger -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
+						if(godlist[u.ualign.god].anger < 0) godlist[u.ualign.god].anger = 0;
 					} else if(u.ualign.record < 0) {
 						if(value > MAXVALUE) value = MAXVALUE;
 						if(value > -u.ualign.record) value = -u.ualign.record;
@@ -5743,7 +5743,7 @@ int spell;
 		
 		if (uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO
 			&& spell_skilltype(spellid(spell)) == P_ATTACK_SPELL
-			&& Race_if(PM_DROW) && strcmp(urole.ngod,"_Keptolo") 
+			&& Race_if(PM_DROW) && urole.ngod == GOD_KEPTOLO 
 			&& u.ualign.type == A_NEUTRAL && u.ualign.record >= 20
 		) {	// Bonus to attack spells, including granted drain life
 			splcaster -= urole.spelarmr;

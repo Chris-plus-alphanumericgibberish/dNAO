@@ -281,7 +281,7 @@ ENDMAP
 #01234567890123456789012345678901234567890123456789012345678901234567890123456
 #0         1         2   	   3	     4	       5		 6	       7
 
-ALTAR:(10,05),law,altar
+ALTAR:(10,05),law,altar,"_Eilistraee"
 MONSTER: '\'', "ford guardian", (10,05), hostile
 
 MONSTER[75%]: '@', "Green-elf", (02,10)

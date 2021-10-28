@@ -11815,7 +11815,7 @@ register struct permonst *ptr;
 	
 	if(mndx == PM_CENTER_OF_ALL && !u.uevent.sum_entered ) return TRUE;
 	
-	if(goat_monster(ptr) && u.uevent.shubbie_atten && !u.ugangr[GA_MOTHER]) return TRUE;
+	if(goat_monster(ptr) && u.uevent.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger) return TRUE;
 	
 	//The painting is normally peaceful
 	if(In_quest(&u.uz) && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
@@ -11825,7 +11825,7 @@ register struct permonst *ptr;
 	if(Race_if(PM_DROW) && 
 		((ual == A_CHAOTIC && (!Role_if(PM_NOBLEMAN) || flags.initgend)) || (ual == A_NEUTRAL && !flags.initgend)) && /*Males can be neutral or chaotic, but a chaotic male nobleman converted to a different god*/
 		mndx == PM_AVATAR_OF_LOLTH && 
-		strcmp(urole.cgod,"_Lolth") &&
+		urole.cgod != GOD_LOLTH &&
 		u.ualign.record >= 20
 	) return TRUE;
 	

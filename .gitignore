@@ -13,6 +13,7 @@ util/tilemap
 
 include/date.h
 include/onames.h
+include/gnames.h
 include/pm.h
 include/verinfo.h
 include/dgn_comp.h

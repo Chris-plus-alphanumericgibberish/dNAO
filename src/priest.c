@@ -151,8 +151,7 @@ int roomno;
 	struct rm *lev;
 
 	shrine_spot = shrine_pos(roomno);
-	lev = &levl[shrine_spot->x][shrine_spot->y];
-	return ((aligntyp)Amask2align(lev->altarmask & AM_MASK));
+	return (a_align(shrine_spot->x, shrine_spot->y));
 }
 #endif /* OVL0 */
 #ifdef OVLB
@@ -211,7 +210,7 @@ register struct monst *priest;
 	return(move_special(priest,FALSE,TRUE,FALSE,avoid,omx,omy,gx,gy));
 }
 
-/* exclusively for mktemple() */
+/* exclusively for when there is an altar to a god */
 void
 priestini(lvl, sroom, sx, sy, sanctum)
 d_level	*lvl;
@@ -225,11 +224,12 @@ int sanctum;   /* is it the seat of the high priest? */
 
 	if(MON_AT(sx+1, sy))
 		(void) rloc(m_at(sx+1, sy), FALSE); /* insurance */
-	priest = god_priest(align_gname_full(Amask2align(levl[sx][sy].altarmask)), sx, sy, sanctum);
+	priest = god_priest(a_gnum(sx, sy), sx, sy, sanctum);
 	if (priest) {
 		add_mx(priest, MX_EPRI);
 		EPRI(priest)->shroom = (sroom - rooms) + ROOMOFFSET;
-		EPRI(priest)->shralign = Amask2align(levl[sx][sy].altarmask);
+		EPRI(priest)->shralign = a_align(sx, sy);
+		EPRI(priest)->godnum = a_gnum(sx, sy);
 		EPRI(priest)->shrpos.x = sx;
 		EPRI(priest)->shrpos.y = sy;
 		assign_level(&(EPRI(priest)->shrlevel), lvl);
@@ -270,7 +270,7 @@ int sanctum;   /* is it the seat of the high priest? */
 	if(In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && Role_if(PM_EXILE)){
 		int qpm = NON_PM;
 		const int *minions;
-		if(Amask2align(levl[sx][sy].altarmask) == A_LAWFUL){
+		if(a_align(sx, sy) == A_LAWFUL){
 			makemon(&mons[roles[flags.panLgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panLgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panLgod].guardnum], sx, sy, MM_ADJACENTOK);
@@ -283,11 +283,11 @@ int sanctum;   /* is it the seat of the high priest? */
 				roles[flags.panLgod].malenum : 
 				roles[flags.panLgod].femalenum;
 			makemon(&mons[qpm], sx, sy, MM_ADJACENTOK);
-			minions = god_minions(align_gname_full(A_LAWFUL));
+			minions = god_minions(align_to_god(A_LAWFUL));
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
-		} else if(Amask2align(levl[sx][sy].altarmask) == A_CHAOTIC){
+		} else if(a_align(sx, sy) == A_CHAOTIC){
 			makemon(&mons[roles[flags.panCgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panCgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panCgod].guardnum], sx, sy, MM_ADJACENTOK);
@@ -300,11 +300,11 @@ int sanctum;   /* is it the seat of the high priest? */
 				roles[flags.panCgod].malenum : 
 				roles[flags.panCgod].femalenum;
 			makemon(&mons[qpm], sx, sy, MM_ADJACENTOK);
-			minions = god_minions(align_gname_full(A_CHAOTIC));
+			minions = god_minions(align_to_god(A_CHAOTIC));
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
-		} else if(Amask2align(levl[sx][sy].altarmask) == A_NEUTRAL){
+		} else if(a_align(sx, sy) == A_NEUTRAL){
 			makemon(&mons[roles[flags.panNgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panNgod].guardnum], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[roles[flags.panNgod].guardnum], sx, sy, MM_ADJACENTOK);
@@ -317,7 +317,7 @@ int sanctum;   /* is it the seat of the high priest? */
 				roles[flags.panNgod].malenum : 
 				roles[flags.panNgod].femalenum;
 			makemon(&mons[qpm], sx, sy, MM_ADJACENTOK);
-			minions = god_minions(align_gname_full(A_NEUTRAL));
+			minions = god_minions(align_to_god(A_NEUTRAL));
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
 			makemon(&mons[minions[0]], sx, sy, MM_ADJACENTOK);
@@ -344,12 +344,12 @@ char *pname;		/* caller-supplied output buffer */
 {
 	const char *what = Hallucination ? rndmonnam() : mon->data->mname;
 	int align = (get_mx(mon, MX_EPRI) ? EPRI(mon)->shralign : get_mx(mon, MX_EMIN) ? EMIN(mon)->min_align : 0);
+	int godnum = (get_mx(mon, MX_EPRI) ? EPRI(mon)->godnum : get_mx(mon, MX_EMIN) ? EMIN(mon)->godnum : GOD_NONE);
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
-	if ((mon->ispriest && !&mons[PM_HIGH_SHAMAN]) || mon->mtyp == PM_ALIGNED_PRIEST ||
-					mon->mtyp == PM_ANGEL) {
-		/* use epri */
+	if ((mon->ispriest && !&mons[PM_HIGH_SHAMAN]) || mon->mtyp == PM_ALIGNED_PRIEST || mon->mtyp == PM_ANGEL)
+	{
 		if (mon->mtame && mon->mtyp == PM_ANGEL)
 			Strcat(pname, "guardian ");
 		if (mon->mtyp == PM_ANGEL) {
@@ -357,7 +357,7 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, " ");
 		}
 		if (mon->mtyp != PM_ANGEL) {
-			if (!mon->ispriest && EPRI(mon)->renegade)
+			if (!mon->ispriest && mon->malign > 0 && align == u.ualign.type)
 				Strcat(pname, "renegade ");
 			if (mon->mtyp == PM_HIGH_PRIEST)
 				Strcat(pname, "high ");
@@ -377,13 +377,13 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, "a whole faith");
 //			Strcat(pname, "?");
 		} else {
-	 		Strcat(pname, halu_gname(align));
+	 		Strcat(pname, godname(godnum));
 		}
 		return(pname);
 	}
 	Strcat(pname, what);
 	Strcat(pname, " of ");
-	Strcat(pname, halu_gname(align));
+	Strcat(pname, godname(godnum));
 	return(pname);
 }
 
@@ -398,14 +398,15 @@ STATIC_OVL boolean
 has_shrine(pri)
 struct monst *pri;
 {
-	struct rm *lev;
+	int x, y;
 
 	if(!pri)
 		return(FALSE);
-	lev = &levl[EPRI(pri)->shrpos.x][EPRI(pri)->shrpos.y];
-	if (!IS_ALTAR(lev->typ) || !(lev->altarmask & AM_SHRINE))
+	x = EPRI(pri)->shrpos.x;
+	y = EPRI(pri)->shrpos.y;
+	if (!IS_ALTAR(levl[x][y].typ) || !(a_shrine(x, y)))
 		return(FALSE);
-	return((boolean)(EPRI(pri)->shralign == Amask2align(lev->altarmask & ~AM_SHRINE)));
+	return((boolean)(EPRI(pri)->shralign == a_align(x, y)));
 }
 
 struct monst *
@@ -593,16 +594,16 @@ register struct monst *priest;
 			coord mm;
 			verbalize("Foul heretic! The Lord's servants shall humble you!");
 			priest->mpeaceful=0;
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 		} else if(seenSeals >= 6){
 			coord mm;
 			verbalize("Foul heretic! The Lord's servants shall humble you!");
 			priest->mpeaceful=0;
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
-			summon_god_minion(align_gname_full(EPRI(priest)->shralign), EPRI(priest)->shralign, FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
+			summon_god_minion(EPRI(priest)->godnum, FALSE);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			makemon(&mons[PM_DAAT_SEPHIRAH], u.ux, u.uy, MM_ADJACENTOK);
 			/* Create swarm near down staircase (hinders return to level) */
@@ -817,14 +818,19 @@ boolean peaceful;
 
 	if (!(roamer = makemon(ptr, x, y, NO_MM_FLAGS)))
 		return((struct monst *)0);
-	add_mx(roamer, MX_EPRI);
+
 	add_mx(roamer, MX_EMIN);
 	EMIN(roamer)->min_align = alignment;
-	EPRI(roamer)->shralign = alignment;
-	if (coaligned && !peaceful)
-		EPRI(roamer)->renegade = TRUE;
-	/* roamer->ispriest == FALSE naturally */
-	roamer->isminion = TRUE;	/* borrowing this bit */
+	EMIN(roamer)->godnum = align_to_god(alignment);
+
+	/* Binders, on astral, should be beset by a wide variety of gods' angels -- overwrite godnum */
+	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && alignment != A_NONE) {
+		do {
+			EMIN(roamer)->godnum = rnd(MAX_GOD);
+		} while(galign(EMIN(roamer)->godnum) != alignment);
+	}
+
+	roamer->isminion = TRUE;
 	roamer->mtrapseen = ~0;		/* traps are known */
 	roamer->mpeaceful = peaceful;
 	roamer->msleeping = 0;
@@ -842,7 +848,9 @@ register struct monst *roamer;
 				  roamer->mtyp == PM_ANGEL)))
 	        return;
 
-	if(EPRI(roamer)->shralign != u.ualign.type) {
+	int alignment = (get_mx(roamer, MX_EPRI) ? EPRI(roamer)->shralign : get_mx(roamer, MX_EMIN) ? EMIN(roamer)->min_align : 0);
+
+	if (alignment != u.ualign.type) {
 		untame(roamer, 0);
 	    set_malign(roamer);
 	}
@@ -944,7 +952,7 @@ void
 angry_priest()
 {
 	register struct monst *priest;
-	struct rm *lev;
+	int x, y;
 
 	if ((priest = findpriest(temple_occupied(u.urooms))) != 0) {
 	    wakeup(priest, TRUE);
@@ -955,10 +963,9 @@ angry_priest()
 	     *	a fresh corpse nearby, the priest ought to have an
 	     *	opportunity to try converting it back; maybe someday...)
 	     */
-	    lev = &levl[EPRI(priest)->shrpos.x][EPRI(priest)->shrpos.y];
-	    if (!IS_ALTAR(lev->typ) ||
-		((aligntyp)Amask2align(lev->altarmask & AM_MASK) !=
-			EPRI(priest)->shralign)) {
+		x = EPRI(priest)->shrpos.x;
+		y = EPRI(priest)->shrpos.y;
+	    if (!IS_ALTAR(levl[x][y].typ) || (a_gnum(x, y) != EPRI(priest)->godnum)) {
 		priest->ispriest = 0;		/* now a roamer */
 		priest->isminion = 1;		/* but still aligned */
 		/* this overloads the `shroom' field, which is now clobbered */

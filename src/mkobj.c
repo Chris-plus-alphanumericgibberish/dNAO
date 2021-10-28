@@ -566,7 +566,7 @@ int mkflags;
 	otmp->oward = 0;
 	for(int i = 0; i < OPROP_LISTSIZE; i++)
 		otmp->oproperties[i] = 0;
-	otmp->gifted = GA_NONE;
+	otmp->gifted = GOD_NONE;
 	otmp->lifted = 0;
 	otmp->shopOwned = 0;
 	otmp->sknown = 0;
@@ -1403,8 +1403,6 @@ doMaskStats(mask)
 //		mask->mp->mskhpmax = mask->mp->mskhp;
 //		mask->mp->msken = 
 //		mask->mp->mskenmax = mask->mp->msken;
-		for(int i = 0; i < GA_NUM; i++)
-			mask->mp->mskgangr[i] = 0;
 //		mask->mp->mskexp = 
 		mask->mp->mskrexp = mask->mp->msklevel-1;
 		mask->mp->mskweapon_slots = 0;

@@ -1573,9 +1573,6 @@ u_init()
 	uswapwep = uquiver = 0;
 	u.twoweap = 0;
 	u.ublessed = 0;				/* not worthy yet */
-	for(i=0;i<SIZE(u.ugangr);i++){
-		u.ugangr[i] = 0;				/* gods not angry */
-	}
 	u.ugifts   = 0;				/* no divine gifts bestowed */
 	u.uartisval = 0;			/* no artifacts directly acquired */
 	u.ucarinc = 0;
@@ -1778,7 +1775,8 @@ u_init()
 	for (i = 0; i <= MAXSPELL; i++) spl_book[i].sp_id = NO_SPELL;
 	u.ublesscnt = 300;			/* no prayers just yet */
 	u.ugoatblesscnt = 300;			/* goat counter also starts high */
-	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = aligns[flags.initalign].value;
+	u.ualign.type = aligns[flags.initalign].value;
+	u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 	u.ulycn = NON_PM;
 
 #if defined(BSD) && !defined(POSIX_TYPES)
@@ -1874,7 +1872,8 @@ u_init()
 		knows_object(BEAMSWORD);
 		knows_object(DOUBLE_LIGHTSABER);
 		if(Race_if(PM_DWARF)){
-			u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = A_CHAOTIC;
+			u.ualign.type = A_CHAOTIC;
+			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 			flags.initalign = 2; // 2 == chaotic
 		}
 		if(Race_if(PM_ANDROID)){
@@ -1884,6 +1883,9 @@ u_init()
 			skill_init(Skill_Ana);
 			skill_add(Skill_All_Ana);
 		}
+		/* lawful god is actually Ilsensine */
+		urole.lgod = GOD_ILSENSINE;
+		
 	break;
 	case PM_BARBARIAN:
 		u.role_variant = TWO_HANDED_SWORD;
@@ -1912,7 +1914,8 @@ u_init()
 			ini_inv(BlackTorches);
 		}
 		if(Race_if(PM_CLOCKWORK_AUTOMATON)){
-			u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] = u.ualign.type = A_LAWFUL;
+			u.ualign.type = A_LAWFUL;
+			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 			flags.initalign = 0; // 0 == lawful
 		}
 		/* This depends on the order in objects.c */
@@ -1972,8 +1975,9 @@ u_init()
 			knows_object(SPE_HEALING);
 			knows_object(SPE_FORCE_BOLT);
 		}
-    	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
-			u.ualign.type = A_VOID; /* Override racial alignment */
+		/* Override racial alignment */
+		u.ualign.type = A_VOID;
+		u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = GOD_THE_VOID;
 		flags.initalign = 4; // 4 == VOID
 		u.hod += 10;  /*One transgression is all it takes*/
 		u.gevurah += 5; /*One resurection or two rehumanizations is all it takes*/
@@ -1997,8 +2001,9 @@ u_init()
 			u.uen = 600;
 		}
 		else u.uhunger = 200;
-    	u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
-			u.ualign.type = A_CHAOTIC; /* Override racial alignment */
+    	/* Override racial alignment */
+		u.ualign.type = A_CHAOTIC;
+		u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 		flags.initalign = 2; // 2 == chaotic
         urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
         urace.lovemask = 0; /* Convicts are pariahs of their race */
@@ -2032,9 +2037,9 @@ u_init()
         skill_init(Skill_Mad);
 		u.ualign.sins += 13; /* You have sinned */
 		/* gods slightly torqued */
-		u.ugangr[GA_LAWFUL] = 1;
-		u.ugangr[GA_NEUTRAL] = 1;
-		u.ugangr[GA_CHAOTIC] = 1;
+		godlist[urole.lgod].anger = 1;
+		godlist[urole.ngod].anger = 1;
+		godlist[urole.cgod].anger = 1;
 		u.usanity = 75; /* Your sanity is not so hot */
 		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
 		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
@@ -2340,15 +2345,17 @@ u_init()
 		
 		if(Role_if(PM_NOBLEMAN)){
 			if(!flags.female){
-				u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
-					u.ualign.type = A_NEUTRAL; /* Males are neutral */
+				/* Males are neutral */
+				u.ualign.type = A_NEUTRAL;
+				u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 				flags.initalign = 1; // 1 == neutral
 			}
 		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !Role_if(PM_MADMAN)){
 			ini_inv(DrovenCloak);
 			if(!flags.female){
-				u.ualignbase[A_CURRENT] = u.ualignbase[A_ORIGINAL] =
-					u.ualign.type = A_NEUTRAL; /* Males are neutral */
+				/* Males are neutral */
+				u.ualign.type = A_NEUTRAL;
+				u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 				flags.initalign = 1; // 1 == neutral
 			}
 		} else if(Role_if(PM_ANACHRONONAUT)){

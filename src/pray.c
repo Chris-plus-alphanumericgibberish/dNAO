@@ -4,7 +4,8 @@
 
 #include "hack.h"
 #include "xhity.h"
-
+#include "gods.h"
+#include "godlist.h"
 #include "artifact.h"
 
 extern const int monstr[];
@@ -22,7 +23,7 @@ STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean));
 STATIC_DCL boolean FDECL(water_prayer,(BOOLEAN_P));
 STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
 static void NDECL(lawful_god_gives_angel);
-static void FDECL(god_gives_pet,(const char *,ALIGNTYP_P,int));
+static void FDECL(god_gives_pet,(int));
 static void FDECL(god_gives_benefit,(ALIGNTYP_P));
 
 /* simplify a few tests */
@@ -98,7 +99,7 @@ static const char *goattitles[] = {
 };
 
 /* values calculated when prayer starts, and used when completed */
-static aligntyp p_aligntyp;
+static int p_god;
 static int p_trouble;
 static int p_type; /* (-1)-3: (-1)=really naughty, 3=really good */
 
@@ -172,7 +173,7 @@ but that's really hard.
 
 #define ugod_is_angry() (u.ualign.record < 0)
 #define on_altar()	(IS_ALTAR(levl[u.ux][u.uy].typ) || goat_mouth_at(u.ux, u.uy))
-#define on_shrine()	((levl[u.ux][u.uy].altarmask & AM_SHRINE) != 0)
+#define on_shrine()	(IS_ALTAR(levl[u.ux][u.uy].typ) && altars[levl[u.ux][u.uy].altar_num].shrine)
 
 STATIC_OVL int
 in_trouble()
@@ -609,8 +610,8 @@ decurse:
  * Divine wrath, dungeon walls, and armor follow the same principle.
  */
 STATIC_OVL void
-god_zaps_you(ga_num)
-int ga_num;
+god_zaps_you(godnum)
+int godnum;
 {
 	if (u.uswallow) {
 	    pline("Suddenly a bolt of lightning comes down at you from the heavens!");
@@ -635,10 +636,10 @@ int ga_num;
 		shieldeff(u.ux, u.uy);
 		pline("It seems not to affect you.");
 	    } else
-		fry_by_god(ga_num);
+		fry_by_god(godnum);
 	}
 
-	pline("%s is not deterred...", ga_gname(ga_num));
+	pline("%s is not deterred...", godname(godnum));
 	if (u.uswallow) {
 	    pline("A wide-angle disintegration beam aimed at you hits %s!",
 			mon_nam(u.ustuck));
@@ -666,76 +667,79 @@ int ga_num;
 	    if (uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc) (void) destroy_arm(uarmu);
 #endif
 	    if (!Disint_resistance)
-		fry_by_god(ga_num);
+		fry_by_god(godnum);
 	    else {
 		You("bask in its %s glow for a minute...", NH_BLACK);
-		godvoice(ga_num, "I believe it not!");
+		godvoice(godnum, "I believe it not!");
 	    }
 	    if (Is_astralevel(&u.uz) || Is_sanctum(&u.uz)) {
 			char buf[BUFSZ];
-			aligntyp resp_god = Gangr2align(ga_num);
 		/* one more try for high altars */
-			godvoice(ga_num, "Thou cannot escape my wrath, mortal!");
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
+			godvoice(godnum, "Thou cannot escape my wrath, mortal!");
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
+			(void) summon_god_minion(godnum, FALSE);
 			Sprintf(buf, "Destroy %s, my servants!", uhim());
-			godvoice(ga_num, buf);
+			godvoice(godnum, buf);
 	    }
 	}
 }
 
 STATIC_OVL void
-fry_by_god(ga_num)
-int ga_num;
+fry_by_god(godnum)
+int godnum;
 {
 	char killerbuf[64];
 
 	You("fry to a crisp.");
 	killer_format = KILLED_BY;
-	Sprintf(killerbuf, "the wrath of %s", ga_gname(ga_num));
+	Sprintf(killerbuf, "the wrath of %s", godname(godnum));
 	killer = killerbuf;
 	done(DIED);
 }
 
 void
-angrygods(ga_num)
-int ga_num;
+angrygods(godnum)
+int godnum;
 {
 	register int	maxanger;
-	aligntyp resp_god = Gangr2align(ga_num);
+	aligntyp resp_god = godlist[godnum].alignment;
 	char buf[BUFSZ];
 
-	if(ga_num == GA_VOID) return;
-	
-	if(Inhell && resp_god != A_NONE && !(Race_if(PM_DROW) && (resp_god != A_LAWFUL || !flags.initgend))){
-		resp_god = A_NONE;
-		ga_num = GA_NONE;
+	if(godnum == GOD_THE_VOID) {
+		/* the void does not get angry */
+		return;
 	}
 	
+	if(Inhell && godnum != GOD_MOLOCH /*&& !(Race_if(PM_DROW) && (resp_god != A_LAWFUL || !flags.initgend))*/){
+		resp_god = A_NONE;
+	}
+	
+	/* removes all divine protection */
 	u.ublessed = 0;
 	
-	if(Align2gangr(u.ualign.type) == ga_num){
+	if(u.ualign.god == godnum){
 		u.lastprayed = moves;
 		u.lastprayresult = PRAY_ANGER;
 		u.reconciled = REC_NONE;
 	}
-	/* changed from tmp = u.ugangr + abs (u.uluck) -- rph */
+	/* changed from tmp = anger + abs (u.uluck) -- rph */
 	/* added test for alignment diff -dlc */
-	if(Align2gangr(u.ualign.type) != ga_num){
-	    maxanger =  3*u.ugangr[ga_num] +
+	if(u.ualign.god != godnum){
+	    maxanger =  3*godlist[godnum].anger +
 		((Luck > 0 || u.ualign.record <= STRAYED) ? -Luck/3 : -Luck);
 	} else {
-	    maxanger =  3*u.ugangr[ga_num] +
+	    maxanger =  3*godlist[godnum].anger +
 		((Luck > 0 || u.ualign.record >= STRIDENT) ? -Luck/3 : -Luck);
 	}
 	
 	if (maxanger < 1) maxanger = 1; /* possible if bad align & good luck */
 	else if (maxanger > 15) maxanger = 15;	/* be reasonable */
 	
-	if(ga_num == GA_MOTHER){
+	if(godnum == GOD_THE_BLACK_MOTHER){
+		/* anger goat-following creatures on the level */
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
 			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT)){
@@ -756,32 +760,32 @@ int ga_num;
 	switch (rn2(maxanger)) {
 	    case 0:
 	    case 1:
-			if(ga_num == GA_MOTHER){
-				You_feel("that %s is %s.", ga_gname(ga_num),
+			if(godnum == GOD_THE_BLACK_MOTHER){
+				You_feel("that %s is %s.", godname(godnum),
 					Hallucination ? "peckish" : "hungry");
 			} else {
-				You_feel("that %s is %s.", ga_gname(ga_num),
+				You_feel("that %s is %s.", godname(godnum),
 			    Hallucination ? "bummed" : "displeased");
 			}
 			break;
 	    case 2:
 	    case 3:
 			Sprintf(buf,"Thou %s, %s. Thou must relearn thy lessons!",
-			    (ugod_is_angry() && Align2gangr(u.ualign.type) == ga_num)
+			    (ugod_is_angry() && godnum == u.ualign.god)
 				? "hast strayed from the path" :
 						"art arrogant",
 			      youracedata->mlet == S_HUMAN ? "mortal" : "creature");
-			godvoice(ga_num,buf);
+			godvoice(godnum,buf);
 			(void) adjattrib(A_WIS, -1, FALSE);
 			losexp((char *)0,TRUE,FALSE,TRUE);
 			break;
 	    case 6:	if (!Punished) {
-			    gods_angry(ga_num);
+			    gods_angry(godnum);
 			    punish((struct obj *)0);
 			    break;
 			} /* else fall thru */
 	    case 4:
-	    case 5:	gods_angry(ga_num);
+	    case 5:	gods_angry(godnum);
 			if (!Blind && !Antimagic)
 			    pline("%s glow surrounds you.",
 				  An(hcolor(NH_BLACK)));
@@ -791,17 +795,17 @@ int ga_num;
 	    case 8:	
 			Sprintf(buf,"Thou durst %s me? Then die, %s!",
 				  (on_altar() &&
-				   (a_align(u.ux,u.uy) != resp_god)) ?
+				   ((god_at_altar(u.ux,u.uy)) != godnum)) ?
 				  "scorn":"call upon",
 			      youracedata->mlet == S_HUMAN ? "mortal" : "creature"
 			);
-			godvoice(ga_num, buf);
-			(void) summon_god_minion(ga_gname_full(ga_num), resp_god, FALSE);
+			godvoice(godnum, buf);
+			(void) summon_god_minion(godnum, FALSE);
 			break;
 
 	    default:	
-			gods_angry(ga_num);
-			god_zaps_you(ga_num);
+			gods_angry(godnum);
+			god_zaps_you(godnum);
 			break;
 	}
 	u.ublesscnt = rnz(300);
@@ -845,14 +849,14 @@ at_your_feet(str)
 }
 
 STATIC_OVL void
-pleased(g_align)
-	aligntyp g_align;
+pleased(godnum)
+int godnum;
 {
 	/* don't use p_trouble, worst trouble may get fixed while praying */
 	int trouble = in_trouble();	/* what's your worst difficulty? */
 	int pat_on_head = 0, kick_on_butt;
 
-	You_feel("that %s is %s.", align_gname(g_align),
+	You_feel("that %s is %s.", godname(godnum),
 	    u.ualign.record >= DEVOUT ?
 	    Hallucination ? "pleased as punch" : "well-pleased" :
 	    u.ualign.record >= STRIDENT ?
@@ -860,7 +864,7 @@ pleased(g_align)
 	    Hallucination ? "full" : "satisfied");
 
 	/* not your deity */
-	if (on_altar() && p_aligntyp != u.ualign.type) {
+	if (on_altar() && p_god != u.ualign.god) {
 		adjalign(-1);
 		return;
 	} else if (u.ualign.record < 2 && trouble <= 0) adjalign(1);
@@ -918,7 +922,7 @@ pleased(g_align)
 		}
 		else if(Pantheon_if(PM_VALKYRIE) && u.ualign.record >= PIOUS 
 			&& uwep && is_spear(uwep) && !uwep->oartifact && uwep->spe >= 5 
-			&& !art_already_exists(ART_GUNGNIR) && (g_align == A_LAWFUL || g_align == A_NEUTRAL)
+			&& !art_already_exists(ART_GUNGNIR) && (galign(godnum) == A_LAWFUL || galign(godnum) == A_NEUTRAL)
 		){
 			pline("Secret runes are engraved on your %s.", xname(uwep));
 			oname(uwep, artilist[ART_GUNGNIR].name);
@@ -970,12 +974,12 @@ pleased(g_align)
 			}
 			break;
 		case 3:
-			/* takes 2 hints to get the music to enter the stronghold */
+			/* takes only 1 hint to get the music to enter the stronghold */
 			if (!u.uevent.uopened_dbridge) {
 			if (u.uevent.uheard_tune < 2) {
 				char buf[BUFSZ];
 				Sprintf(buf, "Hark, %s! To enter the castle, thou must play the right tune!", youracedata->mlet == S_HUMAN ? "mortal" : "creature");
-				godvoice(Align2gangr(g_align), buf);
+				godvoice(godnum, buf);
 				You_hear("a divine music...");
 				pline("It sounds like:  \"%s\".", tune);
 				u.uevent.uheard_tune = 2;
@@ -989,11 +993,11 @@ pleased(g_align)
 			/* if any levels have been lost (and not yet regained),
 			   treat this effect like blessed full healing */
 			if (u.ulevel < u.ulevelmax) {
-			// u.ulevelmax -= 1;	/* see potion.c */
-			pluslvl(FALSE);
+				// u.ulevelmax -= 1;	/* see potion.c */
+				pluslvl(FALSE);
 			} else {
-			u.uhpbonus += 5;
-			calc_total_maxhp();
+				u.uhpbonus += 5;
+				calc_total_maxhp();
 			}
 			u.uhp = u.uhpmax;
 			if (Upolyd) u.mh = u.mhmax;
@@ -1014,7 +1018,7 @@ pleased(g_align)
 			int any = 0;
 
 			if (Blind)
-			You_feel("the power of %s.", u_gname());
+			You_feel("the power of %s.", godname(godnum));
 			else You("are surrounded by %s aura.",
 				 an(hcolor(NH_LIGHT_BLUE)));
 			for(otmp=invent; otmp; otmp=otmp->nobj) {
@@ -1058,7 +1062,7 @@ pleased(g_align)
 			} else u.ublessed++;
 			Sprintf(buf, msg, "my protection");
 			}
-			godvoice(Align2gangr(u.ualign.type), buf);
+			godvoice(godnum, buf);
 			break;
 		}
 		case 7:
@@ -1130,14 +1134,14 @@ pray_goat()
 	if (yn("Force the Goat to be pleased?") == 'y') {
 	    u.ugoatblesscnt = 0;
 	    if (u.uluck < 0) u.uluck = 0;
-	    u.ugangr[GA_MOTHER] = 0;
+	    godlist[GOD_THE_BLACK_MOTHER].anger = 0;
 	}
     }
 #endif
 	
 	You("begin praying to %s.", goattitles[rn2(SIZE(goattitles))]);
 	
-	if((int)Luck < 0 || u.ugangr[GA_MOTHER])
+	if((int)Luck < 0 || godlist[GOD_THE_BLACK_MOTHER].anger)
 		fail = TRUE;
     else if (u.ugoatblesscnt > 0)			/* not in trouble */
 		fail = TRUE;		/* too soon... */
@@ -1181,7 +1185,7 @@ pray_goat()
 			water_damage(invent, FALSE, FALSE, FALSE, &youmonst);
 			losehp(dmg, "hungry goat", KILLED_BY_AN);
 		}
-		gods_upset(GA_MOTHER);
+		gods_upset(GOD_THE_BLACK_MOTHER);
 	}
 	else goat_pleased();
 	
@@ -1449,9 +1453,9 @@ water_prayer(bless_water)
 }
 
 void
-godvoice(ga_num, words)
-    int ga_num;
-    const char *words;
+godvoice(godnum, words)
+int godnum;
+const char *words;
 {
     const char *quot = "";
     if(words)
@@ -1459,50 +1463,55 @@ godvoice(ga_num, words)
     else
 	words = "";
 	
-	if(ga_num == GA_VOID){
+	if(godnum == GOD_THE_VOID){
 		You("think you hear a voice in the distance: %s%s%s", quot, words, quot);
-	} else if(ga_num == GA_SILENCE){
+	} else if(godnum == GOD_THE_SILENCE){
 		You_hear("silence.");
-	} else if(ga_num == GA_OTHER){
+	} else if(godnum == GOD_AN_ALIEN_GOD){
 		if(Hallucination){
 			pline("The world speaks to you: %s%s%s", quot, words, quot);
 		} else {
 			pline("The world quakes around you.  Perhaps it is the voice of a god?");
 		}
 		do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
-	} else if(ga_num == GA_MOTHER){
+	} else if(godnum == GOD_THE_BLACK_MOTHER){
 		You_hear("%s", goatvoices[rn2(SIZE(goatvoices))]);
-	} else if(ga_num == GA_FRACTURE){
+	} else if(godnum == GOD_THE_DREAD_FRACTURE){
 		You_hear("a voice like glass breaking: %s%s%s", quot, words, quot);
-	} else if(ga_num == GA_SOTHOTH){
+	} else if(godnum == GOD_YOG_SOTHOTH){
 		if(is_silent(youracedata)) You_hear("your voice %s: %s%s%s", godvoices[rn2(SIZE(godvoices))], quot, words, quot);
 		else You("%s: %s%s%s", yogvoices[rn2(SIZE(yogvoices))],  quot, words, quot);
 	} else {
-		pline_The("voice of %s %s: %s%s%s", ga_gname(ga_num),
+		pline_The("voice of %s %s: %s%s%s", godname(godnum),
 		  godvoices[rn2(SIZE(godvoices))], quot, words, quot);
 	}
 }
 
+/* god voices their displeasure with you (but doesn't do anything) */
 void
-gods_angry(ga_num)
-    int ga_num;
+gods_angry(godnum)
+int godnum;
 {
-    godvoice(ga_num, "Thou hast angered me.");
+    godvoice(godnum, "Thou hast angered me.");
 }
 
-/* The ga_num god is upset with you. */
+/* This god is upset with you. */
 void
-gods_upset(ga_num)
-int ga_num;
+gods_upset(godnum)
+int godnum;
 {
-	if(ga_num == GA_VOID) return;
-	if(ga_num == Align2gangr(u.ualign.type)) u.ugangr[ga_num]++;
-	else if(u.ugangr[Align2gangr(u.ualign.type)]){
-		u.ugangr[Align2gangr(u.ualign.type)]--;
-		u.ugangr[ga_num]++;
+	if(godnum == GOD_THE_VOID) return;
+
+	if (godnum == u.ualign.god)
+		godlist[godnum].anger++;
+	else {
+		godlist[godnum].anger++;
+		/* anger other gods calms your god */
+		if (godlist[u.ualign.god].anger > 0)
+			godlist[u.ualign.god].anger--;
 	}
-	else u.ugangr[ga_num]++;
-	angrygods(ga_num);
+
+	angrygods(godnum);
 }
 
 static NEARDATA const char sacrifice_types[] = { FOOD_CLASS, AMULET_CLASS, 0 };
@@ -1647,10 +1656,10 @@ register struct obj *otmp;
 		Your("sacrifice rots away!");
 		break;
 		case 7:
-		godvoice(rnd(3), "Hey! I ordered the chicken!");
+		godvoice(GOD_NONE, "Hey! I ordered the chicken!");
 		break;
 		case 8:
-		godvoice(rnd(3), "Oh, gross! Honey, the pets left another dead critter on the doorstep!");
+		godvoice(GOD_NONE, "Oh, gross! Honey, the pets left another dead critter on the doorstep!");
 		break;
 		case 9:
 		Your("sacrifice is consumed in a flash!");
@@ -1668,7 +1677,7 @@ register struct obj *otmp;
 		Your("sacrifice is dejected!");
 		break;
 		case 14:
-		godvoice(rnd(3), "This better be kosher!");
+		godvoice(GOD_NONE, "This better be kosher!");
 		break;
 		case 15:
 		Your("sacrifice is consumed in a lash of fight!");
@@ -1721,16 +1730,14 @@ register struct obj *otmp;
 }
 
 void
-god_gives_pet(gptr, alignment, ga_num)
-const char *gptr;
-aligntyp alignment;
-int ga_num;
+god_gives_pet(godnum)
+int godnum;
 {
 /*
     register struct monst *mtmp2;
     register struct permonst *pm;
  */
-    const int *minions = god_minions(gptr);
+    const int *minions = god_minions(godnum);
     int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon = (struct monst *)0;
 	
@@ -1772,13 +1779,13 @@ int ga_num;
     if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
     }
-	else mon = make_pet_minion(mtyp,alignment,ga_num);
+	else mon = make_pet_minion(mtyp, godnum);
 	
     if (mon) {
-	switch ((int)alignment) {
+	switch (galign(godnum)) {
 	   case A_LAWFUL:
-		if (u.uhp > (u.uhpmax / 10)) godvoice(Align2gangr(u.ualign.type), "My minion shall serve thee!");
-		else godvoice(Align2gangr(u.ualign.type), "My minion shall save thee!");
+		if (u.uhp > (u.uhpmax / 10)) godvoice(godnum, "My minion shall serve thee!");
+		else godvoice(godnum, "My minion shall save thee!");
 	   break;
 	   case A_NEUTRAL:
 	   case A_VOID:
@@ -1805,16 +1812,7 @@ lawful_god_gives_angel()
     int mtyp;
     int mon;
 
-	god_gives_pet(align_gname_full(A_LAWFUL),A_LAWFUL, Align2gangr(A_LAWFUL));
-}
-
-int
-get_ga_mfaction(ga_num)
-int ga_num;
-{
-	if(ga_num == GA_MOTHER)
-		return GOATMOM_FACTION;
-	else return -1;
+	god_gives_pet(align_to_god(A_LAWFUL));
 }
 
 int
@@ -1823,7 +1821,8 @@ dosacrifice()
     register struct obj *otmp;
     int value = 0;
     int pm;
-    aligntyp altaralign = a_align(u.ux,u.uy);
+    aligntyp altaralign = (a_align(u.ux,u.uy));
+	int altargod = god_at_altar(u.ux, u.uy);
     if (!on_altar() || u.uswallow) {
 	You("are not standing on an altar.");
 	return 0;
@@ -1906,8 +1905,10 @@ dosacrifice()
 				/* curse the lawful/neutral altar */
 				if(Race_if(PM_INCANTIFIER)) pline_The("altar is stained with human blood, the blood of your birth race.");
 				else pline_The("altar is stained with %s blood.", urace.adj);
-				if(!Is_astralevel(&u.uz))
-					levl[u.ux][u.uy].altarmask = AM_CHAOTIC;
+				if(!Is_astralevel(&u.uz)) {
+					a_align(u.ux, u.uy) = A_CHAOTIC;
+					a_gnum(u.ux, u.uy) = GOD_NONE;
+				}
 				angry_priest();
 			} else {
 				struct monst *dmon;
@@ -1920,7 +1921,8 @@ dosacrifice()
 					 "The blood floods the altar, which vanishes in %s cloud!",
 					  an(hcolor(NH_BLACK)));
 					levl[u.ux][u.uy].typ = ROOM;
-					levl[u.ux][u.uy].altarmask = 0;
+					levl[u.ux][u.uy].altar_num = 0;
+					/* todo: notice that the altar is gone in #overview */
 					newsym(u.ux, u.uy);
 					angry_priest();
 					demonless_msg = "cloud dissipates";
@@ -1942,14 +1944,14 @@ dosacrifice()
 
 			if (u.ualign.type != A_CHAOTIC) {
 				adjalign(-5);
-				u.ugangr[Align2gangr(u.ualign.type)] += 3;
+				godlist[u.ualign.god].anger += 3;
 				(void) adjattrib(A_WIS, -1, TRUE);
-				if (!Inhell) angrygods(Align2gangr(u.ualign.type));
+				if (!Inhell) angrygods(u.ualign.god);
 				change_luck(-5);
 			} else {
 				adjalign(5);
 				/* create Dirge from player's longsword here if possible */
-				if (Role_if(PM_KNIGHT) && u.ugangr[Align2gangr(u.ualign.type)] == 0 && u.ualign.record > 0
+				if (Role_if(PM_KNIGHT) && godlist[u.ualign.god].anger == 0 && u.ualign.record > 0
 					&& uwep && uwep->otyp == LONG_SWORD
 					&& !uwep->oartifact && !(uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
 					&& !art_already_exists(ART_DIRGE)
@@ -2047,7 +2049,7 @@ dosacrifice()
 					give_ascension_trophy();
 #endif
 					pline("An invisible choir sings, and you are bathed in radiance...");
-					godvoice(AltarAlign2gangr(altaralign), "Congratulations, mortal!");
+					godvoice(altargod, "Congratulations, mortal!");
 					display_nhwindow(WIN_MESSAGE, FALSE);
 					verbalize("In return for thy service, I grant thee the gift of Immortality!");
 					You("ascend to the status of Demigod%s...",
@@ -2067,8 +2069,7 @@ dosacrifice()
 						hcolor((const char *)"orange"));
 					done(ESCAPED);
 				} else if(altaralign == A_CHAOTIC) {
-					/* And the opposing team picks you up and
-					carries you off on their shoulders */
+					/* And the opposing team picks you up squishes you like a bug */
 					adjalign(-99);
 					pline("%s accepts your gift, and gains complete control over creation.", a_gname());
 					pline("In the next instant, she destroys it.");
@@ -2107,7 +2108,7 @@ dosacrifice()
 		if(u.ualign.type != A_VOID){
 			change_luck(-3);
 			adjalign(-1);
-			u.ugangr[Align2gangr(u.ualign.type)] += 3;
+			godlist[u.ualign.god].anger += 3;
 			value = -3;
 			u.lastprayresult = PRAY_ANGER;
 			u.lastprayed = moves;
@@ -2129,27 +2130,28 @@ dosacrifice()
 	 */
 	You_feel("the air around you grow charged...");
 	pline("Suddenly, you realize that %s has noticed you...", a_gname());
-		godvoice(AltarAlign2gangr(altaralign), "So, mortal!  You dare desecrate my High Temple!");
+		godvoice(altargod, "So, mortal!  You dare desecrate my High Temple!");
 	/* Throw everything we have at the player */
-	god_zaps_you(AltarAlign2gangr(altaralign));
+	god_zaps_you(altargod);
     } else if (value < 0) { /* I don't think the gods are gonna like this... */
-		gods_upset(AltarAlign2gangr(altaralign));
+		gods_upset(altargod);
     } else {
-	int saved_anger = u.ugangr[Align2gangr(u.ualign.type)];
+	int saved_anger = godlist[u.ualign.god].anger;
 	int saved_cnt = u.ublesscnt;
 	int saved_luck = u.uluck;
 
-	/* Sacrificing at an altar of a different alignment */
-	if (u.ualign.type != altaralign) {
+	/* Sacrificing at an altar of a different alignment OR a different god */
+	if ((a_gnum(u.ux, u.uy) != GOD_NONE) ?
+			(a_gnum(u.ux, u.uy) != u.ualign.god) : (u.ualign.type != altaralign)
+		){
 	    /* Is this a conversion ? */
 	    /* An unaligned altar in Gehennom will always elicit rejection. */
 	    if ((ugod_is_angry() && u.ualign.type != A_VOID) || (altaralign == A_NONE && Inhell)) {
-		if(u.ualignbase[A_CURRENT] == u.ualignbase[A_ORIGINAL] &&
-		   altaralign != A_NONE && altaralign != A_VOID && !Role_if(PM_EXILE)) {
+		if(u.ugodbase[UGOD_CURRENT] == u.ugodbase[UGOD_ORIGINAL] && god_accepts_you(altargod)) {
 		    You("have a strong feeling that %s is angry...", u_gname());
 			if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 				pline("A pulse of darkness radiates from your sacrifice!");
-				angrygods(AltarAlign2gangr(altaralign));
+				angrygods(altargod);
 				return 1;
 			}
 			consume_offering(otmp);
@@ -2157,9 +2159,11 @@ dosacrifice()
 
 		    /* The player wears a helm of opposite alignment? */
 		    if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
-			u.ualignbase[A_CURRENT] = altaralign;
-		    else
-			u.ualign.type = u.ualignbase[A_CURRENT] = altaralign;
+				u.ugodbase[UGOD_CURRENT] = altargod;
+		    else {
+				u.ualign.god = u.ugodbase[UGOD_CURRENT] = altargod;
+				u.ualign.type = altaralign;
+			}
 		    u.ublessed = 0;
 		    flags.botl = 1;
 
@@ -2170,9 +2174,9 @@ dosacrifice()
 		    u.lastprayed = moves;
 			u.reconciled = REC_NONE;
 		    u.lastprayresult = PRAY_CONV;
-		    adjalign((int)(u.ualignbase[A_ORIGINAL] * (ALIGNLIM / 2)));
+		    adjalign((int)(galign(u.ugodbase[UGOD_ORIGINAL]) * (ALIGNLIM / 2)));
 			if(Race_if(PM_DROW)){
-				switch(u.ualignbase[A_CURRENT]){
+				switch(galign(u.ugodbase[UGOD_ORIGINAL])){
 					case A_LAWFUL:
 						if(Role_if(PM_NOBLEMAN)){
 							if(flags.initgend){
@@ -2224,36 +2228,36 @@ dosacrifice()
 			if(altaralign == A_VOID){
 				consume_offering(otmp);
 				if (!Inhell){
-					godvoice(Align2gangr(u.ualign.type), "Suffer, infidel!");
-					u.ugangr[Align2gangr(u.ualign.type)] += 3;
+					godvoice(u.ualign.god, "Suffer, infidel!");
+					godlist[u.ualign.god].anger += 3;
 					adjalign(-5);
 					u.lastprayed = moves;
 					u.lastprayresult = PRAY_ANGER;
 					u.reconciled = REC_NONE;
 					change_luck(-5);
 					(void) adjattrib(A_WIS, -2, TRUE);
-					angrygods(Align2gangr(u.ualign.type));
+					angrygods(u.ualign.god);
 				} else {
 					pline("Silence greets your offering.");
 				}
 			} else {
-				u.ugangr[Align2gangr(u.ualign.type)] += 3;
+				godlist[u.ualign.god].anger += 3;
 				adjalign(-5);
 				u.lastprayed = moves;
 				u.lastprayresult = PRAY_ANGER;
 				u.reconciled = REC_NONE;
 				pline("%s rejects your sacrifice!", a_gname());
-				godvoice(AltarAlign2gangr(altaralign), "Suffer, infidel!");
+				godvoice(altargod, "Suffer, infidel!");
 				change_luck(-5);
 				(void) adjattrib(A_WIS, -2, TRUE);
-				if (!Inhell) angrygods(Align2gangr(u.ualign.type));
+				if (!Inhell) angrygods(u.ualign.god);
 			}
 		}
 		return(1);
 	    } else {
 		if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 			pline("A pulse of darkness radiates from your sacrifice!");
-			angrygods(AltarAlign2gangr(altaralign));
+			angrygods(altargod);
 			return 1;
 		}
 		consume_offering(otmp);
@@ -2269,11 +2273,8 @@ dosacrifice()
 				You_feel("the power of %s increase.", u_gname());
 				exercise(A_WIS, TRUE);
 				change_luck(1);
-				/* Yes, this is supposed to be &=, not |= */
-				levl[u.ux][u.uy].altarmask &= AM_SHRINE;
-				/* the following accommodates stupid compilers */
-				levl[u.ux][u.uy].altarmask =
-				levl[u.ux][u.uy].altarmask | (Align2amask(u.ualign.type));
+				a_align(u.ux, u.uy) = u.ualign.type;
+				a_gnum(u.ux, u.uy) = GOD_NONE;
 				if (!Blind)
 				pline_The("altar glows %s.",
 					  hcolor(
@@ -2305,24 +2306,22 @@ dosacrifice()
 				}
 				// if (rnl(u.ulevel) > 6 && u.ualign.record > 0 &&
 				   // rnd(u.ualign.record) > (3*ALIGNLIM)/4)
-				if(!Pantheon_if(PM_ELF)){
-					if(u.ulevel > 20) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
-					if(u.ulevel >= 14) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
-					(void) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
+				if(!gods_are_friendly(altargod, u.ualign.god)){
+					if(u.ulevel > 20) summon_god_minion(altargod, FALSE);
+					if(u.ulevel >= 14) summon_god_minion(altargod, FALSE);
+					(void) summon_god_minion(altargod, TRUE);
 				}
 				/* anger priest; test handles bones files */
-				if((pri = findpriest(temple_occupied(u.urooms))) &&
-				   !p_coaligned(pri))
-				angry_priest();
+				if((pri = findpriest(temple_occupied(u.urooms))) && !p_coaligned(pri))
+					angry_priest();
 			} else {
-				pline("Unluckily, you feel the power of %s decrease.",
-				  u_gname());
+				pline("Unluckily, you feel the power of %s decrease.", u_gname());
 				change_luck(-1);
 				exercise(A_WIS, FALSE);
-				if(!Pantheon_if(PM_ELF)){
-					if(u.ulevel > 20) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
-					if(u.ulevel > 10) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
-					(void) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
+				if(!gods_are_friendly(altargod, u.ualign.god)){
+					if(u.ulevel > 20) summon_god_minion(altargod, TRUE);
+					if(u.ulevel > 10) summon_god_minion(altargod, TRUE);
+					(void) summon_god_minion(altargod, TRUE);
 				}
 			}
 		}
@@ -2332,18 +2331,17 @@ dosacrifice()
 
 	if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 		pline("A pulse of darkness radiates from your sacrifice!");
-		angrygods(AltarAlign2gangr(altaralign));
+		angrygods(altargod);
 		return 1;
 	}
 	consume_offering(otmp);
-	/*if(altaralign == A_UNKNOWN) return(1);*/
 	/* OK, you get brownie points. */
-	if(u.ugangr[Align2gangr(u.ualign.type)]) {
-	    u.ugangr[Align2gangr(u.ualign.type)] -=
+	if(godlist[u.ualign.god].anger > 0) {
+	    godlist[u.ualign.god].anger -=
 		((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-	    if(u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
-	    if(u.ugangr[Align2gangr(u.ualign.type)] != saved_anger) {
-		if (u.ugangr[Align2gangr(u.ualign.type)]) {
+	    if(godlist[u.ualign.god].anger < 0) godlist[u.ualign.god].anger = 0;
+	    if(godlist[u.ualign.god].anger != saved_anger) {
+		if (godlist[u.ualign.god].anger) {
 		    pline("%s seems %s.", u_gname(),
 			  Hallucination ? "groovy" : "slightly mollified");
 
@@ -2393,7 +2391,7 @@ dosacrifice()
 	    /* The chance goes down as the number of artifacts goes up */
 		/* Priests now only count gifts in this calculation, found artifacts are excluded */
 		if (u.ulevel > 2 && u.uluck >= 0 && maybe_god_gives_gift()) {
-		otmp = mk_artifact((struct obj *)0, a_align(u.ux,u.uy));
+		otmp = mk_artifact((struct obj *)0, (a_align(u.ux,u.uy)));
 		if (otmp) {
 		    if (otmp->spe < 0) otmp->spe = 0;
 		    if (otmp->cursed) uncurse(otmp);
@@ -2401,8 +2399,8 @@ dosacrifice()
 			    otmp->oerodeproof = TRUE;
 		    dropy(otmp);
 		    at_your_feet("An object");
-		    godvoice(Align2gangr(u.ualign.type), "Use my gift wisely!");
-			otmp->gifted = Align2gangr(u.ualign.type);
+		    godvoice(u.ualign.god, "Use my gift wisely!");
+			otmp->gifted = u.ualign.god;
 			u.ugifts++;
 			u.uartisval += arti_value(otmp);
 		    u.ublesscnt = rnz(300 + (u.uartisval * 10));
@@ -2473,18 +2471,18 @@ boolean praying;	/* false means no messages should be given */
 {
     int alignment;
 
-    p_aligntyp = on_altar() ? a_align(u.ux,u.uy) : u.ualign.type;
+    p_god = on_altar() ? (god_at_altar(u.ux,u.uy)) : u.ualign.god;
     p_trouble = in_trouble();
 
-    if (is_demon(youracedata) && (p_aligntyp != A_CHAOTIC)) {
+    if (is_demon(youracedata) && (galign(p_god) == A_LAWFUL || galign(p_god) == A_NEUTRAL)) {
 	if (praying)
 	    pline_The("very idea of praying to a %s god is repugnant to you.",
-		  p_aligntyp ? "lawful" : "neutral");
+		  godlist[p_god].alignment ? "lawful" : "neutral");
 	return FALSE;
     }
 
     if (praying)
-	You("begin praying to %s.", align_gname(p_aligntyp));
+	You("begin praying to %s.", godname(p_god));
 	
 	// Dungeon currently cut off from the divine
 	if(praying && Misotheism){
@@ -2492,27 +2490,27 @@ boolean praying;	/* false means no messages should be given */
 		return TRUE;
 	}
 
-    if (u.ualign.type && u.ualign.type == -p_aligntyp)
+    if (u.ualign.type && u.ualign.type == -galign(p_god))
 	alignment = -u.ualign.record;		/* Opposite alignment altar */
-    else if (u.ualign.type != p_aligntyp)
+    else if (u.ualign.type != galign(p_god))
 	alignment = u.ualign.record / 2;	/* Different alignment altar */
     else alignment = u.ualign.record;
 
-    if ((int)Luck < 0 || u.ugangr[Align2gangr(u.ualign.type)] || alignment < 0)
+    if ((int)Luck < 0 || godlist[u.ualign.god].anger || alignment < 0)
         p_type = 0;             /* too naughty... */
     else if ((p_trouble > 0) ? (u.ublesscnt > 200) : /* big trouble */
 	(p_trouble < 0) ? (u.ublesscnt > 100) : /* minor difficulties */
 	(u.ublesscnt > 0))			/* not in trouble */
 	p_type = 1;		/* too soon... */
     else /* alignment >= 0 */ {
-	if(on_altar() && u.ualign.type != p_aligntyp)
+	if(on_altar() && u.ualign.type != galign(p_god))
 	    p_type = 2;
 	else
 	    p_type = 3;
     }
 
     if (is_undead(youracedata) && !Inhell &&
-	(p_aligntyp == A_LAWFUL || (p_aligntyp == A_NEUTRAL && !rn2(10))))
+		(gholiness(p_god) == HOLY_HOLINESS || (gholiness(p_god) == NEUTRAL_HOLINESS && !rn2(10))))
 	p_type = -1;
     /* Note:  when !praying, the random factor for neutrals makes the
        return value a non-deterministic approximation for enlightenment.
@@ -2565,7 +2563,7 @@ dopray()
 	    u.ublesscnt = 0;
 	    if (u.uluck < 0) u.uluck = 0;
 	    if (u.ualign.record <= 0) u.ualign.record = 1;
-	    u.ugangr[Align2gangr(u.ualign.type)] = 0;
+	    godlist[u.ualign.god].anger = 0;
 	    if(p_type < 2) p_type = 3;
 	}
     }
@@ -2587,18 +2585,19 @@ dopray()
 STATIC_PTR int
 prayer_done()		/* M. Stephenson (1.0.3b) */
 {
-    aligntyp alignment = p_aligntyp;
+    aligntyp alignment = galign(p_god);
 
     u.uinvulnerable = FALSE;
 	u.lastprayresult = PRAY_GOOD;
     if(p_type == -1) {
-		godvoice(Align2gangr(alignment),
-			 alignment == A_LAWFUL ?
+		godvoice(p_god,
+			 gholiness(p_god) == HOLY_HOLINESS ?
 			 "Vile creature, thou durst call upon me?" :
 			 "Walk no more, perversion of nature!");
 		You_feel("like you are falling apart.");
 	/* KMH -- Gods have mastery over unchanging */
-	if (!Race_if(PM_VAMPIRE)) {
+	/* but not racial vampirism or the helm of undeath */
+	if (!Race_if(PM_VAMPIRE) && !(HUnchanging & FROMOUTSIDE)) {
 		u.lastprayresult = PRAY_GOOD;
 		rehumanize();
 		losehp(rnd(20), "residual undead turning effect", KILLED_BY_AN);
@@ -2607,52 +2606,51 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 	   /* Starting vampires are inherently vampiric */
 	   losehp(rnd(20), "undead turning effect", KILLED_BY_AN);
 	   pline("You get the idea that %s will be of %s help to you.",
-	      align_gname(alignment),
-			 alignment == A_LAWFUL ?
-			 "little" :
-			 "at best sporadic");
+			godname(p_god),
+			gholiness(p_god) == HOLY_HOLINESS ?
+			"little" :
+			"at best sporadic");
 	}
 	exercise(A_CON, FALSE);
 	if(on_altar()){
 		(void) water_prayer(FALSE);
 		change_luck(-3);
-		gods_upset(AltarAlign2gangr(alignment));
+		gods_upset(p_god);
 	}
 	return(1);
     }
-    if (Inhell && u.ualign.type != A_VOID && !(alignment == A_CHAOTIC && strcmp(urole.cgod,"Lolth"))) {
-	pline("Since you are in Gehennom, %s won't help you.",
-	      align_gname(alignment));
+    if (Inhell && !(u.ualign.type == A_VOID || p_god == GOD_LOLTH)) {
+		pline("Since you are in Gehennom, %s won't help you.", godname(p_god));
 	/* haltingly aligned is least likely to anger */
 	if (u.ualign.record <= 0 || rnl(u.ualign.record))
-	    angrygods(Align2gangr(u.ualign.type));
+	    angrygods(u.ualign.god);
 	return(0);
     }
 
     if (p_type == 0) {
         if(on_altar() && u.ualign.type != alignment)
             (void) water_prayer(FALSE);
-        angrygods(Align2gangr(u.ualign.type));       /* naughty */
+        angrygods(u.ualign.god);       /* naughty */
     } else if (p_type == 1) {
 		if(on_altar() && u.ualign.type != alignment)
 			(void) water_prayer(FALSE);
 		if(u.ualign.type != A_VOID){
 			u.ublesscnt += rnz(250);
 			change_luck(-3);
-			gods_upset(Align2gangr(u.ualign.type));
+			gods_upset(u.ualign.god);
 		}
     } else if(p_type == 2) {
 		if(water_prayer(FALSE)) {
 			/* attempted water prayer on a non-coaligned altar */
 			u.ublesscnt += rnz(250);
 			change_luck(-3);
-			if(u.ualign.type != A_VOID) gods_upset(Align2gangr(u.ualign.type));
-		} else pleased(alignment);
+			if(u.ualign.type != A_VOID) gods_upset(u.ualign.god);
+		} else pleased(p_god);
     } else {
 	/* coaligned */
 	if(on_altar())
 	    (void) water_prayer(TRUE);
-	pleased(alignment); /* nice */
+	pleased(p_god); /* nice */
     }
     return(1);
 }
@@ -2693,7 +2691,7 @@ doturn()
 	
 	if ((u.ualign.type != A_CHAOTIC && !Race_if(PM_VAMPIRE) &&
 		    (is_demon(youracedata) || is_undead(youracedata))) ||
-				u.ugangr[Align2gangr(u.ualign.type)] > 6 /* "Die, mortal!" */) {
+				godlist[u.ualign.god].anger > 6 /* "Die, mortal!" */) {
 
 		pline("For some reason, %s seems to ignore you.", u_gname());
 		aggravate();
@@ -2781,19 +2779,23 @@ a_gname()
     return(a_gname_at(u.ux, u.uy));
 }
 
+/* 
+ * returns the name of an altar's deity
+ * if the altar is undedicated, returns the name of the responsible god
+ */
 const char *
-a_gname_at(x,y)     /* returns the name of an altar's deity */
+a_gname_at(x,y)
 xchar x, y;
 {
     if(!IS_ALTAR(levl[x][y].typ)) return((char *)0);
-
-    return align_gname(a_align(x,y));
+	
+	return godname(god_at_altar(x, y));
 }
 
 const char *
 u_gname()  /* returns the name of the player's deity */
 {
-    return align_gname(u.ualign.type);
+    return godname(u.ualign.god);
 }
 
 const char * const hallu_gods[] = {
@@ -2831,11 +2833,9 @@ const char * const hallu_gods[] = {
 	"_Xel'lo'tath",
 	"Mantorok",
 	"_Martel",
-	"Gwyn, Lord of Sunlight",
 	
 	//Literature
 	"Mahasamatman",
-	"Nyarlathotep",
 	"Azathoth",
 	"Ubbo-Sathla",
 	"Galactus",
@@ -2945,163 +2945,33 @@ const char *
 align_gname(alignment)
 aligntyp alignment;
 {
-	return ga_gname(Align2gangr(alignment));
-}
-
-const char *
-align_gname_full(alignment)
-aligntyp alignment;
-{
-	return ga_gname_full(Align2gangr(alignment));
-}
-
-const char *
-ga_gname(ga_num)
-int ga_num;
-{
-    const char *gnam;
-
-	if (Hallucination) {
-		gnam = hallu_gods[rn2(SIZE(hallu_gods))];
-		if (*gnam == '_') ++gnam;
-		return gnam;
-	}
-	gnam = ga_gname_full(ga_num);
-    if (*gnam == '_') ++gnam;
-    return gnam;
-}
-
-const char *
-ga_gname_full(ga_num)
-int ga_num;
-{
-    const char *gnam;
-
-    switch (ga_num) {
-     case GA_NONE:
-		if(In_mordor_quest(&u.uz)){
-			if(on_level(&u.uz, &borehole_4_level)) gnam = MolochLieutenant;
-			else gnam = Moloch;
-		}
-		else gnam = Moloch;
-	 break;
-     case GA_SILENCE:
-		gnam = Silence;
-	 break;
-     case GA_CHAOS_FF:
-		if(In_FF_quest(&u.uz) && on_level(&chaose_level,&u.uz))
-			gnam = DeepChaos;
-		else
-			gnam = Chaos;
-	 break;
-     case GA_DEMIURGE:
-		gnam = Demiurge;
-	 break;
-     case GA_SOPHIA:
-		gnam = Sophia;
-	 break;
-     case GA_OTHER:
-		gnam = Other;
-	 break;
-     case GA_MOTHER:
-		gnam = BlackMother;
-	 break;
-     case GA_NODENS:
-		gnam = Nodens;
-	 break;
-     case GA_FRACTURE:
-		gnam = DreadFracture;
-	 break;
-     case GA_SOTHOTH:
-		gnam = AllInOne;
-	 break;
-     case GA_VELKA:
-		gnam = Velka;
-	 break;
-     case GA_LAWFUL:
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
-			gnam = "";
-		}
-		else gnam = urole.lgod; 
-	 break;
-     case GA_NEUTRAL:	
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
-			gnam = "";
-		}
-		else gnam = urole.ngod; 
-	 break;
-     case GA_CHAOTIC:
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
-			gnam = "";
-		}
-		else gnam = urole.cgod;
-	 break;
-     case GA_VOID:
-		gnam = tVoid;
-	 break;
-     default:
-		impossible("unknown god anger number.");
-		gnam = "someone";
-	 break;
-    }
-    return gnam;
-}
-
-/* hallucination handling for priest/minion names: select a random god
-   iff character is hallucinating */
-const char *
-halu_gname(alignment)
-aligntyp alignment;
-{
-    const char *gnam;
-    int which;
-
-    if (!Hallucination) return align_gname(alignment);
-
-    which = randrole(0);
-    switch (rn2(3)) {
-     case 0:	gnam = roles[which].lgod; break;
-     case 1:	gnam = roles[which].ngod; break;
-     case 2:	gnam = roles[which].cgod; break;
-     default:	gnam = 0; break;		/* lint suppression */
-    }
-    if (!gnam) gnam = Moloch;
-    if (*gnam == '_') ++gnam;
-    return gnam;
+	return godname(align_to_god(alignment));
 }
 
 /* deity's title */
 const char *
-align_gtitle(alignment)
-aligntyp alignment;
+gtitle(godnum)
+int godnum;
 {
-    const char *gnam, *result = "god";
-
-    switch (alignment) {
-     case A_LAWFUL:	gnam = urole.lgod; break;
-     case A_NEUTRAL:	gnam = urole.ngod; break;
-     case A_CHAOTIC:	gnam = urole.cgod; break;
-     default:		gnam = 0; break;
-    }
-    if (gnam && *gnam == '_') result = "goddess";
-    return result;
+	const char *gnam, *result = "god";
+	gnam = godlist[godnum].name;
+	if (gnam && *gnam == '_')
+		result = "goddess";
+	return result;
 }
 
 void
 altar_wrath(x, y)
 register int x, y;
 {
-    aligntyp altaralign = a_align(x,y);
-
-    if(!strcmp(align_gname(altaralign), u_gname())) {
-		godvoice(AltarAlign2gangr(altaralign), "How darest thou desecrate my altar!");
+	if(god_at_altar(x, y) == u.ualign.god) {
+		godvoice(u.ualign.god, "How darest thou desecrate my altar!");
 	(void) adjattrib(A_WIS, -1, FALSE);
-    } else {
-	pline("A voice (could it be %s?) whispers:",
-	      align_gname(altaralign));
-	verbalize("Thou shalt pay, infidel!");
-	change_luck(-1);
-    }
+	} else {
+		pline("A voice (could it be %s?) whispers:", godname(god_at_altar(x, y)));
+		verbalize("Thou shalt pay, infidel!");
+		change_luck(-1);
+	}
 }
 
 /* assumes isok() at one space away, but not necessarily at two */
@@ -3146,7 +3016,7 @@ struct obj *candle;
 {
   if (candle->where != OBJ_FLOOR 
      || !IS_ALTAR(levl[candle->ox][candle->oy].typ)
-     ||  a_align(candle->ox, candle->oy) != u.ualign.type) {
+     ||  (a_align(candle->ox, candle->oy)) != u.ualign.type) {
 
      return 0;
   }
@@ -3160,14 +3030,14 @@ struct obj *candle;
 
 /* Give away something */
 void
-god_gives_benefit(alignment)
-aligntyp alignment;
+god_gives_benefit(godnum)
+int godnum;
 {
 	register struct obj *otmp;
 	const char *what = (const char *)0;
 	int i, ii, lim, timeout;
 	
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(align_gname_full(alignment),alignment,Align2gangr(alignment));
+	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(godnum);
 	else {
 		switch (rn2(6)) {
 			case 0: // randomly increment an ability score
@@ -3377,12 +3247,12 @@ int eatflag;
 		revived = revive(otmp, FALSE);
 		if(eatflag == GOAT_EAT_OFFERED){
 			//She grows angry at you, and may smite you.
-			gods_upset(GA_MOTHER);
+			gods_upset(GOD_THE_BLACK_MOTHER);
 		}
 		else if(eatflag == GOAT_EAT_MARKED){
 			//She grows angry at you, but doesn't actually smite you.
-			u.ugangr[GA_MOTHER]++;
-			gods_angry(GA_MOTHER);
+			godlist[GOD_THE_BLACK_MOTHER].anger++;
+			gods_angry(GOD_THE_BLACK_MOTHER);
 		}
 	}
 
@@ -3403,12 +3273,12 @@ int eatflag;
 		revived = revive(otmp, FALSE);
 		if(eatflag == GOAT_EAT_OFFERED){
 			//She grows angry at you, and may smite you.
-			gods_upset(GA_MOTHER);
+			gods_upset(GOD_THE_BLACK_MOTHER);
 		}
 		else if(eatflag == GOAT_EAT_MARKED){
 			//She grows angry at you, but doesn't actually smite you.
-			u.ugangr[GA_MOTHER]++;
-			gods_angry(GA_MOTHER);
+			godlist[GOD_THE_BLACK_MOTHER].anger++;
+			gods_angry(GOD_THE_BLACK_MOTHER);
 		}
 	}
 	if(revived)
@@ -3420,7 +3290,7 @@ STATIC_OVL void
 goat_gives_benefit()
 {
 	struct obj *optr;
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(ga_gname_full(GA_MOTHER),A_NONE,GA_MOTHER);
+	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(GOD_THE_BLACK_MOTHER);
 	else switch(rnd(7)){
 		case 1:
 			if (Hallucination)
@@ -3531,9 +3401,9 @@ int eatflag;
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC) {
 			adjalign(-5);
-			u.ugangr[Align2gangr(u.ualign.type)] += 3;
+			godlist[u.ualign.god].anger += 3;
 			(void) adjattrib(A_WIS, -1, TRUE);
-			if (!Inhell) angrygods(Align2gangr(u.ualign.type));
+			if (!Inhell) angrygods(u.ualign.god);
 			change_luck(-5);
 		} else adjalign(5);
 	//Pets are just eaten like anything else.  Your god doesn't know you did it, and the goat doesn't care.
@@ -3546,7 +3416,7 @@ int eatflag;
 	//Value can't be 0
 	//Value can't be -1
     {
-	int saved_anger = u.ugangr[GA_MOTHER];
+	int saved_anger = godlist[GOD_THE_BLACK_MOTHER].anger;
 	int saved_cnt = u.ugoatblesscnt;
 	int saved_luck = u.uluck;
 	char goatname[BUFSZ];
@@ -3561,18 +3431,18 @@ int eatflag;
 		goat_seenonce = TRUE;
 	if(eatflag != GOAT_EAT_PASSIVE && u.ualign.type != A_CHAOTIC && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
 		adjalign(-value);
-		u.ugangr[Align2gangr(u.ualign.type)] += 1;
+		godlist[u.ualign.god].anger += 1;
 		(void) adjattrib(A_WIS, -1, TRUE);
-		if (!Inhell) angrygods(Align2gangr(u.ualign.type));
+		if (!Inhell) angrygods(u.ualign.god);
 		change_luck(-1);
 	}
 	/* OK, you get brownie points. */
-	if(u.ugangr[GA_MOTHER]) {
-	    u.ugangr[GA_MOTHER] -=
+	if(godlist[GOD_THE_BLACK_MOTHER].anger) {
+	    godlist[GOD_THE_BLACK_MOTHER].anger -=
 		((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-	    if(u.ugangr[GA_MOTHER] < 0) u.ugangr[GA_MOTHER] = 0;
-	    if(u.ugangr[GA_MOTHER] != saved_anger) {
-		if (u.ugangr[GA_MOTHER]) {
+	    if(godlist[GOD_THE_BLACK_MOTHER].anger < 0) godlist[GOD_THE_BLACK_MOTHER].anger = 0;
+	    if(godlist[GOD_THE_BLACK_MOTHER].anger != saved_anger) {
+		if (godlist[GOD_THE_BLACK_MOTHER].anger) {
 			pline("%s seems %s.", upstart(goatname),
 			  Hallucination ? "groovy" : "slightly mollified");
 
@@ -3703,6 +3573,354 @@ int eatflag;
 	}
     }
 }
+/* declare the global godlist pointer */
+struct god * godlist;
 
+/* save and restore god list */
+void
+init_gods()
+{
+	extern const struct god base_godlist[];
+
+	godlist = malloc(sizeof(struct god) * (MAX_GOD+1));
+	memcpy(godlist, base_godlist, sizeof(struct god) * (MAX_GOD+1));
+}
+
+void
+save_gods(fd)
+int fd;
+{
+	bwrite(fd, (genericptr_t) godlist, sizeof(struct god) * (MAX_GOD+1));
+}
+
+void
+restore_gods(fd)
+int fd;
+{
+	extern const struct god base_godlist[];
+	int i;
+
+	godlist = malloc(sizeof(struct god) * (MAX_GOD+1));
+	mread(fd, (genericptr_t) godlist, sizeof(struct god) * (MAX_GOD+1));
+	/* fix name pointers -- assumes that god names do NOT get changed during the game */
+	for (i=1; i<MAX_GOD; i++)
+		godlist[i].name = base_godlist[i].name;
+}
+
+aligntyp
+galign(godnum)
+int godnum;
+{
+	return godlist[godnum].alignment;
+}
+
+int
+gholiness(godnum)
+int godnum;
+{
+	return godlist[godnum].holiness;
+}
+
+/* transitory function, hopefully, to convert an alignment into the most likely candidate god */
+int
+align_to_god(alignmnt)
+aligntyp alignmnt;
+{
+	const char * name;
+	switch(alignmnt) {
+		case A_LAWFUL:
+			return urole.lgod;
+		case A_NEUTRAL:
+			return urole.ngod;
+		case A_CHAOTIC:
+			return urole.cgod;
+		case A_VOID:
+			return GOD_THE_VOID;
+		case A_NONE:
+			return GOD_MOLOCH;
+	}
+	
+	impossible("no matching god for align %d?", alignmnt);
+	return GOD_NONE;
+}
+
+/* gets god name, with no hallu check */
+const char *
+godname_full(godnum)
+int godnum;
+{
+	/* special cases that give alternative names for particular gods */
+
+	if (godnum == GOD_NONE) {
+		return "no one";
+	}
+	
+	if (godnum == GOD_EDDERGUD && !(
+		Race_if(PM_DROW) &&
+		flags.stag && !flags.initgend
+	))
+		return "the black web";
+
+	if (godnum == GOD_ILSENSINE && (
+		Role_if(PM_ANACHRONONAUT)
+	))
+	{
+		if (flags.questprogress == 2)
+			return "_Ilsensine the Banished One";
+		if (flags.questprogress == 0)
+			return godlist[roles[flags.pantheon].lgod].name;
+	}
+
+	if (godnum == GOD_CHAOS && (
+		In_FF_quest(&u.uz) && on_level(&chaose_level,&u.uz)
+	))
+		return "Chaos, with Cosmos in chains";
+
+	if (godnum == GOD_MOLOCH && (
+		In_mordor_quest(&u.uz) && on_level(&u.uz, &borehole_4_level)
+	))
+		return "Moloch, lieutenant of Melkor";
+
+	/* general case: give the god's name as per godlist */
+	return godlist[godnum].name;
+}
+
+/* gets god name OR a hallu god if appropriate */
+const char *
+godname(godnum)
+int godnum;
+{
+    const char *gnam;
+
+	if (Hallucination) {
+		gnam = hallu_gods[rn2(SIZE(hallu_gods))];
+		if (*gnam == '_') ++gnam;
+		return gnam;
+	}
+	gnam = godname_full(godnum);
+    if (*gnam == '_') ++gnam;
+    return gnam;
+}
+
+int
+god_faction(godnum)
+int godnum;
+{
+	switch(godnum) {
+		case GOD_EDDERGUD: return EDDER_SYMBOL;
+		case GOD_VHAERAUN: return MAGTHERE;
+		case GOD_LOLTH: return LOLTH_SYMBOL;
+		case GOD_GHAUNADAUR: return GHAUNADAUR_SYMBOL;
+		case GOD_VER_TAS: return VER_TAS_SYMBOL;
+		case GOD_EILISTRAEE: return EILISTRAEE_SYMBOL;
+		case GOD_KIARANSALI: return KIARANSALEE_SYMBOL;
+		case GOD_THE_BLACK_MOTHER: return GOATMOM_FACTION;
+	}
+	return -1;
+}
+
+
+const int *
+god_minions(godnum)
+int godnum;
+{
+	/* special cases */
+	if (godnum == GOD_MOLOCH) {
+		/* randomly between Ldevils and Cdemons (from godlist.h) */
+		static const int LdevilsMinions[] = {Ldevils};
+		static const int CdemonsMinions[] = {Cdemons};
+		return rn2(2) ? LdevilsMinions : CdemonsMinions;
+	}
+
+	/* Once you know of Ilsensine, Ilsensine knows of you, even in the past.
+	 * Until then, though, you get the standard minions for the god Ilsensine was */
+	if (godnum == GOD_ILSENSINE && (
+		Role_if(PM_ANACHRONONAUT) && flags.questprogress == 0
+	)) {
+		return godlist[roles[flags.pantheon].lgod].minionlist;
+	}
+
+	if (godnum == GOD_LOLTH && (
+		Race_if(PM_DROW) && flags.initgend
+	)) {
+		/* female drow get gloves-off demon-Lolth minions */
+		static const int NastyLolthMinions[] = {PM_SPROW,PM_YOCHLOL,PM_ANGEL,PM_MARILITH,NON_PM};
+		return NastyLolthMinions;
+	}
+	
+	return godlist[godnum].minionlist;
+}
+
+struct monst *
+god_priest(godnum, sx, sy, sanctum)
+int godnum;
+int sx, sy;
+int sanctum;   /* is it the seat of the high priest? */
+{
+	struct monst *priest;
+	
+	if(on_level(&sanctum_level, &u.uz)) {
+		/* the Elder Priest guards the only altar in the sanctum */
+		priest = makemon(&mons[PM_ELDER_PRIEST], sx + 1, sy, NO_MM_FLAGS);
+	}
+	else if(Role_if(PM_EXILE) && sanctum) {
+		/* the astral altars are untended for a binder */
+		priest = (struct monst *) 0;
+	}
+	else if(In_mordor_depths(&u.uz)){
+		/* the High Shaman of moloch in Chaos3 */
+		priest = makemon(&mons[PM_HIGH_SHAMAN], sx + 1, sy, NO_MM_FLAGS);
+	}
+	else if(Is_bridge_temple(&u.uz)){
+		/* the Blasphemous Lurker in Neutral */
+		priest = makemon(&mons[PM_BLASPHEMOUS_LURKER], sx, sy, NO_MM_FLAGS);
+	}
+	else {
+		priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
+			sx + 1, sy, NO_MM_FLAGS);
+		
+		/* special cases */
+		switch (godnum) {
+			case GOD_MOLOCH:
+				give_mintrinsic(priest, POISON_RES);
+				break;
+			case GOD_OROME:
+				priest->female = FALSE;
+				break;
+			case GOD_YAVANNA:
+				priest->female = TRUE;
+				break;
+			case GOD_TULKAS:
+				priest->female = FALSE;
+				break;
+			case GOD_VARDA_ELENTARI:
+			case GOD_VAIRE:
+			case GOD_NESSA:
+				priest->female = TRUE;
+				break;
+			case GOD_MANWE_SULIMO:
+			case GOD_MANDOS:
+			case GOD_LORIEN:
+				priest->female = FALSE;
+				break;
+			case GOD_EDDERGUD:
+				priest->female = FALSE;
+				if(!sanctum){
+					newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
+					set_faction(priest, XAXOX);
+				}
+				break;
+			case GOD_VHAERAUN:
+				priest->female = FALSE;
+				if(!sanctum){
+					newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
+					set_faction(priest, LOLTH_SYMBOL);
+				}
+				break;
+			case GOD_LOLTH:
+				if (!flags.initgend){
+					priest->female = FALSE;
+					if(!sanctum){
+						newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
+						set_faction(priest, LOLTH_SYMBOL);
+					}
+				}
+				else {
+					priest->female = TRUE;
+					if(!sanctum) {
+						newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+						set_faction(priest, LOLTH_SYMBOL);
+					}
+				}
+				break;
+			case GOD_EILISTRAEE:
+				priest->female = TRUE;
+				if(!sanctum) newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
+				break;
+			case GOD_VER_TAS:
+				priest->female = TRUE;
+				if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+				break;
+			case GOD_KIARANSALI:
+				priest->female = TRUE;
+				if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+				break;
+		}
+	}
+	return priest;
+}
+
+/* 
+ * returns the god you will communicate with at the altar at x,y
+ * unlike a_gnum(), which is a direct access of altars[].godnum, (and can be used as an lvalue)
+ * this comes up with a god for un-dedicated altars
+ * 
+ * ex: the deep blue sea is responsible for "a neutral altar" in a Pirate game
+ */
+int
+god_at_altar(x, y)
+int x, y;
+{
+	if(levl[x][y].typ != ALTAR) {
+		if(goat_mouth_at(x, y))
+			return GOD_THE_BLACK_MOTHER;
+		else
+			return GOD_NONE;
+	}
+	
+	if (a_gnum(x, y) != GOD_NONE)
+		return a_gnum(x, y);
+
+	if (a_align(x, y) == galign(u.ualign.god))
+		return u.ualign.god;
+
+	return align_to_god(a_align(x, y));
+}
+
+
+/*
+ * Returns TRUE if the two gods are on good terms with each other;
+ * No minions sent if converting an altar from one to another.
+ * Any attending priests will still get upset, though!
+ */
+boolean
+gods_are_friendly(god1, god2)
+int god1, god2;
+{
+	/* elf-gods are friendly with each other */
+	/* NOTE: assumes order of elfgods in godlist.h */
+	if ((GOD_OROME <= god1 && god1 <= GOD_LORIEN)
+		&& (GOD_OROME <= god2 && god2 <= GOD_LORIEN))
+	{
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+/*
+ * Returns TRUE if god will accept your worship/allegiance
+ */
+boolean
+god_accepts_you(godnum)
+int godnum;
+{
+	if (galign(godnum) == A_NONE)
+		return FALSE;
+	if (galign(godnum) == A_VOID && !Role_if(PM_EXILE))
+		return FALSE;
+	if (godnum == GOD_ILSENSINE)
+		return FALSE;
+	if ((godnum == GOD_LOLTH || godnum == GOD_VHAERAUN || godnum == GOD_VER_TAS || godnum == GOD_KIARANSALI || godnum == GOD_KEPTOLO)
+		&& !Race_if(PM_DROW))
+		return FALSE;
+	if ((godnum == GOD_ILNEVAL || godnum == GOD_LUTHIC || godnum == GOD_GRUUMSH)
+		&& !Race_if(PM_ORC))
+		return FALSE;
+	if (godnum == GOD_VELKA__GODDESS_OF_SIN)
+		return FALSE;
+
+	return TRUE;
+}
 
 /*pray.c*/
