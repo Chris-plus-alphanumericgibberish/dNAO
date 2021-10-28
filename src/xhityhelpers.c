@@ -518,7 +518,7 @@ struct attack *mattk;
 	}
 
 	if (stealoid) {		/* we will be taking everything */
-	    if (gender(mdef) == (int) u.mfemale &&
+	    if (gender(mdef) == (int) (Upolyd ? u.mfemale : flags.female) &&
 			youracedata->mlet == S_NYMPH)
 		You("charm %s.  She gladly hands over her possessions.",
 		    mon_nam(mdef));
