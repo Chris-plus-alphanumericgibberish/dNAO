@@ -2660,7 +2660,7 @@ int dz;
 				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GA_NONE && optr->gifted != GA_VOID){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -2705,7 +2705,7 @@ int dz;
 
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GA_NONE && optr->gifted != GA_VOID){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -3128,7 +3128,7 @@ int tx,ty;
 //					struct monst *priest = findpriest(roomno);
 					//invoking Amon inside a temple angers the resident deity
 					altar_wrath(tx, ty);
-					angrygods(AltarAlign2gangr(a_align(tx,ty)));
+					angrygods(god_at_altar(tx, ty));
 				}
 				u.sealTimeout[AMON-FIRST_SEAL] = moves + bindingPeriod; // invoking amon on a level with an altar still triggers the binding period.
 			}
@@ -4255,9 +4255,9 @@ int tx,ty;
 						(void) adjattrib(A_WIS, -1, TRUE);
 						exercise(A_WIS, FALSE);
 						adjalign(-5);
-						u.ugangr[Align2gangr(u.ualign.type)] += 3;
+						godlist[u.ualign.god].anger += 3;
 						if (!Inhell) {
-							angrygods(Align2gangr(u.ualign.type));
+							angrygods(u.ualign.god);
 							change_luck(-5);
 						}
 					}

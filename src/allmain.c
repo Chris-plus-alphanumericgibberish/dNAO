@@ -1208,15 +1208,15 @@ moveloop()
 	flags.move = FALSE; /* From nethack 3.6.2 */
     prev_hp_notify = uhp();
 
-	if(u.ualignbase[A_ORIGINAL] == A_LAWFUL && flags.initalign != 0){
+	if(galign(u.ugodbase[UGOD_ORIGINAL]) == A_LAWFUL && flags.initalign != 0){
 		flags.initalign = 0;
 		impossible("Bad alignment initializer detected and fixed. Save and reload.");
 	}
-	if(u.ualignbase[A_ORIGINAL] == A_NEUTRAL && flags.initalign != 1){
+	if(galign(u.ugodbase[UGOD_ORIGINAL]) == A_NEUTRAL && flags.initalign != 1){
 		flags.initalign = 1;
 		impossible("Bad alignment initializer detected and fixed. Save and reload.");
 	}
-	if(u.ualignbase[A_ORIGINAL] == A_CHAOTIC && flags.initalign != 2){
+	if(galign(u.ugodbase[UGOD_ORIGINAL]) == A_CHAOTIC && flags.initalign != 2){
 		flags.initalign = 2;
 		impossible("Bad alignment initializer detected and fixed. Save and reload.");
 	}
@@ -2081,7 +2081,7 @@ karemade:
 					if(ALIGNLIM > 10){
 						u.ualign.sins++;
 					} else {
-						gods_upset(Align2gangr(u.ualign.type));
+						gods_upset(u.ualign.god);
 					}
 				}
 			}
@@ -2318,7 +2318,7 @@ karemade:
 			move_gliders();
 
 		    if (u.ublesscnt)  u.ublesscnt--;
-		    if (u.ugoatblesscnt && u.uevent.shubbie_atten && !u.ugangr[GA_MOTHER])
+		    if (u.ugoatblesscnt && u.uevent.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger)
 				u.ugoatblesscnt--;
 		    if(flags.time && !flags.run)
 			flags.botl = 1;
@@ -2955,6 +2955,7 @@ newgame()
 		mvitals[i].mvflags = mons[i].geno & G_NOCORPSE;
 
 	init_objects();		/* must be before u_init() */
+	init_gods();		/* probably will need to be before u_init */
 	id_permonst();		/* must be before u_init() */
 	
 	flags.pantheon = -1;	/* role_init() will reset this */
@@ -3144,8 +3145,8 @@ boolean new_game;	/* false => restoring an old game */
      * restores it's only shown if different from its original value.
      */
     *buf = '\0';
-    if (new_game || u.ualignbase[A_ORIGINAL] != u.ualignbase[A_CURRENT])
-	Sprintf(eos(buf), " %s", align_str(u.ualignbase[A_ORIGINAL]));
+    if (new_game || galign(u.ugodbase[UGOD_ORIGINAL]) != galign(u.ugodbase[UGOD_CURRENT]))
+	Sprintf(eos(buf), " %s", align_str(galign(u.ugodbase[UGOD_ORIGINAL])));
     if (!urole.name.f &&
 	    (new_game ? (urole.allow & ROLE_GENDMASK) == (ROLE_MALE|ROLE_FEMALE) :
 	     currentgend != flags.initgend))

@@ -334,6 +334,7 @@ struct version_info {
 #define MAXNROFROOMS	40	/* max number of rooms per level */
 #define MAX_SUBROOMS	24	/* max # of subrooms in a given room */
 #define DOORMAX		120	/* max number of doors per level */
+#define ALTARMAX	20	/* max number of altars per level */
 
 #define BUFSZ		1024	/* for getlin buffers */
 #define LONGBUFSZ	4096	/* because we overflowed BUFSZ in one place */

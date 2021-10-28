@@ -626,7 +626,7 @@ E int FDECL(dogfood, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog_core, (struct monst *,struct obj *, int));
 E void FDECL(untame, (struct monst *, boolean));
-E struct monst *FDECL(make_pet_minion, (int,aligntyp,int));
+E struct monst *FDECL(make_pet_minion, (int,int));
 E void FDECL(abuse_dog, (struct monst *));
 E void FDECL(wary_dog, (struct monst *, BOOLEAN_P));
 E void FDECL(enough_dogs, (int));
@@ -1384,7 +1384,7 @@ E void FDECL(relink_ox, (struct obj *));
 /* ### minion.c ### */
 
 E void FDECL(msummon, (struct monst *, struct permonst *));
-E struct monst * FDECL(summon_god_minion, (const char *,ALIGNTYP_P,BOOLEAN_P));
+E struct monst * FDECL(summon_god_minion, (int,BOOLEAN_P));
 E struct monst * FDECL(summon_minion, (ALIGNTYP_P,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(demon_talk, (struct monst *));
 E long FDECL(bribe, (struct monst *));
@@ -1409,6 +1409,7 @@ E void FDECL(add_subroom, (struct mkroom *,int,int,int,int,
 			   BOOLEAN_P,SCHAR_P,BOOLEAN_P));
 E void NDECL(makecorridors);
 E int FDECL(add_door, (int,int,struct mkroom *));
+E void FDECL(add_altar, (int, int, aligntyp, boolean, int));
 E int NDECL(random_special_room);
 E void NDECL(mkpoolroom);
 E void NDECL(mkslabroom);
@@ -2168,6 +2169,7 @@ E void VDECL(verbalize, (const char *,...)) PRINTF_F(1,2);
 E void VDECL(raw_printf, (const char *,...)) PRINTF_F(1,2);
 E void VDECL(impossible, (const char *,...)) PRINTF_F(1,2);
 E const char *FDECL(align_str, (ALIGNTYP_P));
+E const char *FDECL(align_str_proper, (ALIGNTYP_P));
 E void FDECL(mdrslotline, (struct monst *));
 E void FDECL(mstatusline, (struct monst *));
 E void NDECL(ustatusline);
@@ -2231,10 +2233,6 @@ E struct monst *FDECL(split_mon, (struct monst *,struct monst *));
 E const char *NDECL(bottlename);
 
 /* ### pray.c ### */
-
-E const char * NDECL(getDrowMaleLgodKnown);
-E const char * NDECL(getAnachrononautLgod);
-E const char * NDECL(getAnachrononautLgodEnd);
 #ifdef USE_TRAMPOLI
 E int NDECL(prayer_done);
 #endif
@@ -2242,7 +2240,6 @@ E void FDECL(godvoice,(int,const char*));
 E void FDECL(gods_angry,(int));
 E void FDECL(gods_upset,(int));
 E void FDECL(angrygods,(int));
-E int FDECL(get_ga_mfaction,(int));
 E boolean NDECL(maybe_god_gives_gift);
 E int NDECL(dosacrifice);
 E void FDECL(at_your_feet, (const char *));
@@ -2254,15 +2251,26 @@ E int NDECL(doturn);
 E const char *NDECL(a_gname);
 E const char *FDECL(a_gname_at, (XCHAR_P x,XCHAR_P y));
 E const char *FDECL(align_gname, (ALIGNTYP_P));
-E const char *FDECL(align_gname_full, (ALIGNTYP_P));
-E const char *FDECL(ga_gname, (int));
-E const char *FDECL(ga_gname_full, (int));
-E const char *FDECL(halu_gname, (ALIGNTYP_P));
-E const char *FDECL(align_gtitle, (ALIGNTYP_P));
+E const char *FDECL(gtitle, (ALIGNTYP_P));
 E void FDECL(altar_wrath, (int,int));
 E int FDECL(candle_on_altar, (struct obj *));
 E void FDECL(goat_eat, (struct obj *, int));
 E boolean FDECL(goat_mouth_at, (int, int));
+E void NDECL(init_gods);
+E void FDECL(save_gods, (int));
+E void FDECL(restore_gods, (int));
+E aligntyp FDECL(galign, (int));
+E int FDECL(gholiness, (int));
+E int FDECL(align_to_god, (aligntyp));
+E const char * FDECL(godname_full, (int));
+E const char * FDECL(godname, (int));
+E int FDECL(god_faction, (int));
+E int FDECL(altaralign_to_godnum, (int));
+E const int * FDECL(god_minions, (int));
+E struct monst * FDECL(god_priest, (int, int, int, int));
+E int FDECL(god_at_altar, (int, int));
+E boolean FDECL(gods_are_friendly, (int, int));
+E boolean FDECL(god_accepts_you, (int));
 
 /* ### priest.c ### */
 
@@ -2434,9 +2442,6 @@ E int FDECL(randrole, (int));
 E int FDECL(randrace, (int));
 E int FDECL(randgend, (int, int));
 E int FDECL(randalign, (int, int));
-E const int * FDECL(god_minions, (const char *));
-E int FDECL(god_faction, (const char *));
-E struct monst * FDECL(god_priest, (const char *, int, int, int));
 E int FDECL(str2role, (char *));
 E struct Role *FDECL(pm2role, (int));
 E int FDECL(str2race, (char *));
@@ -2457,12 +2462,6 @@ E const char *FDECL(Hello, (struct monst *));
 E const char *NDECL(Goodbye);
 E char *FDECL(build_plselection_prompt, (char *, int, int, int, int, int));
 E char *FDECL(root_plselection_prompt, (char *, int, int, int, int, int));
-E const char *NDECL(getDnDElfLgod);
-E const char *NDECL(getDnDElfNgod);
-E const char *NDECL(getDnDElfCgod);
-E const char *NDECL(getDnDHumLgod);
-E const char *NDECL(getDnDHumNgod);
-E const char *NDECL(getDnDHumCgod);
 #ifdef RECORD_ACHIEVE
 E void NDECL(give_quest_trophy);
 E void NDECL(give_ascension_trophy);

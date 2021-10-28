@@ -545,7 +545,7 @@ ENDMAP
 MONSTER:'&',"priest of an unknown god",(38,10)
 
 #Altar to Nodens
-ALTAR:(35,10),noalign,altar
+ALTAR:(35,10),noalign,altar,"Nodens"
 # Dungeon Description
 REGION:(00,00,75,19),lit,"ordinary"
 REGION:(04,02,08,04),lit,"ordinary"
@@ -728,7 +728,7 @@ ENDMAP
 MONSTER:'&',"priest of an unknown god",(38,10)
 
 #Altar to Nodens
-ALTAR:(35,10),noalign,altar
+ALTAR:(35,10),noalign,altar,"Nodens"
 # Dungeon Description
 REGION:(00,00,75,19),lit,"ordinary"
 REGION:(04,02,08,04),lit,"ordinary"
@@ -2057,7 +2057,7 @@ OBJECT:'#',"blessed four-headed +3 poison-secreting living bone viperwhip",conta
 OBJECT:'#',"blessed four-headed +3 poison-secreting living bone viperwhip",contained
 REGION:(04,01,08,02),lit,"temple"
 MONSTER:'t',"mouth of the goat",(06,01)
-ALTAR:(06,01),noalign,altar
+ALTAR:(06,01),noalign,altar,"_the Black Mother"
 
 #+5 means that it's Nitocris's sarcophagus.  One only please!
 CONTAINER:'#',"trapped metal box",(74,01), cursed, +5
@@ -3213,7 +3213,7 @@ ENDMAP
 REGION:(01,01,75,19),unlit,"morgue",unfilled
 #The altar of the unknown god
 MONSTER:'&',"priest of an unknown god",(35,10)
-ALTAR:(35,10),noalign,altar
+ALTAR:(35,10),noalign,altar,"an alien god"
 
 # Stairs and Branch
 #STAIR:(05,17),down
@@ -3555,32 +3555,32 @@ REGION:(69,08,74,11),unlit,"ordinary"
 REGION:(66,16,72,18),unlit,"ordinary"
 
 # Main Temple
-ALTAR:(04,09),noalign,altar
-ALTAR:(04,10),noalign,altar
+ALTAR:(04,09),noalign,altar,"Yog-Sothoth"
+ALTAR:(04,10),noalign,altar,"Yog-Sothoth"
 REGION:(01,05,23,14),unlit,"temple"
 
 # Northern Temple (Inner)
-ALTAR:(03,02),noalign,altar
+ALTAR:(03,02),noalign,altar,"Yog-Sothoth"
 REGION:(01,01,09,03),unlit,"temple"
 
 # Northern Temple (Outer)
-ALTAR:(16,02),noalign,altar
+ALTAR:(16,02),noalign,altar,"Yog-Sothoth"
 REGION:(14,00,26,04),unlit,"temple"
 
 # Souther Temple (Inner)
-ALTAR:(03,17),noalign,altar
+ALTAR:(03,17),noalign,altar,"Yog-Sothoth"
 REGION:(01,16,09,18),unlit,"temple"
 
 # Southern Temple (Outer)
-ALTAR:(16,17),noalign,altar
+ALTAR:(16,17),noalign,altar,"Yog-Sothoth"
 REGION:(14,15,26,19),unlit,"temple"
 
 # North Eastern Temple
-ALTAR:(36,01),noalign,altar
+ALTAR:(36,01),noalign,altar,"Yog-Sothoth"
 REGION:(33,00,39,02),unlit,"temple"
 
 # South Eastern Tample
-ALTAR:(44,17),noalign,altar
+ALTAR:(44,17),noalign,altar,"Yog-Sothoth"
 REGION:(40,16,45,18),unlit,"temple"
 
 # Stairs and Branch

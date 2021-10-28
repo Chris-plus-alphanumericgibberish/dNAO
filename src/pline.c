@@ -409,11 +409,11 @@ align_str(alignment)
 	}
 	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)){
 		switch ((int)alignment) {
-		case A_CHAOTIC: return "xaotic";
+		case A_CHAOTIC: return "unaligned";
 		case A_NEUTRAL: return "gnostic";
 		case A_LAWFUL:	return "mundane";
 		case A_NONE:	return "unaligned";
-		case A_VOID:	return "non-aligned";
+		case A_VOID:	return "gnostic";
 //		case A_UNKNOWN:	return "unknown";
 		}
     } else if(Role_if(PM_EXILE) && In_quest(&u.uz)){
@@ -422,7 +422,7 @@ align_str(alignment)
 		case A_NEUTRAL: return "neutral";
 		case A_LAWFUL:	return "lawful";
 		case A_NONE:	return "mundane";
-		case A_VOID:	return "non-aligned";
+		case A_VOID:	return "gnostic";
 //		case A_UNKNOWN:	return "unknown";
 		}
     } else {
@@ -431,11 +431,46 @@ align_str(alignment)
 		case A_NEUTRAL: return "neutral";
 		case A_LAWFUL:	return "lawful";
 		case A_NONE:	return "unaligned";
-		case A_VOID:	return "non-aligned";
+		case A_VOID:	return "gnostic";
 //		case A_UNKNOWN:	return "unknown";
 		}
 	}
     return "unknown";
+}
+
+const char *
+align_str_proper(alignment)
+    aligntyp alignment;
+{
+	if(Role_if(PM_EXILE) && Is_astralevel(&u.uz)){
+		switch ((int)alignment) {
+		case A_CHAOTIC: return "Unaligned";
+		case A_NEUTRAL: return "Gnostic";
+		case A_LAWFUL:	return "Mundane";
+		case A_NONE:	return "Unaligned";
+		case A_VOID:	return "Gnostic";
+//		case A_UNKNOWN:	return "Unknown";
+		}
+    } else if(Role_if(PM_EXILE) && In_quest(&u.uz)){
+		switch ((int)alignment) {
+		case A_CHAOTIC: return "Chaotic";
+		case A_NEUTRAL: return "Neutral";
+		case A_LAWFUL:	return "Lawful";
+		case A_NONE:	return "Mundane";
+		case A_VOID:	return "Gnostic";
+//		case A_UNKNOWN:	return "Unknown";
+		}
+    } else {
+		switch ((int)alignment) {
+		case A_CHAOTIC: return "Chaotic";
+		case A_NEUTRAL: return "Neutral";
+		case A_LAWFUL:	return "Lawful";
+		case A_NONE:	return "Unaligned";
+		case A_VOID:	return "Gnostic";
+//		case A_UNKNOWN:	return "Unknown";
+		}
+	}
+    return "Unknown";
 }
 
 #define mslotdrtotal(slot)	\

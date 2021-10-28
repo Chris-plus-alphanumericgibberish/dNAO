@@ -51,7 +51,15 @@ struct door {
 	short arti_text;		/* Index of the text string for this (artifact) door */
 };
 
+struct altar {
+	xchar		x, y;
+	aligntyp	align;
+	xchar		shrine;
+	int			god;
+};
+
 extern NEARDATA struct door doors[DOORMAX];
+extern NEARDATA struct altar altars[ALTARMAX];
 
 /* values for rtype in the room definition structure */
 #define OROOM		 0	/* ordinary room */

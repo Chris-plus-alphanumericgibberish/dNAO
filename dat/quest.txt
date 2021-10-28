@@ -8405,12 +8405,12 @@ Go now!  You are banished from this place.
  %o:	return(artiname());
  %n:	return((char *)neminame());
  %g:	return((char *)guardname());
- %G:	return((char *)align_gtitle(u.ualignbase[1]));
+ %G:	return((char *)align_gtitle(galign(u.ugodbase[UGOD_ORIGINAL])));
  %h:	return((char *)((flags.female) ?  urace.individual.f : urace.individual.m));
  %H:	return((char *)homebase());
- %a:	return(Alignnam(u.ualignbase[1]));
+ %a:	return(Alignnam(galign(u.ugodbase[UGOD_ORIGINAL])));
  %A:	return(Alignnam(u.ualign.type));
- %d:	return((char *)align_gname(u.ualignbase[1]));
+ %d:	return((char *)align_gname(galign(u.ugodbase[UGOD_ORIGINAL])));
  %D:	return((char *)align_gname(A_LAWFUL));
  %C:	return("chaotic");
  %N:	return("neutral");

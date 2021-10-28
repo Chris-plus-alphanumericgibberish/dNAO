@@ -291,7 +291,7 @@ OBJECT:'0',"heavy iron ball",(35,10)
 
 BRANCH:(35,19,35,19),(0,0,0,0)
 
-ALTAR:(35,09),noalign,altar
+ALTAR:(35,09),noalign,altar,"Chaos"
 MONSTER:'@',"Sir Garland", (35, 11)
 
 OBJECT:'`',"statue",(33, 10),cursed,"Sir Garland",0
@@ -639,7 +639,7 @@ LADDER:(54,01),up
 STAIR:(16,19),down
 LADDER:(16,01),down
 
-ALTAR:(35,09),noalign,altar
+ALTAR:(35,09),noalign,altar,"Chaos"
 OBJECT:'0',"heavy iron ball",(35,10)
 
 MAZEWALK:(02,10),south
@@ -1081,7 +1081,7 @@ PORTAL:(35,20,35,20),(00,00,00,00),"chaosf"
 
 REGION:(30,08,40,12),  lit,"ordinary",unfilled
 
-ALTAR:(35,09),noalign,altar
+ALTAR:(35,09),noalign,altar,"Chaos"
 OBJECT:'(',"crystal ball",(35,09),cursed,0,"The Black Crystal"
 
 MONSTER:'@',"Garland", (35, 11)

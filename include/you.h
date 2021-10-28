@@ -95,7 +95,7 @@ struct Role {
 	/*** Strings that name various things ***/
 	struct RoleName name;	/* the role's name (from u_init.c) */
 	struct RoleName rank[9]; /* names for experience levels (from botl.c) */
-	const char *lgod, *ngod, *cgod; /* god names (from pray.c) */
+	int lgod, ngod, cgod;	/* god numbers (from gnames.h) */
 	const char *filecode;	/* abbreviation for use in file names */
 	const char *homebase;	/* quest leader's location (from questpgr.c) */
 	const char *intermed;	/* quest intermediate goal (from questpgr.c) */
@@ -182,7 +182,6 @@ struct mask_properties {
 	schar mskluck;
 	int mskhp,mskhpmax;
 	int msken,mskenmax;
-	int mskgangr[GA_NUM];
 	long mskexp, mskrexp;
 	int	mskweapon_slots;		/* unused skill slots */
 	int	mskskills_advanced;		/* # of advances made so far */
@@ -467,10 +466,10 @@ struct you {
 			atime;		/* used for loss/gain countdown */
 	long exerchkturn;	/* Stat Excercise: What turn is the next exerchk? */		
 	align	ualign;			/* character alignment */
-#define CONVERT		2
-#define A_ORIGINAL	1
-#define A_CURRENT	0
-	aligntyp ualignbase[CONVERT];	/* for ualign conversion record */
+#define UGOD_CONVERT	2
+#define UGOD_ORIGINAL	1
+#define UGOD_CURRENT	0
+	int ugodbase[UGOD_CONVERT];
 	schar uluck, moreluck;		/* luck and luck bonus */
 	int luckturn;
 #define Luck	(u.uluck + u.moreluck)
@@ -497,7 +496,6 @@ struct you {
 	/*"Real" numbers for a WtWalk's non-mask-based HP*/
 	int uhp_real, uhpmax_real, uhprolled_real, uhpbonus_real, uhpmod_real;
 	int uen_real, uenmax_real, uenrolled_real, uenbonus_real;
-	int ugangr[GA_NUM];			/* if the gods are angry at you */
 	int ugifts;			/* number of artifacts bestowed */
 	int uartisval;		/* approximate strength of artifacts and gifts bestowed and wished for */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */

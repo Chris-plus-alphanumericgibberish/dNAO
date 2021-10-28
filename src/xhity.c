@@ -254,9 +254,9 @@ struct monst * mdef;
 				pline("%s sinks into your deep black shadow!", Monnam(mdef));
 				cprefx(monsndx(pd), TRUE, TRUE);
 				cpostfx(monsndx(pd), FALSE, TRUE, FALSE);
-				if (u.ugangr[Align2gangr(u.ualign.type)]) {
-					u.ugangr[Align2gangr(u.ualign.type)] -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-					if (u.ugangr[Align2gangr(u.ualign.type)] < 0) u.ugangr[Align2gangr(u.ualign.type)] = 0;
+				if (godlist[u.ualign.god].anger) {
+					godlist[u.ualign.god].anger -= ((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
+					if (godlist[u.ualign.god].anger < 0) godlist[u.ualign.god].anger = 0;
 				}
 				else if (u.ualign.record < 0) {
 					if (value > MAXVALUE) value = MAXVALUE;
@@ -5837,13 +5837,14 @@ boolean ranged;
 						}
 					}
 					else {
-						int angrygod = A_CHAOTIC + rn2(3); //Note: -1 to +1
+						/* angers a random pantheon god */
 						pline("Blasphemous thoughts fill your mind!");
+						int angrygod = align_to_god(A_CHAOTIC + rn2(3));
 						u.ualign.record -= rnd(20);
 						u.ualign.sins++;
 						u.hod += rnd(20);
-						u.ugangr[Align2gangr(angrygod)]++;
-						angrygods(Align2gangr(angrygod));
+						godlist[angrygod].anger++;
+						angrygods(angrygod);
 					}
 					return MM_HIT;
 				/*Lower Sanity*/
@@ -11896,12 +11897,13 @@ int vis;
 			}
 		}
 		else {
-			int angrygod = A_CHAOTIC + rn2(3); //Note: -1 to +1
+			/* angers a random pantheon god */
+			int angrygod = align_to_god(A_CHAOTIC + rn2(3));
 			u.ualign.record -= rnd(20);
 			u.ualign.sins++;
 			u.hod += rnd(20);
-			u.ugangr[Align2gangr(angrygod)]++;
-			angrygods(Align2gangr(angrygod));
+			godlist[angrygod].anger++;
+			angrygods(angrygod);
 		}
 		break;
 

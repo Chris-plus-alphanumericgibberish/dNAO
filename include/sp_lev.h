@@ -85,6 +85,7 @@ typedef struct {
 	xchar		x, y;
 	aligntyp	align;
 	xchar		shrine;
+	int			god;
 } altar;
 
 typedef struct {

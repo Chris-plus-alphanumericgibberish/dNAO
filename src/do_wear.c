@@ -401,7 +401,10 @@ Helmet_on()
 		    u.ualign.type = rn2(2) ? A_CHAOTIC : A_LAWFUL;
 		else if(u.ualign.type == A_VOID){
 		    u.ualign.type = !rn2(3) ? A_NEUTRAL : rn2(2) ? A_CHAOTIC : A_LAWFUL;
-		} else u.ualign.type = -(u.ualign.type);
+		} else
+			u.ualign.type = -(u.ualign.type);
+		/* forcibly sets your god to that alignments' in the pantheon */
+		u.ualign.god = align_to_god(u.ualign.type);
 		u.ublessed = 0; /* lose your god's protection */
 	     /* makeknown(uarmh->otyp);   -- moved below, after xname() */
 		/*FALLTHRU*/
@@ -507,7 +510,8 @@ Helmet_off()
 	    break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
 		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
-	    u.ualign.type = u.ualignbase[A_CURRENT];
+	    u.ualign.type = galign(u.ugodbase[UGOD_CURRENT]);
+		u.ualign.god = u.ugodbase[UGOD_CURRENT];
 	    u.ublessed = 0; /* lose the other god's protection */
 	    flags.botl = 1;
 	    break;
@@ -1806,7 +1810,7 @@ dowear()
 
 	if (otmp->otyp == HELM_OF_OPPOSITE_ALIGNMENT &&
 			qstart_level.dnum == u.uz.dnum) {	/* in quest */
-		if (u.ualignbase[A_CURRENT] == u.ualignbase[A_ORIGINAL])
+		if (galign(u.ugodbase[UGOD_CURRENT]) == galign(u.ugodbase[UGOD_ORIGINAL]))
 			You("narrowly avoid losing all chance at your goal.");
 		else	/* converted */
 			You("are suddenly overcome with shame and change your mind.");

@@ -4477,8 +4477,13 @@ char *buf;
 	    cmap = S_sink;				/* "sink" */
 #endif
 	else if (IS_ALTAR(ltyp)) {
-	    Sprintf(altbuf, "altar to %s (%s)", a_gname(),
-		    align_str(Amask2align(lev->altarmask & ~AM_SHRINE)));
+		if(a_gnum(x,y) != GOD_NONE) {
+			Sprintf(altbuf, "altar to %s (%s)", a_gname(),
+				align_str(a_align(x,y)));
+		}
+		else {
+			Sprintf(altbuf, "%s altar", align_str(a_align(x,y)));
+		}
 	    dfeature = altbuf;
 	} else if ((x == xupstair && y == yupstair) ||
 		 (x == sstairs.sx && y == sstairs.sy && sstairs.up))

@@ -1914,9 +1914,9 @@ int tary;
 	/* do spell */
 	if (spellnum) {
 		/* special case override: the avatar of lolth can ask Lolth to intercede instead of casting a spell */
-		if (youdef && magr->mtyp == PM_AVATAR_OF_LOLTH && !strcmp(urole.cgod, "Lolth") && !is_undirected_spell(spellnum) && !magr->mpeaceful){
-			u.ugangr[Align2gangr(A_CHAOTIC)]++;
-			angrygods(Align2gangr(A_CHAOTIC));
+		if (youdef && magr->mtyp == PM_AVATAR_OF_LOLTH && (urole.cgod == GOD_LOLTH) && !is_undirected_spell(spellnum) && !magr->mpeaceful){
+			godlist[GOD_LOLTH].anger++;
+			angrygods(GOD_LOLTH);
 			result = MM_HIT;
 		}
 		// !!!
@@ -4205,11 +4205,24 @@ int tary;
 			}
 			mtmp = makemon(&mons[PM_ANGEL], tarx, tary, MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
 			if (mtmp) {
-				add_mx(mtmp, MX_EPRI);
 				add_mx(mtmp, MX_EMIN);
+				int gnum;
+				aligntyp alignment;
+				if (get_mx(magr, MX_EMIN)) {
+					alignment = EMIN(magr)->min_align;
+					gnum = EMIN(magr)->godnum;
+				}
+				else if (get_mx(magr, MX_EPRI)) {
+					alignment = EPRI(magr)->shralign;
+					gnum = EPRI(magr)->godnum;
+				}
+				else {
+					alignment = sgn(magr->data->maligntyp);
+					gnum = align_to_god(alignment);
+				}
 				mtmp->isminion = TRUE;
-				EMIN(mtmp)->min_align = sgn(magr->data->maligntyp);
- 				EPRI(mtmp)->shralign = sgn(magr->data->maligntyp);
+				EMIN(mtmp)->min_align = alignment;
+				EMIN(mtmp)->godnum = gnum;
 
 				u.summonMonster = TRUE;
 				if (canspotmon(mtmp))

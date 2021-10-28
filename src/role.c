@@ -4,7 +4,6 @@
 
 #include "hack.h"
 
-
 /*** Table of all roles ***/
 /* According to AD&D, HD for some classes (ex. Wizard) should be smaller
  * (4-sided for wizards).  But this is not AD&D, and using the AD&D
@@ -35,7 +34,7 @@ struct Role roles[] = {
 	{"Speleologist",0},
 	{"Collector",   0},
 	{"Curator",     0} },
-	"Quetzalcoatl", "Camaxtli", "Huhetotl", /* Central American */
+	GOD_QUETZALCOATL, GOD_CAMAXTLI, GOD_HUHETOTL, /* Central American */
 	"Arc", "the College of Archeology", "the Tomb of the Toltec Kings",
 	PM_ARCHEOLOGIST, NON_PM, NON_PM,
 	PM_LORD_CARNARVON, PM_STUDENT, PM_MINION_OF_HUHETOTL,
@@ -87,7 +86,7 @@ struct Role roles[] = {
 	{"Slayer",      0},
 	{"Chieftain",   "Chieftainess"},
 	{"Conqueror",   "Conqueress"} },
-	"Mitra", "Crom", "Set", /* Hyborian */
+	GOD_MITRA, GOD_CROM, GOD_SET, /* Hyborian */
 	"Bar", "the Camp of the Duali Tribe", "the Duali Oasis",
 	PM_BARBARIAN, NON_PM, NON_PM,
 	PM_PELIAS, PM_CHIEFTAIN, PM_THOTH_AMON,
@@ -139,7 +138,7 @@ struct Role roles[] = {
 	{"Nomad",       0},
 	{"Rover",       0},
 	{"Pioneer",     0} },
-	"Anu", "_Ishtar", "Anshar", /* Babylonian */
+	GOD_ANU, GOD_ISHTAR, GOD_ANSHAR, /* Babylonian */
 	"Cav", "the Caves of the Ancestors", "the Dragon's Lair",
 	PM_CAVEMAN, PM_CAVEWOMAN, PM_LITTLE_DOG,
 	PM_SHAMAN_KARNOV, PM_NEANDERTHAL, PM_CHROMATIC_DRAGON,
@@ -166,7 +165,7 @@ struct Role roles[] = {
 	{"Desperado",     0},
 	{"Felon",    0},
 	{"Fugitive",  0} },
-	"Ilmater", "Grumbar", "_Tymora",	/* Faerunian */
+	GOD_ILMATER, GOD_GRUMBAR, GOD_TYMORA,	/* Faerunian */
 	"Con", "Castle Waterdeep Dungeon", "the Warden's Level",
 	PM_CONVICT, NON_PM, PM_SEWER_RAT,
 	PM_ROBERT_THE_LIFER, PM_INMATE, PM_WARDEN_ARIANNA,
@@ -194,7 +193,7 @@ struct Role roles[] = {
 	{"Magister",       "Magistra"},
 	{"Physician",      0},
 	{"Chirurgeon",     0} },
-	"_Athena", "Hermes", "Poseidon", /* Greek */
+	GOD_ATHENA, GOD_HERMES, GOD_POSEIDON, /* Greek */
 	"Hea", "the Temple of Epidaurus", "the Temple of Coeus",
 	PM_HEALER, NON_PM, NON_PM,
 	PM_HIPPOCRATES, PM_ATTENDANT, PM_CYCLOPS,
@@ -219,7 +218,7 @@ struct Role roles[] = {
 	{"Chevalier",   "Chevaliere"},
 	{"Seignieur",   "Dame"},
 	{"Paladin",     0} },
-	"Lugh", "_Brigit", "Manannan Mac Lir", /* Celtic */
+	GOD_LUGH, GOD_BRIGIT, GOD_MANANNAN_MAC_LIR, /* Celtic */
 	"Kni", "Camelot Castle", "the Isle of Glass",
 	PM_KNIGHT, NON_PM, PM_PONY,
 	PM_KING_ARTHUR, PM_PAGE, PM_NIMUNE,
@@ -244,7 +243,7 @@ struct Role roles[] = {
 	{"Student of Winds",  0},
 	{"Student of Fire",   0},
 	{"Master",            0} },
-	"Shan Lai Ching", "Chih Sung-tzu", "Huan Ti", /* Chinese */
+	GOD_SHAN_LAI_CHING, GOD_CHIH_SUNG_TZU, GOD_HUAN_TI, /* Chinese */
 	"Mon", "the Monastery of Chan-Sune",
 	  "the Monastery of the Earth-Lord",
 	PM_MONK, NON_PM, NON_PM,
@@ -271,7 +270,7 @@ struct Role roles[] = {
 	{"Maniac",     0},
 	{"Augur",    0},
 	{"Seer",  0} },
-	"Zo-Kalar", "Tamash", "Lobon",	/* Dreamlands */
+	GOD_ZO_KALAR, GOD_TAMASH, GOD_LOBON,	/* Dreamlands */
 	"Mad", "Archer Asylum", "the ground floor",
 	PM_MADMAN, PM_MADWOMAN, NON_PM,
 	PM_CASSILDA_THE_IRON_MAIDEN, PM_PATIENT, PM_DOCTOR_ARCHER,
@@ -299,7 +298,7 @@ struct Role roles[] = {
 	{"Clucer",	     0},
 	{"Domn",	     0},
 	{"Domnitor",     0} },
-	"God the Father", "_Mother Earth", "the Satan", /* Romanian, sorta */
+	GOD_GOD_THE_FATHER, GOD_MOTHER_EARTH, GOD_THE_SATAN, /* Romanian, sorta */
 	"Nob", "your ancestral home",
 	  "the rebel village",
 	PM_NOBLEMAN, PM_NOBLEWOMAN, PM_PONY,
@@ -352,7 +351,7 @@ struct Role roles[] = {
 	{"Captain",			0},
 	{"Pirate Lord",   	0},
 	{"Dread Pirate",  	0} },
-	"the Lord", "_the deep blue sea", "the Devil",	/* Christian, sorta */
+	GOD_THE_LORD, GOD_THE_DEEP_BLUE_SEA, GOD_THE_DEVIL,	/* Christian, sorta */
 	"Pir", "Tortuga", "Shipwreck Island",
 	PM_PIRATE, NON_PM, NON_PM,
 	PM_MAYOR_CUMMERBUND, PM_PIRATE_BROTHER, PM_BLACKBEARD_S_GHOST,
@@ -380,7 +379,7 @@ struct Role roles[] = {
 	{"Filcher",     0},
 	{"Magsman",     "Magswoman"},
 	{"Thief",       0} },
-	"Issek", "Mog", "Kos", /* Nehwon */
+	GOD_ISSEK, GOD_MOG, GOD_KOS, /* Nehwon */
 	"Rog", "the Thieves' Guild Hall", "the Assassins' Guild Hall",
 	PM_ROGUE, NON_PM, NON_PM,
 	PM_MASTER_OF_THIEVES, PM_THUG, PM_MASTER_ASSASSIN,
@@ -406,7 +405,7 @@ struct Role roles[] = {
 	{"Archer",        0},
 	{"Sharpshooter",  0},
 	{"Marksman",      "Markswoman"} },
-	"Apollo", "_Latona", "_Diana", /* Roman */
+	GOD_APOLLO, GOD_LATONA, GOD_DIANA, /* Roman */
 	"Ran", "Orion's camp", "the cave of the wumpus",
 	PM_RANGER, NON_PM, PM_LITTLE_DOG /* Orion & canis major */,
 	PM_ORION, PM_HUNTER, PM_SCORPIUS,
@@ -432,7 +431,7 @@ struct Role roles[] = {
 	{"Daimyo",      0},  /* a samurai lord */
 	{"Kuge",        0},  /* Noble of the Court */
 	{"Shogun",      0} },/* supreme commander, warlord */
-	"_Amaterasu Omikami", "Raijin", "Susanowo", /* Japanese */
+	GOD_AMATERASU_OMIKAMI, GOD_RAIJIN, GOD_SUSANOWO, /* Japanese */
 	"Sam", "the Castle of the Taro Clan", "the Shogun's Castle",
 	PM_SAMURAI, NON_PM, PM_LITTLE_DOG,
 	PM_LORD_SATO, PM_ROSHI, PM_ASHIKAGA_TAKAUJI,
@@ -458,7 +457,7 @@ struct Role roles[] = {
 	{"Voyager",     0},
 	{"Explorer",    0},
 	{"Adventurer",  0} },
-	"Blind Io", "_The Lady", "Offler", /* Discworld */
+	GOD_BLIND_IO, GOD_THE_LADY, GOD_OFFLER, /* Discworld */
 	"Tou", "Ankh-Morpork", "the Thieves' Guild Hall",
 	PM_TOURIST, NON_PM, NON_PM,
 	PM_TWOFLOWER, PM_GUIDE, PM_MASTER_OF_THIEVES,
@@ -485,7 +484,7 @@ struct Role roles[] = {
 	{"Lorist",      0},
 	{"Bard",        0},
 	{"Master Bard", 0} },
-	"Apollon", "Pan", "Dionysus", /* Thracian? */
+	GOD_APOLLON, GOD_PAN, GOD_DIONYSUS, /* Thracian? */
 	"Brd", "the Conservatorium", "the Island of Anthemoessa",
 	PM_BARD, NON_PM, NON_PM,
 	PM_PINDAR, PM_RHYMER, PM_AGLAOPE,
@@ -512,7 +511,7 @@ struct Role roles[] = {
 	{"Hero",        "Heroine"},
 	{"Champion",    0},
 	{"Lord",        "Lady"} },
-	"Tyr", "Odin", "Loki", /* Norse */
+	GOD_TYR, GOD_ODIN, GOD_LOKI, /* Norse */
 	"Val", "the Shrine of Destiny", "the cave of Surtur",
 	PM_VALKYRIE, NON_PM, NON_PM /*PM_WINTER_WOLF_CUB*/,
 	PM_NORN, PM_WARRIOR, PM_LORD_SURTUR,
@@ -537,7 +536,7 @@ struct Role roles[] = {
 	{"Necromancer", 0},
 	{"Wizard",      0},
 	{"Archmage",        0} },
-	"Ptah", "Thoth", "Anhur", /* Egyptian */
+	GOD_PTAH, GOD_THOTH, GOD_ANHUR, /* Egyptian */
 	"Wiz", "the Lonely Tower", "the Tower of Darkness",
 	PM_WIZARD, NON_PM, PM_KITTEN,
 	PM_NEFERET_THE_GREEN, PM_APPRENTICE, PM_DARK_ONE,
@@ -568,7 +567,7 @@ const struct Role WtWrole = {
 	{"",0},
 	{"",   0},
 	{"",     0} },
-	"", "", "", /* Determined by Mask */
+	0, 0, 0, /* Determined by Mask */
 	"", "", "", /* Determined by Mask */
 	PM_WORM_THAT_WALKS, NON_PM, NON_PM,
 	NON_PM, NON_PM, NON_PM, /* Determined by Mask */
@@ -596,7 +595,7 @@ const struct Role WtWrole = {
 	{"Archer",        0},
 	{"Sharpshooter",  0},
 	{"Marksman",      "Markswoman"} },
-	"Mercury", "_Venus", "Mars",
+	0, 0, 0,
 	"Ran", "Orion's camp", "the cave of the wumpus",
 	PM_RANGER, NON_PM, PM_LITTLE_DOG,
 	PM_ORION, PM_HUNTER, PM_SCORPIUS,						//Should be PM_NECROMACER, PM_HIGH_ELF, 
@@ -641,24 +640,6 @@ struct RoleName ElfRangerRanks[9] = {
 	{"Aredhel",     "Arwen"},       /* noble elf, maiden (S.) */
 	{"Ernil",       "Elentariel"},  /* prince (S.), elf-maiden (Q.) */
 	{"Elentar",     "Elentari"}};	/* Star-king, -queen (Q.) */
-	
-const char *ElfRangerLgod = "Orome",
-		   *ElfRangerNgod = "_Yavanna",
-		   *ElfRangerCgod = "Tulkas"; /* Elven */
-
-const char *ElfPriestessLgod = "_Varda Elentari",
-		   *ElfPriestessNgod = "_Vaire",
-		   *ElfPriestessCgod = "_Nessa"; /* Elven */
-
-const char *ElfPriestLgod = "Manwe Sulimo",
-		   *ElfPriestNgod = "Mandos",
-		   *ElfPriestCgod = "Lorien"; /* Elven */
-
-const char *AnachrononautLgod = "_Ilsensine",
-		   *AnachrononautLgodEnd = "_Ilsensine the Banished One";
-
-const char *getAnachrononautLgod(){return AnachrononautLgod;}
-const char *getAnachrononautLgodEnd(){return AnachrononautLgodEnd;}
 
 int DrowPriestessFavoredSpell = SPE_CREATE_FAMILIAR;
 int DrowPriestessFavoredBonus = -20;
@@ -674,49 +655,6 @@ struct RoleName DrowRanks[9] = {
 	{"Kas'ka",       "Qu'ess"},		/* merchant, prince */
 	{"Zil",     "Val'sharess"}};	/* Consort, Queen */
 	
-const char *DrowMaleLgodKnown = "the Eddergud",
-		   *DrowMaleLgodUknwn = "the black web",
-		   *DrowMaleNgod = "Vhaeraun",
-		   *DrowMaleCgod = "_Lolth"; /* Hedroven */
-const char *getDrowMaleLgodKnown(){return DrowMaleLgodKnown;}
-
-
-// const char *DrowNobMaleLgod = "Selvetarm", /*Nevermind, using Ver'tas instead*/
-const char *DrowNobMaleNgod = "Keptolo",
-		   *DrowNobMaleCgod = "Ghaunadaur"; /* Hedroven Nobles */
-
-const char *DrowFemaleLgod = "_Eilistraee",
-		   *DrowNobFemaleLgod = "_Ver'tas",
-		   *DrowFemaleNgod = "_Kiaransali", 
-		   *DrowFemaleCgod = "_Lolth"; /* Droven */
-
-const char *BinLgod = "Yaldabaoth",
-		   *BinNgod = "the void",
-		   *BinCgod = "_Sophia"; /* Gnostic */
-
-const char *DwarfLgod = "Mahal",
-		   *DwarfNgod = "Holashner",
-		   *DwarfCgod = "Armok"; /* Dwarven */
-
-const char *GnomeLgod = "Kurtulmak",
-		   *GnomeNgod = "Garl Glittergold",
-		   *GnomeCgod = "Urdlen"; /* Gnomish */
-
-const char *Gwyngod = "Gwyn, Lord of Sunlight",
-		   *Gwyneveregoddess = "_Gwynevere, Princess of Sunlight",
-		   *Gwyndolingod = "Dark Sun Gwyndolin"; /* Dark Souls */
-
-const char *OrcLgod = "Ilneval",
-		   *OrcNgod = "_Luthic",
-		   *OrcCgod = "Gruumsh"; /* Orcish */
-
-const char *DnDElfLgod = "_Vandria",
-		   *DnDElfNgod = "Corellon",
-		   *DnDElfCgod = "_Sehanine"; /* DnD elf pantheon */
-
-const char *DnDHumLgod = "Saint Cuthbert",
-		   *DnDHumNgod = "Helm",
-		   *DnDHumCgod = "_Mask"; /* DnD human pantheon */
 
 struct RoleName FemHDNobRanks[9] = {
 	{"Deprived",   		0},
@@ -728,9 +666,7 @@ struct RoleName FemHDNobRanks[9] = {
 	{"Livid Saint",		0},
 	{"Heir of Frost",	0},
 	{"Lord of Rime",	0}};
-	
-//defined in pray.c
-extern const char *Moloch, *Morgoth, *MolochLieutenant, *Silence, *Chaos, *DeepChaos, *tVoid, *Demiurge, *Sophia, *Other, *BlackMother, *Nodens, *DreadFracture, *AllInOne; /*defined in pray*/
+
 /* The player's role, created at runtime from initial
  * choices.  This may be munged in role_init().
  */
@@ -738,7 +674,7 @@ extern const char *Moloch, *Morgoth, *MolochLieutenant, *Silence, *Chaos, *DeepC
 struct Role urole =
 {	{"Undefined", 0}, { {0, 0}, {0, 0}, {0, 0},
 	{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0} },
-	"L", "N", "C", "Xxx", "home", "locate",
+	GOD_NONE, GOD_NONE, GOD_NONE, "Xxx", "home", "locate",
 	NON_PM, NON_PM, NON_PM, NON_PM, NON_PM, NON_PM,
 	NON_PM, NON_PM, 0, 0, 0, 0, 0,
 	/* Str Int Wis Dex Con Cha */
@@ -1022,443 +958,6 @@ randrole(ralign)
 		for(i=0;i<SIZE(roles)-1;i++) if(roles[i].allow & ralign) if(!(--allowed)) return i;
 	}
 	return 0;/* Backup, should never reach */
-}
-
-const int Langels[] = {PM_JUSTICE_ARCHON,PM_SHIELD_ARCHON,PM_SWORD_ARCHON,PM_TRUMPET_ARCHON,PM_ANGEL,PM_WARDEN_ARCHON,PM_THRONE_ARCHON,PM_LIGHT_ARCHON,NON_PM};
-const int Ldevils[] = {PM_LEMURE,PM_IMP,PM_HORNED_DEVIL,PM_BARBED_DEVIL,PM_LEGION_DEVIL_GRUNT,PM_LEGION_DEVIL_SOLDIER,
-	PM_BONE_DEVIL,PM_ICE_DEVIL,PM_FALLEN_ANGEL,NON_PM};
-const int Nangels[] = {PM_MOVANIC_DEVA,PM_MONADIC_DEVA,PM_ASTRAL_DEVA,PM_ANGEL,PM_GRAHA_DEVA,PM_SURYA_DEVA,PM_MAHADEVA,NON_PM};
-const int NElemen[] = {PM_AIR_ELEMENTAL,PM_WATER_ELEMENTAL,PM_FIRE_ELEMENTAL,PM_EARTH_ELEMENTAL,PM_MORTAI,NON_PM};
-const int Cangels[] = {PM_NOVIERE_ELADRIN,PM_BRALANI_ELADRIN,PM_FIRRE_ELADRIN,PM_SHIERE_ELADRIN,PM_ANGEL,PM_GHAELE_ELADRIN,PM_TULANI_ELADRIN,NON_PM};
-const int Cdemons[] = {PM_MANES,PM_QUASIT,PM_VROCK,PM_HEZROU,PM_NALFESHNEE,PM_MARILITH,PM_BALROG,NON_PM};
-
-const int LArc[] = {PM_COUATL,NON_PM};
-
-const int LIssek[] = {PM_WATER_ELEMENTAL,PM_ANGEL,PM_THRONE_ARCHON,NON_PM};
-const int NMog[] = {PM_GIANT_SPIDER,PM_MIRKWOOD_SPIDER,PM_ANGEL,PM_MAHADEVA,NON_PM};
-const int CKos[] = {PM_ICE_VORTEX,PM_FIRE_VORTEX,PM_BRALANI_ELADRIN,PM_GHAELE_ELADRIN,PM_TULANI_ELADRIN,NON_PM};
-
-const int LAthena[] = {PM_MYRMIDON_HOPLITE,PM_MYRMIDON_LOCHIAS,PM_MYRMIDON_YPOLOCHAGOS,PM_DEMINYMPH,PM_MYRMIDON_LOCHAGOS,PM_SHIELD_ARCHON,PM_SWORD_ARCHON,PM_LIGHT_ARCHON,NON_PM};
-const int NHermes[] = {PM_QUICKLING,PM_AIR_ELEMENTAL,PM_LIGHTNING_PARAELEMENTAL,PM_BANDERSNATCH,PM_MORTAI,NON_PM};
-const int CPoseidon[] = {PM_NOVIERE_ELADRIN,PM_MARID,PM_WATER_ELEMENTAL,PM_ICE_PARAELEMENTAL,PM_LIGHTNING_PARAELEMENTAL,PM_TITAN,NON_PM};
-
-const int LLugh[] = {PM_WARHORSE,PM_ANGEL,PM_KI_RIN,PM_LIGHT_ARCHON,NON_PM};
-const int NBrigit[] = {PM_FIRE_ELEMENTAL,PM_FIRE_VORTEX,PM_FIRRE_ELADRIN,PM_SURYA_DEVA,NON_PM};
-const int CManannan[] = {PM_NAIAD,PM_NOVIERE_ELADRIN,PM_WATER_ELEMENTAL,PM_ICE_PARAELEMENTAL,PM_LIGHTNING_PARAELEMENTAL,PM_STORM_GIANT,NON_PM};
-
-const int LShanLaiChing[] = {PM_OREAD,PM_EARTH_ELEMENTAL,PM_WATER_ELEMENTAL,PM_MAHADEVA,NON_PM};
-const int NSungTzu[] = {PM_NAIAD,PM_WATER_ELEMENTAL,PM_MORTAI,NON_PM};
-const int CHuanTi[] = {PM_SOLDIER,PM_TERRACOTTA_SOLDIER,PM_TULANI_ELADRIN,PM_LIGHT_ARCHON,NON_PM};
-
-const int NSea[] = {PM_NOVIERE_ELADRIN,PM_MARID,PM_WATER_ELEMENTAL,PM_ICE_PARAELEMENTAL,PM_LIGHTNING_PARAELEMENTAL,PM_MORTAI,NON_PM};
-
-const int LApollo[] = {PM_PLAINS_CENTAUR,PM_MOUNTAIN_CENTAUR,PM_OREAD,PM_TRUMPET_ARCHON,PM_LIGHT_ARCHON,NON_PM};
-const int NLatona[] = {PM_NAIAD,PM_OREAD,PM_EARTH_ELEMENTAL,PM_WATER_ELEMENTAL,PM_TITAN,NON_PM};
-const int CDiana[] = {PM_PLAINS_CENTAUR,PM_NAIAD,PM_FOREST_CENTAUR,PM_TULANI_ELADRIN,NON_PM};
-
-const int COffler[] = {PM_BABY_CROCODILE,PM_CROCODILE,PM_ZRUTY,PM_MARILITH,PM_AMMIT,NON_PM};
-const int LApollon[] = {PM_NAIAD,PM_MOVANIC_DEVA,PM_MONADIC_DEVA,PM_LIGHT_ARCHON,NON_PM};
-const int NPan[] = {PM_DRYAD,PM_DEMINYMPH,PM_MONADIC_DEVA,PM_TULANI_ELADRIN,NON_PM};
-const int CDionysus[] = {PM_NAIAD,PM_NOVIERE_ELADRIN,PM_DEMINYMPH,PM_TULANI_ELADRIN,NON_PM};
-
-const int LTyr[] = {PM_ARCADIAN_AVENGER,PM_SHIELD_ARCHON,PM_ANGEL,PM_WARDEN_ARCHON,PM_THRONE_ARCHON,NON_PM};
-const int NOdin[] = {PM_WARHORSE,PM_ARCADIAN_AVENGER,PM_VALKYRIE,PM_SURYA_DEVA,NON_PM};
-const int CLoki[] = {PM_HELL_HOUND_PUP,PM_HELL_HOUND,PM_FIRE_GIANT,PM_TITAN,NON_PM};
-
-const int LPtah[] = {PM_CROCODILE,PM_SERPENT_NECKED_LIONESS,PM_PHARAOH,NON_PM};
-const int NThoth[] = {PM_PARROT,PM_GOLDEN_NAGA,PM_ASTRAL_DEVA,PM_GRAHA_DEVA,PM_PHARAOH,NON_PM};
-const int CAnhur[] = {PM_VROCK,PM_MARILITH,PM_ANUBITE,PM_AMMIT,NON_PM};
-
-//
-const int LOrome[] = {PM_PLAINS_CENTAUR,PM_FOREST_CENTAUR,PM_MOUNTAIN_CENTAUR,PM_HUNTER,PM_TITAN,NON_PM};
-const int NYavanna[] = {PM_GRAY_UNICORN,PM_EARTH_ELEMENTAL,PM_WOOD_TROLL,PM_TITAN,NON_PM};
-
-const int LVarda[] = {PM_WHITE_UNICORN,PM_AIR_ELEMENTAL,PM_ASTRAL_DEVA,PM_ANGEL,PM_GRAHA_DEVA,PM_LIGHT_ARCHON,NON_PM};
-const int NVaire[] = {PM_GRAY_UNICORN,PM_MOVANIC_DEVA,PM_ASTRAL_DEVA,PM_MAHADEVA,NON_PM};
-
-const int LManwe[] = {PM_WHITE_UNICORN,PM_AIR_ELEMENTAL,PM_ANGEL,PM_SURYA_DEVA,PM_GIANT_EAGLE,PM_THRONE_ARCHON,NON_PM};
-const int NMandos[] = {PM_GRAY_UNICORN,PM_MOVANIC_DEVA,PM_ASTRAL_DEVA,PM_GRAHA_DEVA,PM_MAHADEVA,NON_PM};
-
-const int LIlsensine[] = {PM_MIND_FLAYER,PM_BRAIN_GOLEM,PM_SEMBLANCE,PM_MASTER_MIND_FLAYER,NON_PM};
-
-const int LBlackWeb[] = {PM_DROW_MUMMY,PM_EDDERKOP,PM_EDDERKOP,PM_EDDERKOP,PM_DROW_ALIENIST,PM_EMBRACED_DROWESS,NON_PM};
-const int NVhaeraun[] = {PM_HEDROW_WARRIOR,PM_PHASE_SPIDER,PM_MIRKWOOD_ELDER,NON_PM};
-const int CLolthMale[] = {PM_GIANT_SPIDER,PM_MIRKWOOD_SPIDER,PM_MIRKWOOD_ELDER,NON_PM};
-
-const int CGhaunadaur[] = {PM_HEDROW_WARRIOR,PM_DRIDER,PM_HEDROW_WIZARD,PM_SHOGGOTH,PM_PRIESTESS_OF_GHAUNADAUR,PM_PRIEST_OF_GHAUNADAUR,NON_PM};
-
-const int LEilisstraee[] = {PM_ELF_LORD,PM_DROW_MATRON,PM_HEDROW_BLADEMASTER,PM_ANGEL,NON_PM};
-const int LVerTas[] = {PM_HEDROW_WARRIOR,PM_BEHOLDER,PM_ANGEL,PM_EYE_OF_DOOM,NON_PM};
-const int NKiaransali[] = {PM_HEDROW_ZOMBIE,PM_DROW_MUMMY,PM_VAMPIRE,PM_MASTER_LICH,NON_PM};
-const int CLolth[] = {PM_SPROW,PM_YOCHLOL,PM_ANGEL,PM_MARILITH,NON_PM};
-
-const int NVoid[] = {NON_PM};
-const int CSophia[] = {PM_ANGEL,PM_GRAHA_DEVA,PM_TULANI_ELADRIN,PM_SURYA_DEVA,PM_THRONE_ARCHON,PM_LIGHT_ARCHON,NON_PM};
-
-const int LMahal[] = {PM_ROCK_MOLE,PM_DWARF,PM_ANGEL,PM_THRONE_ARCHON,NON_PM};
-const int NHolashner[] = {PM_ROCK_MOLE,PM_MIND_FLAYER,PM_PURPLE_WORM,NON_PM};
-
-const int NGnome[] = {PM_ARCADIAN_AVENGER,PM_MOVANIC_DEVA,PM_MONADIC_DEVA,PM_ASTRAL_DEVA,PM_GRAHA_DEVA,PM_SURYA_DEVA,PM_MAHADEVA,NON_PM};
-const int CGnome[] = {PM_ROCK_MOLE,PM_LONG_WORM,PM_EARTH_ELEMENTAL,PM_PURPLE_WORM,NON_PM};
-
-const int GwynServants[] = {PM_UNDEAD_KNIGHT,PM_GARGOYLE,PM_WINGED_GARGOYLE,PM_WARRIOR_OF_SUNLIGHT,NON_PM};
-const int GwynevereServants[] = {PM_UNDEAD_MAIDEN,PM_UNDEAD_KNIGHT,PM_BLUE_SENTINEL,PM_KNIGHT_OF_THE_PRINCESS_S_GUARD,PM_DEATH_KNIGHT,PM_PISACA,NON_PM};
-const int GwyndolinServants[] = {PM_BLUE_SENTINEL,PM_SNAKE,PM_PYTHON,PM_GARGOYLE,PM_DARKMOON_KNIGHT,NON_PM};
-const int VelkaServants[] = {PM_UNDEAD_REBEL,PM_CROW,PM_RAVEN,PM_TENGU,PM_PARDONER,PM_OCCULTIST,NON_PM};
-
-const int MChaos[] = {PM_GOBLIN,PM_WATER_ELEMENTAL,PM_FIRE_ELEMENTAL,PM_EARTH_ELEMENTAL,PM_AIR_ELEMENTAL,PM_MIND_FLAYER,PM_VAMPIRE,PM_PURPLE_WORM,NON_PM};
-const int MChaosDeep[] = {PM_LICH,PM_MARILITH,PM_KRAKEN,PM_GREEN_DRAGON,NON_PM};
-const int Onone[] = {NON_PM};
-const int MBlackMother[] = {PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN,PM_DEMINYMPH,PM_SWIRLING_MIST,PM_DUST_STORM,PM_ICE_STORM,PM_THUNDER_STORM,PM_FIRE_STORM,PM_GIANT_GOAT_SPAWN,PM_SHOGGOTH,PM_DARK_YOUNG,PM_BLESSED,NON_PM};
-const int MNodens[] = {PM_MOUNTAIN_CENTAUR,PM_WATER_ELEMENTAL,PM_NIGHTGAUNT,PM_TITAN,NON_PM};
-const int MDreadFracture[] = {PM_AMM_KAMEREL,PM_FREEZING_SPHERE,PM_WRAITH,PM_SHADE,PM_HUDOR_KAMEREL,PM_ICE_PARAELEMENTAL,PM_SHARAB_KAMEREL,PM_DARKNESS_GIVEN_HUNGER,PM_FALLEN_ANGEL,PM_SHAYATEEN,NON_PM};
-const int MAllInOne[] = {PM_AOA_DROPLET,PM_HOOLOOVOO,PM_AOA,PM_UVUUDAUM,NON_PM};
-
-const int *
-god_minions(gptr)
-	const char *gptr;
-{
-	int role = -1, galign, i;
-	
-	for(i=0;i<SIZE(roles)-1;i++){
-		if(roles[i].lgod == gptr){
-			role = roles[i].malenum;
-			galign = A_LAWFUL;
-		} else if(roles[i].ngod == gptr){
-			role = roles[i].malenum;
-			galign = A_NEUTRAL;
-		} else if(roles[i].cgod == gptr){
-			role = roles[i].malenum;
-			galign = A_CHAOTIC;
-		}
-	}
-	
-	if(role != -1) switch(role){
-		case PM_ARCHEOLOGIST:
-			if(galign == A_LAWFUL) return LArc;
-			if(galign == A_NEUTRAL) return NElemen;
-			return Cdemons;
-		break;
-		// case PM_ANACHRONONAUT:
-			// //should always be subbed out for something else
-		// break;
-		case PM_BARBARIAN:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return NElemen;
-			return Cdemons;
-		break;
-		// case PM_EXILE:
-			// //should always be subbed out for something else
-		// break;
-		case PM_CAVEMAN:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return NElemen;
-			return Cdemons;
-		break;
-		case PM_CONVICT:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return NElemen;
-			return Cangels;
-		break;
-		case PM_HEALER:
-			if(galign == A_LAWFUL) return LAthena;
-			if(galign == A_NEUTRAL) return NHermes;
-			return CPoseidon;
-		break;
-		case PM_KNIGHT:
-			if(galign == A_LAWFUL) return LLugh;
-			if(galign == A_NEUTRAL) return NBrigit;
-			return CManannan;
-		break;
-		case PM_MONK:
-			//Neutral is water, Law is mountains and seas and Chaos is... the first emperor, lord of the moving heavens...
-			if(galign == A_LAWFUL) return LShanLaiChing;
-			if(galign == A_NEUTRAL) return NSungTzu;
-			return CHuanTi;
-		break;
-		case PM_MADMAN:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return NElemen;
-			return Cangels;
-		break;
-		case PM_NOBLEMAN:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return NElemen;
-			return Cdemons;
-		break;
-		// case PM_PRIEST:
-			// //should always be subbed out for something else
-		// break;
-		case PM_PIRATE:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return NSea;
-			return Cdemons;
-		break;
-		case PM_ROGUE:
-			if(galign == A_LAWFUL) return LIssek;
-			if(galign == A_NEUTRAL) return NMog;
-			return CKos;
-		break;
-		case PM_RANGER:
-			if(galign == A_LAWFUL) return LApollo;
-			if(galign == A_NEUTRAL) return NLatona;
-			return CDiana;
-		break;
-		case PM_SAMURAI:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return Nangels;
-			return Cangels;
-		break;
-		case PM_TOURIST:
-			if(galign == A_LAWFUL) return Langels;
-			if(galign == A_NEUTRAL) return Nangels;
-			return COffler;
-		break;
-		case PM_BARD:
-			if(galign == A_LAWFUL) return LApollon;
-			if(galign == A_NEUTRAL) return NPan;
-			return CDionysus;
-		break;
-		case PM_VALKYRIE:
-			if(galign == A_LAWFUL) return LTyr;
-			if(galign == A_NEUTRAL) return NOdin;
-			return CLoki;
-		break;
-		case PM_WIZARD:
-			if(galign == A_LAWFUL) return LPtah;
-			if(galign == A_NEUTRAL) return NThoth;
-			return CAnhur;
-		break;
-	}
-	
-	if(gptr == Moloch || gptr == MolochLieutenant) return rn2(2) ? Ldevils:Cdemons;
-	
-	if(gptr == ElfRangerLgod) return LOrome;
-	if(gptr == ElfRangerNgod) return NYavanna;
-	if(gptr == ElfRangerCgod) return Cangels;
-	
-	if(gptr == ElfPriestessLgod) return LVarda;
-	if(gptr == ElfPriestessNgod) return NVaire;
-	if(gptr == ElfPriestessCgod) return Cangels;
-	
-	if(gptr == ElfPriestLgod) return LManwe;
-	if(gptr == ElfPriestNgod) return NMandos;
-	if(gptr == ElfPriestCgod) return Cangels;
-	
-	if(gptr == AnachrononautLgod || gptr == AnachrononautLgodEnd) return LIlsensine;
-	
-	if(gptr == DrowMaleLgodKnown || gptr == DrowMaleLgodUknwn) return LBlackWeb;
-	if(gptr == DrowMaleNgod) return NVhaeraun;
-	if(gptr == DrowMaleCgod) return CLolthMale;
-	
-	if(gptr == DrowNobMaleNgod) return NVhaeraun;
-	if(gptr == DrowNobMaleCgod) return CGhaunadaur;
-	
-	if(gptr == DrowFemaleLgod) return LEilisstraee;
-	if(gptr == DrowNobFemaleLgod) return LVerTas;
-	if(gptr == DrowFemaleNgod) return NKiaransali;
-	if(gptr == DrowFemaleCgod) return CLolth;
-	
-	if(gptr == BinLgod || gptr == Demiurge) return Langels;
-	if(gptr == BinNgod || gptr == tVoid) return NVoid;
-	if(gptr == BinCgod || gptr == Sophia) return CSophia;
-	
-	if(gptr == DwarfLgod) return LMahal;
-	if(gptr == DwarfNgod) return NHolashner;
-	if(gptr == DwarfCgod) return Cdemons;
-	
-	if(gptr == GnomeLgod) return Ldevils;
-	if(gptr == GnomeNgod) return NGnome;
-	if(gptr == GnomeCgod) return CGnome;
-	
-	if(gptr == Gwyngod) return GwynServants;
-	if(gptr == Gwyneveregoddess) return GwynevereServants;
-	if(gptr == Gwyndolingod) return GwyndolinServants;
-	if(gptr == Velka) return VelkaServants;
-	
-	if(gptr == Chaos) return MChaos;
-	if(gptr == DeepChaos) return MChaosDeep;
-	if(gptr == Other) return Onone;
-	if(gptr == BlackMother) return MBlackMother;
-	if(gptr == Nodens) return MNodens;
-	if(gptr == DreadFracture) return MDreadFracture;
-	if(gptr == AllInOne) return MAllInOne;
-	
-	pline("ERROR RECOVERY:Minion list for %s not specified, using default", gptr);
-	return Cdemons;
-}
-
-int
-god_faction(gptr)
-	const char *gptr;
-{
-	if(gptr == DrowMaleLgodKnown || gptr == DrowMaleLgodUknwn) return EDDER_SYMBOL;
-	if(gptr == DrowMaleNgod) return MAGTHERE;
-	if(gptr == DrowMaleCgod) return LOLTH_SYMBOL;
-	
-	if(gptr == DrowNobMaleNgod) return MAGTHERE;
-	if(gptr == DrowNobMaleCgod) return GHAUNADAUR_SYMBOL;
-	
-	if(gptr == DrowFemaleLgod) return EILISTRAEE_SYMBOL;
-	if(gptr == DrowNobFemaleLgod) return VER_TAS_SYMBOL;
-	if(gptr == DrowFemaleNgod) return KIARANSALEE_SYMBOL;
-	if(gptr == DrowFemaleCgod) return LOLTH_SYMBOL;
-	
-	return 0;
-}
-
-struct monst *
-god_priest(gptr, sx, sy, sanctum)
-	const char *gptr;
-	int sx, sy;
-	int sanctum;   /* is it the seat of the high priest? */
-{
-	struct monst *priest;
-	
-	if(on_level(&sanctum_level, &u.uz)) //make moloch's high priest, assume gptr == Moloch is potentially misleading and not necessary
-		priest = makemon(&mons[PM_ELDER_PRIEST], sx + 1, sy, NO_MM_FLAGS);
-	else if(Role_if(PM_EXILE) && sanctum) priest = (struct monst *) 0;
-	else if(In_mordor_depths(&u.uz)){
-		priest = makemon(&mons[PM_HIGH_SHAMAN], sx + 1, sy, NO_MM_FLAGS);
-		return priest;
-	}
-	else if(Is_bridge_temple(&u.uz)){
-		priest = makemon(&mons[PM_BLASPHEMOUS_LURKER], sx, sy, NO_MM_FLAGS);
-		return priest;
-	}
-	else {
-		int role = -1, galign, i;
-		
-		for(i=0;i<SIZE(roles)-1;i++){
-			if(roles[i].lgod == gptr){
-				role = roles[i].malenum;
-				galign = A_LAWFUL;
-			} else if(roles[i].ngod == gptr){
-				role = roles[i].malenum;
-				galign = A_NEUTRAL;
-			} else if(roles[i].cgod == gptr){
-				role = roles[i].malenum;
-				galign = A_CHAOTIC;
-			}
-		}
-		
-		priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
-			sx + 1, sy, NO_MM_FLAGS);
-		
-		if(gptr == Moloch){
-			give_mintrinsic(priest, POISON_RES);
-		}
-		
-		if(role != -1){
-			return priest;
-		}
-		
-		if(gptr == ElfRangerLgod){
-			priest->female = FALSE;
-			return priest;
-		}
-		if(gptr == ElfRangerNgod){
-			priest->female = TRUE;
-			return priest;
-		}
-		if(gptr == ElfRangerCgod){
-			priest->female = FALSE;
-			return priest;
-		} 
-		
-		if(gptr == ElfPriestessLgod){
-			priest->female = TRUE;
-			return priest;
-		}
-		if(gptr == ElfPriestessNgod){
-			priest->female = TRUE;
-			return priest;
-		}
-		if(gptr == ElfPriestessCgod){
-			priest->female = TRUE;
-			return priest;
-		}
-		
-		
-		if(gptr == ElfPriestLgod){
-			priest->female = FALSE;
-			return priest;
-		}
-		if(gptr == ElfPriestNgod){
-			priest->female = FALSE;
-			return priest;
-		}
-		if(gptr == ElfPriestCgod){
-			priest->female = FALSE;
-			return priest;
-		}
-		
-		if(gptr == DrowMaleLgodKnown || gptr == DrowMaleLgodUknwn){
-			priest->female = FALSE;
-			if(!sanctum){
-				newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
-				set_faction(priest, XAXOX);
-			}
-			return priest;
-		}
-		if(gptr == DrowMaleNgod){
-			priest->female = FALSE;
-			if(!sanctum){
-				newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
-				set_faction(priest, LOLTH_SYMBOL);
-			}
-			return priest;
-		}
-		if(gptr == DrowMaleCgod){
-			priest->female = FALSE;
-			if(!sanctum){
-				newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-				set_faction(priest, LOLTH_SYMBOL);
-			}
-			return priest;
-		}
-		
-		if(gptr == DrowNobMaleNgod){
-			priest->female = FALSE;
-			if(!sanctum){
-				newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
-				set_faction(priest, LOLTH_SYMBOL);
-			}
-			return priest;
-		}
-		if(gptr == DrowNobMaleCgod){
-			if(!sanctum){
-				if(priest->female) newcham(priest,PM_PRIESTESS_OF_GHAUNADAUR,FALSE,FALSE);
-				else newcham(priest,PM_PRIEST_OF_GHAUNADAUR,FALSE,FALSE);
-				set_faction(priest, GHAUNADAUR_SYMBOL);
-			}
-			return priest;
-		}
-		if(gptr == DrowFemaleLgod){
-			priest->female = TRUE;
-			if(!sanctum) newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
-			return priest;
-		}
-		if(gptr == DrowNobFemaleLgod){
-			priest->female = TRUE;
-			if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-			//ver'tas
-			return priest;
-		}
-		if(gptr == DrowFemaleNgod){
-			priest->female = TRUE;
-			if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-			//NKiaransali
-			return priest;
-		}
-		if(gptr == DrowFemaleCgod){
-			priest->female = TRUE;
-			if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-			//Lolth
-			return priest;
-		}
-	}
-	return priest;
 }
 
 int
@@ -2442,9 +1941,9 @@ int newgame;
 			if(Role_if(PM_NOBLEMAN)){
 				urole.filecode = "Ndr";
 				
-				urole.lgod = DrowNobFemaleLgod;
-				urole.ngod = DrowFemaleNgod;
-				urole.cgod = DrowFemaleCgod;
+				urole.lgod = GOD_VER_TAS;
+				urole.ngod = GOD_KIARANSALI;
+				urole.cgod = GOD_LOLTH;
 				
 				urole.homebase = "your house";
 				urole.intermed = "DRA-MUR-SHOU";
@@ -2460,15 +1959,14 @@ int newgame;
 				urole.enemy2sym = S_UMBER;
 			} else {
 				urole.filecode = "Dro";
-				
+				urole.lgod = GOD_EILISTRAEE;
+				urole.ngod = GOD_KIARANSALI;
+				urole.cgod = GOD_LOLTH;
 				if(Role_if(PM_PRIEST)){
 					urole.spelspec = DrowPriestessFavoredSpell;
 					urole.spelsbon = DrowPriestessFavoredBonus;
 				}
 				if(flags.stag == 0){
-					urole.lgod = DrowFemaleLgod;
-					urole.ngod = DrowFemaleNgod;
-					urole.cgod = DrowFemaleCgod;
 					
 					urole.homebase = "Erelhei-Cinlu";
 					urole.intermed = "the drider caves";
@@ -2482,11 +1980,7 @@ int newgame;
 					urole.enemy2num = PM_ELF_LORD;
 					urole.enemy1sym = S_QUADRUPED;
 					urole.enemy2sym = S_LAW_ANGEL;
-				} else {
-					urole.lgod = DrowFemaleLgod;
-					urole.ngod = DrowFemaleNgod;
-					urole.cgod = DrowFemaleCgod;
-					
+				} else {					
 					urole.homebase = "the Grove of Eilistraee";
 					urole.intermed = "Erelhei-Cinlu";
 					urole.questarti = ART_TENTACLE_ROD;
@@ -2505,9 +1999,9 @@ int newgame;
 			if(Role_if(PM_NOBLEMAN)){
 				urole.filecode = "Nhd";
 				
-				urole.lgod = DrowNobFemaleLgod;
-				urole.ngod = DrowNobMaleNgod;
-				urole.cgod = DrowNobMaleCgod;
+				urole.lgod = GOD_VER_TAS;
+				urole.ngod = GOD_KEPTOLO;
+				urole.cgod = GOD_GHAUNADAUR;
 				
 				urole.homebase = "your house";
 				urole.intermed = "Eryndlyn";
@@ -2523,12 +2017,11 @@ int newgame;
 				urole.enemy2sym = S_DEMON;
 			} else {
 				urole.filecode = "Hdr";
+				urole.lgod = GOD_EDDERGUD;
+				urole.ngod = GOD_VHAERAUN;
+				urole.cgod = GOD_LOLTH;
 				
 				if(flags.stag == 0){
-					urole.lgod = DrowMaleLgodUknwn;
-					urole.ngod = DrowMaleNgod;
-					urole.cgod = DrowMaleCgod;
-					
 					urole.homebase = "Menzoberranzan";
 					urole.intermed = "the drider caves";
 					urole.questarti = ART_DARKWEAVER_S_CLOAK;
@@ -2542,10 +2035,6 @@ int newgame;
 					urole.enemy1sym = S_MUMMY;
 					urole.enemy2sym = S_UMBER;
 				} else {
-					urole.lgod = DrowMaleLgodKnown;
-					urole.ngod = DrowMaleNgod;
-					urole.cgod = DrowMaleCgod;
-					
 					urole.homebase = "Tower Xaxox";
 					urole.intermed = "Menzoberranzan";
 					urole.questarti = ART_TENTACLE_ROD;
@@ -2581,18 +2070,18 @@ int newgame;
 		urole.rank[8] = ElfRangerRanks[8];
 		
 		if(Role_if(PM_RANGER)){
-			urole.lgod = ElfRangerLgod;
-			urole.ngod = ElfRangerNgod;
-			urole.cgod = ElfRangerCgod;
+			urole.lgod = GOD_OROME;
+			urole.ngod = GOD_YAVANNA;
+			urole.cgod = GOD_TULKAS;
 		} else {
 			if(flags.initgend){ /*true = female*/
-				urole.lgod = ElfPriestessLgod;
-				urole.ngod = ElfPriestessNgod;
-				urole.cgod = ElfPriestessCgod;
+				urole.lgod = GOD_VARDA_ELENTARI;
+				urole.ngod = GOD_MANDOS;
+				urole.cgod = GOD_NESSA;
 			} else {
-				urole.lgod = ElfPriestLgod;
-				urole.ngod = ElfPriestNgod;
-				urole.cgod = ElfPriestCgod;
+				urole.lgod = GOD_MANWE_SULIMO;
+				urole.ngod = GOD_YAVANNA;
+				urole.cgod = GOD_LORIEN;
 			}
 		}
 		
@@ -2621,13 +2110,13 @@ int newgame;
 		urole.neminum = PM_NECROMANCER;
 		
 		if(flags.initgend){ /*true = female*/
-			urole.lgod = ElfPriestessLgod;
-			urole.ngod = ElfPriestessNgod;
-			urole.cgod = ElfPriestessCgod;
+			urole.lgod = GOD_VARDA_ELENTARI;
+			urole.ngod = GOD_MANDOS;
+			urole.cgod = GOD_NESSA;
 		} else {
-			urole.lgod = ElfPriestLgod;
-			urole.ngod = ElfPriestNgod;
-			urole.cgod = ElfPriestCgod;
+			urole.lgod = GOD_MANWE_SULIMO;
+			urole.ngod = GOD_YAVANNA;
+			urole.cgod = GOD_LORIEN;
 		}
 		urole.enemy1num = PM_ELF;
 		urole.enemy2num = PM_ORC_SHAMAN;
@@ -2675,9 +2164,9 @@ int newgame;
 		urole.rank[7] = DwarfRanks[7];
 		urole.rank[8] = DwarfRanks[8];
 		
-		urole.lgod = DwarfLgod;
-		urole.ngod = DwarfNgod;
-		urole.cgod = DwarfCgod;
+		urole.lgod = GOD_MAHAL;
+		urole.ngod = GOD_HOLASHNER;
+		urole.cgod = GOD_ARMOK;
 		
 		urole.enemy1num = PM_HILL_ORC;
 		urole.enemy2num = PM_ORC_SHAMAN;
@@ -2695,9 +2184,9 @@ int newgame;
 		urole.guardnum = PM_GNOME_COMRADE;
 		urole.neminum = PM_GREAT_HIGH_SHAMAN_OF_KURTULMAK;
 		
-		urole.lgod = GnomeLgod;
-		urole.ngod = GnomeNgod;
-		urole.cgod = GnomeCgod;
+		urole.lgod = GOD_KURTULMAK;
+		urole.ngod = GOD_GARL_GLITTERGOLD;
+		urole.cgod = GOD_URDLEN;
 		
 		urole.enemy1num = PM_KOBOLD;
 		urole.enemy2num = PM_LARGE_KOBOLD;
@@ -2737,9 +2226,9 @@ int newgame;
 			urole.guardnum = PM_CORVIAN;
 			urole.neminum = PM_BASTARD_OF_THE_BOREAL_VALLEY;
 			
-			urole.lgod = Gwyngod;
-			urole.ngod = Gwyneveregoddess;
-			urole.cgod = Gwyndolingod;
+			urole.lgod = GOD_GWYN__LORD_OF_SUNLIGHT;
+			urole.ngod = GOD_GWYNEVERE__PRINCESS_OF_SUN;
+			urole.cgod = GOD_DARK_SUN_GWYNDOLIN;
 			
 			urole.rank[0] = FemHDNobRanks[0];
 			urole.rank[1] = FemHDNobRanks[1];
@@ -2773,9 +2262,9 @@ int newgame;
 			urole.guardnum = NON_PM;
 			urole.neminum = PM_VECHERNYAYA_THE_SUN_S_GRAVE_KEEPER;
 			
-			urole.lgod = Gwyngod;
-			urole.ngod = Gwyneveregoddess;
-			urole.cgod = Gwyndolingod;
+			urole.lgod = GOD_GWYN__LORD_OF_SUNLIGHT;
+			urole.ngod = GOD_GWYNEVERE__PRINCESS_OF_SUN;
+			urole.cgod = GOD_DARK_SUN_GWYNDOLIN;
 			
 			urole.enemy1num = PM_MAN_SERPENT_SOLDIER;
 			urole.enemy2num = PM_MAN_SERPENT_MAGE;
@@ -2835,8 +2324,8 @@ int newgame;
 		//Drow noble nemesis is regular monster for anachrononauts
 		mons[PM_ELDER_BRAIN].msound = MS_SILENT;
 		mons[PM_ELDER_BRAIN].geno &= ~G_UNIQ;
-		if(flags.questprogress==2) urole.lgod = AnachrononautLgodEnd;
-		else if(flags.questprogress==1) urole.lgod = AnachrononautLgod;
+		if (flags.questprogress)
+			urole.lgod = GOD_ILSENSINE;
 	}
 
 	if(!Role_if(PM_CAVEMAN)){
@@ -2928,41 +2417,6 @@ Goodbye()
 	default:
 	    return ("Goodbye");
 	}
-}
-
-const char *
-getDnDElfLgod()
-{
-	return DnDElfLgod;
-}
-
-const char *
-getDnDElfNgod()
-{
-	return DnDElfNgod;
-}
-
-const char *
-getDnDElfCgod()
-{
-	return DnDElfCgod;
-}
-const char *
-getDnDHumLgod()
-{
-	return DnDHumLgod;
-}
-
-const char *
-getDnDHumNgod()
-{
-	return DnDHumNgod;
-}
-
-const char *
-getDnDHumCgod()
-{
-	return DnDHumCgod;
 }
 
 #ifdef RECORD_ACHIEVE

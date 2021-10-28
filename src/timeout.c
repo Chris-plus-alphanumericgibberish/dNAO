@@ -533,7 +533,7 @@ nh_timeout()
 			}
 	    }
 
-	    if (u.uhave.amulet || u.ugangr[Align2gangr(u.ualign.type)]) timeout = timeout / 2;
+	    if (u.uhave.amulet || godlist[u.ualign.god].anger) timeout = timeout / 2;
 
 	    if (moves >= u.luckturn + timeout) {
 			if(u.uluck > baseluck)

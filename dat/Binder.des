@@ -267,7 +267,7 @@ REGION:(64,09,64,09),lit,"temple",filled,true
 ALTAR:(46,03),align[0], shrine
 ALTAR:(46,15),align[1], shrine
 ALTAR:(52,09),align[2], shrine
-ALTAR:(65,09),noalign, altar
+ALTAR:(65,09),noalign, altar,"Yaldabaoth"
 
 DOOR:locked,(57,09), 3
 DOOR:locked,(58,09), 2

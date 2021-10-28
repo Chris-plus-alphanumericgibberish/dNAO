@@ -296,17 +296,13 @@ struct monst {
 };
 
 /*
- * Note that mextra[] may correspond to any of a number of structures, which
- * are indicated by some of the other fields.
+ * Out-of-date mextra information that hasn't been properly deprecated yet.
  *	isgd	 ->	struct egd
  *	ispriest ->	struct epri
  *	isshk	 ->	struct eshk
  *	isminion ->	struct emin
- *			(struct epri for roaming priests and angels, which is
- *			 compatible with emin for polymorph purposes)
  *	mtame	 ->	struct edog
- *			(struct epri for guardian angels, which do not eat
- *			 or do other doggy things)
+ * OLD:
  * Since at most one structure can be indicated in this manner, it is not
  * possible to tame any creatures using the other structures (the only
  * exception being the guardian angels which are tame on creation).

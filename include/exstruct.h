@@ -47,6 +47,7 @@ struct ehor {
 
 struct emin {
 	aligntyp min_align;	/* alignment of minion */
+	int godnum;			/* index of minion's god */
 };
 #define EMIN(mon)	((mon)->mextra_p->emin_p)
 
@@ -68,6 +69,7 @@ struct enam {
 struct epri {
 	aligntyp shralign;	/* alignment of priest's shrine */
 				/* leave as first field to match emin */
+	int godnum;			/* index of priest's god */
 	schar shroom;		/* index in rooms */
 	coord shrpos;		/* position of shrine */
 	d_level shrlevel;	/* level (& dungeon) of shrine */
