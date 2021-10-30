@@ -3318,7 +3318,10 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-11, "Seven Parts") || /* spear */
 			   !BSTRCMPI(bp, p-10, "Lost Names") || /* book */
 			   !BSTRCMPI(bp, p-15, "Infinite Spells") || /* book */
-			   !BSTRCMPI(bp, p-6, "talons") || /* book */
+			   !BSTRCMPI(bp, p-6, "talons") || /* set of knives */
+			   !BSTRCMPI(bp, p-6, "Thorns") || /* artifact */
+			   !BSTRCMPI(bp, p-9, "Soul Lens") || /* artifact */
+			   !BSTRCMPI(bp, p-19, "Seal of the Spirits") || /* artifact */
 			   !BSTRCMPI(bp, p-10, "eucalyptus") ||
 #ifdef WIZARD
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
@@ -4402,6 +4405,7 @@ int wishflags;
 	if (strncmpi(bp, "Hand of Vecna", 13))
 	if (strncmpi(bp, "Sword of Erathaol", 17))
 	if (strncmpi(bp, "Wand of Orcus", 13))
+	if (strncmpi(bp, "Spear of Peace", 14))
 	if (strncmpi(bp, "Rod of Lordly Might", 19))
 	if (strncmpi(bp, "Spell-warded Wrappings of Nitocris", 34))
 	if (!strstri(bp, "Key of Chaos"))	/* prefixed by First, Second, or Third */
@@ -4455,6 +4459,7 @@ int wishflags;
 	if (strncmpi(bp, "heretic doll", 12)) /* not the "heretic" player monster */
 	if (strncmpi(bp, "archaeologist doll", 18)) /* not the "archaeologist" player monster */
 	if (strncmpi(bp, "high priest doll", 16)) /* not the "high priest" monster */
+	if (strncmpi(bp, "spear of peace", 14)) /* not the "Peace" monster */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
 		int mntmptoo, mntmplen;	/* double check for rank title */
