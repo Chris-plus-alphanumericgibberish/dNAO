@@ -8111,7 +8111,6 @@ int faction;
 				otmp->oeroded = 1;
 				otmp->spe = 7;
 				bless(otmp);
-				otmp->oerodeproof = TRUE;
 				(void) mpickobj(mtmp, otmp);
 
 				otmp = mongets(mtmp, SHACKLES, MKOBJ_NOINIT);
