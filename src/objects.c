@@ -514,7 +514,10 @@ WEAPON(("aklys", "thonged club"),
 	0, 0, MZ_MEDIUM,  8, 15,  4,  0, B,   P_CLUB, IRON, FALSE, HI_METAL),
 WEAPON(("flail"),
 	DMG(D(6), F(1)), DMG(D(2, 4)),
-	1, 0, MZ_MEDIUM, 35, 15,  4,  0, B,   P_FLAIL, IRON, FALSE, HI_METAL),
+	1, 0, MZ_MEDIUM, 25, 15,  4,  0, B,   P_FLAIL, IRON, FALSE, HI_METAL),
+WEAPON(("nunchaku", "set of rope-sticks"),
+	DMG(D(4), F(1)), DMG(D(3)),
+	0, 0, MZ_MEDIUM,  5,  7,  4,  0, B,   P_FLAIL, WOOD, FALSE, HI_WOOD),
 /* misc */
 WEAPON(("bullwhip"),
 	DMG(D(2)), DMG(D(1)),
@@ -526,6 +529,9 @@ WEAPON(("viperwhip"),
 WEAPON(("bestial claw"),
 	DMG(D(10)), DMG(D(8)),
 	1, 0, MZ_MEDIUM,  0, 10,100,  0, S|P, P_BARE_HANDED_COMBAT, BONE, FALSE, CLR_WHITE),
+WEAPON(("katar"),
+	DMG(D(6)), DMG(D(4)),
+	1, 0, MZ_SMALL,  5,  5,   4,  0, S|P, P_BARE_HANDED_COMBAT, IRON, FALSE, HI_METAL),
 
 
 

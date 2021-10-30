@@ -17237,7 +17237,7 @@ monk_moves()
 		}
 		break;
 		case AURA_BOLT:
-		if(!uwep && !(uswapwep && u.twoweap) && beam_monk_target()){
+		if((!uwep || is_monk_weapon(uwep)) && (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep)) && beam_monk_target()){
 			pline("Aura bolt!");
 			monk_aura_bolt();
 			DID_MOVE
@@ -17258,8 +17258,11 @@ monk_moves()
 		}
 		break;
 		case PUMMEL:
-		if(!uwep && !(uswapwep && u.twoweap) && (mdef = adjacent_monk_target(uarmg))){
-			pline("Pummel!");
+		if((!uwep || is_monk_weapon(uwep)) && (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep)) && (mdef = adjacent_monk_target(uarmg))){
+			if(uwep)
+				pline("Flurry!");
+			else
+				pline("Pummel!");
 			boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			for(int i = 0; i < 2 && STILLVALID(mdef); i++){
 				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);

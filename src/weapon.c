@@ -1006,16 +1006,6 @@ int spec;
 		if (otmp->ovar1)
 			otmp->ovar1--;
 		break;
-	case QUARTERSTAFF:
-		if(otmp == uwep && martial_bonus() && otmp->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT){
-			// doubled
-			wdice.oc_damn *= 2;
-			wdice.oc_damd *= 2;
-			wdice.bon_damn *= 2;
-			wdice.bon_damd *= 2;
-			spe_mult *= 2;
-		}
-		break;
 	}
 
 	switch (otmp->oartifact)
@@ -1595,7 +1585,9 @@ static const NEARDATA short hwep[] = {
 	  JAVELIN/*1d6/1d6*/, 
 	  CHAIN/*1d6/1d6*/, 
 	  WAR_HAMMER/*1d4+1/1d4*/, 
+	  KATAR/*1d6/1d4*/, 
 	  AKLYS/*1d6/1d3*/, 
+	  NUNCHAKU/*1d4+1/1d3*/, 
 	  SUNROD/*1d6/1d3*/, 
 	  SHADOWLANDER_S_TORCH/*1d6/1d3*/, 
 	  TORCH/*1d6/1d3*/, 
@@ -1705,7 +1697,9 @@ static const NEARDATA short hpwep[] = {
 	  JAVELIN/*1d6/1d6*/, 
 	  CHAIN/*1d6/1d6*/, 
 	  WAR_HAMMER/*1d4+1/1d4*/, 
+	  KATAR/*1d6/1d4*/, 
 	  AKLYS/*1d6/1d3*/, 
+	  NUNCHAKU/*1d4+1/1d3*/, 
 	  SUNROD/*1d6/1d3*/, 
 	  SHADOWLANDER_S_TORCH/*1d6/1d3*/, 
 	  TORCH/*1d6/1d3*/, 
@@ -2513,7 +2507,7 @@ struct obj *otmp;
 			if (bimanual(otmp, youracedata) ||
 				(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0))
 				bonus *= 2;
-			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == ROD_OF_FORCE)
+			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == ROD_OF_FORCE || weapon_type(otmp) == P_QUARTERSTAFF)
 				bonus *= 2;
 			else if (otmp->otyp == KATANA || otmp->otyp == LONG_SWORD)
 				bonus *= 1.5;
