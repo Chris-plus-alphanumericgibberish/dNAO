@@ -2300,6 +2300,8 @@ mkwell(left)
 			for(j=-1;j<2;j++){
 				if(!isok(x+i,y+j) || t_at(x+i, y+j) || 
 					!(levl[x+i][y+j].typ == TREE 
+					|| levl[x+i][y+j].typ == POOL 
+					|| levl[x+i][y+j].typ == MOAT 
 					|| levl[x+i][y+j].typ == PUDDLE 
 					|| levl[x+i][y+j].typ == GRASS
 					|| levl[x+i][y+j].typ == SOIL
