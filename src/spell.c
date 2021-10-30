@@ -5150,7 +5150,7 @@ int *spell_no;
 			Sprintf(buf, "Unquiver %s", OBJ_NAME(objects[u.quivered_spell]));
 			any.a_int = SPELLMENU_QUIVER;
 			add_menu(tmpwin, NO_GLYPH, &any,
-				'@', 0, ATR_NONE, buf,
+				'&', 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
 		switch (splaction)
