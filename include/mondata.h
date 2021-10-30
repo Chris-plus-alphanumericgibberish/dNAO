@@ -173,7 +173,10 @@
 				 (ptr)->mtyp == PM_AOA || \
 				 (ptr)->mtyp == PM_AOA_DROPLET)
 #define is_watery(ptr)	((ptr)->mtyp == PM_WATER_ELEMENTAL \
+				 || (ptr)->mtyp == PM_FORD_ELEMENTAL \
 				 || (ptr)->mtyp == PM_WATER_DOLPHIN \
+				 || (ptr)->mtyp == PM_WATERSPOUT \
+				 || (ptr)->mtyp == PM_UISCERRE_ELADRIN \
 				 || (ptr)->mtyp == PM_FOG_CLOUD \
 				 || (ptr)->mtyp == PM_STEAM_VORTEX \
 				 || (ptr)->mtyp == PM_ANCIENT_TEMPEST \
