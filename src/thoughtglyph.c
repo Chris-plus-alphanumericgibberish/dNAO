@@ -47,7 +47,7 @@ boolean
 maybe_give_thought(thought)
 long int thought;
 {
-	if ((count_glyphs() >= 3) ||
+	if ((count_glyphs() >= MAX_GLYPHS) ||
 		(u.thoughts & thought) ||
 		(u.uinsight < glyph_insight(thought)) ||
 		(u.usanity > glyph_sanity(thought))
