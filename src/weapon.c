@@ -289,6 +289,7 @@ int oartifact;
 		attackmask |= WHACK;
 	}
 	if (   oartifact == ART_ROGUE_GEAR_SPIRITS
+		|| oartifact == ART_DURIN_S_AXE
 		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
 		){
 		attackmask |= PIERCE;
