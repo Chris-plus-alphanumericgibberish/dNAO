@@ -501,6 +501,10 @@
 #define Amphibious		(HMagical_breathing || EMagical_breathing || \
 				 (Swimming && u.divetimer > 0 && u.usubwater) || \
 				 amphibious(youracedata))
+
+#define HNightmare	u.uprops[WALKING_NIGHTMARE].intrinsic
+#define ENightmare	u.uprops[WALKING_NIGHTMARE].extrinsic
+#define Nightmare		(HNightmare || ENightmare)
 	/* Get wet, may go under surface */
 
 #define Breathless		(HMagical_breathing || EMagical_breathing || \

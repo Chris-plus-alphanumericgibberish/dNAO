@@ -401,6 +401,8 @@ extern struct artifact * artilist;
 #define BLOODLETTER     (LAST_PROP+82)
 #define SEVEN_LEAGUE_STEP   (LAST_PROP+83)
 #define CAPTURE_REFLECTION  (LAST_PROP+84)
+#define DETESTATION  	(LAST_PROP+85)
+#define INVULNERABILITY	(LAST_PROP+86)
 #define IBITE_ARM		(LAST_PROP+87)
 
 
