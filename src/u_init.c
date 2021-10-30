@@ -1105,6 +1105,7 @@ static const struct def_skill Skill_Mon[] = {
     { P_ENCHANTMENT_SPELL, P_BASIC },{ P_CLERIC_SPELL, P_SKILLED }, 
     { P_ESCAPE_SPELL, P_BASIC },	{ P_MATTER_SPELL, P_BASIC },
     { P_MARTIAL_ARTS, P_GRAND_MASTER },	{ P_TWO_WEAPON_COMBAT, P_GRAND_MASTER },
+	{ P_BOOMERANG, P_SKILLED },
 #ifdef BARD
     { P_MUSICALIZE, P_BASIC },
 #endif
