@@ -1802,6 +1802,8 @@ movemon()
 			int tnum = d(1,6);
 			int i;
 			untame(mtmp, 1);
+			//Make sure it won't turn hostile on a timer (possible for Bards at least)
+			mtmp->mpeacetime = 0;
 			for(i = 0; i < 6; i++){
 				baby = makemon(&mons[PM_METROID], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 				if(tnum-- > 0) tamedog(baby,(struct obj *) 0);
