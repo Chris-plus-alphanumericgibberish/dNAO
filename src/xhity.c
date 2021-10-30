@@ -6937,15 +6937,16 @@ boolean ranged;
 				}
 				if ((pa->mtyp == PM_FIERNA || pa->mtyp == PM_PALE_NIGHT) && rnd(20) < 15) return MM_HIT;
 				if (((MON_WEP(magr)) && pa->mtyp == PM_ALRUNES) && !rn2(20)) return MM_HIT;
-				if (dmgtype(youracedata, AD_SEDU)
-#ifdef SEDUCE
+				if ((pa->mflagsa&pd->mflagsa) != 0 && (dmgtype(youracedata, AD_SEDU)
 					|| dmgtype(youracedata, AD_SSEX) || dmgtype(youracedata, AD_LSEX)
-#endif
-					) {
+					)) {
 					pline("%s %s.", Monnam(magr), magr->minvent ?
 						"brags about the goods some dungeon explorer provided" :
 						"makes some remarks about how difficult theft is lately");
 					if (!tele_restrict(magr)) (void)rloc(magr, TRUE);
+					magr->mpeaceful = TRUE;
+					newsym(magr->mx, magr->my);
+					set_malign(magr);
 					return MM_AGR_STOP;
 				}
 				else if (magr->mcan || engring || Chastity) {
