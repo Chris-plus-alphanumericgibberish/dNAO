@@ -1423,6 +1423,32 @@ check_insight()
 }
 
 int
+roll_generic_madness()
+{
+	int sanlevel;
+	if(ClearThoughts)
+		return 0;
+
+	sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
+	
+	if(u.usanity < sanlevel)
+		return 1;
+	return 0;
+}
+
+int
+roll_generic_flat_madness()
+{
+	int sanlevel;
+	if(ClearThoughts)
+		return 0;
+
+	if(u.usanity < rnd(100))
+		return 1;
+	return 0;
+}
+
+int
 roll_madness(madness)
 long int madness;
 {

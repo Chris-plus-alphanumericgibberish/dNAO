@@ -101,42 +101,40 @@ struct monst * mdef;
 	 */
 	/* Intelligent chaotic weapons (Stormbringer) want blood */
 	if (is_safepet(mdef) && !flags.forcefight) {
-		if (!uwep || !arti_is_prop(uwep, ARTI_BLOODTHRST)) {
-			/* there are some additional considerations: this won't work
-			* if in a shop or Punished or you miss a random roll or
-			* if you can walk thru walls and your pet cannot (KAA) or
-			* if your pet is a long worm (unless someone does better).
-			* there's also a chance of displacing a "frozen" monster.
-			* sleeping monsters might magically walk in their sleep.
-			*/
-			boolean foo = (Punished || !rn2(7) || is_longworm(mdef->data)),
-				inshop = FALSE;
-			char *p;
+		/* there are some additional considerations: this won't work
+		* if in a shop or Punished or you miss a random roll or
+		* if you can walk thru walls and your pet cannot (KAA) or
+		* if your pet is a long worm (unless someone does better).
+		* there's also a chance of displacing a "frozen" monster.
+		* sleeping monsters might magically walk in their sleep.
+		*/
+		boolean foo = (Punished || !rn2(7) || is_longworm(mdef->data)),
+			inshop = FALSE;
+		char *p;
 
-			for (p = in_rooms(x(mdef), y(mdef), SHOPBASE); *p; p++)
-			if (tended_shop(&rooms[*p - ROOMOFFSET])) {
-				inshop = TRUE;
-				break;
-			}
-
-			if (inshop || foo ||
-				(IS_ROCK(levl[u.ux][u.uy].typ) &&
-				!mon_resistance(mdef, PASSES_WALLS))) {
-				char buf[BUFSZ];
-
-				monflee(mdef, rnd(6), FALSE, FALSE);
-				Strcpy(buf, y_monnam(mdef));
-				buf[0] = highc(buf[0]);
-				You("stop.  %s is in the way!", buf);
-				return(TRUE);
-			}
-			else if ((mdef->mfrozen || (!mdef->mcanmove)
-				|| (mdef->data->mmove == 0)) && rn2(6)) {
-				pline("%s doesn't seem to move!", Monnam(mdef));
-				return(TRUE);
-			}
-			else return(FALSE);
+		for (p = in_rooms(x(mdef), y(mdef), SHOPBASE); *p; p++)
+		if (tended_shop(&rooms[*p - ROOMOFFSET])) {
+			inshop = TRUE;
+			break;
 		}
+
+		if (inshop || foo ||
+			(IS_ROCK(levl[u.ux][u.uy].typ) &&
+			!mon_resistance(mdef, PASSES_WALLS))) {
+			char buf[BUFSZ];
+
+			monflee(mdef, rnd(6), FALSE, FALSE);
+			Strcpy(buf, y_monnam(mdef));
+			buf[0] = highc(buf[0]);
+			You("stop.  %s is in the way!", buf);
+			return(TRUE);
+		}
+		else if ((mdef->mfrozen || (!mdef->mcanmove)
+			|| (mdef->data->mmove == 0)) && rn2(6)) {
+			pline("%s doesn't seem to move!", Monnam(mdef));
+			return(TRUE);
+		}
+		else return(FALSE);
 	}
 
 	/* attack_checks returns a truthy value if we can attack */

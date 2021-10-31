@@ -247,15 +247,6 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 
 	/* generally, don't attack peaceful monsters */
 	if (mdef->mpeaceful && !Confusion && !Hallucination && !Stunned) {
-		/* Intelligent chaotic weapons (Stormbringer) want blood */
-		/* NOTE:  now generalized to a flag, also, more lawful weapons than chaotic weps have it now :) */
-		if (wep && arti_is_prop(wep, ARTI_BLOODTHRST)) {
-			/* Don't show Stormbringer's message if attack is intended. */
-			if (iflags.attack_mode != ATTACK_MODE_FIGHT_ALL)
-				return ATTACKCHECK_BLDTHRST;
-			else
-				return ATTACKCHECK_ATTACK;
-		}
 		if (canspotmon(mdef)) {
 			if (iflags.attack_mode == ATTACK_MODE_CHAT
 				|| iflags.attack_mode == ATTACK_MODE_PACIFIST) {
@@ -301,9 +292,6 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 		/* Being not in full control of yourself causes you to attack */
 		if (Confusion || Hallucination || Stunned)
 			return ATTACKCHECK_ATTACK;
-		/* Some weapons just want blood */
-		if (wep && arti_is_prop(wep, ARTI_BLOODTHRST))
-			return ATTACKCHECK_BLDTHRST;
 		/* Otherwise, be a pacifist. */
 		You("stop for %s.", mon_nam(mdef));
 		flags.move = 0;

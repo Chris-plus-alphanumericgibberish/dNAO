@@ -4865,13 +4865,24 @@ struct obj *wep;
 		youdef = (mdef == &youmonst);
 		if(DEADMONSTER(mdef))
 			continue;
-
-		if(youagr && (mdef->mpeaceful || !rn2(4)))
-			continue;
-		if(youdef && (magr->mpeaceful || !rn2(4)))
-			continue;
-		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
-			continue;
+		
+		if(arti_is_prop(wep, ARTI_BLOODTHRST)){
+			if(	(youagr && (mdef->mpeaceful && !roll_generic_madness()))
+				|| (youdef && (magr->mpeaceful && !roll_generic_madness()))
+				|| (!youagr && !youdef && (magr->mpeaceful != mdef->mpeaceful))
+			)
+				continue;
+			if(!rn2(4))
+				continue;
+		}
+		else {
+			if(youagr && (mdef->mpeaceful || !rn2(4)))
+				continue;
+			if(youdef && (magr->mpeaceful || !rn2(4)))
+				continue;
+			if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
+				continue;
+		}
 
 		if(!youdef && imprisoned(mdef))
 			continue;
