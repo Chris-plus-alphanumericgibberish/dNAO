@@ -630,7 +630,7 @@ boolean dumping;
 			you_have("reduced AC, reduced spell success, and increased damage");
 		}
 		if (u.umadness&MAD_ARGENT_SHEEN){
-			enl_msg("Sometimes, monsters ", "will panic", "panicked", " will gain reflection for a turn");
+			enl_msg("Sometimes, monsters ", "will gain", "gained", "  reflection for a turn");
 			enl_msg("Sometimes, monsters ", "will take", "took", " reduced damage from your magic");
 			enl_msg("Sometimes, you ", "will stop", "stopped", " to admire yourself in mirrors, losing turns");
 			enl_msg("You ", "take", "took", " increased damage from male humanoids and centaurs");

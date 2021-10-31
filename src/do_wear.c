@@ -4691,7 +4691,7 @@ break_outer_loop:
 	int spelltype;
 	if(youagr || canseemon(magr))
 		pline("The severed arm casts a spell!");
-	switch(rnd(6)){
+	switch(rnd((phase_of_the_moon() == 3 || phase_of_the_moon() == 5) ? 7 : 6)){
 		case 1:
 			spelltype = PLAGUE;
 		break;
@@ -4706,6 +4706,10 @@ break_outer_loop:
 		break;
 		default: //5 and 6
 			spelltype = PSI_BOLT;
+		break;
+		//Uses fire when the moon is gibbous
+		case 7:
+			spelltype = FIRE_PILLAR;
 		break;
 	}
 	cast_spell(magr, mdef, &symbiote, spelltype, i, j);

@@ -572,7 +572,11 @@ unsigned int type;
 		return OPEN_WOUNDS;
 	break;
 	case PM_PRIEST_OF_IB:
-		switch (rnd(6)) {
+		switch (rnd((phase_of_the_moon() == 3 || phase_of_the_moon() == 5) ? 7 : 6)) {
+			//Uses fire when the moon is gibbous
+			case 7:
+			return FIRE_PILLAR;
+			break;
 			default://5, 6
 			return PSI_BOLT;
 			break;

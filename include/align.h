@@ -57,4 +57,10 @@ typedef struct	align {		/* alignment & record */
 						  (x)==A_LAWFUL ? AM_LAWFUL :\
 						  (x)==A_VOID ? AM_VOID : AM_NONE\
 						)
+
+#define Align2ritual(x)	( (x)==A_LAWFUL ? RITUAL_LAW :\
+						  (x)==A_NEUTRAL ? RITUAL_NEUTRAL :\
+						  (x)==A_CHAOTIC ? RITUAL_CHAOS :\
+						  0\
+						)
 #endif /* ALIGN_H */

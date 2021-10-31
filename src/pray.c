@@ -171,10 +171,6 @@ This could get as bizarre as noting surrounding opponents, (or hostile dogs),
 but that's really hard.
  */
 
-#define ugod_is_angry() (u.ualign.record < 0)
-#define on_altar()	(IS_ALTAR(levl[u.ux][u.uy].typ) || goat_mouth_at(u.ux, u.uy))
-#define on_shrine()	(IS_ALTAR(levl[u.ux][u.uy].typ) && altars[levl[u.ux][u.uy].altar_num].shrine)
-
 STATIC_OVL int
 in_trouble()
 {
@@ -2225,6 +2221,7 @@ dosacrifice()
 				}
 			}
 		} else {
+			//???  || u.detestation_ritual
 			if(altaralign == A_VOID){
 				consume_offering(otmp);
 				if (!Inhell){

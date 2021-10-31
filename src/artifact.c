@@ -4516,8 +4516,11 @@ boolean * messaged;
 	case ART_RAMIEL:					wepdesc = "thundering polearm";				break;
 	case ART_MJOLLNIR:					wepdesc = "massive hammer";					break;
 	case ART_IBITE_ARM:
+		//Torch effects when the moon is gibbous
 		if(otmp->otyp == CLUB)
 			wepdesc = "flabby arm";
+		else if(phase_of_the_moon() == 3 || phase_of_the_moon() == 5)
+			wepdesc = "flame-wielding hand";
 		else
 			wepdesc = "webbed hand";
 	break;
@@ -5629,6 +5632,21 @@ boolean * messaged;
 
 			*truedmgptr += d(2, 4)*mult;
 		}
+
+		//Torch effects when the moon is gibbous
+		if((phase_of_the_moon() == 3 || phase_of_the_moon() == 5) && otmp->otyp == CLAWED_HAND){
+			if(!Fire_res(mdef)){
+				if (species_resists_cold(mdef))
+					(*truedmgptr) += 3 * (rnd(16) + otmp->spe) / 2;
+				else
+					(*truedmgptr) += rnd(16) + otmp->spe;
+			}
+			if (!UseInvFire_res(mdef)){
+				if (rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (rn2(3)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+				if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
 	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
@@ -5861,6 +5879,7 @@ arti_invoke(obj)
 		oart->inv_prop == ANNUL ||
 		oart->inv_prop == ALTMODE || 
 		oart->inv_prop == LORDLY ||
+		oart->inv_prop == DETESTATION ||
 		(oart->inv_prop == CAPTURE_REFLECTION && obj == uskin))
 	) {
 	    /* the artifact is tired :-) */
@@ -8828,6 +8847,101 @@ arti_invoke(obj)
 							pline("%s resists!", Monnam(mtmp));
 							obj->age = monstermoves;	// but does use your turn
 						}
+					}
+				}
+			}
+			break;
+        case DETESTATION:
+			obj->age = 0L;
+			if(!Pantheon_if(PM_MADMAN) || u.uevent.uhand_of_elbereth){
+				pline("It's just a piece of blank paper!");
+				obj->oartifact = 0;
+				/* remove old name */
+				rem_ox(obj, OX_ENAM);
+			}
+			else if(!u.uevent.qcompleted){
+				pline("A throbbing yellow haze obscures your vision!");
+				You_cant("use this right now.");
+			}
+			else if(!on_altar()){
+				pline("This records the very secret and ancient rite once performed by the high-priests of Sarnath in detestation of Bokrug, the water-lizard, whose folowers their ancestors had cruelly slain.");
+				if(!u.detestation_ritual){
+					pline("The rite is penned in your hand.");
+					pline("What were you going to do with it?");
+				}
+				else {
+					You("need to find another altar.");
+				}
+			}
+			else {
+				int altaralign = a_align(u.ux,u.uy);
+				boolean used_align = u.detestation_ritual&Align2ritual(altaralign);
+				int godnum = altars[levl[u.ux][u.uy].altar_num].god;
+				if(!godnum)
+					godnum = align_to_god(altaralign);
+				if(used_align || !(godnum == GOD_ZO_KALAR || godnum == GOD_TAMASH || godnum == GOD_LOBON)){
+					int destAlign, destGod;
+					if(!(u.detestation_ritual&RITUAL_LAW)){
+						destAlign = A_LAWFUL;
+						destGod = GOD_ZO_KALAR;
+					}
+					else if(!(u.detestation_ritual&RITUAL_NEUTRAL)){
+						destAlign = A_NEUTRAL;
+						destGod = GOD_TAMASH;
+					}
+					else {
+						destAlign = A_CHAOTIC;
+						destGod = GOD_LOBON;
+					}
+
+					You("modify the rite to attune the altar to %s!", align_gname(destAlign));
+					change_luck(-3);
+					// /* Yes, this is supposed to be &=, not |= */
+					// levl[u.ux][u.uy].altarmask &= AM_SHRINE;
+					// levl[u.ux][u.uy].altarmask |= Align2amask(destAlign);
+					altars[levl[u.ux][u.uy].altar_num].align = destAlign;
+					altars[levl[u.ux][u.uy].altar_num].god = destGod;
+					
+					if(u.ulevel > 20) summon_god_minion(godnum, FALSE);
+					if(u.ulevel >= 14) summon_god_minion(godnum, FALSE);
+					(void) summon_god_minion(godnum, TRUE);
+
+					if(u.ulevel > 20) summon_god_minion(destGod, FALSE);
+					if(u.ulevel >= 14) summon_god_minion(destGod, FALSE);
+					(void) summon_god_minion(destGod, TRUE);
+					angry_priest();
+					if(in_town(u.ux, u.uy))
+						(void) angry_guards(FALSE);
+					u.detestation_ritual |= RITUAL_STARTED;
+				}
+				else {
+					You("perform a rite in detestation of %s!", align_gname(altaralign));
+					change_luck(-3);
+					godlist[GOD_ZO_KALAR].anger++;
+					godlist[GOD_TAMASH].anger++;
+					godlist[GOD_LOBON].anger++;
+					gods_upset(godnum);
+					if(u.ulevel > 20) summon_god_minion(godnum, FALSE);
+					if(u.ulevel >= 14) summon_god_minion(godnum, FALSE);
+					(void) summon_god_minion(godnum, TRUE);
+					angry_priest();
+					if(in_town(u.ux, u.uy))
+						(void) angry_guards(FALSE);
+					pline("The altar sinks into swampy water!");
+					levl[u.ux][u.uy].typ = PUDDLE;
+					levl[u.ux][u.uy].flags = 0;
+					newsym(u.ux, u.uy);
+					u.detestation_ritual |= RITUAL_STARTED;
+					u.detestation_ritual |= Align2ritual(altaralign);
+					if((u.detestation_ritual&RITUAL_DONE) == RITUAL_DONE){
+						struct obj *arm = mksartifact(ART_IBITE_ARM);
+						arm->oerodeproof = TRUE;
+						arm->spe = 1;
+						place_object(arm, u.ux, u.uy);
+						if(Blind)
+							You_hear("water bubbling.");
+						else
+							pline("%s rises from the swamp!", An(xname(arm)));
 					}
 				}
 			}

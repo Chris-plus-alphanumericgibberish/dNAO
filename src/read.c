@@ -1928,6 +1928,8 @@ struct obj	*sobj;
 	case SCR_BLANK_PAPER:
 		if(sobj->oartifact == ART_PAINTING_FRAGMENT){
 			You("can't make out any detail. There seems to have been a lot of white paint involved, though.");
+		} else if(sobj->oartifact == ART_RITE_OF_DETESTATION){
+			doparticularinvoke(sobj);
 		} else {
 			if (Blind)
 			You("don't remember there being any magic words on this scroll.");

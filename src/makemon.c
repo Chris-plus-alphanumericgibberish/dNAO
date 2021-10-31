@@ -8111,7 +8111,6 @@ int faction;
 				otmp->oeroded = 1;
 				otmp->spe = 7;
 				bless(otmp);
-				otmp->oerodeproof = TRUE;
 				(void) mpickobj(mtmp, otmp);
 
 				otmp = mongets(mtmp, SHACKLES, MKOBJ_NOINIT);
@@ -9513,36 +9512,7 @@ int faction;
 	else if(mtmp->mtyp == PM_PARASITIZED_DOLL)
 		mtmp->m_insight_level = rnd(20);
 	else if(mtmp->mtyp == PM_LIVING_DOLL){
-		int i, j;
-		long tmp;
-		long dolltypes[] = {
-			DOLLMAKER_EFFIGY,
-			DOLLMAKER_JUMPING,
-			DOLLMAKER_FRIENDSHIP,
-			DOLLMAKER_CHASTITY,
-			DOLLMAKER_CLEAVING,
-			DOLLMAKER_SATIATION,
-			DOLLMAKER_HEALTH,
-			DOLLMAKER_HEALING,
-			DOLLMAKER_DESTRUCTION,
-			DOLLMAKER_MEMORY,
-			DOLLMAKER_BINDING,
-			DOLLMAKER_PRESERVATION,
-			DOLLMAKER_QUICK_DRAW,
-			DOLLMAKER_WAND_CHARGE,
-			DOLLMAKER_STEALING,
-			DOLLMAKER_MOLLIFICATION,
-			DOLLMAKER_CLEAR_THOUGHT,
-			DOLLMAKER_MIND_BLASTS
-		};
-		for(i = 0; i < SIZE(dolltypes); i++){
-			j = rn2(SIZE(dolltypes));
-			tmp = dolltypes[i];
-			dolltypes[i] = dolltypes[j];
-			dolltypes[j] = tmp;
-		}
-		for(i = rn1(3, SIZE(dolltypes)/2); i > 0; i--)
-			mtmp->mvar_dollTypes |= dolltypes[i];
+		mtmp->mvar_dollTypes = init_doll_sales();
 		mtmp->m_insight_level = rnd(20);
 	}
 	
@@ -12142,6 +12112,42 @@ int *seencount;  /* secondary output */
 		}
 	}
 	return moncount;
+}
+
+long
+init_doll_sales()
+{
+	int i, j;
+	long tmp, dollTypes;
+	long dolltypes[] = {
+		DOLLMAKER_EFFIGY,
+		DOLLMAKER_JUMPING,
+		DOLLMAKER_FRIENDSHIP,
+		DOLLMAKER_CHASTITY,
+		DOLLMAKER_CLEAVING,
+		DOLLMAKER_SATIATION,
+		DOLLMAKER_HEALTH,
+		DOLLMAKER_HEALING,
+		DOLLMAKER_DESTRUCTION,
+		DOLLMAKER_MEMORY,
+		DOLLMAKER_BINDING,
+		DOLLMAKER_PRESERVATION,
+		DOLLMAKER_QUICK_DRAW,
+		DOLLMAKER_WAND_CHARGE,
+		DOLLMAKER_STEALING,
+		DOLLMAKER_MOLLIFICATION,
+		DOLLMAKER_CLEAR_THOUGHT,
+		DOLLMAKER_MIND_BLASTS
+	};
+	for(i = 0; i < SIZE(dolltypes); i++){
+		j = rn2(SIZE(dolltypes));
+		tmp = dolltypes[i];
+		dolltypes[i] = dolltypes[j];
+		dolltypes[j] = tmp;
+	}
+	for(i = rn1(3, SIZE(dolltypes)/2); i > 0; i--)
+		dollTypes |= dolltypes[i];
+	return dollTypes;
 }
 #endif /* OVLB */
 

@@ -981,6 +981,10 @@ int mkflags;
 				}
 				doMaskStats(otmp);
 				break;
+			case DOLL_S_TEAR:
+				otmp->ovar1 = init_doll_sales();
+				otmp->spe = rnd(20);
+				break;
 			}
 			break;
 		case AMULET_CLASS:
@@ -1003,6 +1007,15 @@ int mkflags;
 				case LIFELESS_DOLL:
 					otmp->corpsenm = PM_LIVING_DOLL;
 				break;
+			}
+			if(otmp->otyp == BROKEN_ANDROID || otmp->otyp == BROKEN_GYNOID || otmp->otyp == LIFELESS_DOLL){
+				struct monst * mon;
+				struct obj * otmp2;
+				mon = makemon(&mons[otmp->corpsenm], 0, 0, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+				otmp2 = save_mtraits(otmp, mon);
+				mongone(mon);
+				if(otmp2)
+					otmp = otmp2;
 			}
 			break;
 		case BALL_CLASS:

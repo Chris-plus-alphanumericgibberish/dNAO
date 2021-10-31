@@ -3423,7 +3423,7 @@ struct monst *owner;
 			    if (obj->otyp != POT_BLOOD){
 					if(obj->odiluted){
 						obj->otyp = POT_BLOOD;
-						otmp->corpsenm = PM_HUMAN;
+						obj->corpsenm = PM_HUMAN;
 						obj->odiluted = 0;
 						set_object_color(obj);
 					}

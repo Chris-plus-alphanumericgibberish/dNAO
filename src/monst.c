@@ -7299,7 +7299,7 @@ is a red right hand
 	DEF(NAT_AC(0)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 6), ATTK(AT_XWEP, AD_STUN, 1, 6),
 	  ATTK(AT_BREA, AD_HDRG, 1, 6)),
-	SIZ(WT_HUMAN, 400, MS_HUMANOID, MZ_HUMAN), MR_POISON, 0,
+	SIZ(WT_HUMAN, 400, MS_HUMANOID, MZ_HUMAN), 0, 0,
 	0 /*MM*/, MT_CARNIVORE|MT_HOSTILE|MT_GREEDY|MT_JEWELS /*MT*/, MF_MARTIAL_B /*MF*/,
 	MB_HUMANOID|MB_STRONG|MB_THICK_HIDE /*MB*/, MG_INFRAVISIBLE|MG_NOPOLY|MG_TRACKER /*MG*/,
 	MA_HUMAN|MA_DRAGON /*MA*/,  MV_NORMAL|MV_SCENT /*MV*/, HI_DOMESTIC),
@@ -7788,7 +7788,7 @@ is a red right hand
 	MA_DEMON /*MA*/,  MV_NORMAL|MV_INFRAVISION|MV_SEE_INVIS /*MV*/, CLR_RED),
     MON("mummified android", S_MUMMY,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(9, 8, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(6), NAT_DR_ALL(6, 6, 3, 6, 3)),
+	DEF(NAT_AC(6), NAT_DR_ALL(6, 6, 3, 4, 3)),
 	A( ATTK(AT_CLAW, AD_PHYS, 2, 6), ATTK(AT_CLAW, AD_PHYS, 2, 6)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
 	MR_STONE|MR_POISON|MR_SICK|MR_COLD|MR_ELEC|MR_FIRE, 0,
@@ -7797,7 +7797,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING|MA_UNDEAD /*MA*/,  MV_NORMAL /*MV*/, CLR_BROWN),
     MON("mummified gynoid", S_MUMMY,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(16, 8, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(6), NAT_DR_ALL(6, 6, 3, 6, 3)),
+	DEF(NAT_AC(6), NAT_DR_ALL(6, 6, 3, 4, 3)),
 	A( ATTK(AT_CLAW, AD_PHYS, 2, 6), ATTK(AT_CLAW, AD_PHYS, 2, 6)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
 	MR_STONE|MR_POISON|MR_SICK|MR_COLD|MR_ELEC|MR_FIRE, 0,
@@ -7806,7 +7806,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING|MA_UNDEAD /*MA*/,  MV_NORMAL /*MV*/, CLR_BROWN),
     MON("flayed android", S_ZOMBIE,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(6, 6, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(4), NAT_DR_ALL(4, 3, 1, 3, 1)),
+	DEF(NAT_AC(4), NAT_DR_ALL(4, 3, 1, 2, 1)),
 	A( ATTK(AT_CLAW, AD_PHYS, 2, 6), ATTK(AT_CLAW, AD_PHYS, 2, 6)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
 	MR_STONE|MR_POISON|MR_SICK|MR_COLD|MR_ELEC|MR_FIRE, 0,
@@ -7815,7 +7815,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING|MA_UNDEAD /*MA*/,  MV_NORMAL /*MV*/, CLR_WHITE),
     MON("flayed gynoid", S_ZOMBIE,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(13, 6, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(4), NAT_DR_ALL(4, 3, 1, 3, 1)),
+	DEF(NAT_AC(4), NAT_DR_ALL(4, 3, 1, 2, 1)),
 	A( ATTK(AT_CLAW, AD_PHYS, 2, 6), ATTK(AT_CLAW, AD_PHYS, 2, 6)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
 	MR_STONE|MR_POISON|MR_SICK|MR_COLD|MR_ELEC|MR_FIRE, 0,
@@ -7834,7 +7834,7 @@ is a red right hand
 	MA_ARACHNID|MA_ELF|MA_MINION|MA_PRIMORDIAL /*MA*/,  MV_DARKSIGHT|MV_TELEPATHIC /*MV*/, CLR_GRAY),
     MON("parasitized android", S_GNOME,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(13, 12, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_BODY(6), NAT_DR_GLOV(3), NAT_DR_LEGS(6), NAT_DR_FEET(3)),
+	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_BODY(6), NAT_DR_GLOV(3), NAT_DR_LEGS(4), NAT_DR_FEET(3)),
 	A(ATTK(AT_TENT, AD_DRIN, 1, 4),
 	 ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_WEAP, AD_PHYS, 2, 6), 
 	 ATTK(AT_MMGC, AD_SPEL, 0, 6)),
@@ -7845,7 +7845,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING|MA_PRIMORDIAL /*MA*/,  MV_TELEPATHIC|MV_NORMAL|MV_RLYEHIAN|MV_SEE_INVIS /*MV*/, CLR_MAGENTA),
     MON("parasitized gynoid", S_GNOME,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(20, 12, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_BODY(6), NAT_DR_GLOV(3), NAT_DR_LEGS(6), NAT_DR_FEET(3)),
+	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_BODY(6), NAT_DR_GLOV(3), NAT_DR_LEGS(4), NAT_DR_FEET(3)),
 	A(ATTK(AT_TENT, AD_DRIN, 1, 4),
 	 ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_WEAP, AD_PHYS, 2, 6),
      ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_MARI, AD_PHYS, 2, 6)),
@@ -7856,7 +7856,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING|MA_PRIMORDIAL /*MA*/,  MV_TELEPATHIC|MV_NORMAL|MV_RLYEHIAN|MV_SEE_INVIS /*MV*/, CLR_MAGENTA),
     MON("parasitized operator", S_GNOME,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(13, 10, 40, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(6), NAT_DR_BODY(3), NAT_DR_GLOV(1), NAT_DR_LEGS(3), NAT_DR_FEET(1)),
+	DEF(NAT_AC(6), NAT_DR_BODY(3), NAT_DR_GLOV(1), NAT_DR_LEGS(2), NAT_DR_FEET(1)),
 	A(ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_XWEP, AD_PHYS, 2, 6),
       ATTK(AT_TENT, AD_DRIN, 1, 4)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
@@ -7896,7 +7896,7 @@ is a red right hand
 	MA_PRIMORDIAL /*MA*/,  MV_TELEPATHIC|MV_DARKSIGHT|MV_RLYEHIAN|MV_SEE_INVIS /*MV*/, CLR_MAGENTA),
     MON("crucified android", S_GNOME,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(20, 12, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_ALL(6, 6, 1, 6, 1)),
+	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_ALL(6, 6, 1, 4, 1)),
 	A(ATTK(AT_5SQR, AD_SHDW, 4, 8), 
 	 ATTK(AT_NONE, AD_SHDW, 0, 8)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
@@ -7906,7 +7906,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING /*MA*/,  MV_NORMAL /*MV*/, CLR_BLACK),
     MON("crucified gynoid", S_GNOME,// /*Needs tile*/ /* Needs encyc entry */
 	LVL(20, 12, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_ALL(6, 6, 1, 6, 1)),
+	DEF(NAT_AC(4), SPE_AC(4), NAT_DR_ALL(6, 6, 1, 4, 1)),
 	A(ATTK(AT_5SQR, AD_SHDW, 4, 8), 
 	  ATTK(AT_NONE, AD_SHDW, 0, 8)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
@@ -9124,7 +9124,7 @@ is a red right hand
 	MA_ARACHNID|MA_ELF|MA_MINION /*MA*/,  MV_CATSIGHT|MV_TELEPATHIC /*MV*/, CLR_WHITE),
     MON("android", S_GNOME,// /*Needs tile*/ /*Needs encyc entry*/
 	LVL(7, 12, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(8), NAT_DR_ALL(6, 6, 3, 6, 3)),
+	DEF(NAT_AC(8), NAT_DR_ALL(6, 6, 3, 4, 3)),
 	A(ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_WEAP, AD_PHYS, 2, 6), 
 	 ATTK(AT_MMGC, AD_SPEL, 0, 6)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
@@ -9134,7 +9134,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING /*MA*/,  MV_NORMAL /*MV*/, CLR_WHITE),
     MON("gynoid", S_GNOME,// /*Needs tile*/ /*Needs encyc entry*/
 	LVL(14, 12, 30, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(8), NAT_DR_ALL(6, 6, 3, 6, 3)),
+	DEF(NAT_AC(8), NAT_DR_ALL(6, 6, 3, 4, 3)),
 	A( ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_WEAP, AD_PHYS, 2, 6),
      ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_MARI, AD_PHYS, 2, 6)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
@@ -9144,7 +9144,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING /*MA*/,  MV_NORMAL /*MV*/, CLR_WHITE),
     MON("operator", S_GNOME,// /*Needs tile*/ /*Needs encyc entry*/
 	LVL(7, 10, 40, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(6), NAT_DR_ALL(3, 3, 1, 3, 1)),
+	DEF(NAT_AC(6), NAT_DR_ALL(3, 3, 1, 2, 1)),
 	A(ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_XWEP, AD_PHYS, 2, 6),
       ATTK(AT_GAZE, AD_STDY, 1, 5)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
@@ -9154,7 +9154,7 @@ is a red right hand
 	MA_CLOCK|MA_UNLIVING /*MA*/,  MV_NORMAL /*MV*/, CLR_BLACK),
     MON("commander", S_GNOME,// /*Needs tile*/ /*Needs encyc entry*/
 	LVL(3, 8, 50, 0), (G_GENO|G_NOGEN),
-	DEF(NAT_AC(4), NAT_DR_HEAD(2), NAT_DR_BODY(2), NAT_DR_LEGS(2)),
+	DEF(NAT_AC(4), NAT_DR_HEAD(2), NAT_DR_BODY(2), NAT_DR_LEGS(1)),
 	A(ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_GAZE, AD_STDY, 2, 5)),
 	SIZ(WT_HUMAN*2, 0, MS_HUMANOID, MZ_HUMAN), 
 	MR_STONE|MR_POISON|MR_SICK|MR_COLD|MR_ELEC|MR_FIRE, 0,

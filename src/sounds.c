@@ -1819,7 +1819,7 @@ asGuardian:
 				|| Sick
 				|| Slimed
 				|| u.thoughts
-				|| (count_glyphs() < 3 && !u.render_thought)
+				|| (count_glyphs() < MAX_GLYPHS && !u.render_thought)
 			 )
 			){
 				if(render_services(mtmp))
@@ -2684,7 +2684,7 @@ int dz;
 	
 	if(mtmp && mtmp->data->msound == MS_GLYPHS){
 		if(uwep && offerable_artifact(uwep)
-			&& count_glyphs() < 3 && !(u.thoughts & mtyp_to_thought(mtmp->mtyp))
+			&& count_glyphs() < MAX_GLYPHS && !(u.thoughts & mtyp_to_thought(mtmp->mtyp))
 		){
 			struct obj *optr;
 			if(canspotmon(mtmp)){
@@ -6238,7 +6238,9 @@ dorendermenu()
 			MENU_UNSELECTED);
 	}
 	incntlet++; //Advance anyway
-	if(count_glyphs() < 3 && !u.render_thought){
+	//Pick out parasitic eggs
+	
+	if(count_glyphs() < MAX_GLYPHS && !u.render_thought){
 		Sprintf(buf, "Learn thought");
 		any.a_int = RENDER_THOUGHT;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,

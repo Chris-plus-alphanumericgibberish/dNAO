@@ -389,6 +389,10 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define a_gnum(x,y)		(altars[levl[x][y].altar_num].god)
 #define a_shrine(x,y)	(altars[levl[x][y].altar_num].shrine)
 
+#define ugod_is_angry() (u.ualign.record < 0)
+#define on_altar()	(IS_ALTAR(levl[u.ux][u.uy].typ) || goat_mouth_at(u.ux, u.uy))
+#define on_shrine()	(IS_ALTAR(levl[u.ux][u.uy].typ) && altars[levl[u.ux][u.uy].altar_num].shrine)
+
 /* negative armor class is randomly weakened to prevent invulnerability */
 #define ROLL_NEG10(AC)	(-rnd(-(AC+10)) - 10)
 #define AC_VALUE(AC)	((AC) >= -10 ? (AC) : (u.sealsActive&SEAL_BALAM || activeFightingForm(FFORM_SORESU)) ? min_ints(ROLL_NEG10(AC),ROLL_NEG10(AC)) : ROLL_NEG10(AC))

@@ -1290,6 +1290,8 @@ default_case:
 	// Madman's old stuff
 	if(Is_container(otmp) && otmp->spe == 7){
 		struct obj *stuff;
+		stuff = mksartifact(ART_RITE_OF_DETESTATION);
+		add_to_container(otmp, stuff);
 #define default_add(type) stuff = mksobj(type, MKOBJ_NOINIT);\
 					add_to_container(otmp, stuff);
 #define default_add_2(type) stuff = mksobj(type, MKOBJ_NOINIT);\
