@@ -448,7 +448,18 @@ struct you {
 				change_uinsight(1);\
 			}
 	Bitfield(render_thought,1);	/* you got a thought from a veil-render */
-	/* 20 free bits */
+	Bitfield(detestation_ritual,7);	/* progress in detestation ritual */
+#define NO_RITUAL 0
+#define RITUAL_STARTED	0x01
+#define RITUAL_CHAOS	0x02
+#define RITUAL_NEUTRAL	0x04
+#define RITUAL_LAW		0x08
+#define RITUAL_HI_CHAOS	0x10
+#define RITUAL_HI_NEUTRAL	0x20
+#define RITUAL_HI_LAW	0x40
+#define RITUAL_DONE		(RITUAL_CHAOS|RITUAL_NEUTRAL|RITUAL_LAW)
+#define HI_RITUAL_DONE	(RITUAL_HI_CHAOS|RITUAL_HI_NEUTRAL|RITUAL_HI_LAW)
+	/* 13 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */

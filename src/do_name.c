@@ -703,6 +703,9 @@ const char *name;
 		else if(obj->oartifact == ART_IBITE_ARM){
 			obj->obj_color = CLR_BRIGHT_GREEN;
 		}
+		else if(obj->oartifact == ART_IDOL_OF_BOKRUG__THE_WATER_){
+			obj->obj_color = CLR_GREEN;
+		}
 		
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type

@@ -384,7 +384,11 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 
 #define rn1(x,y)	(rn2(x)+(y))
 
+#define ugod_is_angry() (u.ualign.record < 0)
 #define a_align(x,y)	((aligntyp)Amask2align(levl[x][y].altarmask & AM_MASK))
+#define on_altar()	(IS_ALTAR(levl[u.ux][u.uy].typ) || goat_mouth_at(u.ux, u.uy))
+#define on_shrine()	((levl[u.ux][u.uy].altarmask & AM_SHRINE) != 0)
+
 
 /* negative armor class is randomly weakened to prevent invulnerability */
 #define ROLL_NEG10(AC)	(-rnd(-(AC+10)) - 10)

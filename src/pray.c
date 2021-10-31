@@ -170,10 +170,6 @@ This could get as bizarre as noting surrounding opponents, (or hostile dogs),
 but that's really hard.
  */
 
-#define ugod_is_angry() (u.ualign.record < 0)
-#define on_altar()	(IS_ALTAR(levl[u.ux][u.uy].typ) || goat_mouth_at(u.ux, u.uy))
-#define on_shrine()	((levl[u.ux][u.uy].altarmask & AM_SHRINE) != 0)
-
 STATIC_OVL int
 in_trouble()
 {
@@ -717,7 +713,7 @@ int ga_num;
 	
 	u.ublessed = 0;
 	
-	if(Align2gangr(u.ualign.type) == ga_num){
+	if(Align2gangr(u.ualign.type) == ga_num || u.detestation_ritual){
 		u.lastprayed = moves;
 		u.lastprayresult = PRAY_ANGER;
 		u.reconciled = REC_NONE;

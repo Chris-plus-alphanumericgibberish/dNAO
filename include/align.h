@@ -274,6 +274,12 @@ extern struct god_details god_list[MAX_GOD]; //defined in decl.c
 						  (x)==A_LAWFUL ? GA_LAWFUL :\
 						  GA_NONE\
 						)
+
+#define Align2ritual(x)	( (x)==A_LAWFUL ? RITUAL_LAW :\
+						  (x)==A_NEUTRAL ? RITUAL_NEUTRAL :\
+						  (x)==A_CHAOTIC ? RITUAL_CHAOS :\
+						  0\
+						)
 #define Gangr2align(x)	((aligntyp) ( (x)==GA_NONE ? A_NONE : \
 									  (x)==GA_CHAOTIC ? A_CHAOTIC :\
 									  (x)==GA_NEUTRAL ? A_NEUTRAL :\

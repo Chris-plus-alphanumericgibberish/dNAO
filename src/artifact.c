@@ -4513,8 +4513,11 @@ boolean * messaged;
 	case ART_RAMIEL:					wepdesc = "thundering polearm";				break;
 	case ART_MJOLLNIR:					wepdesc = "massive hammer";					break;
 	case ART_IBITE_ARM:
+		//Torch effects when the moon is gibbous
 		if(otmp->otyp == CLUB)
 			wepdesc = "flabby arm";
+		else if(phase_of_the_moon() == 3 || phase_of_the_moon() == 5)
+			wepdesc = "flame-wielding hand";
 		else
 			wepdesc = "webbed hand";
 	break;
@@ -5626,6 +5629,21 @@ boolean * messaged;
 
 			*truedmgptr += d(2, 4)*mult;
 		}
+
+		//Torch effects when the moon is gibbous
+		if((phase_of_the_moon() == 3 || phase_of_the_moon() == 5) && otmp->otyp == CLAWED_HAND){
+			if(!Fire_res(mdef)){
+				if (species_resists_cold(mdef))
+					(*truedmgptr) += 3 * (rnd(16) + otmp->spe) / 2;
+				else
+					(*truedmgptr) += rnd(16) + otmp->spe;
+			}
+			if (!UseInvFire_res(mdef)){
+				if (rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (rn2(3)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+				if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
 	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
@@ -5858,6 +5876,7 @@ arti_invoke(obj)
 		oart->inv_prop == ANNUL ||
 		oart->inv_prop == ALTMODE || 
 		oart->inv_prop == LORDLY ||
+		oart->inv_prop == DETESTATION ||
 		(oart->inv_prop == CAPTURE_REFLECTION && obj == uskin))
 	) {
 	    /* the artifact is tired :-) */
@@ -8826,6 +8845,85 @@ arti_invoke(obj)
 							pline("%s resists!", Monnam(mtmp));
 							obj->age = monstermoves;	// but does use your turn
 						}
+					}
+				}
+			}
+			break;
+        case DETESTATION:
+			obj->age = 0L;
+			if(!Pantheon_if(PM_MADMAN) || u.uevent.uhand_of_elbereth){
+				pline("It's just a piece of blank paper!");
+				obj->oartifact = 0;
+				/* remove old name */
+				rem_ox(obj, OX_ENAM);
+			}
+			else if(!u.uevent.qcompleted){
+				pline("A throbbing yellow haze obscures your vision!");
+				You_cant("use this right now.");
+			}
+			else if(!on_altar()){
+				pline("This records the very secret and ancient rite once performed by the high-priests of Sarnath in detestation of Bokrug, the water-lizard, whose folowers their ancestors had cruelly slain.");
+				if(!u.detestation_ritual){
+					pline("The rite is penned in your hand.");
+					pline("What were you going to do with it?");
+				}
+				else {
+					You("need to find another altar.");
+				}
+			}
+			else {
+				boolean used_align = u.detestation_ritual&Align2ritual(a_align(u.ux,u.uy));
+				if(used_align || !Align2ritual(a_align(u.ux,u.uy))){
+					int destAlign;
+					if(!(u.detestation_ritual&RITUAL_LAW))
+						destAlign = A_LAWFUL;
+					else if(!(u.detestation_ritual&RITUAL_NEUTRAL))
+						destAlign = A_NEUTRAL;
+					else
+						destAlign = A_CHAOTIC;
+
+					You("modify the rite to attune the altar to %s!", align_gname_full(destAlign));
+					change_luck(-3);
+					/* Yes, this is supposed to be &=, not |= */
+					levl[u.ux][u.uy].altarmask &= AM_SHRINE;
+					levl[u.ux][u.uy].altarmask |= Align2amask(destAlign);
+					if(u.ulevel > 20) summon_god_minion(align_gname_full(destAlign),destAlign, FALSE);
+					if(u.ulevel >= 14) summon_god_minion(align_gname_full(destAlign),destAlign, FALSE);
+					(void) summon_god_minion(align_gname_full(destAlign),destAlign, TRUE);
+					angry_priest();
+					if(in_town(u.ux, u.uy))
+						(void) angry_guards(FALSE);
+					u.detestation_ritual |= RITUAL_STARTED;
+				}
+				else {
+					int altaralign = a_align(u.ux,u.uy);
+					You("perform a rite in detestation of %s!", align_gname_full(altaralign));
+					change_luck(-3);
+					u.ugangr[GA_LAWFUL]++;
+					u.ugangr[GA_NEUTRAL]++;
+					u.ugangr[GA_CHAOTIC]++;
+					gods_upset(Align2amask(a_align(u.ux,u.uy)));
+					if(u.ulevel > 20) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
+					if(u.ulevel >= 14) summon_god_minion(align_gname_full(altaralign),altaralign, FALSE);
+					(void) summon_god_minion(align_gname_full(altaralign),altaralign, TRUE);
+					angry_priest();
+					if(in_town(u.ux, u.uy))
+						(void) angry_guards(FALSE);
+					pline("The altar sinks into swampy water!");
+					levl[u.ux][u.uy].typ = PUDDLE;
+					levl[u.ux][u.uy].flags = 0;
+					newsym(u.ux, u.uy);
+					u.detestation_ritual |= RITUAL_STARTED;
+					u.detestation_ritual |= Align2ritual(altaralign);
+					if((u.detestation_ritual&RITUAL_DONE) == RITUAL_DONE){
+						struct obj *arm = mksartifact(ART_IBITE_ARM);
+						arm->oerodeproof = TRUE;
+						arm->spe = 1;
+						place_object(arm, u.ux, u.uy);
+						if(Blind)
+							You_hear("water bubbling.");
+						else
+							pline("%s rises from the swamp!", An(xname(arm)));
 					}
 				}
 			}
