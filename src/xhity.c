@@ -1254,7 +1254,7 @@ int tary;
 			if (!ranged)
 				continue;
 			/* do the tinkering */
-			result = xtinkery(magr, mdef, attk, vis);
+			xtinkery(magr, mdef, attk, vis);
 			/* increment number of attacks made */
 			attacksmade++;
 			break;
