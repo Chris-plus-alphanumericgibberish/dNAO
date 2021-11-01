@@ -2234,7 +2234,7 @@ int faction;
 					bless(otmp);
 					otmp->spe = 5;
 					(void) mpickobj(mtmp, otmp);
-				} else if (mm == PM_OLD_GYPSY_WOMAN){
+				} else if (mm == PM_OLD_FORTUNE_TELLER){
 					otmp = mksobj(ATHAME, mkobjflags|MKOBJ_NOINIT);
 					bless(otmp);
 					otmp->spe = 7;

@@ -7607,7 +7607,7 @@ is a red right hand
 	MM_AMPHIBIOUS|MM_TPORT_CNTRL /*MM*/, MT_CLOSE|MT_HERBIVORE|MT_PEACEFUL|MT_MAGIC /*MT*/, MF_MARTIAL_E /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, MG_NOWISH|MG_NOTAME|MG_NOPOLY|MG_INFRAVISIBLE|MG_NASTY|MG_LORD /*MG*/,
 	MA_HUMAN /*MA*/,  MV_NORMAL|MV_SEE_INVIS /*MV*/, CLR_BLACK),
-    MON("old Gypsy woman", S_HUMAN,//22 /*Needs encyc entry*/
+    MON("old fortune teller", S_HUMAN,//22 /*Needs encyc entry*/
 	LVL(20, 12, 40, 0), (G_NOGEN),
 	DEF(NAT_AC(0)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 6),
