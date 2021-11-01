@@ -12297,6 +12297,7 @@ int vis;						/* True if action is at all visible to the player */
 	boolean resisted_weapon_attacks = FALSE;
 	boolean resisted_attack_type = FALSE;
 	boolean resisted_thick_skin = FALSE;
+	boolean partly_resisted_thick_skin = FALSE;
 	boolean misotheistic_major = FALSE;
 	int attackmask = 0;
 	static int warnedotyp = -1;
@@ -14306,10 +14307,18 @@ int vis;						/* True if action is at all visible to the player */
 			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS))) || 
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp)) ||
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && check_oprop(otmp, OPROP_FLAYW))
-			)){
-			/* damage entirely mitigated */
-			subtotl = 1;
-			resisted_thick_skin = TRUE;
+			)
+		){
+			if(otmp && otmp->oartifact){
+				/* damage partly mitigated */
+				subtotl /= 4;
+				partly_resisted_thick_skin = TRUE;
+			}
+			else {
+				/* damage entirely mitigated */
+				subtotl = 1;
+				resisted_thick_skin = TRUE;
+			}
 		}
 		if ((attackmask & ~(resistmask)) == 0L && !(otmp && spec_applies(otmp, mdef, TRUE)) && (subtotl > 0)) {
 			/* damage reduced by 75% */
@@ -14349,6 +14358,7 @@ int vis;						/* True if action is at all visible to the player */
 		else if (canseemon(mdef))
 			pline("%s brain-organ is struck!", s_suffix(Monnam(mdef)));
 		*hp(mdef) = 1;
+		partly_resisted_thick_skin = FALSE;
 		resisted_weapon_attacks = FALSE;
 		resisted_attack_type = FALSE;
 		resisted_thick_skin = FALSE;
@@ -14626,6 +14636,10 @@ int vis;						/* True if action is at all visible to the player */
 					pline("%s is resistant to attacks.",
 						Monnam(mdef));
 				}
+				else if (partly_resisted_thick_skin) {
+					pline("Your attack is ineffective against %s thick skin.",
+						s_suffix(mon_nam(mdef)));
+				}
 				else if (resisted_thick_skin) {
 					pline("%s thick skin nullified your attack.",
 						s_suffix(Monnam(mdef)));
@@ -14644,7 +14658,7 @@ int vis;						/* True if action is at all visible to the player */
 						}
 					}
 				}
-				if (resisted_weapon_attacks || resisted_thick_skin || resisted_attack_type) {
+				if (resisted_weapon_attacks || partly_resisted_thick_skin || resisted_thick_skin || resisted_attack_type) {
 					warnedotyp = (weapon ? weapon->otyp : 0);
 					warnedptr = pd;
 				}
