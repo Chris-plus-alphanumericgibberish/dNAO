@@ -5381,6 +5381,7 @@ xkilled(mtmp, dest)
 			    && (otmp->owt > 3 || objects[typ].oc_size > MZ_MEDIUM)
 				&& !is_divider(mdat)
 			) {
+			    if (otmp->oartifact) artifact_exists(otmp, ONAME(otmp), FALSE);
 			    delobj(otmp);
 			} else redisp = TRUE;
 		}

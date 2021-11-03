@@ -316,7 +316,7 @@ struct obj *box;
 
 	for (n = max_ints(rn2(n+1),min); n > 0; n--) {
 	    if (box->otyp == ICE_BOX) {
-			if (!(otmp = mksobj(CORPSE, MKOBJ_ARTIF))) continue;
+			if (!(otmp = mksobj(CORPSE, NO_MKOBJ_FLAGS))) continue;
 			/* Note: setting age to 0 is correct.  Age has a different
 			 * from usual meaning for objects stored in ice boxes. -KAA
 			 */
@@ -343,7 +343,7 @@ struct obj *box;
 
 		for (tprob = rnd(100); (tprob -= iprobs->iprob) > 0; iprobs++)
 		    ;
-		if (!(otmp = mkobj(iprobs->iclass, TRUE))) continue;
+		if (!(otmp = mkobj(iprobs->iclass, FALSE))) continue;
 
 		/* handle a couple of special cases */
 		if (otmp->oclass == COIN_CLASS) {

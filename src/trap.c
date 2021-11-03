@@ -3222,7 +3222,7 @@ xchar x, y;
 	if (catch_lit(obj))
 	    continue;
 
-	if (Is_container(obj)) {
+	if (Is_container(obj) && !obj->oartifact) {
 	    switch (obj->otyp) {
 	    case ICE_BOX:
 		continue;		/* Immune */

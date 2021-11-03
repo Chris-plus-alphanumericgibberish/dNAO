@@ -1004,6 +1004,7 @@ register struct obj *obj;
 
 	while ((curr = obj->cobj) != 0) {
 	    obj_extract_self(curr);
+	    if (curr->oartifact) artifact_exists(curr, ONAME(curr), FALSE);
 	    obfree(curr, (struct obj *)0);
 	}
 }
