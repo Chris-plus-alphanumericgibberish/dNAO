@@ -83,7 +83,7 @@ unsigned gpflags;
 			return FALSE;
 	    } else if (is_lava(x,y)) {
 			if (mtmp == &youmonst)
-				return !!(Levitation || Flying);
+				return !!(Levitation || Flying || likes_lava(youracedata));
 			else
 				return (mon_resistance(mtmp,FLYING) || likes_lava(mdat));
 	    }
