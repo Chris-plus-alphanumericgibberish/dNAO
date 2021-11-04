@@ -2603,9 +2603,11 @@ winid *datawin;
 				Strcat(buf2, damagetypes[i]);
 			}
 		}
+		if (otyp == FRAG_GRENADE || otyp == GAS_GRENADE || otyp == ROCKET || otyp == STICK_OF_DYNAMITE)
+			Strcpy(buf2, "explosive");
 		Strcat(buf2, " ");
 
-		if (oc.oc_skill >= 0) {
+		if (oc.oc_skill > 0) {
 			if (obj) {
 				Sprintf(buf, "%s-handed %s%s%s.", 
 					((obj ? bimanual(obj, youmonst.data) : oc.oc_bimanual) ? "Two" : "One"),
@@ -2636,31 +2638,33 @@ winid *datawin;
 		OBJPUTSTR(buf);
 
 		/* what skill does it use? */
-		if (obj) {
-			Sprintf(buf, "Uses your %s skill", P_NAME(abs(weapon_type(obj))));
-			/* special cases */
-			switch (oartifact) {
-				case ART_LIECLEAVER:
-					Strcpy(buf2, " at range, and your scimitar skill in melee.");
-					break;
-				case ART_ROGUE_GEAR_SPIRITS:
-					Strcpy(buf2, " at range, and your pickaxe skill in melee.");
-					break;
-				case ART_PEN_OF_THE_VOID:
-					if(obj->ovar1 & SEAL_EVE) {
-						Strcpy(buf2, " in melee, and your ammo's skill at range.");
-					}
-					else
+		if (obj ? weapon_type(obj) : oc.oc_skill != P_NONE) {
+			if (obj) {
+				Sprintf(buf, "Uses your %s skill", P_NAME(abs(weapon_type(obj))));
+				/* special cases */
+				switch (oartifact) {
+					case ART_LIECLEAVER:
+						Strcpy(buf2, " at range, and your scimitar skill in melee.");
+						break;
+					case ART_ROGUE_GEAR_SPIRITS:
+						Strcpy(buf2, " at range, and your pickaxe skill in melee.");
+						break;
+					case ART_PEN_OF_THE_VOID:
+						if(obj->ovar1 & SEAL_EVE) {
+							Strcpy(buf2, " in melee, and your ammo's skill at range.");
+						}
+						else
+							Strcpy(buf2, ".");
+						break;
+					default:
 						Strcpy(buf2, ".");
-					break;
-				default:
-					Strcpy(buf2, ".");
+				}
+				Strcat(buf, buf2);
+			} else {
+				Sprintf(buf, "Uses the %s skill.", P_NAME(oc.oc_skill));
 			}
-			Strcat(buf, buf2);
-		} else {
-			Sprintf(buf, "Uses the %s skill.", P_NAME(oc.oc_skill));
+			OBJPUTSTR(buf);
 		}
-		OBJPUTSTR(buf);
 
 		/* weapon dice! */
 		/* Does not apply for launchers. */
