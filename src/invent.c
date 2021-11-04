@@ -2587,7 +2587,7 @@ winid *datawin;
 	}
 
 	/* Object classes currently with no special messages here: amulets. */
-	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill) || otyp == HEAVY_IRON_BALL) {
+	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill) || otyp == HEAVY_IRON_BALL || olet == GEM_CLASS) {
 		int mask = attack_mask(obj, otyp, oartifact);
 		boolean otyp_is_blaster = (otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
 		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) && !otyp_is_blaster);
