@@ -1970,7 +1970,7 @@ int tary;
 			return MM_MISS;
 		}
 	}
-	else if (mdef && dist2(x(magr), y(magr), tarx, tary) <= 2 && tarx == x(mdef) && tary == y(mdef)) {
+	else if (foundem && dist2(x(magr), y(magr), tarx, tary) <= 2) {
 		rangedspell = FALSE;
 	}
 	else {
@@ -2239,7 +2239,7 @@ int tary;
 			basiczap(&zapdata, adtyp, ZAP_SPELL, dmn);
 
 			/* message */
-			if (youdef) {
+			if (youdef && foundem) {
 				/* message */
 				if (canseemon(magr)) {
 					pline("%s zaps you with a %s!", Monnam(magr),
@@ -2252,7 +2252,7 @@ int tary;
 			}
 			else {
 				if (youagr || canseemon(magr)) {
-					if (mdef) {
+					if (mdef && foundem) {
 						pline("%s %s %s with a %s!",
 							(youagr ? "You" : Monnam(magr)),
 							(youagr ? "zap" : "zaps"),
