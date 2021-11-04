@@ -571,11 +571,12 @@ bad_rock(mon,x,y)
 struct monst *mon;
 register xchar x,y;
 {
+	boolean isyou = mon==&youmonst;
 	struct permonst *mdat = mon->data;
 	return((boolean) ((In_sokoban(&u.uz) && boulder_at(x,y)) ||
 	       (IS_ROCK(levl[x][y].typ)
 		    && (!tunnels(mdat) || needspick(mdat) || !may_dig(x,y))
-		    && !(mon_resistance(mon,PASSES_WALLS) && may_passwall(x,y)))));
+		    && !((isyou ? Passes_walls : mon_resistance(mon,PASSES_WALLS)) && may_passwall(x,y)))));
 }
 
 boolean
