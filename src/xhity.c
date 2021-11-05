@@ -11143,7 +11143,7 @@ int vis;
 					if(pa->mtyp == PM_MEDUSA){
 						pline("%s %s look all that ugly to %s.",
 							youagr ? "You" : Monnam(magr),
-							youagr ? "doesn't" : "don't",
+							youagr ? "don't" : "doesn't",
 							youdef ? "you" : mon_nam(mdef)
 							);
 					} else {
