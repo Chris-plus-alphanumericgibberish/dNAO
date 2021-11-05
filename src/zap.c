@@ -4093,7 +4093,7 @@ struct zapdata * zapdata;
 			dmg = 0;
 			doshieldeff = TRUE;
 			if (youdef)
-				addmsg("The missiles bouce off!");
+				addmsg("The missiles bounce off!");
 		}
 		domsg();
 		if (youdef && dmg > 0)
