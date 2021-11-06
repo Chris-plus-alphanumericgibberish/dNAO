@@ -10419,7 +10419,10 @@ expl_common:
 		result |= MM_AGR_STOP;
 	}
 	else {
-		mondead(magr);
+		/* avoid double-killing magr, if it was slain by retaliatory damage from its attack, perhaps */ 
+		if (!DEADMONSTER(magr))
+			mondead(magr);
+
 		if (*hp(magr) > 0)
 			result |= MM_AGR_STOP;
 		else
