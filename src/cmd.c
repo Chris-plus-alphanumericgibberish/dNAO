@@ -1455,6 +1455,12 @@ STATIC_PTR int wiz_setinsight()
 	int newval;
 	int ret;
 
+	if (u.veil) {
+		if (yn("Pierce veil?") == 'y')
+			u.veil = FALSE;
+		else
+			return 0;
+	}
 	getlin("Set your insight to what?", buf);
 
 	(void)mungspaces(buf);
