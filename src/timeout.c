@@ -2986,6 +2986,28 @@ timer_element * tm;
 	}
 }
 
+/* temporarily pause processing of all timers on chain until it they are resumed */
+void
+pause_timers(tm)
+timer_element * tm;
+{
+	timer_element *curr;
+	for (curr = tm; curr; curr = tm->tnxt)
+		rem_procchain_tm(curr);
+}
+
+/* resume processing of all timers on chain */
+void
+resume_timers(tm)
+timer_element * tm;
+{
+	timer_element *curr;
+	for (curr = tm; curr; curr = tm->tnxt)
+		add_procchain_tm(curr);
+	/* catch up with lost time */
+	run_timers();
+}
+
 void
 save_timers(tm, fd, mode)
 struct timer * tm;
