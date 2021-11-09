@@ -2793,6 +2793,8 @@ get_premium_heart_multiplier()
 	int multiplier = 1;
 	if (!Upolyd && u.uhp<u.uhpmax / 4) multiplier++;
 	if (!Upolyd && u.uhp<u.uhpmax / 16) multiplier++;
+	if (Insanity > 50 && !ClearThoughts) multiplier++;
+	if (Insanity > 75 && !ClearThoughts) multiplier++;
 	if (Blind) multiplier++;
 	if (Stunned) multiplier++;
 	if (Confusion) multiplier++;
