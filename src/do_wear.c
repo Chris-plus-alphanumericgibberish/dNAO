@@ -4732,7 +4732,7 @@ struct obj *wep;
 	i = d(6,6);
 	while(ibites[j]){
 		for(; i > 0; i--){
-			mtmp = makemon(ibites[j], 0, 0, MM_ADJACENTOK|maketame|MM_ESUM|NO_MINVENT);
+			mtmp = makemon(ibites[j], 0, 0, MM_ADJACENTOK|MM_NOCOUNTBIRTH|maketame|MM_ESUM|NO_MINVENT);
 			if(mtmp){
 				mtmp->mspec_used = 0;
 				mark_mon_as_summoned(mtmp, magr, duration, 0);
