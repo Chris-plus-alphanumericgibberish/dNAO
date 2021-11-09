@@ -204,6 +204,12 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			thrownobj->oartifact == ART_AMHIMITL
 		) {
 			returning = TRUE;
+			if(uandroid && youagr && impaired){
+				/*Use intrinsic, error proof throwing ability*/
+				range = range/2 + 1;
+				initrange = initrange/2 + 1;
+				impaired = FALSE; //always catch
+			}
 		}
 		else if(uandroid && youagr && !(
 			(launcher) || /* no returning fired ammo */
