@@ -809,9 +809,9 @@ SUIT(("jacket"),
 SUIT(("straitjacket", "long-sleeved jacket"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_MEDIUM,  ARMSZ_HEAVY, 0,   0,  0,  15,   10, 10, 1, 2, CLOTH, CLR_WHITE, O_DRSLOT(UPPER_TORSO_DR|ARM_DR)),
 SUIT(("healer uniform","clean clothes"), /*Needs encyc entry*//*Needs tile*/
-	0, 0, MZ_MEDIUM, ARMSZ_MEDIUM,SICK_RES,0,0, 30,   10, 10, 1, 2, CLOTH, CLR_WHITE),
+	0, 0, MZ_MEDIUM, ARMSZ_LIGHT,SICK_RES,0,0, 30,   10, 10, 1, 2, CLOTH, CLR_WHITE),
 SUIT(("jumpsuit", "silvery clothes", "clothes"),/*Needs encyc entry*//*Needs tile*/
-	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, REFLECTING,0,5,5,1000, 10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
+	0, 0,  MZ_LARGE, ARMSZ_LIGHT, REFLECTING,0,5,5,1000, 10, 1, 3, PLASTIC, HI_SILVER, O_DRSLOT(ALL_DR)),
 #ifdef TOURIST
 /* shirts */
 /*ARMOR(("Hawaiian shorts", "flowery shorts and lei"),
