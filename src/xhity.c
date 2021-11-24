@@ -17081,7 +17081,7 @@ android_combo()
 	return FALSE;
 }
 
-#define peace_check_monk(mon) (canspotmon(mon) && (Hallucination || !mon->mpeaceful) && !imprisoned(mon))
+#define peace_check_monk(mon) ((canspotmon(mon) || mon_warning(mon)) && (Hallucination || !mon->mpeaceful) && !imprisoned(mon))
 
 struct monst *
 adjacent_monk_target(arm)
