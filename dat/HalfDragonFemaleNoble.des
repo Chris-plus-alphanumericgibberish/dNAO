@@ -5,7 +5,7 @@
 #
 #	The "start" level for the quest.
 #
-#	Here you meet your (besieged) class leader, the Old Gypsy woman
+#	Here you meet your (besieged) class leader, the old fortune teller
 #	and receive your quest assignment.
 #
 MAZE: "Hdf-strt" , 'T'

@@ -5,7 +5,7 @@
 #
 #	The "start" level for the quest.
 #
-#	Here you meet your (besieged) class leader, the Old Gypsy woman
+#	Here you meet your (besieged) class leader, the old fortune teller
 #	and receive your quest assignment.
 #
 MAZE: "Nob-strt",'.'
@@ -56,7 +56,7 @@ DOOR:closed,(08,05)
 DOOR:closed,(17,05)
 
 # Fortuneteller
-MONSTER:'@',"old Gypsy woman",(12,05)
+MONSTER:'@',"old fortune teller",(12,05)
 # Your treasure chest
 CONTAINER:'(',"chest",(22,05)
 OBJECT:'?',"resistance",contained
