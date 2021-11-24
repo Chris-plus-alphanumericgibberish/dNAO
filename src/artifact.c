@@ -8865,8 +8865,8 @@ arti_invoke(obj)
 				pline("A throbbing yellow haze obscures your vision!");
 				You_cant("use this right now.");
 			}
-			else if(!on_altar()){
-				pline("This records the very secret and ancient rite once performed by the high-priests of Sarnath in detestation of Bokrug, the water-lizard, whose folowers their ancestors had cruelly slain.");
+			else if(!IS_ALTAR(levl[u.ux][u.uy].typ)){
+				pline("This records the very secret and ancient rite once performed by the high-priests of Sarnath in detestation of Bokrug, the water-lizard, whose followers their ancestors had cruelly slain.");
 				if(!u.detestation_ritual){
 					pline("The rite is penned in your hand.");
 					pline("What were you going to do with it?");
@@ -8896,11 +8896,8 @@ arti_invoke(obj)
 						destGod = GOD_LOBON;
 					}
 
-					You("modify the rite to attune the altar to %s!", align_gname(destAlign));
+					You("modify the rite to attune the altar to %s!", godname(destGod));
 					change_luck(-3);
-					// /* Yes, this is supposed to be &=, not |= */
-					// levl[u.ux][u.uy].altarmask &= AM_SHRINE;
-					// levl[u.ux][u.uy].altarmask |= Align2amask(destAlign);
 					altars[levl[u.ux][u.uy].altar_num].align = destAlign;
 					altars[levl[u.ux][u.uy].altar_num].god = destGod;
 					
@@ -8917,7 +8914,7 @@ arti_invoke(obj)
 					u.detestation_ritual |= RITUAL_STARTED;
 				}
 				else {
-					You("perform a rite in detestation of %s!", align_gname(altaralign));
+					You("perform a rite in detestation of %s!", godname(godnum));
 					change_luck(-3);
 					godlist[GOD_ZO_KALAR].anger++;
 					godlist[GOD_TAMASH].anger++;

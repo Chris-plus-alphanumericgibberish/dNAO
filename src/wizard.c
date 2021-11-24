@@ -1178,7 +1178,7 @@ register struct monst	*mtmp;
 	} else if(is_angel(mtmp->data) && !(is_lminion(mtmp) && rn2(10))){
 		int t = rn2(SIZE(random_angeldiction));
 		if(t == 0) //Contains %s for god
-			verbalize(random_angeldiction[t], align_gname(u.ualign.type));
+			verbalize(random_angeldiction[t], godname(u.ualign.god));
 		else if(t == 1) //Contains %s for cleansed/purged
 			verbalize(random_angeldiction[t], 
 				(sgn(u.ualign.type) == sgn(mtmp->data->maligntyp) &&  u.ualign.type != A_VOID) ? 
