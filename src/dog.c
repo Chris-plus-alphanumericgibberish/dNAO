@@ -396,7 +396,6 @@ boolean with_you;
 	 * Its coordinate fields were overloaded for use as flags that
 	 * specify its final destination.
 	 */
-
 	if (mtmp->mlstmv < monstermoves - 1L) {
 	    /* heal monster for time spent in limbo */
 	    long nmv = monstermoves - 1L - mtmp->mlstmv;
@@ -513,6 +512,8 @@ boolean with_you;
 		mongone(mtmp);
 	    }
 	}
+	/* now that it's placed, we can resume timers (which may kill mtmp) */
+	resume_timers(mtmp->timed);
 }
 
 /* heal monster for time spent elsewhere */
@@ -868,6 +869,9 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	}
 	/* likewise, a summoner leaving affects its summons */
 	summoner_gone(mtmp, TRUE);
+
+	/* timers pause processing while mon is migrating */
+	pause_timers(mtmp->timed);
 
 	relmon(mtmp);
 	mtmp->nmon = migrating_mons;
