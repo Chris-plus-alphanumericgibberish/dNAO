@@ -12925,12 +12925,24 @@ int vis;						/* True if action is at all visible to the player */
 				seardmg += rnd(20);
 			}
 			// no jade monsters (yet)
+			else if (youagr && unarmed_punch && u.sealsActive&SEAL_EDEN) {
+				/* Eden's silver hull, for the player attacking with bared hands */
+				silverobj |= W_SKIN;
+				seardmg += rnd(20);
+			}
 		}
-		if (hates_iron(pd) &&
-			is_iron_mon(magr)) {
-			ironobj |= W_SKIN;
-			seardmg += rnd(mlev(mdef));
+		if (hates_iron(pd)){
+			if(is_iron_mon(magr)) {
+				ironobj |= W_SKIN;
+				seardmg += rnd(mlev(mdef));
+			}
+			else if (youagr && unarmed_punch && u.sealsActive&SEAL_SIMURGH) {
+				/* Simurgh's iron claws, for the player attacking with bared hands */
+				ironobj |= W_SKIN;
+				seardmg += rnd(mlev(mdef));
+			}
 		}
+
 		if (hates_holy_mon(mdef)){
 			if(magr->mtyp == PM_UVUUDAUM){
 				uuvuglory |= W_SKIN;
@@ -13008,11 +13020,6 @@ int vis;						/* True if action is at all visible to the player */
 					seardmg += hatesobjdmg(mdef, otmp);
 				}
 			}
-		}
-		/* Simurgh's iron claws, for the player attacking with bared hands */
-		if (youagr && unarmed_punch && u.sealsActive&SEAL_SIMURGH && hates_iron(pd)) {
-			ironobj |= W_SKIN;
-			seardmg += rnd(mlev(mdef));
 		}
 	}
 	/* Find poisoned object, if any */
@@ -14280,6 +14287,17 @@ int vis;						/* True if action is at all visible to the player */
 				(youagr && !Upolyd && (Race_if(PM_HALF_DRAGON) || Race_if(PM_CHIROPTERAN)))
 				)
 				attackmask |= SLASH;
+			if (/* claw attacks are slashing (even while wearing gloves?) */
+				(youagr && u.sealsActive&SEAL_EURYNOME)
+			){
+				if(rn2(2))
+					attackmask |= SLASH;
+				if(rn2(2))
+					attackmask |= PIERCE;
+				//Less often, the limb is thin and non-whacky.
+				if(attackmask&(PIERCE|SLASH) && !rn2(3))
+					attackmask &= ~WHACK;
+			}
 		}
 		else if (unarmed_kick) {
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
