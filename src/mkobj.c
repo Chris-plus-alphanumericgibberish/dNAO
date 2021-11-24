@@ -3300,7 +3300,8 @@ add_to_migration(obj)
 {
     if (obj->where != OBJ_FREE)
 	panic("add_to_migration: obj not free");
-
+	
+	pause_timers(obj->timed);
     obj->where = OBJ_MIGRATING;
     obj->nobj = migrating_objs;
     migrating_objs = obj;

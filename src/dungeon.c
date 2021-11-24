@@ -1788,10 +1788,10 @@ int	pct;
 	aligntyp al;
 
 	if (lev && lev->flags.align)
-		if(rn2(100) < pct) return(lev->flags.align);
+		if(rn2(100) < pct) return(Amask2align(lev->flags.align));
 
 	if(dungeons[u.uz.dnum].flags.align)
-		if(rn2(100) < pct) return(dungeons[u.uz.dnum].flags.align);
+		if(rn2(100) < pct) return(Amask2align(dungeons[u.uz.dnum].flags.align));
 
 	al = rn2(3) - 1;
 	return(al);
