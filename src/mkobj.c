@@ -628,6 +628,8 @@ int mkflags;
 				|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
 				)
 				add_oprop(otmp, OPROP_UNHYW);
+			if (is_rakuyo(otmp))
+				add_oprop(otmp, OPROP_RAKUW);
 
 			if (is_vibroweapon(otmp)){
 				otmp->ovar1 = 80L + rnd(20);

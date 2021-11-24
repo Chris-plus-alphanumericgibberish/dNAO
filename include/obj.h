@@ -75,6 +75,7 @@ enum {
 	OPROP_GOATW,
 	OPROP_OCLTW,
 	OPROP_RETRW,
+	OPROP_RAKUW,
 	MAX_OPROP
 };
 
@@ -462,8 +463,9 @@ struct obj {
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
 			 otmp->otyp == RAKUYO_DAGGER)
+#define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
 #define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
-			 is_rakuyo(otmp) || \
+			 rakuyo_prop(otmp) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->otyp == BESTIAL_CLAW)
 #define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \

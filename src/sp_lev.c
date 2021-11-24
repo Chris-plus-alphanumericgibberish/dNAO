@@ -1439,11 +1439,13 @@ default_case:
 
 				stuff = mksobj(SHORT_SWORD, MKOBJ_NOINIT);
 				set_material_gm(stuff, MITHRIL);
+				add_oprop(stuff, OPROP_RAKUW);
 				stuff->spe = 2;
 				add_to_container(otmp, stuff);
 
 				stuff = mksobj(KATANA, MKOBJ_NOINIT);
 				set_material_gm(stuff, SILVER);
+				add_oprop(stuff, OPROP_RAKUW);
 				stuff->spe = 2;
 				add_to_container(otmp, stuff);
 

@@ -876,13 +876,13 @@ int tary;
 						otmp->otyp = CLUB;
 					}
 					/* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && is_rakuyo(otmp)){
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 						int subresult = 0;
 						/* try to find direction (u.dx and u.dy may be incorrect) */
 						int dx = sgn(tarx - x(magr));
 						int dy = sgn(tary - y(magr));
 						struct attack blood = {AT_ESPR, AD_BLUD,
-							(youagr && otmp == uwep && u.twoweap && uswapwep && is_rakuyo(uswapwep)) ? 2 : 1, 
+							(youagr && otmp == uwep && u.twoweap && uswapwep && rakuyo_prop(uswapwep)) ? 2 : 1, 
 							12+otmp->spe*2
 						};
 						if (isok(tarx + dx, tary + dy) &&
@@ -913,7 +913,7 @@ int tary;
 							}
 							if(u.uinsight >= 40){
 								explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
-								if(youagr && otmp == uwep && u.twoweap && uswapwep && is_rakuyo(uswapwep))
+								if(youagr && otmp == uwep && u.twoweap && uswapwep && rakuyo_prop(uswapwep))
 									explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
 							}
 						}

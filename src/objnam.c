@@ -1249,7 +1249,7 @@ char *buf;
 		else if(u.uinsight >= 15)
 			Strcat(buf, "severed ");
 	}
-	if (is_rakuyo(obj)){
+	if (rakuyo_prop(obj)){
 		if(u.uinsight >= 40)
 			Strcat(buf, "burning ");
 		if(u.uinsight >= 20)
