@@ -628,9 +628,9 @@ boolean yours; /* is it your fault (for killing monsters) */
 				mdam += rnd(20);
 			}
 
-			if (resists_cold(mtmp) && adtyp == AD_FIRE)
+			if (resists_cold(mtmp) && (adtyp == AD_FIRE || adtyp == AD_EFIR))
 				mdam *= 2;
-			else if (resists_fire(mtmp) && adtyp == AD_COLD)
+			else if (resists_fire(mtmp) && adtyp == (adtyp == AD_COLD || adtyp == AD_ECLD))
 				mdam *= 2;
 			else if (Dark_vuln(mtmp) && adtyp == AD_DARK)
 				mdam *= 2;
@@ -709,7 +709,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 		    damu = (damu+1) / 2;
 			if (u.uvaul_duration) damu = (damu + 1) / 2;
 		}
-		if (adtyp == AD_FIRE) (void) burnarmor(&youmonst, FALSE);
+		if (adtyp == AD_FIRE || adtyp == AD_EFIR) (void) burnarmor(&youmonst, FALSE);
 		if(uhurt == 2){
 			destroy_item(&youmonst, SCROLL_CLASS, (int) adtyp);
 			destroy_item(&youmonst, SPBOOK_CLASS, (int) adtyp);
@@ -766,15 +766,15 @@ boolean yours; /* is it your fault (for killing monsters) */
 			killer = killer_buf;
 			/* Known BUG: BURNING suppresses corpse in bones data,
 			   but done does not handle killer reason correctly */
-			done((adtyp == AD_FIRE) ? BURNING : DIED);
+			done((adtyp == AD_FIRE || adtyp == AD_EFIR) ? BURNING : DIED);
 		    }
 		}
 		if(uhurt == 2) exercise(A_STR, FALSE);
 	}
 
 	if (shopdamage) {
-		pay_for_damage(adtyp == AD_FIRE ? "burn away" :
-			       adtyp == AD_COLD ? "shatter" :
+		pay_for_damage((adtyp == AD_FIRE || adtyp == AD_EFIR) ? "burn away" :
+			       (adtyp == AD_COLD || adtyp == AD_ECLD) ? "shatter" :
 			       adtyp == AD_DISN ? "disintegrate" : "destroy",
 			       FALSE);
 	}

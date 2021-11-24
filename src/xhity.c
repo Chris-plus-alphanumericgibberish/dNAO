@@ -6884,6 +6884,7 @@ boolean ranged;
 #endif
 	{
 		boolean goatspawn = (pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN || pa->mtyp == PM_BLESSED);
+		boolean noflee = (magr->isshk && magr->mpeaceful);
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
@@ -6909,14 +6910,16 @@ boolean ranged;
 						m_dowear(magr, FALSE);
 						return MM_HIT;
 					default:
-						if (*buf) {
-							if (canseemon(magr))
-								pline("%s tries to %s away with %s.",
-								Monnam(magr),
-								locomotion(magr, "run"),
-								buf);
+						if (!noflee) {
+							if (*buf) {
+								if (canseemon(magr))
+									pline("%s tries to %s away with %s.",
+									Monnam(magr),
+									locomotion(magr, "run"),
+									buf);
+							}
+							monflee(magr, 0, FALSE, FALSE);
 						}
-						monflee(magr, 0, FALSE, FALSE);
 						return MM_AGR_STOP;
 					}
 				}
@@ -6957,7 +6960,7 @@ boolean ranged;
 							(is_neuter(magr->data) || flags.female == magr->female) ? "unaffected" : "uninterested");
 					}
 					if (rn2(3)) {
-						if (!tele_restrict(magr)) (void)rloc(magr, TRUE);
+						if (!noflee && !tele_restrict(magr)) (void)rloc(magr, TRUE);
 						return MM_AGR_STOP;
 					}
 					break;
@@ -6974,9 +6977,11 @@ boolean ranged;
 					if(goatspawn){
 						return MM_AGR_STOP;
 					} else {
-						if (!tele_restrict(magr))
-							(void)rloc(magr, TRUE);
-						monflee(magr, 0, FALSE, FALSE);
+						if (!noflee) {
+							if (!tele_restrict(magr))
+								(void)rloc(magr, TRUE);
+							monflee(magr, 0, FALSE, FALSE);
+						}
 						return MM_AGR_STOP;
 					}
 				}
@@ -7049,7 +7054,7 @@ boolean ranged;
 						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
 					if(goatspawn)
 						result |= MM_AGR_STOP;
-					else if (magr->data->mlet == S_NYMPH &&
+					else if (magr->data->mlet == S_NYMPH && !noflee &&
 						!tele_restrict(magr)
 					){
 						(void)rloc(magr, TRUE);
@@ -10467,7 +10472,10 @@ expl_common:
 		result |= MM_AGR_STOP;
 	}
 	else {
-		mondead(magr);
+		/* avoid double-killing magr, if it was slain by retaliatory damage from its attack, perhaps */ 
+		if (!DEADMONSTER(magr))
+			mondead(magr);
+
 		if (*hp(magr) > 0)
 			result |= MM_AGR_STOP;
 		else
@@ -11194,7 +11202,7 @@ int vis;
 					if(pa->mtyp == PM_MEDUSA){
 						pline("%s %s look all that ugly to %s.",
 							youagr ? "You" : Monnam(magr),
-							youagr ? "doesn't" : "don't",
+							youagr ? "don't" : "doesn't",
 							youdef ? "you" : mon_nam(mdef)
 							);
 					} else {

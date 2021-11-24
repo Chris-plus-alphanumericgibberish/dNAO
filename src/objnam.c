@@ -2766,6 +2766,8 @@ register const char *verb;
 
 	if (!strcmp(verb, "are"))
 	    Strcpy(buf, "is");
+	else if (!strcmp(verb, "were"))
+	    Strcpy(buf, "was");
 	else if (!strcmp(verb, "have"))
 	    Strcpy(buf, "has");
 	else if (index("zxs", *spot) ||

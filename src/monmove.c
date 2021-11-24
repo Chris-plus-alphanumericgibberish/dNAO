@@ -133,6 +133,7 @@ dochugw(mtmp)
 	    (canseemon(mtmp) ||
 		(sensemon(mtmp) && couldsee(mtmp->mx,mtmp->my))) &&
 	    mtmp->mcanmove && mtmp->mnotlaugh &&
+		(!(Xray_vision||(u.sealsActive&SEAL_ORTHOS)) || clear_path(u.ux, u.uy, mtmp->mx, mtmp->my)) &&
 	    !noattacks(mtmp->data) && !onscary(u.ux, u.uy, mtmp))
 		stop_occupation();
 

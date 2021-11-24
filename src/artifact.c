@@ -4560,7 +4560,7 @@ boolean * messaged;
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 			}
-		if(oartifact != ART_PROFANED_GREATSCYTHE){
+		if(oartifact != ART_PROFANED_GREATSCYTHE && !UseInvFire_res(mdef)){
 			if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 			if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
