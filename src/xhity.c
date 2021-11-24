@@ -14284,7 +14284,7 @@ int vis;						/* True if action is at all visible to the player */
 			if (/* claw attacks are slashing (even while wearing gloves?) */
 				(attk && attk->aatyp == AT_CLAW) ||
 				/* and so are the player's punches, as a half-dragon or chiropteran */
-				(youagr && !Upolyd && (Race_if(PM_HALF_DRAGON) || Race_if(PM_CHIROPTERAN)))
+				(youagr && (Race_if(PM_HALF_DRAGON) || (!Upolyd && Race_if(PM_CHIROPTERAN))))
 				)
 				attackmask |= SLASH;
 			if (/* claw attacks are slashing (even while wearing gloves?) */
