@@ -2077,7 +2077,7 @@ struct obj *obj, *otmp;
 	case WAN_STRIKING:
 	case SPE_FORCE_BOLT:
 	case ROD_OF_FORCE:
-		if (is_boulder(obj))
+		if (is_boulder(obj) || obj->otyp == STATUE)
 			break_boulder(obj);
 		else {
 			if (!flags.mon_moving)
@@ -4093,7 +4093,7 @@ struct zapdata * zapdata;
 			dmg = 0;
 			doshieldeff = TRUE;
 			if (youdef)
-				addmsg("The missiles bouce off!");
+				addmsg("The missiles bounce off!");
 		}
 		domsg();
 		if (youdef && dmg > 0)

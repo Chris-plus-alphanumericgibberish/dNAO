@@ -598,8 +598,8 @@ extern struct artifact artilist[];
                 (m) == ART_GAUNTLETS_OF_SPELL_POWER ||\
                 (m) == ART_PREMIUM_HEART ||\
                 (m) == ART_GODHANDS ||\
-                (m) == ART_FIRE_BRAND ||\
-                (m) == ART_FROST_BRAND ||\
+                ((m) == ART_FIRE_BRAND && (u.brand_otyp == STRANGE_OBJECT || u.brand_otyp == GAUNTLETS)) ||\
+                ((m) == ART_FROST_BRAND && (u.brand_otyp == STRANGE_OBJECT || u.brand_otyp == GAUNTLETS)) ||\
                 (m) == ART_STORMHELM ||\
                 (m) == ART_APOTHEOSIS_VEIL ||\
                 (m) == ART_HELM_OF_UNDEATH ||\

@@ -5975,7 +5975,7 @@ once again, if just for a short time.
 
     "Bastard. You may kill me, but you can't kill justice!
     The rebellion is greater than any one person. These people shall
-    be free of your tyrany yet!"
+    be free of your tyranny yet!"
 
 %nC is silent after that, but you remain prudently out of arm's reach
 until you are certain she has bled out.

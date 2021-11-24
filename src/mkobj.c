@@ -2527,12 +2527,11 @@ boolean init;
 		otmp = mksobj_at(objtype, x, y, mkobjflags);
 	if (otmp) {
 	    if (mtmp) {
-		struct obj *otmp2;
-
-		if (!ptr) ptr = mtmp->data;
-		/* save_mtraits frees original data pointed to by otmp */
-		otmp2 = save_mtraits(otmp, mtmp);
-		if (otmp2) otmp = otmp2;
+			if (!ptr) ptr = mtmp->data;
+			/* override any OX_EMON made by default mkobj with mtmp */
+			rem_ox(otmp, OX_EMON);
+			/* save_mtraits reallocates the data pointed to by otmp */
+			otmp = save_mtraits(otmp, mtmp);
 	    }
 	    /* use the corpse or statue produced by mksobj() as-is
 	       unless `ptr' is non-null */
