@@ -663,7 +663,7 @@ const char *name;
 		
 		/* property */
 		if (obj->oartifact == ART_IBITE_ARM)
-				add_oprop(obj, OPROP_CCLAW);
+			add_oprop(obj, OPROP_CCLAW);
 		
 		/* size */
 		if (obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT)

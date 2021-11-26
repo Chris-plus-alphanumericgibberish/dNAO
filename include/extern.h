@@ -3297,6 +3297,8 @@ E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *
 E boolean FDECL(miss_via_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 E int FDECL(destroy_item, (struct monst *, int, int));
 E boolean FDECL(wearing_dragon_armor, (struct monst *, int));
+E int FDECL(hit_with_cclaw, (struct monst *,struct obj *, int, int, int, struct attack *));
+E int FDECL(hit_with_rblood, (struct monst *,struct obj *, int, int, int, struct attack *));
 
 /* ### zap.c ### */
 
