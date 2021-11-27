@@ -2713,6 +2713,7 @@ E void NDECL(dodestruction);
 E void NDECL(domindblast_strong);
 E boolean NDECL(doreinforce_spell);
 E void NDECL(update_alternate_spells);
+E void NDECL(expel_summons);
 
 /* ### steal.c ### */
 

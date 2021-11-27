@@ -4493,6 +4493,7 @@ struct obj *obj;
 		pline("The cerulean tree flashes and disapears.");
 	pline("The disk crumbles to dust!");
 	incr_itimeout(&DimensionalLock, 100L);
+	expel_summons();
 	useup(obj);
 	return 1;
 }

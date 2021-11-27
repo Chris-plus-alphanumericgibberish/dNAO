@@ -1751,6 +1751,25 @@ cast_abjuration()
 }
 
 
+/* Banish all summoned creatures 
+ */
+void
+expel_summons()
+{
+	struct monst *mtmp, *nmon;
+	int dur;
+
+	for (mtmp=fmon; mtmp; mtmp = nmon) {
+		nmon = mtmp->nmon;
+		if (get_mx(mtmp, MX_ESUM)) {
+			dur = timer_duration_remaining(get_timer(mtmp->timed, DESUMMON_MON));
+			mtmp->mextra_p->esum_p->permanent = 0;
+			abjure_summon(mtmp, dur);
+		}
+	}
+}
+
+
 STATIC_OVL void
 cast_extra_healing_at(x, y, arg)
 int x, y;
