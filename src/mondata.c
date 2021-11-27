@@ -42,8 +42,8 @@ boolean state;
 	boolean weap_attack, xwep_attack;
 	mon->mcan = state;
 	set_mon_data_core(mon, mon->data);
-	weap_attack = !!mon_attacktype(mon, AT_WEAP);
-	xwep_attack = !!mon_attacktype(mon, AT_XWEP);
+	weap_attack = mon_attacktype(mon, AT_WEAP);
+	xwep_attack = mon_attacktype(mon, AT_XWEP);
 	if(weap_attack && !MON_WEP(mon)){
 		mon->weapon_check = NEED_WEAPON;
 	}
@@ -1457,13 +1457,30 @@ int atyp;
     return attacktype_fordmg(ptr, atyp, AD_ANY) ? TRUE : FALSE;
 }
 
-struct attack *
+//Does monster have an attack of type atyp? Use get_attacktype to avoid duplicating code.
+
+boolean
 mon_attacktype(mon, atyp)
 struct monst *mon;
 int atyp;
 {
-	struct attack *attk;
 	struct attack prev_attk = {0};
+
+	if(mon_get_attacktype(mon, atyp, &prev_attk))
+		return TRUE;
+
+    return FALSE;
+}
+
+//Get a pointer to mon's first attack of type atyp. prev_attk must point to the attack buffer the attack's data should end up in.
+
+struct attack *
+mon_get_attacktype(mon, atyp, prev_attk)
+struct monst *mon;
+int atyp;
+struct attack *prev_attk;
+{
+	struct attack *attk;
 	int	indexnum = 0,	/* loop counter */
 		subout = 0,	/* remembers what attack substitutions have been made for [mon]'s attack chain */
 		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
@@ -1475,9 +1492,9 @@ int atyp;
 	res[2] = MM_MISS;
 	res[3] = MM_MISS;
 	
-	for(attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod);
+	for(attk = getattk(mon, (struct monst *) 0, res, &indexnum, prev_attk, TRUE, &subout, &tohitmod);
 		!is_null_attk(attk);
-		attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod)
+		attk = getattk(mon, (struct monst *) 0, res, &indexnum, prev_attk, TRUE, &subout, &tohitmod)
 	){
 		if(attk->aatyp == atyp)
 			return attk;

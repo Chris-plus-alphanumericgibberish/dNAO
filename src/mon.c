@@ -5806,7 +5806,8 @@ void
 m_widegaze(mtmp)
 register struct monst *mtmp;
 {
-	struct attack *gaze = mon_attacktype(mtmp, AT_WDGZ);
+	struct attack gaze_mem;
+	struct attack *gaze = mon_get_attacktype(mtmp, AT_WDGZ, &gaze_mem);
 	 if(gaze) {
 		 if (!(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD))	// the Eyes of the Overworld protect you from whatever you might see
 			(void) xgazey(mtmp, &youmonst, gaze, -1);

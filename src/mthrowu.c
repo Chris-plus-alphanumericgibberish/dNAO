@@ -88,6 +88,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 {
 	struct monst * mdef = (struct monst *)0;
 	struct monst * best_target = (struct monst *)0;
+	struct attack attkbuff = {0};
 	int target_val = 0;
 	int best_val = 0;
 	int tarx;
@@ -208,8 +209,8 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 			/* attacks that are on a line that do NOT stop on hit */
 			(m_online(magr, mdef, tarx, tary, dogbesafe, FALSE) && (
 				(mon_attacktype(magr, AT_BREA) && !magr->mcan) ||
-				(mon_attacktype(magr, AT_MAGC) && !magr->mcan && !real_spell_adtyp(mon_attacktype(magr, AT_MAGC)->adtyp)) ||
-				(mon_attacktype(magr, AT_MMGC) && !magr->mcan && !real_spell_adtyp(mon_attacktype(magr, AT_MMGC)->adtyp))
+				(mon_get_attacktype(magr, AT_MAGC, &attkbuff) && !magr->mcan && !real_spell_adtyp(attkbuff.adtyp)) ||
+				(mon_get_attacktype(magr, AT_MMGC, &attkbuff) && !magr->mcan && !real_spell_adtyp(attkbuff.adtyp))
 			))
 			||
 			/* attacks that splash */
@@ -254,11 +255,10 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 			(distmin(magr->mx, magr->my, tarx, tary) <= 8 && (
 				(is_commander(magr->data) && !rn2(4)) ||	/* !rn2(4) -> reduce command frequency */
 				(mon_attacktype(magr, AT_GAZE) && !magr->mcan) ||
-				(mon_attacktype(magr, AT_MAGC) && !magr->mcan && real_spell_adtyp(mon_attacktype(magr, AT_MAGC)->adtyp)) ||
-				(mon_attacktype(magr, AT_MMGC) && !magr->mcan && real_spell_adtyp(mon_attacktype(magr, AT_MMGC)->adtyp))
+				(mon_get_attacktype(magr, AT_MAGC, &attkbuff) && !magr->mcan && real_spell_adtyp(attkbuff.adtyp)) ||
+				(mon_get_attacktype(magr, AT_MMGC, &attkbuff) && !magr->mcan && real_spell_adtyp(attkbuff.adtyp))
 			))
-			))
-		{
+		)){
 			/* mdef can be targeted by one of our attacks */
 			/* calculate value of target */
 			if (is_covetous(magr->data) && !magr->mtame &&
