@@ -1273,6 +1273,29 @@ domove()
 		    expl ? "explode at" : "attack",
 		    !Underwater ? "thin air" :
 		    is_pool(x,y, FALSE) ? "empty water" : buf);
+		{
+			struct attack attkbuff = {0};
+			struct attack *attk;
+			int i = 0;
+			int result = 0;
+			struct obj *otmp;
+			attk = mon_get_attacktype(&youmonst, AT_WEAP, &attkbuff);
+			otmp = uwep;
+			do{
+				/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && check_oprop(otmp, OPROP_CCLAW)){
+					result |= hit_with_cclaw(&youmonst, otmp, x, y, 0, attk);
+				}
+				/* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
+					result |= hit_with_rblood(&youmonst, otmp, x, y, 0, attk);
+				}
+				
+				attk = mon_get_attacktype(&youmonst, AT_XWEP, &attkbuff);
+				otmp = uswapwep;
+				i++;
+			} while(i < 2);
+		}
 		// unmap_object(x, y); /* known empty -- remove 'I' if present */
 		if (glyph_is_invisible(levl[x][y].glyph)) {
 			unmap_object(x, y);
