@@ -137,7 +137,8 @@ struct objclass {
 #define is_metallic(otmp)	((otmp)->obj_material >= IRON && \
 				 (otmp)->obj_material <= MITHRIL)
 #define is_iron_obj(otmp)	((otmp)->obj_material == IRON || (otmp)->obj_material == GREEN_STEEL)
-#define is_hard(otmp)	((otmp)->obj_material >= WOOD)
+#define hard_mat(mat)	((mat) >= WOOD)
+#define is_hard(otmp)	(hard_mat((otmp)->obj_material))
 
 /* primary damage: fire/rust/--- */
 /* is_flammable(otmp), is_rottable(otmp) in mkobj.c */
@@ -218,8 +219,10 @@ struct material {
 	const int id;				/* the #define'd id that this material is for */
 	const int color;			/* default material color */
 	const int density;			/* density (from old dnh) */
-	const int cost;				/* cost multiplier (from xnethack, unused) */
-	const int defense;			/* defense modifier (from xnethack, unused) */
+	const int cost;				/* cost multiplier */
+	const int defense;			/* defense modifier */
+	const int flat_dr;			/* minimum ac modifier (torso, limbs and head are 1/2) */
+	const int flat_ac;			/* defense modifier (torso, limbs and head are 1/2) */
 };
 
 extern NEARDATA struct objclass objects[];

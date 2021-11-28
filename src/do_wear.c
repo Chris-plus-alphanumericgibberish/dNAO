@@ -2034,13 +2034,50 @@ struct obj * otmp;
  * materials being very close in their defense ratings; see decl.c
  */
 int
-material_def_bonus(otmp, def)
+material_def_bonus(otmp, def, ac)
 struct obj * otmp;
 int def;
+boolean ac;
 {
-	int curr = materials[otmp->obj_material].defense;
-	int base = materials[objects[otmp->otyp].oc_material].defense;
-	return ((def * curr) + base / 2) / base - def;
+	if(def){
+		int curr = materials[otmp->obj_material].defense;
+		int base = materials[objects[otmp->otyp].oc_material].defense;
+		return ((def * curr) + base / 2) / base - def;
+	}
+	else if(ac){
+		int curr = materials[otmp->obj_material].flat_ac;
+		int base = materials[objects[otmp->otyp].oc_material].flat_ac;
+		//If the object needs to be flexible but the material isn't, its AC from material alone is reduced by half.
+		if(!hard_mat(objects[otmp->otyp].oc_material)){
+			if(hard_mat(otmp->obj_material)){
+				curr = (curr+1)/2;
+			}
+		}
+		//In most cases the base will be 0 (cloth or the like), but if a 0 AC item is made out of normally protective material, take the difference.
+		def = max(0, curr - base);
+		//Non-primary-armor items are less protective
+		if(objects[otmp->otyp].oc_armcat != ARM_SUIT){
+			def = (def+1)/2;
+		}
+		return def;
+	}
+	else { //DR
+		int curr = materials[otmp->obj_material].flat_dr;
+		int base = materials[objects[otmp->otyp].oc_material].flat_dr;
+		//If the object needs to be flexible but the material isn't, its DR from material alone is reduced by a quarter.
+		if(!hard_mat(objects[otmp->otyp].oc_material)){
+			if(hard_mat(otmp->obj_material)){
+				curr = (curr*3+3)/4;
+			}
+		}
+		//In most cases the base will be 0 (cloth or the like), but if a 0 AC item is made out of normally protective material, take the difference.
+		def = max(0, curr - base);
+		//Non-primary-armor items are less protective
+		if(objects[otmp->otyp].oc_armcat != ARM_SUIT){
+			def = (def+1)/2;
+		}
+		return def;
+	}
 }
 
 int arm_ac_bonus(otmp)
@@ -2056,7 +2093,7 @@ struct obj * otmp;
 	if (otmp->otyp == find_vhelm()) def += 1;
 	
 	// add material bonus
-	def += material_def_bonus(otmp, def);
+	def += material_def_bonus(otmp, def, TRUE);
 
 	// reduce by erosion
 	def -= min((int)greatest_erosion(otmp), def);
@@ -2140,7 +2177,7 @@ struct obj * otmp;
 	if (otmp->otyp == find_vhelm()) def += 1;
 	
 	// add material bonus
-	def += material_def_bonus(otmp, def);
+	def += material_def_bonus(otmp, def, FALSE);
 
 	// reduce by erosion
 	def -= min((int)greatest_erosion(otmp), def);
