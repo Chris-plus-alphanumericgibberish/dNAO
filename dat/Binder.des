@@ -44,6 +44,11 @@ OBJECT:'?',"scare monster",random,cursed,0
 OBJECT:'?',"scare monster",random,cursed,0
 OBJECT:'?',"scare monster",random,cursed,0
 
+OBJECT:'(',"doll of binding",random,cursed,0
+OBJECT:'(',"doll of binding",random,cursed,0
+OBJECT:'(',"doll of binding",random,cursed,0
+OBJECT:'(',"doll of binding",random,cursed,0
+OBJECT:'(',"doll of binding",random,cursed,0
 
 GEOMETRY:center,center
 #          1         2         3         4         5         6         7
@@ -281,14 +286,22 @@ MONSTER:'Z',"skeleton",(65,10)
 MONSTER:'Z',"skeleton",(65,08)
 
 MONSTER:'@',"prisoner",(13,00),peaceful
+OBJECT:'(',"doll of binding",(13,00)
 MONSTER:'@',"prisoner",(13,02),peaceful
+OBJECT:'(',"doll of binding",(13,02)
 MONSTER:'@',"prisoner",(13,04),peaceful
+OBJECT:'(',"doll of binding",(13,04)
 MONSTER:'@',"prisoner",(13,06),peaceful
+OBJECT:'(',"doll of binding",(13,06)
 
 MONSTER:'@',"prisoner",(23,00),peaceful
+OBJECT:'(',"doll of binding",(23,00)
 MONSTER:'@',"prisoner",(23,02),peaceful
+OBJECT:'(',"doll of binding",(23,02)
 MONSTER:'@',"prisoner",(23,04),peaceful
+OBJECT:'(',"doll of binding",(23,04)
 MONSTER:'@',"prisoner",(23,06),peaceful
+OBJECT:'(',"doll of binding",(23,05)
 
 # Doors
 
