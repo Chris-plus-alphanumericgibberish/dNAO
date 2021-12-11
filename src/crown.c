@@ -436,8 +436,12 @@ gcrownu()
 					break;
 			}
 
+			/* special-case: object already in your possession */
+			if (obj->where != OBJ_FREE) {
+				/* do nothing */;
+			}
 			/* special-case: place the crown on your brow */
-			if (arti == ART_CROWN_OF_THE_SAINT_KING || arti == ART_HELM_OF_THE_DARK_LORD) {
+			else if (arti == ART_CROWN_OF_THE_SAINT_KING || arti == ART_HELM_OF_THE_DARK_LORD) {
 				obj = hold_another_object(obj, 
 					"A %s appears at your feet", 
 					arti == ART_CROWN_OF_THE_SAINT_KING ? "crown" : "helm",
