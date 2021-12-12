@@ -6351,12 +6351,17 @@ doreinforce_binding()
 	menu_item *selected;
 	anything any;
 
+	/* validate that you have at least one binding to refresh */
+	if (!((u.spirit[QUEST_SPIRIT] && u.spiritT[QUEST_SPIRIT] > 0)
+		||(u.spirit[ALIGN_SPIRIT] && u.spiritT[ALIGN_SPIRIT] > 0)
+		|| u.sealCounts)) {
+		pline1(nothing_happens);
+		return FALSE;
+	}
+
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
-
-	Sprintf(buf, "Choose binding to refresh:");
-	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	
 	for(i=0;i<QUEST_SPIRIT && u.spirit[i];i++){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
@@ -6368,7 +6373,7 @@ doreinforce_binding()
 		incntlet++;
 	}
 	i = QUEST_SPIRIT;
-	if(u.spirit[i]){
+	if(u.spirit[i] && u.spiritT[i] > 0){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
 		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
@@ -6378,7 +6383,7 @@ doreinforce_binding()
 		incntlet++;
 	}
 	i = ALIGN_SPIRIT;
-	if(u.spirit[i]){
+	if(u.spirit[i] && u.spiritT[i] > 0){
 		j = decode_sealID(u.spirit[i]) - FIRST_SEAL;
 		Sprintf(buf, "%s, %ld", sealNames[j], u.spiritT[i] - monstermoves);
 		any.a_int = i+1;	/* must be non-zero */
@@ -6387,6 +6392,7 @@ doreinforce_binding()
 			MENU_UNSELECTED);
 		incntlet++;
 	}
+	end_menu(tmpwin, "Choose binding to refresh:");
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
