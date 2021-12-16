@@ -467,6 +467,7 @@ struct obj {
 #define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
 			 rakuyo_prop(otmp) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
+			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->otyp == BESTIAL_CLAW)
 #define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			otmp->oclass == TOOL_CLASS) && \
