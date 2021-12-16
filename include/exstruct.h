@@ -49,6 +49,7 @@ struct emin {
 	aligntyp min_align;	/* alignment of minion */
 	int godnum;			/* index of minion's god */
 };
+#define HAS_EMIN(mon)	((mon) && (mon)->mextra_p && (mon)->mextra_p->emin_p)
 #define EMIN(mon)	((mon)->mextra_p->emin_p)
 
 struct emon {

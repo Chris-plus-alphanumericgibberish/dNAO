@@ -53,25 +53,25 @@
 #define is_molochan(ptr)	((ptr)->maligntyp == A_NONE)
 #define is_voidalign(ptr)	((ptr)->maligntyp == A_VOID)
 #define is_lawful(ptr)		((ptr)->maligntyp > A_NEUTRAL && !is_molochan(ptr) && !is_voidalign(ptr))
+#define is_lawful_mon(mon) (HAS_EPRI(mon) ? EPRI(mon)->shralign == A_LAWFUL :\
+				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_LAWFUL :\
+				  is_lawful((mon)->data))
 #define is_neutral(ptr)		((ptr)->maligntyp == A_NEUTRAL)
+#define is_neutral_mon(mon) (HAS_EPRI(mon) ? EPRI(mon)->shralign == A_NEUTRAL :\
+				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_NEUTRAL :\
+				  is_neutral((mon)->data))
 #define is_chaotic(ptr)		((ptr)->maligntyp < A_NEUTRAL && !is_molochan(ptr) && !is_voidalign(ptr))
+#define is_chaotic_mon(mon) (HAS_EPRI(mon) ? EPRI(mon)->shralign == A_CHAOTIC :\
+				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_CHAOTIC :\
+				  is_chaotic((mon)->data))
 
 #define is_alabaster_mummy(ptr)	((ptr)->mtyp == PM_ALABASTER_MUMMY)
 
-#define is_lminion(mon)		(is_minion((mon)->data) && \
-				 (mon)->data->maligntyp > A_NEUTRAL && \
-				 ((mon)->mtyp != PM_ANGEL || \
-				  (HAS_EPRI(mon) && EPRI(mon)->shralign > 0)))
+#define is_lminion(mon)		(is_minion((mon)->data) && is_lawful_mon(mon))
 
-#define is_nminion(mon)		(is_minion((mon)->data) && \
-				 (mon)->data->maligntyp == A_NEUTRAL && \
-				 ((mon)->mtyp != PM_ANGEL || \
-				  (HAS_EPRI(mon) && EPRI(mon)->shralign == 0)))
+#define is_nminion(mon)		(is_minion((mon)->data) && is_neutral_mon(mon))
 
-#define is_cminion(mon)		(is_minion((mon)->data) && \
-				 (mon)->data->maligntyp < A_NEUTRAL && \
-				 ((mon)->mtyp != PM_ANGEL || \
-				 (HAS_EPRI(mon) && EPRI(mon)->shralign < 0)))
+#define is_cminion(mon)		(is_minion((mon)->data) && is_chaotic_mon(mon))
 
 #define notonline(ptr)			(((ptr)->mflagsm & MM_NOTONL) != 0L)
 #define fleetflee(ptr)			(((ptr)->mflagsm & MM_FLEETFLEE) != 0L)
