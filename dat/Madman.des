@@ -130,7 +130,7 @@ OBJECT[50%]: '0', "heavy iron ball", random
 NON_DIGGABLE:(25,00,43,18)
 
 MAZE: "Mad-home",'T'
-FLAGS: hardfloor
+FLAGS:noteleport,hardfloor
 #INIT_MAP: ' ' , ' ' , false , true , lit , false
 MESSAGE:"You've reached the main observation level."
 GEOMETRY:center,center
@@ -404,7 +404,7 @@ DOOR:closed,(43,02)
 #
 
 MAZE:"Mad-goal",' '
-FLAGS:hardfloor
+FLAGS:noteleport,hardfloor
 GEOMETRY:center,center
 #          1         2         3         4         5         6         7    7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
@@ -543,7 +543,7 @@ MONSTER:'@',"Doctor Archer",(49,09),hostile
 #
 
 MAZE:"Mad-fila",' '
-FLAGS:hardfloor
+FLAGS:noteleport,hardfloor
 
 GEOMETRY:center,center
 #          1         2         3         4         5         6         7    7
@@ -660,7 +660,7 @@ DOOR:closed,(28,15)
 DOOR:closed,(37,17)
 
 MAZE:"Mad-filb",' '
-FLAGS:hardfloor
+FLAGS:noteleport,hardfloor
 #INIT_MAP: ' ' , ' ', false, false, unlit, false
 
 GEOMETRY:center,center
