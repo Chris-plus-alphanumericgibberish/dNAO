@@ -1237,14 +1237,12 @@ moveloop()
 	if(didmove) {
 	    /* actual time passed */
 		if(u.umoved){
+			int step_cost = NORMAL_SPEED;
+			#define COST(val) step_cost = min(val, step_cost);
 			if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-				youmonst.movement -= 1;
-			} else if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
-				youmonst.movement -= 2;
+				COST(1)
 			} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
-				youmonst.movement -= 3;
-			} else if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
-				youmonst.movement -= 3;
+				COST(3)
 			} else if(uwep && uwep->oartifact == ART_TOBIUME){
 				if((HStealth&TIMEOUT) < 2)
 					set_itimeout(&HStealth, 2L);
@@ -1252,13 +1250,24 @@ moveloop()
 					set_itimeout(&HInvis, 2L);
 					newsym(u.ux, u.uy);
 				}
-				youmonst.movement -= 4;
-			} else {
-				youmonst.movement -= NORMAL_SPEED;
+				COST(4)
 			}
+			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
+				COST(3)
+			}
+			if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
+				COST(12 - artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod)
+				if(artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod < 10){
+					artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod += 2;
+				}
+			}
+			//Subtract the cost.
+			youmonst.movement -= step_cost;
+			#undef COST
 		} else {
 			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED)
 				u.ucspeed = NORM_CLOCKSPEED;
+			artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod = 0;
 			youmonst.movement -= NORMAL_SPEED;
 		}
 		if(Role_if(PM_MONK) && !Upolyd){

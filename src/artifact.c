@@ -8813,6 +8813,9 @@ arti_invoke(obj)
 			}
 			You("click your heels together and take a step... ");
 			jump(15);
+			// Set seven league boots to full speed as well
+			if(obj->oartifact == ART_SEVEN_LEAGUE_BOOTS)
+				artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod = 10;
 			break;
 		case CAPTURE_REFLECTION:
 			if(obj != ublindf && obj != uskin && obj != uwep) {
