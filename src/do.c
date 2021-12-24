@@ -380,8 +380,9 @@ register struct obj *obj;
 					goto giveback;
 				}
 			}
+			You("wish you hadn't done that.");
 		}
-		You("wish you hadn't done that.");
+		else You("kinda wish you hadn't done that.");
 		break;
 	    case RIN_SEARCHING:
 		You("thought your %s got lost in the sink, but there it is!",
