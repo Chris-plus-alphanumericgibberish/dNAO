@@ -1306,7 +1306,7 @@ moveloop()
 			if (!DEADMONSTER(mtmp)
 				&& mon_attacktype(mtmp, AT_WDGZ)
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
-				&& !(hideablewidegaze(mtmp->data) && (rn2(3) < magic_negation(mtmp)))
+				&& !(hideablewidegaze(mtmp->data) && hiddenwidegaze(mtmp))
 				&& couldsee(mtmp->mx, mtmp->my)
 			) m_widegaze(mtmp);
 		}

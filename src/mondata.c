@@ -2627,6 +2627,33 @@ struct monst *mon;
 	return mcon;
 }
 
+boolean
+hiddenwidegaze(magr)
+struct monst *magr;
+{
+	struct obj *cloak = which_armor(magr, W_ARMC);
+	if(magr->mtyp == PM_MEDUSA){
+		//Face
+		struct obj *helm = which_armor(magr, W_ARMH);
+		if((helm && is_opaque(helm) && FacelessHelm(helm))
+			|| (cloak && is_opaque(cloak) && FacelessCloak(cloak))
+		)
+			return TRUE;
+	}
+	else {
+		//Body shape
+		struct obj *armor = which_armor(magr, W_ARM);
+		struct obj *under = which_armor(magr, W_ARMU);
+		int mcan = 0;
+		if(cloak) mcan = objects[cloak->otyp].a_can;
+		if(armor) mcan = max(mcan, objects[armor->otyp].a_can);
+		if(under) mcan = max(mcan, objects[under->otyp].a_can);
+		if(rn2(3) < mcan)
+			return TRUE;
+	}
+	return FALSE;
+}
+
 #endif /* OVLB */
 
 /*mondata.c*/
