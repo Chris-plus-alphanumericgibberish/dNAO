@@ -1245,6 +1245,7 @@ char *buf;
 		if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, "lethe-rusted ");
 		if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, "acid-coated ");
 		if (obj->opoisoned & OPOISON_SILVER)  Strcat(buf, "silvered ");
+		if (obj->opoisoned & OPOISON_HALLU)  Strcat(buf, "ergot-coated ");
 		if (obj->otyp == VIPERWHIP && obj->opoisonchrgs) Sprintf(eos(buf), "(%d coatings) ", (int)(obj->opoisonchrgs + 1));
 	}
 }
@@ -2155,7 +2156,8 @@ weapon:
 					if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, ", venom injecting");
 					if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, ", lethe injecting");
 					if (obj->opoisoned & OPOISON_ACID) Strcat(buf, ", acid injecting");
-					if (obj->opoisoned & OPOISON_SILVER) Strcat(buf, ", silvered ");
+					if (obj->opoisoned & OPOISON_SILVER) Strcat(buf, ", star-water injecting ");
+					if (obj->opoisoned & OPOISON_HALLU) Strcat(buf, ", ergot injecting ");
 				}
 				Strcat(buf, ")");
 			}
@@ -2167,7 +2169,8 @@ weapon:
 				if (obj->opoisoned & OPOISON_PARAL) Strcat(buf, " (venom injecting)");
 				if (obj->opoisoned & OPOISON_AMNES) Strcat(buf, " (lethe injecting)");
 				if (obj->opoisoned & OPOISON_ACID)  Strcat(buf, " (acid injecting)");
-				if (obj->opoisoned & OPOISON_SILVER)  Strcat(buf, " (silvered)");
+				if (obj->opoisoned & OPOISON_SILVER)  Strcat(buf, " (star-water injecting)");
+				if (obj->opoisoned & OPOISON_HALLU)  Strcat(buf, " (ergot injecting)");
 			}
 			break;
 		case FOOD_CLASS:
@@ -3834,6 +3837,8 @@ int wishflags;
 			ispoisoned=OPOISON_ACID;
 		} else if(!strncmpi(bp, "silvered ",l=9)) {
 			ispoisoned=OPOISON_SILVER;
+		} else if(!strncmpi(bp, "ergot-coated ",l=13)) {
+			ispoisoned=OPOISON_SILVER;
 		} else if(!strncmpi(bp, "greased ",l=8)) {
 			isgreased=1;
 		} else if (!strncmpi(bp, "very ", l=5)) {
@@ -4042,6 +4047,8 @@ int wishflags;
 			mat = OBSIDIAN_MT;
 		} else if (!strncmpi(bp, "shadowsteel ", l=12)) {
 			mat = SHADOWSTEEL;
+		} else if (!strncmpi(bp, "mercurial ", l=10)) {
+			mat = MERCURIAL;
 		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)) {
 			add_oprop_list(oprop_list, OPROP_WOOL);
 

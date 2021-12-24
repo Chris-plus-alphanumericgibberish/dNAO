@@ -3124,6 +3124,9 @@ winid *datawin;
 				else if (poisons == OPOISON_SILVER) {
 					OBJPUTSTR("Coated with silver.");
 				}
+				else if (poisons == OPOISON_HALLU) {
+					OBJPUTSTR("Coated with hallucinogen.");
+				}
 				/* general mash-em-together poison */
 				else {
 					buf[0] = '\0';
@@ -3135,6 +3138,7 @@ winid *datawin;
 					if (poisons&OPOISON_AMNES)  {Strcat(buf, "amnesiac " );}
 					if (poisons&OPOISON_ACID)   {Strcat(buf, "acidic "   );}
 					if (poisons&OPOISON_SILVER) {Strcat(buf, "silver "   );}
+					if (poisons&OPOISON_HALLU) {Strcat(buf, "hallucinogenic "   );}
 					
 					Sprintf(buf2, "Coated with %spoison.", an(buf));
 					OBJPUTSTR(buf2);

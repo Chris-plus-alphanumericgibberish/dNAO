@@ -3513,6 +3513,10 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 				make_blinded(rn1(200, 250 - 125 * bcsign(otmp)),
 						 (boolean)!Blind);
 			}
+			if(otmp->opoisoned & OPOISON_HALLU){
+				pline ("Oh wow!  Great stuff!");
+				make_hallucinated(HHallucination + 200,FALSE,0L);
+			}
 			if(otmp->opoisoned & OPOISON_PARAL){
 				if (Free_action)
 					You("stiffen momentarily.");

@@ -13072,6 +13072,10 @@ int vis;						/* True if action is at all visible to the player */
 					silverobj |= slot;
 				majoreff = TRUE;
 				break;
+			case OPOISON_HALLU:
+				resists = youdef ? FALSE : (mindless_mon(mdef) || mon_resistance(mdef, HALLUC_RES));
+				majoreff = !rn2(2);
+				break;
 			}
 			if (!rn2(20) && poisonedobj && (poisonedobj->opoisoned & i))
 				poisons_wipedoff |= i;
@@ -15032,6 +15036,25 @@ int vis;						/* True if action is at all visible to the player */
 						pline("%s looks around as if awakening from a dream.", Monnam(mdef));
 					mdef->mtame = FALSE;
 					mdef->mpeaceful = TRUE;
+				}
+				break;
+			case OPOISON_HALLU:
+				if (youdef) {
+					boolean oldh = Hallucination;
+					boolean olds = Stunned;
+					make_hallucinated(itimeout_incr(HHallucination, 200), FALSE, 0L);
+					make_stunned(itimeout_incr(HStun, 200), FALSE);
+					if(Hallucination)
+						You("are freaked out!");
+					if(Stunned)
+						You("stagger.");
+
+				}
+				else {
+					if (canseemon(mdef))
+						pline("%s looks freaked out!", Monnam(mdef));
+					mdef->mberserk = TRUE;
+					mdef->mconf = TRUE;
 				}
 				break;
 			case OPOISON_ACID:

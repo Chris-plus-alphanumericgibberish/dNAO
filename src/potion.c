@@ -2982,6 +2982,24 @@ dodip()
 			}
 			obj->opoisoned = OPOISON_SILVER;
 			goto poof;
+	    } else if(potion->otyp == POT_HALLUCINATION && (!(obj->opoisoned & OPOISON_HALLU) || obj->otyp == VIPERWHIP)) {
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
+			if(obj->otyp != VIPERWHIP) obj->opoisoned = 0;
+			if(obj->otyp == VIPERWHIP) pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			else pline("%s forms a hallucinogenic coating on %s.",
+				  buf, the(xname(obj)));
+			if(obj->otyp == VIPERWHIP){
+				if(obj->opoisonchrgs && obj->opoisoned == OPOISON_HALLU) obj->opoisonchrgs += 2;
+				else obj->opoisonchrgs = 1;
+			}
+			obj->opoisoned = OPOISON_HALLU;
+			goto poof;
 	    } else if(obj->opoisoned &&
 			  (potion->otyp == POT_HEALING ||
 			   potion->otyp == POT_EXTRA_HEALING ||
@@ -3037,6 +3055,18 @@ dodip()
 			pline("%s is drawn up into %s.",
 				  buf, the(xname(obj)));
 			obj->opoisoned = OPOISON_PARAL;
+			obj->opoisonchrgs = 30;
+			goto poof;
+	    } else if(potion->otyp == POT_HALLUCINATION && (!obj->opoisoned || obj->opoisoned & OPOISON_HALLU)) {
+			char buf[BUFSZ];
+			if (potion->quan > 1L)
+				Sprintf(buf, "One of %s", the(xname(potion)));
+			else
+				Strcpy(buf, The(xname(potion)));
+			obj->opoisoned = 0;
+			pline("%s is drawn up into %s.",
+				  buf, the(xname(obj)));
+			obj->opoisoned = OPOISON_HALLU;
 			obj->opoisonchrgs = 30;
 			goto poof;
 	    } else if((potion->otyp == POT_ACID ||

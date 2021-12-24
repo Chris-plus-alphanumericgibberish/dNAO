@@ -230,15 +230,16 @@ struct obj {
 	
 	int opoisoned; /* poisons smeared on the weapon*/
 #define OPOISON_NONE	0x00
-#define OPOISON_BASIC	0x01 /* Deadly Poison */
-#define OPOISON_FILTH	0x02 /* Deadly Sickness */
-#define OPOISON_SLEEP	0x04 /* Sleeping Poison */
-#define OPOISON_BLIND	0x08 /* Blinding Poison */
-#define OPOISON_PARAL	0x10 /* Paralysis Poison */
-#define OPOISON_AMNES	0x20 /* Amnesia Poison */
-#define OPOISON_ACID	0x40 /* Acid coating */
-#define OPOISON_SILVER	0x80 /* Silver coating */
-#define NUM_POISONS		8	/* number of specifiable poison coatings */
+#define OPOISON_BASIC	0x001 /* Deadly Poison */
+#define OPOISON_FILTH	0x002 /* Deadly Sickness */
+#define OPOISON_SLEEP	0x004 /* Sleeping Poison */
+#define OPOISON_BLIND	0x008 /* Blinding Poison */
+#define OPOISON_PARAL	0x010 /* Paralysis Poison */
+#define OPOISON_AMNES	0x020 /* Amnesia Poison */
+#define OPOISON_ACID	0x040 /* Acid coating */
+#define OPOISON_SILVER	0x080 /* Silver coating */
+#define OPOISON_HALLU	0x100 /* Hallucination coating */
+#define NUM_POISONS		9	/* number of specifiable poison coatings */
 
 	unsigned long int oproperties[OPROP_LISTSIZE];/* special properties */
 
