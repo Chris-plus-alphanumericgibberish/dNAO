@@ -7990,12 +7990,10 @@ int faction;
 					mtmp->entangled = SHACKLES;
 					return;
 				} //else
-				otmp = mksobj(ROBE, mkobjflags|MKOBJ_NOINIT);
-				bless(otmp);
-				otmp->oerodeproof = TRUE;
-				(void) mpickobj(mtmp, otmp);
+				otmp = mongets(mtmp, rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
+				if(otmp) otmp->oerodeproof = TRUE;
 			} else if(ptr->mtyp == PM_HARROWER_OF_ZARIEL){
-				otmp = mksobj(ROBE, mkobjflags|MKOBJ_NOINIT);
+				otmp = mksobj(rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
 				otmp->oeroded3 = 3;
 				otmp->oeroded = 1;
 				otmp->spe = 7;
