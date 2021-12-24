@@ -2561,6 +2561,11 @@ struct obj *otmp;
 			if(ACURR(A_WIS) == 25) bonus += 8;
 			else bonus += (ACURR(A_WIS)-10)/2;
 		}
+		if(otmp->oartifact == ART_IBITE_ARM && u.umaniac){
+			//Combine mechanics: Gets a bonus from your bare-handed stuff.
+			if(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
+				bonus += rnd(ACURR(A_CHA)/5 + weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2);
+		}
 	}
 	
 	return bonus;
