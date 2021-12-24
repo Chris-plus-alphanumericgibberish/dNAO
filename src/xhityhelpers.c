@@ -1524,6 +1524,29 @@ struct obj * otmp;
 			dmg += vd(ndice, diesize);
 	}
 
+	if (hates_lawful_mon(mdef) &&
+		otmp->obj_material == PLATINUM &&
+		!(is_lightsaber(otmp) && litsaber(otmp))
+	) {
+		/* default: 1d5 */
+		ndice = 1;
+		diesize = 5;
+		/* spiritual beings are hurt more */
+		if(is_minion(mdef->data) || is_demon(mdef->data))
+			diesize *= 2;
+		/* strongly chaotic beings are hurt more */
+		if(mdef->mtyp == PM_ANGEL || mdef->data->maligntyp <= -10)
+			diesize *= 2;
+
+		/* special cases */
+		
+		if (otmp->otyp == KHAKKHARA)
+			ndice *= khakharadice;
+		/* calculate */
+		if (ndice)
+			dmg += vd(ndice, diesize);
+	}
+
 	/* the Rod of Seven Parts gets a bonus vs holy and unholy when uncursed */
 	if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS
 		&& !otmp->blessed && !otmp->cursed

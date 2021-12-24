@@ -1264,7 +1264,7 @@ A("The Wallet of Perseus",			BAG_OF_HOLDING,			(const char *)0,
 /*//////////Law Quest Artifacts//////////*/
 
 A("The Rod of Seven Parts",			SPEAR,					(const char *)0,
-	7777L, METAL, MZ_DEFAULT, WT_DEFAULT,
+	7777L, METAL, PLATINUM, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_INHER),
 	NO_MONS(),
 	ATTK(AD_PHYS, 7, 20), (ARTA_HATES|ARTA_CROSSA),

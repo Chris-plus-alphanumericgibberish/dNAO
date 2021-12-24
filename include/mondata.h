@@ -626,6 +626,10 @@
 #define hates_unblessed_mon(mon)	((mon) == &youmonst ? hates_unblessed(youracedata) : hates_unblessed((mon)->data))
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
 #define hates_iron(ptr)		((ptr->mflagsg&MG_HATESIRON) != 0)
+#define hates_lawful(ptr)		(is_chaotic(ptr) || (ptr)->mtyp == PM_UVUUDAUM)
+#define hates_lawful_mon(mon)	((mon) == &youmonst ? u.ualign.type == A_CHAOTIC : (HAS_EPRI(mon) ? EPRI(mon)->shralign == A_CHAOTIC :\
+				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_CHAOTIC :\
+				  hates_lawful((mon)->data)))
 
 #define melee_polearms(ptr)	((ptr)->mtyp == PM_VROCK ||\
 							 (ptr)->mtyp == PM_MEPHISTOPHELES ||\
