@@ -713,14 +713,14 @@ boolean msgs;
 		    u.utrap = 0;
 		if (oldobjs != newobjs)	/* something unearthed */
 			(void) pickup(1);	/* detects pit */
-	    } else if(mtmp) {
-		if(mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION)) {
-		    if(canseemon(mtmp))
-			pline("%s %s over the pit.", Monnam(mtmp),
-						     (mon_resistance(mtmp,FLYING)) ?
-						     "flies" : "floats");
-		} else if(mtmp != madeby)
-		    (void) mintrap(mtmp);
+	    } else if(mtmp && !DEADMONSTER(mtmp)) {
+			if(mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION)) {
+				if(canseemon(mtmp))
+				pline("%s %s over the pit.", Monnam(mtmp),
+								 (mon_resistance(mtmp,FLYING)) ?
+								 "flies" : "floats");
+			} else if(mtmp != madeby)
+				(void) mintrap(mtmp);
 	    }
 	} else {	/* was TRAPDOOR now a HOLE*/
 
@@ -766,7 +766,7 @@ boolean msgs;
 		if (shopdoor && madeby_u) pay_for_damage("ruin", FALSE);
 		if (newobjs)
 		    impact_drop((struct obj *)0, x, y, 0);
-		if (mtmp) {
+		if (mtmp && !DEADMONSTER(mtmp)) {
 		     /*[don't we need special sokoban handling here?]*/
 		    if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
 		        mtmp->mtyp == PM_WUMPUS ||
