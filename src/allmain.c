@@ -436,11 +436,11 @@ STATIC_OVL
 void
 clothes_bite_you()
 {
-	struct obj * uarmor[] = WORN_SLOTS;
+	struct obj * uequip[] = WORN_SLOTS;
 	int i;
-	for (i = 0; i < SIZE(uarmor); i++) {
-		if (uarmor[i] && (uarmor[i]->olarva)) {
-			held_item_bites(&youmonst, uarmor[i]);
+	for (i = 0; i < SIZE(uequip); i++) {
+		if (uequip[i] && (uequip[i]->olarva)) {
+			held_item_bites(&youmonst, uequip[i]);
 			if(multi >= 0) {
 				if (occupation)
 					stop_occupation();
