@@ -17192,7 +17192,11 @@ monk_moves()
 		}
 		break;
 		case AURA_BOLT:
-		if((!uwep || is_monk_weapon(uwep)) && (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep)) && beam_monk_target()){
+		if((!uwep || is_monk_weapon(uwep)) 
+			&& (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep)) 
+			&& u.uz.dlevel != spire_level.dlevel 
+			&& beam_monk_target()
+		){
 			pline("Aura bolt!");
 			monk_aura_bolt();
 			DID_MOVE
