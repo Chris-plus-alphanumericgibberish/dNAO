@@ -6119,7 +6119,7 @@ arti_invoke(obj)
 	break;
 	case TELEPORT_SHOES:
 		if(obj->owornmask){
-			if(level.flags.noteleport && obj->oartifact == ART_CLOAK_OF_THE_UNHELD_ONE){
+			if(notel_level() && obj->oartifact == ART_CLOAK_OF_THE_UNHELD_ONE){
 				if(!u.uhave.amulet){
 					if(Can_rise_up(u.ux, u.uy, &u.uz)){
 						int newlev = depth(&u.uz)-1;

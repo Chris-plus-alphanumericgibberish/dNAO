@@ -682,7 +682,7 @@ tele()
 	coord cc;
 
 	/* Disable teleportation in stronghold && Vlad's Tower */
-	if (level.flags.noteleport) {
+	if (notel_level()) {
 #ifdef WIZARD
 		if (!wizard) {
 #endif
@@ -1430,7 +1430,7 @@ boolean
 tele_restrict(mon)
 struct monst *mon;
 {
-	if (level.flags.noteleport) {
+	if (notel_level()) {
 		if (canseemon(mon))
 		    pline("A mysterious force prevents %s from teleporting!",
 			mon_nam(mon));
@@ -1714,7 +1714,7 @@ boolean give_feedback;
 	    if (give_feedback)
 		pline("%s resists your magic!", Monnam(mtmp));
 	    return FALSE;
-	} else if (level.flags.noteleport && u.uswallow && mtmp == u.ustuck) {
+	} else if (notel_level() && u.uswallow && mtmp == u.ustuck) {
 	    if (give_feedback)
 		You("are no longer inside %s!", mon_nam(mtmp));
 	    unstuck(mtmp);

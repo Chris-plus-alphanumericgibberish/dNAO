@@ -1135,7 +1135,7 @@ register struct monst *mtmp;
 		&& !rn2(40)
 		&& !mtmp->iswiz
 		&& !(noactions(mtmp))
-		&& !level.flags.noteleport
+		&& !notel_level()
 	) {
 		if (rloc(mtmp, TRUE))
 			return(0);
@@ -2261,7 +2261,7 @@ not_special:
 	else flag |= ALLOW_U;
 	if (is_minion(ptr) || is_rider(ptr)) flag |= ALLOW_SANCT;
 	/* unicorn may not be able to avoid hero on a noteleport level */
-	if (notonline(ptr) && ((mon_resistance(mtmp,TELEPORT) || is_unicorn(ptr)) && !level.flags.noteleport)) flag |= NOTONL;
+	if (notonline(ptr) && ((mon_resistance(mtmp,TELEPORT) || is_unicorn(ptr)) && !notel_level())) flag |= NOTONL;
 	if (mon_resistance(mtmp,PASSES_WALLS)) flag |= (ALLOW_WALL | ALLOW_ROCK);
 	if (passes_bars(mtmp) && !Is_illregrd(&u.uz) ) flag |= ALLOW_BARS;
 	if (can_tunnel) flag |= ALLOW_DIG;

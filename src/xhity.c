@@ -15255,10 +15255,10 @@ int vis;						/* True if action is at all visible to the player */
 		if (canseemon(mdef)) {
 			pline("%s %s reality!",
 				Monnam(mdef),
-				level.flags.noteleport ? "tries to warp" : "warps"
+				notel_level() ? "tries to warp" : "warps"
 				);
 		}
-		if (!level.flags.noteleport) {
+		if (!notel_level()) {
 			coord cc;
 			if (magr) {
 				if (youagr) {

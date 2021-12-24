@@ -3682,7 +3682,7 @@ drown()
 	if ((Teleportation || mon_resistance(&youmonst,TELEPORT)) &&
 		    !u.usleep && (Teleport_control || rn2(3) < Luck+2)) {
 		You("attempt a teleport spell.");	/* utcsri!carroll */
-		if (!level.flags.noteleport) {
+		if (!notel_level()) {
 			(void) dotele();
 			if(!is_pool(u.ux,u.uy, FALSE))
 				return(TRUE);

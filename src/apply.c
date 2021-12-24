@@ -5294,7 +5294,7 @@ do_break_wand(obj)
     case WAN_TELEPORTATION:
 		/* WAC make tele trap if you broke a wand of teleport */
 		/* But make sure the spot is valid! */
-	    if ((obj->spe > 2) && rn2(obj->spe - 2) && !level.flags.noteleport &&
+	    if ((obj->spe > 2) && rn2(obj->spe - 2) && !notel_level() &&
 		    !u.uswallow && !On_stairs(u.ux, u.uy) && (!IS_FURNITURE(levl[u.ux][u.uy].typ) &&
 		    !IS_ROCK(levl[u.ux][u.uy].typ) &&
 		    !closed_door(u.ux, u.uy) && !t_at(u.ux, u.uy))) {
