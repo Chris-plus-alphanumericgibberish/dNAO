@@ -1190,7 +1190,9 @@ register struct obj *obj;
 		break;
 	      case SPBOOK_CLASS:
 		if (obj->otyp != SPE_CANCELLATION &&
-			obj->otyp != SPE_BOOK_OF_THE_DEAD) {
+			obj->otyp != SPE_BOOK_OF_THE_DEAD &&
+			!obj->oartifact
+		){
 		    costly_cancel(obj);
 		    obj->otyp = SPE_BLANK_PAPER;
 			obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
