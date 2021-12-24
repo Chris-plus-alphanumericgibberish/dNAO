@@ -45,8 +45,7 @@ boolean
 is_home_elemental(ptr)
 register struct permonst *ptr;
 {
-	if (ptr->mlet == S_ELEMENTAL)
-	    switch (monsndx(ptr)) {
+	if (ptr->mlet == S_ELEMENTAL) switch (monsndx(ptr)) {
 		case PM_AIR_ELEMENTAL: return Is_airlevel(&u.uz);
 		case PM_LIGHTNING_PARAELEMENTAL: return Is_airlevel(&u.uz);
 		case PM_FIRE_ELEMENTAL: return Is_firelevel(&u.uz);
@@ -55,7 +54,9 @@ register struct permonst *ptr;
 		case PM_ACID_PARAELEMENTAL: return Is_earthlevel(&u.uz);
 		case PM_WATER_ELEMENTAL: return Is_waterlevel(&u.uz);
 		case PM_ICE_PARAELEMENTAL: return Is_waterlevel(&u.uz);
-		}
+	}
+	else if((ptr->mlet == S_CHA_ANGEL || ptr->mlet == S_NEU_ANGEL || ptr->mlet == S_LAW_ANGEL ) && is_minion(ptr))
+		return Is_astralevel(&u.uz);
 	return FALSE;
 }
 
