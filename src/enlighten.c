@@ -1191,6 +1191,8 @@ resistances_enlightenment()
 		putstr(en_win, 0, "You periodically struggle with insanity.");
 	else if(u.usanity < 75)
 		putstr(en_win, 0, "You occasionally struggle with insanity.");
+	else if(u.usanity < 90)
+		putstr(en_win, 0, "You rarely struggle with insanity.");
 	else if(u.usanity < 100)
 		putstr(en_win, 0, "You are a little touched in the head.");
 	
