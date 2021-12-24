@@ -1536,6 +1536,7 @@ int faction;
 				} else if(mm == PM_CELEBORN){
 					/*Plate Mail*/
 					otmp = mksobj(HIGH_ELVEN_WARSWORD, mkobjflags);
+					add_oprop(otmp, OPROP_WRTHW);
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					otmp->spe = 7;
