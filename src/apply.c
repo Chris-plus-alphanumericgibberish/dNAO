@@ -6977,7 +6977,7 @@ doapply()
 		return do_carve_obj(obj);
 	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);
-	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) use_lamp(obj);
+	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && !u.veil) use_lamp(obj);
 	else if(obj->oartifact == ART_BLOODLETTER && artinstance[obj->oartifact].BLactive >= monstermoves) res = do_bloodletter(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
 	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
