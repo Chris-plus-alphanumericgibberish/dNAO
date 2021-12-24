@@ -28,6 +28,7 @@ STATIC_DCL struct permonst * NDECL(roguemonst);
 STATIC_DCL boolean FDECL(wrong_elem_type, (struct permonst *));
 STATIC_DCL void FDECL(m_initthrow,(struct monst *, int, int, int));
 STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int));
+STATIC_DCL int FDECL(permonst_max_lev,(struct permonst *));
 #ifdef OVL1
 STATIC_DCL void FDECL(m_initinv,(struct monst *, int, int));
 #endif /* OVL1 */
@@ -9379,8 +9380,14 @@ int faction;
 	if (ptr->mtyp == urole.ldrnum)
 	    quest_status.leader_m_id = mtmp->m_id;
 	mtmp->m_lev = adj_lev(ptr);
+	
+	if(is_eladrin(ptr) && mtmp->m_lev <= u.ulevel){
+		int delta = (u.ulevel - mtmp->m_lev) + 1;
+		mtmp->m_lev += rnd(delta*2) - delta;
+	}
+	
 	mtmp->m_insight_level = 0;
-		
+
 	if(mtmp->mtyp == PM_LURKING_ONE)
 		mtmp->m_insight_level = 20+rn2(21);
 	else if(mtmp->mtyp == PM_BLASPHEMOUS_LURKER)
@@ -11121,6 +11128,10 @@ adj_lev(ptr)	/* adjust strength of monsters based on u.uz and u.ulevel */
 register struct permonst *ptr;
 {
 	int	tmp, tmp2;
+	int scaling_mult = 1;
+	if(is_eladrin(ptr)){
+		scaling_mult = 2;
+	}
 
 	if (ptr->mtyp == PM_WIZARD_OF_YENDOR) {
 		/* does not depend on other strengths, but does get stronger
@@ -11137,12 +11148,12 @@ register struct permonst *ptr;
 	}
 	tmp2 = (level_difficulty() - tmp);
 	if(tmp2 < 0) tmp--;		/* if mlevel > u.uz decrement tmp */
-	else tmp += (tmp2 / 5);		/* else increment 1 per five diff */
+	else tmp += ((scaling_mult*tmp2) / 5);		/* else increment 1 per five diff */
 
 	tmp2 = (u.ulevel - ptr->mlevel);	/* adjust vs. the player */
-	if(tmp2 > 0) tmp += (tmp2 / 4);		/* level as well */
+	if(tmp2 > 0) tmp += ((scaling_mult*tmp2) / 4);		/* level as well */
 
-	tmp2 = (3 * ((int) ptr->mlevel))/ 2;	/* crude upper limit */
+	tmp2 = permonst_max_lev(ptr);	/* crude upper limit */
 	if (tmp2 > 49) tmp2 = 49;		/* hard upper limit */
 	return((tmp > tmp2) ? tmp2 : (tmp > 0 ? tmp : 0)); /* 0 lower limit */
 }
@@ -11300,9 +11311,9 @@ struct monst *mtmp, *victim;
 	     */
 	    hp_threshold = mtmp->m_lev * 8;		/* normal limit */
 	    if (!mtmp->m_lev)
-		hp_threshold = 4;
+			hp_threshold = 4;
 	    else if (is_golem(ptr))	/* strange creatures */
-		hp_threshold = ((mtmp->mhpmax / 10) + 1) * 10 - 1;
+			hp_threshold = ((mtmp->mhpmax / 10) + 1) * 10 - 1;
 	    else if (is_home_elemental(ptr) || 
 			ptr->mtyp == PM_DARKNESS_GIVEN_HUNGER ||
 			ptr->mtyp == PM_WATCHER_IN_THE_WATER ||
@@ -11323,7 +11334,10 @@ struct monst *mtmp, *victim;
 		else if(ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) hp_threshold *= 10;
 		else if(ptr->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) hp_threshold *= 10;
 		else if(ptr->mtyp == PM_CHOKHMAH_SEPHIRAH) hp_threshold *= u.chokhmah;
-	    lev_limit = 3 * (int)ptr->mlevel / 2;	/* same as adj_lev() */
+	    lev_limit = permonst_max_lev(ptr);
+
+		if (mtmp->ispolyp) lev_limit = max(lev_limit, 30);
+
 	    /* If they can grow up, be sure the level is high enough for that */
 	    if (oldtype != newtype && mons[newtype].mlevel > lev_limit)
 		lev_limit = (int)mons[newtype].mlevel;
@@ -11358,11 +11372,11 @@ struct monst *mtmp, *victim;
 		}
 	} else {
 	    /* a gain level potion or wraith corpse; always go up a level
-	       unless already at maximum (49 is hard upper limit except
-	       for demon lords, who start at 50 and can't go any higher) */
+	       unless already at maximum (30 is player limt, so assume it is
+		   the inate limit of gain level potions) */
 	    max_increase = cur_increase = rnd(8);
 	    hp_threshold = 0;	/* smaller than `mhpmax + max_increase' */
-	    lev_limit = 50;		/* recalc below */
+	    lev_limit = max(30, mtmp->m_lev);
 	}
 
 	mtmp->mhpmax += max_increase;
@@ -11370,34 +11384,6 @@ struct monst *mtmp, *victim;
 	if (mtmp->mhpmax <= hp_threshold)
 	    return ptr;		/* doesn't gain a level */
 
-	if(ptr->mtyp == PM_SECRET_WHISPERER || ptr->mtyp == PM_TRUTH_SEER 
-	|| ptr->mtyp == PM_DREAM_EATER || ptr->mtyp == PM_VEIL_RENDER
-	)
-		lev_limit = min(45, u.uinsight);
-
-	if (is_mplayer(ptr) || ptr->mtyp == PM_BYAKHEE || ptr->mtyp == PM_LILLEND || ptr->mtyp == PM_ERINYS || ptr->mtyp == PM_MAID
-	|| ptr->mtyp == PM_CROW_WINGED_HALF_DRAGON || ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY
-	|| ptr->mtyp == PM_UNDEAD_KNIGHT || ptr->mtyp == PM_WARRIOR_OF_SUNLIGHT
-	|| ptr->mtyp == PM_UNDEAD_MAIDEN || ptr->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
-	|| ptr->mtyp == PM_BLUE_SENTINEL || ptr->mtyp == PM_DARKMOON_KNIGHT
-	|| ptr->mtyp == PM_UNDEAD_REBEL || ptr->mtyp == PM_PARDONER || ptr->mtyp == PM_OCCULTIST
-	|| ptr->mtyp == PM_FORMIAN_CRUSHER
-	|| ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_SPROW
-	|| ptr->mtyp == PM_DROW_MATRON || ptr->mtyp == PM_DROW_MATRON_MOTHER
-	|| ptr->mtyp == PM_ELVENKING || ptr->mtyp == PM_ELVENQUEEN
-	|| ptr->mtyp == PM_CUPRILACH_RILMANI || ptr->mtyp == PM_STANNUMACH_RILMANI
-	|| ptr->mtyp == PM_ARGENACH_RILMANI || ptr->mtyp == PM_AURUMACH_RILMANI
-	|| ptr->mtyp == PM_ANDROID || ptr->mtyp == PM_GYNOID || ptr->mtyp == PM_OPERATOR || ptr->mtyp == PM_COMMANDER
-	) lev_limit = 30;	/* same as player */
-	else if (ptr->mtyp == PM_PLUMACH_RILMANI || ptr->mtyp == PM_FERRUMACH_RILMANI) lev_limit = 20;
-	else if (is_eladrin(ptr) && ptr->mlevel <= 20) lev_limit = 30;
-	else if (ptr->mtyp == PM_OONA) lev_limit = 60;
-	else if (is_ancient(ptr)) lev_limit = 45;
-	else if (lev_limit < 5) lev_limit = 5;	/* arbitrary */
-	else if (lev_limit > 49) lev_limit = (ptr->mlevel > 49 ? ptr->mlevel : 49);
-
-	if (mtmp && mtmp->ispolyp) lev_limit = max(lev_limit, 30);
-	
 	if ((int)++mtmp->m_lev >= mons[newtype].mlevel && newtype != oldtype) {
 	    ptr = &mons[newtype];
 	    if (mvitals[newtype].mvflags & G_GENOD && !In_quest(&u.uz)) {	/* allow G_EXTINCT */
@@ -12058,6 +12044,41 @@ init_doll_sales()
 	for(i = rn1(3, SIZE(dolltypes)/2); i > 0; i--)
 		dollTypes |= dolltypes[i];
 	return dollTypes;
+}
+
+int
+permonst_max_lev(ptr)
+struct permonst *ptr;
+{
+	int lev_limit = 3 * (int)ptr->mlevel / 2;
+
+	if(ptr->mtyp == PM_SECRET_WHISPERER || ptr->mtyp == PM_TRUTH_SEER 
+	|| ptr->mtyp == PM_DREAM_EATER || ptr->mtyp == PM_VEIL_RENDER
+	)
+		lev_limit = min(45, u.uinsight);
+
+	if (is_mplayer(ptr) || ptr->mtyp == PM_BYAKHEE || ptr->mtyp == PM_LILLEND || ptr->mtyp == PM_ERINYS || ptr->mtyp == PM_MAID
+	|| ptr->mtyp == PM_CROW_WINGED_HALF_DRAGON || ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY
+	|| ptr->mtyp == PM_UNDEAD_KNIGHT || ptr->mtyp == PM_WARRIOR_OF_SUNLIGHT
+	|| ptr->mtyp == PM_UNDEAD_MAIDEN || ptr->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
+	|| ptr->mtyp == PM_BLUE_SENTINEL || ptr->mtyp == PM_DARKMOON_KNIGHT
+	|| ptr->mtyp == PM_UNDEAD_REBEL || ptr->mtyp == PM_PARDONER || ptr->mtyp == PM_OCCULTIST
+	|| ptr->mtyp == PM_FORMIAN_CRUSHER
+	|| ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_SPROW
+	|| ptr->mtyp == PM_DROW_MATRON || ptr->mtyp == PM_DROW_MATRON_MOTHER
+	|| ptr->mtyp == PM_ELVENKING || ptr->mtyp == PM_ELVENQUEEN
+	|| ptr->mtyp == PM_CUPRILACH_RILMANI || ptr->mtyp == PM_STANNUMACH_RILMANI
+	|| ptr->mtyp == PM_ARGENACH_RILMANI || ptr->mtyp == PM_AURUMACH_RILMANI
+	|| ptr->mtyp == PM_ANDROID || ptr->mtyp == PM_GYNOID || ptr->mtyp == PM_OPERATOR || ptr->mtyp == PM_COMMANDER
+	) lev_limit = 30;	/* same as player */
+	else if (ptr->mtyp == PM_PLUMACH_RILMANI || ptr->mtyp == PM_FERRUMACH_RILMANI) lev_limit = 20;
+	else if (is_eladrin(ptr) && ptr->mlevel <= 20) lev_limit = 30;
+	else if (ptr->mtyp == PM_OONA) lev_limit = 60;
+	else if (is_ancient(ptr)) lev_limit = 45;
+	else if (lev_limit < 5) lev_limit = 5;	/* arbitrary */
+	else if (lev_limit > 49) lev_limit = (ptr->mlevel > 49 ? ptr->mlevel : 49);
+	
+	return lev_limit;
 }
 #endif /* OVLB */
 
