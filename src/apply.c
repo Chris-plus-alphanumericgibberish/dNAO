@@ -5932,7 +5932,7 @@ struct obj *otmp;
 			otmp->oeroded3--;
 			return;
 		}
-		else if((otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && otmp->spe <= speLevel){
+		else if(is_enchantable(otmp) && otmp->spe <= speLevel){
 			otmp->spe = min(3, otmp->spe+2);
 			return;
 		}

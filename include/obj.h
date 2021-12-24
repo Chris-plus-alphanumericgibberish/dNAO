@@ -525,6 +525,7 @@ struct obj {
 				 objects[otmp->otyp].oc_skill <= -P_DART) ||\
 				 objects[otmp->otyp].oc_skill == -P_SLING)\
 			 )
+#define is_enchantable(o) ((o)->oclass == ARMOR_CLASS || (o)->oclass == WEAPON_CLASS || is_weptool(o))
 #define is_weptool(o)	((o)->oclass == TOOL_CLASS && \
 			 objects[(o)->otyp].oc_skill != P_NONE)
 #define is_worn_tool(o)	((o)->otyp == BLINDFOLD || (o)->otyp == ANDROID_VISOR || \
