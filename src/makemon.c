@@ -7681,6 +7681,18 @@ int faction;
 		if (ptr->mtyp == PM_DEATH_KNIGHT){
 			(void)mongets(mtmp, RUNESWORD, mkobjflags);
 			(void)mongets(mtmp, PLATE_MAIL, mkobjflags);
+		} else if (ptr->mtyp == PM_BAELNORN){
+			mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
+			otmp = mongets(mtmp, ROBE, mkobjflags);
+			if(otmp){
+				set_material_gm(otmp, VEGGY);
+			}
+			mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
+			mongets(mtmp, HIGH_ELVEN_GAUNTLETS, mkobjflags);
+			otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+			if(otmp){
+				set_material_gm(otmp, MITHRIL);
+			}
 		} else if (ptr->mtyp == PM_MASTER_LICH && !rn2(13))
 			(void)mongets(mtmp, (rn2(7) ? ATHAME : WAN_NOTHING), mkobjflags);
 		else if (ptr->mtyp == PM_ARCH_LICH && !rn2(3)) {
