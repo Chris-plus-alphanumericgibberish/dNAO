@@ -2112,22 +2112,37 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}	
 	}
 	
-	/* the bestial claw combined with the beast's embrace allows for a powerful extra claw attk */
-	if (youagr && uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE)) {
-		if (attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) {
-			/* replace the attack */
-			attk->aatyp = AT_CLAW;
-			attk->adtyp = AD_PHYS;
-			attk->damn = 1+u.ulevel/8; // from 1 to 4 dice, hitting 4 at xp 24+
-			
-			// scales inversely with insight, insight-based size is 15->5, 40->1, 60->0
-			// total dice assuming +7 and xp30 is 4d12 / 4d8 / 4d7 at insight 15/40/60
-			attk->damd = max(uwep->spe, 1);
-			if (u.uinsight <= 60)
-				attk->damd += (int)(((60.0-u.uinsight)/20.0)*((60.0-u.uinsight)/20.0));
+	/* the bestial claw combined with the beast's embrace (or insanity for monsters) allows for a powerful extra claw attk */
+	{
+	struct obj * otmp = (youagr ? uwep : MON_WEP(magr));
+	if(otmp){
+		if (youagr && otmp->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE)) {
+			if (attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) {
+				/* replace the attack */
+				attk->aatyp = AT_CLAW;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1+u.ulevel/8; // from 1 to 4 dice, hitting 4 at xp 24+
+				
+				// scales inversely with insight, insight-based size is 15->5, 40->1, 60->0
+				// total dice assuming +7 and xp30 is 4d12 / 4d8 / 4d7 at insight 15/40/60
+				attk->damd = max(otmp->spe, 1);
+				attk->damd += (int)((Insanity/30.0)*(Insanity/30.0) + 0.5);
 
-			/* this is applied to all acceptable attacks; no subout marker is necessary */
-		}	
+				/* this is applied to all acceptable attacks; no subout marker is necessary */
+			}	
+		}
+		else if (!youagr && otmp->otyp == BESTIAL_CLAW && magr->mcrazed) {
+			if (attk->aatyp == AT_XWEP) {
+				/* replace the attack */
+				attk->aatyp = AT_CLAW;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1+min(5, magr->m_lev/8); // from 1 to 6 dice, hitting 6 at xp 40+
+				
+				attk->damd = max(otmp->spe, 1) + magr->mberserk ? 11 : 3;
+				/* this is applied to all acceptable attacks; no subout marker is necessary */
+			}	
+		}
+	}
 	}
 	
 

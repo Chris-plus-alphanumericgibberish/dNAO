@@ -49,6 +49,7 @@ long int thought;
 {
 	if ((count_glyphs() >= MAX_GLYPHS) ||
 		(u.thoughts & thought) ||
+		(u.veil) ||
 		(u.uinsight < glyph_insight(thought)) ||
 		(u.usanity > glyph_sanity(thought))
 		)
@@ -121,6 +122,8 @@ long int thought;
 {
 	if (!(u.thoughts&thought))
 		return FALSE;
+	if (u.veil)
+		return FALSE;
 	if (u.uinsight >= glyph_insight(thought) && u.usanity <= glyph_sanity(thought))
 		return TRUE;
 	return FALSE;
@@ -133,6 +136,8 @@ int oldinsight;
 int oldsanity;
 {
 	if (!(u.thoughts&thought))
+		return FALSE;
+	if (u.veil)
 		return FALSE;
 	if (oldinsight >= glyph_insight(thought) && oldsanity <= glyph_sanity(thought))
 		return TRUE;

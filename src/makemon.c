@@ -7000,6 +7000,7 @@ int faction;
 				(void) mpickobj(mtmp, otmp);
 				
 				if (!rn2(3)){
+					mtmp->mcrazed = TRUE;
 					otmp = mksobj(BEAST_S_EMBRACE_GLYPH, mkobjflags);
 					(void) mpickobj(mtmp, otmp);
 				}
@@ -7136,6 +7137,7 @@ int faction;
 					(void) mpickobj(mtmp, otmp);
 				
 					if (!rn2(4)){
+						mtmp->mcrazed = TRUE;
 						otmp = mksobj(BEAST_S_EMBRACE_GLYPH, mkobjflags);
 						(void) mpickobj(mtmp, otmp);
 					}

@@ -2875,8 +2875,7 @@ int * truedmgptr;
 		(otmp->oartifact == ART_FIRE_BRAND) ||
 		(otmp->oartifact == ART_FROST_BRAND)
 		)
-		)
-	{
+	){
 		int multiplier = 1;
 		int dmgtomulti = basedmg;
 
@@ -4166,6 +4165,32 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			u.ustdy += 4;
 		} else if(mdef){
 			mdef->mstdy += 4;
+		}
+	}
+	if(otmp->otyp == BESTIAL_CLAW){
+		int insight_mod;
+		int studystack;
+		if(youagr){
+			if(active_glyph(BEASTS_EMBRACE))
+				insight_mod = 30*pow(.97,u.uinsight);
+		}
+		else if(magr){
+			if(magr->mcrazed)
+				insight_mod = 30.0*pow(.97,(yields_insight(magr->data) ? u_insight_gain(magr) : 0) + magr->m_insight_level);
+		}
+		if(youdef){
+			studystack = min((basedmg+9)/10, insight_mod - u.ustdy);
+			if(studystack > 0) u.ustdy += studystack;
+		} else if(mdef){
+			studystack = min((basedmg+9)/10, insight_mod - mdef->mstdy);
+			if(studystack > 0) mdef->mstdy += studystack;
+		}
+		if(youagr){
+			studystack = min((basedmg+19)/20, insight_mod - u.ustdy);
+			if(studystack > 0) u.ustdy += studystack;
+		} else if(magr){
+			studystack = min((basedmg+19)/20, insight_mod - magr->mstdy);
+			if(studystack > 0) magr->mstdy += studystack;
 		}
 	}
 	//Called once per blade striking
