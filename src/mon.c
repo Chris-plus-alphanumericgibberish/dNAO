@@ -3128,10 +3128,10 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 #ifdef ATTACK_PETS
     // pets attack hostile monsters
-	if (magr->mtame && !mdef->mpeaceful)
+	if (magr->mtame && !mdef->mpeaceful && magr->mhp > magr->mhpmax/2)
 	    return ALLOW_M|ALLOW_TM;
 	// and vice versa, with some limitations that will help your pet survive
-	if (mdef->mtame && !magr->mpeaceful && !mdef->meating && mdef != u.usteed && !mdef->mflee)
+	if (mdef->mtame && !magr->mpeaceful && mdef->mhp > mdef->mhpmax/2 && !mdef->meating && mdef != u.usteed && !mdef->mflee)
 	    return ALLOW_M|ALLOW_TM;
 #endif /* ATTACK_PETS */
 
