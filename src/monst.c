@@ -7962,7 +7962,7 @@ is a red right hand
 	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, HI_LORD),
 #ifdef BARD
     MON("Aglaope", S_NYMPH,/*Needs tile*/
-	LVL(17, 9, 90, -15), (G_NOGEN|G_UNIQ|G_NOCORPSE),
+	LVL(17, 9, 90, -15), (G_NOGEN|G_UNIQ),
 	DEF(NAT_AC(9), DEX_AC(5)),
 	A(ATTK(AT_CLAW, AD_SQUE, 4, 4), ATTK(AT_CLAW, AD_SEDU, 0, 0)),
 	SIZ(600, 300, MS_NEMESIS, MZ_HUMAN), MR_SLEEP|MR_STONE, 0,
@@ -8010,7 +8010,7 @@ is a red right hand
 	MA_DRAGON|MA_MINION /*MA*/,  MV_CATSIGHT|MV_SEE_INVIS|MV_SCENT /*MV*/, HI_LORD),
 #ifdef CONVICT
     MON("Warden Arianna", S_HUMAN,//25 /*Needs encyc entry*/
-	LVL(20, 12, 40, -14), (G_NOGEN|G_UNIQ|G_NOCORPSE),
+	LVL(20, 12, 40, -14), (G_NOGEN|G_UNIQ),
 	DEF(DEX_AC(6), SPE_AC(4)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 25), ATTK(AT_WEAP, AD_PHYS, 1, 25),
 	  ATTK(AT_CLAW, AD_SQUE, 1, 6)),
@@ -8020,7 +8020,7 @@ is a red right hand
 	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, HI_LORD),
 #endif /* CONVICT */
     MON("Necromancer", S_WRAITH, /*Needs encyc entry*//*Needs tile*/
-	LVL(26, 13, 45, -17), (G_NOGEN|G_UNIQ),
+	LVL(26, 13, 45, -17), (G_NOGEN|G_UNIQ|G_NOCORPSE),
 	DEF(SPE_AC(10)),
 	A(ATTK(AT_WEAP, AD_PHYS, 2, 6), ATTK(AT_WEAP, AD_PHYS, 2, 6),
 	  ATTK(AT_CLAW, AD_SQUE, 1, 6), ATTK(AT_BREA, AD_SLEE, 2,25), 
@@ -8090,7 +8090,7 @@ is a red right hand
 	MB_HUMANOID|MB_STRONG|MB_MALE /*MB*/, MG_PNAME|MG_NOTAME|MG_NOPOLY|MG_NASTY|MG_INFRAVISIBLE /*MG*/,
 	MA_HUMAN /*MA*/,  MV_NORMAL|MV_SEE_INVIS /*MV*/, HI_LORD),
     MON("Doctor Archer", S_HUMAN,//25 /*Needs encyc entry*/
-	LVL(20, 12, 40, 14), (G_NOGEN|G_UNIQ|G_NOCORPSE),
+	LVL(20, 12, 40, 14), (G_NOGEN|G_UNIQ),
 	DEF(SPE_AC(10), SPE_DR(10)),
 	A(ATTK(AT_TUCH, AD_SLEE, 1, 6),
 	  ATTK(AT_WEAP, AD_PHYS, 1, 6), ATTK(AT_XWEP, AD_PHYS, 1, 6),
