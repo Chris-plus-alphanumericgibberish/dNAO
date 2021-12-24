@@ -3069,7 +3069,7 @@ newgame()
 				com_pager(214);
 			} else if(Race_if(PM_ELF) && (Role_if(PM_PRIEST) || Role_if(PM_RANGER) || Role_if(PM_NOBLEMAN) || Role_if(PM_WIZARD))){
 				com_pager(213);
-			} else{
+			} else {
 				com_pager(212);
 			}
 			com_pager(215);
@@ -3761,6 +3761,9 @@ printAttacks(buf, ptr)
 		"Magic blades (extra hand)",	/*39*/
 		"Magic blades (deva arms)",	/*40*/
 		"Magic blades (floating)",	/*41*/
+		"Secondary bite",	/*42*/
+		"Waist-wolf bite",	/*43*/
+		"Tail slap",	/*44*/
 		""
 	};
 	static char *damageKey[] = {
@@ -4938,6 +4941,148 @@ struct monst *magr;
 		
 		//Only send the shadow to one square per turn, if we're here we must have done SOMETHING
 		return;
+	}
+}
+
+void
+dosnake(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j;
+	int mult = 1;
+	int x, y;
+	struct attack symbiote = { AT_OBIT, AD_DRST, 1, 6 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	int max = 8;
+	
+	pa = youagr ? youracedata : magr->data;
+	
+	if(pa->mtyp == PM_ANCIENT_NAGA){
+		//2x cobra
+		symbiote.damn = 4;
+		symbiote.damd = 8;
+		max = youagr ? 5 : magr->m_id%2 ? 7 : 5;
+	}
+	else if(pa->mtyp == PM_MEDUSA){
+		//Medusa's hair bites 1-3 times
+		mult = rnd(3);
+	}
+	
+	max *= mult;
+	
+	//Attack all surrounding foes
+	for(j=8*mult;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(u.ux == x(magr)+clockwisex[(i+j)%8] && u.uy == y(magr)+clockwisey[(i+j)%8])
+			mdef = &youmonst;
+		
+		if(!mdef)
+			continue;
+		
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(!youdef && imprisoned(mdef))
+			continue;
+
+		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
+			if((touch_petrifies(mdef->data)
+			 || mdef->mtyp == PM_MEDUSA)
+			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
+		
+		xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+		// Nagas have 5 or 7 snake bites
+		if(--max <= 0)
+			return;
+	}
+}
+
+void
+dotailslap(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	int i = rnd(8),j;
+	int x, y;
+	struct attack symbiote = { AT_TAIL, AD_PHYS, 4, 10 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	
+	pa = youagr ? youracedata : magr->data;
+	
+	if(pa->mtyp == PM_WHITE_DRAGON){
+		//White dragons are weaker
+		symbiote.damn = 2;
+		symbiote.damd = 8;
+	}
+	else if(pa->mtyp == PM_RED_DRAGON || pa->mtyp == PM_IXOTH || pa->mtyp == PM_SMAUG){
+		//Red dragons are stronger
+		symbiote.damn = 5;
+		symbiote.damd = 12;
+	}
+	
+	//Attack one foe
+	for(j=8;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(u.ux == x(magr)+clockwisex[(i+j)%8] && u.uy == y(magr)+clockwisey[(i+j)%8])
+			mdef = &youmonst;
+		
+		if(!mdef)
+			continue;
+		
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(!youdef && imprisoned(mdef))
+			continue;
+
+		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
+			if((touch_petrifies(mdef->data)
+			 || mdef->mtyp == PM_MEDUSA)
+			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
+		
+		xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+		return; //Only attack one foe
 	}
 }
 

@@ -852,7 +852,7 @@ struct attack *mattk;
 			(mattk->aatyp == AT_CLAW) ? "claws" :
 			(mattk->aatyp == AT_TENT) ? "tentacles" :
 			(mattk->aatyp == AT_ENGL) ? "vapor" :
-			(mattk->aatyp == AT_BITE || mattk->aatyp == AT_LNCK || mattk->aatyp == AT_5SBT) ? "bite" :
+			(mattk->aatyp == AT_BITE || mattk->aatyp == AT_OBIT || mattk->aatyp == AT_WBIT || mattk->aatyp == AT_LNCK || mattk->aatyp == AT_5SBT) ? "bite" :
 			(mattk->aatyp == AT_NONE) ? "attack" :
 			"sting";
 	}
@@ -1090,7 +1090,12 @@ int aatyp;
 	case AT_HUGS:
 		w_mask = (W_ARMC | W_ARMG); /* attacker needs both to be protected */
 		break;
+	case AT_TAIL:
+		w_mask = W_ARM;
+		break;
 	case AT_BITE:
+	case AT_OBIT:
+	case AT_WBIT:
 	case AT_LNCK:
 	case AT_5SBT:
 	case AT_STNG:
@@ -1243,7 +1248,7 @@ struct permonst * pd;
 		((pd->mtyp == PM_GREEN_SLIME || pd->mtyp == PM_FLUX_SLIME) &&
 			!(Slime_res(magr)))
 		) && (
-		((attk->aatyp == AT_BITE || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT) && is_vampire(pa)) ||
+		((attk->aatyp == AT_BITE || attk->aatyp == AT_OBIT || attk->aatyp == AT_WBIT || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT) && is_vampire(pa)) ||
 		(attk->aatyp == AT_ENGL && attk->adtyp == AD_DGST)
 		))
 		return FALSE;	// don't attack

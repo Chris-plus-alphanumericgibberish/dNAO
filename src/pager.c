@@ -1861,8 +1861,11 @@ get_description_of_attack_type(uchar id)
 	case AT_NONE: return "passive";
 	case AT_CLAW: return "claw";
 	case AT_BITE: return "bite";
+	case AT_OBIT: return "bite";
+	case AT_WBIT: return "bite";
 	case AT_KICK: return "kick";
 	case AT_BUTT: return "head butt";
+	case AT_TAIL: return "tail slap";
 	case AT_TUCH: return "touch";
 	case AT_STNG: return "sting";
 	case AT_HUGS: return "crushing bearhug";

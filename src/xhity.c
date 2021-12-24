@@ -846,8 +846,11 @@ int tary;
 		case AT_CLAW:	// 
 		case AT_KICK:	// 
 		case AT_BITE:	// not used by vampires against creatures with deadly corpses
+		case AT_OBIT:	//
+		case AT_WBIT:	//
 		case AT_STNG:	// 
 		case AT_BUTT:	// 
+		case AT_TAIL:	// 
 		case AT_TENT:	// 
 		case AT_WHIP:	// 
 		case AT_VINE:	// uses touch accuracy
@@ -1486,7 +1489,7 @@ boolean fresh;
 		{ AT_WISP, AD_OTIAX, 1, 5 },
 		{ AT_CLAW, AD_SIMURGH, 1, 6 },
 		{ AT_MARI, AD_PHYS, 1, 8 },
-		{ AT_BITE, AD_DRST, 2, 4 },
+		{ AT_WBIT, AD_DRST, 2, 4 },
 		{ AT_NONE, AD_SHDW, 4, 8 },
 		{ AT_NONE, AD_ACID, 1, 1 },	/* actually 1d(spiritDsize) */
 		{ AT_NONE, AD_FIRE, 1, 1 }, /* actually 1d(spiritDsize) */
@@ -2494,6 +2497,27 @@ struct attack *attk;
 			/* some more special cases */
 		case AT_TENT:
 			pline("%s tentacles suck %s!",
+				(youagr ? "Your" : s_suffix(Monnam(magr))),
+				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr))
+				);
+			break;
+		case AT_OBIT:
+			pline("%s %s bites %s!",
+				(youagr ? "Your" : s_suffix(Monnam(magr))),
+				(attk->adtyp == AD_MAGM ? "skirt" : magr->mtyp == PM_MEDUSA ? "hair" : "canopy"),
+				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr))
+				);
+			break;
+		case AT_TAIL:
+			pline("%s slap%s %s with %s tail!",
+				(youagr ? "You" : Monnam(magr)),
+				(youagr ? "" : "s"),
+				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr)),
+				(youagr ? "your" : mhis(magr))
+				);
+			break;
+		case AT_WBIT:
+			pline("%s waist-wolf bites %s!",
 				(youagr ? "Your" : s_suffix(Monnam(magr))),
 				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr))
 				);
@@ -3715,8 +3739,11 @@ boolean ranged;
 	case AT_CLAW:
 	case AT_KICK:
 	case AT_BITE:
+	case AT_OBIT:
+	case AT_WBIT:
 	case AT_STNG:
 	case AT_BUTT:
+	case AT_TAIL:
 	case AT_TENT:
 	case AT_WHIP:
 	case AT_VINE:	// uses touch accuracy
@@ -6015,6 +6042,8 @@ boolean ranged;
 					case AT_LNCK:
 					case AT_BITE:
 					case AT_5SBT:
+					case AT_OBIT:
+					case AT_WBIT:
 						pline("%s teeth catch on %s armor!",
 							(youagr ? "Your" : s_suffix(Monnam(magr))),
 							(youdef ? "your" : s_suffix(mon_nam(mdef)))
@@ -6059,6 +6088,12 @@ boolean ranged;
 						pline("%s %s %s armor!",
 							(youagr ? "Your" : s_suffix(Monnam(magr))),
 							(weapon ? "weapon strikes" : "claws catch on"),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_TAIL:
+						pline("%s scales catch on %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
 							(youdef ? "your" : s_suffix(mon_nam(mdef)))
 							);
 						break;

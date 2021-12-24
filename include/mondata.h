@@ -413,6 +413,8 @@
 #define is_dragon(ptr)		(((ptr)->mflagsa & MA_DRAGON) != 0L)
 #define is_true_dragon(ptr)		((monsndx(ptr) >= PM_BABY_GRAY_DRAGON && monsndx(ptr) <= PM_DEEP_DRAGON) || \
 								(ptr)->mtyp == PM_PLATINUM_DRAGON || (ptr)->mtyp == PM_CHROMATIC_DRAGON)
+#define is_true_adult_dragon(ptr)		((monsndx(ptr) >= PM_GRAY_DRAGON && monsndx(ptr) <= PM_DEEP_DRAGON) || \
+								(ptr)->mtyp == PM_PLATINUM_DRAGON || (ptr)->mtyp == PM_CHROMATIC_DRAGON || (ptr)->mtyp == PM_IXOTH || (ptr)->mtyp == PM_SMAUG)
 #define is_pseudodragon(ptr)	(monsndx(ptr) >= PM_TINY_PSEUDODRAGON && monsndx(ptr) <= PM_GIGANTIC_PSEUDODRAGON)
 #define is_bird(ptr)		(((ptr)->mflagsa & MA_AVIAN) != 0L)
 #define is_giant(ptr)		(((ptr)->mflagsa & MA_GIANT) != 0L)
@@ -530,6 +532,12 @@
 									|| (ptr)->mtyp == PM_FIRE_STORM \
 									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT)
 #define	is_goat_tentacle_mon(mon)	(is_goat_tentacle_mtyp((mon)->data) || has_template(mon, MISTWEAVER))
+#define	is_snake_bite_mtyp(ptr)	((ptr)->mtyp == PM_MEDUSA \
+									|| (ptr)->mtyp == PM_ANCIENT_NAGA)
+#define	is_snake_bite_mon(mon)	(is_snake_bite_mtyp((mon)->data))
+#define	is_tailslap_mtyp(ptr)	(is_true_adult_dragon(ptr))
+#define	is_tailslap_mon(mon)	(is_tailslap_mtyp((mon)->data))
+
 #define goat_monster(ptr) (\
 									   (ptr)->mtyp == PM_SMALL_GOAT_SPAWN \
 									|| (ptr)->mtyp == PM_GOAT_SPAWN \

@@ -533,8 +533,11 @@ int template;
 			(
 			attk->aatyp == AT_CLAW ||
 			attk->aatyp == AT_BITE ||
+			attk->aatyp == AT_OBIT ||
+			attk->aatyp == AT_WBIT ||
 			attk->aatyp == AT_KICK ||
 			attk->aatyp == AT_BUTT ||
+			attk->aatyp == AT_TAIL ||
 			attk->aatyp == AT_ARRW ||
 			attk->aatyp == AT_LRCH ||
 			attk->aatyp == AT_HODS ||

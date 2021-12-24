@@ -11010,15 +11010,24 @@ do_passive_attacks()
 		dogoat();
 	}
 	
-	if(is_goat_tentacle_mtyp(youracedata)){
+	if(is_goat_tentacle_mtyp(youracedata))
 		dogoat();
-	}
+	if(is_snake_bite_mtyp(youracedata))
+		dosnake(&youmonst);
+	if(is_tailslap_mtyp(youracedata))
+		dotailslap(&youmonst);
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
-		if(is_goat_tentacle_mon(mtmp) && !mtmp->mappearance && !imprisoned(mtmp) && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK))
-			dogoat_mon(mtmp);
+		if(!mtmp->mappearance && !imprisoned(mtmp) && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK)){
+			if(is_goat_tentacle_mon(mtmp))
+				dogoat_mon(mtmp);
+			if(is_snake_bite_mon(mtmp))
+				dosnake(mtmp);
+			if(is_tailslap_mon(mtmp))
+				dotailslap(mtmp);
+		}
 		if(mtmp->mtyp == PM_NACHASH_TANNIN){
 			donachash(mtmp);
 		}

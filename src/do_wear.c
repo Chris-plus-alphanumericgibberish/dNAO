@@ -4608,7 +4608,7 @@ boolean invoked;
 	if(artinstance[wep->oartifact].RRSember > moves)
 		dobrass_attack(magr, wep, AT_TENT, AD_EFIR);
 	if(artinstance[wep->oartifact].RRSlunar > moves)
-		dobrass_attack(magr, wep, AT_BITE, AD_MAGM);
+		dobrass_attack(magr, wep, AT_OBIT, AD_MAGM);
 }
 
 void

@@ -49,6 +49,9 @@
 #define AT_MSPR		39	/* Phased non-contact attack, "spiritual rapier" (marilith offhand version) */
 #define AT_DSPR		40	/* Phased non-contact attack, "spiritual rapier" (million-arm mainhand version) */
 #define AT_ESPR		41	/* Phased non-contact attack, "spiritual rapier" (non-hand floating version) */
+#define AT_OBIT		42	/* "Other" bite. Medusa's hair, an ancient naga's canopy, and the ring armor's skirt */
+#define AT_WBIT		43	/* Wolf-head bite */
+#define AT_TAIL		44	/* Tail-slap */
 
 #define AT_WEAP		252	/* uses weapon */
 #define AT_XWEP		253	/* uses offhanded weapon */
