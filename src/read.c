@@ -2104,6 +2104,8 @@ struct obj	*sobj;
 						mtmp->mtame += ACURR(A_CHA)*10;
 						if(mtmp->mpeacetime) mtmp->mpeacetime += ACURR(A_CHA);
 					} else if(mtmp->mpeacetime) mtmp->mpeacetime += ACURR(A_CHA);
+					if(mtmp->mtame && mtmp->mtame < ACURR(A_CHA))
+						mtmp->mtame = ACURR(A_CHA);
 				}
 			}
 		}
