@@ -1036,6 +1036,11 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40)
 			Strcat(buf, "living ");
 		
+		if (check_oprop(obj, OPROP_BLADED))
+			Strcat(buf, "bladed ");
+		if (check_oprop(obj, OPROP_SPIKED))
+			Strcat(buf, "spiked ");
+		
 		/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
 		
 		/* note: except "Holy Avenger" and "Unholy Avenger" */
@@ -4221,6 +4226,11 @@ int wishflags;
 			&& strncmpi(bp, "living mask", 11) && strncmpi(bp, "living arm", 10)
 		) {
 			add_oprop_list(oprop_list, OPROP_LIVEW);
+
+		} else if (!strncmpi(bp, "spiked ", l=7)) {
+			add_oprop_list(oprop_list, OPROP_SPIKED);
+		} else if (!strncmpi(bp, "bladed ", l=7)) {
+			add_oprop_list(oprop_list, OPROP_BLADED);
 
 		} else if (!strncmpi(bp, "magicite ", l=9)) {
 			mat = GEMSTONE; gemtype = MAGICITE_CRYSTAL;

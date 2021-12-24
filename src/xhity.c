@@ -14197,11 +14197,11 @@ int vis;						/* True if action is at all visible to the player */
 			/* gloves */
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 
-			if (otmp && (otmp->oartifact == ART_GREAT_CLAWS_OF_URDLEN || otmp->oartifact == ART_SHIELD_OF_THE_RESOLUTE_HEA || otmp->oartifact == ART_PREMIUM_HEART)){
+			if (otmp && (otmp->oartifact == ART_GREAT_CLAWS_OF_URDLEN || otmp->oartifact == ART_SHIELD_OF_THE_RESOLUTE_HEA || otmp->oartifact == ART_PREMIUM_HEART || check_oprop(otmp, OPROP_SPIKED))){
 				//Digging claws, or heart-shaped bit
 				attackmask |= PIERCE;
 			}
-			if (otmp && (otmp->oartifact == ART_GREAT_CLAWS_OF_URDLEN || otmp->oartifact == ART_CLAWS_OF_THE_REVENANCER)){
+			if (otmp && (otmp->oartifact == ART_GREAT_CLAWS_OF_URDLEN || otmp->oartifact == ART_CLAWS_OF_THE_REVENANCER || check_oprop(otmp, OPROP_BLADED))){
 				attackmask |= SLASH;
 			}
 
@@ -14226,6 +14226,12 @@ int vis;						/* True if action is at all visible to the player */
 		else if (unarmed_kick) {
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 			attackmask |= WHACK;
+			if(otmp && check_oprop(otmp, OPROP_BLADED)){
+				attackmask |= SLASH;
+			}
+			if(otmp && check_oprop(otmp, OPROP_SPIKED)){
+				attackmask |= PIERCE;
+			}
 		}
 		else {
 			/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */

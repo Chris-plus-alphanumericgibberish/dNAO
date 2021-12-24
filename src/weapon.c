@@ -291,11 +291,13 @@ int oartifact;
 	if (   oartifact == ART_ROGUE_GEAR_SPIRITS
 		|| oartifact == ART_DURIN_S_AXE
 		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
+		|| (obj && check_oprop(obj, OPROP_SPIKED) && !litsaber(obj))
 		){
 		attackmask |= PIERCE;
 	}
 	if (   oartifact == ART_LIECLEAVER
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
+		|| (obj && check_oprop(obj, OPROP_BLADED) && !litsaber(obj))
 		){
 		attackmask |= SLASH;
 	}
