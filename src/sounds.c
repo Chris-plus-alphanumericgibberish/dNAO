@@ -713,6 +713,7 @@ boolean chatting;
 			*verbl_msg = 0;	/* verbalize() */
 	struct permonst *ptr = mtmp->data;
 	char verbuf[BUFSZ];
+	char msgbuff[BUFSZ];
 	char class_list[MAXOCLASSES+2];
 
 	if(mtmp && noactions(mtmp)){
@@ -2021,34 +2022,90 @@ humanoid_sound:
 		pline_msg = "talks about spellcraft.";
 	    else if (ptr->mlet == S_CENTAUR)
 		pline_msg = "discusses hunting.";
-	    else switch (monsndx(ptr)) {
-		case PM_HOBBIT:
-		    pline_msg = (mtmp->mhpmax - mtmp->mhp >= 10) ?
-				"complains about unpleasant dungeon conditions."
-				: "asks you about the One Ring.";
-		    break;
-		case PM_ARCHEOLOGIST:
-    pline_msg = "describes a recent article in \"Spelunker Today\" magazine.";
-		    break;
-#ifdef TOURIST
-		case PM_TOURIST:
-		    verbl_msg = "Aloha.";
-		    break;
-#endif
-		case PM_LADY_CONSTANCE:
-		    verbl_msg = "There's a strange woman in the observation ward. She's asking for you....";
-		    break;
-		default:
-			if(Role_if(PM_RANGER) && Race_if(PM_GNOME) &&
-				mtmp->mtyp == PM_ARCADIAN_AVENGER && 
-				mtmp->m_id == quest_status.leader_m_id
-			) goto asGuardian; /* Jump up to a different case in this switch statment */
-			
-			if((Role_if(PM_NOBLEMAN) || Role_if(PM_KNIGHT)) && In_quest(&u.uz)){
-				if(Race_if(PM_DWARF)) pline_msg = "talks about fishing.";
-				else pline_msg = "talks about farming.";
-			} else pline_msg = "discusses dungeon exploration.";
-		    break;
+	    else{
+			const char *talkabt = "talks about %s.";
+			const char *discuss = "discusses %s.";
+			switch (monsndx(ptr)) {
+				case PM_VALAVI:
+					Sprintf(msgbuff, talkabt, rn2(2) ? "herding" : rn2(2) ? "carpentry" : rn2(10) ? "pottery" : "delicious sawdust recipes");
+					pline_msg = msgbuff;
+				break;
+				case PM_DRACAE_ELADRIN:
+				case PM_MOTHERING_MASS:
+					Sprintf(msgbuff, talkabt, rn2(10) ? "babies" : "stars distant and strange");
+					pline_msg = msgbuff;
+				break;
+				case PM_HOBBIT:
+					pline_msg = (mtmp->mhpmax - mtmp->mhp >= 10) ?
+						"complains about unpleasant dungeon conditions."
+						: "asks you about the One Ring.";
+				break;
+				case PM_DWARF:
+				case PM_DWARF_LORD:
+					Sprintf(msgbuff, talkabt, !rn2(4) ? "mining" : !rn2(3) ? "prospecting" : rn2(2) ? "metalwork" : "beer");
+					pline_msg = msgbuff;
+				break;
+				case PM_YURIAN:
+					Sprintf(msgbuff, talkabt, "sea gardening");
+					pline_msg = msgbuff;
+				break;
+				case PM_COURE_ELADRIN:
+					Sprintf(msgbuff, talkabt, !rn2(4) ? "flowers" : !rn2(3) ? "green grass" : rn2(2) ? "whimsical things" : "the colors of the stars");
+					pline_msg = msgbuff;
+				break;
+				case PM_NOVIERE_ELADRIN:
+					Sprintf(msgbuff, talkabt, !rn2(3) ? "sudden storms" : !rn2(2) ? "whirlpools" : rn2(10) ? "starlight on the water" : "the secret and forgotten depths");
+					pline_msg = msgbuff;
+				break;
+				case PM_BRALANI_ELADRIN:
+					Sprintf(msgbuff, talkabt, !rn2(4) ? "sudden storms" : !rn2(3) ? "wandering on the gasping dust" : rn2(2) ? "desert flowers" : rn2(10) ? "the stars over the desert sands" : "secret and forgotten ruins");
+					pline_msg = msgbuff;
+				break;
+				case PM_FIRRE_ELADRIN:
+					Sprintf(msgbuff, talkabt, !rn2(4) ? "campfire stories" : !rn2(3) ? "fire and light" : !rn2(2) ? "pyromantic augury" : rn2(10) ? "the stars through the flames" : "secret and forgotten stories");
+					pline_msg = msgbuff;
+				break;
+				case PM_GAE_ELADRIN:
+					Sprintf(msgbuff, talkabt, !rn2(4) ? "birth and death" : !rn2(3) ? "the changing seasons of life" : rn2(10) ? (!rn2(4) ? "the stars beyond the rains of spring" : !rn2(3) ? "the stars above the green summer canopy" : !rn2(4) ? "stars among the autumn leaves" : "stars seen past the barren branches") : "secret rebirths");
+					pline_msg = msgbuff;
+				break;
+				case PM_FORMIAN_CRUSHER:
+				case PM_FORMIAN_TASKMASTER:
+					pline_msg = "chitters.";
+				break;
+				case PM_ARCHEOLOGIST:
+					pline_msg = "describes a recent article in \"Spelunker Today\" magazine.";
+				break;
+				case PM_TOURIST:
+					verbl_msg = "Aloha.";
+				break;
+				case PM_LADY_CONSTANCE:
+					if(!u.uevent.qcompleted)
+						verbl_msg = "There's a strange woman in the observation ward. She's asking for you....";
+					else {
+						if(!rn2(2)){
+							Sprintf(msgbuff, discuss, !rn2(5) ? "Fiore's dagger techniques" : !rn2(4) ? "mentalism" : !rn2(3) ? "theosophy" : rn2(2) ? "the occult" : "your recent dreams");
+						}
+						else {
+							Sprintf(msgbuff, talkabt, !rn2(5) ? "ley lines" : !rn2(4) ? "tectonophysics" : !rn2(3) ? "special relativity" : !rn2(2) ? "archaeology" : rn2(5) ? "the collective unconscious" : rn2(10) ? "her recurring dreams" : "her darkest nightmares");
+						}
+						pline_msg = msgbuff;
+					}
+				break;
+				default:
+					if(Role_if(PM_RANGER) && Race_if(PM_GNOME) &&
+						mtmp->mtyp == PM_ARCADIAN_AVENGER && 
+						mtmp->m_id == quest_status.leader_m_id
+					) goto asGuardian; /* Jump up to a different case in this switch statment */
+					
+					if((Role_if(PM_NOBLEMAN) || Role_if(PM_KNIGHT)) && In_quest(&u.uz)){
+						if(Race_if(PM_DWARF)) pline_msg = "talks about fishing.";
+						else pline_msg = "talks about farming.";
+					} else {
+						pline_msg = "discusses dungeon exploration.";
+					}
+				break;
+			}
 	    }
 	    break;
 	case MS_SEDUCE:
