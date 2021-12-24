@@ -17064,7 +17064,7 @@ beam_monk_target()
 			return at_least_one;
 		mon = m_at(ix, iy);
 		if(!mon){
-			if(!ZAP_POS(levl[ix][iy].typ))
+			if(!ZAP_POS(levl[ix][iy].typ) || closed_door(ix, iy))
 				return at_least_one;
 			continue;
 		}
@@ -17075,7 +17075,7 @@ beam_monk_target()
 			else continue;
 		}
 		else at_least_one = TRUE;
-		if(!ZAP_POS(levl[ix][iy].typ))
+		if(!ZAP_POS(levl[ix][iy].typ) || closed_door(ix, iy))
 			return at_least_one;
 	}
 	return at_least_one;
