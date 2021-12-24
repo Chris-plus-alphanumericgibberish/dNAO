@@ -13048,11 +13048,11 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 			case OPOISON_SLEEP:
 				resists = Sleep_res(mdef);
-				majoreff = !rn2(5) || (poisonedobj && poisonedobj->oartifact == ART_MOONBEAM);
+				majoreff = !rn2(2) || (poisonedobj && poisonedobj->oartifact == ART_MOONBEAM);
 				break;
 			case OPOISON_BLIND:
 				resists = (Poison_res(mdef) || !haseyes(pd));
-				majoreff = !rn2(10);
+				majoreff = !rn2(2);
 				break;
 			case OPOISON_PARAL:
 				resists = FALSE;
@@ -13077,7 +13077,7 @@ int vis;						/* True if action is at all visible to the player */
 				majoreff = !rn2(2);
 				break;
 			}
-			if (!rn2(20) && poisonedobj && (poisonedobj->opoisoned & i))
+			if (majoreff && poisonedobj && (poisonedobj->opoisoned & i) && !rn2(20))
 				poisons_wipedoff |= i;
 
 			if (resists)
