@@ -480,6 +480,18 @@ struct obj {
 			  otmp->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
 			  (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE ) \
 			 ))
+#define is_bad_melee_pole(otmp) (!(otmp->otyp == POLEAXE ||\
+									is_vibropike(otmp) ||\
+									otmp->oartifact == ART_WEBWEAVER_S_CROOK ||\
+									otmp->oartifact == ART_SILENCE_GLAIVE ||\
+									otmp->oartifact == ART_HEARTCLEAVER ||\
+									otmp->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD ||\
+									otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING ||\
+									otmp->oartifact == ART_SOL_VALTIVA ||\
+									otmp->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||\
+									otmp->oartifact == ART_SHADOWLOCK ||\
+									otmp->oartifact == ART_PEN_OF_THE_VOID\
+								) && is_pole(otmp))
 #define is_spear(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill == P_SPEAR)
 #define is_farm(otmp)	(otmp->oclass == WEAPON_CLASS && \

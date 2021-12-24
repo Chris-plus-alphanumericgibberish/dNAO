@@ -105,23 +105,14 @@ register struct obj *obj;
 		unweapon = (obj->oclass == WEAPON_CLASS) ?
 				(is_launcher(obj) || is_ammo(obj) ||
 				 is_missile(obj) ||
-				 (is_pole(obj)
+				 (is_bad_melee_pole(obj)
 #ifdef STEED
 				&& !u.usteed
 #endif
 				&& !melee_polearms(youracedata)
 				&& obj->otyp != AKLYS
 				&& !check_oprop(obj, OPROP_CCLAW)
-				&& !is_vibropike(obj)
-				&& obj->oartifact != ART_WEBWEAVER_S_CROOK
-				&& obj->oartifact != ART_SILENCE_GLAIVE
-				&& obj->oartifact != ART_HEARTCLEAVER
-				&& obj->oartifact != ART_GREEN_DRAGON_CRESCENT_BLAD
-				&& obj->oartifact != ART_CRUCIFIX_OF_THE_MAD_KING
-				&& obj->oartifact != ART_SOL_VALTIVA
-				&& obj->oartifact != ART_SHADOWLOCK
-				&& obj->oartifact != ART_DEATH_SPEAR_OF_KEPTOLO
-				  && obj->oartifact != ART_PEN_OF_THE_VOID)) :
+				)) :
 				!is_weptool(obj);
 	} else
 		unweapon = TRUE;	/* for "bare hands" message */

@@ -613,7 +613,7 @@ int tary;
 
 				/* pick appropriate weapon based on range to target */
 				if (dist2(x(magr), y(magr), tarx, tary) <
-					((otmp && is_pole(otmp)) ? 3 : m_pole_range(magr)))	// if we have a polearm, use it longer range
+					((otmp && is_bad_melee_pole(otmp) && !melee_polearms(pa)) ? 3 : m_pole_range(magr)))	// if we have a polearm, use it longer range
 				{
 					/* melee range */
 					magr->combat_mode = HNDHND_MODE;
@@ -675,7 +675,7 @@ int tary;
 						&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
 						&& (!youagr || otmp->owt <= max(10, P_SKILL(P_TWO_WEAPON_COMBAT)*10))// not too heavy
 						&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
-						&& !(is_ammo(otmp) || is_pole(otmp) || is_missile(otmp))			// not unsuitable for melee (ammo, polearm, missile)
+						&& !(is_ammo(otmp) || (is_bad_melee_pole(otmp) && !melee_polearms(pa)) || is_missile(otmp))	// not unsuitable for melee (ammo, polearm, missile)
 						&& !otmp->owornmask)												// not worn
 					{
 						/* we have a potential weapon */
@@ -12415,24 +12415,14 @@ int vis;						/* True if action is at all visible to the player */
 			weapon->oartifact == ART_LIECLEAVER ||
 			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS) &&
 			/* isn't a misused polearm */
-			(!is_pole(weapon) ||
+			(!is_bad_melee_pole(weapon) ||
 			thrust ||
 #ifdef STEED
 			(youagr && u.usteed) ||
 #endif
 			(pa && melee_polearms(pa)) ||
-			is_vibropike(weapon) ||
 			weapon->otyp == AKLYS ||
-			check_oprop(weapon, OPROP_CCLAW) ||
-			weapon->oartifact == ART_WEBWEAVER_S_CROOK ||
-			weapon->oartifact == ART_SILENCE_GLAIVE ||
-			weapon->oartifact == ART_HEARTCLEAVER ||
-			weapon->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD ||
-			weapon->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING ||
-			weapon->oartifact == ART_SOL_VALTIVA ||
-			weapon->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||
-			weapon->oartifact == ART_SHADOWLOCK ||
-			weapon->oartifact == ART_PEN_OF_THE_VOID
+			check_oprop(weapon, OPROP_CCLAW)
 			) &&
 			/* isn't an unthrown missile */
 			!((is_missile(weapon) || is_ammo(weapon)) && weapon->otyp != CHAKRAM && !thrown) &&
