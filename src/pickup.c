@@ -2010,6 +2010,7 @@ dopetequip()
 			return 0;
 		}
 		if(otmp->unpaid)  addtobill(otmp, FALSE, FALSE, FALSE);
+		You("equip %s with %s.", mon_nam(mtmp), the(xname(otmp)));
 		freeinv(otmp);
 		mpickobj(mtmp, otmp);
 		mtmp->misc_worn_check |= flag;
