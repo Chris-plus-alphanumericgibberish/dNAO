@@ -1498,7 +1498,8 @@ int faction;
 						otmp->ovar1 = rnd(3);
 						(void) mpickobj(mtmp, otmp);
 						(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
-						(void)mongets(mtmp, KITE_SHIELD, mkobjflags);
+						otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
+						set_material_gm(otmp, SHADOWSTEEL);
 					}
 					(void)mongets(mtmp, DROVEN_CROSSBOW, mkobjflags);
 					m_initthrow(mtmp, DROVEN_BOLT, 24, mkobjflags);
