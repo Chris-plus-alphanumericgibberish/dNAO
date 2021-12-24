@@ -3029,8 +3029,7 @@ newgame()
 	if(Race_if(PM_ANDROID))
 		scatter_weapons();
 	docrt();
-#ifdef CONVICT
-	if (Role_if(PM_CONVICT)) {
+	if (Role_if(PM_CONVICT) || (Role_if(PM_MADMAN) && Race_if(PM_VAMPIRE))) {
 		setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
 		setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
 		uball->spe = 1;
@@ -3038,7 +3037,6 @@ newgame()
 		placebc();
 		newsym(u.ux,u.uy);
 	}
-#endif /* CONVICT */
 
 	if (flags.legacy) {
 		flush_screen(1);

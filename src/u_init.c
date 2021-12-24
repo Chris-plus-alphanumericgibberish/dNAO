@@ -357,6 +357,10 @@ static struct trobj Madman[] = {
 	{ POT_BOOZE, 0, POTION_CLASS, 2, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
+static struct trobj Nullmagic_amulet[] = {
+	{ AMULET_OF_NULLIFY_MAGIC, 0, AMULET_CLASS, 1, 0 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj Noble[] = {
 	{ RAPIER, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
 #define NOB_SHIRT	1
@@ -2015,6 +2019,9 @@ u_init()
 		u.veil = FALSE;
 		u.umaniac = TRUE;
         ini_inv(Madman);
+		if(Race_if(PM_INCANTIFIER)){
+			ini_inv(Nullmagic_amulet);
+		}
         knows_object(SKELETON_KEY);
         knows_object(POT_BOOZE);
         knows_object(POT_SLEEPING);
@@ -2479,6 +2486,10 @@ u_init()
 		if(Role_if(PM_BARD)){
 			u.umartial = TRUE;
 			u.uenbonus += 30;
+			calc_total_maxen();
+			u.uen = u.uenmax;
+		} else if(Role_if(PM_MADMAN)) {
+			u.uenbonus += 10 - u.uenmax;
 			calc_total_maxen();
 			u.uen = u.uenmax;
 		} else if(u.uenmax < 15) {
@@ -2979,6 +2990,9 @@ register struct trobj *trop;
             if (obj->otyp == STRAITJACKET ) {
                 obj->cursed = TRUE;
             }
+            if (obj->otyp == AMULET_OF_NULLIFY_MAGIC && Role_if(PM_MADMAN) ) {
+                obj->cursed = TRUE;
+            }
 			if (obj->otyp == TINNING_KIT) {
 				obj->spe = rn1(50, 50);	/* more charges than standard generation */
 			}
@@ -3028,7 +3042,7 @@ register struct trobj *trop;
 		if (otyp == OIL_LAMP)
 			discover_object(POT_OIL, TRUE, FALSE);
 
-		if(obj->otyp == AMULET_OF_NULLIFY_MAGIC && Role_if(PM_ANACHRONONAUT) && !uamul){
+		if(obj->otyp == AMULET_OF_NULLIFY_MAGIC && (Role_if(PM_ANACHRONONAUT) || Role_if(PM_MADMAN)) && !uamul){
 			setworn(obj, W_AMUL);
 		}
 		

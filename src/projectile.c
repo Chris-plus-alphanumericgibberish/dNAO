@@ -2748,6 +2748,7 @@ int tary;
 	static const int random_breaths[] = { AD_MAGM, AD_FIRE, AD_COLD, AD_SLEE, AD_DISN, AD_ELEC, AD_DRST, AD_ACID };
 	int dx, dy, dz;
 	int range;
+	boolean jacket = youagr ? Straitjacketed : straitjacketed_mon(magr);
 
 	if (tarx || tary) {
 		dx = sgn(tarx - x(magr));
@@ -2809,7 +2810,7 @@ int tary;
 		losepw(15);
 		flags.botl = 1;
 	}
-
+	
 	/* message */
 	if (youagr || canseemon(magr)) {
 		char * bofp = flash_type(typ, ZAP_BREATH);
@@ -2818,7 +2819,13 @@ int tary;
 		/* some breaths sound better as "a noun of x" */
 		if (typ == AD_DISN || typ == AD_BLUD)
 			p = NULL;
-
+		
+		if(jacket){
+			if(youagr)
+				Your("straitjacket prevents you from taking a deep breath!");
+			else
+				pline("%s seems to be having trouble breathing.", Monnam(magr));
+		}
 		pline("%s breathe%s %s!",
 			youagr ? "You" : Monnam(magr),
 			youagr ? "" : "s",
@@ -2844,7 +2851,7 @@ int tary;
 	}
 	/* default range */
 	else 
-		range = rn1(7, 7);
+		range = jacket ? rn1(3, 3) : rn1(7, 7);
 
 	/* green dragon breath leaves clouds */
 	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ == AD_DRST)
@@ -2853,6 +2860,11 @@ int tary;
 	/* set damage */
 	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
 	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;
+	
+	if(jacket){
+		zapdata.damn = zapdata.damn/2+1;
+		zapdata.damd = zapdata.damd/2+1;
+	}
 
 	zap(magr, x(magr), y(magr), dx, dy, range, &zapdata);
 
