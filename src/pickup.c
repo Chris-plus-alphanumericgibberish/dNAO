@@ -2604,8 +2604,25 @@ boolean past;
 		knows_object(otmp->otyp);
 	switch(urace.malenum){
 		default:
-		case PM_HUMAN:
 		case PM_HALF_DRAGON:
+			if(flags.initgend){
+				//Read through and find mercurial weapon, grant expert skill
+				for(otmp = box->cobj; otmp; otmp = otmp->nobj){
+					if(otmp->obj_material == MERCURIAL){
+						expert_weapon_skill(objects[otmp->otyp].oc_skill);
+					}
+				}
+				expert_weapon_skill(P_ATTACK_SPELL);
+				u.umartial = TRUE;
+				gm_weapon_skill(P_BARE_HANDED_COMBAT);
+			}
+			else {
+				expert_weapon_skill(P_TWO_HANDED_SWORD);
+				expert_weapon_skill(P_ATTACK_SPELL);
+				skilled_weapon_skill(P_BEAST_MASTERY);
+			}
+		break;
+		case PM_HUMAN:
 		case PM_VAMPIRE:
 		case PM_INCANTIFIER:
 		case PM_GNOME:

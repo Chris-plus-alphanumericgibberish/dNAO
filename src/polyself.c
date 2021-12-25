@@ -870,6 +870,7 @@ struct permonst *mdat;
 		case AD_DRST: mtyp = PM_GREEN_DRAGON;  break;
 		case AD_SLEE: mtyp = PM_ORANGE_DRAGON; break;
 		case AD_ACID: mtyp = PM_YELLOW_DRAGON; break;
+		case AD_RBRE: mtyp = PM_SHIMMERING_DRAGON; break;
 		default:
 			impossible("bad HDbreath %d", flags.HDbreath);
 			return 0;
@@ -971,6 +972,7 @@ doelementalbreath()
 			mon = makemon(&mons[PM_POISON_PARAELEMENTAL], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 		break;
 		case AD_SLEE:
+		case AD_RBRE:
 			mon = makemon(&mons[PM_DREAM_QUASIELEMENTAL], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 		break;
 		case AD_MAGM:

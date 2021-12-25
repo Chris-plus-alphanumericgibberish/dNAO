@@ -2497,8 +2497,8 @@ find_ac()
 		}
 	}
 	if(Race_if(PM_HALF_DRAGON)){
-		//DS half dragons may be more humanoid
-		if(Role_if(PM_NOBLEMAN) && flags.initgend){
+		//Some half dragons are more humanoid
+		if((Role_if(PM_NOBLEMAN) && flags.initgend) || Role_if(PM_MADMAN)){
 			if(carrying_art(ART_DRAGON_S_HEART_STONE))
 				uac -= (u.ulevel+5)/10;
 			else uac -= (u.ulevel+5)/15; //level 10 and 25
@@ -2532,7 +2532,7 @@ int base_nat_udr()
 	
 	if(Race_if(PM_HALF_DRAGON)){
 		//DS half dragons may be more humanoid
-		if(Role_if(PM_NOBLEMAN) && flags.initgend){
+		if((Role_if(PM_NOBLEMAN) && flags.initgend) || Role_if(PM_MADMAN)){
 			if(carrying_art(ART_DRAGON_S_HEART_STONE))
 				udr += (u.ulevel)/10;
 			else udr += (u.ulevel)/15;

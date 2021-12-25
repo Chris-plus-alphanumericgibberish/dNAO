@@ -2764,15 +2764,6 @@ int tary;
 		return FALSE;
 	}
 
-	/* Random breath attacks */
-	if (typ == AD_RBRE){
-		if (pa->mtyp == PM_CHROMATIC_DRAGON)
-			typ = chromatic_dragon_breaths[rn2(SIZE(chromatic_dragon_breaths))];
-		else if (pa->mtyp == PM_PLATINUM_DRAGON)
-			typ = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
-		else 
-			typ = random_breaths[rn2(SIZE(random_breaths))];
-	}
 	/* Halfdragon breath attack */
 	if (typ == AD_HDRG) {
 		if (youagr && Race_if(PM_HALF_DRAGON))
@@ -2786,6 +2777,15 @@ int tary;
 			mult = 4;	/* increased duration */
 	}
 
+	/* Random breath attacks */
+	if (typ == AD_RBRE){
+		if (pa->mtyp == PM_CHROMATIC_DRAGON)
+			typ = chromatic_dragon_breaths[rn2(SIZE(chromatic_dragon_breaths))];
+		else if (pa->mtyp == PM_PLATINUM_DRAGON)
+			typ = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
+		else 
+			typ = random_breaths[rn2(SIZE(random_breaths))];
+	}
 	/* if cancelled, (or the player is strangled) can't use breath attack */
 	if (youagr ? Strangled : magr->mcan) {
 		if (youagr) {

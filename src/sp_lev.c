@@ -1287,7 +1287,7 @@ default_case:
 		}
 		otmp->spe = 0;
 	}
-	// Madman's old stuff
+	// Madman's old stuff to reclaim
 	if(Is_container(otmp) && otmp->spe == 7){
 		struct obj *stuff;
 		stuff = mksartifact(ART_RITE_OF_DETESTATION);
@@ -1300,7 +1300,6 @@ default_case:
 		switch(urace.malenum){
 			default:
 			case PM_HUMAN:
-			case PM_HALF_DRAGON:
 			case PM_VAMPIRE:
 			case PM_INCANTIFIER:
 			case PM_GNOME:
@@ -1345,6 +1344,65 @@ default_case:
 				}
 				if(urace.malenum == PM_GNOME){
 					default_add_2(GNOMISH_POINTY_HAT);
+				}
+			break;
+			case PM_HALF_DRAGON:
+				if(flags.initgend){
+					//Zerth
+					int merctypes[] = {BROADSWORD, LONG_SWORD, TWO_HANDED_SWORD, KATANA, TSURUGI, SPEAR, TRIDENT, MACE, MORNING_STAR };
+					int gauntlettypes[] = {GAUNTLETS_OF_POWER, GAUNTLETS, GAUNTLETS_OF_DEXTERITY, ORIHALCYON_GAUNTLETS };
+					int boottypes[] = {ARMORED_BOOTS, HIGH_BOOTS, SPEED_BOOTS, WATER_WALKING_BOOTS, JUMPING_BOOTS, KICKING_BOOTS, FLYING_BOOTS };
+					int index;
+					index = rn2(SIZE(merctypes));
+					stuff = mksobj(merctypes[index], MKOBJ_NOINIT);
+					set_material_gm(stuff, MERCURIAL);
+					add_to_container(otmp, stuff);
+					//Spiked gauntlets
+					stuff = mksobj(gauntlettypes[rn2(SIZE(gauntlettypes))], MKOBJ_NOINIT);
+					if(index < SPEAR){
+						add_oprop(stuff, OPROP_SPIKED);
+						stuff->spe = 2;
+					}
+					else {
+						add_oprop(stuff, OPROP_BLADED);
+						stuff->spe = 2;
+					}
+					add_to_container(otmp, stuff);
+					default_add_2(RED_DRAGON_SCALE_MAIL);
+					//Spiked boots
+					stuff = mksobj(boottypes[rn2(SIZE(boottypes))], MKOBJ_NOINIT);
+					add_oprop(stuff, OPROP_SPIKED);
+					stuff->spe = 2;
+					add_to_container(otmp, stuff);
+				}
+				else {
+					//Knight
+					stuff = mksobj(TWO_HANDED_SWORD, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					add_oprop(otmp, OPROP_PSIOW);
+					add_oprop(otmp, OPROP_VORPW);
+					otmp->spe = 3;
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(find_gcirclet(), mkobjflags);
+					set_material_gm(otmp, SILVER);
+					otmp->spe = 2;
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(ARCHAIC_PLATE_MAIL, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					otmp->spe = 2;
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(ARCHAIC_GAUNTLETS, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					otmp->spe = 2;
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(ARCHAIC_BOOTS, mkobjflags);
+					set_material_gm(otmp, SILVER);
+					otmp->spe = 2;
+					add_to_container(otmp, stuff);
 				}
 			break;
 			case PM_DWARF:

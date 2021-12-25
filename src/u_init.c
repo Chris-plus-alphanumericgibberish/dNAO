@@ -2637,6 +2637,14 @@ u_init()
 				flags.HDbreath = AD_COLD;
 				HCold_resistance |= (FROMRACE|FROMOUTSIDE);
 			}
+		} else if(Role_if(PM_MADMAN)){
+			if(flags.initgend){
+				flags.HDbreath = AD_RBRE;
+			}
+			else {
+				flags.HDbreath = AD_FIRE;
+				HFire_resistance |= (FROMRACE|FROMOUTSIDE);
+			}
 		} else switch(rnd(6)){
 			case 1:
 				flags.HDbreath = AD_COLD;
