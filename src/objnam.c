@@ -1484,6 +1484,10 @@ boolean adjective;
 		return "salt";
 	case SHADOWSTEEL:
 		return (adjective ? "shadowsteel" : "corporeal darkness");
+	case MERCURIAL:
+		if(obj->where == OBJ_MINVENT || obj->where == OBJ_INVENT)
+			return (adjective ? (is_streaming_merc(obj) ? "streaming" : is_kinstealing_merc(obj) ? "kinstealing" : "chained") : "chaos stuff");
+		return (adjective ? "melting" : "chaos stuff");
 	default:
 		return (adjective ? "mysterious" : "an enigma in solid form");
 	}

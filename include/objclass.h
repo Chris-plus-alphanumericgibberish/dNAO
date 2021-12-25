@@ -126,6 +126,7 @@ struct objclass {
 #define OBSIDIAN_MT	26
 #define SALT		27
 #define SHADOWSTEEL	28
+#define MERCURIAL	29	/* Not actually Hg - mercurial chaos matter */
  //Note: 31 max, coordinate with obj.h
 	Bitfield(oc_showmat,4);
 #define UNIDED	1	/* always show material when base object type is unknown */

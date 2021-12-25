@@ -1547,6 +1547,30 @@ struct obj * otmp;
 			dmg += vd(ndice, diesize);
 	}
 
+	if (hates_chaos_mon(mdef) &&
+		u.ualign.type != A_LAWFUL && u.ualign.type != A_NEUTRAL && /* Note: allows chaos, void, and none */
+		otmp->obj_material == MERCURIAL &&
+		!(is_lightsaber(otmp) && litsaber(otmp))
+	) {
+		ndice = 1;
+		diesize = mdef->data->maligntyp;
+#define MIN_OF(x,y) x = min(x,y)		
+		MIN_OF(diesize, u.ulevel);
+		MIN_OF(diesize, u.ualign.record);
+		MIN_OF(diesize, ACURR(A_INT));
+		MIN_OF(diesize, ACURR(A_WIS));
+		MIN_OF(diesize, ACURR(A_CHA));
+#undef MIN_OF
+		
+		diesize = max(1,diesize);
+		/* special cases */
+		if (otmp->otyp == KHAKKHARA)
+			ndice *= khakharadice;
+		/* calculate */
+		if (ndice)
+			dmg += vd(ndice, diesize);
+	}
+
 	/* the Rod of Seven Parts gets a bonus vs holy and unholy when uncursed */
 	if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS
 		&& !otmp->blessed && !otmp->cursed

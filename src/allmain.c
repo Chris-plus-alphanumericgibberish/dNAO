@@ -18,6 +18,7 @@
 STATIC_DCL void NDECL(do_positionbar);
 #endif
 
+STATIC_DCL void NDECL(mercurial_repair);
 STATIC_DCL void NDECL(clothes_bite_you);
 STATIC_DCL void NDECL(androidUpkeep);
 STATIC_DCL void NDECL(printMons);
@@ -428,6 +429,33 @@ androidUpkeep()
 		}
 		if(moves > u.nextsleep+1400 && u.uen > 0){
 			if(!(moves%20)) losepw(1);
+		}
+	}
+}
+
+STATIC_OVL
+void
+mercurial_repair()
+{
+	struct obj * uequip[] = WORN_SLOTS;
+	int i;
+	if(monstermoves%HEALCYCLE)
+		return;
+	int regto;
+	if(u.ulevel < 3)
+		regto = 0;
+	else if(u.ulevel < 10)
+		regto = 1;
+	else if(u.ulevel < 18)
+		regto = 2;
+	else regto = 3;
+
+	for (i = 0; i < SIZE(uequip); i++) {
+		if (uequip[i] && uequip[i]->obj_material == MERCURIAL
+			&& uequip[i]->spe < regto && is_enchantable(uequip[i])
+			&& rnd(20) < ACURR(A_CHA)
+		){
+			uequip[i]->spe++;
 		}
 	}
 }
@@ -2445,6 +2473,7 @@ karemade:
 			you_regen_san();
 			androidUpkeep();
 			clothes_bite_you();
+			mercurial_repair();
 
 		    if(!(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
 			if(Teleportation && !rn2(85) && !(

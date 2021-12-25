@@ -4493,6 +4493,64 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			}
 		}
 		energy = (spellev(spell) * 5);    /* 5 <= energy <= 35 */
+		
+		if(uwep && uwep->obj_material == MERCURIAL){
+			int level = u.ulevel;
+			int spellev = spellev(spell);
+			//Streaming
+			if(you_merc_streaming(uwep)){
+				if(level < 3);
+				else if(level < 10){
+					if(spellev == 1)
+						energy *= .8;
+				}
+				else if(level < 18){
+					if(spellev == 1)
+						energy *= .5;
+					else if(spellev == 2)
+						energy *= .8;
+				}
+				else{
+					if(spellev == 1)
+						energy *= .5;
+					else if(spellev == 2)
+						energy *= .5;
+					else if(spellev == 3)
+						energy *= .8;
+				}
+			}
+			else if(you_merc_kinstealing(uwep)){
+				if(level < 3);
+				else if(level < 18){
+					if(spellev == 1)
+						energy *= .8;
+				}
+				else{
+					if(spellev == 1)
+						energy *= .5;
+				}
+			}
+			//Chained
+			else {
+				if(level < 3);
+				else if(level < 10){
+					if(spellev == 1)
+						energy *= .8;
+				}
+				else if(level < 18){
+					if(spellev == 1)
+						energy *= .8;
+					else if(spellev == 2)
+						energy *= .8;
+				}
+				else{
+					if(spellev == 1)
+						energy *= .5;
+					else if(spellev == 2)
+						energy *= .5;
+				}
+			}
+		}
 
 		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10 && spellid(spell) != SPE_DETECT_FOOD) {
 			You("are too hungry to cast that spell.");
@@ -5763,6 +5821,9 @@ int spell;
 			|| uwep->oartifact == ART_PROFANED_GREATSCYTHE
 			|| uwep->oartifact == ART_GARNET_ROD
 		) splcaster -= urole.spelarmr;
+
+		if(uwep->obj_material == MERCURIAL)
+			splcaster -= 20;
 		
 		if (uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO
 			&& spell_skilltype(spellid(spell)) == P_ATTACK_SPELL

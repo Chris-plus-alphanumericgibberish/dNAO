@@ -630,6 +630,10 @@
 #define hates_lawful_mon(mon)	((mon) == &youmonst ? u.ualign.type == A_CHAOTIC : (HAS_EPRI(mon) ? EPRI(mon)->shralign == A_CHAOTIC :\
 				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_CHAOTIC :\
 				  hates_lawful((mon)->data)))
+#define hates_chaos(ptr)		(is_lawful(ptr) || (ptr)->mtyp == PM_UVUUDAUM)
+#define hates_chaos_mon(mon)	((mon) == &youmonst ? u.ualign.type == A_LAWFUL : (HAS_EPRI(mon) ? EPRI(mon)->shralign == A_LAWFUL :\
+				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_LAWFUL :\
+				  hates_chaos((mon)->data)))
 
 #define melee_polearms(ptr)	((ptr)->mtyp == PM_VROCK ||\
 							 (ptr)->mtyp == PM_MEPHISTOPHELES ||\

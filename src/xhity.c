@@ -187,7 +187,7 @@ struct monst * mdef;
 	check_caitiff(mdef);
 
 	/* SCOPECREEP: remove this, replace with u.actioncost */
-	if (uwep && fast_weapon(uwep) && uwep->spe >= 2){
+	if (uwep && (fast_weapon(uwep))){
 		youmonst.movement += NORMAL_SPEED / 6;
 	}
 	
@@ -12973,6 +12973,8 @@ int vis;						/* True if action is at all visible to the player */
 			poisons |= OPOISON_SILVER;
 		if (poisonedobj->oartifact == ART_WEBWEAVER_S_CROOK)
 			poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
+		if (is_wet_merc(poisonedobj) && !rn2(5))
+			poisons |= (OPOISON_HALLU);
 		if (poisonedobj->oartifact == ART_SUNBEAM)
 			poisons |= OPOISON_FILTH;
 		if (poisonedobj->oartifact == ART_MOONBEAM)

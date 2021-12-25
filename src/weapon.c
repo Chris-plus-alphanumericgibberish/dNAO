@@ -292,12 +292,14 @@ int oartifact;
 		|| oartifact == ART_DURIN_S_AXE
 		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
 		|| (obj && check_oprop(obj, OPROP_SPIKED) && !litsaber(obj))
+		|| (obj && !litsaber(obj) && is_kinstealing_merc(obj))
 		){
 		attackmask |= PIERCE;
 	}
 	if (   oartifact == ART_LIECLEAVER
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
 		|| (obj && check_oprop(obj, OPROP_BLADED) && !litsaber(obj))
+		|| (obj && !litsaber(obj) && is_streaming_merc(obj))
 		){
 		attackmask |= SLASH;
 	}
@@ -398,63 +400,111 @@ int otyp;
 			dmod += 2;
 
 		/* material-based dmod modifiers */
-		if (obj->obj_material != objects[obj->otyp].oc_material && !(is_lightsaber(obj) && litsaber(obj)))
-		{
-			/* if something is made of an especially effective material 
-			 * and it normally isn't, it gets a dmod bonus 
-			 */
-			int mat;	/* material being contemplated */
-			int mod;	/* mat modifier sign: -1 for base, +1 for current*/
-			for (mod = -1; mod<2; mod+=2){
-				if (mod == -1)
-					mat = objects[obj->otyp].oc_material;
-				else
-					mat = obj->obj_material;
-				switch (mat)
-				{
-				/* flimsy weapons are bad damage */
-				case LIQUID:
-				case WAX:
-				case VEGGY:
-				case FLESH:
-				case PAPER:
-				case CLOTH:
-				case LEATHER:
-					dmod -= mod;
-					break;
-				/* gold and platinum are heavy
-				 * ...regardless that the elven mace is wooden, 
-				 *   and is _better_ than a standard iron mace */
-				case GOLD:
-				case PLATINUM:
-					if (is_bludgeon(obj))
-						dmod += mod;
-					break;
-				/* lead is heavy but bad at cutting (gold and silver should be too, but magic, basically)
+		if(!(is_lightsaber(obj) && litsaber(obj))){
+			if(obj->obj_material == MERCURIAL){
+				if(obj->where == OBJ_MINVENT || obj->where == OBJ_INVENT){
+					int level = obj->where == OBJ_INVENT ? u.ulevel : obj->ocarry->m_lev;
+					if(is_kinstealing_merc(obj)) {
+						if(level < 3){
+							dmod -= 1;
+							ocd--;
+						}
+						else if(level < 10){
+							dmod -= 1;
+							flat += ocn;
+						}
+						else if(level < 18){
+							dmod -= 1;
+							ocd--;
+							ocn*=2;
+						}
+						else {
+							dmod -= 1;
+							ocd--;
+							ocn*=3;
+						}
+					}
+					//Chained and streaming
+					else {
+						if(level < 3){
+							dmod -= 2;
+						}
+						else if(level < 10){
+							dmod -= 1;
+						}
+						else if(level >= 18){
+							dmod += 3;
+							flat += ocn;
+						}
+					}
+				}
+				//Not carried, very weak
+				else {
+					dmod = 0;
+					ocd = 2;
+					ocn = 1;
+					bonn = 0;
+					bond = 0;
+					flat = 0;
+				}
+			}
+			if (obj->obj_material != objects[obj->otyp].oc_material){
+				/* if something is made of an especially effective material 
+				 * and it normally isn't, it gets a dmod bonus 
 				 */
-				case LEAD:
-					if (is_bludgeon(obj))
-						dmod += mod;
-					if (is_slashing(obj) || is_stabbing(obj))
+				int mat;	/* material being contemplated */
+				int mod;	/* mat modifier sign: -1 for base, +1 for current*/
+				for (mod = -1; mod<2; mod+=2){
+					if (mod == -1)
+						mat = objects[obj->otyp].oc_material;
+					else
+						mat = obj->obj_material;
+					switch (mat)
+					{
+					/* flimsy weapons are bad damage */
+					case LIQUID:
+					case WAX:
+					case VEGGY:
+					case FLESH:
+					case PAPER:
+					case CLOTH:
+					case LEATHER:
 						dmod -= mod;
-					break;
-				/* glass and obsidian have sharp edges and points 
-				 * shadowsteel ??? but gameplay-wise, droven weapons
-				 *   made out of this troublesome-to-maintain material
-				 *   shouldn't be weaker than their obsidian counterparts
-				 */
-				case GLASS:
-				case OBSIDIAN_MT:
-				case SHADOWSTEEL:
-				case GREEN_STEEL:
-					if (is_slashing(obj) || is_stabbing(obj))
-						dmod += mod;
-					break;
-				/* dragon teeth are good at piercing */
-				case DRAGON_HIDE:
-					if (is_stabbing(obj))
-						dmod += mod;
-					break;
+						break;
+					/* gold and platinum are heavy
+					 * ...regardless that the elven mace is wooden, 
+					 *   and is _better_ than a standard iron mace */
+					case GOLD:
+					case PLATINUM:
+						if (is_bludgeon(obj))
+							dmod += mod;
+						break;
+					/* lead is heavy but bad at cutting (gold and silver should be too, but magic, basically)
+					 */
+					case LEAD:
+						if (is_bludgeon(obj))
+							dmod += mod;
+						if (is_slashing(obj) || is_stabbing(obj))
+							dmod -= mod;
+						break;
+					/* glass and obsidian have sharp edges and points 
+					 * shadowsteel ??? but gameplay-wise, droven weapons
+					 *   made out of this troublesome-to-maintain material
+					 *   shouldn't be weaker than their obsidian counterparts
+					 */
+					case GLASS:
+					case OBSIDIAN_MT:
+					case SHADOWSTEEL:
+					case GREEN_STEEL:
+						if (is_slashing(obj) || is_stabbing(obj))
+							dmod += mod;
+						break;
+					/* dragon teeth are good at piercing */
+					case DRAGON_HIDE:
+						if (is_stabbing(obj))
+							dmod += mod;
+						break;
+					}
 				}
 			}
 		}
