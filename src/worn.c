@@ -1308,12 +1308,13 @@ struct monst * mon;
 	/* only looks at a monster's base stats with minimal adjustment (and no worn armor) */
 	/* used for pokedex entry */
 	int dr = 0;
+	int denom = 4;
 
 #define m_bdr mon->data->bdr + mon->data->spe_bdr
 #define m_ldr mon->data->ldr + mon->data->spe_ldr
-#define m_hdr mon->data->hdr + mon->data->spe_hdr
-#define m_fdr mon->data->fdr + mon->data->spe_fdr
-#define m_gdr mon->data->gdr + mon->data->spe_gdr
+#define m_hdr (denom++, mon->data->hdr + mon->data->spe_hdr)
+#define m_fdr (denom++, mon->data->fdr + mon->data->spe_fdr)
+#define m_gdr (denom++, mon->data->gdr + mon->data->spe_gdr)
 
 	dr += m_bdr*2;
 	dr += m_ldr*2;
@@ -1333,7 +1334,7 @@ struct monst * mon;
 #undef m_fdr
 #undef m_gdr
 
-	return (dr / 7);
+	return (dr / denom);
 }
 
 /* weapons are handled separately; rings and eyewear aren't used by monsters */
