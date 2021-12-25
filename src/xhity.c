@@ -14926,6 +14926,9 @@ int vis;						/* True if action is at all visible to the player */
 				case OPOISON_SLEEP:
 					Sprintf(poisons_str, "drug");
 					break;
+				case OPOISON_HALLU:
+					Sprintf(poisons_str, "hallucinogen");
+					break;
 				case OPOISON_AMNES:
 					Sprintf(poisons_str, "lethe-rust");
 					break;
