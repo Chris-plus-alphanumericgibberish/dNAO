@@ -3110,7 +3110,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	if (is_drow(ma) && is_drow(md) && (magr->mfaction == mdef->mfaction)) {
 		return 0L;
 	}
-	// Kiaransali drow are friendly to undead
+	// Lost (Lich) house drow are friendly to undead
 	if (((is_drow(ma) && magr->mfaction == LOST_HOUSE) && mm_undead(mdef)) ||
 		((is_drow(md) && mdef->mfaction == LOST_HOUSE) && mm_undead(magr))) {
 		return 0L;
