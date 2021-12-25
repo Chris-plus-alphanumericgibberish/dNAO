@@ -943,7 +943,7 @@ NEARDATA struct permonst mons[] = {
 	MA_DEMIHUMAN|MA_MINION|MA_INSECTOID /*MA*/,  MV_NORMAL|MV_SEE_INVIS|MV_TELEPATHIC /*MV*/, CLR_CYAN),
     MON("star spawn", S_HUMANOID,//17
 	LVL(26, 12, 90, 0), (G_NOGEN),
-	DEF(NAT_AC(15), NAT_DR(10)),
+	DEF(NAT_AC(15), SPE_AC(15), NAT_DR(10), SPE_DR(5)),
 	A(ATTK(AT_WEAP, AD_PHYS, 4, 4), ATTK(AT_XWEP, AD_PHYS, 4, 4), 
 	  ATTK(AT_TENT, AD_DRIN, 1, 4),
 	  ATTK(AT_MAGC, AD_PSON, 0, 15)),
@@ -8998,7 +8998,7 @@ is a red right hand
 	MA_HUMAN|MA_DEMIHUMAN|MA_GIANT|MA_AQUATIC /*MA*/,  MV_INFRAVISION|MV_NORMAL /*MV*/, CLR_BRIGHT_GREEN),
     MON("Great Cthulhu", S_DEMON,//51
 	LVL(100, 3, 127, 0), (G_NOGEN|G_UNIQ),
-	DEF(NAT_AC(10), NAT_DR(21)),
+	DEF(NAT_AC(10), SPE_AC(15), NAT_DR(10), SPE_DR(15)),
 	A(ATTK(AT_CLAW, AD_PHYS, 100, 4), ATTK(AT_WDGZ, AD_WISD, 1, 10), /*You might survive one melee hit from cthulhu, but prob not two*/
 	  ATTK(AT_NONE, AD_POSN, 8, 8)),
 	SIZ(10000, 4000, MS_SILENT, MZ_GIGANTIC), 
@@ -9291,7 +9291,7 @@ is a red right hand
 	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, HI_DOMESTIC),
     MON("Lady Constance", S_HUMAN,//14 /*Needs encyc entry*/
 	LVL(14, 12, 0, 0), (G_NOGEN|G_UNIQ),
-	DEF(NAT_AC(0)),
+	DEF(SPE_AC(15), SPE_DR(5)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 6),
 	  ATTK(AT_MAGC, AD_PSON, 0, 15)),
 	SIZ(WT_HUMAN, CN_HUMAN, MS_HUMANOID, MZ_HUMAN), 0, 0,
