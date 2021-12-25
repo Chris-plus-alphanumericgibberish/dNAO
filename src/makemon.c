@@ -229,6 +229,7 @@ int faction;
 	struct obj *otmp;
 	int chance = 0;
 
+#define MAYBE_MERC(otmp)	if(!rn2(100)) set_material_gm(otmp, MERCURIAL);
 #ifdef REINCARNATION
 	if (Is_rogue_level(&u.uz)) return;
 #endif
@@ -4804,7 +4805,8 @@ int faction;
 		if(rn2(2)) (void)mongets(mtmp, ORCISH_HELM, mkobjflags);
 		switch (mm) {
 		    case PM_ORC_OF_THE_AGES_OF_STARS:
-				(void)mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
+				otmp = mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
+				if(otmp) MAYBE_MERC(otmp)
 				(void)mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
 				(void)mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
 				(void)mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
@@ -5166,6 +5168,7 @@ int faction;
 					case 0:
 						otmp = mksobj(BULLWHIP, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(DWARVISH_MATTOCK, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
@@ -5185,6 +5188,7 @@ int faction;
 						if(rn2(2)){
 							otmp = mksobj(TWO_HANDED_SWORD, mkobjflags|MKOBJ_ARTIF);
 							otmp->spe = 0+rnd(3)+rn2(3);
+							MAYBE_MERC(otmp)
 							(void) mpickobj(mtmp, otmp);
 							otmp = mksobj(AXE, mkobjflags|MKOBJ_ARTIF);
 							otmp->spe = 0+rn2(4);
@@ -5192,6 +5196,7 @@ int faction;
 						} else {
 							otmp = mksobj(BATTLE_AXE, mkobjflags|MKOBJ_ARTIF);
 							otmp->spe = 0+rnd(3)+rn2(3);
+							MAYBE_MERC(otmp)
 							(void) mpickobj(mtmp, otmp);
 							otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
 							otmp->spe = 0+rn2(4);
@@ -5208,6 +5213,7 @@ int faction;
 					case 2:
 						otmp = mksobj(RAPIER, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(CLOAK, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
@@ -5268,6 +5274,7 @@ int faction;
 					case 5:
 						otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(CHAIN_MAIL, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
@@ -5306,6 +5313,7 @@ int faction;
 					case 7:
 						otmp = mksobj(RAPIER, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(VICTORIAN_UNDERWEAR, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
@@ -5333,6 +5341,7 @@ int faction;
 					case 8:
 						otmp = mksobj(SCIMITAR, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(FLINTLOCK, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
@@ -5357,6 +5366,7 @@ int faction;
 					//Priest
 					case 9:
 						otmp = mksobj(MACE, mkobjflags|MKOBJ_ARTIF);
+						MAYBE_MERC(otmp)
 						bless(otmp);
 						otmp->spe = 1+rn2(3);
 						(void) mpickobj(mtmp, otmp);
@@ -5378,6 +5388,7 @@ int faction;
 					case 10:
 						otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(BOW, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
@@ -5398,6 +5409,7 @@ int faction;
 					case 11:
 						otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
+						MAYBE_MERC(otmp)
 						otmp->opoisoned = OPOISON_BASIC;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(DAGGER, mkobjflags);
@@ -5418,6 +5430,7 @@ int faction;
 					case 12:
 						otmp = mksobj(NAGINATA, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(STILETTO, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
@@ -5453,6 +5466,7 @@ int faction;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(STILETTO, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(STILETTO, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
@@ -5482,6 +5496,7 @@ int faction;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(ATHAME, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = -1+rn2(4);
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(CLOAK_OF_MAGIC_RESISTANCE, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
@@ -7715,6 +7730,15 @@ int faction;
 			otmp->spe = 5;
 			(void) mpickobj(mtmp,otmp);
 		} else if(ptr->mtyp == PM_DOKKALFAR_ETERNAL_MATRIARCH){
+			/*Weapon*/
+			otmp = mksobj(HIGH_ELVEN_WARSWORD, mkobjflags);
+			add_oprop(otmp, OPROP_WRTHW);
+			MAYBE_MERC(otmp)
+			otmp->objsize = MZ_LARGE;
+			otmp->blessed = TRUE;
+			otmp->cursed = FALSE;
+			otmp->spe = 9;
+			(void) mpickobj(mtmp, otmp);
 			/*Plate Mail*/
 			otmp = mksobj(DROVEN_PLATE_MAIL, mkobjflags);
 			otmp->ohaluengr = TRUE;
