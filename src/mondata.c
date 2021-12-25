@@ -382,6 +382,20 @@ int template;
 		ptr->mflagst |= (MT_CARNIVORE);
 		ptr->mflagsv |= (MV_ECHOLOCATE|MV_SCENT);
 		ptr->mflagsa |= (MA_ANIMAL|MA_PLANT|MA_PRIMORDIAL);
+#define AVG_DR(typ) if(ptr->typ < 5) ptr->typ = (ptr->typ + 5)/2;
+#define AVG_AC(typ) if(ptr->typ < 16) ptr->typ = (ptr->typ + 16)/2;
+		AVG_AC(nac)
+		AVG_DR(bdr)
+		AVG_DR(ldr)
+		AVG_DR(gdr)
+		AVG_DR(fdr)
+		if(ptr->mtyp == PM_PRIESTESS){
+			AVG_AC(dac)
+			AVG_AC(pac)
+			ptr->spe_bdr += 4;
+			ptr->spe_gdr += 2;
+			ptr->spe_ldr += 2;
+		}
 		break;
 	case DELOUSED:
 		/* flags */
