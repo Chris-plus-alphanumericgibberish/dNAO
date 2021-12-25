@@ -2288,6 +2288,7 @@ base_uac()
 {
 	int dexbonus = 0;
 	int uac = 10-mons[u.umonnum].nac;
+	boolean flat_foot = multi < 0 || mad_turn(MAD_SUICIDAL) || u.ustuck;
 	
 	if(multi >= 0)
 		dexbonus += mons[u.umonnum].dac;
@@ -2297,62 +2298,63 @@ base_uac()
 	}
 
 	if(uwep){
-		if((is_rapier(uwep) && arti_shining(uwep)) || 
-			(uwep->otyp == LIGHTSABER && litsaber(uwep) && uwep->oartifact != ART_ANNULUS && uwep->ovar1 == 0)
-				) uac -= max(
-					min(
-					(ACURR(A_DEX)-13)/4,
-					P_SKILL(weapon_type(uwep))-1
-					)
-				,0);
 		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) uac -= max((uwep->spe+1)/2,0);
-		if(uwep->oartifact == ART_TENSA_ZANGETSU){
-			uac -= max( (uwep->spe+1)/2,0);
+		else if(uwep->oartifact == ART_TENSA_ZANGETSU){
+			if(!flat_foot) uac -= max( (uwep->spe+1)/2,0);
 			if(!uarmc || !uarm) uac -= max( uwep->spe,0);
 			if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
 		}
-		if(is_lightsaber(uwep) && litsaber(uwep)){
-			if(activeFightingForm(FFORM_SORESU)){
-				switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
-					case P_BASIC:
-						uac -=   max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/5);
-					break;
-					case P_SKILLED:
-						uac -= max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/3);
-					break;
-					case P_EXPERT:
-						uac -= max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/2);
-					break;
-				}
-			} else if(activeFightingForm(FFORM_ATARU)){
-				switch(min(P_SKILL(P_ATARU), P_SKILL(weapon_type(uwep)))){
-					case P_BASIC:
-						uac += 20;
-					break;
-					case P_SKILLED:
-						uac += 10;
-					break;
-					case P_EXPERT:
-						uac += 5;
-					break;
-				}
-			} else if(activeFightingForm(FFORM_MAKASHI)){
-				int sx, sy, mcount = 0;
-				for(sx = u.ux-1; sx<=u.ux+1; sx++){
-					for(sy = u.uy-1; sy<=u.uy+1; sy++){
-						if(isok(sx,sy) && m_at(sx,sy)) mcount++;
+		if(!flat_foot){
+			if((is_rapier(uwep) && arti_shining(uwep)) || 
+				(uwep->otyp == LIGHTSABER && litsaber(uwep) && uwep->oartifact != ART_ANNULUS && uwep->ovar1 == 0)
+					) uac -= max(
+						min(
+						(ACURR(A_DEX)-13)/4,
+						P_SKILL(weapon_type(uwep))-1
+						)
+					,0);
+			if(is_lightsaber(uwep) && litsaber(uwep)){
+				if(activeFightingForm(FFORM_SORESU)){
+					switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
+						case P_BASIC:
+							uac -=   max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/5);
+						break;
+						case P_SKILLED:
+							uac -= max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/3);
+						break;
+						case P_EXPERT:
+							uac -= max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/2);
 					}
-				}
-				switch(min(P_SKILL(P_MAKASHI), P_SKILL(weapon_type(uwep)))){
-					case P_BASIC:
-						if(mcount) uac += (mcount-1) * 10;
-					break;
-					case P_SKILLED:
-						if(mcount) uac += (mcount-1) * 5;
-					break;
-					case P_EXPERT:
-						if(mcount) uac += (mcount-1) * 2;
-					break;
+				} else if(activeFightingForm(FFORM_ATARU)){
+					switch(min(P_SKILL(P_ATARU), P_SKILL(weapon_type(uwep)))){
+						case P_BASIC:
+							uac += 20;
+						break;
+						case P_SKILLED:
+							uac += 10;
+						break;
+						case P_EXPERT:
+							uac += 5;
+						break;
+					}
+				} else if(activeFightingForm(FFORM_MAKASHI)){
+					int sx, sy, mcount = 0;
+					for(sx = u.ux-1; sx<=u.ux+1; sx++){
+						for(sy = u.uy-1; sy<=u.uy+1; sy++){
+							if(isok(sx,sy) && m_at(sx,sy)) mcount++;
+						}
+					}
+					switch(min(P_SKILL(P_MAKASHI), P_SKILL(weapon_type(uwep)))){
+						case P_BASIC:
+							if(mcount) uac += (mcount-1) * 10;
+						break;
+						case P_SKILLED:
+							if(mcount) uac += (mcount-1) * 5;
+						break;
+						case P_EXPERT:
+							if(mcount) uac += (mcount-1) * 2;
+						break;
+					}
 				}
 			}
 		}
@@ -2663,12 +2665,14 @@ int depth;
 		}
 	}
 	/* Tensa Zangetsu adds to worn armor */
-	if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU) {
-		if (!uarmc && (slot & CLOAK_DR)) {
-			arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
-		}
-		if (!uarm && (slot & TORSO_DR)) {
-			arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
+	if(uwep){
+		if (uwep->oartifact == ART_TENSA_ZANGETSU) {
+			if (!uarmc && (slot & CLOAK_DR)) {
+				arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
+			}
+			if (!uarm && (slot & TORSO_DR)) {
+				arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
+			}
 		}
 	}
 	/* Natural DR (overriden and ignored by base_nat_udr() for halfdragons) */
