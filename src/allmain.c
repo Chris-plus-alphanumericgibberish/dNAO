@@ -1300,7 +1300,7 @@ moveloop()
 		}
 		if(Role_if(PM_MONK) && !Upolyd){
 			if(u.umoved || u.uattked){
-				if((u.prev_dir.x || u.prev_dir.y) && (multi < 0 || monk_moves())){
+				if((u.prev_dir.x || u.prev_dir.y) && !flags.nopick && (multi < 0 || monk_moves())){
 					//Did a move: clear previous input.
 					u.prev_dir.x = 0;
 					u.prev_dir.y = 0;
