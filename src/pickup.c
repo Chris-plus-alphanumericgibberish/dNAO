@@ -2677,6 +2677,7 @@ boolean past;
 			else {
 				expert_weapon_skill(P_SABER);
 				expert_weapon_skill(P_MORNING_STAR);
+				expert_weapon_skill(P_TWO_HANDED_SWORD);
 			}
 			knows_object(DROVEN_SHORT_SWORD);
 			knows_object(DROVEN_BOLT);

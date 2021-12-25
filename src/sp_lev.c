@@ -1444,6 +1444,11 @@ default_case:
 					default_add_2(GENTLEMAN_S_SUIT);
 					default_add_2(DROVEN_SHORT_SWORD);
 
+					stuff = mksobj(DROVEN_GREATSWORD, MKOBJ_NOINIT);
+					set_material_gm(stuff, SILVER);
+					add_oprop(stuff, OPROP_ASECW);
+					add_to_container(otmp, stuff);
+
 					stuff = mksobj(CLOAK, MKOBJ_NOINIT);
 					set_material_gm(stuff, CLOTH);
 					stuff->obj_color = CLR_BLACK;
