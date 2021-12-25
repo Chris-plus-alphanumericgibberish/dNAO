@@ -471,6 +471,7 @@ struct obj {
 			 rakuyo_prop(otmp) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->oartifact == ART_BLOODLETTER || \
+			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
 			 otmp->obj_material == MERCURIAL || \
 			 otmp->otyp == BESTIAL_CLAW)
 #define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \
@@ -572,10 +573,12 @@ struct obj {
 							obj->where == OBJ_INVENT ? you_merc_streaming(obj) : FALSE))
 #define mon_merc_streaming(obj) ((obj->ocarry->encouraged + (obj->ocarry->mtame ? (obj->ocarry->mtame - 5) : 0)) >= 3)
 #define you_merc_streaming(obj) (Insanity <= 20 && !u.veil)
+
 #define is_kinstealing_merc(obj) ((obj)->obj_material == MERCURIAL && (obj->where == OBJ_MINVENT ? mon_merc_kinstealing(obj) : \
 							obj->where == OBJ_INVENT ? you_merc_kinstealing(obj) : FALSE))
 #define mon_merc_kinstealing(obj) ((obj->ocarry->encouraged + (obj->ocarry->mtame ? (obj->ocarry->mtame - 5) : 0)) < 0)
 #define you_merc_kinstealing(obj) (Insanity > 50)
+
 #define is_chained_merc(obj) ((obj)->obj_material == MERCURIAL && (obj->where == OBJ_MINVENT ? mon_merc_chained(obj) : \
 							obj->where == OBJ_INVENT ? you_merc_chained(obj) : FALSE))
 #define mon_merc_chained(obj) (!mon_merc_kinstealing(obj) && !mon_merc_streaming(obj))

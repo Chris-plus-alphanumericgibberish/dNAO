@@ -2304,6 +2304,12 @@ base_uac()
 			if(!uarmc || !uarm) uac -= max( uwep->spe,0);
 			if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
 		}
+		else if(uwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
+			if(u.uinsight >= 20)
+				uac -= 10;
+			else if(u.uinsight > 10)
+				uac -= u.uinsight - 10;
+		}
 		if(!flat_foot){
 			if((is_rapier(uwep) && arti_shining(uwep)) || 
 				(uwep->otyp == LIGHTSABER && litsaber(uwep) && uwep->oartifact != ART_ANNULUS && uwep->ovar1 == 0)
@@ -2324,6 +2330,7 @@ base_uac()
 						break;
 						case P_EXPERT:
 							uac -= max(0, (ACURR(A_DEX)+ACURR(A_INT) - 20)/2);
+						break;
 					}
 				} else if(activeFightingForm(FFORM_ATARU)){
 					switch(min(P_SKILL(P_ATARU), P_SKILL(weapon_type(uwep)))){
@@ -2562,6 +2569,12 @@ int base_udr()
 	
 	if(uwep){
 		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) udr += max((uwep->spe)/2,0);
+		else if(uwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
+			if(u.uinsight >= 40)
+				udr += 5;
+			else if(u.uinsight > 20)
+				udr += (u.uinsight - 20)/4;
+		}
 	}
 	if (HProtection & INTRINSIC) udr += (u.ublessed)/2;
 	if(u.edenshield > moves) udr += 7;
