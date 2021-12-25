@@ -2123,8 +2123,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1+u.ulevel/8; // from 1 to 4 dice, hitting 4 at xp 24+
 				
-				// scales inversely with insight, insight-based size is 15->5, 40->1, 60->0
-				// total dice assuming +7 and xp30 is 4d12 / 4d8 / 4d7 at insight 15/40/60
+				// scales inversely with sanity, sanity-based size is 0->11, 10->9, 25->6, 50->3, 75->1, 80->0
+				// total dice assuming +7 and xp30 is 4d18 / 4d10 / 4d7 at sanity 15/50/80+
 				attk->damd = max(otmp->spe, 1);
 				attk->damd += (int)((Insanity/30.0)*(Insanity/30.0) + 0.5);
 
