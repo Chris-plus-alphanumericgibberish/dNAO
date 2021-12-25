@@ -559,7 +559,7 @@ A("Frost Brand",		LONG_SWORD,						"ice-runed %s",
 	ATTK(AD_COLD, 1, 0), NOFLAG,
 	PROPS(COLD_RES), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_PLUSSEV)
 	),
 A("Fire Brand",			LONG_SWORD,						"ember-runed %s",
 	3000L, OBSIDIAN_MT, MZ_DEFAULT, WT_DEFAULT,
@@ -568,7 +568,7 @@ A("Fire Brand",			LONG_SWORD,						"ember-runed %s",
 	ATTK(AD_FIRE, 1, 0), NOFLAG,
 	PROPS(FIRE_RES), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
 A("The Green Dragon Crescent Blade",		NAGINATA,	(const char *)0,
