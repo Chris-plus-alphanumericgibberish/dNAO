@@ -533,7 +533,7 @@ int otyp;
 			|| obj->oartifact == ART_SNICKERSNEE
 			|| obj->oartifact == ART_DURIN_S_AXE)
 		{
-			ocn = 2;						// roll two oc dice
+			ocn += 1;						// roll two oc dice
 		}
 		else if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
 		{
