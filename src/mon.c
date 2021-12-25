@@ -3061,9 +3061,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		return 0L;
 	}
 	// queast leaders should generally not be in danger
-	if(!(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz))
-		&& mdef->m_id == quest_status.leader_m_id
-	){
+	if(!Role_if(PM_ANACHRONONAUT) && mdef->m_id == quest_status.leader_m_id){
 		return 0L;
 	}
 	// Slime remnants attack everything not of the same peacefulness as them
