@@ -2371,8 +2371,12 @@ base_uac()
 			else if(you_merc_kinstealing(obj)){
 				if(u.ulevel < 10);
 				else if(u.ulevel < 18)
+					uac -= 1;
+				else
+					uac -= 2;
+			}
 			//Chained
-			else if(Insanity <= 50){
+			else {
 				if(u.ulevel < 3);
 				else if(u.ulevel < 10)
 					uac -= 1;
@@ -2380,14 +2384,6 @@ base_uac()
 					uac -= 4;
 				else
 					uac -= 6;
-			}
-			//Kinstealing
-			else {
-				if(u.ulevel < 10);
-				else if(u.ulevel < 18)
-					uac -= 1;
-				else
-					uac -= 2;
 			}
 		}
 	}
