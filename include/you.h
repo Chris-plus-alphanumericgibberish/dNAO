@@ -610,6 +610,16 @@ struct you {
 	
 	int role_variant;	/*Records what variant of your role you are.*/
 
+	int umystic;	/*Monk mystic attacks active*/	
+#define monk_style_active(style) (u.umystic & (1 << (style-1)))
+#define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1 << (style-1)))
+
+#define DIVE_KICK 1
+#define AURA_BOLT 2
+#define BIRD_KICK 3
+#define METODRIVE 4
+#define PUMMEL    5
+
 	long	wardsknown;	/* known wards */
 #define	WARD_ELBERETH		0x0000001L
 #define WARD_HEPTAGRAM		0x0000002L
@@ -842,11 +852,6 @@ struct you {
 							 (Role_if(PM_BARD) || Role_if(PM_HEALER) || Role_if(PM_TOURIST) || Role_if(PM_WIZARD) || Role_if(PM_MADMAN)) ? 0.50:\
 							  .5) /* Failsafe */
 
-#define DIVE_KICK 1
-#define AURA_BOLT 2
-#define BIRD_KICK 3
-#define METODRIVE 4
-#define PUMMEL    5
 
 extern long sealKey[34]; /*Defined in u_init.c*/
 extern boolean forcesight; /*Defined in u_init.c*/
