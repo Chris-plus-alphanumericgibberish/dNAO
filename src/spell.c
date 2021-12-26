@@ -5925,7 +5925,7 @@ int spell;
 	if (uarm){
 		if(arm_blocks_upper_body(uarm->otyp)){
 			if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
-				splcaster += urole.spelarmr;
+				splcaster += casting_stat == A_CHA ? uarmgbon : urole.spelarmr;
 		}
 		else {
 			if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
@@ -5939,7 +5939,7 @@ int spell;
 	if (uarmu){
 		if(arm_blocks_upper_body(uarmu->otyp)){
 			if (is_metallic(uarmu) || uarmu->oartifact == ART_DRAGON_PLATE)
-				splcaster += urole.spelarmr;
+				splcaster += casting_stat == A_CHA ? uarmgbon : urole.spelarmr;
 		}
 		else {
 			if (is_metallic(uarmu) || uarmu->oartifact == ART_DRAGON_PLATE)
@@ -5962,17 +5962,23 @@ int spell;
 			splcaster += uarmfbon;
 	}
 
-	if (uarmh) {
+	if (uarmh && !Role_if(PM_MONK)) {
+		//Something up with madmen and this, it doesn't affect much.
 		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
-			splcaster += casting_stat == A_CHA ? uarmhbon*3 : uarmhbon;
+			splcaster += casting_stat == A_CHA ? urole.spelarmr : uarmhbon;
 	}
 
 	if (uarmg) {
-		if (is_metallic(uarmg))
+		if(Role_if(PM_MONK)){
+			if(is_hard(uarmg))
+				splcaster += uarmgbon;
+		}
+		else if (is_metallic(uarmg)){
 			splcaster += casting_stat == A_CHA ? uarmfbon : uarmgbon;
+		}
 	}
 
-	if (uarmf) {
+	if (uarmf && !Role_if(PM_MONK)) {
 		if (is_metallic(uarmf))
 			splcaster += uarmfbon;
 	}
@@ -6039,7 +6045,7 @@ int spell;
 	 * to cast a spell.  The penalty is not quite so bad for the
 	 * player's role-specific spell.
 	 */
-	if (uarms && (is_metallic(uarms) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
+	if (uarms && casting_stat != A_CHA && (is_metallic(uarms) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
 		if (spellid(spell) == urole.spelspec) {
 			chance /= 2;
 		} else {
