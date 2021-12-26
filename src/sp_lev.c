@@ -1310,7 +1310,8 @@ default_case:
 					
 					default_add_2(GENTLEWOMAN_S_DRESS);
 					if(Race_if(PM_INCANTIFIER)){
-						set_material_gm(stuff, ROBE);
+						stuff = mksobj(ROBE, MKOBJ_NOINIT);
+						set_material_gm(stuff, CLOTH);
 						stuff->obj_color = CLR_GRAY;
 						stuff->spe = 2;
 						add_to_container(otmp, stuff);
@@ -1328,7 +1329,8 @@ default_case:
 					default_add_2(RAPIER);
 
 					if(Race_if(PM_INCANTIFIER)){
-						set_material_gm(stuff, ROBE);
+						stuff = mksobj(ROBE, MKOBJ_NOINIT);
+						set_material_gm(stuff, CLOTH);
 						stuff->obj_color = CLR_GRAY;
 						add_to_container(otmp, stuff);
 					}
