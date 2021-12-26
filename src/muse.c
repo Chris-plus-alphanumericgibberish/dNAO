@@ -2530,6 +2530,81 @@ struct monst *mtmp;
 }
 
 boolean
+can_equip(mon, obj)
+struct monst *mon;
+struct obj *obj;
+{
+	if(mon->mtyp == PM_CATHEZAR && obj->otyp == CHAIN)
+		return TRUE;
+	if(obj->oclass == WEAPON_CLASS || is_weptool(obj))
+		return mon_attacktype(mon, AT_WEAP) || mon_attacktype(mon, AT_XWEP) || mon_attacktype(mon, AT_MARI) || mon_attacktype(mon, AT_DEVA);
+	if(obj->oclass == AMULET_CLASS)
+		return can_wear_amulet(mon->data) && (obj->otyp == AMULET_OF_LIFE_SAVING || obj->otyp == AMULET_OF_REFLECTION);
+	else if(is_shirt(obj))
+		return  obj->objsize == mon->data->msize && shirt_match(mon->data,obj);
+	else if(is_cloak(obj))
+		return abs(obj->objsize - mon->data->msize) <= 1;
+	else if(is_helmet(obj))
+		return ((!has_horns(mon->data) || obj->otyp == find_gcirclet()) && helm_match(mon->data,obj) && has_head_mon(mon) && obj->objsize == mon->data->msize) || is_flimsy(obj);
+	else if(is_shield(obj))
+		return !cantwield(mon->data);
+	else if(is_gloves(obj))
+		return obj->objsize == mon->data->msize && can_wear_gloves(mon->data);
+	else if(is_boots(obj))
+		return obj->objsize == mon->data->msize && can_wear_boots(mon->data);
+	else if(is_suit(obj))
+		return arm_match(mon->data, obj) && arm_size_fits(mon->data, obj);
+	return FALSE;
+}
+
+boolean
+likes_obj(mon, obj)
+struct monst *mon;
+struct obj *obj;
+{
+	struct permonst *ptr = mon->data;
+	switch(obj->oclass){
+		case WEAPON_CLASS:
+			return likes_objs(ptr);
+		case ARMOR_CLASS:
+			return !mon->mdisrobe && likes_objs(ptr);
+		case RING_CLASS:
+			return likes_magic(ptr);
+		case AMULET_CLASS:
+			return likes_magic(ptr);
+		case TOOL_CLASS:
+			return is_weptool(obj) && likes_objs(ptr);
+		case FOOD_CLASS:
+			return obj->otyp != CORPSE && obj->otyp != MASSIVE_CHUNK_OF_MEAT && likes_objs(ptr);
+		case POTION_CLASS:
+			return likes_magic(ptr);
+		case SCROLL_CLASS:
+			return likes_magic(ptr);
+		case SPBOOK_CLASS:
+			return likes_magic(ptr);
+		case WAND_CLASS:
+			return likes_magic(ptr);
+		case COIN_CLASS:
+			return likes_gold(ptr);
+		case GEM_CLASS:
+			return likes_objs(ptr) || likes_gems(ptr);
+		case ROCK_CLASS:
+			return throws_rocks(ptr) && !In_sokoban(&u.uz);
+		case BALL_CLASS:
+			return likes_objs(ptr);
+		case CHAIN_CLASS:
+			return FALSE;
+		case TILE_CLASS:
+			return likes_magic(ptr);
+		case BED_CLASS:
+			return is_mercenary(ptr) && obj->otyp == BEDROLL;
+		case SCOIN_CLASS:
+			return likes_gold(ptr) || likes_magic(ptr);
+	}
+	return FALSE;
+}
+
+boolean
 searches_for_item(mon, obj)
 struct monst *mon;
 struct obj *obj;

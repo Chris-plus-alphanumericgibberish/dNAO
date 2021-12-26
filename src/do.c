@@ -1814,7 +1814,12 @@ int different;
     cname = eos(strcpy(cname_buf, "bite-covered "));
     Strcpy(cname, corpse_xname(corpse, TRUE));
     mcarry = (where == OBJ_MINVENT) ? corpse->ocarry : 0;
-
+	int ox, oy;
+	if(where == OBJ_FLOOR){
+		ox = corpse->ox;
+		oy = corpse->oy;
+	}
+	
     if (where == OBJ_CONTAINED) {
     	struct monst *mtmp2 = (struct monst *)0;
 		container = corpse->ocontainer;
@@ -1892,6 +1897,19 @@ int different;
 			else
 				pline("%s rises from the dead!", chewed ?
 					Adjmonnam(mtmp, "bite-covered") : Monnam(mtmp));
+			if(level.objects[ox][oy] && !mtmp->menvy){
+				struct obj *cur;
+				struct obj *nobj;
+				for(cur = level.objects[ox][oy]; cur; cur = nobj){
+					nobj = cur->nexthere;
+					if(likes_obj(mtmp, cur) || can_equip(mtmp, cur)){
+						obj_extract_self(cur);
+						mpickobj(mtmp, cur);
+					}
+				}
+				m_dowear(mtmp, TRUE);
+				init_mon_wield_item(mtmp);
+			}
 		}
 		break;
 

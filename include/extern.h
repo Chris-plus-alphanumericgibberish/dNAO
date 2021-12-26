@@ -1752,6 +1752,8 @@ E void FDECL(set_apparxy, (struct monst *));
 E boolean FDECL(can_ooze, (struct monst *));
 E void FDECL(remove_monster, (int, int));
 E void FDECL(held_item_bites, (struct monst *, struct obj *));
+E boolean FDECL(likes_obj, (struct monst *, struct obj *));
+E boolean FDECL(can_equip, (struct monst *, struct obj *));
 
 /* ### monst.c ### */
 

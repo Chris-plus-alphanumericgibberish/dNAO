@@ -1893,7 +1893,7 @@ register struct monst *mtmp;
 static NEARDATA const char practical[] = { WEAPON_CLASS, ARMOR_CLASS, GEM_CLASS, FOOD_CLASS, 0 };
 static NEARDATA const char magical[] = {
 	AMULET_CLASS, POTION_CLASS, SCROLL_CLASS, WAND_CLASS, RING_CLASS,
-	SPBOOK_CLASS, 0 };
+	SPBOOK_CLASS, TILE_CLASS, SCOIN_CLASS, 0 };
 static NEARDATA const char indigestion[] = { BALL_CLASS, ROCK_CLASS, 0 };
 static NEARDATA const char boulder_class[] = { ROCK_CLASS, 0 };
 static NEARDATA const char gem_class[] = { GEM_CLASS, 0 };
@@ -2134,7 +2134,8 @@ not_special:
 
 #define SQSRCHRADIUS	5
 
-      { register int minr = SQSRCHRADIUS;	/* not too far away */
+	{
+	register int minr = SQSRCHRADIUS;	/* not too far away */
 	register struct obj *otmp;
 	register int xx, yy;
 	int oomx, oomy, lmx, lmy;
@@ -2241,7 +2242,7 @@ not_special:
 	    } else
 		appr = 1;
 	}
-      }
+	}
 
 	/* don't tunnel if hostile and close enough to prefer a weapon */
 	if (can_tunnel && needspick(ptr) &&
