@@ -124,6 +124,7 @@ STATIC_PTR int NDECL(doability);
 STATIC_PTR int NDECL(domonability);
 STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
+STATIC_PTR int NDECL(doMysticForm);
 STATIC_PTR int NDECL(dofightingform);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 STATIC_PTR int NDECL(doclearinvissyms);
@@ -896,6 +897,83 @@ use_reach_attack()
 	    pline("%s", nothing_happens);
 	return (1);
 }
+int
+doMysticForm()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+	Sprintf(buf,	"Known Moves");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	if(monk_style_active(DIVE_KICK)) {
+		Sprintf(buf,	"Dive Kick (active)");
+	} else {
+		Sprintf(buf,	"Dive Kick (disabled)");
+	}
+	any.a_int = DIVE_KICK;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	if(monk_style_active(AURA_BOLT)) {
+		Sprintf(buf,	"Aura Bolt (active)");
+	} else {
+		Sprintf(buf,	"Aura Bolt (disabled)");
+	}
+	any.a_int = AURA_BOLT;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	if(monk_style_active(BIRD_KICK)) {
+		Sprintf(buf,	"Bird Kick (active)");
+	} else {
+		Sprintf(buf,	"Bird Kick (disabled)");
+	}
+	any.a_int = BIRD_KICK;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	if(monk_style_active(METODRIVE)) {
+		Sprintf(buf,	"Meteor Drive (active)");
+	} else {
+		Sprintf(buf,	"Meteor Drive (disabled)");
+	}
+	any.a_int = METODRIVE;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	if(monk_style_active(PUMMEL)) {
+		Sprintf(buf,	"Pummel (active)");
+	} else {
+		Sprintf(buf,	"Pummel (disabled)");
+	}
+	any.a_int = PUMMEL;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	end_menu(tmpwin,	"Choose fighting style:");
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if(n <= 0){
+		return 0;
+	} else {
+		toggle_monk_style(selected[0].item.a_int);
+		return 0;
+	}
+
+}
 
 int
 dofightingform()
@@ -906,6 +984,10 @@ dofightingform()
 	char incntlet = 'a';
 	menu_item *selected;
 	anything any;
+
+	if(Role_if(PM_MONK) && !((uwep && is_lightsaber(uwep)) || (u.twoweap && uswapwep && is_lightsaber(uswapwep)))){
+		return doMysticForm();
+	}	
 	
 	if(!(uwep && is_lightsaber(uwep))){
 		pline("You don't know any special fighting styles for use in this situation.");

@@ -17215,6 +17215,7 @@ monk_moves()
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
 	if(!moveID)
 		return FALSE;
+	if(!monk_style_active(moveID)) return FALSE;
 	if(u.uen < 8)
 		return FALSE;
 	switch(moveID){
