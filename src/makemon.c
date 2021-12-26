@@ -3205,7 +3205,7 @@ int faction;
 				
 				(void) mongets(mtmp, GAUNTLETS, mkobjflags);
 				
-				(void) mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+				otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
 				if(otmp) set_material_gm(otmp, IRON);
 				
 				(void) mongets(mtmp, LONG_SWORD, mkobjflags);
