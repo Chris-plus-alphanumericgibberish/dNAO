@@ -2494,7 +2494,7 @@ recalc_mapseen()
 			case ALTAR:
 				if (!mptr->feat.naltar)
 					mptr->feat.msalign = Align2msa(a_align(x,y));
-				else if (mptr->feat.msalign != Align2msa(a_align(x,y)));
+				else if (mptr->feat.msalign != Align2msa(a_align(x,y)))
 					mptr->feat.msalign = MSA_MULTI;
 						
 				mptr->feat.naltar = min(mptr->feat.naltar + 1, 3);
@@ -2787,9 +2787,8 @@ boolean printdun;
 			ADDNTOBUF("altar", mptr->feat.naltar)
 		else
 			ADDNTOBUF("temple", mptr->feat.ntemple)
-
-		/* only print out altar's god if they are all to your god */
-		if (Msa2align(mptr->feat.msalign) == u.ualign.type)
+		/* and print out altar's god if they are all to your god */
+		if ((mptr->feat.ntemple || mptr->feat.naltar) && (Msa2align(mptr->feat.msalign) == u.ualign.type))
 			Sprintf(eos(buf), " to %s", align_gname(u.ualign.type));
 
 		ADDNTOBUF("fountain", mptr->feat.nfount)
