@@ -719,15 +719,14 @@ coord *cc;
         mtmp2->mcanmove=0;
       else
 		mtmp2->mcanmove = 1;
-		/* most cancelled monsters return to normal,
-		   but some need to stay cancelled */
-		if (!dmgtype(mtmp2->data, AD_SEDU)
-#ifdef SEDUCE
-				&& !dmgtype(mtmp2->data, AD_SSEX)
-#endif
-		    ) set_mcan(mtmp2, FALSE);
-		mtmp2->mcansee = 1;	/* set like in makemon */
-		mtmp2->mblinded = 0;
+		if(mtmp2->mblinded){
+			mtmp2->mblinded = 0;
+			mtmp2->mcansee = 1;	/* set like in makemon */
+		}
+		if(mtmp2->mdeafened){
+			mtmp2->mdeafened = 0;
+			mtmp2->mcanhear = 1;	/* set like in makemon */
+		}
 		mtmp2->mstun = 0;
 		mtmp2->mconf = 0;
 		replmon(mtmp,mtmp2);
