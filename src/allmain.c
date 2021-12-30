@@ -1765,12 +1765,12 @@ moveloop()
 				if(mtmp->mtyp == PM_STRANGER) flags.yello_level=1;
 				if(mtmp->mtyp == PM_HMNYW_PHARAOH) dark_pharaoh_visible(mtmp);
 				if(mtmp->mtyp == PM_GOOD_NEIGHBOR) good_neighbor_visible(mtmp);
-				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)))){
+				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || Infuture)){
 					mtmp->mstrategy &= ~STRAT_WAITMASK;
 					pline_The("entire %s is shaking around you!",
 						   In_endgame(&u.uz) ? "plane" : "dungeon");
 					do_earthquake(mtmp->mx, mtmp->my, min(((int)mtmp->m_lev - 1) / 3 + 1,24), 3, TRUE, mtmp);
-					if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+					if(Infuture){
 						digcrater(mtmp);
 					} else if(Is_lolth_level(&u.uz)){
 						digcloudcrater(mtmp);
@@ -1958,7 +1958,7 @@ karemade:
 			static boolean LBbreach = FALSE;
 			static boolean LBproxim = FALSE;
 			static boolean LBperim = FALSE;
-			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
+			if(Infuture && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) if(!mtmp->mpeaceful && mtmp->mx <= 23) break;
 				if(mtmp && !(LBbreach && moves%5)) {
 					verbalize("**EMERGENCY ALERT: hostile entities detected within Last Bastion**");
@@ -1996,12 +1996,12 @@ karemade:
 			)){
 				makemon(&mons[PM_ASPECT_OF_THE_SILENCE], 0, 0, NO_MM_FLAGS);
 			}
-			else if(!(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) && !rn2(COA_PROB)){
+			else if(!Infuture && !rn2(COA_PROB)){
 				coa_arrive();
 			}
 		    else if(!(Is_illregrd(&u.uz) && u.ualign.type == A_LAWFUL && !u.uevent.uaxus_foe) && /*Turn off random generation on axus's level if lawful*/
 				!rn2(u.uevent.udemigod ? 25 :
-				(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) ? (!(Is_qstart(&u.uz) && !(quest_status.leader_is_dead)) ? 35 : ANA_HOME_PROB) :
+				Infuture ? (!(Is_qstart(&u.uz) && !(quest_status.leader_is_dead)) ? 35 : ANA_HOME_PROB) :
 				(In_quest(&u.uz) && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted && u.ualign.record > 4) ? 210 : /*Drastically reduce spawn rate if the painting is peaceful*/
 			    (depth(&u.uz) > depth(&stronghold_level)) ? 50 : 70)
 			){
@@ -2034,7 +2034,7 @@ karemade:
 					} //TEAM ATTACKS
 					if(In_sokoban(&u.uz)){
 						if(u.uz.dlevel != 1 && u.uz.dlevel != 4) makemon((struct permonst *)0, xupstair, yupstair, MM_ADJACENTSTRICT|MM_ADJACENTOK);
-					} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
+					} else if(Infuture && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 						(void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 						if(ANA_SPAWN_TWO) (void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 						if(ANA_SPAWN_THREE) (void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
@@ -2043,7 +2043,7 @@ karemade:
 					else (void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
 				}
 			}
-			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(Is_qstart(&u.uz) && !Race_if(PM_ANDROID)) && !rn2(35)){
+			if(Infuture && !(Is_qstart(&u.uz) && !Race_if(PM_ANDROID)) && !rn2(35)){
 				struct monst* mtmp = makemon(&mons[PM_SEMBLANCE], rn1(COLNO-3,2), rn1(ROWNO-3,2), MM_ADJACENTOK);
 				//"Where stray illuminations from the Far Realm leak onto another plane, matter stirs at the beckoning of inexplicable urges before burning to ash."
 				if(mtmp && canseemon(mtmp)) pline("The base matter of the world stirs at the beckoning of inexplicable urges, dancing with a semblance of life.");

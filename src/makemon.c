@@ -1702,7 +1702,7 @@ int faction;
 						otmp->obj_color = CLR_BLACK;
 						otmp->spe = 8;
 					}
-				} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && mm == PM_ELVENKING){ /* Give the elvenking in the quest a special setup */
+				} else if(Infuture && mm == PM_ELVENKING){ /* Give the elvenking in the quest a special setup */
 					struct obj *gem;
 					mtmp->m_lev += 7;
 					mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
@@ -4683,7 +4683,7 @@ int faction;
 				(void) mongets(mtmp, rnd_attack_potion(mtmp), mkobjflags);
 				
 				if(mm == PM_MASTER_MIND_FLAYER || !rn2(3)) mongets(mtmp, R_LYEHIAN_FACEPLATE, mkobjflags);
-			} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+			} else if(Infuture){
 				if(mm == PM_MASTER_MIND_FLAYER){
 					struct obj *gem;
 					mtmp->m_lev += 6;
@@ -6966,7 +6966,7 @@ int faction;
 				(void) mongets(mtmp, WHISTLE, mkobjflags);
 		} else if (ptr->mtyp == PM_SHOPKEEPER) {
 		    (void) mongets(mtmp,SKELETON_KEY, mkobjflags);
-			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+			if(Infuture){
 				(void) mongets(mtmp, SHOTGUN, mkobjflags);
 				(void) mongets(mtmp, SHOTGUN_SHELL, mkobjflags);
 				(void) mongets(mtmp, SHOTGUN_SHELL, mkobjflags);
@@ -7534,7 +7534,7 @@ int faction;
 					otmp->cursed = FALSE;
 					(void) mpickobj(mtmp, otmp);
 				}
-			} else if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+			} else if(Infuture){
 				otmp = mksobj(QUARTERSTAFF, mkobjflags);
 				otmp->spe = 9;
 				add_oprop(otmp, OPROP_PHSEW);
@@ -9565,7 +9565,7 @@ int faction;
 	} else if (!mtmp->m_lev) {
 	    mtmp->mhpmax = mtmp->mhp = rnd(4);
 	} else {
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+		if(Infuture){
 			mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - 1;
 		} else {
 		    mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
@@ -9995,7 +9995,7 @@ int faction;
 		case S_NYMPH:
 			if (rn2(5) && !u.uhave.amulet 
 				&& mndx != PM_NIMUNE && mndx != PM_INTONER && mndx != PM_AGLAOPE 
-				&& !(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
+				&& !Infuture
 			){
 				mtmp->msleeping = 1;
 			}
@@ -11758,7 +11758,7 @@ register struct permonst *ptr;
 	int mndx = monsndx(ptr);
 	aligntyp mal = ptr->maligntyp, ual = u.ualign.type;
 	
-	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !in_mklev) return FALSE;
+	if(Infuture && !in_mklev) return FALSE;
 	
 	if(Race_if(PM_CLOCKWORK_AUTOMATON) && (mndx == PM_TINKER_GNOME || mndx == PM_HOOLOOVOO) ) return TRUE;
 	
@@ -11808,7 +11808,7 @@ register struct permonst *ptr;
 	if (ptr->msound == MS_NEMESIS)	return FALSE;
 	
 	if (always_peaceful(ptr)) return TRUE;
-	if(!u.uevent.invoked && mndx==PM_UVUUDAUM && !(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))) return TRUE;
+	if(!u.uevent.invoked && mndx==PM_UVUUDAUM && !Infuture) return TRUE;
 	
 	if(ual == A_VOID) return FALSE;
 	

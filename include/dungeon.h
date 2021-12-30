@@ -230,6 +230,7 @@ typedef struct branch {
 #define Is_peanut(x)	(In_sea(x) && dungeon_topology.sea_variant == PEANUT_ISLAND_LEVEL)
 #define In_moloch_temple(x)	((x)->dnum == temple_dnum)
 #define Inhell			In_hell(&u.uz)	/* now gehennom */
+#define Infuture		(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
 #define In_endgame(x)		((x)->dnum == astral_level.dnum)
 
 #define within_bounded_area(X,Y,LX,LY,HX,HY) \

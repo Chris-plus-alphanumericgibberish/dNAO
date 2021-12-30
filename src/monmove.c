@@ -570,7 +570,7 @@ boolean
 scaryLol(mtmp)
 struct monst *mtmp;
 {
-  if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) return FALSE;
+  if(Infuture) return FALSE;
   if(u.ualign.type == A_VOID) return FALSE;
   if((Race_if(PM_DROW)) && !flags.stag){
 	if (mtmp->isshk || mtmp->isgd || mtmp->iswiz || is_blind(mtmp) ||
@@ -592,7 +592,7 @@ boolean
 scaryElb(mtmp)
 struct monst *mtmp;
 {
-  if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) return FALSE;
+  if(Infuture) return FALSE;
   if(Race_if(PM_ELF)){
 	if (mtmp->isshk || mtmp->isgd || mtmp->iswiz || is_blind(mtmp) ||
 	    mtmp->mpeaceful || mtmp->data->mlet == S_HUMAN || 

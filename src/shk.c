@@ -535,7 +535,7 @@ boolean newlev;
 	}
 
 	if (rob_shop(shkp, (struct obj *)0)) {
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(Infuture && Is_qstart(&u.uz)){
 			verbalize("Help me, Ilsensine!");
 			makemon(&mons[PM_WARRIOR_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
 			makemon(&mons[PM_MASTER_MIND_FLAYER], shkp->mx, shkp->my, MM_ADJACENTOK);
@@ -569,7 +569,7 @@ struct obj * otmp;
 	    return;
 
 	if (rob_shop(shkp, otmp)) {
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(Infuture && Is_qstart(&u.uz)){
 			verbalize("Help me, Ilsensine!");
 			makemon(&mons[PM_WARRIOR_CHANGED], shkp->mx, shkp->my, MM_ADJACENTOK);
 			makemon(&mons[PM_MASTER_MIND_FLAYER], shkp->mx, shkp->my, MM_ADJACENTOK);

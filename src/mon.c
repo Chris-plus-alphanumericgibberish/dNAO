@@ -1844,7 +1844,7 @@ movemon()
 	}
 	if(mtmp->mtyp == PM_UVUUDAUM){
 		if(u.uevent.invoked 
-		|| (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
+		|| Infuture
 		|| mtmp->mhp < mtmp->mhpmax
 		|| mtmp->m_lev < 30
 		|| mtmp->mspec_used > 0
@@ -1870,7 +1870,7 @@ movemon()
 	if(mtmp->mtyp == PM_DREAD_SERAPH && 
 		mtmp->mhp == mtmp->mhpmax && 
 		!(mtmp->mstrategy&STRAT_WAITMASK) && 
-		!(u.uevent.invoked || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)))
+		!(u.uevent.invoked || Infuture)
 			
 	){
 		//go back to sleep
@@ -3099,7 +3099,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	// The leader IS in serious danger
 	// However, the imminent doom causes all peacefuls to forget any grudges against each other
 	// (and Illsensine can make her own forces coordinate, of course)
-	if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+	if(Infuture && Is_qstart(&u.uz)){
 		if(magr->mpeaceful != mdef->mpeaceful) return ALLOW_M|ALLOW_TM;
 		else return 0L;
 	}
@@ -3542,7 +3542,7 @@ struct monst *mtmp;
 	mtmp->mhp = 0;
 
 	/* get all lifesavers */
-	if (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && !(mtmp->mpeaceful) && !rn2(20))
+	if (Infuture && !(mtmp->mpeaceful) && !rn2(20))
 		lifesavers |= LSVD_ANA;
 	if(mtmp->mtyp == PM_NITOCRIS
 		&& which_armor(mtmp, W_ARMC)

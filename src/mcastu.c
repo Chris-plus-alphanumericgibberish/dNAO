@@ -4088,7 +4088,7 @@ int tary;
 	case SUMMON_MONS:
 		if(DimensionalLock)
 			return MM_MISS;
-		else if (!youdef || u.summonMonster || (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))) {
+		else if (!youdef || u.summonMonster || Infuture) {
 			/* only mvu allowed */
 			/* only one summon spell per global turn allowed */
 			/* disallowed in Anachrononaut quest */
@@ -5299,7 +5299,7 @@ int tary;
 	if (!youagr
 		&& is_drow(magr->data)
 		&& (is_directed_attack_spell(spellnum) || is_debuff_spell(spellnum))	/* only affects directed and debuff spells */
-		&& !(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))) /* does not work in Ana quest */
+		&& !Infuture) /* does not work in Ana quest */
 	{
 		if ((sengr_at("Elbereth", tarx, tary) && !Race_if(PM_DROW))
 			|| (sengr_at("Lolth", tarx, tary) && Race_if(PM_DROW) && (mlev(magr) < u.ulevel || u.ualign.record-- > 0)))
@@ -5309,7 +5309,7 @@ int tary;
 	}
 
 	/* Don't cast summon spells (with some exceptions) in the Anachrononaut quest */
-	if ((Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) && is_summon_spell(spellnum) && !(
+	if (Infuture && is_summon_spell(spellnum) && !(
 		(spellnum == SUMMON_SPHERE) ||
 		(spellnum == TIME_DUPLICATE) ||
 		(spellnum == CLONE_WIZ)

@@ -228,7 +228,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		*tool = POT_EXTRA_HEALING;
 	break;
 	case PM_INCANTIFIER:
-		if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)){
+		if(Infuture){
 			*weapon = rn2(2) ? DOUBLE_LIGHTSABER : LIGHTSABER;
 			*rweapon = HAND_BLASTER;
 			*armor = !rn2(3) ? JUMPSUIT : 

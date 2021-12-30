@@ -226,7 +226,7 @@ minimal_enlightenment()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	/* Deity list */
-	if (Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz)) {
+	if(Infuture){
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", FALSE);
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings, "The God of the Future", FALSE);
 		Sprintf(buf2, deity_fmtstr, godname(GOD_ILSENSINE), "");
