@@ -1268,6 +1268,14 @@ u_on_sstairs() {	/* place you on the special staircase */
 		    return;
 		}
 	    } while (++trycnt <= 500);
+
+		/* try extra hard to place player */
+		for (x=1; x <= COLNO-1; x++)
+		for (y=0; y <= ROWNO-1; y++)
+		if (!badspot(x, y)) {
+			u_on_newpos(x, y);
+			return;
+		}
 	    panic("u_on_sstairs: could not relocate player!");
 #undef badspot
 	}
