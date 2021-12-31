@@ -327,7 +327,7 @@ boolean nxcor;
 			return;
 
 		// add the door
-		if (okdoor(xx, yy) || !nxcor)
+		if (okdoor(xx, yy))
 		{
 			dodoor(xx, yy, croom);
 			add_door(xx, yy, troom);
@@ -342,7 +342,7 @@ boolean nxcor;
 	if (IS_WALL(levl[xx + dx][yy + dy].typ) || IS_ROOM(levl[xx + dx][yy + dy].typ))	// prevent trying to open corridors into adjacent rooms
 		return;
 
-	if (okdoor(xx,yy) || !nxcor)
+	if (okdoor(xx,yy))
 	    dodoor(xx,yy,croom);
 
 	org.x  = xx+dx; org.y  = yy+dy;
@@ -353,7 +353,7 @@ boolean nxcor;
 	    return;
 
 	/* we succeeded in digging the corridor */
-	if (okdoor(tt.x, tt.y) || !nxcor)
+	if (okdoor(tt.x, tt.y))
 	    dodoor(tt.x, tt.y, troom);
 
 	if(smeq[a] < smeq[b])
