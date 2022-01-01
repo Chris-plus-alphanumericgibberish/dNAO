@@ -64,6 +64,7 @@ struct u_event {
 #define ARTWISH_EARNED	1
 #define ARTWISH_SPENT	2
 	Bitfield(ascended,1);		/* has offered the Amulet */
+	Bitfield(knoxmade,1);		/* Portal to Ludios has been made in the main dungeon, teleport ok */
 };
 
 /* KMH, conduct --

@@ -909,9 +909,10 @@ level_tele()
 		    schar destlev = 0;
 		    int destdnum = 0;
 
-		    if ((newlev = (int)print_dungeon(TRUE, &destlev, &destdnum))) {
+		    if (print_dungeon(TRUE, FALSE, &destlev, &destdnum)) {
 			newlevel.dnum = (xchar) destdnum;
 			newlevel.dlevel = destlev;
+			newlev = depth(&newlevel);
 			if (In_endgame(&newlevel) && !In_endgame(&u.uz)) {
 				Sprintf(buf,
 				    "Destination is earth level");
@@ -931,12 +932,12 @@ level_tele()
 		} else
 #endif
 		if ((newlev = lev_by_name(buf)) == 0) newlev = atoi(buf);
-	    } while (!newlev && !digit(buf[0]) &&
+	    } while (!force_dest && (!newlev && !digit(buf[0]) &&
 		     (buf[0] != '-' || !digit(buf[1])) &&
-		     trycnt < 10);
+		     trycnt < 10));
 
 	    /* no dungeon escape via this route */
-	    if (newlev == 0 /*&& dungeons[u.uz.dnum].depth_start > 0*/) {
+	    if (newlev == 0 && !force_dest) {
 			if (trycnt >= 10)
 				goto random_levtport;
 			if (ynq("Go to Nowhere.  Are you sure?") != 'y') return;
@@ -958,7 +959,7 @@ level_tele()
 	    /* if in Knox and the requested level > 0, stay put.
 	     * we let negative values requests fall into the "heaven" loop.
 	     */
-	    if (Is_knox(&u.uz) && newlev > 0) {
+	    if (!force_dest && Is_knox(&u.uz) && newlev > 0) {
 			You1(shudder_for_moment);
 			return;
 	    }
@@ -970,7 +971,7 @@ level_tele()
 	     *
 	     * we let negative values requests fall into the "heaven" loop.
 	     */
-		if(In_quest(&u.uz) || In_tower(&u.uz) || In_law(&u.uz) || In_neu(&u.uz) || In_cha(&u.uz)){
+		if(!force_dest && (In_quest(&u.uz) || In_tower(&u.uz) || In_law(&u.uz) || In_neu(&u.uz) || In_cha(&u.uz))){
 			boolean rangeRestricted = TRUE;
 			int urlev = dungeons[u.uz.dnum].depth_start + u.uz.dlevel - 1;
 			if (In_quest(&u.uz) && newlev > 0){
@@ -1038,9 +1039,9 @@ level_tele()
 	if (In_endgame(&u.uz)) {	/* must already be wizard */
 	    int llimit = dunlevs_in_dungeon(&u.uz);
 
-	    if (newlev >= 0 || newlev <= -llimit) {
-		You_cant("get there from here.");
-		return;
+	    if (newlev >= 0 || newlev <= -llimit || (force_dest && newlevel.dnum != u.uz.dnum)) {
+			You_cant("get there from here.");
+			return;
 	    }
 	    newlevel.dnum = u.uz.dnum;
 	    newlevel.dlevel = llimit + newlev;

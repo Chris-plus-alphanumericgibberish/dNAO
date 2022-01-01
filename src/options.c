@@ -469,6 +469,7 @@ static struct Comp_Opt
 	{ "windowcolors",  "the foreground/background colors of windows",	/*WC*/
 						80, DISP_IN_GAME },
 	{ "windowtype", "windowing system to use", WINTYPELEN, DISP_IN_GAME },
+	{ "wizlevelport", "wiz-mode ^V settings", 3, SET_IN_GAME},
 	{ (char *)0, (char *)0, 0, 0 }
 };
 
@@ -647,6 +648,7 @@ initoptions()
 	iflags.runmode = RUN_LEAP;
         iflags.delay_length = RUN_STEP;
 	iflags.pokedex = POKEDEX_SHOW_DEFAULT;
+	iflags.wizlevelport = WIZLVLPORT_TRADITIONAL;
 	iflags.msg_history = 20;
 #ifdef TTY_GRAPHICS
 	iflags.prevmsg_window = 's';
@@ -2947,6 +2949,14 @@ goodfruit:
 	    }
 	    return;
 	}
+	fullname = "wizlevelport";
+	if (match_optname(opts, fullname, 12, TRUE)) {
+		op = string_for_opt(opts, negated);
+		if ((negated && !op) || (!negated && op)) {
+			iflags.wizlevelport = negated ? 0 : atoi(op);
+		} else if (negated) bad_negation(fullname, TRUE);
+		return;
+	}
 
 	/* WINCAP
 	 * setting window colors
@@ -3475,6 +3485,8 @@ doset()
 		    	else if (is_wc2_option(compopt[i].name) &&
 					!wc2_supported(compopt[i].name))
 		    		continue;
+				else if (!strcmp(compopt[i].name, "wizlevelport") && !wizard)
+					continue;
 		    	else
 				doset_add_menu(tmpwin, compopt[i].name,
 					(pass == DISP_IN_GAME) ? 0 : indexoffset);
@@ -3567,7 +3579,7 @@ boolean setinitial,setfromfile;
     
     /* Special handling of menustyle, pickup_burden, pickup_types,
      * disclose, runmode, msg_window, menu_headings, number_pad and sortloot
-	 * attack_mode, pokedex
+	 * attack_mode, pokedex, wizlevelport
 #ifdef AUTOPICKUP_EXCEPTIONS
      * Also takes care of interactive autopickup_exception_handling changes.
 #endif
@@ -3723,6 +3735,56 @@ boolean setinitial,setfromfile;
 			else
 				done = TRUE;
 			free((genericptr_t)mode_pick);
+			destroy_nhwindow(tmpwin);
+		}
+		retval = TRUE;
+	} else if (!strcmp("wizlevelport", optname)) {
+		char buf[BUFSZ];
+		menu_item *pick = (menu_item *) 0;
+		boolean done = FALSE;
+		while (!done) {
+			tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+			any = zeroany;
+
+			any.a_int = WIZLVLPORT_TRADITIONAL + 1;
+			Sprintf(buf, "%-33s %s", "traditional: pick level directly",
+				iflags.wizlevelport == WIZLVLPORT_TRADITIONAL ? "(on)" : "(off)");
+			add_menu(tmpwin, NO_GLYPH, &any, 'a', 0, 0, buf, MENU_UNSELECTED);
+
+			any.a_int = WIZLVLPORT_TWOMENU + 1;
+			Sprintf(buf, "%-33s %s", "twomenu: pick branch, then level",
+				iflags.wizlevelport & WIZLVLPORT_TWOMENU ? "(on)" : "(off)");
+			add_menu(tmpwin, NO_GLYPH, &any, 'b', 0, 0, buf, MENU_UNSELECTED);
+
+			if (iflags.wizlevelport & WIZLVLPORT_TWOMENU) {
+				any.a_int = WIZLVLPORT_BRANCHES_FIRST + 1;
+				Sprintf(buf, "%-33s %s", " -> branches first",
+					iflags.wizlevelport & WIZLVLPORT_BRANCHES_FIRST ? "(on)" : "(off)");
+				add_menu(tmpwin, NO_GLYPH, &any, 'c', 0, 0, buf, MENU_UNSELECTED);
+
+				any.a_int = WIZLVLPORT_SELECTED_DUNGEON + 1;
+				Sprintf(buf, "%-33s %s", " -> tight scope",
+					iflags.wizlevelport & WIZLVLPORT_SELECTED_DUNGEON ? "(on)" : "(off)");
+				add_menu(tmpwin, NO_GLYPH, &any, 'd', 0, 0, buf, MENU_UNSELECTED);
+			}
+
+			end_menu(tmpwin, "Select wizlevelport:");
+			if (select_menu(tmpwin, PICK_ONE, &pick) > 0) {
+				int out = pick->item.a_int - 1;
+				if (out == WIZLVLPORT_TRADITIONAL) {
+					iflags.wizlevelport = WIZLVLPORT_TRADITIONAL;
+				}
+				else if (out == WIZLVLPORT_TWOMENU) {
+					iflags.wizlevelport |= WIZLVLPORT_TWOMENU;
+				}
+				else {
+					iflags.wizlevelport ^= out;
+				}
+			}
+			else
+				done = TRUE;
+			free((genericptr_t) pick);
 			destroy_nhwindow(tmpwin);
 		}
 		retval = TRUE;
@@ -4297,6 +4359,8 @@ char *buf;
 			iflags.wc_backgrnd_status  ? iflags.wc_backgrnd_status : defbrief,
 			iflags.wc_foregrnd_text    ? iflags.wc_foregrnd_text : defbrief,
 			iflags.wc_backgrnd_text    ? iflags.wc_backgrnd_text : defbrief);
+	else if (!strcmp(optname, "wizlevelport"))
+		Sprintf(buf, "%d", iflags.wizlevelport);
 #ifdef PREFIXES_IN_USE
 	else {
 	    for (i = 0; i < PREFIX_COUNT; ++i)
