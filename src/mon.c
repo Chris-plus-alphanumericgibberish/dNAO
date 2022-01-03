@@ -3024,7 +3024,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		/* creatures you are interacting with */
 		(mdef->moccupation) ||
 		/* peaceful quest guardians/leaders */
-		(mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN)) ||
+		(mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN || quest_faction(mdef))) ||
 		/* peaceful Axus */
 		(mdef->mpeaceful && !u.uevent.uaxus_foe && md->mtyp == PM_AXUS)
 	)){
@@ -3098,9 +3098,9 @@ struct monst * mdef;	/* another monster which is next to it */
 	// In the anachrononaut quest, all peaceful monsters are at threat from all hostile monsters.
 	// The leader IS in serious danger
 	// However, the imminent doom causes all peacefuls to forget any grudges against each other
-	// (and Illsensine can make her own forces coordinate, of course)
-	if(Infuture && Is_qstart(&u.uz)){
-		if(magr->mpeaceful != mdef->mpeaceful) return ALLOW_M|ALLOW_TM;
+	// (and Ilsensine can make her own forces coordinate, of course)
+	if(Infuture){
+		if(magr->mfaction != mdef->mfaction && (magr->mfaction == ILSENSINE_FACTION || mdef->mfaction == ILSENSINE_FACTION)) return ALLOW_M|ALLOW_TM;
 		else return 0L;
 	}
 	// While the player is sowing discord (enhanced conflict), almost anything goes 
@@ -3136,13 +3136,11 @@ struct monst * mdef;	/* another monster which is next to it */
 	/* Since the quest guardians are under siege, it makes sense to have 
        them fight hostiles.  (But we don't want the quest leader to be in danger.) */
 	if( (ma->msound==MS_GUARDIAN 
-		  || (Role_if(PM_NOBLEMAN) && (ma->mtyp == PM_KNIGHT || ma->mtyp == PM_MAID || ma->mtyp == PM_PEASANT) && magr->mpeaceful && In_quest(&u.uz))
-		  || (Role_if(PM_KNIGHT) && ma->mtyp == PM_KNIGHT && magr->mpeaceful && In_quest(&u.uz))
-		  || (Race_if(PM_DROW) && is_drow(ma) && magr->mfaction == u.uhouse)
-		  || (Race_if(PM_GNOME) && (is_gnome(ma) && !mm_undead(magr)) && magr->mpeaceful)
+		  || (quest_faction(magr) && magr->mpeaceful && In_quest(&u.uz))
+		  || (Role_if(PM_NOBLEMAN) && (ma->mtyp == PM_PEASANT) && magr->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_MADMAN) && ma->mtyp == PM_LADY_CONSTANCE)
 		)
-		&& !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(md)))
+		// && !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(md)))
 		&& !(Role_if(PM_EXILE))
 	) {
 		if(magr->mpeaceful==TRUE && mdef->mpeaceful==FALSE) return ALLOW_M|ALLOW_TM;
@@ -3150,19 +3148,29 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	/* and vice versa */
 	if( (md->msound == MS_GUARDIAN 
-		  || (Role_if(PM_NOBLEMAN) && (md->mtyp == PM_KNIGHT || md->mtyp == PM_MAID || md->mtyp == PM_PEASANT) && mdef->mpeaceful && In_quest(&u.uz))
-		  || (Role_if(PM_KNIGHT) && md->mtyp == PM_KNIGHT && mdef->mpeaceful && In_quest(&u.uz))
-		  || (Race_if(PM_DROW) && is_drow(md) && mdef->mfaction == u.uhouse)
-		  || (Race_if(PM_GNOME) && (is_gnome(md) && !mm_undead(mdef)) && mdef->mpeaceful)
+		  || (quest_faction(mdef) && mdef->mpeaceful && In_quest(&u.uz))
+		  || (Role_if(PM_NOBLEMAN) && (md->mtyp == PM_PEASANT) && mdef->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_MADMAN) && md->mtyp == PM_LADY_CONSTANCE)
 		)
-		&& !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(ma)))
+		// && !(Race_if(PM_DROW) && !(flags.stag || Role_if(PM_NOBLEMAN) || !is_drow(ma)))
 		&& !(Role_if(PM_EXILE))
 	){
 		if(mdef->mpeaceful==TRUE && magr->mpeaceful==FALSE && rn2(2)) return ALLOW_M|ALLOW_TM;
 		if(mdef->mpeaceful==TRUE && magr->mtame==TRUE) return FALSE;
 	}
-
+	
+	/* Various factions don't attack faction-mates each-other */
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YENDORIAN_FACTION)
+		return FALSE;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == GOATMOM_FACTION)
+		return FALSE;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == QUEST_FACTION)
+		return FALSE;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == ILSENSINE_FACTION)
+		return FALSE;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == SEROPAENES_FACTION)
+		return FALSE;
+	
 	/* elves (and Eladrin) vs. (orcs and undead and wargs) */
 	if((is_elf(ma) || is_eladrin(ma) || ma->mtyp == PM_GROVE_GUARDIAN || ma->mtyp == PM_FORD_GUARDIAN || ma->mtyp == PM_FORD_ELEMENTAL)
 		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || mm_undead(mdef))
@@ -3192,12 +3200,12 @@ struct monst * mdef;	/* another monster which is next to it */
 		return ALLOW_M|ALLOW_TM;
 
 	/* undead vs civs */
-	if(!(In_quest(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || In_cha(&u.uz) || Is_stronghold(&u.uz) || Is_rogue_level(&u.uz) || Inhell || Is_astralevel(&u.uz))){
+	if(!(In_cha(&u.uz) || Is_rogue_level(&u.uz))){
 		if(mm_undead(magr) && 
-			(!is_witch_mon(mdef) && !always_hostile_mon(mdef) && !mm_undead(mdef) && !(is_animal(md) && !is_domestic(md)) && !mindless_mon(mdef))
+			(!is_witch_mon(mdef) && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef))
 		)
 			return ALLOW_M|ALLOW_TM;
-		if((!always_hostile_mon(magr) && !is_witch_mon(magr) && !mm_undead(magr) && !(is_animal(ma) && !is_domestic(ma)) && !mindless_mon(magr))
+		if((!is_witch_mon(magr) && !magr->mpetitioner && !mm_undead(magr) && !mindless_mon(magr))
 			&& mm_undead(mdef)
 		)
 			return ALLOW_M|ALLOW_TM;

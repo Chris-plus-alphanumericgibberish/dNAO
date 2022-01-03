@@ -1884,7 +1884,9 @@ boolean *prev_loot;
     /* 3.3.1 introduced the ability to remove saddle from a steed             */
     /* 	*passed_info is set to TRUE if a loot query was given.               */
     /*	*prev_loot is set to TRUE if something was actually acquired in here. */
-	if(mtmp && mtmp != u.usteed && mtmp->mtame){
+	if(mtmp && mtmp != u.usteed 
+		&& (mtmp->mtame || (urole.ldrnum == PM_OLD_FORTUNE_TELLER && mtmp->mpeaceful && (quest_faction(mtmp) || mtmp->data->msound == MS_GUARDIAN)))
+	){
 	if((otmp = pick_creatures_armor(mtmp, passed_info))){
 	long unwornmask;
 		if (nolimbs(youracedata)) {
@@ -1960,26 +1962,37 @@ dopetequip()
 	
 	mtmp = m_at(cc.x, cc.y);
 	
-	if(mtmp && 
-#ifdef STEED
-		mtmp != u.usteed && 
-#endif	/* STEED */
-		mtmp->mtame
+	if(!mtmp || !canspotmon(mtmp)){
+		You_cant("find anyone to equip!");
+		return 0;
+	}
+	if(!mtmp->mtame
+		&& !(urole.ldrnum == PM_OLD_FORTUNE_TELLER && mtmp->mpeaceful && (quest_faction(mtmp) || mtmp->data->msound == MS_GUARDIAN))
 	){
+		pline("%s doesn't trust you enough for that!", Monnam(mtmp));
+		return 0;
+	}
+
+#ifdef STEED
+	if(mtmp == u.usteed){
+		You_cant("change the equipment of something you're riding!");
+		return 0;
+	}
+#endif	/* STEED */
+	if (nolimbs(youracedata)) {
+		You_cant("do that without limbs."); /* not body_part(HAND) */
+		return (0);
+	}
+	if(!freehand()){
+		You("have no free %s to dress %s with!", body_part(HAND), mon_nam(mtmp));
+		return (0);
+	}
 	unseen = !canseemon(mtmp);
 
 	/* Get a copy of monster's name before altering its visibility */
 	Strcpy(nambuf, See_invisible(mtmp->mx,mtmp->my) ? Monnam(mtmp) : mon_nam(mtmp));
 	
 	if((otmp = pick_armor_for_creature(mtmp))){
-		if (nolimbs(youracedata)) {
-		    You_cant("do that without limbs."); /* not body_part(HAND) */
-		    return (0);
-		}
-		if(!freehand()){
-			You("have no free %s to dress %s with!", body_part(HAND), mon_nam(mtmp));
-		    return (0);
-		}
 		if(otmp->oclass == AMULET_CLASS){
 			flag = W_AMUL;
 		} else if(is_shirt(otmp)){
@@ -2030,7 +2043,6 @@ dopetequip()
 	} else {
 		return (0);
 	}
-    }
     return timepassed;
 }
 

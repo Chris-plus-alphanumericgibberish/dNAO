@@ -546,27 +546,11 @@ quest_chat(mtmp)
 		return;
 	}
 	
-	if(
-		(Role_if(PM_NOBLEMAN) && 
-			(mtmp->mtyp == PM_KNIGHT 
-				|| mtmp->mtyp == PM_MAID) && mtmp->mpeaceful)
-	  || (Role_if(PM_ANACHRONONAUT) && 
-			(mtmp->mtyp == PM_MYRKALFAR_WARRIOR || mtmp->mtyp == PM_ALIDER 
-				|| mtmp->mtyp == PM_MYRKALFAR_MATRON) && mtmp->mpeaceful)
-	  || (Race_if(PM_DROW) && is_drow(mtmp->data))
-	  || (Role_if(PM_EXILE) && 
-			mtmp->mtyp == PM_PEASANT && mtmp->mpeaceful)
-	  || (Race_if(PM_GNOME) && Role_if(PM_RANGER) && (mtmp->mtyp == PM_GNOME || mtmp->mtyp == PM_GNOME_LORD || mtmp->mtyp == PM_GNOME_KING
-			|| mtmp->mtyp == PM_TINKER_GNOME || mtmp->mtyp == PM_GNOMISH_WIZARD) && mtmp->mpeaceful)
-	){
-		chat_with_guardian();
-	} else {
-		switch(mtmp->data->msound) {
-			case MS_NEMESIS:	chat_with_nemesis(); break;
-			case MS_GUARDIAN:	chat_with_guardian(); break;
-			default:	impossible("quest_chat: Unknown quest character %s.",
-					   mon_nam(mtmp));
-		}
+	switch(quest_faction(mtmp) ? MS_GUARDIAN : mtmp->data->msound) {
+		case MS_NEMESIS:	chat_with_nemesis(); break;
+		case MS_GUARDIAN:	chat_with_guardian(); break;
+		default:	impossible("quest_chat: Unknown quest character %s.",
+				   mon_nam(mtmp));
 	}
 }
 

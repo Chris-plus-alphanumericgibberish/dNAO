@@ -210,6 +210,9 @@ struct monst {
 #define	HOLYDEAD_FACTION	FACTION_PADDING+4	/* Angel-aligned undead */
 #define	YENDORIAN_FACTION	FACTION_PADDING+5	/* The Yendorian army */
 #define	GOATMOM_FACTION		FACTION_PADDING+6	/* Shubbie's faction */
+#define	QUEST_FACTION		FACTION_PADDING+7	/* The Quest Leader's faction */
+#define	ILSENSINE_FACTION	FACTION_PADDING+8	/* Ilsensine's faction, not allied with the Yendorian faction despite filling the same role */
+#define	SEROPAENES_FACTION	FACTION_PADDING+9	/* Binder quest faction, not allied with the Yendorian faction despite filling the same role */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;

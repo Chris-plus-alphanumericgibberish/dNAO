@@ -788,6 +788,7 @@ boolean chatting;
 		mtmp->ispriest ? MS_PRIEST : 
 		mtmp->isshk ? MS_SELL : 
 		(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used) ? MS_SONG : 
+		mtmp->mfaction == QUEST_FACTION ? MS_GUARDIAN : 
 		ptr->msound
 	) {
 	case MS_ORACLE:
@@ -1895,34 +1896,7 @@ asGuardian:
 	    /* else FALLTHRU */
 	case MS_HUMANOID:
 humanoid_sound:
-		if(Role_if(PM_NOBLEMAN) && 
-			(mtmp->mtyp == PM_KNIGHT 
-				|| mtmp->mtyp == PM_MAID) && 
-			mtmp->mpeaceful
-		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Role_if(PM_KNIGHT) && 
-			mtmp->mtyp == PM_KNIGHT && 
-			mtmp->mpeaceful
-		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Role_if(PM_ANACHRONONAUT) && !Race_if(PM_ANDROID) &&
-			(mtmp->mtyp == PM_MYRKALFAR_WARRIOR 
-				|| mtmp->mtyp == PM_MYRKALFAR_MATRON 
-				|| mtmp->mtyp == PM_ALIDER) && 
-			mtmp->mpeaceful
-		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Race_if(PM_DROW) && 
-			is_drow(mtmp->data) && 
-			mtmp->mfaction == u.uhouse &&
-			mtmp->mpeaceful
-		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Role_if(PM_EXILE) && 
-			mtmp->mtyp == PM_PEASANT && 
-			mtmp->mpeaceful
-		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && (mtmp->mtyp == PM_GNOME || mtmp->mtyp == PM_GNOME_LORD || mtmp->mtyp == PM_GNOME_KING
-			|| mtmp->mtyp == PM_TINKER_GNOME || mtmp->mtyp == PM_GNOMISH_WIZARD) && mtmp->mpeaceful
-		) goto asGuardian; /* Jump up to a different case in this switch statment */
-		else if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && mtmp->mtyp == PM_RUGGO_THE_GNOME_HIGH_KING){
+		if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && mtmp->mtyp == PM_RUGGO_THE_GNOME_HIGH_KING){
 			verbl_msg = "Ah, comrade!  It is good you are here.  I've hidden the angel behind my throne.";
 			break;
 		}

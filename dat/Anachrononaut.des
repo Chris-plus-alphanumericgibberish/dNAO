@@ -505,10 +505,10 @@ MONSTER:'@',"mad seer",(10,12), peaceful
 MONSTER:'@',"mad seer",(08,12), peaceful
 
 MONSTER:'@',"trooper",(16,06)
-MONSTER:'@',"myrkalfar warrior",(17,06)
+MONSTER:'@',"myrkalfar warrior",(17,06), peaceful
 MONSTER:'@',"trooper",(18,06)
 MONSTER:'@',"trooper",(16,07)
-MONSTER:'@',"myrkalfar warrior",(17,07)
+MONSTER:'@',"myrkalfar warrior",(17,07), peaceful
 MONSTER:'@',"trooper",(16,08)
 MONSTER:'@',"trooper",(16,09)
 

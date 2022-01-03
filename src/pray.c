@@ -744,7 +744,7 @@ int godnum;
 			}
 		}
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-			if(goat_monster(mtmp->data) && !mtmp->mtame){
+			if(mtmp->mfaction == GOATMOM_FACTION && !mtmp->mtame){
 				mtmp->mpeaceful = 0;
 				//Does not re-set alignment value (as if you attacked a peaceful)
 				newsym(mtmp->mx, mtmp->my);
@@ -3488,7 +3488,7 @@ int eatflag;
 			}
 		}
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-			if(goat_monster(mtmp->data) || has_template(mtmp, MISTWEAVER)){
+			if(mtmp->mfaction == GOATMOM_FACTION){
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
 				newsym(mtmp->mx, mtmp->my);
@@ -3712,6 +3712,8 @@ int godnum;
 		case GOD_EILISTRAEE: return EILISTRAEE_SYMBOL;
 		case GOD_KIARANSALI: return KIARANSALEE_SYMBOL;
 		case GOD_THE_BLACK_MOTHER: return GOATMOM_FACTION;
+		case GOD_ILSENSINE: return ILSENSINE_FACTION;
+		case GOD_YALDABAOTH: return SEROPAENES_FACTION;
 	}
 	return -1;
 }

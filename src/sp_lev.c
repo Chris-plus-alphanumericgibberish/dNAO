@@ -977,6 +977,8 @@ struct mkroom	*croom;
 		mtmp->mpeaceful = m->peaceful;
 		/* changed mpeaceful again; have to reset malign */
 		set_malign(mtmp);
+		if(mtmp->mpeaceful && Infuture && !Race_if(PM_ANDROID))
+			set_faction(mtmp, QUEST_FACTION);
 	    }
 	    if (m->asleep >= 0) {
 #ifdef UNIXPC

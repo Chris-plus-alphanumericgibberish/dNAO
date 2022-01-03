@@ -538,10 +538,27 @@
 #define	is_tailslap_mtyp(ptr)	(is_true_adult_dragon(ptr))
 #define	is_tailslap_mon(mon)	(is_tailslap_mtyp((mon)->data))
 
-#define goat_monster(ptr) (\
+#define goat_monster(ptr) (In_lost_cities(&u.uz) ? lost_cities_goat_monster(ptr) : always_goat_monster(ptr))
+#define always_goat_monster(ptr) (\
 									   (ptr)->mtyp == PM_SMALL_GOAT_SPAWN \
 									|| (ptr)->mtyp == PM_GOAT_SPAWN \
 									|| (ptr)->mtyp == PM_GIANT_GOAT_SPAWN \
+									|| (ptr)->mtyp == PM_MIGO_WORKER \
+									|| (ptr)->mtyp == PM_MIGO_SOLDIER \
+									|| (ptr)->mtyp == PM_MIGO_PHILOSOPHER \
+									|| (ptr)->mtyp == PM_MIGO_QUEEN \
+									|| (ptr)->mtyp == PM_DARK_YOUNG \
+									|| (ptr)->mtyp == PM_BLESSED \
+									|| (ptr)->mtyp == PM_SWIRLING_MIST \
+									|| (ptr)->mtyp == PM_DUST_STORM \
+									|| (ptr)->mtyp == PM_ICE_STORM \
+									|| (ptr)->mtyp == PM_THUNDER_STORM \
+									|| (ptr)->mtyp == PM_FIRE_STORM \
+									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT \
+								  )
+
+#define lost_cities_goat_monster(ptr) (\
+									   always_goat_monster(ptr) \
 									|| (ptr)->mtyp == PM_PLAINS_CENTAUR \
 									|| (ptr)->mtyp == PM_FOREST_CENTAUR \
 									|| (ptr)->mtyp == PM_MOUNTAIN_CENTAUR \
@@ -555,18 +572,6 @@
 									|| (ptr)->mtyp == PM_GRAY_UNICORN \
 									|| (ptr)->mtyp == PM_BLACK_UNICORN \
 									|| (ptr)->mtyp == PM_NIGHTMARE \
-									|| (ptr)->mtyp == PM_MIGO_WORKER \
-									|| (ptr)->mtyp == PM_MIGO_SOLDIER \
-									|| (ptr)->mtyp == PM_MIGO_PHILOSOPHER \
-									|| (ptr)->mtyp == PM_MIGO_QUEEN \
-									|| (ptr)->mtyp == PM_DARK_YOUNG \
-									|| (ptr)->mtyp == PM_BLESSED \
-									|| (ptr)->mtyp == PM_SWIRLING_MIST \
-									|| (ptr)->mtyp == PM_DUST_STORM \
-									|| (ptr)->mtyp == PM_ICE_STORM \
-									|| (ptr)->mtyp == PM_THUNDER_STORM \
-									|| (ptr)->mtyp == PM_FIRE_STORM \
-									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT \
 								  )
 
 #define gates_in_help(ptr)	((is_demon((ptr)) || is_minion((ptr))) \
@@ -676,6 +681,8 @@
 #define wants_qart(ptr)	((ptr->mflagst & MT_WANTSARTI))
 #define wants_amul(ptr)	((ptr->mflagst & MT_COVETOUS))
 #define is_covetous(ptr)	((ptr->mflagst & MT_COVETOUS))
+
+#define quest_faction(mon)	((mon)->mfaction == QUEST_FACTION || (Race_if(PM_DROW) && (mon)->mfaction == u.uhouse))
 
 #define normalvision(ptr)	((ptr->mflagsv & MV_NORMAL))
 #define darksight(ptr)		((ptr->mflagsv & MV_DARKSIGHT))

@@ -5682,7 +5682,7 @@ long mfaction;
 		)
 			mon = makemon(mdat, cc.x, cc.y, mm_flags);
 		if(mon)
-			mon->mfaction = mfaction;
+			set_faction(mon, mfaction);
 	}
 	level.flags.graveyard = TRUE;	/* reduced chance for undead corpse */
 }

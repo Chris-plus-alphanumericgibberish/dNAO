@@ -136,9 +136,9 @@ struct permonst * ptr;	/* summon as though you were <X> */
 			) {
 				set_template(mtmp, get_template(mon));
 			}
-			/* as are some factions */
-			if (mon && (mon->mtyp == PM_LAMASHTU || mon->mfaction == LAMASHTU_FACTION)) {
-				mtmp->mfaction = LAMASHTU_FACTION;
+			/* as are factions */
+			if (mon && mon->mfaction){
+				set_faction(mtmp, mon->mfaction);
 			}
 	    }
 	    cnt--;

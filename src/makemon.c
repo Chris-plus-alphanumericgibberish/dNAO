@@ -20,7 +20,8 @@ struct monst zeromonst;
 
 #ifdef OVL0
 STATIC_DCL int FDECL(makemon_set_template, (struct permonst **, int, boolean));
-STATIC_DCL int FDECL(makemon_get_faction, (struct permonst *, int));
+STATIC_DCL int FDECL(makemon_get_permonst_faction, (struct permonst *, int));
+STATIC_DCL void FDECL(makemon_set_monster_faction, (struct monst *));
 STATIC_DCL boolean FDECL(uncommon, (int));
 STATIC_DCL int FDECL(align_shift, (struct permonst *));
 #endif /* OVL0 */
@@ -646,7 +647,7 @@ int faction;
 			}
 			else if(mm == PM_GOAT_SPAWN) {
 				int threshold = rnd(10)+rn2(11);
-				if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
+				if(mtmp->female && (In_lost_cities(&u.uz)) && u.uinsight > threshold){
 					set_template(mtmp, MISTWEAVER);
 					mtmp->m_insight_level = threshold;
 				}
@@ -4376,7 +4377,7 @@ int faction;
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_SMALL_GOAT_SPAWN) {
 			int threshold = rnd(10)+rn2(11);
-			if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
+			if(mtmp->female && (In_lost_cities(&u.uz)) && u.uinsight > threshold){
 				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
@@ -5169,7 +5170,7 @@ int faction;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_DEMINYMPH){
-				if(In_lost_cities(&u.uz) || faction == GOATMOM_FACTION){
+				if(faction == GOATMOM_FACTION){
 					//Cultist of the Black Goat
 					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 3;
@@ -5572,7 +5573,7 @@ int faction;
 				}
 			} else {//not shopkeepers, deminymphs, or intoners
 				int threshold = rnd(10)+rn2(11);
-				if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
+				if(mtmp->female && (faction == GOATMOM_FACTION) && u.uinsight > threshold){
 					set_template(mtmp, MISTWEAVER);
 					mtmp->m_insight_level = threshold;
 				}
@@ -5658,7 +5659,7 @@ int faction;
 		}
 		if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR){
 			int threshold = rnd(10)+rn2(11);
-			if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
+			if(mtmp->female && (faction == GOATMOM_FACTION) && u.uinsight > threshold){
 				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
@@ -6353,7 +6354,7 @@ int faction;
 				else (void)mongets(mtmp, GLAIVE, mkobjflags);
 			break;
 			case PM_LILITU:
-				if(In_lost_cities(&u.uz) || faction == GOATMOM_FACTION){
+				if(faction == GOATMOM_FACTION){
 					//Cultist of the Black Goat
 					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 6;
@@ -7653,7 +7654,7 @@ int faction;
 			(void) mpickobj(mtmp, otmp);
 		} else if(ptr->mtyp == PM_GIANT_GOAT_SPAWN) {
 			int threshold = rnd(10)+rn2(11);
-			if(mtmp->female && (In_lost_cities(&u.uz) || faction == GOATMOM_FACTION) && u.uinsight > threshold){
+			if(mtmp->female && (In_lost_cities(&u.uz)) && u.uinsight > threshold){
 				set_template(mtmp, MISTWEAVER);
 				mtmp->m_insight_level = threshold;
 			}
@@ -9048,16 +9049,19 @@ boolean randmonst;
  * Returns faction chosen.
  */
 int
-makemon_get_faction(ptr, faction)
+makemon_get_permonst_faction(ptr, faction)
 struct permonst * ptr;
 int faction;
 {
-	int out_faction;
+	int out_faction = 0;
 
 	if (faction != -1)
 		return faction;
+	
+	if(Infuture)
+		return 0;
 
-	if(is_drow(ptr)){
+	if(is_drow(ptr) && ptr->mtyp != PM_CHANGED  && ptr->mtyp != PM_WARRIOR_CHANGED){
 		if(curhouse) {
 			out_faction = curhouse;
 		} else if((ptr->mtyp == urole.ldrnum && ptr->mtyp != PM_ECLAVDRA) || 
@@ -9113,8 +9117,6 @@ int faction;
 		} else if(In_quest(&u.uz)){
 			if(Race_if(PM_DROW) && Role_if(PM_EXILE)){
 				out_faction = PEN_A_SYMBOL;
-			} else if(Role_if(PM_ANACHRONONAUT)){
-				out_faction = LAST_BASTION_SYMBOL;
 			} else if((Race_if(PM_DROW)) && (in_mklev || flags.stag || rn2(3))){
 				if(Is_qstart(&u.uz)) out_faction = u.start_house;
 				else if(Role_if(PM_NOBLEMAN)){
@@ -9130,7 +9132,46 @@ int faction;
 			out_faction = rn2(LAST_HOUSE+1-FIRST_HOUSE)+FIRST_HOUSE;
 		}
 	}
+	else if(goat_monster(ptr)){
+		out_faction = GOATMOM_FACTION;
+	}
+	else if(ptr->mtyp == PM_LAMASHTU){
+		out_faction = LAMASHTU_FACTION;
+	}
 	return out_faction;
+}
+
+/*
+ * In some cases, we want to roll peace-minded before setting faction, for stuff like the Wizard's army.
+ * This function handles those cases, while makemon_get_permonst_faction() handles factions for
+ * cases like the drow where every monster of that type should get a faction, and where **peace_minded()**
+ * takes the faction into account when deciding peacefulness.
+ */
+void
+makemon_set_monster_faction(mon)
+struct monst * mon;
+{
+	boolean peaceful = mon->mpeaceful;
+	int out_faction = 0;
+	
+	if(Infuture && !peaceful)
+		out_faction = ILSENSINE_FACTION;
+	else if(In_quest(&u.uz) && Role_if(PM_EXILE) && !peaceful)
+		out_faction = SEROPAENES_FACTION;
+	else if((In_quest(&u.uz) || Is_stronghold(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || Is_astralevel(&u.uz)) && !peaceful)
+		out_faction = YENDORIAN_FACTION;
+
+	else if(in_mklev && In_quest(&u.uz) && peaceful && (
+	   (urole.ldrnum == PM_OLD_FORTUNE_TELLER && (mon->mtyp == PM_KNIGHT || mon->mtyp == PM_MAID))
+	|| (urole.ldrnum == PM_KING_ARTHUR && Role_if(PM_KNIGHT) && (mon->mtyp == PM_KNIGHT))
+	|| (Role_if(PM_EXILE) && (mon->mtyp == PM_PEASANT))
+	|| (urole.ldrnum == PM_DAMAGED_ARCADIAN_AVENGER && (mon->mtyp == PM_GNOME || mon->mtyp == PM_GNOME_LORD || mon->mtyp == PM_GNOME_KING
+			|| mon->mtyp == PM_TINKER_GNOME || mon->mtyp == PM_GNOMISH_WIZARD))
+	)){
+		out_faction = QUEST_FACTION;
+	}
+	
+	set_faction(mon, out_faction);
 }
 
 /*
@@ -9356,7 +9397,7 @@ int faction;
 
 	/* determine faction -- since this does not affect ptr (and therefore location),
 	 * it can just be done at the very end */
-	out_faction = makemon_get_faction(ptr, faction);
+	out_faction = makemon_get_permonst_faction(ptr, faction);
 
 	return makemon_core(ptr, x, y, mmflags, out_template, out_faction);
 }
@@ -9655,6 +9696,8 @@ int faction;
 	) mtmp->mpeaceful = TRUE;
 	else mtmp->mpeaceful = (mmflags & MM_ANGRY) ? FALSE : peace_minded(ptr);
 	
+	if(mtmp->mfaction <= 0)
+		makemon_set_monster_faction(mtmp);
 	if(mndx == PM_CHAOS){
 		mtmp->mhpmax = 15*mtmp->mhpmax;
 		mtmp->mhp = mtmp->mhpmax;
@@ -9787,7 +9830,7 @@ int faction;
 			}
 
 			if(in_mklev && is_angel(mtmp->data) && Is_lamashtu_level(&u.uz)){
-				mtmp->mfaction = LAMASHTU_FACTION;
+				set_faction(mtmp, LAMASHTU_FACTION);
 				if(is_eladrin(mtmp->data)){
 					set_template(mtmp, ILLUMINATED);
 				}
@@ -10265,7 +10308,7 @@ int faction;
 			mtmp = christen_monst(mtmp, rndghostname());
 	} else if (mndx == PM_VLAD_THE_IMPALER) {
 		mitem = CANDELABRUM_OF_INVOCATION;
-	} else if (ptr->msound == MS_NEMESIS && !(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN)) ) {
+	} else if (ptr->msound == MS_NEMESIS && !(Race_if(PM_DROW) && !Role_if(PM_NOBLEMAN)) ){
 		flags.made_bell = TRUE;
 		mitem = BELL_OF_OPENING;
 	} else if (mndx == PM_DEATH) {

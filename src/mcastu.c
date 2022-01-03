@@ -4239,7 +4239,7 @@ int tary;
 					an(Hallucination ? rndmonnam() : "hostile angel"));
 				//Despite being a demon lord, Lamashtu is  able to summon angels
 				if(magr->mtyp == PM_LAMASHTU || magr->mfaction == LAMASHTU_FACTION)
-					mtmp->mfaction = LAMASHTU_FACTION;
+					set_faction(mtmp, LAMASHTU_FACTION);
 				//Note: these cases are not currently used, but handled anyway to be safe
 				if(has_template(magr, MAD_TEMPLATE))
 					set_template(mtmp, MAD_TEMPLATE);
