@@ -157,6 +157,7 @@ struct monst {
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*93*/
 	Bitfield(menvy,1);/* wants only others stuff */ /*94*/
+	Bitfield(deadmonster,1); /* is DEADMONSTER */ /*95*/
 	
 	char mbdrown;	/* drowning in blood */
 	char mtaneggs;	/* tannin eggs */
@@ -319,7 +320,7 @@ struct monst {
 #define MON_SWEP(mon)	((mon)->msw)
 #define MON_NOSWEP(mon)	((mon)->msw = (struct obj *)0)
 
-#define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->mhp < 1)
+#define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->deadmonster)
 #define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my)
 
 #endif /* MONST_H */

@@ -3387,7 +3387,7 @@ dmonsfree()
     int count = 0;
 
     for (mtmp = &fmon; *mtmp;) {
-	if ((*mtmp)->mhp <= 0) {
+	if (DEADMONSTER(*mtmp)) {
 	    struct monst *freetmp = *mtmp;
 	    *mtmp = (*mtmp)->nmon;
 		rem_all_mx(freetmp);
@@ -3479,6 +3479,10 @@ m_detach(mtmp, mptr)
 struct monst *mtmp;
 struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 {
+	if(mtmp->deadmonster) {
+		impossible("attempting to detach deadmonster %s", m_monnam(mtmp));
+		return;
+	}
 	if (mtmp->mleashed) m_unleash(mtmp, FALSE);
 	    /* to prevent an infinite relobj-flooreffects-hmon-killed loop */
 	mtmp->mtrapped = 0;
@@ -3494,6 +3498,8 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 
 	if(mtmp->isshk) shkgone(mtmp);
 	if(mtmp->wormno) wormgone(mtmp);
+
+	mtmp->deadmonster = 1;
 	iflags.purge_monsters++;
 }
 
