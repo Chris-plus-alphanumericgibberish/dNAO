@@ -357,10 +357,6 @@ static struct trobj Madman[] = {
 	{ POT_BOOZE, 0, POTION_CLASS, 2, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
-static struct trobj Nullmagic_amulet[] = {
-	{ AMULET_OF_NULLIFY_MAGIC, 0, AMULET_CLASS, 1, 0 },
-	{ 0, 0, 0, 0, 0 }
-};
 static struct trobj Noble[] = {
 	{ RAPIER, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
 #define NOB_SHIRT	1
@@ -2046,9 +2042,6 @@ u_init()
 		u.veil = FALSE;
 		u.umaniac = TRUE;
         ini_inv(Madman);
-		if(Race_if(PM_INCANTIFIER)){
-			ini_inv(Nullmagic_amulet);
-		}
         knows_object(SKELETON_KEY);
         knows_object(POT_BOOZE);
         knows_object(POT_SLEEPING);
