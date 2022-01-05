@@ -47,7 +47,7 @@ struct attack *mattk;
 			return 0;
 	}
 	
-	if (!intelligent_mon(magr) || !intelligent_mon(mdef)) return (0);
+	if (!intelligent_mon(mdef)) return (0);
 	if(youagr) {
 		pagr = youracedata;
 		agrinvis = (Invis != 0);
