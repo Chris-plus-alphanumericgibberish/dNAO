@@ -12875,6 +12875,8 @@ int mkobjflags;
 				else if (roll < 100)
 					set_material(otmp, SILVER);
 
+				MAYBE_MERC(otmp)
+
 				if (rn2(100) < 15){
 					switch (rnd(8)){
 					case 1:
