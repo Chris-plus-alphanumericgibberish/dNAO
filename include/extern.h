@@ -624,7 +624,7 @@ E void NDECL(update_mlstmv);
 E void NDECL(losedogs);
 E void FDECL(mon_arrive, (struct monst *,BOOLEAN_P));
 E void FDECL(mon_catchup_elapsed_time, (struct monst *,long));
-E void FDECL(keepdogs, (BOOLEAN_P));
+E void FDECL(keepdogs, (BOOLEAN_P, d_level *, int));
 E void FDECL(migrate_to_level, (struct monst *,int,XCHAR_P,coord *));
 E int FDECL(dogfood, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog, (struct monst *,struct obj *));
