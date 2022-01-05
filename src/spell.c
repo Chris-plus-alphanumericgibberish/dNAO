@@ -5788,6 +5788,7 @@ int spell;
 	if(Catapsi && casting_stat == A_CHA) return 0;
 	if(Misotheism && casting_stat == A_WIS) return 0;
 	if(Nullmagic) return 0;
+	if(casting_stat != A_CHA && !freehand()) return 0;
 	
 	/* Calculate intrinsic ability (splcaster) */
 
