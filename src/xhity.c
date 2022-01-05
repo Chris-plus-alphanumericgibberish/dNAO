@@ -1760,7 +1760,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damd = 6;
 		}
 		else if(attk->aatyp == AT_MSPR){
-			attk->aatyp = humanoid_upperbody(pa) ? AT_MARI : AT_CLAW;
+			attk->aatyp = (humanoid_upperbody(pa) && pa->mtyp != PM_ALIDER) ? AT_MARI : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 6;
