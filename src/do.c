@@ -1224,7 +1224,7 @@ int portal;
 		if(obj->otyp == MIRROR)
 			u.uz.flags.mirror = 1;
 	}
-	keepdogs(FALSE);
+	keepdogs(FALSE, newlevel, portal);
 	u.ux = u.uy = 0;			/* comes after keepdogs() */
 	
 	if (u.uswallow)				/* idem */

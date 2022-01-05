@@ -185,6 +185,19 @@ static const char *embracedAlider[] = {
 	"Why?"
 };
 
+static const char *freedAlider[] = {
+	"We fought valiently, but we were overrun by the forces of Ilsensine.",
+	"I have seen the flowers at the end of time.",
+	"Ilsensine controls the future, the whole universe is her body.",
+	"The Hero must have failed. We must use the Annulus against Ilsensine.",
+	"We must seek hope in the past. There is none left in the fading corpse of the future.",
+	"Ilsensine must be excised from the past.",
+	"Even the gods could not defeat Ilsensine. They failed and were consumed.",
+	"...I still hear the screams.",
+	"...Mother, Father, will I see you again?",
+	"Divine Mother, I am coming."
+};
+
 static const char *agonePrisoner[] = {
 	"Who am I?",
 	"Where am I?",
@@ -1866,6 +1879,8 @@ asGuardian:
 			verbl_msg = woePrisoners[rn2(SIZE(woePrisoners))];
 		} else if (ptr->mtyp == PM_EMBRACED_DROWESS) {
 			verbl_msg = embracedPrisoners[rn2(SIZE(embracedPrisoners))];
+		} else if (ptr->mtyp == PM_PARASITIZED_EMBRACED_ALIDER) {
+			verbl_msg = embracedAlider[rn2(SIZE(embracedAlider))];
 	    } else if(ptr->mtyp == PM_A_GONE) verbl_msg = agonePrisoner[rn2(SIZE(agonePrisoner))];
 	    else if(ptr->mtyp == PM_MINDLESS_THRALL) verbl_msg = thrallPrisoners[rn2(SIZE(thrallPrisoners))];
 	    else if(ptr->mtyp == PM_PARASITIZED_ANDROID || ptr->mtyp == PM_PARASITIZED_GYNOID) verbl_msg = parasitizedDroid[rn2(SIZE(parasitizedDroid))];
@@ -1986,16 +2001,6 @@ humanoid_sound:
 				doname(comp), (const char *)0);
 			break;
 		}
-	    else if (is_elf(ptr))
-		pline_msg = "curses orcs.";
-	    else if (is_drow(ptr))
-		pline_msg = "curses the pale surface freaks.";
-	    else if (is_dwarf(ptr))
-		pline_msg = "talks about mining.";
-	    else if (likes_magic(ptr))
-		pline_msg = "talks about spellcraft.";
-	    else if (ptr->mlet == S_CENTAUR)
-		pline_msg = "discusses hunting.";
 	    else{
 			const char *talkabt = "talks about %s.";
 			const char *discuss = "discusses %s.";
@@ -2066,6 +2071,10 @@ humanoid_sound:
 						pline_msg = msgbuff;
 					}
 				break;
+				case PM_ALIDER:
+					if(Race_if(PM_ANDROID))
+						verbl_msg = freedAlider[rn2(SIZE(freedAlider))];
+				break;
 				default:
 					if(Role_if(PM_RANGER) && Race_if(PM_GNOME) &&
 						mtmp->mtyp == PM_ARCADIAN_AVENGER && 
@@ -2075,7 +2084,18 @@ humanoid_sound:
 					if((Role_if(PM_NOBLEMAN) || Role_if(PM_KNIGHT)) && In_quest(&u.uz)){
 						if(Race_if(PM_DWARF)) pline_msg = "talks about fishing.";
 						else pline_msg = "talks about farming.";
-					} else {
+					}
+					else if (is_elf(ptr))
+					pline_msg = "curses orcs.";
+					else if (is_drow(ptr))
+					pline_msg = "curses the pale surface freaks.";
+					else if (is_dwarf(ptr))
+					pline_msg = "talks about mining.";
+					else if (likes_magic(ptr))
+					pline_msg = "talks about spellcraft.";
+					else if (ptr->mlet == S_CENTAUR)
+					pline_msg = "discusses hunting.";
+					else {
 						pline_msg = "discusses dungeon exploration.";
 					}
 				break;

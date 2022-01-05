@@ -271,7 +271,7 @@ struct monst *mtmp;
 	/* since unicorn horns don't get used up, the monster would look
 	 * silly trying to use the same cursed horn round after round
 	 */
-	if (mtmp->mconf || mtmp->mstun || !mtmp->mcansee) {
+	if (mtmp->mconf || mtmp->mstun || !mtmp->mcansee || !mtmp->mcanhear) {
 	    if (!(is_unicorn(mtmp->data) || mtmp->mtyp == PM_KI_RIN) && !nohands(mtmp->data)) {
 			for(obj = mtmp->minvent; obj; obj = obj->nobj)
 				if (obj->otyp == UNICORN_HORN && !obj->cursed)
@@ -536,6 +536,7 @@ struct monst *mtmp;
 	struct obj *otmp = m.defensive;
 	boolean vis, vismon, oseen;
 	const char *mcsa = "%s can see again.";
+	const char *mcha = "%s can hear again.";
 
 	if ((i = precheck(mtmp, otmp)) != 0) return i;
 	vis = cansee(mtmp->mx, mtmp->my);
@@ -560,6 +561,10 @@ struct monst *mtmp;
 		    mtmp->mcansee = 1;
 		    mtmp->mblinded = 0;
 		    if (vismon) pline(mcsa, Monnam(mtmp));
+		} else if (!mtmp->mcanhear) {
+		    mtmp->mcanhear = 1;
+		    mtmp->mdeafened = 0;
+		    if (vismon) pline(mcha, Monnam(mtmp));
 		} else if (mtmp->mconf || mtmp->mstun) {
 		    mtmp->mconf = mtmp->mstun = 0;
 		    if (vismon)
@@ -871,6 +876,11 @@ mon_tele:
 			mtmp->mblinded = 0;
 			if (vismon) pline(mcsa, Monnam(mtmp));
 		}
+		if (!otmp->cursed && !mtmp->mcanhear) {
+			mtmp->mcanhear = 1;
+			mtmp->mdeafened = 0;
+			if (vismon) pline(mcha, Monnam(mtmp));
+		}
 		if (vismon) pline("%s looks better.", Monnam(mtmp));
 		if (oseen) makeknown(POT_HEALING);
 		if (!otmp->oartifact)
@@ -887,6 +897,11 @@ mon_tele:
 			mtmp->mblinded = 0;
 			if (vismon) pline(mcsa, Monnam(mtmp));
 		}
+		if (!mtmp->mcanhear) {
+			mtmp->mcanhear = 1;
+			mtmp->mdeafened = 0;
+			if (vismon) pline(mcha, Monnam(mtmp));
+		}
 		if (vismon) pline("%s looks much better.", Monnam(mtmp));
 		if (oseen) makeknown(POT_EXTRA_HEALING);
 		if (!otmp->oartifact)
@@ -901,6 +916,11 @@ mon_tele:
 			mtmp->mcansee = 1;
 			mtmp->mblinded = 0;
 			if (vismon) pline(mcsa, Monnam(mtmp));
+		}
+		if (!mtmp->mcanhear) {
+			mtmp->mcanhear = 1;
+			mtmp->mdeafened = 0;
+			if (vismon) pline(mcha, Monnam(mtmp));
 		}
 		if (vismon) pline("%s looks completely healed.", Monnam(mtmp));
 		if (oseen) makeknown(otmp->otyp);

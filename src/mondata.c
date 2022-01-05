@@ -373,6 +373,7 @@ int template;
 	case CRANIUM_RAT:
 		/* defense: */
 		ptr->dac += 4;
+		ptr->hdr = 0; //Exposed brain
 		break;
 	case MISTWEAVER:
 		/* flags */
@@ -402,7 +403,23 @@ int template;
 		ptr->mflagsa &= ~(MA_PRIMORDIAL);
 		break;
 	case M_BLACK_WEB:
-		/* attacks only */
+		/* flags: */
+		ptr->mflagsm |= (MM_BREATHLESS);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK | MT_TRAITOR);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
+		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT | MG_NOSPELLCOOLDOWN);
+		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
+		ptr->mflagsa |= (MA_UNDEAD);
+		/* defense: */
+		ptr->pac = max(ptr->pac, 8);
+		ptr->dac += -2;	/* penalty to dodge AC */
+		/* resists: */
+		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
+		/* misc: */
+		ptr->msound = MS_SILENT;
+		/* speed: 0.50x, min 6 */
+		if (ptr->mmove > 6)
+			ptr->mmove = max(6, ptr->mmove / 2);
 		break;
 	case M_GREAT_WEB:
 		/* attacks only */
@@ -749,7 +766,7 @@ int template;
 			maybe_insert();
 			attk->aatyp = !attacktype(ptr, AT_WEAP) ? AT_SRPR : !attacktype(ptr, AT_XWEP) ? AT_XSPR : AT_ESPR;
 			attk->adtyp = AD_SHDW;
-			attk->damn = 4;
+			attk->damn = 2; //4-6 with undead bonus.
 			attk->damd = 8;
 			special = TRUE;
 		}

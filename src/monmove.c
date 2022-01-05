@@ -714,14 +714,19 @@ boolean digest_meal;
 			if(!DEADMONSTER(mtmp) && (mtmp != mon) && (mtmp->mpeaceful == mon->mpeaceful)){
 				if(mtmp->mtyp == PM_MYRKALFAR_MATRON)
 					healup += 3;
-				else if(mtmp->mtyp == PM_MYRKALFR || mtmp->mtyp == PM_MYRKALFAR_WARRIOR || (mtmp->mtyp == PM_ELVENKING && mtmp->mfaction == LAST_BASTION_SYMBOL) || (is_drow(mtmp->data) && mtmp->mtame && mon->mtame))
+				else if((!mon->mcan && free_android(mtmp->data))
+					|| mtmp->mtyp == PM_MYRKALFR || mtmp->mtyp == PM_MYRKALFAR_WARRIOR
+					|| mtmp->mtyp == PM_ARCADIAN_AVENGER
+					|| (mtmp->mtyp == PM_ELVENKING && mtmp->mfaction == LAST_BASTION_SYMBOL)
+					|| (is_drow(mtmp->data) && mtmp->mtame && mon->mtame)
+				)
 					healup += 2;
 				else if(mtmp->mfaction == LAST_BASTION_SYMBOL || (mtmp->mtame && mon->mtame))
 					healup += 1;
 			}
 		}
-		if(mon->mtame)
-			healup += Race_if(PM_ANDROID) ? 4 : Race_if(PM_DROW) ? 2 : 1;
+		if(mon->mtame || (Race_if(PM_DROW) && Role_if(PM_ANACHRONONAUT)))
+			healup += (!mon->mcan && Race_if(PM_ANDROID)) ? 3 : Race_if(PM_DROW) ? 2 : 1;
 		if(mon->mcan) healup /= 2;
 		if(healup){
 			set_mcan(mon, FALSE);
@@ -732,8 +737,6 @@ boolean digest_meal;
 		else {
 			if(!rn2(8)) set_mcan(mon, TRUE);
 			if(mon->mcan) mon->mdoubt = TRUE;
-			if(mon->mhp > mon->mhpmax/2)
-				mon->mhp--;
 		}
 	}
 	/* Clouds on Lolth's level deal damage */
@@ -1393,7 +1396,7 @@ register struct monst *mtmp;
 		else mtmp->mspec_used += max(10 - mtmp->m_lev,2);
 	}
 
-	if (mtmp->mtyp == PM_NURSE || mtmp->mtyp == PM_HEALER){
+	if (mtmp->mtyp == PM_NURSE || mtmp->mtyp == PM_HEALER || mtmp->mtyp == PM_CLAIRVOYANT_CHANGED){
 	    // && !uarmu && !uarm && !uarmh && !uarms && !uarmg && !uarmc && !uarmf){
 		struct monst *patient = 0;
 		int i, j, x, y, rot = rn2(3);
@@ -1578,7 +1581,7 @@ register struct monst *mtmp;
 	/* the watch will look around and see if you are up to no good :-) */
 	if (mdat->mtyp == PM_WATCHMAN || mdat->mtyp == PM_WATCH_CAPTAIN)
 		watch_on_duty(mtmp);
-	if(mdat->mtyp == PM_NURSE){
+	if(mdat->mtyp == PM_NURSE || mdat->mtyp == PM_HEALER || mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
 		int i, j;
 		struct trap *ttmp;
 		struct monst *tmon;
@@ -1658,9 +1661,11 @@ register struct monst *mtmp;
 			return 1;
 		else return 0;
 	}
-	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20) && !Catapsi) {
+	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_CLAIRVOYANT_CHANGED ? 3 : mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20) && !Catapsi) {
 		boolean reducedFlayerMessages = (((Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && flags.initgend) || Role_if(PM_ANACHRONONAUT)) && In_quest(&u.uz));
 		struct monst *m2, *nmon = (struct monst *)0;
+		int dmg = 0;
+		int power = 0;
 
 		if (canseemon(mtmp))
 			pline("%s concentrates.", Monnam(mtmp));
@@ -1673,17 +1678,40 @@ register struct monst *mtmp;
 			if(!reducedFlayerMessages) pline("It feels quite soothing.");
 		} else {
 			register boolean m_sen = tp_sensemon(mtmp);
-			
+
 			if(mdat->mtyp == PM_ELDER_BRAIN){
 				lift_veil();
 				quest_chat(mtmp);
 			}
-			if (m_sen || (Blind_telepat && rn2(2)) || !rn2(10)) {
-				int dmg;
+			if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
+				if(m_sen || (Blind_telepat && rn2(2)) || !rn2(10)){
+					power++;
+					dmg += rnd(15);
+				}
+				for(int i = 1; i < 7; i++)
+					if(!rn2(20) && (m_sen || (Blind_telepat && rn2(2)) || !rn2(10))){
+						dmg += rnd(15);
+						power++;
+					}
+				if(power){
+					pline("%s %s %s!",
+						power == 1 ? "A mad voice" : power == 2 ? "A duet of mad voices" : power < 7 ? "Mad voices" : "A cacophony of mad voices",
+						power == 1 
+							? (!rn2(6) ? "screams" : !rn2(5) ? "babbles" : !rn2(4) ? "shouts" : !rn2(3) ? "whispers" : rn2(2) ? "courses" : "cries")
+							: (!rn2(6) ? "scream" : !rn2(5) ? "babble" : !rn2(4) ? "shout" : !rn2(3) ? "whisper" : rn2(2) ? "course" : "cry"),
+						m_sen ? "through your telepathy" :
+						Blind_telepat ? "through your latent telepathy" : "into your mind");
+				}
+			}
+			else if (m_sen || (Blind_telepat && rn2(2)) || !rn2(10)) {
 				pline("It locks on to your %s!",
 					m_sen ? "telepathy" :
 					Blind_telepat ? "latent telepathy" : "mind");
 				dmg = (mdat->mtyp == PM_GREAT_CTHULHU || mdat->mtyp == PM_LUGRIBOSSK || mdat->mtyp == PM_MAANZECORIAN) ? d(5,15) : (mdat->mtyp == PM_ELDER_BRAIN) ? d(3,15) : rnd(15);
+				if(mtmp->mtyp == PM_MAD_SEER)
+					mtmp->mspec_used += dmg;
+			}
+			if(dmg){
 				if (Half_spell_damage) dmg = (dmg+1) / 2;
 				if(u.uvaul_duration) dmg = (dmg + 1) / 2;
 				losehp(dmg, "psychic blast", KILLED_BY_AN);
@@ -1709,9 +1737,40 @@ register struct monst *mtmp;
 						}
 					}
 				}
+				if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
+					if(power >= 3){
+						You("stagger!");
+						make_stunned(HStun + dmg, TRUE);
+					}
+					if(power >= 4 && !Babble && !Screaming){
+						if(rn2(3)){
+							if(!ClearThoughts)
+								You("scream in pain!");
+							HScreaming = 2;
+						}
+						else if(rn2(2)){
+							if(ClearThoughts)
+								You_feel("a little frightened.");
+							else
+								You("begin screaming in terror and madness!");
+							HScreaming = 1+rnd((dmg)/5+1)+rnd((dmg)/5+1);
+						}
+						else {
+							if(ClearThoughts)
+								You_feel("a little incoherent.");
+							else
+								You("begin babbling incoherently!");
+							HBabble = 1+rnd((dmg)/5+1)+rnd((dmg)/5+1);
+						}
+					}
+					if(power >= 7 && !Vomiting){
+						You("feel ill!");
+						make_vomiting(rn1(15,10), TRUE);
+					}
+				}
 				if(has_template(mtmp, DREAM_LEECH)){
 					if (!Sleep_resistance){
-						fall_asleep(-100*dmg, TRUE);
+						fall_asleep(-2*dmg, TRUE);
 					}
 				}
 				nomul(0, NULL);
@@ -1723,31 +1782,123 @@ register struct monst *mtmp;
 			if (m2->mpeaceful == mtmp->mpeaceful) continue;
 			if (mindless_mon(m2)) continue;
 			if (m2 == mtmp) continue;
-			if (species_is_telepathic(m2->data) ||
-				(mon_resistance(m2,TELEPAT) &&
-				(rn2(2) || m2->mblinded)) || 
-				!rn2(10)
-			) {
-				if (cansee(m2->mx, m2->my))
-				    pline("It locks on to %s.", mon_nam(m2));
-				if(mdat->mtyp == PM_GREAT_CTHULHU) m2->mconf=TRUE;
-				if(mdat->mtyp == PM_GREAT_CTHULHU || mdat->mtyp == PM_LUGRIBOSSK || mdat->mtyp == PM_MAANZECORIAN) m2->mhp -= d(5,15);
-				else if(mdat->mtyp == PM_ELDER_BRAIN){
-					int mfdmg = d(3,15);
-					m2->mhp -= mfdmg;
-					m2->mstdy = max(mfdmg, m2->mstdy);
-				} else {
-					m2->mhp -= rnd(15);
-					if(mdat->mtyp == PM_SEMBLANCE) m2->mconf=TRUE;
+			power = 0;
+			dmg = 0;
+			if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
+				if (species_is_telepathic(m2->data) ||
+					(mon_resistance(m2,TELEPAT) &&
+					(rn2(2) || m2->mblinded)) || 
+					!rn2(10)
+				) {
+					power++;
+					dmg += rnd(15);
 				}
-				if (m2->mhp <= 0)
-				    monkilled(m2, "", AD_DRIN);
-				else
-				    m2->msleeping = 0;
-				if(has_template(mtmp, DREAM_LEECH)){
-					if (!resists_sleep(m2)){
-						m2->msleeping = 1;
-						slept_monst(m2);
+				for(int i = 1; i < 7; i++)
+					if (!rn2(20) && (species_is_telepathic(m2->data) ||
+						(mon_resistance(m2,TELEPAT) &&
+						(rn2(2) || m2->mblinded)) || 
+						!rn2(10))
+					) {
+						dmg += rnd(15);
+						power++;
+					}
+				if(power)
+					if (cansee(m2->mx, m2->my))
+						pline("%s looks spooked.", Monnam(m2));
+			}
+			else {
+				if (species_is_telepathic(m2->data) ||
+					(mon_resistance(m2,TELEPAT) &&
+					(rn2(2) || m2->mblinded)) || 
+					!rn2(10)
+				) {
+					if (cansee(m2->mx, m2->my))
+						pline("It locks on to %s.", mon_nam(m2));
+					if(mdat->mtyp == PM_GREAT_CTHULHU || mdat->mtyp == PM_LUGRIBOSSK || mdat->mtyp == PM_MAANZECORIAN)
+						dmg = d(5,15);
+					else if(mdat->mtyp == PM_ELDER_BRAIN){
+						dmg = d(3,15);
+					} else {
+						dmg = rnd(15);
+					}
+					if(mtmp->mtyp == PM_MAD_SEER)
+						mtmp->mspec_used += dmg;
+				}
+				if(dmg){
+					if(mon_resistance(m2, HALF_SPDAM))
+						dmg = (dmg+1) / 2;
+					m2->mhp -= dmg;
+					if (m2->mhp <= 0)
+						monkilled(m2, "", AD_DRIN);
+					else
+						m2->msleeping = 0;
+					if(mdat->mtyp == PM_GREAT_CTHULHU) 
+						m2->mconf=TRUE;
+					else if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
+						if(power >= 3){
+							m2->mconf=TRUE;
+						}
+						if(power >= 4){
+							if(rn2(3)){
+								//Scream in pain
+								if (!is_silent_mon(m2)){
+									if (canseemon(m2))
+										pline("%s %s in pain!", Monnam(m2), humanoid_torso(m2->data) ? "screams" : "shrieks");
+									else You_hear("%s %s in pain!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2), humanoid_torso(m2->data) ? "screaming" : "shrieking");
+								}
+								else {
+									if (canseemon(m2))
+										pline("%s writhes in pain!", Monnam(m2));
+								}
+								m2->movement = max(m2->movement - 12, -12);
+							}
+							else if(rn2(2)){
+								//Laugh in madness
+								if (!is_silent_mon(m2)){
+									if (canseemon(m2))
+										pline("%s begins laughing hysterically!", Monnam(m2));
+									else You_hear("%s begin laughing hysterically!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2));
+								}
+								else {
+									if (canseemon(m2))
+										pline("%s begins tembling hysterically!", Monnam(m2));
+								}
+								mtmp->mlaughing = dmg;
+								m2->mnotlaugh = FALSE;
+							}
+							else {
+								//Babble (set cooldown)
+								if (!is_silent_mon(m2)){
+									if (canseemon(m2))
+										pline("%s %s!", Monnam(m2), humanoid_torso(m2->data) ? "babbles incoherently" : "makes confused noises");
+									else You_hear("%s %s in!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2), humanoid_torso(m2->data) ? "babbling incoherently" : "making confused noises");
+									m2->mspec_used += 2*dmg;
+								}
+							}
+							if(power >= 7){
+								if(canseemon(m2))
+									pline("%s vomits!", Monnam(m2));
+								m2->mcanmove = 0;
+								if ((m2->mfrozen + 3) > 127)
+									m2->mfrozen = 127;
+								else m2->mfrozen += 3;
+								if (get_mx(m2, MX_EDOG)) {
+									EDOG(m2)->hungrytime = max(0, EDOG(m2)->hungrytime-20);
+								}
+							}
+						}
+					} else if(mdat->mtyp == PM_ELDER_BRAIN){
+						m2->mhp -= dmg;
+						m2->mstdy = max(dmg, m2->mstdy);
+					} else {
+						if(mdat->mtyp == PM_SEMBLANCE) 
+							m2->mconf=TRUE;
+					}
+					if(has_template(mtmp, DREAM_LEECH)){
+						if (!resists_sleep(m2)){
+							m2->msleeping = 1;
+							slept_monst(m2);
+						}
 					}
 				}
 			}
@@ -2318,7 +2469,7 @@ not_special:
 				}
 			}//End target closest hostile
 			
-			if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz)){
+			if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz) && !quest_status.leader_is_dead){
 				for(m2=fmon; m2; m2 = m2->nmon){
 					if(m2->m_id == quest_status.leader_m_id){
 						if(distminbest >= SQSRCHRADIUS){
@@ -2337,7 +2488,7 @@ not_special:
 		}
 		
 		//Loop to place breaching charge on ana quest home
-		if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(Role_if(PM_ANACHRONONAUT) && !mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz) && !quest_status.leader_is_dead){
 			if(
 				(mtmp->mtyp == PM_DEEP_ONE && !rn2(1000))
 				|| (mtmp->mtyp == PM_DEEPER_ONE && !rn2(500))

@@ -2193,9 +2193,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 
 	/* Undead damage multipliers -- note that these must be after actual replacements are done */
 	/* zombies deal double damage, and all undead deal double damage at midnight (the midnight multiplier is not shown in the pokedex) */
-	if (!youagr && has_template(magr, ZOMBIFIED) && (is_undead(pa) && midnight() && !by_the_book))
+	if (!youagr && (has_template(magr, ZOMBIFIED) || has_template(magr, M_BLACK_WEB)) && (is_undead(pa) && midnight() && !by_the_book))
 		attk->damn *= 3;
-	else if (!youagr && (has_template(magr, ZOMBIFIED) || (is_undead(pa) && midnight() && !by_the_book)))
+	else if (!youagr && (has_template(magr, ZOMBIFIED) || has_template(magr, M_BLACK_WEB) || (is_undead(pa) && midnight() && !by_the_book)))
 		attk->damn *= 2;
 
 	/* Bandersnatches become frumious instead of fleeing, dealing double damage -- not shown in the pokedex */

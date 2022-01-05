@@ -478,8 +478,9 @@ qt_montype()
 				else return &mons[PM_DOPPELGANGER];
 			break;
 			case 4:
-				if(rn2(3)) return mkclass(S_VAMPIRE, G_NOHELL|G_HELL);
-				else if(rn2(3)) return mkclass(S_WRAITH, G_NOHELL|G_HELL);
+				if(rn2(2)) return mkclass(S_VAMPIRE, G_NOHELL|G_HELL);
+				else if(rn2(2)) return mkclass(S_ZOMBIE, G_NOHELL|G_HELL);
+				else if(rn2(2)) return mkclass(S_WRAITH, G_NOHELL|G_HELL);
 				else if(rn2(3)) return mkclass(S_LICH, G_NOHELL|G_HELL);
 				else if(Is_qstart(&u.uz) || rn2(3)) return &mons[PM_DARKNESS_GIVEN_HUNGER];
 				else return &mons[PM_DREAD_SERAPH];
@@ -487,7 +488,7 @@ qt_montype()
 			case 5:
 				if(rn2(2)) return &mons[PM_DEEP_ONE];
 				else if(rn2(2)) return &mons[PM_DEEPER_ONE];
-				else if(rn2(2)) return &mons[PM_MIND_FLAYER];
+				else if(rn2(2)) return &mons[PM_DEEP_DWELLER];
 				else return &mons[PM_DEEPEST_ONE];
 			break;
 			case 6:

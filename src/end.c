@@ -1322,7 +1322,7 @@ die:
 	    /* count the points for artifacts */
 	    artifact_score(invent, TRUE, endwin);
 
-	    keepdogs(TRUE);
+	    keepdogs(TRUE, 0, 0);
 	    viz_array[0][0] |= IN_SIGHT; /* need visibility for naming */
 	    mtmp = mydogs;
 	    Strcpy(pbuf, "You");

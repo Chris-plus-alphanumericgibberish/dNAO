@@ -216,19 +216,19 @@ struct monst {
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
-#define	ZOMBIFIED		1	/* zombie 'faction' */
-#define	SKELIFIED		2	/* skeleton 'faction' */
-#define	CRYSTALFIED		3	/* crystal dead 'faction' */
-#define	FRACTURED		4	/* witness of the fracture 'faction' */
-#define	VAMPIRIC		5	/* vampirified 'faction' */
-#define	ILLUMINATED		6	/* illuminated 'faction' */
-#define	PSEUDONATURAL	7	/* tentacled */
+#define	ZOMBIFIED		1	/* zombies */
+#define	SKELIFIED		2	/* skeletons */
+#define	CRYSTALFIED		3	/* crystal dead */
+#define	FRACTURED		4	/* witness of the fracture */
+#define	VAMPIRIC		5	/* vampirified monster */
+#define	ILLUMINATED		6	/* illuminated monster */
+#define	PSEUDONATURAL	7	/* far-realms-touched monster */
 #define	TOMB_HERD		8	/* possessed statue */
 #define	YITH			9	/* possessed by the great race of yith */
 #define	CRANIUM_RAT		10	/* psychic rat */
 #define	MISTWEAVER		11	/* daughters of shubie */
 #define	DELOUSED		12	/* android flag: parasite is killed, but not host */
-#define	M_BLACK_WEB		13	/* Has a shadow blade attack */
+#define	M_BLACK_WEB		13	/* Zombie with a shadow blade attack */
 #define	M_GREAT_WEB		14	/* Has a stronger shadow blade attack */
 #define	SLIME_REMNANT	15	/* slimey, like an ancient of corruption */
 #define	YELLOW_TEMPLATE	16	/* causes sleep and damages sanity (unimplemented) */
@@ -290,6 +290,8 @@ struct monst {
 #define	mvar_attack_pm	mvar2
 	long mvar3;
 #define	mvar_conversationTracker	mvar3
+#define	mvar_lifesigns	mvar3
+#define has_lifesigns(mon)	(mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
 
 	struct ls_t * light;
 

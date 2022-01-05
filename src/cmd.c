@@ -1235,7 +1235,7 @@ wiz_makemap(VOID_ARGS)
 	u.uinwater = 0;
 	u.uundetected = 0;
 	dmonsfree();
-	keepdogs(TRUE);
+	keepdogs(TRUE, 0, 0);
 
         savelev(-1, ledger_no(&u.uz), FREE_SAVE);
         /* create a new level; various things like bestowing a guardian

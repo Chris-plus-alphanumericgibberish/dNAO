@@ -190,6 +190,7 @@ int mndx, mode;
 		if (mndx >= LOW_PM && mndx < NUMMONS) {
 			struct permonst *ptr = &mons[mndx];
 			if (is_human(ptr))      mndx = PM_HUMAN;
+			else if (is_myrkalfr(ptr))   mndx = PM_MYRKALFR;
 			else if (is_elf(ptr))   mndx = PM_ELF;
 			else if (is_dwarf(ptr)) mndx = PM_DWARF;
 			else if (is_gnome(ptr)) mndx = PM_GNOME;
@@ -761,7 +762,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_template(mon, ZOMBIFIED);
+				set_template(mon, M_BLACK_WEB);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -784,18 +785,7 @@ register struct monst *mtmp;
 			}
 		break;
 	    case PM_FLAYED_ANDROID:
-			mon = makemon(&mons[PM_ANDROID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
-			if (mon){
-				initedog(mon);
-				mon->mtame = 10;
-				mon->mpeaceful = 1;
-				set_template(mon, ZOMBIFIED);
-				EDOG(mon)->loyal = TRUE;
-				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
-				mongone(mon);
-			} else {
-				obj = mksobj_at(BROKEN_ANDROID, x, y, MKOBJ_NOINIT);
-			}
+			obj = mkcorpstat(BROKEN_ANDROID, mtmp, mdat, x, y, FALSE);
 		break;
 	    case PM_PARASITIZED_ANDROID:
 			mon = makemon(&mons[PM_ANDROID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
@@ -836,7 +826,7 @@ register struct monst *mtmp;
 				initedog(mon);
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_template(mon, ZOMBIFIED);
+				set_template(mon, M_BLACK_WEB);
 				EDOG(mon)->loyal = TRUE;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -859,18 +849,7 @@ register struct monst *mtmp;
 			}
 		break;
 	    case PM_FLAYED_GYNOID:
-			mon = makemon(&mons[PM_GYNOID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
-			if (mon){
-				initedog(mon);
-				mon->mtame = 10;
-				mon->mpeaceful = 1;
-				set_template(mon, ZOMBIFIED);
-				EDOG(mon)->loyal = TRUE;
-				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
-				mongone(mon);
-			} else {
-				obj = mksobj_at(BROKEN_GYNOID, x, y, MKOBJ_NOINIT);
-			}
+			obj = mkcorpstat(BROKEN_GYNOID, mtmp, mdat, x, y, FALSE);
 		break;
 	    case PM_PARASITIZED_GYNOID:
 			mon = makemon(&mons[PM_GYNOID], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
@@ -935,6 +914,8 @@ register struct monst *mtmp;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
 				mon->mcrazed = 1;
+				mon->mcansee = 0;
+				mon->mcanhear = 0;
 				EDOG(mon)->loyal = TRUE;
 				set_template(mon, M_GREAT_WEB);
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
@@ -1129,11 +1110,10 @@ register struct monst *mtmp;
 		goto default_1;
 		break;
 	    case PM_COILING_BRAWN:{
-			num = d(2,4);
-			while (num--){
-				obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
-				obj->corpsenm = PM_HUMAN;
-			}
+			obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
+			obj->corpsenm = mtmp->mvar_lifesigns ? genus(mtmp->mvar_lifesigns, FALSE) : PM_HUMAN;
+			obj->quan = 2;
+			obj->owt = weight(obj);
 		}
 		goto default_1;
 	    case PM_CHANGED:
@@ -1204,32 +1184,38 @@ register struct monst *mtmp;
 				mon->female = TRUE;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				set_template(mon, ZOMBIFIED);
+				set_template(mon, M_BLACK_WEB);
 			}
 			obj = mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 			mongone(mon);
 		break;
 	    case PM_PARASITIZED_EMBRACED_ALIDER:
-			if(mtmp->mpetitioner 
-				&& !is_rider(mtmp->data) 
-				&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
-			) //u.uevent.invoked || 
-				break;
 			mon = makemon(&mons[PM_ALIDER], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
 			if (mon){
 				initedog(mon);
-				mon->mhpmax = (mon->m_lev * 8) - 4;
+				set_template(mon, M_GREAT_WEB);
+				mon->mhpmax = (mon->m_lev * 1);
 				mon->mhp = mon->mhpmax;
 				mon->female = TRUE;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
 				mon->mcrazed = 1;
-				EDOG(mon)->loyal = TRUE;
+				mon->mcansee = 0;
+				mon->mcanhear = 0;
+				set_mcan(mon, TRUE);
+				mon->mdoubt = 1;
+				if(EDOG(mon))
+					EDOG(mon)->loyal = TRUE;
 				mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			}
+			obj = mksobj_at(DROVEN_CLOAK, x, y, MKOBJ_NOINIT);
+			obj->objsize = MZ_LARGE;
+			fix_object(obj);
+			obj = 0;
 			if(mtmp->mpetitioner 
 				&& !is_rider(mtmp->data) 
+				&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
 			) //u.uevent.invoked || 
 				break;
 			obj = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
@@ -3534,17 +3520,18 @@ struct monst *mtmp;
 	int lifesavers = 0;
 	int i;
 #define LSVD_ANA 0x001	/* anachrononaut quest */
-#define LSVD_NBW 0x002	/* nitocris's black wraps */
+#define LSVD_HLO 0x002	/* Halo (Blessed) */
 #define LSVD_UVU 0x004	/* uvuuduam + prayerful thing */
 #define LSVD_OBJ 0x008	/* lifesaving items */
-#define LSVD_ALA 0x010	/* alabaster decay */
+#define LSVD_ILU 0x010	/* illuminated */
 #define LSVD_FRC 0x020	/* fractured kamerel */
-#define LSVD_ILU 0x040	/* illuminated */
+#define LSVD_NBW 0x040	/* nitocris's black wraps */
 #define LSVD_PLY 0x080	/* polypoids */
-#define LSVD_KAM 0x100	/* kamerel becoming fractured */
-#define LSVD_NIT 0x200	/* Nitocris becoming a ghoul */
-#define LSVD_HLO 0x400	/* Halo (Blessed) */
-#define LSVDLAST LSVD_HLO	/* last lifesaver */
+#define LSVD_NIT 0x100	/* Nitocris becoming a ghoul */
+#define LSVD_KAM 0x200	/* kamerel becoming fractured */
+#define LSVD_ALA 0x400	/* alabaster decay */
+#define LSVD_FLS 0x800	/* God of flesh claims body */
+#define LSVDLAST LSVD_FLS	/* last lifesaver */
 
 	/* set to kill */
 	mtmp->mhp = 0;
@@ -3566,6 +3553,8 @@ struct monst *mtmp;
 		|| is_alabaster_mummy(mtmp->data)
 		)))
 		lifesavers |= LSVD_ALA;
+	if (Infuture && mtmp->mpeaceful && !is_myrkalfr(mtmp) && !nonliving(mtmp->data) && !is_android(mtmp->data))
+		lifesavers |= LSVD_FLS;
 	if (has_template(mtmp, FRACTURED) && !rn2(2))
 		lifesavers |= LSVD_FRC;
 	if (mtmp->ispolyp)
@@ -3583,7 +3572,7 @@ struct monst *mtmp;
 
 	/* some lifesavers do NOT work on stone/gold/glass-ing */
 	if (stoned || golded || glassed)
-		lifesavers &= ~(LSVD_ALA | LSVD_NBW | LSVD_FRC | LSVD_PLY | LSVD_ILU | LSVD_KAM | LSVD_NIT | LSVD_HLO);
+		lifesavers &= ~(LSVD_FLS | LSVD_ALA | LSVD_NBW | LSVD_FRC | LSVD_PLY | LSVD_ILU | LSVD_KAM | LSVD_NIT | LSVD_HLO);
 
 	/* some lifesavers should SILENTLY fail to protect from genocide */
 	if (mvitals[monsndx(mtmp->data)].mvflags & G_GENOD && !In_quest(&u.uz))
@@ -3708,6 +3697,88 @@ struct monst *mtmp;
 			}
 			newcham(mtmp, (rn2(4) ? PM_ACID_BLOB : PM_BLACK_PUDDING), FALSE, FALSE);
 			break;
+		case LSVD_FLS:{
+			/* message */
+			int mtyp = mtmp->mtyp;
+			switch(quest_status.leader_m_id == mtmp->m_id ? 0 : rn2(5)){
+				case 0:
+					if(canseemon(mtmp)){
+						pline("But wait...");
+						pline("%s screams and writhes. You hear %s bones splintering!", Monnam(mtmp), mhis(mtmp));
+					}
+					else You_hear("screaming.");
+					if(quest_status.leader_m_id == mtmp->m_id){
+						quest_status.leader_m_id = 0;
+						quest_status.leader_is_dead = TRUE;
+						verbalize("**ALAAAAAAAAAAAAAAAAA:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...**");
+					}
+					set_mon_data(mtmp, PM_COILING_BRAWN);
+				break;
+				case 1:{
+					struct obj *helm, *robe;
+					helm = which_armor(mtmp, W_ARMH);
+					robe = which_armor(mtmp, W_ARMC);
+					if(helm && !FacelessHelm(helm))
+						helm = (struct obj *)0;
+					if(robe && !FacelessCloak(robe))
+						robe = (struct obj *)0;
+					if(canseemon(mtmp)){
+						pline("But wait...");
+						pline("%s gags and grasps at %s face. Purple tentacles tear out of %s %s!", Monnam(mtmp), mhis(mtmp), mhis(mtmp), robe ? "robe" : helm ? "helmet" : "mouth");
+					}
+					else You_hear("gagging.");
+					if(helm)
+						m_useup(mtmp, helm);
+					if(robe)
+						m_useup(mtmp, robe);
+					set_mon_data(mtmp, PM_MIND_FLAYER);
+				}
+				break;
+				case 2:
+					if(canseemon(mtmp))
+						pline("%s head splits open in a profusion of fungal growthes!", s_suffix(Monnam(mtmp)));
+					else You_hear("a wet crack.");
+					set_mon_data(mtmp, PM_FUNGAL_BRAIN);
+				break;
+				case 3:
+					if(canseemon(mtmp)){
+						if(!which_armor(mtmp, W_ARMH)){
+							pline("Or not....");
+							pline("The back of %s head falls off, and %s eyes gleam with newfound madness!", s_suffix(mon_nam(mtmp)), mhis(mtmp));
+						}
+						else pline("Or not...?");
+					}
+					set_template(mtmp, CRANIUM_RAT);
+				break;
+				case 4:
+					if(canseemon(mtmp)){
+						pline("But wait...");
+						pline("%s screams and unnaturally contorts. Tentacles worm their way out of %s body!", Monnam(mtmp), mhis(mtmp));
+					}
+					else You_hear("screaming.");
+					set_template(mtmp, PSEUDONATURAL);
+				break;
+			}
+			if(Role_if(PM_ANACHRONONAUT) && mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
+				if(mtyp == PM_TROOPER){
+					verbalize("**WARNING: Anomalous vital signs detected in trooper %d**", (int)(mtmp->m_id));
+					if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
+				} else if(mtyp == PM_MYRKALFAR_WARRIOR){
+					verbalize("**WARNING: Anomalous vital signs detected in warrior %d**", (int)(mtmp->m_id));
+					if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
+				} else {
+					verbalize("**WARNING: Anomalous vital signs detected in citizen %d**", (int)(mtmp->m_id));
+					if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
+				}
+			}
+			messaged = TRUE;
+			mtmp->mvar_lifesigns = mtyp;
+			mtmp->mtame = 0;
+			mtmp->mpeaceful = 0;
+			set_malign(mtmp);
+			set_faction(mtmp, ILSENSINE_FACTION);
+			newsym(mtmp->mx, mtmp->my);
+		}	break;
 		case LSVD_FRC:
 			/* message */
 			if (couldsee(mtmp->mx, mtmp->my)) {
@@ -4093,12 +4164,12 @@ register struct monst *mtmp;
 	}
 	
 	//Quest flavor
-	if(Role_if(PM_ANACHRONONAUT) && mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
-		if(mtmp->mtyp == PM_TROOPER){
+	if(Role_if(PM_ANACHRONONAUT) && (mtmp->mpeaceful || (has_lifesigns(mtmp) && mtmp->mvar_lifesigns)) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
+		if(mtmp->mtyp == PM_TROOPER || (has_lifesigns(mtmp) && mtmp->mvar_lifesigns == PM_TROOPER)){
 			verbalize("**ALERT: trooper %d vital signs terminated**", (int)(mtmp->m_id));
 		} else if(mtmp->mtyp == PM_MYRKALFAR_WARRIOR){
 			verbalize("**ALERT: warrior %d vital signs terminated**", (int)(mtmp->m_id));
-		} else if(mtmp->mtyp != PM_PHANTASM){
+		} else {
 			verbalize("**ALERT: citizen %d vital signs terminated**", (int)(mtmp->m_id));
 		}
 	}
@@ -4212,6 +4283,8 @@ boolean was_swallowed;			/* digestion */
 	    
 		if(mdat->mtyp != PM_VECNA) return FALSE; /* exception for Vecna, who leaves his hand or eye*/
 	}
+	else if(Infuture && is_myrkalfr(mdat) && !get_template(mon))
+		return FALSE;
 	else if(mdat->mtyp == PM_ECLAVDRA)
 		return FALSE;
 	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH)
@@ -5150,7 +5223,11 @@ int how;
 {
 	boolean be_sad = FALSE;		/* true if unseen pet is killed */
 
-	if ((mdef->wormno ? worm_known(mdef) : cansee(mdef->mx, mdef->my))
+	if(Infuture && is_myrkalfr(mdef->data) && !get_template(mdef) && canseemon(mdef) && how != AD_DGST){
+		pline("Strands of black webbing flow from %s mortal wounds, engulfing %s body and choking off %s screams!", s_suffix(mon_nam(mdef)), mhis(mdef), mhis(mdef));
+		pline("Now totally engulfed, %s is yanked upright and vanishes from the world.", mhe(mdef));
+	}
+	else if ((mdef->wormno ? worm_known(mdef) : cansee(mdef->mx, mdef->my))
 		&& fltxt)
 	    pline("%s is %s%s%s!", Monnam(mdef),
 			nonliving(mdef->data) ? "destroyed" : "killed",

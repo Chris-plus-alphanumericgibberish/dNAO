@@ -367,6 +367,7 @@
 #define is_boreal_dragoon(ptr)		(attacktype_fordmg(ptr, AT_WEAP, AD_HDRG) || attacktype_fordmg(ptr, AT_XWEP, AD_HDRG))
 #define is_elf(ptr)			(((ptr)->mflagsa & MA_ELF) != 0L && !is_drow(ptr))
 #define is_drow(ptr)		(((ptr)->mflagsa & MA_DROW) != 0L)
+#define is_myrkalfr(ptr)	((ptr)->mtyp == PM_MYRKALFAR_WARRIOR || (ptr)->mtyp == PM_MYRKALFAR_MATRON || (ptr)->mtyp == PM_MYRKALFR || (ptr)->mtyp == PM_ALIDER)
 #define is_dwarf(ptr)		(((ptr)->mflagsa & MA_DWARF) != 0L)
 #define is_gnome(ptr)		(((ptr)->mflagsa & MA_GNOME) != 0L)
 #define is_gizmo(ptr)		((ptr)->mlet == S_GNOME && is_clockwork(ptr))
@@ -795,14 +796,19 @@
 								 (ptr)->mtyp == PM_DARUTH_XAXOX ||\
 								 (ptr)->mtyp == PM_EMBRACED_DROWESS\
 								)
-#define has_mind_blast_mon(mon)	(has_mind_blast((mon)->data) \
+#define has_mind_blast_mon(mon)	((has_mind_blast((mon)->data) \
 				 || has_template(mon, DREAM_LEECH) \
+				) && !((mon)->mtyp == PM_MAD_SEER && (mon)->mspec_used)\
+				  && ((mon)->mnotlaugh)\
+				  && !((mon)->mcan)\
 				)
 #define has_mind_blast(ptr)	(is_mind_flayer(ptr) \
 				 || (ptr)->mtyp == PM_BRAIN_GOLEM \
 				 || (ptr)->mtyp == PM_SEMBLANCE \
 				 || (ptr)->mtyp == PM_FUNGAL_BRAIN \
 				 || (ptr)->mtyp == PM_LADY_CONSTANCE \
+				 || (ptr)->mtyp == PM_MAD_SEER \
+				 || (ptr)->mtyp == PM_CLAIRVOYANT_CHANGED \
 				)
 
 #define is_mind_flayer(ptr)	((ptr)->mtyp == PM_MIND_FLAYER || \
@@ -847,6 +853,17 @@
 				 (ptr)->mtyp == PM_COMMANDER || \
 				 (ptr)->mtyp == PM_LIVING_DOLL \
 				)
+
+#define stuck_in_time(mtmp) 		(mtmp->mtyp != PM_EDDERKOP\
+		&& mtmp->mtyp != PM_EMBRACED_DROWESS\
+		&& mtmp->mtyp != PM_PARASITIZED_EMBRACED_ALIDER\
+		&& !is_mind_flayer(mtmp)\
+		&& !has_template(mtmp, M_BLACK_WEB)\
+		&& !has_template(mtmp, M_GREAT_WEB)\
+		&& !has_template(mtmp, PSEUDONATURAL)\
+		&& !has_template(mtmp, FRACTURED)\
+		&& !is_naturally_unalive(mtmp->data)\
+		)
 
 #define nonliving(ptr)	(is_unalive(ptr) || is_undead(ptr) || \
 				 (ptr)->mtyp == PM_MANES \

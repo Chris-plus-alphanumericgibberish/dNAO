@@ -437,6 +437,12 @@ register boolean special;
 		
 		init_mplayer_gear(ptr, special, &weapon, &secweapon, &rweapon, &rwammo, &armor, &shirt, &cloak, &helm, &boots, &gloves, &shield, &tool);
 		
+		if(mtmp && ptr->mtyp == PM_INCANTIFIER && Infuture){
+			give_mintrinsic(mtmp, TELEPAT);
+			give_mintrinsic(mtmp, REGENERATION);
+			give_mintrinsic(mtmp, POISON_RES);
+		}
+		
 		if(special){
 			static int sweptyp[] = {
 				CRYSKNIFE, MOON_AXE, BATTLE_AXE, HIGH_ELVEN_WARSWORD,

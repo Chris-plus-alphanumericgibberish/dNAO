@@ -1488,6 +1488,13 @@ int in_sight;
 	else if(resists_magm(mtmp)){
 		shieldeff(mtmp->mx, mtmp->my);
 		return 0;
+	} else if(Role_if(PM_ANACHRONONAUT) && tt == MAGIC_PORTAL 
+		&& (In_quest(&u.uz) || In_quest(&trap->dst))
+		&& !(In_quest(&u.uz) && In_quest(&trap->dst))
+		&& stuck_in_time(mtmp)
+	){
+		shieldeff(mtmp->mx, mtmp->my);
+		return 0;
 	} else if (teleport_pet(mtmp, force_it)) {
 	    d_level tolevel;
 	    int migrate_typ = MIGR_RANDOM;

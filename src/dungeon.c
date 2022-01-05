@@ -1818,6 +1818,8 @@ level_difficulty()
 	int dpth;
 	if (In_endgame(&u.uz))
 		dpth = ((int)(depth(&sanctum_level) + u.ulevel/2));
+	else if(Infuture)
+		dpth = Is_nemesis(&u.uz) ? ((int)(depth(&sanctum_level) + u.ulevel/2)) : (((int) depth(&u.uz)) + u.ulevel);
 	else
 		if (u.uhave.amulet)
 			dpth = (deepest_lev_reached(FALSE));

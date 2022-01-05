@@ -659,8 +659,10 @@ long nmv;		/* number of moves */
 
 /* called when you move to another level */
 void
-keepdogs(pets_only)
+keepdogs(pets_only, newlev, portal)
 boolean pets_only;	/* true for ascension or final escape */
+d_level *newlev;
+boolean portal;
 {
 	register struct monst *mtmp, *mtmp2;
 	register struct obj *obj;
@@ -723,6 +725,16 @@ boolean pets_only;	/* true for ascension or final escape */
 				if (canspotmon(mtmp))
 					pline("%s seems very disoriented for a moment.",
 					Monnam(mtmp));
+				stay_behind = TRUE;
+			} else if (Role_if(PM_ANACHRONONAUT) && newlev 
+				&& (In_quest(&u.uz) || In_quest(newlev))
+				&& !(In_quest(&u.uz) && In_quest(newlev))
+				&& stuck_in_time(mtmp)
+			) {
+				if (canspotmon(mtmp)){
+					if(portal) pline("%s is unable to touch the portal!", Monnam(mtmp));
+					else pline("%s seems very disoriented for a moment.", Monnam(mtmp));
+				}
 				stay_behind = TRUE;
 			} else if (mtmp->mtame && mtmp->mtrapped && mtmp != u.usteed) {
 				if (canspotmon(mtmp))
