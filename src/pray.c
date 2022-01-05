@@ -1948,11 +1948,11 @@ dosacrifice()
 				adjalign(5);
 				/* create Dirge from player's longsword here if possible */
 				if (Role_if(PM_KNIGHT) && godlist[u.ualign.god].anger == 0 && u.ualign.record > 0
-					&& uwep && uwep->otyp == LONG_SWORD
+					&& uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))
 					&& !uwep->oartifact && !(uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
 					&& !art_already_exists(ART_DIRGE)
 				) {
-					pline("Your sword melts in your hand and transforms into something new!");
+					pline("Your %s melts in your hand and transforms into something new!", xname(uwep));
 					uwep = oname(uwep, artiname(ART_DIRGE));
 					discover_artifact(ART_DIRGE);
 

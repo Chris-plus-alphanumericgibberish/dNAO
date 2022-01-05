@@ -429,6 +429,7 @@ struct obj {
 							( (a)->otyp ) == UNIVERSAL_KEY ? ((o)->otyp==SKELETON_KEY) : \
 							( (a)->otyp ) == ROUNDSHIELD ? ((o)->otyp==DWARVISH_ROUNDSHIELD) : \
 							( (a) == &artilist[ART_GUNGNIR] ) ? (is_spear(o)) : \
+							( (a) == &artilist[ART_DIRGE] ) ? (o->oclass == WEAPON_CLASS || is_weptool(o)) : \
 							((a) == &artilist[ART_FIRE_BRAND] || (a) == &artilist[ART_FROST_BRAND]) ? \
 								(u.brand_otyp == STRANGE_OBJECT ? \
 									((is_blade((o)) && objects[(o)->otyp].oc_size < MZ_HUGE && \
