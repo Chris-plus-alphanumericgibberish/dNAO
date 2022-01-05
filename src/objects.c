@@ -841,7 +841,7 @@ SHIRT(("ruffled shirt"), /*Needs encyc entry*/
 /* needs special case to be 'bulky' */
 SHIRT(("victorian underwear", "frilly dress"),
 	0, 0, MZ_MEDIUM, 0,	 0, 5,   5,  10, 10, 2, 3, CLOTH, CLR_WHITE,  O_DRSLOT(TORSO_DR)),
-SHIRT(("bodyglove", "tight black clothes", "tight clothes"), /*Needs encyc entry*//*Needs tile*/
+SHIRT(("bodyglove", "tight clothes"), /*Needs encyc entry*//*Needs tile*/
 	0, 0, MZ_HUGE, SICK_RES,0,5, 5,1000, 10, 0, 3, PLASTIC, CLR_BLACK, O_DRSLOT(ALL_DR)),
 /* cloaks */
 /*  'cope' is not a spelling mistake... leave it be */
