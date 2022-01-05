@@ -538,18 +538,18 @@ WEAPON(("katar"),
 /* Firearms */
 //ifdef FIREARMS
  /*Needs encyc entry*/
-GUN(("flintlock", "broken hand-crossbow"),            0,   MZ_LARGE, 0,  10,   50,  8, -2,  0, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("flintlock", "broken hand-crossbow"),            0,   MZ_LARGE, 0,  10,   50,  8, -2, -2, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
 
-GUN(("pistol", "broken hand-crossbow"),               0,   MZ_SMALL, 0,  12,  100, 15,  1,  0, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
-GUN(("submachine gun", "strange broken crossbow"),    0,   MZ_SMALL, 0,  25,  250, 10,  3, -1, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("pistol", "broken hand-crossbow"),               0,   MZ_SMALL, 0,  12,  100, 15,  1,  2, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("submachine gun", "strange broken crossbow"),    0,   MZ_SMALL, 0,  25,  250, 10,  3,  0, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
 GUN(("heavy machine gun", "strange broken crossbow"), 0,    MZ_HUGE, 0, 100, 2000, 20,  8, -4, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
-GUN(("rifle", "broken crossbow"),                     0,    MZ_HUGE, 0,  30,  150, 22, -1,  1, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
-GUN(("assault rifle", "broken crossbow"),             0,  MZ_MEDIUM, 0,  40, 1000, 20,  5, -2, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
-GUN(("sniper rifle", "broken crossbow"),              0,    MZ_HUGE, 0,  50, 4000, 25, -3,  0, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
-GUN(("shotgun", "broken crossbow"),                   0,  MZ_MEDIUM, 0,  35,  200,  3, -1,  3,  WP_SHELL, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
-GUN(("auto shotgun", "strange broken crossbow"),      0,    MZ_HUGE, 0,  60, 1500,  3,  2,  0,  WP_SHELL, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("rifle", "broken crossbow"),                     0,    MZ_HUGE, 0,  30,  150, 22, -1,  6, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("assault rifle", "broken crossbow"),             0,  MZ_MEDIUM, 0,  40, 1000, 20,  5,  2, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("sniper rifle", "broken crossbow"),              0,    MZ_HUGE, 0,  50, 4000, 25, -3,  4, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("shotgun", "broken crossbow"),                   0,  MZ_MEDIUM, 0,  35,  200,  3, -1, 20,  WP_SHELL, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("auto shotgun", "strange broken crossbow"),      0,    MZ_HUGE, 0,  60, 1500,  3,  2, 10,  WP_SHELL, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
 GUN(("rocket launcher", "metal tube"),                0,    MZ_HUGE, 0, 100, 3500, 20, -5, -4, WP_ROCKET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
-GUN(("grenade launcher", "strange broken crossbow"),  0,   MZ_LARGE, 0,  55, 1500,  6, -3, -3,WP_GRENADE, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("grenade launcher", "strange broken crossbow"),  0,   MZ_LARGE, 0,  55, 1500,  6, -3,  0,WP_GRENADE, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
 
 GUN(("BFG", "ovoid device"),                          0,    MZ_HUGE, 0, 100, 3000,100,  3,  0,WP_ROCKET|WP_GRENADE|WP_BULLET|WP_SHELL|WP_ROCKET,
                                                                                                 SILVER, P_FIREARM, HI_SILVER), /*Needs tile*/
