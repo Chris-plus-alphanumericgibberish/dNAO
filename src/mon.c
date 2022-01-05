@@ -169,6 +169,7 @@ int mndx, mode;
 	switch (mndx) {
 /* Quest guardians */
 	case PM_STUDENT:     mndx = mode ? PM_ARCHEOLOGIST  : PM_HUMAN; break;
+	case PM_TROOPER:   mndx = mode ? PM_ANACHRONONAUT : PM_HUMAN; break;
 	case PM_CHIEFTAIN:   mndx = mode ? PM_BARBARIAN : PM_HUMAN; break;
 #ifdef BARD
 	case PM_RHYMER:      mndx = mode ? PM_BARD   : PM_HUMAN; break;
@@ -177,6 +178,7 @@ int mndx, mode;
 	case PM_ATTENDANT:   mndx = mode ? PM_HEALER    : PM_HUMAN; break;
 	case PM_PAGE:        mndx = mode ? PM_KNIGHT    : PM_HUMAN; break;
 	case PM_ABBOT:       mndx = mode ? PM_MONK      : PM_HUMAN; break;
+	case PM_PATIENT:       mndx = mode ? PM_MADMAN      : PM_HUMAN; break;
 	case PM_ACOLYTE:     mndx = mode ? PM_PRIEST    : PM_HUMAN; break;
 	case PM_HUNTER:      mndx = mode ? PM_RANGER    : PM_HUMAN; break;
 	case PM_THUG:        mndx = mode ? PM_ROGUE     : PM_HUMAN; break;
