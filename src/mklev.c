@@ -2284,6 +2284,7 @@ xchar x, y;
 	/* Adjust source to be current level and re-insert branch. */
 	*source = u.uz;
 	insert_branch(br, TRUE);
+	u.uevent.knoxmade = TRUE;
 
 #ifdef DEBUG
 	pline("Made knox portal.");
