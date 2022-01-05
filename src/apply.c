@@ -4040,7 +4040,7 @@ use_pole(obj)
 	coord cc = {0};
 	struct monst *mtmp;
 	
-	res = pick_polearm_target(obj, &mtmp, &cc);
+	int res = pick_polearm_target(obj, &mtmp, &cc);
 	if(!mtmp)
 		return res;
 
