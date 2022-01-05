@@ -807,6 +807,8 @@
 				 || (ptr)->mtyp == PM_SEMBLANCE \
 				 || (ptr)->mtyp == PM_FUNGAL_BRAIN \
 				 || (ptr)->mtyp == PM_LADY_CONSTANCE \
+				 || (ptr)->mtyp == PM_MADMAN \
+				 || (ptr)->mtyp == PM_MADWOMAN \
 				 || (ptr)->mtyp == PM_MAD_SEER \
 				 || (ptr)->mtyp == PM_CLAIRVOYANT_CHANGED \
 				)
