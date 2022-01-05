@@ -3412,6 +3412,8 @@ struct monst *owner;
 			} else
 			/* Potions turn to water or amnesia... */
 			if (is_lethe) {
+				if (obj->otyp == POT_STARLIGHT)
+					end_burn(obj, FALSE);
 			    if (obj->otyp == POT_WATER)
 					obj->otyp = POT_AMNESIA;
 			    else if (obj->otyp != POT_AMNESIA) {
@@ -3422,6 +3424,8 @@ struct monst *owner;
 			} else if (blood) {
 			    if (obj->otyp != POT_BLOOD){
 					if(obj->odiluted){
+						if (obj->otyp == POT_STARLIGHT)
+							end_burn(obj, FALSE);
 						obj->otyp = POT_BLOOD;
 						obj->corpsenm = PM_HUMAN;
 						obj->odiluted = 0;
@@ -3431,6 +3435,8 @@ struct monst *owner;
 				}
 				else obj->odiluted = 0;
 			} else if (obj->odiluted || obj->otyp == POT_AMNESIA) {
+				if (obj->otyp == POT_STARLIGHT)
+					end_burn(obj, FALSE);
 				obj->otyp = POT_WATER;
 				obj->blessed = obj->cursed = 0;
 				obj->odiluted = 0;
