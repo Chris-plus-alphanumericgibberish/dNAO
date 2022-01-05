@@ -3776,7 +3776,15 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 {
 	int hungermod = 1;
 	if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) return;	/* you don't feel hungrier */
-	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)) return;
+	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)){
+		//Gradually return to normal if you departed from normal as a result of polymorph.
+		if(u.uhunger < u.uhungermax*.45)
+			u.uhunger++;
+		else if(u.uhunger > u.uhungermax*.45)
+			u.uhunger--;
+		newuhs(TRUE);
+		return;
+	}
 	
 	if(u.usleep) hungermod *= 10; /* slow metabolic rate while asleep */
 	/* Monks and Convicts can last twice as long at hungry and below. Convicts last 5x as long at weak or lower. */
