@@ -2544,6 +2544,7 @@ E int FDECL(doseduce, (struct monst *));
 E int FDECL(dosflseduce, (struct monst *));
 E int FDECL(dopaleseduce, (struct monst *));
 E int FDECL(dotent, (struct monst *, int));
+E boolean FDECL(msteal_m, (struct monst *, struct monst *, struct attack *, int *));
 #endif
 
 /* ### shk.c ### */

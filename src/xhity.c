@@ -6939,60 +6939,9 @@ boolean ranged;
 			steal_it(mdef, attk);
 		}
 		/* monsters just steal items from each other */
-		else {
-			if (notmcan) {
-				/* select item from defender's inventory */
-				for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-					if (!magr->mtame || !otmp->cursed)
-						break;
-
-				if (otmp) {
-					char onambuf[BUFSZ], mdefnambuf[BUFSZ];
-
-					/* make a special x_monnam() call that never omits
-					the saddle, and save it for later messages */
-					Strcpy(mdefnambuf, x_monnam(mdef, ARTICLE_THE, (char *)0, 0, FALSE));
-#ifdef STEED
-					if (u.usteed == mdef &&
-						otmp == which_armor(mdef, W_SADDLE))
-						/* "You can no longer ride <steed>." */
-						dismount_steed(DISMOUNT_POLY);
-#endif
-					obj_extract_self(otmp);
-					if (otmp->owornmask) {
-						mdef->misc_worn_check &= ~otmp->owornmask;
-						if (otmp->owornmask & W_WEP)
-							setmnotwielded(mdef, otmp);
-						otmp->owornmask = 0L;
-						update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
-					}
-					/* add_to_minv() might free otmp [if it merges] */
-					if (vis)
-						Strcpy(onambuf, doname(otmp));
-					(void)add_to_minv(magr, otmp);
-					if (vis) {
-						Strcpy(buf, Monnam(magr));
-						pline("%s steals %s from %s!", buf,
-							onambuf, mdefnambuf);
-					}
-					possibly_unwield(mdef, FALSE);
-					mdef->mstrategy &= ~STRAT_WAITFORU;
-					mselftouch(mdef, (const char *)0, FALSE);
-					if (mdef->mhp <= 0)
-						return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
-					if(goatspawn)
-						result |= MM_AGR_STOP;
-					else if (magr->data->mlet == S_NYMPH && !noflee &&
-						!tele_restrict(magr)
-					){
-						(void)rloc(magr, TRUE);
-						result |= MM_AGR_STOP;
-						if (vis && !canspotmon(magr))
-							pline("%s suddenly disappears!", buf);
-					}
-					m_dowear(magr, FALSE);
-				}
-			}
+		else if(notmcan){
+			if(msteal_m(magr, mdef, attk, &result))
+				return result;
 		}
 		return result;
 	} //end of seduction block

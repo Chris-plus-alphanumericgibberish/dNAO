@@ -35,17 +35,20 @@ struct attack *mattk;
 {
 	register struct permonst *pagr;
 	boolean agrinvis, defperc;
+	boolean youagr = &youmonst == magr;
+	boolean youdef = &youmonst == mdef;
 	xchar genagr, gendef;
-
-	if(Chastity) return 0;
 	
-	if ((uleft  && uleft->otyp  == find_engagement_ring()) ||
-		(uright && uright->otyp == find_engagement_ring()))
-		return 0;
-
+	if(youdef || youagr){
+		if(Chastity) return 0;
+		
+		if ((uleft  && uleft->otyp  == find_engagement_ring()) ||
+			(uright && uright->otyp == find_engagement_ring()))
+			return 0;
+	}
 	
-	if (is_animal(magr->data)) return (0);
-	if(magr == &youmonst) {
+	if (!intelligent_mon(magr) || !intelligent_mon(mdef)) return (0);
+	if(youagr) {
 		pagr = youracedata;
 		agrinvis = (Invis != 0);
 		genagr = poly_gender();
@@ -54,7 +57,7 @@ struct attack *mattk;
 		agrinvis = magr->minvis;
 		genagr = gender(magr);
 	}
-	if(mdef == &youmonst) {
+	if(youdef) {
 		defperc = (See_invisible(magr->mx,magr->my) != 0);
 		gendef = poly_gender();
 	} else {
@@ -67,14 +70,14 @@ struct attack *mattk;
 	) return 0;
 	
 	
-	if(agrinvis && !defperc
+	if(agrinvis && !defperc && magr->mtyp != PM_PHANTASM && magr->mtyp != PM_NEVERWAS
 #ifdef SEDUCE
 		&& mattk && mattk->adtyp != AD_SSEX && mattk->adtyp != AD_LSEX
 #endif
 		)
 		return 0;
 
-	if(pagr->mtyp == PM_SMALL_GOAT_SPAWN || pagr->mtyp == PM_GOAT_SPAWN || pagr->mtyp == PM_GIANT_GOAT_SPAWN)
+	if(pagr->mtyp == PM_SMALL_GOAT_SPAWN || pagr->mtyp == PM_GOAT_SPAWN || pagr->mtyp == PM_GIANT_GOAT_SPAWN || has_template(magr, MISTWEAVER) || pagr->mtyp == PM_PHANTASM || pagr->mtyp == PM_BEAUTEOUS_ONE)
 		return 1;
 	
 	if(pagr->mlet == S_NYMPH || pagr->mtyp == PM_INCUBUS || pagr->mtyp == PM_SUCCUBUS
@@ -2273,6 +2276,226 @@ int effect_num;
 	}
 	return;
 }
+
+/*
+ * Handles monsters stealing from monsters, whether straight theft or due to seduction.
+ *
+ * Returns true if the code returned early
+ */
+
+boolean
+msteal_m(magr, mdef, attk, result)
+struct monst *magr;
+struct monst *mdef;
+struct attack *attk;
+int *result;
+{
+	const long equipmentmask = ~(W_WEP|W_SWAPWEP);
+	boolean seduct_type;
+	struct obj * otmp;
+	boolean vis = canspotmon(mdef) || canspotmon(magr);
+	int nitems = 0;
+	boolean goatspawn = (magr->data->mtyp == PM_SMALL_GOAT_SPAWN || magr->data->mtyp == PM_GOAT_SPAWN || magr->data->mtyp == PM_GIANT_GOAT_SPAWN || magr->data->mtyp == PM_BLESSED);
+	boolean noflee = (magr->isshk && magr->mpeaceful);
+	if(attk->adtyp == AD_SITM){
+		/* select item from defender's inventory */
+		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
+			if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask))
+				nitems++;
+		if(nitems){
+			nitems = rnd(nitems);
+			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
+				if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask))
+					if(--nitems <= 0)
+						break;
+		}
+
+		if (otmp) {
+			char onambuf[BUFSZ], mdefnambuf[BUFSZ];
+
+			/* make a special x_monnam() call that never omits
+			the saddle, and save it for later messages */
+			Strcpy(mdefnambuf, x_monnam(mdef, ARTICLE_THE, (char *)0, 0, FALSE));
+			if (u.usteed == mdef &&
+				otmp == which_armor(mdef, W_SADDLE))
+				/* "You can no longer ride <steed>." */
+				dismount_steed(DISMOUNT_POLY);
+			obj_extract_self(otmp);
+			if (otmp->owornmask) {
+				mdef->misc_worn_check &= ~otmp->owornmask;
+				if (otmp->owornmask & W_WEP)
+					setmnotwielded(mdef, otmp);
+				otmp->owornmask = 0L;
+				update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
+			}
+			/* add_to_minv() might free otmp [if it merges] */
+			if (vis)
+				Strcpy(onambuf, doname(otmp));
+			(void)add_to_minv(magr, otmp);
+			if (vis) {
+				pline("%s steals %s from %s!", Monnam(magr),
+					onambuf, mdefnambuf);
+			}
+			possibly_unwield(mdef, FALSE);
+			mdef->mstrategy &= ~STRAT_WAITFORU;
+			mselftouch(mdef, (const char *)0, FALSE);
+			if (mdef->mhp <= 0)
+				*result |= (MM_HIT | MM_DEF_DIED | ((grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+				return TRUE;
+			if(goatspawn)
+				*result |= MM_AGR_STOP;
+			else if (magr->data->mlet == S_NYMPH && !noflee &&
+				!tele_restrict(magr)
+			){
+				(void)rloc(magr, TRUE);
+				*result |= MM_AGR_STOP;
+				// if (vis && !canspotmon(magr))
+					// pline("%s suddenly disappears!", buf);
+			}
+			m_dowear(magr, FALSE);
+		}
+	}
+	else if((seduct_type = could_seduce(magr, mdef, attk))){
+		boolean seduce = seduct_type == 1;
+		struct obj *stealoid, **minvent_ptr;
+		
+		if(seduce && (attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX)){
+			minvent_ptr = &mdef->minvent;
+			while ((otmp = *minvent_ptr) != 0)
+				if (otmp->owornmask & (W_ARM|W_ARMU)){
+					if (stealoid) /*Steal suit or undershirt*/
+						continue;
+					*minvent_ptr = otmp->nobj;	/* take armor out of minvent */
+					stealoid = otmp;
+					stealoid->nobj = (struct obj *)0;
+				} else {
+					minvent_ptr = &otmp->nobj;
+				}
+			*minvent_ptr = stealoid;	/* put armor back into minvent */
+			otmp = stealoid;
+		}
+		else {
+			/* select item from defender's inventory */
+			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
+				if ((!magr->mtame || !otmp->cursed) && (seduce || !(otmp->owornmask&equipmentmask)))
+					nitems++;
+			if(nitems){
+				nitems = rnd(nitems);
+				for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
+					if ((!magr->mtame || !otmp->cursed) && (seduce || !(otmp->owornmask&equipmentmask)))
+						if(--nitems <= 0)
+							break;
+			}
+		}
+		if (otmp) {
+			int delay = 0;
+			if(seduce && (otmp->owornmask&(W_ARM|W_ARMU))){
+				long unwornmask;
+				//Stealing everything
+				// minvent_ptr = &mdef->minvent;
+				// while ((otmp = *minvent_ptr) != 0)
+					// if (otmp->owornmask & (W_ARM|W_ARMU)){
+						// if (stealoid) /*Steal suit or undershirt*/
+							// continue;
+						// *minvent_ptr = otmp->nobj;	/* take armor out of minvent */
+						// stealoid = otmp;
+						// stealoid->nobj = (struct obj *)0;
+					// } else {
+						// minvent_ptr = &otmp->nobj;
+					// }
+				// *minvent_ptr = stealoid;	/* put armor back into minvent */
+				// otmp = stealoid;
+				if(vis)
+					pline("%s seduces %s and %s starts to take off %s clothes.",
+						Monnam(magr), mon_nam(mdef), mhe(mdef), mhis(mdef));
+				while ((otmp = mdef->minvent) != 0) {
+					/* take the object away from the monster */
+					if(otmp->oclass == ARMOR_CLASS && objects[otmp->otyp].oc_delay)
+						delay = max(delay, objects[otmp->otyp].oc_delay);
+					obj_extract_self(otmp);
+					if ((unwornmask = otmp->owornmask) != 0L) {
+						mdef->misc_worn_check &= ~unwornmask;
+						if (otmp->owornmask & W_WEP) {
+							setmnotwielded(mdef,otmp);
+							MON_NOWEP(mdef);
+						}
+						if (otmp->owornmask & W_SWAPWEP){
+							setmnotwielded(mdef,otmp);
+							MON_NOSWEP(mdef);
+						}
+						otmp->owornmask = 0L;
+						update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
+
+						if (otmp == stealoid)	/* special message for final item */
+							pline("%s finishes taking off %s suit.",
+							  Monnam(mdef), mhis(mdef));
+					}
+					if (vis) {
+						pline("%s hands %s %s!", Monnam(mdef), mon_nam(magr), doname(otmp));
+					}
+					(void) mpickobj(magr, otmp);
+				}
+			}
+			else {
+				//Stealing just the one thing
+				char onambuf[BUFSZ], mdefnambuf[BUFSZ];
+
+				/* make a special x_monnam() call that never omits
+				the saddle, and save it for later messages */
+				Strcpy(mdefnambuf, x_monnam(mdef, ARTICLE_THE, (char *)0, 0, FALSE));
+				if (u.usteed == mdef &&
+					otmp == which_armor(mdef, W_SADDLE))
+					/* "You can no longer ride <steed>." */
+					dismount_steed(DISMOUNT_POLY);
+				obj_extract_self(otmp);
+				if(otmp->oclass == ARMOR_CLASS && objects[otmp->otyp].oc_delay)
+					delay = objects[otmp->otyp].oc_delay;
+				if (otmp->owornmask) {
+					mdef->misc_worn_check &= ~otmp->owornmask;
+					if (otmp->owornmask & W_WEP)
+						setmnotwielded(mdef, otmp);
+					otmp->owornmask = 0L;
+					update_mon_intrinsics(mdef, otmp, FALSE, FALSE);
+				}
+				/* add_to_minv() might free otmp [if it merges] */
+				if (vis)
+					Strcpy(onambuf, doname(otmp));
+				(void)add_to_minv(magr, otmp);
+				if (vis) {
+					if(seduce){
+						pline("%s seduces %s and steals %s!", Monnam(magr), mdefnambuf, onambuf);
+					}
+					else {
+						pline("%s charms %s. %s hands over %s!", Monnam(magr), mdefnambuf, SheHeIt(mdef), onambuf);
+					}
+				}
+			}
+			possibly_unwield(mdef, FALSE);
+			mdef->mstrategy &= ~STRAT_WAITFORU;
+			mselftouch(mdef, (const char *)0, FALSE);
+			if(delay){
+				mdef->mfrozen = max(mdef->mfrozen, delay);
+				mdef->mcanmove = FALSE;
+			}
+			m_dowear(magr, FALSE);
+			if (mdef->mhp <= 0)
+				*result |= (MM_HIT | MM_DEF_DIED | ((grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+				return TRUE;
+			if(goatspawn)
+				*result |= MM_AGR_STOP;
+			else if (magr->data->mlet == S_NYMPH && !noflee &&
+				!tele_restrict(magr)
+			){
+				(void)rloc(magr, TRUE);
+				*result |= MM_AGR_STOP;
+				// if (vis && !canspotmon(magr))
+					// pline("%s suddenly disappears!", buf);
+			}
+		}
+	}
+	return FALSE;
+}
+
 
 
 #endif  /* SEDUCE */

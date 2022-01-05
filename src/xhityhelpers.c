@@ -494,14 +494,15 @@ struct attack *mattk;
 	    /* find armor, and move it to end of inventory in the process */
 	    minvent_ptr = &mdef->minvent;
 	    while ((otmp = *minvent_ptr) != 0)
-		if (otmp->owornmask & W_ARM) {
-		    if (stealoid) panic("steal_it: multiple worn suits");
-		    *minvent_ptr = otmp->nobj;	/* take armor out of minvent */
-		    stealoid = otmp;
-		    stealoid->nobj = (struct obj *)0;
-		} else {
-		    minvent_ptr = &otmp->nobj;
-		}
+			if (otmp->owornmask & (W_ARM|W_ARMU)){
+				if (stealoid) /*Steal suit or undershirt*/
+					continue;
+				*minvent_ptr = otmp->nobj;	/* take armor out of minvent */
+				stealoid = otmp;
+				stealoid->nobj = (struct obj *)0;
+			} else {
+				minvent_ptr = &otmp->nobj;
+			}
 	    *minvent_ptr = stealoid;	/* put armor back into minvent */
 	}
 
