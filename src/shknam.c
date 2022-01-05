@@ -623,6 +623,13 @@ int sx, sy;
 					}
 				}
 			}
+			if(In_outlands(&u.uz)){
+				int material = rn2(5) ? LEAD : rn2(5) ? IRON : rn2(5) ? COPPER : rn2(5) ? SILVER : GOLD;
+				if(curobj->oclass == ARMOR_CLASS && is_hard(curobj) && rn2(20))
+					set_material(curobj, material);
+				else if(curobj->oclass == ARMOR_CLASS && !rn2(10))
+					set_material(curobj, material);
+			}
 			/*end special cases*/
 		}
 	}

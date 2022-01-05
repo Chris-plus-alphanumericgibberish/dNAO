@@ -4035,7 +4035,7 @@ mkferrubarracks()
 		
 		flood_fill_rm(x+size/2, y+size/2,
 			  nroom+ROOMOFFSET, TRUE, TRUE);
-		add_room(x+2, y+2, x+size-3, y+size-3, TRUE, rn2(3) ? BARRACKS : rn2(3) ? POTIONSHOP : COURT, TRUE);
+		add_room(x+2, y+2, x+size-3, y+size-3, TRUE, !rn2(3) ? ARMORSHOP : rn2(2) ? POTIONSHOP : rn2(2) ? BARRACKS : COURT, TRUE);
 		add_door(x+i,y+j,&rooms[roomtypb]);
 		fill_room(&rooms[roomtypb], FALSE);
 	}
@@ -4916,7 +4916,7 @@ void
 place_sum_all_features()
 {
 	mktimaresh();
-	int n = 1 + !rn2(3) + !rn2(3);
+	int n = 1 + !rn2(3) + rn2(2);
 	for(; n > 0; n--)
 		mkferrubarracks();
 	
