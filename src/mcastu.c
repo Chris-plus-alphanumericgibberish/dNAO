@@ -1868,6 +1868,8 @@ int tary;
 		else if (u.uz.dlevel == spire_level.dlevel - 4) chance += 4;
 		else if (u.uz.dlevel == spire_level.dlevel - 5) chance += 2;
 	}
+	if(level.flags.has_minor_spire)
+		chance += 2;
 
 	/*This.... may never be reached :( */
 	/* There is code is getattk() that prevents lilitus from attempting to cast vs. invalid targets */
