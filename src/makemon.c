@@ -5453,7 +5453,7 @@ int faction;
 					set_material_gm(otmp, BONE);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-				} else switch(rn2(15)){
+				} else switch(rn2(16)){
 					//Archeologist
 					case 0:
 						otmp = mksobj(BULLWHIP, mkobjflags|MKOBJ_ARTIF);
@@ -5599,8 +5599,506 @@ int faction;
 						mongets(mtmp, POT_HEALING, mkobjflags);
 						mongets(mtmp, WAN_SLEEP, mkobjflags);
 					break;
-					//Noble
+					//"Madman"/Dreamlands noble
 					case 7:
+						switch(rnd(10)){
+							case 1:
+								//Yellow Sign Noble
+								otmp = mksobj(RAPIER, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 2+rn2(3);
+								set_material_gm(otmp, GOLD);
+								(void) mpickobj(mtmp, otmp);
+								otmp = mksobj(VICTORIAN_UNDERWEAR, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 0+rn2(4);
+								otmp->obj_color = CLR_YELLOW;
+								(void) mpickobj(mtmp, otmp);
+								otmp = mksobj(GENTLEWOMAN_S_DRESS, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 2+rn2(3);
+								otmp->obj_color = CLR_YELLOW;
+								(void) mpickobj(mtmp, otmp);
+								otmp = mksobj(STILETTOS, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 0+rn2(4);
+								set_material_gm(otmp, GOLD);
+								(void) mpickobj(mtmp, otmp);
+								otmp = mksobj(CLOAK, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								otmp->obj_color = CLR_YELLOW;
+								(void) mpickobj(mtmp, otmp);
+								otmp = mksobj(GLOVES, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								otmp->obj_color = CLR_YELLOW;
+								(void) mpickobj(mtmp, otmp);
+								otmp = mksobj(BUCKLER, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								set_material_gm(otmp, GOLD);
+								(void) mpickobj(mtmp, otmp);
+								otmp = mksobj(find_gcirclet(), mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								set_material_gm(otmp, GOLD);
+								(void) mpickobj(mtmp, otmp);
+								set_template(mtmp, DREAM_LEECH);
+							break;
+							case 2:
+								//Pseudonatural
+								otmp = mksobj(rn2(3) ? PLAIN_DRESS : BODYGLOVE, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, FLESH);
+								otmp->obj_color = CLR_RED;
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(ARMORED_BOOTS, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, BONE);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(PLATE_MAIL, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, BONE);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(rn2(10) ? GAUNTLETS : GAUNTLETS_OF_POWER, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, BONE);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(FACELESS_HELM, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, BONE);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(rn2(10) ? STILETTO : TWO_HANDED_SWORD, mkobjflags|MKOBJ_ARTIF);
+								if(!rn2(10))
+									add_oprop(otmp, rn2(5) ? OPROP_PSECW : rn2(4) ? OPROP_ASECW : OPROP_LIVEW);
+								set_material_gm(otmp, BONE);
+								MAYBE_MERC(otmp)
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(PISTOL, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, BONE);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(BULLET, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, BONE);
+								otmp->quan += rn1(20,20);
+								otmp->spe = 1+rn2(3);
+								fix_object(otmp);
+								(void) mpickobj(mtmp, otmp);
+								
+								set_template(mtmp, PSEUDONATURAL);
+							break;
+							case 3:
+								//Mistweaver
+								otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
+								otmp->spe = 3;
+								otmp->ovar1 = 4;
+								otmp->opoisoned = OPOISON_ACID;
+								otmp->opoisonchrgs = 3;
+								set_material_gm(otmp, BONE);
+								if(!rn2(20))
+									add_oprop(otmp, OPROP_LIVEW);
+								if(!rn2(10))
+									add_oprop(otmp, OPROP_ASECW);
+								if(!rn2(20))
+									add_oprop(otmp, OPROP_GOATW);
+								MAYBE_MERC(otmp)
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(GLOVES, mkobjflags|MKOBJ_ARTIF);
+								if(!otmp->oartifact) set_material_gm(otmp, LEATHER);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								otmp->obj_color = CLR_RED;
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(ROBE, mkobjflags|MKOBJ_ARTIF);
+								if(!otmp->oartifact) set_material_gm(otmp, LEATHER);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								otmp->obj_color = CLR_RED;
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(LEATHER_ARMOR, mkobjflags|MKOBJ_ARTIF);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								otmp->obj_color = CLR_RED;
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(SHOES, mkobjflags|MKOBJ_ARTIF);
+								if(!otmp->oartifact) set_material_gm(otmp, LEATHER);
+								fix_object(otmp);
+								otmp->spe = 1+rn2(3);
+								otmp->obj_color = CLR_RED;
+								(void) mpickobj(mtmp, otmp);
+
+								set_template(mtmp, MISTWEAVER);
+								set_faction(mtmp, GOATMOM_FACTION);
+							break;
+							case 4:{
+								//Drow
+								int house = !rn2(10) ? PEN_A_SYMBOL : !rn2(3) ? EILISTRAEE_SYMBOL : rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
+								int mat = !rn2(3) ? MITHRIL : rn2(2) ? SILVER : METAL;
+								
+								otmp = mksobj(rn2(2) ? NOBLE_S_DRESS : DROVEN_PLATE_MAIL, mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, mat);
+								otmp->ohaluengr = TRUE;
+								otmp->oward = house;
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(find_signet_ring(), mkobjflags);
+								otmp->ohaluengr = TRUE;
+								otmp->oward = house;
+								(void) mpickobj(mtmp, otmp);
+								
+								otmp = mksobj(DROVEN_CLOAK, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(DROVEN_HELM, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								set_material_gm(otmp, mat);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(GAUNTLETS, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								set_material_gm(otmp, mat);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags|MKOBJ_ARTIF);
+								if(otmp) otmp->spe = 1+rn2(3);
+
+								otmp = mongets(mtmp, DROVEN_DAGGER, mkobjflags);
+								if(otmp) otmp->spe = 1+rn2(3);
+								
+								if(rn2(4)){
+									otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_ARTIF);
+									MAYBE_MERC(otmp)
+									otmp->spe = 2+rn2(3);
+									otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;
+									otmp->opoisonchrgs = 6;
+									otmp->ovar1 = rnd(3)+rn2(3);
+									(void) mpickobj(mtmp, otmp);
+
+									otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
+									if(otmp){
+										otmp->spe = 1+rn2(3);
+										set_material_gm(otmp, mat);
+									}
+								}
+								else {
+									otmp = mksobj(DROVEN_GREATSWORD, mkobjflags|MKOBJ_ARTIF);
+									MAYBE_MERC(otmp)
+									otmp->spe = 2+rn2(3);
+									(void) mpickobj(mtmp, otmp);
+								}
+							}
+							break;
+							case 5:
+								//Rakuyo
+								otmp = mksobj(RAKUYO, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 2+rn2(3);
+								MAYBE_MERC(otmp)
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(RUFFLED_SHIRT, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 0+rn2(4);
+								(void) mpickobj(mtmp, otmp);
+								
+								otmp = mksobj(LEATHER_ARMOR, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 2+rn2(4);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(LEATHER_HELM, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 2+rn2(4);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mksobj(CLOAK, mkobjflags|MKOBJ_ARTIF);
+								otmp->spe = 1+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+
+								otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags|MKOBJ_ARTIF);
+								if(otmp) otmp->spe = 1+rn2(3);
+
+								otmp = mongets(mtmp, BUCKLER, mkobjflags|MKOBJ_ARTIF);
+								if(otmp) otmp->spe = 1+rn2(3);
+							break;
+							case 6:{
+								//Club-claw
+								long long oprop;
+								switch(rnd(10)){
+									case 1:
+										oprop = OPROP_ELECW;
+									break;
+									case 2:
+										oprop = OPROP_ACIDW;
+									break;
+									case 3:
+										oprop = OPROP_MAGCW;
+									break;
+									case 4:
+										oprop = OPROP_WATRW;
+									break;
+									case 5:
+										oprop = OPROP_VORPW;
+									break;
+									case 6:
+										oprop = OPROP_DRANW;
+									break;
+									case 7:
+										oprop = OPROP_PSIOW;
+									break;
+									case 8:
+										oprop = OPROP_FIREW;
+									break;
+									case 9:
+										oprop = OPROP_COLDW;
+									break;
+									case 10:
+										oprop = OPROP_LIVEW;
+									break;
+								}
+								otmp = mksobj(CLUB, mkobjflags|MKOBJ_NOINIT);
+								set_material_gm(otmp, BONE);
+								add_oprop(otmp, OPROP_CCLAW);
+								add_oprop(otmp, oprop);
+								otmp->objsize = MZ_HUGE;
+								otmp->spe = 2+rn2(3);
+								fix_object(otmp);
+								MAYBE_MERC(otmp)
+								(void) mpickobj(mtmp, otmp);
+								
+								otmp = mksobj(WAISTCLOTH, mkobjflags|MKOBJ_ARTIF);
+								otmp->oeroded3 = 3;
+								otmp->obj_color = CLR_BROWN;
+								otmp->spe = rnd(6);
+								(void) mpickobj(mtmp, otmp);
+								
+								otmp = mksobj(rn2(20) ? ROBE : CLOAK_OF_MAGIC_RESISTANCE, mkobjflags|MKOBJ_ARTIF);
+								otmp->oeroded3 = 3;
+								otmp->spe = rnd(6);
+								(void) mpickobj(mtmp, otmp);
+								
+								otmp = mksobj(find_gcirclet(), mkobjflags|MKOBJ_ARTIF);
+								set_material_gm(otmp, VEGGY);
+								otmp->obj_color = CLR_BROWN;
+								otmp->spe = rnd(6);
+								(void) mpickobj(mtmp, otmp);
+								
+								otmp = mksobj(MASK, mkobjflags|MKOBJ_ARTIF);
+								otmp->oeroded3 = 1;
+								set_material_gm(otmp, MINERAL);
+								otmp->obj_color = CLR_WHITE;
+								otmp->corpsenm = PM_DAUGHTER_OF_BEDLAM;
+								(void) mpickobj(mtmp, otmp);
+								
+							}break;
+							case 7:{
+								//Were claw
+								long long oprop;
+								switch(rnd(20)){
+									case 1:
+										oprop = OPROP_ELECW;
+									break;
+									case 2:
+										oprop = OPROP_ACIDW;
+									break;
+									case 3:
+										oprop = OPROP_MAGCW;
+									break;
+									case 4:
+										oprop = OPROP_WATRW;
+									break;
+									case 5:
+										oprop = OPROP_VORPW;
+									break;
+									case 6:
+										oprop = OPROP_DRANW;
+									break;
+									case 7:
+										oprop = OPROP_PSIOW;
+									break;
+									case 8:
+										oprop = OPROP_FIREW;
+									break;
+									case 9:
+										oprop = OPROP_COLDW;
+									break;
+									case 10:
+										oprop = OPROP_LIVEW;
+									break;
+									default:
+										oprop = 0;
+									break;
+								}
+								otmp = mksobj(BESTIAL_CLAW, mkobjflags|MKOBJ_NOINIT);
+								add_oprop(otmp, oprop);
+								MAYBE_MERC(otmp)
+								otmp->spe = 2+rn2(4)+rn2(3);
+								(void) mpickobj(mtmp, otmp);
+								mtmp->mcrazed = TRUE;
+							}break;
+							case 8:{
+								//Samurai
+								if(rn2(2)){
+									otmp = mksobj(NAGINATA, mkobjflags|MKOBJ_ARTIF);
+									add_oprop(otmp, OPROP_RAKUW);
+									otmp->spe = 0+rn2(4);
+									MAYBE_MERC(otmp)
+									(void) mpickobj(mtmp, otmp);
+									otmp = mksobj(STILETTO, mkobjflags|MKOBJ_ARTIF);
+									add_oprop(otmp, OPROP_RAKUW);
+									otmp->spe = 0+rn2(4);
+									(void) mpickobj(mtmp, otmp);
+
+									otmp = mksobj(SHOES, mkobjflags|MKOBJ_ARTIF);
+									set_material_gm(otmp, WOOD);
+									otmp->spe = 2+rn2(3);
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+									otmp = mksobj(ROBE, mkobjflags|MKOBJ_ARTIF);
+									otmp->obj_color = CLR_BRIGHT_BLUE;
+									otmp->spe = 2+rn2(3);
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+									otmp = mksobj(SEDGE_HAT, mkobjflags|MKOBJ_ARTIF);
+									otmp->obj_color = CLR_ORANGE;
+									otmp->spe = 2+rn2(3);
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+								}
+								else {
+									otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
+									add_oprop(otmp, OPROP_RAKUW);
+									otmp->spe = 0+rn2(4);
+									(void) mpickobj(mtmp, otmp);
+
+									otmp = mksobj(KATANA, mkobjflags|MKOBJ_ARTIF);
+									add_oprop(otmp, OPROP_RAKUW);
+									otmp->spe = 0+rn2(4);
+									MAYBE_MERC(otmp)
+									(void) mpickobj(mtmp, otmp);
+
+									otmp = mksobj(ARMORED_BOOTS, mkobjflags|MKOBJ_ARTIF);
+									otmp->oerodeproof = TRUE;
+									otmp->spe = 2+rn2(3);
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+									otmp = mksobj(SPLINT_MAIL, mkobjflags|MKOBJ_ARTIF);
+									otmp->oerodeproof = TRUE;
+									otmp->spe = 2+rn2(3);
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+									otmp = mksobj(GAUNTLETS, mkobjflags|MKOBJ_ARTIF);
+									otmp->oerodeproof = TRUE;
+									otmp->spe = 2+rn2(3);
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+									otmp = mksobj(HELMET, mkobjflags|MKOBJ_ARTIF);
+									otmp->oerodeproof = TRUE;
+									otmp->spe = 2+rn2(3);
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+									otmp = mksobj(MASK, mkobjflags|MKOBJ_ARTIF);
+									otmp->oerodeproof = TRUE;
+									otmp->corpsenm = PM_TENGU;
+									otmp->obj_color = CLR_RED;
+									bless(otmp);
+									(void) mpickobj(mtmp, otmp);
+								}
+							}break;
+							case 9:{
+								//Patient, Ilsensine-touched or Fulvous
+								otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
+								if(otmp) curse(otmp);
+								if(rn2(2)){
+									set_template(mtmp, CRANIUM_RAT);
+									if(!rn2(10)) //1/20th total
+										(void) mongets(mtmp, SPE_SECRETS, mkobjflags);
+									else {
+										otmp = mkobj( SPBOOK_CLASS, FALSE );
+										curse(otmp);
+										(void) mpickobj(mtmp, otmp);
+									}
+								}
+								else {
+									if(otmp) otmp->obj_color = CLR_YELLOW;
+									set_template(mtmp, YELLOW_TEMPLATE);
+									otmp = mkobj( SCROLL_CLASS, TRUE );
+									if(otmp){
+										otmp->obj_color = CLR_YELLOW;
+										curse(otmp);
+										(void) mpickobj(mtmp, otmp);
+									}
+									otmp = mkobj( SCROLL_CLASS, TRUE );
+									if(otmp){
+										otmp->obj_color = CLR_YELLOW;
+										curse(otmp);
+										(void) mpickobj(mtmp, otmp);
+									}
+									otmp = mkobj( SCROLL_CLASS, TRUE );
+									if(otmp){
+										otmp->obj_color = CLR_YELLOW;
+										curse(otmp);
+										(void) mpickobj(mtmp, otmp);
+									}
+								}
+							}break;
+							case 10:{
+								//Black web drow
+								otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+								if(otmp){
+									set_material_gm(otmp, SHADOWSTEEL);
+									otmp->spe = 2+rn2(3);
+									otmp->oerodeproof = TRUE;
+								}
+								otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+								if(otmp){
+									set_material_gm(otmp, SHADOWSTEEL);
+									otmp->spe = 2+rn2(3);
+									otmp->oerodeproof = TRUE;
+								}
+								otmp = mongets(mtmp, rn2(10) ? GAUNTLETS : GAUNTLETS_OF_POWER, mkobjflags);
+								if(otmp){
+									set_material_gm(otmp, SHADOWSTEEL);
+									otmp->spe = 2+rn2(3);
+									otmp->oerodeproof = TRUE;
+								}
+								otmp = mongets(mtmp, rn2(10) ? find_vhelm() : GAUNTLETS_OF_POWER, mkobjflags);
+								if(otmp){
+									set_material_gm(otmp, SHADOWSTEEL);
+									otmp->spe = 2+rn2(3);
+									otmp->oerodeproof = TRUE;
+								}
+								(void) mongets(mtmp, MUMMY_WRAPPING, mkobjflags);
+								set_template(mtmp, M_BLACK_WEB);
+								otmp = mongets(mtmp, KHAKKHARA, mkobjflags);
+								if(otmp){
+									set_material_gm(otmp, OBSIDIAN_MT);
+									add_oprop(otmp, OPROP_BLADED);
+									otmp->spe = 2+rn2(3);
+									otmp->oerodeproof = TRUE;
+								}
+								otmp = mongets(mtmp, DROVEN_CROSSBOW, mkobjflags);
+								if(otmp){
+									set_material_gm(otmp, OBSIDIAN_MT);
+									otmp->spe = 2+rn2(3);
+									otmp->oerodeproof = TRUE;
+								}
+								m_initthrow(mtmp, DROVEN_BOLT, 20, mkobjflags);
+							}break;
+						}
+					break;
+					//Noble
+					case 8:
 						otmp = mksobj(RAPIER, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
 						MAYBE_MERC(otmp)
@@ -5628,7 +6126,7 @@ int faction;
 						(void) mpickobj(mtmp, otmp);
 					break;
 					//Pirate
-					case 8:
+					case 9:
 						otmp = mksobj(SCIMITAR, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						MAYBE_MERC(otmp)
@@ -5654,7 +6152,7 @@ int faction;
 						(void) mpickobj(mtmp, otmp);
 					break;
 					//Priest
-					case 9:
+					case 10:
 						otmp = mksobj(MACE, mkobjflags|MKOBJ_ARTIF);
 						MAYBE_MERC(otmp)
 						bless(otmp);
@@ -5675,7 +6173,7 @@ int faction;
 						(void) mpickobj(mtmp, otmp);
 					break;
 					//Ranger
-					case 10:
+					case 11:
 						otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
 						MAYBE_MERC(otmp)
@@ -5696,7 +6194,7 @@ int faction;
 						(void) mpickobj(mtmp, otmp);
 					break;
 					//Rogue
-					case 11:
+					case 12:
 						otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						MAYBE_MERC(otmp)
@@ -5717,7 +6215,7 @@ int faction;
 						mongets(mtmp, LOCK_PICK, mkobjflags);
 					break;
 					//Samurai
-					case 12:
+					case 13:
 						otmp = mksobj(NAGINATA, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						MAYBE_MERC(otmp)
@@ -5747,7 +6245,7 @@ int faction;
 						(void) mpickobj(mtmp, otmp);
 					break;
 					//Tourist
-					case 13:
+					case 14:
 						otmp = mksobj(DART, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
 						otmp->quan = rnd(9)+rnd(9)+rnd(9)+rnd(9)+rnd(9);
@@ -5780,7 +6278,7 @@ int faction;
 						mongets(mtmp, CREDIT_CARD, mkobjflags);
 					break;
 					//Wizard
-					case 14:
+					case 15:
 						otmp = mksobj(QUARTERSTAFF, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
 						(void) mpickobj(mtmp, otmp);
