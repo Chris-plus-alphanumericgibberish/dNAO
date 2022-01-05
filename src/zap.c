@@ -685,6 +685,7 @@ coord *cc;
 		if (mtmp->mhpmax > mtmp2->mhpmax && is_rider(mtmp2->data))
 			mtmp2->mhpmax = mtmp->mhpmax;
 		mtmp2->mhp = mtmp2->mhpmax;
+		mtmp2->deadmonster = FALSE;
 		/* Get these ones from mtmp */
 		mtmp2->minvent = mtmp->minvent; /*redundant*/
 		/* monster ID is available if the monster died in the current
