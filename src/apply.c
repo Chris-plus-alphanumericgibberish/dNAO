@@ -3054,7 +3054,7 @@ struct obj *hypo;
 				mon_adjust_speed(mtarg, 1, amp);
 			break;
 			case POT_GAIN_ENERGY:
-				if(!amp->cursed){
+				if(amp->cursed){
 					if (canseemon(mtarg))
 						pline("%s looks lackluster.", Monnam(mtarg));
 					set_mcan(mtarg, TRUE);
