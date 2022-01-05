@@ -1117,7 +1117,7 @@ struct obj *otmp;	/* existing object */
 		if(rn2(2)){
 			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
 		}
-		if(rn2(3)) switch(rn2(6)){
+		if(rn2(3)) switch(rn2(is_hard(otmp) ? 6 : 5)){
 			case 0:
 				add_oprop(otmp, OPROP_WOOL);
 				if(!is_hard(otmp))
@@ -1135,6 +1135,7 @@ struct obj *otmp;	/* existing object */
 			case 4:
 				add_oprop(otmp, OPROP_BCRS);
 			break;
+			//Anything above here should be ok for soft items
 			case 5:
 				add_oprop(otmp, OPROP_REFL);
 				set_material_gm(otmp, rn2(2) ? GOLD : SILVER);
