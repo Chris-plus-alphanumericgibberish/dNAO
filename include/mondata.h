@@ -813,6 +813,12 @@
 				 || (ptr)->mtyp == PM_CLAIRVOYANT_CHANGED \
 				)
 
+#define insightful(ptr)	(yields_insight(ptr) \
+				 || is_great_old_one(ptr) \
+				 || is_primordial(ptr) \
+				 || has_mind_blast(ptr) \
+				)
+
 #define is_mind_flayer(ptr)	((ptr)->mtyp == PM_MIND_FLAYER || \
 				 (ptr)->mtyp == PM_MASTER_MIND_FLAYER || \
 				 (ptr)->mtyp == PM_STAR_SPAWN || \

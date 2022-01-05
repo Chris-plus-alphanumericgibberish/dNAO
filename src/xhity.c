@@ -14124,13 +14124,13 @@ int vis;						/* True if action is at all visible to the player */
 		if (artif_hit && !recursed && magr && (youagr ? Role_switch : monsndx(magr->data)) == PM_PRIEST)
 			artidmg += d(1, mlev(magr));
 		/* madmen do extra damage with insight weapons */
-		if (valid_weapon_attack && is_insight_weapon(weapon) && !recursed && magr && (youagr ? Role_switch : monsndx(magr->data)) == PM_MADMAN){
+		if (valid_weapon_attack && is_insight_weapon(weapon) && !recursed && magr && (youagr ? (Role_if(PM_MADMAN) || u.sealsActive&SEAL_OSE) : insightful(magr->data))){
 			if(youagr){
 				if(u.uinsight)
 					bonsdmg += d(1, (min(u.uinsight, (bimanual(weapon, youracedata) ? 2 : 1) * mlev(magr))+1)/2);
 			}
 			else {
-				bonsdmg += d(1, mlev(magr)/2+1);
+				bonsdmg += d(1, ((bimanual(weapon, magr->data) ? 2 : 1) * mlev(magr) + 1)/2+1);
 			}
 		}
 	}
