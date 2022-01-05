@@ -3916,8 +3916,8 @@ struct obj *pole;
 		cx = u.ux + pole_dx[i];
 		cy = u.uy + pole_dy[i];
 		if(isok(cx, cy) && (mtmp = m_at(cx, cy)) 
-			&& cansee(cx, cy)
 			&& canseemon(mtmp)
+			&& couldsee(cx, cy)
 			&& distu(cx, cy) <= max_range
 			&& !(mtmp->mappearance && mtmp->m_ap_type != M_AP_MONSTER && !sensemon(mtmp))
 			&& !(flags.peacesafe_polearms && mtmp->mpeaceful && !Hallucination)
@@ -3955,15 +3955,16 @@ static const char
 	cant_see_spot[] = "won't hit anything if you can't see that spot.",
 	cant_reach[] = "can't reach that spot from here.";
 
-/* Distance attacks by pole-weapons */
 STATIC_OVL int
-use_pole (obj)
-	struct obj *obj;
+pick_polearm_target(obj,outptr,ccp)
+struct obj *obj;
+struct monst **outptr;
+coord *ccp;
 {
 	int res = 0, typ, max_range = 4, min_range = 4;
 	int i;
-	coord cc;
-	struct monst *mtmp;
+	struct monst *mtmp = (struct monst *) 0;
+	*outptr = (struct monst *) 0;
 
 
 	/* Are you allowed to use the pole? */
@@ -3980,28 +3981,28 @@ use_pole (obj)
 	/* Prompt for a location */
 	if(flags.standard_polearms){
 		pline("%s", where_to_hit);
-		cc.x = u.ux;
-		cc.y = u.uy;
-		if (getpos(&cc, TRUE, "the spot to hit") < 0)
-			return 0;	/* user pressed ESC */
+		ccp->x = u.ux;
+		ccp->y = u.uy;
+		if (getpos(ccp, TRUE, "the spot to hit") < 0)
+			return res;	/* user pressed ESC */
 	}
 	else {
 		if((i = polearm_menu(uwep))){
 			i--; /*Remove the off-by-one offset used to make all returns from polearm_menu non-zero*/
 			if (i<N_POLEDIRS) {
-				cc.x = u.ux + pole_dx[i];
-				cc.y = u.uy + pole_dy[i];
+				ccp->x = u.ux + pole_dx[i];
+				ccp->y = u.uy + pole_dy[i];
 			}
 			else {
 				/* use standard targeting; save retval to return */
 				flags.standard_polearms = TRUE;
-				int retval = use_pole(obj);
+				int retval = pick_polearm_target(obj,outptr,ccp);
 				flags.standard_polearms = FALSE;
 				return retval;
 			}
 		}
 		else {
-			return 0;	/* user pressed ESC */
+			return res;	/* user pressed ESC */
 		}
 	}
 
@@ -4010,24 +4011,41 @@ use_pole (obj)
 	if (typ == P_NONE || P_SKILL(typ) <= P_BASIC) max_range = 4;
 	else if ( P_SKILL(typ) == P_SKILLED) max_range = 5;
 	else max_range = 8;
-	if (distu(cc.x, cc.y) > max_range) {
+	mtmp = m_at(ccp->x, ccp->y);
+	if (distu(ccp->x, ccp->y) > max_range) {
 	    pline("Too far!");
 	    return (res);
-	} else if (distu(cc.x, cc.y) < min_range) {
+	} else if (distu(ccp->x, ccp->y) < min_range) {
 	    pline("Too close!");
 	    return (res);
-	} else if (!cansee(cc.x, cc.y) &&
-		   ((mtmp = m_at(cc.x, cc.y)) == (struct monst *)0 ||
+	} else if (!cansee(ccp->x, ccp->y) &&
+		   (mtmp == (struct monst *)0 ||
 		    !canseemon(mtmp))) {
 	    You(cant_see_spot);
 	    return (res);
-	} else if (!couldsee(cc.x, cc.y)) { /* Eyes of the Overworld */
+	} else if (!couldsee(ccp->x, ccp->y)) { /* Eyes of the Overworld */
 	    You(cant_reach);
 	    return res;
 	}
 
+	*outptr = mtmp;
+	return 1;
+}
+
+/* Distance attacks by pole-weapons */
+STATIC_OVL int
+use_pole(obj)
+	struct obj *obj;
+{
+	coord cc = {0};
+	struct monst *mtmp;
+	
+	res = pick_polearm_target(obj, &mtmp, &cc);
+	if(!mtmp)
+		return res;
+
 	/* Attack the monster there */
-	if ((mtmp = m_at(cc.x, cc.y)) != (struct monst *)0) {
+	if (mtmp) {
 	    bhitpos = cc;
 	    check_caitiff(mtmp);
 		if (u_pole_pound(mtmp)) {
@@ -4227,27 +4245,6 @@ use_crook (obj)
 	}
      /* assert(obj == uwep); */
 
-	/* Prompt for a location */
-	pline("%s", where_to_hit);
-	cc.x = u.ux;
-	cc.y = u.uy;
-	if (getpos(&cc, TRUE, "the spot to hook") < 0)
-	    return 0;	/* user pressed ESC */
-
-	/* Calculate range */
-	typ = uwep_skill_type();
-	max_range = 8;
-	if (distu(cc.x, cc.y) > max_range) {
-	    pline("Too far!");
-	    return (res);
-	} else if (!cansee(cc.x, cc.y)) {
-	    You(cant_see_spot);
-	    return (res);
-	} else if (!couldsee(cc.x, cc.y)) { /* Eyes of the Overworld */
-	    You(cant_reach);
-	    return res;
-	}
-
 	/* What do you want to hit? */
 	{
 	    winid tmpwin = create_nhwindow(NHW_MENU);
@@ -4278,20 +4275,20 @@ use_crook (obj)
 	    destroy_nhwindow(tmpwin);
 	}
 
+	typ = uwep_skill_type();
+	
 	/* What did you hit? */
 	switch (tohit) {
 	case 0:	/* Trap */
 	    /* FIXME -- untrap needs to deal with non-adjacent traps */
 	    break;
 	case 1:	/*Hit Monster */
-	    if ((mtmp = m_at(cc.x, cc.y)) == (struct monst *)0) break;
-		else {
-			u_pole_pound(mtmp);
-		}
-		return (1);
+		return use_pole(obj);
 	break;
 	case 2:	/*Hook Monster */
-	    if ((mtmp = m_at(cc.x, cc.y)) == (struct monst *)0) break;
+		res = pick_polearm_target(obj, &mtmp);
+		if(!mtmp)
+			return res;
 		if(mtmp->mpeaceful){
 			if (!bigmonst(mtmp->data) &&
 				enexto(&cc, u.ux, u.uy, (struct permonst *)0)
