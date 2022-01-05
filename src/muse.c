@@ -1984,13 +1984,13 @@ struct monst *mtmp;
 			m.has_misc = MUSE_MASK;
 		}
 		nomore(MUSE_POT_GAIN_ENERGY);
-		if(!nomouth && obj->otyp == POT_GAIN_ABILITY && (!obj->cursed ||
+		if(!nomouth && obj->otyp == POT_GAIN_ENERGY && (!obj->cursed ||
 			    (!mtmp->isgd && !mtmp->isshk && !mtmp->ispriest))) {
 			m.misc = obj;
 			m.has_misc = MUSE_POT_GAIN_ENERGY;
 		}
 		nomore(MUSE_POT_GAIN_ABILITY);
-		if(!nomouth && (mtmp->mcan || (mtmp->mhp <= .5*(mtmp->mhpmax) && mtmp->mspec_used > 2)) && obj->otyp == POT_GAIN_ENERGY) {
+		if(!nomouth && (mtmp->mcan || (mtmp->mhp <= .5*(mtmp->mhpmax) && mtmp->mspec_used > 2)) && obj->otyp == POT_GAIN_ABILITY) {
 			m.misc = obj;
 			m.has_misc = MUSE_POT_GAIN_ABILITY;
 		}
@@ -2178,7 +2178,7 @@ skipmsg:
 					if(mtmp->mcha > 3) mtmp->mcha--;
 				break;
 			}
-			if (vismon) pline("%s seems more experienced.", Monnam(mtmp));
+			if (vismon) pline("%s seems weaker.", Monnam(mtmp));
 			if (oseen) makeknown(POT_GAIN_ABILITY);
 		} else if(otmp->blessed){
 			if(mtmp->mstr < 25) mtmp->mstr++;
@@ -2187,6 +2187,8 @@ skipmsg:
 			if(mtmp->mint < 25) mtmp->mint++;
 			if(mtmp->mwis < 25) mtmp->mwis++;
 			if(mtmp->mcha < 25) mtmp->mcha++;
+			if (vismon) pline("%s seems enhanced.", Monnam(mtmp));
+			if (oseen) makeknown(POT_GAIN_ABILITY);
 		} else {
 			switch(rnd(6)){
 				case 1:
@@ -2208,6 +2210,8 @@ skipmsg:
 					if(mtmp->mcha < 25) mtmp->mcha++;
 				break;
 			}
+			if (vismon) pline("%s seems enhanced.", Monnam(mtmp));
+			if (oseen) makeknown(POT_GAIN_ABILITY);
 		}
 		if (!otmp->oartifact)
 			m_useup(mtmp, otmp);
