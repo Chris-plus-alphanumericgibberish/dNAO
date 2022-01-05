@@ -1268,6 +1268,14 @@ u_on_sstairs() {	/* place you on the special staircase */
 		    return;
 		}
 	    } while (++trycnt <= 500);
+
+		/* try extra hard to place player */
+		for (x=1; x <= COLNO-1; x++)
+		for (y=0; y <= ROWNO-1; y++)
+		if (!badspot(x, y)) {
+			u_on_newpos(x, y);
+			return;
+		}
 	    panic("u_on_sstairs: could not relocate player!");
 #undef badspot
 	}
@@ -1953,11 +1961,12 @@ print_branch(win, dnum, lower_bound, upper_bound, bymenu, lchoices)
 }
 
 /* Print available dungeon information. */
-schar
-print_dungeon(bymenu, rlev, rdgn)
-boolean bymenu;
-schar *rlev;
-int *rdgn;
+boolean
+print_dungeon(bymenu, gotdgn, rlev, rdgn)
+boolean bymenu;	/* If TRUE, ask for input to select a level */
+boolean gotdgn;	/* Requires bymenu. If FALSE, select dungeon. If TRUE, select a level within rdgn. */
+schar *rlev;	/* returns selected level depth */
+int *rdgn;		/* returns selected level dungeon number */
 {
     int     i, last_level, nlev;
     char    buf[BUFSZ];
@@ -1968,109 +1977,149 @@ int *rdgn;
     anything any;
     struct lchoice lchoices;
 
+	boolean twopartmenu = iflags.wizlevelport;
+	boolean onlyselecteddungeon = (iflags.wizlevelport & WIZLVLPORT_SELECTED_DUNGEON);
+	boolean dungeonsfirst = (iflags.wizlevelport & WIZLVLPORT_BRANCHES_FIRST) && bymenu && !gotdgn;
+
     winid   win = create_nhwindow(NHW_MENU);
     if (bymenu) {
-	start_menu(win);
-	lchoices.idx = 0;
-	lchoices.menuletter = 'a';
+		start_menu(win);
+		lchoices.idx = 0;
+		lchoices.menuletter = 'a';
     }
 
     for (i = 0, dptr = dungeons; i < n_dgns; i++, dptr++) {
-	nlev = dptr->num_dunlevs;
-	if (nlev > 1)
-	    Sprintf(buf, "%s: levels %d to %d", dptr->dname, dptr->depth_start,
-						dptr->depth_start + nlev - 1);
-	else
-	    Sprintf(buf, "%s: level %d", dptr->dname, dptr->depth_start);
 
-	/* Most entrances are uninteresting. */
-	if (dptr->entry_lev != 1) {
-	    if (dptr->entry_lev == nlev)
-		Strcat(buf, ", entrance from below");
-	    else
-		Sprintf(eos(buf), ", entrance on %d",
-			dptr->depth_start + dptr->entry_lev - 1);
-	}
-	if (bymenu) {
-	    any.a_void = 0;
-	    add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings, buf, MENU_UNSELECTED);
-	} else
-	    putstr(win, 0, buf);
+		/* OPTION: show only levels in selected dungeon on 2nd menu */
+		if (onlyselecteddungeon && gotdgn && (i != *rdgn))
+			continue;
+		/* floating branches cannot be teleported to - they must be anchored first */
+		if ((i == knox_level.dnum) && !u.uevent.knoxmade)
+			continue;
 
-	/*
-	 * Circle through the special levels to find levels that are in
-	 * this dungeon.
-	 */
-	for (slev = sp_levchn, last_level = 0; slev; slev = slev->next) {
-		if (slev->dlevel.dnum != i) continue;
-		
-		/* print any branches before this level */
-		print_branch(win, i, last_level, slev->dlevel.dlevel, bymenu, &lchoices);
-		
-		Sprintf(buf, "   %s: %d", slev->proto, depth(&slev->dlevel));
-		if (Is_stronghold(&slev->dlevel))
-		Sprintf(eos(buf), " (tune %s)", tune);
-		if (bymenu) {
-			/* If other floating branches are added, this will need to change */
-			if (i != knox_level.dnum) {
-			lchoices.lev[lchoices.idx] = slev->dlevel.dlevel;
-			lchoices.dgn[lchoices.idx] = i;
-		} else {
-			lchoices.lev[lchoices.idx] = depth(&slev->dlevel);
-			lchoices.dgn[lchoices.idx] = 0;
+		nlev = dptr->num_dunlevs;
+		if (nlev > 1)
+			Sprintf(buf, "%s: levels %d to %d", dptr->dname, dptr->depth_start,
+							dptr->depth_start + nlev - 1);
+		else
+			Sprintf(buf, "%s: level %d", dptr->dname, dptr->depth_start);
+
+		/* Most entrances are uninteresting. */
+		if (dptr->entry_lev != 1) {
+			if (dptr->entry_lev == nlev)
+			Strcat(buf, ", entrance from below");
+			else
+			Sprintf(eos(buf), ", entrance on %d",
+				dptr->depth_start + dptr->entry_lev - 1);
 		}
-		lchoices.playerlev[lchoices.idx] = depth(&slev->dlevel);
-		any.a_void = 0;
-		any.a_int = lchoices.idx + 1;
-		add_menu(win, NO_GLYPH, &any, lchoices.menuletter,
-				0, ATR_NONE, buf, MENU_UNSELECTED);
-		if (lchoices.menuletter == 'z') lchoices.menuletter = 'A';
-		else lchoices.menuletter++;
-		lchoices.idx++;
+
+		if (bymenu) {
+			if (!gotdgn && twopartmenu) {
+				any.a_int = lchoices.idx + 1;
+				lchoices.dgn[lchoices.idx] = i;
+				add_menu(win, NO_GLYPH, &any, lchoices.menuletter, 0, dungeonsfirst ? ATR_NONE : iflags.menu_headings, buf, MENU_UNSELECTED);
+				if (lchoices.menuletter == 'z') lchoices.menuletter = 'A';
+				else lchoices.menuletter++;
+				lchoices.idx++;
+			}
+			else {
+				any.a_void = 0;
+				add_menu(win, NO_GLYPH, &any, 0, 0, dungeonsfirst ? ATR_NONE : iflags.menu_headings, buf, MENU_UNSELECTED);
+			}
 		} else
-		putstr(win, 0, buf);
-		
-		last_level = slev->dlevel.dlevel;
-	}
-	/* print branches after the last special level */
-	print_branch(win, i, last_level, MAXLEVEL, bymenu, &lchoices);
+			putstr(win, 0, buf);
+
+		/*
+		* Circle through the special levels to find levels that are in
+		* this dungeon.
+		*/
+		if (!dungeonsfirst) {
+			for (slev = sp_levchn, last_level = 0; slev; slev = slev->next) {
+				if (slev->dlevel.dnum != i) continue;
+				
+				/* print any branches before this level */
+				print_branch(win, i, last_level, slev->dlevel.dlevel, (bymenu && ((gotdgn && i == *rdgn) || !twopartmenu)), &lchoices);
+				
+				Sprintf(buf, "   %s: %d", slev->proto, depth(&slev->dlevel));
+				if (Is_stronghold(&slev->dlevel))
+					Sprintf(eos(buf), " (tune %s)", tune);
+				if (bymenu) {
+					if ((gotdgn && i == *rdgn) || !twopartmenu) {
+						lchoices.lev[lchoices.idx] = slev->dlevel.dlevel;
+						lchoices.dgn[lchoices.idx] = i;
+						
+						lchoices.playerlev[lchoices.idx] = depth(&slev->dlevel);
+						any.a_void = 0;
+						any.a_int = lchoices.idx + 1;
+						add_menu(win, NO_GLYPH, &any, lchoices.menuletter,
+							0, ATR_NONE, buf, MENU_UNSELECTED);
+						if (lchoices.menuletter == 'z') lchoices.menuletter = 'A';
+						else lchoices.menuletter++;
+						lchoices.idx++;
+					}
+					else {
+						any.a_void = 0;
+						add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+					}
+				} else {
+					putstr(win, 0, buf);
+				}
+				last_level = slev->dlevel.dlevel;
+			}
+			/* print branches after the last special level */
+			print_branch(win, i, last_level, MAXLEVEL, (bymenu && ((gotdgn && i == *rdgn) || !twopartmenu)), &lchoices);
+		}
     }
 
     /* Print out floating branches (if any). */
     for (first = TRUE, br = branches; br; br = br->next) {
-	if (br->end1.dnum == n_dgns) {
-	    if (first) {
-	    	if (!bymenu) {
-		    putstr(win, 0, "");
-		    putstr(win, 0, "Floating branches");
+		if (br->end1.dnum == n_dgns) {
+			if (first) {
+				if (!bymenu) {
+				putstr(win, 0, "");
+				putstr(win, 0, "Floating branches");
+			}
+			first = FALSE;
+			}
+			Sprintf(buf, "   %s to %s",
+				br_string(br->type), dungeons[br->end2.dnum].dname);
+			if (!bymenu)
+			putstr(win, 0, buf);
 		}
-		first = FALSE;
-	    }
-	    Sprintf(buf, "   %s to %s",
-			br_string(br->type), dungeons[br->end2.dnum].dname);
-	    if (!bymenu)
-		putstr(win, 0, buf);
-	}
     }
     if (bymenu) {
     	int n;
-	menu_item *selected;
-	int idx;
+		menu_item *selected;
+		int idx;
 
-	end_menu(win, "Level teleport to where:");
-	n = select_menu(win, PICK_ONE, &selected);
-	destroy_nhwindow(win);
-	if (n > 0) {
-		idx = selected[0].item.a_int - 1;
-		free((genericptr_t)selected);
-		if (rlev && rdgn) {
-			*rlev = lchoices.lev[idx];
-			*rdgn = lchoices.dgn[idx];
-			return lchoices.playerlev[idx];
+		if (lchoices.idx > 1) {
+			end_menu(win, "Level teleport to where:");
+			n = select_menu(win, PICK_ONE, &selected);
+			destroy_nhwindow(win);
+			if (n > 0)
+				idx = selected[0].item.a_int - 1;
+			free((genericptr_t) selected);
 		}
+		else {
+			/* only one choice; don't bother showing it */
+			end_menu(win, "");
+			destroy_nhwindow(win);
+			idx = 0;
+			n = 1;
+		}
+		if (n > 0) {
+			if (!gotdgn && twopartmenu) {
+				*rdgn = lchoices.dgn[idx];
+				return print_dungeon(bymenu, TRUE, rlev, rdgn);
+			}
+			if (rlev && rdgn) {
+				*rlev = lchoices.lev[idx];
+				*rdgn = lchoices.dgn[idx];
+				return TRUE;
+			}
+		}
+		return FALSE;
 	}
-	return 0;
-    }
 
     /* I hate searching for the invocation pos while debugging. -dean */
     if (Invocation_lev(&u.uz)) {
@@ -2101,7 +2150,7 @@ int *rdgn;
 
     display_nhwindow(win, TRUE);
     destroy_nhwindow(win);
-    return 0;
+    return FALSE;
 }
 #endif /* WIZARD */
 
@@ -2496,7 +2545,7 @@ recalc_mapseen()
 			case ALTAR:
 				if (!mptr->feat.naltar)
 					mptr->feat.msalign = Align2msa(a_align(x,y));
-				else if (mptr->feat.msalign != Align2msa(a_align(x,y)));
+				else if (mptr->feat.msalign != Align2msa(a_align(x,y)))
 					mptr->feat.msalign = MSA_MULTI;
 						
 				mptr->feat.naltar = min(mptr->feat.naltar + 1, 3);
@@ -2789,9 +2838,8 @@ boolean printdun;
 			ADDNTOBUF("altar", mptr->feat.naltar)
 		else
 			ADDNTOBUF("temple", mptr->feat.ntemple)
-
-		/* only print out altar's god if they are all to your god */
-		if (Msa2align(mptr->feat.msalign) == u.ualign.type)
+		/* and print out altar's god if they are all to your god */
+		if ((mptr->feat.ntemple || mptr->feat.naltar) && (Msa2align(mptr->feat.msalign) == u.ualign.type))
 			Sprintf(eos(buf), " to %s", align_gname(u.ualign.type));
 
 		ADDNTOBUF("fountain", mptr->feat.nfount)

@@ -1305,7 +1305,7 @@ wiz_genesis()
 STATIC_PTR int
 wiz_where()
 {
-	if (wizard) (void) print_dungeon(FALSE, (schar *)0, (int *)0);
+	if (wizard) (void) print_dungeon(FALSE, FALSE, (schar *)0, (int *)0);
 	else	    pline("Unavailable command '^O'.");
 	return 0;
 }

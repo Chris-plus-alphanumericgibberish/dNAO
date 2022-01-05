@@ -298,7 +298,8 @@ struct linfo {
 					  (x) == MSA_CHAOTIC ? A_CHAOTIC : \
 					  (x) == MSA_UNALI ? A_NONE : \
 					  (x) == MSA_VOID ? A_VOID : \
-					  MSA_MULTI)
+					  A_NONE) /* A_NONE is technically bad and overlaps with MSA_UNALI */
+
 #define MSA_MULTI	0  /* multiple alignments */
 #define MSA_LAWFUL  1
 #define MSA_NEUTRAL 2

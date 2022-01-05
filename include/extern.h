@@ -758,7 +758,7 @@ E boolean FDECL(Invocation_lev, (d_level *));
 E int NDECL(level_difficulty);
 E schar FDECL(lev_by_name, (const char *));
 #ifdef WIZARD
-E schar FDECL(print_dungeon, (BOOLEAN_P,schar *,int *));
+E boolean FDECL(print_dungeon, (BOOLEAN_P,BOOLEAN_P,schar *,int *));
 #endif
 E int NDECL(donamelevel);
 E int NDECL(dooverview);
