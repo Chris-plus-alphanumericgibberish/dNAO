@@ -425,13 +425,8 @@ register int x, y, typ;
 		break;
 	}
 	if (ttmp->ttyp == HOLE) ttmp->tseen = 1;  /* You can't hide a hole */
-	else if (ttmp->ttyp == MAGIC_PORTAL && (
-		In_neu(&u.uz) 
-		|| In_mordor_forest(&u.uz)
-		|| Is_ford_level(&u.uz)
-		|| In_mordor_fields(&u.uz)
-		|| In_mordor_buildings(&u.uz)
-	)) ttmp->tseen = 1;  /* Just make portals known */
+	else if (ttmp->ttyp == MAGIC_PORTAL && visible_portals(&u.uz))
+		ttmp->tseen = 1;  /* Just make portals known */
 	else ttmp->tseen = 0;
 	ttmp->once = 0;
 	ttmp->madeby_u = 0;

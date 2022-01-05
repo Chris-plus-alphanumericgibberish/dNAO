@@ -1461,7 +1461,10 @@ forget_traps()
 
 	/* forget all traps (except the one the hero is in :-) */
 	for (trap = ftrap; trap; trap = trap->ntrap)
-	    if ((trap->tx != u.ux || trap->ty != u.uy) && (trap->ttyp != HOLE))
+	    if ((trap->tx != u.ux || trap->ty != u.uy)
+			&& (trap->ttyp != HOLE)
+			&& !(trap->ttyp == MAGIC_PORTAL && visible_portals(&u.uz))
+		)
 		trap->tseen = 0;
 }
 

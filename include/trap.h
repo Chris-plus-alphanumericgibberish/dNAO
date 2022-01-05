@@ -40,6 +40,13 @@ extern struct trap *ftrap;
 #define trapv_launch(ttyp)	((ttyp) == ROLLING_BOULDER_TRAP)
 #define trapv_statue(ttyp)	((ttyp) == STATUE_TRAP)
 
+#define visible_portals(lev)	(In_neu(lev)\
+		|| In_mordor_forest(lev)\
+		|| Is_ford_level(lev)\
+		|| In_mordor_fields(lev)\
+		|| In_mordor_buildings(lev)\
+	)
+
 /* reasons for statue animation */
 #define ANIMATE_NORMAL	0
 #define ANIMATE_SHATTER 1
