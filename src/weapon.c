@@ -380,16 +380,33 @@ int otyp;
 		return 0;
 	}
 
-	/* grab dice from the objclass definition */
-	*wdice = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
-	int ocn =           (wdice->oc_damn);
-	int ocd =           (wdice->oc_damd);
-	int bonn =          (wdice->bon_damn);
-	int bond =          (wdice->bon_damd);
-	int flat =          (wdice->flat);
-	boolean lucky =     (wdice->lucky);
-	boolean exploding = (wdice->exploding);
-	int explode_amt =   (wdice->explode_amt);
+	int ocn;
+	int ocd;
+	int bonn;
+	int bond;
+	int flat;
+	boolean lucky;
+	boolean exploding;
+	int explode_amt;
+	if (obj && (!valid_weapon(obj) || is_launcher(obj))){
+		struct weapon_dice nulldice = {0};
+		*wdice = nulldice;
+		ocn = wdice->oc_damn = 1;
+		ocd = wdice->oc_damd = 2;
+		bonn = bond = flat = lucky = exploding = explode_amt = 0;
+	}
+	else {
+		/* grab dice from the objclass definition */
+		*wdice = (large ? objects[otyp].oc_wldam : objects[otyp].oc_wsdam);
+		ocn =           (wdice->oc_damn);
+		ocd =           (wdice->oc_damd);
+		bonn =          (wdice->bon_damn);
+		bond =          (wdice->bon_damd);
+		flat =          (wdice->flat);
+		lucky =     	(wdice->lucky);
+		exploding = 	(wdice->exploding);
+		explode_amt =   (wdice->explode_amt);
+	}
 
 	/* set dmod, if possible*/
 	if (obj){
@@ -399,6 +416,49 @@ int otyp;
 		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
 			dmod += 2;
 
+		if (obj->oartifact == ART_LIECLEAVER) {
+			ocn = 1;
+			ocd = 12;
+			bonn = 1;
+			bond = 10;
+		}
+		else if (obj->oartifact == ART_WAND_OF_ORCUS) {
+			ocn = 1;
+			ocd = 4;
+			spe_mult = 0;	/* it's a wand */
+		}
+		else if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) {
+			ocn = 1;
+			ocd = (large ? 2 : 4);
+		}
+		else if (otyp == MOON_AXE)
+		{
+			/*
+			ECLIPSE_MOON	0  -  2d4 v small, 2d12 v large
+			CRESCENT_MOON	1  -  2d6
+			HALF_MOON		2  -  2d8
+			GIBBOUS_MOON	3  - 2d10
+			FULL_MOON	 	4  - 2d12 
+			 */
+			ocn = 2;
+			ocd = max(4 + 2 * obj->ovar1 + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
+			if (!large && obj->ovar1 == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
+				ocd = max(12 + 2 * dmod, 2);
+		}
+
+		if (otyp == HEAVY_IRON_BALL) {
+			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
+
+			if ((int)obj->owt > wt) {
+				wt = ((int)obj->owt - wt) / 160;
+				ocd += 4 * wt;
+				if (ocd > 25) ocd = 25;	/* objects[].oc_wldam */
+			}
+		}
+		if (check_oprop(obj, OPROP_BLADED))
+			ocd = max(ocd, 2*(objects[obj->otyp].oc_size + 1));
+		if (check_oprop(obj, OPROP_SPIKED))
+			ocd = max(ocd, (objects[obj->otyp].oc_size + 2));
 		/* material-based dmod modifiers */
 		if(!(is_lightsaber(obj) && litsaber(obj))){
 			if(obj->obj_material == MERCURIAL){
@@ -595,44 +655,6 @@ int otyp;
 			ocd = 2;
 			bonn = 2;
 			bond = 4;
-		}
-		else if (obj->oartifact == ART_LIECLEAVER) {
-			ocn = 1;
-			ocd = 10;
-			bonn = 1;
-			bond = 12;
-		}
-		else if (obj->oartifact == ART_WAND_OF_ORCUS) {
-			ocn = 1;
-			ocd = 4;
-			spe_mult = 0;	/* it's a wand */
-		}
-		else if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) {
-			ocn = 1;
-			ocd = (large ? 2 : 4);
-		}
-		else if (otyp == MOON_AXE)
-		{
-			/*
-			ECLIPSE_MOON	0  -  2d4 v small, 2d12 v large
-			CRESCENT_MOON	1  -  2d6
-			HALF_MOON		2  -  2d8
-			GIBBOUS_MOON	3  - 2d10
-			FULL_MOON	 	4  - 2d12 
-			 */
-			ocn = 2;
-			ocd = max(4 + 2 * obj->ovar1 + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
-			if (!large && obj->ovar1 == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
-				ocd = max(12 + 2 * dmod, 2);
-		}
-		else if (otyp == HEAVY_IRON_BALL) {
-			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
-
-			if ((int)obj->owt > wt) {
-				wt = ((int)obj->owt - wt) / 160;
-				ocd += 4 * wt;
-				if (ocd > 25) ocd = 25;	/* objects[].oc_wldam */
-			}
 		}
 	}
 
@@ -3765,7 +3787,6 @@ const struct def_skill *class_skill;
 		OLD_P_SKILL(P_ATTACK_SPELL) = P_BASIC;
 		OLD_P_SKILL(P_ENCHANTMENT_SPELL) = P_BASIC;
 	}
-#ifdef BARD
 	if (Role_if(PM_BARD)) {
 	  OLD_P_SKILL(P_MUSICALIZE) = P_BASIC;
 	  OLD_P_SKILL(P_BARE_HANDED_COMBAT) = P_BASIC;
@@ -3773,9 +3794,11 @@ const struct def_skill *class_skill;
 	  OLD_P_SKILL(P_DART) = P_BASIC;
 	  OLD_P_SKILL(P_DAGGER) = P_BASIC;
 	}
-#endif
 	if (u.specialSealsActive&SEAL_BLACK_WEB) {
 	  OLD_P_SKILL(P_CROSSBOW) = P_BASIC;
+	}
+	if (Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)) {
+	  OLD_P_SKILL(P_AXE) = P_BASIC;
 	}
 
 	/* walk through array to set skill maximums */

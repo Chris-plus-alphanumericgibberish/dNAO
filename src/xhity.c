@@ -3489,6 +3489,8 @@ int *shield_margin;
 				wtype = P_SCIMITAR;
 			else if (weapon && weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
 				wtype = P_PICK_AXE;
+			else if (weapon && weapon->oartifact == ART_WAND_OF_ORCUS)
+				wtype = P_MACE;
 			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
 				wtype = P_MACE;
 			else
@@ -12422,11 +12424,17 @@ int vis;						/* True if action is at all visible to the player */
 	/* what kind of attack is being made? */
 	if (weapon) {
 		if (/* valid weapon */
-			valid_weapon(weapon) &&
+			(valid_weapon(weapon)
+				|| check_oprop(weapon, OPROP_BLADED)
+				|| check_oprop(weapon, OPROP_SPIKED)
+				|| weapon->oartifact == ART_WAND_OF_ORCUS
+			) &&
 			/* being used with an attack action, or no attack action (which implies an oddly-launched object, like a falling boulder or something) */
 			(!attk || weapon_aatyp(attk->aatyp)) &&
 			/* isn't a misused launcher */
 			(!is_launcher(weapon) ||
+			check_oprop(weapon, OPROP_BLADED) ||
+			check_oprop(weapon, OPROP_SPIKED) ||
 			weapon->oartifact == ART_LIECLEAVER ||
 			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS) &&
 			/* isn't a misused polearm */
@@ -13974,6 +13982,13 @@ int vis;						/* True if action is at all visible to the player */
 				wtype = P_PICK_AXE;
 			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
 				wtype = P_MACE;
+			else if (weapon && (!valid_weapon(weapon) || is_launcher(weapon))){
+				if (weapon && check_oprop(weapon, OPROP_BLADED))
+					wtype = P_AXE;
+				else if (weapon && check_oprop(weapon, OPROP_SPIKED))
+					wtype = P_SPEAR;
+				else wtype = P_CLUB;
+			}
 			else
 				wtype = weapon_type(weapon);
 			

@@ -69,8 +69,8 @@ static struct trobj Anachrononaut_Hlf[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Anachrononaut_Dw[] = {
-	{ HEAVY_MACHINE_GUN, 5, WEAPON_CLASS, 1, 0 },
-	{ PISTOL, 1, WEAPON_CLASS, 1, 0 },
+	{ HEAVY_MACHINE_GUN, 3, WEAPON_CLASS, 1, 0 },
+	{ RIFLE, 3, WEAPON_CLASS, 1, 0 },
 	{ SEISMIC_HAMMER, 0, WEAPON_CLASS, 1, 0 },
 	{ STICK_OF_DYNAMITE, 0, TOOL_CLASS, 15, 0 },
 	{ HIGH_ELVEN_PLATE, 1, ARMOR_CLASS, 1, 0 },
@@ -839,6 +839,28 @@ static const struct def_skill Skill_A[] = {
 
 static const struct def_skill Skill_Ana[] = {
     { P_DAGGER, P_SKILLED },		{ P_KNIFE,  P_SKILLED },
+    { P_SHORT_SWORD, P_EXPERT },{ P_LANCE,  P_EXPERT },
+    { P_SABER, P_EXPERT },		{ P_LONG_SWORD,  P_BASIC },
+    { P_CLUB, P_SKILLED },		{ P_QUARTERSTAFF, P_EXPERT },
+	{ P_BROAD_SWORD, P_EXPERT },{ P_HAMMER, P_BASIC },
+//#ifdef FIREARMS
+    { P_FIREARM, P_EXPERT },
+//#endif
+    { P_DART, P_EXPERT },		{ P_CROSSBOW, P_SKILLED },
+    { P_WHIP, P_SKILLED },		 { P_BOOMERANG, P_EXPERT },
+    { P_ATTACK_SPELL, P_SKILLED },	{ P_HEALING_SPELL, P_SKILLED },
+    { P_DIVINATION_SPELL, P_SKILLED},	{ P_MATTER_SPELL, P_SKILLED},
+	{ P_ENCHANTMENT_SPELL, P_BASIC },
+#ifdef STEED
+    { P_RIDING, P_BASIC },
+#endif
+    { P_TWO_WEAPON_COMBAT, P_EXPERT },
+    { P_BARE_HANDED_COMBAT, P_BASIC },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_Dwa_Ana[] = {
+    { P_AXE, P_EXPERT },
     { P_SHORT_SWORD, P_EXPERT },{ P_LANCE,  P_EXPERT },
     { P_SABER, P_EXPERT },		{ P_LONG_SWORD,  P_BASIC },
     { P_CLUB, P_SKILLED },		{ P_QUARTERSTAFF, P_EXPERT },
@@ -1887,6 +1909,9 @@ u_init()
 		if(Race_if(PM_ANDROID)){
 			skill_init(Skill_Droid_Ana);
 			u.umartial = TRUE;
+		} else if(Race_if(PM_DWARF)){
+			skill_init(Skill_Dwa_Ana);
+			skill_add(Skill_All_Ana);
 		} else {
 			skill_init(Skill_Ana);
 			skill_add(Skill_All_Ana);
@@ -2770,6 +2795,10 @@ register struct trobj *trop;
 			if(obj->otyp == HEAVY_MACHINE_GUN && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				set_material_gm(obj, MITHRIL);
 			}
+			if(obj->otyp == RIFLE && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
+				set_material_gm(obj, MITHRIL);
+				add_oprop(obj, OPROP_BLADED);
+			}
 			if(obj->otyp == PLAIN_DRESS && Role_if(PM_ANACHRONONAUT) && Race_if(PM_ANDROID)){
 				set_material_gm(obj, LEATHER);
 			}
@@ -2784,9 +2813,6 @@ register struct trobj *trop;
 			}
 			if(obj->otyp == GAUNTLETS && Race_if(PM_CHIROPTERAN)){
 				set_material_gm(obj, LEATHER);
-			}
-			if(obj->otyp == PISTOL && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
-				set_material_gm(obj, MITHRIL);
 			}
 			if(obj->otyp == SEISMIC_HAMMER && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				set_material_gm(obj, MITHRIL);
