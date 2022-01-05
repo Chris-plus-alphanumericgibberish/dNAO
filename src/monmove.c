@@ -2509,8 +2509,8 @@ not_special:
 						}
 					}
 					if(count){
-						count = rn2(count);
-						for(i = -1; i < 2; i++) for(j = -1; j < 2; j++){
+						count = rnd(count);
+						for(i = -1; i < 2 && count > 0; i++) for(j = -1; j < 2 && count > 0; j++){
 							tx = mtmp->mx+i;
 							ty = mtmp->my+j;
 							if(isok(tx, ty) && IS_WALL(levl[tx][ty].typ)){
@@ -2519,22 +2519,22 @@ not_special:
 							}
 						}
 					}
-					if(tx || ty){
-						struct obj *breacher;
-						breacher = mksobj(STICK_OF_DYNAMITE, MKOBJ_NOINIT);
-						breacher->quan = 1L;
-						breacher->cursed = 0;
-						breacher->blessed = 0;
-						breacher->age = rn1(10,10);
-						fix_object(breacher);
-						place_object(breacher, tx, ty);
-						begin_burn(breacher);
-						if(canseemon(mtmp))
-							pline("%s plants a breaching charge!", Monnam(mtmp));
-					}
 				}
-			} else if((mtmp->mtyp == PM_DEEP_ONE && !rn2(20))
-				|| (mtmp->mtyp == PM_DEEPER_ONE && !rn2(5))
+				if((tx || ty) && isok(tx, ty)){
+					struct obj *breacher;
+					breacher = mksobj(STICK_OF_DYNAMITE, MKOBJ_NOINIT);
+					breacher->quan = 1L;
+					breacher->cursed = 0;
+					breacher->blessed = 0;
+					breacher->age = rn1(10,10);
+					fix_object(breacher);
+					place_object(breacher, tx, ty);
+					begin_burn(breacher);
+					if(canseemon(mtmp))
+						pline("%s plants a breaching charge!", Monnam(mtmp));
+				}
+			} else if((mtmp->mtyp == PM_DEEP_ONE && !rn2(6))
+				|| (mtmp->mtyp == PM_DEEPER_ONE && !rn2(3))
 				|| (mtmp->mtyp == PM_DEEPEST_ONE)
 			){
 				int i, j, count=0;
