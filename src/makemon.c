@@ -7318,6 +7318,7 @@ int faction;
 						curse(otmp);
 						otmp->spe = 6;
 						otmp->oerodeproof = TRUE;
+						MAYBE_MERC(otmp)
 						(void) mpickobj(mtmp, otmp);
 					}
 					
