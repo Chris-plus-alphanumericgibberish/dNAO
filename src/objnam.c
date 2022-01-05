@@ -900,8 +900,8 @@ boolean dofull;
 			u.uinsight < 10 ? Strcat(buf, "self-poisoning ") : Strcat(buf, "poison-secreting ");
 		if (check_oprop(obj, OPROP_GRES) && (obj->known || u.uinsight >= 10) && !(obj->greased))
 			u.uinsight < 10 ? Strcat(buf, "self-greasing ") : Strcat(buf, "grease-secreting ");
-		if (check_oprop(obj, OPROP_HEAL) && (obj->known || u.uinsight >= 10))
-			u.uinsight < 10 ? Strcat(buf, "healing ") : Strcat(buf, "angel-haunted ");
+		if (check_oprop(obj, OPROP_HEAL) && (obj->known || u.uinsight >= 21))
+			u.uinsight < 21 ? Strcat(buf, "healing ") : check_oprop(obj, OPROP_UNHY) ? Strcat(buf, "angel-imprisoning ") : Strcat(buf, "angel-haunted ");
 		if (check_oprop(obj, OPROP_RETRW) && (obj->known || u.uinsight >= 10))
 			u.uinsight < 10 ? Strcat(buf, "returning ") : Strcat(buf, "loyal ");
 		
