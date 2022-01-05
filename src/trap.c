@@ -395,6 +395,8 @@ register int x, y, typ;
 	    case PIT:
 	    case SPIKED_PIT:
 	    case TRAPDOOR:
+		{
+		struct monst *mtmp = m_at(x,y);
 		lev = &levl[x][y];
 		if (*in_rooms(x, y, SHOPBASE) &&
 			((typ == HOLE || typ == TRAPDOOR) ||
@@ -420,9 +422,12 @@ register int x, y, typ;
 		else if (IS_WALL(lev->typ) || lev->typ == SDOOR)
 		    lev->typ = level.flags.is_maze_lev ? ROOM :
 			       level.flags.is_cavernous_lev ? CORR : DOOR;
+		
+		if(!does_block(x,y,lev) && (!mtmp || !opaque(mtmp->data)))
+			unblock_point(x,y);
 
 		unearth_objs(x, y);
-		break;
+		}break;
 	}
 	if (ttmp->ttyp == HOLE) ttmp->tseen = 1;  /* You can't hide a hole */
 	else if (ttmp->ttyp == MAGIC_PORTAL && visible_portals(&u.uz))
