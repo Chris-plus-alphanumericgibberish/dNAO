@@ -2357,7 +2357,7 @@ int *result;
 	}
 	else if((seduct_type = could_seduce(magr, mdef, attk))){
 		boolean seduce = seduct_type == 1;
-		struct obj *stealoid, **minvent_ptr;
+		struct obj *stealoid = 0, **minvent_ptr;
 		
 		if(seduce && (attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX)){
 			minvent_ptr = &mdef->minvent;
