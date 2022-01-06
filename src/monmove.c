@@ -717,7 +717,7 @@ boolean digest_meal;
 				else if((!mon->mcan && free_android(mtmp->data))
 					|| mtmp->mtyp == PM_MYRKALFR || mtmp->mtyp == PM_MYRKALFAR_WARRIOR
 					|| mtmp->mtyp == PM_ARCADIAN_AVENGER
-					|| (mtmp->mtyp == PM_ELVENKING && mtmp->mfaction == LAST_BASTION_SYMBOL)
+					|| (mtmp->mtyp == PM_ELVENKING && mtmp->mfaction == QUEST_FACTION)
 					|| (is_drow(mtmp->data) && mtmp->mtame && mon->mtame)
 				)
 					healup += 2;
