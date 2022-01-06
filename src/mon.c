@@ -3708,8 +3708,8 @@ struct monst *mtmp;
 		case LSVD_FLS:{
 			/* message */
 			int mtyp = mtmp->mtyp;
-			switch(quest_status.leader_m_id == mtmp->m_id ? 0 : rn2(5)){
-				case 0:
+			switch(quest_status.leader_m_id == mtmp->m_id ? 0 : rnd(8)){
+				default: //0 or 5-8
 					if(canseemon(mtmp)){
 						pline("But wait...");
 						pline("%s screams and writhes. You hear %s bones splintering!", Monnam(mtmp), mhis(mtmp));
