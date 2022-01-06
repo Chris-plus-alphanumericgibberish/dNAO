@@ -2900,7 +2900,7 @@ nexttry:
 		{ register struct trap *ttmp = t_at(nx, ny);
 		    if(ttmp) {
 			if(ttmp->ttyp >= TRAPNUM || ttmp->ttyp == 0)  {
-impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
+				impossible("A monster looked at a very strange trap of type %d.", ttmp->ttyp);
 			    continue;
 			}
 			struct obj *mwep;
