@@ -1703,7 +1703,7 @@ int shotlimit;
 		(skill == P_DART) ||
 		(skill == P_SHURIKEN) ||
 		(skill == P_BOOMERANG) ||
-		(ammo->oartifact == ART_SICKLE_MOON) || 
+		(ammo->otyp == SICKLE) ||
 		(ammo->oartifact == ART_AMHIMITL)
 		) {
 		/* Skill based bonus */
