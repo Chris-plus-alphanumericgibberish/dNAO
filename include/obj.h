@@ -686,7 +686,7 @@ struct obj {
 	(is_blade((otmp)) && !is_sword((otmp)) && \
 	(objects[(otmp)->otyp].oc_dtyp & PIERCE)) || \
 	(otmp)->otyp == WAR_HAMMER || (otmp)->otyp == AKLYS || \
-	(otmp)->oartifact == ART_SICKLE_MOON || \
+	(otmp)->otyp == SICKLE || \
 	(otmp)->oartifact == ART_HOUCHOU)
 
 /* Armor */

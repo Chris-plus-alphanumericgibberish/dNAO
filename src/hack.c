@@ -2956,13 +2956,17 @@ boolean endnow;
 		return (struct obj *)0;
 	}
 
-	if (start && in_progress) {
-		impossible("all_items() called with start=TRUE while in progress!");
+	if (start == in_progress) {
+		if (start)
+			impossible("all_items() called with start=TRUE while in progress!");
+		else
+			impossible("all_items() called with start=FALSE while not started!");
 		return (struct obj *)0;
 	}
 
 	if (start) {
 		/* fresh start */
+		in_progress = TRUE;
 		curwhere = OBJ_FREE;
 		prevobj = (struct obj *)0;
 		curobj = (struct obj *)0;
