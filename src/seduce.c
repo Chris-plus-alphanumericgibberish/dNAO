@@ -2292,7 +2292,7 @@ int *result;
 {
 	const long equipmentmask = ~(W_WEP|W_SWAPWEP);
 	boolean seduct_type;
-	struct obj * otmp;
+	struct obj * otmp = 0;
 	boolean vis = canspotmon(mdef) || canspotmon(magr);
 	int nitems = 0;
 	boolean goatspawn = (magr->data->mtyp == PM_SMALL_GOAT_SPAWN || magr->data->mtyp == PM_GOAT_SPAWN || magr->data->mtyp == PM_GIANT_GOAT_SPAWN || magr->data->mtyp == PM_BLESSED);
