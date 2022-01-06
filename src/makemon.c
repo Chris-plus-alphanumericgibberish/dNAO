@@ -4910,6 +4910,8 @@ int faction;
 			} else if(Infuture){
 				if(mm == PM_MASTER_MIND_FLAYER){
 					struct obj *gem;
+					give_mintrinsic(mtmp, POISON_RES);
+					give_mintrinsic(mtmp, REGENERATION);
 					mtmp->m_lev += 6;
 					mtmp->mhpmax = mtmp->m_lev*8-1;
 					mtmp->mhp = mtmp->mhpmax;
@@ -4941,6 +4943,8 @@ int faction;
 					(void) mpickobj(mtmp, otmp);
 				} else {
 					struct obj *gem;
+					give_mintrinsic(mtmp, POISON_RES);
+					give_mintrinsic(mtmp, REGENERATION);
 					mtmp->m_lev += 2;
 					mtmp->mhpmax = mtmp->m_lev*8-1;
 					mtmp->mhp = mtmp->mhpmax;
