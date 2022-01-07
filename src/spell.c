@@ -2303,7 +2303,7 @@ spiriteffects(power, atme)
 				otmp = mksobj(SHURIKEN, MKOBJ_NOINIT);
 			    otmp->blessed = 0;
 			    otmp->cursed = 0;
-				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux+xadj, u.uy+yadj, u.dx, u.dy, 0, rn1(5,5), TRUE, FALSE, FALSE);
+				projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux+xadj, u.uy+yadj, u.dx, u.dy, 0, rn1(5,5), TRUE, FALSE, FALSE);
 				nomul(0, NULL);
 			}
 			losehp(dsize, "little shards of metal ripping out of your body", KILLED_BY);
@@ -2618,7 +2618,7 @@ spiriteffects(power, atme)
 				otmp->cursed = 0;
 				otmp->spe = 1; /* to indicate it's yours */
 				otmp->ovar1 = 1 + u.ulevel/10;
-				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, rn1(5,5), TRUE, TRUE, FALSE);
+				projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, rn1(5,5), TRUE, TRUE, FALSE);
 				nomul(0, NULL);
 			} else return 0;
 		break;
@@ -2662,7 +2662,7 @@ spiriteffects(power, atme)
 				You("ask the earth to open.");
 				digfarhole(TRUE, u.ux+u.dx, u.uy+u.dy);
 				otmp = mksobj(BOULDER, MKOBJ_NOINIT);
-				projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
+				projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
 				nomul(0, NULL);
 			} else break;
 		}break;
@@ -2673,7 +2673,7 @@ spiriteffects(power, atme)
 			otmp->spe = 1; /* to indicate it's yours */
 			otmp->ovar1 = d(5,dsize); /* save the damge this should do */
 			You("spit venom.");
-			projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 10, TRUE, FALSE, FALSE);
+			projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 10, TRUE, FALSE, FALSE);
 		}break;
 		case PWR_SUCKLE_MONSTER:{
 			struct monst *mon;
@@ -4019,7 +4019,7 @@ spiriteffects(power, atme)
 			set_material_gm(qvr, SHADOWSTEEL);
 			qvr->opoisoned = (OPOISON_BASIC|OPOISON_BLIND);
 			add_oprop(qvr, OPROP_PHSEW);
-			projectile(&youmonst, qvr, (void *)0, HMON_FIRED, mon->mx, mon->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
+			projectile(&youmonst, qvr, (void *)0, HMON_PROJECTILE|HMON_FIRED, mon->mx, mon->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
 			if(!DEADMONSTER(mon) && mon_can_see_you(mon)) // and mon_can_see_you(mon)?
 				setmangry(mon);
 			ttmp2 = maketrap(mon->mx, mon->my, WEB);

@@ -67,10 +67,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	bhitpos.x = initx;
 	bhitpos.y = inity;
 
-	boolean misthrown = (hmoncode & HMON_MISTHROWN);
 	boolean fired = (hmoncode & HMON_FIRED);
-	boolean thrown = (misthrown || fired);
+	boolean thrown = (hmoncode & HMON_PROJECTILE);
 	boolean trapped = (hmoncode & HMON_TRAP);
+	boolean kicked = (hmoncode & HMON_KICKED);
 
 	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
 	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
@@ -338,7 +338,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	tmp_at(DISP_FLASH, obj_to_glyph(thrownobj));
 
 	/* initialize boomerang thrown direction */
-	if (is_boomerang(thrownobj) && !(hmoncode & (HMON_MISTHROWN|HMON_KICKED))) {
+	if (is_boomerang(thrownobj) && !kicked && magr) {
 		for (boomerang_init = 0; boomerang_init < 8; boomerang_init++)
 		if (xdir[boomerang_init] == dx && ydir[boomerang_init] == dy)
 			break;
@@ -349,7 +349,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	while (TRUE)
 	{
 		/* boomerangs: change dx/dy to make signature circle */
-		if (is_boomerang(thrownobj) && !(hmoncode & (HMON_MISTHROWN|HMON_KICKED))) {
+		if (is_boomerang(thrownobj) && !kicked && magr) {
 			/* assumes boomerangs always start with 10 range */
 			/* don't worry about the math; it works */
 			dx = xdir[((10-range) - (10-range+4)/5 + boomerang_init) % 8];
@@ -542,7 +542,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 							Tobjnam(thrownobj, Blind ? "hit" : "fly"),
 							body_part(ARM));
 						/* object now hits you -- ouch! */
-						(void)hmon_general(magr, magr, (struct attack *)0, (struct attack *)0, thrownobj_p, (void *)0, HMON_FIRED, 0, 0, TRUE, 0, FALSE, -1);
+						(void)hmon_general(magr, magr, (struct attack *)0, (struct attack *)0, thrownobj_p, (void *)0, HMON_PROJECTILE|HMON_FIRED, 0, 0, TRUE, 0, FALSE, -1);
 					}
 					/* end copy */
 				}
@@ -1002,7 +1002,6 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	struct obj * thrownobj = (thrownobj_p) ? (*thrownobj_p) : (struct obj *)0;
 
-	boolean misfired = (hmoncode & HMON_MISTHROWN);
 	boolean fired = (hmoncode & HMON_FIRED);
 	boolean trapped = (hmoncode & HMON_TRAP);
 
@@ -1664,7 +1663,7 @@ struct obj *obj;
 			Doname2(obj), buf, body_part(HEAD));
 
 		/* object now hits you */
-		projectile((struct monst *)0, obj, (void *)0, HMON_MISTHROWN, u.ux, u.uy, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		projectile((struct monst *)0, obj, (void *)0, HMON_PROJECTILE, u.ux, u.uy, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		return;
 	}
 }
@@ -2473,7 +2472,7 @@ boolean forcedestroy;
 		int dx = u.dx, dy = u.dy, dz = u.dz;
 		boolean impaired = misthrow(&youmonst, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
-		(void)projectile(&youmonst, ammo, launcher, (m_shot.s || !is_ammo(ammo) || ammo->oclass==GEM_CLASS) ? HMON_FIRED : HMON_MISTHROWN,
+		(void)projectile(&youmonst, ammo, launcher, HMON_PROJECTILE|(m_shot.s ? HMON_PROJECTILE|HMON_FIRED : 0),
 			u.ux, u.uy, dx, dy, dz, range, forcedestroy, TRUE, impaired);
 		if (Weightless || Levitation)
 			hurtle(-u.dx, -u.dy, hurtle_dist, TRUE, TRUE);
@@ -2962,7 +2961,7 @@ int tary;
 	if (youagr)
 		otmp->spe = 1;
 	/* shoot otmp */
-	projectile(magr, otmp, (void *)0, HMON_FIRED,
+	projectile(magr, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED,
 		x(magr), y(magr), dx, dy, dz,
 		BOLT_LIM, TRUE, youagr, FALSE);
 
@@ -3164,7 +3163,7 @@ int n;	/* number to try to fire */
 				sy = y(magr);
 			}
 		}
-		projectile(magr, qvr, (void *)0, HMON_FIRED,
+		projectile(magr, qvr, (void *)0, HMON_PROJECTILE|HMON_FIRED,
 			sx, sy, dx, dy, dz,
 			BOLT_LIM+rngmod, !from_pack, youagr, FALSE);
 
@@ -3382,7 +3381,7 @@ boolean forcedestroy;
 		int dx = odx, dy = ody, dz = 0;
 		boolean impaired = misthrow(magr, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
-		result = projectile(magr, ammo, launcher, (m_shot.s || !is_ammo(ammo) || ammo->oclass == GEM_CLASS) ? HMON_FIRED : HMON_MISTHROWN,
+		result = projectile(magr, ammo, launcher, HMON_PROJECTILE|(m_shot.s ? HMON_PROJECTILE|HMON_FIRED : 0),
 			x(magr), y(magr), dx, dy, dz, range, forcedestroy, FALSE, impaired);
 		/* monsters don't hurtle like the player does at the moment */
 	}

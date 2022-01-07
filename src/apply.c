@@ -3806,11 +3806,11 @@ struct obj *obj;
 				   so proficient at catching weapons */
 				int hitu, hitvalu;
 				int dieroll;
-				hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, otmp, (void *)0, HMON_MISTHROWN, 8, (int *) 0);
+				hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, otmp, (void *)0, HMON_PROJECTILE, 8, (int *) 0);
 				if(hitvalu > (dieroll = rnd(20)) || dieroll == 1) {
 					boolean wepgone = FALSE;
 					pline_The("%s hits you as you try to snatch it!" the(onambuf));
-					hmon_general((struct monst *)0, &youmonst, (struct attack *)0, &otmp, (void *)0, HMON_MISTHROWN,
+					hmon_general((struct monst *)0, &youmonst, (struct attack *)0, &otmp, (void *)0, HMON_PROJECTILE,
 						0, 0, FALSE, dieroll, FALSE, -1);
 				}
 				else {
@@ -5698,7 +5698,7 @@ struct obj *obj;
 
 				/* Note, blessed was handled above. */
 				if(obj->cursed){
-					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, (x-u.ux), (y-u.uy), 0, 1, FALSE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, (x-u.ux), (y-u.uy), 0, 1, FALSE, FALSE, FALSE);
 				}
 				else if(mtmp){
 					int dmg;

@@ -134,8 +134,8 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 /* types of calls to hmon */
 #define HMON_WHACK		0x01	/* regular melee attack */
 #define HMON_THRUST		0x02	/* polearm thrust */
-#define HMON_MISTHROWN	0x04	/* improper[ly launched] projectile, should NOT use weapon dice */
-#define HMON_FIRED		0x08	/* projectile that should use damage dice */
+#define HMON_PROJECTILE	0x04	/* projectile, general */
+#define HMON_FIRED		0x08	/* projectile had a proper launcher (or simulation thereof), for projectiles that care */
 #define HMON_TRAP		0x10	/* trap-owned attack, either projectile or melee depending on ttyp */
 #define HMON_KICKED		0x20	/* object is a kicked projectile */
 
