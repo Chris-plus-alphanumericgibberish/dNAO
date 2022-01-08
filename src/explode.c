@@ -245,6 +245,11 @@ int color;
 int dest; /* 0 = normal, 1 = silent, 2 = silent/remote */	
 boolean yours; /* is it your fault (for killing monsters) */
 {
+	if (!isok(x,y)) {
+		impossible("bad explosion location %d %d", x, y);
+		return;
+	}
+
 	int i, k, damu = dam;
 	boolean starting = 1, silver = FALSE;
 	boolean visible, any_shield;
