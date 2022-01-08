@@ -1331,7 +1331,8 @@ register struct monst *mtmp;
 						Sprintf(buf,"%s can see", Monnam(mtmp));
 						pline("%s %s...", buf, mon_nam(gazemon));
 					}*/
-					(void) xgazey(gazemon, mtmp, &gazemon->data->mattk[i], -1);
+					if (xgazey(gazemon, mtmp, &gazemon->data->mattk[i], -1) & MM_DEF_DIED)
+						return (1);	/* mtmp died from seeing something */
 					break;
 				 }
 		}
