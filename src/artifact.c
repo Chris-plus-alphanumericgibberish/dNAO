@@ -1847,6 +1847,14 @@ struct obj *obj;
 
 /* used so that callers don't need to known about SPFX_ codes */
 boolean
+arti_returning(obj)
+struct obj *obj;
+{
+    return (obj && obj->oartifact && (arti_attack_prop(obj, ARTA_RETURNING)));
+}
+
+/* used so that callers don't need to known about SPFX_ codes */
+boolean
 arti_bright(obj)
 struct obj *obj;
 {

@@ -126,6 +126,7 @@ E boolean FDECL(arti_blindres, (struct obj *, boolean));
 E boolean FDECL(arti_plussev, (struct obj *));
 E boolean FDECL(arti_plusten, (struct obj *));
 E boolean FDECL(arti_silvered, (struct obj *));
+E boolean FDECL(arti_returning, (struct obj *));
 E boolean FDECL(arti_reflects, (struct obj *));
 E int FDECL(artifact_weight, (struct obj *));
 E boolean FDECL(arti_light, (struct obj *));
