@@ -96,7 +96,6 @@ struct ls_t * ls;
 			return;
 		}
 	}
-	impossible("couldn't find ls in processing chain");
 	return;
 }
 
