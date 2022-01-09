@@ -2595,6 +2595,9 @@ boolean ranged;
 	/* don't message if we are not being verbose about combat, unless it's a thrust polearm */
 	if (!flags.verbose && !ranged)
 		return;
+	/* edge case: hmon takes care of these special hitmessages */
+	if (otmp->otyp == EGG)
+		return;
 
 	if (!ranged) {
 		char *swingwords[] = {"thrusts", "swings"};
@@ -13215,25 +13218,30 @@ int vis;						/* True if action is at all visible to the player */
 		switch (weapon->oclass)
 		{
 		case POTION_CLASS:
+			{
 			/* potionhit() requires our potion to be free, so don't use destroy_one_magr_weapon */
 			if (cnt > 1L)
 				otmp = splitobj(weapon, 1L);
 			else {
 				otmp = weapon;
 			}
-			if (otmp->where != OBJ_FREE) {
-				if (youagr) {
+			int waswhere = otmp->where;
+			
+			switch(otmp->where) {
+				case OBJ_FREE:
+					break;
+				case OBJ_INVENT:
 					if (otmp == uwep) uwepgone();
 					freeinv(otmp);
-				}
-				else if (magr) {
+					break;
+				case OBJ_MINVENT:
 					if (otmp == MON_WEP(magr)) MON_WEP(magr) = (struct obj *)0;
 					m_freeinv(otmp);
-				}
-				else {
+					break;
+				default:
 					impossible("how to free potion?");
 					obj_extract_self(otmp);
-				}
+					break;
 			}
 
 			if (otmp == weapon) {
@@ -13247,6 +13255,14 @@ int vis;						/* True if action is at all visible to the player */
 			/* do the potion effects */
 			/* note: if player is defending, this assumes the potion was thrown */
 			potionhit(mdef, otmp, youagr);
+
+			/* corner-case: AT_HODS */
+			if (waswhere == OBJ_INVENT && !youagr) {
+				Your("%s vanishes!", makesingular(xname(weapon)));
+			}
+			else if (waswhere == OBJ_MINVENT && magr != weapon->ocarry) {
+				pline("%s %s vanishes!", s_suffix(Monnam(weapon->ocarry)), makesingular(xname(weapon)));
+			}
 			/* check if defender was killed */
 			if (*hp(mdef) < 1) {
 				*weapon_p = NULL;
@@ -13258,6 +13274,7 @@ int vis;						/* True if action is at all visible to the player */
 			pd = (youdef ? youracedata : mdef->data);
 			/* set basedmg */
 			basedmg = 1;
+			}
 			break;
 
 		default:
@@ -13299,6 +13316,11 @@ int vis;						/* True if action is at all visible to the player */
 						}
 						hittxt = TRUE;
 					}
+					else if (magr && (vis&VIS_MAGR)) {
+						pline("%s breaks %s mirror!", Monnam(magr),
+							shk_mons(buf, weapon, magr));
+						hittxt = TRUE;
+					}
 					destroy_one_magr_weapon = TRUE;
 					real_attack = FALSE;
 					/* set basedmg */
@@ -13313,6 +13335,9 @@ int vis;						/* True if action is at all visible to the player */
 						You("succeed in destroying %s camera.  Congratulations!",
 							shk_your(buf, weapon));
 					}
+					else if (magr && (vis&VIS_MAGR)) {
+						pline("%s smashes %s camera!", Monnam(magr), shk_mons(buf, weapon, magr));
+					}
 					destroy_one_magr_weapon = TRUE;
 					real_attack = FALSE;
 					basedmg = 1;
@@ -13320,7 +13345,7 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 
 			case BOOMERANG:
-				/* boomerangs can break when used as melee weapons */
+				/* boomerangs can break when used as melee weapons by the player */
 				if (youagr && (melee || thrust) &&
 					rnl(4) == 4 - 1 && !weapon->oartifact) {
 					if (dohitmsg) {
@@ -15096,29 +15121,31 @@ int vis;						/* True if action is at all visible to the player */
 	/* silently handle destroyed weapons */
 	if (destroy_one_magr_weapon || destroy_all_magr_weapon) {
 		boolean deallocweapon = (weapon->quan == 1L || destroy_all_magr_weapon );
-		if (youagr) {
-			if (deallocweapon) {
-				if (weapon == uwep)
-					uwepgone();
-				else if (weapon == uswapwep)
-					uswapwepgone();
-			}
-			if (weapon->where == OBJ_FREE)
+		Strcpy(buf, destroy_all_magr_weapon ? xname(weapon) : makesingular(xname(weapon)));
+		switch(weapon->where)
+		{
+			case OBJ_FREE:
 				obfree(weapon, (struct obj *)0);
-			else if (weapon->where == OBJ_INVENT) {
+				break;
+			case OBJ_INVENT:
+				if (!youagr) {
+					Your("%s %s!", buf, vtense(buf, "vanish"));
+				}
+				if (deallocweapon) {
+					if (weapon == uwep)
+						uwepgone();
+					else if (weapon == uswapwep)
+						uswapwepgone();
+				}
 				if (destroy_all_magr_weapon)
 					useupall(weapon);
 				else
 					useup(weapon);
-			}
-			else
-				impossible("used up weapon is not in player's inventory or free (%d)", weapon->where);
-		}
-		else {
-			if (weapon->where == OBJ_FREE)
-				obfree(weapon, (struct obj *)0);
-			else if (weapon->where == OBJ_MINVENT)
-			{
+				break;
+			case OBJ_MINVENT:
+				if (magr != weapon->ocarry) {
+					pline("%s %s %s!", s_suffix(Monnam(weapon->ocarry)), buf, vtense(buf, "vanish"));
+				}
 				if (destroy_all_magr_weapon)
 				{
 					m_freeinv(weapon);
@@ -15126,9 +15153,10 @@ int vis;						/* True if action is at all visible to the player */
 				}
 				else
 					m_useup(magr, weapon);
-			}
-			else
-				impossible("used up weapon is not in monster's inventory or free (%d)", weapon->where);
+				break;
+			default:
+				impossible("useup weapon from where? (%d)", weapon->where);
+				break;
 		}
 		if (deallocweapon) {
 			weapon = (struct obj *)0;
