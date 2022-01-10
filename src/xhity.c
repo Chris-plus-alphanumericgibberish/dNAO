@@ -237,10 +237,10 @@ struct monst * mdef;
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				if ((dx || dy) && !DEADMONSTER(mdef)){
-					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, x(mdef) + dx, y(mdef) + dy, -dx, -dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 				else {
-					projectile(&youmonst, otmp, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, TRUE, FALSE, FALSE);
 				}
 			}
 		}
@@ -3119,10 +3119,10 @@ int *shield_margin;
 
 	boolean melee = (hmoncode & HMON_WHACK);
 	boolean thrust = (hmoncode & HMON_THRUST);
-	boolean misthrown = (hmoncode & HMON_MISTHROWN);
 	boolean fired = (hmoncode & HMON_FIRED);
-	boolean thrown = (misthrown || fired);
+	boolean thrown = (hmoncode & HMON_PROJECTILE);
 	boolean trapped = (hmoncode & HMON_TRAP);
+	boolean misthrown = (thrown && weapon && is_ammo(weapon) && weapon->oclass != GEM_CLASS && !fired);
 
 	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
 	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
@@ -12039,7 +12039,7 @@ int dieroll;
 		(struct attack *)0,	/* no attack */
 		obj_p,				/* hitting mdef with obj */
 		(void *)0,			/* no launcher*/
-		HMON_FIRED,			/* obj should deal full thrown/fired damage */
+		HMON_PROJECTILE|HMON_FIRED,			/* obj should deal full thrown/fired damage */
 		0,					/* no damage override */
 		0,					/* no bonus damage */
 		TRUE,				/* yes, print hit message */
@@ -12058,7 +12058,7 @@ int dieroll;
 {
 	/* melee traps print their own messages, while ranged traps rely on hmon to print hitmessages */
 	boolean printmsg;
-	if (type&HMON_FIRED)
+	if (type&HMON_PROJECTILE)
 		printmsg = TRUE;
 	else if (type&HMON_WHACK)
 		printmsg = FALSE;
@@ -12210,10 +12210,10 @@ int vis;						/* True if action is at all visible to the player */
 
 	boolean melee = (hmoncode & HMON_WHACK);
 	boolean thrust = (hmoncode & HMON_THRUST);
-	boolean misthrown = (hmoncode & HMON_MISTHROWN);
 	boolean fired = (hmoncode & HMON_FIRED);
-	boolean thrown = (misthrown || fired);
+	boolean thrown = (hmoncode & HMON_PROJECTILE);
 	boolean trapped = (hmoncode & HMON_TRAP);
+	boolean misthrown = (thrown && weapon && is_ammo(weapon) && weapon->oclass != GEM_CLASS && !fired);
 
 	struct obj * launcher = (struct obj *)(fired ? vpointer : 0);
 	struct trap * trap = (struct trap *)(trapped ? vpointer : 0);
@@ -14527,7 +14527,7 @@ int vis;						/* True if action is at all visible to the player */
 				getdir((char *)0);
 				if (u.dx || u.dy){
 					You("toss it away.");
-					projectile(&youmonst, otmp, (void *)0, HMON_MISTHROWN, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE, FALSE);
+					projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE, u.ux, u.uy, u.dx, u.dy, 0, (int)((ACURRSTR) / 2 - otmp->owt / 40 + weapon->spe), FALSE, FALSE, FALSE);
 				}
 				else{
 					You("drop it at your feet.");
@@ -16656,7 +16656,7 @@ android_combo()
 		/* attack (melee twice OR throw lightsaber) */
 		if (!mdef) {
 			if(uwep)
-				projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+				projectile(&youmonst, uwep, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 		}
 		else {
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -16680,7 +16680,7 @@ android_combo()
 				/* attack (melee once OR throw lightsaber) */
 				if (!mdef) {
 					if(uwep)
-						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+						projectile(&youmonst, uwep, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -16709,7 +16709,7 @@ android_combo()
 				/* attack (melee twice OR throw lightsaber) */
 				if (!mdef) {
 					if(uwep)
-						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+						projectile(&youmonst, uwep, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 				else {
 					vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
@@ -16914,7 +16914,7 @@ android_combo()
 						xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 					}
 					if(uwep)
-						projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+						projectile(&youmonst, uwep, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 			}
 			else return TRUE;
@@ -16995,7 +16995,7 @@ android_combo()
 				}
 			}
 			if(uwep)
-				projectile(&youmonst, uwep, (void *)0, HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
+				projectile(&youmonst, uwep, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 			u.uen--;
 			flags.botl = 1;
 			youmonst.movement -= 3;

@@ -837,7 +837,7 @@ unsigned trflags;
 		seetrap(trap);
 		pline("%s shoots out at you!", An(xname(otmp)));
 
-		projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		projectile((struct monst *)0, otmp, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
 	    case ROCKTRAP:
@@ -859,7 +859,7 @@ unsigned trflags;
 			the(ceiling(u.ux, u.uy)),
 			an(xname(otmp))
 			);
-		projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		projectile((struct monst *)0, otmp, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE);
 		break;
 
 	    case SQKY_BOARD:	    /* stepped on a squeaky board */
@@ -1783,9 +1783,9 @@ int style;
 			}
 			/* boulder may hit creature */
 			int dieroll = rnd(20);
-			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, (int *) 0) > dieroll || dieroll == 1) {
+			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, 0, (int *) 0) > dieroll || dieroll == 1) {
 				struct obj ** sobj_p = &singleobj;
-				hmon_with_trap(mtmp, sobj_p, trap, HMON_FIRED, dieroll);
+				hmon_with_trap(mtmp, sobj_p, trap, HMON_PROJECTILE|HMON_FIRED, dieroll);
 				if(!(*sobj_p)) used_up = TRUE;
 			}
 			else if (cansee(bhitpos.x, bhitpos.y))
@@ -1798,11 +1798,11 @@ int style;
 			if (!u.uinvulnerable){
 				/* boulder may hit you */
 				int dieroll = rnd(20);
-				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_FIRED|HMON_TRAP, 0, (int *) 0) > dieroll || dieroll == 1) {
+				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, 0, (int *) 0) > dieroll || dieroll == 1) {
 					killer = "rolling boulder trap";
 					killer_format = KILLED_BY_AN;
 					struct obj ** sobj_p = &singleobj;
-					hmon_with_trap(&youmonst, sobj_p, trap, HMON_FIRED, dieroll);
+					hmon_with_trap(&youmonst, sobj_p, trap, HMON_PROJECTILE|HMON_FIRED, dieroll);
 					if(!(*sobj_p)) used_up = TRUE;
 				}
 				else if (!Blind)
@@ -2139,7 +2139,7 @@ struct monst *mtmp;
 			extract_nobj(otmp, &trap->ammo);
 			if (in_sight)
 				seetrap(trap);
-			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE)&MM_DEF_DIED)
+			if (projectile((struct monst *)0, otmp, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE)&MM_DEF_DIED)
 				trapkilled = TRUE;
 			break;
 		case ROCKTRAP:
@@ -2157,7 +2157,7 @@ struct monst *mtmp;
 			extract_nobj(otmp, &trap->ammo);
 			if (in_sight) seetrap(trap);
 
-			if (projectile((struct monst *)0, otmp, trap, HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE)&MM_DEF_DIED)
+			if (projectile((struct monst *)0, otmp, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, trap->tx, trap->ty, 0, 0, 0, 0, FALSE, FALSE, FALSE)&MM_DEF_DIED)
 			    trapkilled = TRUE;
 			break;
 

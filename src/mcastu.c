@@ -2599,7 +2599,7 @@ int tary;
 			m_shot.s = TRUE;
 			m_shot.o = otmp->otyp;
 			for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
-				(void)projectile(magr, otmp, (void *)0, HMON_FIRED, x(mdef), y(mdef), 0, 0, 0, 0, FALSE, FALSE, FALSE);
+				(void)projectile(magr, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, x(mdef), y(mdef), 0, 0, 0, 0, FALSE, FALSE, FALSE);
 			}
 		}
 		return MM_HIT;

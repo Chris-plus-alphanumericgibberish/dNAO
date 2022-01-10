@@ -612,8 +612,7 @@ xchar x, y;
 	obj_extract_self(kickobj);
 	addtobill(kickobj, FALSE, FALSE, TRUE);
 	newsym(x, y);
-	projectile(&youmonst, kickobj, (void *)0,
-		((is_ammo(kickobj) && kickobj->oclass != GEM_CLASS) ? HMON_MISTHROWN : HMON_FIRED)|HMON_KICKED,
+	projectile(&youmonst, kickobj, (void *)0, HMON_PROJECTILE|HMON_KICKED,
 		x, y, u.dx, u.dy, 0, range, FALSE, FALSE, FALSE);
 
 	return(1);
