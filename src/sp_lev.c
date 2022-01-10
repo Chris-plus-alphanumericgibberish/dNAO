@@ -1382,30 +1382,30 @@ default_case:
 				else {
 					//Knight
 					stuff = mksobj(TWO_HANDED_SWORD, mkobjflags);
-					set_material_gm(otmp, SILVER);
-					add_oprop(otmp, OPROP_PSIOW);
-					add_oprop(otmp, OPROP_VORPW);
-					otmp->spe = 3;
+					set_material_gm(stuff, SILVER);
+					add_oprop(stuff, OPROP_PSIOW);
+					add_oprop(stuff, OPROP_VORPW);
+					stuff->spe = 3;
 					add_to_container(otmp, stuff);
 
 					stuff = mksobj(find_gcirclet(), mkobjflags);
-					set_material_gm(otmp, SILVER);
-					otmp->spe = 2;
+					set_material_gm(stuff, SILVER);
+					stuff->spe = 2;
 					add_to_container(otmp, stuff);
 
 					stuff = mksobj(ARCHAIC_PLATE_MAIL, mkobjflags);
-					set_material_gm(otmp, SILVER);
-					otmp->spe = 2;
+					set_material_gm(stuff, SILVER);
+					stuff->spe = 2;
 					add_to_container(otmp, stuff);
 
 					stuff = mksobj(ARCHAIC_GAUNTLETS, mkobjflags);
-					set_material_gm(otmp, SILVER);
-					otmp->spe = 2;
+					set_material_gm(stuff, SILVER);
+					stuff->spe = 2;
 					add_to_container(otmp, stuff);
 
 					stuff = mksobj(ARCHAIC_BOOTS, mkobjflags);
-					set_material_gm(otmp, SILVER);
-					otmp->spe = 2;
+					set_material_gm(stuff, SILVER);
+					stuff->spe = 2;
 					add_to_container(otmp, stuff);
 				}
 			break;
