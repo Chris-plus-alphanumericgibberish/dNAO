@@ -2937,6 +2937,13 @@ int dz;
 			pline("%s seems not to notice you.", Monnam(mtmp));
 		return(0);
     }
+    if (is_deaf(mtmp) && !mtmp->mcansee) {
+		/* If it is unseen, the player can't tell the difference between
+		   not noticing him and just not existing, so skip the message. */
+		if (canspotmon(mtmp))
+			pline("%s seems not to notice you.", Monnam(mtmp));
+		return(0);
+    }
     /* sleeping monsters won't talk unless they wake up, except priests (who wake up) */
 	if (mtmp->msleeping){
 		if(mtmp->ispriest || !rn2(2)) {
