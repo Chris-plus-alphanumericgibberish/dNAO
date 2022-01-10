@@ -4718,6 +4718,28 @@ register xchar x, y;
 #ifdef OVL2
 
 char *
+shk_mons(buf, obj, mtmp)
+char *buf;
+struct obj *obj;
+struct monst * mtmp;
+{
+	if (!shk_owns(buf, obj) && !mon_owns(buf, obj))
+	    Strcpy(buf, carried(obj) ? "their" : "the");
+	return buf;
+}
+
+char *
+Shk_Mons(buf, obj, mtmp)
+char *buf;
+struct obj *obj;
+struct monst * mtmp;
+{
+	(void) shk_mons(buf, obj, mtmp);
+	*buf = highc(*buf);
+	return buf;
+}
+
+char *
 shk_your(buf, obj)
 char *buf;
 struct obj *obj;
