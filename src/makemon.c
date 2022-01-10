@@ -27,7 +27,6 @@ STATIC_DCL int FDECL(align_shift, (struct permonst *));
 #endif /* OVL0 */
 STATIC_DCL struct permonst * NDECL(roguemonst);
 STATIC_DCL boolean FDECL(wrong_elem_type, (struct permonst *));
-STATIC_DCL void FDECL(m_initthrow,(struct monst *, int, int, int));
 STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int));
 STATIC_DCL int FDECL(permonst_max_lev,(struct permonst *));
 #ifdef OVL1
@@ -185,7 +184,6 @@ register int x, y, n;
 	}
 }
 
-STATIC_OVL
 void
 m_initthrow(mtmp,otyp,oquan,mkobjflags)
 struct monst *mtmp;
@@ -195,7 +193,7 @@ int mkobjflags;
 	register struct obj *otmp;
 
 	otmp = mksobj(otyp, mkobjflags);
-	otmp->quan = (long) rn1(oquan, 3);
+	otmp->quan = (long) rn1(oquan, (oquan+1)/2);
 	otmp->owt = weight(otmp);
 	otmp->objsize = mtmp->data->msize;
 	if(otyp == ORCISH_ARROW) otmp->opoisoned = OPOISON_BASIC;

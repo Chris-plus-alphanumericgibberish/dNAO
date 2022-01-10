@@ -1328,6 +1328,7 @@ E struct permonst *NDECL(mkzombie);
 E int FDECL(adj_lev, (struct permonst *));
 E struct permonst *FDECL(grow_up, (struct monst *,struct monst *));
 E struct obj * FDECL(mongets, (struct monst *,int,int));
+E void FDECL(m_initthrow,(struct monst *, int, int, int));
 E int FDECL(golemhp, (int));
 E boolean FDECL(peace_minded, (struct permonst *));
 E void FDECL(set_malign, (struct monst *));
