@@ -1854,7 +1854,7 @@ struct obj *obj;
 		int str = infinity_s_mirrored_arc_litness(obj);
 		if (str >= 2)
 			return TRUE;
-		else if (str >= 1);
+		else if (str >= 1)
 			return !rn2(10);
 	}
     return (obj && obj->oartifact && (arti_attack_prop(obj, ARTA_BRIGHT) || 
