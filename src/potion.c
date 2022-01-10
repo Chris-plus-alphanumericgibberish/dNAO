@@ -2786,22 +2786,28 @@ dodip()
 		obj->blessed = obj->cursed = obj->bknown = 0;
 		if (Blind || Hallucination) obj->dknown = 0;
 
-		if (obj->otyp == POT_STARLIGHT)
-			end_burn(obj, FALSE);
 
 		if ((mixture = mixtype(obj, potion)) != 0) {
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
 			obj->otyp = mixture;
 		} else {
 		    switch (obj->odiluted ? 1 : rnd(8)) {
 			case 1:
+				if (obj->otyp == POT_STARLIGHT)
+					end_burn(obj, FALSE);
 				obj->otyp = POT_WATER;
 				break;
 			case 2:
 			case 3:
+				if (obj->otyp == POT_STARLIGHT)
+					end_burn(obj, FALSE);
 				obj->otyp = POT_SICKNESS;
 				break;
 			case 4:
 				{
+				  if (obj->otyp == POT_STARLIGHT)
+				  	end_burn(obj, FALSE);
 				  struct obj *otmp;
 				  otmp = mkobj(POTION_CLASS,FALSE);
 				  obj->otyp = otmp->otyp;
