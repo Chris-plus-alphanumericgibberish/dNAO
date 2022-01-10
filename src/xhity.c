@@ -1765,6 +1765,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damn = 1;
 			attk->damd = 6;
 		}
+		else if(attk->aatyp == AT_5SQR && attk->adtyp == AD_SHDW)
+			GETNEXT
 		else if(attk->aatyp == AT_DSPR)
 			GETNEXT
 		else if(attk->aatyp == AT_ESPR)
