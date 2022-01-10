@@ -476,6 +476,7 @@ int template;
 		ptr->spe_hdr += 6;
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
 		ptr->mflagsa |= (MA_UNDEAD);
+		ptr->mflagsv |= (MV_TELEPATHIC);
 		// ptr->mcolor = CLR_YELLOW;
 		break;
 	case MAD_TEMPLATE:
