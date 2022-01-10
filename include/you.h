@@ -528,6 +528,7 @@ struct you {
 #define	PRAY_ANGER	4
 #define	PRAY_CONV	5
 #define PRAY_INPROG	6
+#define PRAY_IGNORED	7
 
 #define	REC_NONE	0
 #define	REC_REC		1

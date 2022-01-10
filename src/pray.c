@@ -87,6 +87,11 @@ static const char *goatvoices[] = {
     "cacophonous bellowing!",
 };
 
+static const char *bokrugvoices[] = {
+    "rising water.",
+    "rippling waves.",
+};
+
 static const char *goattitles[] = {
     "the Black Goat",
     "the Black Goat of the Woods",
@@ -1472,6 +1477,8 @@ const char *words;
 		do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 	} else if(godnum == GOD_THE_BLACK_MOTHER){
 		You_hear("%s", goatvoices[rn2(SIZE(goatvoices))]);
+	} else if(godnum == GOD_BOKRUG__THE_WATER_LIZARD){
+		You_hear("%s", bokrugvoices[rn2(SIZE(bokrugvoices))]);
 	} else if(godnum == GOD_THE_DREAD_FRACTURE){
 		You_hear("a voice like glass breaking: %s%s%s", quot, words, quot);
 	} else if(godnum == GOD_YOG_SOTHOTH){
@@ -1857,6 +1864,16 @@ dosacrifice()
 		return 0;
 	}
 	
+	if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD 
+		&& (a_gnum(u.ux, u.uy) == GOD_BOKRUG__THE_WATER_LIZARD 
+			|| (a_align(u.ux, u.uy) == A_NONE && a_gnum(u.ux, u.uy) == GOD_NONE))
+	){
+		if (otmp->otyp == CORPSE)
+			feel_cockatrice(otmp, TRUE);
+		pline1(nothing_happens);
+		return 1;
+	}
+
 	if(Misotheism && !(otmp->otyp == AMULET_OF_YENDOR && Is_astralevel(&u.uz))){
 		if (otmp->otyp == CORPSE)
 			feel_cockatrice(otmp, TRUE);
@@ -2266,6 +2283,10 @@ dosacrifice()
 			You("sense a conference between %s and %s.",
 				u_gname(), a_gname());
 			pline("But nothing else occurs.");
+		} else if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD){
+			You("sense %s prepare for a conflict....",
+				a_gname());
+			pline("But nothing else occurs.");
 		} else {
 			You("sense a conflict between %s and %s.",
 				u_gname(), a_gname());
@@ -2499,10 +2520,13 @@ boolean praying;	/* false means no messages should be given */
 
     if ((int)Luck < 0 || godlist[u.ualign.god].anger || alignment < 0)
         p_type = 0;             /* too naughty... */
+    else if (u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD)
+		p_type = 1;		/* always too soon */
     else if ((p_trouble > 0) ? (u.ublesscnt > 200) : /* big trouble */
-	(p_trouble < 0) ? (u.ublesscnt > 100) : /* minor difficulties */
-	(u.ublesscnt > 0))			/* not in trouble */
-	p_type = 1;		/* too soon... */
+		(p_trouble < 0) ? (u.ublesscnt > 100) : /* minor difficulties */
+		(u.ublesscnt > 0) /* not in trouble */
+	)
+		p_type = 1;		/* too soon... */
     else /* alignment >= 0 */ {
 	if(on_altar() && u.ualign.type != galign(p_god))
 	    p_type = 2;
@@ -2590,6 +2614,11 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 
     u.uinvulnerable = FALSE;
 	u.lastprayresult = PRAY_GOOD;
+	if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD){
+		u.lastprayresult = PRAY_IGNORED;
+		Your("prayer goes unanswered.");
+		return 1; //I think this is meaningless?
+	}
     if(p_type == -1) {
 		godvoice(p_god,
 			 gholiness(p_god) == HOLY_HOLINESS ?
@@ -3904,6 +3933,8 @@ int x, y;
 	if(levl[x][y].typ != ALTAR) {
 		if(goat_mouth_at(x, y))
 			return GOD_THE_BLACK_MOTHER;
+		else if(bokrug_idol_at(x, y))
+			return GOD_BOKRUG__THE_WATER_LIZARD;
 		else
 			return GOD_NONE;
 	}
@@ -3950,6 +3981,12 @@ int godnum;
 	if (galign(godnum) == A_VOID && !Role_if(PM_EXILE))
 		return FALSE;
 	if (godnum == GOD_ILSENSINE)
+		return FALSE;
+	if (godnum == GOD_ZO_KALAR && u.detestation_ritual&RITUAL_LAW)
+		return FALSE;
+	if (godnum == GOD_TAMASH && u.detestation_ritual&u.detestation_ritual&RITUAL_NEUTRAL)
+		return FALSE;
+	if (godnum == GOD_LOBON && u.detestation_ritual&RITUAL_CHAOS)
 		return FALSE;
 	if ((godnum == GOD_LOLTH || godnum == GOD_VHAERAUN || godnum == GOD_VER_TAS || godnum == GOD_KIARANSALI || godnum == GOD_KEPTOLO)
 		&& !Race_if(PM_DROW))

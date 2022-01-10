@@ -13041,6 +13041,74 @@ int type;
 #ifdef OVL1
 
 /*
+ * Returns true if their IS a conflict (which causes peace minded to return false: the monster is not peaceful)
+ */
+
+STATIC_OVL
+boolean
+conflicting_unaligned_alignment(gnum, ptr)
+int gnum;
+struct permonst *ptr;
+{
+	switch(gnum){
+		case GOD_THE_SILENCE:
+			if(ptr->mlet == S_BLOB || ptr->mlet == S_PUDDING)
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_CHAOS:
+			if(ptr->maligntyp < 0)
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_MOLOCH:
+			if(ptr->maligntyp < 0 || is_demon(ptr))
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_AN_ALIEN_GOD:
+			if(ptr->maligntyp == 0)
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_THE_BLACK_MOTHER:
+			if(goat_monster(ptr))
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_NODENS:
+			if(ptr->mtyp == PM_NIGHTGAUNT)
+				return FALSE;
+			else if(ptr->mtyp == PM_DREAM_QUASIELEMENTAL)
+				return FALSE;
+			else if(is_aquatic(ptr) && !is_primordial(ptr) && !is_great_old_one(ptr) && !is_alien(ptr))
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_BAST:
+			if(ptr->mlet == S_FELINE && ptr->mtyp != PM_MANTICORE)
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_THE_DREAD_FRACTURE:
+			return TRUE;
+		break;
+		case GOD_YOG_SOTHOTH:
+			if(likes_magic(ptr)) /*Yog is all wizards*/
+				return FALSE;
+			else return TRUE;
+		break;
+		case GOD_BOKRUG__THE_WATER_LIZARD:
+			if(ptr->mlet == S_LIZARD || is_aquatic(ptr)) /*Note: Beings of Ib are aquatic*/
+				return FALSE;
+			else return TRUE;
+		break;
+	}
+	// Default to hostile
+	return TRUE;
+}
+
+/*
  *	Alignment vs. yours determines monster's attitude to you.
  *	( some "animal" types are co-aligned, but also hungry )
  */
@@ -13130,8 +13198,15 @@ register struct permonst *ptr;
 	if (race_hostile(ptr)) return FALSE;
 
 	/* the monster is hostile if its alignment is different from the
-	 * player's */
-	if (sgn(mal) != sgn(ual)) return FALSE;
+	 * player's 
+	 * Normal: Done by comparing the signs on the alignments.
+	 * A_NONE: Done by a special function.
+	 */
+	if(ual == A_NONE){
+		if(conflicting_unaligned_alignment(u.ualign.god, ptr))
+			return FALSE;
+	}
+	else if (sgn(mal) != sgn(ual)) return FALSE;
 
 	/* Negative monster hostile to player with Amulet. */
 	if (mal < A_NEUTRAL && u.uhave.amulet) return FALSE;

@@ -365,6 +365,9 @@ boolean dumping;
 		if(u.lastprayresult==PRAY_GOOD){
 			Sprintf(buf, "That prayer was well received");
 			put_enl(buf);
+		} else if(u.lastprayresult==PRAY_IGNORED){
+			Sprintf(buf, "That prayer went unanswered");
+			put_enl(buf);
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly received");
 			put_enl(buf);
@@ -1408,6 +1411,9 @@ resistances_enlightenment()
 		putstr(en_win, 0, buf);
 		if(u.lastprayresult==PRAY_GOOD){
 			Sprintf(buf, "That prayer was well recieved");
+			putstr(en_win, 0, buf);
+		} else if(u.lastprayresult==PRAY_IGNORED){
+			Sprintf(buf, "That prayer went unanswered");
 			putstr(en_win, 0, buf);
 		} else if(u.lastprayresult==PRAY_BAD){
 			Sprintf(buf, "That prayer was poorly recieved");

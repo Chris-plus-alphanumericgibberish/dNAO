@@ -14294,7 +14294,15 @@ int vis;						/* True if action is at all visible to the player */
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && check_oprop(otmp, OPROP_FLAYW))
 			)
 		){
-			if(otmp && otmp->oartifact){
+			if(otmp && otmp->oartifact == ART_IBITE_ARM){
+				if(otmp->otyp == CLAWED_HAND); /*Ghost hand doesn't notice it's too soft to harm the target*/
+				else {
+					/* Ghost elbow not so much: damage entirely mitigated */
+					subtotl = 1;
+					resisted_thick_skin = TRUE;
+				}
+			}
+			else if(otmp && otmp->oartifact){
 				/* damage partly mitigated */
 				subtotl /= 4;
 				partly_resisted_thick_skin = TRUE;

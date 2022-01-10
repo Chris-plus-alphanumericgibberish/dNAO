@@ -279,6 +279,10 @@ int oartifact;
 	}
 
 	int attackmask = objects[otyp].oc_dtyp;
+	if (oartifact == ART_IBITE_ARM){
+		//No claws! Just a flabby hand.
+		attackmask = WHACK;
+	}
 
 	/* catch special cases */
 	if (   oartifact == ART_YORSHKA_S_SPEAR
@@ -312,10 +316,6 @@ int oartifact;
 		|| oartifact == ART_FROST_BRAND
 		){
 		attackmask |= EXPLOSION;
-	}
-	if (oartifact == ART_IBITE_ARM){
-		//No claws! Just a flabby hand.
-		attackmask = WHACK;
 	}
 	/* if it's not any of the above, we're just smacking things with it */
 	if (!attackmask)

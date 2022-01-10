@@ -452,6 +452,7 @@
 							)
 #define is_primordial(ptr)	(((ptr)->mflagsa & MA_PRIMORDIAL) != 0L)
 #define is_great_old_one(ptr)	(((ptr)->mflagsa & MA_G_O_O) != 0L)
+#define is_alien(ptr)	(((ptr)->mflagsa & MA_ET) != 0L)
 #define is_keter(ptr)		((ptr)->mlet == S_KETER)
 #define is_angel(ptr)		((((ptr)->mflagsa & MA_MINION) != 0L) && ((ptr)->mlet == S_LAW_ANGEL || (ptr)->mlet == S_NEU_ANGEL || (ptr)->mlet == S_CHA_ANGEL))
 #define fallen(mx) 			(has_template(mx, MAD_TEMPLATE) || has_template(mx, FALLEN_TEMPLATE) || mx->mfaction == LAMASHTU_FACTION)

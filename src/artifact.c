@@ -9015,6 +9015,23 @@ arti_invoke(obj)
 					newsym(u.ux, u.uy);
 					u.detestation_ritual |= RITUAL_STARTED;
 					u.detestation_ritual |= Align2ritual(altaralign);
+					if(u.ugodbase[UGOD_CURRENT] != GOD_BOKRUG__THE_WATER_LIZARD && (u.ugodbase[UGOD_CURRENT] == godnum || (u.detestation_ritual&RITUAL_DONE) == RITUAL_DONE)){
+						You("have a sudden sense of a new direction.");
+						/* The player wears a helm of opposite alignment? */
+						if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
+							u.ugodbase[UGOD_CURRENT] = GOD_BOKRUG__THE_WATER_LIZARD;
+						else {
+							u.ualign.god = u.ugodbase[UGOD_CURRENT] = GOD_BOKRUG__THE_WATER_LIZARD;
+							u.ualign.type = A_NONE;
+						}
+						u.ublessed = 0;
+						flags.botl = 1;
+
+						u.lastprayed = moves;
+						u.reconciled = REC_NONE;
+						u.lastprayresult = PRAY_CONV;
+						adjalign((int)(galign(u.ugodbase[UGOD_ORIGINAL]) * (ALIGNLIM / 2)));
+					}
 					if((u.detestation_ritual&RITUAL_DONE) == RITUAL_DONE){
 						struct obj *arm = mksartifact(ART_IBITE_ARM);
 						arm->oerodeproof = TRUE;
