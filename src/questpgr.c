@@ -488,7 +488,7 @@ qt_montype()
 			case 5:
 				if(rn2(2)) return &mons[PM_DEEP_ONE];
 				else if(rn2(2)) return &mons[PM_DEEPER_ONE];
-				else if(rn2(2)) return &mons[PM_DEEP_DWELLER];
+				else if(rn2(4)) return &mons[PM_DEEP_DWELLER];
 				else return &mons[PM_DEEPEST_ONE];
 			break;
 			case 6:
