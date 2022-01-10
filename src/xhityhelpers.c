@@ -2522,17 +2522,13 @@ struct attack * attk;
 	/* try to find direction (u.dx and u.dy may be incorrect) */
 	int dx = sgn(tarx - x(magr));
 	int dy = sgn(tary - y(magr));
-	struct attack blood = {AT_ESPR, AD_BLUD,
-		(youagr && otmp == uwep && u.twoweap && uswapwep && rakuyo_prop(uswapwep)) ? 2 : 1, 
-		12+otmp->spe*2
-	};
+	struct attack blood = {AT_ESPR, AD_BLUD, 1, 12+otmp->spe*2};
 	int result = 0;
 	if (isok(tarx + dx, tary + dy) &&
 		isok(tarx - dx, tary - dy) &&
 		x(magr) == tarx - dx &&
 		y(magr) == tary - dy
-		)
-	{
+	){
 		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
 								u.uswallow ? u.ustuck : 
 								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
@@ -2555,8 +2551,6 @@ struct attack * attk;
 		}
 		if(u.uinsight >= 40){
 			explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
-			if(youagr && otmp == uwep && u.twoweap && uswapwep && rakuyo_prop(uswapwep))
-				explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
 		}
 	}
 	return result;
