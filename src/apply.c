@@ -4230,7 +4230,7 @@ use_crook (obj)
 	struct obj *obj;
 {
 	int res = 0, typ, max_range = 4, tohit;
-	coord cc;
+	coord cc = {0};
 	struct monst *mtmp;
 	struct obj *otmp;
 
@@ -4286,7 +4286,7 @@ use_crook (obj)
 		return use_pole(obj);
 	break;
 	case 2:	/*Hook Monster */
-		res = pick_polearm_target(obj, &mtmp);
+		res = pick_polearm_target(obj, &mtmp, &cc);
 		if(!mtmp)
 			return res;
 		if(mtmp->mpeaceful){
