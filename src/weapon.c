@@ -3141,40 +3141,44 @@ struct obj *obj;
 		/* Not a weapon, weapon-tool, or ammo */
 		return (P_NONE);
 
-#define CHECK_ALTERNATE_SKILL(alt_skill) \
-			if(P_SKILL(objects[obj->otyp].oc_skill) > P_SKILL(alt_skill))\
-				type = objects[obj->otyp].oc_skill;\
-			else if(P_MAX_SKILL(objects[obj->otyp].oc_skill) >= P_MAX_SKILL(alt_skill))\
-				type = objects[obj->otyp].oc_skill;\
-			else type = alt_skill;
+#define CHECK_ALTERNATE_SKILL(alt_skill) {\
+	if(P_SKILL(type) > P_SKILL(alt_skill));\
+	else if(P_MAX_SKILL(type) >= P_MAX_SKILL(alt_skill));\
+	else type = alt_skill;\
+}
+	type = objects[obj->otyp].oc_skill;
+	
+	if(obj->oartifact == ART_SUNSWORD){
+		CHECK_ALTERNATE_SKILL(P_SHORT_SWORD)
+	}
+	else if(obj->oartifact == ART_YORSHKA_S_SPEAR){
+		CHECK_ALTERNATE_SKILL(P_HAMMER)
+	}
+	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD){
+		CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
+	}
+	else if(obj->oartifact == ART_TORCH_OF_ORIGINS){
+		type = P_CLUB;
+	}
+	else if(obj->oartifact == ART_SINGING_SWORD){
+		type = P_MUSICALIZE;
+	}
 
-	if(obj){
-		if(obj->oartifact == ART_SUNSWORD){
-			CHECK_ALTERNATE_SKILL(P_SHORT_SWORD)
-		}
-		else if(obj->oartifact == ART_YORSHKA_S_SPEAR){
-			CHECK_ALTERNATE_SKILL(P_HAMMER)
-		}
-		else if(obj->otyp == DOUBLE_LIGHTSABER && !obj->altmode){
+	if(obj->otyp == DOUBLE_LIGHTSABER){
+		if(!obj->altmode)
 			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
-		}
-		else if(obj->otyp == ROD_OF_FORCE && !uarms && !u.twoweap){
+	}
+	else if(obj->otyp == ROD_OF_FORCE){
+		if(!uarms && !u.twoweap)
 			CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
-		}
-		else if(obj->otyp == KHOPESH){
-			CHECK_ALTERNATE_SKILL(P_AXE)
-		}
-		else if(obj->oartifact == ART_TORCH_OF_ORIGINS){
-			type = P_CLUB;
-		}
-		else if(obj->oartifact == ART_SINGING_SWORD){
-			type = P_MUSICALIZE;
-		}
-		else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1){
-			type = (int)obj->ovar1;
-		}
-		else type = objects[obj->otyp].oc_skill;
-	} else type = objects[obj->otyp].oc_skill;
+	}
+	else if(obj->otyp == KHOPESH){
+		CHECK_ALTERNATE_SKILL(P_AXE)
+	}
+	else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1){
+		type = (int)obj->ovar1;
+	}
+
 	return ((type < 0) ? -type : type);
 }
 
