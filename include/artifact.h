@@ -54,6 +54,7 @@
 #define ARTA_EXPLCOLDX	0x01000000L /* cold explosion; 100% chance*/
 #define ARTA_EXPLELECX	0x02000000L /* elec explosion; 100% chance*/
 #define ARTA_KNOCKBACKX	0x04000000L /* knockback; 100% chance*/
+#define ARTA_RETURNING  0x08000000L /* returns to the hand when thrown */
 
 #define ARTP_SEEK		0x0001L /* helps you search, ie, adds enhancement bonus to attempts -- only coded for mainhand weapons */
 #define ARTP_NOCALL		0x0002L /* prevents demons from being gated in */

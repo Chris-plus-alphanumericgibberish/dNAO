@@ -195,13 +195,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 	if(magr && !(hmoncode & HMON_KICKED)){
 		if ((thrownobj->oartifact == ART_MJOLLNIR && (youagr ? (Role_if(PM_VALKYRIE)) : magr ? (magr->mtyp == PM_VALKYRIE) : FALSE)) ||
 			(thrownobj->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS && (youagr ? (Race_if(PM_DWARF)) : magr ? (is_dwarf(magr->data)) : FALSE)) ||
-			thrownobj->oartifact == ART_SICKLE_MOON ||
-			thrownobj->oartifact == ART_ANNULUS ||
-			thrownobj->oartifact == ART_KHAKKHARA_OF_THE_MONKEY ||
-			thrownobj->oartifact == ART_DART_OF_THE_ASSASSIN ||
-			thrownobj->oartifact == ART_WINDRIDER ||
-			check_oprop(thrownobj, OPROP_RETRW) ||
-			thrownobj->oartifact == ART_AMHIMITL
+			arti_returning(thrownobj) ||
+			check_oprop(thrownobj, OPROP_RETRW)
 		) {
 			returning = TRUE;
 			if(uandroid && youagr && impaired){
@@ -1828,12 +1823,8 @@ int shotlimit;
 
 	/* For most things, limit multishot to ammo supply */
 	if ((long)multishot > ammo->quan && !(
-		ammo->oartifact == ART_WINDRIDER ||
 		check_oprop(ammo, OPROP_RETRW) ||
-		ammo->oartifact == ART_SICKLE_MOON ||
-		ammo->oartifact == ART_ANNULUS ||
-		ammo->oartifact == ART_AMHIMITL ||
-		ammo->oartifact == ART_DART_OF_THE_ASSASSIN ||
+		(arti_returning(ammo) && objects[ammo->otyp].oc_merge) ||
 		(launcher && is_blaster(launcher))
 		))
 		multishot = (int)ammo->quan;
