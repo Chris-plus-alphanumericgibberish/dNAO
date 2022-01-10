@@ -165,6 +165,9 @@ ENDMAP
 STAIR:(29,04),down
 STAIR:(39,14),up
 
+# Non diggable walls
+NON_DIGGABLE:(00,00,74,19)
+
 # Cassilda (real quest leader)
 MONSTER:'@',"Cassilda the Iron Maiden",(34,09)
 
