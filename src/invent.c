@@ -3006,7 +3006,7 @@ winid *datawin;
 			/* other stuff
 			 */
 			buf[0] = '\0';
-			ADDCLASSPROP((check_oprop(obj, OPROP_DEEPW && obj->spe < 8)), "telepathically lashes out");
+			ADDCLASSPROP((check_oprop(obj, OPROP_DEEPW) && obj->spe < 8), "telepathically lashes out");
 			ADDCLASSPROP((check_oprop(obj, OPROP_VORPW)), "is vorpal");
 			ADDCLASSPROP((check_oprop(obj, OPROP_MORGW)), "inflicts unhealing wounds while cursed");
 			ADDCLASSPROP((check_oprop(obj, OPROP_FLAYW)), "destroys armor");
