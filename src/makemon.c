@@ -13387,7 +13387,7 @@ long
 init_doll_sales()
 {
 	int i, j;
-	long tmp, dollTypes;
+	long tmp, dollTypes = 0;
 	long dolltypes[] = {
 		DOLLMAKER_EFFIGY,
 		DOLLMAKER_JUMPING,
