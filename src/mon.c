@@ -1848,7 +1848,10 @@ movemon()
 			set_malign(mtmp);
 		}
 	}
-	if(mtmp->data->msound == MS_GLYPHS){
+	if(mtmp->data->msound == MS_GLYPHS
+		|| quest_faction(mtmp)
+		|| (mtmp->mtyp == PM_LADY_CONSTANCE && Role_if(PM_MADMAN))
+	){
 		if(!mtmp->mpeaceful && mtmp->mhp >= mtmp->mhpmax && mtmp->m_lev >= mtmp->data->mlevel-1){
 			pline("%s calms down...", Amonnam(mtmp));
 			mtmp->mpeaceful = 1;
