@@ -1306,16 +1306,21 @@ asGuardian:
 				case 2:
 					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity+10) pline("%s sings a resonant note.", Monnam(mtmp));
 					else pline("%s sings a harmless song of ruin.", Monnam(mtmp));
-					ix = rn2(COLNO);
-					iy = rn2(ROWNO);
+					int trycount;
 					for(i = rnd(5); i > 0; i--){
-						if(isok(ix,iy) && !(ix == u.ux && iy == u.uy)){
-							ttmp = t_at(ix, iy);
-							if(levl[ix][iy].typ <= SCORR || levl[ix][iy].typ == CORR || levl[ix][iy].typ == ROOM){
-								levl[ix][iy].typ = CORR;
-								if(!does_block(ix,iy,&levl[ix][iy])) unblock_point(ix,iy);	/* vision:  can see through */
-								if(ttmp) delfloortrap(ttmp);
-								levl[ix][iy].typ = CORR;
+						trycount = 500;
+						while(trycount-- > 0){
+							ix = rn2(COLNO);
+							iy = rn2(ROWNO);
+							if(isok(ix,iy) && !(ix == u.ux && iy == u.uy)){
+								ttmp = t_at(ix, iy);
+								if((levl[ix][iy].typ <= SCORR || levl[ix][iy].typ == CORR || levl[ix][iy].typ == ROOM) && levl[ix][iy].typ != STONE){
+									levl[ix][iy].typ = CORR;
+									if(!does_block(ix,iy,&levl[ix][iy])) unblock_point(ix,iy);	/* vision:  can see through */
+									if(ttmp) delfloortrap(ttmp);
+									levl[ix][iy].typ = CORR;
+									trycount = 0;
+								}
 							}
 						}
 					}
