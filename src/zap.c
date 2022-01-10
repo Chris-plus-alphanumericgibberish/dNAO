@@ -237,11 +237,11 @@ struct obj *otmp;
 
 	switch(otyp) {
 	case WAN_STRIKING:
+	case ROD_OF_FORCE:
 		use_skill(P_WAND_POWER, wandlevel(otyp));
-		zap_type_text = "wand";
+		zap_type_text = otyp == ROD_OF_FORCE ? "rod" : "wand";
 		/* fall through */
 	case SPE_FORCE_BOLT:
-	case ROD_OF_FORCE:
 		reveal_invis = TRUE;
 		if (MON_WEP(mtmp) && MON_WEP(mtmp)->otyp == ROD_OF_FORCE) {
 			MON_WEP(mtmp)->age = min(MON_WEP(mtmp)->age+10000, LIGHTSABER_MAX_CHARGE);
