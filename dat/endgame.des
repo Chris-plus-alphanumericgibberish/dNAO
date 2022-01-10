@@ -536,27 +536,27 @@ MESSAGE: "Here the High Temples of the aligned gods are located."
 MESSAGE: "You sense alarm, hostility, and excitement in the air!"
 GEOMETRY:center,center
 MAP
-                              ---------------                              
-                              |AAAAAAAAAAAAA|                              
-                              |AA---------AA|                              
-                              |AA|AAAAAAA|AA|                              
----------------               |AA|A.....A|AA|               ---------------
-|AAAAAAAAAAAAA|               |AA|A.....A|AA|               |AAAAAAAAAAAAA|
-|AA---------AA-|   |-------|  |AA|A.....A|AA|  |-------|   |-AA---------AA|
-|AA|AAAAAAA|AAA-| |-AAAAAAA-| |AA|AAA.AAA|AA| |-AAAAAAA-| |-AAA|AAAAAAA|AA|
-|AA|A.....A|AAAA-|-AAAA.AAAA-||AA----+----AA||-AAAA.AAAA-|-AAAA|A.....A|AA|
-|AA|A......+AAAAA+AAAA...AAAA||AAAAAAAAAAAAA||AAAA...AAAA+AAAAA+......A|AA|
-|AA|A.....A|AAAA-|-AAAA.AAAA-|--|AAAAAAAAA|--|-AAAA.AAAA-|-AAAA|A.....A|AA|
-|AA|AAAAAAA|AAA-| |-AAAAAAA-|   -|---+---|-   |-AAAAAAA-| |-AAA|AAAAAAA|AA|
-|AA---------AA-|   |---+---|    |-AAAAAAA-|    |---+---|   |-AA---------AA|
-|AAAAAAAAAAAAA|      |AAA|-----|-AAAA.AAAA-|-----|AAA|      |AAAAAAAAAAAAA|
----------------      |.AAAAAAAA|AAAA...AAAA|AAAAAAAA.|      ---------------
-                     -------AAA|-AAAA.AAAA-|AAA-------                     
-                           |.AAA|-AAAAAAA-|AAA.|                           
-                           ---AAA|---+---|AAA---                           
-                             |AAAAAAAAAAAAAAA|                             
-                             --.AAAAAAAAAAA.--                             
-                              ---------------                              
+0                              ---------------                              
+1                              |AAAAAAAAAAAAA|                              
+2                              |AA---------AA|                              
+3                              |AA|AAAAAAA|AA|                              
+4---------------               |AA|A.....A|AA|               ---------------
+5|AAAAAAAAAAAAA|               |AA|A.....A|AA|               |AAAAAAAAAAAAA|
+6|AA---------AA-|   |-------|  |AA|A.....A|AA|  |-------|   |-AA---------AA|
+7|AA|AAAAAAA|AAA-| |-AAAAAAA-| |AA|AAA.AAA|AA| |-AAAAAAA-| |-AAA|AAAAAAA|AA|
+8|AA|A.....A|AAAA-|-AAAA.AAAA-||AA----+----AA||-AAAA.AAAA-|-AAAA|A.....A|AA|
+9|AA|A......+AAAAA+AAAA...AAAA||AAAAAAAAAAAAA||AAAA...AAAA+AAAAA+......A|AA|
+0|AA|A.....A|AAAA-|-AAAA.AAAA-|--|AAAAAAAAA|--|-AAAA.AAAA-|-AAAA|A.....A|AA|
+1|AA|AAAAAAA|AAA-| |-AAAAAAA-|   -|---+---|-   |-AAAAAAA-| |-AAA|AAAAAAA|AA|
+2|AA---------AA-|   |---+---|    |-AAAAAAA-|    |---+---|   |-AA---------AA|
+3|AAAAAAAAAAAAA|      |AAA|-----|-AAAA.AAAA-|-----|AAA|      |AAAAAAAAAAAAA|
+4---------------      |.AAAAAAAA|AAAA...AAAA|AAAAAAAA.|      ---------------
+5                     -------AAA|-AAAA.AAAA-|AAA-------                     
+6                           |.AAA|-AAAAAAA-|AAA.|                           
+7                           ---AAA|---+---|AAA---                           
+8                             |AAAAAAAAAAAAAAA|                             
+9                             --.AAAAAAAAAAA.--                             
+0                              ---------------                              
 ENDMAP
 # Rider locations
 RANDOM_PLACES:(23,9),(37,14),(51,9)

@@ -8902,7 +8902,52 @@ arti_invoke(obj)
 					pline("What were you going to do with it?");
 				}
 				else {
-					You("need to find another altar.");
+					if((u.detestation_ritual&RITUAL_DONE) != RITUAL_DONE)
+						You("need to find another altar.");
+					else if(!(u.detestation_ritual&HI_RITUAL_DONE))
+						You("need to find some more powerful altars.");
+					else if((u.detestation_ritual&HI_RITUAL_DONE) != HI_RITUAL_DONE)
+						You("need to find another high altar.");
+					// else nothing
+				}
+			}
+			else if(!Is_astralevel(&u.uz) && (u.detestation_ritual&RITUAL_DONE) == RITUAL_DONE){
+				pline("The ritual has run its course here on the material plane. You need to find some more powerful altars!");
+			}
+			else if(Is_astralevel(&u.uz)){
+				//Make sure madman astral always has these three if the player is aligned to Bokrug
+				int dreamgods[] = {GOD_ZO_KALAR, GOD_TAMASH, GOD_LOBON};
+				int godnum = altars[levl[u.ux][u.uy].altar_num].god;
+				int altaralign = a_align(u.ux,u.uy);
+				You("perform a rite in detestation of %s!", godname(godnum));
+				change_luck(-7);
+				for(int i = 0; i < 3; i++){
+					godlist[dreamgods[i]].anger += 3;
+					summon_god_minion(dreamgods[i], FALSE);
+					summon_god_minion(dreamgods[i], FALSE);
+					summon_god_minion(dreamgods[i], FALSE);
+				}
+				gods_upset(godnum);
+				pline("The high altar sinks into swampy water!");
+				levl[u.ux][u.uy].typ = PUDDLE;
+				levl[u.ux][u.uy].flags = 0;
+				newsym(u.ux, u.uy);
+				u.detestation_ritual |= RITUAL_STARTED;
+				u.detestation_ritual |= Align2hiritual(altaralign);
+				if((u.detestation_ritual&HI_RITUAL_DONE) == HI_RITUAL_DONE){
+					struct obj *statue = mksartifact(ART_IDOL_OF_BOKRUG__THE_WATER_);
+					statue->oerodeproof = TRUE;
+					statue->spe = 1;
+					place_object(statue, 37+rn2(7), 19+rn2(2));
+					You_hear("water bubbling.");
+					int i, j;
+					for(i = 0; i < COLNO; i++){
+						for(j = 0; j < ROWNO; j++){
+							if(isok(i,j) && levl[i][j].typ == AIR)
+								levl[i][j].typ = PUDDLE;
+						}
+					}
+					doredraw();
 				}
 			}
 			else {
@@ -8949,10 +8994,10 @@ arti_invoke(obj)
 					godlist[GOD_ZO_KALAR].anger++;
 					godlist[GOD_TAMASH].anger++;
 					godlist[GOD_LOBON].anger++;
-					gods_upset(godnum);
 					if(u.ulevel > 20) summon_god_minion(godnum, FALSE);
 					if(u.ulevel >= 14) summon_god_minion(godnum, FALSE);
-					(void) summon_god_minion(godnum, TRUE);
+					(void) summon_god_minion(godnum, FALSE);
+					gods_upset(godnum);
 					angry_priest();
 					if(in_town(u.ux, u.uy))
 						(void) angry_guards(FALSE);

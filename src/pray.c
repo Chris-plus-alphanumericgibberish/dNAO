@@ -1847,6 +1847,10 @@ dosacrifice()
 		goat_eat(otmp, GOAT_EAT_OFFERED);
 		return 1;
 	}
+	if(bokrug_idol_at(u.ux, u.uy)){
+		bokrug_offer(otmp);
+		return 1;
+	}
 	
 	if(Role_if(PM_ANACHRONONAUT) && otmp->otyp != AMULET_OF_YENDOR && flags.questprogress!=2){
 		You("do not give offerings to the God of the future.");
@@ -3352,6 +3356,43 @@ int x, y;
 		}
 	}
 	return FALSE;
+}
+
+boolean
+bokrug_idol_at(x, y)
+int x, y;
+{
+	struct obj *otmp;
+	for (otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere) {
+		if (otmp->oartifact == ART_IDOL_OF_BOKRUG__THE_WATER_)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+void
+bokrug_offer(otmp)
+struct obj *otmp;
+{
+	if(otmp->otyp == AMULET_OF_YENDOR){
+		/* The final Test.	Did you win? */
+		if(uamul == otmp) Amulet_off();
+		u.uevent.ascended = 1;
+		if(carried(otmp)) useup(otmp); /* well, it's gone now */
+		else useupf(otmp, 1L);
+		You("offer the Amulet of Yendor to Bokrug...");
+		adjalign(10);
+#ifdef RECORD_ACHIEVE
+		achieve.ascended = 1;
+		give_ascension_trophy();
+#endif
+		You("sink into cool lake water...");
+		You("don't drown. You have achieved the status of Demigod%s!",
+			flags.female ? "dess" : "");
+		done(ASCENDED);
+	}
+	//else
+	pline1(nothing_happens);
 }
 
 void
