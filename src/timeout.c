@@ -2858,7 +2858,6 @@ timer_element * tm;
 			return;
 		}
 	}
-	impossible("couldn't find tm in processing chain");
 	return;
 }
 
