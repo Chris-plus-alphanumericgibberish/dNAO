@@ -348,7 +348,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	break;
 	case PM_SAMURAI:
 		*weapon = KATANA;
-		*secweapon = SHORT_SWORD;
+		*secweapon = WAKIZASHI;
 		*rweapon = YUMI;
 		*rwammo = YA;
 		*helm = HELMET;

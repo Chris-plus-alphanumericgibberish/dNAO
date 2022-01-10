@@ -1645,6 +1645,7 @@ static const NEARDATA short hwep[] = {
 	  NAGINATA/*1d6+1/2d4*/, 
 	  SCIMITAR/*1d8/1d8*/,
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
+	  WAKIZASHI/*1d8/1d6*/,
 	  KHOPESH,/*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  MACE/*1d6+1/1d6*/, 
@@ -1752,6 +1753,7 @@ static const NEARDATA short hpwep[] = {
 	  ELVEN_LANCE, /*1d8/1d8*/
 	  SCIMITAR/*1d8/1d8*/,
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
+	  WAKIZASHI/*1d8/1d6*/,
 	  KHOPESH,/*1d8/1d6*/
 	  BEC_DE_CORBIN, /*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 

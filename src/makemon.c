@@ -476,7 +476,7 @@ int faction;
 						m_initthrow(mtmp, YA, 10, mkobjflags);
 					} else {
 						(void)mongets(mtmp, KATANA, mkobjflags);
-						(void)mongets(mtmp, SHORT_SWORD, mkobjflags);
+						(void)mongets(mtmp, WAKIZASHI, mkobjflags);
 						(void)mongets(mtmp, YUMI, mkobjflags);
 						m_initthrow(mtmp, YA, 10, mkobjflags);
 					}
@@ -2443,7 +2443,7 @@ int faction;
 					otmp->spe = 4;
 					(void) mpickobj(mtmp, otmp);
 					
-					otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_NOINIT);
+					otmp = mksobj(WAKIZASHI, mkobjflags|MKOBJ_NOINIT);
 					bless(otmp);
 					otmp->spe = 4;
 					(void) mpickobj(mtmp, otmp);
@@ -5980,7 +5980,7 @@ int faction;
 									(void) mpickobj(mtmp, otmp);
 								}
 								else {
-									otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
+									otmp = mksobj(WAKIZASHI, mkobjflags|MKOBJ_ARTIF);
 									add_oprop(otmp, OPROP_RAKUW);
 									otmp->spe = 0+rn2(4);
 									(void) mpickobj(mtmp, otmp);
@@ -7523,7 +7523,7 @@ int faction;
 					mongets(mtmp, ELVEN_SHORT_SWORD, mkobjflags);
 					mongets(mtmp, DWARVISH_SHORT_SWORD, mkobjflags);
 					mongets(mtmp, KHOPESH, mkobjflags);
-					mongets(mtmp, RAPIER, mkobjflags);
+					mongets(mtmp, WAKIZASHI, mkobjflags);
 				}
 			}break;
 		    case PM_PIT_FIEND:

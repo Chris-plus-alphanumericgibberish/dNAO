@@ -502,7 +502,7 @@ static struct trobj Samurai[] = {
 #define S_WEAPON	0
 	{ KATANA, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
 #define S_SECOND	1
-	{ SHORT_SWORD, 0, WEAPON_CLASS, 1, UNDEF_BLESS }, /* wakizashi */
+	{ WAKIZASHI, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
 #define S_ARROWS	3
 	{ YUMI, 0, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ YA, 0, WEAPON_CLASS, 25, UNDEF_BLESS }, /* variable quan */

@@ -1504,7 +1504,7 @@ default_case:
 				set_material_gm(stuff, WOOD);
 				add_to_container(otmp, stuff);
 
-				stuff = mksobj(SHORT_SWORD, MKOBJ_NOINIT);
+				stuff = mksobj(WAKIZASHI, MKOBJ_NOINIT);
 				set_material_gm(stuff, MITHRIL);
 				add_oprop(stuff, OPROP_RAKUW);
 				stuff->spe = 2;

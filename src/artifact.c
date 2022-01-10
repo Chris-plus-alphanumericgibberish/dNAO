@@ -682,6 +682,8 @@ aligntyp alignment;	/* target alignment, or A_NONE */
 							!rn2(5) ? GAUNTLETS :
 							!rn2(4) ? BROADSWORD :
 							!rn2(3) ? AXE :
+							!rn2(2) ? KHOPESH :
+							!rn2(4) ? WAKIZASHI :
 							!rn2(2) ? SHORT_SWORD :
 									  ATHAME;
 			}
