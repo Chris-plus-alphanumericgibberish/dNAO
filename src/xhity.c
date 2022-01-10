@@ -11210,10 +11210,23 @@ int vis;
 
 			/* split between player and monster */
 			if (youdef) {
-				if (Free_action) {
-					You("momentarily stiffen.");
+				Sprintf(buf, "%%s gaze is %sreflected by your %%s%s",
+					(magr->mtyp == PM_AXUS) ? "only partially " : "",
+					(magr->mtyp == PM_AXUS) ? "!" : "."
+					);
+				if (magr->data->mlet == S_EYE && attk->aatyp == AT_WDGZ &&
+					ureflects(buf,s_suffix(Monnam(magr)))){
+					/* ureflects() prints message */
+					if (magr->mtyp == PM_AXUS)
+						dmg = dmg/2 + 1;
+					else
+						dmg = 0;
 				}
-				else{
+				if (dmg > 0 && Free_action) {
+					You("momentarily stiffen.");
+					dmg = 0;
+				}
+				if (dmg > 0) {
 					You("are mesmerized by %s!", mon_nam(magr));
 					nomovemsg = 0;	/* default: "you can move again" */
 					nomul(-dmg, "mesmerized by a monster");
@@ -11221,12 +11234,25 @@ int vis;
 				}
 			}
 			else {
-				if (mon_resistance(mdef, FREE_ACTION)) {
+				Sprintf(buf, "%s gaze is %sreflected by %%s %%s%s",
+					s_suffix(Monnam(mdef)),
+					(magr->mtyp == PM_AXUS) ? "partially " : "",
+					(magr->mtyp == PM_AXUS) ? "!" : ".");
+				if (magr->data->mlet == S_EYE && attk->aatyp == AT_WDGZ &&
+					mon_reflects(magr, canseemon(magr) ? buf : (char *)0)) {
+					/* mon_reflects() prints message */
+					if (magr->mtyp == PM_AXUS)
+						dmg = dmg/2 + 1;
+					else
+						dmg = 0;
+				}
+				if (dmg > 0 && mon_resistance(mdef, FREE_ACTION)) {
 					if (vis&VIS_MDEF) {
 						pline("%s momentarily stiffens.", Monnam(mdef));
 					}
+					dmg = 0;
 				}
-				else {
+				if (dmg > 0) {
 					if (vis&VIS_MDEF) {
 						pline("%s freezes!", Monnam(mdef));
 					}
@@ -16146,45 +16172,12 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				switch (passive->adtyp)
 				{
 				case AD_AXUS:
-					/* reflection-piercing paralysis gaze */
-					if (ward_at(x(magr), y(magr)) != HAMSA && !is_blind(mdef)) {
-						if (youagr) {
-							if (canseemon(mdef)) {
-								if (Free_action)
-									You("momentarily stiffen under %s gaze!",
-									s_suffix(mon_nam(mdef)));
-								else if (ureflects("%s gaze is only partially reflected by your %s!",
-									s_suffix(Monnam(mdef)))){
-									nomul(-1*(dmg / 2+1), "frozen by the gaze of Axus");
-								}
-								else {
-									You("are frozen by %s gaze!",
-										s_suffix(mon_nam(mdef)));
-									nomul(-dmg, "frozen by the gaze of Axus");
-								}
-							}
-						}
-						else {
-							if (!is_blind(magr) && haseyes(pa) &&
-								(mon_resistance(magr, SEE_INVIS) || !mdef->minvis)) {
-								char buf[BUFSZ];
-								Sprintf(buf, "%s gaze is only partially reflected by %%s %%s!",
-									s_suffix(mon_nam(mdef)));
-								if (mon_reflects(magr,
-									canseemon(magr) ? buf : (char *)0)) {
-									magr->mcanmove = 0;
-									magr->mfrozen = dmg / 2+1;
-								}
-								else {
-									if (canseemon(magr)) {
-										pline("%s is frozen by %s gaze!",
-											Monnam(magr), s_suffix(mon_nam(mdef)));
-									}
-									magr->mcanmove = 0;
-									magr->mfrozen = dmg;
-								}
-							}
-						}
+					/* perform a gaze paralysis attack */
+					if (TRUE) {
+						/* AD_PLYS gaze has a special case for magr=Axus to pierce reflection */
+						/* use widegaze to avoid checking cooldown, failure chance */
+						struct attack plys_gaze = {AT_WDGZ, AD_PLYS, passive->damn, passive->damd};
+						xgazey(mdef, magr, &plys_gaze, vis);
 					}
 					/* anger autons */
 					if (youagr) {
@@ -16200,9 +16193,6 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					break;
 				case AD_PLYS:
 					if (pd->mlet == S_EYE) {	/* assumed to be gaze */
-						/* hamsa prevents gazes */
-						if (ward_at(x(magr), y(magr)) == HAMSA)
-							break;
 						/* the eye can't be blinded */
 						if (is_blind(mdef)) {
 							if (youagr) {
@@ -16213,49 +16203,10 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 							}
 						}
 						else {
-							if (youagr) {
-								if (canseemon(mdef)) {
-									if (ureflects("%s gaze is reflected by your %s.",
-										s_suffix(Monnam(mdef)))){
-										/* ureflects() prints message */;
-									}
-									else if (Free_action) {
-										You("momentarily stiffen under %s gaze!",
-											s_suffix(mon_nam(mdef)));
-									}
-									else {
-										You("are frozen by %s gaze!",
-											s_suffix(mon_nam(mdef)));
-										nomul(-dmg, "frozen by a monster's gaze");
-									}
-								}
-							}
-							else {
-								if (!is_blind(magr) && haseyes(pa) &&
-									(mon_resistance(magr, SEE_INVIS) || !mdef->minvis)) {
-									char buf[BUFSZ];
-									Sprintf(buf, "%s gaze is reflected by %%s %%s.",
-										s_suffix(Monnam(mdef)));
-									if (mon_reflects(magr,
-										canseemon(magr) ? buf : (char *)0)) {
-										/* mon_reflects() prints message */;
-									}
-									else if (mon_resistance(magr, FREE_ACTION)) {
-										if (canseemon(magr)) {
-											pline("%s momentarily stiffens.",
-												Monnam(magr));
-										}
-									}
-									else {
-										if (canseemon(magr)) {
-											pline("%s is frozen by %s gaze!",
-												Monnam(magr), s_suffix(mon_nam(mdef)));
-										}
-										magr->mcanmove = 0;
-										magr->mfrozen = dmg;
-									}
-								}
-							}
+							/* perform a gaze paralysis attack */
+							/* use widegaze to avoid checking cooldown, failure chance */
+							struct attack plys_gaze = {AT_WDGZ, AD_PLYS, passive->damn, passive->damd};
+							xgazey(mdef, magr, &plys_gaze, vis);
 						}
 					}
 					/* not eyes/gazes, assumed to be touch */
