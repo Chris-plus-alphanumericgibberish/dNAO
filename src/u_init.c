@@ -1568,7 +1568,7 @@ u_init()
 	(void) memset((genericptr_t)&u, 0, sizeof(u));
 	u.ustuck = (struct monst *)0;
 
-	u.umystic = 31; //By default, all monk style attacks are active
+	u.umystic = ~0; //By default, all monk style attacks are active
 
 	u.summonMonster = FALSE;
 	u.uleadamulet = FALSE;
