@@ -10403,7 +10403,8 @@ boolean * needs_uncancelled;
 				)
 				maybeset(needs_uncancelled, FALSE);
 			maybeset(needs_magr_eyes, FALSE);
-			if(pa->mtyp == PM_GREAT_CTHULHU && adjacent){
+			if((pa->mtyp == PM_GREAT_CTHULHU && adjacent) ||
+				(pa->mtyp == PM_MEDUSA)){	/* actually is protected from being blind, but we want it to be reflectable */
 				maybeset(needs_mdef_eyes, FALSE);
 			}
 			else maybeset(needs_mdef_eyes, TRUE);
@@ -10893,7 +10894,7 @@ int vis;
 			/* Medusa's gaze can be safely reflected back at her */
 			if (youdef ? Reflecting : mon_resistance(mdef, REFLECTING)) {
 				if (youdef) {
-					if (!medusa_uref) {
+					if (!medusa_uref && (vis&VIS_MAGR)) {
 						(void)ureflects("%s image is reflected by your %s.",
 							s_suffix(Monnam(magr)));
 						medusa_uref = TRUE;
@@ -10901,7 +10902,7 @@ int vis;
 					}
 				}
 				else {
-					if (!medusa_mref && (vis&VIS_MDEF)) {
+					if (!medusa_mref && (vis&VIS_MDEF) && (vis&VIS_MAGR)) {
 						Sprintf(buf, "%s image is reflected by %%s %%s.",
 							Monnam(magr));
 						mon_reflects(mdef, buf);
@@ -11034,6 +11035,18 @@ int vis;
 				else
 					medusa_mref = FALSE;
 			}
+
+			/* now handle being unable to see Medusa */
+			/* copy-paste of needs_mdef_eyes from above :( */
+			if(!(
+				(haseyes(pd)) &&
+				(!(youdef ? Blind : is_blind(mdef))) &&
+				(!(youagr ? Invis : magr->minvis) || (youdef ? See_invisible(x(magr), y(magr)) : mon_resistance(mdef, SEE_INVIS))) &&
+				(youdef ? canseemon(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
+				(!(youdef ? Sleeping : mdef->msleeping)) &&
+				(!(youdef && ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD)) /* wearing the Eyes, nearly anything is safe to see */
+				))
+				return MM_MISS;
 
 			/* reflection handled; we already knew mdef can see magr to get here; attempt to stone mdef */
 			if (!Stone_res(mdef)) {
