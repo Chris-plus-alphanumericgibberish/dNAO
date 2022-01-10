@@ -980,75 +980,7 @@ int faction;
 				if (w2) (void)mongets(mtmp, w2, mkobjflags);
 			} else if(is_drow(ptr)){
 				mtmp->mspec_used = d(4,4);
-				if(mm != PM_DROW_MATRON && mm != PM_DROW_MATRON_MOTHER && mm != PM_DROW_NOVICE 
-					&& mm != PM_A_SALOM && mm != PM_SISTER && mm != PM_MOTHER && !is_yochlol(mtmp->data)
-					&& mm != PM_ECLAVDRA && mm != PM_SEYLL_AUZKOVYN && mm != PM_STJARNA_ALFR
-					&& mm != PM_DARUTH_XAXOX && mm != PM_DROW_ALIENIST && mm != PM_HEDROW_MASTER_WIZARD
-				){
-					otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
-					otmp->ohaluengr = TRUE;
-					otmp->oward = curhouse;
-					(void) mpickobj(mtmp, otmp);
-					(void) mongets(mtmp, DROVEN_CLOAK, mkobjflags);
-					if (rn2(2)) (void)mongets(mtmp, DROVEN_HELM, mkobjflags);
-					else if (!rn2(4)) (void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
-					if (rn2(2)) (void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
-					if (could_twoweap(ptr)) (void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
-					switch (rn2(3)) {
-					case 0:
-						if (!rn2(4)) (void)mongets(mtmp, BUCKLER, mkobjflags);
-						if (rn2(3)) (void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
-						(void)mongets(mtmp, DROVEN_CROSSBOW, mkobjflags);
-						m_initthrow(mtmp, DROVEN_BOLT, 24, mkobjflags);
-					break;
-					case 1:
-						(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
-						if (rn2(2)) (void)mongets(mtmp, KITE_SHIELD, mkobjflags);
-						(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
-						(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
-					break;
-					case 2:
-						if (!rn2(4)) {
-							(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
-							(void)mongets(mtmp, BUCKLER, mkobjflags);
-						} else if(!rn2(3)){
-							(void)mongets(mtmp, DROVEN_SPEAR, mkobjflags);
-						} else if(!rn2(2)){
-							(void)mongets(mtmp, MORNING_STAR, mkobjflags);
-						} else {
-							(void)mongets(mtmp, DROVEN_GREATSWORD, mkobjflags);
-						}
-					break;
-					}
-					switch(rn2(5)){
-						case 0:
-							if(rn2(3)) (void)mongets(mtmp, CRAM_RATION, mkobjflags);
-						break;
-						case 1:
-							if(!rn2(3)) (void)mongets(mtmp, FOOD_RATION, mkobjflags);
-						break;
-						case 2:
-							otmp = mksobj(CORPSE, mkobjflags);
-							otmp->corpsenm = PM_LICHEN;
-							fix_object(otmp);
-							(void) mpickobj(mtmp, otmp);
-						break;
-						case 3:
-							otmp = mksobj(TIN, mkobjflags);
-							if(rnd(20) > 4) otmp->corpsenm = PM_LICHEN;
-							else if(rnd(20) > 5) otmp->corpsenm = PM_SHRIEKER;
-							else otmp->corpsenm = PM_VIOLET_FUNGUS;
-							otmp->quan = rnd(8);
-							otmp->owt = weight(otmp);
-							(void) mpickobj(mtmp, otmp);
-						break;
-						case 4:
-							otmp = mksobj(SLIME_MOLD, mkobjflags);
-							otmp->spe = fruitadd("mushroom cake");
-							(void) mpickobj(mtmp, otmp);
-						break;
-					}
-				} else if(mm == PM_DROW_NOVICE){
+				if(mm == PM_DROW_NOVICE){
 					otmp = mksobj(PLAIN_DRESS, mkobjflags);
 					otmp->spe = 0;
 					// otmp->oeroded2 = 1;
@@ -1239,7 +1171,7 @@ int faction;
 					otmp->spe = 0;
 					(void) mpickobj(mtmp, otmp);
 				} else if(mm == PM_DROW_ALIENIST){
-					/*Plate Mail*/
+					/*Chain Mail*/
 					otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
 					otmp->ohaluengr = TRUE;
 					otmp->oward = curhouse;
@@ -1280,6 +1212,8 @@ int faction;
 					otmp->cursed = TRUE;
 					otmp->oerodeproof = TRUE;
 					otmp->spe = 5;
+					add_oprop(otmp, OPROP_BLADED);
+					set_material_gm(otmp, OBSIDIAN_MT);
 					(void) mpickobj(mtmp, otmp);
 				} else if(is_yochlol(mtmp->data)){
 					/*weapon*/
@@ -1350,6 +1284,16 @@ int faction;
 					(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
 					(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
 					(void)mongets(mtmp, BUCKLER, mkobjflags);
+					(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
+				} else if(mm == PM_HEDROW_WIZARD){
+					otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
+					otmp->ohaluengr = TRUE;
+					otmp->oward = curhouse;
+					otmp->oerodeproof = TRUE;
+					(void) mpickobj(mtmp, otmp);
+					(void) mongets(mtmp, DROVEN_CLOAK, mkobjflags);
+					(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
+					(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
 					(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
 				} else if(mm == PM_SISTER){
 					otmp = mksobj(NOBLE_S_DRESS, mkobjflags);
@@ -1467,7 +1411,28 @@ int faction;
 					(void)mongets(mtmp, ELVEN_BOW, mkobjflags);
 					m_initthrow(mtmp, ELVEN_ARROW, 24, mkobjflags);
 					if (!rn2(50)) (void)mongets(mtmp, CRYSTAL_BALL, mkobjflags);
-				} else {
+				} else if(mm == PM_HEDROW_BLADEMASTER){
+					otmp = mksobj(DROVEN_PLATE_MAIL, mkobjflags);
+					otmp->ohaluengr = TRUE;
+					otmp->oward = curhouse;
+					(void) mpickobj(mtmp, otmp);
+					otmp = mksobj(find_signet_ring(), mkobjflags);
+					otmp->ohaluengr = TRUE;
+					otmp->oward = curhouse;
+					(void) mpickobj(mtmp, otmp);
+					(void) mongets(mtmp, DROVEN_CLOAK, mkobjflags);
+					(void)mongets(mtmp, DROVEN_HELM, mkobjflags);
+					otmp = mongets(mtmp, GAUNTLETS, mkobjflags);
+					if(otmp) set_material_gm(otmp, SHADOWSTEEL);
+					otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+					if(otmp) set_material_gm(otmp, SHADOWSTEEL);
+					(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
+					otmp = mongets(mtmp, DROVEN_GREATSWORD, mkobjflags);
+					if(otmp){
+						otmp->spe = 4;
+						otmp->opoisoned = rn2(4) ? OPOISON_SLEEP : OPOISON_PARAL;
+					}
+				} else if(mm == PM_DROW_MATRON || mm == PM_DROW_MATRON_MOTHER || is_yochlol(mtmp->data)){
 					otmp = mksobj(DROVEN_PLATE_MAIL, mkobjflags);
 					otmp->ohaluengr = TRUE;
 					otmp->oward = LOLTH_SYMBOL;
@@ -1504,6 +1469,71 @@ int faction;
 					}
 					(void)mongets(mtmp, DROVEN_CROSSBOW, mkobjflags);
 					m_initthrow(mtmp, DROVEN_BOLT, 24, mkobjflags);
+				}
+				else {
+					otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
+					otmp->ohaluengr = TRUE;
+					otmp->oward = curhouse;
+					(void) mpickobj(mtmp, otmp);
+					(void) mongets(mtmp, DROVEN_CLOAK, mkobjflags);
+					if (rn2(2)) (void)mongets(mtmp, DROVEN_HELM, mkobjflags);
+					else if (!rn2(4)) (void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
+					if (rn2(2)) (void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
+					if (could_twoweap(ptr)) (void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
+					switch (rn2(3)) {
+					case 0:
+						if (!rn2(4)) (void)mongets(mtmp, BUCKLER, mkobjflags);
+						if (rn2(3)) (void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
+						(void)mongets(mtmp, DROVEN_CROSSBOW, mkobjflags);
+						m_initthrow(mtmp, DROVEN_BOLT, 24, mkobjflags);
+					break;
+					case 1:
+						(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
+						if (rn2(2)) (void)mongets(mtmp, KITE_SHIELD, mkobjflags);
+						(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
+						(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
+					break;
+					case 2:
+						if (!rn2(4)) {
+							(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
+							(void)mongets(mtmp, BUCKLER, mkobjflags);
+						} else if(!rn2(3)){
+							(void)mongets(mtmp, DROVEN_SPEAR, mkobjflags);
+						} else if(!rn2(2)){
+							(void)mongets(mtmp, MORNING_STAR, mkobjflags);
+						} else {
+							(void)mongets(mtmp, DROVEN_GREATSWORD, mkobjflags);
+						}
+					break;
+					}
+					switch(rn2(5)){
+						case 0:
+							if(rn2(3)) (void)mongets(mtmp, CRAM_RATION, mkobjflags);
+						break;
+						case 1:
+							if(!rn2(3)) (void)mongets(mtmp, FOOD_RATION, mkobjflags);
+						break;
+						case 2:
+							otmp = mksobj(CORPSE, mkobjflags);
+							otmp->corpsenm = PM_LICHEN;
+							fix_object(otmp);
+							(void) mpickobj(mtmp, otmp);
+						break;
+						case 3:
+							otmp = mksobj(TIN, mkobjflags);
+							if(rnd(20) > 4) otmp->corpsenm = PM_LICHEN;
+							else if(rnd(20) > 5) otmp->corpsenm = PM_SHRIEKER;
+							else otmp->corpsenm = PM_VIOLET_FUNGUS;
+							otmp->quan = rnd(8);
+							otmp->owt = weight(otmp);
+							(void) mpickobj(mtmp, otmp);
+						break;
+						case 4:
+							otmp = mksobj(SLIME_MOLD, mkobjflags);
+							otmp->spe = fruitadd("mushroom cake");
+							(void) mpickobj(mtmp, otmp);
+						break;
+					}
 				}
 			} else if (is_elf(ptr) && ptr->mtyp != PM_HALF_ELF_RANGER) {
 				if(mm == PM_GALADRIEL){
