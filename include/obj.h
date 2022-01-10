@@ -547,6 +547,12 @@ struct obj {
 							 (otmp)->otyp == ROD_OF_FORCE || \
 							 (otmp)->otyp == BEAMSWORD || \
 							 (otmp)->otyp == DOUBLE_LIGHTSABER)
+#define is_gemable_lightsaber(otmp) (((otmp)->otyp == LIGHTSABER\
+							  || (otmp)->otyp == BEAMSWORD\
+							  || (otmp)->otyp == DOUBLE_LIGHTSABER)\
+							&& (otmp)->oartifact != ART_ANNULUS\
+							&& (otmp)->oartifact != ART_INFINITY_S_MIRRORED_ARC\
+							)
 #define valid_focus_gem(otmp) ((otmp)->oclass == GEM_CLASS && ((otmp)->otyp < LUCKSTONE || (otmp)->otyp == CHUNK_OF_FOSSIL_DARK))
 #define is_vibroweapon(otmp) (force_weapon(otmp) || \
 							  is_vibrosword(otmp) || \

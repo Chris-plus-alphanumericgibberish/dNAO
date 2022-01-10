@@ -1534,8 +1534,8 @@ boolean countem;
 	for(cobj = level.objects[x][y]; cobj; cobj = nobj) {
 		nobj = cobj->nexthere;
 		if(Is_container(cobj) || 
-			(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA) ||
-			(cobj->otyp == MASS_SHADOW_PISTOL)
+			is_gemable_lightsaber(cobj) ||
+			cobj->otyp == MASS_SHADOW_PISTOL
 		) {
 			container_count++;
 			if (!countem) break;
@@ -1596,7 +1596,7 @@ boolean noit;
 {
     if (!cobj) return 0;
 
-	if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA && cobj->otyp != ROD_OF_FORCE){
+	if(is_gemable_lightsaber(cobj)){
 		You("carefully open %s...",the(xname(cobj)));
 		return use_lightsaber(cobj);
 	} else if(cobj->otyp == MASS_SHADOW_PISTOL){
@@ -1657,7 +1657,7 @@ lootcont:
 		if (!able_to_loot(cc.x, cc.y, TRUE)) return 0;
 
 		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
-			if (Is_container(cobj) || cobj->otyp == MASS_SHADOW_PISTOL || (is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA)) num_cont++;
+			if (Is_container(cobj) || cobj->otyp == MASS_SHADOW_PISTOL || is_gemable_lightsaber(cobj)) num_cont++;
 		}
 
 		if (num_cont > 1) {
@@ -1677,7 +1677,7 @@ lootcont:
 			for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
 			if (Is_container(cobj) || 
 				cobj->otyp == MASS_SHADOW_PISTOL ||
-				(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA)
+				is_gemable_lightsaber(cobj)
 			) {
 				any.a_obj = cobj;
 				add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, doname(cobj),
@@ -1733,7 +1733,7 @@ lootcont:
 					You("carefully open %s...", the(xname(cobj)));
 					timepassed |= use_container(cobj, 0);
 					if (multi < 0) return 1;		/* chest trap */
-			    } else if(is_lightsaber(cobj) && cobj->oartifact != ART_ANNULUS && cobj->oartifact != ART_INFINITY_S_MIRRORED_ARC && cobj->otyp != KAMEREL_VAJRA){
+			    } else if(is_gemable_lightsaber(cobj)){
 					Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
 					c = ynq(qbuf);
 					if (c == 'q') return (timepassed);
