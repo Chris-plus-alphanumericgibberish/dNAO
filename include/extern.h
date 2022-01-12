@@ -2831,6 +2831,7 @@ E void FDECL(desummon_mon, (genericptr_t, long));
 E void FDECL(cleanup_msummon, (genericptr_t, long));
 E void FDECL(desummon_obj, (genericptr_t, long));
 E void FDECL(summoner_gone, (struct monst *, boolean));
+E void FDECL(stop_corpse_timers, (struct obj *));
 E boolean FDECL(start_timer, (long, SHORT_P, SHORT_P, genericptr_t));
 E void FDECL(pause_timers, (timer_element *));
 E void FDECL(resume_timers, (timer_element *));

@@ -2218,12 +2218,7 @@ register struct obj *obj;
 		/* stop any corpse timeouts when frozen */
 		if (obj->otyp == CORPSE && obj->timed) {
 			long rot_alarm = stop_timer(ROT_CORPSE, obj->timed);
-			(void) stop_timer(MOLDY_CORPSE, obj->timed);
-			(void) stop_timer(SLIMY_CORPSE, obj->timed);
-			(void) stop_timer(ZOMBIE_CORPSE, obj->timed);
-			(void) stop_timer(SHADY_CORPSE, obj->timed);
-			(void) stop_timer(YELLOW_CORPSE, obj->timed);
-			(void) stop_timer(REVIVE_MON, obj->timed);
+			stop_corpse_timers(obj);
 			/* mark a non-reviving corpse as such */
 			if (rot_alarm) obj->norevive = 1;
 		}
