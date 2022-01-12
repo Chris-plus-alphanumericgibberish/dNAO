@@ -157,8 +157,31 @@ struct monst {
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*93*/
 	Bitfield(menvy,1);/* wants only others stuff */ /*94*/
+	/*Monster madnesses*/
+	Bitfield(msanctity,1);/* can't attack women */ /*95*/
+	Bitfield(mgluttony,1);/* eats food */ /*96*/
+	Bitfield(mfrigophobia,1);/* won't cross water */ /*97*/
+	Bitfield(mcannibal,1);/* attacks same race, eats corpses */ /*98*/
+	Bitfield(mrage,1);/* berserk plus moral */ /*99*/
+	Bitfield(margent,1);/* can't attack men, distracted by mirrors */ /*100*/
+	Bitfield(msuicide,1);/* doesn't defend self */ /*101*/
+	Bitfield(mnudist,1);/* takes off clothing */ /*102*/
+	Bitfield(mophidio,1);/* attacked by snakes */ /*103*/
+	Bitfield(marachno,1);/* attacked by spiders, can't attack women */ /*104*/
+	Bitfield(mthalasso,1);/* attacked by seamonsters */ /*105*/
+	Bitfield(mhelmintho,1);/* attacked by wormy things */ /*106*/
+	Bitfield(mparanoid,1);/* attacks the wrong squares */ /*108*/
+	Bitfield(mtalons,1);/* won't use items */ /*107*/
+	Bitfield(mdreams,1);/* blasted by cthulhu while asleep */ /*108*/
+	Bitfield(mscaiaphilia,1);/* won't move into the light */ /*109*/
+	Bitfield(mforgetful,1);/* can't use wizard spellcasting */ /*110*/
+	Bitfield(mtoobig,1);/* elevated spell failure */ /*111*/
+	Bitfield(mrotting,1);/* spreads poison clouds */ /*112*/
+	
 	Bitfield(deadmonster,1); /* is DEADMONSTER */ /*113*/
 	Bitfield(mnoise,1); /* is DEADMONSTER */ /*114*/
+	
+	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
 	char mbdrown;	/* drowning in blood */
 	char mtaneggs;	/* tannin eggs */

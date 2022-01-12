@@ -1678,7 +1678,7 @@ A("The War-helm of the Dreaming",		FACELESS_HELM,		"bird-like bone faceless helm
 	NO_ATTK(), NOFLAG,
 	PROPS(MAGICAL_BREATHING, WALKING_NIGHTMARE), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	ENERGY_BOOST, NOFLAG
 	),
 
 A("The Spear of Peace",				SPEAR,				(const char *)0,
