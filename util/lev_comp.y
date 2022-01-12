@@ -155,6 +155,7 @@ extern const char *fname;
 %token	<i> SUBROOM_ID NAME_ID FLAGS_ID FLAG_TYPE MON_ATTITUDE MON_ALERTNESS
 %token	<i> MON_APPEARANCE
 %token	<i> CONTAINED
+%token	<i> SANITYFLAG
 %token	<i> ',' ':' '(' ')' '[' ']'
 %token	<map> STRING MAP_ID
 %type	<i> h_justif v_justif trap_name room_type door_state light_state
@@ -946,7 +947,16 @@ object_desc	: chance ':' object_c ',' o_name
 		  }
 		;
 
-object_where	: coordinate
+object_where	: coordinate '[' SANITYFLAG ']'
+		  {
+			tmpobj[nobj]->containment = 0;
+			tmpobj[nobj]->x = current_coord.x;
+			tmpobj[nobj]->y = current_coord.y;
+			if ($3)
+			    check_coord(current_coord.x, current_coord.y,
+					"Object");
+		  }
+		| coordinate
 		  {
 			tmpobj[nobj]->containment = 0;
 			tmpobj[nobj]->x = current_coord.x;
