@@ -321,10 +321,7 @@ struct obj *box;
 			 * from usual meaning for objects stored in ice boxes. -KAA
 			 */
 			otmp->age = 0L;
-			if (otmp->timed) {
-				(void) stop_timer(ROT_CORPSE, otmp->timed);
-				(void) stop_timer(REVIVE_MON, otmp->timed);
-			}
+			stop_corpse_timers(otmp);
 	    } else if(box->otyp == MASSIVE_STONE_CRATE){
 			if (!(otmp = mkobj(FOOD_CLASS, TRUE))) continue;
 	    } else if(box->otyp == WRITING_DESK){

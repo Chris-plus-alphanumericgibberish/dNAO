@@ -3174,6 +3174,24 @@ boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 		run_timers();
 }
 
+/*
+ * stops all corpse-related timers on otmp
+ */
+void
+stop_corpse_timers(otmp)
+struct obj * otmp;
+{
+	if(!otmp->timed)
+		return;
+	(void) stop_timer(ROT_CORPSE, otmp->timed);
+	(void) stop_timer(MOLDY_CORPSE, otmp->timed);
+	(void) stop_timer(REVIVE_MON, otmp->timed);
+	(void) stop_timer(SLIMY_CORPSE, otmp->timed);
+	(void) stop_timer(ZOMBIE_CORPSE, otmp->timed);
+	(void) stop_timer(SHADY_CORPSE, otmp->timed);
+	(void) stop_timer(YELLOW_CORPSE, otmp->timed);
+}
+
 #endif /* OVL0 */
 
 /*timeout.c*/

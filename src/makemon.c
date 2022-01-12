@@ -1517,8 +1517,7 @@ int faction;
 							otmp = mksobj(CORPSE, mkobjflags);
 							otmp->corpsenm = PM_LICHEN;
 							fix_object(otmp);
-							(void) stop_timer(ROT_CORPSE, otmp->timed);
-							(void) stop_timer(REVIVE_MON, otmp->timed);
+							stop_corpse_timers(otmp);
 							(void) mpickobj(mtmp, otmp);
 						break;
 						case 3:
