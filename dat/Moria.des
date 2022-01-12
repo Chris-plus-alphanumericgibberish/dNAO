@@ -364,7 +364,7 @@ STAIR:(00,09), up
 STAIR:(69,02), down
 
 # Artifact Door
-ENGRAVING:(32,09),engrave,"pedo 'Mellon' a minno"
+ENGRAVING:(32,09) [skipcheck],engrave,"pedo 'Mellon' a minno"
 DOOR:locked,(33,09),1
 
 # Doors
