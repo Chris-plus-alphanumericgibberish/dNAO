@@ -391,6 +391,11 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			/* stop on hit? */
 			if (!thrownobj)
 				break;	/* projectile was destroyed */
+			else if (range==initrange) {
+				/* projectile was reflected */
+				/* go directly to next movement of projectile */
+				continue;
+			}
 			else if (is_boulder(thrownobj)) {
 				if (result)
 					range /= 2;	/* continue with less range on hit; keep going on miss */
@@ -1257,12 +1262,18 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		if (!thrownobj) {
 			/*hmon destroyed it, we're already done*/;
 		}
-		else 
+		/* special-case for Center of All -- sometimes its projectiles get added to your inventory */
+		else if (*hp(mdef)>0 && youdef && magr && magr->mtyp == PM_CENTER_OF_ALL && thrownobj->otyp == LOADSTONE && !rn2(3))
+		{
+			pickup_object(thrownobj, 1, TRUE);
+			*thrownobj_p = NULL;
+			result |= MM_HIT;
+		}
 		/* projectiles other than magic stones
 		 * sometimes disappear when thrown
 		 * WAC - Spoon always disappears after doing damage
 		 */
-		if ((objects[thrownobj->otyp].oc_skill < P_NONE &&
+		else if ((objects[thrownobj->otyp].oc_skill < P_NONE &&
 			objects[thrownobj->otyp].oc_skill > -P_BOOMERANG &&
 			thrownobj->oclass != GEM_CLASS &&
 			!objects[thrownobj->otyp].oc_magic) ||
@@ -1298,17 +1309,6 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 				if (thrownobj->blessed && rnl(100) < 25)
 					broken = FALSE;
 			}
-			/* some projectiles should instead be transfered to the defender's inventory... if they lived */
-			if (*hp(mdef)>0) {
-				if (youdef && thrownobj->otyp == LOADSTONE && !rn2(3))
-				{
-					broken = FALSE;
-					pickup_object(thrownobj, 1, TRUE);
-					*thrownobj_p = NULL;
-					result |= MM_HIT;
-				}
-			}
-
 			if (broken) {
 				if (*u.ushops) {
 					check_shop_obj(thrownobj, bhitpos.x, bhitpos.y, TRUE);
