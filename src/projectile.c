@@ -1268,12 +1268,13 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			!objects[thrownobj->otyp].oc_magic) ||
 			(thrownobj->oartifact == ART_HOUCHOU)
 			) {
+			/* mulch code */
 			/* we were breaking 2/3 of everything unconditionally.
 			 * we still don't want anything to survive unconditionally,
 			 * but we need ammo to stay around longer on average.
 			 */
 			boolean broken = FALSE;
-			if (thrownobj->oartifact && thrownobj->oartifact != ART_HOUCHOU){
+			if ((thrownobj->oartifact || (!check_oprop(thrownobj, OPROP_NONE) && !forcedestroy)) && thrownobj->oartifact != ART_HOUCHOU){
 				broken = FALSE;
 			}
 			else if (forcedestroy ||
