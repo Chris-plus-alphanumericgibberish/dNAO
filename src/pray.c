@@ -3847,73 +3847,74 @@ int sanctum;   /* is it the seat of the high priest? */
 	else {
 		priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
 			sx + 1, sy, NO_MM_FLAGS);
-		
-		/* special cases */
-		switch (godnum) {
-			case GOD_MOLOCH:
-				give_mintrinsic(priest, POISON_RES);
-				break;
-			case GOD_OROME:
-				priest->female = FALSE;
-				break;
-			case GOD_YAVANNA:
-				priest->female = TRUE;
-				break;
-			case GOD_TULKAS:
-				priest->female = FALSE;
-				break;
-			case GOD_VARDA_ELENTARI:
-			case GOD_VAIRE:
-			case GOD_NESSA:
-				priest->female = TRUE;
-				break;
-			case GOD_MANWE_SULIMO:
-			case GOD_MANDOS:
-			case GOD_LORIEN:
-				priest->female = FALSE;
-				break;
-			case GOD_EDDERGUD:
-				priest->female = FALSE;
-				if(!sanctum){
-					newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
-					set_faction(priest, XAXOX);
-				}
-				break;
-			case GOD_VHAERAUN:
-				priest->female = FALSE;
-				if(!sanctum){
-					newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
-					set_faction(priest, LOLTH_SYMBOL);
-				}
-				break;
-			case GOD_LOLTH:
-				if (!flags.initgend){
+		if (priest) {
+			/* special cases */
+			switch (godnum) {
+				case GOD_MOLOCH:
+					give_mintrinsic(priest, POISON_RES);
+					break;
+				case GOD_OROME:
+					priest->female = FALSE;
+					break;
+				case GOD_YAVANNA:
+					priest->female = TRUE;
+					break;
+				case GOD_TULKAS:
+					priest->female = FALSE;
+					break;
+				case GOD_VARDA_ELENTARI:
+				case GOD_VAIRE:
+				case GOD_NESSA:
+					priest->female = TRUE;
+					break;
+				case GOD_MANWE_SULIMO:
+				case GOD_MANDOS:
+				case GOD_LORIEN:
+					priest->female = FALSE;
+					break;
+				case GOD_EDDERGUD:
 					priest->female = FALSE;
 					if(!sanctum){
-						newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
+						newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
+						set_faction(priest, XAXOX);
+					}
+					break;
+				case GOD_VHAERAUN:
+					priest->female = FALSE;
+					if(!sanctum){
+						newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
 						set_faction(priest, LOLTH_SYMBOL);
 					}
-				}
-				else {
+					break;
+				case GOD_LOLTH:
+					if (!flags.initgend){
+						priest->female = FALSE;
+						if(!sanctum){
+							newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
+							set_faction(priest, LOLTH_SYMBOL);
+						}
+					}
+					else {
+						priest->female = TRUE;
+						if(!sanctum) {
+							newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+							set_faction(priest, LOLTH_SYMBOL);
+						}
+					}
+					break;
+				case GOD_EILISTRAEE:
 					priest->female = TRUE;
-					if(!sanctum) {
-						newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-						set_faction(priest, LOLTH_SYMBOL);
-					}
-				}
-				break;
-			case GOD_EILISTRAEE:
-				priest->female = TRUE;
-				if(!sanctum) newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
-				break;
-			case GOD_VER_TAS:
-				priest->female = TRUE;
-				if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-				break;
-			case GOD_KIARANSALI:
-				priest->female = TRUE;
-				if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
-				break;
+					if(!sanctum) newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
+					break;
+				case GOD_VER_TAS:
+					priest->female = TRUE;
+					if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+					break;
+				case GOD_KIARANSALI:
+					priest->female = TRUE;
+					if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+					break;
+			}
 		}
 	}
 	return priest;
