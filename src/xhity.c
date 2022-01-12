@@ -499,6 +499,7 @@ int tary;
 		//It is going to try attacking you now, even if it fails for some reason, it tried.
 		magr->mattackedu = TRUE; 
 	}
+	magr->mnoise = TRUE; 
 
 	/* monsters can use offensive items */
 	/* Unlike defensive stuff, don't let them use item _and_ attack. */
