@@ -3183,33 +3183,33 @@ mkpluvillage()
 			//Make left-hand big building
 			roomtypb = nroom;
 			
-			levl[x+sizebig1-1][y+4+3].typ = BRCORNER;
-			levl[x+sizebig1-1][y+4+3].lit = 1;
+			levl[x+sizebig1][y+4+3].typ = BRCORNER;
+			levl[x+sizebig1][y+4+3].lit = 1;
 			levl[x][y+4+3].typ = BLCORNER;
 			levl[x][y+4+3].lit = 1;
-			for(i=1;i<sizebig1-1;i++){
+			for(i=1;i<sizebig1;i++){
 				levl[x+i][y+4+3].typ = HWALL;
 				levl[x+i][y+4+3].lit = 1;
 				levl[x+i][y+3].typ = HWALL;
 				levl[x+i][y+3].lit = 1;
 			}
 			for(i=1+3;i<4+3;i++){
-				levl[x+sizebig1-1][y+i].typ = VWALL;
-				levl[x+sizebig1-1][y+i].lit = 1;
+				levl[x+sizebig1][y+i].typ = VWALL;
+				levl[x+sizebig1][y+i].lit = 1;
 				levl[x][y+i].typ = VWALL;
 				levl[x][y+i].lit = 1;
 			}
-			levl[x+sizebig1-1][y+5].typ = DOOR;
-			levl[x+sizebig1-1][y+5].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			levl[x+sizebig1][y+5].typ = DOOR;
+			levl[x+sizebig1][y+5].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
 
-			levl[x+sizebig1-1][y+3].typ = TRCORNER;
-			levl[x+sizebig1-1][y+3].lit = 1;
+			levl[x+sizebig1][y+3].typ = TRCORNER;
+			levl[x+sizebig1][y+3].lit = 1;
 			levl[x][y+3].typ = TLCORNER;
 			levl[x][y+3].lit = 1;
 			
 			switch(rn2(7)){
 				case 0: //Random store
-					for(i=1;i<sizebig1-1;i++){
+					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = ROOM;
 							levl[x+i][y+j].lit = 1;
@@ -3220,7 +3220,7 @@ mkpluvillage()
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, SHOPBASE + rn2(UNIQUESHOP - SHOPBASE), TRUE);
 				break;
 				case 1: //Temple
-					for(i=1;i<sizebig1-1;i++){
+					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = ROOM;
 							levl[x+i][y+j].lit = 1;
@@ -3234,7 +3234,7 @@ mkpluvillage()
 					level.flags.has_temple = 1;
 				break;
 				case 2: //Garrison
-					for(i=1;i<sizebig1-1;i++){
+					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = ROOM;
 							levl[x+i][y+j].lit = 1;
@@ -3245,7 +3245,7 @@ mkpluvillage()
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, BARRACKS, TRUE);
 				break;
 				case 3: //Courtroom
-					for(i=1;i<sizebig1-1;i++){
+					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = ROOM;
 							levl[x+i][y+j].lit = 1;
@@ -3257,7 +3257,7 @@ mkpluvillage()
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, COURT, TRUE);
 				break;
 				case 4://Normal
-					for(i=1;i<sizebig1-1;i++){
+					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
@@ -3270,7 +3270,7 @@ mkpluvillage()
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 5: //Gold vault
-					for(i=1;i<sizebig1-1;i++){
+					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
@@ -3283,7 +3283,7 @@ mkpluvillage()
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 6://Tool shed
-					for(i=1;i<sizebig1-1;i++){
+					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
@@ -3295,12 +3295,12 @@ mkpluvillage()
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
 				break;
 			}
-			add_door(x+sizebig1-1,y+5,&rooms[roomtypb]);
+			add_door(x+sizebig1,y+5,&rooms[roomtypb]);
 			fill_room(&rooms[roomtypb], FALSE);
 			
 			//Make north and south shacks
 			for(n = 0; n<nshacks; n++){
-				ni = sizebig1 + 1 + n*5;
+				ni = sizebig1 + 2 + n*5;
 				//make north shack
 				levl[x+ni+3][y+3].typ = BRCORNER;
 				levl[x+ni][y+3].typ = BLCORNER;
@@ -3363,84 +3363,84 @@ mkpluvillage()
 			//Make right big building
 			roomtypb = nroom;
 			
-			levl[x+sizetot][y+4+3].typ = BRCORNER;
-			levl[x+sizetot][y+4+3].lit = 1;
-			levl[x+sizetot-sizebig2][y+4+3].typ = BLCORNER;
-			levl[x+sizetot-sizebig2][y+4+3].lit = 1;
-			for(i=sizetot-sizebig2+1;i<sizetot;i++){
+			levl[x+sizetot+1][y+4+3].typ = BRCORNER;
+			levl[x+sizetot+1][y+4+3].lit = 1;
+			levl[x+sizetot+1-sizebig2][y+4+3].typ = BLCORNER;
+			levl[x+sizetot+1-sizebig2][y+4+3].lit = 1;
+			for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 				levl[x+i][y+4+3].typ = HWALL;
 				levl[x+i][y+4+3].lit = 1;
 				levl[x+i][y+3].typ = HWALL;
 				levl[x+i][y+3].lit = 1;
 			}
 			for(i=1+3;i<4+3;i++){
-				levl[x+sizetot][y+i].typ = VWALL;
-				levl[x+sizetot][y+i].lit = 1;
-				levl[x+sizetot-sizebig2][y+i].typ = VWALL;
-				levl[x+sizetot-sizebig2][y+i].lit = 1;
+				levl[x+sizetot+1][y+i].typ = VWALL;
+				levl[x+sizetot+1][y+i].lit = 1;
+				levl[x+sizetot+1-sizebig2][y+i].typ = VWALL;
+				levl[x+sizetot+1-sizebig2][y+i].lit = 1;
 			}
 			
-			levl[x+sizetot-sizebig2][y+5].typ = DOOR;
-			levl[x+sizetot-sizebig2][y+5].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			levl[x+sizetot+1-sizebig2][y+5].typ = DOOR;
+			levl[x+sizetot+1-sizebig2][y+5].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
 			
-			levl[x+sizetot][y+3].typ = TRCORNER;
-			levl[x+sizetot][y+3].lit = 1;
-			levl[x+sizetot-sizebig2][y+3].typ = TLCORNER;
-			levl[x+sizetot-sizebig2][y+3].lit = 1;		
+			levl[x+sizetot+1][y+3].typ = TRCORNER;
+			levl[x+sizetot+1][y+3].lit = 1;
+			levl[x+sizetot+1-sizebig2][y+3].typ = TLCORNER;
+			levl[x+sizetot+1-sizebig2][y+3].lit = 1;		
 			
 			// switch(rn2(6)){
 			switch(rn2(7)){
 				case 0: //Shop
-					for(i=sizetot-sizebig2+1;i<sizetot;i++){
+					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = ROOM;
 							levl[x+i][y+j].lit = 1;
 						}
 					}
-					flood_fill_rm(x+sizetot-1, y+5,
+					flood_fill_rm(x+sizetot+1-1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, SHOPBASE + rn2(UNIQUESHOP - SHOPBASE), TRUE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, SHOPBASE + rn2(UNIQUESHOP - SHOPBASE), TRUE);
 				break;
 				case 1: //Temple
-					for(i=sizetot-sizebig2+1;i<sizetot;i++){
+					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = ROOM;
 							levl[x+i][y+j].lit = 1;
 						}
 					}
-					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
+					flood_fill_rm(x+sizetot+1-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, TEMPLE, TRUE);
-					add_altar(x+sizetot-2, y+5, A_NEUTRAL, TRUE, align_to_god(A_NEUTRAL));
-					priestini(&u.uz, &rooms[nroom - 1], x+sizetot-2, y+5, FALSE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, TEMPLE, TRUE);
+					add_altar(x+sizetot+1-2, y+5, A_NEUTRAL, TRUE, align_to_god(A_NEUTRAL));
+					priestini(&u.uz, &rooms[nroom - 1], x+sizetot+1-2, y+5, FALSE);
 					level.flags.has_temple = 1;
 				break;
 				case 2: //Garrison
-					for(i=sizetot-sizebig2+1;i<sizetot;i++){
+					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = ROOM;
 							levl[x+i][y+j].lit = 1;
 						}
 					}
-					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
+					flood_fill_rm(x+sizetot+1-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, BARRACKS, TRUE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, BARRACKS, TRUE);
 				break;
 				case 3: //Courtroom
 					if(!throne){
-						for(i=sizetot-sizebig2+1;i<sizetot;i++){
+						for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 							for(j=1+3;j<4+3;j++){
 								levl[x+i][y+j].typ = ROOM;
 								levl[x+i][y+j].lit = 1;
 							}
 						}
-						flood_fill_rm(x+sizetot-sizebig2+1, y+5,
+						flood_fill_rm(x+sizetot+1-sizebig2+1, y+5,
 							  nroom+ROOMOFFSET, TRUE, TRUE);
-						add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, COURT, TRUE);
+						add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, COURT, TRUE);
 				break;
 					}
 				case 4: //Normal
-					for(i=sizetot-sizebig2+1;i<sizetot;i++){
+					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
@@ -3448,12 +3448,12 @@ mkpluvillage()
 							if(rn2(2)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
 						}
 					}
-					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
+					flood_fill_rm(x+sizetot+1-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, OROOM, TRUE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 5: //Gold vault
-					for(i=sizetot-sizebig2+1;i<sizetot;i++){
+					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
@@ -3461,24 +3461,24 @@ mkpluvillage()
 							mkgold((long) rn1((10+rnd(10)) * level_difficulty(),10), x+i, y+j);
 						}
 					}
-					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
+					flood_fill_rm(x+sizetot+1-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, OROOM, TRUE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 6: //Tool shed
-					for(i=sizetot-sizebig2+1;i<sizetot;i++){
+					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 						for(j=1+3;j<4+3;j++){
 							levl[x+i][y+j].typ = CORR;
 							levl[x+i][y+j].lit = 1;
 							mkobj_at(TOOL_CLASS, x+i, y+j, NO_MKOBJ_FLAGS);
 						}
 					}
-					flood_fill_rm(x+sizetot-sizebig2+1, y+5,
+					flood_fill_rm(x+sizetot+1-sizebig2+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+sizetot-sizebig2+1, y+4, x+sizetot-1, y+6, TRUE, OROOM, TRUE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 			}
-			add_door(x+sizetot-sizebig2,y+5,&rooms[roomtypb]);
+			add_door(x+sizetot+1-sizebig2,y+5,&rooms[roomtypb]);
 			fill_room(&rooms[roomtypb], FALSE);
 		}
 	}
