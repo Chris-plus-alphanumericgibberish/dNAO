@@ -2113,8 +2113,13 @@ register boolean newlev;
 	    return;		/* no entrance messages necessary */
 
 	/* Did we just enter a shop? */
-	if (*u.ushops_entered)
-	    u_entered_shop(u.ushops_entered);
+	if (*u.ushops_entered) {
+		int i = 0;
+		while(u.ushops_entered[i]) {
+	    	u_entered_shop(&u.ushops_entered[i]);
+			i++;
+		}
+	}
 
 	for (ptr = &u.uentered[0]; *ptr; ptr++) {
 	    register int roomno = *ptr - ROOMOFFSET, rt = rooms[roomno].rtype;
