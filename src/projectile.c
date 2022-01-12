@@ -1279,7 +1279,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			}
 			else if (forcedestroy ||
 				(launcher && fired && (launcher->oartifact == ART_HELLFIRE || launcher->oartifact == ART_BOW_OF_SKADI)) ||
-				(fired && thrownobj->oartifact == ART_HOUCHOU) ||
+				(thrownobj->oartifact == ART_HOUCHOU) ||
 				(fired && thrownobj->otyp == BULLET) || 
 				(fired && thrownobj->otyp == SILVER_BULLET) || 
 				(fired && thrownobj->otyp == SHOTGUN_SHELL) || 
