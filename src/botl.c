@@ -576,6 +576,12 @@ bot2()
 #endif
 	  }
 	}
+  if(Invulnerable)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Invl", newbot2);
+#else
+  Strcat(nb = eos(nb), " Invl");
+#endif
   if(Confusion && !StumbleBlind)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Conf", newbot2);

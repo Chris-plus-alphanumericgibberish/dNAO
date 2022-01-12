@@ -29,7 +29,7 @@ const struct propname {
     int prop_num;
     const char *prop_name;
 } propertynames[] = {
-    { INVULNERABLE, "invulnerable" },
+    { SANCTUARY, "sactuary" },
     { STONED, "petrifying" },
     { FROZEN_AIR, "frozen air" },
     { SLIMED, "becoming slime" },
@@ -546,7 +546,15 @@ nh_timeout()
 #ifdef CONVICT
     if(Phasing) phasing_dialogue();
 #endif /* CONVICT */
-	if(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) return; /* things past this point could kill you */
+	if(u.uprops[SANCTUARY].intrinsic&TIMEOUT){
+		u.uprops[SANCTUARY].intrinsic--;
+		if(!u.uprops[SANCTUARY].intrinsic){
+			if(!Blind)
+				pline("The shimmering light fades.");
+			else You_feel("exposed to harm once more.");
+		}
+	}
+	if(Invulnerable) return; /* things past this point could kill you */
 	if(Stoned) stoned_dialogue();
 	if(Golded) golded_dialogue();
 	if(Slimed) slime_dialogue();
@@ -699,6 +707,8 @@ nh_timeout()
 #endif
 
 	for(upp = u.uprops; upp < u.uprops+SIZE(u.uprops); upp++){
+		if(upp - u.uprops == SANCTUARY)
+			continue; /*Already decremented above. This should be redundant as properties don't time out while invulnerable */
 		if((youracedata->mtyp == PM_SHOGGOTH || youracedata->mtyp == PM_PRIEST_OF_GHAUNADAUR) && upp - u.uprops == BLINDED
 			&&  upp->intrinsic & TIMEOUT
 		){
@@ -2494,7 +2504,7 @@ do_storms()
     if(levl[u.ux][u.uy].typ == CLOUD) {
 	/* inside a cloud during a thunder storm is deafening */
 	pline("Kaboom!!!  Boom!!  Boom!!");
-	if(!(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
+	if(!Invulnerable) {
 	    stop_occupation();
 	    nomul(-3, "hiding from thunderstorm");
 	}

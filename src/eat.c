@@ -3775,7 +3775,7 @@ void
 gethungry()	/* as time goes by - called by moveloop() and domove() */
 {
 	int hungermod = 1;
-	if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20) return;	/* you don't feel hungrier */
+	if (Invulnerable) return;	/* you don't feel hungrier */
 	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)){
 		//Gradually return to normal if you departed from normal as a result of polymorph.
 		if(u.uhunger < u.uhungermax*.45)

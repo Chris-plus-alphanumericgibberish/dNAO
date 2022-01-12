@@ -1662,7 +1662,7 @@ register struct monst *mtmp;
 			return 1;
 		else return 0;
 	}
-	if (has_mind_blast_mon(mtmp) && !u.uinvulnerable && !rn2(mdat->mtyp == PM_CLAIRVOYANT_CHANGED ? 3 : mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20) && !Catapsi) {
+	if (has_mind_blast_mon(mtmp) && !Invulnerable && !rn2(mdat->mtyp == PM_CLAIRVOYANT_CHANGED ? 3 : mdat->mtyp == PM_ELDER_BRAIN ? 10 : 20) && !Catapsi) {
 		boolean reducedFlayerMessages = (((Role_if(PM_NOBLEMAN) && Race_if(PM_DROW) && flags.initgend) || Role_if(PM_ANACHRONONAUT)) && In_quest(&u.uz));
 		struct monst *m2, *nmon = (struct monst *)0;
 		int dmg = 0;

@@ -46,7 +46,7 @@ boolean active;
 
 	/* cases where the agressor cannot make any attacks at all */
 	/* player is invincible*/
-	if (youdef && (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)) {
+	if (youdef && Invulnerable) {
 		/* monsters won't attack you */
 		if (active) {
 			/* only print messages if they were actively attacking you */
@@ -107,7 +107,7 @@ boolean active;
 			u.ustuck->muy = u.uy;
 		}
 		/* if you're invulnerable, you're fine though */
-		if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
+		if (Invulnerable)
 			return FALSE; /* stomachs can't hurt you! */
 	}
 	/* While swallowed OR stuck, you can't attack other monsters */
@@ -1447,6 +1447,8 @@ struct obj * otmp;
 			ndice = 3;
 		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 			diesize = 20;
+		else if (otmp->oartifact == ART_SPEAR_OF_PEACE)
+			diesize = 20;
 		else if (otmp->otyp == KHAKKHARA)
 			ndice = khakharadice;
 		/* gold has a particular affinity to blessings and curses */
@@ -1475,6 +1477,8 @@ struct obj * otmp;
 		{	ndice = 0; dmg += 8; } // add directly; no dice rolled
 		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 			diesize = 20;
+		else if (otmp->oartifact == ART_SPEAR_OF_PEACE)
+			diesize = 20;
 		else if (otmp->oartifact == ART_AMHIMITL)
 		{	ndice = 3; diesize = 4; }
 		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
@@ -1501,8 +1505,6 @@ struct obj * otmp;
 		/* special cases */
 		if (otmp->oartifact == ART_GODHANDS)
 			dmg += 8;
-		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
-			diesize = 20;
 		else if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS)
 			diesize = 20;
 		else if (otmp->oartifact == ART_STAFF_OF_TWELVE_MIRRORS)

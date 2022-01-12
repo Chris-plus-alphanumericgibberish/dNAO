@@ -396,6 +396,10 @@ glyph_t permonst_unicode_codepoint[NUMMONS] = DUMMY;
  */
 boolean curses_stupid_hack = 1;
 
+/* Some arrays to help walk in a circle */
+const int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+const int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+
 /* dummy routine used to force linkage */
 void
 decl_init()

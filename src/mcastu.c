@@ -1784,7 +1784,7 @@ int tary;
 		(magr->mcan) ||
 		(magr->mspec_used && !nospellcooldowns_mon(magr)) ||
 		(mlev(magr) == 0) ||
-		(youdef && (u.uinvulnerable || (u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20))) ||
+		(youdef && Invulnerable) ||
 		(needs_familiar(magr))
 		)) {
 		cursetxt(magr, mdef, is_undirected_spell(spellnum));

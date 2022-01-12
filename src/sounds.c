@@ -1383,7 +1383,7 @@ asGuardian:
 		} else if(!(mtmp->mspec_used) || mtmp->mtyp == PM_INTONER){
 			switch(rnd(3)){
 				case 1:
-					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !u.uinvulnerable){
+					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !Invulnerable){
 						inrange=TRUE;
 					} else for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1424,7 +1424,7 @@ asGuardian:
 							}
 						}
 					}
-					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !u.uinvulnerable){
+					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !Invulnerable){
 						if(u.uencouraged < BASE_DOG_ENCOURAGED_MAX) 
 							u.uencouraged = min_ints(BASE_DOG_ENCOURAGED_MAX, u.uencouraged + rnd(mtmp->m_lev/3+1));
 						You_feel("%s!", u.uencouraged >= BASE_DOG_ENCOURAGED_MAX ? "berserk" : "wild");
@@ -1434,7 +1434,7 @@ asGuardian:
 					}
 				break;
 				case 2:
-					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !u.uinvulnerable){
+					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !Invulnerable){
 						inrange=TRUE;
 					} else for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1486,7 +1486,7 @@ asGuardian:
 							}
 						}
 					}
-					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !u.uinvulnerable){
+					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !Invulnerable){
 						healup(u.ulevel, 0, FALSE, FALSE);
 						use_unicorn_horn((struct obj *)0);
 					}
@@ -1495,7 +1495,7 @@ asGuardian:
 					}
 				break;
 				case 3:
-					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && u.uhp < u.uhpmax && !u.uinvulnerable){
+					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && u.uhp < u.uhpmax && !Invulnerable){
 						inrange=TRUE;
 					} else for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1508,7 +1508,7 @@ asGuardian:
 					}
 					
 					if(!inrange) break;
-					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5 && !u.uinvulnerable)
+					if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 5 && !Invulnerable)
 						map_invisible(mtmp->mx, mtmp->my);
 					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity+10) pline("%s laughs frantically.", Monnam(mtmp));
 					else pline("%s sings a song of haste.", Monnam(mtmp));
@@ -1526,7 +1526,7 @@ asGuardian:
 							}
 						}
 					}
-					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !u.uinvulnerable){
+					if(mtmp->mtame && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && !Invulnerable){
 						pline("That puts a spring in your step.");
 						youmonst.movement += 12;
 						if(Wounded_legs)
@@ -1551,7 +1551,7 @@ asGuardian:
 		if(!(mtmp->mspec_used)){
 			switch(rnd(3)){
 				case 1:
-					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
+					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !Invulnerable){
 						inrange=TRUE;
 					} else for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1613,7 +1613,7 @@ asGuardian:
 							}
 						}
 					}
-					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
+					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !Invulnerable){
 						dmg = 0;
 						switch(u.oonaenergy){
 							case AD_FIRE:
@@ -1637,7 +1637,7 @@ asGuardian:
 					}
 				break;
 				case 2:
-					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
+					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !Invulnerable){
 						inrange=TRUE;
 					} else for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1677,7 +1677,7 @@ asGuardian:
 							}
 						}
 					}
-					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
+					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !Invulnerable){
 						if(u.uencouraged > -1*BASE_DOG_ENCOURAGED_MAX) 
 							u.uencouraged = max_ints(-1*BASE_DOG_ENCOURAGED_MAX, u.uencouraged - rnd(mtmp->m_lev/3+1));
 						You_feel("%s!", u.uencouraged <= -1*BASE_DOG_ENCOURAGED_MAX ? "inconsolable" : "depressed");
@@ -1687,7 +1687,7 @@ asGuardian:
 					}
 				break;
 				case 3:
-					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
+					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !Invulnerable){
 						inrange=TRUE;
 					} else for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
 						if(tmpm != mtmp && !DEADMONSTER(tmpm)){
@@ -1717,7 +1717,7 @@ asGuardian:
 							}
 						}
 					}
-					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !u.uinvulnerable){
+					if(!mtmp->mpeaceful && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && !Invulnerable){
 						pline("Your body feels leaden!");
 						youmonst.movement -= 12;
 						if ((HFast & TIMEOUT_INF)) {

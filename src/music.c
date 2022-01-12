@@ -1145,7 +1145,7 @@ int distance;
 					mtmp->mstun = 1;
 					mtmp->mconf = 1;
 					mtmp->mcanhear = 0;
-					mtmp->mdeafened = distance/3 - distm;
+					mtmp->mdeafened = min(125, distance/3 - distm);
 				}
 			} else {
 				if (distm < distance/3 &&
@@ -1186,7 +1186,7 @@ int distance;
 					mtmp->mstun = 1;
 					mtmp->mconf = 1;
 					mtmp->mcanhear = 0;
-					mtmp->mdeafened = distance/3 - distm;
+					mtmp->mdeafened = min(125, distance/3 - distm);
 				}
 			}
 		}

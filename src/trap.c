@@ -1795,7 +1795,7 @@ int style;
 		}
 		else if (bhitpos.x == u.ux && bhitpos.y == u.uy) {
 			if (multi) nomul(0, NULL);
-			if (!u.uinvulnerable){
+			if (!Invulnerable){
 				/* boulder may hit you */
 				int dieroll = rnd(20);
 				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, 0, (int *) 0) > dieroll || dieroll == 1) {

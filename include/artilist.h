@@ -1661,17 +1661,17 @@ A("Poseidon's Trident",				TRIDENT,				(const char *)0,
 	WATER, NOFLAG
 	),
 
-A("Sickle of Thunderblasts",				SICKLE,				(const char *)0,
+A("The Sickle of Thunderblasts",				SICKLE,				(const char *)0,
 	4500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_MADMAN, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
-	ATTK(AD_PHYS, 3, 0), NOFLAG,
+	ATTK(AD_PHYS, 1, 0), ARTA_SONICX|ARTA_RETURNING,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	NOINVOKE, NOFLAG
 	),
 
-A("War-helm of the Dreaming",		FACELESS_HELM,		"bird-like bone faceless helm",
+A("The War-helm of the Dreaming",		FACELESS_HELM,		"bird-like bone faceless helm",
 	4500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_MADMAN, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
@@ -1681,7 +1681,7 @@ A("War-helm of the Dreaming",		FACELESS_HELM,		"bird-like bone faceless helm",
 	NOINVOKE, NOFLAG
 	),
 
-A("Spear of Peace",				SPEAR,				(const char *)0,
+A("The Spear of Peace",				SPEAR,				(const char *)0,
 	1500L, WOOD, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_MADMAN, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
@@ -1691,7 +1691,7 @@ A("Spear of Peace",				SPEAR,				(const char *)0,
 	INVULNERABILITY, NOFLAG
 	),
 
-A("Ibite arm",				CLUB,				"flabby green arm",
+A("The Ibite arm",				CLUB,				"flabby green arm",
 	4500L, FLESH, MZ_GIGANTIC, WT_DEFAULT,
 	A_NONE, PM_MADMAN, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_FXALGN),
 	NO_MONS(),

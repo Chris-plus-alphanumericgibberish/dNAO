@@ -153,9 +153,6 @@
 #define ETimeStop		u.uprops[TIME_STOP].extrinsic
 #define TimeStop		(HTimeStop || ETimeStop)
 
-/* Intrinsics only */
-#define Invulnerable		u.uprops[INVULNERABLE].intrinsic    /* [Tom] */
-
 #define RapidHealing		u.uprops[RAPID_HEALING].intrinsic
 
 /* Extrinsics only */
@@ -505,7 +502,13 @@
 #define HNightmare	u.uprops[WALKING_NIGHTMARE].intrinsic
 #define ENightmare	u.uprops[WALKING_NIGHTMARE].extrinsic
 #define Nightmare		(HNightmare || ENightmare)
+
+#define HSanctuary	u.uprops[SANCTUARY].intrinsic
+#define ESanctuary	u.uprops[SANCTUARY].extrinsic
+#define Sactuary	(HSanctuary || ESanctuary)
 	/* Get wet, may go under surface */
+
+#define	Invulnerable	(Sactuary || u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
 
 #define Breathless		(HMagical_breathing || EMagical_breathing || \
 				 breathless(youracedata))

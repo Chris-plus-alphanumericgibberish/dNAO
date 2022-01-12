@@ -693,7 +693,8 @@ you_regen_hp()
 	hp    = (Upolyd) ? (&u.mh)    : (&u.uhp);
 	hpmax = (Upolyd) ? (&u.mhmax) : (&u.uhpmax);
 
-	if (u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20) {
+	if (u.uinvulnerable) {
+		/* prayer invulnerablity only */
 		/* for the moment at least, you're in tiptop shape */
 		/* do not regenerate any health */
 		/* you also do not lose health (e.g. from being a fish out of water) */
@@ -2475,7 +2476,7 @@ karemade:
 			clothes_bite_you();
 			mercurial_repair();
 
-		    if(!(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
+		    if(!(Invulnerable)) {
 			if(Teleportation && !rn2(85) && !(
 #ifdef WIZARD
 				(
@@ -2535,14 +2536,14 @@ karemade:
 		    if (u.uhave.amulet) amulet();
 		    if (!rn2(40+(int)(ACURR(A_DEX)*3)))
 			u_wipe_engr(rnd(3));
-		    if (u.uevent.udemigod && !(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
+		    if (u.uevent.udemigod && !(Invulnerable)) {
 				if (u.udg_cnt) u.udg_cnt--;
 				if (!u.udg_cnt) {
 					intervene();
 					u.udg_cnt = rn1(200, 50);
 				}
 		    }
-		    if (u.uevent.ukilled_illurien && !(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
+		    if (u.uevent.ukilled_illurien && !(Invulnerable)) {
 				if (u.ill_cnt) u.ill_cnt--;
 				if (!u.ill_cnt) {
 					illur_intervene();
@@ -2550,7 +2551,7 @@ karemade:
 				}
 		    }
 		    if ((Role_if(PM_MADMAN) && quest_status.touched_artifact && !mvitals[PM_STRANGER].died)
-				&& !(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)
+				&& !(Invulnerable)
 			) {
 				if (u.yel_cnt) u.yel_cnt--;
 				if (!u.yel_cnt) {
@@ -2617,7 +2618,7 @@ karemade:
 		if(u.utrap && u.utraptype == TT_LAVA) {
 			if(!is_lava(u.ux,u.uy))
 			    u.utrap = 0;
-		    else if (!(u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20)) {
+		    else if (!(Invulnerable)) {
 			    u.utrap -= 1<<8;
 				if(u.utrap < 1<<8) {
 					killer_format = KILLED_BY;

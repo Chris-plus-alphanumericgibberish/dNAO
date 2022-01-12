@@ -6021,7 +6021,7 @@ wake_nearby_noisy(){
 			mtmp->mstun = 1;
 			mtmp->mconf = 1;
 			mtmp->mcanhear = 0;
-			mtmp->mdeafened = (u.ulevel*20)/3 - distu(mtmp->mx,mtmp->my);
+			mtmp->mdeafened = min(125, (u.ulevel*20)/3 - distu(mtmp->mx,mtmp->my));
 		}
 	}
 }
@@ -6062,7 +6062,7 @@ register int x, y, distance;
 				mtmp->mstun = 1;
 				mtmp->mconf = 1;
 				mtmp->mcanhear = 0;
-				mtmp->mdeafened = distance - dist2(mtmp->mx, mtmp->my, x, y);
+				mtmp->mdeafened = min(125, distance - dist2(mtmp->mx, mtmp->my, x, y));
 			}
 			if(mtmp->mtyp == PM_ECHO){
 				struct monst *tmpm;
@@ -6102,7 +6102,7 @@ register int x, y, distance;
 					}
 					tmpm->mconf = 1;
 					tmpm->mcanhear = 0;
-					tmpm->mdeafened = distance - dist2(tmpm->mx, tmpm->my, x, y);
+					tmpm->mdeafened = min(125, distance - dist2(tmpm->mx, tmpm->my, x, y));
 					damage = tmpm->m_lev/2+1;
 					if(damage > 0){
 						tmpm->mhp -= 8*damage;

@@ -4362,6 +4362,63 @@ boolean * messaged;
 				EXPL_MAGICAL, 1);
 		}
 	}
+	/* shockwave knocks back and stuns */
+	if (arti_attack_prop(otmp, ARTA_SONICX)){
+		extern const int clockwisex[8];
+		extern const int clockwisey[8];
+		struct monst *tmpm;
+		int sannum = youagr ? u.usanity : 100;
+		int sonicboom = basedmg*sannum/100, i, offset, opposite, tx, ty;
+		int peacefulness = youagr ? TRUE : magr->mpeaceful;
+		offset = rn2(8);
+		mdef->msleeping = 0;
+		mdef->mcanhear = 0;
+		mdef->mdeafened = max(sannum/5, mdef->mdeafened);
+		mdef->mstun = 1;
+		mdef->mconf = 1;
+		You_hear("a deafening clap of thunder!");
+		wake_nearto_noisy(x(mdef), y(mdef), sonicboom*sonicboom);
+		for(i = 0; i<4; i++){
+			for(opposite = 0; opposite<8; opposite+=4){
+				tx = x(mdef) + clockwisex[(i+opposite+offset)%8];
+				ty = y(mdef) + clockwisey[(i+opposite+offset)%8];
+				if(!isok(tx,ty))
+					continue;
+				tmpm = m_at(tx,ty);
+				if(tmpm){
+					if(tmpm == magr)
+						continue;
+					mhurtle(tmpm, clockwisex[(i+opposite+offset)%8], clockwisey[(i+opposite+offset)%8], rnd(sannum/20), FALSE);
+					if(DEADMONSTER(tmpm) || MIGRATINGMONSTER(tmpm))
+						continue; /* Fell down a pit or died while hurtling*/
+					if(peacefulness != tmpm->mpeaceful){
+						tmpm->mhp -= sonicboom;
+						if (tmpm->mhp <= 0){
+							if(youagr)
+								killed(tmpm);
+							else
+								monkilled(tmpm, "", AD_PHYS);
+						}
+						else {
+							tmpm->msleeping = 0;
+							tmpm->mcanhear = 0;
+							tmpm->mdeafened = max(sannum/5, tmpm->mdeafened);
+							tmpm->mstun = 1;
+							tmpm->mconf = 1;
+						}
+					}
+				}
+			}
+		}
+		if(!youagr && !youdef && distmin(u.ux, u.uy, x(mdef), y(mdef)) == 1){
+			You("are blown backwards by a blast of thunder!");
+			hurtle(u.ux-x(mdef), u.uy-y(mdef), rnd(sannum/20), FALSE, FALSE);
+			if(!peacefulness){
+				losehp(sonicboom, "thunderblast", KILLED_BY_AN);
+				make_stunned(HStun + sonicboom, TRUE);
+			}
+		}
+	}
 	/* Genocide */
 	if (oartifact == ART_GENOCIDE) {
 		struct monst *tmpm, *nmon;
@@ -4437,6 +4494,11 @@ boolean * messaged;
 		/* costs some pw */
 		if (u.uen >= (u.uenmax*3/10))
 			losepw(3);
+	}
+	/* sickle of thunderblasts damage multiplier is reduced based on your sanity */
+	else if (oartifact == ART_SICKLE_OF_THUNDERBLASTS && youagr) {
+		*plusdmgptr = (*plusdmgptr) * u.usanity / 100;
+		*truedmgptr = (*truedmgptr) * u.usanity / 100;
 	}
 
 	/* iconoclast deals 9 bonus damage to angels */
@@ -8948,7 +9010,7 @@ arti_invoke(obj)
 					struct obj *statue = mksartifact(ART_IDOL_OF_BOKRUG__THE_WATER_);
 					statue->oerodeproof = TRUE;
 					statue->spe = 1;
-					place_object(statue, 37+rn2(7), 19+rn2(2));
+					place_object(statue, 37+rn2(7), 18+rn2(2));
 					You_hear("water bubbling.");
 					int i, j;
 					for(i = 0; i < COLNO; i++){
@@ -9046,6 +9108,9 @@ arti_invoke(obj)
 					}
 				}
 			}
+			break;
+        case INVULNERABILITY:
+			make_invulnerable(HSanctuary + 3, TRUE);
 			break;
         case IBITE_ARM:
 			You("wake the severed arm.");
@@ -11140,7 +11205,7 @@ living_items()
 	struct obj *obj, *nobj;
 	struct blast_element *blast_list = 0, *nblast = 0;
 	int whisper = 0;
-	if(u.uinvulnerable)
+	if(Invulnerable)
 		return;
 	
 	//collect all the blasting items into a list so that they can blast away without worrying about changing the state of the dungeon.

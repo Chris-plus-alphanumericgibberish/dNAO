@@ -129,6 +129,32 @@ boolean talk;
 }
 
 void
+make_invulnerable(xtime,talk)
+long xtime;
+boolean talk;
+{
+	long old = HStun;
+
+	if (!xtime && old) {
+		if (talk){
+			if(!Blind)
+				pline("The shimmering light fades.");
+			else You_feel("exposed to harm once more.");
+		}
+	}
+	if (xtime && !old) {
+		if (talk) {
+			if(!Blind)
+				pline("Faint shimmering light surrounds you.");
+			else You_feel("shielded from harm.");
+		}
+	}
+	if ((!xtime && old) || (xtime && !old)) flags.botl = TRUE;
+
+	set_itimeout(&HSanctuary, xtime);
+}
+
+void
 make_sick(xtime, cause, talk, type)
 long xtime;
 const char *cause;	/* sickness cause */

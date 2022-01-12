@@ -638,6 +638,7 @@ ustatusline()
 	char info[BUFSZ];
 
 	info[0] = '\0';
+	if (Invulnerable)		Strcat(info, ", invulnerable");
 	if (Sick) {
 		Strcat(info, ", dying from");
 		if (u.usick_type & SICK_VOMITABLE)
