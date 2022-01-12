@@ -17180,6 +17180,8 @@ monk_moves()
 	struct monst *mdef;
 #define STILLVALID(mdef) (!DEADMONSTER(mdef) && mdef == m_at(u.ux + u.dx, u.uy + u.dy))
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	static struct attack xweponhit =	{ AT_XWEP, AD_PHYS, 0, 0 };
+	static struct attack bitehit =	{ AT_BITE, AD_PHYS, 1, 6 };
 	if(!moveID)
 		return FALSE;
 	if(!monk_style_active(moveID)) return FALSE;
@@ -17187,10 +17189,24 @@ monk_moves()
 		return FALSE;
 	switch(moveID){
 		case DIVE_KICK:
-		if(!EWounded_legs && (mdef = adjacent_monk_target(uarmf))){
-			pline("Dive kick!");
-			dive_kick_monster(mdef);
-			DID_MOVE
+		if(Race_if(PM_CHIROPTERAN)){
+			if((mdef = adjacent_monk_target(uarmf))){
+				pline("Swoop!");
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
+				if(u.twoweap && STILLVALID(mdef))
+					xmeleehity(&youmonst, mdef, &xweponhit, (struct obj **)0, vis, 0, FALSE);
+				if(STILLVALID(mdef))
+					xmeleehity(&youmonst, mdef, &bitehit, (struct obj **)0, vis, 0, FALSE);
+				DID_MOVE
+			}
+		}
+		else {
+			if(!EWounded_legs && (mdef = adjacent_monk_target(uarmf))){
+				pline("Dive kick!");
+				dive_kick_monster(mdef);
+				DID_MOVE
+			}
 		}
 		break;
 		case AURA_BOLT:
@@ -17206,7 +17222,10 @@ monk_moves()
 		break;
 		case BIRD_KICK:
 		if(!EWounded_legs && circle_monk_target(uarmf)){
-			pline("Bird kick!");
+			if(Race_if(PM_CHIROPTERAN))
+				pline("Wing bash!");
+			else
+				pline("Bird kick!");
 			bird_kick_monsters();
 			DID_MOVE
 		}
