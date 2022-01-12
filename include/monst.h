@@ -157,7 +157,8 @@ struct monst {
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*92*/
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*93*/
 	Bitfield(menvy,1);/* wants only others stuff */ /*94*/
-	Bitfield(deadmonster,1); /* is DEADMONSTER */ /*95*/
+	Bitfield(deadmonster,1); /* is DEADMONSTER */ /*113*/
+	Bitfield(mnoise,1); /* is DEADMONSTER */ /*114*/
 	
 	char mbdrown;	/* drowning in blood */
 	char mtaneggs;	/* tannin eggs */

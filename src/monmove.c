@@ -969,6 +969,7 @@ register struct monst *mtmp;
 	mdat = mtmp->data;
 	
 	mtmp->mattackedu = 0; /*Clear out attacked bit*/
+	mtmp->mnoise = 0; /*Clear out noise bit*/
 	
 	if(mdat->mtyp == PM_GNOLL_MATRIARCH){
 		if(!rn2(20)){

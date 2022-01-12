@@ -771,6 +771,7 @@ boolean chatting;
 	if (!canspotmon(mtmp) && distmin(u.ux,u.uy,mtmp->mx,mtmp->my) < 2 && ptr->msound != MS_SONG && 
 		ptr->msound != MS_INTONE && ptr->msound != MS_FLOWER && ptr->msound != MS_OONA
 	) map_invisible(mtmp->mx, mtmp->my);
+	mtmp->mnoise = TRUE;
 	
 	if(mtmp->ispriest){
 		priest_talk(mtmp);

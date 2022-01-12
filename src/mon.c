@@ -2373,7 +2373,11 @@ mon_can_see_mon(looker, lookie)
 		return FALSE;
 		//can't feel target adjacent
 	}
-	
+
+	/* Monsters that have recently made noise can be targeted by other monsters */
+	if(lookie->mnoise && !is_deaf(looker) && distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= BOLT_LIM)
+		return TRUE;
+
 	/* 1/8 chance to stumble onto adjacent targets. Ish. */
 	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8))
 		return TRUE;
@@ -5863,6 +5867,7 @@ register struct monst *mtmp;
     if(mtmp->data->msound == MS_SHRIEK) {
 		if(flags.soundok) {
 			pline("%s shrieks.", Monnam(mtmp));
+			mtmp->mnoise = TRUE;
 			stop_occupation();
 		}
 		if (!rn2(10)) {
