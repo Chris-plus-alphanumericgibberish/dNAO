@@ -440,9 +440,9 @@ MONSTER:'i',"manes",random
 # Some liquids and gems
 OBJECT:'*',random,(43,06)
 OBJECT:'*',random,(45,06)
-OBJECT:'!',random,(43,09)
-OBJECT:'!',random,(44,09)
-OBJECT:'!',random,(45,09)
+OBJECT:'!',random,(43,09) [skipcheck]
+OBJECT:'!',random,(44,09) [skipcheck]
+OBJECT:'!',random,(45,09) [skipcheck]
 # And lots of blobby monsters
 MONSTER:monster[0],random,random
 MONSTER:monster[1],random,random
@@ -1164,7 +1164,7 @@ OBJECT:'`',"boulder",(5,6)
 OBJECT:'`',"boulder",(12,8)
 OBJECT:'`',"boulder",(6,8)
 OBJECT:'`',"boulder",(9,9)
-OBJECT:'`',"boulder",(12,10)
+OBJECT:'`',"boulder",(12,10) [skipcheck]
 OBJECT:'`',"boulder",(7,10)
 OBJECT:'`',"boulder",(10,11)
 OBJECT:'`',"boulder",(6,12)

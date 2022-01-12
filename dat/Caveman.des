@@ -131,7 +131,7 @@ DOOR:locked,(28,11)
 STAIR:(04,03),up
 STAIR:(73,10),down
 # Magic Chest
-OBJECT:'(',"magic chest",(73,09)
+OBJECT:'(',"magic chest",(73,09) [skipcheck]
 # Non diggable walls
 NON_DIGGABLE:(00,00,75,19)
 # Objects
