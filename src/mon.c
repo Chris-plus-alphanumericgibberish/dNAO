@@ -6040,6 +6040,10 @@ void
 wake_nearto(x, y, distance)
 register int x, y, distance;
 {
+	if(!isok(x,y)) {
+		impossible("bad wake_nearto location (%d %d)", x, y);
+		return;
+	}
 	register struct monst *mtmp;
 
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {

@@ -9081,6 +9081,13 @@ int vis;
 				pline("Obviously %s doesn't like your taste.", mon_nam(magr));
 			expels(magr, pa, FALSE);
 		}
+		else if (!dmgtype_fromattack(pa, attk->adtyp, attk->aatyp)) {
+			/* engulf attack isn't natural to the monster */
+			pline("%s can't seem to keep you %s.", Monnam(magr), is_animal(pa) ? "down" : "in");
+			delay_output();
+			delay_output();
+			expels(magr, pa, FALSE);
+		}
 	}
 	else {
 		boolean did_tmp_at = FALSE;
@@ -12444,7 +12451,7 @@ int vis;						/* True if action is at all visible to the player */
 			/* isn't an unthrown missile */
 			!((is_missile(weapon) || is_ammo(weapon)) && weapon->otyp != CHAKRAM && !thrown) &&
 			/* isn't an unthrown Houchou */
-			!(weapon->oartifact == ART_HOUCHOU && !fired) &&
+			!(weapon->oartifact == ART_HOUCHOU && !thrown) &&
 			/* isn't unthrowable ammo (ie, any ammo but rocks) being thrown but not fired*/
 			!(misthrown)
 			)
