@@ -5361,6 +5361,10 @@ xkilled(mtmp, dest)
 
 	    if (!wasinside && !canspotmon(mtmp))
 		You("%s it!", verb);
+	    else if(Infuture && is_myrkalfr(mtmp->data) && !get_template(mtmp) && canseemon(mtmp)){
+			pline("Strands of black webbing flow from %s mortal wounds, engulfing %s body and choking off %s screams!", s_suffix(mon_nam(mtmp)), mhis(mtmp), mhis(mtmp));
+			pline("Now totally engulfed, %s is yanked upright and vanishes from the world.", mhe(mtmp));
+		}
 	    else {
 		You("%s %s!", verb,
 		    !mtmp->mtame ? mon_nam(mtmp) :
