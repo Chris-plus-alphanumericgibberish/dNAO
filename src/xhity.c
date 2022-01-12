@@ -9080,6 +9080,13 @@ int vis;
 				pline("Obviously %s doesn't like your taste.", mon_nam(magr));
 			expels(magr, pa, FALSE);
 		}
+		else if (!dmgtype_fromattack(pa, attk->adtyp, attk->aatyp)) {
+			/* engulf attack isn't natural to the monster */
+			pline("%s can't seem to keep you %s.", Monnam(magr), is_animal(pa) ? "down" : "in");
+			delay_output();
+			delay_output();
+			expels(magr, pa, FALSE);
+		}
 	}
 	else {
 		boolean did_tmp_at = FALSE;
