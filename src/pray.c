@@ -3984,9 +3984,9 @@ int godnum;
 		return FALSE;
 	if (godnum == GOD_ZO_KALAR && u.detestation_ritual&RITUAL_LAW)
 		return FALSE;
-	if (godnum == GOD_TAMASH && u.detestation_ritual&RITUAL_NEUTRAL)
+	if (godnum == GOD_LOBON && u.detestation_ritual&RITUAL_NEUTRAL)
 		return FALSE;
-	if (godnum == GOD_LOBON && u.detestation_ritual&RITUAL_CHAOS)
+	if (godnum == GOD_TAMASH && u.detestation_ritual&RITUAL_CHAOS)
 		return FALSE;
 	if ((godnum == GOD_LOLTH || godnum == GOD_VHAERAUN || godnum == GOD_VER_TAS || godnum == GOD_KIARANSALI || godnum == GOD_KEPTOLO)
 		&& !Race_if(PM_DROW))

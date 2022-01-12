@@ -107,8 +107,9 @@ static const struct crowning hand_of_elbereth[] = {
 {GOD_AMATERASU_OMIKAMI,          ART_YOICHI_NO_YUMI,			"Nasu no %s",							verb_thee("proclaim"),					became_the,	CRWN_TTL_NAME	},
 	/* Madman */
 {GOD_ZO_KALAR,                   ART_SICKLE_OF_THUNDERBLASTS,	"the %s of Mnar",						"Thou shalt be the %s!",				became_the, CRWN_TTL_KING	},
-{GOD_TAMASH,                     ART_WAR_HELM_OF_THE_DREAMING,	"Dreamking",							dub_thee_the,							became_the	},
 {GOD_LOBON,                      ART_SPEAR_OF_PEACE,			"the Ambasador of Sarnath",				dub_thee_the,							became_the	},
+// {GOD_TAMASH,                     ART_WAR_HELM_OF_THE_DREAMING,	"Dreamking",							dub_thee_the,							became_the	},
+{GOD_TAMASH,                       ART_VORPAL_BLADE,				"the Envoy of Placeholding",		"Thou shalt be my %s!",					became_the	},
 	/* Terminator -- (-1) to avoid confusion with GOD_NONE */
 {-1}
 };

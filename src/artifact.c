@@ -8988,7 +8988,7 @@ arti_invoke(obj)
 			}
 			else if(Is_astralevel(&u.uz)){
 				//Make sure madman astral always has these three if the player is aligned to Bokrug
-				int dreamgods[] = {GOD_ZO_KALAR, GOD_TAMASH, GOD_LOBON};
+				int dreamgods[] = {GOD_ZO_KALAR, GOD_LOBON, GOD_TAMASH};
 				int godnum = altars[levl[u.ux][u.uy].altar_num].god;
 				int altaralign = a_align(u.ux,u.uy);
 				You("perform a rite in detestation of %s!", godname(godnum));
@@ -9028,7 +9028,7 @@ arti_invoke(obj)
 				int godnum = altars[levl[u.ux][u.uy].altar_num].god;
 				if(!godnum)
 					godnum = align_to_god(altaralign);
-				if(used_align || !(godnum == GOD_ZO_KALAR || godnum == GOD_TAMASH || godnum == GOD_LOBON)){
+				if(used_align || !(godnum == GOD_ZO_KALAR || godnum == GOD_LOBON || godnum == GOD_TAMASH)){
 					int destAlign, destGod;
 					if(!(u.detestation_ritual&RITUAL_LAW)){
 						destAlign = A_LAWFUL;
@@ -9036,11 +9036,11 @@ arti_invoke(obj)
 					}
 					else if(!(u.detestation_ritual&RITUAL_NEUTRAL)){
 						destAlign = A_NEUTRAL;
-						destGod = GOD_TAMASH;
+						destGod = GOD_LOBON;
 					}
 					else {
 						destAlign = A_CHAOTIC;
-						destGod = GOD_LOBON;
+						destGod = GOD_TAMASH;
 					}
 
 					You("modify the rite to attune the altar to %s!", godname(destGod));
@@ -9064,8 +9064,8 @@ arti_invoke(obj)
 					You("perform a rite in detestation of %s!", godname(godnum));
 					change_luck(-3);
 					godlist[GOD_ZO_KALAR].anger++;
-					godlist[GOD_TAMASH].anger++;
 					godlist[GOD_LOBON].anger++;
+					godlist[GOD_TAMASH].anger++;
 					if(u.ulevel > 20) summon_god_minion(godnum, FALSE);
 					if(u.ulevel >= 14) summon_god_minion(godnum, FALSE);
 					(void) summon_god_minion(godnum, FALSE);

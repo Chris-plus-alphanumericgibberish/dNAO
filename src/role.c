@@ -270,7 +270,7 @@ struct Role roles[] = {
 	{"Maniac",     0},
 	{"Augur",    0},
 	{"Seer",  0} },
-	GOD_ZO_KALAR, GOD_TAMASH, GOD_LOBON,	/* Dreamlands */
+	GOD_ZO_KALAR, GOD_LOBON, GOD_TAMASH,	/* Dreamlands */
 	"Mad", "Archer Asylum", "the ground floor",
 	PM_MADMAN, PM_MADWOMAN, NON_PM,
 	PM_CASSILDA_THE_IRON_MAIDEN, PM_PATIENT, PM_DOCTOR_ARCHER,
