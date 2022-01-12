@@ -1403,6 +1403,7 @@ struct obj * otmp;
 		otmp->obj_material == GREEN_STEEL &&
 		!(is_lightsaber(otmp) && litsaber(otmp))) {
 		/* default: 2d9 */
+		/* Note: stacks with curse damage to 3d9 total (pre modifiers). */
 		ndice = 2;
 		diesize = 9;
 		/* special cases */
