@@ -834,7 +834,34 @@ map_detail	: monster_detail
 		| passwall_detail
 		;
 
-monster_detail	: MONSTER_ID chance ':' monster_c ',' m_name ',' coordinate
+monster_detail	: MONSTER_ID chance ':' monster_c ',' m_name ',' coordinate '[' SANITYFLAG ']'
+		  {
+			tmpmonst[nmons] = New(monster);
+			tmpmonst[nmons]->x = current_coord.x;
+			tmpmonst[nmons]->y = current_coord.y;
+			tmpmonst[nmons]->class = $<i>4;
+			tmpmonst[nmons]->peaceful = -1; /* no override */
+			tmpmonst[nmons]->asleep = -1;
+			tmpmonst[nmons]->align = - MAX_REGISTERS - 2;
+			tmpmonst[nmons]->name.str = 0;
+			tmpmonst[nmons]->appear = 0;
+			tmpmonst[nmons]->appear_as.str = 0;
+			tmpmonst[nmons]->chance = $2;
+			tmpmonst[nmons]->id = NON_PM;
+			if ($10)
+			    check_coord(current_coord.x, current_coord.y,
+					"Monster");
+			if ($6) {
+			    int token = get_monster_id($6, (char) $<i>4);
+			    if (token == ERR)
+				yywarning(
+			      "Invalid monster name!  Making random monster.");
+			    else
+				tmpmonst[nmons]->id = token;
+			    Free($6);
+			}
+		  }
+	       |  MONSTER_ID chance ':' monster_c ',' m_name ',' coordinate
 		  {
 			tmpmonst[nmons] = New(monster);
 			tmpmonst[nmons]->x = current_coord.x;
