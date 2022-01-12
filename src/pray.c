@@ -3984,7 +3984,7 @@ int godnum;
 		return FALSE;
 	if (godnum == GOD_ZO_KALAR && u.detestation_ritual&RITUAL_LAW)
 		return FALSE;
-	if (godnum == GOD_TAMASH && u.detestation_ritual&u.detestation_ritual&RITUAL_NEUTRAL)
+	if (godnum == GOD_TAMASH && u.detestation_ritual&RITUAL_NEUTRAL)
 		return FALSE;
 	if (godnum == GOD_LOBON && u.detestation_ritual&RITUAL_CHAOS)
 		return FALSE;
