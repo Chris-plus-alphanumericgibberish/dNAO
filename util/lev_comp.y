@@ -1513,7 +1513,25 @@ gold_detail	: GOLD_ID ':' amount ',' coordinate
 		  }
 		;
 
-engraving_detail: ENGRAVING_ID ':' coordinate ',' engraving_type ',' string
+engraving_detail: ENGRAVING_ID ':' coordinate '[' SANITYFLAG ']' ',' engraving_type ',' string
+		  {
+			tmpengraving[nengraving] = New(engraving);
+			tmpengraving[nengraving]->x = current_coord.x;
+			tmpengraving[nengraving]->y = current_coord.y;
+			tmpengraving[nengraving]->engr.str = $10;
+			tmpengraving[nengraving]->etype = $<i>8;
+			if ($5) {
+				printf("%s %d \n", "value of skip was ", $5);
+			    check_coord(current_coord.x, current_coord.y,
+					"Engraving");
+					}
+			nengraving++;
+			if (nengraving >= MAX_OF_TYPE) {
+			    yyerror("Too many engravings in room or mazepart!");
+			    nengraving--;
+			}
+		  }
+		| ENGRAVING_ID ':' coordinate ',' engraving_type ',' string
 		  {
 			tmpengraving[nengraving] = New(engraving);
 			tmpengraving[nengraving]->x = current_coord.x;
