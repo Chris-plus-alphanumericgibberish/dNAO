@@ -282,10 +282,11 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 		/* weapon might return to your hand */
 		if (returning && !impaired) {
+			const char * location = (old_wep_mask&W_WEP) ? body_part(HAND) : (old_wep_mask&W_QUIVER) ? "quiver" : "pack";
 			if (!In_outdoors(&u.uz))
-				pline("%s the %s and returns to your hand!", Tobjnam(thrownobj, "hit"), ceiling(bhitpos.x, bhitpos.y));
+				pline("%s the %s and returns to your %s!", Tobjnam(thrownobj, "hit"), ceiling(bhitpos.x, bhitpos.y), location);
 			else 
-				pline("%s to your hand!", Tobjnam(thrownobj, "return"));
+				pline("%s to your %s!", Tobjnam(thrownobj, "return"), location);
 			return_thrownobj(magr, thrownobj);
 			return MM_MISS;
 		}
@@ -520,9 +521,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		{
 			/* attempt to catch it */
 			if (!impaired) {
+				const char * location = (old_wep_mask&W_WEP) ? body_part(HAND) : (old_wep_mask&W_QUIVER) ? "quiver" : "pack";
 				/* success */
 				if (youagr) {
-					pline("%s to your hand!", Tobjnam(thrownobj, "return"));
+					pline("%s to your %s!", Tobjnam(thrownobj, "return"), location);
 				}
 				return_thrownobj(magr, thrownobj);
 			}
