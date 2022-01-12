@@ -31,10 +31,6 @@ static const struct crowning hand_of_elbereth[] = {
 {GOD_SHAN_LAI_CHING,             ART_GRANDMASTER_S_ROBE,		"the Sage of Law",						dub_thee_the,							became_the	},
 {GOD_CHIH_SUNG_TZU,              ART_GRANDMASTER_S_ROBE,		"the Grandmaster of Balance",			"Thou shalt be the %s!",				became_the	},
 {GOD_HUAN_TI,                    ART_ROBE_OF_THE_ARCHMAGI,		"the Glory of Eequor",					chosen("cause dismay in My Name"),		became_the	},
-	/* Madman */
-{GOD_ZO_KALAR,                   ART_SICKLE_OF_THUNDERBLASTS,	"the %s of Mnar",						"Thou shalt be the %s!",				became_the, CRWN_TTL_KING	},
-{GOD_TAMASH,                     ART_WAR_HELM_OF_THE_DREAMING,	"Dreamking",							dub_thee_the,							became_the	},
-{GOD_LOBON,                      ART_SPEAR_OF_PEACE,			"the Ambasador of Sarnath",				dub_thee_the,							became_the	},
 	/* Noble (human, vampire, incant). Vampires always get Dark Lord regardless of alignment */
 {GOD_GOD_THE_FATHER,             ART_CROWN_OF_THE_SAINT_KING,	"the Saint %s",							verb_thee_the("crown"),					"received the crown of the Saint King",	CRWN_TTL_KING	},
 {GOD_MOTHER_EARTH,               ART_CROWN_OF_THE_SAINT_KING,	"the Grey Saint",						verb_thee_the("crown"),					"received the crown of the Saint King"	},
@@ -109,6 +105,10 @@ static const struct crowning hand_of_elbereth[] = {
 {GOD_ARMOK,                      ART_DURIN_S_AXE,				"the Lord of Moria",					"Hail, %s!",							became_the	},
 	/* Samurai -- lawful only */
 {GOD_AMATERASU_OMIKAMI,          ART_YOICHI_NO_YUMI,			"Nasu no %s",							verb_thee("proclaim"),					became_the,	CRWN_TTL_NAME	},
+	/* Madman */
+{GOD_ZO_KALAR,                   ART_SICKLE_OF_THUNDERBLASTS,	"the %s of Mnar",						"Thou shalt be the %s!",				became_the, CRWN_TTL_KING	},
+{GOD_TAMASH,                     ART_WAR_HELM_OF_THE_DREAMING,	"Dreamking",							dub_thee_the,							became_the	},
+{GOD_LOBON,                      ART_SPEAR_OF_PEACE,			"the Ambasador of Sarnath",				dub_thee_the,							became_the	},
 	/* Terminator -- (-1) to avoid confusion with GOD_NONE */
 {-1}
 };
