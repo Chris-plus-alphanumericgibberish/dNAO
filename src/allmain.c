@@ -4780,8 +4780,8 @@ dogoat_mon(magr)
 struct monst *magr;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	struct attack symbiote = { AT_TENT, AD_DRST, 4, 4 };
 	boolean youagr = (magr == &youmonst);
@@ -4917,8 +4917,8 @@ donachash(magr)
 struct monst *magr;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int x, y;
 	struct attack symbiote = { AT_ESPR, AD_SHDW, 1, 30 };
@@ -4977,8 +4977,8 @@ dosnake(magr)
 struct monst *magr;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int mult = 1;
 	int x, y;
@@ -5051,8 +5051,8 @@ dotailslap(magr)
 struct monst *magr;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int x, y;
 	struct attack symbiote = { AT_TAIL, AD_PHYS, 4, 10 };

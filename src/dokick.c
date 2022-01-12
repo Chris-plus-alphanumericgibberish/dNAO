@@ -228,8 +228,8 @@ bird_kick_monsters()
 		clumsy = TRUE;
 doit:
 	{
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int offset = rn2(8);
 	int ix, iy;
 	int j;

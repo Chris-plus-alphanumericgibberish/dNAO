@@ -3907,8 +3907,8 @@ struct monst *magr;
 struct obj *armor;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j, lim=0;
 	struct attack symbiote = { AT_TENT, AD_PHYS, 3, 3 };
 	boolean youagr = (magr == &youmonst);
@@ -3963,8 +3963,8 @@ struct monst *magr;
 struct obj *wep;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
@@ -4011,8 +4011,8 @@ struct monst *magr;
 struct obj *wep;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	struct attack symbiote = { AT_HITS, AD_PHYS, 5, 8 };
 	boolean youagr = (magr == &youmonst);
@@ -4076,8 +4076,8 @@ struct monst *magr;
 struct obj *wep;
 {
 	struct zapdata zapdata;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j,k;
 	boolean gooddir = FALSE;
 	boolean youagr = (magr == &youmonst);
@@ -4188,8 +4188,8 @@ struct monst *magr;
 struct obj *wep;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
@@ -4479,8 +4479,8 @@ char atyp;
 char etyp;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j, lim=0;
 	int striking = 0;
 	struct attack symbiote = { atyp, etyp, 4, 2 };
@@ -4927,8 +4927,8 @@ struct monst *magr;
 struct obj *wep;
 {
 	struct monst *mdef;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	struct attack symbiote = { AT_WEAP, AD_PHYS, 4, 4 };
 	boolean youagr = (magr == &youmonst);

@@ -6385,8 +6385,8 @@ dodestruction()
 {
 	struct monst *mon, *nmon;
 	int tmp, weptmp, tchtmp;
-	int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
-	int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
 	int i = rnd(8),j, lim=0;
 	struct attack destruction = { AT_NONE, AD_FIRE, 6, 6 };
 	if(!rn2(3))
