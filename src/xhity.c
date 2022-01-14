@@ -554,7 +554,7 @@ int tary;
 		/* set aatyp, adtyp */
 		aatyp = attk->aatyp;
 		adtyp = attk->adtyp;
-		/* maybe end, maybe update target location (mdef may have been forcibly moved!)*/
+		/* maybe end attack loop early (mdef may have been forcibly moved!)*/
 		if (
 			(youdef
 #ifdef STEED
@@ -563,14 +563,8 @@ int tary;
 			) ? (!missedyou && (tarx != u.ux || tary != u.uy))
 			: (!missedother && m_at(tarx, tary) != mdef)
 		){
-			if(youdef || mdef->mx){//Check that it's not off map
-				tarx = x(mdef);
-				tary = y(mdef);
-				ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);
-			} else {
-				result = MM_AGR_STOP;
-				continue;
-			}
+			result = MM_AGR_STOP;
+			continue;
 		}
 		/* Some armor completely covers the face and prevents bite attacks*/
 		if (aatyp == AT_BITE || aatyp == AT_LNCK || aatyp == AT_5SBT ||
