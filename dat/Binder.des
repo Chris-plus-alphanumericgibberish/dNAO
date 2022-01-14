@@ -301,7 +301,7 @@ OBJECT:'(',"doll of binding",(23,02)
 MONSTER:'@',"prisoner",(23,04),peaceful
 OBJECT:'(',"doll of binding",(23,04)
 MONSTER:'@',"prisoner",(23,06),peaceful
-OBJECT:'(',"doll of binding",(23,05)
+OBJECT:'(',"doll of binding",(23,05) [skipcheck]
 
 # Doors
 

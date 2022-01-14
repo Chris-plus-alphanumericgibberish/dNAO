@@ -376,7 +376,7 @@ PORTAL:(01,06,01,06),(00,00,00,00),"cat1"
 
 OBJECT: '(',"skeleton key", random, uncursed, 0, "The Second Key of Chaos"
 
-MONSTER:'S',"first wraithworm",(07,06)
+MONSTER:'S',"first wraithworm",(07,06) [skipcheck]
 
 PORTAL:(07,00,12,12),(00,00,00,00),"cat3"
 

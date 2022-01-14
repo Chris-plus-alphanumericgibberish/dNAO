@@ -347,7 +347,7 @@ LADDER:(48,09),up
 # Non diggable walls
 NON_DIGGABLE:(00,00,74,19)
 
-OBJECT:'`',"boulder",(15,16)
+OBJECT:'`',"boulder",(15,16) [skipcheck]
 
 #Shared offices
 OBJECT:'(',"writing desk",(31,01)

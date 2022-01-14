@@ -214,7 +214,7 @@ MONSTER:'h',"mind flayer",(47,11)
 MONSTER:'h',"mind flayer",(47,09)
 
 MONSTER:'H',"twitching four-armed changed",(08,01)
-MONSTER:'C',"parasitized embraced alider",(20,10)
+MONSTER:'C',"parasitized embraced alider",(20,10) [skipcheck]
 MONSTER:'h',"mind flayer",(12,01)
 MONSTER:'h',"edderkop",(14,01)
 
@@ -325,7 +325,7 @@ ENDMAP
 #0         1         2         3         4         5         6         7     
 
 MONSTER:'G',"crucified gynoid",(55,13)
-MONSTER:'G',"crucified gynoid",(51,13)
+MONSTER:'G',"crucified gynoid",(51,13) [skipcheck]
 MONSTER:'G',"crucified gynoid",(51,11)
 MONSTER:'G',"crucified android",(49,11)
 MONSTER:'G',"crucified gynoid",(45,11)
