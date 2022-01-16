@@ -1919,6 +1919,7 @@ E void NDECL(synch_cursor);
 /* ### o_init.c ### */
 
 E void NDECL(init_objects);
+E void NDECL(hack_objects);
 E int NDECL(find_sawant);
 E int NDECL(find_gawant);
 E int NDECL(find_pawant);

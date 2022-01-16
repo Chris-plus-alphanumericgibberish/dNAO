@@ -249,6 +249,33 @@ shuffle_all()
 	shuffle(SPEED_BOOTS, FLYING_BOOTS, FALSE);
 }
 
+/* called on init and restore
+ * modify some objects
+ */
+void
+hack_objects()
+{
+	/* Fix up the crown */
+	switch (find_gcirclet())
+	{
+	case HELMET:
+		obj_descr[HELMET].oc_name = "circlet";
+		break;
+	case HELM_OF_BRILLIANCE:
+		obj_descr[HELM_OF_BRILLIANCE].oc_name = "crown of cognizance";
+		break;
+	case HELM_OF_OPPOSITE_ALIGNMENT:
+		obj_descr[HELM_OF_OPPOSITE_ALIGNMENT].oc_name = "tiara of treachery";
+		break;
+	case HELM_OF_TELEPATHY:
+		obj_descr[HELM_OF_TELEPATHY].oc_name = "tiara of telepathy";
+		break;
+	case HELM_OF_DRAIN_RESISTANCE:
+		obj_descr[HELM_OF_DRAIN_RESISTANCE].oc_name = "diadem of drain resistance";
+		break;
+	}
+}
+
 /* finds the object index for an item whose description matches str (first) or any of strs[],
  * within the given bounds of the objects array 
  * Caller is responsible for storing returned otyp.
@@ -1143,6 +1170,7 @@ register int fd;
 #ifdef USE_TILES
 	shuffle_tiles();
 #endif
+	hack_objects();
 }
 
 void

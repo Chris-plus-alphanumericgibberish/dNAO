@@ -3033,6 +3033,7 @@ newgame()
 	u_init();
 	
 	hack_artifacts();	/* recall after u_init() to fix up role specific artifacts */
+	hack_objects();
 
 #ifndef NO_SIGNAL
 	(void) signal(SIGINT, (SIG_RET_TYPE) done1);
