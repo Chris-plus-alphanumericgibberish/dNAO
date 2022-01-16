@@ -5215,7 +5215,7 @@ typfnd:
 			if (dead_species(mntmp, FALSE)) {
 			    otmp->corpsenm = NON_PM;	/* it's empty */
 			} else if (!(mons[mntmp].geno & G_UNIQ) &&
-				   !(mvitals[mntmp].mvflags & G_NOCORPSE) &&
+				   !(mvitals[mntmp].mvflags & G_NON_GEN_CORPSE) &&
 				   mons[mntmp].cnutrit != 0 &&
 				   !(typ==POT_BLOOD && !has_blood(&mons[mntmp]))) {
 			    otmp->corpsenm = mntmp;
@@ -5225,8 +5225,9 @@ typfnd:
 		    otmp->corpsenm = mntmp;
 		break;
 		case CORPSE:
-			if (!(mons[mntmp].geno & G_UNIQ) &&
-				   !(mvitals[mntmp].mvflags & G_NOCORPSE)) {
+			if (!(mons[mntmp].geno & G_UNIQ)
+				&& !(mvitals[mntmp].mvflags & G_NON_GEN_CORPSE)
+			){
 			    /* beware of random troll or lizard corpse,
 			       or of ordinary one being forced to such */
 			    if (otmp->timed) stop_all_timers(otmp->timed);

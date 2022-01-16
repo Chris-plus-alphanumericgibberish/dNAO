@@ -279,6 +279,8 @@
 #define MZ_GIGANTIC	7		/* off the scale */
 
 /* for mons[].geno (constant during game) */
+#define G_NON_GEN_CORPSE	(G_SPCORPSE|G_NOCORPSE)		/* nongenerated corpse */
+#define G_SPCORPSE	0x00010000		/* Corpse is special, and should be non-wishable */
 #define G_INST20	0x00008000		/* generates only if you have 20 insight */
 #define G_INST10	0x00004000		/* generates only if you have 10 insight */
 #define G_UNIQ		0x00002000		/* generated only once */

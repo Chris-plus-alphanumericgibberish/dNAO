@@ -548,7 +548,7 @@ E NEARDATA struct permonst upermonst;	/* init'd in decl.c,
 E NEARDATA struct mvitals {
 	uchar	born;
 	uchar	died;
-	uchar	mvflags;
+	long long mvflags;
 	int	san_lost;
 	int	insight_gained;
 	Bitfield(seen,1);
