@@ -5542,10 +5542,12 @@ typfnd:
 	/* attach creature of the item's permonst type */
 	if(ispetrified && wizwish && otmp->corpsenm != NON_PM){
 		struct monst * mon;
-		struct obj * otmp2;
+		struct obj * otmp2 = 0;
 		mon = makemon(&mons[otmp->corpsenm], 0, 0, NO_MINVENT);
-		otmp2 = save_mtraits(otmp, mon);
-		mongone(mon);
+		if(mon){
+			otmp2 = save_mtraits(otmp, mon);
+			mongone(mon);
+		}
 		if (otmp2){
 			otmp = otmp2;
 		}

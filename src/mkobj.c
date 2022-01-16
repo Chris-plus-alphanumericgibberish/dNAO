@@ -1011,10 +1011,12 @@ int mkflags;
 				struct monst * mon;
 				struct obj * otmp2;
 				mon = makemon(&mons[otmp->corpsenm], 0, 0, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
-				otmp2 = save_mtraits(otmp, mon);
-				mongone(mon);
-				if(otmp2)
-					otmp = otmp2;
+				if(mon){
+					otmp2 = save_mtraits(otmp, mon);
+					mongone(mon);
+					if(otmp2)
+						otmp = otmp2;
+				}
 			}
 			break;
 		case BALL_CLASS:
