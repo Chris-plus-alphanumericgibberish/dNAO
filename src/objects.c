@@ -501,7 +501,7 @@ WEAPON(("quarterstaff", "staff"),
 	0, 0,   MZ_HUGE,  9, 40,  5,  0, B,   P_QUARTERSTAFF, WOOD, FALSE, HI_WOOD),
 WEAPON(("khakkhara", "monk's staff"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(6)), DMG(D(4)),
-	0, 0,   MZ_HUGE,  2,120, 50,  0, B|P, P_QUARTERSTAFF, SILVER, IDED, HI_SILVER),
+	0, 0,   MZ_HUGE,  2, 80, 50,  0, B|P, P_QUARTERSTAFF, SILVER, IDED, HI_SILVER),
 WEAPON(("double sword"),
 	DMG(D(8)), DMG(D(12)),
 	1, 0,   MZ_HUGE,  1, 80, 30,  0, S|P, P_QUARTERSTAFF, IRON, FALSE, HI_METAL),
