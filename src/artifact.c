@@ -10477,12 +10477,12 @@ read_necro(VOID_ARGS)
 					break;
 				}
 				
-				if((skill <= P_NONE || skill > P_LAST_WEAPON) && skill != P_MUSICALIZE){
+				if((skill <= P_NONE || skill > P_LAST_WEAPON) && skill != P_MUSICALIZE && skill != P_MARTIAL_ARTS){
 					You("aren't holding a weapon.");
 					break;
 				}
 				
-				if(!(P_MAX_SKILL(skill) < newmax)) You("already know how to use your weapon.");
+				if(!(P_MAX_SKILL(skill) < newmax)) You("already know how to use your %s.", skill == P_MARTIAL_ARTS ? "fists" : "weapon");
 				else if(u.uen >= 100){
 					if(skill == P_MARTIAL_ARTS){
 						You("grasp the principles of your body's use.");
@@ -10495,7 +10495,7 @@ read_necro(VOID_ARGS)
 					u.uenbonus -= 20;
 					calc_total_maxen();
 					expert_weapon_skill(skill);
-					u.weapon_skills[objects[uwep->otyp].oc_skill].max_skill = newmax;
+					u.weapon_skills[skill].max_skill = newmax;
 				} else You("lack the magical energy to cast this incantation.");
 			}break;
 			case SELECT_HEALTH:
