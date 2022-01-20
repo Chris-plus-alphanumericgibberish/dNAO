@@ -392,9 +392,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			/* stop on hit? */
 			if (!thrownobj)
 				break;	/* projectile was destroyed */
-			else if (range==initrange) {
+			else if (range==initrange && initrange && (dx || dy)) {
 				/* projectile was reflected */
 				/* go directly to next movement of projectile */
+				/* only do this if initrange is not 0 (rock traps) and dx or dy is not zero (traps again, probably other stuff) */
 				continue;
 			}
 			else if (is_boulder(thrownobj)) {
