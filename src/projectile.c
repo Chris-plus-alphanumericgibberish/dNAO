@@ -340,8 +340,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			break;
 	}
 
+	
 	/* move the projectile loop */
 	/* always ends via break */
+	boolean firstmove = TRUE;	/* some behaviour is different on first pass */
 	while (TRUE)
 	{
 		/* boomerangs: change dx/dy to make signature circle */
@@ -373,8 +375,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			break;
 		}
 
-		/* projectile is on a creature */
-		if ((range != initrange || initrange == 0) &&
+		/* projectile is on a creature (except for the first time its moved, unless it's a 0-range projectile) */
+		if ((!firstmove || initrange == 0) &&
 			(mdef = creature_at(bhitpos.x, bhitpos.y)))
 		{
 			/* dart/arrow traps hit your steed some of the time */
@@ -392,10 +394,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			/* stop on hit? */
 			if (!thrownobj)
 				break;	/* projectile was destroyed */
-			else if (range==initrange) {
+			else if (result & MM_REFLECT) {
 				/* projectile was reflected */
 				/* go directly to next movement of projectile */
-				continue;
+				goto move_projectile;
 			}
 			else if (is_boulder(thrownobj)) {
 				if (result)
@@ -484,6 +486,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			}
 		}
 
+move_projectile:
 		/* no projectile -- something destroyed it */
 		if (!thrownobj)
 		{
@@ -498,6 +501,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		}
 		else {
 			/* otherwise move the projectile */
+			firstmove = FALSE;
 			range--;
 			bhitpos.x += dx;
 			bhitpos.y += dy;
@@ -1066,8 +1070,12 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		/* return to sender */
 		*pdx *= -1;
 		*pdy *= -1;
-		*prange = *prange2;
-		return MM_MISS;
+		/* spends some range */
+		if (range2 > range) {
+			*prange = *prange2;
+			*prange2 -= range2 - range;
+		}
+		return MM_REFLECT;
 	}
 	/* blaster bolts and laser beams are reflected by regular reflection */
 	else if ((thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT)
@@ -1086,7 +1094,6 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		if (youdef && shienuse && (u.dx || u.dy)) {
 			*pdx = u.dx;
 			*pdy = u.dy;
-			*prange = *prange2;
 		}
 		else if (youdef || !has_template(mdef, FRACTURED)){
 			*pdx *= -1;
@@ -1097,7 +1104,12 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			*pdx = xdir[i];
 			*pdy = ydir[i];
 		}
-		return MM_MISS;
+		/* spends some range */
+		if (range2 > range) {
+			*prange = *prange2;
+			*prange2 -= range2 - range;
+		}
+		return MM_REFLECT;
 	}
 	/* the player has a chance to burn some projectiles (not blaster bolts or laser beams) out of the air with a lightsaber */
 	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT)

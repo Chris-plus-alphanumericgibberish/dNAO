@@ -268,5 +268,6 @@
 #define MM_AGR_DIED	0x04	/* aggressor died */
 #define MM_AGR_STOP 0x08	/* aggressor stopped attacking for some reason other than being fully dead */
 #define MM_DEF_LSVD 0x10	/* defender died and was lifesaved */
+#define MM_REFLECT	0x20	/* for projectiles: projectile was reflected. */
 
 #endif /* MONATTK_H */
