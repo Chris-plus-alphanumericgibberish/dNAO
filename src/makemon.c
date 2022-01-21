@@ -10357,6 +10357,10 @@ struct monst * mon;
 		out_faction = ILSENSINE_FACTION;
 	else if(In_quest(&u.uz) && Role_if(PM_EXILE) && !peaceful)
 		out_faction = SEROPAENES_FACTION;
+	else if((In_quest(&u.uz) && Role_if(PM_MADMAN) && !peaceful)
+		|| yellow_monster(mon)
+	)
+		out_faction = YELLOW_FACTION;
 	else if((In_quest(&u.uz) || Is_stronghold(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || Is_astralevel(&u.uz)) && !peaceful)
 		out_faction = YENDORIAN_FACTION;
 

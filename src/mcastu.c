@@ -8,7 +8,7 @@
 extern void you_aggravate(struct monst *);
 
 STATIC_DCL int FDECL(choose_magic_spell, (int,int,boolean));
-STATIC_DCL int FDECL(choose_clerical_spell, (int,int,boolean));
+STATIC_DCL int FDECL(choose_clerical_spell, (int,int,boolean,boolean));
 STATIC_DCL int FDECL(choose_psionic_spell, (int,int,boolean));
 STATIC_DCL int FDECL(elemspell, (struct monst *, struct monst *, struct attack *, int, int));
 STATIC_DCL boolean FDECL(is_undirected_spell,(int));
@@ -259,93 +259,58 @@ boolean hostile;
 
 /* default spell selection for priests/monks */
 STATIC_OVL int
-choose_clerical_spell(spellnum,mid,hostile)
+choose_clerical_spell(spellnum,mid,hostile,quake)
 int spellnum;
 int mid;
 boolean hostile;
+boolean quake;
 {
-	/* Alternative spell lists: since the alternative lists contain spells that aren't
-		yet implemented for m vs m combat, non-hostile monsters always use the vanilla 
-		list. Alternate list slection is based on the monster's ID number, which is
+	/* Alternative spell lists:
+		Alternate list slection is based on the monster's ID number, which is
 		annotated as staying constant. Priests are divided up into constructive and
 		destructive casters (constructives favor heal self, destructives favor 
-		inflict wounds). Their spell list is divided into blocks. The order that
+		inflict wounds, constructives summon angels, destructives summon devils). 
+		Their spell list is divided into blocks. The order that
 		they recieve spells from each block is radomized based on their monster
 		ID.
 	*/
-	if(!hostile){
-     switch (spellnum % 18) {
-     case 17:
-       return PUNISH;
-     case 16:
-       return SUMMON_ANGEL;
-     case 14:
-       return PLAGUE;
-    case 13:
-       return ACID_RAIN;
-    case 12:
-	return GEYSER;
-    case 11:
-	return FIRE_PILLAR;
-    case 9:
-	return LIGHTNING;
-    case 8:
-       return DRAIN_LIFE;
-    case 7:
-       return CURSE_ITEMS;
-    case 6:
-       return INSECTS;
-    case 4:
-	return BLIND_YOU;
-    case 3:
-	return PARALYZE;
-    case 2:
-	return CONFUSE_YOU;
-    case 1:
-	return OPEN_WOUNDS;
-    case 0:
-    default:/*5,10,15,18+*/
-	return CURE_SELF;
-    }
-	}else{
-		 spellnum = spellnum % 18;
-		//case "17"
-		if(spellnum == ((mid/100+3)%4)+14) return PUNISH;
-		//case "16"
-		//case "15"
-		//Cure/Inflict
-		if(spellnum == ((mid/100+2)%4)+14) return (mid % 2) ? SUMMON_ANGEL : SUMMON_DEVIL;
-		//case "14"
-		if(spellnum == ((mid/100+0)%4)+14) return PLAGUE;
-		//case "13"
-		if(spellnum == ((mid+4)%5)+9) return EARTHQUAKE;
-		//case "12"
-		if(spellnum == ((mid+3)%5)+9) return ( (mid/11) % 2) ? GEYSER : ACID_RAIN;
-		//case "11"
-		if(spellnum == ((mid+2)%5)+9) return ( (mid/13) % 2) ? FIRE_PILLAR : ICE_STORM;
-		//case "10"
-		//Cure/Inflict
-		//case "9"
-		if(spellnum == ((mid+0)%5)+9) return LIGHTNING;
-		//case "8"
-		if(spellnum == ((mid/10+3)%4)+5) return DRAIN_LIFE;
-		//case "7"
-		if(spellnum == ((mid/10+2)%4)+5) return ( (mid/3) % 2) ? CURSE_ITEMS : EVIL_EYE;
-		//case "6"
-		if(spellnum == ((mid/10+1)%4)+5) return INSECTS;
-		//case "5"
-		//Cure/Inflict
-		//case "4"
-		if(spellnum == ((mid+2)%3)+2) return BLIND_YOU;
-		//case "3"
-		if(spellnum == ((mid+1)%3)+2) return PARALYZE;
-		//case "2"
-		if(spellnum == ((mid+0)%3)+2) return CONFUSE_YOU;
-		//case "1"
-		if(spellnum == ((mid+1)%2)+0) return ( (mid+1) % 2) ? CURE_SELF : OPEN_WOUNDS;
-		//case "0", "5", "10", "15", "18+"
-		return (mid % 2) ? CURE_SELF : OPEN_WOUNDS;
-	}
+	 spellnum = spellnum % 18;
+	//case "17"
+	if(spellnum == ((mid/100+3)%4)+14) return PUNISH;
+	//case "16"
+	if(spellnum == ((mid/100+2)%4)+14) return (mid % 2) ? SUMMON_ANGEL : SUMMON_DEVIL;
+	//case "15"
+	//Cure/Inflict
+	//case "14"
+	if(spellnum == ((mid/100+0)%4)+14) return PLAGUE;
+	//case "13"
+	if(spellnum == ((mid+4)%5)+9) return quake ? EARTHQUAKE : TREMOR;
+	//case "12"
+	if(spellnum == ((mid+3)%5)+9) return ( (mid/11) % 2) ? GEYSER : ACID_RAIN;
+	//case "11"
+	if(spellnum == ((mid+2)%5)+9) return ( (mid/13) % 2) ? FIRE_PILLAR : ICE_STORM;
+	//case "10"
+	//Cure/Inflict
+	//case "9"
+	if(spellnum == ((mid+0)%5)+9) return LIGHTNING;
+	//case "8"
+	if(spellnum == ((mid/10+3)%4)+5) return DRAIN_LIFE;
+	//case "7"
+	if(spellnum == ((mid/10+2)%4)+5) return ( (mid/3) % 2) ? CURSE_ITEMS : EVIL_EYE;
+	//case "6"
+	if(spellnum == ((mid/10+1)%4)+5) return INSECTS;
+	//case "5"
+	//Cure/Inflict
+	//case "4"
+	if(spellnum == ((mid+2)%3)+2) return BLIND_YOU;
+	//case "3"
+	if(spellnum == ((mid+1)%3)+2) return PARALYZE;
+	//case "2"
+	if(spellnum == ((mid+0)%3)+2) return CONFUSE_YOU;
+	//case "1"
+	if(spellnum == ((mid+1)%2)+0) return ( (mid+1) % 2) ? CURE_SELF : OPEN_WOUNDS;
+	//case "0", "5", "10", "15", "18+"
+	return (mid % 2) ? CURE_SELF : OPEN_WOUNDS;
 }
 
 /* default spell selection for psychic-flavored casters */
@@ -391,6 +356,9 @@ choose_magic_special(mtmp, type)
 struct monst *mtmp;
 unsigned int type;
 {
+	int clrc_spell_power = mtmp->m_id == 0 ? (rn2(u.ulevel) * 18 / 30) : rn2(mtmp->m_lev);
+	int wzrd_spell_power = mtmp->m_id == 0 ? (rn2(u.ulevel) * 24 / 30) : rn2(mtmp->m_lev);
+	boolean quake = FALSE;
 	//50% favored spells
     if (rn2(2)) {
        switch(monsndx(mtmp->data)) {
@@ -594,6 +562,55 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_PRIEST:
+	case PM_PRIESTESS:
+	case PM_ALIGNED_PRIEST:
+	case PM_HIGH_PRIEST:
+	case PM_ARCH_PRIEST:
+	case PM_ABBOT:
+		quake = TRUE; //Casts earthquake instead of tremor
+	break;
+	case PM_STRANGER:
+		switch (clrc_spell_power % 18) {
+			case 17:
+				return INCARCERATE;
+			case 16:
+				return SUMMON_ALIEN;
+			// case 15:
+				//Cure
+			case 14:
+				return PLAGUE;
+			case 13:
+				return EARTHQUAKE;
+			case 12:
+				return rn2(2) ? GEYSER : ACID_RAIN;
+			case 11:
+				return rn2(2) ? FIRE_PILLAR : ICE_STORM;
+			// case 10:
+				//Cure
+			case 9:
+				return LIGHTNING;
+			case 8:
+				return DRAIN_LIFE;
+			case 7:
+				return MUMMY_CURSE;
+			case 6:
+				return YELLOW_DEAD;
+			// case 5:
+				//Cure
+			case 4:
+				return NIGHTMARE;
+			case 3:
+				return VULNERABILITY;
+			case 2:
+				return STUN_YOU;
+			case 1:
+				return OPEN_WOUNDS;
+			//case "0", "5", "10", "15"
+			default:
+				return CURE_SELF;
+		}
+	break;
 	case PM_DWARF_CLERIC:
 	case PM_DWARF_QUEEN:
 		switch (rnd(4)) {
@@ -746,7 +763,7 @@ unsigned int type;
 		}
 	break;
 	case PM_HALF_STONE_DRAGON:
-		switch (rn2(mtmp->m_lev)) {
+		switch (clrc_spell_power) {
 			default:/* 10 -> 29*/
 				return LIGHTNING;
 			case 9:
@@ -1598,10 +1615,10 @@ unsigned int type;
 	break;
 	}
     if (type == AD_CLRC)
-        return choose_clerical_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 18 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
+        return choose_clerical_spell(clrc_spell_power, mtmp->m_id,!(mtmp->mpeaceful), quake);
     else if (type == AD_PSON)
-        return choose_psionic_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 18 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
-    return choose_magic_spell(mtmp->m_id == 0 ? (rn2(u.ulevel) * 24 / 30) : rn2(mtmp->m_lev),mtmp->m_id,!(mtmp->mpeaceful));
+        return choose_psionic_spell(clrc_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
+    return choose_magic_spell(wzrd_spell_power,mtmp->m_id,!(mtmp->mpeaceful));
 }
 
 
@@ -1702,6 +1719,11 @@ const char * spellname[] =
 	"MON_WARP_THROW",
 	"SUMMON_TANNIN",
 	"DISINTEGRATION",
+	"TREMOR",
+	//80
+	"INCARCERATE",
+	"MUMMY_CURSE",
+	"YELLOW_DEAD",
 };
 
 
@@ -3717,6 +3739,24 @@ int tary;
 		}
 		return MM_HIT;
 
+	case TREMOR:
+		if (!(tarx || tary)) {
+			impossible("tremor spell with no target location?");
+			return MM_MISS;
+		}
+		else {
+			/* message */
+			pline_The("%s tremors!",
+				In_endgame(&u.uz) ? "plane" : "dungeon");
+
+			do_earthquake(tarx, tary, 0, min((mlev(magr) - 1) / 6 + 1, 8), FALSE, magr);
+
+			aggravate(); /* wake up without scaring */
+			if(couldsee(tarx, tary))
+				stop_occupation();	/* even if you weren't targeted, you certainly noticed! */
+		}
+		return MM_HIT;
+
 //////////////////////////////////////////////////////////////////////////////////////
 // HEALING / BUFFING
 //////////////////////////////////////////////////////////////////////////////////////
@@ -4083,6 +4123,26 @@ int tary;
 			mm.x = x(magr);
 			mm.y = y(magr);
 			mkundead(&mm, TRUE, NO_MINVENT, normalAngel(magr) ? HOLYDEAD_FACTION : magr->mfaction);
+			stop_occupation();
+		}
+		return MM_HIT;
+
+	case YELLOW_DEAD:
+		/* creatures raised are not marked as summoned */
+		if (!youdef) {
+			/* only mvu allowed */
+			return cast_spell(magr, mdef, attk, (foundem ? OPEN_WOUNDS : CURE_SELF), tarx, tary);
+		}
+		else if(rn2(2))
+			yellow_nasty();
+		else
+		{
+			coord mm;
+			if (canseemon(magr))
+				pline("%s raised the dead!", Monnam(magr));
+			mm.x = x(magr);
+			mm.y = y(magr);
+			mk_yellow_undead(&mm, TRUE, NO_MINVENT, YELLOW_FACTION);
 			stop_occupation();
 		}
 		return MM_HIT;
@@ -4968,6 +5028,13 @@ int tary;
 		}
 		return MM_HIT;
 
+	case MUMMY_CURSE:
+		if (!mdef) {
+			impossible("mummy curse with no target?");
+			return MM_MISS;
+		}
+		return mummy_curses_x(magr, mdef);
+
 	case NAIL_TO_THE_SKY:
 		if (!youdef) {
 			/* only makes sense vs player */
@@ -5018,8 +5085,7 @@ int tary;
 			/* only makes sense vs player */
 			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
 		}
-		else
-		{
+		else {
 			if (u.ualign.record <= 1 || !rn2(min(u.ualign.record, 20))){
 				if (!Punished) {
 					punish((struct obj *)0);
@@ -5035,6 +5101,83 @@ int tary;
 			stop_occupation();
 		}
 		return MM_HIT;
+
+	case INCARCERATE:{
+		struct obj *otmp = 0;
+		if (!youdef) {
+			/* only makes sense vs player */
+			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		}
+		else {
+			switch(rn2(3)){
+				case 0:
+				case 1:
+					otmp = uarmc;
+					if(!otmp)
+						otmp = uarm;
+
+					if(!otmp){
+						if(humanoid_torso(youracedata)){
+							otmp = mksobj(STRAITJACKET, MKOBJ_NOINIT);
+							otmp->obj_color = CLR_YELLOW;
+							otmp->objsize = youracedata->msize;
+							pickup_object(otmp, 1, TRUE);
+							curse(otmp);
+							setworn(otmp, W_ARM);
+							Armor_on();
+							// Did something
+							break;
+						}
+						// Didn't do anything, keep going
+					}
+					else if(otmp->otyp == STRAITJACKET && !otmp->cursed){
+						curse(otmp);
+						// Did something
+						break;
+					}
+					
+					if(!otmp || otmp->otyp == STRAITJACKET){
+						otmp = some_armor(&youmonst);
+					}
+					
+					if(otmp && otmp->otyp != STRAITJACKET){
+						if(otmp->obj_color == CLR_YELLOW){
+							teleport_steal_arm(magr, otmp);
+						}
+						else if(is_metallic(otmp)){
+							if(!obj_resists(otmp, 55, 95)){
+								if(!Blind)
+									Your("%s turns golden!", xname(otmp));
+								set_material(otmp, GOLD);
+							}
+						}
+						else {
+							if(!obj_resists(otmp, 55, 95)){
+								if(!Blind)
+									Your("%s abruptly turns yellow!", xname(otmp));
+								otmp->obj_color = CLR_YELLOW;
+							}
+						}
+						// Did something
+						break;
+					}
+				//If we didn't break before now, nothing was done. Fall through.
+				case 2:
+					if (!Punished) {
+						punish((struct obj *)0);
+						if (is_prince(magr->data)) uball->owt += 160;
+					}
+					else {
+						Your("iron ball gets heavier!");
+						if (is_prince(magr->data)) uball->owt += 240;
+						else uball->owt += 160;
+					}
+					stop_occupation();
+				break;
+			}
+		}
+		return MM_HIT;
+	}
 
 	case DARKNESS:
 		if (!youdef) {
@@ -5153,6 +5296,7 @@ int spellnum;
 	case MON_POISON_GAS:
 	case SOLID_FOG:
 	case EARTHQUAKE:
+	case TREMOR:
 	/* also directed attack spells */
 	case MAGIC_MISSILE:
 	case CONE_OF_COLD:
@@ -5239,9 +5383,11 @@ int spellnum;
 	case VULNERABILITY:
 	case EVIL_EYE:
 	case CURSE_ITEMS:
+	case MUMMY_CURSE:
 	case NAIL_TO_THE_SKY:
 	case STERILITY_CURSE:
 	case PUNISH:
+	case INCARCERATE:
 	case DARKNESS:
 	case MAKE_WEB:
 		return TRUE;
@@ -5334,7 +5480,8 @@ int tary;
 		return TRUE;
 
 	/* earthquake should not be cast in the endgame (even for the plane of earth?) */
-	if (spellnum == EARTHQUAKE && In_endgame(&u.uz))
+	///The wizard can't even cast this anyway :(
+	if ((spellnum == EARTHQUAKE || spellnum == TREMOR) && In_endgame(&u.uz))
 		return TRUE;
 
 	/* don't do strangulation if there's no room in player's inventory */

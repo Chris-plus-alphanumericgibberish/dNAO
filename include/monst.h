@@ -238,6 +238,7 @@ struct monst {
 #define	QUEST_FACTION		FACTION_PADDING+7	/* The Quest Leader's faction */
 #define	ILSENSINE_FACTION	FACTION_PADDING+8	/* Ilsensine's faction, not allied with the Yendorian faction despite filling the same role */
 #define	SEROPAENES_FACTION	FACTION_PADDING+9	/* Binder quest faction, not allied with the Yendorian faction despite filling the same role */
+#define	YELLOW_FACTION	    FACTION_PADDING+10	/* Hastur faction, not the same as the Yendorian faction, despite filling the same role in the Madman quest */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;

@@ -11385,6 +11385,7 @@ struct obj *obj;
 			}
 			if(mtmp){
 				mtmp->mpeaceful = 0;
+				mtmp->mfaction = YELLOW_FACTION;
 				set_malign(mtmp);
 				switch(rn2(4)){
 					case 0:

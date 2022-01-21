@@ -5674,13 +5674,44 @@ long mfaction;
 	coord cc;
 
 	while (cnt--) {
-	    mdat = morguemon();
-	    if (enexto(&cc, mm->x, mm->y, mdat) &&
-		    (!revive_corpses ||
-		     !(otmp = sobj_at(CORPSE, cc.x, cc.y)) ||
-		     !(mon = revive(otmp,FALSE)))
-		)
-			mon = makemon(mdat, cc.x, cc.y, mm_flags);
+		if(revive_corpses && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
+			if(!get_template(mon) && mtemplate_accepts_mtyp(ZOMBIFIED, mon->mtyp))
+				set_template(mon, ZOMBIFIED);
+		}
+		else {
+			mdat = morguemon();
+			if (enexto(&cc, mm->x, mm->y, mdat))
+				mon = makemon(mdat, cc.x, cc.y, mm_flags);
+		}
+		if(mon)
+			set_faction(mon, mfaction);
+	}
+	level.flags.graveyard = TRUE;	/* reduced chance for undead corpse */
+}
+
+/* make a swarm of undead around mm */
+void
+mk_yellow_undead(mm, revive_corpses, mm_flags, mfaction)
+coord *mm;
+boolean revive_corpses;
+int mm_flags;
+long mfaction;
+{
+	int cnt = (level_difficulty() + 1)/10 + rnd(5);
+	struct permonst *mdat;
+	struct obj *otmp;
+	struct monst *mon = (struct monst *)0;
+	coord cc;
+
+	while (cnt--) {
+		if(revive_corpses && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
+			if(!get_template(mon) && mtemplate_accepts_mtyp(YELLOW_TEMPLATE, mon->mtyp))
+				set_template(mon, YELLOW_TEMPLATE);
+			mon->mfaction = YELLOW_FACTION;
+		}
+		else {
+			yellow_dead();
+		}
 		if(mon)
 			set_faction(mon, mfaction);
 	}
