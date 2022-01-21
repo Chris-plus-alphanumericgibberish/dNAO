@@ -3776,7 +3776,7 @@ struct monst *mtmp;
 					set_template(mtmp, PSEUDONATURAL);
 				break;
 			}
-			if(Role_if(PM_ANACHRONONAUT) && mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
+			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 				if(mtyp == PM_TROOPER){
 					verbalize("**WARNING: Anomalous vital signs detected in trooper %d**", (int)(mtmp->m_id));
 					if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
@@ -4184,13 +4184,10 @@ register struct monst *mtmp;
 	if(Role_if(PM_ANACHRONONAUT) && (mtmp->mpeaceful || (has_lifesigns(mtmp) && mtmp->mvar_lifesigns)) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 		if(mtmp->mtyp == PM_TROOPER || (has_lifesigns(mtmp) && mtmp->mvar_lifesigns == PM_TROOPER)){
 			verbalize("**ALERT: trooper %d vital signs terminated**", (int)(mtmp->m_id));
-			if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
 		} else if(mtmp->mtyp == PM_MYRKALFAR_WARRIOR){
 			verbalize("**ALERT: warrior %d vital signs terminated**", (int)(mtmp->m_id));
-			if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
 		} else {
 			verbalize("**ALERT: citizen %d vital signs terminated**", (int)(mtmp->m_id));
-			if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
 		}
 	}
 	if(mtmp->mtame && roll_madness(MAD_TALONS)){
@@ -4295,6 +4292,10 @@ boolean was_swallowed;			/* digestion */
 {
 	struct permonst *mdat = mon->data;
 	int i, tmp;
+	//Must be done here for reasons that are obscure
+	if(Role_if(PM_ANACHRONONAUT) && (mon->mpeaceful || (has_lifesigns(mon) && mon->mvar_lifesigns)) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
+	}
 	/* Liches and Vlad and his wives have a fancy death message, and leave no corpse */
 	if ((mdat->mlet == S_LICH) ||
 		(mdat->mlet == S_VAMPIRE && mdat->geno & G_UNIQ)) {
@@ -4310,16 +4311,6 @@ boolean was_swallowed;			/* digestion */
 	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH)
 		return FALSE;
 	
-	//Must be done here for reasons that are obscure
-	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
-		if(mdat->mtyp == PM_TROOPER){
-			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
-		} else if(mdat->mtyp == PM_MYRKALFAR_WARRIOR){
-			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
-		} else if(mdat->mtyp != PM_PHANTASM){
-			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
-		}
-	}
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MALPHAS && rn2(20) <= (mvitals[PM_ACERERAK].died > 0 ? 4 : 1)){
 		struct monst *mtmp;
 		mtmp = makemon(&mons[PM_CROW], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
