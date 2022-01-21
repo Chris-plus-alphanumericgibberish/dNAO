@@ -3190,6 +3190,7 @@ E void NDECL(clonewiz);
 E int NDECL(pick_nasty);
 E int FDECL(nasty, (struct monst*));
 E void NDECL(yellow_nasty);
+E void NDECL(yellow_dead);
 E void NDECL(resurrect);
 E void NDECL(illur_resurrect);
 E void NDECL(yello_resurrect);

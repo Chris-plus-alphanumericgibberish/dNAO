@@ -5674,7 +5674,9 @@ long mfaction;
 	coord cc;
 
 	while (cnt--) {
-		if(revive_corpses && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
+		cc.x = mm->x+rn2(3)-1;
+		cc.y = mm->y+rn2(3)-1;
+		if(revive_corpses && isok(cc.x, cc.y) && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
 			if(!get_template(mon) && mtemplate_accepts_mtyp(ZOMBIFIED, mon->mtyp))
 				set_template(mon, ZOMBIFIED);
 		}
@@ -5704,7 +5706,9 @@ long mfaction;
 	coord cc;
 
 	while (cnt--) {
-		if(revive_corpses && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
+		cc.x = mm->x+rn2(3)-1;
+		cc.y = mm->y+rn2(3)-1;
+		if(revive_corpses && isok(cc.x, cc.y) && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
 			if(!get_template(mon) && mtemplate_accepts_mtyp(YELLOW_TEMPLATE, mon->mtyp))
 				set_template(mon, YELLOW_TEMPLATE);
 			mon->mfaction = YELLOW_FACTION;
