@@ -4184,10 +4184,13 @@ register struct monst *mtmp;
 	if(Role_if(PM_ANACHRONONAUT) && (mtmp->mpeaceful || (has_lifesigns(mtmp) && mtmp->mvar_lifesigns)) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 		if(mtmp->mtyp == PM_TROOPER || (has_lifesigns(mtmp) && mtmp->mvar_lifesigns == PM_TROOPER)){
 			verbalize("**ALERT: trooper %d vital signs terminated**", (int)(mtmp->m_id));
+			if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
 		} else if(mtmp->mtyp == PM_MYRKALFAR_WARRIOR){
 			verbalize("**ALERT: warrior %d vital signs terminated**", (int)(mtmp->m_id));
+			if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
 		} else {
 			verbalize("**ALERT: citizen %d vital signs terminated**", (int)(mtmp->m_id));
+			if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
 		}
 	}
 	if(mtmp->mtame && roll_madness(MAD_TALONS)){
