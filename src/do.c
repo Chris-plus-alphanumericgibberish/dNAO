@@ -1848,6 +1848,7 @@ int different;
 	if(different==REVIVE_YELLOW){
 		set_template(mtmp, YELLOW_TEMPLATE);
 		mtmp->zombify = 0;
+		mtmp->mfaction = YELLOW_FACTION;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;
 		}

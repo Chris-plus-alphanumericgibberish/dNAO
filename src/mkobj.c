@@ -700,7 +700,7 @@ int mkflags;
 				/* possibly overridden by mkcorpstat() */
 				tryct = 50;
 				do otmp->corpsenm = undead_to_corpse(rndmonnum());
-				while ((mvitals[otmp->corpsenm].mvflags & G_NOCORPSE) && (--tryct > 0));
+				while ((mvitals[otmp->corpsenm].mvflags & G_NON_GEN_CORPSE) && (--tryct > 0));
 				if (tryct == 0) {
 					/* perhaps rndmonnum() only wants to make G_NOCORPSE monsters on
 					   this level; let's create an adventurer's corpse instead, then */
@@ -732,7 +732,7 @@ int mkflags;
 				else for (tryct = 200; tryct > 0; --tryct) {
 					mndx = undead_to_corpse(rndmonnum());
 					if (mons[mndx].cnutrit &&
-						!(mvitals[mndx].mvflags & G_NOCORPSE)) {
+						!(mvitals[mndx].mvflags & G_NON_GEN_CORPSE)) {
 						otmp->corpsenm = mndx;
 						break;
 					}
@@ -1011,10 +1011,12 @@ int mkflags;
 				struct monst * mon;
 				struct obj * otmp2;
 				mon = makemon(&mons[otmp->corpsenm], 0, 0, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
-				otmp2 = save_mtraits(otmp, mon);
-				mongone(mon);
-				if(otmp2)
-					otmp = otmp2;
+				if(mon){
+					otmp2 = save_mtraits(otmp, mon);
+					mongone(mon);
+					if(otmp2)
+						otmp = otmp2;
+				}
 			}
 			break;
 		case BALL_CLASS:
@@ -1025,7 +1027,7 @@ int mkflags;
 				for (tryct = 200; tryct > 0; --tryct) {
 					mndx = undead_to_corpse(rndmonnum());
 					if (mons[mndx].cnutrit &&
-						!(mvitals[mndx].mvflags & G_NOCORPSE)
+						!(mvitals[mndx].mvflags & G_NON_GEN_CORPSE)
 						&& has_blood(&mons[mndx])) {
 						otmp->corpsenm = mndx;
 						break;

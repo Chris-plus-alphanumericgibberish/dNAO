@@ -2008,7 +2008,7 @@ int newgame;
 				urole.questarti = ART_CLOAK_OF_THE_CONSORT;
 				
 				urole.ldrnum = PM_DROW_NOVICE;
-				urole.guardnum = PM_PEASANT;
+				urole.guardnum = PM_HOUSELESS_DROW;
 				urole.neminum = PM_A_SALOM;
 				
 				urole.enemy1num = PM_HEDROW_ZOMBIE;

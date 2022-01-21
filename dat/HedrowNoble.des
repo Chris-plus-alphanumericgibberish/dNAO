@@ -201,26 +201,26 @@ DOOR:closed,(55,11)
 DOOR:closed,(63,11)
 
 # Creatures
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
 
 MONSTER:random,random,random
 MONSTER:random,random,random
@@ -511,26 +511,26 @@ ENDMAP
 STAIR: (00,05), up
 STAIR: (71,14), down
 
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
-MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
+MONSTER:'@',"houseless drow",random,peaceful
 
 MONSTER:random,random,random
 MONSTER:random,random,random

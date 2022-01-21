@@ -1124,7 +1124,7 @@ die:
 	    else if (how == GLASSED)
 		u.ugrave_arise = (NON_PM - 4);	/* statue instead of corpse */
 	    else if (u.ugrave_arise == NON_PM &&
-		     !(mvitals[u.umonnum].mvflags & G_NOCORPSE)) {
+		     !(mvitals[u.umonnum].mvflags & G_NOCORPSE && !uandroid)) {
 		int mtyp = u.umonnum;
 
 		if (!Upolyd) {

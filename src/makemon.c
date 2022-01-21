@@ -1432,6 +1432,32 @@ int faction;
 						otmp->spe = 4;
 						otmp->opoisoned = rn2(4) ? OPOISON_SLEEP : OPOISON_PARAL;
 					}
+				} else if(mm == PM_HOUSELESS_DROW){
+					(void) mongets(mtmp, DROVEN_CLOAK, mkobjflags);
+					(void) mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+					(void) mongets(mtmp, LOW_BOOTS, mkobjflags);
+					switch(rn2(6)){
+						case 0:
+							otmp = mongets(mtmp, SICKLE, mkobjflags);
+							set_material_gm(otmp, OBSIDIAN_MT);
+						break;
+						case 1:
+							otmp = mongets(mtmp, SCYTHE, mkobjflags);
+							set_material_gm(otmp, OBSIDIAN_MT);
+						break;
+						case 2:
+							(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
+						break;
+						case 3:
+							(void)mongets(mtmp, CLUB, mkobjflags);
+						break;
+						case 4:
+							(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
+						break;
+						case 5:
+							(void)mongets(mtmp, DROVEN_SPEAR, mkobjflags);
+						break;
+					}
 				} else if(mm == PM_DROW_MATRON || mm == PM_DROW_MATRON_MOTHER || is_yochlol(mtmp->data)){
 					otmp = mksobj(DROVEN_PLATE_MAIL, mkobjflags);
 					otmp->ohaluengr = TRUE;
@@ -10244,7 +10270,7 @@ int faction;
 			else out_faction = LOLTH_SYMBOL;
 		} else if(Is_lolth_level(&u.uz)){
 			out_faction = LOLTH_SYMBOL;
-		} else if(ptr->mtyp == PM_MINDLESS_THRALL || ptr->mtyp == PM_A_GONE || ptr->mtyp == PM_PEASANT){
+		} else if(ptr->mtyp == PM_MINDLESS_THRALL || ptr->mtyp == PM_A_GONE || ptr->mtyp == PM_HOUSELESS_DROW){
 			out_faction = PEN_A_SYMBOL;
 		} else if(ptr->mtyp == PM_DOKKALFAR_ETERNAL_MATRIARCH){
 			out_faction = Infuture ? EDDER_SYMBOL : LOST_HOUSE;
@@ -10331,6 +10357,10 @@ struct monst * mon;
 		out_faction = ILSENSINE_FACTION;
 	else if(In_quest(&u.uz) && Role_if(PM_EXILE) && !peaceful)
 		out_faction = SEROPAENES_FACTION;
+	else if((In_quest(&u.uz) && Role_if(PM_MADMAN) && !peaceful)
+		|| yellow_monster(mon)
+	)
+		out_faction = YELLOW_FACTION;
 	else if((In_quest(&u.uz) || Is_stronghold(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || Is_astralevel(&u.uz)) && !peaceful)
 		out_faction = YENDORIAN_FACTION;
 

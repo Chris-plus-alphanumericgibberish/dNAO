@@ -3154,7 +3154,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		if(mdef->mpeaceful==TRUE && magr->mtame==TRUE) return FALSE;
 	}
 	
-	/* Various factions don't attack faction-mates each-other */
+	/* Various factions don't attack faction-mates */
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YENDORIAN_FACTION)
 		return FALSE;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == GOATMOM_FACTION)
@@ -3164,6 +3164,8 @@ struct monst * mdef;	/* another monster which is next to it */
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == ILSENSINE_FACTION)
 		return FALSE;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == SEROPAENES_FACTION)
+		return FALSE;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YELLOW_FACTION)
 		return FALSE;
 	
 	/* elves (and Eladrin) vs. (orcs and undead and wargs) */
@@ -3197,10 +3199,10 @@ struct monst * mdef;	/* another monster which is next to it */
 	/* undead vs civs */
 	if(!(In_cha(&u.uz) || Is_rogue_level(&u.uz))){
 		if(mm_undead(magr) && 
-			(!is_witch_mon(mdef) && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef))
+			(!is_witch_mon(mdef) && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef) && mdef->mfaction != YELLOW_FACTION)
 		)
 			return ALLOW_M|ALLOW_TM;
-		if((!is_witch_mon(magr) && !magr->mpetitioner && !mm_undead(magr) && !mindless_mon(magr))
+		if((!is_witch_mon(magr) && !magr->mpetitioner && !mm_undead(magr) && !mindless_mon(magr) && magr->mfaction != YELLOW_FACTION)
 			&& mm_undead(mdef)
 		)
 			return ALLOW_M|ALLOW_TM;
@@ -3774,7 +3776,7 @@ struct monst *mtmp;
 					set_template(mtmp, PSEUDONATURAL);
 				break;
 			}
-			if(Role_if(PM_ANACHRONONAUT) && mtmp->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
+			if(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz) && Is_qstart(&u.uz) && !(quest_status.leader_is_dead)){
 				if(mtyp == PM_TROOPER){
 					verbalize("**WARNING: Anomalous vital signs detected in trooper %d**", (int)(mtmp->m_id));
 					if(!canspotmon(mtmp)) map_invisible(mtmp->mx, mtmp->my);
@@ -4290,6 +4292,10 @@ boolean was_swallowed;			/* digestion */
 {
 	struct permonst *mdat = mon->data;
 	int i, tmp;
+	//Must be done here for reasons that are obscure
+	if(Role_if(PM_ANACHRONONAUT) && (mon->mpeaceful || (has_lifesigns(mon) && mon->mvar_lifesigns)) && In_quest(&u.uz) && Is_qstart(&u.uz)){
+		if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
+	}
 	/* Liches and Vlad and his wives have a fancy death message, and leave no corpse */
 	if ((mdat->mlet == S_LICH) ||
 		(mdat->mlet == S_VAMPIRE && mdat->geno & G_UNIQ)) {
@@ -4305,16 +4311,6 @@ boolean was_swallowed;			/* digestion */
 	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH)
 		return FALSE;
 	
-	//Must be done here for reasons that are obscure
-	if(Role_if(PM_ANACHRONONAUT) && mon->mpeaceful && In_quest(&u.uz) && Is_qstart(&u.uz)){
-		if(mdat->mtyp == PM_TROOPER){
-			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
-		} else if(mdat->mtyp == PM_MYRKALFAR_WARRIOR){
-			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
-		} else if(mdat->mtyp != PM_PHANTASM){
-			if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
-		}
-	}
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MALPHAS && rn2(20) <= (mvitals[PM_ACERERAK].died > 0 ? 4 : 1)){
 		struct monst *mtmp;
 		mtmp = makemon(&mons[PM_CROW], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);

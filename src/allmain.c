@@ -3012,7 +3012,7 @@ newgame()
 	flags.ident = 1;
 
 	for (i = 0; i < NUMMONS; i++)
-		mvitals[i].mvflags = mons[i].geno & G_NOCORPSE;
+		mvitals[i].mvflags = mons[i].geno & (G_NOCORPSE|G_SPCORPSE);
 
 	init_objects();		/* must be before u_init() */
 	init_gods();		/* probably will need to be before u_init */
@@ -3033,6 +3033,7 @@ newgame()
 	u_init();
 	
 	hack_artifacts();	/* recall after u_init() to fix up role specific artifacts */
+	hack_objects();
 
 #ifndef NO_SIGNAL
 	(void) signal(SIGINT, (SIG_RET_TYPE) done1);

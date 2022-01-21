@@ -576,6 +576,19 @@
 									|| (ptr)->mtyp == PM_NIGHTMARE \
 								  )
 
+#define always_yellow_monster(ptr) (\
+									   (ptr)->mtyp == PM_BYAKHEE \
+									|| (ptr)->mtyp == PM_COILING_BRAWN \
+									|| (ptr)->mtyp == PM_FUNGAL_BRAIN \
+									|| (ptr)->mtyp == PM_STRANGER \
+								  )
+
+#define yellow_monster(mon) (\
+							   always_yellow_monster(mon->data) \
+							|| has_template(mon, YELLOW_TEMPLATE) \
+							|| has_template(mon, DREAM_LEECH) \
+							)
+
 #define gates_in_help(ptr)	((is_demon((ptr)) || is_minion((ptr))) \
 								&& (ptr)->mtyp != PM_OONA \
 								&& (ptr)->mtyp != PM_BALROG \

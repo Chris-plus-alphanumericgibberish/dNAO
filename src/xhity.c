@@ -17420,6 +17420,13 @@ struct monst * mdef;
 		break;
 		case PM_SOLDIER_MUMMY:
 			cnum = rnd(3);
+		break;
+		case PM_STRANGER:
+			if(rn2(5))
+				cnum = rn2(4);
+			else
+				cnum = 8;
+		break;
 		default:
 			cnum = 0;
 		break;
@@ -17430,8 +17437,11 @@ struct monst * mdef;
 		case 0:
 			//Should never kill target
 			*hp(mdef) = max_ints(*hp(mdef) - (magr->data->mlevel), *hp(mdef)/2+1);
-			if (youdef) 
+			if (youdef){
+				stop_occupation();
+				flags.botl = 1;
 				You_feel("intense pain!");
+			}
 		break;
 		//Bad Luck
 		case 1:
@@ -17478,6 +17488,8 @@ struct monst * mdef;
 			//Should never kill target
 			*hp(mdef) = *hp(mdef)/2 + 1;
 			if (youdef) {
+				stop_occupation();
+				flags.botl = 1;
 				if (!is_silent(pd)){
 					You("%s from the pain!", humanoid_torso(pd) ? "scream" : "shriek");
 				}
@@ -17547,9 +17559,11 @@ struct monst * mdef;
 			if (!nonliving(pd) || !has_blood_mon(mdef) || (youdef && (u.sealsActive & SEAL_OSE)) || resists_death(mdef))
 				break;
 			else if (*hp(mdef) >= 100){
+				*hp(mdef) -= d(10, 8);
+				stop_occupation();
+				flags.botl = 1;
 				if(youdef)
 					Your("%s stops!  When it finally beats again, it is weak and thready.", body_part(HEART));
-				*hp(mdef) -= d(10, 8);
 			}
 			else {
 				if(youdef){
@@ -17590,12 +17604,14 @@ struct monst * mdef;
 				calc_total_maxhp();
 			}
 			else {
-				mdef->mhpmax = max(mdef->m_lev, max(mdef->mhpmax-25, mdef->mhpmax/2));
+				mdef->mhpmax = max(mdef->m_lev, max(mdef->mhpmax-25, mdef->mhpmax/2+1));
 				mdef->mhp = min(mdef->mhp, mdef->mhpmax);
 			}
 			//Should never kill target
 			*hp(mdef) = *hp(mdef)/3 + 1;
 			if (youdef) {
+				stop_occupation();
+				flags.botl = 1;
 				if (!is_silent(pd)){
 					You("%s in agony!", humanoid_torso(pd) ? "scream" : "shriek");
 				}
