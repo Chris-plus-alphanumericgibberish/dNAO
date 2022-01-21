@@ -185,11 +185,11 @@ GOD_V2("Dionysus",              A_CHAOTIC, HOLY_HOLINESS,
 GOD_V2("Zo-Kalar",              A_LAWFUL, HOLY_HOLINESS,
 	MINIONS(Langels)
 	),
-GOD_V2("Tamash",                A_NEUTRAL, NEUTRAL_HOLINESS,
-	MINIONS(NElemen)
+GOD_V2("Lobon",                 A_NEUTRAL, HOLY_HOLINESS,
+	MINIONS(Nangels)
 	),
-GOD_V2("Lobon",                 A_CHAOTIC, HOLY_HOLINESS,
-	MINIONS(Cangels)
+GOD_V2("Tamash",                A_CHAOTIC, NEUTRAL_HOLINESS,
+	MINIONS(NElemen)
 	),
 /* valkyrie, Norse */
 GOD_V2("Tyr",                   A_LAWFUL, HOLY_HOLINESS,
