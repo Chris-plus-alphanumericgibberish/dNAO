@@ -8041,10 +8041,17 @@ boolean ranged;
 		/* no hit message? */
 		{
 		int i = 1 + rnd(3);
+		int x, y;
 		for (; i > 0; i--) {
+			x = x(mdef) + rn2(3) - 1;
+			y = y(mdef) + rn2(3) - 1;
+			if(!isok(x,y)){
+				x = x(mdef);
+				y = y(mdef);
+			}
 			explode(
-				x(mdef) + rn2(3) - 1,	/* x center coord */
-				y(mdef) + rn2(3) - 1,	/* y center coord */
+				x,						/* x center coord */
+				y,						/* y center coord */
 				AD_PHYS,				/* damage type  */
 				-1,						/* object causing explosion (none) */
 				dmg,					/* damage per explosion */

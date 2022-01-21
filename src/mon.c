@@ -4419,9 +4419,13 @@ boolean was_swallowed;			/* digestion */
 			else if(mdat->mattk[i].adtyp == AD_FRWK){
 				int x, y, i;
 				for(i = rn2(3)+2; i > 0; i--){
-					x = rn2(7)-3;
-					y = rn2(7)-3;
-					explode(mon->mx+x, mon->my+y, AD_PHYS, -1, tmp, rn2(7), 1);
+					x = mon->mx+rn2(7)-3;
+					y = mon->my+rn2(7)-3;
+					if(!isok(x,y)){
+						x = mon->mx;
+						y = mon->my;
+					}
+					explode(x, y, AD_PHYS, -1, tmp, rn2(7), 1);
 				}
 				tmp=0;
 			}
