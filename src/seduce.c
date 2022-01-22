@@ -1392,6 +1392,9 @@ boolean badeffect;
 			break;
 
 		case PM_AVATAR_OF_LOLTH:
+			if (!badeffect)
+				mon->mspec_used = rnd(100);
+			break;
 		default:
 			if (!badeffect)
 				mon->mspec_used = rnd(100);
