@@ -1849,6 +1849,7 @@ int different;
 		set_template(mtmp, YELLOW_TEMPLATE);
 		mtmp->zombify = 0;
 		mtmp->mfaction = YELLOW_FACTION;
+		mtmp->mcrazed = 0;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;
 		}
