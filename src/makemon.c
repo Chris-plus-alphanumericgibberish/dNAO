@@ -12764,9 +12764,8 @@ struct monst *mtmp, *victim;
 		else if(ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) hp_threshold *= 10;
 		else if(ptr->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) hp_threshold *= 10;
 		else if(ptr->mtyp == PM_CHOKHMAH_SEPHIRAH) hp_threshold *= u.chokhmah;
-	    lev_limit = permonst_max_lev(ptr);
 
-		if (mtmp->ispolyp) lev_limit = max(lev_limit, 30);
+	    lev_limit = mon_max_lev(mtmp);
 
 	    /* If they can grow up, be sure the level is high enough for that */
 	    if (oldtype != newtype && mons[newtype].mlevel > lev_limit)
@@ -13553,6 +13552,7 @@ init_doll_sales()
 	return dollTypes;
 }
 
+STATIC_OVL
 int
 permonst_max_lev(ptr)
 struct permonst *ptr;
@@ -13584,6 +13584,17 @@ struct permonst *ptr;
 	else if (is_ancient(ptr)) lev_limit = 45;
 	else if (lev_limit < 5) lev_limit = 5;	/* arbitrary */
 	else if (lev_limit > 49) lev_limit = (ptr->mlevel > 49 ? ptr->mlevel : 49);
+	
+	return lev_limit;
+}
+
+int
+mon_max_lev(mon)
+struct monst *mon;
+{
+	int lev_limit = permonst_max_lev(mon->data);
+
+	if (mon->ispolyp) lev_limit = max(lev_limit, 30);
 	
 	return lev_limit;
 }

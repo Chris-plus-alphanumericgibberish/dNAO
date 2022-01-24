@@ -1117,10 +1117,23 @@ int numdogs;
 			){
 				numdogs++;
 				if(!weakdog) weakdog = curmon;
-				if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-				else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
+				if(weakdog->m_lev > curmon->m_lev)
+					weakdog = curmon; /* The weakest pet is stronger than the current pet */
+				else if(weakdog->m_lev == curmon->m_lev){  /* Do we need tiebreakers? */
+					if(weakdog->mtame > curmon->mtame)
+						weakdog = curmon; /* Tiebreaker 1: the weakest pet is more tame than the current pet */
+					else if(weakdog->mtame == curmon->mtame){ /* Do we need another tiebreaker? */
+						int weakdog_mlev = mon_max_lev(weakdog);
+						int curmon_mlev = mon_max_lev(curmon);
+						if(weakdog_mlev > curmon_mlev)
+							weakdog = curmon; /* Tiebreaker 2: the weakest pet has greater potential than the current pet */
+						else if(weakdog_mlev == curmon_mlev){
+							extern int monstr[];
+							if(monstr[weakdog->mtyp] > monstr[curmon->mtyp])
+								weakdog = curmon; /* Tiebreaker 3: the weakest pet has greater starting strength than the current pet */
+						}
+					}
+				}
 			}
 		}
 
