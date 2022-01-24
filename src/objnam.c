@@ -501,6 +501,30 @@ int otyp;
     return bufp;
 }
 
+/* applies unided artifact descriptors for oartifact to a string
+ */
+char *
+artiadjusted_objnam(buf, oartifact)
+char * buf;
+int oartifact;
+{
+	if (!oartifact)
+		return buf;
+
+	struct artifact * oart = &artilist[oartifact];
+	if (oart->desc) {
+		if (strstri(oart->desc, "%s")) {
+			char * buf2 = nextobuf();
+			Sprintf(buf2, oart->desc, buf);
+			Strcpy(buf, buf2);
+		}
+		else {
+			Strcat(buf, oart->desc);
+		}
+	}
+	return buf;
+}
+
 boolean
 obj_is_pname(obj)
 register struct obj *obj;
@@ -4893,7 +4917,7 @@ srch:
 	    short objtyp;
 
 	    /* Perhaps it's an artifact specified by name, not type */
-	    name = artifact_name(actualn, &objtyp);
+	    name = artifact_name(actualn, &objtyp, NULL);
 	    if(name) {
 			isartifact = TRUE;
 			typ = objtyp;
@@ -5465,7 +5489,7 @@ typfnd:
 		short objtyp;
 
 		/* an artifact name might need capitalization fixing */
-		aname = artifact_name(name, &objtyp);
+		aname = artifact_name(name, &objtyp, NULL);
 
 		if (aname) {
 			/* attempt to create an artifact with the modified name */

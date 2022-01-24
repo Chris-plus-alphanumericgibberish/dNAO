@@ -1598,9 +1598,10 @@ struct obj *otmp;	/* existing object */
  * is non-NULL.
  */
 const char*
-artifact_name(name, otyp)
+artifact_name(name, otyp, artinum)
 const char *name;
 short *otyp;
+int *artinum;
 {
     register const struct artifact *a;
     register const char *aname;
@@ -1615,17 +1616,21 @@ short *otyp;
 				*otyp = (u.brand_otyp != STRANGE_OBJECT ? u.brand_otyp : a->otyp);
 			else
 				*otyp = a->otyp;
+			if(artinum)
+				*artinum = a - artilist;
 			return a->name;
 		}
     }
 	aname = "Fluorite Octet";
 	if(!strcmpi(name, aname)) {
 		*otyp = artilist[ART_FLUORITE_OCTAHEDRON].otyp;
+		if(artinum) *artinum = ART_FLUORITE_OCTAHEDRON;
 		return artilist[ART_FLUORITE_OCTAHEDRON].name;
 	}
 	aname = "Fluorite Octahedra";
 	if(!strcmpi(name, aname)) {
 		*otyp = artilist[ART_FLUORITE_OCTAHEDRON].otyp;
+		if(artinum) *artinum = ART_FLUORITE_OCTAHEDRON;
 		return artilist[ART_FLUORITE_OCTAHEDRON].name;
 	}
     return (char *)0;

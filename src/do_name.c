@@ -525,7 +525,7 @@ register struct obj *obj;
 	(void)mungspaces(buf);
 
 	/* relax restrictions over proper capitalization for artifacts */
-	if ((aname = artifact_name(buf, &objtyp)) != 0 && objtyp == obj->otyp)
+	if ((aname = artifact_name(buf, &objtyp, NULL)) != 0 && objtyp == obj->otyp)
 		Strcpy(buf, aname);
 
 	if (obj->oartifact) {

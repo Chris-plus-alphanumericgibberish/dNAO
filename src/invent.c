@@ -37,7 +37,6 @@ STATIC_DCL char FDECL(obj_to_let,(struct obj *));
 STATIC_PTR int FDECL(u_material_next_to_skin,(int));
 STATIC_PTR int FDECL(u_bcu_next_to_skin,(int));
 STATIC_DCL int FDECL(itemactions,(struct obj *));
-STATIC_DCL void FDECL(describe_item, (struct obj *, int, int, winid *));
 
 #ifdef OVLB
 
@@ -2576,8 +2575,8 @@ winid *datawin;
 		return;
 	}
 
-	/* hide artifact properties if we haven't discovered the artifact yet */
-	if (undiscovered_artifact(oartifact))
+	/* hide artifact properties if we haven't discovered the artifact yet, and we aren't speaking in hypotheticals */
+	if (obj && undiscovered_artifact(oartifact))
 		oartifact = 0;
 
 	/* type name */
@@ -2586,7 +2585,11 @@ winid *datawin;
 		OBJPUTSTR(buf);
 	}
 	else {
-		Sprintf(buf, "(%s)", obj_typename(otyp));
+		/* assume we are asking about a "cloak of magic resistance", not a "piece of cloth" */
+		boolean savestate = objects[otyp].oc_name_known;
+		objects[otyp].oc_name_known = TRUE;
+		Sprintf(buf, "(%s)", artiadjusted_objnam(simple_typename(otyp), oartifact));
+		objects[otyp].oc_name_known = savestate;
 		OBJPUTSTR(buf);
 	}
 
@@ -2621,7 +2624,7 @@ winid *datawin;
 					);
 			}
 			else {
-				Sprintf(buf, "%s-handed %s%s%s",
+				Sprintf(buf, "%s-handed %s%s%s.",
 					(oc.oc_bimanual ? "Two" : "Single"),
 					(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
 					(otyp_is_launcher ? "launcher" : "weapon"),
@@ -2668,7 +2671,7 @@ winid *datawin;
 				}
 				Strcat(buf, buf2);
 			} else {
-				Sprintf(buf, "Uses the %s skill.", P_NAME(oc.oc_skill));
+				Sprintf(buf, "Uses the %s skill.", P_NAME(abs(oc.oc_skill)));
 			}
 			OBJPUTSTR(buf);
 		}
@@ -2744,13 +2747,13 @@ winid *datawin;
 				if (oart->damage > 1)
 				{
 					Sprintf(buf, "Deals %dd%d bonus ",
-						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
+						((obj && is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
 						oart->damage);
 				}
 				else
 				{
 					Sprintf(buf, "Deals %d bonus ",
-						((is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1));
+						((obj && is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1));
 				}
 			}
 			else

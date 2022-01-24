@@ -95,7 +95,7 @@ E void FDECL(add_oprop_list, (unsigned long int *, int));
 E boolean FDECL(check_oprop, (struct obj *, int));
 E boolean FDECL(oprops_match, (struct obj *, struct obj *));
 E void FDECL(copy_oprop_list, (struct obj *, unsigned long int *));
-E const char *FDECL(artifact_name, (const char *,short *));
+E const char *FDECL(artifact_name, (const char *,short *, int *));
 E boolean FDECL(art_already_exists, (int));
 E boolean FDECL(art_already_exists_byname, (int,const char *));
 E void FDECL(artifact_exists, (struct obj *,const char *,BOOLEAN_P));
@@ -1165,6 +1165,7 @@ E int FDECL(askchain, (struct obj **,const char *,int,int (*)(OBJ_P),
 E void FDECL(prinv, (const char *,struct obj *,long));
 E char *FDECL(xprname, (struct obj *,const char *,CHAR_P,BOOLEAN_P,long,long));
 E int NDECL(ddoinv);
+E void FDECL(describe_item, (struct obj *, int, int, winid *));
 E char FDECL(display_inventory, (const char *,BOOLEAN_P));
 #ifdef DUMP_LOG
 E char FDECL(dump_inventory, (const char *,BOOLEAN_P,BOOLEAN_P));
@@ -1996,6 +1997,7 @@ E int NDECL(random_saber_hilt);
 E char *FDECL(obj_typename, (int));
 E char *FDECL(obj_descname, (struct obj *));
 E char *FDECL(simple_typename, (int));
+E char *FDECL(artiadjusted_objnam, (char *, int));
 E boolean FDECL(obj_is_pname, (struct obj *));
 E char *FDECL(distant_name, (struct obj *,char *(*)(OBJ_P)));
 E char *FDECL(fruitname, (BOOLEAN_P));
