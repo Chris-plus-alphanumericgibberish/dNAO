@@ -36,6 +36,7 @@ struct thoughtglyph {
 #define	WRITHE							0x0000000000040000L
 #define	RADIANCE						0x0000000000080000L
 #define	BEASTS_EMBRACE					0x0000000000100000L
+#define	SIGHT							0x0000000000200000L
 
 static struct thoughtglyph thoughtglyphs[] =
 {
@@ -100,7 +101,10 @@ static struct thoughtglyph thoughtglyphs[] =
 	12, 100, "An irregular golden pyramid rises from the depths of your mind." },
 
 	{ BEAST_S_EMBRACE_GLYPH, NON_PM, BEASTS_EMBRACE,
-	0, 99, "A bestial figure takes refuge inside you." }
+	0, 99, "A bestial figure takes refuge inside you." },
+
+	{ ORRERY_GLYPH, NON_PM, SIGHT,
+	16, 100, "Your brain blinks open. There is an eye within an eye within an eye within an...." }
 };
 
 

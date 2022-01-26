@@ -3183,6 +3183,11 @@ int *shield_margin;
 				else if (ACURR(A_DEX) < 8)		bons_acc -= 1;
 				else if (ACURR(A_DEX) >= 14)	bons_acc += (ACURR(A_DEX) - 14);
 			}
+			if((active_glyph(SIGHT) || youracedata->mtyp == PM_GROTESQUE_PEEPER) && canseemon(mdef) && !mindless_mon(mdef))
+				bons_acc += rnd(20);
+			if(active_glyph(SIGHT))
+				bons_acc += base_acc*.3;
+
 			/* Stat (INT) (from Dantalion vs telepathically sensed enemies) */
 			if (u.sealsActive&SEAL_DANTALION && tp_sensemon(mdef))
 				bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
@@ -3231,6 +3236,12 @@ int *shield_margin;
 			/* these guys are extra accurate */
 			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED)
 				bons_acc += 20;
+			if (pa->mtyp == PM_GROTESQUE_PEEPER){
+				if((youdef && mon_can_see_you(magr))
+				 ||(!youdef && mon_can_see_mon(magr,mdef) && !mindless_mon(mdef))
+				)
+				bons_acc += rnd(20);
+			}
 			if (pa->mtyp == PM_DANCING_BLADE)
 				bons_acc += 7;
 			if (pa->mtyp == PM_CHOKHMAH_SEPHIRAH)

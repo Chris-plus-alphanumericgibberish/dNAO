@@ -7863,6 +7863,15 @@ dotrephination_menu()
 		incntlet++;
 	}
 	
+	if (u.thoughts&SIGHT){
+		Sprintf(buf, "Extract the recursive eye");
+		any.a_int = BEAST_S_EMBRACE_GLYPH;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	
 	end_menu(tmpwin, "Pick thought to extract");
 
 	how = PICK_ONE;

@@ -10763,6 +10763,8 @@ int faction;
 		mtmp->m_insight_level = 14+rn2(7);
 	else if(mtmp->mtyp == PM_RADIANT_PYRAMID)
 		mtmp->m_insight_level = 12+rn2(6);
+	else if(mtmp->mtyp == PM_GROTESQUE_PEEPER)
+		mtmp->m_insight_level = 16+rn2(8);
 	
 	else if(mtmp->mtyp == PM_BRIGHT_WALKER)
 		mtmp->m_insight_level = 10;

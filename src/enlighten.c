@@ -591,6 +591,9 @@ boolean dumping;
 	if (active_glyph(BEASTS_EMBRACE)){
 		enl_msg("The hidden figure inside of you ", "lets", "let", " you succumb to the inner beast");
 	}
+	if (active_glyph(SIGHT)){
+		enl_msg("The recursive eye ", "lets", "let", " you strike more accurately at monsters.");
+	}
 	
 	/*** Troubles ***/
 	Sprintf(buf, "%d sanity points", u.usanity);
@@ -1182,6 +1185,7 @@ resistances_enlightenment()
 	if (active_glyph(WRITHE)) putstr(en_win, 0, "A subtle mucus covers your brain.");
 	if (active_glyph(RADIANCE)) putstr(en_win, 0, "Your mind is impaled on a golden pyramid.");
 	if (active_glyph(BEASTS_EMBRACE)) putstr(en_win, 0, "A bestial figure hides inside of you.");
+	if (active_glyph(SIGHT)) putstr(en_win, 0, "Your brain is but the lid of an eye within an eye within an eye....");
 	
 	/*** Troubles ***/
 	if(u.usanity == 0)

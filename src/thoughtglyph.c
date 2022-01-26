@@ -391,6 +391,15 @@ dofreethought_menu()
 		incntlet++;
 	}
 	
+	if (!(u.thoughts&SIGHT)){
+		Sprintf(buf, "Greater accuracy");
+		any.a_int = SIGHT;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+	}
+	
 	end_menu(tmpwin, "Pick thought to learn");
 
 	how = PICK_ONE;
