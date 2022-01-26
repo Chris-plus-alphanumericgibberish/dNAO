@@ -8980,7 +8980,7 @@ arti_invoke(obj)
 						You("need to find some more powerful altars.");
 					else if((u.detestation_ritual&HI_RITUAL_DONE) != HI_RITUAL_DONE)
 						You("need to find another high altar.");
-					// else nothing
+					else You("have finished your work at long-last.");
 				}
 			}
 			else if(!Is_astralevel(&u.uz) && (u.detestation_ritual&RITUAL_DONE) == RITUAL_DONE){
@@ -8989,11 +8989,14 @@ arti_invoke(obj)
 			else if(Is_astralevel(&u.uz)){
 				//Make sure madman astral always has these three if the player is aligned to Bokrug
 				int dreamgods[] = {GOD_ZO_KALAR, GOD_LOBON, GOD_TAMASH};
+				int high_ritual[] = {RITUAL_HI_LAW, RITUAL_HI_NEUTRAL, RITUAL_HI_CHAOS};
 				int godnum = altars[levl[u.ux][u.uy].altar_num].god;
 				int altaralign = a_align(u.ux,u.uy);
 				You("perform a rite in detestation of %s!", godname(godnum));
 				change_luck(-7);
 				for(int i = 0; i < 3; i++){
+					if(u.detestation_ritual&high_ritual[i])
+						continue;
 					godlist[dreamgods[i]].anger += 3;
 					summon_god_minion(dreamgods[i], FALSE);
 					summon_god_minion(dreamgods[i], FALSE);
