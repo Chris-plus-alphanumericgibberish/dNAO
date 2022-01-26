@@ -454,7 +454,7 @@ register int roomno;
 			}
 			msg2 = 0;
 			if(sanctum && Is_sanctum(&u.uz)) {
-					if(priest->mpeaceful) {
+				if(priest->mpeaceful) {
 					msg1 = "Infidel, you have entered Moloch's Sanctum!";
 					msg2 = "Be gone!";
 					priest->mpeaceful = 0;
@@ -475,6 +475,14 @@ register int roomno;
 				} else msg1 = "You desecrate this place by your presence!";
 				if(canseemon(priest)) pline("As you approach, the priest suddenly putrefies and melts into a foul-smelling liquid mass!");
 				set_mon_data(priest, PM_DARKNESS_GIVEN_HUNGER);
+				priest->mpeaceful = 0;
+				set_malign(priest);
+			} else if(is_sarnath_god(EPRI(priest)->godnum) && (u.detestation_ritual&Align2ritual(EPRI(priest)->shralign))) {
+				if(priest->mpeaceful) {
+					msg1 = 0;
+					msg2 = 0;
+					msg1 = "Infidel! Traitor! You desecrate this place by your presence!";
+				} else msg1 = "You desecrate this place by your presence!";
 				priest->mpeaceful = 0;
 				set_malign(priest);
 			} else if(In_moloch_temple(&u.uz)) {

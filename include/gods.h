@@ -29,4 +29,7 @@ struct crowning {
 #define CRWN_TTL_NAME	4	/* playername */
 };
 
+#define is_sarnath_god(godnum)	(godnum == GOD_TAMASH || godnum == GOD_LOBON || godnum == GOD_ZO_KALAR)
+
+
 #endif	/* GODS_H */
