@@ -422,6 +422,10 @@ register boolean special;
 	register struct monst *mtmp;
 	char nam[PL_NSIZ];
 
+	//if ptr is null make a random monster instead
+	if(!ptr)
+		return makemon(ptr, x, y, special);
+
 	if(!is_mplayer(ptr))
 		return((struct monst *)0);
 
