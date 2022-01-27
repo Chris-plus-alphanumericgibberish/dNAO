@@ -5101,6 +5101,9 @@ struct monst *magr;
 		if(!mdef)
 			continue;
 		
+		if(rn2(3)) //2/3rds chance to just skip anyway, tails slaps grow more frequent if multiple targets are nearby.
+			continue;
+		
 		youdef = (mdef == &youmonst);
 
 		if(youagr && (mdef->mpeaceful))
