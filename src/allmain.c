@@ -4988,7 +4988,7 @@ struct monst *magr;
 	int i = rnd(8),j;
 	int mult = 1;
 	int ax, ay;
-	struct attack symbiote = { AT_OBIT, AD_DRST, 1, 6 };
+	struct attack * attk;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;
@@ -4996,10 +4996,10 @@ struct monst *magr;
 	
 	pa = youagr ? youracedata : magr->data;
 	
+	// get attack from statblock
+	attk = dmgtype_fromattack(magr->data, AD_DRST, AT_OBIT);
+	
 	if(pa->mtyp == PM_ANCIENT_NAGA){
-		//2x cobra
-		symbiote.damn = 4;
-		symbiote.damd = 8;
 		max = youagr ? 5 : magr->m_id%2 ? 7 : 5;
 	}
 	else if(pa->mtyp == PM_MEDUSA){
@@ -5039,7 +5039,7 @@ struct monst *magr;
 		if(!youdef && imprisoned(mdef))
 			continue;
 
-		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
+		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
 			 || mdef->mtyp == PM_MEDUSA)
 			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
@@ -5049,7 +5049,7 @@ struct monst *magr;
 				continue;
 		}
 		
-		xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
 		// Nagas have 5 or 7 snake bites
 		if(--max <= 0)
 			return;
