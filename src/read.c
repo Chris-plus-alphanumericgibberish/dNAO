@@ -174,6 +174,28 @@ doread()
 				pline("\"Take me up\"");
 			}
 			return(1);
+		} else if(scroll->oartifact == ART_HOLY_MOONLIGHT_SWORD && scroll->lamplit){
+			/* Note: you can see the blade even when blid */
+			if(u.uinsight < 2) {
+				pline("The glowing cyan blade is decorated with faint curves.");
+			}
+			else if(u.uinsight < 5) {
+				You("faintly see strange arches inside the cyan blade.");
+			}
+			else if(u.uinsight < 10){
+				You("can barely see faint bright stars behind the arches inside the cyan blade.");
+			}
+			else if(u.uinsight < 20){
+				pline("The blade is the deep black of the night sky. You don't know why you ever thought it was cyan.");
+			}
+			else if(u.uinsight < 40){
+				pline("The distant stars wink and dance among the arches within the black night sky.");
+			}
+			else {
+				pline("Tiny spirits of light dance in and out of the blade's sky and the black night of your %s.", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
+				maybe_give_thought(GUIDANCE);
+			}
+			return(1);
 		} else if(scroll->oartifact == ART_ITLACHIAYAQUE){
 			if (Blind) {
 				You_cant("see the mirror!");
@@ -819,7 +841,7 @@ struct obj *scroll;
 		thought = otyp_to_thought(scroll->otyp);
 
 		/* maybe_give_thought checks requirements, returns FALSE if it didn't work */
-		if (!maybe_give_thought(thought))	
+		if (!maybe_give_thought(thought))
 		{
 			pline("Nothing happens.");
 			return 0;
