@@ -3790,8 +3790,7 @@ struct monst *mtmp;
 			}
 			messaged = TRUE;
 			mtmp->mvar_lifesigns = mtyp;
-			mtmp->mtame = 0;
-			mtmp->mpeaceful = 0;
+			untame(mtmp, FALSE);
 			set_malign(mtmp);
 			set_faction(mtmp, ILSENSINE_FACTION);
 			newsym(mtmp->mx, mtmp->my);
@@ -7918,8 +7917,7 @@ struct monst *mtmp;
 					tmpm->mpeaceful = 1;
 				} else {
 					if(tmpm->mtame && !(EDOG(tmpm)->loyal)){
-						tmpm->mtame = 0;
-						tmpm->mpeaceful = 0;
+						untame(mtmp, FALSE);
 						set_malign(tmpm);
 					}
 					else if(!tmpm->mtame && tmpm->mpeaceful){

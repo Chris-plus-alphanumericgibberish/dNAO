@@ -1822,14 +1822,12 @@ moveloop()
 						golds -= level.flags.goldkamcount_peace;
 						if(golds <= 0){
 							level.flags.goldkamcount_peace--;
-							mtmp->mtame = 0;
-							mtmp->mpeaceful = 1;
+							untame(mtmp, TRUE);
 							newsym(mtmp->mx,mtmp->my);
 							goto karemade;
 						}
 						level.flags.goldkamcount_hostile--;
-						mtmp->mtame = 0;
-						mtmp->mpeaceful = 0;
+						untame(mtmp, FALSE);
 						newsym(mtmp->mx,mtmp->my);
 karemade:						
 						set_malign(mtmp);
