@@ -1007,13 +1007,10 @@ register int after;	/* this is extra fast monster movement */
 	/* lose tameness if under effects of taming song */
 	if (has_edog && EDOG(mtmp)->friend && mtmp->mtame) {
 		mtmp->mtame -= (always_hostile_mon(mtmp) ? 2 : 1);
+		if (wizard) pline("[%s friend for %d(%d)]", Monnam(mtmp), mtmp->mtame, EDOG(mtmp)->waspeaceful);
 		if (mtmp->mtame <= 0) {
-			mtmp->mtame = 0;
-			EDOG(mtmp)->friend = 0;
-			mtmp->mpeaceful = EDOG(mtmp)->waspeaceful;
+			untame(mtmp, EDOG(mtmp)->waspeaceful);
 		}
-		if (wizard)
-			pline("[%s friend for %d(%d)]", Monnam(mtmp), mtmp->mtame, EDOG(mtmp)->waspeaceful);
 	}
 #endif
 

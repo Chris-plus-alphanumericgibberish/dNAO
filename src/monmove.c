@@ -152,6 +152,10 @@ struct monst *mtmp;
 	int wardAt = ward_at(x,y);
 	struct monst *mat = m_at(x,y);
 	
+	//The PC isn't affected by wards etc.
+	if(mtmp == &youmonst)
+		return FALSE;
+	
 	if(no_upos(mtmp))
 		return FALSE;
 	

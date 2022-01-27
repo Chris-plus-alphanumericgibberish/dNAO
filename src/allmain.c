@@ -1822,14 +1822,12 @@ moveloop()
 						golds -= level.flags.goldkamcount_peace;
 						if(golds <= 0){
 							level.flags.goldkamcount_peace--;
-							mtmp->mtame = 0;
-							mtmp->mpeaceful = 1;
+							untame(mtmp, TRUE);
 							newsym(mtmp->mx,mtmp->my);
 							goto karemade;
 						}
 						level.flags.goldkamcount_hostile--;
-						mtmp->mtame = 0;
-						mtmp->mpeaceful = 0;
+						untame(mtmp, FALSE);
 						newsym(mtmp->mx,mtmp->my);
 karemade:						
 						set_malign(mtmp);
@@ -4784,6 +4782,7 @@ struct monst *magr;
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
+	int ax, ay;
 	struct attack symbiote = { AT_TENT, AD_DRST, 4, 4 };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
@@ -4870,13 +4869,17 @@ struct monst *magr;
 	
 	//Attack all surrounding foes
 	for(j=8;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
-		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+		else if(!isok(ax, ay))
 			continue;
-		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
 		
-		if(u.ux == x(magr)+clockwisex[(i+j)%8] && u.uy == y(magr)+clockwisey[(i+j)%8])
+		if(u.ux == ax && u.uy == ay)
 			mdef = &youmonst;
 		
 		if(!mdef)
@@ -4937,6 +4940,8 @@ struct monst *magr;
 			mdef = u.ustuck;
 		else if(!isok(x, y))
 			continue;
+		else if(onscary(x, y, magr))
+			continue;
 		else mdef = m_at(x, y);
 		
 		if(u.ux == x && u.uy == y)
@@ -4982,7 +4987,7 @@ struct monst *magr;
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int mult = 1;
-	int x, y;
+	int ax, ay;
 	struct attack symbiote = { AT_OBIT, AD_DRST, 1, 6 };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
@@ -5006,13 +5011,17 @@ struct monst *magr;
 	
 	//Attack all surrounding foes
 	for(j=8*mult;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
-		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+		else if(!isok(ax, ay))
 			continue;
-		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
 		
-		if(u.ux == x(magr)+clockwisex[(i+j)%8] && u.uy == y(magr)+clockwisey[(i+j)%8])
+		if(u.ux == ax && u.uy == ay)
 			mdef = &youmonst;
 		
 		if(!mdef)
@@ -5055,7 +5064,7 @@ struct monst *magr;
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
-	int x, y;
+	int ax, ay;
 	struct attack * attk;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
@@ -5068,16 +5077,23 @@ struct monst *magr;
 	
 	//Attack one foe
 	for(j=8;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
-		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+		else if(!isok(ax, ay))
 			continue;
-		else mdef = m_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
 		
-		if(u.ux == x(magr)+clockwisex[(i+j)%8] && u.uy == y(magr)+clockwisey[(i+j)%8])
+		if(u.ux == ax && u.uy == ay)
 			mdef = &youmonst;
 		
 		if(!mdef)
+			continue;
+		
+		if(rn2(3)) //2/3rds chance to just skip anyway, tails slaps grow more frequent if multiple targets are nearby.
 			continue;
 		
 		youdef = (mdef == &youmonst);
