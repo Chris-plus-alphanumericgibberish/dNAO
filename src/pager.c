@@ -1094,6 +1094,8 @@ do_look(quick)
     boolean hit_cloud;		/* true if found cloud explanation */
     int skipped_venom;		/* non-zero if we ignored "splash of venom" */
 	int hallu_obj;		/* non-zero if found hallucinable object */
+	short otyp = STRANGE_OBJECT;	/* to pass to artifact_name */
+	int oartifact;					/* to pass to artifact_name */
     static const char *mon_interior = "the interior of a monster";
 
     force_defsyms = FALSE;
@@ -1136,8 +1138,13 @@ do_look(quick)
 				temp_print = strtok(NULL, "\n");
 			}
 		}
+		// check if they specified an artifact
+		else if ((x_str = artifact_name(out_str, &otyp, &oartifact))) {
+			putstr(datawin, 0, x_str);
+			describe_item(NULL, otyp, oartifact, &datawin);
+		}
 		// check encyclopedia
-	    if(checkfile(out_str, pm, mntmp==NON_PM, TRUE, &datawin) || mntmp != NON_PM)
+	    if(checkfile(out_str, pm, (mntmp==NON_PM && otyp==STRANGE_OBJECT), TRUE, &datawin) || mntmp != NON_PM || otyp != STRANGE_OBJECT)
 			display_nhwindow(datawin, TRUE);
 		destroy_nhwindow(datawin);
 	    return 0;
