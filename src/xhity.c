@@ -1868,7 +1868,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	){
 		GETNEXT
 	}
-	
+	/* auto-tailslappers skip their tailslap in main combat sequence */
+	if(!by_the_book && attk->aatyp == AT_TAIL && is_tailslap_mtyp(pa)) {
+		GETNEXT
+	}	
 	/* the Five Fiends spellcasting */
 	if (!by_the_book && (
 		(pa->mtyp == PM_LICH__THE_FIEND_OF_EARTH) ||

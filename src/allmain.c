@@ -5065,23 +5065,15 @@ struct monst *magr;
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int ax, ay;
-	struct attack symbiote = { AT_TAIL, AD_PHYS, 4, 10 };
+	struct attack * attk;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;
 	
 	pa = youagr ? youracedata : magr->data;
 	
-	if(pa->mtyp == PM_WHITE_DRAGON){
-		//White dragons are weaker
-		symbiote.damn = 2;
-		symbiote.damd = 8;
-	}
-	else if(pa->mtyp == PM_RED_DRAGON || pa->mtyp == PM_IXOTH || pa->mtyp == PM_SMAUG){
-		//Red dragons are stronger
-		symbiote.damn = 5;
-		symbiote.damd = 12;
-	}
+	// get attack from statblock
+	attk = dmgtype_fromattack(magr->data, AD_PHYS, AT_TAIL);
 	
 	//Attack one foe
 	for(j=8;j>=1;j--){
@@ -5116,7 +5108,7 @@ struct monst *magr;
 		if(!youdef && imprisoned(mdef))
 			continue;
 
-		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
+		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
 			 || mdef->mtyp == PM_MEDUSA)
 			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
@@ -5126,7 +5118,7 @@ struct monst *magr;
 				continue;
 		}
 		
-		xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
 		return; //Only attack one foe
 	}
 }
