@@ -819,9 +819,9 @@ boolean peaceful;
 	register struct monst *roamer;
 	register boolean coaligned = (u.ualign.type == alignment);
 
-	//if ptr is null make a random monster instead
+	//if ptr is null don't make a monster
 	if(!ptr)
-		return makemon(ptr, x, y, NO_MM_FLAGS);
+		return((struct monst *)0);
 
 	if (ptr->mtyp != PM_ALIGNED_PRIEST && ptr->mtyp != PM_ANGEL)
 		return((struct monst *)0);
