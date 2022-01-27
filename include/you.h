@@ -7,6 +7,7 @@
 
 #include "attrib.h"
 #include "monst.h"
+#include "cults.h"
 #ifndef PROP_H
 #include "prop.h"		/* (needed here for util/makedefs.c) */
 #endif
@@ -37,34 +38,35 @@ struct u_have {
 };
 
 struct u_event {
-	Bitfield(minor_oracle,1);	/* received at least 1 cheap oracle */
-	Bitfield(major_oracle,1);	/*  "  expensive oracle */
-	Bitfield(qcalled,1);		/* called by Quest leader to do task */
-	Bitfield(qexpelled,1);		/* expelled from the Quest dungeon */
-	Bitfield(qcompleted,1);		/* successfully completed Quest task */
-	Bitfield(uheard_tune,2);	/* 1=know about, 2=heard passtune */
-	Bitfield(uopened_dbridge,1);	/* opened the drawbridge */
-	Bitfield(uread_necronomicon,1);		/* have read the necronomicon */
-	Bitfield(knoweddergud,1);		/* know the identity of the black-web god */
+	Bitfield(minor_oracle,1);		/*1 received at least 1 cheap oracle */
+	Bitfield(major_oracle,1);		/*2  "  expensive oracle */
+	Bitfield(qcalled,1);			/*3 called by Quest leader to do task */
+	Bitfield(qexpelled,1);			/*4 expelled from the Quest dungeon */
+	Bitfield(qcompleted,1);			/*5 successfully completed Quest task */
+	Bitfield(uheard_tune,2);		/*7 1=know about, 2=heard passtune */
+	Bitfield(uopened_dbridge,1);	/*8 opened the drawbridge */
+	Bitfield(uread_necronomicon,1);	/*9 have read the necronomicon */
+	Bitfield(knoweddergud,1);		/*10 know the identity of the black-web god */
 
-	Bitfield(found_square,1);		/* found the vibrating square */
-	Bitfield(invoked,1);		/* invoked Gate to the Sanctum level */
-	Bitfield(gehennom_entered,1);	/* entered Gehennom via Valley */
-	Bitfield(uhand_of_elbereth,6);	/* became Hand of Elbereth */
-	Bitfield(udemigod,1);		/* killed the wiz */
-	Bitfield(ukilled_apollyon,1);		/* killed the angel of the pit.  Lucifer should spawn on Astral */
-	Bitfield(ukilled_illurien,1);		/* Harassment */
-	Bitfield(ukilled_dagon,1);		/* Returns */
-	Bitfield(ukilled_hydra,1);		/* Returns */
-	Bitfield(shubbie_atten,1);		/* Got Shubbie's attention */
-	Bitfield(sum_entered,1);		/* entered Sum-of-All */
-	Bitfield(uaxus_foe,1);		/* enemy of the modrons */
-	Bitfield(utook_castle, 2);	/* sat on the castle throne, used artifact wish */
-	Bitfield(uunknowngod, 2);	/* given five artifacts to the priests of the unknown god, used artifact wish */
+	Bitfield(found_square,1);		/*11 found the vibrating square */
+	Bitfield(invoked,1);			/*12 invoked Gate to the Sanctum level */
+	Bitfield(gehennom_entered,1);	/*13 entered Gehennom via Valley */
+	Bitfield(uhand_of_elbereth,6);	/*19 became Hand of Elbereth */
+	Bitfield(udemigod,1);			/*20 killed the wiz */
+	Bitfield(ukilled_apollyon,1);	/*21 killed the angel of the pit.  Lucifer should spawn on Astral */
+	Bitfield(ukilled_illurien,1);	/*22 Harassment */
+	Bitfield(ukilled_dagon,1);		/*23 Returns */
+	Bitfield(ukilled_hydra,1);		/*24 Returns */
+	Bitfield(sum_entered,1);		/*25 entered Sum-of-All */
+	Bitfield(uaxus_foe,1);			/*26 enemy of the modrons */
+	Bitfield(utook_castle, 2);		/*28 sat on the castle throne, used artifact wish */
+	Bitfield(uunknowngod, 2);		/*30 given five artifacts to the priests of the unknown god, used artifact wish */
 #define ARTWISH_EARNED	1
 #define ARTWISH_SPENT	2
-	Bitfield(ascended,1);		/* has offered the Amulet */
-	Bitfield(knoxmade,1);		/* Portal to Ludios has been made in the main dungeon, teleport ok */
+	Bitfield(ascended,1);			/*31 has offered the Amulet */
+	Bitfield(knoxmade,1);			/*32 Portal to Ludios has been made in the main dungeon, teleport ok */
+	
+	Bitfield(padding,10);			/*42 reseve another bitfield in event. */
 };
 
 /* KMH, conduct --
@@ -514,7 +516,13 @@ struct you {
 	int ugifts;			/* number of artifacts bestowed */
 	int uartisval;		/* approximate strength of artifacts and gifts bestowed and wished for */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */
-	int ugoatblesscnt;
+	int ucultblesscnt[MAX_CULTS];
+#define ugoatblesscnt ucultblesscnt[GOAT_CULT]
+	boolean cult_atten[MAX_CULTS];
+#define shubbie_atten		cult_atten[GOAT_CULT]
+#define silver_atten		cult_atten[FLAME_CULT]
+#define yog_sothoth_atten	cult_atten[SOTH_CULT]
+#define good_neighbor_atten	cult_atten[RAT_CULT]
 	long lastprayed;
 	long lastslept;
 	long nextsleep;

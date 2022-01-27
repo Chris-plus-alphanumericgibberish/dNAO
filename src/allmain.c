@@ -2373,7 +2373,7 @@ karemade:
 			move_gliders();
 
 		    if (u.ublesscnt)  u.ublesscnt--;
-		    if (u.ugoatblesscnt && u.uevent.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger)
+		    if (u.ugoatblesscnt && u.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger)
 				u.ugoatblesscnt--;
 		    if(flags.time && !flags.run)
 			flags.botl = 1;
