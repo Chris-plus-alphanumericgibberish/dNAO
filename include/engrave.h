@@ -100,7 +100,8 @@ struct engr {
 #define ALIGNMENT_THING				(LAST_WARD+40)
 #define UNKNOWN_GOD					(LAST_WARD+41)
 #define BLACK_WEB					(LAST_WARD+42)
-#define NUMINA						(LAST_WARD+43)
+#define YOG_SOTHOTH					(LAST_WARD+43)
+#define NUMINA						(LAST_WARD+44)
 
 /*Some hallucinatory engravings have special properties. Keep track of them here*/
 /*default engraving, disconnected lines*/

@@ -715,6 +715,7 @@ struct you {
 #define SEAL_ALIGNMENT_THING		0x00000100L
 #define SEAL_UNKNOWN_GOD			0x00000200L
 #define SEAL_BLACK_WEB				0x00000400L
+#define SEAL_YOG_SOTHOTH			0x00000800L
 #define SEAL_NUMINA					0x40000000L
 //	long	numina;	//numina does not expire, and can be immediatly re-bound once 30th level is achived if the pact is broken.
 	
