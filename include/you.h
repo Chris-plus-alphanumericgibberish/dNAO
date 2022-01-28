@@ -819,7 +819,7 @@ struct you {
 #define	PWR_CLAIRVOYANCE			70
 #define	PWR_FIND_PATH				71
 #define	PWR_GNOSIS_PREMONITION		72
-#define	NUMBER_POWERS				73
+#define	NUMBER_POWERS				80
 
 	int spiritPOrder[52]; //# of letters in alphabet, capital and lowercase
 //	char spiritPLetters[NUMBER_POWERS];
