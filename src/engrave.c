@@ -932,7 +932,8 @@ char * sealNames[] =  {
 	"the Alignment Thing", /* 38 */
 	"the Unknown God", /* 39 */
 	"the Eddergud", /* 40 */
-	"Numina" /* 41 */
+	"Yog-Sothoth", /* 41 */
+	"Numina" /* 42 */
 };
 
 char * sealTitles[] =  {
@@ -978,7 +979,21 @@ char * sealTitles[] =  {
 	"", /* 38 */
 	"", /* 39 */
 	", The Black Web Entity", /* 40 */
-	", The Whispering Multitude" /* 41 */
+	", the Key and the Gate", /* 41 Also see yog yogTitles */
+	", The Whispering Multitude" /* 42 */
+};
+
+char * yogTitles[] =  {
+	", the key",
+	", the gate",
+	", the knower of the gate",
+	", the key and the guardian of the gate",
+	", the key and the hate",
+	", the past, present, and future",
+	", the opener of the way",
+	", the lurker at the threshold",
+	", the all-in-one",
+	", the one-in-all",
 };
 
 char *
@@ -3745,7 +3760,7 @@ pick_seal()
 				else {
 					Sprintf(buf, "%s%s",
 						sealNames[i],
-						sealTitles[i]
+						i == YOG_SOTHOTH ? ROLL_FROM(yogTitles) : sealTitles[i]
 						);
 				}
 				any.a_int = (i + FIRST_SEAL);	/* must be non-zero */

@@ -795,6 +795,8 @@ E struct _plinemsg *pline_msg;
 #define MSGTYP_NOSHOW  2
 #define MSGTYP_STOP    3
 
+#define ROLL_FROM(array)	array[rn2(SIZE(array))]
+
 
 /* FIXME: These should be integrated into objclass and permonst structs,
    but that invalidates saves */
