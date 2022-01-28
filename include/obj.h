@@ -473,6 +473,7 @@ struct obj {
 #define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
 #define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
 			 rakuyo_prop(otmp) || \
+			 check_oprop(otmp,OPROP_GSSDW) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \

@@ -1401,6 +1401,7 @@ default_case:
 					set_material_gm(stuff, SILVER);
 					add_oprop(stuff, OPROP_PSIOW);
 					add_oprop(stuff, OPROP_VORPW);
+					add_oprop(stuff, OPROP_GSSDW);
 					stuff->spe = 3;
 					add_to_container(otmp, stuff);
 

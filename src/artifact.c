@@ -5305,7 +5305,9 @@ boolean * messaged;
 			wepdesc = buf;
 			if (dieroll == 1)
 			{
-				if (is_slashing(msgr) && is_stabbing(msgr))
+				if(check_oprop(otmp,OPROP_GSSDW) && has_head_mon(mdef))
+					method = VORPAL_BEHEAD;
+				else if (is_slashing(msgr) && is_stabbing(msgr))
 					method = VORPAL_BEHEAD;
 				else if (is_slashing(msgr))
 					method = VORPAL_BISECT;
