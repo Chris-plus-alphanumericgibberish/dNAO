@@ -389,6 +389,12 @@ GOD_V2("Yog-Sothoth",            A_NONE, NEUTRAL_HOLINESS,
 GOD_V2("Bokrug, the water-lizard", A_NONE, NEUTRAL_HOLINESS,
 	MINIONS(PM_BEING_OF_IB, PM_PRIEST_OF_IB)
 	),
+GOD_V2("the Silver Flame", A_NONE, HOLY_HOLINESS,
+	MINIONS(Langels)
+	),
+GOD_V2("Nyarlathotep", A_NONE, NEUTRAL_HOLINESS,
+	MINIONS()
+	),
 /* the great terminator */
 GOD_V2((const char *)0, 0, 0, MINIONS())
 };
