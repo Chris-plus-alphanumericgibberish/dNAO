@@ -516,6 +516,7 @@ struct you {
 	int ugifts;			/* number of artifacts bestowed */
 	int uartisval;		/* approximate strength of artifacts and gifts bestowed and wished for */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */
+	long usaccredit;		/* credit towards next gift */
 	int ucultblesscnt[MAX_CULTS];
 #define ugoatblesscnt ucultblesscnt[GOAT_CULT]
 	boolean cult_atten[MAX_CULTS];
@@ -523,6 +524,7 @@ struct you {
 #define silver_atten		cult_atten[FLAME_CULT]
 #define yog_sothoth_atten	cult_atten[SOTH_CULT]
 #define good_neighbor_atten	cult_atten[RAT_CULT]
+	long ucultcredit[MAX_CULTS];
 	long lastprayed;
 	long lastslept;
 	long nextsleep;
