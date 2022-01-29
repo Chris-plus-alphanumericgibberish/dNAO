@@ -5812,7 +5812,14 @@ int spell;
 		) {
 		splcaster -= 200;
 	}
-	
+
+	if (uarmh){
+		if(uarmh->oartifact == ART_MITRE_OF_HOLINESS 
+		&& (Role_if(PM_PRIEST) || spell_skilltype(spellid(spell)) == P_CLERIC_SPELL)
+		)
+			splcaster -= urole.spelarmr;
+	}
+
 	if(uwep){
 		int cast_bon;
 		// powerful channeling artifacts
