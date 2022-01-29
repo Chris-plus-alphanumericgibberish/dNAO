@@ -714,7 +714,7 @@ int godnum;
 		return;
 	}
 	
-	if(Inhell && godnum != GOD_MOLOCH /*&& !(Race_if(PM_DROW) && (resp_god != A_LAWFUL || !flags.initgend))*/){
+	if(Inhell && godnum != GOD_MOLOCH && godnum != GOD_LOLTH /*&& !(Race_if(PM_DROW) && (resp_god != A_LAWFUL || !flags.initgend))*/){
 		resp_god = A_NONE;
 	}
 	
@@ -2534,14 +2534,14 @@ boolean praying;	/* false means no messages should be given */
 	    p_type = 3;
     }
 
-    if (is_undead(youracedata) && !Inhell &&
+    if (is_undead(youracedata) && (!Inhell || hell_safe_prayer(p_god)) &&
 		(gholiness(p_god) == HOLY_HOLINESS || (gholiness(p_god) == NEUTRAL_HOLINESS && !rn2(10))))
 	p_type = -1;
     /* Note:  when !praying, the random factor for neutrals makes the
        return value a non-deterministic approximation for enlightenment.
        This case should be uncommon enough to live with... */
 
-    return !praying ? (boolean)(p_type == 3 && !(Inhell && u.ualign.type != A_VOID)) : TRUE;
+    return !praying ? (boolean)(p_type == 3 && (!Inhell || hell_safe_prayer(p_god))) : TRUE;
 }
 
 int
@@ -2597,7 +2597,9 @@ dopray()
     nomovemsg = "You finish your prayer.";
     afternmv = prayer_done;
 
-    if((p_type == 3 && !(Inhell && u.ualign.type != A_VOID)) || (uwep && uwep->oartifact == ART_LANCE_OF_LONGINUS)) {
+    if((p_type == 3 && (!Inhell || hell_safe_prayer(p_god)))
+	|| (uwep && uwep->oartifact == ART_LANCE_OF_LONGINUS && rn2(7))
+	){
 	/* if you've been true to your god you can't die while you pray */
 	if (!Blind)
 	    You("are surrounded by a shimmering light.");
@@ -2649,12 +2651,12 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 	}
 	return(1);
     }
-    if (Inhell && !(u.ualign.type == A_VOID || p_god == GOD_LOLTH)) {
+    if (Inhell && !hell_safe_prayer(p_god)){
 		pline("Since you are in Gehennom, %s won't help you.", godname(p_god));
-	/* haltingly aligned is least likely to anger */
-	if (u.ualign.record <= 0 || rnl(u.ualign.record))
-	    angrygods(u.ualign.god);
-	return(0);
+		/* haltingly aligned is least likely to anger */
+		if (u.ualign.record <= 0 || rnl(u.ualign.record))
+			angrygods(u.ualign.god);
+		return(0);
     }
 
     if (p_type == 0) {
@@ -2729,7 +2731,7 @@ doturn()
 		return(0);
 	}
 
-	if (Inhell && !Race_if(PM_VAMPIRE)) {
+	if (Inhell && !hell_safe_prayer(u.ualign.god) && !Race_if(PM_VAMPIRE)) {
 	    pline("Since you are in Gehennom, %s won't help you.", u_gname());
 	    aggravate();
 	    return(0);
@@ -3463,7 +3465,7 @@ int eatflag;
 		//minimum, but still eat.
 		value = 1;
 	}
-	
+
 	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC) {
