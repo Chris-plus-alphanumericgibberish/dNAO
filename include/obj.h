@@ -82,6 +82,7 @@ enum {
 	OPROP_SFLMW,
 	OPROP_GSSDW,
 	OPROP_BLAST,
+	OPROP_BRIL,
 	MAX_OPROP
 };
 
@@ -980,6 +981,16 @@ struct obj {
 #define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == PLAIN_DRESS || onum == VICTORIAN_UNDERWEAR)
 
 #define arm_blocks_upper_body(onum)		(objects[onum].oc_dtyp&UPPER_TORSO_DR)
+
+#define is_cha_otyp(onum)	(onum == NOBLE_S_DRESS\
+							|| onum == GENTLEWOMAN_S_DRESS\
+							|| onum == PLAIN_DRESS\
+							|| onum == VICTORIAN_UNDERWEAR\
+							|| onum == SMOKY_VIOLET_FACELESS_ROBE\
+							|| onum == CONSORT_S_SUIT\
+							|| onum == GENTLEMAN_S_SUIT\
+							|| onum == find_gcirclet())
+
 
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \

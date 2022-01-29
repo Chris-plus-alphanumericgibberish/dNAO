@@ -1224,25 +1224,36 @@ int x;
 		tmp += 6;
 	}
 	
-	if(x ==A_CHA && uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
-		tmp += uwep->spe;
+	if(x == A_WIS){
+		if(uarm && arti_chawis(uarm, FALSE) && uarmc){
+			tmp += uarm->spe;
+		}
+		if(uarmu && arti_chawis(uarmu, FALSE) && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))){
+			tmp += uarmu->spe;
+		}
 	}
+	
+	if(x == A_CHA){
+		if(uarmc && arti_chawis(uarmc, FALSE)){
+			tmp += uarmc->spe;
+		}
+		if(uarm && arti_chawis(uarm, FALSE) && !uarmc){
+			tmp += uarm->spe;
+		}
+		if(uarmu && arti_chawis(uarmu, FALSE) && !uarmc && !(uarm && arm_blocks_upper_body(uarm->otyp))){
+			tmp += uarmu->spe;
+		}
+		//If dress is "on top" i.e., not blocked by body armor (cloak is fine)
+		if(uarmu && uarmu->otyp == PLAIN_DRESS && !(uarm && arm_blocks_upper_body(uarm->otyp))){
+			tmp += uarmu->spe;
+		}
+		if(uarm && (uarm->otyp == PLAIN_DRESS || uarm->otyp == NOBLE_S_DRESS)){
+			tmp += uarm->spe;
+		}
 
-	if(x == A_WIS && (uarm && arm_blocks_upper_body(uarm->otyp)) && arti_chawis(uarm, FALSE) && uarmc){
-		tmp += uarm->spe;
-	}
-	if(x == A_WIS && uarmu && arti_chawis(uarmu, FALSE) && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))){
-		tmp += uarmu->spe;
-	}
-
-	if(x == A_CHA && uarmc && arti_chawis(uarmc, FALSE)){
-		tmp += uarmc->spe;
-	}
-	if(x == A_CHA && (uarm && arm_blocks_upper_body(uarm->otyp)) && arti_chawis(uarm, FALSE) && !uarmc){
-		tmp += uarm->spe;
-	}
-	if(x == A_CHA && uarmu && arti_chawis(uarmu, FALSE) && !uarmc && !(uarm && arm_blocks_upper_body(uarm->otyp))){
-		tmp += uarmu->spe;
+		if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
+			tmp += uwep->spe;
+		}
 	}
 
 	if (x == A_STR) {

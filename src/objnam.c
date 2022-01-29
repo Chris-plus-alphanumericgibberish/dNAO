@@ -1058,11 +1058,14 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40)
 			Strcat(buf, "living ");
 		
+		if (check_oprop(obj, OPROP_BRIL) && !obj->known)
+			Strcat(buf, "ornate ");
+		
 		if (check_oprop(obj, OPROP_BLADED))
 			Strcat(buf, "bladed ");
 		if (check_oprop(obj, OPROP_SPIKED))
 			Strcat(buf, "spiked ");
-		
+
 		/* note: "holy" and "unholy" properties are shown in the BUC part of the name, as they replace "blessed" and "cursed". */
 		
 		/* note: except "Holy Avenger" and "Unholy Avenger" */
@@ -1909,6 +1912,13 @@ boolean with_price;
 		else
 			Strcat(buf, " of blasting");
 	}
+	if(check_oprop(obj, OPROP_BRIL) && obj->known){
+		if(strstr(buf, " of "))
+			Strcat(buf, " and brilliance");
+		else
+			Strcat(buf, " of brilliance");
+	}
+	
 	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)
 		|| (iflags.force_artifact_names && !getting_obj_base_desc && obj->oartifact != ART_FLUORITE_OCTAHEDRON)) {
 		if ((get_ox(obj, OX_ENAM) && obj->dknown) || (obj_is_pname(obj))) {
@@ -4272,6 +4282,9 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "blasting ", l=9)) {
 			add_oprop_list(oprop_list, OPROP_BLAST);
+		} else if (!strncmpi(bp, "ornate ", l=7)) {
+			add_oprop_list(oprop_list, OPROP_BRIL);
+
 		} else if (!strncmpi(bp, "magicite ", l=9)) {
 			mat = GEMSTONE; gemtype = MAGICITE_CRYSTAL;
 		} else if (!strncmpi(bp, "dilithium ", l=10)) {

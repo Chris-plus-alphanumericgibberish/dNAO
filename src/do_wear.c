@@ -93,13 +93,14 @@ Boots_on()
 {
     long oldprop;
     if (!uarmf) return 0;
+	adj_abon(uarmf, uarmf->spe);
  	if(uarmf->otyp == STILETTOS) {
 		if(!Flying && !Levitation) pline("%s are stylish, but not very practical to fight in.", The(xname(uarmf)));
 		else pline("%s are stylish, and, since you don't have to walk, quite practical to fight in.", The(xname(uarmf)));
-		ABON(A_CHA) += 1 + uarmf->spe;
+		ABON(A_CHA) += 2;
 		flags.botl = 1;
 	}
-   oldprop = (u.uprops[objects[uarmf->otyp].oc_oprop].extrinsic & ~WORN_BOOTS);
+	oldprop = (u.uprops[objects[uarmf->otyp].oc_oprop].extrinsic & ~WORN_BOOTS);
 
     switch(uarmf->otyp) {
 	case LOW_BOOTS:
@@ -155,8 +156,10 @@ Boots_off()
     int otyp = uarmf->otyp;
     long oldprop = u.uprops[objects[otyp].oc_oprop].extrinsic & ~WORN_BOOTS;
 
+	if (!cancelled_don) adj_abon(uarmf, -uarmf->spe);
+
  	if(uarmf->otyp == STILETTOS && !cancelled_don) {
-		ABON(A_CHA) -= 1 + uarmf->spe;
+		ABON(A_CHA) -= 2;
 		flags.botl = 1;
 	}
 	
@@ -225,6 +228,7 @@ Cloak_on()
     oldprop =
 	u.uprops[objects[uarmc->otyp].oc_oprop].extrinsic & ~WORN_CLOAK;
 
+	adj_abon(uarmc, uarmc->spe);
     switch(uarmc->otyp) {
 	case ELVEN_CLOAK:
 	case CLOAK_OF_PROTECTION:
@@ -240,9 +244,7 @@ Cloak_on()
 	case LEO_NEMAEUS_HIDE:
 	case WHITE_FACELESS_ROBE:
 	case BLACK_FACELESS_ROBE:
-		break;
 	case SMOKY_VIOLET_FACELESS_ROBE:
-		adj_abon(uarmc, uarmc->spe);
 		break;
 	case MUMMY_WRAPPING:
 	case PRAYER_WARDED_WRAPPING:
@@ -294,8 +296,9 @@ Cloak_off()
 	boolean checkweight = FALSE;
     long oldprop = u.uprops[objects[otyp].oc_oprop].extrinsic & ~WORN_CLOAK;
 	if(arti_lighten(uarmc, FALSE)) checkweight = TRUE;
-	if(otyp == SMOKY_VIOLET_FACELESS_ROBE)
-		adj_abon(uarmc, -uarmc->spe);
+
+	if (!cancelled_don) adj_abon(uarmc, -uarmc->spe);
+
     takeoff_mask &= ~W_ARMC;
 	/* For mummy wrapping, taking it off first resets `Invisible'. */
     setworn((struct obj *)0, W_ARMC);
@@ -357,6 +360,7 @@ Helmet_on()
 	boolean already_blind, blind_changed = FALSE;	/* blindness from wearing the helmet was set before this was called, we need a kludge*/
 	struct obj * otmp;
     if (!uarmh) return 0;
+	adj_abon(uarmh, uarmh->spe);
     switch(uarmh->otyp) {
 	case FEDORA:
 	case SHEMAGH:
@@ -381,10 +385,7 @@ Helmet_on()
 	case HELM_OF_TELEPATHY:
 	case HELM_OF_DRAIN_RESISTANCE:
 	case HARMONIUM_HELM:
-		if (uarmh->otyp == find_gcirclet()) adj_abon(uarmh, uarmh->spe);
-		break;
 	case HELM_OF_BRILLIANCE:
-		adj_abon(uarmh, uarmh->spe);
 		break;
 	case CORNUTHAUM:
 		/* people think marked wizards know what they're talking
@@ -396,7 +397,6 @@ Helmet_on()
 		makeknown(uarmh->otyp);
 		break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
-		if (uarmh->otyp == find_gcirclet()) adj_abon(uarmh, uarmh->spe);
 		if (u.ualign.type == A_NEUTRAL)
 		    u.ualign.type = rn2(2) ? A_CHAOTIC : A_LAWFUL;
 		else if(u.ualign.type == A_VOID){
@@ -464,6 +464,7 @@ Helmet_off()
 	boolean was_blind = Blind, blind_changed = FALSE;
 	struct obj * otmp = uarmh;
 	
+	if (!cancelled_don) adj_abon(uarmh, -uarmh->spe);
     takeoff_mask &= ~W_ARMH;
 
     switch(uarmh->otyp) {
@@ -488,7 +489,6 @@ Helmet_off()
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	case HARMONIUM_HELM:
-		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case DUNCE_CAP:
 	    flags.botl = 1;
@@ -501,22 +501,18 @@ Helmet_off()
 	    break;
 	case HELM_OF_TELEPATHY:
 	    /* need to update ability before calling see_monsters() */
-		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    setworn((struct obj *)0, W_ARMH);
 	    see_monsters();
 	    return 0;
 	case HELM_OF_BRILLIANCE:
-	    if (!cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    break;
 	case HELM_OF_OPPOSITE_ALIGNMENT:
-		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    u.ualign.type = galign(u.ugodbase[UGOD_CURRENT]);
 		u.ualign.god = u.ugodbase[UGOD_CURRENT];
 	    u.ublessed = 0; /* lose the other god's protection */
 	    flags.botl = 1;
 	    break;
 	case HELM_OF_DRAIN_RESISTANCE:
-		if (uarmh->otyp == find_gcirclet() && !cancelled_don) adj_abon(uarmh, -uarmh->spe);
 	    setworn((struct obj *)0, W_ARMH);
 	    return 0;
 	default: impossible(unknown_type, c_helmet, uarmh->otyp);
@@ -560,6 +556,7 @@ Gloves_on()
     oldprop =
 	u.uprops[objects[uarmg->otyp].oc_oprop].extrinsic & ~WORN_GLOVES;
 
+	adj_abon(uarmg, uarmg->spe);
     switch(uarmg->otyp) {
 	case GLOVES:
 	case LONG_GLOVES:
@@ -580,7 +577,6 @@ Gloves_on()
 		flags.botl = 1; /* taken care of in attrib.c */
 		break;
 	case GAUNTLETS_OF_DEXTERITY:
-		adj_abon(uarmg, uarmg->spe);
 		break;
 	default: impossible(unknown_type, c_gloves, uarmg->otyp);
     }
@@ -593,6 +589,7 @@ Gloves_off()
     long oldprop =
 	u.uprops[objects[uarmg->otyp].oc_oprop].extrinsic & ~WORN_GLOVES;
 
+	if (!cancelled_don) adj_abon(uarmg, -uarmg->spe);
     takeoff_mask &= ~W_ARMG;
 
     switch(uarmg->otyp) {
@@ -615,7 +612,6 @@ Gloves_off()
 	    flags.botl = 1; /* taken care of in attrib.c */
 	    break;
 	case GAUNTLETS_OF_DEXTERITY:
-	    if (!cancelled_don) adj_abon(uarmg, -uarmg->spe);
 	    break;
 	default: impossible(unknown_type, c_gloves, uarmg->otyp);
     }
@@ -703,6 +699,7 @@ Shirt_on()
 	default: impossible(unknown_type, c_shirt, uarmu->otyp);
     }
 */
+	adj_abon(uarmu, uarmu->spe);
 	if(uarmu->otyp == RUFFLED_SHIRT) {
 		You("%s very dashing in your %s.", Blind ||
 				(Invis && !See_invisible(u.ux, u.uy)) ? "feel" : "look",
@@ -713,12 +710,12 @@ Shirt_on()
 	else if(uarmu->otyp == VICTORIAN_UNDERWEAR){
 		pline("The %s shapes your figure, but it isn't very practical to fight in.",
 				OBJ_NAME(objects[uarmu->otyp]));
-		ABON(A_CHA) += 2*(1 + uarmu->spe);
+		ABON(A_CHA) += 2;
 		flags.botl = 1;
 	}
 	else if(uarmu->otyp == PLAIN_DRESS) {
 		pline("%s complements your figure nicely.", The(xname(uarmu)));
-		ABON(A_CHA) += 1 + uarmu->spe;
+		ABON(A_CHA) += 1;
 		flags.botl = 1;
 	}
 	if(arti_lighten(uarmu, FALSE)) inv_weight();
@@ -729,6 +726,8 @@ int
 Shirt_off()
 {
 	boolean checkweight = FALSE;
+	if (!cancelled_don) adj_abon(uarmu, -uarmu->spe);
+
     takeoff_mask &= ~W_ARMU;
 	if(arti_lighten(uarmu, FALSE)) checkweight = TRUE;
 /*
@@ -744,11 +743,11 @@ Shirt_off()
 		flags.botl = 1;
 	}
 	else if(uarmu->otyp == VICTORIAN_UNDERWEAR){
-		ABON(A_CHA) -= 2*(1 + uarmu->spe);
+		ABON(A_CHA) -= 2;
 		flags.botl = 1;
 	}
 	else if(uarmu->otyp == PLAIN_DRESS) {
-		ABON(A_CHA) -= (1 + uarmu->spe);
+		ABON(A_CHA) -= 1;
 		flags.botl = 1;
 	}
 	
@@ -764,14 +763,15 @@ Shirt_off()
 int
 Armor_on()
 {
+	adj_abon(uarm, uarm->spe);
 	if(uarm->otyp == NOBLE_S_DRESS || uarm->otyp == PLAIN_DRESS) {
 		pline("%s complements your figure nicely.", The(xname(uarm)));
-		ABON(A_CHA) += 1 + uarm->spe;
+		ABON(A_CHA) += 1;
 		flags.botl = 1;
 	}
 	else if(uarm->otyp == CONSORT_S_SUIT){
 		pline("%s shows off your figure, but is not very practical as armor.", The(xname(uarm)));
-		ABON(A_CHA) += 2 + uarm->spe;
+		ABON(A_CHA) += 2;
 		flags.botl = 1;
 	}
 	else if(uarm->otyp == ELVEN_TOGA){
@@ -785,11 +785,33 @@ Armor_on()
 		You("%s very elegant in your %s.", Blind ||
 				(Invis && !See_invisible(u.ux, u.uy)) ? "feel" : "look",
 				OBJ_NAME(objects[uarm->otyp]));
-		ABON(A_CHA) += 2*(1 + uarm->spe);
+		ABON(A_CHA) += 2;
 		flags.botl = 1;
 	}
 	if(arti_lighten(uarm, FALSE)) inv_weight();
     return 0;
+}
+
+void
+Armor_gone_or_off_abon()
+{
+	if((uarm->otyp == NOBLE_S_DRESS || uarm->otyp == PLAIN_DRESS) && !cancelled_don) {
+		ABON(A_CHA) -= 1;
+		flags.botl = 1;
+	}
+	else if(uarm->otyp == CONSORT_S_SUIT && !cancelled_don){
+		ABON(A_CHA) -= 2;
+		flags.botl = 1;
+	}
+	else if(uarm->otyp == ELVEN_TOGA && !cancelled_don){
+		ABON(A_CHA) -= 2;
+		flags.botl = 1;
+	}
+	else if((uarm->otyp == GENTLEWOMAN_S_DRESS || uarm->otyp == GENTLEMAN_S_SUIT) && !cancelled_don){
+		ABON(A_CHA) -= 2;
+		flags.botl = 1;
+	}
+	if (!cancelled_don) adj_abon(uarm, -uarm->spe);
 }
 
 int
@@ -802,22 +824,8 @@ Armor_off()
 	if(!uarm) {
 		impossible("Armor_off called with no uarm");
 	}
-	else if((uarm->otyp == NOBLE_S_DRESS || uarm->otyp == PLAIN_DRESS) && !cancelled_don) {
-		ABON(A_CHA) -= (1 + uarm->spe);
-		flags.botl = 1;
-	}
-	else if(uarm->otyp == CONSORT_S_SUIT && !cancelled_don){
-		ABON(A_CHA) -= (2 + uarm->spe);
-		flags.botl = 1;
-	}
-	else if(uarm->otyp == ELVEN_TOGA && !cancelled_don){
-		ABON(A_CHA) -= 2;
-		flags.botl = 1;
-	}
-	else if((uarm->otyp == GENTLEWOMAN_S_DRESS || uarm->otyp == GENTLEMAN_S_SUIT) && !cancelled_don){
-		ABON(A_CHA) -= 2*(1+uarm->spe);
-		flags.botl = 1;
-	}
+	else Armor_gone_or_off_abon();
+
     setworn((struct obj *)0, W_ARM);
 	if(checkweight) inv_weight();
     cancelled_don = FALSE;
@@ -831,6 +839,10 @@ int
 Armor_gone()
 {
     takeoff_mask &= ~W_ARM;
+	if(!uarm) {
+		impossible("Armor_gone called with no uarm");
+	}
+	else Armor_gone_or_off_abon();
     setnotworn(uarm);
     cancelled_don = FALSE;
     return 0;
@@ -3939,35 +3951,23 @@ register schar delta;
 		}
 	}
 	if(uarm && uarm == otmp){
-		if(otmp->otyp == PLAIN_DRESS){
-			if (delta) {
-				ABON(A_CHA) += (delta);
-				flags.botl = 1;
-			}
-		}
 		if(otmp->otyp == CONSORT_S_SUIT){
 			if (delta) {
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;
 			}
 		}
-		if(otmp->otyp == NOBLE_S_DRESS || otmp->otyp == GENTLEMAN_S_SUIT){
+		if(otmp->otyp == GENTLEWOMAN_S_DRESS || otmp->otyp == GENTLEMAN_S_SUIT){
 			if (delta) {
-				ABON(A_CHA) += 2*(delta);
+				ABON(A_CHA) += delta;
 				flags.botl = 1;
 			}
 		}
 	}
 	if(uarmu && uarmu == otmp){
-		if(otmp->otyp == PLAIN_DRESS){
-			if (delta) {
-				ABON(A_CHA) += (delta);
-				flags.botl = 1;
-			}
-		}
 		if(otmp->otyp == VICTORIAN_UNDERWEAR){
 			if (delta) {
-				ABON(A_CHA) += 2*(delta);
+				ABON(A_CHA) += delta;
 				flags.botl = 1;
 			}
 		}
@@ -3987,8 +3987,19 @@ register schar delta;
 			if (delta) {
 				makeknown(otmp->otyp);
 				ABON(A_DEX) += (delta);
-			flags.botl = 1;
+				flags.botl = 1;
 			}
+		}
+	}
+	if((otmp->owornmask & W_ARMOR) && otmp->where == OBJ_INVENT && check_oprop(otmp, OPROP_BRIL)){
+		if(!is_cha_otyp(otmp->otyp)){
+			ABON(A_CHA) += delta;
+			flags.botl = 1;
+		}
+		if(otmp->otyp != HELM_OF_BRILLIANCE){
+			ABON(A_INT) += delta;
+			ABON(A_WIS) += delta;
+			flags.botl = 1;
 		}
 	}
 }

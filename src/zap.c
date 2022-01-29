@@ -1069,6 +1069,8 @@ register struct obj *obj;
 {
 	boolean	u_ring = (obj == uleft) || (obj == uright);
 	register boolean holy = (obj->otyp == POT_WATER && obj->blessed);
+	
+	adj_abon(obj, -obj->spe);
 
 	switch(obj->otyp) {
 		case RIN_GAIN_STRENGTH:
@@ -1096,19 +1098,6 @@ register struct obj *obj;
 		case RIN_INCREASE_DAMAGE:
 			if ((obj->owornmask & W_RING) && u_ring)
 				u.udaminc -= obj->spe;
-			break;
-		case GAUNTLETS_OF_DEXTERITY:
-			if ((obj->owornmask & W_ARMG) && (obj == uarmg)) {
-				ABON(A_DEX) -= obj->spe;
-				flags.botl = 1;
-			}
-			break;
-		case HELM_OF_BRILLIANCE:
-			if ((obj->owornmask & W_ARMH) && (obj == uarmh)) {
-				ABON(A_INT) -= obj->spe;
-				ABON(A_WIS) -= obj->spe;
-				flags.botl = 1;
-			}
 			break;
 		/* case RIN_PROTECTION:  not needed */
 	}
@@ -1253,6 +1242,8 @@ register struct obj *obj;
 	/* Charge for the cost of the object */
 	costly_cancel(obj);	/* The term "cancel" is okay for now */
 
+	adj_abon(obj, -1);
+
 	/* Drain the object and any implied effects */
 	obj->spe--;
 	u_ring = (obj == uleft) || (obj == uright);
@@ -1282,19 +1273,6 @@ register struct obj *obj;
 	case RIN_INCREASE_DAMAGE:
 	    if ((obj->owornmask & W_RING) && u_ring)
 	    	u.udaminc--;
-	    break;
-	case HELM_OF_BRILLIANCE:
-	    if ((obj->owornmask & W_ARMH) && (obj == uarmh)) {
-	    	ABON(A_INT)--;
-	    	ABON(A_WIS)--;
-	    	flags.botl = 1;
-	    }
-	    break;
-	case GAUNTLETS_OF_DEXTERITY:
-	    if ((obj->owornmask & W_ARMG) && (obj == uarmg)) {
-	    	ABON(A_DEX)--;
-	    	flags.botl = 1;
-	    }
 	    break;
 	case RIN_PROTECTION:
 	    flags.botl = 1;
@@ -1323,7 +1301,9 @@ register struct obj *obj;
 
 	/* Charge for the cost of the object */
 	costly_cancel(obj);	/* The term "cancel" is okay for now */
-
+	
+	adj_abon(obj, -1);
+	
 	/* Drain the object and any implied effects */
 	obj->spe--;
 	u_ring = (obj == uleft) || (obj == uright);
@@ -1353,19 +1333,6 @@ register struct obj *obj;
 	case RIN_INCREASE_DAMAGE:
 	    if ((obj->owornmask & W_RING) && u_ring)
 	    	u.udaminc--;
-	    break;
-	case HELM_OF_BRILLIANCE:
-	    if ((obj->owornmask & W_ARMH) && (obj == uarmh)) {
-	    	ABON(A_INT)--;
-	    	ABON(A_WIS)--;
-	    	flags.botl = 1;
-	    }
-	    break;
-	case GAUNTLETS_OF_DEXTERITY:
-	    if ((obj->owornmask & W_ARMG) && (obj == uarmg)) {
-	    	ABON(A_DEX)--;
-	    	flags.botl = 1;
-	    }
 	    break;
 	case RIN_PROTECTION:
 	    flags.botl = 1;

@@ -167,6 +167,7 @@ struct prop {
 #	define W_SPIRIT		0x00800000L	/* Bound spirit */
 #	define W_GLYPH		0x01000000L	/* Active thought-glyph */
 #	define W_SKIN		I_SPECIAL	/* merged into skin */
+#	define W_WORN	     (W_ARMOR | W_AMUL | W_RING | W_TOOL)
 
 	/*** Property is blocked by an object ***/
 	long blocked;					/* Same assignments as extrinsic */

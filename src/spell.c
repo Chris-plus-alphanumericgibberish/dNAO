@@ -5950,11 +5950,11 @@ int spell;
 
 	if (uarm){
 		if(arm_blocks_upper_body(uarm->otyp)){
-			if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
+			if ((is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) && !check_oprop(uarm, OPROP_BRIL))
 				splcaster += casting_stat == A_CHA ? uarmgbon : urole.spelarmr;
 		}
 		else {
-			if (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)
+			if ((is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) && !check_oprop(uarm, OPROP_BRIL))
 				splcaster += uarmfbon;
 		}
 
@@ -5964,11 +5964,11 @@ int spell;
 	
 	if (uarmu){
 		if(arm_blocks_upper_body(uarmu->otyp)){
-			if (is_metallic(uarmu) || uarmu->oartifact == ART_DRAGON_PLATE)
+			if (is_metallic(uarmu) && !check_oprop(uarmu, OPROP_BRIL))
 				splcaster += casting_stat == A_CHA ? uarmgbon : urole.spelarmr;
 		}
 		else {
-			if (is_metallic(uarmu) || uarmu->oartifact == ART_DRAGON_PLATE)
+			if (is_metallic(uarmu) && !check_oprop(uarmu, OPROP_BRIL))
 				splcaster += uarmfbon;
 		}
 	}
@@ -5983,14 +5983,14 @@ int spell;
 		if (uarmc->otyp == ROBE)
 			splcaster -= (urole.spelarmr
 			* ((uarmc->oartifact) ? 2 : 1)
-			/ ((uarm && (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE)) ? 2 : 1));
-		if (is_metallic(uarmc))
+			/ ((uarm && (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) && !check_oprop(uarm, OPROP_BRIL)) ? 2 : 1));
+		if (is_metallic(uarmc) && !check_oprop(uarmc, OPROP_BRIL))
 			splcaster += uarmfbon;
 	}
 
 	if (uarmh && !Role_if(PM_MONK)) {
 		//Something up with madmen and this, it doesn't affect much.
-		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE)
+		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE && !check_oprop(uarmh, OPROP_BRIL))
 			splcaster += casting_stat == A_CHA ? urole.spelarmr : uarmhbon;
 	}
 
@@ -5999,13 +5999,13 @@ int spell;
 			if(is_hard(uarmg))
 				splcaster += uarmgbon;
 		}
-		else if (is_metallic(uarmg)){
+		else if (is_metallic(uarmg) && !check_oprop(uarmg, OPROP_BRIL)){
 			splcaster += casting_stat == A_CHA ? uarmfbon : uarmgbon;
 		}
 	}
 
 	if (uarmf && !Role_if(PM_MONK)) {
-		if (is_metallic(uarmf))
+		if (is_metallic(uarmf) && !check_oprop(uarmf, OPROP_BRIL))
 			splcaster += uarmfbon;
 	}
 
