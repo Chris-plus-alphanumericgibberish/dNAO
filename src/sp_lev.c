@@ -1407,6 +1407,7 @@ default_case:
 
 					stuff = mksobj(find_gcirclet(), mkobjflags);
 					set_material_gm(stuff, SILVER);
+					add_oprop(stuff, OPROP_BLAST);
 					stuff->spe = 2;
 					add_to_container(otmp, stuff);
 

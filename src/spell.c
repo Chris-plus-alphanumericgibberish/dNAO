@@ -1082,6 +1082,7 @@ int menutype;
 	if (spellid(0) == NO_SPELL && !((uarmh && uarmh->oartifact == ART_STORMHELM)  
 		|| (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO) 
 		|| (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
+		|| (uarmh && check_oprop(uarmh, OPROP_BLAST))
 	)){
 	    You("don't know any spells right now.");
 	    return FALSE;
@@ -1421,17 +1422,33 @@ update_alternate_spells()
 	int i;
 
 	// for artifacts
-	if (uarmh && uarmh->oartifact == ART_STORMHELM){
-		for (i = 0; i < MAXSPELL; i++) {
-			if (spellid(i) == SPE_LIGHTNING_STORM) {
-				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
-				break;
+	if (uarmh){
+		if(uarmh->oartifact == ART_STORMHELM){
+			for (i = 0; i < MAXSPELL; i++) {
+				if (spellid(i) == SPE_LIGHTNING_STORM) {
+					if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+					break;
+				}
+				if (spellid(i) == NO_SPELL)  {
+					spl_book[i].sp_id = SPE_LIGHTNING_STORM;
+					spl_book[i].sp_lev = objects[SPE_LIGHTNING_STORM].oc_level;
+					spl_book[i].sp_know = 1;
+					break;
+				}
 			}
-			if (spellid(i) == NO_SPELL)  {
-				spl_book[i].sp_id = SPE_LIGHTNING_STORM;
-				spl_book[i].sp_lev = objects[SPE_LIGHTNING_STORM].oc_level;
-				spl_book[i].sp_know = 1;
-				break;
+		}
+		if(check_oprop(uarmh, OPROP_BLAST)){
+			for (i = 0; i < MAXSPELL; i++) {
+				if (spellid(i) == SPE_FIREBALL) {
+					if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+					break;
+				}
+				if (spellid(i) == NO_SPELL)  {
+					spl_book[i].sp_id = SPE_FIREBALL;
+					spl_book[i].sp_lev = objects[SPE_FIREBALL].oc_level;
+					spl_book[i].sp_know = 1;
+					break;
+				}
 			}
 		}
 	}
@@ -4481,14 +4498,13 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			return(0);
 		} else if (
 			!(spellid(spell) == SPE_LIGHTNING_STORM && uarmh && uarmh->oartifact == ART_STORMHELM) &&
+			!(spellid(spell) == SPE_FIREBALL && uarmh && check_oprop(uarmh, OPROP_BLAST)) &&
 			!((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 
 				uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
 		) {
 			if(spellknow(spell) <= 200) { /* 1% */
 				You("strain to recall the spell.");
-			} else if (spellknow(spell) <= 1000 && 
-				!(spellid(spell) == SPE_LIGHTNING_STORM || !uarmh || uarmh->oartifact != ART_STORMHELM)
-			) { /* 5% */
+			} else if (spellknow(spell) <= 1000) { /* 5% */
 				Your("knowledge of this spell is growing faint.");
 			}
 		}
@@ -5807,6 +5823,7 @@ int spell;
 
 	/* some artifacts pracically cast the spells on their own */
 	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
+		(uarmh && check_oprop(uarmh, OPROP_BLAST) && (spellid(spell) == SPE_FIREBALL || spellid(spell) == SPE_FIRE_STORM)) ||
 		(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (
 		(spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE)))
 		) {

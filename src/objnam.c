@@ -1903,6 +1903,12 @@ boolean with_price;
 		if (obj->quan != 1L) Strcpy(buf, makeplural(buf));
 	}//endif !obj_is_pname(obj)
 	
+	if(check_oprop(obj, OPROP_BLAST) && obj->known){
+		if(strstr(buf, " of "))
+			Strcat(buf, " and blasting");
+		else
+			Strcat(buf, " of blasting");
+	}
 	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)
 		|| (iflags.force_artifact_names && !getting_obj_base_desc && obj->oartifact != ART_FLUORITE_OCTAHEDRON)) {
 		if ((get_ox(obj, OX_ENAM) && obj->dknown) || (obj_is_pname(obj))) {
@@ -4264,6 +4270,8 @@ int wishflags;
 		} else if (!strncmpi(bp, "bladed ", l=7)) {
 			add_oprop_list(oprop_list, OPROP_BLADED);
 
+		} else if (!strncmpi(bp, "blasting ", l=9)) {
+			add_oprop_list(oprop_list, OPROP_BLAST);
 		} else if (!strncmpi(bp, "magicite ", l=9)) {
 			mat = GEMSTONE; gemtype = MAGICITE_CRYSTAL;
 		} else if (!strncmpi(bp, "dilithium ", l=10)) {
