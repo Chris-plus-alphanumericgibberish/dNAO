@@ -1853,8 +1853,12 @@ boolean with_price;
 						Strcat(buf, "gloves");
 					else if (is_cloak(obj))
 						Strcat(buf, "cloak");
-					else if (is_helmet(obj))
-						Strcat(buf, "helmet");
+					else if (is_helmet(obj)){
+						if(obj->otyp == find_gcirclet())
+							Strcat(buf, "band");
+						else
+							Strcat(buf, "helmet");
+					}
 					else if (is_shield(obj))
 						Strcat(buf, "shield");
 					else if (obj->oclass == ARMOR_CLASS)
