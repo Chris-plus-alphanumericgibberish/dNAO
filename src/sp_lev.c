@@ -1450,12 +1450,13 @@ default_case:
 				default_add(find_signet_ring());
 				if(flags.initgend){
 					default_add(STILETTOS);
-					default_add(VICTORIAN_UNDERWEAR);
+					default_add_2(VICTORIAN_UNDERWEAR);
 					default_add(GLOVES);
 
 					stuff = mksobj(NOBLE_S_DRESS, MKOBJ_NOINIT);
 					stuff->spe = 2;
 					set_material_gm(stuff, SILVER);
+					add_oprop(stuff, OPROP_REFL);
 					add_to_container(otmp, stuff);
 
 					default_add_2(DROVEN_DAGGER);
