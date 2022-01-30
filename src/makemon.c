@@ -3977,6 +3977,143 @@ int faction;
 					
 					lama_count++;
 				}
+				else if(In_endgame(&u.uz)){
+					const int generic_nasties[] = {
+						PM_BLACK_DRAGON, PM_COCKATRICE, PM_STORM_GIANT,
+						PM_MINOTAUR, PM_UMBER_HULK, PM_MASTER_MIND_FLAYER,
+						PM_IRON_GOLEM, PM_GREEN_SLIME, PM_GIANT_TURTLE,
+						PM_GREMLIN, PM_VAMPIRE_LORD, PM_ARCH_LICH,
+						PM_DISENCHANTER, PM_MANTICORE, PM_SCRAP_TITAN,
+						PM_GUG, PM_BEBELITH, PM_DAUGHTER_OF_BEDLAM,
+						PM_ANCIENT_NAGA,PM_GUARDIAN_NAGA, PM_SERPENT_NECKED_LIONESS, 
+						PM_EDDERKOP, PM_HELLFIRE_COLOSSUS, PM_GREEN_STEEL_GOLEM,
+						PM_NIGHTGAUNT
+					};
+					const int earth_nasties[] = {
+						PM_EARTH_ELEMENTAL, PM_TERRACOTTA_SOLDIER, PM_ACID_PARAELEMENTAL,
+						PM_HEAVEN_PIERCER, PM_LONG_WORM, PM_OREAD
+					};
+					const int air_nasties[] = {
+						PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL, PM_MORTAI,
+						PM_LIVING_MIRAGE, PM_YUKI_ONNA, PM_RAVEN
+					};
+					const int fire_nasties[] = {
+						PM_FIRE_ELEMENTAL, PM_POISON_PARAELEMENTAL, PM_SALAMANDER,
+						PM_DRYAD, PM_SUNFLOWER, PM_BURNING_FERN
+					};
+					const int water_nasties[] = {
+						PM_WATER_ELEMENTAL, PM_ICE_PARAELEMENTAL, PM_FORD_ELEMENTAL,
+						PM_NAIAD, PM_DEEPEST_ONE, PM_JELLYFISH,
+						PM_GREAT_WHITE_SHARK
+					};
+					if(Is_earthlevel(&u.uz)){
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(earth_nasties);
+					}
+					else if(Is_airlevel(&u.uz)){
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(air_nasties);
+					}
+					else if(Is_firelevel(&u.uz)){
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(fire_nasties);
+					}
+					else if(Is_waterlevel(&u.uz)){
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(water_nasties);
+					}
+					else {
+						const int astral_nasties[] = {
+							PM_VALAVI, PM_THRIAE,
+							PM_ELOCATOR, PM_AMMIT,
+							PM_ALEAX, PM_ANGEL,
+							PM_FALLEN_ANGEL, PM_SWORD_ARCHON,
+							PM_THRONE_ARCHON, PM_LIGHT_ARCHON,
+							PM_ASTRAL_DEVA, PM_MAHADEVA,
+							PM_TULANI_ELADRIN, PM_GAE_ELADRIN,
+							PM_BRIGHID_ELADRIN, PM_UISCERRE_ELADRIN,
+							PM_CAILLEA_ELADRIN, PM_DRACAE_ELADRIN,
+							PM_HOD_SEPHIRAH
+						};
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(generic_nasties);
+
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(astral_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = ROLL_FROM(astral_nasties);
+
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = rn2(2) ? ROLL_FROM(air_nasties) : ROLL_FROM(earth_nasties);
+						otmp = mongets(mtmp, MASK, mkobjflags);
+						if(otmp) otmp->corpsenm = rn2(2) ? ROLL_FROM(fire_nasties) : ROLL_FROM(water_nasties);
+					}
+
+					otmp = mongets(mtmp, ELVEN_BOW, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						otmp->oerodeproof = TRUE;
+						spe2 = 6;
+						otmp->spe = max(otmp->spe, spe2);
+						add_oprop(otmp, OPROP_LESSER_ANARW);
+					}
+					otmp = mongets(mtmp, ELVEN_ARROW, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						otmp->quan = 24+rnd(30);
+						set_material_gm(otmp, SILVER);
+						fix_object(otmp);
+					}
+
+					(void)mongets(mtmp, HARP, mkobjflags);
+
+					otmp = mongets(mtmp, LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						spe2 = 6;
+						otmp->spe = max(otmp->spe, spe2);
+						set_material_gm(otmp, SILVER);
+						add_oprop(otmp, OPROP_ANARW);
+					}
+
+					if(!rn2(6)){
+						otmp = mongets(mtmp, HELMET, mkobjflags);
+						if(otmp) set_material_gm(otmp, SILVER);
+						otmp = mongets(mtmp, rn2(2) ? PLATE_MAIL : rn2(2) ? SCALE_MAIL : BANDED_MAIL, mkobjflags);
+						if(otmp) set_material_gm(otmp, SILVER);
+						otmp = mongets(mtmp, rn2(10) ? GAUNTLETS : GAUNTLETS_OF_POWER, mkobjflags);
+						if(otmp) set_material_gm(otmp, SILVER);
+					}
+					else {
+						otmp = mongets(mtmp, ROBE, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, CLOTH);
+							if(!rn2(3))
+								add_oprop(otmp, OPROP_WOOL);
+						}
+						otmp = mongets(mtmp, WAISTCLOTH, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, CLOTH);
+							if(!rn2(3))
+								add_oprop(otmp, OPROP_WOOL);
+						}
+					}
+				}
 				else {
 					(void)mongets(mtmp, MASK, mkobjflags);
 					(void)mongets(mtmp, MASK, mkobjflags);
