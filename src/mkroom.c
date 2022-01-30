@@ -3158,7 +3158,7 @@ mkpluvillage()
 		tries++;
 		okspot = TRUE;
 		accessible = FALSE;
-		for(i=0;i<sizetot+1;i++)
+		for(i=0;i<=sizetot+1;i++)
 			for(j=0;j<12;j++){
 				if(!isok(x+i,y+j) || t_at(x+i, y+j) || !(levl[x+i][y+j].typ == GRASS || levl[x+i][y+j].typ == TREE))
 					okspot = FALSE;
