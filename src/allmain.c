@@ -513,7 +513,7 @@ you_calc_movement()
 		Race_if(PM_GNOME)
 		|| Race_if(PM_DWARF)
 		|| Race_if(PM_ORC)
-		|| (Race_if(PM_HALF_DRAGON) && ((Role_if(PM_NOBLEMAN) && flags.initgend) || Role_if(PM_MADMAN)))
+		|| (Race_if(PM_HALF_DRAGON) && Humanoid_half_dragon(urole.malenum))
 	)) moveamt = 12;
 	else moveamt = youmonst.data->mmove;
 	if(uarmf && uarmf->otyp == STILETTOS && !Flying && !Levitation) moveamt = (moveamt*5)/6;

@@ -240,6 +240,7 @@ extern struct Race urace;
 #define Race_if(X)	(urace.malenum == (X))
 #define Race_switch	(urace.malenum)
 #define youracedata	(maybe_polyd(youmonst.data, &mons[urace.malenum]))
+#define Humanoid_half_dragon(role)	(Role_if(PM_MADMAN) || (Role_if(PM_NOBLEMAN) && flags.initgend))
 
 /*** Unified structure specifying gender information ***/
 struct Gender {

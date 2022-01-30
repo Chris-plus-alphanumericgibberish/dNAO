@@ -1883,6 +1883,9 @@ int newgame;
 			}
 		}
 	}
+	else if(Humanoid_half_dragon(urole.malenum)){
+		urace.attrmax[A_DEX] = 18;
+	}
 
 	/* Fix up the god names */
 	if (flags.pantheon == -1) {		/* new game */
