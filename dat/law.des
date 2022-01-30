@@ -914,7 +914,7 @@ GEOMETRY: center, center
 MAP
 0----------------------------------------------------------------------------
 1----------------------------------------------------------------------------
-2T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,
+2----------------------------------------------------------------------------
 3 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
 4T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,
 5 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
@@ -993,7 +993,7 @@ GEOMETRY: center, center
 MAP
 0----------------------------------------------------------------------------
 1----------------------------------------------------------------------------
-2T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,
+2----------------------------------------------------------------------------
 3 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
 4T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,
 5 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
@@ -1062,7 +1062,7 @@ GEOMETRY: center, center
 MAP
 0------------------------------------------------------------------}}--------
 1------------------------------------------------------------------}}--------
-2T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.}}    -   
+2-----------------------------------------------------------------.}}    -   
 3 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T }}---+--   
 4T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T}--    --  
 5 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T }       -  
@@ -1134,7 +1134,7 @@ GEOMETRY: center, center
 MAP
 0------------------------------------------------------------------}}--------
 1------------------------------------------------------------------}}--------
-2T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.}}F...-...
+2-----------------------------------------------------------------.}}F...-...
 3 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T }}---+--...
 4T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T}--....--..
 5 T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T }F......-..
