@@ -10275,10 +10275,11 @@ read_necro(VOID_ARGS)
 							if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1)) {
 								untame(mtmp, 0);
 								mtmp->mtraitor = 1;
+								mtmp->encouraged = 5;
 							}
 							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
 							mtmp->mhp =  mtmp->mhpmax;
-							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, 100, 0);
+							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, mtmp->mtame ? ESUMMON_PERMANENT : 100, 0);
 						}
 					}
 				}
@@ -10328,7 +10329,7 @@ read_necro(VOID_ARGS)
 						break;
 					}
 					for(i=max(1, d(1,10) - 2); i > 0; i--){
-						mtmp = makemon(&mons[oozes[rn2(11)]], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
+						mtmp = makemon(&mons[ROLL_FROM(oozes)], u.ux+d(1,5)-3, u.uy+d(1,5)-3, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 						if(mtmp){
 							initedog(mtmp);
 							mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
@@ -10352,7 +10353,7 @@ read_necro(VOID_ARGS)
 						pline("%s", nothing_happens);
 						break;
 					}
-					mtmp = makemon(&mons[devils[rn2(12)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
+					mtmp = makemon(&mons[ROLL_FROM(devils)], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);
 						mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
@@ -10374,7 +10375,7 @@ read_necro(VOID_ARGS)
 						pline("%s", nothing_happens);
 						break;
 					}
-					mtmp = makemon(&mons[demons[rn2(15)]], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
+					mtmp = makemon(&mons[ROLL_FROM(demons)], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 					if(mtmp){
 						initedog(mtmp);
 						if(!rn2(6)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
