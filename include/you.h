@@ -526,6 +526,8 @@ struct you {
 #define yog_sothoth_atten	cult_atten[SOTH_CULT]
 #define good_neighbor_atten	cult_atten[RAT_CULT]
 	long ucultcredit[MAX_CULTS];
+	d_level silver_flame_z; 
+	xchar s_f_x, s_f_y; 
 	long lastprayed;
 	long lastslept;
 	long nextsleep;
