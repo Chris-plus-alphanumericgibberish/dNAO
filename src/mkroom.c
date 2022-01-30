@@ -377,30 +377,29 @@ get_vault_misc(vn)
 int vn;
 {
 	int type;
-#define ROLL_ARRAY(arrayname) arrayname[rn2(SIZE(arrayname))];
 	if(vn < LIMIT_VN_RANGE_1_TANNINIM){
 		// Tannin
-		type = ROLL_ARRAY(misc_tan_vault);
+		type = ROLL_FROM(misc_tan_vault);
 	}
 	else if(vn < LIMIT_VN_RANGE_2_ANCIENT){
 		// Ancient
-		type = ROLL_ARRAY(misc_anc_vault);
+		type = ROLL_FROM(misc_anc_vault);
 	}
 	else if(vn < LIMIT_VN_RANGE_3_ANGEL){
 		// Angel
-		type = ROLL_ARRAY(misc_hell_vault);
+		type = ROLL_FROM(misc_hell_vault);
 	}
 	else if(vn < LIMIT_VN_RANGE_4_DEVIL){
 		// Devil
-		type = ROLL_ARRAY(misc_devil_vault);
+		type = ROLL_FROM(misc_devil_vault);
 	}
 	else if(vn < LIMIT_VN_RANGE_5_DEMON){
 		// Demon
-		type = ROLL_ARRAY(misc_demon_vault);
+		type = ROLL_FROM(misc_demon_vault);
 	}
 	else {
 		impossible("Vault number %d out-of-ramge in get_misc", vn);
-		type = ROLL_ARRAY(misc_hell_vault);
+		type = ROLL_FROM(misc_hell_vault);
 	}
 	return type;
 }
