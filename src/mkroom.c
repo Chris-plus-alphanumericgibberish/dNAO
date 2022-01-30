@@ -4876,36 +4876,41 @@ place_chaos_forest_features()
 void
 place_neutral_features()
 {
-	if(!rn2(30)){
+	if(!rn2(20)){
 		mkkamereltowers();
-		if(!rn2(16))
+		if(!rn2(12))
 			mkfishingvillage();
-	} else if(!rn2(16)){
+	} else if(!rn2(12)){
 		mkminorspire();
-	} else if(!rn2(16)){
+	} else if(!rn2(12)){
 		mkfishingvillage();
 	}
 
-	if(!rn2(8)){
+	if(!rn2(6)){
 		mkneuriver();
 	}
 	
 	// mkferrufort();
 	
-	if(!rn2(8)){
+	if(!rn2(6)){
 		mkpluvillage();
 	// } else if(){
 		// mkferrufort();
 	}
 	
-	if(!rn2(16))
+	if(!rn2(12))
 		mkinvertzigg();
 	
-	if(!rn2(8))
+	if(!rn2(6))
 		mkferrutower();
 	
 	if(!rn2(3)){
 		int n = rnd(4) + rn2(4);
+		for(; n > 0; n--)
+			mkpluhomestead();
+	} 
+	else if(!rn2(3)){
+		int n = rnd(3);
 		for(; n > 0; n--)
 			mkpluhomestead();
 	} 
