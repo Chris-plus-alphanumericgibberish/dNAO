@@ -51,22 +51,24 @@ struct u_event {
 	Bitfield(found_square,1);		/*11 found the vibrating square */
 	Bitfield(invoked,1);			/*12 invoked Gate to the Sanctum level */
 	Bitfield(gehennom_entered,1);	/*13 entered Gehennom via Valley */
-	Bitfield(uhand_of_elbereth,6);	/*19 became Hand of Elbereth */
-	Bitfield(udemigod,1);			/*20 killed the wiz */
-	Bitfield(ukilled_apollyon,1);	/*21 killed the angel of the pit.  Lucifer should spawn on Astral */
-	Bitfield(ukilled_illurien,1);	/*22 Harassment */
-	Bitfield(ukilled_dagon,1);		/*23 Returns */
-	Bitfield(ukilled_hydra,1);		/*24 Returns */
-	Bitfield(sum_entered,1);		/*25 entered Sum-of-All */
-	Bitfield(uaxus_foe,1);			/*26 enemy of the modrons */
-	Bitfield(utook_castle, 2);		/*28 sat on the castle throne, used artifact wish */
-	Bitfield(uunknowngod, 2);		/*30 given five artifacts to the priests of the unknown god, used artifact wish */
+#define CROWNING_BITS	7
+#define MAX_CROWNING	pow(2,7)-1
+	Bitfield(uhand_of_elbereth,CROWNING_BITS);	/*19 became Hand of Elbereth */
+	Bitfield(udemigod,1);			/*21 killed the wiz */
+	Bitfield(ukilled_apollyon,1);	/*22 killed the angel of the pit.  Lucifer should spawn on Astral */
+	Bitfield(ukilled_illurien,1);	/*23 Harassment */
+	Bitfield(ukilled_dagon,1);		/*24 Returns */
+	Bitfield(ukilled_hydra,1);		/*25 Returns */
+	Bitfield(sum_entered,1);		/*26 entered Sum-of-All */
+	Bitfield(uaxus_foe,1);			/*27 enemy of the modrons */
+	Bitfield(utook_castle, 2);		/*29 sat on the castle throne, used artifact wish */
+	Bitfield(uunknowngod, 2);		/*31 given five artifacts to the priests of the unknown god, used artifact wish */
 #define ARTWISH_EARNED	1
 #define ARTWISH_SPENT	2
-	Bitfield(ascended,1);			/*31 has offered the Amulet */
-	Bitfield(knoxmade,1);			/*32 Portal to Ludios has been made in the main dungeon, teleport ok */
+	Bitfield(ascended,1);			/*32 has offered the Amulet */
+	Bitfield(knoxmade,1);			/*33 Portal to Ludios has been made in the main dungeon, teleport ok */
 	
-	Bitfield(padding,10);			/*42 reseve another bitfield in event. */
+	Bitfield(padding,10);			/*43 reseve another bitfield in event. */
 };
 
 /* KMH, conduct --
