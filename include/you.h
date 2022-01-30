@@ -52,7 +52,7 @@ struct u_event {
 	Bitfield(invoked,1);			/*12 invoked Gate to the Sanctum level */
 	Bitfield(gehennom_entered,1);	/*13 entered Gehennom via Valley */
 #define CROWNING_BITS	7
-#define MAX_CROWNING	pow(2,7)-1
+#define MAX_CROWNING	pow(2,CROWNING_BITS)-1
 	Bitfield(uhand_of_elbereth,CROWNING_BITS);	/*19 became Hand of Elbereth */
 	Bitfield(udemigod,1);			/*21 killed the wiz */
 	Bitfield(ukilled_apollyon,1);	/*22 killed the angel of the pit.  Lucifer should spawn on Astral */
