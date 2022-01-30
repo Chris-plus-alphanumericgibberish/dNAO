@@ -5003,6 +5003,15 @@ place_law_features()
 				mkcamp(FORMIAN_CAMP2);
 			if(!rn2(3))
 				mkcamp(THRIAE_CAMP);
+		} else if(on_level(&u.uz, &arcadia2_level)){
+			if(rn2(2))
+				mkcamp(VALAVI_CAMP);
+			if(rn2(2))
+				mkcamp(FORMIAN_CAMP1);
+			if(rn2(2))
+				mkcamp(FORMIAN_CAMP2);
+			if(rn2(2))
+				mkcamp(THRIAE_CAMP);
 		} else {
 			if(!rn2(4))
 				mkcamp(VALAVI_CAMP);
