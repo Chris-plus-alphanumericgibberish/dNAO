@@ -3171,6 +3171,15 @@ int *shield_margin;
 	}
 	/* other attacker-related accuracy bonuses */
 	if (magr) {
+		/* Small monsters are more accurage */
+		switch(pa->msize){
+			case MZ_TINY:
+				bons_acc += 5;
+			break;
+			case MZ_SMALL:
+				bons_acc += 2;
+			break;
+		}
 		/* player-only accuracy bonuses */
 		if (youagr) {
 			/* base +1/-1 for no reason */
