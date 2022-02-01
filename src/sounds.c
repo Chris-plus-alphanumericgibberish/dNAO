@@ -1855,6 +1855,8 @@ asGuardian:
 			if(mtmp->mtame){
 				pline("%s whispers dire secrets, filling you with zeal.", Monnam(mtmp));
 				u.uencouraged = min_ints(Insanity/5+1, u.uencouraged+rnd(Insanity/5+1));
+				exercise(A_INT, TRUE);
+				exercise(A_WIS, TRUE);
 			} else if(!mtmp->mpeaceful){
 				aggravate();
 			}
