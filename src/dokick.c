@@ -130,7 +130,7 @@ doit:
 	if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
 	   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
 	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
-	   !mon->mstun && !mon->mconf && !mon->msleeping &&
+	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 	   mon->data->mmove >= 12) {
 		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
 		    pline("%s blocks your %skick.", Monnam(mon),
@@ -188,7 +188,7 @@ doit:
 	if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
 	   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
 	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
-	   !mon->mstun && !mon->mconf && !mon->msleeping &&
+	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 	   mon->data->mmove >= 12) {
 		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
 		    pline("%s blocks your %skick.", Monnam(mon),
@@ -259,7 +259,7 @@ doit:
 			if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
 			   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
 			   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
-			   !mon->mstun && !mon->mconf && !mon->msleeping &&
+			   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 			   mon->data->mmove >= 12) {
 				if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
 					pline("%s blocks your %skick.", Monnam(mon),
