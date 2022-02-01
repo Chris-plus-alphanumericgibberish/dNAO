@@ -86,6 +86,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	} else if (ptr->mtyp == PM_ANGEL) {
 	    if (rn2(6)) {
 			(void) summon_god_minion(gnum, FALSE);
+			return;
 	    } else {
 			dtype = PM_ANGEL;
 	    }
