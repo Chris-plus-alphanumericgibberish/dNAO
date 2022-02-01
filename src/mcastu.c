@@ -1938,7 +1938,15 @@ int tary;
 				buf);
 		}
 	}
-
+	
+	if(youdef && ublindf && ublindf->oartifact == ART_MIRRORED_MASK && rn2(2)){
+		Your("mask shifts and reflects the spell!");
+		youdef = FALSE;
+		mdef = magr;
+		tarx = mdef->mx;
+		tary = mdef->my;
+	}
+	
 	/* do spell */
 	if (spellnum) {
 		/* special case override: the avatar of lolth can ask Lolth to intercede instead of casting a spell */

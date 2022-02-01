@@ -2863,7 +2863,7 @@ const char *str;
 }
 
 boolean
-ureflects (fmt, str)
+ureflects(fmt, str)
 const char *fmt, *str;
 {
 	/* Check from outermost to innermost objects */
@@ -2920,6 +2920,11 @@ const char *fmt, *str;
 	} else if (EReflecting & W_ARMF) {
 	    if (fmt && str)
 	    	pline(fmt, str, "boots");
+	    return TRUE;
+	} else if (EReflecting & W_TOOL) {
+		//May need to be adjusted for flavor if more reflecting blindfold slot items get added.
+	    if (fmt && str)
+	    	pline(fmt, str, "mask");
 	    return TRUE;
 	} else if (youracedata->mtyp == PM_SILVER_DRAGON) {
 	    if (fmt && str)
