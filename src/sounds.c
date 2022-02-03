@@ -5985,7 +5985,7 @@ doblessmenu()
 			MENU_UNSELECTED);
 	}
 	incntlet++; //Advance anyway
-	if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_HOLYW)){
+	if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || is_gloves(uwep)) && !check_oprop(uwep, OPROP_HOLYW)){
 		Sprintf(buf, "Sanctify your weapon");
 		any.a_int = SANCTIFY_WEP;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
