@@ -2703,12 +2703,20 @@ struct obj	*sobj;
 	if (confused) {
 		/* consecrates your weapon */
 		/* NOT valid_weapon(), which also allows non-enchantable things that are effective to hit with */
-		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))) {
-			bless(uwep);
-			if (!check_oprop(uwep, OPROP_HOLYW))
-				add_oprop(uwep, OPROP_LESSER_HOLYW);
-			if(uwep->spe < 3)
-				uwep->spe = 3;
+		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || is_gloves(uwep))) {
+			if (sobj->cursed){
+				curse(uwep);
+				if (!check_oprop(uwep, OPROP_UNHYW))
+					add_oprop(uwep, OPROP_LESSER_UNHYW);
+				if(uwep->spe < 3)
+					uwep->spe = 3;
+			} else { // blessed/uncursed
+				bless(uwep);
+				if (!check_oprop(uwep, OPROP_HOLYW))
+					add_oprop(uwep, OPROP_LESSER_HOLYW);
+				if(uwep->spe < 3)
+					uwep->spe = 3;
+			} 
 		}
 		else {
 			goto returnscroll;
