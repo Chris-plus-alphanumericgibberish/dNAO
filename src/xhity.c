@@ -11165,12 +11165,12 @@ int vis;
 		/* default confusion time: 3d4 */
 		if (!dmg)
 			dmg = d(3, 4);
-		/* put on cooldown */
-		if (!youagr && cooldown) {
-			if (magr->mspec_used)
+		/* simulate cooldown to avoid frequent re-application */
+		if (!youagr && cooldown && !rn2(6)) {
+			if(youdef && Confusion)
 				return MM_MISS;
-			else
-				magr->mspec_used = (dmg + rn2(6));
+			else if(!youdef && mdef->mconf)
+				return MM_MISS;
 		}
 
 		if (youdef) {
@@ -11236,12 +11236,12 @@ int vis;
 				dmg = rnd(10);
 				maxdmg = 10;
 			}
-			/* put on cooldown */
-			if (cooldown && !youagr) {
-				if (magr->mspec_used)
+			/* simulate cooldown to avoid re-application */
+			if (!youagr && cooldown) {
+				if(youdef && multi < 0)
 					return MM_MISS;
-				else
-					magr->mspec_used = maxdmg;
+				else if(!youdef && !mdef->mcanmove)
+					return MM_MISS;
 			}
 
 			/* split between player and monster */
@@ -11340,13 +11340,6 @@ int vis;
 		/* 4/5 chance to succeed */
 		if (maybe_not && !rn2(5))
 			return MM_MISS;
-		/* set cooldown */
-		if (cooldown && !youagr) {
-			if (magr->mspec_used)
-				return MM_MISS;
-			else
-				magr->mspec_used = rn2(12);
-		}
 
 		if (youdef) {
 			if (vis&VIS_MAGR)
@@ -11380,12 +11373,12 @@ int vis;
 		/* default stun time: 2d6 */
 		if (!dmg)
 			dmg = d(2, 6);
-		/* put on cooldown */
-		if (cooldown && !youagr) {
-			if (magr->mspec_used)
+		/* simulate cooldown to avoid frequent re-application */
+		if (!youagr && cooldown && !rn2(6)) {
+			if(youdef && Stunned)
 				return MM_MISS;
-			else
-				magr->mspec_used = (dmg + rn2(6));
+			else if(!youdef && mdef->mstun)
+				return MM_MISS;
 		}
 
 		if (youdef) {
@@ -11452,12 +11445,12 @@ int vis;
 			/* default blind time: 2d6 */
 			if (!dmg)
 				dmg = d(2, 6);
-			/* put on cooldown */
-			if (cooldown && !youagr) {
-				if (magr->mspec_used)
+			/* simulate cooldown to avoid frequent re-application */
+			if (!youagr && cooldown && !rn2(6)) {
+				if(youdef && Blind)
 					return MM_MISS;
-				else
-					magr->mspec_used = (dmg + rn2(6));
+				else if(!youdef && mdef->mblinded)
+					return MM_MISS;
 			}
 
 			if (youdef)
@@ -11487,12 +11480,12 @@ int vis;
 		/* default hallu time: 1d12 */
 		if (!dmg)
 			dmg = rnd(12);
-		/* put on cooldown */
-		if (cooldown && !youagr) {
-			if (magr->mspec_used)
+		/* simulate cooldown to avoid frequent re-application */
+		if (!youagr && cooldown && !rn2(6)) {
+			if(youdef && Hallucination)
 				return MM_MISS;
-			else
-				magr->mspec_used = (dmg + rn2(6));
+			else if(!youdef && mdef->mconf)
+				return MM_MISS;
 		}
 
 		if (youdef) {
@@ -11533,13 +11526,14 @@ int vis;
 		/* default sleep time: 1d10 */
 		if (!dmg)
 			dmg = rnd(10);
-		/* put on cooldown */
-		if (cooldown && !youagr) {
-			if (magr->mspec_used)
+		/* simulate cooldown to avoid frequent re-application */
+		if (!youagr && cooldown && !rn2(6)) {
+			if(youdef && Sleeping)
 				return MM_MISS;
-			else
-				magr->mspec_used = (dmg + rn2(6));
+			else if(!youdef && mdef->msleeping)
+				return MM_MISS;
 		}
+
 		if (youdef) {
 			pline("%s gaze makes you very sleepy...",
 				s_suffix(Monnam(magr)));
