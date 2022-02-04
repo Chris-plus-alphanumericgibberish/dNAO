@@ -9070,6 +9070,7 @@ int faction;
 				otmp = mksobj(DROVEN_GREATSWORD, mkobjflags);
 				set_material_gm(otmp, SHADOWSTEEL);
 				add_oprop(otmp, OPROP_WRTHW);
+				add_oprop(otmp, OPROP_PHSEW);
 				add_oprop(otmp, OPROP_UNHYW);
 				curse(otmp);
 				otmp->spe = 9;
