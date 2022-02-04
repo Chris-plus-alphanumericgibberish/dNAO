@@ -3801,7 +3801,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	
 	//Elder vampires can go for longer without blood
 	if(is_vampire(youracedata))
-		hungermod *= (maybe_polyd(youmonst.data->mlevel, u.ulevel)/10 + 1);
+		hungermod *= (maybe_polyd(youmonst.data->mlevel, u.ulevel)/14 + 1);
 	
 	//Incantifiers get reduced hunger
 	if(Race_if(PM_INCANTIFIER))
