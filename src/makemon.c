@@ -5126,17 +5126,37 @@ int faction;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					
-					otmp = mksobj(HIGH_BOOTS, mkobjflags);
+					otmp = mksobj(SCALE_MAIL, mkobjflags);
+					set_material_gm(otmp, OBSIDIAN_MT);
 					otmp->spe = 4;
 					otmp->blessed = FALSE;
 					otmp->cursed = TRUE;
 					otmp->objsize = MZ_LARGE;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
+					
+					otmp = mksobj(GAUNTLETS, mkobjflags);
+					set_material_gm(otmp, OBSIDIAN_MT);
+					otmp->spe = 4;
+					otmp->blessed = FALSE;
+					otmp->cursed = TRUE;
+					otmp->objsize = MZ_LARGE;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					
+					otmp = mksobj(ARMORED_BOOTS, mkobjflags);
+					set_material_gm(otmp, OBSIDIAN_MT);
+					otmp->spe = 4;
+					otmp->blessed = FALSE;
+					otmp->cursed = TRUE;
+					otmp->objsize = MZ_LARGE;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+					
+					mongets(mtmp, R_LYEHIAN_FACEPLATE, mkobjflags);
 				} else {
 					struct obj *gem;
 					give_mintrinsic(mtmp, POISON_RES);
-					give_mintrinsic(mtmp, REGENERATION);
 					mtmp->m_lev += 2;
 					mtmp->mhpmax = mtmp->m_lev*8-1;
 					mtmp->mhp = mtmp->mhpmax;
@@ -11235,6 +11255,15 @@ int faction;
 			if(mmflags & MM_BIGGROUP){
 				if (mndx == PM_DEEPER_ONE){
 					for(num = rn1(10,3); num >= 0; num--) makemon_full(&mons[PM_DEEP_ONE], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+				}
+				if(Infuture){
+					if (mndx == PM_MIND_FLAYER){
+						m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+					}
+					if (mndx == PM_MASTER_MIND_FLAYER){
+						m_initsgrp(mtmp, mtmp->mx, mtmp->my);
+						for(num = rn1(5,4); num >= 0; num--) makemon_full(&mons[PM_MIND_FLAYER], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+					}
 				}
 			}
 			}
