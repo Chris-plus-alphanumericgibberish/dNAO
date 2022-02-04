@@ -5199,6 +5199,7 @@ int faction;
 				set_material_gm(otmp, SILVER);
 				add_oprop(otmp, OPROP_PSIOW);
 				add_oprop(otmp, OPROP_VORPW);
+				add_oprop(otmp, OPROP_GSSDW);
 				otmp->spe = 5;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
