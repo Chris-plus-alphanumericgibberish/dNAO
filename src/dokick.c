@@ -277,6 +277,44 @@ doit:
 	}
 }
 
+void
+wing_storm_monsters()
+{
+	struct monst *mon;
+	int sdx = u.dx;
+	int sdy = u.dy;
+
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int offset = rn2(8);
+	int ix, iy;
+	int j;
+	for(int i = 0; i < 4; i++){
+		for(j = 0; j < 2; j++){
+			//Necessary so that the kicking functions can knock the monster in the right direction.
+			if(j){
+				u.dx = clockwisex[(offset+(4+i))%8];
+				u.dy = clockwisey[(offset+(4+i))%8];
+			}
+			else {
+				u.dx = clockwisex[(offset+i)%8];
+				u.dy = clockwisey[(offset+i)%8];
+			}
+			ix = u.ux + u.dx;
+			iy = u.uy + u.dy;
+			if(!isok(ix, iy))
+				continue;
+			mon = m_at(ix, iy);
+			if(!mon || (mon->mpeaceful && !Hallucination))
+				continue;
+			
+			mhurtle(mon, u.dx, u.dy, 4, FALSE);
+		}
+	}
+	u.dx = sdx;
+	u.dy = sdy;
+}
+
 /*
  *  Return TRUE if caught (the gold taken care of), FALSE otherwise.
  *  The gold object is *not* attached to the fobj chain!

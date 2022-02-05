@@ -17256,11 +17256,14 @@ monk_moves()
 		break;
 		case BIRD_KICK:
 		if(!EWounded_legs && circle_monk_target(uarmf)){
-			if(Race_if(PM_CHIROPTERAN))
-				pline("Wing bash!");
-			else
+			if(Race_if(PM_CHIROPTERAN)){
+				pline("Wing storm!");
+				wing_storm_monsters();
+			}
+			else {
 				pline("Bird kick!");
-			bird_kick_monsters();
+				bird_kick_monsters();
+			}
 			DID_MOVE
 		}
 		break;
