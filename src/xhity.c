@@ -8023,7 +8023,7 @@ boolean ranged;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		/* add holy damage */
-		if (hates_holy_mon(mdef)) {
+		if (youdef ? (hates_holy(pd)) : (hates_holy_mon(mdef))) {
 			if (vis) {
 				pline("The holy light sears %s!",
 					(youdef ? "your flesh" : mon_nam(mdef))
@@ -8049,7 +8049,7 @@ boolean ranged;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
 		/* add unholy damage */
-		if (hates_unholy_mon(mdef)) {
+		if (youdef ? (hates_unholy(pd)) : (hates_unholy_mon(mdef))) {
 			if (vis) {
 				pline("The unholy light sears %s!",
 					(youdef ? "your flesh" : mon_nam(mdef))
