@@ -17120,7 +17120,7 @@ void
 monk_aura_bolt()
 {
 	struct zapdata zapdat = { 0 };
-	basiczap(&zapdat, u.ualign.record <= -20 ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
+	basiczap(&zapdat, u.ualign.record < -3 ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
 	zapdat.damd = 4;
 	zapdat.affects_floor = FALSE;
 	zapdat.phase_armor = TRUE;
@@ -17246,6 +17246,7 @@ monk_moves()
 		case AURA_BOLT:
 		if((!uwep || is_monk_weapon(uwep)) 
 			&& (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep)) 
+			&& (u.ualign.record < -3 || u.ualign.record > 3)
 			&& u.uz.dlevel != spire_level.dlevel 
 			&& beam_monk_target()
 		){
