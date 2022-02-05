@@ -504,6 +504,8 @@ MONSTER:'@',"mad seer",(12,12), peaceful
 MONSTER:'@',"mad seer",(10,12), peaceful
 MONSTER:'@',"mad seer",(08,12), peaceful
 
+MONSTER:'@',"myrkalfar warrior",(17,03),peaceful
+
 MONSTER:'@',"trooper",(16,06)
 MONSTER:'@',"myrkalfar warrior",(17,06), peaceful
 MONSTER:'@',"trooper",(18,06)
@@ -528,6 +530,7 @@ MONSTER:'@',"trooper",(48,10)
 MONSTER:'@',"trooper",(47,11)
 MONSTER:'@',"trooper",(47,09)
 
+MONSTER:'h',"dwarf",(17,17),peaceful
 
 MONSTER:'@',"myrkalfar matron",(06,01),peaceful
 MONSTER:'@',"Elvenking",(07,01),peaceful
@@ -536,7 +539,7 @@ MONSTER:'C',"alider",(10,01),peaceful
 OBJECT:'\\',"bed",(10,01),uncursed,0
 MONSTER:'@',"trooper",(12,01),peaceful
 OBJECT:'\\',"bed",(12,01),uncursed,0
-MONSTER:'@',"myrkalfar warrior",(14,01),peaceful
+MONSTER:'h',"dwarf",(14,01),peaceful
 OBJECT:'\\',"bed",(14,01),uncursed,0
 
 MONSTER:'@',"human",(06,19),peaceful

@@ -1965,36 +1965,88 @@ int faction;
 					(void)mongets(mtmp, LOW_BOOTS, mkobjflags);
 					(void)mongets(mtmp, FEDORA, mkobjflags);
 				} else if (mm == PM_TROOPER){
-					otmp = mksobj(ARM_BLASTER, mkobjflags);
-					otmp->spe = 0;
-					otmp->ovar1 = d(5,10);
-					otmp->recharged = 4;
-					(void) mpickobj(mtmp, otmp);
-					
-					otmp = mksobj(VIBROBLADE, mkobjflags);
-					otmp->spe = rn1(3,3);
-					otmp->ovar1 = 50 + d(5,10);
-					otmp->recharged = rn1(3,3);
-					(void) mpickobj(mtmp, otmp);
-					
-					otmp = mksobj(HAND_BLASTER, mkobjflags);
-					otmp->spe = 0;
-					otmp->ovar1 = 50 + d(5,10);
-					otmp->recharged = rn1(2,2);
-					(void) mpickobj(mtmp, otmp);
-					
-					otmp = mksobj(BUCKLER, mkobjflags);
-					otmp->spe = rn1(2,2);
-					set_material_gm(otmp, PLASTIC);
-					otmp->obj_color = CLR_WHITE;
-					(void) mpickobj(mtmp, otmp);
-					
-					(void)mongets(mtmp, CLOAK, mkobjflags);
-					(void)mongets(mtmp, PLASTEEL_HELM, mkobjflags);
-					(void)mongets(mtmp, PLASTEEL_ARMOR, mkobjflags);
-					(void)mongets(mtmp, BODYGLOVE, mkobjflags);
-					(void)mongets(mtmp, PLASTEEL_GAUNTLETS, mkobjflags);
-					(void)mongets(mtmp, PLASTEEL_BOOTS, mkobjflags);
+					if(!rn2(10)){
+						otmp = mksobj(ARM_BLASTER, mkobjflags);
+						if(otmp){
+							otmp->spe = 0;
+							otmp->ovar1 = d(5,10);
+							otmp->recharged = 4;
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						otmp = mksobj(DISKOS, mkobjflags);
+						if(otmp){
+							otmp->spe = rn1(4,4);
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						otmp = mksobj(HAND_BLASTER, mkobjflags);
+						if(otmp){
+							otmp->spe = 0;
+							otmp->ovar1 = 50 + d(5,10);
+							otmp->recharged = rn1(2,2);
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						otmp = mksobj(BUCKLER, mkobjflags);
+						if(otmp){
+							otmp->spe = rn1(2,2);
+							set_material_gm(otmp, PLASTIC);
+							otmp->obj_color = CLR_GRAY;
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						(void)mongets(mtmp, CLOAK, mkobjflags);
+						otmp = mongets(mtmp, PLASTEEL_HELM, mkobjflags);
+						if(otmp) otmp->obj_color = CLR_GRAY;
+						otmp = mongets(mtmp, PLASTEEL_ARMOR, mkobjflags);
+						if(otmp) otmp->obj_color = CLR_GRAY;
+						(void)mongets(mtmp, BODYGLOVE, mkobjflags);
+						otmp = mongets(mtmp, PLASTEEL_GAUNTLETS, mkobjflags);
+						if(otmp) otmp->obj_color = CLR_GRAY;
+						otmp = mongets(mtmp, PLASTEEL_BOOTS, mkobjflags);
+						if(otmp) otmp->obj_color = CLR_GRAY;
+					}
+					else {
+						otmp = mksobj(ARM_BLASTER, mkobjflags);
+						if(otmp){
+							otmp->spe = 0;
+							otmp->ovar1 = d(5,10);
+							otmp->recharged = 4;
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						otmp = mksobj(VIBROBLADE, mkobjflags);
+						if(otmp){
+							otmp->spe = rn1(3,3);
+							otmp->ovar1 = 50 + d(5,10);
+							otmp->recharged = rn1(3,3);
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						otmp = mksobj(HAND_BLASTER, mkobjflags);
+						if(otmp){
+							otmp->spe = 0;
+							otmp->ovar1 = 50 + d(5,10);
+							otmp->recharged = rn1(2,2);
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						otmp = mksobj(BUCKLER, mkobjflags);
+						if(otmp){
+							otmp->spe = rn1(2,2);
+							set_material_gm(otmp, PLASTIC);
+							otmp->obj_color = CLR_WHITE;
+							(void) mpickobj(mtmp, otmp);
+						}
+						
+						(void)mongets(mtmp, CLOAK, mkobjflags);
+						(void)mongets(mtmp, PLASTEEL_HELM, mkobjflags);
+						(void)mongets(mtmp, PLASTEEL_ARMOR, mkobjflags);
+						(void)mongets(mtmp, BODYGLOVE, mkobjflags);
+						(void)mongets(mtmp, PLASTEEL_GAUNTLETS, mkobjflags);
+						(void)mongets(mtmp, PLASTEEL_BOOTS, mkobjflags);
+					}
 				} else if (mm == PM_CHIEFTAIN){
 					(void)mongets(mtmp, rn2(2) ? TWO_HANDED_SWORD : BATTLE_AXE, mkobjflags);
 					(void)mongets(mtmp, CHAIN_MAIL, mkobjflags);
@@ -5242,23 +5294,74 @@ int faction;
 				return;
 			}
 			if(Infuture){
-				(void)mongets(mtmp, SHOES, mkobjflags);
-				(void)mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
-				if(is_prince(ptr) || (is_lord(ptr) && !rn2(3))){
-					otmp = mongets(mtmp, RIFLE, mkobjflags);
-					if(otmp)
+				if(in_mklev){
+					mtmp->m_lev += 20;
+					mtmp->mhp = mtmp->mhpmax = d(mtmp->m_lev, 8);
+					otmp = mksobj(ARM_BLASTER, mkobjflags);
+					if(otmp){
+						otmp->spe = 0;
+						otmp->ovar1 = d(5,10);
+						otmp->recharged = 4;
+						(void) mpickobj(mtmp, otmp);
+					}
+					
+					otmp = mksobj(DISKOS, mkobjflags);
+					if(otmp){
+						otmp->spe = rn1(4,4);
+						(void) mpickobj(mtmp, otmp);
+					}
+
+					otmp = mongets(mtmp, PISTOL, mkobjflags);
+					if(otmp){
+						otmp->spe = 7;
 						add_oprop(otmp, OPROP_BLADED);
-					(void)mongets(mtmp, DWARVISH_MATTOCK, mkobjflags);
+						otmp = mksobj(SILVER_BULLET, mkobjflags);
+						if(otmp){
+							otmp->quan += rn1(100,100);
+							otmp->spe = 1+rn2(3);
+							fix_object(otmp);
+							(void) mpickobj(mtmp, otmp);
+						}
+					}
+
+					otmp = mksobj(BUCKLER, mkobjflags);
+					if(otmp){
+						otmp->spe = rn1(2,2);
+						set_material_gm(otmp, PLASTIC);
+						otmp->obj_color = CLR_GRAY;
+						(void) mpickobj(mtmp, otmp);
+					}
+					
+					(void)mongets(mtmp, CLOAK, mkobjflags);
+					otmp = mongets(mtmp, PLASTEEL_HELM, mkobjflags);
+					if(otmp) otmp->obj_color = CLR_GRAY;
+					otmp = mongets(mtmp, PLASTEEL_ARMOR, mkobjflags);
+					if(otmp) otmp->obj_color = CLR_GRAY;
+					(void)mongets(mtmp, BODYGLOVE, mkobjflags);
+					otmp = mongets(mtmp, PLASTEEL_GAUNTLETS, mkobjflags);
+					if(otmp) otmp->obj_color = CLR_GRAY;
+					otmp = mongets(mtmp, PLASTEEL_BOOTS, mkobjflags);
+					if(otmp) otmp->obj_color = CLR_GRAY;
 				}
-				else if (!rn2(4)) {
-					(void)mongets(mtmp, DWARVISH_SHORT_SWORD, mkobjflags);
-				} else {
-					if(!rn2(3)) (void)mongets(mtmp, DWARVISH_SPEAR, mkobjflags);
-					else (void)mongets(mtmp, DAGGER, mkobjflags);
+				else {
+					(void)mongets(mtmp, SHOES, mkobjflags);
+					(void)mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
+					if(is_prince(ptr) || (is_lord(ptr) && !rn2(3))){
+						otmp = mongets(mtmp, RIFLE, mkobjflags);
+						if(otmp)
+							add_oprop(otmp, OPROP_BLADED);
+						(void)mongets(mtmp, DWARVISH_MATTOCK, mkobjflags);
+					}
+					else if (!rn2(4)) {
+						(void)mongets(mtmp, DWARVISH_SHORT_SWORD, mkobjflags);
+					} else {
+						if(!rn2(3)) (void)mongets(mtmp, DWARVISH_SPEAR, mkobjflags);
+						else (void)mongets(mtmp, DAGGER, mkobjflags);
+					}
+					(void)mongets(mtmp, !rn2(3) ? PICK_AXE : AXE, mkobjflags);
+					if(is_prince(ptr) || (is_lord(ptr) && !rn2(3))) (void)mongets(mtmp, DWARVISH_MITHRIL_COAT, mkobjflags);
+					else (void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 				}
-				(void)mongets(mtmp, !rn2(3) ? PICK_AXE : AXE, mkobjflags);
-				if(is_prince(ptr) || (is_lord(ptr) && !rn2(3))) (void)mongets(mtmp, DWARVISH_MITHRIL_COAT, mkobjflags);
-				else (void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 			} else {
 				if (rn2(7)) (void)mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
 				if (rn2(7)) (void)mongets(mtmp, SHOES, mkobjflags);
