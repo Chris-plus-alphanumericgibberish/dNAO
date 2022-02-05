@@ -1286,6 +1286,10 @@ domove()
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && check_oprop(otmp, OPROP_CCLAW)){
 					result |= hit_with_cclaw(&youmonst, otmp, x, y, 0, attk);
 				}
+				/* Isamusei hit additional targets, if your insight is high enough to percieve the distortions */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 22 && otmp && otmp->otyp == ISAMUSEI){
+					result |= hit_with_iwarp(&youmonst, otmp, x, y, 0, attk);
+				}
 				/* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 					result |= hit_with_rblood(&youmonst, otmp, x, y, 0, attk);

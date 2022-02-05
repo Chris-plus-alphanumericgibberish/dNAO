@@ -1280,17 +1280,35 @@ add_insight_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
+	if (rakuyo_prop(obj)){
+		if(u.uinsight >= 40)
+			Strcat(buf, "burning ");
+		if(u.uinsight >= 20)
+			Strcat(buf, "blood-drenched ");
+	}
+	if (obj->otyp == ISAMUSEI){
+		if(u.uinsight >= 45)
+			Strcat(buf, "circular ");
+		else if(u.uinsight >= 22)
+			Strcat(buf, "twisting ");
+	}
 	if (obj->otyp == CLUB && check_oprop(obj, OPROP_CCLAW)){
 		if(u.uinsight >= 30)
 			Strcat(buf, "thrashing ");
 		else if(u.uinsight >= 15)
 			Strcat(buf, "severed ");
 	}
-	if (rakuyo_prop(obj)){
-		if(u.uinsight >= 40)
-			Strcat(buf, "burning ");
-		if(u.uinsight >= 20)
-			Strcat(buf, "blood-drenched ");
+	if (obj->otyp == DISKOS){
+		if(u.uinsight >= 15){
+			if(obj->where == OBJ_INVENT)
+				Strcat(buf, u.ualign.record < -3 ? "shadow-wrapped " : u.ualign.record > 3 ? "light-wrapped " : "energy-wrapped ");
+			else if(obj->where == OBJ_MINVENT)
+				Strcat(buf, obj->ocarry->mtyp == PM_UVUUDAUM ? "rainbow-wrapped " : hates_holy_mon(obj->ocarry) ? "shadow-wrapped " : hates_unholy_mon(obj->ocarry) ? "light-wrapped " : "energy-wrapped ");
+			else
+				Strcat(buf, "energy-wrapped ");
+		}
+		else if(u.uinsight >= 5)
+			Strcat(buf, "spinning ");
 	}
 }
 
@@ -3387,6 +3405,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
 #endif
 			   !BSTRCMPI(bp, p-5, "aklys") ||
+			   !BSTRCMPI(bp, p-6, "diskos") ||
 			   !BSTRCMPI(bp, p-13, "rotated cross") ||
 			   !BSTRCMPI(bp, p-8, "caduceus") ||
 			   !BSTRCMPI(bp, p-14, "vertical lines") ||

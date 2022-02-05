@@ -2424,12 +2424,13 @@ struct attack * attk;
 	int dy = sgn(tary - y(magr));
 	int nx, ny;
 	int result = 0;
-	if (isok(tarx + dx, tary + dy) &&
-		isok(tarx - dx, tary - dy) &&
+	if(!(isok(tarx - dx, tary - dy) &&
 		x(magr) == tarx - dx &&
-		y(magr) == tary - dy
-		)
-	{
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if (isok(tarx + dx, tary + dy)){
 		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
 								u.uswallow ? u.ustuck : 
 								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
@@ -2509,6 +2510,109 @@ struct attack * attk;
 
 
 ///////////////////////////////////////////////////////////////////////////////
+/* Isamusei hit additional targets, if your insight is high enough to percieve the distortions */
+///////////////////////////////////////////////////////////////////////////////
+int
+hit_with_iwarp(magr, otmp, tarx, tary, tohitmod, attk)
+struct monst * magr;
+struct obj * otmp;
+int tarx;
+int tary;
+int tohitmod;
+struct attack * attk;
+{
+	int subresult = 0;
+	boolean youagr = magr == &youmonst;
+	/* try to find direction (u.dx and u.dy may be incorrect) */
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	int nx, ny;
+	int result = 0;
+	if(!(isok(tarx - dx, tary - dy) &&
+		x(magr) == tarx - dx &&
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if (isok(tarx - 2*dx, tary - 2*dy)){
+		struct monst *mdef2 = !youagr ? m_u_at(tarx - 2*dx, tary - 2*dy) : 
+								u.uswallow ? u.ustuck : 
+								(dx || dy) ? m_at(tarx - 2*dx, tary - 2*dy) : 
+								(struct monst *)0;
+		if (mdef2 
+			&& (!DEADMONSTER(mdef2))
+			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+				(youagr && !mdef2->mpeaceful))
+		){ //Can hit a worm multiple times
+			int vis2 = VIS_NONE;
+			if(youagr || canseemon(magr))
+				vis2 |= VIS_MAGR;
+			if(mdef2 == &youmonst || canseemon(mdef2))
+				vis2 |= VIS_MDEF;
+			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		}
+	}
+	if(u.uinsight >= 45){
+		//90 degree rotation
+		nx = -dy;
+		ny = dx;
+		if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+			struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+									u.uswallow ? u.ustuck : 
+									(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+									(struct monst *)0;
+			if (mdef2 
+				&& (!DEADMONSTER(mdef2))
+				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+					(youagr && !mdef2->mpeaceful))
+			) { //Can hit a worm multiple times
+				int vis2 = VIS_NONE;
+				if(youagr || canseemon(magr))
+					vis2 |= VIS_MAGR;
+				if(mdef2 == &youmonst || canseemon(mdef2))
+					vis2 |= VIS_MDEF;
+				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+			}
+		}
+		//-90 degree rotation
+		nx = dy;
+		ny = -dx;
+		if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+			struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+									u.uswallow ? u.ustuck : 
+									(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+									(struct monst *)0;
+			if (mdef2 
+				&& (!DEADMONSTER(mdef2))
+				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+					(youagr && !mdef2->mpeaceful))
+			) { //Can hit a worm multiple times
+				int vis2 = VIS_NONE;
+				if(youagr || canseemon(magr))
+					vis2 |= VIS_MAGR;
+				if(mdef2 == &youmonst || canseemon(mdef2))
+					vis2 |= VIS_MDEF;
+				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+			}
+		}
+	}
+	return result;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 /* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
 ///////////////////////////////////////////////////////////////////////////////
 int
@@ -2527,11 +2631,13 @@ struct attack * attk;
 	int dy = sgn(tary - y(magr));
 	struct attack blood = {AT_ESPR, AD_BLUD, 1, 12+otmp->spe*2};
 	int result = 0;
-	if (isok(tarx + dx, tary + dy) &&
-		isok(tarx - dx, tary - dy) &&
+	if(!(isok(tarx - dx, tary - dy) &&
 		x(magr) == tarx - dx &&
-		y(magr) == tary - dy
-	){
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if (isok(tarx + dx, tary + dy)){
 		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
 								u.uswallow ? u.ustuck : 
 								(dx || dy) ? m_at(tarx + dx, tary + dy) : 

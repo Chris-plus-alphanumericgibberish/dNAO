@@ -1943,6 +1943,7 @@ struct obj *obj;
 		(obj->oartifact && arti_attack_prop(obj, ARTA_SHINING)) ||
 		(is_lightsaber(obj) && litsaber(obj)) ||
 		(check_oprop(obj, OPROP_PHSEW)) ||
+		(obj->otyp == DISKOS && u.uinsight >= 15) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
 }
@@ -4034,7 +4035,6 @@ int * truedmgptr;
 	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
 }
 
-
 /* prints no hitmessages (only "blinded by the flash"?) */
 void
 otyp_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll)
@@ -4153,6 +4153,48 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		*truedmgptr += bonus;
 	}
 	
+	if(otmp->otyp == DISKOS && u.uinsight >= 15){
+		int bonus = 0;
+		//Holy/Unholy energy attack
+		if(u.uinsight >= 50){
+			bonus += d(2, (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
+		} else if(u.uinsight >= 20){
+			bonus += rnd((mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
+		}
+		if(u.uinsight >= 45){
+			bonus += (mdef && bigmonst(pd)) ? 
+						(objects[otmp->otyp].oc_wldam.oc_damd) : 
+						(objects[otmp->otyp].oc_wsdam.oc_damd);
+		} else {
+			bonus += (mdef && bigmonst(pd)) ? 
+						(objects[otmp->otyp].oc_wldam.oc_damd+1)/2 : 
+						(objects[otmp->otyp].oc_wsdam.oc_damd+1)/2;
+		}
+		if(mdef){
+			if(youagr){
+				if(u.ualign.record < -3 && hates_unholy_mon(mdef))
+					bonus *= 2;
+				else if(u.ualign.record > 3 && hates_holy_mon(mdef))
+					bonus *= 2;
+			}
+			else if(magr){
+				if((magr->mtyp == PM_UVUUDAUM || hates_holy_mon(magr)) && hates_unholy_mon(mdef))
+					bonus *= 2;
+				else if((magr->mtyp == PM_UVUUDAUM || hates_unholy_mon(magr)) && hates_holy_mon(mdef))
+					bonus *= 2;
+			}
+		}
+		if (Half_spel(mdef))
+			bonus /= 2;
+		if (youdef && u.uvaul_duration)
+			bonus /= 2;
+		*truedmgptr += bonus;
+	}
+	
 	if(pure_weapon(otmp) && otmp->spe >= 6){
 		if(youagr){
 			if(Upolyd && u.mh == u.mhmax)
@@ -4218,8 +4260,32 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			mdef->mstdy += 3;
 		}
 	}
+	if(otmp->otyp == ISAMUSEI && u.uinsight >= 10){
+		if(youdef || !resist(mdef, WEAPON_CLASS, 0, TRUE)){
+			int factor = 20;
+			if(u.uinsight >= 70){
+				factor = 4;
+			}
+			else if(u.uinsight >= 57){
+				factor = 5;
+			}
+			else if(u.uinsight >= 45){
+				factor = 6;
+			}
+			else if(u.uinsight >= 33){
+				factor = 8;
+			}
+			else if(u.uinsight >= 22){
+				factor = 10;
+			}
+			if(Half_phys(mdef))
+				factor *= 2;
+			*hp(mdef) -= *hp(mdef)/factor;
+			// pline("off: %d", *hp(mdef)/factor);
+		}
+	}
 }
-  
+
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */
 int
 special_weapon_hit(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, messaged)
@@ -11269,6 +11335,16 @@ living_items()
 		/* grease self-greasing objects */
 		if (check_oprop(obj, OPROP_GRES) && !obj->greased && !rn2(40)){
 			obj->greased = TRUE;
+		}
+		/* Isamusei may change collor */
+		if (obj->otyp == ISAMUSEI){
+			int oldColor = obj->obj_color;
+			set_isamusei_color(obj);
+			if(oldColor != obj->obj_color && obj->where == OBJ_FLOOR){
+				if(isok(obj->ox, obj->oy)){
+					newsym(obj->ox, obj->oy);
+				}
+			}
 		}
 	}
 

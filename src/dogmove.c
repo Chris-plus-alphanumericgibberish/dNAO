@@ -124,7 +124,12 @@ boolean check_if_better;
 	    /* food */
             ((dogfood(mtmp, otmp) < APPORT) ||
 	    /* collect artifacts and oprop items */
-		 (otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || (rakuyo_prop(otmp) && u.uinsight >= 20)) ||
+		 (otmp->oartifact
+			|| !check_oprop(otmp, OPROP_NONE)
+			|| (rakuyo_prop(otmp) && u.uinsight >= 20)
+			|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
+			|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+		 ) ||
 	    /* slotless non-artifact items */
 		 ((otmp->otyp == ARMOR_SALVE && u.uinsight >= 66) || otmp->otyp == PRESERVATIVE_ENGINE) ||
 	    /* chains for some */

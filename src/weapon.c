@@ -734,6 +734,26 @@ int otyp;
 	case BEAMSWORD:				spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ plus(3,3); spe_mult *= 2;} break;	// external special case: Atma Weapon, lightsaber forms
 	case DOUBLE_LIGHTSABER:		spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
 	case ROD_OF_FORCE:			spe_mult *= 2; ocn *= 2; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
+	case DISKOS:
+								if(u.uinsight >= 40){
+									ocn+=3;
+									flat+=ocd;
+								} else if(u.uinsight >= 35){
+									ocn+=2;
+									flat+=ocd;
+								} else if(u.uinsight >= 30){
+									ocn+=2;
+									flat+=3*ocd/4;
+								} else if(u.uinsight >= 25){
+									ocn++;
+									flat+=3*ocd/4;
+								} else if(u.uinsight >= 10){
+									ocn++;
+									flat+=ocd/2;
+								} else if(u.uinsight >= 5){
+									flat+=ocd/2;
+								}
+	break;
 	}
 #undef plus_base
 #undef plus
@@ -1621,6 +1641,7 @@ static const NEARDATA short hwep[] = {
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
 	  DROVEN_SPEAR/*1d12/1d12*/,
 	  UNICORN_HORN/*1d12/1d12*/,
+	  ISAMUSEI/*1d12/1d8*/, 
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
@@ -1652,6 +1673,7 @@ static const NEARDATA short hwep[] = {
 	  ELVEN_SHORT_SWORD/*1d7/1d7*/, 
 	  ELVEN_MACE/*1d7/1d7*/, 
 	  ELVEN_SPEAR/*1d7/1d7*/, 
+	  DISKOS/*1d6/1d8*/,
 	  SPEAR/*1d6/1d8*/,
 	  SHORT_SWORD/*1d6/1d8*/,
 	  RAPIER/*1d6/1d4*/, 
@@ -1718,6 +1740,7 @@ static const NEARDATA short hpwep[] = {
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
 	  DROVEN_SPEAR/*1d12/1d12*/,
 	  UNICORN_HORN/*1d12/1d12*/,
+	  ISAMUSEI/*1d12/1d8*/, 
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
@@ -1762,6 +1785,7 @@ static const NEARDATA short hpwep[] = {
 	  ELVEN_SHORT_SWORD/*1d7/1d7*/, 
 	  ELVEN_MACE/*1d7/1d7*/, 
 	  ELVEN_SPEAR/*1d7/1d7*/, 
+	  DISKOS/*1d6/1d8*/,
 	  FAUCHARD, /*1d6/1d8*/
 	  LANCE, /*1d6/1d8*/
 	  SPEAR/*1d6/1d8*/,
@@ -1852,7 +1876,12 @@ register struct monst *mtmp;
 
 	/* if using an artifact or oprop weapon keep using it. */
 	otmp = MON_WEP(mtmp);
-	if(otmp && (otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || (rakuyo_prop(otmp) && u.uinsight >= 20)))
+	if(otmp && (otmp->oartifact
+			|| !check_oprop(otmp, OPROP_NONE)
+			|| (rakuyo_prop(otmp) && u.uinsight >= 20) //Note: Rakuyo-ness is accidently caught by OPROP_
+			|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
+			|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+	))
 		return otmp;
 	
 	/* prefer artifacts to everything else */
@@ -1862,7 +1891,12 @@ register struct monst *mtmp;
 			|| otmp->otyp == CHAIN || otmp->otyp == HEAVY_IRON_BALL
 			) &&
 			/* an artifact or other special weapon*/
-			(otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || (rakuyo_prop(otmp) && u.uinsight >= 20)) &&
+			(otmp->oartifact
+				|| !check_oprop(otmp, OPROP_NONE)
+				|| (rakuyo_prop(otmp) && u.uinsight >= 20)
+				|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
+				|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+			) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
@@ -1916,7 +1950,12 @@ register struct monst *mtmp;
 	
 	/* if using an artifact or oprop weapon keep using it. */
 	otmp = MON_SWEP(mtmp);
-	if(otmp && (otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || (rakuyo_prop(otmp) && u.uinsight >= 20)))
+	if(otmp && (otmp->oartifact
+		|| !check_oprop(otmp, OPROP_NONE)
+		|| (rakuyo_prop(otmp) && u.uinsight >= 20)
+		|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
+		|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+	))
 		return otmp;
 	
 	/* prefer artifacts to everything else */
@@ -1928,7 +1967,12 @@ register struct monst *mtmp;
 			/* not already weided in main hand */
 			(otmp != MON_WEP(mtmp)) &&
 			/* an artifact or other special weapon*/
-			(otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || (rakuyo_prop(otmp) && u.uinsight >= 20)) &&
+			(otmp->oartifact
+				|| !check_oprop(otmp, OPROP_NONE)
+				|| (rakuyo_prop(otmp) && u.uinsight >= 20)
+				|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
+				|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+			) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
 			 || otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC
@@ -2489,6 +2533,10 @@ struct obj *otmp;
 		) bonus *= 2;
 		else if(otmp->otyp == FORCE_SWORD && !arms && !mswp)
 			bonus *= 2;
+		else if(otmp->otyp == DISKOS && !arms && !mswp)
+			bonus *= 2;
+		else if(otmp->otyp == ISAMUSEI && !arms && !mswp)
+			bonus *= 1.5;
 		else if(otmp->otyp == KATANA && !arms && !mswp)
 			bonus *= 1.5;
 		else if(is_vibrosword(otmp) && !arms && !mswp)
@@ -3176,6 +3224,10 @@ struct obj *obj;
 	}
 	else if(obj->otyp == KHOPESH){
 		CHECK_ALTERNATE_SKILL(P_AXE)
+	}
+	else if(obj->otyp == DISKOS){
+		if(!uarms && !u.twoweap)
+			CHECK_ALTERNATE_SKILL(P_POLEARMS)
 	}
 	else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1){
 		type = (int)obj->ovar1;

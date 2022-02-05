@@ -1981,6 +1981,7 @@ E void FDECL(restnames, (int));
 E void FDECL(discover_object, (int,BOOLEAN_P,BOOLEAN_P));
 E void FDECL(undiscover_object, (int));
 E int NDECL(dodiscovered);
+E void FDECL(set_isamusei_color, (struct obj *));
 E void FDECL(set_object_color, (struct obj *));
 E int FDECL(object_color, (struct obj *));
 E void FDECL(fix_object, (struct obj *));
@@ -3322,6 +3323,7 @@ E boolean FDECL(miss_via_insubstantial, (struct monst *, struct monst *, struct 
 E int FDECL(destroy_item, (struct monst *, int, int));
 E boolean FDECL(wearing_dragon_armor, (struct monst *, int));
 E int FDECL(hit_with_cclaw, (struct monst *,struct obj *, int, int, int, struct attack *));
+E int FDECL(hit_with_iwarp, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_rblood, (struct monst *,struct obj *, int, int, int, struct attack *));
 
 /* ### zap.c ### */

@@ -2661,6 +2661,7 @@ boolean past;
 		case PM_ELF:
 			expert_weapon_skill(P_BOW);
 			expert_weapon_skill(P_SCIMITAR);
+			skilled_weapon_skill(P_BROAD_SWORD);
 			knows_object(ELVEN_SHORT_SWORD);
 			knows_object(ELVEN_ARROW);
 			knows_object(ELVEN_BOW);

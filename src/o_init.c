@@ -1302,6 +1302,27 @@ dodiscovered()				/* free after Robert Viduya */
 }
 
 void
+set_isamusei_color(obj)
+struct obj *obj;
+{
+	if(u.uinsight >= 70){
+		obj->obj_color = CLR_MAGENTA;
+	} else if(u.uinsight >= 57){
+		obj->obj_color = CLR_BRIGHT_MAGENTA;
+	} else if(u.uinsight >= 45){
+		obj->obj_color = CLR_BRIGHT_BLUE;
+	} else if(u.uinsight >= 33){
+		obj->obj_color = CLR_BRIGHT_CYAN;
+	} else if(u.uinsight >= 22){
+		obj->obj_color = CLR_BRIGHT_GREEN;
+	} else if(u.uinsight >= 10){
+		obj->obj_color = CLR_YELLOW;
+	} else {
+		obj->obj_color = CLR_ORANGE;
+	}
+}
+
+void
 set_object_color(otmp)
 struct obj *otmp;
 {
@@ -1323,6 +1344,13 @@ struct obj *otmp;
 	}
 	/* color-changing artifacts override this */
 	
+	/* these change color in a not-terribly-well-handled way */
+	if (otmp->otyp == ISAMUSEI)
+	{
+		set_isamusei_color(otmp);
+		return;
+	}
+
 	/* gold pieces are gold */
 	if (otmp->otyp == GOLD_PIECE){
 		otmp->obj_color = HI_GOLD;

@@ -480,12 +480,15 @@ struct obj {
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
 			 otmp->obj_material == MERCURIAL || \
+			 otmp->otyp == ISAMUSEI ||\
+			 otmp->otyp == DISKOS ||\
 			 otmp->otyp == BESTIAL_CLAW)
 #define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			otmp->oclass == TOOL_CLASS) && \
 			 (objects[otmp->otyp].oc_skill == P_POLEARMS || \
 			  objects[otmp->otyp].oc_skill == P_LANCE || \
 			  otmp->otyp==AKLYS || \
+			  otmp->otyp==DISKOS || \
 			  (check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15) || \
 			  otmp->oartifact==ART_SOL_VALTIVA || \
 			  otmp->oartifact==ART_SHADOWLOCK || \
@@ -493,6 +496,7 @@ struct obj {
 			  (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE ) \
 			 ))
 #define is_bad_melee_pole(otmp) (!(otmp->otyp == POLEAXE ||\
+									otmp->otyp == DISKOS ||\
 									is_vibropike(otmp) ||\
 									otmp->oartifact == ART_WEBWEAVER_S_CROOK ||\
 									otmp->oartifact == ART_SILENCE_GLAIVE ||\
@@ -613,6 +617,8 @@ struct obj {
 						  (otmp)->otyp == SHADOWLANDER_S_TORCH || \
 						  (otmp)->otyp == CROW_QUILL || \
 						  (otmp)->otyp == SET_OF_CROW_TALONS || \
+						  (otmp)->otyp == ISAMUSEI || \
+						  (otmp)->otyp == DISKOS || \
 						  (otmp)->otyp == KAMEREL_VAJRA)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \
