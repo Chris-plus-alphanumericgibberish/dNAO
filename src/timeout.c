@@ -2902,7 +2902,7 @@ void
 run_timers()
 {
     timer_element *curr;
-
+	flags.run_timers = FALSE;
     /*
      * Always use the first element.  Elements may be added or deleted at
      * any time.  The list is ordered, we are done when the first element
@@ -3138,7 +3138,6 @@ struct monst * mon;
 boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 {
 	if (!mon) return;
-	boolean done_any = FALSE;
 	timer_element * tm;
 	struct esum * esum;
 	for (tm = timer_base; tm; tm = tm->next) {
@@ -3174,14 +3173,12 @@ boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 			}
 
 			adjust_timer_duration(tm, min(0, monstermoves - tm->timeout));
-			done_any = TRUE;
+			flags.run_timers = TRUE;
 
 			/* remove "permanent" flag from esum so it will despawn */
 			esum->permanent = 0;
 		}
 	}
-	if (done_any)
-		run_timers();
 }
 
 /*

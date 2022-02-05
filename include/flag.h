@@ -52,6 +52,7 @@ struct flag {
 	boolean  made_amulet;
 	boolean  makelev_closerooms;	/* allow rooms to be placed very close to each other, causing overlaps and merges*/
 	boolean  mon_moving;	/* monsters' turn to move */
+	boolean  run_timers;	/* run timers as soon as possible (probably to desummon items) */
 	boolean  drgn_brth;		/* for use with breath weapons, indicates that a dragon is breathing */
 	boolean  move;
 	boolean  mv;
