@@ -1162,6 +1162,11 @@ struct obj *otmp;	/* existing object */
 		if(!rn2(7)){
 			add_oprop(otmp, OPROP_HEAL);
 		}
+		if(is_gloves(otmp)){
+			if(!rn2(7)){
+				add_oprop(otmp, OPROP_BLADED);
+			}
+		}
 	}
 	/* weapon props */
 	else if(otmp->oclass == WEAPON_CLASS){
@@ -1236,6 +1241,11 @@ struct obj *otmp;	/* existing object */
 			case 5:
 				ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
 			break;
+		}
+		if(is_gloves(otmp) || is_boots(otmp)){
+			if(!rn2(4)){
+				add_oprop(otmp, rn2(2) ? OPROP_BLADED : OPROP_SPIKED);
+			}
 		}
 	}
 	/* weapon props */
@@ -1324,6 +1334,11 @@ struct obj *otmp;	/* existing object */
 				ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
 			break;
 		}
+		if(is_gloves(otmp) || is_boots(otmp)){
+			if(!rn2(2)){
+				add_oprop(otmp, rn2(4) ? OPROP_SPIKED : OPROP_BLADED);
+			}
+		}
 	}
 	/* weapon props */
 	else if(otmp->oclass == WEAPON_CLASS){
@@ -1352,6 +1367,9 @@ struct obj *otmp;	/* existing object */
 			case 7:
 				ADD_WEAK_OR_STRONG_OPROP(otmp, ANAR);
 			break;
+		}
+		if(!rn2(10)){
+			add_oprop(otmp, rn2(4) ? OPROP_SPIKED : OPROP_BLADED);
 		}
 	}
 	return otmp;
