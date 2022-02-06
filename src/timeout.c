@@ -3177,6 +3177,9 @@ boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 
 			/* remove "permanent" flag from esum so it will despawn */
 			esum->permanent = 0;
+			/* remove pointer to summoner, who is gone (and may be freed soon) */
+			/* adjusting summonpwr of summoner is moot */
+			esum->summoner = (struct monst *)0;
 		}
 	}
 }
