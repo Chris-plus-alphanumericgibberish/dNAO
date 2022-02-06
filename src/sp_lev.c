@@ -1492,21 +1492,20 @@ default_case:
 					add_to_container(otmp, stuff);
 				}
 				default_add(GLOVES);
-				default_add(HIGH_ELVEN_HELM);
 				default_add_2(ELVEN_MITHRIL_COAT);
+				default_add(ROBE);
+				default_add(HIGH_ELVEN_HELM);
+
 				default_add_2(ELVEN_BOW);
-				
 				stuff = mksobj(ELVEN_ARROW, MKOBJ_NOINIT);
 				stuff->spe = 2;
 				stuff->quan = 30L;
 				fix_object(stuff);
 				add_to_container(otmp, stuff);
-				
+
 				stuff = mksobj(HIGH_ELVEN_WARSWORD, MKOBJ_NOINIT);
 				set_material_gm(stuff, WOOD);
 				add_to_container(otmp, stuff);
-				
-				default_add(ELVEN_CLOAK);
 			break;
 			case PM_ORC:
 					default_add(LOW_BOOTS);
@@ -1551,6 +1550,35 @@ default_case:
 				stuff->obj_color = CLR_ORANGE;
 				add_to_container(otmp, stuff);
 			break;
+		}
+		if(urace.malenum == PM_GNOME || urace.malenum == PM_ELF){
+			int stars[] = {PM_YELLOW_LIGHT, PM_YELLOW_LIGHT, PM_BLACK_LIGHT, PM_MOTE_OF_LIGHT, PM_TINY_BEING_OF_LIGHT};
+			default_add_2(ISAMUSEI);
+
+			stuff = mksobj(POT_STARLIGHT, MKOBJ_NOINIT);
+			stuff->quan = d(3,3);
+			fix_object(stuff);
+			add_to_container(otmp, stuff);
+
+			stuff = mksobj(ROCK, MKOBJ_NOINIT);
+			stuff->quan = d(3,3);
+			set_material_gm(stuff, IRON);
+			fix_object(stuff);
+			add_to_container(otmp, stuff);
+
+			stuff = mksobj(ROCK, MKOBJ_NOINIT);
+			set_material_gm(stuff, IRON);
+			add_oprop(stuff, OPROP_COLDW);
+			add_to_container(otmp, stuff);
+
+			for(int i = d(3,3); i > 0; i--){
+				stuff = mksobj(FIGURINE, MKOBJ_NOINIT);
+				stuff->corpsenm = ROLL_FROM(stars);
+				fix_object(stuff);
+				add_to_container(otmp, stuff);
+			}
+
+			//loyal tulani statuette?
 		}
 	}
 
