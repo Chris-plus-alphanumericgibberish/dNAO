@@ -1961,7 +1961,6 @@ struct obj *obj;
 		(obj->oartifact && arti_attack_prop(obj, ARTA_SHINING)) ||
 		(is_lightsaber(obj) && litsaber(obj)) ||
 		(check_oprop(obj, OPROP_PHSEW)) ||
-		(obj->otyp == DISKOS && u.uinsight >= 15) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
 }
