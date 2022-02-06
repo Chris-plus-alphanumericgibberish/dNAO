@@ -152,22 +152,36 @@ boolean quietly;
 	initedog(mtmp);
 	mtmp->msleeping = 0;
 	if (otmp) { /* figurine; resulting monster might not become a pet */
-	    chance = rn2(10);	/* 0==tame, 1==peaceful, 2==hostile */
-	    if (chance > 2) chance = otmp->blessed ? 0 : !otmp->cursed ? 1 : 2;
-	    /* 0,1,2:  b=80%,10,10; nc=10%,80,10; c=10%,10,80 */
-	    if (chance > 0 && 
-			!(Role_if(PM_BARD) && rnd(20) < ACURR(A_CHA) && 
-				!(is_animal(mtmp->data) || mindless_mon(mtmp)))
-		) {
-
-		untame(mtmp, 1);	/* not tame after all */
-		if (chance == 2) { /* hostile (cursed figurine) */
-		    if (!quietly)
-		       You("get a bad feeling about this.");
-		    mtmp->mpeaceful = 0;
-		    set_malign(mtmp);
+		if(check_fig_template(otmp->spe, FIGURINE_PSEUDO)){
+			set_template(mtmp, PSEUDONATURAL);
 		}
-	    }
+		if(otmp->spe&FIGURINE_MALE){
+			mtmp->female = FALSE;
+		}
+		if(otmp->spe&FIGURINE_FEMALE){
+			mtmp->female = TRUE;
+		}
+
+		if(otmp->spe&FIGURINE_LOYAL){
+			EDOG(mtmp)->loyal = TRUE;
+		}
+		else {
+			chance = rn2(10);	/* 0==tame, 1==peaceful, 2==hostile */
+			if (chance > 2) chance = otmp->blessed ? 0 : !otmp->cursed ? 1 : 2;
+			/* 0,1,2:  b=80%,10,10; nc=10%,80,10; c=10%,10,80 */
+			if (chance > 0 && 
+				!(Role_if(PM_BARD) && rnd(20) < ACURR(A_CHA) && 
+					!(is_animal(mtmp->data) || mindless_mon(mtmp)))
+			){
+				untame(mtmp, 1);	/* not tame after all */
+				if (chance == 2) { /* hostile (cursed figurine) */
+					if (!quietly)
+					   You("get a bad feeling about this.");
+					mtmp->mpeaceful = 0;
+					set_malign(mtmp);
+				}
+			}
+		}
 	    /* if figurine has been named, give same name to the monster */
 	    if (get_ox(otmp, OX_ENAM))
 			mtmp = christen_monst(mtmp, ONAME(otmp));

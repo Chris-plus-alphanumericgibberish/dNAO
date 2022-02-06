@@ -110,12 +110,21 @@ struct obj {
 				   tells which fruit a fruit is
 				   special for uball and amulet
 				   do not decay for corpses
-				   historic and gender for statues */
+				   historic and gender for statues
+				   loyalty, gender, and template for figurines */
 #define STATUE_HISTORIC 0x01
 #define STATUE_MALE     0x02
 #define STATUE_FEMALE   0x04
 #define STATUE_FACELESS 0x08
 #define STATUE_EPRE		0x10
+
+#define FIGURINE_LOYAL	0x01
+#define FIGURINE_MALE	0x02
+#define FIGURINE_FEMALE	0x04
+#define FIGURINE_FLAGS	0x07
+#define FIGURINE_PSEUDO	0x1<<3
+
+#define check_fig_template(spe_val, fig_temp)	((spe_val&~(FIGURINE_FLAGS)) == (fig_temp))
 	char	oclass;		/* object class */
 	char	invlet;		/* designation in inventory */
 	int		oartifact;	/* artifact array index */

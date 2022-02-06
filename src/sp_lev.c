@@ -1578,7 +1578,11 @@ default_case:
 				add_to_container(otmp, stuff);
 			}
 
-			//loyal tulani statuette?
+			stuff = mksobj(FIGURINE, MKOBJ_NOINIT);
+			stuff->corpsenm = PM_BALL_OF_RADIANCE;
+			fix_object(stuff);
+			stuff->spe = FIGURINE_LOYAL|FIGURINE_PSEUDO;
+			add_to_container(otmp, stuff);
 		}
 	}
 
