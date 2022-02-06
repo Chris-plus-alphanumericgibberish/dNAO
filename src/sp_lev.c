@@ -1364,6 +1364,7 @@ default_case:
 				}
 				if(urace.malenum == PM_GNOME){
 					default_add_2(GNOMISH_POINTY_HAT);
+					default_add_2(AKLYS);
 				}
 			break;
 			case PM_HALF_DRAGON:
