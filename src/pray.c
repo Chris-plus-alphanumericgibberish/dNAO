@@ -106,7 +106,14 @@ static const char *goattitles[] = {
 /* values calculated when prayer starts, and used when completed */
 static int p_god;
 static int p_trouble;
-static int p_type; /* (-1)-3: (-1)=really naughty, 3=really good */
+static int p_type;
+/*
+ -1 : rejection    
+  0 : bad standing 
+  1 : too soon     
+  2 : cross-altar  
+  3 : good prayer  
+  */
 
 #define PIOUS 20
 #define DEVOUT 14
@@ -2528,7 +2535,7 @@ boolean praying;	/* false means no messages should be given */
 	)
 		p_type = 1;		/* too soon... */
     else /* alignment >= 0 */ {
-	if(on_altar() && u.ualign.type != galign(p_god))
+	if(on_altar() && u.ualign.god != p_god)
 	    p_type = 2;
 	else
 	    p_type = 3;
@@ -2660,11 +2667,11 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
     }
 
     if (p_type == 0) {
-        if(on_altar() && u.ualign.type != alignment)
+        if(on_altar() && u.ualign.god != p_god)
             (void) water_prayer(FALSE);
         angrygods(u.ualign.god);       /* naughty */
     } else if (p_type == 1) {
-		if(on_altar() && u.ualign.type != alignment)
+		if(on_altar() && u.ualign.god != p_god)
 			(void) water_prayer(FALSE);
 		if(u.ualign.type != A_VOID){
 			u.ublesscnt += rnz(250);
