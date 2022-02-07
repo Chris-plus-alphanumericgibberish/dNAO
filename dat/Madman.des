@@ -129,7 +129,7 @@ OBJECT[50%]: '0', "heavy iron ball", random
 # Non diggable walls
 NON_DIGGABLE:(25,00,43,18)
 
-MAZE: "Mad-home",'T'
+MAZE: "Mad-home",' '
 FLAGS:noteleport,hardfloor
 #INIT_MAP: ' ' , ' ' , false , true , lit , false
 MESSAGE:"You've reached the main observation level."
