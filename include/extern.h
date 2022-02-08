@@ -3127,6 +3127,7 @@ E void FDECL(expert_weapon_skill, (int));
 E void FDECL(skilled_weapon_skill, (int));
 E int FDECL(skill_dam_bonus, (int));
 E void FDECL(gm_weapon_skill, (int));
+E void FDECL(free_skill_up, (int));
 #ifdef DUMP_LOG
 E void NDECL(dump_weapon_skill);
 #endif

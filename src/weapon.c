@@ -2659,14 +2659,14 @@ struct obj *otmp;
 			if(is_rakuyo(otmp))
 				bonus *= 2;
 		}
-		
+
 		if(otmp->oartifact == ART_YORSHKA_S_SPEAR){
 			if(ACURR(A_WIS) == 25) bonus += 8;
 			else bonus += (ACURR(A_WIS)-10)/2;
 			if(ACURR(A_DEX) == 25) bonus += 8;
 			else bonus += (ACURR(A_DEX)-10)/2;
 		}
-		
+
 		if(otmp->oartifact == ART_FRIEDE_S_SCYTHE){
 			bonus /= 2; /*Half strength bonus/penalty*/
 			
@@ -2676,7 +2676,7 @@ struct obj *otmp;
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
 		}
-		
+
 		if(otmp->oartifact == ART_VELKA_S_RAPIER){
 			bonus /= 2;
 			if(ACURR(A_INT) == 25) bonus += 8;
@@ -3109,6 +3109,16 @@ int skill;
 		OLD_P_MAX_SKILL(skill) = P_GRAND_MASTER;
 		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
     }
+}
+
+void
+free_skill_up(skill)
+int skill;
+{
+	if(OLD_P_SKILL(skill) < OLD_P_MAX_SKILL(skill)){
+		OLD_P_SKILL(skill)++;
+		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
+	}
 }
 
 #endif /* OVL1 */
