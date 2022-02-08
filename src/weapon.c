@@ -3104,7 +3104,7 @@ void
 gm_weapon_skill(skill)
 int skill;
 {
-    if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < P_EXPERT) {
+    if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < P_GRAND_MASTER) {
 		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
 		OLD_P_MAX_SKILL(skill) = P_GRAND_MASTER;
 		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
