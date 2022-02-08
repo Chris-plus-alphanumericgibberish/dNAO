@@ -1609,7 +1609,7 @@ do_pit:		    chasm = maketrap(x,y,PIT);
 					NO_KILLER_PREFIX);
 				    selftouch("Falling, you");
 			    }
-			} else if (((!yours && mon) || cursed) && !rn2(2)) {
+			} else if (cursed && !rn2(2)) {
 			   /* make some chthonic nasties */
 			   if(In_quest(&u.uz) && urole.neminum == PM_DARUTH_XAXOX){
 				   switch(rn2(5)) {
