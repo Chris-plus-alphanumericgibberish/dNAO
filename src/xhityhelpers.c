@@ -1539,7 +1539,7 @@ struct obj * otmp;
 		if(is_minion(mdef->data) || is_demon(mdef->data))
 			diesize *= 2;
 		/* strongly chaotic beings are hurt more */
-		if(mdef->mtyp == PM_ANGEL || mdef->data->maligntyp <= -10)
+		if(youdef ? u.ualign.record >= 100 : ( mdef->mtyp == PM_ANGEL || mdef->data->maligntyp <= -10))
 			diesize *= 2;
 
 		/* special cases */
