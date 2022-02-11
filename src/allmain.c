@@ -4492,9 +4492,9 @@ struct monst *mon;
 				mtmp->mhp = mtmp->mhpmax;
 				if(canseemon(mon) && canseemon(mtmp))
 					pline("Dark waters rise at %s command and seal %s's wounds!", s_suffix(mon_nam(mon)), mon_nam(mtmp));
-				else if(canseemon(mtmp))
-					pline("Dark waters rise at %s command.", s_suffix(mon_nam(mon)));
 				else if(canseemon(mon))
+					pline("Dark waters rise at %s command.", s_suffix(mon_nam(mon)));
+				else if(canseemon(mtmp))
 					pline("Dark waters seal %s's wounds!", mon_nam(mtmp));
 			} else {
 				mtmp->mhp = min(mtmp->mhp+9, mtmp->mhpmax);
@@ -4537,6 +4537,8 @@ struct monst *mon;
 		}
 	}
 	if(obj && !rn2(2)){
+		if(canseemon(mon))
+			pline("%s gestures upwards.", s_suffix(Monnam(mon)));
 		if(get_obj_location(obj, &xlocale, &ylocale, 0)){
 			if(cansee(xlocale, ylocale)) pline("Dark waters swallow Nitocris!");
 			mtmp = revive(obj, FALSE);
