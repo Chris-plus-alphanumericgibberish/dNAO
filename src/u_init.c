@@ -2304,7 +2304,7 @@ u_init()
     break;
 
 	case PM_INCANTIFIER:
-		skill_add(Skill_I);
+		skill_up(Skill_I);
 	    if (!Role_if(PM_WIZARD)) ini_inv(ForceBook);
 		else ini_inv(ExtraBook);
 	    if (!Role_if(PM_HEALER) && (!Role_if(PM_MONK) || Monk[M_BOOK].trotyp != SPE_HEALING)) ini_inv(HealingBook);

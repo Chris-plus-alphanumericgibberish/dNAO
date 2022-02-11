@@ -3123,8 +3123,6 @@ E int NDECL(abon);
 E int FDECL(dbon, (struct obj *));
 E int FDECL(m_dbon, (struct monst *, struct obj *));
 E int NDECL(enhance_weapon_skill);
-E void FDECL(expert_weapon_skill, (int));
-E void FDECL(skilled_weapon_skill, (int));
 E int FDECL(skill_dam_bonus, (int));
 E void FDECL(gm_weapon_skill, (int));
 E void FDECL(free_skill_up, (int));
@@ -3132,6 +3130,8 @@ E void FDECL(free_skill_up, (int));
 E void NDECL(dump_weapon_skill);
 #endif
 E void FDECL(unrestrict_weapon_skill, (int));
+E void FDECL(expert_weapon_skill, (int));
+E void FDECL(skilled_weapon_skill, (int));
 E void FDECL(use_skill, (int,int));
 E void FDECL(add_weapon_skill, (int));
 E void FDECL(lose_weapon_skill, (int));
@@ -3142,6 +3142,7 @@ E int FDECL(weapon_dam_bonus, (struct obj *, int));
 E int FDECL(shield_skill, (struct obj *));
 E void FDECL(skill_init, (const struct def_skill *));
 E void FDECL(skill_add, (const struct def_skill *));
+E void FDECL(skill_up, (const struct def_skill *));
 E const char * FDECL(P_NAME, (int));
 E int NDECL(aeshbon);
 

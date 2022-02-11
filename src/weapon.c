@@ -3827,6 +3827,50 @@ const struct def_skill *class_skill;
 	    }
 	}
 }
+
+/*
+ * Read the given array and increment the max skill level of each listed
+ * skill iff its maximum is bellow the given level.
+ */
+void
+skill_up(class_skill)
+const struct def_skill *class_skill;
+{
+	int skmax, skill;
+	/* walk through array to set skill maximums */
+	for (; class_skill->skill != P_NONE; class_skill++) {
+	    skmax = class_skill->skmax;
+	    skill = class_skill->skill;
+
+		increment_weapon_skill_up_to_cap(skill, skmax);
+	}
+
+	/* High potential fighters already know how to use their hands. */
+	if (OLD_P_MAX_SKILL(P_BARE_HANDED_COMBAT) > P_EXPERT)
+	    OLD_P_SKILL(P_BARE_HANDED_COMBAT) = P_BASIC;
+
+	/*
+	 * Make sure we haven't missed setting the max on a skill
+	 * & set advance
+	 */
+	for (skill = 0; skill < P_NUM_SKILLS; skill++) {
+	    if (!OLD_P_RESTRICTED(skill)) {
+			if (OLD_P_MAX_SKILL(skill) < OLD_P_SKILL(skill)) {
+				impossible("skill_init: curr > max: %s", P_NAME(skill));
+				OLD_P_MAX_SKILL(skill) = OLD_P_SKILL(skill);
+			}
+			P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
+	    }
+	}
+}
+
+/*
+ * Initialize weapon skill array for the game.  Start by setting all
+ * skills to restricted, then set the skill for every weapon the
+ * hero is holding, finally reading the given array that sets
+ * maximums.
+ */
+
 void
 skill_init(class_skill)
 const struct def_skill *class_skill;
