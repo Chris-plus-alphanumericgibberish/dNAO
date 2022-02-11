@@ -3067,6 +3067,40 @@ int skill;
 }
 
 /*
+ * Change from restricted to unrestricted, allowing new_cap as max.  This
+ * function may be called with with P_NONE.
+ */
+void
+set_weapon_skill(skill, new_cap)
+int skill;
+int new_cap;
+{
+    if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < new_cap) {
+		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
+		OLD_P_MAX_SKILL(skill) = new_cap;
+		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
+    }
+}
+
+/*
+ * Change from restricted to unrestricted, then increments the skill cap if less than new_cap.  This
+ * function may be called with with P_NONE.
+ */
+void
+increment_weapon_skill_up_to_cap(skill, new_cap)
+int skill;
+int new_cap;
+{
+    if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < new_cap) {
+		if(P_RESTRICTED(skill))
+			unrestrict_weapon_skill(skill);
+		else OLD_P_MAX_SKILL(skill)++;
+		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
+		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
+    }
+}
+
+/*
  * Change from restricted to unrestricted, allowing P_EXPERT as max.  This
  * function may be called with with P_NONE.  Used in pray.c.
  */
@@ -3074,11 +3108,7 @@ void
 expert_weapon_skill(skill)
 int skill;
 {
-    if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < P_EXPERT) {
-		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
-		OLD_P_MAX_SKILL(skill) = P_EXPERT;
-		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
-    }
+	set_weapon_skill(skill, P_EXPERT);
 }
 
 /*
@@ -3089,11 +3119,7 @@ void
 skilled_weapon_skill(skill)
 int skill;
 {
-    if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < P_SKILLED) {
-		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
-		OLD_P_MAX_SKILL(skill) = P_SKILLED;
-		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
-    }
+	set_weapon_skill(skill, P_SKILLED);
 }
 
 /*
@@ -3104,11 +3130,7 @@ void
 gm_weapon_skill(skill)
 int skill;
 {
-    if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < P_GRAND_MASTER) {
-		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
-		OLD_P_MAX_SKILL(skill) = P_GRAND_MASTER;
-		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
-    }
+	set_weapon_skill(skill, P_GRAND_MASTER);
 }
 
 void
@@ -3789,10 +3811,7 @@ struct obj *shield;
 }
 
 /*
- * Initialize weapon skill array for the game.  Start by setting all
- * skills to restricted, then set the skill for every weapon the
- * hero is holding, finally reading the given array that sets
- * maximums.
+ * Add the listed skills to the player's skill list.
  */
 void
 skill_add(class_skill)
