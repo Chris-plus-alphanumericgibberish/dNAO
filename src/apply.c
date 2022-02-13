@@ -1925,6 +1925,12 @@ int
 dojump()
 {
 	/* Physical jump */
+	if(!Upolyd && Role_if(PM_MONK) && uwep && (uwep->otyp == QUARTERSTAFF || uwep->otyp == KHAKKHARA) && P_SKILL(P_QUARTERSTAFF) && P_SKILL(P_MARTIAL_ARTS)){
+		int dist = min(P_SKILL(P_QUARTERSTAFF), P_SKILL(P_MARTIAL_ARTS));
+		if(dist >= P_EXPERT)
+			dist = P_SKILL(P_MARTIAL_ARTS);
+		return jump(dist);
+	}
 	return jump(0);
 }
 
