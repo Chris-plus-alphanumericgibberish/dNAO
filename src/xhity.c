@@ -17236,7 +17236,7 @@ monk_moves()
 			}
 		}
 		else {
-			if(!EWounded_legs && (mdef = adjacent_monk_target(uarmf))){
+			if(!EWounded_legs && (mdef = adjacent_monk_target(uarmf)) && near_capacity() <= SLT_ENCUMBER){
 				pline("Dive kick!");
 				dive_kick_monster(mdef);
 				DID_MOVE
@@ -17256,7 +17256,7 @@ monk_moves()
 		}
 		break;
 		case BIRD_KICK:
-		if(!EWounded_legs && circle_monk_target(uarmf)){
+		if(!EWounded_legs && circle_monk_target(uarmf) && near_capacity() <= SLT_ENCUMBER){
 			if(Race_if(PM_CHIROPTERAN)){
 				pline("Wing storm!");
 				wing_storm_monsters();

@@ -77,7 +77,7 @@ kick_monster(x, y)
 register xchar x, y;
 {
 	register boolean clumsy = FALSE;
-	register struct monst *mon = m_at(x, y);
+	register struct monst *mon = (u.ustuck && u.uswallow) ? u.ustuck : m_at(x, y);
 	register int i, j;
 
 	bhitpos.x = x;
@@ -112,7 +112,8 @@ register xchar x, y;
 
 	if(i < (j*3)/10) {
 		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
-			if(martial() && !rn2(2)) goto doit;
+			clumsy = TRUE;
+			if(martial()) goto doit;
 			Your("clumsy kick does no damage.");
 			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
 			return;
@@ -122,38 +123,43 @@ register xchar x, y;
 	}
 
 	if(Fumbling) clumsy = TRUE;
-
 	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
 		clumsy = TRUE;
 doit:
 	//You("kick %s.", mon_nam(mon));
-	if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
-	   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+	if(!is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
 	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
 	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 	   mon->data->mmove >= 12) {
-		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
+		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
 		    pline("%s blocks your %skick.", Monnam(mon),
 				clumsy ? "clumsy " : "");
 			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			mon->movement -= 6; //Note, may end up with up to -6 move points
 		    return;
-		} else {
-		    mnexto(mon);
+		} else if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= 0){
+			coord mm;
+			if(mon_resistance(mon,TELEPORT))
+				mnexto(mon);
+			else if(enexto(&mm, mon->mx, mon->my, mon->data))
+				rloc_to(mon, mm.x, mm.y);
+
 		    if(mon->mx != x || mon->my != y) {
-			if(glyph_is_invisible(levl[x][y].glyph)) {
-			    unmap_object(x, y);
-			    newsym(x, y);
-			}
-			pline("%s %s, %s evading your %skick.", Monnam(mon),
-				(mon_resistance(mon,TELEPORT) ? "teleports" :
-				 mon_resistance(mon,LEVITATION) ? "floats" :
-				 mon_resistance(mon,FLYING) ? "swoops" :
-				 (nolimbs(mon->data) || slithy(mon->data)) ?
-					"slides" : "jumps"),
-				clumsy ? "easily" : "nimbly",
-				clumsy ? "clumsy " : "");
-			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-			return;
+				mon->data->mmove -= 12; //Note, may end up with up to -12 move points
+				if(glyph_is_invisible(levl[x][y].glyph)) {
+					unmap_object(x, y);
+					newsym(x, y);
+				}
+				pline("%s %s, %s evading your %skick.", Monnam(mon),
+					(mon_resistance(mon,TELEPORT) ? "teleports" :
+					 mon_resistance(mon,LEVITATION) ? "floats" :
+					 mon_resistance(mon,FLYING) ? "swoops" :
+					 (nolimbs(mon->data) || slithy(mon->data)) ?
+						"slides" : "jumps"),
+					clumsy ? "easily" : "nimbly",
+					clumsy ? "clumsy " : "");
+				xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+				return;
 		    }
 		}
 	}
@@ -168,32 +174,26 @@ struct monst *mon;
 	int j = weight_cap();
 	boolean clumsy = FALSE;
 
-	if(i < (j*3)/10) {
+	if(Fumbling) clumsy = TRUE;
+	else if(i < (j*3)/10) {
 		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
-			if(martial() && !rn2(2)) goto doit;
-			Your("clumsy kick does no damage.");
-			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-			return;
+			clumsy = TRUE;
 		}
-		if(i < j/10) clumsy = TRUE;
+		else if(i < j/10) clumsy = TRUE;
 		else if(!rn2((i < j/5) ? 2 : 3)) clumsy = TRUE;
 	}
-
-	if(Fumbling) clumsy = TRUE;
-
 	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
 		clumsy = TRUE;
-doit:
 	//You("kick %s.", mon_nam(mon));
-	if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
-	   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+	if(!is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
 	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
 	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 	   mon->data->mmove >= 12) {
-		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
+		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
 		    pline("%s blocks your %skick.", Monnam(mon),
 				clumsy ? "clumsy " : "");
 			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			mon->movement -= 6; //Note, may end up with up to -6 move points
 		    return;
 		}
 	}
@@ -212,21 +212,16 @@ bird_kick_monsters()
 	int sdx = u.dx;
 	int sdy = u.dy;
 
-	if(i < (j*3)/10) {
+	if(Fumbling) clumsy = TRUE;
+	else if(i < (j*3)/10) {
 		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
-			if(martial() && !rn2(2)) goto doit;
-			Your("clumsy sprinning kicks fail to connect.");
-			return;
+			clumsy = TRUE;
 		}
-		if(i < j/10) clumsy = TRUE;
+		else if(i < j/10) clumsy = TRUE;
 		else if(!rn2((i < j/5) ? 2 : 3)) clumsy = TRUE;
 	}
-
-	if(Fumbling) clumsy = TRUE;
-
 	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
 		clumsy = TRUE;
-doit:
 	{
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
@@ -256,16 +251,40 @@ doit:
 			 && !(Stone_resistance || uarmf))
 				continue;
 			//You("kick %s.", mon_nam(mon));
-			if(!rn2(clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) &&
-			   !is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+			if(!is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
 			   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
 			   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 			   mon->data->mmove >= 12) {
-				if(!nohands(mon->data) && !rn2(martial() ? 5 : 3)) {
+				if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
 					pline("%s blocks your %skick.", Monnam(mon),
 						clumsy ? "clumsy " : "");
 					xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-					continue;
+					mon->movement -= 6; //Note, may end up with up to -6 move points
+					return;
+				} else if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= 0){
+					coord mm;
+					if(mon_resistance(mon,TELEPORT))
+						mnexto(mon);
+					else if(enexto(&mm, mon->mx, mon->my, mon->data))
+						rloc_to(mon, mm.x, mm.y);
+
+					if(mon->mx != ix || mon->my != iy) {
+						mon->data->mmove -= 12; //Note, may end up with up to -12 move points
+						if(glyph_is_invisible(levl[ix][iy].glyph)) {
+							unmap_object(ix, iy);
+							newsym(ix, iy);
+						}
+						pline("%s %s, %s evading your %skick.", Monnam(mon),
+							(mon_resistance(mon,TELEPORT) ? "teleports" :
+							 mon_resistance(mon,LEVITATION) ? "floats" :
+							 mon_resistance(mon,FLYING) ? "swoops" :
+							 (nolimbs(mon->data) || slithy(mon->data)) ?
+								"slides" : "jumps"),
+							clumsy ? "easily" : "nimbly",
+							clumsy ? "clumsy " : "");
+						xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+						return;
+					}
 				}
 			}
 			// You("kick %s", mon_nam(mon));
@@ -784,16 +803,24 @@ int dx, dy;
 	    avrg_attrib = (ACURRSTR+ACURR(A_DEX)+ACURR(A_CON))/3;
 
 	if(u.uswallow) {
-		switch(rn2(3)) {
-		case 0:  You_cant("move your %s!", body_part(LEG));
-			 break;
-		case 1:  if (is_animal(u.ustuck->data)) {
-				pline("%s burps loudly.", Monnam(u.ustuck));
-				break;
-			 }
-		default: Your("feeble kick has no effect."); break;
+		if(is_whirly(u.ustuck->data)){
+			flags.forcefight = TRUE; /* attack even if invisible */
+			kick_monster(x, y);
+			flags.forcefight = FALSE;
+			return 1;
 		}
-		return(1);
+		else {
+			switch(rn2(3)) {
+			case 0:  You_cant("move your %s!", body_part(LEG));
+				 break;
+			case 1:  if (is_animal(u.ustuck->data)) {
+					pline("%s burps loudly.", Monnam(u.ustuck));
+					break;
+				 }
+			default: Your("feeble kick has no effect."); break;
+			}
+			return(1);
+		}
 	}
 	if (Levitation) {
 		int xx, yy;
