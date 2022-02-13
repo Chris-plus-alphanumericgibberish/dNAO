@@ -401,9 +401,18 @@ hurtle_step(arg, x, y)
     }
 
     if ((mon = m_at(x, y)) != 0) {
-	You("bump into %s.", a_monnam(mon));
-	wakeup(mon, FALSE);
-	return FALSE;
+		if(Role_if(PM_MONK) && !Upolyd && !mon->mpeaceful && canseemon(mon)){
+			u.dx = mon->mx - u.ux;
+			u.dy = mon->my - u.uy;
+			flags.forcefight = TRUE;
+			attack2(mon);
+			flags.forcefight = FALSE;
+		}
+		else {
+			You("bump into %s.", a_monnam(mon));
+			wakeup(mon, FALSE);
+		}
+		return FALSE;
     }
     if ((u.ux - x) && (u.uy - y) &&
 	bad_rock(&youmonst,u.ux,y) && bad_rock(&youmonst,x,u.uy)) {
