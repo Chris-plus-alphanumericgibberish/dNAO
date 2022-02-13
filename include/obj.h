@@ -680,6 +680,7 @@ struct obj {
 			 || (otmp)->otyp == SET_OF_CROW_TALONS\
 			 || (otmp)->otyp == NUNCHAKU\
 			 || (otmp)->otyp == BESTIAL_CLAW\
+			 || (otmp)->otyp == SHURIKEN\
 			 || (otmp)->otyp == KATAR\
 			 ))
 
