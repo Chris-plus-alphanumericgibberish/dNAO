@@ -1918,7 +1918,7 @@ dosacrifice()
 			if (is_demon(youracedata)) {
 				You("find the idea very satisfying.");
 				exercise(A_WIS, TRUE);
-			} else if (u.ualign.type != A_CHAOTIC || altaralign != A_CHAOTIC) {
+			} else if ((u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) || altaralign != A_CHAOTIC) {
 				if((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM)){
 					char buf[BUFSZ];
 					Sprintf(buf, "You feel a deep sense of kinship to %s!  Sacrifice %s anyway?",
@@ -1970,7 +1970,7 @@ dosacrifice()
 				} else pline_The("%s.", demonless_msg);
 			}
 
-			if (u.ualign.type != A_CHAOTIC) {
+			if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
 				adjalign(-5);
 				godlist[u.ualign.god].anger += 3;
 				(void) adjattrib(A_WIS, -1, TRUE);
@@ -2014,7 +2014,7 @@ dosacrifice()
 			value = -1;
 			HAggravate_monster |= TIMEOUT_INF;
 		} else if (is_undead(ptr)) { /* Not demons--no demon corpses */
-			if (u.ualign.type != A_CHAOTIC)
+			if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE)
 			value += 1;
 		} else if (is_unicorn(ptr)) {
 			int unicalign = sgn(ptr->maligntyp);
@@ -2022,7 +2022,7 @@ dosacrifice()
 			/* If same as altar, always a very bad action. */
 			if (unicalign == altaralign) {
 			pline("Such an action is an insult to %s!",
-				  (unicalign == A_CHAOTIC)
+				  (u.ualign.type == A_NONE) ? "me" : (unicalign == A_CHAOTIC)
 				  ? "chaos" : unicalign ? "law" : "balance");
 			(void) adjattrib(A_WIS, -1, TRUE);
 			value = -5;
@@ -2732,7 +2732,7 @@ doturn()
 		fast = 1;
 	}
 	
-	if ((u.ualign.type != A_CHAOTIC && !Race_if(PM_VAMPIRE) &&
+	if ((u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE && !Race_if(PM_VAMPIRE) &&
 		    (is_demon(youracedata) || is_undead(youracedata))) ||
 				godlist[u.ualign.god].anger > 6 /* "Die, mortal!" */) {
 
@@ -2790,7 +2790,7 @@ doturn()
 			default:
 			    if (u.ulevel >= xlev &&
 				    !resist(mtmp, '\0', 0, NOTELL)) {
-				if (u.ualign.type == A_CHAOTIC || Race_if(PM_VAMPIRE)){
+				if (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE || Race_if(PM_VAMPIRE)){
 				    mtmp->mpeaceful = 1;
 				    set_malign(mtmp);
 					if(PM_VAMPIRE) tamedog(mtmp, (struct obj *)0);
@@ -3479,7 +3479,7 @@ int eatflag;
 
 	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
-		if (u.ualign.type != A_CHAOTIC) {
+		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
 			adjalign(-5);
 			godlist[u.ualign.god].anger += 3;
 			(void) adjattrib(A_WIS, -1, TRUE);
@@ -3488,7 +3488,7 @@ int eatflag;
 		} else adjalign(5);
 	//Pets are just eaten like anything else.  Your god doesn't know you did it, and the goat doesn't care.
 	} else if (is_undead(ptr)) { /* Not demons--no demon corpses */
-		if (u.ualign.type != A_CHAOTIC)
+		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE)
 			value += 1;
 	//Unicorns are resurrected.
 	}
@@ -3506,10 +3506,10 @@ int eatflag;
 	/* never an altar conversion*/
 	
 	/* Rider handled */
-	eat_offering(otmp, eatflag == GOAT_EAT_MARKED && !(u.ualign.type != A_CHAOTIC && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) && goat_seenonce);
+	eat_offering(otmp, eatflag == GOAT_EAT_MARKED && !(u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) && goat_seenonce);
 	if(eatflag == GOAT_EAT_MARKED)
 		goat_seenonce = TRUE;
-	if(eatflag != GOAT_EAT_PASSIVE && u.ualign.type != A_CHAOTIC && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
+	if(eatflag != GOAT_EAT_PASSIVE && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
 		adjalign(-value);
 		godlist[u.ualign.god].anger += 1;
 		(void) adjattrib(A_WIS, -1, TRUE);
