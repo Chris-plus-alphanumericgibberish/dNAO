@@ -1299,7 +1299,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			 * but we need ammo to stay around longer on average.
 			 */
 			boolean broken = FALSE;
-			if ((thrownobj->oartifact || (!check_oprop(thrownobj, OPROP_NONE) && !forcedestroy)) && thrownobj->oartifact != ART_HOUCHOU){
+			if ((thrownobj->oartifact 
+					|| ((!check_oprop(thrownobj, OPROP_NONE) || thrownobj->otyp == SHURIKEN) && !forcedestroy)
+				)
+				&& thrownobj->oartifact != ART_HOUCHOU
+			){
 				broken = FALSE;
 			}
 			else if (forcedestroy ||
