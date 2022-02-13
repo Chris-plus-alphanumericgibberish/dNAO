@@ -860,13 +860,14 @@ struct you {
 #define uandroid ((Race_if(PM_ANDROID) && !Upolyd) || (Upolyd && (youmonst.data->mtyp == PM_ANDROID || youmonst.data->mtyp == PM_GYNOID || youmonst.data->mtyp == PM_OPERATOR || youmonst.data->mtyp == PM_COMMANDER)))
 #define umechanoid (uclockwork || uandroid)
 //BAB
-#define BASE_ATTACK_BONUS	((Role_if(PM_BARBARIAN) || Role_if(PM_CONVICT) || Role_if(PM_KNIGHT) || Role_if(PM_ANACHRONONAUT) || \
+#define BASE_ATTACK_BONUS(wep)	((Role_if(PM_BARBARIAN) || Role_if(PM_CONVICT) || Role_if(PM_KNIGHT) || Role_if(PM_ANACHRONONAUT) || \
 								Role_if(PM_PIRATE) || Role_if(PM_SAMURAI) || Role_if(PM_VALKYRIE) || (u.sealsActive&SEAL_BERITH) || \
-								(!uwep && (Role_if(PM_MONK) || (u.sealsActive&SEAL_EURYNOME))) || \
-								(uwep && is_lightsaber(uwep) && (Unblind_telepat || (Blind && Blind_telepat)))) ? 1.00 :\
+								(!wep && (u.umartial || (u.sealsActive&SEAL_EURYNOME))) || \
+								(Role_if(PM_MONK) && wep && is_monk_weapon(wep)) || \
+								(wep && is_lightsaber(wep) && (Unblind_telepat || (Blind && Blind_telepat)))) ? 1.00 :\
 							 (Role_if(PM_ARCHEOLOGIST) || Role_if(PM_EXILE) || Role_if(PM_CAVEMAN) || Role_if(PM_MONK) || \
 								Role_if(PM_NOBLEMAN) || Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || \
-								(u.sealsActive&SEAL_ENKI) || (Blind_telepat && uwep && is_lightsaber(uwep))) ? 0.75 :\
+								(u.sealsActive&SEAL_ENKI) || (Blind_telepat && wep && is_lightsaber(wep))) ? 0.75 :\
 							 (Role_if(PM_BARD) || Role_if(PM_HEALER) || Role_if(PM_TOURIST) || Role_if(PM_WIZARD) || Role_if(PM_MADMAN)) ? 0.50:\
 							  .5) /* Failsafe */
 
