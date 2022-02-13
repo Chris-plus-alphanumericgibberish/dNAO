@@ -4117,13 +4117,13 @@ struct zapdata * zapdata;
 
 	case AD_UNHY:
 		/* holy damage */
-		if (hates_holy_mon(mdef)) {
+		if (hates_unholy_mon(mdef)) {
 			if (youdef) {
 				addmsg("The unholy missiles sear your flesh!");
 			}
 			dmg *= 2;
 		}
-		else if (hates_unholy_mon(mdef))
+		else if (hates_holy_mon(mdef))
 			dmg /= 3;
 		domsg();
 		if (youdef && dmg > 0)
