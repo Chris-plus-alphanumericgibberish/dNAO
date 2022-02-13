@@ -716,15 +716,16 @@ int godnum;
 	aligntyp resp_god = godlist[godnum].alignment;
 	char buf[BUFSZ];
 
-	if(godnum == GOD_THE_VOID) {
+	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD) {
 		/* the void does not get angry */
+		/* Bokrug DOES get angry, but has really bad aim. */
 		return;
 	}
-	
+
 	if(Inhell && godnum != GOD_MOLOCH && godnum != GOD_LOLTH /*&& !(Race_if(PM_DROW) && (resp_god != A_LAWFUL || !flags.initgend))*/){
 		resp_god = A_NONE;
 	}
-	
+
 	/* removes all divine protection */
 	u.ublessed = 0;
 	
@@ -1520,6 +1521,9 @@ int godnum;
 		if (godlist[u.ualign.god].anger > 0)
 			godlist[u.ualign.god].anger--;
 	}
+
+	if(godnum == GOD_BOKRUG__THE_WATER_LIZARD)
+		return;
 
 	angrygods(godnum);
 }
