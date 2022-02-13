@@ -2363,6 +2363,7 @@ boolean forcedestroy;
 {
 	int multishot;
 	int hurtle_dist = 0;
+	int otyp = 0;
 	/* ask "in what direction?" */
 	/* needs different code depending on if GOLDOBJ is enabled */
 
@@ -2443,7 +2444,8 @@ boolean forcedestroy;
 	
 	if (!shotlimit && ammo->oartifact == ART_FLUORITE_OCTAHEDRON)
 		shotlimit = m_shot.n;
-	
+
+	otyp = ammo->otyp;
 	/* give a message if shooting more than one, or if player attempted to specify a count */
 	if (ammo->oartifact == ART_FLUORITE_OCTAHEDRON){
 		if (!m_shot.s){
@@ -2497,7 +2499,11 @@ boolean forcedestroy;
 		You("panic after throwing your property!");
 		nomul(-1 * rnd(6), "panic");
 	}
-	return 1;	/* this took time */
+
+	if(otyp == SHURIKEN && Role_if(PM_MONK))
+		return partial_action();	/* this might have taken time */
+	else
+		return 1;	/* this took time */
 }
 
 /* misthrow()
