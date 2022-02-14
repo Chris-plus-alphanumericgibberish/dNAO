@@ -1283,30 +1283,24 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			*thrownobj_p = NULL;
 			result |= MM_HIT;
 		}
-		/* projectiles other than magic stones
-		 * sometimes disappear when thrown
-		 * WAC - Spoon always disappears after doing damage
-		 */
-		else if ((objects[thrownobj->otyp].oc_skill < P_NONE &&
-			objects[thrownobj->otyp].oc_skill > -P_BOOMERANG &&
-			thrownobj->oclass != GEM_CLASS &&
-			!objects[thrownobj->otyp].oc_magic) ||
-			(thrownobj->oartifact == ART_HOUCHOU)
-			) {
-			/* mulch code */
-			/* we were breaking 2/3 of everything unconditionally.
-			 * we still don't want anything to survive unconditionally,
-			 * but we need ammo to stay around longer on average.
+		/* general case */
+		else {
+			/* projectiles other than magic stones
+			 * sometimes disappear when thrown
+			 * WAC - Spoon always disappears after doing damage
 			 */
 			boolean broken = FALSE;
-			if ((thrownobj->oartifact 
-					|| ((!check_oprop(thrownobj, OPROP_NONE) || thrownobj->otyp == SHURIKEN) && !forcedestroy)
-				)
-				&& thrownobj->oartifact != ART_HOUCHOU
-			){
+
+			/* forcedestroy -- caller says to destroy the projectile */
+			if (forcedestroy) {
+				broken = TRUE;
+			}
+			/* artifacts and oproped items survive */
+			else if ((thrownobj->oartifact || !check_oprop(thrownobj, OPROP_NONE)) && thrownobj->oartifact != ART_HOUCHOU) {
 				broken = FALSE;
 			}
-			else if (forcedestroy ||
+			/* specific item types that always break, or are forced to break by being artifactness */
+			else if (
 				(launcher && fired && (launcher->oartifact == ART_HELLFIRE || launcher->oartifact == ART_BOW_OF_SKADI)) ||
 				(thrownobj->oartifact == ART_HOUCHOU) ||
 				(fired && thrownobj->otyp == BULLET) || 
@@ -1316,10 +1310,22 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 				(fired && thrownobj->otyp == BLASTER_BOLT) ||
 				(fired && thrownobj->otyp == HEAVY_BLASTER_BOLT) ||
 				(fired && thrownobj->otyp == FRAG_GRENADE) || 
-				(fired && thrownobj->otyp == GAS_GRENADE)) {
+				(fired && thrownobj->otyp == GAS_GRENADE))
+				{
 				broken = TRUE;
 			}
-			else {
+			/* general item mulching */
+			else if ((objects[thrownobj->otyp].oc_skill < P_NONE &&
+				objects[thrownobj->otyp].oc_skill > -P_BOOMERANG &&
+				thrownobj->oclass != GEM_CLASS &&
+				thrownobj->otyp != SHURIKEN &&
+				!objects[thrownobj->otyp].oc_magic)
+			) {
+				/* mulch code */
+				/* we were breaking 2/3 of everything unconditionally.
+				* we still don't want anything to survive unconditionally,
+				* but we need ammo to stay around longer on average.
+				*/
 				int break_chance = 3 + greatest_erosion(thrownobj) - thrownobj->spe;
 				if (break_chance > 1)
 					broken = rn2(break_chance);
@@ -1328,6 +1334,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 				if (thrownobj->blessed && rnl(100) < 25)
 					broken = FALSE;
 			}
+			/* handle breakage */
 			if (broken) {
 				if (*u.ushops) {
 					check_shop_obj(thrownobj, bhitpos.x, bhitpos.y, TRUE);
@@ -1340,13 +1347,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 				if (*hp(mdef) <= 0)
 					result |= MM_DEF_DIED;
 			}
+			else {
+				/* possibly damage the projectile -- at this point it is surviving */
+				passive_obj2(magr, mdef, thrownobj, (struct attack *)0, (struct attack *)0);
+			}
 		}
-		else
-		{
-			/* possibly damage the projectile -- at this point it is surviving */
-			passive_obj2(magr, mdef, thrownobj, (struct attack *)0, (struct attack *)0);
-		}
-
 		return result;
 	}
 	else
