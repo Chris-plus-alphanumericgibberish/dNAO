@@ -284,7 +284,7 @@ WEAPON(("axe"),
 	1, 0, MZ_MEDIUM, 17, 60,  8,  0, S,   P_AXE, IRON, FALSE, HI_METAL),
 WEAPON(("diskos", "circular-sawbladed axe"),
 	DMG(D(6)), DMG(D(8)),
-	0, 0,   MZ_MEDIUM, 5,120, 500,  0, S,   P_AXE, METAL, FALSE, HI_METAL),
+	0, 0,   MZ_MEDIUM, 5,120, 500,  0, S,   P_AXE, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 WEAPON(("battle-axe", "double-bitted axe"),/* was "double-headed" ? */
 	DMG(D(8), D(4)), DMG(D(6), D(2,4)),
 	0, 0,   MZ_HUGE, 14,120, 40,  0, S,   P_AXE, IRON, FALSE, HI_METAL),
@@ -335,16 +335,16 @@ WEAPON(("crow quill", "feather-etched rapier"),
 	0, 0, MZ_MEDIUM,  0, 34,200,  2, P,   P_SABER, METAL, FALSE, HI_METAL),
 WEAPON(("rakuyo", "double-bladed saber"),
 	DMG(D(8)), DMG(D(8)),
-	0, 0, MZ_MEDIUM,  0, 38,500,  2, P|S, P_SABER, METAL, FALSE, HI_METAL),
+	0, 0, MZ_MEDIUM,  0, 38,500,  2, P|S, P_SABER, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 WEAPON(("rakuyo-saber", "latch-pommeled saber"),
 	DMG(D(8)), DMG(D(8)),
-	0, 0, MZ_MEDIUM,  0, 28,400,  2, P|S, P_SABER, METAL, FALSE, HI_METAL),
+	0, 0, MZ_MEDIUM,  0, 28,400,  2, P|S, P_SABER, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 WEAPON(("rakuyo-dagger", "latch-pommeled dagger"),
 	DMG(D(4)), DMG(D(3)),
-	0, 0,  MZ_SMALL,  0, 10,100,  2, P|S, P_DAGGER, METAL, FALSE, HI_METAL),
+	0, 0,  MZ_SMALL,  0, 10,100,  2, P|S, P_DAGGER, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 WEAPON(("isamusei", "oddly-luminous sword", "razor-thin sword"),
 	DMG(D(12)), DMG(D(8)),
-	0, 0, MZ_MEDIUM,  1, 100,500,  2, S|B, P_BROAD_SWORD, METAL, FALSE, CLR_ORANGE),
+	0, 0, MZ_MEDIUM,  1, 100,500,  2, S|B, P_BROAD_SWORD, METAL, FALSE, CLR_ORANGE, O_MAGIC(1)),
 WEAPON(("broadsword"),
 	DMG(D(2, 4)), DMG(D(6), F(1)),
 	1, 0,  MZ_LARGE,  8, 70, 10,  0, S,   P_BROAD_SWORD, IRON, FALSE, HI_METAL),
@@ -369,7 +369,7 @@ WEAPON(("katana", "samurai sword"),
 /* special swords set up for artifacts and future weapons*/
 WEAPON(("vibroblade", "gray short sword", "short sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
-	1, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY),
+	1, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
 WEAPON(("tsurugi", "long samurai sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 60,500,  2, S,   P_TWO_HANDED_SWORD, METAL, FALSE, HI_METAL),
@@ -378,34 +378,34 @@ WEAPON(("runesword", "runed black blade", "runed blade"),
 	0, 0,  MZ_LARGE,  0, 40,300,  0, S,   P_BROAD_SWORD, IRON, FALSE, CLR_BLACK),
 WEAPON(("white vibrosword", "white sword", "long sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(10)), DMG(D(12)),
-	0, 0, MZ_MEDIUM,  0, 40,8000, 1, P|S, P_LONG_SWORD,  SILVER, FALSE, CLR_WHITE),
+	0, 0, MZ_MEDIUM,  0, 40,8000, 1, P|S, P_LONG_SWORD,  SILVER, FALSE, CLR_WHITE, O_MAGIC(1)),
 WEAPON(("gold-bladed vibrosword", "black and gold sword", "long sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(10)), DMG(D(12)),
-	0, 0, MZ_MEDIUM,  0, 53,8000, 1, P|S, P_LONG_SWORD,    GOLD, FALSE, CLR_BLACK),
+	0, 0, MZ_MEDIUM,  0, 53,8000, 1, P|S, P_LONG_SWORD,    GOLD, FALSE, CLR_BLACK, O_MAGIC(1)),
 WEAPON(("red-eyed vibrosword", "blue-glowing sword", "long sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(10)), DMG(D(12)),
-	0, 0, MZ_MEDIUM,  0, 10,8000, 1, P|S, P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY),
+	0, 0, MZ_MEDIUM,  0, 10,8000, 1, P|S, P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
 WEAPON(("white vibrozanbato", "curved white sword", "long curved sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
-	0, 0,   MZ_HUGE,  0, 60,16000,2, S,   P_TWO_HANDED_SWORD, SILVER, FALSE, CLR_WHITE),
+	0, 0,   MZ_HUGE,  0, 60,16000,2, S,   P_TWO_HANDED_SWORD, SILVER, FALSE, CLR_WHITE, O_MAGIC(1)),
 WEAPON(("gold-bladed vibrozanbato", "curved black and gold sword", "long curved sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
-	0, 0,   MZ_HUGE,  0, 80,16000,2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK),
+	0, 0,   MZ_HUGE,  0, 80,16000,2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK, O_MAGIC(1)),
 
 WEAPON(("double force-blade", "double-bladed weapon"),
 	DMG(D(6)), DMG(D(4)),
-	0, 0,   MZ_HUGE,  0, 40,1000, 2, S,   P_QUARTERSTAFF, PLASTIC, FALSE, CLR_RED),
+	0, 0,   MZ_HUGE,  0, 40,1000, 2, S,   P_QUARTERSTAFF, PLASTIC, FALSE, CLR_RED, O_MAGIC(1)),
 						    /* 2x, but slower */
 WEAPON(("force blade", "latch-ended blade"),
 	DMG(D(6)), DMG(D(4)),
-	0, 0,  MZ_SMALL,  0, 20,500,  2, S,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_RED),
+	0, 0,  MZ_SMALL,  0, 20,500,  2, S,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_RED, O_MAGIC(1)),
 
 WEAPON(("force sword", "hard segmented sword"),
 	DMG(D(8)), DMG(D(6)),
-	0, 0, MZ_MEDIUM,  0, 40,1000, 2, P|B, P_BROAD_SWORD, PLASTIC, FALSE, HI_SILVER),
+	0, 0, MZ_MEDIUM,  0, 40,1000, 2, P|B, P_BROAD_SWORD, PLASTIC, FALSE, HI_SILVER, O_MAGIC(1)),
 WEAPON(("force whip", "segmented whip"),
 	DMG(D(6)), DMG(D(4)),
-	0, 0, MZ_MEDIUM,  0, 40,1000, 2, P|S, P_WHIP, PLASTIC, FALSE, CLR_ORANGE),
+	0, 0, MZ_MEDIUM,  0, 40,1000, 2, P|S, P_WHIP, PLASTIC, FALSE, CLR_ORANGE, O_MAGIC(1)),
 /* polearms */
 /* spear-type */
 WEAPON(("partisan", "vulgar polearm"),
@@ -428,13 +428,13 @@ WEAPON(("lance"),
 	1, 0,  MZ_LARGE,  4, 80, 10,  0, P,   P_LANCE, IRON, FALSE, HI_METAL),
 WEAPON(("force pike", "long gray spear", "long spear"),/*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
-	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_GRAY),
+	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
 WEAPON(("white vibrospear", "long white spear", "long spear"),/*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
-	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_WHITE),
+	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, PLASTIC, FALSE, CLR_WHITE, O_MAGIC(1)),
 WEAPON(("gold-bladed vibrospear", "long black and gold spear", "long spear"),/*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
-	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, GOLD, FALSE, CLR_BLACK),
+	0, 0,  MZ_LARGE,  0, 30,1000, 2, P|S, P_LANCE, GOLD, FALSE, CLR_BLACK, O_MAGIC(1)),
 WEAPON(("elven lance", "runed lance"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(8)), DMG(D(8)),
 	0, 0,  MZ_LARGE,  0, 60, 10,  2, P,   P_LANCE, WOOD, FALSE, HI_WOOD),
@@ -540,7 +540,7 @@ WEAPON(("viperwhip"),
 
 WEAPON(("bestial claw"),
 	DMG(D(10)), DMG(D(8)),
-	1, 0, MZ_MEDIUM,  0, 10,100,  0, S|P, P_BARE_HANDED_COMBAT, BONE, FALSE, CLR_WHITE),
+	1, 0, MZ_MEDIUM,  0, 10,100,  0, S|P, P_BARE_HANDED_COMBAT, BONE, FALSE, CLR_WHITE, O_MAGIC(1)),
 WEAPON(("katar"),
 	DMG(D(6)), DMG(D(4)),
 	1, 0, MZ_SMALL,  5,  5,   4,  0, S|P, P_BARE_HANDED_COMBAT, IRON, FALSE, HI_METAL),
@@ -570,12 +570,12 @@ GUN(("gun", "unfamiliar gun"),                        0,  MZ_MEDIUM, 0,  25,  25
 GUN(("long gun", "unfamiliar long gun"),              0,    MZ_HUGE, 0,  30,  150, 22, -1,  1, WP_BULLET, IRON, P_FIREARM, HI_METAL),/*Needs tile*/
 GUN(("heavy gun", "unfamiliar heavy gun"),            0,    MZ_HUGE, 0, 100, 2000, 20,  8, -4, WP_BULLET, IRON, P_FIREARM, HI_METAL),/*Needs tile*/
  /*Needs encyc entry*/
-GUN(("hand blaster", "hard black handmirror", "hard handmirror"), 0,  MZ_MEDIUM, 0,   2, 1000, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK), /*Needs tile*/
-GUN(("arm blaster",  "hard white bracer", "hard bracer"),         0,   MZ_LARGE, 0,   8, 4500, 15,  6,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE), /*Needs tile*/
-GUN(("mass-shadow pistol",  "rectangular device"),                0,  MZ_MEDIUM, 0,   4, 4500, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_GRAY), /*Needs tile*/
-GUN(("cutting laser","hard tan lozenge", "hard lozenge"),         0,   MZ_SMALL, 0,   1, 1000,  3, -1,  3,WP_BLASTER, PLASTIC, P_FIREARM, CLR_YELLOW), /*Needs tile*/
+GUN(("hand blaster", "hard black handmirror", "hard handmirror"), 0,  MZ_MEDIUM, 0,   2, 1000, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK, O_MAGIC(1)), /*Needs tile*/
+GUN(("arm blaster",  "hard white bracer", "hard bracer"),         0,   MZ_LARGE, 0,   8, 4500, 15,  6,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE, O_MAGIC(1)), /*Needs tile*/
+GUN(("mass-shadow pistol",  "rectangular device"),                0,  MZ_MEDIUM, 0,   4, 4500, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_GRAY, O_MAGIC(1)), /*Needs tile*/
+GUN(("cutting laser","hard tan lozenge", "hard lozenge"),         0,   MZ_SMALL, 0,   1, 1000,  3, -1,  3,WP_BLASTER, PLASTIC, P_FIREARM, CLR_YELLOW, O_MAGIC(1)), /*Needs tile*/
 
-GUN(("raygun", "hard handle ending in glassy disks"), 0,  MZ_MEDIUM, 0,   8, 3000, 15,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BRIGHT_CYAN), /*Needs tile*/
+GUN(("raygun", "hard handle ending in glassy disks"), 0,  MZ_MEDIUM, 0,   8, 3000, 15,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BRIGHT_CYAN, O_MAGIC(1)), /*Needs tile*/
 BULLET(("bullet", "pellet"),
 	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,   5, 0,  WP_BULLET,   P,   METAL, -P_FIREARM, HI_METAL),/*Needs tile*/
