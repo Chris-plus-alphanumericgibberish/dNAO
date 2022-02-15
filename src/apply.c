@@ -7897,7 +7897,7 @@ partial_action()
 	return res;
 }
 
-//Returns 0 if this is the first time its called this round, 1 otherwise.
+//Returns returns 1 if the partial_action() has been used this round.
 int
 check_partial_action()
 {
