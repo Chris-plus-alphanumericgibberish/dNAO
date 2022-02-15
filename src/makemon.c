@@ -3943,7 +3943,7 @@ int faction;
 							add_oprop(otmp, OPROP_OONA_COLDW);
 						break;
 					}
-					set_material_gm(otmp, METAL);
+					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
@@ -3961,7 +3961,7 @@ int faction;
 							add_oprop(otmp, OPROP_OONA_FIREW);
 						break;
 					}
-					set_material_gm(otmp, METAL);
+					set_material_gm(otmp, PLATINUM);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 			} else if(ptr->mtyp == PM_LILLEND){
