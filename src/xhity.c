@@ -3535,13 +3535,28 @@ int *shield_margin;
 		/* monk accuracy bonus/penalty (player-only) (melee) */
 		if (youagr && melee && Role_if(PM_MONK) && !Upolyd) {
 			static boolean armmessage = TRUE;
-			if (uarm) {
-				if (armmessage) Your("armor is rather cumbersome...");
-				armmessage = FALSE;
+			static boolean urmmessage = TRUE;
+			boolean resunderwear = uarmu && uarmu->otyp == VICTORIAN_UNDERWEAR;
+			boolean resarmor = uarm && uarm->otyp != WAISTCLOTH && uarm->otyp != HAWAIIAN_SHORTS;
+			if (resarmor || resunderwear) {
+				if(resarmor && resunderwear && armmessage && urmmessage){
+				if (armmessage) Your("armor and underwear are rather cumbersome...");
+					armmessage = FALSE;
+					urmmessage = FALSE;
+				}
+				if (resarmor && armmessage){
+					Your("armor is rather cumbersome...");
+					armmessage = FALSE;
+				}
+				else if (resunderwear && urmmessage){
+					Your("underwear is rather restrictive...");
+					urmmessage = FALSE;
+				}
 				wepn_acc -= 20; /*flat -20 for monks in armor*/
 			}
 			else {
 				if (!armmessage) armmessage = TRUE;
+				if (!urmmessage) urmmessage = TRUE;
 				if (!uwep && !uarms) {
 					wepn_acc += (u.ulevel / 3) + 2;
 				}
