@@ -141,7 +141,7 @@ doit:
 			coord mm;
 			if(mon_resistance(mon,TELEPORT))
 				mnexto(mon);
-			else if(enexto(&mm, mon->mx, mon->my, mon->data))
+			else if(enexto(&mm, mon->mx, mon->my, mon->data) && abs(mm.x - mon->mx) <= 1 && abs(mm.y - mon->my) <= 1)
 				rloc_to(mon, mm.x, mm.y);
 
 		    if(mon->mx != x || mon->my != y) {
