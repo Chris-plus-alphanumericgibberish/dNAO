@@ -10040,21 +10040,23 @@ boolean verbose;
 		} else if (uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING || uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)) {
 			if(verbose) You(mal_aura, "your wrappings");
 			return TRUE;
-		} else if (uwep && (uwep->oartifact == ART_MAGICBANE) && rn2(20)) {
+		} else if (uwep && (uwep->oartifact == ART_MAGICBANE)) {
 			if(verbose) You(mal_aura, "the magic-absorbing blade");
 			return TRUE;
-		} else if (uwep && (uwep->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20)) {
+		} else if (uwep && (uwep->oartifact == ART_STAFF_OF_NECROMANCY)) {
 			if(verbose) You(mal_aura, "the skeletal staff");
 			return TRUE;
-		} else if (uwep && (uwep->oartifact == ART_TECPATL_OF_HUHETOTL) && rn2(20)) {
+		} else if (uwep && (uwep->oartifact == ART_TECPATL_OF_HUHETOTL)) {
 			if(verbose) You(mal_aura, "the bloodstained dagger");
 			return TRUE;
-		} else if(uwep && (uwep->oartifact == ART_TENTACLE_ROD) && rn2(20)){
+		} else if((uwep && (uwep->oartifact == ART_TENTACLE_ROD))
+			|| (uswapwep && (uswapwep->oartifact == ART_TENTACLE_ROD))
+		){
 			if(verbose) You(mal_aura, "the languid tentacles");
 			return TRUE;
 		}
 		for(otmp = invent; otmp; otmp=otmp->nobj){
-			if(otmp->oartifact == ART_HELPING_HAND && rn2(20)){
+			if(otmp->oartifact == ART_HELPING_HAND && (otmp->owornmask || rn2(20))){
 				if(verbose){
 					You_feel("as if you need some help.");
 					You_feel("something lend you some help!");
@@ -10066,19 +10068,23 @@ boolean verbose;
 				return TRUE;
 			}
 		}
-		if(u.ukinghill && rn2(20)){
-			if(verbose) You(mal_aura, "the cursed treasure chest");
+		if(u.ukinghill){
 			otmp = 0;
 			for(otmp = invent; otmp; otmp=otmp->nobj)
 				if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)
 					break;
-			if(!otmp) impossible("Treasury not actually in inventory??");
-			else if(otmp->blessed)
-				unbless(otmp);
-			else
-				curse(otmp);
-			update_inventory();		
-			return TRUE;
+			if(!otmp){
+				impossible("Treasury not actually in inventory??");
+			}
+			else if(otmp->owornmask || !otmp->cursed || rn2(20)){
+				if(verbose) You(mal_aura, "the cursed treasure chest");
+				else if(otmp->blessed)
+					unbless(otmp);
+				else
+					curse(otmp);
+				update_inventory();	
+				return TRUE;
+			}
 		}
 	}
 	else {
@@ -10098,29 +10104,30 @@ boolean verbose;
 			return TRUE;
 		}
 		if (MON_WEP(mon) &&
-			(MON_WEP(mon)->oartifact == ART_MAGICBANE) && rn2(20)) {
+			(MON_WEP(mon)->oartifact == ART_MAGICBANE)) {
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "magic-absorbing blade");
 			return TRUE;
 		}
 		if (MON_WEP(mon) &&
-			(MON_WEP(mon)->oartifact == ART_STAFF_OF_NECROMANCY) && rn2(20)) {
+			(MON_WEP(mon)->oartifact == ART_STAFF_OF_NECROMANCY)) {
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "skeletal staff");
 			return TRUE;
 		}
 		if (MON_WEP(mon) &&
-			(MON_WEP(mon)->oartifact == ART_TECPATL_OF_HUHETOTL) && rn2(20)) {
+			(MON_WEP(mon)->oartifact == ART_TECPATL_OF_HUHETOTL)) {
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "bloodstained dagger");
 			return TRUE;
 		}
-		if (MON_WEP(mon) &&
-			(MON_WEP(mon)->oartifact == ART_TENTACLE_ROD) && rn2(20)) {
+		if ((MON_WEP(mon) && (MON_WEP(mon)->oartifact == ART_TENTACLE_ROD))
+			|| (MON_SWEP(mon) && (MON_SWEP(mon)->oartifact == ART_TENTACLE_ROD))
+		) {
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "languid tentacles");
 			return TRUE;
 		}
 		for(otmp = mon->minvent; otmp; otmp=otmp->nobj)
 			if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)
 				break;
-		if(otmp && rn2(20)){
+		if(otmp && (otmp->owornmask || !otmp->cursed || rn2(20))){
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "cursed treasure chest");
 			if(otmp->blessed)
 				unbless(otmp);
@@ -10129,7 +10136,7 @@ boolean verbose;
 			return TRUE;
 		}
 		for(otmp = mon->minvent; otmp; otmp=otmp->nobj){
-			if(otmp->oartifact == ART_HELPING_HAND && rn2(20)){
+			if(otmp->oartifact == ART_HELPING_HAND && (otmp->owornmask || rn2(20))){
 				if (visible && verbose)
 					You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "helpful hand");
 				return TRUE;
