@@ -4190,7 +4190,7 @@ struct monst *mon;
 	xlocale = mon->mtrack[1].x;
 	ylocale = mon->mtrack[1].y;
 	if(xyloc == MIGR_EXACT_XY){
-		if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
+		if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful && !(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)){
 			You_feel("someone walking on your grave!");
 			change_luck(-13);
 		} else if(!mon->mpeaceful && !rn2(140)){

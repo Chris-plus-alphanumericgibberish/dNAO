@@ -159,6 +159,12 @@ struct monst *mtmp;
 	if(no_upos(mtmp))
 		return FALSE;
 	
+	/* Nitocris's wrappings are especially warded against Nyarlathotep, and accidently work vs. summons generally */
+	if(u.ux == x && u.uy == y && !mtmp->mpeaceful && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+		return TRUE;
+	else if(mat && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && which_armor(mat, W_ARMC) && which_armor(mat, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+		return TRUE;
+	
 	return (boolean)(
 				((
 					sobj_at(SCR_SCARE_MONSTER, x, y)

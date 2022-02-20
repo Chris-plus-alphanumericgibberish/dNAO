@@ -10037,7 +10037,7 @@ boolean verbose;
 		if (uamul && (uamul->otyp == AMULET_VERSUS_CURSES)) {
 			if(verbose) You(mal_aura, "your amulet");
 			return TRUE;
-		} else if (uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING)) {
+		} else if (uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING || uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)) {
 			if(verbose) You(mal_aura, "your wrappings");
 			return TRUE;
 		} else if (uwep && (uwep->oartifact == ART_MAGICBANE) && rn2(20)) {
@@ -10093,7 +10093,7 @@ boolean verbose;
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "amulet");
 			return TRUE;
 		}
-		if (which_armor(mon, W_ARMC) && (which_armor(mon, W_ARMC)->otyp == PRAYER_WARDED_WRAPPING)) {
+		if (which_armor(mon, W_ARMC) && (which_armor(mon, W_ARMC)->otyp == PRAYER_WARDED_WRAPPING || which_armor(mon, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)) {
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "wrappings");
 			return TRUE;
 		}

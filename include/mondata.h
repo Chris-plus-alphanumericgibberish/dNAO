@@ -452,6 +452,7 @@
 							)
 #define is_primordial(ptr)	(((ptr)->mflagsa & MA_PRIMORDIAL) != 0L)
 #define is_great_old_one(ptr)	(((ptr)->mflagsa & MA_G_O_O) != 0L)
+#define is_mask_of_nyarlathotep(ptr)	((ptr)->mtyp == PM_GOOD_NEIGHBOR || (ptr)->mtyp == PM_HMNYW_PHARAOH || (ptr)->mtyp == PM_NITOCRIS)
 #define is_alien(ptr)	(((ptr)->mflagsa & MA_ET) != 0L)
 #define is_keter(ptr)		((ptr)->mlet == S_KETER)
 #define is_angel(ptr)		((((ptr)->mflagsa & MA_MINION) != 0L) && ((ptr)->mlet == S_LAW_ANGEL || (ptr)->mlet == S_NEU_ANGEL || (ptr)->mlet == S_CHA_ANGEL))

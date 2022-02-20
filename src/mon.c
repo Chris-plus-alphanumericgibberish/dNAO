@@ -3896,7 +3896,8 @@ struct monst *mtmp;
 				pline("The escaping phantasmal mist condenses into %s.", nyar_description[nyar_form]);
 				pline("%s tears off the right half of %s face before rising through the ceiling!", nyar_name[nyar_form], s_suffix(Monnam(mtmp)));
 				change_usanity(u_sanity_loss_nyar(), TRUE);
-				u.umadness |= MAD_THOUSAND_MASKS;
+				if(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+					u.umadness |= MAD_THOUSAND_MASKS;
 			}
 			//Gold turns to lead
 			struct obj *nobj;
@@ -3964,7 +3965,8 @@ register struct monst *mtmp;
 		pline("%s twists and morphs into %s.", Monnam(mtmp), nyar_description[nyar_form]);
 		pline("%s rises through the ceiling!", nyar_name[nyar_form]);
 		change_usanity(u_sanity_loss_nyar(), TRUE);
-		u.umadness |= MAD_THOUSAND_MASKS;
+		if(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+			u.umadness |= MAD_THOUSAND_MASKS;
 	}
 	
 
@@ -4319,7 +4321,7 @@ boolean was_swallowed;			/* digestion */
 		mtmp->mhp =  mtmp->mhpmax;
 	}
 	
-	if(!get_mx(mon, MX_ESUM) && roll_madness(MAD_THOUSAND_MASKS)){
+	if(!get_mx(mon, MX_ESUM) && roll_madness(MAD_THOUSAND_MASKS) && !(mon->data->geno&G_UNIQ) && !(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)){
 		struct monst *maskmon = makemon(mkclass(S_UMBER, G_NOHELL|G_HELL), mon->mx, mon->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH|MM_ESUM);
 		if(maskmon){
 			struct obj *mask;
@@ -6985,6 +6987,23 @@ struct monst *mtmp;
 int
 u_sanity_loss_nyar()
 {
+	/* Nitocris's wrappings are specially warded vs. Nyarlathotep, but he can still break them. */
+	/* If this happens the shock ensures hefty san loss. */
+	if(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_){
+		if (rn2(3)){
+			if(uarmc->oeroded3){
+				Your("wrappings rip to shreds!");
+				useup(uarmc);
+				return -50 - rnd(50);
+			} else {
+				uarmc->oeroded3 = 1;
+				Your("wrappings fray, but hold!");
+				return -5 - rnd(5);
+			}
+		}
+		else return 0;
+	}
+
 	if(save_vs_sanloss()){
 		return -1*rnd(10);
 	} else {
