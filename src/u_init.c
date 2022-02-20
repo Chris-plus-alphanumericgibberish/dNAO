@@ -1051,6 +1051,11 @@ static const struct def_skill Skill_I[] = {
     { P_NONE, 0 }
 };
 
+static const struct def_skill Skill_Y[] = {
+    { P_ENCHANTMENT_SPELL, P_EXPERT },
+    { P_NONE, 0 }
+};
+
 static const struct def_skill Skill_Elf_Music[] = {
     { P_MUSICALIZE, P_EXPERT },
     { P_NONE, 0 }
@@ -2528,7 +2533,11 @@ u_init()
 		u.ualign.sins += 5;
 	    change_luck(-1);
 	    break;
-	default:	/* impossible */
+	case PM_YUKI_ONNA:
+	    knows_object(POT_OBJECT_DETECTION);
+		skill_up(Skill_Y);
+	    break;
+	default:
 		break;
 	}
 
