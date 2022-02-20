@@ -187,6 +187,7 @@ static struct Bool_Opt
 #else
 	{"menu_tab_sep", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
+	{"mod_turncount", &iflags.mod_turncount, FALSE, SET_IN_GAME},
 #ifdef CURSES_GRAPHICS
 	{"mouse_support", &iflags.wc_mouse_support, FALSE, DISP_IN_GAME},	/*WC*/
 #else

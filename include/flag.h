@@ -236,6 +236,7 @@ struct instance_flags {
 	boolean  window_inited; /* true if init_nhwindows() completed */
 	boolean  vision_inited; /* true if vision is ready */
 	boolean  menu_tab_sep;	/* Use tabs to separate option menu fields */
+	boolean  mod_turncount;	/* Mod the turncount by 10 so it doesn't take up so much space */
 	boolean  menu_requested; /* Flag for overloaded use of 'm' prefix
 				  * on some non-move commands */
 	uchar num_pad_mode;

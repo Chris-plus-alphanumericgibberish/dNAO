@@ -550,7 +550,7 @@ bot2()
 		Sprintf(nb = eos(nb), " Exp:%u", u.ulevel);
 
 	if(flags.time)
-	    Sprintf(nb = eos(nb), " T:%ld", moves);
+	    Sprintf(nb = eos(nb), " T:%ld", iflags.mod_turncount ? moves%10 : moves);
 #ifdef REALTIME_ON_BOTL
   if(iflags.showrealtime) {
     time_t currenttime = get_realtime();
