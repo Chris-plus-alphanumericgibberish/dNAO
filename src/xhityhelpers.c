@@ -1435,6 +1435,8 @@ struct obj * otmp;
 		if (otmp->oartifact == ART_EXCALIBUR ||
 			otmp->oartifact == ART_LANCE_OF_LONGINUS)
 			dmg += vd(3, 7);
+		else if (otmp->oartifact == ART_ARCOR_KERYM)
+			dmg += vd(2, 10); // Crackling holy energy
 		else if (otmp->oartifact == ART_GODHANDS)
 			dmg += 7;
 		else if (otmp->oartifact == ART_JINJA_NAGINATA)

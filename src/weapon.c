@@ -314,6 +314,7 @@ int oartifact;
 		|| (oartifact == ART_BLOODLETTER && artinstance[oartifact].BLactive >= moves)
 		|| oartifact == ART_FIRE_BRAND
 		|| oartifact == ART_FROST_BRAND
+		|| oartifact == ART_ARYFAERN_KERYM
 		){
 		attackmask |= EXPLOSION;
 	}

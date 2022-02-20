@@ -4755,6 +4755,26 @@ boolean * messaged;
 	    if (youdef && Slimed) burn_away_slime();
 	    if (youdef && FrozenAir) melt_frozen_air();
 	}
+	if(oartifact == ART_ARYVELAHR_KERYM &&
+		(is_orc(pd) || is_demon(pd) || is_drow(pd) || is_undead(pd))
+	){
+		/*Note: magic blue flames, damage through fire res but still check invent fire res to see if inventory should burn*/
+		pline_The("blue-flamed %s %s %s!",
+			wepdesc,
+			vtense(wepdesc,
+				is_watery(pd) ? "partly vaporize" :
+				"burn"),
+			hittee);
+		*messaged = TRUE;
+		*truedmgptr += d(2, 10);
+		if(!UseInvFire_res(mdef)){
+			if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+		}
+	    if (youdef && Slimed) burn_away_slime();
+	    if (youdef && FrozenAir) melt_frozen_air();
+	}
 	if ((attacks(AD_COLD, otmp)  && !(
 			/* exceptions */
 			(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves)

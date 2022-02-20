@@ -2015,7 +2015,7 @@ A("Sickle Moon",					ELVEN_SICKLE,				(const char *)0,
 
 /* needs encyc entry */
 /* Elf crowning gift, Lawful */
-A("Arcor Kerym",					CRYSTAL_SWORD,			(const char *)0,
+A("Arcor Kerym",					CRYSTAL_SWORD,			"gold-runed craggy and pitted %s",
 	8000L, IRON, MZ_DEFAULT, 40,
 	A_LAWFUL, NON_PM, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
@@ -2027,9 +2027,9 @@ A("Arcor Kerym",					CRYSTAL_SWORD,			(const char *)0,
 
 /* needs encyc entry */
 /* Elf crowning gift, Neutral */
-A("Aryfaern Kerym",					RUNESWORD,			(const char *)0,
-	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NEUTRAL, NON_PM, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
+A("Aryfaern Kerym",					RUNESWORD,			"sword of crimson-edged darkness",
+	8000L, MINERAL, MZ_DEFAULT, 4,
+	A_NEUTRAL, NON_PM, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN|ARTA_SHINING),
 	NO_MONS(),
 	ATTK(AD_ELEC, 5, 10), NOFLAG,
 	PROPS(SHOCK_RES, SPELLBOOST), NOFLAG,
@@ -2039,8 +2039,8 @@ A("Aryfaern Kerym",					RUNESWORD,			(const char *)0,
 
 /* needs encyc entry */
 /* Elf crowning gift, Chaotic */
-A("Aryvelahr Kerym",				LONG_SWORD,		(const char *)0,
-	8000L, SILVER, MZ_DEFAULT, WT_DEFAULT,
+A("Aryvelahr Kerym",				ELVEN_BROADSWORD,		"blue-burning %s",
+	8000L, SILVER, MZ_DEFAULT, 20,
 	A_CHAOTIC, NON_PM, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	ATTK(AD_PHYS, 5, 0), NOFLAG,
