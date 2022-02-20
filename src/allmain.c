@@ -4330,6 +4330,10 @@ static int pharaohspawns[] = {PM_COBRA, PM_COBRA, PM_COBRA, PM_SERPENT_NECKED_LI
 							  PM_HUMAN_MUMMY, PM_HUMAN_MUMMY, PM_HUMAN_MUMMY, PM_GIANT_MUMMY, PM_PHARAOH,
 							  PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_LIGHTNING_PARAELEMENTAL, PM_BLUE_DRAGON};
 
+static int toughpharaohspawns[] = {PM_COBRA, PM_SERPENT_NECKED_LIONESS, PM_HUNTING_HORROR,
+							  PM_GIANT_MUMMY, PM_PHARAOH,
+							  PM_LIGHTNING_PARAELEMENTAL, PM_BLUE_DRAGON};
+
 
 STATIC_OVL
 void
@@ -4546,6 +4550,26 @@ struct monst *mon;
 				rloc(mtmp, TRUE);
 		}
 		return;//No further action.
+	}
+	if(!rn2(7)){
+		struct permonst *pm;
+		pm = &mons[toughpharaohspawns[rn2(SIZE(toughpharaohspawns))]];
+		mtmp = makemon(pm, mon->mx, mon->my, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+		if(mtmp){
+			mtmp->mpeaceful = 0;
+			set_malign(mtmp);
+			if(canseemon(mtmp) || canseemon(mon)){
+				if(canseemon(mtmp) && canseemon(mon)){
+					pline("%s beckons and %s rises from the black flowing water at %s feet!", Monnam(mon), a_monnam(mtmp), mhis(mon));
+				}
+				else if(canseemon(mon)){
+					pline("%s beckons and the black waters flow in response!", Monnam(mon));
+				}
+				else if(canseemon(mtmp)){
+					pline("%s rises from the black flowing water!", Amonnam(mtmp));
+				}
+			}
+		}
 	}
 }
 
