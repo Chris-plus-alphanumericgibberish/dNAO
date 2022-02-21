@@ -2231,6 +2231,8 @@ int tary;
 			}
 			if(hates_holy_mon(mdef))
 				dmg *= 2;
+			else if(hates_unholy_mon(mdef))
+				dmg /= 3;
 			return xdamagey(magr, mdef, attk, dmg);
 
 		case AD_UNHY:
@@ -2243,6 +2245,8 @@ int tary;
 			}
 			if(hates_unholy_mon(mdef))
 				dmg *= 2;
+			else if(hates_holy_mon(mdef))
+				dmg /= 3;
 			return xdamagey(magr, mdef, attk, dmg);
 
 		case AD_STAR:
