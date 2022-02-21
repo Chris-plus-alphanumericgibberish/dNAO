@@ -3808,7 +3808,8 @@ struct monst *mtmp;
 			/* make hostile */
 			untame(mtmp, 0);
 			/* boost level */
-			mtmp->m_lev += 4;
+			if(mtmp->m_lev < 45)
+				mtmp->m_lev += 4;
 			mtmp->mhpmax += d(4, 8);
 			break;
 
