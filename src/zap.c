@@ -2491,10 +2491,12 @@ boolean ordinary;
 	int	damage = 0;
 	char buf[BUFSZ];
 
-    if (Role_if(PM_HEALER))
+    if (Role_if(PM_HEALER)) {
+        struct monst *mtmp;
         for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
             if (mtmp->mtame)
                 bhitm(mtmp, obj);
+    }
 
 	switch(obj->otyp) {
 		case WAN_STRIKING:
