@@ -1065,6 +1065,8 @@ struct monst *mon;
 	
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
+		if(Role_if(PM_HEALER))
+			base += def_beastmastery();
 	}
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
