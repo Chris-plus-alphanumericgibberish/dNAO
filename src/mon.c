@@ -3897,7 +3897,7 @@ struct monst *mtmp;
 				pline("The escaping phantasmal mist condenses into %s.", nyar_description[nyar_form]);
 				pline("%s tears off the right half of %s face before rising through the ceiling!", nyar_name[nyar_form], s_suffix(Monnam(mtmp)));
 				change_usanity(u_sanity_loss_nyar(), TRUE);
-				if(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+				if(!(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_))
 					u.umadness |= MAD_THOUSAND_MASKS;
 			}
 			//Gold turns to lead
@@ -3966,7 +3966,7 @@ register struct monst *mtmp;
 		pline("%s twists and morphs into %s.", Monnam(mtmp), nyar_description[nyar_form]);
 		pline("%s rises through the ceiling!", nyar_name[nyar_form]);
 		change_usanity(u_sanity_loss_nyar(), TRUE);
-		if(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+		if(!(uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_))
 			u.umadness |= MAD_THOUSAND_MASKS;
 	}
 	
