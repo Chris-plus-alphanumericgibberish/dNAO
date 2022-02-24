@@ -1056,6 +1056,11 @@ static const struct def_skill Skill_Y[] = {
     { P_NONE, 0 }
 };
 
+static const struct def_skill Skill_G_Spe[] = {
+    { P_ESCAPE_SPELL, P_EXPERT },
+    { P_NONE, 0 }
+};
+
 static const struct def_skill Skill_Elf_Music[] = {
     { P_MUSICALIZE, P_EXPERT },
     { P_NONE, 0 }
@@ -2470,6 +2475,7 @@ u_init()
 			ini_inv(GnomishHat);
 		}
 		skill_add(Skill_G);
+		skill_up(Skill_G_Spe);
 		ini_inv(TallowCandles);
 		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
 			knows_object(GNOMISH_POINTY_HAT);
