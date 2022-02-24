@@ -900,7 +900,7 @@ maybe_append_injury_desc(mtmp, buf)
 struct monst * mtmp;
 char * buf;
 {
-	if (DEADMONSTER(mtmp))
+	if (DEADMONSTER(mtmp) || mtmp->mhp <= 0)
 		return FALSE;
 	if (can_see_hurtnss_of_mon(mtmp) && !flags.suppress_hurtness){
 		Strcat(buf, injury_desc_word(mtmp));
