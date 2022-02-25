@@ -419,17 +419,19 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &bodyblow, -1)){
 					You_feel("the tentacles squirm under your underclothes.");
-					if( d(1,100) > 15 && !Preservation){
-						pline("The tentacles begin to tear at your underclothes!");
-						 if(uarmu->spe > 1){
-							for(i=rn2(4); i>=0; i--)
-								drain_item(uarmu);
-							Your("%s less effective.", aobjnam(uarmu, "seem"));
-						 }
-						 else{
-							tent_destroy_arm(uarmu);
-							if(!uarmu) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
-						 }
+					if( d(1,100) > 15){
+						if(!Preservation){
+							pline("The tentacles begin to tear at your underclothes!");
+							 if(uarmu->spe > 1){
+								for(i=rn2(4); i>=0; i--)
+									drain_item(uarmu);
+								Your("%s less effective.", aobjnam(uarmu, "seem"));
+							 }
+							 else{
+								tent_destroy_arm(uarmu);
+								if(!uarmu) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
+							 }
+						}
 					}
 					else{
 						pline("The tentacles pull your underclothes off!");
@@ -455,17 +457,19 @@ int dmg;
 			 n--;
 			 if(!slips_free(mon, &youmonst,  &bodyblow, -1)){
 				You_feel("the tentacles squirm under your armor.");
-				if( d(1,100) > 25 && !Preservation){
-					pline("The tentacles begin to tear at your armor!");
-					 if(uarm->spe > 1){
+				if( d(1,100) > 25){
+					if(!Preservation){
+						pline("The tentacles begin to tear at your armor!");
+						if(uarm->spe > 1){
 						for(i=rn2(4); i>=0; i--)
 							drain_item(uarm);
-						Your("%s less effective.", aobjnam(uarm, "seem"));
-					 }
-					 else{
-						tent_destroy_arm(uarm);
-						if(!uarm) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
-					 }
+							Your("%s less effective.", aobjnam(uarm, "seem"));
+						}
+						else{
+							tent_destroy_arm(uarm);
+							if(!uarm) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
+						}
+					}
 				}
 				else{
 					pline("The tentacles shuck you out of your armor!");
@@ -487,16 +491,18 @@ int dmg;
 			n--;
 			if(!slips_free(mon, &youmonst,  &bodyblow, -1)){
 				You_feel("the tentacles work their way under your cloak.");
-				if( d(1,100) > 66 && !Preservation){
-					pline("The tentacles begin to tear at the cloak!");
-					 if(uarmc->spe > 1){
-						for(i=rn2(4); i>=0; i--)
-							drain_item(uarmc);
-						Your("%s less effective.", aobjnam(uarmc, "seem"));
-					 }
-					 else{
-						tent_destroy_arm(uarmc);
-					 }
+				if( d(1,100) > 66){
+					if(!Preservation){
+						pline("The tentacles begin to tear at the cloak!");
+						if(uarmc->spe > 1){
+							for(i=rn2(4); i>=0; i--)
+								drain_item(uarmc);
+							Your("%s less effective.", aobjnam(uarmc, "seem"));
+						}
+						else{
+							tent_destroy_arm(uarmc);
+						}
+					}
 				}
 				else{
 					pline("The tentacles strip off your cloak!");
@@ -525,16 +531,18 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &legblast, -1)){
 					You_feel("the tentacles squirm into your boots.");
-					if( d(1,100) > 66 && !Preservation){
-						pline("The tentacles begin to tear at your boots!");
-						 if(uarmf->spe > 1){
-							for(i=rn2(4); i>=0; i--)
-								drain_item(uarmf);
-							Your("%s less effective.", aobjnam(uarmf, "seem"));
-						 }
-						 else{
-							tent_destroy_arm(uarmf);
-						 }
+					if( d(1,100) > 66){
+						if(!Preservation){
+							pline("The tentacles begin to tear at your boots!");
+							if(uarmf->spe > 1){
+								for(i=rn2(4); i>=0; i--)
+									drain_item(uarmf);
+								Your("%s less effective.", aobjnam(uarmf, "seem"));
+							}
+							else{
+								tent_destroy_arm(uarmf);
+							}
+						}
 					}
 					else{
 						if (uarmf->otyp != find_bboots()){
@@ -582,16 +590,18 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &handshit, -1)){
 					You_feel("the tentacles squirm into your gloves.");
-					if( (d(1,40) <= ACURR(A_STR) || uwep) && !Preservation){
-						pline("The tentacles begin to tear at your gloves!");
-						 if(uarmg->spe > 1){
-							for(i=rn2(4); i>=0; i--)
-								drain_item(uarmg);
-							Your("%s less effective.", aobjnam(uarmg, "seem"));
-						 }
-						 else{
-							tent_destroy_arm(uarmg);
-						 }
+					if( (d(1,40) <= ACURR(A_STR) || uwep)){
+						if(!Preservation){
+							pline("The tentacles begin to tear at your gloves!");
+							if(uarmg->spe > 1){
+								for(i=rn2(4); i>=0; i--)
+									drain_item(uarmg);
+								Your("%s less effective.", aobjnam(uarmg, "seem"));
+							}
+							else{
+								tent_destroy_arm(uarmg);
+							}
+						}
 					}
 					else{
 						pline("The tentacles suck your gloves off!");
@@ -638,17 +648,19 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &headshot, -1)){
 					You_feel("the tentacles squirm under your helmet.");
-					if( d(1,100) > 90 && !Preservation){
-						pline("The tentacles begin to tear at your helmet!");
-						 if(uarmh->spe > 1){
-							for(i=rn2(4); i>=0; i--)
-								drain_item(uarmh);
-							Your("%s less effective.", aobjnam(uarmh, "seem"));
-						 }
-						 else{
-							tent_destroy_arm(uarmh);
-							if(!uarmh) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
-						 }
+					if( d(1,100) > 90){
+						if(!Preservation){
+							pline("The tentacles begin to tear at your helmet!");
+							 if(uarmh->spe > 1){
+								for(i=rn2(4); i>=0; i--)
+									drain_item(uarmh);
+								Your("%s less effective.", aobjnam(uarmh, "seem"));
+							 }
+							 else{
+								tent_destroy_arm(uarmh);
+								if(!uarmh) change_usanity(u_sanity_loss_minor(mon)/2, FALSE); /*Forces a san check*/
+							 }
+						}
 					}
 					else{
 						pline("The tentacles pull your helmet off!");
