@@ -18,6 +18,7 @@ extern const int monstr[];
 STATIC_DCL short FDECL(which_arti, (long int));
 STATIC_DCL boolean FDECL(mon_has_arti, (struct monst *,SHORT_P));
 STATIC_DCL struct monst *FDECL(other_mon_has_arti, (struct monst *,SHORT_P));
+STATIC_DCL boolean FDECL(rightful_owner, (struct monst *,SHORT_P, struct monst *));
 STATIC_DCL struct obj *FDECL(on_ground, (SHORT_P));
 STATIC_DCL boolean FDECL(you_have, (long int));
 STATIC_DCL long FDECL(target_on, (long int,struct monst *));
@@ -205,6 +206,39 @@ other_mon_has_arti(mtmp, otyp)
 	return((struct monst *)0);
 }
 
+STATIC_OVL boolean
+rightful_owner(holder, otyp, seeker)
+	register struct monst *holder;
+	register short	otyp;
+	register struct monst *seeker;
+{
+	switch(otyp){
+		case AMULET_OF_YENDOR:
+			//Note: the Wizard won't steal from the EP (but demon lords will)
+			// Monsters won't attack the wizard (but the wizard will squable with himself)
+			if((holder->mtyp == PM_ELDER_PRIEST && seeker->iswiz) 
+			  || (holder->iswiz && !seeker->iswiz)
+			)
+				return TRUE;
+		break;
+		case BELL_OF_OPENING:
+			if(holder->data->msound == MS_NEMESIS)
+				return TRUE;
+			if(is_Rebel(holder->data) && is_Rebel(seeker->data))
+				return TRUE;
+		break;
+		case CANDELABRUM_OF_INVOCATION:
+			if(holder->mtyp == PM_VLAD_THE_IMPALER)
+				return TRUE;
+		break;
+		case SPE_BOOK_OF_THE_DEAD:
+			if(holder->iswiz)
+				return TRUE;
+		break;
+	}
+	return FALSE;
+}
+
 STATIC_OVL struct obj *
 on_ground(otyp)
 	register short	otyp;
@@ -252,7 +286,7 @@ target_on(mask, mtmp)
 		return(STRAT(STRAT_PLAYER, u.ux, u.uy, mask));
 	    else if((otmp = on_ground(otyp))){
 			return(STRAT(STRAT_GROUND, otmp->ox, otmp->oy, mask));
-	    } else if(!is_Rebel(mtmp->data) && (mtmp2 = other_mon_has_arti(mtmp, otyp)))
+	    } else if((mtmp2 = other_mon_has_arti(mtmp, otyp)) && !rightful_owner(mtmp2, otyp, mtmp))
 		return(STRAT(STRAT_MONSTR, mtmp2->mx, mtmp2->my, mask));
 	}
 	return(STRAT_NONE);
