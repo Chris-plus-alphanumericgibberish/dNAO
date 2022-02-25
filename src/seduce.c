@@ -519,10 +519,6 @@ int dmg;
 			}
 		}
 		while(n > 0 && trycount++ < 50){
-		   if(n < ln && (d(1,100) > 85)){ //it's useless to struggle, but...
-			   yn("Struggle against the tentacles' grasp?");
-			   ln = n;
-		   }
 		   switch(d(1,12)){
 			case 1:
 			if(allreadydone&(0x1<<1)) break;
@@ -746,8 +742,7 @@ int dmg;
 					}
 				}
 				losehp(Half_physical_damage ? dmg/2 + 1 : dmg, "head trauma", KILLED_BY);
-				change_usanity(u_sanity_loss_minor(mon), FALSE); /*Forces a san check*/
-				
+				change_usanity(u_sanity_loss_minor(mon), TRUE); /*Forces a san check*/
 			break;
 			case 8:
 				if(allreadydone&(0x1<<8)) break;
