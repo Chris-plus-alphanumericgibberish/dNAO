@@ -1075,6 +1075,54 @@ struct monst *mon;
 }
 
 int
+avg_spell_mdr(mon)
+struct monst *mon;
+{
+	int base = 0;
+	
+	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
+		base += u.chokhmah;
+	}
+	
+	if(mon->mtame){
+		if(active_glyph(IMPURITY)) base += 3;
+		if(Role_if(PM_HEALER))
+			base += def_beastmastery();
+	}
+	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
+		base += 10;
+	
+
+	if(!mon->mcan){
+		int dr = 0;
+#define m_bdr mon->data->spe_bdr
+#define m_ldr mon->data->spe_ldr
+#define m_hdr mon->data->spe_hdr
+#define m_fdr mon->data->spe_fdr
+#define m_gdr mon->data->spe_gdr
+		dr += m_bdr*2;
+		dr += m_ldr*2;
+
+		if (has_head_mon(mon))			dr += m_hdr;
+		else							dr += m_bdr;
+
+		if (can_wear_boots(mon->data))	dr += m_fdr;
+		else							dr += m_ldr;
+
+		if (can_wear_gloves(mon->data))	dr += m_gdr;
+		else							dr += m_bdr;
+		
+#undef m_bdr
+#undef m_ldr
+#undef m_hdr
+#undef m_fdr
+#undef m_gdr
+		base += (dr / 7);	
+	}
+	return base;
+}
+
+int
 roll_mdr(mon, magr)
 struct monst *mon;
 struct monst *magr;

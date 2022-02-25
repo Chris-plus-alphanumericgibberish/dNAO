@@ -3244,6 +3244,7 @@ E int FDECL(full_mac, (struct monst *));
 E int FDECL(full_marmorac, (struct monst *));
 E int FDECL(base_nat_mdr, (struct monst *));
 E int FDECL(base_mdr, (struct monst *));
+E int FDECL(avg_spell_mdr, (struct monst *));
 E int FDECL(roll_mdr, (struct monst *, struct monst *));
 E int FDECL(roll_mdr_detail, (struct monst *, struct monst *, int, int));
 E void FDECL(mon_slot_dr, (struct monst *, struct monst *, int, int *, int *, int *, int));

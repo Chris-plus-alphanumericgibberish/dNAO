@@ -5297,6 +5297,9 @@ int damage, tell;
 
 #define LUCK_MODIFIER	if(Luck > 0) alev += rnd(Luck)/2; else if(Luck < 0) alev -= rnd(-1*Luck)/2;
 
+	damage -= avg_spell_mdr(mtmp);
+	if(damage < 0)
+		damage = 0;
 	/* attack level */
 	switch (oclass) {
 	    case WAND_CLASS:	
