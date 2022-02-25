@@ -16497,7 +16497,7 @@ struct attack * passive;	/* specific passive attack being used */
 
 		struct permonst * pd = ((mdef == &youmonst) ? youracedata : mdef->data);
 		passive = &noattack;
-		for (i = 0;; i++) {
+		for (i = 0; i < NATTK; i++) {
 			if (pd->mattk[i].aatyp == AT_NONE &&
 				!is_null_attk(&(pd->mattk[i]))) {
 				passive = &pd->mattk[i];
