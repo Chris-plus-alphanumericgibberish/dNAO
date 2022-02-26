@@ -425,18 +425,18 @@ register struct monst *mtmp;
 			(mtmp->female ? "Ms." : "Mr."), shkname(mtmp));
 		killer_format = KILLED_BY;
 		if (templated(mtmp))
-			append_template_desc(mtmp, buf, TRUE);
+			append_template_desc(mtmp, buf, TRUE, FALSE);
 	} else if (get_mx(mtmp, MX_EPRI) || get_mx(mtmp, MX_EMIN)) {
 		/* m_monnam() suppresses "the" prefix plus "invisible", and
 		   it overrides the effect of Hallucination on priestname() */
 		killer = m_monnam(mtmp);
 		Strcat(buf, killer);
 		if (templated(mtmp))
-			append_template_desc(mtmp, buf, type_is_pname(mtmp->data));
+			append_template_desc(mtmp, buf, type_is_pname(mtmp->data), FALSE);
 	} else {
 		Strcat(buf, mtmp->data->mname);
 		if (templated(mtmp))
-			append_template_desc(mtmp, buf, type_is_pname(mtmp->data));
+			append_template_desc(mtmp, buf, type_is_pname(mtmp->data), FALSE);
 		if (M_HAS_NAME(mtmp))
 		    Sprintf(eos(buf), " called %s", MNAME(mtmp));
 	}

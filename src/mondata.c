@@ -862,48 +862,10 @@ int template;
 #undef end_insert_okay
 #undef maybe_insert
 	/*Adjust the name*/
-	/*Draft 1: disalow horrors*/
+	/* horrors are disallowed out of caution - they definitely break if this is enabled */
 	if(!is_horror(&mons[mtyp])){
-		if (type_is_pname(base)){
-			if (template == ZOMBIFIED) Sprintf(nameBuffer, "%s's zombie", base->mname);
-			else if (template == SKELIFIED) Sprintf(nameBuffer, "%s's skeleton", base->mname);
-			else if (template == CRYSTALFIED) Sprintf(nameBuffer, "%s's vitrean", base->mname);
-			else if (template == FRACTURED) Sprintf(nameBuffer, "%s, Witness of the Fracture", base->mname);
-			else if (template == ILLUMINATED) Sprintf(nameBuffer, "%s the Illuminated", base->mname);
-			else if (template == VAMPIRIC) Sprintf(nameBuffer, "%s, vampire", base->mname);
-			else if (template == PSEUDONATURAL) Sprintf(nameBuffer, "%s the Pseudonatural", base->mname);
-			else if (template == TOMB_HERD) Sprintf(nameBuffer, "%s of the Herd", base->mname);
-			else if (template == SLIME_REMNANT) Sprintf(nameBuffer, "slimy remnant of %s", base->mname);
-			else if (template == YELLOW_TEMPLATE) Sprintf(nameBuffer, "%s of Carcosa", base->mname);
-			else if (template == DREAM_LEECH) Sprintf(nameBuffer, "%s the Dream-Leech", base->mname);
-			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "%s the mad", base->mname);
-			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "%s the fallen", base->mname);
-			else if (template == WORLD_SHAPER) Sprintf(nameBuffer, "%s the Worldshaper", base->mname);
-//			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
-			else Sprintf(nameBuffer, "%s", base->mname);
-		}
-		else {
-			if (template == ZOMBIFIED) Sprintf(nameBuffer, "%s zombie", base->mname);
-			else if (template == SKELIFIED) Sprintf(nameBuffer, "%s skeleton", base->mname);
-			else if (template == CRYSTALFIED) Sprintf(nameBuffer, "%s vitrean", base->mname);
-			else if (template == FRACTURED) Sprintf(nameBuffer, "fractured %s", base->mname);
-			else if (template == ILLUMINATED) Sprintf(nameBuffer, "illuminated %s", base->mname);
-			else if (template == VAMPIRIC) Sprintf(nameBuffer, "%s vampire", base->mname);
-			else if (template == PSEUDONATURAL) Sprintf(nameBuffer, "pseudonatural %s", base->mname);
-			else if (template == TOMB_HERD) Sprintf(nameBuffer, "%s herd", base->mname);
-			else if (template == SLIME_REMNANT) Sprintf(nameBuffer, "slimy remnant of %s", an(base->mname));
-			else if (template == YELLOW_TEMPLATE) Sprintf(nameBuffer, "fulvous %s", base->mname);
-			else if (template == DREAM_LEECH){
-				if(base->mtyp == PM_GHOST || base->mtyp == PM_SHADE || base->mtyp == PM_WRAITH)
-					Sprintf(nameBuffer, "dream-leech %s", base->mname);
-				else Sprintf(nameBuffer, "%s dream-leech", base->mname);
-			}
-			else if (template == MAD_TEMPLATE) Sprintf(nameBuffer, "mad %s", base->mname);
-			else if (template == FALLEN_TEMPLATE) Sprintf(nameBuffer, "fallen %s", base->mname);
-			else if (template == WORLD_SHAPER) Sprintf(nameBuffer, "%s worldshaper", base->mname);
-//			else if (template == MISTWEAVER) Depends on sex, handled elsewhere
-			else Sprintf(nameBuffer, "%s", base->mname);
-		}
+		Strcpy(nameBuffer, base->mname);
+		adjust_permonst_template_desc(base, nameBuffer, template);
 		ptr->mname = malloc(sizeof(char)*(strlen(nameBuffer)+1));
 		Strcpy((char *)ptr->mname, nameBuffer);
 	}
