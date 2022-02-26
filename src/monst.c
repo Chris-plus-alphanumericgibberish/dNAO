@@ -8740,7 +8740,7 @@ is a red right hand
 	
     MON("Nitocris", S_MUMMY,//10 /*Needs encyc entry*//*Needs tile*/
 	LVL(30, 12, 99, 0), (G_UNIQ|G_NOGEN),
-	DEF(SPE_AC(19)),
+	DEF(SPE_AC(19), SPE_DR(6)),
 	A(ATTK(AT_WEAP, AD_PHYS, 4, 4), ATTK(AT_XWEP, AD_PHYS, 4, 4), 
 	  ATTK(AT_MAGC, AD_SPEL, 0, 0)),
 	SIZ(1350, 400, MS_CUSS, MZ_HUMAN),
