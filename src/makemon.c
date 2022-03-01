@@ -12023,9 +12023,11 @@ int mndx;
 	if (mons[mndx].geno & (G_NOGEN | G_UNIQ)) return TRUE;
 	if (mvitals[mndx].mvflags & G_GONE && !In_quest(&u.uz)) return TRUE;
 	if (Inhell)
-		return(mons[mndx].maligntyp > A_NEUTRAL);
-	else
+		return((mons[mndx].geno & G_PLANES) != 0);
+	else if (In_endgame(&u.uz))
 		return((mons[mndx].geno & G_HELL) != 0);
+	else
+		return((mons[mndx].geno & (G_HELL|G_PLANES)) != 0);
 }
 
 /*
