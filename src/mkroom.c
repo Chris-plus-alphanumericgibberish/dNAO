@@ -750,6 +750,12 @@ mkvaultlolth()
 					if(!rn2(3)) makemon(&mons[PM_HEDROW_ZOMBIE], x+rnd(2), y+rnd(2), 0);
 				break;
 			}
+			if(!rn2(8)){
+				//Note: lack of adjacent flag means that some of these may not spawn (this is on purpose)
+				makemon(&mons[PM_ALABASTER_MUMMY], x+rnd(2), y+rnd(2), 0);
+				if(rn2(4)) makemon(&mons[PM_HEDROW_ZOMBIE], x+rnd(2), y+rnd(2), 0);
+				if(!rn2(3)) makemon(&mons[PM_HEDROW_ZOMBIE], x+rnd(2), y+rnd(2), 0);
+			}
 		}
 	}
 }
