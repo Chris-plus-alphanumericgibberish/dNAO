@@ -5947,6 +5947,9 @@ struct mkroom *sroom;
 			if (type==COURT && mon->mpeaceful) {
 				mon->mpeaceful = 0;
 				set_malign(mon);
+				if(ctype == PM_EMBRACED_DROWESS && (mon->mtyp == PM_DROW_CAPTAIN || mon->mtyp == PM_DROW_MATRON)){
+					set_template(mon, M_BLACK_WEB);
+				}
 			}
 		}
 		}
@@ -7676,6 +7679,10 @@ courtmon(kingnum)
 				return &mons[PM_HEDROW_WIZARD];
 			else if(i>30)
 				return &mons[PM_HEDROW_WARRIOR];
+			else if(i> 20)
+				return &mons[PM_DROW_MATRON];
+			else if(i> 10)
+				return &mons[PM_DROW_CAPTAIN];
 			else if(i> 0)
 				return &mons[PM_DROW_MUMMY];
 		break;
