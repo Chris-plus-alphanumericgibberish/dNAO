@@ -635,7 +635,7 @@ fixup_special()
 		place_lolth_vaults();
 		for (x = 0; x<COLNO; x++){
 			for (y = 0; y<ROWNO; y++){
-				if (levl[x][y].typ == ROOM) maketrap(x, y, WEB);
+				if (levl[x][y].typ == ROOM && levl[x][y].roomno == NO_ROOM) maketrap(x, y, WEB);
 			}
 		}
 	}
