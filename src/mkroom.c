@@ -191,7 +191,7 @@ mklolthsepulcher()
 		y = rn2(ROWNO-7)+3;
 		tries++;
 		okspot = TRUE;
-		for(i=-2;i<3;i++) for(j=-2;j<3;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=-2;i<3;i++) for(j=-2;j<3;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=-1;i<2;i++) for(j=-1;j<2;j++) levl[x+i][y+j].typ = STONE;
@@ -596,7 +596,7 @@ mkmivaultlolth()
 		y = rn2(ROWNO-4)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<4;i++) for(j=0;j<4;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<4;i++) for(j=0;j<4;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<4;i++) for(j=0;j<4;j++) levl[x+i][y+j].typ = CORR;
@@ -713,7 +713,7 @@ mkvaultlolth()
 		y = rn2(ROWNO-4)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<4;i++) for(j=0;j<4;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<4;i++) for(j=0;j<4;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<4;i++) for(j=0;j<4;j++) levl[x+i][y+j].typ = CORR;
@@ -768,7 +768,7 @@ mklolthgnoll()
 		y = rn2(ROWNO-10)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<10;i++) for(j=0;j<10;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<10;i++) for(j=0;j<10;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<10;i++) for(j=0;j<10;j++){
@@ -911,7 +911,7 @@ mklolthgarden()
 		y = rn2(ROWNO-height)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<width;i++) for(j=0;j<height;j++){
@@ -1041,7 +1041,7 @@ mklolthtroll()
 		y = rn2(ROWNO-height)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<width;i++) for(j=0;j<height;j++){
@@ -1302,7 +1302,7 @@ mklolthcell()
 		y = rn2(ROWNO-height)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<width;i++) for(j=0;j<height;j++){
@@ -1374,7 +1374,7 @@ mklolthtreasure()
 		y = rn2(ROWNO-height)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<width;i++) for(j=0;j<height;j++){
@@ -1514,7 +1514,7 @@ mklolthup()
 		y = rn2(ROWNO-height)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<width;i++) for(j=0;j<height;j++){
@@ -1641,7 +1641,7 @@ mklolthdown()
 		y = rn2(ROWNO-height)+1;
 		tries++;
 		okspot = TRUE;
-		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<width;i++) for(j=0;j<height;j++){
