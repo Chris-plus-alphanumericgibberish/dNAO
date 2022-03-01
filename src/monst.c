@@ -2813,7 +2813,7 @@ then fill new spaces with our spawn!
 	/*statue-only monster*/
     MON("god", S_LAW_ANGEL,//44
 	LVL(77, 7, 77, 77), (G_NOGEN|G_NOCORPSE|G_UNIQ),
-	DEF(NAT_AC(17), NAT_DR(7)),
+	DEF(NAT_AC(17), NAT_DR(7), SPE_DR(7)),
 	A(ATTK(AT_WEAP, AD_PHYS, 7, 7), ATTK(AT_WEAP, AD_PHYS, 7, 7),
 	  ATTK(AT_WDGZ, AD_BLND, 7, 7), ATTK(AT_CLAW, AD_PHYS, 7, 7),
 	  ATTK(AT_MAGC, AD_CLRC, 7, 7)),
