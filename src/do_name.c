@@ -11,6 +11,7 @@
 //STATIC_DCL void FDECL(do_oname, (struct obj *));//moved to extern.h
 static void FDECL(getpos_help, (BOOLEAN_P,const char *));
 
+STATIC_DCL void FDECL(mod_template_desc, (struct monst *, struct permonst *, char *, boolean, int, boolean));
 STATIC_DCL boolean FDECL(maybe_append_injury_desc, (struct monst *, char *));
 
 extern const char what_is_an_unknown_object[];		/* from pager.c */
@@ -854,23 +855,103 @@ rndghostname()
 }
 
 void
-append_template_desc(mtmp, buf, pname)
+append_template_desc(mtmp, buf, pname, full)
 struct monst * mtmp;
 char * buf;
 boolean pname;
+boolean full;
 {
+	mod_template_desc(mtmp, mtmp->data, buf, pname, mtmp->mtemplate, full);
+}
+
+void
+adjust_permonst_template_desc(mptr, buf, template)
+struct permonst * mptr;
+char * buf;
+int template;
+{
+	mod_template_desc((struct monst *)0, mptr, buf, type_is_pname(mptr), template, TRUE);
+}
+
+/* Three possible calling cases:
+ * 1 -- editing permonst name
+ *      (no mtmp available -- used in mondata.c when creating permonsts)
+ *      'full' == TRUE
+ *      'mtmp' == NULL
+ * 2 -- editing monster name
+ *      (in case template is mtmp-only -- used in-place when getting monster names)
+ *      'full' == FALSE
+ *      'mtmp' != NULL
+ * 3 -- editing monster name
+ *      (mtmp didn't use their permonst name -- used in-place when getting special monster names)
+ *      'full' == TRUE
+ *      'mtmp' != NULL
+ */
+void
+mod_template_desc(mtmp, base, buf, pname, template, full)
+struct monst * mtmp;
+struct permonst * base;
+char * buf;
+boolean pname;
+int template;
+boolean full;
+{
+	char buf2[BUFSZ];
+
+	if (!template)
+		return;
+
+	if (is_horror(base) && mtmp)
+		full = TRUE;
+
 	if (pname){
-		if (has_template(mtmp, MISTWEAVER)){
-			if (mtmp->female) Strcat(buf, ", Daughter of the Black Goat");
-			else Strcat(buf, ", Child of the Black Goat");
+		if 		(full && template == ZOMBIFIED)			Sprintf(buf2, "%s's zombie", buf);
+		else if (full && template == SKELIFIED) 		Sprintf(buf2, "%s's skeleton", buf);
+		else if (full && template == CRYSTALFIED)		Sprintf(buf2, "%s's vitrean", buf);
+		else if (full && template == FRACTURED)			Sprintf(buf2, "%s, Witness of the Fracture", buf);
+		else if (full && template == ILLUMINATED)		Sprintf(buf2, "%s the Illuminated", buf);
+		else if (full && template == VAMPIRIC)			Sprintf(buf2, "%s, vampire", buf);
+		else if (full && template == PSEUDONATURAL)		Sprintf(buf2, "%s the Pseudonatural", buf);
+		else if (full && template == TOMB_HERD)			Sprintf(buf2, "%s of the Herd", buf);
+		else if (full && template == SLIME_REMNANT)		Sprintf(buf2, "slimy remnant of %s", buf);
+		else if (full && template == YELLOW_TEMPLATE)	Sprintf(buf2, "%s of Carcosa", buf);
+		else if (full && template == DREAM_LEECH)		Sprintf(buf2, "%s the Dream-Leech", buf);
+		else if (full && template == MAD_TEMPLATE)		Sprintf(buf2, "%s the mad", buf);
+		else if (full && template == FALLEN_TEMPLATE)	Sprintf(buf2, "%s the fallen", buf);
+		else if (full && template == WORLD_SHAPER)		Sprintf(buf2, "%s the Worldshaper", buf);
+		else if (mtmp && template == MISTWEAVER) {
+				if (mtmp->female) 						Sprintf(buf2, "%s, Daughter of the Black Goat", buf);
+				else 									Sprintf(buf2, "%s, Child of the Black Goat", buf);
 		}
+		else											Strcpy(buf2, buf);
 	}
 	else {
-		if (has_template(mtmp, MISTWEAVER)){
-			if (mtmp->female) Strcat(buf, " dark daughter");
-			else Strcat(buf, " dark child");
+		if		(full && template == ZOMBIFIED)			Sprintf(buf2, "%s zombie", buf);
+		else if (full && template == SKELIFIED)			Sprintf(buf2, "%s skeleton", buf);
+		else if (full && template == CRYSTALFIED)		Sprintf(buf2, "%s vitrean", buf);
+		else if (full && template == FRACTURED)			Sprintf(buf2, "fractured %s", buf);
+		else if (full && template == ILLUMINATED)		Sprintf(buf2, "illuminated %s", buf);
+		else if (full && template == VAMPIRIC)			Sprintf(buf2, "%s vampire", buf);
+		else if (full && template == PSEUDONATURAL)		Sprintf(buf2, "pseudonatural %s", buf);
+		else if (full && template == TOMB_HERD)			Sprintf(buf2, "%s herd", buf);
+		else if (full && template == SLIME_REMNANT)		Sprintf(buf2, "slimy remnant of %s", an(buf));
+		else if (full && template == YELLOW_TEMPLATE)	Sprintf(buf2, "fulvous %s", buf);
+		else if (full && template == DREAM_LEECH){
+			if(base->mtyp == PM_GHOST || base->mtyp == PM_SHADE || base->mtyp == PM_WRAITH)
+														Sprintf(buf2, "dream-leech %s", buf);
+			else										Sprintf(buf2, "%s dream-leech", buf);
 		}
+		else if (full && template == MAD_TEMPLATE)		Sprintf(buf2, "mad %s", buf);
+		else if (full && template == FALLEN_TEMPLATE)	Sprintf(buf2, "fallen %s", buf);
+		else if (full && template == WORLD_SHAPER)		Sprintf(buf2, "%s worldshaper", buf);
+		else if (mtmp && template == MISTWEAVER){
+				if (mtmp->female) 						Sprintf(buf2, "%s dark daughter", buf);
+				else 									Sprintf(buf2, "%s dark child", buf);
+		}
+		else											Strcpy(buf2, buf);
 	}
+
+	Strcpy(buf, buf2);
 	return;
 }
 
@@ -1059,7 +1140,7 @@ boolean called;
 			name_at_start = FALSE;
 		}
 	    Strcat(buf, appearname);
-		append_template_desc(mtmp, buf, TRUE);
+		append_template_desc(mtmp, buf, TRUE, FALSE);
 	    return buf;
 	}
 
@@ -1123,7 +1204,7 @@ boolean called;
 			}
 			
 			Sprintf(eos(buf), "%s", appearname);
-			append_template_desc(mtmp, buf, type_is_pname(mdat));
+			append_template_desc(mtmp, buf, type_is_pname(mdat), FALSE);
 			Sprintf(eos(buf), " called %s", name);
 			
 			name_at_start = (boolean)type_is_pname(mdat);
@@ -1139,6 +1220,7 @@ boolean called;
 			Strcpy(buf, pbuf);
 			article = ARTICLE_NONE;
 			name_at_start = TRUE;
+			append_template_desc(mtmp, buf, TRUE, TRUE);
 	    } else {
 			name_at_start = TRUE;
 			if (maybe_append_injury_desc(mtmp, buf))
@@ -1155,7 +1237,7 @@ boolean called;
 				 monsndx(mdat),
 				 (boolean)mtmp->female));
 	    Strcat(buf, lcase(pbuf));
-		append_template_desc(mtmp, buf, FALSE);
+		append_template_desc(mtmp, buf, FALSE, TRUE);
 	    name_at_start = FALSE;
 	} else {
 	    name_at_start = (boolean)type_is_pname(mdat);
@@ -1184,7 +1266,7 @@ boolean called;
 			name_at_start = FALSE;
 		}
 	    Strcat(buf, appearname);
-		append_template_desc(mtmp, buf, type_is_pname(mdat));
+		append_template_desc(mtmp, buf, type_is_pname(mdat), FALSE);
 	}
 
 	if (name_at_start && (article == ARTICLE_YOUR || !has_adjectives)) {
