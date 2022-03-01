@@ -12138,7 +12138,7 @@ rndmonst()
 	
 	/*If Center of All hasn't been made yet, he may appear during level gen.
 	  During normal play, he may also arvive on level from elsewhere. */
-	if(in_mklev && !(mvitals[PM_CENTER_OF_ALL].mvflags & G_EXTINCT) && !rn2(COA_PROB)){
+	if(in_mklev && mvitals[PM_CENTER_OF_ALL].born == 0 && !rn2(COA_PROB)){
 	    return &mons[PM_CENTER_OF_ALL]; /*center of all may be created at any time */
 	}
 
