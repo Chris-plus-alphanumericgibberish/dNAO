@@ -25,6 +25,7 @@ STATIC_DCL boolean FDECL(isbig, (struct mkroom *));
 STATIC_DCL int FDECL(int_sqrt, (int));
 STATIC_DCL boolean FDECL(issemispacious, (struct mkroom *));
 STATIC_DCL void NDECL(mkshop), FDECL(mkzoo,(int)), NDECL(mkswamp);
+STATIC_DCL struct monst *FDECL(prisoner,(int, int, int));
 STATIC_DCL void NDECL(mktemple);
 STATIC_DCL void NDECL(mkkamereltowers);
 STATIC_DCL void NDECL(mkminorspire);
@@ -54,6 +55,7 @@ STATIC_DCL void NDECL(mkvaultlolth);
 STATIC_DCL void NDECL(mklolthgnoll);
 STATIC_DCL void NDECL(mklolthgarden);
 STATIC_DCL void NDECL(mklolthtroll);
+STATIC_DCL void NDECL(mklolthcell);
 STATIC_DCL void NDECL(mklolthdown);
 STATIC_DCL void NDECL(mklolthup);
 STATIC_DCL void NDECL(mksgarden);
@@ -1142,6 +1144,82 @@ mklolthtroll()
 	}
 }
 
+
+STATIC_OVL
+void
+mklolthcell()
+{
+	int x,y,tries=0, width= 3, height=3;
+	int i,j, rmtypb = nroom+ROOMOFFSET, trycount, madedoor;
+	struct obj *obj;
+	struct monst *mon, *warden = 0;
+	boolean good=FALSE,okspot;
+	int mtyp;
+	if(!rn2(4)){
+		width = height = 4;
+	}
+	while(!good && tries < 50){
+		x = rn2(COLNO-width)+1;
+		y = rn2(ROWNO-height)+1;
+		tries++;
+		okspot = TRUE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD)) okspot = FALSE;
+		if(okspot){
+			good = TRUE;
+			for(i=0;i<width;i++) for(j=0;j<height;j++){
+				levl[x+i][y+j].typ = STONE;
+			}
+			warden = makemon(&mons[PM_STINKING_CLOUD], x, y, MM_NOCOUNTBIRTH|MM_ADJACENTOK);
+			if(warden){
+				warden->mhpmax = 8*warden->m_lev;
+				warden->mhpmax += rn2(8);
+				warden->mhp = warden->mhpmax;
+			}
+			for(i=0;i<width;i++) for(j=0;j<height;j++){
+				levl[x+i][y+j].typ = CORR;
+			}
+			levl[x+(width-1)][y+(height-1)].typ = BRCORNER;
+			levl[x][y+(height-1)].typ = BLCORNER;
+			for(i=1;i<(width-1);i++) levl[x+i][y+(height-1)].typ = IRONBARS;
+			for(i=1;i<(width-1);i++) levl[x+i][y].typ = IRONBARS;
+			for(i=1;i<(height-1);i++) levl[x+(width-1)][y+i].typ = IRONBARS;
+			for(i=1;i<(height-1);i++) levl[x][y+i].typ = IRONBARS;
+			levl[x+(width-1)][y].typ = TRCORNER;
+			levl[x][y].typ = TLCORNER;
+			for(i=1;i<width-1;i++){
+				for(j=1;j<height-1;j++){
+					mon = prisoner(PM_AVATAR_OF_LOLTH, i+x, j+y);
+					if(mon){
+						mon->mpetitioner = FALSE; //Not actually dead yet.
+						if(warden){
+							for(obj = mon->minvent; obj; obj = mon->minvent){
+								//The wardens are pinatas so give them an extra HP per item they hold.
+								warden->mhpmax++;
+								warden->mhp++;
+								warden->m_lev = warden->mhpmax/8;
+								mon->misc_worn_check &= ~obj->owornmask;
+								update_mon_intrinsics(mon, obj, FALSE, FALSE);
+								if (obj->owornmask & W_WEP){
+									setmnotwielded(mon,obj);
+									MON_NOWEP(mon);
+								}
+								if (obj->owornmask & W_SWAPWEP){
+									setmnotwielded(mon,obj);
+									MON_NOSWEP(mon);
+								}
+								obj->owornmask = 0L;
+								obj_extract_self(obj);
+								mpickobj(warden, obj);
+							}
+						}
+						(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+						mon->entangled = SHACKLES;
+					}
+				}
+			}
+		}
+	}
+}
 
 STATIC_OVL
 void
@@ -4819,6 +4897,8 @@ place_lolth_vaults()
 	mklolthtreasure();
 	//Co-alligned temple.  Priest transforms and becomes hostile if adjacent.
 	//prison
+	num = rn2(3) + rn2(3) + rn2(3);
+	for(i = 0; i < num; i++) mklolthcell();
 	//sepulcher
 	if(!rn2(4)){
 		mklolthsepulcher();
@@ -5265,7 +5345,7 @@ int type;
 	}
 }
 
-static boolean
+STATIC_OVL boolean
 cell_spot(sx, sy)
 int sx,sy;
 {
@@ -5279,7 +5359,7 @@ int sx,sy;
 	return TRUE;
 }
 
-struct monst *
+STATIC_OVL struct monst *
 prisoner(kingtype, sx, sy)
 int kingtype;
 int sx,sy;
@@ -5411,6 +5491,29 @@ int sx,sy;
 								};
 			mtyp = ROLL_FROM(prisoners);
 		}break;
+		case PM_AVATAR_OF_LOLTH:{
+			int prisoners[] = {
+				PM_WOODLAND_ELF, PM_GREEN_ELF, PM_GREY_ELF, PM_GREY_ELF, PM_ELF_LORD, PM_ELVENKING,
+				PM_WOODLAND_ELF, PM_GREEN_ELF, PM_GREY_ELF, PM_GREY_ELF, PM_ELF_LADY, PM_ELVENQUEEN,
+				PM_ALABASTER_ELF, PM_ALABASTER_ELF, PM_ALABASTER_ELF_ELDER,
+				PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_HEDROW_BLADEMASTER, PM_DROW_CAPTAIN, PM_DROW_MATRON,
+				PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_HEDROW_BLADEMASTER, PM_DROW_CAPTAIN, PM_DROW_MATRON,
+				PM_SPROW, PM_DRIDER, PM_PRIESTESS_OF_GHAUNADAUR, PM_STJARNA_ALFR, PM_STJARNA_ALFR,
+				PM_SPROW, PM_DRIDER, PM_PRIESTESS_OF_GHAUNADAUR, PM_STJARNA_ALFR, PM_STJARNA_ALFR,
+				PM_HILL_ORC, PM_ORC_SHAMAN, PM_ORC_CAPTAIN, PM_ANGBAND_ORC,
+				PM_DRYAD, PM_NAIAD, PM_OREAD, PM_SWAMP_NYMPH, PM_YUKI_ONNA, PM_THRIAE, PM_SELKIE, PM_OCEANID, PM_DEMINYMPH,
+				PM_YURIAN, PM_FORMIAN_TASKMASTER,
+				PM_YURIAN, PM_FORMIAN_TASKMASTER,
+				PM_ICE_DEVIL, PM_NALFESHNEE, PM_MARILITH, PM_PIT_FIEND, PM_FALLEN_ANGEL,
+				PM_ELOCATOR,
+				PM_JUSTICE_ARCHON, PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON, PM_WARDEN_ARCHON, PM_THRONE_ARCHON,
+				PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, PM_GRAHA_DEVA, PM_SURYA_DEVA,
+				PM_LILLEND, PM_ANGEL, PM_ALEAX,
+				PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, 
+				PM_TULANI_ELADRIN, PM_GAE_ELADRIN, PM_BRIGHID_ELADRIN, PM_UISCERRE_ELADRIN, PM_CAILLEA_ELADRIN, PM_KUKER
+			};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
 	}
 	if(mtyp == PM_DRACAE_ELADRIN){
 		if(dungeon_topology.eprecursor_typ != PRE_DRACAE){
@@ -5437,7 +5540,8 @@ int sx,sy;
 		}
 	}
 	if(mtyp != NON_PM){
-		mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS);
+		int equipLevel = ((kingtype == PM_TITAN || kingtype == PM_EMBRACED_DROWESS || kingtype == PM_AVATAR_OF_LOLTH || kingtype == PM_DEEPEST_ONE || kingtype == PM_ORC_OF_THE_AGES_OF_STARS) ? MM_GOODEQUIP : 0);
+		mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
 		if(mon){
 			if(mon->mtyp == PM_SURYA_DEVA){
 				struct monst *blade;
@@ -5464,7 +5568,7 @@ int sx,sy;
 	else return 0;
 }
 
-static void
+STATIC_OVL void
 mkcell(sx, sy, chest, kingtype, dx, dy)
 int sx,sy;
 struct obj *chest;

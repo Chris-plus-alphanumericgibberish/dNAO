@@ -213,12 +213,14 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define MM_ADJACENTSTRICT   0x0200    /* ...but only ONE removed.*/
 #define MM_NOGROUP          0x0400    /* don't generate its normal accompanying groupmates */
 #define MM_BIGGROUP         0x0800    /* do generate its larger size of accompanying groupmates */
+#define MM_GOODEQUIP        0x1000    /* do generate its better equipment sets (planar equip for angels) */
 
 /* flags to control mksobj() et al */
 #define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */
 #define MKOBJ_ARTIF		0x01	/* allow to become a random artifact at standard generation rates */
 #define MKOBJ_NOINIT	0x02	/* skip standard initialization of the object, like randomized enchantment and material */
 #define MKOBJ_SUMMON	0x04	/* attach ox_esum struct to obj */
+#define MKOBJ_GOODEQUIP	0x08	/* attach ox_esum struct to obj */
 
 /* special mhpmax value when loading bones monster to flag as extinct or genocided */
 #define DEFUNCT_MONSTER	(-100)
