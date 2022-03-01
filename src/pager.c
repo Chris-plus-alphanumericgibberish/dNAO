@@ -2174,18 +2174,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 
 	char name[BUFSZ] = "";
 	Strcat(name, ptr->mname);
-	if (type_is_pname(ptr)){
-		if (has_template(mtmp, MISTWEAVER)){
-			if (mtmp->female) Strcat(name, ", Daughter of the Black Goat");
-			else Strcat(name, ", Child of the Black Goat");
-		}
-	}
-	else {
-		if (has_template(mtmp, MISTWEAVER)){
-			if (mtmp->female) Strcat(name, " dark daughter");
-			else Strcat(name, " dark child");
-		}
-	}
+	append_template_desc(mtmp, name, type_is_pname(ptr), FALSE);
 
 	temp_buf[0] = '\0';
 	if (iflags.pokedex) {
