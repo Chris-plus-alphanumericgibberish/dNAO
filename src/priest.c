@@ -545,7 +545,19 @@ register int roomno;
 				if(msg1) verbalize1(msg1);
 				if(msg2) verbalize1(msg2);
 			}
-			if(!sanctum) {
+			if(Is_lolth_level(&u.uz) && !(EPRI(priest) && EPRI(priest)->godnum == GOD_LOLTH)){
+				pline("Rivers of blood pour from the altar!");
+				if(!Is_astralevel(&u.uz)) {
+					int gx = EPRI(priest)->shrpos.x;
+					int gy = EPRI(priest)->shrpos.y;
+					a_align(gx, gy) = A_CHAOTIC;
+					a_gnum(gx, gy) = GOD_LOLTH;
+				}
+				make_doubtful(888L, TRUE);
+				EPRI(priest)->godnum = GOD_LOLTH;
+				EPRI(priest)->shralign = A_CHAOTIC;
+			}
+			else if(!sanctum) {
 				/* !tended -> !shrined */
 				if (!shrined || !p_coaligned(priest) ||
 					u.ualign.record <= ALGN_SINNED)

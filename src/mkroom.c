@@ -55,6 +55,7 @@ STATIC_DCL void NDECL(mkvaultlolth);
 STATIC_DCL void NDECL(mklolthgnoll);
 STATIC_DCL void NDECL(mklolthgarden);
 STATIC_DCL void NDECL(mklolthtroll);
+STATIC_DCL void NDECL(mklolthtemple);
 STATIC_DCL void NDECL(mklolthcell);
 STATIC_DCL void NDECL(mklolthdown);
 STATIC_DCL void NDECL(mklolthup);
@@ -1144,6 +1145,144 @@ mklolthtroll()
 	}
 }
 
+
+STATIC_OVL
+void
+mklolthtemple()
+{
+	int x,y,tries=0, width= 7, height=7;
+	int i,j, rmtypb = nroom+ROOMOFFSET, trycount, madedoor;
+	struct obj *otmp;
+	struct monst *mon;
+	boolean good=FALSE,okspot;
+	while(!good && tries < 50){
+		x = rn2(COLNO-width)+1;
+		y = rn2(ROWNO-height)+1;
+		tries++;
+		okspot = TRUE;
+		for(i=0;i<width;i++) for(j=0;j<height;j++) if(!isok(x+i,y+j) || !(levl[x+i][y+j].typ == ROOM || levl[x+i][y+j].typ == CLOUD) || m_at(x+i, y+j)) okspot = FALSE;
+		if(okspot){
+			good = TRUE;
+			levl[x+(width-1)][y+(height-1)].typ = BRCORNER;
+			levl[x][y+(height-1)].typ = BLCORNER;
+			for(i=1;i<(width-1);i++) levl[x+i][y+(height-1)].typ = HWALL;
+			for(i=1;i<(width-1);i++) levl[x+i][y].typ = HWALL;
+			for(i=1;i<(height-1);i++) levl[x+(width-1)][y+i].typ = VWALL;
+			for(i=1;i<(height-1);i++) levl[x][y+i].typ = VWALL;
+			levl[x+(width-1)][y].typ = TRCORNER;
+			levl[x][y].typ = TLCORNER;
+			for(i=1;i<width-1;i++) for(j=1;j<height-1;j++){
+				levl[x+i][y+j].typ = CORR;
+				levl[x+i][y+j].roomno = rmtypb;
+			}
+			for(i=2;i<width-2;i++) for(j=2;j<height-2;j++){
+				levl[x+i][y+j].typ = ROOM;
+				levl[x+i][y+j].roomno = rmtypb;
+			}
+			rooms[nroom].lx = x + 1;
+			rooms[nroom].hx = x + width - 2;
+			rooms[nroom].ly = y + 1;
+			rooms[nroom].hy = y + height - 2;
+			rooms[nroom].rtype = TEMPLE;
+			rooms[nroom].doorct = 0;
+			rooms[nroom].fdoor = 0;
+			rooms[nroom].nsubrooms = 0;
+			rooms[nroom].irregular = FALSE;
+			rooms[nroom].solidwall = 0;
+			
+			coord shrine_spot = {x+width/2, y+height/2};
+			add_altar(shrine_spot.x, shrine_spot.y, u.ualign.type, TRUE, u.ualign.god);
+			priestini(&u.uz, &rooms[nroom], shrine_spot.x, shrine_spot.y, FALSE);
+			level.flags.has_temple = 1;
+			
+			nroom++;
+			
+			madedoor = 0;
+			trycount = 0;
+			while(madedoor < 2 && trycount<50){
+				i = rnd(width-2);
+				if(isok(x+i,y-1) && levl[x+i][y-1].typ == ROOM){
+					madedoor++;
+					levl[x+i][y].typ = DOOR;
+					levl[x+i][y].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+				}
+				trycount++;
+			}
+			if(madedoor == 0){
+				for(i = 1; i <= (width-2) && madedoor < 2; i++){
+					if(isok(x+i,y-1) && levl[x+i][y-1].typ == ROOM){
+						madedoor++;
+						levl[x+i][y].typ = DOOR;
+						levl[x+i][y].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+					}
+				}
+			}
+			
+			madedoor = 0;
+			trycount = 0;
+			while(madedoor < 2 && trycount<50){
+				i = rnd(width-2);
+				if(isok(x+i,y+height) && levl[x+i][y+height].typ == ROOM){
+					madedoor++;
+					levl[x+i][y+height-1].typ = DOOR;
+					levl[x+i][y+height-1].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+				}
+				trycount++;
+			}
+			if(madedoor == 0){
+				for(i = 1; i <= (width-2) && madedoor < 2; i++){
+					if(isok(x+i,y+height) && levl[x+i][y+height].typ == ROOM){
+						madedoor++;
+						levl[x+i][y+height-1].typ = DOOR;
+						levl[x+i][y+height-1].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+					}
+				}
+			}
+			
+			madedoor = 0;
+			trycount = 0;
+			while(madedoor < 2 && trycount<50){
+				i = rnd(height-2);
+				if(isok(x-1,y+i) && levl[x-1][y+i].typ == ROOM){
+					madedoor++;
+					levl[x][y+i].typ = DOOR;
+					levl[x][y+i].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+				}
+				trycount++;
+			}
+			if(madedoor == 0){
+				for(i = 1; i <= (height-2) && madedoor < 2; i++){
+					if(isok(x+i,y-1) && levl[x+i][y-1].typ == ROOM){
+						madedoor++;
+						levl[x+i][y].typ = DOOR;
+						levl[x+i][y].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+					}
+				}
+			}
+			
+			madedoor = 0;
+			trycount = 0;
+			while(madedoor < 2 && trycount<50){
+				i = rnd(height-2);
+				if(isok(x+width,y+i) && levl[x+width][y+i].typ == ROOM){
+					madedoor++;
+					levl[x+width-1][y+i].typ = DOOR;
+					levl[x+width-1][y+i].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+				}
+				trycount++;
+			}
+			if(madedoor == 0){
+				for(i = 1; i <= (height-2) && madedoor < 2; i++){
+					if(isok(x+width,y+i) && levl[x+width][y+i].typ == ROOM){
+						madedoor++;
+						levl[x+width-1][y+i].typ = DOOR;
+						levl[x+width-1][y+i].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+					}
+				}
+			}
+		}
+	}
+}
 
 STATIC_OVL
 void
@@ -4895,8 +5034,11 @@ place_lolth_vaults()
 	}
 	//4 drow clerics and 1 drow wizard Trapped chest, 4 full healing potions, gold and gems
 	mklolthtreasure();
-	//Co-alligned temple.  Priest transforms and becomes hostile if adjacent.
-	//prison
+	//Co-alligned temple.  Priest transforms and becomes hostile if entered.
+	if(!rn2(3)){
+		mklolthtemple();
+	}
+	//prison 0 - 6 prisons. Prisoners can be rescued for pets.
 	num = rn2(3) + rn2(3) + rn2(3);
 	for(i = 0; i < num; i++) mklolthcell();
 	//sepulcher
