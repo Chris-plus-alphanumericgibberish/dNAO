@@ -5665,7 +5665,7 @@ int sx,sy;
 			polyps = TRUE;
 		}
 	}
-	if(mtyp == PM_TULANI_ELADRIN){
+	if(mtyp == PM_TULANI_ELADRIN && kingtype != PM_AVATAR_OF_LOLTH){
 		switch(dungeon_topology.alt_tulani){
 			case GAE_CASTE:
 				mtyp = PM_GAE_ELADRIN;
