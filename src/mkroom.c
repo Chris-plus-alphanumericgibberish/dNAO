@@ -915,7 +915,7 @@ mklolthgarden()
 		if(okspot){
 			good = TRUE;
 			for(i=0;i<width;i++) for(j=0;j<height;j++){
-				levl[x+i][y+j].typ = CORR;
+				levl[x+i][y+j].typ = ROOM;
 			}
 			levl[x+(width-1)][y+(height-1)].typ = BRCORNER;
 			levl[x][y+(height-1)].typ = BLCORNER;
