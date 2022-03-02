@@ -1201,13 +1201,13 @@ wiz_makemap(VOID_ARGS)
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
 	    int ndx = monsndx(mtmp->data);
 	    if (mtmp->isgd) {
-		mtmp->isgd = 0;
-		mongone(mtmp);
+			mtmp->isgd = 0;
+			mongone(mtmp);
 	    }
-            if (mtmp->data->geno & G_UNIQ)
-                mvitals[ndx].mvflags &= ~(G_EXTINCT);
-            if (mvitals[ndx].born)
-                mvitals[ndx].born--;
+		if (mtmp->data->geno & G_UNIQ)
+			mvitals[ndx].mvflags &= ~(G_EXTINCT);
+		if (mvitals[ndx].born)
+			mvitals[ndx].born--;
 	    if (DEADMONSTER(mtmp))
 		continue;
 	    if (mtmp->isshk)

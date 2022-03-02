@@ -399,58 +399,59 @@ struct obj *otmp;
 		break;
 	case SPE_HEALING:
 	case SPE_EXTRA_HEALING:
+	case SPE_FULL_HEALING:
 	case SPE_MASS_HEALING:{
 		int delta = mtmp->mhp;
+		int health = otyp == SPE_MASS_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
 		reveal_invis = TRUE;
 	    if (mtmp->mtyp != PM_PESTILENCE) {
-		char hurtmonbuf[BUFSZ];
-		Strcpy(hurtmonbuf, Monnam(mtmp));
-		wake = FALSE;		/* wakeup() makes the target angry */
-		/* skill adjustment ranges from -6 to + 18 (-6 means 0 hp healed minimum)*/
-		mtmp->mhp += d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1);
-		if (mtmp->mhp > mtmp->mhpmax)
-		    mtmp->mhp = mtmp->mhpmax;
-		if (mtmp->mblinded) {
-		    mtmp->mblinded = 0;
-		    mtmp->mcansee = 1;
-		}
-		delta = mtmp->mhp - delta; //Note: final minus initial
-		if (canseemon(mtmp)) {
-		    if (disguised_mimic) {
-			if (mtmp->m_ap_type == M_AP_OBJECT &&
-			    mtmp->mappearance == STRANGE_OBJECT) {
-			    /* it can do better now */
-			    set_mimic_sym(mtmp);
-			    newsym(mtmp->mx, mtmp->my);
-			} else
-			    mimic_hit_msg(mtmp, otyp);
-		    } else {
-				if (!can_see_hurtnss_of_mon(mtmp)) {
-					pline("%s looks%s better.", Monnam(mtmp),
-						otyp != SPE_HEALING ? " much" : "" );
-				}
-				else {
-					pline("%s %s %s.",
-						hurtmonbuf, 
-						delta != 0 ? "now looks only" : "looks",
-						injury_desc_word(mtmp));
+			char hurtmonbuf[BUFSZ];
+			Strcpy(hurtmonbuf, Monnam(mtmp));
+			wake = FALSE;		/* wakeup() makes the target angry */
+			/* skill adjustment ranges from -6 to + 18 (-6 means 0 hp healed minimum)*/
+			mtmp->mhp += health;
+			if (mtmp->mhp > mtmp->mhpmax)
+				mtmp->mhp = mtmp->mhpmax;
+			if (mtmp->mblinded) {
+				mtmp->mblinded = 0;
+				mtmp->mcansee = 1;
+			}
+			delta = mtmp->mhp - delta; //Note: final minus initial
+			if (canseemon(mtmp)) {
+				if (disguised_mimic) {
+				if (mtmp->m_ap_type == M_AP_OBJECT &&
+					mtmp->mappearance == STRANGE_OBJECT) {
+					/* it can do better now */
+					set_mimic_sym(mtmp);
+					newsym(mtmp->mx, mtmp->my);
+				} else
+					mimic_hit_msg(mtmp, otyp);
+				} else {
+					if (!can_see_hurtnss_of_mon(mtmp)) {
+						pline("%s looks%s better.", Monnam(mtmp),
+							otyp != SPE_HEALING ? " much" : "" );
+					}
+					else {
+						pline("%s %s %s.",
+							hurtmonbuf, 
+							(delta != 0 && mtmp->mhp < mtmp->mhpmax) ? "now looks only" : "looks",
+							injury_desc_word(mtmp));
+					}
 				}
 			}
-		}
 
-		if(mtmp->mtame && Role_if(PM_HEALER)){
-			int xp = (experience(mtmp, 0)/10) * delta / mtmp->mhpmax;
-			if(wizard) pline("%d out of %d XP", xp, experience(mtmp, 0));
-			if(xp)
-				more_experienced(xp, 0);
-		}
-		if (mtmp->mtame || mtmp->mpeaceful) {
-		    adjalign(Role_if(PM_HEALER) ? 1 : sgn(u.ualign.type));
-		}
+			if(mtmp->mtame && Role_if(PM_HEALER)){
+				int xp = (experience(mtmp, 0)/10) * delta / mtmp->mhpmax;
+				if(wizard) pline("%d out of %d XP", xp, experience(mtmp, 0));
+				if(xp)
+					more_experienced(xp, 0);
+			}
+			if (mtmp->mtame || mtmp->mpeaceful) {
+				adjalign(Role_if(PM_HEALER) ? 1 : sgn(u.ualign.type));
+			}
 	    } else {	/* Pestilence */
-		/* Pestilence will always resist; damage is half of 3d{4,8} */
-		(void) resist(mtmp, otmp->oclass,
-			      d(3, otyp != SPE_HEALING ? 8 : 4), TELL);
+			/* Pestilence will always resist; damage is half of 3d{4,8} */
+			(void) resist(mtmp, otmp->oclass, health/2, TELL);
 	    }
 	}break;
 	case WAN_LIGHT:	/* (broken wand) */
@@ -2131,6 +2132,7 @@ struct obj *obj, *otmp;
 	case WAN_NOTHING:
 	case SPE_HEALING:
 	case SPE_EXTRA_HEALING:
+	case SPE_FULL_HEALING:
 		res = 0;
 		break;
 	case SPE_STONE_TO_FLESH:
@@ -2733,6 +2735,15 @@ boolean ordinary;
 		    } else
 			You("shudder in dread.");
 		    break;
+		case SPE_FULL_HEALING:
+			if (Sick) You("are no longer ill.");
+			if (Slimed) {
+				pline_The("slime disappears!");
+				Slimed = 0;
+			 /* flags.botl = 1; -- healup() handles this */
+			}
+			healup(50*P_SKILL(P_HEALING_SPELL), 0, TRUE, TRUE);
+			break;
 		case SPE_HEALING:
 		case SPE_EXTRA_HEALING:
 		case SPE_MASS_HEALING:
@@ -2849,7 +2860,6 @@ struct obj *obj;	/* wand or spell */
 		    break;
 
 		/* Default processing via bhitm() for these */
-		case SPE_CURE_SICKNESS:
 		case WAN_MAKE_INVISIBLE:
 		case WAN_CANCELLATION:
 		case SPE_CANCELLATION:
@@ -2863,6 +2873,7 @@ struct obj *obj;	/* wand or spell */
 		case WAN_SPEED_MONSTER:
 		case SPE_HEALING:
 		case SPE_EXTRA_HEALING:
+		case SPE_FULL_HEALING:
 		case WAN_DRAINING:
 		case SPE_DRAIN_LIFE:
 		case WAN_OPENING:
@@ -3480,6 +3491,8 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 			}
 			if (weapon != INVIS_BEAM) {
 				int res = (*fhitm)(mtmp, obj);
+				if(obj->otyp == SPE_FULL_HEALING)
+					return (struct monst *)0;
 				if (weapon == TRIGGER_BEAM && res) {
 					if (obj_destroyed) *obj_destroyed = TRUE;	/* doesn't destroy obj, but signals effect was done*/
 					return mtmp;
@@ -5365,8 +5378,8 @@ int damage, tell;
 	resisted = rn2(100 + alev - dlev) < mons_mr;
 	if (resisted) {
 	    if (tell) {
-		shieldeff(mtmp->mx, mtmp->my);
-		pline("%s resists!", Monnam(mtmp));
+			shieldeff(mtmp->mx, mtmp->my);
+			pline("%s resists!", Monnam(mtmp));
 	    }
 	    damage = (damage + 1) / 2;
 	}

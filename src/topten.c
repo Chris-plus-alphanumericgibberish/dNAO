@@ -396,7 +396,7 @@ int how;
 	t0->plrace[ROLESZ] = '\0';
 	(void) strncpy(t0->plgend, genders[flags.female].filecode, ROLESZ);
 	t0->plgend[ROLESZ] = '\0';
-	(void) strncpy(t0->plalign, aligns[1-u.ualign.type].filecode, ROLESZ);
+	(void) strncpy(t0->plalign, get_alignment_code(), ROLESZ);
 	t0->plalign[ROLESZ] = '\0';
 	(void) strncpy(t0->name, plname, NAMSZ);
 	t0->name[NAMSZ] = '\0';

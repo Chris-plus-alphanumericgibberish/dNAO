@@ -4740,6 +4740,7 @@ dothrowspell:
 	case SPE_DETECT_UNSEEN:
 	case SPE_HEALING:
 	case SPE_EXTRA_HEALING:
+	case SPE_FULL_HEALING:
 	case SPE_DRAIN_LIFE:
 	case SPE_STONE_TO_FLESH:
 		if (!(objects[pseudo->otyp].oc_dir == NODIR)) {
@@ -4754,6 +4755,7 @@ dothrowspell:
 				if (iflags.paranoid_self_cast &&
 						pseudo->otyp != SPE_HEALING &&
 						pseudo->otyp != SPE_EXTRA_HEALING &&
+						pseudo->otyp != SPE_FULL_HEALING &&
 						pseudo->otyp != SPE_TELEPORT_AWAY)
 				{
 					char buf[BUFSZ];
@@ -4808,15 +4810,6 @@ dothrowspell:
 
 	case SPE_CURE_BLINDNESS:
 		healup(0, 0, FALSE, TRUE);
-		break;
-	case SPE_CURE_SICKNESS:
-		if (Sick) You("are no longer ill.");
-		if (Slimed) {
-		    pline_The("slime disappears!");
-		    Slimed = 0;
-		 /* flags.botl = 1; -- healup() handles this */
-		}
-		healup(0, 0, TRUE, FALSE);
 		break;
 	case SPE_CREATE_FAMILIAR:
 		if(DimensionalLock)
@@ -5550,6 +5543,12 @@ int spellID;
 			strcat(desc3, "Blinded creatures affected can see again.");
 			strcat(desc4, "");
 			break;
+		case SPE_FULL_HEALING:
+			strcat(desc1, "Creates a directed ray of healing magic.");
+			strcat(desc2, "The first creature hit by the ray is greatly healed.");
+			strcat(desc3, "Blinded creatures hit by the ray can see again.");
+			strcat(desc4, "Cures food poisioning, illness, and sliming.");
+			break;
 		case SPE_DRAIN_LIFE:
 			strcat(desc1, "Creates a directed ray of draining magic.");
 			strcat(desc2, "Creatures affected by the ray lose a level and max health.");
@@ -5648,12 +5647,6 @@ int spellID;
 			break;
 		case SPE_CURE_BLINDNESS:
 			strcat(desc1, "Cures blindness.");
-			strcat(desc2, "");
-			strcat(desc3, "");
-			strcat(desc4, "");
-			break;
-		case SPE_CURE_SICKNESS:
-			strcat(desc1, "Cures food poisioning, illness, and sliming.");
 			strcat(desc2, "");
 			strcat(desc3, "");
 			strcat(desc4, "");
