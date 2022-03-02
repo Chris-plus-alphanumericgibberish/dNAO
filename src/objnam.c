@@ -3647,7 +3647,7 @@ int wishflags;
 	register int i;
 	register struct obj *otmp;
 	int cnt, spe, spesgn, typ, very, rechrg;
-	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen;
+	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen, uncharged;
 	int moonphase = -1, viperheads = -1, ampule = -1, mat = 0;
 	int eroded, eroded2, eroded3, erodeproof;
 	int gemtype = 0;
@@ -3705,7 +3705,7 @@ int wishflags;
 	
 	cnt = spe = spesgn = typ = very = rechrg =
 		blessed = uncursed = iscursed = stolen = 
-		isdrained = halfdrained =
+		isdrained = halfdrained = uncharged =
 #ifdef INVISIBLE_OBJECTS
 		isinvisible =
 #endif
@@ -3861,6 +3861,9 @@ int wishflags;
 			iscursed = 1;
 		} else if (!strncmpi(bp, "uncursed ", l=9)) {
 			uncursed = 1;
+
+		} else if (!strncmpi(bp, "uncharged ", l=10)) {
+			uncharged = 1;
 #ifdef INVISIBLE_OBJECTS
 		} else if (!strncmpi(bp, "invisible ", l=10)) {
 			isinvisible = 1;
@@ -5453,6 +5456,19 @@ typfnd:
 		otmp->cursed = (Luck < 0 && !wizwish);
 	} else if (spesgn < 0) {
 		curse(otmp);
+	}
+	// Some items can be wished for in an uncharged state
+	if (uncharged) {
+		if(objects[otmp->otyp].oc_charged){
+			if(is_lightsaber(otmp))
+				otmp->age = 0;
+			else if(is_weptool(otmp))
+				otmp->ovar1 = 0;
+			else otmp->spe = 0;
+		}
+		else if(otmp->otyp == LANTERN){
+			otmp->age = 0;
+		}
 	}
 
 #ifdef INVISIBLE_OBJECTS
