@@ -1715,7 +1715,7 @@ static const char * const bogusmons[] = {
 	"neutral twin", "vampiric half-dragon half-troll lycanthropic fiendish snail", 
 		"squid thingy", "allegedly-matriarchal drow", "ranch dressing semielemental", /* Order of the Stick */
 	
-	"grue", "Christmas-tree monster", "luck sucker", "paskald",
+	"Christmas-tree monster", "luck sucker", "paskald",
 	"brogmoid", "dornbeast",		/* Quendor (Zork, &c.) */
 	"Ancient Multi-Hued Dragon", "Evil Iggy",
 						/* Moria */
@@ -1791,6 +1791,7 @@ static const char * const bogusmons[] = {
 	"spherical cow",		/* Joke about theoretical physicists */
 	"arsassin",				/* Psych */
 	"booksh elves",			/* Ciel, on freenode */
+	"amazing tommy-gun nun",	/* Arkham Horror, technically */
         "one-winged dewinged stab-bat",  /* KoL */
         "praying mantis",
         "arch-pedant",
