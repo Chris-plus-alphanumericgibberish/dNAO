@@ -805,6 +805,24 @@ find_equip_life_oprop()
 	return (struct obj *) 0;
 }
 
+const char*
+get_alignment_code()
+{
+	for(int i = 0; i<5; i++){
+		if(u.ualign.type == aligns[i].value) return aligns[i].filecode;
+	}
+	return "Naa"; //Not An Alignment
+}
+
+const char*
+get_alignment_adj()
+{
+	for(int i = 0; i<5; i++){
+		if(u.ualign.type == aligns[i].value) return aligns[i].adj;
+	}
+	return "Not applicable"; //Not An Alignment
+}
+
 /* Be careful not to call panic from here! */
 void
 done(how)
@@ -1052,7 +1070,7 @@ die:
             dump_init();
             if (dump_fp) {
                 Sprintf(pbuf, "%s, %s %s %s %s", plname,
-                        aligns[1 - u.ualign.type].adj,
+                        get_alignment_adj(),
                         genders[flags.female].adj,
                         urace.adj,
                         (flags.female && urole.name.f)?

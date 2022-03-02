@@ -638,7 +638,7 @@ touch_whereis()
 	  questcode,
 	  urace.filecode,
 	  genders[flags.female].filecode,
-	  aligns[1-u.ualign.type].filecode,
+	  get_alignment_code(),
 	  encodeconduct(),
 	  u.uhave.amulet ? 1 : 0
 	  );
@@ -2739,7 +2739,7 @@ livelog_write_string(buffer)
 		     questcode,
 		     urace.filecode,
 		     genders[flags.female].filecode,
-		     aligns[1-u.ualign.type].filecode,
+		     get_alignment_code(),
 		     moves, (long)u.ubirthday, (long)time(NULL), msgbuf);
 
 	    fprintf(livelogfile, "%s", tmpbuf);

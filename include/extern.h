@@ -830,6 +830,8 @@ E void FDECL(done_in_by, (struct monst *));
 #endif /* !MAKEDEFS_C && !LEV_LEX_C */
 E void VDECL(panic, (const char *,...)) PRINTF_F(1,2);
 #if !defined(MAKEDEFS_C) && !defined(LEV_LEX_C)
+E const char* NDECL(get_alignment_code);
+E const char* NDECL(get_alignment_adj);
 E void FDECL(done, (int));
 E void FDECL(container_contents, (struct obj *,BOOLEAN_P,BOOLEAN_P));
 #ifdef DUMP_LOG
