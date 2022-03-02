@@ -1003,6 +1003,15 @@ int tary;
 				}
 				break;
 			case AT_ARRW:
+				if(adtyp == AD_PLYS){
+					if(magr->mspec_used)
+						break;
+					else {
+						// Breath timer
+						magr->mspec_used = 10 + rn2(20);
+					}
+				}
+					
 				if ((adtyp != AD_SHDW || ranged)) {	// can be used in melee range, except for shadow
 					/* fire d(n,d) projectiles */
 					result |= xfirey(magr, attk, tarx, tary, d(attk->damn, attk->damd));
