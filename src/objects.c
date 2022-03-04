@@ -527,7 +527,7 @@ WEAPON(("aklys", "thonged club"),
 WEAPON(("flail"),
 	DMG(D(6), F(1)), DMG(D(2, 4)),
 	1, 0, MZ_MEDIUM, 25, 15,  4,  0, B,   P_FLAIL, IRON, FALSE, HI_METAL),
-WEAPON(("nunchaku", "set of rope-sticks"),
+WEAPON(("nunchaku", "set of chain-sticks"),
 	DMG(D(4), F(1)), DMG(D(3)),
 	0, 0, MZ_MEDIUM,  5,  7,  4,  0, B,   P_FLAIL, WOOD, FALSE, HI_WOOD),
 /* misc */

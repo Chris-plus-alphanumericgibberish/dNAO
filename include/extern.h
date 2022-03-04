@@ -57,6 +57,7 @@ E boolean FDECL(tinnable, (struct obj *));
 E void NDECL(reset_trapset);
 E void FDECL(fig_transform, (genericptr_t, long));
 E int FDECL(use_whip, (struct obj *));
+E int FDECL(use_nunchucks, (struct obj *));
 E int FDECL(use_force_sword, (struct obj *));
 E int FDECL(do_bloodletter, (struct obj *));
 E void FDECL(pyramid_effects, (struct obj *, int, int));

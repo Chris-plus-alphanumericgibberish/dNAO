@@ -1254,6 +1254,7 @@ register const char *let,*word;
 //endif
 		      !is_axe(otmp) && !is_pole(otmp) && 
 			  otyp != BULLWHIP && otyp != VIPERWHIP && otyp != FORCE_WHIP &&
+			  otyp != NUNCHAKU && 
 			  !is_knife(otmp) && otmp->oartifact != ART_SILVER_STARLIGHT &&
 			  !(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !u.veil) &&
 			  otmp->otyp != RAKUYO && otmp->otyp != RAKUYO_SABER && 
