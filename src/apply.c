@@ -3650,11 +3650,11 @@ struct obj *obj;
 	}
     mtmp = m_at(rx, ry);
 
-    /* fake some proficiency checks */
-    proficient = 0;
+    /* proficiency check */
+    proficient = P_SKILL(P_WHIP)-P_UNSKILLED;
     if (Role_if(PM_ARCHEOLOGIST)) ++proficient;
     if (ACURR(A_DEX) < 6) proficient--;
-    else if (ACURR(A_DEX) >= 14) proficient += (ACURR(A_DEX) - 14);
+    else if (ACURR(A_DEX) >= 14) proficient += (ACURR(A_DEX) - 11)/3;
     if (Fumbling) --proficient;
     if (proficient > 3) proficient = 3;
     if (proficient < 0) proficient = 0;
