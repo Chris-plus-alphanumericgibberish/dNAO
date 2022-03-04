@@ -3909,7 +3909,10 @@ struct obj *obj;
     mtmp = m_at(rx, ry);
 
     /* proficiency check */
-    proficient = P_SKILL(P_FLAIL)-P_UNSKILLED;
+    proficient = 0;
+	if(u.umartial){
+		proficient = min(P_SKILL(P_FLAIL)-P_UNSKILLED, P_SKILL(P_MARTIAL_ARTS)-P_BASIC);
+	}
     if (Role_if(PM_MONK)) ++proficient;
     if (ACURR(A_DEX) < 6) proficient--;
     else if (ACURR(A_DEX) >= 14) proficient += (ACURR(A_DEX) - 11)/3;
