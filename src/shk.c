@@ -3239,6 +3239,7 @@ move_on:
 	   || eshkp->billct == BILLSZ
 	   || obj->oclass == BALL_CLASS
 	   || obj->oclass == CHAIN_CLASS || offer == 0L
+	   || get_ox(obj, OX_ESUM)
 	   || (obj->oclass == FOOD_CLASS && obj->oeaten)
 	   || (Is_candle(obj) &&
 		   obj->age < 20L * (long)objects[obj->otyp].oc_cost)) {
