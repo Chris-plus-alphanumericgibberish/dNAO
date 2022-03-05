@@ -138,6 +138,7 @@ int mndx;
 	case PM_ELF_MUMMY:	mndx = PM_ELF;  break;
 	case PM_VAMPIRE:
 	case PM_VAMPIRE_LORD:
+	case PM_VAMPIRE_LADY:
 #if 0	/* DEFERRED */
 	case PM_VAMPIRE_MAGE:
 #endif
@@ -536,6 +537,7 @@ register struct monst *mtmp;
 		goto default_1;
 	    case PM_VAMPIRE:
 	    case PM_VAMPIRE_LORD:
+	    case PM_VAMPIRE_LADY:
 		/* include mtmp in the mkcorpstat() call */
 		if(mtmp->mpetitioner 
 			&& !is_rider(mtmp->data) 

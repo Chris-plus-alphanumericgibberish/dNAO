@@ -5596,6 +5596,7 @@ int sx,sy;
 								};
 			mtyp = ROLL_FROM(prisoners);
 		}break;
+		case PM_VAMPIRE_LADY:
 		case PM_VAMPIRE_LORD:{
 			int prisoners[] = {
 									PM_WOODLAND_ELF, PM_GREEN_ELF, PM_GREY_ELF, PM_ELF_LADY,
@@ -5700,6 +5701,10 @@ int sx,sy;
 			}
 			if(kingtype == PM_VAMPIRE_LORD){
 				mon->female = TRUE;
+				set_template(mon, VAMPIRIC);
+			}
+			if(kingtype == PM_VAMPIRE_LADY){
+				mon->female = FALSE;
 				set_template(mon, VAMPIRIC);
 			}
 			if(polyps){
@@ -5857,6 +5862,7 @@ struct mkroom *sroom;
 				PM_DEEPEST_ONE,
 				PM_OGRE_KING,
 				PM_VAMPIRE_LORD,
+				PM_VAMPIRE_LADY,
 				PM_ELVENKING,
 				PM_ELVENQUEEN,
 				PM_DROW_MATRON,
@@ -5903,7 +5909,7 @@ struct mkroom *sroom;
 	for(sx = sroom->lx; sx <= sroom->hx; sx++)
 	    for(sy = sroom->ly; sy <= sroom->hy; sy++) {
 		if(type == COURT){
-			if(ctype == PM_KOBOLD_LORD || ctype == PM_VAMPIRE_LORD || ctype == PM_DROW_MATRON ||
+			if(ctype == PM_KOBOLD_LORD || ctype == PM_VAMPIRE_LORD || ctype == PM_VAMPIRE_LADY || ctype == PM_DROW_MATRON ||
 				ctype == PM_EMBRACED_DROWESS || ctype == PM_DEEPEST_ONE || ctype == PM_ORC_OF_THE_AGES_OF_STARS
 			){
 				levl[tx][ty].lit = 0;
@@ -7569,6 +7575,7 @@ courtmon(kingnum)
 		
 		case PM_VAMPIRE:
 		case PM_VAMPIRE_LORD:
+		case PM_VAMPIRE_LADY:
 			i = rnd(100);
 			if(i>90)
 				return &mons[PM_VAMPIRE];
