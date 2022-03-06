@@ -404,92 +404,90 @@ merge_adj_rooms()
 			if (!(xadj || yadj))
 				continue;
 			// preferred option: merge the rooms by expanding one room so that they share a wall, and add a door along the shared wall
+			boolean okay = TRUE;
+			int dp = 0;
+			schar *p;
+			struct mkroom *t, *u;
+			// determine which room is smaller; only attempt to expand that room
+			t = ((a->hx - a->lx)*(a->hy - a->ly) < (b->hx - b->lx)*(b->hy - b->ly)) ? a : b;
+			u = (t == a) ? b : a;
+
+			// determine which of t's corners has to move, and in which direction
+			if (xadj){
+				dp = (t->hx < u->lx) ? 1 : -1;
+				p = (t->hx < u->lx) ? &(t->hx) : &(t->lx);
+			}
+			if (yadj){
+				dp = (t->hy < u->ly) ? 1 : -1;
+				p = (t->hx < u->lx) ? &(t->hy) : &(t->ly);
+			}
+
+			// check that it is okay to expand in that direction
+			if (xadj){
+				for (g = t->ly - 1; g <= t->hy + 1; g++)
+				if (!IS_STWALL(levl[*p+dp][g].typ))
+					okay = FALSE;
+			}
+			if (yadj){
+				for (f = t->lx - 1; f <= t->hx + 1; f++)
+				if (!IS_STWALL(levl[f][*p+dp].typ))
+					okay = FALSE;
+			}
+			if (okay && rn2(4))	// use this method most of the time, but the oddly-shaped rooms are fun too
 			{
-				boolean okay = TRUE;
-				int dp = 0;
-				schar *p;
-				struct mkroom *t, *u;
-				// determine which room is smaller; only attempt to expand that room
-				t = ((a->hx - a->lx)*(a->hy - a->ly) < (b->hx - b->lx)*(b->hy - b->ly)) ? a : b;
-				u = (t == a) ? b : a;
-
-				// determine which of t's corners has to move, and in which direction
+				// expand the room
 				if (xadj){
-					dp = (t->hx < u->lx) ? 1 : -1;
-					p = (t->hx < u->lx) ? &(t->hx) : &(t->lx);
+					for (g = t->ly - 1; g <= t->hy + 1; g++) {
+						levl[*p + dp * 2][g].typ = VWALL;
+						levl[*p + dp * 2][g].horizontal = 0;
+					}
+					for (g = t->ly; g <= t->hy; g++) {
+						levl[*p + dp * 1][g].typ = ROOM;
+						levl[*p + dp * 1][g].horizontal = 0;
+					}
 				}
 				if (yadj){
-					dp = (t->hy < u->ly) ? 1 : -1;
-					p = (t->hx < u->lx) ? &(t->hy) : &(t->ly);
+					for (f = t->lx - 1; f <= t->hx + 1; f++) {
+						levl[f][*p + dp * 2].typ = HWALL;
+						levl[f][*p + dp * 2].horizontal = 1;
+					}
+					for (f = t->lx; f <= t->hx; f++) {
+						levl[f][*p + dp * 1].typ = ROOM;
+						levl[f][*p + dp * 1].horizontal = 0;
+					}
 				}
-
-				// check that it is okay to expand in that direction
+				*p += dp;
+				// attempt to add a door over the shared length
 				if (xadj){
-					for (g = t->ly - 1; g <= t->hy + 1; g++)
-					if (!IS_STWALL(levl[*p+dp][g].typ))
-						okay = FALSE;
+					f = *p + dp;
+					g = rn2(maxy - miny + 1) + miny;
 				}
 				if (yadj){
-					for (f = t->lx - 1; f <= t->hx + 1; f++)
-					if (!IS_STWALL(levl[f][*p+dp].typ))
-						okay = FALSE;
+					f = rn2(maxx - minx + 1) + minx;
+					g = *p + dp;
 				}
-				if (okay && rn2(4))	// use this method most of the time, but the oddly-shaped rooms are fun too
+
+				if (okdoor(f, g))
 				{
-					// expand the room
-					if (xadj){
-						for (g = t->ly - 1; g <= t->hy + 1; g++) {
-							levl[*p + dp * 2][g].typ = VWALL;
-							levl[*p + dp * 2][g].horizontal = 0;
-						}
-						for (g = t->ly; g <= t->hy; g++) {
-							levl[*p + dp * 1][g].typ = ROOM;
-							levl[*p + dp * 1][g].horizontal = 0;
-						}
-					}
-					if (yadj){
-						for (f = t->lx - 1; f <= t->hx + 1; f++) {
-							levl[f][*p + dp * 2].typ = HWALL;
-							levl[f][*p + dp * 2].horizontal = 1;
-						}
-						for (f = t->lx; f <= t->hx; f++) {
-							levl[f][*p + dp * 1].typ = ROOM;
-							levl[f][*p + dp * 1].horizontal = 0;
-						}
-					}
-					*p += dp;
-					// attempt to add a door over the shared length
-					if (xadj){
-						f = *p + dp;
-						g = rn2(maxy - miny + 1) + miny;
-					}
-					if (yadj){
-						f = rn2(maxx - minx + 1) + minx;
-						g = *p + dp;
-					}
-
-					if (okdoor(f, g))
-					{
-						dodoor(f, g, t);
-						add_door(f, g, u);
-					}
-					else
-					{
-						continue;	// it failed to connect the rooms, but it's too late to go to the fallback
-					}
+					dodoor(f, g, t);
+					add_door(f, g, u);
 				}
-				else {
-					// fallback option: merge the rooms by replacing the walls
-					if (xadj){
-						for (g = miny; g <= maxy; g++)
-						for (f = maxx + 1; f <= minx - 1; f++)
-							levl[f][g].typ = ROOM;
-					}
-					if (yadj){
-						for (f = minx; f <= maxx; f++)
-						for (g = maxy + 1; g <= miny - 1; g++)
-							levl[f][g].typ = ROOM;
-					}
+				else
+				{
+					continue;	// it failed to connect the rooms, but it's too late to go to the fallback
+				}
+			}
+			else {
+				// fallback option: merge the rooms by replacing the walls
+				if (xadj){
+					for (g = miny; g <= maxy; g++)
+					for (f = maxx + 1; f <= minx - 1; f++)
+						levl[f][g].typ = ROOM;
+				}
+				if (yadj){
+					for (f = minx; f <= maxx; f++)
+					for (g = maxy + 1; g <= miny - 1; g++)
+						levl[f][g].typ = ROOM;
 				}
 			}
 			// I now pronounce you... one room for pathing purposes.
@@ -497,21 +495,11 @@ merge_adj_rooms()
 				smeq[j] = smeq[i];
 			else
 				smeq[i] = smeq[j];
-			// make the lighting consistent in the rooms 
-			struct rm *lev;
-			struct mkroom *tmp;
-			if ((((a->hx - a->lx)*(a->hy - a->ly) > (b->hx - b->lx)*(b->hy - b->ly)) || a->rtype == JOINEDROOM) && b->rtype != JOINEDROOM) {
-				tmp = b;
-				tmp->rlit = a->rlit;
-			}
-			else {
-				tmp = a;
-				tmp->rlit = b->rlit;
-			}
-
-			for (f = tmp->lx - 1; f <= tmp->hx + 1; f++) {
-			for (g = tmp->ly - 1; g <= tmp->hy + 1; g++)
-				levl[f][g].lit = tmp->rlit;
+			// make the lighting consistent in the rooms
+			t->rlit = u->rlit;
+			for (f = t->lx - 1; f <= t->hx + 1; f++) {
+			for (g = t->ly - 1; g <= t->hy + 1; g++)
+				levl[f][g].lit = t->rlit;
 			}
 			// change the room types
 			a->rtype = JOINEDROOM;
