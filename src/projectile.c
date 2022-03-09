@@ -8,7 +8,7 @@ STATIC_DCL int FDECL(projectile_attack, (struct monst *, struct monst *, struct 
 STATIC_DCL void FDECL(quest_art_swap, (struct obj **, struct monst *));
 STATIC_DCL void FDECL(sho_obj_return, (struct obj *, int, int));
 STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
-STATIC_DCL void FDECL(toss_up2, (struct obj *));
+STATIC_DCL void FDECL(toss_up, (struct obj *, boolean));
 STATIC_DCL int FDECL(calc_multishot, (struct monst *, struct obj *, struct obj *, int));
 STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
 STATIC_DCL boolean FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
@@ -102,8 +102,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		}
 
 		/* Fluorite Octahedron has obj->quan >1 possible */
-		if (m_shot.o && (m_shot.o == ammo->otyp) && (ammo->oartifact == ART_FLUORITE_OCTAHEDRON) && !m_shot.s) {
-			n_to_throw = m_shot.n;
+		if (m_shot.i && (m_shot.o == ammo->otyp) && (ammo->oartifact == ART_FLUORITE_OCTAHEDRON) && !m_shot.s) {
+			n_to_throw = ammo->where != OBJ_FREE ? m_shot.n : ammo->quan;
 			m_shot.n = 1;
 		}
 
@@ -293,7 +293,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 		/* otherwise do the standard (player-only) toss upwards */
 		if (!(Weightless || Underwater || Is_waterlevel(&u.uz))) {
-			toss_up2(thrownobj);
+			toss_up(thrownobj, forcedestroy);
 			return MM_MISS;
 		}
 		end_projectile(magr, mdef, thrownobj_p, launcher, fired, forcedestroy);
@@ -1650,8 +1650,9 @@ struct obj * thrownobj;
  * Hero tosses an object upwards with appropriate consequences.
  */
 STATIC_OVL void
-toss_up2(obj)
+toss_up(obj, forcedestroy)
 struct obj *obj;
+boolean forcedestroy;
 {
 	char buf[BUFSZ];
 	/* note: obj->quan == 1 */
@@ -1682,7 +1683,7 @@ struct obj *obj;
 			Doname2(obj), buf, body_part(HEAD));
 
 		/* object now hits you */
-		projectile((struct monst *)0, obj, (void *)0, HMON_PROJECTILE, u.ux, u.uy, 0, 0, 0, 0, FALSE, FALSE, FALSE);
+		projectile((struct monst *)0, obj, (void *)0, HMON_PROJECTILE, u.ux, u.uy, 0, 0, 0, 0, forcedestroy, FALSE, FALSE);
 		return;
 	}
 }
@@ -2014,10 +2015,10 @@ dothrow()
 
 	/* try to find a wielded launcher */
 	if (ammo != uwep && ammo != uswapwep &&
-		ammo_and_launcher(ammo, uwep))
+		ammo_and_launcher(ammo, uwep) && !is_blaster(uwep))
 		launcher = uwep;
 	else if (ammo != uwep && ammo != uswapwep &&
-		ammo_and_launcher(ammo, uswapwep) && u.twoweap)
+		ammo_and_launcher(ammo, uswapwep) && u.twoweap && !is_blaster(uswapwep))
 		launcher = uswapwep;
 	else
 		launcher = (struct obj *)0;
