@@ -621,7 +621,7 @@ int *fail_reason;
 	    return (struct monst *)0;
 	}
 	
-	if(mon && cause == ANIMATE_SPELL && rnd(20) < ACURR(A_CHA) && 
+	if(mon && cause == ANIMATE_SPELL && rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA) && 
 		!(is_animal(mon->data) || mindless_mon(mon))
 	){
 		struct monst *newmon;
