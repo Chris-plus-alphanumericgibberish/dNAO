@@ -2561,6 +2561,7 @@ winid *datawin;
 		: (oc.oc_dir == IMMEDIATE ? "Beam"
 		: "Ray"));
 	int goatweaponturn = 0;
+	boolean printed_type = FALSE;
 	
 	if(check_oprop(obj,OPROP_GOATW))
 		goatweaponturn = goat_weapon_damage_turn(obj);
@@ -2599,55 +2600,61 @@ winid *datawin;
 	}
 
 	/* Object classes currently with no special messages here: amulets. */
-	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill) || otyp == HEAVY_IRON_BALL || olet == GEM_CLASS) {
+	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill) || otyp == HEAVY_IRON_BALL || olet == GEM_CLASS || oartifact == ART_WAND_OF_ORCUS) {
 		int mask = attack_mask(obj, otyp, oartifact);
 		boolean otyp_is_blaster = (otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
 		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) && !otyp_is_blaster);
 
-		/* get damage type */
-		buf2[0] = '\0';
-		int i;
-		static const char * damagetypes[] = { "blunt", "piercing", "slashing", "energy" };
-		for (i = 0; i < 4; i++) {
-			if (mask & (1 << i)) {
-				if (eos(buf2) != buf2)
-					Strcat(buf2, "/");
-				Strcat(buf2, damagetypes[i]);
+		/* print type */
+		if (!printed_type) {
+			buf2[0] = '\0';
+			int i;
+			static const char * damagetypes[] = { "blunt", "piercing", "slashing", "energy" };
+			for (i = 0; i < 4; i++) {
+				if (mask & (1 << i)) {
+					if (eos(buf2) != buf2)
+						Strcat(buf2, "/");
+					Strcat(buf2, damagetypes[i]);
+				}
 			}
-		}
-		if (otyp == FRAG_GRENADE || otyp == GAS_GRENADE || otyp == ROCKET || otyp == STICK_OF_DYNAMITE)
-			Strcpy(buf2, "explosive");
-		Strcat(buf2, " ");
+			if (otyp == FRAG_GRENADE || otyp == GAS_GRENADE || otyp == ROCKET || otyp == STICK_OF_DYNAMITE)
+				Strcpy(buf2, "explosive");
+			Strcat(buf2, " ");
 
-		if (oc.oc_skill > 0) {
-			if (obj) {
-				Sprintf(buf, "%s-handed %s%s%s.", 
-					((obj ? bimanual(obj, youmonst.data) : oc.oc_bimanual) ? "Two" : "One"),
-					(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
-					(otyp_is_blaster ? "blaster" : otyp_is_launcher ? "launcher" : "weapon"),
-					((obj && is_weptool(obj)) && !otyp_is_launcher ? "-tool" : "")
-					);
+			if (oc.oc_skill > 0) {
+				if (obj) {
+					Sprintf(buf, "%s-handed %s%s%s.", 
+						((obj ? bimanual(obj, youmonst.data) : oc.oc_bimanual) ? "Two" : "One"),
+						(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
+						(otyp_is_blaster ? "blaster" : otyp_is_launcher ? "launcher" : "weapon"),
+						((obj && is_weptool(obj)) && !otyp_is_launcher ? "-tool" : "")
+						);
+				}
+				else {
+					Sprintf(buf, "%s-handed %s%s%s.",
+						(oc.oc_bimanual ? "Two" : "Single"),
+						(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
+						(otyp_is_launcher ? "launcher" : "weapon"),
+						((olet == TOOL_CLASS && oc.oc_skill) ? "-tool" : ""));
+				}
+			}
+			else if (oc.oc_skill <= -P_BOW && oc.oc_skill >= -P_CROSSBOW) {
+				Sprintf(buf, "%sammunition.", upstart(buf2));
+			}
+			else if (olet == WAND_CLASS) {
+				Sprintf(buf, "%s wand.", dir);
 			}
 			else {
-				Sprintf(buf, "%s-handed %s%s%s.",
-					(oc.oc_bimanual ? "Two" : "Single"),
-					(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
-					(otyp_is_launcher ? "launcher" : "weapon"),
-					((olet == TOOL_CLASS && oc.oc_skill) ? "-tool" : ""));
+				Sprintf(buf, "Thrown %smissile.", buf2);
 			}
+			/* special cases */
+			if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovar1 & SEAL_EVE))
+				Strcpy(eos(buf)-1, ", and launcher.");
+			if (oartifact == ART_LIECLEAVER || oartifact == ART_ROGUE_GEAR_SPIRITS || oartifact == ART_WAND_OF_ORCUS)
+				Sprintf(eos(buf)-1, ", and %smelee weapon.", buf2);
+			OBJPUTSTR(buf);
+			printed_type = TRUE;
 		}
-		else if (oc.oc_skill <= -P_BOW && oc.oc_skill >= -P_CROSSBOW) {
-			Sprintf(buf, "%sammunition.", upstart(buf2));
-		}
-		else {
-			Sprintf(buf, "Thrown %smissile.", buf2);
-		}
-		/* special cases */
-		if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovar1 & SEAL_EVE))
-			Strcpy(eos(buf)-1, ", and launcher.");
-		if (oartifact == ART_LIECLEAVER || oartifact == ART_ROGUE_GEAR_SPIRITS || oartifact == ART_WAND_OF_ORCUS)
-			Sprintf(eos(buf)-1, ", and %smelee weapon.", buf2);
-		OBJPUTSTR(buf);
 
 		/* what skill does it use? */
 		if (obj ? weapon_type(obj) : oc.oc_skill != P_NONE) {
@@ -2660,9 +2667,6 @@ winid *datawin;
 						break;
 					case ART_ROGUE_GEAR_SPIRITS:
 						Strcpy(buf2, " at range, and your pickaxe skill in melee.");
-						break;
-					case ART_WAND_OF_ORCUS:
-						Strcpy(buf2, " at range, and your mace skill in melee.");
 						break;
 					case ART_PEN_OF_THE_VOID:
 						if(obj->ovar1 & SEAL_EVE) {
@@ -3198,27 +3202,30 @@ winid *datawin;
 		/* Armor type */
 		/* Indexes here correspond to ARM_SHIELD, etc; not the W_* masks.
 		* Expects ARM_SUIT = 0, all the way up to ARM_SHIRT = 6. */
-		const char* armorslots[] = {
-			"torso", "shield", "helm", "gloves", "boots", "cloak", "shirt"
-		};
-		if (obj) {
-			Sprintf(buf, "%s, worn in the %s slot.",
-				(oc.oc_armcat != ARM_SUIT ? "Armor" :
-				is_light_armor(obj) ? "Light armor" :
-				is_medium_armor(obj) ? "Medium armor" :
-				"Heavy armor"),
-				armorslots[oc.oc_armcat]);
+		if (!printed_type) {
+			const char* armorslots[] = {
+				"torso", "shield", "helm", "gloves", "boots", "cloak", "shirt"
+			};
+			if (obj) {
+				Sprintf(buf, "%s, worn in the %s slot.",
+					(oc.oc_armcat != ARM_SUIT ? "Armor" :
+					is_light_armor(obj) ? "Light armor" :
+					is_medium_armor(obj) ? "Medium armor" :
+					"Heavy armor"),
+					armorslots[oc.oc_armcat]);
+			}
+			else {
+				/* currently, the is_x_armor checks wouldn't actually need an obj,
+				* but there's no sense in rewriting perfectly good code to fit
+				* immediate needs and possibly prevent future changes that would
+				* like details from the obj itself 
+				*/
+				Sprintf(buf, "Armor, worn in the %s slot.",
+					armorslots[oc.oc_armcat]);
+			}
+			OBJPUTSTR(buf);
+			printed_type = TRUE;
 		}
-		else {
-			/* currently, the is_x_armor checks wouldn't actually need an obj,
-			 * but there's no sense in rewriting perfectly good code to fit
-			 * immediate needs and possibly prevent future changes that would
-			 * like details from the obj itself 
-			 */
-			Sprintf(buf, "Armor, worn in the %s slot.",
-				armorslots[oc.oc_armcat]);
-		}
-		OBJPUTSTR(buf);
 		/* Defense */
 		if (obj && obj->known) {// calculate the actual AC and DR this armor gives
 			if(is_shield(obj) && obj->objsize != youracedata->msize){
@@ -3392,40 +3399,44 @@ winid *datawin;
 		}
 	}
 	if (olet == SPBOOK_CLASS) {
-		if (otyp == SPE_BLANK_PAPER)
-		{
-			OBJPUTSTR("Empty book.");
-		}
-		else if (otyp == SPE_BOOK_OF_THE_DEAD)
-		{
-			OBJPUTSTR("Ancient tome.");
-		}
-		else if (oartifact || otyp == SPE_SECRETS)
-		{
-			OBJPUTSTR("Ancient tome.");
-			switch (oartifact)
-			{
-			case ART_NECRONOMICON:
-				OBJPUTSTR("What dark secrets still lurk in its pages?");
+		if (!printed_type) {
+			switch(otyp) {
+			case SPE_BLANK_PAPER:
+				OBJPUTSTR("Empty book.");
 				break;
-			case ART_BOOK_OF_LOST_NAMES:
-				OBJPUTSTR("Spirits from the void call out from its pages.");
+			case SPE_BOOK_OF_THE_DEAD:
+				OBJPUTSTR("Ancient tome.");
 				break;
-			case ART_BOOK_OF_INFINITE_SPELLS:
-				OBJPUTSTR("Arcane magics fill its endless pages.");
+			case SPE_SECRETS:
+				OBJPUTSTR("Ancient tome.");
+				break;
+			default:
+				Sprintf(buf, "Level %d spellbook, in the %s school. %s spell.",
+					oc.oc_level, spelltypemnemonic(oc.oc_skill), dir);
+				OBJPUTSTR(buf);
 				break;
 			}
+			printed_type = TRUE;
 		}
-		else
+		switch (oartifact)
 		{
-			Sprintf(buf, "Level %d spellbook, in the %s school. %s spell.",
-				oc.oc_level, spelltypemnemonic(oc.oc_skill), dir);
-			OBJPUTSTR(buf);
+		case ART_NECRONOMICON:
+			OBJPUTSTR("What dark secrets still lurk in its pages?");
+			break;
+		case ART_BOOK_OF_LOST_NAMES:
+			OBJPUTSTR("Spirits from the void call out from its pages.");
+			break;
+		case ART_BOOK_OF_INFINITE_SPELLS:
+			OBJPUTSTR("Arcane magics fill its endless pages.");
+			break;
 		}
 	}
 	if (olet == WAND_CLASS) {
-		Sprintf(buf, "%s wand.", dir);
-		OBJPUTSTR(buf);
+		if (!printed_type) {
+			Sprintf(buf, "%s wand.", dir);
+			OBJPUTSTR(buf);
+			printed_type = TRUE;
+		}
 	}
 	if (olet == RING_CLASS) {
 		if (oc.oc_charged && otyp != RIN_WISHES)
@@ -3444,14 +3455,17 @@ winid *datawin;
 			OBJPUTSTR(buf);
 			OBJPUTSTR("Apply to crush the stone and expend the trapped soul.");
 		}
-		else if (oc.oc_material == MINERAL) {
+		else if (oc.oc_material == MINERAL && !printed_type) {
 			OBJPUTSTR("Type of stone.");
+			printed_type = TRUE;
 		}
-		else if (oc.oc_material == GLASS) {
+		else if (oc.oc_material == GLASS && !printed_type) {
 			OBJPUTSTR("Piece of colored glass.");
+			printed_type = TRUE;
 		}
-		else {
+		else if (!printed_type) {
 			OBJPUTSTR("Precious gem.");
+			printed_type = TRUE;
 		}
 	}
 	if (olet == SCOIN_CLASS) {
@@ -3486,7 +3500,7 @@ winid *datawin;
 			break;
 		}
 	}
-	if (olet == TOOL_CLASS && !(olet == TOOL_CLASS && oc.oc_skill)) {
+	if (olet == TOOL_CLASS && !printed_type) {
 		const char* subclass = "tool";
 		switch (otyp) {
 		case BLINDFOLD:
