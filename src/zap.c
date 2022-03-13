@@ -774,10 +774,10 @@ int *container_nesting;
  */
 struct monst *
 revive(obj, dolls)
-register struct obj *obj;
+struct obj *obj;
 boolean dolls;
 {
-	register struct monst *mtmp = (struct monst *)0;
+	struct monst *mtmp = (struct monst *)0;
 	struct obj *container = (struct obj *)0;
 	int container_nesting = 0;
 	schar savetame = 0;

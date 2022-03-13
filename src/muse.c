@@ -2558,6 +2558,10 @@ can_equip(mon, obj)
 struct monst *mon;
 struct obj *obj;
 {
+	/* Monsters csn't equip your ball and chain */
+	if(obj == uball || obj == uchain)
+		return FALSE;
+
 	if(mon->mtyp == PM_CATHEZAR && obj->otyp == CHAIN)
 		return TRUE;
 	if(obj->oclass == WEAPON_CLASS || is_weptool(obj))
@@ -2587,6 +2591,14 @@ struct monst *mon;
 struct obj *obj;
 {
 	struct permonst *ptr = mon->data;
+	/* Monsters don't want your ball and chain */
+	if(obj == uball || obj == uchain)
+		return FALSE;
+
+	/* Monsters don't want bolted magic chests */
+	if(obj->otyp == MAGIC_CHEST && obj->obolted)
+		return FALSE;
+	
 	switch(obj->oclass){
 		case WEAPON_CLASS:
 			return likes_objs(ptr);
