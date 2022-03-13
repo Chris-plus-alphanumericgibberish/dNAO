@@ -1732,7 +1732,7 @@ const char * spellname[] =
  * Magr attempts to cast a monster spell at mdef, who they think is at (tarx, tary)
  * If !mdef or (tarx, tary) is (0,0), magr doesn't have a target and should use an undirected spell.
  * 
- * Returns MM_MISS if the spellcasting failed
+ * Returns MM_MISS if the spellcasting failed and took no time
  * 
  * Can handle any of uvm, mvm, mvu.
  *
@@ -1810,7 +1810,7 @@ int tary;
 		(needs_familiar(magr))
 		)) {
 		cursetxt(magr, mdef, is_undirected_spell(spellnum));
-		return MM_MISS;
+		return MM_HIT;
 	}
 
 	/* At this point, magr is committing to attempting to cast a spell */
@@ -1858,7 +1858,7 @@ int tary;
 		if (!youagr && youdef) {
 			magr->mux = magr->muy = 0;
 		}
-		return MM_MISS;
+		return MM_HIT;
 	}
 
 	/* interrupt the player if the player is being targeted (comes after filtering out spells that miss and fizzle entirely) */
@@ -1913,7 +1913,7 @@ int tary;
 			if (magr->mspec_used)
 				magr->mspec_used /= 2;
 		}
-		return MM_MISS;
+		return MM_HIT;
 	}
 
 	/* print spell-cast message */
@@ -2011,7 +2011,7 @@ int tary;
 			/* get a direction to cast in (assumes ranged spell is possible) */
 			if (!getdir((const char *)0)) {
 				pline_The("air crackles around you.");
-				return MM_MISS;
+				return MM_HIT;
 			}
 			else {
 				rangedspell = TRUE;
@@ -2025,7 +2025,7 @@ int tary;
 				pline_The("air crackles around %s.", mon_nam(magr));
 			impossible("monster got to elemspell() with no target location?"); // test; does this happen?
 			pline("%s is attempting to cast at %s.", Monnam(magr), mdef ? mon_nam(mdef) : "no target");
-			return MM_MISS;
+			return MM_HIT;
 		}
 	}
 	else if (foundem && dist2(x(magr), y(magr), tarx, tary) <= 2) {
@@ -2050,7 +2050,7 @@ int tary;
 					levl[tarx][tary].typ == WATER
 					? "empty water" : "thin air");
 			}
-			return MM_MISS;
+			return MM_HIT;
 		}
 		/* otherwise, print a spellcasting message */
 		else {
@@ -3060,7 +3060,7 @@ int tary;
 				}
 				//else damage
 			}
-			else return MM_MISS;
+			else return MM_HIT;	/* no effect but spell was cast */
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -3285,7 +3285,7 @@ int tary;
 				if (youagr || youdef || canseemon(mdef))
 					pline("Silver rays whiz past %s!",
 					youdef ? "you" : mon_nam(mdef));
-				return MM_MISS;
+				return MM_HIT;
 			}
 			if (n == 1)
 				rays = "a ray";

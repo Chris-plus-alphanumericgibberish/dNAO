@@ -1094,7 +1094,7 @@ register int after;	/* this is extra fast monster movement */
 				if (res & MM_AGR_DIED)
 					return 2; /* Oops, died */
 
-				if (!(mon_ranged_gazeonly) && (res & MM_HIT))
+				if (!(mon_ranged_gazeonly) && (res & (MM_HIT|MM_AGR_STOP)))
 					return 1; /* that was our move for the round */
 			}
 		}
@@ -1161,7 +1161,10 @@ register int after;	/* this is extra fast monster movement */
 			if (mstatus & MM_DEF_DIED) return 2;
 		    }
 
-		    return 0;
+			if (mstatus != MM_MISS)
+		    	return 0;
+			else
+				continue;	/* go to next possible place to move */
 		}
 
 		{   /* Dog avoids harmful traps, but perhaps it has to pass one

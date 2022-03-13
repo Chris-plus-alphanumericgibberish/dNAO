@@ -1933,7 +1933,7 @@ register struct monst *mtmp;
 			if (res & MM_AGR_DIED)
 				return 1; /* Oops. */
 
-			if(!(mon_ranged_gazeonly) && (res & MM_HIT))
+			if(!(mon_ranged_gazeonly) && (res & (MM_HIT|MM_AGR_STOP)))
 				return 0; /* that was our move for the round */
 		}
 	}
@@ -2170,7 +2170,7 @@ register int after;
 	    if((dist2(mtmp->mx, mtmp->my, tx, ty) < 2) &&
 	       intruder && (intruder != mtmp)) {
 			notonhead = (intruder->mx != tx || intruder->my != ty);
-			if(mattackm(mtmp, intruder) == 2) return(2);
+			if(mattackm(mtmp, intruder) & MM_AGR_DIED) return(2);
 			mmoved = 1;
 			goto postmov;
 		} else if(mtmp->mtyp != PM_DEMOGORGON 
@@ -2681,7 +2681,7 @@ not_special:
 		    notonhead = 0;
 		    mstatus = mattackm(mtmp2, mtmp);	/* return attack */
 		    if (mstatus & MM_DEF_DIED)
-			return 2;
+				return 2;
 		}
 		return 3;
 	    }

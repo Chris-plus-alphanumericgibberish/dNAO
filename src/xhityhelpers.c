@@ -589,7 +589,7 @@ register struct monst *mtmp;
 
 int
 mattackm(magr, mdef)
-register struct monst *magr, *mdef;
+struct monst *magr, *mdef;
 {
 	/* this needs both attacker and defender, currently */
 	if (!magr || !mdef)
@@ -681,7 +681,7 @@ fightm(mtmp)		/* have monsters fight each other */
 		    }
 			
 			//If was conflict and a miss, can continue to attack.  Otherwise, ignore you.
-		    return (((result & MM_HIT) || !conflict) ? 1 : 0);
+		    return (((result & (MM_HIT|MM_AGR_STOP)) || !conflict) ? 1 : 0);
 		}
 	    }
 	}

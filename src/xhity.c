@@ -301,8 +301,8 @@ atk_done:
  * Monster to monster attacks.  When a monster attacks another (mattackm),
  * any or all of the following can be returned.  See mattackm() for more
  * details.
- * MM_MISS		0x00	aggressor missed
- * MM_HIT		0x01	aggressor hit defender
+ * MM_MISS		0x00	aggressor did not make any attacks
+ * MM_HIT		0x01	aggressor attacked defender
  * MM_DEF_DIED	0x02	defender died
  * MM_AGR_DIED	0x04	aggressor died
  * MM_AGR_STOP	0x08	aggressor must stop attacking for some reason
@@ -403,7 +403,7 @@ int tary;
 	/* monsters may be in for a surprise if attacking a hidden player */
 	if (youdef && !ranged && !missedyou && !u.uswallow) {
 		if (u_surprise(magr, canseemon(magr)))
-			return MM_MISS;	/* they can't attack this turn */
+			return MM_AGR_STOP;	/* they can't attack this turn */
 	}
 
 	/*	Special demon/minion handling code */
@@ -455,7 +455,7 @@ int tary;
 				pline("%s%s!", upstart(buf), from_nowhere);
 			    }
 				/* help came, that was their action */
-				return MM_MISS;
+				return MM_AGR_STOP;
 			} /* else no help came; but you didn't know it tried */
 		}
 	    }
@@ -3965,8 +3965,8 @@ boolean ranged;
  * Monster to monster attacks.  When a monster attacks another (mattackm),
  * any or all of the following can be returned.  See mattackm() for more
  * details.
- * MM_MISS		0x00	aggressor missed
- * MM_HIT		0x01	aggressor hit defender
+ * MM_MISS		0x00	aggressor cancelled attacking
+ * MM_HIT		0x01	aggressor attacked defender
  * MM_DEF_DIED	0x02	defender died
  * MM_AGR_DIED	0x04	aggressor died
  *
@@ -5726,7 +5726,7 @@ boolean ranged;
 				else
 					pline("%s whispers banal platitudes in %s %s.", Monnam(magr), s_suffix(mon_nam(mdef)), mbodypart(mdef, EAR));
 			}
-			return MM_MISS;
+			return MM_HIT;
 		}
 		if(vis && dohitmsg){
 			if(youagr)
@@ -6041,7 +6041,7 @@ boolean ranged;
 					(youdef ? "you" : mon_nam(mdef))
 					);
 			}
-			return MM_MISS;
+			return MM_HIT;	/* took time */
 		}
 		else {
 			/* print basic hit message */
@@ -6399,7 +6399,7 @@ boolean ranged;
 		/* does nothing at all to noncorporeal or amoprhous creatures */
 		if (noncorporeal(pd) || amorphous(pd))
 		{
-			/* no hitmessage, either */
+			/* skipped, takes no time */
 			return MM_MISS;
 		}
 		else {
@@ -7321,12 +7321,12 @@ boolean ranged;
 				Levitation || Flying) {
 				pline("%s tries to reach your %s %s!", Monnam(magr),
 					sidestr, body_part(LEG));
-				return MM_MISS;
+				return MM_HIT;
 			}
 			else if (magr->mcan) {
 				pline("%s nuzzles against your %s %s!", Monnam(magr),
 					sidestr, body_part(LEG));
-				return MM_MISS;
+				return MM_HIT;
 			}
 			else {
 				if (uarmf) {
@@ -7688,7 +7688,7 @@ boolean ranged;
 				}
 				/* give the player some space */
 				monflee(magr, d(3, 6), TRUE, FALSE);
-				/* and miss */
+				/* and doesn't take time */
 				return (MM_MISS);
 			}
 		}
@@ -7736,7 +7736,7 @@ boolean ranged;
 				if (slips_free(magr, mdef, attk, vis)) {
 					/* message was printed (if visible) */
 					/* nothing happens */
-					return MM_MISS;
+					return MM_HIT;
 				}
 				else {
 					/* get stuck */
@@ -7853,8 +7853,8 @@ boolean ranged;
 							body_part(LEG));
 					}
 				}
-				/* return miss -- nothing happens */
-				return MM_MISS;
+				/* return miss -- nothing happens, but took time */
+				return MM_HIT;
 			}
 		}
 		/* make physical attack without hitmsg */
@@ -10746,7 +10746,7 @@ int vis;
 			}
 			else {
 				You("avoid the gaze of the right head of Demogorgon!");
-				return MM_MISS;
+				return MM_HIT;
 			}
 		}
 		else {
@@ -17701,5 +17701,5 @@ struct monst * mdef;
 			}
 		break;
 	}
-	return MM_MISS;
+	return MM_HIT;
 }
