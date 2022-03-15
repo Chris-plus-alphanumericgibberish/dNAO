@@ -3561,7 +3561,7 @@ struct monst *mtmp;
 		&& which_armor(mtmp, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_
 	)
 		lifesavers |= LSVD_NBW;
-	if (mtmp->mspec_used == 0 && (is_uvuudaum(mtmp->data) || mtmp->mtyp == PM_PRAYERFUL_THING))
+	if (mtmp->mspec_used == 0 && (is_uvuudaum(mtmp->data) || mtmp->mtyp == PM_PRAYERFUL_THING) && !mtmp->mcan)
 		lifesavers |= LSVD_UVU;
 	if (lifesave)
 		lifesavers |= LSVD_OBJ;
@@ -3572,11 +3572,11 @@ struct monst *mtmp;
 		lifesavers |= LSVD_ALA;
 	if (Infuture && mtmp->mpeaceful && !is_myrkalfr(mtmp) && !nonliving(mtmp->data) && !is_android(mtmp->data))
 		lifesavers |= LSVD_FLS;
-	if (has_template(mtmp, FRACTURED) && !rn2(2))
+	if (has_template(mtmp, FRACTURED) && !rn2(2) && !mtmp->mcan)
 		lifesavers |= LSVD_FRC;
 	if (mtmp->ispolyp)
 		lifesavers |= LSVD_PLY;
-	if (has_template(mtmp, ILLUMINATED))
+	if (has_template(mtmp, ILLUMINATED) && !mtmp->mcan)
 		lifesavers |= LSVD_ILU;
 	if (mtmp->zombify && is_kamerel(mtmp->data))
 		lifesavers |= LSVD_KAM;
