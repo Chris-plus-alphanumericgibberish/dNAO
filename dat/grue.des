@@ -104,7 +104,7 @@ STAIR:(68,10),down
 
 # Treasure
 OBJECT:'#',"uncharged lantern",(62,18)
-OBJECT:'(',"sack",(62,18)
+CONTAINER:'(',"sack",(62,18)
 OBJECT:'#',"+2 blessed wrathful silver elven broadsword",contained
 OBJECT:'#',"platinum bar",contained
 
@@ -270,7 +270,7 @@ STAIR:(66,15),down
 
 # Treasure
 OBJECT:'#',"uncharged lantern",(67,17)
-OBJECT:'(',"sack",(67,17)
+CONTAINER:'(',"sack",(67,17)
 OBJECT:'#',"+2 blessed wrathful silver elven broadsword",contained
 OBJECT:'#',"platinum bar",contained
 
