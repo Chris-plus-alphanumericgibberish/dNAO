@@ -2856,16 +2856,19 @@ const char *str;
 				pline(str, s_suffix(mon_nam(mon)), "gold mirrored arcs");
 				break;
 			case PM_SUNFLOWER:
-		pline(str, s_suffix(mon_nam(mon)), "mirrored petals");
+				pline(str, s_suffix(mon_nam(mon)), "mirrored petals");
 				break;
 			case PM_MIRRORED_MOONFLOWER:
-		pline(str, s_suffix(mon_nam(mon)), "mirrored flower-bud");
+				pline(str, s_suffix(mon_nam(mon)), "mirrored flower-bud");
+				break;
+			case PM_ANCIENT_OF_THE_BURNING_WASTES:
+				pline(str, s_suffix(mon_nam(mon)), "shifting mirage-panes");
 				break;
 			default:
 				if(sheen_turn)
-		pline(str, s_suffix(mon_nam(mon)), "argent sheen");
+					pline(str, s_suffix(mon_nam(mon)), "argent sheen");
 				else
-				impossible("Reflecting monster not listed in mon_reflects(): %s", mon_nam(mon));
+					impossible("Reflecting monster not listed in mon_reflects(): %s", mon_nam(mon));
 				break;
 			}
 		}
