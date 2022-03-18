@@ -13851,7 +13851,9 @@ struct permonst *ptr;
 	|| ptr->mtyp == PM_FORMIAN_CRUSHER
 	|| ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_SPROW
 	|| ptr->mtyp == PM_DROW_MATRON || ptr->mtyp == PM_DROW_MATRON_MOTHER
+	|| ptr->mtyp == PM_HEDROW_BLADEMASTER || ptr->mtyp == PM_DROW_ALIENIST
 	|| ptr->mtyp == PM_ELVENKING || ptr->mtyp == PM_ELVENQUEEN
+	|| ptr->mtyp == PM_DWARF_KING || ptr->mtyp == PM_DWARF_QUEEN
 	|| ptr->mtyp == PM_CUPRILACH_RILMANI || ptr->mtyp == PM_STANNUMACH_RILMANI
 	|| ptr->mtyp == PM_ARGENACH_RILMANI || ptr->mtyp == PM_AURUMACH_RILMANI
 	|| ptr->mtyp == PM_ANDROID || ptr->mtyp == PM_GYNOID || ptr->mtyp == PM_OPERATOR || ptr->mtyp == PM_COMMANDER
