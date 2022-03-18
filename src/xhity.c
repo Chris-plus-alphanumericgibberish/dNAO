@@ -3717,8 +3717,8 @@ boolean ranged;
 	boolean miss = FALSE;		/* counterpart to hit */
 	boolean domissmsg = TRUE;	/* FALSE if a message has already been printed about a miss */
 
-	/* if it is the player's pet attacking and it is in LoS, set flag to train Beast Mastery skill */
-	if (!youagr && magr->mtame && canseemon(magr)) {
+	/* if it is the player's pet attacking and it is in LoS or the PC can sense its mind, set flag to train Beast Mastery skill */
+	if (!youagr && magr->mtame && (canseemon(magr) || tp_sensemon(magr))) {
 		u.petattacked = TRUE;
 	}
 
