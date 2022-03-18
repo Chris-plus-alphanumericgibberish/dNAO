@@ -17216,12 +17216,19 @@ struct monst *mdef;
 		}
 	}
 	else {
-		pline("%s slams into the %s!", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
+		if(tmp)
+			pline("%s slams into the %s!", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
+		else
+			pline("%s bounces lightly off the %s.", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
 	}
 
 	mselftouch(mdef, "Falling, ", TRUE);
+	if(!tmp)
+		return; //Too light to do damage :(
 	if (!DEADMONSTER(mdef) && tmp) {
-		xdamagey(&youmonst, mdef, (struct attack *)0, d(dbon((struct obj *)0),tmp));
+		int nd = dbon((struct obj *)0);
+		nd = max(nd, 1);
+		xdamagey(&youmonst, mdef, (struct attack *)0, d(nd,tmp));
 	}
 
 	return;
