@@ -178,8 +178,11 @@ struct monst {
 	Bitfield(mtoobig,1);/* elevated spell failure */ /*111*/
 	Bitfield(mrotting,1);/* spreads poison clouds */ /*112*/
 	
-	Bitfield(deadmonster,1); /* is DEADMONSTER */ /*113*/
-	Bitfield(mnoise,1); /* is DEADMONSTER */ /*114*/
+	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*114*/
+#define DEADMONSTER_DEAD	0x1
+#define DEADMONSTER_PURGE	0x2
+#define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->deadmonster)
+	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*115*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -350,7 +353,6 @@ struct monst {
 #define MON_SWEP(mon)	((mon)->msw)
 #define MON_NOSWEP(mon)	((mon)->msw = (struct obj *)0)
 
-#define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->deadmonster)
 #define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my)
 
 #endif /* MONST_H */
