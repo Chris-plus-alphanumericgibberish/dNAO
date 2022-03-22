@@ -1662,6 +1662,106 @@ struct monst *mon;
 	check_madman_trophy();
 }
 
+/* A monster has seen/whatever you and may contract madnesses
+ */
+void
+you_inflict_madness(mon)
+struct monst *mon;
+{
+	if(mon->seenmadnesses != u.umadness){
+		int madflag;
+		for(madflag = 0x1L; madflag <= LAST_MADNESS; madflag = madflag << 1){
+			if(u.umadness&madflag && !(mon->seenmadnesses&madflag)){
+				mon->seenmadnesses |= madflag;
+				if(d(2,30) > mon->m_lev){
+					if(madflag == MAD_DELUSIONS
+					 || madflag == MAD_REAL_DELUSIONS
+					 || madflag == MAD_SPORES
+					 || madflag == MAD_SPIRAL
+					 || madflag == MAD_GOAT_RIDDEN
+					 || madflag == MAD_FORMICATION
+					){
+						mon->mcrazed = 1;
+					}
+					else if(madflag == MAD_SANCTITY){
+						mon->msanctity = 1;
+					}
+					else if(madflag == MAD_GLUTTONY){
+						mon->mgluttony = 1;
+					}
+					else if(madflag == MAD_FRIGOPHOBIA){
+						mon->mfrigophobia = 1;
+					}
+					else if(madflag == MAD_CANNIBALISM){
+						mon->mcannibal = 1;
+					}
+					else if(madflag == MAD_RAGE){
+						mon->mrage = 1;
+						mon->mberserk = 1;
+						mon->mcrazed = 1;
+					}
+					else if(madflag == MAD_ARGENT_SHEEN){
+						mon->margent = 1;
+					}
+					else if(madflag == MAD_SUICIDAL){
+						mon->msuicide = 1;
+					}
+					else if(madflag == MAD_NUDIST){
+						mon->mnudist = 1;
+					}
+					else if(madflag == MAD_OPHIDIOPHOBIA){
+						mon->mophidio = 1;
+					}
+					else if(madflag == MAD_ARACHNOPHOBIA){
+						mon->marachno = 1;
+					}
+					else if(madflag == MAD_ENTOMOPHOBIA){
+						mon->mentomo = 1;
+					}
+					else if(madflag == MAD_THALASSOPHOBIA){
+						mon->mthalasso = 1;
+					}
+					else if(madflag == MAD_HELMINTHOPHOBIA){
+						mon->mhelmintho = 1;
+					}
+					else if(madflag == MAD_PARANOIA){
+						mon->mparanoid = 1;
+					}
+					else if(madflag == MAD_TALONS){
+						mon->mtalons = 1;
+					}
+					else if(madflag == MAD_DREAMS){
+						mon->mtalons = 1;
+					}
+					else if(madflag == MAD_SCIAPHILIA){
+						mon->mscaiaphilia = 1;
+					}
+					else if(madflag == MAD_FORGETFUL){
+						mon->mforgetful = 1;
+					}
+					else if(madflag == MAD_APOSTASY){
+						mon->mapostasy = 1;
+					}
+					else if(madflag == MAD_TOO_BIG){
+						mon->mtoobig = 1;
+					}
+					else if(madflag == MAD_ROTTING){
+						mon->mrotting = 1;
+					}
+					else if(madflag == MAD_FRENZY){
+						mon->mhp = 1;
+					}
+					// MAD_HOST:
+					// MAD_COLD_NIGHT:
+					// MAD_OVERLORD:
+					// MAD_THOUSAND_MASKS:
+				}
+			}
+		}
+	}
+}
+
+
 /* condense clumsy ACURR(A_STR) value into value that fits into game formulas
  */
 schar

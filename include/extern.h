@@ -209,6 +209,7 @@ E int FDECL(mad_monster_turn, (struct monst *, long int));
 E void NDECL(roll_av_frigophobia);
 E void NDECL(roll_frigophobia);
 E void FDECL(give_madness, (struct monst *));
+E void FDECL(you_inflict_madness, (struct monst *));
 E void NDECL(calc_total_maxhp);
 E void NDECL(calc_total_maxen);
 E schar FDECL(acurr, (int));

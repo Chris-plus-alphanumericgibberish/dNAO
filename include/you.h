@@ -598,6 +598,7 @@ struct you {
 #define	MAD_TOO_BIG			0x0000000040000000L
 #define	MAD_APOSTASY		0x0000000080000000L
 #define	MAD_ROTTING			0x0000000100000000L
+#define	LAST_MADNESS		MAD_ROTTING
 	int 	uinsight;	/* to record level of insight */
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)

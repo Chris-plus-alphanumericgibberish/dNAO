@@ -1783,7 +1783,10 @@ movemon()
 			else continue;
 		}
 		//else no quant lock
-		
+	}
+	
+	if(Nightmare && mon_can_see_you(mtmp)){
+		you_inflict_madness(mtmp);
 	}
 	
 	if(mtmp->mtyp == PM_METROID_QUEEN){
