@@ -2944,6 +2944,15 @@ register struct obj *otmp;
 	}
 }
 
+/* extra handling on extracting an object from a (non magic chest) container */
+void
+uncontain(obj)
+struct obj * obj;
+{
+	if (is_gemable_lightsaber(obj->ocontainer) && obj->ocontainer->lamplit)
+		end_burn(obj->ocontainer, TRUE);
+}
+
 /* throw away all of a monster's inventory */
 void
 discard_minvent(mtmp)
@@ -3020,6 +3029,7 @@ obj_extract_self(obj)
 	    remove_object(obj);
 	    break;
 	case OBJ_CONTAINED:
+		uncontain(obj);
 	    extract_nobj(obj, &obj->ocontainer->cobj);
 	    container_weight(obj->ocontainer);
 	    break;

@@ -1517,6 +1517,7 @@ E boolean FDECL(is_flammable, (struct obj *));
 E boolean FDECL(is_rottable, (struct obj *));
 E void FDECL(place_object, (struct obj *,int,int));
 E void FDECL(remove_object, (struct obj *));
+E void FDECL(uncontain, (struct obj *));
 E void FDECL(discard_minvent, (struct monst *));
 E void FDECL(obj_extract_self, (struct obj *));
 E void FDECL(obj_extract_and_unequip_self, (struct obj *));
