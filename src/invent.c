@@ -3616,8 +3616,11 @@ winid *datawin;
 		boolean got_prop = FALSE, while_carried = FALSE;
 		int j = 0;
 
-		if (oc.oc_oprop == propertynames[i].prop_num)
-			got_prop = TRUE;
+		while(oc.oc_oprop[j] && !got_prop) {
+			if (oc.oc_oprop[j] == propertynames[i].prop_num)
+				got_prop = TRUE;
+			j++;
+		}
 
 		j = 0;
 		while (properties_item[j] && !got_prop) {
