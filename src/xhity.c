@@ -4365,7 +4365,7 @@ boolean ranged;
 						/* assumes the player was polyed and not in natural form */
 						You("burn up!");
 						rehumanize();
-						break;
+						return (MM_HIT | MM_DEF_LSVD);
 					}
 					else {
 						if (vis)
