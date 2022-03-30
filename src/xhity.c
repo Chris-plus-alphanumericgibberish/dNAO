@@ -17238,6 +17238,7 @@ struct monst *mdef;
 
 #define DID_MOVE 			u.uen -= 8;\
 			nomul(0, NULL);\
+			u.uattked = TRUE;\
 			return TRUE;
 
 /* monk_moves()
