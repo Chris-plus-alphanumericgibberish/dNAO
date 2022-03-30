@@ -1148,7 +1148,7 @@ you_regen_san()
 		//Lots of stressful circumstances here!
 		else if(Race_if(PM_DROW)){
 			if(Role_if(PM_NOBLEMAN)){
-				if(Is_nemesis(&u.uz) && flags.initgend){
+				if(Is_nemesis(&u.uz)){
 					reglevel -= 30;
 				}
 				else if(Is_qstart(&u.uz) && Role_if(PM_NOBLEMAN) && !flags.initgend){
