@@ -861,6 +861,13 @@ monster_detail	: MONSTER_ID chance ':' monster_c ',' m_name ',' coordinate '[' S
 			    Free($6);
 			}
 		  }
+		 monster_infos
+		  {
+			if (++nmons >= MAX_OF_TYPE) {
+			    yyerror("Too many monsters in room or mazepart!");
+			    nmons--;
+			}
+		  }
 	       |  MONSTER_ID chance ':' monster_c ',' m_name ',' coordinate
 		  {
 			tmpmonst[nmons] = New(monster);
