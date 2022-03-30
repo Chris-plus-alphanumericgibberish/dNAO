@@ -4739,7 +4739,7 @@ boolean goodequip;
 			if(!rn2(4))(void)mongets(mtmp, CLOAK, mkobjflags);
 		} else if(mm == PM_DEEP_ONE || mm == PM_DEEPER_ONE) {
 		 if(Infuture){
-			if(mm == PM_DEEP_ONE){
+			if(mm == PM_DEEPER_ONE){
 				switch (rn2(3)) {
 					case 0:
 						(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
@@ -5086,7 +5086,7 @@ boolean goodequip;
 				}
 			}
 		 }
-		}else if((mm == PM_MIND_FLAYER || mm == PM_MASTER_MIND_FLAYER)){
+		} else if((mm == PM_MIND_FLAYER || mm == PM_MASTER_MIND_FLAYER)){
 			if(on_level(&rlyeh_level,&u.uz)){
 				otmp = mksobj(BULLWHIP, mkobjflags);
 				otmp->oerodeproof = 1;
