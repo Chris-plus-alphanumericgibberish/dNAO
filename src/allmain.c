@@ -1264,7 +1264,7 @@ moveloop()
 	didmove = flags.move;
 	if(didmove) {
 	    /* actual time passed */
-		if(u.umoved){
+		if(u.umoved && !u.uattked){
 			int step_cost = NORMAL_SPEED;
 			#define COST(val) step_cost = min(val, step_cost);
 			if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
