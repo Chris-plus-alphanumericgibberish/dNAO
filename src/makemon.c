@@ -8817,6 +8817,7 @@ boolean goodequip;
 			} else if(Infuture){
 				otmp = mksobj(QUARTERSTAFF, mkobjflags);
 				otmp->spe = 9;
+				add_oprop(otmp, OPROP_PSIOW);
 				add_oprop(otmp, OPROP_PHSEW);
 				add_oprop(otmp, OPROP_WATRW);
 				otmp->objsize = MZ_GIGANTIC;
