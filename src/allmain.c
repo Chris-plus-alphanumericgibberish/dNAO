@@ -1089,7 +1089,6 @@ you_regen_san()
 	if (Role_if(PM_MONK))     reglevel += 8;
 	if (Role_if(PM_PRIEST))   reglevel += 7;
 	if (Role_if(PM_ANACHRONONAUT))   reglevel += 5;
-	if (Role_if(PM_TOURIST))   reglevel += 2;
 	if (Role_if(PM_EXILE))    reglevel += spiritDsize();
 	if (Role_if(PM_CONVICT))  reglevel -= 3;
 	if (Role_if(PM_NOBLEMAN))  reglevel -= 5;
