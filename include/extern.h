@@ -3351,6 +3351,7 @@ E int FDECL(unturn_dead, (struct monst *));
 E void FDECL(cancel_item, (struct obj *));
 E boolean FDECL(drain_item, (struct obj *));
 E boolean FDECL(damage_item, (struct obj *));
+E struct obj *FDECL(randpoly_obj, (struct obj *));
 E struct obj *FDECL(poly_obj, (struct obj *, int));
 E boolean FDECL(obj_resists, (struct obj *,int,int));
 E boolean FDECL(obj_shudders, (struct obj *));
