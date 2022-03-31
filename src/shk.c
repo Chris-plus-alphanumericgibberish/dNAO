@@ -1066,16 +1066,18 @@ register struct obj *obj, *merge;
 		}
 	}
 
+	if (donning(obj)) cancel_don();
+	
 	if (obj == uwep) uwepgone();
 	else if (obj == uswapwep) uswapwepgone();
 	else if (obj == uquiver) uqwepgone();
-	else if (obj == uarm) setnotworn(obj);
-	else if (obj == uarmc) setnotworn(obj);
-	else if (obj == uarmh) setnotworn(obj);
-	else if (obj == uarms) setnotworn(obj);
-	else if (obj == uarmg) setnotworn(obj);
-	else if (obj == uarmu) setnotworn(obj);
-	else if (obj == uarmf) setnotworn(obj);
+	else if (obj == uarm) {Armor_off(); setnotworn(obj);}
+	else if (obj == uarmc) {Cloak_off(); setnotworn(obj);}
+	else if (obj == uarmh) {Helmet_off(); setnotworn(obj);}
+	else if (obj == uarms) {Shield_off(); setnotworn(obj);}
+	else if (obj == uarmg) {Gloves_off(); setnotworn(obj);}
+	else if (obj == uarmu) {Shirt_off(); setnotworn(obj);}
+	else if (obj == uarmf) {Boots_off(); setnotworn(obj);}
 
 	dealloc_obj(obj);
 }

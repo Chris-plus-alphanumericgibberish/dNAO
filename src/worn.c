@@ -365,6 +365,7 @@ register struct obj *obj;
 	    }
 	update_inventory();
 	if ((obj == uwep || obj == uswapwep) && !test_twoweapon()) u.twoweap = 0;
+	
 }
 
 void
