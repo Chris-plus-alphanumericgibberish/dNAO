@@ -244,7 +244,7 @@ bird_kick_monsters()
 			if(!isok(ix, iy))
 				continue;
 			mon = m_at(ix, iy);
-			if(!mon || (mon->mpeaceful && !Hallucination))
+			if(!mon || (mon->mpeaceful && !Hallucination) || DEADMONSTER(mon))
 				continue;
 			if((touch_petrifies(mon->data)
 				|| mon->mtyp == PM_MEDUSA)
@@ -324,7 +324,7 @@ wing_storm_monsters()
 			if(!isok(ix, iy))
 				continue;
 			mon = m_at(ix, iy);
-			if(!mon || (mon->mpeaceful && !Hallucination))
+			if(!mon || (mon->mpeaceful && !Hallucination) || DEADMONSTER(mon))
 				continue;
 			
 			mhurtle(mon, u.dx, u.dy, 4, FALSE);

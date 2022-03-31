@@ -1904,6 +1904,14 @@ int different;
 				struct obj *nobj;
 				for(cur = level.objects[ox][oy]; cur; cur = nobj){
 					nobj = cur->nexthere;
+					/* Monsters don't pick up your ball and chain */
+					if(cur == uball || cur == uchain)
+						continue;
+
+					/* Monsters don't pick up bolted magic chests */
+					if(cur->otyp == MAGIC_CHEST && cur->obolted)
+						continue;
+
 					if(likes_obj(mtmp, cur) || can_equip(mtmp, cur)){
 						obj_extract_self(cur);
 						mpickobj(mtmp, cur);

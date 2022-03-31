@@ -2558,6 +2558,10 @@ can_equip(mon, obj)
 struct monst *mon;
 struct obj *obj;
 {
+	/* Monsters csn't equip your ball and chain */
+	if(obj == uball || obj == uchain)
+		return FALSE;
+
 	if(mon->mtyp == PM_CATHEZAR && obj->otyp == CHAIN)
 		return TRUE;
 	if(obj->oclass == WEAPON_CLASS || is_weptool(obj))
@@ -2587,6 +2591,14 @@ struct monst *mon;
 struct obj *obj;
 {
 	struct permonst *ptr = mon->data;
+	/* Monsters don't want your ball and chain */
+	if(obj == uball || obj == uchain)
+		return FALSE;
+
+	/* Monsters don't want bolted magic chests */
+	if(obj->otyp == MAGIC_CHEST && obj->obolted)
+		return FALSE;
+	
 	switch(obj->oclass){
 		case WEAPON_CLASS:
 			return likes_objs(ptr);
@@ -2844,16 +2856,19 @@ const char *str;
 				pline(str, s_suffix(mon_nam(mon)), "gold mirrored arcs");
 				break;
 			case PM_SUNFLOWER:
-		pline(str, s_suffix(mon_nam(mon)), "mirrored petals");
+				pline(str, s_suffix(mon_nam(mon)), "mirrored petals");
 				break;
 			case PM_MIRRORED_MOONFLOWER:
-		pline(str, s_suffix(mon_nam(mon)), "mirrored flower-bud");
+				pline(str, s_suffix(mon_nam(mon)), "mirrored flower-bud");
+				break;
+			case PM_ANCIENT_OF_THE_BURNING_WASTES:
+				pline(str, s_suffix(mon_nam(mon)), "shifting mirage-panes");
 				break;
 			default:
 				if(sheen_turn)
-		pline(str, s_suffix(mon_nam(mon)), "argent sheen");
+					pline(str, s_suffix(mon_nam(mon)), "argent sheen");
 				else
-				impossible("Reflecting monster not listed in mon_reflects(): %s", mon_nam(mon));
+					impossible("Reflecting monster not listed in mon_reflects(): %s", mon_nam(mon));
 				break;
 			}
 		}

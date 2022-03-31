@@ -621,7 +621,7 @@ int *fail_reason;
 	    return (struct monst *)0;
 	}
 	
-	if(mon && cause == ANIMATE_SPELL && rnd(20) < ACURR(A_CHA) && 
+	if(mon && cause == ANIMATE_SPELL && rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA) && 
 		!(is_animal(mon->data) || mindless_mon(mon))
 	){
 		struct monst *newmon;
@@ -4147,8 +4147,11 @@ struct monst * mtmp;
 		if (newmon) mtmp = newmon;
 		if (!mtmp->mtame)
 			pline("But, apparently not grateful enough to join you.");
+		if (mtmp->mpeaceful)
+			return;
+		//Otherwise check for peacefulness
 	}
-	else if (mtmp->mpeaceful){
+	if (mtmp->mpeaceful){
 		pline("%s is grateful for the assistance, but makes no move to help you in return.", Monnam(mtmp));
 	}
 	else if (!mtmp->mpeaceful && rnd(10) < ACURR(A_CHA) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){

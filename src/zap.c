@@ -441,7 +441,7 @@ struct obj *otmp;
 			}
 
 			if(mtmp->mtame && Role_if(PM_HEALER)){
-				int xp = (experience(mtmp, 0)/10) * delta / mtmp->mhpmax;
+				int xp = (experience(mtmp, 0)/2) * delta / mtmp->mhpmax;
 				if(wizard) pline("%d out of %d XP", xp, experience(mtmp, 0));
 				if(xp)
 					more_experienced(xp, 0);
@@ -774,10 +774,10 @@ int *container_nesting;
  */
 struct monst *
 revive(obj, dolls)
-register struct obj *obj;
+struct obj *obj;
 boolean dolls;
 {
-	register struct monst *mtmp = (struct monst *)0;
+	struct monst *mtmp = (struct monst *)0;
 	struct obj *container = (struct obj *)0;
 	int container_nesting = 0;
 	schar savetame = 0;

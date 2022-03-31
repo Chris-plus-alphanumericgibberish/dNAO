@@ -1007,6 +1007,7 @@ register int after;	/* this is extra fast monster movement */
 	if (appr == -2) return(0);
 
 #ifdef BARD
+	/*NOTE: This may make pets skip their turns IF YOU ARE SINGING (pet_can_sing checks). */
 	if (pet_can_sing(mtmp, FALSE))
 		return(3);
 	/* lose tameness if under effects of taming song */
@@ -1015,6 +1016,7 @@ register int after;	/* this is extra fast monster movement */
 		if (wizard) pline("[%s friend for %d(%d)]", Monnam(mtmp), mtmp->mtame, EDOG(mtmp)->waspeaceful);
 		if (mtmp->mtame <= 0) {
 			untame(mtmp, EDOG(mtmp)->waspeaceful);
+			return(3);
 		}
 	}
 #endif

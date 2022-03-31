@@ -1089,7 +1089,6 @@ you_regen_san()
 	if (Role_if(PM_MONK))     reglevel += 8;
 	if (Role_if(PM_PRIEST))   reglevel += 7;
 	if (Role_if(PM_ANACHRONONAUT))   reglevel += 5;
-	if (Role_if(PM_TOURIST))   reglevel += 2;
 	if (Role_if(PM_EXILE))    reglevel += spiritDsize();
 	if (Role_if(PM_CONVICT))  reglevel -= 3;
 	if (Role_if(PM_NOBLEMAN))  reglevel -= 5;
@@ -1149,7 +1148,7 @@ you_regen_san()
 		//Lots of stressful circumstances here!
 		else if(Race_if(PM_DROW)){
 			if(Role_if(PM_NOBLEMAN)){
-				if(Is_nemesis(&u.uz) && flags.initgend){
+				if(Is_nemesis(&u.uz)){
 					reglevel -= 30;
 				}
 				else if(Is_qstart(&u.uz) && Role_if(PM_NOBLEMAN) && !flags.initgend){
@@ -1265,7 +1264,7 @@ moveloop()
 	didmove = flags.move;
 	if(didmove) {
 	    /* actual time passed */
-		if(u.umoved){
+		if(u.umoved && !u.uattked){
 			int step_cost = NORMAL_SPEED;
 			#define COST(val) step_cost = min(val, step_cost);
 			if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
@@ -1999,7 +1998,7 @@ karemade:
 			)){
 				makemon(&mons[PM_ASPECT_OF_THE_SILENCE], 0, 0, NO_MM_FLAGS);
 			}
-			else if(!Infuture && !rn2(COA_PROB)){
+			else if(!Infuture && !mvitals[PM_CENTER_OF_ALL].died && !rn2(COA_PROB)){
 				coa_arrive();
 			}
 		    else if(!(Is_illregrd(&u.uz) && u.ualign.type == A_LAWFUL && !u.uevent.uaxus_foe) && /*Turn off random generation on axus's level if lawful*/

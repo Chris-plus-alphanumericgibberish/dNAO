@@ -3489,8 +3489,8 @@ m_detach(mtmp, mptr)
 struct monst *mtmp;
 struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 {
-	if(mtmp->deadmonster) {
-		impossible("attempting to detach deadmonster %s", m_monnam(mtmp));
+	if(mtmp->deadmonster & DEADMONSTER_PURGE) {
+		impossible("attempting to detach already-marked deadmonster %s", m_monnam(mtmp));
 		return;
 	}
 	if (mtmp->mleashed) m_unleash(mtmp, FALSE);
@@ -3509,7 +3509,7 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	if(mtmp->isshk) shkgone(mtmp);
 	if(mtmp->wormno) wormgone(mtmp);
 
-	mtmp->deadmonster = 1;
+	mtmp->deadmonster |= DEADMONSTER_PURGE;
 	iflags.purge_monsters++;
 }
 
@@ -3566,7 +3566,7 @@ struct monst *mtmp;
 		&& which_armor(mtmp, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_
 	)
 		lifesavers |= LSVD_NBW;
-	if (mtmp->mspec_used == 0 && (is_uvuudaum(mtmp->data) || mtmp->mtyp == PM_PRAYERFUL_THING))
+	if (mtmp->mspec_used == 0 && (is_uvuudaum(mtmp->data) || mtmp->mtyp == PM_PRAYERFUL_THING) && !mtmp->mcan)
 		lifesavers |= LSVD_UVU;
 	if (lifesave)
 		lifesavers |= LSVD_OBJ;
@@ -3577,11 +3577,11 @@ struct monst *mtmp;
 		lifesavers |= LSVD_ALA;
 	if (Infuture && mtmp->mpeaceful && !is_myrkalfr(mtmp) && !nonliving(mtmp->data) && !is_android(mtmp->data))
 		lifesavers |= LSVD_FLS;
-	if (has_template(mtmp, FRACTURED) && !rn2(2))
+	if (has_template(mtmp, FRACTURED) && !rn2(2) && !mtmp->mcan)
 		lifesavers |= LSVD_FRC;
 	if (mtmp->ispolyp)
 		lifesavers |= LSVD_PLY;
-	if (has_template(mtmp, ILLUMINATED))
+	if (has_template(mtmp, ILLUMINATED) && !mtmp->mcan)
 		lifesavers |= LSVD_ILU;
 	if (mtmp->zombify && is_kamerel(mtmp->data))
 		lifesavers |= LSVD_KAM;
@@ -3965,6 +3965,8 @@ register struct monst *mtmp;
 	}
 	lifesaved_monster(mtmp);
 	if (mtmp->mhp > 0) return;
+	/* we did not lifesave */
+	mtmp->deadmonster |= DEADMONSTER_DEAD;
 	//Special messages (Nyarlathotep)
 	if(canseemon(mtmp) && (mtmp->mtyp == PM_GOOD_NEIGHBOR || mtmp->mtyp == PM_HMNYW_PHARAOH)){
 		int nyar_form = rn2(SIZE(nyar_description));
@@ -4809,6 +4811,8 @@ register struct monst *mdef;
 {
 	mondead(mdef);
 	if (mdef->mhp > 0) return;	/* lifesaved */
+	/* we did not lifesave */
+	mdef->deadmonster |= DEADMONSTER_DEAD;
 
 	if (corpse_chance(mdef, (struct monst *)0, FALSE) &&
 	    (accessible(mdef->mx, mdef->my) || is_pool(mdef->mx, mdef->my, FALSE)))
@@ -4821,6 +4825,7 @@ mongone(mdef)
 register struct monst *mdef;
 {
 	mdef->mhp = 0;	/* can skip some inventory bookkeeping */
+	mdef->deadmonster |= DEADMONSTER_DEAD;
 #ifdef STEED
 	/* Player is thrown from his steed when it disappears */
 	if (mdef == u.usteed)
@@ -4847,6 +4852,7 @@ monvanished(mdef)
 register struct monst *mdef;
 {
 	mdef->mhp = 0;	/* can skip some inventory bookkeeping */
+	mdef->deadmonster |= DEADMONSTER_DEAD;
 #ifdef STEED
 	/* Player is thrown from his steed when it disappears */
 	if (mdef == u.usteed)
@@ -4891,6 +4897,8 @@ register struct monst *mdef;
 	 */
 	lifesaved_monster(mdef);
 	if (mdef->mhp > 0) return;
+	/* we did not lifesave */
+	mdef->deadmonster |= DEADMONSTER_DEAD;
 
 	mdef->mtrapped = 0;	/* (see m_detach) */
 
@@ -4985,6 +4993,8 @@ register struct monst *mdef;
 	 */
 	lifesaved_monster(mdef);
 	if (mdef->mhp > 0) return;
+	/* we did not lifesave */
+	mdef->deadmonster |= DEADMONSTER_DEAD;
 
 	mdef->mtrapped = 0;	/* (see m_detach) */
 
@@ -5119,6 +5129,8 @@ register struct monst *mdef;
 	 */
 	lifesaved_monster(mdef);
 	if (mdef->mhp > 0) return;
+	/* we did not lifesave */
+	mdef->deadmonster |= DEADMONSTER_DEAD;
 
 	mdef->mtrapped = 0;	/* (see m_detach) */
 
@@ -5425,6 +5437,8 @@ xkilled(mtmp, dest)
 		if (!cansee(x,y)) pline("Maybe not...");
 		return;
 	}
+	/* we did not lifesave */
+	mtmp->deadmonster |= DEADMONSTER_DEAD;
 
 	mdat = mtmp->data; /* note: mondead can change mtmp->data */
 	mndx = monsndx(mdat);

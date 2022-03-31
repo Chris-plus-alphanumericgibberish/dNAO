@@ -2619,8 +2619,12 @@ int tary;
 			else if (!rn2(3)) weap = JAVELIN;
 			else if (!rn2(3)) weap = AXE;
 			else {
-				weap = rnd_class(ARROW, WORM_TOOTH - 1);
-				if (weap == TRIDENT) weap = JAVELIN;
+				int weapons[] = {ARROW, ELVEN_ARROW, ORCISH_ARROW, SILVER_ARROW, GOLDEN_ARROW, ANCIENT_ARROW, YA, CROSSBOW_BOLT, DROVEN_BOLT, DART, 
+								SHURIKEN, BOOMERANG, CHAKRAM, SPEAR, ATGEIR, ELVEN_SPEAR, DROVEN_SPEAR, ORCISH_SPEAR, DWARVISH_SPEAR, JAVELIN,
+								TRIDENT, DAGGER, ELVEN_DAGGER, DROVEN_DAGGER, ORCISH_DAGGER, ATHAME, TECPATL, SCALPEL, KNIFE, STILETTO, 
+								SICKLE, ELVEN_SICKLE, AXE
+				};
+				weap = ROLL_FROM(weapons);
 			}
 			/* make them */
 			otmp = mksobj(weap, NO_MKOBJ_FLAGS);
@@ -4339,6 +4343,8 @@ int tary;
 			struct monst *mtmp;
 			int tries = 0;
 			static struct permonst *aliens[] = {
+				&mons[PM_SHOGGOTH],
+				&mons[PM_HOUND_OF_TINDALOS],
 				&mons[PM_HOOLOOVOO],
 				&mons[PM_SHAMBLING_HORROR],
 				&mons[PM_STUMBLING_HORROR],
@@ -4348,6 +4354,8 @@ int tary;
 				&mons[PM_AOA],
 				&mons[PM_HUNTING_HORROR],
 				&mons[PM_BYAKHEE],
+				&mons[PM_BEBELITH],
+				&mons[PM_WEEPING_ANGEL],
 				&mons[PM_UVUUDAUM] };
 
 			/* maybe summon nearby the caster, instead of at a target */

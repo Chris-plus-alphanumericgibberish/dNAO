@@ -3717,8 +3717,8 @@ boolean ranged;
 	boolean miss = FALSE;		/* counterpart to hit */
 	boolean domissmsg = TRUE;	/* FALSE if a message has already been printed about a miss */
 
-	/* if it is the player's pet attacking and it is in LoS, set flag to train Beast Mastery skill */
-	if (!youagr && magr->mtame && canseemon(magr)) {
+	/* if it is the player's pet attacking and it is in LoS or the PC can sense its mind, set flag to train Beast Mastery skill */
+	if (!youagr && magr->mtame && (canseemon(magr) || tp_sensemon(magr))) {
 		u.petattacked = TRUE;
 	}
 
@@ -17216,12 +17216,19 @@ struct monst *mdef;
 		}
 	}
 	else {
-		pline("%s slams into the %s!", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
+		if(tmp)
+			pline("%s slams into the %s!", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
+		else
+			pline("%s bounces lightly off the %s.", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
 	}
 
 	mselftouch(mdef, "Falling, ", TRUE);
+	if(!tmp)
+		return; //Too light to do damage :(
 	if (!DEADMONSTER(mdef) && tmp) {
-		xdamagey(&youmonst, mdef, (struct attack *)0, d(dbon((struct obj *)0),tmp));
+		int nd = dbon((struct obj *)0);
+		nd = max(nd, 1);
+		xdamagey(&youmonst, mdef, (struct attack *)0, d(nd,tmp));
 	}
 
 	return;
@@ -17231,6 +17238,7 @@ struct monst *mdef;
 
 #define DID_MOVE 			u.uen -= 8;\
 			nomul(0, NULL);\
+			u.uattked = TRUE;\
 			return TRUE;
 
 /* monk_moves()

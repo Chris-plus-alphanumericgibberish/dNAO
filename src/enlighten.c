@@ -1591,31 +1591,46 @@ void
 udr_enlightenment()
 {
 	int dr;
+	int cap = 11;
 	char mbuf[BUFSZ] = {'\0'};
 	en_win = create_nhwindow(NHW_MENU);
 	putstr(en_win, 0, "Current Damage Reduction:");
 	putstr(en_win, 0, "");
 	
+	if(active_glyph(DEEP_SEA))
+		cap += 3;
 	if(!has_head_mon(&youmonst)){
 		Sprintf(mbuf, "You have no head; shots hit upper body");
 		putstr(en_win, 0, mbuf);
 	} else {
 		dr = slot_udr(HEAD_DR, (struct monst *)0, 0);
-	Sprintf(mbuf, "Head Armor:       %s%d", (dr>11) ? "11-" : "", dr);
+		if(dr > cap)
+		Sprintf(mbuf, "Head Armor:       %d-%d", cap, dr);
+		else
+		Sprintf(mbuf, "Head Armor:       %d", dr);
 		putstr(en_win, 0, mbuf);
 	}
 	dr = slot_udr(UPPER_TORSO_DR, (struct monst *)0, 0);
-	Sprintf(mbuf, "Upper Body Armor: %s%d", (dr>11) ? "11-" : "", dr);
+	if(dr > cap)
+		Sprintf(mbuf, "Upper Body Armor: %d-%d", cap, dr);
+	else
+		Sprintf(mbuf, "Upper Body Armor: %d", dr);
 	dr = slot_udr(LOWER_TORSO_DR, (struct monst *)0, 0);
 	putstr(en_win, 0, mbuf);
-	Sprintf(mbuf, "Lower Body Armor: %s%d", (dr>11) ? "11-" : "", dr);
+	if(dr > cap)
+		Sprintf(mbuf, "Lower Body Armor: %d-%d", cap, dr);
+	else
+		Sprintf(mbuf, "Lower Body Armor: %d", dr);
 	putstr(en_win, 0, mbuf);
 	if(!can_wear_gloves(youracedata)){
 		Sprintf(mbuf, "You have no hands; shots hit upper body");
 		putstr(en_win, 0, mbuf);
 	} else {
 		dr = slot_udr(ARM_DR, (struct monst *)0, 0);
-	Sprintf(mbuf, "Hand Armor:       %s%d", (dr>11) ? "11-" : "", dr);
+		if(dr > cap)
+		Sprintf(mbuf, "Hand Armor:       %d-%d", cap, dr);
+		else
+		Sprintf(mbuf, "Hand Armor:       %d", dr);
 		putstr(en_win, 0, mbuf);
 	}
 	if(!can_wear_boots(youracedata)){
@@ -1623,7 +1638,10 @@ udr_enlightenment()
 		putstr(en_win, 0, mbuf);
 	} else {
 		dr = slot_udr(LEG_DR, (struct monst *)0, 0);
-	Sprintf(mbuf, "Foot Armor:       %s%d", (dr>11) ? "11-" : "", dr);
+		if(dr > cap)
+		Sprintf(mbuf, "Foot Armor:       %d-%d", cap, dr);
+		else
+		Sprintf(mbuf, "Foot Armor:       %d", dr);
 		putstr(en_win, 0, mbuf);
 	}
 	

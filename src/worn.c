@@ -668,7 +668,7 @@ struct monst *mon;
 struct obj *obj;
 boolean on, silently;
 {
-	/* don't bother with dead monsters -- at best nothing will happen, at worst we get bad messages */
+	/* dead monsters shouldn't print messages about them no longer getting their intrinsics */
 	if (DEADMONSTER(mon))
 		silently = TRUE;
 

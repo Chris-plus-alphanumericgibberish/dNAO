@@ -4950,7 +4950,7 @@ boolean invoked;
 		//cast spell
 		doibite_cast(magr, wep);
 	}
-	else if(u.uinsight >= 40){
+	else if(u.uinsight >= 40 || invoked){
 		//hit targets
 		doibite_thrash(magr, wep);
 	}

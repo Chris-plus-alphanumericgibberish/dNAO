@@ -3220,7 +3220,7 @@ struct obj *obj;
     if ((obj->otyp == CHAIN) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
         return objects[obj->otyp].oc_skill;
 	if (obj->oclass != WEAPON_CLASS && obj->oclass != TOOL_CLASS &&
-	    obj->oclass != GEM_CLASS)
+	    obj->oclass != GEM_CLASS && obj->oartifact != ART_WAND_OF_ORCUS)
 		/* Not a weapon, weapon-tool, or ammo */
 		return (P_NONE);
 
@@ -3245,6 +3245,9 @@ struct obj *obj;
 	}
 	else if(obj->oartifact == ART_SINGING_SWORD){
 		type = P_MUSICALIZE;
+	}
+	else if(obj->oartifact == ART_WAND_OF_ORCUS){
+		type = P_MACE;
 	}
 
 	if(obj->otyp == DOUBLE_LIGHTSABER){
