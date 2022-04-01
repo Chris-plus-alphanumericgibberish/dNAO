@@ -133,7 +133,7 @@ make_invulnerable(xtime,talk)
 long xtime;
 boolean talk;
 {
-	long old = HStun;
+	long old = HSanctuary;
 
 	if (!xtime && old) {
 		if (talk){
