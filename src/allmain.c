@@ -4772,6 +4772,8 @@ struct monst *mon;
 					else
 						mtmp0->nmon = mtmp->nmon;
 					mon_arrive(mtmp, FALSE);
+					mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;
+					set_malign(mtmp);
 					break;
 				} else
 					mtmp0 = mtmp;
