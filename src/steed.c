@@ -666,6 +666,10 @@ place_monster(mon, x, y)
 struct monst *mon;
 int x, y;
 {
+	if(	(mon->deadmonster&DEADMONSTER_PURGE) && !(mon->deadmonster&DEADMONSTER_DEAD)){
+		mon->deadmonster = 0;
+		pline("Bad deadmonster state detected (and fixed)");
+	}
     if (mon == u.usteed ||
 	    /* special case is for convoluted vault guard handling */
 	    (DEADMONSTER(mon) && !(mon->isgd && x == 0 && y == 0))) {
