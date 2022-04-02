@@ -3392,14 +3392,21 @@ dmonsfree()
     int count = 0;
 
     for (mtmp = &fmon; *mtmp;) {
-	if (DEADMONSTER(*mtmp)) {
-	    struct monst *freetmp = *mtmp;
-	    *mtmp = (*mtmp)->nmon;
-		rem_all_mx(freetmp);
-	    dealloc_monst(freetmp);
-	    count++;
-	} else
-	    mtmp = &(*mtmp)->nmon;
+		if (DEADMONSTER(*mtmp)) {
+			struct monst *freetmp = *mtmp;
+			*mtmp = (*mtmp)->nmon;
+			rem_all_mx(freetmp);
+			dealloc_monst(freetmp);
+			count++;
+		}
+		else {
+			/* sanity check */
+			if ((*mtmp)->mhp < 1) {
+				impossible("monster (%s) has hp <1 (%d) but not marked dead", m_monnam(*mtmp), (*mtmp)->mhp);
+				mondead(*mtmp);
+			}
+			mtmp = &(*mtmp)->nmon;
+		}
     }
 
     if (count != iflags.purge_monsters)
