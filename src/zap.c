@@ -2413,6 +2413,11 @@ register struct obj *obj;
 			incr_itimeout(&HFast, rn1(10, 100 + 60 * bcsign(obj)));
 		break;
 		default:
+			if(obj->otyp == SPE_FULL_HEALING){
+				objects[SPE_FULL_HEALING].oc_dir = IMMEDIATE;
+				pline("Bad full healing zap dir detected and fixed.");
+				break;
+			}
 			pline("Bad zapnodir item: %d", obj->otyp);
 		break;
 	}
