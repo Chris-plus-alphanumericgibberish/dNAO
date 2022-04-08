@@ -863,6 +863,10 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	xchar xyflags;
 	int num_segs = 0;	/* count of worm segments */
 
+	/* dead monsters cannot migrate -- they must die where they stood */
+	if (DEADMONSTER(mtmp))
+		return;
+		
 	if (mtmp->isshk)
 	    set_residency(mtmp, TRUE);
 
