@@ -145,7 +145,7 @@ doit:
 				rloc_to(mon, mm.x, mm.y);
 
 		    if(mon->mx != x || mon->my != y) {
-				mon->data->mmove -= 12; //Note, may end up with up to -12 move points
+				mon->movement -= 12; //Note, may end up with up to -12 move points
 				if(glyph_is_invisible(levl[x][y].glyph)) {
 					unmap_object(x, y);
 					newsym(x, y);
@@ -269,7 +269,7 @@ bird_kick_monsters()
 						rloc_to(mon, mm.x, mm.y);
 
 					if(mon->mx != ix || mon->my != iy) {
-						mon->data->mmove -= 12; //Note, may end up with up to -12 move points
+						mon->movement -= 12; //Note, may end up with up to -12 move points
 						if(glyph_is_invisible(levl[ix][iy].glyph)) {
 							unmap_object(ix, iy);
 							newsym(ix, iy);
