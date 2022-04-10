@@ -3737,6 +3737,8 @@ struct monst *mtmp;
 						verbalize("**ALAAAAAAAAAAAAAAAAA:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...**");
 					}
 					set_mon_data(mtmp, PM_COILING_BRAWN);
+					possibly_unwield(mtmp, FALSE);	/* might lose use of weapon */
+					mon_break_armor(mtmp, FALSE);
 				break;
 				case 1:{
 					struct obj *helm, *robe;
@@ -3763,6 +3765,8 @@ struct monst *mtmp;
 						pline("%s head splits open in a profusion of fungal growthes!", s_suffix(Monnam(mtmp)));
 					else You_hear("a wet crack.");
 					set_mon_data(mtmp, PM_FUNGAL_BRAIN);
+					possibly_unwield(mtmp, FALSE);	/* might lose use of weapon */
+					mon_break_armor(mtmp, FALSE);
 				break;
 				case 3:
 					if(canseemon(mtmp)){
