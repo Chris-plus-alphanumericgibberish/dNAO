@@ -1740,16 +1740,22 @@ moveloop()
 								pline("%s screams and writhes. You hear %s bones splintering!", Monnam(mtmp), mhis(mtmp));
 							else You_hear("screaming.");
 							set_mon_data(mtmp, PM_COILING_BRAWN);
+							possibly_unwield(mtmp, FALSE);	/* might lose use of weapon */
+							mon_break_armor(mtmp, FALSE);
 						break;
 						case 4:
 							if(canseemon(mtmp))
 								pline("%s head splits open in a profusion of fungal growthes!", s_suffix(Monnam(mtmp)));
 							set_mon_data(mtmp, PM_FUNGAL_BRAIN);
+							possibly_unwield(mtmp, FALSE);	/* might lose use of weapon */
+							mon_break_armor(mtmp, FALSE);
 						break;
 						case 5:
 							if(canseemon(mtmp))
 								pline("%s skin peels open!", Monnam(mtmp));
 							set_mon_data(mtmp, PM_BYAKHEE);
+							possibly_unwield(mtmp, FALSE);	/* might lose use of weapon */
+							mon_break_armor(mtmp, FALSE);
 						break;
 					}
 				}
