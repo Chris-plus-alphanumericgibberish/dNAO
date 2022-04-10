@@ -5408,7 +5408,7 @@ xkilled(mtmp, dest)
 	}
 
 	// You killed a mummy and suffer from its curse.
-	if(attacktype_fordmg(mtmp->data, AT_NONE, AD_MROT)){
+	if(!mtmp->mcan && attacktype_fordmg(mtmp->data, AT_NONE, AD_MROT)){
 		mummy_curses_x(mtmp, &youmonst);
 	}
 	
