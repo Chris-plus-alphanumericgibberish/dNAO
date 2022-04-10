@@ -680,11 +680,11 @@ nh_timeout()
 		u.divetimer--;
 		if(u.divetimer<=3) You("are running short on air.");
 		if(u.divetimer==1) You("are running out of air!");
-	} else if (!u.usubwater && !u.ustuck && !Babble){ /* limited duration dive, 2 turns to 6 turns naturally, 8 turns with magic */ 
-		if(u.divetimer < (ACURR(A_CON))/3) u.divetimer++;
+	} else if (!u.usubwater){ /* limited duration dive, 2 turns to 6 turns naturally, 8 turns with magic */ 
+		if(u.divetimer < (ACURR(A_CON))/3 && !u.ustuck && !Babble && !Screaming) u.divetimer++;
 		else if(u.divetimer > (ACURR(A_CON))/3) u.divetimer--;
 	}
-	
+
 	if((Babble || Screaming) && !Strangled && !FrozenAir && !BloodDrown && u.divetimer > 1)
 		u.divetimer--;
 
