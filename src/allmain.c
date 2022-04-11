@@ -4831,7 +4831,12 @@ struct monst *magr;
 	
 	pa = youagr ? youracedata : magr->data;
 		
-	if(pa->mtyp == PM_SWIRLING_MIST){
+	if(pa->mtyp == PM_MOTHERING_MASS){
+		symbiote.aatyp = AT_TENT;
+		symbiote.adtyp = AD_PHYS;
+		symbiote.damn = 2;
+		symbiote.damd = 6;
+	} else if(pa->mtyp == PM_SWIRLING_MIST){
 		symbiote.aatyp = AT_BKGT;
 		symbiote.adtyp = AD_WET;
 		symbiote.damn = 3;
