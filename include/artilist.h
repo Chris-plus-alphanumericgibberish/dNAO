@@ -2658,7 +2658,7 @@ A("Snickersnee",					KNIFE,				(const char *)0,
 /*Needs encyc entry*/
 /*heavier than normal, and causes spell penalties*/
 A("The Platinum Dragon Plate",		SILVER_DRAGON_SCALE_MAIL,			(const char *)0,
-	9000L, PLATINUM, MZ_DEFAULT, 225,
+	9000L, MT_DEFAULT, MZ_DEFAULT, WT_SPECIAL,
 	A_NONE, NON_PM, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,

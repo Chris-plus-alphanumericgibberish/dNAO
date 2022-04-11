@@ -2074,6 +2074,9 @@ struct obj *obj;
 		case ART_LYRE_OF_ORPHEUS:
 			wt = objects[MAGIC_HARP].oc_weight;
 			break;
+		case ART_DRAGON_PLATE:
+			wt = objects[SILVER_DRAGON_SCALE_MAIL].oc_weight*1.5;
+			break;
 		default:
 			impossible("unhandled special artifact weight for %d", obj->oartifact);
 			break;
