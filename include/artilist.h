@@ -2670,7 +2670,7 @@ A("The Platinum Dragon Plate",		SILVER_DRAGON_SCALE_MAIL,			(const char *)0,
 /*Needs encyc entry*/
 /*heavier than normal */
 A("The Chromatic Dragon Scales",	BLACK_DRAGON_SCALES,			(const char *)0,
-	9000L, MT_DEFAULT, MZ_DEFAULT, 225,
+	9000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
