@@ -9025,7 +9025,7 @@ boolean goodequip;
 				}
 			} else if(Infuture){
 				otmp = mksobj(QUARTERSTAFF, mkobjflags);
-				otmp->spe = 9;
+				otmp->spe = 7;
 				add_oprop(otmp, OPROP_PSIOW);
 				add_oprop(otmp, OPROP_PHSEW);
 				add_oprop(otmp, OPROP_WATRW);
@@ -9042,25 +9042,25 @@ boolean goodequip;
 				otmp->oerodeproof = 1;
 				otmp->quan = 18;
 				otmp->owt = weight(otmp);
-				otmp->spe = 9;
+				otmp->spe = 7;
 				otmp->objsize = MZ_HUGE;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(PLATE_MAIL, mkobjflags);
-				otmp->spe = 9;
+				otmp->spe = 5;
 				otmp->objsize = MZ_HUGE;
 				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
 				otmp = mksobj(GAUNTLETS, mkobjflags);
-				otmp->spe = 9;
+				otmp->spe = 5;
 				otmp->objsize = MZ_HUGE;
 				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
 				(void) mpickobj(mtmp,otmp);
 				otmp = mksobj(ARMORED_BOOTS, mkobjflags);
-				otmp->spe = 9;
+				otmp->spe = 5;
 				otmp->objsize = MZ_HUGE;
 				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
