@@ -7031,7 +7031,7 @@ boolean goodequip;
 							otmp->spe = 7;
 							curse(otmp);
 							add_oprop(otmp, OPROP_UNHYW);
-							add_oprop(otmp, OPROP_PHSEW);
+							if(!rn2(4)) add_oprop(otmp, OPROP_PHSEW);
 						}
 
 						otmp = mongets(mtmp, ARCHAIC_BOOTS, mkobjflags);
