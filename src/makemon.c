@@ -11535,7 +11535,7 @@ int faction;
 							tmpm = makemon_full(&mons[PM_EMBRACED_DROWESS], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 							if(tmpm) m_initsgrp(tmpm, mtmp->mx, mtmp->my);
 							tmpm = makemon_full(&mons[PM_MIND_FLAYER], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
-							if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
+							if(tmpm) m_initsgrp(tmpm, mtmp->mx, mtmp->my);
 							tmpm = makemon_full(&mons[PM_EDDERKOP], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 							if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
 							tmpm = makemon_full(&mons[PM_HEDROW_ZOMBIE], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
@@ -11580,7 +11580,7 @@ int faction;
 					}
 					if (mndx == PM_MASTER_MIND_FLAYER){
 						m_initsgrp(mtmp, mtmp->mx, mtmp->my);
-						for(num = rn1(5,4); num >= 0; num--) makemon_full(&mons[PM_MIND_FLAYER], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+						for(num = d(2,3); num >= 0; num--) makemon_full(&mons[PM_MIND_FLAYER], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 					}
 				}
 			}
