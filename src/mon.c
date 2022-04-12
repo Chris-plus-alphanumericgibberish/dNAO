@@ -2662,7 +2662,7 @@ struct obj *otmp;
 	if (mtmp == u.usteed) return (FALSE);
 #endif
 	if (mtmp->isshk) return(TRUE); /* no limit */
-	if ((mtmp->mpeaceful && mtmp->mtyp != PM_MAID) && !mtmp->mtame) return(FALSE);
+	if ((mtmp->mpeaceful && mtmp->mtyp != PM_MAID && !(Infuture && mtmp->mfaction == QUEST_FACTION)) && !mtmp->mtame) return(FALSE);
 	/* otherwise players might find themselves obligated to violate
 	 * their alignment if the monster takes something they need
 	 * 
