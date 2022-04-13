@@ -2458,6 +2458,10 @@ base_uac()
 			dexbonus = min(dexbonus,0);
 		}
 		
+		if(uarm && uarm->otyp == STRAITJACKET && uarm->cursed){
+			dexbonus -= 5; //flat penalty.
+		}
+		
 		if(dexbonus < -5)
 			dexbonus = -5;
 		

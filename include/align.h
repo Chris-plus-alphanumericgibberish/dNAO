@@ -40,6 +40,7 @@ typedef struct	align {		/* alignment & record */
 #define HOLY_HOLINESS	 1
 #define NEUTRAL_HOLINESS 0
 #define UNHOLY_HOLINESS -1
+#define VOID_HOLINESS -2
 
 #define GOAT_EAT_PASSIVE 0
 #define GOAT_EAT_OFFERED 1

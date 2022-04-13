@@ -145,6 +145,8 @@
 #define MF_MARTIAL_B        0x00000001L   /* basic   martial skill -- does nothing yet? */
 #define MF_MARTIAL_S        0x00000002L   /* skilled martial skill */
 #define MF_MARTIAL_E        0x00000004L   /* expert  martial skill */
+#define MF_BAB_FULL        	0x00000008L   /* full base attack bonus */
+#define MF_BAB_HALF        	0x00000010L   /* half base attack bonus */
 
 //Monster Body plan
 #define MB_NOEYES		0x00000001L	/* no eyes to gaze into or blind */

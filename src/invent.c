@@ -853,7 +853,6 @@ carrying_readable_weapon()
 			(otmp->oartifact && (
 				otmp->oartifact == ART_EXCALIBUR || 
 				otmp->oartifact == ART_GLAMDRING || 
-				otmp->oartifact == ART_ITLACHIAYAQUE || 
 				otmp->oartifact == ART_ROD_OF_SEVEN_PARTS ||
 				otmp->oartifact == ART_BOW_OF_SKADI ||
 				otmp->oartifact == ART_STAFF_OF_AESCULAPIUS ||
@@ -889,11 +888,15 @@ carrying_readable_armor()
 
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 		if(otmp->oclass == ARMOR_CLASS
-			&& otmp->ohaluengr
-			&& otmp->oward
-			&& (   otmp->otyp == DROVEN_PLATE_MAIL 
-				|| otmp->otyp == DROVEN_CHAIN_MAIL
-				|| otmp->otyp == CONSORT_S_SUIT)
+			&& ((otmp->ohaluengr
+					&& otmp->oward
+					&& (   otmp->otyp == DROVEN_PLATE_MAIL 
+						|| otmp->otyp == DROVEN_CHAIN_MAIL
+						|| otmp->otyp == CONSORT_S_SUIT)
+				) || (otmp->oartifact && (
+					otmp->oartifact == ART_ITLACHIAYAQUE)
+				)
+			   )
 			)
 			return TRUE;
 	return FALSE;

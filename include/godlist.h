@@ -285,7 +285,7 @@ GOD_V2("_Kiaransali",            A_NEUTRAL, UNHOLY_HOLINESS,
 GOD_V2("Yaldabaoth",             A_LAWFUL, HOLY_HOLINESS,
 	MINIONS(Langels)
 	),
-GOD_V2("the void",               A_VOID, NEUTRAL_HOLINESS,
+GOD_V2("the void",               A_VOID, VOID_HOLINESS,
 	MINIONS(NON_PM)
 	),
 GOD_V2("_Pistis Sophia",         A_CHAOTIC, HOLY_HOLINESS,

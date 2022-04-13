@@ -3169,7 +3169,7 @@ int *shield_margin;
 			base_acc = mlev(magr);
 		}
 		else {
-			base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS(weapon) : thrown ? 0.67 : 1.0);
+			base_acc = mlev(magr) * (youagr ? BASE_ATTACK_BONUS(weapon) : thrown ? 0.67 : MON_BAB(magr));
 		}
 		if(youagr){
 			static long warnpanic = 0;
@@ -4365,7 +4365,7 @@ boolean ranged;
 						/* assumes the player was polyed and not in natural form */
 						You("burn up!");
 						rehumanize();
-						break;
+						return (MM_HIT | MM_DEF_LSVD);
 					}
 					else {
 						if (vis)
@@ -17170,6 +17170,7 @@ struct monst *mdef;
 	struct trap *chasm;
 	static struct attack grab =	{ AT_TUCH, AD_PHYS, 1, 1 };
 	int res;
+	boolean dodig = FALSE;
 	
 	res = xmeleehity(&youmonst, mdef, &grab, (struct obj **)0, FALSE, 0, FALSE);
 	if(res&(MM_MISS|MM_DEF_DIED))
@@ -17203,17 +17204,8 @@ struct monst *mdef;
 	chasm = t_at(x(mdef), y(mdef));	
 	if(weight >= WT_MEDIUM && (!chasm || chasm->ttyp == PIT)){
 		pline("%s slams into the %s, creating a crater!", Monnam(mdef), surface(u.ux + u.dx, u.uy + u.dy));
-		digfarhole(!chasm, x(mdef), y(mdef));
-		chasm = t_at(x(mdef), y(mdef));
-		if (chasm){
-			if(chasm->ttyp == PIT && !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef)) {
-				if (!mon_resistance(mdef,FLYING) && !is_clinger(mdef->data))
-					mdef->mtrapped = 1;
-			}
-			chasm->tseen = 1;
-			levl[u.ux + u.dx][u.uy + u.dy].doormask = 0;
-			tmp *= 2;
-		}
+		tmp *= 2;
+		dodig = TRUE;
 	}
 	else {
 		if(tmp)
@@ -17229,6 +17221,20 @@ struct monst *mdef;
 		int nd = dbon((struct obj *)0);
 		nd = max(nd, 1);
 		xdamagey(&youmonst, mdef, (struct attack *)0, d(nd,tmp));
+	}
+
+	/* do pit/hole digging after applying damage - holes can migrate monsters, and we cannot kill migrating monsters */
+	if (dodig) {
+		digfarhole(!chasm, x(mdef), y(mdef));
+		chasm = t_at(x(mdef), y(mdef));
+		if (chasm){
+			if(chasm->ttyp == PIT && !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef)) {
+				if (!mon_resistance(mdef,FLYING) && !is_clinger(mdef->data))
+					mdef->mtrapped = 1;
+			}
+			chasm->tseen = 1;
+			levl[u.ux + u.dx][u.uy + u.dy].doormask = 0;
+		}
 	}
 
 	return;

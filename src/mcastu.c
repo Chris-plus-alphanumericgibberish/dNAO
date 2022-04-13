@@ -5167,8 +5167,10 @@ int tary;
 						else if(is_metallic(otmp)){
 							if(!obj_resists(otmp, 55, 95)){
 								if(!Blind)
-									Your("%s turns golden!", xname(otmp));
+									Your("%s turns golden yellow!", xname(otmp));
 								set_material(otmp, GOLD);
+								//Item may not naturally be yellow.
+								otmp->obj_color = CLR_YELLOW;
 							}
 						}
 						else {

@@ -1494,6 +1494,9 @@ fix_object(otmp)
 	struct obj *otmp;
 {
 	otmp->owt = weight(otmp);
+	if (obj_eternal_light(otmp) && !otmp->lamplit) {
+		begin_burn(otmp);
+	}
 }
 
 /*o_init.c*/

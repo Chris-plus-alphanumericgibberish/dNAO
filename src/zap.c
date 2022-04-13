@@ -23,6 +23,7 @@ extern boolean notonhead;	/* for long worms */
 /* kludge to use mondied instead of killed */
 extern boolean m_using;
 STATIC_DCL void FDECL(polyuse, (struct obj*, int, int));
+STATIC_DCL struct obj * FDECL(poly_obj_core, (struct obj *, int));
 STATIC_DCL void FDECL(create_polymon, (struct obj *, int));
 STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
 STATIC_DCL boolean FDECL(zap_reflect, (struct monst *, struct zapdata *));
@@ -1567,143 +1568,95 @@ struct obj *obj;
 	delobj(obj);
 }
 
-/*
- * Polymorph the object to the given object ID.  If the ID is STRANGE_OBJECT
- * then pick random object from the source's class (this is the standard
- * "polymorph" case).  If ID is set to a specific object, inhibit fusing
- * n objects into 1.  This could have been added as a flag, but currently
- * it is tied to not being the standard polymorph case. The new polymorphed
- * object replaces obj in its link chains.  Return value is a pointer to
- * the new object.
+/* 
+ * Polymorphs obj into a random object from the source's class.
  *
- * This should be safe to call for an object anywhere.
+ * May shrink stacks, has controls against various abuses,
+ * and is generally has behaviour befitting of polymorph magic.
+ * 
+ * Replaces obj in chains, returing a pointer to the new object.
  */
 struct obj *
-poly_obj(obj, id)
-	struct obj *obj;
-	int id;
+randpoly_obj(obj)
+struct obj * obj;
 {
-	struct obj *otmp;
-	xchar ox, oy;
-	boolean can_merge = (id == STRANGE_OBJECT);
-	int obj_location = obj->where;
+	int new_otyp = STRANGE_OBJECT;	// default to random
+	struct obj * otmp;				// new object
 
-	if (obj->otyp == BOULDER && In_sokoban(&u.uz))
-	    change_luck(-1);	/* Sokoban guilt, boulders only */
-	if (id == STRANGE_OBJECT) { /* preserve symbol */
-		if(obj->otyp == SPE_BLANK_PAPER || obj->otyp == SCR_BLANK_PAPER || obj->otyp == SCR_AMNESIA){
-			otmp = mksobj(rn2(2) ? SPE_BLANK_PAPER : SCR_BLANK_PAPER, MKOBJ_NOINIT);
-		} else if(obj->otyp == POT_BLOOD){
-			otmp = mksobj(POT_BLOOD, MKOBJ_NOINIT);
-		} else if(obj->otyp == POT_WATER || obj->otyp == POT_AMNESIA){
-			if(obj->otyp == POT_AMNESIA){
-				obj->otyp = POT_WATER;
-				set_object_color(obj);
-			}
-			if(!rn2(3)){
-				obj->blessed = 0;
-				obj->cursed = 1;
-			} else if(rn2(2)){
-				obj->cursed = 0;
-				obj->blessed = 1;
-			} else {
-				obj->blessed = 0;
-				obj->cursed = 0;
-			}
-			return obj;
-		} else if(obj->otyp == HYPOSPRAY_AMPULE){
-			int pick;
-			otmp = mksobj(HYPOSPRAY_AMPULE, MKOBJ_NOINIT);
-			do{
-				switch(rn2(14)){
-					case 0:
-						pick = POT_GAIN_ABILITY;
-					break;
-					case 1:
-						pick = POT_RESTORE_ABILITY;
-					break;
-					case 2:
-						pick = POT_BLINDNESS;
-					break;
-					case 3:
-						pick = POT_CONFUSION;
-					break;
-					case 4:
-						pick = POT_PARALYSIS;
-					break;
-					case 5:
-						pick = POT_SPEED;
-					break;
-					case 6:
-						pick = POT_HALLUCINATION;
-					break;
-					case 7:
-						pick = POT_HEALING;
-					break;
-					case 8:
-						pick = POT_EXTRA_HEALING;
-					break;
-					case 9:
-						pick = POT_GAIN_ENERGY;
-					break;
-					case 10:
-						pick = POT_SLEEPING;
-					break;
-					case 11:
-						pick = POT_FULL_HEALING;
-					break;
-					case 12:
-						pick = POT_POLYMORPH;
-					break;
-					case 13:
-						pick = POT_AMNESIA;
-					break;
-				}
-			} while(pick == (int)obj->ovar1);
-			otmp->ovar1 = (long)pick;
-			otmp->spe = obj->spe;
-		} else {
-			int try_limit = 3;
-			/* Try up to 3 times to make the magic-or-not status of
-			   the new item be the same as it was for the old one. */
-			otmp = (struct obj *)0;
-			do {
-			if (otmp) delobj(otmp);
-			otmp = mkobj(obj->oclass, FALSE);
-			} while (--try_limit > 0 &&
-			  objects[obj->otyp].oc_magic != objects[otmp->otyp].oc_magic);
-		}
-	} else {
-	    /* literally replace obj with this new thing */
-	    otmp = mksobj(id, MKOBJ_NOINIT);
-	/* Actually more things use corpsenm but they polymorph differently */
-#define USES_CORPSENM(typ) ((typ)==CORPSE || (typ)==STATUE || (typ)==FIGURINE)
-	    if (USES_CORPSENM(obj->otyp) && USES_CORPSENM(id))
-		otmp->corpsenm = obj->corpsenm;
-#undef USES_CORPSENM
+	/* things that affect what otyp will be created by polymorph */
+	switch(obj->otyp) {
+		case SPE_BLANK_PAPER:
+		case SCR_BLANK_PAPER:
+		case SCR_AMNESIA:
+			new_otyp = rn2(2) ? SPE_BLANK_PAPER : SCR_BLANK_PAPER;
+			break;
+#ifdef MAIL
+		case SCR_MAIL:
+			new_otyp = SCR_MAIL;
+			break;
+#endif
+		case POT_WATER:
+		case POT_AMNESIA:
+			new_otyp = POT_WATER;
+			break;
+		case POT_BLOOD:
+			new_otyp = POT_BLOOD;
+			break;
+		case EGG:
+			if (obj->spe)
+				new_otyp = EGG;
+			break;
+		case HYPOSPRAY_AMPULE:
+			new_otyp = HYPOSPRAY_AMPULE;
+			break;
+		case SCR_GOLD_SCROLL_OF_LAW:
+			new_otyp = GOLD_PIECE;
+			break;
+	}
+	/* turn crocodile corpses into shoes */
+	if (obj->otyp == CORPSE && obj->corpsenm == PM_CROCODILE) {
+		new_otyp = LOW_BOOTS;
+	}
+	/* too-worn-out spellbooks turn blank */
+	if (obj->oclass == SPBOOK_CLASS && obj->spestudied > MAX_SPELL_STUDY) {
+		new_otyp = SPE_BLANK_PAPER;
 	}
 
-	/* preserve quantity */
-	otmp->quan = obj->quan;
-	/* preserve the shopkeepers (lack of) interest */
-	otmp->no_charge = obj->no_charge;
-	/* preserve inventory letter if in inventory */
-	if (obj_location == OBJ_INVENT)
-	    otmp->invlet = obj->invlet;
+	/* create the new object, otmp, of the new type (or random type) */
+	otmp = poly_obj_core(obj, new_otyp);
+
+	/* after-creating-otmp special handling */
+
+	/* Sokoban guilt, boulder-like objects. Assumed to be the players fault. */
+	if (is_boulder(obj) && In_sokoban(&u.uz)) {
+	    change_luck(-1);
+	}
+	/* 'n' merged objects may be fused into 1 object */
+	if (otmp->quan > 1L &&
+		(!objects[otmp->otyp].oc_merge || (otmp->quan > (long)rn2(1000)))) {
+	    otmp->quan = 1L;
+	}
+	/* potions of water have their BUC randomized (and were guaranteed to turn into water) */
+	if (obj->otyp == POT_WATER) {
+		int state = rn2(3) - 1;
+		otmp->blessed = state > 0;
+		otmp->cursed = state < 0;
+	}
+	/* potions of blood get a random appropriate bloodtype (and were guaranteed to turn into blood)  */
+	if (obj->otyp == POT_BLOOD) {
+		struct obj * dummy = mksobj(POT_BLOOD, NO_MKOBJ_FLAGS);
+		otmp->corpsenm = dummy->corpsenm;
+		delobj(dummy);
+	}
 #ifdef MAIL
-	/* You can't send yourself 100 mail messages and then
-	 * polymorph them into useful scrolls
-	 */
+	/* scrolls of mail have spe=1 (and were guaranteed to turn into mail) */
 	if (obj->otyp == SCR_MAIL) {
-		otmp->otyp = SCR_MAIL;
 		otmp->spe = 1;
 	}
 #endif
-
-	/* avoid abusing eggs laid by you */
+	/* eggs laid by the player try to become other plausibly-player-laid eggs (and were guaranteed to turn into eggs)  */
 	if (obj->otyp == EGG && obj->spe) {
 		int mtyp, tryct = 100;
-
 		/* first, turn into a generic egg */
 		if (otmp->otyp == EGG)
 		    kill_egg(otmp);
@@ -1725,6 +1678,145 @@ poly_obj(obj, id)
 		    }
 		}
 	}
+	/* hypospray ampules randomize the contained potion (and were guaranteed to turn into ampules)  */
+	if (obj->otyp == HYPOSPRAY_AMPULE) {
+		int hypospray_ampules[] = {POT_GAIN_ABILITY,POT_RESTORE_ABILITY,POT_BLINDNESS,POT_CONFUSION,POT_PARALYSIS,
+				POT_SPEED,POT_HALLUCINATION,POT_HEALING,POT_EXTRA_HEALING,POT_GAIN_ENERGY,
+				POT_SLEEPING,POT_FULL_HEALING,POT_POLYMORPH,POT_AMNESIA};
+		do {
+			otmp->ovar1 = (long)ROLL_FROM(hypospray_ampules);
+		} while(otmp->ovar1 == obj->ovar1);
+		otmp->spe = obj->spe;
+	}
+	/* gold scrolls of law turn a small randomize amount of gold (and were guaranteed to turn into gold pieces) */
+	if (obj->otyp == SCR_GOLD_SCROLL_OF_LAW) {
+		otmp->quan = rnd(50 * obj->quan) + 50 * obj->quan;
+	}
+	/* crocodile corpses were turned into shoes */
+	if (obj->otyp == CORPSE && obj->corpsenm == PM_CROCODILE) {
+		otmp->spe = 0;
+		otmp->oeroded = 0;
+		otmp->oerodeproof = TRUE;
+		otmp->cursed = FALSE;
+	}
+
+	/* general post-poly changes */
+	switch (otmp->oclass) {
+	case TOOL_CLASS:
+		if (otmp->otyp == CANDLE_OF_INVOCATION) {
+			otmp = poly_obj(otmp, WAX_CANDLE);
+			otmp->age = 400L;
+		}
+	    else if (otmp->otyp == MAGIC_LAMP) {
+			otmp = poly_obj(otmp, OIL_LAMP);
+			otmp->age = 1500L;	/* "best" oil lamp possible */
+	    } else if (otmp->otyp == MAGIC_MARKER) {
+			otmp->recharged = 1;	/* degraded quality */
+	    }
+	    /* don't care about the recharge count of other tools */
+	    break;
+
+	case WAND_CLASS:
+	    while (otmp->otyp == WAN_WISHING || otmp->otyp == WAN_POLYMORPH)
+			otmp = randpoly_obj(otmp);
+	    /* altering the object tends to degrade its quality
+	       (analogous to spellbook `read count' handling) */
+	    if ((int)otmp->recharged < rn2(7))	/* recharge_limit */
+			otmp->recharged++;
+	    break;
+
+	case POTION_CLASS:
+	    while (otmp->otyp == POT_POLYMORPH)
+			otmp = randpoly_obj(otmp);
+	    break;
+
+	case SPBOOK_CLASS:
+	    while (otmp->otyp == SPE_POLYMORPH)
+			otmp = randpoly_obj(otmp);
+	    /* reduce spellbook abuse */
+		if(otmp->otyp != SPE_BLANK_PAPER) {
+			otmp->spestudied = obj->spestudied + 1;
+		}
+	    break;
+
+	case RING_CLASS:
+		while (otmp->otyp == RIN_WISHES)
+			otmp = randpoly_obj(otmp);
+		break;
+
+	case GEM_CLASS:
+	    if (otmp->quan > (long)rnd(4) && obj->obj_material == MINERAL && otmp->obj_material != MINERAL) {
+			otmp = poly_obj(otmp, ROCK);	/* transmutation backfired */
+			set_obj_quan(otmp, otmp->quan/2); /* some material has been lost */
+	    }
+	    break;
+	}
+
+	delobj(obj);
+	return otmp;
+}
+/*
+ * Polymorphs the object to the given object ID.
+ * If given STRANGE OBJECT, uses randpoly_obj().
+ * 
+ * Returns a pointer to the new object.
+ */
+struct obj *
+poly_obj(obj, id)
+struct obj * obj;
+int id;
+{
+	struct obj * otmp;
+	if (id == STRANGE_OBJECT) {
+		impossible("poly_obj called with id=STRANGE_OBJECT?");
+		return randpoly_obj(obj);
+	}
+	otmp = poly_obj_core(obj, id);
+
+	delobj(obj);
+	return otmp;
+}
+
+/* 
+ * the shared core of randpoly_obj and poly_obj 
+ * does not destroy obj, caller must do so.
+ */
+struct obj *
+poly_obj_core(obj, id)
+struct obj *obj;
+int id;
+{
+	struct obj *otmp;
+	xchar ox, oy;
+	int obj_location = obj->where;
+
+	if (id == STRANGE_OBJECT) { /* preserve symbol */
+			int try_limit = 3;
+			/* Try up to 3 times to make the magic-or-not status of
+			   the new item be the same as it was for the old one. */
+			otmp = (struct obj *)0;
+			do {
+			if (otmp) delobj(otmp);
+			otmp = mkobj(obj->oclass, FALSE);
+			} while (--try_limit > 0 &&
+			  objects[obj->otyp].oc_magic != objects[otmp->otyp].oc_magic);
+	} else {
+	    /* literally replace obj with this new thing */
+	    otmp = mksobj(id, MKOBJ_NOINIT);
+	/* Actually more things use corpsenm but they polymorph differently */
+#define USES_CORPSENM(typ) ((typ)==CORPSE || (typ)==STATUE || (typ)==FIGURINE)
+	    if (USES_CORPSENM(obj->otyp) && USES_CORPSENM(id))
+		otmp->corpsenm = obj->corpsenm;
+#undef USES_CORPSENM
+	}
+
+	/* preserve quantity, unless otmp cannot be stacked */
+	otmp->quan = (objects[otmp->otyp].oc_merge) ? obj->quan : 1;
+	/* preserve the shopkeepers (lack of) interest */
+	otmp->no_charge = obj->no_charge;
+	/* preserve inventory letter if in inventory */
+	if (obj_location == OBJ_INVENT)
+	    otmp->invlet = obj->invlet;
 
 	/* keep special fields (including charges on wands) */
 	if (index(charged_objs, otmp->oclass)) otmp->spe = obj->spe;
@@ -1749,91 +1841,8 @@ poly_obj(obj, id)
 	if (obj->opoisoned && is_poisonable(otmp))
 		otmp->opoisoned = obj->opoisoned;
 
-	if (id == STRANGE_OBJECT && obj->otyp == CORPSE) {
-	/* turn crocodile corpses into shoes */
-	    if (obj->corpsenm == PM_CROCODILE) {
-		otmp->otyp = LOW_BOOTS;
-		otmp->oclass = ARMOR_CLASS;
-		otmp->spe = 0;
-		otmp->oeroded = 0;
-		otmp->oerodeproof = TRUE;
-		otmp->quan = 1L;
-		otmp->cursed = FALSE;
-	    }
-	}
-
 	/* no box contents --KAA */
 	if (Has_contents(otmp)) delete_contents(otmp);
-
-	/* 'n' merged objects may be fused into 1 object */
-	if (otmp->quan > 1L && (!objects[otmp->otyp].oc_merge ||
-				(can_merge && otmp->quan > (long)rn2(1000))))
-	    otmp->quan = 1L;
-
-	if (id == STRANGE_OBJECT && obj->otyp == SCR_GOLD_SCROLL_OF_LAW)
-	{
-		/* turn gold scrolls of law into a handful of gold pieces */
-		otmp->otyp = GOLD_PIECE;
-		otmp->oclass = COIN_CLASS;
-		set_material_gm(otmp, GOLD);
-		otmp->quan = rnd(50 * obj->quan) + 50 * obj->quan;
-	}
-	
-	switch (otmp->oclass) {
-
-	case TOOL_CLASS:
-		if (otmp->otyp == CANDLE_OF_INVOCATION) {
-			otmp->otyp = WAX_CANDLE;
-			otmp->age = 400L;
-		}
-	    else if (otmp->otyp == MAGIC_LAMP) {
-			otmp->otyp = OIL_LAMP;
-			otmp->age = 1500L;	/* "best" oil lamp possible */
-	    } else if (otmp->otyp == MAGIC_MARKER) {
-			otmp->recharged = 1;	/* degraded quality */
-	    }
-	    /* don't care about the recharge count of other tools */
-	    break;
-
-	case WAND_CLASS:
-	    while (otmp->otyp == WAN_WISHING || otmp->otyp == WAN_POLYMORPH)
-			otmp->otyp = rnd_class(WAN_LIGHT, WAN_LIGHTNING);
-	    /* altering the object tends to degrade its quality
-	       (analogous to spellbook `read count' handling) */
-	    if ((int)otmp->recharged < rn2(7))	/* recharge_limit */
-			otmp->recharged++;
-	    break;
-
-	case POTION_CLASS:
-	    while (otmp->otyp == POT_POLYMORPH)
-			otmp->otyp = rnd_class(POT_GAIN_ABILITY, POT_WATER);
-	    break;
-
-	case SPBOOK_CLASS:
-	    while (otmp->otyp == SPE_POLYMORPH)
-			otmp->otyp = rnd_class(SPE_DIG, SPE_BLANK_PAPER);
-	    /* reduce spellbook abuse */
-		if(otmp->spestudied > MAX_SPELL_STUDY){
-			otmp->otyp = SPE_BLANK_PAPER;
-			otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color;
-		}
-	    else
-			otmp->spestudied = obj->spestudied + 1;
-	    break;
-
-	case RING_CLASS:
-		while (otmp->otyp == RIN_WISHES)
-			otmp->otyp = rnd_class(RIN_WISHES, RIN_PROTECTION_FROM_SHAPE_CHAN);
-		break;
-
-	case GEM_CLASS:
-	    if (otmp->quan > (long)rnd(4) && obj->obj_material == MINERAL && otmp->obj_material != MINERAL) {
-			otmp->otyp = ROCK;	/* transmutation backfired */
-			set_material_gm(otmp, MINERAL);
-			otmp->quan /= 2L;	/* some material has been lost */
-	    }
-	    break;
-	}
 
 	/* add focusing gems to lightsabers */
 	if (is_lightsaber(otmp)) {
@@ -1851,27 +1860,27 @@ poly_obj(obj, id)
 	/* for now, take off worn items being polymorphed */
 	if (obj_location == OBJ_INVENT) {
 	    if (id == STRANGE_OBJECT)
-		remove_worn_item(obj, TRUE);
+			remove_worn_item(obj, TRUE);
 	    else {
-		/* This is called only for stone to flesh.  It's a lot simpler
-		 * than it otherwise might be.  We don't need to check for
-		 * special effects when putting them on (no meat objects have
-		 * any) and only three worn masks are possible.
-		 */
-		otmp->owornmask = obj->owornmask;
-		remove_worn_item(obj, TRUE);
-		setworn(otmp, otmp->owornmask);
-		if (otmp->owornmask & LEFT_RING)
-		    uleft = otmp;
-		if (otmp->owornmask & RIGHT_RING)
-		    uright = otmp;
-		if (otmp->owornmask & W_WEP)
-		    uwep = otmp;
-		if (otmp->owornmask & W_SWAPWEP)
-		    uswapwep = otmp;
-		if (otmp->owornmask & W_QUIVER)
-		    uquiver = otmp;
-		goto no_unwear;
+			/* This is called only for stone to flesh.  It's a lot simpler
+			* than it otherwise might be.  We don't need to check for
+			* special effects when putting them on (no meat objects have
+			* any) and only three worn masks are possible.
+			*/
+			otmp->owornmask = obj->owornmask;
+			remove_worn_item(obj, TRUE);
+			setworn(otmp, otmp->owornmask);
+			if (otmp->owornmask & LEFT_RING)
+				uleft = otmp;
+			if (otmp->owornmask & RIGHT_RING)
+				uright = otmp;
+			if (otmp->owornmask & W_WEP)
+				uwep = otmp;
+			if (otmp->owornmask & W_SWAPWEP)
+				uswapwep = otmp;
+			if (otmp->owornmask & W_QUIVER)
+				uquiver = otmp;
+			goto no_unwear;
 	    }
 	}
 	else if (obj_location == OBJ_MINVENT) {
@@ -1897,6 +1906,8 @@ no_unwear:
 		!is_boulder(otmp))
 	    unblock_point(obj->ox, obj->oy);
 
+	/* copy OX structures */
+	mov_all_ox(obj, otmp);
 	/* ** we are now done adjusting the object ** */
 
 
@@ -1936,7 +1947,6 @@ no_unwear:
 		} else Norep("%s is furious!", Monnam(shkp));
 	    }
 	}
-	delobj(obj);
 	return otmp;
 }
 
@@ -2051,7 +2061,7 @@ struct obj *obj, *otmp;
 		    do_osshock(obj);
 		    break;
 		}
-		obj = poly_obj(obj, STRANGE_OBJECT);
+		obj = randpoly_obj(obj);;
 		newsym(obj->ox,obj->oy);
 		break;
 	case WAN_PROBING:
@@ -2413,6 +2423,11 @@ register struct obj *obj;
 			incr_itimeout(&HFast, rn1(10, 100 + 60 * bcsign(obj)));
 		break;
 		default:
+			if(obj->otyp == SPE_FULL_HEALING){
+				objects[SPE_FULL_HEALING].oc_dir = IMMEDIATE;
+				pline("Bad full healing zap dir detected and fixed.");
+				break;
+			}
 			pline("Bad zapnodir item: %d", obj->otyp);
 		break;
 	}

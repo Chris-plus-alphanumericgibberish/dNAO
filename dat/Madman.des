@@ -174,7 +174,7 @@ MONSTER:'@',"Cassilda the Iron Maiden",(34,09)
 # Ladders
 LADDER:(50,09),down
 
-MONSTER:'@',"Stranger",(48,09)
+MONSTER:'@',"Stranger",(48,09),hostile
 OBJECT:'"',"amulet versus curses",(48,09),blessed,0,"The Star of Hypernotus"
 
 MONSTER:'@',"priestess",(42,01), peaceful

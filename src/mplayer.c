@@ -232,9 +232,10 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 			*weapon = rn2(2) ? DOUBLE_LIGHTSABER : LIGHTSABER;
 			*rweapon = HAND_BLASTER;
 			*armor = !rn2(3) ? JUMPSUIT : 
-					 rn2(2) ? BODYGLOVE :
+					 rn2(2) ? ELVEN_TOGA :
 					 PLASTEEL_ARMOR;
-			*helm = HELM_OF_BRILLIANCE;
+			*shirt = BODYGLOVE;
+			*helm = rn2(2) ? HELM_OF_BRILLIANCE : CRYSTAL_HELM;
 			*cloak = rn2(4) ? ROBE : CLOAK_OF_PROTECTION;
 		} else {
 			if (rn2(4)) *weapon = rn2(2) ? QUARTERSTAFF : ATHAME;
