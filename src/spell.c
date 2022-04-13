@@ -6014,6 +6014,9 @@ int spell;
 	if(spellid(spell) == urole.spelspec)
 		splcaster += urole.spelsbon;
 
+	if(spellid(spell) == urace.spelspec)
+		splcaster += urace.spelsbon;
+
 	/* `healing spell' bonus */
 	if(emergency_spell(spell)){
 		(uarm && uarm->otyp == HEALER_UNIFORM) ? 

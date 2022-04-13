@@ -227,6 +227,8 @@ struct Race {
 #define NIGHTVISION2	2
 #define NIGHTVISION3	3
 
+	int spelspec;		/* spell (SPE_) the species excels at */
+	int spelsbon;		/* penalty (-bonus) for that spell */
 	/*** Properties in variable-length arrays ***/
 	/* intrinsics (see attrib.c) */
 
