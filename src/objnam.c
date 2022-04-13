@@ -1397,11 +1397,13 @@ boolean adjective;
 	case CHITIN:
 		return "chitin";
 	case BONE:
-		return "bone";
+		return obj->otyp == MAGIC_TORCH ? "ivory" : "bone";
 	case SHELL_MAT:
 		return "shell";
 	case DRAGON_HIDE:
-		/* for some reason, this is dragonhide? */
+		/* for some reason, this is dragonhide?
+		  * Chris: I used "dragonhide" here to mean "generic special leather"
+		 */
 		if (obj->otyp == LEO_NEMAEUS_HIDE)
 			return "lionhide";
 		if (obj->oartifact == ART_XIUHCOATL)
@@ -2103,6 +2105,7 @@ weapon:
 			}
 			else if (obj->otyp == SHADOWLANDER_S_TORCH
 				|| obj->otyp == TORCH || obj->otyp == SUNROD
+				|| obj->otyp == MAGIC_TORCH
 				) {
 				if (obj->lamplit)
 					Strcat(buf, " (lit)");
@@ -2174,6 +2177,7 @@ weapon:
 			else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP
 				|| obj->otyp == LANTERN || Is_candle(obj) || obj->otyp == SHADOWLANDER_S_TORCH
 				|| obj->otyp == TORCH || obj->otyp == SUNROD
+				|| obj->otyp == MAGIC_TORCH
 				) {
 				if (obj->lamplit)
 					Strcat(buf, " (lit)");

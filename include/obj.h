@@ -623,6 +623,7 @@ struct obj {
 #define spec_prop_otyp(otmp)	((pure_weapon(otmp) || dark_weapon(otmp) || force_weapon(otmp)) || \
 						  (otmp)->otyp == SUNROD || \
 						  (otmp)->otyp == TORCH || \
+						  (otmp)->otyp == MAGIC_TORCH || \
 						  (otmp)->otyp == SHADOWLANDER_S_TORCH || \
 						  (otmp)->otyp == CROW_QUILL || \
 						  (otmp)->otyp == SET_OF_CROW_TALONS || \
@@ -956,6 +957,7 @@ struct obj {
 				|| (otmp)->otyp == TALLOW_CANDLE\
 				|| (otmp)->otyp == WAX_CANDLE\
 				|| (otmp)->otyp == TORCH\
+				|| (otmp)->otyp == MAGIC_TORCH\
 				|| (otmp)->otyp == SHADOWLANDER_S_TORCH\
 				|| (otmp)->otyp == CANDLE_OF_INVOCATION\
 				|| (otmp)->otyp == POT_OIL)

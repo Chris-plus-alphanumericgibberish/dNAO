@@ -791,6 +791,10 @@ int mkflags;
 				otmp->lamplit = 0;
 				blessorcurse(otmp, 5);
 				break;
+			case MAGIC_TORCH:
+				otmp->spe = 0;
+				otmp->lamplit = 0;
+				break;
 			case CANDLE_OF_INVOCATION:
 			case MAGIC_LAMP:	otmp->spe = 1;
 				otmp->lamplit = 0;
@@ -1797,6 +1801,7 @@ struct obj* obj;
 	 * work properly. */
 	case BULLWHIP:
 	case TORCH:
+	case MAGIC_TORCH:
 	case SHADOWLANDER_S_TORCH:
 	case SUNROD:
 	case WORM_TOOTH:

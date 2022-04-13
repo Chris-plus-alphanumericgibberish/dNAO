@@ -1710,6 +1710,10 @@ struct obj * obj;
 	    else if (otmp->otyp == MAGIC_LAMP) {
 			otmp = poly_obj(otmp, OIL_LAMP);
 			otmp->age = 1500L;	/* "best" oil lamp possible */
+		}
+	    else if (otmp->otyp == MAGIC_TORCH) {
+			otmp->otyp = TORCH;
+			otmp->age = 1500L;	/* "best" torch possible */
 	    } else if (otmp->otyp == MAGIC_MARKER) {
 			otmp->recharged = 1;	/* degraded quality */
 	    }

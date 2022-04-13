@@ -3198,6 +3198,7 @@ dodip()
 	}
     more_dips:
 
+	// Note: magic torches don't burn items (magic. The torch itself is not burned, and it doesn't burn other things. It does burn creatures though!)
 	if((obj->lamplit || potion->lamplit) 
 		&& (obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH)
 		&& (potion->otyp == POT_OIL)

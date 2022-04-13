@@ -2268,7 +2268,7 @@ struct obj *obj;
 	else if (obj->otyp == FORCE_SWORD)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Unlock your force whip", MENU_UNSELECTED);
-	else if (obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH)
+	else if (obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH || obj->otyp == MAGIC_TORCH)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or snuff this torch", MENU_UNSELECTED);
 	else if (obj->otyp == SUNROD && !obj->lamplit)
@@ -3075,11 +3075,15 @@ winid *datawin;
 		/* other weapon special effects */
 		if(obj){
 			if(obj->otyp == TORCH){
-				Sprintf(buf2, "Deals 1d6 bonus fire damage when lit.");
+				Sprintf(buf2, "Deals 1d6 + enchantment bonus fire damage when lit.");
+				OBJPUTSTR(buf2);
+			}
+			if(obj->otyp == MAGIC_TORCH){
+				Sprintf(buf2, "Deals 1d4 + double enchantment bonus fire damage when lit.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == SHADOWLANDER_S_TORCH){
-				Sprintf(buf2, "Deals 1d6 bonus cold damage when lit.");
+				Sprintf(buf2, "Deals 1d6 + enchantment bonus cold damage when lit.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == SUNROD){
@@ -3536,6 +3540,7 @@ winid *datawin;
 		case CANDLE_OF_INVOCATION:
 		case TORCH: //actually over-ridden by being a weapon-tool
 		case SUNROD: //actually over-ridden by being a weapon-tool
+		case MAGIC_TORCH: //actually over-ridden by being a weapon-tool
 		case LANTERN:
 		case OIL_LAMP:
 		case MAGIC_LAMP:

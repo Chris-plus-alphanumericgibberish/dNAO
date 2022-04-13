@@ -7481,6 +7481,9 @@ doapply()
 	case SHADOWLANDER_S_TORCH:
 		light_torch(obj);
 	break;
+	case MAGIC_TORCH:
+		light_torch(obj);
+	break;
 	case SUNROD:
 		light_torch(obj);
 	break;

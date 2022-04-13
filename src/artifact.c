@@ -4082,6 +4082,14 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			if (!rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 		}
 	}
+	if (otmp->otyp == MAGIC_TORCH && otmp->lamplit){
+		if (!Fire_res(mdef)) {
+			if (species_resists_cold(mdef))
+				(*truedmgptr) += 3 * (rnd(4) + 2*otmp->spe) / 2;
+			else
+				(*truedmgptr) += rnd(4) + 2*otmp->spe;
+		}
+	}
 	if (otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
 		if (!Cold_res(mdef)) {
 			if (species_resists_fire(mdef))

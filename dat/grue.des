@@ -106,6 +106,7 @@ STAIR:(68,10),down
 OBJECT:'#',"uncharged lantern",(62,18)
 CONTAINER:'(',"sack",(62,18)
 OBJECT:'#',"+2 blessed wrathful silver elven broadsword",contained
+OBJECT:'(',"magic torch",contained
 OBJECT:'#',"platinum bar",contained
 
 # Warning
@@ -272,6 +273,7 @@ STAIR:(66,15),down
 OBJECT:'#',"uncharged lantern",(67,17)
 CONTAINER:'(',"sack",(67,17)
 OBJECT:'#',"+2 blessed wrathful silver elven broadsword",contained
+OBJECT:'(',"magic torch",contained
 OBJECT:'#',"platinum bar",contained
 
 # Non diggable walls
