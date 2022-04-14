@@ -4581,8 +4581,7 @@ boolean was_swallowed;			/* digestion */
 //			The dungeon of ill regard, where Axus is found, now spawns only Modrons.  So this is uneeded
 //			for(quincount;quincount<7;quincount++) makemon(&mons[PM_QUINON], mon->mx, mon->my,MM_ADJACENTOK|MM_ANGRY);
 		}
-		else if(mdat->mattk[i].adtyp == AD_GROW || (mdat->mtyp==PM_QUINON 
-		        && mdat->mattk[i].adtyp == AD_STUN)){//horrid quinon kludge
+		else if(mdat->mattk[i].adtyp == AD_GROW){
 			struct monst *mtmp;
 			struct monst * axus = (struct monst *)0;
 			boolean found;
