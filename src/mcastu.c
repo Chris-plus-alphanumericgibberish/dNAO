@@ -3645,9 +3645,18 @@ int tary;
 				explode(tarx, tary, adtyp, MON_EXPLODE, dmg, color, 1);
 			}
 			else {
-				explode(tarx + rn2(3) - 1, tary + rn2(3) - 1, adtyp, MON_EXPLODE, dmg, color, 1);
-				explode(tarx + rn2(3) - 1, tary + rn2(3) - 1, adtyp, MON_EXPLODE, dmg, color, 1);
-				explode(tarx + rn2(3) - 1, tary + rn2(3) - 1, adtyp, MON_EXPLODE, dmg, color, 1);
+				int x;
+				int y;
+				int i;
+				for(i = 0; i < 3; i++){
+					x = tarx + rn2(3) - 1;
+					y = tary + rn2(3) - 1;
+					if(!isok(x,y) || !ZAP_POS(levl[x][y].typ)){
+						x = tarx;
+						y = tary;
+					}
+					explode(x, y, adtyp, MON_EXPLODE, dmg, color, 1);
+				}
 			}
 		}
 		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0);
