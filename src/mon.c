@@ -4595,7 +4595,7 @@ boolean was_swallowed;			/* digestion */
 						continue;
 					if (!axus && mtmp->mtyp == PM_AXUS)
 						axus = mtmp;
-					if (!found && mtmp->mtyp == current_ton-1) {
+					if (!found && current_ton != PM_MONOTON && mtmp->mtyp == current_ton-1) {
 						set_mon_data(mtmp, current_ton);
 						//Assumes Auton
 						mtmp->m_lev += 1;
