@@ -2716,6 +2716,7 @@ int byplayer;
 	if (byplayer) {
 		golded = TRUE;
 		xkilled(mon,0);
+		golded = FALSE;
 	} else mongolded(mon);
 }
 
@@ -2733,6 +2734,7 @@ boolean byplayer;
 	if (byplayer) {
 		glassed = TRUE;
 		xkilled(mon,0);
+		glassed = FALSE;
 	} else monglassed(mon);
 }
 
