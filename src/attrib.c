@@ -1669,7 +1669,7 @@ you_inflict_madness(mon)
 struct monst *mon;
 {
 	if(mon->seenmadnesses != u.umadness){
-		int madflag;
+		unsigned long long int madflag;
 		for(madflag = 0x1L; madflag <= LAST_MADNESS; madflag = madflag << 1){
 			if(u.umadness&madflag && !(mon->seenmadnesses&madflag)){
 				mon->seenmadnesses |= madflag;
