@@ -2390,7 +2390,9 @@ u_init()
 				u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 				flags.initalign = 1; // 1 == neutral
 			}
-		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !Role_if(PM_MADMAN)){
+		} else if(Role_if(PM_ANACHRONONAUT)){
+			u.umartial = TRUE;
+		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT)){
 			ini_inv(DrovenCloak);
 			if(!flags.female){
 				/* Males are neutral */
@@ -2398,8 +2400,6 @@ u_init()
 				u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 				flags.initalign = 1; // 1 == neutral
 			}
-		} else if(Role_if(PM_ANACHRONONAUT)){
-			u.umartial = TRUE;
 		}
 	    /* Drow can recognize all droven objects */
 		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
