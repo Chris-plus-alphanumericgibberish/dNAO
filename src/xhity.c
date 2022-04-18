@@ -15858,7 +15858,10 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 								pline("%s turns to stone!", Monnam(magr));
 							}
 							stoned = 1;
-							xkilled(magr, 0);
+							if(youdef)
+								xkilled(magr, 0);
+							else
+								monkilled(magr, "", AD_STON);
 							stoned = 0;
 							if (*hp(magr) > 0)
 								result |= MM_AGR_STOP;
