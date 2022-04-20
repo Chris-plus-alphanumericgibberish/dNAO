@@ -5812,8 +5812,10 @@ boolean goodequip;
 				if(ptr->mtyp == PM_THRIAE)
 				(void)mongets(mtmp, (rn2(2) ? FLUTE : HARP), mkobjflags);
 			} else if(ptr->mtyp == PM_INTONER){
+				int intoner_color = HI_GLASS;
 				switch(rn2(6)){
 					case 0:
+						intoner_color = CLR_GRAY;
 						otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
 						set_material_gm(otmp, DRAGON_HIDE);
@@ -5828,10 +5830,12 @@ boolean goodequip;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
+						otmp->obj_color = intoner_color;
 						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 1:
+						intoner_color = CLR_WHITE;
 						otmp = mksobj(CHAKRAM, mkobjflags|MKOBJ_NOINIT);
 						otmp->objsize = MZ_HUGE;
 						otmp->spe = 4;
@@ -5847,10 +5851,12 @@ boolean goodequip;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
+						otmp->obj_color = intoner_color;
 						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 2:
+						intoner_color = CLR_BLUE;
 						otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
 						set_material_gm(otmp, METAL);
@@ -5865,10 +5871,12 @@ boolean goodequip;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
+						otmp->obj_color = intoner_color;
 						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 3:
+						intoner_color = CLR_MAGENTA;
 						otmp = mksobj(SCIMITAR, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
 						set_material_gm(otmp, METAL);
@@ -5889,10 +5897,12 @@ boolean goodequip;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
+						otmp->obj_color = intoner_color;
 						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 4:
+						intoner_color = CLR_GREEN;
 						otmp = mksobj(GREEN_DRAGON_SCALE_MAIL, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
 						set_material_gm(otmp, GLASS);
@@ -5906,6 +5916,7 @@ boolean goodequip;
 						(void) mpickobj(mtmp, otmp);
 					break;
 					case 5:
+						intoner_color = CLR_YELLOW;
 						otmp = mksobj(TWO_HANDED_SWORD, mkobjflags|MKOBJ_NOINIT);
 						otmp->objsize = MZ_LARGE;
 						otmp->spe = 4;
@@ -5921,6 +5932,7 @@ boolean goodequip;
 						(void) mpickobj(mtmp, otmp);
 						otmp = mksobj(LONG_GLOVES, mkobjflags|MKOBJ_NOINIT);
 						otmp->spe = 4;
+						otmp->obj_color = intoner_color;
 						add_oprop(otmp, OPROP_AXIO);
 						(void) mpickobj(mtmp, otmp);
 					break;
@@ -5928,10 +5940,12 @@ boolean goodequip;
 				otmp = mksobj(HEELED_BOOTS, mkobjflags|MKOBJ_NOINIT);
 				otmp->spe = 4;
 				add_oprop(otmp, OPROP_AXIO);
+				otmp->obj_color = intoner_color;
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(WAR_HAT, mkobjflags|MKOBJ_NOINIT);
 				otmp->spe = 4;
 				set_material_gm(otmp, GLASS);
+				otmp->obj_color = intoner_color;
 				add_oprop(otmp, OPROP_AXIO);
 				add_oprop(otmp, OPROP_REFL);
 				fix_object(otmp);
