@@ -911,7 +911,11 @@ void
 Amulet_off()
 {
     takeoff_mask &= ~W_AMUL;
-
+	
+	if(!uamul){
+		impossible("Amulet_off() was called, but no amulet is worn.");
+		return;
+	}
     switch(uamul->otyp) {
 	case AMULET_OF_ESP:
 		/* need to update ability before calling see_monsters() */
