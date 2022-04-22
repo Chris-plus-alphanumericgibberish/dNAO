@@ -683,7 +683,7 @@ int mode;
 		    if (amorphous(youracedata))
 			You("try to ooze under the door, but can't squeeze your possessions through.");
 			if (iflags.autoopen && !flags.run && !Confusion && !Stunned && !Fumbling) {
-				iflags.door_opened = flags.move = doopen_indir(x, y);
+				iflags.door_opened = doopen_indir(x, y);
 		    } else if (x == ux || y == uy) {
 				if (Blind || Stunned || ACURR(A_DEX) < 10 || Fumbling) {
 #ifdef STEED
@@ -1035,11 +1035,13 @@ domove()
 	    nomul(0, NULL);
 	    return;
 	}
+	
 	if(u.uswallow) {
 		if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20){
 			You("pass right through %s!", mon_nam(u.ustuck));
 			expels(u.ustuck, u.ustuck->data, 0);
 			u.lastmoved = monstermoves;
+			flags.move |= MOVE_MOVED;
 			return;
 		} else {
 			u.dx = u.dy = 0;
@@ -1123,7 +1125,7 @@ domove()
 		     (is_pool(x, y, TRUE) || is_lava(x, y)) && levl[x][y].seenv)) {
 			if(flags.run >= 2) {
 				nomul(0, NULL);
-				flags.move = 0;
+				flags.move |= MOVE_CANCELLED;
 				return;
 			} else
 				nomul(0, NULL);
@@ -1184,7 +1186,7 @@ domove()
 			       Protection_from_shape_changers)) ||
 			     sensemon(mtmp))) {
 				nomul(0, NULL);
-				flags.move = 0;
+				flags.move |= MOVE_CANCELLED;
 				return;
 			}
 		}
@@ -1257,6 +1259,7 @@ domove()
 					teleds(cc.x, cc.y, FALSE);
 				}
 			}
+			flags.move |= MOVE_ATTACKED;
 			return;
 		}
 	    }
@@ -1311,6 +1314,7 @@ domove()
 		    u.mh = -1;		/* dead in the current form */
 		    rehumanize();
 		}
+		flags.move |= MOVE_ATTACKED;
 		return;
 	}
 	if (glyph_is_invisible(levl[x][y].glyph)) {
@@ -1513,7 +1517,7 @@ domove()
 
 	if (!test_move(u.ux, u.uy, x-u.ux, y-u.uy, DO_MOVE)) {
 		if (!iflags.door_opened) {
-		    flags.move = 0;
+		    flags.move |= MOVE_INSTANT;
 		    nomul(0, NULL);
 		}
 	    return;
@@ -1525,9 +1529,12 @@ domove()
 	     * then we are entitled to our normal attack.
 	     */
 	    if (!attack2(mtmp)) {
-		flags.move = 0;
-		nomul(0, NULL);
+			flags.move |= MOVE_INSTANT;
+			nomul(0, NULL);
 	    }
+		else {
+			flags.move |= MOVE_ATTACKED;
+		}
 	    return;
 	}
 	
@@ -1742,6 +1749,7 @@ domove()
 		}
 	    }
 	}
+	flags.move |= MOVE_MOVED;
 }
 
 void

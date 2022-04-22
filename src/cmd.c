@@ -2778,7 +2778,7 @@ register char *cmd;
 		cmd = parse();
 	}
 	if (*cmd == DOESCAPE) {
-		flags.move = FALSE;
+		flags.move |= MOVE_CANCELLED;
 		return;
 	}
 #ifdef REDO
@@ -2796,7 +2796,7 @@ register char *cmd;
 #endif
 	{
 		nhbell();
-		flags.move = FALSE;
+		flags.move |= MOVE_CANCELLED;
 		return;		/* probably we just had an interrupt */
 	}
 	if (iflags.num_pad && iflags.num_pad_mode == 1) {
@@ -2856,7 +2856,7 @@ register char *cmd;
 		prefix_seen = TRUE;
 	} else if (*cmd == '0' && iflags.num_pad) {
 	    (void)ddoinv(); /* a convenience borrowed from the PC */
-	    flags.move = FALSE;
+	    flags.move |= MOVE_INSTANT;
 	    multi = 0;
 	} else if (*cmd == CMD_TRAVEL && iflags.travelcmd) {
 	  flags.travel = 1;
@@ -2914,17 +2914,21 @@ register char *cmd;
 
 		if (u.uburied && !extcmd->can_if_buried) {
 		    You_cant("do that while you are buried!");
-		    res = 0;
+		    res = MOVE_CANCELLED;
 		} else {
 		    func = extcmd->ef_funct;
 		    if (extcmd->f_text && !occupation && multi)
 			set_occupation(func, extcmd->f_text, multi);
 		    last_cmd_char = *cmd;	/* remember pressed character */
 		    res = (*func)();		/* perform the command */
+
+			/* backwards compatibility with functions returning 0 to mean no time taken */
+			if (res==0)
+				res = MOVE_INSTANT;
 		}
-		if (!res) {
-		    flags.move = FALSE;
-		    multi = 0;
+		flags.move = res;
+		if (res == MOVE_CANCELLED || res == MOVE_INSTANT) {
+			multi = 0;
 		}
 		return;
 	    }
@@ -2952,9 +2956,12 @@ register char *cmd;
 	    if (!prefix_seen || !iflags.cmdassist ||
 		!help_dir(0, "Invalid direction key!"))
 		Norep("Unknown command '%s'.", expcmd);
+		flags.move |= MOVE_CANCELLED;
 	}
-	/* didn't move */
-	flags.move = FALSE;
+	else {
+		/* didn't move */
+		flags.move |= MOVE_INSTANT;
+	}
 	multi = 0;
 	return;
 }
@@ -3297,7 +3304,7 @@ parse()
 	boolean prezero = FALSE;
 
 	multi = 0;
-	flags.move = 1;
+	flags.move = MOVE_DEFAULT;
 	flush_screen(1); /* Flush screen buffer. Put the cursor on the hero. */
 
 	if (!iflags.num_pad || (foo = readchar()) == 'n')
@@ -3350,6 +3357,8 @@ parse()
 	}
 	clear_nhwindow(WIN_MESSAGE);
 	if (prezero) in_line[0] = DOESCAPE;
+
+	flags.last_input_turn = monstermoves;
 	return(in_line);
 }
 

@@ -185,29 +185,6 @@ struct monst * mdef;
 	}
 
 	check_caitiff(mdef);
-
-	/* SCOPECREEP: remove this, replace with u.actioncost */
-	if (uwep && (fast_weapon(uwep))){
-		youmonst.movement += NORMAL_SPEED / 6;
-	}
-	
-	/* SCOPECREEP: remove this, replace with u.actioncost */
-	// note - you don't have to actually be two-weaponing, and that's intentional,
-	// but you must have another ARTA_HASTE wep offhanded (and there's only 2 so)
-	if (uwep && uwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE)){
-		youmonst.movement += NORMAL_SPEED / 3;
-		if (uswapwep && uswapwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE))
-			youmonst.movement += NORMAL_SPEED / 6;
-	}
-	
-	if (uwep
-		&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || 
-			((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER || uwep->otyp == ROD_OF_FORCE) && uwep->altmode)
-		)
-		&& !u.twoweap
-		){
-		youmonst.movement -= NORMAL_SPEED / 4;
-	}
 	
 	if ((u.specialSealsActive&SEAL_BLACK_WEB) && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves + 20)
 		weave_black_web(mdef);
@@ -17072,6 +17049,55 @@ android_combo()
 	return FALSE;
 }
 
+
+/* movement_combos()
+ * 
+ * assigns/clears prev_dir,
+ * checks if a special move should be made based on prev_dir and current movement,
+ * and makes it if so.
+ */
+void
+movement_combos()
+{
+	boolean did_combo = FALSE;
+
+	/* ignore cancelled and instant actions */
+	if (you_action_cost(flags.move, FALSE) == 0)
+		return;
+
+	/* only movements and attacks count for setting prev_dir,
+	 * and being paralyzed or moving with 'm' cancels it as well */
+	if (!(u.umoved || u.uattked) || flags.nopick || (multi<0)) {
+		u.prev_dir.x = 0;
+		u.prev_dir.y = 0;
+		return;
+	}
+
+	/* Monk Moves */
+	if (Role_if(PM_MONK) && !Upolyd) {
+		int moveID = check_monk_move();
+		if (moveID != 0 && perform_monk_move(moveID)) {
+			u.uen -= 8;
+			nomul(0, NULL);
+			u.uattked = TRUE;
+			did_combo = TRUE;
+			/* takes at least as long as a standard action */
+			flags.move |= MOVE_STANDARD;
+		}
+	}
+
+	if (did_combo) {
+		/* successfully doing a combo clears prev_dir */
+		u.prev_dir.x = 0;
+		u.prev_dir.y = 0;
+	}
+	else {
+		/* otherwise, build prev_dir */
+		u.prev_dir.x = u.dx;
+		u.prev_dir.y = u.dy;
+	}
+}
+
 #define peace_check_monk(mon) ((canspotmon(mon) || mon_warning(mon)) && (Hallucination || !mon->mpeaceful) && !imprisoned(mon))
 
 struct monst *
@@ -17242,21 +17268,17 @@ struct monst *mdef;
 
 #undef peace_check_monk
 
-#define DID_MOVE 			u.uen -= 8;\
-			nomul(0, NULL);\
-			u.uattked = TRUE;\
-			return TRUE;
 
-/* monk_moves()
+/* perform_monk_move()
  *
- * Checks if the player has activated a monk martial arts move. Assumes that the move should occur if the function is called, a target is found, and energy is sufficient.
+ * Attempts to perform the given monk move, given that a target is found and energy is sufficient.
  *
  * Returns TRUE if a move goes off.
  */
 boolean
-monk_moves()
+perform_monk_move(moveID)
+int moveID;
 {
-	int moveID = check_monk_move();
 	struct monst *mdef;
 #define STILLVALID(mdef) (!DEADMONSTER(mdef) && mdef == m_at(u.ux + u.dx, u.uy + u.dy))
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
@@ -17278,14 +17300,14 @@ monk_moves()
 					xmeleehity(&youmonst, mdef, &xweponhit, (struct obj **)0, vis, 0, FALSE);
 				if(STILLVALID(mdef))
 					xmeleehity(&youmonst, mdef, &bitehit, (struct obj **)0, vis, 0, FALSE);
-				DID_MOVE
+				return TRUE;
 			}
 		}
 		else {
 			if(!EWounded_legs && (mdef = adjacent_monk_target(uarmf)) && near_capacity() <= SLT_ENCUMBER){
 				pline("Dive kick!");
 				dive_kick_monster(mdef);
-				DID_MOVE
+				return TRUE;
 			}
 		}
 		break;
@@ -17298,7 +17320,7 @@ monk_moves()
 		){
 			pline("Aura bolt!");
 			monk_aura_bolt();
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 		case BIRD_KICK:
@@ -17311,14 +17333,14 @@ monk_moves()
 				pline("Bird kick!");
 				bird_kick_monsters();
 			}
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 		case METODRIVE:
 		if(!uwep && !(uswapwep && u.twoweap) && inv_weight() < 0 && (mdef = adjacent_monk_target(uarmg))){
 			pline("Meteor drive!");
 			monk_meteor_drive(mdef);
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 		case PUMMEL:
@@ -17331,16 +17353,16 @@ monk_moves()
 			for(int i = 0; i < 2 && STILLVALID(mdef); i++){
 				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
 			}
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 	}
 	return FALSE;
 }
 
-/* monk_moves()
+/* check_monk_move()
  *
- * Checks if the player has input a monk martial arts move. Assumes that the checks should occur if the function is called.
+ * Based on prev_dir and current u.dx/dy, determine which monk move (if any) should happen.
  *
  * Returns the move ID or 0 if no ID can be chosen.
  */

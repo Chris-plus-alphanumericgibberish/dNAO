@@ -36,7 +36,7 @@ STATIC_DCL void FDECL(light_cocktail, (struct obj *));
 STATIC_DCL void FDECL(light_torch, (struct obj *));
 STATIC_DCL void FDECL(use_trephination_kit, (struct obj *));
 STATIC_DCL void FDECL(use_tinning_kit, (struct obj *));
-STATIC_DCL void FDECL(use_figurine, (struct obj **));
+STATIC_DCL int FDECL(use_figurine, (struct obj **));
 STATIC_DCL void FDECL(use_grease, (struct obj *));
 STATIC_DCL void FDECL(use_trap, (struct obj *));
 STATIC_DCL void FDECL(use_stone, (struct obj *));
@@ -2546,7 +2546,7 @@ boolean quietly;
 	return TRUE;
 }
 
-STATIC_OVL void
+STATIC_OVL int
 use_figurine(optr)
 struct obj **optr;
 {
@@ -2557,16 +2557,16 @@ struct obj **optr;
 	if (u.uswallow) {
 		/* can't activate a figurine while swallowed */
 		if (!figurine_location_checks(obj, (coord *)0, FALSE))
-			return;
+			return MOVE_CANCELLED;
 	}
 	if(!getdir((char *)0)) {
-		flags.move = multi = 0;
-		return;
+		return MOVE_CANCELLED;
 	}
 	x = u.ux + u.dx; y = u.uy + u.dy;
 	cc.x = x; cc.y = y;
 	/* Passing FALSE arg here will result in messages displayed */
-	if (!figurine_location_checks(obj, &cc, FALSE)) return;
+	if (!figurine_location_checks(obj, &cc, FALSE))
+		return MOVE_CANCELLED;
 	You("%s and it transforms.",
 	    (u.dx||u.dy) ? "set the figurine beside you" :
 	    (Weightless || Is_waterlevel(&u.uz) ||
@@ -2579,6 +2579,8 @@ struct obj **optr;
 	(void) stop_timer(FIG_TRANSFORM, obj->timed);
 	useup(obj);
 	*optr = 0;
+
+	return MOVE_STANDARD;
 }
 
 static NEARDATA const char lubricables[] = { ALL_CLASSES, ALLOW_NONE, 0 };
@@ -4140,7 +4142,7 @@ coord *ccp;
 	}
 	if (obj != uwep && obj != uarmg) {
 	    if (!wield_tool(obj, "swing")) return 0;
-	    else res = 1;
+	    else res = (obj != uswapwep);
 	}
      /* assert(obj == uwep); */
 
@@ -4164,7 +4166,7 @@ coord *ccp;
 				flags.standard_polearms = TRUE;
 				int retval = pick_polearm_target(obj,outptr,ccp);
 				flags.standard_polearms = FALSE;
-				return retval;
+				return res & retval;
 			}
 		}
 		else {
@@ -4226,7 +4228,7 @@ use_pole(obj)
 	    /* Now you know that nothing is there... */
 	    pline("%s", nothing_happens);
 	}
-	return (1);
+	return MOVE_ATTACKED;
 }
 
 STATIC_OVL int
@@ -6591,7 +6593,6 @@ struct obj **optr;
 	coord cc;
 
 	if(!getdir((char *)0)) {
-		flags.move = multi = 0;
 		return 0;
 	}
 	if (u.uswallow && (u.dx || u.dy || u.dz)) {
@@ -7517,7 +7518,7 @@ doapply()
 		goto xit;
 
 	case FIGURINE:
-		use_figurine(&obj);
+		res = use_figurine(&obj);
 	break;
 	case EFFIGY:{
 	    struct obj *curo;
