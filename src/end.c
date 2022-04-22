@@ -690,7 +690,7 @@ int how;
 		delayed_killer = 0;
 	}
 	nomovemsg = "You survived that attempt on your life.";
-	flags.move = 0;
+	flags.move |= MOVE_INSTANT;
 	if(multi > 0) multi = 0; else multi = -1;
 	if(u.utrap && u.utraptype == TT_LAVA) u.utrap = 0;
 	flags.botl = 1;

@@ -54,8 +54,7 @@ struct flag {
 	boolean  mon_moving;	/* monsters' turn to move */
 	boolean  run_timers;	/* run timers as soon as possible (probably to desummon items) */
 	boolean  drgn_brth;		/* for use with breath weapons, indicates that a dragon is breathing */
-	boolean  move;
-	boolean  mv;
+	boolean  mv;		/* player is doing a multi-tile movement */
 	boolean  bypasses;	/* bypass flag is set on at least one fobj */
 	boolean  nap;		/* `timed_delay' option for display effects */
 	boolean  nopick;	/* do not pickup objects (as when running) */
@@ -91,6 +90,17 @@ struct flag {
 	boolean  toptenwin;	/* ending list in window instead of stdout */
 	boolean  verbose;	/* max battle info */
 	boolean  prayconfirm;	/* confirm before praying */
+
+	int move;	/* type[s] of action taken by player's last input/action */
+	int movetoprint;
+	long last_input_turn;
+#define MOVE_DEFAULT	0x40	/* equivalent to Standard unless another move is layered overtop, in which case it is ignored */
+#define MOVE_CANCELLED	0x80	/* overrides all other move types, total action takes no time */
+#define MOVE_STANDARD	0x01	/* player did a general action -- takes 1 standard turn */
+#define MOVE_INSTANT	0x02	/* action should take no time */
+#define MOVE_MOVED		0x04	/* player moved */
+#define MOVE_ATTACKED	0x08	/* player made a weapon attack */
+
 	int	 end_top, end_around;	/* describe desired score list */
 	unsigned ident;		/* social security number for each monster */
 	unsigned moonphase;
