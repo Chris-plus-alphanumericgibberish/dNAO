@@ -3358,7 +3358,6 @@ parse()
 	clear_nhwindow(WIN_MESSAGE);
 	if (prezero) in_line[0] = DOESCAPE;
 
-	flags.last_input_turn = monstermoves;
 	return(in_line);
 }
 
