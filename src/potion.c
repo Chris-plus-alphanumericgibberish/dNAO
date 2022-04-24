@@ -387,24 +387,24 @@ dodrink()
 
 	if (Strangled) {
 		pline("If you can't breathe air, how can you drink liquid?");
-		return 0;
+		return MOVE_INSTANT;
 	}
 	
 	if (uarmh && FacelessHelm(uarmh)){
 		pline("The %s covers your whole face.", xname(uarmh));
 		display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
-		return 0;
+		return MOVE_INSTANT;
 	}
 	if (uarmc && FacelessCloak(uarmc)){
 		pline("The %s covers your whole face.", xname(uarmc));
 		display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
-		return 0;
+		return MOVE_INSTANT;
 	}
 	/* Is there a fountain to drink from here? */
 	if (IS_FOUNTAIN(levl[u.ux][u.uy].typ) && !Levitation) {
 		if(yn("Drink from the fountain?") == 'y') {
 			drinkfountain();
-			return 1;
+			return MOVE_QUAFFED;
 		}
 	}
 #ifdef SINKS
@@ -412,7 +412,7 @@ dodrink()
 	if (IS_SINK(levl[u.ux][u.uy].typ)) {
 		if (yn("Drink from the sink?") == 'y') {
 			drinksink();
-			return 1;
+			return MOVE_QUAFFED;
 		}
 	}
 #endif
@@ -433,7 +433,7 @@ dodrink()
 	}
 
 	otmp = getobj(beverages, "drink");
-	if(!otmp) return(0);
+	if(!otmp) return MOVE_CANCELLED;
 	if(otmp->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
 
 	/* quan > 1 used to be left to useup(), but we need to force
@@ -465,13 +465,13 @@ dodrink()
 		    !rn2(POTION_OCCUPANT_CHANCE(flags.ghost_count))) {
 		ghost_from_bottle();
 		useup(otmp);
-		return(1);
+		return MOVE_STANDARD;
 	    } else if (!strcmp(potion_descr, "smoky") &&
 		    flags.djinni_count < MAXMONNO &&
 		    !rn2(POTION_OCCUPANT_CHANCE(flags.djinni_count))) {
 		djinni_from_bottle(otmp);
 		useup(otmp);
-		return(1);
+		return MOVE_STANDARD;
 	    }
 	}
 	return dopotion(otmp);
@@ -503,7 +503,7 @@ register struct obj *otmp;
 			docall(otmp);
 	}
 	if(!otmp->oartifact) useup(otmp);
-	return(1);
+	return MOVE_QUAFFED;
 }
 
 int
@@ -911,13 +911,13 @@ peffects(otmp)
 		    break;
 		}
 		if (monster_detect(otmp, 0))
-			return(1);		/* nothing detected */
+			return MOVE_QUAFFED;		/* nothing detected */
 		exercise(A_WIS, TRUE);
 		break;
 	case POT_OBJECT_DETECTION:
 	case SPE_DETECT_TREASURE:
 		if (object_detect(otmp, 0))
-			return(1);		/* nothing detected */
+			return MOVE_QUAFFED;		/* nothing detected */
 		exercise(A_WIS, TRUE);
 		break;
 	case POT_SICKNESS:
@@ -1317,7 +1317,7 @@ as_extra_healing:
 			char buf[BUFSZ];
 			Sprintf(buf, "You feel a deep sense of kinship to %s!  Drink %s anyway?",
 				the(xname(otmp)), (otmp->quan == 1L) ? "it" : "one");
-			if (yn_function(buf,ynchars,'n')=='n') return 0;
+			if (yn_function(buf,ynchars,'n')=='n') return MOVE_CANCELLED;
 		}
 		if (is_vampire(youracedata) || (carnivorous(youracedata) && !herbivorous(youracedata))) {
 			pline("It smells like %s%s.", 
@@ -1368,9 +1368,9 @@ as_extra_healing:
 	break;
 	default:
 		impossible("What a funny potion! (%u)", otmp->otyp);
-		return(0);
+		return MOVE_INSTANT;
 	}
-	return(-1);
+	return(-1);	/* will be handled further in dopotion() */
 }
 
 void

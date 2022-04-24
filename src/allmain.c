@@ -579,6 +579,9 @@ boolean affect_game_state;
 			}
 			break;
 
+		case MOVE_QUAFFED:
+			break;
+
 		case MOVE_CANCELLED:
 			/* ignore other costs, force a cost of 0 */
 			return 0;
@@ -1371,12 +1374,14 @@ moveloop()
 #endif
 	movement_combos();
 
-	didmove = flags.move;
-	if (!(didmove & MOVE_CANCELLED))
-		flags.movetoprint = didmove;
-	if(you_action_cost(didmove, FALSE) > 0) {
+	
+	if (!(flags.move & MOVE_CANCELLED))
+		flags.movetoprint = flags.move;
+	if(you_action_cost(flags.move, FALSE) > 0) {
 		/* actual time passed */
-		youmonst.movement -= you_action_cost(didmove, TRUE);
+		flags.movetoprintcost = you_action_cost(flags.move, TRUE);
+		youmonst.movement -= flags.movetoprintcost;
+		didmove = TRUE;
 
 		  /**************************************************/
 		 /* things that respond to the player turn go here */

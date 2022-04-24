@@ -612,12 +612,13 @@ draw_horizontal(int x, int y, int hp, int hpmax)
         for (i=0, tmp = flags.movetoprint; tmp>=1<<i; i++)
             switch(tmp & (1<<i)) {
                 case MOVE_STANDARD: Strcat(buf, "standard/");   break;
-                case MOVE_INSTANT:  Strcat(buf, "instant/");   break;
+                case MOVE_INSTANT:  Strcat(buf, "instant/");    break;
                 case MOVE_ATTACKED: Strcat(buf, "attacked/");   break;
-                case MOVE_MOVED:    Strcat(buf, "moved/");   break;
+                case MOVE_MOVED:    Strcat(buf, "moved/");      break;
+                case MOVE_QUAFFED:  Strcat(buf, "quaffed/");    break;
             }
         Strcpy(eos(buf)-1, "");
-        wprintw(win, " [%d:%s]", you_action_cost(flags.movetoprint, FALSE), buf);
+        wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
     }
     curses_add_statuses(win, FALSE, FALSE, NULL, NULL);
 }
@@ -715,12 +716,13 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
         for (i=0, tmp = flags.movetoprint; tmp>=1<<i; i++)
             switch(tmp & (1<<i)) {
                 case MOVE_STANDARD: Strcat(buf, "standard/");   break;
-                case MOVE_INSTANT:  Strcat(buf, "instant/");   break;
+                case MOVE_INSTANT:  Strcat(buf, "instant/");    break;
                 case MOVE_ATTACKED: Strcat(buf, "attacked/");   break;
-                case MOVE_MOVED:    Strcat(buf, "moved/");   break;
+                case MOVE_MOVED:    Strcat(buf, "moved/");      break;
+                case MOVE_QUAFFED:  Strcat(buf, "quaffed/");    break;
             }
         Strcpy(eos(buf)-1, "");
-        wprintw(win, " [%d:%s]", you_action_cost(flags.movetoprint, FALSE), buf);
+        wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
     }
     curses_add_statuses(win, TRUE, FALSE, &x, &y);
 
