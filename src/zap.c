@@ -2461,9 +2461,9 @@ dozap()
 	register struct obj *obj;
 	int damage;
 
-	if(check_capacity((char *)0)) return(0);
+	if(check_capacity((char *)0)) return MOVE_CANCELLED;
 	obj = getobj(zap_syms, "zap");
-	if(!obj) return(0);
+	if(!obj) return MOVE_CANCELLED;
 
 	check_unpaid(obj);
 
@@ -2472,7 +2472,7 @@ dozap()
 	else if(obj->cursed && obj->oclass == WAND_CLASS && !obj->oartifact && !rn2(100)) {
 		backfire(obj);	/* the wand blows up in your face! */
 		exercise(A_STR, FALSE);
-		return(1);
+		return MOVE_ZAPPED;
 	} else if(!(objects[obj->otyp].oc_dir == NODIR) && !getdir((char *)0)) {
 		if (!Blind)
 		    pline("%s glows and fades.", The(xname(obj)));
@@ -2500,8 +2500,7 @@ dozap()
 	    useup(obj);
 	}
 	update_inventory();	/* maybe used a charge */
-	if(QuickDraw) return partial_action();
-	return(1);
+	return MOVE_ZAPPED;
 }
 
 int
