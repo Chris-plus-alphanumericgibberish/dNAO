@@ -98,9 +98,11 @@ struct flag {
 #define MOVE_CANCELLED	0x8000	/* overrides all other move types, total action takes no time */
 #define MOVE_STANDARD	0x0001	/* player did a general action -- takes 1 standard turn */
 #define MOVE_INSTANT	0x0002	/* action should take no time */
-#define MOVE_MOVED		0x0004	/* player moved */
-#define MOVE_ATTACKED	0x0008	/* player made a weapon attack */
-#define MOVE_QUAFFED	0x0010	/* player quaffed a potion (or sink/fountain) */
+#define MOVE_PARTIAL	0x0004	/* player did a general action -- takes no time for the first instance, 1 standard turn after, resets on non-instant action */ 
+#define MOVE_MOVED		0x0008	/* player moved */
+#define MOVE_ATTACKED	0x0010	/* player made a weapon attack */
+#define MOVE_QUAFFED	0x0020	/* player quaffed a potion (or sink/fountain) */
+#define MOVE_ZAPPED		0x0040	/* player zapped a wand */
 
 	int	 end_top, end_around;	/* describe desired score list */
 	unsigned ident;		/* social security number for each monster */

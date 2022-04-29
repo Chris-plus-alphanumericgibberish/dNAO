@@ -495,7 +495,10 @@ boolean affect_game_state;
 	int i;
 
 	/* loop through all flagged action types to determine which is the largest cost,
-	 * and, if affect_game_state is TRUE, apply all necessary effects
+	 * and, if affect_game_state is TRUE, apply all necessary effects.
+	 * 
+	 * Most often, there is only one action type per player input.
+	 * In very rare circumstances, two actions that should take time can happen simultaneously.
 	 */
 	for (i=0, current_action = MOVE_STANDARD;
 		actiontypes_remaining != 0;
@@ -515,6 +518,17 @@ boolean affect_game_state;
 
 		case MOVE_INSTANT:
 			current_cost = 0;
+			break;
+		
+		case MOVE_PARTIAL:
+			if (affect_game_state ? partial_action() : check_partial_action()) {
+				flags.movetoprint &= ~MOVE_PARTIAL;
+				current_cost = NORMAL_SPEED;
+			}
+			else {
+				flags.movetoprint |= MOVE_PARTIAL;
+				current_cost = 0;
+			}
 			break;
 
 		case MOVE_MOVED:
@@ -581,10 +595,20 @@ boolean affect_game_state;
 
 		case MOVE_QUAFFED:
 			break;
+		
+		case MOVE_ZAPPED:
+			if (QuickDraw) {
+				current_cost = you_action_cost(MOVE_PARTIAL, affect_game_state);
+			}
+			break;
 
 		case MOVE_CANCELLED:
 			/* ignore other costs, force a cost of 0 */
 			return 0;
+
+		default:
+			impossible("Unhandled MOVE_XYZ case (%d)", current_action);
+			break;
 		}
 		/* assign as new highest cost, if applicable */
 		highest_cost = max(current_cost, highest_cost);
@@ -1375,11 +1399,12 @@ moveloop()
 	movement_combos();
 
 	
-	if (!(flags.move & MOVE_CANCELLED))
+	if (!(flags.move & MOVE_CANCELLED)) {
 		flags.movetoprint = flags.move;
-	if(you_action_cost(flags.move, FALSE) > 0) {
+		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
+	}
+	if(you_action_cost(flags.move, TRUE) > 0) {
 		/* actual time passed */
-		flags.movetoprintcost = you_action_cost(flags.move, TRUE);
 		youmonst.movement -= flags.movetoprintcost;
 		didmove = TRUE;
 

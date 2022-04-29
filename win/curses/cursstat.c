@@ -613,9 +613,11 @@ draw_horizontal(int x, int y, int hp, int hpmax)
             switch(tmp & (1<<i)) {
                 case MOVE_STANDARD: Strcat(buf, "standard/");   break;
                 case MOVE_INSTANT:  Strcat(buf, "instant/");    break;
+                case MOVE_PARTIAL:  Strcat(buf, "bonus/");      break;
                 case MOVE_ATTACKED: Strcat(buf, "attacked/");   break;
                 case MOVE_MOVED:    Strcat(buf, "moved/");      break;
                 case MOVE_QUAFFED:  Strcat(buf, "quaffed/");    break;
+                case MOVE_ZAPPED:   Strcat(buf, "zapped/");     break;
             }
         Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
@@ -717,9 +719,11 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
             switch(tmp & (1<<i)) {
                 case MOVE_STANDARD: Strcat(buf, "standard/");   break;
                 case MOVE_INSTANT:  Strcat(buf, "instant/");    break;
+                case MOVE_PARTIAL:  Strcat(buf, "bonus/");      break;
                 case MOVE_ATTACKED: Strcat(buf, "attacked/");   break;
                 case MOVE_MOVED:    Strcat(buf, "moved/");      break;
                 case MOVE_QUAFFED:  Strcat(buf, "quaffed/");    break;
+                case MOVE_ZAPPED:   Strcat(buf, "zapped/");     break;
             }
         Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
