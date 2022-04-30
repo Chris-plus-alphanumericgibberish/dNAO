@@ -1150,6 +1150,13 @@ int level_bonus;
 			attkptr->damn = 1 + d(1, 2) + rn2(2)*rn2(3);	/* 2 -  5, trailing right */
 			attkptr->damd = rn2(5 - attkptr->damn) * 2 + 6;	/* 6 - 10, by 2s */
 
+
+			/* int-drain attack uses dice as stat damage, reduce dice to compensate */
+			if (attkptr->adtyp == AD_DRIN) {
+				attkptr->damn /= 2;	/* 1 - 2 */
+				attkptr->damd /= 2;	/* 3 - 5 */
+			}
+
 			/* sometimes consolidate into a high-variance attack */
 			if (!rn2(4)) {
 				int n = 1 + rn2(2)*rn2(2);
