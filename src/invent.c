@@ -3696,6 +3696,7 @@ winid *datawin;
 			case POLYMORPH_CONTROL:
 			case FREE_ACTION:
 			case FIXED_ABIL:
+			case CLEAR_THOUGHTS:
 				confers = "Confers";
 				break;
 			default:
