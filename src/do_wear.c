@@ -3173,7 +3173,7 @@ take_off()
 	if (taking_off) {
 	    if (todelay > 0) {
 		todelay--;
-		return(1);	/* still busy */
+		return MOVE_STANDARD;	/* still busy */
 	    } else {
 		if ((otmp = do_takeoff())) off_msg(otmp);
 	    }
@@ -3192,7 +3192,7 @@ take_off()
 
 	if (taking_off == 0L) {
 	  You("finish %s.", disrobing);
-	  return 0;
+	  return MOVE_FINISHED_OCCUPATION;
 	} else if (taking_off == W_WEP) {
 	  todelay = 1;
 	} else if (taking_off == W_SWAPWEP) {
@@ -3233,7 +3233,7 @@ take_off()
 	  todelay = 2;
 	} else {
 	  impossible("take_off: taking off %lx", taking_off);
-	  return 0;	/* force done */
+	  return MOVE_FINISHED_OCCUPATION;	/* force done */
 	}
 
 	if (otmp) todelay += objects[otmp->otyp].oc_delay;
@@ -3245,7 +3245,7 @@ take_off()
 	if (todelay > 0) todelay--;
 
 	set_occupation(take_off, disrobing, 0);
-	return(1);		/* get busy */
+	return MOVE_STANDARD;		/* get busy */
 }
 
 /* clear saved context to avoid inappropriate resumption of interrupted 'A' */

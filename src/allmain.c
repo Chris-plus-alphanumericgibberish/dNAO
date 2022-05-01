@@ -602,6 +602,9 @@ boolean affect_game_state;
 			}
 			break;
 
+		case MOVE_READ:
+			break;
+
 		case MOVE_CANCELLED:
 			/* ignore other costs, force a cost of 0 */
 			return 0;
@@ -2963,9 +2966,9 @@ karemade:
 		    pushch(ch);
 # endif /* REDO */
 	    }
-	    if (!abort_lev && (*occupation)() == 0)
+	    if (!abort_lev && ((flags.move = (*occupation)()) & (MOVE_CANCELLED|MOVE_FINISHED_OCCUPATION)))
 #else
-	    if ((*occupation)() == 0)
+	    if (((flags.move = (*occupation)()) & (MOVE_CANCELLED|MOVE_FINISHED_OCCUPATION)))
 #endif
 		occupation = 0;
 	    if(

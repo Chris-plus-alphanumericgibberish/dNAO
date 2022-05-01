@@ -10349,7 +10349,7 @@ read_necro(VOID_ARGS)
 	    artiptr = 0;		/* no longer studying */
 	    nomul(delay, "struggling with the Necronomicon");		/* remaining delay is uninterrupted */
 	    delay = 0;
-	    return(0);
+	    return MOVE_FINISHED_OCCUPATION;
 	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	/* lenses give 50% faster reading */
@@ -10360,7 +10360,7 @@ read_necro(VOID_ARGS)
 		delay++;
 		if(ublindf && ublindf->otyp == LENSES) delay++;
 		if(delay < 0){
-			return(1); /* still busy */
+			return MOVE_READ; /* still busy */
 		}
 		delay = 0;
 	}
@@ -10553,7 +10553,7 @@ read_necro(VOID_ARGS)
 			break;
 			default:
 				impossible("bad necro_effect for necronomicon %d", necro_effect);
-				return(0);
+				return MOVE_FINISHED_OCCUPATION;
 			break;
 		}
 		Sprintf(splname, objects[booktype].oc_name_known ?
@@ -10847,7 +10847,7 @@ read_necro(VOID_ARGS)
 		pline("Unrecognized Necronomicon effect.");
 	}
 	artiptr = 0;
-	return(0);
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 STATIC_PTR int
@@ -10861,7 +10861,7 @@ read_lost(VOID_ARGS)
 	    nomul(delay, "struggling with the Book of Lost Names");		/* remaining delay is uninterrupted */
 		losexp("getting lost in a book",TRUE,TRUE,TRUE);
 	    delay = 0;
-	    return(0);
+	    return MOVE_FINISHED_OCCUPATION;
 	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	/* lenses give 50% faster reading */
@@ -10872,7 +10872,7 @@ read_lost(VOID_ARGS)
 		delay++;
 		if(ublindf && ublindf->otyp == LENSES) delay++;
 		if(delay < 0){
-			return(1); /* still busy */
+			return MOVE_READ; /* still busy */
 		}
 		delay = 0;
 	}
@@ -10921,7 +10921,7 @@ read_lost(VOID_ARGS)
 		pline("Unrecognized Lost Names effect.");
 	}
 	artiptr = 0;
-	return(0);
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 /*

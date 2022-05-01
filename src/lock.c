@@ -124,32 +124,38 @@ picklock()	/* try to open/close a lock */
 
 	if (xlock.box) {
 	    if((xlock.box->ox != u.ux) || (xlock.box->oy != u.uy)) {
-		return((xlock.usedtime = 0));		/* you or it moved */
+			xlock.usedtime = 0;
+			return MOVE_CANCELLED;		/* you or it moved */
 	    }
 	} else {		/* door */
 	    if(xlock.door != &(levl[u.ux+u.dx][u.uy+u.dy])) {
-		return((xlock.usedtime = 0));		/* you moved */
+			xlock.usedtime = 0;
+			return MOVE_CANCELLED;		/* you moved */
 	    }
 	    switch (xlock.door->doormask) {
 		case D_NODOOR:
 		    pline("This doorway has no door.");
-		    return((xlock.usedtime = 0));
+			xlock.usedtime = 0;
+			return MOVE_CANCELLED;
 		case D_ISOPEN:
 		    You("cannot lock an open door.");
-		    return((xlock.usedtime = 0));
+			xlock.usedtime = 0;
+			return MOVE_CANCELLED;
 		case D_BROKEN:
 		    pline("This door is broken.");
-		    return((xlock.usedtime = 0));
+			xlock.usedtime = 0;
+			return MOVE_CANCELLED;
 	    }
 	}
 
 	if (xlock.usedtime++ >= 50 || nohands(youracedata) || !freehand()) {
 	    You("give up your attempt at %s.", lock_action());
 	    exercise(A_DEX, TRUE);	/* even if you don't succeed */
-	    return((xlock.usedtime = 0));
+		xlock.usedtime = 0;
+		return MOVE_FINISHED_OCCUPATION;
 	}
 
-	if(rn2(100) >= xlock.chance) return(1);		/* still busy */
+	if(rn2(100) >= xlock.chance) return MOVE_STANDARD;		/* still busy */
 
 	You("succeed in %s.", lock_action());
 	if (xlock.door) {
@@ -183,7 +189,8 @@ picklock()	/* try to open/close a lock */
 		}
 	}
 	exercise(A_DEX, TRUE);
-	return((xlock.usedtime = 0));
+	xlock.usedtime = 0;
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 STATIC_PTR
@@ -194,7 +201,8 @@ forcelock()	/* try to force a locked chest */
 	register struct obj *otmp;
 
 	if((xlock.box->ox != u.ux) || (xlock.box->oy != u.uy))
-		return((xlock.usedtime = 0));		/* you or it moved */
+		xlock.usedtime = 0;
+		return MOVE_CANCELLED;		/* you or it moved */
 
 	if (xlock.usedtime++ >= 50 || (!uwep && xlock.picktyp != 3) 
 		|| nohands(youracedata) || !freehand()
@@ -202,7 +210,8 @@ forcelock()	/* try to force a locked chest */
 	    You("give up your attempt to force the lock.");
 	    if(xlock.usedtime >= 50)		/* you made the effort */
 	      exercise((xlock.picktyp) ? A_DEX : A_STR, TRUE);
-	    return((xlock.usedtime = 0));
+	    xlock.usedtime = 0;
+		return MOVE_CANCELLED;
 	}
 	
 	
@@ -221,14 +230,15 @@ forcelock()	/* try to force a locked chest */
 		useup(uwep);
 		You("give up your attempt to force the lock.");
 		exercise(A_DEX, TRUE);
-		return((xlock.usedtime = 0));
+		xlock.usedtime = 0;
+		return MOVE_FINISHED_OCCUPATION;
 	    }
 	} else if(xlock.picktyp == 0)			/* blunt */
 	    wake_nearby_noisy();	/* due to hammering on the container */
 
 	if(xlock.picktyp == 3) u.otiaxAttack = moves;
-	if(rn2(100) >= xlock.chance) return(1);		/* still busy */
-	if(xlock.box->otyp == MAGIC_CHEST) return(1); /* you can't force a magic chest's lock, but you can certainly try */
+	if(rn2(100) >= xlock.chance) return MOVE_STANDARD;		/* still busy */
+	if(xlock.box->otyp == MAGIC_CHEST) return MOVE_STANDARD; /* you can't force a magic chest's lock, but you can certainly try */
 
 	You("succeed in forcing the lock.");
 	xlock.box->olocked = 0;
@@ -287,7 +297,8 @@ forcelock()	/* try to force a locked chest */
 	    delobj(xlock.box);
 	}
 	exercise((xlock.picktyp) ? A_DEX : A_STR, TRUE);
-	return((xlock.usedtime = 0));
+	xlock.usedtime = 0;
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 STATIC_PTR
@@ -296,18 +307,22 @@ forcedoor()      /* try to break/pry open a door */
 {
 
 	if(xlock.door != &(levl[u.ux+u.dx][u.uy+u.dy])) {
-	    return((xlock.usedtime = 0));           /* you moved */
+	    xlock.usedtime = 0;
+		return MOVE_CANCELLED; /* you moved */
 	} 
 	switch (xlock.door->doormask) {
 	    case D_NODOOR:
 		pline("This doorway has no door.");
-		return((xlock.usedtime = 0));
+		xlock.usedtime = 0;
+		return MOVE_CANCELLED;
 	    case D_ISOPEN:
 		You("cannot force an open door.");
-		return((xlock.usedtime = 0));
+		xlock.usedtime = 0;
+		return MOVE_CANCELLED;
 	    case D_BROKEN:
 		pline("This door is broken.");
-		return((xlock.usedtime = 0));
+		xlock.usedtime = 0;
+		return MOVE_CANCELLED;
 	}
 	
 	if (xlock.usedtime++ >= 50
@@ -318,12 +333,13 @@ forcedoor()      /* try to break/pry open a door */
 	    	(xlock.picktyp == 2 ? "melting" : xlock.picktyp == 1 ? 
 	    		"prying open" : "breaking down"));
 	    exercise(A_STR, TRUE);      /* even if you don't succeed */
-	    return((xlock.usedtime = 0));
+	    xlock.usedtime = 0;
+		return MOVE_CANCELLED;
 	}
 	
 	if(xlock.picktyp == 3) u.otiaxAttack = moves;
 	
-	if(rn2(100) > xlock.chance) return(1);          /* still busy */
+	if(rn2(100) > xlock.chance) return MOVE_STANDARD;          /* still busy */
 
 	You("succeed in %s the door.",
 	    	(xlock.picktyp == 3 ? "picking the lock on" : xlock.picktyp == 2 ? "melting" : xlock.picktyp == 1 ? 
@@ -349,7 +365,8 @@ forcedoor()      /* try to break/pry open a door */
 	newsym(u.ux+u.dx, u.uy+u.dy);
 	
 	exercise(A_STR, TRUE);
-	return((xlock.usedtime = 0));
+	xlock.usedtime = 0;
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 #endif /* OVLB */

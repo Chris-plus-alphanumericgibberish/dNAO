@@ -46,7 +46,7 @@ doread()
 	char class_list[MAXOCLASSES+2];
 	
 	known = FALSE;
-	if(check_capacity((char *)0)) return (0);
+	if(check_capacity((char *)0)) return MOVE_CANCELLED;
 	
 	Strcpy(class_list, readable);
 	if(carrying_applyable_ring())
@@ -61,7 +61,7 @@ doread()
 		add_class(class_list, ARMOR_CLASS);
 	
 	scroll = getobj(class_list, "read");
-	if(!scroll) return(0);
+	if(!scroll) return MOVE_CANCELLED;
 	
 	if((scroll->oartifact 
 			&& !(scroll->oclass == SCROLL_CLASS)
@@ -76,7 +76,7 @@ doread()
 			if (Blind) {
 				You_cant("see the writing!");
 				exercise(A_WIS, FALSE); //The rod is critical of such logical blunders.
-				return 0;
+				return MOVE_INSTANT;
 			}
 			else{//Ruat Coelum, Fiat Justitia.  Ecce!  Lex Rex!
 				pline(scroll->spe < 7 ? "The Rod is badly scarred, mute testimony to a tumultuous history." :
@@ -138,12 +138,12 @@ doread()
 					pline("There is a crownlike decoration with %s raised segment%s around the pommel.",
 						numbers[artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights], artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights!=1 ? "s" : "");
 				}
-				return(1);
+				return MOVE_READ;
 			}
 		} else if(scroll->oartifact == ART_PEN_OF_THE_VOID){
 			if (Blind) {
 				You_cant("see the blade!");
-				return 0;
+				return MOVE_INSTANT;
 			}
 			else{
 				int j;
@@ -162,18 +162,18 @@ doread()
 						break;
 					}
 				}
-				return(1);
+				return MOVE_READ;
 			}
 		} else if(scroll->oartifact == ART_EXCALIBUR){
 			if (Blind) {
 				You_cant("see the blade!");
-				return 0;
+				return MOVE_INSTANT;
 			} else if(scroll == uwep) {
 				pline("\"Cast me away\"");
 			} else {
 				pline("\"Take me up\"");
 			}
-			return(1);
+			return MOVE_READ;
 		} else if(scroll->oartifact == ART_HOLY_MOONLIGHT_SWORD && scroll->lamplit){
 			/* Note: you can see the blade even when blid */
 			if(u.uinsight < 2) {
@@ -195,30 +195,30 @@ doread()
 				pline("Tiny spirits of light dance in and out of the blade's sky and the black night of your %s.", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
 				maybe_give_thought(GUIDANCE);
 			}
-			return(1);
+			return MOVE_READ;
 		} else if(scroll->oartifact == ART_ITLACHIAYAQUE){
 			if (Blind) {
 				You_cant("see the mirror!");
-				return 0;
+				return MOVE_INSTANT;
 			} else {
 				pline("You see the nearby terrain reflected in the smoky depths of the mirror.");
 				do_vicinity_map(u.ux,u.uy);
 			}
-			return(1);
+			return MOVE_READ;
 		} else if(scroll->oartifact == ART_GLAMDRING){
 			if (Blind) {
 				You_cant("see the blade!");
-				return 0;
+				return MOVE_INSTANT;
 			} else if(Race_if(PM_ELF)) {
 				pline("\"Turgon, king of Gondolin, wields, has, and holds the sword Foe-hammer, Foe of Morgoth's realm, Hammer of the Orcs\".");
 			} else {
 				pline("\"Turgon aran Gondolin tortha gar a matha i vegil Glamdring gud daedheloth, dam an Glamhoth\".");
 			}
-			return(1);
+			return MOVE_READ;
 		} else if(scroll->oartifact == ART_BOW_OF_SKADI){
 			if (Blind) {
 				You_cant("see the bow!");
-				return 0;
+				return MOVE_INSTANT;
 			} else {
 				int i;
 				You("read the Galdr of Skadi!");
@@ -264,13 +264,13 @@ doread()
 					}
 				}
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
-				return 1;
+				return MOVE_READ;
 			}
 		
 		} else if(scroll->oartifact == ART_GUNGNIR){
 			if (Blind) {
 				You_cant("see the spear!");
-				return 0;
+				return MOVE_INSTANT;
 			} else {
 				int i;
 				You("read the secret runes!");
@@ -293,13 +293,13 @@ doread()
 					}
 				}
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
-				return 1;
+				return MOVE_READ;
 			}
 		
 		} else if(scroll->oartifact == ART_STAFF_OF_NECROMANCY){
 			if (Blind) {
 				You_cant("see the staff!");
-				return 0;
+				return MOVE_INSTANT;
 			} else {
 				int i;
 				You("read the dark secrets inscribed on the staff.");
@@ -322,12 +322,12 @@ doread()
 					}
 				}
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
-				return 1;
+				return MOVE_READ;
 			}
 		} else if(scroll->oartifact == ART_STAFF_OF_AESCULAPIUS){
 			if (Blind) {
 				You_cant("see the staff!");
-				return 0;
+				return MOVE_INSTANT;
 			} else {
 				int i;
 				You("read the traceries of healing magics inscribed on the staff.");
@@ -350,19 +350,19 @@ doread()
 					}
 				}
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
-				return 1;
+				return MOVE_READ;
 			}
 		} else if(scroll->otyp == LIGHTSABER){
 			if (Blind) {
 				You_cant("see it!");
-				return 0;
+				return MOVE_INSTANT;
 			} else {
 				pline(lightsaber_hiltText(scroll),xname(scroll));
 			}
-			return(1);
+			return MOVE_READ;
 		} else {
 			pline(silly_thing_to, "read");
-			return(0);
+			return MOVE_CANCELLED;
 		}
 	} else if(scroll->oartifact && scroll->oartifact == ART_ENCYCLOPEDIA_GALACTICA){
       const char *line;
@@ -374,7 +374,7 @@ doread()
 
       pline("%s:", Tobjnam(scroll, "display"));
       verbalize("%s", line);
-      return 1;
+      return MOVE_READ;
     } else if(scroll->oartifact && scroll->oartifact == ART_LOG_OF_THE_CURATOR){
       int oindx = 1 + rn2(NUM_OBJECTS - 1);
       if(objects[oindx].oc_name_known){
@@ -384,20 +384,20 @@ doread()
       } else {
         You("study the pages of %s, but you already can recognize that.", xname(scroll));
       }
-      return 1;
+      return MOVE_READ;
 	} else if(scroll->otyp == CANDLE_OF_INVOCATION ){
 		if (Blind) {
 			You_cant("see the candle!");
-			return 0;
+			return MOVE_INSTANT;
 		} else {
 			pline("The candle is carved with many pictographs, including %s.", fetchHaluWard(FIRST_PLANE_SYMBOL+rn2(LAST_PLANE_SYMBOL-FIRST_PLANE_SYMBOL+1)));
 		}
-		return(1);
+		return MOVE_READ;
 	} else if(scroll->otyp == MISOTHEISTIC_PYRAMID){
 		if (Blind) {
 			pline("The density of the pyramid increases towards the tip, painfully so, enabling it to stand tip-downwards.");
 			pline("There are engravings on the square 'roof' of the pyramid, but you can't see them.");
-			return 0;
+			return MOVE_STANDARD;
 		} else {
 			pline("The density of the pyramid increases towards the tip, painfully so, enabling it to stand tip-downwards.");
 			if(Role_if(PM_EXILE) || Role_if(PM_WIZARD) || u.specialSealsKnown&SEAL_NUDZIRATH)
@@ -406,12 +406,12 @@ doread()
 				pline("There are engravings on the square 'roof' of the pyramid, but you can't read them.");
 			pline("A seam runs around the edges of the roof.");
 		}
-		return(1);
+		return MOVE_READ;
 	} else if(scroll->otyp == MISOTHEISTIC_FRAGMENT){
 		if (Blind) {
 			pline("Some mysterious force holds these mirrored fragments together in a rough aproximation of a pyramid.");
 			You_cant("see the fragments!");
-			return 0;
+			return MOVE_STANDARD;
 		} else {
 			pline("Some mysterious force holds these mirrored fragments together in a rough aproximation of a pyramid.");
 			You("are not reflected in the shards.");
@@ -425,14 +425,14 @@ doread()
 			}
 
 		}
-		return(1);
+		return MOVE_READ;
 	} else if(scroll->oclass == WEAPON_CLASS && (scroll)->obj_material == WOOD && scroll->oward != 0){
 		pline("A %s is carved into the wood.",wardDecode[decode_wardID(scroll->oward)]);
 		if(! (u.wardsknown & scroll->oward) ){
 			You("have learned a new warding stave!");
 			u.wardsknown |= scroll->oward;
 		}
-		return(1);
+		return MOVE_READ;
 	}
 	else if(scroll->oclass == RING_CLASS && (isEngrRing((scroll)->otyp)||isSignetRing((scroll)->otyp)) && scroll->oward){
 		if(!(scroll->ohaluengr)){
@@ -445,7 +445,7 @@ doread()
 		else{
 			pline("There is %s engraved on the ring.",fetchHaluWard((int)scroll->oward));
 		}
-		return(1);
+		return MOVE_READ;
 	}
 	else if(scroll->oclass == AMULET_CLASS && scroll->oward){
 		if(!(scroll->ohaluengr)){
@@ -458,7 +458,7 @@ doread()
 		else{
 			pline("There is %s engraved on the amulet.",fetchHaluWard((int)scroll->oward));
 		}
-		return(1);
+		return MOVE_READ;
 	}
 	/* outrumor has its own blindness check */
 	else if(scroll->otyp == FORTUNE_COOKIE) {
@@ -468,7 +468,7 @@ doread()
 	    outrumor(bcsign(scroll), BY_COOKIE);
 	    if (!Blind) u.uconduct.literate++;
 	    useup(scroll);
-	    return(1);
+	    return MOVE_READ;
 #ifdef TOURIST
 	} else if(scroll->oclass == ARMOR_CLASS
 		&& scroll->ohaluengr
@@ -479,7 +479,7 @@ doread()
 		)
 	){
 		pline("There is %s engraved on the armor.",fetchHaluWard((int)scroll->oward));
-		return(1);
+		return MOVE_READ;
 	}else if (scroll->otyp == T_SHIRT) {
 	    static const char *shirt_msgs[] = { /* Scott Bigham */
     "I explored the Dungeons of Doom and all I got was this lousy T-shirt!",
@@ -606,18 +606,18 @@ doread()
 				else{
 					if (Blind) You_cant("see that.");
 					else You_cant("see that through your %s.", aobjnam(uarm, (char *)0));
-					return 0;
+					return MOVE_INSTANT;
 				}
 			}
 			if (Blind) You("feel as though you can see the image, despite your blindness.");
 			You("feel a sense of peace come over you as you study the mandala.");
 			use_unicorn_horn(scroll);
-			return(1);
+			return MOVE_READ;
 		}
 		else{
 			if (Blind) {
 				You_cant("feel any Braille writing.");
-				return 0;
+				return MOVE_INSTANT;
 			}
 			if(uarmu && uarmu == scroll && uarm && arm_blocks_upper_body(uarm->otyp)){
 				if(!is_opaque(uarm)){
@@ -625,7 +625,7 @@ doread()
 				}
 				else{
 					You_cant("read that through your %s.", aobjnam(uarm, (char *)0));
-					return 0;
+					return MOVE_INSTANT;
 				}
 			}
 			u.uconduct.literate++;
@@ -638,7 +638,7 @@ doread()
 				(int)(strlen(buf) * erosion / (2*MAX_ERODE)),
 				     scroll->o_id ^ (unsigned)u.ubirthday);
 			pline("\"%s\"", buf);
-			return 1;
+			return MOVE_READ;
 		}
 #endif	/* TOURIST */
 	} else if (scroll->oclass == TILE_CLASS){
@@ -647,7 +647,7 @@ doread()
 		&& scroll->oclass != SPBOOK_CLASS
 	) {
 	    pline(silly_thing_to, "read");
-	    return(0);
+	    return MOVE_CANCELLED;
 	} else if ((Babble || Strangled || Drowning) 
 		&& (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS || (scroll->oclass == TILE_CLASS && objects[scroll->otyp].oc_magic))
 	){
@@ -659,11 +659,11 @@ doread()
 			You_cant("read that aloud, you're babbling incoherently!");
 		else
 			impossible("You can't read that aloud for some reason?");
-	    return(0);
+	    return MOVE_INSTANT;
 		//Note, you CAN scream one syllable
 	} else if (Screaming && (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS)){
 	    You_cant("read that aloud, you're too busy screaming!");
-	    return(0);
+	    return MOVE_INSTANT;
 	} else if (Blind) {
 	    const char *what = 0;
 	    if (scroll->oclass == SPBOOK_CLASS)
@@ -672,7 +672,7 @@ doread()
 		what = "formula on the scroll";
 	    if (what) {
 		pline("Being blind, you cannot read the %s.", what);
-		return(0);
+		return MOVE_INSTANT;
 	    }
 	}
 
@@ -697,7 +697,7 @@ doread()
 		if(Blind) {
 			pline("Being blind, you cannot see %s.", the(xname(scroll)));
 			scroll->in_use = FALSE;
-			return 0;
+			return MOVE_INSTANT;
 		}
 		if(scroll->oartifact != ART_PAINTING_FRAGMENT)
 			pline("You examine %s.", the(xname(scroll)));
@@ -729,7 +729,7 @@ doread()
 			useup(scroll);
 		else scroll->in_use = FALSE;
 	}
-	return(1);
+	return MOVE_READ;
 }
 
 static
@@ -891,17 +891,17 @@ learn_word()
 	    curslab = 0;			/* no longer studying */
 	    nomul(delay, "studying a word");		/* remaining delay is uninterrupted */
 	    delay = 0;
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	    delay++;
-	    return(1); /* still busy */
+	    return MOVE_READ; /* still busy */
 	}
 	exercise(A_WIS, TRUE);		/* you're studying. */
 	switch(curslab->otyp){
 		default:
 			impossible("bad slab.");
-			return 0;
+			return MOVE_FINISHED_OCCUPATION;
 		case FIRST_WORD:
 			You("learn the First Word of Creation!");
 			u.ufirst_light = TRUE;
@@ -944,7 +944,7 @@ learn_word()
 		u.specialSealsKnown |= SEAL_LIVING_CRYSTAL;
 	}
 	useupall(curslab);
-	return 0;
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 static void

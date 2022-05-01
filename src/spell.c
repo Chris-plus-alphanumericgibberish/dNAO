@@ -447,17 +447,17 @@ learn()
 	    book = 0;			/* no longer studying */
 	    nomul(delay, "reading a book");		/* remaining delay is uninterrupted */
 	    delay = 0;
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	    delay++;
-	    return(1); /* still busy */
+	    return MOVE_READ; /* still busy */
 	}
 	exercise(A_WIS, TRUE);		/* you're studying. */
 	booktype = book->otyp;
 	if(booktype == SPE_BOOK_OF_THE_DEAD) {
 	    deadbook(book);
-	    return(0);
+	    return MOVE_READ;
 	}
 	if(booktype == SPE_SECRETS){
 		if(book->oartifact) doparticularinvoke(book); //this is a redundant check
@@ -523,7 +523,7 @@ learn()
 			}
 		}
 		book = 0;
-	    return(0);
+	    return MOVE_FINISHED_OCCUPATION;
 	}
 	if(RoSbook == STUDY_WARD){
 	 if((book->oward)){
@@ -537,7 +537,7 @@ learn()
 	 } else{
 		pline("The spellbook is warded with a thaumaturgical ward, good for spellbooks but not much else.");
 	 }
-	 return(0);
+	 return MOVE_FINISHED_OCCUPATION;
 	}
 	
 	Sprintf(splname, objects[booktype].oc_name_known ?
@@ -606,7 +606,7 @@ learn()
 	
 	if (costly) check_unpaid(book);
 	book = 0;
-	return(0);
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 int
@@ -658,7 +658,7 @@ struct obj *spellbook;
 	if(spellbook->oartifact){ //this is the primary artifact-book check.
 		if(spellbook->oartifact != ART_BOOK_OF_INFINITE_SPELLS){
 			doparticularinvoke(spellbook); //there is a redundant check in the spell learning code
-			return 1; //which should never be reached, and only catches books of secrets anyway.
+			return MOVE_READ; //which should never be reached, and only catches books of secrets anyway.
 		} else {
 			int i;
 			boolean read_book = FALSE;
@@ -717,7 +717,7 @@ struct obj *spellbook;
 				pline("The endless pages of the book turn themselves. They settle on a section describing %s.", OBJ_NAME(objects[spellbook->ovar1]));
 			}
 			if (i == MAXSPELL) impossible("Too many spells memorized!");
-			return 1;
+			return MOVE_READ;
 		}
 	}
 
@@ -728,7 +728,7 @@ struct obj *spellbook;
 		if (booktype == SPE_BLANK_PAPER) {
 			pline("This spellbook is all blank.");
 			makeknown(booktype);
-			return(1);
+			return MOVE_READ;
 		}
 		
 		delay = -10*objects[booktype].oc_delay;
@@ -738,14 +738,14 @@ struct obj *spellbook;
 			RoSbook = doreadstudy("You open the spellbook.");
 		if(!RoSbook){
 			delay = 0;
-			return 0;
+			return MOVE_INSTANT;
 		}
 		if((spellbook->oward) && RoSbook == STUDY_WARD){
 			if( (u.wardsknown & spellbook->oward) ){
 				pline("The spellbook is warded with a %s.", wardDecode[decode_wardID(spellbook->oward)]);
 				You("are already familiar with this ward.");
 				delay = 0;
-				return 0;
+				return MOVE_INSTANT;
 			}
 		}
 		
@@ -755,7 +755,7 @@ struct obj *spellbook;
 
 			for (int i = 0; i < MAXSPELL; i++)
 				if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
-					return 0;
+					return MOVE_CANCELLED;
 		}		
 		spellbook->in_use = TRUE;
 		
@@ -763,12 +763,12 @@ struct obj *spellbook;
 		if (confused) {
 		    if (!confused_book(spellbook)) spellbook->in_use = FALSE;
 		    delay = 0;
-		    return(1);
+		    return MOVE_STANDARD;
 		} else if (Hallucination) {
 		    hallu_book(spellbook);
 		    spellbook->in_use = FALSE;
 		    delay = 0;
-		    return(1);
+		    return MOVE_READ;
 		}
 		
 		if (!spellbook->oartifact && spellbook->otyp != SPE_BOOK_OF_THE_DEAD) {
@@ -789,7 +789,7 @@ struct obj *spellbook;
 			    Sprintf(qbuf, "This spellbook is %sdifficult to comprehend. Continue?", (read_ability < 12 ? "very " : ""));
 			    if (yn(qbuf) != 'y') {
 					spellbook->in_use = FALSE;
-					return(1);
+					return MOVE_READ;
 			    }
 			}
 			/* its up to random luck now */
@@ -812,7 +812,7 @@ struct obj *spellbook;
 				useup(spellbook);
 		    } else spellbook->in_use = FALSE;
 	
-		    return(1);
+		    return MOVE_READ;
 		}  
 		
 		spellbook->in_use = FALSE;
@@ -828,7 +828,7 @@ struct obj *spellbook;
 
 	book = spellbook;
 	set_occupation(learn, "studying", 0);
-	return(1);
+	return MOVE_READ;
 }
 
 /* from an SPE_ID get the index of spl_book that casts that spell */

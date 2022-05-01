@@ -764,9 +764,9 @@ play_song()
 		exercise(A_DEX, TRUE);
 		/*if (songs[song_played].turns > 1)*/
 		You("finish the song.");
-		return 0;
+		return MOVE_FINISHED_OCCUPATION;
 	}
-	return 1;
+	return MOVE_STANDARD;
 }
 
 
