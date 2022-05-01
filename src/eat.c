@@ -603,18 +603,18 @@ eatfood()		/* called each move during eating process */
 	 (!carried(victual.piece) && !obj_here(victual.piece, u.ux, u.uy))) {
 		/* maybe it was stolen? */
 		do_reset_eat();
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (is_vampire(youracedata) != victual.piece->odrained) {
 	    /* Polymorphed while eating/draining */
 	    do_reset_eat();
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
-	if(!victual.eating) return(0);
+	if(!victual.eating) return MOVE_CANCELLED;
 
 	if(++victual.usedtime <= victual.reqtime) {
-	    if(bite()) return(0);
-	    return(1);	/* still busy */
+	    if(bite()) return MOVE_CANCELLED;
+	    return MOVE_STANDARD;	/* still busy */
 	} else {	/* done */
 	    int crumbs = victual.piece->oeaten;		/* The last crumbs */
 	    if (victual.piece->odrained) crumbs -= drainlevel(victual.piece);
@@ -623,7 +623,7 @@ eatfood()		/* called each move during eating process */
 			victual.piece->oeaten -= crumbs;
 	    }
 	    done_eating(TRUE);
-	    return(0);
+	    return MOVE_FINISHED_OCCUPATION;
 	}
 }
 
@@ -1425,13 +1425,13 @@ opentin()		/* called during each move whilst opening a tin */
 
 	if(!carried(tin.tin) && !obj_here(tin.tin, u.ux, u.uy))
 					/* perhaps it was stolen? */
-		return(0);		/* %% probably we should use tinoid */
+		return MOVE_CANCELLED;		/* %% probably we should use tinoid */
 	if(tin.usedtime++ >= 50) {
 		You("give up your attempt to open the tin.");
-		return(0);
+		return MOVE_FINISHED_OCCUPATION;
 	}
 	if(tin.usedtime < tin.reqtime)
-		return(1);		/* still busy */
+		return MOVE_STANDARD;		/* still busy */
 	if(tin.tin->otrapped ||
 	   (tin.tin->cursed && tin.tin->spe != -1 && !rn2(8))) {
 		b_trapped("tin", 0);
@@ -1685,7 +1685,7 @@ use_me:
 	if (carried(tin.tin)) useup(tin.tin);
 	else useupf(tin.tin, 1L);
 	tin.tin = (struct obj *) 0;
-	return(0);
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 STATIC_OVL void
@@ -4176,7 +4176,7 @@ windclock()
     stop_occupation();
     victual.piece = 0;
     victual.mon = 0;
-    return 0;
+    return MOVE_CANCELLED;
   }else if(victual.canchoke && u.uhunger >= u.uhungermax && !Race_if(PM_INCANTIFIER)) {
     Your("mainspring is wound too tight!");
     Your("clockwork breaks apart!");
@@ -4185,7 +4185,7 @@ windclock()
     done(OVERWOUND);
     victual.piece = 0;
     victual.mon = 0;
-    return 0;
+    return MOVE_FINISHED_OCCUPATION;
   }
   else if (u.uhunger >= u.uhungermax * 3/4 && !victual.fullwarn && !Race_if(PM_INCANTIFIER)) {
     pline("%s is having a hard time cranking the key.",Monnam(victual.mon));
@@ -4201,7 +4201,7 @@ windclock()
 	}
   }
   flags.botl = 1;
-  return 1;
+  return MOVE_STANDARD;
 }
 #endif /* OVLB */
 #ifdef OVL0

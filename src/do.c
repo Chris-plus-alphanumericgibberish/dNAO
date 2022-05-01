@@ -2471,12 +2471,12 @@ wipeoff()
 		u.ucreamed = 0;
 		Blinded = 1;
 		make_blinded(0L,TRUE);
-		return(0);
+		return MOVE_FINISHED_OCCUPATION;
 	} else if (!u.ucreamed) {
 		Your("%s feels clean now.", body_part(FACE));
-		return(0);
+		return MOVE_FINISHED_OCCUPATION;
 	}
-	return(1);		/* still busy */
+	return MOVE_STANDARD;		/* still busy */
 }
 
 int

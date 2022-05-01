@@ -3535,10 +3535,10 @@ set_trap()
 		u.ux != trapinfo.tx || u.uy != trapinfo.ty) {
 	    /* ?? */
 	    reset_trapset();
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 
-	if (--trapinfo.time_needed > 0) return 1;	/* still busy */
+	if (--trapinfo.time_needed > 0) return MOVE_STANDARD;	/* still busy */
 
 	ttyp = (otmp->otyp == LAND_MINE) ? LANDMINE : BEAR_TRAP;
 	ttmp = maketrap(u.ux, u.uy, ttyp);
@@ -3568,7 +3568,7 @@ set_trap()
 	    Your("trap setting attempt fails.");
 	}
 	reset_trapset();
-	return 0;
+	return MOVE_FINISHED_OCCUPATION;
 }
 
 STATIC_OVL int
