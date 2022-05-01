@@ -105,6 +105,7 @@ struct flag {
 #define MOVE_QUAFFED	0x0020	/* player quaffed a potion (or sink/fountain) */
 #define MOVE_ZAPPED		0x0040	/* player zapped a wand */
 #define MOVE_READ		0x0080	/* player read a book, scroll, or other readable */
+#define MOVE_CASTSPELL	0x0100	/* player cast a spell */
 
 	int	 end_top, end_around;	/* describe desired score list */
 	unsigned ident;		/* social security number for each monster */
