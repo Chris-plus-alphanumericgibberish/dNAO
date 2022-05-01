@@ -123,7 +123,7 @@ picklock()	/* try to open/close a lock */
 {
 
 	if (xlock.box) {
-	    if((xlock.box->ox != u.ux) || (xlock.box->oy != u.uy)) {
+	    if((xlock.box->where != OBJ_FLOOR) || (xlock.box->ox != u.ux) || (xlock.box->oy != u.uy)) {
 		return((xlock.usedtime = 0));		/* you or it moved */
 	    }
 	} else {		/* door */
