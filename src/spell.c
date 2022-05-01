@@ -1412,7 +1412,7 @@ docast()
 	int spell_no;
 	if (getspell(&spell_no, SPELLMENU_CAST))
 					return spelleffects(spell_no, FALSE, 0);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /* allow the player to conditionally cast spells via equipped artifacts */
@@ -4495,7 +4495,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			Your("knowledge of this spell is twisted.");
 			pline("It invokes nightmarish images in your mind...");
 			spell_backfire(spell);
-			return(0);
+			return MOVE_INSTANT;
 		} else if (
 			!(spellid(spell) == SPE_LIGHTNING_STORM && uarmh && uarmh->oartifact == ART_STORMHELM) &&
 			!(spellid(spell) == SPE_FIREBALL && uarmh && check_oprop(uarmh, OPROP_BLAST)) &&
@@ -4570,16 +4570,16 @@ spelleffects(int spell, boolean atme, int spelltyp)
 
 		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10 && spellid(spell) != SPE_DETECT_FOOD) {
 			You("are too hungry to cast that spell.");
-			return(0);
+			return MOVE_CANCELLED;
 		} else if (ACURR(A_STR) < 4 && casting_stat != A_CHA)  {
 			You("lack the strength to cast spells.");
-			return(0);
+			return MOVE_CANCELLED;
 		} else if(check_capacity(
 			"Your concentration falters while carrying so much stuff.")) {
-			return (1);
+			return MOVE_STANDARD;
 		} else if (!freehand() && casting_stat != A_CHA) {
 			Your("arms are not free to cast!");
-			return (0);
+			return MOVE_CANCELLED;
 		}
 
 		if (u.uhave.amulet) {
@@ -4588,7 +4588,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		}
 		if(energy > u.uen)  {
 			You("don't have enough energy to cast that spell (need %d).", energy);
-			return(0);
+			return MOVE_CANCELLED;
 		} else {
 			if (spellid(spell) != SPE_DETECT_FOOD) {
 				int hungr = spellhunger(energy);
@@ -4609,7 +4609,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			You("fail to cast the spell correctly.");
 			losepw(energy / 2);
 			flags.botl = 1;
-			return(1);
+			return MOVE_CASTSPELL;
 		}
 
 		losepw(energy);
@@ -4848,7 +4848,7 @@ dothrowspell:
 	default:
 		impossible("Unknown spell %d attempted.", spell);
 		obfree(pseudo, (struct obj *)0);
-		return(0);
+		return MOVE_INSTANT;
 	}
 	
 	/* gain skill for successful cast */
@@ -4858,7 +4858,7 @@ dothrowspell:
 		u.lastcast += uwep->spe;
 
 	obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
-	return(1);
+	return MOVE_CASTSPELL;
 }
 
 /* Choose location where spell takes effect. */
@@ -4947,7 +4947,7 @@ dovspell()
 	int spell_no;
 	if (getspell(&spell_no, SPELLMENU_VIEW))
 		return spelleffects(spell_no, FALSE, 0);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 int

@@ -522,11 +522,13 @@ boolean affect_game_state;
 		
 		case MOVE_PARTIAL:
 			if (affect_game_state ? partial_action() : check_partial_action()) {
-				flags.movetoprint &= ~MOVE_PARTIAL;
+				if (affect_game_state)
+					flags.movetoprint &= ~MOVE_PARTIAL;
 				current_cost = NORMAL_SPEED;
 			}
 			else {
-				flags.movetoprint |= MOVE_PARTIAL;
+				if (affect_game_state)
+					flags.movetoprint |= MOVE_PARTIAL;
 				current_cost = 0;
 			}
 			break;
@@ -603,6 +605,9 @@ boolean affect_game_state;
 			break;
 
 		case MOVE_READ:
+			break;
+		
+		case MOVE_CASTSPELL:
 			break;
 
 		case MOVE_CANCELLED:
