@@ -2774,7 +2774,7 @@ boolean printdun;
 			} else if(Is_zuggtmoy_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Shedaklah]");
 			} else if(Is_yeenoghu_level(&mptr->lev)){
-				Sprintf(eos(buf), " [Dun Savana]");
+				Sprintf(eos(buf), " [Dun Savannah]");
 			} else if(Is_baphomet_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Lyktion]");
 			} else if(Is_night_level(&mptr->lev)){

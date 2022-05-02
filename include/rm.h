@@ -575,7 +575,7 @@ struct levelflags {
 	/* Not currently used */
 	Bitfield(slime, 1);			/* corpses on level become slimes */
 	Bitfield(fungi, 1);			/* corpses on level become fungi */
-	Bitfield(dun, 1);			/* level is the dun savana */
+	Bitfield(dun, 1);			/* level is the Dun Savannah */
 	Bitfield(necro, 1);			/* corpses on level rise as undead */
 	/* End not currently used */
 	/*28*/
