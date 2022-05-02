@@ -2028,15 +2028,6 @@ karemade:
 						if(tries >= 0)
 							makemon(ford_montype(-1), x, y, MM_ADJACENTOK);
 					}
-				} else if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && !DimensionalLock && check_insight()){
-					int x, y;
-					for(x = 1; x < COLNO; x++)
-						for(y = 0; y < ROWNO; y++){
-							if(IS_CORNER(levl[x][y].typ) && couldsee(x, y) && rn2(45) < u.ulevel){
-								create_gas_cloud(x, y, 4, 30, FALSE);
-								makemon(&mons[PM_HOUND_OF_TINDALOS], x, y, MM_ADJACENTOK);
-							}
-						}
 				} else {
 					if (u.uevent.invoked && xupstair && rn2(10)) {
 						(void) makemon((struct permonst *)0, xupstair, yupstair, MM_ADJACENTOK);
@@ -2050,6 +2041,28 @@ karemade:
 						if(ANA_SPAWN_FOUR) (void) makemon((struct permonst *)0, xdnstair, ydnstair, MM_ADJACENTOK);
 					}
 					else (void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
+				}
+				if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && !DimensionalLock && check_insight()){
+					int x, y;
+					int cx, cy;
+					char messaged = FALSE;
+					for(x = 1; x < COLNO; x++)
+						for(y = 0; y < ROWNO; y++){
+							if(IS_CORNER(levl[x][y].typ) && rn2(20) < u.ulevel){
+								//x,y is an angle, but we want to place the *monster* on a floor space NEXT to the corner.
+								for(cx = x-1; cx < x+2; cx+=2)
+									for(cy = y-1; cy < y+2; cy+=2){
+										//If this "corner" is off map, continue
+										if(!isok(cx,cy) || !IS_ROOM(levl[cx][cy].typ) || !couldsee(cx, cy))
+											continue;
+										//Is this not a corner?
+										if(!IS_WALL(levl[x][cy].typ) || !IS_WALL(levl[cx][y].typ))
+											continue;
+										create_fog_cloud(cx, cy, 2, 30, FALSE);
+										makemon(&mons[PM_HOUND_OF_TINDALOS], cx, cy, MM_ADJACENTOK);
+									}
+							}
+						}
 				}
 			}
 			if(Infuture && !(Is_qstart(&u.uz) && !Race_if(PM_ANDROID)) && !rn2(35)){
