@@ -604,7 +604,7 @@ struct you {
 	int 	uinsight;	/* to record level of insight */
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)
-#define COA_PROB	 (max(1, 5000*pow(.95,u.uinsight)))
+#define COA_PROB	 (max(1, 10000*pow(.95,u.uinsight)))
 	uchar 	wimage;		/* to record if you have the image of a Weeping Angel in your mind */
 	int 	umorgul;	/* to record the number of morgul wounds */
 	int 	utaneggs;	/* tannin eggs */

@@ -1995,6 +1995,10 @@ karemade:
 					LBperim = TRUE;
 				} else if(!mtmp) LBperim = FALSE;
 			}
+			//Center of All may show up
+			if(!Infuture && !mvitals[PM_CENTER_OF_ALL].died && !rn2(COA_PROB)){
+				coa_arrive();
+			}
 			//Random monster generation block
 			if(In_mithardir_terminus(&u.uz) &&
 				mvitals[PM_ASPECT_OF_THE_SILENCE].born == 0 &&
@@ -2003,9 +2007,6 @@ karemade:
 				|| (u.ufirst_sky && u.ufirst_life)
 			)){
 				makemon(&mons[PM_ASPECT_OF_THE_SILENCE], 0, 0, NO_MM_FLAGS);
-			}
-			else if(!Infuture && !mvitals[PM_CENTER_OF_ALL].died && !rn2(COA_PROB)){
-				coa_arrive();
 			}
 		    else if(!(Is_illregrd(&u.uz) && u.ualign.type == A_LAWFUL && !u.uevent.uaxus_foe) && /*Turn off random generation on axus's level if lawful*/
 				!rn2(u.uevent.udemigod ? 25 :
