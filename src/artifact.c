@@ -11246,9 +11246,9 @@ dosymbiotic_equip()
 	}
 	if(uarm && (uarm->otyp == LIVING_ARMOR || uarm->otyp == BARNACLE_ARMOR))
 		dosymbiotic(&youmonst, uarm);
-	if(uwep && ((check_oprop(uwep, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uwep) ))
+	if(uwep && ((check_oprop(uwep, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uwep) || is_bloodthirsty_artifact(uwep) ))
 		doliving(&youmonst, uwep);
-	if(uswapwep && ((check_oprop(uswapwep, OPROP_LIVEW) && u.twoweap && u.uinsight >= 40) || is_living_artifact(uswapwep) ))
+	if(uswapwep && ((check_oprop(uswapwep, OPROP_LIVEW) && u.twoweap && u.uinsight >= 40) || is_living_artifact(uswapwep) || (is_bloodthirsty_artifact(uswapwep) && u.twoweap) ))
 		doliving(&youmonst, uswapwep);
 	if(uarms && ((check_oprop(uarms, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarms) ))
 		doliving(&youmonst, uarms);
