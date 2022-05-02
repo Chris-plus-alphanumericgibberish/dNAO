@@ -11428,25 +11428,29 @@ living_items()
 
 	/* Animate objects in the dungeon -- this only happens to items in one chain (floor) and it changes the state of the dungeon,
 	 * so it's convenient not to handle this in the all_items() loop */
-
-	for (obj = fobj; obj; obj = nobj) {
-		nobj = obj->nobj;
-		if(obj->otyp == STATUE && !get_ox(obj, OX_EMON) && !(obj->spe) && !rn2(70) && check_insight()){
-		// if(obj->otyp == STATUE && !get_ox(obj, OX_EMON) && !(obj->spe)){
-			mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
-			if(mtmp){
-				set_template(mtmp, TOMB_HERD);
-				mtmp->m_lev += 4;
-				mtmp->mhpmax += d(4, 8);
-				mtmp->mhp = mtmp->mhpmax;
-				// mtmp->m_ap_type = M_AP_OBJECT;
-				// mtmp->mappearance = STATUE;
-				// mtmp->m_ap_type = M_AP_MONSTER;
-				// mtmp->mappearance = PM_STONE_GOLEM;
-				newsym(mtmp->mx, mtmp->my);
+	extern const int monstr[];
+	if((level_difficulty()+u.ulevel)/2 > monstr[PM_STONE_GOLEM] && check_insight()){
+		for (obj = fobj; obj; obj = nobj) {
+			nobj = obj->nobj;
+			if(obj->otyp == STATUE && !get_ox(obj, OX_EMON) && !(obj->spe)){
+				mtmp = animate_statue(obj, obj->ox, obj->oy, ANIMATE_NORMAL, (int *) 0);
+				if(mtmp){
+					set_template(mtmp, TOMB_HERD);
+					mtmp->m_lev += 4;
+					mtmp->mhpmax += d(4, 8);
+					mtmp->mhp = mtmp->mhpmax;
+					// mtmp->m_ap_type = M_AP_OBJECT;
+					// mtmp->mappearance = STATUE;
+					// mtmp->m_ap_type = M_AP_MONSTER;
+					// mtmp->mappearance = PM_STONE_GOLEM;
+					newsym(mtmp->mx, mtmp->my);
+				}
 			}
 		}
-		else if((obj->otyp == BROKEN_ANDROID || obj->otyp == BROKEN_GYNOID || obj->otyp == LIFELESS_DOLL) && obj->ovar1){
+	}
+	for (obj = fobj; obj; obj = nobj) {
+		nobj = obj->nobj;
+		if((obj->otyp == BROKEN_ANDROID || obj->otyp == BROKEN_GYNOID || obj->otyp == LIFELESS_DOLL) && obj->ovar1){
 			xchar ox, oy;
 			get_obj_location(obj, &ox, &oy, 0);
 			if(obj->ovar1 <= u.uinsight && !rn2(20)){
