@@ -2124,8 +2124,8 @@ karemade:
 				for(i = rn2(4); i > 0 && u.ulevel > 2; i--){
 					losexp("mind dissolution",FALSE,TRUE,TRUE);
 				}
-				forget((pre_drain - u.ulevel) * 100/(pre_drain)); //drain some proportion of your memory
 				losexp("mind dissolution",TRUE,TRUE,TRUE);
+				forget((pre_drain - u.ulevel) * 100/(pre_drain)); //drain some proportion of your memory
 			}
 			
 			if(mad_turn(MAD_HOST)){
