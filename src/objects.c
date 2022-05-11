@@ -689,7 +689,7 @@ HELM(("high-elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
 HELM(("droven helm", "spider-shaped helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,	0, 1, 20,   5, 8, 4, 0, SHADOWSTEEL, CLR_BLACK),
 HELM(("plasteel helm", "white skull helm", "skull helm"), /*Needs encyc entry*//*Needs tile*/
-		0, 1,  INFRAVISION,   0, 2, 25,  50, 8, 5, 2, PLASTIC, CLR_WHITE),
+		0, 1,  INFRAVISION,   0, 2, 25,  50, 7, 4, 2, PLASTIC, CLR_WHITE),
 HELM(("crystal helm", "fish bowl"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0,   0, 2,150, 300, 8, 5, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 HELM(("pontiff's crown", "filigreed faceless helm"), /*Needs encyc entry*//*Needs tile*/
@@ -783,7 +783,7 @@ SUIT(("harmonium plate", "red-lacquered bladed armor", "bladed armor"),
 SUIT(("harmonium scale mail", "red-lacquered spiked scale mail", "spiked scale mail"),
 	0, 0,  MZ_LARGE, ARMSZ_MEDIUM, 0,   0,  5, 125,    1,  8, 3, 1, METAL, CLR_RED),
 SUIT(("plasteel armor", "hard white armor", "armor"), /*Needs encyc entry*//*Needs tile*/
-	0, 0,   MZ_HUGE, ARMSZ_MEDIUM, 0,   0,  5, 100,  500,  7, 3, 3, PLASTIC, CLR_WHITE),
+	0, 0,   MZ_HUGE, ARMSZ_MEDIUM, 0,   0,  5, 100,  500,  5, 5, 3, PLASTIC, CLR_WHITE),
 // ARMOR(("force armor", "gemstone-adorned clothing"),	/* out of date structure -- rewrite if adding */
 	// 0, 0, 1, 0,	 0, 5,  50, 1000, 9, 3, ARM_SUIT, GEMSTONE, CLR_BRIGHT_GREEN),
 SUIT(("splint mail"),
