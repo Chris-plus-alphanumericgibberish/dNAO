@@ -423,7 +423,11 @@ static const char *haluMesg[] = {
 	"Oh, can't you see the light is fading?",
 		"And in the night the demons rage and call your name",
 		"No deeper madness than your own making",
-		"Visions lashing blades of shame, but will you take the blame?", /* Control */
+		"Visions lashing blades of shame, but will you take the blame?", 
+
+		"You are a worm through time.", 
+		"You've always been the new you.", 
+		"The hole in your room is a hole in you.", /* Control */
 
 		"What's the Bureau's vacation policy?",
 		"I'm interested to hear about your expenditure plan.", /* Awkward Zombie */
