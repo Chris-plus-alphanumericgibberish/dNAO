@@ -1668,6 +1668,14 @@ struct obj * weapon;
 			))
 			return 2;
 
+		if (hates_holy_mon(mdef) &&
+			attk && attk->adtyp == AD_HOLY)
+			return 2;
+
+		if (hates_unholy_mon(mdef) &&
+			attk && attk->adtyp == AD_UNHY)
+			return 2;
+
 		if (has_blood_mon(mdef) &&
 			attk && attk->adtyp == AD_BLUD)
 			return 2;
@@ -1676,8 +1684,28 @@ struct obj * weapon;
 			attk && attk->adtyp == AD_PSON)
 			return 2;
 
-		if (attk && (attk->adtyp == AD_SHDW))
+		if (attk && attk->adtyp == AD_SHDW)
 			return 2;
+
+		/*if (attk && (attk->adtyp == AD_MERC))
+			return 2; Currently unused, unclear what conditions it should check exactly
+		*/
+
+		if ((flaming(mdef->data) || is_iron(mdef->data)) &&
+			attk && attk->adtyp == AD_WET)
+			return 2;
+
+		if (!((species_resists_fire(mdef))
+				|| (ward_at(x(mdef), y(mdef)) == SIGIL_OF_CTHUGHA)
+				|| (youdef && ((Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE)))
+				|| (!youdef && is_half_dragon(pd) && mdef->mvar_hdBreath == AD_FIRE)
+				|| (youdef && u.sealsActive&SEAL_FAFNIR)) &&
+			attk && attk->adtyp == AD_EFIR)
+			return 2;
+
+		if (!Poison_res(mdef) &&
+			attk && attk->adtyp == AD_EDRC)
+			return 2; /* likely will be swapped out to wormwood (poisonous/starlight/water damage) at some point */
 
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
 			(youagr && u.sealsActive&SEAL_EDEN) ||

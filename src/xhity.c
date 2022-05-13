@@ -2479,7 +2479,9 @@ struct attack *attk;
 						(attk->adtyp == AD_MERC) ? " with a blade of mercury!" :
 						(attk->adtyp == AD_WET) ? " with a water-jet blade!" :
 						(attk->adtyp == AD_PSON) ? " with a soul blade!" :
-						(attk->adtyp == AD_BLUD) ? " with a blade of blood!" : "!";
+						(attk->adtyp == AD_BLUD) ? " with a blade of blood!" :
+						(attk->adtyp == AD_EFIR) ? " with a blade of fire!" :
+						(attk->adtyp == AD_EDRC) ? " with a blade of poison!" : "!";
 					if (youdef)
 						specify_you = TRUE;
 				}
