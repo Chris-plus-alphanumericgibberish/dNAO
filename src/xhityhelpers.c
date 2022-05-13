@@ -1672,6 +1672,13 @@ struct obj * weapon;
 			attk && attk->adtyp == AD_BLUD)
 			return 2;
 
+		if (!mindless_mon(mdef) &&
+			attk && attk->adtyp == AD_PSON)
+			return 2;
+
+		if (attk && (attk->adtyp == AD_SHDW))
+			return 2;
+
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
 			(youagr && u.sealsActive&SEAL_EDEN) ||
 			(attk && attk->adtyp == AD_GLSS) ||
