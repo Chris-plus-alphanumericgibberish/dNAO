@@ -3072,6 +3072,14 @@ register struct obj *otmp;
 			return 0;
 	    }
 	}
+	/* merged-with-skin check */
+	if (otmp->owornmask & W_SKIN) {
+		Your("%s %s merged with your skin!",
+			simple_typename(otmp->otyp),
+			otmp->otyp >= GRAY_DRAGON_SCALES && otmp->otyp <= YELLOW_DRAGON_SCALES ? "are" : "is"
+			);
+		return 0;
+	}
 	/* basic curse check */
 	if (otmp == uquiver || (otmp == uswapwep && !u.twoweap)) {
 	    ;	/* some items can be removed even when cursed */
