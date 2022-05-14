@@ -4160,12 +4160,18 @@ struct zapdata * zapdata;
 		return xdamagey(magr, mdef, &attk, dmg);
 
 	case AD_FIRE:
+	case AD_EFIR:
 		/* check resist / weakness */
 		if (Fire_res(mdef)) {
-			doshieldeff = TRUE;
-			if (youdef)
-				addmsg("You don't feel hot!");
-			dmg = 0;
+			if (zapdata->adtyp == AD_EFIR) {
+				dmg *= 0.5;
+			}
+			else {
+				doshieldeff = TRUE;
+				if (youdef)
+					addmsg("You don't feel hot!");
+				dmg = 0;
+			}
 		}
 		else if (Cold_res(mdef)) {
 			dmg *= 1.5;
@@ -4188,12 +4194,18 @@ struct zapdata * zapdata;
 		return xdamagey(magr, mdef, &attk, dmg);
 
 	case AD_COLD:
+	case AD_ECLD:
 		/* check resist / weakness */
 		if (Cold_res(mdef)) {
-			doshieldeff = TRUE;
-			if (youdef)
-				addmsg("You don't feel cold!");
-			dmg = 0;
+			if (zapdata->adtyp == AD_ECLD) {
+				dmg *= 0.5;
+			}
+			else {
+				doshieldeff = TRUE;
+				if (youdef)
+					addmsg("You don't feel cold!");
+				dmg = 0;
+			}
 		}
 		else if (Fire_res(mdef)) {
 			dmg *= 1.5;
@@ -4212,12 +4224,18 @@ struct zapdata * zapdata;
 		return xdamagey(magr, mdef, &attk, dmg);
 
 	case AD_ELEC:
+	case AD_EELC:
 		/* check resist */
 		if (Shock_res(mdef)) {
-			doshieldeff = TRUE;
-			if (youdef)
-				addmsg("You aren't shocked!");
-			dmg = 0;
+			if (zapdata->adtyp == AD_EELC) {
+				dmg *= 0.5;
+			}
+			else {
+				doshieldeff = TRUE;
+				if (youdef)
+					addmsg("You aren't shocked!");
+				dmg = 0;
+			}
 		}
 		domsg();
 		golemeffects(mdef, AD_ELEC, svddmg);
@@ -4229,12 +4247,18 @@ struct zapdata * zapdata;
 		return xdamagey(magr, mdef, &attk, dmg);
 
 	case AD_ACID:
+	case AD_EACD:
 		/* check resist */
 		if (Acid_res(mdef)) {
-			doshieldeff = TRUE;
-			if (youdef)
-				addmsg("You seem unaffected.");
-			dmg = 0;
+			if (zapdata->adtyp == AD_EACD) {
+				dmg *= 0.5;
+			}
+			else {
+				doshieldeff = TRUE;
+				if (youdef)
+					addmsg("You seem unaffected.");
+				dmg = 0;
+			}
 		}
 		/* extra effects vs player */
 		if (youdef && dmg > 0) {
