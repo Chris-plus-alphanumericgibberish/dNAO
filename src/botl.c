@@ -708,7 +708,7 @@ force_bot()
 	bot1();
 	bot2();
 	flags.botl = flags.botlx = 0;
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 #endif /* OVL0 */

@@ -610,6 +610,9 @@ boolean affect_game_state;
 		case MOVE_CASTSPELL:
 			break;
 
+		case MOVE_ATE:
+			break;
+
 		case MOVE_CANCELLED:
 			/* ignore other costs, force a cost of 0 */
 			return 0;
@@ -1408,7 +1411,7 @@ moveloop()
 
 	
 	if (!(flags.move & MOVE_CANCELLED)) {
-		flags.movetoprint = flags.move;
+		flags.movetoprint = flags.move == MOVE_DEFAULT ? MOVE_STANDARD : flags.move;
 		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
 	}
 	if(you_action_cost(flags.move, TRUE) > 0) {

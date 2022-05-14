@@ -1298,7 +1298,7 @@ dodiscovered()				/* free after Robert Viduya */
 	display_nhwindow(tmpwin, TRUE);
     destroy_nhwindow(tmpwin);
 
-    return 0;
+    return MOVE_INSTANT;
 }
 
 void

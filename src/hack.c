@@ -683,7 +683,7 @@ int mode;
 		    if (amorphous(youracedata))
 			You("try to ooze under the door, but can't squeeze your possessions through.");
 			if (iflags.autoopen && !flags.run && !Confusion && !Stunned && !Fumbling) {
-				iflags.door_opened = doopen_indir(x, y);
+				iflags.door_opened = !(doopen_indir(x, y) & (MOVE_CANCELLED|MOVE_INSTANT));
 		    } else if (x == ux || y == uy) {
 				if (Blind || Stunned || ACURR(A_DEX) < 10 || Fumbling) {
 #ifdef STEED

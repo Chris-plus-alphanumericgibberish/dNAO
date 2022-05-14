@@ -3277,11 +3277,11 @@ doddoremarm()
     if (taking_off || takeoff_mask) {
 	You("continue %s.", disrobing);
 	set_occupation(take_off, disrobing, 0);
-	return 0;
+	return MOVE_INSTANT;
     } else if (!uwep && !uswapwep && !uquiver && !uamul && !ublindf &&
 		!uleft && !uright && !wearing_armor()) {
 	You("are not wearing anything.");
-	return 0;
+	return MOVE_CANCELLED;
     }
 
     add_valid_menu_class(0); /* reset */
@@ -3302,7 +3302,7 @@ doddoremarm()
      * in take_off(); if we return 1, that would add an extra turn to each
      * disrobe.
      */
-    return 0;
+    return MOVE_INSTANT;
 }
 
 STATIC_OVL int

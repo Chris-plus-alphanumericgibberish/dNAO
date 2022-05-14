@@ -2104,10 +2104,10 @@ ddoinv()
 				checkfile(xname(otmp), 0, FALSE, TRUE, &datawin);
 				display_nhwindow(datawin, TRUE);
 				destroy_nhwindow(datawin);
-				return 0;
+				return MOVE_INSTANT;
 			}
 		}
-	return 0;
+	return MOVE_INSTANT;
 }
 
 /** Puts up a menu asking what to do with an object;
