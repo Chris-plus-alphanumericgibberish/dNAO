@@ -107,6 +107,7 @@ struct flag {
 #define MOVE_READ		0x0080	/* player read a book, scroll, or other readable */
 #define MOVE_CASTSPELL	0x0100	/* player cast a spell */
 #define MOVE_ATE		0x0200	/* player ate food */
+#define MOVE_FIRED		0x0400	/* player properly fired ammo, using a launcher or intrinsic launching means, NOT a standard thrown object. */
 
 	int	 end_top, end_around;	/* describe desired score list */
 	unsigned ident;		/* social security number for each monster */

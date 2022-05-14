@@ -613,6 +613,9 @@ boolean affect_game_state;
 		case MOVE_ATE:
 			break;
 
+		case MOVE_FIRED:
+			break;
+
 		case MOVE_CANCELLED:
 			/* ignore other costs, force a cost of 0 */
 			return 0;

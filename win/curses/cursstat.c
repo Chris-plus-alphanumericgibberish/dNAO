@@ -621,6 +621,7 @@ draw_horizontal(int x, int y, int hp, int hpmax)
                 case MOVE_READ:      Strcat(buf, "read/");       break;
                 case MOVE_CASTSPELL: Strcat(buf, "cast/");       break;
                 case MOVE_ATE:       Strcat(buf, "ate/");        break;
+                case MOVE_FIRED:     Strcat(buf, "fired/");      break;
             }
         Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
@@ -730,6 +731,7 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
                 case MOVE_READ:      Strcat(buf, "read/");       break;
                 case MOVE_CASTSPELL: Strcat(buf, "cast/");       break;
                 case MOVE_ATE:       Strcat(buf, "ate/");        break;
+                case MOVE_FIRED:     Strcat(buf, "fired/");      break;
             }
         Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);

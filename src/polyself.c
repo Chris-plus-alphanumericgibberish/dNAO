@@ -873,7 +873,7 @@ struct permonst *mdat;
 		case AD_RBRE: mtyp = PM_SHIMMERING_DRAGON; break;
 		default:
 			impossible("bad HDbreath %d", flags.HDbreath);
-			return 0;
+			return MOVE_CANCELLED;
 		}
 		if (uarm && Dragon_armor_matches_mtyp(uarm, mtyp))
 			powermult += 50;
@@ -888,7 +888,7 @@ struct permonst *mdat;
 	mattk.damd = (mattk.damd ? mattk.damd : 6) * powermult / 100;
 
 	/* use xbreathey to do the attack */
-	return xbreathey(&youmonst, &mattk, 0, 0);
+	return xbreathey(&youmonst, &mattk, 0, 0) ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
 int
@@ -994,11 +994,11 @@ dospit()
 	struct obj *otmp;
 
 	if (!getdir((char *)0))
-		return(0);
+		return MOVE_CANCELLED;
 	else {
 		xspity(&youmonst, attacktype_fordmg(youracedata, AT_SPIT, AD_ANY), 0, 0);
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int
@@ -1006,10 +1006,10 @@ doremove()
 {
 	if (!Punished) {
 		You("are not chained to anything!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	unpunish();
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int

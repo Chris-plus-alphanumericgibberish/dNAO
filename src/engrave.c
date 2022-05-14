@@ -1882,7 +1882,7 @@ doengward()
  * moonstone  -  6	(orthoclase)	* amber      -	2-2.5
  */
 
-/* return 1 if action took 1 (or more) moves, 0 if error or aborted */
+/* returns standard time-taken constants */
 int
 dogenengrave(mode)
 int mode;
@@ -1933,12 +1933,12 @@ int mode;
 	/* Can the adventurer engrave at all? */
 	if(!u.wardsknown && mode == WARD_MODE){
 		You("don't know any wards.");
-		return 0;
+		return MOVE_CANCELLED;
 	} else if(mode == SEAL_MODE){
 		if(Role_if(PM_EXILE)) binderup(); //reaply all known seals, in case of memory loss.
 		if(!u.sealsKnown && !u.specialSealsKnown){
 			You("don't know any seals.");
-			return 0;
+			return MOVE_CANCELLED;
 		}
 	}
 
@@ -1946,31 +1946,31 @@ int mode;
 		if (is_animal(u.ustuck->data)) {
 			if(mode == ENGRAVE_MODE) pline("What would you write?  \"Jonah was here\"?");
 			else pline("What would you do, write \"Jonah was here\"?");
-			return(0);
+			return MOVE_CANCELLED;
 		} else if (is_whirly(u.ustuck->data)) {
 			You_cant("reach the %s.", surface(u.ux,u.uy));
-			return(0);
+			return MOVE_CANCELLED;
 		} else
 			jello = TRUE;
 	} else if (is_lava(u.ux, u.uy)) {
 		You_cant("%s on the lava!", word);
-		return(0);
+		return MOVE_CANCELLED;
 	} /*else if (is_pool(u.ux,u.uy, FALSE) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
 		You_cant("draw on the water!");
-		return(0);
+		return MOVE_CANCELLED;
 	}*/else if(is_pool(u.ux,u.uy, FALSE) && !u.uinwater){
 		You_cant("draw on the water!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if(Weightless || Is_waterlevel(&u.uz)/* in bubble */ /*|| is_sky(u.ux, u.uy)*/) {
 		You_cant("%s in thin air!", word);
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (cantwield(youracedata)) {
 		You_cant("even hold anything!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
-	if (check_capacity((char *)0)) return (0);
+	if (check_capacity((char *)0)) return MOVE_CANCELLED;
 
 	/* One may write with finger, or weapon, or wand, or..., or...
 	 * Edited by GAN 10/20/86 so as not to change weapon wielded.
@@ -1979,7 +1979,7 @@ int mode;
 		otmp = getobj(styluses,	"write with");
 	else
 		otmp = getobj(styluses,	"draw with");
-	if(!otmp) return(0);		/* otmp == zeroobj if fingers */
+	if(!otmp) return MOVE_CANCELLED;		/* otmp == zeroobj if fingers */
 
 	if (otmp == &zeroobj) writer = makeplural(body_part(FINGER));
 	else writer = xname(otmp);
@@ -1989,35 +1989,35 @@ int mode;
 	 */
 	if (!freehand() && otmp != uwep && !otmp->owornmask) {
 		You("have no free %s to %s with!", body_part(HAND), word);
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	if (jello) {
 		You("tickle %s with your %s.", mon_nam(u.ustuck), writer);
 		Your("message dissolves...");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (otmp->oclass != WAND_CLASS && !can_reach_floor()) {
 		You_cant("reach the %s!", surface(u.ux,u.uy));
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (IS_ALTAR(levl[u.ux][u.uy].typ)) {
 		You("make a motion towards the altar with your %s.", writer);
 		altar_wrath(u.ux, u.uy);
-		return(0);
+		return MOVE_INSTANT;
 	}
 	if(mode == ENGRAVE_MODE){
 		if (IS_GRAVE(levl[u.ux][u.uy].typ)) {
 		    if (otmp == &zeroobj) { /* using only finger */
 			You("would only make a small smudge on the %s.",
 				surface(u.ux, u.uy));
-			return(0);
+			return MOVE_CANCELLED;
 		    } else if (!levl[u.ux][u.uy].disturbed) {
 			You("disturb the undead!");
 			levl[u.ux][u.uy].disturbed = 1;
 			(void) makemon(&mons[PM_GHOUL], u.ux, u.uy, NO_MM_FLAGS);
 			exercise(A_WIS, FALSE);
-			return(1);
+			return MOVE_STANDARD;
 		    }
 		}
 	}
@@ -2279,7 +2279,7 @@ int mode;
 		} else /* end if zappable */
 		    if (!can_reach_floor()) {
 			You_cant("reach the %s!", surface(u.ux,u.uy));
-			return(0);
+			return MOVE_CANCELLED;
 		    }
 		break;
 
@@ -2307,7 +2307,7 @@ int mode;
 					}
 					if(levl[u.ux][u.uy].typ == GRASS)
 						levl[u.ux][u.uy].typ = SOIL;
-					return 1;
+					return MOVE_STANDARD;
 				} else {
 					ptext = TRUE;
 					type  = BURN;
@@ -2359,7 +2359,7 @@ int mode;
 		} else if(otmp == ublindf) {
 		    pline(
 		"That is a bit difficult to engrave with, don't you think?");
-		    return(0);
+		    return MOVE_CANCELLED;
 		}
 		switch (otmp->otyp)  {
 		    case MAGIC_MARKER:
@@ -2416,7 +2416,7 @@ int mode;
 	}
 	if(type == DUST && levl[u.ux][u.uy].typ == GRASS){
 		You_cant("make legible marks in grass with just your %s.", writer);
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if(type == ENGRAVE && levl[u.ux][u.uy].typ == SAND){
 		type = DUST;
@@ -2487,13 +2487,13 @@ int mode;
 				"sand" :
 				"dust");
 	    useup(otmp);
-	    return(1);
+	    return MOVE_STANDARD;
 	}
 
 	if (!ptext) {		/* Early exit for some implements. */
 	    if (otmp->oclass == WAND_CLASS && !can_reach_floor())
 		You_cant("reach the %s!", surface(u.ux,u.uy));
-	    return(1);
+	    return MOVE_STANDARD;
 	}
 
 	/* Special effects should have deleted the current engraving (if
@@ -2514,7 +2514,7 @@ int mode;
 					ynqchars, 'y');
 			if (c == 'q') {
 			    pline1(Never_mind);
-			    return(0);
+			    return MOVE_CANCELLED;
 			}
 		    }
 	
@@ -2545,7 +2545,7 @@ int mode;
 					levl[u.ux][u.uy].typ == SAND ? "fused into" :
 				   "burned into") :
 				   "engraved in", surface(u.ux,u.uy));
-				return(1);
+				return MOVE_STANDARD;
 			    } else
 				if ( (type != oep->engr_type) || (c == 'n') ) {
 				    if (!Blind || can_reach_floor())
@@ -2563,14 +2563,14 @@ int mode;
 	/*	    if (type == HEADSTONE) {
 			// headstones are not big enough for wards
 				pline("This headstone is not big enough for drawing one");
-			    return(0);
+			    return MOVE_CANCELLED;
 		    } else*/ if ( (type == oep->ward_type) && !Hallucination && (!Blind ||
 			 (oep->ward_type == BURN) || (oep->ward_type == ENGRAVE)) && oep->ward_id <= LAST_WARD) {
 				c = yn_function("Do you want to reinforce the existing ward?",
 						ynqchars, 'y');
 				if (c == 'q') {
 					pline1(Never_mind);
-					return(0);
+					return MOVE_CANCELLED;
 				}
 		    }
 			
@@ -2601,7 +2601,7 @@ int mode;
 						levl[u.ux][u.uy].typ == SAND ? "fused into" :
 					   "burned into") :
 					  	"engraved in", surface(u.ux,u.uy));
-					return(1);
+					return MOVE_STANDARD;
 					} else
 					if ( (type != oep->ward_type) || (c == 'n') ) {
 						if (!Blind || can_reach_floor())
@@ -2615,7 +2615,7 @@ int mode;
 				int increment;
 				if(oep->complete_wards >= 7 || newWards < 1){
 					pline("The warding sign can be reinforced no further!");
-					return 0;
+					return MOVE_CANCELLED;
 				}
 				/*pline("%d to be added, %d there already", newWards, oep->complete_wards);*/
 				boolean continue_loop = TRUE;
@@ -2669,7 +2669,7 @@ int mode;
 					levl[u.ux][u.uy].typ == SAND ? "fused into" :
 				   "burned into") :
 				  	"engraved in", surface(u.ux,u.uy));
-				return(1);
+				return MOVE_STANDARD;
 				} else
 				if ( (type != oep->ward_type) ) {
 					if (!Blind || can_reach_floor())
@@ -2772,10 +2772,10 @@ int mode;
 			if (!Blind)
 			    pline("%s, then %s.",
 				  Tobjnam(otmp,	"glow"), otense(otmp,	"fade"));
-			return(1);
+			return MOVE_STANDARD;
 		    } else {
 				pline1(Never_mind);
-				return(0);
+				return MOVE_CANCELLED;
 		    }
 		}
 	
@@ -2809,10 +2809,10 @@ int mode;
 				if (!Blind)
 					pline("%s, then %s.",
 					  Tobjnam(otmp,	"glow"), otense(otmp,	"fade"));
-				return(1);
+				return MOVE_STANDARD;
 		    } else {
 				pline1(Never_mind);
-				return(0);
+				return MOVE_CANCELLED;
 		    }
 		}
 		if(u.sealsActive&SEAL_CHUPOCLOPS) unbind(SEAL_CHUPOCLOPS,TRUE); 
@@ -2832,10 +2832,10 @@ int mode;
 				if (!Blind)
 					pline("%s, then %s.",
 					  Tobjnam(otmp,	"glow"), otense(otmp,	"fade"));
-				return(1);
+				return MOVE_STANDARD;
 		    } else {
 				pline1(Never_mind);
-				return(0);
+				return MOVE_CANCELLED;
 		    }
 		}
 		if (eow) {
@@ -3122,7 +3122,7 @@ int mode;
 		lightning_blind(&youmonst, rnd(50));
 	}
 
-	return(1);
+	return MOVE_STANDARD;
 }
 
 /* return 1 if action took 1 (or more) moves, 0 if error or aborted */
