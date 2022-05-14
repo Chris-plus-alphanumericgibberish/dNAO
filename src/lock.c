@@ -851,24 +851,24 @@ int x, y;
 
 	if (nohands(youracedata)) {
 	    You_cant("open anything -- you have no hands!");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	if(!freehand()){
 	    You_cant("open anything -- you have no free hands!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	if (u.utrap && u.utraptype == TT_PIT) {
 	    You_cant("reach over the edge of the pit.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	
 	if(x > 0 && y > 0){
 		cc.x = x;
 		cc.y = y;
-	} else if(!get_adjacent_loc((char *)0, (char *)0, u.ux, u.uy, &cc)) return(0);
+	} else if(!get_adjacent_loc((char *)0, (char *)0, u.ux, u.uy, &cc)) return MOVE_CANCELLED;
 
-	if((cc.x == u.ux) && (cc.y == u.uy)) return(0);
+	if((cc.x == u.ux) && (cc.y == u.uy)) return MOVE_CANCELLED;
 
 	if ((mtmp = m_at(cc.x,cc.y))			&&
 		mtmp->m_ap_type == M_AP_FURNITURE	&&
@@ -877,7 +877,7 @@ int x, y;
 		!Protection_from_shape_changers)	 {
 
 	    stumble_onto_mimic(mtmp);
-	    return(1);
+	    return MOVE_STANDARD;
 	}
 
 	door = &levl[cc.x][cc.y];
@@ -885,11 +885,11 @@ int x, y;
 	if(!IS_DOOR(door->typ)) {
 		if (is_db_wall(cc.x,cc.y)) {
 		    There("is no obvious way to open the drawbridge.");
-		    return(0);
+		    return MOVE_INSTANT;
 		}
 		You("%s no door there.",
 				Blind ? "feel" : "see");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	if (!(door->doormask & D_CLOSED)) {
@@ -903,12 +903,12 @@ int x, y;
 	    }
 	    pline("This door%s.", mesg);
 	    if (Blind) feel_location(cc.x,cc.y);
-	    return(0);
+	    return MOVE_INSTANT;
 	}
 
 	if(verysmall(youracedata)) {
 	    pline("You're too small to pull the door open.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 
 	/* door is known to be CLOSED */
@@ -930,7 +930,7 @@ int x, y;
 	    pline_The("door resists!");
 	}
 
-	return(1);
+	return MOVE_STANDARD;
 }
 
 STATIC_OVL
@@ -964,25 +964,25 @@ doclose()		/* try to close a door */
 
 	if (nohands(youracedata)) {
 	    You_cant("close anything -- you have no hands!");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	if(!freehand()){
 	    You_cant("close anything -- you have no free hands!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	if (u.utrap && u.utraptype == TT_PIT) {
 	    You_cant("reach over the edge of the pit.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 
-	if(!getdir((char *)0)) return(0);
+	if(!getdir((char *)0)) return MOVE_CANCELLED;
 
 	x = u.ux + u.dx;
 	y = u.uy + u.dy;
 	if((x == u.ux) && (y == u.uy)) {
 		You("are in the way!");
-		return(1);
+		return MOVE_STANDARD;
 	}
 
 	if ((mtmp = m_at(x,y))				&&
@@ -992,7 +992,7 @@ doclose()		/* try to close a door */
 		!Protection_from_shape_changers)	 {
 
 	    stumble_onto_mimic(mtmp);
-	    return(1);
+	    return MOVE_STANDARD;
 	}
 
 	door = &levl[x][y];
@@ -1003,24 +1003,24 @@ doclose()		/* try to close a door */
 		else
 		    You("%s no door there.",
 				Blind ? "feel" : "see");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	if(door->doormask == D_NODOOR) {
 	    pline("This doorway has no door.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 
-	if(obstructed(x, y)) return(0);
+	if(obstructed(x, y)) return MOVE_CANCELLED;
 
 	if(door->doormask == D_BROKEN) {
 	    pline("This door is broken.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 
 	if(door->doormask & (D_CLOSED | D_LOCKED)) {
 	    pline("This door is already closed.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 
 	if(door->doormask == D_ISOPEN) {
@@ -1030,7 +1030,7 @@ doclose()		/* try to close a door */
 #endif
 		) {
 		 pline("You're too small to push the door closed.");
-		 return(0);
+		 return MOVE_CANCELLED;
 	    }
 	    if (
 #ifdef STEED
@@ -1051,7 +1051,7 @@ doclose()		/* try to close a door */
 	    }
 	}
 
-	return(1);
+	return MOVE_STANDARD;
 }
 
 boolean			/* box obj was hit with spell effect otmp */

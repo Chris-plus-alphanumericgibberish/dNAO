@@ -3893,7 +3893,7 @@ struct obj *obj;
 
     if (obj != uwep) {
 		if (!wield_tool(obj, "nunchaku")) return MOVE_CANCELLED;
-		else res = Role_if(PM_MONK) ? PARTIAL_ACTION : MOVE_STANDARD;
+		else res = Role_if(PM_MONK) ? MOVE_PARTIAL : MOVE_STANDARD;
     }
 
 	if (!getdir((char *)0)) return res;

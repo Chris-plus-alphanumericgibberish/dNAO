@@ -130,11 +130,9 @@ doattributes()
 		case DOATTRIB_SPIRITS:
 			spirits_enlightenment();
 			break;
-		default:
-			return 0;
 		}
 	}
-	return 0;
+	return MOVE_INSTANT;
 }
 
 /* KMH, #conduct
@@ -144,14 +142,14 @@ int
 doconduct()
 {
 	show_conduct(0, FALSE);
-	return 0;
+	return MOVE_INSTANT;
 }
 
 int
 doenlightenment()
 {
 	show_enlightenment(0, FALSE);
-	return 0;
+	return MOVE_INSTANT;
 }
 
 /*

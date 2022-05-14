@@ -3434,7 +3434,7 @@ dotravel()
 	static char cmd[2];
 	coord cc;
 
-	if (!iflags.travelcmd) return 0;
+	if (!iflags.travelcmd) return MOVE_CANCELLED;
 	cmd[1]=0;
 	cc.x = iflags.travelcc.x;
 	cc.y = iflags.travelcc.y;
@@ -3446,13 +3446,13 @@ dotravel()
 	pline("Where do you want to travel to?");
 	if (getpos(&cc, TRUE, "the desired destination") < 0) {
 		/* user pressed ESC */
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	iflags.travelcc.x = u.tx = cc.x;
 	iflags.travelcc.y = u.ty = cc.y;
 	cmd[0] = CMD_TRAVEL;
 	readchar_queue = cmd;
-	return 0;
+	return MOVE_INSTANT;
 }
 
 #ifdef PORT_DEBUG
