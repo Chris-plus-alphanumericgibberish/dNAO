@@ -3051,9 +3051,9 @@ winid *datawin;
 			ADDCLASSPROP((oart->aflags&ARTA_SHATTER), "shattering");
 			ADDCLASSPROP((oart->aflags&ARTA_DISARM), "disarming");
 			ADDCLASSPROP((oart->aflags&ARTA_STEAL), "theiving");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), " fire exploding");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), " cold exploding");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), " shock exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), "fire exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), "cold exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), "shock exploding");
 			ADDCLASSPROP((oart->aflags&(ARTA_KNOCKBACK|ARTA_KNOCKBACKX)), "kinetic");
 			if (buf[0] != '\0')
 			{
