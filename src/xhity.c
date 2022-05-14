@@ -15837,6 +15837,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					&& badtouch(magr, mdef, attk, weapon))
 				{
 					if (youagr) {
+						/* don't call xstoney, we want instant-stoning for the player */
 						if (poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM)) {
 							/* polyd into a stone golem */
 							result |= MM_AGR_STOP;
@@ -15849,22 +15850,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 						}
 					}
 					else {
-						if (poly_when_stoned(pa)) {
-							mon_to_stone(magr);
-							result |= MM_AGR_STOP;
-						}
-						else {
-							if (vis&VIS_MAGR) {
-								pline("%s turns to stone!", Monnam(magr));
-							}
-							stoned = 1;
-							xkilled(magr, 0);
-							stoned = 0;
-							if (*hp(magr) > 0)
-								result |= MM_AGR_STOP;
-							else
-								result |= MM_AGR_DIED;
-						}
+						result |= xstoney(mdef, magr);
 					}
 				}
 				break;
