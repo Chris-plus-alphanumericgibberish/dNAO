@@ -89,7 +89,7 @@ int shots, shotlimit;
 	
 	if(shots <= 0){
 		You("push the firing stud, but nothing happens.");
-		return 1;
+		return MOVE_STANDARD;
 	}
 	
 	if(!u.dx && !u.dy){
@@ -104,7 +104,7 @@ int shots, shotlimit;
 						make_blinded((long)rnd(50),FALSE);
 						if (!Blind) Your1(vision_clears);
 					}
-					return 1;
+					return MOVE_FIRED;
 				} else {
 					struct engr *oep;
 					if(!Blind){
@@ -146,7 +146,7 @@ int shots, shotlimit;
 				   pline("The bugs on the %s stop moving!", surface(u.ux, u.uy));
 				}
 			}
-			return 1;
+			return MOVE_FIRED;
 		} else {
 			if(Hallucination) pline1(Ronnie_ray_gun[rn2(SIZE(Ronnie_ray_gun))]);
 			raygun->ovar1 -= cost;
@@ -154,7 +154,7 @@ int shots, shotlimit;
 			struct zapdata zapdata = { 0 };
 			basiczap(&zapdata, raygun->altmode, ZAP_RAYGUN, 6);
 			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, 1, &zapdata);
-			return 1;
+			return MOVE_FIRED;
 		}
 	}
 	
@@ -178,7 +178,7 @@ int shots, shotlimit;
 	if(clicky){
 		You("push the firing stud, but nothing happens.");
 	}
-	return 1;
+	return (clicky) ? MOVE_STANDARD : MOVE_FIRED;
 }
 
 /* KMH -- Automatically fill quiver */
