@@ -87,33 +87,24 @@ int * property_list;
 struct obj* obj;
 int otyp;
 {
-	int cur_prop, i;
+	int cur_prop, i, j;
 	boolean got_prop;
 
 	if (obj)
 		otyp = obj->otyp;
-
-	// bonus properties some items have that cannot fit into objclass->oc_oprop
-	const static int NO_RES[] = { 0 };
-	const static int ALCHEMY_RES[] = { ACID_RES, 0 };
-	const static int FACEPLATE_RES[] = { WATERPROOF, 0 };
-	const static int ORANGE_RES[] = { SLEEP_RES, HALLUC_RES, 0 };
-	const static int YELLOW_RES[] = { STONE_RES, 0 };
-	const static int GREEN_RES[] = { SICK_RES, 0 };
-	const static int BLUE_RES[] = { FAST, 0 };
-	const static int BLACK_RES[] = { DRAIN_RES, 0 };
-	const static int RED_RES[] = { FLYING, 0 };
-	const static int WHITE_RES[] = { MAGICAL_BREATHING, SWIMMING, WATERPROOF, 0 };
-	const static int GRAY_RES[] = { HALF_SPDAM, 0 };
-	const static int SHIM_RES[] = { SEE_INVIS, 0 };
 
 	i = 0;
 	for (cur_prop = 1; cur_prop < LAST_PROP; cur_prop++)
 	{
 		got_prop = FALSE;
 		// from objclass
-		if (objects[otyp].oc_oprop == cur_prop)
-			got_prop = TRUE;
+		j = 0;
+		while(objects[otyp].oc_oprop[j] && !got_prop) {
+			if (objects[otyp].oc_oprop[j] == cur_prop)
+				got_prop = TRUE;
+			j++;
+		}
+
 		// from object properties
 		if (!got_prop && obj && !check_oprop(obj, OPROP_NONE)){
 			switch (cur_prop)
@@ -150,77 +141,6 @@ int otyp;
 				if (check_oprop(obj, OPROP_LIFE))
 					got_prop = TRUE;
 				break;
-			}
-		}
-		// from object type that doesn't fit into objclass
-		if (!got_prop)
-		{
-			// first, select the item's list of bonus properties
-			const int * bonus_prop_list;
-			switch (otyp)
-			{
-			case ALCHEMY_SMOCK:
-				bonus_prop_list = (ALCHEMY_RES);
-				break;
-			case R_LYEHIAN_FACEPLATE:
-				bonus_prop_list = (FACEPLATE_RES);
-				break;
-			case RED_DRAGON_SCALES:
-			case RED_DRAGON_SCALE_MAIL:
-			//Note: NOT shield: flight is due to wings.
-				bonus_prop_list = (RED_RES);
-				break;
-			case ORANGE_DRAGON_SCALES:
-			case ORANGE_DRAGON_SCALE_MAIL:
-			case ORANGE_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (ORANGE_RES);
-				break;
-			case YELLOW_DRAGON_SCALES:
-			case YELLOW_DRAGON_SCALE_MAIL:
-			case YELLOW_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (YELLOW_RES);
-				break;
-			case GREEN_DRAGON_SCALES:
-			case GREEN_DRAGON_SCALE_MAIL:
-			case GREEN_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (GREEN_RES);
-				break;
-			case BLUE_DRAGON_SCALES:
-			case BLUE_DRAGON_SCALE_MAIL:
-			case BLUE_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (BLUE_RES);
-				break;
-			case BLACK_DRAGON_SCALES:
-			case BLACK_DRAGON_SCALE_MAIL:
-			case BLACK_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (BLACK_RES);
-				break;
-			case WHITE_DRAGON_SCALES:
-			case WHITE_DRAGON_SCALE_MAIL:
-			case WHITE_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (WHITE_RES);
-				break;
-			case GRAY_DRAGON_SCALES:
-			case GRAY_DRAGON_SCALE_MAIL:
-			case GRAY_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (GRAY_RES);
-				break;
-			case SHIMMERING_DRAGON_SCALES:
-			case SHIMMERING_DRAGON_SCALE_MAIL:
-			case SHIMMERING_DRAGON_SCALE_SHIELD:
-				bonus_prop_list = (SHIM_RES);
-				break;
-			default:
-				bonus_prop_list = (NO_RES);
-				break;
-			}
-			// if it has one, then see if the current property is on the list
-			if (bonus_prop_list != (NO_RES))
-			{
-				int j;
-				for (j = 0; bonus_prop_list[j]; j++)
-				if (bonus_prop_list[j] == cur_prop)
-					got_prop = TRUE;
 			}
 		}
 		// if we've got the property, add it to the array
@@ -1879,112 +1799,116 @@ struct obj *obj;
 	if (!obj)
 		return 0;
 
+	int score = 0;
+
 	/* specific item types that are more than their oc_oprop */
 	switch (obj->otyp)
 	{
 		/* gloves */
 	case GAUNTLETS_OF_POWER:
-		return 8;
+		score += 8;
 		break;
 	case GAUNTLETS_OF_DEXTERITY:
-		return (obj->spe / 2);
+		score += (obj->spe / 2);
 		break;
 		/* cloaks */
 	case ALCHEMY_SMOCK:
 		if (!species_resists_acid(mon) || !species_resists_poison(mon))
-			return 5;
+			score += 5;
 		break;
 	case LIVING_MASK:
-		return 3;
+		score += 3;
 		break;
 	case SUNGLASSES:
-		return 2;
+		score += 2;
 		break;
 	case ANDROID_VISOR:
-		if(is_android(mon)) return 4;
-		return 1;
+		if(is_android(mon)) score += 4;
+		score += 1;
 		break;
 	case MUMMY_WRAPPING:
 	case PRAYER_WARDED_WRAPPING:
 		if (mon->data->mlet == S_MUMMY)
-			return 30;
+			score += 30;
 		else if (mon->mtame && mon->minvis && !See_invisible_old)
-			return 10;
+			score += 10;
 		else if (mon->minvis)
-			return -5;
+			score += -5;
 		break;
 	}
 
-	/* oc_oprop -- does not include extra properties
-	 * such as the alchemy smock or object properties */
-	switch (objects[obj->otyp].oc_oprop)
-	{
-	case ANTIMAGIC:
-		if (!species_resists_magic(mon))
-			return 20;
-		break;
-	case REFLECTING:
-		if (!(has_template(mon, FRACTURED) || species_reflects(mon)))
-			return 18;
-		break;
-	case FAST:
-		if (mon->permspeed != MFAST)
-			return 15;
-		break;
-	case FLYING:
-		if (!species_flies(mon->data))
-			return 10;
-		break;
-	case DISPLACED:
-		if (!species_displaces(mon->data))
-			return 8;
-		break;
-	case STONE_RES:
-		if (!species_resists_ston(mon))
-			return 7;
-		break;
-	case SICK_RES:
-		if (!species_resists_sickness(mon))
-			return 5;
-		break;
-	case FIRE_RES:
-		if (!species_resists_fire(mon))
-			return 3;
-	case COLD_RES:
-		if (!species_resists_cold(mon))
-			return 3;
-	case SHOCK_RES:
-		if (!species_resists_elec(mon))
-			return 3;
-	case ACID_RES:
-		if (!species_resists_acid(mon))
-			return 3;
-	case POISON_RES:
-		if (!species_resists_poison(mon))
-			return 3;
-	case SLEEP_RES:
-		if (!species_resists_sleep(mon))
-			return 3;
-	case DRAIN_RES:
-		if (!species_resists_drain(mon))
-			return 3;
-		break;
-	case TELEPAT:
-		if (!species_is_telepathic(mon->data))
-			return 1;
-		break;
-	case FUMBLING:
-		return -20;
-		break;
-	/* pets prefer not to wear items that make themselves invisible to you */
-	case INVIS:
-		if (mon->mtame && !See_invisible_old)
-			return -20;
-		else if (!pm_invisible(mon->data))
-			return 5;
-		break;
+	int j;
+	for (j=0; objects[obj->otyp].oc_oprop[j]; j++) {
+		switch (objects[obj->otyp].oc_oprop[j])
+		{
+		case ANTIMAGIC:
+			if (!species_resists_magic(mon))
+				score += 20;
+			break;
+		case REFLECTING:
+			if (!(has_template(mon, FRACTURED) || species_reflects(mon)))
+				score += 18;
+			break;
+		case FAST:
+			if (mon->permspeed != MFAST)
+				score += 15;
+			break;
+		case FLYING:
+			if (!species_flies(mon->data))
+				score += 10;
+			break;
+		case DISPLACED:
+			if (!species_displaces(mon->data))
+				score += 8;
+			break;
+		case STONE_RES:
+			if (!species_resists_ston(mon))
+				score += 7;
+			break;
+		case SICK_RES:
+			if (!species_resists_sickness(mon))
+				score += 5;
+			break;
+		case FIRE_RES:
+			if (!species_resists_fire(mon))
+				score += 3;
+		case COLD_RES:
+			if (!species_resists_cold(mon))
+				score += 3;
+		case SHOCK_RES:
+			if (!species_resists_elec(mon))
+				score += 3;
+		case ACID_RES:
+			if (!species_resists_acid(mon))
+				score += 3;
+		case POISON_RES:
+			if (!species_resists_poison(mon))
+				score += 3;
+		case SLEEP_RES:
+			if (!species_resists_sleep(mon))
+				score += 3;
+		case DRAIN_RES:
+			if (!species_resists_drain(mon))
+				score += 3;
+			break;
+		case TELEPAT:
+			if (!species_is_telepathic(mon->data))
+				score += 1;
+			break;
+		case FUMBLING:
+			score += -20;
+			break;
+		/* pets prefer not to wear items that make themselves invisible to you */
+		case INVIS:
+			if (mon->mtame && !See_invisible_old)
+				score += -20;
+			else if (!pm_invisible(mon->data))
+				score += 5;
+			break;
+		}
 	}
-    return 0;
+
+    return score;
 }
 
 /* magic_negation()
