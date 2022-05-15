@@ -391,6 +391,14 @@ register struct monst *mtmp;
 
 	You("die...");
 	mark_synch();	/* flush buffered screen output */
+
+	if (mtmp == &youmonst) {
+		killer_format = KILLED_BY;
+		killer = "their own actions";
+		done(DIED);
+		return;
+	}
+
 	buf[0] = '\0';
 	killer_format = KILLED_BY_AN;
 	/* "killed by the high priest of Crom" is okay, "killed by the high

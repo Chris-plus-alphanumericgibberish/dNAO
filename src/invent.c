@@ -3051,9 +3051,9 @@ winid *datawin;
 			ADDCLASSPROP((oart->aflags&ARTA_SHATTER), "shattering");
 			ADDCLASSPROP((oart->aflags&ARTA_DISARM), "disarming");
 			ADDCLASSPROP((oart->aflags&ARTA_STEAL), "theiving");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), " fire exploding");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), " cold exploding");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), " shock exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), "fire exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), "cold exploding");
+			ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), "shock exploding");
 			ADDCLASSPROP((oart->aflags&(ARTA_KNOCKBACK|ARTA_KNOCKBACKX)), "kinetic");
 			if (buf[0] != '\0')
 			{
@@ -3619,8 +3619,11 @@ winid *datawin;
 		boolean got_prop = FALSE, while_carried = FALSE;
 		int j = 0;
 
-		if (oc.oc_oprop == propertynames[i].prop_num)
-			got_prop = TRUE;
+		while(oc.oc_oprop[j] && !got_prop) {
+			if (oc.oc_oprop[j] == propertynames[i].prop_num)
+				got_prop = TRUE;
+			j++;
+		}
 
 		j = 0;
 		while (properties_item[j] && !got_prop) {
@@ -3696,6 +3699,7 @@ winid *datawin;
 			case POLYMORPH_CONTROL:
 			case FREE_ACTION:
 			case FIXED_ABIL:
+			case CLEAR_THOUGHTS:
 				confers = "Confers";
 				break;
 			default:

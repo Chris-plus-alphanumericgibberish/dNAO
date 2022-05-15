@@ -4503,7 +4503,7 @@ int tary;
 					struct obj* otmp;
 					/* not a perfect method to check if mdef gets INVIS from an item */
 					for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-					if (otmp->owornmask && objects[otmp->otyp].oc_oprop == INVIS)
+					if (otmp->owornmask && objects[otmp->otyp].oc_oprop[0] == INVIS)
 						break;
 					if (!otmp) mdef->minvis = 0;
 					newsym(x(mdef), y(mdef));
