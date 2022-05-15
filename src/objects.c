@@ -197,7 +197,7 @@ WEAPON(("dart"),
 WEAPON(("shuriken", "throwing star"),
 	DMG(D(8)), DMG(D(6)),
 	0, 1,   MZ_TINY, 33,  1,  5,  2, P|S, -P_SHURIKEN, IRON, FALSE, HI_METAL),
-WEAPON(("boomerang"),
+WEAPON(("boomerang"),  /*Needs encyc entry*/
 	DMG(D(9)), DMG(D(9)),
 	1, 1,  MZ_SMALL, 13,  5, 20,  0, B,   -P_BOOMERANG, WOOD, FALSE, HI_WOOD),
 WEAPON(("chakram", "circular blade"), /*Needs encyc entry*//*Needs tile*/
@@ -308,10 +308,10 @@ WEAPON(("orcish short sword", "crude short sword"),
 WEAPON(("dwarvish short sword", "broad short sword"),
 	DMG(D(8)), DMG(D(7)),
 	0, 0,  MZ_SMALL,  2, 35, 10,  0, P|S, P_SHORT_SWORD, IRON, FALSE, HI_METAL),
-WEAPON(("mirrorblade", "polished short sword"),
+WEAPON(("mirrorblade", "polished short sword"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(8)),
 	0, 0,  MZ_SMALL,  0, 40,100,  0, P,   P_SHORT_SWORD, SILVER, FALSE, HI_SILVER),
-WEAPON(("khopesh", "sickle-sword"),
+WEAPON(("khopesh", "sickle-sword"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(6)),
 	0, 0,  MZ_SMALL,  0, 30, 10,  0, S,   P_SHORT_SWORD, COPPER, FALSE, HI_COPPER),
 WEAPON(("wakizashi", "samurai short sword"),
@@ -321,19 +321,19 @@ WEAPON(("wakizashi", "samurai short sword"),
 WEAPON(("scimitar", "curved sword"),
 	DMG(D(8)), DMG(D(8)),
 	0, 0, MZ_MEDIUM, 14, 40, 15,  0, S,   P_SCIMITAR, IRON, FALSE, HI_METAL),
-WEAPON(("high-elven warsword", "runed curved sword"),
+WEAPON(("high-elven warsword", "runed curved sword"), /*Needs encyc entry*/
 	DMG(D(10)), DMG(D(10)),
 	0, 0, MZ_MEDIUM,  1, 20,150,  2, S,   P_SCIMITAR, MITHRIL, UNIDED, HI_MITHRIL),
-WEAPON(("rapier"),
+WEAPON(("rapier"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
 	1, 0, MZ_MEDIUM,  5, 28, 20,  2, P,   P_SABER, METAL, FALSE, HI_METAL),
 WEAPON(("saber"),
 	DMG(D(8)), DMG(D(8)),
 	1, 0, MZ_MEDIUM,  6, 34, 75,  0, S,   P_SABER, SILVER, IDED|UNIDED, HI_SILVER),
-WEAPON(("crow quill", "feather-etched rapier"),
+WEAPON(("crow quill", "feather-etched rapier"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(8)),
 	0, 0, MZ_MEDIUM,  0, 34,200,  2, P,   P_SABER, METAL, FALSE, HI_METAL),
-WEAPON(("rakuyo", "double-bladed saber"),
+WEAPON(("rakuyo", "double-bladed saber"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(8)),
 	0, 0, MZ_MEDIUM,  0, 38,500,  2, P|S, P_SABER, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 WEAPON(("rakuyo-saber", "latch-pommeled saber"),
@@ -342,22 +342,22 @@ WEAPON(("rakuyo-saber", "latch-pommeled saber"),
 WEAPON(("rakuyo-dagger", "latch-pommeled dagger"),
 	DMG(D(4)), DMG(D(3)),
 	0, 0,  MZ_SMALL,  0, 10,100,  2, P|S, P_DAGGER, METAL, FALSE, HI_METAL, O_MAGIC(1)),
-WEAPON(("isamusei", "oddly-luminous sword", "razor-thin sword"),
+WEAPON(("isamusei", "oddly-luminous sword", "razor-thin sword"), /*Needs encyc entry*/
 	DMG(D(12)), DMG(D(8)),
 	0, 0, MZ_MEDIUM,  1, 100,500,  2, S|B, P_BROAD_SWORD, METAL, FALSE, CLR_ORANGE, O_MAGIC(1)),
 WEAPON(("broadsword"),
 	DMG(D(2, 4)), DMG(D(6), F(1)),
 	1, 0,  MZ_LARGE,  8, 70, 10,  0, S,   P_BROAD_SWORD, IRON, FALSE, HI_METAL),
-WEAPON(("elven broadsword", "runed broadsword"),
+WEAPON(("elven broadsword", "runed broadsword"), /*Needs encyc entry*/
 	DMG(D(6), D(4)), DMG(D(6), F(2)),
 	0, 0,  MZ_LARGE,  4, 20, 10,  2, S,   P_BROAD_SWORD, WOOD, FALSE, HI_WOOD),
-WEAPON(("long sword"),
+WEAPON(("long sword"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(12)),
 	1, 0, MZ_MEDIUM, 46, 40, 15,  0, S|P, P_LONG_SWORD, IRON, FALSE, HI_METAL),
 WEAPON(("crystal sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(2, 8)), DMG(D(2, 12)),
 	1, 0,  MZ_LARGE, 2, 120,300,  0, S|P, P_LONG_SWORD, GLASS, FALSE, HI_GLASS),
-WEAPON(("two-handed sword"),
+WEAPON(("two-handed sword"), /*Needs encyc entry*/
 	DMG(D(12)), DMG(D(3, 6)),
 	1, 0,   MZ_HUGE, 22,150, 50,  0, S,   P_TWO_HANDED_SWORD, IRON, FALSE, HI_METAL),
 WEAPON(("droven greatsword", "two-handed sword"), /*Needs encyc entry*//*Needs tile*/
@@ -385,14 +385,14 @@ WEAPON(("gold-bladed vibrosword", "black and gold sword", "long sword"), /*Needs
 WEAPON(("red-eyed vibrosword", "blue-glowing sword", "long sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(10)), DMG(D(12)),
 	0, 0, MZ_MEDIUM,  0, 10,8000, 1, P|S, P_LONG_SWORD, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
-WEAPON(("white vibrozanbato", "curved white sword", "long curved sword"),
+WEAPON(("white vibrozanbato", "curved white sword", "long curved sword"), /*Needs encyc entry*/
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 60,16000,2, S,   P_TWO_HANDED_SWORD, SILVER, FALSE, CLR_WHITE, O_MAGIC(1)),
-WEAPON(("gold-bladed vibrozanbato", "curved black and gold sword", "long curved sword"),
+WEAPON(("gold-bladed vibrozanbato", "curved black and gold sword", "long curved sword"), /*Needs encyc entry*/
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 80,16000,2, S,   P_TWO_HANDED_SWORD, GOLD, FALSE, CLR_BLACK, O_MAGIC(1)),
 
-WEAPON(("double force-blade", "double-bladed weapon"),
+WEAPON(("double force-blade", "double-bladed weapon"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
 	0, 0,   MZ_HUGE,  0, 40,1000, 2, S,   P_QUARTERSTAFF, PLASTIC, FALSE, CLR_RED, O_MAGIC(1)),
 						    /* 2x, but slower */
@@ -400,7 +400,7 @@ WEAPON(("force blade", "latch-ended blade"),
 	DMG(D(6)), DMG(D(4)),
 	0, 0,  MZ_SMALL,  0, 20,500,  2, S,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_RED, O_MAGIC(1)),
 
-WEAPON(("force sword", "hard segmented sword"),
+WEAPON(("force sword", "hard segmented sword"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(6)),
 	0, 0, MZ_MEDIUM,  0, 40,1000, 2, P|B, P_BROAD_SWORD, PLASTIC, FALSE, HI_SILVER, O_MAGIC(1)),
 WEAPON(("force whip", "segmented whip"),
@@ -499,10 +499,10 @@ WEAPON(("club"),
 WEAPON(("clawed hand"),
 	DMG(D(12)), DMG(D(6)),
 	1, 0, MZ_MEDIUM,  0, 10, 300, 0, P|S, P_CLUB, BONE, FALSE, CLR_GRAY),
-WEAPON(("macuahuitl", "obsidian-edged club"),
+WEAPON(("macuahuitl", "obsidian-edged club"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(6)),
 	0, 0, MZ_MEDIUM,  0, 40, 10,  0, B|S, P_CLUB, WOOD, FALSE, HI_WOOD),
-WEAPON(("breaking wheel", "wagon wheel"),
+WEAPON(("breaking wheel", "wagon wheel"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(3)),
 	0, 0, MZ_HUGE,  1, 150,  500,  0, B,   P_NONE, WOOD, FALSE, HI_WOOD),
 WEAPON(("quarterstaff", "staff"),
@@ -511,7 +511,7 @@ WEAPON(("quarterstaff", "staff"),
 WEAPON(("khakkhara", "monk's staff"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(6)), DMG(D(4)),
 	0, 0,   MZ_HUGE,  2, 80, 50,  0, B|P, P_QUARTERSTAFF, SILVER, IDED, HI_SILVER),
-WEAPON(("double sword"),
+WEAPON(("double sword"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(12)),
 	1, 0,   MZ_HUGE,  1, 80, 30,  0, S|P, P_QUARTERSTAFF, IRON, FALSE, HI_METAL),
 WEAPON(("kamerel vajra", "short mace"), /*Needs encyc entry*/
@@ -534,14 +534,14 @@ WEAPON(("nunchaku", "set of chain-sticks"),
 WEAPON(("bullwhip"),
 	DMG(D(2)), DMG(D(1)),
 	1, 0, MZ_MEDIUM,  5, 10,  4,  0, B,   P_WHIP, LEATHER, FALSE, CLR_BROWN),
-WEAPON(("viperwhip"),
+WEAPON(("viperwhip"), /*Needs encyc entry*/
 	DMG(D(4)), DMG(D(3)),
 	1, 0, MZ_MEDIUM,  2, 30, 40,  2, P,   P_WHIP, SILVER, IDED|UNIDED, HI_SILVER),
 
-WEAPON(("bestial claw"),
+WEAPON(("bestial claw"), /*Needs encyc entry*/
 	DMG(D(10)), DMG(D(8)),
 	1, 0, MZ_MEDIUM,  0, 10,100,  0, S|P, P_BARE_HANDED_COMBAT, BONE, FALSE, CLR_WHITE, O_MAGIC(1)),
-WEAPON(("katar"),
+WEAPON(("katar"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
 	1, 0, MZ_SMALL,  5,  5,   4,  0, S|P, P_BARE_HANDED_COMBAT, IRON, FALSE, HI_METAL),
 
@@ -569,9 +569,9 @@ GUN(("handgun", "unfamiliar handgun"),                0,   MZ_SMALL, 0,  12,  10
 GUN(("gun", "unfamiliar gun"),                        0,  MZ_MEDIUM, 0,  25,  250, 10,  3, -1, WP_BULLET, IRON, P_FIREARM, HI_METAL),/*Needs tile*/
 GUN(("long gun", "unfamiliar long gun"),              0,    MZ_HUGE, 0,  30,  150, 22, -1,  1, WP_BULLET, IRON, P_FIREARM, HI_METAL),/*Needs tile*/
 GUN(("heavy gun", "unfamiliar heavy gun"),            0,    MZ_HUGE, 0, 100, 2000, 20,  8, -4, WP_BULLET, IRON, P_FIREARM, HI_METAL),/*Needs tile*/
- /*Needs encyc entry*/
 GUN(("hand blaster", "hard black handmirror", "hard handmirror"), 0,  MZ_MEDIUM, 0,   2, 1000, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK, O_MAGIC(1)), /*Needs tile*/
 GUN(("arm blaster",  "hard white bracer", "hard bracer"),         0,   MZ_LARGE, 0,   8, 4500, 15,  6,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE, O_MAGIC(1)), /*Needs tile*/
+ /*Needs encyc entry*/
 GUN(("mass-shadow pistol",  "rectangular device"),                0,  MZ_MEDIUM, 0,   4, 4500, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_GRAY, O_MAGIC(1)), /*Needs tile*/
 GUN(("cutting laser","hard tan lozenge", "hard lozenge"),         0,   MZ_SMALL, 0,   1, 1000,  3, -1,  3,WP_BLASTER, PLASTIC, P_FIREARM, CLR_YELLOW, O_MAGIC(1)), /*Needs tile*/
 
@@ -611,12 +611,16 @@ BULLET(("laser beam", "green bolt", "bolt"),
 
 /* bows */
 BOW(("bow"),                                          1,  MZ_LARGE, 24, 30,  60,  0, WOOD, P_BOW, HI_WOOD),
+/*Needs encyc entry*/
 BOW(("elven bow", "runed bow"),                       0,  MZ_LARGE, 12, 20,  60,  2, WOOD, P_BOW, HI_WOOD),
+/*Needs encyc entry*/
 BOW(("orcish bow", "crude bow"),                      0,  MZ_LARGE, 12, 30,  60, -2, WOOD, P_BOW, CLR_BLACK),
 BOW(("yumi", "long bow"),                             0,  MZ_LARGE,  0, 30,  60,  0, WOOD, P_BOW, HI_WOOD),
 BOW(("sling"),                                        1, MZ_MEDIUM, 40,  3,  20, -1, LEATHER, P_SLING, HI_LEATHER),
 BOW(("crossbow"),                                     1,  MZ_LARGE, 45, 50,  40,  1, WOOD, P_CROSSBOW, HI_WOOD),
+/*Needs encyc entry*/
 BOW(("droven crossbow", "spider-emblemed crossbow"),  0,  MZ_LARGE,  0, 50, 120,  4, SILVER, P_CROSSBOW, CLR_BLACK), /*Needs encyc entry*/
+ /*Needs encyc entry, see aklys*/
 BOW(("atlatl", "notched stick"),                      0, MZ_MEDIUM,  0, 12,  30,  0, WOOD, P_SPEAR, HI_WOOD), /*Needs encyc entry*/
 
 #undef WEAPON
@@ -1102,13 +1106,16 @@ CONTAINER(("box"),             1,   MZ_HUGE, 0, 0,  30, 350,   8, WOOD, HI_WOOD)
 CONTAINER(("massive stone crate"),
 										1,MZ_GIGANTIC,0, 0,   0,6000,  80, MINERAL,HI_MINERAL),/*Needs tile*/
 CONTAINER(("chest"),           1,   MZ_HUGE, 0, 0,  30, 600,  16, WOOD, HI_WOOD),
-CONTAINER(("magic chest", "big chest with 10 keyholes"),
+CONTAINER(("magic chest", "big chest with 10 keyholes"), /*Needs encyc entry*/
 										0,MZ_GIGANTIC,1, 0,  15,1001,7000, METAL, CLR_BRIGHT_MAGENTA),/*Needs tile*/
+/*Needs encyc entry*/
 CONTAINER(("writing desk"),    1,   MZ_HUGE, 0, 0,   0, 600,  16, WOOD, HI_WOOD),
+/*Needs encyc entry*/
 CONTAINER(("ice box"),         1,   MZ_HUGE, 0, 0,   5, 250,  42, PLASTIC, CLR_WHITE),
 CONTAINER(("sack", "bag"),                0, MZ_MEDIUM, 0, 0,  20,  15,   2, CLOTH, HI_CLOTH),
 CONTAINER(("oilskin sack", "bag"),        0, MZ_MEDIUM, 0, 0,  20,  15, 100, CLOTH, HI_CLOTH),
 CONTAINER(("bag of holding", "bag"),      0, MZ_MEDIUM, 1, 0,  20,  15, 100, CLOTH, HI_CLOTH),
+/*Needs encyc entry*/
 CONTAINER(("bag of tricks", "bag"),       0, MZ_MEDIUM, 1, 1,  20,  15, 100, CLOTH, HI_CLOTH),
 #define HOSTAGE(names,kn,mgc,chg,prob,ntrtn,wt,cost,mat,color,...) \
 	OBJECT( names, \
@@ -1125,14 +1132,16 @@ TOOL(("skeleton key", "key"),              0,   MZ_TINY, 0, 0, 0,  80,  3,  10, 
 TOOL(("universal key", "key"),	         0,   MZ_TINY, 0, 0, 0,   0,  3,  10, SILVER,  HI_SILVER, O_MATSPEC(UNIDED)),
 #ifdef TOURIST
 TOOL(("lock pick"),             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON,    HI_METAL),
+/*Needs encyc entry*/
 TOOL(("credit card"),           1,   MZ_TINY, 0, 0, 0,   0,  1,  10, PLASTIC, CLR_WHITE),
 #else
+/*Needs encyc entry*/
 TOOL(("lock pick"),             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON,    HI_METAL),
 #endif
 /* light sources */
 TOOL(("tallow candle", "candle"),          0,   MZ_TINY, 1, 0, 0,  15,  2,  10, WAX,     CLR_WHITE),
 TOOL(("wax candle", "candle"),             0,   MZ_TINY, 1, 0, 0,   5,  2,  20, WAX,     CLR_WHITE),
-TOOL(("candle of invocation", "runed candle"), 
+TOOL(("candle of invocation", "runed candle"), /*Needs encyc entry*/
                                          0,   MZ_TINY, 0, 1, 0,  15,  2,  50, WAX,     CLR_ORANGE, O_NOWISH(1)),
 TOOL(("lantern"),               1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER,  CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
 TOOL(("oil lamp", "lamp"),                 0,  MZ_SMALL, 0, 0, 0,  30, 20,  10, COPPER,  CLR_YELLOW),
@@ -1149,9 +1158,9 @@ TOOL(("mirror", "looking glass"), 0,   MZ_TINY, 0, 0, 0,  60, 13,  10, GLASS, HI
 #endif
 TOOL(("crystal ball", "glass orb"),
 								0,  MZ_SMALL, 0, 1, 1,  15, 50, 200, GLASS, HI_GLASS),
-TOOL(("misotheistic pyramid", "black-stone pyramid"),
+TOOL(("misotheistic pyramid", "black-stone pyramid"),  /*Needs encyc entry*/
 								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, OBSIDIAN_MT, CLR_BLACK),
-TOOL(("misotheistic fragment", "shattered mirrored pyramid"),
+TOOL(("misotheistic fragment", "shattered mirrored pyramid"),/*Needs encyc entry*/
 								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, GLASS, HI_SILVER),
 TOOL(("dimensional lock", "cerulean-willow-engraved disk", "disk"),
 								0,  MZ_SMALL,  1, 1, 0,   0, 10,2000, MINERAL, CLR_BRIGHT_BLUE),
@@ -1168,13 +1177,13 @@ TOOL(("hypospray ampule", "hard gray bottle", "hard bottle"), /*Needs encyc entr
 TOOL(("mask"),			1,  MZ_SMALL, 0, 0, 0,  10, 10,  80, LEATHER, CLR_WHITE),
 TOOL(("R'lyehian faceplate", "ebon pane"), /*Needs tile*/
 								0,  MZ_SMALL, 0, 1, 0,   0, 15, 200, GLASS, CLR_BLACK, O_POWER(POISON_RES)),
-TOOL(("living mask", "gilled jellyfish"),  
+TOOL(("living mask", "gilled jellyfish"),  /*Needs encyc entry*/
 								0,  MZ_SMALL, 0, 1, 0,   0,  5, 200, FLESH, CLR_BLUE, O_POWER(MAGICAL_BREATHING)),
 TOOL(("lenses"),		1,   MZ_TINY, 0, 0, 0,   5,  3,  80, GLASS, HI_GLASS), /*Needs encyc entry*/
-TOOL(("sunglasses", "mirrored lenses"),
+TOOL(("sunglasses", "mirrored lenses"),/*Needs encyc entry*/
 					   0,   MZ_TINY, 0, 0, 0,   0,  3, 240, GLASS, CLR_BROWN, O_POWER(BLIND_RES)), /*Needs encyc entry*/
 TOOL(("blindfold"),    1,   MZ_TINY, 0, 0, 0,  45,  2,  20, CLOTH, CLR_GRAY),
-TOOL(("android visor", "black blindfold", "blindfold"),
+TOOL(("android visor", "black blindfold", "blindfold"), /*Needs encyc entry*/
 								0,   MZ_TINY, 0, 0, 0,   0,  2,  40, CLOTH, CLR_BLACK),
 TOOL(("towel"),        1,   MZ_TINY, 0, 0, 0,  45,  2,  50, CLOTH, CLR_MAGENTA),
 #ifdef STEED
@@ -1183,14 +1192,15 @@ TOOL(("leash"),        1,  MZ_SMALL, 0, 0, 0,  60, 12,  20, LEATHER, HI_LEATHER)
 #else
 TOOL(("leash"),        1,  MZ_SMALL, 0, 0, 0,  65, 12,  20, LEATHER, HI_LEATHER),
 #endif
+/*Needs encyc entry*/
 TOOL(("stethoscope"),  1,  MZ_SMALL, 0, 0, 0,  25,  4,  75, IRON, HI_METAL),
 TOOL(("tinning kit"),  1, MZ_MEDIUM, 0, 0, 1,  15,100,  30, IRON, HI_METAL),
-TOOL(("bullet fabber", "white box with a yellow fiddly bit", "fiddly box"),/*Needs tile*/
+TOOL(("bullet fabber", "white box with a yellow fiddly bit", "fiddly box"),/*Needs tile*/ /*Needs encyc entry*/
 								0, MZ_MEDIUM, 0, 1, 0,   0, 20,  30, PLASTIC, CLR_WHITE),
 TOOL(("upgrade kit"),  1, MZ_MEDIUM, 0, 0, 0,  40,100,  30, COPPER, HI_COPPER),/*Needs encyc entry*//*Needs tile*/
 TOOL(("power pack", "little white cube", "little cube"), /*Needs encyc entry*//*Needs tile*/
 								0,   MZ_TINY, 1, 1, 0,   0,  1,  300, PLASTIC, CLR_WHITE),
-TOOL(("trephination kit"),  
+TOOL(("trephination kit"),  /*Needs encyc entry*/
 								1, MZ_MEDIUM, 0, 0, 1,   5, 10,  30, METAL, HI_METAL),/*Needs encyc entry*//*Needs tile*/
 TOOL(("tin opener"),   1,   MZ_TINY, 0, 0, 0,  20,  4,  30, IRON, HI_METAL),
 TOOL(("can of grease"),1,  MZ_SMALL, 0, 0, 1,  15, 15,  20, IRON, HI_METAL),
@@ -1200,7 +1210,7 @@ TOOL(("effigy",   (char *)0),     1,   MZ_TINY, 1, 1, 0,  20,  5,  80, LEATHER, 
 
 #define DOLL(names, color) \
 	TOOL(DEF_BLINDNAME(names, "doll"), 0, MZ_TINY, 1, 1, 0, 0, 1, 80, CLOTH, color)
-
+/*Needs encyc entry*/
 DOLL(("doll of jumping",        "Pole-vaulter doll"),      CLR_BLUE),
 DOLL(("doll of friendship",     "Bard doll"),              CLR_BRIGHT_GREEN),
 DOLL(("doll of chastity",       "Priest doll"),            CLR_WHITE),
@@ -1219,14 +1229,14 @@ DOLL(("doll of mollification",  "High priest doll"),       HI_GOLD),
 DOLL(("doll of clear-thinking", "Madman doll"),            CLR_GRAY),
 DOLL(("doll of mind-blasting",  "Squid-parasitized doll"), CLR_MAGENTA),
 #undef DOLL
-TOOL(("doll's tear",   "milky gemstone", "gem"),
+TOOL(("doll's tear",   "milky gemstone", "gem"),/*Needs encyc entry*/
 								0,   MZ_TINY, 0, 1, 0,   0,  1,8000, GEMSTONE, CLR_WHITE),
-TOOL(("holy symbol of the black mother", "tarnished triple goat-head"), 
+TOOL(("holy symbol of the black mother", "tarnished triple goat-head"), /*Needs encyc entry*/
 								0,   MZ_TINY, 0, 1, 0,   0, 50,8000, SILVER, CLR_BLACK),
 TOOL(("magic marker"), 1,   MZ_TINY, 0, 1, 1,  15,  2,  50, PLASTIC, CLR_RED),
 /* traps */
 TOOL(("land mine",(char *)0),     1,  MZ_LARGE, 0, 0, 0,   0,300, 180, IRON, CLR_RED),
-TOOL(("beartrap"),     1,  MZ_LARGE, 0, 0, 0,   0,100,  60, IRON, HI_METAL),
+TOOL(("beartrap"),     1,  MZ_LARGE, 0, 0, 0,   0,100,  60, IRON, HI_METAL),/*Needs encyc entry*/
 WEPTOOL(("hook"),
 	DMG(D(6)), DMG(D(6)),
 	1,  MZ_LARGE, 0, 0, 0, 80,  50,  0, P,   P_PICK_AXE, CHITIN, CLR_GREEN, O_MATSPEC(IDED|UNIDED)),
@@ -1256,19 +1266,19 @@ TOOL(("drum of earthquake", "drum"), 0, MZ_MEDIUM, 0, 1, 1,  2, 25, 25, LEATHER,
 WEPTOOL(("pick-axe"),
 	DMG(D(6)), DMG(D(3)),
 	1,  MZ_LARGE, 0, 0, 20, 80,  50,  0, P,   P_PICK_AXE, IRON, HI_METAL),
-WEPTOOL(("seismic hammer", "dull metallic hammer"),
+WEPTOOL(("seismic hammer", "dull metallic hammer"),/*Needs encyc entry*/
 	DMG(D(12)), DMG(D(10)),
 	0,   MZ_HUGE, 1, 1,  0,150, 250, -5, B,   P_HAMMER,  METAL, HI_METAL),
 /*
  * Torches work as clubs
  */
-WEPTOOL(("torch"),
+WEPTOOL(("torch"),/*Needs encyc entry*/
 	DMG(D(6)), DMG(D(3)),
 	1,  MZ_SMALL, 0, 0, 15, 10,   5,  0, B,   P_CLUB, WOOD, HI_WOOD),
-WEPTOOL(("shadowlander's torch", "black torch", "torch"),
+WEPTOOL(("shadowlander's torch", "black torch", "torch"),/*Needs encyc entry*/
 	DMG(D(6)), DMG(D(3)),
 	0,  MZ_SMALL, 0, 0, 10, 10,  50,  0, B,   P_CLUB, WOOD, CLR_BLACK),
-WEPTOOL(("sunrod", "rod"),
+WEPTOOL(("sunrod", "rod"),/*Needs encyc entry*/
 	DMG(D(6)), DMG(D(3)),
 	1,  MZ_SMALL, 0, 0,  5, 20,  50,  0, B,   P_MACE, GOLD, HI_GOLD, O_MATSPEC(UNIDED)),
 /* 
@@ -1289,7 +1299,7 @@ WEPTOOL(("rod of force", "rod"), /*Needs encyc entry*/
 WEPTOOL(("grappling hook", "hook"),
 	DMG(D(2)), DMG(D(6)),
 	0, MZ_MEDIUM, 0, 0,  4, 30,  50,  0, B,   P_FLAIL, IRON, HI_METAL, O_MATSPEC(UNIDED)),
-WEPTOOL(("shepherd's crook", "bent staff"),
+WEPTOOL(("shepherd's crook", "bent staff"),/*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
 	0,   MZ_LARGE, 0, 0, 1,  30,   5, 0, B,   P_QUARTERSTAFF, WOOD, HI_WOOD),
 /* 3.4.1: unicorn horn left classified as "magic" */
@@ -1353,6 +1363,7 @@ FOOD(("slime mold"),             75,   MZ_TINY,  1,  5, 0, VEGGY, 250, HI_ORGANI
 
 /* people food */
 FOOD(("lump of royal jelly"),	    0,   MZ_TINY,  1,  2, 0, VEGGY, 200, CLR_YELLOW),
+/*Needs encyc entry*/
 FOOD(("lump of soldier's jelly"),  
 							    0,   MZ_TINY,  1,  2, 0, VEGGY, 200, CLR_YELLOW),
 FOOD(("lump of dancer's jelly"),
@@ -1363,6 +1374,7 @@ FOOD(("lump of priestess's jelly"),
 							    0,   MZ_TINY,  1,  2, 0, VEGGY, 200, CLR_YELLOW),
 FOOD(("lump of rhetor's jelly"),
 							    0,   MZ_TINY,  1,  2, 0, VEGGY, 200, CLR_YELLOW),
+/*Needs encyc entry*/
 FOOD(("honeycomb"),			    0,   MZ_TINY,  4, 10, 0, VEGGY, 800, CLR_YELLOW),
 FOOD(("cream pie"),              25,   MZ_TINY,  1, 10, 0, VEGGY, 100, CLR_WHITE),
 FOOD(("candy bar"),              13,   MZ_TINY,  1,  2, 0, VEGGY, 100, CLR_BROWN),
@@ -1461,7 +1473,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 #define CERAMIC_TILE(names,prob,...) OBJECT( \
 		DEF_BLINDNAME(names, "shard"), BITS(0,1,0,0,1,0,0,0,MZ_TINY,0,0,0,0,P_NONE,MINERAL, IDED|UNIDED), 0, \
 		TILE_CLASS, prob, 0, 3, 300, {0}, {0}, 0, 0, 0, 6, CLR_WHITE, __VA_ARGS__)
-	/* Randomized descriptions */
+	/* Randomized descriptions */ /*Needs encyc entry*/
 	CERAMIC_TILE(("syllable of strength: Aesh","bipartite glyph"), 167),
 	CERAMIC_TILE(("syllable of power: Krau",   "crossed glyph"),   166),
 	CERAMIC_TILE(("syllable of life: Hoon",    "knotted glyph"),   167),
@@ -1472,6 +1484,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 #define BONE_TILE(names,prob,...) OBJECT( \
 		DEF_BLINDNAME(names, "shard"), BITS(0,1,0,0,0,0,0,0,MZ_TINY,0,0,0,0,P_NONE,BONE, IDED|UNIDED), 0, \
 		TILE_CLASS, prob, 0, 3, 300, {0}, {0}, 0, 0, 0, 6, CLR_GRAY, __VA_ARGS__)
+	/*Needs encyc entry*/
 	BONE_TILE(("anti-clockwise metamorphosis glyph",  "counterclockwise-rotated cross"),   0),	// ANTI_CLOCKWISE_METAMORPHOSIS
 	BONE_TILE(("clockwise metamorphosis glyph",  "clockwise-rotated cross"),   0),				// CLOCKWISE_METAMORPHOSIS
 	BONE_TILE(("sparkling lake glyph",  "sparkling horizontal line"),   0),	// ARCANE_BULWARK
@@ -1498,7 +1511,7 @@ POTION(("blood", "blood-red"),            0, 0,          18, 50,  CLR_RED, O_USK
 #define METALIC_SLAB(names, clr,...) OBJECT( \
 		DEF_BLINDNAME(names, "slab"), BITS(0,0,0,0,1,0,1,1,MZ_HUGE,0,0,0,0,P_NONE,METAL, IDED|UNIDED), 0, \
 		TILE_CLASS, 0, 0, 3, 3000, {0}, {0}, 0, 0, 0, 6, clr, __VA_ARGS__)
-	/* Fixed descriptions (also, artifact base-items only) */
+	/* Fixed descriptions (also, artifact base-items only) *//*Needs encyc entry*/
 	METALIC_SLAB(("First Word",  "blinding glyph"), CLR_YELLOW),
 	METALIC_SLAB(("Dividing Word",  "cerulean glyph"), HI_ZAP),
 	METALIC_SLAB(("Nurturing Word",  "verdant glyph"), CLR_GREEN),
@@ -1697,9 +1710,9 @@ ROCK(("vital soulstone", "gray"),
 							0,  3,   1, 99, 3, 3,  0, 1, 10, 1, MINERAL, CLR_GRAY),
 ROCK(("spiritual soulstone", "gray"),
 							0,  3,   1, 99, 3, 3,  0, 1, 10, 1, MINERAL, CLR_GRAY),
-ROCK(("chunk of unrefined mithril", "silvery metal"), 
+ROCK(("chunk of unrefined mithril", "silvery metal"), /*Needs encyc entry*/
 							0,  0,   1, 10000,3,3, 3, 0, 0, 10, MITHRIL, HI_MITHRIL),/*Needs tile*/
-ROCK(("chunk of fossil dark", "black"),
+ROCK(("chunk of fossil dark", "black"), /*Needs encyc entry*/
 							0,  0,  25, 	500, 8, 8, 4, 1, 0, 1, MINERAL, CLR_BLACK),/*Needs tile*/
 ROCK(("chunk of salt", "white"),		
 							0,  0,   1,  1, 3, 3,  0, 0, 10, 2, SALT, CLR_GRAY), /*Needs tile*/
@@ -1722,17 +1735,17 @@ GEM(("catapsi vortex",  "gray-flawed white"),  0,  1, 4500, 15,  6, GEMSTONE, CL
 								//BITS(nmkn,mrg,uskn,ctnr,mgc,chrg,uniq,nwsh,big,tuf,dir,dtyp,sub,mtrl,shwmat)
 OBJECT(("boulder",(char *)0), BITS(1,0,0,0,0,0,0,0,MZ_GIGANTIC,0,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   100, 0, 6000,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, HI_MINERAL),
-OBJECT(("mass of stuff",(char *)0), BITS(1,0,0,0,0,0,0,0,MZ_GIGANTIC,0,0,0,P|B|S,P_NONE,GOLD,0), 0,
+OBJECT(("mass of stuff",(char *)0), BITS(1,0,0,0,0,0,0,0,MZ_GIGANTIC,0,0,0,P|B|S,P_NONE,GOLD,0), 0, /*Needs encyc entry*/
 		ROCK_CLASS,     0, 0, 9000, 9999, DMG(D(4,5)), DMG(D(5,4)), 0, 0, 0, 2000, HI_GOLD),
 OBJECT(("statue"), BITS(1,0,0,1,0,0,0,0,    MZ_HUGE,0,0,0,0,P_NONE,MINERAL,0), 0,
 		ROCK_CLASS,   800, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 2, 0, 2, 2500, CLR_WHITE),
-OBJECT(("fossil"), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,0,0,P_NONE,MINERAL,0), 0,
+OBJECT(("fossil"), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,0,0,P_NONE,MINERAL,0), 0,		/*Needs encyc entry*/
 		ROCK_CLASS,   100, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_BROWN),
-OBJECT(("bed"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,1,0,0,0,P_NONE,WOOD,0), 0,
+OBJECT(("bed"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,1,0,0,0,P_NONE,WOOD,0), 0,			/*Needs encyc entry*/
 		BED_CLASS,   900, 0, 2000,  1000, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, HI_WOOD),
-OBJECT(("bedroll"), BITS(1,0,0,0,0,0,0,0,MZ_SMALL,1,0,0,0,P_NONE,CLOTH,0), 0,
+OBJECT(("bedroll"), BITS(1,0,0,0,0,0,0,0,MZ_SMALL,1,0,0,0,P_NONE,CLOTH,0), 0,		/*Needs encyc entry*/
 		BED_CLASS,   100, 0, 60,  100, DMG(D(2)), DMG(D(2)), 0, 0, 0, 2000, CLR_GREEN),
-OBJECT(("gurney"), BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,1,0,0,0,P_NONE,METAL,0), 0,
+OBJECT(("gurney"), BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,1,0,0,0,P_NONE,METAL,0), 0,		/*Needs encyc entry*/
 		BED_CLASS,     0, 0, 60,  100, DMG(D(4)), DMG(D(4)), 0, 0, 0, 2000, CLR_WHITE),
 
 #ifdef CONVICT
@@ -1755,16 +1768,16 @@ CHAIN(("chain"),
 CHAIN(("sheaf of hay"),
 	DMG(D(1)), DMG(D(1)),
 	100,  20, 2, 0, 0, VEGGY, CLR_YELLOW),
-CHAIN(("clockwork component"),
+CHAIN(("clockwork component"),	/*Needs encyc entry*/
 	DMG(D(1)), DMG(D(1)),
 	 20,   1, 0, 0, B, COPPER, HI_COPPER),
-CHAIN(("subethaic component"),
+CHAIN(("subethaic component"),	/*Needs encyc entry*/
 	DMG(D(1)), DMG(D(1)),
 	 20,   1, 0, 0, B, GLASS, HI_GLASS),
-CHAIN(("scrap"),
+CHAIN(("scrap"),				/*Needs encyc entry*/
 	DMG(D(1)), DMG(D(1)),
 	 20,   1, 0, 0, B, IRON, CLR_BROWN),
-CHAIN(("hellfire component"),
+CHAIN(("hellfire component"),	/*Needs encyc entry*/
 	DMG(D(1)), DMG(D(1)),
 	 20,   1, 0, 0, B, METAL, CLR_ORANGE),
 
@@ -1780,10 +1793,10 @@ CHAINCORPSE(("lifeless doll"),   750, WOOD, CLR_BRIGHT_MAGENTA), /*Needs encyc e
 #define CHAINROPE(names,dtyp,mat,color,...)\
 	CHAIN(names,DMG(D(4)),DMG(D(4)),200,120,0,0,dtyp,mat,color,O_MERGE(0),__VA_ARGS__)
 
-CHAINROPE(("rope of entangling"),   B, VEGGY, CLR_BROWN),
-CHAINROPE(("iron bands"),           B, IRON,  HI_METAL),
-CHAINROPE(("razor wire"),           S, METAL, HI_METAL),
-CHAINROPE(("shackles"),             B, IRON,  HI_METAL),
+CHAINROPE(("rope of entangling"),   B, VEGGY, CLR_BROWN),	/*Needs encyc entry*/
+CHAINROPE(("iron bands"),           B, IRON,  HI_METAL),	/*Needs encyc entry*/
+CHAINROPE(("razor wire"),           S, METAL, HI_METAL),	/*Needs encyc entry*/
+CHAINROPE(("shackles"),             B, IRON,  HI_METAL),	/*Needs encyc entry*/
 
 #undef CHAINROPE
 
