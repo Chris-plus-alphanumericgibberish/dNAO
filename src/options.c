@@ -3564,7 +3564,7 @@ doset()
 	    }
  	    (void) doredraw();
 	}
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 STATIC_OVL boolean
@@ -4394,7 +4394,7 @@ dotogglepickup()
 	    Strcpy(buf, "OFF");
 	}
 	pline("Autopickup: %s.", buf);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 #ifdef AUTOPICKUP_EXCEPTIONS

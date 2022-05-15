@@ -228,7 +228,7 @@ boolean quietly;	/* hide the basic message saying what you are now wielding */
 		}
 	    }
 	}
-	return(res);
+	return (res) ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
 void
@@ -267,27 +267,27 @@ dowield()
 	multi = 0;
 	if (cantwield(youracedata)) {
 		pline("Don't be ridiculous!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	
 	if (!freehand()) {
 		You("have no free %s to wield anything!", body_part(HAND));
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	/* Prompt for a new weapon */
 	if (!(wep = getobj(wield_objs, "wield")))
 		/* Cancelled */
-		return (0);
+		return MOVE_CANCELLED;
 	else if (wep == uwep) {
 	    You("are already wielding that!");
 	    if (is_weptool(wep)) unweapon = FALSE;	/* [see setuwep()] */
-		return (0);
+		return MOVE_CANCELLED;
 	} else if (welded(uwep)) {
 		weldmsg(uwep);
 		/* previously interrupted armor removal mustn't be resumed */
 		reset_remarm();
-		return (0);
+		return MOVE_INSTANT;
 	}
 
 	/* Handle no object, or object in other slot */
@@ -305,7 +305,7 @@ dowield()
 #endif
 			)) {
 		You("cannot wield that!");
-		return (0);
+		return MOVE_CANCELLED;
 	}
 
 	/* Set your new primary weapon */
@@ -325,18 +325,18 @@ int
 doswapweapon()
 {
 	register struct obj *oldwep, *oldswap;
-	int result = 0;
+	int result = MOVE_INSTANT;
 
 
 	/* May we attempt this? */
 	multi = 0;
 	if (cantwield(youracedata)) {
 		pline("Don't be ridiculous!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (welded(uwep)) {
 		weldmsg(uwep);
-		return (0);
+		return MOVE_INSTANT;
 	}
 
 	/* Unwield your current secondary weapon */
@@ -363,7 +363,7 @@ doswapweapon()
 		untwoweapon();
 
 	// return (result);
-	return (0);
+	return MOVE_INSTANT;
 }
 
 int
@@ -385,7 +385,7 @@ dowieldquiver()
 	/* Prompt for a new quiver */
 	if (!(newquiver = getobj(quivee_types, "ready")))
 		/* Cancelled */
-		return (0);
+		return MOVE_CANCELLED;
 
 	/* Handle no object, or object in other slot */
 	/* Any type is okay, since we give no intrinsics anyways */
@@ -396,23 +396,23 @@ dowieldquiver()
 			setuqwep(newquiver = (struct obj *) 0);
 		} else {
 			You("already have no ammunition readied!");
-			return(0);
+			return MOVE_CANCELLED;
 		}
 	} else if (newquiver == uquiver) {
 		pline("That ammunition is already readied!");
-		return(0);
+		return MOVE_CANCELLED;
 	} else if (newquiver == uwep) {
 		/* Prevent accidentally readying the main weapon */
 		pline("%s already being used as a weapon!",
 		      !is_plural(uwep) ? "That is" : "They are");
-		return(0);
+		return MOVE_CANCELLED;
 	} else if (newquiver->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL
 #ifdef STEED
 			| W_SADDLE
 #endif
 			)) {
 		You("cannot ready that!");
-		return (0);
+		return MOVE_CANCELLED;
 	} else {
 		long dummy;
 
@@ -434,7 +434,7 @@ dowieldquiver()
 	/* Finally, place it in the quiver */
 	setuqwep(newquiver);
 	/* Take no time since this is a convenience slot */
-	return (0);
+	return MOVE_INSTANT;
 }
 /* use to re-wield a returned thrown weapon */
 void
@@ -636,7 +636,7 @@ dotwoweapon()
 		You("switch to your primary weapon.");
 		u.twoweap = 0;
 		update_inventory();
-		return (0);
+		return MOVE_INSTANT;
 	}
 
 	/* May we use two weapons? */
@@ -645,9 +645,9 @@ dotwoweapon()
 		You("begin two-weapon combat.");
 		u.twoweap = 1;
 		update_inventory();
-		return (rnd(20) > ACURR(A_DEX));
+		return (rnd(20) > ACURR(A_DEX)) ? MOVE_STANDARD : MOVE_INSTANT;
 	}
-	return (0);
+	return MOVE_INSTANT;
 }
 
 /*** Functions to empty a given slot ***/

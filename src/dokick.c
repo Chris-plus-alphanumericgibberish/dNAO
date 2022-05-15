@@ -729,11 +729,11 @@ int dx, dy;
 		if (!dx && !dy && yn_function("Kick your steed?", ynchars, 'y') == 'y') {
 		    You("kick %s.", mon_nam(u.usteed));
 		    kick_steed();
-		    return 1;
+		    return MOVE_STANDARD;
 		} else {
 			if(dx || dy)
 				You("can't kick while riding!");
-		    return 0;
+		    return MOVE_CANCELLED;
 		}
 #endif
 	} else if (Wounded_legs) {
@@ -783,15 +783,15 @@ int dx, dy;
 	if (no_kick) {
 		/* ignore direction typed before player notices kick failed */
 		display_nhwindow(WIN_MESSAGE, TRUE);	/* --More-- */
-		return 0;
+		return MOVE_CANCELLED;
 	}
 
-	if(!dx && !dy && !getdir((char *)0)) return(0);
+	if(!dx && !dy && !getdir((char *)0)) return MOVE_CANCELLED;
 	if(!dx && !dy){
 		dx = u.dx;
 		dy = u.dy;
 	}
-	if(!dx && !dy) return(0);
+	if(!dx && !dy) return MOVE_CANCELLED;
 
 	x = u.ux + dx;
 	y = u.uy + dy;
@@ -807,7 +807,7 @@ int dx, dy;
 			flags.forcefight = TRUE; /* attack even if invisible */
 			kick_monster(x, y);
 			flags.forcefight = FALSE;
-			return 1;
+			return MOVE_STANDARD;
 		}
 		else {
 			switch(rn2(3)) {
@@ -819,7 +819,7 @@ int dx, dy;
 				 }
 			default: Your("feeble kick has no effect."); break;
 			}
-			return(1);
+			return MOVE_STANDARD;
 		}
 	}
 	if (Levitation) {
@@ -835,7 +835,7 @@ int dx, dy;
 			!IS_DOOR(levl[xx][yy].typ) &&
 			(!Weightless || !OBJ_AT(xx,yy))) {
 		    You("have nothing to brace yourself against.");
-		    return(0);
+		    return MOVE_CANCELLED;
 		}
 	}
 
@@ -885,7 +885,7 @@ int dx, dy;
 		    hurtle(-dx, -dy, range, TRUE, TRUE);
 		}
 		wake_nearby();
-		return(1);
+		return MOVE_STANDARD;
 	}
 	if (glyph_is_invisible(levl[x][y].glyph)) {
 		unmap_object(x, y);
@@ -895,7 +895,7 @@ int dx, dy;
 		/* objects normally can't be removed from water by kicking */
 		You("splash some water around.");
 		wake_nearby();
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 	kickobj = (struct obj *)0;
@@ -907,7 +907,7 @@ int dx, dy;
 				wake_nearby();
 				hurtle(-dx, -dy, 1, TRUE, TRUE); /* assume it's light */
 			}
-		    return(1);
+		    return MOVE_STANDARD;
 		}
 		goto ouch;
 	}
@@ -937,7 +937,7 @@ int dx, dy;
 			    maploc->doormask == D_NODOOR)
 			    unblock_point(x,y);	/* vision */
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    } else goto ouch;
 		}
 		if(maploc->typ == SCORR) {
@@ -952,7 +952,7 @@ int dx, dy;
 			    newsym(x,y);
 			unblock_point(x,y);	/* vision */
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    } else goto ouch;
 		}
 		if(IS_THRONE(maploc->typ)) {
@@ -972,7 +972,7 @@ int dx, dy;
 			if(u.sealsActive&SEAL_DANTALION) unbind(SEAL_DANTALION,TRUE);
 			exercise(A_DEX, TRUE);
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    } else if(Luck > 0 && !rn2(3) && !(maploc->looted&T_LOOTED)) {
 			(void) mkgold((long) rn1(201, 300), x, y);
 			i = Luck + 1;
@@ -988,12 +988,12 @@ int dx, dy;
 			/* prevent endless milking */
 			maploc->looted &= T_LOOTED;
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    } else if (!rn2(4)) {
 			if(dunlev(&u.uz) < dunlevs_in_dungeon(&u.uz)) {
 				wake_nearby();
 			    fall_through(FALSE);
-			    return(1);
+			    return MOVE_STANDARD;
 			} else goto ouch;
 		    }
 		    goto ouch;
@@ -1005,7 +1005,7 @@ int dx, dy;
 		    altar_wrath(x, y);
 		    exercise(A_DEX, TRUE);
 			wake_nearby();
-		    return(1);
+		    return MOVE_STANDARD;
 		}
 		if(IS_FOUNTAIN(maploc->typ)) {
 		    if(Levitation) goto dumb;
@@ -1019,7 +1019,7 @@ int dx, dy;
 			}
 		    exercise(A_DEX, TRUE);
 			wake_nearby();
-		    return(1);
+		    return MOVE_STANDARD;
 		}
 		if(IS_GRAVE(maploc->typ) || maploc->typ == IRONBARS)
 		    goto ouch;
@@ -1047,7 +1047,7 @@ int dx, dy;
 					    pline("Some black feathers drift down.");
 					maploc->looted |= TREE_SWARM;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 				}
 			    goto ouch;
 			} else if((In_quest(&u.uz) && Role_if(PM_PIRATE)) || Is_paradise(&u.uz)){
@@ -1079,7 +1079,7 @@ int dx, dy;
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 			    } else if (rn2(3)) {
 					if ( !rn2(3) && !(mvitals[PM_PARROT].mvflags & G_GONE && !In_quest(&u.uz)) )
 					    You_hear("flapping wings."); /* a warning */
@@ -1101,7 +1101,7 @@ int dx, dy;
 					    pline("Some colorful feathers drift down.");
 					maploc->looted |= TREE_SWARM;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 				}
 			    goto ouch;
 			} else if(In_quest(&u.uz) && (Race_if(PM_DROW) || (Race_if(PM_DWARF) && Role_if(PM_NOBLEMAN)))){
@@ -1133,7 +1133,7 @@ int dx, dy;
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 			    } else if (rn2(3)) {
 					if ( !rn2(3) && !(mvitals[PM_MIRKWOOD_SPIDER].mvflags & G_GONE && !In_quest(&u.uz)) )
 					    You_hear("skittering legs."); /* a warning */
@@ -1155,7 +1155,7 @@ int dx, dy;
 					    pline("Some scraps of webbing drift down.");
 					maploc->looted |= TREE_SWARM;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 				}
 			    goto ouch;
 			} else if(u.uz.dnum == chaos_dnum) {
@@ -1180,7 +1180,7 @@ int dx, dy;
 					mtmp->mcanmove  = TRUE;
 					maploc->looted |= TREE_SWARM;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 				}
 			    goto ouch;
 			} else if(In_neu(&u.uz) || (In_quest(&u.uz) && 
@@ -1220,7 +1220,7 @@ int dx, dy;
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 			    } else if (!(maploc->looted & TREE_SWARM)) {
 			    	int cnt = rnl(4) + 4;
 					int made = 0;
@@ -1240,7 +1240,7 @@ int dx, dy;
 					    pline("You've attracted the tree's guardians!");
 					maploc->looted |= TREE_SWARM;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 				}
 			    goto ouch;
 			} else{
@@ -1275,7 +1275,7 @@ int dx, dy;
 					newsym(x, y);
 					maploc->looted |= TREE_LOOTED;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 			    } else if (!(maploc->looted & TREE_SWARM)) {
 			    	int cnt = rnl(4) + 2;
 					int made = 0;
@@ -1293,7 +1293,7 @@ int dx, dy;
 					    You("smell stale honey.");
 					maploc->looted |= TREE_SWARM;
 					wake_nearby();
-					return(1);
+					return MOVE_STANDARD;
 				}
 			    goto ouch;
 			}
@@ -1338,7 +1338,7 @@ int dx, dy;
 			}
 			}
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		}
 #ifdef SINKS
 		if(IS_SINK(maploc->typ)) {
@@ -1353,7 +1353,7 @@ int dx, dy;
 			else pline("Klunk!");
 			exercise(A_DEX, TRUE);
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    } else if(!(maploc->looted & S_LPUDDING) && !rn2(3) &&
 			  !(mvitals[PM_BLACK_PUDDING].mvflags & G_GONE && !In_quest(&u.uz))) {
 			if (Blind)
@@ -1367,7 +1367,7 @@ int dx, dy;
 			newsym(x,y);
 			maploc->looted |= S_LPUDDING;
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    } else if(!(maploc->looted & S_LDWASHER) && !rn2(3) &&
 			      !(mvitals[washerndx].mvflags & G_GONE && !In_quest(&u.uz))) {
 			/* can't resist... */
@@ -1378,7 +1378,7 @@ int dx, dy;
 			maploc->looted |= S_LDWASHER;
 			exercise(A_DEX, TRUE);
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    } else if(!rn2(3)) {
 			pline("Flupp!  %s.", (Blind ?
 				      "You hear a sloshing sound" :
@@ -1393,7 +1393,7 @@ int dx, dy;
 			    maploc->looted |= S_LRING;
 			}
 			wake_nearby();
-			return(1);
+			return MOVE_STANDARD;
 		    }
 		    goto ouch;
 		}
@@ -1422,7 +1422,7 @@ ouch:
 				wake_nearby();
 				hurtle(-dx, -dy, rn1(2,4), TRUE, TRUE); /* assume it's heavy */
 			}
-		    return(1);
+		    return MOVE_STANDARD;
 		}
 		goto dumb;
 	}
@@ -1443,7 +1443,7 @@ dumb:
 		if ((Weightless || Levitation) && rn2(2)) {
 		    hurtle(-dx, -dy, 1, TRUE, TRUE);
 		}
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 	/* Ali - artifact doors from slashem*/
@@ -1523,7 +1523,7 @@ dumb:
 		    }
 		}
 	}
-	return 1;
+	return MOVE_STANDARD;
 }
 
 STATIC_OVL void

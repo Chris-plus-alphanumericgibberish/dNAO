@@ -1860,15 +1860,15 @@ struct obj *obj;
 	char qbuf[QBUFSZ];
 	register char *dsp = dirsyms;
 	register int rx, ry;
-	int res = 0;
+	int res = MOVE_CANCELLED;
 	register const char *sdp, *verb;
 
 	if(iflags.num_pad) sdp = ndir; else sdp = sdir;	/* DICE workaround */
 
 	/* Check tool */
 	if (obj != uwep && obj != uarmg) {
-	    if (!wield_tool(obj, "swing")) return 0;
-	    else res = 1;
+	    if (!wield_tool(obj, "swing")) return MOVE_CANCELLED;
+	    else res = MOVE_STANDARD;
 	}
 	ispick = is_pick(obj);
 	verb = ispick ? "dig" : "chop";
@@ -1954,7 +1954,7 @@ struct obj *obj;
 				OBJ_NAME(objects[obj->otyp]));
 		losehp(dam, buf, KILLED_BY);
 		flags.botl=1;
-		return(1);
+		return MOVE_STANDARD;
 	} else if(u.dz == 0) {
 		if(Stunned || (Confusion && !rn2(5))) confdir();
 		rx = u.ux + u.dx;
@@ -1964,11 +1964,11 @@ struct obj *obj;
 				aobjnam(obj, (char *)0));
 			else if (digtyp == HAMMER_TYP) pline("Clunk!");
 			else pline("Clash!");
-			return(1);
+			return MOVE_STANDARD;
 		}
 		lev = &levl[rx][ry];
 		if(MON_AT(rx, ry) && attack2(m_at(rx, ry)))
-			return(1);
+			return MOVE_ATTACKED;
 		dig_target = dig_typ(obj, rx, ry);
 		if (dig_target == DIGTYP_UNDIGGABLE) {
 			/* ACCESSIBLE or POOL */
@@ -2089,7 +2089,7 @@ struct obj *obj;
 		did_dig_msg = FALSE;
 		set_occupation(dig, verbing, 0);
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 /*

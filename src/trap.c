@@ -3807,35 +3807,35 @@ dodeepswim()
 		if(u.usubwater){
 			if(is_3dwater(u.ux, u.uy)){
 				pline("There is no surface!");
-				return 0;
+				return MOVE_CANCELLED;
 			} else {
 				You("swim up to the surface.");
 				u.usubwater = 0;
 				vision_recalc(2);	/* unsee old position */
 				vision_full_recalc = 1;
 				doredraw();
-				return 1;
+				return MOVE_STANDARD;
 			}
 		} else {
 			if(ACURR(A_CON) > 5){
 				if(Is_waterlevel(&u.uz)){
 					You("are already under water!");
-					return 0;
+					return MOVE_CANCELLED;
 				} else {
 					You("dive below the surface.");
 					u.usubwater = 1;
 					under_water(1);
 					vision_recalc(2);	/* unsee old position */
 					vision_full_recalc = 1;
-					return 1;
+					return MOVE_STANDARD;
 				}
 			} else You("can't hold your breath for very long.");
-			return 0;
+			return MOVE_CANCELLED;
 		}
 	} else {
 		if(!u.uinwater) You("can't dive unless you're swimming!");
 		else if(!Swimming) You("can't swim!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 }
 
@@ -3866,19 +3866,19 @@ dountrap()	/* disarm a trap */
 {
 	if (near_capacity() >= HVY_ENCUMBER) {
 	    pline("You're too strained to do that.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	if (((nohands(youracedata) || !freehand()) && !(webmaker(youracedata) || u.sealsActive&SEAL_CHUPOCLOPS || (uarm && uarm->oartifact==ART_SPIDERSILK))) || !youracedata->mmove) {
 	    pline("And just how do you expect to do that?");
-	    return 0;
+	    return MOVE_CANCELLED;
 	} else if (u.ustuck && sticks(&youmonst)) {
 	    pline("You'll have to let go of %s first.", mon_nam(u.ustuck));
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	if (u.ustuck || (welded(uwep) && bimanual(uwep,youracedata))) {
 	    Your("%s seem to be too busy for that.",
 		 makeplural(body_part(HAND)));
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	return untrap((struct obj *)0);
 }
@@ -4100,7 +4100,7 @@ struct trap *ttmp;
 	struct monst *mtmp;
 	int fails = try_disarm(ttmp, FALSE);
 
-	if (fails < 2) return fails;
+	if (fails < 2) return (fails==0 ? MOVE_CANCELLED : MOVE_STANDARD);
 
 	/* ok, disarm it. */
 
@@ -4125,7 +4125,7 @@ struct trap *ttmp;
 		}
 	}
 	newsym(u.ux + u.dx, u.uy + u.dy);
-	return 1;
+	return MOVE_STANDARD;
 }
 
 void
@@ -4173,10 +4173,10 @@ struct trap *ttmp;
 {
 	int fails = try_disarm(ttmp, FALSE);
 
-	if (fails < 2) return fails;
+	if (fails < 2) return (fails==0 ? MOVE_CANCELLED : MOVE_STANDARD);
 	You("disarm %s land mine.", the_your[ttmp->madeby_u]);
 	remove_trap_ammo(ttmp);
-	return 1;
+	return MOVE_STANDARD;
 }
 
 STATIC_OVL int
@@ -4186,7 +4186,7 @@ struct trap *ttmp;
 	xchar trapx = ttmp->tx, trapy = ttmp->ty;
 	int fails = try_disarm(ttmp, FALSE);
 
-	if (fails < 2) return fails;
+	if (fails < 2) return (fails==0 ? MOVE_CANCELLED : MOVE_STANDARD);
 	You("disarm the water trap!");
 	deltrap(ttmp);
 	levl[trapx][trapy].typ = FOUNTAIN;
@@ -4283,7 +4283,7 @@ struct trap *ttmp;
 	bad_tool = (obj->cursed ||
 				(obj->otyp != POT_WATER));
 	fails = try_disarm(ttmp, bad_tool);
-	if (fails < 2) return fails;
+	if (fails < 2) return (fails==0 ? MOVE_CANCELLED : MOVE_STANDARD);
 
 	useup(obj);
 	makeknown(POT_WATER);
@@ -4311,7 +4311,7 @@ struct trap *ttmp;
 			 (obj->otyp != CAN_OF_GREASE || !obj->spe)));
 
 	fails = try_disarm(ttmp, bad_tool);
-	if (fails < 2) return fails;
+	if (fails < 2) return (fails==0 ? MOVE_CANCELLED : MOVE_STANDARD);
 
 	/* successfully used oil or grease to fix squeaky board */
 	if (obj->otyp == CAN_OF_GREASE) {
@@ -4335,10 +4335,10 @@ struct trap *ttmp;
 {
 	int fails = try_disarm(ttmp, FALSE);
 
-	if (fails < 2) return fails;
+	if (fails < 2) return (fails==0 ? MOVE_CANCELLED : MOVE_STANDARD);
 	You("disarm %s trap.", the_your[ttmp->madeby_u]);
 	remove_trap_ammo(ttmp);
-	return 1;
+	return MOVE_STANDARD;
 }
 
 /* Is the weight too heavy?
@@ -4358,13 +4358,14 @@ boolean stuff;
 	    if (!ttmp->madeby_u && !mtmp->mpeaceful && mtmp->mcanmove &&
 		    !mindless_mon(mtmp) &&
 		    mtmp->data->mlet != S_HUMAN && rnl(100) < 30) {
-		mtmp->mpeaceful = 1;
-		set_malign(mtmp);		/* reset alignment */
-		pline("%s thinks it was nice of you to try.", Monnam(mtmp));
+			mtmp->mpeaceful = 1;
+			set_malign(mtmp);		/* reset alignment */
+			pline("%s thinks it was nice of you to try.", Monnam(mtmp));
+			return MOVE_INSTANT;
 	    }
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
-	return 1;
+	return MOVE_STANDARD;
 }
 
 /* Help trapped monster (out of a (spiked) pit) */
@@ -4388,17 +4389,17 @@ struct trap *ttmp;
 	 */
 	if (!mtmp->mtrapped) {
 		pline("%s isn't trapped.", Monnam(mtmp));
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	/* Do you have the necessary capacity to lift anything? */
-	if (check_capacity((char *)0)) return 1;
+	if (check_capacity((char *)0)) return MOVE_STANDARD;
 
 	/* Will our hero succeed? */
 	if ((uprob = untrap_prob(ttmp)) && !mtmp->msleeping && mtmp->mcanmove) {
 		You("try to reach out your %s, but %s backs away skeptically.",
 			makeplural(body_part(ARM)),
 			mon_nam(mtmp));
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 
@@ -4415,7 +4416,7 @@ struct trap *ttmp;
 			Sprintf(kbuf, "trying to help %s out of a pit",
 					an(mtmp->data->mname));
 			instapetrify(kbuf);
-			return 1;
+			return MOVE_STANDARD;
 		}
 	}
 	/* need to do cockatrice check first if sleeping or paralyzed */
@@ -4426,7 +4427,7 @@ struct trap *ttmp;
 		mtmp->msleeping = 0;
 		pline("%s awakens.", Monnam(mtmp));
 	    }
-	    return 1;
+	    return MOVE_STANDARD;
 	}
 
 	You("reach out your %s and grab %s.",
@@ -4444,18 +4445,18 @@ struct trap *ttmp;
 
 	/* is the monster too heavy? */
 	wt = inv_weight() + mtmp->data->cwt;
-	if (!try_lift(mtmp, ttmp, wt, FALSE)) return 1;
+	if (!try_lift(mtmp, ttmp, wt, FALSE)) return MOVE_STANDARD;
 
 	/* is the monster with inventory too heavy? */
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj)
 		wt += otmp->owt;
-	if (!try_lift(mtmp, ttmp, wt, TRUE)) return 1;
+	if (!try_lift(mtmp, ttmp, wt, TRUE)) return MOVE_STANDARD;
 
 	You("pull %s out of the pit.", mon_nam(mtmp));
 	mtmp->mtrapped = 0;
 	fill_pit(mtmp->mx, mtmp->my);
 	reward_untrap(ttmp, mtmp);
-	return 1;
+	return MOVE_STANDARD;
 }
 
 int
@@ -4475,10 +4476,10 @@ struct obj * tool;
 	char the_trap[BUFSZ], qbuf[QBUFSZ];
 	int containercnt = 0;
 
-	if(!getdir((char *)0)) return(0);
+	if(!getdir((char *)0)) return MOVE_CANCELLED;
 	x = u.ux + u.dx;
 	y = u.uy + u.dy;
-	if(!isok(x,y)) return(0);
+	if(!isok(x,y)) return MOVE_CANCELLED;
 
 	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere) {
 		if(Is_box(otmp) && !u.dx && !u.dy) {
@@ -4501,7 +4502,7 @@ struct obj * tool;
 		    
 		    You("see %s.", the_trap);
 		    switch (ynq("Try to pull it out?")) {
-			case 'q': return(1);
+			case 'q': return MOVE_STANDARD;
 			case 'n': trap_skipped = TRUE;  continue;
 		    }
 
@@ -4512,7 +4513,7 @@ struct obj * tool;
 			pline("It is stuck fast!");
 		    }
 
-		    return(1);
+		    return MOVE_STANDARD;
 		}
 	}
 
@@ -4533,7 +4534,7 @@ struct obj * tool;
 				an(defsyms[trap_to_defsym(ttmp->ttyp)].explanation),
 				ttmp->ttyp == WEB ? "Remove" : "Disarm", the_trap);
 			    switch (ynq(qbuf)) {
-				case 'q': return(0);
+				case 'q': return MOVE_CANCELLED;
 				case 'n': trap_skipped = TRUE;
 					  deal_with_floor_trap = FALSE;
 					  break;
@@ -4544,7 +4545,7 @@ struct obj * tool;
 		    if (u.utrap) {
 			You("cannot deal with %s while trapped%s!", the_trap,
 				(x == u.ux && y == u.uy) ? " in it" : "");
-			return 1;
+			return MOVE_STANDARD;
 		    }
 		    switch(ttmp->ttyp) {
 			case FLESH_HOOK:
@@ -4565,11 +4566,11 @@ struct obj * tool;
 			case SPIKED_PIT:
 				if (!u.dx && !u.dy) {
 				    You("are already on the edge of the pit.");
-				    return 0;
+				    return MOVE_CANCELLED;
 				}
 				if (!(mtmp = m_at(x,y))) {
 				    pline("Try filling the pit instead.");
-				    return 0;
+				    return MOVE_CANCELLED;
 				}
 				return help_monster_out(mtmp, ttmp);
 			case VIVI_TRAP:
@@ -4594,7 +4595,7 @@ struct obj * tool;
 				}
 				deltrap(ttmp);
 				newsym(u.ux + u.dx, u.uy + u.dy);
-				return 1;
+				return MOVE_STANDARD;
 			case TELEP_TRAP:
 			case LEVEL_TELEP:
 			case MAGIC_TRAP:
@@ -4605,7 +4606,7 @@ struct obj * tool;
 				// else fall through
 			default:
 				You("cannot disable %s trap.", (u.dx || u.dy) ? "that" : "this");
-				return 0;
+				return MOVE_CANCELLED;
 		    }
 		}
 	} /* end if */
@@ -4627,7 +4628,7 @@ struct obj * tool;
 			}
 			mtmp->entangled = 0;
 		}
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 	if(!u.dx && !u.dy) {
@@ -4637,26 +4638,26 @@ struct obj * tool;
 					safe_qbuf("", sizeof("There is  bolted down here. Unbolt it?"),
 					doname(otmp), an(simple_typename(otmp->otyp)), "a box"));
 				switch (ynq(qbuf)) {
-				case 'q': return(0);
+				case 'q': return MOVE_CANCELLED;
 				case 'n': continue;
 				}
 #ifdef STEED
 				if (u.usteed && P_SKILL(P_RIDING) < P_BASIC) {
 					You("aren't skilled enough to reach from %s.",
 						mon_nam(u.usteed));
-					return(0);
+					return MOVE_CANCELLED;
 				}
 #endif
 				if (!(tool && tool->oartifact == ART_MASTER_KEY_OF_THIEVERY)) {
 					pline("The bolts are seemingly magical and impossible to budge.");
-					return(0);
+					return MOVE_CANCELLED;
 				}
 				else {
 					pline("The bolts release, and %s locks itself!", the(xname(otmp)));
 					otmp->olocked = 1;
 					otmp->obolted = 0;
 					otmp->owt = weight(otmp);
-					return(1);
+					return MOVE_STANDARD;
 				}
 			}
 			if (Is_box(otmp)) {
@@ -4664,14 +4665,14 @@ struct obj * tool;
 					safe_qbuf("", sizeof("There is  here. Check it for traps?"),
 					doname(otmp), an(simple_typename(otmp->otyp)), "a box"));
 				switch (ynq(qbuf)) {
-				case 'q': return(0);
+				case 'q': return MOVE_CANCELLED;
 				case 'n': continue;
 				}
 #ifdef STEED
 				if (u.usteed && P_SKILL(P_RIDING) < P_BASIC) {
 					You("aren't skilled enough to reach from %s.",
 						mon_nam(u.usteed));
-					return(0);
+					return MOVE_CANCELLED;
 				}
 #endif
 				if ((otmp->otrapped && otmp->otyp != MAGIC_CHEST &&
@@ -4681,7 +4682,7 @@ struct obj * tool;
 					if (!confused) exercise(A_WIS, TRUE);
 
 					switch (ynq("Disarm it?")) {
-					case 'q': return(1);
+					case 'q': return MOVE_STANDARD;
 					case 'n': trap_skipped = TRUE;  continue;
 					}
 
@@ -4699,18 +4700,18 @@ struct obj * tool;
 						}
 					}
 					else pline("That %s was not trapped.", xname(otmp));
-					return(1);
+					return MOVE_STANDARD;
 				}
 				else {
 					You("find no traps on %s.", the(xname(otmp)));
-					return(1);
+					return MOVE_STANDARD;
 				}
 			}
 		}
 
 	    You(trap_skipped ? "find no other traps here."
 			     : "know of no traps here.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 
 	if ((mtmp = m_at(x,y))				&&
@@ -4720,7 +4721,7 @@ struct obj * tool;
 		!Protection_from_shape_changers)	 {
 
 	    stumble_onto_mimic(mtmp);
-	    return(1);
+	    return MOVE_STANDARD;
 	}
 
 	if (!IS_DOOR(levl[x][y].typ)) {
@@ -4728,19 +4729,19 @@ struct obj * tool;
 		You("cannot disable that trap.");
 	    else
 		You("know of no traps there.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 
 	switch (levl[x][y].doormask) {
 	    case D_NODOOR:
 		You("%s no door there.", Blind ? "feel" : "see");
-		return(0);
+		return MOVE_CANCELLED;
 	    case D_ISOPEN:
 		pline("This door is safely open.");
-		return(0);
+		return MOVE_CANCELLED;
 	    case D_BROKEN:
 		pline("This door is broken.");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	if ((levl[x][y].doormask & D_TRAPPED
@@ -4749,7 +4750,7 @@ struct obj * tool;
 	    || (!force && confused && !rn2(3))) {
 		You("find a trap on the door!");
 		exercise(A_WIS, TRUE);
-		if (ynq("Disarm it?") != 'y') return(1);
+		if (ynq("Disarm it?") != 'y') return MOVE_STANDARD;
 		if (levl[x][y].doormask & D_TRAPPED) {
 		    ch = 15 + (Role_if(PM_ROGUE) ? u.ulevel*3 : u.ulevel);
 		    exercise(A_DEX, TRUE);
@@ -4767,10 +4768,10 @@ struct obj * tool;
 			levl[x][y].doormask &= ~D_TRAPPED;
 		    }
 		} else pline("This door was not trapped.");
-		return(1);
+		return MOVE_STANDARD;
 	} else {
 		You("find no traps on the door.");
-		return(1);
+		return MOVE_STANDARD;
 	}
 }
 #endif /* OVL2 */

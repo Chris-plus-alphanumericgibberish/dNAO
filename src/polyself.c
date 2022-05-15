@@ -843,7 +843,7 @@ struct permonst *mdat;
 	struct attack mattk;
 	int powermult = 100;
 
-	if (!getdir((char *)0)) return(0);
+	if (!getdir((char *)0)) return MOVE_CANCELLED;
 
 	{
 		struct attack * aptr;
@@ -853,7 +853,7 @@ struct permonst *mdat;
 
 		if (!aptr) {
 			impossible("bad breath attack?");
-			return 0;
+			return MOVE_CANCELLED;
 		}
 		mattk = *aptr;
 	}
@@ -899,7 +899,7 @@ domakewhisperer()
 	int duration;
 	if (u.uen < (10+min(u.uinsight, 45))) {
 	    You("concentrate but lack the energy to maintain doing so.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	
 	duration = ACURR(A_CHA) + 1;
@@ -914,14 +914,14 @@ domakewhisperer()
 	// makedog();
 	mtmp = makemon(&mons[PM_SECRET_WHISPERER], u.ux, u.uy, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG|MM_ESUM);
 
-	if(!mtmp) return 0; /* pets were genocided */
+	if(!mtmp) return MOVE_CANCELLED; /* pets were genocided */
 
 	mark_mon_as_summoned(mtmp, &youmonst, duration, 0);
 	for(int i = min(45, (u.uinsight - mtmp->m_lev)); i > 0; i--){
 		grow_up(mtmp, (struct monst *) 0);
 		//Technically might grow into a genocided form.
 		if(DEADMONSTER(mtmp))
-			return 0;
+			return MOVE_CANCELLED;
 	}
 	mtmp->mspec_used = 0;
 
@@ -934,7 +934,7 @@ domakewhisperer()
 	
 	initedog(mtmp);
 	EDOG(mtmp)->loyal = TRUE;
-	return 1;
+	return MOVE_STANDARD;
 }
 
 int
@@ -945,11 +945,11 @@ doelementalbreath()
 	
 	if (Strangled) {
 	    You_cant("breathe.  Sorry.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	if (u.uen < 45) {
 	    You("don't have enough energy to sing an elemental!");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	losepw(45);
 	flags.botl = 1;
@@ -985,7 +985,7 @@ doelementalbreath()
 		mon->mhpmax = (mon->m_lev * 8) - 4;
 		mon->mhp =  mon->mhpmax;
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int
@@ -1020,13 +1020,13 @@ dospinweb()
 	if (Levitation || Weightless
 	    || Underwater || Is_waterlevel(&u.uz)) {
 		You("must be on the ground to spin a web.");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (u.uswallow) {
 		You("release web fluid inside %s.", mon_nam(u.ustuck));
 		if (is_animal(u.ustuck->data)) {
 			expels(u.ustuck, u.ustuck->data, TRUE);
-			return(0);
+			return MOVE_INSTANT;
 		}
 		if (is_whirly(u.ustuck->data)) {
 			int i;
@@ -1054,14 +1054,14 @@ dospinweb()
 				}
 				pline_The("web %sis swept away!", sweep);
 			}
-			return(0);
+			return MOVE_INSTANT;
 		}		     /* default: a nasty jelly-like creature */
 		pline_The("web dissolves into %s.", mon_nam(u.ustuck));
-		return(0);
+		return MOVE_INSTANT;
 	}
 	if (u.utrap) {
 		You("cannot spin webs while stuck in a trap.");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	exercise(A_DEX, TRUE);
 	if (ttmp) switch (ttmp->ttyp) {
@@ -1070,35 +1070,35 @@ dospinweb()
 			deltrap(ttmp);
 			bury_objs(u.ux, u.uy);
 			newsym(u.ux, u.uy);
-			return(1);
+			return MOVE_STANDARD;
 		case SQKY_BOARD: pline_The("squeaky board is muffled.");
 			deltrap(ttmp);
 			newsym(u.ux, u.uy);
-			return(1);
+			return MOVE_STANDARD;
 		case TELEP_TRAP:
 		case LEVEL_TELEP:
 		case MAGIC_PORTAL:
 			Your("webbing vanishes!");
-			return(0);
+			return MOVE_INSTANT;
 		case WEB: You("make the web thicker.");
-			return(1);
+			return MOVE_STANDARD;
 		case HOLE:
 		case TRAPDOOR:
 			You("web over the %s.",
 			    (ttmp->ttyp == TRAPDOOR) ? "trap door" : "hole");
 			deltrap(ttmp);
 			newsym(u.ux, u.uy);
-			return 1;
+			return MOVE_STANDARD;
 		case ROLLING_BOULDER_TRAP:
 			You("spin a web, jamming the trigger.");
 			deltrap(ttmp);
 			newsym(u.ux, u.uy);
-			return(1);
+			return MOVE_STANDARD;
 		case VIVI_TRAP:
 			You("spin a web, ruining the delicate machinery.");
 			deltrap(ttmp);
 			newsym(u.ux, u.uy);
-			return(1);
+			return MOVE_STANDARD;
 		case ARROW_TRAP:
 		case DART_TRAP:
 		case BEAR_TRAP:
@@ -1111,18 +1111,19 @@ dospinweb()
 		case MAGIC_TRAP:
 		case ANTI_MAGIC:
 		case POLY_TRAP:
+		case MUMMY_TRAP:
 			You("have triggered a trap!");
 			dotrap(ttmp, 0);
-			return(1);
+			return MOVE_STANDARD;
 		default:
 			impossible("Webbing over trap type %d?", ttmp->ttyp);
-			return(0);
+			return MOVE_CANCELLED;
 		}
 	else if (On_stairs(u.ux, u.uy)) {
 	    /* cop out: don't let them hide the stairs */
 	    Your("web fails to impede access to the %s.",
 		 (levl[u.ux][u.uy].typ == STAIRS) ? "stairs" : "ladder");
-	    return(1);
+	    return MOVE_STANDARD;
 		 
 	}
 	ttmp = maketrap(u.ux, u.uy, WEB);
@@ -1131,7 +1132,7 @@ dospinweb()
 		ttmp->madeby_u = 1;
 	}
 	newsym(u.ux, u.uy);
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int
@@ -1140,7 +1141,7 @@ dosummon()
 	int placeholder;
 	if (u.uen < 10) {
 	    You("lack the energy to send forth a call for help!");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	losepw(10);
 	flags.botl = 1;
@@ -1149,7 +1150,7 @@ dosummon()
 	exercise(A_WIS, TRUE);
 	if (!were_summon(&youmonst, &placeholder, (char *)0))
 		pline("But none arrive.");
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int
@@ -1161,11 +1162,11 @@ dodemonpet()
 
 	if (u.uen < 10) {
 		You("lack the energy to call for help!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	else if (youmonst.summonpwr >= youmonst.data->mlevel) {
 		You("don't have the authority to call for any more help!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	losepw(10);
 	flags.botl = 1;
@@ -1188,7 +1189,7 @@ dodemonpet()
 	else {
 		pline("No help arrived.");
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 static NEARDATA const char food_types[] = { FOOD_CLASS, 0 };
@@ -1220,15 +1221,15 @@ dovampminion()
 		}
 	}
 	if (!corpse) corpse = getobj(food_types, "feed blood to");
-	if (!corpse) return(0);
+	if (!corpse) return MOVE_CANCELLED;
 
 	struct permonst *pm = &mons[corpse->corpsenm];
 	if (!has_blood(pm)){
 		pline("You can't put blood in a monster that didn't start with blood!");
-		return(0);
+		return MOVE_CANCELLED;
 	} else if (is_untamable(pm) || (pm->geno & G_UNIQ)){
 		pline("You can't create a minion of that type of monster!");
-		return(0);
+		return MOVE_CANCELLED;
 	} else {
 		struct monst * mtmp = revive(corpse, FALSE);
 		if (mtmp) {
@@ -1241,7 +1242,7 @@ dovampminion()
 		}
 	}
 	
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int
@@ -1249,7 +1250,7 @@ dotinker()
 {
 	if (u.uen < 10) {
 	    You("lack the energy to tinker.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	losepw(10);
 	flags.botl = 1;
@@ -1272,7 +1273,7 @@ dotinker()
 		mlocal->mpeaceful = 1;
 		newsym(mlocal->mx,mlocal->my);
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int
@@ -1284,15 +1285,15 @@ dogaze()
 
 	if (Blind) {
 		You_cant("see anything to gaze at.");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	if (u.uen < 15) {
 		You("lack the energy to use your special gaze!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (!throwgaze()) {
 		/* player cancelled targetting or picked a not-allowed location */
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	else {
 		losepw(15);
@@ -1320,7 +1321,7 @@ dogaze()
 						-d((int)mtmp->m_lev + 1,
 						(int)mtmp->data->mattk[0].damd)
 						: -200, "frozen by a monster's gaze");
-					return 1;
+					return MOVE_STANDARD;
 				}
 				else
 					You("stiffen momentarily under %s gaze.",
@@ -1347,7 +1348,7 @@ dogaze()
 			You("gaze at empty space.");
 		}
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 #if 0
 {
@@ -1589,7 +1590,7 @@ dohide()
 
 	if (u.uundetected || (ismimic && youmonst.m_ap_type != M_AP_NOTHING)) {
 		You("are already hiding.");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (ismimic) {
 		/* should bring up a dialog "what would you like to imitate?" */
@@ -1598,7 +1599,7 @@ dohide()
 	} else
 		u.uundetected = 1;
 	newsym(u.ux,u.uy);
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int
@@ -1609,7 +1610,7 @@ domindblast()
 
 	if (u.uen < 10) {
 	    You("concentrate but lack the energy to maintain doing so.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	losepw(10);
 	flags.botl = 1;
@@ -1655,7 +1656,7 @@ domindblast()
 			}
 		}
 	}
-	return 1;
+	return MOVE_STANDARD;
 }
 
 void
@@ -1696,14 +1697,14 @@ dodarken()
 
 	if (u.uen < 10 && u.uen<u.uenmax) {
 	    You("lack the energy to invoke the darkness.");
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 	u.uen = max(u.uen-10,0);
 	flags.botl = 1;
 	You("invoke the darkness.");
 	litroom(FALSE,NULL);
 	
-	return 1;
+	return MOVE_STANDARD;
 }
 
 int
@@ -1743,13 +1744,13 @@ doclockspeed()
 			break;
 			}
 		}
-		if(u.clockworkUpgrades&FAST_SWITCH) return 0;
-		else return 1;
+		if(u.clockworkUpgrades&FAST_SWITCH) return MOVE_INSTANT;
+		else return MOVE_STANDARD;
 	} else{
 		You("leave your clock at its current speed.");
-		return 0;
+		return MOVE_CANCELLED;
 	}
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 int
@@ -1764,15 +1765,15 @@ doandroid()
 			u.phasengn = 1;
 			You("activate your phase engine.");
 		}
-		return 0;
+		return MOVE_INSTANT;
 	} else if(newspeed == HIGH_CLOCKSPEED){
 		You("activate emergency high speed.");
 		u.ucspeed = HIGH_CLOCKSPEED;
-		return 0;
+		return MOVE_INSTANT;
 	} else if(newspeed == NORM_CLOCKSPEED){
 		You("reduce speed to normal.");
 		u.ucspeed = NORM_CLOCKSPEED;
-		return 1;
+		return MOVE_STANDARD;
 	} else if(newspeed == SLOW_CLOCKSPEED){
 		int mult = HEALCYCLE/u.ulevel;
 		int duration = (u.uenmax - u.uen)*mult*2/3+30, i, lim;
@@ -1789,23 +1790,23 @@ doandroid()
 		u.nextsleep = moves+rnz(350)+duration;
 		u.lastslept = moves;
 		fall_asleep(-rn1(duration+1, duration+1), TRUE);
-		return 1;
+		return MOVE_STANDARD;
 	} else if(newspeed == RECHARGER){
 		static const char recharge_type[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
 	    struct obj *otmp = getobj(recharge_type, "charge");
 
 	    if (!otmp) {
-			return 0;
+			return MOVE_CANCELLED;
 	    }
 	    if(!recharge(otmp, 0))
 			You("recharged %s.", the(xname(otmp)));
 		losepw(10);
 	    update_inventory();
-		return 1;
+		return MOVE_STANDARD;
 	} else if (newspeed == ANDROID_COMBO) {
 		return android_combo();	/* in xhity.c */
 	}
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 int
@@ -1895,7 +1896,7 @@ int splaction;
 		break;
 	} while (TRUE);
 
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 STATIC_OVL void

@@ -2199,12 +2199,12 @@ donamelevel()
 	char nbuf[BUFSZ];	/* Buffer for response */
 	int len;
 
-	if (!(mptr = find_mapseen(&u.uz))) return 0;
+	if (!(mptr = find_mapseen(&u.uz))) return MOVE_CANCELLED;
 
 	Sprintf(qbuf,"What do you want to call this dungeon level? ");
 	getlin(qbuf, nbuf);
 
-	if (index(nbuf, '\033')) return 0;
+	if (index(nbuf, '\033')) return MOVE_CANCELLED;
 
 	len = strlen(nbuf) + 1;
 	if (mptr->custom) {
@@ -2219,7 +2219,7 @@ donamelevel()
 		strcpy(mptr->custom, nbuf);
 	}
    
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /* find the particular mapseen object in the chain */
@@ -2599,7 +2599,7 @@ dooverview()
 	} else {
 		You("have found nothing of note.");
 	}
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 STATIC_OVL char *

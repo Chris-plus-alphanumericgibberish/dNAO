@@ -3070,7 +3070,7 @@ int enhance_skill(boolean want_dump)
 	    }
 #endif
 	} while (speedy && n > 0);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /*

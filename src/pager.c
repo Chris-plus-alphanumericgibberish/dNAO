@@ -1104,7 +1104,7 @@ do_look(quick)
 	from_screen = TRUE;	/* yes, we want to use the cursor */
     } else {
 	i = ynq("Specify unknown object by cursor?");
-	if (i == 'q') return 0;
+	if (i == 'q') return MOVE_CANCELLED;
 	from_screen = (i == 'y');
     }
 
@@ -1115,7 +1115,7 @@ do_look(quick)
     } else {
 	getlin("Specify what? (type the word)", out_str);
 	if (out_str[0] == '\0' || out_str[0] == '\033')
-	    return 0;
+	    return MOVE_CANCELLED;
 
 	if (out_str[1]) {	/* user typed in a complete string */
 		winid datawin = create_nhwindow(NHW_MENU);
@@ -1148,7 +1148,7 @@ do_look(quick)
 	    if(checkfile(out_str, pm, (mntmp==NON_PM && otyp==STRANGE_OBJECT), TRUE, &datawin) || mntmp != NON_PM || otyp != STRANGE_OBJECT)
 			display_nhwindow(datawin, TRUE);
 		destroy_nhwindow(datawin);
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	sym = out_str[0];
     }
@@ -1180,7 +1180,7 @@ do_look(quick)
 	    ans = getpos(&cc, quick, what_is_an_unknown_object);
 	    if (ans < 0 || cc.x < 0) {
 		flags.verbose = save_verbose;
-		return 0;	/* done */
+		return MOVE_CANCELLED;	/* done */
 	    }
 	    flags.verbose = FALSE;	/* only print long question once */
 
@@ -1459,7 +1459,7 @@ do_look(quick)
     } while (from_screen && !quick && ans != LOOK_ONCE);
 
     flags.verbose = save_verbose;
-    return 0;
+    return MOVE_CANCELLED;
 }
 
 
@@ -2309,7 +2309,7 @@ doidtrap()
 	register struct trap *trap;
 	int x, y, tt;
 
-	if (!getdir("^")) return 0;
+	if (!getdir("^")) return MOVE_CANCELLED;
 	x = u.ux + u.dx;
 	y = u.uy + u.dy;
 	for (trap = ftrap; trap; trap = trap->ntrap)
@@ -2329,10 +2329,10 @@ doidtrap()
 			     as much "set" as "dug" anyway */
 			  (tt == HOLE || tt == PIT) ? " dug" : " set",
 		      !trap->madeby_u ? "" : " by you");
-		return 0;
+		return MOVE_CANCELLED;
 	    }
 	pline("I can't see a trap there.");
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 char *
@@ -2401,7 +2401,7 @@ dowhatdoes()
 		pline("%s", reslt);
 	else
 		pline("I've never heard of such commands.");
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /* data for help_menu() */
@@ -2500,14 +2500,14 @@ dohelp()
 #endif
 		}
 	}
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 int
 dohistory()
 {
 	display_file(HISTORY, TRUE);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /*pager.c*/
