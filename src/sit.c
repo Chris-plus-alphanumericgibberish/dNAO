@@ -48,7 +48,7 @@ dosit()
 #ifdef STEED
 	if (u.usteed) {
 	    You("are already sitting on %s.", mon_nam(u.usteed));
-	    return (0);
+	    return MOVE_CANCELLED;
 	}
 #endif
 
@@ -57,7 +57,7 @@ dosit()
 		You("tumble in place.");
 	    else
 		You("are sitting on air.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	} else if (is_pool(u.ux, u.uy, TRUE) && !Underwater) {  /* water walking */
 	    goto in_water;
 	}
@@ -102,7 +102,7 @@ dosit()
 	    melt_frozen_air();
 	    if (likes_lava(youracedata)) {
 		pline_The("lava feels warm.");
-		return 1;
+		return MOVE_STANDARD;
 	    }
 	    pline_The("lava burns you!");
 	    losehp(d((Fire_resistance ? 2 : 10), 10),
@@ -437,7 +437,7 @@ dosit()
 				u.uevent.utook_castle = 1;
 				give_castle_trophy();
 				You_feel("worthy.");
-				return 1;
+				return MOVE_STANDARD;
 			}
 			else if (is_prince(youracedata) || Role_if(PM_NOBLEMAN))
 				You_feel("very comfortable here.");
@@ -458,12 +458,12 @@ dosit()
 
 		if (!flags.female) {
 			pline("Males can't lay eggs!");
-			return 0;
+			return MOVE_CANCELLED;
 		}
 
 		if (YouHunger < (int)objects[EGG].oc_nutrition) {
 			You("don't have enough energy to lay an egg.");
-			return 0;
+			return MOVE_CANCELLED;
 		}
 
 		uegg = mksobj(EGG, MKOBJ_NOINIT);
@@ -483,7 +483,7 @@ dosit()
 		There("are no seats in here!");
 	else
 		pline("Having fun sitting on the %s?", surface(u.ux,u.uy));
-	return(1);
+	return MOVE_STANDARD;
 }
 
 /* returns TRUE if the caller should print a message */

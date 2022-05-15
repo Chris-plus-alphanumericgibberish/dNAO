@@ -2598,29 +2598,29 @@ int dz;
 	
     if (is_silent(youracedata)) {
 		pline("As %s, you cannot speak.", an(youracedata->mname));
-		return(0);
+		return MOVE_CANCELLED;
     }
     if (Strangled) {
 		You_cant("speak.  You're choking!");
-		return(0);
+		return MOVE_CANCELLED;
     }
     else if (Babble) {
 		You_cant("communicate.  You're babbling unintelligibly!");
-		return(0);
+		return MOVE_CANCELLED;
     }
     else if (Screaming) {
 		You_cant("communicate.  You're too busy screaming!");
-		return(0);
+		return MOVE_CANCELLED;
     }
 	
 	if(mad_turn(MAD_TOO_BIG)){
 		pline("It's too big!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	
     if (u.uswallow) {
 		pline("They won't hear you out there.");
-		return(0);
+		return MOVE_CANCELLED;
     }
 
     if (!Blind && (otmp = shop_object(u.ux, u.uy)) != (struct obj *)0) {
@@ -2641,12 +2641,12 @@ int dz;
 		u.dz = dz;
 	} else if (!getdir("Talk to whom? (in what direction)")) {
 		/* decided not to chat */
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 #ifdef STEED
     if (u.usteed && u.dz > 0)
-	return (domonnoise(u.usteed, TRUE));
+	return (domonnoise(u.usteed, TRUE)) ? MOVE_STANDARD : MOVE_INSTANT;
 #endif
 	if (u.dz) {
 		struct engr *ep = get_head_engr();
@@ -2655,7 +2655,7 @@ int dz;
 				break;//else continue
 		if(!ep || ep->halu_ward || ep->ward_id < FIRST_SEAL) pline("They won't hear you %s there.", u.dz < 0 ? "up" : "down");
 		else pline("The gate won't open with you standing on the seal!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	if (u.dx == 0 && u.dy == 0) {
@@ -2665,15 +2665,15 @@ int dz;
  * etc...  --KAA
 	if (u.umonnum == PM_ETTIN) {
 	    You("discover that your other head makes boring conversation.");
-	    return(1);
+	    return MOVE_STANDARD;
 	}
 */
 		pline("Talking to yourself is a bad habit for a dungeoneer.");
-		return(0);
+		return MOVE_CANCELLED;
     }
 
     tx = u.ux+u.dx; ty = u.uy+u.dy;
-	if (!isok(tx, ty)) return 0;
+	if (!isok(tx, ty)) return MOVE_CANCELLED;
     mtmp = m_at(tx, ty);
 	
 	if(In_quest(&u.uz) && urole.neminum == PM_DURIN_S_BANE && artifact_door(tx, ty)){
@@ -2686,7 +2686,7 @@ int dz;
 			unblock_point(tx,ty);
 			newsym(tx,ty);
 		}
-		return 1;
+		return MOVE_STANDARD;
 	}
 	
 	bindresult = dobinding(tx,ty);
@@ -2736,7 +2736,7 @@ int dz;
 						u.specialSealsKnown |= SEAL_UNKNOWN_GOD;
 					}
 				}
-				return 1;
+				return MOVE_STANDARD;
 			}
 	  }
 	}
@@ -2753,7 +2753,7 @@ int dz;
 			}
 			if(yn("Offer it?")=='n'){
 				You("refuse.");
-				return 1;
+				return MOVE_STANDARD;
 			}
 			else{
 				You("let %s take your %s.",mon_nam(mtmp), xname(uwep));
@@ -2770,7 +2770,7 @@ int dz;
 				}
 				useup(optr);
 				mongone(mtmp);
-				return 1;
+				return MOVE_STANDARD1;
 			}
 		}
 	}
@@ -2791,10 +2791,10 @@ int dz;
 					cost = 7;
 					if(gold < cost){
 						pline("Not enough gold!");
-						return 0;
+						return MOVE_STANDARD;
 					}
 					if(yn("That costs 7 gold.  Pay?") != 'y'){
-						return 0;
+						return MOVE_STANDARD;
 					}
 #ifndef GOLDOBJ
 					u.ugold -= cost;
@@ -2814,10 +2814,10 @@ int dz;
 					cost = 70;
 					if(gold < cost){
 						pline("Not enough gold!");
-						return 0;
+						return MOVE_STANDARD;
 					}
 					if(yn("That costs 70 gold.  Pay?") != 'y'){
-						return 0;
+						return MOVE_STANDARD;
 					}
 #ifndef GOLDOBJ
 					u.ugold -= cost;
@@ -2830,10 +2830,10 @@ int dz;
 					cost = 700;
 					if(gold < cost){
 						pline("Not enough gold!");
-						return 0;
+						return MOVE_STANDARD;
 					}
 					if(yn("That costs 700 gold.  Pay?") != 'y'){
-						return 0;
+						return MOVE_STANDARD;
 					}
 					if(!uwep){
 						impossible("Your weapon vanished between the menu and the blessing?");
@@ -2851,10 +2851,10 @@ int dz;
 					cost = 7000;
 					if(gold < cost){
 						pline("Not enough gold!");
-						return 0;
+						return MOVE_STANDARD;
 					}
 					if(yn("That costs 7,000 gold.  Pay?") != 'y'){
-						return 0;
+						return MOVE_STANDARD;
 					}
 #ifndef GOLDOBJ
 					u.ugold -= cost;
@@ -2867,10 +2867,10 @@ int dz;
 					cost = 70000;
 					if(gold < cost){
 						pline("Not enough gold!");
-						return 0;
+						return MOVE_STANDARD;
 					}
 					if(yn("That costs 70,000 gold.  Pay?") != 'y'){
-						return 0;
+						return MOVE_STANDARD;
 					}
 					if(!uwep){
 						impossible("Your weapon vanished between the menu and the blessing?");
@@ -2890,9 +2890,9 @@ int dz;
 				break;
 			}
 			update_inventory();
-			return 1;
+			return MOVE_STANDARD;
 		}
-		return 0;
+		return MOVE_STANDARD;
 	}
 	
     if ( (!mtmp || mtmp->mundetected ||
@@ -2920,7 +2920,7 @@ int dz;
 					Monnam(mtmp), (is_animal(mtmp->data) || mindless_mon(mtmp) ? "its" : hisherits(mtmp))
 				);
 		}
-		return 0;
+		return MOVE_INSTANT;
 	}
 	
     if (!mtmp || mtmp->mundetected ||
@@ -2929,7 +2929,7 @@ int dz;
 	
     if (Underwater) {
 	Your("speech is unintelligible underwater.");
-	return(0);
+	return MOVE_INSTANT;
     }
 
     /* paralized monsters won't talk, except priests (who wake up) */
@@ -2938,14 +2938,14 @@ int dz;
 		   not noticing him and just not existing, so skip the message. */
 		if (canspotmon(mtmp))
 			pline("%s seems not to notice you.", Monnam(mtmp));
-		return(0);
+		return MOVE_INSTANT;
     }
     if (is_deaf(mtmp) && !mtmp->mcansee) {
 		/* If it is unseen, the player can't tell the difference between
 		   not noticing him and just not existing, so skip the message. */
 		if (canspotmon(mtmp))
 			pline("%s seems not to notice you.", Monnam(mtmp));
-		return(0);
+		return MOVE_INSTANT;
     }
     /* sleeping monsters won't talk unless they wake up, except priests (who wake up) */
 	if (mtmp->msleeping){
@@ -2955,7 +2955,7 @@ int dz;
 		}
 		else {
 			pline("%s stirs in %s slumber, but doesn't wake up.", Monnam(mtmp), mhis(mtmp));
-			return 1;
+			return MOVE_STANDARD;
 		}
 	}
 
@@ -2966,27 +2966,27 @@ int dz;
     /* laughing monsters can't talk */
     if (!mtmp->mnotlaugh) {
 		if (!is_silent_mon(mtmp)) pline("%s laughs hysterically", Monnam(mtmp));
-		return(0);
+		return MOVE_INSTANT;
     }
 	
     if (mtmp->mtame && mtmp->mnotlaugh && mtmp->meating) {
 		if (!canspotmon(mtmp))
 			map_invisible(mtmp->mx, mtmp->my);
 		pline("%s is eating noisily. Looks like it will take %d turns to finish.", Monnam(mtmp), mtmp->meating);
-		return (0);
+		return MOVE_INSTANT;
     }
 	
 	if(mtmp->mtyp == PM_NIGHTGAUNT && u.umonnum == PM_GHOUL){
 		You("bark the secret passwords known to ghouls.");
 		mtmp->mpeaceful = 1;
 		mtmp = tamedog(mtmp, (struct obj *)0);
-		return 1;
+		return MOVE_STANDARD;
 	}
 	if(is_undead(mtmp->data) && u.specialSealsActive&SEAL_ACERERAK && u.ulevel > mtmp->m_lev){
 		You("order the lesser dead to stand at ease.");
 		mtmp->mpeaceful = 1;
 		mtmp->mhp = mtmp->mhpmax;
-		return 1;
+		return MOVE_STANDARD;
 	}
 	if(mtmp->mtyp == PM_LADY_CONSTANCE && !mtmp->mtame && mtmp->mpeaceful && Role_if(PM_MADMAN) && u.uevent.qcompleted){
 		verbalize("Let's get out of here!");
@@ -2994,7 +2994,7 @@ int dz;
 		mtmp = tamedog(mtmp, (struct obj *)0);
 		if(mtmp && mtmp->mtame)
 			EDOG(mtmp)->loyal = TRUE;
-		return 1;
+		return MOVE_STANDARD;
 	}
     /* That is IT. EVERYBODY OUT. You are DEAD SERIOUS. */
     if (mtmp->mtyp == PM_URANIUM_IMP) {
@@ -3011,15 +3011,15 @@ int dz;
             if (rnl(100) >= 90) {
                 pline("%s unfortunately ignores your overtures.",
                  Monnam(mtmp));
-                return 0;
+                return MOVE_STANDARD;
             }
             mtmp->mpeaceful = 1;
             set_malign(mtmp);
         }
-        return 0;
+        return MOVE_STANDARD;
     }
 
-    return domonnoise(mtmp, TRUE);
+    return domonnoise(mtmp, TRUE) ? MOVE_STANDARD : MOVE_INSTANT;
 }
 
 //definition of externs in you.h
@@ -3091,11 +3091,11 @@ int tx,ty;
 	for(;ep;ep=ep->nxt_engr)
 		if(ep->engr_x==tx && ep->engr_y==ty)
 			break;//else continue
-	if(!(ep)) return 0; //no engraving found
-	if(ep->halu_ward || ep->ward_id < FIRST_SEAL) return 0;
+	if(!(ep)) return MOVE_CANCELLED; //no engraving found
+	if(ep->halu_ward || ep->ward_id < FIRST_SEAL) return MOVE_CANCELLED;
 	else if(ep->complete_wards < 1){
 		pline("The seal has been damaged.");
-		return 0;
+		return MOVE_INSTANT;
 	// } else if(ep->engr_time+5 < moves){
 		// pline("The seal is too old.");
 		// return 0;
@@ -3110,7 +3110,7 @@ int tx,ty;
       }
     }
 	
-	if(m_at(tx,ty) && (ep->ward_id != ANDROMALIUS || m_at(tx,ty)->mtyp != PM_SEWER_RAT)) return 0;
+	if(m_at(tx,ty) && (ep->ward_id != ANDROMALIUS || m_at(tx,ty)->mtyp != PM_SEWER_RAT)) return MOVE_CANCELLED;
 	
 	switch(ep->ward_id){
 	case AHAZU:{
@@ -5115,7 +5115,7 @@ int tx,ty;
 		} else pline("You hear whispering all around you.");
 	}break;
 	}
-	return 1;
+	return MOVE_STANDARD;
 }
 
 int *

@@ -301,7 +301,7 @@ int
 done2()
 {
 	if (iflags.debug_fuzzer)
-		return 0;
+		return MOVE_CANCELLED;
 #ifdef PARANOID
 	char buf[BUFSZ];
 	int really_quit = FALSE;
@@ -328,7 +328,7 @@ done2()
 		    u.uinvulnerable = FALSE;	/* avoid ctrl-C bug -dlc */
 		    u.usleep = 0;
 		}
-		return 0;
+		return MOVE_CANCELLED;
 	}
 #if defined(WIZARD) && (defined(UNIX) || defined(VMS) || defined(LATTICE))
 	if(wizard) {
@@ -352,7 +352,7 @@ done2()
 #ifndef LINT
 	done(QUIT);
 #endif
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 #ifndef NO_SIGNAL

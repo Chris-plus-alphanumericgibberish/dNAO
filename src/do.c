@@ -2453,7 +2453,7 @@ donull()
 			}
 		}
 	}
-	return(1);	/* Do nothing, but let other things happen */
+	return MOVE_STANDARD;	/* Do nothing, but let other things happen */
 }
 
 #endif /* OVL3 */
@@ -2490,10 +2490,10 @@ dowipe()
 		/* Not totally correct; what if they change back after now
 		 * but before they're finished wiping?
 		 */
-		return(1);
+		return MOVE_STANDARD;
 	}
 	Your("%s is already clean.", body_part(FACE));
-	return(1);
+	return MOVE_STANDARD;
 }
 
 void
@@ -2549,7 +2549,7 @@ int
 dowait()
 {
 	struct monst *mtmp;
-	if (!getdir("Indicate pet that should wait, or '.' for all.")) return(0);
+	if (!getdir("Indicate pet that should wait, or '.' for all.")) return MOVE_CANCELLED;
 	if(!(u.dx || u.dy)){
 		You("order all your pets to wait for your return.");
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
@@ -2560,21 +2560,21 @@ dowait()
 		mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
 		if(!mtmp){
 			pline("There is no target there.");
-			return 0;
+			return MOVE_INSTANT;
 		}
 		if(mtmp->mtame){
 			mtmp->mwait = monstermoves;
 			You("order %s to wait for your return.", mon_nam(mtmp));
 		}
 	} else pline("There is no target there.");
-	return 0;
+	return MOVE_INSTANT;
 }
 
 int
 docome()
 {
 	struct monst *mtmp;
-	if (!getdir("Indicate pet that should come with you, or '.' for all.")) return(0);
+	if (!getdir("Indicate pet that should come with you, or '.' for all.")) return MOVE_CANCELLED;
 	if(!(u.dx || u.dy)){
 		You("order all your pets to follow you.");
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
@@ -2585,14 +2585,14 @@ docome()
 		mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
 		if(!mtmp){
 			pline("There is no target there.");
-			return 0;
+			return MOVE_INSTANT;
 		}
 		if(mtmp->mtame){
 			mtmp->mwait = 0;
 			You("order %s to follow you.", mon_nam(mtmp));
 		}
 	} else pline("There is no target there.");
-	return 0;
+	return MOVE_INSTANT;
 }
 
 #endif /* OVLB */

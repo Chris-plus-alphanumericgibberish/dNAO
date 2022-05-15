@@ -1134,7 +1134,7 @@ pray_goat()
 	
     if (flags.prayconfirm)
 	if (yn("Are you sure you want to pray to the Black Goat?") == 'n')
-	    return 0;
+	    return MOVE_CANCELLED;
 	
 	u.uconduct.gnostic++; //?
 
@@ -1198,7 +1198,7 @@ pray_goat()
 	}
 	else goat_pleased();
 	
-	return 1;
+	return MOVE_STANDARD;
 }
 
 
@@ -1838,8 +1838,8 @@ dosacrifice()
     aligntyp altaralign = (a_align(u.ux,u.uy));
 	int altargod = god_at_altar(u.ux, u.uy);
     if (!on_altar() || u.uswallow) {
-	You("are not standing on an altar.");
-	return 0;
+		You("are not standing on an altar.");
+		return MOVE_CANCELLED;
     }
 
 	if(Role_if(PM_ANACHRONONAUT) && flags.questprogress != 2 && u.uevent.qcompleted && u.uhave.questart && Is_astralevel(&u.uz)){
@@ -1847,9 +1847,9 @@ dosacrifice()
 	}
 	
     if (In_endgame(&u.uz)) {
-	if (!(otmp = getobj(sacrifice_types, "sacrifice"))) return 0;
-    } else {
-	if (!(otmp = floorfood("sacrifice", 1))) return 0;
+		if (!(otmp = getobj(sacrifice_types, "sacrifice"))) return MOVE_CANCELLED;
+	} else {
+		if (!(otmp = floorfood("sacrifice", 1))) return MOVE_CANCELLED;
     }
     /*
       Was based on nutritional value and aging behavior (< 50 moves).
@@ -1863,16 +1863,16 @@ dosacrifice()
 	
 	if(goat_mouth_at(u.ux, u.uy)){
 		goat_eat(otmp, GOAT_EAT_OFFERED);
-		return 1;
+		return MOVE_STANDARD;
 	}
 	if(bokrug_idol_at(u.ux, u.uy)){
 		bokrug_offer(otmp);
-		return 1;
+		return MOVE_STANDARD;
 	}
 	
 	if(Role_if(PM_ANACHRONONAUT) && otmp->otyp != AMULET_OF_YENDOR && flags.questprogress!=2){
 		You("do not give offerings to the God of the future.");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	
 	if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD 
@@ -1882,14 +1882,14 @@ dosacrifice()
 		if (otmp->otyp == CORPSE)
 			feel_cockatrice(otmp, TRUE);
 		pline1(nothing_happens);
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 	if(Misotheism && !(otmp->otyp == AMULET_OF_YENDOR && Is_astralevel(&u.uz))){
 		if (otmp->otyp == CORPSE)
 			feel_cockatrice(otmp, TRUE);
 		pline1(nothing_happens);
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 #define MAXVALUE 24 /* Highest corpse value (besides Wiz) */
@@ -1923,7 +1923,7 @@ dosacrifice()
 					char buf[BUFSZ];
 					Sprintf(buf, "You feel a deep sense of kinship to %s!  Sacrifice %s anyway?",
 						the(xname(otmp)), (otmp->quan == 1L) ? "it" : "one");
-					if (yn_function(buf,ynchars,'n')=='n') return 0;
+					if (yn_function(buf,ynchars,'n')=='n') return MOVE_CANCELLED;
 				}
 				pline("You'll regret this infamous offense!");
 				exercise(A_WIS, FALSE);
@@ -2003,7 +2003,7 @@ dosacrifice()
 			if (carried(otmp)) useup(otmp);
 			else useupf(otmp, 1L);
 	
-			return(1);
+			return MOVE_STANDARD;
 		} else if (get_ox(otmp, OX_EMON)
 				&& ((mtmp = get_mtraits(otmp, FALSE)) != (struct monst *)0)
 				&& mtmp->mtame) {
@@ -2050,7 +2050,7 @@ dosacrifice()
 				You_feel("homesick.");
 			else
 				You_feel("an urge to return to the surface.");
-			return 1;
+			return MOVE_STANDARD;
 		} else {
 			/* The final Test.	Did you win? */
 			if(uamul == otmp) Amulet_off();
@@ -2130,7 +2130,7 @@ dosacrifice()
 		    Hallucination ? "boo-boo" : "mistake");
 		otmp->known = TRUE;
 		change_luck(-1);
-		return 1;
+		return MOVE_STANDARD;
 	    } else {
 		/* don't you dare try to fool the gods */
 		if(u.ualign.type != A_VOID){
@@ -2147,7 +2147,7 @@ dosacrifice()
 
     if (value == 0) {
 	pline1(nothing_happens);
-	return (1);
+	return MOVE_STANDARD;
     }
 
     if (altaralign != u.ualign.type &&
@@ -2180,7 +2180,7 @@ dosacrifice()
 			if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 				pline("A pulse of darkness radiates from your sacrifice!");
 				angrygods(altargod);
-				return 1;
+				return MOVE_STANDARD;
 			}
 			consume_offering(otmp);
 		    pline("%s accepts your allegiance.", a_gname());
@@ -2282,12 +2282,12 @@ dosacrifice()
 				if (!Inhell) angrygods(u.ualign.god);
 			}
 		}
-		return(1);
+		return MOVE_STANDARD;
 	    } else {
 		if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 			pline("A pulse of darkness radiates from your sacrifice!");
 			angrygods(altargod);
-			return 1;
+			return MOVE_STANDARD;
 		}
 		consume_offering(otmp);
 		if(Role_if(PM_EXILE) && u.ualign.type != A_VOID && altaralign != A_VOID){
@@ -2358,14 +2358,14 @@ dosacrifice()
 				}
 			}
 		}
-		return(1);
+		return MOVE_STANDARD;
 	    }
 	}
 
 	if(otmp->otyp == CORPSE && is_rider(&mons[otmp->corpsenm])){
 		pline("A pulse of darkness radiates from your sacrifice!");
 		angrygods(altargod);
-		return 1;
+		return MOVE_STANDARD;
 	}
 	consume_offering(otmp);
 	/* OK, you get brownie points. */
@@ -2472,13 +2472,13 @@ dosacrifice()
 			if(is_shield(otmp)){
 				unrestrict_weapon_skill(P_SHIELD);
 			}
-			return(1);
+			return MOVE_STANDARD;
 		}
 	    } else if (rnl((30 + u.ulevel)*10) < 10) {
 			/* no artifact, but maybe a helpful pet? */
 			/* WAC is now some generic benefit (includes pets) */
 			god_gives_benefit(altaralign);
-		    return(1);
+		    return MOVE_STANDARD;
 	    }
 	    change_luck((value * LUCKMAX) / (MAXVALUE * 2));
 	    if ((int)u.uluck < 0) u.uluck = 0;
@@ -2493,7 +2493,7 @@ dosacrifice()
 		u.reconciled = REC_REC;
 	}
     }
-    return(1);
+    return MOVE_STANDARD;
 }
 
 
@@ -2561,23 +2561,23 @@ dopray()
 	if(Role_if(PM_ANACHRONONAUT) && flags.questprogress!=2){
 		pline("There is but one God in the future.");
 		pline("And to It, you do not pray.");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	
 	if(flat_mad_turn(MAD_APOSTASY)){
 		pline("You can't bring yourself to pray.");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	
 	if(Doubt){
 		pline("You're suffering a crisis of faith.");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	
     /* Confirm accidental slips of Alt-P */
     if (flags.prayconfirm)
 	if (yn("Are you sure you want to pray?") == 'n')
-	    return 0;
+	    return MOVE_CANCELLED;
 
 	if(u.sealsActive&SEAL_AMON) unbind(SEAL_AMON,TRUE);
     u.uconduct.gnostic++;
@@ -2588,7 +2588,7 @@ dopray()
     flags.soundok = 1;
 
     /* set up p_type and p_alignment */
-    if (!can_pray(TRUE)) return 0;
+    if (!can_pray(TRUE)) return MOVE_CANCELLED;
 	
 	u.lastprayed = moves;
 	u.lastprayresult = PRAY_INPROG;
@@ -2617,7 +2617,7 @@ dopray()
 	u.uinvulnerable = TRUE;
     }
 
-    return(1);
+    return MOVE_STANDARD;
 }
 
 STATIC_PTR int
@@ -2630,7 +2630,7 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 	if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD){
 		u.lastprayresult = PRAY_IGNORED;
 		Your("prayer goes unanswered.");
-		return 1; //I think this is meaningless?
+		return MOVE_STANDARD; //I think this is meaningless?
 	}
     if(p_type == -1) {
 		godvoice(p_god,
@@ -2660,14 +2660,14 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 		change_luck(-3);
 		gods_upset(p_god);
 	}
-	return(1);
+	return MOVE_STANDARD;
     }
     if (Inhell && !hell_safe_prayer(p_god)){
 		pline("Since you are in Gehennom, %s won't help you.", godname(p_god));
 		/* haltingly aligned is least likely to anger */
 		if (u.ualign.record <= 0 || rnl(u.ualign.record))
 			angrygods(u.ualign.god);
-		return(0);
+		return MOVE_CANCELLED;
     }
 
     if (p_type == 0) {
@@ -2695,7 +2695,7 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 	    (void) water_prayer(TRUE);
 	pleased(p_god); /* nice */
     }
-    return(1);
+    return MOVE_STANDARD;
 }
 
 int
@@ -2719,11 +2719,11 @@ doturn()
 		}
 
 		You("don't know how to turn undead!");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if(Misotheism){
 		pline("Nothing happens!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 
 	if(!Race_if(PM_VAMPIRE)) u.uconduct.gnostic++;
@@ -2739,13 +2739,13 @@ doturn()
 		pline("For some reason, %s seems to ignore you.", u_gname());
 		aggravate();
 		exercise(A_WIS, FALSE);
-		return(0);
+		return MOVE_INSTANT;
 	}
 
 	if (Inhell && !hell_safe_prayer(u.ualign.god) && !Race_if(PM_VAMPIRE)) {
 	    pline("Since you are in Gehennom, %s won't help you.", u_gname());
 	    aggravate();
-	    return(0);
+	    return MOVE_INSTANT;
 	}
 	if(!Race_if(PM_VAMPIRE)) pline("Calling upon %s, you chant holy scripture.", u_gname());
 	else You("focus your vampiric aura!");
@@ -2813,7 +2813,7 @@ doturn()
 	}
 	else
 		nomul(-5, "trying to turn the undead");
-	return(1);
+	return MOVE_STANDARD;
 }
 
 const char *

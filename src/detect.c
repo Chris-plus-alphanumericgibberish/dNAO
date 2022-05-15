@@ -1646,7 +1646,7 @@ register int aflag;
 					}
 				} else if (!sensemon(mtmp))
 					You("find %s.", a_monnam(mtmp));
-				return(1);
+				return MOVE_STANDARD;
 				}
 				if(!canspotmon(mtmp)) {
 				if (mtmp->mundetected &&
@@ -1672,7 +1672,7 @@ register int aflag;
 				if (trap->ttyp == STATUE_TRAP) {
 				if (activate_statue_trap(trap, x, y, FALSE))
 					exercise(A_WIS, TRUE);
-				return(1);
+				return MOVE_STANDARD;
 				} else {
 				find_trap(trap);
 				}
@@ -1681,7 +1681,7 @@ register int aflag;
 		}
 		}
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 int

@@ -742,16 +742,16 @@ struct obj *scroll;
 	
 	if(!scroll->dknown){
 		You("have never seen it!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	if(objects[scroll->otyp].oc_unique){
 		u.uconduct.literate++;
 		study_word(scroll);
-		return 1;
+		return MOVE_READ;
 	}
 	if(!objects[scroll->otyp].oc_name_known && objects[scroll->otyp].oc_magic){
 		You("don't know how to pronounce the glyph!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	if(scroll->otyp == SYLLABLE_OF_STRENGTH__AESH){
 		if(scroll->cursed){
@@ -844,12 +844,12 @@ struct obj *scroll;
 		if (!maybe_give_thought(thought))
 		{
 			pline("Nothing happens.");
-			return 0;
+			return MOVE_INSTANT;
 		}
 
 	} else {
 		impossible("bad shard");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 
 	u.uconduct.literate++;
@@ -858,11 +858,11 @@ struct obj *scroll;
 	if(objects[scroll->otyp].oc_magic){
 		useup(scroll);
 		check_illumian_trophy();
-		return partial_action();
+		return MOVE_READ|MOVE_PARTIAL;
 	}
 	else {
 		useup(scroll);
-		return 1;
+		return MOVE_READ;
 	}
 }
 
@@ -881,7 +881,7 @@ struct obj *slab;
 	}
 	curslab = slab;
 	set_occupation(learn_word, "studying", 0);
-	return 1;
+	return MOVE_READ;
 }
 
 STATIC_PTR int

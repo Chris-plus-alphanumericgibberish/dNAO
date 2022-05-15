@@ -2603,7 +2603,7 @@ dodip()
 
 	allowall[0] = ALL_CLASSES; allowall[1] = '\0';
 	if(!(obj = getobj(allowall, "dip")))
-		return(0);
+		return MOVE_CANCELLED;
 
 	here = levl[u.ux][u.uy].typ;
 	/* Is there a fountain to dip into here? */
@@ -2615,7 +2615,7 @@ dodip()
 		if(yn("Dip it into the fountain?") == 'y') {
 #endif
 			dipfountain(obj);
-			return(1);
+			return MOVE_STANDARD;
 		}
 	} else if (is_pool(u.ux,u.uy, TRUE)) {
 		tmp = waterbody_name(u.ux,u.uy);
@@ -2636,7 +2636,7 @@ dodip()
 			(void) get_wet(obj, level.flags.lethe); //lethe
 //			if (obj->otyp == POT_ACID) useup(obj); //Potential error here
 		    }
-		    return 1;
+		    return MOVE_STANDARD;
 		}
 	}
 
@@ -2646,10 +2646,10 @@ dodip()
 #else
 	if(!(potion = getobj(beverages, "dip into")))
 #endif
-		return(0);
+		return MOVE_CANCELLED;
 	if (potion == obj && potion->quan == 1L) {
 		pline("That is a potion bottle, not a Klein bottle!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	//from Slashem, modified
 	if(!(potion->otyp == POT_WATER || potion->otyp == POT_ACID || polypotion(potion)) && obj->otyp == POT_WATER) {
@@ -2679,7 +2679,7 @@ dodip()
 				   !(objects[potion->otyp].oc_uname))
 					docall(potion);
 				useup(potion);
-				return(1);
+				return MOVE_STANDARD;
 			} else if(!obj->blessed) {
 				if (useeit) {
 				    tmp = hcolor(NH_LIGHT_BLUE);
@@ -2777,14 +2777,14 @@ dodip()
 				makeknown(POT_POLYMORPH);
 			useup(potion);
 			prinv((char *)0, obj, 0L);
-			return 1;
+			return MOVE_STANDARD;
 		} else {
 			pline("Nothing seems to happen.");
 			goto poof;
 		}
 	    }
 	    potion->in_use = FALSE;	/* didn't go poof */
-	    return(1);
+	    return MOVE_STANDARD;
 	} else if(obj->oclass == POTION_CLASS && (obj->otyp != potion->otyp || (obj->otyp == POT_BLOOD && obj->corpsenm != potion->corpsenm))) {
 		/* Mixing potions is dangerous... */
 		pline_The("potions mix...");
@@ -2806,7 +2806,7 @@ dodip()
 			/* some protection against this: */
 			losehp(Acid_resistance ? rnd(5) : rnd(10),
 			       "alchemic blast", KILLED_BY_AN);
-			return(1);
+			return MOVE_STANDARD;
 		}
 
 		obj->blessed = obj->cursed = obj->bknown = 0;
@@ -2846,7 +2846,7 @@ dodip()
 			  pline_The("mixture glows brightly and evaporates.");
 				useup(obj);
 				useup(potion);
-				return(1);
+				return MOVE_STANDARD;
 		    }
 		}
 
@@ -2861,7 +2861,7 @@ dodip()
 		}
 		set_object_color(obj);
 		useup(potion);
-		return(1);
+		return MOVE_STANDARD;
 	}
 
 #ifdef INVISIBLE_OBJECTS
@@ -3194,7 +3194,7 @@ dodip()
 	    exercise(A_WIS, wisx);
 	    makeknown(potion->otyp);
 	    useup(potion);
-	    return 1;
+	    return MOVE_STANDARD;
 	}
     more_dips:
 
@@ -3208,7 +3208,7 @@ dodip()
 		useup(potion);
 		explode(u.ux, u.uy, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1);
 		exercise(A_WIS, FALSE);
-		return 1;
+		return MOVE_STANDARD;
 	} else if((obj->otyp == SUNROD)
 		&& (potion->otyp == POT_ACID)
 	) {
@@ -3236,7 +3236,7 @@ dodip()
 			if (!Blind) Your1(vision_clears);
 		}
 		exercise(A_WIS, FALSE);
-		return 1;
+		return MOVE_STANDARD;
 	/* Allow filling of MAGIC_LAMPs to prevent identification by player */
 	} else if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP) &&
 	   (potion->otyp == POT_OIL)) {
@@ -3245,7 +3245,7 @@ dodip()
 		useup(potion);
 		explode(u.ux, u.uy, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1);
 		exercise(A_WIS, FALSE);
-		return 1;
+		return MOVE_STANDARD;
 	    }
 	    /* Adding oil to an empty magic lamp renders it into an oil lamp */
 	    if ((obj->otyp == MAGIC_LAMP) && obj->spe == 0) {
@@ -3266,7 +3266,7 @@ dodip()
 	    makeknown(POT_OIL);
 	    obj->spe = 1;
 	    update_inventory();
-	    return 1;
+	    return MOVE_STANDARD;
 	}
 	
 	potion->in_use = FALSE;		/* didn't go poof */
@@ -3316,7 +3316,7 @@ dodip()
 		    /* some protection against this: */
 		    losehp(Acid_resistance ? rnd(5) : rnd(10), 
 			   "alchemic blast", KILLED_BY_AN);
-		    return(1);	  
+		    return MOVE_STANDARD;	  
 		  }
 		
 		  pline("%s dissolves in %s.", The(xname(singlegem)), 
@@ -3372,11 +3372,11 @@ dodip()
 					doname(singlepotion), (const char *)0);
 		update_inventory();
 		}
-		return(1);
+		return MOVE_STANDARD;
 	}
 
 	pline("Interesting...");
-	return(1);
+	return MOVE_STANDARD;
 }
 
 

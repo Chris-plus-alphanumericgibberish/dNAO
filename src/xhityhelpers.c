@@ -254,7 +254,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 					/* Prevent accidental donation prompt. */
 					pline("%s mutters a prayer.", Monnam(mdef));
 				}
-				else if (!dochat(FALSE, u.dx, u.dy, 0)) {
+				else if (dochat(FALSE, u.dx, u.dy, 0) & (MOVE_CANCELLED|MOVE_INSTANT)) {
 					flags.move |= MOVE_INSTANT;
 				}
 				return ATTACKCHECK_NONE;

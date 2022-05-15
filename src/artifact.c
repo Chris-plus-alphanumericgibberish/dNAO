@@ -6071,7 +6071,7 @@ arti_invoke(obj)
 	int windpets[8] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_ICE_PARAELEMENTAL, PM_ICE_VORTEX,
 					   PM_ENERGY_VORTEX, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL};
 	coord cc;
-	int n, damage, time = 1;
+	int n, damage, time = MOVE_STANDARD;
 	struct permonst *pm;
 	struct monst *mtmp = 0;
 	if (!oart || !oart->inv_prop) {
@@ -6090,7 +6090,7 @@ arti_invoke(obj)
 			pline1(nothing_happens);
 			break;
 		}
-		return 1;
+		return MOVE_STANDARD;
 	}
 
     if(oart->inv_prop > LAST_PROP) {
@@ -6107,17 +6107,17 @@ arti_invoke(obj)
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
 			You_hear("the sounds of hurried preparation.");
-			return partial_action();
+			return MOVE_PARTIAL;
 		}
 		if(oart->inv_prop == VOID_CHIME) {
 	    pline("%s makes no sound.", The(xname(obj)));
-			return partial_action();
+			return MOVE_PARTIAL;
 		}
 	    You_feel("that %s %s ignoring you.",
 		     the(xname(obj)), otense(obj, "are"));
 	    /* and just got more so; patience is essential... */
 		obj->age += Role_if(PM_PRIEST) ? (long) d(1,20) : (long) d(3,10);
-	    return partial_action();
+	    return MOVE_PARTIAL;
 	}
 	if(!( /* some properties can be used as often as desired, or track cooldowns in a different way */
 		oart->inv_prop == FIRE_SHIKAI ||
@@ -6179,7 +6179,7 @@ arti_invoke(obj)
 	case UNTRAP: {
 	    if(!untrap(obj)) {
 		obj->age = 0; /* don't charge for changing their mind */
-		return 0;
+		return MOVE_CANCELLED;
 	    }
 	    break;
 	  }
@@ -6189,7 +6189,7 @@ arti_invoke(obj)
 
 	    if (!otmp) {
 		obj->age = 0;
-		return 0;
+		return MOVE_CANCELLED;
 	    }
 	    b_effect = obj->blessed &&
 		((Role_switch == oart->role || oart->role == NON_PM) && (Race_switch == oart->race || oart->race == NON_PM));
@@ -6693,7 +6693,7 @@ arti_invoke(obj)
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
 					artinstance[obj->oartifact].SnSd1 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
-				    return partial_action();
+				    return MOVE_PARTIAL;
 				}
 				else if(throweffect()){
 					int dmg;
@@ -6716,7 +6716,7 @@ arti_invoke(obj)
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
 					artinstance[obj->oartifact].SnSd2 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
-				    return partial_action();
+				    return MOVE_PARTIAL;
 				}
 				else if(getdir((char *)0) && (u.dx || u.dy)) {
 					struct zapdata zapdata;
@@ -6736,7 +6736,7 @@ arti_invoke(obj)
 					     the(xname(obj)), otense(obj, "are"));
 					/* and just got more so; patience is essential... */
 					artinstance[obj->oartifact].SnSd3 += Role_if(PM_PRIEST)||Role_if(PM_SAMURAI) ? (long) d(1,20) : (long) d(3,10);
-				    return partial_action();
+				    return MOVE_PARTIAL;
 				}
 				else{
 					pline("San no mai, Shirafune!");
@@ -6845,11 +6845,11 @@ arti_invoke(obj)
                if (getpos(&cc, TRUE, "the desired position") < 0) {
                    pline1(Never_mind);
                    obj->age = 0;
-                   return 0;
+                   return MOVE_CANCELLED;
                }
                if (!cansee(cc.x, cc.y) || distu(cc.x, cc.y) >= 32) {
                    You("smell rotten eggs.");
-                   return 0;
+                   return MOVE_INSTANT;
                }
            }
            pline("A cloud of toxic smoke pours out!");
@@ -7546,7 +7546,7 @@ arti_invoke(obj)
 			if (!(uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 			getdir((char *)0);
 			
@@ -7573,7 +7573,7 @@ arti_invoke(obj)
 			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 			char food_types[] = { FOOD_CLASS, 0 };
 			struct obj *otmp = (struct obj *) 0;
@@ -7602,7 +7602,7 @@ arti_invoke(obj)
 			if (!corpse) corpse = getobj(food_types, "make a skeletal minion of");
 			if (!corpse) {
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 
 			struct permonst *pm = &mons[corpse->corpsenm];
@@ -7612,15 +7612,15 @@ arti_invoke(obj)
 			) || (is_clockwork(pm) || is_unalive(pm))){
 				pline("That creature has no bones!");
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			} else if (undiffed_innards(pm) || no_innards(pm)){
 				pline("That creature has no bones!");
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			} else if (is_untamable(pm) || (pm->geno & G_UNIQ)){
 				pline("You can't create a minion of that type of monster!");
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 			if (is_mind_flayer(pm)){
 				//Ceremorphosis works on a wide variety of hostes, however, it is typically only done to human-sized creatures.
@@ -7842,7 +7842,7 @@ arti_invoke(obj)
 				 default:
 					impossible("Unknown spellbook level %d, book %d;",
 						objects[booktype].oc_level, booktype);
-					return 0;
+					return MOVE_CANCELLED;
 				}
 				artiptr = obj;
 				set_occupation(read_necro, "studying", 0);
@@ -8343,7 +8343,7 @@ arti_invoke(obj)
 							engrHere->ward_id = CERULEAN_SIGN;
 							engrHere->ward_type = BURN;
 							engrHere->complete_wards = 1;
-							return 1;
+							return MOVE_STANDARD;
 						} else {
 							struct monst *mtmp = fmon, *ntmp;
 							boolean maanze = FALSE;
@@ -8892,7 +8892,7 @@ arti_invoke(obj)
 			/* Don't filter out ' ' here; it has a use */
 			if ((ch != def_monsyms[S_GHOST]) && (ch != def_monsyms[S_SHADE]) && index(quitchars,ch)) { 
 			if (flags.verbose) pline1(Never_mind);
-			return 1;
+			return MOVE_STANDARD;
 			}
 			You("peer into %s...", the(xname(obj)));
 			nomul(-rnd(obj->blessed ? 6 : 10), "peering through the Oracle's eye");
@@ -8942,7 +8942,7 @@ arti_invoke(obj)
 					else pline_The("vision is unclear.");
 				}
 			}
-			return 1;
+			return MOVE_STANDARD;
 		}break;
 		case ALLSIGHT:
 			You("see the world in utter clarity.");
@@ -8965,7 +8965,7 @@ arti_invoke(obj)
 			if ((!uwep && uwep == obj)){
 				You_feel("that you should be wielding %s.", the(xname(obj)));;
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 			/* message */
 			if (flags.soundok) {
@@ -8989,28 +8989,28 @@ arti_invoke(obj)
         case STONE_DRAGON:
 			You("wake the stone dragonhead.");
 			doliving_dragonhead(&youmonst, obj, TRUE);
-			time = partial_action();
+			time = MOVE_PARTIAL;
 		break;
         case MAD_KING:
 			You("wake the mad king.");
 			doliving_mad_king(&youmonst, obj, TRUE);
-			time = partial_action();
+			time = MOVE_PARTIAL;
 		break;
         case RINGED_SPEAR:
 			You("wake the ringed spear.");
 			doliving_ringed_spear(&youmonst, obj, TRUE);
-			time = partial_action();
+			time = MOVE_PARTIAL;
 		break;
         case RINGED_ARMOR:
 			You("wake the ringed armor.");
 			doliving_ringed_armor(&youmonst, obj, TRUE);
-			time = partial_action();
+			time = MOVE_PARTIAL;
 		break;
 		case BLOODLETTER:
 			if (!uwep || uwep != obj){
 				You_feel("that you should be wielding %s.", the(xname(obj)));
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 			if (artinstance[obj->oartifact].BLactive < monstermoves){
 				if (has_blood_mon(&youmonst)){
@@ -9029,7 +9029,7 @@ arti_invoke(obj)
 			if (obj != uarmf) {
 				You_feel("that you should be wearing %s.", the(xname(obj)));
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 			You("click your heels together and take a step... ");
 			jump(15);
@@ -9041,7 +9041,7 @@ arti_invoke(obj)
 			if(obj != ublindf && obj != uskin && obj != uwep) {
 				You_feel("that you should be holding %s.", the(xname(obj)));
 				obj->age = monstermoves;
-				return(0);
+				return MOVE_CANCELLED;
 			}
 			if(Upolyd && obj == uskin) {
 				/* revert */
@@ -9239,7 +9239,7 @@ arti_invoke(obj)
         case IBITE_ARM:
 			You("wake the severed arm.");
 			doliving_ibite_arm(&youmonst, obj, TRUE);
-			time = partial_action();
+			time = MOVE_PARTIAL;
 		break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
@@ -9257,7 +9257,7 @@ arti_invoke(obj)
 		     the(xname(obj)), otense(obj, "are"));
 	    /* can't just keep repeatedly trying */
 	    obj->age += (long) d(3,10);
-	    return partial_action();
+	    return MOVE_PARTIAL;
 	} else if(!on) {
 	    /* when turning off property, determine downtime */
 	    /* arbitrary for now until we can tune this -dlc */
@@ -9274,7 +9274,7 @@ nothing_special:
 	    /* you had the property from some other source too */
 	    if (carried(obj))
 		You_feel("a surge of power, but nothing seems to happen.");
-	    return 1;
+	    return MOVE_STANDARD;
 	}
 	switch(oart->inv_prop) {
 	case FAST:

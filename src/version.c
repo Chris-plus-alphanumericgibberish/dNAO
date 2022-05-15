@@ -45,14 +45,14 @@ doversion()
 	char buf[BUFSZ];
 
 	pline("%s", getversionstring(buf));
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 int
 doextversion()
 {
 	display_file(OPTIONS_USED, TRUE);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 #ifdef MICRO

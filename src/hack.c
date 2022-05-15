@@ -2305,7 +2305,7 @@ dopickup()
 		} else
 		    You("don't %s anything in here to pick up.",
 			  Blind ? "feel" : "see");
-		return(1);
+		return MOVE_STANDARD;
 	    } else {
 	    	int tmpcount = -count;
 		return loot_mon(u.ustuck, &tmpcount, (boolean *)0);
@@ -2315,26 +2315,26 @@ dopickup()
 	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You("cannot dive into the water to pick things up.");
-		return(0);
+		return MOVE_CANCELLED;
 	    } else if (!Underwater) {
 		You_cant("even see the bottom, let alone pick up %s.",
 				something);
-		return(0);
+		return MOVE_CANCELLED;
 	    }
 	}
 	if (is_lava(u.ux, u.uy)) {
 	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You_cant("reach the bottom to pick things up.");
-		return(0);
+		return MOVE_CANCELLED;
 	    } else if (!likes_lava(youracedata)) {
 		You("would burn to a crisp trying to pick things up.");
-		return(0);
+		return MOVE_CANCELLED;
 	    }
 	}
 	if(!OBJ_AT(u.ux, u.uy)) {
 		There("is nothing here to pick up.");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (!can_reach_floor()) {
 #ifdef STEED
@@ -2344,7 +2344,7 @@ dopickup()
 		else
 #endif
 		You("cannot reach the %s.", surface(u.ux,u.uy));
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
  	if (traphere && traphere->tseen) {
@@ -2356,11 +2356,11 @@ dopickup()
 		if ((traphere->ttyp == PIT || traphere->ttyp == SPIKED_PIT) &&
 		     (!u.utrap || (u.utrap && u.utraptype != TT_PIT)) && !Flying) {
 			You("cannot reach the bottom of the pit.");
-			return(0);
+			return MOVE_CANCELLED;
 		}
 	}
 
-	return (pickup(-count));
+	return (pickup(-count)) ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
 #endif /* OVLB */
