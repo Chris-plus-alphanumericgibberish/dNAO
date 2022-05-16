@@ -2927,7 +2927,7 @@ register char *cmd;
 				res = MOVE_INSTANT;
 		}
 		flags.move = res;
-		if (res == MOVE_CANCELLED || res == MOVE_INSTANT) {
+		if (res & MOVE_CANCELLED) {/* player cancelled action, don't try to repeat it */
 			multi = 0;
 		}
 		return;
