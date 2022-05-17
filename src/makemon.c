@@ -9149,35 +9149,39 @@ boolean goodequip;
 			}
 		} else if(ptr->mtyp == PM_LURKING_ONE) {
 			int i;
-			long long oprop;
-			switch(rnd(20)){
+			long long oprop = 0;
+			int spe = rn2(4);
+			if(!rn2(20)) switch(rnd(10)){
 				case 1:
+				case 2:
 					oprop = OPROP_ELECW;
 				break;
-				case 2:
+				case 3:
 					oprop = OPROP_ACIDW;
 				break;
-				case 3:
-					oprop = OPROP_MAGCW;
-				break;
 				case 4:
-					oprop = OPROP_WATRW;
-				break;
 				case 5:
 				case 6:
+					oprop = OPROP_MAGCW;
+				break;
 				case 7:
+					oprop = OPROP_WATRW;
+				break;
+				case 8:
+				case 9:
+				case 10:
 					oprop = OPROP_PSIOW;
 				break;
-				default:
-					oprop = 0;
-				break;
 			}
+			if(!oprop && !rn2(10))
+				spe = 10;
 			for(i = 2; i > 0; i--){
 				otmp = mksobj(CLUB, mkobjflags|MKOBJ_NOINIT);
 				set_material_gm(otmp, BONE);
 				add_oprop(otmp, OPROP_CCLAW);
 				add_oprop(otmp, oprop);
 				otmp->objsize = mtmp->data->msize;
+				otmp->spe = spe;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 			}
