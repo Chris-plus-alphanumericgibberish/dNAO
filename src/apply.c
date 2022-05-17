@@ -1527,6 +1527,7 @@ struct obj *obj;
 		if(!uswapwep || uswapwep->otyp != RAKUYO_DAGGER){
 			You("need the matching dagger in your swap-weapon sheath or offhand.");
 			return MOVE_CANCELLED;
+<<<<<<< HEAD
 		}
 		if(!mergable_traits(obj, uswapwep) &&
 			!((obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER) &&
@@ -1591,13 +1592,15 @@ struct obj *obj;
 		if(!uswapwep || uswapwep->otyp != BLADE_OF_PITY){
 			You("need the matching dagger in your swap-weapon sheath or offhand.");
 			return 0;
+=======
+>>>>>>> 837c6436be6ee1551c0284b6cec2ffdf04c9accf
 		}
 		if(!mergable_traits(obj, uswapwep) &&
 			!((obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER) &&
 			(uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER))
 		){
 			pline("They don't fit together!");
-			return 0;
+			return MOVE_CANCELLED;
 		}
 		if (u.twoweap) {
 			u.twoweap = 0;
@@ -1608,7 +1611,7 @@ struct obj *obj;
 		fix_object(obj);
 		You("latch %s.",the(xname(obj)));
 	}
-	return 0;
+	return MOVE_INSTANT;
 }
 
 STATIC_OVL int
