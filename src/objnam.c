@@ -3654,6 +3654,7 @@ int wishflags;
 	int blessed, uncursed, iscursed, ispoisoned, isgreased, isdrained, stolen, uncharged;
 	int moonphase = -1, viperheads = -1, ampule = -1, mat = 0;
 	int eroded, eroded2, eroded3, erodeproof;
+	int summoned = 0;
 	int gemtype = 0;
 #ifdef INVISIBLE_OBJECTS
 	int isinvisible;
@@ -3706,6 +3707,7 @@ int wishflags;
 	char *un, *dn, *actualn;
 	const char *name=0;
 	boolean isartifact = FALSE;
+	int mkobjflags = NO_MKOBJ_FLAGS;
 	
 	cnt = spe = spesgn = typ = very = rechrg =
 		blessed = uncursed = iscursed = stolen = 
@@ -3775,6 +3777,18 @@ int wishflags;
 			l = 0;
 		} else if (!strncmpi(bp, "stolen ", l=7)) {
 			stolen = 1;
+		} else if (!strncmpi(bp, "summoned ", l=9)) {
+			int tmp;
+			if (bp[9] == '(' && rindex(bp, ')')) {
+				bp += 10;
+				summoned = atoi(bp);
+				while(digit(*bp)) bp++;
+				while((*bp == ' ') || (*bp == ')')) bp++;
+				l = 0;
+			}
+			else {
+				summoned = ESUMMON_PERMANENT;
+			}
 		} else if(!strncmpi(bp, "heptagram ", l=10)){
 			heptagram = TRUE;
 		} else if(!strncmpi(bp, "gorgoneion ", l=10)){
@@ -4640,7 +4654,7 @@ int wishflags;
 		*wishreturn = WISH_SUCCESS;
 		return (&zeroobj);
 #else
-                otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT);
+                otmp = mksobj(GOLD_PIECE, mkobjflags|MKOBJ_NOINIT);
 		otmp->quan = cnt;
                 otmp->owt = weight(otmp);
 		flags.botl=1;
@@ -5212,12 +5226,21 @@ typfnd:
 		*wishreturn = WISH_DENIED;
 		return &zeroobj;
 	}
+
+	if (summoned && wizwish) {
+		mkobjflags |= MKOBJ_SUMMON;
+	}
 	
 	if(typ) {
-		otmp = mksobj(typ, NO_MKOBJ_FLAGS);
+		otmp = mksobj(typ, mkobjflags);
 	} else {
-		otmp = mkobj(oclass, FALSE);
+		otmp = mkobj(oclass, mkobjflags);
 		if (otmp) typ = otmp->otyp;
+	}
+
+	if (get_ox(otmp, OX_ESUM) && summoned != ESUMMON_PERMANENT) {
+		otmp->oextra_p->esum_p->permanent = 0;
+		adjust_timer_duration(get_timer(otmp->timed, DESUMMON_OBJ), summoned - ESUMMON_PERMANENT);
 	}
 
 	if (islit &&

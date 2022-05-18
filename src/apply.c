@@ -4430,9 +4430,8 @@ use_crook (obj)
 				"pull a monster", MENU_UNSELECTED);
 			
 			any.a_int++;
-			Sprintf(buf, "pull an object on the %s", surface(cc.x, cc.y));
 			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
-				 buf, MENU_UNSELECTED);
+				 "pull an object", MENU_UNSELECTED);
 	    end_menu(tmpwin, "Aim for what?");
 	    if (select_menu(tmpwin, PICK_ONE, &selected) > 0)
 			tohit = selected[0].item.a_int - 1;
@@ -4493,6 +4492,13 @@ use_crook (obj)
 		}
 	break;
 	case 3:	/* Object */
+		{
+		int tmp = flags.standard_polearms;
+		flags.standard_polearms = 1;
+		res = pick_polearm_target(obj, &mtmp, &cc);
+		flags.standard_polearms = tmp;
+		}
+		if (!res) return 0;
 	    if ((otmp = level.objects[cc.x][cc.y]) != 0) {
 			You("snag an object from the %s!", surface(cc.x, cc.y));
 			(void) pickup_object(otmp, 1L, FALSE);

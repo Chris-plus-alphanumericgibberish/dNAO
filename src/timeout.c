@@ -64,6 +64,7 @@ const struct propname {
     { SICK_RES, "sickness resistance" },
     { ANTIMAGIC, "magic resistance" },
     { HALLUC_RES, "hallucination resistance" },
+	{ BLOCK_CONFUSION, "confusion resistance" },
     { FUMBLING, "fumbling" },
     { HUNGER, "voracious hunger" },
     { TELEPAT, "telepathic" },
@@ -104,6 +105,7 @@ const struct propname {
     { SHATTERING, "fracturing" },
     { DARKVISION_ONLY, "darksight-override" },
     { DIMENSION_LOCK, "dimensional lock" },
+	{ CLEAR_THOUGHTS, "clear thoughts" },
     {  0, 0 },
 };
 
