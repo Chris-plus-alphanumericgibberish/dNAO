@@ -101,7 +101,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	 * If this daemon is unique and being re-summoned (the only way we
 	 * could get this far with an extinct dtype), try another.
 	 */
-	if (mvitals[dtype].mvflags & G_GONE && !In_quest(&u.uz)) {
+	if (mvitals[dtype].mvflags & G_GONE) {
 	    dtype = ndemon(atyp);
 	    if (dtype == NON_PM) return;
 	}
