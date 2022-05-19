@@ -356,8 +356,20 @@ choose_magic_special(mtmp, type)
 struct monst *mtmp;
 unsigned int type;
 {
-	int clrc_spell_power = mtmp->m_id == 0 ? (rn2(u.ulevel) * 18 / 30) : rn2(mtmp->m_lev);
-	int wzrd_spell_power = mtmp->m_id == 0 ? (rn2(u.ulevel) * 24 / 30) : rn2(mtmp->m_lev);
+	int clrc_spell_power;
+	int wzrd_spell_power;
+	if(mtmp->m_id == 0){
+		clrc_spell_power = rn2(u.ulevel) * 18 / 30;
+		wzrd_spell_power = rn2(u.ulevel) * 24 / 30;
+	}
+	else {
+		if(mtmp->mtemplate == YITH){
+			clrc_spell_power = wzrd_spell_power = rn2(45);
+		}
+		else {
+			clrc_spell_power = wzrd_spell_power = rn2(mtmp->m_lev);
+		}
+	}
 	boolean quake = FALSE;
 	//50% favored spells
     if (rn2(2)) {
