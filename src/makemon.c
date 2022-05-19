@@ -11618,11 +11618,10 @@ int faction;
 				}
 				if(Infuture){
 					if (mndx == PM_MIND_FLAYER){
-						m_initlgrp(mtmp, mtmp->mx, mtmp->my);
+						m_initsgrp(mtmp, mtmp->mx, mtmp->my);
 					}
 					if (mndx == PM_MASTER_MIND_FLAYER){
-						m_initsgrp(mtmp, mtmp->mx, mtmp->my);
-						for(num = d(2,3); num >= 0; num--) makemon_full(&mons[PM_MIND_FLAYER], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+						for(num = d(2,3); num >= 0; num--) makemon_full(&mons[PM_MIND_FLAYER], mtmp->mx, mtmp->my, MM_ADJACENTOK|MM_NOGROUP, template, faction);
 					}
 				}
 			}
