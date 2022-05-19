@@ -2042,7 +2042,11 @@ karemade:
 					}
 					else (void) makemon((struct permonst *)0, 0, 0, NO_MM_FLAGS);
 				}
-				if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz)) && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS] && !DimensionalLock && check_insight()){
+				if(!(mvitals[PM_HOUND_OF_TINDALOS].mvflags&G_GONE && !In_quest(&u.uz))
+					&& (level_difficulty()+u.ulevel)/2+5 > monstr[PM_HOUND_OF_TINDALOS]
+					&& !DimensionalLock
+					&& check_insight()
+				){
 					int x, y;
 					int cx, cy;
 					char messaged = FALSE;
