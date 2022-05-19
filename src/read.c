@@ -648,7 +648,7 @@ doread()
 	) {
 	    pline(silly_thing_to, "read");
 	    return(0);
-	} else if ((Babble || Strangled || Drowning) 
+	} else if ((Babble || Strangled || Drowning ||mad_turn(MAD_TOO_BIG))
 		&& (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS || (scroll->oclass == TILE_CLASS && objects[scroll->otyp].oc_magic))
 	){
 		if(Strangled)
@@ -657,6 +657,8 @@ doread()
 			You_cant("read that aloud, you're drowning!");
 		else if(Babble)
 			You_cant("read that aloud, you're babbling incoherently!");
+		else if(mad_turn(MAD_TOO_BIG))
+			pline("It's too big!");
 		else
 			impossible("You can't read that aloud for some reason?");
 	    return(0);
