@@ -10729,7 +10729,7 @@ boolean randmonst;
 			mkmon_template = CRANIUM_RAT;
 		}
 		/* insight check: making yith */
-		else if(randmonst && check_insight()){
+		else if(randmonst && check_insight() && (level_difficulty()+u.ulevel)/2+5 > monstr[PM_DEMILICH]){
 			mkmon_template = YITH;
 		}
 		/* most general case at bottom -- creatures randomly being zombified */
