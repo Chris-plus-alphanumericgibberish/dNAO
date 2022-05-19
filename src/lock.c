@@ -807,7 +807,7 @@ doforce()		/* try to force a chest with your weapon */
 		    else
 				xlock.chance = uwep->spe + objects[uwep->otyp].oc_wldam.oc_damd;
 		    xlock.picktyp = picktyp;
-		    xlock.usedtime = 0;    
+		    xlock.usedtime = 0;
 		    xlock.door = door;
 		    xlock.box = 0;
 		    set_occupation(forcedoor, "forcing the door", 0);
