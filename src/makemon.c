@@ -13305,7 +13305,7 @@ struct monst *mtmp, *victim;
 	    // if (mtmp->mhpmax + max_increase > hp_threshold + 1)
 			// max_increase = max((hp_threshold + 1) - mtmp->mhpmax, 0);
 	    // cur_increase = (max_increase > 0) ? rn2(max_increase)+1 : 0;
-		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < victim->m_lev + d(2,5)){ /*allow monsters to quickly gain hp up to around their HP limit*/
+		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < victim->m_lev + (d(2,5) + heal_mlevel_bonus())){ /*allow monsters to quickly gain hp up to around their HP limit*/
 			max_increase = 1;
 			cur_increase = 1;
 			if(Role_if(PM_BARD) && mtmp->mtame && canseemon(mtmp)){
@@ -14127,6 +14127,9 @@ struct monst *mon;
 
 	if (mon->ispolyp) lev_limit = max(lev_limit, 30);
 	
+	if(Role_if(PM_HEALER) && mon->mtame && lev_limit < 49)
+		lev_limit = min_ints(49, lev_limit + heal_mlevel_bonus());
+
 	return lev_limit;
 }
 #endif /* OVLB */

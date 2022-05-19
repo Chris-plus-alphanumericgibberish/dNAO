@@ -3265,6 +3265,7 @@ E void FDECL(bypass_obj, (struct obj *));
 E void NDECL(clear_bypasses);
 E int FDECL(magic_negation, (struct monst *));
 E void FDECL(light_damage, (genericptr_t, long));
+E int NDECL(heal_mlevel_bonus);
 
 /* ### write.c ### */
 

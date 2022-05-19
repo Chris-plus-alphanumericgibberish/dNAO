@@ -987,7 +987,7 @@ struct monst *mon;
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
 		if(Role_if(PM_HEALER))
-			base += def_beastmastery();
+			base += heal_mlevel_bonus();
 	}
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
@@ -2251,6 +2251,31 @@ def_beastmastery()
 	}
 	if((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
 		bm *= 2;
+	return bm;
+}
+
+int
+heal_mlevel_bonus()
+{
+	int bm = 0;
+	switch (P_SKILL(P_BEAST_MASTERY)) {
+		case P_ISRESTRICTED: bm +=  0; break;
+		case P_UNSKILLED:    bm +=  0; break;
+		case P_BASIC:        bm +=  1; break;
+		case P_SKILLED:      bm +=  2; break;
+		case P_EXPERT:       bm +=  5; break;
+		default: impossible(">Expert beast mastery unhandled"); bm += 5; break;
+	}
+	if((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
+		bm *= 2;
+	switch (P_SKILL(P_HEALING_SPELL)) {
+		case P_ISRESTRICTED: bm +=  0; break;
+		case P_UNSKILLED:    bm +=  0; break;
+		case P_BASIC:        bm +=  1; break;
+		case P_SKILLED:      bm +=  2; break;
+		case P_EXPERT:       bm +=  5; break;
+		default: impossible(">Expert healing unhandled"); bm += 5; break;
+	}
 	return bm;
 }
 
