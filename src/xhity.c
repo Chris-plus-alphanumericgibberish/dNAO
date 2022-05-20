@@ -4016,6 +4016,9 @@ boolean ranged;
 	else {
 		dmg = 0;
 	}
+	if(attk->adtyp == AD_PERH){
+		dmg *= youdef ? u.ulevel : mdef->m_lev;
+	}
 	/* worms get increased damage on their bite if they are lined up with momentum */
 	if(!youagr && pa->mtyp == PM_LONG_WORM && magr->wormno && attk->aatyp == AT_BITE){
 		if(wormline(magr, bhitpos.x, bhitpos.y))
@@ -4207,6 +4210,7 @@ boolean ranged;
 	case AD_BLUD:	/* bloodied, phases (blade of blood) */
 	case AD_MERC:	/* poisoned, cold, phases (blade of mercury) */
 	case AD_GLSS:	/* silvered (mirror-shards) */
+	case AD_PERH:	/* physical damage */
 
 		/* abort if called with AT_NONE -- the attack was meant to only do special effects of the adtype. */
 		if (attk->aatyp == AT_NONE)

@@ -1526,12 +1526,12 @@ register char sym;
    which appear to be more than enough tools.
    We might also add GEM_CLASS with oc_material != GLASS 
 *** Contributed by Johanna Ploog */
-STATIC_OVL void
-know_random_obj()
+void
+know_random_obj(count)
+int count;
 {
-        register int obj, count, ct;
+        register int obj, ct;
 
-        count = rn1(11,5);
         for (ct = 500; ct > 0 && count > 0; ct--) {
            obj = rn2(NUM_OBJECTS);
            if (objects[obj].oc_magic &&
@@ -1969,7 +1969,7 @@ u_init()
 		knows_object(SPE_CAUSE_FEAR);
 		knows_object(SPE_CHARM_MONSTER);
 		/* Bards also know a lot about legendary & magical stuff. */
-		know_random_obj();
+		know_random_obj(rn1(11,5));
 		/* Bards also know all the basic wards. */
 		u.wardsknown = WARD_ACHERON|WARD_HAMSA|WARD_ELDER_SIGN|WARD_EYE|WARD_QUEEN|WARD_CAT_LORD|WARD_GARUDA;
 		u.wardsknown |= WARD_TOUSTEFNA;

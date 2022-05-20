@@ -11303,6 +11303,11 @@ int faction;
 	
 	else if(mtmp->mtyp == PM_POLYPOID_BEING)
 		mtmp->m_insight_level = 40;
+
+	else if(mtmp->mtyp == PM_APHANACTONAN_AUDIENT)
+		mtmp->m_insight_level = rnd(8);
+	else if(mtmp->mtyp == PM_APHANACTONAN_ASSESSOR)
+		mtmp->m_insight_level = 16+d(4,4);
 	
 	if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH)
 		mtmp->m_lev += u.chokhmah;

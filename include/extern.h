@@ -2930,6 +2930,7 @@ E int NDECL(uescape_entanglement);
 
 E void NDECL(u_init);
 E void FDECL(knows_object,(int) );
+E void FDECL(know_random_obj,(int));
 E void NDECL(scatter_weapons);
 
 /* ### unixmain.c ### */

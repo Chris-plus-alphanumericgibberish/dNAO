@@ -45,6 +45,7 @@
 													|| (levl[(mon)->mx][(mon)->my].lit &&  (viz_array[(mon)->my][(mon)->mx]&TEMP_DRK1 && !(viz_array[(mon)->my][(mon)->mx]&TEMP_LIT1))))))
 #define is_deaf(mon)		(!((mon)->mcanhear) ||\
 							  (mon)->mtyp == PM_NUPPERIBO ||\
+							  (mon)->mtyp == PM_APHANACTONAN_ASSESSOR ||\
 							  (mon)->mtyp == PM_ALABASTER_ELF ||\
 							  (mon)->mtyp == PM_ALABASTER_ELF_ELDER)
 
@@ -112,7 +113,7 @@
 				 ((ptr)->mtyp == PM_CYCLOPS || \
 				  (ptr)->mtyp == PM_MONOTON || \
 				  (ptr)->mtyp == PM_FLOATING_EYE) ? 1 : 2)
-#define sensitive_ears(ptr)		(((ptr)->mflagsv & MV_ECHOLOCATE) != 0L)
+#define sensitive_ears(ptr)		(((ptr)->mflagsv & MV_ECHOLOCATE) != 0L || (ptr)->mtyp == PM_APHANACTONAN_AUDIENT)
 #define nohands(ptr)		(((ptr)->mflagsb & (MB_NOHANDS|MB_NOLIMBS)) != 0L)
 #define nolimbs(ptr)		(((ptr)->mflagsb & MB_NOLIMBS) == MB_NOLIMBS)
 #define nofeet(ptr)			((ptr)->mflagsb & MB_NOFEET)

@@ -19,7 +19,18 @@ struct spell {
     int		sp_know;		/* knowlege of spell */
 };
 
+#define KEEN 20000
+
+#define incrnknow(spell)        spl_book[spell].sp_know = KEEN
+#define percdecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - (KEEN*knw)/100)
+
+#define spellev(spell)		spl_book[spell].sp_lev
+#define spellname(spell)	OBJ_NAME(objects[spellid(spell)])
+#define spellet(spell)	\
+	((char)((spell < 26) ? ('a' + spell) : ('A' + spell - 26)))
+
 #define decrnknow(spell)	spl_book[spell].sp_know--
+#define ndecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - knw)
 #define spellid(spell)		spl_book[spell].sp_id
 #define spellknow(spell)	spl_book[spell].sp_know
 #define emergency_spell(spell) (spellid(spell) == SPE_HEALING || spellid(spell) == SPE_EXTRA_HEALING || \

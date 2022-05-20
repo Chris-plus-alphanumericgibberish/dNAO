@@ -2084,6 +2084,7 @@ get_description_of_damage_type(uchar id)
 	case AD_MOON: return "silver moonlight";
 	case AD_HOLY: return "holy energy";
 	case AD_UNHY: return "unholy energy";
+	case AD_PERH: return "level-based damage";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

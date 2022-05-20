@@ -224,11 +224,12 @@
 #define AD_MOON     144 /* Silver moonlight rapier, depends on phase of moon */
 #define AD_HOLY     145 /* Holy energy (MM-stype damage not resisted by MR and doubled against holy-haters)  */
 #define AD_UNHY     146 /* Unholy energy (MM-stype damage not resisted by MR and doubled against unholy-haters) */
+#define AD_PERH     147 /* "Per-Hit-Die damage (x damage per HD of the defender, be careful with damage die size!) */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	147
+#define AD_DUNSTAN	148
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

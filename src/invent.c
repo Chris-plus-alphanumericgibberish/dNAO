@@ -2362,9 +2362,20 @@ struct obj *obj;
 	else if (obj->oclass == SCROLL_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Cast the spell on this scroll", MENU_UNSELECTED);
-	else if (obj->oclass == TILE_CLASS)
-		add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
-				"Speak the glyph on this tile", MENU_UNSELECTED);
+	else if (obj->oclass == TILE_CLASS){
+		if(obj->otyp >= SYLLABLE_OF_STRENGTH__AESH && obj->otyp <= SYLLABLE_OF_SPIRIT__VAUL)
+			add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+					"Speak the glyph on this tile", MENU_UNSELECTED);
+		else if(obj->otyp >= ANTI_CLOCKWISE_METAMORPHOSIS_G && obj->otyp <= ORRERY_GLYPH)
+			add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+					"Study the glyph on this shard", MENU_UNSELECTED);
+		else if(obj->otyp >= APHANACTONAN_RECORD && obj->otyp <= APHANACTONAN_ARCHIVE)
+			add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+					"Study the glyphs on this disk", MENU_UNSELECTED);
+		else if(obj->otyp >= FIRST_WORD && obj->otyp <= WORD_OF_KNOWLEDGE)
+			add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
+					"Study the glyph on this slab", MENU_UNSELECTED);
+	}
 	else if (obj->oclass == SPBOOK_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study this spellbook", MENU_UNSELECTED);
@@ -3402,6 +3413,15 @@ winid *datawin;
 			OBJPUTSTR("Read to permanently learn the Word of Knowledge.");
 			OBJPUTSTR("Adds a new ability to the #monster powers menu.");
 			OBJPUTSTR("Permanently grants plus three to pet cap.");
+		break;
+		case APHANACTONAN_RECORD:
+			OBJPUTSTR("Read to identify some random item types.");
+		break;
+		case APHANACTONAN_ARCHIVE:
+			OBJPUTSTR("Read to identify some random item types and other knowledge.");
+		break;
+		default:
+			OBJPUTSTR("Read to acquire the thought symbolized by this glyph.");
 		break;
 		}
 	}

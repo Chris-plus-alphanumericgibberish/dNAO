@@ -1509,9 +1509,15 @@ POTION(("blood", "blood-red"),            0, 18, 50,  CLR_RED, O_USKWN(1)),	/* e
 	BONE_TILE(("beast's embrace glyph",  "curling beast's claw"),   0),		// BEASTS_EMBRACE
 	BONE_TILE(("orrery glyph",  "set of nested dotted circles"),   0),		// SIGHT
 #undef BONE_TILE
+#define GOLD_DISK(names, clr, wt, sz,...) OBJECT( \
+		DEF_BLINDNAME(names, "disk"), BITS(0,0,0,0,0,0,0,1,sz,0,0,0,0,P_NONE,GOLD, UNIDED), {0}, \
+		TILE_CLASS, 0, 0, wt, 0, {0}, {0}, 0, 0, 0, 6, clr, __VA_ARGS__)
+	GOLD_DISK(("aphanactonan record",  "disk"), CLR_ORANGE, 80, MZ_MEDIUM),
+	GOLD_DISK(("aphanactonan archive",  "disk"), CLR_ORANGE, 800, MZ_LARGE),
+#undef GOLD_DISK
 #define METALIC_SLAB(names, clr,...) OBJECT( \
 		DEF_BLINDNAME(names, "slab"), BITS(0,0,0,0,1,0,1,1,MZ_HUGE,0,0,0,0,P_NONE,METAL, IDED|UNIDED), {0}, \
-		TILE_CLASS, 0, 0, 3, 3000, {0}, {0}, 0, 0, 0, 6, clr, __VA_ARGS__)
+		TILE_CLASS, 0, 0, 300, 3000, {0}, {0}, 0, 0, 0, 6, clr, __VA_ARGS__)
 	/* Fixed descriptions (also, artifact base-items only) *//*Needs encyc entry*/
 	METALIC_SLAB(("First Word",  "blinding glyph"), CLR_YELLOW),
 	METALIC_SLAB(("Dividing Word",  "cerulean glyph"), HI_ZAP),

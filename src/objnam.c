@@ -814,7 +814,12 @@ boolean dofull;
 				Strcat(buf, "stale ");
 #endif
 		}
-
+		break;
+	case TILE_CLASS:
+			if ((obj->otyp == APHANACTONAN_RECORD || obj->otyp == APHANACTONAN_ARCHIVE) && !objects[obj->otyp].oc_name_known){
+				Strcat(buf, "inscribed ");
+			}
+		break;
 	}
 
 }
@@ -1453,7 +1458,9 @@ boolean adjective;
 	case SILVER:
 		return "silver";
 	case GOLD:
-		return (adjective ? "golden" : "gold");
+		if(obj->otyp == APHANACTONAN_RECORD || obj->otyp == APHANACTONAN_ARCHIVE)
+			return (adjective ? "golden-red" : "red gold");
+		else return (adjective ? "golden" : "gold");
 	case PLATINUM:
 		return "platinum";
 	case LEAD:
@@ -1525,7 +1532,7 @@ boolean adjective;
 		break;
 	case OBSIDIAN_MT:
 		return "obsidian";
-		case SALT:
+	case SALT:
 		return "salt";
 	case SHADOWSTEEL:
 		return (adjective ? "shadowsteel" : "corporeal darkness");
@@ -1714,7 +1721,7 @@ boolean with_price;
 		static const char standardized[] = { RING_CLASS, AMULET_CLASS, POTION_CLASS, SCROLL_CLASS,
 									SPBOOK_CLASS, WAND_CLASS, GEM_CLASS, TILE_CLASS, 0 };
 
-		if (index(standardized, (char)obj->oclass)) {
+		if (index(standardized, (char)obj->oclass) && obj->otyp != APHANACTONAN_RECORD && obj->otyp != APHANACTONAN_ARCHIVE) {
 			if (!bn)
 				impossible("otyp %d doesn't have a when-blind name, and is assumed to!", typ);
 			if (!obj->dknown) {

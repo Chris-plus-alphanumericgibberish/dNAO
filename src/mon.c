@@ -725,6 +725,37 @@ register struct monst *mtmp;
 			}
 			rem_mx(mtmp, MX_ENAM);
 		break;
+	    case PM_APHANACTONAN_AUDIENT:
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
+			obj->quan = d(2,4);
+			obj->owt = weight(obj);
+			rem_mx(mtmp, MX_ENAM);
+			if(!rn2(20))
+				obj = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
+			obj = mksobj_at(APHANACTONAN_RECORD, x, y, NO_MKOBJ_FLAGS);
+		break;
+	    case PM_APHANACTONAN_ASSESSOR:
+			obj = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
+			obj->quan = d(4,8);
+			obj->owt = weight(obj);
+			rem_mx(mtmp, MX_ENAM);
+			obj = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
+			num = d(4,4);
+			while (num--){
+				obj = mksobj_at(EYEBALL, x, y, MKOBJ_NOINIT);
+				obj->corpsenm = PM_BEHOLDER;
+			}
+			num = d(2,4);
+			while(num--){
+				obj = mksobj_at(ARCHAIC_PLATE_MAIL, x, y, NO_MKOBJ_FLAGS);
+				set_material_gm(obj, COPPER);
+				obj->spe = 4;
+			}
+			obj = mksobj_at(CORPSE, x, y, NO_MKOBJ_FLAGS);
+			obj->corpsenm = PM_FLOATING_EYE;
+			fix_object(obj);
+			obj = mksobj_at(APHANACTONAN_ARCHIVE, x, y, NO_MKOBJ_FLAGS);
+		break;
 	    case PM_PARASITIZED_DOLL:
 			num = d(2,4);
 			while (num--){
@@ -4290,6 +4321,7 @@ int adtyp;
 	switch(mdat->mtyp){
 		case PM_GAS_SPORE:
 		case PM_DUNGEON_FERN_SPORE:
+		case PM_APHANACTONAN_AUDIENT:
 			return EXPL_NOXIOUS;
 		case PM_SWAMP_FERN_SPORE:
 			return EXPL_MAGICAL;
@@ -4395,7 +4427,6 @@ boolean was_swallowed;			/* digestion */
 					} 
 					else if (canseemon(magr)) pline("%s seems to have indigestion.", Monnam(magr));
 				}
-			
 				return FALSE;
 			}
 			
@@ -4494,7 +4525,10 @@ boolean was_swallowed;			/* digestion */
 						mon_expl_color(mdat, mdat->mattk[i].adtyp), 
 						1);
 			}
-	    	if(mdat->mtyp == PM_GARO_MASTER || mdat->mtyp == PM_GARO) return (TRUE);
+	    	if(mdat->mtyp == PM_GARO_MASTER
+				|| mdat->mtyp == PM_GARO
+				|| mdat->mtyp == PM_APHANACTONAN_AUDIENT
+			) return (TRUE);
 			else return (FALSE);
 	    } //End AT_BOOM != AD_HLBD && != AD_POSN
 		else if(mdat->mattk[i].adtyp == AD_HLBD && mdat->mtyp == PM_ASMODEUS){
@@ -4707,6 +4741,8 @@ boolean was_swallowed;			/* digestion */
 		   || (mdat->geno & G_UNIQ)
 		   || is_alabaster_mummy(mon->data)
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
+		   || mdat->mtyp == PM_APHANACTONAN_AUDIENT
+		   || mdat->mtyp == PM_APHANACTONAN_ASSESSOR
 		   || mdat->mtyp == PM_HARROWER_OF_ZARIEL
 		   || mdat->mtyp == PM_UNDEAD_KNIGHT
 		   || mdat->mtyp == PM_WARRIOR_OF_SUNLIGHT

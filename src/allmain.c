@@ -3972,6 +3972,7 @@ printAttacks(buf, ptr)
 		"silver moonlight",		/*144*/
 		"holy energy",			/*145*/
 		"unholy energy",		/*146*/
+		"level-based damage",	/*147*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */

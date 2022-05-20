@@ -46,6 +46,7 @@ STATIC_DCL void NDECL(mkferrubarracks);
 STATIC_DCL void NDECL(mkinvertzigg);
 STATIC_DCL void FDECL(mkmch, (int));
 STATIC_DCL void FDECL(mkwrk, (int));
+STATIC_DCL void FDECL(mkaph, (int));
 STATIC_DCL void FDECL(mklostitem, (int));
 STATIC_DCL void FDECL(mklawfossil, (int));
 STATIC_DCL void FDECL(mkcamp, (int));
@@ -4964,6 +4965,80 @@ int typ;
 
 STATIC_OVL
 void
+mkaph(junked)
+int junked;
+{
+	int x, y, i, tries = 0, good = FALSE;
+	struct obj *otmp;
+	struct monst *mon;
+	if(junked){
+		for(i = rnd(2) + rn2(2); i > 0; i--){
+			mon = makemon(&mons[PM_APHANACTONAN_AUDIENT], 0, 0, NO_MM_FLAGS);
+			if(mon && !good){
+				good = TRUE;
+				x = mon->mx;
+				y = mon->my;
+				if(!rn2(20)){
+					struct obj *statue;
+					statue = mksobj_at(STATUE, x, y, NO_MKOBJ_FLAGS);
+					if(statue){
+						statue->corpsenm = PM_APHANACTONAN_ASSESSOR;
+						fix_object(statue);
+						otmp = mksobj(CLOCKWORK_COMPONENT, MKOBJ_NOINIT);
+						if(otmp){
+							otmp->quan = d(4,8)/2;
+							otmp->oeroded2 = 3;
+							otmp->owt = weight(otmp);
+							add_to_container(statue, otmp);
+						}
+						otmp = mksobj(UPGRADE_KIT, NO_MKOBJ_FLAGS);
+						if(otmp){
+							add_to_container(statue, otmp);
+						}
+						if(!rn2(20)){
+							otmp = mksobj(APHANACTONAN_ARCHIVE, NO_MKOBJ_FLAGS);
+							if(otmp){
+								add_to_container(statue, otmp);
+							}
+						}
+					}
+				}
+				else {
+					otmp = mksobj_at(CLOCKWORK_COMPONENT, x, y, NO_MKOBJ_FLAGS);
+					if(otmp){
+						otmp->quan = d(4,8)/2;
+						otmp->oeroded2 = 3;
+						otmp->owt = weight(otmp);
+					}
+					if(rn2(2)){
+						otmp = mksobj_at(ARCHAIC_PLATE_MAIL, x, y, NO_MKOBJ_FLAGS);
+						if(otmp){
+							otmp->oeroded2 = 3;
+						}
+					}
+					if(!rn2(4)){
+						otmp = mksobj_at(UPGRADE_KIT, x, y, NO_MKOBJ_FLAGS);
+						if(otmp){
+							otmp->oeroded2 = 3;
+						}
+					}
+				}
+			}
+		}
+	}
+	else {
+		mon = makemon(&mons[PM_APHANACTONAN_ASSESSOR], 0, 0, NO_MM_FLAGS);
+		if(mon){
+			x = mon->mx;
+			y = mon->my;
+			makemon(&mons[PM_APHANACTONAN_AUDIENT], x, y, MM_ADJACENTOK);
+			makemon(&mons[PM_APHANACTONAN_AUDIENT], x, y, MM_ADJACENTOK);
+		}
+	}
+}
+
+STATIC_OVL
+void
 mklostitem(typ)
 int typ;
 {
@@ -5192,6 +5267,9 @@ place_law_features()
 {
 	int n;
 	if(Is_path(&u.uz)){
+		int cutoff = rn2(9);
+		for(n = 4; n > 0; n--)
+			mkaph(cutoff >= n);
 		if(!rn2(10)){
 		// if(1){
 			n = 10-int_sqrt(rnd(99));

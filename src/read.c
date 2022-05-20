@@ -37,6 +37,7 @@ static void FDECL(ranged_set_lightsources, (int, int, genericptr_t));
 static int FDECL(read_tile, (struct obj *));
 static int FDECL(study_word, (struct obj *));
 static int NDECL(learn_word);
+static void FDECL(learn_spell_aphanactonan, (int));
 
 int
 doread()
@@ -741,7 +742,7 @@ struct obj *scroll;
 {
 	int duration;
 	long int thought;
-	
+
 	if(!scroll->dknown){
 		You("have never seen it!");
 		return 0;
@@ -839,6 +840,87 @@ struct obj *scroll;
 		}
 		u.uvaul_duration += duration;
 		if(!scroll->cursed) u.uvaul++;
+	} else if(scroll->otyp == APHANACTONAN_RECORD){
+		if(Blind){
+			You("can't see the disk.");
+			return 0;
+		}
+		else {
+			You("study the glyph-inscribed disk.");
+			if(u.veil){
+				You("can't understand what they say.");
+				return 0;
+			}
+			else {
+				You("can't understand what they say...");
+				pline("Suddenly, the glyphs glow in rainbow hues and escape from the fracturing disk!");
+				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
+				know_random_obj(2 + rn2(3) + rn2(5));
+				change_uinsight(1);
+			}
+		}
+	} else if(scroll->otyp == APHANACTONAN_ARCHIVE){
+		if(Blind){
+			You("can't see the disk.");
+			return 0;
+		}
+		else {
+			You("study the glyph-inscribed disk.");
+			if(u.veil){
+				You("can't understand what it says.");
+				return 0;
+			}
+			else {
+				int i;
+				int rolls;
+				boolean seals = FALSE, wards = FALSE, combat = FALSE;
+				You("can't understand what it says...");
+				pline("Suddenly, the glyphs glow in impossible hues and escape from the fracturing disk!");
+				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
+				know_random_obj(4 + rn2(5) + rn2(9));
+				change_uinsight(rnd(8));
+				change_usanity(-1*d(8,8),TRUE);
+				
+				for(rolls = d(1,4); rolls > 0; rolls--){
+					switch(rnd(4)){
+						case 1:
+							for(i = rnd(4); i > 0; i--){
+								learn_spell_aphanactonan(rn1(SPE_BLANK_PAPER - SPE_DIG, SPE_DIG));
+							}
+						break;
+						case 2:
+							if(!Role_if(PM_EXILE)){
+								if(!seals){
+									You("see circular seals!");
+									seals = TRUE;
+								}
+								for(i = rnd(8); i > 0; i--){
+									u.sealsKnown |= 0x1L<<rn2(YMIR-FIRST_SEAL+1);
+								}
+							}
+						break;
+						case 3:
+							if(!wards){
+								You("see warding signs!");
+								wards = TRUE;
+							}
+							for(i = d(2,4); i > 0; i--){
+								u.wardsknown |= 0x1L<<rnd(NUM_WARDS-1); //Note: Ward_Elbereth is 0x1L, and does nothing.
+							}
+						break;
+						case 4:
+							if(!combat){
+								You("suddenly know secret combat techniques!");
+								combat = TRUE;
+							}
+							u.uhitinc = min_ints(100, u.uhitinc+d(1,2));
+							u.udaminc = min_ints(100, u.udaminc+d(1,2));
+							u.uacinc = min_ints(100, u.uacinc+d(1,2));
+						break;
+					}
+				}
+			}
+		}
 	} else if(scroll->otyp >= ANTI_CLOCKWISE_METAMORPHOSIS_G && scroll->otyp <= BEAST_S_EMBRACE_GLYPH) {
 		thought = otyp_to_thought(scroll->otyp);
 
@@ -3682,6 +3764,60 @@ createmon:
 	}
 	return mtmp;
 }
+
+static void
+learn_spell_aphanactonan(spellnum)
+int spellnum;
+{
+	int i;
+	char splname[BUFSZ];
+	Sprintf(splname, objects[spellnum].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[spellnum]));
+	for (i = 0; i < MAXSPELL; i++)  {
+		if (spellid(i) == spellnum)  {
+			if (spellknow(i) <= KEEN) {
+				Your("knowledge of %s is keener.", splname);
+				incrnknow(i);
+				exercise(A_WIS,TRUE);       /* extra study */
+			} else { /* 1000 < spellknow(i) <= KEEN */
+				You("know %s quite well already.", splname);
+			}
+			break;
+		} else if (spellid(i) == NO_SPELL)  {
+			spl_book[i].sp_id = spellnum;
+			spl_book[i].sp_lev = objects[spellnum].oc_level;
+			incrnknow(i);
+			You("suddenly know how to cast %s!",OBJ_NAME(objects[spellnum]));
+			break;
+		}
+	}
+	int booktype;
+	if ((booktype = further_study(spellnum))){
+		You("can even see a way to cast another spell.");
+		Sprintf(splname, objects[booktype].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[booktype]));
+		for (i = 0; i < MAXSPELL; i++)  {
+			if (spellid(i) == booktype)  {
+				if (spellknow(i) <= KEEN) {
+					Your("knowledge of %s is keener.", splname);
+					incrnknow(i);
+					exercise(A_WIS, TRUE);       /* extra study */
+				}
+				else { /* 1000 < spellknow(i) <= KEEN */
+					You("know %s quite well already.", splname);
+				}
+				break;
+			}
+			else if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = booktype;
+				spl_book[i].sp_lev = objects[booktype].oc_level;
+				incrnknow(i);
+				You("add %s to your repertoire.", splname);
+				break;
+			}
+		}
+	}
+}
+
+
 #endif /* WIZARD */
 
 #endif /* OVLB */
