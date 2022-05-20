@@ -4107,10 +4107,7 @@ struct zapdata * zapdata;
 	boolean havemsg = FALSE;
 	boolean doshieldeff = FALSE;
 	const char * fltxt = flash_type(zapdata->adtyp, zapdata->ztyp);
-	
-	if(!dmg)
-		pline("zero damage zap?");
-	
+
 	/* macros to help put messages in the right place  */
 #define addmsg(...) do{if(!havemsg){Sprintf(buf, __VA_ARGS__);havemsg=TRUE;}else{Strcat(buf, " "); Sprintf(eos(buf), __VA_ARGS__);}}while(0)
 #define domsg() do{if((youagr || youdef || canseemon(mdef)) && dmg<*hp(mdef))\
@@ -5355,13 +5352,10 @@ int damage, tell;
 	int alev, dlev;
 
 #define LUCK_MODIFIER	if(Luck > 0) alev += rnd(Luck)/2; else if(Luck < 0) alev -= rnd(-1*Luck)/2;
-	
-	pline("%d",damage);
+
 	damage -= avg_spell_mdr(mtmp);
 	if(damage < 0)
 		damage = 0;
-	pline("%d",damage);
-	
 	/* attack level */
 	switch (oclass) {
 	    case WAND_CLASS:	
