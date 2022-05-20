@@ -4253,7 +4253,7 @@ int wishflags;
 		} else if (!strncmpi(bp, "rustling ", l=9)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_PSIOW);
 
-		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", 8)) || !strncmpi(bp, "mumbling ", l=9)) {
+		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", 8) && strncmpi(bp, "deep dragon", 11)) || !strncmpi(bp, "mumbling ", l=9)) {
 			add_oprop_list(oprop_list, OPROP_DEEPW);
 
 		} else if (!strncmpi(bp, "sizzling ", l=9)) {

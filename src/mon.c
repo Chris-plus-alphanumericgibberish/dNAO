@@ -362,6 +362,7 @@ register struct monst *mtmp;
 	    case PM_BLUE_DRAGON:
 	    case PM_GREEN_DRAGON:
 	    case PM_YELLOW_DRAGON:
+	    case PM_DEEP_DRAGON:
 		/* Make dragon scales.  This assumes that the order of the */
 		/* dragons is the same as the order of the scales.	   */
 		if (!rn2(mtmp->mrevived ? 20 : 3)) {
