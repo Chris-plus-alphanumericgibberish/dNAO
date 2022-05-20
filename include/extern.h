@@ -2516,6 +2516,7 @@ E void NDECL(check_loadout_trophy);
 E void NDECL(give_nightmare_hunter_trophy);
 E void NDECL(check_madman_trophy);
 E void NDECL(check_drunkard_trophy);
+E void NDECL(give_bokrug_trophy);
 #endif
 
 /* ### rumors.c ### */

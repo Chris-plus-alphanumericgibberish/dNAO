@@ -3431,6 +3431,7 @@ struct obj *otmp;
 		You("sink into cool lake water...");
 		You("don't drown. You have achieved the status of Demigod%s!",
 			flags.female ? "dess" : "");
+		give_bokrug_trophy();
 		done(ASCENDED);
 	}
 	//else

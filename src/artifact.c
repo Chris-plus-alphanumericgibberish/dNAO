@@ -9134,6 +9134,7 @@ arti_invoke(obj)
 					struct obj *statue = mksartifact(ART_IDOL_OF_BOKRUG__THE_WATER_);
 					statue->oerodeproof = TRUE;
 					statue->spe = 1;
+					give_bokrug_trophy();
 					place_object(statue, 37+rn2(7), 18+rn2(2));
 					You_hear("water bubbling.");
 					int i, j;

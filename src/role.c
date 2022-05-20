@@ -2736,4 +2736,12 @@ check_drunkard_trophy()
 }
 #endif
 
+#ifdef RECORD_ACHIEVE
+void
+give_bokrug_trophy()
+{
+	achieve.trophies |= BOKRUG_QUEST;
+}
+#endif
+
 /* role.c */

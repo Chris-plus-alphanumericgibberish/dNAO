@@ -2788,9 +2788,9 @@ boolean dumping;
 	CHECK_ACHIEVE(ELF_SHR_QUEST,"Driven out: completed elf shared quest")
 	CHECK_ACHIEVE(LAW_QUEST,"Ripple-resistant tower: completed law quest")
 	CHECK_ACHIEVE(NEU_QUEST,"Key to the (corpse) city: completed neutral quest")
-	CHECK_ACHIEVE(CHA_QUEST,"Asinine paradigm: completed chaos temple quest")
-	CHECK_ACHIEVE(MITH_QUEST,"Chasing after the wind: completed mithardir quest")
-	CHECK_ACHIEVE(MORD_QUEST,"Fossil of the First Age: completed mordor quest")
+	CHECK_ACHIEVE(CHA_QUEST,"Asinine paradigm: completed Chaos Temple quest")
+	CHECK_ACHIEVE(MITH_QUEST,"Chasing after the wind: completed Mithardir quest")
+	CHECK_ACHIEVE(MORD_QUEST,"Fossil of the First Age: completed Mordor quest")
 	CHECK_ACHIEVE(SECOND_THOUGHTS,"Had second thoughts after a drow quest")
 	CHECK_ACHIEVE(LAMASHTU_KILL,"Does this count as a paradox?: killed Lamashtu")
 	CHECK_ACHIEVE(BAALPHEGOR_KILL,"A universe without motion: killed Baalphegor")
@@ -2805,6 +2805,7 @@ boolean dumping;
 	CHECK_ACHIEVE(NIGHTMAREHUNTER,"Hunter of Nightmares")
 	CHECK_ACHIEVE(QUITE_MAD,"Quite Mad: Suffered six madnesses")
 	CHECK_ACHIEVE(TOTAL_DRUNK,"Booze Hound")
+	CHECK_ACHIEVE(BOKRUG_QUEST,"Detestable gods: Completed Bokrug's ascension ritual")
 		
 #undef	CHECK_ACHIEVE
 	}
