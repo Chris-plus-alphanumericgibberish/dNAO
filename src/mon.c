@@ -8002,7 +8002,8 @@ struct monst *mtmp;
 					tmpm->mpeaceful = 1;
 				} else {
 					if(tmpm->mtame && !(EDOG(tmpm)->loyal)){
-						untame(mtmp, FALSE);
+						untame(tmpm, FALSE);
+						tmpm->mpeaceful = 0;
 						set_malign(tmpm);
 					}
 					else if(!tmpm->mtame && tmpm->mpeaceful){
