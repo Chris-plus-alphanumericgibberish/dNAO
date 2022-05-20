@@ -852,6 +852,7 @@ int distance;
 					min(1, P_SKILL(P_MUSICALIZE)-P_UNSKILLED) * 3, 
 					FALSE, TRUE);
 				if (mtmp->mpeaceful && rn2(10)) {
+					//How does this interact with tameness?
 					mtmp->mpeaceful = 0;
 				}
 			}
@@ -1328,6 +1329,7 @@ awaken_soldiers()
 	while(mtmp) {
 	    if (!DEADMONSTER(mtmp) &&
 			is_mercenary(mtmp->data) && mtmp->mtyp != PM_GUARD) {
+		//How does this interact with tameness?
 		mtmp->mpeaceful = mtmp->msleeping = mtmp->mfrozen = 0;
 		mtmp->mcanmove = 1;
 		if (canseemon(mtmp))

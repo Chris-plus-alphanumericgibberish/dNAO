@@ -352,7 +352,7 @@
 
 #define HDetect_monsters	u.uprops[DETECT_MONSTERS].intrinsic
 #define EDetect_monsters	u.uprops[DETECT_MONSTERS].extrinsic
-#define Detect_monsters		(HDetect_monsters || EDetect_monsters)
+#define Detect_monsters		(HDetect_monsters || EDetect_monsters || wizard)
 
 #define HTelepat		u.uprops[TELEPAT].intrinsic
 #define ETelepat		u.uprops[TELEPAT].extrinsic

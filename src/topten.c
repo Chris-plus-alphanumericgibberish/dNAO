@@ -573,6 +573,7 @@ int how;
          }
 #endif /* XLOGFILE */
 
+	// if (FALSE && (wizard || discover)) {
 	if (wizard || discover) {
 	    if (how != PANICKED) HUP {
 		char pbuf[BUFSZ];

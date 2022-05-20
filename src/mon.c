@@ -4398,6 +4398,7 @@ boolean was_swallowed;			/* digestion */
 	/* Gas spores always explode upon death */
 	for(i = 0; i < NATTK; i++) {
 		if(mdat->mattk[i].aatyp == AT_NONE &&  mdat->mattk[i].adtyp == AD_OONA){
+			//!!!
 			mdat->mattk[i].aatyp = AT_BOOM;
 			mdat->mattk[i].adtyp = u.oonaenergy;
 		}
