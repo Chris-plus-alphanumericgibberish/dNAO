@@ -330,7 +330,9 @@ static struct trobj Knight[] = {
 	{ KITE_SHIELD, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+#define K_APPLES 7
 	{ APPLE, 0, FOOD_CLASS, 10, 0 },
+#define K_CARROTS 8
 	{ CARROT, 0, FOOD_CLASS, 10, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
@@ -2100,7 +2102,11 @@ u_init()
 		break;
 	case PM_KNIGHT:
 		if(Race_if(PM_DWARF)) ini_inv(DwarfNoble);
-		else ini_inv(Knight);
+		else if(Race_if(PM_HALF_DRAGON)){
+			Knight[K_APPLES].trquan = rn1(9, 5);
+			Knight[K_CARROTS].trquan = 1;
+			ini_inv(Knight);
+		} else ini_inv(Knight);
 		knows_class(WEAPON_CLASS);
 		knows_class(ARMOR_CLASS);
 		/* give knights chess-like mobility
