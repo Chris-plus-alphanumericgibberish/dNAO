@@ -2052,7 +2052,7 @@ struct obj *otmp;
 		     * alternative form's food! 
 		     */
 		    pline("That tripe ration was surprisingly good!");
-		else if (maybe_polyd(is_orc(youmonst.data), Race_if(PM_ORC)) || maybe_polyd(is_half_dragon(youmonst.data), Race_if(PM_HALF_DRAGON)))
+		else if (maybe_polyd(is_orc(youmonst.data), Race_if(PM_ORC)) || Race_if(PM_HALF_DRAGON))
 		    pline(Hallucination ? "Tastes great! Less filling!" :
 			  "Mmm, tripe... not bad!");
 		else {
