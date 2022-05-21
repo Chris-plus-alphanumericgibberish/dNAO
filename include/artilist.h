@@ -2100,7 +2100,7 @@ A("Idol of Bokrug, the water-lizard",		STATUE,	"sea-green stone likeness of a wa
 	NOINVOKE, NOFLAG
 	),
 
-A("The Star of Hypernotus",		AMULET_VERSUS_CURSES,	"blue-green star-shaped stone",
+A("The Star of Hypernotus",		AMULET_VERSUS_CURSES,	"blue-green star-shaped %s",
 	2500L, GEMSTONE, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_MADMAN, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
