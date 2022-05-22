@@ -1434,10 +1434,11 @@ check_insight()
 }
 
 int
-roll_generic_madness()
+roll_generic_madness(clearable)
+boolean clearable;
 {
 	int sanlevel;
-	if(ClearThoughts)
+	if(clearable && ClearThoughts)
 		return 0;
 
 	sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
@@ -1448,10 +1449,11 @@ roll_generic_madness()
 }
 
 int
-roll_generic_flat_madness()
+roll_generic_flat_madness(clearable)
+int clearable;
 {
 	int sanlevel;
-	if(ClearThoughts)
+	if(clearable && ClearThoughts)
 		return 0;
 
 	if(u.usanity < rnd(100))
