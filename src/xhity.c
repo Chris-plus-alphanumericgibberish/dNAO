@@ -215,8 +215,13 @@ struct monst * mdef;
 	/* Do the attacks */
 	bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
 	if (!isok(bhitpos.x, bhitpos.y)) {
-		bhitpos.x = u.ux;
-		bhitpos.y = u.uy;
+		if (u.uswallow) {
+			bhitpos.x = u.ux;
+			bhitpos.y = u.uy;
+		}
+		else {
+			return TRUE;
+		}
 	}
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	if (attack_type == ATTACKCHECK_BLDTHRST) {
