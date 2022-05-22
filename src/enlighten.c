@@ -396,10 +396,12 @@ boolean dumping;
 	else if (u.ualign.record >= -3)	you_have("strayed");
 	else if (u.ualign.record >= -8)	you_have("sinned");
 	else you_have("transgressed");
-#ifdef WIZARD
-	if (wizard) {
+	if (wizard || final) {
 		Sprintf(buf, "%ld gold ", u.spawnedGold);
 		enl_msg(buf, "has been", "was", " created");
+	}
+#ifdef WIZARD
+	if (wizard) {
 		Sprintf(buf, " %d", u.ualign.record);
 		enl_msg("Your alignment ", "is", "was", buf);
 		Sprintf(buf, " %d sins", u.ualign.sins);
