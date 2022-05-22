@@ -1564,6 +1564,9 @@ char *buf;
 	} else if(obj->oartifact == ART_IBITE_ARM && artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material){
 		//Ibite arm descriptor includes "flabby," which is both a material and an appearance :-/
 		return;
+	} else if(obj->oartifact == ART_STAR_OF_HYPERNOTUS && artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material){
+		//Star of Hypernotus plays "fast and loose" with the material - and the material affects the final word rather than being a prefix
+		return;
 	} else {
 		/*Special case: circlets should always show their material, but oc_showmat is tied to otyp, not appearance */
 		if (obj->otyp == find_gcirclet())
@@ -1704,7 +1707,8 @@ boolean with_price;
 		if (strstri(oart->desc, "%s")) {
 			getting_obj_base_desc = TRUE;
 			char * buf2 = nextobuf();
-			Sprintf(buf2, oart->desc, xname(obj));
+			if (obj->oartifact == ART_STAR_OF_HYPERNOTUS) Sprintf(buf2, oart->desc, (objects[obj->ovar1].oc_name_known) ? OBJ_NAME(objects[obj->ovar1]) : "stone");
+			else Sprintf(buf2, oart->desc, xname(obj));
 			Strcat(buf, buf2);
 			getting_obj_base_desc = FALSE;
 		}
