@@ -1521,7 +1521,7 @@ struct obj *obj;
 				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
 		if(dagger && !uswapwep && carried(dagger)){
 			setuswapwep(dagger);
-			dotwoweapon();
+			if(!u.twoweap) dotwoweapon();
 		}
 	} else {
 		if(!uswapwep || uswapwep->otyp != RAKUYO_DAGGER){
@@ -1641,7 +1641,7 @@ struct obj *obj;
 				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
 		if(dagger && !uswapwep && carried(dagger)){
 			setuswapwep(dagger);
-			dotwoweapon();
+			if(!u.twoweap) dotwoweapon();
 		}
 	} else {
 		if(!uswapwep || uswapwep->otyp != FORCE_BLADE){
