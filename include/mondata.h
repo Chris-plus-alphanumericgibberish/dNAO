@@ -618,6 +618,7 @@
 #define can_breathe(ptr)	attacktype(ptr, AT_BREA)
 #define taxes_sanity(ptr)	(((ptr)->mflagsg & MG_SANLOSS) != 0L)
 #define yields_insight(ptr)	(((ptr)->mflagsg & MG_INSIGHT) != 0L)
+#define banish_kill(mtyp)	(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
 
 #define cantwield(ptr)		(nohands(ptr))
 #define could_twoweap(ptr)	attacktype(ptr, AT_XWEP)

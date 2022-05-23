@@ -1584,9 +1584,9 @@ do_pit:		    chasm = maketrap(x,y,PIT);
 									   if(!cansee(x,y) || mon)
 										   pline("%s is %sed!",
 												   cansee(x,y) ? "It" : Monnam(mtmp),
-												  nonliving(mtmp->data) ? "destroy" : "kill");
+												  banish_kill(mtmp->mtyp) ? "banish" : nonliving(mtmp->data) ? "destroy" : "kill");
 						else {
-										   You("%s %s!", nonliving(mtmp->data) ? "destroy" :
+										   You("%s %s!", banish_kill(mtmp->mtyp) ? "banish" : nonliving(mtmp->data) ? "destroy" :
 											   "kill", mtmp->mtame ?
 							x_monnam(mtmp, ARTICLE_THE, "poor",
 					M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, FALSE):

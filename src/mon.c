@@ -3158,10 +3158,10 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 #ifdef ATTACK_PETS
     // pets attack hostile monsters
-	if (magr->mtame && !mdef->mpeaceful && magr->mhp > magr->mhpmax/2)
+	if (magr->mtame && !mdef->mpeaceful && (magr->mhp > magr->mhpmax/2 || banish_kill(magr->mtyp)))
 	    return ALLOW_M|ALLOW_TM;
 	// and vice versa, with some limitations that will help your pet survive
-	if (mdef->mtame && !magr->mpeaceful && mdef->mhp > mdef->mhpmax/2 && !mdef->meating && mdef != u.usteed && !mdef->mflee)
+	if (mdef->mtame && !magr->mpeaceful && (mdef->mhp > mdef->mhpmax/2 || banish_kill(mdef->mtyp)) && !mdef->meating && mdef != u.usteed && !mdef->mflee)
 	    return ALLOW_M|ALLOW_TM;
 #endif /* ATTACK_PETS */
 
@@ -5311,7 +5311,7 @@ int how;
 	else if ((mdef->wormno ? worm_known(mdef) : cansee(mdef->mx, mdef->my))
 		&& fltxt)
 	    pline("%s is %s%s%s!", Monnam(mdef),
-			nonliving(mdef->data) ? "destroyed" : "killed",
+			banish_kill(mdef->mtyp) ? "banished" : nonliving(mdef->data) ? "destroyed" : "killed",
 		    *fltxt ? " by the " : "",
 		    fltxt
 		 );
@@ -5423,7 +5423,7 @@ xkilled(mtmp, dest)
 	}
 	
 	if (dest & 1) {
-	    const char *verb = nonliving(mtmp->data) ? "destroy" : "kill";
+	    const char *verb = banish_kill(mtmp->mtyp) ? "banish" : nonliving(mtmp->data) ? "destroy" : "kill";
 
 	    if (!wasinside && !canspotmon(mtmp))
 		You("%s it!", verb);
@@ -5657,7 +5657,7 @@ cleanup:
 		if (p_coaligned(mtmp)) u.ublessed = 0;
 		if (mdat->maligntyp == A_NONE)
 			adjalign((int)(ALIGNLIM / 4));		/* BIG bonus */
-	} else if (mtmp->mtame && !Role_if(PM_EXILE)) {
+	} else if (mtmp->mtame && u.ualign.type != A_VOID && !banish_kill(mtmp->mtyp)) {
 		adjalign(-15);	/* bad!! */
 		/* your god is mighty displeased... */
 		if (!Hallucination) You_hear("the rumble of distant thunder...");
