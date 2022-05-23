@@ -279,7 +279,7 @@ satiate_uhunger()
 		u.uen = min(u.uen+400, u.uenmax*.55);
 		newuhs(TRUE);
 	} else {
-		if(u.uhunger > min(u.uhunger+400, u.uhungermax*.55))
+		if(u.uhunger > u.uhungermax*.55)
 			return FALSE;
 		u.uhunger = u.uhungermax*.55;
 		u.uhs = NOT_HUNGRY;
