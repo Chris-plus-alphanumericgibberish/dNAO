@@ -2398,7 +2398,7 @@ u_init()
 			}
 		} else if(Role_if(PM_ANACHRONONAUT)){
 			u.umartial = TRUE;
-		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT)){
+		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT) && !Role_if(PM_MADMAN)){
 			ini_inv(DrovenCloak);
 			if(!flags.female){
 				/* Males are neutral */
