@@ -5070,7 +5070,7 @@ struct obj *wep;
 		if(arti_is_prop(wep, ARTI_BLOODTHRST)){
 			if(	(youagr && (mdef->mpeaceful && !roll_generic_madness(TRUE)))
 				|| (youdef && (magr->mpeaceful && !roll_generic_madness(TRUE)))
-				|| (!youagr && !youdef && (magr->mpeaceful != mdef->mpeaceful))
+				|| (!youagr && !youdef && (magr->mpeaceful == mdef->mpeaceful))
 			)
 				continue;
 			if(!rn2(4))
