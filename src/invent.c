@@ -1261,6 +1261,7 @@ register const char *let,*word;
 			  !is_knife(otmp) && otmp->oartifact != ART_SILVER_STARLIGHT &&
 			  !(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !u.veil) &&
 			  otmp->otyp != RAKUYO && otmp->otyp != RAKUYO_SABER && 
+			  otmp->otyp != BLADE_OF_MERCY && otmp->otyp != BLADE_OF_GRACE && 
 			  otmp->otyp != DOUBLE_FORCE_BLADE && otmp->otyp != FORCE_BLADE &&
 			  otmp->otyp != MASS_SHADOW_PISTOL
 			 ) ||
@@ -2262,6 +2263,9 @@ struct obj *obj;
 	else if (obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your rakuyo", MENU_UNSELECTED);
+	else if (obj->otyp == BLADE_OF_MERCY || obj->otyp == BLADE_OF_MERCY)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Latch or unlatch your blade of mercy", MENU_UNSELECTED);
 	else if (obj->otyp == DOUBLE_FORCE_BLADE || obj->otyp == FORCE_BLADE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your force blade", MENU_UNSELECTED);

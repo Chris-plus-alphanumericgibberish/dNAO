@@ -6340,12 +6340,39 @@ boolean goodequip;
 								}
 							}
 							break;
-							case 5:
-								//Rakuyo
-								otmp = mksobj(RAKUYO, mkobjflags|MKOBJ_ARTIF);
-								otmp->spe = 2+rn2(3);
-								MAYBE_MERC(otmp)
-								(void) mpickobj(mtmp, otmp);
+							case 5:{
+								//Hunter
+								int weapon = rn2(3) ? RAKUYO : BLADE_OF_MERCY;
+								if(weapon == BLADE_OF_MERCY){
+									if(rn2(3)){
+										otmp = mksobj(BLADE_OF_MERCY, mkobjflags|MKOBJ_ARTIF);
+										otmp->spe = 5;
+										(void) mpickobj(mtmp, otmp);
+									}
+									else {
+										otmp = mksobj(BLADE_OF_PITY, mkobjflags|MKOBJ_ARTIF);
+										otmp->spe = 5;
+										(void) mpickobj(mtmp, otmp);
+										otmp = mksobj(BLADE_OF_GRACE, mkobjflags|MKOBJ_ARTIF);
+										otmp->spe = 5;
+										(void) mpickobj(mtmp, otmp);
+									}
+								}
+								else {
+									if(rn2(3)){
+										otmp = mksobj(RAKUYO, mkobjflags|MKOBJ_ARTIF);
+										otmp->spe = 5;
+										(void) mpickobj(mtmp, otmp);
+									}
+									else {
+										otmp = mksobj(RAKUYO_DAGGER, mkobjflags|MKOBJ_ARTIF);
+										otmp->spe = 5;
+										(void) mpickobj(mtmp, otmp);
+										otmp = mksobj(RAKUYO_SABER, mkobjflags|MKOBJ_ARTIF);
+										otmp->spe = 5;
+										(void) mpickobj(mtmp, otmp);
+									}
+								}
 
 								otmp = mksobj(RUFFLED_SHIRT, mkobjflags|MKOBJ_ARTIF);
 								otmp->spe = 0+rn2(4);
@@ -6368,6 +6395,15 @@ boolean goodequip;
 
 								otmp = mongets(mtmp, BUCKLER, mkobjflags|MKOBJ_ARTIF);
 								if(otmp) otmp->spe = 1+rn2(3);
+								
+								if(weapon == BLADE_OF_MERCY){
+									otmp = mongets(mtmp, MASK, mkobjflags|MKOBJ_ARTIF);
+									if(otmp){
+										otmp->corpsenm = PM_CROW;
+										set_material_gm(otmp, METAL);
+									}
+								}
+							}
 							break;
 							case 6:{
 								//Club-claw

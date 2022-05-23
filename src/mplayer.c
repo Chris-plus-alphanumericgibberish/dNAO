@@ -264,7 +264,8 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	break;
 	case PM_MADMAN:
 		if(special){
-			*weapon = RAKUYO_SABER;
+			*weapon = RAKUYO;
+			*shield = ROUNDSHIELD;
 			*armor = GENTLEMAN_S_SUIT;
 			*shirt = RUFFLED_SHIRT;
 			*cloak = find_opera_cloak();
@@ -274,7 +275,8 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		}
 	case PM_MADWOMAN:
 		if(special){
-			*weapon = RAKUYO_DAGGER;
+			*weapon = BLADE_OF_GRACE;
+			*secweapon = BLADE_OF_PITY;
 			*armor = GENTLEWOMAN_S_DRESS;
 			*shirt = VICTORIAN_UNDERWEAR;
 			*cloak = ALCHEMY_SMOCK;
@@ -284,7 +286,7 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		}
 		//Else
 		if (rn2(4)) *weapon = KNIFE;
-		else if(rn2(3)) *weapon = STILETTO;
+		else if(rn2(3)) *weapon = AXE;
 		else *weapon = BULLWHIP;
 		*armor = STRAITJACKET;
 	break;

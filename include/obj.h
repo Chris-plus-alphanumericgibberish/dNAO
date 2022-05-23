@@ -481,6 +481,9 @@ struct obj {
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
 			 otmp->otyp == RAKUYO_DAGGER)
+#define is_mercy_blade(otmp)	(otmp->otyp == BLADE_OF_MERCY || \
+			 otmp->otyp == BLADE_OF_GRACE || \
+			 otmp->otyp == BLADE_OF_PITY)
 #define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
 #define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
 			 rakuyo_prop(otmp) || \
@@ -489,6 +492,7 @@ struct obj {
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
 			 otmp->obj_material == MERCURIAL || \
+			 is_mercy_blade(otmp) || \
 			 otmp->otyp == ISAMUSEI ||\
 			 otmp->otyp == DISKOS ||\
 			 otmp->otyp == BESTIAL_CLAW)
@@ -629,6 +633,7 @@ struct obj {
 						  (otmp)->otyp == SET_OF_CROW_TALONS || \
 						  (otmp)->otyp == ISAMUSEI || \
 						  (otmp)->otyp == DISKOS || \
+						  is_mercy_blade(otmp) || \
 						  (otmp)->otyp == KAMEREL_VAJRA)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \
@@ -767,7 +772,11 @@ struct obj {
 				|| (otmp)->otyp == WITCH_HAT)
 
 #define is_plusten(otmp)	(arti_plusten(otmp)\
-								|| is_rakuyo(otmp))
+								|| is_rakuyo(otmp)\
+								|| is_mercy_blade(otmp)\
+								|| otmp->otyp == ISAMUSEI\
+								|| otmp->otyp == BESTIAL_CLAW\
+								)
 #define is_plussev_armor(otmp)	(is_elven_armor((otmp))\
 								|| arti_plussev((otmp))\
 								|| ((otmp)->otyp == CORNUTHAUM && Role_if(PM_WIZARD))\

@@ -768,7 +768,7 @@ A("The Holy Moonlight Sword",	LONG_SWORD,				(const char *)0, // begging for a d
 	ATTK(AD_PHYS, 12, 0), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	ENLIGHTENING, NOFLAG
+	ENLIGHTENING, (ARTI_PLUSTEN)
 	),
 
 /* can be transformed by offering your blood */
@@ -781,7 +781,7 @@ A("Bloodletter",	MORNING_STAR,				(const char *)0,
 	ATTK(AD_BLUD, 8, 12), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	BLOODLETTER, NOFLAG
+	BLOODLETTER, (ARTI_PLUSTEN)
 	),
 
 /*Needs encyc entry*/

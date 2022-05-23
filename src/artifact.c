@@ -4055,6 +4055,110 @@ int * truedmgptr;
 	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
 }
 
+void
+mercy_blade_conflict(mdef, magr, spe, lethal)
+struct monst *mdef;
+struct monst *magr;
+int spe;
+boolean lethal;
+{
+	int x, y, cx, cy, count = 0;
+	struct monst *target;
+	struct monst *targets[8];
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	boolean youdef = (mdef == &youmonst);
+	boolean youagr = (magr == &youmonst);
+	boolean youtar;
+	static boolean in_conflict = FALSE;
+	
+	if(in_conflict)
+		return;
+
+	in_conflict = TRUE;
+	
+	x = x(mdef);
+	y = y(mdef);
+	for(int i = 0; i < 8; i++){
+		cx = x + clockwisex[i];
+		cy = y + clockwisey[i];
+		if(!isok(cx, cy))
+			continue;
+		target = m_u_at(cx, cy);
+		if(!target)
+			continue;
+
+		if(target == mdef || target == magr)
+			continue;
+
+		youtar = (target == &youmonst);
+
+		if(youtar){
+			if(youagr)
+				continue;
+			else if(magr->mpeaceful)
+				continue;
+		}
+
+		if(DEADMONSTER(target))
+			continue;
+
+
+		if(	(youagr && target->mpeaceful)
+			|| (youdef && !target->mpeaceful)
+			|| (youtar && magr->mpeaceful)
+			|| (!youagr && !youdef && !youtar && (magr->mpeaceful == target->mpeaceful))
+		)
+			continue;
+
+		if(!youtar && imprisoned(target))
+			continue;
+
+		targets[count++] = target;
+	}
+	if(count){
+		target = targets[rn2(count)];
+		if(youdef){
+			int temp_encouraged = u.uencouraged;
+			if(lethal)
+				pline("The blade lodges in you %s!", body_part(SPINE));
+			u.uencouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5) + spe;
+			flags.forcefight = TRUE;
+			xattacky(mdef, target, x(target), y(target));
+			flags.forcefight = FALSE;
+			u.uencouraged = temp_encouraged;
+		}
+		else {
+			int temp_encouraged = mdef->encouraged;
+			boolean friendly_fire;
+			long result;
+			mdef->encouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5) + spe;
+			if(lethal)
+				pline("The blade lodges in %s %s!", s_suffix(mon_nam(mdef)), mbodypart(mdef, SPINE));
+			friendly_fire = !mm_grudge(mdef, target);
+			result = xattacky(mdef, target, x(target), y(target));
+			if(friendly_fire && (result&(MM_DEF_DIED|MM_DEF_LSVD)) && !taxes_sanity(mdef->data) && !mindless_mon(mdef) && !resist(mdef, POTION_CLASS, 0, NOTELL)){
+				if (canseemon(mdef) && !lethal)
+					pline("%s goes insane!", Monnam(mdef));
+				mdef->mcrazed = 1;
+				mdef->mberserk = 1;
+				(void) set_apparxy(mdef);
+				if(!rn2(4)){
+					mdef->mconf = 1;
+					(void) set_apparxy(mdef);
+				}
+				if(!rn2(10)){
+					mdef->mnotlaugh=0;
+					mdef->mlaughing=rnd(5);
+				}
+			}
+			mdef->encouraged = temp_encouraged;
+		}
+	}
+
+	in_conflict = FALSE;
+}
+
 /* prints no hitmessages (only "blinded by the flash"?) */
 void
 otyp_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll)
@@ -4221,6 +4325,27 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		if (youdef && u.uvaul_duration)
 			bonus /= 2;
 		*truedmgptr += bonus;
+	}
+	if(is_mercy_blade(otmp)){
+		if(!u.veil && !Magic_res(mdef)){
+			int mod = min(u.uinsight, 50);
+			if(youagr && u.uinsight > 25)
+				mod += min((u.uinsight-25)/2, ACURR(A_CHA));
+			*truedmgptr += basedmg*mod/50;
+		}
+		if(u.uinsight >= 25 && !resist(mdef, youagr ? SPBOOK_CLASS : WEAPON_CLASS, 0, NOTELL)){
+			if(youdef){
+				if(u.uencouraged >= 0 && magr->mcha/5 > 0)
+					You("feel a rush of irrational mercy!");
+				u.uencouraged = max(-1*(otmp->spe + magr->mcha), u.uencouraged - magr->mcha/5);
+			}
+			else if(youagr){
+				mdef->encouraged = max(-1*(otmp->spe + ACURR(A_CHA)), mdef->encouraged - ACURR(A_CHA)/5);
+			}
+			else {
+				mdef->encouraged = max(-1*(otmp->spe + magr->mcha), mdef->encouraged - magr->mcha/5);
+			}
+		}
 	}
 	
 	if(pure_weapon(otmp) && otmp->spe >= 6){

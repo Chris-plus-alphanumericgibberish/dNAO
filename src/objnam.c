@@ -1315,6 +1315,15 @@ char *buf;
 		else if(u.uinsight >= 5)
 			Strcat(buf, "spinning ");
 	}
+	if (is_mercy_blade(obj)){
+		//Note: Brain fluid
+		if(u.uinsight >= 50)
+			Strcat(buf, "sticky ");
+		if(u.uinsight >= 25)
+			Strcat(buf, "sidereal ");
+		else if(!u.veil)
+			Strcat(buf, "twinkling ");
+	}
 }
 
 static void

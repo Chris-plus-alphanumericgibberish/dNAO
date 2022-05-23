@@ -31,6 +31,7 @@ STATIC_DCL void FDECL(use_candle, (struct obj **));
 STATIC_DCL void FDECL(use_lamp, (struct obj *));
 STATIC_DCL int FDECL(swap_aegis, (struct obj *));
 STATIC_DCL int FDECL(use_rakuyo, (struct obj *));
+STATIC_DCL int FDECL(use_mercy_blade, (struct obj *));
 STATIC_DCL int FDECL(use_force_blade, (struct obj *));
 STATIC_DCL void FDECL(light_cocktail, (struct obj *));
 STATIC_DCL void FDECL(light_torch, (struct obj *));
@@ -1540,6 +1541,70 @@ struct obj *obj;
 		}
 		useupall(uswapwep);
 		obj->otyp = RAKUYO;
+		fix_object(obj);
+		You("latch %s.",the(xname(obj)));
+	}
+	return 0;
+}
+
+STATIC_OVL int
+use_mercy_blade(obj)
+struct obj *obj;
+{
+	struct obj *dagger;
+	if(obj != uwep){
+		if(obj->otyp == BLADE_OF_MERCY) You("must wield %s to unlatch it.", the(xname(obj)));
+		else You("must wield %s to latch it.", the(xname(obj)));
+		return 0;
+	}
+	
+	if(obj->unpaid 
+	|| (obj->otyp == BLADE_OF_MERCY && uswapwep && uswapwep->otyp == BLADE_OF_PITY && uswapwep->unpaid)
+	){
+		You("need to buy it.");
+		return 0;
+	}
+	
+	if(obj->otyp == BLADE_OF_MERCY){
+		You("unlatch %s.",the(xname(obj)));
+		obj->otyp = BLADE_OF_GRACE;
+		obj->quan += 1;
+		dagger = splitobj(obj, 1L);
+
+		obj_extract_self(dagger);
+		dagger->otyp = BLADE_OF_PITY;
+		fix_object(obj);
+		fix_object(dagger);
+		
+		// if (obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER){
+			// artifact_exists(dagger, artiname(ART_BLADE_DANCER_S_DAGGER), FALSE);
+			// dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
+		// }
+
+		dagger = hold_another_object(dagger, "You drop %s!",
+				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
+		if(dagger && !uswapwep && carried(dagger)){
+			setuswapwep(dagger);
+			if(!u.twoweap) dotwoweapon();
+		}
+	} else {
+		if(!uswapwep || uswapwep->otyp != BLADE_OF_PITY){
+			You("need the matching dagger in your swap-weapon sheath or offhand.");
+			return 0;
+		}
+		if(!mergable_traits(obj, uswapwep) &&
+			!((obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER) &&
+			(uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER))
+		){
+			pline("They don't fit together!");
+			return 0;
+		}
+		if (u.twoweap) {
+			u.twoweap = 0;
+			update_inventory();
+		}
+		useupall(uswapwep);
+		obj->otyp = BLADE_OF_MERCY;
 		fix_object(obj);
 		You("latch %s.",the(xname(obj)));
 	}
@@ -7151,6 +7216,9 @@ doapply()
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
 	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
 		return use_rakuyo(obj);
+	}
+	else if(obj->otyp == BLADE_OF_MERCY || obj->otyp == BLADE_OF_GRACE){
+		return use_mercy_blade(obj);
 	} else if(obj->otyp == DOUBLE_FORCE_BLADE || obj->otyp == FORCE_BLADE){
 		return use_force_blade(obj);
 	} else switch(obj->otyp){

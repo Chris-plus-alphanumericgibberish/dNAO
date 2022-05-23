@@ -137,6 +137,7 @@ E int FDECL(touch_artifact, (struct obj *,struct monst *, int));
 E int FDECL(spec_abon, (struct obj *,struct monst *, boolean));
 E boolean FDECL(spec_dbon, (struct obj *,struct monst *,int,int*,int*));
 E boolean FDECL(oproperty_dbon, (struct obj *, struct monst *, int, int*, int*));
+E void FDECL(mercy_blade_conflict, (struct monst *, struct monst *, int, boolean));
 E int FDECL(spec_applies, (struct obj *,struct monst *, boolean));
 E void FDECL(discover_artifact, (int));
 E void FDECL(undiscover_artifact, (int));

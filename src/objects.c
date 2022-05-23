@@ -295,7 +295,7 @@ WEAPON(("moon axe", "two-handed axe"), /*Needs encyc entry*//*Needs tile*/
 /* swords */
 WEAPON(("short sword"),
 	DMG(D(6)), DMG(D(8)),
-	1, 0,  MZ_SMALL,  8, 30, 10,  0, P,   P_SHORT_SWORD, IRON, FALSE, HI_METAL),
+	1, 0,  MZ_SMALL,  7, 30, 10,  0, P,   P_SHORT_SWORD, IRON, FALSE, HI_METAL),
 WEAPON(("elven short sword", "runed short sword"),
 	DMG(D(7)), DMG(D(7)),
 	0, 0,  MZ_SMALL,  2, 10, 10,  2, P,   P_SHORT_SWORD, WOOD, FALSE, HI_WOOD),
@@ -317,6 +317,15 @@ WEAPON(("khopesh", "sickle-sword"), /*Needs encyc entry*/
 WEAPON(("wakizashi", "samurai short sword"),
 	DMG(D(8)), DMG(D(6)),
 	0, 0,  MZ_SMALL,  0, 30, 40,  1, P|S,   P_SHORT_SWORD, IRON, FALSE, HI_METAL),
+WEAPON(("blade of mercy", "split-bladed short sword"), /*Needs encyc entry*/
+	DMG(D(6), F(1)), DMG(D(8), F(1)),
+	0, 0, MZ_MEDIUM,  1, 33,500,  2, P|S, P_SHORT_SWORD, METAL, FALSE, HI_METAL, O_MAGIC(1)),
+WEAPON(("blade of grace", "curved short sword"),
+	DMG(D(6)), DMG(D(8)),
+	0, 0, MZ_MEDIUM,  0, 19,400,  2, P|S, P_SHORT_SWORD, METAL, FALSE, HI_METAL, O_MAGIC(1)),
+WEAPON(("blade of pity", "curved dagger"),
+	DMG(D(4)), DMG(D(6)),
+	0, 0,  MZ_SMALL,  0, 14,100,  2, P|S, P_DAGGER, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 
 WEAPON(("scimitar", "curved sword"),
 	DMG(D(8)), DMG(D(8)),
