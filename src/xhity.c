@@ -3076,12 +3076,23 @@ int vis;
 			case 2:/* Craze */
 				if (youdef) {
 					You("go insane!");
-					make_confused(10000, FALSE); //very large value representing insanity
+					make_confused(100, FALSE);
+					change_usanity(-1*d(10,6), TRUE);
 				}
-				else {
+				else if(!mindless_mon(mdef)){
 					if (canseemon(mdef))
 						pline("%s goes insane!", Monnam(mdef));
 					mdef->mcrazed = 1;
+					mdef->mberserk = 1;
+					(void) set_apparxy(mdef);
+					if(!rn2(4)){
+						mdef->mconf = 1;
+						(void) set_apparxy(mdef);
+					}
+					if(!rn2(10)){
+						mdef->mnotlaugh=0;
+						mdef->mlaughing=rnd(5);
+					}
 				}
 				break;
 			}
