@@ -2557,10 +2557,10 @@ struct obj	*sobj;
 			altar_wrath(u.ux, u.uy);
 	break;
 		}
-		pline("The %s shifts beneath you,%sengraving a %s ward.", 
+		pline("The %s shifts beneath you,%sengraving %s.", 
 			surface(u.ux,u.uy),
 			engrHere ? " wiping away the existing engraving and " : " ",
-			wardDecode[sobj->oward]
+			an(wardDecode[sobj->oward])
 		);
 		known = TRUE;
 		del_engr_ward_at(u.ux,u.uy);
