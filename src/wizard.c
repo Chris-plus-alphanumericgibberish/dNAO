@@ -726,7 +726,7 @@ yellow_nasty()
 		}
 		mtmp->msleeping = 0;
 		untame(mtmp, 0);
-		mtmp->mfaction = YELLOW_FACTION;
+		set_faction(mtmp, YELLOW_FACTION);
 		set_malign(mtmp);
 	}
 }
@@ -778,7 +778,7 @@ yellow_dead()
 	}
 	mtmp->msleeping = 0;
 	mtmp->mpeaceful = 0;
-	mtmp->mfaction = YELLOW_FACTION;
+	set_faction(mtmp, YELLOW_FACTION);
 	set_malign(mtmp);
 }
 

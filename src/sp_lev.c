@@ -1124,7 +1124,7 @@ struct mkroom	*croom;
 					}
 				break;
 			}
-			mon->mfaction = YELLOW_FACTION;
+			set_faction(mon, YELLOW_FACTION);
 		}
 		else {
 			mon = makemon(&mons[asylum_types[rn2(SIZE(asylum_types))]], otmp->ox, otmp->oy, NO_MINVENT);
@@ -1163,7 +1163,7 @@ struct mkroom	*croom;
 					if(mon->mtyp != PM_PRIESTESS && rn2(20) > u.uinsight)
 						goto default_case;
 					set_template(mon, MISTWEAVER);
-					mon->mfaction = GOATMOM_FACTION;
+					set_faction(mon, GOATMOM_FACTION);
 					mon->m_insight_level = min(insight, u.uinsight);
 					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
 					mon->entangled = SHACKLES;
@@ -1182,17 +1182,17 @@ default_case:
 					switch(rn2(5)){
 						case 0:
 							set_template(mon, YELLOW_TEMPLATE);
-							mon->mfaction = YELLOW_FACTION;
+							set_faction(mon, YELLOW_FACTION);
 							mon->msleeping = 1;
 						break;
 						case 2:
 							set_template(mon, DREAM_LEECH);
-							mon->mfaction = YELLOW_FACTION;
+							set_faction(mon, YELLOW_FACTION);
 							mon->msleeping = 1;
 						break;
 						case 3:
 							set_template(mon, DREAM_LEECH);
-							mon->mfaction = YELLOW_FACTION;
+							set_faction(mon, YELLOW_FACTION);
 							mon->msleeping = 1;
 						break;
 						default:
@@ -1206,7 +1206,7 @@ default_case:
 								mtmp = makemon(&mons[PM_LILITU], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									set_template(mtmp, YELLOW_TEMPLATE);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 									mongets(mtmp, lilitu_items[rn2(SIZE(lilitu_items))], NO_MKOBJ_FLAGS);
 									
 									meqp = mongets(mtmp, KHAKKHARA, MKOBJ_NOINIT);
@@ -1254,7 +1254,7 @@ default_case:
 									mtmp = makemon(&mons[PM_DAUGHTER_OF_BEDLAM], otmp->ox, otmp->oy, MM_ADJACENTOK);
 									if(mtmp){
 										set_template(mtmp, YELLOW_TEMPLATE);
-										mtmp->mfaction = YELLOW_FACTION;
+										set_faction(mtmp, YELLOW_FACTION);
 										mongets(mtmp, bedlam_items[rn2(SIZE(bedlam_items))], NO_MKOBJ_FLAGS);
 										meqp = mongets(mtmp, rn2(2) ? HEALER_UNIFORM : STRAITJACKET, NO_MKOBJ_FLAGS);
 										meqp->spe = 5;
@@ -1275,17 +1275,17 @@ default_case:
 								mtmp = makemon(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									mongets(mtmp, healer_items[rn2(SIZE(healer_items))], NO_MKOBJ_FLAGS);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 								}
 								mtmp = makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									mongets(mtmp, nurse_items[rn2(SIZE(nurse_items))], NO_MKOBJ_FLAGS);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 								}
 								mtmp = makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									mongets(mtmp, nurse_items[rn2(SIZE(nurse_items))], NO_MKOBJ_FLAGS);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 								}
 							}
 						break;
