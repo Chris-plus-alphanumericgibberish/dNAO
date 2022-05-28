@@ -4049,10 +4049,10 @@ cthulhu_mind_blast()
 	int nd = 1;
 	if(on_level(&rlyeh_level,&u.uz))
 		nd = 5;
-	if (Unblind_telepat || (Blind_telepat && rn2(2)) || !rn2(10)) {
+	if (Unblind_telepat || (Blind_telepat && Blind) || (Blind_telepat && rn2(2)) || !rn2(10)) {
 		int dmg;
 		pline("It locks on to your %s!",
-			Unblind_telepat ? "telepathy" :
+			(Unblind_telepat || (Blind_telepat && Blind)) ? "telepathy" :
 			Blind_telepat ? "latent telepathy" : "mind");
 		dmg = d(nd,15);
 		if(Half_spell_damage) dmg = (dmg+1) / 2;

@@ -11725,9 +11725,9 @@ int spe;
 		pline("You hear a creaking in the sky.");
 		break;
 	}
-	if ((Blind_telepat && rn2(2)) || !rn2(10)) {
+	if (Unblind_telepat || (Blind_telepat && Blind) || (Blind_telepat && rn2(2)) || !rn2(10)) {
 		pline("It locks on to your %s!",
-			Unblind_telepat ? "telepathy" :
+			(Unblind_telepat || (Blind_telepat && Blind)) ? "telepathy" :
 			Blind_telepat ? "latent telepathy" : "mind");
 		dmg = d(dnum, dsize);
 		if (Half_spell_damage) dmg = (dmg+1) / 2;
