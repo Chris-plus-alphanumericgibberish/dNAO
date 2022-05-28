@@ -7810,6 +7810,7 @@ int damage;
 					You("panic!");
 				HPanicking += damage*2;
 			}
+			nomul(0, NULL); //Interrupt
 		}
 	}
 }
@@ -7880,6 +7881,7 @@ struct monst *mtmp;
 		}
 		else if(you_blessings_target_inhale()){
 			damage = blessings_consume(mtmp, &youmonst);
+			nomul(0, NULL); //Interrupt
 		}
 		/** Exhale: Cause misfortune (wounds) in line of sight **/
 		if(damage){
@@ -7927,6 +7929,7 @@ struct monst *mtmp;
 		}
 		else if(you_vitality_target_inhale()){
 			damage = vitality_consume(mtmp, invent, &youmonst);
+			nomul(0, NULL); //Interrupt
 		}
 		
 		/** Exhale: Overload positive energy **/
@@ -7948,6 +7951,7 @@ struct monst *mtmp;
 			}
 			else if(you_vitality_target_exhale(mtmp)){
 				vitality_overload(mtmp, &youmonst, damage);
+				nomul(0, NULL); //Interrupt
 			}
 		}
 	}
@@ -8045,6 +8049,7 @@ struct monst *mtmp;
 			losehp(damage, "corrupting slime", KILLED_BY);
 			u.ugrave_arise = temparise;
 			
+			nomul(0, NULL); //Interrupt
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
@@ -8141,6 +8146,7 @@ struct monst *mtmp;
 			if(has_blood(youracedata) && !Drain_resistance){
 				losexp("blood drain",TRUE,TRUE,TRUE);
 			}
+			nomul(0, NULL); //Interrupt
 
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
@@ -8171,6 +8177,7 @@ struct monst *mtmp;
 				if(Half_spel(tmpm)) damage = (damage+1)/2;
 
 				xdamagey(mtmp, tmpm, (struct attack *)0, damage);
+				nomul(0, NULL); //Interrupt
 			}
 			if(you_wastes_target_exhale(mtmp)){
 				damage = d(5, 5);
@@ -8308,6 +8315,7 @@ struct monst *mtmp;
 					mtmp->muy = u.uy;
 				}
 			}
+			nomul(0, NULL); //Interrupt
 		}
 		/** Exhale: Scream into mind **/
 		if(damage){
@@ -8332,6 +8340,7 @@ struct monst *mtmp;
 				}
 				//Handle off-target side effects
 				thought_scream_side_effects(mtmp, &youmonst, damage);
+				nomul(0, NULL); //Interrupt
 			} else {
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon)
 					if(valid_gray_target_exhale(tmpm))
@@ -8465,6 +8474,7 @@ struct monst *mtmp;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
 			}
+			nomul(0, NULL); //Interrupt
 			mtmp->mspec_used = 0;
 			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
@@ -8580,6 +8590,7 @@ struct monst *mtmp;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
 			}
+			nomul(0, NULL); //Interrupt
 			mtmp->mspec_used = 0;
 			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
@@ -8610,6 +8621,7 @@ struct monst *mtmp;
 					killer = "the ancient breath of death";
 					done(DIED);
 				}
+				nomul(0, NULL); //Interrupt
 			} else {
 				struct monst *targ = 0;
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -8764,6 +8776,7 @@ struct monst *mtmp;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
 			}
+			nomul(0, NULL); //Interrupt
 			mtmp->mspec_used = 0;
 			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
@@ -8834,6 +8847,7 @@ struct monst *mtmp;
 					}
 				}
 				u.umadness |= MAD_COLD_NIGHT;
+				nomul(0, NULL); //Interrupt
 			} else {
 				struct monst *targ = 0;
 				struct obj *otmp;
