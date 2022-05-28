@@ -5657,7 +5657,7 @@ cleanup:
 		if (p_coaligned(mtmp)) u.ublessed = 0;
 		if (mdat->maligntyp == A_NONE)
 			adjalign((int)(ALIGNLIM / 4));		/* BIG bonus */
-	} else if (mtmp->mtame && u.ualign.type != A_VOID && !banish_kill(mtmp->mtyp)) {
+	} else if (mtmp->mtame && u.ualign.type != A_VOID && !banish_kill(mtmp->mtyp) && !(EDOG(mtmp) && EDOG(mtmp)->dominated)) {
 		adjalign(-15);	/* bad!! */
 		/* your god is mighty displeased... */
 		if (!Hallucination) You_hear("the rumble of distant thunder...");
@@ -7240,6 +7240,7 @@ int flags;
 	/* set data */
 	mon->mextra_p->esum_p->summoner = summoner;
 	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
+	mon->mextra_p->esum_p->sm_o_id = 0;
 	mon->mextra_p->esum_p->summonstr = mon->data->mlevel;
 	mon->mextra_p->esum_p->sticky = (!summoner || summoner == &youmonst) && !(flags & ESUMMON_NOFOLLOW);
 	mon->mextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
@@ -7276,6 +7277,7 @@ int flags;
 			add_ox(otmp, OX_ESUM);
 			otmp->oextra_p->esum_p->summoner = mon;
 			otmp->oextra_p->esum_p->sm_id = mon->m_id;
+			otmp->oextra_p->esum_p->sm_o_id = 0;
 			otmp->oextra_p->esum_p->summonstr = 0;
 			otmp->oextra_p->esum_p->sticky = 0;
 			otmp->oextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);

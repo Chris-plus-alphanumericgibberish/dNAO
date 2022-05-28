@@ -730,7 +730,30 @@ struct obj *obj;
 		obj->oerodeproof = 0;
 	    }
 	    break;
+	case CRYSTAL_SKULL:{
+		struct monst *nmon;
+		for(struct monst *mtmp = fmon; mtmp; mtmp = nmon){
+			nmon = mtmp->nmon;
+			if(get_mx(mtmp, MX_ESUM)){
+				if(mtmp->mextra_p->esum_p->sm_o_id == obj->o_id){
+					monvanished(mtmp);
+				}
+			}
+		}
+		}break;
 	}
+}
+
+boolean
+obj_summon_out(obj)
+struct obj *obj;
+{
+	for(struct monst *mtmp = fmon; mtmp; mtmp = mtmp->nmon)
+		if(get_mx(mtmp, MX_ESUM))
+			if(mtmp->mextra_p->esum_p->sm_o_id == obj->o_id)
+				return TRUE;
+	//Else
+	return FALSE;
 }
 
 /* 'D' command: drop several things */

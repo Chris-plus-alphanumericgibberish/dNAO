@@ -2079,6 +2079,20 @@ mbag_explodes(obj, depthin)
 static NEARDATA struct obj *current_container;
 #define Icebox (current_container->otyp == ICE_BOX)
 
+STATIC_OVL boolean
+crystal_skull_overweight(cont, newobj)
+struct obj *cont;
+struct obj *newobj;
+{
+	long weight = newobj->owt;
+	if(Is_container(newobj))
+		return TRUE;
+	for(struct obj *otmp = cont->cobj; otmp; otmp = otmp->nobj){
+		weight += otmp->owt;
+	}
+	return weight > 1000;
+}
+
 /* Returns: -1 to stop, 1 item was inserted, 0 item was not inserted. */
 STATIC_PTR int
 in_container(obj)
@@ -2109,6 +2123,9 @@ register struct obj *obj;
 	} else if ((obj->otyp == LOADSTONE) && obj->cursed) {
 		obj->bknown = 1;
 	      pline_The("stone%s won't leave your person.", plur(obj->quan));
+		return 0;
+	} else if ((current_container->otyp == CRYSTAL_SKULL) && crystal_skull_overweight(current_container, obj)) {
+		pline("%s doesn't fit in the skull!", The(xname(obj)));
 		return 0;
 	} else if (obj->otyp == AMULET_OF_YENDOR ||
 		   obj->otyp == CANDELABRUM_OF_INVOCATION ||

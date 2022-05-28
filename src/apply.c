@@ -16,6 +16,9 @@ static const char apply_corpse[] = { FOOD_CLASS, 0 };
 static const char chain_class[] = { CHAIN_CLASS, 0 };
 static const char apply_all[] = { ALL_CLASSES, CHAIN_CLASS, 0 };
 
+#define TREPH_THOUGHTS 1
+#define TREPH_CRYSTALS 2
+
 #ifdef TOURIST
 STATIC_DCL int FDECL(use_camera, (struct obj *));
 #endif
@@ -38,6 +41,7 @@ STATIC_DCL void FDECL(light_torch, (struct obj *));
 STATIC_DCL void FDECL(use_trephination_kit, (struct obj *));
 STATIC_DCL void FDECL(use_tinning_kit, (struct obj *));
 STATIC_DCL void FDECL(use_figurine, (struct obj **));
+STATIC_DCL int FDECL(use_crystal_skull, (struct obj **));
 STATIC_DCL void FDECL(use_grease, (struct obj *));
 STATIC_DCL void FDECL(use_trap, (struct obj *));
 STATIC_DCL void FDECL(use_stone, (struct obj *));
@@ -69,6 +73,7 @@ STATIC_PTR int FDECL(pick_rune, (BOOLEAN_P));
 STATIC_DCL void FDECL(describe_rune, (int));
 STATIC_PTR char NDECL(pick_carvee);
 STATIC_PTR int FDECL(res_engine_menu, (struct obj *));
+STATIC_PTR int NDECL(dotrephination_options);
 
 #ifdef	AMIGA
 void FDECL( amii_speaker, ( struct obj *, char *, int ) );
@@ -2197,15 +2202,23 @@ struct obj *corpse;
 }
 
 STATIC_OVL void
-use_trephination_kit(obj)
+use_treph_crystals(obj)
+register struct obj *obj;
+{
+	struct obj *cobj = getobj(tools, "trephinate");
+	
+	if(!cobj)
+		return;
+	if(use_container(cobj, TRUE))
+		obj->spe--;
+}
+
+STATIC_OVL void
+use_treph_thoughts(obj)
 register struct obj *obj;
 {
 	int otyp;
 	struct obj *glyph;
-	if(u.uinsight < 10 || !u.thoughts){
-		You("examine the drills in the kit, but have know idea how to use them!");
-		return;
-	}
 	
 	if(Upolyd && u.uinsight < 20){
 		You("can't get at your own brain right now!");
@@ -2246,8 +2259,48 @@ register struct obj *obj;
 		change_usanity(-10, FALSE);
 		//Note: this is always the player's HP, not their polyform HP.
 		u.uhp -= u.uhp/2; //Note: chopped, so 0 to 1/2 max-HP lost.
+		obj->spe--;
 	} else {
 		impossible("Shard creation failed in use_trephination_kit??");
+	}
+	return;
+}
+
+STATIC_OVL void
+use_trephination_kit(obj)
+register struct obj *obj;
+{
+	boolean skulls = !!carrying(CRYSTAL_SKULL);
+	
+	if(!obj->spe){
+		pline("The kit's medical supplies are exhausted.");
+		return;
+	}
+	if(u.uinsight < 10 || !(u.thoughts || skulls)){
+		You("examine the drills in the kit, but have know idea how to use them!");
+		return;
+	}
+	
+	if(skulls && u.thoughts){
+		int pick = dotrephination_options();
+		if(pick == 0){
+			You("close the trephination kit.");
+			return;
+		}
+		if(pick == TREPH_THOUGHTS){
+			use_treph_thoughts(obj);
+			return;
+		}
+		if(pick == TREPH_CRYSTALS){
+			use_treph_crystals(obj);
+			return;
+		}
+	}
+	else if(skulls){
+		use_treph_crystals(obj);
+	}
+	else {
+		use_treph_thoughts(obj);
 	}
 	return;
 }
@@ -2644,6 +2697,109 @@ struct obj **optr;
 	(void) stop_timer(FIG_TRANSFORM, obj->timed);
 	useup(obj);
 	*optr = 0;
+}
+
+STATIC_OVL int
+use_crystal_skull(optr)
+struct obj **optr;
+{
+	coord cc;
+	xchar x, y;
+
+	if(u.veil || !(Unblind_telepat || (Blind_telepat && Blind))){
+		pline("It's just a clear glass skull.");
+		return FALSE;
+	}
+	
+	if(!get_ox(*optr, OX_EMON)){
+		pline("It's REALLY just a glass skull.");
+		return FALSE;
+	}
+
+	if(!getdir((char *)0)) {
+		flags.move = multi = 0;
+		return FALSE;
+	}
+
+	x = u.ux + u.dx; y = u.uy + u.dy;
+	if(!enexto(&cc, x, y, (struct permonst *)0)){
+		pline("No room!");
+		return FALSE;
+	}
+	
+	if(obj_summon_out(*optr)){
+		pline("The imprisoned mind is dreaming.");
+		return TRUE;
+	}
+
+	if((*optr)->age > monstermoves){
+		pline("The imprisoned mind is exhausted.");
+		change_usanity(save_vs_sanloss() ? 0 : -1, FALSE);
+		return TRUE;
+	}
+	
+	if(rnd(20) > u.uinsight || u.uen < EMON(*optr)->m_lev){
+		You_cant("maintain your focus on the crystal!");
+		if(save_vs_sanloss())
+			change_usanity(-1, FALSE);
+		else
+			change_usanity(-1*rnd(10), TRUE);
+		return TRUE;
+	}
+	
+	You("awaken the imprisoned mind!");
+	u.uen -= EMON(*optr)->m_lev;
+	flags.botl = 1;
+	if(save_vs_sanloss())
+		change_usanity(-1*rnd(8), TRUE);
+	else
+		change_usanity(-1*d(2,6), TRUE);
+
+	x_uses_crystal_skull(optr, &youmonst, &cc);
+	return TRUE;
+}
+
+void
+x_uses_crystal_skull(optr, master, cc)
+struct obj **optr;
+struct monst *master;
+coord *cc;
+{
+	struct obj *obj = *optr;
+	struct obj *oinv, *otmp;
+	struct monst *mtmp;
+
+	mtmp = montraits(obj, cc);
+	if(mtmp){
+		obj->age = monstermoves + 100L + rn2(100L);
+		/* if skull has been named, give same name to the monster */
+		if (get_ox(obj, OX_ENAM))
+			mtmp = christen_monst(mtmp, ONAME(obj));
+		mtmp->movement = NORMAL_SPEED;
+		add_mx(mtmp, MX_ESUM);
+		// start_timer(master == &youmonst ? min(u.uinsight, 100) : 100, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mtmp);
+		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
+			otmp = duplicate_obj(oinv);
+			obj_extract_self(otmp);
+			mpickobj(mtmp,otmp);
+		}
+		m_dowear(mtmp, TRUE);
+		init_mon_wield_item(mtmp);
+		if(master == &youmonst || master->mtame){
+			mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
+			if(mtmp && EDOG(mtmp)){
+				EDOG(mtmp)->dominated = TRUE;
+				EDOG(mtmp)->hungrytime = monstermoves + 3000;
+			}
+		}
+		else {
+			if(master->mfaction)
+				set_faction(mtmp, master->mfaction);
+			mtmp->mpeaceful = master->mpeaceful;
+		}
+		mark_mon_as_summoned(mtmp, master, ESUMMON_PERMANENT, 0);
+		mtmp->mextra_p->esum_p->sm_o_id = obj->o_id;
+	}
 }
 
 static NEARDATA const char lubricables[] = { ALL_CLASSES, ALLOW_NONE, 0 };
@@ -7593,6 +7749,9 @@ doapply()
 	case FIGURINE:
 		use_figurine(&obj);
 	break;
+	case CRYSTAL_SKULL:
+		res = use_crystal_skull(&obj);
+	break;
 	case EFFIGY:{
 	    struct obj *curo;
 		if (Hallucination) You_feel("the tall leather doll take up your burdens!");
@@ -8119,6 +8278,47 @@ dotrephination_menu()
 	}
 	
 	end_menu(tmpwin, "Pick thought to extract");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (int)selected[0].item.a_int : 0;
+}
+
+STATIC_OVL int
+dotrephination_options()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Use kit on what?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+	
+	Sprintf(buf, "Your brain");
+	any.a_int = TREPH_THOUGHTS;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet++;
+
+	Sprintf(buf, "Your skulls");
+	any.a_int = TREPH_CRYSTALS;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet++;
+	
+	end_menu(tmpwin, "Pick patient");
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);

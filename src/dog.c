@@ -43,6 +43,7 @@ register struct monst *mtmp;
 	EDOG(mtmp)->waspeaceful = 0;
 //endif
 	EDOG(mtmp)->loyal = 0;
+	EDOG(mtmp)->dominated = 0;
 
 	if (isok(mtmp->mx, mtmp->my))
 		newsym(mtmp->mx, mtmp->my);
@@ -588,7 +589,7 @@ long nmv;		/* number of moves */
 	else mtmp->mspec_used -= imv;
 
 	/* reduce tameness for every 150 moves you are separated */
-	if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->loyal)
+	if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->loyal) && !(EDOG(mtmp)->dominated)
 	 && !(
 	  In_quest(&u.uz) 
 	  && ((Is_qtown(&u.uz) && !flags.stag) || 
@@ -1130,7 +1131,7 @@ int numdogs;
 	// it sets the weakest friendly
 	struct monst *curmon = 0, *weakdog = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
-			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
+			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !(EDOG(curmon)->dominated) && !is_suicidal(curmon->data)
 				&& !curmon->mspiritual && !(get_timer(curmon->timed, DESUMMON_MON) && !(get_mx(curmon, MX_ESUM) && curmon->mextra_p->esum_p->permanent))
 			){
 				numdogs++;
@@ -1474,7 +1475,7 @@ boolean was_dead;
 	}
     } else {
 	/* chance it goes wild anyway - Pet Semetary */
-	if (!(edog && edog->loyal) && !rn2(mtmp->mtame)) {
+	if (!(edog && (edog->loyal || edog->dominated)) && !rn2(mtmp->mtame)) {
 	    untame(mtmp, 0);
 	}
     }

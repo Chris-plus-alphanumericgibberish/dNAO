@@ -1021,6 +1021,7 @@ struct monst *mtmp;
 #define MUSE_MJOLLNIR 21
 
 #define MUSE_WAN_CANCELLATION 22	/* Lethe */
+#define MUSE_CRYSTAL_SKULL 	  23
 
 /* Find a mask.
  */
@@ -1095,6 +1096,11 @@ struct monst *mtmp;
 				}
 			}
 	if(m.has_offense==MUSE_MJOLLNIR) break;
+		}
+		nomore(MUSE_CRYSTAL_SKULL);
+		if(obj->otyp == CRYSTAL_SKULL && obj->age < monstermoves && is_mind_flayer(mtmp->data) && !obj_summon_out(obj)) {
+		m.offensive = obj;
+		m.has_offense = MUSE_CRYSTAL_SKULL;
 		}
 		nomore(MUSE_WAN_DEATH);
 		if (!reflection_skip) {
@@ -1463,6 +1469,16 @@ struct monst *mtmp;
 	oseen = otmp && canseemon(mtmp);
 
 	switch(m.has_offense) {
+	case MUSE_CRYSTAL_SKULL:{
+		coord cc;
+		if(!enexto(&cc, mtmp->mx+sgn(tbx), mtmp->my+sgn(tby), (struct permonst *)0)){
+			return 0;
+		}
+		if(canspotmon(mtmp))
+			pline("%s concentrates on %s!", Monnam(mtmp), canseemon(mtmp) ? "a crystal skull" : "something");
+		x_uses_crystal_skull(&otmp, mtmp, &cc);
+		return 2;
+	}break;
 	case MUSE_WAN_DEATH:
 	case MUSE_WAN_SLEEP:
 	case MUSE_WAN_FIRE:

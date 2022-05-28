@@ -30,6 +30,7 @@ struct edog {
 	Bitfield(waspeaceful, 1);      	/* was peaceful before tame song */
 //endif
 	Bitfield(loyal, 1);      	/* is particularly loyal (starting pet, quest home pet) */
+	Bitfield(dominated, 1);     /* is under mental domination */
 };
 #define EDOG(mon)	((mon)->mextra_p->edog_p)
 
@@ -134,6 +135,7 @@ struct eshk {
 struct esum {
 	struct monst * summoner;	/* monster responsible for this mon/obj -- can be null */
 	unsigned sm_id;				/* m_id of summoner */
+	unsigned sm_o_id;			/* o_id of summon source object */
 	int summonstr;				/* tax on summoner, who may maintain up to its own HD of summons at a time. */
 	Bitfield(staleptr, 1);		/* denotes if `summoner` is a stale pointer and needs to be updated */
 	Bitfield(sticky,1);			/* mon: if TRUE, mon will attempt to follow you between levels. Overridden by having a non-you summoner */

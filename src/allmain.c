@@ -1628,6 +1628,9 @@ moveloop()
 				/* Loyal monsters slowly recover tameness */
 				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && (!moves%100))
 					mtmp->mtame++;
+				/* Dominated monsters stay tame */
+				if(mtmp->mtame && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated)
+					mtmp->mtame = 100;
 				/*Tannin eggs may hatch, monster may die*/
 				if(mtmp->mtaneggs){
 					for(int i = mtmp->mtaneggs; i > 0; i--) if(!rn2(6)){
