@@ -6067,7 +6067,7 @@ struct mkroom *sroom;
 							set_curhouse(mon->mfaction);
 						}
 						//Note: court monsters are always part of rodney's forces.
-						mon->mfaction = YENDORIAN_FACTION;
+						set_faction(mon, YENDORIAN_FACTION);
 						if(mon->mpeaceful){
 							mon->mpeaceful = 0;
 							set_malign(mon);
@@ -6143,7 +6143,7 @@ struct mkroom *sroom;
 			mon->msleeping = 1;
 			if (type==COURT) {
 				//Note: court monsters are always part of rodney's forces, even if they are angels.
-				mon->mfaction = YENDORIAN_FACTION;
+				set_faction(mon, YENDORIAN_FACTION);
 				if(mon->mpeaceful){
 					mon->mpeaceful = 0;
 					set_malign(mon);
@@ -6449,7 +6449,7 @@ long mfaction;
 		if(revive_corpses && isok(cc.x, cc.y) && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
 			if(!get_template(mon) && mtemplate_accepts_mtyp(YELLOW_TEMPLATE, mon->mtyp))
 				set_template(mon, YELLOW_TEMPLATE);
-			mon->mfaction = YELLOW_FACTION;
+			set_faction(mon, YELLOW_FACTION);
 		}
 		else {
 			yellow_dead();
