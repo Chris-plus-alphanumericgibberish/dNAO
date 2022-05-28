@@ -461,7 +461,7 @@ boolean devour;
 	    delobj(obj);
 
 #ifdef PET_SATIATION
-	if (can_choke && edog->hungrytime >= 2*DOG_SATIATED)
+	if (can_choke && edog->hungrytime >= (monstermoves + 2*DOG_SATIATED))
 	{
 	    if (canseemon(mtmp))
 	    {
