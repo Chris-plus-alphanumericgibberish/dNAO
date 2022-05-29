@@ -490,7 +490,7 @@ A("Staff of Necromancy", QUARTERSTAFF,					"skull-topped %s",
 /*Needs encyc entry?*/
 /*provides curse res while wielded */
 A("Magicbane",			ATHAME,							"mystically runed %s",
-	3500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	3500L, METAL, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_WIZARD, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_MAGM, 3, 4), (ARTA_MAGIC),
