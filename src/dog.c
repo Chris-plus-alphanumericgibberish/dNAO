@@ -338,13 +338,33 @@ losedogs()
 			&& mtmp->m_insight_level <= u.uinsight
 		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
 		) {
-		    if(mtmp == migrating_mons)
+		    if(!mtmp0)
 			migrating_mons = mtmp->nmon;
 		    else
 			mtmp0->nmon = mtmp->nmon;
 		    mon_arrive(mtmp, FALSE);
 		} else
 		    mtmp0 = mtmp;
+	}
+}
+
+void
+mon_arrive_on_level(mon)
+struct monst *mon;
+{
+	struct monst *mtmp, *mtmp2, *mtmp0 = 0;
+	if(wizard) pline("arriving");
+	for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+		mtmp2 = mtmp->nmon;
+		if (mtmp == mon) {
+			if(!mtmp0)
+				migrating_mons = mtmp->nmon;
+			else
+				mtmp0->nmon = mtmp->nmon;
+			mon_arrive(mtmp, FALSE);
+			break;
+		} else
+			mtmp0 = mtmp;
 	}
 }
 
@@ -359,6 +379,7 @@ boolean with_you;
 	int num_segs;
 
 	mtmp->nmon = fmon;
+	mtmp->marriving = FALSE;
 	fmon = mtmp;
 	if (mtmp->isshk)
 	    set_residency(mtmp, FALSE);
@@ -400,10 +421,19 @@ boolean with_you;
 	       goto_level(do.c) decides who ends up at your target spot
 	       when there is a monster there too. */
 	    if (!MON_AT(u.ux, u.uy) &&
-		    !rn2(mtmp->mtame ? 10 : mtmp->mpeaceful ? 5 : 2))
-		rloc_to(mtmp, u.ux, u.uy);
+		    !rn2(mtmp->mtame ? 10 : mtmp->mpeaceful ? 5 : 2)
+		)
+			rloc_to(mtmp, u.ux, u.uy);
 	    else
-		mnexto(mtmp);
+			mnexto(mtmp);
+		if(mtmp->mx == 0){
+			if(wizard) pline("no room for buddy! Arriving later.");
+			/*No room! place it once there's space.*/
+			migrate_to_level(mtmp, ledger_no(&u.uz),
+					 MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+			return;
+		}
 	    return;
 	}
 	/*
@@ -490,42 +520,26 @@ boolean with_you;
 
 	mtmp->mx = 0;	/*(already is 0)*/
 	mtmp->my = xyflags;
-	if (xlocale)
+	if (xlocale){
 	    (void) mnearto(mtmp, xlocale, ylocale, FALSE);
+		if(mtmp->mx == 0){
+			if(wizard) pline("no room at local! Qrriving later.");
+			/*No room! place it once there's space.*/
+			migrate_to_level(mtmp, ledger_no(&u.uz),
+					 MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+			return;
+		}
+	}
 	else {
-	    if (!rloc(mtmp,TRUE)) {
-		/*
-		 * Failed to place migrating monster,
-		 * probably because the level is full.
-		 * Dump the monster's cargo and leave the monster dead.
-		 */
-	    	struct obj *obj, *corpse;
-		while ((obj = mtmp->minvent) != 0) {
-		    obj_extract_self(obj);
-		    obj_no_longer_held(obj);
-		    if (obj->owornmask & W_WEP)
-			setmnotwielded(mtmp,obj);
-		    obj->owornmask = 0L;
-		    if (xlocale && ylocale)
-			    place_object(obj, xlocale, ylocale);
-		    else {
-		    	rloco(obj);
-			get_obj_location(obj, &xlocale, &ylocale, 0);
-		    }
+		if (!rloc(mtmp,TRUE)) {
+			if(wizard) pline("no room! arriving later.");
+			/*No room! place it once there's space.*/
+			migrate_to_level(mtmp, ledger_no(&u.uz),
+					 MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+			return;
 		}
-		corpse = mkcorpstat(CORPSE, (struct monst *)0, mtmp->data,
-				xlocale, ylocale, FALSE);
-#ifndef GOLDOBJ
-		if (mtmp->mgold) {
-		    if (xlocale == 0 && ylocale == 0 && corpse) {
-			(void) get_obj_location(corpse, &xlocale, &ylocale, 0);
-			(void) mkgold_core(mtmp->mgold, xlocale, ylocale, FALSE);
-		    }
-		    mtmp->mgold = 0L;
-		}
-#endif
-		mongone(mtmp);
-	    }
 	}
 	/* now that it's placed, we can resume timers (which may kill mtmp) */
 	resume_timers(mtmp->timed);

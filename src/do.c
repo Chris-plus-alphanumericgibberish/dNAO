@@ -1551,10 +1551,13 @@ misc_levelport:
 		   with the situation, so only say something when debugging */
 		if (wizard) pline("(monster in hero's way)");
 #endif
-		if (!rloc(mtmp, TRUE))
+		if (!rloc(mtmp, TRUE)){
+			if(wizard) pline("arriving later.");
 		    /* no room to move it; send it away, to return later */
 		    migrate_to_level(mtmp, ledger_no(&u.uz),
 				     MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+		}
 	    }
 	}
 
