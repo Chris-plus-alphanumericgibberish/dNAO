@@ -2323,9 +2323,8 @@ karemade:
 			/* Unseen monsters may take action */
 			for(mtmp = migrating_mons; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
-				if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->marriving){
+				if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && mtmp->marriving)
 					mon_arrive_on_level(mtmp);
-				}
 				else
 					unseen_actions(mtmp); //May cause mtmp to be removed from the migrating chain
 			}

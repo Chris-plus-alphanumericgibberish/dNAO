@@ -338,10 +338,7 @@ losedogs()
 			&& mtmp->m_insight_level <= u.uinsight
 		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
 		) {
-		    if(!mtmp0)
-			migrating_mons = mtmp->nmon;
-		    else
-			mtmp0->nmon = mtmp->nmon;
+			mon_extract_from_list(mtmp, &migrating_mons);
 		    mon_arrive(mtmp, FALSE);
 		} else
 		    mtmp0 = mtmp;
@@ -349,23 +346,31 @@ losedogs()
 }
 
 void
-mon_arrive_on_level(mon)
+mon_extract_from_list(mon, list_head)
 struct monst *mon;
+struct monst **list_head;
 {
 	struct monst *mtmp, *mtmp2, *mtmp0 = 0;
-	if(wizard) pline("arriving");
-	for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+	for(mtmp = *list_head; mtmp; mtmp = mtmp2) {
 		mtmp2 = mtmp->nmon;
 		if (mtmp == mon) {
 			if(!mtmp0)
-				migrating_mons = mtmp->nmon;
+				*list_head = mtmp->nmon;
 			else
 				mtmp0->nmon = mtmp->nmon;
-			mon_arrive(mtmp, FALSE);
 			break;
 		} else
 			mtmp0 = mtmp;
 	}
+}
+
+void
+mon_arrive_on_level(mon)
+struct monst *mon;
+{
+	if(wizard) pline("arriving");
+	mon_extract_from_list(mon, &migrating_mons);
+	mon_arrive(mon, FALSE);
 }
 
 /* called from resurrect() in addition to losedogs() */

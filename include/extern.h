@@ -630,6 +630,7 @@ E struct monst *FDECL(make_familiar, (struct obj *,XCHAR_P,XCHAR_P,BOOLEAN_P));
 E struct monst *NDECL(makedog);
 E void NDECL(update_mlstmv);
 E void NDECL(losedogs);
+E void FDECL(mon_extract_from_list, (struct monst *, struct monst **));
 E void FDECL(mon_arrive_on_level, (struct monst *));
 E void FDECL(mon_arrive, (struct monst *,BOOLEAN_P));
 E void FDECL(mon_catchup_elapsed_time, (struct monst *,long));
