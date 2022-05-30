@@ -2787,10 +2787,14 @@ coord *cc;
 			if(otmp->oclass == SPBOOK_CLASS){
 				otmp = poly_obj(otmp, SPE_BLANK_PAPER);
 			}
-			if(otmp->oclass == POTION_CLASS){
+			if(!is_ammo(otmp)){
 				if(otmp->quan > 3)
 					otmp->quan = rnd(3);
 				fix_object(otmp);
+			}
+			if(otmp->otyp == MAGIC_MARKER){
+				otmp->recharged = max(1, otmp->recharged);
+				otmp->spe = 0;
 			}
 			mpickobj(mtmp,otmp);
 		}
