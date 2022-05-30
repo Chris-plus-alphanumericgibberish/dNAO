@@ -180,7 +180,7 @@ ENTRY:		2
 DUNGEON:		"Chaos Quest" "F" (15, 0)
 DESCRIPTION:    mazelike
 ALIGNMENT:      chaotic
-LEVEL:		"frst1" "A" @ (1, 0)
+LEVEL:		"frst1" "none" @ (1, 0)
 LEVEL:		"frst2" "B" @ (2, 0)
 LEVEL:		"frst3" "C" @ (3, 0)
 LEVEL:		"ford"  "none" @ (4, 0)
