@@ -2800,7 +2800,7 @@ coord *cc;
 			mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
 			if(mtmp && EDOG(mtmp)){
 				EDOG(mtmp)->dominated = TRUE;
-				EDOG(mtmp)->hungrytime = monstermoves + 3000;
+				EDOG(mtmp)->hungrytime = monstermoves + 4500;
 			}
 		}
 		else {
