@@ -496,6 +496,23 @@ struct obj {
 			 otmp->otyp == ISAMUSEI ||\
 			 otmp->otyp == DISKOS ||\
 			 otmp->otyp == BESTIAL_CLAW)
+#define ensouled_item(otmp)	(((otmp)->otyp >= WAGE_OF_SLOTH && (otmp)->otyp <= WAGE_OF_PRIDE)\
+			 || (otmp)->otyp == VITAL_SOULSTONE\
+			 || (otmp)->otyp == SPIRITUAL_SOULSTONE\
+			 || ((otmp)->otyp >= EFFIGY && (otmp)->otyp <= DOLL_S_TEAR)\
+			 || (otmp)->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE\
+			 || (otmp)->otyp == MAGIC_LAMP\
+			 || (otmp)->otyp == RIN_WISHES\
+			 || (otmp)->otyp == MISOTHEISTIC_PYRAMID\
+			 || (otmp)->otyp == MISOTHEISTIC_FRAGMENT\
+			 || (otmp)->otyp == DIMENSIONAL_LOCK\
+			 || (otmp)->otyp == PRESERVATIVE_ENGINE\
+			 || (otmp)->otyp == ARMOR_SALVE\
+			 || (otmp)->otyp == LIVING_MASK\
+			 || (otmp)->oclass == TILE_CLASS\
+			 || (otmp)->otyp == ANTIMAGIC_RIFT\
+			 || (otmp)->otyp == CATAPSI_VORTEX\
+			)
 #define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			otmp->oclass == TOOL_CLASS) && \
 			 (objects[otmp->otyp].oc_skill == P_POLEARMS || \

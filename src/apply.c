@@ -2781,6 +2781,17 @@ coord *cc;
 		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
 			otmp = duplicate_obj(oinv);
 			obj_extract_self(otmp);
+			if(otmp->oclass == SCROLL_CLASS){
+				otmp = poly_obj(otmp, SCR_BLANK_PAPER);
+			}
+			if(otmp->oclass == SPBOOK_CLASS){
+				otmp = poly_obj(otmp, SPE_BLANK_PAPER);
+			}
+			if(otmp->oclass == POTION_CLASS){
+				if(otmp->quan > 3)
+					otmp->quan = rnd(3);
+				fix_object(otmp);
+			}
 			mpickobj(mtmp,otmp);
 		}
 		m_dowear(mtmp, TRUE);
