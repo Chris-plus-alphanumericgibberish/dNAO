@@ -214,6 +214,15 @@ struct monst * mdef;
 	
 	/* Do the attacks */
 	bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
+	if (!isok(bhitpos.x, bhitpos.y)) {
+		if (u.uswallow) {
+			bhitpos.x = u.ux;
+			bhitpos.y = u.uy;
+		}
+		else {
+			return TRUE;
+		}
+	}
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	if (attack_type == ATTACKCHECK_BLDTHRST) {
 		/* unintentional attacks only cause the one hit, no follow-ups */
@@ -561,7 +570,7 @@ int tary;
 			|| mdef == u.usteed
 #endif
 			) ? (!missedyou && (tarx != u.ux || tary != u.uy))
-			: (!missedother && m_at(tarx, tary) != mdef)
+			: (!missedother && m_at(tarx, tary) != mdef && !(youagr && u.uswallow && mdef == u.ustuck))
 		){
 			result = MM_AGR_STOP;
 			continue;
