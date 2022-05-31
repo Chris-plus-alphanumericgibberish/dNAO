@@ -360,6 +360,7 @@ int template;
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_TENGTPORT);
 		ptr->mflagst |= (MT_HOSTILE);
+		ptr->mflagst &= ~(MT_MINDLESS);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsb |= (MB_INDIGESTIBLE);
 		/* defense: */
