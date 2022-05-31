@@ -11565,6 +11565,9 @@ living_items()
 					mtmp->m_lev += 4;
 					mtmp->mhpmax += d(4, 8);
 					mtmp->mhp = mtmp->mhpmax;
+					mtmp->mpeaceful = 0;
+					untame(mtmp, 0); //Note: should never happen, since we check for the absense of emon
+					set_malign(mtmp);
 					// mtmp->m_ap_type = M_AP_OBJECT;
 					// mtmp->mappearance = STATUE;
 					// mtmp->m_ap_type = M_AP_MONSTER;
