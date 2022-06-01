@@ -2267,7 +2267,7 @@ struct obj *obj;
 	else if (obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your rakuyo", MENU_UNSELECTED);
-	else if (obj->otyp == BLADE_OF_MERCY || obj->otyp == BLADE_OF_MERCY)
+	else if (obj->otyp == BLADE_OF_MERCY || obj->otyp == BLADE_OF_GRACE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your blade of mercy", MENU_UNSELECTED);
 	else if (obj->otyp == DOUBLE_FORCE_BLADE || obj->otyp == FORCE_BLADE)
