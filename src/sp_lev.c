@@ -1306,7 +1306,7 @@ default_case:
 		otmp->spe = 0;
 	}
 	// Madman's old stuff to reclaim
-	if(Is_container(otmp) && otmp->spe == 7){
+	if(Is_real_container(otmp) && otmp->spe == 7){
 		struct obj *stuff;
 		stuff = mksartifact(ART_RITE_OF_DETESTATION);
 		add_to_container(otmp, stuff);
