@@ -4121,7 +4121,7 @@ boolean lethal;
 		if(youdef){
 			int temp_encouraged = u.uencouraged;
 			if(lethal)
-				pline("The blade lodges in you %s!", body_part(SPINE));
+				pline("The blade lodges in your %s!", body_part(SPINE));
 			u.uencouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5) + spe;
 			flags.forcefight = TRUE;
 			xattacky(mdef, target, x(target), y(target));
