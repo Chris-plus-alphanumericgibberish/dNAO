@@ -4692,10 +4692,18 @@ struct monst *mon;
 		if(xlocale == u.ux && ylocale == u.uy){
 			if(!rn2(20)) switch(rnd(3)){
 				case 1:
-					pline("The shadowy mist forms briefly into a yawning maw!");
+					if(!Blind){
+						if(u.veil)
+							pline("The mist moves oddly!");
+						else pline("The shadowy mist forms briefly into a yawning maw!");
+					}
 				break;
 				case 2:
-					pline("The dark forms into hooves and writhing tendrils!");
+					if(!Blind){
+						if(u.veil)
+							pline("The shadows writhe in the corners of your vision!");
+						else pline("The dark forms into hooves and writhing tendrils!");
+					}
 				break;
 				case 3:
 					if(uarmh && uarmh->otyp == SEDGE_HAT){

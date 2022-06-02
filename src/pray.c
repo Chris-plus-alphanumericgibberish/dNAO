@@ -1620,12 +1620,14 @@ boolean silently;
 		else if(Blind || (!carried(otmp) && !cansee(x,y)))
 		You_hear("crunching noises.");
 		else if(!carried(otmp) && cansee(x,y)){
-			pline("A mouth forms from the mist and eats %s!", an(singular(otmp, xname)));
-			lift_veil();
+			if(u.veil)
+				pline("Mist moves over %s. When the mist clears %s is gone!", an(singular(otmp, xname)), the(singular(otmp, xname)));
+			else pline("A mouth forms from the mist and eats %s!", an(singular(otmp, xname)));
 		}
 		else {
+			// If it's carried, it should have lifted the veil.
+			if(u.veil) impossible("Offered to the goat with an intact veil?");
 			pline("A mouth forms from the mist and eats your sacrifice!");
-			lift_veil();
 		}
 	}
     if (carried(otmp)){
@@ -1862,6 +1864,15 @@ dosacrifice()
      */
 	
 	if(goat_mouth_at(u.ux, u.uy)){
+		if(u.veil){
+			You("feel reality threatening to slip away!");
+			if (yn("Are you sure you want to make an offering?") != 'y'){
+				return(0);
+			}
+			else pline("So be it.");
+			u.veil = FALSE;
+			change_uinsight(1);
+		}
 		goat_eat(otmp, GOAT_EAT_OFFERED);
 		return 1;
 	}

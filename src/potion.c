@@ -483,6 +483,15 @@ register struct obj *otmp;
 {
 	int retval;
 
+	if(otmp->otyp == POT_GOAT_S_MILK && u.veil){
+		You("feel reality threatening to slip away from the mere scent of the potion!");
+		if (yn("Are you sure you want to drink it?") != 'y'){
+			return(0);
+		}
+		else pline("So be it.");
+		//Note: the veil is not lifted until the potion is actually drunk.
+	}
+
 	otmp->in_use = TRUE;
 	if (otmp->oartifact)
 		otmp->in_use = FALSE;

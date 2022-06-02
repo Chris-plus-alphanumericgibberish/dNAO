@@ -3112,6 +3112,15 @@ int tx,ty;
 	
 	if(m_at(tx,ty) && (ep->ward_id != ANDROMALIUS || m_at(tx,ty)->mtyp != PM_SEWER_RAT)) return 0;
 	
+	if(u.veil){
+		You("feel reality threatening to slip away!");
+		if (yn("Are you sure you want proceed with the ritual?") != 'y'){
+			return 0;
+		}
+		else pline("So be it.");
+		u.veil = FALSE;
+		change_uinsight(1);
+	}
 	switch(ep->ward_id){
 	case AHAZU:{
 		if(u.sealTimeout[AHAZU-FIRST_SEAL] < moves){
