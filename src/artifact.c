@@ -10477,6 +10477,16 @@ read_necro(VOID_ARGS)
 	    delay = 0;
 	    return(0);
 	}
+	if(u.veil && delay >= -50){
+		You("feel reality threatening to slip away!");
+		if (yn("Are you sure you want to keep reading?") != 'y'){
+			delay = 0;
+			return(0);
+		}
+		else pline("So be it.");
+		u.veil = FALSE;
+		change_uinsight(1);
+	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	/* lenses give 50% faster reading */
 //	    nomul( (ublindf && ublindf->otyp == LENSES) ? 
@@ -10988,6 +10998,16 @@ read_lost(VOID_ARGS)
 		losexp("getting lost in a book",TRUE,TRUE,TRUE);
 	    delay = 0;
 	    return(0);
+	}
+	if(u.veil && delay >= -55){
+		You("feel reality threatening to slip away!");
+		if (yn("Are you sure you want to keep reading?") != 'y'){
+			delay = 0;
+			return(0);
+		}
+		else pline("So be it.");
+		u.veil = FALSE;
+		change_uinsight(1);
 	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	/* lenses give 50% faster reading */
