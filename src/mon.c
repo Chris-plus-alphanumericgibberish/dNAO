@@ -3207,13 +3207,13 @@ struct monst * mdef;	/* another monster which is next to it */
 	
 	/* elves (and Eladrin) vs. (orcs and undead and wargs) */
 	if((is_elf(ma) || is_eladrin(ma) || ma->mtyp == PM_GROVE_GUARDIAN || ma->mtyp == PM_FORD_GUARDIAN || ma->mtyp == PM_FORD_ELEMENTAL)
-		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || is_undead(mdef))
+		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || is_undead(mdef->data))
 		&& !(is_orc(ma) || is_ogre(ma) || mm_undead(magr) || mdef->mfaction == HOLYDEAD_FACTION)
 	)
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if((is_elf(md) || is_eladrin(md) || md->mtyp == PM_GROVE_GUARDIAN || md->mtyp == PM_FORD_GUARDIAN || md->mtyp == PM_FORD_ELEMENTAL) 
-		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || is_undead(magr))
+		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || is_undead(magr->data))
 		&& !(is_orc(md) || is_ogre(md) || mm_undead(mdef) || magr->mfaction == HOLYDEAD_FACTION)
 	)
 		return ALLOW_M|ALLOW_TM;
