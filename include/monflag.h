@@ -414,8 +414,9 @@
 #define INCARCERATE            TREMOR+1
 #define MUMMY_CURSE            INCARCERATE+1
 #define YELLOW_DEAD            MUMMY_CURSE+1
+#define MON_CANCEL             YELLOW_DEAD+1
 
-#define MON_LASTSPELL          YELLOW_DEAD
+#define MON_LASTSPELL          MON_CANCEL
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1
