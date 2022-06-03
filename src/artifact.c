@@ -2329,7 +2329,7 @@ touch_artifact(obj, mon, hypothetical)
 		if(!hypothetical){
 			if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS)
 				give_law_trophy();
-			if(obj->oartifact == ART_SILVER_KEY)
+			if(obj->oartifact == ART_SILVER_KEY || obj->oartifact == ART_HAND_MIRROR_OF_CTHYLLA)
 				give_neutral_trophy();
 			if(obj->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)
 				give_mordor_trophy();
