@@ -4572,8 +4572,9 @@ use_grapple (obj)
 	    end_menu(tmpwin, "Aim for what?");
 	    tohit = rn2(4);
 	    if (select_menu(tmpwin, PICK_ONE, &selected) > 0 &&
-			rn2(P_SKILL(typ) > P_SKILLED ? 20 : 2))
-		tohit = selected[0].item.a_int - 1;
+			rn2(P_SKILL(typ) > P_SKILLED ? 20 : 2)
+		)
+			tohit = selected[0].item.a_int - 1;
 	    free((genericptr_t)selected);
 	    destroy_nhwindow(tmpwin);
 	}
@@ -4671,7 +4672,11 @@ use_crook (obj)
 	    end_menu(tmpwin, "Aim for what?");
 	    if (select_menu(tmpwin, PICK_ONE, &selected) > 0)
 			tohit = selected[0].item.a_int - 1;
-		else return 0;
+		else {
+			free((genericptr_t)selected);
+			destroy_nhwindow(tmpwin);
+			return 0;
+		}
 	    free((genericptr_t)selected);
 	    destroy_nhwindow(tmpwin);
 	}
