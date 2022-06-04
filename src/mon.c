@@ -1258,6 +1258,21 @@ register struct monst *mtmp;
 			obj->corpsenm = PM_PARASITIC_MASTER_MIND_FLAYER;
 			fix_object(obj);
 		break;
+	    case PM_WARDEN_ARIANNA:
+			mon = makemon(&mons[PM_ARIANNA], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT);
+			if (mon){
+				initedog(mon);
+				mon->m_lev = mtmp->m_lev/2;
+				mon->mhpmax = (mtmp->mhpmax+1)/2;
+				mon->female = TRUE;
+				mon->mtame = 10;
+				mon->mpeaceful = 1;
+				if(EDOG(mon))
+					EDOG(mon)->loyal = TRUE;
+				mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
+				mongone(mon);
+			}
+		break;
 	    default_1:
 	    default:
 		if (mvitals[mndx].mvflags & G_NOCORPSE)
