@@ -2482,6 +2482,7 @@ museamnesia:
 		mtmp->m_insight_level = 0;
 		m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
+		m_level_up_intrinsic(mtmp);
 	}break;
 	case 0: return 0; /* i.e. an exploded wand */
 	default: impossible("%s wanted to perform action %d?", Monnam(mtmp),

@@ -1136,6 +1136,7 @@ struct mkroom	*croom;
 					curse(tmpo);
 					m_dowear(mon, TRUE);
 				}
+				m_level_up_intrinsic(mon);
 			}
 		}
 		otmp->spe = 0;
@@ -1240,6 +1241,7 @@ default_case:
 									curse(meqp);
 									
 									m_dowear(mtmp, TRUE);
+									m_level_up_intrinsic(mtmp);
 								}
 							}
 							else if(!rn2(4)){
@@ -1262,6 +1264,7 @@ default_case:
 										unbless(meqp);
 										meqp->obj_color = CLR_YELLOW;
 										m_dowear(mtmp, TRUE);
+										m_level_up_intrinsic(mtmp);
 									}
 								}
 							} else {

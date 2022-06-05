@@ -20,6 +20,7 @@
 struct attack {
 	uchar		aatyp;
 	uchar		adtyp, damn, damd;
+	uchar		lev_req;
 };
 #define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
 

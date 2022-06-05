@@ -2966,6 +2966,75 @@ int tary;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
+	case STARFALL:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("starfall with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			int pdmg = d(8, 8);	/* physical */
+			int cdmg = d(4, 8);	/* cold */
+			int edmg = d(4, 8);	/* energy */
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("%s %s hit by a flury of hail and silver stars!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "are" : "is"
+					);
+			}
+			
+			/* extra message for the silver */
+			if (hates_silver(youracedata)) {
+				pdmg += d(4, 20);/* silver */
+				if(youdef){
+					if (noncorporeal(youracedata)) {
+						pline("The silver stars sear you!");
+					}
+					else {
+						pline("The silver stars sear your %s!", body_part(BODY_FLESH));
+					}
+				}
+			}
+
+			/* calculate physical damage */
+			if (Half_phys(mdef))
+				pdmg = (pdmg + 1) / 2;
+			/* apply average DR */
+			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
+			if (pdmg < 1)
+				pdmg = 1;
+
+			/* special antimagic effect */
+			if (youdef)
+				drain_en(edmg);
+			else
+				mdef->mspec_used += edmg;
+
+			/* calculate cold damage */
+			if (Cold_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				cdmg = 0;
+			}
+			else {
+				if (Half_spel(mdef))
+					cdmg = (cdmg + 1) / 2;
+			}
+			if (!UseInvCold_res(mdef)) {
+				destroy_item(mdef, POTION_CLASS, AD_COLD);
+			}
+
+			/* sum damage components to override dmg */
+			dmg = pdmg + cdmg;
+			/* apply u.uvaul to all */
+			if (youdef && u.uvaul_duration)
+				dmg = (dmg + 1) / 2;
+
+			/* player cold madness*/
+			if (youdef) roll_frigophobia();
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
 	case DEATH_TOUCH:
 		/* needs direct target */
 		if (!foundem) {

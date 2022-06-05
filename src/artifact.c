@@ -11451,6 +11451,7 @@ do_passive_attacks()
 		dosnake(&youmonst);
 	if(is_tailslap_mtyp(youracedata))
 		dotailslap(&youmonst);
+	//Note: The player never gets Eladrin vines, starblades, or storms
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
@@ -11462,6 +11463,12 @@ do_passive_attacks()
 				dosnake(mtmp);
 			if(is_tailslap_mon(mtmp))
 				dotailslap(mtmp);
+			if(is_vines_mon(mtmp))
+				dovines(mtmp);
+			if(is_star_blades_mon(mtmp))
+				dostarblades(mtmp);
+			if(is_storm_mon(mtmp))
+				dostorm(mtmp);
 		}
 		if(mtmp->mtyp == PM_NACHASH_TANNIN){
 			donachash(mtmp);

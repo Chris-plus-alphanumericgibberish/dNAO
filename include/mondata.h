@@ -10,6 +10,11 @@
 
 #define MON_BAB(mon)		((mon)->data->mflagsf&MF_BAB_FULL ? 1.0 : (mon)->data->mflagsf&MF_BAB_HALF ? .5 : .75)
 
+#define lev_limit_30(ptr)		((ptr)->mflagsf&MF_LEVEL_30)
+#define lev_limit_45(ptr)		((ptr)->mflagsf&MF_LEVEL_45)
+
+#define has_phys_scaling(ptr)		((ptr)->mflagsf&MF_PHYS_SCALING)
+
 #define pm_resistance(ptr,typ)	(((ptr)->mresists & (typ)) != 0)
 #define mon_intrinsic(mon,typ)	(((mon)->mintrinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
 #define mon_extrinsic(mon,typ)	(((mon)->mextrinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
@@ -541,8 +546,15 @@
 #define	is_snake_bite_mtyp(ptr)	((ptr)->mtyp == PM_MEDUSA \
 									|| (ptr)->mtyp == PM_ANCIENT_NAGA)
 #define	is_snake_bite_mon(mon)	(is_snake_bite_mtyp((mon)->data))
-#define	is_tailslap_mtyp(ptr)	(is_true_adult_dragon(ptr))
+#define	is_tailslap_mtyp(ptr)	(is_true_adult_dragon(ptr) || (ptr)->mtyp == PM_UISCERRE_ELADRIN)
 #define	is_tailslap_mon(mon)	(is_tailslap_mtyp((mon)->data))
+
+#define	is_vines_mon(mon)	((mon)->mtyp == PM_GAE_ELADRIN && (mon)->m_lev >= 20)
+#define	is_star_blades_mtyp(ptr)	((ptr)->mtyp == PM_COURE_ELADRIN || (ptr)->mtyp == PM_MOTE_OF_LIGHT)
+#define	is_star_blades_mon(mon)	(is_star_blades_mtyp((mon)->data))
+#define	is_storm_mtyp(ptr)	((ptr)->mtyp == PM_CAILLEA_ELADRIN || (ptr)->mtyp == PM_MOONSHADOW\
+							 || (ptr)->mtyp == PM_GHAELE_ELADRIN || (ptr)->mtyp == PM_LUMINOUS_CLOUD)
+#define	is_storm_mon(mon)	((is_storm_mtyp((mon)->data)) && (mon)->m_lev >= 20)
 
 #define goat_monster(ptr) (In_lost_cities(&u.uz) ? lost_cities_goat_monster(ptr) : always_goat_monster(ptr))
 #define always_goat_monster(ptr) (\
@@ -965,6 +977,51 @@
 								   (ptr)->mtyp == PM_PARASITIZED_COMMANDER)
 
 #define is_elemental(ptr)		( (ptr->mflagsa & MA_ELEMENTAL) )
+
+#define mon_archeologist(mon)	((mon)->mtyp == PM_ARCHEOLOGIST || (mon)->mtyp == PM_LORD_CARNARVON || (mon)->mtyp == PM_STUDENT || \
+								 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_ARCHEOLOGIST))
+#define mon_anachrononaut(mon)	((mon)->mtyp == PM_ANACHRONONAUT || (mon)->mtyp == PM_TROOPER || is_myrkalfr(mon) || \
+								 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_ANACHRONONAUT))
+#define mon_barbarian(mon)	((mon)->mtyp == PM_BARBARIAN || (mon)->mtyp == PM_HALF_DRAGON || (mon)->mtyp == PM_ORC_WARCHIEF || \
+							 (mon)->mtyp == PM_CHIEFTAIN || (mon)->mtyp == PM_ORC_WARRIOR || \
+							 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_BARBARIAN))
+#define mon_bard(mon)	((mon)->mtyp == PM_BARD || (mon)->mtyp == PM_PINDAR || (mon)->mtyp == PM_RHYMER || \
+						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_BARD))
+#define mon_caveman(mon)	((mon)->mtyp == PM_CAVEMAN || (mon)->mtyp == PM_CAVEWOMAN || (mon)->mtyp == PM_SHAMAN_KARNOV || \
+							 (mon)->mtyp == PM_NEANDERTHAL || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_CAVEMAN))
+#define mon_convict(mon)	((mon)->mtyp == PM_CONVICT || (mon)->mtyp == PM_ROBERT_THE_LIFER || (mon)->mtyp == PM_INMATE || \
+							 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_CONVICT))
+#define mon_undead_hunter(mon)	(((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_HUNTER))
+#define mon_knight(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || (mon)->mtyp == PM_SIR_GARLAND || \
+						 (mon)->mtyp == PM_GARLAND || (mon)->mtyp == PM_CELEBORN || (mon)->mtyp == PM_DANTRAG || \
+						 (mon)->mtyp == PM_PAGE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
+#define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_MASTER_KAEN || (mon)->mtyp == PM_ABBOT || \
+						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_MONK))
+#define mon_madman(mon)	((mon)->mtyp == PM_MADMAN || (mon)->mtyp == PM_MADWOMAN || (mon)->mtyp == PM_CASSILDA_THE_IRON_MAIDEN || \
+						 (mon)->mtyp == PM_PATIENT || (mon)->mtyp == PM_CONTAMINATED_PATIENT || \
+						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_MADMAN))
+#define mon_pirate(mon)	((mon)->mtyp == PM_PIRATE || (mon)->mtyp == PM_MAYOR_CUMMERBUND || (mon)->mtyp == PM_BLACKBEARD_S_GHOST || \
+						 (mon)->mtyp == PM_PIRATE_BROTHER || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_PIRATE))
+#define mon_priest(mon)	((mon)->mtyp == PM_PRIEST || (mon)->mtyp == PM_PRIESTESS ||\
+						 (mon)->mtyp == PM_ECLAVDRA || (mon)->mtyp == PM_GALADRIEL || (mon)->mtyp == PM_MOTHER ||\
+						 (mon)->mtyp == PM_DROW_NOVICE || (mon)->mtyp == PM_ARCH_PRIEST || (mon)->mtyp == PM_SEYLL_AUZKOVYN || \
+						 (mon)->mtyp == PM_A_SALOM || (mon)->mtyp == PM_DROW_MATRON_MOTHER || (mon)->mtyp == PM_HIGH_ELF || \
+						 (mon)->mtyp == PM_STJARNA_ALFR || (mon)->mtyp == PM_SISTER || (mon)->mtyp == PM_ACOLYTE || \
+						 (mon)->mtyp == PM_PRIEST_OF_GHAUNADAUR || (mon)->mtyp == PM_DWARF_CLERIC || (mon)->mtyp == PM_DWARF_QUEEN || \
+						 (mon)->mtyp == PM_ELVENKING || (mon)->mtyp == PM_ELVENQUEEN || (mon)->mtyp == PM_MILITANT_CLERIC || \
+						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_PRIEST))
+#define mon_ranger(mon)	((mon)->mtyp == PM_RANGER || (mon)->mtyp == PM_ORION || (mon)->mtyp == PM_HALF_ELF_RANGER || (mon)->mtyp == PM_HUNTER || \
+						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_RANGER))
+#define mon_rogue(mon)	((mon)->mtyp == PM_ROGUE || (mon)->mtyp == PM_MASTER_OF_THIEVES || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_ROGUE))
+#define mon_samurai(mon)	((mon)->mtyp == PM_SAMURAI || (mon)->mtyp == PM_LORD_SATO || (mon)->mtyp == PM_ASHIKAGA_TAKAUJI || (mon)->mtyp == PM_ROSHI || \
+							 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_SAMURAI))
+#define mon_tourist(mon)	((mon)->mtyp == PM_TOURIST || (mon)->mtyp == PM_TWOFLOWER || \
+							 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_TOURIST))
+#define mon_valkyrie(mon)	((mon)->mtyp == PM_VALKYRIE || (mon)->mtyp == PM_WARRIOR || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_VALKYRIE))
+#define mon_wizard(mon)	((mon)->mtyp == PM_WIZARD || (mon)->mtyp == PM_WORM_THAT_WALKS || (mon)->mtyp == PM_INCANTIFIER || \
+						 (mon)->mtyp == PM_NEFERET_THE_GREEN || (mon)->mtyp == PM_NIMUNE || (mon)->mtyp == PM_ADVENTURING_WIZARD || \
+						 (mon)->mtyp == PM_HEDROW_MASTER_WIZARD || (mon)->mtyp == PM_GROMPH || (mon)->mtyp == PM_GUIDE || \
+						 (mon)->mtyp == PM_APPRENTICE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_WIZARD))
 
 #define likes_swamp(ptr)	((ptr)->mlet == S_PUDDING || \
 				 (ptr)->mlet == S_FUNGUS || \

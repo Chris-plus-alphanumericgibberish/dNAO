@@ -316,6 +316,7 @@ struct monst {
 #define	MAX_DOLL_MASK	DOLLMAKER_MIND_BLASTS
 #define	mvar_tanninType	mvar1
 #define	mvar_ancient_breath_cooldown	mvar1
+#define	mvar_deminymph_role	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2

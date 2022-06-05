@@ -2800,6 +2800,7 @@ coord *cc;
 		}
 		m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
+		m_level_up_intrinsic(mtmp);
 		if(master == &youmonst || master->mtame){
 			mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
 			if(mtmp && EDOG(mtmp)){

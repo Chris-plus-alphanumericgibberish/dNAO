@@ -1741,6 +1741,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damd = 4;	// unused
 		}
 	}
+	/*Some attacks have level requirements*/
+	if(attk->lev_req > mlev(magr)){
+		GETNEXT
+	}
 	/* khaamnun tanninim switch to sucking memories after dragging target in close */
 	if (pa->mtyp == PM_KHAAMNUN_TANNIN
 		&& mdef && distmin(x(magr),y(magr), x(mdef),y(mdef)) <= 1
@@ -4025,7 +4029,19 @@ boolean ranged;
 	struct obj * otmp;
 	struct monst * mtmp;
 	char buf[BUFSZ];
-
+	
+	/* Monsters with physical attack scaling treat the physical damage component of their attacks much like spellcasting damage */
+	if(attk->adtyp == AD_PHYS && has_phys_scaling(pa)){
+		if(flatdmg >= 0){
+			flatdmg += d(min(MAX_BONUS_DICE, mlev(magr)/3), attk->damd <= 1 ? 6 : attk->damd);
+		}
+		else {
+			attk->damn += min(MAX_BONUS_DICE, mlev(magr)/3);
+			if(attk->damd <= 1)
+				attk->damd = 6;
+		}
+	}
+	
 	/* First determine the base damage done */
 	if (flatdmg >= 0) {
 		dmg = flatdmg;

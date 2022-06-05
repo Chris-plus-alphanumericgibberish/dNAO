@@ -1749,10 +1749,12 @@ final_level()
 		    bless(otmp);
 		    if (otmp->spe < 4) otmp->spe += rnd(4);
 		    if ((otmp = which_armor(mtmp, W_ARMS)) == 0 ||
-			    otmp->otyp != SHIELD_OF_REFLECTION) {
-			(void) mongets(mtmp, AMULET_OF_REFLECTION, NO_MKOBJ_FLAGS);
-			m_dowear(mtmp, TRUE);
-			init_mon_wield_item(mtmp);
+			    otmp->otyp != SHIELD_OF_REFLECTION
+			) {
+				(void) mongets(mtmp, AMULET_OF_REFLECTION, NO_MKOBJ_FLAGS);
+				m_dowear(mtmp, TRUE);
+				init_mon_wield_item(mtmp);
+				m_level_up_intrinsic(mtmp);
 		    }
 		}
 	    }
@@ -1945,6 +1947,7 @@ int different;
 				}
 				m_dowear(mtmp, TRUE);
 				init_mon_wield_item(mtmp);
+				m_level_up_intrinsic(mtmp);
 			}
 		}
 		break;

@@ -1744,6 +1744,7 @@ int x, y;
 			(void) mpickobj(mon, otmp);
 			m_dowear(mon, TRUE);
 			init_mon_wield_item(mon);
+			m_level_up_intrinsic(mon);
 		}
 	}
 	else if(mid == PM_NESSIAN_PIT_FIEND){
@@ -1768,6 +1769,7 @@ int x, y;
 			curse(otmp);
 			m_dowear(mon, TRUE);
 			init_mon_wield_item(mon);
+			m_level_up_intrinsic(mon);
 		}
 #undef NPF_ARMOR
 	}
@@ -1786,6 +1788,7 @@ int x, y;
 			SHAY_WEAPON(BATTLE_AXE)
 			m_dowear(mon, TRUE);
 			init_mon_wield_item(mon);
+			m_level_up_intrinsic(mon);
 		}
 #undef NPF_ARMOR
 	}

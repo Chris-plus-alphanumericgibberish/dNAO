@@ -2629,6 +2629,7 @@ boolean past;
 			break; //Found boots.  Also, otmp->nobj should now be 0 anyway.
 		}
 		m_dowear(daughter, TRUE);
+		m_level_up_intrinsic(daughter);
 	}
     box->owt = weight(box);
     return;

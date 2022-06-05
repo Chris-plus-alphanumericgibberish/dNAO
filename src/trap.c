@@ -649,6 +649,7 @@ int *fail_reason;
 	}
 	m_dowear(mon, TRUE);
 	init_mon_wield_item(mon);
+	m_level_up_intrinsic(mon);
 	delobj(statue);
 
 	/* mimic statue becomes seen mimic; other hiders won't be hidden */

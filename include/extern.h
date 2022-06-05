@@ -1339,6 +1339,7 @@ E void FDECL(reset_rndmonst, (int));
 E struct permonst *FDECL(mkclass, (CHAR_P,int));
 E struct permonst *NDECL(mkzombie);
 E int FDECL(adj_lev, (struct permonst *));
+E void FDECL(m_level_up_intrinsic, (struct monst *));
 E struct permonst *FDECL(grow_up, (struct monst *,struct monst *));
 E struct obj * FDECL(mongets, (struct monst *,int,int));
 E void FDECL(m_initthrow,(struct monst *, int, int, int));

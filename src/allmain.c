@@ -4657,6 +4657,7 @@ struct monst *mon;
 					mon->m_insight_level = 0;
 					m_dowear(mon, TRUE);
 					init_mon_wield_item(mon);
+					m_level_up_intrinsic(mon);
 
 					/*Break out of loop. Warning Note: otmp is stale*/
 					break;
@@ -5068,6 +5069,7 @@ struct monst *magr;
 	int mult = 1;
 	int ax, ay;
 	struct attack * attk;
+	struct attack attkbuff = {0};
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;
@@ -5076,7 +5078,9 @@ struct monst *magr;
 	pa = youagr ? youracedata : magr->data;
 	
 	// get attack from statblock
-	attk = dmgtype_fromattack(magr->data, AD_DRST, AT_OBIT);
+	attk = mon_get_attacktype(magr, AT_OBIT, &attkbuff);
+	if(!attk)
+		return;
 	
 	if(pa->mtyp == PM_ANCIENT_NAGA){
 		max = youagr ? 5 : magr->m_id%2 ? 7 : 5;
@@ -5145,6 +5149,7 @@ struct monst *magr;
 	int i = rnd(8),j;
 	int ax, ay;
 	struct attack * attk;
+	struct attack attkbuff = {0};
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;
@@ -5152,7 +5157,9 @@ struct monst *magr;
 	pa = youagr ? youracedata : magr->data;
 	
 	// get attack from statblock
-	attk = dmgtype_fromattack(magr->data, AD_PHYS, AT_TAIL);
+	attk = mon_get_attacktype(magr, AT_TAIL, &attkbuff);
+	if(!attk)
+		return;
 	
 	//Attack one foe
 	for(j=8;j>=1;j--){
@@ -5200,6 +5207,206 @@ struct monst *magr;
 		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
 		return; //Only attack one foe
 	}
+}
+
+void
+dovines(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i = rnd(8),j;
+	int ax, ay;
+	struct attack * attk;
+	struct attack attkbuff = {0};
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	
+	pa = youagr ? youracedata : magr->data;
+	
+	// get attack from statblock
+	attk = mon_get_attacktype(magr, AT_VINE, &attkbuff);
+	if(!attk)
+		return;
+	
+	//Attack one foe
+	for(j=8;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(ax, ay))
+			continue;
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
+		
+		if(u.ux == ax && u.uy == ay)
+			mdef = &youmonst;
+		
+		if(!mdef)
+			continue;
+		
+		if(mlev(magr) < 30 && rn2(31-mlev(magr))) //Vine attacks grow more likely as the moster grows more powerful.
+			continue;
+		
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(!youdef && imprisoned(mdef))
+			continue;
+
+		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
+			if((touch_petrifies(mdef->data)
+			 || mdef->mtyp == PM_MEDUSA)
+			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
+		
+		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
+	}
+}
+
+void
+dostarblades(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i = rnd(8),j;
+	int ax, ay;
+	struct attack * attk;
+	struct attack attkbuff = {0};
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	
+	pa = youagr ? youracedata : magr->data;
+	
+	// get attack from statblock
+	attk = mon_get_attacktype(magr, AT_ESPR, &attkbuff);
+	if(!attk)
+		return;
+	
+	for(j=8;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(ax, ay))
+			continue;
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
+		
+		if(u.ux == ax && u.uy == ay)
+			mdef = &youmonst;
+		
+		if(!mdef)
+			continue;
+		
+		if(mlev(magr) < 30 && rn2(31-mlev(magr))) //Star blade attacks grow more likely as the moster grows more powerful.
+			continue;
+		
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(!youdef && imprisoned(mdef))
+			continue;
+
+		if(mdef->mtyp == PM_PALE_NIGHT)
+			continue;
+
+		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
+	}
+}
+
+void
+dostorm(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	boolean youagr = (magr == &youmonst);
+	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6};
+	struct permonst *pa;
+	int spellnum = 0;
+	
+	pa = youagr ? youracedata : magr->data;
+
+	if(pa->mtyp == PM_GHAELE_ELADRIN){
+		spellnum = rn2(3) ? LIGHTNING : HAIL_FLURY;
+	}
+	else if(pa->mtyp == PM_LUMINOUS_CLOUD){
+		if(rn2(2) && (mlev(magr) >= 30 || !rn2(31-mlev(magr)))){
+			cast_spell(magr, (struct monst *)0, &attkbuff, MASS_CURE_CLOSE, x(magr), y(magr));
+			return;
+		}
+		spellnum = rn2(3) ? LIGHTNING : HAIL_FLURY;
+	}
+	else if(pa->mtyp == PM_CAILLEA_ELADRIN){
+		spellnum = ICE_STORM;
+	}
+	else if(pa->mtyp == PM_MOONSHADOW){
+		spellnum = STARFALL;
+	}
+	else {
+		spellnum = ACID_RAIN;
+	}
+
+	if(youagr && u.ustuck && u.uswallow){
+		cast_spell(magr, u.ustuck, &attkbuff, spellnum, x(u.ustuck), y(u.ustuck));
+		return;
+	}
+	for(mdef = fmon; mdef; mdef = mdef->nmon){
+		if(DEADMONSTER(mdef))
+			continue;
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(!youagr && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(distmin(x(magr), y(magr), x(mdef), y(mdef)) > BOLT_LIM)
+			continue;
+
+		if(youagr && !canspotmon(mdef))
+			continue;
+		if(!youagr && !mon_can_see_mon(magr, mdef))
+			continue;
+
+		if(onscary(mdef->mx, mdef->my, magr))
+			continue;
+
+		if(rn2(4) || (mlev(magr) < 30 && rn2(31-mlev(magr)))) //Storm attacks grow more likely as the moster grows more powerful.
+			continue;
+
+		cast_spell(magr, mdef, &attkbuff, spellnum, x(mdef), y(mdef));
+	}
+	if(!magr->mpeaceful && mon_can_see_you(magr)
+		&& distmin(x(magr), y(magr), u.ux, u.uy) <= BOLT_LIM
+		&& !onscary(u.ux, u.uy, magr)
+		&& !(rn2(4) || (mlev(magr) < 30 && rn2(31-mlev(magr))))
+	)
+		cast_spell(magr, &youmonst, &attkbuff, spellnum, u.ux, u.uy);
+
 }
 
 #endif /* OVLB */

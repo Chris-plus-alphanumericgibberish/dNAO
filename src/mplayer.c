@@ -560,6 +560,7 @@ register boolean special;
 			
 			m_dowear(mtmp, TRUE);
 			init_mon_wield_item(mtmp);
+			m_level_up_intrinsic(mtmp);
 
 			quan = rn2(3) ? rn2(3) : rn2(16);
 			while(quan--)
@@ -587,6 +588,7 @@ register boolean special;
 			
 			m_dowear(mtmp, TRUE);
 			init_mon_wield_item(mtmp);
+			m_level_up_intrinsic(mtmp);
 		}
 	    quan = rnd(3);
 	    while(quan--)

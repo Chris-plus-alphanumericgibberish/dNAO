@@ -5964,6 +5964,7 @@ boolean goodequip;
 			} else if(ptr->mtyp == PM_DEMINYMPH){
 				if(faction == GOATMOM_FACTION){
 					//Cultist of the Black Goat
+					mtmp->mvar_deminymph_role = PM_PRIEST;
 					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 3;
 					otmp->ovar1 = 4;
@@ -6005,6 +6006,7 @@ boolean goodequip;
 				} else switch(rn2(16)){
 					//Archeologist
 					case 0:
+						mtmp->mvar_deminymph_role = PM_ARCHEOLOGIST;
 						otmp = mksobj(BULLWHIP, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
 						MAYBE_MERC(otmp)
@@ -6024,6 +6026,7 @@ boolean goodequip;
 					break;
 					//Barbarian
 					case 1:
+						mtmp->mvar_deminymph_role = PM_BARBARIAN;
 						if(rn2(2)){
 							otmp = mksobj(TWO_HANDED_SWORD, mkobjflags|MKOBJ_ARTIF);
 							otmp->spe = 0+rnd(3)+rn2(3);
@@ -6050,6 +6053,7 @@ boolean goodequip;
 					break;
 					//Bard
 					case 2:
+						mtmp->mvar_deminymph_role = PM_BARD;
 						otmp = mksobj(RAPIER, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						MAYBE_MERC(otmp)
@@ -6067,6 +6071,7 @@ boolean goodequip;
 					break;
 					//Caveman
 					case 3:
+						mtmp->mvar_deminymph_role = PM_CAVEMAN;
 						otmp = mksobj(CLUB, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
 						(void) mpickobj(mtmp, otmp);
@@ -6083,6 +6088,7 @@ boolean goodequip;
 					break;
 					//Healer
 					case 4:
+						mtmp->mvar_deminymph_role = PM_HEALER;
 						otmp = mksobj(SCALPEL, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						(void) mpickobj(mtmp, otmp);
@@ -6111,6 +6117,7 @@ boolean goodequip;
 					break;
 					//Knight
 					case 5:
+						mtmp->mvar_deminymph_role = PM_KNIGHT;
 						otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
 						MAYBE_MERC(otmp)
@@ -6133,6 +6140,7 @@ boolean goodequip;
 					break;
 					//Monk
 					case 6:
+						mtmp->mvar_deminymph_role = PM_MONK;
 						otmp = mksobj(GLOVES, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
 						(void) mpickobj(mtmp, otmp);
@@ -6153,6 +6161,7 @@ boolean goodequip;
 						switch(rnd(10)){
 							case 1:
 								//Yellow Sign Noble
+								mtmp->mvar_deminymph_role = PM_NOBLEMAN;
 								otmp = mksobj(RAPIER, mkobjflags|MKOBJ_ARTIF);
 								otmp->spe = 2+rn2(3);
 								set_material_gm(otmp, GOLD);
@@ -6189,6 +6198,7 @@ boolean goodequip;
 							break;
 							case 2:
 								//Pseudonatural
+								mtmp->mvar_deminymph_role = PM_ANACHRONONAUT;
 								otmp = mksobj(rn2(3) ? PLAIN_DRESS : BODYGLOVE, mkobjflags|MKOBJ_ARTIF);
 								set_material_gm(otmp, FLESH);
 								otmp->obj_color = CLR_RED;
@@ -6246,6 +6256,7 @@ boolean goodequip;
 							break;
 							case 3:
 								//Mistweaver
+								mtmp->mvar_deminymph_role = PM_PRIEST;
 								otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 								otmp->spe = 3;
 								otmp->ovar1 = 4;
@@ -6293,6 +6304,7 @@ boolean goodequip;
 							break;
 							case 4:{
 								//Drow
+								mtmp->mvar_deminymph_role = PM_PRIEST;
 								int house = !rn2(10) ? PEN_A_SYMBOL : !rn2(3) ? EILISTRAEE_SYMBOL : rn2(LAST_FALLEN_HOUSE+1-FIRST_FALLEN_HOUSE)+FIRST_FALLEN_HOUSE;
 								int mat = !rn2(3) ? MITHRIL : rn2(2) ? SILVER : METAL;
 								
@@ -6354,6 +6366,7 @@ boolean goodequip;
 							case 5:{
 								//Hunter
 								int weapon = rn2(3) ? RAKUYO : BLADE_OF_MERCY;
+								mtmp->mvar_deminymph_role = PM_HUNTER;
 								if(weapon == BLADE_OF_MERCY){
 									if(rn2(3)){
 										otmp = mksobj(BLADE_OF_MERCY, mkobjflags|MKOBJ_ARTIF);
@@ -6419,6 +6432,7 @@ boolean goodequip;
 							case 6:{
 								//Club-claw
 								long long oprop;
+								mtmp->mvar_deminymph_role = PM_HUNTER;
 								switch(rnd(10)){
 									case 1:
 										oprop = OPROP_ELECW;
@@ -6489,6 +6503,7 @@ boolean goodequip;
 							case 7:{
 								//Were claw
 								long long oprop;
+								mtmp->mvar_deminymph_role = PM_HUNTER;
 								switch(rnd(20)){
 									case 1:
 										oprop = OPROP_ELECW;
@@ -6533,6 +6548,7 @@ boolean goodequip;
 							}break;
 							case 8:{
 								//Samurai
+								mtmp->mvar_deminymph_role = PM_HUNTER;
 								if(rn2(2)){
 									otmp = mksobj(NAGINATA, mkobjflags|MKOBJ_ARTIF);
 									add_oprop(otmp, OPROP_RAKUW);
@@ -6602,6 +6618,7 @@ boolean goodequip;
 							}break;
 							case 9:{
 								//Patient, Ilsensine-touched or Fulvous
+								mtmp->mvar_deminymph_role = PM_MADMAN;
 								otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
 								if(otmp) curse(otmp);
 								if(rn2(2)){
@@ -6639,6 +6656,7 @@ boolean goodequip;
 							}break;
 							case 10:{
 								//Black web drow
+								mtmp->mvar_deminymph_role = PM_PRIEST;
 								otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
 								if(otmp){
 									set_material_gm(otmp, SHADOWSTEEL);
@@ -6684,6 +6702,7 @@ boolean goodequip;
 					break;
 					//Noble
 					case 8:
+						mtmp->mvar_deminymph_role = PM_NOBLEMAN;
 						otmp = mksobj(RAPIER, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
 						MAYBE_MERC(otmp)
@@ -6712,6 +6731,7 @@ boolean goodequip;
 					break;
 					//Pirate
 					case 9:
+						mtmp->mvar_deminymph_role = PM_PIRATE;
 						otmp = mksobj(SCIMITAR, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						MAYBE_MERC(otmp)
@@ -6738,6 +6758,7 @@ boolean goodequip;
 					break;
 					//Priest
 					case 10:
+						mtmp->mvar_deminymph_role = PM_PRIEST;
 						otmp = mksobj(MACE, mkobjflags|MKOBJ_ARTIF);
 						MAYBE_MERC(otmp)
 						bless(otmp);
@@ -6759,6 +6780,7 @@ boolean goodequip;
 					break;
 					//Ranger
 					case 11:
+						mtmp->mvar_deminymph_role = PM_RANGER;
 						otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
 						MAYBE_MERC(otmp)
@@ -6780,6 +6802,7 @@ boolean goodequip;
 					break;
 					//Rogue
 					case 12:
+						mtmp->mvar_deminymph_role = PM_ROGUE;
 						otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						MAYBE_MERC(otmp)
@@ -6801,6 +6824,7 @@ boolean goodequip;
 					break;
 					//Samurai
 					case 13:
+						mtmp->mvar_deminymph_role = PM_SAMURAI;
 						otmp = mksobj(NAGINATA, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 0+rn2(4);
 						MAYBE_MERC(otmp)
@@ -6831,6 +6855,7 @@ boolean goodequip;
 					break;
 					//Tourist
 					case 14:
+						mtmp->mvar_deminymph_role = PM_TOURIST;
 						otmp = mksobj(DART, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 2+rn2(3);
 						otmp->quan = rnd(9)+rnd(9)+rnd(9)+rnd(9)+rnd(9);
@@ -6864,6 +6889,7 @@ boolean goodequip;
 					break;
 					//Wizard
 					case 15:
+						mtmp->mvar_deminymph_role = PM_WIZARD;
 						otmp = mksobj(QUARTERSTAFF, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
 						(void) mpickobj(mtmp, otmp);
@@ -12232,6 +12258,7 @@ int faction;
 	    m_initinv(mtmp, mkobjflags, faction, goodequip);  /* add on a few special items incl. more armor */
 	    m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
+		m_level_up_intrinsic(mtmp);
 	} else {
 	    /* no initial inventory is allowed */
 	    if (mtmp->minvent) discard_minvent(mtmp);
@@ -13240,6 +13267,269 @@ struct monst *mtmp;
 		break;
 	}
 	m_dowear(mtmp, TRUE);
+	m_level_up_intrinsic(mtmp);
+}
+
+void
+m_level_up_intrinsic(mtmp)
+struct monst *mtmp;
+{
+	if(mtmp->mtyp == PM_LADY_CONSTANCE){
+		if(mtmp->m_lev >= 7){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, SWIMMING);
+		}
+		if(mtmp->m_lev >= 20){
+			give_mintrinsic(mtmp, FLYING);
+			give_mintrinsic(mtmp, LEVITATION);
+		}
+		if(mtmp->m_lev >= 25){
+			give_mintrinsic(mtmp, DISINT_RES);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, ANTIMAGIC);
+		}
+	}
+	if(mtmp->mtyp == PM_ARIANNA){
+		if(mtmp->m_lev >= 27){
+			give_mintrinsic(mtmp, POISON_RES);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, SICK_RES);
+		}
+	}
+	if(mtmp->mtyp == PM_REBEL_RINGLEADER){
+		if(mtmp->m_lev >= 7){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, COLD_RES);
+		}
+		if(mtmp->m_lev >= 20){
+			give_mintrinsic(mtmp, SHOCK_RES);
+		}
+		if(mtmp->m_lev >= 25){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, FLYING);
+		}
+	}
+	if(mtmp->mtyp == PM_HALF_ELF_RANGER){
+		if(mtmp->m_lev >= 16){
+			give_mintrinsic(mtmp, SLEEP_RES);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+	}
+	if(mon_archeologist(mtmp)){
+		give_mintrinsic(mtmp, STEALTH);
+		if(mtmp->m_lev >= 10){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+	}
+	if(mon_anachrononaut(mtmp)){
+		if(mtmp->m_lev >= 7){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+	}
+	if(mon_barbarian(mtmp)){
+		give_mintrinsic(mtmp, POISON_RES);
+		if(mtmp->m_lev >= 7){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+	}
+	if(mon_bard(mtmp)){
+		if(mtmp->m_lev >= 5){
+			give_mintrinsic(mtmp, SLEEP_RES);
+		}
+		if(mtmp->m_lev >= 10){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+	}
+	if(mon_caveman(mtmp)){
+		if(mtmp->m_lev >= 7){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+	}
+	if(mon_convict(mtmp)){
+		if(mtmp->m_lev >= 7){
+			give_mintrinsic(mtmp, POISON_RES);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+	}
+	if(mon_undead_hunter(mtmp)){
+		give_mintrinsic(mtmp, STEALTH);
+		give_mintrinsic(mtmp, DRAIN_RES);
+		give_mintrinsic(mtmp, SICK_RES);
+		if(mtmp->m_lev >= 7){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+		if(mtmp->m_lev >= 9){
+			give_mintrinsic(mtmp, POISON_RES);
+		}
+	}
+	if(mon_knight(mtmp)){
+		if(mtmp->m_lev >= 7){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+	}
+	if(mon_monk(mtmp)){
+		if(mtmp->m_lev >= 3){
+			give_mintrinsic(mtmp, POISON_RES);
+		}
+		if(mtmp->m_lev >= 5){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+		if(mtmp->m_lev >= 9){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+		if(mtmp->m_lev >= 11){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+		if(mtmp->m_lev >= 13){
+			give_mintrinsic(mtmp, COLD_RES);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, SHOCK_RES);
+		}
+		if(mtmp->m_lev >= 17){
+			give_mintrinsic(mtmp, TELEPORT_CONTROL);
+		}
+		if(mtmp->m_lev >= 19){
+			give_mintrinsic(mtmp, ACID_RES);
+		}
+		if(mtmp->m_lev >= 21){
+			give_mintrinsic(mtmp, SWIMMING);
+		}
+		if(mtmp->m_lev >= 23){
+			give_mintrinsic(mtmp, SICK_RES);
+		}
+		if(mtmp->m_lev >= 25){
+			give_mintrinsic(mtmp, DISINT_RES);
+		}
+		if(mtmp->m_lev >= 27){
+			give_mintrinsic(mtmp, STONE_RES);
+		}
+		if(mtmp->m_lev >= 29){
+			give_mintrinsic(mtmp, ANTIMAGIC);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, DRAIN_RES);
+		}
+	}
+	if(mon_madman(mtmp)){
+		if(mtmp->m_lev >= 7){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+	}
+	if(mon_pirate(mtmp)){
+		if(mtmp->m_lev >= 7){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+		if(mtmp->m_lev >= 11){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+	}
+	if(mon_priest(mtmp)){
+		if(mtmp->m_lev >= 20){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+	}
+	if(mon_ranger(mtmp)){
+		give_mintrinsic(mtmp, SEARCHING);
+		if(mtmp->m_lev >= 7){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, SEE_INVIS);
+		}
+	}
+	if(mon_rogue(mtmp)){
+		give_mintrinsic(mtmp, STEALTH);
+		if(mtmp->m_lev >= 10){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+	}
+	if(mon_samurai(mtmp)){
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+	}
+	if(mon_tourist(mtmp)){
+		if(mtmp->m_lev >= 10){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+		if(mtmp->m_lev >= 20){
+			give_mintrinsic(mtmp, POISON_RES);
+		}
+	}
+	if(mon_valkyrie(mtmp)){
+		give_mintrinsic(mtmp, STEALTH);
+		if(mtmp->m_lev >= 7){
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+		}
+	}
+	if(mon_wizard(mtmp)){
+		if(mtmp->m_lev >= 17){
+			give_mintrinsic(mtmp, TELEPORT_CONTROL);
+		}
+	}
+	if((is_elf(mtmp->data) || is_drow(mtmp->data)) && mtmp->mtyp != PM_HALF_ELF_RANGER){
+		if(mtmp->m_lev >= 4){
+			give_mintrinsic(mtmp, SLEEP_RES);
+		}
+	}
+	if(is_orc(mtmp->data)){
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, ANTIMAGIC);
+		}
+	}
+	if(mtmp->mtyp == PM_CLOCKWORK_AUTOMATON){
+		if(mtmp->m_lev >= 5){
+			give_mintrinsic(mtmp, SHOCK_RES);
+		}
+		if(mtmp->m_lev >= 10){
+			give_mintrinsic(mtmp, COLD_RES);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+	}
+	if(free_android(mtmp->data)){
+		if(mtmp->m_lev >= 5){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+		if(mtmp->m_lev >= 10){
+			give_mintrinsic(mtmp, SHOCK_RES);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+	}
+	if(is_vampire(mtmp->data)){
+		if(mtmp->m_lev >= 11){
+			give_mintrinsic(mtmp, COLD_RES);
+		}
+	}
+	if(is_half_dragon(mtmp->data)){
+		if(mtmp->m_lev >= 14){
+			give_mintrinsic(mtmp, FLYING);
+		}
+	}
+	if(mtmp->mtyp == PM_YUKI_ONNA){
+		if(mtmp->m_lev >= 11){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+	}
 }
 
 struct permonst *
@@ -13424,6 +13714,7 @@ struct monst *mtmp, *victim;
 			}
 		}
 	}
+	m_level_up_intrinsic(mtmp);
 	/* sanity checks */
 	if ((int)mtmp->m_lev > lev_limit) {
 	    mtmp->m_lev--;	/* undo increment */
@@ -14148,26 +14439,10 @@ struct permonst *ptr;
 	)
 		lev_limit = min(45, u.uinsight);
 
-	if (is_mplayer(ptr) || ptr->mtyp == PM_BYAKHEE || ptr->mtyp == PM_LILLEND || ptr->mtyp == PM_ERINYS || ptr->mtyp == PM_MAID
-	|| ptr->mtyp == PM_CROW_WINGED_HALF_DRAGON || ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY
-	|| ptr->mtyp == PM_UNDEAD_KNIGHT || ptr->mtyp == PM_WARRIOR_OF_SUNLIGHT
-	|| ptr->mtyp == PM_UNDEAD_MAIDEN || ptr->mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD
-	|| ptr->mtyp == PM_BLUE_SENTINEL || ptr->mtyp == PM_DARKMOON_KNIGHT
-	|| ptr->mtyp == PM_UNDEAD_REBEL || ptr->mtyp == PM_PARDONER || ptr->mtyp == PM_OCCULTIST
-	|| ptr->mtyp == PM_FORMIAN_CRUSHER
-	|| ptr->mtyp == PM_DRIDER || ptr->mtyp == PM_SPROW
-	|| ptr->mtyp == PM_DROW_MATRON || ptr->mtyp == PM_DROW_MATRON_MOTHER
-	|| ptr->mtyp == PM_HEDROW_BLADEMASTER || ptr->mtyp == PM_DROW_ALIENIST
-	|| ptr->mtyp == PM_ELVENKING || ptr->mtyp == PM_ELVENQUEEN
-	|| ptr->mtyp == PM_DWARF_KING || ptr->mtyp == PM_DWARF_QUEEN
-	|| ptr->mtyp == PM_CUPRILACH_RILMANI || ptr->mtyp == PM_STANNUMACH_RILMANI
-	|| ptr->mtyp == PM_ARGENACH_RILMANI || ptr->mtyp == PM_AURUMACH_RILMANI
-	|| ptr->mtyp == PM_ANDROID || ptr->mtyp == PM_GYNOID || ptr->mtyp == PM_OPERATOR || ptr->mtyp == PM_COMMANDER
-	) lev_limit = 30;	/* same as player */
+	if (lev_limit_30(ptr)) lev_limit = 30;	/* same as player */
+	else if (lev_limit_45(ptr)) lev_limit = 45;
 	else if (ptr->mtyp == PM_PLUMACH_RILMANI || ptr->mtyp == PM_FERRUMACH_RILMANI) lev_limit = 20;
-	else if (is_eladrin(ptr) && ptr->mlevel <= 20) lev_limit = 30;
 	else if (ptr->mtyp == PM_OONA) lev_limit = 60;
-	else if (is_ancient(ptr)) lev_limit = 45;
 	else if (lev_limit < 5) lev_limit = 5;	/* arbitrary */
 	else if (lev_limit > 49) lev_limit = (ptr->mlevel > 49 ? ptr->mlevel : 49);
 	
