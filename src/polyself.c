@@ -2119,6 +2119,14 @@ int part;
 		"retina",			"olfactory nerve",	"interior",		"core",
 		"surface",			"subsurface layers","pulse",		"auras",
 		"tympanic membrane","tympanic membranes","flicker",		"blink out"},
+	*spore_parts[] = { 
+		"stalk", 			"visual area", 		"front", 		"stalk", 
+		"stalk tip", 		"stalk",			"stalk",		"stalked",
+		"annulus",			"stalk", 			"addled",		"equator",
+		"body", 			"stalk tip",		"surface",		"sap",
+		"lip",				"lip",				"interior",		"spores",
+		"annulus",			"flesh",			"...they don't sound like much","cells",
+		"tympanic area",	"tympanic area",	"flex",			"crack"},
 	*fungus_parts[] = {
 		"mycelium", 		"visual area", 		"front", 					"hypha",
 		"hypha", 			"root", 			"strand", 					"stranded",
@@ -2303,6 +2311,8 @@ int part;
 	    return vipertree_parts[part];
 	if (mptr->mtyp == PM_BLACK_FLOWER)
 	    return blackflower_parts[part];
+	if (is_fern_spore(mptr))
+	    return spore_parts[part];
 	if (mptr->mtyp == PM_WARDEN_TREE)
 	    return tree_parts[part];
 	if (mptr->mtyp == PM_LIVING_DOLL)
