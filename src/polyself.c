@@ -2258,7 +2258,7 @@ int part;
 	}
 	if (is_fern(mptr)){
 		if(part == HEAD)
-			return "flower";
+			return "crosier";
 	}
 	if (mptr->mtyp == PM_DREADBLOSSOM_SWARM && part == LEG)
 	    return "root-thorn";
