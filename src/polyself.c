@@ -2244,10 +2244,22 @@ int part;
 	    return "tentacle";
 	if (mptr->mtyp == PM_FLOATING_EYE && part == EYE)
 	    return "cornea";
-	if ((mptr->mtyp == PM_SUNFLOWER || mptr->mtyp == PM_MIRRORED_MOONFLOWER) && part == FACE)
-	    return "mirrored flower";
-	if (mptr->mtyp == PM_DREADBLOSSOM_SWARM && part == FACE)
-	    return "flower";
+	if (mptr->mtyp == PM_SUNFLOWER || mptr->mtyp == PM_MIRRORED_MOONFLOWER){
+		if(part == HEAD)
+			return "flower";
+		if(part == FACE)
+			return "mirrored corolla";
+	}
+	if (mptr->mtyp == PM_DREADBLOSSOM_SWARM){
+		if(part == HEAD)
+			return "flower";
+		if(part == FACE)
+			return "corolla";
+	}
+	if (is_fern(mptr)){
+		if(part == HEAD)
+			return "flower";
+	}
 	if (mptr->mtyp == PM_DREADBLOSSOM_SWARM && part == LEG)
 	    return "root-thorn";
 	if ((mptr->mtyp == PM_DREADBLOSSOM_SWARM || mptr->mtyp == PM_SUNFLOWER || mptr->mtyp == PM_MIRRORED_MOONFLOWER) && part == HAIR)
