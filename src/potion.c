@@ -2767,30 +2767,38 @@ dodip()
 			pline1(nothing_happens);
 	    } else {
 	    	boolean was_wep = FALSE, was_swapwep = FALSE, was_quiver = FALSE;
-		short save_otyp = obj->otyp;
-		/* KMH, conduct */
-		u.uconduct.polypiles++;
+			short save_otyp = obj->otyp;
+			/* KMH, conduct */
+			u.uconduct.polypiles++;
 
-		if (obj == uwep) was_wep = TRUE;
-		else if (obj == uswapwep) was_swapwep = TRUE;
-		else if (obj == uquiver) was_quiver = TRUE;
+			if (obj == uwep) was_wep = TRUE;
+			else if (obj == uswapwep) was_swapwep = TRUE;
+			else if (obj == uquiver) was_quiver = TRUE;
 
-		obj = randpoly_obj(obj);
+			obj = randpoly_obj(obj);
 
-		if (was_wep) setuwep(obj);
-		else if (was_swapwep) setuswapwep(obj);
-		else if (was_quiver) setuqwep(obj);
+#ifndef GOLDOBJ
+			if(obj->otyp == GOLD_PIECE){
+				u.ugold += 2*obj->quan; //Gold piece handling disaster: useupall reduces the player's gold count by the ammount destroyed, so add the gold twice :(
+				useupall(obj);
+				obj = (struct obj *) 0;
+			}
+#endif
+			if (was_wep) setuwep(obj);
+			else if (was_swapwep) setuswapwep(obj);
+			else if (was_quiver) setuqwep(obj);
 
-		if (obj->otyp != save_otyp || (obj->otyp == HYPOSPRAY_AMPULE && objects[HYPOSPRAY_AMPULE].oc_name_known)) {
-			if (save_otyp == POT_POLYMORPH || potion->otyp == POT_POLYMORPH)
-				makeknown(POT_POLYMORPH);
-			useup(potion);
-			prinv((char *)0, obj, 0L);
-			return 1;
-		} else {
-			pline("Nothing seems to happen.");
-			goto poof;
-		}
+			if (!obj || obj->otyp != save_otyp || (obj->otyp == HYPOSPRAY_AMPULE && objects[HYPOSPRAY_AMPULE].oc_name_known)) {
+				if (save_otyp == POT_POLYMORPH || potion->otyp == POT_POLYMORPH)
+					makeknown(POT_POLYMORPH);
+				useup(potion);
+				if(obj)
+					prinv((char *)0, obj, 0L);
+				return 1;
+			} else {
+				pline("Nothing seems to happen.");
+				goto poof;
+			}
 	    }
 	    potion->in_use = FALSE;	/* didn't go poof */
 	    return(1);

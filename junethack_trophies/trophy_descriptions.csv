@@ -19,11 +19,11 @@ dwarf_noble_quest,Durin's Bane's Bane,Completed the dwarf noble quest,x,@ and & 
 dwarf_knight_quest,Battle of (5-4) armies,Completed the dwarf knight quest,x,@ facing a bunch of o
 gnome_ranger_quest,Strongest of all time,Completed the gnome ranger quest,x,Gnome sniping a kobold
 elf_shared_quest,Driven out,Completed the elf shared quest,dnh_elf_shared_quest.png,
-clockwork_ascension,Deus ex machina,Ascended a clockwork automaton,x,Gear-@ with a hovering crown
-chiropteran_ascension,Bat outa hell,Ascended a chiropteran,x,B above lava with a hovering crown
-yuki_onna_ascension,Snow in heaven,Ascended a yuki-onna,x,n with snowflakes with a hovering crown
-half_dragon_ascension,Three halves,Ascended a half-dragon,x,D with a hovering crown
-law_quest,Ripple-resistant tower,Completed the law quest,x,Butterfly
+clockwork_ascension,Deus ex machina,Ascended a clockwork automaton,dnh_clockwork.png,
+chiropteran_ascension,Bat outa hell,Ascended a chiropteran,dnh_chiropteran.png,
+yuki_onna_ascension,Snow in heaven,Ascended a yuki-onna,dnh_yuki_onna.png,
+half_dragon_ascension,Three halves,Ascended a half-dragon,dnh_half_dragon.png,
+law_quest,Ripple-resistant tower,Completed the law quest,dnh_law_quest.png,
 neutral_quest,Key to the (corpse) city,Completed the neutral quest,x,
 chaos_temple_quest,Asinine paradigm,Completed the chaos temple quest,dnh_chaos1_quest.png,
 mithardir_quest,Chasing after the wind,Completed the mithardir quest,x,

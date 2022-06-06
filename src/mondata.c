@@ -337,8 +337,8 @@ int template;
 		ptr->mflagsm |= (MM_BREATHLESS);
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
 		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
-		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
-		ptr->mflagsg |= (MG_REGEN);
+		ptr->mflagsg &= ~(MG_INFRAVISIBLE|MG_HATESUNHOLY);
+		ptr->mflagsg |= (MG_REGEN|MG_HATESHOLY|MG_HATESSILVER);
 		ptr->mflagsa |= (MA_UNDEAD | MA_VAMPIRE);
 		/* resists: */
 		ptr->mresists |= (MR_SLEEP | MR_POISON);	/* individual monsters gain cold res at mlev >= 10 */

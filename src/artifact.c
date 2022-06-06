@@ -11737,7 +11737,7 @@ int spe;
 		pline("You hear chattering among the stars.");
 		break;
 		case 4:
-		pline("You hear ringing in your %s.", makeplural(body_part(EAR)));
+		pline("You hear ringing in your %s.", body_part(EARS));
 		break;
 		case 5:
 		pline("You hear silence in heaven.");

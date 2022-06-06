@@ -4674,9 +4674,9 @@ int wishflags;
 		*wishreturn = WISH_SUCCESS;
 		return (&zeroobj);
 #else
-                otmp = mksobj(GOLD_PIECE, mkobjflags|MKOBJ_NOINIT);
+		otmp = mksobj(GOLD_PIECE, mkobjflags|MKOBJ_NOINIT);
 		otmp->quan = cnt;
-                otmp->owt = weight(otmp);
+		otmp->owt = weight(otmp);
 		flags.botl=1;
 		*wishreturn = WISH_SUCCESS;
 		return (otmp);

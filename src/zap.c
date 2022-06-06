@@ -1690,7 +1690,7 @@ struct obj * obj;
 	}
 	/* gold scrolls of law turn a small randomize amount of gold (and were guaranteed to turn into gold pieces) */
 	if (obj->otyp == SCR_GOLD_SCROLL_OF_LAW) {
-		otmp->quan = rnd(50 * obj->quan) + 50 * obj->quan;
+		otmp->quan = d(obj->quan,50) + 50 * obj->quan;
 	}
 	/* crocodile corpses were turned into shoes */
 	if (obj->otyp == CORPSE && obj->corpsenm == PM_CROCODILE) {

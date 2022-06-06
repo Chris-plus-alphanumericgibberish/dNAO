@@ -337,8 +337,9 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define BEAT 22
 #define BONES 23
 #define EAR 24
-#define CREAK 25
-#define CRACK 26
+#define EARS 25
+#define CREAK 26
+#define CRACK 27
 
 #define BALL_IN_MON	(u.uswallow && uball && uball->where == OBJ_FREE)
 #define CHAIN_IN_MON	(u.uswallow && uchain && uchain->where == OBJ_FREE)

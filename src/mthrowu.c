@@ -167,6 +167,8 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 
 		/* get location of next target */
 		if (mdef == &youmonst) {
+			if(no_upos(magr)) //They don't know where you are.
+				continue;
 			tarx = magr->mux;
 			tary = magr->muy;
 

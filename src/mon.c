@@ -8252,10 +8252,10 @@ struct monst *mtmp;
 			}
 			else {
 				if(canseemon(tmpm) && canseemon(mtmp)){
-					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), mbodypart(tmpm, EARS));
 					pline("The light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				} else if(canseemon(tmpm)){
-					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), mbodypart(tmpm, EARS));
 				} else if(canseemon(mtmp)){
 					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
