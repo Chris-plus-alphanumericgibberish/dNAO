@@ -144,6 +144,7 @@ OBJECT:'%',"pear",contained
 OBJECT:'%',"honeycomb",contained
 OBJECT:'%',"honeycomb",contained
 OBJECT:'%',"cream pie",contained
+CONTAINER:'\\',"expensive bed",(37,15)
 #Box full of crazy
 CONTAINER:'(',"chest",(37,14),cursed,6
 OBJECT:'(',"trephination kit",contained
@@ -159,7 +160,7 @@ OBJECT:'[',"ruffled shirt",contained,blessed,2
 OBJECT:'[',"leather armor",contained,blessed,2
 OBJECT:'[',"buckler",contained,blessed,2
 OBJECT:'#',"+2 blessed fencing gloves",contained
-#Note: in some worlds "fencing gloves" will be fumbling.
+# Note: in some worlds "fencing gloves" will be fumbling.
 #	Fencing tournaments must be real fun to watch in such worlds!
 
 # Police station

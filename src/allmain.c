@@ -800,6 +800,8 @@ you_regen_hp()
 					reglevel *= 1.5;
 				else if(bed->otyp == BED)
 					reglevel *= 2;
+				else if(bed->otyp == EXPENSIVE_BED)
+					reglevel *= 10;
 			}
 			// restfully
 			if(RestfulSleep){
@@ -933,9 +935,11 @@ you_regen_pw()
 			if(bed && bed->oclass == BED_CLASS){
 				// A bedroll must be the only object in the square, other beds can have stuff tucked under them
 				if((bed->otyp == BEDROLL && !bed->nexthere) || bed->otyp == GURNEY)
-					reglevel *= 1.5;
+					reglevel *= 3;
 				else if(bed->otyp == BED)
-					reglevel *= 2;
+					reglevel *= 4;
+				else if(bed->otyp == EXPENSIVE_BED)
+					reglevel *= 20;
 			}
 			// restfully
 			if(RestfulSleep){
