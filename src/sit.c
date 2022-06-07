@@ -116,16 +116,26 @@ dosit()
 			You("sit on the desk chair.");
 			pline("It's reasonably comfortable.");
 		}
-	    else if (obj->otyp == BED){
-			You("sit on the bed.");
-			pline("It's comfortable, but you're not tired.");
-		}
-	    else if (obj->otyp == BEDROLL){
-			You("sit on the bedroll.");
-			if(!obj->nexthere)
-				pline("It's reasonably comfortable, but you're not tired.");
-			else 
-				pline("It's not very comfortable...");
+	    else if (obj->otyp == EXPENSIVE_BED || obj->otyp == BED || obj->otyp == BEDROLL || obj->otyp == GURNEY){
+			if(obj->otyp == EXPENSIVE_BED){
+				You("climb into the bed.");
+			}
+			else {
+				You("sit on the %s.", obj->otyp == BED ? "bed" : obj->otyp == BEDROLL ? "bedroll" : obj->otyp == GURNEY ? "gurney" : "unidentified bedlike object");
+			}
+			if(u.nextsleep <= monstermoves || obj->otyp == EXPENSIVE_BED){
+				if(yn("Take a nap?") == 'y'){
+					u.nextsleep = moves+rnz(100);
+					u.lastslept = moves;
+					fall_asleep(-rn1(180, 180), TRUE);
+				}
+			}
+			else {
+				if(obj->otyp == BEDROLL && obj->nexthere)
+					pline("It's not very comfortable...");
+				else
+					pline("It's %scomfortable, but you're not tired.", obj->otyp == BED ? "" : "reasonably");
+			}
 		}
 	    else {
 			You("sit on %s.", the(xname(obj)));
