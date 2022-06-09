@@ -1,46 +1,46 @@
-achieveXname,name,description,icon,
-archeologist_quest,Walking international incident,Completed the revised archeologist quest,dnh_archeologist_quest.png,
-caveman_quest,Serpent slayer,Completed the revised caveman quest,dnh_caveman_quest.png,
-convict_quest,Sentence commuted,Completed the revised convict quest,dnh_convict_quest.png,
-knight_quest,Into the crystal cave,Completed the revised knight quest,dnh_knight_quest.png,
-anachrononaut_quest,Back from the future,Completed the anachrononaut quest,dnh_anachrononaut_quest.png,
-android_quest,Glory to mankind,Completed the android quest,dnh_android_quest.png,
-anachrononaut_ascension,No fate,Ascended an Anachrononaut and saved the future,dnh_anachrononaut_ascension.png,
-binder_quest,33 spirits,Completed the binder quest,dnh_binder_quest.png,
-binder_ascension,The other side of the sky,Ascended a Binder,dnh_binder_ascension.png,
-pirate_quest,Not so inconceivable,Completed the pirate quest,dnh_pirate_quest.png,
-bard_quest,Not so spoony,Completed the bard quest,dnh_bard_quest.png,
-base_noble_quest,Rebellion crushed,Completed the base noble quest,dnh_noble_quest.png,
-hedrow_noble_quest,Family drama,Completed the hedrow noble quest,dnh_hedrow_noble_quest.png,
-hedrow_shared_quest,On agency,Completed the hedrow shared quest,dnh_hedrow_shared_quest.png,
-drow_noble_quest,Foreshadowing,Completed the drow noble quest,dnh_drow_noble_quest.png,
-drow_shared_quest,Old friends,Completed the drow shared quest,dnh_drow_shared_quest.png,
-dwarf_noble_quest,Durin's Bane's Bane,Completed the dwarf noble quest,x,@ and & on a bridge over lava
-dwarf_knight_quest,Battle of (5-4) armies,Completed the dwarf knight quest,x,@ facing a bunch of o
-gnome_ranger_quest,Strongest of all time,Completed the gnome ranger quest,x,Gnome sniping a kobold
-elf_shared_quest,Driven out,Completed the elf shared quest,dnh_elf_shared_quest.png,
-clockwork_ascension,Deus ex machina,Ascended a clockwork automaton,dnh_clockwork.png,
-chiropteran_ascension,Bat outa hell,Ascended a chiropteran,dnh_chiropteran.png,
-yuki_onna_ascension,Snow in heaven,Ascended a yuki-onna,dnh_yuki_onna.png,
-half_dragon_ascension,Three halves,Ascended a half-dragon,dnh_half_dragon.png,
-law_quest,Ripple-resistant tower,Completed the law quest,dnh_law_quest.png,
-neutral_quest,Key to the (corpse) city,Completed the neutral quest,x,
-chaos_temple_quest,Asinine paradigm,Completed the chaos temple quest,dnh_chaos1_quest.png,
-mithardir_quest,Chasing after the wind,Completed the mithardir quest,x,
-mordor_quest,Fossil of the First Age,Completed the mordor quest,x,& under rock?
-second_thoughts,Second thoughts,Completed a drow shared quest loyally before completing the traitor's quest,x,Drow surrounded by corpses
-illuminated,Illuminated,Learned every word of creation and accumulated 30 passive sylabel bonuses,dnh_illuminated.png,
-exodus,Exodus,Ascended with a pet android commander or operator android,x,
-fully_upgraded,Super Fighting Robot,Acquried all clockwork upgrades (except high-tension spring),x,
-hunter_of_nightmares,Hunter of Nightmares,Defeated at least one of each of the secret insight bosses,x,
-two_keys,Two Keys,Ascended having only touched two alignment keys,dnh_two_keys.png,
-quite_mad,Quite Mad,Suffered from at least 6 madnesses,x,
-booze_hound,Booze Hound,Maxed out your drunkard score by drinking at least 90 potions of booze,x,Dog surrounded by booze potions
-New June 2021,,,,
-madman_quest,Oh good. I'm not crazy.,Completed the madman quest,dnh_madman_quest.png,
-lamashtu_kill,Does this count as a paradox?,Destroyed Lamashtu (Demon Queen of the future),x,
-baalphegor_kill,A universe without motion,Destroyed Baalphegor,x,
-angel_hell_vault OR ancient_hell_vault OR tanninim_hell_vault,Relics of a bygone era,Opened one type of hellish seal,x,Statue in a vault
-angel_hell_vault AND ancient_hell_vault AND tanninim_hell_vault,There are a lot of these….,Opened all three types of hellish seal (across all games played),x,Three statues
-New June 2022,,,,
-bokrug_ascension,Detestable gods,Completed Bokrug's ascension ritual,x,Bokrug statue over water
+achieveXname,name,description,icon,date drawn,
+archeologist_quest,Walking international incident,Completed the revised archeologist quest,dnh_archeologist_quest.png,24/05/2020,
+caveman_quest,Serpent slayer,Completed the revised caveman quest,dnh_caveman_quest.png,24/05/2020,
+convict_quest,Sentence commuted,Completed the revised convict quest,dnh_convict_quest.png,24/05/2020,
+knight_quest,Into the crystal cave,Completed the revised knight quest,dnh_knight_quest.png,24/05/2020,
+anachrononaut_quest,Back from the future,Completed the anachrononaut quest,dnh_anachrononaut_quest.png,24/05/2020,
+android_quest,Glory to mankind,Completed the android quest,dnh_android_quest.png,24/05/2020,
+anachrononaut_ascension,No fate,Ascended an Anachrononaut and saved the future,dnh_anachrononaut_ascension.png,24/05/2020,
+binder_quest,33 spirits,Completed the binder quest,dnh_binder_quest.png,27/05/2020,
+binder_ascension,The other side of the sky,Ascended a Binder,dnh_binder_ascension.png,27/05/2020,
+pirate_quest,Not so inconceivable,Completed the pirate quest,dnh_pirate_quest.png,27/05/2020,
+bard_quest,Not so spoony,Completed the bard quest,dnh_bard_quest.png,27/05/2020,
+base_noble_quest,Rebellion crushed,Completed the base noble quest,dnh_noble_quest.png,27/05/2020,
+hedrow_noble_quest,Family drama,Completed the hedrow noble quest,dnh_hedrow_noble_quest.png,27/05/2020,
+hedrow_shared_quest,On agency,Completed the hedrow shared quest,dnh_hedrow_shared_quest.png,27/05/2020,
+drow_noble_quest,Foreshadowing,Completed the drow noble quest,dnh_drow_noble_quest.png,27/05/2020,
+drow_shared_quest,Old friends,Completed the drow shared quest,dnh_drow_shared_quest.png,27/05/2020,
+dwarf_noble_quest,Durin's Bane's Bane,Completed the dwarf noble quest,x,,@ and & on a bridge over lava
+dwarf_knight_quest,Battle of (5-4) armies,Completed the dwarf knight quest,x,,@ facing a bunch of o
+gnome_ranger_quest,Strongest of all time,Completed the gnome ranger quest,x,,Gnome sniping a kobold
+elf_shared_quest,Driven out,Completed the elf shared quest,dnh_elf_shared_quest.png,24/05/2022,
+clockwork_ascension,Deus ex machina,Ascended a clockwork automaton,dnh_clockwork.png,6/6/2022,
+chiropteran_ascension,Bat outa hell,Ascended a chiropteran,dnh_chiropteran.png,6/6/2022,
+yuki_onna_ascension,Snow in heaven,Ascended a yuki-onna,dnh_yuki_onna.png,6/6/2022,
+half_dragon_ascension,Three halves,Ascended a half-dragon,dnh_half_dragon.png,6/6/2022,
+law_quest,Ripple-resistant tower,Completed the law quest,dnh_law_quest.png,3/6/2022,
+neutral_quest,Key to the (corpse) city,Completed the neutral quest,x,,
+chaos_temple_quest,Asinine paradigm,Completed the chaos temple quest,dnh_chaos1_quest.png,28/05/2022,
+mithardir_quest,Chasing after the wind,Completed the mithardir quest,x,,
+mordor_quest,Fossil of the First Age,Completed the mordor quest,x,,& under rock?
+second_thoughts,Second thoughts,Completed a drow shared quest loyally before completing the traitor's quest,x,,Drow surrounded by corpses
+illuminated,Illuminated,Learned every word of creation and accumulated 30 passive sylabel bonuses,dnh_illuminated.png,24/05/2022,
+exodus,Exodus,Ascended with a pet android commander or operator android,x,,
+fully_upgraded,Super Fighting Robot,Acquried all clockwork upgrades (except high-tension spring),x,,
+hunter_of_nightmares,Hunter of Nightmares,Defeated at least one of each of the secret insight bosses,dnh_nightmare_hunter.png,9/6/2022,
+two_keys,Two Keys,Ascended having only touched two alignment keys,dnh_two_keys.png,28/05/2022,
+quite_mad,Quite Mad,Suffered from at least 6 madnesses,x,,
+booze_hound,Booze Hound,Maxed out your drunkard score by drinking at least 90 potions of booze,x,,Dog surrounded by booze potions
+New June 2021,,,,,
+madman_quest,Oh good. I'm not crazy.,Completed the madman quest,dnh_madman_quest.png,24/05/2022,
+lamashtu_kill,Does this count as a paradox?,Destroyed Lamashtu (Demon Queen of the future),x,,
+baalphegor_kill,A universe without motion,Destroyed Baalphegor,x,,
+angel_hell_vault OR ancient_hell_vault OR tanninim_hell_vault,Relics of a bygone era,Opened one type of hellish seal,x,,Statue in a vault
+angel_hell_vault AND ancient_hell_vault AND tanninim_hell_vault,There are a lot of these….,Opened all three types of hellish seal (across all games played),x,,Three statues
+New June 2022,,,,,
+bokrug_ascension,Detestable gods,Completed Bokrug's ascension ritual,x,,Bokrug statue over water
