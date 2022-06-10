@@ -2281,7 +2281,7 @@ int part;
 			if(part == EYE)
 				return "winking eye";
 			if(part == BLOOD)
-				return "seathing blood";
+				return "seething blood";
 		} else {
 			if(part == FACE)
 				return "squid";
