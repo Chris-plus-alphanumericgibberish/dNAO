@@ -16671,6 +16671,11 @@ android_combo()
 		return FALSE;
 	}
 
+	if(uwep && is_ammo(uwep)){
+		You("can't do a combo using ammo!");
+		return FALSE;
+	}
+
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
 	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
 	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
@@ -16780,7 +16785,7 @@ android_combo()
 		}
 		u.uen--;
 		flags.botl = 1;
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			int a;
 			int k;
 			/* get direction */
@@ -16807,7 +16812,7 @@ android_combo()
 			}
 			else return TRUE;
 		}
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			int j = jump(1);
 			int d = getdir((char *)0);
 			if (!j && (!d || u.dz))
@@ -16835,13 +16840,13 @@ android_combo()
 		}
 		return TRUE;
 	}
-	else if (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_LANCE){ //!uwep handled above
+	else if (weapon_type(uwep) == P_SPEAR || weapon_type(uwep) == P_LANCE){ //!uwep handled above
 		boolean attacked = FALSE;
 		int n = 1;
 		
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED)
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED)
 			n++;
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT)
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT)
 			n++;
 
 		while (n > 0 && u.uen > 0){
@@ -16879,7 +16884,7 @@ android_combo()
 		}
 		return TRUE;
 	}
-	else if (objects[uwep->otyp].oc_skill == P_WHIP){ //!uwep handled above
+	else if (weapon_type(uwep) == P_WHIP){ //!uwep handled above
 		/* get direction of attack */
 		if (!getdir((char *)0) || u.dz)
 			return FALSE;
@@ -16903,7 +16908,7 @@ android_combo()
 		u.uen--;
 		flags.botl = 1;
 
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* get direction AND do whip things */
 			if (!use_whip(uwep) || !uwep)
 				return TRUE;
@@ -16924,7 +16929,7 @@ android_combo()
 		}
 
 
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			/* get direction AND do whip things */
 			if (!use_whip(uwep) || !uwep)
 				return TRUE;
@@ -16989,7 +16994,7 @@ android_combo()
 		u.uen--;
 		flags.botl = 1;
 
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			//Two throws. Aborting either one ends the combo.
 			if(!dofire())
 				return TRUE;
@@ -17000,7 +17005,7 @@ android_combo()
 			if(!dofire())
 				return TRUE;
 		}
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			//One throw, followed by a moving attack.  Aborting either one ends the combo.
 			if (dofire()){
 				//Charge energy for continuing the combo after the throw
@@ -17069,7 +17074,7 @@ android_combo()
 		u.uen--;
 		flags.botl = 1;
 		youmonst.movement -= 3;
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* use a kick to get direction */
 			if (!dokick())
 				return TRUE;
@@ -17093,7 +17098,7 @@ android_combo()
 			flags.botl = 1;
 			youmonst.movement -= 3;
 		}
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			if (!getdir((char *)0) || u.dz)
 				return TRUE;
 			/* attack counterclockwise, hitting first direction once (and then throw) */
