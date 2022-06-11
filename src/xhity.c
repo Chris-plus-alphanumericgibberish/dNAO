@@ -16655,6 +16655,11 @@ android_combo()
 		return FALSE;
 	}
 
+	if(uwep && is_ammo(uwep)){
+		You("can't do a combo using ammo!");
+		return FALSE;
+	}
+
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
 	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
 	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
