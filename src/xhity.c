@@ -5453,8 +5453,9 @@ boolean ranged;
 		}
 
 		/* wraithworms have poisonous negative-energy bites */
-		if ((pa->mtyp == PM_WRAITHWORM
-			|| pa->mtyp == PM_FIRST_WRAITHWORM)) {
+		if (pa->mtyp == PM_WRAITHWORM
+			|| pa->mtyp == PM_FIRST_WRAITHWORM
+			|| pa->mtyp == PM_DEMONIC_BLACK_WIDOW) {
 			alt_attk.adtyp = AD_DRST;
 		}
 		else {

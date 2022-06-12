@@ -32,6 +32,9 @@ E void NDECL(dogoat);
 E void FDECL(dogoat_mon, (struct monst *));
 E void FDECL(dosnake, (struct monst *));
 E void FDECL(dotailslap, (struct monst *));
+E void FDECL(dovines, (struct monst *));
+E void FDECL(dostarblades, (struct monst *));
+E void FDECL(dostorm, (struct monst *));
 E void FDECL(donachash, (struct monst *));
 
 /* ### apply.c ### */

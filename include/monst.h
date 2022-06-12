@@ -40,7 +40,7 @@
 #endif
 
 #define toostrong(monindx, lev) (monstr[monindx] > lev)
-#define tooweak(monindx, lev)	(monstr[monindx] < lev)
+#define tooweak(monindx, lev)	(monstr[monindx] < lev && !is_eladrin(&mons[monindx]))
 
 struct monst {
 	struct monst *nmon;
