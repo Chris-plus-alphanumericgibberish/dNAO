@@ -1761,6 +1761,8 @@ OBJECT(("statue"), BITS(1,0,0,1,0,0,0,0,    MZ_HUGE,0,0,0,0,P_NONE,MINERAL,0), {
 		ROCK_CLASS,   800, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 2, 0, 2, 2500, CLR_WHITE),
 OBJECT(("fossil"), BITS(1,0,0,0,0,0,0,0,    MZ_HUGE,0,0,0,0,P_NONE,MINERAL,0), {0},	/*Needs encyc entry*/
 		ROCK_CLASS,   100, 0, 2500,  0, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2500, CLR_BROWN),
+OBJECT(("expensive bed"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,1,0,0,0,P_NONE,WOOD,0), {0},			/*Needs encyc entry*/
+		BED_CLASS,     0, 0, 3000,  5000, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, CLR_BRIGHT_MAGENTA),
 OBJECT(("bed"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,1,0,0,0,P_NONE,WOOD,0), {0},			/*Needs encyc entry*/
 		BED_CLASS,   900, 0, 2000,  1000, DMG(D(20)), DMG(D(20)), 0, 0, 0, 2000, HI_WOOD),
 OBJECT(("bedroll"), BITS(1,0,0,0,0,0,0,0,MZ_SMALL,1,0,0,0,P_NONE,CLOTH,0), {0},		/*Needs encyc entry*/
