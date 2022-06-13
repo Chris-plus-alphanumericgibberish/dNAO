@@ -143,7 +143,7 @@ static struct Bool_Opt
 	{"role_obj_names",    &iflags.role_obj_names, TRUE, SET_IN_GAME},
 	{"obscure_role_obj_names",    &iflags.obscure_role_obj_names, FALSE, SET_IN_GAME},
 	{"dnethack_dungeon_colors",    &iflags.dnethack_dungeon_colors, TRUE, SET_IN_GAME},
-	{"inv_weight",    &iflags.inv_weight, TRUE, SET_IN_GAME},
+	{"invweight",    &iflags.invweight, TRUE, SET_IN_GAME},
 	{"hitpointbar", &iflags.hitpointbar, FALSE, SET_IN_GAME},
 	{"hp_monitor", (boolean *)0, TRUE, SET_IN_FILE}, /* For backward compat, HP monitor patch */
 	{"hp_notify", &iflags.hp_notify, FALSE, SET_IN_GAME},
