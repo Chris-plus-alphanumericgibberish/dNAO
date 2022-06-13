@@ -38,16 +38,6 @@ curses_update_inv(void)
     /* Clear the window as it is at the moment. */
     werase(win);
 
-    wmove(win, y, x);
-    attr_t attr = A_UNDERLINE;
-    wattron(win, attr);
-    wprintw(win, "Inventory:");
-    wattroff(win, attr);
-
-    /* The actual inventory will override this if we do carry stuff */
-    wmove(win, y + 1, x);
-    wprintw(win, "Not carrying anything");
-
     display_inventory(NULL, FALSE);
 
     if (border)

@@ -4095,9 +4095,19 @@ long* out_cnt;
 #endif /* SORTLOOT */
 
 #ifdef DUMP_LOG
-	if (want_disp)
+	if (want_disp){
 #endif
-	start_menu(win);
+		start_menu(win);
+#ifdef DUMP_LOG
+		if (!lets){
+			any.a_void = 0;
+			char invheading[QBUFSZ];
+			int wcap = weight_cap();
+			Sprintf(invheading, "Inventory: %d/%d weight (%d/52 slots)", inv_weight() + wcap, wcap, inv_cnt());
+			add_menu(win, NO_GLYPH, &any, 0, 0, ATR_BOLD, invheading, MENU_UNSELECTED);
+		}
+	}
+#endif
 nextclass:
 	classcount = 0;
 	any.a_void = 0;		/* set all bits to zero */
