@@ -191,6 +191,15 @@ struct monst * mdef;
 	
 	/* Do the attacks */
 	bhitpos.x = u.ux + u.dx; bhitpos.y = u.uy + u.dy;
+	if (!isok(bhitpos.x, bhitpos.y)) {
+		if (u.uswallow) {
+			bhitpos.x = u.ux;
+			bhitpos.y = u.uy;
+		}
+		else {
+			return TRUE;
+		}
+	}
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	if (attack_type == ATTACKCHECK_BLDTHRST) {
 		/* unintentional attacks only cause the one hit, no follow-ups */
@@ -538,7 +547,7 @@ int tary;
 			|| mdef == u.usteed
 #endif
 			) ? (!missedyou && (tarx != u.ux || tary != u.uy))
-			: (!missedother && m_at(tarx, tary) != mdef)
+			: (!missedother && m_at(tarx, tary) != mdef && !(youagr && u.uswallow && mdef == u.ustuck))
 		){
 			result = MM_AGR_STOP;
 			continue;
@@ -1708,6 +1717,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damn = 1;	// unused
 			attk->damd = 4;	// unused
 		}
+	}
+	/*Some attacks have level requirements*/
+	if(attk->lev_req > mlev(magr)){
+		GETNEXT
 	}
 	/* khaamnun tanninim switch to sucking memories after dragging target in close */
 	if (pa->mtyp == PM_KHAAMNUN_TANNIN
@@ -3993,7 +4006,19 @@ boolean ranged;
 	struct obj * otmp;
 	struct monst * mtmp;
 	char buf[BUFSZ];
-
+	
+	/* Monsters with physical attack scaling treat the physical damage component of their attacks much like spellcasting damage */
+	if(attk->adtyp == AD_PHYS && has_phys_scaling(pa)){
+		if(flatdmg >= 0){
+			flatdmg += d(min(MAX_BONUS_DICE, mlev(magr)/3), attk->damd <= 1 ? 6 : attk->damd);
+		}
+		else {
+			attk->damn += min(MAX_BONUS_DICE, mlev(magr)/3);
+			if(attk->damd <= 1)
+				attk->damd = 6;
+		}
+	}
+	
 	/* First determine the base damage done */
 	if (flatdmg >= 0) {
 		dmg = flatdmg;
@@ -5405,8 +5430,9 @@ boolean ranged;
 		}
 
 		/* wraithworms have poisonous negative-energy bites */
-		if ((pa->mtyp == PM_WRAITHWORM
-			|| pa->mtyp == PM_FIRST_WRAITHWORM)) {
+		if (pa->mtyp == PM_WRAITHWORM
+			|| pa->mtyp == PM_FIRST_WRAITHWORM
+			|| pa->mtyp == PM_DEMONIC_BLACK_WIDOW) {
 			alt_attk.adtyp = AD_DRST;
 		}
 		else {
@@ -16623,6 +16649,11 @@ android_combo()
 		return MOVE_CANCELLED;
 	}
 
+	if(uwep && is_ammo(uwep)){
+		You("can't do a combo using ammo!");
+		return FALSE;
+	}
+
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
 	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
 	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
@@ -16729,7 +16760,7 @@ android_combo()
 		}
 		u.uen--;
 		flags.botl = 1;
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			int a;
 			int k;
 			/* get direction */
@@ -16756,7 +16787,7 @@ android_combo()
 			}
 			else return MOVE_ATTACKED;
 		}
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			int j = jump(1);
 			int d = getdir((char *)0);
 			if (!j && (!d || u.dz))
@@ -16784,13 +16815,13 @@ android_combo()
 		}
 		return MOVE_ATTACKED;
 	}
-	else if (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_LANCE){ //!uwep handled above
+	else if (weapon_type(uwep) == P_SPEAR || weapon_type(uwep) == P_LANCE){ //!uwep handled above
 		boolean attacked = FALSE;
 		int n = 1;
 		
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED)
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED)
 			n++;
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT)
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT)
 			n++;
 
 		while (n > 0 && u.uen > 0){
@@ -16823,7 +16854,7 @@ android_combo()
 		}
 		return MOVE_ATTACKED;
 	}
-	else if (objects[uwep->otyp].oc_skill == P_WHIP){ //!uwep handled above
+	else if (weapon_type(uwep) == P_WHIP){ //!uwep handled above
 		/* get direction of attack */
 		if (!getdir((char *)0) || u.dz)
 			return MOVE_CANCELLED;
@@ -16844,7 +16875,7 @@ android_combo()
 		u.uen--;
 		flags.botl = 1;
 
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* get direction AND do whip things */
 			if (!use_whip(uwep) || !uwep)
 				return MOVE_ATTACKED;
@@ -16865,7 +16896,7 @@ android_combo()
 		}
 
 
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			/* get direction AND do whip things */
 			if (!use_whip(uwep) || !uwep)
 				return MOVE_ATTACKED;
@@ -16928,7 +16959,7 @@ android_combo()
 		u.uen--;
 		flags.botl = 1;
 
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			//Two throws. Aborting either one ends the combo.
 			if(!dofire())
 				return MOVE_ATTACKED;
@@ -16939,7 +16970,7 @@ android_combo()
 			if(!dofire())
 				return MOVE_ATTACKED;
 		}
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			//One throw, followed by a moving attack.  Aborting either one ends the combo.
 			if (dofire()){
 				//Charge energy for continuing the combo after the throw
@@ -17005,7 +17036,7 @@ android_combo()
 		u.uen--;
 		flags.botl = 1;
 		youmonst.movement -= 3;
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_SKILLED && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* use a kick to get direction */
 			if (!dokick())
 				return MOVE_ATTACKED;
@@ -17029,7 +17060,7 @@ android_combo()
 			flags.botl = 1;
 			youmonst.movement -= 3;
 		}
-		if (uwep && P_SKILL(objects[uwep->otyp].oc_skill) >= P_EXPERT && u.uen > 0){
+		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			if (!getdir((char *)0) || u.dz)
 				return MOVE_ATTACKED;
 			/* attack counterclockwise, hitting first direction once (and then throw) */

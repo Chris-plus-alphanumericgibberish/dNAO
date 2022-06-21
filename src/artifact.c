@@ -2329,7 +2329,7 @@ touch_artifact(obj, mon, hypothetical)
 		if(!hypothetical){
 			if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS)
 				give_law_trophy();
-			if(obj->oartifact == ART_SILVER_KEY)
+			if(obj->oartifact == ART_SILVER_KEY || obj->oartifact == ART_HAND_MIRROR_OF_CTHYLLA)
 				give_neutral_trophy();
 			if(obj->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)
 				give_mordor_trophy();
@@ -4121,7 +4121,7 @@ boolean lethal;
 		if(youdef){
 			int temp_encouraged = u.uencouraged;
 			if(lethal)
-				pline("The blade lodges in you %s!", body_part(SPINE));
+				pline("The blade lodges in your %s!", body_part(SPINE));
 			u.uencouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5) + spe;
 			flags.forcefight = TRUE;
 			xattacky(mdef, target, x(target), y(target));
@@ -10477,6 +10477,16 @@ read_necro(VOID_ARGS)
 	    delay = 0;
 	    return MOVE_FINISHED_OCCUPATION;
 	}
+	if(u.veil && delay >= -50){
+		You("feel reality threatening to slip away!");
+		if (yn("Are you sure you want to keep reading?") != 'y'){
+			delay = 0;
+			return(0);
+		}
+		else pline("So be it.");
+		u.veil = FALSE;
+		change_uinsight(1);
+	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	/* lenses give 50% faster reading */
 //	    nomul( (ublindf && ublindf->otyp == LENSES) ? 
@@ -10989,6 +10999,16 @@ read_lost(VOID_ARGS)
 	    delay = 0;
 	    return MOVE_FINISHED_OCCUPATION;
 	}
+	if(u.veil && delay >= -55){
+		You("feel reality threatening to slip away!");
+		if (yn("Are you sure you want to keep reading?") != 'y'){
+			delay = 0;
+			return(0);
+		}
+		else pline("So be it.");
+		u.veil = FALSE;
+		change_uinsight(1);
+	}
 	if (delay) {	/* not if (delay++), so at end delay == 0 */
 	/* lenses give 50% faster reading */
 //	    nomul( (ublindf && ublindf->otyp == LENSES) ? 
@@ -11431,6 +11451,7 @@ do_passive_attacks()
 		dosnake(&youmonst);
 	if(is_tailslap_mtyp(youracedata))
 		dotailslap(&youmonst);
+	//Note: The player never gets Eladrin vines, starblades, or storms
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
@@ -11442,6 +11463,12 @@ do_passive_attacks()
 				dosnake(mtmp);
 			if(is_tailslap_mon(mtmp))
 				dotailslap(mtmp);
+			if(is_vines_mon(mtmp))
+				dovines(mtmp);
+			if(is_star_blades_mon(mtmp))
+				dostarblades(mtmp);
+			if(is_storm_mon(mtmp))
+				dostorm(mtmp);
 		}
 		if(mtmp->mtyp == PM_NACHASH_TANNIN){
 			donachash(mtmp);
@@ -11565,6 +11592,9 @@ living_items()
 					mtmp->m_lev += 4;
 					mtmp->mhpmax += d(4, 8);
 					mtmp->mhp = mtmp->mhpmax;
+					mtmp->mpeaceful = 0;
+					untame(mtmp, 0); //Note: should never happen, since we check for the absense of emon
+					set_malign(mtmp);
 					// mtmp->m_ap_type = M_AP_OBJECT;
 					// mtmp->mappearance = STATUE;
 					// mtmp->m_ap_type = M_AP_MONSTER;
@@ -11650,7 +11680,7 @@ struct obj *obj;
 			}
 			if(mtmp){
 				mtmp->mpeaceful = 0;
-				mtmp->mfaction = YELLOW_FACTION;
+				set_faction(mtmp, YELLOW_FACTION);
 				set_malign(mtmp);
 				switch(rn2(4)){
 					case 0:
@@ -11707,7 +11737,7 @@ int spe;
 		pline("You hear chattering among the stars.");
 		break;
 		case 4:
-		pline("You hear ringing in your %s.", makeplural(body_part(EAR)));
+		pline("You hear ringing in your %s.", body_part(EARS));
 		break;
 		case 5:
 		pline("You hear silence in heaven.");
@@ -11725,9 +11755,9 @@ int spe;
 		pline("You hear a creaking in the sky.");
 		break;
 	}
-	if ((Blind_telepat && rn2(2)) || !rn2(10)) {
+	if (Unblind_telepat || (Blind_telepat && Blind) || (Blind_telepat && rn2(2)) || !rn2(10)) {
 		pline("It locks on to your %s!",
-			Unblind_telepat ? "telepathy" :
+			(Unblind_telepat || (Blind_telepat && Blind)) ? "telepathy" :
 			Blind_telepat ? "latent telepathy" : "mind");
 		dmg = d(dnum, dsize);
 		if (Half_spell_damage) dmg = (dmg+1) / 2;

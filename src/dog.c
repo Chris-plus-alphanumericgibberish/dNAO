@@ -43,6 +43,7 @@ register struct monst *mtmp;
 	EDOG(mtmp)->waspeaceful = 0;
 //endif
 	EDOG(mtmp)->loyal = 0;
+	EDOG(mtmp)->dominated = 0;
 
 	if (isok(mtmp->mx, mtmp->my))
 		newsym(mtmp->mx, mtmp->my);
@@ -337,14 +338,39 @@ losedogs()
 			&& mtmp->m_insight_level <= u.uinsight
 		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
 		) {
-		    if(mtmp == migrating_mons)
-			migrating_mons = mtmp->nmon;
-		    else
-			mtmp0->nmon = mtmp->nmon;
+			mon_extract_from_list(mtmp, &migrating_mons);
 		    mon_arrive(mtmp, FALSE);
 		} else
 		    mtmp0 = mtmp;
 	}
+}
+
+void
+mon_extract_from_list(mon, list_head)
+struct monst *mon;
+struct monst **list_head;
+{
+	struct monst *mtmp, *mtmp2, *mtmp0 = 0;
+	for(mtmp = *list_head; mtmp; mtmp = mtmp2) {
+		mtmp2 = mtmp->nmon;
+		if (mtmp == mon) {
+			if(!mtmp0)
+				*list_head = mtmp->nmon;
+			else
+				mtmp0->nmon = mtmp->nmon;
+			break;
+		} else
+			mtmp0 = mtmp;
+	}
+}
+
+void
+mon_arrive_on_level(mon)
+struct monst *mon;
+{
+	if(wizard) pline("arriving");
+	mon_extract_from_list(mon, &migrating_mons);
+	mon_arrive(mon, FALSE);
 }
 
 /* called from resurrect() in addition to losedogs() */
@@ -358,6 +384,7 @@ boolean with_you;
 	int num_segs;
 
 	mtmp->nmon = fmon;
+	mtmp->marriving = FALSE;
 	fmon = mtmp;
 	if (mtmp->isshk)
 	    set_residency(mtmp, FALSE);
@@ -399,10 +426,19 @@ boolean with_you;
 	       goto_level(do.c) decides who ends up at your target spot
 	       when there is a monster there too. */
 	    if (!MON_AT(u.ux, u.uy) &&
-		    !rn2(mtmp->mtame ? 10 : mtmp->mpeaceful ? 5 : 2))
-		rloc_to(mtmp, u.ux, u.uy);
+		    !rn2(mtmp->mtame ? 10 : mtmp->mpeaceful ? 5 : 2)
+		)
+			rloc_to(mtmp, u.ux, u.uy);
 	    else
-		mnexto(mtmp);
+			mnexto(mtmp);
+		if(mtmp->mx == 0){
+			if(wizard) pline("no room for buddy! Arriving later.");
+			/*No room! place it once there's space.*/
+			migrate_to_level(mtmp, ledger_no(&u.uz),
+					 MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+			return;
+		}
 	    return;
 	}
 	/*
@@ -489,42 +525,26 @@ boolean with_you;
 
 	mtmp->mx = 0;	/*(already is 0)*/
 	mtmp->my = xyflags;
-	if (xlocale)
+	if (xlocale){
 	    (void) mnearto(mtmp, xlocale, ylocale, FALSE);
+		if(mtmp->mx == 0){
+			if(wizard) pline("no room at local! Qrriving later.");
+			/*No room! place it once there's space.*/
+			migrate_to_level(mtmp, ledger_no(&u.uz),
+					 MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+			return;
+		}
+	}
 	else {
-	    if (!rloc(mtmp,TRUE)) {
-		/*
-		 * Failed to place migrating monster,
-		 * probably because the level is full.
-		 * Dump the monster's cargo and leave the monster dead.
-		 */
-	    	struct obj *obj, *corpse;
-		while ((obj = mtmp->minvent) != 0) {
-		    obj_extract_self(obj);
-		    obj_no_longer_held(obj);
-		    if (obj->owornmask & W_WEP)
-			setmnotwielded(mtmp,obj);
-		    obj->owornmask = 0L;
-		    if (xlocale && ylocale)
-			    place_object(obj, xlocale, ylocale);
-		    else {
-		    	rloco(obj);
-			get_obj_location(obj, &xlocale, &ylocale, 0);
-		    }
+		if (!rloc(mtmp,TRUE)) {
+			if(wizard) pline("no room! arriving later.");
+			/*No room! place it once there's space.*/
+			migrate_to_level(mtmp, ledger_no(&u.uz),
+					 MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+			return;
 		}
-		corpse = mkcorpstat(CORPSE, (struct monst *)0, mtmp->data,
-				xlocale, ylocale, FALSE);
-#ifndef GOLDOBJ
-		if (mtmp->mgold) {
-		    if (xlocale == 0 && ylocale == 0 && corpse) {
-			(void) get_obj_location(corpse, &xlocale, &ylocale, 0);
-			(void) mkgold_core(mtmp->mgold, xlocale, ylocale, FALSE);
-		    }
-		    mtmp->mgold = 0L;
-		}
-#endif
-		mongone(mtmp);
-	    }
 	}
 	/* now that it's placed, we can resume timers (which may kill mtmp) */
 	resume_timers(mtmp->timed);
@@ -588,7 +608,7 @@ long nmv;		/* number of moves */
 	else mtmp->mspec_used -= imv;
 
 	/* reduce tameness for every 150 moves you are separated */
-	if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->loyal)
+	if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->loyal) && !(EDOG(mtmp)->dominated)
 	 && !(
 	  In_quest(&u.uz) 
 	  && ((Is_qtown(&u.uz) && !flags.stag) || 
@@ -1130,7 +1150,7 @@ int numdogs;
 	// it sets the weakest friendly
 	struct monst *curmon = 0, *weakdog = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
-			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !is_suicidal(curmon->data)
+			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !(EDOG(curmon)->dominated) && !is_suicidal(curmon->data)
 				&& !curmon->mspiritual && !(get_timer(curmon->timed, DESUMMON_MON) && !(get_mx(curmon, MX_ESUM) && curmon->mextra_p->esum_p->permanent))
 			){
 				numdogs++;
@@ -1474,7 +1494,7 @@ boolean was_dead;
 	}
     } else {
 	/* chance it goes wild anyway - Pet Semetary */
-	if (!(edog && edog->loyal) && !rn2(mtmp->mtame)) {
+	if (!(edog && (edog->loyal || edog->dominated)) && !rn2(mtmp->mtame)) {
 	    untame(mtmp, 0);
 	}
     }

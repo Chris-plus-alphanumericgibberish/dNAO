@@ -189,7 +189,7 @@ GOD_V2("Lobon",                 A_NEUTRAL, HOLY_HOLINESS,
 	MINIONS(Nangels)
 	),
 GOD_V2("Tamash",                A_CHAOTIC, NEUTRAL_HOLINESS,
-	MINIONS(NElemen)
+	MINIONS(PM_HOMUNCULUS,PM_COURE_ELADRIN,PM_ANGEL,PM_WARDEN_ARCHON,PM_CAILLEA_ELADRIN)
 	),
 /* valkyrie, Norse */
 GOD_V2("Tyr",                   A_LAWFUL, HOLY_HOLINESS,

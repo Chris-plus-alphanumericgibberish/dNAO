@@ -730,7 +730,30 @@ struct obj *obj;
 		obj->oerodeproof = 0;
 	    }
 	    break;
+	case CRYSTAL_SKULL:{
+		struct monst *nmon;
+		for(struct monst *mtmp = fmon; mtmp; mtmp = nmon){
+			nmon = mtmp->nmon;
+			if(get_mx(mtmp, MX_ESUM)){
+				if(mtmp->mextra_p->esum_p->sm_o_id == obj->o_id){
+					monvanished(mtmp);
+				}
+			}
+		}
+		}break;
 	}
+}
+
+boolean
+obj_summon_out(obj)
+struct obj *obj;
+{
+	for(struct monst *mtmp = fmon; mtmp; mtmp = mtmp->nmon)
+		if(get_mx(mtmp, MX_ESUM))
+			if(mtmp->mextra_p->esum_p->sm_o_id == obj->o_id)
+				return TRUE;
+	//Else
+	return FALSE;
 }
 
 /* 'D' command: drop several things */
@@ -1528,10 +1551,13 @@ misc_levelport:
 		   with the situation, so only say something when debugging */
 		if (wizard) pline("(monster in hero's way)");
 #endif
-		if (!rloc(mtmp, TRUE))
+		if (!rloc(mtmp, TRUE)){
+			if(wizard) pline("arriving later.");
 		    /* no room to move it; send it away, to return later */
 		    migrate_to_level(mtmp, ledger_no(&u.uz),
 				     MIGR_RANDOM, (coord *)0);
+			mtmp->marriving = TRUE;
+		}
 	    }
 	}
 
@@ -1723,10 +1749,12 @@ final_level()
 		    bless(otmp);
 		    if (otmp->spe < 4) otmp->spe += rnd(4);
 		    if ((otmp = which_armor(mtmp, W_ARMS)) == 0 ||
-			    otmp->otyp != SHIELD_OF_REFLECTION) {
-			(void) mongets(mtmp, AMULET_OF_REFLECTION, NO_MKOBJ_FLAGS);
-			m_dowear(mtmp, TRUE);
-			init_mon_wield_item(mtmp);
+			    otmp->otyp != SHIELD_OF_REFLECTION
+			) {
+				(void) mongets(mtmp, AMULET_OF_REFLECTION, NO_MKOBJ_FLAGS);
+				m_dowear(mtmp, TRUE);
+				init_mon_wield_item(mtmp);
+				m_level_up_intrinsic(mtmp);
 		    }
 		}
 	    }
@@ -1848,7 +1876,7 @@ int different;
 	if(different==REVIVE_YELLOW){
 		set_template(mtmp, YELLOW_TEMPLATE);
 		mtmp->zombify = 0;
-		mtmp->mfaction = YELLOW_FACTION;
+		set_faction(mtmp, YELLOW_FACTION);
 		mtmp->mcrazed = 0;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;
@@ -1919,6 +1947,7 @@ int different;
 				}
 				m_dowear(mtmp, TRUE);
 				init_mon_wield_item(mtmp);
+				m_level_up_intrinsic(mtmp);
 			}
 		}
 		break;

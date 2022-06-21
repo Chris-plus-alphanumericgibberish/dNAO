@@ -2016,80 +2016,222 @@ struct monst *mon;
 int part;
 {
 	static NEARDATA const char
-	*humanoid_parts[] = { "arm", "eye", "face", "finger",
-		"fingertip", "foot", "hand", "handed", "head", "leg",
-		"light headed", "neck", "spine", "toe", "hair",
-		"blood", "lung", "nose", "stomach","heart","skin",
-		"flesh","beat","bones","ear","creak","crack"},
-	*clockwork_parts[] = { "arm", "photoreceptor", "face", "grasping digit",
-		"digit-tip", "foot", "manipulator", "manipulatored", "head", "leg",
-		"addled", "neck", "chassis", "toe", "doll-hair",
-		"oil", "gear", "chemoreceptor", "keyhole","mainspring","metal skin",
-		"brass structure","tick","rods","phonoreceptor","creak","bend"},
-	*jelly_parts[] = { "pseudopod", "dark spot", "front",
-		"pseudopod extension", "pseudopod extremity",
-		"pseudopod root", "grasp", "grasped", "cerebral area",
-		"lower pseudopod", "viscous", "middle", "centriole",
-		"pseudopod extremity", "ripples", "juices",
-		"tiny cilia", "sensor", "stomach","cytoskeletal structure","membrane",
-		"cortex","shift","cytoskeletal filaments","membrane","creak","crack" },
-	*animal_parts[] = { "forelimb", "eye", "face", "foreclaw", "claw tip",
-		"rear claw", "foreclaw", "clawed", "head", "rear limb",
-		"light headed", "neck", "spine", "rear claw tip",
-		"fur", "blood", "lung", "nose", "stomach","heart","skin",
-		"flesh","beat","bones","ear","creak","crack" },
-	*insect_parts[] = { "forelimb", "compound eye", "face", "foreclaw", "claw tip",
-		"rear claw", "foreclaw", "clawed", "head", "rear limb",
-		"light headed", "neck", "notochord", "rear claw tip",
-		"setae", "ichor", "spriacle", "antenna", "stomach","dorsal vessel","exoskeleton",
-		"chitin","pulse","apodeme","ear","creak","tear" },
-	*bird_parts[] = { "wing", "eye", "face", "wing", "wing tip",
-		"foot", "wing", "winged", "head", "leg",
-		"light headed", "neck", "spine", "toe",
-		"feathers", "blood", "lung", "bill", "stomach","heart","skin",
-		"flesh","beat","bones","ear","creak","crack" },
-	*horse_parts[] = { "foreleg", "eye", "face", "forehoof", "hoof tip",
-		"rear hoof", "foreclaw", "hooved", "head", "rear leg",
-		"light headed", "neck", "backbone", "rear hoof tip",
-		"mane", "blood", "lung", "nose", "stomach","heart","skin",
-		"flesh","beat","bones","ear","creak","crack"},
-	*sphere_parts[] = { "appendage", "optic nerve", "body", "tentacle", "tentacle tip", 
-		"lower appendage", "tentacle", "tentacled", "body", "lower tentacle", 
-		"rotational", "equator", "body", "lower tentacle tip", 
-		"surface", "life force", "retina", "olfactory nerve","interior","core","surface",
-		"subsurface layers","pulse","auras","tympanic membrane","flicker","blink out"},
-	*fungus_parts[] = { "mycelium", "visual area", "front", "hypha",
-		"hypha", "root", "strand", "stranded", "cap area",
-		"rhizome", "sporulated", "stalk", "root", "rhizome tip",
-		"spores", "juices", "gill", "gill", "interior","hyphal network","cuticle",
-		"...it doesn't sound like much",
-		"flesh","hyphae","tympanic area","stretch","tear" },
-	*vortex_parts[] = { "region", "eye", "front", "minor current",
-		"minor current", "lower current", "swirl", "swirled",
-		"central core", "lower current", "addled", "center",
-		"currents", "edge", "currents", "life force",
-		"center", "leading edge", "interior","core","vaporous currents",
-		"subsurface currents","pulse","currents","vapor","weaken","falter" },
-	*snake_parts[] = { "vestigial limb", "eye", "face", "large scale",
-		"large scale tip", "rear region", "scale gap", "scale gapped",
-		"head", "rear region", "light headed", "neck", "length",
-		"rear scale", "scales", "blood", "lung", "forked tongue", "stomach","heart","scales",
-		"flesh","beat","bones","ear","creak","crack" },
-	*fish_parts[] = { "fin", "eye", "premaxillary", "pelvic axillary",
-		"pelvic fin", "anal fin", "pectoral fin", "finned", "head", "peduncle",
-		"played out", "gills", "dorsal fin", "caudal fin",
-		"scales", "blood", "gill", "nostril", "stomach","heart","scales",
-		"flesh","beat","bones","ear","creak","crack" },
-	*snakeleg_humanoid_parts[] = { "arm", "eye", "face", "finger",
-		"fingertip", "serpentine lower body", "hand", "handed", "head", "rear region",
-		"light headed", "neck", "spine", "tail-tip", "scales",
-		"blood", "lung", "nose", "stomach","heart","scales",
-		"flesh","beat","bones","ear","creak","crack" },
-	*centauroid_parts[] = { "arm", "eye", "face", "finger",
-		"fingertip", "hoof", "hand", "handed", "head", "front leg",
-		"light headed", "neck", "spine", "hoof-nail", "hair",
-		"blood", "lung", "nose", "stomach","heart","skin",
-		"flesh","beat","bones","ear","creak","crack" };
+	*humanoid_parts[] = { 
+		"arm",			"eye",		"face",			"finger",
+		"fingertip",	"foot",		"hand",			"handed", 
+		"head", 		"leg",		"light headed", "neck",
+		"spine",		"toe",		"hair", 		"blood",
+		"lung",			"nose", 	"stomach",		"heart",
+		"skin",			"flesh",	"beat",			"bones",
+		"ear", 			"ears",		"creak",	"crack"},
+	*uvuudaum_parts[] = { 
+		"arm",			"eye",		"headspike",	"finger",
+		"fingertip",	"hand",		"hand",			"handed", 
+		"tentacle", 	"arm",		"addled", 		"tentacle-base",
+		"spine",		"finger",	"headspike", 	"ichor",
+		"pore",			"pore", 	"stomach",		"heart",
+		"skin",			"flesh",	"beat",			"bones",
+		"clairaudience", "clairaudience", "creak",	"crack"},
+	*clockwork_parts[] = { 
+		"arm", 			"photoreceptor",	"face",			"grasping digit",
+		"digit-tip",	"foot",				"manipulator",	"manipulatored",
+		"head",			"leg",				"addled",		"neck",
+		"chassis",		"toe",				"doll-hair",	"oil",
+		"gear",			"chemoreceptor",	"keyhole",		"mainspring",
+		"foil skin",	"brass structure",	"tick",			"armature",
+		"phonoreceptor","phonoreceptors",	"creak",		"bend"},
+	*doll_parts[] = { 
+		"arm", 			"glass eye",		"face",			"finger",
+		"fingertip",	"foot",				"hand",			"handed",
+		"head",			"leg",				"addled",		"neck",
+		"trunk",		"toe",				"doll-hair",	"ichor",
+		"lip",			"nose",				"wood",			"wood",
+		"painted skin",	"wood",				"...it doesn't sound like much", "wood",
+		"ear",			"ears",				"creak",		"crack"},
+	*android_parts[] = { 
+		"arm", 			"photoreceptor",	"face",			"finger",
+		"fingertip",	"foot",				"hand",			"handed",
+		"head",			"leg",				"buggy",		"neck",
+		"dorsal wiring","toe",				"doll-hair",	"oily red liquid",
+		"vocal pump",	"chemoreceptor",	"black box",	"heart",
+		"cosmetic layer","plasteel",		"pump",			"armature",
+		"phonoreceptor","phonoreceptors",	"flex",			"crack"},
+	*assessor_parts[] = {
+		"arm", 			"eye", 				"central eye", 	"grasping digit",
+		"digit-tip",	"foot",				"manipulator",	"manipulatored",
+		"head", 		"leg",				"addled", 		"shoulders",
+		"chassis", 		"toe", 				"topspike",		"oil",
+		"valve",		"olfactory nerve",	"gearbox",		"eternal core",
+		"armor",		"brass structure",	"tick",			"armature",
+		"phonoreceptor","phonoreceptors",	"creak",		"bend"},
+	*audient_parts[] = {
+		"distal limb",	"photoreceptor",	"front",		"articulated distal spike",
+		"spike-tip",	"ventral needle",	"distal spike",	"spiked",
+		"cap",			"ventral limb",		"addled",		"stalk",
+		"chassis",		"needle-tip",		"spores",		"oil",
+		"gear",			"gill",				"hyphal network","eternal core",
+		"metal skin",	"brass structure",	"tick",			"armature",
+		"phonoreceptor horn","phonoreceptor horn","creak",	"bend"},
+	*jelly_parts[] = {
+		"pseudopod",		"dark spot",		"front",		"pseudopod extension",
+		"pseudopod extremity","pseudopod root", "grasp", 		"grasped", 
+		"cerebral area",	"lower pseudopod",	"viscous",		"middle",
+		"centriole",		"pseudopod extremity","ripples",	"juices",
+		"tiny cilia",		"sensor",			"stomach",		"cytoskeletal structure",
+		"membrane",			"cortex",			"shift",		"cytoskeletal filaments",
+		"membrane",			"membrane",			"creak",		"crack" },
+	*animal_parts[] = {
+		"forelimb", 		"eye", 				"face", 		"foreclaw",
+		"claw tip",			"rear claw", 		"foreclaw", 	"clawed", 
+		"head", 			"rear limb",		"light headed", "neck",
+		"spine", 			"rear claw tip",	"fur", 			"blood", 
+		"lung", 			"nose", 			"stomach",		"heart",
+		"skin",				"flesh",			"beat",			"bones",
+		"ear",				"ears",				"creak",			"crack" },
+	*insect_parts[] = { 
+		"forelimb",			"compound eye",		"face",			"foreclaw",
+		"claw tip",			"rear claw", 		"foreclaw", 	"clawed", 
+		"head", 			"rear limb",		"light headed", "neck", 
+		"notochord", 		"rear claw tip",	"setae", 		"haemolymph", 
+		"spriacle", 		"antenna", 			"stomach",		"dorsal vessel",
+		"exoskeleton",		"chitin",			"pulse",		"apodeme",
+		"tympanum",			"tympana",			"creak",		"tear" },
+	*bird_parts[] = { 
+		"wing", 			"eye", 				"face", 		"wing", 
+		"wing tip",			"foot", 			"wing", 		"winged", 
+		"head", 			"leg",				"light headed", "neck", 
+		"spine", 			"toe",				"feathers", 	"blood",
+		"lung", 			"bill", 			"stomach",		"heart",
+		"skin",				"flesh",			"beat",			"bones",
+		"ear",				"ears",				"creak",		"crack" },
+	*horse_parts[] = {
+		"foreleg", 			"eye", 				"face", 		"forehoof",
+		"hoof tip",			"rear hoof", 		"foreclaw", 	"hooved", 
+		"head", 			"rear leg",			"light headed",	"neck",
+		"backbone", 		"rear hoof tip",	"mane", 		"blood", 
+		"lung", 			"nose", 			"stomach",		"heart",
+		"skin",				"flesh",			"beat",			"bones",
+		"ear",				"ears",				"creak",		"crack"},
+	*sphere_parts[] = { 
+		"appendage", 		"optic nerve", 		"body", 		"tentacle", 
+		"tentacle tip", 	"lower appendage",	"tentacle",		"tentacled",
+		"body",				"lower tentacle", 	"rotational",	"equator",
+		"body", 			"lower tentacle tip","surface",		"life force",
+		"retina",			"olfactory nerve",	"interior",		"core",
+		"surface",			"subsurface layers","pulse",		"auras",
+		"tympanic membrane","tympanic membranes","flicker",		"blink out"},
+	*spore_parts[] = { 
+		"stalk", 			"visual area", 		"front", 		"stalk", 
+		"stalk tip", 		"stalk",			"stalk",		"stalked",
+		"annulus",			"stalk", 			"addled",		"equator",
+		"body", 			"stalk tip",		"surface",		"sap",
+		"lip",				"lip",				"interior",		"spores",
+		"annulus",			"flesh",			"...they don't sound like much","cells",
+		"tympanic area",	"tympanic area",	"flex",			"crack"},
+	*fungus_parts[] = {
+		"mycelium", 		"visual area", 		"front", 					"hypha",
+		"hypha", 			"root", 			"strand", 					"stranded",
+		"cap area",			"rhizome", 			"sporulated", 				"stalk", 
+		"root", 			"rhizome tip",		"spores", 					"juices", 
+		"gill", 			"gill", 			"interior",					"hyphal network",
+		"cuticle",			"flesh",			"...it doesn't sound like much","hyphae",
+		"tympanic area",	"tympanic area",	"stretch",					"tear" },
+	*tree_parts[] = { 
+		"limb", 	"visual area",	"front",						"leaf",
+		"leaftip",	"taproot",		"twig",							"twigged",
+		"crown", 	"root", 		"wilty", 						"trunk",
+		"heartwood","root-tip", 	"leaves", 						"sap",
+		"stoma", 	"stoma",		"xylem",						"phloem",
+		"bark", 	"sapwood",		"...it doesn't sound like much","wood",
+		"tympanic area","tympanic area","creak",					"crack" },
+	*vipertree_parts[] = { 
+		"coil", 	"eye",			"face",				"mouth",
+		"fang",		"taproot",		"viper head",		"headed",
+		"crown", 	"root", 		"disordered", 		"trunk",
+		"heartwood","root-tip", 	"scales", 			"blood",
+		"lung", 	"nose",			"stomach",			"heart",
+		"scales", 	"sapwood",		"beat",				"wood",
+		"ear",		"ears",			"creak",			"crack" },
+	*blackflower_parts[] = {
+		"arm",			"blank eye",	"face",			"finger",
+		"fingertip",	"petal"			"hand",			"handed", 
+		"head", 		"flower"	,	"light headed", "neck",
+		"spine",		"petal-tip", 	"hair", 		"pale fluid",
+		"lung",			"nose", 		"stomach",		"heart",
+		"skin",			"flesh",		"beat",			"bones",
+		"ear",			"ears",			"creak",		"crack" },
+	*plant_parts[] = {
+		"shoot", 		"visual area",	"front",						"leaf",
+		"leaftip",		"lateral root",	"twig",							"twigged",
+		"apical bud",	"primary root", "wilty", 						"stem",
+		"vascular tissue","root-tip", 	"leaves", 						"sap",
+		"stoma", 		"stoma",		"xylem",						"phloem",
+		"epidermis",	"flesh",		"...it doesn't sound like much","stem",
+		"tympanic area","tympanic area","stretch",						"tear" },
+	*mandrake_parts[] = { 
+		"arm-root", 	"eye spot",		"root-face",					"arm-root tip",
+		"arm-root hair","leg-root tip",	"arm-root end",					"rooted",
+		"leaves", 		"leg-root", 	"wilty", 						"ground tissue",
+		"spine",		"leg-root hair","apical bud", 					"bloody sap",
+		"stoma", 		"nose spots",	"xylem",						"phloem",
+		"epidermis",	"flesh",		"...it doesn't sound like much","stem",
+		"ear spot",		"ear spots",	"stretch",						"tear" },
+	*willow_parts[] = { 
+		"limb", 	"visual area",	"front",						"leaf",
+		"leaftip",	"taproot",		"twig",							"twigged",
+		"crown", 	"root", 		"wilty", 						"trunk",
+		"spine",	"root-tip", 	"leaves", 						"blood",
+		"stoma", 	"stoma",		"xylem",						"phloem",
+		"bark", 	"flesh",		"...it doesn't sound like much","wood",
+		"tympanic area","tympanic area","creak",					"crack" },
+	*birch_parts[] = { 
+		"limb", 		"eye",			"face",			"thorn",
+		"thorn-tip",	"crawling-root","scaffold",		"scaffolded",
+		"head", 		"bud union", 	"light headed", "neck",
+		"spine",		"root-tip", 	"hair", 		"sap",
+		"lung", 		"nose",			"stomach",		"heart",
+		"bark", 		"sapwood",		"beat",			"wood",
+		"ear",			"ears",			"creak",		"crack" },
+	*vortex_parts[] = {
+		"region",			"eye",				"front",		"minor current",
+		"minor current",	"lower current",	"swirl",		"swirled",
+		"central core",		"lower current",	"addled",		"center",
+		"currents",			"edge",				"currents",		"life force",
+		"center",			"leading edge", 	"interior",		"core",
+		"vaporous currents","subsurface currents","pulse",		"currents",
+		"vapor",			"vapor",			"weaken",		"falter" },
+	*snake_parts[] = {
+		"vestigial limb", 	"eye",				"face",			"large scale",
+		"large scale tip",	"rear region",		"scale gap",	"scale gapped",
+		"head",				"rear region",		"light headed",	"neck",
+		"length",			"rear scale",		"scales",		"blood",
+		"lung",				"forked tongue",	"stomach",		"heart",
+		"scales",			"flesh",			"beat",			"bones",
+		"ear",				"ears",				"creak",		"crack" },
+	*fish_parts[] = {
+		"fin",				"eye",				"premaxillary",	"pelvic axillary",
+		"pelvic fin",		"anal fin",			"pectoral fin", "finned",
+		"head",				"peduncle",			"played out",	"gills",
+		"dorsal fin",		"caudal fin",		"scales",		"blood",
+		"gill",				"nostril",			"stomach",		"heart",
+		"scales",			"flesh",			"beat",			"bones",
+		"ear",				"ears",				"creak",		"crack" },
+	*snakeleg_humanoid_parts[] = {
+		"arm",				"eye",				"face",			"finger",
+		"fingertip",		"serpentine lower body","hand",		"handed", 
+		"head",				"rear region",		"light headed",	"neck",
+		"spine",			"tail-tip",			"scales",		"blood",
+		"lung",				"nose", 			"stomach",		"heart",
+		"scales",			"flesh",			"beat",			"bones",
+		"ear",				"ears",				"creak",		"crack" },
+	*centauroid_parts[] = {
+		"arm", 				"eye", 				"face", 		"finger",
+		"fingertip", 		"hoof", 			"hand", 		"handed",
+		"head", 			"front leg",		"light headed", "neck", 
+		"spine", 			"hoof-nail", 		"hair",			"blood", 
+		"lung", 			"nose", 			"stomach",		"heart",
+		"skin",				"flesh",			"beat",			"bones",
+		"ear",				"ears",				"creak",		"crack" };
 	/* claw attacks are overloaded in mons[]; most humanoids with
 	   such attacks should still reference hands rather than claws */
 	static const char not_claws[] = {
@@ -2100,21 +2242,7 @@ int part;
 	};
 	struct permonst *mptr = mon->data;
 
-	if (part == HAND || part == HANDED) {	/* some special cases */
-	    if (mptr->mlet == S_DOG || mptr->mlet == S_FELINE ||
-		    mptr->mlet == S_YETI)
-		return part == HAND ? "paw" : "pawed";
-		if(mon == &youmonst && youracedata->mtyp == PM_HALF_DRAGON)
-			return part == HAND ? "claw" : "clawed";
-		if(mon->mtyp == PM_HALF_DRAGON)
-			return part == HAND ? "claw" : "clawed";
-	    if (humanoid(mptr) && attacktype(mptr, AT_CLAW) &&
-		    !index(not_claws, mptr->mlet) &&
-		    mptr->mtyp != PM_STONE_GOLEM &&
-		    mptr->mtyp != PM_SENTINEL_OF_MITHARDIR &&
-		    mptr->mtyp != PM_INCUBUS && mptr->mtyp != PM_SUCCUBUS)
-		return part == HAND ? "claw" : "clawed";
-	}
+	//Specific overrides
 	if ((mptr->mtyp == PM_MUMAK || mptr->mtyp == PM_MASTODON) &&
 		part == NOSE)
 	    return "trunk";
@@ -2125,9 +2253,80 @@ int part;
 	    return "tentacle";
 	if (mptr->mtyp == PM_FLOATING_EYE && part == EYE)
 	    return "cornea";
+	if (mptr->mtyp == PM_SUNFLOWER || mptr->mtyp == PM_MIRRORED_MOONFLOWER){
+		if(part == HEAD)
+			return "flower";
+		if(part == FACE)
+			return "mirrored corolla";
+	}
+	if (mptr->mtyp == PM_DREADBLOSSOM_SWARM){
+		if(part == HEAD)
+			return "flower";
+		if(part == FACE)
+			return "corolla";
+	}
+	if (is_fern(mptr)){
+		if(part == HEAD)
+			return "crosier";
+	}
+	if (mptr->mtyp == PM_DREADBLOSSOM_SWARM && part == LEG)
+	    return "root-thorn";
+	if ((mptr->mtyp == PM_DREADBLOSSOM_SWARM || mptr->mtyp == PM_SUNFLOWER || mptr->mtyp == PM_MIRRORED_MOONFLOWER) && part == HAIR)
+	    return "petals";
+	if (is_delouseable(mptr)){
+		if(mptr->mtyp == PM_PARASITIZED_DOLL){
+			if(part == HEAD)
+				return "nightmarish flesh mass";
+			if(part == FACE)
+				return "gnawing mouths";
+			if(part == EYE)
+				return "winking eye";
+			if(part == BLOOD)
+				return "seething blood";
+		} else {
+			if(part == FACE)
+				return "squid";
+			if(part == EAR)
+				return "skin";
+			if(part == EARS)
+				return "skin";
+			if(part == EYE)
+				return "eye";
+		}
+	}
+
+	//PM-based part lists
 	if (mptr->mtyp == PM_RAVEN || mptr->mtyp == PM_CROW)
 	    return bird_parts[part];
-	if (mptr->mlet == S_CENTAUR || mptr->mlet == S_UNICORN ||
+	if (mptr->mtyp == PM_APHANACTONAN_ASSESSOR)
+	    return assessor_parts[part];
+	if (mptr->mtyp == PM_APHANACTONAN_AUDIENT)
+	    return audient_parts[part];
+	if (mptr->mtyp == PM_MANDRAKE)
+	    return mandrake_parts[part];
+	if (mptr->mtyp == PM_CANDLE_TREE)
+	    return birch_parts[part];
+	if (mptr->mtyp == PM_WEEPING_WILLOW)
+	    return willow_parts[part];
+	if (mptr->mtyp == PM_VIPER_TREE)
+	    return vipertree_parts[part];
+	if (mptr->mtyp == PM_BLACK_FLOWER)
+	    return blackflower_parts[part];
+	if (is_fern_spore(mptr))
+	    return spore_parts[part];
+	if (mptr->mtyp == PM_WARDEN_TREE)
+	    return tree_parts[part];
+	if (mptr->mtyp == PM_LIVING_DOLL)
+	    return doll_parts[part];
+	if (is_android(mptr))
+	    return android_parts[part];
+	if (mptr->mtyp == PM_UVUUDAUM)
+	    return uvuudaum_parts[part];
+
+	//S-based part lists
+	if (mptr->mlet == S_PLANT)
+	    return plant_parts[part];
+	if (mptr->mlet == S_UNICORN ||
 		(mptr->mtyp == PM_ROTHE && part != HAIR))
 	    return horse_parts[part];
 	if (mptr->mlet == S_LIGHT) {
@@ -2149,6 +2348,23 @@ int part;
 	    return fish_parts[part];
 	if (mptr->mlet == S_ANT)
 		return insect_parts[part];
+
+	//General body shape-based
+	if (part == HAND || part == HANDED) {	/* some special cases */
+	    if (mptr->mlet == S_DOG || mptr->mlet == S_FELINE ||
+		    mptr->mlet == S_YETI)
+		return part == HAND ? "paw" : "pawed";
+		if(mon == &youmonst && youracedata->mtyp == PM_HALF_DRAGON)
+			return part == HAND ? "claw" : "clawed";
+		if(mon->mtyp == PM_HALF_DRAGON)
+			return part == HAND ? "claw" : "clawed";
+	    if (humanoid(mptr) && attacktype(mptr, AT_CLAW) &&
+		    !index(not_claws, mptr->mlet) &&
+		    mptr->mtyp != PM_STONE_GOLEM &&
+		    mptr->mtyp != PM_SENTINEL_OF_MITHARDIR &&
+		    mptr->mtyp != PM_INCUBUS && mptr->mtyp != PM_SUCCUBUS)
+		return part == HAND ? "claw" : "clawed";
+	}
 	if (serpentine(mptr) || (mptr->mlet == S_DRAGON && part == HAIR))
 	    return snake_parts[part];
 	if (snakemanoid(mptr))
@@ -2375,7 +2591,7 @@ dodroidmenu()
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(((uwep && (!is_lightsaber(uwep) || litsaber(uwep)) && P_SKILL(objects[uwep->otyp].oc_skill) >= P_BASIC) || ((!uwep || (is_lightsaber(uwep) && !litsaber(uwep))) && P_SKILL(P_MARTIAL_ARTS) >= P_BASIC)) && u.uen > 0 && !u.twoweap){
+	if(((uwep && (!is_lightsaber(uwep) || litsaber(uwep)) && P_SKILL(weapon_type(uwep)) >= P_BASIC) || ((!uwep || (is_lightsaber(uwep) && !litsaber(uwep))) && P_SKILL(P_MARTIAL_ARTS) >= P_BASIC)) && u.uen > 0 && !u.twoweap){
 		Sprintf(buf, "Combo");
 		incntlet = 'c';
 		any.a_int = ANDROID_COMBO;	/* must be non-zero */

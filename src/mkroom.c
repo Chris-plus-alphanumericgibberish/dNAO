@@ -5593,7 +5593,84 @@ int sx,sy;
 	int mtyp = NON_PM;
 	struct monst *mon;
 	boolean polyps = FALSE;
+	//Note: all throne rooms are part of rodney's forces, so everyone has prisoners.
 	switch(kingtype){
+		case 0:{
+			int tries = 500;
+			int zlevel, minmlev, maxmlev;
+			
+			zlevel = level_difficulty();
+			/* determine the level of the weakest monster to make. */
+			minmlev = (zlevel + u.ulevel) / 3 - 5;
+			/* determine the level of the strongest monster to make. */
+			maxmlev = (zlevel + u.ulevel) / 2 + 5;
+			int prisoners[] = { PM_GRIMLOCK, PM_GARGOYLE, PM_WINGED_GARGOYLE, PM_HOBBIT, PM_DWARF, PM_BUGBEAR, 
+				PM_DWARF_LORD, PM_DWARF_CLERIC, PM_DEEP_ONE, PM_DEEPER_ONE, PM_GNOLL, PM_GITHYANKI_PIRATE,
+				PM_ELOCATOR,
+				PM_IMP, PM_QUASIT, PM_TENGU, PM_URANIUM_IMP, 
+				PM_KOBOLD, PM_LARGE_KOBOLD, 
+				PM_KOBOLD_LORD, PM_KOBOLD_SHAMAN, PM_WINGED_KOBOLD, 
+				PM_LEPRECHAUN, 
+				PM_QUICKLING, PM_DRYAD,
+				PM_NAIAD, PM_OREAD, PM_SWAMP_NYMPH, PM_YUKI_ONNA, PM_DEMINYMPH, 
+				PM_GOBLIN, PM_HOBGOBLIN,
+				PM_HILL_ORC, PM_MORDOR_ORC, PM_URUK_HAI, PM_ORC_SHAMAN, PM_ORC_CAPTAIN, PM_URUK_CAPTAIN,
+				PM_ANGBAND_ORC, 
+				PM_ANGEL, PM_KI_RIN,
+				PM_JUSTICE_ARCHON, PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON, PM_WARDEN_ARCHON, PM_THRONE_ARCHON,
+				PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, PM_GRAHA_DEVA, PM_SURYA_DEVA,
+				PM_LILLEND,
+				PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN,
+				PM_PLAINS_CENTAUR, PM_FOREST_CENTAUR, PM_MOUNTAIN_CENTAUR,
+				PM_SPROW, PM_DRIDER, PM_PRIESTESS_OF_GHAUNADAUR, PM_FORMIAN_CRUSHER, PM_FORMIAN_TASKMASTER,
+				PM_GNOME, PM_GNOME_LORD, PM_GNOME_LADY, PM_TINKER_GNOME, PM_GNOMISH_WIZARD,
+				PM_GIANT, PM_STONE_GIANT, PM_HILL_GIANT, PM_FIRE_GIANT, PM_FROST_GIANT, PM_STORM_GIANT,
+				PM_ETTIN, PM_MINOTAUR, PM_MINOTAUR_PRIESTESS, 
+				PM_ANCIENT_NAGA,
+				PM_OGRE, PM_OGRE_MAGE, PM_OGRE_LORD,
+				PM_QUANTUM_MECHANIC, 
+				PM_SERPENT_MAN_OF_YOTH,
+				PM_PISACA,
+				PM_TROLL, PM_ICE_TROLL, PM_ROCK_TROLL, PM_WATER_TROLL, PM_OLOG_HAI, PM_WOOD_TROLL, 
+				PM_VAMPIRE, PM_VAMPIRE_LADY, PM_VAMPIRE_LORD,
+				PM_YETI, PM_SASQUATCH, PM_GUG, 
+				PM_UNDEAD_KNIGHT, PM_WARRIOR_OF_SUNLIGHT, PM_UNDEAD_MAIDEN, PM_KNIGHT_OF_THE_PRINCESS_S_GUARD,
+				PM_BLUE_SENTINEL, PM_DARKMOON_KNIGHT, PM_UNDEAD_REBEL, PM_PARDONER, PM_OCCULTIST, 
+				PM_LIVING_DOLL,
+				PM_PLUMACH_RILMANI, PM_FERRUMACH_RILMANI, PM_CUPRILACH_RILMANI, PM_ARGENACH_RILMANI,
+				PM_PEASANT, PM_MINER, PM_WEREJACKAL, PM_WOODLAND_ELF, PM_DROW_CAPTAIN, PM_GREEN_ELF,
+				PM_WERERAT, PM_GREY_ELF, PM_WEREWOLF, PM_HEDROW_WARRIOR, PM_ELF_LORD, PM_ELF_LADY,
+				PM_DOPPELGANGER, PM_HEDROW_WIZARD, PM_NURSE, PM_MAID, PM_UNEARTHLY_DROW, PM_DROW_MATRON,
+				PM_HEDROW_BLADEMASTER,
+				PM_PRISONER, PM_MINDLESS_THRALL,
+				PM_WATCHMAN, PM_WATCH_CAPTAIN, 
+				PM_MARID, PM_DJINNI, PM_SANDESTIN,
+				PM_HORNED_DEVIL, PM_ERINYS, PM_BARBED_DEVIL, PM_BONE_DEVIL, PM_ICE_DEVIL, 
+				PM_SUCCUBUS, PM_INCUBUS, PM_VROCK, PM_DAUGHTER_OF_BEDLAM, PM_LILITU, PM_MARILITH,
+				PM_FALLEN_ANGEL, 
+				PM_SALAMANDER, 
+				PM_ARCHEOLOGIST, PM_ARCHEOLOGIST, PM_BARBARIAN, PM_BARBARIAN, PM_HALF_DRAGON, PM_HALF_DRAGON, PM_BARD, PM_BARD, 
+				PM_CONVICT, PM_CONVICT, PM_HEALER, PM_HEALER, PM_KNIGHT, PM_KNIGHT, PM_MONK, PM_MONK, 
+				PM_MADMAN, PM_MADWOMAN, PM_PRIEST, PM_PRIESTESS, PM_NOBLEMAN, PM_NOBLEWOMAN, PM_PIRATE, PM_PIRATE,
+				PM_RANGER, PM_RANGER, PM_ROGUE, PM_ROGUE, PM_SAMURAI, PM_SAMURAI, PM_TOURIST, PM_TOURIST,
+				PM_VALKYRIE, PM_VALKYRIE, PM_WIZARD, PM_WIZARD,
+				PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN,
+				PM_APPRENTICE_WITCH, PM_WITCH
+			};
+			do mtyp = ROLL_FROM(prisoners);
+			while((tooweak(mtyp, minmlev) || toostrong(mtyp,maxmlev)) && tries--);
+		}break;
+		case PM_DWARF_KING:
+		case PM_DWARF_QUEEN:{
+			int prisoners[] = {
+				PM_MINER, PM_MINER, PM_WATCHMAN, PM_WATCHMAN, PM_WATCH_CAPTAIN, 
+				PM_WOODLAND_ELF, PM_WOODLAND_ELF, PM_GREEN_ELF, PM_GREEN_ELF, PM_GREY_ELF,
+				PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_DROW_CAPTAIN,
+				PM_HOBBIT, PM_HOBBIT,
+				PM_DRYAD, PM_NAIAD, PM_OREAD, PM_YUKI_ONNA, PM_DEMINYMPH
+			};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
 		case PM_KOBOLD_LORD:{
 			int prisoners[] = {PM_GNOME, PM_GNOME, PM_GNOME, PM_GNOME, PM_GNOME_LORD, PM_GNOME_LADY, PM_TINKER_GNOME, PM_GNOMISH_WIZARD,
 									PM_WOODLAND_ELF, PM_DWARF, PM_HOBBIT
@@ -5635,6 +5712,16 @@ int sx,sy;
 									PM_LILLEND,
 									PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN
 								};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
+		case PM_GNOME_KING:
+		case PM_GNOME_QUEEN:{
+			int prisoners[] = {
+				PM_MINER, PM_MINER, PM_WATCHMAN, PM_WATCHMAN, PM_WATCH_CAPTAIN, 
+				PM_WOODLAND_ELF, PM_WOODLAND_ELF, PM_GREEN_ELF,
+				PM_HOBBIT, PM_HOBBIT,
+				PM_KOBOLD, PM_LARGE_KOBOLD,
+			};
 			mtyp = ROLL_FROM(prisoners);
 		}break;
 		case PM_TITAN:{
@@ -5686,6 +5773,22 @@ int sx,sy;
 									PM_NOBLEWOMAN, PM_RANGER, PM_ROGUE, PM_WIZARD, PM_KNIGHT,
 									PM_VALKYRIE, PM_SAMURAI, PM_TOURIST,
 									PM_DWARF, PM_DWARF, PM_DWARF_CLERIC,
+									PM_DEMINYMPH
+								};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
+		case PM_ELVENKING:
+		case PM_ELVENQUEEN:{
+			int prisoners[] = {
+									PM_WATCHMAN, PM_WATCHMAN, PM_WATCH_CAPTAIN,
+									PM_KNIGHT, PM_KNIGHT, PM_NOBLEMAN, PM_NOBLEWOMAN,
+									PM_HEDROW_WARRIOR, PM_HEDROW_WARRIOR, PM_DROW_CAPTAIN, PM_DROW_CAPTAIN, PM_DROW_MATRON,
+									PM_HOBBIT, PM_HOBBIT, PM_HOBBIT, PM_HOBBIT,
+									PM_DWARF, PM_DWARF, PM_DWARF_CLERIC, PM_DWARF_LORD,
+									PM_DWARF, PM_DWARF, PM_DWARF_CLERIC, PM_DWARF_LORD,
+									PM_HILL_ORC, PM_ORC_SHAMAN, PM_ORC_CAPTAIN, PM_ANGBAND_ORC,
+									PM_UNEARTHLY_DROW, PM_UNEARTHLY_DROW, PM_LILITU, PM_MARILITH,
+									PM_MIRKWOOD_SPIDER, PM_MIRKWOOD_SPIDER, PM_MIRKWOOD_ELDER,
 									PM_DEMINYMPH
 								};
 			mtyp = ROLL_FROM(prisoners);
@@ -5777,6 +5880,13 @@ int sx,sy;
 					break;
 				}
 			}
+			if(mon->mtyp == PM_WITCH || mon->mtyp == PM_APPRENTICE_WITCH){
+				struct monst *rat;
+				for(rat = fmon; rat; rat = rat->nmon) if(rat->mtyp == PM_WITCH_S_FAMILIAR && mon->m_id == rat->mvar_witchID){
+					mongone(rat);
+					break;
+				}
+			}
 			if(kingtype == PM_VAMPIRE_LORD){
 				mon->female = TRUE;
 				set_template(mon, VAMPIRIC);
@@ -5808,8 +5918,6 @@ int dx,dy;
 {
 	struct monst *mon;
 	struct obj *obj;
-	if(!kingtype || kingtype == PM_ELVENKING || kingtype == PM_ELVENQUEEN || kingtype == PM_DWARF_KING || kingtype == PM_DWARF_QUEEN || kingtype == PM_GNOME_KING || kingtype == PM_GNOME_QUEEN)
-		return; //No cells for now
 	levl[sx][sy].typ = CORR;
 	unblock_point(sx,sy);
 	levl[sx-dx][sy-dy].typ = IRONBARS;
@@ -5953,12 +6061,17 @@ struct mkroom *sroom;
 				mon = makemon(&mons[ctype], tx, ty, NO_MM_FLAGS|MM_NOCOUNTBIRTH);
 				if(mon) {
 					mon->msleeping = 1;
-					if (type==COURT && mon->mpeaceful) {
-						mon->mpeaceful = 0;
-						set_malign(mon);
-					}
-					if(ctype == PM_DROW_MATRON || ctype == PM_EMBRACED_DROWESS){
-						set_curhouse(mon->mfaction);
+					if (type==COURT) {
+						//Set curhouse to coordinate equipment
+						if(ctype == PM_DROW_MATRON || ctype == PM_EMBRACED_DROWESS){
+							set_curhouse(mon->mfaction);
+						}
+						//Note: court monsters are always part of rodney's forces.
+						set_faction(mon, YENDORIAN_FACTION);
+						if(mon->mpeaceful){
+							mon->mpeaceful = 0;
+							set_malign(mon);
+						}
 					}
 				}
 			}
@@ -6028,9 +6141,13 @@ struct mkroom *sroom;
 		   sx, sy, NO_MM_FLAGS|MM_NOCOUNTBIRTH);
 		if(mon) {
 			mon->msleeping = 1;
-			if (type==COURT && mon->mpeaceful) {
-				mon->mpeaceful = 0;
-				set_malign(mon);
+			if (type==COURT) {
+				//Note: court monsters are always part of rodney's forces, even if they are angels.
+				set_faction(mon, YENDORIAN_FACTION);
+				if(mon->mpeaceful){
+					mon->mpeaceful = 0;
+					set_malign(mon);
+				}
 				if(ctype == PM_EMBRACED_DROWESS && (mon->mtyp == PM_DROW_CAPTAIN || mon->mtyp == PM_DROW_MATRON)){
 					set_template(mon, M_BLACK_WEB);
 				}
@@ -6332,7 +6449,7 @@ long mfaction;
 		if(revive_corpses && isok(cc.x, cc.y) && (otmp = sobj_at(CORPSE, cc.x, cc.y)) && (mon = revive(otmp,FALSE))){
 			if(!get_template(mon) && mtemplate_accepts_mtyp(YELLOW_TEMPLATE, mon->mtyp))
 				set_template(mon, YELLOW_TEMPLATE);
-			mon->mfaction = YELLOW_FACTION;
+			set_faction(mon, YELLOW_FACTION);
 		}
 		else {
 			yellow_dead();

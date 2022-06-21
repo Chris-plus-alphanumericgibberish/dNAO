@@ -1217,6 +1217,34 @@ unsigned int type;
 				break;
 			}
 	   break;
+	   case PM_DROW_ALIENIST:
+			switch (rnd(8)) {
+				case 8:
+				return MAKE_WEB;
+				break;
+				case 7:
+				return SUMMON_ALIEN;
+				break;
+				case 6:
+				return DESTRY_WEPN;
+				break;
+				case 5:
+				return DESTRY_ARMR;
+				break;
+				case 4:
+				return BLIND_YOU;
+				break;
+				case 3:
+				return PARALYZE;
+				break;
+				case 2:
+				return MON_CANCEL;
+				break;
+				case 1:
+				return PSI_BOLT;
+				break;
+			}
+	   break;
        case PM_WITCH_S_FAMILIAR:
 			return OPEN_WOUNDS;
 	   break;
@@ -1736,6 +1764,7 @@ const char * spellname[] =
 	"INCARCERATE",
 	"MUMMY_CURSE",
 	"YELLOW_DEAD",
+	"MON_CANCEL",
 };
 
 
@@ -2912,6 +2941,75 @@ int tary;
 			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
 			if (pdmg < 1)
 				pdmg = 1;
+
+			/* calculate cold damage */
+			if (Cold_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				cdmg = 0;
+			}
+			else {
+				if (Half_spel(mdef))
+					cdmg = (cdmg + 1) / 2;
+			}
+			if (!UseInvCold_res(mdef)) {
+				destroy_item(mdef, POTION_CLASS, AD_COLD);
+			}
+
+			/* sum damage components to override dmg */
+			dmg = pdmg + cdmg;
+			/* apply u.uvaul to all */
+			if (youdef && u.uvaul_duration)
+				dmg = (dmg + 1) / 2;
+
+			/* player cold madness*/
+			if (youdef) roll_frigophobia();
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case STARFALL:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("starfall with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			int pdmg = d(8, 8);	/* physical */
+			int cdmg = d(4, 8);	/* cold */
+			int edmg = d(4, 8);	/* energy */
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("%s %s hit by a flury of hail and silver stars!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "are" : "is"
+					);
+			}
+			
+			/* extra message for the silver */
+			if (hates_silver(youracedata)) {
+				pdmg += d(4, 20);/* silver */
+				if(youdef){
+					if (noncorporeal(youracedata)) {
+						pline("The silver stars sear you!");
+					}
+					else {
+						pline("The silver stars sear your %s!", body_part(BODY_FLESH));
+					}
+				}
+			}
+
+			/* calculate physical damage */
+			if (Half_phys(mdef))
+				pdmg = (pdmg + 1) / 2;
+			/* apply average DR */
+			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
+			if (pdmg < 1)
+				pdmg = 1;
+
+			/* special antimagic effect */
+			if (youdef)
+				drain_en(edmg);
+			else
+				mdef->mspec_used += edmg;
 
 			/* calculate cold damage */
 			if (Cold_res(mdef)) {
@@ -4184,6 +4282,16 @@ int tary;
 		}
 		return MM_HIT;
 
+	case MON_CANCEL:
+		if (!mdef) {
+			impossible("debuff spell with no target?");
+			return MM_MISS;
+		}
+		if(!foundem)
+			return MM_MISS;
+		cancel_monst(mdef, (struct obj	*)0, youagr, TRUE, FALSE,0);
+		return MM_HIT;
+
 	case SUMMON_MONS:
 		if(DimensionalLock)
 			return MM_MISS;
@@ -5433,6 +5541,7 @@ int spellnum;
 	case INCARCERATE:
 	case DARKNESS:
 	case MAKE_WEB:
+	case MON_CANCEL:
 		return TRUE;
 	default:
 		break;
@@ -5652,6 +5761,10 @@ int tary;
 
 	/* only cast earthquake on found target, too annoying when spammed */
 	if (spellnum == EARTHQUAKE && !(tarx == x(mdef) && tary == y(mdef)))
+		return TRUE;
+
+	/* don't bother re-canceling already canceled target */
+	if (spellnum == MON_CANCEL && mdef != &youmonst && mdef->mcan)
 		return TRUE;
 
 	/* the wiz won't use the following cleric-specific or otherwise weak spells */

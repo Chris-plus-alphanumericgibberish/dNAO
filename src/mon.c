@@ -1258,6 +1258,21 @@ register struct monst *mtmp;
 			obj->corpsenm = PM_PARASITIC_MASTER_MIND_FLAYER;
 			fix_object(obj);
 		break;
+	    case PM_WARDEN_ARIANNA:
+			mon = makemon(&mons[PM_ARIANNA], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT);
+			if (mon){
+				initedog(mon);
+				mon->m_lev = mtmp->m_lev/2;
+				mon->mhpmax = (mtmp->mhpmax+1)/2;
+				mon->female = TRUE;
+				mon->mtame = 10;
+				mon->mpeaceful = 1;
+				if(EDOG(mon))
+					EDOG(mon)->loyal = TRUE;
+				mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
+				mongone(mon);
+			}
+		break;
 	    default_1:
 	    default:
 		if (mvitals[mndx].mvflags & G_NOCORPSE)
@@ -2429,7 +2444,8 @@ mon_can_see_mon(looker, lookie)
 	clearpath = clear_path(looker->mx, looker->my, lookie->mx, lookie->my);
 	hardtosee = (!is_tracker(looker->data) && (
 		(lookie->minvis && !mon_resistance(looker, SEE_INVIS)) ||
-		(lookie->mundetected)
+		(lookie->mundetected) ||
+		(level.objects[lookie->mx][lookie->my] && level.objects[lookie->mx][lookie->my]->otyp == EXPENSIVE_BED)
 		));
 
 	/* sight -- requires looker to not be blind, have clear LoS, and notice an invisible lookie somehow */
@@ -2569,7 +2585,8 @@ struct monst *looker;
 	clearpath = couldsee(looker->mx, looker->my);
 	hardtosee = (!can_track(looker->data) && (
 		(Invis && !mon_resistance(looker, SEE_INVIS)) ||
-		(u.uundetected)
+		(u.uundetected) ||
+		(level.objects[u.ux][u.uy] && level.objects[u.ux][u.uy]->otyp == EXPENSIVE_BED)
 		));
 
 	/* sight -- requires looker to not be blind, have clear LoS, and notice an invisible lookie somehow */
@@ -3207,14 +3224,14 @@ struct monst * mdef;	/* another monster which is next to it */
 	
 	/* elves (and Eladrin) vs. (orcs and undead and wargs) */
 	if((is_elf(ma) || is_eladrin(ma) || ma->mtyp == PM_GROVE_GUARDIAN || ma->mtyp == PM_FORD_GUARDIAN || ma->mtyp == PM_FORD_ELEMENTAL)
-		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || mm_undead(mdef))
-		&& !(is_orc(ma) || is_ogre(ma) || mm_undead(magr))
+		&& (is_orc(md) || md->mtyp == PM_WARG || is_ogre(md) || is_undead(mdef->data))
+		&& !(is_orc(ma) || is_ogre(ma) || mm_undead(magr) || mdef->mfaction == HOLYDEAD_FACTION)
 	)
 		return ALLOW_M|ALLOW_TM;
 	/* and vice versa */
 	if((is_elf(md) || is_eladrin(md) || md->mtyp == PM_GROVE_GUARDIAN || md->mtyp == PM_FORD_GUARDIAN || md->mtyp == PM_FORD_ELEMENTAL) 
-		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || mm_undead(magr))
-		&& !(is_orc(md) || is_ogre(md) || mm_undead(mdef))
+		&& (is_orc(ma) || ma->mtyp == PM_WARG || is_ogre(ma) || is_undead(magr->data))
+		&& !(is_orc(md) || is_ogre(md) || mm_undead(mdef) || magr->mfaction == HOLYDEAD_FACTION)
 	)
 		return ALLOW_M|ALLOW_TM;
 
@@ -5657,7 +5674,7 @@ cleanup:
 		if (p_coaligned(mtmp)) u.ublessed = 0;
 		if (mdat->maligntyp == A_NONE)
 			adjalign((int)(ALIGNLIM / 4));		/* BIG bonus */
-	} else if (mtmp->mtame && u.ualign.type != A_VOID && !banish_kill(mtmp->mtyp)) {
+	} else if (mtmp->mtame && u.ualign.type != A_VOID && !banish_kill(mtmp->mtyp) && !(EDOG(mtmp) && EDOG(mtmp)->dominated)) {
 		adjalign(-15);	/* bad!! */
 		/* your god is mighty displeased... */
 		if (!Hallucination) You_hear("the rumble of distant thunder...");
@@ -7240,6 +7257,7 @@ int flags;
 	/* set data */
 	mon->mextra_p->esum_p->summoner = summoner;
 	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
+	mon->mextra_p->esum_p->sm_o_id = 0;
 	mon->mextra_p->esum_p->summonstr = mon->data->mlevel;
 	mon->mextra_p->esum_p->sticky = (!summoner || summoner == &youmonst) && !(flags & ESUMMON_NOFOLLOW);
 	mon->mextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
@@ -7276,6 +7294,7 @@ int flags;
 			add_ox(otmp, OX_ESUM);
 			otmp->oextra_p->esum_p->summoner = mon;
 			otmp->oextra_p->esum_p->sm_id = mon->m_id;
+			otmp->oextra_p->esum_p->sm_o_id = 0;
 			otmp->oextra_p->esum_p->summonstr = 0;
 			otmp->oextra_p->esum_p->sticky = 0;
 			otmp->oextra_p->esum_p->permanent = (duration == ESUMMON_PERMANENT);
@@ -7808,6 +7827,7 @@ int damage;
 					You("panic!");
 				HPanicking += damage*2;
 			}
+			nomul(0, NULL); //Interrupt
 		}
 	}
 }
@@ -7878,6 +7898,7 @@ struct monst *mtmp;
 		}
 		else if(you_blessings_target_inhale()){
 			damage = blessings_consume(mtmp, &youmonst);
+			nomul(0, NULL); //Interrupt
 		}
 		/** Exhale: Cause misfortune (wounds) in line of sight **/
 		if(damage){
@@ -7925,6 +7946,7 @@ struct monst *mtmp;
 		}
 		else if(you_vitality_target_inhale()){
 			damage = vitality_consume(mtmp, invent, &youmonst);
+			nomul(0, NULL); //Interrupt
 		}
 		
 		/** Exhale: Overload positive energy **/
@@ -7946,6 +7968,7 @@ struct monst *mtmp;
 			}
 			else if(you_vitality_target_exhale(mtmp)){
 				vitality_overload(mtmp, &youmonst, damage);
+				nomul(0, NULL); //Interrupt
 			}
 		}
 	}
@@ -8043,6 +8066,7 @@ struct monst *mtmp;
 			losehp(damage, "corrupting slime", KILLED_BY);
 			u.ugrave_arise = temparise;
 			
+			nomul(0, NULL); //Interrupt
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
@@ -8139,6 +8163,7 @@ struct monst *mtmp;
 			if(has_blood(youracedata) && !Drain_resistance){
 				losexp("blood drain",TRUE,TRUE,TRUE);
 			}
+			nomul(0, NULL); //Interrupt
 
 			mtmp->mhp += damage;
 			if(mtmp->mhp > mtmp->mhpmax){
@@ -8169,6 +8194,7 @@ struct monst *mtmp;
 				if(Half_spel(tmpm)) damage = (damage+1)/2;
 
 				xdamagey(mtmp, tmpm, (struct attack *)0, damage);
+				nomul(0, NULL); //Interrupt
 			}
 			if(you_wastes_target_exhale(mtmp)){
 				damage = d(5, 5);
@@ -8228,10 +8254,10 @@ struct monst *mtmp;
 			}
 			else {
 				if(canseemon(tmpm) && canseemon(mtmp)){
-					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), mbodypart(tmpm, EARS));
 					pline("The light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				} else if(canseemon(tmpm)){
-					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), makeplural(mbodypart(tmpm, EAR)));
+					pline("Gray light shines from %s %s.", s_suffix(mon_nam(tmpm)), mbodypart(tmpm, EARS));
 				} else if(canseemon(mtmp)){
 					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
@@ -8306,6 +8332,7 @@ struct monst *mtmp;
 					mtmp->muy = u.uy;
 				}
 			}
+			nomul(0, NULL); //Interrupt
 		}
 		/** Exhale: Scream into mind **/
 		if(damage){
@@ -8330,6 +8357,7 @@ struct monst *mtmp;
 				}
 				//Handle off-target side effects
 				thought_scream_side_effects(mtmp, &youmonst, damage);
+				nomul(0, NULL); //Interrupt
 			} else {
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon)
 					if(valid_gray_target_exhale(tmpm))
@@ -8463,6 +8491,7 @@ struct monst *mtmp;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
 			}
+			nomul(0, NULL); //Interrupt
 			mtmp->mspec_used = 0;
 			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
@@ -8578,6 +8607,7 @@ struct monst *mtmp;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
 			}
+			nomul(0, NULL); //Interrupt
 			mtmp->mspec_used = 0;
 			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
@@ -8608,6 +8638,7 @@ struct monst *mtmp;
 					killer = "the ancient breath of death";
 					done(DIED);
 				}
+				nomul(0, NULL); //Interrupt
 			} else {
 				struct monst *targ = 0;
 				for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
@@ -8762,6 +8793,7 @@ struct monst *mtmp;
 			if(mtmp->mhp > mtmp->mhpmax){
 				mtmp->mhp = mtmp->mhpmax;
 			}
+			nomul(0, NULL); //Interrupt
 			mtmp->mspec_used = 0;
 			set_mcan(mtmp, FALSE);
 			mtmp->mux = u.ux;
@@ -8832,6 +8864,7 @@ struct monst *mtmp;
 					}
 				}
 				u.umadness |= MAD_COLD_NIGHT;
+				nomul(0, NULL); //Interrupt
 			} else {
 				struct monst *targ = 0;
 				struct obj *otmp;

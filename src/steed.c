@@ -303,7 +303,7 @@ mount_steed(mtmp, force)
 	    return (FALSE);
 	}
 	
-	if (!force && !(Role_if(PM_KNIGHT) || Role_if(PM_NOBLEMAN)) && !(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal) && !(--mtmp->mtame)) {
+	if (!force && !(Role_if(PM_KNIGHT) || Role_if(PM_NOBLEMAN)) && !(get_mx(mtmp, MX_EDOG) && (EDOG(mtmp)->loyal || EDOG(mtmp)->dominated)) && !(--mtmp->mtame)) {
 	    /* no longer tame */
 	    newsym(mtmp->mx, mtmp->my);
 	    pline("%s resists%s!", Monnam(mtmp),
@@ -432,7 +432,7 @@ kick_steed()
 	}
 
 	/* Make the steed less tame and check if it resists */
-	if(!(get_mx(u.usteed, MX_EDOG) && EDOG(u.usteed)->loyal)){
+	if(!(get_mx(u.usteed, MX_EDOG) && (EDOG(u.usteed)->loyal || EDOG(u.usteed)->dominated))){
 		if (u.usteed->mtame) u.usteed->mtame--;
 		if (!u.usteed->mtame && u.usteed->mleashed) m_unleash(u.usteed, TRUE);
 		if (!u.usteed->mtame || (u.ulevel+u.usteed->mtame+P_SKILL(P_RIDING) < rnd(MAXULEV/2+5))) {

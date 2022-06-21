@@ -47,8 +47,9 @@
  * 3.21.0: Implement hell vaults, minor madnesses, and the Madman role
  * 3.21.1: Place chests of hell vault loot in demon lord lairs, implement special hell vault loot (wages, magic blockers, stones, equipment protectors, also rods of force in neutral), minor madness reform and sanity regeneration, resolve AC bugs (+add shield skill), misc bug fixes.
  * 3.21.2: Monk moves, Improve Madman late game: Bokrug "cult," crowning for law and neutral, allow rakuyo and claw swings at empty squares, one-and-done the Stranger, dragon and medusa passive attacks, pets stop fighting when at 1/2 HP, Madman "starting" kits, Mercurial and Platinum weapons, quest factions, Ana quest home level tweaks, misc bug fixes.
+ * 3.21.3: Blades of mercy, Aphanacts, species favored spells, crystal skulls, magic torch on grue level, tweaks to regular insight monsters,  and misc bug fixes.
  */
-#define PATCHLEVEL	2
+#define PATCHLEVEL	3
 /*
  * Incrementing EDITLEVEL can be used to force invalidation of old bones
  * and save files.

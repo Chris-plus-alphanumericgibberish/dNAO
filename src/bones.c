@@ -566,6 +566,7 @@ struct obj *corpse;
 		drop_upon_death(mtmp, (struct obj *)0, x, y);
 		m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
+		m_level_up_intrinsic(mtmp);
 	}
 	if (mtmp) {
 		mtmp->m_lev = (u.ulevel ? u.ulevel : 1);

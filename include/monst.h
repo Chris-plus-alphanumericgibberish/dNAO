@@ -40,7 +40,7 @@
 #endif
 
 #define toostrong(monindx, lev) (monstr[monindx] > lev)
-#define tooweak(monindx, lev)	(monstr[monindx] < lev)
+#define tooweak(monindx, lev)	(monstr[monindx] < lev && !is_eladrin(&mons[monindx]))
 
 struct monst {
 	struct monst *nmon;
@@ -186,6 +186,7 @@ struct monst {
 #define DEADMONSTER_PURGE	0x2
 #define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->deadmonster)
 	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*118*/
+	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*119*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -315,6 +316,7 @@ struct monst {
 #define	MAX_DOLL_MASK	DOLLMAKER_MIND_BLASTS
 #define	mvar_tanninType	mvar1
 #define	mvar_ancient_breath_cooldown	mvar1
+#define	mvar_deminymph_role	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2

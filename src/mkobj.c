@@ -433,6 +433,62 @@ long num;
 }
 
 /*
+ * Duplicate obj. The returned object
+ * has its wornmask cleared and is positioned just following the original
+ * in the nobj chain (and nexthere chain when on the floor).
+ */
+struct obj *
+duplicate_obj(obj)
+struct obj *obj;
+{
+	struct obj *otmp;
+
+	otmp = newobj(0);
+	*otmp = *obj;		/* copies whole structure */
+	/* invalidate pointers */
+	otmp->light = (struct ls_t *)0;
+	otmp->timed = (struct timer *)0;
+	otmp->oextra_p = (union oextra *)0;
+	otmp->mp = (struct mask_properties *)0;	/* not sure if correct -- these are very unfinished */
+	otmp->cobj = (struct obj *)0;
+
+	if (obj->cobj){
+		struct obj *cntdup;
+		struct obj **curcobj = &(otmp->cobj);
+		for(struct obj *cntobj = obj->cobj; cntobj; cntobj = cntobj->nobj){
+			cntdup = duplicate_obj(cntobj);
+			if(cntdup){
+				obj_extract_self(cntdup);
+				//Note: don't use the normal add to container function, or it will reverse the order of cobj
+				cntdup->where = OBJ_CONTAINED;
+				cntdup->ocontainer = otmp;
+				*curcobj = cntdup;
+				curcobj = &(cntdup->nobj);
+			}
+		}
+		
+	}
+	otmp->o_id = flags.ident++;
+	if (!otmp->o_id) otmp->o_id = flags.ident++;	/* ident overflowed */
+	otmp->lamplit = 0;	/* not lit, yet */
+	otmp->owornmask = 0L;	/* new object isn't worn */
+	obj->nobj = otmp;
+	/* Only set nexthere when on the floor, nexthere is also used */
+	/* as a back pointer to the container object when contained. */
+	if (obj->where == OBJ_FLOOR)
+	    obj->nexthere = otmp;
+
+	register int ox_id;
+	for (ox_id=0; ox_id<NUM_OX; ox_id++)
+		cpy_ox(obj, otmp, ox_id);
+	
+	otmp->unpaid = 0;
+	if (obj->timed) split_timers(obj->timed, TIMER_OBJECT, (genericptr_t)otmp);
+	if (obj_sheds_light(obj)) obj_split_light_source(obj, otmp);
+	return otmp;
+}
+
+/*
  * Insert otmp right after obj in whatever chain(s) it is on.  Then extract
  * obj from the chain(s).  This function does a literal swap.  It is up to
  * the caller to provide a valid context for the swap.  When done, obj will
@@ -586,6 +642,7 @@ int mkflags;
 		add_ox(otmp, OX_ESUM);
 		otmp->oextra_p->esum_p->summoner = (struct monst *)0;
 		otmp->oextra_p->esum_p->sm_id = 0;
+		otmp->oextra_p->esum_p->sm_o_id = 0;
 		otmp->oextra_p->esum_p->summonstr = 0;
 		otmp->oextra_p->esum_p->staleptr = 0;
 		otmp->oextra_p->esum_p->permanent = 1;
@@ -925,42 +982,115 @@ int mkflags;
 			case BAG_OF_TRICKS:	otmp->spe = rnd(20);
 				break;
 			case FIGURINE:	{
-								if (Is_paradise(&u.uz)){
-									switch (rn2(3)){
-									case 0:
-										otmp->corpsenm = PM_SHADE;
-										break;
-									case 1:
-										otmp->corpsenm = PM_DARKNESS_GIVEN_HUNGER;
-										break;
-									case 2:
-										otmp->corpsenm = PM_NIGHTGAUNT;
-										break;
-									}
-								}
-								else if (Is_sunkcity(&u.uz)){
-									switch (rn2(3)){
-									case 0:
-										otmp->corpsenm = PM_DEEPEST_ONE;
-										break;
-									case 1:
-										otmp->corpsenm = PM_MASTER_MIND_FLAYER;
-										break;
-									case 2:
-										otmp->corpsenm = PM_SHOGGOTH;
-										break;
-									}
-								}
-								else {
-									int tryct2 = 0;
-									do
-									otmp->corpsenm = rndmonnum();
-									while (is_human(&mons[otmp->corpsenm])
-										&& tryct2++ < 30);
-								}
-								blessorcurse(otmp, 4);
-								break;
+				if (Is_paradise(&u.uz)){
+					switch (rn2(3)){
+					case 0:
+						otmp->corpsenm = PM_SHADE;
+						break;
+					case 1:
+						otmp->corpsenm = PM_DARKNESS_GIVEN_HUNGER;
+						break;
+					case 2:
+						otmp->corpsenm = PM_NIGHTGAUNT;
+						break;
+					}
+				}
+				else if (Is_sunkcity(&u.uz)){
+					switch (rn2(3)){
+					case 0:
+						otmp->corpsenm = PM_DEEPEST_ONE;
+						break;
+					case 1:
+						otmp->corpsenm = PM_MASTER_MIND_FLAYER;
+						break;
+					case 2:
+						otmp->corpsenm = PM_SHOGGOTH;
+						break;
+					}
+				}
+				else {
+					int tryct2 = 0;
+					do
+					otmp->corpsenm = rndmonnum();
+					while (is_human(&mons[otmp->corpsenm])
+						&& tryct2++ < 30);
+				}
+				blessorcurse(otmp, 4);
+				break;
 			}
+			case CRYSTAL_SKULL:	{
+				struct monst * mon;
+				struct obj * otmp2;
+				struct obj * oinv;
+				int skull;
+				if(Infuture){
+					if(Race_if(PM_ANDROID)){
+						int skulls[] = {PM_DWARF_KING, PM_DWARF_QUEEN, PM_GITHYANKI_PIRATE, PM_DEMINYMPH, PM_MORDOR_MARSHAL, PM_MOUNTAIN_CENTAUR, PM_DRIDER, 
+							PM_DROW_CAPTAIN, PM_HEDROW_WIZARD, PM_DROW_MATRON, PM_HEDROW_BLADEMASTER,
+							PM_ARCHEOLOGIST, PM_KNIGHT, PM_MADMAN, PM_MADWOMAN,
+							PM_EMBRACED_DROWESS, PM_EMBRACED_DROWESS, PM_NURSE, 
+							
+							PM_GYNOID, PM_GYNOID, PM_GYNOID, PM_OPERATOR, PM_GYNOID, PM_GYNOID, PM_GYNOID, PM_OPERATOR, PM_ANDROID,
+							PM_MYRKALFAR_WARRIOR, PM_MYRKALFAR_WARRIOR, PM_DWARF, PM_DWARF, PM_HUMAN, PM_HUMAN, 
+							PM_INCANTIFIER, PM_INCANTIFIER 
+						};
+						skull = ROLL_FROM(skulls);
+					}
+					else {
+						int skulls[] = {PM_DWARF_KING, PM_DWARF_QUEEN, PM_GITHYANKI_PIRATE, PM_DEMINYMPH, PM_MORDOR_MARSHAL, PM_MOUNTAIN_CENTAUR, PM_DRIDER, 
+							PM_DROW_CAPTAIN, PM_HEDROW_WIZARD, PM_DROW_MATRON, PM_HEDROW_BLADEMASTER,
+							PM_ARCHEOLOGIST, PM_KNIGHT, PM_MADMAN, PM_MADWOMAN,
+							PM_EMBRACED_DROWESS, PM_EMBRACED_DROWESS, 
+							
+							PM_MYRKALFR, PM_MYRKALFR, PM_ELF, PM_ELF, 
+							PM_MYRKALFAR_WARRIOR, PM_MYRKALFAR_WARRIOR, PM_DWARF, PM_DWARF, PM_HUMAN, PM_HUMAN, 
+							PM_INCANTIFIER, PM_INCANTIFIER 
+						};
+						skull = ROLL_FROM(skulls);
+					}
+				}
+				else {
+					int skulls[] = {PM_DWARF_KING, PM_DWARF_QUEEN, PM_MAID, 
+						PM_GITHYANKI_PIRATE, PM_DEMINYMPH, PM_MORDOR_ORC_ELITE, PM_MORDOR_MARSHAL,
+						PM_MOUNTAIN_CENTAUR, PM_DRIDER, 
+						PM_DROW_CAPTAIN, PM_HEDROW_WIZARD, PM_DROW_MATRON, PM_HEDROW_BLADEMASTER, 
+						PM_DROW_CAPTAIN, PM_HEDROW_WARRIOR, PM_DROW_MATRON, PM_DROW_ALIENIST, 
+						PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN, 
+						PM_ARCHEOLOGIST, PM_KNIGHT, PM_MADMAN, PM_MADWOMAN,
+						PM_BARBARIAN, PM_HALF_DRAGON, PM_PRIEST, PM_PRIESTESS
+					};
+					skull = ROLL_FROM(skulls);
+				}
+				mon = makemon(&mons[skull], 0, 0, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+				if(mon){
+					if(mon->m_lev < 10){
+						mon->m_lev = 10;
+						mon->mhp = mon->mhpmax = d(10, 8);
+					}
+					for(oinv = mon->minvent; oinv; oinv = mon->minvent){
+						mon->misc_worn_check &= ~oinv->owornmask;
+						update_mon_intrinsics(mon, oinv, FALSE, FALSE);
+						if (oinv->owornmask & W_WEP){
+							setmnotwielded(mon,oinv);
+							MON_NOWEP(mon);
+						}
+						if (oinv->owornmask & W_SWAPWEP){
+							setmnotwielded(mon,oinv);
+							MON_NOSWEP(mon);
+						}
+						oinv->owornmask = 0L;
+						if(obj_is_burning(oinv))
+							end_burn(oinv, TRUE);
+						obj_extract_self(oinv);
+						add_to_container(otmp, oinv);
+						container_weight(otmp);
+					}
+					otmp2 = save_mtraits(otmp, mon);
+					if(otmp2)
+						otmp = otmp2;
+					mongone(mon);
+				}
+			}break;
 			case BELL_OF_OPENING:   otmp->spe = 3;
 				break;
 			case MAGIC_FLUTE:
@@ -3180,6 +3310,7 @@ add_to_minv(mon, obj)
 	if (get_ox(obj, OX_ESUM) && obj->oextra_p->esum_p->sticky) {
 		obj->oextra_p->esum_p->summoner = mon;
 		obj->oextra_p->esum_p->sm_id = mon->m_id;
+		obj->oextra_p->esum_p->sm_o_id = 0;
 		obj->oextra_p->esum_p->sticky = 0;
 	}
 	/* apply artifact on-carry properties */

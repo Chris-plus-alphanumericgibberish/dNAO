@@ -1195,6 +1195,7 @@ register const char *let,*word;
 		    ((otmp->oclass == TOOL_CLASS && !is_weptool(otmp)) ||
 			(otmp->oclass == CHAIN_CLASS && otmp->otyp != CHAIN)))
 		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES || otmp->otyp == SUNGLASSES))
+		|| (!strcmp(word, "trephinate") && !(otmp->otyp == CRYSTAL_SKULL))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
 		|| (!strcmp(word, "zap") &&
 		    (otmp->oclass == TOOL_CLASS && otmp->otyp != ROD_OF_FORCE))
@@ -2229,6 +2230,9 @@ struct obj *obj;
 	else if (obj->otyp == FIGURINE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Make this figurine transform", MENU_UNSELECTED);
+	else if (obj->otyp == CRYSTAL_SKULL)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Use this crystal skull", MENU_UNSELECTED);
 	else if (obj->otyp == UNICORN_HORN)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Squeeze the unicorn horn tightly", MENU_UNSELECTED);
@@ -2263,7 +2267,7 @@ struct obj *obj;
 	else if (obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your rakuyo", MENU_UNSELECTED);
-	else if (obj->otyp == BLADE_OF_MERCY || obj->otyp == BLADE_OF_MERCY)
+	else if (obj->otyp == BLADE_OF_MERCY || obj->otyp == BLADE_OF_GRACE)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your blade of mercy", MENU_UNSELECTED);
 	else if (obj->otyp == DOUBLE_FORCE_BLADE || obj->otyp == FORCE_BLADE)
@@ -4091,9 +4095,19 @@ long* out_cnt;
 #endif /* SORTLOOT */
 
 #ifdef DUMP_LOG
-	if (want_disp)
+	if (want_disp){
 #endif
-	start_menu(win);
+		start_menu(win);
+#ifdef DUMP_LOG
+		if (!lets){
+			any.a_void = 0;
+			char invheading[QBUFSZ];
+			int wcap = weight_cap();
+			Sprintf(invheading, "Inventory: %d/%d weight (%d/52 slots)", inv_weight() + wcap, wcap, inv_cnt());
+			add_menu(win, NO_GLYPH, &any, 0, 0, ATR_BOLD, invheading, MENU_UNSELECTED);
+		}
+	}
+#endif
 nextclass:
 	classcount = 0;
 	any.a_void = 0;		/* set all bits to zero */

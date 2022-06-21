@@ -3246,9 +3246,8 @@ struct obj *obj;
 		return (P_NONE);
 
 #define CHECK_ALTERNATE_SKILL(alt_skill) {\
-	if(P_SKILL(type) > P_SKILL(alt_skill));\
-	else if(P_MAX_SKILL(type) >= P_MAX_SKILL(alt_skill));\
-	else type = alt_skill;\
+	if(P_SKILL(type) < P_SKILL(alt_skill)) type = alt_skill;\
+	else if(P_SKILL(type) == P_SKILL(alt_skill) && P_MAX_SKILL(type) < P_MAX_SKILL(alt_skill)) type = alt_skill;\
 }
 	type = objects[obj->otyp].oc_skill;
 	

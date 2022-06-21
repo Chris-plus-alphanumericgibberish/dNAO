@@ -147,6 +147,9 @@
 #define MF_MARTIAL_E        0x00000004L   /* expert  martial skill */
 #define MF_BAB_FULL        	0x00000008L   /* full base attack bonus */
 #define MF_BAB_HALF        	0x00000010L   /* half base attack bonus */
+#define MF_LEVEL_30        	0x00000020L   /* can reach level 30 */
+#define MF_LEVEL_45        	0x00000040L   /* can reach level 45 */
+#define MF_PHYS_SCALING   	0x00000080L   /* recieves HD-based bonus on physical damage */
 
 //Monster Body plan
 #define MB_NOEYES		0x00000001L	/* no eyes to gaze into or blind */
@@ -414,8 +417,10 @@
 #define INCARCERATE            TREMOR+1
 #define MUMMY_CURSE            INCARCERATE+1
 #define YELLOW_DEAD            MUMMY_CURSE+1
+#define MON_CANCEL             YELLOW_DEAD+1
+#define STARFALL               MON_CANCEL+1
 
-#define MON_LASTSPELL          YELLOW_DEAD
+#define MON_LASTSPELL          STARFALL
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

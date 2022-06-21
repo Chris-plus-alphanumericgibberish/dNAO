@@ -1195,6 +1195,7 @@ register struct monst *mtmp;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 					m_dowear(mtmp, TRUE);
+					m_level_up_intrinsic(mtmp);
 				}
 			}
 			return 0;

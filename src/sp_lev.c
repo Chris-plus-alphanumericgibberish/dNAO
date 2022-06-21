@@ -1124,7 +1124,7 @@ struct mkroom	*croom;
 					}
 				break;
 			}
-			mon->mfaction = YELLOW_FACTION;
+			set_faction(mon, YELLOW_FACTION);
 		}
 		else {
 			mon = makemon(&mons[asylum_types[rn2(SIZE(asylum_types))]], otmp->ox, otmp->oy, NO_MINVENT);
@@ -1136,6 +1136,7 @@ struct mkroom	*croom;
 					curse(tmpo);
 					m_dowear(mon, TRUE);
 				}
+				m_level_up_intrinsic(mon);
 			}
 		}
 		otmp->spe = 0;
@@ -1163,7 +1164,7 @@ struct mkroom	*croom;
 					if(mon->mtyp != PM_PRIESTESS && rn2(20) > u.uinsight)
 						goto default_case;
 					set_template(mon, MISTWEAVER);
-					mon->mfaction = GOATMOM_FACTION;
+					set_faction(mon, GOATMOM_FACTION);
 					mon->m_insight_level = min(insight, u.uinsight);
 					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
 					mon->entangled = SHACKLES;
@@ -1182,17 +1183,17 @@ default_case:
 					switch(rn2(5)){
 						case 0:
 							set_template(mon, YELLOW_TEMPLATE);
-							mon->mfaction = YELLOW_FACTION;
+							set_faction(mon, YELLOW_FACTION);
 							mon->msleeping = 1;
 						break;
 						case 2:
 							set_template(mon, DREAM_LEECH);
-							mon->mfaction = YELLOW_FACTION;
+							set_faction(mon, YELLOW_FACTION);
 							mon->msleeping = 1;
 						break;
 						case 3:
 							set_template(mon, DREAM_LEECH);
-							mon->mfaction = YELLOW_FACTION;
+							set_faction(mon, YELLOW_FACTION);
 							mon->msleeping = 1;
 						break;
 						default:
@@ -1206,7 +1207,7 @@ default_case:
 								mtmp = makemon(&mons[PM_LILITU], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									set_template(mtmp, YELLOW_TEMPLATE);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 									mongets(mtmp, lilitu_items[rn2(SIZE(lilitu_items))], NO_MKOBJ_FLAGS);
 									
 									meqp = mongets(mtmp, KHAKKHARA, MKOBJ_NOINIT);
@@ -1240,6 +1241,7 @@ default_case:
 									curse(meqp);
 									
 									m_dowear(mtmp, TRUE);
+									m_level_up_intrinsic(mtmp);
 								}
 							}
 							else if(!rn2(4)){
@@ -1254,7 +1256,7 @@ default_case:
 									mtmp = makemon(&mons[PM_DAUGHTER_OF_BEDLAM], otmp->ox, otmp->oy, MM_ADJACENTOK);
 									if(mtmp){
 										set_template(mtmp, YELLOW_TEMPLATE);
-										mtmp->mfaction = YELLOW_FACTION;
+										set_faction(mtmp, YELLOW_FACTION);
 										mongets(mtmp, bedlam_items[rn2(SIZE(bedlam_items))], NO_MKOBJ_FLAGS);
 										meqp = mongets(mtmp, rn2(2) ? HEALER_UNIFORM : STRAITJACKET, NO_MKOBJ_FLAGS);
 										meqp->spe = 5;
@@ -1262,6 +1264,7 @@ default_case:
 										unbless(meqp);
 										meqp->obj_color = CLR_YELLOW;
 										m_dowear(mtmp, TRUE);
+										m_level_up_intrinsic(mtmp);
 									}
 								}
 							} else {
@@ -1275,17 +1278,17 @@ default_case:
 								mtmp = makemon(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									mongets(mtmp, healer_items[rn2(SIZE(healer_items))], NO_MKOBJ_FLAGS);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 								}
 								mtmp = makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									mongets(mtmp, nurse_items[rn2(SIZE(nurse_items))], NO_MKOBJ_FLAGS);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 								}
 								mtmp = makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									mongets(mtmp, nurse_items[rn2(SIZE(nurse_items))], NO_MKOBJ_FLAGS);
-									mtmp->mfaction = YELLOW_FACTION;
+									set_faction(mtmp, YELLOW_FACTION);
 								}
 							}
 						break;
@@ -1306,7 +1309,7 @@ default_case:
 		otmp->spe = 0;
 	}
 	// Madman's old stuff to reclaim
-	if(Is_container(otmp) && otmp->spe == 7){
+	if(Is_real_container(otmp) && otmp->spe == 7){
 		struct obj *stuff;
 		stuff = mksartifact(ART_RITE_OF_DETESTATION);
 		add_to_container(otmp, stuff);

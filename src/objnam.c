@@ -2349,6 +2349,10 @@ weapon:
 		{
 			buf = strprepend(buf + 2, "an ");
 		}
+
+		if (iflags.invweight && (obj->where == OBJ_INVENT || wizard)) {
+			Sprintf(eos(buf), " {%d}", obj->owt);
+		}
 	}
 	return buf;
 }
@@ -4674,9 +4678,9 @@ int wishflags;
 		*wishreturn = WISH_SUCCESS;
 		return (&zeroobj);
 #else
-                otmp = mksobj(GOLD_PIECE, mkobjflags|MKOBJ_NOINIT);
+		otmp = mksobj(GOLD_PIECE, mkobjflags|MKOBJ_NOINIT);
 		otmp->quan = cnt;
-                otmp->owt = weight(otmp);
+		otmp->owt = weight(otmp);
 		flags.botl=1;
 		*wishreturn = WISH_SUCCESS;
 		return (otmp);
