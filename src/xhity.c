@@ -5270,6 +5270,7 @@ boolean ranged;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
 		/* various poisons */
+	case AD_SVPN:
 	case AD_DRST:
 	case AD_DRDX:
 	case AD_EDRC:
@@ -5277,6 +5278,7 @@ boolean ranged;
 		/* select poison type */
 		switch (attk->adtyp)
 		{
+		case AD_SVPN:	ptmp = !rn2(3) ? A_STR : rn2(2) ? A_DEX : A_CON; break;
 		case AD_DRST:	ptmp = A_STR; break;
 		case AD_DRDX:	ptmp = A_DEX; break;
 		case AD_EDRC:
@@ -5295,7 +5297,7 @@ boolean ranged;
 				/* rely on poisoned(), from mon.c */
 				Sprintf(buf, "%s %s",
 					s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-				poisoned(buf, ptmp, pa->mname, 30);
+				poisoned(buf, ptmp, pa->mname, 30, attk->adtyp == AD_SVPN);
 			}
 			/* vs Monster */
 			else {
@@ -5309,14 +5311,14 @@ boolean ranged;
 						);
 				}
 				/* resistance */
-				if (Poison_res(mdef)) {
+				if (Poison_res(mdef) && attk->adtyp != AD_SVPN) {
 					if (vis)
 						pline_The("poison doesn't seem to affect %s.",
 						mon_nam(mdef));
 				}
 				else {
 					/* 9/10 odds of small bonus damage */
-					if (rn2(10))
+			if (rn2((attk->adtyp != AD_SVPN || Poison_res(mdef)) ? 10 : 5))
 						mdef->mhp -= rn1(10, 6);	/* note that this is BONUS damage */
 					/* 1/10 of deadly */
 					else {
@@ -6737,7 +6739,7 @@ boolean ranged;
 		if (youdef) {
 			Sprintf(buf, "%s %s",
 				s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-			poisoned(buf, A_CON, pa->mname, 60);
+			poisoned(buf, A_CON, pa->mname, 60, TRUE);
 		}
 		/* wis-draining (player only) */
 		if (youdef) {
@@ -7815,24 +7817,30 @@ boolean ranged;
 			/* if you are attached to the other creature, do the thing! */
 			else if (u.ustuck == mtmp) {
 				/* drowning? */
-				if (is_pool(x(magr), y(magr), FALSE)
+				if ((is_pool(x(magr), y(magr), FALSE) || pa->mtyp == PM_DAUGHTER_OF_NAUNET)
 					&& !(youdef ? Swimming : mon_resistance(mdef, SWIMMING))
 					&& !(youdef ? Breathless : breathless_mon(mdef))
-					&& !(amphibious(pd))	/* Odd, need to check the species for amphibious. Fixme later? */
-					){
+					&& !(amphibious(pd))	/* Note: Amphibious is magical breathing, Swimming, or amphibious(). 
+											   Breathless checks magical breathing (and breathless()) and swimming should be skipped here,
+											   leaving only amphibious() */
+				){
 					int ltyp = levl[x(magr)][y(magr)].typ;
 					boolean moat =
 						(ltyp != POOL) &&
 						(ltyp != WATER) &&
 						!Is_medusa_level(&u.uz) &&
 						!Is_waterlevel(&u.uz);
+					boolean daughter = pa->mtyp == PM_DAUGHTER_OF_NAUNET;
 
 					/* water damage to drownee's inventory */
 					water_damage((youdef ? invent : mdef->minvent), FALSE, FALSE, level.flags.lethe, mdef);
 
 					if (youdef) {
 						if (u.divetimer > 0){
-							pline("%s pulls you into the %s!", Monnam(mtmp), moat ? "moat" : "pool of water");
+							if(daughter)
+								pline("%s flows all around you!", Monnam(mtmp));
+							else
+								pline("%s pulls you into the %s!", Monnam(mtmp), moat ? "moat" : "pool of water");
 							if (!uarm || is_light_armor(uarm)){
 								pline("%s is crushing the breath out of you!", Monnam(mtmp));
 								u.divetimer -= dmg;
@@ -16059,7 +16067,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					if (youagr) {
 						char buf[BUFSZ];
 						Sprintf(buf, "%s shadow", s_suffix(Monnam(mdef)));
-						poisoned(buf, A_STR, pd->mname, 30);
+						poisoned(buf, A_STR, pd->mname, 30, FALSE);
 					}
 					else {
 						if (!Poison_res(magr)) {

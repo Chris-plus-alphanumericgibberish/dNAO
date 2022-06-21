@@ -11635,6 +11635,7 @@ living_items()
 
 
 static int nitocrisspawns[] = {PM_PIT_VIPER, PM_PIT_VIPER, PM_COBRA, PM_COBRA, PM_GHOUL, PM_GHOUL, PM_CROCODILE, PM_CROCODILE, PM_SERPENT_NECKED_LIONESS, PM_AMMIT};
+
 STATIC_OVL void
 nitocris_sarcophagous(obj)
 struct obj *obj;

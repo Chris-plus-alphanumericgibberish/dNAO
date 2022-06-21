@@ -740,7 +740,7 @@ break_armor()
 		}
     }
 	if ((otmp = uarmg) != 0) {
-		if(nohands(youracedata) || nolimbs(youracedata) || otmp->objsize != youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)){
+		if(nogloves(youracedata) || nolimbs(youracedata) || otmp->objsize != youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)){
 			if (donning(otmp)) cancel_don();
 			/* Drop weapon along with gloves */
 			You("drop your gloves%s!", uwep ? " and weapon" : "");
@@ -2207,6 +2207,14 @@ int part;
 		"lung",				"forked tongue",	"stomach",		"heart",
 		"scales",			"flesh",			"beat",			"bones",
 		"ear",				"ears",				"creak",		"crack" },
+	*naunet_parts[] = {
+		"watery tentacles", "eye",				"face",			"tentacle",
+		"tentacle tip",		"rear region",		"tentacle",		"tentacled",
+		"head",				"rear region",		"light headed",	"neck",
+		"length",			"rear surface",		"watery surface","blood",
+		"foamy depths",		"forked tongue",	"hungry depths","swirling depths",
+		"watery surface",	"waters",			"flow",			"waters",
+		"ear",				"ears",				"bubble",		"boil" },
 	*fish_parts[] = {
 		"fin",				"eye",				"premaxillary",	"pelvic axillary",
 		"pelvic fin",		"anal fin",			"pectoral fin", "finned",
@@ -2297,6 +2305,8 @@ int part;
 	//PM-based part lists
 	if (mptr->mtyp == PM_RAVEN || mptr->mtyp == PM_CROW)
 	    return bird_parts[part];
+	if (mptr->mtyp == PM_DAUGHTER_OF_NAUNET)
+	    return naunet_parts[part];
 	if (mptr->mtyp == PM_APHANACTONAN_ASSESSOR)
 	    return assessor_parts[part];
 	if (mptr->mtyp == PM_APHANACTONAN_AUDIENT)

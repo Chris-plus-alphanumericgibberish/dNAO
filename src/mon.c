@@ -2696,7 +2696,7 @@ struct obj *otmp;
 	int otyp = otmp->otyp, newload = otmp->owt;
 	struct permonst *mdat = mtmp->data;
 
-	if (notake(mdat)) return FALSE;		/* can't carry anything */
+	if (notake(mdat)) return FALSE;		/* won't carry anything */
 
 	if (otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) &&
 		!(mtmp->misc_worn_check & W_ARMG) && !resists_ston(mtmp))
@@ -5878,22 +5878,25 @@ poisontell(typ)
  * 
  */
 void
-poisoned(string, attrib, pname, fatal)
+poisoned(string, attrib, pname, fatal, severe)
 const char *string;	/* base string of poison message (The killer bee's sting) */
 int attrib;			/* attribute to target */
 const char *pname;	/* name of poisoner (for killer) */
 int fatal;			/* 1 in X chance of significant debilitation */
+boolean severe;			/* Powerful poison that partially overcomes poison resistance */
 {
 	int i, kprefix = KILLED_BY_AN;
+	int drain;
 	boolean plural = strcmp(string, makesingular(string));
 	boolean blast = !strcmp(string, "blast");
+	boolean printed = FALSE;
 
 	if(!blast) {
 	    /* avoid "The" Orcus's sting was poisoned... */
 	    pline("%s%s %s poisoned!", isupper(*string) ? "" : "The ",
 			string, plural ? "were" : "was");
 	}
-	if (Poison_resistance) {
+	if (Poison_resistance && !severe) {
 		if (!blast)
 			shieldeff(u.ux, u.uy);
 		pline_The("poison doesn't seem to affect you.");
@@ -5915,22 +5918,37 @@ int fatal;			/* 1 in X chance of significant debilitation */
 			/*[ does this need a plural check too? ]*/
 			kprefix = KILLED_BY;
 		}
+		if(severe && !Poison_resistance)
+			fatal = (fatal + 1)/2;
 		i = rn2(fatal);
 		if (i == 0 && attrib != A_CHA) {
-			if (adjattrib(A_CON, attrib == A_CON ? -2 : -rn1(3, 3), 1))
+			drain = attrib == A_CON ? -2 : -rn1(3, 3);
+			if(Poison_resistance)
+				drain = (drain + 1)/2;
+			else if(severe)
+				drain += 4;
+			if (adjattrib(A_CON, drain, 1)){
 				pline_The("poison was quite debilitating...");
+				printed = TRUE;
+			}
 		}
-		else if (i <= 5) {
+		if (i <= 5) {
+			drain = -rn1(3, 3);
+			if(Poison_resistance)
+				drain = (drain + 1)/2;
+			else if(severe)
+				drain += 2;
 			/* Check that a stat change was made */
-			if (adjattrib(attrib, -rn1(3, 3), 1))
+			if (adjattrib(attrib, drain, 1) && !printed)
 				pline("You%s!", poiseff[attrib]);
 		}
-		else {
-			i = rn1(10, 6);
-			if (Half_physical_damage) i = (i + 1) / 2;
-			if (u.uvaul_duration) i = (i + 1) / 2;
-			losehp(i, pname, kprefix);
-		}
+
+		i = rn1(10, 6);
+		if (Half_physical_damage) i = (i + 1) / 2;
+		if (Poison_resistance) i = (i + 1) / 2;
+		if (u.uvaul_duration) i = (i + 1) / 2;
+		losehp(i, pname, kprefix);
+
 		if (u.uhp < 1) {
 			killer_format = kprefix;
 			killer = pname;

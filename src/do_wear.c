@@ -1360,7 +1360,6 @@ dotakeoff()
 	register struct obj *otmp = (struct obj *)0;
 	int armorpieces = 0;
 
-	/* nohands checks for shields, gloves, etc... */
 	if (nohands(youracedata)) {
 		pline("Don't even bother.");
 		return(0);
@@ -1711,10 +1710,9 @@ boolean noisy;
 		if (uarmg) {
 			if (noisy) already_wearing(c_gloves);
 			err++;
-		} else if(nohands(youracedata)){
-			/*Included for completeness, but having no hands actually prevents you from equiping anything*/
+		} else if(nogloves(youracedata)){
 			if (noisy)
-			You("don't have hands.");
+			You("don't have proper hands.");
 			err++;
 		} else if(youracedata->msize != otmp->objsize){
 			if (noisy)
@@ -1805,7 +1803,6 @@ dowear()
 	int delay;
 	long mask = 0;
 
-	/* nohands checks for shields, gloves, etc... */
 	if (nohands(youracedata)) {
 		pline("Don't even bother.");
 		return(0);

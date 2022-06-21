@@ -1708,7 +1708,8 @@ get_mb_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, your_race(ptr)			, "same race as you"		, many);
 	many = append(description, !haseyes(ptr)			, "eyeless"					, many);
 	many = append(description, sensitive_ears(ptr)		, "has sensitive ears"		, many);
-	many = append(description, nohands(ptr)				, "handless"				, many);
+	many = append(description, nohands(ptr)				, "can't manipulate objects", many);
+	many = append(description, nogloves(ptr)			, "handless"				, many);
 	many = append(description, nolimbs(ptr)				, "limbless"				, many);
 	many = append(description, !has_head(ptr)			, "headless"				, many);
 	many = append(description, has_horns(ptr)			, "has horns"				, many);
@@ -2085,6 +2086,7 @@ get_description_of_damage_type(uchar id)
 	case AD_HOLY: return "holy energy";
 	case AD_UNHY: return "unholy energy";
 	case AD_PERH: return "level-based damage";
+	case AD_SVPN: return "severe poison";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

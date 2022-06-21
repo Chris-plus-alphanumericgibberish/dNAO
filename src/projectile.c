@@ -1989,7 +1989,7 @@ dothrow()
 	int oldmulti = multi, result, shotlimit;
 	char *oldsave_cm = save_cm;
 
-	if (notake(youracedata)) {
+	if (nolimbs(youracedata)) {
 		You("are physically incapable of throwing anything.");
 		return 0;
 	}
@@ -2065,7 +2065,7 @@ dofire()
 	}
 
 	/* __ You have something ready to fire __ */
-	if (!notake(youracedata)) {
+	if (!nolimbs(youracedata)) {
 		/* Fire loaded launchers and blasters */
 		if ((uwep && ((uquiver && ammo_and_launcher(uquiver, uwep)) || is_blaster(uwep))) ||
 			(uswapwep && ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep)) && u.twoweap)
@@ -2238,7 +2238,7 @@ dofire()
 	}
 
 	/* __ You didn't have anything good ready to fire __ */
-	if (!notake(youracedata)) {
+	if (!nolimbs(youracedata)) {
 		/* Throw any old garbage we have quivered */
 		if (uquiver) {
 			return uthrow(uquiver, (struct obj *)0, shotlimit, FALSE);
@@ -2300,7 +2300,7 @@ dofire()
 	}
 
 	/* print message if we were unable to fire anything due to our form */
-	if (notake(youracedata)) {
+	if (nolimbs(youracedata)) {
 		You("are physically incapable of doing that.");
 	}
 

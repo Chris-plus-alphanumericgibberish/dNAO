@@ -4307,7 +4307,7 @@ struct zapdata * zapdata;
 				if (Poison_res(mdef)) dmg = 0; else dmg = 4;
 				domsg();	/* gotta call before poisoned() */
 				/* poisoned() deals the damage and checks resistance */
-				poisoned("blast", A_DEX, "poisoned blast", 15);
+				poisoned("blast", A_DEX, "poisoned blast", 15, FALSE);
 			}
 			else {
 				if (Poison_res(mdef)) {

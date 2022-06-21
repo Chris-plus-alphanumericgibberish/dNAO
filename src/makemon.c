@@ -4240,7 +4240,7 @@ boolean goodequip;
 					const int water_nasties[] = {
 						PM_WATER_ELEMENTAL, PM_ICE_PARAELEMENTAL, PM_FORD_ELEMENTAL,
 						PM_NAIAD, PM_DEEPEST_ONE, PM_JELLYFISH,
-						PM_GREAT_WHITE_SHARK
+						PM_GREAT_WHITE_SHARK, PM_DAUGHTER_OF_NAUNET
 					};
 					if(Is_earthlevel(&u.uz)){
 						otmp = mongets(mtmp, MASK, mkobjflags);

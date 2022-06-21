@@ -2550,6 +2550,7 @@ struct permonst *ptr;
 		tmp2 = ptr->mattk[i].adtyp;
 		if ((tmp2 == AD_DRLI) || (tmp2 == AD_STON) || (tmp2 == AD_DRST)
 			|| (tmp2 == AD_DRDX) || (tmp2 == AD_DRCO) || (tmp2 == AD_WERE)
+			|| (tmp2 == AD_SVPN)
 			|| (tmp2 == AD_SHDW) || (tmp2 == AD_STAR) || (tmp2 == AD_BLUD)
 			|| (tmp2 == AD_MOON) || (tmp2 == AD_HOLY) || (tmp2 == AD_UNHY)
 			|| (tmp2 == AD_DETH) || (tmp2 == AD_PEST) || (tmp2 == AD_FAMN) || (tmp2 == AD_CNFT)

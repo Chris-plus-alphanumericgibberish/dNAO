@@ -1128,7 +1128,7 @@ int aatyp;
 	case AT_CLAW:
 		if(!mon)
 			slot = W_ARMG;
-		else if(nohands(mon->data))
+		else if(nogloves(mon->data))
 			slot = W_ARMF;
 		else if(
 			mon->mtyp == PM_CROW_WINGED_HALF_DRAGON
