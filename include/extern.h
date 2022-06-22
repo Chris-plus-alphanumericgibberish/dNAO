@@ -3218,7 +3218,6 @@ E void NDECL(yellow_nasty);
 E void NDECL(yellow_dead);
 E void NDECL(resurrect);
 E void NDECL(illur_resurrect);
-E void NDECL(yello_resurrect);
 E void NDECL(coa_arrive);
 E void NDECL(intervene);
 E void NDECL(illur_intervene);
