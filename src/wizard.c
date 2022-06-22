@@ -838,6 +838,13 @@ illur_resurrect()
 	struct monst *mtmp, **mmtmp;
 	long elapsed;
 
+	/* look for a Illurien on the same level */
+	mmtmp = &fmon;
+	while ((mtmp = *mmtmp) != 0) {
+		if (mtmp->mtyp==PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES)
+			return; /*Illurine is currently here */
+		mmtmp = &mtmp->nmon;
+	}
 	/* look for a migrating Illurien */
 	mmtmp = &migrating_mons;
 	while ((mtmp = *mmtmp) != 0) {
