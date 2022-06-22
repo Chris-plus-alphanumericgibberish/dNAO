@@ -2349,6 +2349,10 @@ weapon:
 		{
 			buf = strprepend(buf + 2, "an ");
 		}
+
+		if (iflags.invweight && (obj->where == OBJ_INVENT || wizard)) {
+			Sprintf(eos(buf), " {%d}", obj->owt);
+		}
 	}
 	return buf;
 }
