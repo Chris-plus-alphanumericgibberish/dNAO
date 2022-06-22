@@ -2695,8 +2695,7 @@ int dz;
 	if(!mtmp && (u.specialSealsActive&SEAL_ACERERAK) &&
 		(otmp = level.objects[tx][ty]) && 
 		 otmp->otyp == CORPSE && !mindless(&mons[otmp->corpsenm]) && 
-		 !nohands(&mons[otmp->corpsenm]
-		)
+		 !is_animal(&mons[otmp->corpsenm])
 	){
 		You("speak to the shadow that dwells within this corpse.");
 		if(otmp->ovar1 < moves){
