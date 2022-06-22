@@ -5202,37 +5202,7 @@ typfnd:
 	if (typ) oclass = objects[typ].oc_class;
 
 	/* some objects are only allowed for tourists (or if it's an artifact) */
-	if (typ && !wizwish && !Role_if(PM_TOURIST) && !isartifact && (
-		typ == LIGHTSABER ||
-		typ == BEAMSWORD ||
-		typ == DOUBLE_LIGHTSABER ||
-		typ == VIBROBLADE ||
-		typ == WHITE_VIBROSWORD ||
-		typ == GOLD_BLADED_VIBROSWORD ||
-		typ == WHITE_VIBROZANBATO ||
-		typ == GOLD_BLADED_VIBROZANBATO ||
-		typ == RED_EYED_VIBROSWORD ||
-		typ == SEISMIC_HAMMER ||
-		typ == FORCE_PIKE ||
-		typ == DOUBLE_FORCE_BLADE ||
-		typ == FORCE_BLADE ||
-		typ == FORCE_SWORD ||
-		typ == WHITE_VIBROSPEAR ||
-		typ == GOLD_BLADED_VIBROSPEAR ||
-		(typ >= PISTOL && typ <= RAYGUN) ||
-		(typ >= SHOTGUN_SHELL && typ <= LASER_BEAM) ||
-		typ == FLACK_HELMET ||
-		typ == PLASTEEL_HELM ||
-		typ == PLASTEEL_ARMOR ||
-		typ == JUMPSUIT ||
-		typ == BODYGLOVE ||
-		typ == PLASTEEL_GAUNTLETS ||
-		typ == PLASTEEL_BOOTS ||
-		(typ >= SENSOR_PACK && typ <= HYPOSPRAY_AMPULE) ||
-		typ == BULLET_FABBER ||
-		typ == PROTEIN_PILL
-		))
-	{
+	if (typ && !wizwish && !Role_if(PM_TOURIST) && !isartifact && is_future_otyp(typ)){
 		*wishreturn = WISH_DENIED;
 		return &zeroobj;
 	}
