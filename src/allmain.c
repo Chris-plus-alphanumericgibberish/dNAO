@@ -4824,7 +4824,7 @@ struct monst *mon;
 		}
 		/* The Stranger arrives from other levels and appears as soon as you gain enough insight */
 		if(mon->m_insight_level <= u.uinsight){
-			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2){
 				mtmp2 = mtmp->nmon;
 				if (mtmp == mon) {
 					mtmp->mtrack[0].x = MIGR_RANDOM;
@@ -4843,22 +4843,25 @@ struct monst *mon;
 		}
 	}
 	/* Otherwise, The Stranger acts against you */
-	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && xyloc == MIGR_EXACT_XY && rn2(5)){ /*Sometimes skip a turn so that it can be evaded*/
-		if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
-			You_feel("a stranger's gaze on your back!");
-			u.ustdy = max_ints(u.ustdy, min_ints(5, u.ustdy+rnd(5)));
-		}
-		else {
-			xlocale += sgn(u.ux - xlocale);
-			ylocale += sgn(u.uy - ylocale);
-			if(isok(xlocale, ylocale) && (
-				(!is_pool(xlocale, ylocale, FALSE) && ZAP_POS(levl[xlocale][ylocale].typ))
-				|| is_pool(mon->mtrack[1].x, mon->mtrack[1].y, FALSE) 
-				|| !ZAP_POS(levl[mon->mtrack[1].x][mon->mtrack[1].y].typ)
-				|| ((!Role_if(PM_MADMAN) || quest_status.touched_artifact) && !rn2(5)) /* Sometimes phases through walls */
-			)){
-				mon->mtrack[1].x = xlocale;
-				mon->mtrack[1].y = ylocale;
+	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && xyloc == MIGR_EXACT_XY){
+		flags.yello_level=1;
+		if(rn2(5)){ /*Sometimes skip a turn so that it can be evaded*/
+			if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
+				You_feel("a stranger's gaze on your back!");
+				u.ustdy = max_ints(u.ustdy, min_ints(5, u.ustdy+rnd(5)));
+			}
+			else {
+				xlocale += sgn(u.ux - xlocale);
+				ylocale += sgn(u.uy - ylocale);
+				if(isok(xlocale, ylocale) && (
+					(!is_pool(xlocale, ylocale, FALSE) && ZAP_POS(levl[xlocale][ylocale].typ))
+					|| is_pool(mon->mtrack[1].x, mon->mtrack[1].y, FALSE) 
+					|| !ZAP_POS(levl[mon->mtrack[1].x][mon->mtrack[1].y].typ)
+					|| ((!Role_if(PM_MADMAN) || quest_status.touched_artifact) && !rn2(5)) /* Sometimes phases through walls */
+				)){
+					mon->mtrack[1].x = xlocale;
+					mon->mtrack[1].y = ylocale;
+				}
 			}
 		}
 	}
