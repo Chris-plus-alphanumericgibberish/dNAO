@@ -1714,7 +1714,7 @@ boolean polyspot;
 		}
 	}
 	if ((otmp = which_armor(mon, W_ARMG)) != 0) {
-		if(nohands(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)){
+		if(nogloves(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)){
 			if (vis)
 				pline("%s drops %s gloves!", Monnam(mon), ppronoun);
 			if (polyspot) bypass_obj(otmp);
