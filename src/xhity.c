@@ -3309,7 +3309,7 @@ int *shield_margin;
 			/* simulate accuracy from stat bonuses from gloves */
 			if ((otmp = which_armor(magr, W_ARMG))) {
 				if (otmp->oartifact == ART_GODHANDS)
-					bons_acc += 14;
+					bons_acc += 11;
 				else if (otmp->otyp == GAUNTLETS_OF_DEXTERITY || otmp->oartifact == ART_PREMIUM_HEART)
 					bons_acc += otmp->spe;
 				if (otmp->otyp == GAUNTLETS_OF_POWER)
