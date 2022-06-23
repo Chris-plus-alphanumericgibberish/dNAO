@@ -450,11 +450,6 @@ int what;		/* should be a long */
 		    if(!skipmessages) check_here(FALSE);
 		    return (0);
 		}
-		if (notake(youracedata)) {
-		    if (!autopickup) You("are physically incapable of picking anything up.");
-		    else if(!skipmessages) check_here(FALSE);
-		    return (0);
-		}
 
 		/* if there's anything here, stop running */
 		if (OBJ_AT(u.ux,u.uy) && flags.run && flags.run != 8 && !flags.nopick) nomul(0, NULL);
