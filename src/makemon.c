@@ -13862,7 +13862,8 @@ int mkobjflags;
 								add_oprop(otmp, OPROP_HOLYW);
 							else {
 								add_oprop(otmp, OPROP_HOLY);
-								add_oprop(otmp, OPROP_WOOL);
+								if(is_suit(otmp) || is_cloak(otmp) || is_shirt(otmp))
+									add_oprop(otmp, OPROP_WOOL);
 								add_oprop(otmp, OPROP_LIFE);
 							}
 							if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)){
