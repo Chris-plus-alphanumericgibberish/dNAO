@@ -275,7 +275,7 @@ NEARDATA struct c_color_names c_color_names = {
 	"black", "amber", "golden",
 	"light blue", "red", "green",
 	"silver", "blue", "purple",
-	"white"
+	"white", "yellow"
 };
 
 const char *c_obj_colors[] = {
