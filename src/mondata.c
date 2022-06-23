@@ -377,6 +377,23 @@ int template;
 		ptr->dac += 4;
 		ptr->hdr = 0; //Exposed brain
 		break;
+	case MINDLESS:
+		if(ptr->mflagsm&MM_NEEDPICK)
+			ptr->mflagsm &= ~(MM_TUNNEL|MM_NEEDPICK);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL | MT_STALK);
+		/* defense: */
+		ptr->dac = 0;
+		ptr->hdr += 2; //No one home
+		ptr->msound = MS_SILENT;
+		ptr->mflagsf = 0L;
+		/*Mindless monsters have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
+		break;
 	case MISTWEAVER:
 		/* flags */
 		ptr->mflagsb |= (MB_CAN_AMULET|MB_NOHEAD|MB_STRONG);
@@ -599,6 +616,22 @@ int template;
 			attk[j] = noattack;
 		}
 
+		/* some templates completely skip specific attacks */
+		while ((template == MINDLESS) &&
+			(
+			attk->aatyp == AT_ARRW ||
+			attk->aatyp == AT_ESPR ||
+			attk->aatyp == AT_MMGC ||
+			attk->aatyp == AT_TNKR ||
+			attk->aatyp == AT_MAGC
+			)
+		){
+			/* shift all further attacks forwards one slot, and make last one all 0s */
+			for (j = 0; j < (NATTK - i); j++)
+				attk[j] = attk[j + 1];
+			attk[j] = noattack;
+		}
+
 		/* if creatures don't have eyes, some gaze attacks are impossible */
 		if ((attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ) && !haseyes(ptr))
 		{
@@ -614,6 +647,24 @@ int template;
 			}
 		}
 
+		/* mindless monsters don't use weapons */
+		if ((template == MINDLESS) && 
+			(
+			attk->aatyp == AT_HODS ||
+			attk->aatyp == AT_DEVA ||
+			attk->aatyp == AT_SRPR ||
+			attk->aatyp == AT_XSPR ||
+			attk->aatyp == AT_MSPR ||
+			attk->aatyp == AT_DSPR ||
+			attk->aatyp == AT_MARI ||
+			attk->aatyp == AT_WEAP ||
+			attk->aatyp == AT_XWEP
+			)
+		){
+			attk->aatyp = AT_CLAW;
+			attk->damn = max(attk->damn, ptr->mlevel / 10 + 1);
+			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
+		}
 		/* some templates want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || \
 	((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
@@ -622,7 +673,7 @@ int template;
 #define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;i++;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
-		if ((template == ZOMBIFIED || template == SKELIFIED) && (
+		if ((template == ZOMBIFIED || template == SKELIFIED || template == MINDLESS) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
 			is_null_attk(attk) ||
 			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
@@ -714,6 +765,19 @@ int template;
 			attk->damn = 1;
 			attk->damd = 4;
 			special = TRUE;
+		}
+		/* mindless thralls lose their weapon attacks */
+		if (template == MINDLESS && (
+			(attk->aatyp == AT_WEAP
+			 || attk->aatyp == AT_XWEP
+			 || attk->aatyp == AT_HODS
+			 || attk->aatyp == AT_DEVA
+			)
+			))
+		{
+			attk->aatyp = AT_CLAW;
+			attk->damn += 1;
+			attk->damd += 2;
 		}
 		/* tomb herd's attacks are generally stronger */
 		if (template == TOMB_HERD && (
@@ -921,6 +985,9 @@ int mtyp;
 	case YITH:
 		/* must have had a mind for the yith to have swapped with */
 		return !mindless(ptr);
+	case MINDLESS:
+		/* must have had a mind for the yith to lose, must have a body. */
+		return !mindless(ptr) && can_undead(ptr);
 	case CRANIUM_RAT:
 		/* is a rodent */
 		return is_rat(ptr);

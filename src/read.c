@@ -3582,6 +3582,9 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "mistweaver ", l = 11)) {
 				undeadtype = MISTWEAVER;
 			}
+			else if (!strncmpi(bufp, "mindless ", l = 9)) {
+				undeadtype = MINDLESS;
+			}
 			else
 				break;
 
@@ -3632,6 +3635,8 @@ int gen_restrict;
 				undeadtype = MISTWEAVER;
 			else if (!strncmpi(p, "worldshaper", 11))
 				undeadtype = WORLD_SHAPER;
+			else if (!strncmpi(p, "husk",	4))
+				undeadtype = MINDLESS;
 			else
 			{
 				/* no suffix was used, undo the split made to search for suffixes */
