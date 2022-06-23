@@ -1992,6 +1992,7 @@ dosacrifice()
 				/* create Dirge from player's longsword here if possible */
 				if (Role_if(PM_KNIGHT) && godlist[u.ualign.god].anger == 0 && u.ualign.record > 0
 					&& uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))
+					&& !is_lightsaber(uwep)
 					&& !uwep->oartifact && !(uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
 					&& !art_already_exists(ART_DIRGE)
 				) {
