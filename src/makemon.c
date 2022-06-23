@@ -9084,36 +9084,36 @@ boolean goodequip;
 				otmp = mksobj(TRIDENT, mkobjflags);
 				otmp->oerodeproof = 1;
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(RANSEUR, mkobjflags);
 				otmp->oerodeproof = 1;
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(CROSSBOW, mkobjflags);
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(CROSSBOW_BOLT, mkobjflags);
 				otmp->oerodeproof = 1;
 				otmp->quan = 18;
 				otmp->owt = weight(otmp);
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(SHIELD_OF_REFLECTION, mkobjflags);
 				set_material_gm(otmp, COPPER);
 				otmp->oerodeproof = 1;
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				(void) mongets(mtmp, rnd_attack_potion(mtmp), mkobjflags);
