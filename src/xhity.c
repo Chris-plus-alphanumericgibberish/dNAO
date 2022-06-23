@@ -2260,12 +2260,14 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			/* "Deva" rapiers are assumed to be the Masked Queen's lower arms, and "Energy" rapiers just sorta float or something */
 			|| attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR || attk->aatyp == AT_MSPR
 			|| attk->aatyp == AT_DEVA || attk->aatyp == AT_5SQR || attk->aatyp == AT_MARI
-			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON) ||
-			(humanoid(youracedata) && (
-				attk->aatyp == AT_CLAW
-				|| attk->aatyp == AT_TUCH
-				|| attk->aatyp == AT_HUGS
+			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON)
+			|| (humanoid_torso(youracedata) && (
+				attk->aatyp == AT_TUCH
 				|| attk->aatyp == AT_LRCH
+			))
+			|| (humanoid(youracedata) && (
+				attk->aatyp == AT_CLAW
+				|| attk->aatyp == AT_HUGS
 			))
 		)) ||
 		/* If monster is stuck in a straitjacket */
