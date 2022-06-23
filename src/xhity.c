@@ -3212,7 +3212,7 @@ int *shield_margin;
 	}
 	/* other attacker-related accuracy bonuses */
 	if (magr) {
-		/* Small monsters are more accurage */
+		/* Small monsters are more accurate */
 		switch(pa->msize){
 			case MZ_TINY:
 				bons_acc += 5;
@@ -3290,6 +3290,9 @@ int *shield_margin;
 			case P_SKILLED:   bons_acc += 2; break;
 			case P_EXPERT:    bons_acc += 5; break;
 			}
+			/* predators have keen instincts */
+			if(carnivorous(pa)&&!herbivorous(pa))
+				bons_acc += 2;
 			/* these guys are extra accurate */
 			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED)
 				bons_acc += 20;
