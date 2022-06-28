@@ -991,7 +991,7 @@ int template;
 			attk->damd = 6;
 			special = TRUE;
 		}
-		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN){
+		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN && attk->adtyp != AD_SURY){
 			if(attk->adtyp == AD_PHYS)
 				attk->damn++;
 			attk->damd += 4;
