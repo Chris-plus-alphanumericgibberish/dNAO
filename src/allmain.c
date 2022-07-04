@@ -3376,14 +3376,14 @@ printBodies(){
 	struct permonst *ptr;
 	rfile = fopen_datafile("MonBodies.tab", "w", SCOREPREFIX);
 	if (rfile) {
-		Sprintf(pbuf,"Number\tName\tclass\thumanoid\tanimaloid\tserpentine\tcentauroid\tnaganoid\tleggedserpent\tNAoid\thumanoid torso\thumanoid upperbody\thead\thands\tgloves\tfeet\tboots\teyes\n");
+		Sprintf(pbuf,"Number\tName\tclass\thumanoid\tanimaloid\tserpentine\tcentauroid\tnaganoid\tleggedserpent\tNAoid\thumanoid torso\thumanoid upperbody\thead\thands\tgloves\tfeet\tboots\teyes\toldpolywep\thands but no polywep\n");
 		fprintf(rfile, "%s", pbuf);
 		fflush(rfile);
 		for(j=0;j<NUMMONS;j++){
 			ptr = &mons[j];
 			pbuf[0] = 0;// n	nm	let	hm	anm	srp	cen	ng	lgs	hd	hn	ft	bt  ey
-			Sprintf(pbuf,"%d	%s	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d\n", 
-					j, 			mons[j].mname, 
+			Sprintf(pbuf,"%d	%s	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d\n", 
+						   j,	mons[j].mname, 
 									mons[j].mlet,
 										humanoid(ptr),
 											animaloid(ptr),
@@ -3399,7 +3399,11 @@ printBodies(){
 																					!nogloves(ptr),
 																						!noboots(ptr),
 																							can_wear_boots(ptr),
-																								haseyes(ptr));
+																								haseyes(ptr),
+																									!nohands(ptr) && ((ptr->mattk[0].aatyp == AT_CLAW || (ptr->mattk[0].aatyp == AT_TUCH && ptr->mlet == S_LICH))
+																									|| (ptr->mattk[1].aatyp == AT_CLAW && (ptr->mtyp == PM_INCUBUS || ptr->mtyp == PM_SUCCUBUS))),
+																										!nohands(ptr) && you_cantwield(ptr)
+																										);
 			fprintf(rfile, "%s", pbuf);
 			fflush(rfile);
 		}

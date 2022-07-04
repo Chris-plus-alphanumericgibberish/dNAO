@@ -1422,7 +1422,7 @@ boolean racialexception;
 		    if (has_horns(mon->data) && obj->otyp != find_gcirclet() && !is_flimsy(obj)) continue;
 		    break;
 		case W_ARMS:
-		    if (cantwield(mon->data) || !is_shield(obj)) continue;
+		    if (noshield(mon->data) || (mon_offhand_attack(mon) && !creation) || !is_shield(obj)) continue;
 		    break;
 		case W_ARMG:
 			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)

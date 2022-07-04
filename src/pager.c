@@ -2147,7 +2147,7 @@ get_description_of_attack(struct attack *mattk, char * main_temp_buf)
 		strcat(main_temp_buf, " ");
 	}
 #endif
-	sprintf(temp_buf, "%s - %s%s", get_description_of_attack_type(mattk->aatyp), get_description_of_damage_prefix(mattk->aatyp, mattk->adtyp), get_description_of_damage_type(mattk->adtyp));
+	sprintf(temp_buf, "%s%s - %s%s", mattk->offhand ? "offhand " : "", get_description_of_attack_type(mattk->aatyp), get_description_of_damage_prefix(mattk->aatyp, mattk->adtyp), get_description_of_damage_type(mattk->adtyp));
 	strcat(main_temp_buf, temp_buf);
 #ifdef USE_TILES
 	strcat(main_temp_buf, "; ");

@@ -1966,7 +1966,7 @@ int mode;
 		You_cant("%s in thin air!", word);
 		return(0);
 	}
-	if (cantwield(youracedata)) {
+	if (nohands(youracedata)) {
 		You_cant("even hold anything!");
 		return(0);
 	}

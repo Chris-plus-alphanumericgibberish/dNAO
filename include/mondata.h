@@ -122,7 +122,8 @@
 #define nohands(ptr)		(((ptr)->mflagsb & (MB_NOHANDS|MB_NOLIMBS)) != 0L)
 #define nolimbs(ptr)		(((ptr)->mflagsb & MB_NOLIMBS) == MB_NOLIMBS)
 #define nofeet(ptr)			((ptr)->mflagsb & MB_NOFEET)
-#define nogloves(ptr)		((ptr)->mflagsb & MB_NOGLOVES)
+#define nogloves(ptr)		(nohands(ptr) || ((ptr)->mflagsb & MB_NOGLOVES))
+#define noshield(ptr)		(nogloves(ptr) && !allow_shield(ptr))
 #define notake(ptr)		(((ptr)->mflagst & MT_NOTAKE) != 0L)
 #define has_head(ptr)		(((ptr)->mflagsb & MB_NOHEAD) == 0L)
 #define has_head_mon(mon) ((mon == &youmonst) ? (has_head(youracedata)) : (has_head((mon)->data)))
@@ -634,7 +635,40 @@
 #define yields_insight(ptr)	(((ptr)->mflagsg & MG_INSIGHT) != 0L)
 #define banish_kill(mtyp)	(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
 
-#define cantwield(ptr)		(nohands(ptr))
+#define allow_wield(ptr)	(ptr->mtyp == PM_SHOGGOTH \
+							|| ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR\
+							|| ptr->mtyp == PM_MOTHERING_MASS\
+							|| ptr->mtyp == PM_ANCIENT_NUPPERIBO\
+							|| ptr->mtyp == PM_KOBOLD_SHAMAN\
+							|| ptr->mtyp == PM_ORC_SHAMAN\
+							|| ptr->mtyp == PM_MORDOR_SHAMAN\
+							|| ptr->mtyp == PM_ZETA_METROID\
+							|| ptr->mtyp == PM_MINOTAUR_PRIESTESS\
+							|| ptr->mtyp == PM_BLASPHEMOUS_LURKER\
+							|| ptr->mtyp == PM_DREAD_SERAPH\
+							|| ptr->mtyp == PM_MAD_SEER\
+							|| ptr->mtyp == PM_ORACLE\
+							|| ptr->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD\
+							|| ptr->mtyp == PM_PRIEST_OF_IB\
+							|| ptr->mtyp == PM_PALE_NIGHT\
+							|| ptr->mtyp == PM_SARA__THE_LAST_ORACLE\
+							|| ptr->mtyp == PM_STRANGE_CORPSE\
+							|| ptr->mtyp == PM_NIMUNE\
+							|| ptr->mtyp == PM_ELDER_BRAIN\
+							|| ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER\
+							|| ptr->mtyp == PM_CHAIN_GOLEM\
+							|| ptr->mtyp == PM_GOOD_NEIGHBOR\
+							)
+
+#define allow_shield(ptr)	(ptr->mtyp == PM_SCORPION\
+							|| ptr->mtyp == PM_YURIAN\
+							|| ptr->mtyp == PM_ZETA_METROID\
+							|| ptr->mtyp == PM_DEMOGORGON\
+							|| ptr->mtyp == PM_CHAIN_GOLEM\
+							|| ptr->mtyp == PM_SCORPIUS\
+							|| ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER\
+							)
+
 #define could_twoweap(ptr)	attacktype(ptr, AT_XWEP)
 #define could_twoweap_mon(mon)	mon_attacktype(mon, AT_XWEP)
 // define cantweararm(ptr)	(breakarm(ptr) || sliparm(ptr))

@@ -160,7 +160,7 @@ struct monst * mdef;
 				else You("begin bashing monsters with your %s.",
 					aobjnam(uwep, (char *)0));
 			}
-			else if (!cantwield(youracedata) && !Straitjacketed){
+			else if (!you_cantwield(youracedata) && !Straitjacketed){
 				if (u.specialSealsActive&SEAL_BLACK_WEB)
 					You("begin slashing monsters with your shadow-blades.");
 				else
@@ -586,6 +586,15 @@ int tary;
 				(cloak && FacelessCloak(cloak)))
 				continue;
 		}
+		/* Generalized offhand attack when not allowed */
+		if ((attk->offhand) && (						// offhand attack
+				(youagr && uarms) ||					// player attacking with shield
+				(!youagr && (which_armor(magr, W_ARMS))	// monster attacking with shield
+				))
+			) {
+			continue;									// not allowed, don't attack
+		}
+
 		/* based on the attack type... */
 		switch (aatyp)
 		{
@@ -1731,10 +1740,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	
 	/* players sub out monster claw attacks for weapon attacks */
-	if (youagr && !cantwield(pa)) {
-		if ((*indexnum == 0 || (*indexnum == 1 && (pa->mtyp == PM_INCUBUS || pa->mtyp == PM_SUCCUBUS))) &&
-			(attk->aatyp == AT_CLAW || (attk->aatyp == AT_TUCH && pa->mlet == S_LICH && uwep)))
-		{
+	if (youagr) {
+		if (attk->polywep && (uwep || u.specialSealsActive&SEAL_BLACK_WEB)){
 			attk->aatyp = AT_WEAP;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;	// unused
@@ -1769,19 +1776,21 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damd = 6;
 		}
 		else if(attk->aatyp == AT_SRPR){
-			attk->aatyp = humanoid_upperbody(pa) ? AT_WEAP : AT_CLAW;
+			attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_WEAP : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 6;
 		}
 		else if(attk->aatyp == AT_XSPR){
-			attk->aatyp = humanoid_upperbody(pa) ? AT_XWEP : AT_CLAW;
+			attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_XWEP : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 6;
+			if(attk->aatyp == AT_CLAW)
+				attk->offhand = 1; /*Note: redundant with xwep but needed for claw*/
 		}
 		else if(attk->aatyp == AT_MSPR){
-			attk->aatyp = (humanoid_upperbody(pa) && pa->mtyp != PM_ALIDER) ? AT_MARI : AT_CLAW;
+			attk->aatyp = (humanoid_upperbody(pa) && pa->mtyp != PM_ALIDER && !nogloves(pa)) ? AT_MARI : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 6;
@@ -1840,10 +1849,12 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 		if(pom > 4 || !pom){
 			if(attk->aatyp == AT_XSPR){
-				attk->aatyp = humanoid_upperbody(pa) ? AT_XWEP : AT_CLAW;
+				attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_XWEP : AT_CLAW;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1;
 				attk->damd = 6;
+				if(attk->aatyp == AT_CLAW)
+					attk->offhand = 1; /*Note: redundant with xwep but needed for claw*/
 			}
 			else if((attk->aatyp == AT_MSPR || attk->aatyp == AT_ESPR) && (*indexnum%2)){
 				if(attk->aatyp == AT_ESPR){
@@ -2152,6 +2163,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->aatyp = AT_CLAW;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1+u.ulevel/8; // from 1 to 4 dice, hitting 4 at xp 24+
+				attk->offhand = 1;
 				
 				// scales inversely with sanity, sanity-based size is 0->11, 10->9, 25->6, 50->3, 75->1, 80->0
 				// total dice assuming +7 and xp30 is 4d18 / 4d10 / 4d7 at sanity 15/50/80+
@@ -2167,6 +2179,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->aatyp = AT_CLAW;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1+min(5, magr->m_lev/8); // from 1 to 6 dice, hitting 6 at xp 40+
+				attk->offhand = 1;
 				
 				attk->damd = max(otmp->spe, 1) + magr->mberserk ? 11 : 3;
 				/* this is applied to all acceptable attacks; no subout marker is necessary */

@@ -745,6 +745,8 @@ int template;
 			attk->aatyp == AT_XWEP
 			)
 		){
+			if(attk->aatyp == AT_XWEP || attk->aatyp == AT_XSPR)
+				attk->offhand = 1;
 			attk->aatyp = AT_CLAW;
 			attk->damn = max(attk->damn, ptr->mlevel / 10 + 1);
 			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
@@ -1658,6 +1660,61 @@ struct attack *prev_attk;
 	}
 
     return (struct attack *)0;
+}
+
+boolean
+mon_offhand_attack(mon)
+struct monst *mon;
+{
+	struct attack *attk;
+	struct attack prev_attk_buffer = {0};
+	int	indexnum = 0,	/* loop counter */
+		subout = 0,	/* remembers what attack substitutions have been made for [mon]'s attack chain */
+		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+
+	/* zero out res[] */
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+	
+	for(attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk_buffer, TRUE, &subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk_buffer, TRUE, &subout, &tohitmod)
+	){
+		if(attk->offhand || attk->aatyp == AT_XSPR || (attk->aatyp == AT_XWEP && MON_SWEP(mon)))
+			return TRUE;
+	}
+
+    return FALSE;
+}
+
+boolean
+cantwield(mon)
+struct monst *mon;
+{
+	if(mon_attacktype(mon, AT_WEAP) || mon_attacktype(mon, AT_DEVA))
+		return FALSE;
+
+    return TRUE;
+}
+
+boolean
+you_cantwield(ptr)
+struct permonst *ptr;
+{
+    struct attack *a;
+	
+	if(allow_wield(ptr))
+		return FALSE;
+	
+    for (a = &ptr->mattk[0]; a < &ptr->mattk[NATTK]; a++){
+		if (a->aatyp == AT_WEAP || a->aatyp == AT_DEVA || a->polywep) 
+			return FALSE;
+	}
+	
+	return TRUE;
 }
 
 boolean
