@@ -486,6 +486,7 @@ struct obj {
 			 otmp->otyp == BLADE_OF_PITY)
 #define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
 #define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
+			 is_rakuyo(otmp) ||\
 			 rakuyo_prop(otmp) || \
 			 check_oprop(otmp,OPROP_GSSDW) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
