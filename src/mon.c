@@ -1639,7 +1639,7 @@ void
 timeout_problems(mtmp)
 struct monst *mtmp;
 {
-	if(bold(mtmp->data) && mtmp->mflee){
+	if(mtmp->mflee && (bold(mtmp->data) || (mtmp->mtame && uring_art(ART_NARYA)))){
 		if(mtmp->mfleetim > 4) mtmp->mfleetim /= 4;
 		else {
 			mtmp->mfleetim = 0;

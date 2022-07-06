@@ -1280,8 +1280,18 @@ beastmastery()
 	}
 	if ((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
 		bm *= 2;
+
+	if(uring_art(ART_NARYA))
+		bm += narya();
 	return bm;
 }
+
+int
+narya()
+{
+	return (ACURR(A_CHA) - 11)/2;
+}
+
 int
 mountedCombat()
 {

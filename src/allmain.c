@@ -850,9 +850,8 @@ you_regen_hp()
 
 	// The Ring of Hygiene's Disciple
 	if (!Upolyd &&	// Question for Chris: should this be enabled to also work while polymorphed?
-		((uleft  && uleft->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE) ||
-		(uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE))
-		){
+		uring_art(ART_RING_OF_HYGIENE_S_DISCIPLE)
+	){
 		perX += HEALCYCLE * min(4, (*hpmax) / max((*hp), 1));
 	}
 
@@ -886,6 +885,20 @@ you_regen_hp()
 	if(FaintingFits && rn2(100) >= u.usanity && multi >= 0){
 		You("suddenly faint!");
 		fall_asleep((u.usanity - 100)/10 - 1, FALSE);
+	}
+
+	//Worn Vilya bonus ranges from -4 (penalty) to +7 HP per 10 turns
+	// If you're currently dying (negative HP regen) Vilya may make it worse,
+	//  but vilya won't cause you to start dying if you aren't already.
+	// Consequently, it should be applied after all other bonuses
+	if(uring_art(ART_VILYA)){
+		int vmod = heal_vilya()*HEALCYCLE/10;
+		if(perX >= 0){
+			perX = max(0, perX+vmod);
+		}
+		else {
+			perX += vmod;
+		}
 	}
 
 	if (((perX > 0) && ((*hp) < (*hpmax))) ||			// if regenerating
@@ -983,6 +996,9 @@ you_regen_pw()
 
 	// Carried spiritual soulstones
 	perX += stone_energy();
+	//Worn Nenya bonus ranges from -4 penalty to +7 HP per 10 turns
+	if(uring_art(ART_NENYA))
+		perX += en_nenya()*HEALCYCLE/10;
 	
 	// external power regeneration
 	if (Energy_regeneration ||										// energy regeneration 'trinsic
@@ -1114,6 +1130,10 @@ you_regen_san()
 
 	if(active_glyph(TRANSPARENT_SEA))
 		reglevel += 30;
+
+	//Worn Vilya bonus ranges from -4 (penalty) to +7
+	if(uring_art(ART_VILYA))
+		reglevel += heal_vilya();
 
 	// penalty for certain areas
 	if(Is_rlyeh(&u.uz)){

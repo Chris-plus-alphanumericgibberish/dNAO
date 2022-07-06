@@ -666,6 +666,10 @@ const char *name;
 		if (obj->oartifact == ART_IBITE_ARM)
 			add_oprop(obj, OPROP_CCLAW);
 		
+		/* symbol */
+		if (obj->oartifact == ART_LOMYA)
+			obj->oward = LOLTH_SYMBOL;
+		
 		/* size */
 		if (obj->oartifact && artilist[obj->oartifact].size != MZ_DEFAULT)
 			obj->objsize = artilist[obj->oartifact].size;

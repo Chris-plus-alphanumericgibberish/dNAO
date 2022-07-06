@@ -2306,9 +2306,12 @@ base_uac()
 	if(multi >= 0)
 		dexbonus += mons[u.umonnum].dac;
 	
-	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+	if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN)){
 		uac -= 6;
 	}
+
+	if(!flat_foot && uring_art(ART_NENYA))
+		uac -= (ACURR(A_WIS)-11)/2;
 
 	if(uwep){
 		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) uac -= max((uwep->spe+1)/2,0);
@@ -2580,7 +2583,7 @@ int base_udr()
 {
 	int udr = 0;
 	
-	if((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN)){
+	if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN)){
 		udr += 3;
 	}
 	
@@ -2713,8 +2716,9 @@ int depth;
 		}
 	}
 	/* Wearing the Shard from Morgoth's Crown adds +3 magical DR to arms and head (in addition to its +3 to all slots) */
-	if (((uright && uright->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN) || (uleft && uleft->oartifact == ART_SHARD_FROM_MORGOTH_S_CROWN))
-		&& (slot & (ARM_DR | HEAD_DR))) {
+	if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN)
+		&& (slot & (ARM_DR | HEAD_DR))
+	){
 		bas_udr += 3;
 	}
 	/* Vaul is not randomized, and contributes to magical DR */

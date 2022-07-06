@@ -2668,6 +2668,10 @@ register int n;
 				n -= uwep->spe + 1;
 			}
 		}
+		if(mtmp->mtame){
+			if(uring_art(ART_NARYA))
+				n += narya();
+		}
 		if (n < 0) n = 0;
 	}
 	//endif

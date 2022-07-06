@@ -150,7 +150,7 @@ E int FDECL(disp_artifact_discoveries, (winid));
 E void FDECL(otyp_hit, (struct monst *,struct monst *,
 				struct obj *,int, int *,int*, int));
 E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
-				struct obj *,struct obj*,int,int*,int*,int,boolean*));
+				struct obj *,struct obj*,int,int*,int*,int,boolean*,boolean));
 E int NDECL(doinvoke);
 E int FDECL(doparticularinvoke,(struct obj *));
 E void FDECL(arti_speak, (struct obj *));
@@ -1952,6 +1952,9 @@ E int NDECL(find_gcirclet);
 E int NDECL(find_sring);
 E int NDECL(find_iring);
 E int NDECL(find_good_iring);
+E int NDECL(find_good_fring);
+E int NDECL(find_good_wring);
+E int NDECL(find_good_aring);
 E int NDECL(find_vhelm);
 E int NDECL(find_skates);
 E int NDECL(find_cboots);
@@ -3280,6 +3283,9 @@ E void NDECL(clear_bypasses);
 E int FDECL(magic_negation, (struct monst *));
 E void FDECL(light_damage, (genericptr_t, long));
 E int NDECL(heal_mlevel_bonus);
+E int NDECL(heal_vilya);
+E int NDECL(lev_lomya);
+E int NDECL(en_nenya);
 
 /* ### write.c ### */
 
@@ -3339,6 +3345,7 @@ E long FDECL(attk_equip_slot, (struct monst *, int));
 E boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
 E boolean FDECL(safe_attack, (struct monst *, struct monst *, struct attack *, struct obj *, struct permonst *, struct permonst *));
 E int NDECL(beastmastery);
+E int NDECL(narya);
 E int NDECL(mountedCombat);
 E boolean FDECL(obj_silver_searing, (struct obj *));
 E boolean FDECL(obj_jade_searing, (struct obj *));

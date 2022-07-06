@@ -12165,7 +12165,7 @@ int vis;
 }
 
 int
-apply_hit_effects(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt)
+apply_hit_effects(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt, printmessages)
 struct monst * magr;
 struct monst * mdef;
 struct obj * otmp;
@@ -12175,6 +12175,7 @@ int * plusdmgptr;
 int * truedmgptr;
 int dieroll;
 boolean * hittxt;
+boolean printmessages;
 {
 	int result = MM_HIT;
 	int tmpplusdmg;
@@ -12182,7 +12183,7 @@ boolean * hittxt;
 
 	/* artifact and object properties and misc */
 	tmpplusdmg = tmptruedmg = 0;
-	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
+	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt, printmessages);
 	*plusdmgptr += tmpplusdmg;
 	*truedmgptr += tmptruedmg;
 	if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
@@ -12192,6 +12193,12 @@ boolean * hittxt;
 	if (spec_prop_otyp(otmp)) {	
 		tmpplusdmg = tmptruedmg = 0;
 		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
+		*plusdmgptr += tmpplusdmg;
+		*truedmgptr += tmptruedmg;
+	}
+	if (spec_prop_material(otmp)) {	
+		tmpplusdmg = tmptruedmg = 0;
+		// mat_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
 		*plusdmgptr += tmpplusdmg;
 		*truedmgptr += tmptruedmg;
 	}
@@ -14038,8 +14045,13 @@ int vis;						/* True if action is at all visible to the player */
 		/* Bardic Encouragement */
 		if (youagr)
 			bonsdmg += u.uencouraged;
-		else if (magr)
+		else if (magr){
 			bonsdmg += magr->encouraged;
+			if(magr->mtame){
+				if(uring_art(ART_NARYA))
+					bonsdmg += narya();
+			}
+		}
 		/* Singing Sword -- only works when the player is wielding it >_> */
 		if (uwep && uwep->oartifact == ART_SINGING_SWORD) {
 			if (uwep->osinging == OSING_LIFE) {
@@ -14235,7 +14247,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (valid_weapon_attack) {
 			otmp = weapon;
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
 				/* if the weapon caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
 				if (returnvalue == MM_MISS && youagr && (melee || thrust))
 					u.uconduct.weaphit--;
@@ -14249,7 +14261,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, FALSE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -14261,7 +14273,7 @@ int vis;						/* True if action is at all visible to the player */
 			((otmp = (youagr ? uarmh : which_armor(magr, W_ARMH))) &&
 			otmp->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER)) {
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, FALSE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -14272,7 +14284,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (unarmed_punch) {
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -14283,7 +14295,23 @@ int vis;						/* True if action is at all visible to the player */
 		if (unarmed_kick) {
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
+					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
+			}
+		}
+		/* all valid attacks proc effects of offensive rings */
+		if(youagr){
+			struct obj *rings[] = {uleft, uright};
+			int n = 2;
+			int i = 0;
+			for(otmp = rings[i]; i<n; i++, otmp = rings[i]){
+				if(!otmp)
+					continue;
+				// Note: artifact rings are currently set to always add their damage, but to only print the generic x hits messages when unarmed.
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, unarmed_punch);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)

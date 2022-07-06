@@ -13650,7 +13650,12 @@ struct monst *mtmp, *victim;
 	    // if (mtmp->mhpmax + max_increase > hp_threshold + 1)
 			// max_increase = max((hp_threshold + 1) - mtmp->mhpmax, 0);
 	    // cur_increase = (max_increase > 0) ? rn2(max_increase)+1 : 0;
-		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < victim->m_lev + (d(2,5) + heal_mlevel_bonus())){ /*allow monsters to quickly gain hp up to around their HP limit*/
+		int xp_threshold = victim->m_lev + d(2,5);
+		if(Role_if(PM_HEALER))
+			xp_threshold += heal_mlevel_bonus();
+		if(uring_art(ART_LOMYA))
+			xp_threshold += lev_lomya();
+		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
 			max_increase = 1;
 			cur_increase = 1;
 			if(Role_if(PM_BARD) && mtmp->mtame && canseemon(mtmp)){
@@ -14460,6 +14465,10 @@ struct monst *mon;
 	
 	if(Role_if(PM_HEALER) && mon->mtame && lev_limit < 49)
 		lev_limit = min_ints(49, lev_limit + heal_mlevel_bonus());
+	
+	if(uring_art(ART_LOMYA) && mon->mtame && lev_limit < 49)
+		lev_limit = min_ints(49, lev_limit + lev_lomya());
+		
 
 	return lev_limit;
 }

@@ -22,6 +22,7 @@
 
 #define maybe_polyd(if_so,if_not)	(Upolyd ? (if_so) : (if_not))
 
+#define uring_art(art_num)	((uright && uright->oartifact == art_num) || (uleft && uleft->oartifact == art_num))
 
 /*** Resistances to troubles ***/
 #define Oona_resistance	((u.oonaenergy == AD_FIRE ? Fire_resistance : u.oonaenergy == AD_COLD ? Cold_resistance : u.oonaenergy == AD_ELEC ? Shock_resistance : FALSE))
@@ -166,7 +167,7 @@
 #define	FacelessCloak(obj) ((obj)->otyp == WHITE_FACELESS_ROBE || (obj)->otyp == BLACK_FACELESS_ROBE || (obj)->otyp == SMOKY_VIOLET_FACELESS_ROBE)
 #define	Faceless(obj) (FacelessHelm(obj) || FacelessCloak(obj))
 
-#define save_vs_sanloss()	((uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < ACURR(A_WIS)))
+#define save_vs_sanloss()	((uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < (ACURR(A_WIS) + uring_art(ART_NARYA) ? narya() : 0)))
 
 #define Mortal_race	(!nonliving(youracedata) && !is_minion(youracedata) && !is_demon(youracedata) && !is_primordial(youracedata))
 #define Dark_immune	(is_unalive(youracedata) || is_primordial(youracedata))
