@@ -4568,7 +4568,8 @@ boolean was_swallowed;			/* digestion */
 		}
   		else if(	( (mdat->mattk[i].aatyp == AT_NONE && mdat->mtyp==PM_GREAT_CTHULHU)
 					 || mdat->mattk[i].aatyp == AT_BOOM) 
-				&& mdat->mattk[i].adtyp == AD_POSN){
+				&& mdat->mattk[i].adtyp == AD_POSN
+		){
 	    	Sprintf(killer_buf, "%s explosion", s_suffix(mdat->mname));
 	    	killer = killer_buf;
 	    	killer_format = KILLED_BY_AN;
@@ -4577,75 +4578,19 @@ boolean was_swallowed;			/* digestion */
 				create_gas_cloud(mon->mx, mon->my, 2, 30, FALSE);
 			}
 		}
-		else if(mdat->mattk[i].adtyp == AD_GROW && (mdat->mtyp==PM_AXUS)){
-			struct monst *mtmp;
-			struct permonst *mdat1;
-			int quin = 1, qua = 2, tre = 3, duo = 4;
-			int mndx = 0;
-//			int quincount = 0;
-			for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-				if(DEADMONSTER(mtmp))
-					continue;
-				mdat1 = mtmp->data;
-//				if(mdat1->mtyp==PM_QUINON) quincount++;
-				if(mdat1->mtyp==PM_QUATON && quin){
-					set_mon_data(mtmp, PM_QUINON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					quin--;
-//					quincount++;
-				}
-				else if(mdat1->mtyp==PM_TRITON && qua){
-					set_mon_data(mtmp, PM_QUATON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					qua--;
-				}
-				else if(mdat1->mtyp==PM_DUTON && tre){
-					set_mon_data(mtmp, PM_TRITON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					tre--;
-				}
-				else if(mdat1->mtyp==PM_MONOTON && duo){
-					set_mon_data(mtmp, PM_DUTON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					duo--;
-//					makemon(&mons[PM_MONOTON], mon->mx, mon->my,MM_ADJACENTOK|MM_ANGRY);
-				}
-			}
-			u.uevent.uaxus_foe = 1;//enemy of the modrons
-			for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-					if (is_auton(mtmp->data) && mtmp->mpeaceful && mtmp != mon) {
-						if(canseemon(mtmp)) pline("%s gets angry...", Monnam(mtmp));
-						untame(mtmp, 0);
-					}
-			}
-//			The dungeon of ill regard, where Axus is found, now spawns only Modrons.  So this is uneeded
-//			for(quincount;quincount<7;quincount++) makemon(&mons[PM_QUINON], mon->mx, mon->my,MM_ADJACENTOK|MM_ANGRY);
-		}
 		else if(mdat->mattk[i].adtyp == AD_GROW){
 			struct monst *mtmp;
 			struct monst * axus = (struct monst *)0;
 			boolean found;
 			int current_ton;
 			/* ASSUMES AUTONS ARE IN ORDER FROM MONOTON TO QUINON */
-			for (current_ton = mon->mtyp; current_ton >= PM_MONOTON; current_ton--) {
+			for (current_ton = mon->mtyp == PM_AXUS ? PM_QUINON : mon->mtyp; current_ton >= PM_MONOTON; current_ton--) {
 				found = FALSE; //haven't found this child yet - 1 per level
 				/* search for child */
 				for (mtmp = fmon; mtmp && (!found || !axus); mtmp = mtmp->nmon) {
 					if (DEADMONSTER(mtmp))
 						continue;
-					if (!axus && mtmp->mtyp == PM_AXUS)
+					if (!axus && !DEADMONSTER(mtmp) && mtmp->mtyp == PM_AXUS)
 						axus = mtmp;
 					if (!found && current_ton != PM_MONOTON && mtmp->mtyp == current_ton-1) {
 						set_mon_data(mtmp, current_ton);
@@ -4664,9 +4609,19 @@ boolean was_swallowed;			/* digestion */
 					mtmp = makemon(&mons[current_ton], axus->mx, axus->my, MM_ADJACENTOK | MM_ANGRY | NO_MINVENT);
 					if (mtmp) mtmp->mclone = 1;
 				}
-				/* growth is chained -- if we didn't find a child (and Axus didn't provide one), we don't touch the lower 'tons. */
-				if (!axus && !found)
+				/* growth is chained -- if we didn't find a child, we don't touch the lower 'tons. */
+				/* 	Axus is able to pull from anywhere, so its chain continues. */
+				if (!found && mdat->mtyp != PM_AXUS)
 					break;
+			}
+			if(mdat->mtyp == PM_AXUS){
+				u.uevent.uaxus_foe = 1;//enemy of the modrons
+				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+						if (is_auton(mtmp->data) && mtmp->mpeaceful && mtmp != mon) {
+							if(canseemon(mtmp)) pline("%s gets angry...", Monnam(mtmp));
+							untame(mtmp, 0);
+						}
+				}
 			}
 		}//end AD_GROW basic
 		else if(mdat->mattk[i].adtyp == AD_SOUL){
