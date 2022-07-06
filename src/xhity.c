@@ -3307,7 +3307,7 @@ int *shield_margin;
 			if(carnivorous(pa)&&!herbivorous(pa))
 				bons_acc += 2;
 			/* these guys are extra accurate */
-			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED)
+			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED || pa->mtyp == PM_NORN)
 				bons_acc += 20;
 			if (pa->mtyp == PM_GROTESQUE_PEEPER){
 				if((youdef && mon_can_see_you(magr))
