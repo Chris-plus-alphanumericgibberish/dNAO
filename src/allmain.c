@@ -3465,13 +3465,13 @@ STATIC_DCL
 void
 printDPR(){
 	FILE *rfile;
-	register int i, j, avdm, mdm;
+	register int i, j, avdm, mdm, avgperhit, maxperhit;
 	char pbuf[BUFSZ];
 	struct permonst *ptr;
 	struct attack *attk;
 	rfile = fopen_datafile("MonDPR.tab", "w", SCOREPREFIX);
 	if (rfile) {
-		Sprintf(pbuf,"Number\tName\tclass\taverage\tmax\tspeed\talignment\tunique?\n");
+		Sprintf(pbuf,"Number\tName\tclass\taverage\tmax\tper-hit avg\tper-hit max\tspeed\talignment\tunique?\n");
 		fprintf(rfile, "%s", pbuf);
 		fflush(rfile);
 		for(j=0;j<NUMMONS;j++){
@@ -3479,6 +3479,8 @@ printDPR(){
 			pbuf[0] = 0;
 			avdm = 0;
 			mdm = 0;
+			avgperhit = 0;
+			maxperhit = 0;
 			for(i = 0; i<6; i++){
 				attk = &ptr->mattk[i];
 				if(attk->aatyp == 0 &&
@@ -3488,10 +3490,14 @@ printDPR(){
 				) break;
 				else {
 					avdm += attk->damn * (attk->damd + 1)/2;
+					if(avgperhit < attk->damn * (attk->damd + 1)/2)
+						avgperhit = attk->damn * (attk->damd + 1)/2;
 					mdm += attk->damn * attk->damd;
+					if(maxperhit < attk->damn * attk->damd)
+						maxperhit = attk->damn * attk->damd;
 				}
 			}
-			Sprintf(pbuf,"%d\t%s\t%d\t%d\t%d\t%d\t%d\t%s\n", j, mons[j].mname, mons[j].mlet,avdm, mdm, mons[j].mmove,ptr->maligntyp,(mons[j].geno&G_UNIQ) ? "unique":"");
+			Sprintf(pbuf,"%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\n", j, mons[j].mname, mons[j].mlet,avdm, mdm, avgperhit, maxperhit, mons[j].mmove,ptr->maligntyp,(mons[j].geno&G_UNIQ) ? "unique":"");
 			fprintf(rfile, "%s", pbuf);
 			fflush(rfile);
 		}
