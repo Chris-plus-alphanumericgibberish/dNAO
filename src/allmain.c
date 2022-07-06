@@ -22,6 +22,7 @@ STATIC_DCL void NDECL(mercurial_repair);
 STATIC_DCL void NDECL(clothes_bite_you);
 STATIC_DCL void NDECL(androidUpkeep);
 STATIC_DCL void NDECL(printMons);
+STATIC_DCL void NDECL(printMonNames);
 STATIC_DCL void NDECL(printDPR);
 STATIC_DCL void NDECL(printBodies);
 STATIC_DCL void NDECL(printSanAndInsight);
@@ -3780,6 +3781,21 @@ printMons(){
 			fprintf(rfile, "%s", pbuf);
 			fflush(rfile);
 			i++;
+		}
+	}
+	fclose(rfile);
+}
+
+STATIC_DCL
+void
+printMonNames(){
+	FILE *rfile;
+	register int i;
+	rfile = fopen_datafile("wikiNames.txt", "w", SCOREPREFIX);
+	if (rfile) {
+		for(i=0;i<NUMMONS;i++){
+			fprintf(rfile, "==%s==\n\n\n", mons[i].mname);
+			fflush(rfile);
 		}
 	}
 	fclose(rfile);
