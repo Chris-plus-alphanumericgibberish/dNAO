@@ -1813,7 +1813,6 @@ u_init()
 	init_uhunger();
 	for (i = 0; i <= MAXSPELL; i++) spl_book[i].sp_id = NO_SPELL;
 	u.ublesscnt = 300;			/* no prayers just yet */
-	u.ugoatblesscnt = 300;			/* goat counter also starts high */
 	u.ualign.type = aligns[flags.initalign].value;
 	u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 	u.ulycn = NON_PM;
