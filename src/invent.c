@@ -4678,7 +4678,7 @@ boolean picked_some;
 	if (dfeature)
 		Sprintf(fbuf, "There is %s here.", an(dfeature));
 
-	if (!otmp || is_lava(u.ux,u.uy) || (is_pool(u.ux,u.uy, FALSE) && !Underwater)) {
+	if (!otmp || (is_lava(u.ux,u.uy) && !likes_lava(youracedata)) || (is_pool(u.ux,u.uy, FALSE) && !Underwater)) {
 		if (dfeature) pline1(fbuf);
 		read_engr_at(u.ux, u.uy); /* Eric Backus */
 		if (!skip_objects && (Blind || !dfeature))

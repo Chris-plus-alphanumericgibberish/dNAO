@@ -413,7 +413,7 @@ int what;		/* should be a long */
 		struct trap *ttmp = t_at(u.ux, u.uy);
 		/* no auto-pick if no-pick move, nothing there, or in a pool */
 		if (autopickup && (flags.nopick || !OBJ_AT(u.ux, u.uy) ||
-			(is_pool(u.ux, u.uy, FALSE) && !Underwater) || is_lava(u.ux, u.uy))) {
+			(is_pool(u.ux, u.uy, FALSE) && !Underwater) || (is_lava(u.ux, u.uy) && !likes_lava(youracedata)))) {
 			read_engr_at(u.ux, u.uy);
 			return (0);
 		}
