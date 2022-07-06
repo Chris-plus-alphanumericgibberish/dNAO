@@ -195,7 +195,7 @@ Boots_off()
 			HFumbling = EFumbling = 0;
 		break;
 	case FLYING_BOOTS:
-		if (!oldprop && !species_flies(youracedata) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don) {
+		if (!oldprop && !species_flies(youracedata) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don && !Flying) {
 			(void) float_down(0L, 0L);
 			makeknown(otyp);
 		}
@@ -1154,7 +1154,9 @@ boolean gone;
 		}
 		break;
 	case RIN_LEVITATION:
-		(void) float_down(0L, 0L);
+		if (!species_flies(youracedata) && !(u.usteed && mon_resistance(u.usteed,FLYING)) && !Levitation && !cancelled_don && !Flying) {
+			(void) float_down(0L, 0L);
+		}
 		if (!Levitation) makeknown(RIN_LEVITATION);
 		break;
 	case RIN_GAIN_STRENGTH:
