@@ -150,6 +150,18 @@ STATIC_OVL char *SaberHilts[] = {
 /*39*/"This %s is quite intricate in its design, covered in delicate runes and inlaid with black markings.",
 };
 
+STATIC_OVL char *BeamHilts[] = {
+/*00*/"This %s is shaped like an angel statuette. The angel's upswept wings form the crossguard.",
+/*01*/"This %s is shaped like an angel statuette. The angel's unfurling wings form the handguard.",
+/*02*/"This %s is shaped like a stylized winged humanoid. The wings form the handguard.",
+/*03*/"This %s is shaped like a demonic statuette. The demon's upswept wings form the handguard.",
+/*04*/"This %s is shaped like a demonic statuette. The demon's unfurling wings form the handguard.",
+/*05*/"This %s is shaped like a many-horned draconic being. The longest horns form the crossguard.",
+/*06*/"This %s is crowned with many curling horns. The longest horns form the crossguard.",
+/*07*/"This %s is surmounted by a rising sun. The sun's rays form the crossguard.",
+};
+
+
 STATIC_OVL struct Jitem ObscureJapanese_items[] = {
 	{ BATTLE_AXE, "ono" },
 	{ BROADSWORD, "ninja-to" },
@@ -353,10 +365,23 @@ struct obj *otmp;
 	return SaberHilts[(int)otmp->ovar1];
 }
 
+char *
+beamsword_hiltText(otmp)
+struct obj *otmp;
+{
+	return BeamHilts[(int)otmp->ovar1];
+}
+
 int
 random_saber_hilt()
 {
 	return rn2(SIZE(SaberHilts));
+}
+
+int
+random_beam_hilt()
+{
+	return rn2(SIZE(BeamHilts));
 }
 
 char *

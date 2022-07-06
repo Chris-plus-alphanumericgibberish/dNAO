@@ -71,7 +71,7 @@ doread()
 			&& !arti_mandala(scroll)
 			&& !scroll->oward
 			&& scroll->oartifact != ART_ROD_OF_THE_ELVISH_LORDS
-		) || scroll->otyp==LIGHTSABER
+		) || scroll->otyp==LIGHTSABER || scroll->otyp==BEAMSWORD
 	){
 		if(scroll->oartifact == ART_ROD_OF_SEVEN_PARTS){
 			if (Blind) {
@@ -359,6 +359,14 @@ doread()
 				return 0;
 			} else {
 				pline(lightsaber_hiltText(scroll),xname(scroll));
+			}
+			return(1);
+		} else if(scroll->otyp == BEAMSWORD){
+			if (Blind) {
+				You_cant("see it!");
+				return 0;
+			} else {
+				pline(beamsword_hiltText(scroll),xname(scroll));
 			}
 			return(1);
 		} else {
