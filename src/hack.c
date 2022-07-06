@@ -683,7 +683,7 @@ int mode;
 		    if (amorphous(youracedata))
 			You("try to ooze under the door, but can't squeeze your possessions through.");
 			if (iflags.autoopen && !flags.run && !Confusion && !Stunned && !Fumbling) {
-				iflags.door_opened = flags.move = doopen_indir(x, y);
+				iflags.door_opened = !(doopen_indir(x, y) & (MOVE_CANCELLED|MOVE_INSTANT));
 		    } else if (x == ux || y == uy) {
 				if (Blind || Stunned || ACURR(A_DEX) < 10 || Fumbling) {
 #ifdef STEED
@@ -1035,11 +1035,13 @@ domove()
 	    nomul(0, NULL);
 	    return;
 	}
+	
 	if(u.uswallow) {
 		if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20){
 			You("pass right through %s!", mon_nam(u.ustuck));
 			expels(u.ustuck, u.ustuck->data, 0);
 			u.lastmoved = monstermoves;
+			flags.move |= MOVE_MOVED;
 			return;
 		} else {
 			u.dx = u.dy = 0;
@@ -1123,7 +1125,7 @@ domove()
 		     (is_pool(x, y, TRUE) || is_lava(x, y)) && levl[x][y].seenv)) {
 			if(flags.run >= 2) {
 				nomul(0, NULL);
-				flags.move = 0;
+				flags.move |= MOVE_CANCELLED;
 				return;
 			} else
 				nomul(0, NULL);
@@ -1184,7 +1186,7 @@ domove()
 			       Protection_from_shape_changers)) ||
 			     sensemon(mtmp))) {
 				nomul(0, NULL);
-				flags.move = 0;
+				flags.move |= MOVE_CANCELLED;
 				return;
 			}
 		}
@@ -1257,6 +1259,7 @@ domove()
 					teleds(cc.x, cc.y, FALSE);
 				}
 			}
+			flags.move |= MOVE_ATTACKED;
 			return;
 		}
 	    }
@@ -1311,6 +1314,7 @@ domove()
 		    u.mh = -1;		/* dead in the current form */
 		    rehumanize();
 		}
+		flags.move |= MOVE_ATTACKED;
 		return;
 	}
 	if (glyph_is_invisible(levl[x][y].glyph)) {
@@ -1513,7 +1517,7 @@ domove()
 
 	if (!test_move(u.ux, u.uy, x-u.ux, y-u.uy, DO_MOVE)) {
 		if (!iflags.door_opened) {
-		    flags.move = 0;
+		    flags.move |= MOVE_INSTANT;
 		    nomul(0, NULL);
 		}
 	    return;
@@ -1525,9 +1529,12 @@ domove()
 	     * then we are entitled to our normal attack.
 	     */
 	    if (!attack2(mtmp)) {
-		flags.move = 0;
-		nomul(0, NULL);
+			flags.move |= MOVE_INSTANT;
+			nomul(0, NULL);
 	    }
+		else {
+			flags.move |= MOVE_ATTACKED;
+		}
 	    return;
 	}
 	
@@ -1742,6 +1749,7 @@ domove()
 		}
 	    }
 	}
+	flags.move |= MOVE_MOVED;
 }
 
 void
@@ -2297,7 +2305,7 @@ dopickup()
 		} else
 		    You("don't %s anything in here to pick up.",
 			  Blind ? "feel" : "see");
-		return(1);
+		return MOVE_STANDARD;
 	    } else {
 	    	int tmpcount = -count;
 		return loot_mon(u.ustuck, &tmpcount, (boolean *)0);
@@ -2307,26 +2315,26 @@ dopickup()
 	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You("cannot dive into the water to pick things up.");
-		return(0);
+		return MOVE_CANCELLED;
 	    } else if (!Underwater) {
 		You_cant("even see the bottom, let alone pick up %s.",
 				something);
-		return(0);
+		return MOVE_CANCELLED;
 	    }
 	}
 	if (is_lava(u.ux, u.uy)) {
 	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You_cant("reach the bottom to pick things up.");
-		return(0);
+		return MOVE_CANCELLED;
 	    } else if (!likes_lava(youracedata)) {
 		You("would burn to a crisp trying to pick things up.");
-		return(0);
+		return MOVE_CANCELLED;
 	    }
 	}
 	if(!OBJ_AT(u.ux, u.uy)) {
 		There("is nothing here to pick up.");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (!can_reach_floor()) {
 #ifdef STEED
@@ -2336,7 +2344,7 @@ dopickup()
 		else
 #endif
 		You("cannot reach the %s.", surface(u.ux,u.uy));
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
  	if (traphere && traphere->tseen) {
@@ -2348,11 +2356,11 @@ dopickup()
 		if ((traphere->ttyp == PIT || traphere->ttyp == SPIKED_PIT) &&
 		     (!u.utrap || (u.utrap && u.utraptype != TT_PIT)) && !Flying) {
 			You("cannot reach the bottom of the pit.");
-			return(0);
+			return MOVE_CANCELLED;
 		}
 	}
 
-	return (pickup(-count));
+	return (pickup(-count)) ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
 #endif /* OVLB */

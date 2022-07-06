@@ -20,6 +20,7 @@ E char *FDECL(fmt_ptr, (const genericptr,char *));
 
 /* ### allmain.c ### */
 
+E int FDECL(you_action_cost, (int, boolean));
 E void NDECL(moveloop);
 E void NDECL(stop_occupation);
 E void NDECL(display_gamewindows);
@@ -3317,7 +3318,8 @@ E int FDECL(xpassivey, (struct monst *, struct monst *, struct attack *, struct 
 E int tohitval(struct monst *, struct monst *, struct attack *, struct obj *, void *, int, int, int *);
 E void FDECL(weave_black_web, (struct monst *));
 E int NDECL(android_combo);
-E boolean NDECL(monk_moves);
+E void NDECL(movement_combos);
+E boolean FDECL(perform_monk_move, (int));
 E int NDECL(check_monk_move);
 E int FDECL(u_pole_pound, (struct monst *));
 E boolean FDECL(Curse_res, (struct monst *, boolean));

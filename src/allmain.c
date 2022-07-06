@@ -482,6 +482,156 @@ clothes_bite_you()
 
 static long prev_dgl_extrainfo = 0;
 
+/* returns the movement point cost of the requested action type 
+ * affect_game_state should only be TRUE when called from the
+ * main game loop
+ */
+int
+you_action_cost(actiontype, affect_game_state)
+int actiontype;
+boolean affect_game_state;
+{
+	int actiontypes_remaining = (actiontype == MOVE_DEFAULT) ? MOVE_STANDARD : (actiontype&(~MOVE_DEFAULT));
+	int current_action, current_cost, highest_cost = 0;
+	int i;
+
+	/* loop through all flagged action types to determine which is the largest cost,
+	 * and, if affect_game_state is TRUE, apply all necessary effects.
+	 * 
+	 * Most often, there is only one action type per player input.
+	 * In very rare circumstances, two actions that should take time can happen simultaneously.
+	 */
+	for (i=0, current_action = MOVE_STANDARD;
+		actiontypes_remaining != 0;
+		current_action = 1<<i, i++)
+	{
+		if (!(actiontypes_remaining & current_action))
+			continue;
+		else
+			actiontypes_remaining -= current_action;
+
+		current_cost = NORMAL_SPEED;
+
+		switch(current_action) {
+		case MOVE_STANDARD:
+			/* the default for any not-otherwise-handled non-instant action */
+			break;
+
+		case MOVE_INSTANT:
+			current_cost = 0;
+			break;
+		
+		case MOVE_PARTIAL:
+			if (affect_game_state ? partial_action() : check_partial_action()) {
+				if (affect_game_state)
+					flags.movetoprint &= ~MOVE_PARTIAL;
+				current_cost = NORMAL_SPEED;
+			}
+			else {
+				if (affect_game_state)
+					flags.movetoprint |= MOVE_PARTIAL;
+				current_cost = 0;
+			}
+			break;
+
+		case MOVE_MOVED:
+			/* to determine the fastest movement booster applicable */
+#define MOVECOST(val) current_cost = min(val, current_cost)
+
+			/* these only apply if you didn't attack this action */
+			if (!u.uattked) {
+				if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+					MOVECOST(NORMAL_SPEED/12);
+				} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
+					MOVECOST(NORMAL_SPEED/4);
+				} else if(uwep && uwep->oartifact == ART_TOBIUME){
+					if (affect_game_state) {
+						if((HStealth&TIMEOUT) < 2)
+							set_itimeout(&HStealth, 2L);
+						if((HInvis&TIMEOUT) < 2){
+							set_itimeout(&HInvis, 2L);
+							newsym(u.ux, u.uy);
+						}
+					}
+					MOVECOST(NORMAL_SPEED/4);
+				}
+				if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
+					MOVECOST(NORMAL_SPEED/3);
+				}
+				if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
+					MOVECOST(NORMAL_SPEED - artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod);
+					if(affect_game_state && artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod < 5*NORMAL_SPEED/6){
+						artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod += NORMAL_SPEED/6;
+					}
+				}
+			}
+#undef MOVECOST
+			break;
+
+		case MOVE_ATTACKED:
+			current_cost = NORMAL_SPEED;
+
+			/* some weapons are faster */
+			if (uwep && (fast_weapon(uwep))){
+				current_cost -= NORMAL_SPEED / 6;
+			}
+
+			/* some weapons are slower */
+			if (uwep
+				&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || 
+					((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER || uwep->otyp == ROD_OF_FORCE) && uwep->altmode)
+				)
+				&& !u.twoweap
+				){
+				current_cost += NORMAL_SPEED / 4;
+			}
+
+			/* some artifacts are faster */
+			// note - you don't have to actually be two-weaponing, and that's intentional,
+			// but you must have another ARTA_HASTE wep offhanded (and there's only 2 so)
+			if (uwep && uwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE)){
+				current_cost -= NORMAL_SPEED / 3;
+				if (uswapwep && uswapwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE))
+					current_cost -= NORMAL_SPEED / 6;
+			}
+			break;
+
+		case MOVE_QUAFFED:
+			break;
+		
+		case MOVE_ZAPPED:
+			if (QuickDraw) {
+				current_cost = you_action_cost(MOVE_PARTIAL, affect_game_state);
+			}
+			break;
+
+		case MOVE_READ:
+			break;
+		
+		case MOVE_CASTSPELL:
+			break;
+
+		case MOVE_ATE:
+			break;
+
+		case MOVE_FIRED:
+			break;
+
+		case MOVE_CANCELLED:
+			/* ignore other costs, force a cost of 0 */
+			return 0;
+
+		default:
+			impossible("Unhandled MOVE_XYZ case (%d)", current_action);
+			break;
+		}
+		/* assign as new highest cost, if applicable */
+		highest_cost = max(current_cost, highest_cost);
+	}
+
+	return highest_cost;
+}
+
 void
 you_calc_movement()
 {
@@ -1285,64 +1435,20 @@ moveloop()
 #ifdef POSITIONBAR
 	do_positionbar();
 #endif
+	movement_combos();
 
-	didmove = flags.move;
-	if(didmove) {
-	    /* actual time passed */
-		if(u.umoved && !u.uattked){
-			int step_cost = NORMAL_SPEED;
-			#define COST(val) step_cost = min(val, step_cost);
-			if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-				COST(1)
-			} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
-				COST(3)
-			} else if(uwep && uwep->oartifact == ART_TOBIUME){
-				if((HStealth&TIMEOUT) < 2)
-					set_itimeout(&HStealth, 2L);
-				if((HInvis&TIMEOUT) < 2){
-					set_itimeout(&HInvis, 2L);
-					newsym(u.ux, u.uy);
-				}
-				COST(4)
-			}
-			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED){
-				COST(3)
-			}
-			if(uarmf && uarmf->oartifact == ART_SEVEN_LEAGUE_BOOTS){
-				COST(12 - artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod)
-				if(artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod < 10){
-					artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod += 2;
-				}
-			}
-			//Subtract the cost.
-			youmonst.movement -= step_cost;
-			#undef COST
-		} else {
-			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED)
-				u.ucspeed = NORM_CLOCKSPEED;
-			artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod = 0;
-			youmonst.movement -= NORMAL_SPEED;
-		}
-		if(Role_if(PM_MONK) && !Upolyd){
-			if(u.umoved || u.uattked){
-				if((u.prev_dir.x || u.prev_dir.y) && !flags.nopick && (multi < 0 || monk_moves())){
-					//Did a move: clear previous input.
-					u.prev_dir.x = 0;
-					u.prev_dir.y = 0;
-				}
-				else {
-					u.prev_dir.x = u.dx;
-					u.prev_dir.y = u.dy;
-				}
-			}
-			else {
-				u.prev_dir.x = 0;
-				u.prev_dir.y = 0;
-			}
-		}
+	
+	if (!(flags.move & MOVE_CANCELLED)) {
+		flags.movetoprint = flags.move == MOVE_DEFAULT ? MOVE_STANDARD : flags.move;
+		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
+	}
+	if(you_action_cost(flags.move, TRUE) > 0) {
+		/* actual time passed */
+		youmonst.movement -= flags.movetoprintcost;
+		didmove = TRUE;
 
 		  /**************************************************/
-		 /*monsters that respond to the player turn go here*/
+		 /* things that respond to the player turn go here */
 		/**************************************************/
 		for (mtmp = fmon; mtmp; mtmp = nxtmon){
 			nxtmon = mtmp->nmon;
@@ -1372,6 +1478,11 @@ moveloop()
 				You("panic from traveling over ice!");
 				HPanicking += 1+rnd(3);
 			}
+		}
+		if (u.uattked || !u.umoved) {
+			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED)
+				u.ucspeed = NORM_CLOCKSPEED;
+			artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod = 0;
 		}
 		
 	    do { /* hero can't move this turn loop */
@@ -2902,7 +3013,7 @@ karemade:
 	  prev_hp_notify = uhp();
 	}
 
-	flags.move = 1;
+	flags.move = MOVE_DEFAULT;
 
 	if(multi >= 0 && occupation) {
 #if defined(MICRO) || defined(WIN32)
@@ -2915,9 +3026,9 @@ karemade:
 		    pushch(ch);
 # endif /* REDO */
 	    }
-	    if (!abort_lev && (*occupation)() == 0)
+	    if (!abort_lev && ((flags.move = (*occupation)()) & (MOVE_CANCELLED|MOVE_FINISHED_OCCUPATION)))
 #else
-	    if ((*occupation)() == 0)
+	    if (((flags.move = (*occupation)()) & (MOVE_CANCELLED|MOVE_FINISHED_OCCUPATION)))
 #endif
 		occupation = 0;
 	    if(
@@ -2958,7 +3069,7 @@ karemade:
 	    lookaround();
 	    if (!multi) {
 		/* lookaround may clear multi */
-		flags.move = 0;
+		flags.move |= MOVE_CANCELLED;
 		if (flags.time) flags.botl = 1;
 		continue;
 	    }

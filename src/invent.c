@@ -2106,10 +2106,10 @@ ddoinv()
 				checkfile(xname(otmp), 0, FALSE, TRUE, &datawin);
 				display_nhwindow(datawin, TRUE);
 				destroy_nhwindow(datawin);
-				return 0;
+				return MOVE_INSTANT;
 			}
 		}
-	return 0;
+	return MOVE_INSTANT;
 }
 
 /** Puts up a menu asking what to do with an object;
@@ -4435,7 +4435,7 @@ dotypeinv()
 	if (!invent && !billx) {
 #endif
 	    You("aren't carrying anything.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	unpaid_count = count_unpaid(invent);
 	if (flags.menu_style != MENU_TRADITIONAL) {
@@ -4445,7 +4445,7 @@ dotypeinv()
 		i = UNPAID_TYPES;
 		if (billx) i |= BILLED_TYPES;
 		n = query_category(prompt, invent, i, &pick_list, PICK_ONE);
-		if (!n) return 0;
+		if (!n) return MOVE_CANCELLED;
 		this_type = c = pick_list[0].item.a_int;
 		free((genericptr_t) pick_list);
 	    }
@@ -4486,7 +4486,7 @@ dotypeinv()
 #endif
 		if(c == '\0') {
 			clear_nhwindow(WIN_MESSAGE);
-			return 0;
+			return MOVE_CANCELLED;
 		}
 	    } else {
 		/* only one thing to itemize */
@@ -4503,14 +4503,14 @@ dotypeinv()
 		(void) doinvbill(1);
 	    else
 		pline("No used-up objects on your shopping bill.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	if (c == 'u') {
 	    if (unpaid_count)
 		dounpaid();
 	    else
 		You("are not carrying any unpaid objects.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	}
 	if (traditional) {
 	    oclass = def_char_to_objclass(c); /* change to object class */
@@ -4518,7 +4518,7 @@ dotypeinv()
 		return doprgold();
 	    } else if (index(types, c) > index(types, '\033')) {
 		You("have no such objects.");
-		return 0;
+		return MOVE_CANCELLED;
 	    }
 	    this_type = oclass;
 	}
@@ -4526,7 +4526,7 @@ dotypeinv()
 		    (flags.invlet_constant ? USE_INVLET : 0)|INVORDER_SORT,
 		    &pick_list, PICK_NONE, this_type_only) > 0)
 	    free((genericptr_t)pick_list);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /* return a string describing the dungeon feature at <x,y> if there
@@ -4646,7 +4646,7 @@ boolean picked_some;
 	    } else {
 		You("%s no objects here.", verb);
 	    }
-	    return(!!Blind);
+	    return (Blind ? MOVE_STANDARD : MOVE_INSTANT);
 	}
 	if (!skip_objects && (trap = t_at(u.ux,u.uy)) && trap->tseen)
 		There("is %s here.",
@@ -4671,7 +4671,7 @@ boolean picked_some;
 			dfeature = 0;		/* ice already identifed */
 		if (!can_reach_floor()) {
 			pline("But you can't reach it!");
-			return(0);
+			return MOVE_INSTANT;
 		}
 	}
 
@@ -4683,7 +4683,7 @@ boolean picked_some;
 		read_engr_at(u.ux, u.uy); /* Eric Backus */
 		if (!skip_objects && (Blind || !dfeature))
 		    You("%s no objects here.", verb);
-		return(!!Blind);
+		return (Blind ? MOVE_STANDARD : MOVE_INSTANT);
 	}
 	/* we know there is something here */
 
@@ -4727,7 +4727,7 @@ boolean picked_some;
 	    if (felt_cockatrice) feel_cockatrice(otmp, FALSE);
 	    read_engr_at(u.ux, u.uy); /* Eric Backus */
 	}
-	return(!!Blind);
+	return (Blind ? MOVE_STANDARD : MOVE_INSTANT);
 }
 
 /* explicilty look at what is here, including all objects */
@@ -4911,7 +4911,7 @@ doprgold()
 	    Your("wallet contains %ld %s.", umoney, currency(umoney));
 #endif
 	shopper_financial_report();
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 #endif /* OVL1 */
@@ -4929,7 +4929,7 @@ doprwep()
 		if (!uwep) You("are empty %s.", body_part(HANDED));
 		else prinv((char *)0, uwep, 0L);
 	}
-    return 0;
+    return MOVE_CANCELLED;
 }
 
 int
@@ -4958,7 +4958,7 @@ doprarm()
 		(void) display_inventory(lets, FALSE);
 	}
 	udr_enlightenment();
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 int
@@ -4975,7 +4975,7 @@ doprring()
 		lets[ct] = 0;
 		(void) display_inventory(lets, FALSE);
 	}
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 int
@@ -4985,7 +4985,7 @@ dopramulet()
 		You("are not wearing an amulet.");
 	else
 		prinv((char *)0, uamul, 0L);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 STATIC_OVL boolean
@@ -5015,7 +5015,7 @@ doprtool()
 	lets[ct] = '\0';
 	if (!ct) You("are not using any tools.");
 	else (void) display_inventory(lets, FALSE);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /* '*' command; combines the ')' + '[' + '=' + '"' + '(' commands;
@@ -5033,7 +5033,7 @@ doprinuse()
 	lets[ct] = '\0';
 	if (!ct) You("are not wearing or wielding anything.");
 	else (void) display_inventory(lets, FALSE);
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /*
@@ -5200,7 +5200,7 @@ doorganize()	/* inventory organizer by Del Lamb */
 	if (!flags.invlet_constant) reassign();
 	/* get a pointer to the object the user wants to organize */
 	allowall[0] = ALL_CLASSES; allowall[1] = '\0';
-	if (!(obj = getobj(allowall,"adjust"))) return(0);
+	if (!(obj = getobj(allowall,"adjust"))) return MOVE_CANCELLED;
 
 	/* initialize the list with all upper and lower case letters */
 	for (let = 'a', ix = 0;  let <= 'z';) alphabet[ix++] = let++;
@@ -5269,7 +5269,7 @@ doorganize()	/* inventory organizer by Del Lamb */
 
 	prinv(adj_type, obj, 0L);
 	update_inventory();
-	return(0);
+	return MOVE_CANCELLED;
 }
 
 /* common to display_minventory and display_cinventory */

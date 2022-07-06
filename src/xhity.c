@@ -185,29 +185,6 @@ struct monst * mdef;
 	}
 
 	check_caitiff(mdef);
-
-	/* SCOPECREEP: remove this, replace with u.actioncost */
-	if (uwep && (fast_weapon(uwep))){
-		youmonst.movement += NORMAL_SPEED / 6;
-	}
-	
-	/* SCOPECREEP: remove this, replace with u.actioncost */
-	// note - you don't have to actually be two-weaponing, and that's intentional,
-	// but you must have another ARTA_HASTE wep offhanded (and there's only 2 so)
-	if (uwep && uwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE)){
-		youmonst.movement += NORMAL_SPEED / 3;
-		if (uswapwep && uswapwep->oartifact && arti_attack_prop(uwep, ARTA_HASTE))
-			youmonst.movement += NORMAL_SPEED / 6;
-	}
-	
-	if (uwep
-		&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || 
-			((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER || uwep->otyp == ROD_OF_FORCE) && uwep->altmode)
-		)
-		&& !u.twoweap
-		){
-		youmonst.movement -= NORMAL_SPEED / 4;
-	}
 	
 	if ((u.specialSealsActive&SEAL_BLACK_WEB) && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves + 20)
 		weave_black_web(mdef);
@@ -16718,12 +16695,12 @@ android_combo()
 
 	if (!uandroid) {
 		pline("You aren't an android!");
-		return FALSE;
+		return MOVE_CANCELLED;
 	}
 
 	if(Straitjacketed){
 		You("can't do a combo while your arms are bound!");
-		return FALSE;
+		return MOVE_CANCELLED;
 	}
 
 	if(uwep && is_ammo(uwep)){
@@ -16740,7 +16717,7 @@ android_combo()
 	/* unarmed */
 	if (!uwep || (is_lightsaber(uwep) && !litsaber(uwep))){
 		if (!getdir((char *)0))
-			return FALSE;
+			return MOVE_CANCELLED;
 		if (u.ustuck && u.uswallow)
 			mdef = u.ustuck;
 		else
@@ -16761,7 +16738,7 @@ android_combo()
 				u.uen--;
 				flags.botl = 1;
 			}
-			else return TRUE;
+			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && u.uen > 0){
 			int j = jump(1);
@@ -16770,12 +16747,12 @@ android_combo()
 				u.uen--;
 				flags.botl = 1;
 			}
-			else return TRUE;
+			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_MASTER && u.uen > 0){
 			int j = jump(1);
 			int d = getdir((char *)0);
-			if (!j && !d) return TRUE;
+			if (!j && !d) return MOVE_ATTACKED;
 			u.uen--;
 			flags.botl = 1;
 			if (d){
@@ -16798,7 +16775,7 @@ android_combo()
 			}
 		}
 		if(P_SKILL(P_BARE_HANDED_COMBAT) >= P_GRAND_MASTER && u.uen > 0){
-			if(!getdir((char *)0)) return 1;
+			if(!getdir((char *)0)) return MOVE_ATTACKED;
 			u.uen--;
 			flags.botl = 1;
 			if (u.ustuck && u.uswallow)
@@ -16812,15 +16789,12 @@ android_combo()
 				xmeleehity(&youmonst, mdef, &finisher, (struct obj **)0, vis, 0, FALSE);
 			}
 		}
-		return TRUE;
+		return MOVE_ATTACKED;
 	}
 	else if (is_lightsaber(uwep) && litsaber(uwep)){ //!uwep handled above
 		/* get direction of attack */
 		if (!getdir((char *)0))
-			return FALSE;
-		/* fast weapons give you speed */
-		if (fast_weapon(uwep))
-			youmonst.movement += 2;
+			return MOVE_CANCELLED;
 		/* get defender */
 		if (u.ustuck && u.uswallow)
 			mdef = u.ustuck;
@@ -16865,13 +16839,13 @@ android_combo()
 			if ((a && !u.dz) || k){
 				u.uen--;
 			}
-			else return TRUE;
+			else return MOVE_ATTACKED;
 		}
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			int j = jump(1);
 			int d = getdir((char *)0);
 			if (!j && (!d || u.dz))
-				return TRUE;
+				return MOVE_ATTACKED;
 			u.uen--;
 			flags.botl = 1;
 			if (d){
@@ -16893,7 +16867,7 @@ android_combo()
 				}
 			}
 		}
-		return TRUE;
+		return MOVE_ATTACKED;
 	}
 	else if (weapon_type(uwep) == P_SPEAR || weapon_type(uwep) == P_LANCE){ //!uwep handled above
 		boolean attacked = FALSE;
@@ -16907,12 +16881,7 @@ android_combo()
 		while (n > 0 && u.uen > 0){
 			/* get direction of attack; if first time, cancelling will take no time */
 			if (!getdir((char *)0) || u.dz)
-				return attacked;
-			/* things that only occur in the first 'attack' of the combo */
-			if (!attacked) {
-				if (fast_weapon(uwep))
-					youmonst.movement += 2;
-			}
+				return attacked ? MOVE_ATTACKED : MOVE_CANCELLED;
 			/* get defender */
 			if (u.ustuck && u.uswallow)
 				mdef = u.ustuck;
@@ -16937,15 +16906,12 @@ android_combo()
 			flags.botl = 1;
 			attacked = TRUE;
 		}
-		return TRUE;
+		return MOVE_ATTACKED;
 	}
 	else if (weapon_type(uwep) == P_WHIP){ //!uwep handled above
 		/* get direction of attack */
 		if (!getdir((char *)0) || u.dz)
-			return FALSE;
-		/* fast weapons give you speed */
-		if (fast_weapon(uwep))
-			youmonst.movement += 2;
+			return MOVE_CANCELLED;
 		/* get defender */
 		if (u.ustuck && u.uswallow)
 			mdef = u.ustuck;
@@ -16966,7 +16932,7 @@ android_combo()
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* get direction AND do whip things */
 			if (!use_whip(uwep) || !uwep)
-				return TRUE;
+				return MOVE_ATTACKED;
 			/* get defender */
 			if (u.ustuck && u.uswallow)
 				mdef = u.ustuck;
@@ -16987,7 +16953,7 @@ android_combo()
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			/* get direction AND do whip things */
 			if (!use_whip(uwep) || !uwep)
-				return TRUE;
+				return MOVE_ATTACKED;
 			if (uwep->otyp == FORCE_WHIP){
 				/* turn it into a sword */
 				use_force_sword(uwep);
@@ -17023,15 +16989,13 @@ android_combo()
 			u.uen--;
 			flags.botl = 1;
 		}
-		return TRUE;
+		return MOVE_ATTACKED;
 	}
 	else if (!bimanual(uwep, youracedata)){ //!uwep handled above
 		/* get direction of attack */
 		if (!getdir((char *)0) || u.dz)
-			return FALSE;
-		/* fast weapons give you speed */
-		if (fast_weapon(uwep))
-			youmonst.movement += 2;
+			return MOVE_CANCELLED;
+		
 		/* get defender */
 		if (u.ustuck && u.uswallow)
 			mdef = u.ustuck;
@@ -17052,13 +17016,13 @@ android_combo()
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			//Two throws. Aborting either one ends the combo.
 			if(!dofire())
-				return TRUE;
+				return MOVE_ATTACKED;
 			//Charge energy for continuing combo after first throw.
 			u.uen--;
 			flags.botl = 1;
 			//Now do second throw. Aborting either one ends the combo.
 			if(!dofire())
-				return TRUE;
+				return MOVE_ATTACKED;
 		}
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			//One throw, followed by a moving attack.  Aborting either one ends the combo.
@@ -17069,7 +17033,7 @@ android_combo()
 				if (uwep){
 					/* get direction of attack */
 					if (!getdir((char *)0) || u.dz)
-						return TRUE;
+						return MOVE_ATTACKED;
 					/* Lunge in indicated direction */
 					if(!u.ustuck && !u.utrap && goodpos(u.ux+u.dx, u.uy+u.dy, &youmonst, 0)){
 						hurtle(u.dx, u.dy, 1, FALSE, FALSE);
@@ -17091,19 +17055,16 @@ android_combo()
 						projectile(&youmonst, uwep, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, u.dz, 10, FALSE, TRUE, FALSE);
 				}
 			}
-			else return TRUE;
+			else return MOVE_ATTACKED;
 		}
-		return TRUE;
+		return MOVE_ATTACKED;
 	}
 	else if (bimanual(uwep, youracedata)){ //!uwep handled above
 		int i, j;
 		/* get direction of attack */
 		if (!getdir((char *)0) || u.dz)
-			return FALSE;
-		/* fast weapons give you speed */
-		if (fast_weapon(uwep))
-			youmonst.movement += 2;
-		
+			return MOVE_CANCELLED;
+
 		if (u.dz) {
 			/* if getdir() was gived u.dz != 0, we will just pick a random direction to start hitting */
 			i = rn2(8);
@@ -17132,7 +17093,7 @@ android_combo()
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* use a kick to get direction */
 			if (!dokick())
-				return TRUE;
+				return MOVE_ATTACKED;
 			/* get your targetted direction's index */
 			for (i = 0; i < 8; i++)
 			if (xdir[i] == u.dx && ydir[i] == u.dy)
@@ -17155,7 +17116,7 @@ android_combo()
 		}
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			if (!getdir((char *)0) || u.dz)
-				return TRUE;
+				return MOVE_ATTACKED;
 			/* attack counterclockwise, hitting first direction once (and then throw) */
 			for (j = 8; j > 0; j--){
 				if (u.ustuck && u.uswallow)
@@ -17174,10 +17135,59 @@ android_combo()
 			flags.botl = 1;
 			youmonst.movement -= 3;
 		}
-		return TRUE;
+		return MOVE_ATTACKED;
 	}
 	/* This should never be reached */
-	return FALSE;
+	return MOVE_CANCELLED;
+}
+
+
+/* movement_combos()
+ * 
+ * assigns/clears prev_dir,
+ * checks if a special move should be made based on prev_dir and current movement,
+ * and makes it if so.
+ */
+void
+movement_combos()
+{
+	boolean did_combo = FALSE;
+
+	/* ignore cancelled and instant actions */
+	if (you_action_cost(flags.move, FALSE) == 0)
+		return;
+
+	/* only movements and attacks count for setting prev_dir,
+	 * and being paralyzed or moving with 'm' cancels it as well */
+	if (!(u.umoved || u.uattked) || flags.nopick || (multi<0)) {
+		u.prev_dir.x = 0;
+		u.prev_dir.y = 0;
+		return;
+	}
+
+	/* Monk Moves */
+	if (Role_if(PM_MONK) && !Upolyd) {
+		int moveID = check_monk_move();
+		if (moveID != 0 && perform_monk_move(moveID)) {
+			u.uen -= 8;
+			nomul(0, NULL);
+			u.uattked = TRUE;
+			did_combo = TRUE;
+			/* takes at least as long as a standard action */
+			flags.move |= MOVE_STANDARD;
+		}
+	}
+
+	if (did_combo) {
+		/* successfully doing a combo clears prev_dir */
+		u.prev_dir.x = 0;
+		u.prev_dir.y = 0;
+	}
+	else {
+		/* otherwise, build prev_dir */
+		u.prev_dir.x = u.dx;
+		u.prev_dir.y = u.dy;
+	}
 }
 
 #define peace_check_monk(mon) ((canspotmon(mon) || mon_warning(mon)) && (Hallucination || !mon->mpeaceful) && !imprisoned(mon))
@@ -17350,21 +17360,17 @@ struct monst *mdef;
 
 #undef peace_check_monk
 
-#define DID_MOVE 			u.uen -= 8;\
-			nomul(0, NULL);\
-			u.uattked = TRUE;\
-			return TRUE;
 
-/* monk_moves()
+/* perform_monk_move()
  *
- * Checks if the player has activated a monk martial arts move. Assumes that the move should occur if the function is called, a target is found, and energy is sufficient.
+ * Attempts to perform the given monk move, given that a target is found and energy is sufficient.
  *
  * Returns TRUE if a move goes off.
  */
 boolean
-monk_moves()
+perform_monk_move(moveID)
+int moveID;
 {
-	int moveID = check_monk_move();
 	struct monst *mdef;
 #define STILLVALID(mdef) (!DEADMONSTER(mdef) && mdef == m_at(u.ux + u.dx, u.uy + u.dy))
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
@@ -17386,14 +17392,14 @@ monk_moves()
 					xmeleehity(&youmonst, mdef, &xweponhit, (struct obj **)0, vis, 0, FALSE);
 				if(STILLVALID(mdef))
 					xmeleehity(&youmonst, mdef, &bitehit, (struct obj **)0, vis, 0, FALSE);
-				DID_MOVE
+				return TRUE;
 			}
 		}
 		else {
 			if(!EWounded_legs && (mdef = adjacent_monk_target(uarmf)) && near_capacity() <= SLT_ENCUMBER){
 				pline("Dive kick!");
 				dive_kick_monster(mdef);
-				DID_MOVE
+				return TRUE;
 			}
 		}
 		break;
@@ -17406,7 +17412,7 @@ monk_moves()
 		){
 			pline("Aura bolt!");
 			monk_aura_bolt();
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 		case BIRD_KICK:
@@ -17419,14 +17425,14 @@ monk_moves()
 				pline("Bird kick!");
 				bird_kick_monsters();
 			}
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 		case METODRIVE:
 		if(!uwep && !(uswapwep && u.twoweap) && inv_weight() < 0 && (mdef = adjacent_monk_target(uarmg))){
 			pline("Meteor drive!");
 			monk_meteor_drive(mdef);
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 		case PUMMEL:
@@ -17439,16 +17445,16 @@ monk_moves()
 			for(int i = 0; i < 2 && STILLVALID(mdef); i++){
 				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
 			}
-			DID_MOVE
+			return TRUE;
 		}
 		break;
 	}
 	return FALSE;
 }
 
-/* monk_moves()
+/* check_monk_move()
  *
- * Checks if the player has input a monk martial arts move. Assumes that the checks should occur if the function is called.
+ * Based on prev_dir and current u.dx/dy, determine which monk move (if any) should happen.
  *
  * Returns the move ID or 0 if no ID can be chosen.
  */

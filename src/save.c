@@ -62,7 +62,7 @@ int
 dosave()
 {
 	if (iflags.debug_fuzzer)
-		return 0;
+		return MOVE_CANCELLED;
 	clear_nhwindow(WIN_MESSAGE);
 	if(yn("Really save?") == 'n') {
 		clear_nhwindow(WIN_MESSAGE);
@@ -82,7 +82,7 @@ dosave()
 			terminate(EXIT_SUCCESS);
 		} else (void)doredraw();
 	}
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 

@@ -790,7 +790,7 @@ dotele()
 			if (!Teleportation)
 			    You("don't know that spell.");
 			else You("are not able to teleport at will.");
-			return(0);
+			return MOVE_CANCELLED;
 		    }
 #ifdef WIZARD
 		}
@@ -803,7 +803,7 @@ dotele()
 #endif
 			You("lack the strength %s.",
 			    castit ? "for a teleport spell" : "to teleport");
-			return 1;
+			return MOVE_STANDARD;
 #ifdef WIZARD
 		}
 #endif
@@ -819,23 +819,23 @@ dotele()
 		{
 			You("lack the energy %s.",
 			    castit ? "for a teleport spell" : "to teleport");
-			return 1;
+			return MOVE_STANDARD;
 		}
 	    }
 
 	    if (check_capacity(
 			"Your concentration falters from carrying so much."))
-		return 1;
+		return MOVE_STANDARD;
 
 	    if (castit) {
 		exercise(A_WIS, TRUE);
 		if (spelleffects(sp_no, TRUE, 0))
-			return(1);
+			return MOVE_STANDARD;
 		else
 #ifdef WIZARD
 		    if (!wizard)
 #endif
-			return(0);
+			return MOVE_CANCELLED;
 	    } else {
 		losepw(energy);
 		flags.botl = 1;
@@ -848,10 +848,10 @@ dotele()
 		(void) next_to_u();
 	} else {
 		You1(shudder_for_moment);
-		return(0);
+		return MOVE_INSTANT;
 	}
 	if (!trap) morehungry(100);
-	return(1);
+	return MOVE_STANDARD;
 }
 
 

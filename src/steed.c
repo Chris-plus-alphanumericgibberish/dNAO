@@ -199,10 +199,10 @@ doride()
 	if (wizard && yn("Force the mount to succeed?") == 'y')
 		forcemount = TRUE;
 #endif
-	    return (mount_steed(m_at(u.ux+u.dx, u.uy+u.dy), forcemount));
+	    return (mount_steed(m_at(u.ux+u.dx, u.uy+u.dy), forcemount)) ? MOVE_STANDARD : MOVE_CANCELLED;
 	} else
-	    return 0;
-	return 1;
+	    return MOVE_CANCELLED;
+	return MOVE_STANDARD;
 }
 
 

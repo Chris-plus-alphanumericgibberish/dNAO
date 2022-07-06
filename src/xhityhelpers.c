@@ -254,8 +254,8 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 					/* Prevent accidental donation prompt. */
 					pline("%s mutters a prayer.", Monnam(mdef));
 				}
-				else if (!dochat(FALSE, u.dx, u.dy, 0)) {
-					flags.move = 0;
+				else if (dochat(FALSE, u.dx, u.dy, 0) & (MOVE_CANCELLED|MOVE_INSTANT)) {
+					flags.move |= MOVE_INSTANT;
 				}
 				return ATTACKCHECK_NONE;
 			}
@@ -269,7 +269,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 					getlin(qbuf, buf);
 					(void)lcase(buf);
 					if (strcmp(buf, "yes")) {
-						flags.move = 0;
+						flags.move |= MOVE_CANCELLED;
 						return ATTACKCHECK_NONE;
 					}
 				}
@@ -277,7 +277,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 #endif
 					Sprintf(qbuf, "Really attack %s?", mon_nam(mdef));
 					if (yn(qbuf) != 'y') {
-						flags.move = 0;
+						flags.move |= MOVE_CANCELLED;
 						return ATTACKCHECK_NONE;
 					}
 #ifdef PARANOID
@@ -294,7 +294,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 			return ATTACKCHECK_ATTACK;
 		/* Otherwise, be a pacifist. */
 		You("stop for %s.", mon_nam(mdef));
-		flags.move = 0;
+		flags.move |= MOVE_CANCELLED;
 		return ATTACKCHECK_NONE;
 	}
 

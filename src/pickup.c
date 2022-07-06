@@ -1624,7 +1624,7 @@ doloot()	/* loot a container on the floor or loot saddle from mon. */
 {
     register struct obj *cobj, *nobj;
     register int c = -1;
-    int timepassed = 0;
+    int timepassed = MOVE_CANCELLED;
     coord cc;
     boolean underfoot = TRUE;
     const char *dont_find_anything = "don't find anything";
@@ -1637,11 +1637,11 @@ doloot()	/* loot a container on the floor or loot saddle from mon. */
 
     if (check_capacity((char *)0)) {
 	/* "Can't do that while carrying so much stuff." */
-	return 0;
+	return MOVE_CANCELLED;
     }
     if (nolimbs(youracedata)) {
 	You("have no limbs!");	/* not `body_part(HAND)' */
-	return 0;
+	return MOVE_CANCELLED;
     }
     cc.x = u.ux; cc.y = u.uy;
 
@@ -1649,7 +1649,7 @@ lootcont:
 
 	if (container_at(cc.x, cc.y, FALSE)) {
 
-		if (!able_to_loot(cc.x, cc.y, TRUE)) return 0;
+		if (!able_to_loot(cc.x, cc.y, TRUE)) return MOVE_CANCELLED;
 
 		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
 			if (Is_container(cobj) || cobj->otyp == MASS_SHADOW_PISTOL || is_gemable_lightsaber(cobj)) num_cont++;
@@ -1663,7 +1663,7 @@ lootcont:
 			anything any;
 			menu_item *pick_list;
 
-			timepassed = 0;
+			timepassed = MOVE_CANCELLED;
 
 			any.a_void = 0;
 			win = create_nhwindow(NHW_MENU);
@@ -1687,8 +1687,8 @@ lootcont:
 			for (i = 0; i < n; i++) {
 				timepassed |= do_loot_cont(pick_list[i].item.a_obj, TRUE);
 				if (multi < 0) {/* chest trap, stop looting */
-				free((genericptr_t) pick_list);
-				return 1;
+					free((genericptr_t) pick_list);
+					return MOVE_STANDARD;
 				}
 			}
 			}
@@ -1721,27 +1721,27 @@ lootcont:
 						if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 						losehp(tmp, "carnivorous bag", KILLED_BY_AN);
 						makeknown(BAG_OF_TRICKS);
-						timepassed = 1;
+						timepassed = MOVE_STANDARD;
 						continue;
 					}
 
 					You("carefully open %s...", the(xname(cobj)));
 					timepassed |= use_container(cobj, 0);
-					if (multi < 0) return 1;		/* chest trap */
+					if (multi < 0) return MOVE_STANDARD;		/* chest trap */
 			    } else if(is_gemable_lightsaber(cobj)){
 					Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
 					c = ynq(qbuf);
 					if (c == 'q') return (timepassed);
 					if (c == 'n') continue;
 					timepassed |= use_lightsaber(cobj);
-					if(timepassed) underfoot = TRUE;
+					if(timepassed & MOVE_STANDARD) underfoot = TRUE;
 				} else if(cobj->otyp == MASS_SHADOW_PISTOL){
 					Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
 					c = ynq(qbuf);
 					if (c == 'q') return (timepassed);
 					if (c == 'n') continue;
 					timepassed |= use_massblaster(cobj);
-					if(timepassed) underfoot = TRUE;
+					if(timepassed & MOVE_STANDARD) underfoot = TRUE;
 				}
 			}
 		}
@@ -1812,7 +1812,7 @@ gotit:
      */
     if (c != 'y' && mon_beside(u.ux, u.uy)) {
 	if (!get_adjacent_loc("Loot in what direction?", "Invalid loot location",
-			u.ux, u.uy, &cc)) return 0;
+			u.ux, u.uy, &cc)) return MOVE_CANCELLED;
 	if (cc.x == u.ux && cc.y == u.uy) {
 	    underfoot = TRUE;
 	    if (container_at(cc.x, cc.y, FALSE))
@@ -1829,7 +1829,7 @@ gotit:
 	if (mtmp) {
 		if (costly_spot(mtmp->mx, mtmp->my)) {
 			verbalize("Not in my store!");
-			timepassed = 1;
+			timepassed = MOVE_STANDARD;
 		}
 		else {
 			timepassed = loot_mon(mtmp, &prev_inquiry, &prev_loot);
@@ -1886,7 +1886,7 @@ boolean *prev_loot;
 	long unwornmask;
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
-		    return (0);
+		    return MOVE_CANCELLED;
 		}
 		if (otmp->cursed && otmp->owornmask && !is_weldproof_mon(mtmp)) {
 		    You("can't. It seems to be stuck to %s.",
@@ -1894,7 +1894,7 @@ boolean *prev_loot;
 				SUPPRESS_SADDLE, FALSE));
 			    
 		    /* the attempt costs you time */
-			return (1);
+			return MOVE_STANDARD;
 		}
 		if (otmp->otyp == STATUE && (otmp->corpsenm == PM_PARASITIC_MIND_FLAYER || otmp->corpsenm == PM_PARASITIC_MASTER_MIND_FLAYER)){
 		    You("can't. It's stuck in %s face.",
@@ -1902,7 +1902,7 @@ boolean *prev_loot;
 				SUPPRESS_SADDLE, FALSE)));
 			    
 		    /* the attempt costs you time */
-			return (1);
+			return MOVE_STANDARD;
 		}
 		obj_extract_self(otmp);
 		if ((unwornmask = otmp->owornmask) != 0L) {
@@ -1925,7 +1925,7 @@ boolean *prev_loot;
 		mtmp->mfrozen = timepassed;
 		if (prev_loot) *prev_loot = TRUE;
 	} else {
-		return (0);
+		return MOVE_CANCELLED;
 	}
     }
 #endif	/* STEED */
@@ -1934,7 +1934,7 @@ boolean *prev_loot;
 	int count = passed_info ? *passed_info : 0;
 	timepassed = pickup(count);
     }
-    return timepassed;
+    return timepassed ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
 /* dopetequip() returns amount of time passed.
@@ -1953,34 +1953,34 @@ dopetequip()
 	char nambuf[BUFSZ];
 	
 	if (!get_adjacent_loc("Equip a pet in what direction?", "Invalid location",
-		u.ux, u.uy, &cc)) return 0;
+		u.ux, u.uy, &cc)) return MOVE_CANCELLED;
 	
 	mtmp = m_at(cc.x, cc.y);
 	
 	if(!mtmp || !canspotmon(mtmp)){
 		You_cant("find anyone to equip!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	if(!mtmp->mtame
 		&& !(urole.ldrnum == PM_OLD_FORTUNE_TELLER && mtmp->mpeaceful && (quest_faction(mtmp) || mtmp->data->msound == MS_GUARDIAN))
 	){
 		pline("%s doesn't trust you enough for that!", Monnam(mtmp));
-		return 0;
+		return MOVE_CANCELLED;
 	}
 
 #ifdef STEED
 	if(mtmp == u.usteed){
 		You_cant("change the equipment of something you're riding!");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 #endif	/* STEED */
 	if (nolimbs(youracedata)) {
 		You_cant("do that without limbs."); /* not body_part(HAND) */
-		return (0);
+		return MOVE_CANCELLED;
 	}
 	if(!freehand()){
 		You("have no free %s to dress %s with!", body_part(HAND), mon_nam(mtmp));
-		return (0);
+		return MOVE_CANCELLED;
 	}
 	unseen = !canseemon(mtmp);
 
@@ -2008,14 +2008,14 @@ dopetequip()
 			flag = W_TOOL;
 		} else {
 			pline("Error: Unknown monster armor type!?");
-			return 0;
+			return MOVE_CANCELLED;
 		}
 		if(mtmp->mtyp == PM_HARROWER_OF_ZARIEL
 		 && ((flag == W_ARM && arm_blocks_upper_body(otmp->otyp))
 			|| flag == W_ARMU
 		)){
 			You_cant("fit %s on over the thicket of spears stuck through %s chest.", the(xname(otmp)), mhis(mtmp));
-			return 0;
+			return MOVE_CANCELLED;
 		}
 		if(otmp->unpaid)  addtobill(otmp, FALSE, FALSE, FALSE);
 		You("equip %s with %s.", mon_nam(mtmp), the(xname(otmp)));
@@ -2036,9 +2036,9 @@ dopetequip()
 		mtmp->mcanmove = FALSE;
 		mtmp->mfrozen = timepassed;
 	} else {
-		return (0);
+		return MOVE_CANCELLED;
 	}
-    return timepassed;
+    return timepassed ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
 /*
@@ -2998,8 +2998,8 @@ register struct obj *obj;
 			if(otmp->oartifact && !obj->oartifact)
 				obj->oartifact = otmp->oartifact;
 		}
-		return 1;
-	} else return 0;
+		return MOVE_STANDARD;
+	} else return MOVE_CANCELLED;
 }
 
 int
@@ -3021,8 +3021,8 @@ register struct obj *obj;
 			out_container(obj->cobj);
 		if(!obj->cobj)
 			in_container(otmp);
-		return 1;
-	} else return 0;
+		return MOVE_STANDARD;
+	} else return MOVE_CANCELLED;
 }
 
 int
@@ -3045,15 +3045,15 @@ register int held;
 	emptymsg[0] = '\0';
 	if (nohands(youracedata)) {
 		You("have no hands!");	/* not `body_part(HAND)' */
-		return 0;
+		return MOVE_CANCELLED;
 	} else if (!freehand()) {
 		You("have no free %s.", body_part(HAND));
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	if (obj->olocked) {
 	    pline("%s to be locked.", Tobjnam(obj, "seem"));
 	    if (held) You("must put it down to unlock.");
-	    return 0;
+	    return MOVE_CANCELLED;
 	} else if (obj->otrapped && (obj->otyp != MAGIC_CHEST)) {
 	    if (held) You("open %s...", the(xname(obj)));
 	    (void) chest_trap(obj, HAND, FALSE);
@@ -3062,7 +3062,7 @@ register int held;
 		nomul(-1, "opening a container");
 		nomovemsg = "";
 	    }
-	    return 1;
+	    return MOVE_STANDARD;
 	}
 	current_container = obj;	/* for use by in/out_container */
 
@@ -3072,22 +3072,18 @@ register int held;
 	    quantum_cat = TRUE;	/* for adjusting "it's empty" message */
 	}else if(obj->spe == 4){
 	    open_coffin(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-	    used = 1;
-		return used;
+		return MOVE_STANDARD;
 	}else if(obj->spe == 5){
 	    open_sarcophagus(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-	    used = 1;
-		return used;
+	    return MOVE_STANDARD;
 	}else if(obj->spe == 6 && u.uinsight >= 10){
 	    open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-	    used = 1;
-		return used;
+	    return MOVE_STANDARD;
 	}else if(obj->spe == 7){
 		// Madman reclaims their stuff. Contents handled by the level loader.
 		//FALSE: the box was not destroyed. Use present tense.
 	    if(open_madstuff_box(obj, FALSE)){
-			used = 1;
-			return used;
+			return MOVE_STANDARD;
 		}
 	}else if(obj->spe == 8){
 		// Nothing. Fulvous desk spawns monsters.
@@ -3134,13 +3130,13 @@ register int held;
 		    if (!outokay && !inokay) {
 			pline("%s", emptymsg);
 			You("don't have anything to put in.");
-			return used;
+			return used ? MOVE_STANDARD : MOVE_CANCELLED;
 		    }
 		    menuprompt[0] = '\0';
 		    if (!cnt) Sprintf(menuprompt, "%s ", emptymsg);
 		    Strcat(menuprompt, "Do what?");
 		    t = in_or_out_menu(menuprompt, current_container, outokay, inokay);
-		    if (t <= 0) return 0;
+		    if (t <= 0) return MOVE_CANCELLED;
 		    loot_out = (t & 0x01) != 0;
 		    loot_in  = (t & 0x02) != 0;
 		} else {	/* MENU_COMBINATION or MENU_PARTIAL */
@@ -3188,7 +3184,7 @@ ask_again2:
 		    break;
 		case 'q':
 		default:
-		    return used;
+		    return used ? MOVE_STANDARD : MOVE_CANCELLED;
 		}
 	    }
 	} else {
@@ -3202,7 +3198,7 @@ ask_again2:
 #endif
 	    /* nothing to put in, but some feedback is necessary */
 	    You("don't have anything to put in.");
-	    return used;
+	    return used ? MOVE_STANDARD : MOVE_CANCELLED;
 	}
 	if (flags.menu_style != MENU_FULL) {
 	    Sprintf(qbuf, "Do you wish to put %s in?", something);
@@ -3222,7 +3218,7 @@ ask_again2:
 		    break;
 		case 'q':
 		default:
-		    return used;
+		    return used ? MOVE_STANDARD : MOVE_CANCELLED;
 	    }
 	}
 	/*
@@ -3276,7 +3272,7 @@ ask_again2:
 	    dealloc_obj(u_gold);
 	}
 #endif
-	return used;
+	return used ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
 /* Loot a container (take things out, put things in), using a menu. */
@@ -3493,10 +3489,10 @@ dotip()
 					free((genericptr_t) pick_list);
 				if (otmp && otmp != &dummyobj) {
 					tipcontainer(otmp);
-					return 1;
+					return MOVE_STANDARD;
 				}
 				if (n == -1)
-					return 0;
+					return MOVE_CANCELLED;
 				/* else pick-from-invent below */
 			} else {
 				for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = nobj) {
@@ -3506,12 +3502,12 @@ dotip()
 					Sprintf(qbuf, "You see here %s, tip it?", safe_qbuf(qbuf, sizeof("You see here , tip it?"), doname(cobj), xname(cobj), "container"));
 					c = ynq(qbuf);
 					if (c == 'q')
-						return 0;
+						return MOVE_CANCELLED;
 					if (c == 'n')
 						continue;
 					tipcontainer(cobj);
 					/* can only tip one container at a time */
-					return 1;
+					return MOVE_STANDARD;
 				}
 			}
 		}
@@ -3525,7 +3521,7 @@ dotip()
 	/* normal case */
 	if (Is_container(cobj) || cobj->otyp == HORN_OF_PLENTY) {
 		tipcontainer(cobj);
-		return 1;
+		return MOVE_STANDARD;
 	}
 	/* assorted other cases */
 	if (Is_candle(cobj) && cobj->lamplit) {
@@ -3559,7 +3555,7 @@ dotip()
 			consume_obj_charge(cobj, TRUE);
 		}
 		/* something [useless] happened */
-		return 1;
+		return MOVE_STANDARD;
 	}
 	/* anything not covered yet */
 	if (cobj->oclass == POTION_CLASS) /* can't pour potions... */
@@ -3678,10 +3674,10 @@ tipmonster:
 		} else {
 			pline("That's a silly monster to tip.");
 		}
-		return 1;
+		return MOVE_STANDARD;
 			
 	} 
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 static void
@@ -3843,9 +3839,9 @@ tiphat()
 	int x, y, range, glyph, vismon, unseen, statue, res;
 
 	if (!uarmh) /* can't get here from there */
-		return 0;
+		return MOVE_CANCELLED;
 
-	res = uarmh->bknown ? 0 : 1;
+	res = uarmh->bknown ? MOVE_INSTANT : MOVE_STANDARD;
 	if (cursed(uarmh)) /* "You can't.  It is cursed." */
 		return res; /* if learned of curse, use a move */
 
@@ -3853,7 +3849,7 @@ tiphat()
 	if (!getdir("At whom? (in what direction)")) /* bail on ESC */
 		return res; /* iffy; now know it's not cursed for sure (since we got
 					 * past prior test) but might have already known that */
-	res = 1; /* physical action is going to take place */
+	res = MOVE_STANDARD; /* physical action is going to take place */
 
 	/* most helmets have a short wear/take-off delay and we could set
 	   'multi' to account for that, but we'll pretend that no extra time

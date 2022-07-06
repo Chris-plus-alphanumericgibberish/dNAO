@@ -54,8 +54,7 @@ struct flag {
 	boolean  mon_moving;	/* monsters' turn to move */
 	boolean  run_timers;	/* run timers as soon as possible (probably to desummon items) */
 	boolean  drgn_brth;		/* for use with breath weapons, indicates that a dragon is breathing */
-	boolean  move;
-	boolean  mv;
+	boolean  mv;		/* player is doing a multi-tile movement */
 	boolean  bypasses;	/* bypass flag is set on at least one fobj */
 	boolean  nap;		/* `timed_delay' option for display effects */
 	boolean  nopick;	/* do not pickup objects (as when running) */
@@ -91,6 +90,25 @@ struct flag {
 	boolean  toptenwin;	/* ending list in window instead of stdout */
 	boolean  verbose;	/* max battle info */
 	boolean  prayconfirm;	/* confirm before praying */
+
+	int move;	/* type[s] of action taken by player's last input/action */
+	int movetoprint;
+	int movetoprintcost;
+#define MOVE_DEFAULT	0x4000	/* equivalent to Standard unless another move is layered overtop, in which case it is ignored */
+#define MOVE_CANCELLED	0x8000	/* overrides all other move types, total action takes no time. Also used for infomenus and other instant nonactions. */
+#define MOVE_FINISHED_OCCUPATION	MOVE_CANCELLED
+#define MOVE_STANDARD	0x0001	/* player did a general action -- takes 1 standard turn */
+#define MOVE_INSTANT	0x0002	/* player did an action that should take no time */
+#define MOVE_PARTIAL	0x0004	/* player did a general action -- takes no time for the first instance, 1 standard turn after, resets on non-instant action */ 
+#define MOVE_MOVED		0x0008	/* player moved */
+#define MOVE_ATTACKED	0x0010	/* player made a weapon attack */
+#define MOVE_QUAFFED	0x0020	/* player quaffed a potion (or sink/fountain) */
+#define MOVE_ZAPPED		0x0040	/* player zapped a wand */
+#define MOVE_READ		0x0080	/* player read a book, scroll, or other readable */
+#define MOVE_CASTSPELL	0x0100	/* player cast a spell */
+#define MOVE_ATE		0x0200	/* player ate food */
+#define MOVE_FIRED		0x0400	/* player properly fired ammo, using a launcher or intrinsic launching means, NOT a standard thrown object. */
+
 	int	 end_top, end_around;	/* describe desired score list */
 	unsigned ident;		/* social security number for each monster */
 	unsigned moonphase;

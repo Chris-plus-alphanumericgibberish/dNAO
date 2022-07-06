@@ -253,16 +253,16 @@ dig()
 	    !on_level(&digging.level, &u.uz) ||
 	    ((digging.down ? (dpx != u.ux || dpy != u.uy)
 			   : (distu(dpx,dpy) > 2)))
-	) return(0);
+	) return MOVE_CANCELLED;
 	
 	if (digging.down) {
-		if(!dig_check(BY_YOU, TRUE, u.ux, u.uy)) return(0);
+		if(!dig_check(BY_YOU, TRUE, u.ux, u.uy)) return MOVE_CANCELLED;
 	} else { /* !digging.down */
 		if (IS_TREES(lev->typ) && !may_dig(dpx,dpy) &&
 			dig_typ(digitem, dpx, dpy) == DIGTYP_TREE
 		) {
 			pline("This tree seems to be petrified.");
-			return(0);
+			return MOVE_CANCELLED;
 		}
 	    /* ALI - Artifact doors from Slash'em */
 		if ((IS_ROCK(lev->typ) && !may_dig(dpx,dpy) &&
@@ -271,7 +271,7 @@ dig()
 		) {
 			pline("This %s is too hard to %s.",
 				IS_DOOR(lev->typ) ? "door" : "wall", verb);
-			return(0);
+			return MOVE_CANCELLED;
 		}
 	}
 	if(Fumbling &&
@@ -309,7 +309,7 @@ dig()
 	    default: Your("swing misses its mark.");
 		break;
 	    }
-	    return(0);
+	    return MOVE_CANCELLED;
 	}
 
 	bonus = 10 + rn2(5) + abon() +
@@ -333,7 +333,7 @@ dig()
 		if (digging.effort > 250) {
 		    (void) dighole(FALSE);
 		    (void) memset((genericptr_t)&digging, 0, sizeof digging);
-		    return(0);	/* done with digging */
+		    return MOVE_FINISHED_OCCUPATION;	/* done with digging */
 		}
 
 		if (digging.effort <= 50 ||
@@ -341,7 +341,7 @@ dig()
 		    ((ttmp = t_at(dpx,dpy)) != 0 &&
 			(ttmp->ttyp == PIT || ttmp->ttyp == SPIKED_PIT ||
 			 ttmp->ttyp == TRAPDOOR || ttmp->ttyp == HOLE)))
-		    return(1);
+		    return MOVE_STANDARD;
 
 		if (IS_ALTAR(lev->typ)) {
 		    altar_wrath(dpx, dpy);
@@ -352,7 +352,7 @@ dig()
 		    digging.level.dnum = 0;
 		    digging.level.dlevel = -1;
 		}
-		return(0);
+		return MOVE_FINISHED_OCCUPATION;
 	}
 
 	if (digging.effort > 100) {
@@ -520,7 +520,7 @@ dig()
 			}
 			if(!(lev->doormask & D_TRAPPED))
 				lev->doormask = D_BROKEN;
-		} else return(0); /* statue or boulder got taken */
+		} else return MOVE_CANCELLED; /* statue or boulder got taken */
 
 		if(!does_block(dpx,dpy,&levl[dpx][dpy]))
 		    unblock_point(dpx,dpy);	/* vision:  can see through */
@@ -557,7 +557,7 @@ cleanup:
 		digging.quiet = FALSE;
 		digging.level.dnum = 0;
 		digging.level.dlevel = -1;
-		return(0);
+		return MOVE_FINISHED_OCCUPATION;
 	} else {		/* not enough effort has been spent yet */
 		static const char *const d_target[10] = {
 			"", "rock", "statue", "boulder", "crate", "mass", "door", "tree", "bars", "chains"
@@ -570,10 +570,10 @@ cleanup:
 		    if(*in_rooms(dpx, dpy, SHOPBASE)) {
 			pline("This %s seems too hard to %s.",
 			      IS_DOOR(lev->typ) ? "door" : "wall", verb);
-			return(0);
+			return MOVE_CANCELLED;
 		    }
 		} else if (!IS_ROCK(lev->typ) && dig_target == DIGTYP_ROCK)
-		    return(0); /* statue or boulder got taken */
+		    return MOVE_CANCELLED; /* statue or boulder got taken */
 		if(!did_dig_msg) {
 		    if (is_lightsaber(digitem)) You("burn steadily through the %s.",
 			d_target[dig_target]);
@@ -583,7 +583,7 @@ cleanup:
 		    did_dig_msg = TRUE;
 		}
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 /* When will hole be finished? Very rough indication used by shopkeeper. */
@@ -1863,15 +1863,15 @@ struct obj *obj;
 	char qbuf[QBUFSZ];
 	register char *dsp = dirsyms;
 	register int rx, ry;
-	int res = 0;
+	int res = MOVE_CANCELLED;
 	register const char *sdp, *verb;
 
 	if(iflags.num_pad) sdp = ndir; else sdp = sdir;	/* DICE workaround */
 
 	/* Check tool */
 	if (obj != uwep && obj != uarmg) {
-	    if (!wield_tool(obj, "swing")) return 0;
-	    else res = 1;
+	    if (!wield_tool(obj, "swing")) return MOVE_CANCELLED;
+	    else res = MOVE_STANDARD;
 	}
 	ispick = is_pick(obj);
 	verb = ispick ? "dig" : "chop";
@@ -1957,7 +1957,7 @@ struct obj *obj;
 				OBJ_NAME(objects[obj->otyp]));
 		losehp(dam, buf, KILLED_BY);
 		flags.botl=1;
-		return(1);
+		return MOVE_STANDARD;
 	} else if(u.dz == 0) {
 		if(Stunned || (Confusion && !rn2(5))) confdir();
 		rx = u.ux + u.dx;
@@ -1967,11 +1967,11 @@ struct obj *obj;
 				aobjnam(obj, (char *)0));
 			else if (digtyp == HAMMER_TYP) pline("Clunk!");
 			else pline("Clash!");
-			return(1);
+			return MOVE_STANDARD;
 		}
 		lev = &levl[rx][ry];
 		if(MON_AT(rx, ry) && attack2(m_at(rx, ry)))
-			return(1);
+			return MOVE_ATTACKED;
 		dig_target = dig_typ(obj, rx, ry);
 		if (dig_target == DIGTYP_UNDIGGABLE) {
 			/* ACCESSIBLE or POOL */
@@ -2092,7 +2092,7 @@ struct obj *obj;
 		did_dig_msg = FALSE;
 		set_occupation(dig, verbing, 0);
 	}
-	return(1);
+	return MOVE_STANDARD;
 }
 
 /*

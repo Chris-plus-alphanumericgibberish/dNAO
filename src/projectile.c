@@ -11,7 +11,7 @@ STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(toss_up, (struct obj *, boolean));
 STATIC_DCL int FDECL(calc_multishot, (struct monst *, struct obj *, struct obj *, int));
 STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
-STATIC_DCL boolean FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
+STATIC_DCL int FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
 STATIC_DCL boolean FDECL(misthrow, (struct monst *, struct obj *, struct obj *, boolean, int *, int *, int *));
 STATIC_DCL struct obj * FDECL(blaster_ammo, (struct obj *));
 
@@ -1991,10 +1991,10 @@ dothrow()
 
 	if (nolimbs(youracedata)) {
 		You("are physically incapable of throwing anything.");
-		return 0;
+		return MOVE_CANCELLED;
 	}
 	if (check_capacity((char *)0)) {
-		return 0;
+		return MOVE_CANCELLED;
 	}
 
 	/* get object to throw */
@@ -2007,7 +2007,7 @@ dothrow()
 	ammo = getobj(uslinging() ? bullets : toss_objs, "throw");
 
 	if (!ammo)
-		return(0);
+		return MOVE_CANCELLED;
 
 	/* kludge to work around parse()'s pre-decrement of 'multi' */
 	shotlimit = (multi || save_cm) ? multi + 1 : 0;
@@ -2040,12 +2040,12 @@ int
 dofire()
 {
 	int oldmulti = multi;
-	int result = 0;
+	int result = MOVE_CANCELLED;
 	int shotlimit = 0;
 	char *oldsave_cm = save_cm;
 
 	if (check_capacity((char *)0))
-		return 0;
+		return MOVE_CANCELLED;
 
 	/*
 	 * Since some characters shoot multiple missiles at one time,
@@ -2086,7 +2086,7 @@ dofire()
 
 				if (uquiver && ammo_and_launcher(uquiver, launcher)) {
 					/* simply fire uquiver from the launcher */
-					result += uthrow(uquiver, launcher, shotlimit, FALSE);
+					result = uthrow(uquiver, launcher, shotlimit, FALSE);
 				}
 				else if (is_blaster(launcher)) {
 					/* blasters need to generate their ammo on the fly */
@@ -2110,7 +2110,7 @@ dofire()
 							/* create fake ammo in order to calculate multishot correctly */
 							ammo = blaster_ammo(launcher);
 							if (getdir((char *)0))
-								result += zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
+								result = zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
 							/* destroy ammo and don't go through uthrow */
 							obfree(ammo, 0);
 							ammo = (struct obj *)0;
@@ -2124,14 +2124,14 @@ dofire()
 							if (launcher->otyp == MASS_SHADOW_PISTOL)
 								ammo->ovar1 = -P_FIREARM;	/* special case to use FIREARM skill instead of SLING */
 
-							result += uthrow(ammo, launcher, shotlimit, TRUE);
+							result = uthrow(ammo, launcher, shotlimit, TRUE);
 							/* and now delete the ammo object we created */
 							obfree(ammo, 0);
 						}
 					}
 				}
 			}
-			return (result > 0);
+			return result;
 		}
 
 		/* Throw quivered throwing weapons */
@@ -2160,7 +2160,7 @@ dofire()
 			struct monst *mon;
 			sx = u.ux;
 			sy = u.uy;
-			if (!getdir((char *)0) || !(u.dx || u.dy)) return 0;
+			if (!getdir((char *)0) || !(u.dx || u.dy)) return MOVE_CANCELLED;
 			losepw(25);
 			/* also swing in the direction chosen */
 			flags.forcefight = 1;
@@ -2169,7 +2169,7 @@ dofire()
 
 			if (u.uswallow){
 				explode(u.ux, u.uy, AD_MAGM, WAND_CLASS, (d(2, 12) + 2 * uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, 1 + !!Double_spell_size);
-				return 1;
+				return MOVE_STANDARD;
 			}
 			else {
 				while (--range >= 0){
@@ -2193,7 +2193,7 @@ dofire()
 						break;//break loop
 					}
 				}
-				return 1;
+				return MOVE_STANDARD;
 			}
 		}
 
@@ -2227,12 +2227,12 @@ dofire()
 			result |= xfirey(&youmonst, attk, 0, 0, d(attk->damn, attk->damd));
 
 			if (result) {
-				return 1;
+				return MOVE_STANDARD;
 			}
 			else {
 				/* nothing shot, but we messaged, so we have to end here */
 				pline("You have nothing to intrinsically shoot!");
-				return 0;
+				return MOVE_INSTANT;
 			}
 		}
 	}
@@ -2273,7 +2273,7 @@ dofire()
 		{
 			struct obj * launcher;
 			int hand;
-			int result = 0;
+			int result = MOVE_CANCELLED;
 
 			/* verify twoweapon status */
 			if (u.twoweap && !test_twoweapon())
@@ -2287,7 +2287,7 @@ dofire()
 
 				if (uquiver && ammo_and_launcher(uquiver, launcher)) {
 					/* simply fire uquiver from the launcher */
-					result += uthrow(uquiver, launcher, shotlimit, FALSE);
+					result = uthrow(uquiver, launcher, shotlimit, FALSE);
 				}
 			}
 			return result;
@@ -2305,7 +2305,7 @@ dofire()
 	}
 
 	/* Fall through: we did nothing */
-	return 0;
+	return MOVE_CANCELLED;
 }
 
 /* 
@@ -2360,7 +2360,7 @@ struct obj * blaster;
  * Get firing direction from player, calculate multishot,
  * call projectile().
  */
-boolean
+int
 uthrow(ammo, launcher, shotlimit, forcedestroy)
 struct obj * ammo;
 struct obj * launcher;
@@ -2384,32 +2384,32 @@ boolean forcedestroy;
 		freeinv(ammo);
 		addinv(ammo);
 #endif
-		return(0);
+		return MOVE_CANCELLED;
 	}
 
 	/* reasons we can't throw ammo */
 	if (!canletgo(ammo, "throw"))
-		return(0);
+		return MOVE_CANCELLED;
 	if ((ammo->oartifact == ART_MJOLLNIR ||
 		ammo->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS) &&
 		ammo != uwep) {
 		pline("%s must be wielded before it can be thrown.",
 			The(xname(ammo)));
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (((ammo->oartifact == ART_MJOLLNIR ||
 		ammo->oartifact == ART_AXE_OF_THE_DWARVISH_LORDS) && ACURR(A_STR) < STR19(25))
 		|| (is_boulder(ammo) && !throws_rocks(youracedata) && !(u.sealsActive&SEAL_YMIR))) {
 		pline("It's too heavy.");
-		return(1);
+		return MOVE_STANDARD;
 	}
 	if (!u.dx && !u.dy && !u.dz) {
 		You("cannot throw an object at yourself.");
-		return(0);
+		return MOVE_CANCELLED;
 	}
 	if (welded(ammo)) {
 		weldmsg(ammo);
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 	/* blasters */
@@ -2507,9 +2507,9 @@ boolean forcedestroy;
 	}
 
 	if(otyp == SHURIKEN && Role_if(PM_MONK))
-		return partial_action();	/* this might have taken time */
+		return MOVE_PARTIAL;	/* this might have taken time */
 	else
-		return 1;	/* this took time */
+		return (launcher) ? MOVE_FIRED : MOVE_STANDARD;	/* this took time */
 }
 
 /* misthrow()
@@ -3311,7 +3311,7 @@ int tary;
 					case RAYGUN:
 						// TODO: monster raygun function
 						//if (!getdir((char *)0))
-						//	result |= zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
+						//	result = zap_raygun(launcher, calc_multishot(&youmonst, ammo, launcher, shotlimit), shotlimit);
 						/* fall through to error */
 					default:
 						ammo = (struct obj *)0;

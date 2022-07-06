@@ -1352,7 +1352,7 @@ int
 doredraw()
 {
     docrt();
-    return 0;
+    return MOVE_CANCELLED;
 }
 
 void
