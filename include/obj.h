@@ -486,6 +486,7 @@ struct obj {
 			 otmp->otyp == BLADE_OF_PITY)
 #define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
 #define is_insight_weapon(otmp) (check_oprop(otmp, OPROP_CCLAW) || \
+			 is_rakuyo(otmp) ||\
 			 rakuyo_prop(otmp) || \
 			 check_oprop(otmp,OPROP_GSSDW) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
@@ -496,6 +497,37 @@ struct obj {
 			 otmp->otyp == ISAMUSEI ||\
 			 otmp->otyp == DISKOS ||\
 			 otmp->otyp == BESTIAL_CLAW)
+#define is_future_otyp(typ)	(\
+		typ == LIGHTSABER ||\
+		typ == BEAMSWORD ||\
+		typ == DOUBLE_LIGHTSABER ||\
+		typ == VIBROBLADE ||\
+		typ == WHITE_VIBROSWORD ||\
+		typ == GOLD_BLADED_VIBROSWORD ||\
+		typ == WHITE_VIBROZANBATO ||\
+		typ == GOLD_BLADED_VIBROZANBATO ||\
+		typ == RED_EYED_VIBROSWORD ||\
+		typ == SEISMIC_HAMMER ||\
+		typ == FORCE_PIKE ||\
+		typ == DOUBLE_FORCE_BLADE ||\
+		typ == FORCE_BLADE ||\
+		typ == FORCE_SWORD ||\
+		typ == WHITE_VIBROSPEAR ||\
+		typ == GOLD_BLADED_VIBROSPEAR ||\
+		(typ >= PISTOL && typ <= RAYGUN) ||\
+		(typ >= SHOTGUN_SHELL && typ <= LASER_BEAM) ||\
+		typ == FLACK_HELMET ||\
+		typ == PLASTEEL_HELM ||\
+		typ == PLASTEEL_ARMOR ||\
+		typ == JUMPSUIT ||\
+		typ == BODYGLOVE ||\
+		typ == PLASTEEL_GAUNTLETS ||\
+		typ == PLASTEEL_BOOTS ||\
+		(typ >= SENSOR_PACK && typ <= HYPOSPRAY_AMPULE) ||\
+		typ == BULLET_FABBER ||\
+		typ == PROTEIN_PILL\
+		)
+
 #define ensouled_item(otmp)	(((otmp)->otyp >= WAGE_OF_SLOTH && (otmp)->otyp <= WAGE_OF_PRIDE)\
 			 || (otmp)->otyp == VITAL_SOULSTONE\
 			 || (otmp)->otyp == SPIRITUAL_SOULSTONE\

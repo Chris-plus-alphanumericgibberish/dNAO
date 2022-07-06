@@ -128,6 +128,7 @@ static int randSpecialDamageTypes[] =
 						AD_DRDX,
 						AD_DRCO,
 						AD_POSN,
+						AD_SVPN,
 						/* physical + status effects */
 						AD_SLEE,
 						AD_BLND,

@@ -447,9 +447,9 @@ extern struct artifact * artilist;
             art_already_exists(ART_STAFF_OF_WILD_MAGIC) ||\
             art_already_exists(ART_ROBE_OF_THE_ARCHMAGI) ||\
             art_already_exists(ART_FORGE_HAMMER_OF_THE_ARTIFI) ||\
-            art_already_exists(ART_RING_OF_LOLTH) ||\
+            art_already_exists(ART_LOMYA) ||\
             art_already_exists(ART_BULWARK_OF_THE_DWARVEN_DEF) ||\
-            art_already_exists(ART_RING_OF_LOLTH) ||\
+            art_already_exists(ART_LOMYA) ||\
             art_already_exists(ART_NARYA) ||\
             art_already_exists(ART_NENYA) ||\
             art_already_exists(ART_VILYA) ||\
@@ -564,7 +564,7 @@ extern struct artifact * artilist;
             || ((a) == &artilist[ART_FORGE_HAMMER_OF_THE_ARTIFI] && (Role_if(PM_WIZARD) || Pantheon_if(PM_WIZARD)) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Drow */\
-            || ((a) == &artilist[ART_RING_OF_LOLTH] && Race_if(PM_DROW) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
+            || ((a) == &artilist[ART_LOMYA] && Race_if(PM_DROW) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\
                 !has_named_mastery_artifact())\
             /* Dwarf */\
             || ((a) == &artilist[ART_BULWARK_OF_THE_DWARVEN_DEF] && Race_if(PM_DWARF) && u.ulevel >= MASTERY_ARTIFACT_LEVEL &&\

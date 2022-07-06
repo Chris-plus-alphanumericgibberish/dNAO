@@ -188,6 +188,12 @@ hack_artifacts()
 	artilist[ART_HELM_OF_THE_DARK_LORD].otyp = find_vhelm();
 	artilist[ART_SHARD_FROM_MORGOTH_S_CROWN].otyp = find_good_iring();
 	
+	artilist[ART_NARYA].otyp = find_good_fring();
+	artilist[ART_NENYA].otyp = find_good_wring();
+	artilist[ART_VILYA].otyp = find_good_aring();
+	
+	artilist[ART_LOMYA].otyp = find_signet_ring();
+
 	if(!Role_if(PM_BARD)){
  	    artilist[ART_SINGING_SWORD].role = NON_PM;
 	}
@@ -544,7 +550,7 @@ struct obj *otmp;	/* existing object; NOT ignored even if alignment specified */
 
 	if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) {
 		/* offensive stuff */
-		do { a->adtyp = rn2(9); }while(a->adtyp == AD_DISN || a->adtyp == AD_SLEE);
+		do { a->adtyp = rn2(9); }while(a->adtyp == AD_DISN);
 		a->accuracy = max(1, rn2(5)*5);
 		a->damage = rn2(3)*10;
 
@@ -2639,6 +2645,18 @@ boolean narrow_only;
 			if (!has_blood_mon(mdef))
 				return FALSE;
 		break;
+		case AD_SLEE:
+			if (Sleep_res(mdef))
+				return FALSE;
+		break;
+		case AD_STDY:
+			if (youdef ? !canspotmon(mdef) : !mon_can_see_you(mdef))
+				return FALSE;
+		break;
+		case AD_STAR:
+			if (!hates_silver(ptr))
+				return FALSE;
+		break;
 		default:
 			impossible("Weird weapon special attack: (%d).", weap->adtyp);
 		}
@@ -2867,7 +2885,7 @@ int basedmg;
 int * plusdmgptr;
 int * truedmgptr;
 {
-	register const struct artifact *weap = get_artifact(otmp);
+	const struct artifact *weap = get_artifact(otmp);
 	int damd = (int)weap->damage;
 	boolean goodpointers = (plusdmgptr && truedmgptr);
 	
@@ -2902,12 +2920,15 @@ int * truedmgptr;
 		return TRUE;
 	}
 	
+	spec_dbon_applies = spec_applies(otmp, mon, FALSE)
+			&& !(
+			/* additional conditions required to deal bonus damage */
+			(weap->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves) /* only while invoked */
+			||	(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)	/* only while lit */
+			);
 	/* determine if we will apply bonus damage */
-	if ((spec_dbon_applies = (spec_applies(otmp, mon, FALSE)
-		&& !(
-		/* additional conditions required to deal bonus damage */
-		(weap->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves) ||	/* only while invoked */
-		(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit))	/* only while lit */
+	if ((spec_dbon_applies && !(
+			(weap->adtyp == AD_SLEE) ||	(weap->adtyp == AD_STDY)	/* doesn't do damage */
 		)) || (
 		/* alternative conditions for dealing bonus damage (ie spec_dbon_applies == FALSE) */
 		(otmp->oartifact == ART_FIRE_BRAND) ||
@@ -4441,7 +4462,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */
 int
-special_weapon_hit(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, messaged)
+special_weapon_hit(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, messaged, printmessages)
 struct monst * magr;
 struct monst * mdef;
 struct obj * otmp;
@@ -4451,6 +4472,7 @@ int * plusdmgptr;
 int * truedmgptr;
 int dieroll; /* needed for Magicbane and vorpal blades */
 boolean * messaged;
+boolean printmessages; /* print generic elemental damage messages */
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -4466,6 +4488,8 @@ boolean * messaged;
 	Strcpy(hittee, youdef ? you : mon_nam(mdef));
 
 	const char *wepdesc;
+
+	const struct artifact *arti_struct = get_artifact(otmp);
 
 	/* set msgr to otmp if we weren't given one */
 	/* for artifacts, we must assume they are used properly -- msgr will not override artifact-specific hitmsgs */
@@ -4873,7 +4897,7 @@ boolean * messaged;
 		mdef->mgoatmarked = TRUE;
 	
 	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW) || goatweaponturn == AD_FIRE){
-		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR)) {	/* only artifacts message */
+		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR) && printmessages) {	/* only artifacts message */
 			pline_The("fiery %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc,
@@ -4882,7 +4906,7 @@ boolean * messaged;
 					"burn"),
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
-			}
+		}
 		if(oartifact != ART_PROFANED_GREATSCYTHE && !UseInvFire_res(mdef)){
 			if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
@@ -4895,13 +4919,15 @@ boolean * messaged;
 		(is_orc(pd) || is_demon(pd) || is_drow(pd) || is_undead(pd))
 	){
 		/*Note: magic blue flames, damage through fire res but still check invent fire res to see if inventory should burn*/
-		pline_The("blue-flamed %s %s %s!",
-			wepdesc,
-			vtense(wepdesc,
-				is_watery(pd) ? "partly vaporize" :
-				"burn"),
-			hittee);
-		*messaged = TRUE;
+		if(printmessages){
+			pline_The("blue-flamed %s %s %s!",
+				wepdesc,
+				vtense(wepdesc,
+					is_watery(pd) ? "partly vaporize" :
+					"burn"),
+				hittee);
+			*messaged = TRUE;
+		}
 		*truedmgptr += d(2, 10);
 		if(!UseInvFire_res(mdef)){
 			if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -4913,10 +4939,10 @@ boolean * messaged;
 	}
 	if ((attacks(AD_COLD, otmp)  && !(
 			/* exceptions */
-			(oartifact && get_artifact(otmp)->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves)
+			(oartifact && arti_struct->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves)
 		)) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW) || goatweaponturn == AD_COLD
 	){
-		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR)) {
+		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("ice-cold %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc,
@@ -4924,14 +4950,14 @@ boolean * messaged;
 					"freeze"),
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
-			}
+		}
 		if (!UseInvCold_res(mdef)) {
 	    	if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 	}
 	if (oartifact == ART_SHADOWLOCK) {
 		if (!Cold_res(mdef)) {
-			if (vis&VIS_MAGR) {
+			if (vis&VIS_MAGR && printmessages) {
 				pline_The("ice-cold blade-shadow freezes %s!", hittee);
 				*messaged = TRUE;
 			}
@@ -4942,7 +4968,7 @@ boolean * messaged;
 		}
 	}
 	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW) || goatweaponturn == AD_ELEC){
-		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR)) {
+		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("%s %s %s%c",
 				wepdesc,
 				vtense(wepdesc, "hit"),
@@ -4955,7 +4981,7 @@ boolean * messaged;
 		}
 	}
 	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW) || goatweaponturn == AD_EACD || goatweaponturn == AD_ACID){
-		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR)) {
+		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("foul %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc,
@@ -4970,8 +4996,28 @@ boolean * messaged;
 //	    	if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 		}
 	}
+	if (attacks(AD_SLEE, otmp)){
+		if (attacks(AD_SLEE, otmp) && (vis&VIS_MAGR) && printmessages) {
+			pline_The("soporific %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc, "hit"),
+				hittee, !spec_dbon_applies ? '.' : '!');
+			*messaged = TRUE;
+		}
+	}
+	if (attacks(AD_STAR, otmp)){
+		if (attacks(AD_STAR, otmp) && (vis&VIS_MAGR) && printmessages) {
+			pline_The("starlit %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"sear"),
+				hittee, !spec_dbon_applies ? '.' : '!');
+			*messaged = TRUE;
+		}
+	}
 	if (attacks(AD_BLUD, otmp)){
-		if (vis&VIS_MAGR) {
+		if (vis&VIS_MAGR && printmessages) {
 			pline_The("bloodstained %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc, "hit"),
@@ -5995,6 +6041,7 @@ boolean * messaged;
 			}
 		}
 	}
+	
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
@@ -6150,6 +6197,30 @@ boolean * messaged;
 		}
 		if (youagr || youdef)
 			flags.botl = 1;
+	}
+	//Sleeping weapons put targets to sleep
+	if(attacks(AD_SLEE, otmp)){
+		if (youdef) {
+			fall_asleep(-rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), TRUE);
+			if (Blind) You("are put to sleep!");
+			else You("are put to sleep by %s!", mon_nam(magr));
+		}
+		else {
+			if (sleep_monst(mdef, rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), -1)) {
+				pline("%s falls asleep!",
+					Monnam(mdef));
+				mdef->mstrategy &= ~STRAT_WAITFORU;
+				slept_monst(mdef);
+			}
+		}
+	}
+	//Studying weapons study target
+	if(attacks(AD_STDY, otmp)){
+		int * stdy = (youdef ? &(u.ustdy) : &(mdef->mstdy));
+		int dmg = arti_struct->damage ? rnd(arti_struct->damage) : basedmg ? basedmg : 1;
+		/* only print message or increase study if it is an increase */
+		if(dmg > *stdy)
+			(*stdy) = dmg;
 	}
 	return MM_HIT;
 #undef currdmg
@@ -11635,6 +11706,7 @@ living_items()
 
 
 static int nitocrisspawns[] = {PM_PIT_VIPER, PM_PIT_VIPER, PM_COBRA, PM_COBRA, PM_GHOUL, PM_GHOUL, PM_CROCODILE, PM_CROCODILE, PM_SERPENT_NECKED_LIONESS, PM_AMMIT};
+
 STATIC_OVL void
 nitocris_sarcophagous(obj)
 struct obj *obj;

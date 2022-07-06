@@ -1208,6 +1208,8 @@ dog_limit()
 	int n = ACURR(A_CHA)/3;
 	if(u.ufirst_know)
 		n += 3;
+	if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN))
+		n += 6;
 	return n;
 }
 

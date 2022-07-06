@@ -44,7 +44,7 @@ static NEARDATA const int nasties[] = {
 	PM_OGRE_KING, PM_OLOG_HAI, PM_DISENCHANTER, PM_DISPLACER_BEAST, 
 	PM_MANTICORE, PM_GNOLL, PM_SCRAP_TITAN, PM_GUG, 
 	PM_ANUBAN_JACKAL, PM_BEBELITH, PM_WEREWOLF, PM_WERERAT,
-	PM_DAUGHTER_OF_BEDLAM, PM_WALKING_DELIRIUM,
+	PM_DAUGHTER_OF_BEDLAM, PM_WALKING_DELIRIUM, PM_DAUGHTER_OF_NAUNET,
 	
 	/* lawful */
 	PM_GREEN_DRAGON, PM_YELLOW_DRAGON, PM_ORANGE_DRAGON, PM_CAPTAIN,
@@ -838,6 +838,13 @@ illur_resurrect()
 	struct monst *mtmp, **mmtmp;
 	long elapsed;
 
+	/* look for a Illurien on the same level */
+	mmtmp = &fmon;
+	while ((mtmp = *mmtmp) != 0) {
+		if (mtmp->mtyp==PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES)
+			return; /*Illurine is currently here */
+		mmtmp = &mtmp->nmon;
+	}
 	/* look for a migrating Illurien */
 	mmtmp = &migrating_mons;
 	while ((mtmp = *mmtmp) != 0) {
@@ -869,28 +876,6 @@ illur_resurrect()
 		verbalize("You thought to steal memories from ME, she of the Myriad Glimpses!?");
 	}
 
-}
-
-void
-yello_resurrect()
-{
-	struct monst *mtmp;
-	long elapsed;
-
-	/* look for a migrating Stranger */
-	mtmp = migrating_mons;
-	while (mtmp) {
-		if (mtmp->mtyp==PM_STRANGER)
-			return; /*It's currently making its way over*/
-		mtmp = mtmp->nmon;
-	}
-	
-	if(!mtmp) mtmp = makemon(&mons[PM_STRANGER], 0, 0, MM_NOWAIT|MM_NOCOUNTBIRTH);
-	
-	if (mtmp) {
-		mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;
-		set_malign(mtmp);
-	}
 }
 
 void
@@ -1077,7 +1062,10 @@ yello_intervene()
 			aggravate();
 		break;
 	    case 4:
-			yello_resurrect();
+			if (!Blind)
+			    You("notice a %s glow surrounding you.",
+				  hcolor(NH_YELLOW));
+			rndcurse();
 		break;
 	}
 }

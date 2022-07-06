@@ -22,6 +22,7 @@ STATIC_DCL void NDECL(mercurial_repair);
 STATIC_DCL void NDECL(clothes_bite_you);
 STATIC_DCL void NDECL(androidUpkeep);
 STATIC_DCL void NDECL(printMons);
+STATIC_DCL void NDECL(printMonNames);
 STATIC_DCL void NDECL(printDPR);
 STATIC_DCL void NDECL(printBodies);
 STATIC_DCL void NDECL(printSanAndInsight);
@@ -1000,9 +1001,8 @@ you_regen_hp()
 
 	// The Ring of Hygiene's Disciple
 	if (!Upolyd &&	// Question for Chris: should this be enabled to also work while polymorphed?
-		((uleft  && uleft->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE) ||
-		(uright && uright->oartifact == ART_RING_OF_HYGIENE_S_DISCIPLE))
-		){
+		uring_art(ART_RING_OF_HYGIENE_S_DISCIPLE)
+	){
 		perX += HEALCYCLE * min(4, (*hpmax) / max((*hp), 1));
 	}
 
@@ -1036,6 +1036,20 @@ you_regen_hp()
 	if(FaintingFits && rn2(100) >= u.usanity && multi >= 0){
 		You("suddenly faint!");
 		fall_asleep((u.usanity - 100)/10 - 1, FALSE);
+	}
+
+	//Worn Vilya bonus ranges from -4 (penalty) to +7 HP per 10 turns
+	// If you're currently dying (negative HP regen) Vilya may make it worse,
+	//  but vilya won't cause you to start dying if you aren't already.
+	// Consequently, it should be applied after all other bonuses
+	if(uring_art(ART_VILYA)){
+		int vmod = heal_vilya()*HEALCYCLE/10;
+		if(perX >= 0){
+			perX = max(0, perX+vmod);
+		}
+		else {
+			perX += vmod;
+		}
 	}
 
 	if (((perX > 0) && ((*hp) < (*hpmax))) ||			// if regenerating
@@ -1133,6 +1147,9 @@ you_regen_pw()
 
 	// Carried spiritual soulstones
 	perX += stone_energy();
+	//Worn Nenya bonus ranges from -4 penalty to +7 HP per 10 turns
+	if(uring_art(ART_NENYA))
+		perX += en_nenya()*HEALCYCLE/10;
 	
 	// external power regeneration
 	if (Energy_regeneration ||										// energy regeneration 'trinsic
@@ -1264,6 +1281,10 @@ you_regen_san()
 
 	if(active_glyph(TRANSPARENT_SEA))
 		reglevel += 30;
+
+	//Worn Vilya bonus ranges from -4 (penalty) to +7
+	if(uring_art(ART_VILYA))
+		reglevel += heal_vilya();
 
 	// penalty for certain areas
 	if(Is_rlyeh(&u.uz)){
@@ -3487,14 +3508,34 @@ printBodies(){
 	struct permonst *ptr;
 	rfile = fopen_datafile("MonBodies.tab", "w", SCOREPREFIX);
 	if (rfile) {
-		Sprintf(pbuf,"Number\tName\tclass\thumanoid\tanimaloid\tserpentine\tcentauroid\tnaganoid\tleggedserpent\tNAoid\thumanoid torso\thumanoid upperbody\thead\thands\tfeet\tboots\teyes\n");
+		Sprintf(pbuf,"Number\tName\tclass\thumanoid\tanimaloid\tserpentine\tcentauroid\tnaganoid\tleggedserpent\tNAoid\thumanoid torso\thumanoid upperbody\thead\thands\tgloves\tfeet\tboots\teyes\toldpolywep\thands but no polywep\n");
 		fprintf(rfile, "%s", pbuf);
 		fflush(rfile);
 		for(j=0;j<NUMMONS;j++){
 			ptr = &mons[j];
 			pbuf[0] = 0;// n	nm	let	hm	anm	srp	cen	ng	lgs	hd	hn	ft	bt  ey
-			Sprintf(pbuf,"%d	%s	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d\n", 
-					j, mons[j].mname, mons[j].mlet,humanoid(ptr),animaloid(ptr),serpentine(ptr),centauroid(ptr),snakemanoid(ptr),leggedserpent(ptr),naoid(ptr),humanoid_torso(ptr),humanoid_upperbody(ptr),has_head(ptr),!nohands(ptr),!noboots(ptr),can_wear_boots(ptr),haseyes(ptr));
+			Sprintf(pbuf,"%d	%s	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d\n", 
+						   j,	mons[j].mname, 
+									mons[j].mlet,
+										humanoid(ptr),
+											animaloid(ptr),
+												serpentine(ptr),
+													centauroid(ptr),
+														snakemanoid(ptr),
+															leggedserpent(ptr),
+																naoid(ptr),
+																	humanoid_torso(ptr),
+																		humanoid_upperbody(ptr),
+																			has_head(ptr),
+																				!nohands(ptr),
+																					!nogloves(ptr),
+																						!noboots(ptr),
+																							can_wear_boots(ptr),
+																								haseyes(ptr),
+																									!nohands(ptr) && ((ptr->mattk[0].aatyp == AT_CLAW || (ptr->mattk[0].aatyp == AT_TUCH && ptr->mlet == S_LICH))
+																									|| (ptr->mattk[1].aatyp == AT_CLAW && (ptr->mtyp == PM_INCUBUS || ptr->mtyp == PM_SUCCUBUS))),
+																										!nohands(ptr) && you_cantwield(ptr)
+																										);
 			fprintf(rfile, "%s", pbuf);
 			fflush(rfile);
 		}
@@ -3535,13 +3576,13 @@ STATIC_DCL
 void
 printDPR(){
 	FILE *rfile;
-	register int i, j, avdm, mdm;
+	register int i, j, avdm, mdm, avgperhit, maxperhit;
 	char pbuf[BUFSZ];
 	struct permonst *ptr;
 	struct attack *attk;
 	rfile = fopen_datafile("MonDPR.tab", "w", SCOREPREFIX);
 	if (rfile) {
-		Sprintf(pbuf,"Number\tName\tclass\taverage\tmax\tspeed\talignment\tunique?\n");
+		Sprintf(pbuf,"Number\tName\tclass\taverage\tmax\tper-hit avg\tper-hit max\tspeed\talignment\tunique?\n");
 		fprintf(rfile, "%s", pbuf);
 		fflush(rfile);
 		for(j=0;j<NUMMONS;j++){
@@ -3549,6 +3590,8 @@ printDPR(){
 			pbuf[0] = 0;
 			avdm = 0;
 			mdm = 0;
+			avgperhit = 0;
+			maxperhit = 0;
 			for(i = 0; i<6; i++){
 				attk = &ptr->mattk[i];
 				if(attk->aatyp == 0 &&
@@ -3558,10 +3601,14 @@ printDPR(){
 				) break;
 				else {
 					avdm += attk->damn * (attk->damd + 1)/2;
+					if(avgperhit < attk->damn * (attk->damd + 1)/2)
+						avgperhit = attk->damn * (attk->damd + 1)/2;
 					mdm += attk->damn * attk->damd;
+					if(maxperhit < attk->damn * attk->damd)
+						maxperhit = attk->damn * attk->damd;
 				}
 			}
-			Sprintf(pbuf,"%d\t%s\t%d\t%d\t%d\t%d\t%d\t%s\n", j, mons[j].mname, mons[j].mlet,avdm, mdm, mons[j].mmove,ptr->maligntyp,(mons[j].geno&G_UNIQ) ? "unique":"");
+			Sprintf(pbuf,"%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\n", j, mons[j].mname, mons[j].mlet,avdm, mdm, avgperhit, maxperhit, mons[j].mmove,ptr->maligntyp,(mons[j].geno&G_UNIQ) ? "unique":"");
 			fprintf(rfile, "%s", pbuf);
 			fflush(rfile);
 		}
@@ -3858,6 +3905,21 @@ printMons(){
 
 STATIC_DCL
 void
+printMonNames(){
+	FILE *rfile;
+	register int i;
+	rfile = fopen_datafile("wikiNames.txt", "w", SCOREPREFIX);
+	if (rfile) {
+		for(i=0;i<NUMMONS;i++){
+			fprintf(rfile, "==%s==\n\n\n", mons[i].mname);
+			fflush(rfile);
+		}
+	}
+	fclose(rfile);
+}
+
+STATIC_DCL
+void
 resFlags(buf, rflags)
 	char *buf;
 	unsigned int rflags;
@@ -4094,6 +4156,7 @@ printAttacks(buf, ptr)
 		"holy energy",			/*145*/
 		"unholy energy",		/*146*/
 		"level-based damage",	/*147*/
+		"severe poison",		/*148*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */
@@ -4473,11 +4536,11 @@ struct monst *mon;
 static int pharaohspawns[] = {PM_COBRA, PM_COBRA, PM_COBRA, PM_SERPENT_NECKED_LIONESS, PM_HUNTING_HORROR,
 							  PM_COBRA, PM_COBRA, PM_COBRA, PM_SERPENT_NECKED_LIONESS, PM_HUNTING_HORROR,
 							  PM_HUMAN_MUMMY, PM_HUMAN_MUMMY, PM_HUMAN_MUMMY, PM_GIANT_MUMMY, PM_PHARAOH,
-							  PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_LIGHTNING_PARAELEMENTAL, PM_BLUE_DRAGON};
+							  PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_ENERGY_VORTEX, PM_LIGHTNING_PARAELEMENTAL, PM_BLUE_DRAGON, PM_DAUGHTER_OF_NAUNET};
 
 static int toughpharaohspawns[] = {PM_COBRA, PM_SERPENT_NECKED_LIONESS, PM_HUNTING_HORROR,
 							  PM_GIANT_MUMMY, PM_PHARAOH,
-							  PM_LIGHTNING_PARAELEMENTAL, PM_BLUE_DRAGON};
+							  PM_LIGHTNING_PARAELEMENTAL, PM_BLUE_DRAGON, PM_DAUGHTER_OF_NAUNET};
 
 
 STATIC_OVL
@@ -4918,7 +4981,7 @@ struct monst *mon;
 		}
 		/* The Stranger arrives from other levels and appears as soon as you gain enough insight */
 		if(mon->m_insight_level <= u.uinsight){
-			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2){
 				mtmp2 = mtmp->nmon;
 				if (mtmp == mon) {
 					mtmp->mtrack[0].x = MIGR_RANDOM;
@@ -4937,22 +5000,25 @@ struct monst *mon;
 		}
 	}
 	/* Otherwise, The Stranger acts against you */
-	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && xyloc == MIGR_EXACT_XY && rn2(5)){ /*Sometimes skip a turn so that it can be evaded*/
-		if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
-			You_feel("a stranger's gaze on your back!");
-			u.ustdy = max_ints(u.ustdy, min_ints(5, u.ustdy+rnd(5)));
-		}
-		else {
-			xlocale += sgn(u.ux - xlocale);
-			ylocale += sgn(u.uy - ylocale);
-			if(isok(xlocale, ylocale) && (
-				(!is_pool(xlocale, ylocale, FALSE) && ZAP_POS(levl[xlocale][ylocale].typ))
-				|| is_pool(mon->mtrack[1].x, mon->mtrack[1].y, FALSE) 
-				|| !ZAP_POS(levl[mon->mtrack[1].x][mon->mtrack[1].y].typ)
-				|| ((!Role_if(PM_MADMAN) || quest_status.touched_artifact) && !rn2(5)) /* Sometimes phases through walls */
-			)){
-				mon->mtrack[1].x = xlocale;
-				mon->mtrack[1].y = ylocale;
+	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && xyloc == MIGR_EXACT_XY){
+		flags.yello_level=1;
+		if(rn2(5)){ /*Sometimes skip a turn so that it can be evaded*/
+			if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
+				You_feel("a stranger's gaze on your back!");
+				u.ustdy = max_ints(u.ustdy, min_ints(5, u.ustdy+rnd(5)));
+			}
+			else {
+				xlocale += sgn(u.ux - xlocale);
+				ylocale += sgn(u.uy - ylocale);
+				if(isok(xlocale, ylocale) && (
+					(!is_pool(xlocale, ylocale, FALSE) && ZAP_POS(levl[xlocale][ylocale].typ))
+					|| is_pool(mon->mtrack[1].x, mon->mtrack[1].y, FALSE) 
+					|| !ZAP_POS(levl[mon->mtrack[1].x][mon->mtrack[1].y].typ)
+					|| ((!Role_if(PM_MADMAN) || quest_status.touched_artifact) && !rn2(5)) /* Sometimes phases through walls */
+				)){
+					mon->mtrack[1].x = xlocale;
+					mon->mtrack[1].y = ylocale;
+				}
 			}
 		}
 	}

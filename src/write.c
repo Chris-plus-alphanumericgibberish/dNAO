@@ -319,7 +319,7 @@ found_ward:
 	/* can't write if we don't know it - unless we're lucky */
 	if(objects[new_obj->otyp].oc_nowish ||
 	  (!(objects[new_obj->otyp].oc_name_known) &&
-	   !(objects[new_obj->otyp].oc_uname) &&
+	   !(by_descr && objects[new_obj->otyp].oc_uname) &&
 	   (rnl(100) >= (Role_if(PM_WIZARD) ? 33 : 7)))) {
 		if(new_obj->otyp != SPE_SECRETS) You("%s to write that!", by_descr ? "fail" : "don't know how");
 		/* scrolls disappear, spellbooks don't */

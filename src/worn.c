@@ -9,6 +9,9 @@ boolean FDECL(mon_gets_extrinsic, (struct monst *, int, struct obj *));
 STATIC_DCL void FDECL(update_mon_intrinsic, (struct monst *,struct obj *,int,BOOLEAN_P,BOOLEAN_P));
 STATIC_DCL void FDECL(m_dowear_type, (struct monst *,long, BOOLEAN_P, BOOLEAN_P));
 STATIC_DCL int NDECL(def_beastmastery);
+STATIC_DCL int NDECL(def_vilya);
+STATIC_DCL int NDECL(def_narya);
+STATIC_DCL int NDECL(def_lomya);
 STATIC_DCL int NDECL(def_mountedCombat);
 
 const struct worn {
@@ -676,6 +679,12 @@ struct monst *mon;
 			base -= rnd(def_beastmastery()); // the duster doubles for tame animals
 		
 		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
+		
+		if(uring_art(ART_VILYA) && def_vilya())
+			base -=  sgn(def_vilya())*rnd(abs(def_vilya()));
+
+		if(uring_art(ART_NARYA) && def_narya())
+			base -= sgn(def_narya())*rnd(abs(def_narya()));
 	}
 
 	monwep = MON_WEP(mon);
@@ -868,6 +877,12 @@ struct monst *mon;
 		
 		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && is_animal(mon->data))
 			base -= def_beastmastery(); // the duster doubles for tame animals
+
+		if(uring_art(ART_VILYA))
+			base -= def_vilya();
+
+		if(uring_art(ART_NARYA))
+			base -= def_narya();
 	}
 	
 	if(mon->mtyp == PM_HOD_SEPHIRAH){
@@ -988,6 +1003,9 @@ struct monst *mon;
 		if(active_glyph(IMPURITY)) base += 3;
 		if(Role_if(PM_HEALER))
 			base += heal_mlevel_bonus();
+
+		if(uring_art(ART_LOMYA))
+			base += def_lomya();
 	}
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
@@ -1008,7 +1026,10 @@ struct monst *mon;
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
 		if(Role_if(PM_HEALER))
-			base += def_beastmastery();
+			base += heal_mlevel_bonus();
+
+		if(uring_art(ART_LOMYA))
+			base += def_lomya();
 	}
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
@@ -1422,7 +1443,7 @@ boolean racialexception;
 		    if (has_horns(mon->data) && obj->otyp != find_gcirclet() && !is_flimsy(obj)) continue;
 		    break;
 		case W_ARMS:
-		    if (cantwield(mon->data) || !is_shield(obj)) continue;
+		    if (noshield(mon->data) || (mon_offhand_attack(mon) && !creation) || !is_shield(obj)) continue;
 		    break;
 		case W_ARMG:
 			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)
@@ -1650,7 +1671,6 @@ boolean polyspot;
 	register struct obj *otmp;
 	struct permonst *mdat = mon->data;
 	boolean vis = cansee(mon->mx, mon->my);
-	boolean handless_or_tiny = (nohands(mdat) || nolimbs(mdat) || verysmall(mdat));
 	const char *pronoun = mhim(mon),
 			*ppronoun = mhis(mon);
 
@@ -1715,7 +1735,7 @@ boolean polyspot;
 		}
 	}
 	if ((otmp = which_armor(mon, W_ARMG)) != 0) {
-		if(nohands(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)){
+		if(nogloves(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)){
 			if (vis)
 				pline("%s drops %s gloves!", Monnam(mon), ppronoun);
 			if (polyspot) bypass_obj(otmp);
@@ -2252,6 +2272,53 @@ def_beastmastery()
 	if((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
 		bm *= 2;
 	return bm;
+}
+
+int
+heal_vilya()
+{
+	return (ACURR(A_INT) - 11)/2;
+}
+
+STATIC_OVL int
+def_vilya()
+{
+	return (ACURR(A_INT) - 11)/2;
+}
+
+STATIC_OVL int
+def_lomya()
+{
+	return (ACURR(A_WIS) - 11)/2;
+}
+
+int
+lev_lomya()
+{
+	int bm = 0;
+	switch (P_SKILL(P_BEAST_MASTERY)) {
+		case P_ISRESTRICTED: bm +=  0; break;
+		case P_UNSKILLED:    bm +=  0; break;
+		case P_BASIC:        bm +=  1; break;
+		case P_SKILLED:      bm +=  2; break;
+		case P_EXPERT:       bm +=  5; break;
+		default: impossible(">Expert beast mastery unhandled"); bm += 5; break;
+	}
+	if((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
+		bm *= 2;
+	return bm + (ACURR(A_WIS) + ACURR(A_CHA) - 18)/4;
+}
+
+int
+en_nenya()
+{
+	return (ACURR(A_WIS) - 11)/2;
+}
+
+STATIC_OVL int
+def_narya()
+{
+	return (ACURR(A_CHA) - 11)/2;
 }
 
 int

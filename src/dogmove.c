@@ -60,9 +60,12 @@ register struct obj *otmp;
     if (is_helmet(otmp) && (!has_head_mon(mtmp) || otmp->objsize != mtmp->data->msize || !helm_match(mtmp->data,otmp)) && !is_flimsy(otmp))
         return FALSE;
     
-    if (is_shield(otmp) &&
-        (mtmp == &youmonst) ? (uwep && bimanual(uwep,youracedata)) 
-	                    : (MON_WEP(mtmp) && bimanual(MON_WEP(mtmp),mtmp->data)))
+    if (is_shield(otmp) && (
+			((mtmp == &youmonst) ? (uwep && bimanual(uwep,youracedata)) 
+							: (MON_WEP(mtmp) && bimanual(MON_WEP(mtmp),mtmp->data)))
+			|| mon_offhand_attack(mtmp)
+		)
+	)
 		return FALSE;
     
     if (is_gloves(otmp) && (otmp->objsize != mtmp->data->msize || !can_wear_gloves(mtmp->data))) return FALSE;

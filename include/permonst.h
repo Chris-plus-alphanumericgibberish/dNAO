@@ -20,7 +20,9 @@
 struct attack {
 	uchar		aatyp;
 	uchar		adtyp, damn, damd;
-	uchar		lev_req;
+	uchar		lev_req;	/*The attacker must have reached X hit dice to get this attack.*/
+	boolean		offhand;	/*This attack is blocked by a shield (offhand weapons and spiritual rapiers handled via at_ type).*/
+	boolean		polywep;	/*This attack is changed to a weapon attack if you're poly'd into this form and wielding a weapon.*/
 };
 #define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
 

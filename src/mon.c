@@ -1639,7 +1639,7 @@ void
 timeout_problems(mtmp)
 struct monst *mtmp;
 {
-	if(bold(mtmp->data) && mtmp->mflee){
+	if(mtmp->mflee && (bold(mtmp->data) || (mtmp->mtame && uring_art(ART_NARYA)))){
 		if(mtmp->mfleetim > 4) mtmp->mfleetim /= 4;
 		else {
 			mtmp->mfleetim = 0;
@@ -2696,7 +2696,7 @@ struct obj *otmp;
 	int otyp = otmp->otyp, newload = otmp->owt;
 	struct permonst *mdat = mtmp->data;
 
-	if (notake(mdat)) return FALSE;		/* can't carry anything */
+	if (notake(mdat)) return FALSE;		/* won't carry anything */
 
 	if (otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) &&
 		!(mtmp->misc_worn_check & W_ARMG) && !resists_ston(mtmp))
@@ -3175,7 +3175,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 #ifdef ATTACK_PETS
     // pets attack hostile monsters
-	if (magr->mtame && !mdef->mpeaceful && (magr->mhp > magr->mhpmax/2 || banish_kill(magr->mtyp)))
+	if (magr->mtame && !mdef->mpeaceful && (magr->mhp > magr->mhpmax/2 || banish_kill(magr->mtyp)) && !magr->mflee)
 	    return ALLOW_M|ALLOW_TM;
 	// and vice versa, with some limitations that will help your pet survive
 	if (mdef->mtame && !magr->mpeaceful && (mdef->mhp > mdef->mhpmax/2 || banish_kill(mdef->mtyp)) && !mdef->meating && mdef != u.usteed && !mdef->mflee)
@@ -4568,7 +4568,8 @@ boolean was_swallowed;			/* digestion */
 		}
   		else if(	( (mdat->mattk[i].aatyp == AT_NONE && mdat->mtyp==PM_GREAT_CTHULHU)
 					 || mdat->mattk[i].aatyp == AT_BOOM) 
-				&& mdat->mattk[i].adtyp == AD_POSN){
+				&& mdat->mattk[i].adtyp == AD_POSN
+		){
 	    	Sprintf(killer_buf, "%s explosion", s_suffix(mdat->mname));
 	    	killer = killer_buf;
 	    	killer_format = KILLED_BY_AN;
@@ -4577,75 +4578,19 @@ boolean was_swallowed;			/* digestion */
 				create_gas_cloud(mon->mx, mon->my, 2, 30, FALSE);
 			}
 		}
-		else if(mdat->mattk[i].adtyp == AD_GROW && (mdat->mtyp==PM_AXUS)){
-			struct monst *mtmp;
-			struct permonst *mdat1;
-			int quin = 1, qua = 2, tre = 3, duo = 4;
-			int mndx = 0;
-//			int quincount = 0;
-			for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-				if(DEADMONSTER(mtmp))
-					continue;
-				mdat1 = mtmp->data;
-//				if(mdat1->mtyp==PM_QUINON) quincount++;
-				if(mdat1->mtyp==PM_QUATON && quin){
-					set_mon_data(mtmp, PM_QUINON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					quin--;
-//					quincount++;
-				}
-				else if(mdat1->mtyp==PM_TRITON && qua){
-					set_mon_data(mtmp, PM_QUATON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					qua--;
-				}
-				else if(mdat1->mtyp==PM_DUTON && tre){
-					set_mon_data(mtmp, PM_TRITON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					tre--;
-				}
-				else if(mdat1->mtyp==PM_MONOTON && duo){
-					set_mon_data(mtmp, PM_DUTON);
-					mtmp->m_lev += 1;
-					mtmp->mhp += 4;
-					mtmp->mhpmax += 4;
-					newsym(mtmp->mx, mtmp->my);
-					duo--;
-//					makemon(&mons[PM_MONOTON], mon->mx, mon->my,MM_ADJACENTOK|MM_ANGRY);
-				}
-			}
-			u.uevent.uaxus_foe = 1;//enemy of the modrons
-			for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
-					if (is_auton(mtmp->data) && mtmp->mpeaceful && mtmp != mon) {
-						if(canseemon(mtmp)) pline("%s gets angry...", Monnam(mtmp));
-						untame(mtmp, 0);
-					}
-			}
-//			The dungeon of ill regard, where Axus is found, now spawns only Modrons.  So this is uneeded
-//			for(quincount;quincount<7;quincount++) makemon(&mons[PM_QUINON], mon->mx, mon->my,MM_ADJACENTOK|MM_ANGRY);
-		}
 		else if(mdat->mattk[i].adtyp == AD_GROW){
 			struct monst *mtmp;
 			struct monst * axus = (struct monst *)0;
 			boolean found;
 			int current_ton;
 			/* ASSUMES AUTONS ARE IN ORDER FROM MONOTON TO QUINON */
-			for (current_ton = mon->mtyp; current_ton >= PM_MONOTON; current_ton--) {
+			for (current_ton = mon->mtyp == PM_AXUS ? PM_QUINON : mon->mtyp; current_ton >= PM_MONOTON; current_ton--) {
 				found = FALSE; //haven't found this child yet - 1 per level
 				/* search for child */
 				for (mtmp = fmon; mtmp && (!found || !axus); mtmp = mtmp->nmon) {
 					if (DEADMONSTER(mtmp))
 						continue;
-					if (!axus && mtmp->mtyp == PM_AXUS)
+					if (!axus && !DEADMONSTER(mtmp) && mtmp->mtyp == PM_AXUS)
 						axus = mtmp;
 					if (!found && current_ton != PM_MONOTON && mtmp->mtyp == current_ton-1) {
 						set_mon_data(mtmp, current_ton);
@@ -4664,9 +4609,19 @@ boolean was_swallowed;			/* digestion */
 					mtmp = makemon(&mons[current_ton], axus->mx, axus->my, MM_ADJACENTOK | MM_ANGRY | NO_MINVENT);
 					if (mtmp) mtmp->mclone = 1;
 				}
-				/* growth is chained -- if we didn't find a child (and Axus didn't provide one), we don't touch the lower 'tons. */
-				if (!axus && !found)
+				/* growth is chained -- if we didn't find a child, we don't touch the lower 'tons. */
+				/* 	Axus is able to pull from anywhere, so its chain continues. */
+				if (!found && mdat->mtyp != PM_AXUS)
 					break;
+			}
+			if(mdat->mtyp == PM_AXUS){
+				u.uevent.uaxus_foe = 1;//enemy of the modrons
+				for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+						if (is_auton(mtmp->data) && mtmp->mpeaceful && mtmp != mon) {
+							if(canseemon(mtmp)) pline("%s gets angry...", Monnam(mtmp));
+							untame(mtmp, 0);
+						}
+				}
 			}
 		}//end AD_GROW basic
 		else if(mdat->mattk[i].adtyp == AD_SOUL){
@@ -5878,22 +5833,25 @@ poisontell(typ)
  * 
  */
 void
-poisoned(string, attrib, pname, fatal)
+poisoned(string, attrib, pname, fatal, severe)
 const char *string;	/* base string of poison message (The killer bee's sting) */
 int attrib;			/* attribute to target */
 const char *pname;	/* name of poisoner (for killer) */
 int fatal;			/* 1 in X chance of significant debilitation */
+boolean severe;			/* Powerful poison that partially overcomes poison resistance */
 {
 	int i, kprefix = KILLED_BY_AN;
+	int drain;
 	boolean plural = strcmp(string, makesingular(string));
 	boolean blast = !strcmp(string, "blast");
+	boolean printed = FALSE;
 
 	if(!blast) {
 	    /* avoid "The" Orcus's sting was poisoned... */
 	    pline("%s%s %s poisoned!", isupper(*string) ? "" : "The ",
 			string, plural ? "were" : "was");
 	}
-	if (Poison_resistance) {
+	if (Poison_resistance && !severe) {
 		if (!blast)
 			shieldeff(u.ux, u.uy);
 		pline_The("poison doesn't seem to affect you.");
@@ -5915,22 +5873,37 @@ int fatal;			/* 1 in X chance of significant debilitation */
 			/*[ does this need a plural check too? ]*/
 			kprefix = KILLED_BY;
 		}
+		if(severe && !Poison_resistance)
+			fatal = (fatal + 1)/2;
 		i = rn2(fatal);
 		if (i == 0 && attrib != A_CHA) {
-			if (adjattrib(A_CON, attrib == A_CON ? -2 : -rn1(3, 3), 1))
+			drain = attrib == A_CON ? -2 : -rn1(3, 3);
+			if(Poison_resistance)
+				drain = (drain + 1)/2;
+			else if(severe)
+				drain += 4;
+			if (adjattrib(A_CON, drain, 1)){
 				pline_The("poison was quite debilitating...");
+				printed = TRUE;
+			}
 		}
-		else if (i <= 5) {
+		if (i <= 5) {
+			drain = -rn1(3, 3);
+			if(Poison_resistance)
+				drain = (drain + 1)/2;
+			else if(severe)
+				drain += 2;
 			/* Check that a stat change was made */
-			if (adjattrib(attrib, -rn1(3, 3), 1))
+			if (adjattrib(attrib, drain, 1) && !printed)
 				pline("You%s!", poiseff[attrib]);
 		}
-		else {
-			i = rn1(10, 6);
-			if (Half_physical_damage) i = (i + 1) / 2;
-			if (u.uvaul_duration) i = (i + 1) / 2;
-			losehp(i, pname, kprefix);
-		}
+
+		i = rn1(10, 6);
+		if (Half_physical_damage) i = (i + 1) / 2;
+		if (Poison_resistance) i = (i + 1) / 2;
+		if (u.uvaul_duration) i = (i + 1) / 2;
+		losehp(i, pname, kprefix);
+
 		if (u.uhp < 1) {
 			killer_format = kprefix;
 			killer = pname;

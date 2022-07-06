@@ -265,8 +265,11 @@ dowield()
 
 	/* May we attempt this? */
 	multi = 0;
-	if (cantwield(youracedata)) {
-		pline("Don't be ridiculous!");
+	if (you_cantwield(youracedata)) {
+		if(!nohands(youracedata))
+			Your("%s aren't dexterous enough to properly wield weapons!", makeplural(body_part(HAND)));
+		else
+			pline("Don't be ridiculous!");
 		return MOVE_CANCELLED;
 	}
 	
@@ -330,8 +333,11 @@ doswapweapon()
 
 	/* May we attempt this? */
 	multi = 0;
-	if (cantwield(youracedata)) {
-		pline("Don't be ridiculous!");
+	if (you_cantwield(youracedata)) {
+		if(!nohands(youracedata))
+			Your("%s aren't dexterous enough to properly wield weapons!", makeplural(body_part(HAND)));
+		else
+			pline("Don't be ridiculous!");
 		return MOVE_CANCELLED;
 	}
 	if (welded(uwep)) {
@@ -496,7 +502,7 @@ const char *verb;	/* "rub",&c */
 	}
 	return FALSE;
     }
-    if (cantwield(youracedata)) {
+    if (you_cantwield(youracedata)) {
 	You_cant("hold %s strongly enough.", more_than_1 ? "them" : "it");
 	return FALSE;
     }

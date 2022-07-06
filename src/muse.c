@@ -2591,8 +2591,8 @@ struct obj *obj;
 		return abs(obj->objsize - mon->data->msize) <= 1;
 	else if(is_helmet(obj))
 		return ((!has_horns(mon->data) || obj->otyp == find_gcirclet()) && helm_match(mon->data,obj) && has_head_mon(mon) && obj->objsize == mon->data->msize) || is_flimsy(obj);
-	else if(is_shield(obj))
-		return !cantwield(mon->data);
+	else if(is_shield(obj) && !mon_offhand_attack(mon))
+		return !noshield(mon->data);
 	else if(is_gloves(obj))
 		return obj->objsize == mon->data->msize && can_wear_gloves(mon->data);
 	else if(is_boots(obj))

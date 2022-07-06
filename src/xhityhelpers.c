@@ -1128,7 +1128,7 @@ int aatyp;
 	case AT_CLAW:
 		if(!mon)
 			slot = W_ARMG;
-		else if(nohands(mon->data))
+		else if(nogloves(mon->data))
 			slot = W_ARMF;
 		else if(
 			mon->mtyp == PM_CROW_WINGED_HALF_DRAGON
@@ -1280,8 +1280,18 @@ beastmastery()
 	}
 	if ((uwep && uwep->oartifact == ART_CLARENT) || (uswapwep && uswapwep->oartifact == ART_CLARENT))
 		bm *= 2;
+
+	if(uring_art(ART_NARYA))
+		bm += narya();
 	return bm;
 }
+
+int
+narya()
+{
+	return (ACURR(A_CHA) - 11)/2;
+}
+
 int
 mountedCombat()
 {

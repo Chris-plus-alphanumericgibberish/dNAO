@@ -482,6 +482,63 @@ find_good_iring()
     return 0;
 }
 
+/* find the object index for a non-polymorph ruby or gold ring */
+int
+find_good_fring()
+{
+	static int i = -1;
+    register const char *s;
+	if (i != -1) return i;
+	
+	/* maybe use ruby ring */
+	if ((i = find_otyp_of_desc("ruby", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1 && i != RIN_POLYMORPH)
+		return i;
+	/* if we don't like the iron ring, use "gold" */
+	if ((i = find_otyp_of_desc("gold", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find gold ring");
+    return 0;
+}
+
+/* find the object index for a non-polymorph iron ring */
+int
+find_good_wring()
+{
+	static int i = -1;
+    register const char *s;
+	if (i != -1) return i;
+	
+	/* maybe use diamond ring */
+	if ((i = find_otyp_of_desc("diamond", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1 && i != RIN_POLYMORPH)
+		return i;
+	/* if we don't like the diamond ring, use "silver" */
+	if ((i = find_otyp_of_desc("silver", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find silver ring");
+    return 0;
+}
+
+/* find the object index for a non-polymorph iron ring */
+int
+find_good_aring()
+{
+	static int i = -1;
+    register const char *s;
+	if (i != -1) return i;
+	
+	/* maybe use sapphire ring */
+	if ((i = find_otyp_of_desc("sapphire", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1 && i != RIN_POLYMORPH)
+		return i;
+	/* if we don't like the sapphire ring, use "brass" */
+	if ((i = find_otyp_of_desc("brass", 0, RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, 0)) != -1)
+		return i;
+	else
+		impossible("could not find brass ring");
+    return 0;
+}
+
 /* find the object index for visored helmet */
 int
 find_vhelm()

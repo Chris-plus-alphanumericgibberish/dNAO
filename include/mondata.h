@@ -122,6 +122,8 @@
 #define nohands(ptr)		(((ptr)->mflagsb & (MB_NOHANDS|MB_NOLIMBS)) != 0L)
 #define nolimbs(ptr)		(((ptr)->mflagsb & MB_NOLIMBS) == MB_NOLIMBS)
 #define nofeet(ptr)			((ptr)->mflagsb & MB_NOFEET)
+#define nogloves(ptr)		(nohands(ptr) || ((ptr)->mflagsb & MB_NOGLOVES))
+#define noshield(ptr)		(nogloves(ptr) && !allow_shield(ptr))
 #define notake(ptr)		(((ptr)->mflagst & MT_NOTAKE) != 0L)
 #define has_head(ptr)		(((ptr)->mflagsb & MB_NOHEAD) == 0L)
 #define has_head_mon(mon) ((mon == &youmonst) ? (has_head(youracedata)) : (has_head((mon)->data)))
@@ -226,6 +228,7 @@
 						 ((ptr)->mtyp == PM_BALL_OF_LIGHT) || \
 						 ((ptr)->mtyp == PM_BALL_OF_RADIANCE) || \
 						 ((ptr)->mtyp == PM_BALL_OF_GOSSAMER_SUNLIGHT) || \
+						 ((ptr)->mtyp == PM_DAUGHTER_OF_NAUNET) || \
 						 ((ptr)->mtyp == PM_SHAMBLING_HORROR && u.shambin == 2) || \
 						 ((ptr)->mtyp == PM_STUMBLING_HORROR && u.stumbin == 2) || \
 						 ((ptr)->mtyp == PM_WANDERING_HORROR && u.wandein == 2) || \
@@ -321,7 +324,7 @@
 #define	can_undead(ptr)	(!nonliving(ptr) && !is_minion(ptr) && ((ptr)->mlet != S_PUDDING) &&\
 								((ptr)->mlet != S_JELLY) && ((ptr)->mlet != S_BLOB) && !is_elemental(ptr) &&\
 								!is_plant(ptr) && !is_demon(ptr) && !is_great_old_one(ptr) && !is_primordial(ptr) && !(mvitals[monsndx(ptr)].mvflags&G_NOCORPSE))
-#define is_weldproof(ptr)		(is_undead(ptr) || is_demon(ptr) || is_were(ptr) || is_great_old_one(ptr))
+#define is_weldproof(ptr)		(is_undead(ptr) || is_demon(ptr) || is_were(ptr) || is_great_old_one(ptr) || ptr->mtyp == PM_DAUGHTER_OF_NAUNET)
 #define is_weldproof_mon(mon)		(is_weldproof((mon)->data))
 #define is_were(ptr)		(((ptr)->mflagsa & MA_WERE) != 0L)
 #define is_heladrin(ptr)		(\
@@ -632,7 +635,40 @@
 #define yields_insight(ptr)	(((ptr)->mflagsg & MG_INSIGHT) != 0L)
 #define banish_kill(mtyp)	(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
 
-#define cantwield(ptr)		(nohands(ptr))
+#define allow_wield(ptr)	(ptr->mtyp == PM_SHOGGOTH \
+							|| ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR\
+							|| ptr->mtyp == PM_MOTHERING_MASS\
+							|| ptr->mtyp == PM_ANCIENT_NUPPERIBO\
+							|| ptr->mtyp == PM_KOBOLD_SHAMAN\
+							|| ptr->mtyp == PM_ORC_SHAMAN\
+							|| ptr->mtyp == PM_MORDOR_SHAMAN\
+							|| ptr->mtyp == PM_ZETA_METROID\
+							|| ptr->mtyp == PM_MINOTAUR_PRIESTESS\
+							|| ptr->mtyp == PM_BLASPHEMOUS_LURKER\
+							|| ptr->mtyp == PM_DREAD_SERAPH\
+							|| ptr->mtyp == PM_MAD_SEER\
+							|| ptr->mtyp == PM_ORACLE\
+							|| ptr->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD\
+							|| ptr->mtyp == PM_PRIEST_OF_IB\
+							|| ptr->mtyp == PM_PALE_NIGHT\
+							|| ptr->mtyp == PM_SARA__THE_LAST_ORACLE\
+							|| ptr->mtyp == PM_STRANGE_CORPSE\
+							|| ptr->mtyp == PM_NIMUNE\
+							|| ptr->mtyp == PM_ELDER_BRAIN\
+							|| ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER\
+							|| ptr->mtyp == PM_CHAIN_GOLEM\
+							|| ptr->mtyp == PM_GOOD_NEIGHBOR\
+							)
+
+#define allow_shield(ptr)	(ptr->mtyp == PM_SCORPION\
+							|| ptr->mtyp == PM_YURIAN\
+							|| ptr->mtyp == PM_ZETA_METROID\
+							|| ptr->mtyp == PM_DEMOGORGON\
+							|| ptr->mtyp == PM_CHAIN_GOLEM\
+							|| ptr->mtyp == PM_SCORPIUS\
+							|| ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER\
+							)
+
 #define could_twoweap(ptr)	attacktype(ptr, AT_XWEP)
 #define could_twoweap_mon(mon)	mon_attacktype(mon, AT_XWEP)
 // define cantweararm(ptr)	(breakarm(ptr) || sliparm(ptr))
@@ -644,7 +680,7 @@
 							(full_body_match(ptr,obj)))
 #define full_body_match(ptr,obj)	(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && \
 		((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK)))
-#define can_wear_gloves(ptr)	(!nohands(ptr))
+#define can_wear_gloves(ptr)	(!nogloves(ptr) && !nohands(ptr))
 #define can_wear_amulet(ptr)	(has_head(ptr) || (ptr->mflagsb&MB_CAN_AMULET))
 #define can_wear_blindf(ptr)	(has_head(ptr))
 #define can_wear_boots(ptr)	((humanoid(ptr) || humanoid_feet(ptr)) && !nofeet(ptr) && !nolimbs(ptr))

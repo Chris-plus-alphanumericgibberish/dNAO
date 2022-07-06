@@ -160,7 +160,7 @@ struct monst * mdef;
 				else You("begin bashing monsters with your %s.",
 					aobjnam(uwep, (char *)0));
 			}
-			else if (!cantwield(youracedata) && !Straitjacketed){
+			else if (!you_cantwield(youracedata) && !Straitjacketed){
 				if (u.specialSealsActive&SEAL_BLACK_WEB)
 					You("begin slashing monsters with your shadow-blades.");
 				else
@@ -563,6 +563,15 @@ int tary;
 				(cloak && FacelessCloak(cloak)))
 				continue;
 		}
+		/* Generalized offhand attack when not allowed */
+		if ((attk->offhand) && (						// offhand attack
+				(youagr && uarms) ||					// player attacking with shield
+				(!youagr && (which_armor(magr, W_ARMS))	// monster attacking with shield
+				))
+			) {
+			continue;									// not allowed, don't attack
+		}
+
 		/* based on the attack type... */
 		switch (aatyp)
 		{
@@ -1708,10 +1717,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	
 	/* players sub out monster claw attacks for weapon attacks */
-	if (youagr && !cantwield(pa)) {
-		if ((*indexnum == 0 || (*indexnum == 1 && (pa->mtyp == PM_INCUBUS || pa->mtyp == PM_SUCCUBUS))) &&
-			(attk->aatyp == AT_CLAW || (attk->aatyp == AT_TUCH && pa->mlet == S_LICH && uwep)))
-		{
+	if (youagr) {
+		if (attk->polywep && (uwep || u.specialSealsActive&SEAL_BLACK_WEB)){
 			attk->aatyp = AT_WEAP;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;	// unused
@@ -1746,19 +1753,21 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damd = 6;
 		}
 		else if(attk->aatyp == AT_SRPR){
-			attk->aatyp = humanoid_upperbody(pa) ? AT_WEAP : AT_CLAW;
+			attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_WEAP : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 6;
 		}
 		else if(attk->aatyp == AT_XSPR){
-			attk->aatyp = humanoid_upperbody(pa) ? AT_XWEP : AT_CLAW;
+			attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_XWEP : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 6;
+			if(attk->aatyp == AT_CLAW)
+				attk->offhand = 1; /*Note: redundant with xwep but needed for claw*/
 		}
 		else if(attk->aatyp == AT_MSPR){
-			attk->aatyp = (humanoid_upperbody(pa) && pa->mtyp != PM_ALIDER) ? AT_MARI : AT_CLAW;
+			attk->aatyp = (humanoid_upperbody(pa) && pa->mtyp != PM_ALIDER && !nogloves(pa)) ? AT_MARI : AT_CLAW;
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 6;
@@ -1817,10 +1826,12 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 		if(pom > 4 || !pom){
 			if(attk->aatyp == AT_XSPR){
-				attk->aatyp = humanoid_upperbody(pa) ? AT_XWEP : AT_CLAW;
+				attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_XWEP : AT_CLAW;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1;
 				attk->damd = 6;
+				if(attk->aatyp == AT_CLAW)
+					attk->offhand = 1; /*Note: redundant with xwep but needed for claw*/
 			}
 			else if((attk->aatyp == AT_MSPR || attk->aatyp == AT_ESPR) && (*indexnum%2)){
 				if(attk->aatyp == AT_ESPR){
@@ -2129,6 +2140,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->aatyp = AT_CLAW;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1+u.ulevel/8; // from 1 to 4 dice, hitting 4 at xp 24+
+				attk->offhand = 1;
 				
 				// scales inversely with sanity, sanity-based size is 0->11, 10->9, 25->6, 50->3, 75->1, 80->0
 				// total dice assuming +7 and xp30 is 4d18 / 4d10 / 4d7 at sanity 15/50/80+
@@ -2144,6 +2156,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->aatyp = AT_CLAW;
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1+min(5, magr->m_lev/8); // from 1 to 6 dice, hitting 6 at xp 40+
+				attk->offhand = 1;
 				
 				attk->damd = max(otmp->spe, 1) + magr->mberserk ? 11 : 3;
 				/* this is applied to all acceptable attacks; no subout marker is necessary */
@@ -2237,12 +2250,14 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			/* "Deva" rapiers are assumed to be the Masked Queen's lower arms, and "Energy" rapiers just sorta float or something */
 			|| attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR || attk->aatyp == AT_MSPR
 			|| attk->aatyp == AT_DEVA || attk->aatyp == AT_5SQR || attk->aatyp == AT_MARI
-			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON) ||
-			(humanoid(youracedata) && (
-				attk->aatyp == AT_CLAW
-				|| attk->aatyp == AT_TUCH
-				|| attk->aatyp == AT_HUGS
+			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON)
+			|| (humanoid_torso(youracedata) && (
+				attk->aatyp == AT_TUCH
 				|| attk->aatyp == AT_LRCH
+			))
+			|| (humanoid(youracedata) && (
+				attk->aatyp == AT_CLAW
+				|| attk->aatyp == AT_HUGS
 			))
 		)) ||
 		/* If monster is stuck in a straitjacket */
@@ -3187,7 +3202,7 @@ int *shield_margin;
 	}
 	/* other attacker-related accuracy bonuses */
 	if (magr) {
-		/* Small monsters are more accurage */
+		/* Small monsters are more accurate */
 		switch(pa->msize){
 			case MZ_TINY:
 				bons_acc += 5;
@@ -3265,8 +3280,11 @@ int *shield_margin;
 			case P_SKILLED:   bons_acc += 2; break;
 			case P_EXPERT:    bons_acc += 5; break;
 			}
+			/* predators have keen instincts */
+			if(carnivorous(pa)&&!herbivorous(pa))
+				bons_acc += 2;
 			/* these guys are extra accurate */
-			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED)
+			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED || pa->mtyp == PM_NORN)
 				bons_acc += 20;
 			if (pa->mtyp == PM_GROTESQUE_PEEPER){
 				if((youdef && mon_can_see_you(magr))
@@ -3281,7 +3299,7 @@ int *shield_margin;
 			/* simulate accuracy from stat bonuses from gloves */
 			if ((otmp = which_armor(magr, W_ARMG))) {
 				if (otmp->oartifact == ART_GODHANDS)
-					bons_acc += 14;
+					bons_acc += 11;
 				else if (otmp->otyp == GAUNTLETS_OF_DEXTERITY || otmp->oartifact == ART_PREMIUM_HEART)
 					bons_acc += otmp->spe;
 				if (otmp->otyp == GAUNTLETS_OF_POWER)
@@ -5247,6 +5265,7 @@ boolean ranged;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
 		/* various poisons */
+	case AD_SVPN:
 	case AD_DRST:
 	case AD_DRDX:
 	case AD_EDRC:
@@ -5254,6 +5273,7 @@ boolean ranged;
 		/* select poison type */
 		switch (attk->adtyp)
 		{
+		case AD_SVPN:	ptmp = !rn2(3) ? A_STR : rn2(2) ? A_DEX : A_CON; break;
 		case AD_DRST:	ptmp = A_STR; break;
 		case AD_DRDX:	ptmp = A_DEX; break;
 		case AD_EDRC:
@@ -5272,7 +5292,7 @@ boolean ranged;
 				/* rely on poisoned(), from mon.c */
 				Sprintf(buf, "%s %s",
 					s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-				poisoned(buf, ptmp, pa->mname, 30);
+				poisoned(buf, ptmp, pa->mname, 30, attk->adtyp == AD_SVPN);
 			}
 			/* vs Monster */
 			else {
@@ -5286,14 +5306,14 @@ boolean ranged;
 						);
 				}
 				/* resistance */
-				if (Poison_res(mdef)) {
+				if (Poison_res(mdef) && attk->adtyp != AD_SVPN) {
 					if (vis)
 						pline_The("poison doesn't seem to affect %s.",
 						mon_nam(mdef));
 				}
 				else {
 					/* 9/10 odds of small bonus damage */
-					if (rn2(10))
+			if (rn2((attk->adtyp != AD_SVPN || Poison_res(mdef)) ? 10 : 5))
 						mdef->mhp -= rn1(10, 6);	/* note that this is BONUS damage */
 					/* 1/10 of deadly */
 					else {
@@ -6714,7 +6734,7 @@ boolean ranged;
 		if (youdef) {
 			Sprintf(buf, "%s %s",
 				s_suffix(Monnam(magr)), mpoisons_subj(magr, attk));
-			poisoned(buf, A_CON, pa->mname, 60);
+			poisoned(buf, A_CON, pa->mname, 60, TRUE);
 		}
 		/* wis-draining (player only) */
 		if (youdef) {
@@ -7792,24 +7812,30 @@ boolean ranged;
 			/* if you are attached to the other creature, do the thing! */
 			else if (u.ustuck == mtmp) {
 				/* drowning? */
-				if (is_pool(x(magr), y(magr), FALSE)
+				if ((is_pool(x(magr), y(magr), FALSE) || pa->mtyp == PM_DAUGHTER_OF_NAUNET)
 					&& !(youdef ? Swimming : mon_resistance(mdef, SWIMMING))
 					&& !(youdef ? Breathless : breathless_mon(mdef))
-					&& !(amphibious(pd))	/* Odd, need to check the species for amphibious. Fixme later? */
-					){
+					&& !(amphibious(pd))	/* Note: Amphibious is magical breathing, Swimming, or amphibious(). 
+											   Breathless checks magical breathing (and breathless()) and swimming should be skipped here,
+											   leaving only amphibious() */
+				){
 					int ltyp = levl[x(magr)][y(magr)].typ;
 					boolean moat =
 						(ltyp != POOL) &&
 						(ltyp != WATER) &&
 						!Is_medusa_level(&u.uz) &&
 						!Is_waterlevel(&u.uz);
+					boolean daughter = pa->mtyp == PM_DAUGHTER_OF_NAUNET;
 
 					/* water damage to drownee's inventory */
 					water_damage((youdef ? invent : mdef->minvent), FALSE, FALSE, level.flags.lethe, mdef);
 
 					if (youdef) {
 						if (u.divetimer > 0){
-							pline("%s pulls you into the %s!", Monnam(mtmp), moat ? "moat" : "pool of water");
+							if(daughter)
+								pline("%s flows all around you!", Monnam(mtmp));
+							else
+								pline("%s pulls you into the %s!", Monnam(mtmp), moat ? "moat" : "pool of water");
 							if (!uarm || is_light_armor(uarm)){
 								pline("%s is crushing the breath out of you!", Monnam(mtmp));
 								u.divetimer -= dmg;
@@ -12116,7 +12142,7 @@ int vis;
 }
 
 int
-apply_hit_effects(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt)
+apply_hit_effects(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt, printmessages)
 struct monst * magr;
 struct monst * mdef;
 struct obj * otmp;
@@ -12126,6 +12152,7 @@ int * plusdmgptr;
 int * truedmgptr;
 int dieroll;
 boolean * hittxt;
+boolean printmessages;
 {
 	int result = MM_HIT;
 	int tmpplusdmg;
@@ -12133,7 +12160,7 @@ boolean * hittxt;
 
 	/* artifact and object properties and misc */
 	tmpplusdmg = tmptruedmg = 0;
-	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt);
+	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt, printmessages);
 	*plusdmgptr += tmpplusdmg;
 	*truedmgptr += tmptruedmg;
 	if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
@@ -12143,6 +12170,12 @@ boolean * hittxt;
 	if (spec_prop_otyp(otmp)) {	
 		tmpplusdmg = tmptruedmg = 0;
 		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
+		*plusdmgptr += tmpplusdmg;
+		*truedmgptr += tmptruedmg;
+	}
+	if (spec_prop_material(otmp)) {	
+		tmpplusdmg = tmptruedmg = 0;
+		// mat_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
 		*plusdmgptr += tmpplusdmg;
 		*truedmgptr += tmptruedmg;
 	}
@@ -13989,8 +14022,13 @@ int vis;						/* True if action is at all visible to the player */
 		/* Bardic Encouragement */
 		if (youagr)
 			bonsdmg += u.uencouraged;
-		else if (magr)
+		else if (magr){
 			bonsdmg += magr->encouraged;
+			if(magr->mtame){
+				if(uring_art(ART_NARYA))
+					bonsdmg += narya();
+			}
+		}
 		/* Singing Sword -- only works when the player is wielding it >_> */
 		if (uwep && uwep->oartifact == ART_SINGING_SWORD) {
 			if (uwep->osinging == OSING_LIFE) {
@@ -14186,7 +14224,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (valid_weapon_attack) {
 			otmp = weapon;
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
 				/* if the weapon caused a miss and we incremented u.uconduct.weaphit, decrement decrement it back */
 				if (returnvalue == MM_MISS && youagr && (melee || thrust))
 					u.uconduct.weaphit--;
@@ -14200,7 +14238,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (fired && launcher && valid_weapon_attack) {
 			otmp = launcher;
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, FALSE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -14212,7 +14250,7 @@ int vis;						/* True if action is at all visible to the player */
 			((otmp = (youagr ? uarmh : which_armor(magr, W_ARMH))) &&
 			otmp->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER)) {
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, weapon, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, FALSE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -14223,7 +14261,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (unarmed_punch) {
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -14234,7 +14272,23 @@ int vis;						/* True if action is at all visible to the player */
 		if (unarmed_kick) {
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
+					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
+			}
+		}
+		/* all valid attacks proc effects of offensive rings */
+		if(youagr){
+			struct obj *rings[] = {uleft, uright};
+			int n = 2;
+			int i = 0;
+			for(otmp = rings[i]; i<n; i++, otmp = rings[i]){
+				if(!otmp)
+					continue;
+				// Note: artifact rings are currently set to always add their damage, but to only print the generic x hits messages when unarmed.
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, unarmed_punch);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -16036,7 +16090,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					if (youagr) {
 						char buf[BUFSZ];
 						Sprintf(buf, "%s shadow", s_suffix(Monnam(mdef)));
-						poisoned(buf, A_STR, pd->mname, 30);
+						poisoned(buf, A_STR, pd->mname, 30, FALSE);
 					}
 					else {
 						if (!Poison_res(magr)) {

@@ -385,7 +385,7 @@ boolean incr;	/* true iff via incremental experience growth */
 	u.uhprolled += num;
 	u.uhp += num + conplus(ACURR(A_CON));
 	if((int)(conplus(ACURR(A_CON))) != conplus(ACURR(A_CON))){
-		/* .5 remainder (just give an extra HP)*/
+		/* Remainder (just give an extra HP of healing)*/
 		u.uhp++;
 	}
 	if (Upolyd) {
@@ -393,7 +393,7 @@ boolean incr;	/* true iff via incremental experience growth */
 	    u.mhrolled += num;
 	    u.mh += num + conplus(ACURR(A_CON));
 		if((int)(conplus(ACURR(A_CON))) != conplus(ACURR(A_CON))){
-			/* .5 remainder (just give an extra HP)*/
+			/* Remainder (just give an extra HP of healing)*/
 			u.mh++;
 		}
 	}

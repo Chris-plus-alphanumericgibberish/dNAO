@@ -5189,7 +5189,7 @@ You have settled up with your old Doctor,
 but strangely the oppressive yellow taint
 does not fade away.
 
-If anything, the fuvous presure grows stronger
+If anything, the fulvous presure grows stronger
 as the life fades from %n!
 %E
 %Cc Mad 00081

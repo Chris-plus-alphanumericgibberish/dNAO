@@ -71,7 +71,7 @@ doread()
 			&& !arti_mandala(scroll)
 			&& !scroll->oward
 			&& scroll->oartifact != ART_ROD_OF_THE_ELVISH_LORDS
-		) || scroll->otyp==LIGHTSABER
+		) || scroll->otyp==LIGHTSABER || scroll->otyp==BEAMSWORD
 	){
 		if(scroll->oartifact == ART_ROD_OF_SEVEN_PARTS){
 			if (Blind) {
@@ -359,6 +359,14 @@ doread()
 				return MOVE_INSTANT;
 			} else {
 				pline(lightsaber_hiltText(scroll),xname(scroll));
+			}
+			return MOVE_READ;
+		} else if(scroll->otyp == BEAMSWORD){
+			if (Blind) {
+				You_cant("see it!");
+				return MOVE_INSTANT;
+			} else {
+				pline(beamsword_hiltText(scroll),xname(scroll));
 			}
 			return MOVE_READ;
 		} else {
@@ -3582,6 +3590,9 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "mistweaver ", l = 11)) {
 				undeadtype = MISTWEAVER;
 			}
+			else if (!strncmpi(bufp, "mindless ", l = 9)) {
+				undeadtype = MINDLESS;
+			}
 			else
 				break;
 
@@ -3632,6 +3643,8 @@ int gen_restrict;
 				undeadtype = MISTWEAVER;
 			else if (!strncmpi(p, "worldshaper", 11))
 				undeadtype = WORLD_SHAPER;
+			else if (!strncmpi(p, "husk",	4))
+				undeadtype = MINDLESS;
 			else
 			{
 				/* no suffix was used, undo the split made to search for suffixes */

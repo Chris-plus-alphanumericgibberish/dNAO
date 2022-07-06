@@ -874,6 +874,7 @@ carrying_readable_tool()
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 		if(otmp->otyp == CANDLE_OF_INVOCATION
 			|| otmp->otyp == LIGHTSABER
+			|| otmp->otyp == BEAMSWORD
 			|| otmp->otyp == MISOTHEISTIC_PYRAMID
 			|| otmp->otyp == MISOTHEISTIC_FRAGMENT
 		)

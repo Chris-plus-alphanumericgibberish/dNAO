@@ -251,6 +251,7 @@ struct monst *mtmp;
 	return 	mtmp->data->mlet == S_DOG ||
 			mtmp->data->mlet == S_FELINE;
 }
+
 boolean
 scaryDre(mtmp)
 struct monst *mtmp;
@@ -776,22 +777,40 @@ boolean digest_meal;
 			}
 		}
 	}
-	if(is_uvuudaum(mon->data)){
-		mon->mhp += 25; //Fast healing
-	} else {
-		if(mon->mhp < mon->mhpmax && mon_resistance(mon,REGENERATION)) mon->mhp++;
+	if(mon->mhp < mon->mhpmax){
+		int perX = 0;
+		if(is_uvuudaum(mon->data)){
+			perX += 25*HEALCYCLE; //Fast healing
+		} else {
+			perX += mon->m_lev;
+			if(mon_resistance(mon,REGENERATION))
+				perX += HEALCYCLE;
+		}
+		//Worn Vilya bonus ranges from (penalty) to +7 HP per 10 turns
+		if(uring_art(ART_VILYA)){
+			perX += heal_vilya()*HEALCYCLE/10;
+		}
 		if(!nonliving(mon->data)){
+			if(perX < 1)
+				perX = 1;
 			if (mon->mhp < mon->mhpmax){
 				//recover 1/HEALCYCLEth hp per turn:
-				mon->mhp += (mon->m_lev)/HEALCYCLE;
+				mon->mhp += perX/HEALCYCLE;
 				//Now deal with any remainder
-				if(((moves)*((mon->m_lev)%HEALCYCLE))/HEALCYCLE > ((moves-1)*((mon->m_lev)%HEALCYCLE))/HEALCYCLE) mon->mhp += 1;
+				if(((moves)*(perX%HEALCYCLE))/HEALCYCLE > ((moves-1)*(perX%HEALCYCLE))/HEALCYCLE)
+					mon->mhp += 1;
 			}
 		}
+		if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING && !mindless_mon(mon) && !is_deaf(mon) && mon->mtame)
+			mon->mhp += 1;
+		if (mon->mhp > mon->mhpmax)
+			mon->mhp = mon->mhpmax;
 	}
-	if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING && !mindless_mon(mon) && !is_deaf(mon) && mon->mtame) mon->mhp += 1;
-	if (mon->mhp > mon->mhpmax) mon->mhp = mon->mhpmax;
 	if (mon->mspec_used) mon->mspec_used--;
+
+	if(mon->mspec_used && uring_art(ART_LOMYA)){
+		mon->mspec_used--;
+	}
 	if (digest_meal) {
 	    if (mon->meating) mon->meating--;
 	}

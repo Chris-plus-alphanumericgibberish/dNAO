@@ -878,7 +878,10 @@ int mkflags;
 					add_to_container(otmp, gem);
 					container_weight(otmp);
 				}
-				otmp->ovar1 = random_saber_hilt();
+				if(otmp->otyp == LIGHTSABER)
+					otmp->ovar1 = random_saber_hilt();
+				else if(otmp->otyp == BEAMSWORD)
+					otmp->ovar1 = random_beam_hilt();
 				break;
 			case CHEST:
 			case BOX:

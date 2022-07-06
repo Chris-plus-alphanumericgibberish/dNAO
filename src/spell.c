@@ -5808,10 +5808,14 @@ int spell;
 		return 0;
 
 	/* some artifacts pracically cast the spells on their own */
-	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM) ||
-		(uarmh && check_oprop(uarmh, OPROP_BLAST) && (spellid(spell) == SPE_FIREBALL || spellid(spell) == SPE_FIRE_STORM)) ||
-		(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (
-		(spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE)))
+	if ((uarmh && uarmh->oartifact == ART_STORMHELM && spellid(spell) == SPE_LIGHTNING_STORM)
+		|| (uarmh && check_oprop(uarmh, OPROP_BLAST) && (spellid(spell) == SPE_FIREBALL || spellid(spell) == SPE_FIRE_STORM))
+		|| (uring_art(ART_LOMYA) && (spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL))
+		|| (uring_art(ART_NARYA) && (spellid(spell) == SPE_FIREBALL || spellid(spell) == SPE_FIRE_STORM))
+		|| (uring_art(ART_NENYA) && (spell_skilltype(spellid(spell)) == P_DIVINATION_SPELL))
+		|| (uring_art(ART_VILYA) && (spell_skilltype(spellid(spell)) == P_HEALING_SPELL))
+		|| (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM && (
+			(spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE)))
 		) {
 		splcaster -= 200;
 	}

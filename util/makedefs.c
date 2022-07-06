@@ -11,6 +11,7 @@
 #include "permonst.h"
 #include "objclass.h"
 #include "monsym.h"
+#include "mondata.h"
 #include "dungeon.h"
 #include "obj.h"
 #include "monst.h"
@@ -1382,21 +1383,45 @@ struct permonst *ptr;
 /*	For each attack and "special" attack */
 	for(i = 0; i < NATTK; i++) {
 
+		if(ptr->mlevel < ptr->mattk[i].lev_req)
+			continue;
+
 	    tmp2 = ptr->mattk[i].aatyp;
 	    n += (tmp2 > 0);
 	    n += (tmp2 == AT_MAGC || tmp2 == AT_MMGC || 
 			tmp2 == AT_TUCH || spirit_rapier_at(tmp2) || tmp2 == AT_TNKR);
 	    n += (tmp2 == AT_WEAP && (ptr->mflagsb & MB_STRONG));
+		if(has_phys_scaling(ptr) && 
+		  (ptr->mattk[i].aatyp || ptr->mattk[i].adtyp || ptr->mattk[i].damn || ptr->mattk[i].damd)
+		  &&!(
+			tmp2 == AT_SPIT
+			|| tmp2 == AT_BREA
+			|| tmp2 == AT_BRSH
+			|| tmp2 == AT_BOOM
+			|| tmp2 == AT_GAZE
+			|| tmp2 == AT_ARRW
+			|| tmp2 == AT_MMGC
+			|| tmp2 == AT_TNKR
+			|| tmp2 == AT_WDGZ
+			|| tmp2 == AT_MAGC
+		))
+			n += 2;
 	}
 
 /*	For each "special" damage type */
 	for(i = 0; i < NATTK; i++) {
 
+		if(ptr->mlevel < ptr->mattk[i].lev_req)
+			continue;
+
 	    tmp2 = ptr->mattk[i].adtyp;
-	    if ((tmp2 == AD_DRLI) || (tmp2 == AD_STON) || (tmp2 == AD_DRST)
-		|| (tmp2 == AD_DRDX) || (tmp2 == AD_DRCO) || (tmp2 == AD_WERE)
-		|| (tmp2 == AD_SHDW) || (tmp2 == AD_STAR) || (tmp2 == AD_BLUD)
-		|| (tmp2 == AD_MOON) || (tmp2 == AD_HOLY) || (tmp2 == AD_UNHY)
+		if ((tmp2 == AD_DRLI) || (tmp2 == AD_STON) || (tmp2 == AD_DRST)
+			|| (tmp2 == AD_DRDX) || (tmp2 == AD_DRCO) || (tmp2 == AD_WERE)
+			|| (tmp2 == AD_SVPN)
+			|| (tmp2 == AD_SHDW) || (tmp2 == AD_STAR) || (tmp2 == AD_BLUD)
+			|| (tmp2 == AD_MOON) || (tmp2 == AD_HOLY) || (tmp2 == AD_UNHY)
+			|| (tmp2 == AD_DETH) || (tmp2 == AD_PEST) || (tmp2 == AD_FAMN) || (tmp2 == AD_CNFT)
+			|| (tmp2 == AD_BLAS)
 		)
 			n += 2;
 	    else if (strcmp(ptr->mname, "grid bug")) n += (tmp2 != AD_PHYS);

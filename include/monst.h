@@ -269,7 +269,8 @@ struct monst {
 #define	MAD_TEMPLATE	18	/* mad angel template */
 #define	FALLEN_TEMPLATE	19	/* fallen angel template */
 #define WORLD_SHAPER	20	/* plane-of-earth nastify */
-#define MAXTEMPLATE	WORLD_SHAPER
+#define MINDLESS		21	/* brain eaten by mind flayers */
+#define MAXTEMPLATE	MINDLESS
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */

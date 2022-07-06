@@ -4240,7 +4240,7 @@ boolean goodequip;
 					const int water_nasties[] = {
 						PM_WATER_ELEMENTAL, PM_ICE_PARAELEMENTAL, PM_FORD_ELEMENTAL,
 						PM_NAIAD, PM_DEEPEST_ONE, PM_JELLYFISH,
-						PM_GREAT_WHITE_SHARK
+						PM_GREAT_WHITE_SHARK, PM_DAUGHTER_OF_NAUNET
 					};
 					if(Is_earthlevel(&u.uz)){
 						otmp = mongets(mtmp, MASK, mkobjflags);
@@ -9084,36 +9084,36 @@ boolean goodequip;
 				otmp = mksobj(TRIDENT, mkobjflags);
 				otmp->oerodeproof = 1;
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(RANSEUR, mkobjflags);
 				otmp->oerodeproof = 1;
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(CROSSBOW, mkobjflags);
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				otmp = mksobj(CROSSBOW_BOLT, mkobjflags);
 				otmp->oerodeproof = 1;
 				otmp->quan = 18;
 				otmp->owt = weight(otmp);
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				otmp = mksobj(SHIELD_OF_REFLECTION, mkobjflags);
 				set_material_gm(otmp, COPPER);
 				otmp->oerodeproof = 1;
 				otmp->spe = 9;
-					otmp->objsize = MZ_HUGE;
-					fix_object(otmp);
+				otmp->objsize = MZ_HUGE;
+				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
 				(void) mongets(mtmp, rnd_attack_potion(mtmp), mkobjflags);
@@ -13650,7 +13650,12 @@ struct monst *mtmp, *victim;
 	    // if (mtmp->mhpmax + max_increase > hp_threshold + 1)
 			// max_increase = max((hp_threshold + 1) - mtmp->mhpmax, 0);
 	    // cur_increase = (max_increase > 0) ? rn2(max_increase)+1 : 0;
-		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < victim->m_lev + (d(2,5) + heal_mlevel_bonus())){ /*allow monsters to quickly gain hp up to around their HP limit*/
+		int xp_threshold = victim->m_lev + d(2,5);
+		if(Role_if(PM_HEALER))
+			xp_threshold += heal_mlevel_bonus();
+		if(uring_art(ART_LOMYA))
+			xp_threshold += lev_lomya();
+		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
 			max_increase = 1;
 			cur_increase = 1;
 			if(Role_if(PM_BARD) && mtmp->mtame && canseemon(mtmp)){
@@ -13862,7 +13867,8 @@ int mkobjflags;
 								add_oprop(otmp, OPROP_HOLYW);
 							else {
 								add_oprop(otmp, OPROP_HOLY);
-								add_oprop(otmp, OPROP_WOOL);
+								if(is_suit(otmp) || is_cloak(otmp) || is_shirt(otmp))
+									add_oprop(otmp, OPROP_WOOL);
 								add_oprop(otmp, OPROP_LIFE);
 							}
 							if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)){
@@ -14459,6 +14465,10 @@ struct monst *mon;
 	
 	if(Role_if(PM_HEALER) && mon->mtame && lev_limit < 49)
 		lev_limit = min_ints(49, lev_limit + heal_mlevel_bonus());
+	
+	if(uring_art(ART_LOMYA) && mon->mtame && lev_limit < 49)
+		lev_limit = min_ints(49, lev_limit + lev_lomya());
+		
 
 	return lev_limit;
 }

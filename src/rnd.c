@@ -70,6 +70,7 @@ register int x;	/* good luck approaches 0, bad luck approaches (x-1) */
 {
 	register int i;
     check_reseed();
+	if(x<=0) x=1; //fixes a crash from feeding rnd a negative number.  I'd rather have this behavior.
 #ifdef DEBUG
 	if (x <= 0) {
 		impossible("rnl(%d) attempted", x);

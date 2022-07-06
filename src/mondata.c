@@ -5,6 +5,7 @@
 #include "hack.h"
 
 #include "horrordata.h"
+#include "mondata.h"
 #include "xhity.h"
 
 /*	These routines provide basic data for any type of monster. */
@@ -259,11 +260,20 @@ int template;
 	case ZOMBIFIED:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
-		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
+		if(ptr->mflagsm&MM_NEEDPICK)
+			ptr->mflagsm &= ~(MM_TUNNEL|MM_NEEDPICK);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK | MT_CARNIVORE);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL | MT_HERBIVORE);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		
+		/*Zombies have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
 		/* defense: */
 		ptr->nac += 4;
 		ptr->dac += -2;	/* penalty to dodge AC */
@@ -284,11 +294,19 @@ int template;
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_BREATHLESS);
+		if(ptr->mflagsm&MM_NEEDPICK)
+			ptr->mflagsm &= ~(MM_TUNNEL|MM_NEEDPICK);
 		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL | MT_HERBIVORE | MT_CARNIVORE | MT_METALLIVORE | MT_MAGIVORE);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		/*Skeletons have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
 		/* defense: */
 		ptr->nac += 2;
 		/* resists: */
@@ -305,11 +323,13 @@ int template;
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_BREATHLESS|MM_WEBRIP);
 		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK);
-		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL | MT_HERBIVORE | MT_CARNIVORE | MT_METALLIVORE | MT_MAGIVORE);
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
 		ptr->mflagsb |= (MB_INDIGESTIBLE);
+		/*Crystal dead have no skill*/
+		ptr->mflagsf &= ~(MF_BAB_HALF);
 		/* defense: */
 		ptr->nac += 10;
 		ptr->dac += 6;
@@ -354,27 +374,74 @@ int template;
 		ptr->mflagsa |= (MA_PRIMORDIAL);
 		/* resists: */
 		ptr->mresists |= (MR_POISON);
+		/*More intelligent*/
+		if(ptr->mflagst&MT_MINDLESS){
+			ptr->mflagst &= ~MT_MINDLESS;
+			ptr->mflagst |= MT_ANIMAL;
+		}
+		else if(ptr->mflagst&MT_ANIMAL){
+			//Shouldn't be a mindless animal, but
+			ptr->mflagst &= ~MT_MINDLESS;
+			ptr->mflagst &= ~MT_ANIMAL;
+		}
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S);
+		ptr->mflagsf |= MF_MARTIAL_E;
+		ptr->mflagsf &= ~(MF_BAB_HALF);
+		ptr->mflagsf |= MF_BAB_FULL;
+		/*Pseudonaturals have tentacles, which changes their grasp situation.*/
+		if(ptr->mflagsb&MB_NOLIMBS){
+			ptr->mflagsb &= ~MB_NOLIMBS;
+			ptr->mflagsb |= MB_NOFEET|MB_NOGLOVES;
+		}
+		else if(ptr->mflagsb&MB_NOHANDS){
+			ptr->mflagsb &= ~MB_NOHANDS;
+			ptr->mflagsb |= MB_NOGLOVES;
+		}
+		ptr->mflagsb |= MB_ACID|MB_POIS;
 		break;
 	case TOMB_HERD:
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
-		ptr->mflagsm |= (MM_TENGTPORT);
-		ptr->mflagst |= (MT_HOSTILE);
-		ptr->mflagst &= ~(MT_MINDLESS);
+		ptr->mflagsm &= ~(MM_AMORPHOUS|MM_WALLWALK|MM_NOTONL|MM_FLEETFLEE);
+		if(ptr->mflagsm&MM_NEEDPICK)
+			ptr->mflagsm &= ~(MM_TUNNEL|MM_NEEDPICK);
+		ptr->mflagsm |= (MM_TENGTPORT|MM_AMPHIBIOUS|MM_BREATHLESS|MM_TPORT|MM_TPORT_CNTRL|MM_WEBRIP);
+		ptr->mflagst &= ~(MT_MINDLESS|MT_HERBIVORE|MT_METALLIVORE);
+		ptr->mflagst |= (MT_HOSTILE|MT_ANIMAL|MT_CARNIVORE|MT_TRAITOR);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
-		ptr->mflagsb |= (MB_INDIGESTIBLE);
+		ptr->mflagsb &= ~(MB_UNSOLID|MB_OVIPAROUS|MB_ACID|MB_POIS|MB_POIS|MB_TOSTY|MB_HALUC|MB_INSUBSTANTIAL);
+		ptr->mflagsb |= (MB_INDIGESTIBLE|MB_THICK_HIDE|MB_STRONG);
 		/* defense: */
 		ptr->nac += 6;
 		/* resists: */
 		ptr->mresists |= (MR_FIRE | MR_COLD | MR_SLEEP | MR_POISON | MR_STONE | MR_DRAIN | MR_SICK | MR_MAGIC);
 		break;
 	case YITH:
-		/* attacks only */
+		ptr->mflagst &= ~(MT_MINDLESS|MT_ANIMAL|MT_DOMESTIC);
+		if(!(ptr->mflagsb&(MB_NOLIMBS|MB_NOHANDS)) && !(ptr->mflagsm&MM_TUNNEL))
+			ptr->mflagsm |= (MM_TUNNEL|MM_NEEDPICK);
 		break;
 	case CRANIUM_RAT:
 		/* defense: */
 		ptr->dac += 4;
 		ptr->hdr = 0; //Exposed brain
+		break;
+	case MINDLESS:
+		if(ptr->mflagsm&MM_NEEDPICK)
+			ptr->mflagsm &= ~(MM_TUNNEL|MM_NEEDPICK);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL | MT_STALK);
+		/* defense: */
+		ptr->dac = 0;
+		ptr->hdr += 2; //No one home
+		ptr->msound = MS_SILENT;
+		ptr->mflagsf = 0L;
+		/*Mindless monsters have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
 		break;
 	case MISTWEAVER:
 		/* flags */
@@ -411,6 +478,12 @@ int template;
 		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT | MG_NOSPELLCOOLDOWN);
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		/*Black web victims have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
 		/* defense: */
 		ptr->pac = max(ptr->pac, 8);
 		ptr->dac += -2;	/* penalty to dodge AC */
@@ -435,6 +508,12 @@ int template;
 		ptr->mflagsg &= ~(MG_RBLUNT|MG_PNAME);
 		ptr->mflagsa |= (MA_PRIMORDIAL|MA_AQUATIC);
 		ptr->mflagsb |= (MB_NOLIMBS|MB_ACID|MB_POIS|MB_STRONG);
+		/*Slime remnants have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
 		/* defense: */
 		ptr->nac = 14;
 		ptr->dac = 0;
@@ -467,6 +546,12 @@ int template;
 		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		/*Yellow dead have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
 		/* resists: */
 		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
 		ptr->mresists |= (MR_COLD | MR_SLEEP | MR_POISON);
@@ -537,8 +622,9 @@ int template;
 		insert = FALSE;
 
 		/* some templates completely skip specific attacks */
-		while ((template == ZOMBIFIED || template == SKELIFIED || template == CRYSTALFIED) &&
+		while ((template == ZOMBIFIED || template == SKELIFIED) &&
 			(
+			attk->lev_req > ptr->mlevel ||
 			attk->aatyp == AT_SPIT ||
 			attk->aatyp == AT_BREA ||
 			attk->aatyp == AT_BRSH ||
@@ -562,8 +648,23 @@ int template;
 		}
 
 		/* some templates completely skip specific attacks */
+		while ((template == CRYSTALFIED) &&
+			(
+			attk->aatyp == AT_SPIT ||
+			attk->aatyp == AT_BREA ||
+			attk->aatyp == AT_BRSH
+			)
+		){
+			/* shift all further attacks forwards one slot, and make last one all 0s */
+			for (j = 0; j < (NATTK - i); j++)
+				attk[j] = attk[j + 1];
+			attk[j] = noattack;
+		}
+
+		/* some templates completely skip specific attacks */
 		while ((template == SLIME_REMNANT) &&
 			(
+			attk->lev_req > ptr->mlevel ||
 			attk->aatyp == AT_CLAW ||
 			attk->aatyp == AT_BITE ||
 			attk->aatyp == AT_OBIT ||
@@ -598,6 +699,23 @@ int template;
 			attk[j] = noattack;
 		}
 
+		/* some templates completely skip specific attacks */
+		while ((template == MINDLESS) &&
+			(
+			attk->lev_req > ptr->mlevel ||
+			attk->aatyp == AT_ARRW ||
+			attk->aatyp == AT_ESPR ||
+			attk->aatyp == AT_MMGC ||
+			attk->aatyp == AT_TNKR ||
+			attk->aatyp == AT_MAGC
+			)
+		){
+			/* shift all further attacks forwards one slot, and make last one all 0s */
+			for (j = 0; j < (NATTK - i); j++)
+				attk[j] = attk[j + 1];
+			attk[j] = noattack;
+		}
+
 		/* if creatures don't have eyes, some gaze attacks are impossible */
 		if ((attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ) && !haseyes(ptr))
 		{
@@ -613,6 +731,26 @@ int template;
 			}
 		}
 
+		/* mindless monsters don't use weapons */
+		if ((template == MINDLESS) && 
+			(
+			attk->aatyp == AT_HODS ||
+			attk->aatyp == AT_DEVA ||
+			attk->aatyp == AT_SRPR ||
+			attk->aatyp == AT_XSPR ||
+			attk->aatyp == AT_MSPR ||
+			attk->aatyp == AT_DSPR ||
+			attk->aatyp == AT_MARI ||
+			attk->aatyp == AT_WEAP ||
+			attk->aatyp == AT_XWEP
+			)
+		){
+			if(attk->aatyp == AT_XWEP || attk->aatyp == AT_XSPR)
+				attk->offhand = 1;
+			attk->aatyp = AT_CLAW;
+			attk->damn = max(attk->damn, ptr->mlevel / 10 + 1);
+			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
+		}
 		/* some templates want to adjust existing attacks, or add additional attacks */
 #define insert_okay (!special && (is_null_attk(attk) || \
 	((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
@@ -621,7 +759,7 @@ int template;
 #define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;i++;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
-		if ((template == ZOMBIFIED || template == SKELIFIED) && (
+		if ((template == ZOMBIFIED || template == SKELIFIED || template == MINDLESS) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
 			is_null_attk(attk) ||
 			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
@@ -842,7 +980,7 @@ int template;
 			attk->damd = 6;
 			special = TRUE;
 		}
-		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN){
+		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN && attk->adtyp != AD_SURY){
 			if(attk->adtyp == AD_PHYS)
 				attk->damn++;
 			attk->damd += 4;
@@ -920,6 +1058,9 @@ int mtyp;
 	case YITH:
 		/* must have had a mind for the yith to have swapped with */
 		return !mindless(ptr);
+	case MINDLESS:
+		/* must have had a mind for the yith to lose, must have a body. */
+		return !mindless(ptr) && can_undead(ptr);
 	case CRANIUM_RAT:
 		/* is a rodent */
 		return is_rat(ptr);
@@ -1506,6 +1647,61 @@ struct attack *prev_attk;
 	}
 
     return (struct attack *)0;
+}
+
+boolean
+mon_offhand_attack(mon)
+struct monst *mon;
+{
+	struct attack *attk;
+	struct attack prev_attk_buffer = {0};
+	int	indexnum = 0,	/* loop counter */
+		subout = 0,	/* remembers what attack substitutions have been made for [mon]'s attack chain */
+		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+
+	/* zero out res[] */
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+	
+	for(attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk_buffer, TRUE, &subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk_buffer, TRUE, &subout, &tohitmod)
+	){
+		if(attk->offhand || attk->aatyp == AT_XSPR || (attk->aatyp == AT_XWEP && MON_SWEP(mon)))
+			return TRUE;
+	}
+
+    return FALSE;
+}
+
+boolean
+cantwield(mon)
+struct monst *mon;
+{
+	if(mon_attacktype(mon, AT_WEAP) || mon_attacktype(mon, AT_DEVA))
+		return FALSE;
+
+    return TRUE;
+}
+
+boolean
+you_cantwield(ptr)
+struct permonst *ptr;
+{
+    struct attack *a;
+	
+	if(allow_wield(ptr))
+		return FALSE;
+	
+    for (a = &ptr->mattk[0]; a < &ptr->mattk[NATTK]; a++){
+		if (a->aatyp == AT_WEAP || a->aatyp == AT_DEVA || a->polywep) 
+			return FALSE;
+	}
+	
+	return TRUE;
 }
 
 boolean
@@ -2514,22 +2710,46 @@ struct permonst *ptr;
 	/*	For each attack and "special" attack */
 	for (i = 0; i < NATTK; i++) {
 
+		if(ptr->mlevel < ptr->mattk[i].lev_req)
+			continue;
+
 		tmp2 = ptr->mattk[i].aatyp;
 		n += (tmp2 > 0);
 		n += (tmp2 == AT_MAGC || tmp2 == AT_MMGC ||
 			tmp2 == AT_TUCH || tmp2 == AT_TNKR ||
 			spirit_rapier_at(tmp2));
 		n += (tmp2 == AT_WEAP && (ptr->mflagsb & MB_STRONG));
+		if(has_phys_scaling(ptr) && 
+		  (ptr->mattk[i].aatyp || ptr->mattk[i].adtyp || ptr->mattk[i].damn || ptr->mattk[i].damd)
+		  &&!(
+			tmp2 == AT_SPIT
+			|| tmp2 == AT_BREA
+			|| tmp2 == AT_BRSH
+			|| tmp2 == AT_BOOM
+			|| tmp2 == AT_GAZE
+			|| tmp2 == AT_ARRW
+			|| tmp2 == AT_MMGC
+			|| tmp2 == AT_TNKR
+			|| tmp2 == AT_WDGZ
+			|| tmp2 == AT_MAGC
+		))
+			n += 2;
 	}
 
 	/*	For each "special" damage type */
 	for (i = 0; i < NATTK; i++) {
 
+		if(ptr->mlevel < ptr->mattk[i].lev_req)
+			continue;
+
 		tmp2 = ptr->mattk[i].adtyp;
 		if ((tmp2 == AD_DRLI) || (tmp2 == AD_STON) || (tmp2 == AD_DRST)
 			|| (tmp2 == AD_DRDX) || (tmp2 == AD_DRCO) || (tmp2 == AD_WERE)
+			|| (tmp2 == AD_SVPN)
 			|| (tmp2 == AD_SHDW) || (tmp2 == AD_STAR) || (tmp2 == AD_BLUD)
 			|| (tmp2 == AD_MOON) || (tmp2 == AD_HOLY) || (tmp2 == AD_UNHY)
+			|| (tmp2 == AD_DETH) || (tmp2 == AD_PEST) || (tmp2 == AD_FAMN) || (tmp2 == AD_CNFT)
+			|| (tmp2 == AD_BLAS)
 		)
 			n += 2;
 		else if (strcmp(ptr->mname, "grid bug")) n += (tmp2 != AD_PHYS);

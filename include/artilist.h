@@ -378,7 +378,6 @@ A("The Pen of the Void",ATHAME,							(const char *)0,
 	VOID_CHIME, NOFLAG
 	),
 
-#ifdef CONVICT
 A("Luck Blade",			SHORT_SWORD,					"clover-inscribed %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_CONVICT, NON_PM, TIER_D, (ARTG_GIFT),
@@ -388,7 +387,6 @@ A("Luck Blade",			SHORT_SWORD,					"clover-inscribed %s",
 	PROPS(), NOFLAG,
 	NOINVOKE, (ARTI_LUCK)
 	),
-#endif /* CONVICT */
 
 A("Cleaver",			BATTLE_AXE,						(const char *)0,
 	1500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
@@ -1237,6 +1235,80 @@ A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
 	ENLIGHTENING, (ARTI_PLUSSEV)
 	),
 
+/*Needs encyc entry*/
+/* Modifier: (charisma-11)/2 (-4 to +7) */
+/* Inspires pets: add modifier to pet to-hit and damage, roll modifier and add to pet AC */
+/* Pets gain the bold() property (stop fleeing faster) */
+/* Applies the modifier to your save vs san loss */
+/* Strongly boost fireball and firestorm success rate */
+/* Also adds 1d10 fire damage to all attacks (only prints messages for unarmed attacks) */
+/* Gives fire res when worn */
+A("Narya",								RIN_CONFLICT,	/* ruby or gold */			(const char *)0,
+	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, PM_ELF, TIER_A, (ARTG_INHER|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_FIRE, 1, 10), NOFLAG,
+	PROPS(FIRE_RES), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+/*Needs encyc entry*/
+/* Modifier: (wisdom-11)/2 (-4 to +7) */
+/* Gain (or lose) modifer energy per 10 turns */
+/* Applies the modifier to your base AC when not flat footed */
+/* Strongly boost divination spell success rate */
+/* Also adds 1d20 silver damage to all attacks (only prints messages for unarmed attacks) */
+/* Grants monster detection, waterproofing, and water walking when worn */
+A("Nenya",								RIN_WARNING,	/* diamond or silver */			(const char *)0,
+	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, PM_ELF, TIER_A, (ARTG_INHER|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_STAR, 1, 20), NOFLAG,
+	PROPS(DETECT_MONSTERS, WATERPROOF, WWALKING), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+/*Needs encyc entry*/
+/* Modifier: (intelligence-11)/2 (-4 to +7) */
+/* Gain modifier HP per 10 turns. May worsen you're condition if you are already dying due to negative HP regen, but won't cause HP regen to be negative otherwise. */
+/* Add modifier to your San regen threshold */
+/* Applies modifier to pet regen rate (may kill pets if negative!) */
+/* Add modifier to your pet's AC */
+/* Strongly boost healing spell success rate */
+/* Also adds 1d20 study to all attacks */
+/* Grants shock res, warning, stealth, and magical breathing when worn */
+A("Vilya",								RIN_AGGRAVATE_MONSTER,	/* sapphire or brass */			(const char *)0,
+	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, PM_ELF, TIER_A, (ARTG_INHER|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_STDY, 1, 20), NOFLAG,
+	PROPS(SHOCK_RES, WARN_OF_MON, STEALTH, MAGICAL_BREATHING), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+/*Needs encyc entry*/
+/* Modifier: (wisdom-11)/2 (-4 to +7) */
+/* Applies modifier to pet DR */
+/* Level modifier: (wisdom + charisma - 18)/4 (-3 to +8) plus beast mastery (0 to 5, doubled by clarent) */
+/* Applies level modifier to pet max level */
+/* Halves pet special attack timeout */
+/* Strongly boost enchantment spell success rate */
+/* Also adds 1d8 turn sleep attack to all attacks (only prints messages for unarmed attacks) */
+/*  Since it always has Lolth's holy symbol, also adds silver damage when used without gloves */
+/* Grants teleportation, teleport control, and searching when worn */
+A("Lomya",					RIN_PROTECTION_FROM_SHAPE_CHAN,/* black signet */			(const char *)0,
+	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, PM_DROW, TIER_A, (ARTG_INHER|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_SLEE,1,8), NOFLAG,
+	PROPS(TELEPORT, TELEPORT_CONTROL, SEARCHING), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 A("Hellrider's Saddle",				SADDLE,					(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, NON_PM, TIER_A, NOFLAG,
@@ -1825,7 +1897,6 @@ A("The Sceptre of Might",			MACE,				(const char *)0,
 	PROPS(ANTIMAGIC), NOFLAG,
 	CONFLICT, NOFLAG
 	),
-#ifdef CONVICT
 // old-style artifact block
 // A("The Iron Ball of Liberation", HEAVY_IRON_BALL,	0,			0,
 	// (SPFX_NOGEN|SPFX_RESTR|SPFX_LUCK|SPFX_INTEL),
@@ -1852,7 +1923,6 @@ A("The Iron Spoon of Liberation",	SPOON,				(const char *)0,
 	PROPS(SEARCHING, FREE_ACTION), (ARTP_SEEK),
 	PHASING, (ARTI_DIG|ARTI_ENGRAVE|ARTI_LUCK)
 	),
-#endif	/* CONVICT */
 
 /*Creates throwing stars. Makes throwing stars count as silver if wielded */
 /*Also can be (a)pplied as a magic flute.								  */
@@ -3433,18 +3503,6 @@ A("The Forge Hammer of the Artificer",	WAR_HAMMER,		(const char *)0,
 	ARTIFICE, NOFLAG
 	),
 
-/* Drow */
-/* TODO name by appearance */
-A("The Ring of Lolth",					RIN_PROTECTION_FROM_SHAPE_CHAN,/* black signet */			(const char *)0,
-	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, PM_DROW, NO_TIER, (ARTG_NOGEN|ARTG_NOWISH),
-	MONS(vsMA(MA_ORC)),
-	NO_ATTK(), NOFLAG,
-	PROPS(FIRE_RES), NOFLAG,
-	PROPS(WARN_OF_MON), NOFLAG,
-	FIRE_BLAST, NOFLAG
-	),
-
 /* Dwarf */
 A("The Bulwark of the Dwarven Defender",DWARVISH_ROUNDSHIELD,			(const char *)0,
 	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
@@ -3455,42 +3513,6 @@ A("The Bulwark of the Dwarven Defender",DWARVISH_ROUNDSHIELD,			(const char *)0,
 	PROPS(), NOFLAG,
 	BLESS, (ARTI_PLUSSEV)
 	),
-/* Elf */
-/* TODO name by appearance */
-A("Narya",								RIN_TELEPORT_CONTROL,	/* gold */			(const char *)0,
-	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, PM_ELF, NO_TIER, (ARTG_NOGEN|ARTG_NOWISH),
-	MONS(vsMA(MA_ORC)),
-	NO_ATTK(), NOFLAG,
-	PROPS(FIRE_RES), NOFLAG,
-	PROPS(WARN_OF_MON), NOFLAG,
-	FIRE_BLAST, NOFLAG
-	),
-
-/* TODO water walking */
-/* TODO protect inventory from water damage */
-/* TODO name by appearance */
-A("Nenya",								RIN_TELEPORTATION,	/* silver */			(const char *)0,
-	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, PM_ELF, NO_TIER, (ARTG_NOGEN|ARTG_NOWISH),
-	MONS(vsMA(MA_ORC)),
-	NO_ATTK(), NOFLAG,
-	PROPS(), NOFLAG,
-	PROPS(WARN_OF_MON), NOFLAG,
-	NOINVOKE, NOFLAG
-	),
-
-/* TODO name by appearance */
-A("Vilya",								RIN_AGGRAVATE_MONSTER,	/* sapphire */			(const char *)0,
-	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, PM_ELF, NO_TIER, (ARTG_NOGEN|ARTG_NOWISH),
-	MONS(vsMA(MA_ORC)),
-	NO_ATTK(), NOFLAG,
-	PROPS(SHOCK_RES), NOFLAG,
-	PROPS(WARN_OF_MON), NOFLAG,
-	HEALING, NOFLAG
-	),
-
 /* Gnome */
 /* TODO +1d5 bth against med+ */
 /* TODO warn against medium+ */

@@ -4176,7 +4176,7 @@ struct zapdata * zapdata;
 				dmg = 0;
 			}
 		}
-		else if (Cold_res(mdef)) {
+		else if (species_resists_cold(mdef)) {
 			dmg *= 1.5;
 		}
 		domsg();
@@ -4210,7 +4210,7 @@ struct zapdata * zapdata;
 				dmg = 0;
 			}
 		}
-		else if (Fire_res(mdef)) {
+		else if (species_resists_fire(mdef)) {
 			dmg *= 1.5;
 		}
 		domsg();
@@ -4306,7 +4306,7 @@ struct zapdata * zapdata;
 				if (Poison_res(mdef)) dmg = 0; else dmg = 4;
 				domsg();	/* gotta call before poisoned() */
 				/* poisoned() deals the damage and checks resistance */
-				poisoned("blast", A_DEX, "poisoned blast", 15);
+				poisoned("blast", A_DEX, "poisoned blast", 15, FALSE);
 			}
 			else {
 				if (Poison_res(mdef)) {
