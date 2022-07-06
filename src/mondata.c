@@ -852,19 +852,6 @@ int template;
 			attk->damd = 4;
 			special = TRUE;
 		}
-		/* mindless thralls lose their weapon attacks */
-		if (template == MINDLESS && (
-			(attk->aatyp == AT_WEAP
-			 || attk->aatyp == AT_XWEP
-			 || attk->aatyp == AT_HODS
-			 || attk->aatyp == AT_DEVA
-			)
-			))
-		{
-			attk->aatyp = AT_CLAW;
-			attk->damn += 1;
-			attk->damd += 2;
-		}
 		/* tomb herd's attacks are generally stronger */
 		if (template == TOMB_HERD && (
 			!is_null_attk(attk))
