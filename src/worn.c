@@ -1026,7 +1026,8 @@ struct monst *mon;
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
 		if(Role_if(PM_HEALER))
-			base += def_beastmastery();
+			base += heal_mlevel_bonus();
+
 		if(uring_art(ART_LOMYA))
 			base += def_lomya();
 	}
