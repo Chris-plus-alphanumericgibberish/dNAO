@@ -1279,8 +1279,7 @@ int
 dogaze()
 {
 	register struct monst *mtmp;
-	struct attack * attk = attacktype_fordmg(youracedata, AT_GAZE, AD_ANY);
-	int result;
+	int result = 0;
 
 	if (Blind) {
 		You_cant("see anything to gaze at.");
@@ -1299,7 +1298,12 @@ dogaze()
 		flags.botl = 1;
 
 		if ((mtmp = m_at(u.dx, u.dy)) && canseemon(mtmp)) {
-			result = xgazey(&youmonst, mtmp, attk, -1);
+			struct attack *a;
+
+			for (a = &youracedata->mattk[0]; a < &youracedata->mattk[NATTK]; a++){
+				if (a->aatyp == AT_GAZE) 
+					result |= xgazey(&youmonst, mtmp, a, -1);
+			}
 
 			if (!result) {
 				pline("%s seemed not to notice.", Monnam(mtmp));
