@@ -808,7 +808,7 @@ unsigned trflags;
 		((ttype == HOLE || ttype == TRAPDOOR || ttype == PIT || ttype == SPIKED_PIT) && u.sealsActive&SEAL_SIMURGH)
 		)) {
 		You("escape %s %s.",
-		    (ttype == ARROW_TRAP && !trap->madeby_u) ? "an" :
+		    ((ttype == ARROW_TRAP || ttyp == VIVI_TRAP) && !trap->madeby_u) ? "an" :
 			a_your[trap->madeby_u],
 		    defsyms[trap_to_defsym(ttype)].explanation);
 		nomul(0, NULL);
