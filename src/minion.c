@@ -207,10 +207,9 @@ boolean talk;
 
     if (mon) {
 		if (talk) {
-			pline_The("voice of %s booms:", godname(godnum));
-			verbalize("Thou shalt pay for thy indiscretion!");
+			godvoice(godnum, "Thou shalt pay for thy indiscretion!");
 			if (!Blind)
-			pline("%s appears before you.", An(Hallucination ? rndmonnam() : mon->data->mname));
+				pline("%s appears before you.", An(Hallucination ? rndmonnam() : mon->data->mname));
 		}
 		mon->mpeaceful = FALSE;
 		/* don't call set_malign(); player was naughty */

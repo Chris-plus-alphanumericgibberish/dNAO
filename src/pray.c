@@ -1613,6 +1613,13 @@ dosacrifice()
 		pline1(nothing_happens);
 		return MOVE_STANDARD;
 	}
+	
+	if (a_gnum(u.ux, u.uy) == GOD_THE_BLACK_MOTHER && u.shubbie_atten) {
+		if (otmp->otyp == CORPSE)
+			feel_cockatrice(otmp, TRUE);
+		pline1(nothing_happens);
+		return 1;
+	}
 
 	if(Misotheism && !(otmp->otyp == AMULET_OF_YENDOR && Is_astralevel(&u.uz))){
 		if (otmp->otyp == CORPSE)
@@ -3344,6 +3351,10 @@ int eatflag;
 			goat_gives_benefit();
 		    return;
 	    }
+		else if (Luck < 0) {
+			/* silently slightly improve your luck, because being unable to get gifts because of negative luck indefinitely feels bad */
+			change_luck(1);
+		}
 	}
 }
 /* declare the global godlist pointer */
