@@ -4177,7 +4177,7 @@ struct zapdata * zapdata;
 				dmg = 0;
 			}
 		}
-		else if (Cold_res(mdef)) {
+		else if (species_resists_cold(mdef)) {
 			dmg *= 1.5;
 		}
 		domsg();
@@ -4211,7 +4211,7 @@ struct zapdata * zapdata;
 				dmg = 0;
 			}
 		}
-		else if (Fire_res(mdef)) {
+		else if (species_resists_fire(mdef)) {
 			dmg *= 1.5;
 		}
 		domsg();
