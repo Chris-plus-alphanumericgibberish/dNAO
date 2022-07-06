@@ -3871,6 +3871,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		priest = makemon(&mons[PM_BLASPHEMOUS_LURKER], sx, sy, NO_MM_FLAGS);
 	}
 	else {
+		struct obj *otmp;
 		priest = makemon(&mons[sanctum ? PM_HIGH_PRIEST : PM_ALIGNED_PRIEST],
 			sx + 1, sy, NO_MM_FLAGS);
 		if (priest) {
@@ -3903,6 +3904,30 @@ int sanctum;   /* is it the seat of the high priest? */
 					if(!sanctum){
 						newcham(priest,PM_DROW_ALIENIST,FALSE,FALSE);
 						set_faction(priest, XAXOX);
+						otmp = mongets(priest, DROVEN_CHAIN_MAIL, MKOBJ_NOINIT);
+						if(otmp){
+							otmp->ohaluengr = TRUE;
+							otmp->oward = XAXOX;
+						}
+						otmp = mongets(priest, find_signet_ring(), MKOBJ_NOINIT);
+						if(otmp){
+							otmp->ohaluengr = TRUE;
+							otmp->oward = EDDER_SYMBOL;
+						}
+						mongets(priest, DROVEN_HELM, MKOBJ_NOINIT);
+						mongets(priest, HIGH_BOOTS, MKOBJ_NOINIT);
+						otmp = mongets(priest, KHAKKHARA, MKOBJ_NOINIT);
+						if(otmp){
+							otmp->blessed = FALSE;
+							otmp->cursed = TRUE;
+							otmp->oerodeproof = TRUE;
+							otmp->spe = 5;
+							add_oprop(otmp, OPROP_BLADED);
+							set_material_gm(otmp, OBSIDIAN_MT);
+						}
+						m_dowear(priest, TRUE);
+						init_mon_wield_item(priest);
+						m_level_up_intrinsic(priest);
 					}
 					break;
 				case GOD_VHAERAUN:
@@ -3910,14 +3935,66 @@ int sanctum;   /* is it the seat of the high priest? */
 					if(!sanctum){
 						newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
 						set_faction(priest, LOLTH_SYMBOL);
+						otmp = mongets(priest, DROVEN_PLATE_MAIL, MKOBJ_NOINIT);
+						if(otmp){
+							otmp->ohaluengr = TRUE;
+							otmp->oward = MAGTHERE;
+						}
+						otmp = mongets(priest, find_signet_ring(), MKOBJ_NOINIT);
+						if(otmp){
+							otmp->ohaluengr = TRUE;
+							otmp->oward = MAGTHERE;
+						}
+						mongets(priest, DROVEN_HELM, MKOBJ_NOINIT);
+						otmp = mongets(priest, GAUNTLETS, MKOBJ_NOINIT);
+						if(otmp) set_material_gm(otmp, SHADOWSTEEL);
+						otmp = mongets(priest, ARMORED_BOOTS, MKOBJ_NOINIT);
+						if(otmp) set_material_gm(otmp, SHADOWSTEEL);
+						otmp = mongets(priest, DROVEN_GREATSWORD, MKOBJ_NOINIT);
+						if(otmp){
+							otmp->oerodeproof = TRUE;
+							otmp->spe = 5;
+							otmp->opoisoned = rn2(4) ? OPOISON_SLEEP : OPOISON_PARAL;
+						}
+						m_dowear(priest, TRUE);
+						init_mon_wield_item(priest);
+						m_level_up_intrinsic(priest);
 					}
 					break;
+#define DROW_PRIESTESS_GEAR(sym) {\
+	otmp = mongets(priest, DROVEN_PLATE_MAIL, MKOBJ_NOINIT);\
+	if(otmp){\
+		otmp->ohaluengr = TRUE;\
+		otmp->oward = sym;\
+	}\
+	otmp = mongets(priest, find_signet_ring(), MKOBJ_NOINIT);\
+	if(otmp){\
+		otmp->ohaluengr = TRUE;\
+		otmp->oward = sym;\
+	}\
+	mongets(priest, DROVEN_HELM, MKOBJ_NOINIT);\
+	mongets(priest, HIGH_BOOTS, MKOBJ_NOINIT);\
+	otmp = mongets(priest, VIPERWHIP, MKOBJ_NOINIT);\
+	if(otmp){\
+		otmp->oerodeproof = TRUE;\
+		otmp->spe = 2;\
+		otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;\
+		otmp->opoisonchrgs = 1;\
+		otmp->ovar1 = 1+rnd(3);\
+	}\
+	mongets(priest, KHAKKHARA, MKOBJ_NOINIT);\
+	m_dowear(priest, TRUE);\
+	init_mon_wield_item(priest);\
+	m_level_up_intrinsic(priest);\
+}
 				case GOD_LOLTH:
 					if (!flags.initgend){
 						priest->female = FALSE;
 						if(!sanctum){
 							newcham(priest,PM_HEDROW_WIZARD,FALSE,FALSE);
 							set_faction(priest, LOLTH_SYMBOL);
+							(void)mongets(priest, DROVEN_CROSSBOW, MKOBJ_NOINIT);
+							m_initthrow(priest, DROVEN_BOLT, 24, MKOBJ_NOINIT);
 						}
 					}
 					else {
@@ -3925,20 +4002,101 @@ int sanctum;   /* is it the seat of the high priest? */
 						if(!sanctum) {
 							newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
 							set_faction(priest, LOLTH_SYMBOL);
+							DROW_PRIESTESS_GEAR(LOLTH_SYMBOL)
 						}
 					}
 					break;
 				case GOD_EILISTRAEE:
 					priest->female = TRUE;
-					if(!sanctum) newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
+					if(!sanctum){
+						newcham(priest,PM_STJARNA_ALFR,FALSE,FALSE);
+						otmp = mongets(priest, DROVEN_PLATE_MAIL, MKOBJ_NOINIT);
+						if(otmp){
+							set_material_gm(otmp, MITHRIL);
+							otmp->ohaluengr = TRUE;
+							otmp->oward = EILISTRAEE_SYMBOL;
+						}
+						otmp = mongets(priest, find_signet_ring(), MKOBJ_NOINIT);
+						if(otmp){
+							set_material_gm(otmp, MITHRIL);
+							otmp->ohaluengr = TRUE;
+							otmp->oward = EILISTRAEE_SYMBOL;
+						}
+						otmp = mongets(priest, DROVEN_HELM, MKOBJ_NOINIT);
+						if(otmp) set_material_gm(otmp, MITHRIL);
+						mongets(priest, ELVEN_BOOTS, MKOBJ_NOINIT);
+						otmp = mongets(priest, HIGH_ELVEN_WARSWORD, MKOBJ_NOINIT);
+						if(otmp){
+							otmp->spe = 2;
+						}
+						(void)mongets(priest, ELVEN_BOW, MKOBJ_NOINIT);
+						m_initthrow(priest, ELVEN_ARROW, 24, MKOBJ_NOINIT);
+						m_dowear(priest, TRUE);
+						init_mon_wield_item(priest);
+						m_level_up_intrinsic(priest);
+					}
 					break;
 				case GOD_VER_TAS:
 					priest->female = TRUE;
-					if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+					if(!sanctum){
+						newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+						set_faction(priest, VER_TAS_SYMBOL);
+						DROW_PRIESTESS_GEAR(VER_TAS_SYMBOL)
+					}
+					break;
+				case GOD_PEN_A:
+					priest->female = TRUE;
+					if(!sanctum){
+						newcham(priest,rn2(2) ? PM_DROW : PM_DRIDER,FALSE,FALSE);
+						set_faction(priest, PEN_A_SYMBOL);
+					}
+					break;
+				case GOD_GHAUNADAUR:
+					if(!sanctum){
+						if(rn2(2)){
+							priest->female = TRUE;
+							newcham(priest,PM_PRIESTESS_OF_GHAUNADAUR,FALSE,FALSE);
+							set_faction(priest, GHAUNADAUR_SYMBOL);
+							DROW_PRIESTESS_GEAR(GHAUNADAUR_SYMBOL)
+						}
+						else {
+							priest->female = FALSE;
+							newcham(priest,PM_HEDROW_BLADEMASTER,FALSE,FALSE);
+							set_faction(priest, GHAUNADAUR_SYMBOL);
+							otmp = mongets(priest, DROVEN_PLATE_MAIL, MKOBJ_NOINIT);
+							if(otmp){
+								otmp->ohaluengr = TRUE;
+								otmp->oward = GHAUNADAUR_SYMBOL;
+							}
+							otmp = mongets(priest, find_signet_ring(), MKOBJ_NOINIT);
+							if(otmp){
+								otmp->ohaluengr = TRUE;
+								otmp->oward = GHAUNADAUR_SYMBOL;
+							}
+							mongets(priest, DROVEN_HELM, MKOBJ_NOINIT);
+							otmp = mongets(priest, GAUNTLETS, MKOBJ_NOINIT);
+							if(otmp) set_material_gm(otmp, SHADOWSTEEL);
+							otmp = mongets(priest, ARMORED_BOOTS, MKOBJ_NOINIT);
+							if(otmp) set_material_gm(otmp, SHADOWSTEEL);
+							otmp = mongets(priest, DROVEN_GREATSWORD, MKOBJ_NOINIT);
+							if(otmp){
+								otmp->oerodeproof = TRUE;
+								otmp->spe = 5;
+								otmp->opoisoned = rn2(4) ? OPOISON_ACID : OPOISON_PARAL;
+							}
+							m_dowear(priest, TRUE);
+							init_mon_wield_item(priest);
+							m_level_up_intrinsic(priest);
+						}
+					}
 					break;
 				case GOD_KIARANSALI:
 					priest->female = TRUE;
-					if(!sanctum) newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+					if(!sanctum){
+						newcham(priest,PM_DROW_MATRON,FALSE,FALSE);
+						set_faction(priest, KIARANSALEE_SYMBOL);
+						DROW_PRIESTESS_GEAR(KIARANSALEE_SYMBOL)
+					}
 					break;
 			}
 		}
