@@ -2248,10 +2248,6 @@ humanoid_sound:
 			start_clockwinding(key, mtmp, turns);
 			break;
 		}
-		if(mtmp->mpeaceful && !nonliving(youracedata)){
-			if(nurse_services(mtmp))
-				break;
-		}
 	    if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
 			verbl_msg = "Put that weapon away before you hurt someone!";
 	    else if (uarmc || uarm || uarmh || uarms || uarmg || uarmf)
@@ -2260,6 +2256,18 @@ humanoid_sound:
 			  "Please undress so I can examine you.";
 	    else if (uarmu)
 			verbl_msg = "Take off your shirt, please.";
+		else if(nonliving(youracedata)){
+			if(uandroid)
+				verbl_msg = "Wow, you're so lifelike! I think you want a mechanic, though.";
+			else if(uclockwork)
+				verbl_msg = "Oh, not my area of expertise! Try a mechanic!";
+			else
+				verbl_msg = "Oops, not my department!";
+		}
+		else if(mtmp->mpeaceful){
+			if(nurse_services(mtmp))
+				break;
+		}
 	    else verbl_msg = "Relax, this won't hurt a bit.";
 	    break;
 	case MS_GUARD:
