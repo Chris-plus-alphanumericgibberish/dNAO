@@ -16348,7 +16348,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				case AD_PLYS:
 					if (pd->mlet == S_EYE) {	/* assumed to be gaze */
 						/* the eye can't be blinded */
-						if (is_blind(mdef)) {
+						if (youdef ? Blind : is_blind(mdef)) {
 							if (youagr) {
 								pline("%s cannot defend itself.",
 									Adjmonnam(mdef, "blind"));
