@@ -1101,7 +1101,7 @@ conplus(con)
 	else if (con <= 4) conplus = -1.5;
 	else if (con <= 6) conplus = -1;
 	else if (con < 13) conplus = 0;
-	else conplus = (con-11)/2.0;
+	else conplus = (con-11)/4.0;
 	
 	return conplus;
 }
