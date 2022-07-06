@@ -2709,34 +2709,34 @@ struct obj **optr;
 
 	if(u.veil || !(Unblind_telepat || (Blind_telepat && Blind))){
 		pline("It's just a clear glass skull.");
-		return FALSE;
+		return MOVE_CANCELLED;
 	}
 	
 	if(!get_ox(*optr, OX_EMON)){
 		pline("It's REALLY just a glass skull.");
-		return FALSE;
+		return MOVE_CANCELLED;
 	}
 
 	if(!getdir((char *)0)) {
 		flags.move = multi = 0;
-		return FALSE;
+		return MOVE_CANCELLED;
 	}
 
 	x = u.ux + u.dx; y = u.uy + u.dy;
 	if(!enexto(&cc, x, y, (struct permonst *)0)){
 		pline("No room!");
-		return FALSE;
+		return MOVE_CANCELLED;
 	}
 	
 	if(obj_summon_out(*optr)){
 		pline("The imprisoned mind is dreaming.");
-		return TRUE;
+		return MOVE_STANDARD;
 	}
 
 	if((*optr)->age > monstermoves){
 		pline("The imprisoned mind is exhausted.");
 		change_usanity(save_vs_sanloss() ? 0 : -1, FALSE);
-		return TRUE;
+		return MOVE_STANDARD;
 	}
 	
 	if(rnd(20) > u.uinsight || u.uen < EMON(*optr)->m_lev){
@@ -2745,7 +2745,7 @@ struct obj **optr;
 			change_usanity(-1, FALSE);
 		else
 			change_usanity(-1*rnd(10), TRUE);
-		return TRUE;
+		return MOVE_STANDARD;
 	}
 	
 	You("awaken the imprisoned mind!");
@@ -2757,7 +2757,7 @@ struct obj **optr;
 		change_usanity(-1*d(2,6), TRUE);
 
 	x_uses_crystal_skull(optr, &youmonst, &cc);
-	return TRUE;
+	return MOVE_STANDARD;
 }
 
 void
