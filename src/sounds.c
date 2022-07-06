@@ -2777,7 +2777,7 @@ int dz;
 				}
 				useup(optr);
 				mongone(mtmp);
-				return MOVE_STANDARD1;
+				return MOVE_STANDARD;
 			}
 		}
 	}
