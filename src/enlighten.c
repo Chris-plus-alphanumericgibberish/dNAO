@@ -130,6 +130,8 @@ doattributes()
 		case DOATTRIB_SPIRITS:
 			spirits_enlightenment();
 			break;
+		default:
+			return MOVE_INSTANT;
 		}
 	}
 	return MOVE_INSTANT;
