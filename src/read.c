@@ -1791,7 +1791,10 @@ struct obj	*sobj;
 				} else {
 					Your("%s merges and hardens!", xname(otmp));
 				}
-				setworn((struct obj *)0, W_ARM);
+				boolean is_worn = !!(otmp->owornmask & W_ARM);
+				if (is_worn) {
+					setworn((struct obj *)0, W_ARM);
+				}
 				/* assumes same order */
 				otmp->otyp = GRAY_DRAGON_SCALE_SHIELD +
 					otmp->otyp - GRAY_DRAGON_SCALES;
@@ -1805,8 +1808,9 @@ struct obj	*sobj;
 				fix_object(otmp);
 
 				long wornmask = 0L;
-				if (canwearobj(otmp, &wornmask, FALSE))
+				if (is_worn && canwearobj(otmp, &wornmask, FALSE)) {
 					setworn(otmp, wornmask);
+				}
 				break;
 			} else {
 				if(Blind) {
@@ -1893,8 +1897,12 @@ struct obj	*sobj;
 				break;
 			}
 			/* dragon scales get turned into dragon scale mail */
+			boolean is_worn = !!(otmp->owornmask & W_ARM);
+
 			Your("%s merges and hardens!", xname(otmp));
-			setworn((struct obj *)0, W_ARM);
+			if (is_worn) {
+				setworn((struct obj *)0, W_ARM);
+			}
 			/* assumes same order */
 			otmp->otyp = GRAY_DRAGON_SCALE_MAIL +
 						otmp->otyp - GRAY_DRAGON_SCALES;
@@ -1908,7 +1916,10 @@ struct obj	*sobj;
 				otmp->blessed = 1;
 			}
 			otmp->known = 1;
-			setworn(otmp, W_ARM);
+			long wornmask = 0L;
+			if (is_worn && canwearobj(otmp, &wornmask, FALSE)) {
+				setworn(otmp, W_ARM);
+			}
 			break;
 		}
 		Your("%s %s%s%s%s for a %s.",

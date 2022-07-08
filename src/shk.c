@@ -5515,13 +5515,19 @@ shk_armor_works(slang, shkp)
 					obj->otyp <= YELLOW_DRAGON_SCALES) {
 			/* dragon scales get turned into dragon scale mail */
 			Your("%s merges and hardens!", xname(obj));
-			setworn((struct obj *)0, W_ARM);
+			boolean is_worn = !!(obj->owornmask & W_ARM);
+			if (is_worn) {
+			    setworn((struct obj *)0, W_ARM);
+			}
 			/* assumes same order */
 			obj->otyp = GRAY_DRAGON_SCALE_MAIL +
 						obj->otyp - GRAY_DRAGON_SCALES;
 			obj->cursed = 0;
 			obj->known = 1;
-			setworn(obj, W_ARM);
+			long wornmask = 0L;
+			if (is_worn && canwearobj(obj, &wornmask, FALSE)) {
+			    setworn(obj, wornmask);
+			}
 			break;
 		}
 
