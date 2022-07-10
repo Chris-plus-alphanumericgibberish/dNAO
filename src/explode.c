@@ -850,8 +850,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 		    pline("%s apart.", Tobjnam(otmp, "break"));
 			if(shkp){
 				int loss_cost = stolen_value(otmp, otmp->ox, otmp->oy, (boolean)shkp->mpeaceful, TRUE);
-				if(loss)
-					*loss += loss_cost;
+				if(loss) *loss += loss_cost;
 			}
 		    break_boulder(otmp);
 		    place_object(otmp, sx, sy);
@@ -881,8 +880,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 			if (breaktest(otmp)){
 				if(shkp){
 					int loss_cost = stolen_value(otmp, sx, sy, (boolean)shkp->mpeaceful, TRUE);
-					if(loss)
-						*loss += loss_cost;
+					if(loss) *loss += loss_cost;
 				}
 				breakobj(otmp, sx, sy, FALSE, FALSE);
 				used_up = TRUE;
@@ -945,7 +943,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 					else
 						miss(xname(stmp->obj), mtmp);
 					if (!(*s_p)) {
-						*loss += loss_cost;
+						if (loss) *loss += loss_cost;
 						stmp->obj = (struct obj *)0;
 						stmp->stopped = TRUE;
 				    }
@@ -971,7 +969,7 @@ struct monst *shkp;		/* shopkeepr that owns the object (may be null) */
 						else You("are almost hit by %s.", the(xname(stmp->obj)));
 					}
 					if (!(*s_p)) {
-						*loss += loss_cost;
+						if (loss) *loss += loss_cost;
 						stmp->obj = (struct obj *)0;
 						stmp->stopped = TRUE;
 				    }
