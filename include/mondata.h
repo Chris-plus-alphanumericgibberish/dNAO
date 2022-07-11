@@ -449,6 +449,7 @@
 #define is_clockwork(ptr)	(((ptr)->mflagsa & MA_CLOCK) != 0L)
 #define is_domestic(ptr)	(((ptr)->mflagst & MT_DOMESTIC) != 0L)
 #define is_fey(ptr)			(((ptr)->mflagsa & MA_FEY) != 0L)
+#define is_snake(ptr)		(((ptr)->mflagsa & MA_REPTILIAN) != 0L && (ptr)->mlet == S_SNAKE)
 #define is_demon(ptr)		(((ptr)->mflagsa & MA_DEMON) != 0L)
 #define is_law_demon(ptr)	(((ptr)->mflagsa & MA_DEMON) != 0L && is_lawful(ptr))
 #define is_ancient(ptr)		(((ptr)->mtyp >=  PM_ANCIENT_OF_BLESSINGS\
