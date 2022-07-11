@@ -491,9 +491,15 @@ you_action_cost(actiontype, affect_game_state)
 int actiontype;
 boolean affect_game_state;
 {
-	int actiontypes_remaining = (actiontype == MOVE_DEFAULT) ? MOVE_STANDARD : (actiontype&(~MOVE_DEFAULT));
+	int actiontypes_remaining = actiontype; 
 	int current_action, current_cost, highest_cost = 0;
 	int i;
+
+	/* 1. ignore the MOVE_FINISHED_OCCUPATION flag, it only says to end occupations
+	 * 2. if no other types are specified 'default' means 'standard', otherwise is ignored
+	 */
+	actiontypes_remaining &= ~MOVE_FINISHED_OCCUPATION;
+	actiontypes_remaining = (actiontypes_remaining == MOVE_DEFAULT) ? MOVE_STANDARD : (actiontypes_remaining&(~MOVE_DEFAULT));
 
 	/* loop through all flagged action types to determine which is the largest cost,
 	 * and, if affect_game_state is TRUE, apply all necessary effects.
