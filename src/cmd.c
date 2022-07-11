@@ -201,10 +201,11 @@ doprev_message()
 STATIC_PTR int
 timed_occupation()
 {
-	(*timed_occ_fn)();
+	int result;
+	result = (*timed_occ_fn)();
 	if (multi > 0)
 		multi--;
-	return multi > 0;
+	return (multi > 0) ? result : (result|MOVE_FINISHED_OCCUPATION);
 }
 
 /* If you have moved since initially setting some occupations, they
