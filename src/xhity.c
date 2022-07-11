@@ -14282,9 +14282,8 @@ int vis;						/* True if action is at all visible to the player */
 		/* all valid attacks proc effects of offensive rings */
 		if(youagr){
 			struct obj *rings[] = {uleft, uright};
-			int n = 2;
-			int i = 0;
-			for(otmp = rings[i]; i<n; i++, otmp = rings[i]){
+			for(int i = 0 ; i < 2; i++){
+				otmp = rings[i];
 				if(!otmp)
 					continue;
 				// Note: artifact rings are currently set to always add their damage, but to only print the generic x hits messages when unarmed.
