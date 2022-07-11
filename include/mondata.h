@@ -193,6 +193,7 @@
 				 || (ptr)->mtyp == PM_MORTAI \
 				 || (ptr)->mtyp == PM_HUDOR_KAMEREL \
 				 || (ptr)->mtyp == PM_LETHE_ELEMENTAL \
+				 || (ptr)->mtyp == PM_DAUGHTER_OF_NAUNET \
 				 )
 #define is_uvuudaum(ptr)	((ptr)->mtyp == PM_UVUUDAUM \
 				 || (ptr)->mtyp == PM_MASKED_QUEEN \
