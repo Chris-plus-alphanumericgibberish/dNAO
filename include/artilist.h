@@ -1235,6 +1235,16 @@ A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
 	ENLIGHTENING, (ARTI_PLUSSEV)
 	),
 
+A("Ring of Thror",								RIN_GAIN_STRENGTH,	/* granite or gold (Note: since gold is the fallback at most one of this or Narya will be gold) */			(const char *)0,
+	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, PM_ELF, TIER_C, (ARTG_INHER),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(AGGRAVATE_MONSTER), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /*Needs encyc entry*/
 /* Modifier: (charisma-11)/2 (-4 to +7) */
 /* Inspires pets: add modifier to pet to-hit and damage, roll modifier and add to pet AC */

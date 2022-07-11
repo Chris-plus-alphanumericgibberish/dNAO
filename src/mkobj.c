@@ -346,6 +346,8 @@ struct obj *box;
 		if (otmp->oclass == COIN_CLASS) {
 		    /* 2.5 x level's usual amount; weight adjusted below */
 		    otmp->quan = (long)(rnd(level_difficulty()+2) * rnd(75));
+			if(uring_art(ART_RING_OF_THROR))
+				otmp->quan *= 2;
 		    otmp->owt = weight(otmp);
 		} else while (otmp->otyp == ROCK) {
 		    otmp->otyp = rnd_class(DILITHIUM_CRYSTAL, LOADSTONE);
@@ -2649,7 +2651,7 @@ boolean new;
     register struct obj *gold = g_at(x,y);
 
     if (amount <= 0L)
-	amount = (long)(1 + rnd(level_difficulty()+2) * rnd(30));
+		amount = (long)(1 + rnd(level_difficulty()+2) * rnd(30));
     if (gold) {
 	gold->quan += amount;
     } else {
@@ -2667,7 +2669,20 @@ mkgold(amount, x, y)
 long amount;
 int x, y;
 {
-	return mkgold_core(amount, x, y, TRUE);
+	struct obj *gold;
+	gold = mkgold_core(amount, x, y, TRUE);
+	if(uring_art(ART_RING_OF_THROR)){
+		if(gold->quan&0x1L){//Odd piles stay odd
+			if(rn2(2))
+				gold->quan = 2*gold->quan + 1;
+			else
+				gold->quan = 2*gold->quan - 1;
+		}
+		else
+			gold->quan = 2*gold->quan;
+		gold->owt = weight(gold);
+	}
+	return gold;
 }
 
 #endif /* OVLB */
