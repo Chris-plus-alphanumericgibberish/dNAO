@@ -385,12 +385,12 @@ DOOR:closed,(37,16)
 DOOR:closed,(42,10)
 # Random monsters.
 MONSTER:'W',"Necromancer",(37,10),hostile
-MONSTER:'o',"Mordor orc",(36,09),hostile
-MONSTER:'o',"Mordor orc",(36,10),hostile
-MONSTER:'o',"Mordor orc",(36,11),hostile
-MONSTER:'o',"Mordor orc",(37,09),hostile
-MONSTER:'o',"Mordor orc",(37,11),hostile
-MONSTER:'o',"Mordor orc",(38,09),hostile
+MONSTER:'o',"Mordor orc elite",(36,09),hostile
+MONSTER:'o',"Mordor orc elite",(36,10),hostile
+MONSTER:'o',"Mordor orc elite",(36,11),hostile
+MONSTER:'o',"Mordor marshal",(37,09),hostile
+MONSTER:'o',"Mordor orc elite",(37,11),hostile
+MONSTER:'o',"Mordor orc elite",(38,09),hostile
 MONSTER:'o',"goblin",(38,10),hostile
 MONSTER:'o',"goblin",(38,11),hostile
 MONSTER:'o',"goblin",(02,02),hostile
