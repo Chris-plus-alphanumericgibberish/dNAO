@@ -2650,7 +2650,7 @@ boolean narrow_only;
 				return FALSE;
 		break;
 		case AD_STDY:
-			if (youdef ? !canspotmon(mdef) : !mon_can_see_you(mdef))
+			if (youagr ? !canspotmon(mdef) : youdef ? !mon_can_see_you(mdef) : mon_can_see_mon(magr, mdef))
 				return FALSE;
 		break;
 		case AD_STAR:
