@@ -2598,8 +2598,8 @@ boolean narrow_only;
 	if(weap->name == artilist[ART_STING].name && webmaker(ptr))
 		return TRUE;
 	
-	/* elements can be resisted -- this block always returns if entered */
-	if (weap->adtyp != AD_PHYS) {
+	/* elements can be resisted */
+	if (weap->adtyp != AD_PHYS && weap->adtyp != AD_STDY) {
 		switch(weap->adtyp) 
 		{
 		case AD_FIRE:
@@ -2648,10 +2648,6 @@ boolean narrow_only;
 		break;
 		case AD_SLEE:
 			if (Sleep_res(mdef))
-				return FALSE;
-		break;
-		case AD_STDY:
-			if (youagr ? !canspotmon(mdef) : youdef ? !mon_can_see_you(mdef) : mon_can_see_mon(magr, mdef))
 				return FALSE;
 		break;
 		case AD_STAR:
