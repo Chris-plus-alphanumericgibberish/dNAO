@@ -1953,6 +1953,7 @@ E int NDECL(find_gcirclet);
 E int NDECL(find_sring);
 E int NDECL(find_iring);
 E int NDECL(find_good_iring);
+E int NDECL(find_good_dring);
 E int NDECL(find_good_fring);
 E int NDECL(find_good_wring);
 E int NDECL(find_good_aring);

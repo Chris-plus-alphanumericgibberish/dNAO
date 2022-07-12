@@ -188,6 +188,7 @@ hack_artifacts()
 	artilist[ART_HELM_OF_THE_DARK_LORD].otyp = find_vhelm();
 	artilist[ART_SHARD_FROM_MORGOTH_S_CROWN].otyp = find_good_iring();
 	
+	artilist[ART_RING_OF_THROR].otyp = find_good_dring();
 	artilist[ART_NARYA].otyp = find_good_fring();
 	artilist[ART_NENYA].otyp = find_good_wring();
 	artilist[ART_VILYA].otyp = find_good_aring();
