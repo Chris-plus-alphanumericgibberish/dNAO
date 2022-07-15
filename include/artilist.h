@@ -1282,7 +1282,7 @@ A("Nenya",								RIN_WARNING,	/* diamond or silver */			(const char *)0,
 
 /*Needs encyc entry*/
 /* Modifier: (intelligence-11)/2 (-4 to +7) */
-/* Gain modifier HP per 10 turns. May worsen you're condition if you are already dying due to negative HP regen, but won't cause HP regen to be negative otherwise. */
+/* Gain modifier HP per 10 turns. May worsen your condition if you are already dying due to negative HP regen, but won't cause HP regen to be negative otherwise. */
 /* Add modifier to your San regen threshold */
 /* Applies modifier to pet regen rate (may kill pets if negative!) */
 /* Add modifier to your pet's AC */
@@ -1307,7 +1307,7 @@ A("Vilya",								RIN_AGGRAVATE_MONSTER,	/* sapphire or brass */			(const char *
 /* Halves pet special attack timeout */
 /* Strongly boost enchantment spell success rate */
 /* Also adds 1d8 turn sleep attack to all attacks (only prints messages for unarmed attacks) */
-/*  Since it always has Lolth's holy symbol, also adds silver damage when used without gloves */
+/*  Since it always has Lolth's holy symbol, also adds silver damage when used unarmed without gloves */
 /* Grants teleportation, teleport control, and searching when worn */
 A("Lomya",					RIN_PROTECTION_FROM_SHAPE_CHAN,/* black signet */			(const char *)0,
 	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
