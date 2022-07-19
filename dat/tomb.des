@@ -43,7 +43,7 @@ TRAP: "spiked pit",random
 TRAP: "spiked pit",random
 TRAP: "spiked pit",random
 TRAP: "spiked pit",random
-OBJECT:'(',"chest",(47,9)
+CONTAINER:'(',"chest",(47,9)
 GOLD: random,(47,9)
 GOLD: random,(47,9)
 GOLD: random,(47,9)
@@ -54,27 +54,27 @@ GOLD: random,(47,9)
 GOLD: random,(47,9)
 GOLD: random,(47,9)
 GOLD: random,(47,9)
-OBJECT: '?', random, (47,9)
-OBJECT: '?', random, (47,9)
-OBJECT: '?', random, (47,9)
-OBJECT: '?', random, (47,9)
-OBJECT: '!', random, (47,9)
-OBJECT: '!', random, (47,9)
-OBJECT: '!', random, (47,9)
-OBJECT: random, random, (47,9)
-OBJECT: random, random, (47,9)
-OBJECT: '!', "water", (47,9),cursed,0
-OBJECT: '!', "water", (47,9),cursed,0
+OBJECT: '?', random, contained
+OBJECT: '?', random, contained
+OBJECT: '?', random, contained
+OBJECT: '?', random, contained
+OBJECT: '!', random, contained
+OBJECT: '!', random, contained
+OBJECT: '!', random, contained
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+OBJECT: '!', "water", contained,cursed,0
+OBJECT: '!', "water", contained,cursed,0
 OBJECT: random, random, random
-OBJECT:'(',"chest",(23,1)
-OBJECT: random, random, (23,1)
-OBJECT: random, random, (23,1)
-OBJECT: random, random, (23,1)
-OBJECT:'(',"chest",(24,18)
-OBJECT: random, random, (24,18)
-OBJECT: random, random, (24,18)
-OBJECT: random, random, (24,18)
-OBJECT:'(',"chest",(47,10)
+CONTAINER:'(',"chest",(23,1)
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+CONTAINER:'(',"chest",(24,18)
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+CONTAINER:'(',"chest",(47,10)
 GOLD: random,(47,10)
 GOLD: random,(47,10)
 GOLD: random,(47,10)
@@ -85,23 +85,23 @@ GOLD: random,(47,10)
 GOLD: random,(47,10)
 GOLD: random,(47,10)
 GOLD: random,(47,10)
-OBJECT: '?', random, (47,10)
-OBJECT: '?', random, (47,10)
-OBJECT: '?', random, (47,10)
-OBJECT: '?', random, (47,10)
-OBJECT: '+', random, (47,10)
-OBJECT: '+', random, (47,10)
-OBJECT: '+', random, (47,10)
-OBJECT: '+', random, (47,10)
-OBJECT: random, random, (47,10)
-OBJECT: random, random, (47,10)
-OBJECT: random, random, (47,10)
-OBJECT: random, random, (47,10)
-OBJECT: random, random, (47,10)
-OBJECT: '!', "water", (47,10),cursed,0
-OBJECT: '!', "water", (47,10),cursed,0
+OBJECT: '?', random, contained
+OBJECT: '?', random, contained
+OBJECT: '?', random, contained
+OBJECT: '?', random, contained
+OBJECT: '+', random, contained
+OBJECT: '+', random, contained
+OBJECT: '+', random, contained
+OBJECT: '+', random, contained
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+OBJECT: random, random, contained
+OBJECT: '!', "water", contained,cursed,0
+OBJECT: '!', "water", contained,cursed,0
 MONSTER: 'M', "priest mummy", (47,9)
-OBJECT:'(',"magic chest",(47,10)
+OBJECT:'(',"magic chest",(47,11)
 MONSTER: '.',random,random
 MONSTER: '.',random,random
 MONSTER: '.',random,random
