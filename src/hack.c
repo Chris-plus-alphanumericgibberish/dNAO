@@ -2417,7 +2417,7 @@ lookaround()
 		  (mtmp->mappearance == S_hcdoor ||
 		   mtmp->mappearance == S_vcdoor))) {
 	    if(x != u.ux && y != u.uy) continue;
-	    if(flags.run != 1) goto stop;
+	    if(flags.run != 1 && !flags.travel) goto stop;
 	    goto bcorr;
 	} else if (levl[x][y].typ == CORR) {
 bcorr:
