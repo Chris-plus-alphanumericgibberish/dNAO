@@ -1428,13 +1428,14 @@ boolean be_peaceful;
 }
 
 struct monst *
-make_pet_minion(mtyp,godnum)
+make_pet_minion(mtyp,godnum, is_summoned)
 int mtyp;
 int godnum;
+boolean is_summoned;
 {
     register struct monst *mon;
     register struct monst *mtmp2;
-	mon = makemon_full(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS, -1, god_faction(godnum));
+	mon = makemon_full(&mons[mtyp], u.ux, u.uy, is_summoned ? MM_ESUM : NO_MM_FLAGS, -1, god_faction(godnum));
     if (!mon) return 0;
     /* now tame that puppy... */
 	add_mx(mon, MX_EDOG);
