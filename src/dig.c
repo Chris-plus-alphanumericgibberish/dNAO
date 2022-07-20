@@ -2586,6 +2586,11 @@ long timeout;	/* unused */
 		if(cansee(obj->ox, obj->oy))
 			pline_The("%s boils to black mist!", surface(obj->ox, obj->oy));
 		makemon(&mons[PM_MOUTH_OF_THE_GOAT], obj->ox, obj->oy, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+		/* Spreading the Goat's influence is worth credit. Intentionally not affected by the usual diminishing returns on credit gain. */
+		if (u.shubbie_atten) {
+			u.shubbie_credit += 30;
+			u.shubbie_devotion += 30;
+		}
 	}
 	obj_extract_self(obj);
 	obfree(obj, (struct obj *) 0);

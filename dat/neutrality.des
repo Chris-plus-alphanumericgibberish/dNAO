@@ -2057,7 +2057,7 @@ OBJECT:'#',"blessed four-headed +3 poison-secreting living bone viperwhip",conta
 OBJECT:'#',"blessed four-headed +3 poison-secreting living bone viperwhip",contained
 REGION:(04,01,08,02),lit,"temple"
 MONSTER:'t',"mouth of the goat",(06,01)
-ALTAR:(06,01),noalign,altar,"_the Black Mother"
+
 
 #+5 means that it's Nitocris's sarcophagus.  One only please!
 CONTAINER:'#',"trapped metal box",(74,01), cursed, +5
@@ -2274,6 +2274,7 @@ TRAP:random,random
 TRAP:random,random
 TRAP:random,random
 TRAP[50%]:random,random
+ALTAR:(06,01),noalign,altar,"_the Black Mother"
 
 #Kukeri
 MONSTER[7%]:'A',"kuker",random

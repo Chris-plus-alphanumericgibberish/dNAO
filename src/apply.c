@@ -7897,7 +7897,7 @@ doapply()
 			}
 		break;
 		case HOLY_SYMBOL_OF_THE_BLACK_MOTHE:
-			res = pray_goat();
+			return commune_with_goat();
 		break;
 	case MISOTHEISTIC_PYRAMID:
 	case MISOTHEISTIC_FRAGMENT:

@@ -14,7 +14,6 @@ STATIC_PTR int NDECL(prayer_done);
 STATIC_DCL struct obj *NDECL(worst_cursed_item);
 STATIC_DCL int NDECL(in_trouble);
 STATIC_DCL void FDECL(fix_worst_trouble,(int));
-STATIC_DCL void NDECL(goat_pleased);
 STATIC_DCL void FDECL(pleased,(ALIGNTYP_P));
 STATIC_DCL void FDECL(god_zaps_you, (int));
 STATIC_DCL void FDECL(fry_by_god, (int));
@@ -713,17 +712,12 @@ angrygods(godnum)
 int godnum;
 {
 	register int	maxanger;
-	aligntyp resp_god = godlist[godnum].alignment;
 	char buf[BUFSZ];
 
 	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD) {
 		/* the void does not get angry */
 		/* Bokrug DOES get angry, but has really bad aim. */
 		return;
-	}
-
-	if(Inhell && godnum != GOD_MOLOCH && godnum != GOD_LOLTH /*&& !(Race_if(PM_DROW) && (resp_god != A_LAWFUL || !flags.initgend))*/){
-		resp_god = A_NONE;
 	}
 
 	/* removes all divine protection */
@@ -763,7 +757,12 @@ int godnum;
 				newsym(mtmp->mx, mtmp->my);
 			}
 		}
-		u.ugoatblesscnt = rnz(300);
+		/* lose 20% of accumulated credit */
+		if (u.shubbie_credit > 0)
+			u.shubbie_credit = u.shubbie_credit * 4 / 5;
+		/* do NOT go to standard smites */
+		godvoice(godnum,"");
+		return;
 	}
 	
 	switch (rn2(maxanger)) {
@@ -1124,284 +1123,6 @@ int godnum;
 #endif
 	if (kick_on_butt) u.ublesscnt += kick_on_butt * rnz(1000);
 
-	return;
-}
-
-int
-pray_goat()
-{
-	boolean fail = FALSE;
-	
-    if (flags.prayconfirm)
-	if (yn("Are you sure you want to pray to the Black Goat?") == 'n')
-	    return MOVE_CANCELLED;
-	
-	u.uconduct.gnostic++; //?
-
-#ifdef WIZARD
-    if (wizard) {
-	if (yn("Force the Goat to be pleased?") == 'y') {
-	    u.ugoatblesscnt = 0;
-	    if (u.uluck < 0) u.uluck = 0;
-	    godlist[GOD_THE_BLACK_MOTHER].anger = 0;
-	}
-    }
-#endif
-	
-	You("begin praying to %s.", goattitles[rn2(SIZE(goattitles))]);
-	
-	if((int)Luck < 0 || godlist[GOD_THE_BLACK_MOTHER].anger)
-		fail = TRUE;
-    else if (u.ugoatblesscnt > 0)			/* not in trouble */
-		fail = TRUE;		/* too soon... */
-	
-	if(fail){
-		pline("...Something is drooling on you.");
-		if(uarmh && uarmh->otyp == SEDGE_HAT){
-			pline("The drool runs off the brim of your wide straw hat.");
-			erode_obj(uarmh, TRUE, FALSE);
-		} else if(uarmh && uarmh->otyp == WAR_HAT) {
-			pline("The drool runs off the brim of your wide helm.");
-			erode_obj(uarmh, TRUE, FALSE);
-		} else if(uarmh && uarmh->otyp == WITCH_HAT) {
-			pline("The drool runs off the brim of your wide conical hat.");
-			erode_obj(uarmh, TRUE, FALSE);
-		} else if(uarmh && uarmh->otyp == WIDE_HAT) {
-			pline("The drool runs off the brim of your wide hat.");
-			erode_obj(uarmh, TRUE, FALSE);
-		} else {
-			int dmg = d(8, 6);
-			pline("You're drenched in drool!");
-			if (Acid_resistance) {
-				shieldeff(u.ux, u.uy);
-				pline("It feels mildly uncomfortable.");
-				dmg = 0;
-			} else {
-				pline("It burns!");
-				if (!resists_blnd(&youmonst) && rn2(2)) {
-					pline_The("acid gets into your %s!", eyecount(youracedata) == 1 ?
-							body_part(EYE) : makeplural(body_part(EYE)));
-					make_blinded((long)rnd(Acid_resistance ? 10 : 50),FALSE);
-					if (!Blind) Your1(vision_clears);
-				}
-			}
-			if (!UseInvAcid_res(&youmonst)) {
-				destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
-			}
-			erode_obj(uwep, TRUE, FALSE);
-			erode_obj(uswapwep, TRUE, FALSE);
-			erode_armor(&youmonst, TRUE);
-			water_damage(invent, FALSE, FALSE, FALSE, &youmonst);
-			losehp(dmg, "hungry goat", KILLED_BY_AN);
-		}
-		gods_upset(GOD_THE_BLACK_MOTHER);
-	}
-	else goat_pleased();
-	
-	return MOVE_STANDARD;
-}
-
-
-STATIC_OVL void
-goat_pleased()
-{
-	/* don't use p_trouble, worst trouble may get fixed while praying */
-	int trouble = in_trouble();	/* what's your worst difficulty? */
-	int pat_on_head = 0, kick_on_butt;
-
-	You_feel("that the Goat is satisfied.");
-
-	/* depending on your luck & align level, the god you prayed to will:
-	   - fix your worst problem if it's major.
-	   - fix all your major problems.
-	   - fix your worst problem if it's minor.
-	   - fix all of your problems.
-	   - do you a gratuitous favor.
-
-	   if you make it to the the last category, you roll randomly again
-	   to see what they do for you.
-
-	   If your luck is at least 0, then you are guaranteed rescued
-	   from your worst major problem. */
-
-	if (!trouble){
-	    pat_on_head = 1;
-	} else {
-	    int action = rn1(Luck + (goat_mouth_at(u.ux, u.uy) ? 4 : 2), 1);
-
-	    if (!goat_mouth_at(u.ux, u.uy)) action = min(action, 3);
-
-	    switch(min(action,5)) {
-	    case 5: pat_on_head = 1;
-	    case 4: do fix_worst_trouble(trouble);
-		    while ((trouble = in_trouble()) != 0);
-		    break;
-
-	    case 3: fix_worst_trouble(trouble);
-	    case 2: while ((trouble = in_trouble()) > 0)
-		    fix_worst_trouble(trouble);
-		    break;
-
-	    case 1: if (trouble > 0) fix_worst_trouble(trouble);
-	    case 0: break; /* your god blows you off, too bad */
-	    }
-	}
-
-    /* note: can't get pat_on_head unless all troubles have just been
-       fixed or there were no troubles to begin with; hallucination
-       won't be in effect so special handling for it is superfluous */
-    if(pat_on_head){
-		switch(rn2((Luck + 6)>>1)) {
-		case 0:	break;
-		case 1:
-			if (uwep && (welded(uwep) || uwep->oclass == WEAPON_CLASS ||
-				 is_weptool(uwep))) {
-			char repair_buf[BUFSZ];
-
-			*repair_buf = '\0';
-			if (uwep->oeroded || uwep->oeroded2)
-				Sprintf(repair_buf, " and %s now as good as new",
-					otense(uwep, "are"));
-
-			if (uwep->cursed) {
-				uncurse(uwep);
-				uwep->bknown = TRUE;
-				if (!Blind)
-				Your("%s %s%s.", aobjnam(uwep, "softly glow"),
-					 hcolor(NH_AMBER), repair_buf);
-				else You_feel("the power of %s over your %s.",
-				goattitles[rn2(SIZE(goattitles))], xname(uwep));
-				*repair_buf = '\0';
-			} else if (!uwep->blessed) {
-				bless(uwep);
-				uwep->bknown = TRUE;
-				if (!Blind)
-				Your("%s with %s aura%s.",
-					 aobjnam(uwep, "softly glow"),
-					 an(hcolor(NH_LIGHT_BLUE)), repair_buf);
-				else You_feel("the blessing of %s over your %s.",
-				goattitles[rn2(SIZE(goattitles))], xname(uwep));
-				*repair_buf = '\0';
-			}
-
-			/* fix any rust/burn/rot damage, but don't protect
-			   against future damage */
-			if (uwep->oeroded || uwep->oeroded2) {
-				uwep->oeroded = uwep->oeroded2 = 0;
-				/* only give this message if we didn't just bless
-				   or uncurse (which has already given a message) */
-				if (*repair_buf)
-				Your("%s as good as new!",
-					 aobjnam(uwep, Blind ? "feel" : "look"));
-			}
-			update_inventory();
-			}
-			break;
-		case 3:
-		case 2:
-			if (!Blind)
-			You("are surrounded by %s glow.", an(hcolor(NH_GOLDEN)));
-			/* if any levels have been lost (and not yet regained),
-			   treat this effect like blessed full healing */
-			if (u.ulevel < u.ulevelmax) {
-			// u.ulevelmax -= 1;	/* see potion.c */
-			pluslvl(FALSE);
-			} else {
-			u.uhpbonus += 5;
-			calc_total_maxhp();
-			}
-			u.uhp = u.uhpmax;
-			if (Upolyd) u.mh = u.mhmax;
-			ABASE(A_STR) = AMAX(A_STR);
-			if(Race_if(PM_INCANTIFIER)){
-				if (u.uen < u.uenmax*.45) u.uen += 400;
-				newuhs(TRUE);
-			} else {
-				if (u.uhunger < u.uhungermax*.45) u.uhunger = u.uhungermax*.45;
-				u.uhs = NOT_HUNGRY;
-			}
-			if (u.uluck < 0) u.uluck = 0;
-			make_blinded(0L,TRUE);
-			flags.botl = 1;
-			break;
-		case 4: {
-			register struct obj *otmp;
-			int any = 0;
-
-			if (!Blind)
-				You("are surrounded by %s aura.",
-				 an(hcolor(NH_LIGHT_BLUE)));
-			for(otmp=invent; otmp; otmp=otmp->nobj) {
-			if (otmp->cursed) {
-				uncurse(otmp);
-				if (!Blind) {
-				Your("%s %s.", aobjnam(otmp, "softly glow"),
-					 hcolor(NH_AMBER));
-				otmp->bknown = TRUE;
-				++any;
-				}
-			}
-			}
-			if (any) update_inventory();
-			if(u.sealsActive&SEAL_MARIONETTE) unbind(SEAL_MARIONETTE,TRUE);
-			break;
-		}
-		case 5:	{
-			struct obj *otmp;
-			int sp_no, trycnt = u.ulevel + 1;
-
-			at_your_feet("An object");
-			/* not yet known spells given preference over already known ones */
-			/* Also, try to grant a spell for which there is a skill slot */
-			otmp = mkobj(WAND_CLASS, TRUE);
-			bless(otmp);
-			place_object(otmp, u.ux, u.uy);
-			break;
-		}
-		case 7:
-		case 8:
-		case 9:		/* KMH -- can occur during full moons */
-		case 6:	{
-			struct obj *otmp;
-			int sp_no, trycnt = u.ulevel + 1;
-
-			at_your_feet("An object");
-			/* not yet known spells given preference over already known ones */
-			/* Also, try to grant a spell for which there is a skill slot */
-			otmp = mkobj(SPBOOK_CLASS, TRUE);
-			while (--trycnt > 0) {
-			if (otmp->otyp != SPE_BLANK_PAPER) {
-				for (sp_no = 0; sp_no < MAXSPELL; sp_no++)
-				if (spl_book[sp_no].sp_id == otmp->otyp) break;
-				if (sp_no == MAXSPELL &&
-				!P_RESTRICTED(spell_skilltype(otmp->otyp)))
-				break;	/* usable, but not yet known */
-			} else {
-				if (!objects[SPE_BLANK_PAPER].oc_name_known ||
-					carrying(MAGIC_MARKER)) break;
-			}
-			otmp->otyp = rnd_class(bases[SPBOOK_CLASS], SPE_BLANK_PAPER);
-			}
-			bless(otmp);
-			place_object(otmp, u.ux, u.uy);
-			break;
-		}
-		default:	impossible("Confused deity!");
-			break;
-		}
-	}
-	
-	/*Scare hostile monsters on level*/
-	{
-		struct monst *tmpm;
-		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(!tmpm->mpeaceful){
-				monflee(tmpm, 44, TRUE, TRUE);
-			}
-		}
-	}
-	
-	u.ugoatblesscnt = rnz(350);
 	return;
 }
 
@@ -1795,7 +1516,7 @@ int godnum;
     if (mtyp == NON_PM) {
 		mon = (struct monst *)0;
     }
-	else mon = make_pet_minion(mtyp, godnum);
+	else mon = make_pet_minion(mtyp, godnum, FALSE);
 	
     if (mon) {
 	switch (galign(godnum)) {
@@ -1894,6 +1615,13 @@ dosacrifice()
 			feel_cockatrice(otmp, TRUE);
 		pline1(nothing_happens);
 		return MOVE_STANDARD;
+	}
+	
+	if (a_gnum(u.ux, u.uy) == GOD_THE_BLACK_MOTHER && u.shubbie_atten) {
+		if (otmp->otyp == CORPSE)
+			feel_cockatrice(otmp, TRUE);
+		pline1(nothing_happens);
+		return 1;
 	}
 
 	if(Misotheism && !(otmp->otyp == AMULET_OF_YENDOR && Is_astralevel(&u.uz))){
@@ -3341,52 +3069,262 @@ int eatflag;
 	return FALSE;
 }
 
-STATIC_OVL void
-goat_gives_benefit()
+/* must be non-zero */
+#define GOATBOON_GOAT_MILK	1
+#define GOATBOON_RENEWAL	2
+#define GOATBOON_REMOVE_CURSE	3
+#define GOATBOON_LUCK	4
+#define GOATBOON_DARK_YOUNG	5
+#define GOATBOON_ACID	6
+#define GOATBOON_DROOL	7
+#define GOATBOON_RED_WORD	8
+int
+dogoat_menu(greater_boon)
+boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
 {
-	struct obj *optr;
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(GOD_THE_BLACK_MOTHER);
-	else switch(rnd(7)){
-		case 1:
-			if (Hallucination)
-				You_feel("in touch with the Universal Oneness.");
-			else
-				You_feel("like someone is helping you.");
-			for (optr = invent; optr; optr = optr->nobj) {
-				uncurse(optr);
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Ask for what?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	Sprintf(buf, "her Healing");
+	any.a_int = GOATBOON_GOAT_MILK;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "her Vitality");
+	any.a_int = GOATBOON_RENEWAL;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "her Blessing");
+	any.a_int = GOATBOON_REMOVE_CURSE;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "her Fortune");
+	any.a_int = GOATBOON_LUCK;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "her Intervention");
+	any.a_int = GOATBOON_DARK_YOUNG;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	/* the following boons are permanent boosters, and so require devotion */
+	if (greater_boon) {
+
+		Sprintf(buf, "her Bite");
+		any.a_int = GOATBOON_DARK_YOUNG;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+
+		Sprintf(buf, "her Hunger");
+		any.a_int = GOATBOON_DARK_YOUNG;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+
+		if (!flags.made_know) {
+			Sprintf(buf, "her Knowledge");
+			any.a_int = GOATBOON_DARK_YOUNG;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+	}
+	
+	end_menu(tmpwin, "You have the Goat's attention...");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (int)selected[0].item.a_int : 0;
+}
+
+int
+commune_with_goat()
+{
+	const char * goatname = goattitles[rn2(SIZE(goattitles))];
+
+	/* you must be an active cultist */
+	if (!u.shubbie_atten) {
+		pline1(nothing_happens);
+		return MOVE_STANDARD;
+	}
+	/* not in the Future */
+	if (Infuture) {
+		You("only draw It's attention!");
+		aggravate();
+		return MOVE_STANDARD;
+	}
+	/* in good standing */
+	if (godlist[GOD_THE_BLACK_MOTHER].anger) {
+		You_feel("a fraction of %s %s.",
+			s_suffix(goatname),
+			godlist[GOD_THE_BLACK_MOTHER].anger > 6 ? "wrath" :
+			godlist[GOD_THE_BLACK_MOTHER].anger > 3 ? "anger" :
+			                                          "displeasure");
+		return MOVE_STANDARD;
+	}
+	/* must have accumulated enough cult credit */
+	if (u.shubbie_credit < 50) {
+		/* not enough credit, give a message based on how much you have */
+		You_feel("a %s of %s attention.",
+			(u.shubbie_credit < 25 ? "flicker" : "tendril"),
+			s_suffix(goatname)
+			);
+		/* taxes sanity! (a tiny bit) */
+		change_usanity(-3, TRUE);
+		return MOVE_STANDARD;
+	}
+
+	/* if you are devout enough (total accumulated credit), allow selecting permanent boons and boost the power of regular ones */
+	/* devotion required increases as per standard gift giving formula */
+	boolean greater_boon = u.shubbie_devotion > 25*(10 + (u.uartisval * u.uartisval * 2 / 25));
+	struct obj * otmp = (struct obj *)0;
+	int menu_result = dogoat_menu(greater_boon);
+	int i;
+	int cost = 0;	/* credit and sanity/2 cost for the chosen boon */
+
+	switch (menu_result) {
+		case GOATBOON_GOAT_MILK:
+			cost = 25;
+			/* as the potion of goat's milk */
+			otmp = mksobj(POT_GOAT_S_MILK, MKOBJ_NOINIT);
+			otmp->blessed = otmp->cursed = 0;
+			otmp->quan = 20L;			/* do not let useup get it */
+			otmp->blessed = greater_boon;
+			(void) peffects(otmp);
+			obfree(otmp, (struct obj *)0);	/* now, get rid of it */
+			break;
+
+		case GOATBOON_RENEWAL:
+			cost = 15;
+			/* cures Sterility, otherwise as the potion of restore ability (minus sanity recovery) */
+			if(HSterile) {
+				You_feel("fertile.");
+				HSterile = 0L;
 			}
-			if(Punished) unpunish();
+			else {
+				otmp = mksobj(POT_RESTORE_ABILITY, MKOBJ_NOINIT);
+				otmp->blessed = otmp->cursed = 0;
+				otmp->quan = 20L;			/* do not let useup get it */
+				otmp->blessed = greater_boon;
+				/* potions of restore ability recover sanity, so pre-decrement sanity */
+				change_usanity(otmp->blessed ? -20 : -5, FALSE);
+				(void) peffects(otmp);
+				obfree(otmp, (struct obj *)0);	/* now, get rid of it */
+			}
 			break;
-		case 2:
-			You_feel("very lucky.");
-			change_luck(2*LUCKMAX);
+
+		case GOATBOON_REMOVE_CURSE:
+			cost = 10;
+			/* as the spell of remove curse */
+			otmp = mksobj(SPE_REMOVE_CURSE, MKOBJ_NOINIT);
+			otmp->blessed = otmp->cursed = 0;
+			otmp->quan = 20L;			/* do not let useup get it */
+			otmp->blessed = greater_boon;
+			(void) seffects(otmp);
+			obfree(otmp, (struct obj *)0);	/* now, get rid of it */
 			break;
-		case 3:
+
+		case GOATBOON_LUCK:
+			cost = 20;
+			/* removes all negative luck, and adds a few extra */
+			You_feel("%slucky.",
+				greater_boon ? "very " : "");
+			if (u.uluck < 0) u.uluck = 0;
+			change_luck(greater_boon ? 7 : 3);
+			break;
+
+		case GOATBOON_DARK_YOUNG:
+			cost = 25;
+			/* Temporarily summons 1-3 tame dark young. Since they are temporary, they don't count against your pet cap */
+			for (i = 0; i < (greater_boon ? 3 : rnd(3)); i++) {
+				struct monst * mtmp = make_pet_minion(PM_DARK_YOUNG, GOD_THE_BLACK_MOTHER, TRUE);
+				mark_mon_as_summoned(mtmp, (struct monst *)0, rnz(u.shubbie_credit), 0);
+				seemimic(mtmp);
+			}
+			break;
+
+		case GOATBOON_ACID:
+			cost = 25;
+			/* gives your wielded (nonartifact) weapon the Acrid (+2d6 acid damage) property */
 			if(uwep && !uwep->oartifact && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_GOATW) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_LESSER_ACIDW)){
 				if(!Blind) pline("Acid drips from your weapon!");
 				add_oprop(uwep, OPROP_LESSER_ACIDW);
 				uwep->oeroded = 0;
 				uwep->oeroded2 = 0;
 				uwep->oerodeproof = 1;
+				u.ugifts++;
+				u.uartisval += TIER_B;
+			}
+			else {
+				cost = 0;
 			}
 			break;
-		case 4:
-			if(HSterile){
-				You_feel("fertile.");
-				HSterile = 0L;
+
+		case GOATBOON_DROOL:
+			cost = 40;
+			/* gives your wielded weapon the Drooling property, and can intentionally be done for artifacts */
+			if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_GOATW))
+				otmp = uwep;
+			else if (uarmg && !uwep && u.umartial && !check_oprop(uarmg, OPROP_ACIDW) && !check_oprop(uarmg, OPROP_GOATW))
+				otmp = uarmg;
+			else if (uarmf && !uarmg && !uwep && u.umartial && !check_oprop(uarmf, OPROP_ACIDW) && !check_oprop(uarmf, OPROP_GOATW))
+				otmp = uarmf;
+			
+			if(otmp){
+				if(!Blind) pline("...your %s %s drooling.", 
+					(otmp == uwep) ? "weapon" : ((otmp == uarmg) ? "gloves" : "boots"),
+					(otmp == uwep) ? "is" : "are");
+				remove_oprop(otmp, OPROP_LESSER_ACIDW);
+				add_oprop(otmp, OPROP_GOATW);
+				otmp->oeroded = 0;
+				otmp->oeroded2 = 0;
+				otmp->oerodeproof = 1;
+				u.ugifts++;
+				u.uartisval += TIER_S;
+			}
+			else {
+				cost = 0;
 			}
 			break;
-		case 5:
-		case 6:
-		case 7:
-			optr = mksobj(POT_GOAT_S_MILK, MKOBJ_NOINIT);
-			optr->quan = rnd(8);
-			optr->owt = weight(optr);
-			dropy(optr);
-			optr->quan > 1 ? at_your_feet("Some potions") : at_your_feet("A potion");
+
+		case GOATBOON_RED_WORD:
+			cost = 40;
+			/* gives the Word of Knowledge */
+			otmp = mksobj(WORD_OF_KNOWLEDGE, MKOBJ_NOINIT);
+			dropy(otmp);
+			at_your_feet("An object");
+			u.ugifts++;
+			u.uartisval += TIER_A;
+			break;
+
+		default:
+			pline("The connection fades.");
 			break;
 	}
-	return;
+
+	u.shubbie_credit -= cost;
+	change_usanity(-cost/2, TRUE);
+	
+	return MOVE_STANDARD;
 }
 
 boolean
@@ -3508,10 +3446,6 @@ int eatflag;
     /* corpse */
 	//Value can't be 0
 	//Value can't be -1
-    {
-	int saved_anger = godlist[GOD_THE_BLACK_MOTHER].anger;
-	int saved_cnt = u.ugoatblesscnt;
-	int saved_luck = u.uluck;
 	char goatname[BUFSZ];
 	Strcpy(goatname, goattitles[rn2(SIZE(goattitles))]);
 	/* Sacrificing at an altar of a different alignment */
@@ -3529,53 +3463,29 @@ int eatflag;
 		if (!Inhell) angrygods(u.ualign.god);
 		change_luck(-1);
 	}
-	/* OK, you get brownie points. */
+
+	/* off floor -- the only possible effect is creating Goat's Milk. You do not get credit, return early */
+	if (eatflag == GOAT_EAT_PASSIVE) {
+		if(isok(x,y) && rnl((30 + u.ulevel)*10) < 10){
+			mksobj_at(POT_GOAT_S_MILK, x, y, MKOBJ_NOINIT);
+		}
+		return;
+	}
+
+	/* anger must be paid off before credit can be built, return early */
 	if(godlist[GOD_THE_BLACK_MOTHER].anger) {
-	    godlist[GOD_THE_BLACK_MOTHER].anger -=
-		((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
-	    if(godlist[GOD_THE_BLACK_MOTHER].anger < 0) godlist[GOD_THE_BLACK_MOTHER].anger = 0;
-	    if(godlist[GOD_THE_BLACK_MOTHER].anger != saved_anger) {
-		if (godlist[GOD_THE_BLACK_MOTHER].anger) {
-			pline("%s seems %s.", upstart(goatname),
-			  Hallucination ? "groovy" : "slightly mollified");
-
-		    if ((int)u.uluck < 0) change_luck(1);
-		} else {
-			pline("%s seems %s.", upstart(goatname), Hallucination ?
-			  "cosmic (not a new fact)" : "mollified");
-
-		    if ((int)u.uluck < 0) u.uluck = 0;
-		    u.reconciled = REC_MOL;
+		/* goatmom can be quickly appeased by direct offerings; marked creatures count less */
+		if (eatflag == GOAT_EAT_OFFERED || (rn2(MAXVALUE) < value)) {
+			godlist[GOD_THE_BLACK_MOTHER].anger--;
+			godvoice(GOD_THE_BLACK_MOTHER, "");
+			if (godlist[GOD_THE_BLACK_MOTHER].anger == 0)
+				You_feel("like %s is appeased.", goatname);
 		}
-	    } else { /* not satisfied yet */
-		if (Hallucination)
-		    pline_The("gods seem tall.");
-		else You("have a feeling of inadequacy.");
-	    }
-	//No alignment record for the goat
-	} else if (u.ugoatblesscnt > 0 && eatflag != GOAT_EAT_MARKED) {
-	    u.ugoatblesscnt -=
-		((value * (u.ualign.type == A_CHAOTIC ? 500 : 300)) / MAXVALUE);
-	    if(u.ugoatblesscnt < 0) u.ugoatblesscnt = 0;
-	    if(u.ugoatblesscnt != saved_cnt) {
-		if (u.ugoatblesscnt) {
-		    if (Hallucination)
-			You("realize that the gods are not like you and I.");
-		    else
-			You("have a hopeful feeling.");
-		    if ((int)u.uluck < 0) change_luck(1);
-		} else {
-		    if (Hallucination)
-			pline("Overall, there is a smell of fried onions.");
-		    else
-			You("have a feeling of reconciliation.");
-		    if ((int)u.uluck < 0) u.uluck = 0;
-			
-			u.reconciled = REC_REC;
-		}
-	    }
-	} else if(eatflag == GOAT_EAT_OFFERED){
-		//The Black Goat is pleased
+		return;
+	}
+
+	/* direct offerings make all goat-aligned creatures on the level peaceful. This intentionally happens before the holy-symbol check. */
+	if(eatflag == GOAT_EAT_OFFERED) {
 		struct monst *mtmp;
 		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
 			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT || has_template(mtmp, MISTWEAVER))){
@@ -3590,81 +3500,42 @@ int eatflag;
 				newsym(mtmp->mx, mtmp->my);
 			}
 		}
-		//Character needs a holy symbol
-		if(!has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
-			struct obj *otmp;
-			if(u.shubbie_atten ? !rn2(10+u.ugifts) : !rn2(4)){
-				otmp = mksobj(HOLY_SYMBOL_OF_THE_BLACK_MOTHE, MKOBJ_NOINIT);
-				dropy(otmp);
-				at_your_feet("An object");
-				//event: only increment this once.
-				if(!u.shubbie_atten){
-					u.ugifts++;
-					u.shubbie_atten = 1;
-				}
-			}
-			return;
-		}
-		//pline("looking into goat gift.  %d gift val accumulated. %d gifts given, on level %d, and your luck %d.", u.uartisval, (int)u.ugifts, u.ulevel, (int)u.uluck);
-	    /* you were already in pretty good standing */
-	    /* The player can gain an artifact */
-	    /* The chance goes down as the number of artifacts goes up */
-		/* Priests now only count gifts in this calculation, found artifacts are excluded */
-		/* deliberately can affect artifact weapons */
-		struct obj *otmp = (struct obj *)0;
-		if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_GOATW))
-			otmp = uwep;
-		else if (uarmg && !uwep && u.umartial && !check_oprop(uarmg, OPROP_ACIDW) && !check_oprop(uarmg, OPROP_GOATW))
-			otmp = uarmg;
-		else if (uarmf && !uarmg && !uwep && u.umartial && !check_oprop(uarmf, OPROP_ACIDW) && !check_oprop(uarmf, OPROP_GOATW))
-			otmp = uarmf;
-			
-	    if(u.ulevel > 2 && u.uluck >= 0 && (!flags.made_know || otmp) && maybe_god_gives_gift()){
-			if(otmp){
-				if(!Blind) pline("...your %s %s drooling.", 
-					(otmp == uwep) ? "weapon" : ((otmp == uarmg) ? "gloves" : "boots"),
-					(otmp == uwep) ? "is" : "are");
-				remove_oprop(otmp, OPROP_LESSER_ACIDW);
-				add_oprop(otmp, OPROP_GOATW);
-				otmp->oeroded = 0;
-				otmp->oeroded2 = 0;
-				otmp->oerodeproof = 1;
-				u.ugifts++;
-				u.uartisval += TIER_S;
-			}
-			else if(!flags.made_know){
-				otmp = mksobj(WORD_OF_KNOWLEDGE, MKOBJ_NOINIT);
-				dropy(otmp);
-				at_your_feet("An object");
-				u.ugifts++;
-				u.uartisval += TIER_A;
-			}
-			//Note: bugs in the above blocks were making ugifts go up without giving a benefit.
-			//  I think the bugs are squashed, but keep the increment tightly associated with actual gifts.
-			return;
-	    } else if (rnl((30 + u.ulevel)*10) < 10) {
-			/* no artifact, but maybe a helpful pet? */
-			/* WAC is now some generic benefit (includes pets) */
-			goat_gives_benefit();
-		    return;
-	    }
-	    change_luck((value * LUCKMAX) / (MAXVALUE * 2));
-	    if ((int)u.uluck < 0) u.uluck = 0;
-	    if (u.uluck != saved_luck) {
-		if (Blind)
-		    You("think %s brushed your %s.",something, body_part(FOOT));
-		else You(Hallucination ?
-		    "see crabgrass at your %s.  A funny thing in a dungeon." :
-		    "glimpse a four-leaf clover at your %s.",
-		    makeplural(body_part(FOOT)));
-	    }
-		u.reconciled = REC_REC;
-	} else { //Off floor
-		if(isok(x,y) && rnl((30 + u.ulevel)*10) < 10){
-			mksobj_at(POT_GOAT_S_MILK, x, y, MKOBJ_NOINIT);
-		}
 	}
-    }
+	/* the player must carry a holy symbol to gain credit. Chance to give one, if missing. return early */
+	if(!has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+		struct obj *otmp;
+		if(u.shubbie_atten ? !rn2(10+u.ugifts) : !rn2(4)){
+			otmp = mksobj(HOLY_SYMBOL_OF_THE_BLACK_MOTHE, MKOBJ_NOINIT);
+			dropy(otmp);
+			at_your_feet("An object");
+			//event: only increment this once.
+			if(!u.shubbie_atten){
+				u.ugifts++;
+				u.shubbie_atten = 1;
+			}
+		}
+		return;
+	}
+
+	/* at this point, gain credit */
+
+	/* direct offerings are worth more than kills with drooling weapons */
+	value = value * (eatflag == GOAT_EAT_MARKED ? 2 : 6) / 3;
+
+	/* credit gain suffers diminishing returns, less harshly if you are goat-ridden */
+	int dim_return_factor = (u.umadness & MAD_GOAT_RIDDEN) ? 100 : 50;
+	if (wizard) {
+		/* debug */
+		pline("ShubbieCredit = %ld [+%ld base %d]",
+			u.shubbie_credit + max(1, value * dim_return_factor / (dim_return_factor + u.shubbie_credit)),
+			max(1, value * dim_return_factor / (dim_return_factor + u.shubbie_credit)),
+			value
+			);
+	}
+	value = max(1, value * dim_return_factor / (dim_return_factor + u.shubbie_credit));
+	u.shubbie_credit += value;
+	u.shubbie_devotion += value;
+	return;
 }
 /* declare the global godlist pointer */
 struct god * godlist;
