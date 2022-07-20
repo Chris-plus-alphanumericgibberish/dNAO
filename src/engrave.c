@@ -1888,8 +1888,9 @@ dogenengrave(mode)
 int mode;
 {
 	boolean dengr = FALSE;	/* TRUE if we wipe out the current engraving */
+	boolean preknown = FALSE;  /* TRUE if we identify the stylus before */
+	boolean postknown = FALSE; /* TRUE if we identify the stylus after */
 	boolean doblind = FALSE;/* TRUE if engraving blinds the player */
-	boolean doknown = FALSE;/* TRUE if we identify the stylus */
 	boolean eow = FALSE;	/* TRUE if we are overwriting oep */
 	boolean jello = FALSE;	/* TRUE if we are engraving in slime */
 	boolean ptext = TRUE;	/* TRUE if we must prompt for engrave text */
@@ -2092,6 +2093,8 @@ int mode;
 		    case WAN_WISHING:
 		    case WAN_ENLIGHTENMENT:
 			zapnodir(otmp);
+			/* pre/postknown not needed; these will make it known if
+			 * applicable */
 			break;
 
 			/* IMMEDIATE wands */
@@ -2108,12 +2111,14 @@ int mode;
 				"The wand unsuccessfully fights your attempt to draw!"
 				);
 			}
+			postknown = TRUE;
 			break;
 		    case WAN_SLOW_MONSTER:
 			if (!Blind) {
 			   Sprintf(post_engr_text,
 				  	"The bugs on the %s slow down!",
 				   surface(u.ux, u.uy));
+				 postknown = TRUE;
 			}
 			break;
 		    case WAN_SPEED_MONSTER:
@@ -2121,6 +2126,7 @@ int mode;
 			   Sprintf(post_engr_text,
 				  	"The bugs on the %s speed up!",
 				   surface(u.ux, u.uy));
+				 postknown = TRUE;
 			}
 			break;
 		    case WAN_POLYMORPH:
@@ -2128,6 +2134,7 @@ int mode;
 			    if (oep->engr_txt[0]) {
 					type = (xchar)0;	/* random */
 					(void) random_engraving(buf);
+					preknown = TRUE;
 			    }
 				if(oep->ward_id){
 					randWard = rn2(10) ? 1 : rn2(10) ? randHaluWard() : 0;
@@ -2136,6 +2143,8 @@ int mode;
 						randHalu = FALSE;
 					}
 					else randHalu = TRUE;
+
+					preknown = TRUE;
 				}
 			    dengr = TRUE;
 			}
@@ -2177,6 +2186,7 @@ int mode;
 			   Sprintf(post_engr_text,
 				  	"The %s is riddled by bullet holes!",
 				   surface(u.ux, u.uy));
+				 postknown = TRUE;
 			}
 			break;
 
@@ -2188,6 +2198,8 @@ int mode;
 				   Sprintf(post_engr_text,
 						"The grass withers and dies!");
 					levl[u.ux][u.uy].typ = SOIL;
+					/* except if you're aiming at grass, apparently - Amate Urhour */
+					postknown = TRUE;
 				}
 			} else if (!Blind) {
 			   Sprintf(post_engr_text,
@@ -2197,9 +2209,11 @@ int mode;
 			break;
 
 		    case WAN_COLD:
-			if (!Blind)
+			if (!Blind) {
 			    Strcpy(post_engr_text,
 				"A few ice cubes drop from the wand.");
+					postknown = TRUE;
+			}
 			if(!oep || (oep->engr_type != BURN))
 			    break;
 		    case WAN_CANCELLATION:
@@ -2228,7 +2242,7 @@ int mode;
 			    if (flags.verbose)
 				pline("This %s is a wand of digging!",
 				xname(otmp));
-			    doknown = TRUE;
+				preknown = TRUE;
 			}
 			if (!Blind)
 			    Strcpy(post_engr_text,
@@ -2246,9 +2260,9 @@ int mode;
 			ptext = TRUE;
 			type  = BURN;
 			if(!objects[otmp->otyp].oc_name_known) {
-			if (flags.verbose)
-			    pline("This %s is a wand of fire!", xname(otmp));
-			    doknown = TRUE;
+				if (flags.verbose)
+					pline("This %s is a wand of fire!", xname(otmp));
+				preknown = TRUE;
 			}
 			Strcpy(post_engr_text,
 				Blind ?	"You feel the wand heat up." :
@@ -2261,9 +2275,9 @@ int mode;
 			type  = BURN;
 			if(!objects[otmp->otyp].oc_name_known) {
 			    if (flags.verbose)
-				pline("This %s is a wand of lightning!",
+						pline("This %s is a wand of lightning!",
 					xname(otmp));
-			    doknown = TRUE;
+			    preknown = TRUE;
 			}
 			if (!Blind) {
 			    Strcpy(post_engr_text,
@@ -2437,9 +2451,9 @@ int mode;
 	/* End of implement setup */
 
 	/* Identify stylus */
-	if (doknown) {
-	    makeknown(otmp->otyp);
-	    more_experienced(0,10);
+	if (preknown) {
+		makeknown(otmp->otyp);
+		more_experienced(0,10);
 	}
 
 	if (teleengr) {
@@ -3116,7 +3130,13 @@ int mode;
 			}
 		}
 	}
-	if (post_engr_text[0]) pline1(post_engr_text);
+	if (post_engr_text[0]) {
+		pline1(post_engr_text);
+		if (postknown) {
+			makeknown(otmp->otyp);
+			more_experienced(0,10);
+		}
+	}
 
 	if (doblind && !resists_blnd(&youmonst)) {
 		lightning_blind(&youmonst, rnd(50));
