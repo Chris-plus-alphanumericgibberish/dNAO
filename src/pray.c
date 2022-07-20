@@ -3127,20 +3127,20 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 	if (greater_boon) {
 
 		Sprintf(buf, "her Bite");
-		any.a_int = GOATBOON_DARK_YOUNG;
+		any.a_int = GOATBOON_ACID;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			inclet++, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 
 		Sprintf(buf, "her Hunger");
-		any.a_int = GOATBOON_DARK_YOUNG;
+		any.a_int = GOATBOON_DROOL;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			inclet++, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 
 		if (!flags.made_know) {
 			Sprintf(buf, "her Knowledge");
-			any.a_int = GOATBOON_DARK_YOUNG;
+			any.a_int = GOATBOON_RED_WORD;
 			add_menu(tmpwin, NO_GLYPH, &any,
 				inclet++, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
