@@ -5539,7 +5539,7 @@ xkilled(mtmp, dest)
 				//We are in the "player has killed monster" function, so it's their fault
 				if(goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
 					goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
-				} else if(mtmp->mgoatmarked){
+				} else if(mtmp->mgoatmarked && !Infuture){
 					goat_eat(corpse, GOAT_EAT_MARKED); //Goat eat tries *really* hard to destroy whatever you give it.
 				} else goat_seenonce = FALSE;
 				corpse = (struct obj *)0; //corpse pointer is now stale
