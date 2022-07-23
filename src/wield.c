@@ -154,7 +154,7 @@ boolean quietly;	/* hide the basic message saying what you are now wielding */
 	    You("cannot wield a two-handed %s while wearing a shield.",
 		is_sword(wep) ? "sword" :
 		    wep->otyp == BATTLE_AXE ? "axe" : "weapon");
-	else if (wep->otyp == ARM_BLASTER && uarmg && is_metal(uarmg))
+	else if (wep->otyp == ARM_BLASTER && uarmg && is_metallic(uarmg))
 		You("cannot fit the bracer over such bulky, rigid gloves.");
 	else if (wep->oartifact == ART_KUSANAGI_NO_TSURUGI && !(u.ulevel >= 30 || u.uhave.amulet)) {
 	    pline("Only a Shogun, or a bearer of the Amulet of Yendor, is truly worthy of wielding this sword.");
@@ -586,7 +586,7 @@ test_twoweapon()
 	else if (uarms)
 		You_cant("use two weapons while wearing a shield.");
 	/* cannot fit armblaster over metal gloves */
-	else if (uswapwep && uswapwep->otyp == ARM_BLASTER && uarmg && is_metal(uarmg))
+	else if (uswapwep && uswapwep->otyp == ARM_BLASTER && uarmg && is_metallic(uarmg))
 		You("cannot fit the bracer over such bulky, rigid gloves.");
 	/* some artifacts resist being offhanded */
 	else if (uswapwep && uswapwep->oartifact && !is_twoweapable_artifact(uswapwep))
