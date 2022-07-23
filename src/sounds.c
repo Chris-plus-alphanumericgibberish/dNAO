@@ -2697,9 +2697,9 @@ int dz;
 		}
 		return MOVE_STANDARD;
 	}
-	
+
 	bindresult = dobinding(tx,ty);
-	if(bindresult) return bindresult;
+	if(bindresult != MOVE_CANCELLED) return bindresult;
 	
 	if(!mtmp && (u.specialSealsActive&SEAL_ACERERAK) &&
 		(otmp = level.objects[tx][ty]) && 
@@ -2766,7 +2766,7 @@ int dz;
 			else{
 				You("let %s take your %s.",mon_nam(mtmp), xname(uwep));
 				if (!mtyp_to_thought(mtmp->mtyp))
-					return 1;	/* error */
+					return MOVE_CANCELLED;	/* error */
 				else
 					give_thought(mtyp_to_thought(mtmp->mtyp));
 
@@ -2933,7 +2933,11 @@ int dz;
 	
     if (!mtmp || mtmp->mundetected ||
 		mtmp->m_ap_type == M_AP_FURNITURE ||
-		mtmp->m_ap_type == M_AP_OBJECT) return 0;
+		mtmp->m_ap_type == M_AP_OBJECT
+	){
+		You("don't see anyone to talk to there.");
+		return MOVE_CANCELLED;
+	}
 	
     if (Underwater) {
 	Your("speech is unintelligible underwater.");
