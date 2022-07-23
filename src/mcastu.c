@@ -3737,7 +3737,7 @@ int tary;
 			case MON_BLIZZARA:
 			case MON_BLIZZAGA:
 				adtyp = AD_COLD;
-				color = EXPL_FIERY;
+				color = EXPL_FROSTY;
 				break;
 			case MON_THUNDARA:
 			case MON_THUNDAGA:
