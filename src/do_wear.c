@@ -1724,7 +1724,7 @@ boolean noisy;
 			if (noisy) You("cannot wear gloves over your %s.",
 				   is_sword(uwep) ? c_sword : c_weapon);
 			err++;
-		} else if (uwep && uwep->otyp == ARM_BLASTER && is_metal(otmp)) {
+		} else if (uwep && uwep->otyp == ARM_BLASTER && is_metallic(otmp)) {
 			if (noisy) pline("%s too tightly to allow such bulky, rigid gloves.",
 				   Tobjnam(uwep, "fit"));
 			err++;
