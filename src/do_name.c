@@ -1057,7 +1057,7 @@ boolean called;
 	if (article == ARTICLE_YOUR && !mtmp->mtame)
 	    article = ARTICLE_THE;
 
-	do_hallu = (Hallucination) && !(suppress & SUPPRESS_HALLUCINATION);
+	do_hallu = (Hallucination || Delusion(mtmp)) && !(suppress & SUPPRESS_HALLUCINATION);
 	do_invis = mtmp->minvis && !(suppress & SUPPRESS_INVISIBLE);
 	do_it = !canspotmon(mtmp) && 
 	    article != ARTICLE_YOUR &&
@@ -1569,12 +1569,13 @@ char *outbuf;
     /* high priest(ess)'s identity is concealed on the Astral Plane,
        unless you're adjacent (overridden for hallucination which does
        its own obfuscation) */
-    if ( (mon->mtyp == PM_HIGH_PRIEST || mon->mtyp == PM_ELDER_PRIEST) && !(Hallucination) &&
-	    Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
-	Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
-	Strcat(outbuf, mon->female ? "high priestess" : "high priest");
+	if ( (mon->mtyp == PM_HIGH_PRIEST || mon->mtyp == PM_ELDER_PRIEST) && !(Hallucination || Delusion(mon)) &&
+	    Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2
+	) {
+		Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
+		Strcat(outbuf, mon->female ? "high priestess" : "high priest");
     } else {
-	Strcpy(outbuf, x_monnam(mon, article, (char *)0, 0, TRUE));
+		Strcpy(outbuf, x_monnam(mon, article, (char *)0, 0, TRUE));
     }
     return outbuf;
 }

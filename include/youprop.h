@@ -231,6 +231,8 @@
 				 (Upolyd && dmgtype(youmonst.data, AD_HALU)))
 #define Hallucination		(HHallucination && !Halluc_resistance)
 
+#define Delusion(mon)	((mon) && !BlockableClearThoughts && ((mon)->mtyp == PM_WALKING_DELIRIUM))
+
 /* Timeout, plus a worn mask */
 #define HFumbling		u.uprops[FUMBLING].intrinsic
 #define EFumbling		u.uprops[FUMBLING].extrinsic
@@ -503,6 +505,8 @@
 #define HNightmare	u.uprops[WALKING_NIGHTMARE].intrinsic
 #define ENightmare	u.uprops[WALKING_NIGHTMARE].extrinsic
 #define Nightmare		(HNightmare || ENightmare)
+
+#define BlockableClearThoughts		(ClearThoughts && !Nightmare)
 
 #define HSanctuary	u.uprops[SANCTUARY].intrinsic
 #define ESanctuary	u.uprops[SANCTUARY].extrinsic

@@ -419,7 +419,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	/* we want M_AP_MONSTER to not be revealed by monster dectection */
     register boolean mon_mimic = (mon->m_ap_type != M_AP_NOTHING);
     register int sensed = mon_mimic && (Protection_from_shape_changers || sensemon(mon));
-	register int appear = what_mon(mon->mtyp);
+	register int appear = what_mon(mon->mtyp, mon);
     /*
      * We must do the mimic check first.  If the mimic is mimicing something,
      * and the location is in sight, we have to change the hero's memory
@@ -465,7 +465,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	    }
 
 	    case M_AP_MONSTER:
-		appear = what_mon(mon->mappearance);
+		appear = what_mon(mon->mappearance, mon);
 		break;
 	}
 	
@@ -506,16 +506,16 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	 */
 	} else if (sightflags == DETECTED) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
-			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
-			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL));
+			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, (struct monst *)0)):
+			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, (struct monst *)0));
 	    else
-		num = detected_monnum_to_glyph(appear);
+			num = detected_monnum_to_glyph(appear);
 	} else {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
-			monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL)):
-			monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL));
+			monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, (struct monst *)0)):
+			monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, (struct monst *)0));
 	    else
-		num = monnum_to_glyph(appear);
+			num = monnum_to_glyph(appear);
 	}
 	show_glyph(x,y,num);
     }
@@ -1848,7 +1848,7 @@ int mtyp;
 	impossible("swallow_to_glyph: bad swallow location");
 	loc = S_sw_br;
     }
-	return ((int)(what_mon(mtyp) << 3) | (loc - S_sw_tl)) + GLYPH_SWALLOW_OFF;
+	return ((int)(what_mon(mtyp, u.ustuck) << 3) | (loc - S_sw_tl)) + GLYPH_SWALLOW_OFF;
 }
 
 
