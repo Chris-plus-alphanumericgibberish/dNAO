@@ -17641,11 +17641,19 @@ struct monst * mdef;
 		//Bad Luck
 		case 1:
 			if(youdef){
-				You_feel("an ill fate settle over you.");
-				change_luck(-26);
+				if(magr->mtyp == PM_SOLDIER_MUMMY){
+					You_feel("an ill fate swirl around you.");
+					change_luck(-rnd(7));
+				} else {
+					You_feel("an ill fate settle over you.");
+					change_luck(-26);
+				}
 			}
 			else {
-				mdef->encouraged = max(-13, mdef->encouraged-26);
+				if(magr->mtyp == PM_SOLDIER_MUMMY)
+					mdef->encouraged = max_ints(-13, mdef->encouraged-rnd(7));
+				else
+					mdef->encouraged = max(-13, mdef->encouraged-26);
 			}
 		break;
 		//Curse Equipment
