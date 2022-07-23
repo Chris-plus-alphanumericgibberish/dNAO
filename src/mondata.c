@@ -2876,6 +2876,29 @@ struct monst *magr;
 	return FALSE;
 }
 
+int
+hd_size(ptr)
+struct permonst *ptr;
+{
+	return 8;
+	
+	// switch(ptr->msize){
+		// case MZ_TINY:
+			// return 4;
+		// case MZ_SMALL:
+			// return 6;
+		// case MZ_MEDIUM:
+			// return 8;
+		// case MZ_LARGE:
+			// return 10;
+		// case MZ_HUGE:
+			// return 12;
+		// case MZ_GIGANTIC:
+			// return 20;
+	// }
+	// return 8;
+}
+
 #endif /* OVLB */
 
 /*mondata.c*/
