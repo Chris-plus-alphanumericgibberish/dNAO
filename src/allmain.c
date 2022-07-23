@@ -1957,7 +1957,7 @@ moveloop()
 						}
 						set_mon_data(mtmp, PM_ARA_KAMEREL);
 						mtmp->m_lev = 15;
-						mtmp->mhpmax = d(15, 8);
+						mtmp->mhpmax = d(15, hd_size(mtmp->data));
 						mtmp->mhp = mtmp->mhpmax;
 						if(M_HAS_NAME(mtmp)) mtmp = christen_monst(mtmp, ""); //Now a different entity
 						mtmp->movement = 9;//Don't pause for a turn
