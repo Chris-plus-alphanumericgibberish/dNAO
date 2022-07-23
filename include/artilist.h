@@ -1753,7 +1753,7 @@ A("The Sickle of Thunderblasts",				SICKLE,				(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
-A("The War-helm of the Dreaming",		FACELESS_HELM,		"bird-like bone faceless helm",
+A("The War-helm of the Dreaming",		FACELESS_HELM,		"bird-like faceless helm",
 	4500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_MADMAN, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
