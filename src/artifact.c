@@ -859,7 +859,22 @@ int oprop;
 	if(oprop >= MAX_OPROP || oprop < 0)
 		impossible("Attempting to give %s oprop number %d?", doname(obj), oprop);
 	
-	obj->oproperties[(oprop-1)/32] |= (0x1L << ((oprop-1)%32));
+	switch(obj->where){
+		case OBJ_INVENT:{
+			long mask = obj->owornmask;
+			setnotworn(obj);
+			obj->oproperties[(oprop-1)/32] |= (0x1L << ((oprop-1)%32));
+			setworn(obj, mask);
+		}break;
+		case OBJ_MINVENT:
+			update_mon_intrinsics(obj->ocarry, obj, FALSE, TRUE); /* remove all intrinsics for now */
+			obj->oproperties[(oprop-1)/32] |= (0x1L << ((oprop-1)%32));
+			update_mon_intrinsics(obj->ocarry, obj, TRUE, TRUE); /* re-set remaining intrinsics */
+		break;
+		default:
+			obj->oproperties[(oprop-1)/32] |= (0x1L << ((oprop-1)%32));
+		break;
+	}
 }
 
 void
