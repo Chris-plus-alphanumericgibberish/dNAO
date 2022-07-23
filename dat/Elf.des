@@ -327,17 +327,17 @@ MAP
 1--...------------------------------------------------------------------...--
 2-..........................................................................-
 3--...------------------------S-------+---------------------------------...--
-4 --.--   ............     .......    #                   .......      --.-- 
-5  -.- .............................  ########........   .........H..   -.-  
-6  -.-  ............    .  ......             .      .    .......   ..  -.-  
+4 --.--   ............     .......    #                   ...F...      --.-- 
+5  -.- .............................  ########........   ....F....H..   -.-  
+6  -.-  ............    .  ......             .      .    ...F...   ..  -.-  
 7  -.-    .........     .   .... -----+-----  . ...  .               .. -.-  
 8  -.-       H    ----- .        |.........|  .H.    .H...............  -.-  
 9  -.- ...   .   --...--.        |.........|         .                  -.-  
-0  -.-........   -.....S.+####H #+....\....+####HH##H.                  -.-  
+0  -.-......F.   -.....S.+####H #+....\....+####HH##H.                  -.-  
 1  -.- ...       --...--  H      |.........|          ..      .....     -.-  
-2  -.-            -----  ..      |.........|           ..      ......   -.-  
-3  -.-     .......     ...       -----+-----  ....    ....    ..........S.-  
-4  -.-..............  ..              #      ......  ..  .............  -.-  
+2  -.-            -----  ..     #F.........F#          ..      ......   -.-  
+3  -.-     .......     ...       -F-F-+-F-F-  ....    ....    ..........S.-  
+4  -.-..............  ..          # # # # #  ......  ..  .............  -.-  
 5 --.--   .............                     ..........          ...... --.-  
 6--...--------S-----------------------+---------------------------------..---
 7-..........................................................................-
@@ -353,8 +353,33 @@ STAIR:(19,10),up
 # Non diggable walls
 NON_DIGGABLE:(00,00,75,19)
 # Objects
-OBJECT:'(',"crystal ball",(37,10),blessed,0,"The Palantir of Westernesse"
-OBJECT:'(',"chest",(37,10)
+OBJECT:'(',"crystal ball",(37,10),blessed,10,"The Palantir of Westernesse"
+CONTAINER:'(',"chest",(37,10)
+OBJECT: '=', random, contained
+OBJECT: '=', random, contained
+OBJECT: '=', random, contained
+OBJECT[75%]: '=', random, contained
+OBJECT[62%]: '=', random, contained
+OBJECT[50%]: '=', random, contained
+OBJECT[32%]: '=', random, contained
+OBJECT[25%]: '=', random, contained
+OBJECT[12%]: '=', random, contained
+OBJECT:'#',"+1 uncursed iron armored boots",contained
+OBJECT:'#',"+1 uncursed iron gauntlets",contained
+OBJECT:'#',"+1 uncursed iron plate mail",contained
+OBJECT:'#',"+1 uncursed magic-resistant leather dwarvish cloak",contained
+OBJECT:'#',"+1 uncursed iron dwarvish helm",contained
+OBJECT:'#',"+1 uncursed iron dwarf mask",contained
+OBJECT:'#',"+1 uncursed iron dwarvish roundshield",contained
+OBJECT:'#',"+1 uncursed iron axe",contained
+
+OBJECT:'#',"+3 blessed elven boots",contained
+OBJECT:'#',"+3 blessed high-elven gauntlets",contained
+OBJECT:'#',"+3 blessed reflective high-elven plate",contained
+OBJECT:'#',"+3 holy-armor elven cloak",contained
+OBJECT:'#',"+3 blessed high-elven helm",contained
+OBJECT:'#',"+3 holy-weapon wrathful mithril elven broadsword",contained
+
 OBJECT:random,random,(36,09)
 OBJECT:random,random,(36,10)
 OBJECT:random,random,(36,11)
@@ -383,6 +408,23 @@ DOOR:closed,(37,07)
 DOOR:closed,(37,13)
 DOOR:closed,(37,16)
 DOOR:closed,(42,10)
+
+# Prisoners
+MONSTER: 'h', "dwarf king", (07,10), "Thror"
+MONSTER: '@', "Elvenqueen", (56,05)
+# Random prisoners (done via level loader).
+OBJECT: '_', "chain", (57,04)
+OBJECT: '_', "chain", (59,04)
+OBJECT: '_', "chain", (57,06)
+OBJECT: '_', "chain", (59,06)
+
+OBJECT: '_', "chain", (31,12)
+OBJECT: '_', "chain", (33,14)
+OBJECT: '_', "chain", (35,14)
+OBJECT: '_', "chain", (39,14)
+OBJECT: '_', "chain", (41,14)
+OBJECT: '_', "chain", (43,12)
+
 # Random monsters.
 MONSTER:'W',"Necromancer",(37,10),hostile
 MONSTER:'o',"Mordor orc elite",(36,09),hostile
@@ -401,11 +443,11 @@ MONSTER:'o',"Mordor orc",random,hostile
 MONSTER:'o',"Mordor orc",random,hostile
 MONSTER:'o',"goblin",random,hostile
 MONSTER:'o',"goblin",random,hostile
-MONSTER:'o',random,random,hostile
-MONSTER:'o',random,random,hostile
-MONSTER:'O',"ogre",(03,02),hostile
-MONSTER:'O',"ogre",(72,02),hostile
-MONSTER:'O',"ogre",(03,17),hostile
+MONSTER:'V',random,random,hostile
+MONSTER:'V',random,random,hostile
+MONSTER:'@',"werewolf",(03,02),hostile
+MONSTER:'@',"werewolf",(72,02),hostile
+MONSTER:'@',"werewolf",(03,17),hostile
 MONSTER:'O',"ogre",(72,17),hostile
 MONSTER:'O',"ogre",(41,10),hostile
 MONSTER:'O',"ogre",(33,09),hostile
@@ -426,6 +468,11 @@ MONSTER: 's', "mirkwood elder", random, hostile
 MONSTER: 's', "mirkwood elder", random, hostile
 MONSTER: 's', "mirkwood elder", random, hostile
 
+MONSTER:'o',"Mordor marshal",(62,05),hostile
+MONSTER:'@',"werewolf",(61,05),hostile
+MONSTER:'o',"Mordor orc",(62,04),hostile
+MONSTER:'o',"Mordor orc",(62,06),hostile
+MONSTER:'o',"Mordor orc",(63,05),hostile
 
 #
 #	The "fill" levels for the quest.

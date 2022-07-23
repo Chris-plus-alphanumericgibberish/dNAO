@@ -1308,6 +1308,63 @@ default_case:
 		}
 		otmp->spe = 0;
 	}
+	if(otmp->otyp == CHAIN && otmp->where == OBJ_FLOOR && In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && urole.neminum == PM_NECROMANCER){
+		int mtyp;
+		boolean polyps;
+		struct monst *mon;
+		int prisoners[] = {
+							PM_ELF_LORD, PM_ELF_LADY, PM_GREY_ELF, PM_GREY_ELF,
+							PM_HEDROW_BLADEMASTER, PM_DROW_CAPTAIN, PM_DROW_MATRON, PM_UNEARTHLY_DROW,
+							PM_DWARF_CLERIC, PM_DWARF_LORD, PM_DWARF_QUEEN, PM_DWARF_KING,
+							PM_RANGER, PM_RANGER, PM_WIZARD, PM_KNIGHT, PM_KNIGHT, PM_VALKYRIE,
+							PM_DEMINYMPH, PM_DEMINYMPH,
+							PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON,
+							PM_ASTRAL_DEVA, PM_GRAHA_DEVA,
+							PM_LILLEND, PM_ALEAX,
+							PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, PM_DRACAE_ELADRIN,
+							PM_TITAN, 
+							PM_ERINYS, PM_LILITU, PM_DAUGHTER_OF_BEDLAM, PM_ICE_DEVIL, PM_MARILITH, PM_PIT_FIEND, PM_FALLEN_ANGEL
+						};
+		mtyp = ROLL_FROM(prisoners);
+		if(mtyp == PM_DRACAE_ELADRIN){
+			if(dungeon_topology.eprecursor_typ != PRE_DRACAE){
+				mtyp = PM_TULANI_ELADRIN;
+			}
+			if(dungeon_topology.eprecursor_typ == PRE_POLYP){
+				polyps = TRUE;
+			}
+		}
+		if(mtyp == PM_TULANI_ELADRIN){
+			switch(dungeon_topology.alt_tulani){
+				case GAE_CASTE:
+					mtyp = PM_GAE_ELADRIN;
+				break;
+				case BRIGHID_CASTE:
+					mtyp = PM_BRIGHID_ELADRIN;
+				break;
+				case UISCERRE_CASTE:
+					mtyp = PM_UISCERRE_ELADRIN;
+				break;
+				case CAILLEA_CASTE:
+					mtyp = PM_CAILLEA_ELADRIN;
+				break;
+			}
+		}
+		mon = makemon(&mons[mtyp], otmp->ox, otmp->oy, MM_GOODEQUIP);
+		if(mon && polyps){
+			mon->ispolyp = TRUE;
+			mongets(mon, MASK, NO_MKOBJ_FLAGS);
+			mongets(mon, MASK, NO_MKOBJ_FLAGS);
+			mongets(mon, MASK, NO_MKOBJ_FLAGS);
+			mongets(mon, MASK, NO_MKOBJ_FLAGS);
+			mongets(mon, MASK, NO_MKOBJ_FLAGS);
+		}
+		if(mon){
+			(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+			mon->entangled = SHACKLES;
+		}
+	}
+
 	// Madman's old stuff to reclaim
 	if(Is_real_container(otmp) && otmp->spe == 7){
 		struct obj *stuff;
