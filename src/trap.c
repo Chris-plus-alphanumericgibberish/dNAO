@@ -4446,12 +4446,12 @@ struct trap *ttmp;
 
 	/* is the monster too heavy? */
 	wt = inv_weight() + mtmp->data->cwt;
-	if (!try_lift(mtmp, ttmp, wt, FALSE)) return MOVE_STANDARD;
+	if (try_lift(mtmp, ttmp, wt, FALSE) != MOVE_CANCELLED) return MOVE_STANDARD;
 
 	/* is the monster with inventory too heavy? */
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj)
 		wt += otmp->owt;
-	if (!try_lift(mtmp, ttmp, wt, TRUE)) return MOVE_STANDARD;
+	if (try_lift(mtmp, ttmp, wt, TRUE) != MOVE_CANCELLED) return MOVE_STANDARD;
 
 	You("pull %s out of the pit.", mon_nam(mtmp));
 	mtmp->mtrapped = 0;
