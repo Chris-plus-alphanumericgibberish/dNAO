@@ -2647,7 +2647,7 @@ winid *datawin;
 			if (oc.oc_skill > 0) {
 				if (obj) {
 					Sprintf(buf, "%s-handed %s%s%s.", 
-						((obj ? bimanual(obj, youmonst.data) : oc.oc_bimanual) ? "Two" : "One"),
+						((obj ? bimanual(obj, youracedata) : oc.oc_bimanual) ? "Two" : "One"),
 						(otyp_is_blaster || otyp_is_launcher) ? "" : buf2,
 						(otyp_is_blaster ? "blaster" : otyp_is_launcher ? "launcher" : "weapon"),
 						((obj && is_weptool(obj)) && !otyp_is_launcher ? "-tool" : "")
