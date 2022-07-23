@@ -16704,7 +16704,7 @@ android_combo()
 
 	if(uwep && is_ammo(uwep)){
 		You("can't do a combo using ammo!");
-		return FALSE;
+		return MOVE_CANCELLED;
 	}
 
 	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
@@ -16733,15 +16733,15 @@ android_combo()
 		u.uen--;
 		flags.botl = 1;
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_SKILLED && u.uen > 0){
-			if (dokick()){
+			if (dokick() != MOVE_CANCELLED){
 				u.uen--;
 				flags.botl = 1;
 			}
 			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && u.uen > 0){
-			int j = jump(1);
-			int k = dokick();
+			int j = jump(1) != MOVE_CANCELLED;
+			int k = dokick() != MOVE_CANCELLED;
 			if (j || k){
 				u.uen--;
 				flags.botl = 1;
@@ -16749,7 +16749,7 @@ android_combo()
 			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_MASTER && u.uen > 0){
-			int j = jump(1);
+			int j = jump(1) != MOVE_CANCELLED;
 			int d = getdir((char *)0);
 			if (!j && !d) return MOVE_ATTACKED;
 			u.uen--;
@@ -16834,14 +16834,14 @@ android_combo()
 					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 				}
 			}
-			k = dokick();
+			k = dokick() != MOVE_CANCELLED;
 			if ((a && !u.dz) || k){
 				u.uen--;
 			}
 			else return MOVE_ATTACKED;
 		}
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
-			int j = jump(1);
+			int j = jump(1) != MOVE_CANCELLED;
 			int d = getdir((char *)0);
 			if (!j && (!d || u.dz))
 				return MOVE_ATTACKED;
@@ -17014,18 +17014,18 @@ android_combo()
 
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			//Two throws. Aborting either one ends the combo.
-			if(!dofire())
+			if(dofire() == MOVE_CANCELLED)
 				return MOVE_ATTACKED;
 			//Charge energy for continuing combo after first throw.
 			u.uen--;
 			flags.botl = 1;
 			//Now do second throw. Aborting either one ends the combo.
-			if(!dofire())
+			if(dofire() == MOVE_CANCELLED)
 				return MOVE_ATTACKED;
 		}
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			//One throw, followed by a moving attack.  Aborting either one ends the combo.
-			if (dofire()){
+			if(dofire() != MOVE_CANCELLED){
 				//Charge energy for continuing the combo after the throw
 				u.uen--;
 				flags.botl = 1;
@@ -17091,7 +17091,7 @@ android_combo()
 		youmonst.movement -= 3;
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* use a kick to get direction */
-			if (!dokick())
+			if (dokick() == MOVE_CANCELLED)
 				return MOVE_ATTACKED;
 			/* get your targetted direction's index */
 			for (i = 0; i < 8; i++)
