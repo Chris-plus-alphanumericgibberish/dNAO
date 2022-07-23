@@ -58,8 +58,8 @@
 #define templated(mon)			((mon)->mtemplate != 0)
 #define get_template(mon)			((mon)->mtemplate)
 
-#define is_molochan(ptr)	((ptr)->maligntyp == A_NONE)
-#define is_voidalign(ptr)	((ptr)->maligntyp == A_VOID)
+#define is_molochan(ptr)	((ptr)->maligntyp == MON_A_NONE)
+#define is_voidalign(ptr)	((ptr)->maligntyp == MON_A_VOID)
 #define is_lawful(ptr)		((ptr)->maligntyp > A_NEUTRAL && !is_molochan(ptr) && !is_voidalign(ptr))
 #define is_lawful_mon(mon) (HAS_EPRI(mon) ? EPRI(mon)->shralign == A_LAWFUL :\
 				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_LAWFUL :\

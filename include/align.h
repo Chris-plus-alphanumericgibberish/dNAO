@@ -20,6 +20,8 @@ typedef struct	align {		/* alignment & record */
 #define ALIGNLIM	(min(100L, 10L + (moves/200L) - u.ualign.sins))
 
 #define A_NONE		(-128)	/* the value range of type */
+#define MON_A_NONE	(-128)
+#define MON_A_VOID	(-127)
 
 #define A_CHAOTIC	(-1)
 #define A_NEUTRAL	 0
