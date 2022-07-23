@@ -2624,6 +2624,21 @@ docome()
 	return MOVE_INSTANT;
 }
 
+
+int
+dodownboy()
+{
+	u.peaceful_pets = TRUE;
+	return MOVE_INSTANT;
+}
+
+int
+dosickem()
+{
+	u.peaceful_pets = FALSE;
+	return MOVE_INSTANT;
+}
+
 #endif /* OVLB */
 
 /*do.c*/

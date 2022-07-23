@@ -3068,6 +3068,8 @@ struct monst * mdef;	/* another monster which is next to it */
 
 	// Pets don't attack:
 	if(magr->mtame && (
+		/* peacefuls if you told them not to */
+		(u.peaceful_pets && mdef->mpeaceful) ||
 		/* other pets */
 		(mdef->mtame) ||
 		/* creatures you are interacting with */

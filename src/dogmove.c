@@ -865,6 +865,9 @@ boolean ranged;
 	
 	if(imprisoned(mtmp2)) return FALSE;
 	
+	if(mtmp->mtame && u.peaceful_pets && mtmp2->mpeaceful)
+		return FALSE;
+
 	if(mtmp->mtame && mtmp2->mpeaceful && !u.uevent.uaxus_foe && mtmp2->mtyp == PM_AXUS)
 		return FALSE;
 	

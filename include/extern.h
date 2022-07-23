@@ -503,6 +503,8 @@ E void FDECL(set_wounded_legs, (long,int));
 E void NDECL(heal_legs);
 E int NDECL(dowait);
 E int NDECL(docome);
+E int NDECL(dodownboy);
+E int NDECL(dosickem);
 E int FDECL(drop, (struct obj *));
 
 /* ### do_name.c ### */

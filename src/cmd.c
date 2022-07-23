@@ -37,6 +37,7 @@ extern int NDECL(doextlist); /**/
 extern int NDECL(dodrop); /**/
 extern int NDECL(doddrop); /**/
 extern int NDECL(dodown); /**/
+extern int NDECL(dodownboy); /**/
 extern int NDECL(doup); /**/
 extern int NDECL(donull); /**/
 extern int NDECL(dowait); /**/
@@ -94,6 +95,7 @@ extern int NDECL(dosave); /**/
 extern int NDECL(dosearch); /**/
 extern int NDECL(doidtrap); /**/
 extern int NDECL(dopay); /**/
+extern int NDECL(dosickem); /**/
 extern int NDECL(dosit); /**/
 extern int NDECL(dodeepswim); /**/
 extern int NDECL(dotalk); /**/
@@ -1703,6 +1705,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"cast", "zap (cast) a spell", docast, IFBURIED},
 	{"discoveries", "show what object types have been discovered", dodiscovered, IFBURIED},
 	{"down", "go down a staircase", dodown, !IFBURIED},
+	{"downboy", "pets don't attack peaceful creatures", dodownboy, IFBURIED, AUTOCOMPLETE},
 	{"drop", "drop an item", dodrop, !IFBURIED},
 	{"dropall", "drop specific item types", doddrop, !IFBURIED},
 	{"takeoffall", "remove all armor", doddoremarm, !IFBURIED},
@@ -1780,6 +1783,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"enhance", "advance or check weapons skills", enhance_weapon_skill, IFBURIED, AUTOCOMPLETE},
 	{"equip", "give a pet an item", dopetequip, !IFBURIED, AUTOCOMPLETE},
 	{"force", "force a lock", doforce, !IFBURIED, AUTOCOMPLETE},
+	{"getem", "pets may attack peaceful creaturs", dosickem, IFBURIED, AUTOCOMPLETE},
 	{"invoke", "invoke an object's powers", doinvoke, IFBURIED, AUTOCOMPLETE},
 	{"jump", "jump to a location", dojump, !IFBURIED, AUTOCOMPLETE},
 	{"loot", "loot a box on the floor", doloot, !IFBURIED, AUTOCOMPLETE},
