@@ -2754,7 +2754,8 @@ boolean printdun;
 			} else {
 				Sprintf(eos(buf), " [Upper Hell]");
 			}
-		} else if(Is_hell2(&mptr->lev)){
+		}
+		else if(Is_hell2(&mptr->lev)){
 			if(Is_leviathan_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Stygia]");
 			} else if(Is_lilith_level(&mptr->lev)){
@@ -2766,9 +2767,11 @@ boolean printdun;
 			} else {
 				Sprintf(eos(buf), " [Lower Hell]");
 			}
-		} else if(Is_hell3(&mptr->lev)){
+		}
+		else if(Is_hell3(&mptr->lev)){
 			Sprintf(eos(buf), " [Nessus]");
-		} else if(Is_abyss1(&mptr->lev)){
+		}
+		else if(Is_abyss1(&mptr->lev)){
 			if(Is_juiblex_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Slime Pits]");
 			} else if(Is_zuggtmoy_level(&mptr->lev)){
@@ -2784,7 +2787,8 @@ boolean printdun;
 			} else {
 				Sprintf(eos(buf), " [First Abyss]");
 			}
-		} else if(Is_abyss2(&mptr->lev)){
+		}
+		else if(Is_abyss2(&mptr->lev)){
 			if(Is_malcanthet_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Shendilavri]");
 			} else if(Is_grazzt_level(&mptr->lev)){
@@ -2796,7 +2800,8 @@ boolean printdun;
 			} else {
 				Sprintf(eos(buf), " [Second Abyss]");
 			}
-		} else if(Is_abyss3(&mptr->lev)){
+		}
+		else if(Is_abyss3(&mptr->lev)){
 			if(Is_demogorgon_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Brine Flats]");
 			} else if(Is_dagon_level(&mptr->lev)){
@@ -2806,6 +2811,11 @@ boolean printdun;
 			} else {
 				Sprintf(eos(buf), " [Third Abyss]");
 			}
+		}
+		else if(In_outlands(&u.uz)){
+			if(dunlev(&u.uz) == 1) Sprintf(eos(buf)," [Gatetown]");
+			else if(dunlev(&u.uz) == 6) Sprintf(eos(buf)," [Spire]");
+			else if(dunlev(&u.uz) == 7) Sprintf(eos(buf)," [Sum of All]");
 		}
 	}
 
