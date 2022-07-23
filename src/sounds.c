@@ -803,6 +803,7 @@ boolean chatting;
 		mtmp->isshk ? MS_SELL : 
 		(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used) ? MS_SONG : 
 		mtmp->mfaction == QUEST_FACTION ? MS_GUARDIAN : 
+		(ptr->msound == MS_CUSS && mtmp->mpeaceful) ? MS_HUMANOID : 
 		ptr->msound
 	) {
 	case MS_ORACLE:
