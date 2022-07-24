@@ -1307,6 +1307,26 @@ register const char *let,*word;
 		    ((otmp->oclass == TOOL_CLASS && otyp != CAN_OF_GREASE) ||
 			(otmp->oclass == CHAIN_CLASS)))
 		|| (!strcmp(word, "charge") && !is_chargeable(otmp))
+		|| (!strcmp(word, "offer to the flame") && 
+			!sflm_offerable(otmp))
+		|| (!strcmp(word, "mirror-finish") && 
+			!sflm_mirrorable(otmp))
+		|| (!strcmp(word, "curse-proof glaze") && 
+			!sflm_glazeable(otmp))
+		|| (!strcmp(word, "reveal mortality") && 
+			!sflm_mortalable(otmp))
+		|| (!strcmp(word, "reveal true death") && 
+			!sflm_truedeathable(otmp))
+		|| (!strcmp(word, "reveal the unworthy") && 
+			!sflm_unworthyable(otmp))
+		|| (!strcmp(word, "smelt silver in the silver light") && 
+			!sflm_smeltable_silver(otmp))
+		|| (!strcmp(word, "smelt platinum in the silver light") && 
+			!sflm_smeltable_platinum(otmp))
+		|| (!strcmp(word, "smelt mithril in the silver light") && 
+			!sflm_smeltable_mithril(otmp))
+		|| (!strcmp(word, "burn in the silver flame") && 
+			!(otmp->blessed || otmp->cursed))
 		|| (!strcmp(word, "upgrade your stove with") &&
 		    (otyp != TINNING_KIT))
 		|| (!strcmp(word, "upgrade your switch with") &&
@@ -2939,6 +2959,24 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			
+			if (check_oprop(obj, OPROP_MORTW))
+			{
+				Sprintf(buf2, "Drains 1d2 levels from living intelligent targets.");
+				OBJPUTSTR(buf2);
+			}
+
+			if (check_oprop(obj, OPROP_TDTHW))
+			{
+				Sprintf(buf2, "Deals double damage plus 2d7 to undead.");
+				OBJPUTSTR(buf2);
+			}
+
+			if (check_oprop(obj, OPROP_SFUWW))
+			{
+				Sprintf(buf2, "Deals double disintegration damage to spiritual beings.");
+				OBJPUTSTR(buf2);
+			}
+
 			ADDCLASSPROP(check_oprop(obj, OPROP_PSIOW), "psionic");
 			if (buf[0] != '\0')
 			{
@@ -3768,6 +3806,8 @@ winid *datawin;
 	if (otyp == RIN_INCREASE_ACCURACY)			OBJPUTSTR("Increases your to-hit modifier.");
 	if (otyp == AMULET_VERSUS_CURSES ||
 		otyp == PRAYER_WARDED_WRAPPING ||
+		check_oprop(obj, OPROP_BCRS) ||
+		check_oprop(obj, OPROP_CGLZ) ||
 		oartifact == ART_HELPING_HAND ||
 		oartifact == ART_STAFF_OF_NECROMANCY ||
 		oartifact == ART_TREASURY_OF_PROTEUS ||

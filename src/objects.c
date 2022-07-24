@@ -1166,6 +1166,7 @@ TOOL(("mirror", "looking glass"), 0,   MZ_TINY, 0, 0, 0,  45, 13,  10, GLASS, HI
 #else
 TOOL(("mirror", "looking glass"), 0,   MZ_TINY, 0, 0, 0,  60, 13,  10, GLASS, HI_SILVER),
 #endif
+TOOL(("purified mirror", "disk"), 0,   MZ_TINY, 0, 0, 0,  0, 13,1000, SILVER, HI_SILVER, O_MATSPEC(UNIDED)),
 TOOL(("crystal ball", "glass orb"),
 								0,  MZ_SMALL, 0, 1, 1,  15, 50, 200, GLASS, HI_GLASS),
 TOOL(("misotheistic pyramid", "black-stone pyramid"),  /*Needs encyc entry*/

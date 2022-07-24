@@ -981,6 +981,8 @@ boolean dofull;
 			Strcat(buf, "disintegration-proof ");
 		if(check_oprop(obj, OPROP_BCRS) && obj->known)
 			Strcat(buf, "prayer-warded ");
+		if(check_oprop(obj, OPROP_CGLZ))
+			Strcat(buf, "glazed ");
 		
 		if (check_oprop(obj, OPROP_LESSER_ANARW) && obj->known)
 			Strcat(buf, "unruly ");
@@ -1490,16 +1492,22 @@ boolean adjective;
 		else
 			return "bronze";
 	case SILVER:
+		if(check_oprop(obj,  OPROP_SFLMW))
+			return "shining silver";
 		return "silver";
 	case GOLD:
 		if(obj->otyp == APHANACTONAN_RECORD || obj->otyp == APHANACTONAN_ARCHIVE)
 			return (adjective ? "golden-red" : "red gold");
 		else return (adjective ? "golden" : "gold");
 	case PLATINUM:
+		if(check_oprop(obj,  OPROP_SFLMW))
+			return "shining platinum";
 		return "platinum";
 	case LEAD:
 		return "lead";
 	case MITHRIL:
+		if(check_oprop(obj,  OPROP_SFLMW))
+			return "shining mithril";
 		return "mithril";
 	case PLASTIC:
 		return "plastic";
@@ -4377,6 +4385,17 @@ int wishflags;
 			add_oprop_list(oprop_list, OPROP_BLAST);
 		} else if (!strncmpi(bp, "ornate ", l=7)) {
 			add_oprop_list(oprop_list, OPROP_BRIL);
+
+		} else if (!strncmpi(bp, "glazed ", l=7)) {
+			add_oprop_list(oprop_list, OPROP_SFLMW);
+		} else if (!strncmpi(bp, "silverflame ", l=12)) {
+			add_oprop_list(oprop_list, OPROP_SFLMW);
+		} else if (!strncmpi(bp, "mortalflame ", l=12)) {
+			add_oprop_list(oprop_list, OPROP_MORTW);
+		} else if (!strncmpi(bp, "trueflame ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_TDTHW);
+		} else if (!strncmpi(bp, "unworthyflame ", l=14)) {
+			add_oprop_list(oprop_list, OPROP_SFUWW);
 
 		} else if (!strncmpi(bp, "magicite ", l=9)) {
 			mat = GEMSTONE; gemtype = MAGICITE_CRYSTAL;

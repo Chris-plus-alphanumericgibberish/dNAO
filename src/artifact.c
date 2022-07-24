@@ -943,6 +943,12 @@ int oprop;
 		return FALSE;
 	}
 	
+	//May have changed mats/be ammo. Silver fire only works on some materials.
+	if((oprop == OPROP_SFLMW || oprop == OPROP_CGLZ || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW)
+		&& !sflm_able(obj)
+	)
+		return FALSE;
+
 	return !!(obj->oproperties[(oprop-1)/32] & (0x1L << ((oprop-1)%32)));
 }
 
@@ -3976,6 +3982,9 @@ int * truedmgptr;
 				*truedmgptr += d(1, otmp->spe);
 		}
 	}
+	if(is_undead(pd) && check_oprop(otmp, OPROP_TDTHW)){
+		*truedmgptr += basedmg + d(2,7);
+	}
 	if(check_oprop(otmp, OPROP_GOATW)){
 		switch(goat_weapon_damage_turn(otmp)){
 			case AD_EACD:
@@ -4084,6 +4093,9 @@ int * truedmgptr;
 			*truedmgptr += basedmg;
 		if(check_oprop(otmp, OPROP_LESSER_CONCW))
 			*truedmgptr += d(2, 6);
+	}
+	if(check_oprop(otmp, OPROP_SFLMW) && sflm_target(mdef)){
+		*truedmgptr += d(2,7);
 	}
 	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
 }
@@ -4907,6 +4919,8 @@ boolean printmessages; /* print generic elemental damage messages */
 	
 	if(goatweaponturn && !youdef && youagr && !is_rider(mdef->data))
 		mdef->mgoatmarked = TRUE;
+	if(check_oprop(otmp, OPROP_SFLMW) && !youdef && youagr && sflm_target(mdef))
+		mdef->mflamemarked = TRUE;
 	
 	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW) || goatweaponturn == AD_FIRE){
 		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR) && printmessages) {	/* only artifacts message */
@@ -5893,13 +5907,15 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		else {
 			dlife = *hpmax(mdef);
-			*hpmax(mdef) -= min_ints(rnd(8), *hpmax(mdef));
+			*hpmax(mdef) -= min_ints(rnd(hd_size(mdef->data)), *hpmax(mdef));
 			if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
 				*hp(mdef) = 1;
 				*hpmax(mdef) = 1;
 			}
 			if (mdef->m_lev > 0)
 				mdef->m_lev--;
+			else
+				*truedmgptr += *hpmax(mdef);
 			dlife -= *hpmax(mdef);
 		}
 
@@ -5911,6 +5927,51 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		*truedmgptr += dlife;
 		if (youagr || youdef)
+			flags.botl = 1;
+	}
+
+	/*reveal mortality*/
+	if (check_oprop(otmp, OPROP_MORTW) && !Drain_res(mdef) && (youdef ? Mortal_race : mortal_race(mdef))){
+		int dlife;
+		int i = rnd(2);
+		/* message */
+		if (youdef) {
+			if (Blind)
+				You_feel("your frailty revealed!");
+			else
+				pline("%s reveals your frailty!", The(wepdesc));
+			*messaged = TRUE;
+		}
+		else if (vis) {
+				pline("%s reveals %s frailty!",
+				The(wepdesc),
+				s_suffix(mon_nam(mdef)));
+			*messaged = TRUE;
+		}
+
+		if (youdef) {
+			dlife = *hpmax(mdef);
+			while(i--)
+				losexp("life drainage", FALSE, FALSE, FALSE);
+			dlife -= *hpmax(mdef);
+		}
+		else {
+			dlife = *hpmax(mdef);
+			*hpmax(mdef) -= min_ints(d(i, hd_size(mdef->data)), *hpmax(mdef));
+			if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
+				*hp(mdef) = 1;
+				*hpmax(mdef) = 1;
+			}
+			if(mdef->m_lev == 0)
+				*truedmgptr += *hpmax(mdef);
+			else if (mdef->m_lev >= i)
+				mdef->m_lev -= i;
+			else mdef->m_lev = 0;
+			dlife -= *hpmax(mdef);
+		}
+
+		*truedmgptr += dlife;
+		if (youdef)
 			flags.botl = 1;
 	}
 
@@ -6018,6 +6079,44 @@ boolean printmessages; /* print generic elemental damage messages */
 					mdef->movement = max(mdef->movement - 2, -12);
 			}
 		}
+	}
+
+	/* Reveal unworthy */
+	if (check_oprop(otmp, OPROP_SFUWW) && (is_minion(pd) || is_demon(pd))){
+		struct obj *obj;
+		int i = basedmg;
+		boolean printed = FALSE;
+		while((obj = some_armor(mdef)) && i > 0){
+			i-=3;
+			if(check_res_engine(mdef, AD_SHRD)){
+				i = 0;
+				break; //End while loop
+			}
+			if(oresist_disintegration(obj))
+				continue;//May possibly sellect a different item next time.
+
+			if(!((youdef && Preservation)
+				|| (!youdef && mon_resistance(mdef, PRESERVATION))
+			)){
+				if (vis && !printed) {
+					pline("%s disintegrates %s armor!",
+						The(xname(msgr)),
+						(youdef ? "your" : s_suffix(mon_nam(mdef)))
+						);
+					*messaged = TRUE;
+					printed = TRUE;
+				}
+				if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
+					damage_item(obj);
+				}
+				else if (!obj->oartifact){
+					destroy_marm(mdef, obj);
+				}
+			}
+		}
+		//Note: i may be as low as -2.
+		if(i > 0)
+			*truedmgptr += i;
 	}
 	if(otmp->oartifact == ART_IBITE_ARM){
 		struct obj *cloak = which_armor(mdef, W_ARMC);

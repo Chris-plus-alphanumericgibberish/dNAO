@@ -922,8 +922,11 @@ struct obj *obj;
 			pline("An incomprehensible sight meets your eyes!");
 			losehp(d(15,15), "looking into Cthylla's hand-mirror", KILLED_BY);
 			obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
-		} else if(!Blind && !Invisible) {
-		    if (u.umonnum == PM_FLOATING_EYE && ward_at(u.ux, u.uy) != HAMSA) {
+		} else if(!Blind) {
+			if (youracedata->mlet == S_VAMPIRE || Invisible) {
+				You("don't have a reflection.");
+				vis = FALSE;
+		    } else if (u.umonnum == PM_FLOATING_EYE && ward_at(u.ux, u.uy) != HAMSA) {
 				if (!Free_action) {
 					pline("%s", Hallucination ?
 						  "Yow!  The mirror stares back!" :
@@ -935,9 +938,6 @@ struct obj *obj;
 					You("stiffen momentarily under your gaze.");
 					vis = TRUE;
 				}
-			} else if (youracedata->mlet == S_VAMPIRE) {
-				You("don't have a reflection.");
-				vis = FALSE;
 			} else if (u.umonnum == PM_UMBER_HULK && ward_at(u.ux, u.uy) != HAMSA) {
 				pline("Huh?  That doesn't look like you!");
 				make_confused(HConfusion + d(3,4),FALSE);
@@ -968,6 +968,96 @@ struct obj *obj;
 			}
 			if (vis){
 				signs_mirror();
+			}
+			if(u.uinsight >= 20 && !obj->oartifact){
+				// if(wizard)
+					// pline("silver flame d: %d, l: %d, x:%d, y:%d", u.silver_flame_z.dnum, u.silver_flame_z.dlevel, u.s_f_x, u.s_f_y);
+				if(u.uz.dnum == u.silver_flame_z.dnum){
+					if(u.silver_flame_z.dlevel > u.uz.dlevel){
+						if(!u.silver_atten)
+							You("notice a silver light %sbelow you.", ((u.silver_flame_z.dlevel-u.uz.dlevel) > 10) ? "deep " : "");
+					}
+					else if(u.silver_flame_z.dlevel < u.uz.dlevel){
+						if(!u.silver_atten)
+							You("notice a silver light %sabove you.", ((u.silver_flame_z.dlevel-u.uz.dlevel) > 10) ? "high " : "");
+					}
+					else {
+						int dx = u.ux - u.s_f_x, 
+							dy = u.uy - u.s_f_y;
+						int absx = abs(dx),
+							absy = abs(dy);
+						if(!dx && !dy){
+							if(u.silver_atten)
+								You("have returned to the silver flame.");
+							else
+								pline("A volcanic pillar of silver flame spouts forth here, rising arrow-straight from the profound and inconceivable depths to the empty and unknown heavens!");
+							if(yn("Offer an implement to the fire?") == 'y'){
+								const char sflm_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
+								struct obj *sflm_obj = getobj(sflm_classes, "offer to the flame");
+								if(sflm_obj){
+									if(sflm_offerable(sflm_obj)){
+										pline("The silver light reflects from your mirror and takes up residence within %s.", doname(sflm_obj));
+										add_oprop(sflm_obj, OPROP_SFLMW);
+										u.silver_atten = TRUE;
+										poly_obj(obj, PURIFIED_MIRROR);
+									}
+									else pline("Nothing happens.");
+								}
+							}
+						}
+						else if(absx <= 4 && absy <= 4){
+							if(absx && absy){
+								You("see a column of silver fire %d step%s %s and %d step%s %s.", absx, absx > 1 ? "s" : "", dx > 0 ? "west" : "east",
+																								   absy, absy > 1 ? "s" : "", dy > 0 ? "north" : "south");
+							}
+							else {
+								//Note: One of the distances is 0, figure out which one isn't
+								int absd = absx ? absx : absy;
+								You("see a column of silver fire %d step%s %s.", absd, absd > 1 ? "s" : "", dx > 0 ? "west" : dx < 0 ? "east" : dy > 0 ? "north" : "south");
+							}
+						}
+						else {
+							char *distword = (absx > 10 || absy > 10) ? "far " : "";
+							char *dirword;
+							//Note: at least one of absx and absy is > 0 (> 4 in fact)
+							if(dy > 0){
+								//North, or maybe east or west
+								if(absy > 2*absx)
+									dirword = "north";
+								else if(absx > 2*absy){
+									if(dx > 0)
+										dirword = "west";
+									else
+										dirword = "east";
+								}
+								else {
+									if(dx > 0)
+										dirword = "north-west";
+									else
+										dirword = "north-east";
+								}
+							}
+							else {
+								//South, or maybe east or west
+								if(absy > 2*absx)
+									dirword = "south";
+								else if(absx > 2*absy){
+									if(dx > 0)
+										dirword = "west";
+									else
+										dirword = "east";
+								}
+								else {
+									if(dx > 0)
+										dirword = "south-west";
+									else
+										dirword = "south-east";
+								}
+							}
+							You("notice a silver light %sto the %s.", distword, dirword);
+						}
+					}
+				}
 			}
 		} else {
 			You_cant("see your %s %s.",
@@ -7884,21 +7974,25 @@ doapply()
 		case DOLL_OF_MIND_BLASTING:
 			res = use_doll(obj);
 		break;
-		case DOLL_S_TEAR:
-			res = use_doll_tear(obj);
-		break;
-		case DILITHIUM_CRYSTAL:
-			if(Role_if(PM_ANACHRONONAUT) && !obj->oartifact)
-				res = use_dilithium(obj);
-			else {
-				pline("Sorry, I don't know how to use that.");
-				nomul(0, NULL);
-				return MOVE_CANCELLED;
-			}
-		break;
-		case HOLY_SYMBOL_OF_THE_BLACK_MOTHE:
-			return commune_with_goat();
-		break;
+	case DOLL_S_TEAR:
+		res = use_doll_tear(obj);
+	break;
+	case DILITHIUM_CRYSTAL:
+		if(Role_if(PM_ANACHRONONAUT) && !obj->oartifact)
+			res = use_dilithium(obj);
+		else {
+			pline("Sorry, I don't know how to use that.");
+			nomul(0, NULL);
+			return MOVE_CANCELLED;
+		}
+	break;
+	case HOLY_SYMBOL_OF_THE_BLACK_MOTHE:
+		return commune_with_goat();
+	break;
+	case PURIFIED_MIRROR:
+		if(u.silver_atten) return commune_with_silver_flame();
+		else res = use_mirror(obj);
+	break;
 	case MISOTHEISTIC_PYRAMID:
 	case MISOTHEISTIC_FRAGMENT:
 		res = use_pyramid(obj);

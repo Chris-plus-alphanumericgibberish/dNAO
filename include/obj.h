@@ -83,6 +83,10 @@ enum {
 	OPROP_GSSDW,
 	OPROP_BLAST,
 	OPROP_BRIL,
+	OPROP_CGLZ,
+	OPROP_MORTW,
+	OPROP_TDTHW,
+	OPROP_SFUWW,
 	MAX_OPROP
 };
 
@@ -546,30 +550,46 @@ struct obj {
 			 || (otmp)->otyp == ANTIMAGIC_RIFT\
 			 || (otmp)->otyp == CATAPSI_VORTEX\
 			)
-#define is_pole(otmp)	((otmp->oclass == WEAPON_CLASS || \
-			otmp->oclass == TOOL_CLASS) && \
-			 (objects[otmp->otyp].oc_skill == P_POLEARMS || \
-			  objects[otmp->otyp].oc_skill == P_LANCE || \
-			  otmp->otyp==AKLYS || \
-			  otmp->otyp==DISKOS || \
+#define sflm_able(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
+				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
+#define sflm_offerable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
+				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
+				&& !check_oprop(otmp, OPROP_SFLMW))
+#define sflm_mirrorable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_suit(otmp) || is_shield(otmp))\
+				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
+				&& !check_oprop(otmp, OPROP_REFL))
+#define sflm_glazeable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || (otmp)->oclass == ARMOR_CLASS)\
+				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
+#define sflm_smeltable_silver(otmp)	(is_metallic(otmp) && (otmp)->obj_material != SILVER)
+#define sflm_smeltable_platinum(otmp)	(is_metallic(otmp) && (otmp)->obj_material != PLATINUM)
+#define sflm_smeltable_mithril(otmp)	(is_metallic(otmp) && (otmp)->obj_material != MITHRIL)
+#define sflm_mortalable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_MORTW))
+#define sflm_truedeathable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_TDTHW))
+#define sflm_unworthyable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_SFUWW))
+#define is_pole(otmp)	(((otmp)->oclass == WEAPON_CLASS || \
+			(otmp)->oclass == TOOL_CLASS) && \
+			 (objects[(otmp)->otyp].oc_skill == P_POLEARMS || \
+			  objects[(otmp)->otyp].oc_skill == P_LANCE || \
+			  (otmp)->otyp==AKLYS || \
+			  (otmp)->otyp==DISKOS || \
 			  (check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15) || \
-			  otmp->oartifact==ART_SOL_VALTIVA || \
-			  otmp->oartifact==ART_SHADOWLOCK || \
-			  otmp->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
-			  (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE ) \
+			  (otmp)->oartifact==ART_SOL_VALTIVA || \
+			  (otmp)->oartifact==ART_SHADOWLOCK || \
+			  (otmp)->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
+			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovar1&SEAL_MARIONETTE ) \
 			 ))
-#define is_bad_melee_pole(otmp) (!(otmp->otyp == POLEAXE ||\
-									otmp->otyp == DISKOS ||\
+#define is_bad_melee_pole(otmp) (!((otmp)->otyp == POLEAXE ||\
+									(otmp)->otyp == DISKOS ||\
 									is_vibropike(otmp) ||\
-									otmp->oartifact == ART_WEBWEAVER_S_CROOK ||\
-									otmp->oartifact == ART_SILENCE_GLAIVE ||\
-									otmp->oartifact == ART_HEARTCLEAVER ||\
-									otmp->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD ||\
-									otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING ||\
-									otmp->oartifact == ART_SOL_VALTIVA ||\
-									otmp->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||\
-									otmp->oartifact == ART_SHADOWLOCK ||\
-									otmp->oartifact == ART_PEN_OF_THE_VOID\
+									(otmp)->oartifact == ART_WEBWEAVER_S_CROOK ||\
+									(otmp)->oartifact == ART_SILENCE_GLAIVE ||\
+									(otmp)->oartifact == ART_HEARTCLEAVER ||\
+									(otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD ||\
+									(otmp)->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING ||\
+									(otmp)->oartifact == ART_SOL_VALTIVA ||\
+									(otmp)->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||\
+									(otmp)->oartifact == ART_SHADOWLOCK ||\
+									(otmp)->oartifact == ART_PEN_OF_THE_VOID\
 								) && is_pole(otmp))
 #define is_spear(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill == P_SPEAR)
@@ -1058,6 +1078,7 @@ struct obj {
 #define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == PLAIN_DRESS || onum == VICTORIAN_UNDERWEAR)
 
 #define arm_blocks_upper_body(onum)		(objects[onum].oc_dtyp&UPPER_TORSO_DR)
+#define arm_blocks_lower_body(onum)		(objects[onum].oc_dtyp&LOWER_TORSO_DR)
 
 #define is_cha_otyp(onum)	(onum == NOBLE_S_DRESS\
 							|| onum == GENTLEWOMAN_S_DRESS\

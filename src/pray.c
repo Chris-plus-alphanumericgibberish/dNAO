@@ -19,6 +19,7 @@ STATIC_DCL void FDECL(god_zaps_you, (int));
 STATIC_DCL void FDECL(fry_by_god, (int));
 STATIC_DCL void FDECL(consume_offering,(struct obj *));
 STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean));
+STATIC_DCL void FDECL(burn_offering,(struct obj *, boolean));
 STATIC_DCL boolean FDECL(water_prayer,(BOOLEAN_P));
 STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
 static void NDECL(lawful_god_gives_angel);
@@ -1364,6 +1365,29 @@ boolean silently;
 	}
     else useupf(otmp, 1L);
     exercise(A_WIS, TRUE);
+}
+
+STATIC_OVL void
+burn_offering(otmp, silently)
+register struct obj *otmp;
+boolean silently;
+{
+	xchar x, y;
+	get_obj_location(otmp, &x, &y, BURIED_TOO);
+	if(!silently){
+		Your("sacrifice is consumed in a flash of silver flame!");
+	}
+	if(u.sealsActive&SEAL_BALAM){
+		struct permonst *ptr = &mons[otmp->corpsenm];
+		if(!(is_animal(ptr) || nohands(ptr))) unbind(SEAL_BALAM,TRUE);
+	}
+	if(u.sealsActive&SEAL_YMIR){
+		struct permonst *ptr = &mons[otmp->corpsenm];
+		if(is_giant(ptr)) unbind(SEAL_YMIR,TRUE);
+	}
+    if (carried(otmp)) useup(otmp);
+    else useupf(otmp, 1L);
+    exercise(A_CHA, TRUE);
 }
 
 STATIC_OVL void
@@ -3069,6 +3093,24 @@ int eatflag;
 	return FALSE;
 }
 
+STATIC_OVL int
+fire_rider(otmp)
+struct obj *otmp;
+{
+	int cn = otmp->corpsenm;
+	struct monst *revived = 0;
+	if(is_rider(&mons[otmp->corpsenm])){
+		pline("A pulse of darkness radiates from %s!", the(xname(otmp)));
+		revived = revive(otmp, FALSE);
+		//Grows angry at you, but doesn't actually smite you.
+		godlist[GOD_THE_SILVER_FLAME].anger++;
+		gods_angry(GOD_THE_SILVER_FLAME);
+	}
+	if(revived)
+		return TRUE;
+	return FALSE;
+}
+
 /* must be non-zero */
 #define GOATBOON_GOAT_MILK	1
 #define GOATBOON_RENEWAL	2
@@ -3327,6 +3369,277 @@ commune_with_goat()
 	return MOVE_STANDARD;
 }
 
+/* must be non-zero */
+#define FLAMEBOON_SMELT_IMPURITY	1
+#define FLAMEBOON_SMELT_IMPERFECTION	2
+#define FLAMEBOON_SMELT_IMMOBILITY	3
+#define FLAMEBOON_SPREAD_FIRE	4
+#define FLAMEBOON_REFLECTION	5
+#define FLAMEBOON_CURSE_GLAZE	6
+// #define FLAMEBOON_SHAPE_CHANGERS	7
+#define FLAMEBOON_BURN_MORTALITY	8
+#define FLAMEBOON_BURN_UNDEATH	9
+#define FLAMEBOON_BURN_SPIRIT	10
+#define FLAMEBOON_BURN_BEATITUDE	11
+int
+dosflm_menu(greater_boon)
+boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "What will you do?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	Sprintf(buf, "Smelt away impurity");
+	any.a_int = FLAMEBOON_SMELT_IMPURITY;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "Smelt away imperfection");
+	any.a_int = FLAMEBOON_SMELT_IMPERFECTION;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "Smelt away immobility");
+	any.a_int = FLAMEBOON_SMELT_IMMOBILITY;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "Spread the reflected silver flame");
+	any.a_int = FLAMEBOON_SPREAD_FIRE;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	Sprintf(buf, "Burn aura");
+	any.a_int = FLAMEBOON_BURN_BEATITUDE;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	/* the following boons are permanent boosters, and so require devotion */
+	if (greater_boon) {
+		Sprintf(buf, "Mirror-finish a surface");
+		any.a_int = FLAMEBOON_REFLECTION;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Burn on a curse-proof glaze");
+		any.a_int = FLAMEBOON_CURSE_GLAZE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Focus the light to reveal mortality");
+		any.a_int = FLAMEBOON_BURN_MORTALITY;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Focus the light to reveal true death");
+		any.a_int = FLAMEBOON_BURN_UNDEATH;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Focus the light to reveal the unworthy");
+		any.a_int = FLAMEBOON_BURN_SPIRIT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	
+	end_menu(tmpwin, "You stare into the silver flame...");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	return (n > 0) ? (int)selected[0].item.a_int : 0;
+}
+
+int
+commune_with_silver_flame()
+{
+	/* you must be an active cultist (redirects to mirror if you haven't, so this shouldn't actually happen) */
+	if (!u.silver_atten) {
+		pline1(nothing_happens);
+		return MOVE_STANDARD;
+	}
+	/* not in the Future */
+	if (Infuture) {
+		You("see a distant silver light.");
+		return MOVE_STANDARD;
+	}
+	/* in good standing */
+	if (godlist[GOD_THE_SILVER_FLAME].anger) {
+		//Import bad prayer effects (where she drools on you if you're prayer timeout is bad)
+		You("are burned by the silver light!");
+		losehp(rnd(20), "angry silver light", KILLED_BY);
+		return MOVE_STANDARD;
+	}
+	/* must have accumulated enough cult credit */
+	if (u.silver_credit < 50) {
+		/* not enough credit, give a message based on how much you have */
+		pline("The silver flame is distant and uninterested.");
+		return MOVE_STANDARD;
+	}
+
+	/* if you are devout enough (total accumulated credit), allow selecting permanent boons and boost the power of regular ones */
+	/* devotion required increases as per standard gift giving formula */
+	if(wizard)
+		pline("boon threshold: %d", 25*(10 + (u.uartisval * u.uartisval * 2 / 25)));
+	boolean greater_boon = u.silver_devotion > 25*(10 + (u.uartisval * u.uartisval * 2 / 25));
+	struct obj * otmp = (struct obj *)0;
+	int menu_result = dosflm_menu(greater_boon);
+	int i;
+	int cost = 0;	/* credit and sanity/2 cost for the chosen boon */
+	const char sflm_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
+	const char all_classes[] = { ALL_CLASSES, 0 };
+
+	switch (menu_result) {
+		case FLAMEBOON_SMELT_IMPURITY:
+			otmp = getobj(all_classes, "smelt silver in the silver light");
+			if(otmp && sflm_smeltable_silver(otmp)){
+				cost = 50;
+				You("smelt %s to silver with the reflected light of the silver flame.", doname(otmp));
+				set_material(otmp, SILVER);
+			}
+			else pline("Nothing happens.");
+			break;
+
+		case FLAMEBOON_SMELT_IMPERFECTION:
+			otmp = getobj(all_classes, "smelt platinum in the silver light");
+			if(otmp && sflm_smeltable_platinum(otmp)){
+				cost = 50;
+				You("smelt %s to platinum with the reflected light of the silver flame.", doname(otmp));
+				set_material(otmp, PLATINUM);
+			}
+			else pline("Nothing happens.");
+			break;
+
+		case FLAMEBOON_SMELT_IMMOBILITY:
+			otmp = getobj(all_classes, "smelt mithril in the silver light");
+			if(otmp && sflm_smeltable_mithril(otmp)){
+				cost = 50;
+				You("smelt %s to mithril with the reflected light of the silver flame.", doname(otmp));
+				set_material(otmp, MITHRIL);
+			}
+			else pline("Nothing happens.");
+			break;
+
+		case FLAMEBOON_SPREAD_FIRE:
+			otmp = getobj(sflm_classes, "offer to the flame");
+			if(otmp){
+				if(sflm_offerable(otmp)){
+					cost = 25;
+					pline("The silver light reflects from your mirror and takes up residence within %s.", doname(otmp));
+					add_oprop(otmp, OPROP_SFLMW);
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_BURN_BEATITUDE:
+			otmp = getobj(all_classes, "burn in the silver flame");
+			if(otmp){
+				if(otmp->blessed || otmp->cursed){
+					cost = 10;
+					You("burn %s with the reflected light of the silver flame.", doname(otmp));
+					unbless(otmp);
+					uncurse(otmp);
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_REFLECTION:
+			otmp = getobj(sflm_classes, "mirror-finish");
+			if(otmp){
+				if(sflm_mirrorable(otmp)){
+					cost = 50;
+					You("melt %s to a mirror finish.", doname(otmp));
+					add_oprop(otmp, OPROP_REFL);
+					u.uartisval += TIER_B; /*Theory: You now want reflection in the asc kit to deal with holy missiles, so the ability to add it to anything is pretty great. */
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_CURSE_GLAZE:
+			otmp = getobj(sflm_classes, "curse-proof glaze");
+			if(otmp){
+				if(sflm_glazeable(otmp)){
+					cost = 25;
+					You("add a curse-proof glaze to %s.", doname(otmp));
+					add_oprop(otmp, OPROP_CGLZ);
+					/*Theory: You need 4-5 of these, which adds to TIER_A. */
+					if(arm_blocks_upper_body(otmp->otyp))
+						u.uartisval += TIER_D;
+					else u.uartisval += TIER_F;
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		// case FLAMEBOON_SHAPE_CHANGERS:
+			// cost = 25;
+			// break;
+
+		case FLAMEBOON_BURN_MORTALITY:
+			otmp = getobj(sflm_classes, "reveal mortality");
+			if(otmp){
+				if(sflm_mortalable(otmp)){
+					cost = 50;
+					pline("The silver light is focused by your mirror!");
+					add_oprop(otmp, OPROP_MORTW);
+					u.uartisval += TIER_B; /*Theory: Life drain is actually not all that powerful, but the Wizard and his summons are still affected. */
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_BURN_UNDEATH:
+			otmp = getobj(sflm_classes, "reveal true death");
+			if(otmp){
+				if(sflm_truedeathable(otmp)){
+					cost = 50;
+					pline("The silver light is focused by your mirror!");
+					add_oprop(otmp, OPROP_TDTHW);
+					u.uartisval += TIER_A; /*Theory: Nasty stuff like liches and pharaohs is affected, plus it deals a lot of damage to them. */
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_BURN_SPIRIT:
+			otmp = getobj(sflm_classes, "reveal the unworthy");
+			if(otmp){
+				if(sflm_unworthyable(otmp)){
+					cost = 50;
+					pline("The silver light is focused by your mirror!");
+					add_oprop(otmp, OPROP_SFUWW);
+					u.uartisval += TIER_S; /*Theory: This specifically affects the nastiest late game enemies. */
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+	}
+	
+	if(!cost)
+		pline("The silver light recedes.");
+
+	u.silver_credit -= cost;
+	change_usanity(-cost/2, TRUE);
+	
+	return MOVE_STANDARD;
+}
+
 boolean
 goat_mouth_at(x, y)
 int x, y;
@@ -3537,6 +3850,95 @@ int eatflag;
 	u.shubbie_devotion += value;
 	return;
 }
+void
+flame_consume(mtmp, otmp)
+struct monst *mtmp;
+struct obj *otmp;
+{
+    int value = 0;
+	struct permonst *ptr = mtmp ? mtmp->data : otmp ? &mons[otmp->corpsenm] : 0;
+	extern const int monstr[];
+	
+	if(!ptr){
+		impossible("flame eat with no subject");
+		return;
+	}
+	
+	if(otmp && fire_rider(otmp)){
+		//otmp is now gone, and rider may have printed messages
+		return;
+	}
+
+	if(otmp && otmp->otyp == AMULET_OF_YENDOR){
+		pline("The Amulet proves fireproof.");
+		return;
+	}
+
+	value = monstr[ptr->mtyp] + 1;
+	if (otmp && otmp->oeaten)
+		value = eaten_stat(value, otmp);
+
+	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
+	//No demon summoning.  Your god just smites you, and sac continues.
+		if (u.ualign.type != A_LAWFUL && u.ualign.type != A_NONE) {
+			adjalign(-5);
+			godlist[u.ualign.god].anger += 3;
+			(void) adjattrib(A_WIS, -1, TRUE);
+			if (!Inhell) angrygods(u.ualign.god);
+			change_luck(-5);
+		} else adjalign(5);
+	//Pets are burned like anything else.
+	} else if (is_undead(ptr)) { /* Not demons--no demon corpses */
+		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE)
+			value += 1;
+	//Unicorns are burned like anything else.
+	}
+    /* corpse */
+	//Value can't be 0
+	//Value can't be -1
+	/* Sacrificing at an altar of a different alignment */
+	/* Never a conversion */
+	/* never an altar conversion*/
+	
+	/* Rider handled */
+	if(otmp)
+		burn_offering(otmp, !(u.ualign.type != A_LAWFUL && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)));
+	if(u.ualign.type != A_LAWFUL && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
+		adjalign(-value);
+		godlist[u.ualign.god].anger += 1;
+		(void) adjattrib(A_CHA, -1, TRUE);
+		if (!Inhell) angrygods(u.ualign.god);
+		change_luck(-1);
+	}
+
+	/* anger must be paid off before credit can be built, return early */
+	if(godlist[GOD_THE_SILVER_FLAME].anger) {
+		if (rn2(MAXVALUE) < value) {
+			godlist[GOD_THE_SILVER_FLAME].anger--;
+			if (godlist[GOD_THE_SILVER_FLAME].anger == 0)
+				You_feel("like the silver flame is appeased.");
+		}
+		return;
+	}
+
+	/* at this point, gain credit */
+
+	int dim_return_factor = 50;
+	if (wizard) {
+		/* debug */
+		pline("FlameCredit = %ld [+%ld base %d], FlameDevotion = %ld",
+			u.silver_credit + max(1, value * dim_return_factor / (dim_return_factor + u.silver_credit)),
+			max(1, value * dim_return_factor / (dim_return_factor + u.silver_credit)),
+			value,
+			u.silver_devotion + max(1, value * dim_return_factor / (dim_return_factor + u.silver_credit))
+			);
+	}
+	value = max(1, value * dim_return_factor / (dim_return_factor + u.silver_credit));
+	u.silver_credit += value;
+	u.silver_devotion += value;
+	return;
+}
+
 /* declare the global godlist pointer */
 struct god * godlist;
 

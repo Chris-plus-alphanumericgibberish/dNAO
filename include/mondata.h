@@ -710,6 +710,9 @@
 				  HAS_EMIN(mon) ? EMIN(mon)->min_align == A_LAWFUL :\
 				  hates_chaos((mon)->data)))
 
+#define sflm_target(mon) (!is_rider((mon)->data) && (is_angel((mon)->data) || ((mon) == &youmonst ? Displaced : mon_resistance(mon, DISPLACED)) || is_shapechanger((mon)->data) || is_chaotic_mon(mon)))
+#define sflm_target_data(ptr) (!is_rider(ptr) && (is_angel(ptr) || ((ptr)->mflagsg&MG_DISPLACEMENT) || is_shapechanger(ptr) || is_chaotic(ptr)))
+
 #define melee_polearms(ptr)	((ptr)->mtyp == PM_VROCK ||\
 							 (ptr)->mtyp == PM_MEPHISTOPHELES ||\
 							 (ptr)->mtyp == PM_BAPHOMET \
@@ -745,6 +748,13 @@
 				 ((ptr)->mtyp == PM_LONG_WORM_TAIL) || \
 				 ((ptr)->mtyp == PM_HUNTING_HORROR) || \
 				 ((ptr)->mtyp == PM_HUNTING_HORROR_TAIL))
+#define is_shapechanger(ptr)	((ptr)->mtyp == PM_CHAMELEON\
+							  || (ptr)->mtyp == PM_DOPPELGANGER\
+							  || (ptr)->mtyp == PM_SANDESTIN\
+							  || (ptr)->mtyp == PM_DREAM_QUASIELEMENTAL\
+							  || is_were(ptr)\
+							  || (ptr)->mlet == S_MIMIC\
+								 )
 #define wants_bell(ptr)	((ptr->mflagst & MT_WANTSBELL))
 #define wants_book(ptr)	((ptr->mflagst & MT_WANTSBOOK))
 #define wants_cand(ptr)	((ptr->mflagst & MT_WANTSCAND))

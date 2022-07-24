@@ -14133,8 +14133,12 @@ register struct permonst *ptr;
 
 	if(Role_if(PM_VALKYRIE) && (mndx==PM_CROW || mndx==PM_RAVEN)) return TRUE;
 	
+	if(u.silver_atten && sflm_target_data(ptr))
+		return FALSE;
+
 	if (race_peaceful(ptr)) return TRUE;
 	if (race_hostile(ptr)) return FALSE;
+	
 
 	/* the monster is hostile if its alignment is different from the
 	 * player's 

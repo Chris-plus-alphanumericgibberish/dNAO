@@ -7427,7 +7427,7 @@ boolean ranged;
 						damage_item(otmp);
 					}
 					else if (!otmp->oartifact){
-						youdef ? destroy_arm(otmp) : destroy_marm(mdef, otmp);
+						destroy_marm(mdef, otmp);
 					}
 				}
 			}
@@ -10123,6 +10123,41 @@ boolean verbose;
 				return TRUE;
 			}
 		}
+		int curse_glazed = 0;
+		//Head
+		otmp = uarmh;
+		if(otmp && check_oprop(otmp, OPROP_CGLZ))
+			curse_glazed++;
+		//upper body
+		if((otmp = uarm) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = uarmc) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = uarmu) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
+			curse_glazed++;
+
+		//lower body
+		if((otmp = uarm) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = uarmc) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = uarmu) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
+			curse_glazed++;
+
+		//gloves
+		if((otmp = uarmg) && check_oprop(otmp, OPROP_CGLZ))
+			curse_glazed++;
+
+		//feet
+		if((otmp = uarmf) && check_oprop(otmp, OPROP_CGLZ))
+			curse_glazed++;
+
+		if(rnd(5) <= curse_glazed){
+			if(verbose)
+				You_feel("a malignant aura burn in the silver light.");
+			return TRUE;
+		}
+
 		if(u.ukinghill){
 			otmp = 0;
 			for(otmp = invent; otmp; otmp=otmp->nobj)
@@ -10179,6 +10214,35 @@ boolean verbose;
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "languid tentacles");
 			return TRUE;
 		}
+		int curse_glazed = 0;
+		//Head - what if has no head etc?
+		otmp = which_armor(mon, W_ARMH);
+		if(otmp && check_oprop(otmp, OPROP_CGLZ))
+			curse_glazed++;
+		//upper body
+		if((otmp = which_armor(mon, W_ARM)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = which_armor(mon, W_ARMC)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = which_armor(mon, W_ARMU)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
+			curse_glazed++;
+
+		//lower body
+		if((otmp = which_armor(mon, W_ARM)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = which_armor(mon, W_ARMC)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
+			curse_glazed++;
+		else if((otmp = which_armor(mon, W_ARMU)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
+			curse_glazed++;
+
+		//gloves
+		if((otmp = which_armor(mon, W_ARMG)) && check_oprop(otmp, OPROP_CGLZ))
+			curse_glazed++;
+
+		//feet
+		if((otmp = which_armor(mon, W_ARMF)) && check_oprop(otmp, OPROP_CGLZ))
+			curse_glazed++;
+
 		for(otmp = mon->minvent; otmp; otmp=otmp->nobj)
 			if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)
 				break;
@@ -12928,7 +12992,7 @@ int vis;						/* True if action is at all visible to the player */
 			(is_orc(pd) || is_demon(pd)))
 			silverobj |= slot;
 		if (hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) {
-			if (obj_silver_searing(otmp))
+			if (obj_silver_searing(otmp) || check_oprop(otmp, OPROP_SFLMW))
 				silverobj |= slot;
 			if (obj_jade_searing(otmp))
 				jadeobj |= slot;
@@ -13039,7 +13103,7 @@ int vis;						/* True if action is at all visible to the player */
 				/* find what applies */
 				if (otmp) {
 					if (hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) {
-						if (obj_silver_searing(otmp))
+						if (obj_silver_searing(otmp) || check_oprop(otmp, OPROP_SFLMW))
 							silverobj |= rslot;
 						if (obj_jade_searing(otmp))
 							jadeobj |= rslot;

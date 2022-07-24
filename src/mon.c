@@ -1660,6 +1660,7 @@ struct monst *mtmp;
 	
 	//No point in checking it before setting it.
 	mtmp->mgoatmarked = FALSE;
+	mtmp->mflamemarked = FALSE;
 	
 	/* gradually time out temporary problems */
 	if (mtmp->mblinded && !--mtmp->mblinded)
@@ -5397,23 +5398,30 @@ xkilled(mtmp, dest)
 	}
 	
 	if (dest & 1) {
-	    const char *verb = banish_kill(mtmp->mtyp) ? "banish" : nonliving(mtmp->data) ? "destroy" : "kill";
+		static boolean sflm_message = FALSE;
+	    const char *verb = banish_kill(mtmp->mtyp) ? "banish" : (mtmp->mflamemarked && !Infuture) ? "burn" : nonliving(mtmp->data) ? "destroy" : "kill";
 
 	    if (!wasinside && !canspotmon(mtmp))
-		You("%s it!", verb);
+			You("%s it!", verb);
 	    else if(Infuture && is_myrkalfr(mtmp->data) && !get_template(mtmp) && canseemon(mtmp)){
 			pline("Strands of black webbing flow from %s mortal wounds, engulfing %s body and choking off %s screams!", s_suffix(mon_nam(mtmp)), mhis(mtmp), mhis(mtmp));
 			pline("Now totally engulfed, %s is yanked upright and vanishes from the world.", mhe(mtmp));
 		}
+	    else if(!banish_kill(mtmp->mtyp) && mtmp->mflamemarked && !Infuture && !sflm_message){
+			pline("%s burns from within, consumed by silver fire!", Monnam(mtmp));
+			sflm_message = TRUE;
+		}
 	    else {
-		You("%s %s!", verb,
-		    !mtmp->mtame ? mon_nam(mtmp) :
-			x_monnam(mtmp,
-				 M_HAS_NAME(mtmp) ? ARTICLE_NONE : ARTICLE_THE,
-				 "poor",
-				 M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0,
-				 FALSE));
+			You("%s %s!", verb,
+				!mtmp->mtame ? mon_nam(mtmp) :
+				x_monnam(mtmp,
+					 M_HAS_NAME(mtmp) ? ARTICLE_NONE : ARTICLE_THE,
+					 "poor",
+					 M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0,
+					 FALSE));
 	    }
+		if(!mtmp->mflamemarked)
+			sflm_message = FALSE;
 	}
 
 	if(Is_illregrd(&u.uz)){
@@ -5534,18 +5542,24 @@ xkilled(mtmp, dest)
 		 * different from whether or not the corpse is "special";
 		 * if we want both, we have to specify it explicitly.
 		 */
+		struct obj *corpse = 0;
 		if (corpse_chance(mtmp, (struct monst *)0, FALSE)){
-			struct obj *corpse;
 			corpse = make_corpse(mtmp);
-			if(corpse && corpse->otyp == CORPSE && !corpse->oartifact){
-				//We are in the "player has killed monster" function, so it's their fault
-				if(goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
-					goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
-				} else if(mtmp->mgoatmarked){
-					goat_eat(corpse, GOAT_EAT_MARKED); //Goat eat tries *really* hard to destroy whatever you give it.
-				} else goat_seenonce = FALSE;
-				corpse = (struct obj *)0; //corpse pointer is now stale
-			}
+		}
+		if(mtmp->mflamemarked){
+			if(mtmp->data->geno&G_NOCORPSE)
+				flame_consume(mtmp, (struct obj *) 0);
+			else if(corpse)
+				flame_consume((struct monst *) 0, corpse);
+		}
+		if(corpse && corpse->otyp == CORPSE && !corpse->oartifact){
+			//We are in the "player has killed monster" function, so it's their fault
+			if(goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+				goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
+			} else if(mtmp->mgoatmarked){
+				goat_eat(corpse, GOAT_EAT_MARKED); //Goat eat tries *really* hard to destroy whatever you give it.
+			} else goat_seenonce = FALSE;
+			corpse = (struct obj *)0; //corpse pointer is now stale
 		}
 	}
 	if(redisp) newsym(x,y);

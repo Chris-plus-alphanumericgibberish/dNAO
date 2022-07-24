@@ -1399,12 +1399,27 @@ struct obj * otmp;
 		ndice = 1;
 		diesize = 20;
 		/* special cases */
-		if (otmp->oartifact == ART_PEN_OF_THE_VOID && mvitals[PM_ACERERAK].died > 0)
+		if(otmp->otyp == KHAKKHARA)
+			ndice = khakharadice;
+		else if (otmp->oartifact == ART_PEN_OF_THE_VOID && mvitals[PM_ACERERAK].died > 0)
 			ndice = 2;
 		else if (otmp->oartifact == ART_SILVER_STARLIGHT)
 			ndice = 2;
-		else if(otmp->otyp == KHAKKHARA)
+		
+		/* calculate */
+		dmg += vd(ndice, diesize);
+	}
+	if(hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)
+		&& check_oprop(otmp, OPROP_SFLMW)
+	){
+		/* default: 1d20 */
+		ndice = 1;
+		diesize = 20;
+		/* special cases */
+		if(otmp->otyp == KHAKKHARA)
 			ndice = khakharadice;
+		else if (otmp->oartifact == ART_PEN_OF_THE_VOID && mvitals[PM_ACERERAK].died > 0)
+			ndice = 2;
 		/* calculate */
 		dmg += vd(ndice, diesize);
 	}
@@ -1721,9 +1736,9 @@ struct obj * weapon;
 			(youagr && u.sealsActive&SEAL_EDEN) ||
 			(attk && attk->adtyp == AD_GLSS) ||
 			(magr && is_silver_mon(magr)) ||
-			obj_silver_searing(otmp) ||
-			(youagr && slot == W_ARMG && uright && obj_silver_searing(uright)) ||
-			(youagr && slot == W_ARMG && uleft && obj_silver_searing(uleft))
+			obj_silver_searing(otmp) || obj_jade_searing(otmp) || check_oprop(otmp, OPROP_SFLMW) ||
+			(youagr && slot == W_ARMG && uright && (obj_silver_searing(uright) || obj_jade_searing(uright) || check_oprop(uright, OPROP_SFLMW))) ||
+			(youagr && slot == W_ARMG && uleft && (obj_silver_searing(uleft) || obj_jade_searing(uleft) || check_oprop(uleft, OPROP_SFLMW)))
 			))
 			return 1;
 
@@ -1772,6 +1787,9 @@ struct obj * weapon;
 		if (weapon->oartifact == ART_IBITE_ARM)	/* Ghost touch, not actually phasing */
 			return 2;
 
+		if (check_oprop(weapon, OPROP_SFLMW))
+			return 2;
+
 		if (hatesobjdmg(mdef, weapon))
 			return 1;
 
@@ -1808,6 +1826,7 @@ int vis;
 	/* monster displacement */
 	if (!youdef &&
 		mon_resistance(mdef, DISPLACED) &&
+		!(weapon && check_oprop(weapon, OPROP_SFLMW)) &&
 		!(youagr && u.ustuck && u.ustuck == mdef) &&
 		!(youagr && u.uswallow) &&
 		!(has_passthrough_displacement(mdef->data) && hits_insubstantial(magr, mdef, attk, weapon)) &&
