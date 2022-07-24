@@ -1944,7 +1944,10 @@ int tary;
 	}
 
 	/* failure chance determined, check if attack fumbles */
-	if (force_fail || rn2(mlev(magr) * 2) < chance) {
+	if (force_fail 
+		|| rn2(mlev(magr) * 2) < chance
+		|| (magr->mtoobig && magr->m_lev < rnd(100))
+	) {
 		if (youagr) {
 			pline_The("air crackles around you.");
 			u.uen += mlev(magr) / 2;
