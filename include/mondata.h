@@ -638,6 +638,32 @@
 #define yields_insight(ptr)	(((ptr)->mflagsg & MG_INSIGHT) != 0L)
 #define banish_kill(mtyp)	(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
 
+#define triggers_ophidiophobia(ptr)	(is_snake((ptr))\
+		|| (ptr)->mlet == S_NAGA\
+		|| (ptr)->mtyp == PM_COUATL\
+		|| (ptr)->mtyp == PM_LILLEND\
+		|| (ptr)->mtyp == PM_MEDUSA\
+		|| (ptr)->mtyp == PM_MARILITH\
+		|| (ptr)->mtyp == PM_MAMMON\
+		|| (ptr)->mtyp == PM_SHAKTARI\
+		|| (ptr)->mtyp == PM_DEMOGORGON\
+		|| (ptr)->mtyp == PM_GIANT_EEL\
+		|| (ptr)->mtyp == PM_ELECTRIC_EEL\
+		|| (ptr)->mtyp == PM_KRAKEN\
+		|| (ptr)->mtyp == PM_SALAMANDER\
+		|| (ptr)->mtyp == PM_KARY__THE_FIEND_OF_FIRE\
+		|| (ptr)->mtyp == PM_CATHEZAR)
+
+#define triggers_entomophobia(ptr)	(is_insectoid(ptr) || is_arachnid(ptr))
+
+#define triggers_arachnophobia(ptr)	(is_spider(ptr)\
+		|| (ptr)->mtyp == PM_SPROW\
+		|| (ptr)->mtyp == PM_DRIDER\
+		|| (ptr)->mtyp == PM_PRIESTESS_OF_GHAUNADAUR\
+		|| (ptr)->mtyp == PM_AVATAR_OF_LOLTH)
+
+#define triggers_helminthophobia(mon)	((mon)->data->mlet == S_WORM || mon_attacktype((mon), AT_TENT))
+
 #define allow_wield(ptr)	(ptr->mtyp == PM_SHOGGOTH \
 							|| ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR\
 							|| ptr->mtyp == PM_MOTHERING_MASS\

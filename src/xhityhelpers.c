@@ -315,37 +315,17 @@ struct monst * mon;
 		return TRUE;
 	}
 
-	if ((mon->data->mlet == S_SNAKE
-		|| mon->data->mlet == S_NAGA
-		|| mon->mtyp == PM_COUATL
-		|| mon->mtyp == PM_LILLEND
-		|| mon->mtyp == PM_MEDUSA
-		|| mon->mtyp == PM_MARILITH
-		|| mon->mtyp == PM_MAMMON
-		|| mon->mtyp == PM_SHAKTARI
-		|| mon->mtyp == PM_DEMOGORGON
-		|| mon->mtyp == PM_GIANT_EEL
-		|| mon->mtyp == PM_ELECTRIC_EEL
-		|| mon->mtyp == PM_KRAKEN
-		|| mon->mtyp == PM_SALAMANDER
-		|| mon->mtyp == PM_KARY__THE_FIEND_OF_FIRE
-		|| mon->mtyp == PM_CATHEZAR
-		) && roll_madness(MAD_OPHIDIOPHOBIA)){
+	if (triggers_ophidiophobia(mon->data) && roll_madness(MAD_OPHIDIOPHOBIA)){
 		pline("You're afraid to go near that horrid serpent!");
 		return TRUE;
 	}
 
-	if ((is_insectoid(mon->data) || is_arachnid(mon->data)) && roll_madness(MAD_ENTOMOPHOBIA)){
+	if (triggers_entomophobia(mon->data) && roll_madness(MAD_ENTOMOPHOBIA)){
 		pline("You're afraid to go near that frightful bug!");
 		return TRUE;
 	}
 
-	if ((is_spider(mon->data)
-		|| mon->mtyp == PM_SPROW
-		|| mon->mtyp == PM_DRIDER
-		|| mon->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
-		|| mon->mtyp == PM_AVATAR_OF_LOLTH
-		) && roll_madness(MAD_ARACHNOPHOBIA)){
+	if (triggers_arachnophobia(mon->data) && roll_madness(MAD_ARACHNOPHOBIA)){
 		pline("You're afraid to go near that terrifying spider!");
 		return TRUE;
 	}
