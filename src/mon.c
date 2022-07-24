@@ -5328,6 +5328,32 @@ struct monst *mtmp;
 	}
 }
 
+/* Monster is damaged by some source */
+/*  Returns 1 if it died or 0 otherwise. */
+boolean
+m_losehp(mon, dam, yours, how)
+struct monst *mon;
+int dam;
+boolean yours;
+char *how;
+// int adtype; //Note: AD type should be used to signal nocorpse etc, but would not be respected if yours.
+{
+	boolean killed = FALSE;
+
+	if ((mon->mhp -= dam) <= 0) {
+		int xx = mon->mx;
+		int yy = mon->my;
+
+		if (yours) xkilled(mon, TRUE);
+		else monkilled(mon, how, AD_PHYS);
+		if (mon->mhp <= 0) {
+			newsym(xx, yy);
+			killed = TRUE;
+		}
+	}
+	return killed;
+}
+
 void
 killed(mtmp)
 register struct monst *mtmp;

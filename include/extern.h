@@ -1621,6 +1621,7 @@ E void FDECL(mongolded, (struct monst *));
 E void FDECL(monglassed, (struct monst *));
 E void FDECL(monkilled, (struct monst *,const char *,int));
 E void FDECL(unstuck, (struct monst *));
+E boolean FDECL(m_losehp, (struct monst *, int, boolean, char*));
 E void FDECL(killed, (struct monst *));
 E void FDECL(xkilled, (struct monst *,int));
 E void FDECL(mon_to_stone, (struct monst*));
