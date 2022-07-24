@@ -1746,6 +1746,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	) {
 		return &noattack;
 	}
+	if(magr->mforgetful && (attk->adtyp == AD_MAGM || attk->adtyp == AD_SPEL)){
+		GETNEXT
+	}
 	/* Magic blade attacks are changed or lost if the creature is canceled */
 	if (magr->mcan) {
 		if(magr->mtyp == PM_ALIDER && magr->mcan && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP)){
