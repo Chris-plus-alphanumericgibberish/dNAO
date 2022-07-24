@@ -894,6 +894,8 @@
 #define touch_petrifies(ptr)	((ptr)->mtyp == PM_COCKATRICE || \
 				 (ptr)->mtyp == PM_CHICKATRICE)
 
+#define mad_no_armor(mon)		((mon)->mdisrobe || (mon)->mnudist)
+
 #define is_weeping(ptr)		((ptr)->mtyp == PM_WEEPING_ANGEL)
 
 #define is_alienist(ptr)		(is_mind_flayer(ptr) || \

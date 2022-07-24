@@ -1141,7 +1141,10 @@ register struct monst *mtmp;
 	}
 	
 	if(mtmp->mdisrobe){
-		if(mon_remove_armor(mtmp))
+		if(mon_throw_armor(mtmp))
+			return 0;
+	} else if(mtmp->mnudist){
+		if(mon_strip_armor(mtmp))
 			return 0;
 	}
 	
@@ -2314,7 +2317,7 @@ not_special:
 				likegems = (likes_gems(ptr) && pctload < 85);
 				uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
 					&& pctload < 75);
-				likeobjs = (!mtmp->mdisrobe && likes_objs(ptr) && pctload < 75);
+				likeobjs = (!mad_no_armor(mtmp) && likes_objs(ptr) && pctload < 75);
 				likemagic = (likes_magic(ptr) && pctload < 85);
 				likerock = (throws_rocks(ptr) && pctload < 50 && !In_sokoban(&u.uz));
 				conceals = hides_under(ptr);
@@ -2893,7 +2896,7 @@ postmov:
 		    likegems = (likes_gems(ptr) && pctload < 85);
 		    uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
 				  && pctload < 75);
-		    likeobjs = (!mtmp->mdisrobe && likes_objs(ptr) && pctload < 75);
+		    likeobjs = (!mad_no_armor(mtmp) && likes_objs(ptr) && pctload < 75);
 		    likemagic = (likes_magic(ptr) && pctload < 85);
 		    likerock = (throws_rocks(ptr) && pctload < 50 &&
 				!In_sokoban(&u.uz));

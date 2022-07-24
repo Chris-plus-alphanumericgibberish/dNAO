@@ -1363,6 +1363,8 @@ boolean creation;
 	 * Give animals and mindless creatures a chance to wear their initial
 	 * equipment.
 	 */
+	if(mad_no_armor(mon))
+		return;
 	if ((is_animal(mon->data) || mindless_mon(mon)) && !creation)
 		return;
 
@@ -1523,14 +1525,40 @@ outer_break:
 }
 #undef RACE_EXCEPTION
 
+struct obj *
+mon_remove_armor(mon, flag)
+struct monst *mon;
+long flag;
+{
+	struct obj *old;
+	int m_delay = 0;
+
+	old = which_armor(mon, flag);
+
+	if(!old)
+		return (struct obj *)0;
+	
+	if ((flag == W_ARM
+	  || flag == W_ARMU
+	) && (mon->misc_worn_check & W_ARMC))
+	    m_delay += 2;
+	m_delay += objects[old->otyp].oc_delay;
+	old->owornmask = 0L;
+	mon->mfrozen = max(mon->mfrozen, m_delay);
+	if(mon->mfrozen)
+		mon->mcanmove = 0;
+	update_mon_intrinsics(mon, old, FALSE, FALSE);
+	mon->misc_worn_check &= ~flag;
+	return old;
+}
+
 boolean
-mon_remove_armor(mon)
+mon_throw_armor(mon)
 struct monst *mon;
 {
 	struct obj *old;
 	long flag;
-	int m_delay = 0;
-	int unseen = !canseemon(mon);
+	int seen = canseemon(mon);
 	int tarx, tary;
 	int tries = 10;
 	
@@ -1562,22 +1590,67 @@ struct monst *mon;
 
 	if(!old) return FALSE;
 	
-	if ((flag == W_ARM
-	  || flag == W_ARMU
-	) && (mon->misc_worn_check & W_ARMC))
-	    m_delay += 2;
-	m_delay += objects[old->otyp].oc_delay;
-	old->owornmask = 0L;
-	mon->mfrozen = m_delay;
-	if(mon->mfrozen) mon->mcanmove = 0;
-	update_mon_intrinsics(mon, old, FALSE, FALSE);
-	mon->misc_worn_check &= ~flag;
-	pline("%s removes %s.", Monnam(mon), distant_name(old, doname));
-	do{
+	old = mon_remove_armor(mon, flag);
+	
+	if(!old) return FALSE; //Shouldn't occur since we already checked this, but perhaps remove_armor will support welded armor.
+
+	if(seen)
+		pline("%s removes %s.", Monnam(mon), distant_name(old, doname));
+	do {
 		tarx = rn2(17)-8+mon->mx;
 		tary = rn2(17)-8+mon->my;
 	} while((tarx == mon->mx && tary == mon->my) || !isok(tarx, tary));
 	mthrow(mon, old, 0, tarx, tary, FALSE);
+	return TRUE;
+}
+
+boolean
+mon_strip_armor(mon)
+struct monst *mon;
+{
+	struct obj *old;
+	long flag;
+	int seen = canseemon(mon);
+	int i;
+	
+	if (mon->mfrozen) return FALSE;
+	
+	for(i = 1; i<=7;i++){
+		switch(rnd(7)){
+			case 1:
+				flag = W_ARM;
+			break;
+			case 2:
+				flag = W_ARMC;
+			break;
+			case 3:
+				flag = W_ARMH;
+			break;
+			case 4:
+				flag = W_ARMG;
+			break;
+			case 5:
+				flag = W_ARMF;
+			break;
+			case 6:
+				flag = W_ARMU;
+			break;
+			case 7:
+				flag = W_AMUL;
+			break;
+		}
+
+		if(!which_armor(mon, flag)) continue;
+	
+		old = mon_remove_armor(mon, flag);
+
+		if(!old) continue; //Shouldn't occur since we already checked this, but perhaps remove_armor will support welded armor.
+
+		if(seen){
+			seen = FALSE;
+			pline("%s removes %s clothes.", Monnam(mon), mhis(mon));
+		}
+	}
 	return TRUE;
 }
 

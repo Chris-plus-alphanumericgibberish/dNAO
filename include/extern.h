@@ -3284,7 +3284,9 @@ E void FDECL(mon_slot_dr, (struct monst *, struct monst *, int, int *, int *, in
 E int FDECL(avg_mdr, (struct monst *)); 
 E int FDECL(mdat_avg_mdr, (struct monst *));
 E void FDECL(m_dowear, (struct monst *,BOOLEAN_P));
-E boolean FDECL(mon_remove_armor, (struct monst *));
+E boolean FDECL(mon_throw_armor, (struct monst *));
+E boolean FDECL(mon_strip_armor, (struct monst *));
+E struct obj *FDECL(mon_remove_armor, (struct monst *,long));
 E struct obj *FDECL(which_armor, (struct monst *,long));
 E void FDECL(mon_break_armor, (struct monst *,BOOLEAN_P));
 E int FDECL(extra_pref, (struct monst *, struct obj *));

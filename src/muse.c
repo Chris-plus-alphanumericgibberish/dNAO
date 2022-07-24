@@ -2620,7 +2620,7 @@ struct obj *obj;
 		case WEAPON_CLASS:
 			return likes_objs(ptr);
 		case ARMOR_CLASS:
-			return !mon->mdisrobe && likes_objs(ptr);
+			return !mad_no_armor(mon) && likes_objs(ptr);
 		case RING_CLASS:
 			return likes_magic(ptr);
 		case AMULET_CLASS:
