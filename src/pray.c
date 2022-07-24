@@ -3923,7 +3923,8 @@ struct obj *otmp;
 
 	/* at this point, gain credit */
 
-	int dim_return_factor = 50;
+	/* credit gain suffers diminishing returns, less harshly if you have a lot of insight */
+	int dim_return_factor = max(1, u.uinsight);
 	if (wizard) {
 		/* debug */
 		pline("FlameCredit = %ld [+%ld base %d], FlameDevotion = %ld",
