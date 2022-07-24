@@ -1131,6 +1131,14 @@ register struct monst *mtmp;
 			mtmp->mlaughing=rnd(5);
 		}
 	}
+	if(mtmp->mrage){
+		extern const int monstr[];
+		if(!rn2(4)){
+			mtmp->mberserk = 1;
+			(void) set_apparxy(mtmp);
+		}
+		mtmp->encouraged = max(mtmp->encouraged, min(20, monstr[mtmp->mtyp]));
+	}
 	
 	if(mtmp->mdisrobe){
 		if(mon_remove_armor(mtmp))
