@@ -3101,6 +3101,33 @@ struct monst * mdef;	/* another monster which is next to it */
 	if (magr->mberserk) {
 		return ALLOW_M | ALLOW_TM;
 	}
+	// Some madnesses cause infighting.
+	//  These grudges are one-way by design.
+	if(mdef->mophidio && triggers_ophidiophobia(magr->data)){
+		return ALLOW_M | ALLOW_TM;
+	}
+	if(mdef->marachno && (
+		triggers_arachnophobia(magr->data)
+		|| (gender(magr) == 1 && humanoid_upperbody(magr->data))
+	)){
+		return ALLOW_M | ALLOW_TM;
+	}
+	if(mdef->mentomo && triggers_entomophobia(magr->data)){
+		return ALLOW_M | ALLOW_TM;
+	}
+	if(mdef->mthalasso && is_aquatic(magr->data)){
+		return ALLOW_M | ALLOW_TM;
+	}
+	if(mdef->mparanoid && mdef->m_lev < rnd(100)){
+		return ALLOW_M | ALLOW_TM;
+	}
+	if(mdef->mhelmintho && triggers_helminthophobia(magr)){
+		return ALLOW_M | ALLOW_TM;
+	}
+	if(magr->mcannibal && (magr->data->mflagsa&mdef->data->mflagsa)){
+		//I.e., attack if the defender and attacker have some MA flags in common.
+		return ALLOW_M | ALLOW_TM;
+	}
 	// careful around mandrakes 
 	if (attacktype_fordmg(md, AT_BOOM, AD_MAND) && (
 		(!mindless(magr->data) && magr->mhp < 100) ||
