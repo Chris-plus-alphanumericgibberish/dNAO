@@ -265,6 +265,8 @@ struct monst *mtmp;
 		return FALSE;
 	if (u.uswallow && stuck) return FALSE;
 
+	if(mtmp->mtalons) return FALSE;
+	
 	m.defensive = (struct obj *)0;
 	m.has_defense = 0;
 
@@ -1063,6 +1065,8 @@ struct monst *mtmp;
 	if(tbx == 0 && tby == 0) return FALSE; //Target is not lined up.
 	
 	if(noactions(mtmp)) return 0;
+	
+	if(mtmp->mtalons) return 0;
 	
 	if (target)
 	{
@@ -1935,6 +1939,8 @@ struct monst *mtmp;
 			|| ((mtmp->misc_worn_check & W_ARMC) && which_armor(mtmp, W_ARMC)
 				&& FacelessCloak(which_armor(mtmp, W_ARMC)));
 
+	if(mtmp->mtalons) return 0;
+	
 	m.misc = (struct obj *)0;
 	m.has_misc = 0;
 	if (is_animal(mdat) || mindless_mon(mtmp))
