@@ -5,6 +5,7 @@
 #include "hack.h"
 #include "mfndpos.h"
 #include "artifact.h"
+#include "xhity.h"
 
 extern boolean notonhead;
 extern struct attack noattack;
@@ -802,6 +803,23 @@ boolean digest_meal;
 				if(mon->mhp <= 0) return;	/* not lifesaved */
 			}
 		}
+	}
+	/*Cthulhu's mind blast*/
+	if(mon->mdreams && (mon->msleeping || !rn2(70)) && !rn2(5)){
+		int dmg;
+		int nd = 1;
+		if(on_level(&rlyeh_level,&u.uz))
+			nd = 5;
+		dmg = d(nd,15);
+		if(Half_spel(mon))
+			dmg = (dmg+1) / 2;
+		if(m_losehp(mon, dmg, FALSE, "fevered dreams"))
+			return; //Died.
+		if(!mon->msleeping && !resists_sleep(mon)){
+			mon->msleeping = 1;
+			slept_monst(mon);
+		}
+		
 	}
 	if(mon->mhp < mon->mhpmax){
 		int perX = 0;

@@ -1733,7 +1733,11 @@ struct monst *mon;
 						mon->mtalons = 1;
 					}
 					else if(madflag == MAD_DREAMS){
-						mon->mtalons = 1;
+						mon->mdreams = 1;
+						if(!resists_sleep(mon) && !mon->msleeping){
+							mon->msleeping = 1;
+							slept_monst(mon);
+						}
 					}
 					else if(madflag == MAD_SCIAPHILIA){
 						mon->mscaiaphilia = 1;
