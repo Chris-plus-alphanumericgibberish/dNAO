@@ -734,7 +734,7 @@ struct monst *mon;
 		}
 	}
 
-	if (helpless(mon))
+	if (helpless(mon) || mon->msuicide)
 		base += 5;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
@@ -909,7 +909,7 @@ struct monst *mon;
 
 	base -= armac;
 	
-	if (helpless(mon))
+	if (helpless(mon) || mon->msuicide)
 		base += 5;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
