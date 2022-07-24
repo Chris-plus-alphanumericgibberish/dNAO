@@ -156,15 +156,41 @@ struct monst *mtmp;
 	if(mtmp == &youmonst)
 		return FALSE;
 	
-	if(no_upos(mtmp))
-		return FALSE;
-	
 	/* Nitocris's wrappings are especially warded against Nyarlathotep, and accidently work vs. summons generally */
 	if(u.ux == x && u.uy == y && !mtmp->mpeaceful && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
 		return TRUE;
-	else if(mat && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && which_armor(mat, W_ARMC) && which_armor(mat, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+	if(!no_upos(mtmp) && mtmp->mux == x && mtmp->muy == y && !mtmp->mpeaceful && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
 		return TRUE;
+	if(mat && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && which_armor(mat, W_ARMC) && which_armor(mat, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
+		return TRUE;
+
+	if(no_upos(mtmp) && !mat)
+		return FALSE;
 	
+	if(mat && rn2(100) < (80-mtmp->m_lev)){
+		if(mtmp->msanctity && gender(mat) == 1){
+			return TRUE;
+		}
+		if(mtmp->marachno && humanoid_upperbody(mat->data) && gender(mat) == 1){
+			return TRUE;
+		}
+		if(mtmp->margent && gender(mat) == 0){
+			return TRUE;
+		}
+	}
+	if(!no_upos(mtmp) && mtmp->mux == x && mtmp->muy == y && rn2(100) < (80-mtmp->m_lev)){
+		char curgen = is_neuter(youracedata) ? 2 : Upolyd ? u.mfemale : flags.female;
+		if(mtmp->msanctity && curgen == 1){
+			return TRUE;
+		}
+		if(mtmp->marachno && humanoid_upperbody(youracedata) && curgen == 1){
+			return TRUE;
+		}
+		if(mtmp->margent && curgen == 0){
+			return TRUE;
+		}
+	}
+
 	return (boolean)(
 				((
 					sobj_at(SCR_SCARE_MONSTER, x, y)
