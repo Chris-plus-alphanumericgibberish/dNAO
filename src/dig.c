@@ -2495,7 +2495,7 @@ bury_an_obj(otmp)
 		&& !obj_resists(otmp, 0, 100)) {
 	    (void) start_timer((under_ice ? 0L : 250L) + (long)rnd(250),
 			       TIMER_OBJECT, ROT_ORGANIC, (genericptr_t)otmp);
-	} else if(otmp->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE){
+	} else if(otmp->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE && !Infuture){
 	    (void) start_timer(250L + (long)rnd(250), TIMER_OBJECT, ROT_ORGANIC, (genericptr_t)otmp);
 	}
 	add_to_buried(otmp);
