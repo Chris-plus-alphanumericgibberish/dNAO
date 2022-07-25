@@ -887,6 +887,7 @@ int mkflags;
 				break;
 			case CHEST:
 			case BOX:
+			case SARCOPHAGUS:
 				if (Is_stronghold(&u.uz) && in_mklev){
 					otmp->olocked = 1;
 					otmp->otrapped = 0;
@@ -1985,6 +1986,7 @@ struct obj* obj;
 	case WRITING_DESK:
 		return NULL;
 		/* Any other cases for specific object types go here. */
+	case SARCOPHAGUS:
 	case SHIELD_OF_REFLECTION:
 		return shiny_materials;
 	case BOW:
@@ -2521,7 +2523,7 @@ register struct obj *obj;
 		}
 	}
 	
-	if (obj->otyp == BOX && obj->spe){ /* Schroedinger's Cat */
+	if ((Is_real_container(obj) && obj->otyp != MAGIC_CHEST) && obj->spe){ /* Schroedinger's Cat */
 		if(obj->spe == 1){
 			wt += mons[PM_HOUSECAT].cwt;
 		}else if(obj->spe == 4){

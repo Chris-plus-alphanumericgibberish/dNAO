@@ -2533,7 +2533,10 @@ boolean past;
     struct monst *mummy;
     xchar ox, oy;
 
-	pline(past ? "That wasn't %s, it was a sarcophagus!" : "This isn't %s, it's a sarcophagus!", an(simple_typename(box->otyp)));
+	if(box->otyp == SARCOPHAGUS)
+		pline(past ? "That wasn't a sarcophagus, it was a prison!" : "This isn't a sarcophagus, it's a prison!");
+	else
+		pline(past ? "That wasn't %s, it was a sarcophagus!" : "This isn't %s, it's a sarcophagus!", an(simple_typename(box->otyp)));
     box->spe = 3;		/* box->owt will be updated below */
     if (get_obj_location(box, &ox, &oy, 0))
 		box->ox = ox, box->oy = oy;	/* in case it's being carried */

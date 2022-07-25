@@ -2060,7 +2060,7 @@ MONSTER:'t',"mouth of the goat",(06,01)
 
 
 #+5 means that it's Nitocris's sarcophagus.  One only please!
-CONTAINER:'#',"trapped metal box",(74,01), cursed, +5
+CONTAINER:'#',"trapped metal sarcophagus",(74,01), cursed, +5
 MONSTER:'&',"Hmnyw-Pharaoh",(74,01)
 CONTAINER:'`',"statue",(74,01),uncursed,"god",1,"the God of the Bloody Tongue"
 OBJECT:'/',"death",contained

@@ -3587,6 +3587,7 @@ winid *datawin;
 			subclass = "facial accessory";
 			break;
 		case BOX:
+		case SARCOPHAGUS:
 		case CHEST:
 		case MAGIC_CHEST:
 		case MASSIVE_STONE_CRATE:

@@ -7535,6 +7535,7 @@ doapply()
 	case CHEST:
 	case ICE_BOX:
 	case SACK:
+	case SARCOPHAGUS:
 	case BAG_OF_HOLDING:
 	case OILSKIN_SACK:
 		res = use_container(obj, 1);

@@ -3235,6 +3235,7 @@ xchar x, y;
 		chance = 40;
 		break;
 	    case BOX:
+	    case SARCOPHAGUS:
 		chance = 30;
 		break;
 	    default:

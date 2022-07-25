@@ -1113,6 +1113,7 @@ AMULET(("Amulet of Yendor", "Amulet of Yendor"), {0}, 0, /* note: description ==
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
 /* containers */
 CONTAINER(("box"),             1,   MZ_HUGE, 0, 0,  30, 350,   8, WOOD, HI_WOOD),
+CONTAINER(("sarcophagus"),             1,   MZ_HUGE, 0, 0,  0, 3500,   8, GOLD, HI_GOLD),
 CONTAINER(("massive stone crate"),
 										1,MZ_GIGANTIC,0, 0,   0,6000,  80, MINERAL,HI_MINERAL),/*Needs tile*/
 CONTAINER(("chest"),           1,   MZ_HUGE, 0, 0,  30, 600,  16, WOOD, HI_WOOD),

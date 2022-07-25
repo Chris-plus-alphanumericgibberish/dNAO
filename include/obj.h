@@ -911,7 +911,7 @@ struct obj {
 			 (o)->cobj != (struct obj *)0)
 #define Is_container(o) ((o)->otyp >= BOX && (o)->otyp <= BAG_OF_TRICKS/*DISTRESSED_PRINCESS*/)
 #define Is_real_container(o) ((o)->otyp >= BOX && (o)->otyp < BAG_OF_TRICKS)
-#define Is_box(otmp)	(otmp->otyp == BOX || otmp->otyp == CHEST || otmp->otyp == MAGIC_CHEST)
+#define Is_box(otmp)	(otmp->otyp == BOX || otmp->otyp == SARCOPHAGUS || otmp->otyp == CHEST || otmp->otyp == MAGIC_CHEST)
 #define Is_mbag(otmp)	(otmp->otyp == BAG_OF_HOLDING || \
 			 otmp->otyp == BAG_OF_TRICKS)
 
