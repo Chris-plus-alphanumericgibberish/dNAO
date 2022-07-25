@@ -5655,11 +5655,13 @@ typfnd:
 		}
 		else {
 			/* they get the artifact */
-			if(!wizwish)
+			if(!wizwish){
 				u.uconduct.wisharti++;	/* KMH, conduct */
-			/* characters other than priests also have their god's likelyhood to grant artifacts decreased */
-			if(!Role_if(PM_PRIEST))
-				u.uartisval += arti_value(otmp);
+
+				/* characters other than priests also have their god's likelyhood to grant artifacts decreased */
+				if(!Role_if(PM_PRIEST))
+					u.uartisval += arti_value(otmp);
+			}
 		}
 	}
 	/* even more wishing abuse: if we tried to create an artifact but failed (it was already generated) we may need a new otyp */
