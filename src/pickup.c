@@ -1846,7 +1846,10 @@ gotit:
 	    timepassed = 1;
 	    return timepassed;
 	}
-	mtmp = m_at(cc.x, cc.y);
+	if(u.dz > 0)
+		mtmp = u.usteed;
+	else
+		mtmp = m_at(cc.x, cc.y);
 	if (mtmp) {
 		if (costly_spot(mtmp->mx, mtmp->my)) {
 			verbalize("Not in my store!");
@@ -2897,19 +2900,19 @@ int *passed_info;
 	Sprintf(buf, "Equipment");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-		// if(otmp->owornmask){
-			Sprintf1(buf, doname(otmp));
-			any.a_obj = otmp;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet++;
-			if(incntlet > 'z')
-				incntlet = 'A';
-			if(incntlet > 'Z' && incntlet < 'a')
-				incntlet = 'a';
-			count++;
-		// }
+		if((otmp->owornmask&W_SADDLE) && mon == u.usteed)
+			continue;
+		Sprintf1(buf, doname(otmp));
+		any.a_obj = otmp;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet++;
+		if(incntlet > 'z')
+			incntlet = 'A';
+		if(incntlet > 'Z' && incntlet < 'a')
+			incntlet = 'a';
+		count++;
 	}
 	end_menu(tmpwin, "What do you want to remove:");
 
