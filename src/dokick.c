@@ -40,7 +40,10 @@ register boolean clumsy;
 	int result;
 
 	if(mon->m_ap_type) {
-		if(mon->m_ap_type == M_AP_MONSTER) seemimic_ambush(mon); else seemimic(mon);
+		// if((M_AP_TYPEMASK&(mon->m_ap_type)) == M_AP_MONSTER)
+		if(mon->m_ap_type == M_AP_MONSTER)
+			seemimic_ambush(mon);
+		else seemimic(mon);
 	}
 	check_caitiff(mon);
 

@@ -3823,11 +3823,11 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	
 	if ((!inediate(youracedata) || Race_if(PM_INCANTIFIER))
 		&& !uclockwork
-		&& u.usanity < 100
-		&& !ClearThoughts
+		&& NightmareAware_Sanity < 100
+		&& !BlockableClearThoughts
 		&& u.umadness&MAD_GLUTTONY
 	){
-		int delta = Insanity;
+		int delta = NightmareAware_Insanity;
 		if(Race_if(PM_INCANTIFIER)) losepw(delta/25);
 		else u.uhunger -= delta/25;
 		//remainder

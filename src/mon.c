@@ -1798,7 +1798,7 @@ movemon()
 	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 		average_dogs();
 	if(mtmp->m_insight_level > u.uinsight
-	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 	){
 		insight_vanish(mtmp);
 		continue;
@@ -7866,7 +7866,7 @@ int damage;
 			You("hear a terrible scream!");
 			dmg = d(damage,7);
 			losehp(dmg, "the scream of an old one", KILLED_BY);
-			if(rn2(100) >= u.usanity){
+			if(rn2(100) >= NightmareAware_Sanity){
 				if(!Panicking)
 					You("panic!");
 				HPanicking += damage*2;
@@ -8394,7 +8394,7 @@ struct monst *mtmp;
 					done(DIED);
 				}
 				//Roll vs. sanity
-				if(rn2(100) >= u.usanity){
+				if(rn2(100) >= NightmareAware_Sanity){
 					if(!Panicking)
 						You("panic!");
 					HPanicking = max(damage*5, HPanicking);

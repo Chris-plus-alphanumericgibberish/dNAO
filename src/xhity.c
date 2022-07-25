@@ -3601,8 +3601,8 @@ int *shield_margin;
 		/* Some madnesses give accuracy bonus/penalty (player-only) (melee) */
 		if(youagr && melee && u.umadness){
 			/* nudist accuracy bonus/penalty */
-			if (u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-				int delta = Insanity;
+			if (u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+				int delta = NightmareAware_Insanity;
 				int discomfort = u_clothing_discomfort();
 				static boolean clothmessage = TRUE;
 				if (discomfort) {
@@ -3618,8 +3618,8 @@ int *shield_margin;
 				}
 			}
 			/* Sciaphilia accuracy bonus/penalty */
-			if (u.umadness&MAD_SCIAPHILIA && !ClearThoughts && u.usanity < 96){
-				int delta = Insanity;
+			if (u.umadness&MAD_SCIAPHILIA && !BlockableClearThoughts && NightmareAware_Sanity < 96){
+				int delta = NightmareAware_Insanity;
 				boolean discomfort = (dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0);
 				static boolean shadowmessage = TRUE;
 				if (discomfort) {
@@ -4063,8 +4063,8 @@ boolean ranged;
 	}
 	/* madness can make the player take more damage */
 	if (youdef) {
-		if (u.umadness&MAD_SUICIDAL && !ClearThoughts){
-			dmg += ((Insanity)*u.ulevel) / 200;
+		if (u.umadness&MAD_SUICIDAL && !BlockableClearThoughts){
+			dmg += ((NightmareAware_Insanity)*u.ulevel) / 200;
 		}
 
 		if ((pa->mlet == S_SNAKE
@@ -4082,26 +4082,26 @@ boolean ranged;
 			|| pa->mtyp == PM_SALAMANDER
 			|| pa->mtyp == PM_KARY__THE_FIEND_OF_FIRE
 			|| pa->mtyp == PM_CATHEZAR
-			) && u.umadness&MAD_OPHIDIOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (Insanity) / 5;
+			) && u.umadness&MAD_OPHIDIOPHOBIA && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			dmg += (NightmareAware_Insanity) / 5;
 		}
 
 		if ((pa->mlet == S_WORM
 			|| mon_attacktype(magr, AT_TENT)
-			) && u.umadness&MAD_HELMINTHOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (Insanity) / 5;
+			) && u.umadness&MAD_HELMINTHOPHOBIA && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			dmg += (NightmareAware_Insanity) / 5;
 		}
 
-		if (!magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARGENT_SHEEN && !ClearThoughts && u.usanity < 100){
-			dmg += (Insanity) / 5;
+		if (!magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARGENT_SHEEN && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			dmg += (NightmareAware_Insanity) / 5;
 		}
 
-		if ((is_insectoid(pa) || is_arachnid(pa)) && u.umadness&MAD_ENTOMOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (Insanity) / 5;
+		if ((is_insectoid(pa) || is_arachnid(pa)) && u.umadness&MAD_ENTOMOPHOBIA && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			dmg += (NightmareAware_Insanity) / 5;
 		}
 
-		if (is_aquatic(pa) && u.umadness&MAD_THALASSOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (Insanity) / 5;
+		if (is_aquatic(pa) && u.umadness&MAD_THALASSOPHOBIA && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			dmg += (NightmareAware_Insanity) / 5;
 		}
 
 		if ((is_spider(pa)
@@ -4109,12 +4109,12 @@ boolean ranged;
 			|| pa->mtyp == PM_DRIDER
 			|| pa->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
 			|| pa->mtyp == PM_AVATAR_OF_LOLTH
-			) && u.umadness&MAD_ARACHNOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (Insanity) / 5;
+			) && u.umadness&MAD_ARACHNOPHOBIA && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			dmg += (NightmareAware_Insanity) / 5;
 		}
 
-		if (magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARACHNOPHOBIA && !ClearThoughts && u.usanity < 100){
-			dmg += (Insanity) / 5;
+		if (magr->female && humanoid_upperbody(pa) && u.umadness&MAD_ARACHNOPHOBIA && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			dmg += (NightmareAware_Insanity) / 5;
 		}
 	}
 

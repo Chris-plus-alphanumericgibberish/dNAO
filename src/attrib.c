@@ -1298,8 +1298,8 @@ int x;
 			tmp += u.ulevel/3;
 		}
 	} else if (x == A_CHA) {
-		if(u.umadness&MAD_ROTTING && !ClearThoughts){
-			tmp -= (Insanity)/5;
+		if(u.umadness&MAD_ROTTING && !BlockableClearThoughts){
+			tmp -= (NightmareAware_Insanity)/5;
 		}
 	} else if (x == A_INT || x == A_WIS) {
 		/* yes, this may raise int/wis if player is sufficiently
@@ -1321,8 +1321,9 @@ change_usanity(delta, check)
 int delta;
 boolean check;
 {
+	int nightmare_starting_sanity = NightmareAware_Sanity;
 	int starting_sanity = u.usanity;
-	int starting_insanity = Insanity;
+	int starting_insanity = NightmareAware_Insanity;
 	if(discover || wizard)
 		pline("Sanity change: %d + %d", u.usanity, delta);
 	u.usanity += delta;
@@ -1345,40 +1346,40 @@ boolean check;
 		}
 	}
 	
-	if(check && delta < 0 && ((-delta > rn2(ACURR(A_WIS))) || -delta >= starting_sanity/10) && rn2(100) >= starting_sanity 
+	if(check && delta < 0 && ((-delta > rn2(ACURR(A_WIS))) || -delta >= starting_sanity/10) && rn2(100) >= nightmare_starting_sanity 
 		&& !Panicking && !StumbleBlind && !StaggerShock && !Babble && !Screaming && !FaintingFits
 	){
 		switch(rn2(5)){
 			case 0:
-				if(ClearThoughts)
+				if(BlockableClearThoughts)
 					You_feel("a little panicky.");
 				else
 					You("panic in your insanity!");
 				HPanicking = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 1:
-				if(ClearThoughts)
+				if(BlockableClearThoughts)
 					You_feel("a little off balance.");
 				else
 					You("stumble blindly in your insanity!");
 				HStumbleBlind = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 2:
-				if(ClearThoughts)
+				if(BlockableClearThoughts)
 					You_feel("a little shocked.");
 				else
 					You("stagger in shock!");
 				HStaggerShock = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 3:
-				if(ClearThoughts)
+				if(BlockableClearThoughts)
 					You_feel("a little incoherent.");
 				else
 					You("begin babbling incoherently!");
 				HBabble = 1+rnd((starting_insanity)/10+1)+rnd((starting_insanity)/10+1);
 			break;
 			case 4:
-				if(ClearThoughts)
+				if(BlockableClearThoughts)
 					You_feel("a little frightened.");
 				else
 					You("begin screaming in terror and madness!");
@@ -1386,7 +1387,7 @@ boolean check;
 			break;
 			/*Dummied out for being unusually nasty and non-interactive*/
 			// case 5:
-				// if(ClearThoughts)
+				// if(BlockableClearThoughts)
 					// You_feel("a little faint.");
 				// else
 					// You(Hallucination ? "have a case of the vapors!" : "feel faint!");
@@ -1438,12 +1439,17 @@ roll_generic_madness(clearable)
 boolean clearable;
 {
 	int sanlevel;
-	if(clearable && ClearThoughts)
+	int usan = u.usanity;
+	if((clearable && BlockableClearThoughts) || TimeStop)
 		return 0;
 
 	sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
 	
-	if(u.usanity < sanlevel)
+	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
+	if(clearable)
+		usan = NightmareAware_Sanity;
+
+	if(usan < sanlevel)
 		return 1;
 	return 0;
 }
@@ -1453,10 +1459,15 @@ roll_generic_flat_madness(clearable)
 int clearable;
 {
 	int sanlevel;
-	if(clearable && ClearThoughts)
+	int usan = u.usanity;
+	if((clearable && BlockableClearThoughts) || TimeStop)
 		return 0;
 
-	if(u.usanity < rnd(100))
+	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
+	if(clearable)
+		usan = NightmareAware_Sanity;
+
+	if(usan < rnd(100))
 		return 1;
 	return 0;
 }
@@ -1466,7 +1477,8 @@ roll_madness(madness)
 long int madness;
 {
 	int sanlevel;
-	if(ClearThoughts && madness != MAD_GOAT_RIDDEN)
+	int usan = u.usanity;
+	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN) || TimeStop)
 		return 0;
 	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
@@ -1476,7 +1488,11 @@ long int madness;
 	
 	sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
 	
-	if(u.usanity < sanlevel)
+	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
+	if(madness != MAD_GOAT_RIDDEN)
+		usan = NightmareAware_Sanity;
+
+	if(usan < sanlevel)
 		return 1;
 	return 0;
 }
@@ -1486,8 +1502,9 @@ mad_turn(madness)
 long int madness;
 {
 	int sanlevel;
+	int usan = u.usanity;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
-	if(ClearThoughts || TimeStop)
+	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN) || TimeStop)
 		return 0;
 	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
@@ -1497,7 +1514,11 @@ long int madness;
 	
 	sanlevel = max_ints(1,(int)(((float)hashed/ULONG_MAX) * ((float)hash(hashed)/ULONG_MAX) * 100));
 	
-	if(u.usanity < sanlevel)
+	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
+	if(madness != MAD_GOAT_RIDDEN)
+		usan = NightmareAware_Sanity;
+
+	if(usan < sanlevel)
 		return 1;
 	return 0;
 }
@@ -1507,8 +1528,9 @@ flat_mad_turn(madness)
 long int madness;
 {
 	int sanlevel;
+	int usan = u.usanity;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
-	if(ClearThoughts || TimeStop)
+	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN) || TimeStop)
 		return 0;
 	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
@@ -1516,7 +1538,11 @@ long int madness;
 	if(!(u.umadness&madness))
 		return 0;
 	
-	if(u.usanity <= hashed%100)
+	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
+	if(madness != MAD_GOAT_RIDDEN)
+		usan = NightmareAware_Sanity;
+
+	if(usan < hashed%100)
 		return 1;
 	return 0;
 }
@@ -1527,8 +1553,9 @@ struct monst *mon;
 long int madness;
 {
 	int sanlevel;
+	int usan = u.usanity;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness + mon->m_id))); //Offset the different madnesses before hashing
-	if(ClearThoughts || TimeStop)
+	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN) || TimeStop)
 		return 0;
 	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
@@ -1538,7 +1565,11 @@ long int madness;
 	
 	sanlevel = max_ints(1,(int)(((float)hashed/ULONG_MAX) * ((float)hash(hashed)/ULONG_MAX) * 100));
 	
-	if(u.usanity < sanlevel)
+	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
+	if(madness != MAD_GOAT_RIDDEN)
+		usan = NightmareAware_Sanity;
+
+	if(usan < sanlevel)
 		return 1;
 	return 0;
 }

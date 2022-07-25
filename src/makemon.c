@@ -12124,7 +12124,7 @@ int faction;
 				}
 			    mtmp->invis_blkd = TRUE;
 			}
-			if(mndx == PM_WALKING_DELIRIUM && !ClearThoughts){
+			if(mndx == PM_WALKING_DELIRIUM && !BlockableClearThoughts){
 				mtmp->mappearance = select_newcham_form(mtmp);
 				mtmp->m_ap_type = M_AP_MONSTER;
 			}

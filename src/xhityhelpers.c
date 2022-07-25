@@ -340,14 +340,12 @@ struct monst * mon;
 		return TRUE;
 	}
 
-	if (u.umadness&MAD_PARANOIA && !ClearThoughts && u.usanity < rnd(100)){
+	if (u.umadness&MAD_PARANOIA && !BlockableClearThoughts && NightmareAware_Sanity < rnd(100)){
 		You("attack %s's hallucinatory twin!", mon_nam(mon));
 		return TRUE;
 	}
 
-	if ((mon->data->mlet == S_WORM
-		|| mon_attacktype(mon, AT_TENT)
-		) && roll_madness(MAD_HELMINTHOPHOBIA)){
+	if (triggers_helminthophobia(mon) && roll_madness(MAD_HELMINTHOPHOBIA)){
 		pline("You're afraid to go near that wormy thing!");
 		return TRUE;
 	}

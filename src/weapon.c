@@ -2644,7 +2644,7 @@ struct obj *otmp;
 	else if (str < STR19(25)) bonus = 7;
 	else /*  str ==25*/bonus = 8;
 	
-	if(u.umadness&MAD_RAGE && !ClearThoughts){
+	if(u.umadness&MAD_RAGE && !BlockableClearThoughts){
 		bonus += (Insanity)/10;
 	}
 	if(otmp){

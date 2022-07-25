@@ -336,7 +336,7 @@ losedogs()
 		mtmp2 = mtmp->nmon;
 		if (mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel 
 			&& mtmp->m_insight_level <= u.uinsight
-		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 		) {
 			mon_extract_from_list(mtmp, &migrating_mons);
 		    mon_arrive(mtmp, FALSE);

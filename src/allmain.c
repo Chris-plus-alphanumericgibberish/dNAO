@@ -818,8 +818,8 @@ you_calc_movement()
 	default: break;
 	}
 	
-	if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-		int delta = Insanity;
+	if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+		int delta = NightmareAware_Insanity;
 		int discomfort = u_clothing_discomfort();
 		discomfort = (discomfort * delta)/100;
 		if (moveamt - discomfort < NORMAL_SPEED/2) {
@@ -1039,9 +1039,9 @@ you_regen_hp()
 		}
 	}
 	
-	if(FaintingFits && rn2(100) >= u.usanity && multi >= 0){
+	if(FaintingFits && rn2(100) >= NightmareAware_Sanity && multi >= 0){
 		You("suddenly faint!");
-		fall_asleep((u.usanity - 100)/10 - 1, FALSE);
+		fall_asleep((NightmareAware_Sanity - 100)/10 - 1, FALSE);
 	}
 
 	//Worn Vilya bonus ranges from -4 (penalty) to +7 HP per 10 turns
@@ -1459,7 +1459,7 @@ moveloop()
 		for (mtmp = fmon; mtmp; mtmp = nxtmon){
 			nxtmon = mtmp->nmon;
 			if(mtmp->m_insight_level > u.uinsight
-			  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+			  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 			){
 				insight_vanish(mtmp);
 				continue;
@@ -1541,7 +1541,7 @@ moveloop()
 					}
 				}
 				if(mtmp->m_insight_level > u.uinsight
-				  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+				  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 				){
 					insight_vanish(mtmp);
 					continue;
@@ -1999,7 +1999,7 @@ karemade:
 				if(DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
 					continue;
 
-				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !mtmp->mtame && !ClearThoughts) {
+				if(mtmp->mtyp == PM_WALKING_DELIRIUM && !mtmp->mtame && !BlockableClearThoughts) {
 					static long lastusedmove = 0;
 					if (lastusedmove != moves) {
 						if (!mtmp->mappearance || (canseemon(mtmp) && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1 && rn2(3))) {
@@ -2015,7 +2015,7 @@ karemade:
 					}
 				}
 
-				if(has_template(mtmp, MAD_TEMPLATE) && !ClearThoughts && canseemon(mtmp) && dimness(mtmp->mx, mtmp->my) <= 0 && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
+				if(has_template(mtmp, MAD_TEMPLATE) && !BlockableClearThoughts && canseemon(mtmp) && dimness(mtmp->mx, mtmp->my) <= 0 && distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 1){
 					static long lastusedmove = 0;
 					static int lastcost = 0;
 					int sancost = u_sanity_loss_minor(mtmp);
@@ -2295,7 +2295,10 @@ karemade:
 					You("feel it %s inside your body!", hoststrings[rn2(SIZE(hoststrings))]);
 					make_vomiting(Vomiting+49+d(4,11), TRUE);
 				}
+				if(Nightmare)
+					dohost_mon(&youmonst);
 			}
+
 			if(roll_madness(MAD_ROTTING)){
 				if(roll_madness(MAD_ROTTING))
 					create_gas_cloud(u.ux+rn2(3)-1, u.uy+rn2(3)-1, 1, rnd(6), FALSE); //Longer-lived smoke
@@ -2540,7 +2543,7 @@ karemade:
 
 		    if (flags.bypasses) clear_bypasses();
 		    if(Glib) glibr();
-		    // if(StumbleBlind && rn2(100) >= u.usanity) bumbler();
+		    // if(StumbleBlind && rn2(100) >= NightmareAware_Sanity) bumbler();
 		    nh_timeout();
 		    run_regions();
 		    run_maintained_spells();
@@ -2864,7 +2867,7 @@ karemade:
 			}
 		}
 		if(mtmp->m_insight_level > u.uinsight
-		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && ClearThoughts)
+		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 		){
 			insight_vanish(mtmp);
 			continue;
@@ -2916,11 +2919,11 @@ karemade:
 			see_objects();
 			see_traps();
 			if (u.uswallow) swallowed(0);
-		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || u.usanity < 100 || oldsanity < 100) {
+		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || NightmareAware_Sanity < 100 || oldsanity < 100) {
 	     	see_monsters();
 	    }
 		
-		oldsanity = u.usanity;
+		oldsanity = NightmareAware_Sanity;
 
 		switch (((u_healing_penalty() - healing_penalty) > 0) - ((u_healing_penalty() - healing_penalty) < 0))
 		{
@@ -2964,11 +2967,11 @@ karemade:
 			see_objects();
 			see_traps();
 			if (u.uswallow) swallowed(0);
-		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || u.usanity < 100 || oldsanity < 100) {
+		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || NightmareAware_Sanity < 100 || oldsanity < 100) {
 	     	see_monsters();
 	    }
 		
-		oldsanity = u.usanity;
+		oldsanity = NightmareAware_Sanity;
 
 		if (!oldLightBlind ^ !LightBlind) {  /* one or the other but not both */
 			see_monsters();
@@ -5178,6 +5181,150 @@ struct monst *magr;
 			xgazey(magr, mdef, &symbiote, -1);
 		else
 			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+	}
+}
+
+void
+dohost_mon(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	int count_close = 0;
+	int count_far = 0;
+	int dist;
+	boolean peace = 0;
+	boolean youagr = &youmonst == magr;
+	struct attack symbiote = { 0, 0, 6, 6 };
+	// if(&youmonst == magr || magr->mpeaceful)
+	if(youagr)
+		peace = 1;
+	for(mdef = fmon; mdef; mdef = mdef->nmon){
+		if(mdef->mpeaceful == peace)
+			continue;
+		dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
+		if(dist > BOLT_LIM)
+			continue;
+		if(!couldsee(x(mdef), y(mdef)))
+			continue;
+		if(dist > 1)
+			count_far++;
+		if((touch_petrifies(mdef->data)
+		 || mdef->mtyp == PM_MEDUSA)
+		 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+		) continue;
+		
+		if(mdef->mtyp == PM_PALE_NIGHT)
+			continue;
+		if(dist <= 2)
+			count_close++;
+	}
+	if(!peace){
+		mdef = &youmonst;
+	}
+
+	switch(rn2(6)){
+		//Acid blast
+		case 0:
+			// pline("acid blast");
+			if(!count_far)
+				return;
+			count_far = rn2(count_far);
+			for(mdef = fmon; mdef; mdef = mdef->nmon){
+				if(mdef->mpeaceful == peace)
+					continue;
+					dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
+					if(dist > BOLT_LIM)
+						continue;
+					if(!couldsee(x(mdef), y(mdef)))
+						continue;
+					if(dist > 1){
+						if(count_far-- > 0)
+							continue;
+						explode(x(mdef), y(mdef), AD_ACID, 0, d(6,6), EXPL_NOXIOUS, 1);
+						return;
+					}
+			}
+		break;
+		//Sickness
+		case 1:
+			// pline("sickness");
+			if(!count_far && !count_close)
+				return;
+			count_far = rn2(count_far+count_close);
+			symbiote.aatyp = AT_MAGC;
+			symbiote.adtyp = AD_CLRC;
+			for(mdef = fmon; mdef; mdef = mdef->nmon){
+				if(mdef->mpeaceful == peace)
+					continue;
+					dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
+					if(dist > BOLT_LIM)
+						continue;
+					if(!couldsee(mdef->mx, mdef->my))
+						continue;
+					if(count_far-- > 0)
+						continue;
+					cast_spell(magr, mdef, &symbiote, PLAGUE, x(mdef), y(mdef));
+					return;
+			}
+		break;
+		//Flesh hook
+		case 2:
+			// pline("flesh hook");
+			if(!count_close)
+				return;
+			count_close = rn2(count_close);
+			symbiote.aatyp = AT_LRCH;
+			symbiote.adtyp = AD_HOOK;
+		break;
+		//Vampiric
+		case 3:
+			// pline("vampire");
+			if(!count_close)
+				return;
+			count_close = rn2(count_close);
+			symbiote.aatyp = AT_BITE;
+			symbiote.adtyp = AD_VAMP;
+		break;
+		//Brain
+		case 4:
+			// pline("brain");
+			if(!count_close)
+				return;
+			count_close = rn2(count_close);
+			symbiote.aatyp = AT_TENT;
+			symbiote.adtyp = AD_DRIN;
+		break;
+		//Acid slash
+		case 5:
+			// pline("acid slash");
+			if(!count_close)
+				return;
+			count_close = rn2(count_close);
+			symbiote.aatyp = AT_SRPR;
+			symbiote.adtyp = AD_EACD;
+		break;
+	}
+	for(mdef = fmon; mdef; mdef = mdef->nmon){
+		if(mdef->mpeaceful == peace)
+			continue;
+		dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
+		if(dist > BOLT_LIM)
+			continue;
+		if(!couldsee(mdef->mx, mdef->my))
+			continue;
+		if((touch_petrifies(mdef->data)
+		 || mdef->mtyp == PM_MEDUSA)
+		 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+		) continue;
+		
+		if(mdef->mtyp == PM_PALE_NIGHT)
+			continue;
+		if(dist <= 2){
+			if(count_close-- > 0)
+				continue;
+			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+			return;
+		}
 	}
 }
 

@@ -5544,8 +5544,8 @@ u_healing_penalty()
 
 		penalty += plat_penalty/2;
 	}
-	if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
-		int delta = Insanity;
+	if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+		int delta = NightmareAware_Insanity;
 		penalty += (u_clothing_discomfort() * delta)/10;
 	}
 	return penalty;

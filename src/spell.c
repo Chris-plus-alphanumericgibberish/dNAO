@@ -1048,7 +1048,7 @@ age_spells()
 	 * does not alter the loss of memory.
 	 */
 	if(roll_madness(MAD_FORGETFUL))
-		timeout += (Insanity);
+		timeout += (NightmareAware_Insanity);
 		
 	for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++)
 	    if (spellknow(i)){
@@ -6082,23 +6082,24 @@ int spell;
 	
 	//Many madnesses affect spell casting chances
 	if(u.umadness){
-		int delta = Insanity;
-		if(u.umadness&MAD_RAGE && !ClearThoughts){
+		int delta = NightmareAware_Insanity;
+		if(u.umadness&MAD_RAGE && !BlockableClearThoughts){
 			chance -= delta;
 		}
-		if(u.umadness&MAD_FORMICATION && !ClearThoughts){
+		if(u.umadness&MAD_FORMICATION && !BlockableClearThoughts){
 			chance -= delta/2;
 		}
 		if(u.umadness&MAD_SCIAPHILIA && !ClearThoughts && ((dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0))){
 			chance -= delta;
 		}
-		if(u.umadness&MAD_NUDIST && !ClearThoughts && u.usanity < 100){
+		if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
 			int discomfort = u_clothing_discomfort();
 			if (discomfort) {
 				chance -= (discomfort * delta)/10;
 			} else {
 				if (!uwep && !uarms) {
-					chance += delta/10;
+					//Not reduced by ClearThoughts+Nightmare combo
+					chance += Insanity/10;
 				}
 			}
 		}

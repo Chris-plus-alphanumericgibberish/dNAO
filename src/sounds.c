@@ -5722,8 +5722,10 @@ boolean inc_penalties;
 			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uswapwep)));
 	}
 	
-	if(inc_penalties && u.umadness&MAD_FORMICATION && !ClearThoughts && maxskill > P_UNSKILLED){
+	if(inc_penalties && u.umadness&MAD_FORMICATION && !BlockableClearThoughts && maxskill > P_UNSKILLED){
 		int delta = (Insanity)/20;
+		if(Nightmare && ClearThoughts && delta)
+			delta = 1; /* Want Should have SOME effect */
 		maxskill = max(maxskill - delta, P_UNSKILLED);
 	}
 	
@@ -5788,8 +5790,10 @@ boolean inc_penalties;
 		curskill = P_BASIC;
 	}
 	
-	if(inc_penalties && u.umadness&MAD_FORMICATION && !ClearThoughts && curskill > P_UNSKILLED){
+	if(inc_penalties && u.umadness&MAD_FORMICATION && !BlockableClearThoughts && curskill > P_UNSKILLED){
 		int delta = (Insanity)/20;
+		if(Nightmare && ClearThoughts && delta)
+			delta = 1; /* Want Should have SOME effect */
 		curskill = max(curskill - delta, P_UNSKILLED);
 	}
 	

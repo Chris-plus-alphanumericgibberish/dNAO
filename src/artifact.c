@@ -2869,6 +2869,7 @@ get_premium_heart_multiplier()
 	if (!Upolyd && u.uhp<u.uhpmax / 16) multiplier++;
 	if (Insanity > 50 && !ClearThoughts) multiplier++;
 	if (Insanity > 75 && !ClearThoughts) multiplier++;
+	if (NightmareAware_Insanity >= 90 && ClearThoughts && Nightmare) multiplier++;
 	if (Blind) multiplier++;
 	if (Stunned) multiplier++;
 	if (Confusion) multiplier++;

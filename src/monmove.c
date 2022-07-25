@@ -1831,19 +1831,19 @@ register struct monst *mtmp;
 					}
 					if(power >= 4 && !Babble && !Screaming){
 						if(rn2(3)){
-							if(!ClearThoughts)
+							if(!BlockableClearThoughts)
 								You("scream in pain!");
 							HScreaming = 2;
 						}
 						else if(rn2(2)){
-							if(ClearThoughts)
+							if(BlockableClearThoughts)
 								You_feel("a little frightened.");
 							else
 								You("begin screaming in terror and madness!");
 							HScreaming = 1+rnd((dmg)/5+1)+rnd((dmg)/5+1);
 						}
 						else {
-							if(ClearThoughts)
+							if(BlockableClearThoughts)
 								You_feel("a little incoherent.");
 							else
 								You("begin babbling incoherently!");
