@@ -1704,14 +1704,13 @@ struct monst *mon;
 	if(mon->seenmadnesses != u.umadness){
 		unsigned long long int madflag;
 		for(madflag = 0x1L; madflag <= LAST_MADNESS; madflag = madflag << 1){
-			if(u.umadness&madflag && !(mon->seenmadnesses&madflag)){
+			if(u.umadness&madflag && !(mon->seenmadnesses&madflag) && roll_generic_madness(FALSE)){
 				mon->seenmadnesses |= madflag;
-				if(d(2,30) > mon->m_lev){
+				if(d(2,u.ulevel) > mon->m_lev){
 					if(madflag == MAD_DELUSIONS
 					 || madflag == MAD_REAL_DELUSIONS
 					 || madflag == MAD_SPORES
 					 || madflag == MAD_SPIRAL
-					 || madflag == MAD_GOAT_RIDDEN
 					 || madflag == MAD_FORMICATION
 					){
 						mon->mcrazed = 1;
