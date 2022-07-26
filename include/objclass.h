@@ -110,7 +110,7 @@ struct objclass {
 #define CHITIN		10
 #define SHELL_MAT	11
 #define DRAGON_HIDE	12	/* not leather! */
-#define IRON		13	/* Fe - includes steel */
+#define IRON		13	/* Fe - includes steel (note: is_metallic uses this as the start-point) */
 #define GREEN_STEEL	14	/* special steal */
 #define METAL		15	/* Sn, &c. */
 #define COPPER		16	/* Cu - includes brass and bronze*/
@@ -118,7 +118,7 @@ struct objclass {
 #define GOLD		18	/* Au */
 #define PLATINUM	19	/* Pt */
 #define LEAD		20	/* Pu */
-#define MITHRIL		21
+#define MITHRIL		21  /* (note: is_metallic uses this as the end-point) */
 #define PLASTIC		22
 #define GLASS		23
 #define GEMSTONE	24
