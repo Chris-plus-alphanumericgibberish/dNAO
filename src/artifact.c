@@ -2093,6 +2093,10 @@ struct obj *obj;
 		case ART_GOLDEN_SWORD_OF_Y_HA_TALLA:
 			wt = 2*objects[SCIMITAR].oc_weight;
 			break;
+		case ART_GREEN_DRAGON_CRESCENT_BLAD:
+			wt = 2*objects[NAGINATA].oc_weight;
+			wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
+			break;
 		case ART_AEGIS:
 			wt = objects[CLOAK].oc_weight;
 			break;
