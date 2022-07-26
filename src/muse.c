@@ -968,9 +968,10 @@ struct monst *mtmp;
 	int difficulty = monstr[(monsndx(pm))];
 	int trycnt = 0;
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || nohands(mtmp->data)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
+
     try_again:
 	switch (rn2(8 + (difficulty > 3) + (difficulty > 6) +
 				(difficulty > 8))) {
@@ -1749,7 +1750,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))], diesize;
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || nohands(mtmp->data) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	if (difficulty > 7 && !rn2(35)) return WAN_DEATH;
