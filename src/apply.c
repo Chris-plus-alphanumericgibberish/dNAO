@@ -4535,7 +4535,7 @@ use_pole(obj)
 	struct monst *mtmp;
 	
 	int res = pick_polearm_target(obj, &mtmp, &cc);
-	if(!mtmp)
+	if(res == MOVE_CANCELLED)
 		return res;
 
 	/* Attack the monster there */
