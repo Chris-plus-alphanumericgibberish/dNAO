@@ -5810,7 +5810,7 @@ boolean ranged;
 		else {
 			if(youdef){
 				dmg = Insanity/5;
-				if(Insanity%5 && rn2(Insanity%5))
+				if(Insanity%5 > rn2(5))
 					dmg++;
 			}
 			else {
