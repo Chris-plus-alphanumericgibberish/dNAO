@@ -13661,8 +13661,36 @@ struct monst *mtmp, *victim;
 		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
 			max_increase = 1;
 			cur_increase = 1;
-			if(Role_if(PM_BARD) && mtmp->mtame && canseemon(mtmp)){
-				u.pethped = TRUE;
+			if(mtmp->mtame){
+				if(Role_if(PM_BARD) && canseemon(mtmp)){
+					u.pethped = TRUE;
+				}
+				if(get_mx(mtmp, MX_EDOG) && (!EDOG(mtmp)->waspeaceful || mtmp->mpeacetime)){
+					int roll = 950;
+					roll -= ACURR(A_CHA)*10;
+					switch(P_SKILL(P_BEAST_MASTERY)){
+						case P_ISRESTRICTED:
+						case P_UNSKILLED:
+						//Nothing
+						break;
+						case P_BASIC:
+							roll /= 2;
+						break;
+						case P_SKILLED:
+							roll /= 5;
+						break;
+						case P_EXPERT:
+							roll /= 10;
+						break;
+						default:
+							impossible(">Expert beast mastery not handled in grow_up.");
+						break;
+					}
+					if(canspotmon(mtmp))
+						pline("%s looks free of turmoil.", Monnam(mtmp));
+					EDOG(mtmp)->waspeaceful = TRUE;
+					mtmp->mpeacetime = 0;
+				}
 			}
 			for(bardmon = fmon; bardmon; bardmon = bardmon->nmon){
 				if(is_bardmon(bardmon->data) 
