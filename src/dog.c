@@ -1002,7 +1002,7 @@ register struct obj *obj;
 	boolean herbi = herbivorous(mon->data);
 	boolean starving;
 
-	if (is_quest_artifact(obj) || obj_resists(obj, 0, 95))
+	if (is_quest_artifact(obj) || obj_resists(obj, 0, 100))
 	    return (obj->cursed ? TABU : APPORT);
 
 	switch(obj->oclass) {
