@@ -3285,13 +3285,15 @@ struct monst * mdef;	/* another monster which is next to it */
 	/* undead vs civs */
 	if(!(In_cha(&u.uz) || Is_rogue_level(&u.uz))){
 		if(mm_undead(magr) && 
-			(!is_witch_mon(mdef) && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef) && mdef->mfaction != YELLOW_FACTION)
-		)
+			(!is_witch_mon(mdef) && mdef->mtyp != PM_WITCH_S_FAMILIAR && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef) && mdef->mfaction != YELLOW_FACTION)
+		){
 			return ALLOW_M|ALLOW_TM;
-		if((!is_witch_mon(magr) && !magr->mpetitioner && !mm_undead(magr) && !mindless_mon(magr) && magr->mfaction != YELLOW_FACTION)
+		}
+		if((!is_witch_mon(magr) && magr->mtyp != PM_WITCH_S_FAMILIAR && !magr->mpetitioner && !mm_undead(magr) && !mindless_mon(magr) && magr->mfaction != YELLOW_FACTION)
 			&& mm_undead(mdef)
-		)
+		){
 			return ALLOW_M|ALLOW_TM;
+		}
 	}
 	
 	/* Alabaster elves vs. oozes */
