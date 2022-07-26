@@ -2201,7 +2201,7 @@ struct monst *mtmp;
 			    mtmp->mtrapped = 1;
 			    if(in_sight) {
 					pline("%s is caught by %s %s!",
-						  Monnam(mtmp), a_your[trap->madeby_u], the(xname(trap->ammo)));
+						  Monnam(mtmp), a_your[trap->madeby_u], xname(trap->ammo));
 					seetrap(trap);
 			    }
 
