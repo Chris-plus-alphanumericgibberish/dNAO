@@ -1550,6 +1550,13 @@ mklev()
 #endif
 	}
 	set_wall_state();
+	if(u.silver_flame_z.dnum == u.uz.dnum && u.silver_flame_z.dlevel == u.uz.dlevel){
+		int limit = 1000;
+		do {
+			u.s_f_x = rnd(COLNO-1);
+			u.s_f_y = rn2(ROWNO);
+		} while((!isok(u.s_f_x, u.s_f_y) || !ZAP_POS(levl[u.s_f_x][u.s_f_y].typ)) && limit-- > 0);
+	}
 }
 
 void
