@@ -1833,7 +1833,7 @@ movemon()
 		//else no quant lock
 	}
 	
-	if(Nightmare && mon_can_see_you(mtmp)){
+	if(Nightmare && mon_can_see_you(mtmp) && !mindless_mon(mtmp)){
 		you_inflict_madness(mtmp);
 	}
 	
