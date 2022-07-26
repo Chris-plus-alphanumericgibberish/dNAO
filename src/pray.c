@@ -18,7 +18,7 @@ STATIC_DCL void FDECL(pleased,(ALIGNTYP_P));
 STATIC_DCL void FDECL(god_zaps_you, (int));
 STATIC_DCL void FDECL(fry_by_god, (int));
 STATIC_DCL void FDECL(consume_offering,(struct obj *));
-STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean));
+STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean, int));
 STATIC_DCL void FDECL(burn_offering,(struct obj *, boolean));
 STATIC_DCL boolean FDECL(water_prayer,(BOOLEAN_P));
 STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
@@ -1253,9 +1253,10 @@ int godnum;
 static NEARDATA const char sacrifice_types[] = { FOOD_CLASS, AMULET_CLASS, 0 };
 
 STATIC_OVL void
-eat_offering(otmp, silently)
+eat_offering(otmp, silently, eatflag)
 register struct obj *otmp;
 boolean silently;
+int eatflag;
 {
 	xchar x, y;
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
@@ -1352,17 +1353,15 @@ boolean silently;
 			pline("A mouth forms from the mist and eats your sacrifice!");
 		}
 	}
-    if (carried(otmp)){
-		if(u.sealsActive&SEAL_BALAM){
-			struct permonst *ptr = &mons[otmp->corpsenm];
-			if(!(is_animal(ptr) || nohands(ptr))) unbind(SEAL_BALAM,TRUE);
-		}
-		if(u.sealsActive&SEAL_YMIR){
-			struct permonst *ptr = &mons[otmp->corpsenm];
-			if(is_giant(ptr)) unbind(SEAL_YMIR,TRUE);
-		}
-		useup(otmp);
+	if(u.sealsActive&SEAL_BALAM && eatflag != GOAT_EAT_PASSIVE){
+		struct permonst *ptr = &mons[otmp->corpsenm];
+		if(!(is_animal(ptr) || nohands(ptr))) unbind(SEAL_BALAM,TRUE);
 	}
+	if(u.sealsActive&SEAL_YMIR && eatflag != GOAT_EAT_PASSIVE){
+		struct permonst *ptr = &mons[otmp->corpsenm];
+		if(is_giant(ptr)) unbind(SEAL_YMIR,TRUE);
+	}
+    if (carried(otmp)) useup(otmp);
     else useupf(otmp, 1L);
     exercise(A_WIS, TRUE);
 }
@@ -3766,7 +3765,7 @@ int eatflag;
 	/* never an altar conversion*/
 	
 	/* Rider handled */
-	eat_offering(otmp, eatflag == GOAT_EAT_MARKED && !(u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) && goat_seenonce);
+	eat_offering(otmp, eatflag == GOAT_EAT_MARKED && !(u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) && goat_seenonce, eatflag);
 	if(eatflag == GOAT_EAT_MARKED)
 		goat_seenonce = TRUE;
 	if(eatflag != GOAT_EAT_PASSIVE && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
