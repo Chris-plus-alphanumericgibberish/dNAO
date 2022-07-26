@@ -5478,7 +5478,10 @@ boolean goodequip;
 		    otmp = mongets(mtmp, rn2(11) ? ROBE : CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
 			if(otmp) otmp->obj_color = CLR_ORANGE;
 		} else if (is_dwarf(ptr)) { //slightly rearanged code so more dwarves get helms -D_E
-			if(In_mordor_quest(&u.uz) 
+			if(mm == PM_DWARF_KING && In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && urole.neminum == PM_NECROMANCER && in_mklev){
+				(void)mongets(mtmp, SHACKLES, mkobjflags);
+				mtmp->entangled = SHACKLES;
+			} else if(In_mordor_quest(&u.uz)
 				&& !In_mordor_forest(&u.uz)
 				&& !Is_ford_level(&u.uz)
 				&& !In_mordor_fields(&u.uz)
