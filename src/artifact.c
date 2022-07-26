@@ -2502,20 +2502,20 @@ touch_artifact(obj, mon, hypothetical)
 	
 	if(obj->oartifact >= ART_BLACK_CRYSTAL && obj->oartifact <= ART_AIR_CRYSTAL){
 		if(obj->oartifact == ART_BLACK_CRYSTAL){
-			if(yours) badclass = badalign = forceEvade = !(mvitals[PM_CHAOS].died);
+			if(yours) badclass = badalign = forceEvade = !(PURIFIED_CHAOS);
 			else badclass = badalign = forceEvade = TRUE;
 		} else if(obj->oartifact == ART_EARTH_CRYSTAL){
-			if(yours) badclass = badalign = forceEvade = !mvitals[PM_LICH__THE_FIEND_OF_EARTH].died;
-			else badclass = badalign = forceEvade = !!(mvitals[PM_LICH__THE_FIEND_OF_EARTH].died);
+			if(yours) badclass = badalign = forceEvade = !PURIFIED_EARTH;
+			else badclass = badalign = forceEvade = !!(PURIFIED_EARTH);
 		} else if(obj->oartifact == ART_FIRE_CRYSTAL){
-			if(yours) badclass = badalign = forceEvade = !mvitals[PM_KARY__THE_FIEND_OF_FIRE].died;
-			else badclass = badalign = forceEvade = !!(mvitals[PM_KARY__THE_FIEND_OF_FIRE].died);
+			if(yours) badclass = badalign = forceEvade = !PURIFIED_FIRE;
+			else badclass = badalign = forceEvade = !!(PURIFIED_FIRE);
 		} else if(obj->oartifact == ART_WATER_CRYSTAL){
-			if(yours) badclass = badalign = forceEvade = !mvitals[PM_KRAKEN__THE_FIEND_OF_WATER].died;
-			else badclass = badalign = forceEvade = !!(mvitals[PM_KRAKEN__THE_FIEND_OF_WATER].died);
+			if(yours) badclass = badalign = forceEvade = !PURIFIED_WATER;
+			else badclass = badalign = forceEvade = !!(PURIFIED_WATER);
 		} else if(obj->oartifact == ART_AIR_CRYSTAL){
-			if(yours) badclass = badalign = forceEvade = !mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died;
-			else badclass = badalign = forceEvade = !!(mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died);
+			if(yours) badclass = badalign = forceEvade = !PURIFIED_WIND;
+			else badclass = badalign = forceEvade = !!(PURIFIED_WIND);
 		}
 	}
 	

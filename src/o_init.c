@@ -1549,15 +1549,11 @@ struct obj *otmp;
 	switch (otmp->oartifact)
 	{
 	case ART_EPOCH_S_CURVE:		return CLR_WHITE;
-	case ART_BLACK_CRYSTAL:		return mvitals[PM_CHAOS].died ? CLR_BLACK : HI_GLASS;
-	case ART_EARTH_CRYSTAL:		return mvitals[PM_LICH__THE_FIEND_OF_EARTH].died ? 
-										CLR_YELLOW : CLR_BROWN;
-	case ART_FIRE_CRYSTAL:		return  mvitals[PM_KARY__THE_FIEND_OF_FIRE].died ? 
-										CLR_ORANGE : CLR_RED;
-	case ART_WATER_CRYSTAL:		return  mvitals[PM_KRAKEN__THE_FIEND_OF_WATER].died ? 
-										CLR_BRIGHT_BLUE : CLR_BLUE;
-	case ART_AIR_CRYSTAL:		return  mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died ? 
-										CLR_BRIGHT_GREEN : CLR_GREEN;
+	case ART_BLACK_CRYSTAL:		return PURIFIED_CHAOS ? CLR_BLACK : HI_GLASS;
+	case ART_EARTH_CRYSTAL:		return PURIFIED_EARTH ? CLR_YELLOW : CLR_BROWN;
+	case ART_FIRE_CRYSTAL:		return PURIFIED_FIRE ? 	CLR_ORANGE : CLR_RED;
+	case ART_WATER_CRYSTAL:		return PURIFIED_WATER ? CLR_BRIGHT_BLUE : CLR_BLUE;
+	case ART_AIR_CRYSTAL:		return PURIFIED_WIND ?  CLR_BRIGHT_GREEN : CLR_GREEN;
 	case ART_SPELL_WARDED_WRAPPINGS_OF_:		return CLR_BLACK;
 	}
 	

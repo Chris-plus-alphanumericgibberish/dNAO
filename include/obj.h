@@ -1113,4 +1113,10 @@ struct obj {
 		(depth&(W_ARMU|W_SKIN)) ? TRUE :\
 		FALSE))
 
+#define PURIFIED_CHAOS	(mvitals[PM_CHAOS].died)
+#define PURIFIED_EARTH	(mvitals[PM_CHAOS].died || mvitals[PM_LICH__THE_FIEND_OF_EARTH].died)
+#define PURIFIED_FIRE	(mvitals[PM_CHAOS].died || mvitals[PM_KARY__THE_FIEND_OF_FIRE].died)
+#define PURIFIED_WATER	(mvitals[PM_CHAOS].died || mvitals[PM_KRAKEN__THE_FIEND_OF_WATER].died)
+#define PURIFIED_WIND	(mvitals[PM_CHAOS].died || mvitals[PM_TIAMAT__THE_FIEND_OF_WIND].died)
+
 #endif /* OBJ_H */
