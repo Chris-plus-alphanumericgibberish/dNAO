@@ -268,6 +268,12 @@ int template;
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
 		
+		/*Undead are against natural law*/
+		if(ptr->maligntyp > 0)
+			ptr->maligntyp = -1*ptr->maligntyp;
+		else if(ptr->maligntyp == 0)
+			ptr->maligntyp = -5;
+
 		/*Zombies have no skill*/
 		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
 		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
@@ -301,6 +307,13 @@ int template;
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+
+		/*Undead are against natural law*/
+		if(ptr->maligntyp > 0)
+			ptr->maligntyp = -1*ptr->maligntyp;
+		else if(ptr->maligntyp == 0)
+			ptr->maligntyp = -5;
+
 		/*Skeletons have no skill*/
 		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
 		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
@@ -328,6 +341,10 @@ int template;
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
 		ptr->mflagsb |= (MB_INDIGESTIBLE);
+
+		/*Crystal dead have no free will*/
+		ptr->maligntyp = 20;
+
 		/*Crystal dead have no skill*/
 		ptr->mflagsf &= ~(MF_BAB_HALF);
 		/* defense: */
@@ -411,12 +428,19 @@ int template;
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsb &= ~(MB_UNSOLID|MB_OVIPAROUS|MB_ACID|MB_POIS|MB_POIS|MB_TOSTY|MB_HALUC|MB_INSUBSTANTIAL);
 		ptr->mflagsb |= (MB_INDIGESTIBLE|MB_THICK_HIDE|MB_STRONG);
+
+		/*The tomb herd is neutral*/
+		ptr->maligntyp = 0;
+
 		/* defense: */
 		ptr->nac += 6;
 		/* resists: */
 		ptr->mresists |= (MR_FIRE | MR_COLD | MR_SLEEP | MR_POISON | MR_STONE | MR_DRAIN | MR_SICK | MR_MAGIC);
 		break;
 	case YITH:
+		/*Yith are lawful*/
+		ptr->maligntyp = 10;
+
 		ptr->mflagst &= ~(MT_MINDLESS|MT_ANIMAL|MT_DOMESTIC);
 		if(!(ptr->mflagsb&(MB_NOLIMBS|MB_NOHANDS)) && !(ptr->mflagsm&MM_TUNNEL))
 			ptr->mflagsm |= (MM_TUNNEL|MM_NEEDPICK);
@@ -436,6 +460,10 @@ int template;
 		ptr->hdr += 2; //No one home
 		ptr->msound = MS_SILENT;
 		ptr->mflagsf = 0L;
+
+		/*Mindless monsters are neutral*/
+		ptr->maligntyp = 0;
+
 		/*Mindless monsters have no skill*/
 		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
 		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
