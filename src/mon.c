@@ -6290,10 +6290,13 @@ void
 seemimic_ambush(mtmp)
 struct monst *mtmp;
 {
+	//Note: not affected by time stop
+	if(mtmp->m_ap_type == M_AP_MONSTER && NightmareAware_Sanity < rnd(100))
+		return; //Failed to notice monster wasn't as it seemed
 	unsigned old_app = mtmp->mappearance;
 	uchar old_ap_type = mtmp->m_ap_type;
 	boolean couldsense = canseemon(mtmp) && !(sensemon(mtmp) && old_ap_type != M_AP_MONSTER);
-
+	
 	seemimic(mtmp);
 
 	if (couldsense) {
