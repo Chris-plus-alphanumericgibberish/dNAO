@@ -2392,6 +2392,24 @@ int mat;
 			else if (mat == GEMSTONE)	obj->otyp = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
 			else						obj->otyp = ROCK;
 		break;
+		case WHITE_VIBROSPEAR:
+			if(mat == GOLD) obj->otyp = GOLD_BLADED_VIBROSPEAR;
+		break;
+		case WHITE_VIBROSWORD:
+			if(mat == GOLD) obj->otyp = GOLD_BLADED_VIBROSWORD;
+		break;
+		case WHITE_VIBROZANBATO:
+			if(mat == GOLD) obj->otyp = GOLD_BLADED_VIBROZANBATO;
+		break;
+		case GOLD_BLADED_VIBROSPEAR:
+			if(mat != GOLD) obj->otyp = WHITE_VIBROSPEAR;
+		break;
+		case GOLD_BLADED_VIBROSWORD:
+			if(mat != GOLD) obj->otyp = WHITE_VIBROSWORD;
+		break;
+		case GOLD_BLADED_VIBROZANBATO:
+			if(mat != GOLD) obj->otyp = WHITE_VIBROZANBATO;
+		break;
 		// case HEAVY_IRON_BALL:
 			// obj->otyp = ;
 		// break;
