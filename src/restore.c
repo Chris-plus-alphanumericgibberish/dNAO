@@ -1056,8 +1056,9 @@ boolean ghostly;
 			   them is different now than when the level was saved */
 			restore_cham(mtmp);
 	    }
+		//Note: in case there's a bones file or other fail.
 		if(u.silver_flame_z.dnum == u.uz.dnum && u.silver_flame_z.dlevel == u.uz.dlevel
-		 && !(u.s_f_x) && !(u.s_f_y)
+		 && ((!(u.s_f_x) && !(u.s_f_y)) || (!isok(u.s_f_x, u.s_f_y) || !ZAP_POS(levl[u.s_f_x][u.s_f_y].typ)))
 		){
 			int limit = 1000;
 			do {
