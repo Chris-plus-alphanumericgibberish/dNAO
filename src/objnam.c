@@ -4766,7 +4766,8 @@ int wishflags;
 	   strncmpi(bp, "sceptre of lolth", 16) && 
 	   strncmpi(bp, "atma weapon", 11) &&
 	   strncmpi(bp, "wand of orcus", 13) &&
-	   strncmpi(bp, "shard from morgoth's crown", 26)
+	   strncmpi(bp, "shard from morgoth's crown", 26) &&
+	   strncmpi(bp, "ring of thror", 13)
 	)
 	for (i = 0; i < (int)(sizeof wrpsym); i++) {
 		register int j = strlen(wrp[i]);

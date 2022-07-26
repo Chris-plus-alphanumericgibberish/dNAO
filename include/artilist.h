@@ -1235,11 +1235,14 @@ A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
 	ENLIGHTENING, (ARTI_PLUSSEV)
 	),
 
+/*Needs encyc entry*/
+/* Doubles gold found in the dungeon when worn. */
+/* Also gives +1d6 physical damage to attacks when worn. */
 A("Ring of Thror",								RIN_GAIN_STRENGTH,	/* granite or gold (Note: since gold is the fallback at most one of this or Narya will be gold) */			(const char *)0,
 	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, PM_ELF, TIER_C, (ARTG_INHER),
 	NO_MONS(),
-	NO_ATTK(), NOFLAG,
+	ATTK(AD_PHYS, 1, 6), NOFLAG,
 	PROPS(AGGRAVATE_MONSTER), NOFLAG,
 	PROPS(), NOFLAG,
 	NOINVOKE, NOFLAG
