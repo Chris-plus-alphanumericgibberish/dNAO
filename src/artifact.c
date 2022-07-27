@@ -11654,6 +11654,8 @@ do_passive_attacks()
 				dovines(mtmp);
 			if(is_star_blades_mon(mtmp))
 				dostarblades(mtmp);
+			if(mtmp->mtyp == PM_SHALOSH_TANNAH)
+				dohost_mon(mtmp);
 			if(is_storm_mon(mtmp))
 				dostorm(mtmp);
 		}

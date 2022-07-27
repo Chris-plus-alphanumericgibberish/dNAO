@@ -5167,8 +5167,8 @@ struct monst *magr;
 
 		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
-			 || mdef->mtyp == PM_MEDUSA)
-			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+				|| mdef->mtyp == PM_MEDUSA)
+			 && (youagr ? !Stone_resistance : !resists_ston(magr))
 			) continue;
 			
 			if(mdef->mtyp == PM_PALE_NIGHT)
@@ -5189,6 +5189,7 @@ dohost_mon(magr)
 struct monst *magr;
 {
 	struct monst *mdef;
+	struct monst *nmon;
 	int count_close = 0;
 	int count_far = 0;
 	int dist;
@@ -5198,28 +5199,44 @@ struct monst *magr;
 	// if(&youmonst == magr || magr->mpeaceful)
 	if(youagr)
 		peace = 1;
-	for(mdef = fmon; mdef; mdef = mdef->nmon){
+	else peace = magr->mpeaceful;
+
+	//Loop init
+	nmon = fmon;
+	if(!nmon){
+		if(!peace)
+			nmon = &youmonst;
+	}
+	//mdef may be null (player attacking and no monsters on level
+	while((mdef = nmon)){
+		//Loop update
+		if(mdef == &youmonst)
+			nmon = (struct monst *)0;
+		else if(mdef->nmon)
+			nmon = mdef->nmon;
+		else if(!peace)
+			nmon = &youmonst;
+		else
+			nmon = (struct monst *)0;
+
 		if(mdef->mpeaceful == peace)
 			continue;
 		dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
 		if(dist > BOLT_LIM)
 			continue;
-		if(!couldsee(x(mdef), y(mdef)))
+		if(youagr ? !couldsee(x(mdef), y(mdef)) : !clear_path(x(magr), y(magr), x(mdef), y(mdef)))
 			continue;
 		if(dist > 1)
 			count_far++;
 		if((touch_petrifies(mdef->data)
-		 || mdef->mtyp == PM_MEDUSA)
-		 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+			|| mdef->mtyp == PM_MEDUSA)
+		 && (youagr ? !Stone_resistance : !resists_ston(magr))
 		) continue;
 		
 		if(mdef->mtyp == PM_PALE_NIGHT)
 			continue;
 		if(dist <= 2)
 			count_close++;
-	}
-	if(!peace){
-		mdef = &youmonst;
 	}
 
 	switch(rn2(6)){
@@ -5229,20 +5246,37 @@ struct monst *magr;
 			if(!count_far)
 				return;
 			count_far = rn2(count_far);
-			for(mdef = fmon; mdef; mdef = mdef->nmon){
+			//Loop init
+			nmon = fmon;
+			if(!nmon){
+				if(!peace)
+					nmon = &youmonst;
+			}
+			//mdef may be null (player attacking and no monsters on level
+			while((mdef = nmon)){
+				//Loop update
+				if(mdef == &youmonst)
+					nmon = (struct monst *)0;
+				else if(mdef->nmon)
+					nmon = mdef->nmon;
+				else if(!peace)
+					nmon = &youmonst;
+				else
+					nmon = (struct monst *)0;
+
 				if(mdef->mpeaceful == peace)
 					continue;
-					dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
-					if(dist > BOLT_LIM)
+				dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
+				if(dist > BOLT_LIM)
+					continue;
+				if(youagr ? !couldsee(x(mdef), y(mdef)) : !clear_path(x(magr), y(magr), x(mdef), y(mdef)))
+					continue;
+				if(dist > 1){
+					if(count_far-- > 0)
 						continue;
-					if(!couldsee(x(mdef), y(mdef)))
-						continue;
-					if(dist > 1){
-						if(count_far-- > 0)
-							continue;
-						explode(x(mdef), y(mdef), AD_ACID, 0, d(6,6), EXPL_NOXIOUS, 1);
-						return;
-					}
+					explode(x(mdef), y(mdef), AD_ACID, 0, d(6,6), EXPL_NOXIOUS, 1);
+					return;
+				}
 			}
 		break;
 		//Sickness
@@ -5253,18 +5287,35 @@ struct monst *magr;
 			count_far = rn2(count_far+count_close);
 			symbiote.aatyp = AT_MAGC;
 			symbiote.adtyp = AD_CLRC;
-			for(mdef = fmon; mdef; mdef = mdef->nmon){
+			//Loop init
+			nmon = fmon;
+			if(!nmon){
+				if(!peace)
+					nmon = &youmonst;
+			}
+			//mdef may be null (player attacking and no monsters on level
+			while((mdef = nmon)){
+				//Loop update
+				if(mdef == &youmonst)
+					nmon = (struct monst *)0;
+				else if(mdef->nmon)
+					nmon = mdef->nmon;
+				else if(!peace)
+					nmon = &youmonst;
+				else
+					nmon = (struct monst *)0;
+
 				if(mdef->mpeaceful == peace)
 					continue;
-					dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
-					if(dist > BOLT_LIM)
-						continue;
-					if(!couldsee(mdef->mx, mdef->my))
-						continue;
-					if(count_far-- > 0)
-						continue;
-					cast_spell(magr, mdef, &symbiote, PLAGUE, x(mdef), y(mdef));
-					return;
+				dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
+				if(dist > BOLT_LIM)
+					continue;
+				if(youagr ? !couldsee(x(mdef), y(mdef)) : !clear_path(x(magr), y(magr), x(mdef), y(mdef)))
+					continue;
+				if(count_far-- > 0)
+					continue;
+				cast_spell(magr, mdef, &symbiote, PLAGUE, x(mdef), y(mdef));
+				return;
 			}
 		break;
 		//Flesh hook
@@ -5304,17 +5355,34 @@ struct monst *magr;
 			symbiote.adtyp = AD_EACD;
 		break;
 	}
-	for(mdef = fmon; mdef; mdef = mdef->nmon){
+	//Loop init
+	nmon = fmon;
+	if(!nmon){
+		if(!peace)
+			nmon = &youmonst;
+	}
+	//mdef may be null (player attacking and no monsters on level
+	while((mdef = nmon)){
+		//Loop update
+		if(mdef == &youmonst)
+			nmon = (struct monst *)0;
+		else if(mdef->nmon)
+			nmon = mdef->nmon;
+		else if(!peace)
+			nmon = &youmonst;
+		else
+			nmon = (struct monst *)0;
+
 		if(mdef->mpeaceful == peace)
 			continue;
 		dist = distmin(x(magr), y(magr), x(mdef), y(mdef));
 		if(dist > BOLT_LIM)
 			continue;
-		if(!couldsee(mdef->mx, mdef->my))
+		if(youagr ? !couldsee(x(mdef), y(mdef)) : !clear_path(x(magr), y(magr), x(mdef), y(mdef)))
 			continue;
 		if((touch_petrifies(mdef->data)
-		 || mdef->mtyp == PM_MEDUSA)
-		 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+			|| mdef->mtyp == PM_MEDUSA)
+		 && (youagr ? !Stone_resistance : !resists_ston(magr))
 		) continue;
 		
 		if(mdef->mtyp == PM_PALE_NIGHT)
@@ -5456,8 +5524,8 @@ struct monst *magr;
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
-			 || mdef->mtyp == PM_MEDUSA)
-			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+				|| mdef->mtyp == PM_MEDUSA)
+			 && (youagr ? !Stone_resistance : !resists_ston(magr))
 			) continue;
 			
 			if(mdef->mtyp == PM_PALE_NIGHT)
@@ -5528,8 +5596,8 @@ struct monst *magr;
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
-			 || mdef->mtyp == PM_MEDUSA)
-			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+				|| mdef->mtyp == PM_MEDUSA)
+			 && (youagr ? !Stone_resistance : !resists_ston(magr))
 			) continue;
 			
 			if(mdef->mtyp == PM_PALE_NIGHT)
@@ -5598,8 +5666,8 @@ struct monst *magr;
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
-			 || mdef->mtyp == PM_MEDUSA)
-			 && ((!youagr && !resists_ston(magr)) || (youagr && !Stone_resistance))
+				|| mdef->mtyp == PM_MEDUSA)
+			 && (youagr ? !Stone_resistance : !resists_ston(magr))
 			) continue;
 			
 			if(mdef->mtyp == PM_PALE_NIGHT)
