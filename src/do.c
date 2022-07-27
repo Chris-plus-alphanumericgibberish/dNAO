@@ -1232,7 +1232,7 @@ int portal;
 	if (fd < 0) return;
 
 	if (falling) /* assuming this is only trap door or hole */
-	    impact_drop((struct obj *)0, u.ux, u.uy, newlevel->dlevel);
+	    impact_drop((struct obj *)0, u.ux, u.uy, newlevel->dlevel, TRUE);
 
 	check_special_room(TRUE);		/* probably was a trap door */
 	if (Punished) unplacebc();
@@ -2401,6 +2401,7 @@ donull()
 {
 	static long lastreped = -13;//hacky way to tell if the player has recently tried repairing themselves
 	u.unull = TRUE;
+
 	if(uclockwork){
 		if(!Upolyd && u.uhp<u.uhpmax){
 			if(lastreped < monstermoves-13) You("attempt to make repairs.");

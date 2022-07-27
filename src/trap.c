@@ -514,7 +514,7 @@ boolean td;	/* td == TRUE : trap door or hole */
 	if (dont_fall) {
 	    You1(dont_fall);
 	    /* hero didn't fall through, but any objects here might */
-	    impact_drop((struct obj *)0, u.ux, u.uy, 0);
+	    impact_drop((struct obj *)0, u.ux, u.uy, 0, TRUE);
 	    if (!td) {
 		display_nhwindow(WIN_MESSAGE, FALSE);
 		pline_The("opening under you closes up.");

@@ -1563,9 +1563,10 @@ schar loc;
 }
 
 void
-impact_drop(missile, x, y, dlev)
+impact_drop(missile, x, y, dlev, yourfault)
 struct obj *missile;
 xchar x, y, dlev;
+boolean yourfault;
 {
 	schar toloc;
 	register struct obj *obj, *obj2;
@@ -1588,7 +1589,7 @@ xchar x, y, dlev;
 		cc.y = dlev;
 	}
 
-	costly = costly_spot(x, y);
+	costly = yourfault && costly_spot(x, y);
 	price = debit = robbed = 0L;
 	angry = FALSE;
 	shkp = (struct monst *) 0;
@@ -1723,7 +1724,7 @@ boolean shop_floor_obj;
 	if (is_boulder(otmp) &&
 		((t = t_at(x, y)) != 0) &&
 		(t->ttyp == TRAPDOOR || t->ttyp == HOLE)) {
-	    if (impact) impact_drop(otmp, x, y, 0);
+	    if (impact) impact_drop(otmp, x, y, 0, !flags.mon_moving);
 	    return FALSE;		/* let caller finish the drop */
 	}
 
@@ -1731,7 +1732,7 @@ boolean shop_floor_obj;
 	    otransit_msg(otmp, nodrop, n);
 
 	if (nodrop) {
-	    if (impact) impact_drop(otmp, x, y, 0);
+	    if (impact) impact_drop(otmp, x, y, 0, !flags.mon_moving);
 	    return(FALSE);
 	}
 
@@ -1799,7 +1800,7 @@ boolean shop_floor_obj;
 	     * fall down a trap door--thereby getting two shopkeepers
 	     * angry at the hero in one shot.
 	     */
-	    impact_drop(otmp, x, y, 0);
+	    impact_drop(otmp, x, y, 0, !flags.mon_moving);
 	    newsym(x,y);
 	}
 	return(TRUE);

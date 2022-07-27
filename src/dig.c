@@ -744,7 +744,7 @@ boolean msgs;
 		 */
 		if (u.ustuck || wont_fall) {
 		    if (newobjs)
-			impact_drop((struct obj *)0, x, y, 0);
+			impact_drop((struct obj *)0, x, y, 0, madeby_u);
 		    if (oldobjs != newobjs)
 			(void) pickup(1);
 		    if (shopdoor && madeby_u) pay_for_damage("ruin", FALSE);
@@ -755,7 +755,7 @@ boolean msgs;
 		    if (*u.ushops && madeby_u)
 			shopdig(1); /* shk might snatch pack */
 		    /* handle earlier damage, eg breaking wand of digging */
-		    else if (!madeby_u) pay_for_damage("dig into", TRUE);
+		    else if (madeby_u) pay_for_damage("dig into", TRUE);
 
 		    fall_through(TRUE);
 		    /* Earlier checks must ensure that the destination
@@ -765,7 +765,7 @@ boolean msgs;
 	    } else {
 		if (shopdoor && madeby_u) pay_for_damage("ruin", FALSE);
 		if (newobjs)
-		    impact_drop((struct obj *)0, x, y, 0);
+		    impact_drop((struct obj *)0, x, y, 0, madeby_u);
 		if (mtmp && !DEADMONSTER(mtmp)) {
 		     /*[don't we need special sokoban handling here?]*/
 		    if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
@@ -875,7 +875,7 @@ int ttyp;
 		 */
 		if (u.ustuck || wont_fall) {
 		    if (newobjs)
-			impact_drop((struct obj *)0, x, y, 0);
+			impact_drop((struct obj *)0, x, y, 0, madeby_u);
 		    if (oldobjs != newobjs)
 			(void) pickup(1);
 		    if (shopdoor && madeby_u) pay_for_damage("ruin", FALSE);
@@ -886,7 +886,7 @@ int ttyp;
 		    if (*u.ushops && madeby_u)
 			shopdig(1); /* shk might snatch pack */
 		    /* handle earlier damage, eg breaking wand of digging */
-		    else if (!madeby_u) pay_for_damage("dig into", TRUE);
+		    else if (madeby_u) pay_for_damage("dig into", TRUE);
 
 		    You("fall through...");
 		    /* Earlier checks must ensure that the destination
@@ -901,7 +901,7 @@ int ttyp;
 	    } else {
 		if (shopdoor && madeby_u) pay_for_damage("ruin", FALSE);
 		if (newobjs)
-		    impact_drop((struct obj *)0, x, y, 0);
+		    impact_drop((struct obj *)0, x, y, 0, madeby_u);
 		if (mtmp) {
 		     /*[don't we need special sokoban handling here?]*/
 		    if (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION) ||
