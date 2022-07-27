@@ -100,6 +100,7 @@
 #define MM_NOTONL		0x00004000L	/* Tries to avoid being on same line as player */
 #define MM_FLEETFLEE	0x00008000L	/* Flees if adjacent if it thinks it can outrun you */
 #define MM_WEBRIP		0x00010000L	/* Tears through webs instead of getting stuck */
+#define MM_DOORBUST		0x00020000L	/* Breaks down locked doors (UNIMPLEMENTED, part of ma_giant currently!) */
 
 //Monster Thoughts and behavior
 #define MT_WANTSAMUL	0x00000001L	/* would like to steal the amulet */

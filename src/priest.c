@@ -53,7 +53,7 @@ register xchar omx,omy,gx,gy;
 		if (m_carrying(mtmp, SKELETON_KEY)||m_carrying(mtmp, UNIVERSAL_KEY)) 
 			allowflags |= BUSTDOOR;
 	}
-	if (is_giant(mtmp->data)) allowflags |= BUSTDOOR;
+	if (species_busts_doors(mtmp->data)) allowflags |= BUSTDOOR;
 	cnt = mfndpos(mtmp, poss, info, allowflags);
 
 	/* this function ONLY moves, never attacks -- disallow any occupied squares */

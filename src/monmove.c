@@ -2209,7 +2209,7 @@ register int after;
 	can_open = !(nohands(ptr) || verysmall(ptr) || straitjacketed_mon(mtmp));
 	can_unlock = ((can_open && (m_carrying(mtmp, SKELETON_KEY)||m_carrying(mtmp, UNIVERSAL_KEY))) ||
 		      mtmp->iswiz || is_rider(ptr) || ptr->mtyp==PM_DREAD_SERAPH);
-	doorbuster = is_giant(ptr);
+	doorbuster = species_busts_doors(ptr);
 	if(mtmp->wormno) goto not_special;
 	/* my dog gets special treatment */
 	if(mtmp->mtame) {
