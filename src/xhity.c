@@ -3311,6 +3311,9 @@ int *shield_margin;
 				if (otmp->otyp == GAUNTLETS_OF_POWER)
 					bons_acc += 3;
 			}
+			if(magr->msciaphilia && unshadowed_square(magr->mx, magr->my)){
+				bons_acc -= min(20, magr->m_lev);
+			}
 #ifdef STEED
 			/* Your steed gets a skill-based boost */
 			if (magr == u.usteed)
@@ -3620,7 +3623,7 @@ int *shield_margin;
 			/* Sciaphilia accuracy bonus/penalty */
 			if (u.umadness&MAD_SCIAPHILIA && !BlockableClearThoughts && NightmareAware_Sanity < 96){
 				int delta = NightmareAware_Insanity;
-				boolean discomfort = (dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0);
+				boolean discomfort = unshadowed_square(u.ux, u.uy);
 				static boolean shadowmessage = TRUE;
 				if (discomfort) {
 					if (shadowmessage) You("long for the flickering shadows!");

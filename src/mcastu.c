@@ -1947,6 +1947,7 @@ int tary;
 	if (force_fail 
 		|| rn2(mlev(magr) * 2) < chance
 		|| (magr->mtoobig && magr->m_lev < rnd(100))
+		|| (magr->msciaphilia && magr->m_lev < rnd(100) && unshadowed_square(magr->mx, magr->my))
 	) {
 		if (youagr) {
 			pline_The("air crackles around you.");

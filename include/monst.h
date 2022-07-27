@@ -175,7 +175,7 @@ struct monst {
 	Bitfield(mparanoid,1);/* attacks the wrong squares */ /*108*/
 	Bitfield(mtalons,1);/* won't use items */ /*109*/
 	Bitfield(mdreams,1);/* blasted by cthulhu while asleep */ /*110*/
-	Bitfield(mscaiaphilia,1);/* won't move into the light */ /*111*/
+	Bitfield(msciaphilia,1);/* elevated spell failure and lowered accuracy while not in shadows */ /*111*/
 	Bitfield(mforgetful,1);/* can't use wizard spellcasting */ /*112*/
 	Bitfield(mapostasy,1);/* can't use priest spellcasting */ /*113*/
 	Bitfield(mtoobig,1);/* elevated spell failure */ /*114*/

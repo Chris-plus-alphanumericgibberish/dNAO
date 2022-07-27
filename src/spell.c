@@ -6089,7 +6089,7 @@ int spell;
 		if(u.umadness&MAD_FORMICATION && !BlockableClearThoughts){
 			chance -= delta/2;
 		}
-		if(u.umadness&MAD_SCIAPHILIA && !ClearThoughts && ((dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0))){
+		if(u.umadness&MAD_SCIAPHILIA && !BlockableClearThoughts && unshadowed_square(u.ux, u.uy)){
 			chance -= delta;
 		}
 		if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
@@ -6134,7 +6134,7 @@ int spell;
 	// these effects totally block the spell-choosing menu, but need to be handled here too for quivered spells
 	else if ((mad_turn(MAD_TOO_BIG)) ||
 		(Doubt && casting_stat == A_WIS) ||
-//		(mad_turn(MAD_SCIAPHILIA) && ()(dimness(u.ux, u.uy) != 3 && dimness(u.ux, u.uy) > 0) || (!levl[u.ux][u.uy].lit && dimness(u.ux, u.uy) == 0)) ||
+//		(mad_turn(MAD_SCIAPHILIA) && unshadowed_square(u.ux, u.uy)) ||
 		(casting_stat == A_WIS && flat_mad_turn(MAD_APOSTASY))
 		){
 		chance = 0;

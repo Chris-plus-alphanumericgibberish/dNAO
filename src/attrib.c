@@ -1770,7 +1770,7 @@ struct monst *mon;
 						}
 					}
 					else if(madflag == MAD_SCIAPHILIA){
-						mon->mscaiaphilia = 1;
+						mon->msciaphilia = 1;
 					}
 					else if(madflag == MAD_FORGETFUL){
 						mon->mforgetful = 1;
