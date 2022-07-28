@@ -256,8 +256,8 @@ struct Role roles[] = {
 	{  10,  7,  8,  8,  7,  7 },
 	{  25, 10, 20, 20, 15, 10 },
 	/* Init   Lower  Higher */
-	{ 12, 0,  0, 8,  1, 0 },	/* Hit points */
-	{  2, 2,  0, 2,  0, 2 },10,	/* Energy */
+	{  8, 0,  0, 8,  1, 0 },	/* Hit points */
+	{  8, 0,  0, 2,  0, 2 },10,	/* Energy */
 	10, 8,-2, 2, 20, A_WIS, SPE_RESTORE_ABILITY, -24
 },
 {	{"Madman", "Madwoman"}, {
