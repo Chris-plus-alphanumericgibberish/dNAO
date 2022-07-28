@@ -7782,6 +7782,9 @@ boolean goodequip;
 					mongets(mtmp, GAUNTLETS, mkobjflags);
 					mongets(mtmp, ARMORED_BOOTS, mkobjflags);
 				}
+				else {
+					mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+				}
 			break;
 		    case PM_ERINYS:{
 				if(In_mordor_quest(&u.uz) 
@@ -7892,6 +7895,14 @@ boolean goodequip;
 						(void)mongets(mtmp, SHORT_SWORD, mkobjflags);
 				}
 				else (void)mongets(mtmp, GLAIVE, mkobjflags);
+				if(Inhell || goodequip){
+					otmp = mongets(mtmp, HELMET, mkobjflags);
+					if(otmp) set_material_gm(otmp, METAL);
+					otmp = mongets(mtmp, !rn2(20) ? GAUNTLETS_OF_POWER : GAUNTLETS, mkobjflags);
+					if(otmp) set_material_gm(otmp, METAL);
+					otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+					if(otmp) set_material_gm(otmp, METAL);
+				}
 			break;
 			case PM_LILITU:
 				if(faction == GOATMOM_FACTION){
@@ -8170,7 +8181,20 @@ boolean goodequip;
 				otmp = mksobj(TRIDENT, mkobjflags|MKOBJ_NOINIT);
 				otmp->spe = rnd(9);
 				otmp->objsize = MZ_HUGE;
+				if(!rn2(20))
+					set_material_gm(otmp, GREEN_STEEL);
 				(void) mpickobj(mtmp, otmp);
+				if(Inhell || goodequip){
+					if(!rn2(10)){
+						mongets(mtmp, GAUNTLETS_OF_POWER, mkobjflags);
+						if(!rn2(20)){
+							otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+							if(otmp) set_material_gm(otmp, LEATHER);
+						}
+					}
+					else if(!rn2(9))
+						mongets(mtmp, ORIHALCYON_GAUNTLETS, mkobjflags);
+				}
 			break;
 		    case PM_FALLEN_ANGEL:
 				otmp = mongets(mtmp, LONG_SWORD, mkobjflags);
@@ -8267,7 +8291,7 @@ boolean goodequip;
 			break;
 		    case PM_ANCIENT_OF_ICE:
 				otmp = mksobj(MACE, mkobjflags|MKOBJ_NOINIT);
-				set_material_gm(otmp, METAL);
+				if(otmp) set_material_gm(otmp, METAL);
 				fix_object(otmp);
 				otmp->spe = rnd(8);
 				(void) mpickobj(mtmp, otmp);
@@ -8311,7 +8335,20 @@ boolean goodequip;
 				otmp = mksobj(rn2(2) ? MACE : BATTLE_AXE, mkobjflags|MKOBJ_NOINIT);
 				otmp->objsize = MZ_HUGE;
 				otmp->spe = 9;
+				if(!rn2(10))
+					set_material_gm(otmp, GREEN_STEEL);
 				(void) mpickobj(mtmp, otmp);
+				if(Inhell || goodequip){
+					if(!rn2(9)){
+						mongets(mtmp, GAUNTLETS_OF_POWER, mkobjflags);
+						if(!rn2(3)){
+							otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+							if(otmp) set_material_gm(otmp, LEATHER);
+						}
+					}
+					else if(!rn2(8))
+						mongets(mtmp, ORIHALCYON_GAUNTLETS, mkobjflags);
+				}
 			break;
 		    case PM_SHAYATEEN:
 				otmp = mongets(mtmp, BATTLE_AXE, mkobjflags);
