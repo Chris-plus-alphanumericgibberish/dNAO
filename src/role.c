@@ -756,8 +756,8 @@ const struct Race races[] = {
 	{    3,     3,  3,  3,  3,  3 },
 	{   18,    20, 18, 20, 16, 20 },
 	/* Init   Lower  Higher */
-	{  8, 0,  3, 0,  1, 0 },	/* Hit points */
-	{  8, 0,  3, 0,  3, 0 },	/* Energy */
+	{  8, 0,  0, 4,  1, 0 },	/* Hit points */
+	{  8, 0,  0, 4,  0, 4 },	/* Energy */
 	NO_NIGHTVISION,
 	SPE_SLEEP, -5
 },
@@ -906,8 +906,8 @@ struct Race myrkalfr =
 	{    3,     3,  3,  3,  3,  3 },
 	{   18,    20, 20, 18, 16, 18 },
 	/* Init   Lower  Higher */
-	{  1, 0,  0, 1,  1, 0 },	/* Hit points */
-	{  2, 0,  3, 0,  3, 0 },	/* Energy */
+	{  7, 1,  1, 2,  1, 0 },	/* Hit points */
+	{  7, 1,  1, 2,  3, 0 },	/* Energy */
 	NO_NIGHTVISION
 };
 
