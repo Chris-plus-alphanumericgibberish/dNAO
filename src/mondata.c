@@ -442,7 +442,7 @@ int template;
 		ptr->maligntyp = 10;
 
 		ptr->mflagst &= ~(MT_MINDLESS|MT_ANIMAL|MT_DOMESTIC);
-		if(!(ptr->mflagsb&(MB_NOLIMBS|MB_NOHANDS)) && !(ptr->mflagsm&MM_TUNNEL))
+		if(!(ptr->mflagsb&(MB_NOLIMBS|MB_NOHANDS)) && !(ptr->mflagsm&MM_TUNNEL) && !(ptr->mflagsm&MM_WALLWALK))
 			ptr->mflagsm |= (MM_TUNNEL|MM_NEEDPICK);
 		break;
 	case CRANIUM_RAT:
