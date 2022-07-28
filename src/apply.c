@@ -2298,6 +2298,10 @@ register struct obj *obj;
 	
 	if(!cobj)
 		return;
+	if(cobj->otyp != CRYSTAL_SKULL){
+		You("examine %s in minute detail. Eventually, you conclude that it is not in fact a skull.", the(xname(cobj)));
+		return;
+	}
 	if(use_container(cobj, TRUE))
 		obj->spe--;
 }
