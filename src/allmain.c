@@ -3383,7 +3383,7 @@ boolean new_game;	/* false => restoring an old game */
      */
     *buf = '\0';
     if (new_game || galign(u.ugodbase[UGOD_ORIGINAL]) != galign(u.ugodbase[UGOD_CURRENT]))
-	Sprintf(eos(buf), " %s", align_str(galign(u.ugodbase[UGOD_ORIGINAL])));
+	Sprintf(eos(buf), " %s", align_str(galign(u.ugodbase[UGOD_CURRENT])));
     if (!urole.name.f &&
 	    (new_game ? (urole.allow & ROLE_GENDMASK) == (ROLE_MALE|ROLE_FEMALE) :
 	     currentgend != flags.initgend))
