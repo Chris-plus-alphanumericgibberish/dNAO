@@ -1067,10 +1067,7 @@ struct obj {
 #define is_veggy(otmp)		((otmp)->obj_material == VEGGY)
 #define is_flesh(otmp)		((otmp)->obj_material == FLESH)
 #define is_paper(otmp)		((otmp)->obj_material == PAPER)
-#define is_metal(otmp)		((otmp)->obj_material == METAL || \
-							 (otmp)->obj_material == COPPER || \
-							 (otmp)->obj_material == SILVER || \
-							 (otmp)->obj_material == IRON)
+/* Note: use is_metallic() */
 
 /* misc */
 #define is_boulder(otmp)		((otmp)->otyp == BOULDER || (otmp)->otyp == MASSIVE_STONE_CRATE || (otmp)->otyp == MASS_OF_STUFF || ((otmp)->otyp == STATUE && opaque(&mons[(otmp)->corpsenm])))
