@@ -452,7 +452,7 @@ A("The Rod of Lordly Might",		MACE,				(const char *)0,
 /* uses the Musicalize skill; learns special abilities from hearing songs */
 A("The Singing Sword",	LONG_SWORD,						"softly singing %s",
 	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, PM_BARD, NON_PM, TIER_A, (ARTG_GIFT|ARTG_INHER|ARTG_MAJOR),
+	A_NONE, PM_BARD, NON_PM, TIER_A, (ARTG_NAME|ARTG_INHER|ARTG_MAJOR),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 1), NOFLAG,
 	PROPS(), NOFLAG,
