@@ -27,7 +27,7 @@ STATIC_DCL int FDECL(align_shift, (struct permonst *));
 #endif /* OVL0 */
 STATIC_DCL struct permonst * NDECL(roguemonst);
 STATIC_DCL boolean FDECL(wrong_elem_type, (struct permonst *));
-STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int, boolean));
+STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int, boolean, int));
 STATIC_DCL int FDECL(permonst_max_lev,(struct permonst *));
 #ifdef OVL1
 STATIC_DCL void FDECL(m_initinv,(struct monst *, int, int, boolean));
@@ -5336,9 +5336,9 @@ boolean goodequip;
 				
 				if(mm == PM_MASTER_MIND_FLAYER || !rn2(3)) mongets(mtmp, R_LYEHIAN_FACEPLATE, mkobjflags);
 				
-				if(mm == PM_MASTER_MIND_FLAYER && !rn2(20))
+				if(mm == PM_MASTER_MIND_FLAYER && !(mmflags&MM_ESUM) && (!rn2(20) || in_mklev))
 					 mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
-				if(mm == PM_MIND_FLAYER && !rn2(60))
+				if(mm == PM_MIND_FLAYER && !(mmflags&MM_ESUM) && !rn2(60))
 					 mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
 			} else if(Infuture){
 				if(mm == PM_MASTER_MIND_FLAYER){
@@ -5395,7 +5395,7 @@ boolean goodequip;
 					(void) mpickobj(mtmp, otmp);
 					
 					mongets(mtmp, R_LYEHIAN_FACEPLATE, mkobjflags);
-					if(!rn2(3))
+					if(!rn2(3) && !(mmflags&MM_ESUM))
 						mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
 				} else {
 					struct obj *gem;
@@ -5426,7 +5426,7 @@ boolean goodequip;
 					otmp->blessed = FALSE;
 					otmp->cursed = TRUE;
 					(void) mpickobj(mtmp, otmp);
-					if(!rn2(30))
+					if(!rn2(30) && !(mmflags&MM_ESUM))
 						mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
 				}
 			} else {
@@ -5437,8 +5437,8 @@ boolean goodequip;
 				mongets(mtmp, LEATHER_HELM, mkobjflags);
 				if(mm == PM_MASTER_MIND_FLAYER && !rn2(3)) mongets(mtmp, R_LYEHIAN_FACEPLATE, mkobjflags);
 				else if(mm == PM_MIND_FLAYER && !rn2(20)) mongets(mtmp, R_LYEHIAN_FACEPLATE, mkobjflags);
-				if(mm == PM_MASTER_MIND_FLAYER && !rn2(90)) mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
-				else if(mm == PM_MIND_FLAYER && !rn2(120)) mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
+				if(mm == PM_MASTER_MIND_FLAYER && !(mmflags&MM_ESUM) && !rn2(90)) mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
+				else if(mm == PM_MIND_FLAYER && !(mmflags&MM_ESUM) && !rn2(120)) mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
 			}
 		} else if(mm == PM_GITHYANKI_PIRATE){
 			if(!rn2(40)){
@@ -9528,6 +9528,40 @@ boolean goodequip;
 			otmp->blessed = FALSE;
 			otmp->cursed = FALSE;
 			(void) mpickobj(mtmp,otmp);
+			otmp = mongets(mtmp, SCALE_MAIL, mkobjflags);
+			if(otmp){
+				otmp->spe = 4;
+				otmp->cursed = TRUE;
+				set_material_gm(otmp, COPPER);
+				otmp->oeroded2 = 1;
+			}
+			otmp = mongets(mtmp, LEATHER_HELM, mkobjflags);
+			if(otmp){
+				otmp->spe = 4;
+				otmp->cursed = TRUE;
+			}
+			otmp = mongets(mtmp, GLOVES, mkobjflags);
+			if(otmp){
+				otmp->spe = 4;
+				otmp->cursed = TRUE;
+				set_material_gm(otmp, LEATHER);
+				otmp->oeroded2 = 1;
+			}
+			otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags);
+			if(otmp){
+				otmp->spe = 4;
+				otmp->cursed = TRUE;
+				set_material_gm(otmp, LEATHER);
+				otmp->oeroded2 = 3;
+			}
+			otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+			if(otmp){
+				otmp->spe = 4;
+				otmp->cursed = TRUE;
+				set_material_gm(otmp, LEATHER);
+				otmp->oeroded2 = 1;
+			}
+			otmp = mongets(mtmp, CRYSTAL_SKULL, mkobjflags);
 		} else if(ptr->mtyp == PM_ACERERAK){
 			struct obj *otmp = mksobj(ATHAME, mkobjflags);
 			otmp = oname(otmp, artiname(ART_PEN_OF_THE_VOID));
@@ -12294,7 +12328,7 @@ int faction;
 	
 	if (allow_minvent) {
 	    if(is_armed_mon(mtmp))
-			m_initweap(mtmp, mkobjflags, faction, goodequip);	/* equip with weapons / armor */
+			m_initweap(mtmp, mkobjflags, faction, goodequip, mmflags);	/* equip with weapons / armor */
 	    m_initinv(mtmp, mkobjflags, faction, goodequip);  /* add on a few special items incl. more armor */
 	    m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);

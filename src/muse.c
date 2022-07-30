@@ -1103,9 +1103,9 @@ struct monst *mtmp;
 	if(m.has_offense==MUSE_MJOLLNIR) break;
 		}
 		nomore(MUSE_CRYSTAL_SKULL);
-		if(obj->otyp == CRYSTAL_SKULL && obj->age < monstermoves && is_mind_flayer(mtmp->data) && !obj_summon_out(obj)) {
-		m.offensive = obj;
-		m.has_offense = MUSE_CRYSTAL_SKULL;
+		if(obj->otyp == CRYSTAL_SKULL && obj->age < monstermoves && is_mind_flayer(mtmp->data) && !obj_summon_out(obj) && !get_ox(obj, OX_ESUM)) {
+			m.offensive = obj;
+			m.has_offense = MUSE_CRYSTAL_SKULL;
 		}
 		nomore(MUSE_WAN_DEATH);
 		if (!reflection_skip) {

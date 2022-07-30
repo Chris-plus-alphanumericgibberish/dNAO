@@ -2822,7 +2822,8 @@ struct obj **optr;
 		return MOVE_CANCELLED;
 	}
 	
-	if(obj_summon_out(*optr)){
+	//Note: summoning from summoned crystal skulls doesn't work well
+	if(get_ox(*optr, OX_ESUM) || obj_summon_out(*optr)){
 		pline("The imprisoned mind is dreaming.");
 		return MOVE_STANDARD;
 	}
@@ -2863,6 +2864,7 @@ coord *cc;
 	struct obj *obj = *optr;
 	struct obj *oinv, *otmp;
 	struct monst *mtmp;
+	
 
 	mtmp = montraits(obj, cc);
 	if(mtmp){
