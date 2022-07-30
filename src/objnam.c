@@ -3476,6 +3476,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-5, "dress") ||
 			   !BSTRCMPI(bp, p-16, "descent of stars") ||
 			   !BSTRCMPI(bp, p-13, "dragon scales") ||
+			   !BSTRCMPI(bp, p-11, "sarcophagus") ||
 			   !BSTRCMPI(bp, p-6, "fungus"))
 				return bp;
 	mins:
