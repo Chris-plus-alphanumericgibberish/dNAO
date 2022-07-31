@@ -287,6 +287,10 @@ found_ward:
 
 	/* see if there's enough ink */
 	basecost = cost(new_obj);
+	
+	if(Role_if(PM_WIZARD))
+		basecost = basecost * 4 / 5;
+
 	if(pen->spe < basecost/2)  {
 		Your("marker is too dry to write that!");
 		obfree(new_obj, (struct obj *) 0);
@@ -315,12 +319,49 @@ found_ward:
 		return(1);
 	}
 	pen->spe -= actualcost;
+	
+	struct objclass *oc = &objects[new_obj->otyp];
+	int school_skill;
+	if(oc->oc_skill){
+		int i;
+		int spell_schools[] = {P_ATTACK_SPELL, P_HEALING_SPELL, P_DIVINATION_SPELL, P_ENCHANTMENT_SPELL, P_CLERIC_SPELL, P_ESCAPE_SPELL, P_MATTER_SPELL};
+		int generalism_bonus = 0;
+		for(i=0; i < SIZE(spell_schools); i++)
+			generalism_bonus += max(0, P_SKILL(spell_schools[i])-1);
+		//-1 (restricted) to +3 (expert)
+		school_skill = P_SKILL(oc->oc_skill) - 1;
+		if(school_skill*2 >= oc->oc_level){
+			//Note: double-counts school_skill by design
+			school_skill = school_skill*5 + generalism_bonus*5;
+		}
+		else {
+			school_skill = school_skill*5 - oc->oc_level*5;
+		}
+	}
+	//			(15*3)		16				14/2			2*10 (skilled)		4 >= 4 (skilled vs. fireball)
+	//			45			16				7				20					-0
+	//			45			61				68				88%
 
+	//			(20*3)		23				23/2			1*5 (basic)		2 < 5 (basic vs. charm)
+	//			60			23				11				5					-30
+	//			60			83				94				99					69%
+
+	//			(20*3)		23				23/2			3*5 (expert)		6 < 7 (expert vs. finger of death)
+	//			60			23				11				15					-35
+	//			60			83				94				109					74%
+	int target = u.ulevel*3 + ACURR(A_INT) + ACURR(A_WIS)/2 + school_skill;
+	
+	if(!Role_if(PM_WIZARD) && target > 0)
+		target /= 5;
+	
+	pline("level: %d school: %d target: %d", oc->oc_level, school_skill, target);
+	
 	/* can't write if we don't know it - unless we're lucky */
 	if(objects[new_obj->otyp].oc_nowish ||
 	  (!(objects[new_obj->otyp].oc_name_known) &&
 	   !(by_descr && objects[new_obj->otyp].oc_uname) &&
-	   (rnl(100) >= (Role_if(PM_WIZARD) ? 33 : 7)))) {
+	   (rnl(100) >= target))
+	){
 		if(new_obj->otyp != SPE_SECRETS) You("%s to write that!", by_descr ? "fail" : "don't know how");
 		/* scrolls disappear, spellbooks don't */
 		if (paper->oclass == SPBOOK_CLASS) {
