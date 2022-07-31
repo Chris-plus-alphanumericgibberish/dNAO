@@ -2275,7 +2275,7 @@ int magic; /* 0=Physical, otherwise skill level */
 	    teleds(cc.x, cc.y, TRUE);
 	    nomul(-1, "jumping around");
 	    nomovemsg = "";
-	    morehungry(rnd(25));
+	    morehungry(max_ints(1, rnd(25) * get_uhungersizemod()));
 	    return MOVE_STANDARD;
 	}
 }
@@ -6177,7 +6177,7 @@ struct obj *obj;
 				else {
 					tmp = obj->cursed ? 2000 : 1000;
 					if(mtmp == &youmonst){
-						morehungry(tmp);
+						morehungry(tmp*get_uhungersizemod());
 					}
 					else {
 						if(mtmp->mtame && get_mx(mtmp, MX_EDOG)){

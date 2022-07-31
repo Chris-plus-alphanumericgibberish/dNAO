@@ -1015,7 +1015,7 @@ int godnum;
 				if (u.uen < u.uenmax*.45) u.uen += 400;
 				newuhs(TRUE);
 			} else {
-				if (u.uhunger < u.uhungermax*.45) u.uhunger = u.uhungermax*.45;
+				if (u.uhunger < get_uhungermax()*.45) u.uhunger = get_uhungermax()*.45;
 				u.uhs = NOT_HUNGRY;
 			}
 			if (u.uluck < 0) u.uluck = 0;

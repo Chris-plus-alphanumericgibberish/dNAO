@@ -589,7 +589,7 @@ drinksink()
 			break;
 		case 9: if (!uclockwork) {
 				pline("Gaggg... this tastes like sewage!  You vomit.");
-				morehungry(rn1(30-ACURR(A_CON), 11));
+				morehungry(max_ints(1, rn1(30-ACURR(A_CON), 11) * get_uhungersizemod()));
 				vomit();
 			}
 			else {

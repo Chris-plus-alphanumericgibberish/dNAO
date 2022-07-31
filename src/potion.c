@@ -613,7 +613,7 @@ peffects(otmp)
 		    if(Race_if(PM_INCANTIFIER)) u.uen += 50 + rnd(50);
 		    else u.uhunger += 50 + rnd(50);
 			
-			if(u.uhunger > u.uhungermax) u.uhunger = u.uhungermax;
+			if(u.uhunger > get_uhungermax()) u.uhunger = get_uhungermax();
 		    
 		    newuhs(FALSE);
 		} else
@@ -638,7 +638,7 @@ peffects(otmp)
 				pline("This tastes like water.");
 				if(!Race_if(PM_INCANTIFIER)) u.uhunger += rnd(10);
 				
-				if(u.uhunger > u.uhungermax) u.uhunger = u.uhungermax;
+				if(u.uhunger > get_uhungermax()) u.uhunger = get_uhungermax();
 		    
 				newuhs(FALSE);
 				break;
@@ -764,8 +764,8 @@ peffects(otmp)
 			newuhs(FALSE);
 		}
 		if (!umechanoid){
-			if(u.uhunger > u.uhungermax){
-				u.uhunger = u.uhungermax - d(2,20);
+			if(u.uhunger > get_uhungermax()){
+				u.uhunger = get_uhungermax() - d(2,20);
 				vomit();
 				exercise(A_WIS, FALSE);
 			}
@@ -838,7 +838,7 @@ peffects(otmp)
 			  fruitname(TRUE));
 		if (otmp->otyp == POT_FRUIT_JUICE) {
 		    if(!Race_if(PM_INCANTIFIER) && !umechanoid) u.uhunger += (otmp->odiluted ? 40 : 100) + 10 * (2 + bcsign(otmp));
-            if(u.uhunger > u.uhungermax) u.uhunger = u.uhungermax;
+            if(u.uhunger > get_uhungermax()) u.uhunger = get_uhungermax();
 		    newuhs(FALSE);
 		    break;
 		}
@@ -1195,8 +1195,8 @@ as_extra_healing:
 			newuhs(FALSE);
 		}
 		if (!umechanoid){
-			if(u.uhunger > u.uhungermax){
-				u.uhunger = u.uhungermax - d(2,20);
+			if(u.uhunger > get_uhungermax()){
+				u.uhunger = get_uhungermax() - d(2,20);
 				vomit();
 				exercise(A_WIS, FALSE);
 			}

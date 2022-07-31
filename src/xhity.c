@@ -8743,7 +8743,7 @@ boolean ranged;
 			exercise(A_CON, FALSE);
 			if (!is_fainted()){
 				int hungr = rn1(40, 40);
-				morehungry(hungr);
+				morehungry(hungr*get_uhungersizemod());
 				//heal by the amount of HP it would heal by resting for that nutr worth of turns
 				heal(magr, (mlev(magr)*hungr / 30));
 			}

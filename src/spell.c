@@ -907,7 +907,7 @@ run_maintained_spells()
 		int spell_level = objects[spell].oc_level;
 		if (u.uhave.amulet)
 			spell_level *= 2;
-		int hungr = spellhunger(spell_level * 5) * MAINTAINED_SPELL_HUNGER_MULTIPLIER;
+		int hungr = spellhunger(spell_level * 5) * MAINTAINED_SPELL_HUNGER_MULTIPLIER * get_uhungersizemod();
 		if (u.uen < spell_level){
 			You("lack the energy to maintain %s.",
 				spellname(spell_index));
@@ -3489,7 +3489,7 @@ spiriteffects(power, atme)
 		}break;
 		case PWR_GREAT_LEAP:
 			You("plunge through the ceiling!");
-			morehungry(rnd(625));
+			morehungry(max_ints(1, rnd(625)*get_uhungersizemod()));
 			level_tele();
 		break;
 		case PWR_MASTER_OF_DOORWAYS:{
@@ -4583,7 +4583,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			return MOVE_CANCELLED;
 		} else {
 			if (spellid(spell) != SPE_DETECT_FOOD) {
-				int hungr = spellhunger(energy);
+				int hungr = spellhunger(energy) * get_uhungersizemod();
 				/* don't put player (quite) into fainting from
 				 * casting a spell, particularly since they might
 				 * not even be hungry at the beginning; however,

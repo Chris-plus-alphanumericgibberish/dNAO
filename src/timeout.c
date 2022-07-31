@@ -212,7 +212,7 @@ vomiting_dialogue()
 	switch ((int) i) {
 	case 0:
 		vomit();
-		morehungry(20);
+		morehungry(20*get_uhungersizemod());
 		break;
 	case 2:
 		make_stunned(HStun + d(2,4), FALSE);

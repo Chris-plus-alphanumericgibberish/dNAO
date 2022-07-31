@@ -59,7 +59,12 @@ const char *fmt, *arg;
 		was_mimicking = (youmonst.m_ap_type == M_AP_OBJECT);
 	boolean could_pass_walls = Passes_walls;
 	boolean was_blind = !!Blind;
+	int starting_hungermax;
+	double starting_hungersizemod;
 
+	starting_hungermax = get_uhungermax();
+	starting_hungersizemod = get_uhungersizemod();
+	
 	if (Upolyd) {
 		u.acurr = u.macurr;	/* restore old attribs */
 		u.amax = u.mamax;
@@ -110,6 +115,12 @@ const char *fmt, *arg;
 	if(!Levitation && !u.ustuck &&
 	   (is_pool(u.ux,u.uy, TRUE) || is_lava(u.ux,u.uy)))
 		spoteffects(TRUE);
+
+	int new_hungermax = get_uhungermax();
+	if(starting_hungermax != new_hungermax){
+		u.uhunger = u.uhunger * new_hungermax/starting_hungermax;
+	}
+	newuhs(get_uhungersizemod() < starting_hungersizemod); //May result in a message for gnomes, as the starvation thresholds will move.
 
 	see_monsters();
 }
@@ -197,7 +208,7 @@ newman()
 	if(u.uen < 1) u.uen = 1;
 
 	if(Race_if(PM_INCANTIFIER)) u.uen = min(u.uenmax, rn1(500,500));
-	else u.uhunger = rn1(500,500);
+	else u.uhunger = rn1(500,500) * get_uhungersizemod();
 	if (Sick) make_sick(0L, (char *) 0, FALSE, SICK_ALL);
 	Stoned = 0;
 	Golded = 0;
@@ -378,6 +389,8 @@ int	mntmp;
 		was_blind = !!Blind, dochange = FALSE;
 	boolean could_pass_walls = Passes_walls;
 	int mlvl;
+	int starting_hungermax;
+	double starting_hungersizemod;
 	const char *s;
 
 	if (mvitals[mntmp].mvflags & G_GENOD && !In_quest(&u.uz)) {	/* allow G_EXTINCT */
@@ -388,7 +401,10 @@ int	mntmp;
 
 	/* KMH, conduct */
 	u.uconduct.polyselfs++;
-
+	
+	starting_hungermax = get_uhungermax();
+	starting_hungersizemod = get_uhungersizemod();
+	
 	if (!Upolyd) {
 		/* Human to monster; save human stats */
 		u.macurr = u.acurr;
@@ -661,6 +677,11 @@ int	mntmp;
 	    You("orient yourself on the web.");
 	    u.utrap = 0;
 	}
+	int new_hungermax = get_uhungermax();
+	if(starting_hungermax != new_hungermax){
+		u.uhunger = u.uhunger * new_hungermax/starting_hungermax;
+	}
+	newuhs(get_uhungersizemod() < starting_hungersizemod); //May result in a message for gnomes, as the starvation thresholds will move.
 	flags.botl = 1;
 	vision_full_recalc = 1;
 	see_monsters();

@@ -1552,7 +1552,7 @@ boolean badeffect;
 				if (uclockwork) {
 					if (!rn2(5))
 						return SEDU_EDUCATE;
-					else if (u.uhunger < .5*u.uhungermax && !Race_if(PM_INCANTIFIER))
+					else if (u.uhunger < .5*get_uhungermax() && !Race_if(PM_INCANTIFIER))
 						return SEDU_WIND;
 					else
 						return SEDU_NOTHING;

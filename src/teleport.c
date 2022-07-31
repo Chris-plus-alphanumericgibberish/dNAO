@@ -850,7 +850,7 @@ dotele()
 		You1(shudder_for_moment);
 		return MOVE_INSTANT;
 	}
-	if (!trap) morehungry(100);
+	if (!trap) morehungry(100*get_uhungersizemod());
 	return MOVE_STANDARD;
 }
 

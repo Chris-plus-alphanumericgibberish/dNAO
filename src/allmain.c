@@ -1138,6 +1138,8 @@ you_regen_pw()
 			reglevel += 7;
 		if (Race_if(PM_DROW) && !Upolyd)
 			reglevel += 8;
+		if (Race_if(PM_GNOME) && !Upolyd)
+			reglevel += 12;
 		// penalty for being itchy
 		reglevel -= u_healing_penalty();
 		// penalty from spell protection interfering with natural pw regeneration

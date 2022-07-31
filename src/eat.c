@@ -253,7 +253,7 @@ init_uhunger()
 		u.uen = u.uenmax*.45;
 	} else {
 		u.uhungermax = DEFAULT_HMAX;
-		u.uhunger = u.uhungermax*.45;
+		u.uhunger = get_uhungermax()*.45;
 	}
 	u.uhs = NOT_HUNGRY;
 }
@@ -265,7 +265,7 @@ reset_uhunger()
 		u.uen = min(u.uen+400, u.uenmax*.45);
 		newuhs(TRUE);
 	} else {
-		u.uhunger = u.uhungermax*.45;
+		u.uhunger = get_uhungermax()*.45;
 		u.uhs = NOT_HUNGRY;
 	}
 }
@@ -279,12 +279,35 @@ satiate_uhunger()
 		u.uen = min(u.uen+400, u.uenmax*.55);
 		newuhs(TRUE);
 	} else {
-		if(u.uhunger > u.uhungermax*.55)
+		if(u.uhunger >= get_uhungermax()*.55)
 			return FALSE;
-		u.uhunger = u.uhungermax*.55;
+		u.uhunger = get_uhungermax()*.55;
 		u.uhs = NOT_HUNGRY;
 	}
 	return TRUE;
+}
+
+double
+get_uhungersizemod()
+{
+	double sizemod = 1;
+	if(youracedata->msize > MZ_MEDIUM)
+		sizemod *= 1 + youracedata->msize - MZ_MEDIUM;
+	else if(youracedata->msize < MZ_MEDIUM)
+		sizemod /= 1 + MZ_MEDIUM - youracedata->msize;
+
+	return sizemod;
+}
+
+int
+get_uhungermax()
+{
+	int hungermax = u.uhungermax;
+	if(youracedata->msize > MZ_MEDIUM)
+		hungermax *= 1 + youracedata->msize - MZ_MEDIUM;
+	//For gameplay reasons, Gnomes et al can overeat by the same amount as humans before choking
+
+	return hungermax;
 }
 
 static const struct { const char *txt; int nut; } tintxts[] = {
@@ -404,7 +427,7 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 			return;
 		}
 		You("stuff yourself and then vomit voluminously.");
-		morehungry(1000);	/* you just got *very* sick! */
+		morehungry(1000*get_uhungersizemod());	/* you just got *very* sick! */
 		nomovemsg = 0;
 		vomit();
 	} else {
@@ -420,7 +443,7 @@ choke(food)	/* To a full belly all food is bad. (It.) */
 		morehungry(u.uenmax/2);	/* lifesaved */
 	 } else if(magivorous(youracedata)){
 		You("absorb too much energy and then vomit up a rainbow!");
-		morehungry(1000);	/* you just got *very* sick! */
+		morehungry(1000*get_uhungersizemod());	/* you just got *very* sick! */
 		nomovemsg = 0;
 		vomit();
 	 } else {
@@ -1002,6 +1025,7 @@ boolean drained;
 	if(ptr->geno & G_UNIQ && ptr->mlevel > 14) permanent = 1;
 
 	long duration = nutval * multiplier;
+	duration /= get_uhungersizemod();
 	if (permanent)
 		duration = -1;
 	
@@ -2041,7 +2065,7 @@ struct obj *otmp;
 		if(YouHunger <= 200)
 		    pline(Hallucination ? "Oh wow, like, superior, man!" :
 			  "That food really hit the spot!");
-		else if(YouHunger <= u.uhungermax/2 - 300) pline("That satiated your %s!",
+		else if(YouHunger <= get_uhungermax()/2 - 300) pline("That satiated your %s!",
 						body_part(STOMACH));
 		break;
 	    case TRIPE_RATION:
@@ -2733,7 +2757,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	){
 		if(yn("Eat some of the grass growing here?") == 'y'){
 			You("eat some grass.");
-			if(u.uhunger < u.uhungermax * 3/4 || yn_function("You feel awfully full, stop eating?",ynchars,'y') == 'n'){
+			if(u.uhunger < get_uhungermax() * 3/4 || yn_function("You feel awfully full, stop eating?",ynchars,'y') == 'n'){
 				lesshungry(objects[FOOD_RATION].oc_nutrition/objects[FOOD_RATION].oc_delay);
 			}
 			return MOVE_ATE;
@@ -3449,7 +3473,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		/* Note: gold weighs 1 pt. for each 1000 pieces (see */
 		/* pickup.c) so gold and non-gold is consistent. */
 	    if (otmp->oclass == COIN_CLASS)
-			basenutrit = ((otmp->quan > ((long)u.uhungermax)*100L) ? u.uhungermax : (int)(otmp->quan/100L));
+			basenutrit = ((otmp->quan > ((long)get_uhungermax())*100L) ? get_uhungermax() : (int)(otmp->quan/100L));
 	    else if(otmp->oclass == BALL_CLASS || (otmp->oclass == CHAIN_CLASS && weight(otmp) > objects[otmp->otyp].oc_nutrition))
 			basenutrit = weight(otmp);
 			/* oc_nutrition is usually weight anyway */
@@ -3746,7 +3770,7 @@ bite()
 {
 	if(victual.canchoke && 
 		((Race_if(PM_INCANTIFIER) && u.uen >= u.uenmax) ||
-		 (!Race_if(PM_INCANTIFIER)&& u.uhunger >= u.uhungermax) )
+		 (!Race_if(PM_INCANTIFIER)&& u.uhunger >= get_uhungermax()) )
 		) {
 		choke(victual.piece);
 		return 1;
@@ -3778,9 +3802,9 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if (Invulnerable) return;	/* you don't feel hungrier */
 	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)){
 		//Gradually return to normal if you departed from normal as a result of polymorph.
-		if(u.uhunger < u.uhungermax*.45)
+		if(u.uhunger < get_uhungermax()*.45)
 			u.uhunger++;
-		else if(u.uhunger > u.uhungermax*.45)
+		else if(u.uhunger > get_uhungermax()*.45)
 			u.uhunger--;
 		newuhs(TRUE);
 		return;
@@ -3807,12 +3831,26 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if(Race_if(PM_INCANTIFIER))
 		hungermod *= 10;
 	
+	//Unusually-sized creatures have more or less hunger
+	if(get_uhungersizemod() < 1){
+		hungermod /= get_uhungersizemod();
+	}
+	
 	if ((!inediate(youracedata) || Race_if(PM_INCANTIFIER))
 		&& !(moves % hungermod)
 		&& !( (Slow_digestion && !Race_if(PM_INCANTIFIER)) ||
 				(uclockwork) )
 	){
-		(Race_if(PM_INCANTIFIER) ? u.uen-- : u.uhunger--);		/* ordinary food consumption */
+		int hunger = 1;
+		if(get_uhungersizemod() > 1){
+			hunger *= get_uhungersizemod();
+		}
+
+		/* ordinary food consumption */
+		if(Race_if(PM_INCANTIFIER))
+			u.uen -= hunger;
+		else u.uhunger -= hunger;
+
 		if(uwep && (
 			uwep->oartifact == ART_GARNET_ROD || (uwep->oartifact == ART_TENSA_ZANGETSU && !is_undead(youracedata)))
 		){
@@ -3854,7 +3892,7 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	}
 	if (moves % 2) {	/* odd turns */
 	    /* Regeneration uses up food, unless due to an artifact */
-	    if ( (HRegeneration && !is_vampire(youracedata)) || ((ERegeneration & (~W_ART)) &&
+	    if ( (HRegeneration && uhp() < uhpmax()) || ((ERegeneration & (~W_ART)) &&
 				(ERegeneration != W_WEP || !uwep->oartifact) &&
 				(ERegeneration != W_ARMS || !uarms->oartifact) 
 				))
@@ -3912,7 +3950,7 @@ register int num;
 	if(Race_if(PM_INCANTIFIER)) u.uen += num;
 	else u.uhunger += num;
 	if(((Race_if(PM_INCANTIFIER) && u.uen > u.uenmax) ||
-		 (!Race_if(PM_INCANTIFIER)&& u.uhunger >= u.uhungermax) )
+		 (!Race_if(PM_INCANTIFIER)&& u.uhunger >= get_uhungermax()) )
 		) {
 	    if (!iseating || victual.canchoke) {
 		if (iseating) {
@@ -3941,7 +3979,7 @@ register int num;
 	     * warns when you're about to choke.
 	     */
 	    if ((Race_if(PM_INCANTIFIER) && u.uen >= u.uenmax * 3/4) ||
-			(!Race_if(PM_INCANTIFIER) && u.uhunger >= u.uhungermax * 3/4)) {
+			(!Race_if(PM_INCANTIFIER) && u.uhunger >= get_uhungermax() * 3/4)) {
 			if (!victual.eating || (victual.eating && !victual.fullwarn)) {
 				if(!uclockwork){
 					pline("You're having a hard time getting all of it down.");
@@ -4177,7 +4215,7 @@ windclock()
     victual.piece = 0;
     victual.mon = 0;
     return MOVE_CANCELLED;
-  }else if(victual.canchoke && u.uhunger >= u.uhungermax && !Race_if(PM_INCANTIFIER)) {
+  }else if(victual.canchoke && u.uhunger >= get_uhungermax() && !Race_if(PM_INCANTIFIER)) {
     Your("mainspring is wound too tight!");
     Your("clockwork breaks apart!");
     killer_format = KILLED_BY;
@@ -4187,7 +4225,7 @@ windclock()
     victual.mon = 0;
     return MOVE_FINISHED_OCCUPATION;
   }
-  else if (u.uhunger >= u.uhungermax * 3/4 && !victual.fullwarn && !Race_if(PM_INCANTIFIER)) {
+  else if (u.uhunger >= get_uhungermax() * 3/4 && !victual.fullwarn && !Race_if(PM_INCANTIFIER)) {
     pline("%s is having a hard time cranking the key.",Monnam(victual.mon));
     victual.fullwarn = TRUE;
   }
@@ -4243,9 +4281,9 @@ boolean incr;
 	int h = YouHunger;
      boolean clockwork = uclockwork;
 
-	newhs = (h > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : u.uhungermax/2) ) ? SATIATED :
-		(h > 150) ? NOT_HUNGRY :
-		(h > 50) ? HUNGRY :
+	newhs = (h > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : get_uhungermax()/2) ) ? SATIATED :
+		(h > 150*get_uhungersizemod()) ? NOT_HUNGRY :
+		(h > 50*get_uhungersizemod()) ? HUNGRY :
 		(h > 0) ? WEAK : FAINTING;
 
 	/* While you're eating, you may pass from WEAK to HUNGRY to NOT_HUNGRY.

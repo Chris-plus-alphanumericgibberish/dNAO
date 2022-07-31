@@ -802,6 +802,8 @@ E boolean FDECL(is_edible, (struct obj *));
 E void NDECL(init_uhunger);
 E void NDECL(reset_uhunger);
 E boolean NDECL(satiate_uhunger);
+E double NDECL(get_uhungersizemod);
+E int NDECL(get_uhungermax);
 E int NDECL(Hear_again);
 E void NDECL(reset_eat);
 E int NDECL(doeat);
