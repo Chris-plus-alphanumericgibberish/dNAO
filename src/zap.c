@@ -4585,7 +4585,7 @@ struct zapdata * zapdata;
 					for (otmp = mdef->minvent; otmp; otmp = otmp2) {
 						otmp2 = otmp->nobj;
 						if (!(oresist_disintegration(otmp) || obj_resists(otmp, 5, 50) || otmp == m_lsvd)) {
-							obj_extract_self(otmp);
+							obj_extract_and_unequip_self(otmp);
 							obfree(otmp, (struct obj *)0);
 						}
 					}
