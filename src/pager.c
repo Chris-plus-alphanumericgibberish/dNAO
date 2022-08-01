@@ -2087,6 +2087,7 @@ get_description_of_damage_type(uchar id)
 	case AD_UNHY: return "unholy energy";
 	case AD_PERH: return "level-based damage";
 	case AD_SVPN: return "severe poison";
+	case AD_HLUH: return "corrupted holy energy";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

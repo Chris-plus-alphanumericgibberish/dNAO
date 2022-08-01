@@ -1749,7 +1749,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(magr->mforgetful && (attk->adtyp == AD_MAGM || attk->adtyp == AD_SPEL)){
 		GETNEXT
 	}
-	if(magr->mapostasy && (attk->adtyp == AD_CLRC || attk->adtyp == AD_HOLY || attk->adtyp == AD_UNHY)){
+	if(magr->mapostasy && (attk->adtyp == AD_CLRC || attk->adtyp == AD_HOLY)){
 		GETNEXT
 	}
 	/* Magic blade attacks are changed or lost if the creature is canceled */
@@ -2492,6 +2492,7 @@ struct attack *attk;
 						(attk->adtyp == AD_MOON) ? " with a moonlight rapier!" :
 						(attk->adtyp == AD_HOLY) ? " with a holy light-beam!" :
 						(attk->adtyp == AD_UNHY) ? " with a unholy light-blade!" :
+						(attk->adtyp == AD_HLUH) ? " with a corrupted light-blade!" :
 						(attk->adtyp == AD_MERC) ? " with a blade of mercury!" :
 						(attk->adtyp == AD_WET) ? " with a water-jet blade!" :
 						(attk->adtyp == AD_PSON) ? " with a soul blade!" :
@@ -8142,6 +8143,35 @@ boolean ranged;
 			dmg *= 2;
 		}
 		alt_attk.adtyp = AD_UNHY;
+		/* apply half-magic */
+		if (Half_spel(mdef))
+			dmg /= 2;
+		if (youdef && u.uvaul_duration)
+			dmg /= 2;
+
+		result = xdamagey(magr, mdef, &alt_attk, dmg);
+		return result;
+
+	case AD_HLUH:
+		/* make a physical attack */
+		alt_attk.adtyp = AD_PHYS;
+		alt_attk.damn = 1;
+		alt_attk.damd = 1;
+		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		/* add unholy damage */
+		if (youdef ? (hates_unholy(pd) || hates_holy(pd)) : (hates_unholy_mon(mdef) || hates_holy_mon(mdef))) {
+			if (vis) {
+				pline("The corrupted light sears %s!",
+					(youdef ? "your flesh" : mon_nam(mdef))
+					);
+			}
+			if(youdef ? (hates_unholy(pd) && hates_holy(pd)) : (hates_unholy_mon(mdef) && hates_holy_mon(mdef)))
+				dmg *= 3;
+			else
+				dmg *= 2;
+		}
+		alt_attk.adtyp = AD_HLUH;
 		/* apply half-magic */
 		if (Half_spel(mdef))
 			dmg /= 2;

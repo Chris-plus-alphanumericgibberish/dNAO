@@ -812,6 +812,9 @@ struct attack *mattk;
 		else if (mattk->adtyp == AD_UNHY){
 			return "unholy light-blade";
 		}
+		else if (mattk->adtyp == AD_HLUH){
+			return "corrupted light-blade";
+		}
 		else {
 			return "blade";
 		}
@@ -1185,6 +1188,7 @@ struct obj * weapon;
 		|| attk->adtyp == AD_MOON
 		|| attk->adtyp == AD_HOLY
 		|| attk->adtyp == AD_UNHY
+		|| attk->adtyp == AD_HLUH
 		)
 		)
 		return TRUE;	// will touch
@@ -1672,11 +1676,11 @@ struct obj * weapon;
 			return 2;
 
 		if (hates_holy_mon(mdef) &&
-			attk && attk->adtyp == AD_HOLY)
+			attk && (attk->adtyp == AD_HOLY || attk->adtyp == AD_HLUH))
 			return 2;
 
 		if (hates_unholy_mon(mdef) &&
-			attk && attk->adtyp == AD_UNHY)
+			attk && (attk->adtyp == AD_UNHY || attk->adtyp == AD_HLUH))
 			return 2;
 
 		if (has_blood_mon(mdef) &&

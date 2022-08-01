@@ -2302,6 +2302,20 @@ int tary;
 				dmg /= 3;
 			return xdamagey(magr, mdef, attk, dmg);
 
+		case AD_HLUH:
+			/* message */
+			if (youdef || canspotmon(mdef)) {
+				pline("%s %s hit by a shower of corrupted missiles!",
+					youdef ? "You" : Monnam(mdef),
+					youdef ? "are" : "is"
+					);
+			}
+			if(hates_unholy_mon(mdef) && hates_holy_mon(mdef))
+				dmg *= 3;
+			else if(hates_unholy_mon(mdef) || hates_holy_mon(mdef))
+				dmg *= 2;
+			return xdamagey(magr, mdef, attk, dmg);
+
 		case AD_STAR:
 			/* message */
 			if (youdef || canspotmon(mdef)) {
@@ -2413,7 +2427,7 @@ int tary;
 				zapdata.unreflectable = ZAP_REFL_NEVER;
 				zapdata.damd = 8;
 			}
-			if (adtyp == AD_HOLY || adtyp == AD_UNHY) {
+			if (adtyp == AD_HOLY || adtyp == AD_UNHY || adtyp == AD_HLUH) {
 				zapdata.affects_floor = FALSE;
 				zapdata.phase_armor = TRUE;
 			}

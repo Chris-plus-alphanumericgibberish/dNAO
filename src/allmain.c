@@ -4166,6 +4166,7 @@ printAttacks(buf, ptr)
 		"unholy energy",		/*146*/
 		"level-based damage",	/*147*/
 		"severe poison",		/*148*/
+		"corrupted holy energy",/*149*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */

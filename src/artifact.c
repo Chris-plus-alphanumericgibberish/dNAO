@@ -2679,6 +2679,10 @@ boolean narrow_only;
 			if (!hates_silver(ptr))
 				return FALSE;
 		break;
+		case AD_HLUH:
+			if (!hates_holy_mon(mdef) && !hates_unholy_mon(mdef))
+				return FALSE;
+		break;
 		default:
 			impossible("Weird weapon special attack: (%d).", weap->adtyp);
 		}
@@ -5039,6 +5043,17 @@ boolean printmessages; /* print generic elemental damage messages */
 	if (attacks(AD_STAR, otmp)){
 		if (attacks(AD_STAR, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("starlit %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"sear"),
+				hittee, !spec_dbon_applies ? '.' : '!');
+			*messaged = TRUE;
+		}
+	}
+	if (attacks(AD_HLUH, otmp)){
+		if (attacks(AD_HLUH, otmp) && (vis&VIS_MAGR) && printmessages) {
+			pline_The("corrupted %s %s %s%c",
 				wepdesc,
 				vtense(wepdesc,
 					!spec_dbon_applies ? "hit" :
