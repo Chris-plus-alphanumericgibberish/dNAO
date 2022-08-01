@@ -228,7 +228,7 @@ dosit()
 						  flags.female ? "Dame" : "Sire");
 					while(cnt--){
 						mtmp = makemon(courtmon(monsndx(youracedata)), u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
-						initedog(mtmp);
+						if(mtmp) initedog(mtmp);
 					}
 					levl[u.ux][u.uy].looted |= NOBLE_PETS;
 				}break;
