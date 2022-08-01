@@ -5187,6 +5187,93 @@ struct monst *magr;
 }
 
 void
+dochaos_mon(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i = rnd(8),j;
+	int ax, ay;
+	struct attack symbiote = { AT_BITE, AD_UNHY, 5, 4 };
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	
+	pa = youagr ? youracedata : magr->data;
+
+	//mostly uses default 5d4 damage dice
+	switch(rnd(4)){
+		//1: Bite
+		case 2:
+			symbiote.aatyp = AT_GAZE;
+			symbiote.adtyp = AD_STDY;
+		break;
+		case 3:
+			//Bad luck, curse items
+			symbiote.aatyp = AT_MAGC;
+			symbiote.adtyp = AD_CLRC;
+		break;
+		case 4:
+			symbiote.aatyp = AT_SPIT;
+			symbiote.adtyp = AD_BLND;
+			symbiote.damn = 0;
+			symbiote.damd = 0;
+		break;
+	}
+	
+	//Attack all surrounding foes
+	for(j=8;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(ax, ay))
+			continue;
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
+		
+		if(u.ux == ax && u.uy == ay)
+			mdef = &youmonst;
+		
+		if(!mdef)
+			continue;
+		
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(!youdef && imprisoned(mdef))
+			continue;
+
+		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE && symbiote.aatyp != AT_SPIT){
+			if((touch_petrifies(mdef->data)
+				|| mdef->mtyp == PM_MEDUSA)
+			 && (youagr ? !Stone_resistance : !resists_ston(magr))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
+		
+		if(symbiote.aatyp == AT_MAGC)
+			cast_spell(magr, mdef, &symbiote, rn2(2) ? EVIL_EYE : CURSE_ITEMS, x(mdef), y(mdef));
+		else if(symbiote.aatyp == AT_GAZE)
+			xgazey(magr, mdef, &symbiote, -1);
+		else if(symbiote.aatyp == AT_SPIT)
+			xspity(magr, &symbiote, ax, ay);
+		else
+			xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+	}
+}
+
+void
 dohost_mon(magr)
 struct monst *magr;
 {
@@ -5536,6 +5623,80 @@ struct monst *magr;
 		
 		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
 		// Nagas have 5 or 7 snake bites
+		if(--max <= 0)
+			return;
+	}
+}
+
+void
+dokraken_mon(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i = rnd(8),j;
+	int mult = 1;
+	int ax, ay;
+	struct attack * attk;
+	struct attack attkbuff = {0};
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct permonst *pa;
+	int max = 8;
+	
+	pa = youagr ? youracedata : magr->data;
+	
+	// get attack from statblock
+	attk = mon_get_attacktype(magr, AT_TENT, &attkbuff);
+	if(!attk)
+		return;
+
+	//1-8 tentacles attack, up to all of which can be vs. one target
+	max = mult = rnd(8);
+
+	//Attack all surrounding foes
+	for(j=8*mult;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(ax, ay))
+			continue;
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
+		
+		if(u.ux == ax && u.uy == ay)
+			mdef = &youmonst;
+		
+		if(!mdef)
+			continue;
+		
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(!youdef && imprisoned(mdef))
+			continue;
+
+		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
+			if((touch_petrifies(mdef->data)
+				|| mdef->mtyp == PM_MEDUSA)
+			 && (youagr ? !Stone_resistance : !resists_ston(magr))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
+		
+		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
+		// 1-8 tentacles attack
 		if(--max <= 0)
 			return;
 	}

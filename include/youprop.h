@@ -590,6 +590,26 @@
 #define ESpellboost		u.uprops[SPELLBOOST].extrinsic
 #define Spellboost		(HSpellboost || ESpellboost)
 
+#define HFire_crystal	u.uprops[FIRE_CRYSTAL].intrinsic
+#define EFire_crystal	u.uprops[FIRE_CRYSTAL].extrinsic
+#define Fire_crystal	(HFire_crystal || EFire_crystal)
+
+#define HWater_crystal	u.uprops[WATER_CRYSTAL].intrinsic
+#define EWater_crystal	u.uprops[WATER_CRYSTAL].extrinsic
+#define Water_crystal	(HWater_crystal || EWater_crystal)
+
+#define HAir_crystal	u.uprops[AIR_CRYSTAL].intrinsic
+#define EAir_crystal	u.uprops[AIR_CRYSTAL].extrinsic
+#define Air_crystal		(HAir_crystal || EAir_crystal)
+
+#define HEarth_crystal	u.uprops[EARTH_CRYSTAL].intrinsic
+#define EEarth_crystal	u.uprops[EARTH_CRYSTAL].extrinsic
+#define Earth_crystal	(HEarth_crystal || EEarth_crystal)
+
+#define HBlack_crystal	u.uprops[BLACK_CRYSTAL].intrinsic
+#define EBlack_crystal	u.uprops[BLACK_CRYSTAL].extrinsic
+#define Black_crystal	(HBlack_crystal || EBlack_crystal)
+
 #define HSterile	u.uprops[STERILE].intrinsic
 #define ESterile	u.uprops[STERILE].extrinsic
 #define Sterile		((HSterile || ESterile) && !GoodHealth)

@@ -10512,7 +10512,14 @@ boolean goodequip;
 				otmp->blessed = FALSE;
 				otmp->cursed = FALSE;
 				(void) mpickobj(mtmp,otmp);
-
+				
+				if(!PURIFIED_FIRE){
+					mongets(mtmp, LONG_SWORD, mkobjflags);
+					mongets(mtmp, SCIMITAR, mkobjflags);
+					mongets(mtmp, SCIMITAR, mkobjflags);
+					mongets(mtmp, SCIMITAR, mkobjflags);
+				}
+				
 				// mlocal = makemon(&mons[PM_KRAKEN], mtmp->mx, mtmp->my, MM_ADJACENTOK);
 				// otmp = mksobj(CRYSTAL_BALL, mkobjflags);
 				// otmp = oname(otmp, artiname(ART_WATER_CRYSTAL));		
@@ -11466,6 +11473,16 @@ int faction;
 	} else if (rider_hp(ptr)) {
 	    /* We want low HP, but a high mlevel so they can attack well */
 	    mtmp->mhpmax = mtmp->mhp = d(10,8);
+	} else if (ptr->mtyp == PM_LICH__THE_FIEND_OF_EARTH) {
+	    mtmp->mhpmax = mtmp->mhp = 500;
+	} else if (ptr->mtyp == PM_KARY__THE_FIEND_OF_FIRE) {
+	    mtmp->mhpmax = mtmp->mhp = 700;
+	} else if (ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) {
+	    mtmp->mhpmax = mtmp->mhp = 900;
+	} else if (ptr->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) {
+	    mtmp->mhpmax = mtmp->mhp = 1100;
+	} else if (ptr->mtyp == PM_CHAOS) {
+	    mtmp->mhpmax = mtmp->mhp = 2000;
 	} else if (ptr->mlevel > 49 || ptr->geno & G_UNIQ) {
 	    /* "special" fixed hp monster
 	     * the hit points are encoded in the mlevel in a somewhat strange
@@ -11575,21 +11592,6 @@ int faction;
 	
 	if(mtmp->mfaction <= 0)
 		makemon_set_monster_faction(mtmp);
-	if(mndx == PM_CHAOS){
-		mtmp->mhpmax = 15*mtmp->mhpmax;
-		mtmp->mhp = mtmp->mhpmax;
-	} else if(mndx == PM_KARY__THE_FIEND_OF_FIRE){
-		mtmp->mhpmax = 10*mtmp->mhpmax;
-		mtmp->mhp = mtmp->mhpmax;
-	} else if(mndx == PM_LICH__THE_FIEND_OF_EARTH){
-		mtmp->mhpmax = 10*mtmp->mhpmax;
-		mtmp->mhp = mtmp->mhpmax;
-	} else if(mndx == PM_KRAKEN__THE_FIEND_OF_WATER){
-		mtmp->mhpmax = 10*mtmp->mhpmax;
-		mtmp->mhp = mtmp->mhpmax;
-	} else if(mndx == PM_TIAMAT__THE_FIEND_OF_WIND){
-		mtmp->mhpmax = 10*mtmp->mhpmax;
-		mtmp->mhp = mtmp->mhpmax;
 	}
 	
 	switch(ptr->mlet) {
@@ -13706,11 +13708,11 @@ struct monst *mtmp, *victim;
 			ptr->mtyp == PM_SHOGGOTH
 		) hp_threshold *= 3;
 	    else if (ptr->mtyp == PM_RAZORVINE) hp_threshold *= .5;
-		else if(ptr->mtyp == PM_CHAOS) hp_threshold *= 15;
-		else if(ptr->mtyp == PM_KARY__THE_FIEND_OF_FIRE) hp_threshold *= 10;
-		else if(ptr->mtyp == PM_LICH__THE_FIEND_OF_EARTH) hp_threshold *= 10;
-		else if(ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) hp_threshold *= 10;
-		else if(ptr->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) hp_threshold *= 10;
+		else if(ptr->mtyp == PM_CHAOS) hp_threshold = mtmp->m_lev * 2200/16;
+		else if(ptr->mtyp == PM_KARY__THE_FIEND_OF_FIRE) hp_threshold = mtmp->m_lev * 770/12;
+		else if(ptr->mtyp == PM_LICH__THE_FIEND_OF_EARTH) hp_threshold = mtmp->m_lev * 550/11;
+		else if(ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) hp_threshold = mtmp->m_lev * 990/20;
+		else if(ptr->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) hp_threshold = mtmp->m_lev * 1210/13;
 		else if(ptr->mtyp == PM_CHOKHMAH_SEPHIRAH) hp_threshold *= u.chokhmah;
 
 	    lev_limit = mon_max_lev(mtmp);

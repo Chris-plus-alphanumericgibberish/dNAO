@@ -1562,6 +1562,8 @@ struct monst *mon;
 		mmove += 12;
 	if(mon->mtyp == PM_UVUUDAUM && mon->mpeaceful)
 		mmove /= 4;
+	if(mon->mtyp == PM_CHAOS && !PURIFIED_FIRE)
+		mmove += 3;
     /* Note: MSLOW's `+ 1' prevents slowed speed 1 getting reduced to 0;
      *	     MFAST's `+ 2' prevents hasted speed 1 from becoming a no-op;
      *	     both adjustments have negligible effect on higher speeds.

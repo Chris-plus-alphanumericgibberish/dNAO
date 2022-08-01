@@ -1121,6 +1121,14 @@ unsigned int type;
 	break;
 	case PM_GREAT_HIGH_SHAMAN_OF_KURTULMAK:
 		return SUMMON_DEVIL; 
+	case PM_DOOM_KNIGHT:
+		switch(rn2(4)){
+			case 0: return BLIND_YOU;
+			case 1: return VULNERABILITY;
+			case 2: return MON_FLARE;
+			case 3: return DRAIN_LIFE;
+		}
+	break;
 	case PM_LICH__THE_FIEND_OF_EARTH:
 		if(mtmp->mvar_spList_1 > 3) mtmp->mvar_spList_1 = 0;
 		switch(mtmp->mvar_spList_1++){
@@ -1171,21 +1179,21 @@ unsigned int type;
 			if(mtmp->mvar_spList_1 > 7) mtmp->mvar_spList_1 = 0;
 			switch(mtmp->mvar_spList_1++){
 				case 0: return MON_BLIZZAGA;
-				case 1: return WEAKEN_STATS;
+				case 1: return !PURIFIED_EARTH ? DEATH_TOUCH : WEAKEN_STATS;
 				case 2: return MON_THUNDAGA;
 				case 3: return CURE_SELF;
 				case 4: return HASTE_SELF;
 				case 5: return MON_FIRAGA;
-				case 6: return ICE_STORM;
+				case 6: return !PURIFIED_EARTH ? MON_WARP : ICE_STORM;
 				case 7: return MON_FLARE;
 			}
 		} else {
 			if(mtmp->mvar_spList_2 > 3) mtmp->mvar_spList_2 = 0;
 			switch(mtmp->mvar_spList_2++){
-				case 0: return FIRE_PILLAR;
-				case 1: return GEYSER;
-				case 2: return MON_POISON_GAS;
-				case 3: return EARTHQUAKE;
+				case 0: return !PURIFIED_FIRE ? STUN_YOU : FIRE_PILLAR;
+				case 1: return !PURIFIED_WATER ? ICE_STORM : GEYSER;
+				case 2: return !PURIFIED_WIND ? PLAGUE : MON_POISON_GAS;
+				case 3: return !PURIFIED_EARTH ? MON_FLARE : EARTHQUAKE;
 			}
 		}
 	break;
@@ -3909,7 +3917,13 @@ int tary;
 			else {
 				if (canseemon(magr))
 					pline("%s looks better.", Monnam(magr));
-				*hp(magr) += d(dmn, 8);
+				if(magr->mtyp == PM_CHAOS){
+					//Chaos could heal himself fully, but lets not do that.
+					*hp(magr) += 999;
+				}
+				else {
+					*hp(magr) += d(dmn, 8);
+				}
 				if (*hp(magr) > *hpmax(magr))
 					*hp(magr) = *hpmax(magr);
 			}

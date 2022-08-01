@@ -669,7 +669,10 @@ struct monst *mon;
 		if(mon->mvar2 & 0x4L) base = -125; //Fully Quantum Locked
 		if(mon->mvar2 & 0x2L) base = -20; //Partial Quantum Lock
 	}
-	
+	else if(mon->mtyp == PM_CHAOS && !PURIFIED_WIND){
+		base -= 6;
+	}
+
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
 	
@@ -866,6 +869,9 @@ struct monst *mon;
 			}
 		}
 	}
+	else if(mon->mtyp == PM_CHAOS && !PURIFIED_WIND){
+		base -= 6;
+	}
 	
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
@@ -998,6 +1004,9 @@ struct monst *mon;
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base += u.chokhmah;
 	}
+	else if(mon->mtyp == PM_CHAOS && !PURIFIED_WIND){
+		base += 4;
+	}
 	
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
@@ -1021,6 +1030,9 @@ struct monst *mon;
 	
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base += u.chokhmah;
+	}
+	else if(mon->mtyp == PM_CHAOS && !PURIFIED_WIND){
+		base += 4;
 	}
 	
 	if(mon->mtame){

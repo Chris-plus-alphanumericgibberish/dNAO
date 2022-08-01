@@ -1111,6 +1111,24 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		}
 		return MM_REFLECT;
 	}
+	/* Non-future (and rockets) protectiles are blown back by Tiamat's winds (somehow!) */
+	/*  And also not a rock from a sling. It's pretty arbitrary, but the idea is aerodynamic stuff gets blown back. */
+	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == BULLET 
+			|| (launcher && (launcher->otyp == SLING || launcher->otyp == GRENADE_LAUNCHER))
+		)
+		&& !trap
+		&& (mdef->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND || (mdef->mtyp == PM_CHAOS && !PURIFIED_WIND)))
+	{
+		*pdx *= -1;
+		*pdy *= -1;
+		pline("%s path is curved by the wind!", s_suffix(The(doname(thrownobj))));
+		/* spends some range */
+		if (range2 > range) {
+			*prange = *prange2;
+			*prange2 -= range2 - range;
+		}
+		return MM_REFLECT;
+	}
 	/* the player has a chance to burn some projectiles (not blaster bolts or laser beams) out of the air with a lightsaber */
 	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT)
 		&& youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && (

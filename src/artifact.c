@@ -11658,6 +11658,10 @@ do_passive_attacks()
 				dohost_mon(mtmp);
 			if(is_storm_mon(mtmp))
 				dostorm(mtmp);
+			if(mtmp->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER)
+				dokraken_mon(mtmp);
+			if(mtmp->mtyp == PM_CHAOS && !PURIFIED_WATER)
+				dochaos_mon(mtmp);
 		}
 		if(mtmp->mtyp == PM_NACHASH_TANNIN){
 			donachash(mtmp);

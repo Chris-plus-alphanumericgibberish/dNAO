@@ -31,8 +31,10 @@ E time_t NDECL(get_realtime);
 #endif
 E void NDECL(dogoat);
 E void FDECL(dogoat_mon, (struct monst *));
+E void FDECL(dochaos_mon, (struct monst *));
 E void FDECL(dohost_mon, (struct monst *));
 E void FDECL(dosnake, (struct monst *));
+E void FDECL(dokraken_mon, (struct monst *));
 E void FDECL(dotailslap, (struct monst *));
 E void FDECL(dovines, (struct monst *));
 E void FDECL(dostarblades, (struct monst *));

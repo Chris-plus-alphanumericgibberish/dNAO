@@ -5715,6 +5715,48 @@ boolean inc_penalties;
 		else maxskill = P_UNSKILLED;
 	}
 	
+	if(Air_crystal){
+		if(p_skill == P_AXE
+		 || p_skill == P_HEALING_SPELL
+		 || p_skill == P_ATTACK_SPELL
+		 || p_skill == P_DAGGER
+		)
+			maxskill = min(maxskill + 1, P_EXPERT);
+		if(p_skill == P_BARE_HANDED_COMBAT)
+			maxskill = min(maxskill + 1, P_GRAND_MASTER);
+	}
+	if(Fire_crystal){
+		if(p_skill == P_LONG_SWORD
+		 || p_skill == P_BOW
+		 || p_skill == P_WAND_POWER
+		 || p_skill == P_MATTER_SPELL
+		)
+			maxskill = min(maxskill + 1, P_EXPERT);
+	}
+	if(Water_crystal){
+		if(p_skill == P_HAMMER
+		 || p_skill == P_SPEAR
+		 || p_skill == P_BROAD_SWORD
+		 || p_skill == P_CLERIC_SPELL
+		 || p_skill == P_MUSICALIZE
+		)
+			maxskill = min(maxskill + 1, P_EXPERT);
+	}
+	if(Earth_crystal){
+		if(p_skill == P_ATTACK_SPELL
+		 || p_skill == P_HEALING_SPELL
+		 || p_skill == P_CLERIC_SPELL
+		 || p_skill == P_DAGGER
+		)
+			maxskill = min(maxskill + 1, P_EXPERT);
+		if(p_skill == P_BARE_HANDED_COMBAT)
+			maxskill = min(maxskill + 1, P_GRAND_MASTER);
+	}
+	if(Black_crystal){
+		if(p_skill == P_TWO_HANDED_SWORD)
+			maxskill = min(maxskill + 1, P_EXPERT);
+	}
+
 	if(p_skill == P_NIMAN){
 		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 			maxskill = min(P_EXPERT, P_SKILL(weapon_type(uwep)));
@@ -5776,6 +5818,40 @@ boolean inc_penalties;
 		if(OLD_P_SKILL(P_SHIEN) >= P_EXPERT) curskill++;
 	}
 	
+	if(Air_crystal){
+		if(p_skill == P_BARE_HANDED_COMBAT
+		 || p_skill == P_AXE
+		 || p_skill == P_HEALING_SPELL
+		 || p_skill == P_ATTACK_SPELL
+		 || p_skill == P_DAGGER
+		)
+		curskill += 1;
+	}
+	if(Fire_crystal){
+		if(p_skill == P_LONG_SWORD
+		 || p_skill == P_BOW
+		 || p_skill == P_WAND_POWER
+		 || p_skill == P_MATTER_SPELL
+		)
+		curskill += 1;
+	}
+	if(Water_crystal){
+		if(p_skill == P_HAMMER
+		 || p_skill == P_SPEAR
+		 || p_skill == P_CLERIC_SPELL
+		 || p_skill == P_MUSICALIZE
+		)
+		curskill += 1;
+	}
+	if(Earth_crystal){
+		if(p_skill == P_BARE_HANDED_COMBAT
+		 || p_skill == P_ATTACK_SPELL
+		 || p_skill == P_HEALING_SPELL
+		 || p_skill == P_CLERIC_SPELL
+		 || p_skill == P_DAGGER
+		)
+		curskill += 1;
+	}
 	if(p_skill == P_NIMAN && curskill < P_BASIC){
 		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC){
 			curskill = P_BASIC;

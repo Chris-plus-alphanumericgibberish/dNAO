@@ -614,6 +614,8 @@
 #define gates_in_help(ptr)	((is_demon((ptr)) || is_minion((ptr))) \
 								&& !is_auton(ptr) \
 								&& (ptr)->mtyp != PM_OONA \
+								&& (ptr)->mtyp != PM_CHAOS \
+								&& (ptr)->mtyp != PM_KARY__THE_FIEND_OF_FIRE \
 								&& (ptr)->mtyp != PM_BALROG \
 								&& (ptr)->mtyp != PM_DURIN_S_BANE \
 								&& (ptr)->mtyp != PM_SUCCUBUS \

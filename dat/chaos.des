@@ -661,15 +661,11 @@ DOOR:locked,(35,14)
 DOOR:closed,(35,16)
 DOOR:locked,(54,10)
 
-MONSTER: '@', "knight", (15,9), hostile, "Black Knight"
-OBJECT: '[', "plate mail", (15,9)
-MONSTER: '@', "knight", (15,11), hostile, "Black Knight"
-OBJECT: '[', "plate mail", (15,11)
+MONSTER: '@', "doom knight", (15,9), hostile
+MONSTER: '@', "doom knight", (15,11), hostile
 
-MONSTER: '@', "knight", (55,9), hostile, "Black Knight"
-OBJECT: '[', "plate mail", (55,09)
-MONSTER: '@', "knight", (55,11), hostile, "Black Knight"
-OBJECT: '[', "plate mail", (55,11)
+MONSTER: '@', "doom knight", (55,9), hostile
+MONSTER: '@', "doom knight", (55,11), hostile
 
 MAZE:"chaosfrh",' '
 FLAGS: nommap,hardfloor, shortsighted

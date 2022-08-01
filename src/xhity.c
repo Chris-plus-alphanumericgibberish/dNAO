@@ -1914,6 +1914,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				(pa->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER && rn2(100)<52) ||
 				(pa->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND && !rn2(4)) ||
 				(pa->mtyp == PM_CHAOS && rn2(3)) ||
+				(pa->mtyp == PM_DOOM_KNIGHT && !magr->mcan && !magr->mspec_used && !rn2(4)) ||
 				(pa->mtyp == PM_GAE_ELADRIN && !magr->mcan && !magr->mspec_used && !rn2(3)) ||
 				(pa->mtyp == PM_CAILLEA_ELADRIN && !magr->mcan && !magr->mspec_used)
 				){
@@ -1924,6 +1925,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		if (!is_null_attk(attk) && ((attk->aatyp == AT_MAGC) == !(*subout&SUBOUT_SPELLS))) {
 			/* just get the next attack */
 			GETNEXT
+		}
+		if(pa->mtyp == PM_CHAOS && !PURIFIED_FIRE){
+			if(attk->aatyp == AT_CLAW && attk->adtyp == AD_SQUE)
+				attk->aatyp = AT_MARI;
 		}
 	}
 	/*Lilitus actually skip their spellcasting attack unless the target has their status ailment*/

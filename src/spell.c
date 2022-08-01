@@ -1073,6 +1073,7 @@ int menutype;
 		|| (uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO) 
 		|| (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
 		|| (uarmh && check_oprop(uarmh, OPROP_BLAST))
+		|| Fire_crystal || Water_crystal || Air_crystal || Earth_crystal || Black_crystal
 	)){
 	    You("don't know any spells right now.");
 	    return FALSE;
@@ -1412,33 +1413,99 @@ update_alternate_spells()
 	int i;
 
 	// for artifacts
-	if (uarmh){
-		if(uarmh->oartifact == ART_STORMHELM){
-			for (i = 0; i < MAXSPELL; i++) {
-				if (spellid(i) == SPE_LIGHTNING_STORM) {
-					if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
-					break;
-				}
-				if (spellid(i) == NO_SPELL)  {
-					spl_book[i].sp_id = SPE_LIGHTNING_STORM;
-					spl_book[i].sp_lev = objects[SPE_LIGHTNING_STORM].oc_level;
-					spl_book[i].sp_know = 1;
-					break;
-				}
+	if(uarmh && uarmh->oartifact == ART_STORMHELM){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == SPE_LIGHTNING_STORM) {
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				break;
+			}
+			if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = SPE_LIGHTNING_STORM;
+				spl_book[i].sp_lev = objects[SPE_LIGHTNING_STORM].oc_level;
+				spl_book[i].sp_know = 1;
+				break;
 			}
 		}
-		if(check_oprop(uarmh, OPROP_BLAST)){
-			for (i = 0; i < MAXSPELL; i++) {
-				if (spellid(i) == SPE_FIREBALL) {
-					if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
-					break;
-				}
-				if (spellid(i) == NO_SPELL)  {
-					spl_book[i].sp_id = SPE_FIREBALL;
-					spl_book[i].sp_lev = objects[SPE_FIREBALL].oc_level;
-					spl_book[i].sp_know = 1;
-					break;
-				}
+	}
+	if(Fire_crystal || (uarmh && check_oprop(uarmh, OPROP_BLAST))){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == SPE_FIREBALL) {
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				break;
+			}
+			if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = SPE_FIREBALL;
+				spl_book[i].sp_lev = objects[SPE_FIREBALL].oc_level;
+				spl_book[i].sp_know = 1;
+				break;
+			}
+		}
+	}
+	if(Water_crystal){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == SPE_CONE_OF_COLD) {
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				break;
+			}
+			if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = SPE_CONE_OF_COLD;
+				spl_book[i].sp_lev = objects[SPE_CONE_OF_COLD].oc_level;
+				spl_book[i].sp_know = 1;
+				break;
+			}
+		}
+	}
+	if(Air_crystal){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == SPE_LIGHTNING_BOLT) {
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				break;
+			}
+			if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = SPE_LIGHTNING_BOLT;
+				spl_book[i].sp_lev = objects[SPE_LIGHTNING_BOLT].oc_level;
+				spl_book[i].sp_know = 1;
+				break;
+			}
+		}
+	}
+	if(Earth_crystal){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == SPE_DIG) {
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				break;
+			}
+			if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = SPE_DIG;
+				spl_book[i].sp_lev = objects[SPE_DIG].oc_level;
+				spl_book[i].sp_know = 1;
+				break;
+			}
+		}
+	}
+	if(Black_crystal){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == SPE_HASTE_SELF) {
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				break;
+			}
+			if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = SPE_HASTE_SELF;
+				spl_book[i].sp_lev = objects[SPE_HASTE_SELF].oc_level;
+				spl_book[i].sp_know = 1;
+				break;
+			}
+		}
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) == SPE_EXTRA_HEALING) {
+				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				break;
+			}
+			if (spellid(i) == NO_SPELL)  {
+				spl_book[i].sp_id = SPE_EXTRA_HEALING;
+				spl_book[i].sp_lev = objects[SPE_EXTRA_HEALING].oc_level;
+				spl_book[i].sp_know = 1;
+				break;
 			}
 		}
 	}
@@ -5836,6 +5903,7 @@ int spell;
 			|| uwep->oartifact == ART_PROFANED_GREATSCYTHE
 			|| uwep->oartifact == ART_GARNET_ROD
 			|| (Role_if(PM_KNIGHT) && uwep->oartifact == ART_MAGIC_MIRROR_OF_MERLIN)
+			|| Black_crystal
 		) splcaster -= urole.spelarmr;
 
 		if(uwep->obj_material == MERCURIAL)
