@@ -2514,7 +2514,7 @@ find_ac()
 				P_SKILL(weapon_type(uwep))-1
 				)
 			,0);
-		if(uwep->oartifact == ART_TOBIUME || uwep->oartifact == ART_MASAMUNE)
+		if(uwep->oartifact == ART_TOBIUME)
 			uac -= max(uwep->spe,0);
 		if(uwep->otyp == NAGINATA && !uarms){
 			if(uwep->oartifact == ART_JINJA_NAGINATA)
