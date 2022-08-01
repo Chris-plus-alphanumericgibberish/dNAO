@@ -3269,6 +3269,21 @@ struct obj *obj;
 	else if(obj->oartifact == ART_WAND_OF_ORCUS){
 		type = P_MACE;
 	}
+	else if(obj->oartifact == ART_MASAMUNE){
+		for(int skl = P_FIRST_WEAPON; skl <= P_LAST_WEAPON; skl++){
+			/* Ranged weapon skills are intermixed with melee skills :( */
+			if(skl == P_BOW
+				|| skl == P_SLING
+				|| skl == P_FIREARM
+				|| skl == P_CROSSBOW
+				|| skl == P_DART
+				|| skl == P_SHURIKEN
+				|| skl == P_BOOMERANG
+			)
+				continue;
+			CHECK_ALTERNATE_SKILL(skl)
+		}
+	}
 
 	if(obj->otyp == DOUBLE_LIGHTSABER){
 		if(!obj->altmode)

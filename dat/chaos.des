@@ -1039,7 +1039,7 @@ STAIR:(51,02),down
 MONSTER:'D',"Tiamat, the Fiend of Wind", (35, 06)
 
 CONTAINER: '(', "chest"  , (60,03)
-OBJECT:')',"tsurugi", contained, blessed, +8, "Masamune"
+OBJECT:')',"tsurugi", contained, blessed, +0, "Masamune"
 MONSTER:'\'',"retriever", (51, 18), asleep, "Warmachine"
 
 MAZE:"chaose",' '

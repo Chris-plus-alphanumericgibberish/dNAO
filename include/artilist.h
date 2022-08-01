@@ -1396,12 +1396,12 @@ A("Werebuster",						LONG_SWORD,				(const char *)0,
 /*Needs encyc entry*/
 A("Masamune",						TSURUGI,				(const char *)0,
 	7500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_NOCNT|ARTG_MAJOR),
+	A_NONE, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
-	NO_ATTK(), (ARTA_SILVER),
+	ATTK(AD_PHYS, 10, 20), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	BLESS, NOFLAG
+	NOINVOKE, NOFLAG
 	),
 
 /*from Final Fantasy*/

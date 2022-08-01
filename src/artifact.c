@@ -5164,6 +5164,24 @@ boolean printmessages; /* print generic elemental damage messages */
 			mdef->mstrategy &= ~STRAT_WAITFORU;
 		}
 	}
+	if(oartifact == ART_MASAMUNE){
+		int experts = -2;
+		if(youagr){
+			for(int skl = 1; skl < P_NUM_SKILLS; skl++){
+				if(P_SKILL(skl) >= P_EXPERT)
+					experts += 2;
+			}
+		}
+		else if(m_martial_skill(magr->data) == P_EXPERT){
+			experts = 10;
+		}
+		/* Masamune rewards skill */
+		if(experts > 0)
+			*plusdmgptr += experts;
+		/* Masamune can crit (this purposefully bypasses dr etc.) */
+		if(dieroll <= 4)
+			*truedmgptr += basedmg + rnd(20);
+	}
 	/* The anti-elemental sword */
 	if (oartifact == ART_KUSANAGI_NO_TSURUGI){
 		/* special effects vs whirly */
