@@ -1115,6 +1115,7 @@ E int FDECL(strncmpi, (const char *,const char *,int));
 #ifndef STRSTRI
 E char *FDECL(strstri, (const char *,const char *));
 #endif
+E char *FDECL(strsubst, (char *bp, const char *orig, const char *replacement));
 E boolean FDECL(fuzzymatch, (const char *,const char *,const char *,BOOLEAN_P));
 E void NDECL(setrandom);
 E int NDECL(getyear);

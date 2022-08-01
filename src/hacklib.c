@@ -34,6 +34,7 @@ NetHack, except that rounddiv may call panic().
 	boolean		pmatch		(const char *, const char *)
 	int		strncmpi	(const char *, const char *, int)
 	char *		strstri		(const char *, const char *)
+        char *          strsubst        (char *, const char *, const char *)
 	boolean		fuzzymatch	(const char *,const char *,const char *,boolean)
 	void		setrandom	(void)
 	int		getyear		(void)
@@ -429,6 +430,25 @@ strstri(str, sub)	/* case insensitive substring search */
     return (char *) 0;	/* not found */
 }
 #endif	/* STRSTRI */
+
+/* substitute a word or phrase in a string (in place) */
+/* caller is responsible for ensuring that bp points to big enough buffer */
+char *
+strsubst(char *bp, const char *orig, const char *replacement)
+{
+    char *found, buf[BUFSZ];
+
+    if (bp) {
+        /* [this could be replaced by strNsubst(bp, orig, replacement, 1)] */
+        found = strstr(bp, orig);
+        if (found) {
+            Strcpy(buf, found + strlen(orig));
+            Strcpy(found, replacement);
+            Strcat(bp, buf);
+        }
+    }
+    return bp;
+}
 
 /* compare two strings for equality, ignoring the presence of specified
    characters (typically whitespace) and possibly ignoring case */
