@@ -16,6 +16,93 @@ GEOMETRY:center,center
 MAP
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,-----,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,-----,
+,|   |,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,|   |,
+,--| -------------------  ------------------- |--,
+,,,|                                          |,,,
+,,,| |-----------------|  |-----------------| |,,,
+,,,| |                 |  |         |       | |,,,
+,,,| |                              |       | |,,,
+,,,| |                                      | |,,,
+,,,| |                 |  |         |       | |,,,
+,,,| |--------------------------------------| |,,,
+,,,|                                          |,,,
+,--| ---------------------------------------- |--,
+,|   |,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,|   |,
+,-----,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,-----,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ENDMAP
+OBJECT:')',random,random
+OBJECT:')',random,random
+OBJECT:')',random,random
+
+OBJECT:')',random,random
+OBJECT:')',random,random
+OBJECT:')',random,random
+
+OBJECT:')',"long sword",random
+OBJECT:')',"long sword",random
+OBJECT:')',"long sword",random
+
+OBJECT:')',"lance",random
+OBJECT:')',"lance",random
+OBJECT:')',"lance",random
+
+OBJECT:')',"poleaxe",random
+OBJECT:')',"poleaxe",random
+OBJECT:')',"poleaxe",random
+
+OBJECT:')',"short sword",random
+OBJECT:')',"short sword",random
+OBJECT:')',"short sword",random
+
+OBJECT:'[',random,random
+OBJECT:'[',random,random
+OBJECT:'[',random,random
+
+OBJECT:'[',random,random
+OBJECT:'[',random,random
+OBJECT:'[',random,random
+
+OBJECT:'[',"helmet",random
+OBJECT:'[',"helmet",random
+OBJECT:'[',"helmet",random
+
+OBJECT:'[',"helmet",random
+OBJECT:'[',"helmet",random
+OBJECT:'[',"helmet",random
+
+OBJECT:'[',"kite shield",random
+OBJECT:'[',"kite shield",random
+OBJECT:'[',"kite shield",random
+
+OBJECT:'[',"plate mail",random
+OBJECT:'[',"plate mail",random
+OBJECT:'[',"plate mail",random
+
+OBJECT:'[',"plate mail",random
+OBJECT:'[',"plate mail",random
+OBJECT:'[',"plate mail",random
+
+OBJECT:'[',"gauntlets",random
+OBJECT:'[',"gauntlets",random
+OBJECT:'[',"gauntlets",random
+
+OBJECT:'[',"gauntlets",random
+OBJECT:'[',"gauntlets",random
+OBJECT:'[',"gauntlets",random
+
+OBJECT:'[',"armored boots",random
+OBJECT:'[',"armored boots",random
+OBJECT:'[',"armored boots",random
+
+OBJECT:'[',"armored boots",random
+OBJECT:'[',"armored boots",random
+OBJECT:'[',"armored boots",random
+
+GEOMETRY:center,center
+MAP
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,-----,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,-----,
 ,|...|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,|...|,
 ,--|+-------------------++-------------------+|--,
 ,,,|...................+..+...................|,,,
