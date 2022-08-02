@@ -2654,6 +2654,8 @@ boolean
 adjacent_mon()
 {
 	int i, j;
+	if(u.ustuck)
+		return TRUE;
 	for(i = -1; i < 2; i++)
 		for(j = -1; j < 2; j++)
 			if(i != 0 || j != 0)
