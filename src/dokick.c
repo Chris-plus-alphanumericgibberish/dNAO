@@ -1177,10 +1177,11 @@ int dx, dy;
 				    if ((mtmp = makemon(&mons[PM_DRYAD],
 						       mm.x, mm.y, MM_ANGRY))
 					) made++;
-					if ( made )
+					if ( made ) {
 					    pline("You've woken the tree's spirit!");
-					mtmp->msleeping  = FALSE;
-					mtmp->mcanmove  = TRUE;
+							mtmp->msleeping  = FALSE;
+							mtmp->mcanmove  = TRUE;
+					}
 					maploc->looted |= TREE_SWARM;
 					wake_nearby();
 					return MOVE_STANDARD;
