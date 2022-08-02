@@ -11693,7 +11693,6 @@ int faction;
 	
 	if(mtmp->mfaction <= 0)
 		makemon_set_monster_faction(mtmp);
-	}
 	
 	switch(ptr->mlet) {
 		case S_MIMIC:
