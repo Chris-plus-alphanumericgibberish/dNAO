@@ -1614,13 +1614,8 @@ domove()
 	 * be caught by the normal falling-monster code.
 	 */
 	if (is_safepet(mtmp) && !(is_hider(mtmp->data) && mtmp->mundetected)) {
-	    /* if trapped, there's a chance the pet goes wild */
-	    if (mtmp->mtrapped) {
-			abuse_dog(mtmp);
-	    }
 	    mtmp->mundetected = 0;
 	    if (mtmp->m_ap_type) seemimic(mtmp);
-	    else if (!mtmp->mtame) newsym(mtmp->mx, mtmp->my);
 
 	    if (mtmp->mtrapped &&
 		    (trap = t_at(mtmp->mx, mtmp->my)) != 0 &&
@@ -1635,7 +1630,20 @@ domove()
 		/* can't swap places when pet won't fit thru the opening */
 		u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
 		You("stop.  %s won't fit through.", upstart(y_monnam(mtmp)));
+	    } else if (mtmp->mpeaceful && !mtmp->mtame
+		    && (!goodpos(u.ux0, u.uy0, mtmp, 0)
+			|| t_at(u.ux0, u.uy0) != NULL
+			|| mtmp->m_id == quest_status.leader_m_id
+		       )) {
+		u.ux = u.ux0, u.uy = u.uy0; /* didn't move after all */
+		You("stop. %s doesn't want to swap places.",
+			upstart(y_monnam(mtmp)));
+
 	    } else {
+		/* if trapped, there's a chance the pet goes wild */
+		if (mtmp->mtrapped) {
+		    abuse_dog(mtmp);
+		}
 		char pnambuf[BUFSZ];
 
 		/* save its current description in case of polymorph */
@@ -1643,13 +1651,15 @@ domove()
 		mtmp->mtrapped = 0;
 		remove_monster(x, y);
 		place_monster(mtmp, u.ux0, u.uy0);
+		newsym(x, y);
+		newsym(u.ux0, u.uy0);
 
 		/* check for displacing it into pools and traps */
 		trap = t_at(u.ux0, u.uy0);
 		int switchcase = minliquid(mtmp) ? 2 : mintrap(mtmp);
 		switch (switchcase) {
 		case 0:
-		    You("%s %s.", mtmp->mtame ? "displaced" : "frightened",
+		    You("%s %s.", mtmp->mpeaceful ? "displaced" : "frightened",
 			pnambuf);
 		    break;
 		case 1:		/* trapped */
