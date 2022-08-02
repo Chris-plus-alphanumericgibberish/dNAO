@@ -900,7 +900,8 @@ static const char * const bogusobjects[] = {
 	   "crown of swords",					/* Wheel of Time */
 	   
 	   /* Interwebs */
-	   "memetic kill agent",				/* SCP Foundation */
+	   "memetic kill agent",
+		"global retrocausality torus",		/* SCP Foundation */
 	   "bottle of squid pro quo ink",		/* MSPA */
 		"highly indulgent self-insert",
 	   "cursed -1 phillips head",			/* xkcd nethack joke */
