@@ -3940,6 +3940,24 @@ find_unpaid(list, last_found)
 }
 
 #ifdef SORTLOOT
+void
+munge_objnames(obj, buffer)
+	struct obj *obj;
+	char *buffer;
+{
+  if (obj->otyp == POT_WATER && obj->bknown
+	  && (obj->blessed || obj->cursed)) {
+	  Strcpy(buffer, cxname2(obj));
+	  (void) strsubst(buffer, obj->blessed ? "holy ": "unholy ", "");
+  }
+  else if (obj->otyp == POT_BLOOD) {
+	  Strcpy(buffer, "potion of blood");
+  }
+  else {
+	  Strcpy(buffer, cxname2(obj));
+  }
+}
+
 int
 sortloot_cmp(obj1, obj2)
      struct obj *obj1;
@@ -3948,12 +3966,29 @@ sortloot_cmp(obj1, obj2)
   int val1 = 0;
   int val2 = 0;
 
+  char name1[BUFSZ];
+  char name2[BUFSZ];
+
+  munge_objnames(obj1, name1);
+  munge_objnames(obj2, name2);
+
   /* Sort object names in lexicographical order. */
-  int name_cmp = strcmpi(cxname2(obj1), cxname2(obj2));
+  int name_cmp = strcmpi(name1, name2);
 
   if (name_cmp != 0) {
     return name_cmp;
   }
+
+  /* Sort potions of blood by the corpse they represent */
+  if (obj1->otyp == POT_BLOOD && obj2->otyp == POT_BLOOD) {
+	  const char *corpse_name1 = obj1->corpsenm == NON_PM
+		  ? "" : mons[obj1->corpsenm].mname;
+	  const char *corpse_name2 = obj2->corpsenm == NON_PM
+		  ? "" : mons[obj2->corpsenm].mname;
+	  name_cmp = strcmpi(corpse_name1, corpse_name2);
+	  if (name_cmp) return name_cmp;
+  }
+
   /* Sort by BUC. Map blessed to 4, uncursed to 2, cursed to 1, and unknown to 0. */
   val1 = obj1->bknown ? (obj1->blessed << 2) + ((!obj1->blessed && !obj1->cursed) << 1) + obj1->cursed : 0;
   val2 = obj2->bknown ? (obj2->blessed << 2) + ((!obj2->blessed && !obj2->cursed) << 1) + obj2->cursed : 0;
