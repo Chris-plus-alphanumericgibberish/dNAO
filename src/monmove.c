@@ -2135,6 +2135,7 @@ static NEARDATA const char magical[] = {
 static NEARDATA const char indigestion[] = { BALL_CLASS, ROCK_CLASS, 0 };
 static NEARDATA const char boulder_class[] = { ROCK_CLASS, 0 };
 static NEARDATA const char gem_class[] = { GEM_CLASS, 0 };
+static NEARDATA const char tool_class[] = { TOOL_CLASS, 0 };
 
 boolean
 itsstuck(mtmp)
@@ -2161,7 +2162,7 @@ register int after;
 	int appr;
 	xchar gx,gy,nix,niy,chcnt;
 	int chi;	/* could be schar except for stupid Sun-2 compiler */
-	boolean likegold=0, likegems=0, likeobjs=0, likemagic=0, conceals=0;
+	boolean likegold=0, likegems=0, likeobjs=0, likemagic=0, likefood=0, likemirrors=0, conceals=0;
 	boolean likerock=0, can_tunnel=0;
 	boolean can_open=0, can_unlock=0, doorbuster=0;
 	boolean uses_items=0, setlikes=0;
@@ -2364,6 +2365,8 @@ not_special:
 				likeobjs = (!mad_no_armor(mtmp) && likes_objs(ptr) && pctload < 75);
 				likemagic = (likes_magic(ptr) && pctload < 85);
 				likerock = (throws_rocks(ptr) && pctload < 50 && !In_sokoban(&u.uz));
+				likefood = mtmp->mgluttony;
+				likemirrors = (mtmp->margent && pctload < 100);
 				conceals = hides_under(ptr);
 				setlikes = TRUE;
 			}
@@ -2385,7 +2388,7 @@ not_special:
 	/* guards shouldn't get too distracted */
 	if(!mtmp->mpeaceful && is_mercenary(ptr)) minr = 1;
 
-	if((likegold || likegems || likeobjs || likemagic || likerock || conceals)
+	if((likegold || likegems || likeobjs || likemagic || likerock || likefood || likemirrors || conceals)
 	      && (!*in_rooms(omx, omy, SHOPBASE) || (!rn2(25) && !mtmp->isshk))) {
 	look_for_obj:
 	    oomx = min(COLNO-1, omx+minr);
@@ -2429,6 +2432,10 @@ not_special:
 					is_boulder(otmp))) ||
 				(likegems && (
 					otmp->oclass == GEM_CLASS && otmp->obj_material != MINERAL)) ||
+				(likefood && (
+					otmp->oclass == FOOD_CLASS || (otmp->obj_material == VEGGY && herbivorous(ptr)) || (otmp->obj_material == FLESH && carnivorous(ptr)) )) ||
+				(likemirrors && (
+					otmp->otyp == MIRROR || item_has_property(otmp, REFLECTING) )) ||
 				(conceals && (
 					!cansee(otmp->ox, otmp->oy))) ||
 				((ptr->mtyp == PM_GELATINOUS_CUBE || ptr->mtyp == PM_ANCIENT_OF_CORRUPTION) && (
@@ -2469,7 +2476,7 @@ not_special:
 	} else if(likegold) {
 	    /* don't try to pick up anything else, but use the same loop */
 	    uses_items = 0;
-	    likegems = likeobjs = likemagic = likerock = conceals = 0;
+	    likegems = likeobjs = likemagic = likerock = likefood = likemirrors = conceals = 0;
 	    goto look_for_obj;
 	}
 
@@ -2947,21 +2954,24 @@ postmov:
 		    conceals = hides_under(ptr);
 		}
 
-		/* Maybe a rock mole just ate some metal object */
-		if (metallivorous(ptr)) {
-		    if (meatmetal(mtmp) == 2) return 2;	/* it died */
+		if(ptr->mtyp == PM_NACHASH_TANNIN){
+			mvanishobj(mtmp, mtmp->mx, mtmp->my);
 		}
-
-		if(g_at(mtmp->mx,mtmp->my) && likegold) mpickgold(mtmp);
 
 		/* Maybe a cube ate just about anything */
 		if (ptr->mtyp == PM_GELATINOUS_CUBE || ptr->mtyp == PM_ANCIENT_OF_CORRUPTION) {
 		    if (meatobj(mtmp) == 2) return 2;	/* it died */
 		}
-		
-		if(ptr->mtyp == PM_NACHASH_TANNIN){
-			mvanishobj(mtmp, mtmp->mx, mtmp->my);
+		/* Maybe a rock mole just ate some metal object */
+		else if (metallivorous(ptr)) {
+		    if (meatmetal(mtmp) == 2) return 2;	/* it died */
 		}
+		/* Maybe a gluttonous monster just ate some food */
+		else if (mtmp->mgluttony || mtmp->mcannibal) {
+		    if (meatgluttony(mtmp) == 2) return 2;	/* it died */
+		}
+
+		if(g_at(mtmp->mx,mtmp->my) && likegold) mpickgold(mtmp);
 
 		if(!*in_rooms(mtmp->mx, mtmp->my, SHOPBASE) || !rn2(25)) {
 		    boolean picked = FALSE;
@@ -2970,6 +2980,7 @@ postmov:
 		    if(likemagic) picked |= mpickstuff(mtmp, magical);
 		    if(likerock) picked |= mpickstuff(mtmp, boulder_class);
 		    if(likegems) picked |= mpickstuff(mtmp, gem_class);
+		    if(likemirrors) picked |= mpickstuff(mtmp, tool_class);
 		    if(uses_items) picked |= mpickstuff(mtmp, (char *)0);
 		    if(picked) mmoved = 3;
 		}

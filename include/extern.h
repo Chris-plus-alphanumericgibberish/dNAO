@@ -646,6 +646,7 @@ E void FDECL(mon_catchup_elapsed_time, (struct monst *,long));
 E void FDECL(keepdogs, (BOOLEAN_P, d_level *, int));
 E void FDECL(migrate_to_level, (struct monst *,int,XCHAR_P,coord *));
 E int FDECL(dogfood, (struct monst *,struct obj *));
+E boolean FDECL(is_edible_mon, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog, (struct monst *,struct obj *));
 E struct monst *FDECL(tamedog_core, (struct monst *,struct obj *, int));
 E void FDECL(untame, (struct monst *, boolean));
@@ -664,6 +665,7 @@ E boolean FDECL(acceptable_pet_target, (struct monst *,struct monst *,BOOLEAN_P)
 E boolean FDECL(betrayed, (struct monst *));
 E int FDECL(dog_nutrition, (struct monst *,struct obj *));
 E int FDECL(dog_eat, (struct monst *,struct obj *,int,int,BOOLEAN_P));
+E int FDECL(monster_eat, (struct monst *,struct obj *,int,int,BOOLEAN_P));
 E int FDECL(dog_move, (struct monst *,int));
 #ifdef USE_TRAMPOLI
 E void FDECL(wantdoor, (int,int,genericptr_t));
@@ -800,6 +802,7 @@ E int NDECL(unfaint);
 #endif
 E void FDECL(cprefx, (int, BOOLEAN_P, BOOLEAN_P));
 E void FDECL(cpostfx, (int, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P));
+E boolean FDECL(incantifier_edible, (struct obj *));
 E boolean FDECL(is_edible, (struct obj *));
 E void NDECL(init_uhunger);
 E void NDECL(reset_uhunger);
@@ -1599,6 +1602,7 @@ E int FDECL(pm_to_cham, (int));
 E int FDECL(minliquid, (struct monst *));
 E int NDECL(movemon);
 E int FDECL(meatmetal, (struct monst *));
+E int FDECL(meatgluttony, (struct monst *));
 E int FDECL(meatobj, (struct monst *));
 E void FDECL(mvanishobj, (struct monst *, int, int));
 E void FDECL(mpickgold, (struct monst *));

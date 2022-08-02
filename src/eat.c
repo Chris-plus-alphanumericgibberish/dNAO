@@ -1947,12 +1947,14 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 		tp++;
 		You("feel your stomach freeze!"); /* not body_part() */
 		roll_frigophobia();
-		losehp(rnd(12) + rnd(12), "cryonic corpse", KILLED_BY_AN);
-	} if (burning(&mons[mtyp]) && !Fire_resistance) {
+		losehp(d(2, 12), "cryonic corpse", KILLED_BY_AN);
+	}
+	if (burning(&mons[mtyp]) && !Fire_resistance) {
 		tp++;
 		You("feel your stomach boil!"); /* not body_part() */
 		losehp(rnd(20), "boiling hot corpse", KILLED_BY_AN);
-	} if (poisonous(&mons[mtyp]) && rn2(5)) {
+	}
+	if (poisonous(&mons[mtyp]) && rn2(5)) {
 		tp++;
 		pline("Ecch - that must have been poisonous!");
 		if(!Poison_resistance) {

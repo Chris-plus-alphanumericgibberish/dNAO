@@ -2074,6 +2074,229 @@ meatmetal(mtmp)
 	return 0;
 }
 
+/*
+ * Maybe eat a food item.
+ * Return value: 0 => nothing happened, 1 => monster ate something,
+ * 2 => monster died (from eating poison, petrifying corpses, etc.).
+ */
+int
+meatgluttony(mtmp)
+	register struct monst *mtmp;
+{
+	register struct obj *otmp, *otmp2;
+	struct permonst *ptr;
+	int poly, grow, heal, count = 0, ecount = 0;
+	char buf[BUFSZ];
+
+	/* If a pet, eating is handled separately, in dog.c */
+	if (mtmp->mtame)
+		return 0;
+	else if (inediate(mtmp->data))
+		return 0;
+
+	ptr = mtmp->data;
+	for (otmp = level.objects[mtmp->mx][mtmp->my]; otmp; otmp = otmp2) {
+	    otmp2 = otmp->nexthere;
+		if(!is_edible_mon(mtmp, otmp))
+			continue;
+		if(!mtmp->mgluttony && mtmp->mcannibal && 
+			(otmp->otyp != CORPSE || !((mons[otmp->corpsenm].mflagsa&mtmp->data->mflagsa) || otmp->corpsenm == mtmp->mtyp))
+		)
+			continue;
+	    if (!obj_resists(otmp, 0, 100) &&
+		    touch_artifact(otmp, mtmp, FALSE)
+		){
+			if(mtmp->mtame && get_mx(mtmp, MX_EDOG)){
+				return dog_eat(mtmp, otmp, mtmp->mx, mtmp->my, FALSE);
+			}
+			else {
+				return monster_eat(mtmp, otmp, mtmp->mx, mtmp->my, FALSE);
+			}
+		}
+	}
+	return 0;
+}
+
+/* returns 2 if monster dies, otherwise 1 */
+int
+monster_eat(mtmp, obj, x, y, devour)
+register struct monst *mtmp;
+register struct obj * obj;
+int x, y;
+boolean devour;
+{
+	boolean poly = FALSE, grow = FALSE, heal = FALSE, ston = FALSE,
+		tainted = FALSE, acidic = FALSE, freeze = FALSE, burning = FALSE, poison = FALSE;
+	boolean vampiric = is_vampire(mtmp->data);
+	boolean eatonlyone = (obj->oclass == FOOD_CLASS || obj->oclass == CHAIN_CLASS || obj->oclass == POTION_CLASS);
+
+	boolean can_choke = !Breathless_res(mtmp);
+
+	int nutrit = dog_nutrition(mtmp, obj);
+	long rotted = 0;
+	poly = polyfodder(obj) && !resists_poly(mtmp->data);
+	grow = mlevelgain(obj);
+	heal = mhealup(obj);
+	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
+	
+	if(obj->otyp == CORPSE){
+		int mtyp = obj->corpsenm;
+		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
+			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+		) {
+			long age = peek_at_iced_corpse_age(obj);
+
+			rotted = (monstermoves - age)/(10L + rn2(20));
+			if (obj->cursed) rotted += 2L;
+			else if (obj->blessed) rotted -= 2L;
+		}
+
+		if(mtyp != PM_ACID_BLOB && !ston && rotted > 5L)
+			tainted = TRUE;
+		else if(acidic(&mons[mtyp]) && !Acid_res(mtmp))
+			acidic = TRUE;
+		if(freezing(&mons[mtyp]) && !Cold_res(mtmp))
+			freeze = TRUE;
+		if(burning(&mons[mtyp]) && !Fire_res(mtmp))
+			burning = TRUE;
+		if(poisonous(&mons[mtyp]) && !Poison_res(mtmp))
+			poison = TRUE;
+	}
+
+	if (devour) {
+	    if (mtmp->meating > 1) mtmp->meating /= 2;
+	    if (nutrit > 1) nutrit = (nutrit * 3) / 4;
+	}
+	/* vampires only get 1/5 normal nutrition */
+	if (vampiric) {
+	    mtmp->meating = (mtmp->meating + 4) / 5;
+	    nutrit = (nutrit + 4) / 5;
+	}
+
+	if(u.sealsActive&SEAL_MALPHAS && mtmp->mtyp == PM_CROW && obj->otyp == CORPSE){
+		more_experienced(ptrexperience(&mons[obj->corpsenm]),0);
+		newexplevel();
+	}
+	mtmp->mconf = 0;
+
+	if (mtmp->mflee && mtmp->mfleetim > 1) mtmp->mfleetim /= 2;
+
+	if (x != mtmp->mx || y != mtmp->my) {	/* moved & ate on same turn */
+	    newsym(x, y);
+	    newsym(mtmp->mx, mtmp->my);
+	}
+	if (is_pool(x, y, FALSE) && !Underwater) {
+	    /* Don't print obj */
+	    /* TODO: Reveal presence of sea monster (especially sharks) */
+	} else
+	/* hack: observe the action if either new or old location is in view */
+	/* However, invisible monsters should still be "it" even though out of
+	   sight locations should not. */
+	if (cansee(x, y) || cansee(mtmp->mx, mtmp->my))
+	    pline("%s %s %s.", mon_visible(mtmp) ? noit_Monnam(mtmp) : "It",
+		  obj->oclass == POTION_CLASS ? "drinks" : vampiric ? "drains" : devour ? "devours" : "eats",
+		  eatonlyone ? singular(obj, doname) : doname(obj));
+
+	if (mtmp->mtyp == PM_RUST_MONSTER && obj->oerodeproof) {
+	    /* The object's rustproofing is gone now */
+	    obj->oerodeproof = 0;
+	    mtmp->mstun = 1;
+	    if (canseemon(mtmp) && flags.verbose) {
+		pline("%s spits %s out in disgust!",
+		      Monnam(mtmp), distant_name(obj,doname));
+	    }
+	} else if (vampiric && !(obj->otyp == POT_BLOOD)) {
+		/* Split Object */
+		if (obj->quan > 1L) {
+		    if(!carried(obj)) {
+			(void) splitobj(obj, 1L);
+		    } else {
+		    	/* Carried */
+			obj = splitobj(obj, obj->quan - 1L);
+			
+			freeinv(obj);
+			if (inv_cnt() >= 52 && !merge_choice(invent, obj))
+			    dropy(obj);
+			else
+			    obj = addinv(obj); /* unlikely but a merge is possible */			
+		    }
+#ifdef DEBUG
+		    debugpline("split object,");
+#endif
+		}
+		
+		/* Take away blood nutrition */
+	    	obj->oeaten = drainlevel(obj);
+		obj->odrained = 1;
+	} else if (obj == uball) {
+	    unpunish();
+	    delobj(obj);
+	} else if (obj == uchain)
+	    unpunish();
+	else if (obj->quan > 1L && eatonlyone) {
+	    obj->quan--;
+	    obj->owt = weight(obj);
+	} else
+	    delobj(obj);
+
+	if (can_choke && rn2(nutrit) > 5*mtmp->data->cnutrit) /*Magic number: dog_nutrition multiplier for medium-sized monsters*/
+	{
+	    if (canseemon(mtmp))
+	    {
+	        pline("%s chokes over %s food!", Monnam(mtmp), mhis(mtmp));
+			pline("%s dies!", Monnam(mtmp));
+	    }
+		mondied(mtmp);
+	    if (mtmp->mhp <= 0)
+			return 2;
+	}
+
+	if (ston) {
+		xstoney((struct monst *)0, mtmp);
+	    if (mtmp->mhp <= 0)
+			return 2;
+	}
+	if(tainted){
+		int dmg = d(3, 12);
+		if(!rn2(10))
+			dmg += 100;
+		if(m_losehp(mtmp, dmg, FALSE, "tainted corpse"))
+			return 2;
+	}
+	if(acidic){
+		// if(canspotmon(mtmp))
+			// pline()
+		if(m_losehp(mtmp, rnd(15), FALSE, "acidic corpse"))
+			return 2;
+	}
+	if(freeze){
+		if(m_losehp(mtmp, d(2, 12), FALSE, "frozen corpse"))
+			return 2;
+	}
+	if(burning){
+		if(m_losehp(mtmp, rnd(20), FALSE, "burning corpse"))
+			return 2;
+	}
+	if(poison){
+		int dmg = d(1, 8);
+		if(!rn2(10))
+			dmg += 80;
+		if(m_losehp(mtmp, dmg, FALSE, "poisonous corpse"))
+			return 2;
+	}
+	if (poly) {
+	    (void) newcham(mtmp, NON_PM, FALSE,
+			   cansee(mtmp->mx, mtmp->my));
+	}
+	
+	/* limit "instant" growth to prevent potential abuse */
+	if (grow && (int) mtmp->m_lev < (int)mtmp->data->mlevel + 15) {
+	    if (!grow_up(mtmp, (struct monst *)0)) return 2;
+	}
+	if (heal) mtmp->mhp = mtmp->mhpmax;
+	return 1;
+}
+
 int
 meatobj(mtmp)		/* for gelatinous cubes */
 	register struct monst *mtmp;

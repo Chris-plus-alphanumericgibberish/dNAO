@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "xhity.h"
 
 #include "mfndpos.h"
 
@@ -357,24 +358,49 @@ int x, y;
 boolean devour;
 {
 	register struct edog *edog = EDOG(mtmp);
-	boolean poly = FALSE, grow = FALSE, heal = FALSE;
+	boolean poly = FALSE, grow = FALSE, heal = FALSE, ston = FALSE,
+		tainted = FALSE, acidic = FALSE, freeze = FALSE, burning = FALSE, poison = FALSE;
 	int nutrit;
 	boolean vampiric = is_vampire(mtmp->data);
 	boolean eatonlyone = (obj->oclass == FOOD_CLASS || obj->oclass == CHAIN_CLASS || obj->oclass == POTION_CLASS);
 
-#ifdef PET_SATIATION
 	// boolean can_choke = (edog->hungrytime >= monstermoves + DOG_SATIATED && !vampiric);
-	boolean can_choke = FALSE;
-#else
-        /* disabled if pets can choke;
-	   if they're really hungry you should feed them big food! */
+	boolean can_choke = mtmp->mgluttony;
+
 	if(edog->hungrytime < monstermoves)
 	    edog->hungrytime = monstermoves;
-#endif /* PET_SATIATION */
+
 	nutrit = dog_nutrition(mtmp, obj);
+	long rotted = 0;
 	poly = polyfodder(obj) && !resists_poly(mtmp->data);
 	grow = mlevelgain(obj);
 	heal = mhealup(obj);
+	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
+	
+	if(obj->otyp == CORPSE){
+		int mtyp = obj->corpsenm;
+		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
+			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+		) {
+			long age = peek_at_iced_corpse_age(obj);
+
+			rotted = (monstermoves - age)/(10L + rn2(20));
+			if (obj->cursed) rotted += 2L;
+			else if (obj->blessed) rotted -= 2L;
+		}
+
+		if(mtyp != PM_ACID_BLOB && !ston && rotted > 5L)
+			tainted = TRUE;
+		else if(acidic(&mons[mtyp]) && !Acid_res(mtmp))
+			acidic = TRUE;
+		if(freezing(&mons[mtyp]) && !Cold_res(mtmp))
+			freeze = TRUE;
+		if(burning(&mons[mtyp]) && !Fire_res(mtmp))
+			burning = TRUE;
+		if(poisonous(&mons[mtyp]) && !Poison_res(mtmp))
+			poison = TRUE;
+	}
+
 	if (devour) {
 	    if (mtmp->meating > 1) mtmp->meating /= 2;
 	    if (nutrit > 1) nutrit = (nutrit * 3) / 4;
@@ -463,26 +489,58 @@ boolean devour;
 	} else
 	    delobj(obj);
 
-#ifdef PET_SATIATION
-	if (can_choke && edog->hungrytime >= (monstermoves + 2*DOG_SATIATED))
+	if (can_choke && edog->hungrytime >= (monstermoves + 5*DOG_SATIATED))
 	{
 	    if (canseemon(mtmp))
 	    {
 	        pline("%s chokes over %s food!", Monnam(mtmp), mhis(mtmp));
-		pline("%s dies!", Monnam(mtmp));
+			pline("%s dies!", Monnam(mtmp));
 	    } else {
 	        You("have a very sad feeling for a moment, then it passes.");
 	    }
-            mondied(mtmp);
-	    if (mtmp->mhp > 0) return 1;
-	    return 2;
+		mondied(mtmp);
+	    if (mtmp->mhp <= 0)
+			return 2;
 	}
-#endif /* PET_SATIATION */
 
+	if (ston) {
+		xstoney((struct monst *)0, mtmp);
+	    if (mtmp->mhp <= 0)
+			return 2;
+	}
+	if(tainted){
+		int dmg = d(3, 12);
+		if(!rn2(10))
+			dmg += 100;
+		if(m_losehp(mtmp, dmg, FALSE, "tainted corpse"))
+			return 2;
+	}
+	if(acidic){
+		// if(canspotmon(mtmp))
+			// pline()
+		if(m_losehp(mtmp, rnd(15), FALSE, "acidic corpse"))
+			return 2;
+	}
+	if(freeze){
+		if(m_losehp(mtmp, d(2, 12), FALSE, "frozen corpse"))
+			return 2;
+	}
+	if(burning){
+		if(m_losehp(mtmp, rnd(20), FALSE, "burning corpse"))
+			return 2;
+	}
+	if(poison){
+		int dmg = d(1, 8);
+		if(!rn2(10))
+			dmg += 80;
+		if(m_losehp(mtmp, dmg, FALSE, "poisonous corpse"))
+			return 2;
+	}
 	if (poly) {
 	    (void) newcham(mtmp, NON_PM, FALSE,
 			   cansee(mtmp->mx, mtmp->my));
 	}
+	
 	/* limit "instant" growth to prevent potential abuse */
 	if (grow && (int) mtmp->m_lev < (int)mtmp->data->mlevel + 15) {
 	    if (!grow_up(mtmp, (struct monst *)0)) return 2;

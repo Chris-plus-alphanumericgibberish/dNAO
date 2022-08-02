@@ -159,8 +159,7 @@ struct monst {
 	Bitfield(menvy,1);/* wants only others stuff */ /*94*/
 	/*Monster madnesses*/
 	Bitfield(msanctity,1);/* can't attack women */ /*95*/
-	/**unimplemented**/
-	Bitfield(mgluttony,1);/* eats food */ /*96*/
+	/** Needs improvement **/ Bitfield(mgluttony,1);/* eats food */ /*96*/
 	Bitfield(mfrigophobia,1);/* won't cross ice */ /*97*/
 	Bitfield(mcannibal,1);/* attacks same race, eats corpses */ /*98*/
 	Bitfield(mrage,1);/* berserk plus morale*/ /*99*/
