@@ -3968,9 +3968,9 @@ boolean ranged;
 			}
 		}
 	}
-	/* blast the player sometimes if they're wearing blasty artifact body armor */
-	if (youdef && uarm && uarm->oartifact && !rn2(10))
-		touch_artifact(uarm, &youmonst, FALSE);
+	// /* blast the player sometimes if they're wearing blasty artifact body armor */
+	// if (youdef && uarm && uarm->oartifact && !rn2(10))
+		// touch_artifact(uarm, &youmonst, FALSE);
 
 	/* if we hit... */
 	if (hit) {
