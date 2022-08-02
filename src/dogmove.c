@@ -889,29 +889,32 @@ boolean ranged;
 	if(mtmp2->mtyp == PM_BEAUTEOUS_ONE && mtmp->mpeaceful == mtmp2->mpeaceful)
 		return FALSE;
 	
-    return !((!ranged &&
-#ifdef BARD
-                (int)mtmp2->m_lev >= (int)mtmp->m_lev+2 + (mtmp->encouraged)*2 &&
-#else
-                (int)mtmp2->m_lev >= (int)mtmp->m_lev+2 &&
-#endif
-		!(mon_attacktype(mtmp, AT_EXPL) || extra_nasty(mtmp->data))) ||
+    return !(
 		(!ranged &&
-		 mtmp2->mtyp == PM_FLOATING_EYE && rn2(10) &&
-		 !is_blind(mtmp) && haseyes(mtmp->data) && !is_blind(mtmp2)
-		 && (mon_resistance(mtmp,SEE_INVIS) || !mtmp2->minvis)) ||
+			(int)mtmp2->m_lev >= (int)mtmp->m_lev+2 + (mtmp->encouraged)*2 &&
+			!(mon_attacktype(mtmp, AT_EXPL) || extra_nasty(mtmp->data) || mtmp->m_lev >= max(mtmp->data->mlevel*1.5, 5))
+		) ||
 		(!ranged &&
-		 mtmp2->mtyp==PM_GELATINOUS_CUBE && rn2(10)) ||
+			 mtmp2->mtyp == PM_FLOATING_EYE && rn2(10) &&
+			 !is_blind(mtmp) && haseyes(mtmp->data) && !is_blind(mtmp2)
+			 && (mon_resistance(mtmp,SEE_INVIS) || !mtmp2->minvis)
+		) ||
 		(!ranged &&
-		 max_passive_dmg(mtmp2, mtmp) >= mtmp->mhp) ||
+			mtmp2->mtyp==PM_GELATINOUS_CUBE && rn2(10)
+		) ||
+		(!ranged &&
+			max_passive_dmg(mtmp2, mtmp) >= mtmp->mhp
+		) ||
 		((   mtmp2->mtyp == urole.guardnum
-		  || mtmp2->mtyp == urole.ldrnum
-		  || (Role_if(PM_NOBLEMAN) && (mtmp->mtyp == PM_KNIGHT || mtmp->mtyp == PM_MAID || mtmp->mtyp == PM_PEASANT) && mtmp->mpeaceful)
-		  || (Race_if(PM_DROW) && is_drow(mtmp->data) && mtmp->mpeaceful)
-		  || (Role_if(PM_KNIGHT) && (mtmp->mtyp == PM_KNIGHT) && mtmp->mpeaceful)
-		  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead(mtmp->data)) && mtmp->mpeaceful)
-		  || always_peaceful(mtmp2->data)) &&
-		 mtmp2->mpeaceful && !(Conflict || mtmp->mberserk)) ||
+			  || mtmp2->mtyp == urole.ldrnum
+			  || (Role_if(PM_NOBLEMAN) && (mtmp->mtyp == PM_KNIGHT || mtmp->mtyp == PM_MAID || mtmp->mtyp == PM_PEASANT) && mtmp->mpeaceful)
+			  || (Race_if(PM_DROW) && is_drow(mtmp->data) && mtmp->mpeaceful)
+			  || (Role_if(PM_KNIGHT) && (mtmp->mtyp == PM_KNIGHT) && mtmp->mpeaceful)
+			  || (Race_if(PM_GNOME) && (is_gnome(mtmp->data) && !is_undead(mtmp->data)) && mtmp->mpeaceful)
+			  || always_peaceful(mtmp2->data)
+		  ) &&
+			mtmp2->mpeaceful && !(Conflict || mtmp->mberserk)
+		) ||
 	   (!ranged && touch_petrifies(mtmp2->data) &&
 		!resists_ston(mtmp)));
 }
