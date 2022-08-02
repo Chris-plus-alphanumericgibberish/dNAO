@@ -1579,10 +1579,10 @@ boolean looting;
 		You("cannot %s things that are deep in the %s.", verb,
 		    is_lava(x, y) ? "lava" : "water");
 		return FALSE;
-	} else if (nolimbs(youracedata)) {
+	} else if (looting && nolimbs(youracedata)) {
 		pline("Without limbs, you cannot %s anything.", verb);
 		return FALSE;
-	} else if (!freehand()) {
+	} else if (looting && !freehand()) {
 		pline("Without a free %s, you cannot %s anything.",
 			body_part(HAND), verb);
 		return FALSE;
