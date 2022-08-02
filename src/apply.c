@@ -4400,8 +4400,11 @@ struct obj *pole;
 
 	/* Calculate range */
 	typ = weapon_type(pole);
-	if (typ == P_NONE || P_SKILL(typ) <= P_BASIC) max_range = 4;
-	else if ( P_SKILL(typ) == P_SKILLED) max_range = 5;
+	int skill = P_SKILL(typ);
+	if(pole->otyp == POLEAXE)
+		skill--;
+	if (typ == P_NONE || skill <= P_BASIC) max_range = 4;
+	else if ( skill == P_SKILLED) max_range = 5;
 	else max_range = 8;
 	
 	tmpwin = create_nhwindow(NHW_MENU);
@@ -4508,8 +4511,11 @@ coord *ccp;
 
 	/* Calculate range */
 	typ = uwep_skill_type();
-	if (typ == P_NONE || P_SKILL(typ) <= P_BASIC) max_range = 4;
-	else if ( P_SKILL(typ) == P_SKILLED) max_range = 5;
+	int skill = P_SKILL(typ);
+	if(obj->otyp == POLEAXE)
+		skill--;
+	if (typ == P_NONE || skill <= P_BASIC) max_range = 4;
+	else if ( skill == P_SKILLED) max_range = 5;
 	else max_range = 8;
 	mtmp = m_at(ccp->x, ccp->y);
 	if (distu(ccp->x, ccp->y) > max_range) {
