@@ -1214,6 +1214,32 @@ boolean goodequip;
 		set_material_gm(otmp, GOLD);
 		fix_object(otmp);
 		(void) mpickobj(mtmp,otmp);
+	} else if(ptr->mtyp == PM_DOOM_KNIGHT) {
+		otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+		if(otmp) otmp->obj_color = CLR_GRAY;
+		otmp = mongets(mtmp, GAUNTLETS, mkobjflags);
+		if(otmp) otmp->obj_color = CLR_GRAY;
+		otmp = mongets(mtmp, CLOAK, mkobjflags);
+		if(otmp) otmp->obj_color = CLR_BLACK;
+		otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+		if(otmp) otmp->obj_color = CLR_GRAY;
+		otmp = mongets(mtmp, HELMET, mkobjflags);
+		if(otmp) otmp->obj_color = CLR_GRAY;
+		otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
+		if(otmp) otmp->obj_color = CLR_BLACK;
+		otmp = mongets(mtmp, RUNESWORD, mkobjflags);
+		if(otmp && !rn2(40)) add_oprop(otmp, rn2(2) ? OPROP_LESSER_UNHYW : rn2(2) ? OPROP_UNHYW : OPROP_DRANW);
+		if(in_mklev || !rn2(20)){
+			int quan = rnd(3);
+			while(quan--)
+				(void)mongets(mtmp, rnd_offensive_item(mtmp), NO_MKOBJ_FLAGS);
+			quan = rnd(3);
+			while(quan--)
+				(void)mongets(mtmp, rnd_defensive_item(mtmp), NO_MKOBJ_FLAGS);
+			quan = rnd(3);
+			while(quan--)
+				(void)mongets(mtmp, rnd_misc_item(mtmp), NO_MKOBJ_FLAGS);
+		}
 	} else if(is_mercenary(ptr)) {
 		int w1 = 0, w2 = 0;
 		switch (mm) {
