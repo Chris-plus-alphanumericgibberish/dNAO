@@ -3525,7 +3525,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 				
 				if(mdef->mhp <= 0) return vis; //otherwise lifesaved
 			} else {
-			    int drain = rnd(8);
+			    int drain = rnd(hd_size(mdef->data));
 			    *dmgptr += drain;
 			    mdef->mhpmax -= drain;
 			    mdef->m_lev--;
@@ -5240,7 +5240,7 @@ boolean printmessages; /* print generic elemental damage messages */
 					if (mtmp){
 						initedog(mtmp);
 						mtmp->m_lev = u.ulevel / 2 + 1;
-						mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+						mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
 						mtmp->mhp = mtmp->mhpmax;
 						mtmp->mtame = 10;
 						mtmp->mpeaceful = 1;
@@ -5279,7 +5279,7 @@ boolean printmessages; /* print generic elemental damage messages */
 					if (mtmp){
 						initedog(mtmp);
 						mtmp->m_lev = u.ulevel / 2 + 1;
-						mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+						mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
 						mtmp->mhp = mtmp->mhpmax;
 						mtmp->mtame = 10;
 						mtmp->mpeaceful = 1;
@@ -5318,7 +5318,7 @@ boolean printmessages; /* print generic elemental damage messages */
 					if (mtmp){
 						initedog(mtmp);
 						mtmp->m_lev = u.ulevel / 2 + 1;
-						mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+						mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
 						mtmp->mhp = mtmp->mhpmax;
 						mtmp->mtame = 10;
 						mtmp->mpeaceful = 1;
@@ -6314,7 +6314,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 			else {
 				dlife = *hpmax(mdef);
-				*hpmax(mdef) -= min_ints(rnd(8), *hpmax(mdef));
+				*hpmax(mdef) -= min_ints(rnd(hd_size(mdef->data)), *hpmax(mdef));
 				if (*hpmax(mdef) == 0 || mlev(mdef) == 0) {
 					if (youagr && oartifact == ART_STORMBRINGER && dieroll <= 2 && !is_silent_mon(mdef))
 						pline("%s cries out in pain and despair and terror.", Monnam(mdef));
@@ -7320,7 +7320,7 @@ arti_invoke(obj)
 					while(n--) {
 						explode(u.dx, u.dy,
 							AD_FIRE, 0,
-					dmg,
+							dmg,
 							EXPL_FIERY, 1);
 						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
 						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
@@ -7812,7 +7812,7 @@ arti_invoke(obj)
 						if(mtmp){
 							initedog(mtmp);
 							if(u.ulevel > 12) mtmp->m_lev += u.ulevel / 3;
-							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+							mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
 							mtmp->mhp =  mtmp->mhpmax;
 							mtmp->mtame = 10;
 							mtmp->mpeaceful = 1;
@@ -7842,7 +7842,7 @@ arti_invoke(obj)
 							initedog(mtmp);
 							mtmp->m_lev += 7;
 							if(u.ulevel > 12) mtmp->m_lev += u.ulevel / 3;
-							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+							mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
 							mtmp->mhp =  mtmp->mhpmax;
 						}
 					}
@@ -7882,7 +7882,7 @@ arti_invoke(obj)
 					initedog(mtmp);
 					mtmp->m_lev += 7;
 					if(u.ulevel > 12) mtmp->m_lev += u.ulevel / 3;
-					mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
+					mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
 					mtmp->mhp =  mtmp->mhpmax;
 				}
 			}
@@ -8435,7 +8435,7 @@ arti_invoke(obj)
 						){
 							pline("The %s glows and then fades.", obj->oartifact == ART_SCEPTRE_OF_LOLTH ? "Sceptre" : "Rod");
 						} else {
-							int dmg = d(2,8);
+							int dmg = d(2,hd_size(mtmp->data));
 							if (resists_drli(mtmp)){
 								shieldeff(mtmp->mx, mtmp->my);
 					break;
@@ -8729,7 +8729,7 @@ arti_invoke(obj)
 								set_malign(mtmp);
 								//Assumes Maanzecorian is 27 (archon)
 								mtmp->m_lev = 27;
-								mtmp->mhpmax = 8*26 + rn2(8);
+								mtmp->mhpmax = hd_size(mtmp->data)*26 + rn2(hd_size(mtmp->data));
 								mtmp->mhp = mtmp->mhpmax;
 								do_clear_area(mtmp->mx,mtmp->my, 4, set_lit, (genericptr_t)0);
 								do_clear_area(u.ux,u.uy, 4, set_lit, (genericptr_t)0);
@@ -10747,8 +10747,7 @@ read_necro(VOID_ARGS)
 								mtmp->mtraitor = 1;
 								mtmp->encouraged = 5;
 							}
-							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
-							mtmp->mhp =  mtmp->mhpmax;
+							mtmp->mhpmax = mtmp->mhp = mtmp->m_lev * hd_size(mtmp->data) - hd_size(mtmp->data)/2;
 							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, mtmp->mtame ? ESUMMON_PERMANENT : 100, 0);
 						}
 					}
@@ -10803,13 +10802,12 @@ read_necro(VOID_ARGS)
 						if(mtmp){
 							initedog(mtmp);
 							mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
-							mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
+							mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*hd_size(mtmp->data) - rnd(hd_size(mtmp->data)-1);
 							if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1)) {
 								untame(mtmp, 0);
 								mtmp->mtraitor = 1;
 							}
-							mtmp->mhpmax = (mtmp->m_lev * 8) - 4;
-							mtmp->mhp =  mtmp->mhpmax;
+							mtmp->mhpmax = mtmp->mhp = mtmp->m_lev * hd_size(mtmp->data) - hd_size(mtmp->data)/2;
 							mark_mon_as_summoned(mtmp, mtmp->mtame ? &youmonst : (struct monst *)0, ESUMMON_PERMANENT, 0);
 						}
 					}
@@ -10828,7 +10826,7 @@ read_necro(VOID_ARGS)
 						initedog(mtmp);
 						mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
 						if(!rn2(9)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
-						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
+						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*hd_size(mtmp->data) - rnd(hd_size(mtmp->data)-1);
 						if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1)) {
 							untame(mtmp, 0);
 							mtmp->mtraitor = 1;
@@ -10849,7 +10847,7 @@ read_necro(VOID_ARGS)
 					if(mtmp){
 						initedog(mtmp);
 						if(!rn2(6)) mtmp->m_lev += d(1,(3 * mtmp->m_lev)/2);
-						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - rnd(7);
+						mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*hd_size(mtmp->data) - rnd(hd_size(mtmp->data)-1);
 						if (rn2((youmonst.summonpwr + mtmp->m_lev) / (u.ulevel + 10) + 1) || !rn2(10)) {
 							untame(mtmp, 0);
 							mtmp->mtraitor = 1;

@@ -1122,7 +1122,7 @@ calc_total_maxhp()
 		hp = &u.mh;
 		hpmax = &u.mhmax;
 		hprolled = &u.mhrolled;
-		hpcap = 24 + 2*mons[u.umonnum].mlevel*8;
+		hpcap = 24 + 2*mons[u.umonnum].mlevel*hd_size(&mons[u.umonnum]);
 	} else {
 		ulev = u.ulevel;
 		hp = &u.uhp;

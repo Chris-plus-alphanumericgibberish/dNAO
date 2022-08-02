@@ -7068,7 +7068,7 @@ struct obj **optr;
 		if (mm){
 			initedog(mm);
 			mm->m_lev = u.ulevel / 2 + 1;
-			mm->mhpmax = (mm->m_lev * 8) - 4;
+			mm->mhpmax = (mm->m_lev * hd_size(mm->data)) - hd_size(mm->data)/2;
 			mm->mhp = mm->mhpmax;
 			mm->mtame = 10;
 			mm->mpeaceful = 1;
