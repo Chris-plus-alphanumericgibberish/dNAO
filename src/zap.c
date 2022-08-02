@@ -90,6 +90,7 @@ int adtyp, ztyp;
 		case AD_STAR: return "stream of silver stars";
 		case AD_HOLY: return "holy missile";
 		case AD_UNHY: return "unholy missile";
+		case AD_HLUH: return "corrupted missile";
 		case AD_DISN: return "disintegration ray";
 		default:      impossible("unknown spell damage type in flash_type: %d", adtyp);
 			return "cube of questions";
@@ -170,7 +171,8 @@ int adtyp;
 	case AD_DISE:
 		return CLR_MAGENTA;
 		//	return CLR_CYAN;
-		//	return CLR_GRAY;
+	case AD_HLUH:
+		return CLR_GRAY;
 		//	return NO_COLOR;
 	case AD_EFIR:
 	case AD_FIRE:
@@ -4157,6 +4159,23 @@ struct zapdata * zapdata;
 		}
 		else if (hates_holy_mon(mdef))
 			dmg /= 3;
+		domsg();
+		if (youdef && dmg > 0)
+			exercise(A_WIS, FALSE);
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_HLUH:
+		/* holy damage */
+		if (hates_unholy_mon(mdef) || hates_holy_mon(mdef)) {
+			if (youdef) {
+				addmsg("The corrupted missiles sear your flesh!");
+			}
+			if(hates_unholy_mon(mdef) && hates_holy_mon(mdef))
+				dmg *= 3;
+			else
+				dmg *= 2;
+		}
 		domsg();
 		if (youdef && dmg > 0)
 			exercise(A_WIS, FALSE);
