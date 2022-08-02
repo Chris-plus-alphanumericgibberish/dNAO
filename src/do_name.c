@@ -1869,6 +1869,9 @@ static const char * const bogusmons[] = {
 	"miniature blimp",
 	"lungfish",
 
+	"hard-to-destroy reptile",
+		"shy guy",								/* SCP Foundation */
+
         "apostrophe golem", "angry flower named Bob",
         "bonsai-kitten", "Boxxy", "lonelygirl15",
         "tie-thulu", "Domo-kun",
