@@ -2595,11 +2595,11 @@ boolean goodequip;
 			(void)mongets(mtmp, drgnscl2[rn2(SIZE(drgnscl2))], mkobjflags);
 			otmp = mksobj(LEATHER_HELM, mkobjflags|MKOBJ_NOINIT);
 			otmp->spe = rn2(4);
-			otmp = mk_chromatic_dragonhide(otmp);
+			set_material_gm(otmp, DRAGON_HIDE);
 			(void) mpickobj(mtmp, otmp);
 			otmp = mksobj(CLOAK, mkobjflags|MKOBJ_NOINIT);
 			otmp->spe = rn2(4);
-			otmp = mk_chromatic_dragonhide(otmp);
+			set_material_gm(otmp, DRAGON_HIDE);
 			(void) mpickobj(mtmp, otmp);
 // ifdef CONVICT
 		} else if (mm == PM_INMATE){
