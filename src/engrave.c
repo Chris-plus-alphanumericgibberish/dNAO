@@ -271,6 +271,7 @@ static const char *haluMesg[] = {
 	"Reach heaven through violence.",/*Kill 6 Billion Demons*/
 		"Kindly ignore my first three answers.",
 		"I will see you in Samura.",
+		"By names she cuts the world as she pleases, and she cuts herself into greater forms still.",
 	"ALL POWER TO THE OLD FLESH!!!!!!! A HOWLING VOID UPON DETRACTORS!!!", /*Awful Hospital*/
 		"You *must* see the IMMACULATE LAD!!",
 	"You are lost. You can never go home.", /* Gollum's Song */
