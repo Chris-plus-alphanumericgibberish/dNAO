@@ -7846,8 +7846,9 @@ arti_invoke(obj)
 							mtmp->mhp =  mtmp->mhpmax;
 						}
 					}
-					pseudo = mksobj(SPE_CHARM_MONSTER, MKOBJ_NOINIT);
+					pseudo = mksobj(SCR_TAMING, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
+					pseudo->forceconf = TRUE;
 					pseudo->quan = 20L;			/* do not let useup get it */
 					if(u.ulevel > 13) pseudo->blessed = TRUE;
 					(void) seffects(pseudo);

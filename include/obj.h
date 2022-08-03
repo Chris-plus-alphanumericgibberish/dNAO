@@ -208,7 +208,8 @@ struct obj {
 	Bitfield(obj_material,5); /*Max 31*/
 	//See objclass for values
 	Bitfield(nomerge,1);	/* temporarily block from merging */
-	/* 12 free bits in this field, I think -CM */
+	Bitfield(forceconf,1);	/* when set on a scroll, forces the confusion effect. Meant for use with pseudo objects, isn't checked while merging */
+	/* 11 free bits in this field, I think -CM */
 	
 	int obj_color;
 	union {

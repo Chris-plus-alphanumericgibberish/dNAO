@@ -1729,7 +1729,10 @@ struct obj *sobj;
 			int skill = spell_skilltype(sobj->otyp);
 			int role_skill = P_SKILL(skill)-1; //P_basic would be 2
 			if(Spellboost) role_skill++;
-			if(role_skill < 1) role_skill = 1;
+			if(role_skill < 1)
+				role_skill = 1;
+			if(sobj->blessed)
+				role_skill++;
 			
 			for(; role_skill; role_skill--)
 				if(!resist(mtmp, sobj->oclass, 0, NOTELL)){
@@ -1746,7 +1749,7 @@ seffects(sobj)
 struct obj	*sobj;
 {
 	int cval;
-	boolean confused = (Confusion != 0);
+	boolean confused = (Confusion != 0) || sobj->forceconf;
 	struct obj *otmp;
 	boolean extra = FALSE;
 	
