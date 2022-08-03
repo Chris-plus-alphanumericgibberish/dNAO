@@ -4613,7 +4613,7 @@ use_grapple (obj)
 	struct obj *obj;
 {
 	int res = MOVE_CANCELLED, typ, max_range = 4, tohit;
-	coord cc;
+	coord cc = {0};
 	struct monst *mtmp;
 	struct obj *otmp;
 
@@ -4839,12 +4839,13 @@ use_crook (obj)
 	break;
 	case 3:	/* Object */
 		{
-		int tmp = flags.standard_polearms;
-		flags.standard_polearms = 1;
-		res = pick_polearm_target(obj, &mtmp, &cc);
-		flags.standard_polearms = tmp;
+			int tmp = flags.standard_polearms;
+			flags.standard_polearms = 1;
+			res = pick_polearm_target(obj, &mtmp, &cc);
+			flags.standard_polearms = tmp;
 		}
-		if (!res) return 0;
+		if (res != MOVE_CANCELLED && isok(cc.x, cc.y))
+			return 0;
 	    if ((otmp = level.objects[cc.x][cc.y]) != 0) {
 			You("snag an object from the %s!", surface(cc.x, cc.y));
 			(void) pickup_object(otmp, 1L, FALSE);
@@ -7424,7 +7425,7 @@ struct obj **optr;
 			}
 		}
 	if (yn("Resize a piece of armor?") == 'y'){
-		if (resizeArmor()){
+		if (resizeArmor() != MOVE_CANCELLED){
 			useup(obj);
 			*optr = 0;
 			return MOVE_STANDARD;
