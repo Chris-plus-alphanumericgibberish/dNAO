@@ -13885,10 +13885,12 @@ struct monst *mtmp, *victim;
 							impossible(">Expert beast mastery not handled in grow_up.");
 						break;
 					}
-					if(canspotmon(mtmp))
-						pline("%s looks free of turmoil.", Monnam(mtmp));
-					EDOG(mtmp)->waspeaceful = TRUE;
-					mtmp->mpeacetime = 0;
+					if(!rn2(roll)){
+						if(canspotmon(mtmp))
+							pline("%s looks free of turmoil.", Monnam(mtmp));
+						EDOG(mtmp)->waspeaceful = TRUE;
+						mtmp->mpeacetime = 0;
+					}
 				}
 			}
 			for(bardmon = fmon; bardmon; bardmon = bardmon->nmon){
