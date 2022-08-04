@@ -421,8 +421,10 @@
 #define YELLOW_DEAD            MUMMY_CURSE+1
 #define MON_CANCEL             YELLOW_DEAD+1
 #define STARFALL               MON_CANCEL+1
+//85
+#define EARTH_CRACK            STARFALL+1
 
-#define MON_LASTSPELL          STARFALL
+#define MON_LASTSPELL          EARTH_CRACK
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

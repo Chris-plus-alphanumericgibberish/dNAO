@@ -1179,21 +1179,21 @@ unsigned int type;
 			if(mtmp->mvar_spList_1 > 7) mtmp->mvar_spList_1 = 0;
 			switch(mtmp->mvar_spList_1++){
 				case 0: return MON_BLIZZAGA;
-				case 1: return !PURIFIED_EARTH ? DEATH_TOUCH : WEAKEN_STATS;
-				case 2: return MON_THUNDAGA;
+				case 1: return MON_THUNDAGA;
+				case 2: return !PURIFIED_EARTH ? DEATH_TOUCH : WEAKEN_STATS;
 				case 3: return CURE_SELF;
-				case 4: return HASTE_SELF;
-				case 5: return MON_FIRAGA;
-				case 6: return !PURIFIED_EARTH ? MON_WARP : ICE_STORM;
+				case 4: return MON_FIRAGA;
+				case 5: return !PURIFIED_EARTH ? MON_WARP : ICE_STORM;
+				case 6: return HASTE_SELF;
 				case 7: return MON_FLARE;
 			}
 		} else {
 			if(mtmp->mvar_spList_2 > 3) mtmp->mvar_spList_2 = 0;
 			switch(mtmp->mvar_spList_2++){
-				case 0: return !PURIFIED_FIRE ? STUN_YOU : FIRE_PILLAR;
-				case 1: return !PURIFIED_WATER ? ICE_STORM : GEYSER;
-				case 2: return !PURIFIED_WIND ? PLAGUE : MON_POISON_GAS;
-				case 3: return !PURIFIED_EARTH ? MON_FLARE : EARTHQUAKE;
+				case 0: return !PURIFIED_EARTH ? MON_FLARE : EARTH_CRACK;
+				case 1: return (!PURIFIED_FIRE && rn2(2)) ? STUN_YOU : FIRE_PILLAR;
+				case 2: return !PURIFIED_WATER ? ICE_STORM : GEYSER;
+				case 3: return !PURIFIED_WIND ? PLAGUE : MON_POISON_GAS;
 			}
 		}
 	break;
@@ -1773,6 +1773,9 @@ const char * spellname[] =
 	"MUMMY_CURSE",
 	"YELLOW_DEAD",
 	"MON_CANCEL",
+	"STARFALL",
+	//85
+	"EARTH_CRACK",
 };
 
 
@@ -3165,6 +3168,75 @@ int tary;
 			}
 		}
 		return xdamagey(magr, mdef, attk, dmg);
+
+
+	case EARTH_CRACK:
+		/* needs direct target */
+		if (!(tarx || tary)) {
+			impossible("earth-crack spell with no target location?");
+			return MM_MISS;
+		}
+		else {
+			struct trap * ttmp = t_at(tarx, tary);
+			if(!ttmp || !(ttmp->ttyp == PIT || ttmp->ttyp == SPIKED_PIT || ttmp->ttyp == HOLE || ttmp->ttyp == TRAPDOOR)){
+				/* message */
+				pline_The("%s tremors!",
+					In_endgame(&u.uz) ? "plane" : "dungeon");
+
+				do_earthquake(tarx, tary, 0, min((mlev(magr) - 1) / 6 + 1, 8), FALSE, magr);
+
+				aggravate(); /* wake up without scaring */
+				if(couldsee(tarx, tary))
+					stop_occupation();	/* even if you weren't targeted, you certainly noticed! */
+				return MM_HIT;
+			}
+			else {
+				/*Note: May be different than the intended target!*/
+				struct monst *smdef = m_u_at(tarx, tary);
+				/* message */
+				char heshe[BUFSZ];
+				youdef = smdef == &youmonst;
+
+				/* check resistance cases and do effects */
+				if (youdef ? !u.utrap : !smdef->mtrapped) {
+					pline("The earth's maw snaps shut!");
+					deltrap(ttmp);
+					return MM_MISS;
+				}
+				else if ((youdef && (u.sealsActive & SEAL_OSE)) || (smdef == u.usteed && u.sealsActive&SEAL_BERITH && u.sealsActive&SEAL_OSE)) {
+					//phasing
+					shieldeff(x(smdef), y(smdef));
+					dmg = 0;
+				}
+				else {
+					if (rn2(mlev(magr)) > 12) {
+						dmg += *hp(smdef)/4;
+						if(youdef){
+							pline("The earth's maw chews you!");
+							killer_format = KILLED_BY;
+							killer = "the hungry earth";
+						}
+						else if(canspotmon(smdef)){
+							pline("The earth's maw chews %s!", mon_nam(smdef));
+						}
+						if(youdef || smdef == u.usteed)
+							set_wounded_legs(BOTH_SIDES, (int)HWounded_legs + rn1(100,50));
+					}
+					else {
+						if(youdef)
+							pline("The earth's maw squeezes you!");
+						else if(canspotmon(smdef))
+							pline("The earth's maw squeezes %s!", mon_nam(smdef));
+						dmg /= 4; //still take damage
+					}
+				}
+				if(couldsee(tarx, tary))
+					stop_occupation();	/* even if you weren't targeted, you certainly noticed! */
+				return xdamagey(magr, smdef, attk, dmg);
+			}
+		}
+		impossible("Bad flow through crack spell handling.");
+		return MM_MISS;/*shouldn't be reached*/
 
 
 	case PLAGUE:
@@ -5453,6 +5525,7 @@ int spellnum;
 	case MON_WARP_THROW:
 	case DROP_BOULDER:
 	case DISINT_RAY:
+	case STARFALL:
 		return TRUE;
 	default:
 		break;
@@ -5480,6 +5553,7 @@ int spellnum;
 	case SOLID_FOG:
 	case EARTHQUAKE:
 	case TREMOR:
+	case EARTH_CRACK:
 	/* also directed attack spells */
 	case MAGIC_MISSILE:
 	case CONE_OF_COLD:
@@ -5665,7 +5739,7 @@ int tary;
 
 	/* earthquake should not be cast in the endgame (even for the plane of earth?) */
 	///The wizard can't even cast this anyway :(
-	if ((spellnum == EARTHQUAKE || spellnum == TREMOR) && In_endgame(&u.uz))
+	if ((spellnum == EARTHQUAKE || spellnum == TREMOR || spellnum == EARTH_CRACK) && In_endgame(&u.uz))
 		return TRUE;
 
 	/* don't do strangulation if there's no room in player's inventory */

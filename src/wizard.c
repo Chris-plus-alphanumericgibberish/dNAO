@@ -435,7 +435,10 @@ tactics(mtmp)
 					return(0);
 				}
 			}
-			if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
+			if(mtmp->mtyp == PM_CHAOS){
+				mnexto(mtmp);
+			}
+			else if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )

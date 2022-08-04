@@ -13834,11 +13834,11 @@ struct monst *mtmp, *victim;
 			ptr->mtyp == PM_SHOGGOTH
 		) hp_threshold *= 3;
 	    else if (ptr->mtyp == PM_RAZORVINE) hp_threshold *= .5;
-		else if(ptr->mtyp == PM_CHAOS) hp_threshold = mtmp->m_lev * 2200/16;
-		else if(ptr->mtyp == PM_KARY__THE_FIEND_OF_FIRE) hp_threshold = mtmp->m_lev * 770/12;
-		else if(ptr->mtyp == PM_LICH__THE_FIEND_OF_EARTH) hp_threshold = mtmp->m_lev * 550/11;
-		else if(ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) hp_threshold = mtmp->m_lev * 990/20;
-		else if(ptr->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) hp_threshold = mtmp->m_lev * 1210/13;
+		else if(ptr->mtyp == PM_CHAOS) hp_threshold = mtmp->data->mlevel * 2200/16;
+		else if(ptr->mtyp == PM_KARY__THE_FIEND_OF_FIRE) hp_threshold = mtmp->data->mlevel * 770/12;
+		else if(ptr->mtyp == PM_LICH__THE_FIEND_OF_EARTH) hp_threshold = mtmp->data->mlevel * 550/11;
+		else if(ptr->mtyp == PM_KRAKEN__THE_FIEND_OF_WATER) hp_threshold = mtmp->data->mlevel * 990/20;
+		else if(ptr->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND) hp_threshold = mtmp->data->mlevel * 1210/13;
 		else if(ptr->mtyp == PM_CHOKHMAH_SEPHIRAH) hp_threshold *= u.chokhmah;
 
 	    lev_limit = mon_max_lev(mtmp);
