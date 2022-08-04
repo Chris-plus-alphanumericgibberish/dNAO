@@ -2726,13 +2726,14 @@ karemade:
 					u.ill_cnt = rn1(1000, 250);
 				}
 		    }
-		    if ((Role_if(PM_MADMAN) && quest_status.touched_artifact && !mvitals[PM_STRANGER].died)
+		    if ((!Role_if(PM_MADMAN) || quest_status.touched_artifact) && !mvitals[PM_STRANGER].died
 				&& !(Invulnerable)
 			) {
-				if (u.yel_cnt) u.yel_cnt--;
 				if (!u.yel_cnt) {
-					yello_intervene();
-					u.yel_cnt = rn1(1000, 555);
+					if(!yello_intervene())
+						u.yel_cnt = rn1(51, 5);
+					else
+						u.yel_cnt = rn1(501, 55);
 				}
 		    }
 		    restore_attrib();
@@ -5012,10 +5013,19 @@ struct monst *mon;
 	/* Otherwise, The Stranger acts against you */
 	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && xyloc == MIGR_EXACT_XY){
 		flags.yello_level=1;
+		//Smite counter runs
+		if (u.yel_cnt && (!Role_if(PM_MADMAN) || quest_status.touched_artifact))
+			u.yel_cnt--;
 		if(rn2(5)){ /*Sometimes skip a turn so that it can be evaded*/
 			if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
 				You_feel("a stranger's gaze on your back!");
 				u.ustdy = max_ints(u.ustdy, min_ints(5, u.ustdy+rnd(5)));
+				if (!Role_if(PM_MADMAN) || quest_status.touched_artifact){
+					if(u.yel_cnt < 4)
+						u.yel_cnt = 0;
+					else
+						u.yel_cnt -= 4; //5 total
+				}
 			}
 			else {
 				xlocale += sgn(u.ux - xlocale);

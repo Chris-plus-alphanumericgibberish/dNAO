@@ -3243,12 +3243,13 @@ E int NDECL(pick_nasty);
 E int FDECL(nasty, (struct monst*));
 E void NDECL(yellow_nasty);
 E void NDECL(yellow_dead);
+E boolean NDECL(yellow_smite);
 E void NDECL(resurrect);
 E void NDECL(illur_resurrect);
 E void NDECL(coa_arrive);
 E void NDECL(intervene);
 E void NDECL(illur_intervene);
-E void NDECL(yello_intervene);
+E boolean NDECL(yello_intervene);
 E void NDECL(wizdead);
 E void FDECL(cuss, (struct monst *));
 

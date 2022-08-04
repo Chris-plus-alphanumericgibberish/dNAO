@@ -1626,7 +1626,7 @@ u_init()
 	u.uevent.udemigod = 0;		/* not a demi-god yet... */
 	u.udg_cnt = 0;
 	u.ill_cnt = 0;
-	u.yel_cnt = 0;
+	u.yel_cnt = 555;
 	/*Ensure that the HP and energy fields are zeroed out*/
 	u.uhp = u.uhpmax = u.uhprolled = u.uhpmultiplier = u.uhpbonus = u.uhpmod = 0;
 	u.uen = u.uenmax = u.uenrolled = u.uenmultiplier = u.uenbonus = 0;
