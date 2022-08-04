@@ -321,13 +321,13 @@ found_ward:
 	pen->spe -= actualcost;
 	
 	struct objclass *oc = &objects[new_obj->otyp];
-	int school_skill;
-	if(oc->oc_skill){
-		int i;
-		int spell_schools[] = {P_ATTACK_SPELL, P_HEALING_SPELL, P_DIVINATION_SPELL, P_ENCHANTMENT_SPELL, P_CLERIC_SPELL, P_ESCAPE_SPELL, P_MATTER_SPELL};
-		int generalism_bonus = 0;
-		for(i=0; i < SIZE(spell_schools); i++)
-			generalism_bonus += max(0, P_SKILL(spell_schools[i])-1);
+	int school_skill = 0;
+	int skl;
+	int spell_schools[] = {P_ATTACK_SPELL, P_HEALING_SPELL, P_DIVINATION_SPELL, P_ENCHANTMENT_SPELL, P_CLERIC_SPELL, P_ESCAPE_SPELL, P_MATTER_SPELL};
+	int generalism_bonus = 0;
+	for(skl=0; skl < SIZE(spell_schools); skl++)
+		generalism_bonus += max(0, P_SKILL(spell_schools[skl])-1);
+	if(oc->oc_skill && new_obj->oclass == SPBOOK_CLASS){
 		//-1 (restricted) to +3 (expert)
 		school_skill = P_SKILL(oc->oc_skill) - 1;
 		if(school_skill*2 >= oc->oc_level){
@@ -337,6 +337,9 @@ found_ward:
 		else {
 			school_skill = school_skill*5 - oc->oc_level*5;
 		}
+	}
+	else {
+			school_skill = generalism_bonus*5;
 	}
 	//			(15*3)		16				14/2			2*10 (skilled)		4 >= 4 (skilled vs. fireball)
 	//			45			16				7				20					-0
