@@ -5551,6 +5551,9 @@ int floorID;
 	case ENKI:
 		HSwimming |= INTRINSIC;
 		break;
+	case ORTHOS:
+		make_singing_sword_nameable();
+		break;
 	case TENEBROUS:
 		if (Role_if(PM_EXILE) && u.ufirst_life && u.ufirst_sky && u.ufirst_light && !(u.specialSealsKnown&SEAL_LIVING_CRYSTAL)){
 			pline("As knowledge of the Echo flows into your mind, you also realize how the Words you've learned can be used in the drawing of a seal!");

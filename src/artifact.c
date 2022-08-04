@@ -150,6 +150,12 @@ struct obj * otmp;
 	return TRUE;
 }
 
+void
+make_singing_sword_nameable()
+{
+	artilist[ART_SINGING_SWORD].gflags |= ARTG_NAME;
+}
+
 /* handle some special cases; must be called after u_init() 
 	Uh, it isn't, it's called BEFORE u_init. See allmain */
 void
@@ -322,6 +328,9 @@ hack_artifacts()
 	}
 	if(aligns[flags.initalign].value == artilist[ART_CARNWENNAN].alignment){
 		artilist[ART_CARNWENNAN].gflags |= (ARTG_NAME); //name only
+	}
+	if(Role_if(PM_BARD) || Race_if(PM_ELF)){
+		make_singing_sword_nameable(); //name only
 	}
 	/* Callandor only works for natural male players */
 	if (flags.initgend) {
