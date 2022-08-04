@@ -11160,6 +11160,8 @@ struct monst * mon;
 		|| yellow_monster(mon)
 	)
 		out_faction = YELLOW_FACTION;
+	else if(Is_knox(&u.uz))
+		out_faction = YENDORIAN_FACTION;
 	else if((In_quest(&u.uz) || Is_stronghold(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || Is_astralevel(&u.uz)) && !peaceful)
 		out_faction = YENDORIAN_FACTION;
 

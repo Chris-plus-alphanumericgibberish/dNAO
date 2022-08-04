@@ -6127,32 +6127,36 @@ struct mkroom *sroom;
 		if(type == COURT && IS_THRONE(levl[sx][sy].typ))
 		    continue;
 		if(!(Role_if(PM_NOBLEMAN) && In_quest(&u.uz) )){
-		mon = makemon(
-		    (type == COURT) ? courtmon(ctype) :
-			(type == BARRACKS) ? squadmon(&u.uz) :
-		    (type == MORGUE) ? morguemon() :
-		    (type == BEEHIVE) ?
-			(sx == tx && sy == ty ? &mons[PM_QUEEN_BEE] :
-			 &mons[PM_KILLER_BEE]) :
-		    (type == LEPREHALL) ? &mons[PM_LEPRECHAUN] :
-		    (type == COCKNEST) ? &mons[PM_COCKATRICE] :
-		    (type == ANTHOLE) ? antholemon() :
-		    (struct permonst *) 0,
-		   sx, sy, NO_MM_FLAGS|MM_NOCOUNTBIRTH);
-		if(mon) {
-			mon->msleeping = 1;
-			if (type==COURT) {
-				//Note: court monsters are always part of rodney's forces, even if they are angels.
-				set_faction(mon, YENDORIAN_FACTION);
-				if(mon->mpeaceful){
-					mon->mpeaceful = 0;
-					set_malign(mon);
+			mon = makemon(
+				(type == COURT) ? courtmon(ctype) :
+				(type == BARRACKS) ? squadmon(&u.uz) :
+				(type == MORGUE) ? morguemon() :
+				(type == BEEHIVE) ?
+				(sx == tx && sy == ty ? &mons[PM_QUEEN_BEE] :
+				 &mons[PM_KILLER_BEE]) :
+				(type == LEPREHALL) ? &mons[PM_LEPRECHAUN] :
+				(type == COCKNEST) ? &mons[PM_COCKATRICE] :
+				(type == ANTHOLE) ? antholemon() :
+				(struct permonst *) 0,
+			   sx, sy, NO_MM_FLAGS|MM_NOCOUNTBIRTH);
+			if(mon) {
+				mon->msleeping = 1;
+				if(type == ZOO){
+					//Note: zoo monsters are always part of rodney's forces.
+					set_faction(mon, YENDORIAN_FACTION);
 				}
-				if(ctype == PM_EMBRACED_DROWESS && (mon->mtyp == PM_DROW_CAPTAIN || mon->mtyp == PM_DROW_MATRON)){
-					set_template(mon, M_BLACK_WEB);
+				if (type==COURT) {
+					//Note: court monsters are always part of rodney's forces, even if they are angels.
+					set_faction(mon, YENDORIAN_FACTION);
+					if(mon->mpeaceful){
+						mon->mpeaceful = 0;
+						set_malign(mon);
+					}
+					if(ctype == PM_EMBRACED_DROWESS && (mon->mtyp == PM_DROW_CAPTAIN || mon->mtyp == PM_DROW_MATRON)){
+						set_template(mon, M_BLACK_WEB);
+					}
 				}
 			}
-		}
 		}
 		switch(type) {
 		    case ZOO:
