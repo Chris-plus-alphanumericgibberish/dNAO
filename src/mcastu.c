@@ -4951,7 +4951,7 @@ int tary;
 
 	case DRAIN_ENERGY:
 		if (!mdef) {
-			impossible("nightmare with no target?");
+			impossible("drain energy with no target?");
 			return MM_MISS;
 		}
 		else {
