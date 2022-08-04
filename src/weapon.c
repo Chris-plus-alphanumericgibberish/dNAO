@@ -2544,6 +2544,8 @@ struct obj *otmp;
 			bonus *= 2;
 		else if(otmp->otyp == DISKOS && !arms && !mswp)
 			bonus *= 2;
+		else if(is_spear(otmp) && !arms && !mswp)
+			bonus *= 1.5;
 		else if(otmp->otyp == ISAMUSEI && !arms && !mswp)
 			bonus *= 1.5;
 		else if(otmp->otyp == KATANA && !arms && !mswp)
