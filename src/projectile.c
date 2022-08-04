@@ -1044,7 +1044,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	if (youdef && youagr && is_boomerang(thrownobj)) {
 		if (!(Fumbling || (!thrownobj->oartifact && rn2(18) >= ACURR(A_DEX)))) {
 			/* we catch it */
-			You("skillfully catch the %s.", xname(thrownobj));
+			You("skillfully catch %s.", the(xname(thrownobj)));
 			exercise(A_DEX, TRUE);
 			return_thrownobj(&youmonst, thrownobj);
 			*thrownobj_p = NULL;
@@ -1121,7 +1121,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	{
 		*pdx *= -1;
 		*pdy *= -1;
-		pline("%s path is curved by the wind!", s_suffix(The(doname(thrownobj))));
+		pline("%s path is curved by the wind!", s_suffix(The(xname(thrownobj))));
 		/* spends some range */
 		if (range2 > range) {
 			*prange = *prange2;
