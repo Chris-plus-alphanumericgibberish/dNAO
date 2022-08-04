@@ -6515,10 +6515,15 @@ boolean ranged;
 					/* 1d130 > STR */
 					if (d(1, 130) > (youdef ? ACURR(A_STR) : mdef->mstr)){
 						if (youdef) {
-							Your("weapon is sucked out of your grasp!");
-							uwepgone();
-							freeinv(otmp);
-							(void)mpickobj(magr, otmp);
+							if(uwep == uball){
+								pline("Fortunately, you are chained to your weapon!");
+							}
+							else {
+								Your("weapon is sucked out of your grasp!");
+								uwepgone();
+								freeinv(otmp);
+								(void)mpickobj(magr, otmp);
+							}
 						}
 						else {
 							if (vis) {
