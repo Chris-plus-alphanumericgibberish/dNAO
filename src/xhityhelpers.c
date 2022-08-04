@@ -406,6 +406,10 @@ struct monst *mtmp;
 	//Animals and mindless creatures are always considered fair game
 	if(mindless_mon(mtmp) || is_animal(mtmp->data))
 		return;
+
+	//If a monster attacked you last turn, it's fair game
+	if(mtmp->mattackedu)
+		return;
 	
 	if (Role_if(PM_KNIGHT) && u.ualign.type == A_LAWFUL &&
 	    (!mtmp->mcanmove || !mtmp->mnotlaugh || mtmp->msleeping ||
