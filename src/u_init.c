@@ -1601,42 +1601,46 @@ u_init()
 	u.quivered_spell = 0;
 	//u.wardsknown = ~0; //~0 should be all 1s, and is therefore debug mode.
 
-#if 0	/* documentation of more zero values as desirable */
-	u.usick_cause[0] = 0;
-	u.uluck  = u.moreluck = 0;
-# ifdef TOURIST
-	uarmu = 0;
-# endif
-	uarm = uarmc = uarmh = uarms = uarmg = uarmf = 0;
-	uwep = uball = uchain = uleft = uright = urope = 0;
-	uswapwep = uquiver = 0;
-	u.twoweap = 0;
-	u.ublessed = 0;				/* not worthy yet */
-	u.ugifts   = 0;				/* no divine gifts bestowed */
-	u.uartisval = 0;			/* no artifacts directly acquired */
-	u.ucarinc = 0;
-	u.uacinc = 0;
-// ifdef ELBERETH
-	u.uevent.uhand_of_elbereth = 0;
-// endif
-	u.uevent.utook_castle = 0;
-	u.uevent.uunknowngod = 0;
-	u.uevent.uheard_tune = 0;
-	u.uevent.uopened_dbridge = 0;
-	u.uevent.udemigod = 0;		/* not a demi-god yet... */
 	u.udg_cnt = 0;
 	u.ill_cnt = 0;
 	u.yel_cnt = 555;
-	/*Ensure that the HP and energy fields are zeroed out*/
-	u.uhp = u.uhpmax = u.uhprolled = u.uhpmultiplier = u.uhpbonus = u.uhpmod = 0;
-	u.uen = u.uenmax = u.uenrolled = u.uenmultiplier = u.uenbonus = 0;
-	u.uhp_real = u.uhpmax_real = u.uhprolled_real = u.uhpmultiplier_real = u.uhpbonus_real = u.uhpmod_real = 0;
-	u.uen_real = u.uenmax_real = u.uenrolled_real = u.uenmultiplier_real = u.uenbonus_real = 0;
+
+// #if 0	/* documentation of more zero values as desirable */
+	// u.usick_cause[0] = 0;
+	// u.uluck  = u.moreluck = 0;
+// # ifdef TOURIST
+	// uarmu = 0;
+// # endif
+	// uarm = uarmc = uarmh = uarms = uarmg = uarmf = 0;
+	// uwep = uball = uchain = uleft = uright = urope = 0;
+	// uswapwep = uquiver = 0;
+	// u.twoweap = 0;
+	// u.ublessed = 0;				/* not worthy yet */
+	// u.ugifts   = 0;				/* no divine gifts bestowed */
+	// u.uartisval = 0;			/* no artifacts directly acquired */
+	// u.ucarinc = 0;
+	// u.uacinc = 0;
+// // ifdef ELBERETH
+	// u.uevent.uhand_of_elbereth = 0;
+// // endif
+	// u.uevent.utook_castle = 0;
+	// u.uevent.uunknowngod = 0;
+	// u.uevent.uheard_tune = 0;
+	// u.uevent.uopened_dbridge = 0;
+	// u.uevent.udemigod = 0;		/* not a demi-god yet... */
+	// u.udg_cnt = 0;
+	// u.ill_cnt = 0;
+	// u.yel_cnt = 555; /*ineffective due to ifdef 0 */
+	// /*Ensure that the HP and energy fields are zeroed out*/
+	// u.uhp = u.uhpmax = u.uhprolled = u.uhpmultiplier = u.uhpbonus = u.uhpmod = 0;
+	// u.uen = u.uenmax = u.uenrolled = u.uenmultiplier = u.uenbonus = 0;
+	// u.uhp_real = u.uhpmax_real = u.uhprolled_real = u.uhpmultiplier_real = u.uhpbonus_real = u.uhpmod_real = 0;
+	// u.uen_real = u.uenmax_real = u.uenrolled_real = u.uenmultiplier_real = u.uenbonus_real = 0;
 	
-	u.mh = u.mhmax = u.mhrolled = u.mtimedone = 0;
-	u.uz.dnum = u.uz0.dnum = 0;
-	u.utotype = 0;
-#endif	/* 0 */
+	// u.mh = u.mhmax = u.mhrolled = u.mtimedone = 0;
+	// u.uz.dnum = u.uz0.dnum = 0;
+	// u.utotype = 0;
+// #endif	/* 0 */
 
 	u.uz.dlevel = 1;
 	u.uz0.dlevel = 0;
