@@ -8399,7 +8399,7 @@ dotrephination_menu()
 	
 	if (u.thoughts&SIGHT){
 		Sprintf(buf, "Extract the recursive eye");
-		any.a_int = BEAST_S_EMBRACE_GLYPH;	/* must be non-zero */
+		any.a_int = ORRERY_GLYPH;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
