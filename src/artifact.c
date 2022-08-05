@@ -6327,7 +6327,7 @@ boolean printmessages; /* print generic elemental damage messages */
 
 		/* Stormbringer special -- convert base damage into lifedrain */
 		if (oartifact == ART_STORMBRINGER && dieroll <= 2) {
-			leveldrain += basedmg / 4;
+			leveldrain += basedmg / hd_size(mdef->data)/2;
 			*plusdmgptr -= basedmg;
 		}
 
