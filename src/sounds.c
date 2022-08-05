@@ -2061,6 +2061,18 @@ humanoid_sound:
 				case PM_FORMIAN_TASKMASTER:
 					pline_msg = "chitters.";
 				break;
+				case PM_MARILITH:
+					if(rn2(2)){
+						Sprintf(msgbuff, talkabt, !rn2(4) ? "swords" : !rn2(3) ? "spears" : rn2(2) ? "bludgeons" : "knives");
+						pline_msg = msgbuff;
+					}
+					else if(!rn2(3))
+						pline_msg = "discusses military tactics.";
+					else if(rn2(2))
+						pline_msg = "curses devils.";
+					else
+						pline_msg = "curses angels.";
+				break;
 				case PM_ARCHEOLOGIST:
 					pline_msg = "describes a recent article in \"Spelunker Today\" magazine.";
 				break;
