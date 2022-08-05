@@ -827,7 +827,7 @@ yellow_smite()
 		return FALSE;
 	}
 	if(canseemon(magr))
-		You("glimpse %s over %s %s", 
+		You("glimpse %s over %s %s!", 
 			u_recognize_stars() ? "the five flaxen sisters" : "five amber stars", 
 			s_suffix(mon_nam(magr)), 
 			mbodypart(magr, HEAD));
