@@ -2713,6 +2713,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	etype = 0;
 	char qbuf[QBUFSZ];
 	char c;
+	struct obj *obj2;
 	
 	boolean dont_start = FALSE;
 	
@@ -2840,18 +2841,32 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			(void) splitobj(otmp, otmp->quan - 1L);
 		    else
 			otmp = splitobj(otmp, 1L);
-		if (carried(otmp)) {
-			freeinv(otmp);
-			if (inv_cnt() >= 52) {
-				sellobj_state(SELL_DONTSELL);
-				dropy(otmp);
-				sellobj_state(SELL_NORMAL);
-			} else {
-				otmp->nomerge = TRUE;
-				otmp = addinv(otmp);
-				otmp->nomerge = FALSE;
+			if (carried(otmp)) {
+				freeinv(otmp);
+				if (inv_cnt() >= 52) {
+					sellobj_state(SELL_DONTSELL);
+					dropy(otmp);
+					sellobj_state(SELL_NORMAL);
+				} else {
+					otmp->nomerge = TRUE;
+					otmp = addinv(otmp);
+					otmp->nomerge = FALSE;
+				}
 			}
 		}
+		/*These cases destroy the object, rescue its contents*/
+		while((obj2 = otmp->cobj)){
+			obj_extract_self(obj2);
+			/* Compartmentalize tip() */
+			if(carried(otmp)){
+				sellobj_state(SELL_DONTSELL);
+				dropy(obj2);
+				sellobj_state(SELL_NORMAL);
+			}
+			else {
+				place_object(obj2, u.ux, u.uy);
+				stackobj(obj2);
+			}
 		}
 		switch(otmp->oclass){
 			case WEAPON_CLASS:
@@ -2978,23 +2993,51 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			int curspe;
 			if(objects[otmp->otyp].oc_unique) return 1;//redundant check against unique
 			You("place the %s in your magic furnace.", xname(otmp));
-			if (otmp->quan > 1L) {
-				if(!carried(otmp))
-				(void) splitobj(otmp, otmp->quan - 1L);
-				else
-				otmp = splitobj(otmp, 1L);
-			if (carried(otmp)) {
-				freeinv(otmp);
-				if (inv_cnt() >= 52) {
-				sellobj_state(SELL_DONTSELL);
-				dropy(otmp);
-				sellobj_state(SELL_NORMAL);
-				} else {
-					otmp->nomerge = TRUE;
-					otmp = addinv(otmp);
-					otmp->nomerge = FALSE;
+			/*These cases destroy the object, rescue its contents*/
+			while((obj2 = otmp->cobj)){
+				obj_extract_self(obj2);
+				/* Compartmentalize tip() */
+				if(carried(otmp)){
+					sellobj_state(SELL_DONTSELL);
+					dropy(obj2);
+					sellobj_state(SELL_NORMAL);
+				}
+				else {
+					place_object(obj2, u.ux, u.uy);
+					stackobj(obj2);
 				}
 			}
+			if (otmp->quan > 1L) {
+				if(!carried(otmp))
+					(void) splitobj(otmp, otmp->quan - 1L);
+				else
+					otmp = splitobj(otmp, 1L);
+				if (carried(otmp)) {
+					freeinv(otmp);
+					if (inv_cnt() >= 52) {
+					sellobj_state(SELL_DONTSELL);
+					dropy(otmp);
+					sellobj_state(SELL_NORMAL);
+					} else {
+						otmp->nomerge = TRUE;
+						otmp = addinv(otmp);
+						otmp->nomerge = FALSE;
+					}
+				}
+			}
+			/*These cases destroy the object, rescue its contents*/
+			while((obj2 = otmp->cobj)){
+				obj_extract_self(obj2);
+				/* Compartmentalize tip() */
+				if(carried(otmp)){
+					sellobj_state(SELL_DONTSELL);
+					dropy(obj2);
+					sellobj_state(SELL_NORMAL);
+				}
+				else {
+					place_object(obj2, u.ux, u.uy);
+					stackobj(obj2);
+				}
 			}
 			switch(otmp->oclass){
 				case WEAPON_CLASS:
@@ -3088,6 +3131,20 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		if(etype == WOOD_STOVE && !otmp->oartifact){
 			if(objects[otmp->otyp].oc_unique) return 1;//redundant check against unique
 			You("place the %s in your wood stove.", xname(otmp));
+			/*These cases destroy the object, rescue its contents*/
+			while((obj2 = otmp->cobj)){
+				obj_extract_self(obj2);
+				/* Compartmentalize tip() */
+				if(carried(otmp)){
+					sellobj_state(SELL_DONTSELL);
+					dropy(obj2);
+					sellobj_state(SELL_NORMAL);
+				}
+				else {
+					place_object(obj2, u.ux, u.uy);
+					stackobj(obj2);
+				}
+			}
 			if (otmp->quan > 1L) {
 				if(!carried(otmp))
 					(void) splitobj(otmp, otmp->quan - 1L);
@@ -3206,6 +3263,20 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		if(etype == HELLFIRE_FURNACE && !otmp->oartifact){
 			if(objects[otmp->otyp].oc_unique) return 1;//redundant check against unique
 			You("place the %s in your hellfire furnace.", xname(otmp));
+			/*These cases destroy the object, rescue its contents*/
+			while((obj2 = otmp->cobj)){
+				obj_extract_self(obj2);
+				/* Compartmentalize tip() */
+				if(carried(otmp)){
+					sellobj_state(SELL_DONTSELL);
+					dropy(obj2);
+					sellobj_state(SELL_NORMAL);
+				}
+				else {
+					place_object(obj2, u.ux, u.uy);
+					stackobj(obj2);
+				}
+			}
 			if (otmp->quan > 1L) {
 				if(!carried(otmp))
 					(void) splitobj(otmp, otmp->quan - 1L);
@@ -3324,6 +3395,20 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		if(etype == SCRAP_MAW && !otmp->oartifact){
 			if(objects[otmp->otyp].oc_unique) return 1;//redundant check against unique
 			You("crunch up the %s with your scrap maw.", xname(otmp));
+			/*These cases destroy the object, rescue its contents*/
+			while((obj2 = otmp->cobj)){
+				obj_extract_self(obj2);
+				/* Compartmentalize tip() */
+				if(carried(otmp)){
+					sellobj_state(SELL_DONTSELL);
+					dropy(obj2);
+					sellobj_state(SELL_NORMAL);
+				}
+				else {
+					place_object(obj2, u.ux, u.uy);
+					stackobj(obj2);
+				}
+			}
 			if (otmp->quan > 1L) {
 				if(!carried(otmp))
 					(void) splitobj(otmp, otmp->quan - 1L);
@@ -3501,6 +3586,21 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    if (otmp->cursed)
 		(void) rottenfood(otmp);
 
+		/*These cases destroy the object, rescue its contents*/
+		while((obj2 = otmp->cobj)){
+			obj_extract_self(obj2);
+			/* Compartmentalize tip() */
+			if(carried(otmp)){
+				sellobj_state(SELL_DONTSELL);
+				dropy(obj2);
+				sellobj_state(SELL_NORMAL);
+			}
+			else {
+				place_object(obj2, u.ux, u.uy);
+				stackobj(obj2);
+			}
+		}
+
 	    if (otmp->oclass == WEAPON_CLASS && otmp->opoisoned) {
 			if(otmp->opoisoned & OPOISON_BASIC){
 				pline("Ecch - that must have been poisonous!");
@@ -3598,9 +3698,9 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 				losehp(rnd(20), "silvery meal", KILLED_BY_AN);
 			}
 		} else if (!otmp->cursed)
-		pline("This %s is delicious!",
-		      otmp->oclass == COIN_CLASS ? foodword(otmp) :
-		      singular(otmp, xname));
+			pline("This %s is delicious!",
+				  otmp->oclass == COIN_CLASS ? foodword(otmp) :
+				  singular(otmp, xname));
 
 	    eatspecial();
 	    return MOVE_ATE;

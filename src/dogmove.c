@@ -365,9 +365,9 @@ boolean devour;
 	boolean eatonlyone = (obj->oclass == FOOD_CLASS || obj->oclass == CHAIN_CLASS || obj->oclass == POTION_CLASS);
 
 	// boolean can_choke = (edog->hungrytime >= monstermoves + DOG_SATIATED && !vampiric);
-	boolean can_choke = mtmp->mgluttony;
+	boolean can_choke = mtmp->mgluttony && !Breathless_res(mtmp);
 
-	if(edog->hungrytime < monstermoves)
+	if(!can_choke && edog->hungrytime < monstermoves)
 	    edog->hungrytime = monstermoves;
 
 	nutrit = dog_nutrition(mtmp, obj);
@@ -375,7 +375,7 @@ boolean devour;
 	poly = polyfodder(obj) && !resists_poly(mtmp->data);
 	grow = mlevelgain(obj);
 	heal = mhealup(obj);
-	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
+	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && obj->corpsenm >= LOW_PM && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
 	
 	if(obj->otyp == CORPSE){
 		int mtyp = obj->corpsenm;
@@ -455,6 +455,8 @@ boolean devour;
 		pline("%s spits %s out in disgust!",
 		      Monnam(mtmp), distant_name(obj,doname));
 	    }
+		can_choke = FALSE;
+		nutrit = 0;
 	} else if (vampiric && !(obj->otyp == POT_BLOOD)) {
 		/* Split Object */
 		if (obj->quan > 1L) {
@@ -478,16 +480,28 @@ boolean devour;
 		/* Take away blood nutrition */
 	    	obj->oeaten = drainlevel(obj);
 		obj->odrained = 1;
-	} else if (obj == uball) {
-	    unpunish();
-	    delobj(obj);
-	} else if (obj == uchain)
-	    unpunish();
-	else if (obj->quan > 1L && eatonlyone) {
-	    obj->quan--;
-	    obj->owt = weight(obj);
-	} else
-	    delobj(obj);
+		can_choke = FALSE;
+	} else {
+		/*These cases destroy the object, rescue its contents*/
+		struct obj *obj2;
+		while((obj2 = obj->cobj)){
+			obj_extract_self(obj2);
+			/* Compartmentalize tip() */
+			place_object(obj2, mtmp->mx, mtmp->my);
+			stackobj(obj2);
+		}
+
+		if (obj == uball) {
+			unpunish();
+			delobj(obj);
+		} else if (obj == uchain)
+			unpunish();
+		else if (obj->quan > 1L && eatonlyone) {
+			obj->quan--;
+			obj->owt = weight(obj);
+		} else
+			delobj(obj);
+	}
 
 	if (can_choke && edog->hungrytime >= (monstermoves + 5*DOG_SATIATED))
 	{

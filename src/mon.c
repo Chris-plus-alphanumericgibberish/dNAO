@@ -2030,6 +2030,15 @@ meatmetal(mtmp)
 			mtmp->mhp += objects[otmp->otyp].oc_weight;
 			if (mtmp->mhp > mtmp->mhpmax) mtmp->mhp = mtmp->mhpmax;
 		    }
+
+			struct obj *obj2;
+			while((obj2 = otmp->cobj)){
+				obj_extract_self(obj2);
+				/* Compartmentalize tip() */
+				place_object(obj2, mtmp->mx, mtmp->my);
+				stackobj(obj2);
+			}
+
 		    if(otmp == uball) {
 			unpunish();
 			delobj(otmp);
@@ -2137,7 +2146,7 @@ boolean devour;
 	poly = polyfodder(obj) && !resists_poly(mtmp->data);
 	grow = mlevelgain(obj);
 	heal = mhealup(obj);
-	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
+	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && obj->corpsenm >= LOW_PM && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
 	
 	if(obj->otyp == CORPSE){
 		int mtyp = obj->corpsenm;
@@ -2205,6 +2214,8 @@ boolean devour;
 		pline("%s spits %s out in disgust!",
 		      Monnam(mtmp), distant_name(obj,doname));
 	    }
+		can_choke = FALSE;
+		nutrit = 0;
 	} else if (vampiric && !(obj->otyp == POT_BLOOD)) {
 		/* Split Object */
 		if (obj->quan > 1L) {
@@ -2228,16 +2239,28 @@ boolean devour;
 		/* Take away blood nutrition */
 	    	obj->oeaten = drainlevel(obj);
 		obj->odrained = 1;
-	} else if (obj == uball) {
-	    unpunish();
-	    delobj(obj);
-	} else if (obj == uchain)
-	    unpunish();
-	else if (obj->quan > 1L && eatonlyone) {
-	    obj->quan--;
-	    obj->owt = weight(obj);
-	} else
-	    delobj(obj);
+		can_choke = FALSE;
+	} else {
+		/*These cases destroy the object, rescue its contents*/
+		struct obj *obj2;
+		while((obj2 = obj->cobj)){
+			obj_extract_self(obj2);
+			/* Compartmentalize tip() */
+			place_object(obj2, mtmp->mx, mtmp->my);
+			stackobj(obj2);
+		}
+
+		if (obj == uball) {
+			unpunish();
+			delobj(obj);
+		} else if (obj == uchain)
+			unpunish();
+		else if (obj->quan > 1L && eatonlyone) {
+			obj->quan--;
+			obj->owt = weight(obj);
+		} else
+			delobj(obj);
+	}
 
 	if (can_choke && rn2(nutrit) > 5*mtmp->data->cnutrit) /*Magic number: dog_nutrition multiplier for medium-sized monsters*/
 	{
@@ -7917,6 +7940,7 @@ struct obj *obj;
 				/* Compartmentalize tip() */
 				if(floor){
 					place_object(obj2, x, y);
+					stackobj(obj2);
 				} else if(youdef){
 					dropy(obj2);
 				} else {
