@@ -5615,6 +5615,18 @@ boolean printmessages; /* print generic elemental damage messages */
 				}
 			}
 			break;
+		case ART_RELEASE_FROM_CARE:
+			wepdesc = "heedless scythe";
+			if (dieroll <= 2) {
+				if ((has_head_mon(mdef) || !bigmonst(pd)) && !(youagr && u.uswallow)
+					&& !(youagr && u.uswallow && mdef == u.ustuck))
+				{
+					method = VORPAL_BEHEAD;
+				}
+				else
+					method = VORPAL_BISECT;
+			}
+			break;
 		case ART_ARROW_OF_SLAYING:
 			wepdesc = "heart-seeking arrow";
 			if (dieroll == 1) {
@@ -5691,6 +5703,8 @@ boolean printmessages; /* print generic elemental damage messages */
 		else if ((youagr && u.uswallow && mdef == u.ustuck) &&
 			((method == VORPAL_BISECT) || (method == VORPAL_SMASH)))
 		{
+			if(oartifact == ART_RELEASE_FROM_CARE && !youdef)
+				set_mcan(mdef, TRUE);
 			You("%s %s wide open!", 
 				((method == VORPAL_BISECT) ? "slice" : "smash"),
 				mon_nam(mdef));
@@ -5745,6 +5759,8 @@ boolean printmessages; /* print generic elemental damage messages */
 			if ((vorpaldamage + basedmg > *hp(mdef)) && vorpaldamage >= basedmg*4) {
 				if (vis)
 				{
+					if(oartifact == ART_RELEASE_FROM_CARE && !youdef)
+						set_mcan(mdef, TRUE);
 					/* print message */
 					switch (method) {
 					case VORPAL_BEHEAD:
