@@ -477,11 +477,14 @@ struct attack *mattk;
 	    minvent_ptr = &mdef->minvent;
 	    while ((otmp = *minvent_ptr) != 0)
 			if (otmp->owornmask & (W_ARM|W_ARMU)){
-				if (stealoid) /*Steal suit or undershirt*/
-					continue;
-				*minvent_ptr = otmp->nobj;	/* take armor out of minvent */
-				stealoid = otmp;
-				stealoid->nobj = (struct obj *)0;
+				if (stealoid){ /*Steal suit or undershirt*/
+					minvent_ptr = &otmp->nobj;
+				}
+				else {
+					*minvent_ptr = otmp->nobj;	/* take armor out of minvent */
+					stealoid = otmp;
+					stealoid->nobj = (struct obj *)0;
+				}
 			} else {
 				minvent_ptr = &otmp->nobj;
 			}

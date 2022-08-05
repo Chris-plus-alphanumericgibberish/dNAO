@@ -2371,16 +2371,20 @@ int *result;
 		
 		if(seduce && (attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX)){
 			minvent_ptr = &mdef->minvent;
-			while ((otmp = *minvent_ptr) != 0)
+			while ((otmp = *minvent_ptr) != 0){
 				if (otmp->owornmask & (W_ARM|W_ARMU)){
-					if (stealoid) /*Steal suit or undershirt*/
-						continue;
-					*minvent_ptr = otmp->nobj;	/* take armor out of minvent */
-					stealoid = otmp;
-					stealoid->nobj = (struct obj *)0;
+					if (stealoid){ /*Steal suit or undershirt*/
+						minvent_ptr = &otmp->nobj;
+					}
+					else {
+						*minvent_ptr = otmp->nobj;	/* take armor out of minvent */
+						stealoid = otmp;
+						stealoid->nobj = (struct obj *)0;
+					}
 				} else {
 					minvent_ptr = &otmp->nobj;
 				}
+			}
 			*minvent_ptr = stealoid;	/* put armor back into minvent */
 			otmp = stealoid;
 		}
