@@ -1708,10 +1708,14 @@ int otyp;
 const char * artiname;
 {
 	int i;
-	if (otyp && *artiname)
-	    for (i = 1; artilist[i].otyp; i++)
+	if (otyp && *artiname){
+	    for (i = 1; artilist[i].otyp; i++){
+			if (artinstance[i].exists && !strcmp(artilist[i].name, artiname))
+				return TRUE;
 			if ((int) artilist[i].otyp == otyp && !strcmp(artilist[i].name, artiname))
 				return artinstance[i].exists;
+		}
+	}
 	return FALSE;
 }
 
