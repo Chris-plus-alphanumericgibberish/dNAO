@@ -1878,9 +1878,9 @@ struct obj *obj;
 
 	if (u.utrap && u.utraptype == TT_WEB) {
 	    pline("%s you can't %s while entangled in a web.",
-		  /* res==0 => no prior message;
-		     res==1 => just got "You now wield a pick-axe." message */
-		  !res ? "Unfortunately," : "But", verb);
+		  /* res==MOVE_CANCELLED => no prior message;
+		     res==MOVE_STANDARD => just got "You now wield a pick-axe." message */
+		  res == MOVE_CANCELLED ? "Unfortunately," : "But", verb);
 	    return res;
 	}
 
