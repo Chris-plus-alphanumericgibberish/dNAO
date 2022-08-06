@@ -4229,13 +4229,14 @@ struct obj *obj;
     }
 
 	if (!getdir((char *)0)) return res;
+	else res = Role_if(PM_MONK) ? MOVE_PARTIAL : MOVE_STANDARD;
 
 	if (Stunned || (Confusion && !rn2(5))) confdir();
 	rx = u.ux + u.dx;
 	ry = u.uy + u.dy;
 	if (!isok(rx,ry)) {
 		pline("%s",msg_snap);
-		return MOVE_STANDARD;
+		return res;
 	}
     mtmp = m_at(rx, ry);
 
@@ -4353,12 +4354,13 @@ struct obj *obj;
 			}
 			wakeup(mtmp, TRUE);
 		} else {
+			res |= MOVE_ATTACKED;
 			if ((mtmp->m_ap_type && mtmp->m_ap_type != M_AP_MONSTER) &&
 			!Protection_from_shape_changers && !sensemon(mtmp))
 			stumble_onto_mimic(mtmp);
 			else You("swing your nunchaku toward %s.", mon_nam(mtmp));
 			if (proficient) {
-				if (attack2(mtmp)) return MOVE_ATTACKED;
+				if (attack2(mtmp)) return res;
 				else pline("%s", msg_snap);
 			}
 		}
@@ -4371,7 +4373,7 @@ struct obj *obj;
 		pline("%s", msg_snap);
 
     }
-    return MOVE_STANDARD;
+    return res;
 }
 
 
@@ -4501,6 +4503,8 @@ coord *ccp;
 				flags.standard_polearms = TRUE;
 				int retval = pick_polearm_target(obj,outptr,ccp);
 				flags.standard_polearms = FALSE;
+				if(res == MOVE_STANDARD || retval == MOVE_STANDARD)
+					return MOVE_STANDARD;
 				return res | retval;
 			}
 		}
@@ -4633,7 +4637,7 @@ use_grapple (obj)
 	cc.x = u.ux;
 	cc.y = u.uy;
 	if (getpos(&cc, TRUE, "the spot to hit") < 0)
-	    return MOVE_CANCELLED;	/* user pressed ESC */
+	    return res;	/* user pressed ESC */
 
 	/* Calculate range */
 	typ = uwep_skill_type();
@@ -4794,12 +4798,18 @@ use_crook (obj)
 	    /* FIXME -- untrap needs to deal with non-adjacent traps */
 	    break;
 	case 1:	/*Hit Monster */
-		return use_pole(obj);
+		res |= use_pole(obj);
+		if(res & MOVE_STANDARD)
+			return MOVE_STANDARD;
+		return res;
 	break;
 	case 2:	/*Hook Monster */
-		res = pick_polearm_target(obj, &mtmp, &cc);
-		if(!mtmp)
+		res |= pick_polearm_target(obj, &mtmp, &cc);
+		if(!mtmp){
+			if(res & MOVE_STANDARD)
+				return MOVE_STANDARD;
 			return res;
+		}
 		if(mtmp->mpeaceful){
 			if (!bigmonst(mtmp->data) &&
 				enexto(&cc, u.ux, u.uy, (struct permonst *)0)
@@ -4840,12 +4850,14 @@ use_crook (obj)
 	case 3:	/* Object */
 		{
 			int tmp = flags.standard_polearms;
+			int subres;
 			flags.standard_polearms = 1;
-			res = pick_polearm_target(obj, &mtmp, &cc);
+			subres = pick_polearm_target(obj, &mtmp, &cc);
 			flags.standard_polearms = tmp;
+			//Note: May have wielded polearm.
+			if (subres == MOVE_CANCELLED || !isok(cc.x, cc.y))
+				return res;
 		}
-		if (res != MOVE_CANCELLED && isok(cc.x, cc.y))
-			return 0;
 	    if ((otmp = level.objects[cc.x][cc.y]) != 0) {
 			You("snag an object from the %s!", surface(cc.x, cc.y));
 			(void) pickup_object(otmp, 1L, FALSE);
