@@ -1725,7 +1725,7 @@ lootcont:
 						safe_qbuf("", sizeof("There is  here, loot it?"),
 							 doname(cobj), an(simple_typename(cobj->otyp)), "a container"));
 					c = ynq(qbuf);
-					if (c == 'q') return (timepassed);
+					if (c == 'q') return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
 					if (c == 'n') continue;
 					any = TRUE;
 
@@ -1752,14 +1752,14 @@ lootcont:
 			    } else if(is_gemable_lightsaber(cobj)){
 					Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
 					c = ynq(qbuf);
-					if (c == 'q') return (timepassed);
+					if (c == 'q') return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
 					if (c == 'n') continue;
 					timepassed |= use_lightsaber(cobj);
 					if(timepassed & MOVE_STANDARD) underfoot = TRUE;
 				} else if(cobj->otyp == MASS_SHADOW_PISTOL){
 					Sprintf(qbuf, "There is %s here, open it?",an(xname(cobj)));
 					c = ynq(qbuf);
-					if (c == 'q') return (timepassed);
+					if (c == 'q') return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
 					if (c == 'n') continue;
 					timepassed |= use_massblaster(cobj);
 					if(timepassed & MOVE_STANDARD) underfoot = TRUE;
@@ -1843,7 +1843,7 @@ gotit:
 	if (u.dz < 0) {
 	    You("%s to loot on the %s.", dont_find_anything,
 		ceiling(cc.x, cc.y));
-	    timepassed = 1;
+	    timepassed = MOVE_STANDARD;
 	    return timepassed;
 	}
 	if(u.dz > 0)
@@ -1869,21 +1869,21 @@ gotit:
 		if (mtmp) {
 		    You_cant("loot anything %sthere with %s in the way.",
 			    prev_inquiry ? "else " : "", mon_nam(mtmp));
-		    return timepassed;
+		    return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
 		} else {
 		    You("have to be at a container to loot it.");
 		}
 	    } else {
 		You("%s %sthere to loot.", dont_find_anything,
 			(prev_inquiry || prev_loot) ? "else " : "");
-		return timepassed;
+		return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
 	    }
 	}
     } else if (c != 'y' && c != 'n') {
 	You("%s %s to loot.", dont_find_anything,
 		    underfoot ? "here" : "there");
     }
-    return (timepassed);
+    return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
 }
 
 /* loot_mon() returns amount of time passed.
