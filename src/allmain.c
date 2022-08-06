@@ -507,6 +507,8 @@ boolean affect_game_state;
 	 * Most often, there is only one action type per player input.
 	 * In very rare circumstances, two actions that should take time can happen simultaneously.
 	 */
+	if(wizard && actiontypes_remaining != MOVE_CANCELLED && (actiontypes_remaining&MOVE_CANCELLED))
+		pline("ERROR: incompletely cancelled actions in you_action_cost: %d", actiontypes_remaining);
 	for (i=0, current_action = MOVE_STANDARD;
 		actiontypes_remaining != 0;
 		current_action = 1<<i, i++)
