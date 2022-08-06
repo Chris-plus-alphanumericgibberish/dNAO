@@ -10647,10 +10647,11 @@ boolean goodequip;
 				(void) mpickobj(mtmp,otmp);
 				
 				if(!PURIFIED_FIRE){
-					mongets(mtmp, LONG_SWORD, mkobjflags);
-					mongets(mtmp, SCIMITAR, mkobjflags);
-					mongets(mtmp, SCIMITAR, mkobjflags);
-					mongets(mtmp, SCIMITAR, mkobjflags);
+					for(int i = 0; i < 4; i++){
+						otmp = mongets(mtmp, RUNESWORD, mkobjflags);
+						add_oprop(otmp, OPROP_LESSER_FIREW);
+						otmp->spe = 4;
+					}
 				}
 				
 				// mlocal = makemon(&mons[PM_KRAKEN], mtmp->mx, mtmp->my, MM_ADJACENTOK);
