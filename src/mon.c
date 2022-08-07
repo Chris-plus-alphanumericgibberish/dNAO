@@ -7555,6 +7555,10 @@ int flags;
 		add_mx(mon, MX_ESUM);
 		start_timer(ESUMMON_PERMANENT, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
 	}
+	/* sanity-check */
+	if (summoner && DEADMONSTER(summoner)) {
+		impossible("summoner (%s) is dead?", m_monnam(summoner));
+	}
 	/* set data */
 	mon->mextra_p->esum_p->summoner = summoner;
 	mon->mextra_p->esum_p->sm_id = summoner ? summoner->m_id : 0;
