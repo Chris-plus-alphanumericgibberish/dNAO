@@ -552,6 +552,11 @@ struct obj {
 			 || (otmp)->otyp == ANTIMAGIC_RIFT\
 			 || (otmp)->otyp == CATAPSI_VORTEX\
 			)
+#define goat_acidable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp))\
+				&& !(otmp)->oartifact	\
+				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW) && !check_oprop((otmp), OPROP_LESSER_ACIDW))
+#define goat_droolable(otmp) (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
+				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW))
 #define sflm_able(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
 				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
 #define sflm_offerable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
