@@ -3201,6 +3201,7 @@ int
 commune_with_goat()
 {
 	const char * goatname = goattitles[rn2(SIZE(goattitles))];
+	const char blessable_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
 
 	/* you must be an active cultist */
 	if (!u.shubbie_atten) {
@@ -3306,12 +3307,13 @@ commune_with_goat()
 		case GOATBOON_ACID:
 			cost = 25;
 			/* gives your wielded (nonartifact) weapon the Acrid (+2d6 acid damage) property */
-			if(uwep && !uwep->oartifact && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_GOATW) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_LESSER_ACIDW)){
+			otmp = getobj(blessable_classes, "give the Goat's bite");
+			if(otmp && goat_acidable(otmp)) {
 				if(!Blind) pline("Acid drips from your weapon!");
-				add_oprop(uwep, OPROP_LESSER_ACIDW);
-				uwep->oeroded = 0;
-				uwep->oeroded2 = 0;
-				uwep->oerodeproof = 1;
+				add_oprop(otmp, OPROP_LESSER_ACIDW);
+				otmp->oeroded = 0;
+				otmp->oeroded2 = 0;
+				otmp->oerodeproof = 1;
 				u.ugifts++;
 				u.uartisval += TIER_B;
 			}
@@ -3322,18 +3324,11 @@ commune_with_goat()
 
 		case GOATBOON_DROOL:
 			cost = 40;
-			/* gives your wielded weapon the Drooling property, and can intentionally be done for artifacts */
-			if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && !check_oprop(uwep, OPROP_ACIDW) && !check_oprop(uwep, OPROP_GOATW))
-				otmp = uwep;
-			else if (uarmg && !uwep && u.umartial && !check_oprop(uarmg, OPROP_ACIDW) && !check_oprop(uarmg, OPROP_GOATW))
-				otmp = uarmg;
-			else if (uarmf && !uarmg && !uwep && u.umartial && !check_oprop(uarmf, OPROP_ACIDW) && !check_oprop(uarmf, OPROP_GOATW))
-				otmp = uarmf;
-			
-			if(otmp){
-				if(!Blind) pline("...your %s %s drooling.", 
-					(otmp == uwep) ? "weapon" : ((otmp == uarmg) ? "gloves" : "boots"),
-					(otmp == uwep) ? "is" : "are");
+
+			/* gives your wielded weapon the Drooling property, which does various +dmg effects and marks mons for eating */
+			otmp = getobj(blessable_classes, "give the Goat's hunger");
+			if(otmp && goat_droolable(otmp)){
+				if(!Blind) pline("...your %s %s drooling.", xname(otmp), vtense(xname(otmp), "are"));
 				remove_oprop(otmp, OPROP_LESSER_ACIDW);
 				add_oprop(otmp, OPROP_GOATW);
 				otmp->oeroded = 0;

@@ -1307,6 +1307,10 @@ register const char *let,*word;
 		    ((otmp->oclass == TOOL_CLASS && otyp != CAN_OF_GREASE) ||
 			(otmp->oclass == CHAIN_CLASS)))
 		|| (!strcmp(word, "charge") && !is_chargeable(otmp))
+		|| (!strcmp(word, "give the Goat's bite") &&
+			!goat_acidable(otmp))
+		|| (!strcmp(word, "give the Goat's hunger") &&
+			!goat_droolable(otmp))
 		|| (!strcmp(word, "offer to the flame") && 
 			!sflm_offerable(otmp))
 		|| (!strcmp(word, "mirror-finish") && 
