@@ -4309,6 +4309,7 @@ register struct monst *mtmp;
 	if (mtmp->mhp > 0) return;
 	/* we did not lifesave */
 	mtmp->deadmonster |= DEADMONSTER_DEAD;
+	mtmp->mbdrown = 0;
 	//Special messages (Nyarlathotep)
 	if(canseemon(mtmp) && (mtmp->mtyp == PM_GOOD_NEIGHBOR || mtmp->mtyp == PM_HMNYW_PHARAOH)){
 		int nyar_form = rn2(SIZE(nyar_description));
@@ -5127,6 +5128,7 @@ register struct monst *mdef;
 {
 	mdef->mhp = 0;	/* can skip some inventory bookkeeping */
 	mdef->deadmonster |= DEADMONSTER_DEAD;
+
 #ifdef STEED
 	/* Player is thrown from his steed when it disappears */
 	if (mdef == u.usteed)
@@ -5154,6 +5156,7 @@ register struct monst *mdef;
 {
 	mdef->mhp = 0;	/* can skip some inventory bookkeeping */
 	mdef->deadmonster |= DEADMONSTER_DEAD;
+
 #ifdef STEED
 	/* Player is thrown from his steed when it disappears */
 	if (mdef == u.usteed)
@@ -5773,6 +5776,7 @@ xkilled(mtmp, dest)
 	}
 	/* we did not lifesave */
 	mtmp->deadmonster |= DEADMONSTER_DEAD;
+	mtmp->mbdrown = 0;
 
 	mdat = mtmp->data; /* note: mondead can change mtmp->data */
 	mndx = monsndx(mdat);
