@@ -49,13 +49,16 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 
 /* used in timeout.c */
 typedef struct timer {
-    struct timer *next;		/* next item in PROCESSING chain */
-    struct timer *tnxt;     /* next item in LOCAL chain */
-    long timeout;		/* when we time out */
-    unsigned long tid;		/* timer ID */
-    short kind;			/* kind of use */
-    short func_index;		/* what to call when we time out */
-    genericptr_t arg;		/* pointer to timeout argument */
+	struct timer *next;	/* next item in PROCESSING chain */
+	struct timer *tnxt;	/* next item in LOCAL chain */
+	long timeout;		/* when we time out */
+	unsigned long tid;	/* timer ID */
+	short kind;			/* kind of use */
+	short func_index;	/* what to call when we time out */
+	genericptr_t arg;	/* pointer to timeout argument */
+	int timerflags;		/* flags for the timer */ 
 } timer_element;
+#define TIMERFLAG_PAUSED	0x01	/* pause progression of timer -- 'timeout' is how many turns were remaining when paused, instead of end-turn*/
+#define TIMERFLAG_MIGRATING	0x10	/* progress but do not execute timer, as 'arg' is migrating */
 
 #endif /* TIMEOUT_H */

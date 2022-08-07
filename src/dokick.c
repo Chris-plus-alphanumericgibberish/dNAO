@@ -1845,7 +1845,7 @@ obj_delivery()
 		otmp->ox = otmp->oy = 0;
 		rloco(otmp);
 	    }
-		resume_timers(otmp->timed);
+		receive_timers(otmp->timed);
 	}
 }
 
