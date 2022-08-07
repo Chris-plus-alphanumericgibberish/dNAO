@@ -809,14 +809,13 @@ int dmg;
 					){ //only steal if you have at least one item and everything else of interest is already gone.
 					n = 0;
 					You_feel("the tentacles pick through your remaining possessions.");
-					buf[0] = '\0';
-					steal(mon, buf,FALSE, FALSE);
-					buf[0] = '\0';
-					steal(mon, buf,FALSE, FALSE);
-					buf[0] = '\0';
-					steal(mon, buf,FALSE, FALSE);
-					buf[0] = '\0';
-					steal(mon, buf,FALSE, FALSE);
+					for(int i = 0; i<4; i++){
+						buf[0] = '\0';
+						steal(mon, buf,FALSE, FALSE);
+						/*The elder priest is petrification immune, but if the attacker somehow dies from the theft we should return.*/
+						if(DEADMONSTER(mon))
+							return 1;
+					}
 				}
 			break;
 		   }
@@ -1717,6 +1716,9 @@ int effect_num;
 			for (tmp = 0; tmp < 8; tmp++) {
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, TRUE);
+				/*Lolth is petrification immune, but if the attacker somehow dies from the theft we should return.*/
+				if(DEADMONSTER(mon))
+					return;
 			}
 			break;
 		
@@ -1855,6 +1857,9 @@ int effect_num;
 			for (tmp = 0; tmp < 6; tmp++) {
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
+				/*Graz'zt is petrification immune, but if the attacker somehow dies from the theft we should return.*/
+				if(DEADMONSTER(mon))
+					return;
 			}
 			break;
 
@@ -1882,6 +1887,9 @@ int effect_num;
 			if (!uwep){
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
+				/*Graz'zt is petrification immune, but if the attacker somehow dies from the theft we should return.*/
+				if(DEADMONSTER(mon))
+					return;
 				optr = mksobj(BAR, NO_MKOBJ_FLAGS);
 				curse(optr);
 				optr->spe = -6;
@@ -1910,6 +1918,9 @@ int effect_num;
 				verbalize("This should greatly improve your intellect.");
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
+				/*Graz'zt is petrification immune, but if the attacker somehow dies from the theft we should return.*/
+				if(DEADMONSTER(mon))
+					return;
 				optr = mksobj(DUNCE_CAP, NO_MKOBJ_FLAGS);
 				curse(optr);
 				optr->spe = -6;
@@ -1939,6 +1950,9 @@ int effect_num;
 				verbalize("These boots will improve your looks.");
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
+				/*Graz'zt is petrification immune, but if the attacker somehow dies from the theft we should return.*/
+				if(DEADMONSTER(mon))
+					return;
 				optr = mksobj(FUMBLE_BOOTS, NO_MKOBJ_FLAGS);
 				curse(optr);
 				optr->spe = -6;
@@ -1967,6 +1981,9 @@ int effect_num;
 				verbalize("You need to take things more slowly.");
 				buf[0] = '\0';
 				steal(mon, buf, FALSE, FALSE);
+				/*Graz'zt is petrification immune, but if the attacker somehow dies from the theft we should return.*/
+				if(DEADMONSTER(mon))
+					return;
 				optr = mksobj(AMULET_OF_RESTFUL_SLEEP, NO_MKOBJ_FLAGS);
 				curse(optr);
 				(void)hold_another_object(optr, u.uswallow ?
