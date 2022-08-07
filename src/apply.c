@@ -4468,6 +4468,15 @@ static const char
 	cant_see_spot[] = "won't hit anything if you can't see that spot.",
 	cant_reach[] = "can't reach that spot from here.";
 
+/*Note: If input is invalid or cancelled, may return MOVE_CANCELLED OR MOVE_STANDARD
+	* MOVE_STANDARD: The PC wielded the polearm before failing to give input.
+	* MOVE_CANCELLED: The PC either failed to wield the pole, or was already wielding it before failing to give input.
+	* If input succeeds, MOVE_STANDARD is returned.
+	* 
+	* If input fails, cc should be set to 0,0 and *outptr should be 0.
+	* The caller should therefor always check isok() before using the coordinates.
+	*/
+
 STATIC_OVL int
 pick_polearm_target(obj,outptr,ccp)
 struct obj *obj;
@@ -4479,7 +4488,7 @@ coord *ccp;
 	struct monst *mtmp = (struct monst *) 0;
 	*outptr = (struct monst *) 0;
 
-
+	ccp->x = 0; ccp->y = 0;
 	/* Are you allowed to use the pole? */
 	if (u.uswallow) {
 	    pline("%s", not_enough_room);
@@ -4500,8 +4509,10 @@ coord *ccp;
 		pline("%s", where_to_hit);
 		ccp->x = u.ux;
 		ccp->y = u.uy;
-		if (getpos(ccp, TRUE, "the spot to hit") < 0)
+		if (getpos(ccp, TRUE, "the spot to hit") < 0){
+			ccp->x = 0; ccp->y = 0;
 			return res;	/* user pressed ESC */
+		}
 	}
 	else {
 		if((i = polearm_menu(uwep))){
@@ -4521,6 +4532,7 @@ coord *ccp;
 			}
 		}
 		else {
+			ccp->x = 0; ccp->y = 0;
 			return res;	/* user pressed ESC */
 		}
 	}
@@ -4536,17 +4548,21 @@ coord *ccp;
 	mtmp = m_at(ccp->x, ccp->y);
 	if (distu(ccp->x, ccp->y) > max_range) {
 	    pline("Too far!");
+		ccp->x = 0; ccp->y = 0;
 	    return (res);
 	} else if (distu(ccp->x, ccp->y) < min_range) {
 	    pline("Too close!");
+		ccp->x = 0; ccp->y = 0;
 	    return (res);
 	} else if (!cansee(ccp->x, ccp->y) &&
 		   (mtmp == (struct monst *)0 ||
 		    !canseemon(mtmp))) {
 	    You(cant_see_spot);
+		ccp->x = 0; ccp->y = 0;
 	    return (res);
 	} else if (!couldsee(ccp->x, ccp->y)) { /* Eyes of the Overworld */
 	    You(cant_reach);
+		ccp->x = 0; ccp->y = 0;
 	    return res;
 	}
 
@@ -4563,7 +4579,7 @@ use_pole(obj)
 	struct monst *mtmp;
 	
 	int res = pick_polearm_target(obj, &mtmp, &cc);
-	if(res == MOVE_CANCELLED)
+	if(!isok(cc.x, cc.y))
 		return res;
 
 	/* Attack the monster there */
@@ -4875,7 +4891,7 @@ use_crook (obj)
 			subres = pick_polearm_target(obj, &mtmp, &cc);
 			flags.standard_polearms = tmp;
 			//Note: May have wielded polearm.
-			if (subres == MOVE_CANCELLED || !isok(cc.x, cc.y))
+			if (!isok(cc.x, cc.y))
 				return res;
 		}
 	    if ((otmp = level.objects[cc.x][cc.y]) != 0) {
