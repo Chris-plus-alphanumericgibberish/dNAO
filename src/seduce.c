@@ -205,6 +205,9 @@ struct monst * mon;
 
 	/* perform effect */
 	seduce_effect(mon, effect);
+	/*Some effects result in theft, some thefts result in death!*/
+	if(DEADMONSTER(mon))
+		return 1;
 
 	/* knife to the ribs -- Belial, Lilith only */
 	if (mon->mtyp == PM_BELIAL || mon->mtyp == PM_MOTHER_LILITH)
