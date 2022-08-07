@@ -6055,7 +6055,7 @@ int spell;
 
 	if (uarmg) {
 		if(Role_if(PM_MONK)){
-			if(is_hard(uarmg))
+			if(is_hard(uarmg) && uarmg->oartifact != ART_PREMIUM_HEART && uarmg->oartifact != ART_GODHANDS)
 				splcaster += uarmgbon;
 		}
 		else if (is_metallic(uarmg) && !check_oprop(uarmg, OPROP_BRIL)){
