@@ -3867,7 +3867,7 @@ int tary;
 				}
 			}
 		}
-		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0);
+		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0) | ((magr && DEADMONSTER(magr)) ? MM_AGR_DIED : 0);
 
 	case MON_FLARE:
 		if (!(tarx || tary)) {
@@ -3883,7 +3883,7 @@ int tary;
 			explode(tarx, tary, AD_PHYS, MON_EXPLODE, dmg, EXPL_FROSTY, 2);
 			dmg = 0;
 		}
-		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0);
+		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0) | ((magr && DEADMONSTER(magr)) ? MM_AGR_DIED : 0);
 
 	case PRISMATIC_SPRAY:
 		if (!(tarx || tary)) {
@@ -3918,6 +3918,7 @@ int tary;
 				}
 			}
 		}
+		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0) | ((magr && DEADMONSTER(magr)) ? MM_AGR_DIED : 0);
 
 //////////////////////////////////////////////////////////////////////////////////////
 // CLOUDS
