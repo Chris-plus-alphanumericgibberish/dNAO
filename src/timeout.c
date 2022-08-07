@@ -2984,7 +2984,7 @@ run_timers()
      * any time.  The list is ordered, we are done when the first element
      * is in the future.
      */
-    while (timer_base && timer_base->timeout <= monstermoves) {
+    while (timer_base && timer_base->timeout <= monstermoves && timer_base != timer_paused) {
 		curr = timer_base;
 		timer_base = curr->next;
 		rem_locchain_tm(curr, owner_tm(curr->kind, curr->arg));
