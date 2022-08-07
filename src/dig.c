@@ -1873,6 +1873,11 @@ struct obj *obj;
 	    if (!wield_tool(obj, "swing")) return MOVE_CANCELLED;
 	    else res = MOVE_STANDARD;
 	}
+	if(Straitjacketed){
+		//Tool: axe or pickaxe
+		You("can't swing a tool while your %s are bound!", makeplural(body_part(ARM)));
+		return MOVE_CANCELLED;
+	}
 	ispick = is_pick(obj);
 	verb = ispick ? "dig" : "chop";
 

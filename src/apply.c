@@ -3966,6 +3966,10 @@ struct obj *obj;
 	if (!wield_tool(obj, "lash")) return MOVE_CANCELLED;
 	else res = MOVE_STANDARD;
     }
+	if(Straitjacketed){
+		You("can't snap a whip while your %s are bound!", makeplural(body_part(ARM)));
+		return MOVE_CANCELLED;
+	}
     if (!getdir((char *)0)) return res;
 
 	if(obj->otyp == FORCE_WHIP && !u.dx && !u.dy && !u.dz){
@@ -4227,6 +4231,10 @@ struct obj *obj;
 		if (!wield_tool(obj, "nunchaku")) return MOVE_CANCELLED;
 		else res = Role_if(PM_MONK) ? MOVE_PARTIAL : MOVE_STANDARD;
     }
+	if(Straitjacketed){
+		You("can't swing nunchaku while your %s are bound!", makeplural(body_part(ARM)));
+		return MOVE_CANCELLED;
+	}
 
 	if (!getdir((char *)0)) return res;
 	else res = Role_if(PM_MONK) ? MOVE_PARTIAL : MOVE_STANDARD;
@@ -4481,6 +4489,10 @@ coord *ccp;
 	    if (!wield_tool(obj, "swing")) return MOVE_CANCELLED;
 	    else res = MOVE_STANDARD;
 	}
+	if(Straitjacketed){
+		You("can't swing a polearm while your %s are bound!", makeplural(body_part(ARM)));
+		return MOVE_CANCELLED;
+	}
      /* assert(obj == uwep); */
 
 	/* Prompt for a location */
@@ -4630,6 +4642,10 @@ use_grapple (obj)
 	    if (!wield_tool(obj, "cast")) return MOVE_CANCELLED;
 	    else res = MOVE_STANDARD;
 	}
+	if(Straitjacketed){
+		You("can't cast a grappling hook while your %s are bound!", makeplural(body_part(ARM)));
+		return MOVE_CANCELLED;
+	}
      /* assert(obj == uwep); */
 
 	/* Prompt for a location */
@@ -4753,6 +4769,10 @@ use_crook (obj)
 	if (obj != uwep) {
 	    if (!wield_tool(obj, "hook")) return MOVE_CANCELLED;
 	    else res = MOVE_STANDARD;
+	}
+	if(Straitjacketed){
+		You("can't use a shepherd's crook while your %s are bound!", makeplural(body_part(ARM)));
+		return MOVE_CANCELLED;
 	}
      /* assert(obj == uwep); */
 

@@ -502,6 +502,12 @@ const char *verb;	/* "rub",&c */
 	}
 	return FALSE;
     }
+	if(Straitjacketed){
+	    pline(
+	     "Since your %s are trapped in a straitjacket, you cannot %s %s %s.",
+		  makeplural(body_part(HAND)), verb, more_than_1 ? "those" : "that", xname(obj));
+		return FALSE;
+	}
     if (you_cantwield(youracedata)) {
 	You_cant("hold %s strongly enough.", more_than_1 ? "them" : "it");
 	return FALSE;
