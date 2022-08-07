@@ -938,19 +938,20 @@ yellow_smite()
 			}
 			losehp(dmg, "the yellow death", KILLED_BY);
 		break;
-		case 7:
+		case 7:{
 			//buff monsters
-			for(magr = fmon; magr; magr = magr->nmon){
-				if(magr->mpeaceful
-					|| imprisoned(magr)
-					|| magr->msleeping
-					|| !magr->mcanmove
-					|| !(magr->mstrategy & STRAT_WAITMASK)
+			for(struct monst *mon = fmon; mon; mon = mon->nmon){
+				if(mon->mpeaceful
+					|| imprisoned(mon)
+					|| mon->msleeping
+					|| !mon->mcanmove
+					|| DEADMONSTER(mon)
+					|| !(mon->mstrategy & STRAT_WAITMASK)
 				)
 					continue;
-				magr->encouraged += 5;
+				mon->encouraged += 5;
 			}
-		break;
+		}break;
 		case 8:
 			//poison (Con)
 			cast_spell(magr, &youmonst, &attkbuff, MON_POISON_GAS, u.ux, u.uy);
