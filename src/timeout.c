@@ -2692,7 +2692,9 @@ STATIC_DCL void FDECL(rem_procchain_tm, (timer_element *));
 STATIC_DCL void FDECL(rem_locchain_tm, (timer_element *, timer_element **));
 
 /* ordered timer list */
-static timer_element *timer_base;		/* "active" */
+static timer_element *timer_base;		/* head of timer procchain */
+static timer_element *timer_paused;		/* helper pointer to first paused/migrating timer in procchain */
+static timer_element *timer_last;		/* last timer in procchain */
 static unsigned long timer_id = 1;
 
 
@@ -2879,16 +2881,32 @@ timer_element * tm;
 			return;
 		}
 	}
-	/* insert in ordered place in processing loop */
-    for (prev = 0, curr = timer_base; curr; prev = curr, curr = curr->next)
+
+	/* insert into procchain */
+	if (tm->timerflags & (TIMERFLAG_PAUSED | TIMERFLAG_MIGRATING)) {
+		/* timer is not executable, goes on very end, order independent */
+		prev = timer_last;
+		curr = (timer_element *)0;
+		if (!timer_paused)
+			timer_paused = tm;
+	}
+	else
 	{
-		if (curr->timeout >= tm->timeout) break;
+		/* insert in ordered place in processing loop */
+		for (prev = 0, curr = timer_base; curr && curr != timer_paused; prev = curr, curr = curr->next)
+		{
+			if (curr->timeout >= tm->timeout) break;
+		}
 	}
     tm->next = curr;
+
     if (prev)
-	prev->next = tm;
+		prev->next = tm;
     else
-	timer_base = tm;
+		timer_base = tm;
+
+	if (!curr)
+		timer_last = tm;
 	return;
 }
 
@@ -2902,15 +2920,31 @@ timer_element * tm;
 
 	if (timer_base == tm) {
 		timer_base = tm->next;
+		if (timer_paused == tm)
+			timer_paused = tm->next;
+		if (!tm->next)
+			timer_last = timer_base;
 		return;
 	}
 	else for (tmtmp = timer_base; tmtmp; tmtmp = tmtmp->next) {
 		if (tmtmp->next == tm) {
 			tmtmp->next = tm->next;
+			if (timer_paused == tm)
+				timer_paused = tm->next;
+			if (!tm->next)
+				timer_last = tmtmp;
 			return;
 		}
 	}
 	return;
+}
+/* removes and readds a timer from the procchain, so that it is in the correct place */
+void
+adj_procchain_tm(tm)
+timer_element * tm;
+{
+	rem_procchain_tm(tm);
+	add_procchain_tm(tm);
 }
 
 /* removes a timer from a local chain */
@@ -3037,6 +3071,26 @@ timer_element * tm;
 	}
 }
 
+/* temporarily pause processing of a single timer */
+void
+pause_timer(tm)
+timer_element * tm;
+{
+	tm->timeout = tm->timeout - monstermoves;
+	tm->timerflags |= TIMERFLAG_PAUSED;
+	adj_procchain_tm(tm);
+}
+/* resume processing of a single timer */
+void
+resume_timer(tm)
+timer_element * tm;
+{
+	tm->timeout = tm->timeout + monstermoves;
+	tm->timerflags &= ~TIMERFLAG_PAUSED;
+	adj_procchain_tm(tm);
+	flags.run_timers = TRUE;
+}
+
 /* temporarily pause processing of all timers on chain until it they are resumed */
 void
 pause_timers(tm)
@@ -3044,7 +3098,7 @@ timer_element * tm;
 {
 	timer_element *curr;
 	for (curr = tm; curr; curr = tm->tnxt)
-		rem_procchain_tm(curr);
+		pause_timer(curr);
 }
 
 /* resume processing of all timers on chain */
@@ -3054,9 +3108,33 @@ timer_element * tm;
 {
 	timer_element *curr;
 	for (curr = tm; curr; curr = tm->tnxt)
-		add_procchain_tm(curr);
-	/* catch up with lost time */
-	run_timers();
+		resume_timer(curr);
+}
+
+/* set all timers on chain as migrating (do not execute) */
+void
+migrate_timers(tm)
+timer_element * tm;
+{
+	timer_element *curr;
+	for (curr = tm; curr; curr = tm->tnxt)
+	{
+		curr->timerflags |= TIMERFLAG_MIGRATING;
+		adj_procchain_tm(curr);
+	}
+}
+/* resume handling of migrating timers on chain */
+void
+receive_timers(tm)
+timer_element * tm;
+{
+	timer_element *curr;
+	for (curr = tm; curr; curr = tm->tnxt)
+	{
+		curr->timerflags &= ~TIMERFLAG_MIGRATING;
+		adj_procchain_tm(curr);
+	}
+	flags.run_timers = TRUE;
 }
 
 void

@@ -547,7 +547,7 @@ boolean with_you;
 		}
 	}
 	/* now that it's placed, we can resume timers (which may kill mtmp) */
-	resume_timers(mtmp->timed);
+	receive_timers(mtmp->timed);
 }
 
 /* heal monster for time spent elsewhere */
@@ -921,7 +921,7 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	summoner_gone(mtmp, TRUE);
 
 	/* timers pause processing while mon is migrating */
-	pause_timers(mtmp->timed);
+	migrate_timers(mtmp->timed);
 
 	relmon(mtmp);
 	mtmp->nmon = migrating_mons;
