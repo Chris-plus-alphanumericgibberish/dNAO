@@ -918,10 +918,11 @@ yellow_smite()
 				if (!Antimagic && (rn2(20) > 12)) {
 					if (Hallucination) {
 						You("have an out of body experience.");
+						dmg = 0;
 					}
 					else if (*hp(&youmonst) >= 100){
 						Your("%s stops!  When it finally beats again, it is weak and thready.", body_part(HEART));
-						*hp(&youmonst) -= d(8, 8);
+						dmg = d(8, 8);
 					}
 					else {
 						killer_format = KILLED_BY_AN;
