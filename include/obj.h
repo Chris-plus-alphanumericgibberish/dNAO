@@ -759,6 +759,7 @@ struct obj {
 #define is_monk_weapon(otmp)	((otmp)->oclass == WEAPON_CLASS && (\
 			 (otmp)->otyp == QUARTERSTAFF\
 			 || (otmp)->otyp == KHAKKHARA\
+			 || (otmp)->otyp == DOUBLE_SWORD\
 			 || (otmp)->otyp == CHAKRAM\
 			 || (otmp)->otyp == SET_OF_CROW_TALONS\
 			 || (otmp)->otyp == NUNCHAKU\

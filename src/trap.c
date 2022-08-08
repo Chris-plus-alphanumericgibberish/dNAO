@@ -314,7 +314,7 @@ register int x, y, typ;
 
 		case DART_TRAP:
 		case ARROW_TRAP:
-			otmp = mksobj((typ == ARROW_TRAP ? ARROW : DART), NO_MKOBJ_FLAGS);
+			otmp = mksobj(((Role_if(PM_MONK) && In_quest(&u.uz)) ? SHURIKEN : typ == ARROW_TRAP ? ARROW : DART), NO_MKOBJ_FLAGS);
 			otmp->quan = 15 + rnd(20);
 			// material special cases: role quests
 			if (In_quest(&u.uz))

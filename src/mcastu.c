@@ -490,7 +490,7 @@ unsigned int type;
 	
        case PM_GRAND_MASTER:
        case PM_MASTER_KAEN:
-          return (rn2(2) ? WEAKEN_YOU : EARTHQUAKE);
+          return (!rn2(3) ? MON_AURA_BOLT : rn2(2) ? WEAKEN_YOU : EARTHQUAKE);
 
        case PM_MINION_OF_HUHETOTL:
            return (rn2(2) ? CURSE_ITEMS : (rn2(2) ? DESTRY_WEPN : DROP_BOULDER));
@@ -1776,6 +1776,8 @@ const char * spellname[] =
 	"STARFALL",
 	//85
 	"EARTH_CRACK",
+	"AURA_BOLT",
+	"RAIN",
 };
 
 
@@ -2599,6 +2601,7 @@ int tary;
 	case LIGHTNING_BOLT:
 	case SLEEP:
 	case DISINT_RAY:
+	case MON_AURA_BOLT:
 		/* these are allowed to miss */
 		if (!mdef) {
 			impossible("ray spell with no mdef?");
@@ -2617,6 +2620,41 @@ int tary;
 			case LIGHTNING_BOLT:	alt_attk.adtyp = AD_ELEC; break;
 			case SLEEP:				alt_attk.adtyp = AD_SLEE; break;
 			case DISINT_RAY:		alt_attk.adtyp = AD_DISN; break;
+			case MON_AURA_BOLT:
+				if(youagr){
+					if(u.ualign.record < -3){
+						alt_attk.damn = 0;
+						alt_attk.damd = min(alt_attk.damd, 4);
+						alt_attk.adtyp = AD_UNHY;
+					}
+					else if(u.ualign.record > 3){
+						alt_attk.damn = 0;
+						alt_attk.damd = min(alt_attk.damd, 4);
+						alt_attk.adtyp = AD_HOLY; 
+					}
+					else
+						return MM_MISS;
+				}
+				else if(magr->mtyp == PM_GRAND_MASTER){
+					alt_attk.damd = 4;
+					alt_attk.adtyp = AD_HOLY;
+				}
+				else if(magr->mtyp == PM_MASTER_KAEN){
+					alt_attk.damn = 0;
+					alt_attk.damd = 4;
+					alt_attk.adtyp = AD_UNHY; 
+				}
+				else if(is_unholy_mon(magr)){
+					alt_attk.damn = 0;
+					alt_attk.damd = min(alt_attk.damd, 4);
+					alt_attk.adtyp = AD_UNHY; 
+				}
+				else {
+					alt_attk.damn = 0;
+					alt_attk.damd = min(alt_attk.damd, 4);
+					alt_attk.adtyp = AD_HOLY; 
+				}
+			break;
 			}
 			return elemspell(magr, mdef, &alt_attk, tarx, tary);
 		}
@@ -2942,6 +2980,41 @@ int tary;
 				}
 			}
 			/* TODO: corrode floor objects */
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case RAIN:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("rain with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("A torrent of water rains down on %s!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+
+			struct obj * helm = (youdef ? uarmh : which_armor(mdef, W_ARMH));
+
+			if (helm && is_wide_helm(helm)) {
+				dmg = 0;
+				if (youagr || youdef || canseemon(mdef)) {
+					pline("It runs off the brim of %s %s.",
+						youdef ? "your" : s_suffix(mon_nam(mdef)),
+						OBJ_DESCR(objects[helm->otyp]));
+				}
+			}
+			else {
+				/* check resistance and override damage */
+				dmg = flaming(mdef->data) ? d(8, 6) : 0;
+				if (!dmg) {
+					if (youdef)
+						pline("It feels mildly uncomfortable.");
+				}
+				water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
+			}
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -5512,6 +5585,7 @@ int spellnum;
 	case FIRE_PILLAR:
 	case GEYSER:
 	case ACID_RAIN:
+	case RAIN:
 	case HAIL_FLURY:
 	case ICE_STORM:
 	case DEATH_TOUCH:
@@ -5527,6 +5601,7 @@ int spellnum;
 	case DROP_BOULDER:
 	case DISINT_RAY:
 	case STARFALL:
+	case MON_AURA_BOLT:
 		return TRUE;
 	default:
 		break;
@@ -5561,6 +5636,7 @@ int spellnum;
 	case LIGHTNING_BOLT:
 	case SLEEP:
 	case DISINT_RAY:
+	case MON_AURA_BOLT:
 		return TRUE;
 	default:
 		break;
@@ -5758,7 +5834,7 @@ int tary;
 //////////////////////////////////////////////////////////////////////////////////////
 
 	/* ray attack when monster isn't lined up */
-	if ((spellnum == MAGIC_MISSILE || spellnum == SLEEP || spellnum == CONE_OF_COLD || spellnum == LIGHTNING_BOLT || spellnum == DISINT_RAY)
+	if ((spellnum == MAGIC_MISSILE || spellnum == SLEEP || spellnum == CONE_OF_COLD || spellnum == LIGHTNING_BOLT || spellnum == MON_AURA_BOLT || spellnum == DISINT_RAY)
 		&& !clearline)
 		return TRUE;
 
@@ -5925,7 +6001,7 @@ int tary;
 	if ((youdef ? Reflecting : mon_resistance(mdef, REFLECTING)) && (
 		spellnum == MAGIC_MISSILE || spellnum == SLEEP ||
 		spellnum == CONE_OF_COLD || spellnum == LIGHTNING ||
-		spellnum == LIGHTNING_BOLT
+		spellnum == LIGHTNING_BOLT || spellnum == MON_AURA_BOLT
 		))
 		return TRUE;
 	/* Elemental Resistances */

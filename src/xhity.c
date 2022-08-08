@@ -1949,7 +1949,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 	if(!by_the_book && 
-		(pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN)
+		(pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN || pa->mtyp == PM_XUENU_MONK)
 	){
 		// first index -- determine if using the alternate attack set (one seduction attack)
 		if (*indexnum == 0){
@@ -1961,9 +1961,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				if(pd && (!(dmgtype(pd, AD_SEDU)
 					|| dmgtype(pd, AD_SSEX)
 					|| dmgtype(pd, AD_LSEX)
-					|| magr->mcan 
-					|| engring
-					|| Chastity
+					|| !could_seduce(magr,mdef,attk)
 					|| !(uarm || uarmu || uarmh || uarmg || uarmf || uarmc || uwep || uswapwep)
 				))){
 					*subout |= SUBOUT_GOATSPWN;
@@ -1972,11 +1970,14 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					attk->damn = 0;
 					attk->damd = 0;
 				}
+				else if(attk->adtyp == AD_SEDU)
+					GETNEXT;
 			} else {
 				if(pd && (!(dmgtype(pd, AD_SEDU)
 					|| dmgtype(pd, AD_SSEX)
 					|| dmgtype(pd, AD_LSEX)
 					|| magr->mcan 
+					|| !(mdef && could_seduce(magr,mdef,attk))
 					|| (mdef && !(which_armor(mdef, W_ARM) || which_armor(mdef, W_ARMU) || which_armor(mdef, W_ARMH) || 
 						 which_armor(mdef, W_ARMG) || which_armor(mdef, W_ARMF) || which_armor(mdef, W_ARMC) ||
 						 MON_WEP(mdef) || MON_SWEP(mdef)
@@ -1988,6 +1989,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					attk->damn = 0;
 					attk->damd = 0;
 				}
+				else if(attk->adtyp == AD_SEDU)
+					GETNEXT;
 			}
 		}
 		else if (*subout&SUBOUT_GOATSPWN){
@@ -6927,7 +6930,7 @@ boolean ranged;
 	case AD_SSEX:
 #endif
 	{
-		boolean goatspawn = (pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN || pa->mtyp == PM_BLESSED);
+		boolean goatspawn = (pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN || pa->mtyp == PM_BLESSED || pa->mtyp == PM_XUENU_MONK);
 		boolean noflee = (magr->isshk && magr->mpeaceful);
 		/* make physical attack */
 		alt_attk.adtyp = AD_PHYS;
@@ -13006,9 +13009,11 @@ int vis;						/* True if action is at all visible to the player */
 	{
 	case W_ARMG:
 		otmp = (youagr ? uarmg : which_armor(magr, slot));
+		unarmed_punch = TRUE;
 		break;
 	case W_ARMF:
 		otmp = (youagr ? uarmf : which_armor(magr, slot));
+		unarmed_kick = TRUE;
 		break;
 	case W_ARMH:
 		otmp = (youagr ? uarmh : which_armor(magr, slot));

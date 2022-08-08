@@ -3081,6 +3081,13 @@ int n;	/* number to try to fire */
 		qvr->quan = 1;
 		qvr->opoisoned = (OPOISON_PARAL);
 		break;
+	case AD_POSN:
+		ammo_type = SPIKE;
+		qvr = mksobj(ammo_type, MKOBJ_NOINIT);
+		set_material_gm(qvr, BONE);
+		qvr->quan = 1;
+		qvr->opoisoned = !rn2(20) ? OPOISON_FILTH : OPOISON_BASIC;
+		break;
 	case AD_SOLR:
 		ammo_type = SILVER_ARROW;
 		qvr = mksobj(ammo_type, NO_MKOBJ_FLAGS);

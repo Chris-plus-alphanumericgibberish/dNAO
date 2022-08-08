@@ -550,6 +550,26 @@ qt_montype()
 		if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
 			return (&mons[qpm]);
 		return (mkclass(S_DEMON, G_HELL));
+	} else if(Role_if(PM_MONK)){
+		int qpm;
+		int monks_of_kaen[] = {PM_XORN_MONK, PM_DAO_LAO_GUI_MONK, PM_ZHI_REN_MONK, PM_XUENU_MONK};
+		if(rn2(3)){
+			qpm = rn2(3) ? PM_TERRACOTTA_SOLDIER : PM_EARTH_ELEMENTAL;
+			if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+				return (&mons[qpm]);
+			return (mkclass(S_ELEMENTAL, G_NOHELL));
+		}
+		if(rn2(2)){
+			qpm = PM_XORN;
+			if (qpm != NON_PM && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+				return (&mons[qpm]);
+			//Fall through in this (impossible?) case
+		}
+		qpm = ROLL_FROM(monks_of_kaen);
+		if (qpm != NON_PM && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+			return (&mons[qpm]);
+		//Should be impossible:
+		return (mkclass(S_YETI, G_NOHELL));
 	} else if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend
 		&& ((Is_qlocate(&u.uz) && rn2(2)) || (u.uz.dlevel < qlocate_level.dlevel))
 	){

@@ -276,6 +276,7 @@
 #define MA_PRIMORDIAL	0x02000000L	/* is an ancient race */
 #define MA_ET			0x04000000L	/* is an alien race */
 #define MA_G_O_O		0x08000000L	/* is a Great Old One */
+#define MA_XORN			0x10000000L	/* is a Xorn */
 
 #define MZ_TINY		0		/* < 2' */
 #define MZ_SMALL	1		/* 2-4' */
@@ -423,8 +424,10 @@
 #define STARFALL               MON_CANCEL+1
 //85
 #define EARTH_CRACK            STARFALL+1
+#define MON_AURA_BOLT          EARTH_CRACK+1
+#define RAIN                   MON_AURA_BOLT+1
 
-#define MON_LASTSPELL          EARTH_CRACK
+#define MON_LASTSPELL          RAIN
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

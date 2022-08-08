@@ -5924,6 +5924,8 @@ struct monst *magr;
 	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6};
 	struct permonst *pa;
 	int spellnum = 0;
+	int range = magr->mtyp == PM_DAO_LAO_GUI_MONK ? 2 : BOLT_LIM;
+	boolean frequency_decrease = TRUE;
 	
 	pa = youagr ? youracedata : magr->data;
 
@@ -5943,6 +5945,10 @@ struct monst *magr;
 	else if(pa->mtyp == PM_MOONSHADOW){
 		spellnum = STARFALL;
 	}
+	else if(pa->mtyp == PM_DAO_LAO_GUI_MONK){
+		spellnum = rn2(3) ? RAIN : rn2(3) ? LIGHTNING : HAIL_FLURY;
+		frequency_decrease = FALSE;
+	}
 	else {
 		spellnum = ACID_RAIN;
 	}
@@ -5960,7 +5966,7 @@ struct monst *magr;
 		if(!youagr && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(distmin(x(magr), y(magr), x(mdef), y(mdef)) > BOLT_LIM)
+		if(distmin(x(magr), y(magr), x(mdef), y(mdef)) > range)
 			continue;
 
 		if(youagr && !canspotmon(mdef))
@@ -5971,17 +5977,19 @@ struct monst *magr;
 		if(onscary(mdef->mx, mdef->my, magr))
 			continue;
 
-		if(rn2(4) || (mlev(magr) < 30 && rn2(31-mlev(magr)))) //Storm attacks grow more likely as the moster grows more powerful.
+		if(!rn2(4) || (frequency_decrease && mlev(magr) < 30 && rn2(31-mlev(magr)))) //Storm attacks grow more likely as the moster grows more powerful.
 			continue;
 
 		cast_spell(magr, mdef, &attkbuff, spellnum, x(mdef), y(mdef));
 	}
+
 	if(!magr->mpeaceful && mon_can_see_you(magr)
-		&& distmin(x(magr), y(magr), u.ux, u.uy) <= BOLT_LIM
+		&& distmin(x(magr), y(magr), u.ux, u.uy) <= range
 		&& !onscary(u.ux, u.uy, magr)
-		&& !(rn2(4) || (mlev(magr) < 30 && rn2(31-mlev(magr))))
-	)
+		&& !(!rn2(4) || (frequency_decrease && mlev(magr) < 30 && rn2(31-mlev(magr))))
+	){
 		cast_spell(magr, &youmonst, &attkbuff, spellnum, u.ux, u.uy);
+	}
 
 }
 

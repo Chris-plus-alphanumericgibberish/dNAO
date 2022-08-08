@@ -1115,6 +1115,11 @@ register struct monst *mtmp;
 				obj = mksobj_at(SCR_BLANK_PAPER, x, y, NO_MKOBJ_FLAGS);
 			rem_mx(mtmp, MX_ENAM);
 		break;
+		case PM_ZHI_REN_MONK:
+			obj = mksobj_at(rn2(20) ? SCR_BLANK_PAPER : EFFIGY, x, y, NO_MKOBJ_FLAGS);
+			if(obj) set_material_gm(obj, PAPER);
+			rem_mx(mtmp, MX_ENAM);
+		break;
 	    case PM_STRAW_GOLEM:
 		if(!rn2(10)) mksobj_at(SEDGE_HAT, x, y, MKOBJ_NOINIT);
 		obj = mksobj_at(SHEAF_OF_HAY, x, y, MKOBJ_NOINIT);

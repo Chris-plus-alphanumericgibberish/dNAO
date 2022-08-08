@@ -2908,6 +2908,8 @@ int
 hd_size(ptr)
 struct permonst *ptr;
 {
+	if(ptr->mtyp == PM_ZHI_REN_MONK)
+		return 4;
 	return 8;
 	
 	// switch(ptr->msize){

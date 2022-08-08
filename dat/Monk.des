@@ -11,91 +11,82 @@
 MAZE: "Mon-strt",' '
 FLAGS: noteleport,hardfloor
 GEOMETRY:center,center
+#         1         2         3         4         5         6         7 
+#123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG------------------------------------ GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|................|.....|.....|.....| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|..------------..|--+-----+-----+--| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|..|..........|..|.................| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|..|..........|..|+---+---+-----+--| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGG---..|..........|......|...|...|.....| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGG+....|..........+......|...|...|.....| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGG+....|..........+......|...|...|.....| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGG---..|..........|......|...|...|.....| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|..|..........|..|+-----+---+---+--| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|..|..........|..|.................| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|..------------..|--+-----+-----+--| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG|................|.....|.....|.....| GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGG------------------------------------ GGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+          TGGGGGGGGGGGGGGGGG           GGGGGGT                              
+        GTTGGGGGGGGGGGGGGGGGGG   GGGGGGGGGGGGGT                             
+      GGGGGGGGGGGGGGGGGGGGGGGGG GGGGGGGGGGGGGG                              
+      GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG                              
+       GGGGGGGGGG-----------------------GGGGGG                              
+       GGGGGGGGGG|............|........|GGGGGG                              
+       GGGGGGGGGG|............|........|GGGGGGGT                            
+      GGGGGGGGGGG|............+........+GGGGGGGGGG                          
+      GGGGGGGGGGG|............|........|GGGGGGGGGGGG                        
+     GGGGGGGGGGGG|............|........|GGGGGGGGGGGGGG                      
+      GGGGGGGGGGG|------+-----|........|GG   GGGGGGGGGGGGGGGG               
+      GGGGGGGGGGG|.....|.|....|........|GG    GGGGGGGGGGGGGGGGGGGGG         
+       GGGGGGGGGG|.....+.+....|---+----|GG      GGGGGGGGGGGGGGGGGGGGGGG     
+       GGGGGGGGGG|.....|.|....|........|GG       GGGGGGGGGGGGGGGGGGGGGGG    
+        GGGGGGGGG|.....|.|....|........|GG                  GGGGGGGGGGGG    
+       GGGGGGGTGG-----------------------GG                    GGGGGGGGGG    
+     GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG                      GGGGGGGG    
+  GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG                       GGGGGGG   
+   GGGGGGGGGGGT    GGGGGGGGGGG  GGGGGGGGGGGGT                     GGGGGGGG  
+     GGGGGG            GGGGG        GGGGGGGGGT                   GGGGGG     
 ENDMAP
 # Dungeon Description
 REGION:(00,00,75,19),lit,"ordinary"
-REGION:(24,06,33,13),lit,"temple"
+REGION:(18,05,29,09),lit,"temple"
 # Portal arrival point
-BRANCH:(05,04,05,04),(0,0,0,0)
+BRANCH:(70,17,70,17),(0,0,0,0)
 # Stairs
-STAIR:(52,09),down
-# Doors
-DOOR:locked,(18,09)
-DOOR:locked,(18,10)
-DOOR:closed,(34,09)
-DOOR:closed,(34,10)
-DOOR:closed,(40,05)
-DOOR:closed,(46,05)
-DOOR:closed,(52,05)
-DOOR:locked,(38,07)
-DOOR:closed,(42,07)
-DOOR:closed,(46,07)
-DOOR:closed,(52,07)
-DOOR:locked,(38,12)
-DOOR:closed,(44,12)
-DOOR:closed,(48,12)
-DOOR:closed,(52,12)
-DOOR:closed,(40,14)
-DOOR:closed,(46,14)
-DOOR:closed,(52,14)
+STAIR:(21,14),down
 # Unattended Altar - unaligned due to conflict - player must align it.
-ALTAR:(28,09),noalign,altar
+ALTAR:(20,07),noalign,altar
+# Doors
+DOOR:broken,(39,07)
+DOOR:broken,(30,07)
+DOOR:broken,(34,12)
+DOOR:closed,(25,12)
+DOOR:closed,(23,12)
+DOOR:closed,(24,10)
 # The Grand Master
-MONSTER:'@',"Grand Master",(28,10)
+MONSTER:'@',"Grand Master",(24,07)
 # No treasure chest!
+
 # guards for the audience chamber
-MONSTER:'@',"abbot",(32,07)
-MONSTER:'@',"abbot",(32,08)
-MONSTER:'@',"abbot",(32,11)
-MONSTER:'@',"abbot",(32,12)
-MONSTER:'@',"abbot",(33,07)
-MONSTER:'@',"abbot",(33,08)
-MONSTER:'@',"abbot",(33,11)
-MONSTER:'@',"abbot",(33,12)
+MONSTER:'@',"abbot",(26,07)
+MONSTER:'@',"abbot",(26,08)
+MONSTER:'@',"abbot",(35,10)
+MONSTER:'@',"abbot",(35,11)
+MONSTER:'@',"abbot",(27,07)
+MONSTER:'@',"abbot",(27,08)
+MONSTER:'@',"abbot",(35,10)
+MONSTER:'@',"abbot",(35,11)
 # Non diggable walls
 NON_DIGGABLE:(00,00,75,19)
 # Random traps
-TRAP:"dart",(20,09)
-TRAP:"dart",(20,10)
+TRAP:"dart",(43,06)
+TRAP:"dart",(43,08)
 TRAP:random,random
 TRAP:random,random
 TRAP:random,random
 TRAP:random,random
 # Monsters on siege duty.
-MONSTER: 'E',"earth elemental",(37,01)
-MONSTER: 'E',"earth elemental",(37,18)
-MONSTER: 'E',"earth elemental",(03,03)
-MONSTER: 'E',"earth elemental",(65,04)
+MONSTER: 'E',"terracotta soldier",(37,01)
+MONSTER: 'E',"terracotta soldier",(37,18)
+MONSTER: 'E',"terracotta soldier",(11,03)
+MONSTER: 'E',"terracotta soldier",(44,04)
 MONSTER: 'E',"earth elemental",(12,11)
 MONSTER: 'E',"earth elemental",(60,12)
 MONSTER: 'E',"earth elemental",(14,08)
-MONSTER: 'E',"earth elemental",(55,00)
-MONSTER: 'X',"xorn",(18,18)
+MONSTER: 'E',"earth elemental",(55,11)
+MONSTER: 'X',"xorn",(18,17)
 MONSTER: 'X',"xorn",(59,10)
 MONSTER: 'X',"xorn",(13,09)
-MONSTER: 'X',"xorn",(01,17)
-
+MONSTER: 'X',"xorn",(11,17)
+ 
 #
 #	The "locate" level for the quest.
 #
@@ -105,33 +96,31 @@ MONSTER: 'X',"xorn",(01,17)
 
 MAZE: "Mon-loca",' '
 GEOMETRY:center,center
-#         1         2         3         4         5         6         7 
-#123456789012345678901234567890123456789012345678901234567890123456789012345
+#          1         2         3         4         5         6         7 
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
 0             ----------------------------------------------------   --------
-1           ---.................................................-    --.....|
-2         ---...--------........------........................---     ---...|
-3       ---.....-      --.......-    ----..................----         --.--
-4     ---.....----      ---------       --..................--         --..|
-5   ---...-----                       ----.----.....----.....---      --..||
-6----..----                       -----..---  |...---  |.......---   --...|
-7|...---                       ----....---    |.---    |.........-- --...||
-8|...-                      ----.....---     ----      |..........---....|
-9|...----                ----......---       |         |...|.......-....||
-0|......-----          ---.........-         |     -----...|............|
-1|..........-----   ----...........---       -------......||...........||
-2|..............-----................---     |............|||..........|
-3|-S----...............................---   |...........|| |.........||
-4|.....|--............------.............-----..........||  ||........|
-5|.....| ||..........--    ---.........................||    |.......||
-6|.....|  ||.........-       ---.....................--|     ||......|
-7|---S--------.......----      --.................----        |.....||
-8|...........|..........--------..............-----           ||....|
-9|...........|............................-----                |....|
+1           ---eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-    --eeeee|
+2         ---eee--------eeeeeeee------eeeeeeeeeeeeeeeeeeeeeeee---     ---eee|
+3       ---eeeee-      --eeeeeee-    ----eeeeeeeeeeeeeeeeee----         --e--
+4     ---eeeee----      ---------       --eeeeeeeeeeeeeeeeee--         --ee|
+5   ---eee-----                       ----e----eeeee----eeeee---      --ee||
+6----ee----                       -----ee---  |eee---  |eeeeeee---   --eee|
+7|eee---                       ----eeee---    |e---    |eeeeeeeee-- --eee||
+8|eee-                      ----eeeee---     ----      |eeeeeeeeee---eeee|
+9|eee----                ----eeeeee---       |         |eee|eeeeeee-eeee||
+0|eeeeee-----          ---eeeeeeeee-         |     -----eee|eeeeeeeeeeee|
+1|eeeeeeeeee-----   ----eeeeeeeeeee---       -------eeeeee||eeeeeeeeeee||
+2|eeeeeeeeeeeeee-----eeeeeeeeeeeeeeee---     |eeeeeeeeeeee|||eeeeeeeeee|
+3|-S----eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee---   |eeeeeeeeeee|| |eeeeeeeee||
+4|.....|--eeeeeeeeeeee------eeeeeeeeeeeee-----eeeeeeeeee||  ||eeeeeeee|
+5|.....| ||eeeeeeeeee--    ---eeeeeeeeeeeeeeeeeeeeeeeee||    |eeeeeee||
+6|.....|  ||eeeeeeeee-       ---eeeeeeeeeeeeeeeeeeeee--|     ||eeeeee|
+7|---S--------eeeeeee----      --eeeeeeeeeeeeeeeee----        |eeeee||
+8|...........|eeeeeeeeee--------eeeeeeeeeeeeee-----           ||eeee|
+9|...........|eeeeeeeeeeeeeeeeeeeeeeeeeeee-----                |eeee|
 0------------------------------------------                    ------
 ENDMAP
-# Random Monsters
-RANDOM_MONSTERS: 'E', 'X'
 # Dungeon Description
 REGION:(00,00,75,20),lit,"ordinary"
 # Stairs
@@ -170,23 +159,23 @@ TRAP:random,random
 TRAP:random,random
 TRAP:random,random
 # Random monsters.
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
 MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'X',"xorn",random
-MONSTER: 'X',"xorn",random
-MONSTER: 'X',"xorn",random
+MONSTER: 'X',"xorn monk",random
+MONSTER: 'X',"xorn monk",random
+MONSTER: 'X',"xorn monk",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
@@ -203,42 +192,31 @@ MONSTER: 'X',"xorn",random
 #
 
 MAZE: "Mon-goal", ' '
-INIT_MAP: 'L' , '.' , false , false , unlit , false
 GEOMETRY:center,center
+#         1         2         3         4         5         6         7 
+#123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
-.L......L.LLL.......LL....
-.LLL.......L......LL......
-LL.LL.............L.LL....
-..........................
-......................LL..
-......................LLL.
-LL........................
-.LL.......................
-.LL................LL.L...
-..LL.....L.LL.......LLL...
-.........LLL.........L....
+                                   ||-------------------------|             
+                                  ||...L...L....L..L..L..L....||            
+                 ||----------------.....L....L....L.....L..L...||           
+                ||                 ..L.....L...L.||.L.L..L....L.||          
+               ||                  ....L.L..L....||....L....L....||         
+              ||                 ||.L..........L....L....L......L.||        
+             ||                  ||..L.L..........L....L..L...L....------|| 
+             |                     ..........LL...........................||
+             |                     ......L..LLLL...L..L....L...L...L..L....|
+             |                   ||..L..L..LLLLLL....L..L.......L......L...|
+             |                   ||...L....LLLLLL..L....L.L...L...L..L.....|
+             |                     .....L.L.LLLL.L...L...L......L......L...|
+             |                     ..........LL...........................||
+             ||                  ||...L...........L....L.L.........------|| 
+              ||                 ||....L...L...L...L.L...L...L....||        
+               ||                  ..L...L.......||...L.......L..||         
+                ||                 ....L.....L.L.||.L..L..L.....||          
+                 ||----------------...L..L.L...L...L........L..||           
+                                  ||....L.....L..L....L..L....||            
+                                   ||-------------------------|             
 ENDMAP
-# Dungeon Description
-RANDOM_PLACES:(14,04),(13,07)
-REGION:(00,00,25,10),unlit,"ordinary"
-# Stairs
-STAIR:(20,05),up
-# Objects
-OBJECT:'(',"lenses",place[0],blessed,0,"The Eyes of the Overworld"
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
 # Random traps
 TRAP:"fire",random
 TRAP:"fire",random
@@ -246,18 +224,33 @@ TRAP:"fire",random
 TRAP:"fire",random
 TRAP:random,random
 TRAP:random,random
+
+# Objects
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+
 # Random monsters.
-MONSTER:'@',"Master Kaen",place[0]
-ALTAR:place[0],noalign,altar
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
-MONSTER: 'E',"earth elemental",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"terracotta soldier",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
@@ -267,6 +260,80 @@ MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7 
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0                                   ||-------------------------|             
+1                                  ||...L...L....L..L..L..L....||            
+2                 ||----------------.....L....L....L.....L..L...||           
+3                ||................S..L.....L...L.||.L.L..L....L.||          
+4               ||.................S....L.L..L....||....L....L....||         
+5              ||.................||.L..........L....L....L......L.||        
+6             ||..................||..L.L..........L....L..L...L....------|| 
+7             |....................S..........LL...........................||
+8             |....................S......L..LLLL...L..L....L...L...L..L....|
+9             |...................||..L..L..LLLLLL....L..L.......L......L...|
+0             |...................||...L....LLLLLL..L....L.L...L...L..L.....|
+1             |....................S.....L.L.LLLL.L...L...L......L......L...|
+2             |....................S..........LL...........................||
+3             ||..................||...L...........L....L.L.........------|| 
+4              ||.................||....L...L...L...L.L...L...L....||        
+5               ||.................S..L...L.......||...L.......L..||         
+6                ||................S....L.....L.L.||.L..L..L.....||          
+7                 ||----------------...L..L.L...L...L........L..||           
+8                                  ||....L.....L..L....L..L....||            
+9                                   ||-------------------------|             
+ENDMAP
+# Dungeon Description
+REGION:(00,00,75,19),lit,"ordinary"
+# Stairs
+STAIR:(73,09),up
+# Altars
+ALTAR:(20,09),chaos,altar
+# Objects
+OBJECT:'(',"lenses",(20,09),blessed,0,"The Eyes of the Overworld"
+# Kaen.
+MONSTER:'@',"Master Kaen",(20,10)
+
+MONSTER:'X',"xorn monk",(24,11)
+MONSTER:'X',"xorn monk",(25,11)
+MONSTER:'X',"xorn monk",(26,11)
+MONSTER:'X',"xorn monk",(27,11)
+MONSTER:'X',"xorn",(28,11), asleep
+MONSTER:'X',"xorn",(29,11), asleep
+MONSTER:'X',"xorn",(30,11), asleep
+MONSTER:'X',"xorn",(31,11), asleep
+MONSTER:'X',"xorn",(32,11), asleep
+MONSTER:'X',"xorn",(33,11), asleep
+
+MONSTER:'Z',"dao lao gui monk",(24,04)
+MONSTER:'Z',"dao lao gui monk",(26,04)
+MONSTER:'Z',"dao lao gui monk",(28,04)
+MONSTER:'Z',"dao lao gui monk",(30,04)
+MONSTER:'Z',"dao lao gui monk",(32,04)
+
+MONSTER:'\'',"zhi ren monk",(24,15)
+MONSTER:'\'',"zhi ren monk",(25,15)
+MONSTER:'\'',"zhi ren monk",(26,15)
+MONSTER:'\'',"zhi ren monk",(27,15)
+MONSTER:'\'',"zhi ren monk",(28,15)
+MONSTER:'\'',"zhi ren monk",(29,15)
+MONSTER:'\'',"zhi ren monk",(30,15)
+MONSTER:'\'',"zhi ren monk",(31,15)
+MONSTER:'\'',"zhi ren monk",(32,15)
+MONSTER:'\'',"zhi ren monk",(33,15)
+
+MONSTER:'n',"xuenu monk",(24,08)
+MONSTER:'n',"xuenu monk",(25,08)
+MONSTER:'n',"xuenu monk",(26,08)
+MONSTER:'n',"xuenu monk",(27,08)
+MONSTER:'n',"yuki-onna",(28,08), asleep
+MONSTER:'n',"yuki-onna",(29,08), asleep
+MONSTER:'n',"yuki-onna",(30,08), asleep
+MONSTER:'n',"yuki-onna",(31,08), asleep
+MONSTER:'n',"yuki-onna",(32,08), asleep
+MONSTER:'n',"yuki-onna",(33,08), asleep
 
 #
 #	The "fill" levels for the quest.
@@ -277,66 +344,55 @@ MONSTER: 'X',"xorn",random
 #	and goal levels.
 #
 
-LEVEL: "Mon-fila"
-# Random Monsters
-RANDOM_MONSTERS: 'E', 'X'
+MAZE: "Mon-fila",' '
+FLAGS: shortsighted,hardfloor
+INIT_MAP: ' ' , 'G' , false, false, lit , false
 #
-ROOM: "ordinary" , random, random, random, random
+NOMAP
+#
 STAIR: random, up
-OBJECT: random,random,random
-MONSTER: 'E', random, random, hostile
-
-ROOM: "ordinary" , random, random, random, random
-OBJECT: random, random, random
-OBJECT: random,random,random
-MONSTER: 'E', random, random, hostile
-
-ROOM: "ordinary" , random, random, random, random
-OBJECT: random, random, random
-TRAP: random, random
-OBJECT: random,random,random
-MONSTER: 'X', "xorn", random
-MONSTER: 'E', "earth elemental", random
-
-ROOM: "ordinary" , random, random, random, random
 STAIR: random, down
-OBJECT: random, random, random
-TRAP: random, random
-MONSTER: 'E', random, random, hostile
-MONSTER: 'E', "earth elemental", random
-
-ROOM: "ordinary" , random, random, random, random
+#
 OBJECT: random, random, random
 OBJECT: random, random, random
-TRAP: random, random
-MONSTER: 'X', random, random, hostile
-
-ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
-TRAP: random, random
-MONSTER: 'E', "earth elemental", random
-
-RANDOM_CORRIDORS
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+#
+MONSTER: random, random, random, hostile
+MONSTER: random, random, random, hostile
+MONSTER: random, random, random, hostile
+MONSTER: random, random, random, hostile
+MONSTER: random, random, random, hostile
+MONSTER: random, random, random, hostile
+MONSTER: random, random, random, hostile
+MONSTER: random, random, random, hostile
 
 LEVEL: "Mon-filb"
-# Random Monsters
-RANDOM_MONSTERS: 'E', 'X'
 #
 ROOM: "ordinary" , random, random, random, random
 STAIR: random, up
 OBJECT: random,random,random
-MONSTER: 'X', random, random, hostile
+MONSTER: random, random, random, hostile
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
 OBJECT: random,random,random
-MONSTER: 'X', random, random, hostile
+MONSTER: 'X', "xorn monk", random, hostile
+MONSTER: 'X', "xorn", random, hostile
+MONSTER: 'X', "xorn", random, hostile
+MONSTER: 'X', "xorn", random, hostile
+MONSTER: 'X', "xorn", random, hostile
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
 TRAP: random, random
 OBJECT: random,random,random
-MONSTER: 'E', random, random, hostile
+MONSTER: random, random, random, hostile
 
 ROOM: "ordinary" , random, random, random, random
 STAIR: random, down
@@ -349,7 +405,7 @@ ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
 OBJECT: random, random, random
 TRAP: random, random
-MONSTER: 'X', random, random, hostile
+MONSTER: random, random, random, hostile
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random

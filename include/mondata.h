@@ -558,9 +558,10 @@
 #define	is_vines_mon(mon)	((mon)->mtyp == PM_GAE_ELADRIN && (mon)->m_lev >= 20)
 #define	is_star_blades_mtyp(ptr)	((ptr)->mtyp == PM_COURE_ELADRIN || (ptr)->mtyp == PM_MOTE_OF_LIGHT)
 #define	is_star_blades_mon(mon)	(is_star_blades_mtyp((mon)->data))
-#define	is_storm_mtyp(ptr)	((ptr)->mtyp == PM_CAILLEA_ELADRIN || (ptr)->mtyp == PM_MOONSHADOW\
+#define	is_storm_mtyp(ptr)	((ptr)->mtyp == PM_DAO_LAO_GUI_MONK)
+#define	is_level_storm_mtyp(ptr)	((ptr)->mtyp == PM_CAILLEA_ELADRIN || (ptr)->mtyp == PM_MOONSHADOW\
 							 || (ptr)->mtyp == PM_GHAELE_ELADRIN || (ptr)->mtyp == PM_LUMINOUS_CLOUD)
-#define	is_storm_mon(mon)	((is_storm_mtyp((mon)->data)) && (mon)->m_lev >= 20)
+#define	is_storm_mon(mon)	((is_level_storm_mtyp((mon)->data) && (mon)->m_lev >= 20) || is_storm_mtyp((mon)->data))
 
 #define goat_monster(ptr) (In_lost_cities(&u.uz) ? lost_cities_goat_monster(ptr) : always_goat_monster(ptr))
 #define always_goat_monster(ptr) (\
@@ -858,6 +859,7 @@
 				  (ptr)->mtyp == PM_BALL_OF_RADIANCE) ? 2 : \
 				 ((ptr)->mtyp == PM_THRONE_ARCHON ||\
 				  (ptr)->mtyp == PM_BEAUTEOUS_ONE ||\
+				  (ptr)->mtyp == PM_DAO_LAO_GUI_MONK ||\
 				 (ptr)->mtyp == PM_ASPECT_OF_THE_SILENCE) ? 3 : \
 				 ((ptr)->mtyp == PM_BLESSED) ? 4 : \
 				 ((ptr)->mtyp == PM_LIGHT_ARCHON|| \
@@ -872,6 +874,7 @@
 #define Is_darklight_monster(ptr)	((ptr)->mtyp == PM_EDDERKOP\
 					|| (ptr)->mtyp == PM_DARK_WORM\
 					|| (ptr)->mtyp == PM_ASPECT_OF_THE_SILENCE\
+					|| (ptr)->mtyp == PM_DAO_LAO_GUI_MONK\
 					)
 /*	[note: the light ranges above were reduced to 1 for performance...] */
 #define likes_lava(ptr)		( \
@@ -1076,7 +1079,8 @@
 						 (mon)->mtyp == PM_GARLAND || (mon)->mtyp == PM_CELEBORN || (mon)->mtyp == PM_DANTRAG || \
 						 (mon)->mtyp == PM_PAGE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
 #define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_MASTER_KAEN || (mon)->mtyp == PM_ABBOT || \
-						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_MONK))
+						 (mon)->mtyp == PM_XORN_MONK || (mon)->mtyp == PM_DAO_LAO_GUI_MONK || (mon)->mtyp == PM_ZHI_REN_MONK || \
+						 (mon)->mtyp == PM_XUENU_MONK || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_MONK))
 #define mon_madman(mon)	((mon)->mtyp == PM_MADMAN || (mon)->mtyp == PM_MADWOMAN || (mon)->mtyp == PM_CASSILDA_THE_IRON_MAIDEN || \
 						 (mon)->mtyp == PM_PATIENT || (mon)->mtyp == PM_CONTAMINATED_PATIENT || \
 						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_MADMAN))

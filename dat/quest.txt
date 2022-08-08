@@ -4730,30 +4730,29 @@ the Planes of the Elements, to achieve this goal.
 # to be treated as plural by messages which use %o.
 #
 %Cc Mon 00001
-You find yourself standing in sight of %H.  Something
-is obviously wrong here. Strange shapes lumber around
-outside %H!
-
-You realize that the %l needs your assistance!
+You approach %H on the isolated path you have grown to 
+know so well.  As you get closer you notice that the lights are all dim,
+even in the library!  The %l would never stand for that in a 
+normal situation.  Knowing something is very wrong you stride forward with 
+grace and determination.
 %E
 %Cp Mon 00002
-Once again, you stand before %H.
+Once again, you stand on the path to %H.
 %E
 %Cp Mon 00003
-Again you face %H.  Your intuition hints that this may be
-the final time you come here.
+Again you are on the path to %H. You know this could be the last time.
 %E
 %Cp Mon 00005
-"Greetings, honorable %r.  It is good to see you."
+"Greetings %s.  We are glad to see you whole."
 %E
 %Cp Mon 00006
-"Ah, %p!  Surely you can help us in our hour of need."
+"%pC, only you can help. %dC has let it be known."
 %E
 %Cp Mon 00007
-"Greetings, %s.  %lC has great need of your help."
+"Welcome back %s. Please see the %l as soon as possible."
 %E
 %Cp Mon 00008
-"Alas, it seems as if even %d has deserted us."
+"Your return is a sign from %d that all is not lost."
 %E
 %Cp Mon 00009
 "May %d be with you, %s."
@@ -4774,56 +4773,64 @@ the final time you come here.
 "May %d be with you, %s."
 %E
 %Cc Mon 00015
-"Ah, %p, my %S.  You have returned to us at last.
-A great blow has befallen our order; perhaps you can help us.
-First, however, I must determine if you are prepared for this
-great challenge."
+"Ah, %p, my %S.  You have returned.  I knew you would come, but
+I am happy it is not too late.  The %shood has suffered a great 
+dishonor. I will tell you in good time, first we must see if you 
+are ready."
 %E
 %Cp Mon 00016
-"Again, my %S, you stand before me.  Are you ready now to help us?"
+"Again, my %S, you stand before me.  Have you improved your skills since
+our last meeting?"
 %E
 %Cp Mon 00017
-"Once more, %p, you stand within the sanctum.  Are you ready now?"
+"Once more, %p, you have returned.  Hopefully %d has been 
+with you and your skills have improved."
 %E
 %Cc Mon 00018
-"You are a heretic, %p!  How can you, %ra, deviate so from the
-teachings of %d?  Begone from this temple.  You are no longer
-%sa to this order.  We will pray to %d for other assistance,
-as you have failed us utterly."
+"You have become polluted my %S.  How could you, my best student,
+deviate from the teachings of %d so? You dishonor the %shood. 
+
+Begone from here and do not return. Even in our hour of need, we would 
+rather die than be polluted by one such as yourself."
 %E
 %Cc Mon 00019
-"Alas, %p, it is not yet to be.  A mere %r could never
-withstand the might of %n.  Go forth, again into the world, and return
-when you have attained the post of %R."
+"It is not yet to be, %p.  %dC has let it be known that
+only %Ra will have a chance to succeed against %n. 
+Return when your skills have improved."
 %E
 %Cc Mon 00020
-"This is terrible, %p.  You have deviated from the true path!
-You know that %d requires the most strident devotion of this
-order.  The %shood must stand for utmost piety.
-
-"Go from here, atone for your sins against %d.  Return only when
-you have purified yourself."
+"%pC, you have let yourself become polluted.  %dC requires
+piety among the %shood of the order and your devotion, my %S.  
+You cannot hope to face %n without it. Attone yourself, my %S. 
+Return when you once again walk the path that %d has set."
 %E
 %Cc Mon 00021
-"Yes, %p.  You are truly ready now.  Attend to me and I shall
-tell you of what has transpired:
+"You are ready.  As I said before, a great dishonor has befallen
+the order.  Not long ago, a zealous %c such as yourself came to 
+learn the way of %d.  He rose quickly in our ranks and
+displayed great skill.  Silently we hoped for another such as
+yourself to enter our ranks, and we gave thanks to %d."
 
-"During one of the Great Meditations a short time ago, %n and
-a legion of elementals invaded %H.  Many %gP were
-killed, including the one bearing %o.
+"I do not know where we have gone wrong.  Perhaps it was a trick from 
+the beginning.  Perhaps his faith faltered and he seized an opportunity
+to better himself at the cost of others."
 
-Now, there are barely enough %gP left to keep the
-elementals at bay.
+"In the darkest hour he crept in and stole %o from its
+resting place.  He tried to sneak away, but was caught.  In his desperate 
+flight he killed many %gP."
 
-"We need you to find %i, then, from there, travel
-to %ns lair.  If you can manage to defeat %n
-and return %o here, we can then drive off the
-legions of elementals that slay our students.
+"%dC has not yet enlightened us for the reasons this has come to 
+pass, but he has granted the knowledge that %n has fled to 
+%i.  Go there my %S. %nC must not be allowed to gain 
+strength and cause more harm with %o."
 
-"Go with %d as your guide, %p."
+"Do not waste your time trying to save his soul.  It is a sad day 
+for the %shood, but we will survive with your help."
+
+"May %d ever guide your steps."
 %E
 %Cp Mon 00025
-"You can prevail, if you rely on %d."
+"Go with %d as your guide, %p."
 %E
 %Cp Mon 00026
 "Remember that %n has great magic at his command."
@@ -4832,7 +4839,8 @@ legions of elementals that slay our students.
 "Be pure, my %S."
 %E
 %Cp Mon 00028
-"Beware, %i is surrounded by hordes of earth elementals."
+"Be careful. The only way to %i is through a long 
+canyon. There will be many chances for ambushes!"
 %E
 %Cp Mon 00029
 "Remember your studies, and you will prevail!"
@@ -4845,105 +4853,108 @@ against %n."
 "Call upon %d when your need is greatest.  You will be answered."
 %E
 %Cp Mon 00032
-"Remember to use the elementals' strength against them!"
+"You will face many foes. Consider well the strengths of each!"
 %E
 %Cp Mon 00033
-"Do not lose faith, %p.  If you do so, %n will grow stronger."
+"Do not lose faith, %p.
 %E
 %Cp Mon 00034
-"Wear %o.  They will assist you in your efforts."
+"%nC will be a great foe.  It will take all of your talents to defeat him."
 %E
 %Cc Mon 00035
-You remember the descriptions of %i, given to you
-by the %l.  It is ahead that you will find %n's trail.
+You stand at the mouth of a long twisting valley that leads to %i.
+You know that %n waits after countless traps and ambushes. 
+Scanning the walls of valley you notice none of the usual signs of
+clumsy men. No broken twigs, footprints, or hoofprints. These ambushers
+are either very good or not human...
 %E
 %Cp Mon 00036
-Again, you stand before %i.
+Again, you stand on the trail to %i.
 %E
 %Cc Mon 00040
-The stench of brimstone is all about you, and the elementals close in
-from all sides!
-
-Ahead, there is a small clearing amidst the bubbling pits of lava...
+You enter a large cave that houses %i and %n 
+at the far end.  Lava pools are all around except for two paths
+leading to %i.  The final battle begins...
 %E
 %Cp Mon 00041
-Again, you have invaded %ns domain.
+You once again stand at the entrance to the cave.
 %E
 %Cc Mon 00050
-"Ah, so %l has sent another %g to retrieve
-%o.
-
-"No, I see you are no %g.  Perhaps I shall have some fun today
-after all.  Prepare to die, %r!  You shall never regain
-%o."
+"So you must be %p.  %lC has spoken highly of your skills!
+I will enjoy bringing your body back to him when I return!"
 %E
 %Cp Mon 00051
-"So, %r.  Again you challenge me."
+"Again we meet.  This time you will die!"
 %E
 %Cp Mon 00052
-"Die now, %r.  %d has no power here to aid you."
+"This shall be the final encounter. Prepare to meet %d."
 %E
 %Cp Mon 00053
-"You shall die, %r, and I will have %o back."
+"I will be all too happy to take %o from your corpse!"
 %E
 %Cp Mon 00060
-"Submit to my will, %c, and I shall spare you."
+"%lC was wise to respect your skills. You are still no match for me though!"
 %E
 %Cp Mon 00061
-"Your puny powers are no match for me, %c."
+"Your puny powers are no match for me."
 %E
 %Cp Mon 00062
-"I shall have you turned into a zombie for my pleasure!"
+"You death will not be a quick one."
 %E
 %Cp Mon 00063
-"Despair now, %r.  %d cannot help you."
+"Despair now, %r.  %dC cannot help you."
 %E
 %Cp Mon 00064
-"I shall feast upon your soul for many days, %c."
+"I can see your fear.  Escape while you can!"
 %E
 %Cp Mon 00065
-"Your death will be slow and painful.  That I promise!"
+"Your skills are a disgrace to your ancestors!"
 %E
 %Cp Mon 00066
-"You cannot defeat %n, you fool.  I shall kill you now."
+"%dC will no save you now.  Prepare to die!"
 %E
 %Cp Mon 00067
-"Your precious %lt will be my next victim."
+"I should have killed %l when I had the chance!"
 %E
 %Cp Mon 00068
-"I feel your powers failing you, %r.  You shall die now."
+"I feel your weariness.  You shall die now."
 %E
 %Cp Mon 00069
 "With %o, nothing can stand in my way."
 %E
 %Cc Mon 00070
-As you pick up %o, you feel the essence of
-%d fill your soul.  You know now why %n stole them from
-%H, for with them, %ca of %d could
-easily defeat his plans.
+When you touch %o your mind is jolted with awareness and
+understanding.  You can now see why %n stole them, and risked
+everything to keep them.  Silently you vow not to let them consume
+you as they did him.
 
 You sense a message from %d.  Though not verbal, you
 get the impression that you must return to %l as soon
 as possible.
 %E
 %Cc Mon 00080
-%nC gasps:
+%nC falls over motionless after your stunning blow. 
+He whispers:
+    "I knew everything and it is gone. I know now how I will
+    spend the countless years, and I am afraid. %pC,  do 
+    not give yourself to the same fate, it is not nice."
 
-    "You have only defeated this mortal body.  Know this: my spirit
-    is strong.  I shall return and reclaim what is mine!"
-
-With that, %n expires.
+You feel that in a small way %n has redeemed himself to
+%d with his last breath.
 %E
 %Cc Mon 00081
-"You have returned, %p.  And with %o, I see.
-Congratulations.
+"Ah, you have returned.  We have been waiting for you.  We wanted to
+to honor you, but your quest for the Amulet is more pressing.  You have
+done the %shood a great service and we will remember you for it."
 
-"I have been in meditation, and have received direction from
-a minion of %d.  %d commands that you retain
-%o.  With them, you must recover the Amulet
-of Yendor.
+"I know that %o is a great burden and temptation, but
+I can not accept responsibilty for them again.  I have failed in that charge
+once already.  You are far more capable that I, so you must keep them.  They
+will aid you with the rest of your quest."
 
-"Go forth, and let %d guide your steps."
+"We hope to see you when your great quest is done. We will celebrate them."
+
+"May %d ever guide your way."
 %E
 %Cc Mon 00082
 %lC studies %o for a moment,
@@ -4958,10 +4969,11 @@ that brought you here."
 "Welcome back, %p.  How is your quest for the Amulet going?"
 %E
 %Cc Mon 00091
-"You have prevailed, %p!  %d is surely with you.  Now,
-you must take the amulet, and sacrifice it on %ds altar on
-the Astral Plane.  I suspect that I shall never see you again in this
-life, but I hope to at %ds feet."
+"You have succeeded, %p!  As much as we would like to celebrate
+your succeess, you must not delay.  Proceed to the surface and through
+the elementals to the plane of the gods. Give the Amulet to %d
+when you find his temple.  I suspect that I shall never see you again
+in this life, but I hope to at %ds feet."
 %E
 #
 #	Madman
