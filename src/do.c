@@ -2440,7 +2440,9 @@ donull()
 		} else if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
 	} else if(uandroid){
 		if(!Upolyd && u.uhp<u.uhpmax && u.uen > 0){
-			u.uhp += u.ulevel/3+1;
+			u.uhp += u.ulevel/6+1;
+			if(rn2(6) < u.ulevel%6)
+				u.uhp++;
 			flags.botl = 1;
 			u.uen--;
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
