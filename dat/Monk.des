@@ -47,9 +47,9 @@ ALTAR:(20,07),noalign,altar
 # Doors
 DOOR:broken,(39,07)
 DOOR:broken,(30,07)
-DOOR:locked,(34,12)
+DOOR:broken,(34,12)
 DOOR:closed,(25,12)
-DOOR:closed,(23,12)
+DOOR:locked,(23,12)
 DOOR:closed,(24,10)
 # The Grand Master
 MONSTER:'@',"Grand Master",(24,07)
@@ -87,11 +87,25 @@ MONSTER: 'X',"xorn",(59,10)
 MONSTER: 'X',"xorn",(13,09)
 MONSTER: 'X',"xorn",(11,17)
 # Monsters in the mentioned library.
-MONSTER: '\'',"living lectern",(31,14)
-MONSTER: '\'',"living lectern",(33,14)
-MONSTER: '\'',"living lectern",(36,14)
-MONSTER: '\'',"living lectern",(38,14)
+MONSTER: '\'',"living lectern",(18,11)
+MONSTER: '\'',"living lectern",(22,11)
+MONSTER: '\'',"living lectern",(18,14)
+MONSTER: '\'',"living lectern",(22,14)
  
+MONSTER: '\'',"paper golem",(21,13)
+MONSTER: '\'',"paper golem",(21,12)
+MONSTER: '\'',"paper golem",(19,12)
+MONSTER: '\'',"spell golem",(19,13)
+OBJECT[90%]:'?',"blank paper",(19,12)
+OBJECT[90%]:'?',"blank paper",(22,13)
+OBJECT[90%]:'?',"blank paper",(18,11)
+OBJECT[90%]:'?',"blank paper",(22,12)
+OBJECT[90%]:'?',"blank paper",(19,14)
+OBJECT[90%]:'?',"blank paper",(21,12)
+
+OBJECT[80%]:'?',random,(21,13)
+OBJECT[80%]:'?',random,(21,14)
+OBJECT[80%]:'?',random,(18,12)
 #
 #	The "locate" level for the quest.
 #
