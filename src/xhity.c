@@ -2136,6 +2136,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->damn = 1;
 		attk->damd = 8;
 	}
+	
+	/*Strong unarmed fighter*/
+	if (pa->mtyp == PM_FORMIAN_CRUSHER && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP) && (
+		 (youagr && !uwep) ||
+		 (!youagr && !MON_WEP(magr))
+	)){
+		attk->damn = 4;
+		attk->damd = 8;
+	}
 	/* players with the Black Web Entity bound replace unarmed punches with shadow-blade attacks */
 	if (youagr && u.specialSealsActive&SEAL_BLACK_WEB && !by_the_book) {
 		if ((attk->aatyp == AT_WEAP && !uwep) ||
