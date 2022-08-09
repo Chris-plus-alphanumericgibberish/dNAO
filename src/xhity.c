@@ -2128,6 +2128,14 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 
+	/*Weapon user, not as good without*/
+	if (pa->mtyp == PM_DAO_LAO_GUI_MONK && attk->aatyp == AT_WEAP && (
+		 (youagr && !uwep) ||
+		 (!youagr && !MON_WEP(magr))
+	)){
+		attk->damn = 1;
+		attk->damd = 8;
+	}
 	/* players with the Black Web Entity bound replace unarmed punches with shadow-blade attacks */
 	if (youagr && u.specialSealsActive&SEAL_BLACK_WEB && !by_the_book) {
 		if ((attk->aatyp == AT_WEAP && !uwep) ||
@@ -4045,12 +4053,18 @@ boolean ranged;
 	char buf[BUFSZ];
 	
 	/* Monsters with physical attack scaling treat the physical damage component of their attacks much like spellcasting damage */
-	if(attk->adtyp == AD_PHYS && has_phys_scaling(pa)){
+	/*  This represents skill, so the player doesn't get the bonus. */
+	if(!youagr && attk->adtyp == AD_PHYS && has_phys_scaling(pa) &&
+		/*Weapon user, not as good without*/
+		!(pa->mtyp == PM_DAO_LAO_GUI_MONK && attk->aatyp == AT_WEAP && !MON_WEP(magr))
+	){
 		if(flatdmg >= 0){
 			flatdmg += d(min(MAX_BONUS_DICE, mlev(magr)/3), attk->damd <= 1 ? 6 : attk->damd);
 		}
 		else {
 			attk->damn += min(MAX_BONUS_DICE, mlev(magr)/3);
+			if(attk->damn < 1)
+				attk->damn = 1;
 			if(attk->damd <= 1)
 				attk->damd = 6;
 		}
