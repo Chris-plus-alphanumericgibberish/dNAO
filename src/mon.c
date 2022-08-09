@@ -800,6 +800,8 @@ register struct monst *mtmp;
 				mon->mpeaceful = 1;
 				set_template(mon, M_BLACK_WEB);
 				EDOG(mon)->loyal = TRUE;
+				EDOG(mtmp)->waspeaceful = TRUE;
+				mtmp->mpeacetime = 0;
 				obj = mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
@@ -831,6 +833,8 @@ register struct monst *mtmp;
 				mon->mpeaceful = 1;
 				mon->mcrazed = 1;
 				EDOG(mon)->loyal = TRUE;
+				EDOG(mtmp)->waspeaceful = TRUE;
+				mtmp->mpeacetime = 0;
 				mkcorpstat(BROKEN_ANDROID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
@@ -895,6 +899,8 @@ register struct monst *mtmp;
 				mon->mpeaceful = 1;
 				mon->mcrazed = 1;
 				EDOG(mon)->loyal = TRUE;
+				EDOG(mtmp)->waspeaceful = TRUE;
+				mtmp->mpeacetime = 0;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
@@ -921,6 +927,8 @@ register struct monst *mtmp;
 				mon->mpeaceful = 1;
 				mon->mcrazed = 1;
 				EDOG(mon)->loyal = TRUE;
+				EDOG(mtmp)->waspeaceful = TRUE;
+				mtmp->mpeacetime = 0;
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			} else {
@@ -953,6 +961,8 @@ register struct monst *mtmp;
 				mon->mcansee = 0;
 				mon->mcanhear = 0;
 				EDOG(mon)->loyal = TRUE;
+				EDOG(mtmp)->waspeaceful = TRUE;
+				mtmp->mpeacetime = 0;
 				set_template(mon, M_GREAT_WEB);
 				obj = mkcorpstat(BROKEN_GYNOID, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
@@ -1245,8 +1255,11 @@ register struct monst *mtmp;
 				mon->mcanhear = 0;
 				set_mcan(mon, TRUE);
 				mon->mdoubt = 1;
-				if(EDOG(mon))
+				if(EDOG(mon)){
 					EDOG(mon)->loyal = TRUE;
+					EDOG(mtmp)->waspeaceful = TRUE;
+					mtmp->mpeacetime = 0;
+				}
 				mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			}
@@ -1272,8 +1285,11 @@ register struct monst *mtmp;
 				mon->female = TRUE;
 				mon->mtame = 10;
 				mon->mpeaceful = 1;
-				if(EDOG(mon))
+				if(EDOG(mon)){
 					EDOG(mon)->loyal = TRUE;
+					EDOG(mtmp)->waspeaceful = TRUE;
+					mtmp->mpeacetime = 0;
+				}
 				mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
 				mongone(mon);
 			}
@@ -1881,6 +1897,8 @@ movemon()
 	
 	if(mtmp->mtyp == PM_CROW_WINGED_HALF_DRAGON && mtmp->mtame && !EDOG(mtmp)->loyal && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
 		EDOG(mtmp)->loyal = 1;
+		EDOG(mtmp)->waspeaceful = TRUE;
+		mtmp->mpeacetime = 0;
 	}
 	
 	if(u.uevent.uaxus_foe && 

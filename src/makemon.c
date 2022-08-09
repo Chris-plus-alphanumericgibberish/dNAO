@@ -10968,6 +10968,8 @@ boolean goodequip;
 			add_mx(mtmp, MX_EDOG);
 		initedog(mtmp);
 		EDOG(mtmp)->loyal = TRUE;
+		EDOG(mtmp)->waspeaceful = TRUE;
+		mtmp->mpeacetime = 0;
 		if (otmp) {
 			if (mpickobj(mtmp, otmp)) panic("merged saddle?");
 			mtmp->misc_worn_check |= W_SADDLE;

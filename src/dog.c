@@ -302,6 +302,8 @@ makedog()
 
 	initedog(mtmp);
 	EDOG(mtmp)->loyal = TRUE;
+	EDOG(mtmp)->waspeaceful = TRUE;
+	mtmp->mpeacetime = 0;
 	if(is_half_dragon(mtmp->data) && flags.HDbreath){
 		mtmp->mvar_hdBreath = flags.HDbreath;
 		set_mon_data(mtmp, mtmp->mtyp);

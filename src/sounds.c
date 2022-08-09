@@ -3016,8 +3016,11 @@ int dz;
 		verbalize("Let's get out of here!");
 		mtmp->mpeaceful = 1;
 		mtmp = tamedog(mtmp, (struct obj *)0);
-		if(mtmp && mtmp->mtame)
+		if(mtmp && mtmp->mtame){
 			EDOG(mtmp)->loyal = TRUE;
+			EDOG(mtmp)->waspeaceful = TRUE;
+			mtmp->mpeacetime = 0;
+		}
 		return MOVE_STANDARD;
 	}
     /* That is IT. EVERYBODY OUT. You are DEAD SERIOUS. */

@@ -3187,6 +3187,8 @@ scatter_weapons(){
 		mtmp = makemon(&mons[PM_ANDROID], xdnstair, ydnstair, MM_ADJACENTOK|MM_EDOG);
 		initedog(mtmp);
 		EDOG(mtmp)->loyal = TRUE;
+		EDOG(mtmp)->waspeaceful = TRUE;
+		mtmp->mpeacetime = 0;
 		nlev = rnd(stronghold_level.dlevel-10)+10;
 		if(nlev >= 8){
 			//Landed in poly-trap-land, and found a random CoMR on the ground nearby
@@ -3209,6 +3211,8 @@ scatter_weapons(){
 		mtmp = makemon(&mons[PM_GYNOID], xdnstair, ydnstair, MM_ADJACENTOK|MM_EDOG);
 		initedog(mtmp);
 		EDOG(mtmp)->loyal = TRUE;
+		EDOG(mtmp)->waspeaceful = TRUE;
+		mtmp->mpeacetime = 0;
 		nlev = rnd(stronghold_level.dlevel-10)+10;
 		// pline("going to %d",nlev);
 		if(nlev >= 8){
