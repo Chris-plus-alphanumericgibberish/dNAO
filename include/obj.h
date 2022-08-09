@@ -667,11 +667,14 @@ struct obj {
 						  (otmp)->otyp == GOLD_BLADED_VIBROSPEAR || \
 						  (otmp)->otyp == FORCE_PIKE)
 #define fast_weapon(otmp)	 ((((otmp)->otyp == WHITE_VIBROSWORD || \
-						  (otmp)->otyp == GOLD_BLADED_VIBROSWORD || \
-						  (otmp)->otyp == WHITE_VIBROZANBATO || \
-						  (otmp)->otyp == GOLD_BLADED_VIBROZANBATO || \
-						  (otmp)->otyp ==  WHITE_VIBROSPEAR || \
-						  (otmp)->otyp == GOLD_BLADED_VIBROSPEAR) && otmp->spe >= 2) || fast_mercurial(otmp))
+							  (otmp)->otyp == GOLD_BLADED_VIBROSWORD || \
+							  (otmp)->otyp == WHITE_VIBROZANBATO || \
+							  (otmp)->otyp == GOLD_BLADED_VIBROZANBATO || \
+							  (otmp)->otyp ==  WHITE_VIBROSPEAR || \
+							  (otmp)->otyp == GOLD_BLADED_VIBROSPEAR) && otmp->spe >= 2)\
+						  || fast_mercurial(otmp)\
+						  || otmp->oartifact == ART_FIRE_BRAND\
+						  )
  
 #define fast_mercurial(otmp)	 ((otmp)->obj_material == MERCURIAL && (carried(otmp) ? u.ulevel >= 10 : mcarried(otmp) ? otmp->ocarry->m_lev >= 10 : FALSE))
 #define is_wet_merc(obj) (is_streaming_merc(obj) || is_melting_merc(obj))

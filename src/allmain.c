@@ -580,7 +580,11 @@ boolean affect_game_state;
 			current_cost = NORMAL_SPEED;
 
 			/* some weapons are faster */
-			if (uwep && (fast_weapon(uwep))){
+			/*  Note: Fire brand is a fast weapon, and works with frost brand in the main hand */
+			if ((uwep && fast_weapon(uwep))
+				|| (!uwep && uarmg && fast_weapon(uarmg))
+				|| (uwep && uwep->oartifact == ART_FROST_BRAND && u.twoweap && uswapwep && uswapwep->oartifact == ART_FIRE_BRAND && fast_weapon(uswapwep))
+			){
 				current_cost -= NORMAL_SPEED / 6;
 			}
 

@@ -5002,6 +5002,8 @@ boolean printmessages; /* print generic elemental damage messages */
 		if (!UseInvCold_res(mdef)) {
 	    	if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
+		if(otmp->oartifact == ART_FROST_BRAND && spec_dbon_applies)
+			mdef->movement = max(youdef ? 6 : -12, mdef->movement-2);
 	}
 	if (oartifact == ART_SHADOWLOCK) {
 		if (!Cold_res(mdef)) {
