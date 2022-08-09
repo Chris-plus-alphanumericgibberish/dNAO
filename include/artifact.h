@@ -615,6 +615,10 @@ extern struct artifact * artilist;
                 (m) == ART_ARKENSTONE ||\
                 (m) == ART_FLUORITE_OCTAHEDRON ||\
                 (m) == ART_WALLET_OF_PERSEUS ||\
+                (m) == ART_VILYA ||\
+                (m) == ART_NENYA ||\
+                (m) == ART_NARYA ||\
+                (m) == ART_LOMYA ||\
                 (m) == ART_MARAUDER_S_MAP\
             )
 
