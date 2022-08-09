@@ -17525,7 +17525,7 @@ int moveID;
 		if((!uwep || is_monk_weapon(uwep)) 
 			&& (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep)) 
 			&& (u.ualign.record < -3 || u.ualign.record > 3)
-			&& u.uz.dlevel != spire_level.dlevel 
+			&& !Is_spire(&u.uz) 
 			&& beam_monk_target()
 		){
 			pline("Aura bolt!");
