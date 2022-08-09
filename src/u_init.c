@@ -2126,7 +2126,15 @@ u_init()
 		case 2: Monk[M_BOOK].trotyp = SPE_SLEEP; break;
 		}
 		ini_inv(Monk);
+		knows_object(QUARTERSTAFF);
 		knows_object(KHAKKHARA);
+		knows_object(DOUBLE_SWORD);
+		knows_object(CHAKRAM);
+		knows_object(SET_OF_CROW_TALONS);
+		knows_object(NUNCHAKU);
+		knows_object(BESTIAL_CLAW);
+		knows_object(SHURIKEN);
+		knows_object(KATAR);
 		// if(!rn2(5)) ini_inv(Magicmarker);
 		// else if(!rn2(10)) ini_inv(Lamp);
 		// knows_class(ARMOR_CLASS);
