@@ -955,6 +955,8 @@ domakewhisperer()
 	
 	initedog(mtmp);
 	EDOG(mtmp)->loyal = TRUE;
+	EDOG(mtmp)->waspeaceful = TRUE;
+	mtmp->mpeacetime = 0;
 	return MOVE_STANDARD;
 }
 

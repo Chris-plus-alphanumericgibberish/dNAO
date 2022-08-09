@@ -4927,6 +4927,8 @@ struct monst *mon;
 			mon->mpeaceful = 1;
 			mon->mcrazed = 1;
 			EDOG(mon)->loyal = TRUE;
+			EDOG(mtmp)->waspeaceful = TRUE;
+			mtmp->mpeacetime = 0;
 			newsym(mon->mx, mon->my);
 		}
 	}
