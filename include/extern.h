@@ -854,6 +854,7 @@ E void VDECL(panic, (const char *,...)) PRINTF_F(1,2);
 #if !defined(MAKEDEFS_C) && !defined(LEV_LEX_C)
 E const char* NDECL(get_alignment_code);
 E const char* NDECL(get_alignment_adj);
+E boolean NDECL(Check_crystal_lifesaving);
 E void FDECL(done, (int));
 E void FDECL(container_contents, (struct obj *,BOOLEAN_P,BOOLEAN_P));
 #ifdef DUMP_LOG

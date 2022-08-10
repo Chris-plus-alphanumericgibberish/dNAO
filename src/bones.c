@@ -102,6 +102,15 @@ boolean restore;
 			if(otmp->oclass == SPBOOK_CLASS){
 				set_object_color(otmp);
 			}
+			/*Make sure the life-saving effect is unused for this player*/
+			if (otmp->oartifact == ART_EARTH_CRYSTAL
+				|| otmp->oartifact == ART_FIRE_CRYSTAL
+				|| otmp->oartifact == ART_WATER_CRYSTAL
+				|| otmp->oartifact == ART_AIR_CRYSTAL
+				|| otmp->oartifact == ART_BLACK_CRYSTAL
+			) {
+				otmp->oeroded3 = 0;
+			}
 		}
 		if (!restore) {
 			/* do not zero out o_ids for ghost levels anymore */
