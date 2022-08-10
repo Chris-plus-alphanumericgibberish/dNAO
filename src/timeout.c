@@ -2768,10 +2768,11 @@ timer_element *base;
 	putstr(win, 0, "timeout  id   kind   call");
 	for (curr = base; curr; curr = curr->next) {
 #ifdef VERBOSE_TIMER
-	    Sprintf(buf, " %4ld   %4ld  %-6s %s(%s)",
+	    Sprintf(buf, " %4ld   %4ld  %-6s %s(%s) %d",
 		curr->timeout, curr->tid, kind_name(curr->kind),
 		timeout_funcs[curr->func_index].name,
-		fmt_ptr((genericptr_t)curr->arg, arg_address));
+		fmt_ptr((genericptr_t)curr->arg, arg_address),
+		curr->timerflags);
 #else
 	    Sprintf(buf, " %4ld   %4ld  %-6s #%d(%s)",
 		curr->timeout, curr->tid, kind_name(curr->kind),
@@ -3023,6 +3024,7 @@ genericptr_t owner;
     gnu->kind = tmtype;
     gnu->func_index = func_index;
     gnu->arg = owner;
+	gnu->timerflags = 0;
 
 	/* add to owner */
 	*owner_tm(tmtype, owner) = gnu;
