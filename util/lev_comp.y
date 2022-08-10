@@ -1528,6 +1528,7 @@ altar_god_infos : /* nothing */
 		 | ',' string
 		  {
 			tmpaltar[naltar]->god = get_god_id($2);
+			Free($2);
 		  }
 
 gold_detail	: GOLD_ID ':' amount ',' coordinate
