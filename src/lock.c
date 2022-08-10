@@ -200,9 +200,10 @@ forcelock()	/* try to force a locked chest */
 
 	register struct obj *otmp;
 
-	if((xlock.box->ox != u.ux) || (xlock.box->oy != u.uy))
+	if((xlock.box->ox != u.ux) || (xlock.box->oy != u.uy)){
 		xlock.usedtime = 0;
 		return MOVE_CANCELLED;		/* you or it moved */
+	}
 
 	if (xlock.usedtime++ >= 50 || (!uwep && xlock.picktyp != 3) 
 		|| nohands(youracedata) || !freehand()
@@ -218,20 +219,21 @@ forcelock()	/* try to force a locked chest */
 	if(xlock.picktyp == 1) {	/* blade */
 
 		if (((is_shatterable(uwep) && !uwep->oerodeproof) || (rn2(1000 - (int)uwep->spe) > (992 - greatest_erosion(uwep) * 10) &&
-	       !uwep->cursed)) && !uwep->oartifact) {
-		/* for a +0 weapon, probability that it survives an unsuccessful
-		 * attempt to force the lock is (.992)^50 = .67
-		 */
-		pline("%sour %s broke!",
-		      (uwep->quan > 1L) ? "One of y" : "Y", xname(uwep));
-		if (is_shatterable(uwep) && uwep->oerodeproof && uwep->known) {
-			pline("Apparently \"shatterproof\" is more like \"shatter-resistant\".");
-		}
-		useup(uwep);
-		You("give up your attempt to force the lock.");
-		exercise(A_DEX, TRUE);
-		xlock.usedtime = 0;
-		return MOVE_FINISHED_OCCUPATION;
+	       !uwep->cursed)) && !uwep->oartifact
+		) {
+			/* for a +0 weapon, probability that it survives an unsuccessful
+			 * attempt to force the lock is (.992)^50 = .67
+			 */
+			pline("%sour %s broke!",
+				  (uwep->quan > 1L) ? "One of y" : "Y", xname(uwep));
+			if (is_shatterable(uwep) && uwep->oerodeproof && uwep->known) {
+				pline("Apparently \"shatterproof\" is more like \"shatter-resistant\".");
+			}
+			useup(uwep);
+			You("give up your attempt to force the lock.");
+			exercise(A_DEX, TRUE);
+			xlock.usedtime = 0;
+			return MOVE_FINISHED_OCCUPATION;
 	    }
 	} else if(xlock.picktyp == 0)			/* blunt */
 	    wake_nearby_noisy();	/* due to hammering on the container */
