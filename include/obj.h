@@ -542,6 +542,7 @@ struct obj {
 			 || (otmp)->otyp == MAGIC_LAMP\
 			 || (otmp)->otyp == CANDLE_OF_INVOCATION\
 			 || (otmp)->otyp == RIN_WISHES\
+			 || (otmp)->otyp == AMULET_OF_LIFE_SAVING\
 			 || (otmp)->otyp == MISOTHEISTIC_PYRAMID\
 			 || (otmp)->otyp == MISOTHEISTIC_FRAGMENT\
 			 || (otmp)->otyp == DIMENSIONAL_LOCK\
