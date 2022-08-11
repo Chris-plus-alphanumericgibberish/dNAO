@@ -14112,7 +14112,7 @@ struct monst *mtmp, *victim;
 			xp_threshold += heal_mlevel_bonus();
 		if(uring_art(ART_LOMYA))
 			xp_threshold += lev_lomya();
-		if(mtmp->mvar_flask_charges < MAX_FLASK_CHARGES(mtmp) && !rn2(6+mtmp->mvar_flask_charges)){
+		if(has_sunflask(mtmp->mtyp) && mtmp->mvar_flask_charges < MAX_FLASK_CHARGES(mtmp) && !rn2(6+mtmp->mvar_flask_charges)){
 			if(canseemon(mtmp))
 				pline("Warm light shines on %s", mon_nam(mtmp));
 			mtmp->mvar_flask_charges++;
