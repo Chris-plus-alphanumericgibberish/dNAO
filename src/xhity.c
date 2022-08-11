@@ -565,9 +565,9 @@ int tary;
 		}
 		/* Generalized offhand attack when not allowed */
 		if ((attk->offhand) && (						// offhand attack
-				(youagr && uarms) ||					// player attacking with shield
-				(!youagr && (which_armor(magr, W_ARMS))	// monster attacking with shield
-				))
+				(youagr && (uarms || (uwep && bimanual(uwep, youracedata)))) ||					// player attacking with shield
+				(!youagr && (which_armor(magr, W_ARMS) || (MON_WEP(magr) && bimanual(MON_WEP(magr), pa))))	// monster attacking with shield
+				)
 			) {
 			continue;									// not allowed, don't attack
 		}
@@ -629,8 +629,8 @@ int tary;
 			/* 2: Offhand attack when not allowed */
 			if ((aatyp == AT_XWEP || aatyp == AT_XSPR) && (	// offhand attack
 					(youagr && !u.twoweap) ||				// player attacking and choosing not to twoweapon
-					(!youagr && (which_armor(magr, W_ARMS))	// monster attacking and cannot twoweapon (wearing shield)
-					))
+					(!youagr && (which_armor(magr, W_ARMS) || (MON_WEP(magr) && bimanual(MON_WEP(magr), pa))))	// monster attacking and cannot twoweapon (wearing shield)
+					)
 				) {
 				continue;									// not allowed, don't attack
 			}
@@ -4091,6 +4091,13 @@ boolean ranged;
 	}
 	if(attk->adtyp == AD_PERH){
 		dmg *= youdef ? u.ulevel : mdef->m_lev;
+	}
+	/*Monsters get a small bonus for using a two-handed weapon if it means forgoing offhand weapon attacks*/
+	if(!youagr && attk->aatyp == AT_WEAP 
+	&& (MON_WEP(magr) && bimanual(MON_WEP(magr), pa))
+	&& (attacktype(pa, AT_XWEP))
+	){
+		dmg += (dmg+1)/2;
 	}
 	/* worms get increased damage on their bite if they are lined up with momentum */
 	if(!youagr && pa->mtyp == PM_LONG_WORM && magr->wormno && attk->aatyp == AT_BITE){
