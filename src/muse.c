@@ -237,6 +237,7 @@ struct obj *otmp;
 #define MUSE_UNICORN_HORN 17
 #define MUSE_POT_FULL_HEALING 18
 #define MUSE_LIZARD_CORPSE 19
+#define MUSE_LIFE_FLASK 20
 /*
 #define MUSE_INNATE_TPT 9999
  * We cannot use this.  Since monsters get unlimited teleportation, if they
@@ -333,6 +334,10 @@ struct monst *mtmp;
 		if ((obj = m_carrying(mtmp, POT_FULL_HEALING)) != 0) {
 		    m.defensive = obj;
 		    m.has_defense = MUSE_POT_FULL_HEALING;
+		    return TRUE;
+		}
+		if(has_sunflask(mtmp->mtyp) && mtmp->mvar_flask_charges > 0){
+			m.has_defense = MUSE_LIFE_FLASK;
 		    return TRUE;
 		}
 		if ((obj = m_carrying(mtmp, POT_EXTRA_HEALING)) != 0) {
@@ -488,6 +493,10 @@ struct monst *mtmp;
 		if(obj->otyp == POT_FULL_HEALING) {
 			m.defensive = obj;
 			m.has_defense = MUSE_POT_FULL_HEALING;
+		}
+		nomore(MUSE_LIFE_FLASK);
+		if(has_sunflask(mtmp->mtyp) && mtmp->mvar_flask_charges > 0){
+			m.has_defense = MUSE_LIFE_FLASK;
 		}
 		nomore(MUSE_POT_EXTRA_HEALING);
 		if(obj->otyp == POT_EXTRA_HEALING) {
@@ -912,8 +921,14 @@ mon_tele:
 	case MUSE_POT_FULL_HEALING:
 		mquaffmsg(mtmp, otmp);
 		if (otmp->otyp == POT_SICKNESS) unbless(otmp); /* Pestilence */
-		if(mtmp->mhpmax - mtmp->mhp > 400) mtmp->mhp += 400;
-		else mtmp->mhp = (mtmp->mhpmax += (otmp->blessed ? 8 : 4));
+		if(mtmp->mhpmax - mtmp->mhp > 400){
+			mtmp->mhp += 400;
+			if (vismon) pline("%s looks far healthier.", Monnam(mtmp));
+		}
+		else {
+			mtmp->mhp = (mtmp->mhpmax += (otmp->blessed ? 8 : 4));
+			if (vismon) pline("%s looks completely healed.", Monnam(mtmp));
+		}
 		if (!mtmp->mcansee && otmp->otyp != POT_SICKNESS) {
 			mtmp->mcansee = 1;
 			mtmp->mblinded = 0;
@@ -924,10 +939,20 @@ mon_tele:
 			mtmp->mdeafened = 0;
 			if (vismon) pline(mcha, Monnam(mtmp));
 		}
-		if (vismon) pline("%s looks completely healed.", Monnam(mtmp));
 		if (oseen) makeknown(otmp->otyp);
 		if (!otmp->oartifact)
 			m_useup(mtmp, otmp);
+		return 2;
+	case MUSE_LIFE_FLASK:
+		if(vismon)
+			pline("%s drinks from %s flask of warm light!", Monnam(mtmp), mhis(mtmp));
+		if(mtmp->mhpmax - mtmp->mhp > 200){
+			mtmp->mhp += min(200, mtmp->mhpmax/2);
+		}
+		else{
+			mtmp->mhp = mtmp->mhpmax/2;
+		}
+		mtmp->mvar_flask_charges--;
 		return 2;
 	case MUSE_LIZARD_CORPSE:
 		/* not actually called for its unstoning effect */

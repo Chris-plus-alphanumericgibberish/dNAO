@@ -642,6 +642,13 @@
 #define yields_insight(ptr)	(((ptr)->mflagsg & MG_INSIGHT) != 0L)
 #define banish_kill(mtyp)	(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
 
+#define has_sunflask(mtyp)	(mtyp == PM_UNDEAD_KNIGHT || mtyp == PM_WARRIOR_OF_SUNLIGHT\
+							 || mtyp == PM_UNDEAD_MAIDEN || mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD\
+							 || mtyp == PM_BLUE_SENTINEL || mtyp == PM_DARKMOON_KNIGHT\
+							 || mtyp == PM_UNDEAD_REBEL || mtyp == PM_PARDONER || mtyp == PM_OCCULTIST\
+							 || mtyp == PM_CROW_WINGED_HALF_DRAGON || mtyp == PM_ADVENTURESS_ZARIA \
+							)
+
 #define triggers_ophidiophobia(ptr)	(is_snake((ptr))\
 		|| (ptr)->mlet == S_NAGA\
 		|| (ptr)->mtyp == PM_COUATL\

@@ -827,8 +827,6 @@ boolean digest_meal;
 			perX += 25*HEALCYCLE; //Fast healing
 		} else {
 			perX += mon->m_lev;
-			if(mon_resistance(mon,REGENERATION))
-				perX += HEALCYCLE;
 		}
 		//Worn Vilya bonus ranges from (penalty) to +7 HP per 10 turns
 		if(uring_art(ART_VILYA)){
@@ -845,6 +843,8 @@ boolean digest_meal;
 					mon->mhp += 1;
 			}
 		}
+		if(mon_resistance(mon,REGENERATION))
+			mon->mhp+=1;
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING && !mindless_mon(mon) && !is_deaf(mon) && mon->mtame)
 			mon->mhp += 1;
 		if (mon->mhp > mon->mhpmax)

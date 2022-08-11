@@ -8208,6 +8208,7 @@ int mmflags;
 		break;
 	    case S_ZOMBIE:
 		if(mm == PM_UNDEAD_KNIGHT){
+			mtmp->mvar_flask_charges = 1;
 			otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
 			otmp->oeroded = 1;
 			(void) mpickobj(mtmp, otmp);
@@ -8232,6 +8233,7 @@ int mmflags;
 			fix_object(otmp);
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_WARRIOR_OF_SUNLIGHT){
+			mtmp->mvar_flask_charges = 4;
 			otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
 			otmp->spe = 3;
 			(void) mpickobj(mtmp, otmp);
@@ -8258,6 +8260,7 @@ int mmflags;
 			otmp->spe = 3;
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_UNDEAD_MAIDEN){
+			mtmp->mvar_flask_charges = 1;
 			otmp = mksobj(STILETTO, mkobjflags|MKOBJ_NOINIT);
 			otmp->oeroded = 1;
 			(void) mpickobj(mtmp, otmp);
@@ -8288,6 +8291,7 @@ int mmflags;
 			otmp->oeroded2 = 1;
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD){
+			mtmp->mvar_flask_charges = 4;
 			otmp = mksobj(SPEAR, mkobjflags|MKOBJ_NOINIT);
 			set_material_gm(otmp, SILVER);
 			otmp->objsize = MZ_LARGE;
@@ -8324,6 +8328,7 @@ int mmflags;
 			otmp->spe = 3;
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_BLUE_SENTINEL){
+			mtmp->mvar_flask_charges = 1;
 			otmp = mksobj(SHORT_SWORD, mkobjflags|MKOBJ_NOINIT);
 			otmp->oeroded = 1;
 			(void) mpickobj(mtmp, otmp);
@@ -8359,6 +8364,7 @@ int mmflags;
 			fix_object(otmp);
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_DARKMOON_KNIGHT){
+			mtmp->mvar_flask_charges = 4;
 			otmp = mksobj(LONG_SWORD, mkobjflags|MKOBJ_NOINIT);
 			otmp->spe = 3;
 			(void) mpickobj(mtmp, otmp);
@@ -8387,6 +8393,7 @@ int mmflags;
 			otmp->spe = 3;
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_UNDEAD_REBEL){
+			mtmp->mvar_flask_charges = 1;
 			otmp = mksobj(STILETTO, mkobjflags|MKOBJ_NOINIT);
 			otmp->oeroded = 1;
 			(void) mpickobj(mtmp, otmp);
@@ -8412,6 +8419,7 @@ int mmflags;
 			otmp->oeroded2 = 1;
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_OCCULTIST){
+			mtmp->mvar_flask_charges = 4;
 			otmp = mksobj(CLUB, mkobjflags|MKOBJ_NOINIT);
 			set_material_gm(otmp, DRAGON_HIDE);
 			add_oprop(otmp, OPROP_OCLTW);
@@ -8440,6 +8448,7 @@ int mmflags;
 			set_material_gm(otmp, DRAGON_HIDE);
 			(void) mpickobj(mtmp,otmp);
 		} else if(mm == PM_PARDONER){
+			mtmp->mvar_flask_charges = 6;
 			otmp = mksobj(RAPIER, mkobjflags|MKOBJ_NOINIT);
 			add_oprop(otmp, OPROP_LESSER_MAGCW);
 			set_material_gm(otmp, METAL);
@@ -14103,6 +14112,11 @@ struct monst *mtmp, *victim;
 			xp_threshold += heal_mlevel_bonus();
 		if(uring_art(ART_LOMYA))
 			xp_threshold += lev_lomya();
+		if(mtmp->mvar_flask_charges < MAX_FLASK_CHARGES(mtmp) && !rn2(6+mtmp->mvar_flask_charges)){
+			if(canseemon(mtmp))
+				pline("Warm light shines on %s", mon_nam(mtmp));
+			mtmp->mvar_flask_charges++;
+		}
 		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
 			max_increase = 1;
 			cur_increase = 1;
