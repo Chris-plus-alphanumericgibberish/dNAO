@@ -7475,7 +7475,7 @@ arti_invoke(obj)
 		}
 	break;
 	case SHADOW_FLARE:
-		if( (obj->spe > 0) && throweffect()){
+		if(throweffect()){
 			int dmg;
 			dmg = u.ulevel + 10;
 			if(u.ukrau_duration) dmg *= 1.5;
