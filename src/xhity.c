@@ -147,7 +147,6 @@ struct monst * mdef;
 		//Dokick can't move you
 		return TRUE;
 	}
-
 	if (u.twoweap && !test_twoweapon())
 		untwoweapon();
 
@@ -184,6 +183,7 @@ struct monst * mdef;
 		return(FALSE);
 	}
 
+	u.uattked = TRUE;
 	check_caitiff(mdef);
 	
 	if ((u.specialSealsActive&SEAL_BLACK_WEB) && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves + 20)
@@ -195,6 +195,7 @@ struct monst * mdef;
 		if (u.uswallow) {
 			bhitpos.x = u.ux;
 			bhitpos.y = u.uy;
+			u.uattked = TRUE;
 		}
 		else {
 			return TRUE;
@@ -17325,17 +17326,23 @@ movement_combos()
 			flags.move |= MOVE_STANDARD;
 		}
 	}
-
+	extern coord save_d;
 	if (did_combo) {
 		/* successfully doing a combo clears prev_dir */
 		u.prev_dir.x = 0;
 		u.prev_dir.y = 0;
 	}
-	else {
+	else if(u.dx || u.dy){
 		/* otherwise, build prev_dir */
 		u.prev_dir.x = u.dx;
 		u.prev_dir.y = u.dy;
 	}
+	else {
+		u.prev_dir.x = save_d.x;
+		u.prev_dir.y = save_d.y;
+	}
+	save_d.x = 0;
+	save_d.y = 0;
 }
 
 #define peace_check_monk(mon) ((canspotmon(mon) || mon_warning(mon)) && (Hallucination || !mon->mpeaceful) && !imprisoned(mon))
@@ -17345,6 +17352,12 @@ adjacent_monk_target(arm)
 struct obj *arm;
 {
 	struct monst *mon;
+	//Same rules as kicking. Whirly monsters allow moves, solid ones do not.
+	if(u.ustuck && u.uswallow){
+		if(is_whirly(u.ustuck->data))
+			return u.ustuck;
+		else return (struct monst *)0;
+	}
 	if(!isok(u.ux+u.dx, u.uy+u.dy))
 		return (struct monst *)0;
 	mon = m_at(u.ux+u.dx, u.uy+u.dy);
@@ -17365,6 +17378,12 @@ struct obj *arm;
 {
 	struct monst *mon;
 	int i, j;
+	//Same rules as kicking. Whirly monsters allow moves, solid ones do not.
+	if(u.ustuck && u.uswallow){
+		if(is_whirly(u.ustuck->data))
+			return TRUE;
+		else return FALSE;
+	}
 	for(i = u.ux-1; i < u.ux+2; i++) for(j = u.uy-1; j < u.uy+2; j++){
 		if(i == u.ux && j == u.uy)
 			continue;
@@ -17390,6 +17409,12 @@ beam_monk_target()
 	int i;
 	int ix = u.ux, iy = u.uy;
 	boolean at_least_one = FALSE;
+	//Same rules as kicking. Whirly monsters allow moves, solid ones do not.
+	if(u.ustuck && u.uswallow){
+		if(is_whirly(u.ustuck->data))
+			return TRUE;
+		else return FALSE;
+	}
 	for(i = 1; i < BOLT_LIM; i++){
 		ix += u.dx;
 		iy += u.dy;
@@ -17402,7 +17427,7 @@ beam_monk_target()
 			continue;
 		}
 		if(!peace_check_monk(mon)){
-			//We'll call this the Monk's "sixth sense" talkning <_<'
+			//We'll call this the Monk's "sixth sense" talking <_<'
 			if(mon->mpeaceful && !Hallucination)
 				return FALSE;
 			else continue;
@@ -17577,7 +17602,7 @@ int moveID;
 		}
 		break;
 		case METODRIVE:
-		if(!uwep && !(uswapwep && u.twoweap) && inv_weight() < 0 && (mdef = adjacent_monk_target(uarmg))){
+		if(!uwep && !(uswapwep && u.twoweap) && inv_weight() < 0 && !u.uswallow && (mdef = adjacent_monk_target(uarmg))){
 			pline("Meteor drive!");
 			monk_meteor_drive(mdef);
 			return TRUE;
@@ -17614,6 +17639,11 @@ check_monk_move()
 	int dy1 = u.prev_dir.y;
 	int dx2 = u.dx;
 	int dy2 = u.dy;
+	if(!dx2 && !dy2){
+		extern coord save_d;
+		dx2 = save_d.x;
+		dy2 = save_d.y;
+	}
 	//If there haven't been two inputs for some reason, return false.
 	if(!(dx1 || dy1) || !(dx2 || dy2))
 		return 0;

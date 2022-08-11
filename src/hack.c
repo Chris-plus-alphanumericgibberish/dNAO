@@ -1044,6 +1044,9 @@ domove()
 			flags.move |= MOVE_MOVED;
 			return;
 		} else {
+			extern coord save_d;
+			save_d.x = u.dx;
+			save_d.y = u.dy;
 			u.dx = u.dy = 0;
 			u.ux = x = u.ustuck->mx;
 			u.uy = y = u.ustuck->my;

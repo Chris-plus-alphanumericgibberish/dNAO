@@ -389,7 +389,9 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 				mdef = u.usteed;
 			}
 
-			result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);
+			result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);\
+			if(kicked && youagr)
+				u.uattked = TRUE;
 
 			/* stop on hit? */
 			if (!thrownobj)

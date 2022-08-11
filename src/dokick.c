@@ -87,6 +87,7 @@ register xchar x, y;
 	bhitpos.y = y;
 	if (!attack_checks(mon, (struct obj *)0)) return;
 	setmangry(mon);
+	u.uattked = TRUE;
 
 	/* Kick attacks by kicking monsters are normal attacks, not special.
 	 * This is almost always worthless, since you can either take one turn
@@ -246,7 +247,7 @@ bird_kick_monsters()
 			iy = u.uy + u.dy;
 			if(!isok(ix, iy))
 				continue;
-			mon = m_at(ix, iy);
+			mon = (u.ustuck && u.uswallow) ? u.ustuck : m_at(ix, iy);
 			if(!mon || (mon->mpeaceful && !Hallucination) || DEADMONSTER(mon))
 				continue;
 			if((touch_petrifies(mon->data)
@@ -311,6 +312,11 @@ wing_storm_monsters()
 	int offset = rn2(8);
 	int ix, iy;
 	int j;
+	if(u.ustuck && u.uswallow){
+		You("use your wings to counteract %s whirling!", s_suffix(mon_nam(u.ustuck)));
+		xdamagey(&youmonst, u.ustuck, (struct attack *)0, u.ulevel*10);
+		return;
+	}
 	for(int i = 0; i < 4; i++){
 		for(j = 0; j < 2; j++){
 			//Necessary so that the kicking functions can knock the monster in the right direction.
