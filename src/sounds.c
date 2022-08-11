@@ -5773,6 +5773,8 @@ boolean inc_penalties;
 	if(Black_crystal){
 		if(p_skill == P_TWO_HANDED_SWORD)
 			maxskill = min(maxskill + 1, P_EXPERT);
+		if(p_skill == P_ESCAPE_SPELL)
+			maxskill = min(maxskill + 1, P_EXPERT);
 	}
 
 	if(p_skill == P_NIMAN){
