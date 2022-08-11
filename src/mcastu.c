@@ -579,7 +579,6 @@ unsigned int type;
 	case PM_ALIGNED_PRIEST:
 	case PM_HIGH_PRIEST:
 	case PM_ARCH_PRIEST:
-	case PM_ABBOT:
 		quake = TRUE; //Casts earthquake instead of tremor
 	break;
 	case PM_STRANGER:
