@@ -17560,9 +17560,10 @@ int moveID;
 			if((mdef = adjacent_monk_target(uarmf))){
 				pline("Swoop!");
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
-				if(u.twoweap && STILLVALID(mdef))
-					xmeleehity(&youmonst, mdef, &xweponhit, (struct obj **)0, vis, 0, FALSE);
+				if(is_monk_weapon(uwep))
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
+				if(u.twoweap && STILLVALID(mdef) && is_monk_weapon(uswapwep))
+					xmeleehity(&youmonst, mdef, &xweponhit, &uswapwep, vis, 0, FALSE);
 				if(STILLVALID(mdef))
 					xmeleehity(&youmonst, mdef, &bitehit, (struct obj **)0, vis, 0, FALSE);
 				return TRUE;
@@ -17616,7 +17617,10 @@ int moveID;
 				pline("Pummel!");
 			boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 			for(int i = 0; i < 2 && STILLVALID(mdef); i++){
-				xmeleehity(&youmonst, mdef, &weaponhit, (struct obj **)0, vis, 0, FALSE);
+				if((i&0x1) && u.twoweap) /*Odd attacks with valid offhand*/
+					xmeleehity(&youmonst, mdef, &xweponhit, &uswapwep, vis, 0, FALSE);
+				else
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
 			}
 			return TRUE;
 		}
