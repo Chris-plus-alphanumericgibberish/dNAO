@@ -996,48 +996,50 @@ genericptr_t p2;
     reg = (NhRegion *) p1;
     dam = (int)(intptr_t)reg->arg;
     if (p2 == NULL) {		/* This means *YOU* Bozo! */
-	if (nonliving(youracedata) || Breathless ||
-		youmonst.mtyp == PM_GREEN_DRAGON || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_DRST) ||
-		wearing_dragon_armor(&youmonst, PM_GREEN_DRAGON))
-	    return FALSE;
-	if (!Blind)
-	    make_blinded(1L, FALSE);
-	if (!Poison_resistance) {
-	    pline("%s is burning your %s!", Something, makeplural(body_part(LUNG)));
-	    You("cough and spit blood!");
-	    losehp(rnd(dam) + 5, "gas cloud", KILLED_BY_AN);
-	    return FALSE;
-	} else {
-	    You("cough!");
-	    return FALSE;
-	}
-    } else {			/* A monster is inside the cloud */
-	mtmp = (struct monst *) p2;
-
-	/* Non living, non breathing, and
-	   poison-resistant monsters are not concerned */
-	if (!nonliving(mtmp->data) && !breathless_mon(mtmp) &&
-		!resists_poison(mtmp)) {
-	    if (cansee(mtmp->mx, mtmp->my))
-			pline("%s coughs!", Monnam(mtmp));
-	    if(heros_fault(reg)) setmangry(mtmp);
-	    if (haseyes(mtmp->data) && mtmp->mcansee) {
-			mtmp->mblinded = 1;
-			mtmp->mcansee = 0;
-	    }
-	    if (resists_poison(mtmp))
+		if (Invulnerable)
 			return FALSE;
-	    mtmp->mhp -= rnd(dam) + 5;
-	    if (mtmp->mhp <= 0) {
-		if (heros_fault(reg))
-		    killed(mtmp);
-		else
-		    monkilled(mtmp, "gas cloud", AD_DRST);
-		if (mtmp->mhp <= 0) {	/* not lifesaved */
-		    return TRUE;
+		if (nonliving(youracedata) || Breathless ||
+			youmonst.mtyp == PM_GREEN_DRAGON || (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_DRST) ||
+			wearing_dragon_armor(&youmonst, PM_GREEN_DRAGON))
+			return FALSE;
+		if (!Blind)
+			make_blinded(1L, FALSE);
+		if (!Poison_resistance) {
+			pline("%s is burning your %s!", Something, makeplural(body_part(LUNG)));
+			You("cough and spit blood!");
+			losehp(rnd(dam) + 5, "gas cloud", KILLED_BY_AN);
+			return FALSE;
+		} else {
+			You("cough!");
+			return FALSE;
 		}
-	    }
-	}
+    } else {			/* A monster is inside the cloud */
+		mtmp = (struct monst *) p2;
+
+		/* Non living, non breathing, and
+		   poison-resistant monsters are not concerned */
+		if (!nonliving(mtmp->data) && !breathless_mon(mtmp) &&
+			!resists_poison(mtmp)) {
+			if (cansee(mtmp->mx, mtmp->my))
+				pline("%s coughs!", Monnam(mtmp));
+			if(heros_fault(reg)) setmangry(mtmp);
+			if (haseyes(mtmp->data) && mtmp->mcansee) {
+				mtmp->mblinded = 1;
+				mtmp->mcansee = 0;
+			}
+			if (resists_poison(mtmp))
+				return FALSE;
+			mtmp->mhp -= rnd(dam) + 5;
+			if (mtmp->mhp <= 0) {
+				if (heros_fault(reg))
+					killed(mtmp);
+				else
+					monkilled(mtmp, "gas cloud", AD_DRST);
+				if (mtmp->mhp <= 0) {	/* not lifesaved */
+					return TRUE;
+				}
+			}
+		}
     }
     return FALSE;		/* Monster is still alive */
 }
@@ -1182,6 +1184,8 @@ genericptr_t p2;
     reg = (NhRegion *) p1;
     dam = (int)(intptr_t)reg->arg;
     if (p2 == NULL) {		/* This means *YOU* Bozo! */
+		if (Invulnerable)
+			return FALSE;
 		if (youracedata->mtyp == PM_SENTINEL_OF_MITHARDIR){
 			healup(dam, 0, FALSE, FALSE);
 		}
