@@ -950,7 +950,7 @@ mon_tele:
 			mtmp->mhp += min(200, mtmp->mhpmax/2);
 		}
 		else{
-			mtmp->mhp = mtmp->mhpmax/2;
+			mtmp->mhp += mtmp->mhpmax/2;
 		}
 		mtmp->mvar_flask_charges--;
 		return 2;
