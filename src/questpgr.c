@@ -554,7 +554,7 @@ qt_montype()
 		int qpm;
 		int monks_of_kaen[] = {PM_XORN_MONK, PM_DAO_LAO_GUI_MONK, PM_ZHI_REN_MONK, PM_XUENU_MONK};
 		if(rn2(3)){
-			qpm = rn2(3) ? PM_TERRACOTTA_SOLDIER : PM_EARTH_ELEMENTAL;
+			qpm = rn2(3) ? PM_EARTH_ELEMENTAL : PM_TERRACOTTA_SOLDIER;
 			if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
 				return (&mons[qpm]);
 			return (mkclass(S_ELEMENTAL, G_NOHELL));
