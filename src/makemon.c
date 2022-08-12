@@ -3770,6 +3770,54 @@ boolean goodequip;
 }
 
 STATIC_OVL void
+elemental_initweap(mtmp, mkobjflags, faction, goodequip, mmflags)
+register struct monst *mtmp;
+int mkobjflags;
+int faction;
+boolean goodequip;
+int mmflags;
+{
+	int mm = mtmp->mtyp;
+	int chance;
+	struct permonst *ptr = mtmp->data;
+	struct obj *otmp;
+	switch(mm){
+		case PM_TERRACOTTA_SOLDIER:
+			if(Role_if(PM_MONK) && In_quest(&u.uz)){
+				switch(rn2(3)){
+					case 0:
+						otmp = mongets(mtmp, QUARTERSTAFF, mkobjflags);
+						set_material_gm(otmp, WOOD);
+					break;
+					case 1:
+						otmp = mongets(mtmp, NUNCHAKU, mkobjflags);
+						set_material_gm(otmp, WOOD);
+					break;
+					case 2:
+						otmp = mongets(mtmp, KATAR, mkobjflags);
+						set_material_gm(otmp, MINERAL);
+					break;
+				}
+				otmp = mongets(mtmp, SEDGE_HAT, mkobjflags);
+				set_material_gm(otmp, MINERAL);
+			}
+			else switch(rn2(3)){
+				case 0:
+					otmp = mongets(mtmp, BROADSWORD, mkobjflags);
+				break;
+				case 1:
+					otmp = mongets(mtmp, SPEAR, mkobjflags);
+				break;
+				case 2:
+					otmp = mongets(mtmp, MACE, mkobjflags);
+				break;
+			}
+			set_material_gm(otmp, MINERAL);
+		break;
+	}
+}
+
+STATIC_OVL void
 m_initweap(mtmp, mkobjflags, faction, goodequip, mmflags)
 register struct monst *mtmp;
 int mkobjflags;
@@ -3809,6 +3857,9 @@ int mmflags;
 		break;
 		case S_IMP:
 			imp_initweap(mtmp, mkobjflags, faction, goodequip);
+		break;
+	    case S_ELEMENTAL:
+			elemental_initweap(mtmp, mkobjflags, faction, goodequip);
 		break;
 	    case S_HUMAN:
 			human_initweap(mtmp, mkobjflags, faction, goodequip);
