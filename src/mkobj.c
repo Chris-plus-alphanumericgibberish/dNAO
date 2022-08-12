@@ -3543,6 +3543,9 @@ dealloc_obj(obj)
 	if (obj->oextra_p)
 		rem_all_ox(obj);
 
+	if (obj->mp)
+		free((genericptr_t) obj->mp);
+
     free((genericptr_t) obj);
 }
 
