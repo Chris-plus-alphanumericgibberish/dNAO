@@ -443,6 +443,7 @@ tactics(mtmp)
 				|| mtmp->mtyp == PM_MASTER_KAEN
 			){
 				monline(mtmp);
+				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			}
 			else if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
