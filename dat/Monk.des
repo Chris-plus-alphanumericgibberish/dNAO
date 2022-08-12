@@ -190,7 +190,7 @@ MONSTER: random,random,random
 MONSTER: random,random,random
 MONSTER: random,random,random
 MONSTER: 'E',"terracotta soldier",random
-MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"earth elemental",random
 MONSTER: 'E',"earth elemental",random
 MONSTER: 'X',"xorn monk",random
 MONSTER: 'X',"xorn monk",random
@@ -264,12 +264,14 @@ OBJECT:random,random,random
 MONSTER: 'E',"terracotta soldier",random
 MONSTER: 'E',"terracotta soldier",random
 MONSTER: 'E',"terracotta soldier",random
-MONSTER: 'E',"terracotta soldier",random
-MONSTER: 'E',"terracotta soldier",random
-MONSTER: 'E',"terracotta soldier",random
-MONSTER: 'E',"terracotta soldier",random
-MONSTER: 'E',"terracotta soldier",random
-MONSTER: 'E',"terracotta soldier",random
+
+MONSTER: 'E',"earth elemental",random
+MONSTER: 'E',"earth elemental",random
+MONSTER: 'E',"earth elemental",random
+
+MONSTER: 'E',"earth elemental",random
+MONSTER: 'E',"earth elemental",random
+MONSTER: 'E',"earth elemental",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
 MONSTER: 'X',"xorn",random
