@@ -325,9 +325,15 @@ struct monst *mtmp;
 	}
 
 	fraction = u.ulevel < 10 ? 5 : u.ulevel < 14 ? 4 : 3;
-	if(mtmp->mhp >= mtmp->mhpmax ||
-			(mtmp->mhp >= 10 && mtmp->mhp*fraction >= mtmp->mhpmax))
+	if(mtmp->mhp >= mtmp->mhpmax
+		|| (mtmp->mhp >= 10 && mtmp->mhp*fraction >= mtmp->mhpmax)
+	){
+		if(mtmp->mhp < mtmp->mhpmax*9/10 && has_sunflask(mtmp->mtyp) && mtmp->mvar_flask_charges > 3 && mtmp->mvar_flask_charges == MAX_FLASK_CHARGES(mtmp)){
+			m.has_defense = MUSE_LIFE_FLASK;
+		    return TRUE;
+		}
 		return FALSE;
+	}
 
 	if (mtmp->mpeaceful) {
 	    if (!nohands(mtmp->data)) {
