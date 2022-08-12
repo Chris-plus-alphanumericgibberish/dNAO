@@ -1864,6 +1864,8 @@ int different;
 	 */
 	if (different)
 	    mtmp->mhp = mtmp->mhpmax;
+	else if(has_sunflask(mtmp->mtyp))
+		mtmp->mvar_flask_charges = MAX_FLASK_CHARGES(mtmp);
 	chewed = !different && (mtmp->mhp < mtmp->mhpmax);
 	if (chewed) cname = cname_buf;	/* include "bite-covered" prefix */
 	if(different==REVIVE_ZOMBIE){
