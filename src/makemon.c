@@ -3624,8 +3624,6 @@ boolean goodequip;
 #else
 		mkmonmoney(mtmp,(long)rn1(10,20));
 #endif
-	} else if (quest_mon_represents_role(ptr,PM_MONK)) {
-		(void) mongets(mtmp, rn2(11) ? ROBE : CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
 	} else if(ptr->mtyp == PM_MEDUSA){
 	 struct engr *oep = engr_at(mtmp->mx,mtmp->my);
 	 int i;
