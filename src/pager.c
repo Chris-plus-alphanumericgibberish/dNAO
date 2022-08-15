@@ -1777,6 +1777,8 @@ get_ma_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, (ptr->mflagsa & MA_MINION)		, "minion of a deity"	, many);
 	many = append(description, (ptr->mflagsa & MA_PRIMORDIAL)	, "primordial"			, many);
 	many = append(description, (ptr->mflagsa & MA_ET)			, "alien"				, many);
+	many = append(description, (ptr->mflagsa & MA_G_O_O)		, "great old one"				, many);
+	many = append(description, (ptr->mflagsa & MA_XORN)			, "xorn"				, many);
 	strcat(description, ". ");
 	return description;
 }
