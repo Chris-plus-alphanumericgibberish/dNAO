@@ -387,12 +387,17 @@ const char * const hallu_alignments[] = {
 	"Spam",
 	"tastes like orange Tang",
 	"doesn't taste like orange Tang",
+	"butterscotch", 
+	"cinnamon",
 	
 	"currently not available",
 	"gone swimming",
 	"not listening",
 	"smashing things",
 	"thinking",
+	
+	"jumble",
+	"crossword",
 
 	"yellow",
 	"purple",
