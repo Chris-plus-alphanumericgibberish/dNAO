@@ -331,8 +331,8 @@ WEAPON(("scimitar", "curved sword"),
 	DMG(D(8)), DMG(D(8)),
 	0, 0, MZ_MEDIUM, 14, 40, 15,  0, S,   P_SCIMITAR, IRON, FALSE, HI_METAL),
 WEAPON(("high-elven warsword", "runed curved sword"), /*Needs encyc entry*/
-	DMG(D(10)), DMG(D(10)),
-	0, 0, MZ_MEDIUM,  1, 20,150,  2, S,   P_SCIMITAR, MITHRIL, UNIDED, HI_MITHRIL),
+	DMG(D(10), D(6)), DMG(D(10), D(6)),
+	0, 0, MZ_HUGE,    1, 75,150,  2, S,   P_SCIMITAR, MITHRIL, UNIDED, HI_MITHRIL),
 WEAPON(("rapier"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
 	1, 0, MZ_MEDIUM,  5, 28, 20,  2, P,   P_SABER, METAL, FALSE, HI_METAL),
