@@ -2474,10 +2474,10 @@ wiz_migrate_mons()
 	struct monst *mtmp;
 	d_level tolevel;
 	getlin("How many random monsters to migrate? [0]", inbuf);
-	if (*inbuf == '\033') return 0;
+	if (*inbuf == '\033') return MOVE_CANCELLED;
 	mcount = atoi(inbuf);
 	if (mcount < 0 || mcount > (COLNO * ROWNO) || Is_botlevel(&u.uz))
-		return 0;
+		return MOVE_CANCELLED;
 	while (mcount > 0) {
 		if (Is_stronghold(&u.uz))
 		    assign_level(&tolevel, &valley_level);
@@ -2489,7 +2489,7 @@ wiz_migrate_mons()
 				MIGR_RANDOM, (coord *)0);
 		mcount--;
 	}
-	return 0;
+	return MOVE_INSTANT;
 }
 #endif
 
@@ -2869,7 +2869,8 @@ register char *cmd;
 		prefix_seen = TRUE;
 	} else if (*cmd == '0' && iflags.num_pad) {
 	    (void)ddoinv(); /* a convenience borrowed from the PC */
-	    flags.move |= MOVE_INSTANT;
+		if(flags.move != MOVE_CANCELLED)
+			flags.move |= MOVE_INSTANT;
 	    multi = 0;
 	} else if (*cmd == CMD_TRAVEL && iflags.travelcmd) {
 	  flags.travel = 1;

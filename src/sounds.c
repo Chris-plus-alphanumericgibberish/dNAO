@@ -3142,7 +3142,7 @@ int tx,ty;
 	if(u.veil){
 		You("feel reality threatening to slip away!");
 		if (yn("Are you sure you want proceed with the ritual?") != 'y'){
-			return 0;
+			return MOVE_CANCELLED;
 		}
 		else pline("So be it.");
 		u.veil = FALSE;
