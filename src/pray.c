@@ -1644,7 +1644,7 @@ dosacrifice()
 		if (otmp->otyp == CORPSE)
 			feel_cockatrice(otmp, TRUE);
 		pline1(nothing_happens);
-		return 1;
+		return MOVE_STANDARD;
 	}
 
 	if(Misotheism && !(otmp->otyp == AMULET_OF_YENDOR && Is_astralevel(&u.uz))){
