@@ -1621,7 +1621,7 @@ boolean noit;
 	}
     if (cobj->olocked) {
 	pline("Hmmm, %s seems to be locked.", noit ? the(xname(cobj)) : "it");
-	return 0;
+	return MOVE_CANCELLED;
     }
     if (cobj->otyp == BAG_OF_TRICKS) {
 	int tmp;
@@ -1632,7 +1632,7 @@ boolean noit;
 	if(u.uvaul_duration) tmp = (tmp + 1) / 2;
 	losehp(tmp, "carnivorous bag", KILLED_BY_AN);
 	makeknown(BAG_OF_TRICKS);
-	return 1;
+	return MOVE_STANDARD;
     }
 
     You("carefully open %s...", the(xname(cobj)));
