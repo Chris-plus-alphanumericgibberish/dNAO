@@ -3541,7 +3541,8 @@ int *shield_margin;
 				if (launcher->oartifact){
 					wepn_acc += spec_abon(launcher, mdef, youagr);
 				}
-				if (is_insight_weapon(launcher) && (youagr ? Role_switch : monsndx(magr->data)) == PM_MADMAN){
+
+				if (is_insight_weapon(launcher) && (youagr ? (Role_if(PM_MADMAN) || u.sealsActive&SEAL_OSE) : insightful(magr->data))){
 					if(youagr){
 						if(u.uinsight)
 							wepn_acc += rnd(min(u.uinsight, mlev(magr)));
