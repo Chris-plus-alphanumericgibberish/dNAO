@@ -1637,6 +1637,7 @@ static const NEARDATA short hwep[] = {
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
 	  MOON_AXE/*variable, 2d6 to 2d12*/,
+	  HIGH_ELVEN_WARSWORD/*1d10+1d6/1d10+1d6*/,
 	  RUNESWORD/*1d10+1d4/1d10+1*/, 
 	  BATTLE_AXE/*1d8+1d4/1d6+2d4*/,
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
@@ -1647,7 +1648,6 @@ static const NEARDATA short hwep[] = {
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
 	  KATANA/*1d10/1d12*/,
-	  HIGH_ELVEN_WARSWORD/*1d10/1d10*/,
 	  CRYSKNIFE/*1d10/1d10*/, 
 	  BESTIAL_CLAW/*1d10/1d8*/, 
 	  VIPERWHIP/*2d4/2d3/poison*/,
@@ -1740,6 +1740,7 @@ static const NEARDATA short hpwep[] = {
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
 	  MOON_AXE/*variable, 2d6 to 2d12*/,
+	  HIGH_ELVEN_WARSWORD/*1d10+1d6/1d10+1d6*/,
 	  RUNESWORD/*1d10+1d4/1d10+1*/, 
 	  BATTLE_AXE/*1d8+1d4/1d6+2d4*/,
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
@@ -1753,7 +1754,6 @@ static const NEARDATA short hpwep[] = {
 	  HALBERD, /*1d10/2d6*/
 	  KATANA/*1d10/1d12*/,
 	  DROVEN_LANCE, /*1d10/1d10*/
-	  HIGH_ELVEN_WARSWORD/*1d10/1d10*/,
 	  CRYSKNIFE/*1d10/1d10*/, 
 	  BESTIAL_CLAW/*1d10/1d8*/, 
 	  VIPERWHIP/*2d4/2d3/poison*/,
