@@ -184,8 +184,12 @@ static const char *haluMesg[] = {
 	"If you have time to read this, you should get to the down stairs immediately!", /* Zelda 3 */
 	"Gary was here! Ash is a loser!", /* Pokemon */
 	"Oh, I get it. The real treasure was the people I had executed along the way!", /* A Practical Guide To Evil  */
-	"I don't care if it compiles / Or makes your head explode / I want a messy makefile / I want a billion lines of code", /* Scope Creep by Radiohead by qt */
+	"the cake is a lie", /* Portal */
+	"Beware the Wheelers", /* Ozma of Oz */
+	"The words of the prophets are written on the subway walls and tenement halls", /* The Sound of Silence, Simon and Garfunkel */
 	
+	"I don't care if it compiles / Or makes your head explode / I want a messy makefile / I want a billion lines of code", /* Scope Creep by Radiohead by qt */
+
 	"I see you...",
 		"...do you see me?",
 		"That was a mistake.",
@@ -340,6 +344,9 @@ static const char *haluMesg[] = {
 		"Sand stays.  All else changes.",
 		"We will remember you when you are sand too.",
 	"That is a lesson I will never learn, for I do not believe it.", /* Knights of the Old Republic II */
+	"The one who left his name in the people's souls.",
+		"The one who lived protecting a small happiness with his name known to no one.",
+		"Even on journeys of different ways, people live out their days the best they can.", /* Lunar Legend */
 	"Do not call up any that you can not put down.", /*HP Lovecraft*/
 		"That is not dead, that can eternal lie,",
 		"for with strange aeons even death may die.",
@@ -759,6 +766,7 @@ const char * haluWard[] =  {
 	"a Sharuan Mindharp", /* Star Wars expanded universe */
 	"a winged blade of light", /* Jedi Order symbol */
 	"an inverted scarab beetle", /* Worm */
+	"a stylized eye formed from the letters V, F, and D", /* A Series of Unfortunate Events */
 	
 	/* webcomics */
 	"a Court symbol",	"a Forest symbol",	"the sign of the Wandering Eye", /* Gunnerkrigg Court */
