@@ -5414,6 +5414,7 @@ int *spell_no;
 					}
 				} // switch(splaction)
 			} // doing something allowable
+			free(selected);
 		} // menu item was selected
 		/* else end menu, nothing was selected */
 		break;
