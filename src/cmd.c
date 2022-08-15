@@ -672,7 +672,10 @@ boolean you_abilities;
 	
 	if(n <= 0) return MOVE_CANCELLED;
 	
-	switch (selected[0].item.a_int) {
+	int picked = selected[0].item.a_int;
+	free(selected);
+	
+	switch (picked) {
 	/* Player abilities */
 	case MATTK_U_WORD: return dowords(SPELLMENU_CAST);
 	case MATTK_U_SPELLS: return docast();
@@ -970,9 +973,11 @@ doMysticForm()
 	destroy_nhwindow(tmpwin);
 
 	if(n <= 0){
+		free(selected);
 		return MOVE_CANCELLED;
 	} else {
 		toggle_monk_style(selected[0].item.a_int);
+		free(selected);
 		return MOVE_INSTANT;
 	}
 
@@ -1037,9 +1042,11 @@ dofightingform()
 	destroy_nhwindow(tmpwin);
 	
 	if(n <= 0 || selectedFightingForm(selected[0].item.a_int)){
+		if(n>0) free(selected);
 		return MOVE_CANCELLED;
 	} else {
 		setFightingForm(selected[0].item.a_int);
+		free(selected);
 		return MOVE_INSTANT;
 	}
 }
@@ -1089,6 +1096,7 @@ dounmaintain()
 		pline("You cease to maintain %s.",
 			  OBJ_NAME(objects[selected[0].item.a_int]));
 		spell_unmaintain(selected[0].item.a_int);
+		free(selected);
 		return MOVE_INSTANT;
 	}
 }

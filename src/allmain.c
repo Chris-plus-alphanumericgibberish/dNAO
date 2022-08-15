@@ -3371,7 +3371,12 @@ do_inheritor_menu()
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return (n > 0) ? selected[0].item.a_int : 0;
+	if(n > 0){
+		int inherited = selected[0].item.a_int;
+		free(selected);
+		return inherited;
+	}
+	return 0;
 }
 
 /* show "welcome [back] to nethack" message at program startup */

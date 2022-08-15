@@ -3398,14 +3398,18 @@ int describe;
 
 		if (n > 0 && selected[0].item.a_int == -1){
 			describe = !describe;
+			free(selected);
 			continue;
 		}
 		if (n > 0 && describe){
 			describe_ward(selected[0].item.a_int);
+			free(selected);
 			continue;
 		}
 		if (n > 0 && !describe){
-			return selected[0].item.a_int;
+			int picked = selected[0].item.a_int;
+			free(selected);
+			return picked;
 		}
 		/* else end menu; no selection made */
 		break;
@@ -3820,8 +3824,11 @@ pick_seal()
 		n = select_menu(tmpwin, how, &selected);
 		destroy_nhwindow(tmpwin);
 
-		if (n > 0)
-			return selected[0].item.a_int;
+		if(n > 0){
+			int picked = selected[0].item.a_int;
+			free(selected);
+			return picked;
+		}
 		/* else end menu, no selection made */
 		break;
 	}while (TRUE);
