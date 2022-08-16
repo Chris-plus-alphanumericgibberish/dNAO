@@ -1725,7 +1725,9 @@ register struct monst *mtmp;
 				pline("%s gyres and gimbles into the %s.", Monnam(mtmp),surface(mtmp->mx,mtmp->my));
 			if (typ != ROOM) {
 				lev->typ = typ;
-				if (ttmp) (void) delfloortrap(ttmp);
+				if (ttmp) {
+					if (delfloortrap(ttmp)) ttmp = (struct trap *)0;
+				}
 				/* if any objects were frozen here, they're released now */
 				unearth_objs(mtmp->mx, mtmp->my);
 

@@ -1319,7 +1319,9 @@ asGuardian:
 								if((levl[ix][iy].typ <= SCORR || levl[ix][iy].typ == CORR || levl[ix][iy].typ == ROOM) && levl[ix][iy].typ != STONE){
 									levl[ix][iy].typ = CORR;
 									if(!does_block(ix,iy,&levl[ix][iy])) unblock_point(ix,iy);	/* vision:  can see through */
-									if(ttmp) delfloortrap(ttmp);
+									if(ttmp) {
+										if (delfloortrap(ttmp)) ttmp = (struct trap *)0;
+									}
 									levl[ix][iy].typ = CORR;
 									trycount = 0;
 								}
