@@ -3768,12 +3768,11 @@ boolean goodequip;
 }
 
 STATIC_OVL void
-elemental_initweap(mtmp, mkobjflags, faction, goodequip, mmflags)
+elemental_initweap(mtmp, mkobjflags, faction, goodequip)
 register struct monst *mtmp;
 int mkobjflags;
 int faction;
 boolean goodequip;
-int mmflags;
 {
 	int mm = mtmp->mtyp;
 	int chance;
