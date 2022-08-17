@@ -11131,7 +11131,7 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	/* duplicate timers */
 	if (mon->timed) {
 		m2->timed = (struct timer *) 0;
-		split_timers(mon->timed, TIMER_MONSTER, (genericptr_t)m2);
+		copy_timers(mon->timed, TIMER_MONSTER, (genericptr_t)m2);
 	}
 
 	/* place the monster -- we want to do this before any display things happen */

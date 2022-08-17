@@ -2665,7 +2665,7 @@ long timeout;
  *		timer would have gone off.  If no timer is found, return 0.
  *		If an object, decrement the object's timer count.
  *
- *	void split_timers(struct timer *src_timer, int tmtype, genericptr_t dest)
+ *	void copy_timers(struct timer *src_timer, int tmtype, genericptr_t dest)
  *		Duplicate all timers on src and attach them to dest.
  *
  *	void stop_all_timers(timer_element * tm)
@@ -2997,7 +2997,7 @@ run_timers()
 /*
  * Start a timer.  Return TRUE if successful.
  */
-boolean
+timer_element *
 start_timer(when, tmtype, func_index, owner)
 long when;
 short tmtype;
@@ -3012,7 +3012,7 @@ genericptr_t owner;
 	if (curr->arg == owner && curr->func_index == func_index) {
 		impossible("Attempted to start 2nd %s timer, aborted.",
 			timeout_funcs[func_index].name);
-		return FALSE;
+		return (timer_element *)0;
 	}
     if (func_index < 0 || func_index >= NUM_TIME_FUNCS)
 		panic("start_timer bad func_index");
@@ -3031,7 +3031,7 @@ genericptr_t owner;
 	/* add to processing chain */
 	add_procchain_tm(gnu);
 
-    return TRUE;
+    return gnu;
 }
 
 /*
@@ -3219,22 +3219,39 @@ short func;
 	return tm;
 }
 
-/* Specific timer functions */
+/* Duplicates a specific timer onto dest.
+ */
+void
+copy_timer(src_timer, tmtype, dest)
+timer_element *src_timer;
+int tmtype;
+genericptr_t dest;
+{
+	timer_element * tmp;
+	if (src_timer) {
+		tmp = start_timer(src_timer->timeout-monstermoves, tmtype, src_timer->func_index, dest);
+		tmp->timerflags = src_timer->timerflags;
+		adj_procchain_tm(tmp);
+	}
+}
 
 /*
  * Duplicate all timers on the given chain onto dest.
  */
 void
-split_timers(src_timer, tmtype, dest)
+copy_timers(src_timer, tmtype, dest)
 timer_element *src_timer;
 int tmtype;
 genericptr_t dest;
 {
     timer_element *curr;
+	timer_element *tmp;
 	/* loop over src's local chain, which is safe as we add to dest's chain and the processing loop */
-    for (curr = src_timer; curr; curr = curr->tnxt) {
-		(void) start_timer(curr->timeout-monstermoves, tmtype,
-					curr->func_index, dest);
+    for (curr = src_timer; curr; curr = curr->tnxt)
+	{
+		tmp = start_timer(curr->timeout-monstermoves, tmtype, curr->func_index, dest);
+		tmp->timerflags = curr->timerflags;
+		adj_procchain_tm(tmp);
     }
 }
 

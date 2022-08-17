@@ -429,7 +429,7 @@ long num;
 		cpy_ox(obj, otmp, ox_id);
 		
 	if (obj->unpaid) splitbill(obj,otmp);
-	if (obj->timed) split_timers(obj->timed, TIMER_OBJECT, (genericptr_t)otmp);
+	if (obj->timed) copy_timers(obj->timed, TIMER_OBJECT, (genericptr_t)otmp);
 	if (obj_sheds_light(obj)) obj_split_light_source(obj, otmp);
 	return otmp;
 }
@@ -485,7 +485,7 @@ struct obj *obj;
 		cpy_ox(obj, otmp, ox_id);
 	
 	otmp->unpaid = 0;
-	if (obj->timed) split_timers(obj->timed, TIMER_OBJECT, (genericptr_t)otmp);
+	if (obj->timed) copy_timers(obj->timed, TIMER_OBJECT, (genericptr_t)otmp);
 	if (obj_sheds_light(obj)) obj_split_light_source(obj, otmp);
 	return otmp;
 }
