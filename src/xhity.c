@@ -1890,11 +1890,11 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		GETNEXT
 	}
 	/* auto-tailslappers skip their tailslap in main combat sequence */
-	if(!by_the_book && attk->aatyp == AT_TAIL && is_tailslap_mtyp(pa)) {
+	if(!by_the_book && attk->aatyp == AT_TAIL && is_tailslap_mon(magr)) {
 		GETNEXT
 	}
 	/* auto-snake-biters skip their other-snake-head attacks in main combat sequence */
-	if(!by_the_book && attk->aatyp == AT_OBIT && is_snake_bite_mtyp(pa)) {
+	if(!by_the_book && attk->aatyp == AT_OBIT && is_snake_bite_mon(magr)) {
 		GETNEXT
 	}
 	/* auto-rapier-slashers skip their floating rapier attacks in main combat sequence */
