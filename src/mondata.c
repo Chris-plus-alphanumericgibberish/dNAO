@@ -1646,6 +1646,38 @@ int atyp;
     return FALSE;
 }
 
+//Count the number of attacks of type atyp a monster has.
+
+int
+mon_count_attacktype(mon, atyp)
+struct monst *mon;
+int atyp;
+{
+	struct attack *attk;
+	struct attack prev_attk = {0};
+	int	indexnum = 0,	/* loop counter */
+		subout = 0,	/* remembers what attack substitutions have been made for [mon]'s attack chain */
+		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+	int counter = 0;
+
+	/* zero out res[] */
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+	
+	for(attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(mon, (struct monst *) 0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod)
+	){
+		if(attk->aatyp == atyp)
+			counter++;
+	}
+
+    return counter;
+}
+
 //Get a pointer to mon's first attack of type atyp. prev_attk must point to the attack buffer the attack's data should end up in.
 
 struct attack *

@@ -1897,6 +1897,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(!by_the_book && attk->aatyp == AT_OBIT && is_snake_bite_mtyp(pa)) {
 		GETNEXT
 	}
+	/* auto-rapier-slashers skip their floating rapier attacks in main combat sequence */
+	if(!by_the_book && attk->aatyp == AT_ESPR && is_star_blades_mon(magr)) {
+		GETNEXT
+	}
 	/* the Five Fiends spellcasting */
 	if (!by_the_book && (
 		(pa->mtyp == PM_LICH__THE_FIEND_OF_EARTH) ||

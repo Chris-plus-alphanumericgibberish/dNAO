@@ -1707,6 +1707,7 @@ E boolean FDECL(mon_attacktype, (struct monst *,int));
 E boolean FDECL(mon_offhand_attack, (struct monst *));
 E boolean FDECL(cantwield, (struct monst *));
 E boolean FDECL(you_cantwield, (struct permonst *));
+E int FDECL(mon_count_attacktype, (struct monst *,int));
 E struct attack *FDECL(mon_get_attacktype, (struct monst *,int, struct attack *));
 E boolean FDECL(noattacks, (struct permonst *));
 E int FDECL(attackindex, (struct permonst *,int,int));
