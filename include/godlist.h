@@ -393,7 +393,7 @@ GOD_V2("the Silver Flame", A_NONE, HOLY_HOLINESS,
 	MINIONS(Langels)
 	),
 GOD_V2("Nyarlathotep", A_NONE, NEUTRAL_HOLINESS,
-	MINIONS()
+	MINIONS(PM_HUNTING_HORROR)
 	),
 /* the great terminator */
 GOD_V2((const char *)0, 0, 0, MINIONS())
