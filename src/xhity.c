@@ -17565,9 +17565,9 @@ int moveID;
 			if((mdef = adjacent_monk_target(uarmf))){
 				pline("Swoop!");
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-				if(is_monk_weapon(uwep))
+				if(!uwep || is_monk_weapon(uwep))
 					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE);
-				if(u.twoweap && STILLVALID(mdef) && is_monk_weapon(uswapwep))
+				if(u.twoweap && STILLVALID(mdef) && (!uswapwep || is_monk_weapon(uswapwep)))
 					xmeleehity(&youmonst, mdef, &xweponhit, &uswapwep, vis, 0, FALSE);
 				if(STILLVALID(mdef))
 					xmeleehity(&youmonst, mdef, &bitehit, (struct obj **)0, vis, 0, FALSE);
