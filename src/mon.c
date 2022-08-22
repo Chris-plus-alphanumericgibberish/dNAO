@@ -6229,9 +6229,9 @@ boolean severe;			/* Powerful poison that partially overcomes poison resistance 
 		if (i == 0 && attrib != A_CHA) {
 			drain = attrib == A_CON ? -2 : -rn1(3, 3);
 			if(Poison_resistance)
-				drain = (drain + 1)/2;
+				drain = (drain - 1)/2;
 			else if(severe)
-				drain += 4;
+				drain -= 4;
 			if (adjattrib(A_CON, drain, 1)){
 				pline_The("poison was quite debilitating...");
 				printed = TRUE;
@@ -6240,9 +6240,9 @@ boolean severe;			/* Powerful poison that partially overcomes poison resistance 
 		if (i <= 5) {
 			drain = -rn1(3, 3);
 			if(Poison_resistance)
-				drain = (drain + 1)/2;
+				drain = (drain - 1)/2;
 			else if(severe)
-				drain += 2;
+				drain -= 2;
 			/* Check that a stat change was made */
 			if (adjattrib(attrib, drain, 1) && !printed)
 				pline("You%s!", poiseff[attrib]);
