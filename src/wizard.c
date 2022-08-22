@@ -468,7 +468,7 @@ tactics(mtmp)
 			}
 		}
 		/* if you're not around, cast healing spells */
-		if (distu(mtmp->mx,mtmp->my) > (BOLT_LIM * BOLT_LIM))
+		if (distu(mtmp->mx,mtmp->my) > (BOLT_LIM * BOLT_LIM) && !mtmp->mcan)
 		    if(mtmp->mhp <= mtmp->mhpmax - 8) {
 			mtmp->mhp += rnd(8);
 			return(1);
