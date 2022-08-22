@@ -1613,7 +1613,7 @@ struct obj *obj;
 		}
 
 		dagger = hold_another_object(dagger, "You drop %s!",
-				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
+				      doname(dagger), (const char *)0); /*shouldn't merge, but may drop*/
 		if(dagger && !uswapwep && carried(dagger)){
 			setuswapwep(dagger);
 			if(!u.twoweap) dotwoweapon();
@@ -1677,7 +1677,7 @@ struct obj *obj;
 		// }
 
 		dagger = hold_another_object(dagger, "You drop %s!",
-				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
+				      doname(dagger), (const char *)0); /*shouldn't merge, but may drop*/
 		if(dagger && !uswapwep && carried(dagger)){
 			setuswapwep(dagger);
 			if(!u.twoweap) dotwoweapon();
@@ -1733,7 +1733,7 @@ struct obj *obj;
 		obj_extract_self(dagger);
 		fix_object(obj);
 		dagger = hold_another_object(dagger, "You drop %s!",
-				      doname(obj), (const char *)0); /*shouldn't merge, but may drop*/
+				      doname(dagger), (const char *)0); /*shouldn't merge, but may drop*/
 		if(dagger && !uswapwep && carried(dagger)){
 			setuswapwep(dagger);
 			if(!u.twoweap) dotwoweapon();
