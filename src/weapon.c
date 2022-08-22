@@ -242,11 +242,11 @@ struct monst *magr;
 	}
 
 	if (is_insight_weapon(otmp)){
-		if(youagr && Role_if(PM_MADMAN)){
+		if(youagr && (Role_if(PM_MADMAN) || u.sealsActive&SEAL_OSE)){
 			if(u.uinsight)
 				tmp += rnd(min(u.uinsight, mlev(magr)));
 		}
-		else if(magr && monsndx(magr->data) == PM_MADMAN){
+		else if(magr && insightful(magr->data)){
 			tmp += rnd(mlev(magr));
 		}
 	}
