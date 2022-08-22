@@ -1250,9 +1250,6 @@ dovampminion()
 	if (!has_blood(pm)){
 		pline("You can't put blood in a monster that didn't start with blood!");
 		return MOVE_CANCELLED;
-	} else if (is_untamable(pm) || (pm->geno & G_UNIQ)){
-		pline("You can't create a minion of that type of monster!");
-		return MOVE_CANCELLED;
 	} else {
 		struct monst * mtmp = revive(corpse, FALSE);
 		if (mtmp) {

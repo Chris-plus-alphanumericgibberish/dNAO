@@ -8116,10 +8116,6 @@ arti_invoke(obj)
 				pline("That creature has no bones!");
 				obj->age = monstermoves;
 				return MOVE_CANCELLED;
-			} else if (is_untamable(pm) || (pm->geno & G_UNIQ)){
-				pline("You can't create a minion of that type of monster!");
-				obj->age = monstermoves;
-				return MOVE_CANCELLED;
 			}
 			if (is_mind_flayer(pm)){
 				//Ceremorphosis works on a wide variety of hostes, however, it is typically only done to human-sized creatures.
