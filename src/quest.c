@@ -677,7 +677,6 @@ turn_stag()
 	    mons[urole.ldrnum].mflagst |= (MT_PEACEFUL|MT_CLOSE);
 	    mons[urole.ldrnum].mflagst &= ~(MT_WAITFORU|MT_COVETOUS);
 		
-	    mons[urole.guardnum].msound = MS_GUARDIAN;
 	    mons[urole.guardnum].mflagst |= (MT_PEACEFUL);
 	    mons[urole.guardnum].mflagst &= ~(MT_WAITFORU|MT_COVETOUS);
 		
