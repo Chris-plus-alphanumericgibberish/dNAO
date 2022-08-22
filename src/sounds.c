@@ -2417,6 +2417,12 @@ mon_in_command_chain(follower, commander)
 struct monst * follower;
 struct monst * commander;
 {
+	if(has_template(commander, MOLY_TEMPLATE)){
+		if(is_cha_demon(follower->data))
+			return TRUE;
+		else return FALSE;
+	}
+	// else 
 	switch (monsndx(commander->data))	// for special cases
 	{
 	case PM_LEGION:

@@ -514,6 +514,55 @@ mklolthvaultitem()
 }
 
 struct obj *
+mk_jrt_obj(oclass)
+int oclass;
+{
+	switch(oclass){
+		case WEAPON_CLASS:{
+			const int jrt_weapons[] = {
+						ARROW, ELVEN_ARROW, SILVER_ARROW, GOLDEN_ARROW, CHAKRAM,
+						SPEAR, ELVEN_SPEAR, JAVELIN, TRIDENT,
+						DAGGER, ELVEN_DAGGER, STILETTO, 
+						SICKLE, ELVEN_SICKLE, 
+						AXE, BATTLE_AXE, MOON_AXE,
+						SHORT_SWORD, ELVEN_SHORT_SWORD, KHOPESH, KHOPESH,
+						MACE, ELVEN_MACE, CLUB,
+						BOW, ELVEN_BOW, SLING, ATLATL
+						};
+			return mksobj(ROLL_FROM(jrt_weapons), MKOBJ_ARTIF);
+		}break;
+		case ARMOR_CLASS:{
+			const int jrt_armor[] = {
+						HELMET, ARCHAIC_HELM, HELM_OF_BRILLIANCE, 
+						ARCHAIC_PLATE_MAIL, SCALE_MAIL,
+						ELVEN_TOGA, WAISTCLOTH,
+						CLOAK, ELVEN_CLOAK, LEO_NEMAEUS_HIDE,
+						BUCKLER, ELVEN_SHIELD, ROUNDSHIELD, TOWER_SHIELD, SHIELD_OF_REFLECTION,
+						ARCHAIC_GAUNTLETS, GAUNTLETS_OF_DEXTERITY, GAUNTLETS_OF_POWER,
+						ARCHAIC_BOOTS, HIGH_BOOTS, 
+						FLYING_BOOTS, ELVEN_BOOTS, KICKING_BOOTS
+						};
+			return mksobj(ROLL_FROM(jrt_armor), MKOBJ_ARTIF);
+		}break;
+	}
+	//default
+	return mkobj(oclass, TRUE);
+}
+
+struct obj *
+mk_v_obj(oclass, vn)
+int oclass;
+int vn;
+{
+	if(vn == VN_JRT){
+		return mk_jrt_obj(oclass);
+	}
+	else{
+		return mkobj(oclass, TRUE);
+	}
+}
+
+struct obj *
 mkhellvaultitem(vn)
 int vn;
 {
@@ -539,7 +588,7 @@ int vn;
 		type = RANDOM_CLASS;
 	do {
 		if(otmp) delobj(otmp);
-		otmp = mkobj(type, TRUE);
+		otmp = mk_v_obj(type, vn);
 		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
 			otmp = mk_vault_special(otmp, vn);
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)

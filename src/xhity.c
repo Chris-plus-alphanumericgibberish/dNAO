@@ -1760,18 +1760,34 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damd = 6;
 		}
 		else if(attk->aatyp == AT_SRPR){
-			attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_WEAP : AT_CLAW;
-			attk->adtyp = AD_PHYS;
-			attk->damn = 1;
-			attk->damd = 6;
+			if(magr->mtyp == PM_JRT_NETJER){
+				attk->aatyp = AT_WEAP;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 7;
+			}
+			else {
+				attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_WEAP : AT_CLAW;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 6;
+			}
 		}
 		else if(attk->aatyp == AT_XSPR){
-			attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_XWEP : AT_CLAW;
-			attk->adtyp = AD_PHYS;
-			attk->damn = 1;
-			attk->damd = 6;
-			if(attk->aatyp == AT_CLAW)
-				attk->offhand = 1; /*Note: redundant with xwep but needed for claw*/
+			if(magr->mtyp == PM_JRT_NETJER){
+				attk->aatyp = AT_XWEP;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 7;
+			}
+			else {
+				attk->aatyp = (humanoid_upperbody(pa) && !nogloves(pa)) ? AT_XWEP : AT_CLAW;
+				attk->adtyp = AD_PHYS;
+				attk->damn = 1;
+				attk->damd = 6;
+				if(attk->aatyp == AT_CLAW)
+					attk->offhand = 1; /*Note: redundant with xwep but needed for claw*/
+			}
 		}
 		else if(attk->aatyp == AT_MSPR){
 			attk->aatyp = (humanoid_upperbody(pa) && pa->mtyp != PM_ALIDER && !nogloves(pa)) ? AT_MARI : AT_CLAW;
@@ -1851,6 +1867,13 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					attk->damd = 6;
 				}
 			}
+		}
+		//Most other poison template subs happen when the template is applied, but the moon phase stuff still needs to happen so this had to be postponed.
+		if(has_template(magr, POISON_TEMPLATE)){
+			if(attk->adtyp == AD_PHYS)
+				attk->adtyp = AD_DRCO;
+			else if(attk->adtyp == AD_MOON)
+				attk->adtyp = AD_EDRC;
 		}
 	}
 
@@ -2524,6 +2547,7 @@ struct attack *attk;
 						(attk->adtyp == AD_BLUD) ? " with a blade of blood!" :
 						(attk->adtyp == AD_EFIR) ? " with a blade of fire!" :
 						(attk->adtyp == AD_EACD) ? " with a blade of acid!" :
+						(attk->adtyp == AD_SVPN) ? " with a pitch-black blade!" :
 						(attk->adtyp == AD_EDRC) ? " with a blade of poison!" : "!";
 					if (youdef)
 						specify_you = TRUE;
@@ -13261,6 +13285,8 @@ int vis;						/* True if action is at all visible to the player */
 			poisons |= OPOISON_SLEEP;
 		if (poisonedobj->oartifact == ART_DIRGE)
 			poisons |= OPOISON_ACID;
+		if (poisonedobj->otyp == FANG_OF_APEP)
+			poisons |= OPOISON_DIRE;
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
 			if (monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
@@ -13323,6 +13349,9 @@ int vis;						/* True if action is at all visible to the player */
 			{
 			case OPOISON_BASIC:
 				resists = Poison_res(mdef);
+				majoreff = !rn2(10);
+				break;
+			case OPOISON_DIRE:
 				majoreff = !rn2(10);
 				break;
 			case OPOISON_FILTH:
@@ -13395,6 +13424,12 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 			case OPOISON_FILTH:
 				poisdmg += (major) ? (youdef ? d(3, 12) : 100) : rnd(12);
+				break;
+			case OPOISON_DIRE:
+				if(Poison_res(mdef))
+					poisdmg += (major) ? (youdef ? d(3, 6) : 80) : rn1(10, 6)/2;
+				else
+					poisdmg += (major) ? (youdef ? d(6, 6) : 160) : rn1(10, 6);
 				break;
 			case OPOISON_SLEEP:
 				/* no damage */
@@ -15258,6 +15293,7 @@ int vis;						/* True if action is at all visible to the player */
 				case OPOISON_BASIC:
 				case OPOISON_BLIND:
 				case OPOISON_PARAL:
+				case OPOISON_DIRE:
 					Sprintf(poisons_str, "poison");
 					break;
 				case OPOISON_FILTH:
@@ -15305,6 +15341,33 @@ int vis;						/* True if action is at all visible to the player */
 						!rn2(2) ?	A_CON :
 									A_DEX);
 					int amnt = rnd(ACURR(attrib) / 5);
+
+					if (adjattrib(attrib, -amnt, 1))
+						pline_The("poison was quite debilitating...");
+				}
+				else if ((vis&VIS_MDEF) && lethaldamage)
+					pline_The("poison was deadly...");
+				break;
+			case OPOISON_DIRE:
+				if (youdef) {
+					int attrib = (
+						!rn2(3) ?	A_STR :
+						!rn2(2) ?	A_CON :
+									A_DEX);
+					if (!rn2(10) && attrib != A_CHA) {
+						int drain = attrib == A_CON ? -2 : -rn1(3, 3);
+						if(Poison_resistance)
+							drain = (drain - 1)/2;
+						else
+							drain -= 4;
+
+						adjattrib(A_CON, drain, 1);
+					}
+					int amnt = rn1(3, 3);
+					if(Poison_resistance)
+						amnt = (amnt + 1)/2;
+					else
+						amnt += 2;
 
 					if (adjattrib(attrib, -amnt, 1))
 						pline_The("poison was quite debilitating...");

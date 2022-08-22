@@ -380,6 +380,69 @@ tactics(mtmp)
 			mtmp->mfleetim = 0;
 			return 1;
 		}
+		else if(mtmp->mtyp == PM_JRT_NETJER && !mtmp->mpeaceful && !mtmp->mcan && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) > 1){
+		// else if(mtmp->mtyp == PM_JRT_NETJER && !mtmp->mpeaceful && !mtmp->mcan && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) > 1 && !rn2(3)){
+			if(!Blind)
+				pline("Stars swirl around you.");
+			int type;
+			int ox = mtmp->mx, oy = mtmp->my;
+			struct monst *tmpm;
+			if(rn2(6)){
+				type = PM_MOTE_OF_LIGHT;
+			}
+			else {
+				if(dungeon_topology.alt_tulani == CAILLEA_CASTE)
+					type = PM_MOONSHADOW;
+				else
+					type = PM_BALL_OF_RADIANCE;
+			}
+			tmpm = makemon(&mons[type], u.ux, u.uy, NO_MINVENT|MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+			if(tmpm){
+				struct obj *otmp;
+				int ctype = counter_were(type);
+				if(canseemon(tmpm))
+					pline("The stars coalesce into %s!", an(mons[type].mname));
+				otmp = mksobj(KHOPESH, MKOBJ_NOINIT);
+				set_material_gm(otmp, COPPER);
+				add_oprop(otmp, OPROP_HOLYW);
+				otmp->objsize = mons[ctype].msize;
+				fix_object(otmp);
+				(void) mpickobj(tmpm, otmp);
+
+
+				if(type != PM_BALL_OF_RADIANCE){
+					otmp = mksobj(KHOPESH, MKOBJ_NOINIT);
+					set_material_gm(otmp, COPPER);
+					add_oprop(otmp, OPROP_HOLYW);
+					otmp->objsize = mons[ctype].msize;
+					fix_object(otmp);
+					(void) mpickobj(tmpm, otmp);
+				}
+				otmp = mksobj(ARCHAIC_HELM, MKOBJ_NOINIT);
+				set_material_gm(otmp, COPPER);
+				add_oprop(otmp, OPROP_HOLY);
+				otmp->objsize = mons[ctype].msize;
+				fix_object(otmp);
+				(void) mpickobj(tmpm, otmp);
+				
+				otmp = mksobj(WAISTCLOTH, MKOBJ_NOINIT);
+				set_material_gm(otmp, CLOTH);
+				otmp->obj_color = CLR_WHITE;
+				add_oprop(otmp, OPROP_HOLY);
+				otmp->objsize = mons[ctype].msize;
+				fix_object(otmp);
+				(void) mpickobj(tmpm, otmp);
+			}
+			if(has_template(mtmp, POISON_TEMPLATE))
+				set_template(tmpm, POISON_TEMPLATE);
+			else if(has_template(mtmp, MAD_TEMPLATE))
+				set_template(tmpm, FALLEN_TEMPLATE);
+			else if(has_template(mtmp, FALLEN_TEMPLATE))
+				set_template(tmpm, FALLEN_TEMPLATE);
+			if(mtmp->mfaction)
+				set_faction(tmpm, mtmp->mfaction);
+			return 1;
+		}
 		/* if wounded, hole up on or near the stairs (to block them) */
 		/* unless, of course, there are no stairs (e.g. endlevel) */
 		mtmp->mavenge = 1; /* covetous monsters attack while fleeing */
@@ -443,6 +506,15 @@ tactics(mtmp)
 				|| mtmp->mtyp == PM_MASTER_KAEN
 			){
 				monline(mtmp);
+				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
+			}
+			else if(mtmp->mtyp == PM_JRT_NETJER){
+				if(!mtmp->mcan && !rn2(3))
+					mofflin(mtmp);
+				else if(!mtmp->mcan && rn2(2))
+					mofflin_close(mtmp);
+				else
+					mnexto(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			}
 			else if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||

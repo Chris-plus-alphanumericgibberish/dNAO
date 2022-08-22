@@ -3607,6 +3607,12 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "mindless ", l = 9)) {
 				undeadtype = MINDLESS;
 			}
+			else if (!strncmpi(bufp, "poison_template ", l = 16)) {
+				undeadtype = POISON_TEMPLATE;
+			}
+			else if (!strncmpi(bufp, "moly-", l = 5)) {
+				undeadtype = MOLY_TEMPLATE;
+			}
 			else
 				break;
 

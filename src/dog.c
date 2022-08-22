@@ -1478,7 +1478,7 @@ int enhanced;
 		return (struct monst *)0;
 	}
 
-	if (mtmp->mtame || (!mtmp->mcanmove && !mtmp->moccupation) ||
+	if (mtmp->mtame || (!mtmp->mcanmove && !mtmp->moccupation && !enhanced) ||
 	    /* monsters with conflicting structures cannot be tamed */
 	    mtmp->isshk || mtmp->isgd || mtmp->ispriest || mtmp->isminion ||
 	    mtmp->mtyp == urole.neminum ||

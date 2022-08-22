@@ -315,7 +315,7 @@ struct monst * mon;
 		return TRUE;
 	}
 
-	if (triggers_ophidiophobia(mon->data) && roll_madness(MAD_OPHIDIOPHOBIA)){
+	if (triggers_ophidiophobia(mon) && roll_madness(MAD_OPHIDIOPHOBIA)){
 		pline("You're afraid to go near that horrid serpent!");
 		return TRUE;
 	}

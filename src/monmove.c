@@ -1322,6 +1322,61 @@ register struct monst *mtmp;
 			return 0;
 		}
 	}
+	if(mtmp->mtyp == PM_JRT_NETJER && !mtmp->mpeaceful && !mtmp->mcan && !rn2(3)){
+		int type;
+		int ox = mtmp->mx, oy = mtmp->my;
+		struct monst *tmpm;
+		boolean printed = FALSE;
+		if(canseemon(mtmp)){
+			pline("Stars twinkle around %s.", mon_nam(mtmp));
+			printed = TRUE;
+		}
+		rloc(mtmp, TRUE);
+		if(mtmp->mx != ox || mtmp->my != oy){
+			if(rn2(3)){
+				type = PM_COURE_ELADRIN;
+			}
+			else {
+				if(dungeon_topology.alt_tulani == CAILLEA_CASTE)
+					type = PM_CAILLEA_ELADRIN;
+				else
+					type = PM_TULANI_ELADRIN;
+			}
+			tmpm = makemon(&mons[type], ox, oy, NO_MINVENT|MM_NOCOUNTBIRTH);
+			if(tmpm){
+				struct obj *otmp;
+				if(canseemon(tmpm))
+					pline("%stars coalesce into %s!", printed ? "The s" : "S", an(mons[type].mname));
+				otmp = mongets(tmpm, KHOPESH, MKOBJ_NOINIT);
+				set_material_gm(otmp, COPPER);
+				add_oprop(otmp, OPROP_HOLYW);
+				if(type != PM_TULANI_ELADRIN){
+					otmp = mongets(tmpm, KHOPESH, MKOBJ_NOINIT);
+					set_material_gm(otmp, COPPER);
+					add_oprop(otmp, OPROP_HOLYW);
+				}
+				otmp = mongets(tmpm, ARCHAIC_HELM, MKOBJ_NOINIT);
+				set_material_gm(otmp, COPPER);
+				add_oprop(otmp, OPROP_HOLY);
+				
+				otmp = mongets(tmpm, WAISTCLOTH, MKOBJ_NOINIT);
+				set_material_gm(otmp, CLOTH);
+				add_oprop(otmp, OPROP_HOLY);
+				otmp->obj_color = CLR_WHITE;
+				tmpm->mpeaceful = mtmp->mpeaceful;
+				set_malign(tmpm);
+				if(has_template(mtmp, POISON_TEMPLATE))
+					set_template(tmpm, POISON_TEMPLATE);
+				else if(has_template(mtmp, MAD_TEMPLATE))
+					set_template(tmpm, FALLEN_TEMPLATE);
+				else if(has_template(mtmp, FALLEN_TEMPLATE))
+					set_template(tmpm, FALLEN_TEMPLATE);
+				if(mtmp->mfaction)
+					set_faction(tmpm, mtmp->mfaction);
+			}
+			return 0;
+		}
+	}
 	if(mtmp->mtyp == PM_SHALOSH_TANNAH && !rn2(9)){
 		struct monst *tmpm;
 		int i = rnd(3);
@@ -1668,7 +1723,7 @@ register struct monst *mtmp;
 	/* the watch will look around and see if you are up to no good :-) */
 	if (mdat->mtyp == PM_WATCHMAN || mdat->mtyp == PM_WATCH_CAPTAIN)
 		watch_on_duty(mtmp);
-	if(mdat->mtyp == PM_NURSE || mdat->mtyp == PM_HEALER || mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
+	if(mdat->mtyp == PM_NURSE || mdat->mtyp == PM_HEALER || mdat->mtyp == PM_CLAIRVOYANT_CHANGED || mdat->mtyp == PM_VEIL_RENDER){
 		int i, j;
 		struct trap *ttmp;
 		struct monst *tmon;
@@ -1677,20 +1732,42 @@ register struct monst *mtmp;
 				if(isok(mtmp->mx+i,mtmp->my+j)){
 					ttmp = t_at(mtmp->mx+i,mtmp->my+j);
 					tmon = m_at(mtmp->mx+i,mtmp->my+j);
-					if(ttmp && ttmp->ttyp == VIVI_TRAP && tmon && tmon->mtrapped){
-						if(canspotmon(mtmp))
-							pline("%s frees a vivisected prisoner from an essence trap!", Monnam(mtmp));
-						tmon->mpeaceful = mtmp->mpeaceful;
-						tmon->mtrapped = 0;
-						if(mtmp->mtame){
-							reward_untrap(ttmp, tmon);
-							u.uevent.uaxus_foe = 1;
-							pline("An alarm sounds!");
-							aggravate();
+					if(tmon){
+						if(tmon->mtrapped && ttmp && ttmp->ttyp == VIVI_TRAP){
+							if(canspotmon(mtmp))
+								pline("%s frees a vivisected prisoner from an essence trap!", Monnam(mtmp));
+							tmon->mpeaceful = mtmp->mpeaceful;
+							tmon->mtrapped = 0;
+							if(mtmp->mtame){
+								reward_untrap(ttmp, tmon);
+								u.uevent.uaxus_foe = 1;
+								pline("An alarm sounds!");
+								aggravate();
+							}
+							deltrap(ttmp);
+							newsym(mtmp->mx+i,mtmp->my+j);
+							return 1;
 						}
-						deltrap(ttmp);
-						newsym(mtmp->mx+i,mtmp->my+j);
-						return 1;
+						else if(tmon->mtyp == PM_JRT_NETJER && has_template(tmon, POISON_TEMPLATE) && mon_can_see_mon(mtmp, tmon)){
+							struct obj *armor = which_armor(tmon, W_ARM);
+							struct obj *under = which_armor(tmon, W_ARMU);
+							if((!armor || !arm_blocks_upper_body(armor->otyp)) && (!under || !arm_blocks_upper_body(under->otyp)) && helpless_still(tmon)){
+								pline("%s extracts the fang from %s heart!", Monnam(mtmp), s_suffix(mon_nam(tmon)));
+								set_template(tmon, 0);
+								struct monst *newmon = tamedog_core(tmon, (struct obj *)0, TRUE);
+								if(newmon){
+									tmon = newmon;
+									newsym(tmon->mx, tmon->my);
+									tmon->mpeaceful = mtmp->mpeaceful;
+									if(mtmp->mtame){
+										pline("%s comes to %s senses, and is incredibly grateful for the aid!", Monnam(tmon), mhis(tmon));
+										if(get_mx(tmon, MX_EDOG)){
+											EDOG(tmon)->loyal = 1;
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 	}

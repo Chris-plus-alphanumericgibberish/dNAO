@@ -1851,7 +1851,23 @@ gotit:
 	else
 		mtmp = m_at(cc.x, cc.y);
 	if (mtmp) {
-		if (costly_spot(mtmp->mx, mtmp->my)) {
+		if(mtmp->mtyp == PM_JRT_NETJER && has_template(mtmp, POISON_TEMPLATE) && canseemon(mtmp)){
+			struct obj *armor;
+			if((armor = which_armor(mtmp, W_ARM)) && arm_blocks_upper_body(armor->otyp))
+				/*no message*/;
+			else if((armor = which_armor(mtmp, W_ARMU)) && arm_blocks_upper_body(armor->otyp))
+				/*no message*/;
+			else {
+				pline("A broken-off fang is embedded in %s chest. It seems to have pierced %s heart!", s_suffix(mon_nam(mtmp)), mhis(mtmp));
+				if(!helpless_still(mtmp)){
+					pline("%s moves to quickly for you to grasp the fang.", Monnam(mtmp));
+				}
+				else if(yn("Attempt to remove the fang?")=='y'){
+					timepassed = you_remove_jrt_fang(mtmp, (struct obj *)0);
+				}
+			}
+		}
+		else if (costly_spot(mtmp->mx, mtmp->my)) {
 			verbalize("Not in my store!");
 			timepassed = MOVE_STANDARD;
 		}

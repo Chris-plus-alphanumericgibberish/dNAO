@@ -2954,6 +2954,7 @@ E int NDECL(dodeepswim);
 E void FDECL(drain_en, (int));
 E int NDECL(dountrap);
 E void FDECL(remove_trap_ammo, (struct trap *));
+E int FDECL(you_remove_jrt_fang, (struct monst *, struct obj *));
 E int FDECL(untrap, (struct obj *));
 E boolean FDECL(chest_trap, (struct obj *,int,BOOLEAN_P));
 E void FDECL(deltrap, (struct trap *));

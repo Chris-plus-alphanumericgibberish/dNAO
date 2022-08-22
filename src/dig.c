@@ -1717,6 +1717,9 @@ int x, y;
 				break;
 			}
 		break;
+		case VN_JRT:
+			mid = PM_JRT_NETJER;
+		break;
 		case VN_N_PIT_FIEND:
 			mid = PM_NESSIAN_PIT_FIEND;
 		break;
@@ -1795,12 +1798,18 @@ int x, y;
 	else {
 		mon = makemon(&mons[mid], x, y, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 	}
-	
+
 	if(mon){
+		mon->mpeaceful = FALSE;
+		set_malign(mon);
 		give_hell_vault_trophy(levl[x][y].vaulttype);
 		if(levl[x][y].vaulttype == VN_MAD_ANGEL){
 			set_template(mon, MAD_TEMPLATE);
 			mon->m_lev += (mon->data->mlevel)/2;
+		}
+		else if(levl[x][y].vaulttype == VN_JRT){
+			set_template(mon, POISON_TEMPLATE);
+			mon->m_lev = 30;
 		}
 		mon->mhpmax = max(4, 8*mon->m_lev);
 		mon->mhp = mon->mhpmax;
@@ -1821,6 +1830,7 @@ int x, y;
 
 			case VN_TERAPHIM:
 			case VN_MAD_ANGEL:
+			case VN_JRT:
 				mofflin_close(mon);
 				break;
 

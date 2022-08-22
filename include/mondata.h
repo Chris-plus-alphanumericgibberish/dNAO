@@ -453,6 +453,7 @@
 #define is_snake(ptr)		(((ptr)->mflagsa & MA_REPTILIAN) != 0L && (ptr)->mlet == S_SNAKE)
 #define is_demon(ptr)		(((ptr)->mflagsa & MA_DEMON) != 0L)
 #define is_law_demon(ptr)	(((ptr)->mflagsa & MA_DEMON) != 0L && is_lawful(ptr))
+#define is_cha_demon(ptr)	(((ptr)->mflagsa & MA_DEMON) != 0L && is_chaotic(ptr))
 #define is_ancient(ptr)		(((ptr)->mtyp >=  PM_ANCIENT_OF_BLESSINGS\
 							&& (ptr)->mtyp <= PM_ANCIENT_OF_DEATH) \
 							|| (ptr)->mtyp == PM_BAALPHEGOR \
@@ -551,7 +552,7 @@
 #define	is_goat_tentacle_mon(mon)	(is_goat_tentacle_mtyp((mon)->data) || has_template(mon, MISTWEAVER))
 #define	is_snake_bite_mtyp(ptr)	((ptr)->mtyp == PM_MEDUSA \
 									|| (ptr)->mtyp == PM_ANCIENT_NAGA)
-#define	is_snake_bite_mon(mon)	(is_snake_bite_mtyp((mon)->data))
+#define	is_snake_bite_mon(mon)	(is_snake_bite_mtyp((mon)->data) || has_template(mon, MOLY_TEMPLATE))
 #define	is_tailslap_mtyp(ptr)	(is_true_adult_dragon(ptr) || (ptr)->mtyp == PM_UISCERRE_ELADRIN || (ptr)->mtyp == PM_DISENCHANTER)
 #define	is_tailslap_mon(mon)	(is_tailslap_mtyp((mon)->data))
 
@@ -649,7 +650,9 @@
 							 || mtyp == PM_CROW_WINGED_HALF_DRAGON || mtyp == PM_ADVENTURESS_ZARIA \
 							)
 
-#define triggers_ophidiophobia(ptr)	(is_snake((ptr))\
+#define triggers_ophidiophobia(mon)	(triggers_ophidiophobia_ptr((mon)->data) || has_template(mon, MOLY_TEMPLATE))
+
+#define triggers_ophidiophobia_ptr(ptr)	(is_snake((ptr))\
 		|| (ptr)->mlet == S_NAGA\
 		|| (ptr)->mtyp == PM_COUATL\
 		|| (ptr)->mtyp == PM_LILLEND\
@@ -938,6 +941,7 @@
 				 || is_great_old_one(ptr) \
 				 || is_primordial(ptr) \
 				 || has_mind_blast(ptr) \
+				 || (ptr)->mtyp == PM_JRT_NETJER \
 				)
 
 #define is_mind_flayer(ptr)	((ptr)->mtyp == PM_MIND_FLAYER || \

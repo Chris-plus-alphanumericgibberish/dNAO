@@ -4462,6 +4462,117 @@ struct trap *ttmp;
 }
 
 int
+you_remove_jrt_fang(mtmp, tool)
+struct monst *mtmp;
+struct obj *tool;
+{
+	int dmg = 0;
+	if(tool && tool->oartifact){
+		if(Role_if(PM_HEALER) || u.sealsActive&SEAL_BUER){
+			You("teleport the fang out of %s heart, treating the wound after you do.", s_suffix(mon_nam(mtmp)));
+			set_template(mtmp, 0);
+			struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+			if(newmon){
+				mtmp = newmon;
+				newsym(mtmp->mx, mtmp->my);
+				pline("%s comes to %s senses, and is incredibly grateful for the aid!", Monnam(mtmp), mhis(mtmp));
+				if(get_mx(mtmp, MX_EDOG)){
+					EDOG(mtmp)->loyal = 1;
+				}
+			}
+		}
+		else if(mtmp->mhp > (dmg = d(10,4))){
+			You("teleport the fang out of %s heart, but are unable to provide proper medical care afterwards.", s_suffix(mon_nam(mtmp)));
+			pline("Luckly, %s survives the process!", mhe(mtmp));
+			set_template(mtmp, 0);
+			mtmp->mhp -= dmg;
+			if(rnd(20) > (ACURR(A_CHA)+2)){
+				pline("%s comes to %s senses, but makes no move to aid you in return.", Monnam(mtmp), mhis(mtmp));
+				mtmp->mpeaceful = TRUE;
+				set_malign(mtmp);
+			}
+			else {
+				struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+				if(newmon){
+					mtmp = newmon;
+					newsym(mtmp->mx, mtmp->my);
+					pline("%s comes to %s senses, and is incredibly grateful for the aid!", Monnam(mtmp), mhis(mtmp));
+					if(get_mx(mtmp, MX_EDOG)){
+						EDOG(mtmp)->loyal = 1;
+					}
+				}
+			}
+		}
+		else {
+			You("teleport the fang out of %s heart, but are unable to provide proper medical care afterwards.", s_suffix(mon_nam(mtmp)));
+			pline("Unfortunately, the wound is fatal.");
+			set_template(mtmp, 0);
+			mondied(mtmp);
+		}
+		struct obj *fang = mksobj(FANG_OF_APEP, MKOBJ_NOINIT);
+		hold_another_object(fang, "You drop %s!", doname(fang), (const char *)0);
+		return MOVE_STANDARD;
+	}
+	else if(uwep && uwep->otyp == SCALPEL){
+		if(Role_if(PM_HEALER) || u.sealsActive&SEAL_BUER){
+			You("extract the fang from %s heart, treating the wound as you do.", s_suffix(mon_nam(mtmp)));
+			set_template(mtmp, 0);
+			struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+			if(newmon){
+				mtmp = newmon;
+				newsym(mtmp->mx, mtmp->my);
+				pline("%s comes to %s senses, and is incredibly grateful for the aid!", Monnam(mtmp), mhis(mtmp));
+				if(get_mx(mtmp, MX_EDOG)){
+					EDOG(mtmp)->loyal = 1;
+				}
+			}
+		}
+		else if(mtmp->mhp > (dmg = d(20,4))){
+			You("extract the fang from %s heart without providing medical care.", s_suffix(mon_nam(mtmp)));
+			pline("Luckly, %s survives the process!", mhe(mtmp));
+			set_template(mtmp, 0);
+			mtmp->mhp -= dmg;
+			if(rnd(20) > ACURR(A_CHA)){
+				pline("%s comes to %s senses, but makes no move to aid you in return.", Monnam(mtmp), mhis(mtmp));
+				mtmp->mpeaceful = TRUE;
+				set_malign(mtmp);
+			}
+			else {
+				struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+				if(newmon){
+					mtmp = newmon;
+					newsym(mtmp->mx, mtmp->my);
+					pline("%s comes to %s senses, and is incredibly grateful for the aid!", Monnam(mtmp), mhis(mtmp));
+					if(get_mx(mtmp, MX_EDOG)){
+						EDOG(mtmp)->loyal = 1;
+					}
+				}
+			}
+		}
+		else {
+			You("cut the fang out of %s heart without providing medical care.", s_suffix(mon_nam(mtmp)));
+			pline("Unfortunately, the process is fatal.");
+			set_template(mtmp, 0);
+			// xkilled(mtmp,0); //Breaks pacifist
+			mondied(mtmp);
+		}
+		struct obj *fang = mksobj(FANG_OF_APEP, MKOBJ_NOINIT);
+		hold_another_object(fang, "You drop %s!", doname(fang), (const char *)0);
+		return MOVE_STANDARD;
+	}
+	else if(yn("You lack an appropriate medical tool. Attempt to remove the fang anyway?")=='y'){
+		You("try to extract the fang from %s heart.", s_suffix(mon_nam(mtmp)));
+		pline("Unfortunately, the process is fatal.");
+		set_template(mtmp, 0);
+		xkilled(mtmp,0); //Breaks pacifist (you got a warning)
+		struct obj *fang = mksobj(FANG_OF_APEP, MKOBJ_NOINIT);
+		hold_another_object(fang, "You drop %s!", doname(fang), (const char *)0);
+		return MOVE_STANDARD;
+	}
+	return MOVE_CANCELLED;
+}
+
+int
 untrap(tool)
 struct obj * tool;
 {
@@ -4482,7 +4593,26 @@ struct obj * tool;
 	x = u.ux + u.dx;
 	y = u.uy + u.dy;
 	if(!isok(x,y)) return MOVE_CANCELLED;
-
+	
+	if((mtmp = m_at(x,y)) && mtmp->mtyp == PM_JRT_NETJER && has_template(mtmp, POISON_TEMPLATE) && canseemon(mtmp)){
+		struct obj *armor;
+		if((armor = which_armor(mtmp, W_ARM)) && arm_blocks_upper_body(armor->otyp))
+			/*no message*/;
+		else if((armor = which_armor(mtmp, W_ARMU)) && arm_blocks_upper_body(armor->otyp))
+			/*no message*/;
+		else {
+			pline("A broken-off fang is embedded in %s chest. It seems to have pierced %s heart!", s_suffix(mon_nam(mtmp)), mhis(mtmp));
+			if(!helpless_still(mtmp)){
+				pline("%s moves to quickly for you to grasp the fang.", Monnam(mtmp));
+			}
+			else if(yn("Attempt to remove the fang?")=='y'){
+				int res = you_remove_jrt_fang(mtmp, tool);
+				if(res != MOVE_CANCELLED)
+					return res;
+			}
+		}
+	}
+	
 	for(otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere) {
 		if(Is_box(otmp) && !u.dx && !u.dy) {
 			box_here = TRUE;

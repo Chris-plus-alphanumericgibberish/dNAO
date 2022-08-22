@@ -300,7 +300,7 @@ register struct monst *mtmp;
 	if(u.specialSealsActive&SEAL_NUDZIRATH && !rn2(4)){
 		(void) mksobj_at(MIRROR, x, y, NO_MKOBJ_FLAGS);
 	}
-	
+
 	if(has_template(mtmp, CRYSTALFIED)){
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
@@ -1051,6 +1051,11 @@ register struct monst *mtmp;
 	    case PM_STONE_GOLEM:
 			obj = mkcorpstat(STATUE, (struct monst *)0,
 				mdat, x, y, FALSE);
+		break;
+	    case PM_JRT_NETJER:
+			if(has_template(mtmp, POISON_TEMPLATE)){
+				(void) mksobj_at(FANG_OF_APEP, x, y, MKOBJ_NOINIT);
+			}
 		break;
 	    case PM_TERAPHIM_TANNAH:
 			obj = mkcorpstat(STATUE, (struct monst *)0,
@@ -3374,7 +3379,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	// Some madnesses cause infighting.
 	//  These grudges are one-way by design.
-	if(mdef->mophidio && triggers_ophidiophobia(magr->data)){
+	if(mdef->mophidio && triggers_ophidiophobia(magr)){
 		return ALLOW_M | ALLOW_TM;
 	}
 	if(mdef->marachno && (
@@ -5010,6 +5015,9 @@ boolean was_swallowed;			/* digestion */
 		return TRUE;
 
 	if (has_template(mon, TOMB_HERD))
+		return TRUE;
+
+	if (has_template(mon, POISON_TEMPLATE))
 		return TRUE;
 
 	if (is_golem(mdat)

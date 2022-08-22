@@ -271,6 +271,9 @@ WEAPON(("worm tooth"),
 WEAPON(("crysknife"),
 	DMG(D(10)), DMG(D(10)),
 	1, 0,  MZ_SMALL,  0, 20,100,  3, P,   P_KNIFE, MINERAL, FALSE, CLR_WHITE),
+WEAPON(("fang of apep"),
+	DMG(D(4)), DMG(D(4)),
+	1, 0,  MZ_MEDIUM,  0, 20,200,  0, P,   P_KNIFE, BONE, FALSE, CLR_BLACK),
 
 WEAPON(("sickle"), /* Vs plants: +6 to hit and double damage */
 	DMG(D(4)), DMG(D(1)),
