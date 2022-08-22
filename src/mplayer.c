@@ -603,6 +603,8 @@ register boolean special;
 		if((special && (mtmp->mtyp == PM_MADMAN || mtmp->mtyp == PM_MADWOMAN))
 			|| (Role_if(PM_MADMAN) && In_quest(&u.uz) && (mtmp->mtyp == PM_NOBLEMAN || mtmp->mtyp == PM_NOBLEWOMAN || mtmp->mtyp == PM_HEALER))
 		){
+			if(mtmp->mtyp == PM_HEALER && in_mklev)
+				mongets(mtmp, TREPHINATION_KIT, NO_MKOBJ_FLAGS);
 			for(struct obj *otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
 				if(is_metallic(otmp)){
 					set_material_gm(otmp, GOLD);
