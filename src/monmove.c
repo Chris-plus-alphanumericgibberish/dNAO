@@ -1244,7 +1244,7 @@ register struct monst *mtmp;
 				int type = mtmp->mvar_dracaePreg;
 				mtmp->mvar_dracaePreg = 0;
 				mtmp->mvar_dracaePregTimer = 0;
-				mtmp = makemon(&mons[type], ox, oy, NO_MINVENT);
+				mtmp = makemon(&mons[type], ox, oy, NO_MINVENT|MM_NOCOUNTBIRTH);
 				if(mtmp){
 					struct obj *otmp;
 					otmp = mksobj(LONG_SWORD, MKOBJ_NOINIT);
@@ -1292,7 +1292,7 @@ register struct monst *mtmp;
 			mtmp->mvar_dracaePregTimer = 0;
 			for(i = rnd(4); i; i--){
 				if(etyp)
-					mtmp = makemon(&mons[etyp], ox, oy, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT);
+					mtmp = makemon(&mons[etyp], ox, oy, NO_MINVENT|MM_ADJACENTOK|MM_ADJACENTSTRICT|MM_NOCOUNTBIRTH);
 				else return 0;
 				if(mtmp){
 					struct obj *otmp;
