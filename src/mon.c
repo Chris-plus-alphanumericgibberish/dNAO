@@ -3354,7 +3354,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		/* creatures you are interacting with */
 		(mdef->moccupation) ||
 		/* peaceful quest guardians/leaders */
-		(mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || md->msound==MS_GUARDIAN || quest_faction(mdef))) ||
+		(mdef->mpeaceful && (mdef->m_id == quest_status.leader_m_id || quest_faction(mdef))) ||
 		/* peaceful Axus */
 		(mdef->mpeaceful && !u.uevent.uaxus_foe && md->mtyp == PM_AXUS)
 	)){
@@ -3492,8 +3492,7 @@ struct monst * mdef;	/* another monster which is next to it */
 
 	/* Since the quest guardians are under siege, it makes sense to have 
        them fight hostiles.  (But we don't want the quest leader to be in danger.) */
-	if( (ma->msound==MS_GUARDIAN 
-		  || (quest_faction(magr) && magr->mpeaceful && In_quest(&u.uz))
+	if( ( (quest_faction(magr) && magr->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_NOBLEMAN) && (ma->mtyp == PM_PEASANT) && magr->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_MADMAN) && ma->mtyp == PM_LADY_CONSTANCE)
 		)
@@ -3504,8 +3503,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		if(magr->mpeaceful==TRUE && mdef->mtame==TRUE) return FALSE;
 	}
 	/* and vice versa */
-	if( (md->msound == MS_GUARDIAN 
-		  || (quest_faction(mdef) && mdef->mpeaceful && In_quest(&u.uz))
+	if( ( (quest_faction(mdef) && mdef->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_NOBLEMAN) && (md->mtyp == PM_PEASANT) && mdef->mpeaceful && In_quest(&u.uz))
 		  || (Role_if(PM_MADMAN) && md->mtyp == PM_LADY_CONSTANCE)
 		)
@@ -5968,8 +5966,8 @@ cleanup:
 	} else if (mdat->msound == MS_NEMESIS){	/* Real good! */
 	    adjalign((int)(ALIGNLIM/4));
 		u.hod = max(u.hod-10,0);
-	} else if (mdat->msound == MS_GUARDIAN && mdat->mtyp != PM_THUG && !always_hostile(mdat)) {	/* Bad *//*nobody cares if you kill thugs*/
-	    adjalign(-(int)(ALIGNLIM/8));											/*what's a little murder amongst rogues?*/
+	} else if (quest_faction(mtmp) && mdat->mtyp == urole.guardnum && mdat->mtyp != PM_THUG) {	/*nobody cares if you kill thugs*/
+	    adjalign(-(int)(ALIGNLIM/8));															/* what's a little murder amongst rogues?*/
 		u.hod += 10;
 	    if (!Hallucination) pline("That was probably a bad idea...");
 	    else pline("Whoopsie-daisy!");
@@ -6378,14 +6376,13 @@ register struct monst *mtmp;
 	/* attacking your own quest leader will anger his or her guardians */
 	if (!flags.mon_moving &&	/* should always be the case here */
 		mtmp->m_id == quest_status.leader_m_id) {
-		// mtmp->mtyp == quest_info(MS_LEADER) {
 	    struct monst *mon;
 	    struct permonst *q_guardian = &mons[quest_info(MS_GUARDIAN)];
 	    int got_mad = 0;
 
 	    /* guardians will sense this attack even if they can't see it */
 	    for (mon = fmon; mon; mon = mon->nmon)
-		if (!DEADMONSTER(mon) && mon->data == q_guardian && mon->mpeaceful) {
+		if (!DEADMONSTER(mon) && quest_faction(mon) && mon->mpeaceful) {
 		    mon->mpeaceful = 0;
 			newsym(mon->mx, mon->my);
 		    if (canseemon(mon)) ++got_mad;
