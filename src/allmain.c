@@ -1440,6 +1440,7 @@ moveloop()
 		impossible("Bad alignment initializer detected and fixed. Save and reload.");
 	}
 	// printMons();
+	// printMonNames();
 	// printDPR();
 	// printBodies();
 	// printSanAndInsight();
