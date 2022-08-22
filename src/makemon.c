@@ -6422,7 +6422,6 @@ int mmflags;
 		    case PM_ORC_OF_THE_AGES_OF_STARS:
 				otmp = mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
 				if(otmp) MAYBE_MERC(otmp)
-				(void)mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
 				(void)mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
 				(void)mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
 				(void)mongets(mtmp, ORCISH_CLOAK, mkobjflags);
