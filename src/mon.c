@@ -5118,22 +5118,16 @@ struct monst *mon;
 
 	/* create a gas cloud */
 	create_gas_cloud(mm.x, mm.y, rn1(2,1), rnd(8), FALSE);
-
-	if (ferntype != NON_PM) 
+	
+	/*Note: the original summoner might already be dead by the time the fern grows, so what to do with summoned ferns can be unclear*/
+	if (ferntype != NON_PM && !get_mx(mon, MX_ESUM)) 
 	{
 		struct monst * mtmp;
-		boolean summoned = !!get_mx(mon, MX_ESUM);
-		int mmflags = summoned ? MM_ESUM : NO_MM_FLAGS;
 		/* when creating a new fern, 5/6 chance of creating a fern sprout and 1/6 chance of a fully-grown one */
 		if (rn2(6))
 			ferntype = big_to_little(ferntype);
 
-		mtmp = makemon(&mons[ferntype], mm.x, mm.y, mmflags);
-
-		if (mtmp) {
-			if (summoned)
-				mark_mon_as_summoned(mtmp, mon->mextra_p->esum_p->summoner, ESUMMON_PERMANENT, 0);
-		}
+		mtmp = makemon(&mons[ferntype], mm.x, mm.y, NO_MM_FLAGS);
 	}
 }
 
