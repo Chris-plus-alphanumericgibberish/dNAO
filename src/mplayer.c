@@ -112,8 +112,9 @@ int typ;
 }
 
 void
-init_mplayer_gear(ptr, special, weapon, secweapon, rweapon, rwammo, armor, shirt, cloak, helm, boots, gloves, shield, tool)
+init_mplayer_gear(ptr, female, special, weapon, secweapon, rweapon, rwammo, armor, shirt, cloak, helm, boots, gloves, shield, tool)
 register struct permonst *ptr;
+boolean female;
 boolean special;
 int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boots, *gloves, *shield, *tool;
 {
@@ -350,8 +351,14 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		*boots = LOW_BOOTS;
 	break;
 	case PM_SAMURAI:
-		*weapon = KATANA;
-		*secweapon = WAKIZASHI;
+		if(female){
+			*weapon = NAGINATA;
+			*secweapon = KNIFE;
+		}
+		else {
+			*weapon = KATANA;
+			*secweapon = WAKIZASHI;
+		}
 		*rweapon = YUMI;
 		*rwammo = YA;
 		*helm = HELMET;
@@ -443,7 +450,7 @@ register boolean special;
 	    struct obj *otmp;
 		int weapon, secweapon, rweapon, rwammo, armor, shirt, cloak, helm, boots, gloves, shield, tool;
 		
-		init_mplayer_gear(ptr, special, &weapon, &secweapon, &rweapon, &rwammo, &armor, &shirt, &cloak, &helm, &boots, &gloves, &shield, &tool);
+		init_mplayer_gear(ptr, mtmp->female, special, &weapon, &secweapon, &rweapon, &rwammo, &armor, &shirt, &cloak, &helm, &boots, &gloves, &shield, &tool);
 		
 		if(mtmp && ptr->mtyp == PM_INCANTIFIER && Infuture){
 			give_mintrinsic(mtmp, TELEPAT);
