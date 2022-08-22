@@ -1794,7 +1794,7 @@ moveloop()
 						continue;
 					}
 				}
-				if(mtmp->mtyp == PM_STRANGE_LARVA){
+				if(mtmp->mtyp == PM_STRANGE_LARVA && !has_template(mtmp, TOMB_HERD)){
 					grow_up(mtmp, (struct monst *)0);
 					//grow up can kill monster.
 					if(DEADMONSTER(mtmp))
