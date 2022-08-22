@@ -901,12 +901,22 @@ int template;
 			attk->damd = max(ptr->msize * 2, max(attk->damd, 4));
 			special = TRUE;
 		}
-		/* vampires' bites are vampiric */
+		/* vampires' bites are vampiric: pt 1: other bites */
 		if (template == VAMPIRIC && (
-			(attk->aatyp == AT_BITE)
-			|| insert_okay
-			))
-		{
+			attk->aatyp == AT_OBIT
+			|| attk->aatyp == AT_LNCK
+			)
+		){
+			attk->adtyp = AD_VAMP;
+			attk->damn = max(1, attk->damn);
+			attk->damd = max(4, max(ptr->msize * 2, attk->damd));
+		}
+		/* vampires' bites are vampiric: pt 2: primary bites*/
+		if (template == VAMPIRIC && (
+			attk->aatyp == AT_BITE
+			|| (insert_okay && !nomouth(ptr->mtyp))
+			)
+		){
 			maybe_insert();
 			attk->aatyp = AT_BITE;
 			attk->adtyp = AD_VAMP;
