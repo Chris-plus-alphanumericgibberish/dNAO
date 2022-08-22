@@ -5063,6 +5063,8 @@ int junked;
 						otmp = mksobj_at(ARCHAIC_PLATE_MAIL, x, y, NO_MKOBJ_FLAGS);
 						if(otmp){
 							otmp->oeroded2 = 3;
+							otmp->objsize = MZ_LARGE;
+							fix_object(otmp);
 						}
 					}
 					if(!rn2(4)){
