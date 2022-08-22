@@ -5481,6 +5481,9 @@ boolean ranged;
 			/* metroids gain life (but not the player) */
 			if (!youagr && is_metroid(pa)) {
 				*hpmax(magr) += d(1, 4);
+				if(ptmp < 0){
+					impossible("Monster (%s) has negative current hp in metroid code (hp: %d ptmp: %d)!", noit_mon_nam(mdef), mdef->mhp, ptmp);
+				}
 				heal(magr, ptmp/2);
 				/* tame metroids gain nutrition (does not stack with for-vampires above, since they have lifedrain instead of bloodsuck attacks) */
 				if (get_mx(magr, MX_EDOG)){
