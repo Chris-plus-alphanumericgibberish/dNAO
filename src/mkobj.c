@@ -660,7 +660,7 @@ int mkflags;
 #ifdef INVISIBLE_OBJECTS
 	otmp->oinvis = !rn2(1250);
 #endif
-	otmp->quan = is_multigen(otmp) ? (long) rn1(6,6) : 1L;
+	otmp->quan = is_multigen(otmp) ? ((long) rn1(4,4) + d(2,level_difficulty()+2)) : 1L;
 	if (init) {
 		switch (let) {
 		case WEAPON_CLASS:

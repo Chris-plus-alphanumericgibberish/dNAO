@@ -1168,7 +1168,7 @@ boolean goodequip;
 		fix_object(otmp);
 		(void) mpickobj(mtmp,otmp);
 		
-		otmp = mksobj(FACELESS_HELM, mkobjflags|MKOBJ_NOINIT);
+		otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
 		set_material_gm(otmp, METAL);
 		otmp->bodytypeflag = MB_LONGHEAD;
 		fix_object(otmp);
