@@ -1038,10 +1038,11 @@ struct obj *otmp;	/* existing object */
 		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
 			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
 		){
+			void (*func)(struct obj *, int) = is_ammo(otmp) ? &set_material : &set_material_gm;
 			if(objects[otmp->otyp].oc_material == GLASS)
-				set_material_gm(otmp, rn2(2) ? GLASS : rn2(3) ? OBSIDIAN_MT : GEMSTONE);
+				(*func)(otmp, rn2(2) ? GLASS : rn2(3) ? OBSIDIAN_MT : GEMSTONE);
 			else
-				set_material_gm(otmp, !rn2(7) ? SHADOWSTEEL 
+				(*func)(otmp, !rn2(7) ? SHADOWSTEEL 
 									: !rn2(6) ? SILVER 
 									: !rn2(5) ? MITHRIL 
 									: !rn2(4) ? GLASS
@@ -1246,7 +1247,11 @@ struct obj *otmp;	/* existing object */
 		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
 			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
 		){
-			set_material_gm(otmp, rn2(2) ? GOLD : SILVER);
+			//Ammo can be stuff like silver arrows, so it should use sim-facing material setting
+			if(is_ammo(otmp))
+				set_material(otmp, rn2(2) ? GOLD : SILVER);
+			else
+				set_material_gm(otmp, rn2(2) ? GOLD : SILVER);
 		}
 		else if(otmp->oclass == ARMOR_CLASS){
 			add_oprop(otmp, OPROP_WOOL);
@@ -1356,7 +1361,11 @@ struct obj *otmp;	/* existing object */
 		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
 			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
 		){
-			set_material_gm(otmp, rn2(2) ? GOLD : GREEN_STEEL);
+			//Ammo can be stuff like silver arrows, so it should use sim-facing material setting
+			if(is_ammo(otmp))
+				set_material(otmp, rn2(2) ? GOLD : GREEN_STEEL);
+			else
+				set_material_gm(otmp, rn2(2) ? GOLD : GREEN_STEEL);
 		}
 	}
 	/* armor props */
@@ -1448,7 +1457,11 @@ struct obj *otmp;	/* existing object */
 		if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) 
 			|| (is_hard(otmp) && otmp->oclass == ARMOR_CLASS && otmp->otyp != ORIHALCYON_GAUNTLETS)
 		){
-			set_material_gm(otmp, rn2(2) ? GOLD : IRON);
+			//Ammo can be stuff like silver arrows, so it should use sim-facing material setting
+			if(is_ammo(otmp))
+				set_material(otmp, rn2(2) ? GOLD : IRON);
+			else
+				set_material_gm(otmp, rn2(2) ? GOLD : IRON);
 		}
 	}
 	/* armor props */
