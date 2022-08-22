@@ -2562,6 +2562,8 @@ struct monst *mtmp;
 	display_nhwindow(WIN_MAP, TRUE);
 	docrt();
 	if (unconscious()) {
+		if(is_fainted())
+			unfaint();
 		multi = -1;
 		nomovemsg =
 		      "Aggravated, you are jolted into full consciousness.";

@@ -15,7 +15,6 @@ STATIC_PTR int NDECL(eatmdone);
 STATIC_PTR int NDECL(eatfood);
 STATIC_PTR void FDECL(costly_tin, (const char*));
 STATIC_PTR int NDECL(opentin);
-STATIC_PTR int NDECL(unfaint);
 STATIC_PTR int NDECL(windclock);
 STATIC_PTR int FDECL(clockwork_eat_menu, (BOOLEAN_P,BOOLEAN_P));
 
@@ -4109,7 +4108,6 @@ register int num;
 	newuhs(FALSE);
 }
 
-STATIC_PTR
 int
 unfaint(VOID_ARGS)
 {

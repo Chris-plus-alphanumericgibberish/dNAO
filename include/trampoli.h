@@ -91,7 +91,6 @@
 #define doeat()      doeat_()
 #define eatfood()    eatfood_()
 #define opentin()    opentin_()
-#define unfaint()    unfaint_()
 
 
 /* ### end.c ### */

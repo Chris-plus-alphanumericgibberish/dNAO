@@ -799,8 +799,8 @@ E void NDECL(dust_storm);
 E int NDECL(eatmdone);
 E int NDECL(eatfood);
 E int NDECL(opentin);
-E int NDECL(unfaint);
 #endif
+E int NDECL(unfaint);
 E void FDECL(cprefx, (int, BOOLEAN_P, BOOLEAN_P));
 E void FDECL(cpostfx, (int, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P));
 E boolean FDECL(incantifier_edible, (struct obj *));
