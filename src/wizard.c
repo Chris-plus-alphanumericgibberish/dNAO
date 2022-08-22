@@ -502,6 +502,9 @@ tactics(mtmp)
 			if(mtmp->mtyp == PM_CHAOS){
 				mnexto(mtmp);
 			}
+			else if(mtmp->mtame){
+				mnexto(mtmp);
+			}
 			else if(mtmp->mtyp == PM_GRAND_MASTER
 				|| mtmp->mtyp == PM_MASTER_KAEN
 			){
@@ -523,8 +526,17 @@ tactics(mtmp)
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
 				&& !mtmp->mcan && !mtmp->mspec_used
 			){
-				monline(mtmp);
-				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
+				if(attacktype_fordmg(mtmp->data, AT_ARRW, AD_SLVR)
+					&& !has_object_type(mtmp->minvent, ARROW)
+					&& !has_object_type(mtmp->minvent, SILVER_ARROW)
+					&& !has_object_type(mtmp->minvent, GOLDEN_ARROW)
+					&& !has_object_type(mtmp->minvent, ANCIENT_ARROW)
+				)
+					mnexto(mtmp);
+				else {
+					monline(mtmp);
+					if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
+				}
 			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY)
 				|| attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
 				|| attacktype_fordmg(mtmp->data, AT_BRSH, AD_ANY)
@@ -580,14 +592,44 @@ tactics(mtmp)
 				}
 				return 1;
 			}
-			if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
+			if(mtmp->mtyp == PM_CHAOS){
+				mnexto(mtmp);
+			}
+			else if(mtmp->mtame){
+				mnexto(mtmp);
+			}
+			else if(mtmp->mtyp == PM_GRAND_MASTER
+				|| mtmp->mtyp == PM_MASTER_KAEN
+			){
+				monline(mtmp);
+				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
+			}
+			else if(mtmp->mtyp == PM_JRT_NETJER){
+				if(!mtmp->mcan && !rn2(3))
+					mofflin(mtmp);
+				else if(!mtmp->mcan && rn2(2))
+					mofflin_close(mtmp);
+				else
+					mnexto(mtmp);
+				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
+			}
+			else if((attacktype_fordmg(mtmp->data, AT_BREA, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
 				&& !mtmp->mcan && !mtmp->mspec_used
 			){
-				monline(mtmp);
-				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+				if(attacktype_fordmg(mtmp->data, AT_ARRW, AD_SLVR)
+					&& !has_object_type(mtmp->minvent, ARROW)
+					&& !has_object_type(mtmp->minvent, SILVER_ARROW)
+					&& !has_object_type(mtmp->minvent, GOLDEN_ARROW)
+					&& !has_object_type(mtmp->minvent, ANCIENT_ARROW)
+				)
+					mnexto(mtmp);
+				else {
+					monline(mtmp);
+					if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+				}
 			} else if(attacktype_fordmg(mtmp->data, AT_LRCH, AD_ANY)
 				|| attacktype_fordmg(mtmp->data, AT_LNCK, AD_ANY)
 				|| attacktype_fordmg(mtmp->data, AT_BRSH, AD_ANY)
