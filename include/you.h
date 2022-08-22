@@ -101,6 +101,7 @@ struct Role {
 	struct RoleName name;	/* the role's name (from u_init.c) */
 	struct RoleName rank[9]; /* names for experience levels (from botl.c) */
 	int lgod, ngod, cgod;	/* god numbers (from gnames.h) */
+	int vgod;				/* god number (from gnames.h) to use for vampires */
 	const char *filecode;	/* abbreviation for use in file names */
 	const char *homebase;	/* quest leader's location (from questpgr.c) */
 	const char *intermed;	/* quest intermediate goal (from questpgr.c) */
@@ -165,6 +166,7 @@ extern struct Role urole;
 #define Role_if(X)	(urole.malenum == (X))
 #define Pantheon_if(X)	(flags.racial_pantheon != 0 ? flags.racial_pantheon == (X) : roles[flags.pantheon].malenum == (X))
 #define Role_switch	(urole.malenum)
+
 /* also used to see if you're allowed to eat cats and dogs */
 #define CANNIBAL_ALLOWED() (Role_if(PM_CAVEMAN) || Race_if(PM_ORC) || \
 		Race_if(PM_VAMPIRE))

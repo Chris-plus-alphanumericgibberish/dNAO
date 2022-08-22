@@ -1442,6 +1442,14 @@ moveloop()
 		flags.initalign = 2;
 		impossible("Bad alignment initializer detected and fixed. Save and reload.");
 	}
+	if(galign(u.ugodbase[UGOD_ORIGINAL]) == A_NONE && flags.initalign != 3){
+		flags.initalign = 3;
+		impossible("Bad alignment initializer detected and fixed. Save and reload.");
+	}
+	if(galign(u.ugodbase[UGOD_ORIGINAL]) == A_VOID && flags.initalign != 4){
+		flags.initalign = 4;
+		impossible("Bad alignment initializer detected and fixed. Save and reload.");
+	}
 	// printMons();
 	// printMonNames();
 	// printDPR();
@@ -3213,6 +3221,7 @@ newgame()
 	flags.panLgod = -1;	/* role_init() will reset this */
 	flags.panNgod = -1;	/* role_init() will reset this */
 	flags.panCgod = -1;	/* role_init() will reset this */
+	flags.panVgod = -1;	/* role_init() will reset this */
 	role_init(TRUE);		/* must be before init_dungeons(), u_init(),
 				 * and init_artifacts() */
 	

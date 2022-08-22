@@ -2085,6 +2085,7 @@ u_init()
 		godlist[urole.lgod].anger = 1;
 		godlist[urole.ngod].anger = 1;
 		godlist[urole.cgod].anger = 1;
+		godlist[urole.vgod].anger = 0;
 		u.usanity = 75; /* Your sanity is not so hot */
 		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
 		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
@@ -2554,6 +2555,12 @@ u_init()
 	case PM_VAMPIRE:
 	    /* Vampires start off with gods not as pleased, luck penalty */
 	    knows_object(POT_BLOOD);
+		if(!Role_if(PM_EXILE) && (u.ualign.type == godlist[urole.vgod].alignment || godlist[urole.vgod].alignment == A_NONE)){
+			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = urole.vgod;
+			if(godlist[urole.vgod].alignment == A_NONE){
+				flags.initalign = 3;
+			}
+		}
 	    adjalign(-5); 
 		u.ualign.sins += 5;
 	    change_luck(-1);
