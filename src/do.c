@@ -734,7 +734,7 @@ struct obj *obj;
 		struct monst *nmon;
 		for(struct monst *mtmp = fmon; mtmp; mtmp = nmon){
 			nmon = mtmp->nmon;
-			if(get_mx(mtmp, MX_ESUM)){
+			if(!DEADMONSTER(mtmp) && get_mx(mtmp, MX_ESUM)){
 				if(mtmp->mextra_p->esum_p->sm_o_id == obj->o_id){
 					monvanished(mtmp);
 				}
