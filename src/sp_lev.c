@@ -1168,7 +1168,7 @@ struct mkroom	*croom;
 					mon->m_insight_level = min(insight, u.uinsight);
 					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
 					mon->entangled = SHACKLES;
-					makemon(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
+					mk_mplayer(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
 					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 				break;
@@ -1275,7 +1275,7 @@ default_case:
 													  WAN_PROBING, SPE_REMOVE_CURSE};
 								int nurse_items[] = {POT_SLEEPING, POT_PARALYSIS, POT_AMNESIA,
 													  SCR_DESTROY_ARMOR, SCR_AMNESIA};
-								mtmp = makemon(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
+								mtmp = mk_mplayer(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
 								if(mtmp){
 									mongets(mtmp, healer_items[rn2(SIZE(healer_items))], NO_MKOBJ_FLAGS);
 									set_faction(mtmp, YELLOW_FACTION);
