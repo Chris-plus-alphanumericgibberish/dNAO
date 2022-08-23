@@ -780,7 +780,9 @@ boolean you_abilities;
 			You("gyre and gimble into the %s.", surface(u.ux,u.uy));
 			if (typ != ROOM) {
 				lev->typ = typ;
-				if (ttmp) (void) delfloortrap(ttmp);
+				if (ttmp) {
+					if(delfloortrap(ttmp)) ttmp = (struct trap *)0;
+				}
 				/* if any objects were frozen here, they're released now */
 				unearth_objs(u.ux, u.uy);
 
