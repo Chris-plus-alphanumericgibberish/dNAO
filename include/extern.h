@@ -2885,7 +2885,7 @@ E void FDECL(cleanup_msummon, (genericptr_t, long));
 E void FDECL(desummon_obj, (genericptr_t, long));
 E void FDECL(summoner_gone, (struct monst *, boolean));
 E void FDECL(stop_corpse_timers, (struct obj *));
-E boolean FDECL(start_timer, (long, SHORT_P, SHORT_P, genericptr_t));
+E timer_element * FDECL(start_timer, (long, SHORT_P, SHORT_P, genericptr_t));
 E void FDECL(pause_timer, (timer_element *));
 E void FDECL(resume_timer, (timer_element *));
 E void FDECL(pause_timers, (timer_element *));
@@ -2897,7 +2897,8 @@ E void FDECL(stop_all_timers, (timer_element *));
 E void NDECL(run_timers);
 E void FDECL(save_timers, (timer_element *,int,int));
 E void FDECL(rest_timers, (int,genericptr_t,timer_element *,int,BOOLEAN_P,long));
-E void FDECL(split_timers, (struct timer *, int, genericptr_t));
+E void FDECL(copy_timer, (struct timer *, int, genericptr_t));
+E void FDECL(copy_timers, (struct timer *, int, genericptr_t));
 #ifdef WIZARD
 E int NDECL(wiz_timeout_queue);
 E void NDECL(timer_sanity_check);
