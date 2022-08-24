@@ -319,7 +319,7 @@ boolean domsg;
 	
 	//Ill-regard specimens are unconscious
 	// So are prisoners
-	if(imprisoned(mtmp)){
+	if(nonthreat(mtmp)){
 		return 0;
 	}
 	

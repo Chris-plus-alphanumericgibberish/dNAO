@@ -4299,7 +4299,7 @@ boolean lethal;
 		)
 			continue;
 
-		if(!youtar && imprisoned(target))
+		if(!youtar && nonthreat(target))
 			continue;
 
 		targets[count++] = target;
@@ -11863,7 +11863,7 @@ do_passive_attacks()
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
-		if(!mtmp->mappearance && !imprisoned(mtmp) && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK)){
+		if(!mtmp->mappearance && !nonthreat(mtmp) && !mtmp->msleeping && mtmp->mcanmove && !(mtmp->mstrategy & STRAT_WAITMASK)){
 			if(is_goat_tentacle_mon(mtmp))
 				dogoat_mon(mtmp);
 			if(is_snake_bite_mon(mtmp))

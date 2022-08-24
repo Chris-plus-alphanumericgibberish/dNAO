@@ -934,7 +934,7 @@ yellow_smite()
 	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6};
 	for(magr = fmon; magr; magr = magr->nmon){
 		if(magr->mpeaceful
-			|| imprisoned(magr)
+			|| nonthreat(magr)
 			|| magr->msleeping
 			|| !magr->mcanmove
 			|| (magr->mstrategy & STRAT_WAITMASK)
@@ -1063,7 +1063,7 @@ yellow_smite()
 			//buff monsters
 			for(struct monst *mon = fmon; mon; mon = mon->nmon){
 				if(mon->mpeaceful
-					|| imprisoned(mon)
+					|| nonthreat(mon)
 					|| mon->msleeping
 					|| !mon->mcanmove
 					|| DEADMONSTER(mon)

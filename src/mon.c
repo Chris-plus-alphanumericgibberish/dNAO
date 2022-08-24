@@ -3362,7 +3362,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	// monsters trapped in vivisection traps are excluded
 	// shackled monsters aren't a threat
-	if(imprisoned(mdef)){
+	if(nonthreat(mdef)){
 		return 0L;
 	}
 	// must be in range to attack mdef
@@ -6495,7 +6495,7 @@ register int x, y, distance;
 						&& !nonliving(tmpm->data)
 						&& !resists_drain(tmpm)
 						&& !DEADMONSTER(tmpm)
-						&& !imprisoned(tmpm)
+						&& !nonthreat(tmpm)
 					) targets++;
 				}
 				if(dist2(u.ux,u.uy,mtmp->mx,mtmp->my) <= distance
@@ -6512,7 +6512,7 @@ register int x, y, distance;
 							&& !nonliving(tmpm->data)
 							&& !resists_drain(tmpm)
 							&& !DEADMONSTER(tmpm)
-							&& !imprisoned(tmpm)
+							&& !nonthreat(tmpm)
 						) targets--;
 						if(!targets) break;
 					}
@@ -8178,7 +8178,7 @@ struct monst *mtmp;
 	&& tmpm->mtame != mtmp->mtame\
 	&& !is_ancient(tmpm)\
 	&& !DEADMONSTER(tmpm)\
-	&& !imprisoned(tmpm)
+	&& !nonthreat(tmpm)
 #define common_valid_target_exhale(tmpm) distmin(tmpm->mx,tmpm->my,mtmp->mx,mtmp->my) <= BOLT_LIM\
 	&& common_valid_target_exhale_nodistance(tmpm)
 
@@ -9038,7 +9038,7 @@ struct monst *mtmp;
 				&& !has_template(tmpm, CRYSTALFIED)
 				&& !is_demon(tmpm->data)
 				&& !DEADMONSTER(tmpm)
-				&& !imprisoned(tmpm)
+				&& !nonthreat(tmpm)
 			) targets++;
 		}
 		if(distmin(u.ux,u.uy,mtmp->mx,mtmp->my) <= 4
@@ -9055,7 +9055,7 @@ struct monst *mtmp;
 					&& !has_template(tmpm, CRYSTALFIED)
 					&& !is_demon(tmpm->data)
 					&& !DEADMONSTER(tmpm)
-					&& !imprisoned(tmpm)
+					&& !nonthreat(tmpm)
 				) targets--;
 				if(!targets) break;
 			}
@@ -9206,7 +9206,7 @@ struct monst *mtmp;
 						&& !has_template(tmpm, CRYSTALFIED)
 						&& (!Curse_res(tmpm, FALSE) || !rn2(8))
 						&& !DEADMONSTER(tmpm)
-						&& !imprisoned(tmpm)
+						&& !nonthreat(tmpm)
 					){
 						for(otmp = tmpm->minvent; otmp; otmp=otmp->nobj)
 							if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)

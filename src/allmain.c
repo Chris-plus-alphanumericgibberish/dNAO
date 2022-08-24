@@ -5187,7 +5187,7 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
@@ -5272,7 +5272,7 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE && symbiote.aatyp != AT_SPIT){
@@ -5552,7 +5552,7 @@ struct monst *magr;
 			if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 				continue;
 
-			if(!youdef && imprisoned(mdef))
+			if(!youdef && nonthreat(mdef))
 				continue;
 
 			if(mdef->mtyp == PM_PALE_NIGHT)
@@ -5631,7 +5631,7 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
@@ -5705,7 +5705,7 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
@@ -5777,7 +5777,7 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
@@ -5847,7 +5847,7 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
@@ -5917,7 +5917,7 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(mdef->mtyp == PM_PALE_NIGHT)

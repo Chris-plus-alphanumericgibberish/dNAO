@@ -199,7 +199,7 @@ struct monst *mon;
 	    return;
 	}
 	
-	if(is_heladrin(mon->data) && imprisoned(mon))
+	if(is_heladrin(mon->data) && nonthreat(mon))
 		return;
 	
 	if(mon == u.ustuck && u.uswallow)

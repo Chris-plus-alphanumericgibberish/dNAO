@@ -935,7 +935,7 @@ boolean ranged;
 {
 	if(mtmp2->moccupation) return FALSE;
 	
-	if(imprisoned(mtmp2)) return FALSE;
+	if(nonthreat(mtmp2)) return FALSE;
 	
 	if(mtmp->mtame && u.peaceful_pets && mtmp2->mpeaceful)
 		return FALSE;

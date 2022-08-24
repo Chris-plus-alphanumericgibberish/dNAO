@@ -199,6 +199,7 @@ struct monst {
 	int entangled;/* The monster is entangled, and in what? */
 #define imprisoned(mon)	((mon)->entangled == SHACKLES || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
 #define noactions(mon)	((mon)->entangled || imprisoned(mon))
+#define nonthreat(mon)	(imprisoned(mon))
 #define helpless(mon) (mon->msleeping || !(mon->mcanmove) || !(mon->mnotlaugh) || noactions(mon))	
 #define helpless_still(mon) (mon->msleeping || !(mon->mcanmove) || noactions(mon))	
 	long mstrategy;		/* for monsters with mflag3: current strategy */
