@@ -2853,7 +2853,12 @@ pick_gemstone()
 	if(count) n = select_menu(tmpwin, how, &selected);
 	else You("don't have any gems.");
 	destroy_nhwindow(tmpwin);
-	return ( n > 0 ) ? selected[0].item.a_char : 0;
+	if(n > 0){
+		char picked = selected[0].item.a_char;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 STATIC_OVL
@@ -2892,7 +2897,12 @@ pick_bullet()
 	if(count) n = select_menu(tmpwin, how, &selected);
 	else You("don't have any bullets.");
 	destroy_nhwindow(tmpwin);
-	return ( n > 0 ) ? selected[0].item.a_char : 0;
+	if(n > 0){
+		char picked = selected[0].item.a_char;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 STATIC_OVL
@@ -2938,7 +2948,12 @@ int *passed_info;
 		n = select_menu(tmpwin, how, &selected);
 	} else pline("Nothing to remove!");
 	destroy_nhwindow(tmpwin);
-	return ( n > 0 ) ? selected[0].item.a_obj : 0;
+	if(n > 0){
+		struct obj *picked = selected[0].item.a_obj;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 #define addArmorMenuOption	Sprintf1(buf, doname(otmp));\
@@ -3013,7 +3028,12 @@ struct monst *mon;
 		n = select_menu(tmpwin, how, &selected);
 	} else pline("Nothing to equip!");
 	destroy_nhwindow(tmpwin);
-	return ( n > 0 ) ? selected[0].item.a_obj : 0;
+	if(n > 0){
+		struct obj *picked = selected[0].item.a_obj;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 STATIC_OVL int

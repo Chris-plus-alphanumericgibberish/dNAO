@@ -1915,6 +1915,7 @@ int splaction;
 
 				} // switch(splaction)
 			} // doing something allowable
+			free(selected);
 		} // menu item was selected
 		/* else end menu, nothing was selected */
 		break;
@@ -2571,7 +2572,12 @@ doclockmenu()
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return (n > 0) ? (short)selected[0].item.a_int : (short)u.ucspeed;
+	if(n > 0){
+		int picked = (short) selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return (short)u.ucspeed;
 }
 
 STATIC_OVL short
@@ -2655,7 +2661,12 @@ dodroidmenu()
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return (n > 0) ? (short)selected[0].item.a_int : 0;
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 #endif /* OVLB */

@@ -401,7 +401,11 @@ register struct monst *oracl;
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	n = (n > 0) ? selected[0].item.a_int : 0;
+	if(n > 0){
+		n = selected[0].item.a_int;
+		free(selected);
+	}
+	n = 0;
 
 	switch (n){
 		case SELECT_MINOR:
@@ -518,7 +522,11 @@ register struct monst *oracl;
 				how = PICK_ONE;
 				n = select_menu(tmpwin, how, &selected);
 				destroy_nhwindow(tmpwin);
-				n = (n > 0) ? selected[0].item.a_int : rnd(5);
+				if(n > 0){
+					n = selected[0].item.a_int;
+					free(selected);
+				}
+				n = rnd(5);
 				switch (n){
 					case 1:
 						switch(dungeon_topology.alt_tulani){

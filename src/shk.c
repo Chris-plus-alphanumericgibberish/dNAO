@@ -1979,7 +1979,7 @@ shk_other_services()
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
 
-	if (n > 0)
+	if (n > 0){
 	    switch (selected[0].item.a_int) {
 	        case 1:
 	                shk_identify(slang, shkp);
@@ -2011,6 +2011,8 @@ shk_other_services()
 	                pline ("Unknown Service");
 	                break;
 	    }
+		free(selected);
+	}
 }
 #endif /* OTHER_SERVICES */
 
@@ -5245,7 +5247,10 @@ struct monst *shkp;
 	end_menu(tmpwin, "Weapon-works:");
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
-	if (n > 0) service = selected[0].item.a_int;
+	if (n > 0){
+		service = selected[0].item.a_int;
+		free(selected);
+	}
 	else service = 0;
 
     /* Here we go */
@@ -5458,86 +5463,88 @@ shk_armor_works(slang, shkp)
 
 	verbalize(we_offer);
 
-	if (n > 0)
-	switch(selected[0].item.a_int) {
-		case 1:
-		if (!flags.female && is_human(youracedata))
-		     verbalize("They'll call you the man of stainless steel!");
+	if (n > 0){
+		switch(selected[0].item.a_int) {
+			case 1:
+			if (!flags.female && is_human(youracedata))
+				 verbalize("They'll call you the man of stainless steel!");
 
-		/* Costs more the more rusty it is (oeroded 0-3) */
-		charge = 300 * (obj->oeroded+1);
-		if (obj->oeroded > 2) verbalize("Yikes!  This thing's a mess!");
+			/* Costs more the more rusty it is (oeroded 0-3) */
+			charge = 300 * (obj->oeroded+1);
+			if (obj->oeroded > 2) verbalize("Yikes!  This thing's a mess!");
 
-		/* Artifacts cost more to deal with */
-		/* KMH -- Avoid floating-point */
-		if (obj->oartifact) charge = charge * 3 / 2;
-		
-		/* Smooth out the charge a bit */
-		shk_smooth_charge(&charge, 100, 1000);
+			/* Artifacts cost more to deal with */
+			/* KMH -- Avoid floating-point */
+			if (obj->oartifact) charge = charge * 3 / 2;
+			
+			/* Smooth out the charge a bit */
+			shk_smooth_charge(&charge, 100, 1000);
 
-		if (shk_offer_price(slang, charge, shkp) == FALSE) return;
+			if (shk_offer_price(slang, charge, shkp) == FALSE) return;
 
-		/* Have some fun, but for this $$$ it better work. */
-		if (Confusion)
-			You("forget how to put your %s back on!", xname(obj));
-		else if (Hallucination)
-			You("mistake your %s for a pot and...", xname(obj));
+			/* Have some fun, but for this $$$ it better work. */
+			if (Confusion)
+				You("forget how to put your %s back on!", xname(obj));
+			else if (Hallucination)
+				You("mistake your %s for a pot and...", xname(obj));
 
-		obj->oeroded = 0;
-		obj->rknown = TRUE;
-		obj->oerodeproof = TRUE;
-		break;
-
-		case 2:
-		verbalize("Nobody will ever hit on you again.");
- 
-		/* Higher enchantment levels cost more. */
-		charge = (obj->spe+1) * (obj->spe+1) * 100;
-						
-		if (obj->spe < 0) charge = 100;                
-
-		/* Artifacts cost more to deal with */
-		if (obj->oartifact) charge *= 2;
-		
-		/* Smooth out the charge a bit */
-		shk_smooth_charge(&charge, 50, NOBOUND);
-
-		if (shk_offer_price(slang, charge, shkp) == FALSE) return;
-		if (obj->spe+1 > 3) { 
-			verbalize("I can't enchant this any higher!");
-			charge = 0;
+			obj->oeroded = 0;
+			obj->rknown = TRUE;
+			obj->oerodeproof = TRUE;
 			break;
+
+			case 2:
+			verbalize("Nobody will ever hit on you again.");
+	 
+			/* Higher enchantment levels cost more. */
+			charge = (obj->spe+1) * (obj->spe+1) * 100;
+							
+			if (obj->spe < 0) charge = 100;                
+
+			/* Artifacts cost more to deal with */
+			if (obj->oartifact) charge *= 2;
+			
+			/* Smooth out the charge a bit */
+			shk_smooth_charge(&charge, 50, NOBOUND);
+
+			if (shk_offer_price(slang, charge, shkp) == FALSE) return;
+			if (obj->spe+1 > 3) { 
+				verbalize("I can't enchant this any higher!");
+				charge = 0;
+				break;
+				}
+			 /* Have some fun! */
+			if (Hallucination) Your("%s looks dented.", xname(obj));
+			
+			if (obj->otyp >= GRAY_DRAGON_SCALES &&
+						obj->otyp <= YELLOW_DRAGON_SCALES) {
+				/* dragon scales get turned into dragon scale mail */
+				Your("%s merges and hardens!", xname(obj));
+				boolean is_worn = !!(obj->owornmask & W_ARM);
+				if (is_worn) {
+					setworn((struct obj *)0, W_ARM);
+				}
+				/* assumes same order */
+				obj->otyp = GRAY_DRAGON_SCALE_MAIL +
+							obj->otyp - GRAY_DRAGON_SCALES;
+				obj->cursed = 0;
+				obj->known = 1;
+				long wornmask = 0L;
+				if (is_worn && canwearobj(obj, &wornmask, FALSE)) {
+					setworn(obj, wornmask);
+				}
+				break;
 			}
-		 /* Have some fun! */
-		if (Hallucination) Your("%s looks dented.", xname(obj));
-		
-		if (obj->otyp >= GRAY_DRAGON_SCALES &&
-					obj->otyp <= YELLOW_DRAGON_SCALES) {
-			/* dragon scales get turned into dragon scale mail */
-			Your("%s merges and hardens!", xname(obj));
-			boolean is_worn = !!(obj->owornmask & W_ARM);
-			if (is_worn) {
-			    setworn((struct obj *)0, W_ARM);
-			}
-			/* assumes same order */
-			obj->otyp = GRAY_DRAGON_SCALE_MAIL +
-						obj->otyp - GRAY_DRAGON_SCALES;
-			obj->cursed = 0;
-			obj->known = 1;
-			long wornmask = 0L;
-			if (is_worn && canwearobj(obj, &wornmask, FALSE)) {
-			    setworn(obj, wornmask);
-			}
+
+			obj->spe++;
+			adj_abon(obj, 1);
 			break;
+
+			default:
+					pline ("Unknown Armor Enhancement");
+					break;
 		}
-
-		obj->spe++;
-		adj_abon(obj, 1);
-		break;
-
-	    default:
-                pline ("Unknown Armor Enhancement");
-                break;
+		free(selected);
 	}
 }
 
