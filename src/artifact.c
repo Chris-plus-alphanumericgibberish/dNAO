@@ -286,7 +286,6 @@ hack_artifacts()
 		artilist[ART_HELM_OF_THE_DARK_LORD].size = (&mons[urace.malenum])->msize;
 
 		if(Race_if(PM_VAMPIRE)){
-			urole.questarti = ART_VESTMENT_OF_HELL;
 			artilist[ART_HELM_OF_THE_DARK_LORD].alignment = alignmnt;
 		} else if(Race_if(PM_ELF)){
 			artilist[ART_ROD_OF_LORDLY_MIGHT].gflags |= ARTG_NOGEN;
