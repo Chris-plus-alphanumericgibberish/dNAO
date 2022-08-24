@@ -405,7 +405,7 @@ struct obj *otmp;
 	case SPE_FULL_HEALING:
 	case SPE_MASS_HEALING:{
 		int delta = mtmp->mhp;
-		int health = otyp == SPE_MASS_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
+		int health = otyp == SPE_FULL_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
 		reveal_invis = TRUE;
 	    if (mtmp->mtyp != PM_PESTILENCE) {
 			char hurtmonbuf[BUFSZ];
