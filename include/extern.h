@@ -869,7 +869,7 @@ E int NDECL(num_genocides);
 E void FDECL(bindspirit, (int));
 E void NDECL(blank_all_wards);
 E void NDECL(randomize_all_wards);
-E int NDECL(pick_seal);
+E int FDECL(pick_seal, (const char *));
 E int FDECL(pick_ward, (int));
 E void FDECL(describe_ward, (int));
 E int NDECL(randHaluWard);

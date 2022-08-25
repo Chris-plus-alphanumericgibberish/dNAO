@@ -131,6 +131,7 @@ STATIC_PTR int NDECL(dofightingform);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 STATIC_PTR int NDECL(doclearinvissyms);
 # ifdef WIZARD
+STATIC_PTR int NDECL(wiz_bind);
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
 STATIC_PTR int NDECL(wiz_wish);
 STATIC_PTR int NDECL(wiz_identify);
@@ -1168,6 +1169,19 @@ doclearinvissyms()
 #ifdef WIZARD
 
 STATIC_PTR int
+wiz_bind()
+{
+	int tmp;
+	u.sealsKnown = ~0;
+	u.specialSealsKnown = ~0;
+	tmp = pick_seal("Bind spirit:");
+	if (tmp)
+		bindspirit(tmp);
+	return MOVE_INSTANT;
+}
+
+
+STATIC_PTR int
 wiz_mk_mapglyphdump()
 {
 #ifdef MAPDUMP_FN
@@ -1892,6 +1906,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"showkills", "show list of monsters killed", wiz_showkills, IFBURIED, AUTOCOMPLETE},
 	{"setinsight", "sets your insight value", wiz_setinsight, IFBURIED, AUTOCOMPLETE },
 	{"setsanity", "sets your sanity value", wiz_setsanity, IFBURIED, AUTOCOMPLETE },
+	{"wizbind", "grants knowledge of all seals and binds one", wiz_bind, IFBURIED, AUTOCOMPLETE},
 	{"dump_map", "dump map glyphs into a file", wiz_mk_mapglyphdump, IFBURIED, AUTOCOMPLETE},
 #ifdef DEBUG
 	{"wizdebug", "wizard debug command", wiz_debug_cmd, IFBURIED, AUTOCOMPLETE},

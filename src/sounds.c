@@ -5502,6 +5502,9 @@ int floorID;
 	}
 	else
 	{
+		if (u.sealCounts == GATE_SPIRITS) {
+			unbind(u.spirit[0], FALSE);
+		}
 		spirit_type = u.sealCounts;
 	}
 
