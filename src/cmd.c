@@ -1171,13 +1171,17 @@ doclearinvissyms()
 STATIC_PTR int
 wiz_bind()
 {
-	int tmp;
-	u.sealsKnown = ~0;
-	u.specialSealsKnown = ~0;
-	tmp = pick_seal("Bind spirit:");
-	if (tmp)
-		bindspirit(tmp);
-	return MOVE_INSTANT;
+	if (wizard) {
+		int tmp;
+		u.sealsKnown = ~0;
+		u.specialSealsKnown = ~0;
+		tmp = pick_seal("Bind spirit:");
+		if (tmp)
+			bindspirit(tmp);
+	}
+	else
+		pline("Unavailable command.");
+	return MOVE_CANCELLED;
 }
 
 
@@ -1878,6 +1882,7 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #wish */
 	{(char *)0, (char *)0, donull, TRUE}, /* #where */
 	{(char *)0, (char *)0, donull, TRUE}, /* #tests */
+	{(char *)0, (char *)0, donull, TRUE}, /* #wizbind */
 #endif
 	{(char *)0, (char *)0, donull, TRUE}	/* sentinel */
 };
