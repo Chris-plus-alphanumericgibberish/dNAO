@@ -1529,6 +1529,9 @@ struct obj *otmp;
 		impossible("object_color called with no object");
 		return 0;
 	}
+	if(!otmp->dknown && otmp->where == OBJ_FLOOR && !cansee(otmp->ox, otmp->oy)){
+		return CLR_GRAY;
+	}
 	/* fake mimic objects use the default color 
 	 * they also have unset data in too many places
 	 */
