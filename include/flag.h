@@ -440,6 +440,7 @@ struct instance_flags {
 	int	 runmode;	/* update screen display during run moves */
 	int delay_length;	/* length of delay for delay_output */
 	int wizlevelport;	/* options for ^V in wizmode */
+	int wizcombatdebug;	/* options for combat debug messages (damage, accuracy) */
 #ifdef AUTOPICKUP_EXCEPTIONS
 	struct autopickup_exception *autopickup_exceptions[2];
 #define AP_LEAVE 0
@@ -491,4 +492,19 @@ extern NEARDATA struct instance_flags iflags;
 #define WIZLVLPORT_TWOMENU			1	/* Select a branch, then a level in that branch */
 #define WIZLVLPORT_BRANCHES_FIRST	2	/* With TWOMENU, don't show levels in each branch during 1st selection */
 #define WIZLVLPORT_SELECTED_DUNGEON	4	/* With TWOMENU, only show the levels of the selected branch during 2nd selection */
+
+/* wizcombatdebug options */
+#define WIZCOMBATDEBUG_NONE		0x00
+#define WIZCOMBATDEBUG_DMG		0x01
+#define WIZCOMBATDEBUG_FULLDMG	0x02
+#define WIZCOMBATDEBUG_ACCURACY	0x04
+#define WIZCOMBATDEBUG_UVM		0x08
+#define WIZCOMBATDEBUG_MVU		0x10
+#define WIZCOMBATDEBUG_MVM		0x20
+#define WIZCOMBATDEBUG_APPLIES(magr, mdef)	\
+	(iflags.wizcombatdebug & ( WIZCOMBATDEBUG_MVM |    \
+	(((magr) == &youmonst) ? WIZCOMBATDEBUG_UVM : 0) | \
+	(((mdef) == &youmonst) ? WIZCOMBATDEBUG_MVU : 0)   \
+	))
+
 #endif /* FLAG_H */
