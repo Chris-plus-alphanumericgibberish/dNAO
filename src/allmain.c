@@ -533,12 +533,12 @@ boolean affect_game_state;
 			if (affect_game_state ? partial_action() : check_partial_action()) {
 				if (affect_game_state)
 					flags.movetoprint &= ~MOVE_PARTIAL;
-				current_cost = NORMAL_SPEED;
+				current_cost = highest_cost;
 			}
 			else {
 				if (affect_game_state)
 					flags.movetoprint |= MOVE_PARTIAL;
-				current_cost = 0;
+				return 0;
 			}
 			break;
 
