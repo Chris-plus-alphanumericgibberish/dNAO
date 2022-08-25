@@ -3024,7 +3024,7 @@ int dz;
 		verbalize("Let's get out of here!");
 		mtmp->mpeaceful = 1;
 		mtmp = tamedog(mtmp, (struct obj *)0);
-		if(mtmp && mtmp->mtame){
+		if(mtmp && mtmp->mtame && get_mx(mtmp, MX_EDOG)){
 			EDOG(mtmp)->loyal = TRUE;
 			EDOG(mtmp)->waspeaceful = TRUE;
 			mtmp->mpeacetime = 0;
