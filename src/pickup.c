@@ -2987,14 +2987,7 @@ struct monst *mon;
 			if(otmp->oclass == AMULET_CLASS && !(mon->misc_worn_check&W_AMUL) &&
 				can_wear_amulet(mon->data) && 
 				objects[otmp->otyp].oc_name_known &&
-			    (otmp->otyp == AMULET_OF_LIFE_SAVING ||
-				 otmp->otyp == AMULET_OF_REFLECTION ||
-				 otmp->otyp == AMULET_OF_NULLIFY_MAGIC ||
-				 otmp->otyp == AMULET_OF_MAGICAL_BREATHING ||
-				 otmp->otyp == AMULET_OF_DRAIN_RESISTANCE ||
-				 otmp->otyp == AMULET_VERSUS_CURSES ||
-				 otmp->otyp == AMULET_OF_ESP ||
-				 otmp->otyp == AMULET_VERSUS_POISON)
+			    is_museable_amulet(otmp->otyp)
 			){
 				addArmorMenuOption
 			} else if(is_shirt(otmp) && !(mon->misc_worn_check&W_ARMU) && otmp->objsize == mon->data->msize && shirt_match(mon->data,otmp)){

@@ -1100,6 +1100,15 @@ struct obj {
 							|| onum == GENTLEMAN_S_SUIT\
 							|| onum == find_gcirclet())
 
+#define is_museable_amulet(otyp) (otyp == AMULET_OF_LIFE_SAVING \
+								||otyp == AMULET_OF_REFLECTION \
+								||otyp == AMULET_OF_NULLIFY_MAGIC \
+								||otyp == AMULET_OF_MAGICAL_BREATHING \
+								||otyp == AMULET_OF_DRAIN_RESISTANCE \
+								||otyp == AMULET_VERSUS_CURSES \
+								||otyp == AMULET_OF_ESP \
+								||otyp == AMULET_VERSUS_POISON \
+								)
 
 /* helpers, simple enough to be macros */
 #define is_plural(o)	((o)->quan > 1 || \

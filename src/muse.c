@@ -2624,7 +2624,7 @@ struct obj *obj;
 	if(obj->oclass == WEAPON_CLASS || is_weptool(obj))
 		return mon_attacktype(mon, AT_WEAP) || mon_attacktype(mon, AT_XWEP) || mon_attacktype(mon, AT_MARI) || mon_attacktype(mon, AT_DEVA);
 	if(obj->oclass == AMULET_CLASS)
-		return can_wear_amulet(mon->data) && (obj->otyp == AMULET_OF_LIFE_SAVING || obj->otyp == AMULET_OF_REFLECTION);
+		return can_wear_amulet(mon->data) && is_museable_amulet(obj->otyp);
 	else if(is_shirt(obj))
 		return  obj->objsize == mon->data->msize && shirt_match(mon->data,obj);
 	else if(is_cloak(obj))
@@ -2758,7 +2758,18 @@ struct obj *obj;
 	case AMULET_CLASS:
 	    if (typ == AMULET_OF_LIFE_SAVING)
 		return (boolean)(!nonliving(mon->data));
-	    if (typ == AMULET_OF_REFLECTION)
+	    if (typ == AMULET_OF_NULLIFY_MAGIC)
+		return (boolean)(!attacktype(mon->data, AT_MAGC) && !attacktype(mon->data, AT_MMGC));
+	    if (typ == AMULET_OF_MAGICAL_BREATHING)
+		return (boolean)(!breathless(mon->data));
+	    if (typ == AMULET_OF_DRAIN_RESISTANCE)
+		return (boolean)(!species_resists_drain(mon));
+		// Cursed potions are still non-optimal
+	    // if (typ == AMULET_VERSUS_CURSES)
+		// return (boolean)(!is_weldproof(mon->data));
+	    if (typ == AMULET_OF_ESP)
+		return (boolean)(!species_is_telepathic(mon->data));
+	    if (is_museable_amulet(typ))
 		return TRUE;
 	    break;
 	case TOOL_CLASS:

@@ -153,8 +153,7 @@ boolean check_if_better;
 	     (otmp->oclass == ARMOR_CLASS &&
 	      (!check_if_better || is_better_armor(mtmp, otmp))) ||
 	    /* useful amulets */
-	     otmp->otyp == AMULET_OF_LIFE_SAVING ||
-	     otmp->otyp == AMULET_OF_REFLECTION ||
+	     is_museable_amulet(otmp->otyp) ||
 	    /* misc magic items that muse can use */
 	     otmp->otyp == SCR_TELEPORTATION ||
              otmp->otyp == SCR_EARTH ||
