@@ -3843,7 +3843,7 @@ printMons(){
 			// if()	Sprintf(eos(pbuf)," |hitasfour=\n");
 			if(is_vampire(ptr))	Sprintf(eos(pbuf)," |vampire=%s\n", is_vampire(ptr) ? "1":"");
 			if(can_betray(ptr))	Sprintf(eos(pbuf)," |traitor=%s\n", can_betray(ptr) ? "1":"");
-			if((!(is_covetous(ptr) || is_human(ptr))))	Sprintf(eos(pbuf)," |notame=%s\n", (!(is_covetous(ptr) || is_human(ptr))) ? "1":"");
+			if(is_untamable(ptr))	Sprintf(eos(pbuf)," |notame=%s\n", is_untamable(ptr) ? "1":"");
 			if((emits_light(ptr) == 1))	Sprintf(eos(pbuf)," |light1=%s\n", (emits_light(ptr) == 1) ? "1":"");
 			if((emits_light(ptr) == 2))	Sprintf(eos(pbuf)," |light2=%s\n", (emits_light(ptr) == 2) ? "1":"");
 			if((emits_light(ptr) == 3))	Sprintf(eos(pbuf)," |light3=%s\n", (emits_light(ptr) == 3) ? "1":"");
