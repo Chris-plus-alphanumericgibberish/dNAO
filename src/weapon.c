@@ -2822,7 +2822,7 @@ could_advance(skill)
 int skill;
 {
     return !P_RESTRICTED(skill)
-	    && P_SKILL(skill) < P_MAX_SKILL(skill) && 
+	    && P_SKILL_CORE(skill, FALSE) < P_MAX_SKILL_CORE(skill, FALSE) && 
 	    P_ADVANCE(skill) >=
 		(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))
 		&& practice_needed_to_advance(OLD_P_SKILL(skill)) > 0
@@ -2836,7 +2836,7 @@ peaked_skill(skill)
 int skill;
 {
     return !P_RESTRICTED(skill)
-	    && P_SKILL(skill) >= P_MAX_SKILL(skill) && (
+	    && P_SKILL_CORE(skill, FALSE) >= P_MAX_SKILL_CORE(skill, FALSE) && (
 	    (P_ADVANCE(skill) >=
 		(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))));
 }
@@ -2850,7 +2850,7 @@ int skill;
 	u.skill_record[u.skills_advanced++] = skill;
 	/* subtly change the advance message to indicate no more advancement */
 	You("are now %s skilled in %s.",
-	P_SKILL(skill) >= P_MAX_SKILL(skill) ? "most" : "more",
+	P_SKILL_CORE(skill, FALSE) >= P_MAX_SKILL_CORE(skill, FALSE) ? "most" : "more",
 	P_NAME(skill));
 }
 
