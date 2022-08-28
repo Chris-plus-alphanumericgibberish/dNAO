@@ -405,7 +405,8 @@ register struct monst *oracl;
 		n = selected[0].item.a_int;
 		free(selected);
 	}
-	n = 0;
+	else
+		n = 0;
 
 	switch (n){
 		case SELECT_MINOR:
