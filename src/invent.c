@@ -3795,6 +3795,7 @@ winid *datawin;
 	if (otyp == GAUNTLETS_OF_POWER ||
 		oartifact == ART_SCEPTRE_OF_MIGHT ||
 		oartifact == ART_STORMBRINGER ||
+		oartifact == ART_GOLDEN_KNIGHT ||
 		oartifact == ART_OGRESMASHER)			OBJPUTSTR("Greatly increases STR.");
 	if (oartifact == ART_STORMBRINGER ||
 		oartifact == ART_GREAT_CLAWS_OF_URDLEN ||
