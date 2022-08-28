@@ -20,6 +20,7 @@ STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *,
 STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int));
+STATIC_DCL void FDECL(add_silvered_art_sear_adjectives, (char *, struct obj*));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
 
@@ -12568,10 +12569,19 @@ int vis;						/* True if action is at all visible to the player */
 	long rslot = 0L;	/* slot, dedicated to rings (left and right) -- set at start, should not be reset */
 
 	/* pick the most correct ring slot */
-	rslot = (!melee || !attk || !magr || attk->aatyp == AT_MARI) ? 0L	/* no attack, or no attacker, or marilith: not a ring-hand */
-		//: (attk->aatyp == AT_WEAP || attk->aatyp == AT_DEVA || attk->aatyp == AT_HODS) ? W_RINGR /* mainhand */
-		//: (attk->aatyp == AT_XWEP) ? W_RINGL	/* offhand */
-		: ((youagr ? uarms : which_armor(magr, W_ARMS)) || !rn2(2)) ? W_RINGR : W_RINGL;	/* either hand, but not offhand if wearing a shield */
+	if(!youagr || !magr)
+		rslot = 0L; /* no attacker or the attacker isn't you (redundant for now) */
+	else if(!melee || !attk || attk->aatyp == AT_MARI)
+		rslot = 0L; /* no attack, not in melee, or marilith: not a ring-hand */
+	else if(youagr ? uarms : which_armor(magr, W_ARMS))
+		rslot = W_RINGR; /* sadly, all characters are right-handed */
+	else if(u.twoweap){
+		if(attk->aatyp == AT_XWEP || attk->aatyp == AT_XSPR || attk->offhand)
+			rslot = W_RINGL;
+		else 
+			rslot = W_RINGR;
+	}
+	else rslot = rn2(2) ? W_RINGR : W_RINGL;
 
 	int precision_mult = 0;	/* damage multiplier for precision weapons */
 
@@ -13276,8 +13286,6 @@ int vis;						/* True if action is at all visible to the player */
 		poisons |= poisonedobj->opoisoned;
 		if (arti_poisoned(poisonedobj))
 			poisons |= OPOISON_BASIC;
-		if (arti_silvered(poisonedobj))
-			poisons |= OPOISON_SILVER;
 		if (poisonedobj->oartifact == ART_WEBWEAVER_S_CROOK)
 			poisons |= (OPOISON_SLEEP | OPOISON_BLIND | OPOISON_PARAL);
 		if (is_wet_merc(poisonedobj) && !rn2(5))
@@ -15044,6 +15052,8 @@ int vis;						/* True if action is at all visible to the player */
 		long active_slots = (silverobj | jadeobj | grnstlobj | ironobj | holyobj | unholyobj | unblessedobj | otherobj);
 		char buf[BUFSZ];
 		char * obuf;
+		boolean plural = FALSE;
+		char searcount = 0;
 		/* Examples:
 		 * Your silver skin and blessed silver ring sear Foo's flesh!
 		 * Bar's white-burning blade sears Foo!
@@ -15057,6 +15067,7 @@ int vis;						/* True if action is at all visible to the player */
 		/* skin / simurgh claws */
 		slot = W_SKIN;
 		if (active_slots & slot) {
+			searcount++;
 			if (holyobj & slot)
 				Strcat(buf, "glorious ");
 			if (unholyobj & slot)
@@ -15097,6 +15108,7 @@ int vis;						/* True if action is at all visible to the player */
 		/* weapon */
 		slot = W_WEP;
 		if (active_slots & slot) {
+			searcount++;
 			otmp = weapon;
 			obuf = xname(otmp);
 
@@ -15127,8 +15139,11 @@ int vis;						/* True if action is at all visible to the player */
 			}
 			else {
 				if (silverobj & slot){
-					if (!strstri(obuf, "silver "))
-						Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
+					if (!strstri(obuf, "silver")){
+						if(otmp->obj_material != SILVER && arti_silvered(otmp))
+							add_silvered_art_sear_adjectives(buf, otmp);
+						else Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
+					}
 				}
 				if (jadeobj & slot) {
 					if (!strstri(obuf, "jade "))
@@ -15171,6 +15186,7 @@ int vis;						/* True if action is at all visible to the player */
 
 			if (otmp)
 			{
+				searcount++;
 				if (holyobj & slot)
 					Strcat(buf,
 					(otmp->known && (check_oprop(otmp, OPROP_HOLYW) || check_oprop(otmp, OPROP_HOLY))) ? "holy " : 
@@ -15187,7 +15203,9 @@ int vis;						/* True if action is at all visible to the player */
 					(otmp->known && check_oprop(otmp, OPROP_LESSER_CONCW)) ? "accordant " : "uncursed "
 					);
 				if (silverobj & slot){
-					Strcat(buf, ((jadeobj&slot) || (ironobj&slot) ? "silvered " : "silver "));
+					if(otmp->obj_material != SILVER && arti_silvered(otmp))
+						add_silvered_art_sear_adjectives(buf, otmp);
+					else Strcat(buf, (otmp->obj_material != SILVER || (jadeobj&slot) || (ironobj&slot) ? "silvered " : "silver "));
 				}
 				if (jadeobj & slot) {
 					Strcat(buf, "jade ");
@@ -15212,9 +15230,11 @@ int vis;						/* True if action is at all visible to the player */
 		{
 		case W_ARMG:
 			otmp = (youagr ? uarmg : which_armor(magr, slot));
+			plural = TRUE;
 			break;
 		case W_ARMF:
 			otmp = (youagr ? uarmf : which_armor(magr, slot));
+			plural = TRUE;
 			break;
 		case W_ARMH:
 			otmp = (youagr ? uarmh : which_armor(magr, slot));
@@ -15224,6 +15244,9 @@ int vis;						/* True if action is at all visible to the player */
 			break;
 		}
 		if (otmp && (active_slots & slot)) {
+			searcount++;
+			if(plural)
+				searcount++;
 			obuf = xname(otmp);
 			if (active_slots & (W_SKIN|W_WEP|rslot))
 				Strcat(buf, " and ");
@@ -15244,8 +15267,11 @@ int vis;						/* True if action is at all visible to the player */
 				(otmp->known && check_oprop(otmp, OPROP_LESSER_CONCW)) ? "accordant " : "uncursed "
 				);
 			if (silverobj & slot){
-				if (!strstri(obuf, "silver "))
-					Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
+				if (!strstri(obuf, "silver")){
+					if(otmp->obj_material != SILVER && arti_silvered(otmp))
+						add_silvered_art_sear_adjectives(buf, otmp);
+					else Strcat(buf, (otmp->obj_material != SILVER ? "silvered " : "silver "));
+				}
 			}
 			if (jadeobj & slot) {
 				if (!strstri(obuf, "jade "))
@@ -15275,7 +15301,7 @@ int vis;						/* True if action is at all visible to the player */
 				(youdef ? body_part(BODY_FLESH) : mbodypart(mdef, BODY_FLESH))
 				);
 		}
-		pline("%s sears %s!", buf, seared);
+		pline("%s sear%s %s!", buf, (searcount > 1) ? "" : "s", seared);
 	}
 
 	/* poison */
@@ -15742,6 +15768,61 @@ int vis;						/* True if action is at all visible to the player */
 	}
 
 	return result;
+}
+
+void
+add_silvered_art_sear_adjectives(buf, otmp)
+char *buf;
+struct obj *otmp;
+{
+	switch(otmp->oartifact){
+		default:
+			if (!strstri(xname(otmp), "silver"))
+				Strcat(buf, "silvered ");
+		break;
+		case ART_NODENSFORK:
+			Strcat(buf, "silver-waved ");
+		break;
+		case ART_PEACE_KEEPER:
+			Strcat(buf, "minute-silver-runed ");
+		break;
+		case ART_SKY_RENDER:
+			Strcat(buf, "half-silver ");
+		break;
+		case ART_WATER_FLOWERS:
+			Strcat(buf, "silver-flowered ");
+		break;
+		case ART_GAUNTLETS_OF_SPELL_POWER:
+			Strcat(buf, "silver-runed ");
+		break;
+		case ART_LOLTH_S_FANG:
+			Strcat(buf, "silver-edged ");
+		break;
+		case ART_WEB_OF_LOLTH:
+			Strcat(buf, "silver-starred ");
+		break;
+		case ART_RUINOUS_DESCENT_OF_STARS:
+			Strcat(buf, "silver-spiked ");
+		break;
+		case ART_STAFF_OF_AESCULAPIUS:
+			Strcat(buf, "silver-snaked ");
+		break;
+		case ART_DURIN_S_AXE:
+			Strcat(buf, "silver-inlaid ");
+		break;
+		case ART_WEB_OF_THE_CHOSEN:
+			Strcat(buf, "silver-dewed ");
+		break;
+		case ART_YENDORIAN_EXPRESS_CARD:
+			Strcat(buf, "silver-writing-embossed ");
+		break;
+		case ART_UNBLEMISHED_SOUL:
+			Strcat(buf, "silver-spattered ");
+		break;
+		case ART_WRATHFUL_WIND:
+			Strcat(buf, "silver-clouded ");
+		break;
+	}
 }
 
 /* shadow_strike()

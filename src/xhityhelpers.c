@@ -1315,7 +1315,7 @@ struct obj * obj;
 	if (is_lightsaber(obj) && litsaber(obj))
 		return FALSE;
 
-	if ((obj->obj_material == SILVER) ||
+	if ((obj->obj_material == SILVER || arti_silvered(obj)) ||
 		(obj->oclass == RING_CLASS && obj->ohaluengr
 		&& (isEngrRing(obj->otyp) || isSignetRing(obj->otyp))
 		&& obj->oward >= LOLTH_SYMBOL && obj->oward <= LOST_HOUSE) ||

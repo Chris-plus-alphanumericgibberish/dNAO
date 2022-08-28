@@ -1289,9 +1289,6 @@ char *buf;
 	if (show_poison){
 		if (arti_poisoned(obj) && obj->oartifact != ART_WEBWEAVER_S_CROOK)
 			Strcat(buf, "poisoned ");
-	
-		if (arti_silvered(obj))
-			Strcat(buf, "silvered ");
 	}
 	if (obj->opoisoned){
 		if (obj->opoisoned & OPOISON_BASIC) Strcat(buf, "poisoned ");

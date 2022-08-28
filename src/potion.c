@@ -3011,7 +3011,7 @@ dodip()
 			obj->opoisoned = OPOISON_PARAL;
 			goto poof;
 	    } else if(potion->otyp == POT_STARLIGHT && obj->obj_material != SILVER &&
-	    		(!(obj->opoisoned & OPOISON_SILVER || arti_silvered(obj))
+	    		(!(obj->opoisoned & OPOISON_SILVER)
 	    		|| obj->otyp == VIPERWHIP)
 	    	) {
 			char buf[BUFSZ];

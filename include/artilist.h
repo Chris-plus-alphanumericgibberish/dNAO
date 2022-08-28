@@ -314,7 +314,7 @@ A("Kingslayer",			STILETTO,						"delicately filigreed %s",
 	),
 
 /* speaks for itself */
-A("Peace Keeper",		ATHAME,							(const char *)0,
+A("Peace Keeper",		ATHAME,							"minute-rune-covered %s",
 	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_C, (ARTG_GIFT),
 	MONS(vsMT(MT_HOSTILE)),
@@ -896,7 +896,7 @@ A("Quicksilver",		FLAIL,							(const char *)0,
 
 /*Needs encyc entry*/
 /* slotless displacement makes this quite good even after you've found a better weapon */
-A("Sky Render",			KATANA,							(const char *)0,
+A("Sky Render",			KATANA,							"silver-and-black-iron %s",
 	1200L, IRON, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_B, (ARTG_GIFT),
 	NO_MONS(),
@@ -1111,7 +1111,7 @@ A("Seven League Boots",				JUMPING_BOOTS,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("Water Flowers",					WATER_WALKING_BOOTS,(const char *)0,
+A("Water Flowers",					WATER_WALKING_BOOTS, "silver-flowered %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, NOFLAG,
 	NO_MONS(),
@@ -2023,7 +2023,7 @@ A("The Webweaver's Crook",			FAUCHARD,			(const char *)0,
 
 /* needs encyc entry */
 /* Hedrow crowning gift, chaotic or neutral */
-A("Lolth's Fang",					DROVEN_SHORT_SWORD,	(const char *)0,
+A("Lolth's Fang",					DROVEN_SHORT_SWORD,	"silver-edged %s",
 	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, PM_DROW, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
@@ -2035,7 +2035,7 @@ A("Lolth's Fang",					DROVEN_SHORT_SWORD,	(const char *)0,
 
 /* needs encyc entry */
 /* Drow crowning gift, chaotic */
-A("The Web of Lolth",				ELVEN_MITHRIL_COAT,	(const char *)0,
+A("The Web of Lolth",				ELVEN_MITHRIL_COAT,	"silver-starred %s",
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, PM_DROW, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	MONS(vsMA(MA_ELF)),
@@ -2071,7 +2071,7 @@ A("Liecleaver",						DROVEN_CROSSBOW,	(const char *)0,
 
 /* needs encyc entry */
 /* Hedrow noble crowning gift, Chaotic */
-A("The Ruinous Descent of Stars",	MORNING_STAR,		(const char *)0,
+A("The Ruinous Descent of Stars",	MORNING_STAR,		"silver-spiked %s",
 	8000L, METAL, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, PM_DROW, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
@@ -2257,7 +2257,7 @@ A("The War-mask of Durin",			MASK,				(const char *)0,
 
 /*Needs encyc entry*/
 /*Moria dwarf noble crowning gift */
-A("Durin's Axe",					AXE,				(const char *)0,
+A("Durin's Axe",					AXE,				"silver-rune-inlaid %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_NOBLEMAN, PM_DWARF, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
@@ -2320,7 +2320,7 @@ A("The Sceptre of Lolth",			KHAKKHARA,			(const char *)0,
 /*Needs encyc entry*/
 /* Drow noble quest */
 /* Plus double AC bonus */
-A("The Web of the Chosen",			DROVEN_CLOAK,		(const char *)0,
+A("The Web of the Chosen",			DROVEN_CLOAK,		"silver-dewed %s",
 	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, PM_NOBLEMAN, PM_DROW, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
@@ -2494,10 +2494,10 @@ A("The Treasury of Proteus",		CHEST,				(const char *)0,
 	),
 
 A("The Longbow of Diana",			BOW,				(const char *)0,
-	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	4000L, SILVER, MZ_DEFAULT, 0,
 	A_CHAOTIC, PM_RANGER, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 6), (ARTA_SILVER),
+	ATTK(AD_PHYS, 5, 6), NOFLAG,
 	PROPS(REFLECTING), NOFLAG,
 	PROPS(TELEPAT), NOFLAG,
 	CREATE_AMMO, NOFLAG
@@ -2547,10 +2547,10 @@ A("Great Claws of Urdlen",			GAUNTLETS_OF_POWER,	"clawed %s",
 	
 /*Needs encyc entry*/
 A("The Moonbow of Sehanine",		ELVEN_BOW,			(const char *)0,
-	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	4000L, SILVER, MZ_DEFAULT, 0,
 	A_CHAOTIC, PM_RANGER, PM_ELF, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
-	ATTK(AD_PHYS, 5, 6), (ARTA_SILVER),
+	ATTK(AD_PHYS, 5, 6), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	CREATE_AMMO, NOFLAG
@@ -2646,7 +2646,7 @@ A("The Tsurugi of Muramasa",		TSURUGI,			(const char *)0,
 
 #ifdef TOURIST
 A("The Platinum Yendorian Express Card",		CREDIT_CARD,			(const char *)0,
-	7000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	7000L, MT_DEFAULT, MZ_DEFAULT, PLATINUM,
 	A_NEUTRAL, PM_TOURIST, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), (ARTA_SILVER),
@@ -2872,7 +2872,7 @@ A("Serpent's Tooth",				ATHAME,				(const char *)0,
 	),
 
 /*Needs encyc entry */
-A("Unblemished Soul",				UNICORN_HORN,		(const char *)0,
+A("Unblemished Soul",				UNICORN_HORN,		"silver-spattered %s",
 	3333L, MT_DEFAULT, MZ_LARGE, WT_DEFAULT,
 	A_LAWFUL, NON_PM, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
@@ -2985,7 +2985,7 @@ A("Heartcleaver",					POLEAXE,			(const char *)0,
 	),
 
 /*Needs encyc entry */
-A("Wrathful Wind",					CLUB,				(const char *)0,
+A("Wrathful Wind",					CLUB,				"cloud-inlaid %s",
 	6660L, MT_DEFAULT, MZ_HUGE, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_NOCNT),
 	NO_MONS(),
