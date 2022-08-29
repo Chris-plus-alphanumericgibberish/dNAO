@@ -1915,6 +1915,7 @@ struct obj *obj;
 	if(!getdir(qbuf))
 		return(res);
 
+	res &= ~MOVE_CANCELLED;
 	res |= use_pick_axe2(obj);
 	return res; /*Pickaxe might be an attack. It will not cancel*/
 }
