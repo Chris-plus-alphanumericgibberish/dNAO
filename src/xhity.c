@@ -2867,7 +2867,7 @@ int dmg;				/* damage to deal */
 	}
 
 	/* debug */
-	if (wizard && youagr && ublindf && ublindf->otyp == LENSES)
+	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
 		pline("(dmg = %d)", dmg);
 	/* deal damage */
 	*hp(mdef) -= dmg;
@@ -2880,6 +2880,12 @@ int dmg;				/* damage to deal */
 		flags.botl = 1;
 		if (dmg > 0 && magr)
 			magr->mhurtu = TRUE;
+		/* the golden knight saves you from dying from hp loss */
+		if (uarms && uarms->oartifact == ART_GOLDEN_KNIGHT && u.uhp < 1 && (u.uhp*-2 < u.uen) && !Upolyd)
+		{	
+			Your("power pours into your shield, and your mortal wounds close!");
+			healup(u.uen, 0, FALSE, FALSE); losepw(u.uen);
+		}
 		/* messages */
 		if ((dmg > 0) && (*hp(mdef) > 0) && (*hp(mdef) * 10 < *hpmax(mdef)) && !(Upolyd && !Unchanging))
 			maybe_wail();
@@ -3753,7 +3759,7 @@ int *shield_margin;
 		+ defn_acc
 		+ flat_acc;
 
-	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
+	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_ACCURACY) && WIZCOMBATDEBUG_APPLIES(magr, mdef)) {
 		pline("Accuracy = %d+%d+%d+%d+%d+%d+%d+%d=%d",
 			base_acc,
 			rang_acc,
@@ -3857,7 +3863,7 @@ boolean ranged;
 	/* roll to-hit die */
 	dieroll = rnd(20);
 	
-	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
+	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_ACCURACY) && WIZCOMBATDEBUG_APPLIES(magr, mdef)) {
 		pline("accuracy = %d, die roll = %d", accuracy, dieroll);
 	}
 	/* Diverge on aatyp */
@@ -14732,7 +14738,7 @@ int vis;						/* True if action is at all visible to the player */
 	lethaldamage = (totldmg >= *hp(mdef));
 
 	/* Debug mode: report sum components */
-	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR)) {
+	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_FULLDMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef)) {
 		pline("dmg = (b:%d + art:%d + bon:%d + mon:%d + s/j:%d - defense) = %d; + add:%d = %d",
 			basedmg,
 			artidmg,

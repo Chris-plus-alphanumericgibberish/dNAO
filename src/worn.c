@@ -824,8 +824,9 @@ struct monst *mon;
 	}
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
 	
-	if (wizard && ublindf && (ublindf->otyp == LENSES || ublindf->otyp == ANDROID_VISOR))
+	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_ACCURACY) && WIZCOMBATDEBUG_APPLIES((struct monst *)0, mon)) {
 		pline("base: %d, armac: %d", base, armac);
+	}
 	
 	base -= armac;
 	/* since arm_ac_bonus is positive, subtracting it increases AC */
