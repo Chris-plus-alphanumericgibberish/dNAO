@@ -857,9 +857,11 @@ struct obj {
 
 #define is_plusten(otmp)	(arti_plusten(otmp)\
 								|| is_rakuyo(otmp)\
+								|| rakuyo_prop(otmp)\
 								|| is_mercy_blade(otmp)\
 								|| otmp->otyp == ISAMUSEI\
 								|| otmp->otyp == BESTIAL_CLAW\
+								|| check_oprop(otmp, OPROP_CCLAW)\
 								)
 #define is_plussev_armor(otmp)	(is_elven_armor((otmp))\
 								|| arti_plussev((otmp))\

@@ -754,7 +754,7 @@ A("The Lifehunt Scythe",SCYTHE,							(const char *)0,
 	ATTK(AD_PHYS, 6, 6), (ARTA_HATES|ARTA_VORPAL), /* damage only applies vs living or undead monsters */
 	PROPS(DRAIN_RES, STEALTH), NOFLAG,
 	PROPS(COLD_RES), NOFLAG,
-	INVIS, NOFLAG
+	INVIS, (ARTI_PLUSTEN)
 	),
 
 /* effectively becomes two sizes larger when lit, requiring two hands */
@@ -2386,7 +2386,7 @@ A("The Profaned Greatscythe",		SCYTHE,				(const char *)0,
 	ATTK(AD_FIRE, 8, 30), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(FIRE_RES), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_PLUSTEN)
 	),
 
 /*Needs encyc entry*/
@@ -2399,7 +2399,7 @@ A("Friede's Scythe",				SCYTHE,				(const char *)0,
 	ATTK(AD_MAGM, 6, 6), (ARTA_MAGIC|ARTA_SHINING),
 	PROPS(), NOFLAG,
 	PROPS(ANTIMAGIC), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_PLUSTEN)
 	),
 
 /*Needs encyc entry*/
@@ -2412,7 +2412,7 @@ A("Yorshka's Spear",				SPEAR,				(const char *)0,
 	NO_ATTK(), (NOFLAG),
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_PLUSTEN)
 	),
 
 /*Needs encyc entry*/
@@ -2467,7 +2467,7 @@ A("Velka's Rapier",		RAPIER,					(const char *)0,
 	ATTK(AD_MAGM, 20, 0), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_PLUSTEN)
 	),
 
 /*Needs encyc entry*/
