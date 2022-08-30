@@ -8378,7 +8378,7 @@ arti_invoke(obj)
 				u.sealsKnown = obj->ovar1;
 				u.specialSealsKnown = 0;
 				u.uconduct.literate++;
-				lostname = pick_seal();
+				lostname = pick_seal("Bind spirit:");
 				u.sealsKnown = yourseals;
 				u.specialSealsKnown = yourspecial;
 				if(!lostname) break;
