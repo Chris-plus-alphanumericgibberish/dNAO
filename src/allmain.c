@@ -497,9 +497,11 @@ boolean affect_game_state;
 
 	/* 1. ignore the MOVE_FINISHED_OCCUPATION flag, it only says to end occupations
 	 * 2. if no other types are specified 'default' means 'standard', otherwise is ignored
+	 * 3. exceptions to 2. 'Partial' |'d with no others is Partial|Standard
 	 */
 	actiontypes_remaining &= ~MOVE_FINISHED_OCCUPATION;
-	actiontypes_remaining = (actiontypes_remaining == MOVE_DEFAULT) ? MOVE_STANDARD : (actiontypes_remaining&(~MOVE_DEFAULT));
+	actiontypes_remaining = !(actiontypes_remaining & ~(MOVE_DEFAULT|MOVE_PARTIAL)) ? MOVE_STANDARD : (actiontypes_remaining&(~MOVE_DEFAULT));
+	actiontypes_remaining |= (actiontype&MOVE_PARTIAL);
 
 	/* loop through all flagged action types to determine which is the largest cost,
 	 * and, if affect_game_state is TRUE, apply all necessary effects.
@@ -1454,7 +1456,7 @@ moveloop()
 
 	
 	if (!(flags.move & MOVE_CANCELLED)) {
-		flags.movetoprint = flags.move == MOVE_DEFAULT ? MOVE_STANDARD : flags.move;
+		flags.movetoprint = !(flags.move & ~(MOVE_PARTIAL|MOVE_DEFAULT)) ? MOVE_STANDARD : flags.move;
 		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
 	}
 	if(you_action_cost(flags.move, TRUE) > 0) {
