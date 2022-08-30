@@ -2874,6 +2874,7 @@ register char *cmd;
 		if(flags.move != MOVE_CANCELLED)
 			flags.move |= MOVE_INSTANT;
 	    multi = 0;
+		return;
 	} else if (*cmd == CMD_TRAVEL && iflags.travelcmd) {
 	  flags.travel = 1;
 	  u.itx = u.ity = 0;
