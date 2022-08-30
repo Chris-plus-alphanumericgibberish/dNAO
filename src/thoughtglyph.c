@@ -405,7 +405,12 @@ dofreethought_menu()
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return (n > 0) ? (int)selected[0].item.a_int : 0;
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 boolean

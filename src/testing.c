@@ -57,6 +57,7 @@ wiz_testmenu()
 				test_levelgen();
 				break;
 		}
+		free(selected);
 	}
 
 	return 0;

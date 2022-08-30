@@ -1326,7 +1326,12 @@ pick_council_seal()
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return ( n > 0 ) ? selected[0].item.a_int : 0;
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 int
@@ -1363,7 +1368,12 @@ pick_gnosis_seal()
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return ( n > 0 ) ? selected[0].item.a_int : 0;
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 STATIC_OVL boolean
@@ -2127,17 +2137,17 @@ stargate()
 	}
 	end_menu(tmpwin, "Open a portal to which dungeon?");
 	if (num_ok_dungeons > 1) {
-	/* more than one entry; display menu for choices */
-	menu_item *selected;
-	int n;
+		/* more than one entry; display menu for choices */
+		menu_item *selected;
+		int n;
 
-	n = select_menu(tmpwin, PICK_ONE, &selected);
-	if (n <= 0) {
-		destroy_nhwindow(tmpwin);
-		return MOVE_CANCELLED;
-	}
-	i = selected[0].item.a_int - 1;
-	free((genericptr_t)selected);
+		n = select_menu(tmpwin, PICK_ONE, &selected);
+		if (n <= 0) {
+			destroy_nhwindow(tmpwin);
+			return MOVE_CANCELLED;
+		}
+		i = selected[0].item.a_int - 1;
+		free((genericptr_t)selected);
 	} else
 	i = last_ok_dungeon;	/* also first & only OK dungeon */
 	destroy_nhwindow(tmpwin);
@@ -4183,7 +4193,12 @@ choose_crystal_summon()
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return ( n > 0 ) ? &mons[selected[0].item.a_int] : (struct permonst *) 0;
+	if(n > 0){
+		struct permonst *picked = &mons[selected[0].item.a_int];
+		free(selected);
+		return picked;
+	}
+	return (struct permonst *) 0;
 }
 
 /* nudzirath active power for bhit, hits pile */
@@ -5150,9 +5165,11 @@ int respect_timeout;
 
 			if (selected[0].item.a_int < 0){
 				action = selected[0].item.a_int;
+				free(selected);
 				continue;
 			}
 			else {
+				free(selected); // :( Still needed in the other clause of the if
 				switch (action)
 				{
 				case SPELLMENU_VIEW:
@@ -5365,10 +5382,12 @@ int *spell_no;
 				&& !(selected[0].item.a_int == splaction && splaction == SPELLMENU_QUIVER)	// special case to unquiver current spell
 			){
 				splaction = selected[0].item.a_int;
+				free(selected);
 				continue;
 			}
 			else if (!(splaction == SPELLMENU_VIEW && spellid(1) == NO_SPELL)) {
 				/* we aren't attempting to rearrange spells with only 1 spell known */
+				free(selected);
 				switch (splaction)
 				{
 				case SPELLMENU_VIEW:
@@ -5414,7 +5433,8 @@ int *spell_no;
 					}
 				} // switch(splaction)
 			} // doing something allowable
-			free(selected);
+			else
+				free(selected);
 		} // menu item was selected
 		/* else end menu, nothing was selected */
 		break;
@@ -6353,7 +6373,12 @@ const char *prompt;
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	return (n > 0) ? selected[0].item.a_int : 0;
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
 }
 
 
@@ -6577,6 +6602,7 @@ doreinforce_binding()
 	
 	if(n > 0){
 		i = (int)selected[0].item.a_int - 1;
+		free(selected);
 		if(i < QUEST_SPIRIT){
 			long sID = u.spirit[i];
 			while(u.spirit[i+1] && i+1 < QUEST_SPIRIT){
