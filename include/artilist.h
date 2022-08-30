@@ -1088,6 +1088,18 @@ A("The Shield of Yggdrasil",		ELVEN_SHIELD,		(const char *)0,
 	HEALING, (ARTI_PLUSSEV)
 	),
 
+/* grants 25 STR as gauntlets of power */
+/* heals you when your hp would be depleted at the cost of pw */
+A("The Golden Knight",		BUCKLER,		(const char *)0,
+	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, NON_PM, NON_PM, TIER_B, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	QUAKE, (ARTI_PLUSSEV)
+	),
+
 /*Needs encyc entry*/
 A("Whisperfeet",					SPEED_BOOTS,		(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

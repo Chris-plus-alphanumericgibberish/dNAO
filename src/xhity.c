@@ -2874,6 +2874,12 @@ int dmg;				/* damage to deal */
 		flags.botl = 1;
 		if (dmg > 0 && magr)
 			magr->mhurtu = TRUE;
+		/* the golden knight saves you from dying from hp loss */
+		if (uarms && uarms->oartifact == ART_GOLDEN_KNIGHT && u.uhp < 1 && (u.uhp*-2 < u.uen) && !Upolyd)
+		{	
+			Your("power pours into your shield, and your mortal wounds close!");
+			healup(u.uen, 0, FALSE, FALSE); losepw(u.uen);
+		}
 		/* messages */
 		if ((dmg > 0) && (*hp(mdef) > 0) && (*hp(mdef) * 10 < *hpmax(mdef)) && !(Upolyd && !Unchanging))
 			maybe_wail();

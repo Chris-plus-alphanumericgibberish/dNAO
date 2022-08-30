@@ -2643,6 +2643,12 @@ boolean k_format;
 	u.uhp -= n;
 	if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;	/* perhaps n was negative */
 	flags.botl = 1;
+	/* the golden knight saves you from dying from hp loss */
+	if (uarms && uarms->oartifact == ART_GOLDEN_KNIGHT && u.uhp < 1 && (u.uhp*-2 < u.uen) && !Upolyd)
+	{	
+		Your("power pours into your shield, and your mortal wounds close!");
+		healup(u.uen, 0, FALSE, FALSE); losepw(u.uen);
+	}
 	if(u.uhp < 1) {
 		killer_format = k_format;
 		killer = knam;		/* the thing that killed you */
