@@ -95,7 +95,7 @@ struct flag {
 	int movetoprint;
 	int movetoprintcost;
 #define MOVE_DEFAULT				0x04000	/* equivalent to Standard unless another move is layered overtop, in which case it is ignored */
-#define MOVE_CANCELLED				0x08000	/* overrides all other move types, total action takes no time. Also used for infomenus and other instant nonactions. */
+#define MOVE_CANCELLED				0x08000	/* Like move instant, but does not update the bottom line. Use for cancelled actions and non-functional menus, etc */
 #define MOVE_FINISHED_OCCUPATION	0x10000	/* finished an occupation; does not affect action time */
 #define MOVE_STANDARD				0x00001	/* player did a general action -- takes 1 standard turn */
 #define MOVE_INSTANT				0x00002	/* player did an action that should take no time */

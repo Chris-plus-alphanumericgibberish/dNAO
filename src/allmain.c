@@ -509,8 +509,8 @@ boolean affect_game_state;
 	 * Most often, there is only one action type per player input.
 	 * In very rare circumstances, two actions that should take time can happen simultaneously.
 	 */
-	if(wizard && actiontypes_remaining != MOVE_CANCELLED && (actiontypes_remaining&MOVE_CANCELLED) && affect_game_state)
-		impossible("Incompletely cancelled actions in you_action_cost: %d", actiontypes_remaining-MOVE_CANCELLED);
+	//if(wizard && actiontypes_remaining != MOVE_CANCELLED && (actiontypes_remaining&MOVE_CANCELLED) && affect_game_state)
+	//	impossible("Incompletely cancelled actions in you_action_cost: %d", actiontypes_remaining-MOVE_CANCELLED);
 	for (i=0, current_action = MOVE_STANDARD;
 		actiontypes_remaining != 0;
 		current_action = 1<<i, i++)
@@ -632,8 +632,8 @@ boolean affect_game_state;
 			break;
 
 		case MOVE_CANCELLED:
-			/* ignore other costs, force a cost of 0 */
-			return 0;
+			current_cost = 0;
+			break;
 
 		default:
 			impossible("Unhandled MOVE_XYZ case (%d)", current_action);
@@ -1455,7 +1455,7 @@ moveloop()
 	movement_combos();
 
 	
-	if (!(flags.move & MOVE_CANCELLED)) {
+	if (flags.move == MOVE_CANCELLED) {
 		flags.movetoprint = !(flags.move & ~(MOVE_PARTIAL|MOVE_DEFAULT)) ? MOVE_STANDARD : flags.move;
 		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
 	}
