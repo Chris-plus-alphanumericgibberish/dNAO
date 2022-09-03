@@ -1426,7 +1426,7 @@ moveloop()
 
     u.uz0.dlevel = u.uz.dlevel;
     youmonst.movement = NORMAL_SPEED;	/* give the hero some movement points */
-	flags.move = FALSE; /* From nethack 3.6.2 */
+	flags.move = MOVE_CANCELLED; /* From nethack 3.6.2 */
     prev_hp_notify = uhp();
 
 	if(galign(u.ugodbase[UGOD_ORIGINAL]) == A_LAWFUL && flags.initalign != 0){
