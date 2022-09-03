@@ -1455,7 +1455,7 @@ moveloop()
 	movement_combos();
 
 	
-	if ((flags.move & ~(MOVE_DEFAULT)) == MOVE_CANCELLED) {
+	if ((flags.move & ~(MOVE_DEFAULT)) != MOVE_CANCELLED) {
 		flags.movetoprint = !(flags.move & ~(MOVE_PARTIAL|MOVE_DEFAULT)) ? MOVE_STANDARD : flags.move;
 		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
 	}
