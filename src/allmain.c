@@ -1389,7 +1389,7 @@ moveloop()
 	int tx,ty;
 	static boolean oldBlind = 0, oldLightBlind = 0;
 	int healing_penalty = 0;
-    int hpDiff;
+    int hpDiff, movecost;
 	static int oldsanity = 100;
 
     flags.moonphase = phase_of_the_moon();
@@ -1455,13 +1455,13 @@ moveloop()
 	movement_combos();
 
 	
-	if (flags.move == MOVE_CANCELLED) {
+	if (flags.move != MOVE_CANCELLED) {
 		flags.movetoprint = !(flags.move & ~(MOVE_PARTIAL|MOVE_DEFAULT)) ? MOVE_STANDARD : flags.move;
 		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
 	}
-	if(you_action_cost(flags.move, TRUE) > 0) {
+	if((movecost = you_action_cost(flags.move, TRUE)) > 0) {
 		/* actual time passed */
-		youmonst.movement -= flags.movetoprintcost;
+		youmonst.movement -= movecost;
 		didmove = TRUE;
 
 		  /**************************************************/
