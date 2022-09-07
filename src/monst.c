@@ -4067,7 +4067,7 @@ struct permonst _mons2[] = {
 	MA_UNDEAD /*MA*/,  MV_NORMAL|MV_INFRAVISION /*MV*/, CLR_BRIGHT_MAGENTA),
     MON("dokkalfar eternal matriarch", S_LICH,//40 /*Needs encyc entry*//*Needs tile*/
 	LVL(30, 13, 99, -15), (G_NOHELL|G_GENO|G_NOCORPSE|1),
-	DEF(NAT_AC(18)),
+	DEF(NAT_AC(18), NAT_DR(8)),
 	A(ATTK(AT_WEAP, AD_ENCH, 6, 8), ATTK(AT_WEAP, AD_ENCH, 6, 8),
 	  ATTK(AT_BITE, AD_VAMP, 4, 6), OFFHND_ATTK(AT_TUCH, AD_COLD, 4, 6), 
 	  ATTK(AT_MAGC, AD_SPEL, 0, 0)),
