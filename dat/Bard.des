@@ -284,6 +284,95 @@ MONSTER:'r',random,(43,10),hostile
 MONSTER:'S',random,(43,12),hostile
 MONSTER:'s',random,(43,14),hostile
 
+# Magic treasure (Note this has some pretty good stuff to help the bard equip an army)
+
+OBJECT:'[',"cloak of magic resistance",random
+OBJECT[50%]:'[',"cloak of magic resistance",random
+OBJECT[50%]:'[',"cloak of magic resistance",random
+OBJECT[50%]:'[',"cloak of magic resistance",random
+
+OBJECT[75%]:'[',"cloak of invisibility",random
+OBJECT[75%]:'[',"cloak of invisibility",random
+
+OBJECT:'[',"gray dragon scales",random
+OBJECT[75%]:'[',"gray dragon scales",random
+OBJECT[75%]:'[',"silver dragon scales",random
+OBJECT[75%]:'[',"shimmering dragon scales",random
+OBJECT[75%]:'[',"red dragon scales",random
+OBJECT[75%]:'[',"deep dragon scales",random
+OBJECT[75%]:'[',"white dragon scales",random
+OBJECT[75%]:'[',"orange dragon scales",random
+OBJECT[75%]:'[',"black dragon scales",random
+OBJECT[75%]:'[',"blue dragon scales",random
+OBJECT[75%]:'[',"green dragon scales",random
+OBJECT[75%]:'[',"yellow dragon scales",random
+
+OBJECT[75%]:'#',"bronze gauntlets of power",random
+OBJECT[75%]:'#',"bronze gauntlets of power",random
+OBJECT[75%]:'#',"bronze gauntlets of power",random
+
+OBJECT[75%]:'[',"orihalcyon gauntlets",random
+
+OBJECT[75%]:'[',"speed boots",random
+OBJECT[75%]:'[',"speed boots",random
+OBJECT[75%]:'[',"water walking boots",random
+OBJECT[75%]:'[',"kicking boots",random
+OBJECT[75%]:'[',"flying boots",random
+
+OBJECT[25%]:'"',"amulet of drain resistance",random
+OBJECT[25%]:'"',"amulet of ESP",random
+OBJECT[25%]:'"',"amulet of life saving",random
+OBJECT[25%]:'"',"amulet versus poison",random
+OBJECT[25%]:'"',"amulet versus sickness",random
+OBJECT[25%]:'"',"amulet versus curses",random
+OBJECT[25%]:'"',"amulet of unchanging",random
+OBJECT[25%]:'"',"amulet of nullify magic",random
+OBJECT[25%]:'"',"amulet of reflection",random
+OBJECT[25%]:'"',"amulet of magical breathing",random
+
+OBJECT[75%]:'[',"archaic helm",random
+OBJECT[75%]:'[',"archaic plate mail",random
+OBJECT[75%]:'[',"roundshield",random
+OBJECT[75%]:'#',"bronze short sword",random
+OBJECT[75%]:'#',"bronze spear",random
+OBJECT[75%]:'[',"archaic gauntlets",random
+OBJECT[75%]:'[',"archaic boots",random
+
+OBJECT[75%]:'[',"archaic helm",random
+OBJECT[75%]:'[',"archaic plate mail",random
+OBJECT[75%]:'[',"roundshield",random
+OBJECT[75%]:'#',"bronze short sword",random
+OBJECT[75%]:'#',"bronze spear",random
+OBJECT[75%]:'[',"archaic gauntlets",random
+OBJECT[75%]:'[',"archaic boots",random
+
+OBJECT[75%]:'[',"archaic helm",random
+OBJECT[75%]:'[',"archaic plate mail",random
+OBJECT[75%]:'[',"roundshield",random
+OBJECT[75%]:'#',"bronze short sword",random
+OBJECT[75%]:'#',"bronze spear",random
+OBJECT[75%]:'[',"archaic gauntlets",random
+OBJECT[75%]:'[',"archaic boots",random
+
+OBJECT[75%]:'[',"archaic helm",random
+OBJECT[75%]:'[',"studded leather cloak",random
+OBJECT[75%]:'[',"waistcloth",random
+OBJECT[75%]:'#',"wood tower shield",random
+OBJECT[75%]:'#',"bronze spear",random
+
+OBJECT[75%]:'[',"archaic helm",random
+OBJECT[75%]:'[',"cloak",random
+OBJECT[75%]:'[',"waistcloth",random
+OBJECT[75%]:'#',"wood tower shield",random
+OBJECT[75%]:'#',"bronze spear",random
+OBJECT[75%]:'#',"bronze khopesh",random
+
+OBJECT[75%]:'[',"archaic helm",random
+OBJECT[75%]:'[',"cloak",random
+OBJECT[75%]:'[',"waistcloth",random
+OBJECT[75%]:'#',"wood tower shield",random
+OBJECT[75%]:'#',"bronze spear",random
+OBJECT[75%]:'#',"bronze khopesh",random
 
 #
 #	The "fill" levels for the quest.
