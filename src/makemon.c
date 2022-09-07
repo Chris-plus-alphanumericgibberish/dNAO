@@ -1811,11 +1811,11 @@ boolean goodequip;
 			switch(rn2(6)){
 				case 0:
 					otmp = mongets(mtmp, SICKLE, mkobjflags);
-					set_material_gm(otmp, OBSIDIAN_MT);
+					if(otmp) set_material_gm(otmp, OBSIDIAN_MT);
 				break;
 				case 1:
 					otmp = mongets(mtmp, SCYTHE, mkobjflags);
-					set_material_gm(otmp, OBSIDIAN_MT);
+					if(otmp) set_material_gm(otmp, OBSIDIAN_MT);
 				break;
 				case 2:
 					(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
@@ -2002,27 +2002,34 @@ boolean goodequip;
 		} else if(mm == PM_ALABASTER_ELF){
 			if(rn2(3)){
 				otmp = mksobj(ELVEN_SICKLE, mkobjflags);
-				set_material_gm(otmp, METAL);
-				otmp->objsize = MZ_HUGE;
-				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				if(otmp){
+					set_material_gm(otmp, METAL);
+					otmp->objsize = MZ_HUGE;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
 			} else if(rn2(3)){
 				otmp = mksobj(ELVEN_DAGGER, mkobjflags);
-				set_material_gm(otmp, METAL);
-				otmp->objsize = MZ_LARGE;
-				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
-				
-				otmp = mksobj(ELVEN_SICKLE, mkobjflags);
-				set_material_gm(otmp, METAL);
-				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				if(otmp){
+					set_material_gm(otmp, METAL);
+					otmp->objsize = MZ_LARGE;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
+				if(otmp){
+					otmp = mksobj(ELVEN_SICKLE, mkobjflags);
+					set_material_gm(otmp, METAL);
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
 			} else {
 				otmp = mksobj(ELVEN_BROADSWORD, mkobjflags);
-				set_material_gm(otmp, METAL);
-				if(rn2(2)) otmp->objsize = MZ_LARGE;
-				fix_object(otmp);
-				(void) mpickobj(mtmp, otmp);
+				if(otmp){
+					set_material_gm(otmp, METAL);
+					if(rn2(2)) otmp->objsize = MZ_LARGE;
+					fix_object(otmp);
+					(void) mpickobj(mtmp, otmp);
+				}
 			}
 			
 			(void)mongets(mtmp, ELVEN_BOW, mkobjflags);
