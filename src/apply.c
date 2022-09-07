@@ -2868,7 +2868,7 @@ coord *cc;
 
 	mtmp = montraits(obj, cc);
 	if(mtmp){
-		obj->age = monstermoves + 1000L + rn2(1000L);
+		obj->age = monstermoves + 250L + rn2(250L);
 		/* if skull has been named, give same name to the monster */
 		if (get_ox(obj, OX_ENAM))
 			mtmp = christen_monst(mtmp, ONAME(obj));
