@@ -234,7 +234,7 @@ STAIR:(75,10),down
 
 # Church
 REGION:(18,01,24,07),lit,"temple"
-ALTAR:(21,02),noalign,altar,"_Velka, Goddess of Sin"
+ALTAR:(21,02),neutral,altar,"_Velka, Goddess of Sin"
 REGION:(10,01,18,04),lit,"morgue"
 
 # Doors
