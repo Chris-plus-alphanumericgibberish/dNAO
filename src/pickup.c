@@ -1635,6 +1635,12 @@ boolean noit;
 	return MOVE_STANDARD;
     }
 
+	if(cobj->spe == 5){
+	    pline("%s is wrapped around with a rope motif, and the face seems to be screaming.", The(xname(cobj)));
+		if(yn("Are you sure you want to open it?") != 'y'){
+			return MOVE_CANCELLED;
+		}
+	}
     You("carefully open %s...", the(xname(cobj)));
     return use_container(cobj, 0);
 }
@@ -1746,6 +1752,12 @@ lootcont:
 						continue;
 					}
 
+					if(cobj->spe == 5){
+						pline("%s is wrapped around with a rope motif, and the face seems to be screaming.", The(xname(cobj)));
+						if(yn("Are you sure you want to open it?") != 'y'){
+							return MOVE_CANCELLED;
+						}
+					}
 					You("carefully open %s...", the(xname(cobj)));
 					timepassed |= use_container(cobj, 0);
 					if (multi < 0) return MOVE_STANDARD;		/* chest trap */
