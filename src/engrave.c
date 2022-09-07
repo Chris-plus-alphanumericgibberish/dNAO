@@ -4075,7 +4075,7 @@ static const char *epitaphs[] = {
 		"The world began without knowledge, and without knowledge will it end.",
 		"Fear not the dark, my friend. And let the feast begin.",
 	
-	"For every hero commemorated, a thousand martyrs die unmourned and unremembered." /*Warhammer 40k*/
+	"For every hero commemorated, a thousand martyrs die unmourned and unremembered.", /*Warhammer 40k*/
 	
 	"FIQ:  One step from divinity.",
 		"FIQ:  Debugging dNethack, one iron ball to the face at a time.",
