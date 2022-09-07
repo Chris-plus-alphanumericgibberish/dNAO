@@ -5569,7 +5569,7 @@ u_healing_penalty()
 	if(hates_unblessed(youracedata)){
 		penalty += (8*u_bcu_next_to_skin(0)+1)/2;
 	}
-	if(is_demon(youracedata) || is_undead(youracedata)){
+	if(hates_holy(youracedata)){
 		penalty += (4*u_bcu_next_to_skin(1)+1)/2;
 	}
 	if(u.ualign.type == A_CHAOTIC){
