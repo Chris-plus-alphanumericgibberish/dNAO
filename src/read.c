@@ -482,10 +482,7 @@ doread()
 	} else if(scroll->oclass == ARMOR_CLASS
 		&& scroll->ohaluengr
 		&& scroll->oward
-		&& (scroll->otyp == DROVEN_PLATE_MAIL
-			|| scroll->otyp == DROVEN_CHAIN_MAIL
-			|| scroll->otyp == CONSORT_S_SUIT
-		)
+		&& is_readable_armor_otyp(scroll->otyp)
 	){
 		pline("There is %s engraved on the armor.",fetchHaluWard((int)scroll->oward));
 		return MOVE_READ;

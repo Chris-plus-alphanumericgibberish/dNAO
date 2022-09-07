@@ -1102,6 +1102,12 @@ struct obj {
 							|| onum == GENTLEMAN_S_SUIT\
 							|| onum == find_gcirclet())
 
+#define is_readable_armor_otyp(onum)	(onum == NOBLE_S_DRESS\
+							  || onum == DROVEN_PLATE_MAIL\
+							  || onum == DROVEN_CHAIN_MAIL\
+							  || onum == CONSORT_S_SUIT\
+							)
+
 #define is_museable_amulet(otyp) (otyp == AMULET_OF_LIFE_SAVING \
 								||otyp == AMULET_OF_REFLECTION \
 								||otyp == AMULET_OF_NULLIFY_MAGIC \

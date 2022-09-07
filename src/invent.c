@@ -891,14 +891,13 @@ carrying_readable_armor()
 		if(otmp->oclass == ARMOR_CLASS
 			&& ((otmp->ohaluengr
 					&& otmp->oward
-					&& (   otmp->otyp == DROVEN_PLATE_MAIL 
-						|| otmp->otyp == DROVEN_CHAIN_MAIL
-						|| otmp->otyp == CONSORT_S_SUIT)
+					&& is_readable_armor_otyp(otmp->otyp)
 				) || (otmp->oartifact && (
-					otmp->oartifact == ART_ITLACHIAYAQUE)
+					otmp->oartifact == ART_ITLACHIAYAQUE
+				 )
 				)
 			   )
-			)
+		)
 			return TRUE;
 	return FALSE;
 }

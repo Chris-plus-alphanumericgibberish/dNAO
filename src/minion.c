@@ -229,7 +229,7 @@ boolean talk;
 				set_faction(mon, faction);
 				
 				for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-					if(otmp->otyp == find_signet_ring() || otmp->otyp == DROVEN_CHAIN_MAIL || otmp->otyp == DROVEN_PLATE_MAIL || otmp->otyp == NOBLE_S_DRESS){
+					if(otmp->otyp == find_signet_ring() || is_readable_armor_otyp(otmp->otyp)){
 						otmp->oward = faction;
 					}
 				}
