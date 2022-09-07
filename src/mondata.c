@@ -2287,6 +2287,7 @@ struct permonst *ptr;
     case PM_LEGION_DEVIL_SOLDIER:
     case PM_LEGION_DEVIL_SERGEANT:
     case PM_LEGION_DEVIL_CAPTAIN:
+    case PM_GOOD_NEIGHBOR:
     case PM_GLASYA:
 	return 2;
     case PM_WHITE_UNICORN:
