@@ -21,14 +21,14 @@ STATIC_PTR int NDECL(forcedoor);
 	//All hope abandon, ye who enter here!
 const char * const gates_of_hell[] = {
 "",
-"Through me you pass into the city of woe;\n\
-Through me you pass into eternal pain;\n\
+"Through me you pass into the city of woe; \
+Through me you pass into eternal pain; \
 Through me among the people lost for aye.",
-"Justice the founder of my fabric moved:\n\
-To rear me the task of power divine,\n\
+"Justice the founder of my fabric moved: \
+To rear me the task of power divine, \
 supremest wisdom, and primeval love.",
-"Before me only eternal things were made,\n\
-And I shall endure eternally.\n\
+"Before me only eternal things were made, \
+And I shall endure eternally. \
 All hope abandon, ye who enter here!"
 };
 /* at most one of `door' and `box' should be non-null at any given time */
