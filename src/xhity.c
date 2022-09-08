@@ -8288,10 +8288,13 @@ boolean ranged;
 				rn2(EXPL_MAX),			/* color */
 				1);						/* radius */
 		}
+		int retval = MM_HIT;
 		if (DEADMONSTER(mdef))
-			return (MM_HIT|MM_DEF_DIED);
-		else
-			return MM_HIT;
+			retval |= MM_DEF_DIED;
+		if (DEADMONSTER(magr)) //Blew itself up (likely)
+			retval |= MM_AGR_DIED;
+
+		return retval;
 		}
 		
 	case AD_PAIN:
@@ -10433,6 +10436,12 @@ int vis;
 	else {
 		switch (attk->adtyp)
 		{
+		case AD_PHYS:
+			if(magr->mtyp == PM_FABERGE_SPHERE){
+				break;
+			}
+			else
+				goto expl_common;
 		case AD_FNEX:
 			/* fern spores are extra special */
 			/* need to die before their explosion, so that a new monster can be placed there */
@@ -10665,8 +10674,12 @@ expl_common:
 	}
 	else {
 		/* avoid double-killing magr, if it was slain by retaliatory damage from its attack, perhaps */ 
-		if (!DEADMONSTER(magr))
-			mondead(magr);
+		if (!DEADMONSTER(magr)){
+			if(magr->mtyp == PM_FABERGE_SPHERE)
+				mondied(magr);
+			else
+				mondead(magr);
+		}
 
 		if (*hp(magr) > 0)
 			result |= MM_AGR_STOP;
