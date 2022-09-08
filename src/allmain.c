@@ -497,9 +497,11 @@ boolean affect_game_state;
 
 	/* 1. ignore the MOVE_FINISHED_OCCUPATION flag, it only says to end occupations
 	 * 2. if no other types are specified 'default' means 'standard', otherwise is ignored
+	 * 3. exceptions to 2. 'Partial' |'d with no others is Partial|Standard
 	 */
 	actiontypes_remaining &= ~MOVE_FINISHED_OCCUPATION;
-	actiontypes_remaining = (actiontypes_remaining == MOVE_DEFAULT) ? MOVE_STANDARD : (actiontypes_remaining&(~MOVE_DEFAULT));
+	actiontypes_remaining = !(actiontypes_remaining & ~(MOVE_DEFAULT|MOVE_PARTIAL)) ? MOVE_STANDARD : (actiontypes_remaining&(~MOVE_DEFAULT));
+	actiontypes_remaining |= (actiontype&MOVE_PARTIAL);
 
 	/* loop through all flagged action types to determine which is the largest cost,
 	 * and, if affect_game_state is TRUE, apply all necessary effects.
@@ -507,8 +509,8 @@ boolean affect_game_state;
 	 * Most often, there is only one action type per player input.
 	 * In very rare circumstances, two actions that should take time can happen simultaneously.
 	 */
-	if(wizard && actiontypes_remaining != MOVE_CANCELLED && (actiontypes_remaining&MOVE_CANCELLED) && affect_game_state)
-		impossible("Incompletely cancelled actions in you_action_cost: %d", actiontypes_remaining-MOVE_CANCELLED);
+	//if(wizard && actiontypes_remaining != MOVE_CANCELLED && (actiontypes_remaining&MOVE_CANCELLED) && affect_game_state)
+	//	impossible("Incompletely cancelled actions in you_action_cost: %d", actiontypes_remaining-MOVE_CANCELLED);
 	for (i=0, current_action = MOVE_STANDARD;
 		actiontypes_remaining != 0;
 		current_action = 1<<i, i++)
@@ -630,8 +632,8 @@ boolean affect_game_state;
 			break;
 
 		case MOVE_CANCELLED:
-			/* ignore other costs, force a cost of 0 */
-			return 0;
+			current_cost = 0;
+			break;
 
 		default:
 			impossible("Unhandled MOVE_XYZ case (%d)", current_action);
@@ -1387,7 +1389,7 @@ moveloop()
 	int tx,ty;
 	static boolean oldBlind = 0, oldLightBlind = 0;
 	int healing_penalty = 0;
-    int hpDiff;
+    int hpDiff, movecost;
 	static int oldsanity = 100;
 
     flags.moonphase = phase_of_the_moon();
@@ -1424,7 +1426,7 @@ moveloop()
 
     u.uz0.dlevel = u.uz.dlevel;
     youmonst.movement = NORMAL_SPEED;	/* give the hero some movement points */
-	flags.move = FALSE; /* From nethack 3.6.2 */
+	flags.move = MOVE_CANCELLED; /* From nethack 3.6.2 */
     prev_hp_notify = uhp();
 
 	if(galign(u.ugodbase[UGOD_ORIGINAL]) == A_LAWFUL && flags.initalign != 0){
@@ -1453,13 +1455,13 @@ moveloop()
 	movement_combos();
 
 	
-	if (!(flags.move & MOVE_CANCELLED)) {
-		flags.movetoprint = flags.move == MOVE_DEFAULT ? MOVE_STANDARD : flags.move;
+	if ((flags.move & ~(MOVE_DEFAULT)) != MOVE_CANCELLED) {
+		flags.movetoprint = !(flags.move & ~(MOVE_PARTIAL|MOVE_DEFAULT)) ? MOVE_STANDARD : flags.move;
 		flags.movetoprintcost = you_action_cost(flags.move, FALSE);
 	}
-	if(you_action_cost(flags.move, TRUE) > 0) {
+	if((movecost = you_action_cost(flags.move, TRUE)) > 0) {
 		/* actual time passed */
-		youmonst.movement -= flags.movetoprintcost;
+		youmonst.movement -= movecost;
 		didmove = TRUE;
 
 		  /**************************************************/
