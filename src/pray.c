@@ -2461,6 +2461,49 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
     return MOVE_STANDARD;
 }
 
+STATIC_OVL
+int
+turn_level(mtmp)
+struct monst *mtmp;
+{
+	boolean youdef = mtmp == &youmonst;
+	int xlev = youdef ? u.ulevel : mtmp->data->mlevel;
+	if(youdef){
+		if(youracedata->mlet == S_ZOMBIE)
+			xlev = 6;
+		else if(youracedata->mlet == S_MUMMY)
+			xlev = 8;
+		else if(youracedata->mlet == S_WRAITH)
+			xlev = 10;
+		else if(youracedata->mlet == S_VAMPIRE)
+			xlev = 12;
+		else if(youracedata->mlet == S_GHOST)
+			xlev = 14;
+		else if(youracedata->mlet == S_SHADE)
+			xlev = 16;
+		else if(youracedata->mlet == S_LICH)
+			xlev = 18;
+	}
+	else {
+		/* lichs are tougher than zombies, but monster level generally doesn't help much. */
+		if(mtmp->data->mlet == S_ZOMBIE || has_template(mtmp, ZOMBIFIED) || has_template(mtmp, SKELIFIED))
+			xlev = 6;
+		else if(mtmp->data->mlet == S_MUMMY || has_template(mtmp, M_BLACK_WEB))
+			xlev = 8;
+		else if(mtmp->data->mlet == S_WRAITH || has_template(mtmp, FRACTURED))
+			xlev = 10;
+		else if(mtmp->data->mlet == S_VAMPIRE || has_template(mtmp, VAMPIRIC))
+			xlev = 12;
+		else if(mtmp->data->mlet == S_GHOST)
+			xlev = 14;
+		else if(mtmp->data->mlet == S_SHADE)
+			xlev = 16;
+		else if(mtmp->data->mlet == S_LICH)
+			xlev = 18;
+	}
+	return xlev;
+}
+
 int
 doturn()
 {	/* Knights & Priest(esse)s only please */
@@ -2522,50 +2565,45 @@ doturn()
 	    mtmp2 = mtmp->nmon;
 
 	    if (DEADMONSTER(mtmp)) continue;
-	    if (!cansee(mtmp->mx,mtmp->my) ||
-		distu(mtmp->mx,mtmp->my) > range) continue;
+	    if (!couldsee(mtmp->mx,mtmp->my) ||
+			(Race_if(PM_VAMPIRE) && !canseemon(mtmp)) ||
+			distu(mtmp->mx,mtmp->my) > range
+		) continue;
 
 	    if (!mtmp->mpeaceful && (is_undead(mtmp->data) ||
 		   (is_demon(mtmp->data) && (u.ulevel > (MAXULEV/2))))) {
 
 		    mtmp->msleeping = 0;
 		    if (Confusion) {
-			if (!once++){
-			    if(!Race_if(PM_VAMPIRE)) pline("Unfortunately, your voice falters.");
-			    else pline("Unfortunately, your concentration falters.");
-			}
-			if(mtmp->mtyp != PM_BANDERSNATCH) mtmp->mflee = 0;
-			mtmp->mfrozen = 0;
-			mtmp->mcanmove = 1;
-		    } else if (!resist(mtmp, '\0', 0, TELL)) {
-			xlev = 6;
-			switch (mtmp->data->mlet) {
-			    /* this is intentional, lichs are tougher
-			       than zombies. */
-			case S_LICH:    xlev += 2;  /*FALLTHRU*/
-			case S_SHADE:   xlev += 2;  /*FALLTHRU*/
-			case S_GHOST:   xlev += 2;  /*FALLTHRU*/
-			case S_BAT: //Asumes undead bats are vampires
-			case S_VAMPIRE: xlev += 2;  /*FALLTHRU*/
-			case S_WRAITH:  xlev += 2;  /*FALLTHRU*/
-			case S_MUMMY:   xlev += 2;  /*FALLTHRU*/
-			case S_ZOMBIE:
-			default:
-			    if (u.ulevel >= xlev &&
-				    !resist(mtmp, '\0', 0, NOTELL)) {
-				if (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE || Race_if(PM_VAMPIRE)){
-				    mtmp->mpeaceful = 1;
-				    set_malign(mtmp);
-					if(PM_VAMPIRE) tamedog(mtmp, (struct obj *)0);
-				} else { /* damn them */
-				    killed(mtmp);
+				if (!once++){
+					if(!Race_if(PM_VAMPIRE)) pline("Unfortunately, your voice falters.");
+					else pline("Unfortunately, your concentration falters.");
 				}
-				break;
-			    } /* else flee */
-			    /*FALLTHRU*/
-			    monflee(mtmp, 0, FALSE, TRUE);
-			    break;
-			}
+				if(mtmp->mtyp != PM_BANDERSNATCH) mtmp->mflee = 0;
+				mtmp->mfrozen = 0;
+				mtmp->mcanmove = 1;
+				//Knows your position now!
+				mtmp->mux = u.ux;
+				mtmp->muy = u.uy;
+		    } else if (!resist(mtmp, '\0', 0, TELL)) {
+				if(is_undead(mtmp->data)){
+					xlev = turn_level(mtmp);
+					if (u.ulevel >= xlev && !resist(mtmp, '\0', 0, NOTELL)) {
+						if (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE || Race_if(PM_VAMPIRE)){
+							mtmp->mpeaceful = 1;
+							set_malign(mtmp);
+							if(PM_VAMPIRE){
+								//Should be temporary, or it will de-tame all your minions :(
+								tamedog(mtmp, (struct obj *)0);
+							}
+						} else { /* damn them */
+							killed(mtmp);
+						}
+					}
+				}
+				/* else flee */
+				if(!DEADMONSTER(mtmp))
+					monflee(mtmp, 0, FALSE, TRUE);
 		    }
 	    }
 	}
