@@ -209,6 +209,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		else if(uandroid && youagr && !(
 			(launcher) || /* no returning fired ammo */
 			(forcedestroy) || /* no temporary ammo */
+			(uball == thrownobj) || /* Not the ball (it clears wornmask and does special stuff anyway) */
 			(thrownobj->oartifact == ART_FLUORITE_OCTAHEDRON && thrownobj->quan > 1)	/* no multithrown fluorite octet for balance reasons */
 		)){
 			returning = TRUE;
