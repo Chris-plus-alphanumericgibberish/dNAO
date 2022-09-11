@@ -3758,6 +3758,10 @@ dmonsfree()
     for (mtmp = &fmon; *mtmp;) {
 		if (DEADMONSTER(*mtmp)) {
 			struct monst *freetmp = *mtmp;
+			if(!((*mtmp)->deadmonster&DEADMONSTER_DEAD))
+				impossible("dmonsfree: monster (%s) marked as purged but not marked dead", m_monnam(*mtmp));
+			if(!((*mtmp)->deadmonster&DEADMONSTER_PURGE))
+				impossible("dmonsfree: monster (%s) marked dead but not purged", m_monnam(*mtmp));
 			*mtmp = (*mtmp)->nmon;
 			rem_all_mx(freetmp);
 			dealloc_monst(freetmp);
@@ -3766,7 +3770,7 @@ dmonsfree()
 		else {
 			/* sanity check */
 			if ((*mtmp)->mhp < 1) {
-				impossible("monster (%s) has hp <1 (%d) but not marked dead", m_monnam(*mtmp), (*mtmp)->mhp);
+				impossible("dmonsfree: monster (%s) has hp <1 (%d) but not marked dead", m_monnam(*mtmp), (*mtmp)->mhp);
 				mondead(*mtmp);
 			}
 			mtmp = &(*mtmp)->nmon;
