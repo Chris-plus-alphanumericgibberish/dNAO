@@ -6308,7 +6308,7 @@ int mmflags;
 					otmp = mongets(mtmp, PISTOL, mkobjflags);
 					if(otmp){
 						otmp->spe = 7;
-						add_oprop(otmp, OPROP_BLADED);
+						// add_oprop(otmp, OPROP_BLADED);
 						otmp = mksobj(SILVER_BULLET, mkobjflags);
 						if(otmp){
 							otmp->quan += rn1(100,100);
@@ -6328,6 +6328,7 @@ int mmflags;
 					
 					otmp = mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
 					if(otmp){
+						otmp->obj_color = CLR_GRAY;
 						otmp->spe = rn1(4,4);
 						otmp->cursed = FALSE; //Either uncurses or has no effect.
 					}

@@ -530,7 +530,7 @@ MONSTER:'@',"trooper",(48,10)
 MONSTER:'@',"trooper",(47,11)
 MONSTER:'@',"trooper",(47,09)
 
-MONSTER:'h',"dwarf",(17,17),peaceful
+MONSTER:'h',"dwarf warrior",(17,17),peaceful
 
 MONSTER:'@',"myrkalfar matron",(06,01),peaceful
 MONSTER:'@',"Elvenking",(07,01),peaceful
@@ -539,7 +539,7 @@ MONSTER:'C',"alider",(10,01),peaceful
 OBJECT:'\\',"bed",(10,01),uncursed,0
 MONSTER:'@',"trooper",(12,01),peaceful
 OBJECT:'\\',"bed",(12,01),uncursed,0
-MONSTER:'h',"dwarf",(14,01),peaceful
+MONSTER:'h',"dwarf warrior",(14,01),peaceful
 OBJECT:'\\',"bed",(14,01),uncursed,0
 
 MONSTER:'@',"human",(06,19),peaceful
