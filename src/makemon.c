@@ -2049,6 +2049,7 @@ boolean goodequip;
 			mtmp->m_lev = 4;
 			mtmp->mhp = mtmp->mhpmax = 6*mtmp->m_lev;
 			if(mtmp->female){
+				(void)mongets(mtmp, CRYSTAL_HELM, mkobjflags);
 				otmp = mksobj(NOBLE_S_DRESS, mkobjflags);
 				set_material_gm(otmp, PLASTIC);
 				otmp->obj_color = CLR_WHITE;
