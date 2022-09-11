@@ -7784,7 +7784,7 @@ arti_invoke(obj)
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
 					pseudo->quan = 20L;			/* do not let useup get it */
-					(void) peffects(pseudo);
+					(void) peffects(pseudo, TRUE);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 					pseudo = mksobj(SPE_DETECT_UNSEEN, MKOBJ_NOINIT);
 					pseudo->blessed = pseudo->cursed = 0;
@@ -7820,9 +7820,9 @@ arti_invoke(obj)
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
 					pseudo->quan = 23L;			/* do not let useup get it */
-					(void) peffects(pseudo);
-					(void) peffects(pseudo);
-					(void) peffects(pseudo);
+					(void) peffects(pseudo, TRUE);
+					(void) peffects(pseudo, TRUE);
+					(void) peffects(pseudo, TRUE);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights--;
 				}
@@ -7833,9 +7833,9 @@ arti_invoke(obj)
 					pseudo->blessed = pseudo->cursed = 0;
 					pseudo->blessed = TRUE;
 					pseudo->quan = 23L;			/* do not let useup get it */
-					(void) peffects(pseudo);
-					(void) peffects(pseudo);
-					(void) peffects(pseudo);
+					(void) peffects(pseudo, TRUE);
+					(void) peffects(pseudo, TRUE);
+					(void) peffects(pseudo, TRUE);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 					obj->spe--; obj->spe--; obj->spe--; // lose three charge
 					pline("Your weapon has become much more flawed!");

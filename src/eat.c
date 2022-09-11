@@ -2343,7 +2343,7 @@ eatspecial() /* called after eating non-food */
 	}
 	if (otmp->oclass == POTION_CLASS) {
 		otmp->quan++; /* dopotion() does a useup() */
-		(void)dopotion(otmp);
+		(void)dopotion(otmp, TRUE);
 	}
 	if (otmp->oclass == RING_CLASS || otmp->oclass == AMULET_CLASS)
 		eataccessory(otmp);

@@ -474,16 +474,17 @@ dodrink()
 		return MOVE_STANDARD;
 	    }
 	}
-	return dopotion(otmp);
+	return dopotion(otmp, FALSE);
 }
 
 int
-dopotion(otmp)
+dopotion(otmp, force)
 register struct obj *otmp;
+boolean force;
 {
 	int retval;
 
-	if(otmp->otyp == POT_GOAT_S_MILK && u.veil){
+	if(!force && otmp->otyp == POT_GOAT_S_MILK && u.veil){
 		You("feel reality threatening to slip away from the mere scent of the potion!");
 		if (yn("Are you sure you want to drink it?") != 'y'){
 			return(0);
@@ -497,7 +498,7 @@ register struct obj *otmp;
 		otmp->in_use = FALSE;
 	
 	nothing = unkn = 0;
-	if((retval = peffects(otmp)) >= 0) return(retval);
+	if((retval = peffects(otmp, force)) >= 0) return(retval);
 
 	if(nothing) {
 	    unkn++;
@@ -516,8 +517,9 @@ register struct obj *otmp;
 }
 
 int
-peffects(otmp)
-	register struct obj	*otmp;
+peffects(otmp, force)
+register struct obj	*otmp;
+boolean force;
 {
 	register int i, ii, lim;
     boolean enhanced;
@@ -1320,7 +1322,7 @@ as_extra_healing:
 		break;
 	case POT_BLOOD:
 		unkn++;
-		if(your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm]) && !CANNIBAL_ALLOWED() 
+		if(!force && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm]) && !CANNIBAL_ALLOWED() 
 			&& ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
 		){
 			char buf[BUFSZ];
@@ -1342,7 +1344,7 @@ as_extra_healing:
 						makeplural(mons[otmp->corpsenm].mname)
 			);
 			if(!Hallucination) otmp->known = TRUE;
-			if (yn("Drink it?") == 'n') {
+			if (!force && yn("Drink it?") == 'n') {
 				break;
 			}else{
 				violated_vegetarian();

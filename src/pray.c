@@ -3294,7 +3294,7 @@ commune_with_goat()
 			otmp->blessed = otmp->cursed = 0;
 			otmp->quan = 20L;			/* do not let useup get it */
 			otmp->blessed = greater_boon;
-			(void) peffects(otmp);
+			(void) peffects(otmp, TRUE);
 			obfree(otmp, (struct obj *)0);	/* now, get rid of it */
 			break;
 
@@ -3312,7 +3312,7 @@ commune_with_goat()
 				otmp->blessed = greater_boon;
 				/* potions of restore ability recover sanity, so pre-decrement sanity */
 				change_usanity(otmp->blessed ? -20 : -5, FALSE);
-				(void) peffects(otmp);
+				(void) peffects(otmp, TRUE);
 				obfree(otmp, (struct obj *)0);	/* now, get rid of it */
 			}
 			break;

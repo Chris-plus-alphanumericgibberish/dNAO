@@ -960,7 +960,7 @@ int how;
 	                                            NO_MKOBJ_FLAGS);
 	
 	                bless(potion);
-	                (void) peffects(potion); /* always -1 for restore ability */
+	                (void) peffects(potion, TRUE); /* always -1 for restore ability */
 	                /* not useup(); we haven't put this potion into inventory */
 	                obfree(potion, (struct obj *) 0);
 	            }

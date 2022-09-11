@@ -549,6 +549,14 @@ drinksink()
 				if (!rn2(13) && ((Luck >= 0 && is_vampire(youracedata)) ||
 				    (Luck <= 0 && !is_vampire(youracedata)))) {
 					otmp = mksobj(POT_BLOOD, MKOBJ_NOINIT);
+					if(Luck){
+						/*Good luck: vampire, which wants cursed human blood, bad luck: sucks to be a human PC!*/
+						otmp->corpsenm = PM_HUMAN;
+						curse(otmp);
+					}
+					else {
+						otmp->corpsenm = (mvitals[PM_SEWER_RAT].mvflags & G_GENOD && !In_quest(&u.uz)) ? PM_WERERAT : PM_SEWER_RAT;
+					}
 				} else {
 					otmp = mkobj(POTION_CLASS, NO_MKOBJ_FLAGS);
 					if (otmp->otyp == POT_WATER) {
@@ -564,7 +572,7 @@ drinksink()
 			otmp->dknown = !(Blind || Hallucination);
 			otmp->quan++; /* Avoid panic upon useup() */
 			otmp->fromsink = 1; /* kludge for docall() */
-			(void) dopotion(otmp);
+			(void) dopotion(otmp, TRUE);
 			obfree(otmp, (struct obj *)0);
 			break;
 		case 5: if (!(levl[u.ux][u.uy].looted & S_LRING)) {
