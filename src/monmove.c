@@ -1996,74 +1996,76 @@ register struct monst *mtmp;
 					m2->mhp -= dmg;
 					if (m2->mhp <= 0)
 						monkilled(m2, "", AD_DRIN);
-					else
+					else {
 						m2->msleeping = 0;
-					if(mdat->mtyp == PM_GREAT_CTHULHU) 
-						m2->mconf=TRUE;
-					else if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
-						if(power >= 3){
-							m2->mconf=TRUE;
-						}
-						if(power >= 4){
-							if(rn2(3)){
-								//Scream in pain
-								if (!is_silent_mon(m2)){
-									if (canseemon(m2))
-										pline("%s %s in pain!", Monnam(m2), humanoid_torso(m2->data) ? "screams" : "shrieks");
-									else You_hear("%s %s in pain!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2), humanoid_torso(m2->data) ? "screaming" : "shrieking");
-								}
-								else {
-									if (canseemon(m2))
-										pline("%s writhes in pain!", Monnam(m2));
-								}
-								m2->movement = max(m2->movement - 12, -12);
-							}
-							else if(rn2(2)){
-								//Laugh in madness
-								if (!is_silent_mon(m2)){
-									if (canseemon(m2))
-										pline("%s begins laughing hysterically!", Monnam(m2));
-									else You_hear("%s begin laughing hysterically!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2));
-								}
-								else {
-									if (canseemon(m2))
-										pline("%s begins tembling hysterically!", Monnam(m2));
-								}
-								mtmp->mlaughing = dmg;
-								m2->mnotlaugh = FALSE;
-							}
-							else {
-								//Babble (set cooldown)
-								if (!is_silent_mon(m2)){
-									if (canseemon(m2))
-										pline("%s %s!", Monnam(m2), humanoid_torso(m2->data) ? "babbles incoherently" : "makes confused noises");
-									else You_hear("%s %s in!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2), humanoid_torso(m2->data) ? "babbling incoherently" : "making confused noises");
-									m2->mspec_used += 2*dmg;
-								}
-							}
-							if(power >= 7){
-								if(canseemon(m2))
-									pline("%s vomits!", Monnam(m2));
-								m2->mcanmove = 0;
-								if ((m2->mfrozen + 3) > 127)
-									m2->mfrozen = 127;
-								else m2->mfrozen += 3;
-								if (get_mx(m2, MX_EDOG)) {
-									EDOG(m2)->hungrytime = max(0, EDOG(m2)->hungrytime-20);
-								}
-							}
-						}
-					} else if(mdat->mtyp == PM_ELDER_BRAIN){
-						m2->mhp -= dmg;
-						m2->mstdy = max(dmg, m2->mstdy);
-					} else {
-						if(mdat->mtyp == PM_SEMBLANCE) 
-							m2->mconf=TRUE;
 					}
-					if(has_template(mtmp, DREAM_LEECH)){
-						if (!resists_sleep(m2)){
-							m2->msleeping = 1;
-							slept_monst(m2);
+					if(!DEADMONSTER(m2)){
+						if(mdat->mtyp == PM_GREAT_CTHULHU) 
+							m2->mconf=TRUE;
+						else if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
+							if(power >= 3){
+								m2->mconf=TRUE;
+							}
+							if(power >= 4){
+								if(rn2(3)){
+									//Scream in pain
+									if (!is_silent_mon(m2)){
+										if (canseemon(m2))
+											pline("%s %s in pain!", Monnam(m2), humanoid_torso(m2->data) ? "screams" : "shrieks");
+										else You_hear("%s %s in pain!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2), humanoid_torso(m2->data) ? "screaming" : "shrieking");
+									}
+									else {
+										if (canseemon(m2))
+											pline("%s writhes in pain!", Monnam(m2));
+									}
+									m2->movement = max(m2->movement - 12, -12);
+								}
+								else if(rn2(2)){
+									//Laugh in madness
+									if (!is_silent_mon(m2)){
+										if (canseemon(m2))
+											pline("%s begins laughing hysterically!", Monnam(m2));
+										else You_hear("%s begin laughing hysterically!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2));
+									}
+									else {
+										if (canseemon(m2))
+											pline("%s begins tembling hysterically!", Monnam(m2));
+									}
+									m2->mlaughing = min(100, dmg);
+									m2->mnotlaugh = FALSE;
+								}
+								else {
+									//Babble (set cooldown)
+									if (!is_silent_mon(m2)){
+										if (canseemon(m2))
+											pline("%s %s!", Monnam(m2), humanoid_torso(m2->data) ? "babbles incoherently" : "makes confused noises");
+										else You_hear("%s %s in!", m2->mtame ? noit_mon_nam(m2) : mon_nam(m2), humanoid_torso(m2->data) ? "babbling incoherently" : "making confused noises");
+										m2->mspec_used += 2*dmg;
+									}
+								}
+								if(power >= 7){
+									if(canseemon(m2))
+										pline("%s vomits!", Monnam(m2));
+									m2->mcanmove = 0;
+									if ((m2->mfrozen + 3) > 127)
+										m2->mfrozen = 127;
+									else m2->mfrozen += 3;
+									if (get_mx(m2, MX_EDOG)) {
+										EDOG(m2)->hungrytime = max(0, EDOG(m2)->hungrytime-20);
+									}
+								}
+							}
+						} else if(mdat->mtyp == PM_ELDER_BRAIN){
+							m2->mstdy = max(dmg, m2->mstdy);
+						} else {
+							if(mdat->mtyp == PM_SEMBLANCE) 
+								m2->mconf=TRUE;
+						}
+						if(has_template(mtmp, DREAM_LEECH)){
+							if (!resists_sleep(m2)){
+								m2->msleeping = 1;
+								slept_monst(m2);
+							}
 						}
 					}
 				}
