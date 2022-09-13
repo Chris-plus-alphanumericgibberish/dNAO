@@ -2491,7 +2491,7 @@ bury_an_obj(otmp)
 	if (otmp->otyp == LEASH && otmp->leashmon != 0)
 		o_unleash(otmp);
 
-	if (otmp->lamplit && otmp->otyp != POT_OIL)
+	if (obj_is_burning(otmp) && otmp->otyp != POT_OIL)
 		end_burn(otmp, TRUE);
 
 	obj_extract_self(otmp);

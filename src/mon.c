@@ -5357,7 +5357,7 @@ register struct monst *mdef;
 			if (flooreffects(obj, x, y, "fall")) continue;
 			place_object(obj, x, y);
 		    } else {
-			if (obj->lamplit) end_burn(obj, TRUE);
+			if (obj_is_burning(obj)) end_burn(obj, TRUE);
 			obj->nobj = oldminvent;
 			oldminvent = obj;
 		    }
@@ -5415,7 +5415,7 @@ register struct monst *mdef;
 			if (flooreffects(obj, x, y, "fall")) continue;
 			place_object(obj, x, y);
 		    } else {
-			if (obj->lamplit) end_burn(obj, TRUE);
+			if (obj_is_burning(obj)) end_burn(obj, TRUE);
 			obj->nobj = oldminvent;
 			oldminvent = obj;
 		    }
@@ -5493,7 +5493,7 @@ register struct monst *mdef;
 			if (flooreffects(obj, x, y, "fall")) continue;
 			place_object(obj, x, y);
 		    } else {
-			if (obj->lamplit) end_burn(obj, TRUE);
+			if (obj_is_burning(obj)) end_burn(obj, TRUE);
 			obj->nobj = oldminvent;
 			oldminvent = obj;
 		    }
@@ -5550,7 +5550,7 @@ register struct monst *mdef;
 			if (flooreffects(obj, x, y, "fall")) continue;
 			place_object(obj, x, y);
 		    } else {
-			if (obj->lamplit) end_burn(obj, TRUE);
+			if (obj_is_burning(obj)) end_burn(obj, TRUE);
 			obj->nobj = oldminvent;
 			oldminvent = obj;
 		    }
