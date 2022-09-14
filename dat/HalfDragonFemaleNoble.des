@@ -504,7 +504,7 @@ MAP
 2|.-.......|.|... ....-+---.|.|.|.........|................|..T|.-----.|TTTTT
 3|.........|.|........|...|.|.|.|.........|.......  ........TTT|.......|TTTTT
 4|.-.......|.|........--.------.--........  ......  ......TTTTT---------TTTTT
-5|.........|.|........|..........|........  .............TTTTTTTTTTTTTTTTTTTT
+5|.........|.|........+..........|........  .............TTTTTTTTTTTTTTTTTTTT
 6----------|.|........------------........|.............TTTTTTTTTTTTTTTTTTTTT
 7TTTTTTTTTT|.---..........................|...........TTTTTTTTTTTTTTTTTTTTTTT
 8TTTTTTTTT--...------------------.........|--.......TTTTTTTTTTTTTTTTTTTTTTTTT
@@ -525,6 +525,7 @@ DOOR:closed,(68,10)
 DOOR:locked,(62,10)
 DOOR:locked,(16,08), 1
 DOOR:closed,(22,12)
+DOOR:closed,(21,15)
 
 # Church
 MONSTER:'@',"Bastard of the Boreal Valley",(16,04)
