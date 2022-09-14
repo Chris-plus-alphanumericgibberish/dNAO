@@ -2327,7 +2327,7 @@ register int after;
 	    if((dist2(mtmp->mx, mtmp->my, tx, ty) < 2) &&
 	       intruder && (intruder != mtmp)) {
 			notonhead = (intruder->mx != tx || intruder->my != ty);
-			if(mattackm(mtmp, intruder) == 2) return(2);
+			if(mattackm(mtmp, intruder)&(MM_AGR_DIED)) return(2);
 			mmoved = 1;
 			goto postmov;
 		} else if(mtmp->mtyp != PM_DEMOGORGON 
