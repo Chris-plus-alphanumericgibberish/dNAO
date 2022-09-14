@@ -1343,7 +1343,7 @@ dopay()
 #ifdef GOLDOBJ
 	long umoney;
 #endif
-	int pass, tmp, sk = 0, seensk = 0;
+	int pass, tmp, sk = 0, seensk = 0, adjacent = 0;
 	boolean paid = FALSE, stashed_gold = (hidden_gold() > 0L);
 	int seenSeals;
 	multi = 0;
@@ -1356,6 +1356,7 @@ dopay()
 	    sk++;
 	    if (ANGRY(shkp) && distu(shkp->mx, shkp->my) <= 2) nxtm = shkp;
 	    if (canspotmon(shkp)) seensk++;
+		if (distmin(u.ux, u.uy, shkp->mx, shkp->my)) adjacent++;
 	    if (inhishop(shkp) && (*u.ushops == ESHK(shkp)->shoproom))
 		resident = shkp;
 	}
@@ -1370,7 +1371,7 @@ dopay()
 		return MOVE_CANCELLED;
 	}
 
-	if(!seensk) {
+	if(!seensk && adjacent != 1) {
 		You_cant("see...");
 		return MOVE_CANCELLED;
 	}
@@ -1382,10 +1383,10 @@ dopay()
 		goto proceed;
 	}
 
-	if (seensk == 1) {
+	if (seensk == 1 || (seensk == 0 && adjacent == 1)) {
 		for (shkp = next_shkp(fmon, FALSE, FALSE);
 			shkp; shkp = next_shkp(shkp->nmon, FALSE, FALSE))
-		    if (canspotmon(shkp)) break;
+		    if (canspotmon(shkp) || (seensk == 0 && distmin(u.ux, u.uy, shkp->mx, shkp->my))) break;
 		if (shkp != resident && distu(shkp->mx, shkp->my) > 2) {
 		    pline("%s is not near enough to receive your payment.",
 					     Monnam(shkp));
