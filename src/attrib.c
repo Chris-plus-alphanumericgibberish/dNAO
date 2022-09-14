@@ -426,7 +426,7 @@ boolean	inc_or_dec;
 #ifdef DEBUG
 	pline("Exercise:");
 #endif
-	/* Mechanoids can't excercise abilities */
+	/* Mechanoids can't exercise abilities */
 	if(umechanoid) return;
 	/* no physical exercise while polymorphed; the body's temporary */
 	if (Upolyd && i != A_WIS && i != A_INT) return;
