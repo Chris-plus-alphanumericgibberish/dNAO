@@ -2879,7 +2879,9 @@ not_special:
 		
 		if(mtmp->mtyp == PM_SURYA_DEVA){
 			struct monst *blade;
-			for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
+			for(blade = fmon; blade; blade = blade->nmon)
+				if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID && !DEADMONSTER(blade))
+					break;
 			if(blade){
 				int bx = blade->mx, by = blade->my;
 				remove_monster(bx, by);
