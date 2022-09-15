@@ -1356,7 +1356,7 @@ dopay()
 	    sk++;
 	    if (ANGRY(shkp) && distu(shkp->mx, shkp->my) <= 2) nxtm = shkp;
 	    if (canspotmon(shkp)) seensk++;
-		if (distmin(u.ux, u.uy, shkp->mx, shkp->my)) adjacent++;
+		if (distmin(u.ux, u.uy, shkp->mx, shkp->my) < 2) adjacent++;
 	    if (inhishop(shkp) && (*u.ushops == ESHK(shkp)->shoproom))
 		resident = shkp;
 	}
@@ -1386,7 +1386,7 @@ dopay()
 	if (seensk == 1 || (seensk == 0 && adjacent == 1)) {
 		for (shkp = next_shkp(fmon, FALSE, FALSE);
 			shkp; shkp = next_shkp(shkp->nmon, FALSE, FALSE))
-		    if (canspotmon(shkp) || (seensk == 0 && distmin(u.ux, u.uy, shkp->mx, shkp->my))) break;
+		    if (canspotmon(shkp) || (seensk == 0 && distmin(u.ux, u.uy, shkp->mx, shkp->my) < 2)) break;
 		if (shkp != resident && distu(shkp->mx, shkp->my) > 2) {
 		    pline("%s is not near enough to receive your payment.",
 					     Monnam(shkp));
