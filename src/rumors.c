@@ -527,9 +527,9 @@ register struct monst *oracl;
 					n = selected[0].item.a_int;
 					free(selected);
 				}
-				n = rnd(5);
+				else n = rnd(5);
 				switch (n){
-					case 1:
+					case GLIMPSE_ELDRN:
 						switch(dungeon_topology.alt_tulani){
 							case TULANI_CASTE:
 								pline("They say radiant spheres roam the land.");
@@ -550,13 +550,13 @@ register struct monst *oracl;
 							break;
 						}
 					break;
-					case 2:
+					case GLIMPSE_DRAGN:
 						if (dungeon_topology.alt_tower)
 							pline("They say Bahamut's palace has been sighted from afar.");
 						else
 							pline("Rumors of Bahamut's palace have been greatly exaggerated.");
 					break;
-					case 3:
+					case GLIMPSE_POLYP:
 						if (dungeon_topology.eprecursor_typ == PRE_DRACAE)
 							pline("They say the ancient eladrin mothers have been seen once again.");
 						else if (dungeon_topology.eprecursor_typ == PRE_POLYP){
@@ -567,7 +567,7 @@ register struct monst *oracl;
 						} else
 							pline("I've been considering expanding my statue collection. I hear Oona has quite the variety...");
 					break;
-					case 4:
+					case GLIPMSE_CHAOS:
 						if (dungeon_topology.d_chaos_dvariant == TEMPLE_OF_CHAOS)
 							pline("Some adventurer came through here the other day, all dressed in blue and muttering about 'Materia'?");
 						else if (dungeon_topology.d_chaos_dvariant == MITHARDIR)
@@ -579,7 +579,7 @@ register struct monst *oracl;
 								pline("A pair of short adventurers came through here the other day, apparently in search of a volcano?");
 						}
 					break;
-					case 5:
+					case GLIMPSE_OOONA:
 						if (u.oonaenergy == AD_FIRE)
 							pline("They say Oona has a bit of a fiery personality...");
 						else if (u.oonaenergy == AD_COLD)
