@@ -13512,8 +13512,21 @@ int	spc;
 {
 	register int	first, last, num = 0;
 	int maxmlev, mask = (G_PLANES | G_NOHELL | G_HELL | G_NOGEN | G_UNIQ) & ~spc;
+	int freq;
+	
 
 	maxmlev = (level_difficulty() + u.ulevel)/2+1;
+	if(In_quest(&u.uz)){
+		/* The gnomish quest is lower-power */
+		if(Pantheon_if(PM_GNOME))
+			maxmlev = max(GNOMISH_MIN_QUEST_LEVEL, GNOMISH_MIN_QUEST_LEVEL/2+maxmlev/2);
+		/* The Android quest is after the Anachrononaut quest */
+		else if(Race_if(PM_ANDROID))
+			maxmlev = 100;
+		/* The quest is at least quest-level difficulty */
+		else if(!Is_qhome(&u.uz))
+			maxmlev = max(MIN_QUEST_LEVEL, maxmlev);
+	}
 	if(class < 1 || class >= MAXMCLASSES) {
 	    impossible("mkclass called with bad class!");
 	    return((struct permonst *) 0);
@@ -13538,10 +13551,11 @@ int	spc;
 	    if (!(mvitals[last].mvflags & G_GONE && !In_quest(&u.uz)) && !(mons[last].geno & mask)
 					&& !is_placeholder(&mons[last])) {
 		/* consider it */
-		if(num && toostrong(last, maxmlev) &&
-		   monstr[last] != monstr[last-1] && (rn2(2) || monstr[last] > maxmlev+5)
-		) break;
-		num += mons[last].geno & G_FREQ;
+		if(num && toostrong(last, maxmlev) && monstr[last] != monstr[last-1]) break;
+		freq = (mons[last].geno & G_FREQ);
+		if(!freq)
+			freq++;
+		num += freq;
 	    }
 
 	if(!num) return((struct permonst *) 0);
@@ -13551,16 +13565,20 @@ int	spc;
  */
 	for(num = rnd(num); num > 0; first++)
 	    if (!(mvitals[first].mvflags & G_GONE && !In_quest(&u.uz)) && !(mons[first].geno & mask)
-					&& !is_placeholder(&mons[first])) {
-		/* skew towards lower value monsters at lower exp. levels */
-		num -= mons[first].geno & G_FREQ;
-		if (num && adj_lev(&mons[first]) > (u.ulevel*2)) {
-		    /* but not when multiple monsters are same level */
-		    if (mons[first].mlevel != mons[first+1].mlevel)
-			num--;
-		}
+					&& !is_placeholder(&mons[first])
+		) {
+			/* skew towards lower value monsters at lower exp. levels */
+			freq = (mons[first].geno & G_FREQ);
+			if(!freq)
+				freq++;
+			num -= freq;
+			if (num && adj_lev(&mons[first]) > (u.ulevel*2)) {
+				/* but not when multiple monsters are same level */
+				if (mons[first].mlevel != mons[first+1].mlevel)
+					num--;
+			}
 	    }
-	first--; /* correct an off-by-one error */
+	first--; /* correct off-by-one error (it will definitely enter the loop, so it will definitely increment first before noticing that num is now <= 0) */
 
 	return(&mons[first]);
 }
