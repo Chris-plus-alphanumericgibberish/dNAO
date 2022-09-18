@@ -619,6 +619,7 @@ extern struct artifact * artilist;
                 (m) == ART_NENYA ||\
                 (m) == ART_NARYA ||\
                 (m) == ART_LOMYA ||\
+                (m) == ART_RING_OF_THROR ||\
                 (m) == ART_MARAUDER_S_MAP\
             )
 
