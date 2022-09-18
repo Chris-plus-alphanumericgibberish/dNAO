@@ -13498,6 +13498,32 @@ int mndx;	/* particular species that can no longer be created */
 #endif /* OVL0 */
 #ifdef OVL1
 
+/*	Makes a random adult dragon, favoring non-deep dragons but otherwise ignoring frequency.
+ *	Ignores all generation masks other than G_GONE.
+ *	Together with mkclass() below, assumes that any time anything asks for a random 'D', it means
+ *		a random adult dragon.
+ * 	Tries 100 times to make one before giving up and returning a null permonst pointer.
+ */
+
+struct permonst *
+mkdragon()
+{
+	int dragons[] = {PM_GRAY_DRAGON, PM_SILVER_DRAGON, PM_SHIMMERING_DRAGON, 
+					 PM_RED_DRAGON, PM_WHITE_DRAGON, PM_ORANGE_DRAGON, 
+					 PM_BLACK_DRAGON, PM_BLUE_DRAGON, PM_GREEN_DRAGON,
+					 PM_YELLOW_DRAGON};
+	int tries = 100;
+	int dragon;
+	while(tries--> 0){
+		if(!rn2(20))
+			dragon = PM_DEEP_DRAGON;
+		else dragon = ROLL_FROM(dragons);
+		if(!(mvitals[dragon].mvflags & G_GONE && !In_quest(&u.uz)))
+			return &mons[dragon];
+	}
+	return (struct permonst *) 0;
+}
+
 /*	The routine below is used to make one of the multiple types
  *	of a given monster class.  The second parameter specifies a
  *	special casing bit mask to allow the normal genesis
@@ -13514,6 +13540,8 @@ int	spc;
 	int maxmlev, mask = (G_PLANES | G_NOHELL | G_HELL | G_NOGEN | G_UNIQ) & ~spc;
 	int freq;
 	
+	if(class == S_DRAGON)
+		return mkdragon();
 
 	maxmlev = (level_difficulty() + u.ulevel)/2+1;
 	if(In_quest(&u.uz)){
