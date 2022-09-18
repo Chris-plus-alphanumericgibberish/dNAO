@@ -742,13 +742,13 @@ HELM(("helm of drain resistance", "band"), /*diadem of drain resistance*//*Needs
 DRGN_MAIL(("gray dragon scale mail"),       1, 1200, 7, 5, CLR_GRAY,      O_POWER(ANTIMAGIC, HALF_SPDAM)),
 DRGN_MAIL(("silver dragon scale mail"),     1, 1200, 7, 5, DRAGON_SILVER, O_POWER(REFLECTING)),
 DRGN_MAIL(("shimmering dragon scale mail"), 1, 1200, 7, 5, CLR_CYAN,      O_POWER(DISPLACED, SEE_INVIS)),
-DRGN_MAIL(("red dragon scale mail"),        1,  900, 7, 5, CLR_RED,       O_POWER(FIRE_RES, FLYING)),
-DRGN_MAIL(("deep dragon scale mail"),       1, 1200, 7, 8, CLR_MAGENTA,   O_POWER(DRAIN_RES, UNCHANGING)),
 DRGN_MAIL(("white dragon scale mail"),      1,  900, 7, 5, CLR_WHITE,     O_POWER(COLD_RES, MAGICAL_BREATHING, SWIMMING, WATERPROOF)),
 DRGN_MAIL(("orange dragon scale mail"),     1,  900, 7, 5, CLR_ORANGE,    O_POWER(FREE_ACTION, SLEEP_RES, HALLUC_RES)),
 DRGN_MAIL(("black dragon scale mail"),      1, 1200, 7, 5, CLR_BLACK,     O_POWER(DISINT_RES, DRAIN_RES)),
 DRGN_MAIL(("blue dragon scale mail"),       1,  900, 7, 5, CLR_BLUE,      O_POWER(SHOCK_RES, FAST)),
 DRGN_MAIL(("green dragon scale mail"),      1,  900, 7, 5, CLR_GREEN,     O_POWER(POISON_RES, SICK_RES)),
+DRGN_MAIL(("red dragon scale mail"),        1,  900, 7, 5, CLR_RED,       O_POWER(FIRE_RES, FLYING)),
+DRGN_MAIL(("deep dragon scale mail"),       1, 1200, 7, 8, CLR_MAGENTA,   O_POWER(DRAIN_RES, UNCHANGING)),
 DRGN_MAIL(("yellow dragon scale mail"),     1,  900, 7, 5, CLR_YELLOW,    O_POWER(ACID_RES, STONE_RES)),
 #undef DRGN_MAIL
 
@@ -760,13 +760,13 @@ DRGN_MAIL(("yellow dragon scale mail"),     1,  900, 7, 5, CLR_YELLOW,    O_POWE
 DRGN_SCALES(("gray dragon scales"),       1, 700, 9, 2, CLR_GRAY,      O_POWER(ANTIMAGIC, HALF_SPDAM)),
 DRGN_SCALES(("silver dragon scales"),     1, 700, 9, 2, DRAGON_SILVER, O_POWER(REFLECTING)),
 DRGN_SCALES(("shimmering dragon scales"), 1, 700, 9, 2, CLR_CYAN,      O_POWER(DISPLACED, SEE_INVIS)),
-DRGN_SCALES(("red dragon scales"),        1, 500, 9, 2, CLR_RED,       O_POWER(FIRE_RES, FLYING)),
-DRGN_SCALES(("deep dragon scales"),       1, 500, 9, 4, CLR_MAGENTA,   O_POWER(DRAIN_RES, UNCHANGING)),
 DRGN_SCALES(("white dragon scales"),      1, 500, 9, 2, CLR_WHITE,     O_POWER(COLD_RES, MAGICAL_BREATHING, SWIMMING, WATERPROOF)),
 DRGN_SCALES(("orange dragon scales"),     1, 500, 9, 2, CLR_ORANGE,    O_POWER(FREE_ACTION, SLEEP_RES, HALLUC_RES)),
 DRGN_SCALES(("black dragon scales"),      1, 700, 9, 2, CLR_BLACK,     O_POWER(DISINT_RES, DRAIN_RES)),
 DRGN_SCALES(("blue dragon scales"),       1, 500, 9, 2, CLR_BLUE,      O_POWER(SHOCK_RES, FAST)),
 DRGN_SCALES(("green dragon scales"),      1, 500, 9, 2, CLR_GREEN,     O_POWER(POISON_RES, SICK_RES)),
+DRGN_SCALES(("red dragon scales"),        1, 500, 9, 2, CLR_RED,       O_POWER(FIRE_RES, FLYING)),
+DRGN_SCALES(("deep dragon scales"),       1, 500, 9, 4, CLR_MAGENTA,   O_POWER(DRAIN_RES, UNCHANGING)),
 DRGN_SCALES(("yellow dragon scales"),     1, 500, 9, 2, CLR_YELLOW,    O_POWER(ACID_RES, STONE_RES)),
 #undef DRGN_SCALES
 
@@ -944,13 +944,13 @@ SHIELD(("shield of reflection", "polished shield", "smooth shield"),
 DRGN_SHIELD(("gray dragon scale shield"),       1, 1200, 7, 0, CLR_GRAY,      O_POWER(ANTIMAGIC, HALF_SPDAM)),
 DRGN_SHIELD(("silver dragon scale shield"),     1, 1200, 7, 0, DRAGON_SILVER, O_POWER(REFLECTING)),
 DRGN_SHIELD(("shimmering dragon scale shield"), 1, 1200, 7, 0, CLR_CYAN,      O_POWER(DISPLACED, SEE_INVIS)),
-DRGN_SHIELD(("red dragon scale shield"),        1,  900, 7, 0, CLR_RED,       O_POWER(FIRE_RES)), // intentionally does not give flight; wings from armor
-DRGN_SHIELD(("deep dragon scale shield"),       1, 1200, 6, 0, CLR_MAGENTA,   O_POWER(DRAIN_RES, UNCHANGING)),
 DRGN_SHIELD(("white dragon scale shield"),      1,  900, 7, 0, CLR_WHITE,     O_POWER(COLD_RES, MAGICAL_BREATHING, SWIMMING, WATERPROOF)),
 DRGN_SHIELD(("orange dragon scale shield"),     1,  900, 7, 0, CLR_ORANGE,    O_POWER(FREE_ACTION, SLEEP_RES, HALLUC_RES)),
 DRGN_SHIELD(("black dragon scale shield"),      1, 1200, 7, 0, CLR_BLACK,     O_POWER(DISINT_RES, DRAIN_RES)),
 DRGN_SHIELD(("blue dragon scale shield"),       1,  900, 7, 0, CLR_BLUE,      O_POWER(SHOCK_RES, FAST)),
 DRGN_SHIELD(("green dragon scale shield"),      1,  900, 7, 0, CLR_GREEN,     O_POWER(POISON_RES, SICK_RES)),
+DRGN_SHIELD(("red dragon scale shield"),        1,  900, 7, 0, CLR_RED,       O_POWER(FIRE_RES)), // intentionally does not give flight; wings from armor
+DRGN_SHIELD(("deep dragon scale shield"),       1, 1200, 6, 0, CLR_MAGENTA,   O_POWER(DRAIN_RES, UNCHANGING)),
 DRGN_SHIELD(("yellow dragon scale shield"),     1,  900, 7, 0, CLR_YELLOW,    O_POWER(ACID_RES, STONE_RES)),
 #undef DRGN_SHIELD
 SHIELD(("stone dragon shield"),
