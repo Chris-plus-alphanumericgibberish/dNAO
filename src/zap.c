@@ -3297,7 +3297,9 @@ register struct	obj	*obj;
 int
 spell_damage_bonus()
 {
-    int tmp, intell = ACURR(A_INT);
+    int tmp, intell;
+	
+	intell = ACURR(base_casting_stat());
 
     /* Punish low intellegence before low level else low intellegence
        gets punished only when high level */
@@ -3675,8 +3677,11 @@ struct zapdata * zapdata;
 
 	/* damage bonuses */
 	if (magr && zapdata->ztyp == ZAP_SPELL) {
-		if (youagr)
+		if (youagr){
 			dmg += spell_damage_bonus();
+			if(dmg < 1)
+				dmg = 1;
+		}
 		if (youagr && u.ukrau_duration)
 			dmg *= 1.5;
 		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)
