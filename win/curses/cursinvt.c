@@ -77,7 +77,7 @@ curses_add_inv(int y, int glyph, CHAR_P accelerator, attr_t attr,
                      u.ux, u.uy);
         attr_t glyphclr = curses_color_attr(color, 0);
         wattron(win, glyphclr);
-        wprintw(win, "%c ", symbol);
+        wprintw(win, "%c ", (char)symbol);
         wattroff(win, glyphclr);
     }
 
