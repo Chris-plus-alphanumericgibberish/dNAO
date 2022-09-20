@@ -447,7 +447,8 @@ learn()
 	booktype = book->otyp;
 	if(booktype == SPE_BOOK_OF_THE_DEAD) {
 	    deadbook(book);
-	    return MOVE_READ;
+		book = 0;
+	    return MOVE_FINISHED_OCCUPATION;
 	}
 	if(booktype == SPE_SECRETS){
 		if(book->oartifact) doparticularinvoke(book); //this is a redundant check
