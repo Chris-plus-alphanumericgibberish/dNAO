@@ -357,8 +357,6 @@ found_ward:
 	if(!Role_if(PM_WIZARD) && target > 0)
 		target /= 5;
 	
-	pline("level: %d school: %d target: %d", oc->oc_level, school_skill, target);
-	
 	/* can't write if we don't know it - unless we're lucky */
 	if(objects[new_obj->otyp].oc_nowish ||
 	  (!(objects[new_obj->otyp].oc_name_known) &&
