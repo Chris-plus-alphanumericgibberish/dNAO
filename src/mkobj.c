@@ -3386,7 +3386,7 @@ maid_clean(mon, obj)
 		obj->oeroded2 = 0;
 		if(canseemon(mon)) pline("The maid %s", is_corrodeable(obj) ? "scourers away the corrosion." : "excises and patches the rotted areas.");
 	}
-	if(obj->obroken){
+	if(obj->obroken && Is_real_container(obj)){
 		if(canseemon(mon)) pline("The maid mends the broken lock.");
 		obj->obroken = 0;
 	}
