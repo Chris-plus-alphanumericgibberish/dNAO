@@ -5887,8 +5887,10 @@ xkilled(mtmp, dest)
 		if(mtmp->mflamemarked){
 			if(mtmp->data->geno&G_NOCORPSE)
 				flame_consume(mtmp, (struct obj *) 0);
-			else if(corpse)
+			else if(corpse){
 				flame_consume((struct monst *) 0, corpse);
+				corpse = (struct obj *)0; //corpse pointer is now stale
+			}
 		}
 		if(corpse && corpse->otyp == CORPSE && !corpse->oartifact){
 			//We are in the "player has killed monster" function, so it's their fault
