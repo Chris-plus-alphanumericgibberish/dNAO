@@ -8249,7 +8249,7 @@ doapply()
 		nomul(0, NULL);
 		return MOVE_CANCELLED;
 	}
-	if(res && !waslabile && obj && obj->oartifact) arti_speak(obj);
+	if(!(res == MOVE_CANCELLED) && !waslabile && obj && obj->oartifact) arti_speak(obj);
 xit2:
 	nomul(0, NULL);
 	return res;
