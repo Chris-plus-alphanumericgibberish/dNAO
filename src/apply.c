@@ -7653,10 +7653,10 @@ doapply()
 	case CREDIT_CARD:
 #endif
 	case SKELETON_KEY:
-		res = pick_lock(obj);
+		res = pick_lock(&obj);
 		break;
 	case UNIVERSAL_KEY:
-		res =  pick_lock(obj);
+		res =  pick_lock(&obj);
 		break;
 	case PICK_AXE:
 	case DWARVISH_MATTOCK:

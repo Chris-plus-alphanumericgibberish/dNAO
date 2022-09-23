@@ -386,15 +386,18 @@ reset_pick()
 #ifdef OVLB
 
 int
-pick_lock(pick) /* pick a lock with a given object */
-	register struct	obj	*pick;
+pick_lock(pick_p) /* pick a lock with a given object */
+	register struct	obj	**pick_p;
 {
 	int picktyp, c, ch;
+	struct obj *pick = 0;
 	coord cc;
 	int key;
 	struct rm	*door;
 	struct obj	*otmp;
 	char qbuf[QBUFSZ];
+
+	if(pick_p) pick = *pick_p;
 
 	picktyp = pick->otyp;
 
@@ -629,6 +632,10 @@ pick_lock(pick) /* pick a lock with a given object */
 					here = &levl[cc.x][cc.y];
 					here->typ = ROOM;
 					useupall(pick);
+					//0 out obj in the calling code. uwep should already be 0 at this point due to useupall, so it's harmless to set it to 0 again.
+					// pick_p shouldn't ever be 0 in this case, but....
+					if(pick_p)
+						*pick_p = (struct obj *) 0;
 					make_engr_at(cc.x, cc.y,
 						 gates_of_hell[key%4], 0L, BURN); //mod 4 the array index so people can mess up the des file without causing problems
 					unblock_point(cc.x,cc.y);
@@ -683,7 +690,7 @@ doforce()		/* try to force a chest with your weapon */
 	} else if(uwep->otyp == LOCK_PICK ||
 	    uwep->otyp == CREDIT_CARD ||
 	    uwep->otyp == SKELETON_KEY) {
-	    	return pick_lock(uwep);
+	    	return pick_lock(&uwep);
 	/* not a lightsaber or lockpicking device*/
 	} else if(!uwep ||     /* proper type test */
 	   (uwep->oclass != WEAPON_CLASS && !is_weptool(uwep) &&
