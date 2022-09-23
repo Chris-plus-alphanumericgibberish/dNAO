@@ -4387,7 +4387,7 @@ int wishflags;
 			add_oprop_list(oprop_list, OPROP_BRIL);
 
 		} else if (!strncmpi(bp, "glazed ", l=7)) {
-			add_oprop_list(oprop_list, OPROP_SFLMW);
+			add_oprop_list(oprop_list, OPROP_CGLZ);
 		} else if (!strncmpi(bp, "silverflame ", l=12)) {
 			add_oprop_list(oprop_list, OPROP_SFLMW);
 		} else if (!strncmpi(bp, "mortalflame ", l=12)) {
