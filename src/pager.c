@@ -1721,7 +1721,7 @@ get_mb_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, unsolid(ptr)				, "unsolid"					, many);
 	many = append(description, slithy(ptr)				, "slithy"					, many);
 	many = append(description, thick_skinned(ptr)		, "thick-skinned"			, many);
-	many = append(description, lays_eggs(ptr)			, "oviparus"				, many);
+	many = append(description, lays_eggs(ptr)			, "oviparous"				, many);
 	many = append(description, acidic(ptr)				, "acidic to eat"			, many);
 	many = append(description, poisonous(ptr)			, "poisonous to eat"		, many);
 	many = append(description, freezing(ptr)			, "freezing to eat"			, many);
@@ -1764,7 +1764,7 @@ get_ma_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, (ptr->mflagsa & MA_PLANT)		, "plant"				, many);
 	many = append(description, (ptr->mflagsa & MA_GIANT)		, "giant"				, many);
 	many = append(description, (ptr->mflagsa & MA_INSECTOID)	, "insectoid"			, many);
-	many = append(description, (ptr->mflagsa & MA_ARACHNID)		, "arachind"			, many);
+	many = append(description, (ptr->mflagsa & MA_ARACHNID)		, "arachnid"			, many);
 	many = append(description, (ptr->mflagsa & MA_AVIAN)		, "avian"				, many);
 	many = append(description, (ptr->mflagsa & MA_REPTILIAN)	, "reptilian"			, many);
 	many = append(description, (ptr->mflagsa & MA_ANIMAL)		, "mundane animal"		, many);
