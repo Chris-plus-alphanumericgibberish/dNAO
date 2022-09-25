@@ -11558,6 +11558,7 @@ struct monst * mon;
 	else if(in_mklev && In_quest(&u.uz) && peaceful && (
 	   (urole.ldrnum == PM_OLD_FORTUNE_TELLER && (mon->mtyp == PM_KNIGHT || mon->mtyp == PM_MAID))
 	|| (urole.ldrnum == PM_KING_ARTHUR && Role_if(PM_KNIGHT) && (mon->mtyp == PM_KNIGHT))
+	|| (urole.ldrnum == PM_GALADRIEL && (mon->mtyp == PM_CELEBORN))
 	|| (Role_if(PM_EXILE) && (mon->mtyp == PM_PEASANT))
 	|| (urole.ldrnum == PM_DAMAGED_ARCADIAN_AVENGER && (mon->mtyp == PM_GNOME || mon->mtyp == PM_GNOME_LORD || mon->mtyp == PM_GNOME_KING
 			|| mon->mtyp == PM_TINKER_GNOME || mon->mtyp == PM_GNOMISH_WIZARD))
