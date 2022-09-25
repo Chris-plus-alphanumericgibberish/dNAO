@@ -11553,9 +11553,12 @@ struct monst * mon;
 	else if((In_quest(&u.uz) || Is_stronghold(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || Is_astralevel(&u.uz)) && !peaceful)
 		out_faction = YENDORIAN_FACTION;
 
+	else if(In_quest(&u.uz) && mon->mtyp == urole.guardnum)
+		out_faction = QUEST_FACTION;
 	else if(in_mklev && In_quest(&u.uz) && peaceful && (
 	   (urole.ldrnum == PM_OLD_FORTUNE_TELLER && (mon->mtyp == PM_KNIGHT || mon->mtyp == PM_MAID))
 	|| (urole.ldrnum == PM_KING_ARTHUR && Role_if(PM_KNIGHT) && (mon->mtyp == PM_KNIGHT))
+	|| (urole.ldrnum == PM_GALADRIEL && (mon->mtyp == PM_CELEBORN))
 	|| (Role_if(PM_EXILE) && (mon->mtyp == PM_PEASANT))
 	|| (urole.ldrnum == PM_DAMAGED_ARCADIAN_AVENGER && (mon->mtyp == PM_GNOME || mon->mtyp == PM_GNOME_LORD || mon->mtyp == PM_GNOME_KING
 			|| mon->mtyp == PM_TINKER_GNOME || mon->mtyp == PM_GNOMISH_WIZARD))
@@ -14783,7 +14786,7 @@ register struct permonst *ptr;
 		&& (ptr->mtyp == PM_SHOGGOTH || ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR || ptr->mtyp == PM_PRIESTESS_OF_GHAUNADAUR)
 	) return TRUE;
 	
-	if (ptr->mtyp == urole.ldrnum || ptr->msound == MS_GUARDIAN)
+	if (ptr->mtyp == urole.ldrnum || ptr->mtyp == urole.guardnum)
 		return TRUE;
 	if (ptr->msound == MS_NEMESIS)	return FALSE;
 	
