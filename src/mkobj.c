@@ -1598,7 +1598,7 @@ start_corpse_timeout(body)
 	/* lizards, beholders, and lichen don't rot or revive */
 	if (body->corpsenm == PM_LIZARD || body->corpsenm == PM_LICHEN || body->corpsenm == PM_CROW_WINGED_HALF_DRAGON || body->corpsenm == PM_BEHOLDER || body->spe) return;
 	
-	if(get_ox(body, OX_EMON)) attchmon = get_ox(body, OX_EMON)+sizeof(int);
+	if(get_ox(body, OX_EMON)) attchmon = EMON(body);
 
 	action = ROT_CORPSE;		/* default action: rot away */
 	rot_adjust = in_mklev ? 25 : 10;	/* give some variation */
@@ -1647,9 +1647,10 @@ start_corpse_timeout(body)
 	 && (has_template(attchmon, ZOMBIFIED))
 	 && !body->norevive
 	) {
-//		pline("setting up zombie revival for %s", xname(body));
+		// if(wizard)
+			// pline("checking for zombie revival for %s", xname(body));
 		attchmon->mclone = 1;
-		for (age = 2; age <= TAINT_AGE; age++)
+		for (age = 2; age <= ROT_AGE; age++)
 		    if (!rn2(HALF_MOLDY_CHANCE)) {	/* zombie revives */
 			action = REVIVE_MON;
 			when = age;
@@ -1708,7 +1709,7 @@ start_corpse_timeout(body)
 			 0;
 	if(action == ROT_CORPSE && chance){
 		for (age = TAINT_AGE + 1; age <= ROT_AGE; age++)
-			if (!rn2(chance)) {    /* "revives" as a random s_fungus */
+			if (!rn2(chance)) {    /* "revives" as a zombie */
 				action = ZOMBIE_CORPSE;
 				when = age;
 				break;
