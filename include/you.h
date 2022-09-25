@@ -874,7 +874,7 @@ struct you {
 //BAB
 #define BASE_ATTACK_BONUS(wep)	((Role_if(PM_BARBARIAN) || Role_if(PM_CONVICT) || Role_if(PM_KNIGHT) || Role_if(PM_ANACHRONONAUT) || \
 								Role_if(PM_PIRATE) || Role_if(PM_SAMURAI) || Role_if(PM_VALKYRIE) || (u.sealsActive&SEAL_BERITH) || \
-								(!wep && (u.umartial || (u.sealsActive&SEAL_EURYNOME))) || \
+								(!wep && (martial_bonus() || (u.sealsActive&SEAL_EURYNOME))) || \
 								(Role_if(PM_MONK) && wep && is_monk_weapon(wep)) || \
 								(wep && is_lightsaber(wep) && (Unblind_telepat || (Blind && Blind_telepat)))) ? 1.00 :\
 							 (Role_if(PM_ARCHEOLOGIST) || Role_if(PM_EXILE) || Role_if(PM_CAVEMAN) || Role_if(PM_MONK) || \

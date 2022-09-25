@@ -2730,6 +2730,7 @@ char *buf;
     const char *ptr;
 
     switch (P_SKILL(skill)) {
+	case P_ISRESTRICTED:    ptr = "Restricted"; break;
 	case P_UNSKILLED:    ptr = "Unskilled"; break;
 	case P_BASIC:	     ptr = "Basic";     break;
 	case P_SKILLED:	     ptr = "Skilled";   break;
@@ -2752,6 +2753,7 @@ char *buf;
     const char *ptr;
 
     switch (P_MAX_SKILL(skill)) {
+	case P_ISRESTRICTED:    ptr = "Restricted"; break;
 	case P_UNSKILLED:    ptr = "Unskilled"; break;
 	case P_BASIC:	     ptr = "Basic";     break;
 	case P_SKILLED:	     ptr = "Skilled";   break;
@@ -2800,7 +2802,7 @@ can_advance(skill, speedy)
 int skill;
 boolean speedy;
 {
-    return !P_RESTRICTED(skill)
+    return !OLD_P_RESTRICTED(skill)
 	    && P_SKILL_CORE(skill, FALSE) < P_MAX_SKILL_CORE(skill, FALSE)
 		&& (
 #ifdef WIZARD
@@ -2821,7 +2823,7 @@ STATIC_OVL boolean
 could_advance(skill)
 int skill;
 {
-    return !P_RESTRICTED(skill)
+    return !OLD_P_RESTRICTED(skill)
 	    && P_SKILL_CORE(skill, FALSE) < P_MAX_SKILL_CORE(skill, FALSE) && 
 	    P_ADVANCE(skill) >=
 		(unsigned) practice_needed_to_advance(OLD_P_SKILL(skill))
@@ -3116,7 +3118,7 @@ int skill;
 int new_cap;
 {
     if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < new_cap) {
-		if(P_RESTRICTED(skill))
+		if(OLD_P_RESTRICTED(skill))
 			unrestrict_weapon_skill(skill);
 		else OLD_P_MAX_SKILL(skill)++;
 		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
@@ -3179,7 +3181,7 @@ int degree;
 	
 	if(skill < 0) skill *= -1;
 	
-    if (skill != P_NONE && !P_RESTRICTED(skill)) {
+    if (skill != P_NONE && !OLD_P_RESTRICTED(skill)) {
 	advance_before = can_advance(skill, FALSE);
 	P_ADVANCE(skill)+=degree;
 	if (!advance_before && can_advance(skill, FALSE))

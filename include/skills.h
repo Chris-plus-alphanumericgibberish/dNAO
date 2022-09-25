@@ -110,7 +110,7 @@
 #define P_NUM_SKILLS		(P_LAST_H_TO_H+1)
 
 /* These roles qualify for a martial arts bonus */
-#define martial_bonus()	(u.umartial)
+#define martial_bonus()	(u.umartial || Earth_crystal)
 
 /* Fighting form IDs */
 #define NO_FFORM		0

@@ -5724,6 +5724,16 @@ int p_skill;
 	return P_MAX_SKILL_CORE(p_skill, TRUE);
 }
 
+#define WIND_SKILL(skl) (skl == P_BARE_HANDED_COMBAT || skl == P_AXE || skl == P_SABER || skl == P_HEALING_SPELL || skl == P_ATTACK_SPELL || skl == P_DAGGER)
+#define FIRE_SKILL(skl) (skl == P_LONG_SWORD || skl == P_BOW || skl == P_WAND_POWER || skl == P_MATTER_SPELL || skl == P_DAGGER)
+#define WATER_SKILL(skl) (skl == P_HAMMER || skl == P_SPEAR || skl == P_BROAD_SWORD || skl == P_CLERIC_SPELL || skl == P_MUSICALIZE)
+#define EARTH_SKILL(skl) (skl == P_BARE_HANDED_COMBAT || skl == P_ATTACK_SPELL || skl == P_HEALING_SPELL || skl == P_CLERIC_SPELL || skl == P_SHURIKEN)
+#define CHAOS_SKILL(skl) (skl == P_TWO_HANDED_SWORD || skl == P_ESCAPE_SPELL)
+
+#define INCR_MAXSKILL	maxskill = min(max(P_BASIC, maxskill + 1), p_skill == P_BARE_HANDED_COMBAT ? P_GRAND_MASTER : P_EXPERT)
+#define INCR_CURSKILL	OLD_P_SKILL(p_skill) == P_ISRESTRICTED ? curskill+=2 : curskill++;
+
+
 int
 P_MAX_SKILL_CORE(p_skill, inc_penalties)
 int p_skill;
@@ -5745,47 +5755,24 @@ boolean inc_penalties;
 	}
 	
 	if(Air_crystal){
-		if(p_skill == P_AXE
-		 || p_skill == P_HEALING_SPELL
-		 || p_skill == P_ATTACK_SPELL
-		 || p_skill == P_DAGGER
-		)
-			maxskill = min(maxskill + 1, P_EXPERT);
-		if(p_skill == P_BARE_HANDED_COMBAT)
-			maxskill = min(maxskill + 1, P_GRAND_MASTER);
+		if(WIND_SKILL(p_skill))
+			INCR_MAXSKILL;
 	}
 	if(Fire_crystal){
-		if(p_skill == P_LONG_SWORD
-		 || p_skill == P_BOW
-		 || p_skill == P_WAND_POWER
-		 || p_skill == P_MATTER_SPELL
-		)
-			maxskill = min(maxskill + 1, P_EXPERT);
+		if(FIRE_SKILL(p_skill))
+			INCR_MAXSKILL;
 	}
 	if(Water_crystal){
-		if(p_skill == P_HAMMER
-		 || p_skill == P_SPEAR
-		 || p_skill == P_BROAD_SWORD
-		 || p_skill == P_CLERIC_SPELL
-		 || p_skill == P_MUSICALIZE
-		)
-			maxskill = min(maxskill + 1, P_EXPERT);
+		if(WATER_SKILL(p_skill))
+			INCR_MAXSKILL;
 	}
 	if(Earth_crystal){
-		if(p_skill == P_ATTACK_SPELL
-		 || p_skill == P_HEALING_SPELL
-		 || p_skill == P_CLERIC_SPELL
-		 || p_skill == P_DAGGER
-		)
-			maxskill = min(maxskill + 1, P_EXPERT);
-		if(p_skill == P_BARE_HANDED_COMBAT)
-			maxskill = min(maxskill + 1, P_GRAND_MASTER);
+		if(EARTH_SKILL(p_skill))
+			INCR_MAXSKILL;
 	}
 	if(Black_crystal){
-		if(p_skill == P_TWO_HANDED_SWORD)
-			maxskill = min(maxskill + 1, P_EXPERT);
-		if(p_skill == P_ESCAPE_SPELL)
-			maxskill = min(maxskill + 1, P_EXPERT);
+		if(CHAOS_SKILL(p_skill))
+			INCR_MAXSKILL;
 	}
 
 	if(p_skill == P_NIMAN){
@@ -5850,38 +5837,24 @@ boolean inc_penalties;
 	}
 	
 	if(Air_crystal){
-		if(p_skill == P_BARE_HANDED_COMBAT
-		 || p_skill == P_AXE
-		 || p_skill == P_HEALING_SPELL
-		 || p_skill == P_ATTACK_SPELL
-		 || p_skill == P_DAGGER
-		)
-		curskill += 1;
+		if(WIND_SKILL(p_skill))
+			INCR_CURSKILL;
 	}
 	if(Fire_crystal){
-		if(p_skill == P_LONG_SWORD
-		 || p_skill == P_BOW
-		 || p_skill == P_WAND_POWER
-		 || p_skill == P_MATTER_SPELL
-		)
-		curskill += 1;
+		if(FIRE_SKILL(p_skill))
+			INCR_CURSKILL;
 	}
 	if(Water_crystal){
-		if(p_skill == P_HAMMER
-		 || p_skill == P_SPEAR
-		 || p_skill == P_CLERIC_SPELL
-		 || p_skill == P_MUSICALIZE
-		)
-		curskill += 1;
+		if(WATER_SKILL(p_skill))
+			INCR_CURSKILL;
 	}
 	if(Earth_crystal){
-		if(p_skill == P_BARE_HANDED_COMBAT
-		 || p_skill == P_ATTACK_SPELL
-		 || p_skill == P_HEALING_SPELL
-		 || p_skill == P_CLERIC_SPELL
-		 || p_skill == P_DAGGER
-		)
-		curskill += 1;
+		if(EARTH_SKILL(p_skill))
+			INCR_CURSKILL;
+	}
+	if(Black_crystal){
+		if(CHAOS_SKILL(p_skill))
+			INCR_CURSKILL;
 	}
 	if(p_skill == P_NIMAN && curskill < P_BASIC){
 		if(uwep && uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC){
@@ -5919,8 +5892,7 @@ int p_skill;
 		else if(uswapwep && uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC)
 			return P_RESTRICTED(weapon_type(uswapwep));
 	}
-	return (u.weapon_skills[p_skill].skill==P_ISRESTRICTED 
-		&& !(spiritSkill(p_skill) || u.specialSealsActive&SEAL_NUMINA) );
+	return (P_SKILL(p_skill) == P_ISRESTRICTED);
 }
 
 boolean

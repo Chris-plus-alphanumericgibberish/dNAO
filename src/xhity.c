@@ -165,7 +165,7 @@ struct monst * mdef;
 					You("begin slashing monsters with your shadow-blades.");
 				else
 					You("begin %sing monsters with your %s %s.",
-					u.umartial ? "strik" : "bash",
+					martial_bonus() ? "strik" : "bash",
 					uarmg ? "gloved" : "bare",	/* Del Lamb */
 					makeplural(body_part(HAND)));
 			}

@@ -1170,7 +1170,7 @@ you_regen_pw()
 	
 	// external power regeneration
 	if (Energy_regeneration ||										// energy regeneration 'trinsic
-		(u.umartial && !uarmf && IS_GRASS(levl[u.ux][u.uy].typ))	// or being a bare-foot martial-artist standing on grass
+		(martial_bonus() && !uarmf && IS_GRASS(levl[u.ux][u.uy].typ))	// or being a bare-foot martial-artist standing on grass
 		)
 	{
 		perX += HEALCYCLE;

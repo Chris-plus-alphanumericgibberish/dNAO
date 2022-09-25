@@ -2914,9 +2914,9 @@ int godnum;
 					otmp = uwep;
 				else if (uswapwep && uswapwep->spe < 5 && (uswapwep->oclass == WEAPON_CLASS || is_weptool(uswapwep)))
 					otmp = uswapwep;
-				else if (u.umartial && uarmg && (uarmg->oartifact || !uwep) && uarmg->spe < 5)
+				else if (martial_bonus() && uarmg && (uarmg->oartifact || !uwep) && uarmg->spe < 5)
 					otmp = uarmg;
-				else if (u.umartial && uarmf && (uarmf->oartifact || !uwep) && uarmf->spe < 5)
+				else if (martial_bonus() && uarmf && (uarmf->oartifact || !uwep) && uarmf->spe < 5)
 					otmp = uarmf;
 				else if (uleft && uleft->otyp != RIN_WISHES && objects[uleft->otyp].oc_charged && uleft->spe < 5)
 					otmp = uleft;
