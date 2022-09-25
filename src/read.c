@@ -3232,7 +3232,7 @@ do_class_genocide()
 			       quest_info(MS_LEADER) == i)
 			   && (mons[i].msound != MS_NEMESIS ||
 			       quest_info(MS_NEMESIS) == i)
-			   && (mons[i].msound != MS_GUARDIAN ||
+			   && (i < PM_STUDENT ||
 			       quest_info(MS_GUARDIAN) == i)
 			/* non-leader/nemesis/guardian role-specific monster */
 			   && (i != PM_NINJA ||		/* nuisance */

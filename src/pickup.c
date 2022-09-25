@@ -1932,7 +1932,7 @@ boolean *prev_loot;
     /* 	*passed_info is set to TRUE if a loot query was given.               */
     /*	*prev_loot is set to TRUE if something was actually acquired in here. */
 	if(mtmp 
-		&& (mtmp->mtame || (urole.ldrnum == PM_OLD_FORTUNE_TELLER && mtmp->mpeaceful && (quest_faction(mtmp) || mtmp->data->msound == MS_GUARDIAN)))
+		&& (mtmp->mtame || (urole.ldrnum == PM_OLD_FORTUNE_TELLER && mtmp->mpeaceful && quest_faction(mtmp)))
 	){
 	if((otmp = pick_creatures_armor(mtmp, passed_info))){
 	long unwornmask;
@@ -2014,7 +2014,7 @@ dopetequip()
 		return MOVE_CANCELLED;
 	}
 	if(!mtmp->mtame
-		&& !(urole.ldrnum == PM_OLD_FORTUNE_TELLER && mtmp->mpeaceful && (quest_faction(mtmp) || mtmp->data->msound == MS_GUARDIAN))
+		&& !(urole.ldrnum == PM_OLD_FORTUNE_TELLER && mtmp->mpeaceful && quest_faction(mtmp))
 	){
 		pline("%s doesn't trust you enough for that!", Monnam(mtmp));
 		return MOVE_CANCELLED;
