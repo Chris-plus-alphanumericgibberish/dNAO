@@ -1400,44 +1400,44 @@ resistances_enlightenment()
 	}
 	
 	if(u.wimage >= 10){
-		if(ACURR(A_WIS) < 6) Sprintf(buf, "Your mind is filled with the image of a weeping angel");
-		else if(ACURR(A_WIS) < 9) Sprintf(buf, "The image of a weeping angel is ever on your mind");
-		else if(ACURR(A_WIS) < 12) Sprintf(buf, "You can't seem to shake the image of a weeping angel from your mind");
-		else Sprintf(buf, "The image of a weeping angel lurks in the back of your mind");
+		if(ACURR(A_WIS) < 6) Sprintf(buf, "Your mind is filled with the image of a weeping angel.");
+		else if(ACURR(A_WIS) < 9) Sprintf(buf, "The image of a weeping angel is ever on your mind.");
+		else if(ACURR(A_WIS) < 12) Sprintf(buf, "You can't seem to shake the image of a weeping angel from your mind.");
+		else Sprintf(buf, "The image of a weeping angel lurks in the back of your mind.");
 		putstr(en_win, 0, buf);
 	}
 	if (u.umorgul){
-		Sprintf(buf, "You feel deathly cold");
+		Sprintf(buf, "You feel deathly cold.");
 		putstr(en_win, 0, buf);
 	}
 	if (u.umummyrot){
-		Sprintf(buf, "You are gradually rotting to dust");
+		Sprintf(buf, "You are gradually rotting to dust.");
 		putstr(en_win, 0, buf);
 	}
 	
 	if(u.lastprayed){
-		Sprintf(buf, "You last %s %ld turns ago", u.lastprayresult==PRAY_GIFT ? "recieved a gift" :
+		Sprintf(buf, "You last %s %ld turns ago.", u.lastprayresult==PRAY_GIFT ? "recieved a gift" :
 												  u.lastprayresult==PRAY_ANGER ? "angered your god" : 
 												  u.lastprayresult==PRAY_CONV ? "converted to a new god" : 
 												  "prayed",
 			moves - u.lastprayed);
 		putstr(en_win, 0, buf);
 		if(u.lastprayresult==PRAY_GOOD){
-			Sprintf(buf, "That prayer was well recieved");
+			Sprintf(buf, "That prayer was well received.");
 			putstr(en_win, 0, buf);
 		} else if(u.lastprayresult==PRAY_IGNORED){
-			Sprintf(buf, "That prayer went unanswered");
+			Sprintf(buf, "That prayer went unanswered.");
 			putstr(en_win, 0, buf);
 		} else if(u.lastprayresult==PRAY_BAD){
-			Sprintf(buf, "That prayer was poorly recieved");
+			Sprintf(buf, "That prayer was poorly received.");
 			putstr(en_win, 0, buf);
 		} else if(u.lastprayresult==PRAY_INPROG){
-			Sprintf(buf, "That prayer is in progress");
+			Sprintf(buf, "That prayer is in progress.");
 			putstr(en_win, 0, buf);
 		}
 		if(u.reconciled){
-			if(u.reconciled==REC_REC) Sprintf(buf, "You have since reconciled with your god");
-			else if(u.reconciled==REC_MOL) Sprintf(buf, "You have since mollified your god");
+			if(u.reconciled==REC_REC) Sprintf(buf, "You have since reconciled with your god.");
+			else if(u.reconciled==REC_MOL) Sprintf(buf, "You have since mollified your god.");
 			putstr(en_win, 0, buf);
 		}
 	}
@@ -1607,7 +1607,7 @@ udr_enlightenment()
 	if(active_glyph(DEEP_SEA))
 		cap += 3;
 	if(!has_head_mon(&youmonst)){
-		Sprintf(mbuf, "You have no head; shots hit upper body");
+		Sprintf(mbuf, "You have no head; shots hit upper body.");
 		putstr(en_win, 0, mbuf);
 	} else {
 		dr = slot_udr(HEAD_DR, (struct monst *)0, 0);
@@ -1630,7 +1630,7 @@ udr_enlightenment()
 		Sprintf(mbuf, "Lower Body Armor: %d", dr);
 	putstr(en_win, 0, mbuf);
 	if(!can_wear_gloves(youracedata)){
-		Sprintf(mbuf, "You have no hands; shots hit upper body");
+		Sprintf(mbuf, "You have no hands; shots hit upper body.");
 		putstr(en_win, 0, mbuf);
 	} else {
 		dr = slot_udr(ARM_DR, (struct monst *)0, 0);
@@ -1641,7 +1641,7 @@ udr_enlightenment()
 		putstr(en_win, 0, mbuf);
 	}
 	if(!can_wear_boots(youracedata)){
-		Sprintf(mbuf, "You have no feet; shots hit lower body");
+		Sprintf(mbuf, "You have no feet; shots hit lower body.");
 		putstr(en_win, 0, mbuf);
 	} else {
 		dr = slot_udr(LEG_DR, (struct monst *)0, 0);
