@@ -14383,8 +14383,10 @@ struct monst *mtmp, *victim;
 		return (struct permonst *)0;
 	    }
 		set_mon_data(mtmp, newtype);	/* preserve intrinsics */
-		if(oldtype == PM_STRANGE_LARVA)
+		if(oldtype == PM_STRANGE_LARVA){
 			give_grown_equipment(mtmp);
+			give_mintrinsic(mtmp, ACID_RES);
+		}
 	    newsym(mtmp->mx, mtmp->my);		/* color may change */
 	    lev_limit = (int)mtmp->m_lev;	/* never undo increment */
 		if(newtype == PM_METROID_QUEEN && mtmp->mtame){
