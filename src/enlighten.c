@@ -1416,7 +1416,7 @@ resistances_enlightenment()
 	}
 	
 	if(u.lastprayed){
-		Sprintf(buf, "You last %s %ld turns ago.", u.lastprayresult==PRAY_GIFT ? "recieved a gift" :
+		Sprintf(buf, "You last %s %ld turns ago.", u.lastprayresult==PRAY_GIFT ? "received a gift" :
 												  u.lastprayresult==PRAY_ANGER ? "angered your god" : 
 												  u.lastprayresult==PRAY_CONV ? "converted to a new god" : 
 												  "prayed",
