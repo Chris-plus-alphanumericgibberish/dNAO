@@ -1019,6 +1019,93 @@ struct monst *mon;
 	return -1;
 }
 
+STATIC_OVL void
+jrt_eladrin_spawn_equip(tmpm, mtyp)
+struct monst *tmpm;
+int mtyp;
+{
+	struct obj *otmp;
+	otmp = mongets(tmpm, KHOPESH, MKOBJ_NOINIT);
+	set_material_gm(otmp, COPPER);
+	add_oprop(otmp, OPROP_HOLYW);
+	if(mtyp != PM_TULANI_ELADRIN){
+		otmp = mongets(tmpm, KHOPESH, MKOBJ_NOINIT);
+		set_material_gm(otmp, COPPER);
+		add_oprop(otmp, OPROP_HOLYW);
+	}
+
+	otmp = mongets(tmpm, ARCHAIC_HELM, MKOBJ_NOINIT);
+	set_material_gm(otmp, COPPER);
+	add_oprop(otmp, OPROP_HOLY);
+
+	otmp = mongets(tmpm, WAISTCLOTH, MKOBJ_NOINIT);
+	set_material_gm(otmp, CLOTH);
+	add_oprop(otmp, OPROP_HOLY);
+	otmp->obj_color = CLR_WHITE;
+
+}
+
+STATIC_OVL void
+dracae_eladrin_spawn_equip(mtmp, mtyp)
+struct monst *mtmp;
+int mtyp;
+{
+	struct obj *otmp;
+	int size = mons[mtyp].msize;
+	if(mtyp != PM_UISCERRE_ELADRIN){
+		otmp = mksobj(LONG_SWORD, MKOBJ_NOINIT);
+		set_material_gm(otmp, DRAGON_HIDE);
+		otmp->objsize = size;
+		add_oprop(otmp, OPROP_ACIDW);
+		fix_object(otmp);
+		(void) mpickobj(mtmp, otmp);
+	}
+	if(mtyp == PM_COURE_ELADRIN || mtyp == PM_BRALANI_ELADRIN
+	 || mtyp == PM_FIRRE_ELADRIN || mtyp == PM_GHAELE_ELADRIN
+	 || mtyp == PM_GAE_ELADRIN || mtyp == PM_BRIGHID_ELADRIN
+	 || mtyp == PM_CAILLEA_ELADRIN
+	){
+		//Note: 2/3 then 1/6 / 1/6 is the intended behavior
+		if(rn2(3)){
+			otmp = mksobj(SHORT_SWORD, MKOBJ_NOINIT);
+			set_material_gm(otmp, DRAGON_HIDE);
+			otmp->objsize = size;
+			add_oprop(otmp, OPROP_ACIDW);
+			fix_object(otmp);
+			(void) mpickobj(mtmp, otmp);
+		}
+		else if(rn2(2)){
+			otmp = mksobj(KITE_SHIELD, MKOBJ_NOINIT);
+			set_material_gm(otmp, DRAGON_HIDE);
+			otmp->objsize = size;
+			fix_object(otmp);
+			(void) mpickobj(mtmp, otmp);
+		}
+		//else nothing
+	}
+	else if(mtyp == PM_NOVIERE_ELADRIN || mtyp == PM_SHIERE_ELADRIN){
+		otmp = mksobj(KITE_SHIELD, MKOBJ_NOINIT);
+		set_material_gm(otmp, DRAGON_HIDE);
+		otmp->objsize = size;
+		fix_object(otmp);
+		(void) mpickobj(mtmp, otmp);
+	}
+	//Tulani, Uiscerre
+
+	int armors[] = {PLATE_MAIL, GAUNTLETS, ARMORED_BOOTS};
+	for(int i = 0; i < SIZE(armors); i++){
+		if(mtyp == PM_UISCERRE_ELADRIN && armors[i] == ARMORED_BOOTS)
+			continue;
+		otmp = mksobj(armors[i], NO_MKOBJ_FLAGS);
+		set_material_gm(otmp, SHELL_MAT);
+		otmp->objsize = size;
+		if(mtyp == PM_UISCERRE_ELADRIN && armors[i] == PLATE_MAIL)
+			otmp->bodytypeflag = MB_HUMANOID|MB_SLITHY;
+		fix_object(otmp);
+		(void) mpickobj(mtmp, otmp);
+	}
+}
+
 /* returns 1 if monster died moving, 0 otherwise */
 /* The whole dochugw/m_move/distfleeck/mfndpos section is serious spaghetti
  * code. --KAA
@@ -1246,28 +1333,7 @@ register struct monst *mtmp;
 				mtmp->mvar_dracaePregTimer = 0;
 				mtmp = makemon(&mons[type], ox, oy, NO_MINVENT|MM_NOCOUNTBIRTH);
 				if(mtmp){
-					struct obj *otmp;
-					otmp = mksobj(LONG_SWORD, MKOBJ_NOINIT);
-					set_material_gm(otmp, DRAGON_HIDE);
-					otmp->objsize = mtmp->data->msize;
-					add_oprop(otmp, OPROP_ACIDW);
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(PLATE_MAIL, NO_MKOBJ_FLAGS);
-					set_material_gm(otmp, SHELL_MAT);
-					otmp->objsize = mtmp->data->msize;
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(GAUNTLETS, NO_MKOBJ_FLAGS);
-					set_material_gm(otmp, SHELL_MAT);
-					otmp->objsize = mtmp->data->msize;
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(ARMORED_BOOTS, NO_MKOBJ_FLAGS);
-					set_material_gm(otmp, SHELL_MAT);
-					otmp->objsize = mtmp->data->msize;
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
+					dracae_eladrin_spawn_equip(mtmp, mtmp->mtyp);
 					m_dowear(mtmp, TRUE);
 					m_level_up_intrinsic(mtmp);
 				}
@@ -1296,27 +1362,8 @@ register struct monst *mtmp;
 				else return 0;
 				if(mtmp){
 					struct obj *otmp;
-					otmp = mksobj(LONG_SWORD, MKOBJ_NOINIT);
-					set_material_gm(otmp, DRAGON_HIDE);
-					otmp->objsize = mons[type].msize;
-					add_oprop(otmp, OPROP_ACIDW);
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(PLATE_MAIL, NO_MKOBJ_FLAGS);
-					set_material_gm(otmp, SHELL_MAT);
-					otmp->objsize = mons[type].msize;
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(GAUNTLETS, NO_MKOBJ_FLAGS);
-					set_material_gm(otmp, SHELL_MAT);
-					otmp->objsize = mons[type].msize;
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
-					otmp = mksobj(ARMORED_BOOTS, NO_MKOBJ_FLAGS);
-					set_material_gm(otmp, SHELL_MAT);
-					otmp->objsize = mons[type].msize;
-					fix_object(otmp);
-					(void) mpickobj(mtmp, otmp);
+					dracae_eladrin_spawn_equip(mtmp, type);
+					m_level_up_intrinsic(mtmp);
 				}
 			}
 			return 0;
@@ -1347,22 +1394,8 @@ register struct monst *mtmp;
 				struct obj *otmp;
 				if(canseemon(tmpm))
 					pline("%stars coalesce into %s!", printed ? "The s" : "S", an(mons[type].mname));
-				otmp = mongets(tmpm, KHOPESH, MKOBJ_NOINIT);
-				set_material_gm(otmp, COPPER);
-				add_oprop(otmp, OPROP_HOLYW);
-				if(type != PM_TULANI_ELADRIN){
-					otmp = mongets(tmpm, KHOPESH, MKOBJ_NOINIT);
-					set_material_gm(otmp, COPPER);
-					add_oprop(otmp, OPROP_HOLYW);
-				}
-				otmp = mongets(tmpm, ARCHAIC_HELM, MKOBJ_NOINIT);
-				set_material_gm(otmp, COPPER);
-				add_oprop(otmp, OPROP_HOLY);
 				
-				otmp = mongets(tmpm, WAISTCLOTH, MKOBJ_NOINIT);
-				set_material_gm(otmp, CLOTH);
-				add_oprop(otmp, OPROP_HOLY);
-				otmp->obj_color = CLR_WHITE;
+				jrt_eladrin_spawn_equip(tmpm, type);
 				tmpm->mpeaceful = mtmp->mpeaceful;
 				set_malign(tmpm);
 				if(has_template(mtmp, POISON_TEMPLATE))
