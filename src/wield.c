@@ -572,10 +572,8 @@ test_twoweapon()
 		(uwep && bimanual(uwep,youracedata) && !((martial_bonus() || u.umaniac) && !uswapwep)) || 
 		(uswapwep && bimanual(uswapwep,youracedata) && !((martial_bonus() || u.umaniac) && !uwep))
 		) &&
-		/* Exception: Friede's Scythe can be offhanded with the (twohanded) Profaned Greatscythe or Lifehunt Scythe. */
-		!(uwep && uswapwep &&
-		  ((uwep->oartifact == ART_PROFANED_GREATSCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE) ||
-		  (uwep->oartifact == ART_LIFEHUNT_SCYTHE && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)))
+		/* Exception: Friede's Scythe can be offhanded with the (twohanded) Profaned Greatscythe or Lifehunt Scythe (or other farm implement). */
+		!(uwep && uswapwep && is_farm(uwep) && uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
 	) {
 		otmp = bimanual(uwep,youracedata) ? uwep : uswapwep;
 		if(otmp) pline("%s isn't one-handed.", Yname2(otmp));
