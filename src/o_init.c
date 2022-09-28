@@ -1529,9 +1529,6 @@ struct obj *otmp;
 		impossible("object_color called with no object");
 		return 0;
 	}
-	if(!otmp->dknown && otmp->where == OBJ_FLOOR && !cansee(otmp->ox, otmp->oy)){
-		return CLR_GRAY;
-	}
 	/* fake mimic objects use the default color 
 	 * they also have unset data in too many places
 	 */
@@ -1545,6 +1542,12 @@ struct obj *otmp;
 		return HI_GOLD;
 	}
 	
+	/* Otherwise, the PC may not know the object's color (or description) */
+	/*   If the description is not known, the object is of unknown color and is shown in grey */
+	if(!otmp->dknown){
+		return CLR_GRAY;
+	}
+
 	if(litsaber(otmp) && otmp->otyp != ROD_OF_FORCE)
 		return lightsaber_colorCLR(otmp);
 	
