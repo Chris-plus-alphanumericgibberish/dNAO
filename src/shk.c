@@ -723,7 +723,7 @@ register char *enterstring;
 			makemon(&mons[PM_DAAT_SEPHIRAH], mm.x, mm.y, MM_ADJACENTOK);
 			makemon(&mons[PM_DAAT_SEPHIRAH], mm.x, mm.y, MM_ADJACENTOK);
 			makeketer(&mm);
-		} else if(seenSeals == 6){
+		} else if(seenSeals >= 6){
 			coord mm;
 			verbalize("Foul heretic! The Crown's servants shall make you pay!");
 			make_angry_shk(shkp,shkp->mx,shkp->my);
