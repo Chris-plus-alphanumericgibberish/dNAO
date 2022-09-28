@@ -4602,13 +4602,19 @@ struct obj * tool;
 			/*no message*/;
 		else {
 			pline("A broken-off fang is embedded in %s chest. It seems to have pierced %s heart!", s_suffix(mon_nam(mtmp)), mhis(mtmp));
-			if(!helpless_still(mtmp)){
+			if(!helpless_still(mtmp) && !TimeStop){
 				pline("%s moves to quickly for you to grasp the fang.", Monnam(mtmp));
 			}
 			else if(yn("Attempt to remove the fang?")=='y'){
-				int res = you_remove_jrt_fang(mtmp, tool);
-				if(res != MOVE_CANCELLED)
-					return res;
+				/* Don't really want the solution to be wages of sloth */
+				if(TimeStop){
+					pline("The flesh around %s wound is too unyielding in your accelerated time frame.", s_suffix(Monnam(mtmp)));
+				}
+				else {
+					int res = you_remove_jrt_fang(mtmp, tool);
+					if(res != MOVE_CANCELLED)
+						return res;
+				}
 			}
 		}
 	}
