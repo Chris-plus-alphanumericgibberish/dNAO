@@ -6,6 +6,7 @@
 #define MONST_H
 
 #include "prop.h"
+#include "attrib.h"
 
 /* The weapon_check flag is used two ways:
  * 1) When calling mon_wield_item, is 2-6 depending on what is desired.
@@ -77,6 +78,13 @@ struct monst {
 	int m_insight_level;/* to record insight level at which this monster will be reveled */
 	
 	short mstr, mdex, mcon, mint, mwis, mcha; /* Monster ability scores */
+
+	struct attribs	acurr,		/* your attributes (eg. str)*/
+			aexe,		/* for gain/loss via "exercise" */
+			abon,		/* your bonus attributes (eg. str) */
+			amax,		/* max attributes (eg. str) */
+			atemp,		/* used for temporary loss/gain */
+			atime;		/* used for loss/gain countdown */
 
 	Bitfield(mferal,1);	/* was once tame */ /*1*/
 	

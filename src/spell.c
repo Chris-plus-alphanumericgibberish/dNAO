@@ -1717,7 +1717,7 @@ int energy;
 	 * b) Wizards have spent their life at magic and
 	 * understand quite well how to cast spells.
 	 */
-	intell = acurr(A_INT);
+	intell = ACURR(A_INT);
 	if (!Role_if(PM_WIZARD)){
 		if(uarmh && uarmh->oartifact == ART_APOTHEOSIS_VEIL) intell -= 4;
 		else if(u.sealsActive&SEAL_PAIMON) intell -= 6;
