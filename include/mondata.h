@@ -641,7 +641,8 @@
 #define can_breathe(ptr)	attacktype(ptr, AT_BREA)
 #define taxes_sanity(ptr)	(((ptr)->mflagsg & MG_SANLOSS) != 0L)
 #define yields_insight(ptr)	(((ptr)->mflagsg & MG_INSIGHT) != 0L)
-#define banish_kill(mtyp)	(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
+#define is_render(mtyp)		(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
+#define banish_kill(mtyp)	(is_render(mtyp))
 
 #define has_sunflask(mtyp)	(mtyp == PM_UNDEAD_KNIGHT || mtyp == PM_WARRIOR_OF_SUNLIGHT\
 							 || mtyp == PM_UNDEAD_MAIDEN || mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD\
