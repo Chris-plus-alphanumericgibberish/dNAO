@@ -77,8 +77,6 @@ struct monst {
 	int m_san_level;/* DEPRECATED: to record sanity level at which this monster will be obscured */
 	int m_insight_level;/* to record insight level at which this monster will be reveled */
 	
-	short mstr, mdex, mcon, mint, mwis, mcha; /* Monster ability scores */
-
 	struct attribs	acurr,		/* your attributes (eg. str)*/
 			aexe,		/* for gain/loss via "exercise" */
 			abon,		/* your bonus attributes (eg. str) */

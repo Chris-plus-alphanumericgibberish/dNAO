@@ -6592,7 +6592,7 @@ boolean ranged;
 						You_feel("%s pull on your weapon!", mon_nam(magr));
 					}
 					/* 1d130 > STR */
-					if (d(1, 130) > (youdef ? ACURR(A_STR) : mdef->mstr)){
+					if (d(1, 130) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
 						if (youdef) {
 							if(uwep == uball){
 								pline("Fortunately, you are chained to your weapon!");
@@ -6665,7 +6665,7 @@ boolean ranged;
 						You_feel("%s pull on your gloves!", mon_nam(magr));
 					}
 					/* 1d40 > STR */
-					if (d(1, 40) > (youdef ? ACURR(A_STR) : mdef->mstr)){
+					if (d(1, 40) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
 						if (youdef) {
 							Your("gloves are sucked off!");
 							if (donning(otmp)) cancel_don();
@@ -6704,7 +6704,7 @@ boolean ranged;
 						You_feel("%s pull on your shield!", mon_nam(magr));
 					}
 					/* 1d150 > STR */
-					if (d(1, 150) > (youdef ? ACURR(A_STR) : mdef->mstr)){
+					if (d(1, 150) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
 						if (youdef) {
 							Your("shield is sucked out of your grasp!");
 							if (donning(otmp)) cancel_don();

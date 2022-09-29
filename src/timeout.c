@@ -2580,12 +2580,12 @@ long timeout;
 						for(int i = 0; i < MPROP_SIZE; i++){
 							EMON(obj)->mintrinsics[i] = mon->mintrinsics[i];
 						}
-						EMON(obj)->mstr = mon->mstr;
-						EMON(obj)->mdex = mon->mdex;
-						EMON(obj)->mcon = mon->mcon;
-						EMON(obj)->mint = mon->mint;
-						EMON(obj)->mwis = mon->mwis;
-						EMON(obj)->mcha = mon->mcha;
+						EMON(obj)->acurr = mon->acurr;
+						EMON(obj)->aexe = mon->aexe;
+						EMON(obj)->abon = mon->abon;
+						EMON(obj)->amax = mon->amax;
+						EMON(obj)->atemp = mon->atemp;
+						EMON(obj)->atime = mon->atime;
 						EMON(obj)->female = mon->female;
 					}
 					EMON(obj)->mcrazed = mon->mcrazed;
