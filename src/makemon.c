@@ -11837,6 +11837,17 @@ int faction;
 	mtmp->mblinded = mtmp->mfrozen = mtmp->mlaughing = 0;
 	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
 	mtmp->mtyp = mndx;
+	int i;
+	/* zero out attribute stats*/
+	for(i = 0; i < A_MAX; i++){
+		mtmp->acurr.a[i] = 0;
+		mtmp->aexe.a[i] = 0;
+		mtmp->abon.a[i] = 0;
+		mtmp->amax.a[i] = 0;
+		mtmp->atemp.a[i] = 0;
+		mtmp->atime.a[i] = 0;
+	}
+
 	/* might have been called saying to add an mx */
 	if (mmflags & MM_EDOG)
 		add_mx(mtmp, MX_EDOG);
