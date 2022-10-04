@@ -12369,7 +12369,7 @@ boolean printmessages;
 	result = special_weapon_hit(magr, mdef, otmp, msgr, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt, printmessages);
 	*plusdmgptr += tmpplusdmg;
 	*truedmgptr += tmptruedmg;
-	if ((result & (MM_DEF_DIED | MM_DEF_LSVD)) || (result == MM_MISS))
+	if ((result & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_STOP)) || (result == MM_MISS))
 		return result;
 
 	/* otyp */
@@ -12378,12 +12378,16 @@ boolean printmessages;
 		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
 		*plusdmgptr += tmpplusdmg;
 		*truedmgptr += tmptruedmg;
+		if ((result & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_STOP)) || (result == MM_MISS))
+			return result;
 	}
-	if (spec_prop_material(otmp)) {	
+	if (spec_prop_material(otmp)) {
 		tmpplusdmg = tmptruedmg = 0;
 		// mat_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
 		*plusdmgptr += tmpplusdmg;
 		*truedmgptr += tmptruedmg;
+		if ((result & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_STOP)) || (result == MM_MISS))
+			return result;
 	}
 	return result;
 }

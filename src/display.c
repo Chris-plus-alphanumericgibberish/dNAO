@@ -255,11 +255,15 @@ obj_to_glyph(obj)
 {
     int otyp = Hallucination ? random_object() : obj->otyp;
 
+	/* If the object is on the floor in a visible square and is on top of the pile, the PC learns its description now */
+	if(!obj->dknown && !Hallucination && obj->where == OBJ_FLOOR && cansee(obj->ox, obj->oy) && obj == level.objects[obj->ox][obj->oy]){
+		obj->dknown = 1;
+	}
+
     if (otyp == CORPSE) {
 	int corpsenm = Hallucination ? random_monster() : obj->corpsenm;
 	return corpsenm + GLYPH_BODY_OFF;
     }
-
     int ocolor = Hallucination ? rn2(16) : object_color(obj);
     return (otyp << 4) + ocolor + GLYPH_OBJ_OFF;
 }
