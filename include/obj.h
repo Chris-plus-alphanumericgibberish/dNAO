@@ -209,13 +209,14 @@ struct obj {
 	Bitfield(yours,1);	/* obj is yours (eg. thrown by you) */
 	Bitfield(masters,1);	/* obj is given by a monster's master, it will not drop it */
 	Bitfield(objsize,3);	/* 0-7 */
-	Bitfield(obj_material,5); /*Max 31*/
 	//See objclass for values
 	Bitfield(nomerge,1);	/* temporarily block from merging */
 	Bitfield(forceconf,1);	/* when set on a scroll, forces the confusion effect. Meant for use with pseudo objects, isn't checked while merging */
 	Bitfield(ohaluengr,1);	/* engraving on item isn't a "real" ward */
-	/* 10 free bits in this field, I think -CM */
+	/* 15 free bits in this field, I think -CM */
 	
+	int obj_material;		/*Object material (from lookup table)*/
+	int sub_material;		/*Sub-material (currently, gemstone object id)*/
 	int obj_color;
 	union {
 		long bodytypeflag;	/* MB tag(s) this item goes with. Overloaded with wrathdata */
@@ -308,7 +309,6 @@ struct obj {
 			
 	long ovar1;		/* extra variable. Specifies: */
 #define ovar1_charges ovar1
-#define ovar1_gemstone ovar1
 #define ovar1_ampule ovar1
 #define ovar1_insightlevel ovar1
 #define ovar1_dollTypes ovar1

@@ -3450,7 +3450,7 @@ struct obj *tstone;
 	    streak_color = "silvery";
 	    break;
 	case GEMSTONE:
-		if (obj->ovar1_gemstone && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		if (obj->sub_material) {
 			/* similare check as above */
 			if (tstone->otyp != TOUCHSTONE) {
 				do_scratch = TRUE;
@@ -3458,7 +3458,7 @@ struct obj *tstone;
 			else if (tstone->blessed || (!tstone->cursed &&
 				(Role_if(PM_ARCHEOLOGIST) || Race_if(PM_GNOME)))) {
 				makeknown(TOUCHSTONE);
-				makeknown(obj->ovar1_gemstone);
+				makeknown(obj->sub_material);
 				prinv((char *)0, obj, 0L);
 				return;
 			}

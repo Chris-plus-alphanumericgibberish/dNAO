@@ -1450,8 +1450,8 @@ struct obj *otmp;
 		&& materials[objects[otmp->otyp].oc_material].color == objects[otmp->otyp].oc_color)
 	{
 		/* Fancy gem colors */
-		if (otmp->obj_material == GEMSTONE && otmp->ovar1_gemstone && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)){
-			otmp->obj_color = objects[otmp->ovar1_gemstone].oc_color;
+		if (otmp->obj_material == GEMSTONE && otmp->sub_material){
+			otmp->obj_color = objects[otmp->sub_material].oc_color;
 			return;
 		}
 		/* Dragon hide/bone discrepancy -- dragonhide should be leather colored, not bone colored.

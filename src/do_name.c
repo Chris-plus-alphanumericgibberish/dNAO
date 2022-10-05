@@ -704,7 +704,7 @@ const char *name;
 			set_material_gm(obj, tmp);
 		
 		if(obj->oartifact == ART_STAR_OF_HYPERNOTUS){
-			obj->ovar1_gemstone = STAR_SAPPHIRE;
+			obj->sub_material = STAR_SAPPHIRE;
 			obj->obj_color = CLR_BRIGHT_GREEN;
 			obj->oward = ELDER_SIGN;
 		}

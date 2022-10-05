@@ -1044,7 +1044,7 @@ boolean goodequip;
 		(void) mpickobj(mtmp, otmp);
 		otmp = mksobj(rnd_good_amulet(), mkobjflags);
 		set_material_gm(otmp, GEMSTONE);
-		otmp->ovar1_gemstone = JADE;
+		otmp->sub_material = JADE;
 		fix_object(otmp);
 		curse(otmp);
 		(void) mpickobj(mtmp, otmp);
@@ -5064,7 +5064,7 @@ int mmflags;
 #define HOLY_TULANI_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
 			if(otmp){\
 				set_material_gm(otmp, mat);\
-				if(stone) otmp->ovar1_gemstone = stone;\
+				if(stone) otmp->sub_material = stone;\
 				add_oprop(otmp, OPROP_HOLY);\
 				if(is_gloves(otmp) || is_boots(otmp))\
 					add_oprop(otmp, OPROP_HOLYW);\
@@ -5116,7 +5116,7 @@ int mmflags;
 					case 1:
 					otmp = mksobj(CRYSTAL_PLATE_MAIL, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1_gemstone = gemstone;
+					otmp->sub_material = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -5127,14 +5127,14 @@ int mmflags;
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(CRYSTAL_GAUNTLETS, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1_gemstone = gemstone;
+					otmp->sub_material = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(rn2(4) ? ARCHAIC_HELM : find_gcirclet(), mkobjflags);
 					if(gemstone == EMERALD && rn2(2)){
 						set_material_gm(otmp, GEMSTONE);
-						otmp->ovar1_gemstone = gemstone;
+						otmp->sub_material = gemstone;
 					} else {
 						set_material_gm(otmp, GOLD);
 					}
@@ -5143,13 +5143,13 @@ int mmflags;
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(CRYSTAL_SWORD, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1_gemstone = gemstone;
+					otmp->sub_material = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(SICKLE, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1_gemstone = gemstone;
+					otmp->sub_material = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -5175,7 +5175,7 @@ int mmflags;
 					add_oprop(otmp, OPROP_MAGC);
 					add_oprop(otmp, OPROP_REFL);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1_gemstone = gemstone;
+					otmp->sub_material = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);

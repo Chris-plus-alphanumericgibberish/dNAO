@@ -1524,10 +1524,8 @@ boolean adjective;
 		else if (obj->oclass == RING_CLASS)
 			return OBJ_DESCR(objects[obj->otyp]);
 		/* items made out of specific gemstones */
-		else if ((obj->oclass == GEM_CLASS) ||
-			(obj->ovar1_gemstone && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj))
-			) {
-			int gemtype = (obj->oclass == GEM_CLASS) ? obj->otyp : obj->ovar1_gemstone;
+		else if ((obj->oclass == GEM_CLASS) || obj->sub_material) {
+			int gemtype = (obj->oclass == GEM_CLASS) ? obj->otyp : obj->sub_material;
 
 			if (!objects[gemtype].oc_name_known) {
 				char str[BUFSZ];
@@ -1747,7 +1745,7 @@ boolean with_price;
 		if (strstri(oart->desc, "%s")) {
 			getting_obj_base_desc = TRUE;
 			char * buf2 = nextobuf();
-			if (obj->oartifact == ART_STAR_OF_HYPERNOTUS) Sprintf(buf2, oart->desc, (objects[obj->ovar1_gemstone].oc_name_known) ? OBJ_NAME(objects[obj->ovar1_gemstone]) : "stone");
+			if (obj->oartifact == ART_STAR_OF_HYPERNOTUS) Sprintf(buf2, oart->desc, (objects[obj->sub_material].oc_name_known) ? OBJ_NAME(objects[obj->sub_material]) : "stone");
 			else Sprintf(buf2, oart->desc, xname(obj));
 			Strcat(buf, buf2);
 			getting_obj_base_desc = FALSE;
@@ -2483,8 +2481,7 @@ register struct obj *otmp;
 	return TRUE;
     if (otmp->oartifact && undiscovered_artifact(otmp->oartifact))
 	return TRUE;
-	if (otmp->obj_material == GEMSTONE && otmp->ovar1_gemstone && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
-		&& !objects[otmp->ovar1_gemstone].oc_name_known)
+	if (otmp->obj_material == GEMSTONE && otmp->sub_material && !objects[otmp->sub_material].oc_name_known)
 	return TRUE;
     /* otmp->rknown is the only item of interest if we reach here */
        /*
@@ -5562,8 +5559,8 @@ typfnd:
 		else if (!otmp->oartifact || is_malleable_artifact(&artilist[otmp->oartifact]))
 			maybe_set_material(otmp, mat);	// always limited by allowable random materials, but ignore normal probabilities
 		/* set gemtype, if specified and allowable*/
-		if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)) {
-			otmp->ovar1_gemstone = gemtype;
+		if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype) {
+			otmp->sub_material = gemtype;
 			set_object_color(otmp);
 		}
 

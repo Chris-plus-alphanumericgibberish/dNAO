@@ -3455,13 +3455,13 @@ boolean shk_buying, shk_selling;
 		long denominator = materials[objects[obj->otyp].oc_material].cost;
 
 		/* items made of specific gems use that as their material cost mod */
-		if (obj->obj_material == GEMSTONE && obj->ovar1_gemstone && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj))
+		if (obj->obj_material == GEMSTONE && obj->sub_material && obj->oclass != GEM_CLASS)
 		{
 			/* costs more if the gem type is expensive */
-			if (objects[obj->ovar1_gemstone].oc_cost >= 500)
-				numerator += min(4000, objects[obj->ovar1_gemstone].oc_cost) / 10;	// 100 to 500
+			if (objects[obj->sub_material].oc_cost >= 500)
+				numerator += min(4000, objects[obj->sub_material].oc_cost) / 10;	// 100 to 500
 
-			if (!objects[obj->ovar1_gemstone].oc_name_known) {
+			if (!objects[obj->sub_material].oc_name_known) {
 				if (shk_buying)
 					/* shopkeepers insist your gem armor is fluorite or equally inexpensive and you don't know otherwise */
 					numerator = materials[obj->obj_material].cost;	// 100

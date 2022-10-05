@@ -2177,13 +2177,13 @@ int oldmat, newmat;
 		stop_timer(LIGHT_DAMAGE, obj->timed);
 	}
 	/* set random gemstone type for valid gemstone objects */
-	if (!obj->ovar1_gemstone && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+	if (!obj->sub_material && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS) {
 		do{
-			obj->ovar1_gemstone = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
-		} while (obj->ovar1_gemstone == OBSIDIAN);
+			obj->sub_material = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+		} while (obj->sub_material == OBSIDIAN);
 	}
-	else if (oldmat == GEMSTONE && newmat != GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
-		obj->ovar1_gemstone = 0;	/* and reset if changing away from gemstone*/
+	else if (oldmat == GEMSTONE && newmat != GEMSTONE && obj->oclass != GEM_CLASS) {
+		obj->sub_material = 0;	/* and reset if changing away from gemstone*/
 	}
 }
 
