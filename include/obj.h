@@ -307,8 +307,33 @@ struct obj {
 			/*Records runes for wooden weapons */
 			
 	long ovar1;		/* extra variable. Specifies: */
+#define ovar1_charges ovar1
+#define ovar1_gemstone ovar1
+#define ovar1_ampule ovar1
+#define ovar1_insightlevel ovar1
+#define ovar1_dollTypes ovar1
 #define ovar1_darklight ovar1
 #define ovar1_eilistran_charges ovar1
+#define ovar1_necronomicon ovar1
+#define ovar1_infinitespells ovar1
+#define ovar1_lostNames ovar1
+#define ovar1_moonPhase ovar1
+#define ovar1_pincerTarget ovar1
+#define ovar1_heads ovar1
+#define ovar1_lightsaberHandle ovar1
+#define ovar1_webGush ovar1
+#define ovar1_mgclcknm ovar1
+#define ovar1_projectileSkill ovar1
+#define ovar1_acidSplashDamage ovar1
+#define ovar1_corpseRumorCooldown ovar1
+#define ovar1_secretsSecret ovar1
+
+#define ovar1_gober ovar1
+#define ovar1_seals ovar1
+#define ovar1_timeout ovar1
+#define ovar1_lifeDeath ovar1
+#define ovar1_artiTheftType ovar1
+#define ovar1_heard ovar1
 	/* Number of viperwhip heads */
 	/* Moon axe phase */
 	/* Acid venom non-1d6 damage */
@@ -509,7 +534,7 @@ struct obj {
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
 			 otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS || \
-			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_OSE) ||\
+			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_OSE) ||\
 			 otmp->obj_material == MERCURIAL || \
 			 is_mercy_blade(otmp) || \
 			 otmp->otyp == ISAMUSEI ||\
@@ -597,7 +622,7 @@ struct obj {
 			  (otmp)->oartifact==ART_SOL_VALTIVA || \
 			  (otmp)->oartifact==ART_SHADOWLOCK || \
 			  (otmp)->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
-			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovar1&SEAL_MARIONETTE ) \
+			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovar1_seals&SEAL_MARIONETTE ) \
 			 ))
 #define is_bad_melee_pole(otmp) (!((otmp)->otyp == POLEAXE ||\
 									(otmp)->otyp == DISKOS ||\
@@ -629,7 +654,7 @@ struct obj {
 			 ((otmp) && (ltmp) && (\
 			  (\
 			   (ltmp->otyp == BFG) ||\
-			   (ltmp->oartifact == ART_PEN_OF_THE_VOID && ltmp->ovar1&SEAL_EVE) ||\
+			   (ltmp->oartifact == ART_PEN_OF_THE_VOID && ltmp->ovar1_seals&SEAL_EVE) ||\
 			   (ltmp->otyp == MASS_SHADOW_PISTOL && ltmp->cobj && (otmp->otyp == ltmp->cobj->otyp)) ||\
 			   (ltmp->otyp == ATLATL && is_spear(otmp)) ||\
 			   (\
@@ -788,7 +813,7 @@ struct obj {
 /* multistriking() is 0-based so that only actual multistriking weapons return multistriking!=0 */
 #define multistriking(otmp)	(!(otmp) ? 0 : \
 	(otmp)->otyp == SET_OF_CROW_TALONS ? 2 : \
-	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1 - 1) : \
+	(otmp)->otyp == VIPERWHIP ? ((otmp)->ovar1_heads - 1) : \
 	(((otmp) == uwep || (otmp) == uswapwep) && martial_bonus() && (otmp)->otyp == NUNCHAKU && P_SKILL(P_FLAIL) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT) ? 1 : \
 	arti_threeHead((otmp)) ? 2 : \
 	arti_tentRod((otmp)) ? 6 : \

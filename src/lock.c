@@ -179,7 +179,7 @@ picklock()	/* try to open/close a lock */
 				xlock.box->obolted = 1;
 			}
 			xlock.box->owt = weight(xlock.box);
-			xlock.box->ovar1 = xlock.mgclcknm;
+			xlock.box->ovar1_mgclcknm = xlock.mgclcknm;
 			
 		}
 		else {
@@ -503,7 +503,7 @@ pick_lock(pick_p) /* pick a lock with a given object */
 					pline1(Never_mind);
 					return MOVE_CANCELLED;
 				}
-				if(otmp->ovar1 == (long)(locknumber-'0') && !otmp->olocked){
+				if(otmp->ovar1_mgclcknm == (long)(locknumber-'0') && !otmp->olocked){
 					pline("That lock is already open.");
 					return MOVE_CANCELLED;
 				}

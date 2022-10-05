@@ -1362,15 +1362,15 @@ int curse_bless;
 			if(obj->recharged >= 4){
 				obj->recharged = 4;
 			} else {
-				if(is_blessed) obj->ovar1 = 100L;
-				else if(is_cursed) obj->ovar1 = 10L;
-				else obj->ovar1 = 80L + rn2(20);
+				if(is_blessed) obj->ovar1_charges = 100L;
+				else if(is_cursed) obj->ovar1_charges = 10L;
+				else obj->ovar1_charges = 80L + rn2(20);
 			}
 		break;
 	    case MASS_SHADOW_PISTOL:
-			if(is_blessed) obj->ovar1 = 1000L;
-			else if(is_cursed) obj->ovar1 = 100L;
-			else obj->ovar1 = 800L + rn2(200);
+			if(is_blessed) obj->ovar1_charges = 1000L;
+			else if(is_cursed) obj->ovar1_charges = 100L;
+			else obj->ovar1_charges = 800L + rn2(200);
 		break;
 	    case CUTTING_LASER:
 	    case VIBROBLADE:
@@ -1387,20 +1387,20 @@ int curse_bless;
 	    case FORCE_SWORD:
 	    case FORCE_WHIP:
 	    case SEISMIC_HAMMER:
-			if(is_blessed) obj->ovar1 = 100L;
-			else if(is_cursed) obj->ovar1 = 10L;
-			else obj->ovar1 = 80L + rn2(20);
+			if(is_blessed) obj->ovar1_charges = 100L;
+			else if(is_cursed) obj->ovar1_charges = 10L;
+			else obj->ovar1_charges = 80L + rn2(20);
 		break;
 	    case RAYGUN:
 			if(Role_if(PM_ANACHRONONAUT) || Role_if(PM_TOURIST)){
-				if(is_blessed) obj->ovar1 = 160L;
-				else if(is_cursed) obj->ovar1 = 10L;
-				else obj->ovar1 = (8 + rn2(8))*10L;
+				if(is_blessed) obj->ovar1_charges = 160L;
+				else if(is_cursed) obj->ovar1_charges = 10L;
+				else obj->ovar1_charges = (8 + rn2(8))*10L;
 			} else {
 				//The Raygun's power cell is damaged:
-				if(is_blessed) obj->ovar1 = 15L;
-				else if(is_cursed) obj->ovar1 = 2L;
-				else obj->ovar1 = 2+rnd(5)*2;
+				if(is_blessed) obj->ovar1_charges = 15L;
+				else if(is_cursed) obj->ovar1_charges = 2L;
+				else obj->ovar1_charges = 2+rnd(5)*2;
 			}
 		break;
 //#endif

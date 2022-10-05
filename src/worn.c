@@ -170,16 +170,16 @@ long mask;
 	
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){
-		if(obj->ovar1 && !Role_if(PM_EXILE)){
+		if(obj->ovar1_seals && !Role_if(PM_EXILE)){
 			long oldseals = u.sealsKnown;
-			u.sealsKnown |= obj->ovar1;
+			u.sealsKnown |= obj->ovar1_seals;
 			if(oldseals != u.sealsKnown) You("learned new seals.");
 		}
-		obj->ovar1 = u.spiritTineA|u.spiritTineB;
+		obj->ovar1_seals = u.spiritTineA|u.spiritTineB;
 		if(u.voidChime){
 			int i;
 			for(i=0; i<u.sealCounts; i++){
-				obj->ovar1 |= u.spirit[i];
+				obj->ovar1_seals |= u.spirit[i];
 			}
 		}
 	} else if(obj && obj->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER){
@@ -277,8 +277,8 @@ register struct obj *obj;
 		}
 		
 		if(obj->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER){
-//        adj_abon(uarmg, -uarmg->ovar1);
-          uarmg->ovar1 = 0;
+//        adj_abon(uarmg, -uarmg->ovar1_gober);
+          uarmg->ovar1_gober = 0;
         }
 		obj->owornmask &= ~wp->w_mask;
 		if (obj->oartifact)
@@ -2084,7 +2084,7 @@ struct monst *mon;
 	armor = (mon == &youmonst) ? uarmc : which_armor(mon, W_ARMC);
 	if(armor){
 		cpro = armor->otyp == DROVEN_CLOAK ? 
-			objects[armor->otyp].a_can - armor->ovar1 :
+			objects[armor->otyp].a_can - armor->oeroded3 :
 			objects[armor->otyp].a_can;
 		if(armpro < cpro) armpro = cpro;
 	}
@@ -2210,7 +2210,7 @@ long timeout;
 					obj == uarmg || obj == uarmf || obj == uarms;
 		if(uarmc){
 			armpro = uarmc->otyp == DROVEN_CLOAK ? 
-				objects[uarmc->otyp].a_can - uarmc->ovar1 :
+				objects[uarmc->otyp].a_can - uarmc->oeroded3 :
 				objects[uarmc->otyp].a_can;
 		}
 		
@@ -2307,7 +2307,7 @@ long timeout;
 		y = obj->ocarry->my;
 		if(armor){
 			armpro = armor->otyp == DROVEN_CLOAK ? 
-				objects[armor->otyp].a_can - armor->ovar1 :
+				objects[armor->otyp].a_can - armor->oeroded3 :
 				objects[armor->otyp].a_can;
 		}
 		if (obj->ocarry->perminvis || obj->ocarry->minvis){

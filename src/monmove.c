@@ -1684,7 +1684,7 @@ register struct monst *mtmp;
 		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR)
 		&& MON_WEP(mtmp)
 		&& (is_vibroweapon(MON_WEP(mtmp)) || is_blaster(MON_WEP(mtmp)))
-		&& MON_WEP(mtmp)->ovar1 <= 0
+		&& MON_WEP(mtmp)->ovar1_charges <= 0
 		&& (!(MON_WEP(mtmp)->otyp == HAND_BLASTER || MON_WEP(mtmp)->otyp == ARM_BLASTER) || MON_WEP(mtmp)->recharged < 4)
 		&& !mtmp->mcan && !mtmp->mspec_used
 		&& !(noactions(mtmp))
@@ -1696,13 +1696,13 @@ register struct monst *mtmp;
 			else pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
 		}
 		if(MON_WEP(mtmp)->otyp == MASS_SHADOW_PISTOL){
-			MON_WEP(mtmp)->ovar1 = 800L + rn2(200);
+			MON_WEP(mtmp)->ovar1_charges = 800L + rn2(200);
 		} else if(MON_WEP(mtmp)->otyp == RAYGUN){
 			if(Role_if(PM_ANACHRONONAUT) || Role_if(PM_TOURIST))
-				MON_WEP(mtmp)->ovar1 = (8 + rn2(8))*10L;
-			else MON_WEP(mtmp)->ovar1 = 2+rnd(5)*2;
+				MON_WEP(mtmp)->ovar1_charges = (8 + rn2(8))*10L;
+			else MON_WEP(mtmp)->ovar1_charges = 2+rnd(5)*2;
 		} else {
-			MON_WEP(mtmp)->ovar1 =80L + rn2(20);
+			MON_WEP(mtmp)->ovar1_charges =80L + rn2(20);
 		}
 		if(MON_WEP(mtmp)->recharged < 7) MON_WEP(mtmp)->recharged++;
 		mtmp->mspec_used = 10;

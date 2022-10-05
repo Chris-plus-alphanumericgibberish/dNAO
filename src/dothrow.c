@@ -82,8 +82,8 @@ int shots, shotlimit;
 	else if(raygun->altmode == AD_FIRE) cost = 2;
 	else cost = 1;
 	
-	if(raygun->ovar1 < shots*cost){
-		shots = raygun->ovar1/cost;
+	if(raygun->ovar1_charges < shots*cost){
+		shots = raygun->ovar1_charges/cost;
 		clicky = TRUE;
 	}
 	
@@ -95,7 +95,7 @@ int shots, shotlimit;
 	if(!u.dx && !u.dy){
 		shotlimit = 1;
 		if(u.dz > 0){
-			raygun->ovar1 -= cost;
+			raygun->ovar1_charges -= cost;
 			if(raygun->altmode == AD_DISN){
 				if (dighole(FALSE)){
 					Your("raygun disintegrated the floor!");
@@ -149,7 +149,7 @@ int shots, shotlimit;
 			return MOVE_FIRED;
 		} else {
 			if(Hallucination) pline1(Ronnie_ray_gun[rn2(SIZE(Ronnie_ray_gun))]);
-			raygun->ovar1 -= cost;
+			raygun->ovar1_charges -= cost;
 
 			struct zapdata zapdata = { 0 };
 			basiczap(&zapdata, raygun->altmode, ZAP_RAYGUN, 6);
@@ -166,7 +166,7 @@ int shots, shotlimit;
 	
 	while(shots){
 		if(Hallucination) pline1(Ronnie_ray_gun[rn2(SIZE(Ronnie_ray_gun))]);
-		raygun->ovar1 -= cost;
+		raygun->ovar1_charges -= cost;
 
 		struct zapdata zapdata = { 0 };
 		basiczap(&zapdata, raygun->altmode, ZAP_RAYGUN, 6);
@@ -834,7 +834,7 @@ boolean from_invent;
 			    change_luck((schar) -min(obj->quan, 5L));
 			break;
 		case BALL_OF_WEBBING:
-			dowebgush(x,y, obj->ovar1 ? obj->ovar1 : 2);
+			dowebgush(x,y, obj->ovar1_webGush ? obj->ovar1_webGush : 2);
 		break;
 		case MISOTHEISTIC_PYRAMID:
 		case MISOTHEISTIC_FRAGMENT:

@@ -4406,7 +4406,7 @@ int sanctum;   /* is it the seat of the high priest? */
 		otmp->spe = 2;\
 		otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;\
 		otmp->opoisonchrgs = 1;\
-		otmp->ovar1 = 1+rnd(3);\
+		otmp->ovar1_heads = 1+rnd(3);\
 	}\
 	mongets(priest, KHAKKHARA, MKOBJ_NOINIT);\
 	m_dowear(priest, TRUE);\

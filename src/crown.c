@@ -439,10 +439,10 @@ gcrownu()
 					fix_object(obj);
 					break;
 				case ART_NECRONOMICON:
-					obj->ovar1 |= SP_DEATH;
+					obj->ovar1_necronomicon |= SP_DEATH;
 					break;
 				case ART_BOOK_OF_INFINITE_SPELLS:
-					obj->ovar1 = SPE_FINGER_OF_DEATH;
+					obj->ovar1_infinitespells = SPE_FINGER_OF_DEATH;
 					break;
 				case ART_POSEIDON_S_TRIDENT:
 					HSwimming |= FROMOUTSIDE;

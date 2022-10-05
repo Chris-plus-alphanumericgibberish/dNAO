@@ -771,7 +771,7 @@ register struct monst *mtmp;
 					mon->m_insight_level = mtmp->m_insight_level;
 				obj = mkcorpstat(LIFELESS_DOLL, mon, (struct permonst *)0, x, y, FALSE);
 				if(obj)
-					obj->ovar1 = mon->m_insight_level;
+					obj->ovar1_insightlevel = mon->m_insight_level;
 				mongone(mon);
 			}
 		break;
@@ -779,13 +779,13 @@ register struct monst *mtmp;
 		    obj = mkcorpstat(LIFELESS_DOLL, KEEPTRAITS(mtmp) ? mtmp : 0,
 				     mdat, x, y, TRUE);
 			if(obj)
-				obj->ovar1 = mtmp->m_insight_level;
+				obj->ovar1_insightlevel = mtmp->m_insight_level;
 		break;
 	    case PM_ANDROID:
 		    obj = mkcorpstat(BROKEN_ANDROID, KEEPTRAITS(mtmp) ? mtmp : 0,
 				     mdat, x, y, TRUE);
 			if(obj)
-				obj->ovar1 = mtmp->m_insight_level;
+				obj->ovar1_insightlevel = mtmp->m_insight_level;
 		break;
 	    case PM_CRUCIFIED_ANDROID:
 			obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
@@ -853,7 +853,7 @@ register struct monst *mtmp;
 		    obj = mkcorpstat(BROKEN_GYNOID, KEEPTRAITS(mtmp) ? mtmp : 0,
 				     mdat, x, y, TRUE);
 			if(obj)
-				obj->ovar1 = mtmp->m_insight_level;
+				obj->ovar1_insightlevel = mtmp->m_insight_level;
 		break;
 	    case PM_CRUCIFIED_GYNOID:
 			obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
@@ -918,7 +918,7 @@ register struct monst *mtmp;
 	    case PM_OPERATOR:
 		    obj = mkcorpstat(BROKEN_GYNOID, mtmp, mdat, x, y, TRUE);
 			if(obj)
-				obj->ovar1 = mtmp->m_insight_level;
+				obj->ovar1_insightlevel = mtmp->m_insight_level;
 		break;
 	    case PM_PARASITIZED_OPERATOR:
 			mon = makemon(&mons[PM_OPERATOR], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
@@ -946,7 +946,7 @@ register struct monst *mtmp;
 	    case PM_COMMANDER:
 		    obj = mkcorpstat(BROKEN_GYNOID, mtmp, mdat, x, y, TRUE);
 			if(obj)
-				obj->ovar1 = mtmp->m_insight_level;
+				obj->ovar1_insightlevel = mtmp->m_insight_level;
 		break;
 	    case PM_PARASITIZED_COMMANDER:
 			obj = mksobj_at(SHACKLES, x, y, MKOBJ_NOINIT);
@@ -4843,7 +4843,7 @@ boolean was_swallowed;			/* digestion */
 	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH)
 		return FALSE;
 	
-	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_MALPHAS && rn2(20) <= (mvitals[PM_ACERERAK].died > 0 ? 4 : 1)){
+	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_MALPHAS && rn2(20) <= (mvitals[PM_ACERERAK].died > 0 ? 4 : 1)){
 		struct monst *mtmp;
 		mtmp = makemon(&mons[PM_CROW], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 		initedog(mtmp);
@@ -5232,7 +5232,7 @@ boolean was_swallowed;			/* digestion */
 	
 	tmp = (int)(2 + ((int)(mdat->geno & G_FREQ)<2) + verysmall(mdat));
 	return (u.sealsActive&SEAL_EVE) ? (!rn2(tmp)||!rn2(tmp)) : 
-		  (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_EVE) ?  (!rn2(tmp)||!rn2(2*tmp - 1)) :
+		  (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_EVE) ?  (!rn2(tmp)||!rn2(2*tmp - 1)) :
 		  !rn2(tmp);
 }
 

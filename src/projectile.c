@@ -110,8 +110,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		/* Blasters create ammo as needed */
 		/* we also need to leave the ammo object left behind so it can be cleaned up */
 		if (launcher && is_blaster(launcher)) {
-			if (launcher->ovar1 > 0) {
-				launcher->ovar1--;
+			if (launcher->ovar1_charges > 0) {
+				launcher->ovar1_charges--;
 				ammo->quan++;
 			}
 			else {
@@ -1877,8 +1877,8 @@ int shotlimit;
 
 	/* Blasters limit multishot to charge */
 	if (launcher && is_blaster(launcher) &&
-		multishot > launcher->ovar1)
-		multishot = launcher->ovar1;
+		multishot > launcher->ovar1_charges)
+		multishot = launcher->ovar1_charges;
 
 	/* minimum multishot of 1*/
 	if (multishot < 1)
@@ -1940,11 +1940,11 @@ int * hurtle_dist;
 		/* some things maximize range */
 		if ((launcher->oartifact == ART_LONGBOW_OF_DIANA) ||
 			(launcher->oartifact == ART_XIUHCOATL) ||
-			(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
+			(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1_seals&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
 			) {
 			range = 1000;
 		}
-		else if (launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1&SEAL_EVE) {
+		else if (launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1_seals&SEAL_EVE) {
 			/* the pen, being an athame, has a conflict between oc_range and oc_wsdam */
 			range = 8;	/* arbitrary */
 		}
@@ -2114,7 +2114,7 @@ dofire()
 					struct obj * ammo = (struct obj *)0;
 
 					/* do we have enough charge to fire? */
-					if (!launcher->ovar1 || (launcher->otyp == MASS_SHADOW_PISTOL && (!launcher->cobj || Has_contents(launcher->cobj)))) {
+					if (!launcher->ovar1_charges || (launcher->otyp == MASS_SHADOW_PISTOL && (!launcher->cobj || Has_contents(launcher->cobj)))) {
 						if (launcher->otyp == RAYGUN) You("push the firing stud, but nothing happens.");
 						else pline("Nothing happens when you pull the trigger.");
 						/* nothing else happens */
@@ -2143,7 +2143,7 @@ dofire()
 						/* always destroy ammo fired from a blaster */
 						if (ammo) {
 							if (launcher->otyp == MASS_SHADOW_PISTOL)
-								ammo->ovar1 = -P_FIREARM;	/* special case to use FIREARM skill instead of SLING */
+								ammo->ovar1_projectileSkill = -P_FIREARM;	/* special case to use FIREARM skill instead of SLING */
 
 							result = uthrow(ammo, launcher, shotlimit, TRUE);
 							/* and now delete the ammo object we created */
@@ -2994,7 +2994,7 @@ int tary;
 	case AD_ACID:
 		otmp = mksobj(ACID_VENOM, NO_MKOBJ_FLAGS);
 		if (attk->damn && attk->damd)
-			otmp->ovar1 = d(attk->damn, attk->damd);
+			otmp->ovar1_projectileSkill = d(attk->damn, attk->damd);
 		break;
 	}
 
@@ -3328,7 +3328,7 @@ int tary;
 				struct obj * ammo;
 
 				/* do we have enough charge to fire? */
-				if (!launcher->ovar1) {
+				if (!launcher->ovar1_charges) {
 					/* nothing happens */
 					magr->weapon_check = NEED_WEAPON;	/* magr figures out it needs new weapons */
 				}

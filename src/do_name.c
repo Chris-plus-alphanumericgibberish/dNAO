@@ -573,7 +573,7 @@ const char *name;
 	
     if(!strcmp((&artilist[ART_SCALPEL_OF_LIFE_AND_DEATH])->name,name) &&
        obj && obj->otyp == SCALPEL){
-      obj->ovar1 = COMMAND_DEATH;
+      obj->ovar1_lifeDeath = COMMAND_DEATH;
     }
     if(((!strcmp((&artilist[ART_FIGURINE_OF_GALATEA])->name,name)) || (!strcmp((&artilist[ART_FIGURINE_OF_PYGMALION])->name,name))) &&
        obj && obj->otyp == FIGURINE){
@@ -704,7 +704,7 @@ const char *name;
 			set_material_gm(obj, tmp);
 		
 		if(obj->oartifact == ART_STAR_OF_HYPERNOTUS){
-			obj->ovar1 = STAR_SAPPHIRE;
+			obj->ovar1_gemstone = STAR_SAPPHIRE;
 			obj->obj_color = CLR_BRIGHT_GREEN;
 			obj->oward = ELDER_SIGN;
 		}
@@ -734,7 +734,7 @@ const char *name;
 		
 		/* viperwhip heads */
 		if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
-			obj->ovar1 = 8;
+			obj->ovar1_heads = 8;
 
 		fix_object(obj);
 

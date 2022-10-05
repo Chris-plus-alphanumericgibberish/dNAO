@@ -141,7 +141,7 @@ xchar x, y;
 {
 	boolean ispick = is_pick(otmp),
 		is_saber = is_lightsaber(otmp),
-		is_seismic = (otmp->otyp == SEISMIC_HAMMER && otmp->ovar1 > 0),
+		is_seismic = (otmp->otyp == SEISMIC_HAMMER && otmp->ovar1_charges > 0),
 		is_axe = is_axe(otmp);
 
 	return ((ispick||is_saber||is_seismic) && sobj_at(STATUE, x, y) ? DIGTYP_STATUE :
@@ -322,7 +322,7 @@ dig()
 	    bonus *= 2;
 	if (is_lightsaber(digitem) && !IS_TREES(lev->typ))
 	    bonus -= 11; /* Melting a hole takes longer */
-	if ((digitem->otyp == SEISMIC_HAMMER) && digitem->ovar1-- > 0)
+	if ((digitem->otyp == SEISMIC_HAMMER) && digitem->ovar1_charges-- > 0)
 	    bonus += 1000; /* Smashes through */
 
 	digging.effort += bonus;

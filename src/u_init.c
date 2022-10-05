@@ -2946,7 +2946,7 @@ register struct trobj *trop;
 			if(obj->otyp == BULLWHIP && Race_if(PM_DROW) && flags.initgend){
 				obj->otyp = VIPERWHIP;
 				set_material_gm(obj, SILVER);
-				obj->ovar1 = 1;
+				obj->ovar1_heads = 1;
 			}
 			if(Role_if(PM_HEALER) && Race_if(PM_DROW)){
 				if(obj->otyp == SCALPEL){
@@ -3033,8 +3033,8 @@ register struct trobj *trop;
 				|| otyp == nocreate5
 				|| otyp == nocreate6
 				|| otyp == nocreate7
-				|| (obj->otyp == HYPOSPRAY_AMPULE && nocreateam1 == (short)obj->ovar1)
-				|| (obj->otyp == HYPOSPRAY_AMPULE && nocreateam2 == (short)obj->ovar1)
+				|| (obj->otyp == HYPOSPRAY_AMPULE && nocreateam1 == (short)obj->ovar1_ampule)
+				|| (obj->otyp == HYPOSPRAY_AMPULE && nocreateam2 == (short)obj->ovar1_ampule)
 				|| otyp == RIN_LEVITATION
 				/* 'useless' items */
 				|| otyp == POT_HALLUCINATION
@@ -3105,8 +3105,8 @@ register struct trobj *trop;
 			}
 			/* or ampule */
 			if (obj->otyp == HYPOSPRAY_AMPULE){
-				if(nocreateam1 == STRANGE_OBJECT) nocreateam1 = (short)obj->ovar1;
-				else if(nocreateam2 == STRANGE_OBJECT) nocreateam2 = (short)obj->ovar1;
+				if(nocreateam1 == STRANGE_OBJECT) nocreateam1 = (short)obj->ovar1_ampule;
+				else if(nocreateam2 == STRANGE_OBJECT) nocreateam2 = (short)obj->ovar1_ampule;
 			}
 		}
 

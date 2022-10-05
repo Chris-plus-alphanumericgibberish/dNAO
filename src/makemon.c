@@ -664,7 +664,7 @@ boolean goodequip;
 		otmp = mksobj(LIGHTSABER, mkobjflags);
 		otmp->spe = 4;
 		set_material_gm(otmp, BONE);
-		otmp->ovar1 = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
+		otmp->ovar1_lightsaberHandle = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
 		otmp->blessed = TRUE;
 		otmp->cursed = FALSE;
 		fix_object(otmp);
@@ -677,7 +677,7 @@ boolean goodequip;
 		otmp = mksobj(LIGHTSABER, mkobjflags);
 		otmp->spe = 3;
 		set_material_gm(otmp, BONE);
-		otmp->ovar1 = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
+		otmp->ovar1_lightsaberHandle = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
 		otmp->blessed = TRUE;
 		otmp->cursed = FALSE;
 		fix_object(otmp);
@@ -1044,7 +1044,7 @@ boolean goodequip;
 		(void) mpickobj(mtmp, otmp);
 		otmp = mksobj(rnd_good_amulet(), mkobjflags);
 		set_material_gm(otmp, GEMSTONE);
-		otmp->ovar1 = JADE;
+		otmp->ovar1_gemstone = JADE;
 		fix_object(otmp);
 		curse(otmp);
 		(void) mpickobj(mtmp, otmp);
@@ -1399,7 +1399,7 @@ boolean goodequip;
 			otmp->spe = 4;
 			otmp->opoisoned = OPOISON_FILTH;
 			otmp->opoisonchrgs = 30;
-			otmp->ovar1 = 1;
+			otmp->ovar1_heads = 1;
 			(void) mpickobj(mtmp, otmp);
 			otmp = mksobj(BUCKLER, mkobjflags);
 			otmp->spe = 0;
@@ -1701,7 +1701,7 @@ boolean goodequip;
 			otmp->spe = 2;
 			otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;
 			otmp->opoisonchrgs = 1;
-			otmp->ovar1 = rnd(3);
+			otmp->ovar1_heads = rnd(3);
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_MOTHER){
 			otmp = mksobj(NOBLE_S_DRESS, mkobjflags);
@@ -1764,7 +1764,7 @@ boolean goodequip;
 			otmp->spe = 2;
 			otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;
 			otmp->opoisonchrgs = 30;
-			otmp->ovar1 = 5;
+			otmp->ovar1_heads = 5;
 			fix_object(otmp);
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_STJARNA_ALFR){
@@ -2026,7 +2026,7 @@ boolean goodequip;
 				otmp->spe = 2;
 				otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;
 				otmp->opoisonchrgs = 1;
-				otmp->ovar1 = 1+rnd(3);
+				otmp->ovar1_heads = 1+rnd(3);
 				(void) mpickobj(mtmp, otmp);
 				(void)mongets(mtmp, KHAKKHARA, mkobjflags);
 				(void)mongets(mtmp, DROVEN_DAGGER, mkobjflags);
@@ -2037,7 +2037,7 @@ boolean goodequip;
 				otmp->spe = 2;
 				otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;
 				otmp->opoisonchrgs = 1;
-				otmp->ovar1 = rnd(3);
+				otmp->ovar1_heads = rnd(3);
 				(void) mpickobj(mtmp, otmp);
 				(void)mongets(mtmp, DROVEN_SHORT_SWORD, mkobjflags);
 				otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
@@ -2280,7 +2280,7 @@ boolean goodequip;
 			
 			otmp = mksobj(VIBROBLADE, mkobjflags);
 			otmp->spe = rn1(3,3);
-			otmp->ovar1 = 50 + d(5,10);
+			otmp->ovar1_charges = 50 + d(5,10);
 			otmp->recharged = rn1(3,3);
 			otmp->cursed = FALSE; //Either uncurses or has no effect.
 			(void) mpickobj(mtmp, otmp);
@@ -2324,14 +2324,14 @@ boolean goodequip;
 			give_mintrinsic(mtmp, TELEPAT);
 			otmp = mksobj(ARM_BLASTER, mkobjflags);
 			otmp->spe = 4;
-			otmp->ovar1 = 50 + d(5,10);
+			otmp->ovar1_charges = 50 + d(5,10);
 			otmp->recharged = 4;
 			otmp->cursed = FALSE; //Either uncurses or has no effect.
 			(void) mpickobj(mtmp, otmp);
 			
 			otmp = mksobj(LIGHTSABER, mkobjflags);
 			otmp->spe = 4;
-			otmp->ovar1 = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
+			otmp->ovar1_lightsaberHandle = !rn2(4) ? 38L : !rn2(3) ? 18L : rn2(2) ? 10L : 26L;
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			gem = otmp->cobj;
@@ -2400,7 +2400,7 @@ boolean goodequip;
 			give_mintrinsic(mtmp, POISON_RES);
 			otmp = mksobj(LIGHTSABER, mkobjflags);
 			otmp->spe = 3;
-			otmp->ovar1 = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
+			otmp->ovar1_lightsaberHandle = !rn2(4) ? 2L : !rn2(3) ? 9L : rn2(2) ? 21L : 22L;
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			gem = otmp->cobj;
@@ -2412,7 +2412,7 @@ boolean goodequip;
 			
 			otmp = mksobj(HAND_BLASTER, mkobjflags);
 			otmp->spe = 3;
-			otmp->ovar1 = 50 + d(5,10);
+			otmp->ovar1_charges = 50 + d(5,10);
 			otmp->recharged = rnd(4);
 			bless(otmp);
 			(void) mpickobj(mtmp, otmp);
@@ -2664,7 +2664,7 @@ boolean goodequip;
 				otmp = mksobj(ARM_BLASTER, mkobjflags);
 				if(otmp){
 					otmp->spe = 0;
-					otmp->ovar1 = d(5,10);
+					otmp->ovar1_charges = d(5,10);
 					otmp->recharged = 4;
 					otmp->cursed = FALSE; //Either uncurses or has no effect.
 					(void) mpickobj(mtmp, otmp);
@@ -2680,7 +2680,7 @@ boolean goodequip;
 				otmp = mksobj(HAND_BLASTER, mkobjflags);
 				if(otmp){
 					otmp->spe = rn1(4,4);
-					otmp->ovar1 = 50 + d(5,10);
+					otmp->ovar1_charges = 50 + d(5,10);
 					otmp->recharged = rn1(2,2);
 					otmp->cursed = FALSE; //Either uncurses or has no effect.
 					(void) mpickobj(mtmp, otmp);
@@ -2731,7 +2731,7 @@ boolean goodequip;
 				otmp = mksobj(ARM_BLASTER, mkobjflags);
 				if(otmp){
 					otmp->spe = 0;
-					otmp->ovar1 = d(5,10);
+					otmp->ovar1_charges = d(5,10);
 					otmp->recharged = 4;
 					otmp->cursed = FALSE; //Either uncurses or has no effect.
 					(void) mpickobj(mtmp, otmp);
@@ -2740,7 +2740,7 @@ boolean goodequip;
 				otmp = mksobj(rn2(4) ? VIBROBLADE : FORCE_PIKE, mkobjflags);
 				if(otmp){
 					otmp->spe = rn1(3,3);
-					otmp->ovar1 = 50 + d(5,10);
+					otmp->ovar1_charges = 50 + d(5,10);
 					otmp->recharged = rn1(3,3);
 					otmp->cursed = FALSE; //Either uncurses or has no effect.
 					(void) mpickobj(mtmp, otmp);
@@ -2749,7 +2749,7 @@ boolean goodequip;
 				otmp = mksobj(HAND_BLASTER, mkobjflags);
 				if(otmp){
 					otmp->spe = 0;
-					otmp->ovar1 = 50 + d(5,10);
+					otmp->ovar1_charges = 50 + d(5,10);
 					otmp->recharged = rn1(2,2);
 					otmp->cursed = FALSE; //Either uncurses or has no effect.
 					(void) mpickobj(mtmp, otmp);
@@ -3895,7 +3895,7 @@ boolean goodequip;
 			otmp->blessed = FALSE;
 			otmp->cursed = TRUE;
 			otmp->spe = -d(1,3);
-			otmp->ovar1 = 1;
+			otmp->oeroded3 = 1;
 			(void) mpickobj(mtmp,otmp);
 		}
 		else if( ptr->mtyp == PM_A_GONE ){
@@ -3906,7 +3906,7 @@ boolean goodequip;
 			otmp->blessed = FALSE;
 			otmp->cursed = TRUE;
 			otmp->spe = -d(1,3);
-			otmp->ovar1 = 3;
+			otmp->oeroded3 = 3;
 			(void) mpickobj(mtmp,otmp);
 		}
 	} else if (ptr->mtyp == PM_HUMAN_WEREWOLF){
@@ -5064,7 +5064,7 @@ int mmflags;
 #define HOLY_TULANI_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
 			if(otmp){\
 				set_material_gm(otmp, mat);\
-				if(stone) otmp->ovar1 = stone;\
+				if(stone) otmp->ovar1_gemstone = stone;\
 				add_oprop(otmp, OPROP_HOLY);\
 				if(is_gloves(otmp) || is_boots(otmp))\
 					add_oprop(otmp, OPROP_HOLYW);\
@@ -5116,7 +5116,7 @@ int mmflags;
 					case 1:
 					otmp = mksobj(CRYSTAL_PLATE_MAIL, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = gemstone;
+					otmp->ovar1_gemstone = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -5127,14 +5127,14 @@ int mmflags;
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(CRYSTAL_GAUNTLETS, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = gemstone;
+					otmp->ovar1_gemstone = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(rn2(4) ? ARCHAIC_HELM : find_gcirclet(), mkobjflags);
 					if(gemstone == EMERALD && rn2(2)){
 						set_material_gm(otmp, GEMSTONE);
-						otmp->ovar1 = gemstone;
+						otmp->ovar1_gemstone = gemstone;
 					} else {
 						set_material_gm(otmp, GOLD);
 					}
@@ -5143,13 +5143,13 @@ int mmflags;
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(CRYSTAL_SWORD, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = gemstone;
+					otmp->ovar1_gemstone = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
 					otmp = mksobj(SICKLE, mkobjflags);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = gemstone;
+					otmp->ovar1_gemstone = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -5175,7 +5175,7 @@ int mmflags;
 					add_oprop(otmp, OPROP_MAGC);
 					add_oprop(otmp, OPROP_REFL);
 					set_material_gm(otmp, GEMSTONE);
-					otmp->ovar1 = gemstone;
+					otmp->ovar1_gemstone = gemstone;
 					fix_object(otmp);
 					bless(otmp);
 					(void) mpickobj(mtmp, otmp);
@@ -5287,7 +5287,7 @@ int mmflags;
 								break;
 								case 2:
 									set_material_gm(otmp, OBSIDIAN_MT);
-									otmp->ovar1 = FULL_MOON;
+									otmp->ovar1_moonPhase = FULL_MOON;
 								break;
 							}
 							otmp->objsize = MZ_SMALL;
@@ -5989,7 +5989,7 @@ int mmflags;
 				set_material_gm(otmp, SILVER);
 				otmp->objsize = MZ_SMALL;
 				add_oprop(otmp, OPROP_HOLYW);
-				otmp->ovar1 = 80 + d(2,10);
+				otmp->ovar1_charges = 80 + d(2,10);
 				otmp->spe = 3;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
@@ -6104,7 +6104,7 @@ int mmflags;
 			set_material_gm(otmp, BONE);
 			fix_object(otmp);
 			otmp->spe = 4;
-			otmp->ovar1 = 39L;
+			otmp->ovar1_lightsaberHandle = 39L;
 			gem = otmp->cobj;
 			obj_extract_self(gem);
 			gem = poly_obj(gem,STAR_SAPPHIRE);
@@ -6640,7 +6640,7 @@ int mmflags;
 					otmp = mksobj(LIGHTSABER, mkobjflags);
 					otmp->oerodeproof = 1;
 					otmp->spe = 1;
-					otmp->ovar1 = !rn2(4) ? 6L : !rn2(3) ? 10L : rn2(2) ? 35L : 37L;
+					otmp->ovar1_lightsaberHandle = !rn2(4) ? 6L : !rn2(3) ? 10L : rn2(2) ? 35L : 37L;
 					otmp->blessed = TRUE;
 					otmp->cursed = FALSE;
 					gem = otmp->cobj;
@@ -6867,7 +6867,7 @@ int mmflags;
 					otmp = mksobj(ARM_BLASTER, mkobjflags);
 					if(otmp){
 						otmp->spe = 0;
-						otmp->ovar1 = d(5,10);
+						otmp->ovar1_charges = d(5,10);
 						otmp->recharged = 4;
 						(void) mpickobj(mtmp, otmp);
 					}
@@ -7371,7 +7371,7 @@ int mmflags;
 					mtmp->mvar_deminymph_role = PM_PRIEST;
 					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 3;
-					otmp->ovar1 = 4;
+					otmp->ovar1_heads = 4;
 					otmp->opoisoned = OPOISON_ACID;
 					otmp->opoisonchrgs = 3;
 					set_material_gm(otmp, BONE);
@@ -7675,7 +7675,7 @@ int mmflags;
 								mtmp->mvar_deminymph_role = PM_PRIEST;
 								otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 								otmp->spe = 3;
-								otmp->ovar1 = 4;
+								otmp->ovar1_heads = 4;
 								otmp->opoisoned = OPOISON_ACID;
 								otmp->opoisonchrgs = 3;
 								set_material_gm(otmp, BONE);
@@ -7762,7 +7762,7 @@ int mmflags;
 									otmp->spe = 2+rn2(3);
 									otmp->opoisoned = rn2(4) ? OPOISON_BASIC : OPOISON_PARAL;
 									otmp->opoisonchrgs = 6;
-									otmp->ovar1 = rnd(3)+rn2(3);
+									otmp->ovar1_heads = rnd(3)+rn2(3);
 									(void) mpickobj(mtmp, otmp);
 
 									otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
@@ -8391,12 +8391,12 @@ int mmflags;
 		} else if(ptr->mtyp == PM_ALIDER){
 			otmp = mksobj(WHITE_VIBROZANBATO, mkobjflags);
 			otmp->spe = 8;
-			otmp->ovar1 = 50 + d(5,10);
+			otmp->ovar1_charges = 50 + d(5,10);
 			otmp->blessed = TRUE;
 			set_material_gm(otmp, SILVER);
 			otmp->cursed = FALSE;
 			otmp->recharged = rn1(3,3);
-			otmp->ovar1 = 50 + d(5,10);
+			otmp->ovar1_charges = 50 + d(5,10);
 			otmp = oname(otmp, "The Mk 2 Crescent Blade");
 			otmp->oartifact = ART_CRESCENT_BLADE;
 			fix_object(otmp);
@@ -8405,7 +8405,7 @@ int mmflags;
 			
 			otmp = mksobj(HAND_BLASTER, mkobjflags);
 			otmp->spe = 8;
-			otmp->ovar1 = 50 + d(5,10);
+			otmp->ovar1_charges = 50 + d(5,10);
 			otmp->recharged = rn2(3);
 			bless(otmp);
 			(void) mpickobj(mtmp, otmp);
@@ -9355,7 +9355,7 @@ int mmflags;
 					//Cultist of the Black Goat
 					otmp = mksobj(VIPERWHIP, mkobjflags|MKOBJ_NOINIT);
 					otmp->spe = 6;
-					otmp->ovar1 = 4;
+					otmp->ovar1_heads = 4;
 					otmp->opoisoned = OPOISON_ACID;
 					otmp->opoisonchrgs = 3;
 					set_material_gm(otmp, BONE);
@@ -10335,7 +10335,7 @@ boolean goodequip;
 				set_material_gm(otmp, SILVER);
 				otmp->objsize = MZ_SMALL;
 				add_oprop(otmp, OPROP_HOLYW);
-				otmp->ovar1 = 50 + d(5,10);
+				otmp->ovar1_charges = 50 + d(5,10);
 				otmp->spe = 3;
 				fix_object(otmp);
 				place_object(otmp, mtmp->mx, mtmp->my); /* drop on ground */

@@ -362,14 +362,14 @@ lightsaber_hiltText(otmp)
 struct obj *otmp;
 {
 	if(otmp->oartifact == ART_ANNULUS) return "This %s is just a hollow silver pipe.";
-	return SaberHilts[(int)otmp->ovar1];
+	return SaberHilts[(int)otmp->ovar1_lightsaberHandle];
 }
 
 char *
 beamsword_hiltText(otmp)
 struct obj *otmp;
 {
-	return BeamHilts[(int)otmp->ovar1];
+	return BeamHilts[(int)otmp->ovar1_lightsaberHandle];
 }
 
 int
@@ -756,8 +756,8 @@ boolean dofull;
 	switch (obj->oclass)
 	{
 	case WEAPON_CLASS:
-		if (obj->otyp == VIPERWHIP && obj->ovar1){
-			switch (obj->ovar1){
+		if (obj->otyp == VIPERWHIP && obj->ovar1_heads){
+			switch (obj->ovar1_heads){
 			case 1: Strcat(buf, "one-headed "); break;
 			case 2: Strcat(buf, "two-headed "); break;
 			case 3: Strcat(buf, "three-headed "); break;
@@ -766,6 +766,7 @@ boolean dofull;
 			case 6: Strcat(buf, "six-headed "); break;
 			case 7: Strcat(buf, "seven-headed "); break;
 			case 8: Strcat(buf, "eight-headed "); break;
+			default: Strcat(buf, "many-headed "); break;
 			}
 		}
 
@@ -1122,138 +1123,138 @@ char *buf;
 		return;
 	}
 
-	if (obj->ovar1&SEAL_AHAZU){
+	if (obj->ovar1_seals&SEAL_AHAZU){
 		Strcat(buf, "hungry ");
 	}
 
-	if (obj->ovar1&SEAL_AMON){
-		if (obj->ovar1&SEAL_ENKI)
+	if (obj->ovar1_seals&SEAL_AMON){
+		if (obj->ovar1_seals&SEAL_ENKI)
 			Strcat(buf, "steaming ");
-		else if (obj->ovar1&SEAL_BERITH)
+		else if (obj->ovar1_seals&SEAL_BERITH)
 			Strcat(buf, "blood-crusted ");
 		else
 			Strcat(buf, "fiery ");
 	}
 
-	if (obj->ovar1&SEAL_ANDREALPHUS){
+	if (obj->ovar1_seals&SEAL_ANDREALPHUS){
 		Strcat(buf, "curved ");
 	}
 
-	if (obj->ovar1&SEAL_ANDROMALIUS){
+	if (obj->ovar1_seals&SEAL_ANDROMALIUS){
 		Strcat(buf, "mischievous ");
 	}
 
-	if (obj->ovar1&SEAL_ASTAROTH){
+	if (obj->ovar1_seals&SEAL_ASTAROTH){
 		Strcat(buf, "crackling ");
 	}
 
-	if (obj->ovar1&SEAL_BALAM){
+	if (obj->ovar1_seals&SEAL_BALAM){
 		Strcat(buf, "freezing ");
 	}
 
-	if (obj->ovar1&SEAL_BERITH){
-		if (obj->ovar1&SEAL_ENKI)
+	if (obj->ovar1_seals&SEAL_BERITH){
+		if (obj->ovar1_seals&SEAL_ENKI)
 			Strcat(buf, "blood-dripping ");
-		else if (!(obj->ovar1&SEAL_AMON))
+		else if (!(obj->ovar1_seals&SEAL_AMON))
 			Strcat(buf, "blood-soaked ");
 	}
 
-	if (obj->ovar1&SEAL_BUER){
+	if (obj->ovar1_seals&SEAL_BUER){
 		Strcat(buf, "lively ");
 	}
 
-	if (obj->ovar1&SEAL_CHUPOCLOPS){
+	if (obj->ovar1_seals&SEAL_CHUPOCLOPS){
 		Strcat(buf, "webbed ");
 	}
 
-	if (obj->ovar1&SEAL_DANTALION){
+	if (obj->ovar1_seals&SEAL_DANTALION){
 		Strcat(buf, "jeweled ");
 	}
 
-	if (obj->ovar1&SEAL_ECHIDNA){
+	if (obj->ovar1_seals&SEAL_ECHIDNA){
 		Strcat(buf, "caustic ");
 	}
 
-	if (obj->ovar1&SEAL_EDEN){
+	if (obj->ovar1_seals&SEAL_EDEN){
 		// covered in poisoned words
 	}
 
-	if (obj->ovar1&SEAL_ENKI){
-		if (obj->ovar1&SEAL_IRIS)
+	if (obj->ovar1_seals&SEAL_ENKI){
+		if (obj->ovar1_seals&SEAL_IRIS)
 			Strcat(buf, "dehydrated ");
-		else if (!(obj->ovar1&SEAL_AMON) && !(obj->ovar1&SEAL_BERITH))
+		else if (!(obj->ovar1_seals&SEAL_AMON) && !(obj->ovar1_seals&SEAL_BERITH))
 			Strcat(buf, "dripping ");
 	}
 
-	if (obj->ovar1&SEAL_EURYNOME){
+	if (obj->ovar1_seals&SEAL_EURYNOME){
 		Strcat(buf, "vengeful ");
 	}
 
-	if (obj->ovar1&SEAL_EVE){
+	if (obj->ovar1_seals&SEAL_EVE){
 		Strcat(buf, "vine-wrapped ");
 	}
 
-	if (obj->ovar1&SEAL_FAFNIR){
+	if (obj->ovar1_seals&SEAL_FAFNIR){
 		Strcat(buf, "ruinous ");
 	}
 
-	if (obj->ovar1&SEAL_HUGINN_MUNINN){
+	if (obj->ovar1_seals&SEAL_HUGINN_MUNINN){
 		Strcat(buf, "talon-shaped ");
 	}
 
-	if (obj->ovar1&SEAL_IRIS){
+	if (obj->ovar1_seals&SEAL_IRIS){
 		Strcat(buf, "rainbow ");
 	}
 
-	if (obj->ovar1&SEAL_JACK){
+	if (obj->ovar1_seals&SEAL_JACK){
 		Strcat(buf, "glowing ");
 	}
 
-	if (obj->ovar1&SEAL_MALPHAS){
+	if (obj->ovar1_seals&SEAL_MALPHAS){
 		Strcat(buf, "crow-embossed ");
 	}
 
-	if (obj->ovar1&SEAL_MARIONETTE){
+	if (obj->ovar1_seals&SEAL_MARIONETTE){
 		Strcat(buf, "wire-wrapped ");
 	}
 
-	if (obj->ovar1&SEAL_MOTHER){
+	if (obj->ovar1_seals&SEAL_MOTHER){
 		Strcat(buf, "eye-marked ");
 	}
 
-	if (obj->ovar1&SEAL_NABERIUS){
+	if (obj->ovar1_seals&SEAL_NABERIUS){
 		Strcat(buf, "fanged ");
 	}
 
-	if (obj->ovar1&SEAL_ORTHOS){
+	if (obj->ovar1_seals&SEAL_ORTHOS){
 		Strcat(buf, "whistling ");
 	}
 
-	if (obj->ovar1&SEAL_OSE){
+	if (obj->ovar1_seals&SEAL_OSE){
 		Strcat(buf, "murmuring ");
 	}
 
-	if (obj->ovar1&SEAL_OTIAX){
+	if (obj->ovar1_seals&SEAL_OTIAX){
 		Strcat(buf, "mist-wreathed ");
 	}
 
-	if (obj->ovar1&SEAL_PAIMON){
+	if (obj->ovar1_seals&SEAL_PAIMON){
 		Strcat(buf, "ink-stained ");
 	}
 
-	if (obj->ovar1&SEAL_SHIRO){
+	if (obj->ovar1_seals&SEAL_SHIRO){
 		Strcat(buf, "distinctive ");
 	}
 
-	if (obj->ovar1&SEAL_SIMURGH){
+	if (obj->ovar1_seals&SEAL_SIMURGH){
 		Strcat(buf, "feathered ");
 	}
 
-	if (obj->ovar1&SEAL_TENEBROUS){
+	if (obj->ovar1_seals&SEAL_TENEBROUS){
 		Strcat(buf, "shadowed ");
 	}
 
-	if (obj->ovar1&SEAL_YMIR){
+	if (obj->ovar1_seals&SEAL_YMIR){
 		// covered in poisoned words
 	}
 
@@ -1524,9 +1525,9 @@ boolean adjective;
 			return OBJ_DESCR(objects[obj->otyp]);
 		/* items made out of specific gemstones */
 		else if ((obj->oclass == GEM_CLASS) ||
-			(obj->ovar1 && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj))
+			(obj->ovar1_gemstone && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj))
 			) {
-			int gemtype = (obj->oclass == GEM_CLASS) ? obj->otyp : obj->ovar1;
+			int gemtype = (obj->oclass == GEM_CLASS) ? obj->otyp : obj->ovar1_gemstone;
 
 			if (!objects[gemtype].oc_name_known) {
 				char str[BUFSZ];
@@ -1654,7 +1655,7 @@ char *buf;
 		Strcat(buf, " ");
 	}
 	if (obj->otyp == MOON_AXE && objects[obj->otyp].oc_name_known){
-		switch (obj->ovar1){
+		switch (obj->ovar1_moonPhase){
 		case ECLIPSE_MOON:  Strcat(buf, "eclipse ");  break;
 		case CRESCENT_MOON: Strcat(buf, "crescent "); break;
 		case HALF_MOON:     Strcat(buf, "half ");     break;
@@ -1746,7 +1747,7 @@ boolean with_price;
 		if (strstri(oart->desc, "%s")) {
 			getting_obj_base_desc = TRUE;
 			char * buf2 = nextobuf();
-			if (obj->oartifact == ART_STAR_OF_HYPERNOTUS) Sprintf(buf2, oart->desc, (objects[obj->ovar1].oc_name_known) ? OBJ_NAME(objects[obj->ovar1]) : "stone");
+			if (obj->oartifact == ART_STAR_OF_HYPERNOTUS) Sprintf(buf2, oart->desc, (objects[obj->ovar1_gemstone].oc_name_known) ? OBJ_NAME(objects[obj->ovar1_gemstone]) : "stone");
 			else Sprintf(buf2, oart->desc, xname(obj));
 			Strcat(buf, buf2);
 			getting_obj_base_desc = FALSE;
@@ -1875,7 +1876,7 @@ boolean with_price;
 					Sprintf(eos(buf), "%s ", mons[obj->corpsenm].mname);
 			}
 			if (typ == HYPOSPRAY_AMPULE && nn && obj->dknown){
-				int ptyp = (int)(obj->ovar1);
+				int ptyp = (int)(obj->ovar1_ampule);
 				if (ptyp == POT_WATER && obj->bknown && (obj->blessed || obj->cursed)) {
 					Strcat(buf, obj->blessed ? "holy " : "unholy ");
 				}
@@ -2022,7 +2023,7 @@ boolean with_price;
 		case WEAPON_CLASS:
 weapon:
 			if ((is_blaster(obj) || is_vibroweapon(obj) || typ == SEISMIC_HAMMER) && (obj->known || uandroid)) {
-				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1);
+				Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, (int)obj->ovar1_charges);
 			}
 			if (obj->known && obj->oartifact &&
 				(oart->inv_prop == LORDLY || oart->inv_prop == ANNUL)
@@ -2030,8 +2031,8 @@ weapon:
 				Sprintf(eos(buf), " (%s)", OBJ_NAME(objects[obj->otyp]));
 			}
 			if (obj->oartifact == ART_SCALPEL_OF_LIFE_AND_DEATH){
-				if (COMMAND_LIFE == obj->ovar1) Sprintf(eos(buf), " (life)");
-				if (COMMAND_DEATH == obj->ovar1) Sprintf(eos(buf), " (death)");
+				if (COMMAND_LIFE == obj->ovar1_lifeDeath) Sprintf(eos(buf), " (life)");
+				if (COMMAND_DEATH == obj->ovar1_lifeDeath) Sprintf(eos(buf), " (death)");
 			}
 			if(obj->oartifact == ART_SINGING_SWORD && uwep == obj){
 				switch(obj->osinging){
@@ -2482,8 +2483,8 @@ register struct obj *otmp;
 	return TRUE;
     if (otmp->oartifact && undiscovered_artifact(otmp->oartifact))
 	return TRUE;
-	if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
-		&& !objects[otmp->ovar1].oc_name_known)
+	if (otmp->obj_material == GEMSTONE && otmp->ovar1_gemstone && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
+		&& !objects[otmp->ovar1_gemstone].oc_name_known)
 	return TRUE;
     /* otmp->rknown is the only item of interest if we reach here */
        /*
@@ -5542,7 +5543,7 @@ typfnd:
 			if(is_lightsaber(otmp))
 				otmp->age = 0;
 			else if(is_weptool(otmp))
-				otmp->ovar1 = 0;
+				otmp->ovar1_charges = 0;
 			else otmp->spe = 0;
 		}
 		else if(otmp->otyp == LANTERN){
@@ -5562,7 +5563,7 @@ typfnd:
 			maybe_set_material(otmp, mat);	// always limited by allowable random materials, but ignore normal probabilities
 		/* set gemtype, if specified and allowable*/
 		if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)) {
-			otmp->ovar1 = gemtype;
+			otmp->ovar1_gemstone = gemtype;
 			set_object_color(otmp);
 		}
 
@@ -5691,17 +5692,17 @@ typfnd:
 
 	/* set ampule type */
 	if(ampule != -1 && otmp->otyp == HYPOSPRAY_AMPULE){
-		otmp->ovar1 = ampule;
+		otmp->ovar1_ampule = ampule;
 	}
 
 	/* set viper heads, probability of getting what you wished for copied loosely from setting weapon/armor spe, but the minimum is 1, not 0. */
 	if(viperheads != -1 && otmp->otyp == VIPERWHIP){
-		otmp->ovar1 = (viperheads > rnd(5) && viperheads > otmp->ovar1 && !wizwish) ? 1 : viperheads;
+		otmp->ovar1_heads = (viperheads > rnd(5) && viperheads > otmp->ovar1_heads && !wizwish) ? 1 : viperheads;
 	}
 	
 	/* set moon phase */
 	if(moonphase != -1 && otmp->otyp == MOON_AXE){
-		otmp->ovar1 = moonphase;
+		otmp->ovar1_moonPhase = moonphase;
 	}
 
 	/* attach creature of the item's permonst type */

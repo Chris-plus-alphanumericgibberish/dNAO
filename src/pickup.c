@@ -2330,13 +2330,13 @@ register struct obj *obj;
 	    Strcpy(buf, the(xname(current_container)));
 	    You("put %s into %s.", doname(obj), buf);
 		if(cobj_is_magic_chest(current_container))
-			pline("The lock labeled '%d' is open.", (int)current_container->ovar1);
+			pline("The lock labeled '%d' is open.", (int)current_container->ovar1_mgclcknm);
 
 	    /* gold in container always needs to be added to credit */
 	    if (floor_container && obj->oclass == COIN_CLASS && !cobj_is_magic_chest(current_container))
 			sellobj(obj, current_container->ox, current_container->oy);
 		if(cobj_is_magic_chest(current_container)){
-			add_to_magic_chest(obj,((int)(current_container->ovar1))%10);
+			add_to_magic_chest(obj,((int)(current_container->ovar1_mgclcknm))%10);
 		} else {
 			(void) add_to_container(current_container, obj);
 			current_container->owt = weight(current_container);
@@ -2376,19 +2376,19 @@ register struct obj *obj;
 	}
 
 	if(obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 0;
-	// if(obj->oartifact && obj->oartifact == ART_PEN_OF_THE_VOID && !Role_if(PM_EXILE)) u.sealsKnown |= obj->ovar1;
+	// if(obj->oartifact && obj->oartifact == ART_PEN_OF_THE_VOID && !Role_if(PM_EXILE)) u.sealsKnown |= obj->ovar1_seals;
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){
-		if(obj->ovar1 && !Role_if(PM_EXILE)){
+		if(obj->ovar1_seals && !Role_if(PM_EXILE)){
 			long oldseals = u.sealsKnown;
-			u.sealsKnown |= obj->ovar1;
+			u.sealsKnown |= obj->ovar1_seals;
 			if(oldseals != u.sealsKnown) You("learned new seals.");
 		}
-		obj->ovar1 = u.spiritTineA|u.spiritTineB;
+		obj->ovar1_seals = u.spiritTineA|u.spiritTineB;
 		if(u.voidChime){
 			int i;
 			for(i=0; i<u.sealCounts; i++){
-				obj->ovar1 |= u.spirit[i];
+				obj->ovar1_seals |= u.spirit[i];
 			}
 		}
 	}
@@ -3251,7 +3251,7 @@ register int held;
 	}
 	/* Count the number of contained objects. Sometimes toss objects if a cursed magic bag. */
 	if (cobj_is_magic_chest(obj))
-	    curr = magic_chest_objs[((int)obj->ovar1)%10];/*guard against polymorph related whoopies*/
+	    curr = magic_chest_objs[((int)obj->ovar1_mgclcknm)%10];/*guard against polymorph related whoopies*/
 	else
 	    curr = obj->cobj;
 	for (; curr; curr = otmp) {
@@ -3463,7 +3463,7 @@ boolean put_in;
 	    otmp = invent;
 	} else {
 	    if (cobj_is_magic_chest(container))
-		otmp = magic_chest_objs[((int)(container->ovar1))%10];
+		otmp = magic_chest_objs[((int)(container->ovar1_mgclcknm))%10];
 	    else
 		otmp = container->cobj;
 	}
@@ -3482,7 +3482,7 @@ boolean put_in;
 
     if (loot_everything) {
 	if (cobj_is_magic_chest(container))
-	    otmp = magic_chest_objs[((int)(container->ovar1))%10];
+	    otmp = magic_chest_objs[((int)(container->ovar1_mgclcknm))%10];
 	else
 	    otmp = container->cobj;
 	for (; otmp; otmp = otmp2) {
@@ -3499,7 +3499,7 @@ boolean put_in;
 	    otmp = invent;
 	} else {
 	    if (cobj_is_magic_chest(container))
-		otmp = magic_chest_objs[((int)(container->ovar1))%10];
+		otmp = magic_chest_objs[((int)(container->ovar1_mgclcknm))%10];
 	    else
 		otmp = container->cobj;
 	}

@@ -1350,7 +1350,7 @@ struct obj * obj;
 	if (
 		(obj->otyp == JADE) ||
 		(obj->oclass == RING_CLASS && obj->otyp == jadeRing) ||
-		(obj->obj_material == GEMSTONE && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj) && obj->ovar1 == JADE)
+		(obj->obj_material == GEMSTONE && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj) && obj->ovar1_gemstone == JADE)
 		)
 		return TRUE;
 

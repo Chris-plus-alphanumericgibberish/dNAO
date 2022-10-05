@@ -182,7 +182,7 @@ struct monst *magr;
 	if(mon == &youmonst)
 		ptr = youracedata;
 	
-	if (Is_weapon || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1 == -P_FIREARM)){
+	if (Is_weapon || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)){
 		if(Race_if(PM_ORC) && otmp == uwep){
 			tmp += max((u.ulevel+2)/3, otmp->spe);
 		} else {
@@ -443,8 +443,8 @@ struct monst *magr;
 			FULL_MOON	 	4  - 2d12 
 			 */
 			ocn = 2;
-			ocd = max(4 + 2 * obj->ovar1 + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1 <= 4)
-			if (!large && obj->ovar1 == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
+			ocd = max(4 + 2 * obj->ovar1_moonPhase + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1_moonPhase <= 4)
+			if (!large && obj->ovar1_moonPhase == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
 				ocd = max(12 + 2 * dmod, 2);
 		}
 
@@ -680,7 +680,7 @@ struct monst *magr;
 #define plus(n,x)		plus_base((n), (x) + 2 * dmod)
 #define pls(x)			plus(1, (x))
 #define add(x)			flat += max(0, (x) + dmod)
-#define chrgd			(!obj || obj->ovar1>0)
+#define chrgd			(!obj || obj->ovar1_charges>0)
 	/* bonus dice */
 	switch (otyp)
 	{
@@ -746,7 +746,7 @@ struct monst *magr;
 	case VIPERWHIP:				if(large){;} else {;} break;	// external special case: number of heads striking
 
 	case SEISMIC_HAMMER:		if (chrgd){ ocd *= 3; } break;
-	case ACID_VENOM:			if (obj&&obj->ovar1){ ocn = 0; flat = obj->ovar1; } else{ add(6); } break;
+	case ACID_VENOM:			if (obj&&obj->ovar1_acidSplashDamage){ ocn = 0; flat = obj->ovar1_acidSplashDamage; } else{ add(6); } break;
 	case LIGHTSABER:			spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ plus(3,3); spe_mult *= 2;} break;	// external special case: lightsaber forms
 	case BEAMSWORD:				spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ plus(3,3); spe_mult *= 2;} break;	// external special case: Atma Weapon, lightsaber forms
 	case DOUBLE_LIGHTSABER:		spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
@@ -1081,11 +1081,11 @@ struct monst *magr;
 		break;
 	case SEISMIC_HAMMER:
 		// damage die is increased by 3x the enchantment of the hammer when charged
-		if (otmp->ovar1)
+		if (otmp->ovar1_charges)
 		{
 			wdice.oc_damd += 3 * (otmp->spe);
 			// drain charge on future-tech powered weapons
-			otmp->ovar1--;
+			otmp->ovar1_charges--;
 		}
 		break;
 	case VIBROBLADE:
@@ -1101,8 +1101,8 @@ struct monst *magr;
 	case FORCE_SWORD:
 	case FORCE_WHIP:
 		// drain charge on future-tech powered weapons
-		if (otmp->ovar1)
-			otmp->ovar1--;
+		if (otmp->ovar1_charges)
+			otmp->ovar1_charges--;
 		break;
 	case DOUBLE_FORCE_BLADE:
 		// deals bonus damage when not twoweaponing
@@ -1116,8 +1116,8 @@ struct monst *magr;
 			spe_mult *= 2;
 	    }
 		// drain charge on future-tech powered weapons
-		if (otmp->ovar1)
-			otmp->ovar1--;
+		if (otmp->ovar1_charges)
+			otmp->ovar1_charges--;
 		break;
 	}
 
@@ -1236,7 +1236,7 @@ struct monst *magr;
 	}
 
 	/* enchantment damage */
-	if ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp) || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1 == -P_FIREARM))
+	if ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp) || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM))
 	{
 		int dambon = otmp->spe;
 		/* player orcs can use their level as their weapon's enchantment */
@@ -1447,7 +1447,7 @@ struct obj *otmp;
 		if(wep->otyp == otmp->otyp) return dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp);
 		
 		if(wep->otyp == ARM_BLASTER) return FALSE;
-		if(wep->otyp == HAND_BLASTER) return (otmp->otyp == ARM_BLASTER && otmp->ovar1 > 0);
+		if(wep->otyp == HAND_BLASTER) return (otmp->otyp == ARM_BLASTER && otmp->ovar1_charges > 0);
     }
     
     if (((strongmonst(mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0) || !bimanual(otmp,mtmp->data)) && 
@@ -2554,7 +2554,7 @@ struct obj *otmp;
 	
 	if(otmp){
 		if((bimanual(otmp,mon->data)||
-				(otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
+				(otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
 			) && !arms && !mswp
 		) bonus *= 2;
 		else if(otmp->otyp == FORCE_SWORD && !arms && !mswp)
@@ -2572,7 +2572,7 @@ struct obj *otmp;
 		
 		if(otmp==mwp 
 		&& (is_rapier(otmp) || is_rakuyo(otmp)
-			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
+			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1_lightsaberHandle == 0)
 			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
 			|| is_mercy_blade(otmp)
@@ -2669,7 +2669,7 @@ struct obj *otmp;
 	if(otmp){
 		if (!uarms && !u.twoweap) {
 			if (bimanual(otmp, youracedata) ||
-				(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0))
+				(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0))
 				bonus *= 2;
 			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == ROD_OF_FORCE || weapon_type(otmp) == P_QUARTERSTAFF)
 				bonus *= 2;
@@ -2681,7 +2681,7 @@ struct obj *otmp;
 		
 		if(otmp==uwep 
 		&& (is_rapier(otmp) || is_rakuyo(otmp)
-			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1 == 0)
+			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1_lightsaberHandle == 0)
 			|| otmp->otyp == SET_OF_CROW_TALONS
 			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
 			|| is_mercy_blade(otmp)
@@ -3326,8 +3326,8 @@ struct obj *obj;
 		if(!uarms && !u.twoweap)
 			CHECK_ALTERNATE_SKILL(P_POLEARMS)
 	}
-	else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1){
-		type = (int)obj->ovar1;
+	else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1_projectileSkill){
+		type = (int)obj->ovar1_projectileSkill;
 	}
 
 	return ((type < 0) ? -type : type);

@@ -13063,7 +13063,7 @@ int vis;						/* True if action is at all visible to the player */
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE))
 		sneak_dice++;
-	if (weapon && weapon->owornmask && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_ANDROMALIUS)
+	if (weapon && weapon->owornmask && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_ANDROMALIUS)
 		sneak_dice++;
 
 	/* check sneak attack conditions -- defender's conditions must allow sneak attacking */
@@ -13136,7 +13136,7 @@ int vis;						/* True if action is at all visible to the player */
 		/* some things increase the number of sneak dice even further */
 		if (weapon && weapon->owornmask && weapon->oartifact == ART_SPINESEEKER && (sneak_attack&SNEAK_BEHIND))
 			sneak_dice++;
-		if (weapon && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_ANDROMALIUS && (mvitals[PM_ACERERAK].died > 0))
+		if (weapon && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_ANDROMALIUS && (mvitals[PM_ACERERAK].died > 0))
 			sneak_dice++;
 
 		/* some of the player's glyphs proc on sneak attacks */
@@ -13168,7 +13168,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (u.usteed && weapon &&
 			(weapon_type(weapon) == P_LANCE ||
 			(weapon->oartifact == ART_ROD_OF_SEVEN_PARTS) ||
-			(weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_BERITH)
+			(weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_BERITH)
 			) &&
 			mdef != u.ustuck &&
 			!Fumbling &&
@@ -13245,7 +13245,7 @@ int vis;						/* True if action is at all visible to the player */
 			(
 			(weapon->oclass == WEAPON_CLASS && bimanual(weapon, youracedata)) ||	// twohanded weapon OR
 			(Role_if(PM_SAMURAI) && weapon->otyp == KATANA && !uarms) ||			// samurai w/ a katana and no shield OR
-			(weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_BERITH)	// berith bound into the Pen
+			(weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_BERITH)	// berith bound into the Pen
 			) &&
 			(weapon_type(weapon) != P_NONE) && (P_SKILL(weapon_type(weapon)) >= P_SKILLED) &&	// must be Skilled+
 			(!u.twoweap)	// cannot be twoweaponing
@@ -13782,7 +13782,7 @@ int vis;						/* True if action is at all visible to the player */
 	/* case 5: none of the above */
 	if (valid_weapon_attack) {
 		/* note: dmgval() includes enchantment and erosion of weapon */
-		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_MARIONETTE) ||
+		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_MARIONETTE) ||
 			(youagr && thrust && u.sealsActive&SEAL_MARIONETTE))
 			basedmg = dmgval(weapon, mdef, SPEC_MARIONETTE, magr);
 		else
@@ -16318,7 +16318,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 				}
 				/* Pen of the Void */
 				if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
-					otmp->ovar1&SEAL_EURYNOME) {
+					otmp->ovar1_seals&SEAL_EURYNOME) {
 					chance += 10;
 					if (quest_status.killed_nemesis && Role_if(PM_EXILE))
 						chance += 10;

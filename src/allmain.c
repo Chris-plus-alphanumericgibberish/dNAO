@@ -2863,10 +2863,10 @@ karemade:
 		hpDiff = (hpDiff > 0) ? hpDiff : 0;
 		if(uarmg && ART_GAUNTLETS_OF_THE_BERSERKER == uarmg->oartifact){
 			float a = .1; /* closer to 1 -> discard older faster */
-			long next = (long)(a * hpDiff + (1 - a) * uarmg->ovar1);
+			long next = (long)(a * hpDiff + (1 - a) * uarmg->ovar1_gober);
 			next = (next > 10) ? 10 : next;
-			long diff = next - uarmg->ovar1;
-			uarmg->ovar1 = next;
+			long diff = next - uarmg->ovar1_gober;
+			uarmg->ovar1_gober = next;
 			//if(diff) adj_abon(uarmg, diff);
 		}
 		didmove = FALSE;

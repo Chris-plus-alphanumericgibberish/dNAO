@@ -2939,7 +2939,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    	    otmp->otyp = SCR_BLANK_PAPER;
 				remove_oprop(otmp, OPROP_TACTB);
 	    	    otmp->spe = 0;
-	    	    otmp->ovar1 = 0;
+	    	    otmp->oward = 0;
 				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;
 			break;

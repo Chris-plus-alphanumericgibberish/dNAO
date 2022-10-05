@@ -1277,7 +1277,7 @@ struct monst *mon;
 		}
 		if ((armg && armg->otyp == GAUNTLETS_OF_POWER) || 
 			(wep && wep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
-			(wep && wep->oartifact == ART_PEN_OF_THE_VOID && wep->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
+			(wep && wep->oartifact == ART_PEN_OF_THE_VOID && wep->ovar1_seals&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
 			(wep && wep->oartifact == ART_STORMBRINGER) ||
 			(wep && wep->oartifact == ART_OGRESMASHER) ||
 			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||

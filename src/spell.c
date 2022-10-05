@@ -455,10 +455,10 @@ learn()
 	if(booktype == SPE_SECRETS){
 		if(book->oartifact) doparticularinvoke(book); //this is a redundant check
 		else{ 
-			if(!(book->ovar1) || 
-				book->ovar1 > 10 ||
-				book->ovar1 < 1) book->ovar1 = d(1,10);
-			switch(book->ovar1){
+			if(!(book->ovar1_secretsSecret) || 
+				book->ovar1_secretsSecret > 10 ||
+				book->ovar1_secretsSecret < 1) book->ovar1_secretsSecret = d(1,10);
+			switch(book->ovar1_secretsSecret){
 				case 1:
 					pline("...these are some surprisingly petty secrets.");
 				break;
@@ -468,7 +468,7 @@ learn()
 				case 3:
 					pline("It's blank. You guess the author KEPT his secrets.");
 				    book->otyp = booktype = SPE_BLANK_PAPER;
-					book->ovar1 = 0;
+					book->ovar1_secretsSecret = 0;
 					book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
 					remove_oprop(book, OPROP_TACTB);
 				break;
@@ -657,10 +657,10 @@ struct obj *spellbook;
 		} else {
 			int i;
 			boolean read_book = FALSE;
-			Sprintf(splname, objects[spellbook->ovar1].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[spellbook->ovar1]));
+			Sprintf(splname, objects[spellbook->ovar1_infinitespells].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[spellbook->ovar1_infinitespells]));
 			for (i = 0; i < MAXSPELL; i++)  {
-				if (spellid(i) == spellbook->ovar1)  {
-					pline("The endless pages of the book cover the material of a spellbook of %s in exhaustive detail.", OBJ_NAME(objects[spellbook->ovar1]));
+				if (spellid(i) == spellbook->ovar1_infinitespells)  {
+					pline("The endless pages of the book cover the material of a spellbook of %s in exhaustive detail.", OBJ_NAME(objects[spellbook->ovar1_infinitespells]));
 					if (spellknow(i) <= KEEN) {
 						Your("knowledge of %s is keener.", splname);
 						incrnknow(i);
@@ -671,17 +671,17 @@ struct obj *spellbook;
 					}
 					break;
 				} else if (spellid(i) == NO_SPELL)  {
-					spl_book[i].sp_id = spellbook->ovar1;
-					spl_book[i].sp_lev = objects[spellbook->ovar1].oc_level;
+					spl_book[i].sp_id = spellbook->ovar1_infinitespells;
+					spl_book[i].sp_lev = objects[spellbook->ovar1_infinitespells].oc_level;
 					incrnknow(i);
 					read_book = TRUE;
-					pline("The endless pages of the book cover the material of a spellbook of %s in exhaustive detail.",OBJ_NAME(objects[spellbook->ovar1]));
+					pline("The endless pages of the book cover the material of a spellbook of %s in exhaustive detail.",OBJ_NAME(objects[spellbook->ovar1_infinitespells]));
 					pline("Using the instructions on the pages, you easily learn to cast the spell!");
 					break;
 				}
 			}
 			int booktype;
-			if ((booktype = further_study(spellbook->ovar1))){
+			if ((booktype = further_study(spellbook->ovar1_infinitespells))){
 				You("understand the material thoroughly, and can see a way to cast another spell.");
 				Sprintf(splname, objects[booktype].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[booktype]));
 				for (i = 0; i < MAXSPELL; i++)  {
@@ -708,8 +708,8 @@ struct obj *spellbook;
 				}
 			}
 			if (read_book && !rn2(20)){
-				spellbook->ovar1 = rn1(SPE_BLANK_PAPER - SPE_DIG, SPE_DIG);
-				pline("The endless pages of the book turn themselves. They settle on a section describing %s.", OBJ_NAME(objects[spellbook->ovar1]));
+				spellbook->ovar1_infinitespells = rn1(SPE_BLANK_PAPER - SPE_DIG, SPE_DIG);
+				pline("The endless pages of the book turn themselves. They settle on a section describing %s.", OBJ_NAME(objects[spellbook->ovar1_infinitespells]));
 			}
 			if (i == MAXSPELL) impossible("Too many spells memorized!");
 			return MOVE_READ;
@@ -2637,7 +2637,7 @@ spiriteffects(power, atme)
 				otmp->blessed = 0;
 				otmp->cursed = 0;
 				otmp->spe = 1; /* to indicate it's yours */
-				otmp->ovar1 = 1 + u.ulevel/10;
+				otmp->ovar1_webGush = 1 + u.ulevel/10;
 				projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, rn1(5,5), TRUE, TRUE, FALSE);
 				nomul(0, NULL);
 			} else return MOVE_CANCELLED;
@@ -2691,7 +2691,7 @@ spiriteffects(power, atme)
 			if (!getdir((char *)0) || !(u.dx || u.dy)) return MOVE_CANCELLED;
 			otmp = mksobj(ACID_VENOM, NO_MKOBJ_FLAGS);
 			otmp->spe = 1; /* to indicate it's yours */
-			otmp->ovar1 = d(5,dsize); /* save the damge this should do */
+			otmp->ovar1_acidSplashDamage = d(5,dsize); /* save the damge this should do */
 			You("spit venom.");
 			projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 10, TRUE, FALSE, FALSE);
 		}break;

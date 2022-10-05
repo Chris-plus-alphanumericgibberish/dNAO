@@ -2311,7 +2311,7 @@ int mode;
 
 	    case WEAPON_CLASS:
 		if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
-				mvitals[PM_ACERERAK].died > 0 && (otmp->ovar1 & SEAL_ANDREALPHUS)
+				mvitals[PM_ACERERAK].died > 0 && (otmp->ovar1_seals & SEAL_ANDREALPHUS)
 		) {
 			type = BURN;
 		} else if (is_blade(otmp)) {
@@ -2324,8 +2324,8 @@ int mode;
 		    else
 				Your("%s too dull for engraving.", aobjnam(otmp,"are"));
 		} else if(otmp->otyp == RAYGUN){
-			if(otmp->altmode == AD_DISN && otmp->ovar1 >= 15){
-				otmp->ovar1 -= 15;
+			if(otmp->altmode == AD_DISN && otmp->ovar1_charges >= 15){
+				otmp->ovar1_charges -= 15;
 				if (dighole(FALSE)){
 					Your("raygun disintegrated the floor!");
 					if(!resists_blnd(&youmonst)) {
@@ -2345,8 +2345,8 @@ int mode;
 					if(levl[u.ux][u.uy].typ == GRASS)
 						levl[u.ux][u.uy].typ = SOIL;
 				}
-			} else if(otmp->altmode == AD_DEAD && otmp->ovar1 >= 10){
-				otmp->ovar1 -= 10;
+			} else if(otmp->altmode == AD_DEAD && otmp->ovar1_charges >= 10){
+				otmp->ovar1_charges -= 10;
 				ptext = TRUE;
 				if (!Blind) {
 					if(levl[u.ux][u.uy].typ == GRASS){
@@ -2357,8 +2357,8 @@ int mode;
 						   "The bugs on the %s stop moving!",
 						   surface(u.ux, u.uy));
 				}
-			} else if(otmp->altmode == AD_FIRE && otmp->ovar1 >= 2){
-				otmp->ovar1 -= 2;
+			} else if(otmp->altmode == AD_FIRE && otmp->ovar1_charges >= 2){
+				otmp->ovar1_charges -= 2;
 				ptext = TRUE;
 				type  = BURN;
 				Strcpy(post_engr_text,
@@ -2366,8 +2366,8 @@ int mode;
 						"A heat ray shoots from the raygun.");
 				if(levl[u.ux][u.uy].typ == GRASS)
 					levl[u.ux][u.uy].typ = SOIL;
-			} else if(otmp->ovar1 >= 1){
-				otmp->ovar1 -= 1;
+			} else if(otmp->ovar1_charges >= 1){
+				otmp->ovar1_charges -= 1;
 				ptext = TRUE;
 				if (!Blind) {
 				   Sprintf(post_engr_text,
@@ -3369,7 +3369,7 @@ int describe;
 				MENU_UNSELECTED);
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
-		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_ANDREALPHUS){
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_ANDREALPHUS){
 			Sprintf(buf, "Hypergeometric transit solution");
 			any.a_int = ANDREALPHUS_TRANSIT;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -3377,7 +3377,7 @@ int describe;
 				MENU_UNSELECTED);
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
-		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_ANDREALPHUS){
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_ANDREALPHUS){
 			Sprintf(buf, "Hypergeometric stabilization solution");
 			any.a_int = ANDREALPHUS_STABILIZE;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,

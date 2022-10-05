@@ -181,7 +181,7 @@ struct obj **potmp, **pobj;
 		 * to stop the burn on both items, then merge the age,
 		 * then restart the burn.
 		 */
-		if(obj->otyp == CORPSE && otmp->otyp == CORPSE) otmp->ovar1 = max(otmp->ovar1,obj->ovar1);
+		if(obj->otyp == CORPSE && otmp->otyp == CORPSE) otmp->ovar1_corpseRumorCooldown = max(otmp->ovar1_corpseRumorCooldown,obj->ovar1_corpseRumorCooldown);
 		if (!obj->lamplit)
 		    otmp->age = ((otmp->age*otmp->quan) + (obj->age*obj->quan))
 			    / (otmp->quan + obj->quan);
@@ -1204,9 +1204,9 @@ register const char *let,*word;
 		    (otmp->oclass == TOOL_CLASS && otmp->otyp != ROD_OF_FORCE))
 		|| (!strcmp(word, "inject") && !(otmp->otyp == HYPOSPRAY_AMPULE && otmp->spe > 0))
 		|| (!strcmp(word, "give the tear to") &&
-			!(otmp->otyp == BROKEN_ANDROID && otmp->ovar1 == 0) &&
-			!(otmp->otyp == BROKEN_GYNOID && otmp->ovar1 == 0) &&
-			!(otmp->otyp == LIFELESS_DOLL && otmp->ovar1 == 0)
+			!(otmp->otyp == BROKEN_ANDROID && otmp->ovar1_insightlevel == 0) &&
+			!(otmp->otyp == BROKEN_GYNOID && otmp->ovar1_insightlevel == 0) &&
+			!(otmp->otyp == LIFELESS_DOLL && otmp->ovar1_insightlevel == 0)
 		)
 		|| (!strcmp(word, "install dilithim in") &&
 			!(otmp->otyp == BROKEN_ANDROID) &&
@@ -1384,8 +1384,8 @@ register const char *let,*word;
 	    }
 		
 		//Make exceptions for gemstone items made of specific gems
-		if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
-			&& (!objects[otmp->ovar1].oc_name_known || !otmp->dknown)
+		if (otmp->obj_material == GEMSTONE && otmp->ovar1_gemstone && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp)
+			&& (!objects[otmp->ovar1_gemstone].oc_name_known || !otmp->dknown)
 			&& !strncmp(word, "rub on the stone", 16)) {
 			bp[foo++] = otmp->invlet;
 			allowall = TRUE;
@@ -1935,8 +1935,8 @@ fully_identify_obj(otmp)
 struct obj *otmp;
 {
     makeknown(otmp->otyp);
-	if (otmp->obj_material == GEMSTONE && otmp->ovar1 && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
-		makeknown(otmp->ovar1);
+	if (otmp->obj_material == GEMSTONE && otmp->ovar1_gemstone && !obj_type_uses_ovar1(otmp) && !obj_art_uses_ovar1(otmp))
+		makeknown(otmp->ovar1_gemstone);
     if (otmp->oartifact) discover_artifact(otmp->oartifact);
     otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = otmp->sknown = 1;
     if (otmp->otyp == EGG && otmp->corpsenm != NON_PM)
@@ -2326,7 +2326,7 @@ struct obj *obj;
 	else if (obj->otyp == HYPOSPRAY)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Inject an ampule with this hypospray", MENU_UNSELECTED);
-	else if ((is_knife(obj) && !(obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE))
+	else if ((is_knife(obj) && !(obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1_seals&SEAL_MARIONETTE))
 		&& (u.wardsknown & (WARD_TOUSTEFNA | WARD_DREPRUN | WARD_OTTASTAFUR | WARD_KAUPALOKI | WARD_VEIOISTAFUR | WARD_THJOFASTAFUR)))
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Carve a stave with this knife", MENU_UNSELECTED);
@@ -2708,7 +2708,7 @@ winid *datawin;
 				Sprintf(buf, "Thrown %smissile.", buf2);
 			}
 			/* special cases */
-			if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovar1 & SEAL_EVE))
+			if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovar1_seals & SEAL_EVE))
 				Strcpy(eos(buf)-1, ", and launcher.");
 			if (oartifact == ART_LIECLEAVER || oartifact == ART_ROGUE_GEAR_SPIRITS || oartifact == ART_WAND_OF_ORCUS)
 				Sprintf(eos(buf)-1, ", and %smelee weapon.", buf2);
@@ -2729,7 +2729,7 @@ winid *datawin;
 						Strcpy(buf2, " at range, and your pickaxe skill in melee.");
 						break;
 					case ART_PEN_OF_THE_VOID:
-						if(obj->ovar1 & SEAL_EVE) {
+						if(obj->ovar1_seals & SEAL_EVE) {
 							Strcpy(buf2, " in melee, and your ammo's skill at range.");
 						}
 						else
@@ -2842,14 +2842,14 @@ winid *datawin;
 				if (mvitals[PM_ACERERAK].died > 0)
 				{
 					Sprintf(buf, "Deals double damage");
-					if (obj->ovar1)
+					if (obj->ovar1_seals)
 						Strcat(buf, ", and enhanced spirit bonus damage.");
 					else
 						Strcat(buf, ".");
 				}
 				else
 				{
-					if (obj->ovar1)
+					if (obj->ovar1_seals)
 						Sprintf(buf, "Deals bonus damage from the spirit bound into it.");
 					else
 						buf[0] = '\0';
@@ -3169,8 +3169,8 @@ winid *datawin;
 				Sprintf(buf2, "Deals 2d6 bonus lightning damage, or 6d6 if wielded by an Ara Kamerel.");
 				OBJPUTSTR(buf2);
 			}
-			if(obj->otyp == VIPERWHIP && obj->ovar1 > 1){
-				Sprintf(buf2, "May strike with up to %d heads at once, multiplying the damage accordingly.", (int)(obj->ovar1));
+			if(obj->otyp == VIPERWHIP && obj->ovar1_heads > 1){
+				Sprintf(buf2, "May strike with up to %d heads at once, multiplying the damage accordingly.", (int)(obj->ovar1_heads));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == MIRRORBLADE){

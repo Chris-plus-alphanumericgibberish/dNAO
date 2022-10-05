@@ -1245,7 +1245,7 @@ int spiritseal;
 	    consume_obj_charge(obj, TRUE);
 		
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-			uwep->ovar1 |= OHEARD_OPEN;
+			uwep->ovar1_heard |= OHEARD_OPEN;
 		}
 		
 	    if (u.uswallow) {
@@ -2077,7 +2077,7 @@ struct obj *obj;
 			u.twoweap = 0;
 			update_inventory();
 		}
-		obj->ovar1 = (obj->ovar1 + uswapwep->ovar1)/2;
+		obj->ovar1_charges = (obj->ovar1_charges + uswapwep->ovar1_charges)/2;
 		useupall(uswapwep);
 		obj->otyp = DOUBLE_FORCE_BLADE;
 		fix_object(obj);
@@ -3450,7 +3450,7 @@ struct obj *tstone;
 	    streak_color = "silvery";
 	    break;
 	case GEMSTONE:
-		if (obj->ovar1 && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+		if (obj->ovar1_gemstone && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
 			/* similare check as above */
 			if (tstone->otyp != TOUCHSTONE) {
 				do_scratch = TRUE;
@@ -3458,7 +3458,7 @@ struct obj *tstone;
 			else if (tstone->blessed || (!tstone->cursed &&
 				(Role_if(PM_ARCHEOLOGIST) || Race_if(PM_GNOME)))) {
 				makeknown(TOUCHSTONE);
-				makeknown(obj->ovar1);
+				makeknown(obj->ovar1_gemstone);
 				prinv((char *)0, obj, 0L);
 				return;
 			}
@@ -3666,7 +3666,7 @@ struct obj *hypo;
 		}
 		if(!has_blood_mon(mtarg)){
 			pline("It would seem that the patient has no circulatory system....");
-		} else switch(amp->ovar1){
+		} else switch(amp->ovar1_ampule){
 			case POT_HEALING:
 				if (mtarg->mtyp == PM_PESTILENCE){
 					mtarg->mhp -= d(6 + 2 * bcsign(amp), 4);
@@ -3786,7 +3786,7 @@ struct obj *hypo;
 			pline("The ampule is empty!");
 			return MOVE_STANDARD;
 		}
-		switch(amp->ovar1){
+		switch(amp->ovar1_ampule){
 			case POT_GAIN_ABILITY:
 				if(amp->cursed) {
 					//poison
@@ -5537,7 +5537,7 @@ use_doll_tear(obj)
 				return MOVE_CANCELLED;
 			}
 			
-			mtmp->mvar_dollTypes = obj->ovar1;
+			mtmp->mvar_dollTypes = obj->ovar1_dollTypes;
 			mtmp->m_insight_level = obj->spe;
 			useup(obj);
 			return MOVE_STANDARD;
@@ -5567,9 +5567,9 @@ use_doll_tear(obj)
 			return MOVE_CANCELLED;
 		}
 		
-		dollobj->ovar1 = (long)obj->spe;
+		dollobj->ovar1_insightlevel = (long)obj->spe;
 		mtmp->m_insight_level = (long)obj->spe;
-		mtmp->mvar_dollTypes = obj->ovar1;
+		mtmp->mvar_dollTypes = obj->ovar1_dollTypes;
 		useup(obj);
 		return MOVE_STANDARD;
 	}
@@ -8018,7 +8018,7 @@ doapply()
 	    return do_soul_coin(obj);
 	else if (obj->oclass == RING_CLASS || obj->oclass == AMULET_CLASS)
 	    return do_present_item(obj);
-	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1&SEAL_MARIONETTE)) 
+	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1_seals&SEAL_MARIONETTE)) 
 		return do_carve_obj(obj);
 	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);

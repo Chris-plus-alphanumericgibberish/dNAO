@@ -3073,7 +3073,7 @@ struct monst *mon;
 	//else
 	if(weap){
 		if(weap->oartifact == ART_SCEPTRE_OF_MIGHT
-		|| (weap->oartifact == ART_PEN_OF_THE_VOID && weap->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0)
+		|| (weap->oartifact == ART_PEN_OF_THE_VOID && weap->ovar1_seals&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0)
 		|| weap->oartifact == ART_STORMBRINGER
 		|| weap->oartifact == ART_OGRESMASHER
 		)

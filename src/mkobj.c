@@ -638,7 +638,7 @@ int mkflags;
 	
 	set_obj_shape(otmp, MB_HUMANOID);
 	
-	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
+	if(otyp == VIPERWHIP) otmp->ovar1_heads = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
 	
 	if (summon) {
 		/* set up otmp as summoned indefinitely
@@ -690,44 +690,44 @@ int mkflags;
 				add_oprop(otmp, OPROP_RAKUW);
 
 			if (is_vibroweapon(otmp)){
-				otmp->ovar1 = 80L + rnd(20);
+				otmp->ovar1_charges = 80L + rnd(20);
 			}
 			else if (otmp->otyp == RAYGUN){
-				otmp->ovar1 = (8 + rnd(8)) * 10L;
+				otmp->ovar1_charges = (8 + rnd(8)) * 10L;
 				otmp->altmode = AD_SLEE;
 			}
 			else if (otmp->otyp == MASS_SHADOW_PISTOL){
 				struct obj *stone = mksobj(ROCK, NO_MKOBJ_FLAGS);
-				otmp->ovar1 = 800L + rnd(200);
+				otmp->ovar1_charges = 800L + rnd(200);
 				stone->quan = 1;
 				stone->owt = weight(stone);
 				add_to_container(otmp, stone);
 				container_weight(otmp);
 			}
 			else if (is_blaster(otmp)){ //Rayguns and mass-shadow pistols are also blasters, so this has to go under that case
-				otmp->ovar1 = 80L + rnd(20);
+				otmp->ovar1_charges = 80L + rnd(20);
 				if (otmp->otyp == ARM_BLASTER) otmp->altmode = WP_MODE_SINGLE;
 				if (otmp->otyp == RAYGUN) otmp->altmode = AD_FIRE;	// I think this is never reached?
 			}
 			else if (otmp->otyp == MOON_AXE){
 				switch (phase_of_the_moon()){
 				case 0:
-					otmp->ovar1 = ECLIPSE_MOON;
+					otmp->ovar1_moonPhase = ECLIPSE_MOON;
 					break;
 				case 1:
 				case 7:
-					otmp->ovar1 = CRESCENT_MOON;
+					otmp->ovar1_moonPhase = CRESCENT_MOON;
 					break;
 				case 2:
 				case 6:
-					otmp->ovar1 = HALF_MOON;
+					otmp->ovar1_moonPhase = HALF_MOON;
 					break;
 				case 3:
 				case 5:
-					otmp->ovar1 = GIBBOUS_MOON;
+					otmp->ovar1_moonPhase = GIBBOUS_MOON;
 					break;
 				case 4:
-					otmp->ovar1 = FULL_MOON;
+					otmp->ovar1_moonPhase = FULL_MOON;
 					break;
 				}
 			}
@@ -865,7 +865,7 @@ int mkflags;
 				blessorcurse(otmp, 2);
 				break;
 			case SEISMIC_HAMMER:
-				otmp->ovar1 = 80L + rnd(20);
+				otmp->ovar1_charges = 80L + rnd(20);
 				break;
 			case DOUBLE_LIGHTSABER:
 			case LIGHTSABER:
@@ -883,9 +883,9 @@ int mkflags;
 					container_weight(otmp);
 				}
 				if(otmp->otyp == LIGHTSABER)
-					otmp->ovar1 = random_saber_hilt();
+					otmp->ovar1_lightsaberHandle = random_saber_hilt();
 				else if(otmp->otyp == BEAMSWORD)
-					otmp->ovar1 = random_beam_hilt();
+					otmp->ovar1_lightsaberHandle = random_beam_hilt();
 				break;
 			case CHEST:
 			case BOX:
@@ -982,8 +982,7 @@ int mkflags;
 										  pick = POT_AMNESIA;
 										  break;
 									  }
-									  // otmp->ovar1 = (long)(rn2(POT_POLYMORPH - POT_GAIN_ABILITY + 1) + POT_GAIN_ABILITY);
-									  otmp->ovar1 = (long)(pick);
+									  otmp->ovar1_ampule = (long)(pick);
 									  otmp->spe = rn1(6, 6);
 			}break;
 			case HORN_OF_PLENTY:
@@ -1134,7 +1133,7 @@ int mkflags;
 				doMaskStats(otmp);
 				break;
 			case DOLL_S_TEAR:
-				otmp->ovar1 = init_doll_sales();
+				otmp->ovar1_dollTypes = init_doll_sales();
 				otmp->spe = rnd(20);
 				break;
 			}
@@ -2178,13 +2177,13 @@ int oldmat, newmat;
 		stop_timer(LIGHT_DAMAGE, obj->timed);
 	}
 	/* set random gemstone type for valid gemstone objects */
-	if (!obj->ovar1 && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
+	if (!obj->ovar1_gemstone && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
 		do{
-			obj->ovar1 = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
-		} while (obj->ovar1 == OBSIDIAN);
+			obj->ovar1_gemstone = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+		} while (obj->ovar1_gemstone == OBSIDIAN);
 	}
 	else if (oldmat == GEMSTONE && newmat != GEMSTONE && obj->oclass != GEM_CLASS && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj)) {
-		obj->ovar1 = 0;	/* and reset if changing away from gemstone*/
+		obj->ovar1_gemstone = 0;	/* and reset if changing away from gemstone*/
 	}
 }
 
@@ -2578,7 +2577,7 @@ register struct obj *obj;
 	}
 	
 	if(obj->otyp == MOON_AXE && obj->oartifact != ART_SCEPTRE_OF_LOLTH){
-		if(obj->ovar1) wt =  wt/4*obj->ovar1;
+		if(obj->ovar1_moonPhase) wt =  wt/4*obj->ovar1_moonPhase;
 		else wt = wt/4;
 	}
 

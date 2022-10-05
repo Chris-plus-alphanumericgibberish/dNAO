@@ -3412,7 +3412,7 @@ struct monst *owner;
 			    obj->otyp = (is_lethe && !rn2(10)) ?
 					SCR_AMNESIA : SCR_BLANK_PAPER;
 			obj->spe = 0;
-			obj->ovar1 = 0;
+			obj->oward = 0;
 		    }
 			break;
 		    case SPBOOK_CLASS:

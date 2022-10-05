@@ -384,7 +384,7 @@ int type;
 	return((struct obj *) 0);
 }
 
-/* Check if a monster is carrying a particular charged (ovar1>0) item.
+/* Check if a monster is carrying a particular charged (ovar1_charges>0) item.
  */
 struct obj *
 m_carrying_charged(mtmp, type)
@@ -394,7 +394,7 @@ int type;
 	register struct obj *otmp;
 
 	for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj)
-		if(otmp->otyp == type && otmp->ovar1 > 0)
+		if(otmp->otyp == type && otmp->ovar1_charges > 0)
 			return(otmp);
 	return((struct obj *) 0);
 }

@@ -183,7 +183,7 @@ boolean restore;
 			//Plasteel Armor: Ok for bones inclusion
 			//Sensors and Hyposprays: Ok for bones inclusion
 			if(otmp->otyp == HAND_BLASTER || otmp->otyp == ARM_BLASTER || otmp->otyp == RAYGUN){
-			    otmp->ovar1 /= 2;
+			    otmp->ovar1_charges /= 2;
 			    otmp->recharged = 4;
 				curse(otmp);
 			//Actually, make it so these can barely be recharged/don't work, but let them be saved
