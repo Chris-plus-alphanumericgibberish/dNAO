@@ -557,13 +557,13 @@ int template;
 		ptr->msound = MS_SILENT;
 		break;
 	case YELLOW_TEMPLATE:
-		ptr->nac += 3;
+		ptr->nac += 2;
 		ptr->pac += 3;
-		ptr->hdr += 3;
-		ptr->bdr += 3;
-		ptr->gdr += 3;
-		ptr->ldr += 3;
-		ptr->fdr += 3;
+		ptr->hdr += 2;
+		ptr->bdr += 2;
+		ptr->gdr += 2;
+		ptr->ldr += 2;
+		ptr->fdr += 2;
 		ptr->spe_hdr += 3;
 		ptr->spe_bdr += 3;
 		ptr->spe_gdr += 3;
@@ -586,8 +586,8 @@ int template;
 		// ptr->mcolor = CLR_YELLOW;
 		break;
 	case DREAM_LEECH:
-		ptr->pac += 6;
-		ptr->spe_hdr += 6;
+		ptr->pac += 5;
+		ptr->spe_hdr += 5;
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
 		ptr->mflagsa |= (MA_UNDEAD);
 		ptr->mflagsv |= (MV_TELEPATHIC);
@@ -1062,7 +1062,7 @@ int template;
 			attk->aatyp = AT_TUCH;
 			attk->adtyp = AD_DRIN;
 			attk->damn = 1;
-			attk->damd = 6;
+			attk->damd = 5;
 			special = TRUE;
 		}
 		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN && attk->adtyp != AD_SURY){

@@ -1983,6 +1983,11 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			}
 		}
 	}
+	/* Dream leech dream leeches disappear when cancelled */
+	if(has_template(magr, DREAM_LEECH) && magr->mcan &&attk->aatyp == AT_TUCH && attk->adtyp == AT_TUCH){
+		GETNEXT
+	}
+		
 	if(!by_the_book && 
 		(pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN || pa->mtyp == PM_XUENU_MONK)
 	){
