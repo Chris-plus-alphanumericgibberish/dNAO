@@ -695,7 +695,9 @@ d_level *lev;
 {
 	static char bonesid[16];
 	s_level *sptr;
+	branch * bptr;
 	char *dptr;
+	char *bspr;
 
 	Sprintf(bonesid, "%c%s", dungeons[lev->dnum].boneid,
 			In_quest(lev) ? urole.filecode : "0");
@@ -704,6 +706,13 @@ d_level *lev;
 	    Sprintf(dptr, ".%c", sptr->boneid);
 	else
 	    Sprintf(dptr, ".%d", lev->dlevel);
+	if ((bptr = Is_branchlev(lev)) != 0)
+	{
+		bspr = eos(dptr);
+		d_level * end = branchlev_other_end(bptr, lev);
+		Sprintf(bspr, ".%c%s", dungeons[end->dnum].boneid,
+			In_quest(end) ? urole.filecode : "0");
+	}
 	Sprintf(file, "bon%s", bonesid);
 #ifdef BONES_POOL
 	Sprintf(eos(file), ".%ld", (u.ubirthday % 10));

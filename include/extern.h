@@ -724,6 +724,7 @@ E void NDECL(init_dungeons);
 E s_level *FDECL(find_level, (const char *));
 E s_level *FDECL(Is_special, (d_level *));
 E branch *FDECL(Is_branchlev, (d_level *));
+E d_level *FDECL(branchlev_other_end, (branch *, d_level *));
 E int FDECL(ledger_no, (d_level *));
 E int NDECL(maxledgerno);
 E schar FDECL(depth, (d_level *));
