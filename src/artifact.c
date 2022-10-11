@@ -6278,10 +6278,6 @@ boolean printmessages; /* print generic elemental damage messages */
 		boolean printed = FALSE;
 		while((obj = some_armor(mdef)) && i > 0){
 			i-=3;
-			if(check_res_engine(mdef, AD_SHRD)){
-				i = 0;
-				break; //End while loop
-			}
 			if(oresist_disintegration(obj))
 				continue;//May possibly sellect a different item next time.
 
