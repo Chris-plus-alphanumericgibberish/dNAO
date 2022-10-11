@@ -641,7 +641,7 @@ tactics(mtmp)
 				&& !mtmp->mcan && !mtmp->mspec_used
 			){
 				mofflin(mtmp);
-				if(!mon_can_see_you(mtmp)) mnexto(mtmp);
+				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			} else {
 				mnexto(mtmp);
 			}

@@ -1063,7 +1063,7 @@ int distance;
 		    resist_song(mtmp, SNG_CNCL, song_instr) >= 0) {
 			if (canseemon(mtmp))
 				pline("%s seems unable to focus.", Monnam(mtmp));
-			mtmp->mspec_used += min(max(1, P_SKILL(P_MUSICALIZE)-P_UNSKILLED), 255);
+			mtmp->mspec_used = min(max(1, mtmp->mspec_used + P_SKILL(P_MUSICALIZE)-P_UNSKILLED), 255);
 			// if(wizard) pline("mspec cooldown: %d", (int)mtmp->mspec_used);
 		}
 		mtmp = mtmp->nmon;
