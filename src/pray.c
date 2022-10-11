@@ -672,7 +672,10 @@ int godnum;
 	    		!(EDisint_resistance & W_ARM) && !uarmc)
 		(void) destroy_arm(uarm);
 #ifdef TOURIST
-	    if (uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc) (void) destroy_arm(uarmu);
+	    if (uarmu && 
+			!(EReflecting & W_ARMU) && !(EDisint_resistance & W_ARMU) &&
+			!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc
+		) (void) destroy_arm(uarmu);
 #endif
 	    if (!Disint_resistance)
 		fry_by_god(godnum);
