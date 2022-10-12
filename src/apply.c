@@ -28,7 +28,7 @@ STATIC_DCL boolean FDECL(its_dead, (int,int,int *,struct obj*));
 STATIC_DCL int FDECL(use_stethoscope, (struct obj *));
 STATIC_DCL void FDECL(use_whistle, (struct obj *));
 STATIC_DCL void FDECL(use_leash, (struct obj *));
-STATIC_DCL int FDECL(use_mirror, (struct obj *));
+STATIC_DCL int FDECL(use_mirror, (struct obj **));
 STATIC_DCL void FDECL(use_candelabrum, (struct obj *));
 STATIC_DCL void FDECL(use_candle, (struct obj **));
 STATIC_DCL void FDECL(use_lamp, (struct obj *));
@@ -905,12 +905,13 @@ register xchar x, y;
 static const char look_str[] = "look %s.";
 
 STATIC_OVL int
-use_mirror(obj)
-struct obj *obj;
+use_mirror(obj_p)
+struct obj **obj_p;
 {
 	register struct monst *mtmp;
 	register char mlet;
 	boolean vis;
+	struct obj *obj = *obj_p;
 
 	if(!getdir((char *)0)) return MOVE_CANCELLED;
 	if(obj->cursed && !rn2(2)) {
@@ -1000,7 +1001,7 @@ struct obj *obj;
 										pline("The silver light reflects from your mirror and takes up residence within %s.", doname(sflm_obj));
 										add_oprop(sflm_obj, OPROP_SFLMW);
 										u.silver_atten = TRUE;
-										poly_obj(obj, PURIFIED_MIRROR);
+										*obj_p = poly_obj(obj, PURIFIED_MIRROR);
 									}
 									else pline("Nothing happens.");
 								}
@@ -7715,7 +7716,7 @@ doapply()
 		res = use_stethoscope(obj);
 		break;
 	case MIRROR:
-		res = use_mirror(obj);
+		res = use_mirror(&obj);
 		break;
 	case SPOON:
 		if(Role_if(PM_CONVICT)) pline("The guards used to hand these out with our food rations.  No one was ever able to figure out why.");
@@ -8094,7 +8095,7 @@ doapply()
 	break;
 	case PURIFIED_MIRROR:
 		if(u.silver_atten) return commune_with_silver_flame();
-		else res = use_mirror(obj);
+		else res = use_mirror(&obj);
 	break;
 	case MISOTHEISTIC_PYRAMID:
 	case MISOTHEISTIC_FRAGMENT:
