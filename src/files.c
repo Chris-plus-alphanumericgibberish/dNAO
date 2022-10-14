@@ -2056,7 +2056,9 @@ char		*tmp_levels;
 #endif
 	} else if (match_varname(buf, "MONSTERCOLOR", 12)) {
 	    return parse_monster_color(bufp);
-	} else if (match_varname(buf, "MONSTERSYMBOL", 13)) {
+	} else if (match_varname(buf, "MONSTERTEMPLATE", 15)) {
+	    return parse_monster_template(bufp);
+	}else if (match_varname(buf, "MONSTERSYMBOL", 13)) {
 	    return parse_monster_symbol(bufp);
 	} else if (match_varname(buf, "OBJECTSYMBOL", 12)) {
 	    return parse_object_symbol(bufp);
