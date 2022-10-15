@@ -10,10 +10,10 @@
 #define PROPS(...) {FIRST_TEN(dummy, ##__VA_ARGS__, 0,0,0,0,0,0,0,0,0,0)}
 #define FIRST_TEN(dummy, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, ...) a1, a2, a3, a4, a5, a6, a7, a8, a9, a10
 
-#define NO_MONS()									 0,   0,   0,   0,   0,   0,   0,   0
-//#define MONS(mt, mfm, mft, mfb, mfg, mfr, mfv)		mt, mfm, mft, mff, mfb, mfg, mfr, mfv
+#define NO_MONS()									 0,   0,   0,   0,   0,   0,   0,   0,   0
+//#define MONS(mt, mfm, mft, mfb, mfg, mfr, mfv, mfw)		mt, mfm, mft, mff, mfb, mfg, mfr, mfv, mfw
 
-#define MONS(...) SET08(0,0,0,0,0,0,0,0, __VA_ARGS__)
+#define MONS(...) SET09(0,0,0,0,0,0,0,0,0, __VA_ARGS__)
 #define vsMSYM(x) C01((x))
 #define vsMM(x)   C02((x))
 #define vsMT(x)   C03((x))
@@ -22,6 +22,7 @@
 #define vsMG(x)   C06((x))
 #define vsMA(x)   C07((x))
 #define vsMV(x)   C08((x))
+#define vsMW(x)   C09((x))
 
 #define NO_ATTK()									    0,   0,   0
 #define ATTK(adtyp, acc, dam)						adtyp, acc, dam

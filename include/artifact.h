@@ -269,6 +269,7 @@ struct artifact {
 	unsigned long mflagsg;	/* Monster Game mechanics and bookkeeping boolean bitflags */
 	unsigned long mflagsa;	/* Monster rAce boolean bitflags */
 	unsigned long mflagsv;	/* Monster Vision boolean bitflags */
+	unsigned long mflagsw;	/* Monster Warded boolean bitflags */
 
 	/* Offense */
 	int adtyp;				/* damage type */

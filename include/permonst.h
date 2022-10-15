@@ -108,7 +108,8 @@ struct permonst {
 					mflagsb,		/* Monster Body plan boolean bitflags */
 					mflagsg,		/* Monster Game mechanics and bookkeeping boolean bitflags */
 					mflagsa,		/* Monster rAce boolean bitflags */
-					mflagsv;		/* Monster Vision boolean bitflags */
+					mflagsv,		/* Monster Vision boolean bitflags */
+					mflagsw;		/* Monster Warded boolean bitflags */
 # ifdef TEXTCOLOR
 	uchar		mcolor;			/* color to use */
 # endif
