@@ -369,69 +369,9 @@ struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->iswiz) return FALSE;
-	return 	mtmp->data->mlet == S_BLOB ||
-			mtmp->data->mlet == S_JELLY ||
-			mtmp->data->mlet == S_MIMIC ||
-			mtmp->data->mlet == S_PIERCER ||
-			mtmp->data->mlet == S_WORM ||
-			mtmp->data->mlet == S_LIGHT ||
-			mtmp->data->mlet == S_PUDDING ||
-			mtmp->data->mlet == S_UMBER ||
-			mtmp->data->mlet == S_EEL ||
-			has_template(mtmp, PSEUDONATURAL) ||
-			has_template(mtmp, TOMB_HERD) ||
-			has_template(mtmp, YITH) ||
-			has_template(mtmp, CRANIUM_RAT) ||
-			has_template(mtmp, MISTWEAVER) ||
-			has_template(mtmp, FRACTURED) ||
-			has_template(mtmp, YELLOW_TEMPLATE) ||
-			mtmp->mtyp == PM_GUG ||
-			mtmp->mtyp == PM_MIGO_WORKER ||
-			mtmp->mtyp == PM_MIGO_SOLDIER ||
-			mtmp->mtyp == PM_MIGO_PHILOSOPHER ||
-			mtmp->mtyp == PM_MIGO_QUEEN ||
-			mtmp->mtyp == PM_HOUND_OF_TINDALOS ||
-			mtmp->mtyp == PM_TRAPPER ||
-			mtmp->mtyp == PM_LURKER_ABOVE ||
-			mtmp->mtyp == PM_NIGHTGAUNT ||
-			mtmp->mtyp == PM_BYAKHEE ||
-			(mtmp->mtyp == PM_HUNTING_HORROR && complete == 6) ||
-			mtmp->mtyp == PM_MIND_FLAYER ||
-			mtmp->mtyp == PM_PARASITIC_MIND_FLAYER ||
-			mtmp->mtyp == PM_PARASITIZED_ANDROID ||
-			mtmp->mtyp == PM_PARASITIZED_GYNOID ||
-			(mtmp->mtyp == PM_PARASITIC_MASTER_MIND_FLAYER && complete == 6) ||
-			(mtmp->mtyp == PM_PARASITIZED_EMBRACED_ALIDER && complete == 6) ||
-			(mtmp->mtyp == PM_MASTER_MIND_FLAYER && complete == 6) ||
-			mtmp->mtyp == PM_DEEP_ONE ||
-			mtmp->mtyp == PM_DEEPER_ONE ||
-			(mtmp->mtyp == PM_DEEPEST_ONE && complete == 6) ||
-			(mtmp->mtyp == PM_FATHER_DAGON && complete == 6) ||
-			(mtmp->mtyp == PM_MOTHER_HYDRA && complete == 6) ||
-			mtmp->mtyp == PM_CHANGED ||
-			(mtmp->mtyp == PM_WARRIOR_CHANGED && complete == 6) ||
-			mtmp->mtyp == PM_EDDERKOP ||
-			mtmp->mtyp == PM_NEVERWAS ||
-			mtmp->mtyp == PM_INTONER ||
-			(mtmp->mtyp == PM_BLACK_FLOWER && complete == 6) ||
-			mtmp->mtyp == PM_DARK_YOUNG ||
-			mtmp->mtyp == PM_WEEPING_ANGEL ||
-			mtmp->mtyp == PM_ANCIENT_OF_ICE ||
-			(mtmp->mtyp == PM_ANCIENT_OF_DEATH && complete == 6) ||
-			(mtmp->mtyp == PM_JUIBLEX && complete == 6) ||
-			(mtmp->mtyp == PM_MASKED_QUEEN && complete == 6) ||
-			(mtmp->mtyp == PM_PALE_NIGHT && complete == 6) ||
-			(mtmp->mtyp == PM_LEVIATHAN && complete == 6) ||
-			(mtmp->mtyp == PM_BAALPHEGOR && complete == 6) ||
-			(mtmp->mtyp == PM_VERIER && complete == 6) ||
-			(mtmp->mtyp == PM_DAGON && complete == 6) ||
-			(mtmp->mtyp == PM_DEMOGORGON && complete == 6 && !rn2(3)) ||
-			(mtmp->mtyp == PM_GREAT_CTHULHU && complete == 6) ||
-			(mtmp->mtyp == PM_LUGRIBOSSK && complete == 6) ||
-			(mtmp->mtyp == PM_MAANZECORIAN && complete == 6) ||
-			(mtmp->mtyp == PM_ELDER_PRIEST && complete == 6) ||
-			(mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD && complete == 6);
+	return ((mtmp->data->mflagsw&MW_ELDER_SIGN) || (complete >= 6 && (mtmp->data->mflagsw&MW_EYE_OF_YGG))) && (mtmp->mtyp != PM_DEMOGORGON || !rn2(3));
 }
+
 boolean
 scaryHam(complete, mtmp)
 int complete;

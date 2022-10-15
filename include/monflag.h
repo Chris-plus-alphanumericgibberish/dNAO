@@ -288,6 +288,11 @@
 #define MZ_HUGE		4		/* 12-25' */
 #define MZ_GIGANTIC	7		/* off the scale */
 
+//Monster Warded
+#define MW_ELDER_SIGN		0x00000001L	/* by the elder sign */
+#define MW_EYE_OF_YGG		0x00000002L	/* by the fully-reinforced elder sign */
+
+
 /* for mons[].geno (constant during game) */
 #define G_NON_GEN_CORPSE	(G_SPCORPSE|G_NOCORPSE)		/* nongenerated corpse */
 #define G_SPCORPSE	0x00010000		/* Corpse is special, and should be non-wishable */

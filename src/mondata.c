@@ -406,6 +406,9 @@ int template;
 		ptr->mflagsb |= (MB_NOEYES|MB_INDIGESTIBLE);
 		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 		break;
 	case VAMPIRIC:
 		/* flags: */
@@ -452,6 +455,9 @@ int template;
 			ptr->mflagsb &= ~MB_NOHANDS;
 			ptr->mflagsb |= MB_NOGLOVES;
 		}
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 		ptr->mflagsb |= MB_ACID|MB_POIS;
 		break;
 	case TOMB_HERD:
@@ -467,6 +473,9 @@ int template;
 		ptr->mflagsb &= ~(MB_UNSOLID|MB_OVIPAROUS|MB_ACID|MB_POIS|MB_POIS|MB_TOSTY|MB_HALUC|MB_INSUBSTANTIAL);
 		ptr->mflagsb |= (MB_INDIGESTIBLE|MB_THICK_HIDE|MB_STRONG);
 
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 		/*The tomb herd is neutral*/
 		ptr->maligntyp = 0;
 
@@ -482,11 +491,17 @@ int template;
 		ptr->mflagst &= ~(MT_MINDLESS|MT_ANIMAL|MT_DOMESTIC);
 		if(!(ptr->mflagsb&(MB_NOLIMBS|MB_NOHANDS)) && !(ptr->mflagsm&MM_TUNNEL) && !(ptr->mflagsm&MM_WALLWALK))
 			ptr->mflagsm |= (MM_TUNNEL|MM_NEEDPICK);
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 		break;
 	case CRANIUM_RAT:
 		/* defense: */
 		ptr->dac += 4;
 		ptr->hdr = 0; //Exposed brain
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 		break;
 	case MINDLESS:
 		if(ptr->mflagsm&MM_NEEDPICK)
@@ -517,6 +532,9 @@ int template;
 		ptr->mflagst |= (MT_CARNIVORE);
 		ptr->mflagsv |= (MV_ECHOLOCATE|MV_SCENT);
 		ptr->mflagsa |= (MA_ANIMAL|MA_PLANT|MA_PRIMORDIAL);
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 #define AVG_DR(typ) if(ptr->typ < 5) ptr->typ = (ptr->typ + 5)/2;
 #define AVG_AC(typ) if(ptr->typ < 16) ptr->typ = (ptr->typ + 16)/2;
 		AVG_AC(nac)
@@ -612,6 +630,9 @@ int template;
 		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 		/*Yellow dead have no skill*/
 		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
 		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
