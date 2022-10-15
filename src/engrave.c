@@ -3012,7 +3012,7 @@ int mode;
 	} else if(mode == WARD_MODE){
 		if (len > maxelen) {
 			int perc = (len*100)/maxelen;
-			if (multi) nomovemsg =	"Unfortunatly, you can't complete the ward.";
+			if (multi) nomovemsg =	"Unfortunately, you can't complete the ward.";
 			else You("can't complete the ward.");
 		} else perc = 100;
 		
@@ -3076,7 +3076,7 @@ int mode;
 		if (len > maxelen) {
 			perc = (len*100)/maxelen;
 			
-			if (multi) nomovemsg =	"Unfortunatly, you can't complete the seal.";
+			if (multi) nomovemsg =	"Unfortunately, you can't complete the seal.";
 			else You("can't complete the seal.");
 		} else perc = 100;
 		if (oep && oep->ward_id){
