@@ -103,13 +103,15 @@ dungeonline	: A_DUNGEON ':' STRING bones_tag rcouple optional_int
 			tmpdungeon[n_dgns].lev.base = couple.base;
 			tmpdungeon[n_dgns].lev.rand = couple.rand;
 			tmpdungeon[n_dgns].chance = $6;
+			tmpdungeon[n_dgns].alternates = 0;
+			if(!check_dungeon()) n_dgns--;
 			Free($3);
 		  }
 		;
 
 optional_int	: /* nothing */
 		  {
-			$$ = 0;
+			$$ = 100;
 		  }
 		| INTEGER
 		  {
@@ -504,7 +506,6 @@ getchain(s)
 /*
  *	Consistancy checking routines:
  *
- *	- A dungeon must have a unique name.
  *	- A dungeon must have a originating "branch" command
  *	  (except, of course, for the first dungeon).
  *	- A dungeon must have a proper depth (at least (1, 0)).
@@ -517,8 +518,8 @@ check_dungeon()
 
 	for(i = 0; i < n_dgns; i++)
 	    if(!strcmp(tmpdungeon[i].name, tmpdungeon[n_dgns].name)) {
-		yyerror("Duplicate dungeon name.");
-		return(0);
+			tmpdungeon[i].alternates++;
+			tmpdungeon[n_dgns].alternates = tmpdungeon[i].alternates;
 	    }
 
 	if(n_dgns)

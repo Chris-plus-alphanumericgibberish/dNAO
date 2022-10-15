@@ -1360,6 +1360,9 @@ register const char *s;
 	if(*s) {
 	    if(sp && sp->rndlevs){
 			levvar = rnd((int) sp->rndlevs);
+			/* special case -- chalev should always use the corresponding level */
+			if (!strcmp(sp->proto, "chalev"))
+				levvar = chaos_dvariant + 1;
 			Sprintf(protofile, "%s-%d", s, levvar);
 		}
 	    else Strcpy(protofile, s);
