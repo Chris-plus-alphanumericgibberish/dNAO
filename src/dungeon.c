@@ -13,11 +13,12 @@
 
 //define DUNGEON_FILE	"dungeon"
 
-const char *DUNGEON_FILES[] = {
-	"dngnch1", //Temple of Chaos (FF1) TEMPLE_OF_CHAOS
-	"dngnch2", //Aquallor->Mithardir (D&D) MITHARDIR
-	"dngnch3"  //sorta-Mordor (LotR) MORDOR
-};
+const char *DUNGEON_FILE = "dungeon";
+//[] = {
+//	"dngnch1", //Temple of Chaos (FF1) TEMPLE_OF_CHAOS
+//	"dngnch2", //Aquallor->Mithardir (D&D) MITHARDIR
+//	"dngnch3"  //sorta-Mordor (LotR) MORDOR
+//};
 
 #define X_START		"x-strt"
 #define X_LOCATE	"x-loca"
@@ -59,6 +60,7 @@ STATIC_DCL void FDECL(init_level, (int,int,struct proto_dungeon *));
 STATIC_DCL int FDECL(possible_places, (int, boolean *, struct proto_dungeon *));
 STATIC_DCL int FDECL(pick_level, (boolean *, int));
 STATIC_DCL boolean FDECL(place_level, (int, struct proto_dungeon *));
+STATIC_DCL boolean FDECL(select_alternate, (int, struct proto_dungeon *));
 #ifdef WIZARD
 STATIC_DCL const char *FDECL(br_string, (int));
 STATIC_DCL void FDECL(print_branch, (winid, int, int, int, BOOLEAN_P, struct lchoice *));
@@ -653,6 +655,59 @@ place_level(proto_index, pd)
     return FALSE;
 }
 
+/* */
+struct {
+	char name[20];
+	int prev;
+	boolean selected;
+	boolean set;
+} alternate_history[MAXDUNGEON];
+
+/* return TRUE if this dungeon, which possesses alternates, should be chosen */
+boolean
+select_alternate(i, pd)
+int i;
+struct proto_dungeon * pd;
+{
+	int j;
+	int altnum = 0;
+	boolean select;
+	char * dgn_name = pd->tmpdungeon[i].name;
+
+	/* check list of previous alternates checked */
+	for (j=0; j<i && alternate_history[j].set; j++) {
+		if (!strncmp(dgn_name, alternate_history[j].name, 20)) {
+			if (alternate_history[j].selected)
+				return FALSE;	/* we've already selected a dungeon with this name */
+			else {
+				altnum = alternate_history[j].prev;	/* how many alternates have we passed by so far? */
+				break;
+			}
+		}
+	}
+
+	/* general case, may be overridden by special cases */
+	/* 1/X chance of being selected, where X is the number of versions remaining to choose from */
+	select = !rn2(pd->tmpdungeon[i].alternates - altnum + 1);
+
+	/* are we a special case? */
+	if (!strcmp(dgn_name, "Chaos Quest") && flags.chaosvar && (wizard || is_june())) {
+		// chaosvar is incremented by 1 so that all variants are nonzero in the option
+		// select if alt_i == our chosen version
+		select = (altnum == (flags.chaosvar-1));
+	}
+	/* record Chaos Quest version, if selected */
+	if (select && !strcmp(dgn_name, "Chaos Quest"))
+		chaos_dvariant = altnum;
+
+	/* update alternate_history */
+	strncpy(alternate_history[j].name, dgn_name, 20);
+	alternate_history[j].set = TRUE;
+	alternate_history[j].prev++;
+	alternate_history[j].selected = select;
+
+	return select;
+}
 
 struct level_map {
 	const char *lev_name;
@@ -771,25 +826,14 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	struct proto_dungeon pd;
 	struct level_map *lev_map;
 	struct version_info vers_info;
-	int dungeonversion;
-	
-	if(flags.chaosvar && (wizard || is_june())) {
-		//chaosvar is incremented by 1 so that all variants are nonzero
-		dungeonversion = flags.chaosvar-1;
-	} else {
-		//Otherwise pick a random variant
-		dungeonversion = rn2(3);
-	}
-	//Record chaos quest version (note: in the future not all dungeonversions will relate to the chaos quest)
-	chaos_dvariant = dungeonversion;
 	
 	pd.n_levs = pd.n_brs = 0;
 
-	dgn_file = dlb_fopen(DUNGEON_FILES[dungeonversion], RDBMODE);
+	dgn_file = dlb_fopen(DUNGEON_FILE, RDBMODE);
 	if (!dgn_file) {
 	    char tbuf[BUFSZ];
 	    Sprintf(tbuf, "Cannot open dungeon description - \"%s",
-		DUNGEON_FILES[dungeonversion]);
+		DUNGEON_FILE);
 #ifdef DLBRSRC /* using a resource from the executable */
 	    Strcat(tbuf, "\" resource!");
 #else /* using a file or DLB file */
@@ -819,10 +863,9 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	 * mix with the raw messages that might be already on the screen
 	 */
 	if (iflags.window_inited) clear_nhwindow(WIN_MAP);
-	for(dungeonversion = 0; dungeonversion < SIZE(DUNGEON_FILES); dungeonversion++){
-		if (!check_version(&vers_info, DUNGEON_FILES[dungeonversion], TRUE))
+		if (!check_version(&vers_info, DUNGEON_FILE, TRUE))
 	    panic("Dungeon description not valid.");
-	}
+
 
 	/*
 	 * Read in each dungeon and transfer the results to the internal
@@ -836,23 +879,22 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	for (i = 0; i < n_dgns; i++) {
 	    Fread((genericptr_t)&pd.tmpdungeon[i],
 				    sizeof(struct tmpdungeon), 1, dgn_file);
-#ifdef WIZARD
-	    if(!wizard)
-#endif
-	      if(pd.tmpdungeon[i].chance && (pd.tmpdungeon[i].chance <= rn2(100))) {
-		int j;
 
-		/* skip over any levels or branches */
-		for(j = 0; j < pd.tmpdungeon[i].levels; j++)
-		    Fread((genericptr_t)&pd.tmplevel[cl], sizeof(struct tmplevel),
-							1, dgn_file);
+	    if ((pd.tmpdungeon[i].alternates > 0 && !select_alternate(i, &pd))
+			|| pd.tmpdungeon[i].chance <= rn2(100)) {
+			int j;
 
-		for(j = 0; j < pd.tmpdungeon[i].branches; j++)
-		    Fread((genericptr_t)&pd.tmpbranch[cb],
-					sizeof(struct tmpbranch), 1, dgn_file);
-		n_dgns--; i--;
-		continue;
-	      }
+			/* skip over any levels or branches */
+			for(j = 0; j < pd.tmpdungeon[i].levels; j++)
+				Fread((genericptr_t)&pd.tmplevel[cl], sizeof(struct tmplevel),
+								1, dgn_file);
+
+			for(j = 0; j < pd.tmpdungeon[i].branches; j++)
+				Fread((genericptr_t)&pd.tmpbranch[cb],
+						sizeof(struct tmpbranch), 1, dgn_file);
+			n_dgns--; i--;
+			continue;
+	    }
 
 	    Strcpy(dungeons[i].dname, pd.tmpdungeon[i].name);
 	    Strcpy(dungeons[i].proto, pd.tmpdungeon[i].protoname);

@@ -3,7 +3,7 @@
 #
 # Chaos Quest branch
 #
-MAZE: "chalev",' '
+MAZE: "chalev-1",' '
 FLAGS: nommap, shortsighted
 INIT_MAP: '.' , ' ' , true , true , unlit , false
 

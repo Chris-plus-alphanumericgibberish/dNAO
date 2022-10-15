@@ -3,7 +3,7 @@
 #
 # Chaos Quest branch
 #
-MAZE: "chalv3",' '
+MAZE: "chalev-3",' '
 FLAGS: nommap, shortsighted
 GEOMETRY:center,center
 #0         1         2   	   3	     4	       5		 6	       7
