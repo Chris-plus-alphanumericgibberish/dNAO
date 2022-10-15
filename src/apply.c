@@ -217,6 +217,7 @@ do_present_item(obj)
 				(obj->oward == PENTAGRAM && scaryPent(1, mtmp)) ||
 				(obj->oward == HEXAGRAM && scaryHex(1, mtmp)) ||
 				(obj->oward == HAMSA && scaryHam(1, mtmp)) ||
+				(obj->oward == ELDER_SIGN && obj->oartifact == ART_STAR_OF_HYPERNOTUS && scarySign(6, mtmp)) ||
 				( (obj->oward == ELDER_SIGN || obj->oward == CERULEAN_SIGN) && scarySign(1, mtmp)) ||
 				(obj->oward == ELDER_ELEMENTAL_EYE && scaryEye(1, mtmp)) ||
 				(obj->oward == SIGN_OF_THE_SCION_QUEEN && scaryQueen(1, mtmp)) ||

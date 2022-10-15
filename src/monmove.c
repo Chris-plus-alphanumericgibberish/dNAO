@@ -386,6 +386,7 @@ struct monst *mtmp;
 			has_template(mtmp, FRACTURED) ||
 			has_template(mtmp, YELLOW_TEMPLATE) ||
 			mtmp->mtyp == PM_GUG ||
+			(mtmp->mtyp == PM_LURKING_ONE && complete == 6) ||
 			mtmp->mtyp == PM_MIGO_WORKER ||
 			mtmp->mtyp == PM_MIGO_SOLDIER ||
 			mtmp->mtyp == PM_MIGO_PHILOSOPHER ||
@@ -400,9 +401,13 @@ struct monst *mtmp;
 			mtmp->mtyp == PM_PARASITIC_MIND_FLAYER ||
 			mtmp->mtyp == PM_PARASITIZED_ANDROID ||
 			mtmp->mtyp == PM_PARASITIZED_GYNOID ||
+			mtmp->mtyp == PM_PARASITIZED_OPERATOR ||
 			(mtmp->mtyp == PM_PARASITIC_MASTER_MIND_FLAYER && complete == 6) ||
 			(mtmp->mtyp == PM_PARASITIZED_EMBRACED_ALIDER && complete == 6) ||
+			(mtmp->mtyp == PM_PARASITIZED_COMMANDER && complete == 6) ||
 			(mtmp->mtyp == PM_MASTER_MIND_FLAYER && complete == 6) ||
+			(mtmp->mtyp == PM_ALHOON && complete == 6) ||
+			(mtmp->mtyp == PM_STAR_SPAWN && complete == 6) ||
 			mtmp->mtyp == PM_DEEP_ONE ||
 			mtmp->mtyp == PM_DEEPER_ONE ||
 			(mtmp->mtyp == PM_DEEPEST_ONE && complete == 6) ||
@@ -415,14 +420,32 @@ struct monst *mtmp;
 			mtmp->mtyp == PM_INTONER ||
 			(mtmp->mtyp == PM_BLACK_FLOWER && complete == 6) ||
 			mtmp->mtyp == PM_DARK_YOUNG ||
+			(mtmp->mtyp == PM_BLESSED && complete == 6) ||
+			mtmp->mtyp == PM_SWARM_OF_SNAKING_TENTACLES ||
+			mtmp->mtyp == PM_LONG_SINUOUS_TENTACLE ||
+			(mtmp->mtyp == PM_WATCHER_IN_THE_WATER && complete == 6) ||
+			(mtmp->mtyp == PM_LEGION && complete == 6) ||
 			mtmp->mtyp == PM_WEEPING_ANGEL ||
-			mtmp->mtyp == PM_ANCIENT_OF_ICE ||
+			mtmp->mtyp == PM_DRACAE_ELADRIN ||
+			mtmp->mtyp == PM_METAMORPHOSED_NUPPERIBO ||
+			mtmp->mtyp == PM_ANCIENT_NUPPERIBO ||
+			mtmp->mtyp == PM_BEBELITH ||
+			(mtmp->mtyp == PM_ANCIENT_OF_BLESSINGS && complete == 6) ||
+			(mtmp->mtyp == PM_ANCIENT_OF_VITALITY && complete == 6) ||
+			(mtmp->mtyp == PM_ANCIENT_OF_CORRUPTION && complete == 6) ||
+			(mtmp->mtyp == PM_ANCIENT_OF_THE_BURNING_WASTES && complete == 6) ||
+			(mtmp->mtyp == PM_ANCIENT_OF_THOUGHT && complete == 6) ||
+			(mtmp->mtyp == PM_ANCIENT_OF_ICE && complete == 6) ||
 			(mtmp->mtyp == PM_ANCIENT_OF_DEATH && complete == 6) ||
+			(mtmp->mtyp == PM_NESSIAN_PIT_FIEND && complete == 6) ||
+			(mtmp->mtyp == PM_SHAYATEEN && complete == 6) ||
+			(mtmp->mtyp == PM_STRANGE_LARVA) ||
+			(mtmp->mtyp >= PM_AKKABISH_TANNIN && mtmp->mtyp <= PM_SARTAN_TANNIN && complete == 6) ||
 			(mtmp->mtyp == PM_JUIBLEX && complete == 6) ||
-			(mtmp->mtyp == PM_MASKED_QUEEN && complete == 6) ||
 			(mtmp->mtyp == PM_PALE_NIGHT && complete == 6) ||
 			(mtmp->mtyp == PM_LEVIATHAN && complete == 6) ||
-			(mtmp->mtyp == PM_BAALPHEGOR && complete == 6) ||
+			(mtmp->mtyp == PM_BAALPHEGOR && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_ASMODEUS && complete == 6 && !rn2(3)) ||
 			(mtmp->mtyp == PM_VERIER && complete == 6) ||
 			(mtmp->mtyp == PM_DAGON && complete == 6) ||
 			(mtmp->mtyp == PM_DEMOGORGON && complete == 6 && !rn2(3)) ||
@@ -430,6 +453,19 @@ struct monst *mtmp;
 			(mtmp->mtyp == PM_LUGRIBOSSK && complete == 6) ||
 			(mtmp->mtyp == PM_MAANZECORIAN && complete == 6) ||
 			(mtmp->mtyp == PM_ELDER_PRIEST && complete == 6) ||
+			(mtmp->mtyp == PM_BLASPHEMOUS_LURKER && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_STRANGER && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_MASKED_QUEEN && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_MOUTH_OF_THE_GOAT && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_SWIRLING_MIST && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_DUST_STORM && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_ICE_STORM && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_THUNDER_STORM && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_FIRE_STORM && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_GOOD_NEIGHBOR && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_HMNYW_PHARAOH && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_NITOCRIS && complete == 6 && !rn2(3)) ||
+			(mtmp->mtyp == PM_GHOUL_QUEEN_NITOCRIS && complete == 6) ||
 			(mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD && complete == 6);
 }
 boolean
