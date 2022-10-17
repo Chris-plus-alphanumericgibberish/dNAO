@@ -276,10 +276,61 @@ MONSTER:'W',random,random
 
 LEVEL: "Pri-fila"
 #
-ROOM: "ordinary" , random, random, random, random
-STAIR: random, up
+ROOM: "ordinary" , unlit, random, random, (5, 5)
+NAME: "entrance"
+STAIR: (2, 2), up
 OBJECT: random,random,random
 MONSTER: 'Z', random, random
+SUBROOM: "ordinary", unlit, (2, 2), (1, 1), "entrance"
+DOOR: false , nodoor , north, random
+DOOR: false , nodoor , south, random
+DOOR: false , nodoor , east, random
+DOOR: false , nodoor , west, random
+
+# long room with zombies
+ROOM: "ordinary", unlit, random, random, (11, 5)
+CHANCE:20
+NAME: "hall"
+SUBROOM: "ordinary", unlit, (2, 1), (1, 1), "hall"
+DOOR: false, nodoor, south, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+SUBROOM: "ordinary", unlit, (4, 1), (1, 1), "hall"
+DOOR: false, nodoor, south, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+SUBROOM: "ordinary", unlit, (6, 1), (1, 1), "hall"
+DOOR: false, nodoor, south, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+SUBROOM: "ordinary", unlit, (8, 1), (1, 1), "hall"
+DOOR: false, nodoor, south, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+SUBROOM: "ordinary", unlit, (2, 4), (1, 1), "hall"
+DOOR: false, nodoor, north, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+SUBROOM: "ordinary", unlit, (4, 4), (1, 1), "hall"
+DOOR: false, nodoor, north, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+SUBROOM: "ordinary", unlit, (6, 4), (1, 1), "hall"
+DOOR: false, nodoor, north, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+SUBROOM: "ordinary", unlit, (8, 4), (1, 1), "hall"
+DOOR: false, nodoor, north, random
+MONSTER: 'Z', random, random
+OBJECT[20%]: random,random,random
+
+# Angel shrine
+ROOM: "ordinary", unlit, random, random, (3, 3)
+CHANCE:8
+TRAP[33%]:"statue",(1,1)
+OBJECT:'#',"lit candle",(1, 1)
+CONTAINER:'#',"statue of an angel",(1, 1)
+OBJECT:'#',"blessed +3 silver long sword",contained
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
@@ -310,11 +361,39 @@ RANDOM_CORRIDORS
 
 LEVEL: "Pri-filb"
 #
-ROOM: "ordinary" , random, random, random, random
-STAIR: random, up
+ROOM: "ordinary" , unlit, random, random, (5, 5)
+NAME: "entrance"
+STAIR: (2, 2), up
 OBJECT: random,random,random
 MONSTER: 'Z', random, random
 MONSTER: 'W', "wraith", random
+SUBROOM: "ordinary", unlit, (2, 2), (1, 1), "entrance"
+DOOR: false , nodoor , north, random
+DOOR: false , nodoor , south, random
+DOOR: false , nodoor , east, random
+DOOR: false , nodoor , west, random
+
+# large, partly-enclosed morgues 
+ROOM: "ordinary", unlit, random, (right, center), (11, 11)
+NAME: "enclosed_morgue_right"
+CHANCE: 5
+SUBROOM: "morgue", unlit, (2, 2), (9, 7), "enclosed_morgue_right"
+OBJECT: random,random,random
+OBJECT: random,random,random
+DOOR: false, closed, west, random
+DOOR: false, closed, north, random
+DOOR: false, closed, south, random
+DOOR: true, closed, west, random
+ROOM: "ordinary", unlit, random, (left, center), (11, 11)
+NAME: "enclosed_morgue_left"
+CHANCE: 5
+SUBROOM: "morgue", unlit, (0, 2), (9, 7), "enclosed_morgue_left"
+OBJECT: random,random,random
+OBJECT: random,random,random
+DOOR: false, closed, east, random
+DOOR: false, closed, north, random
+DOOR: false, closed, south, random
+DOOR: true, closed, east, random
 
 ROOM: "morgue" , random, random, random, random
 OBJECT: random, random, random
@@ -344,5 +423,40 @@ MONSTER: 'W', "wraith", random
 ROOM: "morgue" , random, random, random, random
 OBJECT: random, random, random
 TRAP: random, random
+
+# study with an attendant lich
+ROOM: "ordinary", unlit, random, random, (7, 5)
+NAME: "studyA1"
+CHANCE: 4
+SUBROOM: "ordinary", unlit, (2, 2), (1, 1), "studyA1"
+CONTAINER:'(',"writing desk",(0, 0)
+OBJECT:'+',random,contained
+MONSTER: 'L', random, (0, 0), asleep
+DOOR: false, closed, west, random
+SUBROOM: "ordinary", unlit, (4, 2), (1, 1), "studyA1"
+CONTAINER:'(',"writing desk",(0, 0)
+DOOR: false, closed, east, random
+
+ROOM: "ordinary", unlit, random, random, (7, 5)
+NAME: "studyA2"
+CHANCE: 4
+SUBROOM: "ordinary", unlit, (2, 2), (1, 1), "studyA2"
+CONTAINER:'(',"writing desk",(0, 0)
+DOOR: false, closed, west, random
+SUBROOM: "ordinary", unlit, (4, 2), (1, 1), "studyA2"
+CONTAINER:'(',"writing desk",(0, 0)
+OBJECT:'+',random,contained
+MONSTER: 'L', random, (0, 0), asleep
+DOOR: false, closed, east, random
+
+# a store of relics! Or it used to be, hopefully there's still at least one left for you...
+ROOM: "ordinary", unlit, (3,3), random, (1, 1)
+CHANCE: 2
+CONTAINER: '#', "iron chest", random
+OBJECT[20%]: '#', "blessed +3 mithril magic-resistant plate mail", contained
+OBJECT[20%]: '+', "remove curse", contained
+OBJECT[20%]: '#', "holy-weapon +3 silver mace", contained
+OBJECT[20%]: '#', "holy-weapon +3 crossbow", contained
+OBJECT[20%]: '#', "blessed +3 prayer-warded robe", contained
 
 RANDOM_CORRIDORS
