@@ -85,6 +85,11 @@ mkcavepos(x, y, dist, waslit, rockit)
     if(Blind)
 	feel_location(x, y);
     else newsym(x,y);
+
+	if (rockit)
+		block_point(x, y);
+	else
+		unblock_point(x, y);
 }
 
 STATIC_OVL void
@@ -2284,13 +2289,17 @@ int oldy;
 	/* fill in around prev position */
 	for (tx = max(0, oldx-1); tx < min(COLNO, oldx+1); tx++)
 	for (ty = max(0, oldy-1); ty < min(ROWNO, oldy+1); ty++)
-		if (levl[tx][ty].typ == CORR)
+		if (levl[tx][ty].typ == CORR) {
 			levl[tx][ty].typ = STONE;
+			block_point(tx, ty);
+		}
 	/* dig out around new position */
 	for (tx = max(0, mtmp->mx-1); tx < min(COLNO, mtmp->mx+1); tx++)
 	for (ty = max(0, mtmp->my-1); ty < min(ROWNO, mtmp->my+1); ty++)
-		if (levl[tx][ty].typ == STONE && may_dig(tx, ty))
+		if (levl[tx][ty].typ == STONE && may_dig(tx, ty)) {
 			levl[tx][ty].typ = CORR;
+			unblock_point(tx, ty);
+		}
 }
 
 #endif /* OVL0 */
