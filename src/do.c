@@ -952,7 +952,7 @@ dodown()
 			}
 		}
 	}
-	if(u.ustuck) {
+	if(u.ustuck && (u.uswallow || !sticks(&youmonst))) {
 		You("are %s, and cannot go down.",
 			!u.uswallow ? "being held" : is_animal(u.ustuck->data) ?
 			"swallowed" : "engulfed");
@@ -1038,7 +1038,7 @@ doup()
 		return MOVE_CANCELLED;
 	} else
 #endif
-	if(u.ustuck) {
+	if(u.ustuck && (u.uswallow || !sticks(&youmonst))) {
 		You("are %s, and cannot go up.",
 			!u.uswallow ? "being held" : is_animal(u.ustuck->data) ?
 			"swallowed" : "engulfed");
