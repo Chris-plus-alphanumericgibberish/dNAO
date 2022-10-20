@@ -1056,6 +1056,7 @@ struct monst *mtmp;
 
 #define MUSE_WAN_CANCELLATION 22	/* Lethe */
 #define MUSE_CRYSTAL_SKULL 	  23
+#define MUSE_MON_TURN_UNDEAD  24
 
 /* Find a mask.
  */
@@ -1120,24 +1121,31 @@ struct monst *mtmp;
 	}
 
 	if (!ranged_stuff) return FALSE;
+
+	if(mon_knight(mtmp) && target && is_undead(target->data) && !mtmp->mspec_used && !Inhell) {
+		m.offensive = (struct obj *) 0;
+		m.has_offense = MUSE_MON_TURN_UNDEAD;
+	}
+
 #define nomore(x) if(m.has_offense==x) continue;
 	for(obj=mtmp->minvent; obj; obj=obj->nobj) {
-	    if(mtmp->mtyp == PM_VALKYRIE && obj->oartifact == ART_MJOLLNIR && !obj->cursed && mtmp->misc_worn_check & ARM_GLOVES) {
+	    if(mon_valkyrie(mtmp) && obj->oartifact == ART_MJOLLNIR && !obj->cursed && mtmp->misc_worn_check & W_ARMG) {
 			struct obj *otmp;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
-				if (otmp->owornmask & ARM_GLOVES && otmp->otyp == GAUNTLETS_OF_POWER){
+				if (otmp->owornmask & W_ARMG && otmp->otyp == GAUNTLETS_OF_POWER){
 					m.offensive = obj;
 					m.has_offense = MUSE_MJOLLNIR;
 			break;
 				}
 			}
-	if(m.has_offense==MUSE_MJOLLNIR) break;
+			if(m.has_offense==MUSE_MJOLLNIR) break;
 		}
 		nomore(MUSE_CRYSTAL_SKULL);
 		if(obj->otyp == CRYSTAL_SKULL && obj->age < monstermoves && is_mind_flayer(mtmp->data) && !obj_summon_out(obj) && !get_ox(obj, OX_ESUM)) {
 			m.offensive = obj;
 			m.has_offense = MUSE_CRYSTAL_SKULL;
 		}
+		nomore(MUSE_MON_TURN_UNDEAD);
 		nomore(MUSE_WAN_DEATH);
 		if (!reflection_skip) {
 		    if(obj->otyp == WAN_DEATH && obj->spe > 0) {
@@ -1500,11 +1508,15 @@ struct monst *mtmp;
 	boolean oseen;
 
 	/* offensive potions are not drunk, they're thrown */
-	if (otmp->oclass != POTION_CLASS && (i = precheck(mtmp, otmp)) != 0)
+	if (otmp && otmp->oclass != POTION_CLASS && (i = precheck(mtmp, otmp)) != 0)
 		return i;
 	oseen = otmp && canseemon(mtmp);
 
 	switch(m.has_offense) {
+	case MUSE_MON_TURN_UNDEAD:{
+		mon_doturn(mtmp);
+		mtmp->mspec_used = 3;
+	}break;
 	case MUSE_CRYSTAL_SKULL:{
 		coord cc;
 		if(!enexto(&cc, mtmp->mx+sgn(tbx), mtmp->my+sgn(tby), (struct permonst *)0)){

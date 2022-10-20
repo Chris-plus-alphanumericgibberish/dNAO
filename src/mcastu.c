@@ -948,6 +948,30 @@ unsigned int type;
 			break;
 		}
 	break;
+       case PM_HEALER:
+		switch(clrc_spell_power/2){
+			case 14:
+				return RECOVER;
+			case 16:
+			case 13:
+				return MASS_CURE_FAR;
+			case 12:
+				return PARALYZE;
+			case 11:
+				return SLEEP;
+			case 10:
+				return DESTRY_ARMR;
+			case 9:
+				return DESTRY_WEPN;
+			case 15:
+			case 8:
+			case 7:
+			case 6:
+				return MASS_CURE_CLOSE;
+			default:
+				return CURE_SELF;
+		}
+	   break;
        case PM_MAHADEVA:
 		switch(rn2(10)){
 			case 0:

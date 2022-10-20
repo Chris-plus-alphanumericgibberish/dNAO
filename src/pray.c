@@ -9,6 +9,7 @@
 #include "artifact.h"
 
 extern const int monstr[];
+extern void you_aggravate(struct monst *);
 
 STATIC_PTR int NDECL(prayer_done);
 STATIC_DCL struct obj *NDECL(worst_cursed_item);
@@ -2614,6 +2615,80 @@ doturn()
 	}
 	else
 		nomul(-5, "trying to turn the undead");
+	return MOVE_STANDARD;
+}
+
+int
+mon_doturn(mon)
+struct monst *mon;
+{	/* Knights & Priest(esse)s only please */
+	struct monst *mtmp, *mtmp2;
+	int once, range, xlev;
+	short fast = 0;
+
+	pline("%s chants holy scripture.", Monnam(mon));
+
+	if(Misotheism){
+		pline("But nothing happens!");
+		return MOVE_CANCELLED;
+	}
+
+	/* note: does not perform unturn_dead() on victims' inventories */
+	range = BOLT_LIM + (mon->m_lev / 5);	/* 5 to 11 */
+	range *= range;
+	once = 0;
+	for(mtmp = fmon; mtmp; mtmp = mtmp2) {
+	    mtmp2 = mtmp->nmon;
+
+	    if (DEADMONSTER(mtmp)) continue;
+	    if (mtmp == mon) continue;
+	    if (!clear_path(mon->mx,mon->my, mtmp->mx,mtmp->my) ||
+			dist2(mon->mx,mon->my, mtmp->mx,mtmp->my) > range
+		) continue;
+		
+	    if (mm_grudge(mon, mtmp) && (is_undead(mtmp->data) ||
+		   (is_demon(mtmp->data) && (mon->m_lev > (MAXULEV/2))))) {
+
+		    mtmp->msleeping = 0;
+		    if (mon->mconf) {
+				if (!once++){
+					pline("%s voice falters!", s_suffix(Monnam(mon)));
+				}
+				if(mtmp->mtyp != PM_BANDERSNATCH) mtmp->mflee = 0;
+				mtmp->mfrozen = 0;
+				mtmp->mcanmove = 1;
+		    } else if (!resist(mtmp, '\0', 0, TELL)) {
+				if(is_undead(mtmp->data)){
+					xlev = turn_level(mtmp);
+					if (mon->m_lev >= xlev && !resist(mtmp, '\0', 0, NOTELL)) {
+						pline("%s is destroyed!", Monnam(mtmp));
+						grow_up(mon, mtmp);
+						monkilled(mtmp, (const char *)0, AD_SPEL);
+					}
+				}
+				/* else flee */
+				if(!DEADMONSTER(mtmp))
+					monflee(mtmp, 0, FALSE, TRUE);
+		    }
+	    }
+	}
+	if(distu(mon->mx,mon->my) <= range && !mon->mpeaceful){
+		if(is_undead(youracedata) || (is_demon(youracedata) && (mon->m_lev > (MAXULEV/2)))){
+			if(mon->mconf){
+				pline("%s faltering voice enrages you!", s_suffix(Monnam(mon)));
+				you_aggravate(mon);
+			}
+			else {
+				xlev = turn_level(&youmonst);
+				if(is_undead(youracedata) && mon->m_lev >= xlev && rnd(u.ulevel) <= xlev){
+					You("are burned by the holy words!");
+					losehp(d(6,6), "holy scripture", KILLED_BY);
+				}
+				You("panic!");
+				HPanicking += d(6,6);
+			}
+		}
+	}
 	return MOVE_STANDARD;
 }
 

@@ -2312,6 +2312,7 @@ E boolean FDECL(can_pray, (BOOLEAN_P));
 E int NDECL(dopray);
 E const char *NDECL(u_gname);
 E int NDECL(doturn);
+E int FDECL(mon_doturn, (struct monst *));
 E const char *NDECL(a_gname);
 E const char *FDECL(a_gname_at, (XCHAR_P x,XCHAR_P y));
 E const char *FDECL(align_gname, (ALIGNTYP_P));
