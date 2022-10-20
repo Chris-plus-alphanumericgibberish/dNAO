@@ -376,8 +376,9 @@ OBJECT:'#',"+1 uncursed iron axe",contained
 OBJECT:'#',"+3 blessed elven boots",contained
 OBJECT:'#',"+3 blessed high-elven gauntlets",contained
 OBJECT:'#',"+3 blessed reflective high-elven plate",contained
-OBJECT:'#',"+3 holy-armor elven cloak",contained
+OBJECT:'#',"+3 holy-armor dragonhide prayer-warded elven cloak",contained
 OBJECT:'#',"+3 blessed high-elven helm",contained
+OBJECT:'#',"+3 holy-armor elven shield",contained
 OBJECT:'#',"+3 holy-weapon wrathful mithril elven broadsword",contained
 
 OBJECT:random,random,(36,09)
