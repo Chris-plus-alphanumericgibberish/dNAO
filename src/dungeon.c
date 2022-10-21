@@ -772,6 +772,7 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	struct level_map *lev_map;
 	struct version_info vers_info;
 	int dungeonversion;
+	boolean quest_i;
 	
 	if(flags.chaosvar && (wizard || is_june())) {
 		//chaosvar is incremented by 1 so that all variants are nonzero
@@ -859,10 +860,15 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	    dungeons[i].boneid = pd.tmpdungeon[i].boneschar;
 
 	    if(pd.tmpdungeon[i].lev.rand)
-		dungeons[i].num_dunlevs = (int)rn1(pd.tmpdungeon[i].lev.rand,
-						     pd.tmpdungeon[i].lev.base);
+			dungeons[i].num_dunlevs = (int)rn1(pd.tmpdungeon[i].lev.rand,
+								 pd.tmpdungeon[i].lev.base);
 	    else dungeons[i].num_dunlevs = (int)pd.tmpdungeon[i].lev.base;
-
+		
+		if(!strcmp(dungeons[i].dname, "The Quest")){
+			quest_i = TRUE;
+		}
+		else quest_i = FALSE;
+		
 	    if(!i) {
 		dungeons[i].ledger_start = 0;
 		dungeons[i].depth_start = 1;
@@ -948,10 +954,20 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	     * special levels until they are all placed.
 	     */
 	    for(; cl < pd.n_levs; cl++) {
-		Fread((genericptr_t)&pd.tmplevel[cl],
-					sizeof(struct tmplevel), 1, dgn_file);
-		init_level(i, cl, &pd);
+			Fread((genericptr_t)&pd.tmplevel[cl],
+						sizeof(struct tmplevel), 1, dgn_file);
+			init_level(i, cl, &pd);
 	    }
+		//If the quest is long enough, move the locate level to create one to two of each filler level
+		//	New levels are added to the end of tmplevel, this asumes that the locate level is 2nd to last :(
+		if(quest_i){
+			if(dungeons[i].num_dunlevs == 7){
+				pd.tmplevel[pd.n_levs-2].lev.base++;
+			}
+			else if(dungeons[i].num_dunlevs == 6){
+				pd.tmplevel[pd.n_levs-2].lev.base += rn2(2);
+			}
+		}
 	    /*
 	     * Recursively place the generated levels for this dungeon.  This
 	     * routine will attempt all possible combinations before giving
