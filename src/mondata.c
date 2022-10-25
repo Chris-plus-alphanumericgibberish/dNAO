@@ -664,6 +664,22 @@ int template;
 			ptr->pac += 6;
 			ptr->hdr += 6;
 		break;
+		case PLAGUE_TEMPLATE:
+			ptr->mflagst &= ~(MT_HOSTILE);
+			ptr->mflagst |= MT_PEACEFUL;
+			ptr->mlevel = (ptr->mlevel+2)/3;
+			ptr->mr /= 3;
+			ptr->dac = -5;
+			ptr->pac = 0;
+			ptr->spe_hdr = 0;
+			ptr->spe_bdr = 0;
+			ptr->spe_gdr = 0;
+			ptr->spe_ldr = 0;
+			ptr->spe_fdr = 0;
+			ptr->mmove = 0;
+			ptr->msound = (ptr->msound == MS_SILENT) ? MS_SILENT : MS_COUGH;
+			ptr->mresists &= ~(MR_POISON|MR_DRAIN|MR_SICK|MR_MAGIC);
+		break;
 	}
 #undef MT_ITEMS
 
@@ -2610,6 +2626,9 @@ static const short grownups[][2] = {
 	{PM_OMEGA_METROID, PM_METROID_QUEEN},
 	{PM_VAMPIRE, PM_VAMPIRE_LORD}, {PM_VAMPIRE, PM_VAMPIRE_LADY}, {PM_BAT, PM_GIANT_BAT},
 	{PM_GIANT_BAT, PM_BATTLE_BAT}, {PM_BATTLE_BAT, PM_WARBAT},
+	{PM_PLAINS_CENTAUR, PM_CENTAUR_CHIEFTAIN},
+	{PM_FOREST_CENTAUR, PM_CENTAUR_CHIEFTAIN},
+	{PM_MOUNTAIN_CENTAUR, PM_CENTAUR_CHIEFTAIN},
 	{PM_BABY_GRAY_DRAGON, PM_GRAY_DRAGON},
 	{PM_BABY_SILVER_DRAGON, PM_SILVER_DRAGON},
 	{PM_BABY_DEEP_DRAGON, PM_DEEP_DRAGON},

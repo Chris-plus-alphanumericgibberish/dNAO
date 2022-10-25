@@ -199,7 +199,7 @@ struct monst {
 	int entangled;/* The monster is entangled, and in what? */
 #define imprisoned(mon)	((mon)->entangled == SHACKLES || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
 #define noactions(mon)	((mon)->entangled || imprisoned(mon))
-#define nonthreat(mon)	(imprisoned(mon))
+#define nonthreat(mon)	(imprisoned(mon) || has_template(mon, PLAGUE_TEMPLATE))
 #define helpless(mon) (mon->msleeping || !(mon->mcanmove) || !(mon->mnotlaugh) || noactions(mon))	
 #define helpless_still(mon) (mon->msleeping || !(mon->mcanmove) || noactions(mon))	
 	long mstrategy;		/* for monsters with mflag3: current strategy */
@@ -274,7 +274,8 @@ struct monst {
 #define MINDLESS		21	/* brain eaten by mind flayers */
 #define POISON_TEMPLATE	22	/* turned evil by poison */
 #define MOLY_TEMPLATE	23	/* off-turn snake-bite + insight */
-#define MAXTEMPLATE	MOLY_TEMPLATE
+#define PLAGUE_TEMPLATE	24	/* suffering from a life-drain plague, cure to recruit */
+#define MAXTEMPLATE	PLAGUE_TEMPLATE
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */

@@ -407,6 +407,19 @@ struct obj *otmp;
 		int delta = mtmp->mhp;
 		int health = otyp == SPE_FULL_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
 		reveal_invis = TRUE;
+		if(has_template(mtmp, PLAGUE_TEMPLATE) && otyp == SPE_FULL_HEALING){
+			if(canseemon(mtmp))
+				pline("%s is no longer sick!", Monnam(mtmp));
+			set_template(mtmp, 0);
+			if(rnd(!always_hostile(mtmp->data) ? 12 : 20) < ACURR(A_CHA)){
+			struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+			if(newmon){
+				mtmp = newmon;
+				newsym(mtmp->mx, mtmp->my);
+				pline("%s is very grateful!", Monnam(mtmp));
+			}
+		}
+		}
 	    if (mtmp->mtyp != PM_PESTILENCE) {
 			char hurtmonbuf[BUFSZ];
 			Strcpy(hurtmonbuf, Monnam(mtmp));

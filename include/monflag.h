@@ -64,6 +64,7 @@
 #define MS_SCREAM	53	/* Screams in madness */
 #define MS_HARROW	54	/* Summon wraiths */
 #define MS_APOC		55	/* Dire Revelations */
+#define MS_COUGH	56	/* Sick coughing */
 
 
 #define MR_FIRE			0x0001	/* 1 resists fire */

@@ -1864,7 +1864,7 @@ genericptr_t arg;
 	struct monst * mtmp = m_u_at(x, y);
 	if (mtmp == &youmonst)
 		zapyourself((struct obj *)arg, TRUE);
-	else if (mtmp && mtmp->mtame)
+	else if (mtmp && (mtmp->mtame || mtmp->mpeaceful))
 		bhitm(mtmp, (struct obj *)arg);
 }
 
@@ -5966,7 +5966,9 @@ int spell;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 
-		if (uwep->otyp == SCALPEL) {	// a tool of healing
+		if (uwep->otyp == SCALPEL
+			|| uwep->oartifact == ART_STAFF_OF_AESCULAPIUS
+		) {	// tools of healing
 			cast_bon = 0;
 			if(spell_skilltype(spellid(spell)) == P_HEALING_SPELL)
 			cast_bon += 2;

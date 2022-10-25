@@ -1308,60 +1308,125 @@ default_case:
 		}
 		otmp->spe = 0;
 	}
-	if(otmp->otyp == CHAIN && otmp->where == OBJ_FLOOR && In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && urole.neminum == PM_NECROMANCER){
-		int mtyp;
-		boolean polyps;
+	if(otmp->otyp == BEDROLL && otmp->spe == 2 && otmp->where == OBJ_FLOOR){
+		int plague_types[] = {PM_HOBBIT, PM_DWARF, PM_BUGBEAR, PM_DWARF_LORD, PM_DWARF_CLERIC,
+			PM_DWARF_QUEEN, PM_DWARF_KING, PM_DEEP_ONE, PM_IMP, PM_QUASIT, PM_WINGED_KOBOLD,
+			PM_DRYAD, PM_NAIAD, PM_OREAD, PM_DEMINYMPH, PM_THRIAE, PM_HILL_ORC, PM_ORC_SHAMAN, 
+			PM_ORC_CAPTAIN, PM_JUSTICE_ARCHON, PM_SHIELD_ARCHON, PM_SWORD_ARCHON,
+			PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, PM_LILLEND, PM_COURE_ELADRIN,
+			PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN,
+			PM_CHIROPTERAN, PM_PLAINS_CENTAUR, PM_FOREST_CENTAUR, PM_MOUNTAIN_CENTAUR,
+			PM_DRIDER, PM_FORMIAN_CRUSHER, PM_FORMIAN_TASKMASTER, PM_MYRMIDON_HOPLITE,
+			PM_MYRMIDON_LOCHIAS, PM_MYRMIDON_YPOLOCHAGOS, PM_MYRMIDON_LOCHAGOS,
+			PM_GNOME, PM_GNOME_LORD, PM_GNOME_LADY, PM_TINKER_GNOME, PM_GNOME_KING, PM_GNOME_QUEEN,
+			PM_HILL_GIANT, PM_MINOTAUR, PM_MINOTAUR_PRIESTESS,
+			PM_VAMPIRE, PM_VAMPIRE_LORD, PM_VAMPIRE_LADY,
+			PM_PEASANT, PM_NURSE, PM_WATCHMAN, PM_WATCH_CAPTAIN, 
+			PM_WOODLAND_ELF, PM_GREEN_ELF, PM_GREY_ELF, PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+			PM_DROW_CAPTAIN, PM_HEDROW_WIZARD,
+			PM_HORNED_DEVIL, PM_SUCCUBUS, PM_INCUBUS, PM_ERINYS, PM_VROCK, PM_BARBED_DEVIL,
+			PM_LILITU,
+			PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE,
+			PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN
+		};
+		
 		struct monst *mon;
-		int prisoners[] = {
-							PM_ELF_LORD, PM_ELF_LADY, PM_GREY_ELF, PM_GREY_ELF,
-							PM_HEDROW_BLADEMASTER, PM_DROW_CAPTAIN, PM_DROW_MATRON, PM_UNEARTHLY_DROW,
-							PM_DWARF_CLERIC, PM_DWARF_LORD, PM_DWARF_QUEEN, PM_DWARF_KING,
-							PM_RANGER, PM_RANGER, PM_WIZARD, PM_KNIGHT, PM_KNIGHT, PM_VALKYRIE,
-							PM_DEMINYMPH, PM_DEMINYMPH,
-							PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON,
-							PM_ASTRAL_DEVA, PM_GRAHA_DEVA,
-							PM_LILLEND, PM_ALEAX,
-							PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, PM_DRACAE_ELADRIN,
-							PM_TITAN, 
-							PM_ERINYS, PM_LILITU, PM_DAUGHTER_OF_BEDLAM, PM_ICE_DEVIL, PM_MARILITH, PM_PIT_FIEND, PM_FALLEN_ANGEL
-						};
-		mtyp = ROLL_FROM(prisoners);
-		if(mtyp == PM_DRACAE_ELADRIN){
-			if(dungeon_topology.eprecursor_typ != PRE_DRACAE){
-				mtyp = PM_TULANI_ELADRIN;
-			}
-			if(dungeon_topology.eprecursor_typ == PRE_POLYP){
-				polyps = TRUE;
-			}
-		}
-		if(mtyp == PM_TULANI_ELADRIN){
-			switch(dungeon_topology.alt_tulani){
-				case GAE_CASTE:
-					mtyp = PM_GAE_ELADRIN;
-				break;
-				case BRIGHID_CASTE:
-					mtyp = PM_BRIGHID_ELADRIN;
-				break;
-				case UISCERRE_CASTE:
-					mtyp = PM_UISCERRE_ELADRIN;
-				break;
-				case CAILLEA_CASTE:
-					mtyp = PM_CAILLEA_ELADRIN;
-				break;
-			}
-		}
-		mon = makemon(&mons[mtyp], otmp->ox, otmp->oy, MM_GOODEQUIP);
-		if(mon && polyps){
-			mon->ispolyp = TRUE;
-			mongets(mon, MASK, NO_MKOBJ_FLAGS);
-			mongets(mon, MASK, NO_MKOBJ_FLAGS);
-			mongets(mon, MASK, NO_MKOBJ_FLAGS);
-			mongets(mon, MASK, NO_MKOBJ_FLAGS);
-			mongets(mon, MASK, NO_MKOBJ_FLAGS);
-		}
+		mon = makemon_full(&mons[ROLL_FROM(plague_types)], otmp->ox, otmp->oy, NO_MINVENT, PLAGUE_TEMPLATE, -1);
 		if(mon){
-			(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-			mon->entangled = SHACKLES;
+			mon->mpeaceful = 1;
+			set_malign(mon);
+		}
+		otmp->spe = 0;
+	}
+	if(otmp->otyp == CHAIN && otmp->where == OBJ_FLOOR && In_quest(&u.uz)){
+		if(urole.neminum == PM_CYCLOPS){
+			int plague_types[] = {
+				PM_DWARF_LORD, PM_DWARF_CLERIC, PM_DWARF_QUEEN, PM_DWARF_KING, 
+				PM_DEEP_ONE, PM_WINGED_KOBOLD,
+				PM_DEMINYMPH, PM_THRIAE, 
+				PM_ORC_CAPTAIN, PM_JUSTICE_ARCHON, PM_SHIELD_ARCHON, PM_SWORD_ARCHON,
+				PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, PM_LILLEND, PM_COURE_ELADRIN,
+				PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN,
+				PM_CENTAUR_CHIEFTAIN,
+				PM_DRIDER, PM_FORMIAN_CRUSHER, PM_FORMIAN_TASKMASTER,
+				PM_MYRMIDON_YPOLOCHAGOS, PM_MYRMIDON_LOCHAGOS,
+				PM_GNOME_KING, PM_GNOME_QUEEN,
+				PM_HILL_GIANT, PM_MINOTAUR, PM_MINOTAUR_PRIESTESS,
+				PM_VAMPIRE, PM_VAMPIRE_LORD, PM_VAMPIRE_LADY,
+				PM_NURSE, PM_WATCH_CAPTAIN, 
+				PM_GREY_ELF, PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+				PM_DROW_MATRON,
+				PM_HORNED_DEVIL, PM_SUCCUBUS, PM_INCUBUS, PM_ERINYS, PM_VROCK, PM_BARBED_DEVIL,
+				PM_LILITU,
+				PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE,
+				PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN
+			};
+			
+			struct monst *mon;
+			mon = makemon(&mons[ROLL_FROM(plague_types)], otmp->ox, otmp->oy, NO_MINVENT);
+			if(mon){
+				//Note: these are "fresh" so they don't take the 1/3rd penalty to level
+				set_template(mon, PLAGUE_TEMPLATE);
+				mon->mpeaceful = 1;
+				set_malign(mon);
+			}
+			otmp->spe = 0;
+		}
+		else if(u.uz.dlevel == nemesis_level.dlevel && urole.neminum == PM_NECROMANCER){
+			int mtyp;
+			boolean polyps;
+			struct monst *mon;
+			int prisoners[] = {
+								PM_ELF_LORD, PM_ELF_LADY, PM_GREY_ELF, PM_GREY_ELF,
+								PM_HEDROW_BLADEMASTER, PM_DROW_CAPTAIN, PM_DROW_MATRON, PM_UNEARTHLY_DROW,
+								PM_DWARF_CLERIC, PM_DWARF_LORD, PM_DWARF_QUEEN, PM_DWARF_KING,
+								PM_RANGER, PM_RANGER, PM_WIZARD, PM_KNIGHT, PM_KNIGHT, PM_VALKYRIE,
+								PM_DEMINYMPH, PM_DEMINYMPH,
+								PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON,
+								PM_ASTRAL_DEVA, PM_GRAHA_DEVA,
+								PM_LILLEND, PM_ALEAX,
+								PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, PM_DRACAE_ELADRIN,
+								PM_TITAN, 
+								PM_ERINYS, PM_LILITU, PM_DAUGHTER_OF_BEDLAM, PM_ICE_DEVIL, PM_MARILITH, PM_PIT_FIEND, PM_FALLEN_ANGEL
+							};
+			mtyp = ROLL_FROM(prisoners);
+			if(mtyp == PM_DRACAE_ELADRIN){
+				if(dungeon_topology.eprecursor_typ != PRE_DRACAE){
+					mtyp = PM_TULANI_ELADRIN;
+				}
+				if(dungeon_topology.eprecursor_typ == PRE_POLYP){
+					polyps = TRUE;
+				}
+			}
+			if(mtyp == PM_TULANI_ELADRIN){
+				switch(dungeon_topology.alt_tulani){
+					case GAE_CASTE:
+						mtyp = PM_GAE_ELADRIN;
+					break;
+					case BRIGHID_CASTE:
+						mtyp = PM_BRIGHID_ELADRIN;
+					break;
+					case UISCERRE_CASTE:
+						mtyp = PM_UISCERRE_ELADRIN;
+					break;
+					case CAILLEA_CASTE:
+						mtyp = PM_CAILLEA_ELADRIN;
+					break;
+				}
+			}
+			mon = makemon(&mons[mtyp], otmp->ox, otmp->oy, MM_GOODEQUIP);
+			if(mon && polyps){
+				mon->ispolyp = TRUE;
+				mongets(mon, MASK, NO_MKOBJ_FLAGS);
+				mongets(mon, MASK, NO_MKOBJ_FLAGS);
+				mongets(mon, MASK, NO_MKOBJ_FLAGS);
+				mongets(mon, MASK, NO_MKOBJ_FLAGS);
+				mongets(mon, MASK, NO_MKOBJ_FLAGS);
+			}
+			if(mon){
+				(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+				mon->entangled = SHACKLES;
+			}
 		}
 	}
 

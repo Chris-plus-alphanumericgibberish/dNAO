@@ -855,6 +855,7 @@ E void VDECL(panic, (const char *,...)) PRINTF_F(1,2);
 E const char* NDECL(get_alignment_code);
 E const char* NDECL(get_alignment_adj);
 E boolean NDECL(Check_crystal_lifesaving);
+E boolean NDECL(Check_iaso_lifesaving);
 E void FDECL(done, (int));
 E void FDECL(container_contents, (struct obj *,BOOLEAN_P,BOOLEAN_P));
 #ifdef DUMP_LOG
@@ -2181,6 +2182,7 @@ E void FDECL(open_coffin, (struct obj *, BOOLEAN_P));
 E void FDECL(open_sarcophagus, (struct obj *, BOOLEAN_P));
 E void FDECL(open_crazy_box, (struct obj *, BOOLEAN_P));
 E boolean FDECL(open_madstuff_box, (struct obj *, BOOLEAN_P));
+E void FDECL(open_giants_sack, (struct obj *, BOOLEAN_P));
 #ifdef GOLDOBJ
 E int FDECL(collect_obj_classes,
 	(char *,struct obj *,BOOLEAN_P,boolean FDECL((*),(OBJ_P)), int *));
@@ -3245,6 +3247,7 @@ E void FDECL(genl_preference_update, (const char *));
 E void NDECL(amulet);
 E int FDECL(mon_has_amulet, (struct monst *));
 E int FDECL(mon_has_special, (struct monst *));
+E boolean FDECL(mon_has_arti, (struct monst *,SHORT_P));
 E int FDECL(tactics, (struct monst *));
 E void NDECL(aggravate);
 E void NDECL(clonewiz);

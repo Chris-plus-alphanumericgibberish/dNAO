@@ -622,9 +622,10 @@ register struct monst *mtmp;
 /* the sounds of mistreated pets */
 void
 yelp(mtmp)
-register struct monst *mtmp;
+struct monst *mtmp;
 {
-    register const char *yelp_verb = 0;
+    const char *yelp_verb = 0;
+	const char *yelp_modifier = 0;
 
     if (mtmp->msleeping || !mtmp->mcanmove || !mtmp->mnotlaugh || !mtmp->data->msound)
 	return;
@@ -655,9 +656,13 @@ register struct monst *mtmp;
 	case MS_WAIL:
 	    yelp_verb = "wail";
 	    break;
+	case MS_COUGH:
+	    yelp_verb = "cough";
+		yelp_modifier = " paroxysmally";
+	    break;
     }
     if (yelp_verb) {
-	pline("%s %s!", Monnam(mtmp), vtense((char *)0, yelp_verb));
+	pline("%s %s%s!", Monnam(mtmp), vtense((char *)0, yelp_verb), yelp_modifier ? yelp_modifier : "");
 	if(flags.run) nomul(0, NULL);
 	wake_nearto_noisy(mtmp->mx, mtmp->my, mtmp->data->mlevel * 12);
     }
@@ -1002,6 +1007,38 @@ asGuardian:
 	    break;
 	case MS_BURBLE:
 	    pline_msg = "burbles.";
+	    break;
+	case MS_COUGH:
+		if (mtmp->mflee)
+		    pline_msg = "coughs frantically.";
+		else if ((get_mx(mtmp, MX_EDOG) && moves > EDOG(mtmp)->hungrytime) || mtmp->mhp*10 < mtmp->mhpmax)
+		    pline_msg = "coughs weakly.";
+		else switch(rn2(10)){
+			default:
+				pline_msg = "coughs spasmodically.";
+			break;
+			case 0:
+				pline_msg = "coughs wetly.";
+			break;
+			case 1:
+				pline_msg = "groans weakly.";
+			break;
+			case 2:
+				pline_msg = "mumbles incoherently.";
+			break;
+			case 3:
+				pline_msg = "coughs.";
+			break;
+			case 4:
+				pline_msg = "coughs dryly.";
+			break;
+			case 5:
+				pline_msg = "coughs up blood.";
+			break;
+			case 6:
+				pline_msg = "vomits.";
+			break;
+		}
 	    break;
 	case MS_JUBJUB:{
 		struct monst *tmpm;
@@ -2356,6 +2393,8 @@ static const short command_chain[][2] = {
 	{ PM_ANGBAND_ORC, PM_ORC_OF_THE_AGES_OF_STARS},
 
 	{ PM_JUSTICE_ARCHON, PM_RAZIEL }, { PM_SWORD_ARCHON, PM_RAZIEL }, { PM_SHIELD_ARCHON, PM_RAZIEL },
+
+	{ PM_PLAINS_CENTAUR, PM_CENTAUR_CHIEFTAIN }, { PM_FOREST_CENTAUR, PM_CENTAUR_CHIEFTAIN }, { PM_MOUNTAIN_CENTAUR, PM_CENTAUR_CHIEFTAIN },
 
 	{ PM_MIGO_WORKER, PM_MIGO_SOLDIER }, { PM_MIGO_SOLDIER, PM_MIGO_PHILOSOPHER }, { PM_MIGO_PHILOSOPHER, PM_MIGO_QUEEN },
 

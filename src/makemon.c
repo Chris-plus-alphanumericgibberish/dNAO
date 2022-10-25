@@ -503,6 +503,14 @@ boolean goodequip;
 	if (ptr->mtyp == PM_MINOTAUR) {
 		if (!rn2(3) || (in_mklev && Is_earthlevel(&u.uz)))
 		(void) mongets(mtmp, WAN_DIGGING, mkobjflags);
+	} else if(ptr->mtyp == PM_HILL_GIANT){
+		if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS && in_mklev){
+			otmp = mongets(mtmp, SACK, NO_MKOBJ_FLAGS);
+			if(otmp){
+				otmp->spe = 9; //plague victim
+				fix_object(otmp);
+			}
+		}
 	} else if(ptr->mtyp == PM_DEEPEST_ONE
 		|| ptr->mtyp == PM_FATHER_DAGON
 		|| ptr->mtyp == PM_MOTHER_HYDRA) {
@@ -4470,6 +4478,76 @@ int mmflags;
 				
 				otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
 				if(otmp) set_material_gm(otmp, GLASS);
+			} else if(ptr->mtyp == PM_PANAKEIAN_ARCHON){
+				if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS){
+					set_template(mtmp, PLAGUE_TEMPLATE);
+				}
+				else {
+					if(In_endgame(&u.uz) || goodequip){
+#define HOLY_PANAKEIAN_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
+			if(otmp){\
+				add_oprop(otmp, OPROP_HOLY);\
+				add_oprop(otmp, OPROP_HEAL);\
+				if(is_gloves(otmp) || is_boots(otmp))\
+					add_oprop(otmp, OPROP_HOLYW);\
+				bless(otmp);\
+			}
+						otmp = mongets(mtmp, SCALPEL, mkobjflags);
+						if(otmp) set_material_gm(otmp, SILVER);
+						HOLY_PANAKEIAN_ARMOR(HEALER_UNIFORM);
+						HOLY_PANAKEIAN_ARMOR(CLOAK_OF_MAGIC_RESISTANCE);
+						if(otmp)
+							add_oprop(otmp, OPROP_MAGC);
+						HOLY_PANAKEIAN_ARMOR(GLOVES);
+						HOLY_PANAKEIAN_ARMOR(LOW_BOOTS);
+					}
+					else {
+						mongets(mtmp, SCALPEL, mkobjflags);
+						mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+						mongets(mtmp, GLOVES, mkobjflags);
+						mongets(mtmp, LOW_BOOTS, mkobjflags);
+					}
+				}
+			} else if(ptr->mtyp == PM_HYGIEIAN_ARCHON){
+				if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS){
+					set_template(mtmp, PLAGUE_TEMPLATE);
+				}
+				else {
+					if(In_endgame(&u.uz) || goodequip){
+#define HOLY_HYGIEIAN_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
+			if(otmp){\
+				set_material_gm(otmp, SILVER);\
+				add_oprop(otmp, OPROP_HOLY);\
+				if(is_gloves(otmp) || is_boots(otmp))\
+					add_oprop(otmp, OPROP_HOLYW);\
+				bless(otmp);\
+			}
+						otmp = mongets(mtmp, QUARTERSTAFF, mkobjflags);
+						if(otmp){
+							set_material_gm(otmp, SILVER);
+							add_oprop(otmp, OPROP_HOLYW);
+							add_oprop(otmp, OPROP_FIREW);
+						}
+						HOLY_HYGIEIAN_ARMOR(ARCHAIC_HELM);
+						HOLY_HYGIEIAN_ARMOR(ARCHAIC_GAUNTLETS);
+						HOLY_HYGIEIAN_ARMOR(ARCHAIC_PLATE_MAIL);
+						HOLY_HYGIEIAN_ARMOR(ARCHAIC_BOOTS);
+						HOLY_HYGIEIAN_ARMOR(CLOAK);
+						if(otmp){
+							set_material_gm(otmp, CLOTH);
+							set_material_gm(otmp, OPROP_BCRS);
+						}
+					}
+					else {
+						otmp = mongets(mtmp, QUARTERSTAFF, mkobjflags);
+						if(otmp) set_material_gm(otmp, SILVER);
+						otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+						otmp = mongets(mtmp, GLOVES, mkobjflags);
+						otmp = mongets(mtmp, LOW_BOOTS, mkobjflags);
+						otmp = mongets(mtmp, CLOAK, mkobjflags);
+						if(otmp) set_material_gm(otmp, CLOTH);
+					}
+				}
 			} else if(ptr->mtyp == PM_MONADIC_DEVA){
 				otmp = mongets(mtmp, TWO_HANDED_SWORD, mkobjflags);
 				if(otmp){
@@ -10375,6 +10453,16 @@ boolean goodequip;
 				} //else
 				otmp = mongets(mtmp, rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
 				if(otmp) otmp->oerodeproof = TRUE;
+			} else if(ptr->mtyp == PM_IASOIAN_ARCHON){
+				if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS){
+					set_template(mtmp, PLAGUE_TEMPLATE);
+				}
+				else {
+					otmp = mongets(mtmp, MIRROR, mkobjflags);
+					otmp = mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+					otmp = mongets(mtmp, GLOVES, mkobjflags);
+					otmp = mongets(mtmp, LOW_BOOTS, mkobjflags);
+				}
 			} else if(ptr->mtyp == PM_HARROWER_OF_ZARIEL){
 				otmp = mksobj(rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
 				otmp->oeroded3 = 3;

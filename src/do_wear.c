@@ -4064,7 +4064,7 @@ struct obj *armor;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		//Note: the armor avoids touching petrifying things even if you're immune
@@ -4121,7 +4121,7 @@ struct obj *wep;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 		
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		mdef->movement -= 12;
@@ -4172,7 +4172,7 @@ struct obj *wep;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		//Note: petrifying targets are safe, it's a weapon attack
@@ -4246,7 +4246,7 @@ struct obj *wep;
 				break; //break out of inner loop now, we found a bad target.
 			}
 
-			if(!youdef && imprisoned(mdef)){
+			if(!youdef && nonthreat(mdef)){
 				gooddir = FALSE;
 				break; //break out of inner loop now, we found a bad target.
 			}
@@ -4346,7 +4346,7 @@ struct obj *wep;
 		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		if(youdef){
@@ -4637,7 +4637,7 @@ char etyp;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
 			continue;
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		//Note: the armor avoids touching petrifying things even if you're immune
@@ -4817,7 +4817,7 @@ struct obj *wep;
 			if(!peaceSafe && youdef && !mdef->mpeaceful)
 				continue;
 
-			if(!youdef && imprisoned(mdef))
+			if(!youdef && nonthreat(mdef))
 				continue;
 
 			//Note: petrifying targets are safe, it's a weapon attack
@@ -4860,7 +4860,7 @@ struct obj *wep;
 			if(!peaceSafe && youdef && !mdef->mpeaceful)
 				continue;
 
-			if(!youdef && imprisoned(mdef))
+			if(!youdef && nonthreat(mdef))
 				continue;
 
 			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
@@ -5092,7 +5092,7 @@ struct obj *wep;
 				continue;
 		}
 
-		if(!youdef && imprisoned(mdef))
+		if(!youdef && nonthreat(mdef))
 			continue;
 
 		//Note: petrifying targets are safe, it's a weapon attack

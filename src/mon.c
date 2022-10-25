@@ -3901,6 +3901,86 @@ struct monst *mon;
 	return (struct obj *)0;
 }
 
+boolean
+plague_victim_on_level()
+{
+	struct monst *mon;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(has_template(mon, PLAGUE_TEMPLATE))
+			return TRUE;
+	return FALSE;
+}
+
+boolean
+allied_iaso_on_level(mtmp)
+struct monst *mtmp;
+{
+	struct monst *mon;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !mon->mspec_used
+		  && !nonthreat(mon)
+		  && !mon->mtame == !mtmp->mtame
+		  && mon->mpeaceful == mtmp->mpeaceful
+		)
+			return TRUE;
+	return FALSE;
+}
+
+struct monst *
+random_plague_victim()
+{
+	struct monst *mon;
+	int count = 0;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(has_template(mon, PLAGUE_TEMPLATE))
+			count++;
+	if(!count)
+		return (struct monst *) 0;
+
+	count = rn2(count);
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(has_template(mon, PLAGUE_TEMPLATE)){
+			if(!count)
+				return mon;
+			else count--;
+		}
+	return (struct monst *) 0;
+}
+
+void
+timeout_random_allied_iaso(mtmp)
+struct monst *mtmp;
+{
+	struct monst *mon;
+	int count = 0;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !mon->mspec_used
+		  && !nonthreat(mon)
+		  && !mon->mtame == !mtmp->mtame
+		  && mon->mpeaceful == mtmp->mpeaceful
+		)
+			count++;
+	if(!count)
+		return;
+
+	count = rn2(count);
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !mon->mspec_used
+		  && !nonthreat(mon)
+		  && !mon->mtame == !mtmp->mtame
+		  && mon->mpeaceful == mtmp->mpeaceful
+		){
+			if(!count){
+				mon->mspec_used = mtmp->mhpmax;
+				return;
+			}
+			else count--;
+		}
+}
+
 /* maybe kills mtmp, possibly lifesaving it */
 STATIC_OVL void
 lifesaved_monster(mtmp)
@@ -3910,18 +3990,20 @@ struct monst *mtmp;
 	boolean messaged = FALSE;
 	int lifesavers = 0;
 	int i;
-#define LSVD_ANA 0x001	/* anachrononaut quest */
-#define LSVD_HLO 0x002	/* Halo (Blessed) */
-#define LSVD_UVU 0x004	/* uvuuduam + prayerful thing */
-#define LSVD_OBJ 0x008	/* lifesaving items */
-#define LSVD_ILU 0x010	/* illuminated */
-#define LSVD_FRC 0x020	/* fractured kamerel */
-#define LSVD_NBW 0x040	/* nitocris's black wraps */
-#define LSVD_PLY 0x080	/* polypoids */
-#define LSVD_NIT 0x100	/* Nitocris becoming a ghoul */
-#define LSVD_KAM 0x200	/* kamerel becoming fractured */
-#define LSVD_ALA 0x400	/* alabaster decay */
-#define LSVD_FLS 0x800	/* God of flesh claims body */
+#define LSVD_ANA 0x0001	/* anachrononaut quest */
+#define LSVD_IAS 0x0002	/* Iasoian Archon grants recovery */
+#define LSVD_HLO 0x0004	/* Halo (Blessed) */
+#define LSVD_UVU 0x0008	/* uvuuduam + prayerful thing */
+#define LSVD_ASC 0x0010	/* drained the life from another */
+#define LSVD_OBJ 0x0020	/* lifesaving items */
+#define LSVD_ILU 0x0040	/* illuminated */
+#define LSVD_FRC 0x0080	/* fractured kamerel */
+#define LSVD_NBW 0x0100	/* nitocris's black wraps */
+#define LSVD_PLY 0x0200	/* polypoids */
+#define LSVD_NIT 0x0400	/* Nitocris becoming a ghoul */
+#define LSVD_KAM 0x0800	/* kamerel becoming fractured */
+#define LSVD_ALA 0x1000	/* alabaster decay */
+#define LSVD_FLS 0x2000	/* God of flesh claims body */
 #define LSVDLAST LSVD_FLS	/* last lifesaver */
 
 	/* set to kill */
@@ -3960,6 +4042,10 @@ struct monst *mtmp;
 		lifesavers |= LSVD_NIT;
 	if (mtmp->mtyp == PM_BLESSED && !mtmp->mcan && rn2(3))
 		lifesavers |= LSVD_HLO;
+	if (mtmp->mtyp == PM_CYCLOPS && !mtmp->mcan && mon_has_arti(mtmp, 0) && plague_victim_on_level())
+		lifesavers |= LSVD_ASC;
+	if (allied_iaso_on_level(mtmp))
+		lifesavers |= LSVD_IAS;
 
 	/* some lifesavers do NOT work on stone/gold/glass-ing */
 	if (stoned || golded || glassed)
@@ -4042,6 +4128,40 @@ struct monst *mtmp;
 			/* set mspec_used */
 			mtmp->mspec_used = mtmp->mhpmax / 5;
 			break;
+		case LSVD_ASC:{
+			struct monst *victim = random_plague_victim();
+			if(!victim)
+				break; //???
+			/* message */
+			if (couldsee(mtmp->mx, mtmp->my) || couldsee(victim->mx, victim->my)) {
+				messaged = TRUE;
+				pline("But wait...");
+				pline("A glowing mist rises from %s and flows to %s!",
+					mon_nam(victim), mon_nam(mtmp));
+				if (mon_attacktype(mtmp, AT_EXPL)
+					|| mon_attacktype(mtmp, AT_BOOM))
+					pline("%s reconstitutes!", Monnam(mtmp));
+				else
+					pline("%s looks much better!", Monnam(mtmp));
+				if(canseemon(victim))
+					pline("%s dies of %s illness!", Monnam(victim), mhis(victim));
+				mondied(victim);
+			}
+			break;
+		}
+		case LSVD_IAS:{
+			timeout_random_allied_iaso(mtmp);
+			/* message */
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
+				pline("But wait...");
+				if (mon_attacktype(mtmp, AT_EXPL)
+					|| mon_attacktype(mtmp, AT_BOOM))
+					pline("%s reconstitutes!", Monnam(mtmp));
+				pline("%s recovers!", Monnam(mtmp));
+			}
+			break;
+		}
 		case LSVD_OBJ:
 			/* message */
 			if (couldsee(mtmp->mx, mtmp->my)) {

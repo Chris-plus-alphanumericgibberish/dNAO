@@ -2557,6 +2557,75 @@ boolean past;
 }
 
 void
+open_giants_sack(box, past)
+struct obj *box;
+boolean past;
+{
+    struct monst *victim;
+    xchar ox, oy;
+
+	pline(past ? "That %s was being used to haul a plague victim!" : "This %s is being used to haul a plague victim!", simple_typename(box->otyp));
+    box->spe = 0;		/* box->owt will be updated below */
+    if (get_obj_location(box, &ox, &oy, 0))
+		box->ox = ox, box->oy = oy;	/* in case it's being carried */
+		int plague_types[] = {
+			PM_DWARF_LORD, PM_DWARF_CLERIC, PM_DWARF_QUEEN, PM_DWARF_KING, 
+			PM_DEEP_ONE, PM_WINGED_KOBOLD,
+			PM_DEMINYMPH, PM_THRIAE, 
+			PM_ORC_CAPTAIN, PM_JUSTICE_ARCHON, PM_SHIELD_ARCHON, PM_SWORD_ARCHON,
+			PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, 
+			PM_LILLEND, PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN,
+			PM_CENTAUR_CHIEFTAIN,
+			PM_DRIDER, PM_FORMIAN_CRUSHER, PM_FORMIAN_TASKMASTER,
+			PM_MYRMIDON_YPOLOCHAGOS, PM_MYRMIDON_LOCHAGOS,
+			PM_GNOME_KING, PM_GNOME_QUEEN,
+			PM_HILL_GIANT, PM_MINOTAUR, PM_MINOTAUR_PRIESTESS,
+			PM_VAMPIRE, PM_VAMPIRE_LORD, PM_VAMPIRE_LADY,
+			PM_NURSE, PM_WATCH_CAPTAIN, 
+			PM_GREY_ELF, PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+			PM_DROW_MATRON,
+			PM_HORNED_DEVIL, PM_SUCCUBUS, PM_INCUBUS, PM_ERINYS, PM_VROCK, PM_BARBED_DEVIL,
+			PM_LILITU,
+			PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE,
+			PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN
+		};
+
+		victim = makemon(&mons[ROLL_FROM(plague_types)], box->ox, box->oy, NO_MM_FLAGS);
+	if(victim){
+		struct obj *nobj;
+		for(struct obj *obj = victim->minvent; obj; obj = nobj){
+			nobj = obj->nobj;
+			victim->misc_worn_check &= ~obj->owornmask;
+			update_mon_intrinsics(victim, obj, FALSE, FALSE);
+			if (obj->owornmask & W_WEP){
+				setmnotwielded(victim,obj);
+				MON_NOWEP(victim);
+			}
+			if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(victim,obj);
+				MON_NOSWEP(victim);
+			}
+			obj->owornmask = 0L;
+			obj_extract_self(obj);
+			if(past)
+				place_object(obj, victim->mx, victim->my);
+			else
+				add_to_container(box, obj);
+		}
+		(void)mongets(victim, SHACKLES, NO_MKOBJ_FLAGS);
+		victim->entangled = SHACKLES;
+		//Note: these are "fresh" so they don't take the 1/3rd penalty to level
+		set_template(victim, PLAGUE_TEMPLATE);
+		victim->mpeaceful = 1;
+		set_malign(victim);
+	} else {
+		pline(past ? "But the sack was now empty." : "But the sack is now empty.");
+	}
+    box->owt = weight(box);
+    return;
+}
+
+void
 open_sarcophagus(box, past)
 struct obj *box;
 boolean past;
@@ -3133,28 +3202,32 @@ register int held;
 	    return MOVE_STANDARD;
 	}
 	current_container = obj;	/* for use by in/out_container */
-
-	if (obj->spe == 1) {
-	    observe_quantum_cat(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-	    used = 1;
-	    quantum_cat = TRUE;	/* for adjusting "it's empty" message */
-	}else if(obj->spe == 4){
-	    open_coffin(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-		return MOVE_STANDARD;
-	}else if(obj->spe == 5){
-	    open_sarcophagus(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-	    return MOVE_STANDARD;
-	}else if(obj->spe == 6 && u.uinsight >= 10){
-	    open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-	    return MOVE_STANDARD;
-	}else if(obj->spe == 7){
-		// Madman reclaims their stuff. Contents handled by the level loader.
-		//FALSE: the box was not destroyed. Use present tense.
-	    if(open_madstuff_box(obj, FALSE)){
+	if(Is_real_container(obj)){
+		if (obj->spe == 1) {
+			observe_quantum_cat(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
+			used = 1;
+			quantum_cat = TRUE;	/* for adjusting "it's empty" message */
+		}else if(obj->spe == 4){
+			open_coffin(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
+			return MOVE_STANDARD;
+		}else if(obj->spe == 5){
+			open_sarcophagus(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
+			return MOVE_STANDARD;
+		}else if(obj->spe == 6 && u.uinsight >= 10){
+			open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
+			return MOVE_STANDARD;
+		}else if(obj->spe == 7){
+			// Madman reclaims their stuff. Contents handled by the level loader.
+			//FALSE: the box was not destroyed. Use present tense.
+			if(open_madstuff_box(obj, FALSE)){
+				return MOVE_STANDARD;
+			}
+		}else if(obj->spe == 8){
+			// Nothing. Fulvous desk spawns monsters.
+		}else if(obj->spe == 9){
+			open_giants_sack(obj, FALSE); //FALSE: not destroyed
 			return MOVE_STANDARD;
 		}
-	}else if(obj->spe == 8){
-		// Nothing. Fulvous desk spawns monsters.
 	}
 	/* Count the number of contained objects. Sometimes toss objects if a cursed magic bag. */
 	if (cobj_is_magic_chest(obj))

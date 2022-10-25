@@ -256,20 +256,24 @@ forcelock()	/* try to force a locked chest */
 	    pline("In fact, you've totally destroyed %s.",
 		  the(xname(xlock.box)));
 
-	    /* Put the contents on ground at the hero's feet. */
-		if (xlock.box->spe == 1) {
-			observe_quantum_cat(xlock.box, TRUE); //TRUE: use past tense
-		}else if(xlock.box->spe == 4){
-			open_coffin(xlock.box, TRUE); //TRUE: use past tense
-		}else if(xlock.box->spe == 5){
-			open_sarcophagus(xlock.box, TRUE); //TRUE: use past tense
-		}else if(xlock.box->spe == 6){ /*Note: destroying the box always releases the crazy*/
-			open_crazy_box(xlock.box, TRUE); //TRUE: use past tense
-		}else if(xlock.box->spe == 7){
-			// Madman reclaims their stuff. Contents handled by the level loader.
-			open_madstuff_box(xlock.box, TRUE); //TRUE: use past tense
-		}else if(xlock.box->spe == 8){
-			// Nothing. 
+		if(Is_real_container(xlock.box)){
+			/* Put the contents on ground at the hero's feet. */
+			if (xlock.box->spe == 1) {
+				observe_quantum_cat(xlock.box, TRUE); //TRUE: use past tense
+			}else if(xlock.box->spe == 4){
+				open_coffin(xlock.box, TRUE); //TRUE: use past tense
+			}else if(xlock.box->spe == 5){
+				open_sarcophagus(xlock.box, TRUE); //TRUE: use past tense
+			}else if(xlock.box->spe == 6){ /*Note: destroying the box always releases the crazy*/
+				open_crazy_box(xlock.box, TRUE); //TRUE: use past tense
+			}else if(xlock.box->spe == 7){
+				// Madman reclaims their stuff. Contents handled by the level loader.
+				open_madstuff_box(xlock.box, TRUE); //TRUE: use past tense
+			}else if(xlock.box->spe == 8){
+				// Nothing. 
+			}else if(xlock.box->spe == 9){
+				open_giants_sack(xlock.box, TRUE); //TRUE: use past tense
+			}
 		}
 		while ((otmp = xlock.box->cobj) != 0) {
 		obj_extract_self(otmp);

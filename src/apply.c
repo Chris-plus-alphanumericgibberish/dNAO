@@ -33,6 +33,7 @@ STATIC_DCL void FDECL(use_candelabrum, (struct obj *));
 STATIC_DCL void FDECL(use_candle, (struct obj **));
 STATIC_DCL void FDECL(use_lamp, (struct obj *));
 STATIC_DCL int FDECL(swap_aegis, (struct obj *));
+STATIC_DCL int FDECL(aesculapius_poke, (struct obj *));
 STATIC_DCL int FDECL(use_rakuyo, (struct obj *));
 STATIC_DCL int FDECL(use_mercy_blade, (struct obj *));
 STATIC_DCL int FDECL(use_force_blade, (struct obj *));
@@ -1554,6 +1555,196 @@ struct obj *obj;
 		pline("Aegis in unexpected state?");
 		return MOVE_CANCELLED;
 	}
+}
+
+STATIC_OVL int
+aesculapius_poke(obj)
+struct obj *obj;
+{
+	struct monst *mon;
+	if(obj != uwep){
+		if (!wield_tool(obj, "staff")) return MOVE_CANCELLED;
+	}
+	if(!getdir((char *)0)) {
+		return MOVE_CANCELLED;
+	}
+	if(u.dz > 0){
+		if(u.usteed)
+			mon = u.usteed;
+		else if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			You("doubt that will have any further effect.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(u.dz < 0){
+		if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			You("don't see anything up there to poke with your staff.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(!u.dx && !u.dy){
+		use_unicorn_horn(obj);
+		return MOVE_STANDARD;
+	}
+	else if(!isok(u.ux + u.dx, u.uy + u.dy)){
+		pline("Your staff doesn't touch anything.");
+		return MOVE_STANDARD;
+	}
+	else {
+		mon = m_at(u.ux + u.dx, u.uy + u.dy);
+	}
+	if(!mon){
+		pline("Your staff doesn't touch anything.");
+		return MOVE_STANDARD;
+	}
+	boolean good_effect = (mon->mpeaceful && !obj->cursed) || (!mon->mpeaceful && obj->cursed);
+	if(good_effect){
+		if (!mon->mcansee) {
+		    mon->mcansee = 1;
+		    mon->mblinded = 0;
+		    if (canseemon(mon)) pline("%s can see again.", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mcanhear) {
+		    mon->mcanhear = 1;
+		    mon->mdeafened = 0;
+		    if (canseemon(mon)) pline("%s can hear again.", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mconf || mon->mstun) {
+		    mon->mconf = mon->mstun = 0;
+		    if (canseemon(mon))
+				pline("%s seems steadier now.", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->msleeping) {
+		    mon->msleeping = 0;
+		    if (canseemon(mon)) pline("%s wakes up!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mcanmove) {
+		    mon->mcanmove = 1;
+		    mon->mfrozen = 0;
+		    if (canseemon(mon)) pline("%s can move again!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcan) {
+			set_mcan(mon, FALSE);
+		    if (canseemon(mon)) pline("%s looks special again!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		}
+		else if(has_template(mon, PLAGUE_TEMPLATE)){
+			set_template(mon, 0);
+			mon->mhpmax = max(3, (mon->m_lev * hd_size(mon->data))-1);
+		    if (canseemon(mon)) pline("%s has been cured!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+			if(rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)){
+				struct monst *newmon = tamedog_core(mon, (struct obj *)0, TRUE);
+				if(newmon){
+					mon = newmon;
+					newsym(mon->mx, mon->my);
+					pline("%s is very grateful!", Monnam(mon));
+				}
+			}
+		}
+		else {
+		    if (canseemon(mon)) pline("%s looks really healthy!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		}
+	}
+	//bad effect
+	else {
+		if (mon->mcanhear) {
+		    mon->mcanhear = 0;
+		    mon->mdeafened = d(6,6);
+		    if (canseemon(mon)) pline("%s is stricken deaf!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcansee) {
+		    mon->mcansee = 0;
+		    mon->mblinded = d(6,6);
+		    if (canseemon(mon)) pline("%s is stricken blind!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mstun) {
+		    mon->mstun = 1;
+		    if (canseemon(mon))
+				pline("%s wobbles!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mconf) {
+		    mon->mconf = 1;
+		    if (canseemon(mon))
+				pline("%s seems confused!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcanmove && !mon_resistance(mon, FREE_ACTION)) {
+		    mon->mcanmove = 0;
+			mon->mfrozen = d(2,2);
+		    if (canseemon(mon))
+				pline("%s seems frozen!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if(!mon->mcan){
+			set_mcan(mon, TRUE);
+		    if (canseemon(mon)) pline("%s looks mediocre!", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcanmove && !mon_resistance(mon, SICK_RES)) {
+			int dmg = d(3, 12);
+			if(!rn2(10))
+				dmg += 100;
+			if(m_losehp(mon, dmg, TRUE, "illness"));
+		    else if (canseemon(mon))
+				pline("%s looks slightly ill.", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else {
+		    if (canseemon(mon)) pline("%s looks stubbornly  healthy.", Monnam(mon));
+			else {
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		}
+	}
+	return MOVE_STANDARD;
 }
 
 int
@@ -7582,6 +7773,7 @@ doapply()
 	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && !u.veil) use_lamp(obj);
 	else if(obj->oartifact == ART_BLOODLETTER && artinstance[obj->oartifact].BLactive >= monstermoves) res = do_bloodletter(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
+	else if(obj->oartifact == ART_STAFF_OF_AESCULAPIUS) res = aesculapius_poke(obj);
 	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
 		return use_rakuyo(obj);
 	}

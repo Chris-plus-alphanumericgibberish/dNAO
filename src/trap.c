@@ -621,14 +621,23 @@ int *fail_reason;
 	    return (struct monst *)0;
 	}
 	
-	if(mon && cause == ANIMATE_SPELL && rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA) && 
-		!(is_animal(mon->data) || mindless_mon(mon))
+	if(mon && cause == ANIMATE_SPELL 
+		&& ((In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON))
+			||  rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)
+		) && !(is_animal(mon->data) || mindless_mon(mon))
 	){
 		struct monst *newmon;
 		newmon = tamedog(mon, (struct obj *)0);
 		if(newmon) mon = newmon;
+
 		if(canspotmon(mon) && mon->mtame)
 			grateful = TRUE;
+
+		if(In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON)){
+			set_template(mon, PLAGUE_TEMPLATE);
+			if(get_mx(mon, MX_EDOG))
+				EDOG(mon)->loyal = TRUE;
+		}
 	}
 
 	/* in case statue is wielded and hero zaps stone-to-flesh at self */
@@ -667,8 +676,11 @@ int *fail_reason;
 	    		canspotmon(mon) ? comes_to_life : "disappears");
 	    } else if(cansee(x,y)) pline_The("statue %s!",
 			canspotmon(mon) ? comes_to_life : "disappears");
-		if(grateful)
-			pline("%s is incredibly grateful!", Monnam(mon));
+		if(grateful){
+			if(has_template(mon, PLAGUE_TEMPLATE))
+				pline("%s is glad to see you, but too sick to help!", Monnam(mon));
+			else pline("%s is incredibly grateful!", Monnam(mon));
+		}
 	    if (historic) {
 		    You_feel("guilty that the historic statue is now gone.");
 		    adjalign(-1);

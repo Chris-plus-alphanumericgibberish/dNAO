@@ -972,6 +972,53 @@ unsigned int type;
 				return CURE_SELF;
 		}
 	   break;
+       case PM_PANAKEIAN_ARCHON:
+		switch(clrc_spell_power/2){
+			case 14:
+				return RECOVER;
+			case 16:
+			case 13:
+			case 12:
+			case 11:
+				return MASS_CURE_FAR;
+			case 10:
+			case 9:
+				return PARALYZE;
+			case 15:
+			case 8:
+			case 7:
+			case 6:
+				return MASS_CURE_CLOSE;
+			case 5:
+			case 4:
+				return SLEEP;
+			case 3:
+				return DESTRY_ARMR;
+			case 2:
+				return DESTRY_WEPN;
+			case 1:
+				return MAKE_WEB;
+			default:
+				return CURE_SELF;
+		}
+	   break;
+       case PM_HYGIEIAN_ARCHON:
+		switch(wzrd_spell_power/5){
+			case 8:
+			case 7:
+				return DEATH_TOUCH;
+			case 6:
+				return LIGHTNING;
+			case 5:
+				return GEYSER;
+			case 4:
+				return ACID_RAIN;
+			case 3:
+				return CURE_SELF;
+			default:
+				return FIRE_PILLAR;
+		}
+	   break;
        case PM_MAHADEVA:
 		switch(rn2(10)){
 			case 0:

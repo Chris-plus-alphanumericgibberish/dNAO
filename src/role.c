@@ -201,12 +201,12 @@ struct Role roles[] = {
 	ART_STAFF_OF_AESCULAPIUS,
 	MA_HUMAN|MA_GNOME|MA_FEY, ROLE_MALE|ROLE_FEMALE | ROLE_NEUTRAL,
 	/* Str Int Wis Dex Con Cha */
-	{   7,  7, 13,  7, 11, 16 },
-	{  15, 20, 20, 15, 25, 5 },
+	{   7, 13, 11,  7, 11, 16 },
+	{   5, 30, 20, 15, 25, 5 },
 	/* Init   Lower  Higher */
 	{ 11, 0,  0, 8,  1, 0 },	/* Hit points */
 	{  1, 4,  1, 2,  0, 3 },20,	/* Energy */
-	10, 3,-3, 2, 10, A_WIS, SPE_FULL_HEALING,   -14
+	10, 3,-3, 2, 10, A_INT, SPE_FULL_HEALING,   -14
 },
 {	{"Knight", 0}, {
 	{"Gallant",     0},
