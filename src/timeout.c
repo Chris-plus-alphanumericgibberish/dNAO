@@ -2718,23 +2718,24 @@ typedef struct {
 
 /* table of timeout functions */
 static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
-    TTAB(rot_organic,	(timeout_proc)0,	"rot_organic"),
-    TTAB(rot_corpse,	(timeout_proc)0,	"rot_corpse"),
-    TTAB(moldy_corpse,	(timeout_proc)0,	"moldy_corpse"),
-    TTAB(revive_mon,	(timeout_proc)0,	"revive_mon"),
-    TTAB(burn_object,	cleanup_burn,		"burn_object"),
-    TTAB(hatch_egg,		(timeout_proc)0,	"hatch_egg"),
-    TTAB(fig_transform,	(timeout_proc)0,	"fig_transform"),
-    TTAB(light_damage,	(timeout_proc)0,	"light_damage"),
-    TTAB(slimy_corpse,	(timeout_proc)0,	"slimy_corpse"),
-	TTAB(zombie_corpse,	(timeout_proc)0,	"zombie_corpse"),
-    TTAB(shady_corpse,	(timeout_proc)0,	"shady_corpse"),
-    TTAB(yellow_corpse,	(timeout_proc)0,	"yellow_corpse"),
-    TTAB(bomb_blow,     (timeout_proc)0,	"bomb_blow"),
-	TTAB(return_ammo,   (timeout_proc)0,	"return_ammo"),
-	TTAB(desummon_mon,	cleanup_msummon,	"desummon_mon"),
-	TTAB(desummon_obj,	(timeout_proc)0,	"desummon_obj"),
-	TTAB(larvae_die,	(timeout_proc)0,	"larvae_die")
+	TTAB(rot_organic,		(timeout_proc)0,	"rot_organic"),
+	TTAB(rot_corpse,		(timeout_proc)0,	"rot_corpse"),
+	TTAB(moldy_corpse,		(timeout_proc)0,	"moldy_corpse"),
+	TTAB(revive_mon,		(timeout_proc)0,	"revive_mon"),
+	TTAB(revive_mon_pickup,	(timeout_proc)0,	"revive_mon_pickup"),
+	TTAB(burn_object,		cleanup_burn,		"burn_object"),
+	TTAB(hatch_egg,			(timeout_proc)0,	"hatch_egg"),
+	TTAB(fig_transform,		(timeout_proc)0,	"fig_transform"),
+	TTAB(light_damage,		(timeout_proc)0,	"light_damage"),
+	TTAB(slimy_corpse,		(timeout_proc)0,	"slimy_corpse"),
+	TTAB(zombie_corpse,		(timeout_proc)0,	"zombie_corpse"),
+	TTAB(shady_corpse,		(timeout_proc)0,	"shady_corpse"),
+	TTAB(yellow_corpse,		(timeout_proc)0,	"yellow_corpse"),
+	TTAB(bomb_blow,			(timeout_proc)0,	"bomb_blow"),
+	TTAB(return_ammo,		(timeout_proc)0,	"return_ammo"),
+	TTAB(desummon_mon,		cleanup_msummon,	"desummon_mon"),
+	TTAB(desummon_obj,		(timeout_proc)0,	"desummon_obj"),
+	TTAB(larvae_die,		(timeout_proc)0,	"larvae_die")
 };
 #undef TTAB
 
