@@ -32,20 +32,20 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define ROT_CORPSE		1
 #define MOLDY_CORPSE	2
 #define REVIVE_MON		3
-#define REVIVE_PICKUP	4
-#define BURN_OBJECT		5
-#define HATCH_EGG		6
-#define FIG_TRANSFORM	7
-#define LIGHT_DAMAGE	8
-#define SLIMY_CORPSE	9
-#define ZOMBIE_CORPSE	10
-#define SHADY_CORPSE	11
-#define YELLOW_CORPSE	12
-#define BOMB_BLOW		13
-#define RETURN_AMMO		14
-#define DESUMMON_MON	15
-#define DESUMMON_OBJ	16
-#define LARVAE_DIE		17
+#define BURN_OBJECT		4
+#define HATCH_EGG		5
+#define FIG_TRANSFORM	6
+#define LIGHT_DAMAGE	7
+#define SLIMY_CORPSE	8
+#define ZOMBIE_CORPSE	9
+#define SHADY_CORPSE	10
+#define YELLOW_CORPSE	11
+#define BOMB_BLOW		12
+#define RETURN_AMMO		13
+#define DESUMMON_MON	14
+#define DESUMMON_OBJ	15
+#define LARVAE_DIE		16
+#define REVIVE_PICKUP	17
 #define NUM_TIME_FUNCS	18
 
 /* used in timeout.c */
