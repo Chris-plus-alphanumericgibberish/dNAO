@@ -463,7 +463,7 @@ E char misc_cmds[];
 
 E NEARDATA schar tbx, tby;		/* set in mthrowu.c */
 
-E NEARDATA struct multishot { int n, i; short o; boolean s; } m_shot;
+E NEARDATA struct multishot { int n, i; short o; boolean s; struct obj * x;} m_shot;
 
 E NEARDATA struct dig_info {		/* apply.c, hack.c */
 	int	effort;
