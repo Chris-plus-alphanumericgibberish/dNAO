@@ -8,7 +8,10 @@
 
 extern const int monstr[];
 
-/* mon summons a monster */
+/* mon summons a monster 
+ * 
+ * if mon is null, treat as if as being summoned by a far-off Wizard of Yendor
+ */
 void
 msummon(mon, ptr)
 struct monst *mon;		/* mon to attribute summons to */
@@ -45,7 +48,9 @@ struct permonst * ptr;	/* summon as though you were <X> */
 		gnum = (ptr->maligntyp==A_NONE) ? GOD_MOLOCH : align_to_god(sgn(ptr->maligntyp));
 	}
 
-	if(ptr->mtyp == PM_SHAKTARI) {
+	if (!mon) {
+		/* if no mon, skip all these special cases which might query mon */;
+	} else if(ptr->mtyp == PM_SHAKTARI) {
 	    dtype = PM_MARILITH;
 		cnt = d(1,6);
 	} else if(ptr->mtyp == PM_BAALPHEGOR && rn2(4)) {
@@ -110,7 +115,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 		int mmflags = ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_ESUM|MM_NOCOUNTBIRTH);
 		mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
 	    if (mtmp) {
-		    	if (mmflags&MM_ESUM)
+			if (mmflags&MM_ESUM)
 				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
 			
 			if (dtype == PM_ANGEL) {
@@ -118,8 +123,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 				add_mx(mtmp, MX_EMIN);
 				EMIN(mtmp)->min_align = atyp;
 				EMIN(mtmp)->godnum = gnum;
-				if(mon->isminion) mtmp->isminion = TRUE;
-				mtmp->mpeaceful = mon && mon->mpeaceful;
+				if(mon && mon->isminion) mtmp->isminion = TRUE;
 			}
 
 			/* some templates are passed from summoner to summon */
@@ -142,7 +146,7 @@ struct permonst * ptr;	/* summon as though you were <X> */
 				set_faction(mtmp, mon->mfaction);
 			}
 			if(!is_lord(mtmp->data) && !is_prince(mtmp->data)){
-				mtmp->mpeaceful = mon->mpeaceful;
+				mtmp->mpeaceful = mon && mon->mpeaceful;
 				set_malign(mtmp);
 			}
 	    }
