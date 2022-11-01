@@ -301,6 +301,7 @@ struct artinstance{
 #define PlagueDuration avar1
 #define IMAlitness avar1
 #define LeagueMod avar1
+#define Esscoo_mid avar1
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2
@@ -407,6 +408,7 @@ extern struct artifact * artilist;
 #define DETESTATION  	(LAST_PROP+85)
 #define INVULNERABILITY	(LAST_PROP+86)
 #define IBITE_ARM		(LAST_PROP+87)
+#define LOOT_SELF		(LAST_PROP+88)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
@@ -472,7 +474,7 @@ extern struct artifact * artilist;
 /* artifact has no specific material or size, eg "silver Grimtooth" */
 #define is_malleable_artifact(a) (is_nameable_artifact((a)) || (a) == &artilist[ART_EXCALIBUR] || (a) == &artilist[ART_GUNGNIR] || (a) == &artilist[ART_DIRGE])
 
-#define is_living_artifact(obj) ((obj)->oartifact == ART_TENTACLE_ROD || (obj)->oartifact == ART_DRAGONHEAD_SHIELD || (obj)->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING || (obj)->oartifact == ART_RITUAL_RINGED_SPEAR || (obj)->oartifact == ART_RINGED_BRASS_ARMOR || (obj)->oartifact == ART_IBITE_ARM)
+#define is_living_artifact(obj) ((obj)->oartifact == ART_TENTACLE_ROD || (obj)->oartifact == ART_DRAGONHEAD_SHIELD || (obj)->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING || (obj)->oartifact == ART_RITUAL_RINGED_SPEAR || (obj)->oartifact == ART_RINGED_BRASS_ARMOR || (obj)->oartifact == ART_IBITE_ARM || (obj)->oartifact == ART_ESSCOOAHLIPBOOURRR)
 #define is_bloodthirsty_artifact(obj) (arti_is_prop(obj, ARTI_BLOODTHRST) && roll_generic_flat_madness(FALSE))
 
 #define is_mastery_artifact_nameable(a) (\

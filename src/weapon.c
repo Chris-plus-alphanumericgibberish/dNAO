@@ -657,6 +657,21 @@ int otyp;
 			bonn = 2;
 			bond = 4;
 		}
+		else if (obj->oartifact == ART_ESSCOOAHLIPBOOURRR)
+		{
+			if (large)
+			{
+				ocn = 2;
+				ocd = max(6 + 2 * dmod, 2);
+				flat += 1;
+			}
+			else
+			{
+				ocn = 1;
+				ocd = max(6 + 2 * dmod, 2);
+				flat += 2;
+			}
+		}
 	}
 
 

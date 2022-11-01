@@ -4980,6 +4980,265 @@ boolean invoked;
 }
 
 void
+dotsmi_theft(magr, mdef, inventory, artifact)
+struct monst *magr;
+struct monst *mdef;
+struct obj *inventory;
+struct obj *artifact;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct obj *nobj, *obj;
+	int n = rnd(3), taken = 0, weapon = 0, armor = 0;
+	int ox = 0, oy = 0;
+	for(obj = inventory; obj; obj = nobj){
+		nobj = obj->where == OBJ_FLOOR ? obj->nexthere : obj->nobj;
+		if(is_magic_obj(obj) && (n > 0 || !rn2(5))){
+			n--;
+			taken++;
+			if((obj->owornmask&W_WEP) || ((obj->owornmask&W_SWAPWEP) && (!youdef || u.twoweap)))
+				weapon++;
+			if(obj->owornmask&W_ARMOR)
+				armor++;
+			if(obj->where == OBJ_FLOOR){
+				ox = obj->ox;
+				oy = obj->oy;
+			}
+			obj_extract_and_unequip_self(obj);
+			if(artifact)
+				add_to_container(artifact, obj);
+			else
+				mpickobj(magr, obj);
+			if(ox || oy)
+				newsym(ox, oy);
+			ox = oy = 0;
+		}
+	}
+	if(taken){
+		if(!mdef)
+			pline("The tentacles pick up %s.", taken > 1 ? "some objects" : "an object");
+		else if(!youdef && !canseemon(mdef))
+			pline("The tentacles acquire %s.", taken > 1 ? "some objects" : "an object");
+		else if(armor && weapon && armor+weapon < taken){
+			if(youdef){
+				pline("The tentacles somehow disentangle several objects from your person, including %s from your grip and %s from your body!",
+					u.twoweap && weapon > 1 ? "your weapons" : u.twoweap ? "a weapon" : "your weapon",
+					(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+				);
+				pline("You're pretty sure that wasn't physically possible.");
+			}
+			else {
+				pline("The tentacles somehow disentangle several objects from %s, including %s from %s grip and %s from %s body!",
+					mon_nam(mdef),
+					!(MON_WEP(mdef) || MON_SWEP(mdef)) && weapon > 1 ? "the weapons" : u.twoweap ? "a weapon" : "the weapon",
+					mhis(mdef),
+					(mdef->misc_worn_check&W_ARMOR) ? "some clothes" : "the clothes",
+					mhis(mdef)
+				);
+			}
+		}
+		else if(armor && weapon){
+			if(youdef){
+				pline("The tentacles somehow disentangle %s from your grip and %s from your body!",
+					u.twoweap && weapon > 1 ? "your weapons" : u.twoweap ? "a weapon" : "your weapon",
+					(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+				);
+				pline("You're pretty sure that wasn't physically possible.");
+			}
+			else {
+				pline("The tentacles somehow disentangle %s from %s grip and %s from %s body!",
+					!(MON_WEP(mdef) || MON_SWEP(mdef)) && weapon > 1 ? "the weapons" : u.twoweap ? "a weapon" : "the weapon",
+					mon_nam(mdef),
+					(mdef->misc_worn_check&W_ARMOR) ? "some clothes" : "the clothes",
+					mhis(mdef)
+				);
+			}
+		}
+		else if(armor+weapon < taken){
+			if(weapon){
+				if(youdef){
+					pline("The tentacles somehow disentangle several objects from your person, including %s from your grip!",
+						u.twoweap && weapon > 1 ? "your weapons" : u.twoweap ? "a weapon" : "your weapon"
+					);
+					pline("You're pretty sure that wasn't physically possible.");
+				}
+				else {
+					pline("The tentacles somehow disentangle several objects from %s, including %s from %s grip!",
+						mon_nam(mdef),
+						!(MON_WEP(mdef) || MON_SWEP(mdef)) && weapon > 1 ? "the weapons" : u.twoweap ? "a weapon" : "the weapon",
+						mhis(mdef)
+					);
+				}
+			}
+			else if(armor){
+				if(youdef){
+					pline("The tentacles somehow disentangle several objects from your person, including %s from your body!",
+						(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+					);
+					pline("You're pretty sure that wasn't physically possible.");
+				}
+				else {
+					pline("The tentacles somehow disentangle several objects from %s, including %s from %s body!",
+						mon_nam(mdef),
+						(mdef->misc_worn_check&W_ARMOR) ? "some clothes" : "the clothes",
+						mhis(mdef)
+					);
+				}
+			}
+			else {//armor+weapon == 0
+				if(youdef){
+					pline("The tentacles somehow disentangle %s from your person!", taken > 1 ? "some objects" : "an object");
+				}
+				else {
+					pline("The tentacles somehow disentangle %s from %s!",
+						taken > 1 ? "some objects" : "an object",
+						mon_nam(mdef)
+					);
+				}
+			}
+		}
+		else {//armor == taken ^ weapon == taken
+			if(weapon){
+				if(youdef){
+					pline("The tentacles somehow disentangle %s from your grip!",
+						u.twoweap && weapon > 1 ? "your weapons" : u.twoweap ? "a weapon" : "your weapon"
+					);
+					pline("You're pretty sure that wasn't physically possible.");
+				}
+				else {
+					pline("The tentacles somehow disentangle %s from %s grip!",
+						!(MON_WEP(mdef) || MON_SWEP(mdef)) && weapon > 1 ? "the weapons" : u.twoweap ? "a weapon" : "the weapon",
+						s_suffix(mon_nam(mdef))
+					);
+				}
+			}
+			else if(armor){
+				if(youdef){
+					pline("The tentacles somehow disentangle %s from your body!",
+						(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+					);
+					pline("You're pretty sure that wasn't physically possible.");
+				}
+				else {
+					pline("The tentacles somehow disentangle %s from %s body!",
+						(mdef->misc_worn_check&W_ARMOR) ? "some clothes" : "the clothes",
+						s_suffix(mon_nam(mdef))
+					);
+				}
+			}
+		}
+	}
+}
+
+static void
+doesscoo_theft(magr, wep)
+struct monst *magr;
+struct obj *wep;
+{
+	struct monst *mdef;
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i = rnd(8),j;
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct obj *inventory;
+	
+	for(j=8;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		youdef = (mdef == &youmonst);
+
+		if(mdef && DEADMONSTER(mdef))
+			mdef = (struct monst *)0;
+		
+		if(mdef){
+			
+			if(youagr && mdef->mpeaceful)
+				continue;
+			if(youdef && magr->mpeaceful)
+				continue;
+			if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
+				continue;
+
+			if(!youdef && nonthreat(mdef))
+				continue;
+
+			//Note: petrifying targets are safe, it's not an attack
+			if(mdef->mtyp == PM_PALE_NIGHT) continue;
+		}
+		
+		inventory = youdef ? invent : mdef ? mdef->minvent : level.objects[x(magr)+clockwisex[(i+j)%8]][y(magr)+clockwisey[(i+j)%8]];
+		// inventory = youdef ? invent : mdef ? mdef->minvent : (struct obj *)0;
+		
+		if(!inventory)
+			continue;
+		
+		if(!mdef){
+			if(youagr || canseemon(magr))
+				pline("The aura of strange tentacles investigates a pile of debris!");
+			else
+				pline("Strange tentacles investigate a pile of debris!");
+		}
+		else if(youdef){
+			if(canseemon(magr))
+				pline("The aura of strange tentacles investigates your belongings!");
+			else pline("Strange tentacles investigate your belongings!");
+		}
+		else if(youagr){
+			if(canseemon(mdef))
+				pline("The aura of strange tentacles investigates %s belongings!", s_suffix(mon_nam(mdef)));
+			else pline("The aura of strange tentacles investigates something!");
+		}
+		else {
+			if(canseemon(mdef) && canseemon(magr))
+				pline("The aura of strange tentacles investigates %s belongings!", s_suffix(mon_nam(mdef)));
+			else if(canseemon(magr))
+				pline("The aura of strange tentacles investigates something!");
+			else
+				pline("Strange tentacles investigate something!");
+		}
+		
+		dotsmi_theft(magr, mdef, inventory, wep);
+		
+		break;//Only one target per proc
+	}
+}
+
+boolean
+floor_magic(magr)
+struct monst *magr;
+{
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i;
+	
+	for(i=7;i>=0;i--){
+		if(OBJ_AT(x(magr)+clockwisex[i], y(magr)+clockwisey[i]))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+void
+doliving_esscoo(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	if(!invoked){
+		if(rn2(5))
+			return;
+		if(!floor_magic(magr) && !nearby_targets(magr))
+			return;
+	}
+	doesscoo_theft(magr, wep); /*Can steal magic powers (cancel target, and if successful gain a pot of gain energy)*/
+}
+
+void
 doliving_healing_armor(magr, wep, invoked)
 struct monst *magr;
 struct obj *wep;
@@ -5122,6 +5381,8 @@ struct obj *wep;
 		doliving_ringed_armor(magr, wep, FALSE);
 	else if(wep->oartifact == ART_IBITE_ARM)
 		doliving_ibite_arm(magr, wep, FALSE);
+	else if(wep->oartifact == ART_ESSCOOAHLIPBOOURRR)
+		doliving_esscoo(magr, wep, FALSE);
 	else doliving_single_attack(magr, wep);
 }
 

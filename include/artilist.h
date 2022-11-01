@@ -2368,6 +2368,17 @@ A("The Cloak of the Consort",		DROVEN_CLOAK,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("Esscooahlipboourrr",			KHAKKHARA,					"tentacle-auraed claw-ended %s",
+	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_S, (ARTG_NOGEN|ARTG_MAJOR|ARTG_FXALGN),
+	NO_MONS(),
+	ATTK(AD_PHYS, 20, 10), (ARTA_DRAIN),
+	PROPS(DRAIN_RES, SEARCHING), (ARTP_SEEK),
+	PROPS(), NOFLAG,
+	LOOT_SELF, NOFLAG
+	),
+
+/*Needs encyc entry*/
 A("Painting Fragment",	SCR_BLANK_PAPER,				"scroll fragment",
 	200L, CLOTH, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_NOBLEMAN, PM_HALF_DRAGON, TIER_F, (ARTG_NOGEN|ARTG_NOWISH),

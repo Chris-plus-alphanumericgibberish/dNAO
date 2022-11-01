@@ -5968,9 +5968,19 @@ int spell;
 
 		if (uwep->otyp == SCALPEL
 			|| uwep->oartifact == ART_STAFF_OF_AESCULAPIUS
+			|| uwep->oartifact == ART_ESSCOOAHLIPBOOURRR
 		) {	// tools of healing
 			cast_bon = 0;
 			if(spell_skilltype(spellid(spell)) == P_HEALING_SPELL)
+			cast_bon += 2;
+			if (uwep->oartifact)
+				cast_bon *= 2;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
+
+		if (uwep->oartifact == ART_ESSCOOAHLIPBOOURRR) {	// mutation
+			cast_bon = 0;
+			if(spell_skilltype(spellid(spell)) == P_MATTER_SPELL)
 			cast_bon += 2;
 			if (uwep->oartifact)
 				cast_bon *= 2;

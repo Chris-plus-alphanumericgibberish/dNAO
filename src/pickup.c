@@ -2174,6 +2174,11 @@ register struct obj *obj;
 	) {
 		pline("That combination is a little too explosive.");
 		return 0;
+	} else if (!(is_magic_obj(obj))
+		&& current_container->oartifact == ART_ESSCOOAHLIPBOOURRR
+	) {
+		pline("The artifact isn't interested in taking %s.", the(xname(obj)));
+		return 0;
 	} else if (obj->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL)) {
 		Norep("You cannot %s %s you are wearing.",
 			Icebox ? "refrigerate" : "stash", something);

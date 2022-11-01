@@ -233,6 +233,9 @@ WEAPON(("javelin", "throwing spear"),
 WEAPON(("trident"), /*Needs encyc entry*/
 	DMG(D(8), F(1)), DMG(D(3, 6)),
 	1, 0,  MZ_LARGE,  8, 25,  5,  0, P,   P_TRIDENT, IRON, FALSE, HI_METAL),
+WEAPON(("pincer staff", "claw-ended staff"), /*Needs encyc entry*/
+	DMG(D(6), F(2)), DMG(D(2, 6), F(1)),
+	0, 0,  MZ_HUGE,  0, 25, 800,  0, P,   P_TRIDENT, SHELL_MAT, FALSE, CLR_BRIGHT_MAGENTA),
 
 /* blades */
 WEAPON(("dagger"),

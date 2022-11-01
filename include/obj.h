@@ -326,6 +326,7 @@ struct obj {
 	|| (otmp)->otyp == HYPOSPRAY_AMPULE \
 	|| (otmp)->oclass == RING_CLASS \
 	|| (otmp)->otyp == DOLL_S_TEAR \
+	|| (otmp)->otyp == PINCER_STAFF \
 	)
 #define ECLIPSE_MOON	0
 #define CRESCENT_MOON	1
@@ -541,6 +542,7 @@ struct obj {
 			 || (otmp)->otyp == SPIRITUAL_SOULSTONE\
 			 || ((otmp)->otyp >= EFFIGY && (otmp)->otyp <= DOLL_S_TEAR)\
 			 || (otmp)->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE\
+			 || (otmp)->oartifact == ART_ESSCOOAHLIPBOOURRR\
 			 || (otmp)->otyp == MAGIC_LAMP\
 			 || (otmp)->otyp == CANDLE_OF_INVOCATION\
 			 || (otmp)->otyp == RIN_WISHES\
@@ -1091,6 +1093,8 @@ struct obj {
 
 #define arm_blocks_upper_body(onum)		(objects[onum].oc_dtyp&UPPER_TORSO_DR)
 #define arm_blocks_lower_body(onum)		(objects[onum].oc_dtyp&LOWER_TORSO_DR)
+
+#define is_magic_obj(obj)		(objects[(obj)->otyp].oc_magic || ((is_enchantable(obj)) && (obj)->spe > 0))
 
 #define is_cha_otyp(onum)	(onum == NOBLE_S_DRESS\
 							|| onum == GENTLEWOMAN_S_DRESS\

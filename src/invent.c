@@ -859,6 +859,7 @@ carrying_readable_weapon()
 				otmp->oartifact == ART_GUNGNIR ||
 				otmp->oartifact == ART_PEN_OF_THE_VOID ||
 				otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD ||
+				otmp->oartifact == ART_ESSCOOAHLIPBOOURRR ||
 				otmp->oartifact == ART_STAFF_OF_NECROMANCY
 			))
 		)
@@ -1285,7 +1286,8 @@ register const char *let,*word;
 		      otyp != DROVEN_CLOAK &&
 			  otyp != GNOMISH_POINTY_HAT &&
 			  otmp->oartifact != ART_AEGIS &&
-			  otmp->oartifact != ART_STAFF_OF_AESCULAPIUS
+			  otmp->oartifact != ART_STAFF_OF_AESCULAPIUS &&
+			  otmp->oartifact != ART_ESSCOOAHLIPBOOURRR
 			  ) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)
 				&& otyp != CATAPSI_VORTEX && otyp != ANTIMAGIC_RIFT
@@ -2427,7 +2429,7 @@ struct obj *obj;
 	else if (obj->oartifact == ART_STAFF_OF_NECROMANCY)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study the forbidden secrets of necromancy", MENU_UNSELECTED);
-	else if (obj->oartifact == ART_STAFF_OF_AESCULAPIUS)
+	else if (obj->oartifact == ART_STAFF_OF_AESCULAPIUS || obj->oartifact == ART_ESSCOOAHLIPBOOURRR)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study the grand magic of healing", MENU_UNSELECTED);
 	else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
