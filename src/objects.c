@@ -775,6 +775,8 @@ DRGN_SCALES(("yellow dragon scales"),     1, 500, 9, 2, CLR_YELLOW,    O_POWER(A
 
 SUIT(("plate mail"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 44,  5, 225,  600,  4, 6, 3, IRON, HI_METAL),
+SUIT(("lantern plate mail", "glass-set plate mail"),
+	0, 0,   MZ_HUGE,  ARMSZ_HEAVY,  0,  5, 225,  650,  5, 6, 3, IRON, HI_METAL),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5, 110, 1200,  3, 7, 3, MITHRIL, HI_MITHRIL),
 SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/

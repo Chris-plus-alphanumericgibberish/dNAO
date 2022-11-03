@@ -1035,6 +1035,7 @@ struct obj {
 #define age_is_relative(otmp)	((otmp)->otyp == LANTERN\
 				|| (otmp)->otyp == OIL_LAMP\
 				|| (otmp)->otyp == DWARVISH_HELM\
+				|| (otmp)->otyp == LANTERN_PLATE_MAIL\
 				|| (otmp)->otyp == LIGHTSABER\
 				|| (otmp)->otyp == BEAMSWORD\
 				|| (otmp)->otyp == DOUBLE_LIGHTSABER\

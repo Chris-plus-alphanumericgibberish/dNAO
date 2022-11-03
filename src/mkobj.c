@@ -1361,6 +1361,10 @@ int mkflags;
 				otmp->age = (long)rn1(900, 900);//Last longer than dwarvish helms, since the radius is smaller
 				otmp->lamplit = 0;
 			}
+			if (otmp->otyp == LANTERN_PLATE_MAIL) {
+				otmp->age = (long)rn1(500, 1000);
+				otmp->lamplit = 0;
+			}
 			if (is_readable_armor_otyp(otmp->otyp)){
 				otmp->ohaluengr = TRUE;
 				if (Race_if(PM_DROW) && Is_qstart(&u.uz)) otmp->oward = u.start_house;
@@ -3413,10 +3417,15 @@ maid_clean(mon, obj)
 		if(canseemon(mon)) pline("The maid sticks an ofuda to the offending object.");
 		obj->cursed = 0;
 	}
-	if(obj->otyp == DWARVISH_HELM || obj->otyp == OIL_LAMP || obj->otyp == LANTERN){
+	if(obj->otyp == DWARVISH_HELM || obj->otyp == OIL_LAMP || obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL){
 		if(obj->age < 750){
 			obj->age += 750;
-			if(canseemon(mon)) pline("The maid adds some oil.");
+			if(canseemon(mon)) {
+				if(obj->otyp == OIL_LAMP)
+					pline("The maid adds some oil.");
+				else if(obj->otyp == LANTERN_PLATE_MAIL)
+					pline("The maid changes the batteries.");
+			}
 		}
 	}
 #ifdef TOURIST

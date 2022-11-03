@@ -1570,6 +1570,24 @@ register struct monst *mtmp;
 	    if(mtmp->mtyp == PM_HEDROW_WARRIOR) mtmp->mspec_used += d(4,4);
 		else mtmp->mspec_used += max(10 - mtmp->m_lev,2);
 	}
+	
+	if((!mtmp->mpeaceful || !Darksight)
+		&& (levl[mtmp->mx][mtmp->my].lit == 0 || viz_array[mtmp->my][mtmp->mx]&TEMP_DRK1)
+		&& !(noactions(mtmp))
+		&& !(mindless_mon(mtmp))
+		&& !darksight(mtmp->data)
+		&& which_armor(mtmp, W_ARM)
+	){
+		struct obj *otmp = which_armor(mtmp, W_ARM);
+		if(otmp->otyp == LANTERN_PLATE_MAIL && !otmp->lamplit && !otmp->cursed){
+			if (canseemon(mtmp)) {
+				pline("%s lights %s %s.", Monnam(mtmp), mhis(mtmp),
+					xname(otmp));
+			}	    	
+			begin_burn(otmp);
+			return 0;
+		}
+	}
 
 	if (mtmp->mtyp == PM_NURSE || mtmp->mtyp == PM_HEALER || mtmp->mtyp == PM_CLAIRVOYANT_CHANGED){
 	    // && !uarmu && !uarm && !uarmh && !uarms && !uarmg && !uarmc && !uarmf){
