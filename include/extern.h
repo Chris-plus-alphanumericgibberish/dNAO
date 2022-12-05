@@ -667,6 +667,7 @@ E boolean FDECL(acceptable_pet_target, (struct monst *,struct monst *,BOOLEAN_P)
 E boolean FDECL(betrayed, (struct monst *));
 E int FDECL(dog_nutrition, (struct monst *,struct obj *));
 E int FDECL(dog_eat, (struct monst *,struct obj *,int,int,BOOLEAN_P));
+E void FDECL(give_mon_corpse_intrinsic, (struct monst *,int));
 E int FDECL(monster_eat, (struct monst *,struct obj *,int,int,BOOLEAN_P));
 E int FDECL(dog_move, (struct monst *,int));
 #ifdef USE_TRAMPOLI
@@ -832,6 +833,7 @@ E void FDECL(food_substitution, (struct obj *,struct obj *));
 E boolean FDECL(bite_monster, (struct monst *));
 E void FDECL(give_intrinsic, (int, long));
 E void NDECL(fix_petrification);
+E int FDECL(intrinsic_possible, (int,struct permonst *));
 E void FDECL(consume_oeaten, (struct obj *,int));
 E int FDECL(obj_nutrition, (struct obj *));
 E boolean FDECL(maybe_finished_meal, (BOOLEAN_P));

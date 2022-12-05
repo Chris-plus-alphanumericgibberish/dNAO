@@ -308,11 +308,11 @@ struct obj *obj;
 	 */
 	if (obj->oclass == FOOD_CLASS) {
 	    if(obj->otyp == CORPSE) {
-		mtmp->meating = 3 + (mons[obj->corpsenm].cwt >> 6);
-		nutrit = mons[obj->corpsenm].cnutrit;
+			mtmp->meating = 3 + (mons[obj->corpsenm].cwt >> 6);
+			nutrit = mons[obj->corpsenm].cnutrit;
 	    } else {
-		mtmp->meating = objects[obj->otyp].oc_delay;
-		nutrit = objects[obj->otyp].oc_nutrition;
+			mtmp->meating = objects[obj->otyp].oc_delay;
+			nutrit = objects[obj->otyp].oc_nutrition;
 	    }
 	    switch(mtmp->data->msize) {
 		case MZ_TINY: nutrit *= 8; break;
@@ -362,6 +362,7 @@ boolean devour;
 	int nutrit;
 	boolean vampiric = is_vampire(mtmp->data);
 	boolean eatonlyone = (obj->oclass == FOOD_CLASS || obj->oclass == CHAIN_CLASS || obj->oclass == POTION_CLASS);
+	int mtyp = NON_PM;
 
 	// boolean can_choke = (edog->hungrytime >= monstermoves + DOG_SATIATED && !vampiric);
 	boolean can_choke = mtmp->mgluttony && !Breathless_res(mtmp);
@@ -377,7 +378,7 @@ boolean devour;
 	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && obj->corpsenm >= LOW_PM && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
 	
 	if(obj->otyp == CORPSE){
-		int mtyp = obj->corpsenm;
+		mtyp = obj->corpsenm;
 		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
 			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
 		) {
@@ -559,6 +560,9 @@ boolean devour;
 	    if (!grow_up(mtmp, (struct monst *)0)) return 2;
 	}
 	if (heal) mtmp->mhp = mtmp->mhpmax;
+	if(mtyp != NON_PM){
+		give_mon_corpse_intrinsic(mtmp, mtyp);
+	}
 	return 1;
 }
 
@@ -654,6 +658,70 @@ dog_died:
 	    }
 	}
 	return(FALSE);
+}
+
+void
+give_mon_corpse_intrinsic(mon, mtyp)
+struct monst *mon;
+int mtyp;
+{
+	struct permonst *ptr = &mons[mtyp];
+	 for (int i = 1; i <= LAST_PROP; i++) {
+		if (intrinsic_possible(i, ptr)) {
+			if(mon_acquired_trinsic(mon, i))
+				continue;
+			if(ptr->mlevel <= rn2(15))
+				continue;
+			give_mintrinsic(mon, i);
+			if(canspotmon(mon)){
+#define Mon(str) pline("%s %s", Monnam(mon), str)
+				switch (i) {
+					case FIRE_RES:
+						Mon(Hallucination ? "be chillin'." :"looks cool.");
+					break;
+					case SLEEP_RES:
+						Mon("looks wide awake.");
+					break;
+					case COLD_RES:
+						Mon("looks warm.");
+					break;
+					case DISINT_RES:
+						Mon(Hallucination ? "has it totally together, man." : "looks very firm.");
+					break;
+					case SHOCK_RES:	/* shock (electricity) resistance */
+						if (Hallucination)
+							rn2(2) ? Mon("is grounded in reality.") : pline("%s health is currently amplified!", s_suffix(Monnam(mon)));
+						else Mon("looks well grounded.");
+					break;
+					case ACID_RES:	/* acid resistance */
+						if (Hallucination)
+							rn2(2) ? Mon("has really gotten back to basics!") : Mon("looks insoluble.");
+						else Mon("looks tough.");
+					break;
+					case POISON_RES:
+						Mon("looks healthy.");
+					break;
+					case DISPLACED:	/* displacement resistance */
+						if (Hallucination) pline("%s is quite beside %sself!", Monnam(mon), mhim(mon));
+						else pline("%s outline shimmers and shifts.", s_suffix(Monnam(mon)));
+					break;
+					case TELEPORT:
+						Mon(Hallucination ? "looks diffuse." : "looks very jumpy.");
+					break;
+					case TELEPORT_CONTROL:
+						Mon(Hallucination ? "looks centered." : "looks in control.");
+					break;
+					case TELEPAT:
+						if(Hallucination){
+							Mon("is in touch with the cosmos.");
+							change_uinsight(1);
+						}
+						//else nothing
+					break;
+				}
+			}
+		}
+	 }
 }
 
 /* do something with object (drop, pick up, eat) at current position

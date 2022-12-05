@@ -25,7 +25,6 @@ STATIC_DCL void NDECL(recalc_wt);
 STATIC_DCL struct obj *FDECL(touchfood, (struct obj *));
 STATIC_DCL void NDECL(do_reset_eat);
 STATIC_DCL void FDECL(done_eating, (BOOLEAN_P));
-STATIC_DCL int FDECL(intrinsic_possible, (int,struct permonst *));
 STATIC_DCL void FDECL(givit, (int,struct permonst *,SHORT_P,BOOLEAN_P));
 STATIC_DCL void FDECL(start_tin, (struct obj *));
 STATIC_DCL int FDECL(eatcorpse, (struct obj *));
@@ -861,7 +860,7 @@ fix_petrification()
  */
 
 /* intrinsic_possible() returns TRUE iff a monster can give an intrinsic. */
-STATIC_OVL int
+int
 intrinsic_possible(type, ptr)
 int type;
 register struct permonst *ptr;
@@ -869,7 +868,7 @@ register struct permonst *ptr;
 	switch (type) {
 	    case FIRE_RES:
 			if (ptr->mconveys & MR_FIRE) {
-				//debugpline("can get fire resistance");
+				debugpline("can get fire resistance");
 				return(TRUE);
 			} else  return(FALSE);
 	    case SLEEP_RES:

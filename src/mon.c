@@ -2172,13 +2172,14 @@ boolean devour;
 
 	int nutrit = dog_nutrition(mtmp, obj);
 	long rotted = 0;
+	int mtyp = NON_PM;
 	poly = polyfodder(obj) && !resists_poly(mtmp->data);
 	grow = mlevelgain(obj);
 	heal = mhealup(obj);
 	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && obj->corpsenm >= LOW_PM && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
 	
 	if(obj->otyp == CORPSE){
-		int mtyp = obj->corpsenm;
+		mtyp = obj->corpsenm;
 		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
 			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
 		) {
@@ -2346,6 +2347,9 @@ boolean devour;
 	    if (!grow_up(mtmp, (struct monst *)0)) return 2;
 	}
 	if (heal) mtmp->mhp = mtmp->mhpmax;
+	if(mtyp != NON_PM){
+		give_mon_corpse_intrinsic(mtmp, mtyp);
+	}
 	return 1;
 }
 
