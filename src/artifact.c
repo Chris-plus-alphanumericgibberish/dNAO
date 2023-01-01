@@ -4523,15 +4523,15 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		}
 		if(u.uinsight >= 25 && !resist(mdef, youagr ? SPBOOK_CLASS : WEAPON_CLASS, 0, NOTELL)){
 			if(youdef){
-				if(u.uencouraged >= 0 && magr->mcha/5 > 0)
+				if(u.uencouraged >= 0 && ACURR_MON(A_CHA, magr)/5 > 0)
 					You("feel a rush of irrational mercy!");
-				u.uencouraged = max(-1*(otmp->spe + magr->mcha), u.uencouraged - magr->mcha/5);
+				u.uencouraged = max(-1*(otmp->spe + ACURR_MON(A_CHA, magr)), u.uencouraged - ACURR_MON(A_CHA, magr)/5);
 			}
 			else if(youagr){
 				mdef->encouraged = max(-1*(otmp->spe + ACURR(A_CHA)), mdef->encouraged - ACURR(A_CHA)/5);
 			}
 			else {
-				mdef->encouraged = max(-1*(otmp->spe + magr->mcha), mdef->encouraged - magr->mcha/5);
+				mdef->encouraged = max(-1*(otmp->spe + ACURR_MON(A_CHA, mdef)), mdef->encouraged - ACURR_MON(A_CHA, magr)/5);
 			}
 		}
 	}

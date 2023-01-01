@@ -4929,7 +4929,7 @@ struct monst *magr;
 struct obj *wep;
 {
 	boolean youagr = magr == &youmonst;
-	int efcha = youagr ? (ACURR(A_CHA) + 1) : (magr->mcha + 1);
+	int efcha = youagr ? (ACURR(A_CHA) + 1) : (ACURR_MON(A_CHA, magr) + 1);
 	int duration = efcha + wep->spe + max(Insanity, 10)/5;
 	struct monst *mtmp;
 	int i, j = 0;

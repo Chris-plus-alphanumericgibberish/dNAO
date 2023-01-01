@@ -683,7 +683,7 @@ long nmv;		/* number of moves */
 		else mtmp->mhp += imv;
 	}
 	if(!nonliving(mtmp->data)){
-		imv = imv*(mtmp->m_lev + mtmp->mcon)/30;
+		imv = imv*(mtmp->m_lev + ACURR_MON(A_CHA, mtmp))/30;
 		if (mtmp->mhp + imv >= mtmp->mhpmax)
 			mtmp->mhp = mtmp->mhpmax;
 		else mtmp->mhp += imv;
