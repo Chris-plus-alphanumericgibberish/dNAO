@@ -262,7 +262,7 @@ struct monst *mtmp;
 
 	if (is_animal(mtmp->data) || mindless_mon(mtmp))
 		return FALSE;
-	if(dist2(x, y, mtmp->mux, mtmp->muy) > 25)
+	if(dist2(x, y, mtmp->mux, mtmp->muy) > 25 || (mtmp->mux == 0 && mtmp->muy == 0))
 		return FALSE;
 	if (u.uswallow && stuck) return FALSE;
 
@@ -1971,19 +1971,19 @@ struct monst *mtmp;
 			|| ((mtmp->misc_worn_check & W_ARMC) && which_armor(mtmp, W_ARMC)
 				&& FacelessCloak(which_armor(mtmp, W_ARMC)));
 
-	if(mtmp->mtalons) return 0;
+	if(mtmp->mtalons) return FALSE;
 	
 	m.misc = (struct obj *)0;
 	m.has_misc = 0;
 	if (is_animal(mdat) || mindless_mon(mtmp))
-		return 0;
+		return FALSE;
 	if (u.uswallow && stuck) return FALSE;
 
 	/* We arbitrarily limit to times when a player is nearby for the
 	 * same reason as Junior Pac-Man doesn't have energizers eaten until
 	 * you can see them...
 	 */
-	if(dist2(x, y, mtmp->mux, mtmp->muy) > 36)
+	if(dist2(x, y, mtmp->mux, mtmp->muy) > 36 || (mtmp->mux == 0 && mtmp->muy == 0))
 		return FALSE;
 
 	if (!stuck && !immobile && !mtmp->cham 
