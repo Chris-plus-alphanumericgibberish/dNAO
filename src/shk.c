@@ -5193,7 +5193,11 @@ struct monst *shkp;
 
     /* Check if you asked for a non weapon tool to be improved */
     if (obj->oclass == TOOL_CLASS && !is_weptool(obj))
-	pline("%s grins greedily...", mon_nam(shkp));
+		pline("%s grins greedily...", mon_nam(shkp));
+	
+	/* Check if you asked for a non-poisonable weapon to be poisoned */
+	if (!is_poisonable(obj) && !(ESHK(shkp)->services & (SHK_SPECIAL_A|SHK_SPECIAL_B)))
+		pline("%s grins greedily...", mon_nam(shkp));
 
 	any.a_void = 0;         /* zero out all bits */
 	tmpwin = create_nhwindow(NHW_MENU);
@@ -5335,7 +5339,7 @@ struct monst *shkp;
 			obj->spe++;
 		break;
 		case 3:
-			verbalize("Just imagine what poisoned %s can do!", xname(obj));
+			verbalize("Just imagine what your poisoned %s can do!", xname(obj));
 
 			charge = 90;
 			charge+= 10 * obj->quan;
@@ -5346,10 +5350,15 @@ struct monst *shkp;
 				if(obj->opoisoned == OPOISON_BASIC) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
-			obj->opoisoned = OPOISON_BASIC;
+			else if (is_poisonable(obj))
+				obj->opoisoned = OPOISON_BASIC;
+			else {
+				verbalize("All done!");
+				// steals your money
+			}
 		break;
 		case 4:
-			verbalize("Just imagine what drugged %s can do!", xname(obj));
+			verbalize("Just imagine what your drugged %s can do!", xname(obj));
 
 			charge = 45;
 			charge += 5 * obj->quan;
@@ -5360,10 +5369,15 @@ struct monst *shkp;
 				if(obj->opoisoned == OPOISON_SLEEP) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
-			obj->opoisoned = OPOISON_SLEEP;
+			else if (is_poisonable(obj))
+				obj->opoisoned = OPOISON_SLEEP;
+			else {
+				verbalize("All done!");
+				// steals your money
+			}
 		break;
 		case 5:
-			verbalize("Just imagine what stained %s can do!", xname(obj));
+			verbalize("Just imagine what your stained %s can do!", xname(obj));
 
 			charge = 45;
 			charge += 5 * obj->quan;
@@ -5374,10 +5388,15 @@ struct monst *shkp;
 				if(obj->opoisoned == OPOISON_BLIND) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
-			obj->opoisoned = OPOISON_BLIND;
+			else if (is_poisonable(obj))
+				obj->opoisoned = OPOISON_BLIND;
+			else {
+				verbalize("All done!");
+				// steals your money
+			}
 		break;
 		case 6:
-			verbalize("Just imagine what envenomed %s can do!", xname(obj));
+			verbalize("Just imagine what your envenomed %s can do!", xname(obj));
 
 			charge = 90;
 			charge+= 10 * obj->quan;
@@ -5388,10 +5407,15 @@ struct monst *shkp;
 				if(obj->opoisoned == OPOISON_PARAL) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
-			obj->opoisoned = OPOISON_PARAL;
+			else if (is_poisonable(obj))
+				obj->opoisoned = OPOISON_PARAL;
+			else {
+				verbalize("All done!");
+				// steals your money
+			}
 		break;
 		case 7:
-			verbalize("Just imagine what filth-crusted %s can do!", xname(obj));
+			verbalize("Just imagine what your filth-crusted %s can do!", xname(obj));
 
 			charge = 900;
 			charge+= 100 * obj->quan;
@@ -5402,10 +5426,15 @@ struct monst *shkp;
 				if(obj->opoisoned == OPOISON_FILTH) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
-			obj->opoisoned = OPOISON_FILTH;
+			else if (is_poisonable(obj))
+				obj->opoisoned = OPOISON_FILTH;
+			else {
+				verbalize("All done!");
+				// steals your money
+			}
 		break;
 		case 8:
-			verbalize("Just imagine what acid-coated %s can do!", xname(obj));
+			verbalize("Just imagine what your acid-coated %s can do!", xname(obj));
 
 			charge = 90;
 			charge+= 10 * obj->quan;
@@ -5416,7 +5445,12 @@ struct monst *shkp;
 				if(obj->opoisoned == OPOISON_ACID) obj->opoisonchrgs += 2;
 				else obj->opoisonchrgs = 1;
 			}
-			obj->opoisoned = OPOISON_ACID;
+			else if (is_poisonable(obj))
+				obj->opoisoned = OPOISON_ACID;
+			else {
+				verbalize("All done!");
+				// steals your money
+			}
 		break;
 
 		default:
