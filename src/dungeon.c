@@ -2827,10 +2827,10 @@ boolean printdun;
 				Sprintf(eos(buf), " [Third Abyss]");
 			}
 		}
-		else if(In_outlands(&u.uz)){
-			if(dunlev(&u.uz) == 1) Sprintf(eos(buf)," [Gatetown]");
-			else if(dunlev(&u.uz) == 6) Sprintf(eos(buf)," [Spire]");
-			else if(dunlev(&u.uz) == 7) Sprintf(eos(buf)," [Sum of All]");
+		else if(In_outlands(&mptr->lev)){
+			if(dunlev(&umptr->lev) == 1) Sprintf(eos(buf)," [Gatetown]");
+			else if(dunlev(&mptr->lev) == 6) Sprintf(eos(buf)," [Spire]");
+			else if(dunlev(&mptr->lev) == 7) Sprintf(eos(buf)," [Sum of All]");
 		}
 	}
 
