@@ -496,6 +496,7 @@ E void FDECL(schedule_goto, (d_level *,BOOLEAN_P,BOOLEAN_P,int,
 E void NDECL(deferred_goto);
 E boolean FDECL(revive_corpse, (struct obj *, int));
 E void FDECL(revive_mon, (genericptr_t, long));
+E void FDECL(revive_mon_pickup, (genericptr_t, long));
 E void FDECL(moldy_corpse, (genericptr_t, long));
 E void FDECL(slimy_corpse, (genericptr_t, long));
 E void FDECL(shady_corpse, (genericptr_t, long));
