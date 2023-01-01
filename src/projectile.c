@@ -2856,7 +2856,12 @@ int tary;
 	/* message */
 	if (youagr || canseemon(magr)) {
 		char * bofp = flash_type(typ, ZAP_BREATH);
-		char * p = strstri(bofp, " of ")+4;
+		char * p = strstri(bofp, " of ");
+
+		if (p) {
+			p += 4;
+			if (!*p) p = NULL;
+		}
 		
 		/* some breaths sound better as "a noun of x" */
 		if (typ == AD_DISN || typ == AD_BLUD)
