@@ -1194,6 +1194,21 @@ Is_branchlev(lev)
 	return (branch *) 0;
 }
 
+d_level *
+branchlev_other_end(bptr, lev)
+branch * bptr;
+d_level * lev;
+{
+	d_level * other_end;
+	if (bptr->end1.dnum == lev->dnum && bptr->end1.dlevel == lev->dlevel)
+		other_end = &(bptr->end2);
+	else if (bptr->end2.dnum == lev->dnum && bptr->end2.dlevel == lev->dlevel)
+		other_end = &(bptr->end1);
+	else
+		other_end = (d_level *)0;
+	return other_end;
+}
+
 /* goto the next level (or appropriate dungeon) */
 void
 next_level(at_stairs)
