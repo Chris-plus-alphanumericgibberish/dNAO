@@ -6284,6 +6284,90 @@ struct obj *obj;
 	return;
 }
 
+void
+initialforgotwizardspells(num)
+int num;
+{
+	int spells[num];
+	int found = 0;
+	int i = 0, j;
+	int lim;
+	boolean ok;
+	while(num--){
+		lim = 500;
+		while(lim-- > 0){
+			spells[i] = rn2(SPE_STONE_TO_FLESH-SPE_DIG)+SPE_DIG;
+			if(objects[spells[i]].oc_level > 3)
+				continue;
+			ok = TRUE;
+			for(j = 0; j < found; j++)
+				if(spells[j] == spells[i])
+					ok = FALSE;
+			if(ok){
+				initialforgotspell(spells[i]);
+				found++;
+				i++;
+				break;
+			}
+		}
+	}
+}
+
+void
+initialforgotpriestspells(num)
+int num;
+{
+	int candidatespells[] = {SPE_LIGHT, SPE_DETECT_MONSTERS, SPE_DETECT_UNSEEN,
+				  SPE_CURE_BLINDNESS, SPE_EXTRA_HEALING,
+				  SPE_TURN_UNDEAD, SPE_REMOVE_CURSE, SPE_PROTECTION};
+	int spells[num];
+	int found = 0;
+	int i = 0, j;
+	int lim;
+	boolean ok;
+	while(num--){
+		lim = 500;
+		while(lim-- > 0){
+			spells[i] = ROLL_FROM(candidatespells);
+
+			ok = TRUE;
+			for(j = 0; j < found; j++)
+				if(spells[j] == spells[i])
+					ok = FALSE;
+			if(ok){
+				initialforgotspell(spells[i]);
+				found++;
+				i++;
+				break;
+			}
+		}
+	}
+}
+
+/* Learn a forgotten spell during creation of the initial inventory */
+void
+initialforgotspell(otyp)
+int otyp;
+{
+	int i;
+	knows_object(otyp);
+	for (i = 0; i < MAXSPELL; i++) {
+	    if (spellid(i) == otyp) {
+	         pline("Error: Spell %s already known.",
+	         		OBJ_NAME(objects[otyp]));
+	         return;
+	    }
+	    if (spellid(i) == NO_SPELL)  {
+	        spl_book[i].sp_id = otyp;
+	        spl_book[i].sp_lev = objects[otyp].oc_level;
+	        spl_book[i].sp_know = 0;
+	        return;
+	    }
+	}
+	impossible("Too many spells memorized!");
+	return;
+}
+
 /* Learn a ward during creation of the initial inventory */
 void
 initialward(obj)
