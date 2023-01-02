@@ -2498,7 +2498,7 @@ struct monst * commander;
 		if (!clear_path(mtmp->mx, mtmp->my, commander->mx, commander->my)
 			|| (mtmp == commander)
 			|| !mon_in_command_chain(mtmp, commander)
-			|| !(mtmp->mpeaceful == commander->mpeaceful && mtmp->mtame == commander->mtame))
+			|| !(mtmp->mpeaceful == commander->mpeaceful && !mtmp->mtame == !commander->mtame))
 			continue;
 
 		tmp = d(nd, sd);
