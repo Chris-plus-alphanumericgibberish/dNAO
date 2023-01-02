@@ -5919,7 +5919,7 @@ int tary;
 			return FALSE;
 		/* all: if nearby ally injured, or enemy near */
 		for (tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if (magr->mtame == tmpm->mtame || magr->mpeaceful == tmpm->mpeaceful){
+			if (!magr->mtame == !tmpm->mtame || magr->mpeaceful == tmpm->mpeaceful){
 				if (!mm_aggression(magr, tmpm)
 					&& (*hp(tmpm) < *hpmax(tmpm))
 					&& dist2(magr->mx, magr->my, tmpm->mx, tmpm->my) <= 3 * 3 + 1
