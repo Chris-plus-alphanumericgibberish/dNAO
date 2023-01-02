@@ -832,6 +832,7 @@ boolean digest_meal;
 		if(uring_art(ART_VILYA)){
 			perX += heal_vilya()*HEALCYCLE/10;
 		}
+		perX -= mon_healing_penalty(mon);
 		if(!nonliving(mon->data)){
 			if(perX < 1)
 				perX = 1;

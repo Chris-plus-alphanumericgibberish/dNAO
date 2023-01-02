@@ -1235,6 +1235,7 @@ E struct obj *NDECL(getnextgetobj);
 #ifdef SORTLOOT
 E int FDECL(sortloot_cmp, (struct obj *, struct obj *));
 #endif
+E int FDECL(mon_healing_penalty, (struct monst *));
 E int NDECL(u_healing_penalty);
 E int NDECL(u_clothing_discomfort);
 E struct obj * FDECL(outermost_armor, (struct monst *));
