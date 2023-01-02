@@ -1063,10 +1063,18 @@ betrayed(mtmp)
 register struct monst *mtmp;
 {
     int udist = distu(mtmp->mx, mtmp->my);
+	if(get_mx(mtmp, MX_EDOG)){
+		if(EDOG(mtmp)->loyal)
+			return FALSE;
+		else if(EDOG(mtmp)->waspeaceful && mtmp->mpeacetime == 0 && u.uhp >= u.uhpmax/10)
+			return FALSE;
+
+	}
 //	pline("testing for betrayal");
     if ( (udist < 4 || !rn2(3)) 
 			&& get_mx(mtmp, MX_EDOG)
 		    && (can_betray(mtmp->data) || roll_madness(MAD_PARANOIA))
+		    && u.uhp < u.uhpmax/2	/* You look like you're in a bad spot */
 		    && mtmp->mhp >= u.uhp	/* Pet is buff enough */
 		    && rn2(22) > mtmp->mtame  - 10	/* Roll against tameness */
 		    && rn2(EDOG(mtmp)->abuse + 2)) {
