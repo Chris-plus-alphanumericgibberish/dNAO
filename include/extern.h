@@ -2766,6 +2766,7 @@ E int FDECL(spiriteffects, (int,BOOLEAN_P));
 E int FDECL(nudzirath_hit_pile, (struct obj *, struct obj *));
 E int FDECL(nudzirath_hit_mon, (struct monst *, struct obj *));
 E void FDECL(nudzirath_shatter, (struct obj *, int, int));
+E int FDECL(spellenergy, (int));
 E int FDECL(spelleffects, (int,boolean,int));
 E int FDECL(wordeffects, (int));
 E void FDECL(losespells, (int));
@@ -2780,7 +2781,7 @@ E void NDECL(dopseudonatural);
 E void NDECL(dodestruction);
 E void NDECL(domindblast_strong);
 E boolean NDECL(doreinforce_spell);
-E void NDECL(update_alternate_spells);
+E void NDECL(update_externally_granted_spells);
 E void NDECL(expel_summons);
 
 /* ### steal.c ### */

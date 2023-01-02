@@ -17,6 +17,7 @@ struct spell {
     short	sp_id;			/* spell id (== object.otyp) */
     xchar	sp_lev;			/* power level */
     int		sp_know;		/* knowlege of spell */
+	boolean	sp_ext;			/* spell is externally provided (by an artifact) */
 };
 
 #define KEEN 20000
@@ -33,6 +34,7 @@ struct spell {
 #define ndecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - knw)
 #define spellid(spell)		spl_book[spell].sp_id
 #define spellknow(spell)	spl_book[spell].sp_know
+#define spellext(spell)		spl_book[spell].sp_ext
 #define emergency_spell(spell) (spellid(spell) == SPE_HEALING || spellid(spell) == SPE_EXTRA_HEALING || \
                                 spellid(spell) == SPE_MASS_HEALING || \
 							    spellid(spell) == SPE_CURE_BLINDNESS || spellid(spell) == SPE_FULL_HEALING || \
