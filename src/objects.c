@@ -886,7 +886,7 @@ CLOAK(("prayer-warded wrapping"),
 CLOAK(("elven cloak", "faded pall"),
 		0, 1,	7, 0, 10, 60,  9, 0, 3, CLOTH, CLR_BLACK, O_POWER(STEALTH)),
 CLOAK(("droven cloak", "cobwebbed cloak"), /*Needs encyc entry*/
-		0, 1,	1, 0, 10, 60,  10, 0, 3, CLOTH, CLR_GRAY),
+		0, 1,	1, 0, 10, 60,  10, 0, 3, CLOTH, CLR_GRAY, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK(("orcish cloak", "coarse mantelet"),
 		0, 0,	8, 0, 10, 40, 10, 0, 2, CLOTH, CLR_BLACK),
 CLOAK(("dwarvish cloak", "hooded cloak"),
