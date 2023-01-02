@@ -6427,7 +6427,7 @@ struct obj *obj;
 				}
 			break;
 			case WAGE_OF_LUST:
-				tmp = obj->cursed ? 99 : 9;
+				tmp = obj->cursed ? 22 : 9;
 
 				if(!BlowingWinds){
 					pline("Hurricane-force winds surround you!");
@@ -6454,10 +6454,10 @@ struct obj *obj;
 						}
 						else {
 							if(obj->cursed){
-								mtmp->mhp -= min(999, mtmp->mhpmax);
+								mtmp->mhp -= min(333, mtmp->mhpmax);
 							}
 							else {
-								mtmp->mhp -= min(99, mtmp->mhpmax/2);
+								mtmp->mhp -= max(33, min(99, mtmp->mhpmax/2));
 							}
 							if(mtmp->mhp <= 0){
 								pline("%s starves.", Monnam(mtmp));
