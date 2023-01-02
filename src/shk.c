@@ -1065,6 +1065,7 @@ register struct obj *obj, *merge;
 #endif
 		}
 	}
+	interrupt_multishot(obj, merge);
 
 	if (donning(obj)) cancel_don();
 	
