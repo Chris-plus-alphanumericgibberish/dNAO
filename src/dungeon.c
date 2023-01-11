@@ -2828,7 +2828,7 @@ boolean printdun;
 			}
 		}
 		else if(In_outlands(&mptr->lev)){
-			if(dunlev(&umptr->lev) == 1) Sprintf(eos(buf)," [Gatetown]");
+			if(dunlev(&mptr->lev) == 1) Sprintf(eos(buf)," [Gatetown]");
 			else if(dunlev(&mptr->lev) == 6) Sprintf(eos(buf)," [Spire]");
 			else if(dunlev(&mptr->lev) == 7) Sprintf(eos(buf)," [Sum of All]");
 		}
