@@ -553,26 +553,14 @@ curses_print_glyph(winid wid, XCHAR_P x, XCHAR_P y, int glyph)
 {
     glyph_t ch;
     int color;
-    unsigned int special;
+    unsigned int bgcolor;
     int attr = -1;
 
     /* map glyph to character and color */
-    mapglyph(glyph, &ch, &color, &special, x, y);
-    if ((special & MG_PET) && iflags.hilite_pet)
-        attr = curses_color_attr(color, CLR_BLUE);
-    else if ((special & MG_STAIRS) && iflags.hilite_hidden_stairs)
-        attr = curses_color_attr(color, CLR_RED);
-    else if ((special & MG_PEACE) && iflags.hilite_peaceful)
-        attr = curses_color_attr(color, CLR_BROWN);
-    else if (special & MG_ZOMBIE) {
-        if (iflags.hilite_zombies)
-            attr = curses_color_attr(color, CLR_GREEN);
-        if (iflags.zombie_z)
-            ch = 'Z';
-    } else if ((special & MG_DETECT) && iflags.hilite_detected)
-        attr = curses_color_attr(color, CLR_MAGENTA);
-    else if (special & MG_OBJPILE && iflags.hilite_obj_piles)
-        attr = curses_color_attr(color, CLR_BLUE);
+    mapglyph(glyph, &ch, &color, &bgcolor, x, y);
+	if (bgcolor != NO_COLOR) {
+		attr = curses_color_attr(color, bgcolor);
+	}
 
     if (iflags.cursesgraphics)
         ch = curses_convert_glyph(ch, glyph);

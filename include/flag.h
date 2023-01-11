@@ -371,7 +371,6 @@ struct instance_flags {
 	boolean wc_color;		/* use color graphics                  */
 	boolean wc_hilite_pet;		/* hilight pets (blue)                    */
 	boolean wc_hilite_peaceful;		/* hilight peaceful monsters (brown)   */
-	boolean wc_hilite_zombies;		/* hilight pets  (green)               */
 	boolean wc_zombie_z;		/* show zombies as Z of monster's color    */
 	boolean wc_hilite_detected;		/* hilight detected monsters (magenta)   */
 	boolean wc_ascii_map;		/* show map using traditional ascii    */
@@ -453,6 +452,12 @@ struct instance_flags {
 #ifdef REALTIME_ON_BOTL
   boolean  showrealtime; /* show actual elapsed time */
 #endif
+	struct {
+		int set;
+		int fg;
+		int bg;
+		char symbol;
+	} monstertemplate[MAXTEMPLATE];
 };
 
 /*
@@ -466,8 +471,6 @@ struct instance_flags {
 #endif
 #define hilite_pet wc_hilite_pet
 #define hilite_peaceful wc_hilite_peaceful
-#define hilite_zombies wc_hilite_zombies
-#define zombie_z wc_zombie_z
 #define hilite_detected wc_hilite_detected
 #define use_inverse wc_inverse
 #ifdef MAC_GRAPHICS_ENV
@@ -506,5 +509,10 @@ extern NEARDATA struct instance_flags iflags;
 	(((magr) == &youmonst) ? WIZCOMBATDEBUG_UVM : 0) | \
 	(((mdef) == &youmonst) ? WIZCOMBATDEBUG_MVU : 0)   \
 	))
+
+/* monstertemplate options */
+#define MONSTERTEMPLATE_FOREGROUND	0x1
+#define MONSTERTEMPLATE_BACKGROUND	0x2
+#define MONSTERTEMPLATE_SYMBOL		0x4
 
 #endif /* FLAG_H */
