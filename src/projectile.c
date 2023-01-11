@@ -30,6 +30,20 @@ static boolean u_was_twoweap;
 static boolean u_was_swallowed;
 static long old_wep_mask;
 
+/* Keep ammo pointer sane whilst multishotting.
+ * If merging ammo into a new stack, pass the new stack into merge (otherwise leave as null)
+ */
+void
+interrupt_multishot(ammo, merge)
+struct obj * ammo;
+struct obj * merge;
+{
+	if (ammo != m_shot.x)
+		return;
+	m_shot.x = merge;
+}
+
+
 /* projectile()
  * 
  * Omnibus projectile firing function
@@ -2468,6 +2482,7 @@ boolean forcedestroy;
 	m_shot.s = (launcher) ? TRUE : FALSE;
 	m_shot.o = ammo->otyp;
 	m_shot.n = multishot;
+	m_shot.x = ammo;
 	
 	if (!shotlimit && ammo->oartifact == ART_FLUORITE_OCTAHEDRON)
 		shotlimit = m_shot.n;
@@ -2507,20 +2522,23 @@ boolean forcedestroy;
 	int range = calc_range(&youmonst, ammo, launcher, &hurtle_dist);
 
 	/* call projectile() to shoot n times */
-	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
+	for (m_shot.i = 1; m_shot.x && m_shot.i <= m_shot.n; m_shot.i++) {
 		int dx = u.dx, dy = u.dy, dz = u.dz;
-		boolean impaired = misthrow(&youmonst, ammo, launcher, m_shot.s, &dx, &dy, &dz);
+		boolean impaired = misthrow(&youmonst, m_shot.x, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
-		(void)projectile(&youmonst, ammo, launcher, HMON_PROJECTILE|(m_shot.s ? HMON_PROJECTILE|HMON_FIRED : 0),
+		(void)projectile(&youmonst, m_shot.x, launcher, HMON_PROJECTILE|(m_shot.s ? HMON_PROJECTILE|HMON_FIRED : 0),
 			u.ux, u.uy, dx, dy, dz, range, forcedestroy, TRUE, impaired);
 		if (Weightless || Levitation)
 			hurtle(-u.dx, -u.dy, hurtle_dist, TRUE, TRUE);
 	}
+	if (m_shot.i <= m_shot.n)
+		Your("firing is cut short!");
 
 	/* end */
 	m_shot.n = m_shot.i = 0;
 	m_shot.o = STRANGE_OBJECT;
 	m_shot.s = FALSE;
+	m_shot.x = (struct obj *)0;
 	/* madness on losing an object */
 	if (takenfromyourinv && roll_madness(MAD_TALONS)) {
 		You("panic after throwing your property!");
