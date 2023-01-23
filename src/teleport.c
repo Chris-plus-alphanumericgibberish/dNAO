@@ -92,6 +92,12 @@ unsigned gpflags;
 	if (!ACCESSIBLE(levl[x][y].typ)) {
 		if (!(is_pool(x,y, FALSE) && ignorewater)) return FALSE;
 	}
+	if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[x][y].typ == AIR){
+		if(mtmp){
+			return mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION);
+		}
+		else return FALSE;
+	}
 
 	if (closed_door(x, y) && (!mdat || !amorphous(mdat)))
 		return FALSE;
@@ -1045,7 +1051,7 @@ level_tele()
 	    }
 	    newlevel.dnum = u.uz.dnum;
 	    newlevel.dlevel = llimit + newlev;
-	    schedule_goto(&newlevel, FALSE, FALSE, 0, (char *)0, (char *)0);
+	    schedule_goto(&newlevel, FALSE, FALSE, 0, (char *)0, (char *)0, 0);
 	    return;
 	}
 #endif
@@ -1157,7 +1163,7 @@ level_tele()
 #endif
 	    get_level(&newlevel, newlev);
 	}
-	schedule_goto(&newlevel, FALSE, FALSE, 0, (char *)0, (char *)0);
+	schedule_goto(&newlevel, FALSE, FALSE, 0, (char *)0, (char *)0, 0);
 	/* in case player just read a scroll and is about to be asked to
 	   call it something, we can't defer until the end of the turn */
 	if (u.utotype && !flags.mon_moving) deferred_goto();
@@ -1211,12 +1217,12 @@ register struct trap *ttmp;
 		schedule_goto(&target_level, FALSE, FALSE, painting,
 				  painting ? "You find yourself next to a scrap of canvas." :
 				  "You feel dizzy for a moment, but the sensation passes.",
-				  (char *)0);
+				  (char *)0, 0);
 	} else {
 		target_level = ttmp->dst;
 		schedule_goto(&target_level, FALSE, FALSE, TRUE,
 				  "You feel dizzy for a moment, but the sensation passes.",
-				  (char *)0);
+				  (char *)0, 0);
 	}
 }
 

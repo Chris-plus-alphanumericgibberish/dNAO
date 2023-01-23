@@ -78,6 +78,7 @@ E int NDECL(partial_action);
 E int NDECL(check_partial_action);
 E int FDECL(check_res_engine, (struct monst *, int));
 E void FDECL(add_class, (char *, char));
+E boolean FDECL(set_obj_shape, (struct obj *, long));
 E void FDECL(salve_effect, (struct obj *));
 
 /* ### artifact.c ### */
@@ -492,7 +493,7 @@ E void NDECL(save_currentstate);
 #endif
 E void FDECL(goto_level, (d_level *,BOOLEAN_P,BOOLEAN_P,int));
 E void FDECL(schedule_goto, (d_level *,BOOLEAN_P,BOOLEAN_P,int,
-			     const char *,const char *));
+			     const char *,const char *,int));
 E void NDECL(deferred_goto);
 E boolean FDECL(revive_corpse, (struct obj *, int));
 E void FDECL(revive_mon, (genericptr_t, long));
@@ -942,6 +943,7 @@ E long FDECL(rndexp, (BOOLEAN_P));
 /* ### explode.c ### */
 
 E void FDECL(explode, (int,int,int,int,int,int,int));
+E void FDECL(explode_pa, (int,int,int,int,int,int,int,struct permonst *));
 E void FDECL(explode_yours, (int,int,int,int,int,int,int,boolean));
 E void FDECL(splash, (int,int,int,int,int,int,int,int));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *, long *, struct monst *));
@@ -1563,6 +1565,7 @@ E void FDECL(dealloc_obj, (struct obj *));
 E int FDECL(hornoplenty, (struct obj *, boolean));
 E void FDECL(obj_ice_effects, (int, int, BOOLEAN_P));
 E long FDECL(peek_at_iced_corpse_age, (struct obj *));
+E void FDECL(size_and_shape_to_fit, (struct obj *, struct monst *));
 E void FDECL(doMaskStats, (struct obj *));
 #ifdef WIZARD
 E void NDECL(obj_sanity_check);
@@ -1574,11 +1577,13 @@ E boolean FDECL(isspacious, (struct mkroom *));
 E void NDECL(mksepulcher);
 E void NDECL(mkmivault);
 E void FDECL(mkmivaultitem,(struct obj *));
+E struct obj * NDECL(mkjewel);
 E struct obj * NDECL(mklolthvaultitem);
 E struct obj * FDECL(mkhellvaultitem,(int));
 E void FDECL(mkhellvaultitem_cnt,(struct obj *, int, boolean));
 E void NDECL(place_lolth_vaults);
 E void NDECL(place_chaos_forest_features);
+E void NDECL(place_drow_healer_features);
 E void NDECL(place_law_features);
 E void NDECL(place_neutral_features);
 E void NDECL(place_sum_all_features);
@@ -2446,7 +2451,7 @@ E void NDECL(unpunish);
 E boolean FDECL(cant_create, (int *, BOOLEAN_P));
 #ifdef WIZARD
 E int NDECL(wiz_kill_all);
-E struct monst * FDECL(create_particular, (unsigned long, int, int, unsigned long, unsigned long, int));
+E struct monst * FDECL(create_particular, (int, int, unsigned long, int, int, unsigned long, unsigned long, int, char *));
 #endif
 
 /* ### rect.c ### */

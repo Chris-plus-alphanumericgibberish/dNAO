@@ -227,11 +227,12 @@
 #define AD_PERH     147 /* "Per-Hit-Die damage (x damage per HD of the defender, be careful with damage die size!) */
 #define AD_SVPN     148 /* Severe poison that partially pierces poison resistance */
 #define AD_HLUH     149 /* Holy/Unholy energy (MM-stype damage not resisted by MR and doubled against both holy- and unholy-haters) */
+#define AD_TSMI     150 /* Tentacles Steal Magic Items */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	150
+#define AD_DUNSTAN	151
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

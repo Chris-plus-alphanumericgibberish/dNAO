@@ -4200,6 +4200,7 @@ int godnum;
 		case GOD_LOLTH: return LOLTH_SYMBOL;
 		case GOD_GHAUNADAUR: return GHAUNADAUR_SYMBOL;
 		case GOD_VER_TAS: return VER_TAS_SYMBOL;
+		case GOD_PEN_A: return PEN_A_SYMBOL;
 		case GOD_EILISTRAEE: return EILISTRAEE_SYMBOL;
 		case GOD_KIARANSALI: return KIARANSALEE_SYMBOL;
 		case GOD_THE_BLACK_MOTHER: return GOATMOM_FACTION;
@@ -4535,15 +4536,29 @@ int x, y;
  * Any attending priests will still get upset, though!
  */
 boolean
-gods_are_friendly(god1, god2)
-int god1, god2;
+gods_are_friendly(from_god, to_god)
+int from_god, to_god;
 {
 	/* elf-gods are friendly with each other */
 	/* NOTE: assumes order of elfgods in godlist.h */
-	if ((GOD_OROME <= god1 && god1 <= GOD_LORIEN)
-		&& (GOD_OROME <= god2 && god2 <= GOD_LORIEN))
+	if ((GOD_OROME <= from_god && from_god <= GOD_LORIEN)
+		&& (GOD_OROME <= to_god && to_god <= GOD_LORIEN))
 	{
 		return TRUE;
+	}
+	if(from_god == GOD_PEN_A || to_god == GOD_PEN_A){
+		if(from_god == GOD_ILMATER || to_god == GOD_ILMATER)
+			return TRUE;
+		if(from_god == GOD_EILISTRAEE || to_god == GOD_EILISTRAEE)
+			return TRUE;
+	}
+	if(from_god == GOD_VANDRIA || from_god == GOD_SEHANINE){
+		if(to_god == GOD_VANDRIA)
+			return TRUE;
+		if(to_god == GOD_SEHANINE)
+			return TRUE;
+		if(to_god == GOD_CORELLON)
+			return TRUE; /*Note: but not FROM Corellon*/
 	}
 
 	return FALSE;

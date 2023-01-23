@@ -405,6 +405,7 @@ struct obj *otmp;
 	case SPE_FULL_HEALING:
 	case SPE_MASS_HEALING:{
 		int delta = mtmp->mhp;
+		const char *starting_word_ptr = injury_desc_word(mtmp);
 		int health = otyp == SPE_FULL_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
 		reveal_invis = TRUE;
 		if(has_template(mtmp, PLAGUE_TEMPLATE) && otyp == SPE_FULL_HEALING){
@@ -448,10 +449,20 @@ struct obj *otmp;
 							otyp != SPE_HEALING ? " much" : "" );
 					}
 					else {
-						pline("%s %s %s.",
-							hurtmonbuf, 
-							(delta != 0 && mtmp->mhp < mtmp->mhpmax) ? "now looks only" : "looks",
-							injury_desc_word(mtmp));
+						const char * ending_word_ptr = injury_desc_word(mtmp);
+						// Note: this compares the string pointers recieved from injury_desc_word. They should be the same if the level is unchanged, and different otherwise.
+						if(starting_word_ptr != ending_word_ptr){
+							pline("%s %s %s.",
+								hurtmonbuf, 
+								(mtmp->mhp < mtmp->mhpmax) ? "now looks only" : "looks",
+								ending_word_ptr);
+						}
+						else if(delta != 0){
+							pline("%s looks better, but still %s.", hurtmonbuf, ending_word_ptr);
+						}
+						// else {
+							// pline("%s is still %s.", hurtmonbuf, ending_word_ptr);
+						// }
 					}
 				}
 			}
@@ -1872,6 +1883,10 @@ int id;
 		gem->quan = 1;
 		gem->owt = weight(gem);
 		add_to_container(otmp, gem);
+	}
+	//Transfer body type flags. A non-armor item that becomes armor SHOULD end up MB_HUMANOID
+	if(is_suit(otmp) || is_shirt(otmp) || is_helmet(otmp)){
+		set_obj_shape(otmp, obj->bodytypeflag);
 	}
 
 	/* update the weight */

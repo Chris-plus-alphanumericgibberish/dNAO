@@ -179,7 +179,6 @@ struct obj {
 #define oarmed olocked
 #define odrained olocked	/* drained corpse */
 	Bitfield(obroken,1);	/* lock has been broken */
-#define ohaluengr obroken	/* engraving on ring isn't a ward */
 #define odebone obroken		/* corpse has been de-boned */
 	Bitfield(otrapped,1);	/* container is trapped */
 #define obolted otrapped	/* magic chest is permanently attached to floor */
@@ -209,7 +208,8 @@ struct obj {
 	//See objclass for values
 	Bitfield(nomerge,1);	/* temporarily block from merging */
 	Bitfield(forceconf,1);	/* when set on a scroll, forces the confusion effect. Meant for use with pseudo objects, isn't checked while merging */
-	/* 11 free bits in this field, I think -CM */
+	Bitfield(ohaluengr,1);	/* engraving on item isn't a "real" ward */
+	/* 10 free bits in this field, I think -CM */
 	
 	int obj_color;
 	union {
@@ -302,6 +302,7 @@ struct obj {
 			/*Records runes for wooden weapons */
 			
 	long ovar1;		/* extra variable. Specifies: */
+#define ovar1_darklight ovar1
 	/* Number of viperwhip heads */
 	/* Moon axe phase */
 	/* Acid venom non-1d6 damage */
@@ -852,10 +853,10 @@ struct obj {
 				|| (otmp)->otyp == DWARVISH_ROUNDSHIELD)
 #define is_gnomish_armor(otmp)	((otmp)->otyp == GNOMISH_POINTY_HAT)
 
-#define is_wide_helm(otmp)		((otmp)->otyp == SEDGE_HAT\
-				|| (otmp)->otyp == WAR_HAT\
-				|| (otmp)->otyp == WIDE_HAT\
-				|| (otmp)->otyp == WITCH_HAT)
+#define is_wide_helm(otmp)		((otmp)->otyp == SEDGE_HAT \
+				|| (otmp)->otyp == WAR_HAT \
+				|| (otmp)->otyp == WIDE_HAT \
+				|| (otmp)->otyp == WITCH_HAT )
 
 #define is_plusten(otmp)	(arti_plusten(otmp)\
 								|| is_rakuyo(otmp)\
@@ -1023,6 +1024,7 @@ struct obj {
 #define MAX_OIL_IN_FLASK 400	/* maximum amount of oil in a potion of oil */
 #define Is_darklight_source(otmp) ((otmp)->otyp == SHADOWLANDER_S_TORCH || \
 			 (otmp)->otyp == CHUNK_OF_FOSSIL_DARK ||\
+			 ((otmp)->otyp == DWARVISH_HELM && (otmp)->ovar1_darklight) ||\
 			 (is_lightsaber(otmp) && otmp->cobj && otmp->cobj->otyp == CHUNK_OF_FOSSIL_DARK))
 // NOT an exhaustive list, but this SHOULD be everything that would fall under snuff_lit
 // and shouldn't be put out by darkness spells
@@ -1092,6 +1094,17 @@ struct obj {
 
 #define is_dress(onum)		(onum == NOBLE_S_DRESS || onum == GENTLEWOMAN_S_DRESS || onum == PLAIN_DRESS || onum == VICTORIAN_UNDERWEAR)
 
+#define is_hat(otmp) (otmp->otyp == SEDGE_HAT \
+			 || otmp->otyp == WIDE_HAT \
+			 || otmp->otyp == GNOMISH_POINTY_HAT \
+			 || otmp->otyp == FEDORA \
+			 || otmp->otyp == CORNUTHAUM \
+			 || otmp->otyp == WITCH_HAT \
+			 || otmp->otyp == DUNCE_CAP \
+			 || otmp->otyp == WAR_HAT \
+			 || otmp->otyp == SHEMAGH \
+			 || otmp->otyp == find_gcirclet() \
+			)
 #define arm_blocks_upper_body(onum)		(objects[onum].oc_dtyp&UPPER_TORSO_DR)
 #define arm_blocks_lower_body(onum)		(objects[onum].oc_dtyp&LOWER_TORSO_DR)
 
@@ -1111,6 +1124,8 @@ struct obj {
 							  || onum == DROVEN_CHAIN_MAIL\
 							  || onum == CONSORT_S_SUIT\
 							)
+
+#define is_readable_armor(obj)	((obj)->oward)
 
 #define is_museable_amulet(otyp) (otyp == AMULET_OF_LIFE_SAVING \
 								||otyp == AMULET_OF_REFLECTION \

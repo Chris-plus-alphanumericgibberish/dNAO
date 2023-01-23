@@ -3180,18 +3180,9 @@ spiriteffects(power, atme)
 				mon->m_lev += (u.ulevel - mon->m_lev)/3;
 				mon->mhpmax = (mon->m_lev * 8) - 4;
 				mon->mhp =  mon->mhpmax;
-				for(curmon = fmon; curmon; curmon = curmon->nmon){
-					if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){
-						numdogs++;
-						if(!weakdog) weakdog = curmon;
-						if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-					}
-				}
-				if(weakdog && numdogs > dog_limit()) start_timer(5L, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
 				mon->mspiritual = TRUE;
+				// May result in the new dog getting the vanish timer if it's weakest, but that's fine.
+				vanish_dogs();
 			}
 		}break;
 		case PWR_ROOT_SHOUT:{

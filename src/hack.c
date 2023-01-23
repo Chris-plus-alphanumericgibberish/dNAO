@@ -1894,6 +1894,17 @@ stillinwater:;
 			zap_over_floor(u.ux, u.uy, AD_COLD, WAND_CLASS, FALSE, NULL);
 		}
 	}
+	if(!Levitation && !Flying && In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[u.ux][u.uy].typ == AIR){
+		if(on_level(&u.uz, &qstart_level) && !ok_to_quest()){
+			pline("A mysterious force prevents you from falling.");
+		} else {
+			struct d_level target_level;
+			target_level.dnum = u.uz.dnum;
+			target_level.dlevel = qlocate_level.dlevel+1;
+			int dist = qlocate_level.dlevel+1 - u.uz.dlevel;
+			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6));
+		}
+	}
 	check_special_room(FALSE);
 #ifdef SINKS
 	if(IS_SINK(levl[u.ux][u.uy].typ) && Levitation)

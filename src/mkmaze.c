@@ -731,6 +731,43 @@ fixup_special()
 			}
 		}
 	}
+	/* DROW QUEST: transfer equip */
+	if (urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && In_quest(&u.uz)) {
+		if(qlocate_level.dlevel < u.uz.dlevel)
+			place_drow_healer_features();
+		struct obj *chest;
+		struct obj *obj, *nobj;
+		struct monst *mon;
+		int ctyp = CHEST;
+		if(Is_nemesis(&u.uz))
+			ctyp = SACK;
+		for(chest = fobj; chest; chest = chest->nobj){
+			if(chest->otyp == ctyp)
+				break;
+		}
+		if(chest) for(mon = fmon; mon; mon = mon->nmon){
+			if(mon->entangled != SHACKLES)
+				continue;
+			for(obj = mon->minvent; obj; obj = nobj){
+				nobj = obj->nobj;
+				if(obj->otyp == SHACKLES)
+					continue;
+				mon->misc_worn_check &= ~obj->owornmask;
+				update_mon_intrinsics(mon, obj, FALSE, FALSE);
+				if (obj->owornmask & W_WEP){
+					setmnotwielded(mon,obj);
+					MON_NOWEP(mon);
+				}
+				if (obj->owornmask & W_SWAPWEP){
+					setmnotwielded(mon,obj);
+					MON_NOSWEP(mon);
+				}
+				obj->owornmask = 0L;
+				obj_extract_self(obj);
+				add_to_container(chest, obj);
+			}
+		}
+	}
 	/* PRIEST QUEST: make graveyard */
 	if (Role_if(PM_PRIEST) && In_quest(&u.uz)) {
 		/* less chance for undead corpses (lured from lower morgues) */

@@ -2327,15 +2327,16 @@ int *result;
 	int nitems = 0;
 	boolean goatspawn = (magr->data->mtyp == PM_SMALL_GOAT_SPAWN || magr->data->mtyp == PM_GOAT_SPAWN || magr->data->mtyp == PM_GIANT_GOAT_SPAWN || magr->data->mtyp == PM_BLESSED);
 	boolean noflee = (magr->isshk && magr->mpeaceful);
+	boolean mi_only = is_chuul(magr->data);
 	if(attk->adtyp == AD_SITM){
 		/* select item from defender's inventory */
 		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-			if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask))
+			if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask) && (!mi_only || is_magic_obj(otmp)))
 				nitems++;
 		if(nitems){
 			nitems = rnd(nitems);
 			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-				if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask))
+				if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask) && (!mi_only || is_magic_obj(otmp)))
 					if(--nitems <= 0)
 						break;
 		}

@@ -2110,6 +2110,262 @@ the Astral plane.  There you must offer the Amulet
 to %d."
 %E
 #
+#	Drow Healer
+#
+%Cc Dhl 00001
+What sorcery has brought you back to Menzoberranzan?
+You thought you had finally escaped from your depraved homeland.
+
+Despair chokes your mind. Why have your companions betrayed you?
+The priestesses of Lolth will destroy you for fleeing their mercy.
+
+...Yet, all is not as it should be. You %x the shrieker mushrooms
+are feral and hungry, and the scent of disease hangs in the cavern
+air.
+
+Perhaps you should seek out Sister T'eirastra, the head of the
+mendicant order to which you now belong?
+%E
+%Cp Dhl 00002
+After your last experience you expected to be here, but you certainly
+did not expect to see things so much worse.  This time you must
+succeed.
+%E
+%Cp Dhl 00003
+You have the oddest feeling that this may be the last time you
+are to vist %H.
+%E
+%Cp Dhl 00005
+"We were sent by the surface alliance to investigate the Underdark disturbance"
+%E
+%Cp Dhl 00006
+"The demonic incursion has been delt with, but now something drives these kuo-toa against you."
+%E
+%Cp Dhl 00007
+"Lolth has betrayed you!"
+%E
+%Cp Dhl 00008
+"We've occupied as much of the city as possible. Ilmater shall send aid!"
+%E
+%Cp Dhl 00009
+"The dwarf-giants have taken much of the lower levels."
+%E
+%Cp Dhl 00010
+"We must work together to save all our peoples."
+%E
+%Cp Dhl 00011
+"I think a demon lord was behind the attacks."
+%E
+%Cp Dhl 00012
+"Pen'a and Ilmater shall free this city from the webs of Lolth!"
+%E
+%Cp Dhl 00013
+"We're holding as much of the city as possible. Ilmater shall send aid!"
+%E
+%Cp Dhl 00014
+"The dwarf-giants have taken much of the lower levels."
+%E
+%Cc Dhl 00015
+You approach the strange purple frog-creature. He is unlike any
+kuo toa you've ever %x, for he exudes an aura of calm
+enlightenment.
+
+"Greetings %p, my %S.  I am glad to see you whole.
+
+"Though we have never met, the cadence has shown me that you
+alone can reverse the great harm that my people have
+unleashed on the world.
+
+"Come closer and let me lay hands on you, and determine if you have
+the skills necessary to accomplish this mission."
+%E
+%Cp Dhl 00016
+"Again, my %S, you stand before me.  Have you improved your skills since
+our last meeting?"
+%E
+%Cp Dhl 00017
+"Once more, %p, you have returned.  Hopefully %d has been 
+with you and your skills have improved."
+%E
+%Cc Dhl 00018
+"You have become polluted my %S.
+
+"The cadence has turned away from you. Begon from this place,
+inflict no more harm on your %shood. Lolth will be happy to
+hear that you are once again practicing your arts on the
+unsuspecting, but I hope you will someday find forgiveness."
+%E
+%Cc Dhl 00019
+"Alas, %p, you are yet too inexperienced to deal with the rigors
+of such a task.  You must be able to draw on the knowledge of botany,
+vetenary, and alchemy before I can send you on this quest with good
+conscience.
+
+"Return when you wear %Ra's caduceus."
+%E
+%Cc Dhl 00020
+"You have learned much of the remedies that benefit, but you must also
+know which physic for which ail.  That is why %ds teachings are a
+part of your training.
+
+"Return to us when you have healed thyself."
+%E
+%Cc Dhl 00021
+"You are ready. As I said before, a great evil has been unleashed
+on the world by my people. With the help of a mad mind flayer and
+the Ana'auo, an artifact of healing stolen from your %shood, 
+they have graven an image of Blibdoolpoolp into the world.
+
+"This plague is the result of Ana'auo's perversion. It now draws
+the health from your people in order to power the image of
+Blibdoolpoolp.
+
+"You must travel to the slums below Menzoberranzan, recover
+the Ana'auo, and put an end to this monstrosity. Be careful."
+%E
+%Cp Dhl 00025
+"Go with %d as your guide, %p."
+%E
+%Cp Dhl 00026
+"Beware the water-magic of Blibdoolpoolp."
+%E
+%Cp Dhl 00027
+"Be pure, my %S."
+%o."
+%E
+%Cp Dhl 00028
+"Remember your studies, and you will prevail!"
+%E
+%Cp Dhl 00029
+"Remember this, %n can twist the powers of the Ana'auo to hurt instead of heal."
+%E
+%Cp Dhl 00030
+"Call upon %d when your need is greatest.  You will be answered."
+%E
+%Cp Dhl 00031
+"You will face many foes. Consider well the strengths of each!"
+%E
+%Cp Dhl 00032
+"The plague grows worse as we speak.  Hurry, %p!"
+%E
+%Cp Dhl 00033
+"I fear that which drives the cult of 'Y' will move against
+you if you tary."
+%E
+%Cp Dhl 00034
+"Reclaim the Ana'auo as soon as possible. Blibdoolpoolp may prove immortal otherwise."
+%E
+%Cc Dhl 00035
+You have nearly reached %i, where the commoners live.
+Screams, shouts, and the smell of sickness fill the air.
+
+You fear that whatever suffering was felt by the nobles
+has been visited a hundredfold upon the commoners.
+%E
+%Cp Dhl 00036
+Once again you approach the %i.
+%E
+%Cc Dhl 00040
+You sense that you have reached the ritual site. You must find
+the perpetrators of this madness.
+
+Steeling yourself against the wails of the ill that pierce your ears,
+you hurry on your task.  Maybe with the Ana'auo you can heal them on
+your return, but not now.
+%E
+%Cp Dhl 00041
+Once again, you have reached the ritual site.
+%E
+%Cc Dhl 00050
+"Plib! Blip! Blibdoolpoolp! Plip! Blib! Blibdoolpoolp!"
+%E
+%Cp Dhl 00051
+"Burblipahgug!"
+%E
+%Cp Dhl 00052
+"Blubruploopl!"
+%E
+%Cp Dhl 00053
+"Chchchchchshshhhhh!"
+%E
+%Cp Dhl 00060
+"Glubarub!"
+%E
+%Cp Dhl 00061
+"Bloopblorborbdor!"
+%E
+%Cp Dhl 00062
+"Blorpblooboolflp!"
+%E
+%Cp Dhl 00063
+"Glackdakk!"
+%E
+%Cp Dhl 00064
+"Bloogagadool!"
+%E
+%Cp Dhl 00065
+"Gloopglop!"
+%E
+%Cp Dhl 00066
+"Drip. Drop."
+%E
+%Cp Dhl 00067
+"Dumoogoolgoorn! Dumoogoolgoorn!"
+%E
+%Cp Dhl 00068
+"Loolooploop! Blibloolooploop!"
+%E
+%Cp Dhl 00069
+"Voonroondoo."
+%E
+%Cc Dhl 00070
+This double sword has been crudely fashioned by fusing the
+hilts of two long swords together with a pair of claw-ended
+shackles. Your heart sinks as you recognize the melted
+remnants of the Ana'auo.
+
+As you pick up the swordstaff, though, you feel its healing
+begin to warm your soul. You breathe a sigh of relief as it
+does, for it seems the Ana'auo still functions despite
+the frightful, half-seen muatations wrought upon it by 
+the imaginations of the kuo toa.
+%E
+%Cc Dhl 00080
+The battered body of %n slumps to the ground and rots to a
+putrescent puddle, separating into its constituent parts
+as it does.
+%E
+%Cc Dhl 00081
+As soon as %l sees %o he summons your %ss.
+
+Gently, %l reaches out and touches %o.
+He instructs each of the assembled to do the same.  When everyone
+has finished he speaks to you.
+
+    Now that we have been replenished we can defeat this plague.  You must
+    take %o with you and replenish the worlds you have
+    been called upon to travel next. It seems my people have imagined
+    a great and holy weapon. Use it well.
+%E
+%Cc Dhl 00082
+%l cautiously handles %o while watching you.
+
+"You are its keeper now, and the time has come to resume your search
+for the Amulet.  %Z await your return through the
+magic portal which brought you here."
+%E
+%Cp Dhl 00090
+"You have again returned to us, %p.  We have done well in your
+absence, yes?  How fare you upon your quest for the Amulet?"
+%E
+%Cc Dhl 00091
+"Ah, you have recovered the Amulet, %p.  Well done!
+
+"Now, you should know that you must travel through the Elemental Planes
+to the Astral, and there return the Amulet to %d.  Go forth and
+may our prayers be as a wind upon your back."
+%E
+#
 #	Drow general quest
 #
 %Cc Dro 00001

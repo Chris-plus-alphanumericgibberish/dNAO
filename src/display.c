@@ -498,6 +498,8 @@ display_monster(x, y, mon, sightflags, worm_tail)
 				has_template(mon, SKELIFIED) ||
 				has_template(mon, CRYSTALFIED) ||
 				has_template(mon, SLIME_REMNANT) ||
+				has_template(mon, SPORE_ZOMBIE) ||
+				has_template(mon, CORDYCEPS) ||
 				has_template(mon, FRACTURED)
 			)) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?

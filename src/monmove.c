@@ -777,6 +777,10 @@ boolean digest_meal;
 			if(mon->mcan) mon->mdoubt = TRUE;
 		}
 	}
+	if(mon->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !mon_has_arti(mon, 0) && quest_status.touched_artifact && mon->mhp > 1){
+		mon->mhp -= 1;
+		return;
+	}
 	/* Clouds on Lolth's level deal damage */
 	if(Is_lolth_level(&u.uz) && levl[mon->mx][mon->my].typ == CLOUD){
 		if (!(nonliving(mon->data) || breathless_mon(mon))){
@@ -1100,8 +1104,7 @@ int mtyp;
 		otmp = mksobj(armors[i], NO_MKOBJ_FLAGS);
 		set_material_gm(otmp, SHELL_MAT);
 		otmp->objsize = size;
-		if(mtyp == PM_UISCERRE_ELADRIN && armors[i] == PLATE_MAIL)
-			otmp->bodytypeflag = MB_HUMANOID|MB_SLITHY;
+		set_obj_shape(otmp, mtmp->data->mflagsb);
 		fix_object(otmp);
 		(void) mpickobj(mtmp, otmp);
 	}
@@ -1168,6 +1171,9 @@ register struct monst *mtmp;
 				familliar->mhpmax = mtmp->mhpmax;
 				familliar->mvar_witchID = (long)mtmp->m_id;
 				familliar->mpeaceful = mtmp->mpeaceful;
+				if(mtmp->mtame){
+					familliar = tamedog_core(familliar, (struct obj *)0, TRUE);
+				}
 				//Stop running
 				if(mtmp->mflee && mtmp->mhp > mtmp->mhpmax/2){
 					mtmp->mflee = 0;
@@ -1261,6 +1267,16 @@ register struct monst *mtmp;
 		if(!rn2(10)){
 			mtmp->mnotlaugh=0;
 			mtmp->mlaughing=rnd(5);
+		}
+	}
+	if(mtmp->mspores){
+		if(!rn2(4)){
+			mtmp->mconf = 1;
+			(void) set_apparxy(mtmp);
+		}
+		if(!rn2(4)){
+			mtmp->mberserk = 1;
+			(void) set_apparxy(mtmp);
 		}
 	}
 	if(mtmp->mrage){

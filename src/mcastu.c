@@ -581,6 +581,28 @@ unsigned int type;
 	case PM_ARCH_PRIEST:
 		quake = TRUE; //Casts earthquake instead of tremor
 	break;
+	case PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH:
+		switch(rn2(6)){
+			case 0:
+				return GEYSER;
+			break;
+			case 1:
+				return STEAM_GEYSER;
+			break;
+			case 2:
+				return RAIN;
+			break;
+			case 3:
+				return ACID_RAIN;
+			break;
+			case 4:
+				return BLOOD_RAIN;
+			break;
+			case 5:
+				return FILTH;
+			break;
+		}
+	break;
 	case PM_STRANGER:
 		switch (clrc_spell_power % 18) {
 			case 17:
@@ -1323,6 +1345,43 @@ unsigned int type;
 				break;
 			}
 	   break;
+       case PM_ANULO:
+       case PM_ANULO_DANCER:
+			return rn2(2) ? choose_clerical_spell(clrc_spell_power, mtmp->m_id,!(mtmp->mpeaceful), quake) 
+						  : choose_magic_spell(wzrd_spell_power,mtmp->m_id,!(mtmp->mpeaceful));
+	   break;
+       case PM_PEN_A_MENDICANT:
+       case PM_MENDICANT_SPROW:
+       case PM_MENDICANT_DRIDER:
+       case PM_SISTER_T_EIRASTRA:
+			switch (rnd(8)) {
+				case 8:
+				return (!quest_status.offered_artifact ? CURE_SELF : RECOVER);
+				break;
+				case 7:
+				return (!quest_status.offered_artifact ? CURE_SELF : MASS_CURE_CLOSE);
+				break;
+				case 6:
+				return DESTRY_WEPN;
+				break;
+				case 5:
+				return DESTRY_ARMR;
+				break;
+				case 4:
+				return BLIND_YOU;
+				break;
+				case 3:
+				return PARALYZE;
+				break;
+				case 2:
+				return CURSE_ITEMS;
+				break;
+				case 1:
+				return PSI_BOLT;
+				break;
+			}
+       case PM_SHUUSHAR_THE_ENLIGHTENED:
+          return (!quest_status.offered_artifact ? CURE_SELF : MASS_CURE_CLOSE);
        case PM_WITCH_S_FAMILIAR:
 			return OPEN_WOUNDS;
 	   break;
@@ -1848,6 +1907,8 @@ const char * spellname[] =
 	"EARTH_CRACK",
 	"AURA_BOLT",
 	"RAIN",
+	"BLOOD_RAIN",
+	"STEAM_GEYSER",
 };
 
 
@@ -2932,6 +2993,7 @@ int tary;
 		return xdamagey(magr, mdef, attk, dmg);
 
 	case GEYSER:
+	case STEAM_GEYSER:
 		/* needs direct target */
 		if (!foundem) {
 			impossible("geyser with no mdef?");
@@ -2940,6 +3002,9 @@ int tary;
 		else
 		{
 			struct obj * boots = (youdef ? uarmf : which_armor(mdef, W_ARMF));
+#define	TOTAL_DUNK		1
+#define PARTIAL_DUNK	2
+			char dunked = FALSE;
 
 			if (boots && boots->otyp == WATER_WALKING_BOOTS) {
 				/* message part 1*/
@@ -2964,11 +3029,15 @@ int tary;
 						if (ACURR(A_DEX) <= 3) dmg = d(8, 6);
 						else if (ACURR(A_DEX) <= 6) dmg = d(4, 6);
 						else if (ACURR(A_DEX) <= 10) dmg = rnd(6);
+						dunked = PARTIAL_DUNK;
 					}
 				}
 				else {
 					if (mdef->data->mmove >= 14) pline("%s puts the added monmentum to good use!", Monnam(mdef));
-					else if (mdef->data->mmove <= 10) pline("%s is knocked around by the geyser's force!", Monnam(mdef));
+					else if (mdef->data->mmove <= 10){
+						pline("%s is knocked around by the geyser's force!", Monnam(mdef));
+						dunked = PARTIAL_DUNK;
+					}
 					
 					if (mdef->data->mmove >= 25) mdef->movement += 12;
 					else if (mdef->data->mmove >= 18) mdef->movement += 8;
@@ -2979,6 +3048,7 @@ int tary;
 				}
 			}
 			else {
+				dunked = TOTAL_DUNK;
 				/* message */
 				if (youagr || youdef || canseemon(mdef)) {
 					pline("A sudden geyser slams into %s from nowhere!",
@@ -2996,6 +3066,18 @@ int tary;
 				}
 				else
 					water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
+			}
+			if(spell == STEAM_GEYSER && dunked){
+				if(!Fire_res(mdef)){
+					if(dunked == TOTAL_DUNK)
+						dmg += d(3,6);
+					else
+						dmg += d(1,10);
+				}
+				//Boiling water just boils potions
+				if(dunked == TOTAL_DUNK && !InvFire_res(mdef)){
+					destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				}
 			}
 		}
 		return xdamagey(magr, mdef, attk, dmg);
@@ -3084,6 +3166,45 @@ int tary;
 						pline("It feels mildly uncomfortable.");
 				}
 				water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
+			}
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case BLOOD_RAIN:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("blood rain with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("A torrent of blood rains down on %s!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+
+			struct obj * helm = (youdef ? uarmh : which_armor(mdef, W_ARMH));
+
+			if (helm && is_wide_helm(helm)) {
+				dmg = 0;
+				if (youagr || youdef || canseemon(mdef)) {
+					pline("It runs off the brim of %s %s.",
+						youdef ? "your" : s_suffix(mon_nam(mdef)),
+						OBJ_DESCR(objects[helm->otyp]));
+				}
+				if(helm->blessed)
+					unbless(helm);
+				else if(!helm->cursed)
+					curse(helm);
+				if(youdef)
+					change_usanity(save_vs_sanloss() ? 0 : -1*d(1,4), TRUE);
+			}
+			else {
+				/* check resistance and override damage */
+				dmg = flaming(mdef->data) ? d(8, 6) : 0;
+				water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, WD_BLOOD, mdef);
+				if(youdef)
+					change_usanity(save_vs_sanloss() ? -1 : -1*d(2,6), TRUE);
 			}
 		}
 		return xdamagey(magr, mdef, attk, dmg);
@@ -5654,8 +5775,10 @@ int spellnum;
 	case LIGHTNING:
 	case FIRE_PILLAR:
 	case GEYSER:
+	case STEAM_GEYSER:
 	case ACID_RAIN:
 	case RAIN:
+	case BLOOD_RAIN:
 	case HAIL_FLURY:
 	case ICE_STORM:
 	case DEATH_TOUCH:

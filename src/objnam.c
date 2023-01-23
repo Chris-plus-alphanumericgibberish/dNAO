@@ -3754,6 +3754,7 @@ int wishflags;
 		dreprun = FALSE,
 		veioistafur = FALSE,
 		thjofastafur = FALSE,
+		lolth_symbol = FALSE,
 		sizewished = FALSE;
 	int objsize = (from_user ? youracedata->msize : MZ_MEDIUM);
 	long bodytype = 0L;
@@ -3808,6 +3809,8 @@ int wishflags;
 			return mkhellvaultitem(VN_APOCALYPSE);
 		if(!strcmpi(bp, "lolth vault loot"))
 			return mklolthvaultitem();
+		if(!strcmpi(bp, "jewel"))
+			return mkjewel();
 	}
 
 	for(;;) {
@@ -3886,6 +3889,8 @@ int wishflags;
 			veioistafur = TRUE;
 		} else if(!strncmpi(bp, "thjofastafur ", l=13)){
 			thjofastafur = TRUE;
+		} else if(!strncmpi(bp, "lolth_symbol ", l=13)){
+			lolth_symbol = TRUE;
 		} else if(!strncmpi(bp, "engraved ", l=9)){
 			/*This modifier does nothing, really, but people should be allowed to write it.*/;
 		} else if(!strncmpi(bp, "carved ", l=7)){
@@ -4714,21 +4719,29 @@ int wishflags;
 	   !strcmpi(bp, "coin") || *bp == GOLD_SYM) {
 			if (cnt > 5000 && !wizwish) cnt=5000;
 		if (cnt < 1) cnt=1;
+		if (!in_mklev) {
 #ifndef GOLDOBJ
-		if (from_user)
-		    pline("%d gold piece%s.", cnt, plur(cnt));
-		u.ugold += cnt;
-		flags.botl=1;
-		*wishreturn = WISH_SUCCESS;
-		return (&zeroobj);
+			if (from_user)
+				pline("%d gold piece%s.", cnt, plur(cnt));
+			u.ugold += cnt;
+			flags.botl=1;
+			*wishreturn = WISH_SUCCESS;
+			return (&zeroobj);
 #else
-		otmp = mksobj(GOLD_PIECE, mkobjflags|MKOBJ_NOINIT);
-		otmp->quan = cnt;
-		otmp->owt = weight(otmp);
-		flags.botl=1;
-		*wishreturn = WISH_SUCCESS;
-		return (otmp);
+			otmp = mksobj(GOLD_PIECE, mkobjflags|MKOBJ_NOINIT);
+			otmp->quan = cnt;
+			otmp->owt = weight(otmp);
+			flags.botl=1;
+			*wishreturn = WISH_SUCCESS;
+			return (otmp);
 #endif
+		}
+		else {
+			otmp = mkgold(cnt, 0, 0);
+			obj_extract_self(otmp);
+			*wishreturn = WISH_SUCCESS;
+			return otmp;
+		}
 	}
 	if (strlen(bp) == 1 &&
 	   (i = def_char_to_objclass(*bp)) < MAXOCLASSES && i > ILLOBJ_CLASS
@@ -5445,31 +5458,19 @@ typfnd:
 	if(otmp->oclass == ARMOR_CLASS && !Is_dragon_scales(otmp)){
 		if(bodytype == 0L){
 			if (from_user) {
-				if (is_suit(otmp) && (youracedata->mflagsb&MB_BODYTYPEMASK)) otmp->bodytypeflag = (youracedata->mflagsb&MB_BODYTYPEMASK);
-				else if (is_helmet(otmp)) otmp->bodytypeflag = (youracedata->mflagsb&MB_HEADMODIMASK);
-				else if (is_shirt(otmp) && (youracedata->mflagsb&MB_BODYTYPEMASK)) otmp->bodytypeflag = (youracedata->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (youracedata->mflagsb&MB_BODYTYPEMASK);
-				else otmp->bodytypeflag = MB_HUMANOID;
+				set_obj_shape(otmp, youracedata->mflagsb);
 			}
 			else {
-				otmp->bodytypeflag = MB_HUMANOID;
+				set_obj_shape(otmp, MB_HUMANOID);
 			}
 		} else {
-			if(is_suit(otmp)){
-				if((bodytype&MB_BODYTYPEMASK) != 0L) otmp->bodytypeflag = (bodytype&MB_BODYTYPEMASK);
-				else otmp->bodytypeflag = (youracedata->mflagsb&MB_BODYTYPEMASK);
-			} else if(is_helmet(otmp)){
-				if((bodytype&MB_HEADMODIMASK) != 0L) otmp->bodytypeflag = (bodytype&MB_HEADMODIMASK);
-				else if((bodytype&MB_HUMANOID) != 0L) otmp->bodytypeflag = 0L; //Humanoid heads have no special modifier
-				else otmp->bodytypeflag = (youracedata->mflagsb&MB_HEADMODIMASK);
-			} else if(is_shirt(otmp)){
-				if((bodytype&MB_BODYTYPEMASK) != 0L) otmp->bodytypeflag = (bodytype&MB_HUMANOID) ? MB_HUMANOID : (bodytype&MB_BODYTYPEMASK);
-				else otmp->bodytypeflag = (youracedata->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (youracedata->mflagsb&MB_BODYTYPEMASK);
-			}
+			set_obj_shape(otmp, youracedata->mflagsb);
+			set_obj_shape(otmp, bodytype);
 		}
 		
 	}
 	
-	if(otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && (wizwish || (otmp->oward && !(otmp->ohaluengr)))){
+	if(wizwish || (otmp->oclass == RING_CLASS && isEngrRing((otmp)->otyp) && otmp->oward && !otmp->ohaluengr)){
 		if(heptagram && wizwish)			otmp->oward = HEPTAGRAM;  /*can't be wished for*/
 		else if(gorgoneion && wizwish)		otmp->oward = GORGONEION;/*can't be wished for*/
 		else if(acheron)					otmp->oward = CIRCLE_OF_ACHERON;
@@ -5485,6 +5486,10 @@ typfnd:
 		else if(dreprun && wizwish)			otmp->oward = DREPRUN;/*can't be wished for*/
 		else if(veioistafur && wizwish)		otmp->oward = VEIOISTAFUR;/*can't be wished for*/
 		else if(thjofastafur && wizwish)	otmp->oward = THJOFASTAFUR; /*can't be wished for*/
+		else if(lolth_symbol && wizwish){/*can't be wished for*/
+			otmp->oward = LOLTH_SYMBOL;
+			otmp->ohaluengr = TRUE;
+		}
 	}
 
 	
@@ -5580,8 +5585,8 @@ typfnd:
 
 	/* set poisoned */
 	if (ispoisoned) {
-	    if (is_poisonable(otmp))
-		otmp->opoisoned = (Luck >= 0) ? ispoisoned : 0;
+	    if (is_poisonable(otmp) || wizwish)
+		otmp->opoisoned = (Luck >= 0 || wizwish) ? ispoisoned : 0;
 	    else if (Is_box(otmp) || typ == TIN)
 		otmp->otrapped = 1;
 	    else if (oclass == FOOD_CLASS)

@@ -199,7 +199,7 @@ struct Role roles[] = {
 	PM_HIPPOCRATES, PM_ATTENDANT, PM_CYCLOPS,
 	PM_GIANT_RAT, PM_SNAKE, S_RODENT, S_YETI,
 	ART_STAFF_OF_AESCULAPIUS,
-	MA_HUMAN|MA_GNOME|MA_FEY, ROLE_MALE|ROLE_FEMALE | ROLE_NEUTRAL,
+	MA_HUMAN|MA_ELF|MA_GNOME|MA_FEY, ROLE_MALE|ROLE_FEMALE | ROLE_NEUTRAL,
 	/* Str Int Wis Dex Con Cha */
 	{   7, 13, 11,  7, 11, 16 },
 	{   5, 30, 20, 15, 25, 5 },
@@ -1986,7 +1986,7 @@ int newgame;
 				}
 				if(flags.stag == 0){
 					
-					urole.homebase = "Erelhei-Cinlu";
+					urole.homebase = "Menzoberranzan";
 					urole.intermed = "the drider caves";
 					urole.questarti = ART_SILVER_STARLIGHT;
 					
@@ -2000,7 +2000,7 @@ int newgame;
 					urole.enemy2sym = S_LAW_ANGEL;
 				} else {					
 					urole.homebase = "the Grove of Eilistraee";
-					urole.intermed = "Erelhei-Cinlu";
+					urole.intermed = "Menzoberranzan";
 					urole.questarti = ART_TENTACLE_ROD;
 					
 					urole.ldrnum = PM_SEYLL_AUZKOVYN;
@@ -2067,6 +2067,27 @@ int newgame;
 					urole.enemy2sym = S_ZOMBIE;
 				}
 			}
+		}
+	} else if(Race_if(PM_DROW) && Role_if(PM_HEALER)){
+		urole.filecode = "Dhl";
+		urole.lgod = GOD_ILMATER;
+		urole.ngod = GOD_PEN_A;
+		urole.cgod = GOD_GHAUNADAUR;
+
+		urole.homebase = "Ceiling District";/*Menzoberranzan*/
+		urole.intermed = "Floor District";
+		urole.questarti = ART_ESSCOOAHLIPBOOURRR; /*Steals items and stores them weightlessly, but can only be accessed via #invoke. Deals bonus damage with repeated hits.*/
+		
+		urole.ldrnum = PM_SHUUSHAR_THE_ENLIGHTENED;
+		urole.guardnum = PM_ALLIANCE_VANGUARD; /*Also drow commoners*/
+		urole.neminum = PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH; /*Chuul/drow grab and steal magic items. Demogorgon cultists? Madness causes victims to imagine different natural attacks for themselves*/
+		
+		urole.enemy1num = PM_DUERGAR;
+		urole.enemy2num = PM_KUO_TOA;
+		urole.enemy1sym = S_HUMANOID;
+		urole.enemy2sym = S_HUMANOID;
+		for(int i = 0; i<6; i++){
+			dungeons[quest_dnum].connect_side[i] = !rn2(3) ? CONNECT_LEFT : rn2(2) ? CONNECT_CENT : CONNECT_RGHT;
 		}
 	} else if((Race_if(PM_ELF) || Pantheon_if(PM_ELF)) && (Role_if(PM_RANGER) || Role_if(PM_WIZARD) || Role_if(PM_NOBLEMAN))){
 		flags.racial_pantheon = PM_ELF;

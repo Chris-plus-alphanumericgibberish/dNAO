@@ -13,6 +13,7 @@ typedef union any {
     struct obj *a_obj;
     int  a_int;
     char a_char;
+    long a_long;
     schar a_schar;
     /* add types as needed */
 } anything;

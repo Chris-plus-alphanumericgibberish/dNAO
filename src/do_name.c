@@ -715,10 +715,10 @@ const char *name;
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
 		else if (Role_if(PM_PRIEST) && obj->oartifact == ART_MITRE_OF_HOLINESS)
-			obj->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
+			set_obj_shape(obj, mons[urace.malenum].mflagsb);
 		else if (Pantheon_if(PM_NOBLEMAN) && (obj->oartifact == ART_HELM_OF_THE_DARK_LORD || obj->oartifact == ART_CROWN_OF_THE_SAINT_KING))
-			obj->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
-		else obj->bodytypeflag = MB_HUMANOID;
+			set_obj_shape(obj, mons[urace.malenum].mflagsb);
+		else set_obj_shape(obj, MB_HUMANOID);
 		
 		/* viperwhip heads */
 		if (obj->oartifact == ART_SCOURGE_OF_LOLTH)
@@ -928,6 +928,9 @@ boolean full;
 				if (mtmp->female) 						Sprintf(buf2, "%s, Daughter of the Black Goat", buf);
 				else 									Sprintf(buf2, "%s, Child of the Black Goat", buf);
 		}
+		else if (full && template == PLAGUE_TEMPLATE)	Sprintf(buf2, "%s, plague victim", buf);
+		else if (full && template == SPORE_ZOMBIE)		Sprintf(buf2, "%s, spore infectee", buf);
+		else if (full && template == CORDYCEPS)			Sprintf(buf2, "%s's sporulating corpse", buf);
 		else											Strcpy(buf2, buf);
 	}
 	else {
@@ -954,6 +957,9 @@ boolean full;
 				if (mtmp->female) 						Sprintf(buf2, "%s dark daughter", buf);
 				else 									Sprintf(buf2, "%s dark child", buf);
 		}
+		else if (full && template == PLAGUE_TEMPLATE)	Sprintf(buf2, "%s plague-victim", buf);
+		else if (full && template == SPORE_ZOMBIE)		Sprintf(buf2, "%s infectee", buf);
+		else if (full && template == CORDYCEPS)			Sprintf(buf2, "%s cordyceps", buf);
 		else											Strcpy(buf2, buf);
 	}
 
@@ -1134,7 +1140,7 @@ boolean called;
 		if(is_drow(mdat)){
 			struct obj *otmp;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
-				if (is_readable_armor_otyp(otmp->otyp)
+				if (is_readable_armor(otmp)
 					&& otmp->owornmask & mtmp->misc_worn_check && otmp->oward
 				){
 						Sprintf(eos(buf), "%s ", getDrowHouse(otmp->oward));
@@ -1198,7 +1204,7 @@ boolean called;
 			if(is_drow(mdat)){
 				struct obj *otmp;
 				for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
-					if (is_readable_armor_otyp(otmp->otyp) 
+					if (is_readable_armor(otmp) 
 						&& otmp->owornmask & mtmp->misc_worn_check && otmp->oward){
 							Sprintf(eos(buf), "%s ", getDrowHouse(otmp->oward));
 							name_at_start = FALSE;
@@ -1687,6 +1693,8 @@ long hnum;
 			return "silver-sign bearing";
 		case EDDER_SYMBOL:
 			return u.uevent.knoweddergud ? "Edderkirke" : "black-webbed";
+		case Y_CULT_SYMBOL:
+			return "Y bearing";
 	}
 	return "";
 }

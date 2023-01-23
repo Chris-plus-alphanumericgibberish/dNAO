@@ -2642,13 +2642,13 @@ struct obj *obj;
 	else if(is_cloak(obj))
 		return abs(obj->objsize - mon->data->msize) <= 1;
 	else if(is_helmet(obj))
-		return ((!has_horns(mon->data) || obj->otyp == find_gcirclet()) && helm_match(mon->data,obj) && has_head_mon(mon) && obj->objsize == mon->data->msize) || is_flimsy(obj);
+		return helm_match(mon->data, obj) && helm_size_fits(mon->data,obj);
 	else if(is_shield(obj) && !mon_offhand_attack(mon))
 		return !noshield(mon->data);
 	else if(is_gloves(obj))
 		return obj->objsize == mon->data->msize && can_wear_gloves(mon->data);
 	else if(is_boots(obj))
-		return obj->objsize == mon->data->msize && can_wear_boots(mon->data);
+		return boots_size_fits(mon->data, obj) && can_wear_boots(mon->data);
 	else if(is_suit(obj))
 		return arm_match(mon->data, obj) && arm_size_fits(mon->data, obj);
 	return FALSE;

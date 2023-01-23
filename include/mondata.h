@@ -376,6 +376,14 @@
 							 (ptr)->mtyp == PM_UNEARTHLY_DROW ||\
 							 (ptr)->mtyp == PM_STINKING_CLOUD ||\
 							 (ptr)->mtyp == PM_DEMONIC_BLACK_WIDOW)
+#define is_duergar(ptr)		((ptr)->mtyp == PM_DUERGAR ||\
+							 (ptr)->mtyp == PM_GIANT_DUERGAR ||\
+							 (ptr)->mtyp == PM_DUERGAR_STONEGUARD ||\
+							 (ptr)->mtyp == PM_GIANT_STONEGUARD ||\
+							 (ptr)->mtyp == PM_DUERGAR_DEBILITATOR ||\
+							 (ptr)->mtyp == PM_DUERGAR_ANNIHILATOR)
+#define is_kuo_toa(ptr)		((ptr)->mtyp == PM_KUO_TOA ||\
+							 (ptr)->mtyp == PM_KUO_TOA_WHIP)
 #define is_vampire(ptr)		(((ptr)->mflagsa & MA_VAMPIRE) != 0L)
 #define is_half_dragon(ptr)		attacktype_fordmg(ptr, AT_BREA, AD_HDRG)
 #define is_boreal_dragoon(ptr)		(attacktype_fordmg(ptr, AT_WEAP, AD_HDRG) || attacktype_fordmg(ptr, AT_XWEP, AD_HDRG))
@@ -534,6 +542,11 @@
 							|| (ptr)->mtyp == PM_WANDERING_HORROR\
 							|| (ptr)->mtyp == PM_NAMELESS_HORROR\
 							)
+#define is_chuul(ptr)		(  (ptr)->mtyp == PM_CHUUL \
+							|| (ptr)->mtyp == PM_ELDER_CHUUL \
+							|| (ptr)->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION \
+							|| (ptr)->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH \
+							)
 #define is_mercenary(ptr)	(((ptr)->mflagsg & MG_MERC) != 0L)
 #define is_army_pm(pm)		(pm == PM_CAPTAIN || pm == PM_LIEUTENANT || pm == PM_SERGEANT || pm == PM_SOLDIER)
 #define is_bardmon(ptr)		((ptr)->mtyp == PM_LILLEND || (ptr)->mtyp == PM_RHYMER || (ptr)->mtyp == PM_BARD)
@@ -631,7 +644,15 @@
 									|| has_template(magr, TOMB_HERD)\
 									|| has_template(magr, SLIME_REMNANT)\
 								)
-
+#define always_one_hand_mtyp(ptr)	(ptr->mtyp == PM_THRONE_ARCHON \
+										|| ptr->mtyp == PM_OCCULTIST \
+										|| ptr->mtyp == PM_LUNGORTHIN \
+										|| ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY \
+										|| ptr->mtyp == PM_GUG \
+										|| ptr->mtyp == PM_Y_CULTIST_MATRON \
+										|| ptr->mtyp == PM_Y_CULTIST_PATRON \
+										|| ptr->mtyp == PM_DEMOGORGON \
+									)
 #define always_hostile(ptr)	(((ptr)->mflagst & MT_HOSTILE) != 0L)
 #define always_hostile_mon(mon)	(always_hostile((mon)->data))
 #define always_peaceful(ptr)	(((ptr)->mflagst & MT_PEACEFUL) != 0L)
@@ -720,11 +741,15 @@
 #define arm_size_fits(ptr,obj)	(Is_dragon_scales(obj) || \
 								 obj->objsize == (ptr)->msize || \
 								 (is_elven_armor(obj) && abs(obj->objsize - (ptr)->msize) <= 1))
-#define arm_match(ptr,obj)	(Is_dragon_scales(obj) || \
+#define arm_match(ptr,obj)	(Is_dragon_scales(obj) || obj->otyp == WAISTCLOTH ||\
 							((obj->otyp == ELVEN_TOGA || obj->otyp == NOBLE_S_DRESS || obj->otyp == GENTLEWOMAN_S_DRESS) && upper_body_match(ptr,obj)) ||\
+							(ptr->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && upper_body_match(ptr,obj)) ||\
 							(full_body_match(ptr,obj)))
 #define full_body_match(ptr,obj)	(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && \
 		((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK)))
+#define boots_size_fits(ptr,obj)	(ptr->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION ? \
+								 (ptr->msize+1 == obj->objsize) : \
+								 (ptr->msize == obj->objsize))
 #define can_wear_gloves(ptr)	(!nogloves(ptr) && !nohands(ptr))
 #define can_wear_amulet(ptr)	(has_head(ptr) || (ptr->mflagsb&MB_CAN_AMULET))
 #define can_wear_blindf(ptr)	(has_head(ptr))
@@ -733,8 +758,10 @@
 								full_body_match(ptr,obj))
 #define upper_body_match(ptr,obj)	(((ptr->mflagsb&MB_HUMANOID) && (obj->bodytypeflag&MB_HUMANOID)) || \
 		(((ptr->mflagsb&MB_BODYTYPEMASK) != 0) && ((ptr->mflagsb&MB_BODYTYPEMASK) == (obj->bodytypeflag&MB_BODYTYPEMASK))))
-#define helm_match(ptr,obj)	(((ptr->mflagsb&MB_HEADMODIMASK) == (obj->bodytypeflag&MB_HEADMODIMASK)))
+#define helm_match(ptr,obj)	((!has_horns(ptr) || obj->otyp == find_gcirclet() || is_flimsy(obj)) && \
+						(is_hat(obj) || (has_head(ptr) && (ptr->mflagsb&MB_HEADMODIMASK) == (obj->bodytypeflag&MB_HEADMODIMASK))))
 /*Note: No-modifier helms are "normal"*/
+#define helm_size_fits(ptr,obj)	(obj->objsize == ptr->msize || (is_hat(obj) && obj->objsize <= ptr->msize))
 
 #define hates_holy_mon(mon)	((mon) == &youmonst ? hates_holy(youracedata) : hates_holy((mon)->data))
 #define hates_holy(ptr)		(is_demon(ptr) || is_undead(ptr) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
@@ -949,6 +976,7 @@
 #define is_mind_flayer(ptr)	((ptr)->mtyp == PM_MIND_FLAYER || \
 				 (ptr)->mtyp == PM_MASTER_MIND_FLAYER || \
 				 (ptr)->mtyp == PM_STAR_SPAWN || \
+				 (ptr)->mtyp == PM_MAD_GRAZI || \
 				 (ptr)->mtyp == PM_PARASITIZED_ANDROID || \
 				 (ptr)->mtyp == PM_PARASITIZED_GYNOID || \
 				 (ptr)->mtyp == PM_PARASITIC_MIND_FLAYER || \

@@ -616,7 +616,7 @@ int mkflags;
 	otmp->dknown = 0;
 	otmp->corpsenm = 0; /* BUGFIX: Where does this get set? shouldn't it be given a default during initialization? */
 	otmp->objsize = MZ_MEDIUM;
-	otmp->bodytypeflag = MB_HUMANOID;
+	otmp->bodytypeflag = 0;
 	otmp->ovar1 = 0;
 	otmp->oward = 0;
 	for(int i = 0; i < OPROP_LISTSIZE; i++)
@@ -635,6 +635,8 @@ int mkflags;
 	init_obj_material(otmp);
 	
 	set_object_color(otmp);
+	
+	set_obj_shape(otmp, MB_HUMANOID);
 	
 	if(otyp == VIPERWHIP) otmp->ovar1 = rn2(2) ? 1 : rn2(5) ? rnd(2) : rnd(5);
 	
@@ -1054,6 +1056,11 @@ int mkflags;
 						};
 						skull = ROLL_FROM(skulls);
 					}
+				}
+				// else if(In_quest(&u.uz) && Role_if(PM_HEALER) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born == 0){
+				else if(Role_if(PM_HEALER) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born == 0){
+					skull = PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION;
+					mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born = 1;
 				}
 				else {
 					int skulls[] = {PM_DWARF_KING, PM_DWARF_QUEEN, PM_MAID, 
@@ -1506,12 +1513,7 @@ int mkflags;
 		if (quest_equipment(otmp) && !otmp->oartifact) {
 			otmp->objsize = (&mons[urace.malenum])->msize;
 			if (otmp->oclass == ARMOR_CLASS){
-				if (is_suit(otmp) || otmp->otyp == BODYGLOVE) 
-					otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-				else if (is_helmet(otmp)) 
-					otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
-				else if (is_shirt(otmp)) 
-					otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
+				set_obj_shape(otmp, mons[urace.malenum].mflagsb);
 			}
 		}
 	}
@@ -1544,6 +1546,47 @@ int mkflags;
 	
 	otmp->owt = weight(otmp);
 	return(otmp);
+}
+
+void
+size_and_shape_to_fit(obj, mon)
+struct obj *obj;
+struct monst *mon;
+{
+	struct permonst *ptr = mon->data;
+	if (Is_dragon_scales(obj)){
+		//Fits everything
+		return;
+	}
+	// change shape
+	if (is_shirt(obj) || obj->otyp == ELVEN_TOGA){
+		//Check that the monster can actually have armor that fits it.
+		if(!(ptr->mflagsb&MB_BODYTYPEMASK)){
+			return;
+		}
+		set_obj_shape(obj, ptr->mflagsb);
+	}
+	else if (is_suit(obj)){
+		//Check that the monster can actually have armor that fits it.
+		if(!(ptr->mflagsb&MB_BODYTYPEMASK)){
+			return;
+		}
+		set_obj_shape(obj, ptr->mflagsb);
+	}
+	else if (is_helmet(obj) && !is_hat(obj)){
+		//Check that the monster can actually have armor that fits it.
+		if(!has_head(ptr)){
+			return;
+		}
+		set_obj_shape(obj, ptr->mflagsb);
+	}
+	
+	// change size (AFTER shape, because this may be aborted during that step.
+	obj->objsize = ptr->msize;
+	if(ptr->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && is_boots(obj))
+		obj->objsize++;
+	
+	fix_object(obj);
 }
 
 void
@@ -1708,7 +1751,7 @@ start_corpse_timeout(body)
 			}
 	}
 	chance = (flags.walky_level) ? TROLL_REVIVE_CHANCE : 
-			 (attchmon && attchmon->zombify) ? FULL_MOLDY_CHANCE : 
+			 (attchmon && (attchmon->zombify || attchmon->mspores)) ? FULL_MOLDY_CHANCE : 
 			 (Is_night_level(&u.uz)) ? HALF_MOLDY_CHANCE : 
 			 0;
 	if(action == ROT_CORPSE && chance){
@@ -2554,6 +2597,11 @@ register struct obj *obj;
 			wt += mons[PM_VAMPIRE].cwt;
 		}else if(obj->spe == 5){
 			wt += mons[PM_NITOCRIS].cwt;
+		}else if(obj->spe == 9){
+			if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+				wt += mons[PM_PRIESTESS_OF_GHAUNADAUR].cwt;
+			else
+				wt += mons[PM_VAMPIRE_LADY].cwt;
 		}
 	}
 	if ((Is_container(obj) && obj->otyp != MAGIC_CHEST) || obj->otyp == STATUE) {

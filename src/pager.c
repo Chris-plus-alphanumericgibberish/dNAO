@@ -2091,6 +2091,7 @@ get_description_of_damage_type(uchar id)
 	case AD_PERH: return "level-based damage";
 	case AD_SVPN: return "severe poison";
 	case AD_HLUH: return "corrupted holy energy";
+	case AD_TSMI: return "magic-item-stealing tentacles";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

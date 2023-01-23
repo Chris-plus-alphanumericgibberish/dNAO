@@ -359,7 +359,7 @@ doread()
 				return MOVE_INSTANT;
 			} else {
 				int i;
-				You("read the still-visible traceries of healing magics inscribed on the staff.");
+				You("read the still-visible traceries of healing magics inscribed on the shackles fusing the sword together.");
 				for (i = 0; i < MAXSPELL; i++)  {
 					if (spellid(i) == SPE_MASS_HEALING)  {
 						if (spellknow(i) <= 1000) {
@@ -508,11 +508,15 @@ doread()
 	    return MOVE_READ;
 #ifdef TOURIST
 	} else if(scroll->oclass == ARMOR_CLASS
-		&& scroll->ohaluengr
-		&& scroll->oward
-		&& is_readable_armor_otyp(scroll->otyp)
+		&& is_readable_armor(scroll)
 	){
 		pline("There is %s engraved on the armor.",fetchHaluWard((int)scroll->oward));
+		if(!scroll->ohaluengr){
+			if( !(u.wardsknown & get_wardID(scroll->oward)) ){
+				You("have learned a new warding sign!");
+				u.wardsknown |= get_wardID(scroll->oward);
+			}
+		}
 		return MOVE_READ;
 	}else if (scroll->otyp == T_SHIRT) {
 	    static const char *shirt_msgs[] = { /* Scott Bigham */
@@ -1939,7 +1943,7 @@ struct obj	*sobj;
 						otmp->otyp - GRAY_DRAGON_SCALES;
 			otmp->objsize = youracedata->msize;
 			
-			otmp->bodytypeflag = youracedata->mflagsb&MB_BODYTYPEMASK;
+			set_obj_shape(otmp, youracedata->mflagsb);
 			
 			otmp->cursed = 0;
 			if (sobj->blessed) {
@@ -3544,17 +3548,20 @@ boolean revival;
  * than a mimic; this behavior quirk is useful so don't "fix" it...
  */
 struct monst *
-create_particular(specify_attitude, specify_derivation, allow_multi, ma_require, mg_restrict, gen_restrict)
+create_particular(x, y, specify_attitude, specify_derivation, allow_multi, ma_require, mg_restrict, gen_restrict, in_buff)\
+int x,y;
 unsigned long specify_attitude;		// -1 -> true; 0 -> false; >0 -> as given
 int specify_derivation;				// -1 -> true; 0 -> false; >0 -> as given
 int allow_multi;
 unsigned long ma_require;
 unsigned long mg_restrict;
 int gen_restrict;
+char *in_buff;
 {
 	char buf[BUFSZ], *bufp, *p, *q, monclass = MAXMCLASSES;
 	int which, tries, i;
 	int undeadtype = 0;
+	boolean mad_suicidal = FALSE;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
@@ -3565,8 +3572,13 @@ int gen_restrict;
 	do {
 	    which = urole.malenum;	/* an arbitrary index into mons[] */
 	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = FALSE;
-	    getlin("Create what kind of monster? [type the name or symbol]",
-		   buf);
+		if(in_buff){
+			Sprintf(buf, "%s", in_buff);
+		}
+		else {
+			getlin("Create what kind of monster? [type the name or symbol]",
+			   buf);
+		}
 	    bufp = mungspaces(buf);
 	    if (*bufp == '\033') return (struct monst *)0;
 
@@ -3641,6 +3653,9 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "moly-", l = 5)) {
 				undeadtype = MOLY_TEMPLATE;
 			}
+			else if (!strncmpi(bufp, "suicidal ", l = 9)) {
+				mad_suicidal = TRUE;
+			}
 			else
 				break;
 
@@ -3693,6 +3708,12 @@ int gen_restrict;
 				undeadtype = WORLD_SHAPER;
 			else if (!strncmpi(p, "husk",	4))
 				undeadtype = MINDLESS;
+			else if (!strncmpi(p, "infectee",	8))
+				undeadtype = SPORE_ZOMBIE;
+			else if (!strncmpi(p, "cordyceps",	9))
+				undeadtype = CORDYCEPS;
+			else if (!strncmpi(p, "plague-victim",	13))
+				undeadtype = PLAGUE_TEMPLATE;
 			else
 			{
 				/* no suffix was used, undo the split made to search for suffixes */
@@ -3730,6 +3751,11 @@ int gen_restrict;
 			if (monclass == MAXMCLASSES)
 			{
 				pline("I've never heard of such monsters.");
+				if(in_buff){
+					impossible("Bad parsed monster name in sp_lev");
+					tries = 5;
+					break;
+				}
 				continue;	//try again
 			}
 			if (monclass == S_MIMIC_DEF && !(ma_require || mg_restrict || gen_restrict))	// bugfeature made feature
@@ -3801,7 +3827,7 @@ createmon:
 			if (makesummoned)
 				mm_flags |= MM_ESUM;
 
-			mtmp = makemon_full(whichpm, u.ux, u.uy, mm_flags, undeadtype ? undeadtype : -1, -1);
+			mtmp = makemon_full(whichpm, x, y, mm_flags, undeadtype ? undeadtype : -1, -1);
 
 			if (mtmp) {
 				if (maketame){
@@ -3817,6 +3843,9 @@ createmon:
 
 				if (makesummoned)
 					mark_mon_as_summoned(mtmp, (struct monst *)0, ESUMMON_PERMANENT, 0);
+
+				if (mad_suicidal)
+					mtmp->msuicide = TRUE;
 
 				madeany = TRUE;
 				newsym(mtmp->mx, mtmp->my);

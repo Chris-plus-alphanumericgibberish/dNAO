@@ -893,8 +893,7 @@ carrying_readable_armor()
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 		if(otmp->oclass == ARMOR_CLASS
 			&& ((otmp->ohaluengr
-					&& otmp->oward
-					&& is_readable_armor_otyp(otmp->otyp)
+					&& is_readable_armor(otmp)
 				) || (otmp->oartifact && (
 					otmp->oartifact == ART_ITLACHIAYAQUE
 				 )

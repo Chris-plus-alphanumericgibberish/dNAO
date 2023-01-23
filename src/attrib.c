@@ -1710,7 +1710,6 @@ struct monst *mon;
 				if(d(2,u.ulevel) > mon->m_lev){
 					if(madflag == MAD_DELUSIONS
 					 || madflag == MAD_REAL_DELUSIONS
-					 || madflag == MAD_SPORES
 					 || madflag == MAD_SPIRAL
 					 || madflag == MAD_FORMICATION
 					){
@@ -1718,6 +1717,9 @@ struct monst *mon;
 					}
 					else if(madflag == MAD_SANCTITY){
 						mon->msanctity = 1;
+					}
+					else if(madflag == MAD_SPORES){
+						mon->mspores = 1;
 					}
 					else if(madflag == MAD_GLUTTONY){
 						mon->mgluttony = 1;

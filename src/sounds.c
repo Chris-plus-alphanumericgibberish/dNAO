@@ -588,6 +588,9 @@ register struct monst *mtmp;
 	case MS_WAIL:
 	    ret = "wail";
 	    break;
+	case MS_RIBBIT:
+	    ret = "croak";
+	    break;
 	case MS_SILENT:
 		ret = "commotion";
 		break;
@@ -655,6 +658,9 @@ struct monst *mtmp;
 	    break;
 	case MS_WAIL:
 	    yelp_verb = "wail";
+	    break;
+	case MS_RIBBIT:
+	    yelp_verb = "peep";
 	    break;
 	case MS_COUGH:
 	    yelp_verb = "cough";
@@ -801,17 +807,37 @@ boolean chatting;
 			}
 		}
 	}
-	switch (
-		is_silent_mon(mtmp) ? MS_SILENT : 
-		(is_dollable(mtmp->data) && mtmp->m_insight_level) ? MS_STATS : 
-		mtmp->ispriest ? MS_PRIEST : 
-		mtmp->isshk ? MS_SELL : 
-		(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used) ? MS_SONG : 
-		mtmp->mfaction == QUEST_FACTION ? MS_GUARDIAN : 
-		mtmp->mtyp == urole.guardnum ? MS_GUARDIAN : 
-		(ptr->msound == MS_CUSS && mtmp->mpeaceful) ? MS_HUMANOID : 
-		ptr->msound
-	) {
+	int soundtype = ptr->msound;
+	//Faction and special abilities adjustment
+	if(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used)
+		soundtype = MS_SONG;
+	else if(mtmp->mfaction == QUEST_FACTION)
+		soundtype = MS_GUARDIAN;
+	else if(mtmp->mtyp == urole.guardnum)
+		soundtype = MS_GUARDIAN;
+	else if(ptr->msound == MS_CUSS && mtmp->mpeaceful)
+		soundtype = MS_HUMANOID;
+
+	//Don't sing if chatted to.
+	if(chatting && (soundtype == MS_SONG || soundtype == MS_OONA)){
+		if(mtmp->mfaction == QUEST_FACTION)
+			soundtype = MS_GUARDIAN;
+		if(mtmp->mtyp == urole.guardnum)
+			soundtype = MS_GUARDIAN;
+		else soundtype = MS_HUMANOID;
+	}
+
+	//Template and profession adjustments
+	if(is_silent_mon(mtmp))
+		soundtype = MS_SILENT;
+	else if(is_dollable(mtmp->data) && mtmp->m_insight_level)
+		soundtype = MS_STATS;
+	else if(mtmp->ispriest)
+		soundtype = MS_PRIEST;
+	else if(mtmp->isshk)
+		soundtype = MS_SELL;
+
+	switch (soundtype) {
 	case MS_ORACLE:
 	    return doconsult(mtmp);
 	case MS_PRIEST: /*Most (all?) things with this will have ispriest set*/
@@ -1004,6 +1030,9 @@ asGuardian:
 	    break;
 	case MS_GURGLE:
 	    pline_msg = "gurgles.";
+	    break;
+	case MS_RIBBIT:
+	    pline_msg = mtmp->mpeaceful ? "ribbits." : "croaks.";
 	    break;
 	case MS_BURBLE:
 	    pline_msg = "burbles.";

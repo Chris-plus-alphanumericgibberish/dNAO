@@ -866,6 +866,11 @@ init_dungeons()		/* initialize the "dungeon" structs */
 		
 		if(!strcmp(dungeons[i].dname, "The Quest")){
 			quest_i = TRUE;
+			if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				if(dungeons[i].num_dunlevs < 6){
+					dungeons[i].num_dunlevs = 6;
+				}
+			}
 		}
 		else quest_i = FALSE;
 		
@@ -961,7 +966,10 @@ init_dungeons()		/* initialize the "dungeon" structs */
 		//If the quest is long enough, move the locate level to create one to two of each filler level
 		//	New levels are added to the end of tmplevel, this asumes that the locate level is 2nd to last :(
 		if(quest_i){
-			if(dungeons[i].num_dunlevs == 7){
+			if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				pd.tmplevel[pd.n_levs-2].lev.base++;
+			}
+			else if(dungeons[i].num_dunlevs == 7){
 				pd.tmplevel[pd.n_levs-2].lev.base++;
 			}
 			else if(dungeons[i].num_dunlevs == 6){
@@ -1968,6 +1976,7 @@ print_branch(win, dnum, lower_bound, upper_bound, bymenu, lchoices)
 		add_menu(win, NO_GLYPH, &any, lchoices->menuletter,
 				0, ATR_NONE, buf, MENU_UNSELECTED);
 		if (lchoices->menuletter == 'z') lchoices->menuletter = 'A';
+		else if (lchoices->menuletter == 'Z') lchoices->menuletter = 'a';
 		else lchoices->menuletter++;
 		lchoices->idx++;
 	    } else
@@ -2035,6 +2044,7 @@ int *rdgn;		/* returns selected level dungeon number */
 				lchoices.dgn[lchoices.idx] = i;
 				add_menu(win, NO_GLYPH, &any, lchoices.menuletter, 0, dungeonsfirst ? ATR_NONE : iflags.menu_headings, buf, MENU_UNSELECTED);
 				if (lchoices.menuletter == 'z') lchoices.menuletter = 'A';
+				else if (lchoices.menuletter == 'Z') lchoices.menuletter = 'a';
 				else lchoices.menuletter++;
 				lchoices.idx++;
 			}

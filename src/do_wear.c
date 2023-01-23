@@ -1643,28 +1643,34 @@ boolean noisy;
 		if (uarmh) {
 			if (noisy) already_wearing(an(c_helmet));
 			err++;
-		} else if (!is_flimsy(otmp) && otmp->otyp != find_gcirclet()){
+		} else if (!helm_match(youracedata, otmp)){
 			/* (flimsy exception matches polyself handling), you can even just set a hat on top of your body (no head requried)*/
-			if(!has_head_mon(&youmonst)){
+			boolean hat = is_hat(otmp);
+			if(!has_head_mon(&youmonst) && !hat){
 				if (noisy)
 				You("don't have a head.");
 				err++;
-			} else if(youracedata->msize != otmp->objsize){
-				if (noisy)
-				pline_The("%s is the wrong size for you.", c_helmet);
-				err++;
-			} else if(!helm_match(youracedata,otmp)){
+			} else if(!helm_match(youracedata,otmp) && !hat){
 				if (noisy)
 				pline_The("%s is the wrong shape for your head.", c_helmet);
 				err++;
-			} else if(has_horns(youracedata)){
+			} else if(has_horns(youracedata) && !(otmp->otyp == find_gcirclet() || is_flimsy(otmp))){
 				if (noisy)
 				pline_The("%s won't fit over your horn%s.",
 					  c_helmet, plur(num_horns(youracedata)));
 				err++;
-			} else
-				*mask = W_ARMH;
-		} else
+			} else {
+				if (noisy)
+				pline_The("%s won't fit for some reason.", c_helmet);
+				err++;
+			}
+		}
+		else if(!helm_size_fits(youracedata, otmp)){
+			if (noisy)
+			pline_The("%s is the wrong size for you.", c_helmet);
+			err++;
+		}
+		else
 			*mask = W_ARMH;
     } else if (is_shield(otmp)) {
 		if (uarms) {
@@ -1692,7 +1698,7 @@ boolean noisy;
 		} else if (!humanoid(youracedata) && !can_wear_boots(youracedata)) {
 			if (noisy) pline("You have too many legs to wear %s.",  c_boots);
 			err++;
-		} else if(youracedata->msize != otmp->objsize){
+		} else if(!(boots_size_fits(youracedata, otmp))){
 			if (noisy)
 			pline_The("%s are the wrong size for you.", c_boots);
 			err++;

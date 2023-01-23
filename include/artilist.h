@@ -2368,7 +2368,7 @@ A("The Cloak of the Consort",		DROVEN_CLOAK,		(const char *)0,
 	),
 
 /*Needs encyc entry*/
-A("Esscooahlipboourrr",			KHAKKHARA,					"tentacle-auraed claw-ended %s",
+A("Esscooahlipboourrr",			DOUBLE_SWORD,					"tentacle-auraed shackle-wrapped %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_S, (ARTG_NOGEN|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),

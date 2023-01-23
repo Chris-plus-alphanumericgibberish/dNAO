@@ -242,6 +242,7 @@ int monkey_business; /* true iff an animal is doing the thievery */
 	struct obj *otmp;
 	int tmp, could_petrify, named = 0, armordelay;
 	boolean charms = (is_neuter(mtmp->data) || flags.female == mtmp->female);
+	boolean mi_only = is_chuul(mtmp->data);
 	if(mtmp->mtyp == PM_ALRUNES) charms = !charms;
 	else if(mtmp->mtyp == PM_FIERNA) charms = TRUE;
 	else if(mtmp->mtyp == PM_BEAUTEOUS_ONE) charms = FALSE;
@@ -281,6 +282,7 @@ nothing_to_steal:
 	tmp = 0;
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 	    if ((!uarm || otmp != uarmc) && otmp != uskin
+				&& (!mi_only || is_magic_obj(otmp))
 #ifdef INVISIBLE_OBJECTS
 				&& (!otmp->oinvis || mon_resistance(mtmp,SEE_INVIS))
 #endif
@@ -291,6 +293,7 @@ nothing_to_steal:
 	tmp = rn2(tmp);
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 	    if ((!uarm || otmp != uarmc) && otmp != uskin
+				&& (!mi_only || is_magic_obj(otmp))
 #ifdef INVISIBLE_OBJECTS
 				&& (!otmp->oinvis || mon_resistance(mtmp,SEE_INVIS))
 #endif

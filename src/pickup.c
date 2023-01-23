@@ -2573,6 +2573,27 @@ boolean past;
     box->spe = 0;		/* box->owt will be updated below */
     if (get_obj_location(box, &ox, &oy, 0))
 		box->ox = ox, box->oy = oy;	/* in case it's being carried */
+	if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+		int drow_plague_types[] = {
+			PM_DWARF_QUEEN, PM_DWARF_KING, 
+			PM_ORC_CAPTAIN, PM_JUSTICE_ARCHON, PM_SHIELD_ARCHON, PM_SWORD_ARCHON,
+			PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, 
+			PM_LILLEND, PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN,
+			PM_SPROW, PM_DRIDER, PM_PRIESTESS_OF_GHAUNADAUR,
+			PM_NURSE,
+			PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+			PM_ANULO, PM_ANULO,
+			PM_DROW_CAPTAIN, PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_DROW_MATRON,
+			PM_DROW_CAPTAIN, PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_DROW_MATRON, PM_UNEARTHLY_DROW, PM_HEDROW_BLADEMASTER,
+			PM_HEDROW_MASTER_WIZARD, PM_STJARNA_ALFR, PM_PEN_A_MENDICANT, PM_MENDICANT_SPROW, PM_MENDICANT_DRIDER,
+			PM_YOCHLOL, PM_LILITU, PM_MARILITH,
+			PM_ALLIANCE_VANGUARD, PM_PAGE, PM_DWARF_WARRIOR,
+			PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE
+		};
+
+		victim = makemon(&mons[ROLL_FROM(drow_plague_types)], box->ox, box->oy, NO_MM_FLAGS);
+	}
+	else {
 		int plague_types[] = {
 			PM_DWARF_LORD, PM_DWARF_CLERIC, PM_DWARF_QUEEN, PM_DWARF_KING, 
 			PM_DEEP_ONE, PM_WINGED_KOBOLD,
@@ -2596,6 +2617,7 @@ boolean past;
 		};
 
 		victim = makemon(&mons[ROLL_FROM(plague_types)], box->ox, box->oy, NO_MM_FLAGS);
+	}
 	if(victim){
 		struct obj *nobj;
 		for(struct obj *obj = victim->minvent; obj; obj = nobj){
@@ -2715,42 +2737,42 @@ boolean past;
 				continue;
 			obj_extract_self(otmp);
 			mpickobj(daughter, otmp);
-			break; //Found boots.  Also, otmp->nobj should now be 0 anyway.
+			break; //Found gloves.  Also, otmp->nobj should now be 0 anyway.
 		}
 		for(otmp = box->cobj; otmp; otmp = otmp->nobj){
 			if(!is_shirt(otmp))
 				continue;
 			obj_extract_self(otmp);
 			mpickobj(daughter, otmp);
-			break; //Found boots.  Also, otmp->nobj should now be 0 anyway.
+			break; //Found shirt.  Also, otmp->nobj should now be 0 anyway.
 		}
 		for(otmp = box->cobj; otmp; otmp = otmp->nobj){
 			if(!is_suit(otmp))
 				continue;
 			obj_extract_self(otmp);
 			mpickobj(daughter, otmp);
-			break; //Found boots.  Also, otmp->nobj should now be 0 anyway.
+			break; //Found suit.  Also, otmp->nobj should now be 0 anyway.
 		}
 		for(otmp = box->cobj; otmp; otmp = otmp->nobj){
 			if(!is_cloak(otmp))
 				continue;
 			obj_extract_self(otmp);
 			mpickobj(daughter, otmp);
-			break; //Found boots.  Also, otmp->nobj should now be 0 anyway.
+			break; //Found cloak.  Also, otmp->nobj should now be 0 anyway.
 		}
 		for(otmp = box->cobj; otmp; otmp = otmp->nobj){
 			if(!is_helmet(otmp))
 				continue;
 			obj_extract_self(otmp);
 			mpickobj(daughter, otmp);
-			break; //Found boots.  Also, otmp->nobj should now be 0 anyway.
+			break; //Found helm.  Also, otmp->nobj should now be 0 anyway.
 		}
 		for(otmp = box->cobj; otmp; otmp = otmp->nobj){
 			if(!is_shield(otmp))
 				continue;
 			obj_extract_self(otmp);
 			mpickobj(daughter, otmp);
-			break; //Found boots.  Also, otmp->nobj should now be 0 anyway.
+			break; //Found shield.  Also, otmp->nobj should now be 0 anyway.
 		}
 		m_dowear(daughter, TRUE);
 		m_level_up_intrinsic(daughter);
@@ -3080,18 +3102,13 @@ struct monst *mon;
 				addArmorMenuOption
 			} else if(is_cloak(otmp) && !(mon->misc_worn_check&W_ARMC) && (abs(otmp->objsize - mon->data->msize) <= 1)){
 				addArmorMenuOption
-			} else if(is_helmet(otmp) && !(mon->misc_worn_check&W_ARMH) && 
-				((helm_match(mon->data,otmp) && has_head_mon(mon) && otmp->objsize == mon->data->msize && !has_horns(mon->data))
-				|| is_flimsy(otmp)
-				|| otmp->otyp == find_gcirclet()
-				)
-			){
+			} else if(is_helmet(otmp) && !(mon->misc_worn_check&W_ARMH) && helm_match(mon->data,otmp) && helm_size_fits(mon->data,otmp)){
 				addArmorMenuOption
 			} else if(is_shield(otmp) && !(mon->misc_worn_check&W_ARMS) && !noshield(mon->data)){
 				addArmorMenuOption
 			} else if(is_gloves(otmp) && !(mon->misc_worn_check&W_ARMG) && otmp->objsize == mon->data->msize && can_wear_gloves(mon->data)){
 				addArmorMenuOption
-			} else if(is_boots(otmp) && !(mon->misc_worn_check&W_ARMF) && otmp->objsize == mon->data->msize && can_wear_boots(mon->data)){
+			} else if(is_boots(otmp) && !(mon->misc_worn_check&W_ARMF) && boots_size_fits(mon->data, otmp) && can_wear_boots(mon->data)){
 				addArmorMenuOption
 			} else if(is_suit(otmp) && !(mon->misc_worn_check&W_ARM) && arm_match(mon->data, otmp) && arm_size_fits(mon->data, otmp)){
 				addArmorMenuOption

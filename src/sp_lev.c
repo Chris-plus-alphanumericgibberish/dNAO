@@ -843,78 +843,96 @@ struct mkroom	*croom;
     struct permonst *pm;
     unsigned g_mvflags;
 
+	boolean parsed = m->class=='#';
+
     if (rn2(100) < m->chance) {
-
-	if (m->class >= 0)
-	    class = (char) def_char_to_monclass((char)m->class);
-	else if (m->class > -11)
-	    class = (char) def_char_to_monclass(rmonst[- m->class - 1]);
-	else
-	    class = 0;
-
-	if (class == MAXMCLASSES)
-	    panic("create_monster: unknown monster class '%c'", m->class);
-
-	if(m->align == AM_SPLEV_CO)
-		alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
-	else if(m->align == AM_SPLEV_NONCO){
-		alignment = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
-	}
-	else if(m->align <= -11) 
-		alignment = induced_align(80);
-	else if(m->align < 0)
-		alignment = Amask2align(ralign[-m->align-1]);
-	else
-		alignment = Amask2align(m->align);
-
-	if (!class)
-	    pm = (struct permonst *) 0;
-	else if (m->id != NON_PM) {
-	    pm = &mons[m->id];
-	    g_mvflags = (unsigned) mvitals[monsndx(pm)].mvflags;
-	    if ((pm->geno & G_UNIQ) && (g_mvflags & G_EXTINCT))
-		goto m_done;
-	    else if (g_mvflags & G_GONE && !In_quest(&u.uz))	/* genocided or extinct */
-		pm = (struct permonst *) 0;	/* make random monster */
-	} else {
-	    pm = mkclass(class,Inhell ? G_HELL : G_NOHELL);
-	    /* if we can't get a specific monster type (pm == 0) then the
-	       class has been genocided, so settle for a random monster */
-	}
-	/* reduce quantity of peacefuls in the Mines */
-	if (In_mines(&u.uz) && pm && your_race(pm) &&
-			(Race_if(PM_DWARF) || Race_if(PM_GNOME)) && rn2(3))
-	    pm = (struct permonst *) 0;
-	/* replace priests with angels on Binder's Astral */
-	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && m->id == PM_ALIGNED_PRIEST) {
-		pm = &mons[PM_ANGEL];
-	}
-
-	x = m->x;
-	y = m->y;
-	if (croom)
-	    get_room_loc(&x, &y, croom);
-	else {
-	    if (!pm || !species_swims(pm))
+		
+	if(parsed){
+		x = m->x;
+		y = m->y;
+		if (croom)
+			get_room_loc(&x, &y, croom);
+		else {
 			get_location(&x, &y, DRY);
-	    else if (pm->mlet == S_EEL)
-			get_location(&x, &y, WET);
-	    else
-			get_location(&x, &y, DRY|WET);
+		}
+		// /* try to find a close place if someone else is already there */
+		// if (MON_AT(x,y) && enexto(&cc, x, y, pm))
+			// x = cc.x,  y = cc.y;
+		
+		mtmp = create_particular(x, y, -1, -1, TRUE, 0, 0, 0, m->name.str);
+		if (mtmp)
+			pm = mtmp->data;
+	} else {
+		if (m->class >= 0)
+			class = (char) def_char_to_monclass((char)m->class);
+		else if (m->class > -11)
+			class = (char) def_char_to_monclass(rmonst[- m->class - 1]);
+		else
+			class = 0;
+
+		if (class == MAXMCLASSES)
+			panic("create_monster: unknown monster class '%c'", m->class);
+
+		if(m->align == AM_SPLEV_CO)
+			alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
+		else if(m->align == AM_SPLEV_NONCO){
+			alignment = noncoalignment(galign(u.ugodbase[UGOD_ORIGINAL]));
+		}
+		else if(m->align <= -11) 
+			alignment = induced_align(80);
+		else if(m->align < 0)
+			alignment = Amask2align(ralign[-m->align-1]);
+		else
+			alignment = Amask2align(m->align);
+
+		if (!class)
+			pm = (struct permonst *) 0;
+		else if (m->id != NON_PM) {
+			pm = &mons[m->id];
+			g_mvflags = (unsigned) mvitals[monsndx(pm)].mvflags;
+			if ((pm->geno & G_UNIQ) && (g_mvflags & G_EXTINCT))
+			goto m_done;
+			else if (g_mvflags & G_GONE && !In_quest(&u.uz))	/* genocided or extinct */
+			pm = (struct permonst *) 0;	/* make random monster */
+		} else {
+			pm = mkclass(class,Inhell ? G_HELL : G_NOHELL);
+			/* if we can't get a specific monster type (pm == 0) then the
+			   class has been genocided, so settle for a random monster */
+		}
+		/* reduce quantity of peacefuls in the Mines */
+		if (In_mines(&u.uz) && pm && your_race(pm) &&
+				(Race_if(PM_DWARF) || Race_if(PM_GNOME)) && rn2(3))
+			pm = (struct permonst *) 0;
+		/* replace priests with angels on Binder's Astral */
+		if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && m->id == PM_ALIGNED_PRIEST) {
+			pm = &mons[PM_ANGEL];
+		}
+
+		x = m->x;
+		y = m->y;
+		if (croom)
+			get_room_loc(&x, &y, croom);
+		else {
+			if (!pm || !species_swims(pm))
+				get_location(&x, &y, DRY);
+			else if (pm->mlet == S_EEL)
+				get_location(&x, &y, WET);
+			else
+				get_location(&x, &y, DRY|WET);
+		}
+		/* try to find a close place if someone else is already there */
+		if (MON_AT(x,y) && enexto(&cc, x, y, pm))
+			x = cc.x,  y = cc.y;
+
+		if(m->align != -12)
+			mtmp = mk_roamer(pm, alignment, x, y, m->peaceful);
+		else if(PM_ARCHEOLOGIST <= m->id && m->id <= PM_WIZARD)
+				 mtmp = mk_mplayer(pm, x, y, FALSE);
+		else mtmp = makemon(pm, x, y, NO_MM_FLAGS);
 	}
-	/* try to find a close place if someone else is already there */
-	if (MON_AT(x,y) && enexto(&cc, x, y, pm))
-	    x = cc.x,  y = cc.y;
-
-	if(m->align != -12)
-	    mtmp = mk_roamer(pm, alignment, x, y, m->peaceful);
-	else if(PM_ARCHEOLOGIST <= m->id && m->id <= PM_WIZARD)
-	         mtmp = mk_mplayer(pm, x, y, FALSE);
-	else mtmp = makemon(pm, x, y, NO_MM_FLAGS);
-
 	if (mtmp) {
 	    /* handle specific attributes for some special monsters */
-	    if (m->name.str) mtmp = christen_monst(mtmp, m->name.str);
+	    if (m->name.str && !parsed) mtmp = christen_monst(mtmp, m->name.str);
 
 	    /*
 	     * This is currently hardwired for mimics only.  It should
@@ -1338,6 +1356,39 @@ default_case:
 		}
 		otmp->spe = 0;
 	}
+	if(otmp->otyp == BEDROLL && otmp->spe == 3 && otmp->where == OBJ_FLOOR){
+		int drow_types[] = {
+			PM_SPROW, PM_DRIDER, PM_SPROW, PM_DRIDER,
+			PM_ANULO, PM_ANULO,
+			PM_DROW_CAPTAIN, PM_DROW_CAPTAIN, PM_DROW_CAPTAIN, PM_DROW_CAPTAIN,
+			PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD,
+			PM_DROW_MATRON, PM_DROW_MATRON,
+			PM_UNEARTHLY_DROW
+		};
+		int other_types[] = {PM_HOBBIT, PM_BUGBEAR, PM_GNOLL, 
+			PM_HILL_ORC, PM_ORC_SHAMAN, PM_ORC_CAPTAIN,
+			PM_JUSTICE_ARCHON, PM_MOVANIC_DEVA,  PM_LILLEND, PM_COURE_ELADRIN,
+			PM_CHIROPTERAN, PM_CHIROPTERAN,
+			PM_STONE_GIANT, PM_HILL_GIANT, PM_FIRE_GIANT, PM_FROST_GIANT, 
+			PM_MINOTAUR, PM_MINOTAUR_PRIESTESS,
+			PM_WOODLAND_ELF, PM_GREEN_ELF, PM_ELF_LORD, PM_ELF_LADY,
+			PM_PRISONER, PM_PRISONER, PM_PRISONER,
+			PM_HORNED_DEVIL, PM_ERINYS, PM_BARBED_DEVIL,
+			PM_SUCCUBUS, PM_INCUBUS, PM_VROCK, PM_LILITU, PM_NALFESHNEE, PM_MARILITH,
+			PM_HALF_DRAGON, PM_BARD, PM_CONVICT, PM_KNIGHT, PM_TOURIST, PM_VALKYRIE
+		};
+		
+		struct monst *mon;
+		if(rn2(3))
+			mon = makemon_full(&mons[ROLL_FROM(drow_types)], otmp->ox, otmp->oy, NO_MINVENT, PLAGUE_TEMPLATE, -1);
+		else 
+			mon = makemon_full(&mons[ROLL_FROM(other_types)], otmp->ox, otmp->oy, NO_MINVENT, PLAGUE_TEMPLATE, -1);
+		if(mon){
+			mon->mpeaceful = 1;
+			set_malign(mon);
+		}
+		otmp->spe = 0;
+	}
 	if(otmp->otyp == CHAIN && otmp->where == OBJ_FLOOR && In_quest(&u.uz)){
 		if(urole.neminum == PM_CYCLOPS){
 			int plague_types[] = {
@@ -1369,6 +1420,84 @@ default_case:
 				set_template(mon, PLAGUE_TEMPLATE);
 				mon->mpeaceful = 1;
 				set_malign(mon);
+			}
+			otmp->spe = 0;
+		}
+		else if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+			if(otmp->spe == 0){
+				int sacc_types[] = {
+					PM_DWARF_LORD, PM_DWARF_CLERIC, PM_DWARF_QUEEN, PM_DWARF_KING, 
+					PM_DEMINYMPH, PM_THRIAE,
+					PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+					PM_DROW_MATRON,
+					PM_BARBARIAN, PM_HALF_DRAGON, PM_VALKYRIE
+				};
+				
+				struct monst *mon;
+				mon = makemon(&mons[ROLL_FROM(sacc_types)], otmp->ox, otmp->oy, NO_MM_FLAGS);
+				if(mon){
+					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					mon->entangled = SHACKLES;
+					//Note: these are "fresh" so they don't take the 1/3rd penalty to level
+					set_template(mon, PLAGUE_TEMPLATE);
+					mon->mpeaceful = 1;
+					set_malign(mon);
+				}
+			}
+			else if(otmp->spe == 1){
+				int prison2_types[] = {
+					PM_SWORD_ARCHON, PM_TRUMPET_ARCHON, PM_PANAKEIAN_ARCHON, PM_HYGIEIAN_ARCHON,
+					PM_ASTRAL_DEVA, PM_GRAHA_DEVA,
+					PM_LILLEND,
+					PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIELD_ARCHON, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN
+				};
+				
+				struct monst *mon;
+				mon = makemon(&mons[ROLL_FROM(prison2_types)], otmp->ox, otmp->oy, MM_GOODEQUIP);
+				if(mon){
+					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					mon->entangled = SHACKLES;
+					//Note: these are "fresh" so they don't take the 1/3rd penalty to level
+					set_template(mon, PLAGUE_TEMPLATE);
+					mon->mpeaceful = 1;
+					set_malign(mon);
+				}
+			}
+			else if(otmp->spe == 2){
+				int drowplague3_types[] = {
+					PM_DROW_CAPTAIN, PM_DROW_CAPTAIN, PM_DROW_CAPTAIN, PM_DROW_CAPTAIN,
+					PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD,
+					PM_DROW_MATRON, PM_DROW_MATRON,
+					PM_UNEARTHLY_DROW
+				};
+				int plague3_types[] = {
+					PM_HOUSELESS_DROW, PM_HOUSELESS_DROW,
+					PM_HOUSELESS_DROW, PM_HOUSELESS_DROW,
+					PM_ANULO, PM_ANULO,
+					PM_SPROW, PM_DRIDER, PM_SPROW, PM_DRIDER,
+					PM_PRIESTESS_OF_GHAUNADAUR, PM_MENDICANT_DRIDER, PM_MENDICANT_SPROW,
+					PM_PEN_A_MENDICANT,
+					PM_DWARF_LORD, PM_DWARF_CLERIC, PM_DWARF_QUEEN, PM_DWARF_KING,
+					PM_DEMINYMPH, PM_ORC_CAPTAIN,
+					PM_DRIDER,
+					PM_GNOME_KING, PM_GNOME_QUEEN,
+					PM_HILL_GIANT, PM_MINOTAUR, PM_MINOTAUR_PRIESTESS,
+					PM_WOODLAND_ELF, PM_GREEN_ELF, PM_GREY_ELF, PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN
+				};
+				
+				struct monst *mon;
+				if(rn2(3)){
+					mon = makemon_full(&mons[ROLL_FROM(drowplague3_types)], otmp->ox, otmp->oy, NO_MM_FLAGS, PLAGUE_TEMPLATE, -1);
+				}
+				else {
+					mon = makemon_full(&mons[ROLL_FROM(plague3_types)], otmp->ox, otmp->oy, NO_MM_FLAGS, PLAGUE_TEMPLATE, -1);
+				}
+				if(mon){
+					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					mon->entangled = SHACKLES;
+					mon->mpeaceful = 1;
+					set_malign(mon);
+				}
 			}
 			otmp->spe = 0;
 		}
@@ -1440,12 +1569,7 @@ default_case:
 					)\
 						stuff->objsize = (&mons[urace.malenum])->msize;\
 					if (stuff->oclass == ARMOR_CLASS){\
-						if (is_suit(stuff) || stuff->otyp == BODYGLOVE)\
-							stuff->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);\
-						else if (is_helmet(stuff))\
-							stuff->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);\
-						else if (is_shirt(stuff))\
-							stuff->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);\
+						set_obj_shape(stuff, mons[urace.malenum].mflagsb);\
 						stuff->objsize = (&mons[urace.malenum])->msize;\
 					}
 #define default_add(type) stuff = mksobj(type, MKOBJ_NOINIT);\
@@ -3465,7 +3589,70 @@ dlb *fd;
 		prevstair.x = x;
 		prevstair.y = y;
 	}
-
+	
+	if(Role_if(PM_HEALER) && Race_if(PM_DROW)){
+		//Up stair
+		if(u.uz.dlevel > 1 && u.uz.dlevel <= 4){
+			if(dungeons[u.uz.dnum].connect_side[u.uz.dlevel-2] == CON_UNSPECIFIED){
+				dungeons[u.uz.dnum].connect_side[u.uz.dlevel-2] = rnd(3);
+			}
+			int start_x, end_x;
+			switch(dungeons[u.uz.dnum].connect_side[u.uz.dlevel-2]){
+				case CONNECT_LEFT:
+					start_x = 0;
+					end_x = COLNO/3;
+				break;
+				case CONNECT_CENT:
+					start_x = COLNO/3;
+					end_x = COLNO*2/3;
+				break;
+				case CONNECT_RGHT:
+					start_x = COLNO*2/3;
+					end_x = COLNO;
+				break;
+			}
+			int x, y;
+			for(x = start_x; x < end_x; x++){
+				for(y = 0; y < ROWNO; y++){
+					if(levl[x][y].typ == STAIRS && levl[x][y].ladder == LA_UP){
+						xupstair = x;
+						yupstair = y;
+					}
+				}
+			}
+		}
+		//Down stair
+		if(u.uz.dlevel < 4){
+			if(dungeons[u.uz.dnum].connect_side[u.uz.dlevel-1] == CON_UNSPECIFIED){
+				dungeons[u.uz.dnum].connect_side[u.uz.dlevel-1] = rnd(3);
+			}
+			int start_x, end_x;
+			switch(dungeons[u.uz.dnum].connect_side[u.uz.dlevel-1]){
+				case CONNECT_LEFT:
+					start_x = 0;
+					end_x = COLNO/3;
+				break;
+				case CONNECT_CENT:
+					start_x = COLNO/3;
+					end_x = COLNO*2/3;
+				break;
+				case CONNECT_RGHT:
+					start_x = COLNO*2/3;
+					end_x = COLNO;
+				break;
+			}
+			int x, y;
+			for(x = start_x; x < end_x; x++){
+				for(y = 0; y < ROWNO; y++){
+					if(levl[x][y].typ == STAIRS && levl[x][y].ladder == LA_DOWN){
+						xdnstair = x;
+						ydnstair = y;
+					}
+				}
+			}
+		}
+	}
+	
 	Fread((genericptr_t) &n, 1, sizeof(n), fd);
 						/* Number of altars */
 	while(n--) {

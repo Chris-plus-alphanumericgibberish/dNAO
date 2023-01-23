@@ -57,8 +57,8 @@ register struct obj *otmp;
     
     if (is_cloak(otmp) && ((abs(otmp->objsize - mtmp->data->msize) > 1)))
         return FALSE;
-    
-    if (is_helmet(otmp) && (!has_head_mon(mtmp) || otmp->objsize != mtmp->data->msize || !helm_match(mtmp->data,otmp)) && !is_flimsy(otmp))
+
+    if (is_helmet(otmp) && !(helm_match(mtmp->data, otmp) && helm_size_fits(mtmp->data, otmp)))
         return FALSE;
     
     if (is_shield(otmp) && (
@@ -72,7 +72,7 @@ register struct obj *otmp;
     if (is_gloves(otmp) && (otmp->objsize != mtmp->data->msize || !can_wear_gloves(mtmp->data))) return FALSE;
     
     if (is_boots(otmp) &&
-        (otmp->objsize != mtmp->data->msize || !can_wear_boots(mtmp->data)))
+        (!boots_size_fits(mtmp->data, otmp) || !can_wear_boots(mtmp->data)))
 	return FALSE;
     
     if (is_helmet(otmp) &&

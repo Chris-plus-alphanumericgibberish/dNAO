@@ -1327,7 +1327,7 @@ wiz_map()
 STATIC_PTR int
 wiz_genesis()
 {
-	if (wizard)	(void) create_particular(-1, -1, TRUE, 0, 0, 0);
+	if (wizard)	(void) create_particular(u.ux, u.uy, -1, -1, TRUE, 0, 0, 0, (char *)0);
 	else		pline("Unavailable command '^G'.");
 	return MOVE_CANCELLED;
 }

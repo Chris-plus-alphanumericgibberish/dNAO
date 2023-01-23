@@ -467,6 +467,7 @@ struct attack *mattk;
 	long unwornmask;
 	int petrifies = FALSE;
 	char kbuf[BUFSZ];
+	boolean mi_only = is_chuul(youracedata);
 
 	if (!mdef->minvent) return;		/* nothing to take */
 
@@ -501,6 +502,8 @@ struct attack *mattk;
 		    mon_nam(mdef), mhe(mdef), mhis(mdef));
 	}
 	while ((otmp = mdef->minvent) != 0) {
+		if(mi_only && !is_magic_obj(otmp) && otmp != stealoid)
+			continue;
 	    /* take the object away from the monster */
 	    obj_extract_self(otmp);
 	    if ((unwornmask = otmp->owornmask) != 0L) {
