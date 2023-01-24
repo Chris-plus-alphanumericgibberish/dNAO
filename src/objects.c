@@ -384,7 +384,7 @@ WEAPON(("katana", "samurai sword"),
 /* special swords set up for artifacts and future weapons*/
 WEAPON(("vibroblade", "gray short sword", "short sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
-	1, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
+	0, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
 WEAPON(("tsurugi", "long samurai sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 60,500,  2, S,   P_TWO_HANDED_SWORD, METAL, FALSE, HI_METAL),
@@ -519,7 +519,7 @@ WEAPON(("macuahuitl", "obsidian-edged club"), /*Needs encyc entry*/
 	0, 0, MZ_MEDIUM,  0, 40, 10,  0, B|S, P_CLUB, WOOD, FALSE, HI_WOOD),
 WEAPON(("breaking wheel", "wagon wheel"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(3)),
-	0, 0, MZ_HUGE,  1, 150,  500,  0, B,   P_NONE, WOOD, FALSE, HI_WOOD),
+	0, 0, MZ_HUGE,    1, 150,  500,  0, B,   P_NONE, WOOD, FALSE, HI_WOOD),
 WEAPON(("quarterstaff", "staff"),
 	DMG(D(6)), DMG(D(6)),
 	0, 0,   MZ_HUGE,  9, 40,  5,  0, B,   P_QUARTERSTAFF, WOOD, FALSE, HI_WOOD),
@@ -1161,8 +1161,8 @@ TOOL(("lock pick"),             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON,    HI
 TOOL(("tallow candle", "candle"),          0,   MZ_TINY, 1, 0, 0,  15,  2,  10, WAX,     CLR_WHITE),
 TOOL(("wax candle", "candle"),             0,   MZ_TINY, 1, 0, 0,   5,  2,  20, WAX,     CLR_WHITE),
 TOOL(("candle of invocation", "runed candle"), /*Needs encyc entry*/
-                                         0,   MZ_TINY, 0, 1, 0,  15,  2,  50, WAX,     CLR_ORANGE, O_NOWISH(1)),
-TOOL(("lantern"),               1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER,  CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
+                                           0,  MZ_TINY,  0, 1, 0,  15,  2,  50, WAX,     CLR_ORANGE, O_NOWISH(1)),
+TOOL(("lantern"),               		   1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER,  CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
 TOOL(("oil lamp", "lamp"),                 0,  MZ_SMALL, 0, 0, 0,  30, 20,  10, COPPER,  CLR_YELLOW),
 TOOL(("magic lamp", "lamp"),               0,  MZ_SMALL, 0, 1, 0,  15, 20,  50, COPPER,  CLR_YELLOW, O_NOWISH(1)),
 // TOOL(("shadowlander's torch", "black torch"),
