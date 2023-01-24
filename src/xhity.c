@@ -2006,7 +2006,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				if(pd && (!(dmgtype(pd, AD_SEDU)
 					|| dmgtype(pd, AD_SSEX)
 					|| dmgtype(pd, AD_LSEX)
-					|| !could_seduce(magr,mdef,attk)
+					|| !could_seduce(magr,mdef,0)
 					|| !(uarm || uarmu || uarmh || uarmg || uarmf || uarmc || uwep || uswapwep)
 				))){
 					*subout |= SUBOUT_GOATSPWN;
@@ -2022,7 +2022,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					|| dmgtype(pd, AD_SSEX)
 					|| dmgtype(pd, AD_LSEX)
 					|| magr->mcan 
-					|| !(mdef && could_seduce(magr,mdef,attk))
+					|| !(mdef && could_seduce(magr,mdef,0))
 					|| (mdef && !(which_armor(mdef, W_ARM) || which_armor(mdef, W_ARMU) || which_armor(mdef, W_ARMH) || 
 						 which_armor(mdef, W_ARMG) || which_armor(mdef, W_ARMF) || which_armor(mdef, W_ARMC) ||
 						 MON_WEP(mdef) || MON_SWEP(mdef)
