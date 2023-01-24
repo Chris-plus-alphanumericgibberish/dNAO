@@ -889,11 +889,14 @@ struct obj *scroll;
 				return 0;
 			}
 			else {
+				int objcount = 2 + rn2(3) + rn2(5);
 				You("can't understand what they say...");
 				pline("Suddenly, the glyphs glow in rainbow hues and escape from the fracturing disk!");
 				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
-				know_random_obj(2 + rn2(3) + rn2(5));
+				know_random_obj(objcount);
 				change_uinsight(1);
+				more_experienced(d(objcount+1, 100), 0);
+				newexplevel();
 			}
 		}
 	} else if(scroll->otyp == APHANACTONAN_ARCHIVE){
@@ -910,24 +913,35 @@ struct obj *scroll;
 			else {
 				int i;
 				int rolls;
+				int effectcount;
+				int xp = 0;
 				boolean seals = FALSE, wards = FALSE, combat = FALSE;
 				You("can't understand what it says...");
 				pline("Suddenly, the glyphs glow in impossible hues and escape from the fracturing disk!");
 				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
-				know_random_obj(4 + rn2(5) + rn2(9));
-				change_uinsight(rnd(8));
+				//ID
+				effectcount = 4 + rn2(5) + rn2(9);
+				xp += d(effectcount,100);
+				know_random_obj(effectcount);
+
+				//Insight
+				effectcount = rnd(8);
+				xp += d(effectcount,100);
+				change_uinsight(effectcount);
 				change_usanity(-1*d(8,8),TRUE);
 				
 				for(rolls = d(1,4); rolls > 0; rolls--){
 					switch(rnd(4)){
 						case 1:
 							for(i = rnd(4); i > 0; i--){
+								xp += d(1,200);
 								learn_spell_aphanactonan(rn1(SPE_BLANK_PAPER - SPE_DIG, SPE_DIG));
 							}
 						break;
 						case 2:
 							if(!Role_if(PM_EXILE)){
 								if(!seals){
+									xp += 625;
 									You("see circular seals!");
 									seals = TRUE;
 								}
@@ -942,6 +956,7 @@ struct obj *scroll;
 								wards = TRUE;
 							}
 							for(i = d(2,4); i > 0; i--){
+								xp += d(1,50);
 								u.wardsknown |= 0x1L<<rnd(NUM_WARDS-1); //Note: Ward_Elbereth is 0x1L, and does nothing.
 							}
 						break;
@@ -950,12 +965,15 @@ struct obj *scroll;
 								You("suddenly know secret combat techniques!");
 								combat = TRUE;
 							}
+							xp += 1000;
 							u.uhitinc = min_ints(100, u.uhitinc+d(1,2));
 							u.udaminc = min_ints(100, u.udaminc+d(1,2));
 							u.uacinc = min_ints(100, u.uacinc+d(1,2));
 						break;
 					}
 				}
+				more_experienced(xp, 0);
+				newexplevel();
 			}
 		}
 	} else if(scroll->otyp >= ANTI_CLOCKWISE_METAMORPHOSIS_G && scroll->otyp <= ORRERY_GLYPH) {
