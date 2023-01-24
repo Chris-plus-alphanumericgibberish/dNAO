@@ -1067,7 +1067,7 @@ boolean force;
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4),
 		       !(get_ox(otmp, OX_ESUM)) * ((enhanced ? 2 : 1) * (!otmp->cursed ? 1 : 0)),
-			   !!otmp->blessed, !otmp->cursed);
+			   otmp->blessed, !otmp->cursed);
 		exercise(A_CON, TRUE);
 		break;
 	case POT_EXTRA_HEALING:
