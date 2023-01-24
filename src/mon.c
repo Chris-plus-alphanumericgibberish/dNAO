@@ -9244,6 +9244,7 @@ struct monst *mtmp;
 				pline("Some unseen virtue is sucked into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
+			if(mon_resistance(tmpm, FREE_ACTION)) damage /= 2;
 			if(resists_cold(tmpm)) damage /= 2;
 			if(damage >= tmpm->mhp){
 				grow_up(mtmp,tmpm);
@@ -9399,6 +9400,7 @@ struct monst *mtmp;
 						pline("%s breathes out static curses.", Monnam(mtmp));
 					}
 					if(
+						!(mon_resistance(targ, FREE_ACTION)) &&
 						!(targ->misc_worn_check & W_ARMH && (otmp = which_armor(targ, W_ARMH)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARMC && (otmp = which_armor(targ, W_ARMC)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARM && (otmp = which_armor(targ, W_ARM)) && !otmp->cursed) &&
