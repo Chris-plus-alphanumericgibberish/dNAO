@@ -707,7 +707,7 @@ boolean dumping;
 		}
 		if(has_blood(youracedata)){
 			if (u.umadness&MAD_FRENZY){
-				Sprintf(buf, "your %s seethe below your %s", body_part(BLOOD), body_part(BODY_SKIN));
+				Sprintf(buf, "your %s seethes below your %s", body_part(BLOOD), body_part(BODY_SKIN));
 				enl_msg("You ", "feel ", "felt ", buf);
 			}
 		}
@@ -1327,7 +1327,7 @@ resistances_enlightenment()
 		}
 		if(has_blood(youracedata)){
 			if (u.umadness&MAD_FRENZY){
-				Sprintf(buf, "You feel your %s seethe below your %s.", body_part(BLOOD), body_part(BODY_SKIN));
+				Sprintf(buf, "You feel your %s seethes below your %s.", body_part(BLOOD), body_part(BODY_SKIN));
 				putstr(en_win, 0, buf);
 				messaged++;
 			}
