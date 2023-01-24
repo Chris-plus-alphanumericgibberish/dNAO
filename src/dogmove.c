@@ -1240,7 +1240,7 @@ register int after;	/* this is extra fast monster movement */
 	{
 		if(!mtarget_adjacent(mtmp)){ /* don't fight at range if there's a melee target */
 			/* Look for monsters to fight (at a distance) */
-			struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+			struct monst *mtmp2 = mfind_target(mtmp, FALSE, TRUE);
 			if (mtmp2 && (mtmp2 != mtmp)
 				&& (mtmp2 != &youmonst)
 				&& acceptable_pet_target(mtmp, mtmp2, TRUE))

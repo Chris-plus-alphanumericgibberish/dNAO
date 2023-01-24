@@ -1128,17 +1128,18 @@
 						 (mon)->mtyp == PM_PAGE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
 #define mon_turn_undead(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || \
 						 (mon)->mtyp == PM_PYROCLASTIC_VORTEX || (mon)->mtyp == PM_BRIGHID_ELADRIN || \
+						 (mon)->mtyp == PM_DRACAE_ELADRIN || \
 						 (mon)->mtyp == PM_KUKER || (mon)->mtyp == PM_SHIELD_ARCHON || \
 						 (mon)->mtyp == PM_MONADIC_DEVA || \
 						 (mon)->mtyp == PM_ALRUNES || (mon)->mtyp == PM_HATEFUL_WHISPERS || \
 						 (mon)->mtyp == PM_ELF_LORD || (mon)->mtyp == PM_ELVENKING || \
 						 (mon)->mtyp == PM_CELEBORN || (mon)->mtyp == PM_DANTRAG || \
-						 (mon)->mtyp == PM_ALRUNES || (mon)->mtyp == PM_HATEFUL_WHISPERS || \
 						 (mon)->mtyp == PM_ARIANNA || (mon)->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION || \
 						 (mon)->mtyp == PM_REBEL_RINGLEADER || (mon)->mtyp == PM_RADIANT_PYRAMID || \
 						 (mon)->mtyp == PM_SIR_ALJANOR || (mon)->mtyp == PM_ALLIANCE_VANGUARD || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
+#define mon_healing_turn(mon)	((mon)->mtyp == PM_DRACAE_ELADRIN)
 #define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_MASTER_KAEN || (mon)->mtyp == PM_ABBOT || \
 						 (mon)->mtyp == PM_XORN_MONK || (mon)->mtyp == PM_DAO_LAO_GUI_MONK || (mon)->mtyp == PM_ZHI_REN_MONK || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_MONK)) || \

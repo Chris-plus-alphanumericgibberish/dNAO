@@ -3407,6 +3407,8 @@ int *shield_margin;
 			/* these guys are extra accurate */
 			if (is_uvuudaum(pa) || pa->mtyp == PM_CLAIRVOYANT_CHANGED || pa->mtyp == PM_NORN)
 				bons_acc += 20;
+			if (pa->mtyp == PM_DRACAE_ELADRIN)
+				bons_acc += rnd(12);
 			if (pa->mtyp == PM_GROTESQUE_PEEPER){
 				if((youdef && mon_can_see_you(magr))
 				 ||(!youdef && mon_can_see_mon(magr,mdef) && !mindless_mon(mdef))
@@ -14594,9 +14596,11 @@ int vis;						/* True if action is at all visible to the player */
 		}
 		/* unarmed punches proc effects of worn gloves */
 		if (unarmed_punch) {
+			//Monsters have extra damage for their attacks, it makes sense to treat it as part of the unarmed damage.
+			int unarmed_basedmg = basedmg + ((youagr && !natural_strike) ? 0 : monsdmg);
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, unarmed_basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)
@@ -14605,9 +14609,11 @@ int vis;						/* True if action is at all visible to the player */
 		}
 		/* unarmed kicks proc effects of worn boots */
 		if (unarmed_kick) {
+			//Monsters have extra damage for their attacks, it makes sense to treat it as part of the unarmed damage.
+			int unarmed_basedmg = basedmg + ((youagr && !natural_strike) ? 0 : monsdmg);
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 			if (otmp) {
-				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, unarmed_basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
 					return returnvalue;
 				if (otmp->oartifact)

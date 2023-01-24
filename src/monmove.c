@@ -1050,7 +1050,7 @@ int mtyp;
 
 }
 
-STATIC_OVL void
+void
 dracae_eladrin_spawn_equip(mtmp, mtyp)
 struct monst *mtmp;
 int mtyp;
@@ -1081,7 +1081,7 @@ int mtyp;
 		}
 		else if(rn2(2)){
 			otmp = mksobj(KITE_SHIELD, MKOBJ_NOINIT);
-			set_material_gm(otmp, DRAGON_HIDE);
+			set_material_gm(otmp, SHELL_MAT);
 			otmp->objsize = size;
 			fix_object(otmp);
 			(void) mpickobj(mtmp, otmp);
@@ -1090,7 +1090,7 @@ int mtyp;
 	}
 	else if(mtyp == PM_NOVIERE_ELADRIN || mtyp == PM_SHIERE_ELADRIN){
 		otmp = mksobj(KITE_SHIELD, MKOBJ_NOINIT);
-		set_material_gm(otmp, DRAGON_HIDE);
+		set_material_gm(otmp, SHELL_MAT);
 		otmp->objsize = size;
 		fix_object(otmp);
 		(void) mpickobj(mtmp, otmp);
@@ -1471,7 +1471,7 @@ register struct monst *mtmp;
 		}
 	}
 
-	if (is_commander(mdat) && mfind_target(mtmp, FALSE))
+	if (is_commander(mdat) && mfind_target(mtmp, FALSE, TRUE))
 		m_command(mtmp);
 
 	if (((mdat->msound == MS_SHRIEK || mdat->msound == MS_HOWL) && !um_dist(mtmp->mx, mtmp->my, 1))
@@ -2143,7 +2143,7 @@ register struct monst *mtmp;
 
 	if(!mtarget_adjacent(mtmp)){ /* don't fight at range if there's a melee target */
 		/* Look for other monsters to fight (at a distance) */
-		struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+		struct monst *mtmp2 = mfind_target(mtmp, FALSE, TRUE);
 		if (mtmp2 && 
 			(mtmp2 != &youmonst || 
 				dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) > 2) &&

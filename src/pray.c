@@ -2626,7 +2626,12 @@ struct monst *mon;
 	int once, range, xlev;
 	short fast = 0;
 
-	pline("%s chants holy scripture.", Monnam(mon));
+	if(mon_healing_turn(mon)){
+		if(canseemon(mon))
+			pline("%s shines with holy light!", Monnam(mon));
+	}
+	else
+		pline("%s chants holy scripture.", Monnam(mon));
 
 	if(Misotheism){
 		pline("But nothing happens!");
@@ -2634,7 +2639,7 @@ struct monst *mon;
 	}
 
 	/* note: does not perform unturn_dead() on victims' inventories */
-	range = BOLT_LIM + (mon->m_lev / 5);	/* 5 to 11 */
+	range = BOLT_LIM + (mon->m_lev / 5);
 	range *= range;
 	once = 0;
 	for(mtmp = fmon; mtmp; mtmp = mtmp2) {
@@ -2646,9 +2651,11 @@ struct monst *mon;
 			dist2(mon->mx,mon->my, mtmp->mx,mtmp->my) > range
 		) continue;
 		
-	    if (mm_grudge(mon, mtmp) && (is_undead(mtmp->data) ||
-		   (is_demon(mtmp->data) && (mon->m_lev > (MAXULEV/2))))) {
-
+	    if (mm_grudge(mon, mtmp) && 
+			(is_undead(mtmp->data) ||
+				(is_demon(mtmp->data) && (mon->m_lev > (MAXULEV/2)))
+			)
+		){
 		    mtmp->msleeping = 0;
 		    if (mon->mconf) {
 				if (!once++){
@@ -2671,6 +2678,16 @@ struct monst *mon;
 					monflee(mtmp, 0, FALSE, TRUE);
 		    }
 	    }
+		else if (mon_healing_turn(mon) && mtmp->mhp < mtmp->mhpmax 
+			&& !mon->mtame == !mtmp->mtame && mon->mpeaceful == mtmp->mpeaceful && !mm_grudge(mon, mtmp)
+			&& !(is_undead(mtmp->data) || is_demon(mtmp->data))
+		){
+			if(canseemon(mtmp))
+				pline("%s looks better!", Monnam(mtmp));
+			mtmp->mhp += d(10,6);
+			if(mtmp->mhp > mtmp->mhpmax)
+				mtmp->mhp = mtmp->mhpmax;
+		}
 	}
 	if(distu(mon->mx,mon->my) <= range && !mon->mpeaceful){
 		if(is_undead(youracedata) || (is_demon(youracedata) && (mon->m_lev > (MAXULEV/2)))){
@@ -2681,12 +2698,23 @@ struct monst *mon;
 			else {
 				xlev = turn_level(&youmonst);
 				if(is_undead(youracedata) && mon->m_lev >= xlev && rnd(u.ulevel) <= xlev){
-					You("are burned by the holy words!");
-					losehp(d(6,6), "holy scripture", KILLED_BY);
+					if(mon_healing_turn(mon)){
+						You("are burned by the holy light!");
+						losehp(d(10,6), "holy light", KILLED_BY);
+					}
+					else {
+						You("are burned by the holy words!");
+						losehp(d(6,6), "holy scripture", KILLED_BY);
+					}
 				}
 				You("panic!");
 				HPanicking += d(6,6);
 			}
+		}
+		else if(mon->mtame && mon_healing_turn(mon)
+		 && !(is_undead(youracedata) || (is_demon(youracedata) && (mon->m_lev > (MAXULEV/2))))
+		){
+			healup(d(10,6), 0, FALSE, FALSE);
 		}
 	}
 	return MOVE_STANDARD;

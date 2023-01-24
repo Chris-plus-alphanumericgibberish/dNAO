@@ -238,6 +238,7 @@ struct obj *otmp;
 #define MUSE_POT_FULL_HEALING 18
 #define MUSE_LIZARD_CORPSE 19
 #define MUSE_LIFE_FLASK 20
+#define MUSE_HEALING_SURGE 21
 /*
 #define MUSE_INNATE_TPT 9999
  * We cannot use this.  Since monsters get unlimited teleportation, if they
@@ -254,6 +255,7 @@ find_defensive(mtmp)
 struct monst *mtmp;
 {
 	register struct obj *obj = 0;
+	struct monst *mtarg;
 	struct trap *t;
 	int x=mtmp->mx, y=mtmp->my;
 	boolean stuck = (mtmp == u.ustuck);
@@ -325,6 +327,21 @@ struct monst *mtmp;
 	}
 
 	fraction = u.ulevel < 10 ? 5 : u.ulevel < 14 ? 4 : 3;
+	if(mon_healing_turn(mtmp) && !mtmp->mspec_used && !mtmp->mcan){
+		int range = BOLT_LIM + (mtmp->m_lev / 5);
+		range *= range;
+		for(mtarg = fmon; mtarg; mtarg = mtarg->nmon){
+			if(DEADMONSTER(mtarg)) continue;
+			if(is_undead(mtarg->data) || is_demon(mtarg->data)) continue;
+			if(!mtmp->mtame != !mtarg->mtame || mtmp->mpeaceful != mtarg->mpeaceful || mm_grudge(mtmp, mtarg)) continue;
+			if (!clear_path(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my) ||
+				dist2(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my) > range
+			) continue;
+			if(mtarg->mhp*fraction >= mtarg->mhpmax) continue;
+		    m.has_defense = MUSE_HEALING_SURGE;
+		    return TRUE;
+		}
+	}
 	if(mtmp->mhp >= mtmp->mhpmax
 		|| (mtmp->mhp >= 10 && mtmp->mhp*fraction >= mtmp->mhpmax)
 	){
@@ -964,6 +981,10 @@ mon_tele:
 		/* not actually called for its unstoning effect */
 		mon_consume_unstone(mtmp, otmp, FALSE, FALSE);
 		return 2;
+	case MUSE_HEALING_SURGE:
+		mon_doturn(mtmp);
+		mtmp->mspec_used = 3;
+		return 2;
 	case 0: return 0; /* i.e. an exploded wand */
 	default: impossible("%s wanted to perform action %d?", Monnam(mtmp),
 			m.has_defense);
@@ -1093,7 +1114,7 @@ struct monst *mtmp;
 	boolean reflection_skip = FALSE; 
 	struct obj *helmet = which_armor(mtmp, W_ARMH);
 
-	struct monst *target = mfind_target(mtmp, TRUE);
+	struct monst *target = mfind_target(mtmp, TRUE, FALSE);
 	
 	if(tbx == 0 && tby == 0) return FALSE; //Target is not lined up.
 	
@@ -1122,9 +1143,14 @@ struct monst *mtmp;
 
 	if (!ranged_stuff) return FALSE;
 
-	if(mon_knight(mtmp) && target && is_undead(target->data) && !mtmp->mspec_used && !Inhell) {
-		m.offensive = (struct obj *) 0;
-		m.has_offense = MUSE_MON_TURN_UNDEAD;
+	if(mon_turn_undead(mtmp) && !mtmp->mspec_used && !mtmp->mcan && (!Inhell || mon_healing_turn(mtmp))){
+		struct monst *target2 = mfind_target(mtmp, FALSE, FALSE); 
+		if((target && is_undead(target->data))
+		 || (target2 && is_undead(target2->data))
+		) {
+			m.offensive = (struct obj *) 0;
+			m.has_offense = MUSE_MON_TURN_UNDEAD;
+		}
 	}
 
 #define nomore(x) if(m.has_offense==x) continue;
