@@ -671,7 +671,7 @@ boolean digest_meal;
 	if(mon->mtrapped && t_at(mon->mx, mon->my) && t_at(mon->mx, mon->my)->ttyp == VIVI_TRAP)
 		return;
 	
-	if(mon->mtame && u.ufirst_life)
+	if(mon->mtame && u.ufirst_life && mon->mhp < mon->mhpmax)
 		mon->mhp++;
 		
 	if(is_alabaster_mummy(mon->data) 
