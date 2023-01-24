@@ -5191,6 +5191,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5276,6 +5278,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5556,6 +5560,8 @@ struct monst *magr;
 			if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 				continue;
 
+			if(youdef && u.uswallow)
+				continue;
 			if(!youdef && nonthreat(mdef))
 				continue;
 
@@ -5635,6 +5641,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5709,6 +5717,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5781,6 +5791,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5851,6 +5863,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5921,6 +5935,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
