@@ -3403,7 +3403,7 @@ int tary;
 					/* monster */
 					boolean resisted = FALSE;
 
-					if (!(resisted = (Magic_res(mdef) || resists_death(mdef) || resist(mdef, 0, 0, FALSE))) ||
+					if (!(resisted = (Magic_res(mdef) || resists_death(mdef) || resist(mdef, 0, 0, FALSE))) &&
 						rn2(mlev(magr)) > 12
 						){
 						if (is_delouseable(mdef->data)){
@@ -5177,6 +5177,7 @@ int tary;
 							pline("%s goes blind!", Monnam(mdef));
 						}
 					}
+					mdef->mcansee = 0;
 					mdef->mblinded = min(dmg, 127);
 				}
 			}
