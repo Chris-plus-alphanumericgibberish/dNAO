@@ -2079,7 +2079,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/* Bael has alternate attack routines -- not shown in pokedex */
 	if (pa->mtyp == PM_BAEL && *indexnum < NATTK && !by_the_book) {
-		static const struct attack marilithHands[6] = {
+		static const struct attack marilithHands[NATTK] = {
 			{ AT_MARI, AD_PHYS, 1, 15 },
 			{ AT_MARI, AD_PHYS, 1, 15 },
 			{ AT_MARI, AD_PHYS, 1, 15 },
@@ -2087,7 +2087,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			{ AT_MARI, AD_PHYS, 1, 15 },
 			{ AT_MARI, AD_PHYS, 1, 15 }
 		};
-		static const struct attack swordArchon[6] = {
+		static const struct attack swordArchon[NATTK] = {
 			{ AT_CLAW, AD_ACFR, 3, 7 },
 			{ AT_CLAW, AD_ACFR, 3, 7 },
 			{ AT_REND, AD_DISN, 7, 1 },
