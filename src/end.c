@@ -1037,10 +1037,10 @@ int how;
 		if(uarmh && uarmh->oartifact == ART_HELM_OF_UNDEATH) {
 			otmp = uarmh;
 			if (!(
-					((mvitals[PM_DEATH_KNIGHT].mvflags & G_GENOD) && !In_quest(&u.uz)) ||/* G_EXTINCT okay */
+					(mvitals[PM_DEATH_KNIGHT].mvflags & G_GENOD) ||/* G_EXTINCT okay */
 					(Unchanging) ||
 					is_undead(youracedata)
-				)) {
+			)) {
 				You_feel("a curse fall upon your soul!");
 				if (Upolyd && uskin && uskin->oartifact == ART_MIRRORED_MASK) {
 					pline("Your mask falls to pieces!");
