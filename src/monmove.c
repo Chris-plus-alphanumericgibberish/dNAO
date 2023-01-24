@@ -1576,7 +1576,8 @@ register struct monst *mtmp;
 	
 	if((is_drow(mtmp->data) || mtmp->mtyp == PM_LUGRIBOSSK || mtmp->mtyp == PM_MAANZECORIAN)
 		&& (!mtmp->mpeaceful || Darksight)
-		&& (levl[mtmp->mx][mtmp->my].lit == 1 || viz_array[mtmp->my][mtmp->mx]&TEMP_LIT1)
+		&& !(mtmp->mpeaceful && !mtmp->mtame && mtmp->mfaction == PEN_A_SYMBOL)
+		&& (levl[mtmp->mx][mtmp->my].lit == 1 || (viz_array[mtmp->my][mtmp->mx]&TEMP_LIT1 && !(viz_array[mtmp->my][mtmp->mx]&TEMP_DRK1)))
 		&& !mtmp->mcan && mtmp->mspec_used < 4
 		&& !(noactions(mtmp))
 		&& !(mindless_mon(mtmp))
@@ -1586,6 +1587,7 @@ register struct monst *mtmp;
 		vision_full_recalc = 1;
 	    if(mtmp->mtyp == PM_HEDROW_WARRIOR) mtmp->mspec_used += d(4,4);
 		else mtmp->mspec_used += max(10 - mtmp->m_lev,2);
+		return 0;
 	}
 	
 	if((!mtmp->mpeaceful || !Darksight)
