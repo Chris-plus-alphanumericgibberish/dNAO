@@ -77,7 +77,7 @@ struct attack *mattk;
 		)
 		return 0;
 
-	if(pagr->mtyp == PM_SMALL_GOAT_SPAWN || pagr->mtyp == PM_GOAT_SPAWN || pagr->mtyp == PM_GIANT_GOAT_SPAWN || has_template(magr, MISTWEAVER) || pagr->mtyp == PM_PHANTASM || pagr->mtyp == PM_BEAUTEOUS_ONE)
+	if(pagr->mtyp == PM_SMALL_GOAT_SPAWN || pagr->mtyp == PM_GOAT_SPAWN || pagr->mtyp == PM_GIANT_GOAT_SPAWN || pagr->mtyp == PM_BLESSED || has_template(magr, MISTWEAVER) || pagr->mtyp == PM_PHANTASM || pagr->mtyp == PM_BEAUTEOUS_ONE)
 		return 1;
 	
 	if(pagr->mlet == S_NYMPH || pagr->mtyp == PM_INCUBUS || pagr->mtyp == PM_SUCCUBUS
