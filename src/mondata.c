@@ -699,7 +699,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -713,7 +713,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -751,7 +751,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -768,7 +768,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -800,7 +800,7 @@ int template;
 			{
 				/* remove attack */
 				/* shift all further attacks forwards one slot, and make last one all 0s */
-				for (j = 0; j < (NATTK - i); j++)
+				for (j = 0; j < (NATTK - i - 1); j++)
 					attk[j] = attk[j + 1];
 				attk[j] = noattack;
 			}
