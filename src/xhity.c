@@ -9527,6 +9527,7 @@ int vis;
 				result = xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 			}
 			else {
+				*hp(mdef) -= *hp(mdef)/(u.uswldtim+1); //Floored and current HP, so never fatal. 
 				pline("%s%s digests you!", Monnam(magr),
 					(u.uswldtim == 2) ? " thoroughly" :
 					(u.uswldtim == 1) ? " utterly" : "");
@@ -9679,7 +9680,12 @@ int vis;
 				if(thick_skinned(pd))
 					resist += 2;
 				if(resist > 0){
-					if(rnd(20) < resist){
+					if(resist >= 20)
+						dmg = 0;
+					else
+						dmg = mdef->mhpmax*(20-resist)/20;
+					if(dmg < mdef->mhp){
+						mdef->mhp -= dmg;//Will not kill defender
 						if(canspotmon(magr) || canspotmon(mdef)){
 							pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
 						}
