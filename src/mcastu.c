@@ -1131,6 +1131,16 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_COUATL:
+		switch(rn2(3)){
+			case 0:
+				return choose_clerical_spell(clrc_spell_power, mtmp->m_id,!(mtmp->mpeaceful), quake);
+			case 1:
+				return choose_psionic_spell(clrc_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
+			case 2:
+				return choose_magic_spell(wzrd_spell_power,mtmp->m_id,!(mtmp->mpeaceful));
+		}
+	break;
 	case PM_AMM_KAMEREL:
 	case PM_HUDOR_KAMEREL:
 	case PM_ARA_KAMEREL:
