@@ -10064,6 +10064,18 @@ int vis;
 		/* deal damage */
 		result = xdamagey(magr, mdef, attk, dmg);
 		break;
+	case AD_DREN:
+		/* message */
+		if (vis&VIS_MDEF) {
+			pline_The("air around %s flashes with multicolored sparks.",
+				(youdef ? "you" : mon_nam(mdef))
+				);
+		}
+		if (youdef)
+			drain_en(dmg);
+		else
+			mdef->mspec_used += (dmg+9)/10;
+		break;
 	case AD_COLD:
 	case AD_ECLD:
 		/* apply resistance */

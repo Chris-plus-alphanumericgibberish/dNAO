@@ -1962,7 +1962,7 @@ NEARDATA struct permonst mons[] = {
     MON("energy vortex", S_VORTEX,//9
 	LVL(6, 8, 30, 0), (G_GENO|G_NOCORPSE|1), /*Engulfing vorticies slower than 12 get 2x speed when stuck to you*/
 	DEF(NAT_AC(8)),
-	A(ATTK(AT_ENGL, AD_ELEC, 2, 6), ATTK(AT_ENGL, AD_DREN, 0, 0),
+	A(ATTK(AT_ENGL, AD_ELEC, 2, 6), ATTK(AT_ENGL, AD_DREN, 6, 6),
 	  ATTK(AT_NONE, AD_ELEC, 0, 4)),
 	SIZ(0, 0, MS_SILENT, MZ_HUGE),
 	MR_ELEC|MR_SLEEP|MR_DISINT|MR_POISON|MR_STONE|MR_SICK, 0,
