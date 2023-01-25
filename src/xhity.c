@@ -7092,9 +7092,14 @@ boolean ranged;
 	{
 		boolean goatspawn = (pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN || pa->mtyp == PM_BLESSED || pa->mtyp == PM_XUENU_MONK);
 		boolean noflee = (magr->isshk && magr->mpeaceful);
-		/* make physical attack */
-		alt_attk.adtyp = AD_PHYS;
-		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
+		if(attk->damn > 0 || attk->damd > 0){
+			/* make physical attack */
+			alt_attk.adtyp = AD_PHYS;
+			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
+		}
+		else if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 			return result;
