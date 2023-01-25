@@ -17,7 +17,6 @@ extern const int monstr[];
 #ifdef OVLB
 
 STATIC_DCL short FDECL(which_arti, (long int));
-STATIC_DCL boolean FDECL(mon_has_arti, (struct monst *,SHORT_P));
 STATIC_DCL struct monst *FDECL(other_mon_has_arti, (struct monst *,SHORT_P));
 STATIC_DCL boolean FDECL(rightful_owner, (struct monst *,SHORT_P, struct monst *));
 STATIC_DCL struct obj *FDECL(on_ground, (SHORT_P));
@@ -174,7 +173,7 @@ which_arti(mask)
  *	since bell, book, candle, and amulet are all objects, not really
  *	artifacts right now.	[MRS]
  */
-STATIC_OVL boolean
+boolean
 mon_has_arti(mtmp, otyp)
 	register struct monst *mtmp;
 	register short	otyp;
@@ -183,10 +182,11 @@ mon_has_arti(mtmp, otyp)
 
 	for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 	    if(otyp) {
-		if(otmp->otyp == otyp)
-			return(1);
+			if(otmp->otyp == otyp)
+				return(1);
 	    }
-	     else if(is_quest_artifact(otmp)) return(1);
+	    else if(is_quest_artifact(otmp))
+			return(1);
 	}
 	return(0);
 
@@ -194,8 +194,8 @@ mon_has_arti(mtmp, otyp)
 
 STATIC_OVL struct monst *
 other_mon_has_arti(mtmp, otyp)
-	register struct monst *mtmp;
-	register short	otyp;
+	struct monst *mtmp;
+	int otyp;
 {
 	register struct monst *mtmp2;
 
@@ -275,9 +275,9 @@ target_on(mask, mtmp)
 	register long int mask;
 	register struct monst *mtmp;
 {
-	register short	otyp;
-	register struct obj *otmp;
-	register struct monst *mtmp2;
+	int otyp;
+	struct obj *otmp;
+	struct monst *mtmp2;
 
 	if(!M_Wants(mask))	return(STRAT_NONE);
 

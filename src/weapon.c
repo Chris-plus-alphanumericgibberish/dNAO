@@ -657,6 +657,21 @@ int otyp;
 			bonn = 2;
 			bond = 4;
 		}
+		else if (obj->oartifact == ART_ESSCOOAHLIPBOOURRR)
+		{
+			if (large)
+			{
+				ocn = 2;
+				ocd = max(6 + 2 * dmod, 2);
+				flat += 1;
+			}
+			else
+			{
+				ocn = 1;
+				ocd = max(6 + 2 * dmod, 2);
+				flat += 2;
+			}
+		}
 	}
 
 
@@ -3974,6 +3989,18 @@ const struct def_skill *class_skill;
 	  OLD_P_SKILL(P_BEAST_MASTERY) = P_BASIC;
 	  OLD_P_SKILL(P_DART) = P_BASIC;
 	  OLD_P_SKILL(P_DAGGER) = P_BASIC;
+	}
+	if (Role_if(PM_HEALER) && Race_if(PM_DROW)){
+	  OLD_P_SKILL(P_BARE_HANDED_COMBAT) = P_BASIC;
+	  OLD_P_SKILL(P_BEAST_MASTERY) = P_BASIC;
+	  OLD_P_SKILL(P_DIVINATION_SPELL) = P_BASIC;
+	  if(flags.initgend){
+		OLD_P_SKILL(P_CLERIC_SPELL) = P_BASIC;
+	  }
+	  else {
+		OLD_P_SKILL(P_ATTACK_SPELL) = P_BASIC;
+		OLD_P_SKILL(P_ENCHANTMENT_SPELL) = P_BASIC;
+	  }
 	}
 	if (u.specialSealsActive&SEAL_BLACK_WEB) {
 	  OLD_P_SKILL(P_CROSSBOW) = P_BASIC;

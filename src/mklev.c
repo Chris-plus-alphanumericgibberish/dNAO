@@ -1058,6 +1058,16 @@ makelevel()
 				// pline("%s",fillname);
 				makemaz(fillname);
 			}
+			else if(Role_if(PM_HEALER) && Race_if(PM_DROW) && qstart_level.dnum == u.uz.dnum && qstart_level.dlevel == (u.uz.dlevel-1)){
+				Sprintf(fillname, "%s-secn", urole.filecode);
+				// pline("%s",fillname);
+				makemaz(fillname);
+			}
+			else if(Role_if(PM_HEALER) && Race_if(PM_DROW) && qstart_level.dnum == u.uz.dnum && qlocate_level.dlevel == (u.uz.dlevel-1)){
+				Sprintf(fillname, "%s-flor", urole.filecode);
+				// pline("%s",fillname);
+				makemaz(fillname);
+			}
 			else {
 			    Sprintf(fillname, "%s-loca", urole.filecode);
 			    loc_lev = find_level(fillname);

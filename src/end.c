@@ -858,6 +858,18 @@ Check_crystal_lifesaving()
 	return FALSE;
 }
 
+boolean
+Check_iaso_lifesaving()
+{
+	for(struct monst *mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !nonthreat(mon)
+		  && mon->mtame
+		)
+			return TRUE;
+	return FALSE;
+}
+
 STATIC_OVL void
 Use_crystal_lifesaving()
 {
@@ -914,6 +926,36 @@ Use_crystal_lifesaving()
 		}
 	}
 	impossible("Crystal lifesaving with invalid crystals!?");
+}
+
+STATIC_OVL void
+Use_iaso_lifesaving()
+{
+	struct monst *mon;
+	int count = 0;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !nonthreat(mon)
+		  && mon->mtame
+		)
+			count++;
+	if(count){
+		count = rn2(count);
+		for(mon = fmon; mon; mon = mon->nmon)
+			if(mon->mtyp == PM_IASOIAN_ARCHON
+			  && !mon->mcan && !nonthreat(mon)
+			  && mon->mtame
+			){
+				if(!count){
+					set_mcan(mon, TRUE);
+					if(canspotmon(mon))
+						pline("%s seems lackluster.", Monnam(mon));
+					return;
+				}
+				else count--;
+			}
+	}
+	impossible("Iasoian lifesaving but can't find pet!?");
 }
 
 /* Be careful not to call panic from here! */
@@ -995,10 +1037,10 @@ int how;
 		if(uarmh && uarmh->oartifact == ART_HELM_OF_UNDEATH) {
 			otmp = uarmh;
 			if (!(
-					((mvitals[PM_DEATH_KNIGHT].mvflags & G_GENOD) && !In_quest(&u.uz)) ||/* G_EXTINCT okay */
+					(mvitals[PM_DEATH_KNIGHT].mvflags & G_GENOD) ||/* G_EXTINCT okay */
 					(Unchanging) ||
 					is_undead(youracedata)
-				)) {
+			)) {
 				You_feel("a curse fall upon your soul!");
 				if (Upolyd && uskin && uskin->oartifact == ART_MIRRORED_MASK) {
 					pline("Your mask falls to pieces!");
@@ -1023,6 +1065,20 @@ int how;
 				obj_extract_self(otmp);
 				obfree(otmp, (struct obj *)0);
 			}
+		}
+		else if(Check_iaso_lifesaving()){
+			if(Hallucination){
+				//"I got better..."
+				You("get better.");
+			}
+			else {
+				if (how == CHOKING) You("vomit ...");
+				if (how == DISINTEGRATED) You("reconstitute!");
+				else if (how == OVERWOUND) You("reassemble!");
+				else You("miraculously recover!");
+			}
+			Use_iaso_lifesaving();
+			lsvd = LSVD_MISC;
 		}
 		else if(uamul && uamul->otyp == AMULET_OF_LIFE_SAVING){
 			if(!check_oprop(uamul, OPROP_LIFE))

@@ -360,6 +360,44 @@ int template;
 		/* misc: */
 		ptr->msound = MS_SILENT;
 		break;
+	case CORDYCEPS:
+		ptr->mflagsm |= (MM_STATIONARY);
+	case SPORE_ZOMBIE:
+		/* flags: */
+		ptr->mflagsm |= (MM_BREATHLESS);
+		if(ptr->mflagsm&MM_NEEDPICK)
+			ptr->mflagsm &= ~(MM_TUNNEL|MM_NEEDPICK);
+		ptr->mflagst = (MT_HOSTILE|MT_MINDLESS|MT_NOTAKE);
+		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
+		ptr->mflagsv = (MV_ECHOLOCATE|MV_SCENT);
+		ptr->mflagsb |= (MB_NOEYES);
+		//Note: Plant, NOT Undead. It's a living zombie. Also less resistant to damage
+		ptr->mflagsa |= (MA_PLANT);
+		
+		/*Zuggtmoy's spores are against natural law*/
+		if(ptr->maligntyp > 0)
+			ptr->maligntyp = -1*ptr->maligntyp;
+		else if(ptr->maligntyp == 0)
+			ptr->maligntyp = -5;
+
+		/*Zombies have no skill*/
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
+		/* defense: */
+		ptr->dac += -2;	/* penalty to dodge AC */
+		ptr->hdr += 1;
+		ptr->bdr += 1;
+		ptr->gdr += 1;
+		ptr->ldr += 1;
+		ptr->fdr += 1;
+		/* resists: */
+		ptr->mresists |= MR_SICK;
+		/* misc: */
+		ptr->msound = MS_SILENT;
+		break;
 	case FRACTURED:
 		/* flags: */
 		ptr->mflagsm |= (MM_BREATHLESS);
@@ -664,6 +702,22 @@ int template;
 			ptr->pac += 6;
 			ptr->hdr += 6;
 		break;
+		case PLAGUE_TEMPLATE:
+			ptr->mflagst &= ~(MT_HOSTILE);
+			ptr->mflagst |= MT_PEACEFUL;
+			ptr->mlevel = (ptr->mlevel+2)/3;
+			ptr->mr /= 3;
+			ptr->dac = -5;
+			ptr->pac = 0;
+			ptr->spe_hdr = 0;
+			ptr->spe_bdr = 0;
+			ptr->spe_gdr = 0;
+			ptr->spe_ldr = 0;
+			ptr->spe_fdr = 0;
+			ptr->mmove = 0;
+			ptr->msound = (ptr->msound == MS_SILENT) ? MS_SILENT : MS_COUGH;
+			ptr->mresists &= ~(MR_POISON|MR_DRAIN|MR_SICK|MR_MAGIC);
+		break;
 	}
 #undef MT_ITEMS
 
@@ -679,7 +733,7 @@ int template;
 		insert = FALSE;
 
 		/* some templates completely skip specific attacks */
-		while ((template == ZOMBIFIED || template == SKELIFIED) &&
+		while ((template == ZOMBIFIED || template == SKELIFIED || template == SPORE_ZOMBIE) &&
 			(
 			attk->lev_req > ptr->mlevel ||
 			attk->aatyp == AT_SPIT ||
@@ -699,7 +753,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -713,7 +767,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -751,7 +805,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -768,7 +822,7 @@ int template;
 			)
 		){
 			/* shift all further attacks forwards one slot, and make last one all 0s */
-			for (j = 0; j < (NATTK - i); j++)
+			for (j = 0; j < (NATTK - i - 1); j++)
 				attk[j] = attk[j + 1];
 			attk[j] = noattack;
 		}
@@ -800,7 +854,7 @@ int template;
 			{
 				/* remove attack */
 				/* shift all further attacks forwards one slot, and make last one all 0s */
-				for (j = 0; j < (NATTK - i); j++)
+				for (j = 0; j < (NATTK - i - 1); j++)
 					attk[j] = attk[j + 1];
 				attk[j] = noattack;
 			}
@@ -924,6 +978,29 @@ int template;
 			attk->damd = max(4, max(ptr->msize * 2, attk->damd));
 			special = TRUE;
 		}
+		/* infectees' bites are sickening: pt 1: other bites */
+		if (template == SPORE_ZOMBIE && (
+			attk->aatyp == AT_OBIT
+			|| attk->aatyp == AT_LNCK
+			)
+		){
+			attk->adtyp = AD_DISE;
+			attk->damn = max(1, attk->damn);
+			attk->damd = max(4, max(ptr->msize * 2, attk->damd));
+		}
+		/* infectees' bites are sickening: pt 2: primary bites*/
+		if (template == SPORE_ZOMBIE && (
+			attk->aatyp == AT_BITE
+			|| (insert_okay && !nomouth(ptr->mtyp))
+			)
+		){
+			maybe_insert();
+			attk->aatyp = AT_BITE;
+			attk->adtyp = AD_DISE;
+			attk->damn = max(1, attk->damn);
+			attk->damd = max(4, max(ptr->msize * 2, attk->damd));
+			special = TRUE;
+		}
 		/* pseudonatural's bites become int-draining tentacles */
 		if (template == PSEUDONATURAL && (
 			(attk->aatyp == AT_BITE)
@@ -936,6 +1013,27 @@ int template;
 			attk->damn = 1;
 			attk->damd = 4;
 			special = TRUE;
+		}
+		/* Cordyceps always have the same attacks */
+		if(template == CORDYCEPS){
+			if(i==0){
+				attk->aatyp = AT_GAZE;
+				attk->adtyp = AD_SPOR;
+				attk->damn = 0;
+				attk->damd = 0;
+			}
+			else if(i==1){
+				attk->aatyp = AT_NONE;
+				attk->adtyp = AD_DISE;
+				attk->damn = 0;
+				attk->damd = 0;
+			}
+			else {
+				/* shift all further attacks forwards one slot, and make last one all 0s */
+				for (j = 0; j < (NATTK - i - 1); j++)
+					attk[j] = attk[j + 1];
+				attk[j] = noattack;
+			}
 		}
 		/* tomb herd's attacks are generally stronger */
 		if (template == TOMB_HERD && (
@@ -1180,6 +1278,9 @@ int mtyp;
 		return is_minion(ptr);
 	case MOLY_TEMPLATE:
 		return is_cha_demon(ptr);
+	case CORDYCEPS:
+	case SPORE_ZOMBIE:
+		return can_undead(ptr);
 	}
 	/* default fall through -- allow all */
 	return TRUE;
@@ -2279,21 +2380,54 @@ num_horns(ptr)
 struct permonst *ptr;
 {
     switch (monsndx(ptr)) {
+	case PM_DRACAE_ELADRIN:
+	case PM_FIERNA:
+	case PM_GRAZ_ZT:
+	return 6;
+	case PM_TRICERATOPS:
+	return 3;
+	case PM_LAMB:
+	case PM_ROTHE:
+	case PM_SHEEP:
+	case PM_DIRE_SHEEP:
     case PM_HORNED_DEVIL:	/* ? "more than one" */
     case PM_MINOTAUR:
-    case PM_ASMODEUS:
+    case PM_MINOTAUR_PRIESTESS:
+    case PM_SMALL_GOAT_SPAWN:
+    case PM_GOAT_SPAWN:
+    case PM_GIANT_GOAT_SPAWN:
+    case PM_BLESSED:
+    case PM_BAPHOMET:
+    case PM_MALCANTHET:
+    case PM_ORCUS:
     case PM_BALROG:
+    case PM_DURIN_S_BANE:
+    case PM_LUNGORTHIN:
     case PM_LEGION_DEVIL_GRUNT:
     case PM_LEGION_DEVIL_SOLDIER:
     case PM_LEGION_DEVIL_SERGEANT:
     case PM_LEGION_DEVIL_CAPTAIN:
     case PM_GOOD_NEIGHBOR:
+    case PM_PIT_FIEND:
+    case PM_NESSIAN_PIT_FIEND:
+    case PM_BAEL:
+    case PM_DISPATER:
+    case PM_MAMMON:
+    case PM_GREEN_PIT_FIEND:
+    case PM_BELIAL:
+    case PM_MOLEK:
+    case PM_MEPHISTOPHELES:
+    case PM_BAALPHEGOR:
+    case PM_ASMODEUS:
+    case PM_VERIER:
     case PM_GLASYA:
 	return 2;
     case PM_WHITE_UNICORN:
     case PM_GRAY_UNICORN:
     case PM_BLACK_UNICORN:
+    case PM_NIGHTMARE:
     case PM_KI_RIN:
+    case PM_ANCIENT_OF_CORRUPTION:
 	return 1;
     default:
 	break;
@@ -2610,6 +2744,9 @@ static const short grownups[][2] = {
 	{PM_OMEGA_METROID, PM_METROID_QUEEN},
 	{PM_VAMPIRE, PM_VAMPIRE_LORD}, {PM_VAMPIRE, PM_VAMPIRE_LADY}, {PM_BAT, PM_GIANT_BAT},
 	{PM_GIANT_BAT, PM_BATTLE_BAT}, {PM_BATTLE_BAT, PM_WARBAT},
+	{PM_PLAINS_CENTAUR, PM_CENTAUR_CHIEFTAIN},
+	{PM_FOREST_CENTAUR, PM_CENTAUR_CHIEFTAIN},
+	{PM_MOUNTAIN_CENTAUR, PM_CENTAUR_CHIEFTAIN},
 	{PM_BABY_GRAY_DRAGON, PM_GRAY_DRAGON},
 	{PM_BABY_SILVER_DRAGON, PM_SILVER_DRAGON},
 	{PM_BABY_DEEP_DRAGON, PM_DEEP_DRAGON},
@@ -2630,6 +2767,7 @@ static const short grownups[][2] = {
 	{PM_BABY_LONG_WORM, PM_LONG_WORM},
 	{PM_BABY_PURPLE_WORM, PM_PURPLE_WORM},
 	{PM_BABY_CROCODILE, PM_CROCODILE},
+	{PM_CHUUL, PM_ELDER_CHUUL},
 	{PM_BABY_CAVE_LIZARD,PM_SMALL_CAVE_LIZARD}, {PM_SMALL_CAVE_LIZARD, PM_CAVE_LIZARD}, {PM_CAVE_LIZARD, PM_LARGE_CAVE_LIZARD},
 	{PM_SOLDIER, PM_SERGEANT}, {PM_SERGEANT, PM_LIEUTENANT}, {PM_LIEUTENANT, PM_CAPTAIN},
 	{PM_MYRMIDON_HOPLITE, PM_MYRMIDON_LOCHIAS}, {PM_MYRMIDON_LOCHIAS, PM_MYRMIDON_YPOLOCHAGOS}, 
@@ -2646,6 +2784,7 @@ static const short grownups[][2] = {
 	{PM_ACOLYTE, PM_PRIESTESS},
 	{PM_SECRET_WHISPERER, PM_TRUTH_SEER}, {PM_TRUTH_SEER, PM_DREAM_EATER}, {PM_DREAM_EATER, PM_VEIL_RENDER},
 	{PM_APPRENTICE, PM_WIZARD},
+	{PM_VALKYRIE, PM_AWAKENED_VALKYRIE}, {PM_AWAKENED_VALKYRIE, PM_TRANSCENDENT_VALKYRIE},
 	{PM_DUNGEON_FERN_SPROUT, PM_DUNGEON_FERN},
 	{PM_SWAMP_FERN_SPROUT, PM_SWAMP_FERN},
 	{PM_BURNING_FERN_SPROUT, PM_BURNING_FERN},

@@ -1158,6 +1158,7 @@ int depth;
 	int bas_mdr; /* base DR:    magical-ish   */
 	int nat_mdr; /* natural DR: (poly)form    */
 	int arm_mdr; /* armor DR:   worn armor    */
+	boolean blip_humanoid_armor = FALSE;
 
 	bas_mdr = base_mdr(mon);
 	nat_mdr = base_nat_mdr(mon);
@@ -1193,6 +1194,14 @@ int depth;
 		slot = LOWER_TORSO_DR;
 	if (slot == ARM_DR && !can_wear_gloves(mon->data))
 		slot = UPPER_TORSO_DR;
+	if(mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && magr && !depth){
+		if(slot != LEG_DR && rn2(3)){
+			slot = LOWER_TORSO_DR;
+		}
+		else {
+			blip_humanoid_armor = TRUE;
+		}
+	}
 
 	/* DR of worn armor */
 	int marmor[] = { W_ARM,          				W_ARMC,         					  W_ARMF, W_ARMH,  W_ARMG, W_ARMS, W_ARMU };
@@ -1205,6 +1214,10 @@ int depth;
 				if (curarm && ((objects[curarm->otyp].oc_dtyp & slot) || (!objects[curarm->otyp].oc_dtyp && (slot&adfalt[i])))) {
 					if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
 						continue;
+					if(marmor[i] == W_ARM && slot == LOWER_TORSO_DR && mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !blip_humanoid_armor && magr && !depth){
+						if(!full_body_match(mon->data, curarm))
+							continue;
+					}
 					arm_mdr += arm_dr_bonus(curarm);
 					if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
 				}
@@ -1378,6 +1391,8 @@ boolean creation;
 	 */
 	if(mad_no_armor(mon))
 		return;
+	if(mon->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+		return;
 	if ((is_animal(mon->data) || mindless_mon(mon)) && !creation)
 		return;
 
@@ -1452,9 +1467,7 @@ boolean racialexception;
 		case W_ARMH:
 			if(mon->mtyp == PM_CATHEZAR && obj->otyp == CHAIN)
 				break;
-		    if (!is_helmet(obj) || ((!helm_match(mon->data,obj) || !has_head_mon(mon) || obj->objsize != mon->data->msize) && !is_flimsy(obj))) continue;
-		    /* (flimsy exception matches polyself handling) */
-		    if (has_horns(mon->data) && obj->otyp != find_gcirclet() && !is_flimsy(obj)) continue;
+		    if (!is_helmet(obj) || !helm_match(mon->data,obj) || !helm_size_fits(mon->data,obj)) continue;
 		    break;
 		case W_ARMS:
 		    if (noshield(mon->data) || (mon_offhand_attack(mon) && !creation) || !is_shield(obj)) continue;
@@ -1467,7 +1480,7 @@ boolean racialexception;
 		case W_ARMF:
 			if((mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)
 				break;
-		    if (!is_boots(obj) || obj->objsize != mon->data->msize || !can_wear_boots(mon->data)) continue;
+		    if (!is_boots(obj) || !boots_size_fits(mon->data, obj) || !can_wear_boots(mon->data)) continue;
 		    break;
 		case W_ARM:
 			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_WARDEN_ARIANNA) && obj->otyp == CHAIN)
@@ -1839,22 +1852,18 @@ boolean polyspot;
 	}
 	if ((otmp = which_armor(mon, W_ARMH)) != 0 &&
 		/* flimsy test for horns matches polyself handling */
-		(!(is_flimsy(otmp) || otmp->otyp == find_gcirclet()) || is_whirly(mon->data) || noncorporeal(mon->data))
+		(!helm_match(mon->data, otmp) || !helm_size_fits(mon->data, otmp) || is_whirly(mon->data) || noncorporeal(mon->data) )
 	) {
-		if(!has_head_mon(mon) || mon->data->msize != otmp->objsize || !helm_match(mon->data,otmp) || has_horns(mon->data)
-			 || is_whirly(mon->data) || noncorporeal(mon->data)
-		){
-			if (vis)
-				pline("%s helmet falls to the %s!",
-				  s_suffix(Monnam(mon)), surface(mon->mx, mon->my));
-			else
-				You_hear("a clank.");
-			if (polyspot) bypass_obj(otmp);
-			m_lose_armor(mon, otmp);
-		}
+		if (vis)
+			pline("%s helmet falls to the %s!",
+			  s_suffix(Monnam(mon)), surface(mon->mx, mon->my));
+		else
+			You_hear("a clank.");
+		if (polyspot) bypass_obj(otmp);
+		m_lose_armor(mon, otmp);
 	}
 	if ((otmp = which_armor(mon, W_ARMF)) != 0) {
-		if(((noboots(mon->data) || !humanoid(mon->data)) && !can_wear_boots(mon->data)) || mon->data->msize != otmp->objsize || is_whirly(mon->data) || noncorporeal(mon->data)){
+		if(((noboots(mon->data) || !humanoid(mon->data)) && !can_wear_boots(mon->data)) || !boots_size_fits(mon->data, otmp) || is_whirly(mon->data) || noncorporeal(mon->data)){
 			if (vis) {
 				if (is_whirly(mon->data) || noncorporeal(mon->data))
 					pline("%s %s falls, unsupported!",

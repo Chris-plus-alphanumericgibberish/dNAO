@@ -64,6 +64,8 @@
 #define MS_SCREAM	53	/* Screams in madness */
 #define MS_HARROW	54	/* Summon wraiths */
 #define MS_APOC		55	/* Dire Revelations */
+#define MS_COUGH	56	/* Sick coughing */
+#define MS_RIBBIT	57	/* Frog sounds */
 
 
 #define MR_FIRE			0x0001	/* 1 resists fire */
@@ -426,8 +428,10 @@
 #define EARTH_CRACK            STARFALL+1
 #define MON_AURA_BOLT          EARTH_CRACK+1
 #define RAIN                   MON_AURA_BOLT+1
+#define BLOOD_RAIN             RAIN+1
+#define STEAM_GEYSER           BLOOD_RAIN+1
 
-#define MON_LASTSPELL          RAIN
+#define MON_LASTSPELL          STEAM_GEYSER
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

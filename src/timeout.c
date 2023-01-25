@@ -1521,6 +1521,7 @@ long timeout;
 	/* timeout while away */
 	if (timeout != monstermoves && (obj->where != OBJ_MINVENT || (
 				(!is_dwarf(obj->ocarry->data) || obj->otyp != DWARVISH_HELM)
+				&& obj->otyp != LANTERN_PLATE_MAIL
 				&& (!is_gnome(obj->ocarry->data) || obj->otyp != GNOMISH_POINTY_HAT)
 				&& (!is_szcultist(obj->ocarry->data) || !(obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH))
 	))) {
@@ -1616,29 +1617,35 @@ long timeout;
 
    	    case DWARVISH_HELM:
 	    case LANTERN:
+	    case LANTERN_PLATE_MAIL:
 	    case OIL_LAMP:
 		switch((int)obj->age) {
 		    case 150:
 		    case 100:
 		    case 50:
 			if (canseeit) {
-			    if (obj->otyp == LANTERN 
-				|| obj->otyp == DWARVISH_HELM)
-				lantern_message(obj);
+			    if (obj->otyp == LANTERN
+				 || obj->otyp == DWARVISH_HELM
+				 || obj->otyp == LANTERN_PLATE_MAIL
+				)
+					lantern_message(obj);
 			    else
 				see_lamp_flicker(obj,
 				    obj->age == 50L ? " considerably" : "");
 			}
 			//Dwarvish lamps don't go out in monster inventories
 			if(obj->where == OBJ_MINVENT && 
-				is_dwarf(obj->ocarry->data) &&
-				obj->otyp == DWARVISH_HELM) obj->age = (long) rn1(250,250);
+				((is_dwarf(obj->ocarry->data) && obj->otyp == DWARVISH_HELM)
+				 || obj->otyp == LANTERN_PLATE_MAIL)
+			) obj->age = (long) rn1(250,250);
 			break;
 
 		    case 25:
 			if (canseeit) {
 			    if (obj->otyp == LANTERN 
-				|| obj->otyp == DWARVISH_HELM)
+				|| obj->otyp == DWARVISH_HELM
+				|| obj->otyp == LANTERN_PLATE_MAIL
+				)
 				lantern_message(obj);
 			    else {
 				switch (obj->where) {
@@ -1656,8 +1663,9 @@ long timeout;
 			}
 			//Dwarvish lamps don't go out in monster inventories
 			if(obj->where == OBJ_MINVENT && 
-				is_dwarf(obj->ocarry->data) &&
-				obj->otyp == DWARVISH_HELM) obj->age = (long) rn1(50,25);
+				((is_dwarf(obj->ocarry->data) && obj->otyp == DWARVISH_HELM)
+				 || obj->otyp == LANTERN_PLATE_MAIL)
+			) obj->age = (long) rn1(50,25);
 			break;
 
 		    case 0:
@@ -1667,6 +1675,7 @@ long timeout;
 				case OBJ_INVENT:
 				case OBJ_MINVENT:
 			    if (obj->otyp == LANTERN 
+				|| obj->otyp == LANTERN_PLATE_MAIL
 				|| obj->otyp == DWARVISH_HELM)
 					pline("%s lantern has run out of power.",
 					    whose);
@@ -1676,6 +1685,7 @@ long timeout;
 				    break;
 				case OBJ_FLOOR:
 			    if (obj->otyp == LANTERN 
+				|| obj->otyp == LANTERN_PLATE_MAIL
 				|| obj->otyp == DWARVISH_HELM)
 					You("see a lantern run out of power.");
 				    else
@@ -2140,6 +2150,7 @@ struct obj * obj;
 	case MAGIC_LAMP:
 	case DWARVISH_HELM:
 	case LANTERN:
+	case LANTERN_PLATE_MAIL:
 	case OIL_LAMP:
 	case CANDLE_OF_INVOCATION:
 		radius = 3;
@@ -2232,6 +2243,7 @@ struct obj * obj;
 
 	case DWARVISH_HELM:
 	case LANTERN:
+	case LANTERN_PLATE_MAIL:
 	case OIL_LAMP:
 		/* magic times are 150, 100, 50, 25, and 0 */
 		if (obj->age > 150L)
@@ -2295,6 +2307,7 @@ struct obj * obj;
 		(obj->otyp == GNOMISH_POINTY_HAT) ||
 		(obj->otyp == DWARVISH_HELM) ||
 		(obj->otyp == LANTERN) ||
+		(obj->otyp == LANTERN_PLATE_MAIL) ||
 		(obj->otyp == OIL_LAMP) ||
 		(obj->otyp == CANDELABRUM_OF_INVOCATION) ||
 		(obj->otyp == TALLOW_CANDLE) ||

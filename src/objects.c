@@ -233,6 +233,9 @@ WEAPON(("javelin", "throwing spear"),
 WEAPON(("trident"), /*Needs encyc entry*/
 	DMG(D(8), F(1)), DMG(D(3, 6)),
 	1, 0,  MZ_LARGE,  8, 25,  5,  0, P,   P_TRIDENT, IRON, FALSE, HI_METAL),
+WEAPON(("pincer staff", "claw-ended staff"), /*Needs encyc entry*/
+	DMG(D(6), F(2)), DMG(D(2, 6), F(1)),
+	0, 0,  MZ_HUGE,  0, 25, 800,  0, P,   P_TRIDENT, SHELL_MAT, FALSE, CLR_BRIGHT_MAGENTA),
 
 /* blades */
 WEAPON(("dagger"),
@@ -381,7 +384,7 @@ WEAPON(("katana", "samurai sword"),
 /* special swords set up for artifacts and future weapons*/
 WEAPON(("vibroblade", "gray short sword", "short sword"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(6)), DMG(D(8)),
-	1, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
+	0, 0,  MZ_SMALL,  0,  5,1000, 0, P,   P_SHORT_SWORD, PLASTIC, FALSE, CLR_GRAY, O_MAGIC(1)),
 WEAPON(("tsurugi", "long samurai sword"),
 	DMG(D(16)), DMG(D(8), D(2,6)),
 	0, 0,   MZ_HUGE,  0, 60,500,  2, S,   P_TWO_HANDED_SWORD, METAL, FALSE, HI_METAL),
@@ -516,7 +519,7 @@ WEAPON(("macuahuitl", "obsidian-edged club"), /*Needs encyc entry*/
 	0, 0, MZ_MEDIUM,  0, 40, 10,  0, B|S, P_CLUB, WOOD, FALSE, HI_WOOD),
 WEAPON(("breaking wheel", "wagon wheel"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(3)),
-	0, 0, MZ_HUGE,  1, 150,  500,  0, B,   P_NONE, WOOD, FALSE, HI_WOOD),
+	0, 0, MZ_HUGE,    1, 150,  500,  0, B,   P_NONE, WOOD, FALSE, HI_WOOD),
 WEAPON(("quarterstaff", "staff"),
 	DMG(D(6)), DMG(D(6)),
 	0, 0,   MZ_HUGE,  9, 40,  5,  0, B,   P_QUARTERSTAFF, WOOD, FALSE, HI_WOOD),
@@ -772,6 +775,8 @@ DRGN_SCALES(("yellow dragon scales"),     1, 500, 9, 2, CLR_YELLOW,    O_POWER(A
 
 SUIT(("plate mail"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE,  ARMSZ_HEAVY, 44,  5, 225,  600,  4, 6, 3, IRON, HI_METAL),
+SUIT(("lantern plate mail", "glass-set plate mail"),
+	0, 0,   MZ_HUGE,  ARMSZ_HEAVY,  0,  5, 225,  650,  5, 6, 3, IRON, HI_METAL),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5, 110, 1200,  3, 7, 3, MITHRIL, HI_MITHRIL),
 SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/
@@ -881,7 +886,7 @@ CLOAK(("prayer-warded wrapping"),
 CLOAK(("elven cloak", "faded pall"),
 		0, 1,	7, 0, 10, 60,  9, 0, 3, CLOTH, CLR_BLACK, O_POWER(STEALTH)),
 CLOAK(("droven cloak", "cobwebbed cloak"), /*Needs encyc entry*/
-		0, 1,	1, 0, 10, 60,  10, 0, 3, CLOTH, CLR_GRAY),
+		0, 1,	1, 0, 10, 60,  10, 0, 3, CLOTH, CLR_GRAY, O_DRSLOT(HEAD_DR|CLOAK_DR)),
 CLOAK(("orcish cloak", "coarse mantelet"),
 		0, 0,	8, 0, 10, 40, 10, 0, 2, CLOTH, CLR_BLACK),
 CLOAK(("dwarvish cloak", "hooded cloak"),
@@ -1156,8 +1161,8 @@ TOOL(("lock pick"),             1,   MZ_TINY, 0, 0, 0,  60,  4,  20, IRON,    HI
 TOOL(("tallow candle", "candle"),          0,   MZ_TINY, 1, 0, 0,  15,  2,  10, WAX,     CLR_WHITE),
 TOOL(("wax candle", "candle"),             0,   MZ_TINY, 1, 0, 0,   5,  2,  20, WAX,     CLR_WHITE),
 TOOL(("candle of invocation", "runed candle"), /*Needs encyc entry*/
-                                         0,   MZ_TINY, 0, 1, 0,  15,  2,  50, WAX,     CLR_ORANGE, O_NOWISH(1)),
-TOOL(("lantern"),               1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER,  CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
+                                           0,  MZ_TINY,  0, 1, 0,  15,  2,  50, WAX,     CLR_ORANGE, O_NOWISH(1)),
+TOOL(("lantern"),               		   1,  MZ_SMALL, 0, 0, 0,  20, 30,  12, COPPER,  CLR_YELLOW, O_MATSPEC(IDED|UNIDED)),
 TOOL(("oil lamp", "lamp"),                 0,  MZ_SMALL, 0, 0, 0,  30, 20,  10, COPPER,  CLR_YELLOW),
 TOOL(("magic lamp", "lamp"),               0,  MZ_SMALL, 0, 1, 0,  15, 20,  50, COPPER,  CLR_YELLOW, O_NOWISH(1)),
 // TOOL(("shadowlander's torch", "black torch"),
@@ -1588,7 +1593,7 @@ SPELL(("invisibility",    "dark brown"),  P_ESCAPE_SPELL,			25, 4, 1, NODIR,    
 SPELL(("detect treasure", "gray"),        P_DIVINATION_SPELL,  	20, 4, 1, NODIR,     CLR_GRAY),
 SPELL(("remove curse",    "wrinkled"),    P_CLERIC_SPELL,			25, 3, 1, NODIR,     HI_PAPER),
 SPELL(("magic mapping",   "dusty"),       P_DIVINATION_SPELL,  	18, 5, 1, NODIR,     HI_PAPER),
-SPELL(("identify",        "bronze"),      P_DIVINATION_SPELL,  	20, 3, 1, NODIR,     HI_COPPER),
+SPELL(("identify",        "bronze"),      P_DIVINATION_SPELL,  	20, 6, 1, NODIR,     HI_COPPER),
 // SPELL(("turn undead",     "copper"),      P_CLERIC_SPELL,		16, 6, 1, IMMEDIATE, HI_COPPER),
 SPELL(("create monster",  "turquoise"),   P_CLERIC_SPELL,			16, 6, 1, NODIR,     CLR_BRIGHT_CYAN),
 SPELL(("polymorph",       "silver"),      P_MATTER_SPELL,			10, 7, 1, IMMEDIATE, HI_SILVER),

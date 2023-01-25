@@ -618,6 +618,7 @@ obj_is_burning(obj)
     return (obj->lamplit &&
 		 (	ignitable(obj)					/* lightsource uses a flame */
 		 || obj->otyp == LANTERN			/* electric */
+		 || obj->otyp == LANTERN_PLATE_MAIL	/* electric */
 		 || obj->otyp == DWARVISH_HELM		/* electric */
 		 || (is_lightsaber(obj) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->otyp != KAMEREL_VAJRA)	/* future-electric */
 		 || obj->oartifact == ART_HOLY_MOONLIGHT_SWORD));	/* magical fire */

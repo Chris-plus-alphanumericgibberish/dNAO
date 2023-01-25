@@ -999,7 +999,7 @@ you_regen_hp()
 		if (Race_if(PM_ELF) && !Upolyd)
 			reglevel += 7;
 		if (Race_if(PM_DROW) && !Upolyd)
-			reglevel += 8;
+			reglevel += flags.female ? 4 : 8; //Note: blessing of Lolth
 		// Healer role bonus
 		if (Role_if(PM_HEALER) && !Upolyd)
 			reglevel += 10;
@@ -1146,7 +1146,7 @@ you_regen_pw()
 		if (Race_if(PM_ELF) && !Upolyd)
 			reglevel += 7;
 		if (Race_if(PM_DROW) && !Upolyd)
-			reglevel += 8;
+			reglevel += flags.female ? 8 : 4;//Note: blessing of Lolth
 		if (Race_if(PM_GNOME) && !Upolyd)
 			reglevel += 12;
 		// penalty for being itchy
@@ -3423,7 +3423,8 @@ boolean new_game;	/* false => restoring an old game */
 		You("have psychic powers. Type #ability or press Shift-B to access your powers!");
 	}
 	if(Race_if(PM_DROW)){
-		pline("Beware, droven armor evaporates in light!");
+		if(!(Role_if(PM_HEALER) || Role_if(PM_EXILE)))
+			pline("Beware, droven armor evaporates in light!");
 		pline("Use #monster to create a patch of darkness.");
 	}
 	if(Race_if(PM_ANDROID)){
@@ -5190,6 +5191,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5275,6 +5278,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5555,6 +5560,8 @@ struct monst *magr;
 			if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 				continue;
 
+			if(youdef && u.uswallow)
+				continue;
 			if(!youdef && nonthreat(mdef))
 				continue;
 
@@ -5634,6 +5641,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5708,6 +5717,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5780,6 +5791,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5850,6 +5863,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
@@ -5920,6 +5935,8 @@ struct monst *magr;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
+		if(youdef && u.uswallow)
+			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
 

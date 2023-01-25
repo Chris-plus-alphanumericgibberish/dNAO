@@ -4625,6 +4625,12 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			// pline("off: %d", *hp(mdef)/factor);
 		}
 	}
+
+	if(otmp->otyp == PINCER_STAFF && u.uinsight >= 10){
+		if(otmp->ovar1 == mdef->m_id)
+			*plusdmgptr += basedmg;
+		else otmp->ovar1 = mdef->m_id;
+	}
 }
 
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */
@@ -6343,6 +6349,12 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 	}
 	
+	if(otmp->oartifact == ART_ESSCOOAHLIPBOOURRR){
+		if(artinstance[otmp->oartifact].Esscoo_mid == mdef->m_id)
+			*plusdmgptr += basedmg;
+		else artinstance[otmp->oartifact].Esscoo_mid = mdef->m_id;
+	}
+	
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
@@ -6756,6 +6768,12 @@ arti_invoke(obj)
 	    }
 	    break;
 	  }
+	case LOOT_SELF:
+		if(!use_container(obj, TRUE)){
+			obj->age = 0;
+			return MOVE_CANCELLED;
+		}
+	break;
 	case QUEST_PORTAL: {
 	    int i;
 	    d_level newlev;
@@ -6791,7 +6809,7 @@ arti_invoke(obj)
 		
 		schedule_goto(&newlev, FALSE, FALSE, FALSE,
 				  "You feel dizzy for a moment, but the sensation passes.",
-				  (char *)0);
+				  (char *)0, 0);
 	}break;
 	case ENLIGHTENING:
 	    (void)doenlightenment();

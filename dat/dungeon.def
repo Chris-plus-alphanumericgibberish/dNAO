@@ -229,7 +229,7 @@ LEVEL:		"bore4" "none" @ (15, 0)
 #	A special "x-fill" level must be defined in the levels description
 #	file.  It will be used for all levels not defined explicitly below.
 #
-DUNGEON:	"The Quest" "Q" (5, 2)
+DUNGEON:	"The Quest" "Q" (5, 3)
 LEVEL:	"x-strt" "none" @ (1, 1)
 LEVEL:	"x-loca" "L" @ (3, 1)
 LEVEL:	"x-goal" "none" @ (-1, 0)

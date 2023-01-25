@@ -193,6 +193,7 @@ struct monst {
 	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*118*/
 	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*119*/
 	Bitfield(mflamemarked,1); /* monster was damaged by a silver flame weapon and will be sacced if they die */ /*120*/
+	Bitfield(mspores,1); /* monster is being consumed by Zuggutmoy's spores */ /*121*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -205,7 +206,7 @@ struct monst {
 	int entangled;/* The monster is entangled, and in what? */
 #define imprisoned(mon)	((mon)->entangled == SHACKLES || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
 #define noactions(mon)	((mon)->entangled || imprisoned(mon))
-#define nonthreat(mon)	(imprisoned(mon))
+#define nonthreat(mon)	(imprisoned(mon) || has_template(mon, PLAGUE_TEMPLATE))
 #define helpless(mon) (mon->msleeping || !(mon->mcanmove) || !(mon->mnotlaugh) || noactions(mon))	
 #define helpless_still(mon) (mon->msleeping || !(mon->mcanmove) || noactions(mon))	
 	long mstrategy;		/* for monsters with mflag3: current strategy */
@@ -280,7 +281,10 @@ struct monst {
 #define MINDLESS		21	/* brain eaten by mind flayers */
 #define POISON_TEMPLATE	22	/* turned evil by poison */
 #define MOLY_TEMPLATE	23	/* off-turn snake-bite + insight */
-#define MAXTEMPLATE	MOLY_TEMPLATE
+#define PLAGUE_TEMPLATE	24	/* suffering from a life-drain plague, cure to recruit */
+#define SPORE_ZOMBIE	25	/* fungus zombie */
+#define CORDYCEPS		26	/* spore shedder */
+#define MAXTEMPLATE	CORDYCEPS
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */

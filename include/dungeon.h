@@ -66,6 +66,11 @@ typedef struct dungeon {	/* basic dungeon identifier */
 	int	dunlev_ureturn; /* where should you return to in this dungeon? */
 	int	ledger_start,	/* the starting depth in "real" terms */
 		depth_start;	/* the starting depth in "logical" terms */
+	char connect_side[7];/* for fancy quests like drow healer. What level sides are connected? */
+#define CON_UNSPECIFIED	0
+#define CONNECT_LEFT	1
+#define CONNECT_CENT	2
+#define CONNECT_RGHT	3
 } dungeon;
 
 /*

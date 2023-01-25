@@ -405,8 +405,22 @@ struct obj *otmp;
 	case SPE_FULL_HEALING:
 	case SPE_MASS_HEALING:{
 		int delta = mtmp->mhp;
+		const char *starting_word_ptr = injury_desc_word(mtmp);
 		int health = otyp == SPE_FULL_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
 		reveal_invis = TRUE;
+		if(has_template(mtmp, PLAGUE_TEMPLATE) && otyp == SPE_FULL_HEALING){
+			if(canseemon(mtmp))
+				pline("%s is no longer sick!", Monnam(mtmp));
+			set_template(mtmp, 0);
+			if(rnd(!always_hostile(mtmp->data) ? 12 : 20) < ACURR(A_CHA)){
+			struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+			if(newmon){
+				mtmp = newmon;
+				newsym(mtmp->mx, mtmp->my);
+				pline("%s is very grateful!", Monnam(mtmp));
+			}
+		}
+		}
 	    if (mtmp->mtyp != PM_PESTILENCE) {
 			char hurtmonbuf[BUFSZ];
 			Strcpy(hurtmonbuf, Monnam(mtmp));
@@ -435,10 +449,20 @@ struct obj *otmp;
 							otyp != SPE_HEALING ? " much" : "" );
 					}
 					else {
-						pline("%s %s %s.",
-							hurtmonbuf, 
-							(delta != 0 && mtmp->mhp < mtmp->mhpmax) ? "now looks only" : "looks",
-							injury_desc_word(mtmp));
+						const char * ending_word_ptr = injury_desc_word(mtmp);
+						// Note: this compares the string pointers recieved from injury_desc_word. They should be the same if the level is unchanged, and different otherwise.
+						if(starting_word_ptr != ending_word_ptr){
+							pline("%s %s %s.",
+								hurtmonbuf, 
+								(mtmp->mhp < mtmp->mhpmax) ? "now looks only" : "looks",
+								ending_word_ptr);
+						}
+						else if(delta != 0){
+							pline("%s looks better, but still %s.", hurtmonbuf, ending_word_ptr);
+						}
+						// else {
+							// pline("%s is still %s.", hurtmonbuf, ending_word_ptr);
+						// }
 					}
 				}
 			}
@@ -1860,6 +1884,10 @@ int id;
 		gem->owt = weight(gem);
 		add_to_container(otmp, gem);
 	}
+	//Transfer body type flags. A non-armor item that becomes armor SHOULD end up MB_HUMANOID
+	if(is_suit(otmp) || is_shirt(otmp) || is_helmet(otmp)){
+		set_obj_shape(otmp, obj->bodytypeflag);
+	}
 
 	/* update the weight */
 	otmp->owt = weight(otmp);
@@ -2028,7 +2056,7 @@ struct obj *obj, *otmp;
 	case SCR_LIGHT:
 	case SPE_LIGHT:
 		if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == LANTERN || obj->otyp == POT_OIL ||
+			obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL || obj->otyp == POT_OIL ||
 			obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT ||
 			obj->otyp == TALLOW_CANDLE || obj->otyp == WAX_CANDLE) &&
 			!((!Is_candle(obj) && obj->age == 0) || (obj->otyp == MAGIC_LAMP && obj->spe == 0))
@@ -2038,7 +2066,9 @@ struct obj *obj, *otmp;
 			// Assumes the player is the only cause of this effect for purposes of shk billing
 
 			if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-				obj->otyp == LANTERN || obj->otyp == DWARVISH_HELM) {
+				obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL || 
+				obj->otyp == DWARVISH_HELM
+			) {
 				check_unpaid(obj);
 			}
 			else {

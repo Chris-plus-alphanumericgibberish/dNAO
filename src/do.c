@@ -152,6 +152,15 @@ const char *verb;
 	/* make sure things like water_damage() have no pointers to follow */
 	obj->nobj = obj->nexthere = (struct obj *)0;
 
+	if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[x][y].typ == AIR){
+		add_to_migration(obj);
+		obj->ox = u.uz.dnum;
+		obj->oy = qlocate_level.dlevel+1;
+		obj->owornmask = (long)MIGR_RANDOM;
+		newsym(x,y);
+		return TRUE;
+	}
+
 	if (is_boulder(obj) && boulder_hits_pool(obj, x, y, FALSE))
 		return TRUE;
 	else if (is_boulder(obj) && (t = t_at(x,y)) != 0 &&
@@ -945,7 +954,14 @@ dodown()
 					if (Is_hell3(&u.uz) && !(u.ux == xupstair && u.uy == yupstair)){
 						pline("These stairs are fake!");
 						levl[u.ux][u.uy].typ = ROOM;
-					} else pline("These stairs don't go down!");
+					} else {
+						if(levl[u.ux][u.uy].ladder != LA_DOWN){
+							pline("These stairs don't go down!");
+						}
+						else {
+							pline("These stairs have been blocked by rubble!");
+						}
+					}
 				}
 				else You_cant("go down here.");
 				return MOVE_CANCELLED;
@@ -1023,7 +1039,12 @@ doup()
 		}
 		else{
 			if(levl[u.ux][u.uy].typ == STAIRS){
-				pline("These stairs don't go up!");
+				if(levl[u.ux][u.uy].ladder != LA_UP){
+					pline("These stairs don't go up!");
+				}
+				else {
+					pline("These stairs have been blocked by rubble!");
+				}
 			}
 			else You_cant("go up here.");
 		}
@@ -1653,6 +1674,15 @@ misc_levelport:
 				pline("Your help is urgently needed at Archer Asylum!  Look for a ...ic transporter.");
 				pline("You couldn't quite make out that last message.");
 			}
+		} else if(Role_if(PM_HEALER) && Race_if(PM_DROW)){
+			if(u.uevent.qcalled){
+				You("again sense Sister T'eirastra pleading for help.");
+			}
+			else {
+				You("receive a faint telepathic message from T'eirastra:");
+				pline("Your help is urgently needed at Menzoberranzan!  Look for a ...ic transporter.");
+				pline("You couldn't quite make out that last message.");
+			}
 		} else {
 			if (u.uevent.qcalled) {
 				com_pager(Role_if(PM_ROGUE) ? 4 : 3);
@@ -1769,13 +1799,16 @@ final_level()
 static char *dfr_pre_msg = 0,	/* pline() before level change */
 	    *dfr_post_msg = 0;	/* pline() after level change */
 
+static int dfr_post_dmg = 0;
+
 /* change levels at the end of this turn, after monsters finish moving */
 void
-schedule_goto(tolev, at_stairs, falling, portal_flag, pre_msg, post_msg)
+schedule_goto(tolev, at_stairs, falling, portal_flag, pre_msg, post_msg, post_dmg)
 d_level *tolev;
 boolean at_stairs, falling;
 int portal_flag;
 const char *pre_msg, *post_msg;
+int post_dmg;
 {
 	int typmask = 0100;		/* non-zero triggers `deferred_goto' */
 
@@ -1793,6 +1826,8 @@ const char *pre_msg, *post_msg;
 	    dfr_pre_msg = strcpy((char *)alloc(strlen(pre_msg) + 1), pre_msg);
 	if (post_msg)
 	    dfr_post_msg = strcpy((char *)alloc(strlen(post_msg)+1), post_msg);
+	if(post_dmg)
+		dfr_post_dmg = post_dmg;
 }
 
 /* handle something like portal ejection */
@@ -1815,6 +1850,10 @@ deferred_goto()
 		}
 	    }
 	    if (dfr_post_msg) pline1(dfr_post_msg);
+		if (dfr_post_dmg){
+			losehp(dfr_post_dmg, "abrupt arrival", KILLED_BY_AN);
+			dfr_post_dmg = 0;
+		}
 	}
 	u.utotype = 0;		/* our caller keys off of this */
 	if (dfr_pre_msg)
@@ -1874,7 +1913,13 @@ int different;
 	chewed = !different && (mtmp->mhp < mtmp->mhpmax);
 	if (chewed) cname = cname_buf;	/* include "bite-covered" prefix */
 	if(different==REVIVE_ZOMBIE){
-		set_template(mtmp, ZOMBIFIED);
+		if(mtmp->mspores){
+			set_template(mtmp, SPORE_ZOMBIE);
+			mtmp->mspores = 0;
+		}
+		else {
+			set_template(mtmp, ZOMBIFIED);
+		}
 		mtmp->zombify = 0;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;
@@ -2294,7 +2339,7 @@ long timeout;
 	
 	if (pmtype != -1) {
 		/* We don't want special case revivals */
-		if (cant_create(&pmtype, TRUE) || (get_ox(body, OX_EMON) && !(EMON(body)->zombify)))
+		if (cant_create(&pmtype, TRUE) || (get_ox(body, OX_EMON) && !(EMON(body)->zombify || EMON(body)->mspores)))
 			pmtype = -1; /* cantcreate might have changed it so change it back */
 		else {
 			body->corpsenm = pmtype;
@@ -2408,7 +2453,7 @@ donull()
 {
 	static long lastreped = -13;//hacky way to tell if the player has recently tried repairing themselves
 	u.unull = TRUE;
-
+	
 	if(uclockwork){
 		if(!Upolyd && u.uhp<u.uhpmax){
 			if(lastreped < monstermoves-13) You("attempt to make repairs.");

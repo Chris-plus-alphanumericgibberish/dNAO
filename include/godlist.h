@@ -214,6 +214,7 @@ GOD_V2("Thoth",                 A_NEUTRAL, NEUTRAL_HOLINESS,
 GOD_V2("Anhur",                 A_CHAOTIC, UNHOLY_HOLINESS,
 	MINIONS(PM_VROCK,PM_MARILITH,PM_ANUBITE,PM_AMMIT)
 	),
+/*Note: Orome is assumed to be first elf god*/
 /* elf ranger */
 GOD_V2("Orome",                 A_LAWFUL, HOLY_HOLINESS,
 	MINIONS(PM_PLAINS_CENTAUR,PM_FOREST_CENTAUR,PM_MOUNTAIN_CENTAUR,PM_HUNTER,PM_TITAN)
@@ -244,6 +245,7 @@ GOD_V2("Mandos",                 A_NEUTRAL, HOLY_HOLINESS,
 GOD_V2("Lorien",                 A_CHAOTIC, HOLY_HOLINESS,
 	MINIONS(Cangels)
 	),
+/*Note: Lorien is assumed to be last elf god*/
 /* anachrononaut */
 GOD_V2("_Ilsensine",             A_LAWFUL, UNHOLY_HOLINESS,
 	MINIONS(PM_MIND_FLAYER,PM_BRAIN_GOLEM,PM_SEMBLANCE,PM_MASTER_MIND_FLAYER)

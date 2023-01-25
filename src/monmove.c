@@ -671,7 +671,7 @@ boolean digest_meal;
 	if(mon->mtrapped && t_at(mon->mx, mon->my) && t_at(mon->mx, mon->my)->ttyp == VIVI_TRAP)
 		return;
 	
-	if(mon->mtame && u.ufirst_life)
+	if(mon->mtame && u.ufirst_life && mon->mhp < mon->mhpmax)
 		mon->mhp++;
 		
 	if(is_alabaster_mummy(mon->data) 
@@ -762,6 +762,11 @@ boolean digest_meal;
 	}
 	
 	//Degeneration cases block normal healing. Only one will take effect (bug?).
+	/*Blib's image degrades from loss of artifact*/
+	if(mon->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !mon_has_arti(mon, 0) && quest_status.touched_artifact && mon->mhp > 1){
+		mon->mhp -= 1;
+		return;
+	}
 	/*Degen from drowning in blood*/
 	if(mon->mbdrown > 0){
 		mon->mbdrown--;
@@ -837,6 +842,7 @@ boolean digest_meal;
 		if(uring_art(ART_VILYA)){
 			perX += heal_vilya()*HEALCYCLE/10;
 		}
+		perX -= mon_healing_penalty(mon);
 		if(!nonliving(mon->data)){
 			if(perX < 1)
 				perX = 1;
@@ -1042,7 +1048,7 @@ int mtyp;
 
 }
 
-STATIC_OVL void
+void
 dracae_eladrin_spawn_equip(mtmp, mtyp)
 struct monst *mtmp;
 int mtyp;
@@ -1073,7 +1079,7 @@ int mtyp;
 		}
 		else if(rn2(2)){
 			otmp = mksobj(KITE_SHIELD, MKOBJ_NOINIT);
-			set_material_gm(otmp, DRAGON_HIDE);
+			set_material_gm(otmp, SHELL_MAT);
 			otmp->objsize = size;
 			fix_object(otmp);
 			(void) mpickobj(mtmp, otmp);
@@ -1082,7 +1088,7 @@ int mtyp;
 	}
 	else if(mtyp == PM_NOVIERE_ELADRIN || mtyp == PM_SHIERE_ELADRIN){
 		otmp = mksobj(KITE_SHIELD, MKOBJ_NOINIT);
-		set_material_gm(otmp, DRAGON_HIDE);
+		set_material_gm(otmp, SHELL_MAT);
 		otmp->objsize = size;
 		fix_object(otmp);
 		(void) mpickobj(mtmp, otmp);
@@ -1096,8 +1102,7 @@ int mtyp;
 		otmp = mksobj(armors[i], NO_MKOBJ_FLAGS);
 		set_material_gm(otmp, SHELL_MAT);
 		otmp->objsize = size;
-		if(mtyp == PM_UISCERRE_ELADRIN && armors[i] == PLATE_MAIL)
-			otmp->bodytypeflag = MB_HUMANOID|MB_SLITHY;
+		set_obj_shape(otmp, mtmp->data->mflagsb);
 		fix_object(otmp);
 		(void) mpickobj(mtmp, otmp);
 	}
@@ -1164,6 +1169,9 @@ register struct monst *mtmp;
 				familliar->mhpmax = mtmp->mhpmax;
 				familliar->mvar_witchID = (long)mtmp->m_id;
 				familliar->mpeaceful = mtmp->mpeaceful;
+				if(mtmp->mtame){
+					familliar = tamedog_core(familliar, (struct obj *)0, TRUE);
+				}
 				//Stop running
 				if(mtmp->mflee && mtmp->mhp > mtmp->mhpmax/2){
 					mtmp->mflee = 0;
@@ -1257,6 +1265,16 @@ register struct monst *mtmp;
 		if(!rn2(10)){
 			mtmp->mnotlaugh=0;
 			mtmp->mlaughing=rnd(5);
+		}
+	}
+	if(mtmp->mspores){
+		if(!rn2(4)){
+			mtmp->mconf = 1;
+			(void) set_apparxy(mtmp);
+		}
+		if(!rn2(4)){
+			mtmp->mberserk = 1;
+			(void) set_apparxy(mtmp);
 		}
 	}
 	if(mtmp->mrage){
@@ -1451,7 +1469,7 @@ register struct monst *mtmp;
 		}
 	}
 
-	if (is_commander(mdat) && mfind_target(mtmp, FALSE))
+	if (is_commander(mdat) && mfind_target(mtmp, FALSE, TRUE))
 		m_command(mtmp);
 
 	if (((mdat->msound == MS_SHRIEK || mdat->msound == MS_HOWL) && !um_dist(mtmp->mx, mtmp->my, 1))
@@ -1556,7 +1574,8 @@ register struct monst *mtmp;
 	
 	if((is_drow(mtmp->data) || mtmp->mtyp == PM_LUGRIBOSSK || mtmp->mtyp == PM_MAANZECORIAN)
 		&& (!mtmp->mpeaceful || Darksight)
-		&& (levl[mtmp->mx][mtmp->my].lit == 1 || viz_array[mtmp->my][mtmp->mx]&TEMP_LIT1)
+		&& !(mtmp->mpeaceful && !mtmp->mtame && mtmp->mfaction == PEN_A_SYMBOL)
+		&& (levl[mtmp->mx][mtmp->my].lit == 1 || (viz_array[mtmp->my][mtmp->mx]&TEMP_LIT1 && !(viz_array[mtmp->my][mtmp->mx]&TEMP_DRK1)))
 		&& !mtmp->mcan && mtmp->mspec_used < 4
 		&& !(noactions(mtmp))
 		&& !(mindless_mon(mtmp))
@@ -1566,6 +1585,25 @@ register struct monst *mtmp;
 		vision_full_recalc = 1;
 	    if(mtmp->mtyp == PM_HEDROW_WARRIOR) mtmp->mspec_used += d(4,4);
 		else mtmp->mspec_used += max(10 - mtmp->m_lev,2);
+		return 0;
+	}
+	
+	if((!mtmp->mpeaceful || !Darksight)
+		&& (levl[mtmp->mx][mtmp->my].lit == 0 || viz_array[mtmp->my][mtmp->mx]&TEMP_DRK1)
+		&& !(noactions(mtmp))
+		&& !(mindless_mon(mtmp))
+		&& !darksight(mtmp->data)
+		&& which_armor(mtmp, W_ARM)
+	){
+		struct obj *otmp = which_armor(mtmp, W_ARM);
+		if(otmp->otyp == LANTERN_PLATE_MAIL && !otmp->lamplit && !otmp->cursed){
+			if (canseemon(mtmp)) {
+				pline("%s lights %s %s.", Monnam(mtmp), mhis(mtmp),
+					xname(otmp));
+			}	    	
+			begin_burn(otmp);
+			return 0;
+		}
 	}
 
 	if (mtmp->mtyp == PM_NURSE || mtmp->mtyp == PM_HEALER || mtmp->mtyp == PM_CLAIRVOYANT_CHANGED){
@@ -2105,7 +2143,7 @@ register struct monst *mtmp;
 
 	if(!mtarget_adjacent(mtmp)){ /* don't fight at range if there's a melee target */
 		/* Look for other monsters to fight (at a distance) */
-		struct monst *mtmp2 = mfind_target(mtmp, FALSE);
+		struct monst *mtmp2 = mfind_target(mtmp, FALSE, TRUE);
 		if (mtmp2 && 
 			(mtmp2 != &youmonst || 
 				dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) > 2) &&

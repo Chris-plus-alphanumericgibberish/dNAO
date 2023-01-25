@@ -745,7 +745,7 @@ break_armor()
 		}
     }
 	if ((otmp = uarmh) != 0){
-		if((!is_flimsy(otmp) && otmp->otyp != find_gcirclet() && (otmp->objsize != youracedata->msize || has_horns(youracedata) || !has_head_mon(&youmonst) || !helm_match(youracedata,otmp)))
+		if(!helm_match(youracedata, uarmh) || !helm_size_fits(youracedata, uarmh)
 			|| is_whirly(youracedata) || noncorporeal(youracedata)
 		) {
 			if (donning(otmp)) cancel_don();
@@ -756,12 +756,12 @@ break_armor()
 			char hornbuf[BUFSZ], yourbuf[BUFSZ];
 			/* Future possiblities: This could damage/destroy helmet */
 			Sprintf(hornbuf, "horn%s", plur(num_horns(youracedata)));
-			Your("%s %s through %s %s.", hornbuf, vtense(hornbuf, "pierce"),
+			Your("%s %s through %s %s.", hornbuf, vtense(hornbuf, uarmh->otyp == find_gcirclet() ? "pass" : "pierce"),
 				 shk_your(yourbuf, otmp), xname(otmp));
 		}
     }
 	if ((otmp = uarmg) != 0) {
-		if(nogloves(youracedata) || nolimbs(youracedata) || otmp->objsize != youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)){
+		if(nogloves(youracedata) || nolimbs(youracedata) || boots_size_fits(youracedata, otmp) || is_whirly(youracedata) || noncorporeal(youracedata)){
 			if (donning(otmp)) cancel_don();
 			/* Drop weapon along with gloves */
 			You("drop your gloves%s!", uwep ? " and weapon" : "");
@@ -2048,7 +2048,7 @@ int part;
 		"spine",		"toe",		"hair", 		"blood",
 		"lung",			"nose", 	"stomach",		"heart",
 		"skin",			"flesh",	"beat",			"bones",
-		"ear", 			"ears",		"creak",	"crack"},
+		"ear", 			"ears",		"creak",		"crack"},
 	*uvuudaum_parts[] = { 
 		"arm",			"eye",		"headspike",	"finger",
 		"fingertip",	"hand",		"hand",			"handed", 
@@ -2095,14 +2095,14 @@ int part;
 		"cap",			"ventral limb",		"addled",		"stalk",
 		"chassis",		"needle-tip",		"spores",		"oil",
 		"gear",			"gill",				"hyphal network","eternal core",
-		"metal skin",	"brass structure",	"tick",			"armature",
+		"armor",		"brass structure",	"tick",			"armature",
 		"phonoreceptor horn","phonoreceptor horn","creak",	"bend"},
 	*jelly_parts[] = {
 		"pseudopod",		"dark spot",		"front",		"pseudopod extension",
 		"pseudopod extremity","pseudopod root", "grasp", 		"grasped", 
 		"cerebral area",	"lower pseudopod",	"viscous",		"middle",
-		"centriole",		"pseudopod extremity","ripples",	"juices",
-		"tiny cilia",		"sensor",			"stomach",		"cytoskeletal structure",
+		"centriole",		"pseudopod extremity","ripples",	"plasm",
+		"tiny cilia",		"chemosensor",		"vacuoles",		"cytoskeletal structure",
 		"membrane",			"cortex",			"shift",		"cytoskeletal filaments",
 		"membrane",			"membrane",			"creak",		"crack" },
 	*animal_parts[] = {
@@ -2112,7 +2112,7 @@ int part;
 		"spine", 			"rear claw tip",	"fur", 			"blood", 
 		"lung", 			"nose", 			"stomach",		"heart",
 		"skin",				"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",			"crack" },
+		"ear",				"ears",				"creak",		"crack" },
 	*insect_parts[] = { 
 		"forelimb",			"compound eye",		"face",			"foreclaw",
 		"claw tip",			"rear claw", 		"foreclaw", 	"clawed", 
@@ -2157,7 +2157,7 @@ int part;
 		"mycelium", 		"visual area", 		"front", 					"hypha",
 		"hypha", 			"root", 			"strand", 					"stranded",
 		"cap area",			"rhizome", 			"sporulated", 				"stalk", 
-		"root", 			"rhizome tip",		"spores", 					"juices", 
+		"root", 			"rhizome tip",		"spores", 					"juice", 
 		"gill", 			"gill", 			"interior",					"hyphal network",
 		"cuticle",			"flesh",			"...it doesn't sound like much","hyphae",
 		"tympanic area",	"tympanic area",	"stretch",					"tear" },
@@ -2253,10 +2253,18 @@ int part;
 		"arm",				"eye",				"face",			"finger",
 		"fingertip",		"serpentine lower body","hand",		"handed", 
 		"head",				"rear region",		"light headed",	"neck",
-		"spine",			"tail-tip",			"scales",		"blood",
+		"spine",			"tail-tip",			"hair",			"blood",
 		"lung",				"nose", 			"stomach",		"heart",
 		"scales",			"flesh",			"beat",			"bones",
 		"ear",				"ears",				"creak",		"crack" },
+	*dracae_parts[] = {
+		"arm",				"eye",				"face",			"finger",
+		"claw tip",			"gooey proleg",		"hand",			"handed", 
+		"head",				"gooey caterpilloid lower body","light headed",	"neck",
+		"notochord",		"tentacle-tip",		"tendrils",		"sol",
+		"spongiform jelly",	"chemopores", 		"vacuoles",		"heart",
+		"mucous membrane",	"protoplasm",		"beat",			"cytoskeletal filaments",
+		"tympanic membrane","tympanic membranes","creak",		"crack" },
 	*centauroid_parts[] = {
 		"arm", 				"eye", 				"face", 		"finger",
 		"fingertip", 		"hoof", 			"hand", 		"handed",
@@ -2357,6 +2365,8 @@ int part;
 	    return android_parts[part];
 	if (mptr->mtyp == PM_UVUUDAUM)
 	    return uvuudaum_parts[part];
+	if (mptr->mtyp == PM_DRACAE_ELADRIN)
+	    return dracae_parts[part];
 
 	//S-based part lists
 	if (mptr->mlet == S_PLANT)

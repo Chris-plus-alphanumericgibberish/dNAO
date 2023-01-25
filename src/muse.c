@@ -238,6 +238,7 @@ struct obj *otmp;
 #define MUSE_POT_FULL_HEALING 18
 #define MUSE_LIZARD_CORPSE 19
 #define MUSE_LIFE_FLASK 20
+#define MUSE_HEALING_SURGE 21
 /*
 #define MUSE_INNATE_TPT 9999
  * We cannot use this.  Since monsters get unlimited teleportation, if they
@@ -254,6 +255,7 @@ find_defensive(mtmp)
 struct monst *mtmp;
 {
 	register struct obj *obj = 0;
+	struct monst *mtarg;
 	struct trap *t;
 	int x=mtmp->mx, y=mtmp->my;
 	boolean stuck = (mtmp == u.ustuck);
@@ -325,6 +327,21 @@ struct monst *mtmp;
 	}
 
 	fraction = u.ulevel < 10 ? 5 : u.ulevel < 14 ? 4 : 3;
+	if(mon_healing_turn(mtmp) && !mtmp->mspec_used && !mtmp->mcan){
+		int range = BOLT_LIM + (mtmp->m_lev / 5);
+		range *= range;
+		for(mtarg = fmon; mtarg; mtarg = mtarg->nmon){
+			if(DEADMONSTER(mtarg)) continue;
+			if(is_undead(mtarg->data) || is_demon(mtarg->data)) continue;
+			if(!mtmp->mtame != !mtarg->mtame || mtmp->mpeaceful != mtarg->mpeaceful || mm_grudge(mtmp, mtarg)) continue;
+			if (!clear_path(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my) ||
+				dist2(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my) > range
+			) continue;
+			if(mtarg->mhp*fraction >= mtarg->mhpmax) continue;
+		    m.has_defense = MUSE_HEALING_SURGE;
+		    return TRUE;
+		}
+	}
 	if(mtmp->mhp >= mtmp->mhpmax
 		|| (mtmp->mhp >= 10 && mtmp->mhp*fraction >= mtmp->mhpmax)
 	){
@@ -964,6 +981,10 @@ mon_tele:
 		/* not actually called for its unstoning effect */
 		mon_consume_unstone(mtmp, otmp, FALSE, FALSE);
 		return 2;
+	case MUSE_HEALING_SURGE:
+		mon_doturn(mtmp);
+		mtmp->mspec_used = 3;
+		return 2;
 	case 0: return 0; /* i.e. an exploded wand */
 	default: impossible("%s wanted to perform action %d?", Monnam(mtmp),
 			m.has_defense);
@@ -1056,6 +1077,7 @@ struct monst *mtmp;
 
 #define MUSE_WAN_CANCELLATION 22	/* Lethe */
 #define MUSE_CRYSTAL_SKULL 	  23
+#define MUSE_MON_TURN_UNDEAD  24
 
 /* Find a mask.
  */
@@ -1092,7 +1114,7 @@ struct monst *mtmp;
 	boolean reflection_skip = FALSE; 
 	struct obj *helmet = which_armor(mtmp, W_ARMH);
 
-	struct monst *target = mfind_target(mtmp, TRUE);
+	struct monst *target = mfind_target(mtmp, TRUE, FALSE);
 	
 	if(tbx == 0 && tby == 0) return FALSE; //Target is not lined up.
 	
@@ -1120,24 +1142,36 @@ struct monst *mtmp;
 	}
 
 	if (!ranged_stuff) return FALSE;
+
+	if(mon_turn_undead(mtmp) && !mtmp->mspec_used && !mtmp->mcan && (!Inhell || mon_healing_turn(mtmp))){
+		struct monst *target2 = mfind_target(mtmp, FALSE, FALSE); 
+		if((target && is_undead(target->data))
+		 || (target2 && is_undead(target2->data))
+		) {
+			m.offensive = (struct obj *) 0;
+			m.has_offense = MUSE_MON_TURN_UNDEAD;
+		}
+	}
+
 #define nomore(x) if(m.has_offense==x) continue;
 	for(obj=mtmp->minvent; obj; obj=obj->nobj) {
-	    if(mtmp->mtyp == PM_VALKYRIE && obj->oartifact == ART_MJOLLNIR && !obj->cursed && mtmp->misc_worn_check & ARM_GLOVES) {
+	    if(mon_valkyrie(mtmp) && obj->oartifact == ART_MJOLLNIR && !obj->cursed && mtmp->misc_worn_check & W_ARMG) {
 			struct obj *otmp;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
-				if (otmp->owornmask & ARM_GLOVES && otmp->otyp == GAUNTLETS_OF_POWER){
+				if (otmp->owornmask & W_ARMG && otmp->otyp == GAUNTLETS_OF_POWER){
 					m.offensive = obj;
 					m.has_offense = MUSE_MJOLLNIR;
 			break;
 				}
 			}
-	if(m.has_offense==MUSE_MJOLLNIR) break;
+			if(m.has_offense==MUSE_MJOLLNIR) break;
 		}
 		nomore(MUSE_CRYSTAL_SKULL);
 		if(obj->otyp == CRYSTAL_SKULL && obj->age < monstermoves && is_mind_flayer(mtmp->data) && !obj_summon_out(obj) && !get_ox(obj, OX_ESUM)) {
 			m.offensive = obj;
 			m.has_offense = MUSE_CRYSTAL_SKULL;
 		}
+		nomore(MUSE_MON_TURN_UNDEAD);
 		nomore(MUSE_WAN_DEATH);
 		if (!reflection_skip) {
 		    if(obj->otyp == WAN_DEATH && obj->spe > 0) {
@@ -1500,11 +1534,15 @@ struct monst *mtmp;
 	boolean oseen;
 
 	/* offensive potions are not drunk, they're thrown */
-	if (otmp->oclass != POTION_CLASS && (i = precheck(mtmp, otmp)) != 0)
+	if (otmp && otmp->oclass != POTION_CLASS && (i = precheck(mtmp, otmp)) != 0)
 		return i;
 	oseen = otmp && canseemon(mtmp);
 
 	switch(m.has_offense) {
+	case MUSE_MON_TURN_UNDEAD:{
+		mon_doturn(mtmp);
+		mtmp->mspec_used = 3;
+	}break;
 	case MUSE_CRYSTAL_SKULL:{
 		coord cc;
 		if(!enexto(&cc, mtmp->mx+sgn(tbx), mtmp->my+sgn(tby), (struct permonst *)0)){
@@ -2592,13 +2630,13 @@ struct obj *obj;
 	else if(is_cloak(obj))
 		return abs(obj->objsize - mon->data->msize) <= 1;
 	else if(is_helmet(obj))
-		return ((!has_horns(mon->data) || obj->otyp == find_gcirclet()) && helm_match(mon->data,obj) && has_head_mon(mon) && obj->objsize == mon->data->msize) || is_flimsy(obj);
+		return helm_match(mon->data, obj) && helm_size_fits(mon->data,obj);
 	else if(is_shield(obj) && !mon_offhand_attack(mon))
 		return !noshield(mon->data);
 	else if(is_gloves(obj))
 		return obj->objsize == mon->data->msize && can_wear_gloves(mon->data);
 	else if(is_boots(obj))
-		return obj->objsize == mon->data->msize && can_wear_boots(mon->data);
+		return boots_size_fits(mon->data, obj) && can_wear_boots(mon->data);
 	else if(is_suit(obj))
 		return arm_match(mon->data, obj) && arm_size_fits(mon->data, obj);
 	return FALSE;

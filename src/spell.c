@@ -1773,7 +1773,7 @@ genericptr_t arg;
 	struct monst * mtmp = m_u_at(x, y);
 	if (mtmp == &youmonst)
 		zapyourself((struct obj *)arg, TRUE);
-	else if (mtmp && mtmp->mtame)
+	else if (mtmp && (mtmp->mtame || mtmp->mpeaceful))
 		bhitm(mtmp, (struct obj *)arg);
 }
 
@@ -3089,18 +3089,9 @@ spiriteffects(power, atme)
 				mon->m_lev += (u.ulevel - mon->m_lev)/3;
 				mon->mhpmax = (mon->m_lev * 8) - 4;
 				mon->mhp =  mon->mhpmax;
-				for(curmon = fmon; curmon; curmon = curmon->nmon){
-					if(curmon->mspiritual && !get_timer(curmon->timed, DESUMMON_MON)){
-						numdogs++;
-						if(!weakdog) weakdog = curmon;
-						if(weakdog->m_lev > curmon->m_lev) weakdog = curmon;
-						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-						else if(weakdog->mtame > curmon->mtame) weakdog = curmon;
-					}
-				}
-				if(weakdog && numdogs > dog_limit()) start_timer(5L, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mon);
 				mon->mspiritual = TRUE;
+				// May result in the new dog getting the vanish timer if it's weakest, but that's fine.
+				vanish_dogs();
 			}
 		}break;
 		case PWR_ROOT_SHOUT:{
@@ -5897,9 +5888,21 @@ int spell;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 
-		if (uwep->otyp == SCALPEL) {	// a tool of healing
+		if (uwep->otyp == SCALPEL
+			|| uwep->oartifact == ART_STAFF_OF_AESCULAPIUS
+			|| uwep->oartifact == ART_ESSCOOAHLIPBOOURRR
+		) {	// tools of healing
 			cast_bon = 0;
 			if(spell_skilltype(spellid(spell)) == P_HEALING_SPELL)
+			cast_bon += 2;
+			if (uwep->oartifact)
+				cast_bon *= 2;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
+
+		if (uwep->oartifact == ART_ESSCOOAHLIPBOOURRR) {	// mutation
+			cast_bon = 0;
+			if(spell_skilltype(spellid(spell)) == P_MATTER_SPELL)
 			cast_bon += 2;
 			if (uwep->oartifact)
 				cast_bon *= 2;
@@ -6196,6 +6199,90 @@ struct obj *obj;
 	        spl_book[i].sp_id = obj->otyp;
 	        spl_book[i].sp_lev = objects[obj->otyp].oc_level;
 	        incrnknow(i);
+	        return;
+	    }
+	}
+	impossible("Too many spells memorized!");
+	return;
+}
+
+void
+initialforgotwizardspells(num)
+int num;
+{
+	int spells[num];
+	int found = 0;
+	int i = 0, j;
+	int lim;
+	boolean ok;
+	while(num--){
+		lim = 500;
+		while(lim-- > 0){
+			spells[i] = rn2(SPE_STONE_TO_FLESH-SPE_DIG)+SPE_DIG;
+			if(objects[spells[i]].oc_level > 3)
+				continue;
+			ok = TRUE;
+			for(j = 0; j < found; j++)
+				if(spells[j] == spells[i])
+					ok = FALSE;
+			if(ok){
+				initialforgotspell(spells[i]);
+				found++;
+				i++;
+				break;
+			}
+		}
+	}
+}
+
+void
+initialforgotpriestspells(num)
+int num;
+{
+	int candidatespells[] = {SPE_LIGHT, SPE_DETECT_MONSTERS, SPE_DETECT_UNSEEN,
+				  SPE_CURE_BLINDNESS, SPE_EXTRA_HEALING,
+				  SPE_TURN_UNDEAD, SPE_REMOVE_CURSE, SPE_PROTECTION};
+	int spells[num];
+	int found = 0;
+	int i = 0, j;
+	int lim;
+	boolean ok;
+	while(num--){
+		lim = 500;
+		while(lim-- > 0){
+			spells[i] = ROLL_FROM(candidatespells);
+
+			ok = TRUE;
+			for(j = 0; j < found; j++)
+				if(spells[j] == spells[i])
+					ok = FALSE;
+			if(ok){
+				initialforgotspell(spells[i]);
+				found++;
+				i++;
+				break;
+			}
+		}
+	}
+}
+
+/* Learn a forgotten spell during creation of the initial inventory */
+void
+initialforgotspell(otyp)
+int otyp;
+{
+	int i;
+	knows_object(otyp);
+	for (i = 0; i < MAXSPELL; i++) {
+	    if (spellid(i) == otyp) {
+	         pline("Error: Spell %s already known.",
+	         		OBJ_NAME(objects[otyp]));
+	         return;
+	    }
+	    if (spellid(i) == NO_SPELL)  {
+	        spl_book[i].sp_id = otyp;
+	        spl_book[i].sp_lev = objects[otyp].oc_level;
+	        spl_book[i].sp_know = 0;
 	        return;
 	    }
 	}

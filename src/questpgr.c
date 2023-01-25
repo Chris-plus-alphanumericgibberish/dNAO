@@ -570,6 +570,41 @@ qt_montype()
 			return (&mons[qpm]);
 		//Should be impossible:
 		return (mkclass(S_YETI, G_NOHELL));
+	} else if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+		int qpm;
+		int duergar[] = {PM_DUERGAR, PM_DUERGAR_STONEGUARD, PM_DUERGAR_DEBILITATOR};
+		int drow_etc[] = {PM_HOUSELESS_DROW, PM_HOUSELESS_DROW, PM_HOUSELESS_DROW, PM_HOUSELESS_DROW,
+					PM_SPROW, PM_SPROW, PM_DRIDER, PM_DROW_MUMMY,
+					PM_HEDROW_ZOMBIE, PM_DROW_CAPTAIN, PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD,
+					PM_DROW_MATRON, PM_PEN_A_MENDICANT, PM_MENDICANT_SPROW, PM_MENDICANT_DRIDER,
+					PM_ALLIANCE_VANGUARD, PM_ANULO, PM_ANULO, PM_DWARF,
+					PM_DWARF, PM_WOODLAND_ELF, PM_WOODLAND_ELF, PM_GREEN_ELF,
+					PM_GREEN_ELF, PM_PEASANT, PM_PEASANT, PM_GOBLIN,
+					PM_HOBGOBLIN, PM_BUGBEAR, PM_BUGBEAR, PM_HOBBIT,
+					PM_GNOME, PM_GNOME, PM_HILL_GIANT, PM_HILL_GIANT,
+					PM_MINOTAUR, PM_MINOTAUR_PRIESTESS, PM_ETTIN,
+					PM_DEMINYMPH
+			};
+		if(!rn2(3)){
+			qpm = ROLL_FROM(duergar);
+			if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+				return (&mons[qpm]);
+			return (mkclass(S_HUMANOID, G_NOHELL));
+		}
+		if(rn2(2)){
+			if(u.uevent.qcompleted)
+				qpm = rn2(5) ? ROLL_FROM(duergar) : rn2(3) ? PM_CHUUL : PM_ELDER_CHUUL;
+			else
+				qpm = rn2(5) ? PM_KUO_TOA : rn2(3) ? PM_KUO_TOA_WHIP : rn2(3) ? PM_CHUUL : PM_ELDER_CHUUL;
+			if (qpm != NON_PM && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+				return (&mons[qpm]);
+			//Fall through in this (impossible?) case
+		}
+		qpm = ROLL_FROM(drow_etc);
+		if (qpm != NON_PM && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+			return (&mons[qpm]);
+		//Should be impossible:
+		return (mkclass(S_HUMAN, G_NOHELL));
 	} else if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend
 		&& ((Is_qlocate(&u.uz) && rn2(2)) || (u.uz.dlevel < qlocate_level.dlevel))
 	){

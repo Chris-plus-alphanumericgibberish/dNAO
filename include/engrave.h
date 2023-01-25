@@ -166,17 +166,18 @@ struct engr {
 #define GHAUNADAUR_SYMBOL	40
 #define LOST_HOUSE			41
 #define EDDER_SYMBOL		42
+#define Y_CULT_SYMBOL		43
 
 
-#define LAST_DROW_SYM		EDDER_SYMBOL
+#define LAST_DROW_SYM		Y_CULT_SYMBOL
 
-#define FOOTPRINT		43
-#define HOOFPRINT		44
+#define FOOTPRINT		44
+#define HOOFPRINT		45
 
-#define FIRST_PLANE_SYMBOL	45
-#define LAST_PLANE_SYMBOL	60
+#define FIRST_PLANE_SYMBOL	46
+#define LAST_PLANE_SYMBOL	61
 
-#define CLAW_MARKS		61
+#define CLAW_MARKS		62
 
 	xchar halu_ward; /* If you draw while halucinating, you inscribe a halucinatory symbol */
 

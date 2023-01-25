@@ -82,9 +82,10 @@ extern int monstr[];
 /* Find a target for a ranged attack. */
 /* needs to set tbx, tby */
 struct monst *
-mfind_target(magr, force_linedup)
+mfind_target(magr, force_linedup, use_find_offensive)
 struct monst *magr;
-int force_linedup;	/* if TRUE, we have some offensive item ready that will work if we are lined up */
+boolean force_linedup;	/* if TRUE, we have some offensive item ready that will work if we are lined up */
+boolean use_find_offensive;	/* if TRUE, we have some offensive item ready that will work if we are lined up */
 {
 	struct monst * mdef = (struct monst *)0;
 	struct monst * best_target = (struct monst *)0;
@@ -121,6 +122,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		(mon_attacktype(magr, AT_MAGC) && !magr->mcan) ||
 		(mon_attacktype(magr, AT_MMGC) && !magr->mcan) ||
 		(mon_attacktype(magr, AT_GAZE) && !magr->mcan) ||
+		(mon_turn_undead(magr) && !magr->mspec_used && !magr->mcan && (!Inhell || mon_healing_turn(magr))) ||
 		(mon_attacktype(magr, AT_SPIT)) ||
 		(mon_attacktype(magr, AT_ARRW)) ||
 		(mon_attacktype(magr, AT_TNKR)) ||
@@ -130,7 +132,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 		(mon_attacktype(magr, AT_5SQR)) ||
 		(mon_attacktype(magr, AT_5SBT)) ||
 		(is_commander(magr->data)) ||
-		(find_offensive(magr))
+		(use_find_offensive && find_offensive(magr))
 		))
 		return (struct monst *)0;
 
@@ -226,7 +228,7 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 				(mon_attacktype(magr, AT_ARRW)) ||
 				(mon_attacktype(magr, AT_WEAP) && mrwep && !is_pole(mrwep)) ||
 				(mon_attacktype(magr, AT_DEVA) && mrwep && !is_pole(mrwep)) ||
-				(find_offensive(magr))
+				(use_find_offensive && find_offensive(magr))
 			))
 			||
 			/* attacks that are on a line that are ALWAYS SAFE */
@@ -257,8 +259,10 @@ int force_linedup;	/* if TRUE, we have some offensive item ready that will work 
 			(distmin(magr->mx, magr->my, tarx, tary) <= 8 && (
 				(is_commander(magr->data) && !rn2(4)) ||	/* !rn2(4) -> reduce command frequency */
 				(mon_attacktype(magr, AT_GAZE) && !magr->mcan) ||
+				(mon_turn_undead(magr) && !magr->mspec_used && !magr->mcan) ||
 				(mon_get_attacktype(magr, AT_MAGC, &attkbuff) && !magr->mcan && real_spell_adtyp(attkbuff.adtyp)) ||
-				(mon_get_attacktype(magr, AT_MMGC, &attkbuff) && !magr->mcan && real_spell_adtyp(attkbuff.adtyp))
+				(mon_get_attacktype(magr, AT_MMGC, &attkbuff) && !magr->mcan && real_spell_adtyp(attkbuff.adtyp)) ||
+				(mon_turn_undead(magr) && !magr->mspec_used && !magr->mcan && (!Inhell || mon_healing_turn(magr)))
 			))
 		)){
 			/* mdef can be targeted by one of our attacks */

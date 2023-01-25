@@ -588,6 +588,9 @@ register struct monst *mtmp;
 	case MS_WAIL:
 	    ret = "wail";
 	    break;
+	case MS_RIBBIT:
+	    ret = "croak";
+	    break;
 	case MS_SILENT:
 		ret = "commotion";
 		break;
@@ -622,9 +625,10 @@ register struct monst *mtmp;
 /* the sounds of mistreated pets */
 void
 yelp(mtmp)
-register struct monst *mtmp;
+struct monst *mtmp;
 {
-    register const char *yelp_verb = 0;
+    const char *yelp_verb = 0;
+	const char *yelp_modifier = 0;
 
     if (mtmp->msleeping || !mtmp->mcanmove || !mtmp->mnotlaugh || !mtmp->data->msound)
 	return;
@@ -655,9 +659,16 @@ register struct monst *mtmp;
 	case MS_WAIL:
 	    yelp_verb = "wail";
 	    break;
+	case MS_RIBBIT:
+	    yelp_verb = "peep";
+	    break;
+	case MS_COUGH:
+	    yelp_verb = "cough";
+		yelp_modifier = " paroxysmally";
+	    break;
     }
     if (yelp_verb) {
-	pline("%s %s!", Monnam(mtmp), vtense((char *)0, yelp_verb));
+	pline("%s %s%s!", Monnam(mtmp), vtense((char *)0, yelp_verb), yelp_modifier ? yelp_modifier : "");
 	if(flags.run) nomul(0, NULL);
 	wake_nearto_noisy(mtmp->mx, mtmp->my, mtmp->data->mlevel * 12);
     }
@@ -796,17 +807,37 @@ boolean chatting;
 			}
 		}
 	}
-	switch (
-		is_silent_mon(mtmp) ? MS_SILENT : 
-		(is_dollable(mtmp->data) && mtmp->m_insight_level) ? MS_STATS : 
-		mtmp->ispriest ? MS_PRIEST : 
-		mtmp->isshk ? MS_SELL : 
-		(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used) ? MS_SONG : 
-		mtmp->mfaction == QUEST_FACTION ? MS_GUARDIAN : 
-		mtmp->mtyp == urole.guardnum ? MS_GUARDIAN : 
-		(ptr->msound == MS_CUSS && mtmp->mpeaceful) ? MS_HUMANOID : 
-		ptr->msound
-	) {
+	int soundtype = ptr->msound;
+	//Faction and special abilities adjustment
+	if(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used)
+		soundtype = MS_SONG;
+	else if(mtmp->mfaction == QUEST_FACTION)
+		soundtype = MS_GUARDIAN;
+	else if(mtmp->mtyp == urole.guardnum)
+		soundtype = MS_GUARDIAN;
+	else if(ptr->msound == MS_CUSS && mtmp->mpeaceful)
+		soundtype = MS_HUMANOID;
+
+	//Don't sing if chatted to.
+	if(chatting && (soundtype == MS_SONG || soundtype == MS_OONA)){
+		if(mtmp->mfaction == QUEST_FACTION)
+			soundtype = MS_GUARDIAN;
+		if(mtmp->mtyp == urole.guardnum)
+			soundtype = MS_GUARDIAN;
+		else soundtype = MS_HUMANOID;
+	}
+
+	//Template and profession adjustments
+	if(is_silent_mon(mtmp))
+		soundtype = MS_SILENT;
+	else if(is_dollable(mtmp->data) && mtmp->m_insight_level)
+		soundtype = MS_STATS;
+	else if(mtmp->ispriest)
+		soundtype = MS_PRIEST;
+	else if(mtmp->isshk)
+		soundtype = MS_SELL;
+
+	switch (soundtype) {
 	case MS_ORACLE:
 	    return doconsult(mtmp);
 	case MS_PRIEST: /*Most (all?) things with this will have ispriest set*/
@@ -1000,8 +1031,43 @@ asGuardian:
 	case MS_GURGLE:
 	    pline_msg = "gurgles.";
 	    break;
+	case MS_RIBBIT:
+	    pline_msg = mtmp->mpeaceful ? "ribbits." : "croaks.";
+	    break;
 	case MS_BURBLE:
 	    pline_msg = "burbles.";
+	    break;
+	case MS_COUGH:
+		if (mtmp->mflee)
+		    pline_msg = "coughs frantically.";
+		else if ((get_mx(mtmp, MX_EDOG) && moves > EDOG(mtmp)->hungrytime) || mtmp->mhp*10 < mtmp->mhpmax)
+		    pline_msg = "coughs weakly.";
+		else switch(rn2(10)){
+			default:
+				pline_msg = "coughs spasmodically.";
+			break;
+			case 0:
+				pline_msg = "coughs wetly.";
+			break;
+			case 1:
+				pline_msg = "groans weakly.";
+			break;
+			case 2:
+				pline_msg = "mumbles incoherently.";
+			break;
+			case 3:
+				pline_msg = "coughs.";
+			break;
+			case 4:
+				pline_msg = "coughs dryly.";
+			break;
+			case 5:
+				pline_msg = "coughs up blood.";
+			break;
+			case 6:
+				pline_msg = "vomits.";
+			break;
+		}
 	    break;
 	case MS_JUBJUB:{
 		struct monst *tmpm;
@@ -2357,6 +2423,8 @@ static const short command_chain[][2] = {
 
 	{ PM_JUSTICE_ARCHON, PM_RAZIEL }, { PM_SWORD_ARCHON, PM_RAZIEL }, { PM_SHIELD_ARCHON, PM_RAZIEL },
 
+	{ PM_PLAINS_CENTAUR, PM_CENTAUR_CHIEFTAIN }, { PM_FOREST_CENTAUR, PM_CENTAUR_CHIEFTAIN }, { PM_MOUNTAIN_CENTAUR, PM_CENTAUR_CHIEFTAIN },
+
 	{ PM_MIGO_WORKER, PM_MIGO_SOLDIER }, { PM_MIGO_SOLDIER, PM_MIGO_PHILOSOPHER }, { PM_MIGO_PHILOSOPHER, PM_MIGO_QUEEN },
 
 	{ PM_SOLDIER, PM_SERGEANT }, { PM_SERGEANT, PM_LIEUTENANT }, { PM_LIEUTENANT, PM_CAPTAIN },
@@ -2499,7 +2567,7 @@ struct monst * commander;
 		if (!clear_path(mtmp->mx, mtmp->my, commander->mx, commander->my)
 			|| (mtmp == commander)
 			|| !mon_in_command_chain(mtmp, commander)
-			|| !(mtmp->mpeaceful == commander->mpeaceful && mtmp->mtame == commander->mtame))
+			|| !(mtmp->mpeaceful == commander->mpeaceful && !mtmp->mtame == !commander->mtame))
 			continue;
 
 		tmp = d(nd, sd);

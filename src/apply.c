@@ -33,6 +33,7 @@ STATIC_DCL void FDECL(use_candelabrum, (struct obj *));
 STATIC_DCL void FDECL(use_candle, (struct obj **));
 STATIC_DCL void FDECL(use_lamp, (struct obj *));
 STATIC_DCL int FDECL(swap_aegis, (struct obj *));
+STATIC_DCL int FDECL(aesculapius_poke, (struct obj *));
 STATIC_DCL int FDECL(use_rakuyo, (struct obj *));
 STATIC_DCL int FDECL(use_mercy_blade, (struct obj *));
 STATIC_DCL int FDECL(use_force_blade, (struct obj *));
@@ -1483,7 +1484,8 @@ struct obj *obj;
 
 	if (obj->lamplit) {
 	    if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-		    obj->otyp == LANTERN || obj->otyp == POT_OIL ||
+		    obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL || 
+			obj->otyp == POT_OIL ||
 			obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT) {
 		(void) get_obj_location(obj, &x, &y, 0);
 		if (obj->where == OBJ_MINVENT ? cansee(x,y) : !Blind)
@@ -1516,8 +1518,8 @@ struct obj *obj;
 	    if (obj->otyp == CANDELABRUM_OF_INVOCATION && obj->cursed)
 		return FALSE;
 	    if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-		 obj->otyp == LANTERN || obj->otyp == DWARVISH_HELM ||
-		 obj->otyp == GNOMISH_POINTY_HAT) && 
+		 obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL ||
+		 obj->otyp == DWARVISH_HELM || obj->otyp == GNOMISH_POINTY_HAT) && 
 			obj->cursed && !rn2(2))
 		return FALSE;
 	    if (obj->where == OBJ_MINVENT ? cansee(x,y) : !Blind)
@@ -1555,6 +1557,254 @@ struct obj *obj;
 		pline("Aegis in unexpected state?");
 		return MOVE_CANCELLED;
 	}
+}
+
+STATIC_OVL int
+aesculapius_poke(obj)
+struct obj *obj;
+{
+	struct monst *mon;
+	boolean shackles = obj->oartifact == ART_ESSCOOAHLIPBOOURRR;
+	if(obj != uwep){
+		if (!wield_tool(obj, "staff")) return MOVE_CANCELLED;
+	}
+	if(!getdir((char *)0)) {
+		return MOVE_CANCELLED;
+	}
+	if(u.dz > 0){
+		if(u.usteed)
+			mon = u.usteed;
+		else if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			You("doubt that will have any further effect.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(u.dz < 0){
+		if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			if(shackles)
+				You("don't see anything up there to touch with your broken shackles.");
+			else
+				You("don't see anything up there to poke with your staff.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(!u.dx && !u.dy){
+		use_unicorn_horn(obj);
+		return MOVE_STANDARD;
+	}
+	else if(!isok(u.ux + u.dx, u.uy + u.dy)){
+		if(shackles)
+			pline("Your broken shackles touch it!");
+		else
+			pline("Your staff doesn't touch anything.");
+		return MOVE_STANDARD;
+	}
+	else {
+		mon = m_at(u.ux + u.dx, u.uy + u.dy);
+	}
+	if(!mon){
+		if(shackles)
+			pline("Your broken shackles touch it!");
+		else
+			pline("Your staff doesn't touch anything.");
+		return MOVE_STANDARD;
+	}
+	boolean good_effect = (mon->mpeaceful && !obj->cursed) || (!mon->mpeaceful && obj->cursed);
+	if(good_effect){
+		if (!mon->mcansee) {
+		    mon->mcansee = 1;
+		    mon->mblinded = 0;
+		    if (canseemon(mon)) pline("%s can see again.", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mcanhear) {
+		    mon->mcanhear = 1;
+		    mon->mdeafened = 0;
+		    if (canseemon(mon)) pline("%s can hear again.", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mconf || mon->mstun) {
+		    mon->mconf = mon->mstun = 0;
+		    if (canseemon(mon))
+				pline("%s seems steadier now.", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->msleeping) {
+		    mon->msleeping = 0;
+		    if (canseemon(mon)) pline("%s wakes up!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mcanmove) {
+		    mon->mcanmove = 1;
+		    mon->mfrozen = 0;
+		    if (canseemon(mon)) pline("%s can move again!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcan) {
+			set_mcan(mon, FALSE);
+		    if (canseemon(mon)) pline("%s looks special again!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+				pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		}
+		else if(has_template(mon, PLAGUE_TEMPLATE)){
+			set_template(mon, 0);
+			mon->mhpmax = max(3, (mon->m_lev * hd_size(mon->data))-1);
+		    if (canseemon(mon)) pline("%s has been cured!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+			if(rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)){
+				struct monst *newmon = tamedog_core(mon, (struct obj *)0, TRUE);
+				if(newmon){
+					mon = newmon;
+					newsym(mon->mx, mon->my);
+					pline("%s is very grateful!", Monnam(mon));
+				}
+			}
+		}
+		else {
+		    if (canseemon(mon)) pline("%s looks really healthy!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		}
+	}
+	//bad effect
+	else {
+		if (mon->mcanhear) {
+		    mon->mcanhear = 0;
+		    mon->mdeafened = d(6,6);
+		    if (canseemon(mon)) pline("%s is stricken deaf!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcansee) {
+		    mon->mcansee = 0;
+		    mon->mblinded = d(6,6);
+		    if (canseemon(mon)) pline("%s is stricken blind!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mstun) {
+		    mon->mstun = 1;
+		    if (canseemon(mon))
+				pline("%s wobbles!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (!mon->mconf) {
+		    mon->mconf = 1;
+		    if (canseemon(mon))
+				pline("%s seems confused!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcanmove && !mon_resistance(mon, FREE_ACTION)) {
+		    mon->mcanmove = 0;
+			mon->mfrozen = d(2,2);
+		    if (canseemon(mon))
+				pline("%s seems frozen!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if(!mon->mcan){
+			set_mcan(mon, TRUE);
+		    if (canseemon(mon)) pline("%s looks mediocre!", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else if (mon->mcanmove && !mon_resistance(mon, SICK_RES)) {
+			int dmg = d(3, 12);
+			if(!rn2(10))
+				dmg += 100;
+			if(m_losehp(mon, dmg, TRUE, "illness"));
+		    else if (canseemon(mon))
+				pline("%s looks slightly ill.", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		} else {
+		    if (canseemon(mon)) pline("%s looks stubbornly healthy.", Monnam(mon));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		}
+	}
+	return MOVE_STANDARD;
 }
 
 int
@@ -1799,7 +2049,7 @@ struct obj *obj;
 	}
 	if(obj->lamplit) {
 		if(obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-		   obj->otyp == LANTERN ||
+		   obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL ||
 		   obj->otyp == DWARVISH_HELM)
 		    pline("%s lamp is now off.", Shk_Your(buf, obj));
 		else if(is_lightsaber(obj)) {
@@ -1824,6 +2074,7 @@ struct obj *obj;
 			|| (obj->otyp == MAGIC_LAMP && obj->spe == 0)
 		) {
 		if (obj->otyp == LANTERN || 
+			obj->otyp == LANTERN_PLATE_MAIL || 
 			obj->otyp == DWARVISH_HELM || 
 			is_lightsaber(obj)
 		)
@@ -1851,7 +2102,8 @@ struct obj *obj;
 		      Tobjnam(obj, "flicker"), otense(obj, "die"));
 	} else {
 		if(obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-				obj->otyp == LANTERN || obj->otyp == DWARVISH_HELM) {
+				obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL ||
+				obj->otyp == DWARVISH_HELM) {
 		    check_unpaid(obj);
 		    pline("%s lamp is now on.", Shk_Your(buf, obj));
 		} else if (is_lightsaber(obj)) {
@@ -2070,7 +2322,7 @@ dorub()
 	    } else if (rn2(2) && !Blind)
 		You("see a puff of smoke.");
 	    else pline1(nothing_happens);
-	} else if (obj->otyp == LANTERN || obj->otyp == DWARVISH_HELM) {
+	} else if (obj->otyp == LANTERN || obj->otyp == LANTERN_PLATE_MAIL || obj->otyp == DWARVISH_HELM) {
 	    /* message from Adventure */
 	    pline("Rubbing the electric lamp is not particularly rewarding.");
 	    pline("Anyway, nothing exciting happens.");
@@ -2913,6 +3165,16 @@ coord *cc;
 		}
 		mark_mon_as_summoned(mtmp, master, ESUMMON_PERMANENT, 0);
 		mtmp->mextra_p->esum_p->sm_o_id = obj->o_id;
+		//Dodge being marked as summoned :(
+		if(mtmp->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !art_already_exists(ART_ESSCOOAHLIPBOOURRR)){
+			otmp = mksartifact(ART_ESSCOOAHLIPBOOURRR);
+			if(otmp){
+				otmp->blessed = TRUE;
+				otmp->cursed = FALSE;
+				otmp->spe = 3;
+				(void) mpickobj(mtmp, otmp);
+			}
+		}
 	}
 }
 
@@ -3579,7 +3841,7 @@ struct obj *hypo;
 			case POT_HEALING:
 				You_feel("better.");
 				healup(d(6 + 2 * bcsign(amp), 4),
-					   (!amp->cursed ? 1 : 0), !!amp->blessed, !amp->cursed);
+					   (!amp->cursed ? 1 : 0), amp->blessed, !amp->cursed);
 				exercise(A_CON, TRUE);
 			break;
 			case POT_EXTRA_HEALING:
@@ -5702,7 +5964,7 @@ struct obj *obj;
 			}
 			break;
 		case SUMMON_SERVANT:
-			mtmp = create_particular(MT_DOMESTIC, 0, FALSE, MA_MINION | MA_DEMON | MA_FEY | MA_PRIMORDIAL, MG_NOWISH | MG_NOTAME, G_UNIQ);
+			mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, MA_MINION | MA_DEMON | MA_FEY | MA_PRIMORDIAL, MG_NOWISH | MG_NOTAME, G_UNIQ, (char *)0);
 			if (!mtmp) {
 				pline("Perhaps try summoning something else?");
 				consumed = FALSE;
@@ -6234,7 +6496,7 @@ struct obj *obj;
 				}
 			break;
 			case WAGE_OF_LUST:
-				tmp = obj->cursed ? 99 : 9;
+				tmp = obj->cursed ? 22 : 9;
 
 				if(!BlowingWinds){
 					pline("Hurricane-force winds surround you!");
@@ -6261,10 +6523,10 @@ struct obj *obj;
 						}
 						else {
 							if(obj->cursed){
-								mtmp->mhp -= min(999, mtmp->mhpmax);
+								mtmp->mhp -= min(333, mtmp->mhpmax);
 							}
 							else {
-								mtmp->mhp -= min(99, mtmp->mhpmax/2);
+								mtmp->mhp -= max(33, min(99, mtmp->mhpmax/2));
 							}
 							if(mtmp->mhp <= 0){
 								pline("%s starves.", Monnam(mtmp));
@@ -6893,7 +7155,8 @@ pick_carvee()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	for(otmp = invent; otmp; otmp = otmp->nobj){
 		if(otmp->oclass == WEAPON_CLASS && otmp->obj_material == WOOD && otmp->otyp != MOON_AXE
-				&& otmp->oartifact != ART_BOW_OF_SKADI && otmp->oartifact != ART_GUNGNIR && otmp->oartifact != ART_STAFF_OF_AESCULAPIUS){
+				&& otmp->oartifact != ART_BOW_OF_SKADI && otmp->oartifact != ART_GUNGNIR
+				&& otmp->oartifact != ART_STAFF_OF_AESCULAPIUS && otmp->oartifact != ART_ESSCOOAHLIPBOOURRR){
 			Sprintf1(buf, doname(otmp));
 			any.a_char = otmp->invlet;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -7289,6 +7552,39 @@ upgradeMenu()
 	return 0;
 }
 
+boolean
+set_obj_shape(obj, shape)
+struct obj *obj;
+long shape;
+{
+	long starting_shape = obj->bodytypeflag;
+	//Dragon scales don't have a shape.
+	if(Is_dragon_scales(obj))
+		return FALSE;
+	if(is_shirt(obj) || is_suit(obj)){
+		//Only CHANGE the shape if the result will be valid.
+		if(shape&MB_BODYTYPEMASK){
+			//Body gloves cover the whole body.
+			if(obj->otyp == BODYGLOVE)
+				obj->bodytypeflag = shape&MB_BODYTYPEMASK;
+			//Shirts, dresses, and togas aren't concerned by the shape of the lower body.
+			else if (is_shirt(obj) || obj->otyp == ELVEN_TOGA || is_dress(obj->otyp))
+				obj->bodytypeflag = (shape&MB_HUMANOID) ? MB_HUMANOID : (shape&MB_BODYTYPEMASK);
+			else if (is_suit(obj))
+				obj->bodytypeflag = shape&MB_BODYTYPEMASK;
+		}
+		//If the given shape is invalid and the object's current shape is invalid, set the object to humanoid.
+		// I believe this will never happen, as armor is initialized to humanoid.
+		else if((obj->bodytypeflag&MB_BODYTYPEMASK) == 0)
+				obj->bodytypeflag = MB_HUMANOID;
+	}
+	else if (is_helmet(obj) && !is_hat(obj))
+		obj->bodytypeflag = shape&MB_HEADMODIMASK;
+	if(obj->bodytypeflag != starting_shape)
+		return TRUE;
+	return FALSE;
+}
+
 STATIC_OVL int
 resizeArmor()
 {
@@ -7296,6 +7592,7 @@ resizeArmor()
 	struct permonst *ptr;
 	struct monst *mtmp;
 	int rx, ry;
+	boolean changed = FALSE;
 	
     if (!getdir("Resize armor to fit what creature? (in what direction)")) {
 		/* decided not to */
@@ -7337,39 +7634,35 @@ resizeArmor()
 	}
 
 	// change shape
-	if (is_shirt(otmp) || otmp->otyp == ELVEN_TOGA){
+	if (is_shirt(otmp) || otmp->otyp == ELVEN_TOGA || is_suit(otmp)){
 		//Check that the monster can actually have armor that fits it.
 		if(!(ptr->mflagsb&MB_BODYTYPEMASK)){
 			You("can't figure out how to make it fit.");
 			return MOVE_CANCELLED;
 		}
-		if(otmp->otyp == BODYGLOVE)
-			otmp->bodytypeflag = (ptr->mflagsb&MB_BODYTYPEMASK);
-		else
-			otmp->bodytypeflag = (ptr->mflagsb&MB_HUMANOID) ? MB_HUMANOID : (ptr->mflagsb&MB_BODYTYPEMASK);
+		changed |= set_obj_shape(otmp, ptr->mflagsb);
 	}
-	else if (is_suit(otmp)){
-		//Check that the monster can actually have armor that fits it.
-		if(!(ptr->mflagsb&MB_BODYTYPEMASK)){
-			You("can't figure out how to make it fit.");
-			return MOVE_CANCELLED;
-		}
-		otmp->bodytypeflag = (ptr->mflagsb&MB_BODYTYPEMASK);
-	}
-	else if (is_helmet(otmp)){
+	else if (is_helmet(otmp) && !is_hat(otmp)){
 		//Check that the monster can actually have armor that fits it.
 		if(!has_head(ptr)){
 			pline("No head!");
 			return MOVE_CANCELLED;
 		}
-		otmp->bodytypeflag = (ptr->mflagsb&MB_HEADMODIMASK);
+		changed |= set_obj_shape(otmp, ptr->mflagsb);
 	}
 	
 	// change size (AFTER shape, because this may be aborted during that step.
-	otmp->objsize = ptr->msize;
-	
+	if(otmp->objsize != ptr->msize){
+		otmp->objsize = ptr->msize;
+		changed = TRUE;
+	}
+
 	fix_object(otmp);
-	
+
+	if(!changed){
+		You("figure it already fits fine.");
+		return MOVE_CANCELLED;
+	}
 	You("resize the armor to fit.");
 	pline("The kit is used up.");
 	return MOVE_STANDARD;
@@ -7541,8 +7834,9 @@ doapply()
 		Strcpy(class_list, tools);
 	if (carrying(CREAM_PIE) || carrying(EUCALYPTUS_LEAF))
 		add_class(class_list, FOOD_CLASS);
-	if (carrying(DWARVISH_HELM) || carrying(GNOMISH_POINTY_HAT) 
-		|| carrying(DROVEN_CLOAK) || carrying_art(ART_AEGIS))
+	if (carrying(DWARVISH_HELM) || carrying(LANTERN_PLATE_MAIL) ||
+		carrying(GNOMISH_POINTY_HAT) || carrying(DROVEN_CLOAK) ||
+		carrying_art(ART_AEGIS))
 		add_class(class_list, ARMOR_CLASS);
 	if(carrying_applyable_ring()){
 		add_class(class_list, RING_CLASS);
@@ -7583,6 +7877,8 @@ doapply()
 	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && !u.veil) use_lamp(obj);
 	else if(obj->oartifact == ART_BLOODLETTER && artinstance[obj->oartifact].BLactive >= monstermoves) res = do_bloodletter(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
+	else if(obj->oartifact == ART_STAFF_OF_AESCULAPIUS) res = aesculapius_poke(obj);
+	else if(obj->oartifact == ART_ESSCOOAHLIPBOOURRR) res = aesculapius_poke(obj);
 	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
 		return use_rakuyo(obj);
 	}
@@ -7913,6 +8209,7 @@ doapply()
  * Code by Malcom Ryan
  */
 	case DWARVISH_HELM: 
+	case LANTERN_PLATE_MAIL: 
 	case OIL_LAMP:
 	case MAGIC_LAMP:
 	case LANTERN:

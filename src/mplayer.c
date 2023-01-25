@@ -389,8 +389,10 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	break;
 #endif
 	case PM_VALKYRIE:
+	case PM_AWAKENED_VALKYRIE:
+	case PM_TRANSCENDENT_VALKYRIE:
 		if (rn2(2)) *weapon = WAR_HAMMER;
-		else *weapon = SPEAR;
+		else *weapon = ptr->mtyp == PM_VALKYRIE ? SPEAR : ATGEIR;
 		*rweapon = BOW;
 		*rwammo = ARROW;
 		if(special){

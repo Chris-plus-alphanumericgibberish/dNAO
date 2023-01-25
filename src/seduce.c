@@ -77,7 +77,7 @@ struct attack *mattk;
 		)
 		return 0;
 
-	if(pagr->mtyp == PM_SMALL_GOAT_SPAWN || pagr->mtyp == PM_GOAT_SPAWN || pagr->mtyp == PM_GIANT_GOAT_SPAWN || has_template(magr, MISTWEAVER) || pagr->mtyp == PM_PHANTASM || pagr->mtyp == PM_BEAUTEOUS_ONE)
+	if(pagr->mtyp == PM_SMALL_GOAT_SPAWN || pagr->mtyp == PM_GOAT_SPAWN || pagr->mtyp == PM_GIANT_GOAT_SPAWN || pagr->mtyp == PM_BLESSED || has_template(magr, MISTWEAVER) || pagr->mtyp == PM_PHANTASM || pagr->mtyp == PM_BEAUTEOUS_ONE)
 		return 1;
 	
 	if(pagr->mlet == S_NYMPH || pagr->mtyp == PM_INCUBUS || pagr->mtyp == PM_SUCCUBUS
@@ -2327,15 +2327,16 @@ int *result;
 	int nitems = 0;
 	boolean goatspawn = (magr->data->mtyp == PM_SMALL_GOAT_SPAWN || magr->data->mtyp == PM_GOAT_SPAWN || magr->data->mtyp == PM_GIANT_GOAT_SPAWN || magr->data->mtyp == PM_BLESSED);
 	boolean noflee = (magr->isshk && magr->mpeaceful);
+	boolean mi_only = is_chuul(magr->data);
 	if(attk->adtyp == AD_SITM){
 		/* select item from defender's inventory */
 		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-			if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask))
+			if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask) && (!mi_only || is_magic_obj(otmp)))
 				nitems++;
 		if(nitems){
 			nitems = rnd(nitems);
 			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-				if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask))
+				if ((!magr->mtame || !otmp->cursed) && !(otmp->owornmask&equipmentmask) && (!mi_only || is_magic_obj(otmp)))
 					if(--nitems <= 0)
 						break;
 		}

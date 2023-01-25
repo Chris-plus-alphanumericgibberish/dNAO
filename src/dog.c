@@ -56,13 +56,16 @@ pet_type()
 		return PM_SECRET_WHISPERER;
 	}
 	else if(Race_if(PM_DROW)){
+		if (Role_if(PM_HEALER)){
+			return (PM_KNIGHT);
+		}
 		if(Role_if(PM_NOBLEMAN)){
 			if(flags.initgend) return (PM_GIANT_SPIDER);
 			else return (PM_SMALL_CAVE_LIZARD);
 		}
 		if(preferred_pet == 's')
 			return (PM_CAVE_SPIDER);
-		else if(preferred_pet == ':' || preferred_pet == 'l')
+		else if(preferred_pet == ':')
 			return (PM_BABY_CAVE_LIZARD);
 		else 
 			return (rn2(3) ? PM_CAVE_SPIDER : PM_BABY_CAVE_LIZARD);
@@ -272,6 +275,44 @@ makedog()
 	
 	if(mtmp->m_lev < mtmp->data->mlevel) mtmp->m_lev = mtmp->data->mlevel;
 	
+	if(pettype == PM_KNIGHT){
+		struct obj *obj;
+		mtmp->m_lev = 1;
+		mon_adjust_speed(mtmp, -1, (struct obj *) 0);
+		obj = mongets(mtmp, CRAM_RATION, MKOBJ_NOINIT);
+		if(obj){
+			obj->quan = 3;
+			fix_object(obj);
+			fully_identify_obj(obj);
+		}
+		obj = mongets(mtmp, FOOD_RATION, MKOBJ_NOINIT);
+		if(obj){
+			obj->quan = 1;
+			fix_object(obj);
+			fully_identify_obj(obj);
+		}
+		obj = mongets(mtmp, HIGH_BOOTS, MKOBJ_NOINIT);
+		if(obj) fully_identify_obj(obj);
+		obj = mongets(mtmp, CHAIN_MAIL, MKOBJ_NOINIT);
+		if(obj) fully_identify_obj(obj);
+		obj = mongets(mtmp, GAUNTLETS, MKOBJ_NOINIT);
+		if(obj) fully_identify_obj(obj);
+		obj = mongets(mtmp, AMULET_OF_NULLIFY_MAGIC, MKOBJ_NOINIT);
+		fully_identify_obj(obj);
+		obj = mongets(mtmp, HELMET, MKOBJ_NOINIT);
+		if(obj) fully_identify_obj(obj);
+		obj = mongets(mtmp, KITE_SHIELD, MKOBJ_NOINIT);
+		if(obj) fully_identify_obj(obj);
+		obj = mongets(mtmp, LONG_SWORD, MKOBJ_NOINIT);
+		if(obj){
+			bless(obj);
+			obj->spe = 1;
+			fully_identify_obj(obj);
+		}
+		m_dowear(mtmp, TRUE);
+		init_mon_wield_item(mtmp);
+	}
+
 	if(Role_if(PM_HEALER)){
 		grow_up(mtmp, (struct monst *) 0);
 		//Technically might grow into a genocided form.
@@ -1266,32 +1307,43 @@ int numdogs;
 	// finds weakest pet, and if there's more than 6 pets that count towards your limit
 	// it sets the weakest friendly
 	struct monst *curmon = 0, *weakdog = 0;
+	int witches = 0, familiars = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
-			if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !(EDOG(curmon)->dominated) && !is_suicidal(curmon->data)
-				&& !curmon->mspiritual && !(get_timer(curmon->timed, DESUMMON_MON) && !(get_mx(curmon, MX_ESUM) && curmon->mextra_p->esum_p->permanent))
-			){
+		if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !(EDOG(curmon)->dominated) && !is_suicidal(curmon->data)
+			&& !curmon->mspiritual && !(get_timer(curmon->timed, DESUMMON_MON) && !(get_mx(curmon, MX_ESUM) && curmon->mextra_p->esum_p->permanent))
+		){
+			if(is_witch_mon(curmon)){
+				if(witches >= familiars)
+					numdogs++;
+				witches++;
+			}
+			else if(curmon->mtyp == PM_WITCH_S_FAMILIAR){
+				if(familiars >= witches)
+					numdogs++;
+				familiars++;
+			}
+			else
 				numdogs++;
-				if(!weakdog) weakdog = curmon;
-				if(weakdog->m_lev > curmon->m_lev)
-					weakdog = curmon; /* The weakest pet is stronger than the current pet */
-				else if(weakdog->m_lev == curmon->m_lev){  /* Do we need tiebreakers? */
-					if(weakdog->mtame > curmon->mtame)
-						weakdog = curmon; /* Tiebreaker 1: the weakest pet is more tame than the current pet */
-					else if(weakdog->mtame == curmon->mtame){ /* Do we need another tiebreaker? */
-						int weakdog_mlev = mon_max_lev(weakdog);
-						int curmon_mlev = mon_max_lev(curmon);
-						if(weakdog_mlev > curmon_mlev)
-							weakdog = curmon; /* Tiebreaker 2: the weakest pet has greater potential than the current pet */
-						else if(weakdog_mlev == curmon_mlev){
-							extern int monstr[];
-							if(monstr[weakdog->mtyp] > monstr[curmon->mtyp])
-								weakdog = curmon; /* Tiebreaker 3: the weakest pet has greater starting strength than the current pet */
-						}
+			if(!weakdog) weakdog = curmon;
+			if(weakdog->m_lev > curmon->m_lev)
+				weakdog = curmon; /* The weakest pet is stronger than the current pet */
+			else if(weakdog->m_lev == curmon->m_lev){  /* Do we need tiebreakers? */
+				if(weakdog->mtame > curmon->mtame)
+					weakdog = curmon; /* Tiebreaker 1: the weakest pet is more tame than the current pet */
+				else if(weakdog->mtame == curmon->mtame){ /* Do we need another tiebreaker? */
+					int weakdog_mlev = mon_max_lev(weakdog);
+					int curmon_mlev = mon_max_lev(curmon);
+					if(weakdog_mlev > curmon_mlev)
+						weakdog = curmon; /* Tiebreaker 2: the weakest pet has greater potential than the current pet */
+					else if(weakdog_mlev == curmon_mlev){
+						extern int monstr[];
+						if(monstr[weakdog->mtyp] > monstr[curmon->mtyp])
+							weakdog = curmon; /* Tiebreaker 3: the weakest pet has greater starting strength than the current pet */
 					}
 				}
 			}
 		}
-
+	}
 	if(weakdog && numdogs > dog_limit()) EDOG(weakdog)->friend = 1;
 }
 

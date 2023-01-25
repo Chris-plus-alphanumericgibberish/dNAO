@@ -239,6 +239,7 @@ STATIC_VAR int cham_to_pm[] = {
 			 (get_mx((mon), MX_ESUM)) ||	\
 			 ((mon)->ispolyp) ||			\
 			 ((mon)->zombify) ||			\
+			 ((mon)->mspores) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_KNIGHT) ||			\
 			 ((mon)->mtyp == PM_WARRIOR_OF_SUNLIGHT) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_MAIDEN) ||			\
@@ -1478,76 +1479,76 @@ register struct monst *mtmp;
 	}
 
     if (inlava) {
-	/*
-	 * Lava effects much as water effects. Lava likers are able to
-	 * protect their stuff. Fire resistant monsters can only protect
-	 * themselves  --ALI
-	 */
-	if (!is_clinger(mtmp->data) && !likes_lava(mtmp->data)) {
-	    if (!resists_fire(mtmp)) {
-		if (cansee(mtmp->mx,mtmp->my))
-		    pline("%s %s.", Monnam(mtmp),
-			  mtmp->mtyp == PM_WATER_ELEMENTAL ?
-			  "boils away" : "burns to a crisp");
-		mondead(mtmp);
-	    }
-	    else {
-		if (--mtmp->mhp < 1) {
-		    if (cansee(mtmp->mx,mtmp->my))
-			pline("%s surrenders to the fire.", Monnam(mtmp));
-		    mondead(mtmp);
-		}
-		else if (cansee(mtmp->mx,mtmp->my))
-		    pline("%s burns slightly.", Monnam(mtmp));
-	    }
-	    if (mtmp->mhp > 0) {
-		(void) fire_damage(mtmp->minvent, FALSE, FALSE,
-						mtmp->mx, mtmp->my);
-		(void) rloc(mtmp, TRUE);
-		return 0;
-	    }
-	    return (1);
-	}
-    } else if (inpool) {
-	/* Most monsters drown in pools.  flooreffects() will take care of
-	 * water damage to dead monsters' inventory, but survivors need to
-	 * be handled here.  Swimmers are able to protect their stuff...
-	 */
-	if (!is_clinger(mtmp->data)
-	    && !mon_resistance(mtmp,SWIMMING) && !amphibious_mon(mtmp)) {
-	    if (cansee(mtmp->mx,mtmp->my)) {
-		    if(mtmp->mtyp == PM_ACID_PARAELEMENTAL){
-				int tx = mtmp->mx, ty = mtmp->my, dn = mtmp->m_lev;
-				pline("%s explodes.", Monnam(mtmp));
-				mondead(mtmp);
-				explode(tx, ty, AD_EACD, MON_EXPLODE, d(dn, 10), EXPL_NOXIOUS, 1);
-			} else pline("%s drowns.", Monnam(mtmp));
-	    }
-	    if (u.ustuck && u.uswallow && u.ustuck == mtmp) {
-	    /* This can happen after a purple worm plucks you off a
-		flying steed while you are over water. */
-		pline("%s sinks as water rushes in and flushes you out.",
-			Monnam(mtmp));
-	    }
-		if(!DEADMONSTER(mtmp))
+		/*
+		 * Lava effects much as water effects. Lava likers are able to
+		 * protect their stuff. Fire resistant monsters can only protect
+		 * themselves  --ALI
+		 */
+		if (!is_clinger(mtmp->data) && !likes_lava(mtmp->data)) {
+			if (!resists_fire(mtmp)) {
+			if (cansee(mtmp->mx,mtmp->my))
+				pline("%s %s.", Monnam(mtmp),
+				  mtmp->mtyp == PM_WATER_ELEMENTAL ?
+				  "boils away" : "burns to a crisp");
 			mondead(mtmp);
-	    if (mtmp->mhp > 0) {
-		(void) rloc(mtmp, TRUE);
-		water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
-		return 0;
-	    }
-	    return (1);
-	}
-    } else {
-	/* but eels have a difficult time outside */
-	if (mtmp->data->mlet == S_EEL && !Is_waterlevel(&u.uz)) {
-		/* Puddles can sustain a tiny sea creature, or lessen the burdens of a larger one */
-		if (!(inshallow && mtmp->data->msize == MZ_TINY))
-		{
-			if (mtmp->mhp > 1 && rn2(mtmp->data->msize)) mtmp->mhp--;
-			monflee(mtmp, 2, FALSE, FALSE);
+			}
+			else {
+			if (--mtmp->mhp < 1) {
+				if (cansee(mtmp->mx,mtmp->my))
+				pline("%s surrenders to the fire.", Monnam(mtmp));
+				mondead(mtmp);
+			}
+			else if (cansee(mtmp->mx,mtmp->my))
+				pline("%s burns slightly.", Monnam(mtmp));
+			}
+			if (mtmp->mhp > 0) {
+			(void) fire_damage(mtmp->minvent, FALSE, FALSE,
+							mtmp->mx, mtmp->my);
+			(void) rloc(mtmp, TRUE);
+			return 0;
+			}
+			return (1);
 		}
-	}
+    } else if (inpool) {
+		/* Most monsters drown in pools.  flooreffects() will take care of
+		 * water damage to dead monsters' inventory, but survivors need to
+		 * be handled here.  Swimmers are able to protect their stuff...
+		 */
+		if (!is_clinger(mtmp->data)
+			&& !mon_resistance(mtmp,SWIMMING) && !amphibious_mon(mtmp)) {
+			if (cansee(mtmp->mx,mtmp->my)) {
+				if(mtmp->mtyp == PM_ACID_PARAELEMENTAL){
+					int tx = mtmp->mx, ty = mtmp->my, dn = mtmp->m_lev;
+					pline("%s explodes.", Monnam(mtmp));
+					mondead(mtmp);
+					explode_pa(tx, ty, AD_EACD, MON_EXPLODE, d(dn, 10), EXPL_NOXIOUS, 1, mtmp->data);
+				} else pline("%s drowns.", Monnam(mtmp));
+			}
+			if (u.ustuck && u.uswallow && u.ustuck == mtmp) {
+			/* This can happen after a purple worm plucks you off a
+			flying steed while you are over water. */
+			pline("%s sinks as water rushes in and flushes you out.",
+				Monnam(mtmp));
+			}
+			if(!DEADMONSTER(mtmp))
+				mondead(mtmp);
+			if (mtmp->mhp > 0) {
+			(void) rloc(mtmp, TRUE);
+			water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
+			return 0;
+			}
+			return (1);
+		}
+    } else {
+		/* but eels have a difficult time outside */
+		if (mtmp->data->mlet == S_EEL && !Is_waterlevel(&u.uz)) {
+			/* Puddles can sustain a tiny sea creature, or lessen the burdens of a larger one */
+			if (!(inshallow && mtmp->data->msize == MZ_TINY))
+			{
+				if (mtmp->mhp > 1 && rn2(mtmp->data->msize)) mtmp->mhp--;
+				monflee(mtmp, 2, FALSE, FALSE);
+			}
+		}
     }
     return (0);
 }
@@ -1829,6 +1830,26 @@ movemon()
 	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 	){
 		insight_vanish(mtmp);
+		continue;
+	}
+	if(mtmp->mtyp == PM_APPRENTICE_WITCH && !mtmp->mtame){
+		mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
+		mtmp->movement = 0;
+		continue;
+	}
+    if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[mtmp->mx][mtmp->my].typ == AIR
+		&& !mon_resistance(mtmp,FLYING)
+		&& !mon_resistance(mtmp,LEVITATION)
+		&& mtmp != u.ustuck
+		&& mtmp != u.usteed
+	){
+		struct d_level target_level;
+		target_level.dnum = u.uz.dnum;
+		target_level.dlevel = qlocate_level.dlevel+1;
+		mtmp->mhp = 1; //How Lucky! Almost Died!
+		if(canseemon(mtmp))
+			pline("%s plummets to the rocky cavern floor below!", Monnam(mtmp));
+	    migrate_to_level(mtmp, ledger_no(&target_level), MIGR_RANDOM, (coord *)0);
 		continue;
 	}
 	if(TimeStop && !is_uvuudaum(mtmp))
@@ -2172,13 +2193,14 @@ boolean devour;
 
 	int nutrit = dog_nutrition(mtmp, obj);
 	long rotted = 0;
+	int mtyp = NON_PM;
 	poly = polyfodder(obj) && !resists_poly(mtmp->data);
 	grow = mlevelgain(obj);
 	heal = mhealup(obj);
 	ston = (obj->otyp == CORPSE || obj->otyp == EGG || obj->otyp == TIN || obj->otyp == POT_BLOOD) && obj->corpsenm >= LOW_PM && touch_petrifies(&mons[obj->corpsenm]) && !Stone_res(mtmp);
 	
 	if(obj->otyp == CORPSE){
-		int mtyp = obj->corpsenm;
+		mtyp = obj->corpsenm;
 		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
 			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
 		) {
@@ -2346,6 +2368,9 @@ boolean devour;
 	    if (!grow_up(mtmp, (struct monst *)0)) return 2;
 	}
 	if (heal) mtmp->mhp = mtmp->mhpmax;
+	if(mtyp != NON_PM){
+		give_mon_corpse_intrinsic(mtmp, mtyp);
+	}
 	return 1;
 }
 
@@ -3131,6 +3156,11 @@ nexttry:
 			) continue;
 		if(mon->mfrigophobia && ntyp == ICE)
 			continue;
+		if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && ntyp == AIR
+			&& !mon_resistance(mon,FLYING)
+			&& !mon_resistance(mon,LEVITATION)
+		)
+			continue;
 		if((mdat->mtyp == PM_GRUE) && isdark(mon->mx, mon->my) && !isdark(nx, ny))
 				continue;
 		if((mdat->mtyp == PM_WATCHER_IN_THE_WATER || mdat->mtyp == PM_KETO) && 
@@ -3344,7 +3374,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	ma = magr->data;
 	md = mdef->data;
 
-#define mm_undead(mon) (is_undead(mon->data) && mon->mfaction != HOLYDEAD_FACTION)
+#define mm_undead(mon) ((is_undead(mon->data) || has_template(mon, CORDYCEPS) || has_template(mon, SPORE_ZOMBIE)) && mon->mfaction != HOLYDEAD_FACTION)
 
 	// Pets don't attack:
 	if(magr->mtame && (
@@ -3552,11 +3582,24 @@ struct monst * mdef;	/* another monster which is next to it */
 		return ALLOW_M|ALLOW_TM;
 
 	/* elves vs. drow */
-	if(is_elf(ma) && is_drow(md) && mdef->mfaction != EILISTRAEE_SYMBOL)
+	if(is_elf(ma) && is_drow(md) && mdef->mfaction != EILISTRAEE_SYMBOL && mdef->mfaction != PEN_A_SYMBOL)
 		return ALLOW_M|ALLOW_TM;
-	if(is_elf(md) && is_drow(ma) && magr->mfaction != EILISTRAEE_SYMBOL)
+	if(is_elf(md) && is_drow(ma) && magr->mfaction != EILISTRAEE_SYMBOL && magr->mfaction != PEN_A_SYMBOL)
 		return ALLOW_M|ALLOW_TM;
-
+	/* drow healer quest: drow vs. invaders */
+	/* Other houses do fight the Y-cult, but that's handled by the drow faction code */
+	/* Pen'a's faction is handled by the pet friendly code */
+	if(In_quest(&u.uz)
+		&& urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH
+		&& magr->mfaction != Y_CULT_SYMBOL
+		&& mdef->mfaction != Y_CULT_SYMBOL
+		&& magr->mfaction != PEN_A_SYMBOL
+		&& mdef->mfaction != PEN_A_SYMBOL
+		&& (!is_drow(ma) + !is_drow(md)) == 1
+	){
+		return ALLOW_M|ALLOW_TM;
+	}
+	
 	/* undead vs civs */
 	if(!(In_cha(&u.uz) || Is_rogue_level(&u.uz))){
 		if(mm_undead(magr) && 
@@ -3593,26 +3636,10 @@ struct monst * mdef;	/* another monster which is next to it */
 	/* Note that factions may be different than the displayed house name, 
 		as faction is set during generation and displayed house name goes by equipment! */
 	if( is_drow(ma) && is_drow(md) && 
-		magr->mfaction != mdef->mfaction
+		magr->mfaction != mdef->mfaction &&
+		!allied_faction(magr->mfaction, mdef->mfaction)
 	){
-		int f1 = magr->mfaction, f2 = mdef->mfaction;
-		boolean truce1 = FALSE, truce2 = FALSE;
-				
-		if((f1 >= FIRST_GODDESS && f1 <= LAST_GODDESS) ||
-			(f1 >= FIRST_TOWER && f1 <= LAST_TOWER)
-		) truce1 = TRUE;
-		
-		if((f2 >= FIRST_GODDESS && f2 <= LAST_GODDESS) ||
-			(f2 >= FIRST_TOWER && f2 <= LAST_TOWER)
-		) truce2 = TRUE;
-		
-		if((f1 == XAXOX || f1 == EDDER_SYMBOL) && (f2 == XAXOX || f2 == EDDER_SYMBOL));
-		else if(!truce1 && !truce2) return ALLOW_M|ALLOW_TM;
-		else if(truce1 && truce2);
-		else if(truce1 && !(f2 <= LAST_HOUSE && f2 >= FIRST_HOUSE))
-			return ALLOW_M|ALLOW_TM;
-		else if(truce2 && !(f1 <= LAST_HOUSE && f1 >= FIRST_HOUSE))
-			return ALLOW_M|ALLOW_TM;
+		return ALLOW_M|ALLOW_TM;
 	}
 
 	/* drow vs. edderkops */
@@ -3901,6 +3928,86 @@ struct monst *mon;
 	return (struct obj *)0;
 }
 
+boolean
+plague_victim_on_level()
+{
+	struct monst *mon;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(has_template(mon, PLAGUE_TEMPLATE))
+			return TRUE;
+	return FALSE;
+}
+
+boolean
+allied_iaso_on_level(mtmp)
+struct monst *mtmp;
+{
+	struct monst *mon;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !mon->mspec_used
+		  && !nonthreat(mon)
+		  && !mon->mtame == !mtmp->mtame
+		  && mon->mpeaceful == mtmp->mpeaceful
+		)
+			return TRUE;
+	return FALSE;
+}
+
+struct monst *
+random_plague_victim()
+{
+	struct monst *mon;
+	int count = 0;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(has_template(mon, PLAGUE_TEMPLATE))
+			count++;
+	if(!count)
+		return (struct monst *) 0;
+
+	count = rn2(count);
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(has_template(mon, PLAGUE_TEMPLATE)){
+			if(!count)
+				return mon;
+			else count--;
+		}
+	return (struct monst *) 0;
+}
+
+void
+timeout_random_allied_iaso(mtmp)
+struct monst *mtmp;
+{
+	struct monst *mon;
+	int count = 0;
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !mon->mspec_used
+		  && !nonthreat(mon)
+		  && !mon->mtame == !mtmp->mtame
+		  && mon->mpeaceful == mtmp->mpeaceful
+		)
+			count++;
+	if(!count)
+		return;
+
+	count = rn2(count);
+	for(mon = fmon; mon; mon = mon->nmon)
+		if(mon->mtyp == PM_IASOIAN_ARCHON
+		  && !mon->mcan && !mon->mspec_used
+		  && !nonthreat(mon)
+		  && !mon->mtame == !mtmp->mtame
+		  && mon->mpeaceful == mtmp->mpeaceful
+		){
+			if(!count){
+				mon->mspec_used = mtmp->mhpmax;
+				return;
+			}
+			else count--;
+		}
+}
+
 /* maybe kills mtmp, possibly lifesaving it */
 STATIC_OVL void
 lifesaved_monster(mtmp)
@@ -3910,18 +4017,20 @@ struct monst *mtmp;
 	boolean messaged = FALSE;
 	int lifesavers = 0;
 	int i;
-#define LSVD_ANA 0x001	/* anachrononaut quest */
-#define LSVD_HLO 0x002	/* Halo (Blessed) */
-#define LSVD_UVU 0x004	/* uvuuduam + prayerful thing */
-#define LSVD_OBJ 0x008	/* lifesaving items */
-#define LSVD_ILU 0x010	/* illuminated */
-#define LSVD_FRC 0x020	/* fractured kamerel */
-#define LSVD_NBW 0x040	/* nitocris's black wraps */
-#define LSVD_PLY 0x080	/* polypoids */
-#define LSVD_NIT 0x100	/* Nitocris becoming a ghoul */
-#define LSVD_KAM 0x200	/* kamerel becoming fractured */
-#define LSVD_ALA 0x400	/* alabaster decay */
-#define LSVD_FLS 0x800	/* God of flesh claims body */
+#define LSVD_ANA 0x0001	/* anachrononaut quest */
+#define LSVD_IAS 0x0002	/* Iasoian Archon grants recovery */
+#define LSVD_HLO 0x0004	/* Halo (Blessed) */
+#define LSVD_UVU 0x0008	/* uvuuduam + prayerful thing */
+#define LSVD_ASC 0x0010	/* drained the life from another */
+#define LSVD_OBJ 0x0020	/* lifesaving items */
+#define LSVD_ILU 0x0040	/* illuminated */
+#define LSVD_FRC 0x0080	/* fractured kamerel */
+#define LSVD_NBW 0x0100	/* nitocris's black wraps */
+#define LSVD_PLY 0x0200	/* polypoids */
+#define LSVD_NIT 0x0400	/* Nitocris becoming a ghoul */
+#define LSVD_KAM 0x0800	/* kamerel becoming fractured */
+#define LSVD_ALA 0x1000	/* alabaster decay */
+#define LSVD_FLS 0x2000	/* God of flesh claims body */
 #define LSVDLAST LSVD_FLS	/* last lifesaver */
 
 	/* set to kill */
@@ -3960,6 +4069,12 @@ struct monst *mtmp;
 		lifesavers |= LSVD_NIT;
 	if (mtmp->mtyp == PM_BLESSED && !mtmp->mcan && rn2(3))
 		lifesavers |= LSVD_HLO;
+	if (mtmp->mtyp == PM_CYCLOPS && !mtmp->mcan && mon_has_arti(mtmp, 0) && plague_victim_on_level())
+		lifesavers |= LSVD_ASC;
+	if (mtmp->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !mtmp->mcan && (mon_has_arti(mtmp, 0) || !quest_status.touched_artifact) && plague_victim_on_level())
+		lifesavers |= LSVD_ASC;
+	if (allied_iaso_on_level(mtmp))
+		lifesavers |= LSVD_IAS;
 
 	/* some lifesavers do NOT work on stone/gold/glass-ing */
 	if (stoned || golded || glassed)
@@ -4042,6 +4157,40 @@ struct monst *mtmp;
 			/* set mspec_used */
 			mtmp->mspec_used = mtmp->mhpmax / 5;
 			break;
+		case LSVD_ASC:{
+			struct monst *victim = random_plague_victim();
+			if(!victim)
+				break; //???
+			/* message */
+			if (couldsee(mtmp->mx, mtmp->my) || couldsee(victim->mx, victim->my)) {
+				messaged = TRUE;
+				pline("But wait...");
+				pline("A glowing mist rises from %s and flows to %s!",
+					mon_nam(victim), mon_nam(mtmp));
+				if (mon_attacktype(mtmp, AT_EXPL)
+					|| mon_attacktype(mtmp, AT_BOOM))
+					pline("%s reconstitutes!", Monnam(mtmp));
+				else
+					pline("%s looks much better!", Monnam(mtmp));
+				if(canseemon(victim))
+					pline("%s dies of %s illness!", Monnam(victim), mhis(victim));
+				mondied(victim);
+			}
+			break;
+		}
+		case LSVD_IAS:{
+			timeout_random_allied_iaso(mtmp);
+			/* message */
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
+				pline("But wait...");
+				if (mon_attacktype(mtmp, AT_EXPL)
+					|| mon_attacktype(mtmp, AT_BOOM))
+					pline("%s reconstitutes!", Monnam(mtmp));
+				pline("%s recovers!", Monnam(mtmp));
+			}
+			break;
+		}
 		case LSVD_OBJ:
 			/* message */
 			if (couldsee(mtmp->mx, mtmp->my)) {
@@ -4766,11 +4915,11 @@ boolean was_swallowed;			/* digestion */
 	    	killer = killer_buf;
 	    	killer_format = KILLED_BY_AN;
 			if(mdat->mattk[i].adtyp == AD_JAILER){
-				explode(mon->mx, mon->my, AD_FIRE, MON_EXPLODE, tmp, EXPL_FIERY, 1);
+				explode_pa(mon->mx, mon->my, AD_FIRE, MON_EXPLODE, tmp, EXPL_FIERY, 1, mdat);
 				u.uevent.ukilled_apollyon = 1;
 			}
 			else if(mdat->mtyp == PM_ANCIENT_OF_DEATH){
-				if(!(u.sealsActive&SEAL_OSE)) explode(mon->mx, mon->my, mdat->mattk[i].adtyp, MON_EXPLODE, tmp, EXPL_DARK, 1);
+				if(!(u.sealsActive&SEAL_OSE)) explode_pa(mon->mx, mon->my, mdat->mattk[i].adtyp, MON_EXPLODE, tmp, EXPL_DARK, 1, mdat);
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO){
 				if(couldsee(mon->mx, mon->my)){
@@ -4779,10 +4928,10 @@ boolean was_swallowed;			/* digestion */
 					outrumor(rn2(2), BY_OTHER); //either true (3/4) or false (1/4), no mechanism specified.
 					pline("Belief or disbelief rests with you.");
 					pline("To die without leaving a corpse....\"");
-					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+					explode_pa(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1, mdat);
 					pline("\"That is the way of us Garo.\"");
 				} else {
-					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+					explode_pa(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1, mdat);
 				}
 			}
 			else if(mdat->mattk[i].adtyp == AD_GARO_MASTER){
@@ -4793,10 +4942,10 @@ boolean was_swallowed;			/* digestion */
 					outgmaster(); //Gives out a major consultation. Does not set the consultation flags.
 					pline("Do not forget these words...");
 					pline("Die I shall, leaving no corpse.\"");
-					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+					explode_pa(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1, mdat);
 					pline("\"That is the law of us Garo.\"");
 				} else {
-					explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1);
+					explode_pa(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, tmp, EXPL_MUDDY, 1, mdat);
 				}
 			}
 			else if(mdat->mattk[i].adtyp == AD_FRWK){
@@ -4814,7 +4963,7 @@ boolean was_swallowed;			/* digestion */
 			}
 			else if(mdat->mattk[i].adtyp == AD_SPNL){
 				struct monst *levi;
-				explode(mon->mx, mon->my, AD_COLD, MON_EXPLODE, tmp, EXPL_WET, 1);
+				explode_pa(mon->mx, mon->my, AD_COLD, MON_EXPLODE, tmp, EXPL_WET, 1, mdat);
 				levi = makemon(&mons[rn2(2) ? PM_LEVISTUS : PM_LEVIATHAN], mon->mx, mon->my, MM_ADJACENTOK);
 				if(levi)
 					levi_spawn_items(mon->mx, mon->my, levi);
@@ -4850,12 +4999,13 @@ boolean was_swallowed;			/* digestion */
 				} else shieldeff(u.ux,u.uy);
 			}
 			else {
-				explode(mon->mx, mon->my, 
+				explode_pa(mon->mx, mon->my, 
 						mdat->mattk[i].adtyp, 
 						MON_EXPLODE, 
 						tmp, 
 						mon_expl_color(mdat, mdat->mattk[i].adtyp), 
-						1);
+						1,
+						mdat);
 			}
 	    	if(mdat->mtyp == PM_GARO_MASTER
 				|| mdat->mtyp == PM_GARO
@@ -4887,7 +5037,7 @@ boolean was_swallowed;			/* digestion */
 	    	Sprintf(killer_buf, "%s explosion", s_suffix(mdat->mname));
 	    	killer = killer_buf;
 	    	killer_format = KILLED_BY_AN;
-			explode(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, d(8,8), EXPL_NOXIOUS, 1);
+			explode_pa(mon->mx, mon->my, AD_PHYS, MON_EXPLODE, d(8,8), EXPL_NOXIOUS, 1, mdat);
 			if(mdat->mtyp==PM_GREAT_CTHULHU){
 				create_gas_cloud(mon->mx, mon->my, 2, 30, FALSE);
 			}
@@ -5671,6 +5821,34 @@ register struct monst *mtmp;
 	xkilled(mtmp, 1);
 }
 
+struct obj *
+mk_death_drop_obj(mtmp)
+struct monst *mtmp;
+{
+	int typ;
+	struct obj *otmp;
+
+	otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
+	if(In_quest(&u.uz) && !Role_if(PM_CONVICT)){
+		if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
+		if(otmp->oclass == ARMOR_CLASS){
+			set_obj_shape(otmp, mons[urace.malenum].mflagsb);
+		}
+	}
+	/* Don't create large objects from small monsters */
+	typ = otmp->otyp;
+	if (mtmp->data->msize < MZ_HUMAN && typ != FOOD_RATION
+		&& typ != LEASH
+		&& typ != FIGURINE
+		&& (otmp->owt > 3 || objects[typ].oc_size > MZ_MEDIUM)
+		&& !is_divider(mtmp->data)
+	) {
+		delobj(otmp);
+		otmp = 0;
+	}
+	return otmp;
+}
+
 /* the player has killed the monster mtmp */
 void
 xkilled(mtmp, dest)
@@ -5681,11 +5859,11 @@ xkilled(mtmp, dest)
  */
 	int	dest;
 {
-	register int tmp, x = mtmp->mx, y = mtmp->my;
-	register struct permonst *mdat;
+	int tmp, x = mtmp->mx, y = mtmp->my;
+	struct permonst *mdat;
 	int mndx;
-	register struct obj *otmp;
-	register struct trap *t;
+	struct obj *otmp;
+	struct trap *t;
 	boolean redisp = FALSE, illalarm = FALSE;
 	boolean wasinside = u.uswallow && (u.ustuck == mtmp);
 
@@ -5848,32 +6026,21 @@ xkilled(mtmp, dest)
 					&& mdat->mlet != S_PLANT
 					&& !(get_mx(mtmp, MX_ESUM))
 					&& !(mtmp->mclone)
+					/*Not reviving templates*/
 					&& !(has_template(mtmp, ZOMBIFIED))
+					&& !(has_template(mtmp, VAMPIRIC))
+					&& !(has_template(mtmp, TOMB_HERD))
+					&& !(has_template(mtmp, YELLOW_TEMPLATE))
+					&& !(has_template(mtmp, SPORE_ZOMBIE))
+					&& !(has_template(mtmp, CORDYCEPS))
 					&& !(is_auton(mtmp->data))
 		) {
-			int typ;
-
 			/*Death Drop*/
-			otmp = mkobj_at(RANDOM_CLASS, x, y, MKOBJ_ARTIF);
-			if(In_quest(&u.uz) && !Role_if(PM_CONVICT)){
-				if(otmp->oclass == WEAPON_CLASS || otmp->oclass == ARMOR_CLASS) otmp->objsize = (&mons[urace.malenum])->msize;
-				if(otmp->oclass == ARMOR_CLASS){
-					if(is_suit(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-					else if(is_helmet(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HEADMODIMASK);
-					else if(is_shirt(otmp)) otmp->bodytypeflag = ((&mons[urace.malenum])->mflagsb&MB_HUMANOID) ? MB_HUMANOID : ((&mons[urace.malenum])->mflagsb&MB_BODYTYPEMASK);
-				}
+			otmp = mk_death_drop_obj(mtmp);
+			if(otmp){
+				place_object(otmp, x, y);
+				redisp = TRUE;
 			}
-			
-			/* Don't create large objects from small monsters */
-			typ = otmp->otyp;
-			if (mdat->msize < MZ_HUMAN && typ != FOOD_RATION
-			    && typ != LEASH
-			    && typ != FIGURINE
-			    && (otmp->owt > 3 || objects[typ].oc_size > MZ_MEDIUM)
-				&& !is_divider(mdat)
-			) {
-			    delobj(otmp);
-			} else redisp = TRUE;
 		}
 		/* Whether or not it always makes a corpse is, in theory,
 		 * different from whether or not the corpse is "special";
@@ -9077,6 +9244,7 @@ struct monst *mtmp;
 				pline("Some unseen virtue is sucked into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
+			if(mon_resistance(tmpm, FREE_ACTION)) damage /= 2;
 			if(resists_cold(tmpm)) damage /= 2;
 			if(damage >= tmpm->mhp){
 				grow_up(mtmp,tmpm);
@@ -9232,6 +9400,7 @@ struct monst *mtmp;
 						pline("%s breathes out static curses.", Monnam(mtmp));
 					}
 					if(
+						!(mon_resistance(targ, FREE_ACTION)) &&
 						!(targ->misc_worn_check & W_ARMH && (otmp = which_armor(targ, W_ARMH)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARMC && (otmp = which_armor(targ, W_ARMC)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARM && (otmp = which_armor(targ, W_ARM)) && !otmp->cursed) &&

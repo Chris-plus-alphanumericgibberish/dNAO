@@ -731,10 +731,81 @@ fixup_special()
 			}
 		}
 	}
+	/* DROW QUEST: transfer equip */
+	if (urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && In_quest(&u.uz)) {
+		if(qlocate_level.dlevel < u.uz.dlevel)
+			place_drow_healer_features();
+		struct obj *chest;
+		struct obj *obj, *nobj;
+		struct monst *mon;
+		int ctyp = CHEST;
+		if(Is_nemesis(&u.uz))
+			ctyp = SACK;
+		for(chest = fobj; chest; chest = chest->nobj){
+			if(chest->otyp == ctyp)
+				break;
+		}
+		if(chest) for(mon = fmon; mon; mon = mon->nmon){
+			if(mon->entangled != SHACKLES)
+				continue;
+			for(obj = mon->minvent; obj; obj = nobj){
+				nobj = obj->nobj;
+				if(obj->otyp == SHACKLES)
+					continue;
+				mon->misc_worn_check &= ~obj->owornmask;
+				update_mon_intrinsics(mon, obj, FALSE, FALSE);
+				if (obj->owornmask & W_WEP){
+					setmnotwielded(mon,obj);
+					MON_NOWEP(mon);
+				}
+				if (obj->owornmask & W_SWAPWEP){
+					setmnotwielded(mon,obj);
+					MON_NOSWEP(mon);
+				}
+				obj->owornmask = 0L;
+				obj_extract_self(obj);
+				add_to_container(chest, obj);
+			}
+		}
+	}
 	/* PRIEST QUEST: make graveyard */
 	if (Role_if(PM_PRIEST) && In_quest(&u.uz)) {
 		/* less chance for undead corpses (lured from lower morgues) */
 		level.flags.graveyard = 1;
+	}
+	/* HEALER QUEST: put some plague victims around the map */
+	if (Role_if(PM_HEALER) && In_quest(&u.uz)) {
+		if(!Race_if(PM_DROW)) {
+			int plague_types[] = {PM_HOBBIT, PM_DWARF, PM_BUGBEAR, PM_DWARF_LORD, PM_DWARF_CLERIC,
+				PM_DWARF_QUEEN, PM_DWARF_KING, PM_DEEP_ONE, PM_IMP, PM_QUASIT, PM_WINGED_KOBOLD,
+				PM_DRYAD, PM_NAIAD, PM_OREAD, PM_DEMINYMPH, PM_THRIAE, PM_HILL_ORC, PM_ORC_SHAMAN, 
+				PM_ORC_CAPTAIN, PM_JUSTICE_ARCHON,
+				PM_MOVANIC_DEVA, PM_LILLEND, PM_COURE_ELADRIN,
+				PM_CHIROPTERAN, PM_PLAINS_CENTAUR, PM_FOREST_CENTAUR, PM_MOUNTAIN_CENTAUR,
+				PM_DRIDER, PM_FORMIAN_CRUSHER, PM_FORMIAN_TASKMASTER, PM_MYRMIDON_HOPLITE,
+				PM_MYRMIDON_LOCHIAS, PM_MYRMIDON_YPOLOCHAGOS, PM_MYRMIDON_LOCHAGOS,
+				PM_GNOME, PM_GNOME_LORD, PM_GNOME_LADY, PM_TINKER_GNOME, PM_GNOME_KING, PM_GNOME_QUEEN,
+				PM_VAMPIRE, PM_VAMPIRE_LORD, PM_VAMPIRE_LADY,
+				PM_PEASANT, PM_PEASANT, PM_PEASANT, PM_PEASANT, PM_NURSE, PM_WATCHMAN, PM_WATCH_CAPTAIN, 
+				PM_WOODLAND_ELF, PM_GREEN_ELF, PM_GREY_ELF, PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+				PM_DROW_CAPTAIN, PM_HEDROW_WIZARD,
+				PM_HORNED_DEVIL, PM_SUCCUBUS, PM_INCUBUS,
+				PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE,
+				PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN
+			};
+			int x, y, tries;
+			for(int i = d(2,4); i >0; i--){
+				tries = 10;
+				do {
+					x = rn2(COLNO)+1;
+					y = rn2(ROWNO);
+				}
+				while(!(isok(x,y) && levl[x][y].typ == SOIL) && tries-->0);
+				
+				if(isok(x,y) && levl[x][y].typ == SOIL)
+					makemon_full(&mons[ROLL_FROM(plague_types)], x, y, NO_MM_FLAGS, PLAGUE_TEMPLATE, -1);
+			}
+		}
 	}
 	/* KNIGHT QUEST: convert half the swamp to a forest on the knight locate level*/
 	if (Role_if(PM_KNIGHT) &&

@@ -36,6 +36,8 @@ STATIC_DCL boolean FDECL(tool_in_use, (struct obj *));
 STATIC_DCL char FDECL(obj_to_let,(struct obj *));
 STATIC_PTR int FDECL(u_material_next_to_skin,(int));
 STATIC_PTR int FDECL(u_bcu_next_to_skin,(int));
+STATIC_PTR int FDECL(mon_material_next_to_skin,(struct monst *, int));
+STATIC_PTR int FDECL(mon_bcu_next_to_skin,(struct monst *, int));
 STATIC_DCL int FDECL(itemactions,(struct obj *));
 
 #ifdef OVLB
@@ -859,6 +861,7 @@ carrying_readable_weapon()
 				otmp->oartifact == ART_GUNGNIR ||
 				otmp->oartifact == ART_PEN_OF_THE_VOID ||
 				otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD ||
+				otmp->oartifact == ART_ESSCOOAHLIPBOOURRR ||
 				otmp->oartifact == ART_STAFF_OF_NECROMANCY
 			))
 		)
@@ -890,8 +893,7 @@ carrying_readable_armor()
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 		if(otmp->oclass == ARMOR_CLASS
 			&& ((otmp->ohaluengr
-					&& otmp->oward
-					&& is_readable_armor_otyp(otmp->otyp)
+					&& is_readable_armor(otmp)
 				) || (otmp->oartifact && (
 					otmp->oartifact == ART_ITLACHIAYAQUE
 				 )
@@ -1281,10 +1283,13 @@ register const char *let,*word;
 		      otyp != CREAM_PIE && otyp != EUCALYPTUS_LEAF) ||
 		     /* MRKR: mining helmets */
 		     (otmp->oclass == ARMOR_CLASS &&
+		      otyp != LANTERN_PLATE_MAIL &&
 		      otyp != DWARVISH_HELM &&
 		      otyp != DROVEN_CLOAK &&
 			  otyp != GNOMISH_POINTY_HAT &&
-			  otmp->oartifact != ART_AEGIS
+			  otmp->oartifact != ART_AEGIS &&
+			  otmp->oartifact != ART_STAFF_OF_AESCULAPIUS &&
+			  otmp->oartifact != ART_ESSCOOAHLIPBOOURRR
 			  ) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)
 				&& otyp != CATAPSI_VORTEX && otyp != ANTIMAGIC_RIFT
@@ -2426,7 +2431,7 @@ struct obj *obj;
 	else if (obj->oartifact == ART_STAFF_OF_NECROMANCY)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study the forbidden secrets of necromancy", MENU_UNSELECTED);
-	else if (obj->oartifact == ART_STAFF_OF_AESCULAPIUS)
+	else if (obj->oartifact == ART_STAFF_OF_AESCULAPIUS || obj->oartifact == ART_ESSCOOAHLIPBOOURRR)
 				add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 				"Study the grand magic of healing", MENU_UNSELECTED);
 	else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
@@ -5552,6 +5557,42 @@ boolean as_if_seen;
 }
 
 int
+mon_healing_penalty(mon)
+struct monst *mon;
+{
+	int penalty = 0;
+	if(hates_silver(mon->data)){
+		penalty += (20*mon_material_next_to_skin(mon, SILVER))/2;
+	}
+	if(hates_iron(mon->data)){
+		penalty += (mon->m_lev * mon_material_next_to_skin(mon, IRON)+1)/2;
+		penalty += (mon->m_lev * mon_material_next_to_skin(mon, GREEN_STEEL)+1)/2;
+	}
+	if(hates_unholy_mon(mon)){
+		penalty += (9*mon_bcu_next_to_skin(mon, -1)+1)/2;
+		penalty += 9*mon_material_next_to_skin(mon, GREEN_STEEL);
+	}
+	if(hates_unblessed_mon(mon)){
+		penalty += (8*mon_bcu_next_to_skin(mon, 0)+1)/2;
+	}
+	if(hates_holy_mon(mon)){
+		penalty += (4*mon_bcu_next_to_skin(mon, 1)+1)/2;
+	}
+	if(is_chaotic_mon(mon)){
+		int plat_penalty = 5 * mon_material_next_to_skin(mon, PLATINUM);
+		if(is_minion(mon->data) || is_demon(mon->data))
+			plat_penalty *= 2;
+		/* strongly chaotic beings are hurt more */
+		if(mon->mtyp == PM_ANGEL || mon->data->maligntyp <= -10)
+			plat_penalty *= 2;
+
+		penalty += plat_penalty/2;
+	}
+
+	return penalty;
+}
+
+int
 u_healing_penalty()
 {
 	int penalty = 0;
@@ -5654,6 +5695,131 @@ u_clothing_discomfort()
 			count++;
 	}
 	return count; //0-25
+}
+
+STATIC_OVL int
+mon_material_next_to_skin(mon, material)
+struct monst *mon;
+int material;
+{
+	int count = 0;
+	struct obj *curarm;
+	boolean marm_blocks_ub = FALSE;
+	boolean hasgloves = !!which_armor(mon, W_ARMG);
+	boolean hasshirt = !!which_armor(mon, W_ARMU);
+
+	curarm = which_armor(mon, W_ARMU);
+	if(curarm && curarm->obj_material == material)
+		count += curarm->otyp == BODYGLOVE ? 5 : 1;
+	if(curarm && curarm->otyp == BODYGLOVE)
+		return count;
+
+	if(MON_WEP(mon) && MON_WEP(mon)->obj_material == material && !hasgloves)
+		count++;
+
+	curarm = which_armor(mon, W_ARM);
+	if(curarm && curarm->obj_material == material && !hasshirt)
+		count++;
+	if(curarm && arm_blocks_upper_body(curarm->otyp))
+		marm_blocks_ub = TRUE;
+	
+	curarm = which_armor(mon, W_ARMC);
+	if(curarm && curarm->obj_material == material && !hasshirt && !marm_blocks_ub)
+		count++;
+
+	curarm = which_armor(mon, W_ARMH);
+	if(curarm && curarm->obj_material == material)
+		count++;
+
+	curarm = which_armor(mon, W_ARMS);
+	if(curarm && curarm->obj_material == material && !hasgloves)
+		count++;
+
+	curarm = which_armor(mon, W_ARMG);
+	if(curarm && curarm->obj_material == material)
+		count++;
+
+	curarm = which_armor(mon, W_ARMF);
+	if(curarm && curarm->obj_material == material)
+		count++;
+
+	curarm = which_armor(mon, W_AMUL);
+	if(curarm && curarm->obj_material == material && !hasshirt && !marm_blocks_ub)
+		count++;
+
+	if(mon->entangled && !hasshirt && !marm_blocks_ub && !which_armor(mon, W_ARMC) && entangle_material(mon, material))
+		count++;
+
+	curarm = which_armor(mon, W_TOOL);
+	if(curarm && curarm->obj_material == material)
+		count++;
+
+	if(MON_SWEP(mon) && MON_SWEP(mon)->obj_material == material && !hasgloves)
+		count++;
+	return count;
+}
+
+STATIC_OVL int
+mon_bcu_next_to_skin(mon, bcu)
+struct monst *mon;
+int bcu;
+{
+	#define bcu(otmp) (is_unholy(otmp) ? -1 : otmp->blessed ? 1 : 0)
+	int count = 0;
+	struct obj *curarm;
+	boolean marm_blocks_ub = FALSE;
+	boolean hasgloves = !!which_armor(mon, W_ARMG);
+	boolean hasshirt = !!which_armor(mon, W_ARMU);
+
+	curarm = which_armor(mon, W_ARMU);
+	if(curarm && bcu(curarm) == bcu)
+		count += curarm->otyp == BODYGLOVE ? 5 : 1;
+	if(curarm && curarm->otyp == BODYGLOVE)
+		return count;
+
+	if(MON_WEP(mon) && bcu(MON_WEP(mon)) == bcu && !hasgloves)
+		count++;
+
+	curarm = which_armor(mon, W_ARM);
+	if(curarm && bcu(curarm) == bcu && !hasshirt)
+		count++;
+	if(curarm && arm_blocks_upper_body(curarm->otyp))
+		marm_blocks_ub = TRUE;
+
+	curarm = which_armor(mon, W_ARMC);
+	if(curarm && bcu(curarm) == bcu && !hasshirt && !marm_blocks_ub)
+		count++;
+
+	curarm = which_armor(mon, W_ARMH);
+	if(curarm && bcu(curarm) == bcu)
+		count++;
+
+	curarm = which_armor(mon, W_ARMS);
+	if(curarm && bcu(curarm) == bcu && !hasgloves)
+		count++;
+
+	curarm = which_armor(mon, W_ARMG);
+	if(curarm && bcu(curarm) == bcu)
+		count++;
+
+	curarm = which_armor(mon, W_ARMF);
+	if(curarm && bcu(curarm) == bcu)
+		count++;
+
+	curarm = which_armor(mon, W_AMUL);
+	if(curarm && bcu(curarm) == bcu && !hasshirt && !marm_blocks_ub)
+		count++;
+
+	if(mon->entangled && !hasshirt && !marm_blocks_ub && !which_armor(mon, W_ARMC) && entangle_beatitude(mon, bcu))
+		count++;
+
+	curarm = which_armor(mon, W_TOOL);
+	if(curarm && bcu(curarm) == bcu)
+		count++;
+
+	if(MON_SWEP(mon) && bcu(MON_SWEP(mon)) == bcu && !hasgloves)
+		count++;
+	return count;
 }
 
 STATIC_OVL int

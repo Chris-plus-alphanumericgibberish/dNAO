@@ -970,12 +970,7 @@ struct permonst * ptr;
 	}
 
 	/* Some creatures are specifically always able to wield any weapon in one hand */
-	if (ptr && (
-		ptr->mtyp == PM_THRONE_ARCHON ||
-		ptr->mtyp == PM_OCCULTIST ||
-		ptr->mtyp == PM_LUNGORTHIN ||
-		ptr->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY
-		))
+	if (ptr && always_one_hand_mtyp(ptr))
 		return FALSE;
 
 	/* get object size */

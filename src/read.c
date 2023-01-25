@@ -353,6 +353,34 @@ doread()
 				if (i == MAXSPELL) impossible("Too many spells memorized!");
 				return MOVE_READ;
 			}
+		} else if(scroll->oartifact == ART_ESSCOOAHLIPBOOURRR){
+			if (Blind) {
+				You_cant("see the staff!");
+				return MOVE_INSTANT;
+			} else {
+				int i;
+				You("read the still-visible traceries of healing magics inscribed on the shackles fusing the sword together.");
+				for (i = 0; i < MAXSPELL; i++)  {
+					if (spellid(i) == SPE_MASS_HEALING)  {
+						if (spellknow(i) <= 1000) {
+							Your("knowledge of Mass Healing is keener.");
+							spl_book[i].sp_know = 20000;
+							exercise(A_WIS,TRUE);       /* extra study */
+						} else { /* 1000 < spellknow(i) <= MAX_SPELL_STUDY */
+							You("know Mass Healing quite well already.");
+						}
+						break;
+					} else if (spellid(i) == NO_SPELL)  {
+						spl_book[i].sp_id = SPE_MASS_HEALING;
+						spl_book[i].sp_lev = objects[SPE_MASS_HEALING].oc_level;
+						spl_book[i].sp_know = 20000;
+						You("learn to cast Mass Healing!");
+						break;
+					}
+				}
+				if (i == MAXSPELL) impossible("Too many spells memorized!");
+				return MOVE_READ;
+			}
 		} else if(scroll->otyp == LIGHTSABER){
 			if (Blind) {
 				You_cant("see it!");
@@ -480,11 +508,15 @@ doread()
 	    return MOVE_READ;
 #ifdef TOURIST
 	} else if(scroll->oclass == ARMOR_CLASS
-		&& scroll->ohaluengr
-		&& scroll->oward
-		&& is_readable_armor_otyp(scroll->otyp)
+		&& is_readable_armor(scroll)
 	){
 		pline("There is %s engraved on the armor.",fetchHaluWard((int)scroll->oward));
+		if(!scroll->ohaluengr){
+			if( !(u.wardsknown & get_wardID(scroll->oward)) ){
+				You("have learned a new warding sign!");
+				u.wardsknown |= get_wardID(scroll->oward);
+			}
+		}
 		return MOVE_READ;
 	}else if (scroll->otyp == T_SHIRT) {
 	    static const char *shirt_msgs[] = { /* Scott Bigham */
@@ -857,11 +889,14 @@ struct obj *scroll;
 				return 0;
 			}
 			else {
+				int objcount = 2 + rn2(3) + rn2(5);
 				You("can't understand what they say...");
 				pline("Suddenly, the glyphs glow in rainbow hues and escape from the fracturing disk!");
 				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
-				know_random_obj(2 + rn2(3) + rn2(5));
+				know_random_obj(objcount);
 				change_uinsight(1);
+				more_experienced(d(objcount+1, 100), 0);
+				newexplevel();
 			}
 		}
 	} else if(scroll->otyp == APHANACTONAN_ARCHIVE){
@@ -878,24 +913,35 @@ struct obj *scroll;
 			else {
 				int i;
 				int rolls;
+				int effectcount;
+				int xp = 0;
 				boolean seals = FALSE, wards = FALSE, combat = FALSE;
 				You("can't understand what it says...");
 				pline("Suddenly, the glyphs glow in impossible hues and escape from the fracturing disk!");
 				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
-				know_random_obj(4 + rn2(5) + rn2(9));
-				change_uinsight(rnd(8));
+				//ID
+				effectcount = 4 + rn2(5) + rn2(9);
+				xp += d(effectcount,100);
+				know_random_obj(effectcount);
+
+				//Insight
+				effectcount = rnd(8);
+				xp += d(effectcount,100);
+				change_uinsight(effectcount);
 				change_usanity(-1*d(8,8),TRUE);
 				
 				for(rolls = d(1,4); rolls > 0; rolls--){
 					switch(rnd(4)){
 						case 1:
 							for(i = rnd(4); i > 0; i--){
+								xp += d(1,200);
 								learn_spell_aphanactonan(rn1(SPE_BLANK_PAPER - SPE_DIG, SPE_DIG));
 							}
 						break;
 						case 2:
 							if(!Role_if(PM_EXILE)){
 								if(!seals){
+									xp += 625;
 									You("see circular seals!");
 									seals = TRUE;
 								}
@@ -910,6 +956,7 @@ struct obj *scroll;
 								wards = TRUE;
 							}
 							for(i = d(2,4); i > 0; i--){
+								xp += d(1,50);
 								u.wardsknown |= 0x1L<<rnd(NUM_WARDS-1); //Note: Ward_Elbereth is 0x1L, and does nothing.
 							}
 						break;
@@ -918,12 +965,15 @@ struct obj *scroll;
 								You("suddenly know secret combat techniques!");
 								combat = TRUE;
 							}
+							xp += 1000;
 							u.uhitinc = min_ints(100, u.uhitinc+d(1,2));
 							u.udaminc = min_ints(100, u.udaminc+d(1,2));
 							u.uacinc = min_ints(100, u.uacinc+d(1,2));
 						break;
 					}
 				}
+				more_experienced(xp, 0);
+				newexplevel();
 			}
 		}
 	} else if(scroll->otyp >= ANTI_CLOCKWISE_METAMORPHOSIS_G && scroll->otyp <= ORRERY_GLYPH) {
@@ -1202,7 +1252,9 @@ int curse_bless;
 	    }
 
 	} else if (obj->oclass == TOOL_CLASS || is_blaster(obj)
-		   || obj->otyp == DWARVISH_HELM || is_vibroweapon(obj)) {
+		   || obj->otyp == DWARVISH_HELM || obj->otyp == LANTERN_PLATE_MAIL
+		   || is_vibroweapon(obj)
+	   ) {
 	    int rechrg = (int)obj->recharged;
 
 	    if (objects[obj->otyp].oc_charged) {
@@ -1260,8 +1312,9 @@ int curse_bless;
 	    case DWARVISH_HELM:
 	    case OIL_LAMP:
 	    case LANTERN:
+	    case LANTERN_PLATE_MAIL:
 		if (is_cursed) {
-		    if (obj->otyp == DWARVISH_HELM) {
+		    if (obj->otyp == DWARVISH_HELM && obj->otyp != LANTERN_PLATE_MAIL) {
 			/* Don't affect the +/- of the helm */
 			obj->age = 0;
 		    }
@@ -1273,7 +1326,7 @@ int curse_bless;
 			end_burn(obj, TRUE);
 		    }
 		} else if (is_blessed) {
-		    if (obj->otyp != DWARVISH_HELM) {
+		    if (obj->otyp != DWARVISH_HELM && obj->otyp != LANTERN_PLATE_MAIL) {
 				obj->spe = 1;
 		    }
 		    obj->age = 1500;
@@ -1908,7 +1961,7 @@ struct obj	*sobj;
 						otmp->otyp - GRAY_DRAGON_SCALES;
 			otmp->objsize = youracedata->msize;
 			
-			otmp->bodytypeflag = youracedata->mflagsb&MB_BODYTYPEMASK;
+			set_obj_shape(otmp, youracedata->mflagsb);
 			
 			otmp->cursed = 0;
 			if (sobj->blessed) {
@@ -3513,17 +3566,20 @@ boolean revival;
  * than a mimic; this behavior quirk is useful so don't "fix" it...
  */
 struct monst *
-create_particular(specify_attitude, specify_derivation, allow_multi, ma_require, mg_restrict, gen_restrict)
+create_particular(x, y, specify_attitude, specify_derivation, allow_multi, ma_require, mg_restrict, gen_restrict, in_buff)\
+int x,y;
 unsigned long specify_attitude;		// -1 -> true; 0 -> false; >0 -> as given
 int specify_derivation;				// -1 -> true; 0 -> false; >0 -> as given
 int allow_multi;
 unsigned long ma_require;
 unsigned long mg_restrict;
 int gen_restrict;
+char *in_buff;
 {
 	char buf[BUFSZ], *bufp, *p, *q, monclass = MAXMCLASSES;
 	int which, tries, i;
 	int undeadtype = 0;
+	boolean mad_suicidal = FALSE;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
@@ -3534,8 +3590,13 @@ int gen_restrict;
 	do {
 	    which = urole.malenum;	/* an arbitrary index into mons[] */
 	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = FALSE;
-	    getlin("Create what kind of monster? [type the name or symbol]",
-		   buf);
+		if(in_buff){
+			Sprintf(buf, "%s", in_buff);
+		}
+		else {
+			getlin("Create what kind of monster? [type the name or symbol]",
+			   buf);
+		}
 	    bufp = mungspaces(buf);
 	    if (*bufp == '\033') return (struct monst *)0;
 
@@ -3610,6 +3671,9 @@ int gen_restrict;
 			else if (!strncmpi(bufp, "moly-", l = 5)) {
 				undeadtype = MOLY_TEMPLATE;
 			}
+			else if (!strncmpi(bufp, "suicidal ", l = 9)) {
+				mad_suicidal = TRUE;
+			}
 			else
 				break;
 
@@ -3662,6 +3726,12 @@ int gen_restrict;
 				undeadtype = WORLD_SHAPER;
 			else if (!strncmpi(p, "husk",	4))
 				undeadtype = MINDLESS;
+			else if (!strncmpi(p, "infectee",	8))
+				undeadtype = SPORE_ZOMBIE;
+			else if (!strncmpi(p, "cordyceps",	9))
+				undeadtype = CORDYCEPS;
+			else if (!strncmpi(p, "plague-victim",	13))
+				undeadtype = PLAGUE_TEMPLATE;
 			else
 			{
 				/* no suffix was used, undo the split made to search for suffixes */
@@ -3699,6 +3769,11 @@ int gen_restrict;
 			if (monclass == MAXMCLASSES)
 			{
 				pline("I've never heard of such monsters.");
+				if(in_buff){
+					impossible("Bad parsed monster name in sp_lev");
+					tries = 5;
+					break;
+				}
 				continue;	//try again
 			}
 			if (monclass == S_MIMIC_DEF && !(ma_require || mg_restrict || gen_restrict))	// bugfeature made feature
@@ -3770,7 +3845,7 @@ createmon:
 			if (makesummoned)
 				mm_flags |= MM_ESUM;
 
-			mtmp = makemon_full(whichpm, u.ux, u.uy, mm_flags, undeadtype ? undeadtype : -1, -1);
+			mtmp = makemon_full(whichpm, x, y, mm_flags, undeadtype ? undeadtype : -1, -1);
 
 			if (mtmp) {
 				if (maketame){
@@ -3786,6 +3861,9 @@ createmon:
 
 				if (makesummoned)
 					mark_mon_as_summoned(mtmp, (struct monst *)0, ESUMMON_PERMANENT, 0);
+
+				if (mad_suicidal)
+					mtmp->msuicide = TRUE;
 
 				madeany = TRUE;
 				newsym(mtmp->mx, mtmp->my);
