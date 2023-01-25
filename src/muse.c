@@ -2212,58 +2212,20 @@ skipmsg:
 	case MUSE_POT_GAIN_ABILITY:
 		mquaffmsg(mtmp, otmp);
 		if (otmp->cursed) {
-			switch(rnd(6)){
-				case 1:
-					if(mtmp->mstr > 3) mtmp->mstr--;
-				break;
-				case 2:
-					if(mtmp->mdex > 3) mtmp->mdex--;
-				break;
-				case 3:
-					if(mtmp->mcon > 3) mtmp->mcon--;
-				break;
-				case 4:
-					if(mtmp->mint > 3) mtmp->mint--;
-				break;
-				case 5:
-					if(mtmp->mwis > 3) mtmp->mwis--;
-				break;
-				case 6:
-					if(mtmp->mcha > 3) mtmp->mcha--;
-				break;
-			}
+			int i = rn2(A_MAX);
+			if(ABASE_MON(i, mtmp) > 3) ABASE_MON(i, mtmp)--;
 			if (vismon) pline("%s seems weaker.", Monnam(mtmp));
 			if (oseen) makeknown(POT_GAIN_ABILITY);
 		} else if(otmp->blessed){
-			if(mtmp->mstr < 25) mtmp->mstr++;
-			if(mtmp->mdex < 25) mtmp->mdex++;
-			if(mtmp->mcon < 25) mtmp->mcon++;
-			if(mtmp->mint < 25) mtmp->mint++;
-			if(mtmp->mwis < 25) mtmp->mwis++;
-			if(mtmp->mcha < 25) mtmp->mcha++;
-			if (vismon) pline("%s seems enhanced.", Monnam(mtmp));
+			int i;
+			for(int i = 0; i < A_MAX; i++){
+				if(ABASE_MON(i,mtmp) < 25) ABASE_MON(i,mtmp)++;
+			}
+			if (vismon) pline("%s seems quite enhanced.", Monnam(mtmp));
 			if (oseen) makeknown(POT_GAIN_ABILITY);
 		} else {
-			switch(rnd(6)){
-				case 1:
-					if(mtmp->mstr < 25) mtmp->mstr++;
-				break;
-				case 2:
-					if(mtmp->mdex < 25) mtmp->mdex++;
-				break;
-				case 3:
-					if(mtmp->mcon < 25) mtmp->mcon++;
-				break;
-				case 4:
-					if(mtmp->mint < 25) mtmp->mint++;
-				break;
-				case 5:
-					if(mtmp->mwis < 25) mtmp->mwis++;
-				break;
-				case 6:
-					if(mtmp->mcha < 25) mtmp->mcha++;
-				break;
-			}
+			int i = rn2(A_MAX);
+			if(ABASE_MON(i, mtmp) < 25) ABASE_MON(i, mtmp)++;
 			if (vismon) pline("%s seems enhanced.", Monnam(mtmp));
 			if (oseen) makeknown(POT_GAIN_ABILITY);
 		}

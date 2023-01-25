@@ -41,7 +41,7 @@ int explcolors[] = {
 #define mon_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
 #define invis_color(n) color = NO_COLOR
 #define pet_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
-#define zombie_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
+#define mtemplate_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
 #define peace_color(n)  color = iflags.use_color ? mons[n].mcolor : NO_COLOR
 #define warn_color(n) color = iflags.use_color ? def_warnsyms[n].color : NO_COLOR
 #define explode_color(n) color = iflags.use_color ? explcolors[n] : NO_COLOR
@@ -102,14 +102,15 @@ int glyph;
 
 /*ARGSUSED*/
 void
-mapglyph(glyph, ochar, ocolor, ospecial, x, y)
+mapglyph(glyph, ochar, ocolor, obgcolor, x, y)
 int glyph, *ocolor, x, y;
 glyph_t *ochar;
-unsigned *ospecial;
+unsigned int *obgcolor;
 {
 	register int offset;
 #if defined(TEXTCOLOR) || defined(ROGUE_COLOR)
 	int color = NO_COLOR;
+	int bgcolor = NO_COLOR;
 #endif
 	glyph_t ch;
 	unsigned special = 0;
@@ -596,16 +597,25 @@ unsigned *ospecial;
 #endif
 	    invis_color(offset);
 	    special |= MG_INVIS;
-    } else if ((offset = (glyph - GLYPH_ZOMBIE_OFF)) >= 0) {	/* a zombie */
+    } else if ((offset = (glyph - GLYPH_MTEMPLATE_OFF)) >= 0) {	/* a templated monster */
 		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
-		ch = monsyms[(int)mons[offset].mlet];
+		ch = monsyms[(int)mons[offset % NUMMONS].mlet];
+		int template = (glyph - GLYPH_MTEMPLATE_OFF) / NUMMONS + 1;
+
+		if (iflags.monstertemplate[template - 1].set & MONSTERTEMPLATE_BACKGROUND)
+			bgcolor = iflags.monstertemplate[template - 1].bg;
+
+		if (iflags.monstertemplate[template - 1].set & MONSTERTEMPLATE_SYMBOL)
+			ch = iflags.monstertemplate[template - 1].symbol;
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS)
 			color = NO_COLOR;	/* no need to check iflags.use_color */
 		else
 #endif
-	    zombie_color(offset);
-	    special |= MG_ZOMBIE;
+		if (iflags.monstertemplate[template - 1].set & MONSTERTEMPLATE_FOREGROUND)
+			color = iflags.monstertemplate[template - 1].fg;
+		else
+	    	mtemplate_color(offset % NUMMONS);
     } else if ((offset = (glyph - GLYPH_PEACE_OFF)) >= 0) {	/* a peaceful monster */
 		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = monsyms[(int)mons[offset].mlet];
@@ -649,6 +659,20 @@ unsigned *ospecial;
 		}
     }
 
+	/* translate 'special' into 'bgcolor' */
+	if (special && bgcolor == NO_COLOR) {
+		if ((special & MG_PET) && iflags.hilite_pet)
+			bgcolor = CLR_BLUE;
+		else if ((special & MG_STAIRS) && iflags.hilite_hidden_stairs)
+			bgcolor = CLR_RED;
+		else if ((special & MG_PEACE) && iflags.hilite_peaceful)
+			bgcolor = CLR_BROWN;
+		else if ((special & MG_DETECT) && iflags.hilite_detected)
+			bgcolor = CLR_MAGENTA;
+		else if (special & MG_OBJPILE && iflags.hilite_obj_piles)
+			bgcolor = CLR_BLUE;
+	}
+
 #ifdef TEXTCOLOR
     /* Turn off color if no color defined, or rogue level w/o PC graphics. */
 # ifdef REINCARNATION
@@ -664,7 +688,7 @@ unsigned *ospecial;
 #endif
 
     *ochar = ch;
-    *ospecial = special;
+    *obgcolor = bgcolor;
 #ifdef TEXTCOLOR
     *ocolor = color;
 #endif

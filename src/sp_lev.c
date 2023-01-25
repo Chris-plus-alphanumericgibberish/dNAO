@@ -1807,15 +1807,10 @@ default_case:
 		struct trap * ttmp = t_at(x, y);
 		struct obj * statue;
 		if (ttmp && ttmp->ttyp == STATUE_TRAP) {
+			for (statue = level.objects[x][y]; statue; statue = statue->nobj)
+				if (statue->o_id == ttmp->statueid)
+					delobj(statue);
 			ttmp->statueid = otmp->o_id;
-			//for (statue = level.objects[x][y]; statue; statue = statue->nobj)
-			//{
-			//	if (statue->o_id == ttmp->statueid)
-			//	{
-			//		//obfree(statue, (struct obj *)0);
-			//		
-			//	}
-			//}
 		}
 	}
 
@@ -2514,8 +2509,14 @@ room *r, *pr;
 	boolean okroom;
 	struct mkroom	*aroom;
 	short i;
-	xchar rtype = (!r->chance || rn2(100) < r->chance) ? r->rtype : OROOM;
-
+	xchar rtype = r->rtype;
+	/* if rtype != OROOM, chance is chance to be the special type. Otherwise, chance is chance of being generated */
+	if (r->chance && r->chance <= rn2(100)) {
+		if (r->rtype != OROOM)
+			rtype = OROOM;
+		else
+			return;
+	}
 	if(pr) {
 		aroom = &subrooms[nsubroom];
 		okroom = create_subroom(pr->mkr, r->x, r->y, r->w, r->h,

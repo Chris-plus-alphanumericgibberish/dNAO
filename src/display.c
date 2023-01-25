@@ -492,19 +492,12 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	    else
 		num = peacenum_to_glyph(appear);
 	}
-	else if (!Hallucination && (
-				has_template(mon, VAMPIRIC) ||
-				has_template(mon, ZOMBIFIED) ||
-				has_template(mon, SKELIFIED) ||
-				has_template(mon, CRYSTALFIED) ||
-				has_template(mon, SLIME_REMNANT) ||
-				has_template(mon, FRACTURED)
-			)) {
+	else if (!Hallucination && mon->mtemplate != 0) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
-			zombienum_to_glyph(PM_HUNTING_HORROR_TAIL):
-			zombienum_to_glyph(PM_LONG_WORM_TAIL);
+			mtemplatenum_to_glyph(PM_HUNTING_HORROR_TAIL, mon->mtemplate):
+			mtemplatenum_to_glyph(PM_LONG_WORM_TAIL, mon->mtemplate);
 	    else
-		num = zombienum_to_glyph(appear);
+		num = mtemplatenum_to_glyph(appear, mon->mtemplate);
 	/* [ALI] Only use detected glyphs when monster wouldn't be
 	 * visible by any other means.
 	 */
@@ -1464,8 +1457,8 @@ show_glyph(x,y,glyph)
 	    text = "detected mon";	offset = glyph - GLYPH_DETECT_OFF;
 	} else if (glyph >= GLYPH_INVIS_OFF) {		/* invisible mon */
 	    text = "invisible mon";	offset = glyph - GLYPH_INVIS_OFF;
-	} else if (glyph >= GLYPH_ZOMBIE_OFF) {		/* a zombie */
-	    text = "zombie";		offset = glyph - GLYPH_ZOMBIE_OFF;
+	} else if (glyph >= GLYPH_MTEMPLATE_OFF) {		/* a zombie */
+	    text = "mtemplate";		offset = glyph - GLYPH_MTEMPLATE_OFF;
 	} else if (glyph >= GLYPH_PEACE_OFF) {		/* a peaceful monster */
 	    text = "peaceful mon";		offset = glyph - GLYPH_PEACE_OFF;
 	} else if (glyph >= GLYPH_PET_OFF) {		/* a pet */
@@ -1627,8 +1620,8 @@ int glyph;
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_INVIS_OFF)) >= 0) {  /* invisible */
 	ch = DEF_INVISIBLE;
-    } else if ((offset = (glyph - GLYPH_ZOMBIE_OFF)) >= 0) {	/* a zombie */
-	ch = def_monsyms[(int)mons[offset].mlet];
+    } else if ((offset = (glyph - GLYPH_MTEMPLATE_OFF)) >= 0) {	/* a templated monster */
+	ch = def_monsyms[(int)mons[offset % NUMMONS].mlet];
     } else if ((offset = (glyph - GLYPH_PEACE_OFF)) >= 0) {	/* a peaceful monster */
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_PET_OFF)) >= 0) {	/* a pet */

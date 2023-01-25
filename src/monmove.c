@@ -2437,7 +2437,7 @@ not_special:
 		if (!should_see && (goodsmeller(ptr) || (mtmp)->mcansee)) {
 			register coord *cp;
 			/* good trackers can follow your trail up to 200 turns, others just for your few most recent steps */
-			cp = gettrack(omx, omy, can_track(ptr) ? 0 : rnd(mtmp->mint/3));
+			cp = gettrack(omx, omy, can_track(ptr) ? 0 : rnd(ACURR_MON(A_INT, mtmp)/3));
 			if (cp) {
 				gx = cp->x;
 				gy = cp->y;

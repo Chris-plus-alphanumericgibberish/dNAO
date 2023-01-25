@@ -19,8 +19,10 @@
 #define ABASE(x)	(u.acurr.a[x])
 #define ABON(x)		(u.abon.a[x])
 #define AEXE(x)		(u.aexe.a[x])
-#define ACURR(x)	(acurr(x))
+#define ACURR(x)	(acurr_player(x))
 #define ACURRSTR	(acurrstr(ACURR(A_STR)))
+#define ACURR_MON(x, mon)	(acurr(x, mon))
+#define ABASE_MON(x, mon)	(mon->acurr.a[x])
 /* should be: */
 /* #define ACURR(x) (ABON(x) + ATEMP(x) + (Upolyd  ? MBASE(x) : ABASE(x)) */
 #define MCURR(x)	(u.macurr.a[x])

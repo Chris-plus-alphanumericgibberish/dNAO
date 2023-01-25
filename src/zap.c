@@ -4129,6 +4129,10 @@ struct zapdata * zapdata;
 
 	/* do effects of zap */
 	switch (zapdata->adtyp) {
+	case AD_PHYS:
+		if (Half_phys(mdef))
+			dmg = (dmg + 1) / 2;
+		return xdamagey(magr, mdef, &attk, dmg);
 	case AD_MAGM:
 		/* check resist */
 		if (Magic_res(mdef)) {

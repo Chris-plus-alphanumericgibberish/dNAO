@@ -1200,121 +1200,132 @@ calc_total_maxen()
 #ifdef OVL0
 
 schar
-acurr(x)
+acurr(x, mon)
 int x;
+struct monst *mon;
 {
-	register int tmp = (u.abon.a[x] + u.atemp.a[x] + u.acurr.a[x]);
-
-	if (x == A_STR && override_str)
-		return override_str;
-
-	if (x == A_CHA && tmp < 18 && youracedata && (youracedata->mlet == S_NYMPH ||
-		u.umonnum==PM_SUCCUBUS || u.umonnum == PM_INCUBUS))
-		tmp = 18;
-		
-	if(u.ufirst_light)
-		tmp++;
-	if(u.ufirst_sky)
-		tmp++;
-	if(u.ufirst_life)
-		tmp++;
-	if(u.ufirst_know && (x == A_INT || x == A_WIS || x == A_CHA))
-		tmp+=2;
-	if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN)){
-		tmp += 6;
-	}
+	boolean is_player = !mon; 
+	struct permonst *dat = (is_player? youracedata: mon->data);
+	struct obj *arm = (is_player ? uarm : which_armor(mon, W_ARM));
+	struct obj *armu = (is_player ? uarmu : which_armor(mon, W_ARMU));
+	struct obj *armc = (is_player ? uarmc : which_armor(mon, W_ARMC));
+	struct obj *armg = (is_player ? uarmg : which_armor(mon, W_ARMG));
+	struct obj *arms = (is_player ? uarms : which_armor(mon, W_ARMS));
+	struct obj *armh = (is_player ? uarmh : which_armor(mon, W_ARMH));
+	struct obj *wep = (is_player ? uwep : MON_WEP(mon));
+	struct obj *swapwep = (is_player ? uswapwep : MON_SWEP(mon));
 	
-	if(x == A_WIS){
-		if(uarm && arti_chawis(uarm, FALSE) && uarmc){
-			tmp += uarm->spe;
+	int tmp;
+	if(is_player){
+		tmp = (u.abon.a[x] + u.atemp.a[x] + u.acurr.a[x]);
+	} else {
+		tmp = (mon->abon.a[x] + mon->atemp.a[x] + mon->acurr.a[x]);
+	}
+	if(is_player){
+		if (x == A_STR && override_str)
+			return override_str;
+		if(u.ufirst_light)
+			tmp++;
+		if(u.ufirst_sky)
+			tmp++;
+		if(u.ufirst_life)
+			tmp++;
+		if(u.ufirst_know && (x == A_INT || x == A_WIS || x == A_CHA))
+			tmp+=2;
+		if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN)){
+			tmp += 6;
 		}
-		if(uarmu && arti_chawis(uarmu, FALSE) && (uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))){
-			tmp += uarmu->spe;
+	}
+	if (x == A_CHA && tmp < 18 && dat && (dat->mlet == S_NYMPH ||
+		dat->mtyp==PM_SUCCUBUS || dat->mtyp == PM_INCUBUS))
+		tmp = 18;
+	if(x == A_WIS){
+		if(arm && arti_chawis(arm, FALSE) && armc){
+			tmp += arm->spe;
+		}
+		if(armu && arti_chawis(armu, FALSE) && (armc || (arm && arm_blocks_upper_body(arm->otyp)))){
+			tmp += armu->spe;
 		}
 	}
 	
 	if(x == A_CHA){
-		if(uarmc && arti_chawis(uarmc, FALSE)){
-			tmp += uarmc->spe;
+		if(armc && arti_chawis(armc, FALSE)){
+			tmp += armc->spe;
 		}
-		if(uarm && arti_chawis(uarm, FALSE) && !uarmc){
-			tmp += uarm->spe;
+		if(arm && arti_chawis(arm, FALSE) && !armc){
+			tmp += arm->spe;
 		}
-		if(uarmu && arti_chawis(uarmu, FALSE) && !uarmc && !(uarm && arm_blocks_upper_body(uarm->otyp))){
-			tmp += uarmu->spe;
+		if(armu && arti_chawis(armu, FALSE) && !armc && !(arm && arm_blocks_upper_body(arm->otyp))){
+			tmp += armu->spe;
 		}
 		//If dress is "on top" i.e., not blocked by body armor (cloak is fine)
-		if(uarmu && uarmu->otyp == PLAIN_DRESS && !(uarm && arm_blocks_upper_body(uarm->otyp))){
-			tmp += uarmu->spe;
+		if(armu && armu->otyp == PLAIN_DRESS && !(arm && arm_blocks_upper_body(arm->otyp))){
+			tmp += armu->spe;
 		}
-		if(uarm && (uarm->otyp == PLAIN_DRESS || uarm->otyp == NOBLE_S_DRESS)){
-			tmp += uarm->spe;
+		if(arm && (arm->otyp == PLAIN_DRESS || arm->otyp == NOBLE_S_DRESS)){
+			tmp += arm->spe;
 		}
 
-		if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
-			tmp += uwep->spe;
+		if(wep && wep->oartifact == ART_SODE_NO_SHIRAYUKI){
+			tmp += wep->spe;
 		}
 	}
-
 	if (x == A_STR) {
-		if(Race_if(PM_ORC)){
+		if(is_player && Race_if(PM_ORC)){
 			tmp += u.ulevel/3;
 			if(tmp > 18) tmp = STR19(tmp);
 		}
-		if ((uarmg && uarmg->otyp == GAUNTLETS_OF_POWER) || 
-			(uwep && uwep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
-			(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
-			(uwep && uwep->oartifact == ART_STORMBRINGER) ||
-			// (uswapwep && uswapwep->oartifact == ART_STORMBRINGER) ||
-			(uwep && uwep->oartifact == ART_OGRESMASHER) ||
-			(uswapwep && uswapwep->oartifact == ART_OGRESMASHER) ||
-			(uarms && uarms->oartifact == ART_GOLDEN_KNIGHT)
+		if ((armg && armg->otyp == GAUNTLETS_OF_POWER) || 
+			(wep && wep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
+			(wep && wep->oartifact == ART_PEN_OF_THE_VOID && wep->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
+			(wep && wep->oartifact == ART_STORMBRINGER) ||
+			(wep && wep->oartifact == ART_OGRESMASHER) ||
+			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||
+			(arms && arms->oartifact == ART_GOLDEN_KNIGHT)
 		) return(125);
-#ifdef WIN32_BUG
-		else return(x=((tmp >= 125) ? 125 : (tmp <= 3) ? 3 : tmp));
-#else
 		else return((schar)((tmp >= 125) ? 125 : (tmp <= 3) ? 3 : tmp));
-#endif
 	} else if (x == A_CON) {
 		if (
-			(uwep && uwep->oartifact == ART_OGRESMASHER) ||
-			(uswapwep && uswapwep->oartifact == ART_OGRESMASHER) ||
-			(uwep && uwep->oartifact == ART_STORMBRINGER) ||
-			// (uswapwep && uswapwep->oartifact == ART_STORMBRINGER) ||
-			(uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+			(wep && wep->oartifact == ART_OGRESMASHER) ||
+			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||
+			(wep && wep->oartifact == ART_STORMBRINGER) ||
+			(armg && armg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
 		) return(25);
-		if(Race_if(PM_ORC)){
+		if(is_player && Race_if(PM_ORC)){
 			tmp += u.ulevel/3;
 		}
 	} else if (x == A_DEX) {
-		if(mad_turn(MAD_HOST))
+		if(is_player && mad_turn(MAD_HOST))
 			return 3;
 		if (
-			(uarmg && uarmg->oartifact == ART_GODHANDS)
+			(armg && armg->oartifact == ART_GODHANDS)
 		) return(25);
 		if (
-			(uarmg && uarmg->oartifact == ART_PREMIUM_HEART)
-		) tmp += uarmg->spe;
-		if(Race_if(PM_ORC)){
+			(armg && armg->oartifact == ART_PREMIUM_HEART)
+		) tmp += armg->spe;
+		if(is_player && Race_if(PM_ORC)){
 			tmp += u.ulevel/3;
 		}
 	} else if (x == A_CHA) {
-		if(u.umadness&MAD_ROTTING && !BlockableClearThoughts){
+		if(is_player && u.umadness&MAD_ROTTING && !BlockableClearThoughts){
 			tmp -= (NightmareAware_Insanity)/5;
 		}
 	} else if (x == A_INT || x == A_WIS) {
-		/* yes, this may raise int/wis if player is sufficiently
+		/* yes, this may raise int/wis if player or monster is sufficiently
 		 * stupid.  there are lower levels of cognition than "dunce".
 		 */
-		if (uarmh && uarmh->otyp == DUNCE_CAP) return(6);
-		else if(u.sealsActive&SEAL_HUGINN_MUNINN) return 25;
+		if (armh && armh->otyp == DUNCE_CAP) return(6);
+		else if(is_player && u.sealsActive&SEAL_HUGINN_MUNINN) return 25;
 	}
-	
-#ifdef WIN32_BUG
-	return(x=((tmp >= 25) ? 25 : (tmp <= 3) ? 3 : tmp));
-#else
 	return((schar)((tmp >= 25) ? 25 : (tmp <= 3) ? 3 : tmp));
-#endif
+
+}
+
+schar
+acurr_player(x)
+int x;
+{
+	return acurr(x, (struct monst *) 0);
 }
 
 void

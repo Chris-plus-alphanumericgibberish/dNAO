@@ -1122,7 +1122,7 @@ resistances_enlightenment()
 	
 	if(Deadmagic && base_casting_stat() == A_INT){
 		int i;
-		update_alternate_spells();
+		update_externally_granted_spells();
 		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 			putstr(en_win, 0, "Magic is damaged.");
 			break;
@@ -1130,7 +1130,7 @@ resistances_enlightenment()
 	}
 	else if(Catapsi && base_casting_stat() == A_CHA){
 		int i;
-		update_alternate_spells();
+		update_externally_granted_spells();
 		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 			putstr(en_win, 0, "Your mind is full of static.");
 			break;
@@ -1138,7 +1138,7 @@ resistances_enlightenment()
 	}
 	else if(Misotheism && base_casting_stat() == A_WIS){
 		int i;
-		update_alternate_spells();
+		update_externally_granted_spells();
 		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 			putstr(en_win, 0, "Your mind is full of static.");
 			break;
@@ -1146,7 +1146,7 @@ resistances_enlightenment()
 	}
 	else if(Nullmagic){
 		int i;
-		update_alternate_spells();
+		update_externally_granted_spells();
 		for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++) {
 			putstr(en_win, 0, "Your magic is blocked.");
 			break;

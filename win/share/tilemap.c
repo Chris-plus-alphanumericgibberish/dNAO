@@ -320,7 +320,8 @@ init_tilemap()
 		tilemap[GLYPH_MON_OFF+i] = tilenum;
 		tilemap[GLYPH_PET_OFF+i] = tilenum;
 		tilemap[GLYPH_PEACE_OFF+i] = tilenum;
-		tilemap[GLYPH_ZOMBIE_OFF+i] = tilenum;
+		for (j=0; j<MAXTEMPLATE; j++)
+			tilemap[GLYPH_MTEMPLATE_OFF+i+j*NUMMONS] = tilenum;
 		tilemap[GLYPH_DETECT_OFF+i] = tilenum;
 		tilemap[GLYPH_RIDDEN_OFF+i] = tilenum;
 		tilemap[GLYPH_BODY_OFF+i] = corpsetile;

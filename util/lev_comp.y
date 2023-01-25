@@ -579,8 +579,6 @@ room_chance	: CHANCE_ID ':' INTEGER
 		   {
 			if (tmproom[nrooms]->chance)
 			    yyerror("This room already assigned a chance!");
-			else if (tmproom[nrooms]->rtype == OROOM)
-			    yyerror("Only typed rooms can have a chance!");
 			else if ($3 < 1 || $3 > 99)
 			    yyerror("The chance is supposed to be percentile.");
 			else

@@ -222,7 +222,8 @@ E void FDECL(give_madness, (struct monst *));
 E void FDECL(you_inflict_madness, (struct monst *));
 E void NDECL(calc_total_maxhp);
 E void NDECL(calc_total_maxen);
-E schar FDECL(acurr, (int));
+E schar FDECL(acurr, (int, struct monst *));
+E schar FDECL(acurr_player, (int));
 E schar FDECL(acurrstr, (int));
 E void FDECL(adjalign, (int));
 E void FDECL(setFightingForm, (int));
@@ -2108,6 +2109,7 @@ E void NDECL(free_autopickup_exceptions);
 E boolean FDECL(add_menu_coloring, (char *));
 #endif /* MENU_COLOR */
 E boolean FDECL(parse_monster_color, (char *));
+E boolean FDECL(parse_monster_template, (char *));
 E int FDECL(parse_codepoint, (char *));
 E boolean FDECL(parse_monster_symbol, (const char *));
 E boolean FDECL(parse_object_symbol, (const char *));
@@ -2765,6 +2767,7 @@ E int FDECL(spiriteffects, (int,BOOLEAN_P));
 E int FDECL(nudzirath_hit_pile, (struct obj *, struct obj *));
 E int FDECL(nudzirath_hit_mon, (struct monst *, struct obj *));
 E void FDECL(nudzirath_shatter, (struct obj *, int, int));
+E int FDECL(spellenergy, (int));
 E int FDECL(spelleffects, (int,boolean,int));
 E int FDECL(wordeffects, (int));
 E void FDECL(losespells, (int));
@@ -2779,7 +2782,7 @@ E void NDECL(dopseudonatural);
 E void NDECL(dodestruction);
 E void NDECL(domindblast_strong);
 E boolean NDECL(doreinforce_spell);
-E void NDECL(update_alternate_spells);
+E void NDECL(update_externally_granted_spells);
 E void NDECL(expel_summons);
 
 /* ### steal.c ### */

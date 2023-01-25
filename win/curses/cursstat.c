@@ -229,6 +229,7 @@ attr_t
 curses_color_attr(int nh_color, int bg_color)
 {
     int color = nh_color + 1;
+	int cnum = COLORS >= 16 ? 16 : 8;
     attr_t cattr = A_NORMAL;
 
     if (!nh_color) {
@@ -248,70 +249,9 @@ curses_color_attr(int nh_color, int bg_color)
 
     /* Can we do background colors? We can if we have more than
        16*7 colors (more than 8*7 for terminals with bold) */
-    if (COLOR_PAIRS > (COLORS >= 16 ? 16 : 8) * 7) {
-        /* NH3 has a rather overcomplicated way of defining
-           its colors past the first 16:
-           Pair    Foreground  Background
-           17      Black       Red
-           18      Black       Blue
-           19      Red         Red
-           20      Red         Blue
-           21      Green       Red
-           ...
-           (Foreground order: Black, Red, Green, Yellow, Blue,
-           Magenta, Cyan, Gray/White)
-
-           To work around these oddities, we define backgrounds
-           by the following pairs:
-
-           16 COLORS
-           49-64: Green
-           65-80: Yellow
-           81-96: Magenta
-           97-112: Cyan
-           113-128: Gray/White
-
-           8 COLORS
-           9-16: Green
-           33-40: Yellow
-           41-48: Magenta
-           49-56: Cyan
-           57-64: Gray/White */
-
-        if (bg_color == nh_color)
-            color = 1; /* Make foreground black if fg==bg */
-
-        if (bg_color == CLR_RED || bg_color == CLR_BLUE) {
-            /* already defined before extension */
-            color *= 2;
-            color += 16;
-            if (bg_color == CLR_RED)
-                color--;
-        } else {
-            boolean hicolor = FALSE;
-            if (COLORS >= 16)
-                hicolor = TRUE;
-
-            switch (bg_color) {
-            case CLR_GREEN:
-                color = (hicolor ? 48 : 8) + color;
-                break;
-            case CLR_BROWN:
-                color = (hicolor ? 64 : 32) + color;
-                break;
-            case CLR_MAGENTA:
-                color = (hicolor ? 80 : 40) + color;
-                break;
-            case CLR_CYAN:
-                color = (hicolor ? 96 : 48) + color;
-                break;
-            case CLR_GRAY:
-                color = (hicolor ? 112 : 56) + color;
-                break;
-            default:
-                break;
-            }
-        }
+    if (COLOR_PAIRS > cnum * 7) {
+		if (bg_color != NO_COLOR && bg_color != CLR_BLACK)
+			color += cnum * (1+bg_color);
     }
     cattr |= COLOR_PAIR(color);
 

@@ -11837,6 +11837,17 @@ int faction;
 	mtmp->mblinded = mtmp->mfrozen = mtmp->mlaughing = 0;
 	mtmp->mvar1 = mtmp->mvar2 = mtmp->mvar3 = 0;
 	mtmp->mtyp = mndx;
+	int i;
+	/* zero out attribute stats*/
+	for(i = 0; i < A_MAX; i++){
+		mtmp->acurr.a[i] = 0;
+		mtmp->aexe.a[i] = 0;
+		mtmp->abon.a[i] = 0;
+		mtmp->amax.a[i] = 0;
+		mtmp->atemp.a[i] = 0;
+		mtmp->atime.a[i] = 0;
+	}
+
 	/* might have been called saying to add an mx */
 	if (mmflags & MM_EDOG)
 		add_mx(mtmp, MX_EDOG);
@@ -11873,26 +11884,26 @@ int faction;
 	}
 	set_mon_data(mtmp, mndx);
 	
-	mtmp->mstr = d(3,6);
-	if(strongmonst(mtmp->data)) mtmp->mstr += 10;
-	mtmp->mdex = d(3,6);
-	if(is_elf(mtmp->data) && mtmp->mstr > mtmp->mdex){
-		short swap = mtmp->mstr;
-		mtmp->mstr = mtmp->mdex;
-		mtmp->mdex = swap;
+	ABASE_MON(A_STR, mtmp) = d(3,6);
+	if(strongmonst(mtmp->data)) ABASE_MON(A_STR, mtmp) += 10;
+	ABASE_MON(A_DEX, mtmp) = d(3,6);
+	if(is_elf(mtmp->data) && ABASE_MON(A_STR, mtmp) > ABASE_MON(A_DEX, mtmp)){
+		short swap = ABASE_MON(A_STR, mtmp);
+		ABASE_MON(A_STR, mtmp) = ABASE_MON(A_DEX, mtmp);
+		ABASE_MON(A_DEX, mtmp) = swap;
 	}
 	// mtmp->mcon = d(3,6);
 	//More tightly constrain to "average"
-	mtmp->mcon = 7 + d(1,6);
-	if(is_animal(mtmp->data)) mtmp->mint = 3;
-	else if(mindless_mon(mtmp)) mtmp->mint = 0;
-	else if(is_magical(mtmp->data)) mtmp->mint = 13+rnd(5);
-	else mtmp->mint = d(3,6);
-	mtmp->mwis = d(3,6);
-	mtmp->mcha = d(3,6);
+	ABASE_MON(A_CON, mtmp) = 7 + d(1,6);
+	if(is_animal(mtmp->data)) ABASE_MON(A_INT, mtmp) = 3;
+	else if(mindless_mon(mtmp)) ABASE_MON(A_INT, mtmp) = 0;
+	else if(is_magical(mtmp->data)) ABASE_MON(A_INT, mtmp) = 13+rnd(5);
+	else ABASE_MON(A_INT, mtmp) = d(3,6);
+	ABASE_MON(A_WIS, mtmp) = d(3,6);
+	ABASE_MON(A_CHA, mtmp) = d(3,6);
 	if(mtmp->data->mlet == S_NYMPH){
-		if(mtmp->mtyp == PM_DEMINYMPH) mtmp->mcha = (mtmp->mcha + 25)/2;
-		else mtmp->mcha = 25;
+		if(mtmp->mtyp == PM_DEMINYMPH) ABASE_MON(A_CHA, mtmp) = (ABASE_MON(A_CHA, mtmp) + 25)/2;
+		else ABASE_MON(A_CHA, mtmp) = 25;
 	}
 	
 	if (ptr->mtyp == urole.ldrnum)
