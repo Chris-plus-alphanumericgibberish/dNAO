@@ -1129,7 +1129,7 @@ long timeout;
 			goto free_bomb;
 			break;
 		}
-		grenade_explode(bomb, x, y, bomb->yours, silent ? 2 : 0);
+		grenade_explode(bomb, x, y, bomb->yours, silent ? 3 : 0);
 		return;
 	} /* Migrating grenades "blow up in midair" */
 

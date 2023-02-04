@@ -1505,6 +1505,9 @@ register struct monst *mtmp;
 			
 			if (hideablewidegaze(gazemon->data) && hiddenwidegaze(gazemon))
 				continue;
+
+			if(mon_resistance(mtmp, GAZE_RES))
+				continue;
 			
 			if (controlledwidegaze(gazemon->data)
 				&& !mm_aggression(gazemon, mtmp)

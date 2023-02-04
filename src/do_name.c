@@ -711,6 +711,15 @@ const char *name;
 		else if(obj->oartifact == ART_IDOL_OF_BOKRUG__THE_WATER_){
 			obj->obj_color = CLR_GREEN;
 		}
+		else if(obj->oartifact == ART_ROBE_OF_CLOSED_EYES){
+			obj->obj_color = CLR_BLUE;
+		}
+		else if(obj->oartifact == ART_RED_CORDS_OF_ILMATER){
+			obj->obj_color = CLR_RED;
+		}
+		else if(obj->oartifact == ART_CROWN_OF_THE_PERCIPIENT){
+			obj->obj_color = CLR_MAGENTA;
+		}
 		
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type

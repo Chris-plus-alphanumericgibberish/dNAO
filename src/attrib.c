@@ -1277,11 +1277,12 @@ int x;
 #endif
 	} else if (x == A_CON) {
 		if (
-			(uwep && uwep->oartifact == ART_OGRESMASHER) ||
-			(uswapwep && uswapwep->oartifact == ART_OGRESMASHER) ||
-			(uwep && uwep->oartifact == ART_STORMBRINGER) ||
-			// (uswapwep && uswapwep->oartifact == ART_STORMBRINGER) ||
-			(uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+			(uwep && uwep->oartifact == ART_OGRESMASHER)
+			|| (uswapwep && uswapwep->oartifact == ART_OGRESMASHER)
+			|| (uwep && uwep->oartifact == ART_STORMBRINGER)
+			// || (uswapwep && uswapwep->oartifact == ART_STORMBRINGER)
+			|| (uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+			|| (uarmg && uarmg->oartifact == ART_RED_CORDS_OF_ILMATER)
 		) return(25);
 		if(Race_if(PM_ORC)){
 			tmp += u.ulevel/3;

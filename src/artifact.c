@@ -6355,6 +6355,78 @@ boolean printmessages; /* print generic elemental damage messages */
 		else artinstance[otmp->oartifact].Esscoo_mid = mdef->m_id;
 	}
 	
+	if(otmp->oartifact == ART_RED_CORDS_OF_ILMATER && otmp->owornmask&W_ARMG && magr){
+		int wounds = *hpmax(magr) - *hp(magr);
+		wounds = min(wounds, *hp(mdef)/2);
+		
+		if(youagr)
+			healup(wounds, 0, FALSE, FALSE);
+		else
+			*hp(magr) += wounds;
+		*hp(mdef) -= wounds;
+		if(youagr || youdef)
+			flags.botl = 1;
+	}
+	
+	if(arti_struct && arti_struct->inv_prop == FALLING_STARS){
+		if(!Fire_res(mdef)){
+			if(u.uinsight >= 36){
+				*truedmgptr += d(6,6);
+			}
+			else if(u.uinsight >= 6){
+				*truedmgptr += d(u.uinsight/6,6);
+			}
+		}
+		if (!UseInvFire_res(mdef) && u.uinsight >= 6){
+			if (rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			if (rn2(3) && u.uinsight >= 12) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			if (rn2(3) && u.uinsight >= 18) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+		}
+		if(NightmareAware_Insanity >= 4){
+			int n = ClearThoughts ? 1 : 2;
+			if(!Acid_res(mdef)){
+				if(NightmareAware_Insanity >= 48)
+					*truedmgptr += d(n,12);
+				else
+					*truedmgptr += d(n,NightmareAware_Insanity/4);
+			}
+			if(!UseInvAcid_res(mdef)){
+				if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
+		if(u.uinsight >= 42 && u.uinsight > rn2(73)){
+			int x, y, n, tries = 0;
+			coord cc;
+			do{
+				x = rn2(COLNO-2)+1;
+				y = rn2(ROWNO-2)+1;
+				cc.x=x;cc.y=y;
+			} while (!(isok(x,y) && ACCESSIBLE(levl[x][y].typ) && (!magr || (distmin(x(magr), y(magr), x, y) > 2))) && tries++ < 1000);
+
+			if(u.uinsight >= 72)
+				n = 6;
+			else
+				n = (u.uinsight - 36)/6;
+			n=rnd(n)+1;
+			explode(x, y,
+				AD_PHYS, 0,
+				d(6,6),
+				EXPL_MUDDY, 1);
+			while(n--) {
+				explode_sound(x, y,
+					AD_FIRE, 0,
+					d(6,6),
+					EXPL_FIERY, 1, 4);
+				
+				x = cc.x+rnd(3)-1; y = cc.y+rnd(3)-1;
+				if (!isok(x,y)) {
+					/* Spell is reflected back to center */
+					x = cc.x;
+					y = cc.y;
+				}
+			}
+		}
+	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
@@ -6434,8 +6506,10 @@ boolean printmessages; /* print generic elemental damage messages */
 			// }
 		}
 	}
-	if (arti_attack_prop(otmp, ARTA_DRAIN) ||
-		(dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON))) {
+	if (arti_attack_prop(otmp, ARTA_DRAIN)
+		|| (otmp->oartifact == ART_ESSCOOAHLIPBOOURRR && !Drain_res(mdef))
+		|| (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON))
+	){
 		int dlife;
 		int leveldrain = 1;
 		/* message */
@@ -7571,17 +7645,26 @@ arti_invoke(obj)
 	case FALLING_STARS:{
 		int starfall = rnd(u.ulevel/10+1), x, y, n;
 		int tries = 0;
+		boolean getLoc = TRUE;
 		coord cc;
+		if(throweffect()){
+			x=u.dx;y=u.dy;
+			getLoc = FALSE;
+		}
 		verbalize("Even Stars Fall");
 		for (; starfall > 0; starfall--){
-			x = rn2(COLNO-2)+1;
-			y = rn2(ROWNO-2)+1;
-			if(!isok(x,y) || !ACCESSIBLE(levl[x][y].typ)){
-				if(tries++ < 1000){
-					starfall++;
-					continue;
+			if(getLoc){
+				x = rn2(COLNO-2)+1;
+				y = rn2(ROWNO-2)+1;
+				if(!isok(x,y) || !ACCESSIBLE(levl[x][y].typ) || distmin(u.ux, u.uy, x, y) < 3){
+					if(tries++ < 1000){
+						starfall++;
+						continue;
+					}
 				}
 			}
+			else getLoc = TRUE;
+
 			cc.x=x;cc.y=y;
 			n=rnd(8)+1;
 			explode(x, y,
@@ -7589,10 +7672,10 @@ arti_invoke(obj)
 				d(6,6),
 				EXPL_MUDDY, 1);
 			while(n--) {
-				explode(x, y,
+				explode_sound(x, y,
 					AD_FIRE, 0,
 					d(6,6),
-					EXPL_FIERY, 1);
+					EXPL_FIERY, 1, 4);
 				
 				x = cc.x+rnd(3)-1; y = cc.y+rnd(3)-1;
 				if (!isok(x,y)) {
@@ -11825,6 +11908,8 @@ dosymbiotic_equip()
 		doliving(&youmonst, uarms);
 	if(uarm && ((check_oprop(uarm, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarm) ))
 		doliving(&youmonst, uarm);
+	if(uarmh && ((check_oprop(uarm, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarmh) ))
+		doliving(&youmonst, uarmh);
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
@@ -11847,6 +11932,9 @@ dosymbiotic_equip()
 		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
 			doliving(mtmp, obj);
 		obj = which_armor(mtmp, W_ARM);
+		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
+			doliving(mtmp, obj);
+		obj = which_armor(mtmp, W_ARMH);
 		if(obj && ((check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(obj) ))
 			doliving(mtmp, obj);
 	}

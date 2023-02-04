@@ -862,6 +862,7 @@ carrying_readable_weapon()
 				otmp->oartifact == ART_PEN_OF_THE_VOID ||
 				otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD ||
 				otmp->oartifact == ART_ESSCOOAHLIPBOOURRR ||
+				otmp->oartifact == ART_RED_CORDS_OF_ILMATER ||
 				otmp->oartifact == ART_STAFF_OF_NECROMANCY
 			))
 		)
@@ -1257,6 +1258,8 @@ register const char *let,*word;
 		      otyp != FRAG_GRENADE &&
 		      otyp != GAS_GRENADE &&
 		      otyp != STICK_OF_DYNAMITE &&
+			  otmp->oartifact != ART_STAFF_OF_AESCULAPIUS &&
+			  otmp->oartifact != ART_ESSCOOAHLIPBOOURRR &&
 //endif
 		      !is_axe(otmp) && !is_pole(otmp) && 
 			  otyp != BULLWHIP && otyp != VIPERWHIP && otyp != FORCE_WHIP &&
@@ -1288,8 +1291,7 @@ register const char *let,*word;
 		      otyp != DROVEN_CLOAK &&
 			  otyp != GNOMISH_POINTY_HAT &&
 			  otmp->oartifact != ART_AEGIS &&
-			  otmp->oartifact != ART_STAFF_OF_AESCULAPIUS &&
-			  otmp->oartifact != ART_ESSCOOAHLIPBOOURRR
+			  otmp->oartifact != ART_RED_CORDS_OF_ILMATER
 			  ) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)
 				&& otyp != CATAPSI_VORTEX && otyp != ANTIMAGIC_RIFT

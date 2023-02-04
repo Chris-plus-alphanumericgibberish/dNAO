@@ -1424,17 +1424,26 @@ update_alternate_spells()
 	int i;
 
 	// for artifacts
-	if(uarmh && uarmh->oartifact == ART_STORMHELM){
-		for (i = 0; i < MAXSPELL; i++) {
-			if (spellid(i) == SPE_LIGHTNING_STORM) {
-				if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
-				break;
+	if(uarmh){
+		if(uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT){
+			for (i = 0; i < MAXSPELL; i++) {
+				if (spellid(i) != NO_SPELL) {
+					if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+				}
 			}
-			if (spellid(i) == NO_SPELL)  {
-				spl_book[i].sp_id = SPE_LIGHTNING_STORM;
-				spl_book[i].sp_lev = objects[SPE_LIGHTNING_STORM].oc_level;
-				spl_book[i].sp_know = 1;
-				break;
+		}
+		else if(uarmh->oartifact == ART_STORMHELM){
+			for (i = 0; i < MAXSPELL; i++) {
+				if (spellid(i) == SPE_LIGHTNING_STORM) {
+					if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+					break;
+				}
+				if (spellid(i) == NO_SPELL)  {
+					spl_book[i].sp_id = SPE_LIGHTNING_STORM;
+					spl_book[i].sp_lev = objects[SPE_LIGHTNING_STORM].oc_level;
+					spl_book[i].sp_know = 1;
+					break;
+				}
 			}
 		}
 	}
@@ -4564,6 +4573,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			spell_backfire(spell);
 			return MOVE_INSTANT;
 		} else if (
+			!(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT) && 
 			!(spellid(spell) == SPE_LIGHTNING_STORM && uarmh && uarmh->oartifact == ART_STORMHELM) &&
 			!(spellid(spell) == SPE_FIREBALL && uarmh && check_oprop(uarmh, OPROP_BLAST)) &&
 			!((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 

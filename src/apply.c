@@ -34,6 +34,7 @@ STATIC_DCL void FDECL(use_candle, (struct obj **));
 STATIC_DCL void FDECL(use_lamp, (struct obj *));
 STATIC_DCL int FDECL(swap_aegis, (struct obj *));
 STATIC_DCL int FDECL(aesculapius_poke, (struct obj *));
+STATIC_DCL int FDECL(ilmater_touch, (struct obj *));
 STATIC_DCL int FDECL(use_rakuyo, (struct obj *));
 STATIC_DCL int FDECL(use_mercy_blade, (struct obj *));
 STATIC_DCL int FDECL(use_force_blade, (struct obj *));
@@ -1559,6 +1560,80 @@ struct obj *obj;
 }
 
 STATIC_OVL int
+ilmater_touch(obj)
+struct obj *obj;
+{
+	struct monst *mon;
+	// Allow the cords to be used from inventory, like a unicorn horn or a stethoscope.
+	if(!getdir((char *)0)) {
+		return MOVE_CANCELLED;
+	}
+	if(u.dz > 0){
+		if(u.usteed)
+			mon = u.usteed;
+		else if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			You("doubt that will have any further effect.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(u.dz < 0){
+		if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			You("don't see anything up there to touch with your cords.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(!u.dx && !u.dy){
+		if(*hp(&youmonst) >= *hpmax(&youmonst))
+			pline("Nothing happens.");
+		else
+			You("transfer your wounds to yourself.");
+		return MOVE_STANDARD;
+	}
+	else if(!isok(u.ux + u.dx, u.uy + u.dy)){
+		You("don't touch anything.");
+		return MOVE_STANDARD;
+	}
+	else {
+		mon = m_at(u.ux + u.dx, u.uy + u.dy);
+	}
+	if(!mon){
+		You("don't touch anything.");
+		return MOVE_STANDARD;
+	}
+	if(mon->mpeaceful){
+		if(*hp(mon) >= *hpmax(mon))
+			pline("Nothing happens.");
+		else {
+			You("transfer %s wounds to yourself.", s_suffix(mon_nam(mon)));
+			int wounds = *hpmax(mon) - *hp(mon);
+			wounds = min(wounds, *hp(&youmonst)/2);
+			*hp(mon) += wounds;
+			*hp(&youmonst) -= wounds;
+			flags.botl = 1;
+		}
+		return MOVE_STANDARD;
+	}
+	else {
+		if(*hp(&youmonst) >= *hpmax(&youmonst))
+			pline("Nothing happens.");
+		else {
+			You("transfer your wounds to %s.", mon_nam(mon));
+			int wounds = *hpmax(&youmonst) - *hp(&youmonst);
+			wounds = min(wounds, *hp(mon)/2);
+			*hp(&youmonst) += wounds;
+			*hp(mon) -= wounds;
+			flags.botl = 1;
+		}
+		return MOVE_STANDARD;
+	}
+	return MOVE_STANDARD;
+}
+
+STATIC_OVL int
 aesculapius_poke(obj)
 struct obj *obj;
 {
@@ -1597,7 +1672,7 @@ struct obj *obj;
 	}
 	else if(!isok(u.ux + u.dx, u.uy + u.dy)){
 		if(shackles)
-			pline("Your broken shackles touch it!");
+			pline("Your broken shackles don't touch anything.");
 		else
 			pline("Your staff doesn't touch anything.");
 		return MOVE_STANDARD;
@@ -1607,7 +1682,7 @@ struct obj *obj;
 	}
 	if(!mon){
 		if(shackles)
-			pline("Your broken shackles touch it!");
+			pline("Your broken shackles don't touch anything!");
 		else
 			pline("Your staff doesn't touch anything.");
 		return MOVE_STANDARD;
@@ -7878,6 +7953,7 @@ doapply()
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
 	else if(obj->oartifact == ART_STAFF_OF_AESCULAPIUS) res = aesculapius_poke(obj);
 	else if(obj->oartifact == ART_ESSCOOAHLIPBOOURRR) res = aesculapius_poke(obj);
+	else if(obj->oartifact == ART_RED_CORDS_OF_ILMATER) res = ilmater_touch(obj);
 	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
 		return use_rakuyo(obj);
 	}

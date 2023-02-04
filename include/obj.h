@@ -501,6 +501,7 @@ struct obj {
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
+			 otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS || \
 			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1&SEAL_OSE) ||\
 			 otmp->obj_material == MERCURIAL || \
 			 is_mercy_blade(otmp) || \

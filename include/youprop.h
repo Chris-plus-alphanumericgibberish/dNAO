@@ -212,6 +212,10 @@
 		/* ...the Eyes operate even when you really are blind
 		    or don't have any eyes */
 
+#define HGaze_immune		u.uprops[GAZE_RES].intrinsic
+#define EGaze_immune		u.uprops[GAZE_RES].extrinsic
+#define Gaze_immune			(HGaze_immune || EGaze_immune)
+
 #define Sick			u.uprops[SICK].intrinsic
 #define Stoned			u.uprops[STONED].intrinsic
 #define Golded			u.uprops[GOLDED].intrinsic

@@ -943,7 +943,9 @@ E long FDECL(rndexp, (BOOLEAN_P));
 /* ### explode.c ### */
 
 E void FDECL(explode, (int,int,int,int,int,int,int));
+E void FDECL(explode_sound, (int,int,int,int,int,int,int,int));
 E void FDECL(explode_pa, (int,int,int,int,int,int,int,struct permonst *));
+E void FDECL(explode_full, (int,int,int,int,int,int,int,struct permonst *,int));
 E void FDECL(explode_yours, (int,int,int,int,int,int,int,boolean));
 E void FDECL(splash, (int,int,int,int,int,int,int,int));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *, long *, struct monst *));

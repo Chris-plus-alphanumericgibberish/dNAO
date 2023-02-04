@@ -975,6 +975,8 @@ GLOVES(("archaic gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		1, 0,  0, 2, 25, 10, 8, 3, 0, COPPER, HI_COPPER),
 GLOVES(("long gloves"),
 		1, 0,  0, 1,  5,  8, 10, 2, 1, CLOTH, CLR_WHITE),
+GLOVES(("hand wraps"),
+		1, 0,  0, 1,  1,  1, 10, 0, 1, CLOTH, CLR_WHITE),
 GLOVES(("harmonium gauntlets", "red-lacquered hooked gauntlets", "hooked gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 2, 40,  1, 9, 4, 0, METAL, CLR_RED),
 GLOVES(("high-elven gauntlets", "runed gauntlets"), /*Needs encyc entry*//*Needs tile*/

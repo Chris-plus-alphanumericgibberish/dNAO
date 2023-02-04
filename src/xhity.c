@@ -10905,7 +10905,7 @@ boolean
 umetgaze(mtmp)
 struct monst *mtmp;
 {
-	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && multi>=0);
+	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !Gaze_immune && multi>=0);
 }
 
 
@@ -11001,7 +11001,7 @@ int vis;
 			(!(youagr ? Invis : magr->minvis) || (youdef ? See_invisible(x(magr), y(magr)) : mon_resistance(mdef, SEE_INVIS))) &&
 			(youdef ? canseemon(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
 			(!(youdef ? Sleeping : mdef->msleeping)) &&
-			(!(youdef && ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD)) /* wearing the Eyes, nearly anything is safe to see */
+			(!Gaze_res(mdef)) /* wearing the Eyes, nearly anything is safe to see */
 		))
 		){
 		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
@@ -11014,7 +11014,7 @@ int vis;
 		/* gaze fails because magr is cancelled */
 		return MM_MISS;
 	}
-		
+
 	/* Do the appropriate stuff -- function often returns in this switch statement */
 	switch (adtyp)
 	{
@@ -11482,7 +11482,7 @@ int vis;
 				(!(youagr ? Invis : magr->minvis) || (youdef ? See_invisible(x(magr), y(magr)) : mon_resistance(mdef, SEE_INVIS))) &&
 				(youdef ? canseemon(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
 				(!(youdef ? Sleeping : mdef->msleeping)) &&
-				(!(youdef && ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD)) /* wearing the Eyes, nearly anything is safe to see */
+				(!Gaze_res(mdef)) /* wearing the Eyes, nearly anything is safe to see */
 				))
 				return MM_MISS;
 
