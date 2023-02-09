@@ -5259,6 +5259,10 @@ boolean invoked;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	
+	/*Must have some insight or all targets will be skipped.*/
+	if(u.uinsight < 1)
+		return;
+	
 	for(j=8;j>=1;j--){
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
@@ -5273,14 +5277,17 @@ boolean invoked;
 		if(DEADMONSTER(mdef))
 			continue;
 		
-		if(youagr && (mdef->mpeaceful || !rn2(4)))
+		if(youagr && mdef->mpeaceful)
 			continue;
-		if(youdef && (magr->mpeaceful || !rn2(4)))
+		if(youdef && magr->mpeaceful)
 			continue;
-		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
+		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
 			continue;
 
 		if(!youdef && nonthreat(mdef))
+			continue;
+		
+		if(rn2(101) >= u.uinsight)
 			continue;
 		
 		if(youdef && u.uen > 0){

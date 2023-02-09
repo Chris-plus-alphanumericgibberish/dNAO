@@ -1206,6 +1206,7 @@ register struct obj *obj;
 		costly_cancel(obj);
 		if (obj->otyp == SCR_GOLD_SCROLL_OF_LAW) break;	//no cancelling these
 		obj->otyp = SCR_BLANK_PAPER;
+		remove_oprop(obj, OPROP_TACTB);
 		obj->spe = 0;
 		obj->oward = 0;
 		break;
@@ -1217,6 +1218,7 @@ register struct obj *obj;
 		    costly_cancel(obj);
 		    obj->otyp = SPE_BLANK_PAPER;
 			obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+			remove_oprop(obj, OPROP_TACTB);
 			obj->spe = 0;
 			obj->oward = 0;
 		}
@@ -1649,6 +1651,7 @@ struct obj * obj;
 	/* too-worn-out spellbooks turn blank */
 	if (obj->oclass == SPBOOK_CLASS && obj->spestudied > MAX_SPELL_STUDY) {
 		new_otyp = SPE_BLANK_PAPER;
+		remove_oprop(obj, OPROP_TACTB);
 	}
 
 	/* create the new object, otmp, of the new type (or random type) */

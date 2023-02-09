@@ -749,6 +749,7 @@ boolean fade_scrolls;
 			pline_The("%s.", aobjnam(target, "fade"));
 		}
 		target->otyp = SCR_BLANK_PAPER;
+		remove_oprop(target, OPROP_TACTB);
 		target->spe = 0;
 	    }
 	} else if (target->oerodeproof ||

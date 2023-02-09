@@ -445,7 +445,7 @@ const char *drop_fmt, *drop_arg, *hold_msg;
 {
 	char buf[BUFSZ];
 
-	if (!Blind) obj->dknown = 1;	/* maximize mergibility */
+	if (!Blind || (obj->oclass == SCROLL_CLASS && check_oprop(obj, OPROP_TACTB))) obj->dknown = 1;	/* maximize mergibility */
 	if (obj->oartifact) {
 	    /* place_object may change these */
 	    boolean crysknife = (obj->otyp == CRYSKNIFE);
@@ -1243,6 +1243,9 @@ register const char *let,*word;
 		    otmp->dknown && objects[otyp].oc_name_known)
 		|| (!strncmp(word, "replace with", 12) &&
 		    otmp->otyp != HELLFIRE_COMPONENT)
+		|| (!strncmp(word, "replace with", 12)
+		    && otmp->otyp != HELLFIRE_COMPONENT
+			&& otmp->otyp != CLOCKWORK_COMPONENT)
 		|| (!strncmp(word, "salve", 5) && !salve_target(otmp))
 		|| ((!strcmp(word, "use or apply") ||
 			!strcmp(word, "untrap with")) &&
@@ -1287,6 +1290,7 @@ register const char *let,*word;
 		     /* MRKR: mining helmets */
 		     (otmp->oclass == ARMOR_CLASS &&
 		      otyp != LANTERN_PLATE_MAIL &&
+		      otyp != EILISTRAN_ARMOR &&
 		      otyp != DWARVISH_HELM &&
 		      otyp != DROVEN_CLOAK &&
 			  otyp != GNOMISH_POINTY_HAT &&
@@ -2231,7 +2235,7 @@ struct obj *obj;
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this candle", MENU_UNSELECTED);
 	else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == LANTERN)
+			obj->otyp == MAGIC_LAMP || obj->otyp == LANTERN_PLATE_MAIL)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this light source", MENU_UNSELECTED);
 	else if (obj->otyp == POT_OIL && objects[obj->otyp].oc_name_known)
@@ -2292,6 +2296,9 @@ struct obj *obj;
 	else if (obj->otyp == DROVEN_CLOAK)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Spin out or sweep up a web", MENU_UNSELECTED);
+	else if (obj->otyp == EILISTRAN_ARMOR)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Recharge armor or switch arms on/off", MENU_UNSELECTED);
 	else if (obj->oartifact == ART_AEGIS)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Change Aegis' form", MENU_UNSELECTED);

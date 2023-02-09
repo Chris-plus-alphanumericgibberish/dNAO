@@ -325,6 +325,7 @@ int tary;
 		struck = 0,	/* hit at least once */
 		marinum = 0,/* number of AT_MARI weapons used */
 		subout = 0,	/* remembers what attack substitutions have been made for [magr]'s attack chain */
+		mariarm = 0,/* remembers what attack substitutions had been [magr]'s attack chain, to charge for eilistran armor */
 		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
 	int attacklimit = 0;
 	int attacksmade = 0;
@@ -686,6 +687,13 @@ int tary;
 								wcount++;
 							}
 						}
+					}
+				}
+				if((mariarm&(SUBOUT_MARIARM1|SUBOUT_MARIARM2)) != (subout&(SUBOUT_MARIARM1|SUBOUT_MARIARM2))){
+					struct obj *armor = (youagr ? uarm : which_armor(magr, W_ARM));;
+					mariarm = subout;
+					if(armor && armor->otyp == EILISTRAN_ARMOR){
+						armor->ovar1_eilistran_charges--;
 					}
 				}
 			}
@@ -1636,18 +1644,6 @@ int * indexnum;					/* index number to use, incremented HERE (if actually pullin
 struct attack * prev_and_buf;	/* double-duty pointer: 1st, is the previous attack; 2nd, is a pointer to allocated memory */
 boolean by_the_book;			/* if true, gives the "standard" attacks for [magr]. Useful for the pokedex. */
 int * subout;					/* records what attacks have been subbed out */
-#define SUBOUT_SPELLS	0x0001	/* Spellcasting attack instead (Five Fiends of Chaos1 and Gae) */
-#define SUBOUT_BAEL1	0x0002	/* Bael's Sword Archon attack chain */
-#define SUBOUT_BAEL2	0x0004	/* Bael's marilith-hands attack chain */
-#define SUBOUT_SPIRITS	0x0008	/* Player's bound spirits */
-#define SUBOUT_BARB1	0x0010	/* 1st bit of barbarian bonus attacks */
-#define SUBOUT_BARB2	0x0020	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
-#define SUBOUT_MAINWEPB	0x0040	/* Bonus attack caused by the wielded *mainhand* weapon */
-#define SUBOUT_XWEP		0x0080	/* Made an offhand attack */
-#define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
-#define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
-#define SUBOUT_SCORPION	0x0400	/* Scorpion Carapace's sting */
-#define SUBOUT_LOLTH1	0x0800	/* Lolth's 8 arm attack chain */
 int * tohitmod;					/* some attacks are made with decreased accuracy */
 {
 	struct attack * attk;
@@ -1736,6 +1732,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/*Some attacks have level requirements*/
 	if(attk->lev_req > mlev(magr)){
+		GETNEXT
+	}
+	/*Some attacks have insight requirements*/
+	if(attk->ins_req > u.uinsight){
 		GETNEXT
 	}
 	/* khaamnun tanninim switch to sucking memories after dragging target in close */
@@ -1930,6 +1930,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/* auto-rapier-slashers skip their floating rapier attacks in main combat sequence */
 	if(!by_the_book && attk->aatyp == AT_ESPR && is_star_blades_mon(magr)) {
+		GETNEXT
+	}
+	if(attk->aatyp == AT_ESPR && magr->mtyp == PM_PORO_AULON && magr->mhp >= magr->mhpmax/2) {
 		GETNEXT
 	}
 	/* the Five Fiends spellcasting */
@@ -2209,6 +2212,30 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 
+	/* Some armor can insert attacks */
+	if ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
+		&& (is_null_attk(&prev_attack) || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP || prev_attack.aatyp == AT_MARI)
+		&& ((*subout&(SUBOUT_MARIARM1|SUBOUT_MARIARM2)) != (SUBOUT_MARIARM1|SUBOUT_MARIARM2))
+	){
+		struct obj * otmp = (youagr ? uarm : which_armor(magr, W_ARM));
+		
+		if(!otmp);//Nothing
+		else if (otmp->otyp == EILISTRAN_ARMOR 
+			&& otmp->altmode == EIL_MODE_ON
+			&& otmp->ovar1_eilistran_charges > 0
+		){
+			attk->aatyp = AT_MARI;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 2;
+			attk->damd = 8;
+			fromlist = FALSE;
+			if(*subout&SUBOUT_MARIARM1)
+				*subout |= SUBOUT_MARIARM2;
+			else
+				*subout |= SUBOUT_MARIARM1;
+		}
+	}
+
 	/*Weapon user, not as good without*/
 	if (pa->mtyp == PM_DAO_LAO_GUI_MONK && attk->aatyp == AT_WEAP && (
 		 (youagr && !uwep) ||
@@ -2420,16 +2447,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	return attk;
 }
 #undef GETNEXT
-#undef SUBOUT_SPELLS
-#undef SUBOUT_BAEL1
-#undef SUBOUT_BAEL2
-#undef SUBOUT_DEMO1
-#undef SUBOUT_DEMO2
-#undef SUBOUT_SPIRITS
-#undef SUBOUT_BARB1
-#undef SUBOUT_BARB2
-#undef SUBOUT_MAINWEPB
-#undef SUBOUT_XWEP
 
 /* noises()
  * prints noises from mvm combat
@@ -4854,7 +4871,7 @@ boolean ranged;
 					pline("%s is afflicted by disease!",
 						Monnam(mdef));
 				}
-				if(!youagr && ((magr->mspores && !rn2(20)) || has_template(magr, SPORE_ZOMBIE) || has_template(magr, CORDYCEPS)))
+				if(!youagr && mdef->mhp < mdef->mhpmax/2 && ((magr->mspores && !rn2(20)) || has_template(magr, SPORE_ZOMBIE) || has_template(magr, CORDYCEPS)))
 					mdef->mspores = TRUE;
 			}
 		}
@@ -9218,6 +9235,9 @@ int vis;
 					monid = PM_GOLDEN_HEART;
 				else
 					monid = PM_ID_JUGGERNAUT;
+			}
+			else if (magr->mtyp == PM_PORO_AULON){
+				monid = PM_FABERGE_SPHERE;
 			}
 			else {
 				if (mlev(mdef) > 10 && !rn2(10))

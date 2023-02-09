@@ -487,6 +487,8 @@ unsigned int type;
 	   break;
        case PM_SURYA_DEVA:
            return (rn2(2) ? MASS_CURE_CLOSE : FIRE_PILLAR);
+       case PM_IKSH_NA_DEVA:
+           return MOTHER_S_GAZE;
 	
        case PM_GRAND_MASTER:
        case PM_MASTER_KAEN:
@@ -1061,6 +1063,30 @@ unsigned int type;
 			case 9:
 				return GEYSER;
 			break;
+		}
+	   break;
+	case PM_IKSH_NA_DEVA:
+		switch(clrc_spell_power/2){
+			case 14:
+				return RECOVER;
+			case 16:
+			case 13:
+				return MASS_CURE_FAR;
+			case 12:
+				return PARALYZE;
+			case 11:
+				return SLEEP;
+			case 10:
+				return DESTRY_ARMR;
+			case 9:
+				return DESTRY_WEPN;
+			case 15:
+			case 8:
+			case 7:
+			case 6:
+				return MASS_CURE_CLOSE;
+			default:
+				return CURE_SELF;
 		}
 	   break;
 	case PM_GAE_ELADRIN:
@@ -1919,6 +1945,8 @@ const char * spellname[] =
 	"RAIN",
 	"BLOOD_RAIN",
 	"STEAM_GEYSER",
+	//90
+	"MOTHER_S_GAZE",
 };
 
 
@@ -2955,6 +2983,43 @@ int tary;
 				You("are blinded by the flash!");
 				make_blinded((long)rnd(100), FALSE);
 				if (!Blind) Your1(vision_clears);
+			}
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case MOTHER_S_GAZE:
+		dmg = 0;
+		/* needs direct target */
+		if (!foundem) {
+			impossible("mother's gaze with no mdef?");
+			return MM_MISS;
+		}
+		else
+		{
+			magr->movement += NORMAL_SPEED;
+			if(youagr)
+				pline("The wild, staring eyes that cover your extra hand-appendages focus on %s.", mon_nam(mdef));
+			else if(youdef)
+				pline("The wild, staring eyes that cover %s extra hand-appendages focus on you.", s_suffix(mon_nam(magr)));
+			else if(canseemon(magr))
+				pline("The wild, staring eyes that cover %s extra hand-appendages focus on %s.", s_suffix(mon_nam(magr)), mon_nam(mdef));
+			if(distmin(x(magr), y(magr), x(mdef), y(mdef)) <= mlev(magr)/10+1 && !resist(mdef, '\0', 0, NOTELL)){
+				if(!youdef){
+					mdef->mcanmove = 0;
+					mdef->mfrozen = min_ints(7, max(mdef->mfrozen, u.uinsight/11));
+				}
+				else {
+					mdef->movement -= u.uinsight/11;
+				}
+			}
+			if(!youdef && cansee(x(mdef),y(mdef)))
+				pline("%s is struck by a bolt of lightning.", Monnam(mdef));
+			else if(youdef)
+				You("are struck  by a bolt of lightning.");
+			if (Shock_res(mdef)) {
+				shieldeff(mdef->mx, mdef->my);
+			} else {
+				dmg = d(min(10, u.uinsight/11*2),6);
 			}
 		}
 		return xdamagey(magr, mdef, attk, dmg);
@@ -5784,6 +5849,7 @@ int spellnum;
 	case ARROW_RAIN:
 	case DISINTEGRATION:
 	case LIGHTNING:
+	case MOTHER_S_GAZE:
 	case FIRE_PILLAR:
 	case GEYSER:
 	case STEAM_GEYSER:

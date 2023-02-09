@@ -622,7 +622,7 @@ int *fail_reason;
 	}
 	
 	if(mon && cause == ANIMATE_SPELL 
-		&& ((In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON))
+		&& ((In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON || mon->mtyp == PM_IKSH_NA_DEVA))
 			||  rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)
 		) && !(is_animal(mon->data) || mindless_mon(mon))
 	){
@@ -633,7 +633,7 @@ int *fail_reason;
 		if(canspotmon(mon) && mon->mtame)
 			grateful = TRUE;
 
-		if(In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON)){
+		if(In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON || mon->mtyp == PM_IKSH_NA_DEVA)){
 			set_template(mon, PLAGUE_TEMPLATE);
 			if(get_mx(mon, MX_EDOG))
 				EDOG(mon)->loyal = TRUE;
@@ -3425,6 +3425,7 @@ struct monst *owner;
 			else {
 				obj->otyp = SPE_BLANK_PAPER;
 				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+				remove_oprop(obj, OPROP_TACTB);
 			}
 			break;
 		    case POTION_CLASS:

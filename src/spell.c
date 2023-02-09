@@ -468,6 +468,7 @@ learn()
 				    book->otyp = booktype = SPE_BLANK_PAPER;
 					book->ovar1 = 0;
 					book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+					remove_oprop(book, OPROP_TACTB);
 				break;
 				case 4:
 					pline("...these metallurgical techniques are 200 years out of date.");
@@ -593,6 +594,7 @@ learn()
 		pline("This spellbook is too faint to be read any more.");
 		book->otyp = booktype = SPE_BLANK_PAPER;
 		book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+		remove_oprop(book, OPROP_TACTB);
 	}
 	
 	if (costly) check_unpaid(book);
@@ -1428,7 +1430,8 @@ update_alternate_spells()
 		if(uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT){
 			for (i = 0; i < MAXSPELL; i++) {
 				if (spellid(i) != NO_SPELL) {
-					if (spl_book[i].sp_know < 1) spl_book[i].sp_know = 1;
+					if (spl_book[i].sp_know < 1 && spl_book[i].sp_lev <= (u.uinsight*2)/11+1)
+						spl_book[i].sp_know = 1;
 				}
 			}
 		}
@@ -3654,6 +3657,7 @@ spiriteffects(power, atme)
 					// pline("The magical energy within %s is exhausted.",the(xname(uwep)));
 					// uwep->otyp = SPE_BLANK_PAPER;
 					// uwep->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+					// remove_oprop(uwep, OPROP_TACTB);
 				// }
 			} else{
 				You("need to be holding a spellbook.");
@@ -4573,7 +4577,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 			spell_backfire(spell);
 			return MOVE_INSTANT;
 		} else if (
-			!(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT) && 
+			!(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT && spellev(spell) <= (u.uinsight*2)/11+1) && 
 			!(spellid(spell) == SPE_LIGHTNING_STORM && uarmh && uarmh->oartifact == ART_STORMHELM) &&
 			!(spellid(spell) == SPE_FIREBALL && uarmh && check_oprop(uarmh, OPROP_BLAST)) &&
 			!((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 

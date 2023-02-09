@@ -4528,7 +4528,7 @@ int f1,f2;
 	/*Ruling houses*/
 	if(f1 >= FIRST_HOUSE && f1 <= LAST_HOUSE){
 		/*with elite towers, lolth, and pen'a*/
-		return (f2 >= FIRST_TOWER && f2 <= LAST_TOWER) || f2 == LOLTH_SYMBOL || f2 == PEN_A_SYMBOL || f2 == GHAUNADAUR_SYMBOL;
+		return (f2 >= FIRST_TOWER && f2 <= LAST_TOWER) || f2 == LOLTH_SYMBOL || (f2 == PEN_A_SYMBOL && urole.neminum != PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) || f2 == GHAUNADAUR_SYMBOL;
 	} 
 	/*Fallen houses*/
 	else if(f1 >= FIRST_FALLEN_HOUSE && f1 <= LAST_FALLEN_HOUSE){
@@ -4538,7 +4538,7 @@ int f1,f2;
 	/*Elite towers*/
 	else if(f1 >= FIRST_TOWER && f1 <= LAST_TOWER){
 		/*with all goddesses (except eilistraee) and tower xaxox*/
-		return (f2 >= FIRST_GODDESS && f2 <= LAST_GODDESS) || f2 == XAXOX || f2 == GHAUNADAUR_SYMBOL;
+		return f2 == LOLTH_SYMBOL || f2 == KIARANSALEE_SYMBOL || (f2 == PEN_A_SYMBOL && urole.neminum != PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) || f2 == VER_TAS_SYMBOL || f2 == XAXOX || f2 == GHAUNADAUR_SYMBOL;
 	}
 	/*Tower xaxox*/
 	else if(f1 == XAXOX){
@@ -4546,13 +4546,13 @@ int f1,f2;
 		return (f2 == EDDER_SYMBOL);
 	}
 	else if(f1 == LOLTH_SYMBOL){
-		return (f2 >= FIRST_GODDESS && f2 <= LAST_GODDESS) || f2 == GHAUNADAUR_SYMBOL;
+		return f2 == KIARANSALEE_SYMBOL || (f2 == PEN_A_SYMBOL && urole.neminum != PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) || f2 == VER_TAS_SYMBOL || f2 == GHAUNADAUR_SYMBOL;
 	}
 	else if(f1 == KIARANSALEE_SYMBOL){
 		return f2 == PEN_A_SYMBOL || f2 == GHAUNADAUR_SYMBOL;
 	}
 	else if(f1 == PEN_A_SYMBOL){
-		return (f2 >= FIRST_GODDESS && f2 <= LAST_GODDESS) || f2 == EILISTRAEE_SYMBOL || f2 == GHAUNADAUR_SYMBOL || f2 == LOST_HOUSE;
+		return (f2 == VER_TAS_SYMBOL && urole.neminum != PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) || f2 == EILISTRAEE_SYMBOL || f2 == GHAUNADAUR_SYMBOL || f2 == LOST_HOUSE;
 	}
 	else if(f1 == VER_TAS_SYMBOL){
 		return f2 == GHAUNADAUR_SYMBOL;

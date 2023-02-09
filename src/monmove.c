@@ -1270,13 +1270,13 @@ register struct monst *mtmp;
 		}
 	}
 	if(mtmp->mspores){
-		if(!rn2(4)){
+		if(!rn2(mtmp->m_lev)){
 			mtmp->mconf = 1;
 			(void) set_apparxy(mtmp);
-		}
-		if(!rn2(4)){
-			mtmp->mberserk = 1;
-			(void) set_apparxy(mtmp);
+			if(!rn2(mtmp->m_lev)){
+				mtmp->mberserk = 1;
+				(void) set_apparxy(mtmp);
+			}
 		}
 	}
 	if(mtmp->mrage){
@@ -1730,6 +1730,25 @@ register struct monst *mtmp;
 		if(MON_WEP(mtmp)->recharged < 7) MON_WEP(mtmp)->recharged++;
 		mtmp->mspec_used = 10;
 		return 0;
+	}
+
+	if(mtmp->mtyp == PM_PORO_AULON
+		&& !mtmp->mcan && !mtmp->mspec_used
+		&& !(noactions(mtmp))
+		&& !(mindless_mon(mtmp))
+		&& !rn2(20)
+	){
+		struct obj * otmp = which_armor(mtmp, W_ARM);
+		if(otmp && otmp->otyp == EILISTRAN_ARMOR){
+			if(otmp->altmode != EIL_MODE_ON)
+				otmp->altmode = EIL_MODE_ON;
+			if(otmp->ovar1_eilistran_charges <= 40){
+				if(canspotmon(mtmp))
+					pline("%s replaces some worn out components in %s armor.",Monnam(mtmp), hisherits(mtmp));
+				otmp->ovar1_eilistran_charges += 60;
+				return 0;
+			}
+		}
 	}
 
 	if(mtmp->mtyp == PM_PHALANX

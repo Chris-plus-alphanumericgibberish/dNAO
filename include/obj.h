@@ -87,6 +87,7 @@ enum {
 	OPROP_MORTW,
 	OPROP_TDTHW,
 	OPROP_SFUWW,
+	OPROP_TACTB,
 	MAX_OPROP
 };
 
@@ -141,6 +142,10 @@ struct obj {
 #define ENG_MODE_OFF	0	/* Engine is off */
 #define ENG_MODE_PYS	1	/* Engine reacts to vorpal and shredding only */
 #define ENG_MODE_ENR	2	/* Engine reacts to energy damage (fire/elec/cold/acid) too */
+				/* ELI_MODEs if the eilistran armor is on or off */
+#define EIL_MODE_OFF	0	/* Armor is off */
+#define EIL_MODE_ON		1	/* Armor is on */
+
 
 	xchar where;		/* where the object thinks it is */
 #define OBJ_FREE	0		/* object not attached to anything */
@@ -303,6 +308,7 @@ struct obj {
 			
 	long ovar1;		/* extra variable. Specifies: */
 #define ovar1_darklight ovar1
+#define ovar1_eilistran_charges ovar1
 	/* Number of viperwhip heads */
 	/* Moon axe phase */
 	/* Acid venom non-1d6 damage */

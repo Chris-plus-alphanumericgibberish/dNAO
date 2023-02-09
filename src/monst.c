@@ -52,12 +52,14 @@ void NDECL(monst_init);
 #define LVL(lvl,mov,mr,aln) lvl,mov,mr,aln
 #define SIZ(wt,nut,snd,siz) wt,nut,snd,siz
 /* ATTK() and A() are to avoid braces and commas within args to MON() */
-#define ATTK(at,ad,n,d) {at,ad,n,d,0,0,0}
-#define ATTK_LEV(at,ad,n,d, lev) {at,ad,n,d,lev,0,0}
-#define OFFHND_ATTK(at,ad,n,d) {at,ad,n,d,0,1,0}
-#define OFFHND_ATTK_LEV(at,ad,n,d, lev) {at,ad,n,d,lev,1,0}
-#define POLYWEP_ATTK(at,ad,n,d) {at,ad,n,d,0,0,1}
-#define NO_ATTK {0,0,0,0}
+#define ATTK(at,ad,n,d) {at,ad,n,d,0,0,0,0}
+#define ATTK_LEV(at,ad,n,d, lev) {at,ad,n,d,lev,0,0,0}
+#define ATTK_INS(at,ad,n,d, ins) {at,ad,n,d,0,0,0,ins}
+#define OFFHND_ATTK(at,ad,n,d) {at,ad,n,d,0,1,0,0}
+#define OFFHND_ATTK_LEV(at,ad,n,d, lev) {at,ad,n,d,lev,1,0,0}
+#define OFFHND_ATTK_INS(at,ad,n,d, lev) {at,ad,n,d,0,1,0,ins}
+#define POLYWEP_ATTK(at,ad,n,d) {at,ad,n,d,0,0,1,0}
+#define NO_ATTK {0,0,0,0,0,0,0,0}
 #define A(...) {FIRST_TEN(dummy, ##__VA_ARGS__, NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK)}
 #define FIRST_TEN(dummy, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, ...) a1, a2, a3, a4, a5, a6, a7, a8, a9, a10
 
@@ -601,7 +603,7 @@ NEARDATA struct permonst mons[] = {
 	DEF(NAT_AC(6)),
 	A(ATTK(AT_GAZE, AD_RGAZ, 4, 6), ATTK(AT_GAZE, AD_RGAZ, 4,6),
 	  ATTK(AT_NONE, AD_PLYS, 3, 5)),
-	SIZ(WT_GIGANTIC, CN_LARGE, MS_SILENT, MZ_LARGE), MR_COLD|MR_FIRE|MR_ELEC, 0,//beholder meat has a special effect.  beholder corpses are impossibly heavy
+	SIZ(WT_GIGANTIC, CN_LARGE, MS_SILENT, MZ_LARGE), MR_MAGIC|MR_COLD|MR_FIRE|MR_ELEC, 0,//beholder meat has a special effect.  beholder corpses are impossibly heavy
  	MM_FLY|MM_FLOAT|MM_BREATHLESS|MM_WEBRIP /*MM*/, MT_HOSTILE /*MT*/, 0 /*MF*/,
 	MB_NOLIMBS|MB_NOHEAD|MB_POIS|MB_NEUTER /*MB*/, MG_NOPOLY|MG_INFRAVISIBLE|MG_SANLOSS|MG_INSIGHT /*MG*/,
 	0 /*MA*/,  MV_INFRAVISION|MV_CATSIGHT|MV_SEE_INVIS /*MV*/, CLR_GRAY),
@@ -2332,6 +2334,22 @@ then fill new spaces with our spawn!
 	MB_STRONG|MB_HUMANOID /*MB*/, MG_NASTY|MG_LORD|MG_INFRAVISIBLE|MG_NOPOLY|MG_REGEN|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
 	MA_MINION /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, CLR_BRIGHT_MAGENTA),
 
+    MON("Poro Aulon", S_LAW_ANGEL,//34 /* Needs encyc entry */
+	LVL(12, 12, 30, 8), (G_PLANES|G_NOCORPSE|G_NOGEN),
+	DEF(NAT_AC(10), DEX_AC(4), NAT_DR(10), SPE_DR_HEAD(2)),
+	A(ATTK(AT_WEAP, AD_PHYS, 3, 4), ATTK(AT_XWEP, AD_PHYS, 2, 4),
+	  ATTK_LEV(AT_WEAP, AD_PHYS, 3, 4, 20), ATTK_LEV(AT_XWEP, AD_PHYS, 2, 4, 20),
+	  ATTK_LEV(AT_WEAP, AD_PHYS, 3, 4, 30), ATTK_LEV(AT_XWEP, AD_PHYS, 2, 4, 30),
+	  ATTK(AT_TNKR, AD_TNKR, 0, 0),
+	  ATTK(AT_ESPR, AD_STAR, 4, 4), ATTK_LEV(AT_ESPR, AD_STAR, 4, 4, 15),
+	  ATTK_LEV(AT_ESPR, AD_STAR, 4, 4, 25)
+	),
+	SIZ(WT_HUMAN, 350, MS_HUMANOID, MZ_HUMAN),
+	MR_POISON|MR_STONE|MR_DISINT|MR_FIRE|MR_SLEEP, MR_SLEEP,
+	MM_BREATHLESS|MM_AMPHIBIOUS /*MM*/, MT_OMNIVORE|MT_STALK|MT_COLLECT|MT_BOLD /*MT*/, MF_MARTIAL_E|MF_BAB_FULL|MF_LEVEL_30 /*MF*/,
+	MB_STRONG|MB_HUMANOID /*MB*/, MG_VBLUNT|MG_NOPOLY|MG_INFRAVISIBLE|MG_NASTY|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
+	MA_MINION|MA_FEY /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, CLR_BRIGHT_MAGENTA),
+
     MON("harrower of Zariel", S_LAW_ANGEL,//18 /* Needs encyc entry */
 	LVL(14, 17, 77, 7), (G_PLANES|G_NOCORPSE|G_NOGEN),
 	DEF(SPE_AC(16), NAT_DR_BODY(9), NAT_DR_GLOV(7), SPE_DR(9), SPE_DR_HEAD(12)),
@@ -2498,6 +2516,20 @@ then fill new spaces with our spawn!
 	MM_FLY /*MM*/, MT_STALK|MT_COLLECT|MT_MAGIC|MT_BOLD /*MT*/, MF_MARTIAL_E|MF_BAB_FULL /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, MG_NASTY|MG_LORD|MG_NOPOLY|MG_INFRAVISIBLE|MG_REGEN|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
 	MA_MINION /*MA*/,  MV_LOWLIGHT3|MV_SEE_INVIS|MV_TELEPATHIC|MV_LIFESENSE /*MV*/, CLR_BRIGHT_MAGENTA),
+
+    MON("Iksh'na Deva", S_NEU_ANGEL,//34 /*Needs tile*/
+	LVL(11, 14, 50, 0), (G_PLANES|G_NOCORPSE|G_NOGEN),
+	DEF(DEX_AC(4), SPE_DR(2)),
+	A(ATTK(AT_WEAP, AD_PHYS, 1, 6), ATTK(AT_XWEP, AD_PHYS, 1, 6),
+	  ATTK_INS(AT_MAGC, AD_CLRC, 0, 0, 11),
+	  ATTK_INS(AT_GAZE, AD_RGAZ, 4, 6, 77), ATTK_INS(AT_GAZE, AD_RGAZ, 4, 6, 88),
+	  ATTK_INS(AT_NONE, AD_PLYS, 3, 5, 66)
+	  ),
+	SIZ(WT_GIGANTIC, 400, MS_CUSS, MZ_HUMAN),
+	MR_MAGIC|MR_COLD|MR_FIRE|MR_ELEC|MR_SLEEP, MR_SLEEP,
+	MM_FLY|MM_FLOAT /*MM*/, MT_STALK|MT_COLLECT /*MT*/, MF_MARTIAL_S|MF_BAB_FULL /*MF*/,
+	MB_STRONG|MB_HUMANOID /*MB*/, MG_INSIGHT|MG_NOPOLY|MG_INFRAVISIBLE|MG_NASTY|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
+	MA_MINION|MA_DROW /*MA*/,  MV_SEE_INVIS|MV_DARKSIGHT /*MV*/, CLR_BLACK),
 	
     MON("Birth", S_NEU_ANGEL,//31 /* Needs encyc entry */
 	LVL(30, 24, 125, 0), (G_UNIQ|G_NOGEN),
@@ -9289,7 +9321,7 @@ is a red right hand
 	MA_UNLIVING /*MA*/,  MV_NORMAL /*MV*/, HI_LORD),
     MON("Oona", S_CHA_ANGEL,//28 /*Needs tile*/
 	LVL(20, 9, 77, 20), (G_NOCORPSE|G_NOGEN|G_UNIQ), //
-	DEF(NAT_AC(19), DEX_AC(4), NAT_DR(4), SPE_DR_HEAD(4)),
+	DEF(NAT_AC(19), DEX_AC(4), NAT_DR(8), SPE_DR_HEAD(4)),
 	A(ATTK(AT_WEAP, AD_OONA, 4, 8), ATTK(AT_XWEP, AD_OONA, 4, 8),
 	  ATTK(AT_MAGC, AD_OONA, 10,8), ATTK(AT_NONE, AD_OONA, 0, 0)),
 	SIZ(WT_ELF, 350, MS_OONA, MZ_HUMAN), MR_POISON|MR_STONE|MR_DISINT|MR_FIRE|MR_ELEC|MR_COLD|MR_DRAIN|MR_SLEEP, MR_SLEEP,

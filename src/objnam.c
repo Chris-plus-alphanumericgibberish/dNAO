@@ -3345,12 +3345,14 @@ const char *oldstr;
 		(p = strstri(bp, " labelled ")) != 0 ||
 		(p = strstri(bp, " called ")) != 0) {
 		/* don't singularize these: */
-		if (!BSTRNCMPI(bp, p- 4, "Eyes of the Overworld", 21) ||
-			!BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21) ||
-			!BSTRNCMPI(bp, p- 5, "Claws of the Revenancer", 23) ||
-			!BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25) ||
-			!BSTRNCMPI(bp, p- 9, "Wrappings of the Sacred Fist", 28) ||
-			!BSTRNCMPI(bp, p-22, "Spell-warded Wrappings of Nitocris", 34))
+		if (!BSTRNCMPI(bp, p- 4, "Eyes of the Overworld", 21)
+			|| !BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21)
+			|| !BSTRNCMPI(bp, p- 5, "Claws of the Revenancer", 23)
+			|| !BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25)
+			|| !BSTRNCMPI(bp, p- 9, "Wrappings of the Sacred Fist", 28)
+			|| !BSTRNCMPI(bp, p-22, "Spell-warded Wrappings of Nitocris", 34)
+			|| !BSTRNCMPI(bp, p- 9, "Red Cords of Ilmater", 20)
+		)
 			return bp;
 		else {
 			/* save the string from " of " onwards */
@@ -3433,6 +3435,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-14, "shape changers") ||
 			   !BSTRCMPI(bp, p-15, "detect monsters") ||
 			   !BSTRCMPI(bp, p-15, "Hawaiian shorts") ||
+			   !BSTRCMPI(bp, p-10, "hand wraps") ||
 			   !BSTRCMPI(bp, p-5, "Chaos") ||
 			   !BSTRCMPI(bp, p-8, "Nitocris") ||
 			   !BSTRCMPI(bp, p-13, "Wand of Orcus") || /* wand */
@@ -4319,6 +4322,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "drooling ", l=9) || !strncmpi(bp, "lashing ", l=8) || !strncmpi(bp, "staring ", l=8) || !strncmpi(bp, "stormwrapped ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_GOATW);
 
+		} else if (!strncmpi(bp, "tactile ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_TACTB);
+
 		} else if (!strncmpi(bp, "sparkling ", l=10) && 
 				strncmpi(bp, "sparkling horizontal", 20) && 
 				strncmpi(bp, "sparkling lake", 14) && 
@@ -4771,7 +4777,8 @@ int wishflags;
 	   strncmpi(bp, "rod of lordly might", 19) && 
 	   strncmpi(bp, "rod of the elvish lords", 23) && 
 	   strncmpi(bp, "glamdring", 9) && 
-	   strncmpi(bp, "plasteel armor", 13) &&
+	   strncmpi(bp, "plasteel armor", 14) &&
+	   strncmpi(bp, "eilistran armor", 15) &&
 	   strncmpi(bp, "armor of erebor", 15) && 
 	   strncmpi(bp, "armor of khazad-dum", 19) && 
 	   strncmpi(bp, "black dress", 11) && 

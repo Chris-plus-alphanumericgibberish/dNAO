@@ -460,7 +460,6 @@ doread()
 				pline("With that realization comes knowledge of the seal's final form!");
 				u.specialSealsKnown |= SEAL_NUDZIRATH;
 			}
-
 		}
 		return MOVE_READ;
 	} else if(scroll->oclass == WEAPON_CLASS && (scroll)->obj_material == WOOD && scroll->oward != 0){
@@ -686,8 +685,20 @@ doread()
 	) {
 	    pline(silly_thing_to, "read");
 	    return MOVE_CANCELLED;
+	} else if ((Babble || Screaming || mad_turn(MAD_TOO_BIG))
+		&& (scroll->oclass == SPBOOK_CLASS)
+	){
+		if(Screaming)
+			You_cant("focus on that while you're screaming!");
+		else if(Babble)
+			You_cant("focus on that while you're babbling incoherently!");
+		else if(mad_turn(MAD_TOO_BIG))
+			pline("It's too big!");
+		else
+			impossible("You can't read that book for some reason?");
+	    return MOVE_INSTANT;
 	} else if ((Babble || Strangled || Drowning || mad_turn(MAD_TOO_BIG))
-		&& (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS || (scroll->oclass == TILE_CLASS && objects[scroll->otyp].oc_magic))
+		&& (scroll->oclass == SCROLL_CLASS || (scroll->oclass == TILE_CLASS && objects[scroll->otyp].oc_magic))
 	){
 		if(Strangled)
 			You_cant("read that aloud, you can't breathe!");
@@ -701,18 +712,23 @@ doread()
 			impossible("You can't read that aloud for some reason?");
 	    return MOVE_INSTANT;
 		//Note, you CAN scream one syllable
-	} else if (Screaming && (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS)){
+	} else if (Screaming && (scroll->oclass == SCROLL_CLASS)){
 	    You_cant("read that aloud, you're too busy screaming!");
 	    return MOVE_INSTANT;
 	} else if (Blind) {
 	    const char *what = 0;
 	    if (scroll->oclass == SPBOOK_CLASS)
-		what = "mystic runes";
+			what = "mystic runes";
 	    else if (!scroll->dknown)
-		what = "formula on the scroll";
+			what = "formula on the scroll";
 	    if (what) {
-		pline("Being blind, you cannot read the %s.", what);
-		return MOVE_INSTANT;
+			if(check_oprop(scroll, OPROP_TACTB)){
+				pline("A tactile script supplements the %s.", what);
+			}
+			else {
+				pline("Being blind, you cannot read the %s.", what);
+				return MOVE_INSTANT;
+			}
 	    }
 	}
 

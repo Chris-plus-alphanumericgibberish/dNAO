@@ -4293,6 +4293,76 @@ struct obj *otmp;
 	return MOVE_STANDARD;
 }
 
+STATIC_OVL int
+use_eilistran_armor(optr)
+struct obj **optr;
+{
+	struct obj *otmp = *optr;
+	winid tmpwin;
+	anything any;
+	menu_item *selected;
+	int n;
+
+	any.a_void = 0;         /* zero out all bits */
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	
+	if(otmp->ovar1_eilistran_charges > 0){
+		any.a_int = 1;
+		add_menu(tmpwin, NO_GLYPH, &any , 't', 0, ATR_NONE,
+			 (otmp->altmode == EIL_MODE_ON) ? "Turn off." : "Turn on.", MENU_UNSELECTED);
+	}
+	if(otmp->ovar1_eilistran_charges <= 540){
+		any.a_int = 2;
+		add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
+			 "Replace worn components.", MENU_UNSELECTED);
+	}
+
+	end_menu(tmpwin, "Do what?");
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	if(n > 0){
+		n = selected[0].item.a_int;
+		free(selected);
+	}
+	destroy_nhwindow(tmpwin);
+	if(!n)
+		return MOVE_CANCELLED;
+	
+	switch(n){
+		case 1:
+			if(otmp->altmode == EIL_MODE_ON){
+				otmp->altmode = EIL_MODE_OFF;
+				You("Switch the armor off.");
+				return MOVE_PARTIAL;
+			}
+			else {
+				otmp->altmode = EIL_MODE_ON;
+				You("Switch the armor on.");
+				return MOVE_PARTIAL;
+			}
+		break;
+		case 2:{
+			struct obj *component = getobj(tools, "replace with");
+			if(!component)
+				return MOVE_CANCELLED;
+			else if(component->otyp != CLOCKWORK_COMPONENT){
+				pline("This device requires clockwork components.");
+				return MOVE_CANCELLED;
+			}
+			else if(component->cursed){
+				pline("The component won't go into the mechanism!");
+				return MOVE_STANDARD;
+			}
+			//else
+			useup(component);
+			You("put the new component into the armor's mechanism.");
+			otmp->ovar1_eilistran_charges += 60;
+			return MOVE_STANDARD;
+		}break;
+	}
+	return MOVE_STANDARD;
+}
+
 int
 use_whip(obj)
 struct obj *obj;
@@ -6951,6 +7021,10 @@ struct obj *obj;
 			otmp = getobj(tools, "replace with");
 			if(!otmp)
 				return FALSE;
+			else if(otmp->otyp != HELLFIRE_COMPONENT){
+				pline("This device requires hellfire components.");
+				return FALSE;
+			}
 			//else
 			useup(otmp);
 			You("put the new component into the engine.");
@@ -7910,7 +7984,7 @@ doapply()
 		add_class(class_list, FOOD_CLASS);
 	if (carrying(DWARVISH_HELM) || carrying(LANTERN_PLATE_MAIL) ||
 		carrying(GNOMISH_POINTY_HAT) || carrying(DROVEN_CLOAK) ||
-		carrying_art(ART_AEGIS))
+		carrying_art(ART_AEGIS) || carrying(EILISTRAN_ARMOR))
 		add_class(class_list, ARMOR_CLASS);
 	if(carrying_applyable_ring()){
 		add_class(class_list, RING_CLASS);
@@ -8525,6 +8599,9 @@ doapply()
 	case DROVEN_CLOAK:
 		if(obj->oartifact == ART_DARKWEAVER_S_CLOAK) res = use_darkweavers_cloak(obj);
 		else res = use_droven_cloak(&obj);
+	break;
+	case EILISTRAN_ARMOR:
+		res = use_eilistran_armor(&obj);
 	break;
 	case FLINT:
 	case LUCKSTONE:
