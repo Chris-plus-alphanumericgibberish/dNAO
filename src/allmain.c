@@ -2073,9 +2073,17 @@ karemade:
 						if(sensemon(mtmp) || (canseemon(mtmp) && !mtmp->mundetected)){
 							pline("%s is laughing hysterically.", Monnam(mtmp));
 						} else if(couldsee(mtmp->mx,mtmp->my)){
-							You_hear("hysterical laughter.");
+							static long lastHeard = 0;
+							if(lastHeard < monstermoves){
+								lastHeard = monstermoves;
+								You_hear("hysterical laughter.");
+							}
 						} else {
-							You_hear("laughter in the distance.");
+							static long lastHeard = 0;
+							if(lastHeard < monstermoves){
+								You_hear("laughter in the distance.");
+								lastHeard = monstermoves;
+							}
 						}
 					} else if(sensemon(mtmp) || (canseemon(mtmp) && !mtmp->mundetected))
 						pline("%s is trembling hysterically.", Monnam(mtmp));
