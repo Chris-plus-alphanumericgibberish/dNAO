@@ -10754,7 +10754,7 @@ expl_common:
 				if(magr->mtyp == PM_BALLISTOSPORE && !Sick_res(mdef)){
 					if(youdef)
 						diseasemu(pa);
-					else
+					else if(mdef->mhp < mdef->mhpmax/2)
 						mdef->mspores = TRUE;
 				}
 				/* deal damage */
