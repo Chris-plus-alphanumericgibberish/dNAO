@@ -3596,6 +3596,7 @@ char *in_buff;
 	int which, tries, i;
 	int undeadtype = 0;
 	boolean mad_suicidal = FALSE;
+	boolean noequip = FALSE;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
@@ -3689,6 +3690,9 @@ char *in_buff;
 			}
 			else if (!strncmpi(bufp, "suicidal ", l = 9)) {
 				mad_suicidal = TRUE;
+			}
+			else if (!strncmpi(bufp, "noequip ", l = 8)) {
+				noequip = TRUE;
 			}
 			else
 				break;
@@ -3860,6 +3864,8 @@ createmon:
 				mm_flags |= MM_EDOG;
 			if (makesummoned)
 				mm_flags |= MM_ESUM;
+			if (noequip)
+				mm_flags |= NO_MINVENT;
 
 			mtmp = makemon_full(whichpm, x, y, mm_flags, undeadtype ? undeadtype : -1, -1);
 
