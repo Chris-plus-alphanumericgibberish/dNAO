@@ -2380,7 +2380,7 @@ A("Esscooahlipboourrr",			DOUBLE_SWORD,					"tentacle-auraed shackle-wrapped %s"
 
 A("The Robe of Closed Eyes",				ROBE,			"shut-eye-patterned %s",
 	4000L, LEATHER, MZ_DEFAULT, WT_DEFAULT,
-	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_FXALGN),
+	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_C, (ARTG_NOGEN),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(INVIS, GAZE_RES), NOFLAG,

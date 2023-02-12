@@ -250,6 +250,11 @@ hack_artifacts()
 		}
 	}
 	
+	if(Role_if(PM_HEALER) && Race_if(PM_DROW)){
+		artilist[ART_ROBE_OF_CLOSED_EYES].gflags |= ARTG_GIFT;
+		artilist[ART_ROBE_OF_CLOSED_EYES].gflags &= ~ARTG_NOGEN;
+	}
+	
 	if(Race_if(PM_HALF_DRAGON) && flags.initgend){
 		int i;
 		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++)
