@@ -1828,6 +1828,7 @@ movemon()
 		average_dogs();
 	if(mtmp->m_insight_level > u.uinsight
 	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+	  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 	){
 		insight_vanish(mtmp);
 		continue;

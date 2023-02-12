@@ -1472,6 +1472,7 @@ moveloop()
 			nxtmon = mtmp->nmon;
 			if(mtmp->m_insight_level > u.uinsight
 			  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+			  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 			){
 				insight_vanish(mtmp);
 				continue;
@@ -1554,6 +1555,7 @@ moveloop()
 				}
 				if(mtmp->m_insight_level > u.uinsight
 				  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+				  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 				){
 					insight_vanish(mtmp);
 					continue;
@@ -2906,6 +2908,7 @@ karemade:
 		}
 		if(mtmp->m_insight_level > u.uinsight
 		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+		  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 		){
 			insight_vanish(mtmp);
 			continue;
@@ -5031,7 +5034,7 @@ struct monst *mon;
 			return;
 		}
 		/* The Stranger arrives from other levels and appears as soon as you gain enough insight */
-		if(mon->m_insight_level <= u.uinsight){
+		if(mon->m_insight_level <= u.uinsight && quest_status.touched_artifact){
 			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2){
 				mtmp2 = mtmp->nmon;
 				if (mtmp == mon) {
