@@ -1833,11 +1833,6 @@ movemon()
 		insight_vanish(mtmp);
 		continue;
 	}
-	if(mtmp->mtyp == PM_APPRENTICE_WITCH && !mtmp->mtame){
-		mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
-		mtmp->movement = 0;
-		continue;
-	}
     if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[mtmp->mx][mtmp->my].typ == AIR
 		&& !mon_resistance(mtmp,FLYING)
 		&& !mon_resistance(mtmp,LEVITATION)
