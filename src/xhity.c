@@ -2772,7 +2772,7 @@ boolean ranged;
 		
 		if(!(objects[otmp->otyp].oc_dtyp&PIERCE))
 			swingindex = 1;
-		else if(weapon_type(otmp) == P_PICK_AXE || weapon_type(otmp) == P_MORNING_STAR || weapon_type(otmp) == P_FLAIL)
+		else if(weapon_type(otmp) == P_PICK_AXE || weapon_type(otmp) == P_MORNING_STAR || weapon_type(otmp) == P_FLAIL || weapon_type(otmp) == P_WHIP)
 			swingindex = 1;
 		else if(objects[otmp->otyp].oc_dtyp == PIERCE)
 			swingindex = 0;
