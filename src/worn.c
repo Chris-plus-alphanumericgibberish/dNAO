@@ -658,6 +658,8 @@ struct monst *mon;
 	}
 	if(!mon->mcan){
 		base -= mon->data->pac;
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			base -= (32-u.uinsight)/2;
 	}
 	
 	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
@@ -855,6 +857,8 @@ struct monst *mon;
 	}
 	if(!mon->mcan){
 		base -= mon->data->pac;
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			base -= (32-u.uinsight)/2;
 	}
 	
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
@@ -1086,6 +1090,9 @@ struct monst *mon;
 #undef m_fdr
 #undef m_gdr
 		base += (dr / 7);
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			base += (33-u.uinsight)/2;
+
 		if(mon->mtyp == PM_OONA && mon->mhp < mon->mhpmax/2){
 			base += 7;
 		}
@@ -1293,6 +1300,9 @@ int depth;
 		case LEG_DR:         bas_mdr += mon->data->spe_fdr; break;
 		case ARM_DR:         bas_mdr += mon->data->spe_gdr; break;
 		}
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			bas_mdr += (33-u.uinsight)/2;
+
 		if(mon->mtyp == PM_OONA && mon->mhp < mon->mhpmax/2){
 			bas_mdr += 7;
 		}

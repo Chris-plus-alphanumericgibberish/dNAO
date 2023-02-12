@@ -4383,7 +4383,7 @@ int mmflags;
 				otmp->objsize = MZ_LARGE;
 				otmp->blessed = FALSE;
 				otmp->cursed = FALSE;
-				otmp->spe = 4;
+				otmp->spe = 0;
 				add_oprop(otmp, OPROP_CONCW);
 				set_material_gm(otmp, GOLD);
 				fix_object(otmp);

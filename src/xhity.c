@@ -18484,6 +18484,8 @@ boolean magical;
 		dmg = (dmg + 1) / 2;
 	if (magical && Half_spel(mdef))
 		dmg = (dmg + 1) / 2;
+	if (mdef->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+		dmg = (dmg + 1) / 2;
 	if (mdef == &youmonst && u.uvaul_duration){
 		if(physical && magical)
 			dmg = (dmg + 3) / 4;
