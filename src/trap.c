@@ -536,7 +536,7 @@ boolean td;	/* td == TRUE : trap door or hole */
 	    Sprintf(msgbuf, "The hole in the %s above you closes up.",
 		    ceiling(u.ux,u.uy));
 	schedule_goto(&dtmp, FALSE, TRUE, 0,
-		      (char *)0, !td ? msgbuf : (char *)0, 0);
+		      (char *)0, !td ? msgbuf : (char *)0, 0, 0);
 }
 
 /*
@@ -2994,7 +2994,7 @@ long hmask, emask;     /* might cancel timeout */
 			target_level.dnum = u.uz.dnum;
 			target_level.dlevel = qlocate_level.dlevel+1;
 			int dist = qlocate_level.dlevel+1 - u.uz.dlevel;
-			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6));
+			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6), 0);
 		}
 	}
 	else if(trap)

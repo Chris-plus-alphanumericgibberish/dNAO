@@ -2162,6 +2162,17 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			*attk = lolthHands[*indexnum];
 		}
 	}
+	/* Blasphemous hands have lurker attacks if they can't abduct the target to their temple*/
+	if(pa->mtyp == PM_BLASPHEMOUS_HAND && magr && *indexnum < NATTK && (In_endgame(&u.uz) || on_level(&bridge_temple, &u.uz))){
+		static const struct attack altblas[NATTK] = {
+			{ AT_TUCH, AD_PHYS, 4, 8 }
+		};
+		int atypes[] = {AD_DETH, AD_PEST, AD_FAMN, AD_CNFT};
+		*attk = altblas[*indexnum];
+		if(attk->aatyp == AT_TUCH)
+			attk->adtyp = atypes[(int) magr->m_id % SIZE(atypes)];
+	}
+
 	/* Various weapons can cause an additional full attack to be made */
 	/* This only works if it is wielded in the mainhand, and a weapon attack is being made with it (AT_WEAP, AT_DEVA) */
 	/* not shown in pokedex */
@@ -7401,8 +7412,22 @@ boolean ranged;
 				}
 				break;
 			case AD_ABDC:
-				if (armuncancel || (pa->mtyp == PM_PALE_NIGHT && !rn2(3))) {
-					(void)safe_teleds(FALSE);
+				if (armuncancel 
+					|| (pa->mtyp == PM_PALE_NIGHT && !rn2(3))
+					|| (pa->mtyp == PM_BLASPHEMOUS_HAND && !rn2(3))
+				) {
+					if(pa->mtyp == PM_BLASPHEMOUS_HAND && !In_endgame(&u.uz) && !on_level(&bridge_temple, &u.uz)){
+						d_level newlev;
+						newlev.dnum = rlyeh_dnum;
+						newlev.dlevel = bridge_temple.dlevel;
+						
+						pline("The hand grabs you!");
+						schedule_goto(&newlev, FALSE, FALSE, FALSE,
+								  Blind ? "You feel weightless for a moment." : "The hand drags you into a starry void!",
+								  "Awful tentacles suck at you as you fall!", d(8,8), u_sanity_loss(magr));
+					}
+					else
+						(void)safe_teleds(FALSE);
 				}
 				break;
 			}

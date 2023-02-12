@@ -6885,7 +6885,7 @@ arti_invoke(obj)
 		
 		schedule_goto(&newlev, FALSE, FALSE, FALSE,
 				  "You feel dizzy for a moment, but the sensation passes.",
-				  (char *)0, 0);
+				  (char *)0, 0, 0);
 	}break;
 	case ENLIGHTENING:
 	    (void)doenlightenment();

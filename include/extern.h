@@ -493,7 +493,7 @@ E void NDECL(save_currentstate);
 #endif
 E void FDECL(goto_level, (d_level *,BOOLEAN_P,BOOLEAN_P,int));
 E void FDECL(schedule_goto, (d_level *,BOOLEAN_P,BOOLEAN_P,int,
-			     const char *,const char *,int));
+			     const char *,const char *,int,int));
 E void NDECL(deferred_goto);
 E boolean FDECL(revive_corpse, (struct obj *, int));
 E void FDECL(revive_mon, (genericptr_t, long));

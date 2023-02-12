@@ -735,6 +735,9 @@ boolean dumping;
 		if (u.umadness&MAD_ROTTING){
 			enl_msg("Your body ", "is", "was", " rotting from within");
 		}
+		if (u.umadness&MAD_REACHER){
+			enl_msg("Sometimes, a lurking thing ", "tries", "tried", " to reach in and grab you");
+		}
 	}
 	
 	if(u.utaneggs){
@@ -1355,6 +1358,9 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_ROTTING){
 			putstr(en_win, 0, "Your body is rotting from within.");
+		}
+		if (u.umadness&MAD_REACHER){
+			putstr(en_win, 0, "You are being stalked by a blasphemous reacher.");
 		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)

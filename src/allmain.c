@@ -2225,6 +2225,20 @@ karemade:
 							}
 						}
 				}
+				if(roll_madness(MAD_REACHER) && check_insight() && !DimensionalLock){
+					struct monst* mtmp;
+					boolean messaged = FALSE;
+					for(int i = 0; i < 7; i++){
+						mtmp = makemon(&mons[rn2(3) ? PM_LURKING_HAND : PM_BLASPHEMOUS_HAND], u.ux-7+rn2(15), u.uy-7+rn2(15), MM_NOCOUNTBIRTH|MM_ADJACENTOK|NO_MINVENT|MM_ESUM);
+						if(mtmp){
+							if(canspotmon(mtmp) && !messaged){
+								pline("A terrible hand reaches into the world!");
+								messaged = TRUE;
+							}
+							mark_mon_as_summoned(mtmp, (struct monst *)0, NightmareAware_Insanity+u.uinsight, 0);
+						}
+					}
+				}
 			}
 			if(Infuture && !(Is_qstart(&u.uz) && !Race_if(PM_ANDROID)) && !rn2(35)){
 				struct monst* mtmp = makemon(&mons[PM_SEMBLANCE], rn1(COLNO-3,2), rn1(ROWNO-3,2), MM_ADJACENTOK);
@@ -2429,6 +2443,17 @@ karemade:
 					u.ustdy += 90;
 					destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 				}
+				nomul(0, NULL);
+			}
+
+			if(!rn2(7) && roll_madness(MAD_REACHER)){
+				You("feel its multitudinous gaze upon you!");
+				if(!UseInvShock_res(&youmonst) || !rn2(11)){
+					destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+					destroy_item(&youmonst, RING_CLASS, AD_ELEC);
+				}
+				if(roll_madness(MAD_REACHER))
+					explode_yours(u.ux, u.uy, AD_EELC, MON_EXPLODE, d(4,8),EXPL_BBLUE,2,FALSE);
 				nomul(0, NULL);
 			}
 			

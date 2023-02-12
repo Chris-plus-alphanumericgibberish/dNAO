@@ -1126,7 +1126,7 @@ openfakedoor()
 	Sprintf(msgbuf, "The hole in the %s above you closes up.",
 		ceiling(u.ux,u.uy));
 	schedule_goto(&dtmp, FALSE, TRUE, 0,
-			  (char *)0, !Blind ? msgbuf : (char *)0, 0);
+			  (char *)0, !Blind ? msgbuf : (char *)0, 0, 0);
 }
 
 /* return TRUE if digging succeeded, FALSE otherwise */

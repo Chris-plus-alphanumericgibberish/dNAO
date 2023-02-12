@@ -4729,6 +4729,9 @@ register struct monst *mtmp;
 	if(mtmp->mtyp == PM_ASMODEUS){
 		u.umadness |= MAD_OVERLORD;
 	}
+	if(mtmp->mtyp == PM_BLASPHEMOUS_LURKER){
+		u.umadness |= MAD_REACHER;
+	}
 #ifdef RECORD_ACHIEVE
 	if(mtmp->mtyp == PM_LUCIFER){
 		achieve.killed_lucifer = 1;

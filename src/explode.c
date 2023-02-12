@@ -332,6 +332,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			break;
 		case AD_DISN: str = "disintegration field";
 			break;
+		case AD_EELC:
 		case AD_ELEC: str = "ball of lightning";
 			break;
 		case AD_DRST: str = "poison gas cloud";
