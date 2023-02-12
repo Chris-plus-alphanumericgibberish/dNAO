@@ -13697,7 +13697,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 
-	/* Misotheistic weapon ancelling the divine (and also supressing magic) */
+	/* Misotheistic weapon cancelling the divine (and also supressing magic) */
 	if(weapon && weapon->otyp == ROD_OF_FORCE && !recursed && !litsaber(weapon)){
 		int misdamage;
 		if(youdef){
