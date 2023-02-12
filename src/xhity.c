@@ -8476,18 +8476,37 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return (result|xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged));
 	case AD_LAVA:
-		/* print a basic hit message */
-		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
-		}
-		if(youdef && distmin(x(mdef), y(mdef), x(magr), y(magr)) <= 1){
+		
+		if(distmin(x(mdef), y(mdef), x(magr), y(magr)) > 1)
+			return MM_MISS;
+	
+		if(youdef){
 			if(u.ustuck != magr ){
-				pline("%s begins to ooze around you!", Monnam(magr));
-				u.ustuck = magr;
+				if(!sticks(mdef)){
+					pline("%s begins to ooze around you!", Monnam(magr));
+					u.ustuck = magr;
+				}
+				else pline("%s oozes around you!", Monnam(magr));
 			}
 			else {
 				pline("%s is crushing you!", Monnam(magr));
 			}
+		}
+		else if(youagr){
+			if(u.ustuck != mdef ){
+				if(!sticks(mdef)){
+					pline("You begin to ooze around %s!", mon_nam(mdef));
+					u.ustuck = magr;
+				}
+				else pline("You ooze around %s!", mon_nam(mdef));
+			}
+			else {
+				pline("You are crushing %s!", mon_nam(mdef));
+			}
+		}
+		else {
+			if(vis)
+				pline("%s oozes around %s!", Monnam(magr), mon_nam(mdef));
 		}
 
 		if(!UseInvFire_res(mdef)){
