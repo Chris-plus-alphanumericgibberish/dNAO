@@ -5029,6 +5029,10 @@ boolean ranged;
 					if (!Hallucination)
 						Your("mind is filled with kaleidoscopic light!");
 					chg = make_hallucinated(HHallucination + (long)dmg, FALSE, 0L);
+					if (chg && Hallucination && magr->mtyp == PM_DAUGHTER_OF_BEDLAM){
+						u.umadness |= MAD_DELUSIONS;
+						change_usanity(-1*rnd(6), FALSE); //Deals sanity damage
+					}
 					You("%s.", chg ? "are freaked out" : "seem unaffected");
 				}
 			}
