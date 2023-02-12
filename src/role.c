@@ -2500,6 +2500,10 @@ give_quest_trophy()
 		achieve.trophies |= GNO_RAN_QUEST;
 	else if(urole.neminum == PM_DOCTOR_ARCHER)
 		achieve.trophies |= MAD_QUEST;
+	else if(urole.neminum == PM_CYCLOPS)
+		achieve.trophies |= HEA_QUEST;
+	else if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+		achieve.trophies |= DRO_HEA_QUEST;
 	
 	if(quest_status.second_thoughts)
 		achieve.trophies |= SECOND_THOUGHTS;
