@@ -3177,10 +3177,10 @@ E int NDECL(dosuspend);
 
 E int FDECL(hitval, (struct obj *,struct monst *,struct monst *));
 E int FDECL(attack_mask, (struct obj *, int, int));
-E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int));
+E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int, struct monst *));
 E int FDECL(weapon_dmg_roll, (struct weapon_dice *, boolean));
 E int FDECL(weapon_die_roll, (int, int, struct weapon_dice *, boolean));
-E int FDECL(dmgval, (struct obj *,struct monst *, int));
+E int FDECL(dmgval, (struct obj *,struct monst *, int, struct monst *));
 E struct obj *FDECL(select_rwep, (struct monst *));
 E struct obj *FDECL(select_hwep, (struct monst *));
 E struct obj *FDECL(select_pick, (struct monst *));
@@ -3372,6 +3372,7 @@ E int NDECL(check_monk_move);
 E int FDECL(u_pole_pound, (struct monst *));
 E boolean FDECL(Curse_res, (struct monst *, boolean));
 E int FDECL(mummy_curses_x, (struct monst *, struct monst *));
+E int FDECL(reduce_dmg, (struct monst *, int, boolean, boolean));
 
 /* ### xhityhelpers.c ### */
 

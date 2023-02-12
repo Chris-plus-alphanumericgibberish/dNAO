@@ -1337,8 +1337,7 @@ register struct monst *magr;
 			} else {
 			    pline_The("wand hits you!");
 			    tmp = d(2,12);
-			    if(Half_spell_damage) tmp = (tmp+1) / 2;
-				if(u.uvaul_duration) tmp = (tmp + 1) / 2;
+				tmp = reduce_dmg(&youmonst,tmp,FALSE,TRUE);
 			    losehp(tmp, "wand", KILLED_BY_AN);
 				if(otmp->otyp == ROD_OF_FORCE)
 					hurtle(sgn(u.ux-magr->mx), sgn(u.uy-magr->my), BOLT_LIM, FALSE, TRUE);
@@ -1661,7 +1660,7 @@ struct monst *mtmp;
 				    if (mtmp2->minvis && !canspotmon(mtmp2))
 					map_invisible(mtmp2->mx, mtmp2->my);
 				}
-	    	    	    	mdmg = dmgval(otmp2, mtmp2, 0) * otmp2->quan;
+					mdmg = dmgval(otmp2, mtmp2, 0, mtmp) * otmp2->quan;
 				if (helmet) {
 				    if(is_hard(helmet)) {
 					if (canspotmon(mtmp2))
@@ -1710,7 +1709,7 @@ struct monst *mtmp;
 			    !noncorporeal(youracedata) &&
 			    !unsolid(youracedata)) {
 			You("are hit by %s!", doname(otmp2));
-			dmg = dmgval(otmp2, &youmonst, 0) * otmp2->quan;
+			dmg = dmgval(otmp2, &youmonst, 0, mtmp) * otmp2->quan;
 			if (uarmh) {
 			    if(is_hard(uarmh)) {
 				pline("Fortunately, you are wearing a hard helmet.");
@@ -1758,8 +1757,7 @@ struct monst *mtmp;
 			    You("are not harmed.");
 			burn_away_slime();
 			melt_frozen_air();
-			if (Half_spell_damage) num = (num+1) / 2;
-			if(u.uvaul_duration) num = (num + 1) / 2;
+			num = reduce_dmg(&youmonst,num,FALSE,TRUE);
 			losehp(num, "scroll of fire", KILLED_BY_AN);
 			for(mtmp2 = fmon; mtmp2; mtmp2 = mtmp2->nmon) {
 			   if(DEADMONSTER(mtmp2)) continue;

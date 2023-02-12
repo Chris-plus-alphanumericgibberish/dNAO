@@ -4829,8 +4829,7 @@ boolean ranged;
 		}
 		/* active? */
 		if (notmcan && (youdef || !mindless_mon(mdef))) {
-			if(Half_spel(mdef)) dmg = (dmg+1)/2;
-			if(youdef && u.uvaul_duration) dmg = (dmg+1)/2;
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 			/* print message */
 			if (youdef) {
 				pline("You get a %sache!", body_part(HEAD));
@@ -7745,10 +7744,7 @@ boolean ranged;
 		}
 
 		/* reduce damage through half-phys-damage */
-		if (youdef ? Half_physical_damage : mon_resistance(mdef, HALF_PHDAM))
-			dmg = (dmg+1)/2;
-		if(youdef && u.uvaul_duration)
-			dmg = (dmg+1)/2;
+		dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 		/* brains will be attacked now */
 		if(is_android(pd) && !is_mind_flayer(pd)){
@@ -8309,10 +8305,7 @@ boolean ranged;
 		}
 		alt_attk.adtyp = AD_HOLY;
 		/* apply half-magic */
-		if (Half_spel(mdef))
-			dmg /= 2;
-		if (youdef && u.uvaul_duration)
-			dmg /= 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 		result = xdamagey(magr, mdef, &alt_attk, dmg);
 		return result;
@@ -8335,10 +8328,7 @@ boolean ranged;
 		}
 		alt_attk.adtyp = AD_UNHY;
 		/* apply half-magic */
-		if (Half_spel(mdef))
-			dmg /= 2;
-		if (youdef && u.uvaul_duration)
-			dmg /= 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 		result = xdamagey(magr, mdef, &alt_attk, dmg);
 		return result;
@@ -8364,10 +8354,7 @@ boolean ranged;
 		}
 		alt_attk.adtyp = AD_HLUH;
 		/* apply half-magic */
-		if (Half_spel(mdef))
-			dmg /= 2;
-		if (youdef && u.uvaul_duration)
-			dmg /= 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 		result = xdamagey(magr, mdef, &alt_attk, dmg);
 		return result;
@@ -9518,10 +9505,7 @@ int vis;
 	struct obj * otmp;
 
 	/* apply half-phys */
-	if (Half_phys(mdef))
-		dmg /= 2;
-	if (youdef && u.uvaul_duration)
-		dmg /= 2;
+	dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 	switch (attk->adtyp)
 	{
@@ -10700,10 +10684,7 @@ expl_common:
 			/* dmg has been (maybe fully) reduced based on element */
 
 			/* apply half phys damage */
-			if (Half_phys(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 			if (dmg > 0) {
 				/* damage dealt */
@@ -13750,9 +13731,9 @@ int vis;						/* True if action is at all visible to the player */
 		/* note: dmgval() includes enchantment and erosion of weapon */
 		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_MARIONETTE) ||
 			(youagr && thrust && u.sealsActive&SEAL_MARIONETTE))
-			basedmg = dmgval(weapon, mdef, SPEC_MARIONETTE);
+			basedmg = dmgval(weapon, mdef, SPEC_MARIONETTE, magr);
 		else
-			basedmg = dmgval(weapon, mdef, 0);
+			basedmg = dmgval(weapon, mdef, 0, magr);
 
 		/* Liecleaver adds 1d10 damage to fired bolts */
 		if (fired && launcher && launcher->oartifact == ART_LIECLEAVER)
@@ -14188,7 +14169,7 @@ int vis;						/* True if action is at all visible to the player */
 								);
 						}
 					}
-					basedmg = dmgval(weapon, mdef, 0);
+					basedmg = dmgval(weapon, mdef, 0, magr);
 				}
 				/* projectile should take care of it */
 				//destroy_all_magr_weapon = TRUE;
@@ -14215,7 +14196,7 @@ int vis;						/* True if action is at all visible to the player */
 		struct weapon_dice unarmed_dice;
 		int unarmedMult;
 		/* initialize struct */
-		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0);
+		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0, magr);
 		/* determine unarmedMult */
 		if (youagr) {
 			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!gloves && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
@@ -14858,10 +14839,7 @@ int vis;						/* True if action is at all visible to the player */
 
 	/* Half Physical Damage -- does not stack with damage-type resistance */
 	if (!resisted_attack_type && (subtotl > 0)) {
-		if(Half_phys(mdef))
-			subtotl /= 2;
-		if(youdef && u.uvaul_duration)
-			subtotl /= 2;
+		subtotl = reduce_dmg(mdef,subtotl,TRUE,FALSE);
 		/* can only reduce damage to 1 */
 		if (subtotl < 1)
 			subtotl = 1;
@@ -16617,12 +16595,9 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				}
 				/* damage (reduced by DR, half-phys damage, min 1) */
 				dmg -= (youagr ? roll_udr(mdef) : roll_mdr(magr, mdef));
-				if (Half_phys(magr))
-					dmg = (dmg + 1) / 2;
-				if (youagr && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
 				if (dmg < 1)
 					dmg = 1;
+				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 				newres = xdamagey(mdef, magr, &noattack, dmg);
 				if (newres&MM_DEF_DIED)
@@ -16902,12 +16877,9 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					/* no message */
 					/* damage (reduced by DR, half-phys damage, min 1) */
 					dmg -= (youagr ? roll_udr(mdef) : roll_mdr(magr, mdef));
-					if (Half_phys(magr))
-						dmg = (dmg + 1) / 2;
-					if (youagr && u.uvaul_duration)
-						dmg = (dmg + 1) / 2;
 					if (dmg < 1)
 						dmg = 1;
+					dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 					newres = xdamagey(mdef, magr, &noattack, dmg);
 					if (newres&MM_DEF_DIED)
@@ -18398,10 +18370,7 @@ struct monst * mdef;
 					pline("Bright liquid sparks smite %s %s!", s_suffix(mon_nam(mdef)) , mbodypart(mdef, HEAD));
 			}
 			dmg = d(min((mlev(magr)+2)/3, MAX_BONUS_DICE), 6);
-			if (Half_spel(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 			/* damage inventory */
 			if (!UseInvShock_res(mdef)){
@@ -18461,11 +18430,8 @@ struct monst * mdef;
 				dmg = (dmg + 3) / 4;
 			else if (resistances == 1)
 				dmg = (dmg + 1) / 2;
-
-			if (Half_spel(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 			/* damage inventory */
 			if (!UseInvShock_res(mdef)){
@@ -18480,4 +18446,24 @@ struct monst * mdef;
 		}break;
 	}
 	return MM_MISS;
+}
+
+int
+reduce_dmg(mdef,dmg,physical,magical)
+struct monst *mdef;
+int dmg;
+boolean physical;
+boolean magical;
+{
+	if (physical && Half_phys(mdef))
+		dmg = (dmg + 1) / 2;
+	if (magical && Half_spel(mdef))
+		dmg = (dmg + 1) / 2;
+	if (mdef == &youmonst && u.uvaul_duration){
+		if(physical && magical)
+			dmg = (dmg + 3) / 4;
+		else
+			dmg = (dmg + 1) / 2;
+	}
+	return dmg;
 }

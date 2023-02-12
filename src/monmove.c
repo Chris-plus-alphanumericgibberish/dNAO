@@ -1970,8 +1970,7 @@ register struct monst *mtmp;
 					mtmp->mspec_used += dmg;
 			}
 			if(dmg){
-				if (Half_spell_damage) dmg = (dmg+1) / 2;
-				if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 				losehp(dmg, "psychic blast", KILLED_BY_AN);
 				if(mdat->mtyp == PM_SEMBLANCE) make_hallucinated(HHallucination + dmg, FALSE, 0L);
 				if(mdat->mtyp == PM_GREAT_CTHULHU){

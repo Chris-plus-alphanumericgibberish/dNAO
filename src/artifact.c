@@ -4513,10 +4513,7 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 					bonus *= 2;
 			}
 		}
-		if (Half_spel(mdef))
-			bonus /= 2;
-		if (youdef && u.uvaul_duration)
-			bonus /= 2;
+		bonus = reduce_dmg(mdef,bonus,FALSE,TRUE);
 		*truedmgptr += bonus;
 	}
 	if(is_mercy_blade(otmp)){
@@ -12285,8 +12282,7 @@ int spe;
 			(Unblind_telepat || (Blind_telepat && Blind)) ? "telepathy" :
 			Blind_telepat ? "latent telepathy" : "mind");
 		dmg = d(dnum, dsize);
-		if (Half_spell_damage) dmg = (dmg+1) / 2;
-		if (u.uvaul_duration) dmg = (dmg+1) / 2;
+		dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 		losehp(dmg, "psychic blast", KILLED_BY_AN);
 		if(dnum >= 3){
 			for (m2 = fmon; m2; m2 = nmon2) {

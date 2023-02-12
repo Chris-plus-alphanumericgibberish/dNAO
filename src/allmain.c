@@ -4263,8 +4263,7 @@ cthulhu_mind_blast()
 			(Unblind_telepat || (Blind_telepat && Blind)) ? "telepathy" :
 			Blind_telepat ? "latent telepathy" : "mind");
 		dmg = d(nd,15);
-		if(Half_spell_damage) dmg = (dmg+1) / 2;
-		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+		dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 		losehp(dmg, "psychic blast", KILLED_BY_AN);
 		make_stunned(itimeout_incr(HStun, dmg*10), TRUE);
 		if (Sleep_resistance){

@@ -6705,7 +6705,7 @@ struct obj *obj;
 						map_invisible(mtmp->mx, mtmp->my);
 					}
 
-					dmg = dmgval(otmp, mtmp, 0);
+					dmg = dmgval(otmp, mtmp, 0, &youmonst);
 					struct obj *helmet = youdef ? uarmh : which_armor(mtmp, W_ARMH);
 					if (helmet) {
 						if(is_hard(helmet)) {
@@ -6733,10 +6733,7 @@ struct obj *obj;
 						newsym(x, y);
 					}
 
-					if (Half_phys(mtmp))
-						dmg = (dmg + 1) / 2;
-					if (youdef && u.uvaul_duration)
-						dmg = (dmg + 1) / 2;
+					dmg = reduce_dmg(mtmp,dmg,TRUE,FALSE);
 					if(youdef)
 						losehp(dmg, "mass of falling stuff", KILLED_BY_AN);
 					else {

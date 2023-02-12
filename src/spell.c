@@ -237,8 +237,7 @@ STATIC_OVL boolean cursed_book(struct obj *bp){
 				dmg = 2*rnd(10) + 10;
 			}
 			
-			if (Half_spell_damage) dmg = (dmg+1/2);
-			if (u.uvaul_duration) dmg = (dmg+1/2);
+			dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 			losehp(dmg, "exploding rune", KILLED_BY_AN);
 			
 			return TRUE;

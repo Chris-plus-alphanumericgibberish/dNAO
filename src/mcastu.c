@@ -2300,10 +2300,7 @@ int tary;
 		dmg = d(dmn, dmd);
 
 		/* apply damage reductions */
-		if (Half_spel(mdef))
-			dmg = (dmg + 1) / 2;
-		if (youdef && u.uvaul_duration)
-			dmg = (dmg + 1) / 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 		
 		/* handle damage type modifiers */
 		switch (adtyp) {
@@ -2505,10 +2502,7 @@ int tary;
 				mdef->mspec_used += dmg / 2;
 			/* approximate as dmn/3 silver stars */
 			
-			if (Half_phys(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 			if (dmg > 0) {
 				int i;
@@ -2967,10 +2961,7 @@ int tary;
 			}
 			else {
 				dmg = d(8, 6);
-				if (Half_spel(mdef))
-					dmg = (dmg + 1) / 2;
-				if (youdef && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 			}
 
 			/* destroy items if it hit */
@@ -3045,13 +3036,10 @@ int tary;
 			}
 			else {
 				dmg = d(8, 6);
-				if (Half_spel(mdef))
-					dmg = (dmg + 1) / 2;
-				if (youdef && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 			}
 
-			if (!InvFire_res(mdef)) {
+			if (!UseInvFire_res(mdef)) {
 				(void)burnarmor(mdef, FALSE);
 				destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -3131,10 +3119,7 @@ int tary;
 				}
 				/* this is physical damage, not magical damage */
 				dmg = d(8, 6);
-				if (Half_phys(mdef))
-					dmg = (dmg + 1) / 2;
-				if (youdef && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 				if (boots && boots->otyp == find_mboots()) {
 					if(youdef) pline("Good thing you're wearing mud boots!");
@@ -3150,7 +3135,7 @@ int tary;
 						dmg += d(1,10);
 				}
 				//Boiling water just boils potions
-				if(dunked == TOTAL_DUNK && !InvFire_res(mdef)){
+				if(dunked == TOTAL_DUNK && !UseInvFire_res(mdef)){
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				}
 			}
@@ -3303,8 +3288,7 @@ int tary;
 			}
 
 			/* calculate physical damage */
-			if (Half_phys(mdef))
-				pdmg = (pdmg + 1) / 2;
+			pdmg = reduce_dmg(mdef,pdmg,TRUE,FALSE);
 			/* apply average DR */
 			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
 			if (pdmg < 1)
@@ -3316,8 +3300,7 @@ int tary;
 				cdmg = 0;
 			}
 			else {
-				if (Half_spel(mdef))
-					cdmg = (cdmg + 1) / 2;
+				cdmg = reduce_dmg(mdef,cdmg,FALSE,TRUE);
 			}
 			if (!UseInvCold_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -3325,9 +3308,6 @@ int tary;
 
 			/* sum damage components to override dmg */
 			dmg = pdmg + cdmg;
-			/* apply u.uvaul to all */
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
 
 			/* player cold madness*/
 			if (youdef) roll_frigophobia();
@@ -3366,8 +3346,7 @@ int tary;
 			}
 
 			/* calculate physical damage */
-			if (Half_phys(mdef))
-				pdmg = (pdmg + 1) / 2;
+			pdmg = reduce_dmg(mdef,pdmg,TRUE,FALSE);
 			/* apply average DR */
 			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
 			if (pdmg < 1)
@@ -3385,8 +3364,7 @@ int tary;
 				cdmg = 0;
 			}
 			else {
-				if (Half_spel(mdef))
-					cdmg = (cdmg + 1) / 2;
+				cdmg = reduce_dmg(mdef,cdmg,FALSE,TRUE);
 			}
 			if (!UseInvCold_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -3394,9 +3372,6 @@ int tary;
 
 			/* sum damage components to override dmg */
 			dmg = pdmg + cdmg;
-			/* apply u.uvaul to all */
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
 
 			/* player cold madness*/
 			if (youdef) roll_frigophobia();
@@ -3725,10 +3700,7 @@ int tary;
 
 			/* piddling physical damage, regardless of sickness resistance */
 			dmg = rnd(10);
-			if (Half_phys(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -3823,8 +3795,7 @@ int tary;
 			impossible("silver rays with no mdef?");
 			return MM_MISS;
 		}
-		else
-		{
+		else {
 			int n = 0;
 			char * rays;
 
@@ -3929,8 +3900,12 @@ int tary;
 				if (youagr || youdef || canseemon(mdef))
 					pline("%s %s pierced by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
-				dmg = d(n, 20);
+				dmg = d(n, 20) - (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+				if(dmg < 1)
+					dmg = 1;
+				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 			}
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -3940,8 +3915,7 @@ int tary;
 			impossible("golden wave with no mdef?");
 			return MM_MISS;
 		}
-		else
-		{
+		else {
 			if (!Fire_res(mdef) && species_resists_cold(mdef)){
 				if (youagr || youdef || canseemon(mdef))
 					pline("%s %s burned by golden light!",
@@ -4029,8 +4003,12 @@ int tary;
 				if (youagr || youdef || canseemon(mdef))
 					pline("%s %s slashed by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
-				dmg = d(2, 12);
+				dmg = d(2, 12) - (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+				if(dmg < 1)
+					dmg = 1;
+				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 			}
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -4080,12 +4058,7 @@ int tary;
 			}
 
 			/* reduce damage */
-			if (Half_spel(mdef))
-				dmg = (dmg + 1) / 2;
-			if (Half_phys(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 3) / 4;
+			dmg = reduce_dmg(mdef,dmg,TRUE,TRUE);
 			if (dmg > 100)
 				dmg = 100;
 		}
@@ -4112,7 +4085,7 @@ int tary;
 			if (foundem) {
 				pline("%s drops out of %s and hits you!", An(xname(otmp)),
 					iron ? "nowhere" : the(ceiling(tarx, tary)));
-				dmg = dmgval(otmp, &youmonst, 0);
+				dmg = dmgval(otmp, &youmonst, 0, magr);
 				if (uarmh) {
 					if (is_hard(uarmh)) {
 						pline("Fortunately, you are wearing a hard helmet.");
@@ -4135,10 +4108,7 @@ int tary;
 				newsym(tarx, tary);
 			}
 
-			if (Half_phys(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -5146,8 +5116,7 @@ int tary;
 					if (youdef) {
 						You(Stunned ? "struggle to keep your balance." : "reel...");
 						dmg = d(ACURR(A_DEX) < 12 ? 2 : 1, 4);
-						if (Half_spell_damage) dmg = (dmg + 1) / 2;
-						if (u.uvaul_duration) dmg = (dmg + 1) / 2;
+						dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 						make_stunned(HStun + dmg, FALSE);
 					}
 					else {
@@ -5166,8 +5135,7 @@ int tary;
 						boolean oldprop = !!Confusion;
 
 						dmg = rnd(10) + rnd(mlev(magr));
-						if (Half_spell_damage) dmg = (dmg + 1) / 2;
-						if (u.uvaul_duration) dmg = (dmg + 1) / 2;
+						dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 						make_confused(HConfusion + dmg, TRUE);
 						if (Hallucination)
 							You_feel("%s!", oldprop ? "trippier" : "trippy");
@@ -5185,10 +5153,7 @@ int tary;
 				case PARALYZE:
 					/* set damage */
 					dmg = min(youdef ? rnd(4) : rnd(30), mlev(magr));	/* much less effective vs player */
-					if (Half_spel(mdef))
-						dmg = (dmg + 1) / 2;
-					if (youdef && u.uvaul_duration)
-						dmg = (dmg + 1) / 2;
+					dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 					/* apply with message */
 					if (youdef) {
 						if (multi >= 0) You("are frozen in place!");
@@ -5217,10 +5182,7 @@ int tary;
 		else {
 			/* set damage */
 			dmg = rnd(200);
-			if (Half_spel(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 			/* note: resist_blnd does not apply here */
 			if (youdef) {
@@ -5268,10 +5230,7 @@ int tary;
 			dmg = rnd(mlev(magr));
 			if (Magic_res(mdef))
 				dmg = (dmg + 1) / 2;
-			if (Half_spel(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 			if (youdef) {
 				You_hear("%s laugh menacingly as the world blurs around you...", mon_nam(magr));
@@ -5337,10 +5296,7 @@ int tary;
 			else {
 				You("suddenly feel weaker!");
 				dmg = rnd(2);
-				if (Half_spel(mdef))
-					dmg = (dmg + 1) / 2;
-				if (youdef && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 				losestr(dmg);
 				if (u.uhp < 1)
 					done_in_by(magr);
@@ -5371,10 +5327,7 @@ int tary;
 				/* drain one stat by a lot */
 				int typ = rn2(A_MAX);
 				dmg = rnd(4);
-				if (Half_spel(mdef))
-					dmg = (dmg + 1) / 2;
-				if (youdef && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 				/* try for a random stat */
 				if (adjattrib(typ, -dmg, -1)) {
 					/* Quest nemesis maledictions */
@@ -5386,10 +5339,7 @@ int tary;
 			if (!drained && !Fixed_abil) { /* if statdrain fails due to min stats, drain max HP a bit */
 				You_feel("your life force draining away...");
 
-				if (Half_spel(mdef))
-					dmg = (dmg + 1) / 2;
-				if (youdef && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 				if (dmg > 20)
 					dmg = 20;
 
@@ -5528,10 +5478,7 @@ int tary;
 				}
 				else {
 					dmg = rnd(4);
-					if (Half_spel(mdef))
-						dmg = (dmg + 1) / 2;
-					if (youdef && u.uvaul_duration)
-						dmg = (dmg + 1) / 2;
+					dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 					smarm->spe -= dmg;
 					if (smarm->spe < -1 * a_acdr(objects[smarm->otyp]))

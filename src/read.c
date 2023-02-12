@@ -2543,7 +2543,7 @@ struct obj	*sobj;
 				    if (mtmp->minvis && !canspotmon(mtmp))
 					map_invisible(mtmp->mx, mtmp->my);
 				}
-	    	    	    	mdmg = dmgval(otmp2, mtmp, 0) * otmp2->quan;
+	    	    	    	mdmg = dmgval(otmp2, mtmp, 0, &youmonst) * otmp2->quan;
 				if (helmet) {
 				    if(is_hard(helmet)) {
 					if (canspotmon(mtmp))
@@ -2586,7 +2586,7 @@ struct obj	*sobj;
 				!noncorporeal(youracedata) &&
 				!unsolid(youracedata)) {
 			You("are hit by %s!", doname(otmp2));
-			dmg = dmgval(otmp2, &youmonst, 0) * otmp2->quan;
+			dmg = dmgval(otmp2, &youmonst, 0, &youmonst) * otmp2->quan;
 			if (uarmh && !sobj->cursed) {
 			    if(is_hard(uarmh)) {
 				pline("Fortunately, you are wearing a hard helmet.");

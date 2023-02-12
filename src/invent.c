@@ -2756,8 +2756,8 @@ winid *datawin;
 		{
 			// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
 			struct weapon_dice wdice[2];
-			(void)dmgval_core(&wdice[0], FALSE, obj, otyp);	// small dice
-			(void)dmgval_core(&wdice[1], TRUE, obj, otyp);		// large dice
+			(void)dmgval_core(&wdice[0], FALSE, obj, otyp, &youmonst);	// small dice
+			(void)dmgval_core(&wdice[1], TRUE, obj, otyp, &youmonst);		// large dice
 
 			Sprintf(buf, "Damage: ");
 

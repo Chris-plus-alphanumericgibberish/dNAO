@@ -748,9 +748,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 		    damu = 0;
 		    You("are unharmed!");
 		} else {
-			if (Half_physical_damage && adtyp == AD_PHYS)
-		    damu = (damu+1) / 2;
-			if (u.uvaul_duration) damu = (damu + 1) / 2;
+			damu = reduce_dmg(&youmonst,damu,TRUE,FALSE);
 		}
 		if (adtyp == AD_FIRE || adtyp == AD_EFIR) (void) burnarmor(&youmonst, FALSE);
 		if(uhurt == 2){

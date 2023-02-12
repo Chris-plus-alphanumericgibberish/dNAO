@@ -4463,12 +4463,9 @@ struct zapdata * zapdata;
 			drain_en(dmg / 2);
 		else
 			mdef->mspec_used += dmg / 2;
-		/* approximate as dmn/3 silver stars */
-		if (Half_phys(mdef))
-			dmg = (dmg + 1) / 2;
-		if (youdef && u.uvaul_duration)
-			dmg = (dmg + 1) / 2;
 
+		dmg = reduce_dmg(mdef, dmg, TRUE, FALSE);
+		/* approximate as dmn/3 silver stars */
 		if (dmg > 0) {
 			int i;
 			/* reduce by DR */

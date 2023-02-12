@@ -5098,8 +5098,8 @@ shk_appraisal(slang, shkp)
 	/* Convert damage to ascii */
 
 	struct weapon_dice wdice[2];
-	(void)dmgval_core(&wdice[0], FALSE, obj, obj->otyp);	// small dice
-	(void)dmgval_core(&wdice[1], TRUE, obj, obj->otyp);		// large dice
+	(void)dmgval_core(&wdice[0], FALSE, obj, obj->otyp, &youmonst);	// small dice
+	(void)dmgval_core(&wdice[1], TRUE, obj, obj->otyp, &youmonst);		// large dice
 
 	Sprintf(buf, "Damage: ");
 

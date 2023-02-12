@@ -1476,9 +1476,9 @@ remake:
 					} else {
 						You("come into contact with your energy sword%s.", (mainsaber && secsaber && (lrole >= ACURR(A_DEX) || (mainsaber_locked && secsaber_locked))) ? "s" : "");
 						if(mainsaber && (mainsaber_locked || lrole >= ACURR(A_DEX)))
-							losehp(dmgval(uwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
+							losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
 						if(secsaber && (secsaber_locked || lrole >= ACURR(A_DEX)))
-							losehp(dmgval(uswapwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
+							losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
 					}
 					if(mainsaber && !mainsaber_locked)
 						lightsaber_deactivate(uwep, TRUE);
@@ -1489,8 +1489,8 @@ remake:
 						You("hurriedly deactivate your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
 					} else {
 						You("come into contact with your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
-						if(mainsaber) losehp(dmgval(uwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
-						if(secsaber) losehp(dmgval(uswapwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
+						if(mainsaber) losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
+						if(secsaber) losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
 					}
 					if(mainsaber) lightsaber_deactivate(uwep, TRUE);
 					if(secsaber) lightsaber_deactivate(uswapwep, TRUE);

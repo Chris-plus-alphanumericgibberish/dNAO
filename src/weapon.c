@@ -357,11 +357,12 @@ int oartifact;
  * typically 1, but artifacts and lightsabers affect it
  */
 int
-dmgval_core(wdice, large, obj, otyp)
+dmgval_core(wdice, large, obj, otyp, magr)
 struct weapon_dice *wdice;
 boolean large;
 struct obj* obj;
 int otyp;
+struct monst *magr;
 {
 	int dmod = 0;						/* die size modifier */
 	int spe_mult = 1;					/* multiplier for enchantment value */
@@ -957,10 +958,11 @@ boolean youdef;
  *	of "otmp" against the monster.
  */
 int
-dmgval(otmp, mon, spec)
+dmgval(otmp, mon, spec, magr)
 struct obj *otmp;
 struct monst *mon;
 int spec;
+struct monst *magr;
 {
 	int tmp = 0;				// running damage sum
 	int otyp = otmp->otyp;		// obj's type
@@ -981,7 +983,7 @@ int spec;
 	    return 9999;
 
 	/* grab the weapon dice from dmgval_core */
-	spe_mult = dmgval_core(&wdice, bigmonst(ptr), otmp, otyp);
+	spe_mult = dmgval_core(&wdice, bigmonst(ptr), otmp, otyp, magr);
 
 	/* increase die sizes by 2 if Marionette applies*/
 	if (spec & SPEC_MARIONETTE)
@@ -1039,7 +1041,7 @@ int spec;
 			int mir = 0;
 			struct weapon_dice mirdice;
 			/* grab the weapon dice from dmgval_core */
-			(void) dmgval_core(&mirdice, bigmonst(ptr), otmp2, 0);	//note: dmgval_core handles zero weapons gracefully
+			(void) dmgval_core(&mirdice, bigmonst(ptr), otmp2, 0, mon);	//note: dmgval_core handles zero weapons gracefully
 			if (spec & SPEC_MARIONETTE)
 			{
 				mirdice.oc_damd += 2;
@@ -1330,7 +1332,7 @@ int spot;
 			(mtmp->misc_worn_check & W_ARMG || !hates_unblessed_mon(mtmp) || (is_unholy(otmp) || otmp->blessed))
 		){
 			if (!obest ||
-				(dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0))
+				(dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(obest, 0 /*zeromonst*/,0, mtmp))
 				/*
 				(is_bludgeon(otmp) ? 
 					(otmp->spe - greatest_erosion(otmp) > obest->spe - greatest_erosion(obest)):
@@ -1354,7 +1356,7 @@ struct monst *mtmp;
 		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)))
             {
 	        if (!obest ||
-		    dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(obest, 0 /*zeromonst*/,0))
+		    dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(obest, 0 /*zeromonst*/,0, mtmp))
 		    obest = otmp;
 		}
 	}
@@ -1442,7 +1444,7 @@ struct obj *otmp;
         if (throws_rocks(mtmp->data) &&  is_boulder(wep)) return FALSE;
         if (throws_rocks(mtmp->data) && is_boulder(otmp)) return TRUE;
 		
-		if(wep->otyp == otmp->otyp) return dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(wep, 0 /*zeromonst*/, 0);
+		if(wep->otyp == otmp->otyp) return dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp);
 		
 		if(wep->otyp == ARM_BLASTER) return FALSE;
 		if(wep->otyp == HAND_BLASTER) return (otmp->otyp == ARM_BLASTER && otmp->ovar1 > 0);
@@ -1471,7 +1473,7 @@ struct obj *otmp;
         if ( wep &&
              wep->otyp == rwep[i] &&
            !(otmp->otyp == rwep[i] &&
-	     (dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(wep, 0 /*zeromonst*/, 0))))
+	     (dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp))))
 	    return FALSE;
         if (otmp->otyp == rwep[i]) return TRUE;
     }
@@ -1876,7 +1878,7 @@ struct obj *otmp;
         if ( wep &&
 	     wep->otyp == hwep[i] &&
            !(otmp->otyp == hwep[i] &&
-	     dmgval(otmp, 0 /*zeromonst*/, 0) > dmgval(wep, 0 /*zeromonst*/, 0)))
+	     dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp)))
 	    return FALSE;
         if (otmp->otyp == hwep[i]) return TRUE;
     }

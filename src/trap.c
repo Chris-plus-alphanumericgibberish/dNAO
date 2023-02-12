@@ -1052,8 +1052,7 @@ unsigned trflags;
 
 		    pline("%s you!", A_gush_of_water_hits);
 		    You("are covered with rust!");
-		    if (Half_physical_damage) dam = (dam+1) / 2;
-			if(u.uvaul_duration) dam = (dam + 1) / 2;
+			dam = reduce_dmg(&youmonst,dam,TRUE,FALSE);
 		    losehp(dam, "rusting away", KILLED_BY);
 			nomul(0, NULL);
 		    break;
@@ -1062,8 +1061,7 @@ unsigned trflags;
 
 		    pline("%s you!", A_gush_of_water_hits);
 		    You("are extinguished!");
-		    if (Half_physical_damage) dam = (dam+1) / 2;
-			if(u.uvaul_duration) dam = (dam + 1) / 2;
+			dam = reduce_dmg(&youmonst,dam,TRUE,FALSE);
 		    losehp(dam, "drenching", KILLED_BY);
 			nomul(0, NULL);
 		    break;

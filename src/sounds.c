@@ -1224,8 +1224,7 @@ asGuardian:
 				}
 				ix = mtmp ? rnd((int)mtmp->m_lev) : rnd(10);
 				if(Antimagic) ix = (ix + 1) / 2;
-				if(Half_spell_damage) ix = (ix+1) / 2;
-				if(u.uvaul_duration) ix = (ix + 1) / 2;
+				ix = reduce_dmg(&youmonst,ix,FALSE,TRUE);
 				make_confused(HConfusion + ix*10, FALSE);
 				make_stunned(HStun + ix*5, FALSE);
 				make_hallucinated(HHallucination + ix*15, FALSE, 0L);
@@ -1701,8 +1700,7 @@ asGuardian:
 								if(Shock_resistance) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 							break;
 						}
-						if(Half_spell_damage) dmg /= 2;
-						if(u.uvaul_duration) dmg /= 2;
+						dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 						if(dmg) dmg = min(dmg,Upolyd ? (u.mh - 1) : (u.uhp - 1));
 						if(dmg) mdamageu(mtmp,dmg);
 					}
