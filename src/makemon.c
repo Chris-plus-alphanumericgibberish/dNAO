@@ -8381,6 +8381,13 @@ int mmflags;
 			if(otmp){
 				(void) mpickobj(mtmp, otmp);
 			}
+			otmp = mksartifact(ART_ESSCOOAHLIPBOOURRR);
+			if(otmp){
+				otmp->blessed = TRUE;
+				otmp->cursed = FALSE;
+				otmp->spe = 3;
+				(void) mpickobj(mtmp, otmp);
+			}
 		} else if(ptr->mtyp == PM_ALIDER){
 			otmp = mksobj(WHITE_VIBROZANBATO, mkobjflags);
 			otmp->spe = 8;

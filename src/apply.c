@@ -3203,6 +3203,10 @@ coord *cc;
 		add_mx(mtmp, MX_ESUM);
 		// start_timer(master == &youmonst ? min(u.uinsight, 100) : 100, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mtmp);
 		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
+			//Invalid items that are in the skull (possibly as a result of special cases) are skipped and handled later.
+			if(oinv->otyp == TREPHINATION_KIT || ensouled_item(oinv))
+				continue;
+
 			otmp = duplicate_obj(oinv);
 			obj_extract_self(otmp);
 			if(otmp->oclass == SCROLL_CLASS){
@@ -3222,8 +3226,6 @@ coord *cc;
 			}
 			mpickobj(mtmp,otmp);
 		}
-		m_dowear(mtmp, TRUE);
-		init_mon_wield_item(mtmp);
 		m_level_up_intrinsic(mtmp);
 		if(master == &youmonst || master->mtame){
 			mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
@@ -3239,16 +3241,16 @@ coord *cc;
 		}
 		mark_mon_as_summoned(mtmp, master, ESUMMON_PERMANENT, 0);
 		mtmp->mextra_p->esum_p->sm_o_id = obj->o_id;
-		//Dodge being marked as summoned :(
-		if(mtmp->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !art_already_exists(ART_ESSCOOAHLIPBOOURRR)){
-			otmp = mksartifact(ART_ESSCOOAHLIPBOOURRR);
-			if(otmp){
-				otmp->blessed = TRUE;
-				otmp->cursed = FALSE;
-				otmp->spe = 3;
-				(void) mpickobj(mtmp, otmp);
+		//After being marked as summoning, extract invalid items from skull and add to inventory.
+		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
+			if(oinv->otyp == TREPHINATION_KIT || ensouled_item(oinv)){
+				obj_extract_self(oinv);
+				mpickobj(mtmp,oinv);
 			}
 		}
+
+		m_dowear(mtmp, TRUE);
+		init_mon_wield_item(mtmp);
 	}
 }
 
