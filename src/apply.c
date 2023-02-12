@@ -34,6 +34,7 @@ STATIC_DCL void FDECL(use_candle, (struct obj **));
 STATIC_DCL void FDECL(use_lamp, (struct obj *));
 STATIC_DCL int FDECL(swap_aegis, (struct obj *));
 STATIC_DCL int FDECL(aesculapius_poke, (struct obj *));
+STATIC_DCL int FDECL(ilmater_touch, (struct obj *));
 STATIC_DCL int FDECL(use_rakuyo, (struct obj *));
 STATIC_DCL int FDECL(use_mercy_blade, (struct obj *));
 STATIC_DCL int FDECL(use_force_blade, (struct obj *));
@@ -1560,6 +1561,80 @@ struct obj *obj;
 }
 
 STATIC_OVL int
+ilmater_touch(obj)
+struct obj *obj;
+{
+	struct monst *mon;
+	// Allow the cords to be used from inventory, like a unicorn horn or a stethoscope.
+	if(!getdir((char *)0)) {
+		return MOVE_CANCELLED;
+	}
+	if(u.dz > 0){
+		if(u.usteed)
+			mon = u.usteed;
+		else if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			You("doubt that will have any further effect.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(u.dz < 0){
+		if(u.uswallow)
+			mon = u.ustuck;
+		else {
+			You("don't see anything up there to touch with your cords.");
+			return MOVE_CANCELLED;
+		}
+	}
+	else if(!u.dx && !u.dy){
+		if(*hp(&youmonst) >= *hpmax(&youmonst))
+			pline("Nothing happens.");
+		else
+			You("transfer your wounds to yourself.");
+		return MOVE_STANDARD;
+	}
+	else if(!isok(u.ux + u.dx, u.uy + u.dy)){
+		You("don't touch anything.");
+		return MOVE_STANDARD;
+	}
+	else {
+		mon = m_at(u.ux + u.dx, u.uy + u.dy);
+	}
+	if(!mon){
+		You("don't touch anything.");
+		return MOVE_STANDARD;
+	}
+	if(mon->mpeaceful){
+		if(*hp(mon) >= *hpmax(mon))
+			pline("Nothing happens.");
+		else {
+			You("transfer %s wounds to yourself.", s_suffix(mon_nam(mon)));
+			int wounds = *hpmax(mon) - *hp(mon);
+			wounds = min(wounds, *hp(&youmonst)/2);
+			*hp(mon) += wounds;
+			*hp(&youmonst) -= wounds;
+			flags.botl = 1;
+		}
+		return MOVE_STANDARD;
+	}
+	else {
+		if(*hp(&youmonst) >= *hpmax(&youmonst))
+			pline("Nothing happens.");
+		else {
+			You("transfer your wounds to %s.", mon_nam(mon));
+			int wounds = *hpmax(&youmonst) - *hp(&youmonst);
+			wounds = min(wounds, *hp(mon)/2);
+			*hp(&youmonst) += wounds;
+			*hp(mon) -= wounds;
+			flags.botl = 1;
+		}
+		return MOVE_STANDARD;
+	}
+	return MOVE_STANDARD;
+}
+
+STATIC_OVL int
 aesculapius_poke(obj)
 struct obj *obj;
 {
@@ -1598,7 +1673,7 @@ struct obj *obj;
 	}
 	else if(!isok(u.ux + u.dx, u.uy + u.dy)){
 		if(shackles)
-			pline("Your broken shackles touch it!");
+			pline("Your broken shackles don't touch anything.");
 		else
 			pline("Your staff doesn't touch anything.");
 		return MOVE_STANDARD;
@@ -1608,7 +1683,7 @@ struct obj *obj;
 	}
 	if(!mon){
 		if(shackles)
-			pline("Your broken shackles touch it!");
+			pline("Your broken shackles don't touch anything!");
 		else
 			pline("Your staff doesn't touch anything.");
 		return MOVE_STANDARD;
@@ -3129,6 +3204,10 @@ coord *cc;
 		add_mx(mtmp, MX_ESUM);
 		// start_timer(master == &youmonst ? min(u.uinsight, 100) : 100, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mtmp);
 		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
+			//Invalid items that are in the skull (possibly as a result of special cases) are skipped and handled later.
+			if(oinv->otyp == TREPHINATION_KIT || ensouled_item(oinv))
+				continue;
+
 			otmp = duplicate_obj(oinv);
 			obj_extract_self(otmp);
 			if(otmp->oclass == SCROLL_CLASS){
@@ -3148,8 +3227,6 @@ coord *cc;
 			}
 			mpickobj(mtmp,otmp);
 		}
-		m_dowear(mtmp, TRUE);
-		init_mon_wield_item(mtmp);
 		m_level_up_intrinsic(mtmp);
 		if(master == &youmonst || master->mtame){
 			mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
@@ -3165,16 +3242,16 @@ coord *cc;
 		}
 		mark_mon_as_summoned(mtmp, master, ESUMMON_PERMANENT, 0);
 		mtmp->mextra_p->esum_p->sm_o_id = obj->o_id;
-		//Dodge being marked as summoned :(
-		if(mtmp->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !art_already_exists(ART_ESSCOOAHLIPBOOURRR)){
-			otmp = mksartifact(ART_ESSCOOAHLIPBOOURRR);
-			if(otmp){
-				otmp->blessed = TRUE;
-				otmp->cursed = FALSE;
-				otmp->spe = 3;
-				(void) mpickobj(mtmp, otmp);
+		//After being marked as summoning, extract invalid items from skull and add to inventory.
+		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
+			if(oinv->otyp == TREPHINATION_KIT || ensouled_item(oinv)){
+				obj_extract_self(oinv);
+				mpickobj(mtmp,oinv);
 			}
 		}
+
+		m_dowear(mtmp, TRUE);
+		init_mon_wield_item(mtmp);
 	}
 }
 
@@ -4215,6 +4292,76 @@ struct obj *otmp;
 		otmp->spe--;
 		pline("The cloak releases a cloud of darkness!");
 		litroom(FALSE, otmp);	/* only needs to be done once */
+	}
+	return MOVE_STANDARD;
+}
+
+STATIC_OVL int
+use_eilistran_armor(optr)
+struct obj **optr;
+{
+	struct obj *otmp = *optr;
+	winid tmpwin;
+	anything any;
+	menu_item *selected;
+	int n;
+
+	any.a_void = 0;         /* zero out all bits */
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	
+	if(otmp->ovar1_eilistran_charges > 0){
+		any.a_int = 1;
+		add_menu(tmpwin, NO_GLYPH, &any , 't', 0, ATR_NONE,
+			 (otmp->altmode == EIL_MODE_ON) ? "Turn off." : "Turn on.", MENU_UNSELECTED);
+	}
+	if(otmp->ovar1_eilistran_charges <= 540){
+		any.a_int = 2;
+		add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
+			 "Replace worn components.", MENU_UNSELECTED);
+	}
+
+	end_menu(tmpwin, "Do what?");
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	if(n > 0){
+		n = selected[0].item.a_int;
+		free(selected);
+	}
+	destroy_nhwindow(tmpwin);
+	if(!n)
+		return MOVE_CANCELLED;
+	
+	switch(n){
+		case 1:
+			if(otmp->altmode == EIL_MODE_ON){
+				otmp->altmode = EIL_MODE_OFF;
+				You("Switch the armor off.");
+				return MOVE_PARTIAL;
+			}
+			else {
+				otmp->altmode = EIL_MODE_ON;
+				You("Switch the armor on.");
+				return MOVE_PARTIAL;
+			}
+		break;
+		case 2:{
+			struct obj *component = getobj(tools, "replace with");
+			if(!component)
+				return MOVE_CANCELLED;
+			else if(component->otyp != CLOCKWORK_COMPONENT){
+				pline("This device requires clockwork components.");
+				return MOVE_CANCELLED;
+			}
+			else if(component->cursed){
+				pline("The component won't go into the mechanism!");
+				return MOVE_STANDARD;
+			}
+			//else
+			useup(component);
+			You("put the new component into the armor's mechanism.");
+			otmp->ovar1_eilistran_charges += 60;
+			return MOVE_STANDARD;
+		}break;
 	}
 	return MOVE_STANDARD;
 }
@@ -6561,7 +6708,7 @@ struct obj *obj;
 						map_invisible(mtmp->mx, mtmp->my);
 					}
 
-					dmg = dmgval(otmp, mtmp, 0);
+					dmg = dmgval(otmp, mtmp, 0, &youmonst);
 					struct obj *helmet = youdef ? uarmh : which_armor(mtmp, W_ARMH);
 					if (helmet) {
 						if(is_hard(helmet)) {
@@ -6589,10 +6736,7 @@ struct obj *obj;
 						newsym(x, y);
 					}
 
-					if (Half_phys(mtmp))
-						dmg = (dmg + 1) / 2;
-					if (youdef && u.uvaul_duration)
-						dmg = (dmg + 1) / 2;
+					dmg = reduce_dmg(mtmp,dmg,TRUE,FALSE);
 					if(youdef)
 						losehp(dmg, "mass of falling stuff", KILLED_BY_AN);
 					else {
@@ -6877,6 +7021,10 @@ struct obj *obj;
 			otmp = getobj(tools, "replace with");
 			if(!otmp)
 				return FALSE;
+			else if(otmp->otyp != HELLFIRE_COMPONENT){
+				pline("This device requires hellfire components.");
+				return FALSE;
+			}
 			//else
 			useup(otmp);
 			You("put the new component into the engine.");
@@ -7836,7 +7984,7 @@ doapply()
 		add_class(class_list, FOOD_CLASS);
 	if (carrying(DWARVISH_HELM) || carrying(LANTERN_PLATE_MAIL) ||
 		carrying(GNOMISH_POINTY_HAT) || carrying(DROVEN_CLOAK) ||
-		carrying_art(ART_AEGIS))
+		carrying_art(ART_AEGIS) || carrying(EILISTRAN_ARMOR))
 		add_class(class_list, ARMOR_CLASS);
 	if(carrying_applyable_ring()){
 		add_class(class_list, RING_CLASS);
@@ -7879,6 +8027,7 @@ doapply()
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
 	else if(obj->oartifact == ART_STAFF_OF_AESCULAPIUS) res = aesculapius_poke(obj);
 	else if(obj->oartifact == ART_ESSCOOAHLIPBOOURRR) res = aesculapius_poke(obj);
+	else if(obj->oartifact == ART_RED_CORDS_OF_ILMATER) res = ilmater_touch(obj);
 	else if(obj->otyp == RAKUYO || obj->otyp == RAKUYO_SABER){
 		return use_rakuyo(obj);
 	}
@@ -8450,6 +8599,9 @@ doapply()
 	case DROVEN_CLOAK:
 		if(obj->oartifact == ART_DARKWEAVER_S_CLOAK) res = use_darkweavers_cloak(obj);
 		else res = use_droven_cloak(&obj);
+	break;
+	case EILISTRAN_ARMOR:
+		res = use_eilistran_armor(&obj);
 	break;
 	case FLINT:
 	case LUCKSTONE:

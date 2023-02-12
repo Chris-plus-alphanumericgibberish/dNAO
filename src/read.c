@@ -460,7 +460,6 @@ doread()
 				pline("With that realization comes knowledge of the seal's final form!");
 				u.specialSealsKnown |= SEAL_NUDZIRATH;
 			}
-
 		}
 		return MOVE_READ;
 	} else if(scroll->oclass == WEAPON_CLASS && (scroll)->obj_material == WOOD && scroll->oward != 0){
@@ -686,8 +685,20 @@ doread()
 	) {
 	    pline(silly_thing_to, "read");
 	    return MOVE_CANCELLED;
+	} else if ((Babble || Screaming || mad_turn(MAD_TOO_BIG))
+		&& (scroll->oclass == SPBOOK_CLASS)
+	){
+		if(Screaming)
+			You_cant("focus on that while you're screaming!");
+		else if(Babble)
+			You_cant("focus on that while you're babbling incoherently!");
+		else if(mad_turn(MAD_TOO_BIG))
+			pline("It's too big!");
+		else
+			impossible("You can't read that book for some reason?");
+	    return MOVE_INSTANT;
 	} else if ((Babble || Strangled || Drowning || mad_turn(MAD_TOO_BIG))
-		&& (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS || (scroll->oclass == TILE_CLASS && objects[scroll->otyp].oc_magic))
+		&& (scroll->oclass == SCROLL_CLASS || (scroll->oclass == TILE_CLASS && objects[scroll->otyp].oc_magic))
 	){
 		if(Strangled)
 			You_cant("read that aloud, you can't breathe!");
@@ -701,18 +712,23 @@ doread()
 			impossible("You can't read that aloud for some reason?");
 	    return MOVE_INSTANT;
 		//Note, you CAN scream one syllable
-	} else if (Screaming && (scroll->oclass == SCROLL_CLASS || scroll->oclass == SPBOOK_CLASS)){
+	} else if (Screaming && (scroll->oclass == SCROLL_CLASS)){
 	    You_cant("read that aloud, you're too busy screaming!");
 	    return MOVE_INSTANT;
 	} else if (Blind) {
 	    const char *what = 0;
 	    if (scroll->oclass == SPBOOK_CLASS)
-		what = "mystic runes";
+			what = "mystic runes";
 	    else if (!scroll->dknown)
-		what = "formula on the scroll";
+			what = "formula on the scroll";
 	    if (what) {
-		pline("Being blind, you cannot read the %s.", what);
-		return MOVE_INSTANT;
+			if(check_oprop(scroll, OPROP_TACTB)){
+				pline("A tactile script supplements the %s.", what);
+			}
+			else {
+				pline("Being blind, you cannot read the %s.", what);
+				return MOVE_INSTANT;
+			}
 	    }
 	}
 
@@ -2527,7 +2543,7 @@ struct obj	*sobj;
 				    if (mtmp->minvis && !canspotmon(mtmp))
 					map_invisible(mtmp->mx, mtmp->my);
 				}
-	    	    	    	mdmg = dmgval(otmp2, mtmp, 0) * otmp2->quan;
+	    	    	    	mdmg = dmgval(otmp2, mtmp, 0, &youmonst) * otmp2->quan;
 				if (helmet) {
 				    if(is_hard(helmet)) {
 					if (canspotmon(mtmp))
@@ -2570,7 +2586,7 @@ struct obj	*sobj;
 				!noncorporeal(youracedata) &&
 				!unsolid(youracedata)) {
 			You("are hit by %s!", doname(otmp2));
-			dmg = dmgval(otmp2, &youmonst, 0) * otmp2->quan;
+			dmg = dmgval(otmp2, &youmonst, 0, &youmonst) * otmp2->quan;
 			if (uarmh && !sobj->cursed) {
 			    if(is_hard(uarmh)) {
 				pline("Fortunately, you are wearing a hard helmet.");
@@ -3580,6 +3596,7 @@ char *in_buff;
 	int which, tries, i;
 	int undeadtype = 0;
 	boolean mad_suicidal = FALSE;
+	boolean noequip = FALSE;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
@@ -3673,6 +3690,9 @@ char *in_buff;
 			}
 			else if (!strncmpi(bufp, "suicidal ", l = 9)) {
 				mad_suicidal = TRUE;
+			}
+			else if (!strncmpi(bufp, "noequip ", l = 8)) {
+				noequip = TRUE;
 			}
 			else
 				break;
@@ -3844,6 +3864,8 @@ createmon:
 				mm_flags |= MM_EDOG;
 			if (makesummoned)
 				mm_flags |= MM_ESUM;
+			if (noequip)
+				mm_flags |= NO_MINVENT;
 
 			mtmp = makemon_full(whichpm, x, y, mm_flags, undeadtype ? undeadtype : -1, -1);
 

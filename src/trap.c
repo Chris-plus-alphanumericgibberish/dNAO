@@ -536,7 +536,7 @@ boolean td;	/* td == TRUE : trap door or hole */
 	    Sprintf(msgbuf, "The hole in the %s above you closes up.",
 		    ceiling(u.ux,u.uy));
 	schedule_goto(&dtmp, FALSE, TRUE, 0,
-		      (char *)0, !td ? msgbuf : (char *)0, 0);
+		      (char *)0, !td ? msgbuf : (char *)0, 0, 0);
 }
 
 /*
@@ -622,7 +622,7 @@ int *fail_reason;
 	}
 	
 	if(mon && cause == ANIMATE_SPELL 
-		&& ((In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON))
+		&& ((In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON || mon->mtyp == PM_IKSH_NA_DEVA))
 			||  rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)
 		) && !(is_animal(mon->data) || mindless_mon(mon))
 	){
@@ -633,7 +633,7 @@ int *fail_reason;
 		if(canspotmon(mon) && mon->mtame)
 			grateful = TRUE;
 
-		if(In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON)){
+		if(In_quest(&u.uz) && Role_if(PM_HEALER) && (mon->mtyp == PM_IASOIAN_ARCHON || mon->mtyp == PM_PANAKEIAN_ARCHON || mon->mtyp == PM_HYGIEIAN_ARCHON || mon->mtyp == PM_IKSH_NA_DEVA)){
 			set_template(mon, PLAGUE_TEMPLATE);
 			if(get_mx(mon, MX_EDOG))
 				EDOG(mon)->loyal = TRUE;
@@ -1052,8 +1052,7 @@ unsigned trflags;
 
 		    pline("%s you!", A_gush_of_water_hits);
 		    You("are covered with rust!");
-		    if (Half_physical_damage) dam = (dam+1) / 2;
-			if(u.uvaul_duration) dam = (dam + 1) / 2;
+			dam = reduce_dmg(&youmonst,dam,TRUE,FALSE);
 		    losehp(dam, "rusting away", KILLED_BY);
 			nomul(0, NULL);
 		    break;
@@ -1062,8 +1061,7 @@ unsigned trflags;
 
 		    pline("%s you!", A_gush_of_water_hits);
 		    You("are extinguished!");
-		    if (Half_physical_damage) dam = (dam+1) / 2;
-			if(u.uvaul_duration) dam = (dam + 1) / 2;
+			dam = reduce_dmg(&youmonst,dam,TRUE,FALSE);
 		    losehp(dam, "drenching", KILLED_BY);
 			nomul(0, NULL);
 		    break;
@@ -2996,7 +2994,7 @@ long hmask, emask;     /* might cancel timeout */
 			target_level.dnum = u.uz.dnum;
 			target_level.dlevel = qlocate_level.dlevel+1;
 			int dist = qlocate_level.dlevel+1 - u.uz.dlevel;
-			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6));
+			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6), 0);
 		}
 	}
 	else if(trap)
@@ -3425,6 +3423,7 @@ struct monst *owner;
 			else {
 				obj->otyp = SPE_BLANK_PAPER;
 				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+				remove_oprop(obj, OPROP_TACTB);
 			}
 			break;
 		    case POTION_CLASS:

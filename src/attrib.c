@@ -1286,10 +1286,11 @@ struct monst *mon;
 		else return((schar)((tmp >= 125) ? 125 : (tmp <= 3) ? 3 : tmp));
 	} else if (x == A_CON) {
 		if (
-			(wep && wep->oartifact == ART_OGRESMASHER) ||
-			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||
-			(wep && wep->oartifact == ART_STORMBRINGER) ||
-			(armg && armg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+			(uwep && uwep->oartifact == ART_OGRESMASHER)
+			|| (uswapwep && uswapwep->oartifact == ART_OGRESMASHER)
+			|| (uwep && uwep->oartifact == ART_STORMBRINGER)
+			|| (uarmg && uarmg->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+			|| (uarmg && uarmg->oartifact == ART_RED_CORDS_OF_ILMATER)
 		) return(25);
 		if(is_player && Race_if(PM_ORC)){
 			tmp += u.ulevel/3;

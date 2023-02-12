@@ -184,8 +184,8 @@ FLAGS: hardfloor
 #
 INIT_MAP: 'e' , 'P', true , true , lit , false
 GEOMETRY:center,center
-#          1        2         3
-#012345678901234567901234567890
+#          1         2         3
+#0123456789012345678901234567890
 MAP
 0PPPPPPPPPPPPPeeeeeeePPPPPPPPPPP
 1PPPPPPPPeeeeeeeeeeeeeeePPPPPPPP

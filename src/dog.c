@@ -779,7 +779,10 @@ boolean portal;
 		/* the wiz will level t-port from anywhere to chase
 		   the amulet; if you don't have it, will chase you
 		   only if in range. -3. */
-			(u.uhave.amulet && mtmp->iswiz))
+			(u.uhave.amulet && mtmp->iswiz)
+		/* All lurking hands follow between levels */
+			|| (mtmp->mtyp == PM_LURKING_HAND || mtmp->mtyp == PM_BLASPHEMOUS_HAND)
+		)
 		&& ((!mtmp->msleeping && mtmp->mcanmove)
 #ifdef STEED
 		    /* eg if level teleport or new trap, steed has no control

@@ -218,6 +218,9 @@ register struct monst *mon;
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
 	
+	if(is_eeladrin(mon->data))
+		return (struct obj *)0; //Eladrin don't drop objects in their energy form.
+	
 	rwep = mon_attacktype(mon, AT_WEAP) ? propellor : &zeroobj;
 
 	if (is_animal(mon->data) || mindless_mon(mon)) {

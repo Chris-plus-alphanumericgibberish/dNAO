@@ -1372,6 +1372,10 @@ int mkflags;
 				otmp->age = (long)rn1(500, 1000);
 				otmp->lamplit = 0;
 			}
+			if (otmp->otyp == EILISTRAN_ARMOR) {
+				otmp->altmode = EIL_MODE_ON;
+				otmp->ovar1_eilistran_charges = 600;
+			}
 			if (is_readable_armor_otyp(otmp->otyp)){
 				otmp->ohaluengr = TRUE;
 				if (Race_if(PM_DROW) && Is_qstart(&u.uz)) otmp->oward = u.start_house;

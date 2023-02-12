@@ -1100,6 +1100,8 @@ int godnum;
 			otmp->otyp = rnd_class(bases[SPBOOK_CLASS], SPE_BLANK_PAPER);
 			}
 			bless(otmp);
+			if(otmp->otyp != SPE_BLANK_PAPER && (Blind || godnum == GOD_PEN_A))
+				add_oprop(otmp, OPROP_TACTB);
 			place_object(otmp, u.ux, u.uy);
 			break;
 		}

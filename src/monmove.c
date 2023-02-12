@@ -1268,13 +1268,13 @@ register struct monst *mtmp;
 		}
 	}
 	if(mtmp->mspores){
-		if(!rn2(4)){
+		if(!rn2(mtmp->m_lev)){
 			mtmp->mconf = 1;
 			(void) set_apparxy(mtmp);
-		}
-		if(!rn2(4)){
-			mtmp->mberserk = 1;
-			(void) set_apparxy(mtmp);
+			if(!rn2(mtmp->m_lev)){
+				mtmp->mberserk = 1;
+				(void) set_apparxy(mtmp);
+			}
 		}
 	}
 	if(mtmp->mrage){
@@ -1503,6 +1503,9 @@ register struct monst *mtmp;
 			
 			if (hideablewidegaze(gazemon->data) && hiddenwidegaze(gazemon))
 				continue;
+
+			if(mon_resistance(mtmp, GAZE_RES))
+				continue;
 			
 			if (controlledwidegaze(gazemon->data)
 				&& !mm_aggression(gazemon, mtmp)
@@ -1727,6 +1730,25 @@ register struct monst *mtmp;
 		return 0;
 	}
 
+	if(mtmp->mtyp == PM_PORO_AULON
+		&& !mtmp->mcan && !mtmp->mspec_used
+		&& !(noactions(mtmp))
+		&& !(mindless_mon(mtmp))
+		&& !rn2(20)
+	){
+		struct obj * otmp = which_armor(mtmp, W_ARM);
+		if(otmp && otmp->otyp == EILISTRAN_ARMOR){
+			if(otmp->altmode != EIL_MODE_ON)
+				otmp->altmode = EIL_MODE_ON;
+			if(otmp->ovar1_eilistran_charges <= 40){
+				if(canspotmon(mtmp))
+					pline("%s replaces some worn out components in %s armor.",Monnam(mtmp), hisherits(mtmp));
+				otmp->ovar1_eilistran_charges += 60;
+				return 0;
+			}
+		}
+	}
+
 	if(mtmp->mtyp == PM_PHALANX
 		&& !mtmp->mcan
 		&& !(noactions(mtmp))
@@ -1946,8 +1968,7 @@ register struct monst *mtmp;
 					mtmp->mspec_used += dmg;
 			}
 			if(dmg){
-				if (Half_spell_damage) dmg = (dmg+1) / 2;
-				if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 				losehp(dmg, "psychic blast", KILLED_BY_AN);
 				if(mdat->mtyp == PM_SEMBLANCE) make_hallucinated(HHallucination + dmg, FALSE, 0L);
 				if(mdat->mtyp == PM_GREAT_CTHULHU){

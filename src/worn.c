@@ -650,9 +650,17 @@ struct monst *mon;
 	int base = 10, armac = 0;
 	struct obj *monwep;
 	
-	base -= mon->data->nac;
-	if(!mon->mcan)
+	if(mon->mtyp == PM_OONA || mon->mtyp == PM_PORO_AULON){
+		base -= mon->data->nac*mon->mhp/mon->mhpmax;
+	}
+	else{
+		base -= mon->data->nac;
+	}
+	if(!mon->mcan){
 		base -= mon->data->pac;
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			base -= (32-u.uinsight)/2;
+	}
 	
 	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
 	else if(mon->mtyp == PM_PALE_NIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
@@ -840,9 +848,18 @@ struct monst *mon;
 	struct obj *obj;
 	int base = 10, armac = 0;
 	long mwflags = mon->misc_worn_check;
-	base -= mon->data->nac;
-	if(!mon->mcan)
+	
+	if(mon->mtyp == PM_OONA || mon->mtyp == PM_PORO_AULON){
+		base -= mon->data->nac*mon->mhp/mon->mhpmax;
+	}
+	else {
+		base -= mon->data->nac;
+	}
+	if(!mon->mcan){
 		base -= mon->data->pac;
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			base -= (32-u.uinsight)/2;
+	}
 	
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base -= u.chokhmah;
@@ -1072,7 +1089,16 @@ struct monst *mon;
 #undef m_hdr
 #undef m_fdr
 #undef m_gdr
-		base += (dr / 7);	
+		base += (dr / 7);
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			base += (33-u.uinsight)/2;
+
+		if(mon->mtyp == PM_OONA && mon->mhp < mon->mhpmax/2){
+			base += 7;
+		}
+		if(mon->mtyp == PM_PORO_AULON && mon->mhp < mon->mhpmax/2){
+			base += 1;
+		}
 	}
 	return base;
 }
@@ -1252,14 +1278,19 @@ int depth;
 		arm_mdr = slot_udr(slot, magr, 0);
 	}
 	/* Natural DR */
+	int slotnatdr;
 	switch (slot)
 	{
-	case UPPER_TORSO_DR: nat_mdr += mon->data->bdr; break;
-	case LOWER_TORSO_DR: nat_mdr += mon->data->ldr; break;
-	case HEAD_DR:        nat_mdr += mon->data->hdr; break;
-	case LEG_DR:         nat_mdr += mon->data->fdr; break;
-	case ARM_DR:         nat_mdr += mon->data->gdr; break;
+	case UPPER_TORSO_DR: slotnatdr = mon->data->bdr; break;
+	case LOWER_TORSO_DR: slotnatdr = mon->data->ldr; break;
+	case HEAD_DR:        slotnatdr = mon->data->hdr; break;
+	case LEG_DR:         slotnatdr = mon->data->fdr; break;
+	case ARM_DR:         slotnatdr = mon->data->gdr; break;
 	}
+	if(mon->mtyp == PM_OONA || mon->mtyp == PM_PORO_AULON){
+		slotnatdr = slotnatdr*mon->mhp/mon->mhpmax;
+	}
+	nat_mdr += slotnatdr;
 	if (!mon->mcan) {
 		switch (slot)
 		{
@@ -1268,6 +1299,15 @@ int depth;
 		case HEAD_DR:        bas_mdr += mon->data->spe_hdr; break;
 		case LEG_DR:         bas_mdr += mon->data->spe_fdr; break;
 		case ARM_DR:         bas_mdr += mon->data->spe_gdr; break;
+		}
+		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+			bas_mdr += (33-u.uinsight)/2;
+
+		if(mon->mtyp == PM_OONA && mon->mhp < mon->mhpmax/2){
+			bas_mdr += 7;
+		}
+		if(mon->mtyp == PM_PORO_AULON && mon->mhp < mon->mhpmax/2){
+			bas_mdr += 1;
 		}
 	}
 
@@ -1332,7 +1372,6 @@ struct monst * mon;
 	/* only looks at a monster's base stats with minimal adjustment (and no worn armor) */
 	/* used for pokedex entry */
 	int dr = 0;
-
 #define m_bdr (mon->data->bdr + mon->data->spe_bdr)
 #define m_ldr (mon->data->ldr + mon->data->spe_ldr)
 #define m_hdr (mon->data->hdr + mon->data->spe_hdr)

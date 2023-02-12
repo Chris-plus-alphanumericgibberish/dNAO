@@ -983,10 +983,7 @@ yellow_smite()
 			dmg = d(10,5);
 			if (Antimagic)
 				dmg = (dmg + 1) / 2;
-			if (Half_spell_damage)
-				dmg = (dmg + 1) / 2;
-			if (u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 			if (dmg >= *hp(&youmonst)) {
 				Your("body is covered with deadly wounds!");
 				dmg = max(*hp(&youmonst) - 5, 0);	/* Cap the damage */
@@ -1006,10 +1003,7 @@ yellow_smite()
 			dmg = rnd(d(5,15));
 			if (Antimagic)
 				dmg = (dmg + 1) / 2;
-			if (Half_spell_damage)
-				dmg = (dmg + 1) / 2;
-			if (u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 			You_hear("Menacing laughter as the world blurs around you...");
 			make_confused(HConfusion + dmg * 10, FALSE);
 			make_stunned(HStun + dmg, FALSE);

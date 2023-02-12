@@ -203,7 +203,7 @@ boolean seal;
 		portal_flag = u.uevent.qexpelled ? 0 :	/* returned via artifact? */
 			  !seal ? 1 : -1;
 	}
-    schedule_goto(dest, FALSE, FALSE, portal_flag, (char *)0, (char *)0,0);
+    schedule_goto(dest, FALSE, FALSE, portal_flag, (char *)0, (char *)0,0, 0);
     if (seal) {	/* remove the portal to the quest - sealing it off */
 		int reexpelled = u.uevent.qexpelled;
 		u.uevent.qexpelled = 1;

@@ -141,7 +141,20 @@ int dam;
 int color;
 int radius;
 {
-	explode_pa(x, y, adtyp, olet, dam, color, radius, (struct permonst *) 0);
+	explode_full(x, y, adtyp, olet, dam, color, radius, (struct permonst *) 0, 0);
+}
+
+void
+explode_sound(x, y, adtyp, olet, dam, color, radius, dest)
+int x, y;
+int adtyp; /* the same as in zap.c */
+int olet;
+int dam;
+int color;
+int radius;
+int dest;
+{
+	explode_full(x, y, adtyp, olet, dam, color, radius, (struct permonst *) 0, dest);
 }
 
 void
@@ -153,6 +166,20 @@ int dam;
 int color;
 int radius;
 struct permonst *pa;
+{
+	explode_full(x, y, adtyp, olet, dam, color, radius, pa, 0);
+}
+
+void
+explode_full(x, y, adtyp, olet, dam, color, radius, pa, dest)
+int x, y;
+int adtyp; /* the same as in zap.c */
+int olet;
+int dam;
+int color;
+int radius;
+struct permonst *pa;
+int dest;
 {
 	ExplodeRegion *area;
 	area = create_explode_region();
@@ -174,7 +201,7 @@ struct permonst *pa;
 		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
 	}
 
-	do_explode(x, y, area, adtyp, olet, dam, color, 0, !flags.mon_moving, pa);
+	do_explode(x, y, area, adtyp, olet, dam, color, dest, !flags.mon_moving, pa);
 	free_explode_region(area);
 }
 
@@ -255,7 +282,7 @@ int adtyp; /* AD_TYPE and O_CLASS describing the cause of the explosion */
 int olet;
 int dam;
 int color;
-int dest; /* 0 = normal, 1 = silent, 2 = silent/remote */	
+int dest; /* 0 = normal, 1 = silent, 2 = remote, 4 = no sound */	
 boolean yours; /* is it your fault (for killing monsters) */
 struct permonst *pa; /* permonst of the attacker (used for disease) */
 {
@@ -269,11 +296,12 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 	boolean explmask;
 	boolean shopdamage = FALSE;
 	boolean generic = FALSE;
-	boolean silent = FALSE, remote = FALSE;
+	boolean silent = FALSE, remote = FALSE, blast = TRUE;
 	xchar xi, yi;
 
-	if (dest > 0) silent = TRUE;	
-	if (dest == 2) remote = TRUE;
+	if (dest & 1) silent = TRUE;	
+	if (dest & 2) remote = TRUE;
+	if (dest & 4) blast = FALSE;
 
 	if (olet == WAND_CLASS)		/* retributive strike */
 		switch (Role_switch) {
@@ -304,6 +332,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			break;
 		case AD_DISN: str = "disintegration field";
 			break;
+		case AD_EELC:
 		case AD_ELEC: str = "ball of lightning";
 			break;
 		case AD_DRST: str = "poison gas cloud";
@@ -513,8 +542,8 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 		str = "explosion";
 		generic = TRUE;
 	    }
-	    if (flags.soundok)
-		You_hear(is_pool(x, y, FALSE) ? "a muffled explosion." : "a blast.");
+	    if (flags.soundok && blast)
+			You_hear(is_pool(x, y, FALSE) ? "a muffled explosion." : "a blast.");
 	}
 
 	    if (dam) for(i = 0; i < area->nlocations; i++) {
@@ -720,9 +749,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 		    damu = 0;
 		    You("are unharmed!");
 		} else {
-			if (Half_physical_damage && adtyp == AD_PHYS)
-		    damu = (damu+1) / 2;
-			if (u.uvaul_duration) damu = (damu + 1) / 2;
+			damu = reduce_dmg(&youmonst,damu,TRUE,FALSE);
 		}
 		if (adtyp == AD_FIRE || adtyp == AD_EFIR) (void) burnarmor(&youmonst, FALSE);
 		if(uhurt == 2){

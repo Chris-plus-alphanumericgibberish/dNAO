@@ -1828,13 +1828,9 @@ movemon()
 		average_dogs();
 	if(mtmp->m_insight_level > u.uinsight
 	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+	  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 	){
 		insight_vanish(mtmp);
-		continue;
-	}
-	if(mtmp->mtyp == PM_APPRENTICE_WITCH && !mtmp->mtame){
-		mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
-		mtmp->movement = 0;
 		continue;
 	}
     if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[mtmp->mx][mtmp->my].typ == AIR
@@ -4729,6 +4725,9 @@ register struct monst *mtmp;
 	if(mtmp->mtyp == PM_ASMODEUS){
 		u.umadness |= MAD_OVERLORD;
 	}
+	if(mtmp->mtyp == PM_BLASPHEMOUS_LURKER){
+		u.umadness |= MAD_REACHER;
+	}
 #ifdef RECORD_ACHIEVE
 	if(mtmp->mtyp == PM_LUCIFER){
 		achieve.killed_lucifer = 1;
@@ -4894,8 +4893,7 @@ boolean was_swallowed;			/* digestion */
 						  body_part(STOMACH));
 					Sprintf(killer_buf, "%s explosion",
 						s_suffix(mdat->mname));
-					if (Half_physical_damage) tmp = (tmp+1) / 2;
-					if(u.uvaul_duration) tmp = (tmp + 1) / 2;
+					tmp = reduce_dmg(&youmonst,tmp,TRUE,FALSE);
 					losehp(tmp, killer_buf, KILLED_BY_AN);
 				} 
 				else {
@@ -6421,9 +6419,8 @@ boolean severe;			/* Powerful poison that partially overcomes poison resistance 
 		}
 
 		i = rn1(10, 6);
-		if (Half_physical_damage) i = (i + 1) / 2;
 		if (Poison_resistance) i = (i + 1) / 2;
-		if (u.uvaul_duration) i = (i + 1) / 2;
+		i = reduce_dmg(&youmonst,i,FALSE,TRUE);
 		losehp(i, pname, kprefix);
 
 		if (u.uhp < 1) {
@@ -6494,7 +6491,7 @@ register struct monst *mtmp;
 	struct attack gaze_mem;
 	struct attack *gaze = mon_get_attacktype(mtmp, AT_WDGZ, &gaze_mem);
 	 if(gaze) {
-		 if (!(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD))	// the Eyes of the Overworld protect you from whatever you might see
+		if (Gaze_immune)
 			(void) xgazey(mtmp, &youmonst, gaze, -1);
 	 }
 }
@@ -7853,8 +7850,7 @@ struct monst *mdef;
 	/* Why do we do all integer probabilities again? >_< */
 	const int smoothing_factor = 100000;
 
-	if(Half_spel(mdef)) damage = (damage+1)/2;
-	if(mdef == &youmonst && u.uvaul_duration) damage = (damage+1)/2;
+	damage = reduce_dmg(mdef,damage,FALSE,TRUE);
 	
 	objchain = (mdef == &youmonst) ? invent : mdef->minvent;
 
@@ -8018,9 +8014,7 @@ struct obj *obj;
 		// pline("damage post DR: %d", damage);
 		if(damage < 1)
 			damage = 1;
-
-		if(Half_phys(mdef)) damage = (damage+1)/2;
-		if(u.uvaul_duration) damage = (damage+1)/2;
+		damage = reduce_dmg(mdef,damage,TRUE,FALSE);
 	
 		losehp(damage, "their clothes", KILLED_BY);
 	}
@@ -8175,8 +8169,8 @@ struct monst *owner;
 	/* Why do we do all integer probabilities again? >_< */
 	const int smoothing_factor = 100000;
 	
-	if(owner && Half_spel(owner)) damage = (damage+1)/2;
-	if(owner == &youmonst && u.uvaul_duration) damage = (damage+1)/2;
+	if(owner)
+		damage = reduce_dmg(owner,damage,FALSE,TRUE);
 
 	/* &0x1 means odd */
 	if(remaining > 2)
@@ -8559,9 +8553,7 @@ struct monst *mtmp;
 			
 			if(is_wooden(youracedata) || (!Fire_resistance && species_resists_cold(&youmonst)))
 				damage *= 2;
-			
-			if(Half_spell_damage) damage = (damage+1)/2;
-			if(u.uvaul_duration) damage = (damage+1)/2;
+			damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
 
 			int temparise = u.ugrave_arise;
 			u.ugrave_arise = PM_ANCIENT_OF_CORRUPTION;
@@ -8656,8 +8648,7 @@ struct monst *mtmp;
 				pline("The mist is drawn down to the shifting panes of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 5);
-			if(Half_spell_damage) damage = (damage+1)/2;
-			if(u.uvaul_duration) damage = (damage+1)/2;
+			damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
 
 
 			xdamagey(mtmp, &youmonst, (struct attack *)0, damage);
@@ -8703,8 +8694,7 @@ struct monst *mtmp;
 				if(!Fire_resistance && nonliving(youracedata)){
 					damage += d(5, 5);
 				}
-				if(Half_spell_damage) damage = (damage+1)/2;
-				if(u.uvaul_duration) damage = (damage+1)/2;
+				damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
 
 				xdamagey(mtmp, &youmonst, (struct attack *)0, damage);
 			}
@@ -8798,9 +8788,7 @@ struct monst *mtmp;
 			else {
 				//Assumes you can't see your own ears
 				damage = d(1, min(10, (mtmp->m_lev)/3));
-
-				if(Half_spell_damage) damage = (damage+1)/2;
-				if(u.uvaul_duration) damage = (damage+1)/2;
+				damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
 
 				if(!Blind){
 					if(Fixed_abil){
@@ -8985,8 +8973,7 @@ struct monst *mtmp;
 				pline("The shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
-			if(Half_spell_damage) damage = (damage+1)/2;
-			if(u.uvaul_duration) damage = (damage+1)/2;
+			damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
 
 			losehp(damage, "heat drain", KILLED_BY);
 			mtmp->mhp += damage;
@@ -9101,8 +9088,7 @@ struct monst *mtmp;
 				pline("The motes are drawn into the %s of %s.", mtmp->mtyp == PM_BAALPHEGOR ? "open mouth" : "ghostly hood", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 4);
-			if(Half_spell_damage) damage = (damage+1)/2;
-			if(u.uvaul_duration) damage = (damage+1)/2;
+			damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
 
 			losehp(damage, "life-force theft", KILLED_BY);
 			mtmp->mhp += damage;

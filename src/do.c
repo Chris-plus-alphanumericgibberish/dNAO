@@ -1476,9 +1476,9 @@ remake:
 					} else {
 						You("come into contact with your energy sword%s.", (mainsaber && secsaber && (lrole >= ACURR(A_DEX) || (mainsaber_locked && secsaber_locked))) ? "s" : "");
 						if(mainsaber && (mainsaber_locked || lrole >= ACURR(A_DEX)))
-							losehp(dmgval(uwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
+							losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
 						if(secsaber && (secsaber_locked || lrole >= ACURR(A_DEX)))
-							losehp(dmgval(uswapwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
+							losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
 					}
 					if(mainsaber && !mainsaber_locked)
 						lightsaber_deactivate(uwep, TRUE);
@@ -1489,8 +1489,8 @@ remake:
 						You("hurriedly deactivate your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
 					} else {
 						You("come into contact with your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
-						if(mainsaber) losehp(dmgval(uwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
-						if(secsaber) losehp(dmgval(uswapwep,&youmonst,0), "falling downstairs with a lit lightsaber", KILLED_BY);
+						if(mainsaber) losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
+						if(secsaber) losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
 					}
 					if(mainsaber) lightsaber_deactivate(uwep, TRUE);
 					if(secsaber) lightsaber_deactivate(uswapwep, TRUE);
@@ -1800,15 +1800,17 @@ static char *dfr_pre_msg = 0,	/* pline() before level change */
 	    *dfr_post_msg = 0;	/* pline() after level change */
 
 static int dfr_post_dmg = 0;
+static int dfr_post_san = 0;
 
 /* change levels at the end of this turn, after monsters finish moving */
 void
-schedule_goto(tolev, at_stairs, falling, portal_flag, pre_msg, post_msg, post_dmg)
+schedule_goto(tolev, at_stairs, falling, portal_flag, pre_msg, post_msg, post_dmg, post_san)
 d_level *tolev;
 boolean at_stairs, falling;
 int portal_flag;
 const char *pre_msg, *post_msg;
 int post_dmg;
+int post_san;
 {
 	int typmask = 0100;		/* non-zero triggers `deferred_goto' */
 
@@ -1828,6 +1830,8 @@ int post_dmg;
 	    dfr_post_msg = strcpy((char *)alloc(strlen(post_msg)+1), post_msg);
 	if(post_dmg)
 		dfr_post_dmg = post_dmg;
+	if(post_san)
+		dfr_post_san = post_san;
 }
 
 /* handle something like portal ejection */
@@ -1853,6 +1857,10 @@ deferred_goto()
 		if (dfr_post_dmg){
 			losehp(dfr_post_dmg, "abrupt arrival", KILLED_BY_AN);
 			dfr_post_dmg = 0;
+		}
+		if (dfr_post_san){
+			change_usanity(dfr_post_san, dfr_post_san < 0);
+			dfr_post_san = 0;
 		}
 	}
 	u.utotype = 0;		/* our caller keys off of this */

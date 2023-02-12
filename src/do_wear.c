@@ -567,6 +567,7 @@ Gloves_on()
 	case CRYSTAL_GAUNTLETS:
 	case PLASTEEL_GAUNTLETS:
 	case ORIHALCYON_GAUNTLETS:
+	case HAND_WRAPS:
 		break;
 	case GAUNTLETS_OF_FUMBLING:
 		if (!oldprop && !(HFumbling & ~TIMEOUT))
@@ -602,6 +603,7 @@ Gloves_off()
 	case CRYSTAL_GAUNTLETS:
 	case PLASTEEL_GAUNTLETS:
 	case ORIHALCYON_GAUNTLETS:
+	case HAND_WRAPS:
 	    break;
 	case GAUNTLETS_OF_FUMBLING:
 	    if (!oldprop && !(HFumbling & ~TIMEOUT))
@@ -3963,7 +3965,7 @@ register schar delta;
 				flags.botl = 1;
 			}
 		}
-		if (otmp->otyp == find_gcirclet()){
+		if (otmp->otyp == find_gcirclet() || otmp->oartifact == ART_CROWN_OF_THE_PERCIPIENT){
 			if (delta) {
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;
@@ -4063,11 +4065,11 @@ struct obj *armor;
 		if(DEADMONSTER(mdef))
 			continue;
 		
-		if(youagr && (mdef->mpeaceful || !rn2(4)))
+		if(youagr && (mdef->mpeaceful || rn2(11)))
 			continue;
-		if(youdef && (magr->mpeaceful || !rn2(4)))
+		if(youdef && (magr->mpeaceful || rn2(11)))
 			continue;
-		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || !rn2(4)))
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || rn2(11)))
 			continue;
 
 		if(!youdef && nonthreat(mdef))
@@ -5245,6 +5247,60 @@ boolean invoked;
 }
 
 void
+doliving_percipient(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	struct monst *mdef;
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i = rnd(8),j, lim=0;
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	
+	/*Must have some insight or all targets will be skipped.*/
+	if(u.uinsight < 1)
+		return;
+	
+	for(j=8;j>=1;j--){
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]))
+			continue;
+		else mdef = m_u_at(x(magr)+clockwisex[(i+j)%8], y(magr)+clockwisey[(i+j)%8]);
+		
+		if(!mdef)
+			continue;
+
+		youdef = (mdef == &youmonst);
+		if(DEADMONSTER(mdef))
+			continue;
+		
+		if(youagr && mdef->mpeaceful)
+			continue;
+		if(youdef && magr->mpeaceful)
+			continue;
+		if(!youagr && !youdef && (mdef->mpeaceful == magr->mpeaceful))
+			continue;
+
+		if(!youdef && nonthreat(mdef))
+			continue;
+		
+		if(rn2(101) >= u.uinsight)
+			continue;
+		
+		if(youdef && u.uen > 0){
+			u.uen = max(u.uen-400, 0);
+			flags.botl = 1;
+		}
+		else if(!youdef && !resist(mdef, WEAPON_CLASS, 0, NOTELL)){
+			set_mcan(mdef, TRUE);
+		}
+	}
+}
+
+void
 doliving_healing_armor(magr, wep, invoked)
 struct monst *magr;
 struct obj *wep;
@@ -5389,6 +5445,8 @@ struct obj *wep;
 		doliving_ibite_arm(magr, wep, FALSE);
 	else if(wep->oartifact == ART_ESSCOOAHLIPBOOURRR)
 		doliving_esscoo(magr, wep, FALSE);
+	else if(wep->oartifact == ART_CROWN_OF_THE_PERCIPIENT)
+		doliving_percipient(magr, wep, FALSE);
 	else doliving_single_attack(magr, wep);
 }
 

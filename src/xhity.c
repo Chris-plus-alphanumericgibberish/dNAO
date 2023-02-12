@@ -325,6 +325,7 @@ int tary;
 		struck = 0,	/* hit at least once */
 		marinum = 0,/* number of AT_MARI weapons used */
 		subout = 0,	/* remembers what attack substitutions have been made for [magr]'s attack chain */
+		mariarm = 0,/* remembers what attack substitutions had been [magr]'s attack chain, to charge for eilistran armor */
 		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
 	int attacklimit = 0;
 	int attacksmade = 0;
@@ -686,6 +687,13 @@ int tary;
 								wcount++;
 							}
 						}
+					}
+				}
+				if((mariarm&(SUBOUT_MARIARM1|SUBOUT_MARIARM2)) != (subout&(SUBOUT_MARIARM1|SUBOUT_MARIARM2))){
+					struct obj *armor = (youagr ? uarm : which_armor(magr, W_ARM));;
+					mariarm = subout;
+					if(armor && armor->otyp == EILISTRAN_ARMOR){
+						armor->ovar1_eilistran_charges--;
 					}
 				}
 			}
@@ -1636,18 +1644,6 @@ int * indexnum;					/* index number to use, incremented HERE (if actually pullin
 struct attack * prev_and_buf;	/* double-duty pointer: 1st, is the previous attack; 2nd, is a pointer to allocated memory */
 boolean by_the_book;			/* if true, gives the "standard" attacks for [magr]. Useful for the pokedex. */
 int * subout;					/* records what attacks have been subbed out */
-#define SUBOUT_SPELLS	0x0001	/* Spellcasting attack instead (Five Fiends of Chaos1 and Gae) */
-#define SUBOUT_BAEL1	0x0002	/* Bael's Sword Archon attack chain */
-#define SUBOUT_BAEL2	0x0004	/* Bael's marilith-hands attack chain */
-#define SUBOUT_SPIRITS	0x0008	/* Player's bound spirits */
-#define SUBOUT_BARB1	0x0010	/* 1st bit of barbarian bonus attacks */
-#define SUBOUT_BARB2	0x0020	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
-#define SUBOUT_MAINWEPB	0x0040	/* Bonus attack caused by the wielded *mainhand* weapon */
-#define SUBOUT_XWEP		0x0080	/* Made an offhand attack */
-#define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
-#define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
-#define SUBOUT_SCORPION	0x0400	/* Scorpion Carapace's sting */
-#define SUBOUT_LOLTH1	0x0800	/* Lolth's 8 arm attack chain */
 int * tohitmod;					/* some attacks are made with decreased accuracy */
 {
 	struct attack * attk;
@@ -1736,6 +1732,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/*Some attacks have level requirements*/
 	if(attk->lev_req > mlev(magr)){
+		GETNEXT
+	}
+	/*Some attacks have insight requirements*/
+	if(attk->ins_req > u.uinsight){
 		GETNEXT
 	}
 	/* khaamnun tanninim switch to sucking memories after dragging target in close */
@@ -1930,6 +1930,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/* auto-rapier-slashers skip their floating rapier attacks in main combat sequence */
 	if(!by_the_book && attk->aatyp == AT_ESPR && is_star_blades_mon(magr)) {
+		GETNEXT
+	}
+	if(attk->aatyp == AT_ESPR && magr->mtyp == PM_PORO_AULON && magr->mhp >= magr->mhpmax/2) {
 		GETNEXT
 	}
 	/* the Five Fiends spellcasting */
@@ -2164,6 +2167,17 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			*attk = lolthHands[*indexnum];
 		}
 	}
+	/* Blasphemous hands have lurker attacks if they can't abduct the target to their temple*/
+	if(pa->mtyp == PM_BLASPHEMOUS_HAND && magr && *indexnum < NATTK && (In_endgame(&u.uz) || on_level(&bridge_temple, &u.uz))){
+		static const struct attack altblas[NATTK] = {
+			{ AT_TUCH, AD_PHYS, 4, 8 }
+		};
+		int atypes[] = {AD_DETH, AD_PEST, AD_FAMN, AD_CNFT};
+		*attk = altblas[*indexnum];
+		if(attk->aatyp == AT_TUCH)
+			attk->adtyp = atypes[(int) magr->m_id % SIZE(atypes)];
+	}
+
 	/* Various weapons can cause an additional full attack to be made */
 	/* This only works if it is wielded in the mainhand, and a weapon attack is being made with it (AT_WEAP, AT_DEVA) */
 	/* not shown in pokedex */
@@ -2211,6 +2225,30 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			(*subout) |= ((SUBOUT_BARB1 & (*subout&SUBOUT_BARB1)) ? SUBOUT_BARB2 : 0);
 			(*subout) ^= SUBOUT_BARB1;
 			(*subout) &= ~SUBOUT_XWEP;	/* allow another followup offhand attack if twoweaponing */
+		}
+	}
+
+	/* Some armor can insert attacks */
+	if ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
+		&& (is_null_attk(&prev_attack) || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP || prev_attack.aatyp == AT_MARI)
+		&& ((*subout&(SUBOUT_MARIARM1|SUBOUT_MARIARM2)) != (SUBOUT_MARIARM1|SUBOUT_MARIARM2))
+	){
+		struct obj * otmp = (youagr ? uarm : which_armor(magr, W_ARM));
+		
+		if(!otmp);//Nothing
+		else if (otmp->otyp == EILISTRAN_ARMOR 
+			&& otmp->altmode == EIL_MODE_ON
+			&& otmp->ovar1_eilistran_charges > 0
+		){
+			attk->aatyp = AT_MARI;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 2;
+			attk->damd = 8;
+			fromlist = FALSE;
+			if(*subout&SUBOUT_MARIARM1)
+				*subout |= SUBOUT_MARIARM2;
+			else
+				*subout |= SUBOUT_MARIARM1;
 		}
 	}
 
@@ -2425,16 +2463,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	return attk;
 }
 #undef GETNEXT
-#undef SUBOUT_SPELLS
-#undef SUBOUT_BAEL1
-#undef SUBOUT_BAEL2
-#undef SUBOUT_DEMO1
-#undef SUBOUT_DEMO2
-#undef SUBOUT_SPIRITS
-#undef SUBOUT_BARB1
-#undef SUBOUT_BARB2
-#undef SUBOUT_MAINWEPB
-#undef SUBOUT_XWEP
 
 /* noises()
  * prints noises from mvm combat
@@ -2749,7 +2777,7 @@ boolean ranged;
 		
 		if(!(objects[otmp->otyp].oc_dtyp&PIERCE))
 			swingindex = 1;
-		else if(weapon_type(otmp) == P_PICK_AXE || weapon_type(otmp) == P_MORNING_STAR || weapon_type(otmp) == P_FLAIL)
+		else if(weapon_type(otmp) == P_PICK_AXE || weapon_type(otmp) == P_MORNING_STAR || weapon_type(otmp) == P_FLAIL || weapon_type(otmp) == P_WHIP)
 			swingindex = 1;
 		else if(objects[otmp->otyp].oc_dtyp == PIERCE)
 			swingindex = 0;
@@ -4817,8 +4845,7 @@ boolean ranged;
 		}
 		/* active? */
 		if (notmcan && (youdef || !mindless_mon(mdef))) {
-			if(Half_spel(mdef)) dmg = (dmg+1)/2;
-			if(youdef && u.uvaul_duration) dmg = (dmg+1)/2;
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 			/* print message */
 			if (youdef) {
 				pline("You get a %sache!", body_part(HEAD));
@@ -4859,7 +4886,7 @@ boolean ranged;
 					pline("%s is afflicted by disease!",
 						Monnam(mdef));
 				}
-				if(!youagr && ((magr->mspores && !rn2(20)) || has_template(magr, SPORE_ZOMBIE) || has_template(magr, CORDYCEPS)))
+				if(!youagr && mdef->mhp < mdef->mhpmax/2 && ((magr->mspores && !rn2(20)) || has_template(magr, SPORE_ZOMBIE) || has_template(magr, CORDYCEPS)))
 					mdef->mspores = TRUE;
 			}
 		}
@@ -5007,6 +5034,10 @@ boolean ranged;
 					if (!Hallucination)
 						Your("mind is filled with kaleidoscopic light!");
 					chg = make_hallucinated(HHallucination + (long)dmg, FALSE, 0L);
+					if (chg && Hallucination && magr->mtyp == PM_DAUGHTER_OF_BEDLAM){
+						u.umadness |= MAD_DELUSIONS;
+						change_usanity(-1*rnd(6), FALSE); //Deals sanity damage
+					}
 					You("%s.", chg ? "are freaked out" : "seem unaffected");
 				}
 			}
@@ -7390,8 +7421,22 @@ boolean ranged;
 				}
 				break;
 			case AD_ABDC:
-				if (armuncancel || (pa->mtyp == PM_PALE_NIGHT && !rn2(3))) {
-					(void)safe_teleds(FALSE);
+				if (armuncancel 
+					|| (pa->mtyp == PM_PALE_NIGHT && !rn2(3))
+					|| (pa->mtyp == PM_BLASPHEMOUS_HAND && !rn2(3))
+				) {
+					if(pa->mtyp == PM_BLASPHEMOUS_HAND && !In_endgame(&u.uz) && !on_level(&bridge_temple, &u.uz)){
+						d_level newlev;
+						newlev.dnum = rlyeh_dnum;
+						newlev.dlevel = bridge_temple.dlevel;
+						
+						pline("The hand grabs you!");
+						schedule_goto(&newlev, FALSE, FALSE, FALSE,
+								  Blind ? "You feel weightless for a moment." : "The hand drags you into a starry void!",
+								  "Awful tentacles suck at you as you fall!", d(8,8), u_sanity_loss(magr));
+					}
+					else
+						(void)safe_teleds(FALSE);
 				}
 				break;
 			}
@@ -7733,10 +7778,7 @@ boolean ranged;
 		}
 
 		/* reduce damage through half-phys-damage */
-		if (youdef ? Half_physical_damage : mon_resistance(mdef, HALF_PHDAM))
-			dmg = (dmg+1)/2;
-		if(youdef && u.uvaul_duration)
-			dmg = (dmg+1)/2;
+		dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 		/* brains will be attacked now */
 		if(is_android(pd) && !is_mind_flayer(pd)){
@@ -8297,10 +8339,7 @@ boolean ranged;
 		}
 		alt_attk.adtyp = AD_HOLY;
 		/* apply half-magic */
-		if (Half_spel(mdef))
-			dmg /= 2;
-		if (youdef && u.uvaul_duration)
-			dmg /= 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 		result = xdamagey(magr, mdef, &alt_attk, dmg);
 		return result;
@@ -8323,10 +8362,7 @@ boolean ranged;
 		}
 		alt_attk.adtyp = AD_UNHY;
 		/* apply half-magic */
-		if (Half_spel(mdef))
-			dmg /= 2;
-		if (youdef && u.uvaul_duration)
-			dmg /= 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 		result = xdamagey(magr, mdef, &alt_attk, dmg);
 		return result;
@@ -8352,10 +8388,7 @@ boolean ranged;
 		}
 		alt_attk.adtyp = AD_HLUH;
 		/* apply half-magic */
-		if (Half_spel(mdef))
-			dmg /= 2;
-		if (youdef && u.uvaul_duration)
-			dmg /= 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 		result = xdamagey(magr, mdef, &alt_attk, dmg);
 		return result;
@@ -8448,18 +8481,37 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return (result|xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged));
 	case AD_LAVA:
-		/* print a basic hit message */
-		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
-		}
-		if(youdef && distmin(x(mdef), y(mdef), x(magr), y(magr)) <= 1){
+		
+		if(distmin(x(mdef), y(mdef), x(magr), y(magr)) > 1)
+			return MM_MISS;
+	
+		if(youdef){
 			if(u.ustuck != magr ){
-				pline("%s begins to ooze around you!", Monnam(magr));
-				u.ustuck = magr;
+				if(!sticks(mdef)){
+					pline("%s begins to ooze around you!", Monnam(magr));
+					u.ustuck = magr;
+				}
+				else pline("%s oozes around you!", Monnam(magr));
 			}
 			else {
 				pline("%s is crushing you!", Monnam(magr));
 			}
+		}
+		else if(youagr){
+			if(u.ustuck != mdef ){
+				if(!sticks(mdef)){
+					pline("You begin to ooze around %s!", mon_nam(mdef));
+					u.ustuck = magr;
+				}
+				else pline("You ooze around %s!", mon_nam(mdef));
+			}
+			else {
+				pline("You are crushing %s!", mon_nam(mdef));
+			}
+		}
+		else {
+			if(vis)
+				pline("%s oozes around %s!", Monnam(magr), mon_nam(mdef));
 		}
 
 		if(!UseInvFire_res(mdef)){
@@ -9224,6 +9276,9 @@ int vis;
 				else
 					monid = PM_ID_JUGGERNAUT;
 			}
+			else if (magr->mtyp == PM_PORO_AULON){
+				monid = PM_FABERGE_SPHERE;
+			}
 			else {
 				if (mlev(mdef) > 10 && !rn2(10))
 					monid = PM_FIREWORK_CART;
@@ -9503,10 +9558,7 @@ int vis;
 	struct obj * otmp;
 
 	/* apply half-phys */
-	if (Half_phys(mdef))
-		dmg /= 2;
-	if (youdef && u.uvaul_duration)
-		dmg /= 2;
+	dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 	switch (attk->adtyp)
 	{
@@ -10685,10 +10737,7 @@ expl_common:
 			/* dmg has been (maybe fully) reduced based on element */
 
 			/* apply half phys damage */
-			if (Half_phys(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 			if (dmg > 0) {
 				/* damage dealt */
@@ -10710,7 +10759,7 @@ expl_common:
 				if(magr->mtyp == PM_BALLISTOSPORE && !Sick_res(mdef)){
 					if(youdef)
 						diseasemu(pa);
-					else
+					else if(mdef->mhp < mdef->mhpmax/2)
 						mdef->mspores = TRUE;
 				}
 				/* deal damage */
@@ -10910,7 +10959,7 @@ boolean
 umetgaze(mtmp)
 struct monst *mtmp;
 {
-	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !(ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) && multi>=0);
+	return (canseemon_eyes(mtmp) && couldsee(mtmp->mx, mtmp->my) && !Gaze_immune && multi>=0);
 }
 
 
@@ -11006,7 +11055,7 @@ int vis;
 			(!(youagr ? Invis : magr->minvis) || (youdef ? See_invisible(x(magr), y(magr)) : mon_resistance(mdef, SEE_INVIS))) &&
 			(youdef ? canseemon(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
 			(!(youdef ? Sleeping : mdef->msleeping)) &&
-			(!(youdef && ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD)) /* wearing the Eyes, nearly anything is safe to see */
+			(!Gaze_res(mdef)) /* wearing the Eyes, nearly anything is safe to see */
 		))
 		){
 		/* gaze fails because the appropriate gazer/gazee eye (contact?) is not available */
@@ -11019,7 +11068,7 @@ int vis;
 		/* gaze fails because magr is cancelled */
 		return MM_MISS;
 	}
-		
+
 	/* Do the appropriate stuff -- function often returns in this switch statement */
 	switch (adtyp)
 	{
@@ -11487,7 +11536,7 @@ int vis;
 				(!(youagr ? Invis : magr->minvis) || (youdef ? See_invisible(x(magr), y(magr)) : mon_resistance(mdef, SEE_INVIS))) &&
 				(youdef ? canseemon(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
 				(!(youdef ? Sleeping : mdef->msleeping)) &&
-				(!(youdef && ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD)) /* wearing the Eyes, nearly anything is safe to see */
+				(!Gaze_res(mdef)) /* wearing the Eyes, nearly anything is safe to see */
 				))
 				return MM_MISS;
 
@@ -13653,7 +13702,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 
-	/* Misotheistic weapon ancelling the divine (and also supressing magic) */
+	/* Misotheistic weapon cancelling the divine (and also supressing magic) */
 	if(weapon && weapon->otyp == ROD_OF_FORCE && !recursed && !litsaber(weapon)){
 		int misdamage;
 		if(youdef){
@@ -13735,9 +13784,9 @@ int vis;						/* True if action is at all visible to the player */
 		/* note: dmgval() includes enchantment and erosion of weapon */
 		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1&SEAL_MARIONETTE) ||
 			(youagr && thrust && u.sealsActive&SEAL_MARIONETTE))
-			basedmg = dmgval(weapon, mdef, SPEC_MARIONETTE);
+			basedmg = dmgval(weapon, mdef, SPEC_MARIONETTE, magr);
 		else
-			basedmg = dmgval(weapon, mdef, 0);
+			basedmg = dmgval(weapon, mdef, 0, magr);
 
 		/* Liecleaver adds 1d10 damage to fired bolts */
 		if (fired && launcher && launcher->oartifact == ART_LIECLEAVER)
@@ -14173,7 +14222,7 @@ int vis;						/* True if action is at all visible to the player */
 								);
 						}
 					}
-					basedmg = dmgval(weapon, mdef, 0);
+					basedmg = dmgval(weapon, mdef, 0, magr);
 				}
 				/* projectile should take care of it */
 				//destroy_all_magr_weapon = TRUE;
@@ -14200,7 +14249,7 @@ int vis;						/* True if action is at all visible to the player */
 		struct weapon_dice unarmed_dice;
 		int unarmedMult;
 		/* initialize struct */
-		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0);
+		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0, magr);
 		/* determine unarmedMult */
 		if (youagr) {
 			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!gloves && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
@@ -14843,10 +14892,7 @@ int vis;						/* True if action is at all visible to the player */
 
 	/* Half Physical Damage -- does not stack with damage-type resistance */
 	if (!resisted_attack_type && (subtotl > 0)) {
-		if(Half_phys(mdef))
-			subtotl /= 2;
-		if(youdef && u.uvaul_duration)
-			subtotl /= 2;
+		subtotl = reduce_dmg(mdef,subtotl,TRUE,FALSE);
 		/* can only reduce damage to 1 */
 		if (subtotl < 1)
 			subtotl = 1;
@@ -16602,12 +16648,9 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				}
 				/* damage (reduced by DR, half-phys damage, min 1) */
 				dmg -= (youagr ? roll_udr(mdef) : roll_mdr(magr, mdef));
-				if (Half_phys(magr))
-					dmg = (dmg + 1) / 2;
-				if (youagr && u.uvaul_duration)
-					dmg = (dmg + 1) / 2;
 				if (dmg < 1)
 					dmg = 1;
+				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 				newres = xdamagey(mdef, magr, &noattack, dmg);
 				if (newres&MM_DEF_DIED)
@@ -16887,12 +16930,9 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					/* no message */
 					/* damage (reduced by DR, half-phys damage, min 1) */
 					dmg -= (youagr ? roll_udr(mdef) : roll_mdr(magr, mdef));
-					if (Half_phys(magr))
-						dmg = (dmg + 1) / 2;
-					if (youagr && u.uvaul_duration)
-						dmg = (dmg + 1) / 2;
 					if (dmg < 1)
 						dmg = 1;
+					dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 
 					newres = xdamagey(mdef, magr, &noattack, dmg);
 					if (newres&MM_DEF_DIED)
@@ -18383,10 +18423,7 @@ struct monst * mdef;
 					pline("Bright liquid sparks smite %s %s!", s_suffix(mon_nam(mdef)) , mbodypart(mdef, HEAD));
 			}
 			dmg = d(min((mlev(magr)+2)/3, MAX_BONUS_DICE), 6);
-			if (Half_spel(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 			/* damage inventory */
 			if (!UseInvShock_res(mdef)){
@@ -18446,11 +18483,8 @@ struct monst * mdef;
 				dmg = (dmg + 3) / 4;
 			else if (resistances == 1)
 				dmg = (dmg + 1) / 2;
-
-			if (Half_spel(mdef))
-				dmg = (dmg + 1) / 2;
-			if (youdef && u.uvaul_duration)
-				dmg = (dmg + 1) / 2;
+			
+			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 
 			/* damage inventory */
 			if (!UseInvShock_res(mdef)){
@@ -18465,4 +18499,26 @@ struct monst * mdef;
 		}break;
 	}
 	return MM_MISS;
+}
+
+int
+reduce_dmg(mdef,dmg,physical,magical)
+struct monst *mdef;
+int dmg;
+boolean physical;
+boolean magical;
+{
+	if (physical && Half_phys(mdef))
+		dmg = (dmg + 1) / 2;
+	if (magical && Half_spel(mdef))
+		dmg = (dmg + 1) / 2;
+	if (mdef->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
+		dmg = (dmg + 1) / 2;
+	if (mdef == &youmonst && u.uvaul_duration){
+		if(physical && magical)
+			dmg = (dmg + 3) / 4;
+		else
+			dmg = (dmg + 1) / 2;
+	}
+	return dmg;
 }

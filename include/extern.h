@@ -494,7 +494,7 @@ E void NDECL(save_currentstate);
 #endif
 E void FDECL(goto_level, (d_level *,BOOLEAN_P,BOOLEAN_P,int));
 E void FDECL(schedule_goto, (d_level *,BOOLEAN_P,BOOLEAN_P,int,
-			     const char *,const char *,int));
+			     const char *,const char *,int,int));
 E void NDECL(deferred_goto);
 E boolean FDECL(revive_corpse, (struct obj *, int));
 E void FDECL(revive_mon, (genericptr_t, long));
@@ -944,7 +944,9 @@ E long FDECL(rndexp, (BOOLEAN_P));
 /* ### explode.c ### */
 
 E void FDECL(explode, (int,int,int,int,int,int,int));
+E void FDECL(explode_sound, (int,int,int,int,int,int,int,int));
 E void FDECL(explode_pa, (int,int,int,int,int,int,int,struct permonst *));
+E void FDECL(explode_full, (int,int,int,int,int,int,int,struct permonst *,int));
 E void FDECL(explode_yours, (int,int,int,int,int,int,int,boolean));
 E void FDECL(splash, (int,int,int,int,int,int,int,int));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *, long *, struct monst *));
@@ -3178,10 +3180,10 @@ E int NDECL(dosuspend);
 
 E int FDECL(hitval, (struct obj *,struct monst *,struct monst *));
 E int FDECL(attack_mask, (struct obj *, int, int));
-E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int));
+E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int, struct monst *));
 E int FDECL(weapon_dmg_roll, (struct weapon_dice *, boolean));
 E int FDECL(weapon_die_roll, (int, int, struct weapon_dice *, boolean));
-E int FDECL(dmgval, (struct obj *,struct monst *, int));
+E int FDECL(dmgval, (struct obj *,struct monst *, int, struct monst *));
 E struct obj *FDECL(select_rwep, (struct monst *));
 E struct obj *FDECL(select_hwep, (struct monst *));
 E struct obj *FDECL(select_pick, (struct monst *));
@@ -3373,6 +3375,7 @@ E int NDECL(check_monk_move);
 E int FDECL(u_pole_pound, (struct monst *));
 E boolean FDECL(Curse_res, (struct monst *, boolean));
 E int FDECL(mummy_curses_x, (struct monst *, struct monst *));
+E int FDECL(reduce_dmg, (struct monst *, int, boolean, boolean));
 
 /* ### xhityhelpers.c ### */
 

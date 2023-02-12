@@ -735,6 +735,9 @@ boolean dumping;
 		if (u.umadness&MAD_ROTTING){
 			enl_msg("Your body ", "is", "was", " rotting from within");
 		}
+		if (u.umadness&MAD_REACHER){
+			enl_msg("Sometimes, a lurking thing ", "tries", "tried", " to reach in and grab you");
+		}
 	}
 	
 	if(u.utaneggs){
@@ -1355,6 +1358,9 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_ROTTING){
 			putstr(en_win, 0, "Your body is rotting from within.");
+		}
+		if (u.umadness&MAD_REACHER){
+			putstr(en_win, 0, "You are being stalked by a blasphemous reacher.");
 		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)
@@ -2780,6 +2786,7 @@ boolean dumping;
 	CHECK_ACHIEVE(CAV_QUEST,"Serpent slayer: completed caveman quest")
 	CHECK_ACHIEVE(CON_QUEST,"Sentence commuted: completed convict quest")
 	CHECK_ACHIEVE(KNI_QUEST,"Into the crystal cave: completed knight quest")
+	CHECK_ACHIEVE(HEA_QUEST,"Plague of stolen lives: completed healer quest")
 	CHECK_ACHIEVE(ANA_QUEST,"Back from the future: completed anachrononaut quest")
 	CHECK_ACHIEVE(AND_QUEST,"Glory to mankind: completed android quest")
 	CHECK_ACHIEVE(BIN_QUEST,"33 spirits: completed binder quest")
@@ -2791,6 +2798,7 @@ boolean dumping;
 	CHECK_ACHIEVE(HDR_SHR_QUEST,"On agency: completed hedrow shared quest")
 	CHECK_ACHIEVE(DRO_NOB_QUEST,"Foreshadowing: completed drow noble quest")
 	CHECK_ACHIEVE(DRO_SHR_QUEST,"Old friends: completed drow shared quest")
+	CHECK_ACHIEVE(DRO_HEA_QUEST,"Twisted by dreams: completed drow healer quest")
 	CHECK_ACHIEVE(DWA_NOB_QUEST,"Durin's Bane's Bane: completed dwarf noble quest")
 	CHECK_ACHIEVE(DWA_KNI_QUEST,"Battle of (5-4) armies: completed dwarf knight quest")
 	CHECK_ACHIEVE(GNO_RAN_QUEST,"Strongest of all time: completed gnome ranger quest")

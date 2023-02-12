@@ -238,8 +238,7 @@ STATIC_OVL boolean cursed_book(struct obj *bp){
 				dmg = 2*rnd(10) + 10;
 			}
 			
-			if (Half_spell_damage) dmg = (dmg+1/2);
-			if (u.uvaul_duration) dmg = (dmg+1/2);
+			dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 			losehp(dmg, "exploding rune", KILLED_BY_AN);
 			
 			return TRUE;
@@ -471,6 +470,7 @@ learn()
 				    book->otyp = booktype = SPE_BLANK_PAPER;
 					book->ovar1 = 0;
 					book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+					remove_oprop(book, OPROP_TACTB);
 				break;
 				case 4:
 					pline("...these metallurgical techniques are 200 years out of date.");
@@ -596,6 +596,7 @@ learn()
 		pline("This spellbook is too faint to be read any more.");
 		book->otyp = booktype = SPE_BLANK_PAPER;
 		book->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+		remove_oprop(book, OPROP_TACTB);
 	}
 	
 	if (costly) check_unpaid(book);
@@ -1451,6 +1452,14 @@ update_externally_granted_spells()
 	if (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM) {
 		exspells[n++] = SPE_MAGIC_MISSILE;
 		exspells[n++] = SPE_FORCE_BOLT;
+	}
+	if(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT){
+		for (i = 0; i < MAXSPELL; i++) {
+			if (spellid(i) != NO_SPELL) {
+				if (spl_book[i].sp_know < 1 && spl_book[i].sp_lev <= (u.uinsight*2)/11+1)
+					spellext(i) = TRUE;
+			}
+		}
 	}
 
 	/* mark sp_ext, and add them to the book if necessary */
@@ -3554,6 +3563,7 @@ spiriteffects(power, atme)
 					// pline("The magical energy within %s is exhausted.",the(xname(uwep)));
 					// uwep->otyp = SPE_BLANK_PAPER;
 					// uwep->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+					// remove_oprop(uwep, OPROP_TACTB);
 				// }
 			} else{
 				You("need to be holding a spellbook.");
@@ -4432,8 +4442,10 @@ int spell;
 			for(sy = 0; sy < ROWNO; sy++){
 				for(sx = 0; sx < COLNO; sx++){
 					if(isok(sx,sy) && couldsee(sx,sy) && (mon = m_at(sx, sy)) && !resist(mon, '\0', 0, NOTELL)){
-						mon->mcrazed = TRUE;
-						mon->mflee = TRUE;
+						if(!mon->mpeaceful){
+							mon->mcrazed = TRUE;
+							mon->mflee = TRUE;
+						}
 						mon->mdisrobe = TRUE;
 					}
 				}

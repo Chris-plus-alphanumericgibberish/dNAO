@@ -35,6 +35,7 @@
 #define Change_res(mon)		((mon)==&youmonst ? Unchanging : mon_resistance((mon), UNCHANGING))
 #define Breathless_res(mon)	((mon)==&youmonst ? Breathless : breathless_mon(mon))
 #define Water_res(mon)		((mon)==&youmonst ? Waterproof : mon_resistance((mon), WATERPROOF))
+#define Gaze_res(mon)		((mon)==&youmonst ? Gaze_immune : mon_resistance((mon), GAZE_RES))
 #define creature_at(x,y)	(isok(x,y) ? MON_AT(x, y) ? level.monsters[x][y] : (x==u.ux && y==u.uy) ? &youmonst : (struct monst *)0 : (struct monst *)0)
 
 #define FATAL_DAMAGE_MODIFIER 9001
@@ -52,4 +53,20 @@
 #define is_holy_mon(mon)	(is_angel((mon)->data) || has_template(mon, ILLUMINATED))
 #define is_unholy_mon(mon)	(is_demon((mon)->data))
 #define is_unblessed_mon(mon)	(is_auton((mon)->data) || is_rilmani((mon)->data) || is_kamerel((mon)->data))
+
+#define SUBOUT_SPELLS	0x0001	/* Spellcasting attack instead (Five Fiends of Chaos1 and Gae) */
+#define SUBOUT_BAEL1	0x0002	/* Bael's Sword Archon attack chain */
+#define SUBOUT_BAEL2	0x0004	/* Bael's marilith-hands attack chain */
+#define SUBOUT_SPIRITS	0x0008	/* Player's bound spirits */
+#define SUBOUT_BARB1	0x0010	/* 1st bit of barbarian bonus attacks */
+#define SUBOUT_BARB2	0x0020	/* 2nd bit of barbarian bonus attacks, must directly precede the 1st bit */
+#define SUBOUT_MAINWEPB	0x0040	/* Bonus attack caused by the wielded *mainhand* weapon */
+#define SUBOUT_XWEP		0x0080	/* Made an offhand attack */
+#define SUBOUT_GOATSPWN	0x0100	/* Goat spawn: seduction */
+#define SUBOUT_GRAPPLE	0x0200	/* Grappler's Grasp crushing damage */
+#define SUBOUT_SCORPION	0x0400	/* Scorpion Carapace's sting */
+#define SUBOUT_LOLTH1	0x0800	/* Lolth's 8 arm attack chain */
+#define SUBOUT_MARIARM1	0x1000	/* Mechanical armor attack 1 */
+#define SUBOUT_MARIARM2	0x2000	/* Mechanical armor attack 2 */
+
 #endif

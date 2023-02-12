@@ -430,8 +430,10 @@
 #define RAIN                   MON_AURA_BOLT+1
 #define BLOOD_RAIN             RAIN+1
 #define STEAM_GEYSER           BLOOD_RAIN+1
+//90
+#define MOTHER_S_GAZE          STEAM_GEYSER+1
 
-#define MON_LASTSPELL          STEAM_GEYSER
+#define MON_LASTSPELL          MOTHER_S_GAZE
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

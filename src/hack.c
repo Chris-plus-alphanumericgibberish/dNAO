@@ -1902,7 +1902,7 @@ stillinwater:;
 			target_level.dnum = u.uz.dnum;
 			target_level.dlevel = qlocate_level.dlevel+1;
 			int dist = qlocate_level.dlevel+1 - u.uz.dlevel;
-			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6));
+			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6), 0);
 		}
 	}
 	check_special_room(FALSE);
@@ -1933,8 +1933,7 @@ stillinwater:;
 			    pline("Its blow glances off your helmet.");
 				if(((mtmp->m_lev) - 8) > 0){
 				    dmg = d((mtmp->m_lev) - 5,3);
-				    if(Half_physical_damage) dmg = (dmg+1) / 2;
-					if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+					dmg = reduce_dmg(&youmonst,dmg,TRUE,FALSE);
 				    mdamageu(mtmp, dmg);
 				}
 			}
@@ -1943,8 +1942,7 @@ stillinwater:;
 			    pline("Its blow glances off your head.");
 				if(((mtmp->m_lev) - 8) > 0){
 				    dmg = d((mtmp->m_lev) - 5,3);
-				    if(Half_physical_damage) dmg = (dmg+1) / 2;
-					if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+					dmg = reduce_dmg(&youmonst,dmg,TRUE,FALSE);
 				    mdamageu(mtmp, dmg);
 				}
 			} else if (u.uac + 3 <= rnd(20))
@@ -1955,8 +1953,7 @@ stillinwater:;
 			    You("are hit by %s!",
 				x_monnam(mtmp, ARTICLE_A, "falling", 0, TRUE));
 			    dmg = d(mtmp->m_lev,6);
-			    if(Half_physical_damage) dmg = (dmg+1) / 2;
-				if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+				dmg = reduce_dmg(&youmonst,dmg,TRUE,FALSE);
 			    mdamageu(mtmp, dmg);
 			}
 			break;

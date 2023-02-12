@@ -1472,6 +1472,7 @@ moveloop()
 			nxtmon = mtmp->nmon;
 			if(mtmp->m_insight_level > u.uinsight
 			  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+			  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 			){
 				insight_vanish(mtmp);
 				continue;
@@ -1554,6 +1555,7 @@ moveloop()
 				}
 				if(mtmp->m_insight_level > u.uinsight
 				  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+				  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 				){
 					insight_vanish(mtmp);
 					continue;
@@ -2071,9 +2073,17 @@ karemade:
 						if(sensemon(mtmp) || (canseemon(mtmp) && !mtmp->mundetected)){
 							pline("%s is laughing hysterically.", Monnam(mtmp));
 						} else if(couldsee(mtmp->mx,mtmp->my)){
-							You_hear("hysterical laughter.");
+							static long lastHeard = 0;
+							if(lastHeard < monstermoves){
+								lastHeard = monstermoves;
+								You_hear("hysterical laughter.");
+							}
 						} else {
-							You_hear("laughter in the distance.");
+							static long lastHeard = 0;
+							if(lastHeard < monstermoves){
+								You_hear("laughter in the distance.");
+								lastHeard = monstermoves;
+							}
 						}
 					} else if(sensemon(mtmp) || (canseemon(mtmp) && !mtmp->mundetected))
 						pline("%s is trembling hysterically.", Monnam(mtmp));
@@ -2224,6 +2234,20 @@ karemade:
 									}
 							}
 						}
+				}
+				if(roll_madness(MAD_REACHER) && check_insight() && !DimensionalLock){
+					struct monst* mtmp;
+					boolean messaged = FALSE;
+					for(int i = 0; i < 7; i++){
+						mtmp = makemon(&mons[rn2(3) ? PM_LURKING_HAND : PM_BLASPHEMOUS_HAND], u.ux-7+rn2(15), u.uy-7+rn2(15), MM_NOCOUNTBIRTH|MM_ADJACENTOK|NO_MINVENT|MM_ESUM);
+						if(mtmp){
+							if(canspotmon(mtmp) && !messaged){
+								pline("A terrible hand reaches into the world!");
+								messaged = TRUE;
+							}
+							mark_mon_as_summoned(mtmp, (struct monst *)0, NightmareAware_Insanity+u.uinsight, 0);
+						}
+					}
 				}
 			}
 			if(Infuture && !(Is_qstart(&u.uz) && !Race_if(PM_ANDROID)) && !rn2(35)){
@@ -2429,6 +2453,17 @@ karemade:
 					u.ustdy += 90;
 					destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 				}
+				nomul(0, NULL);
+			}
+
+			if(!rn2(7) && roll_madness(MAD_REACHER)){
+				You("feel its multitudinous gaze upon you!");
+				if(!UseInvShock_res(&youmonst) || !rn2(11)){
+					destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+					destroy_item(&youmonst, RING_CLASS, AD_ELEC);
+				}
+				if(roll_madness(MAD_REACHER))
+					explode_yours(u.ux, u.uy, AD_EELC, MON_EXPLODE, d(4,8),EXPL_BBLUE,2,FALSE);
 				nomul(0, NULL);
 			}
 			
@@ -2881,6 +2916,7 @@ karemade:
 		}
 		if(mtmp->m_insight_level > u.uinsight
 		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+		  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 		){
 			insight_vanish(mtmp);
 			continue;
@@ -4263,8 +4299,7 @@ cthulhu_mind_blast()
 			(Unblind_telepat || (Blind_telepat && Blind)) ? "telepathy" :
 			Blind_telepat ? "latent telepathy" : "mind");
 		dmg = d(nd,15);
-		if(Half_spell_damage) dmg = (dmg+1) / 2;
-		if(u.uvaul_duration) dmg = (dmg + 1) / 2;
+		dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 		losehp(dmg, "psychic blast", KILLED_BY_AN);
 		make_stunned(itimeout_incr(HStun, dmg*10), TRUE);
 		if (Sleep_resistance){
@@ -5007,7 +5042,7 @@ struct monst *mon;
 			return;
 		}
 		/* The Stranger arrives from other levels and appears as soon as you gain enough insight */
-		if(mon->m_insight_level <= u.uinsight){
+		if(mon->m_insight_level <= u.uinsight && quest_status.touched_artifact){
 			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2){
 				mtmp2 = mtmp->nmon;
 				if (mtmp == mon) {

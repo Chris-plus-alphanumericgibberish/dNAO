@@ -4383,7 +4383,7 @@ int mmflags;
 				otmp->objsize = MZ_LARGE;
 				otmp->blessed = FALSE;
 				otmp->cursed = FALSE;
-				otmp->spe = 4;
+				otmp->spe = 0;
 				add_oprop(otmp, OPROP_CONCW);
 				set_material_gm(otmp, GOLD);
 				fix_object(otmp);
@@ -4788,7 +4788,9 @@ int mmflags;
 				otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
 				if(otmp) set_material_gm(otmp, GLASS);
 			} else if(ptr->mtyp == PM_PANAKEIAN_ARCHON){
-				if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS){
+				if(In_quest(&u.uz) 
+					&& (urole.neminum == PM_CYCLOPS || urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+				){
 					set_template(mtmp, PLAGUE_TEMPLATE);
 				}
 				else {
@@ -4818,7 +4820,9 @@ int mmflags;
 					}
 				}
 			} else if(ptr->mtyp == PM_HYGIEIAN_ARCHON){
-				if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS){
+				if(In_quest(&u.uz) 
+					&& (urole.neminum == PM_CYCLOPS || urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+				){
 					set_template(mtmp, PLAGUE_TEMPLATE);
 				}
 				else {
@@ -4855,6 +4859,27 @@ int mmflags;
 						otmp = mongets(mtmp, LOW_BOOTS, mkobjflags);
 						otmp = mongets(mtmp, CLOAK, mkobjflags);
 						if(otmp) set_material_gm(otmp, CLOTH);
+					}
+				}
+			} else if(ptr->mtyp == PM_PORO_AULON){
+				int mat = rn2(3) ? SILVER : PLATINUM;
+				if(In_endgame(&u.uz) || goodequip){
+					otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+					if(otmp) set_material_gm(otmp, mat);
+					otmp = mongets(mtmp, !rn2(3) ? GAUNTLETS_OF_POWER : GAUNTLETS, mkobjflags);
+					if(otmp) set_material_gm(otmp, mat);
+				}
+				otmp = mongets(mtmp, EILISTRAN_ARMOR, mkobjflags);
+				if(otmp) set_material_gm(otmp, mat);
+				otmp = mongets(mtmp, FACELESS_HELM, mkobjflags);
+				if(otmp) set_material_gm(otmp, mat);
+				for(int i = 0; i < 4; i++){
+					otmp = mongets(mtmp, SABER, mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, mat);
+						if(In_endgame(&u.uz) || goodequip){
+							add_oprop(otmp, OPROP_FIREW);
+						}
 					}
 				}
 			} else if(ptr->mtyp == PM_MONADIC_DEVA){
@@ -4961,6 +4986,20 @@ int mmflags;
 				if(otmp){
 					otmp->oerodeproof = TRUE;
 					otmp->spe = 9;
+				}
+			} else if(ptr->mtyp == PM_IKSH_NA_DEVA){
+				if(In_quest(&u.uz) 
+					&& (urole.neminum == PM_CYCLOPS || urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+				){
+					set_template(mtmp, PLAGUE_TEMPLATE);
+				}
+				else {
+					otmp = mongets(mtmp, WAISTCLOTH, mkobjflags);
+					if(otmp)
+						otmp->obj_color = CLR_BRIGHT_BLUE;
+					otmp = mongets(mtmp, ROBE, mkobjflags);
+					if(otmp)
+						otmp->obj_color = CLR_BLUE;
 				}
 			} else if(ptr->mtyp == PM_COURE_ELADRIN){
 				(void)mongets(mtmp, GLOVES, mkobjflags);
@@ -8342,6 +8381,13 @@ int mmflags;
 			if(otmp){
 				(void) mpickobj(mtmp, otmp);
 			}
+			otmp = mksartifact(ART_ESSCOOAHLIPBOOURRR);
+			if(otmp){
+				otmp->blessed = TRUE;
+				otmp->cursed = FALSE;
+				otmp->spe = 3;
+				(void) mpickobj(mtmp, otmp);
+			}
 		} else if(ptr->mtyp == PM_ALIDER){
 			otmp = mksobj(WHITE_VIBROZANBATO, mkobjflags);
 			otmp->spe = 8;
@@ -10938,7 +10984,9 @@ boolean goodequip;
 				otmp = mongets(mtmp, rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
 				if(otmp) otmp->oerodeproof = TRUE;
 			} else if(ptr->mtyp == PM_IASOIAN_ARCHON){
-				if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS){
+				if(In_quest(&u.uz) 
+					&& (urole.neminum == PM_CYCLOPS || urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+				){
 					set_template(mtmp, PLAGUE_TEMPLATE);
 				}
 				else {
@@ -12077,6 +12125,7 @@ int faction;
 			out_faction = curhouse;
 		} else if(ptr->mtyp == PM_PEN_A_MENDICANT || ptr->mtyp == PM_MENDICANT_DRIDER 
 			|| ptr->mtyp == PM_MENDICANT_SPROW || ptr->mtyp == PM_SISTER_T_EIRASTRA
+			|| ptr->mtyp == PM_IKSH_NA_DEVA
 		){
 			out_faction = PEN_A_SYMBOL;
 		} else if(ptr->mtyp == PM_Y_CULTIST || ptr->mtyp == PM_Y_CULTIST_FIGHTER 
@@ -12216,7 +12265,7 @@ struct monst * mon;
 	|| (Role_if(PM_EXILE) && (mon->mtyp == PM_PEASANT))
 	|| (urole.ldrnum == PM_DAMAGED_ARCADIAN_AVENGER && (mon->mtyp == PM_GNOME || mon->mtyp == PM_GNOME_LORD || mon->mtyp == PM_GNOME_KING
 			|| mon->mtyp == PM_TINKER_GNOME || mon->mtyp == PM_GNOMISH_WIZARD))
-	|| (urole.ldrnum == PM_SHUUSHAR_THE_ENLIGHTENED && (mon->mtyp == PM_ALLIANCE_VANGUARD || mon->mtyp == PM_SIR_ALJANOR))
+	|| (urole.ldrnum == PM_SHUUSHAR_THE_ENLIGHTENED && (mon->mtyp == PM_ALLIANCE_VANGUARD || mon->mtyp == PM_DWARF_WARRIOR || mon->mtyp == PM_SIR_ALJANOR || mon->mtyp == PM_NURSE))
 	)){
 		out_faction = QUEST_FACTION;
 	}
@@ -12885,6 +12934,9 @@ int faction;
 				mtmp->m_lev *= 1.5;
 				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
 				mtmp->mhp = mtmp->mhpmax;
+			} else if(mndx == PM_IKSH_NA_DEVA){
+				mtmp->mcansee = 0;
+				mtmp->mblinded = 0;
 			} else if(mndx == PM_KUKER){ 
 				mtmp->mhpmax = mtmp->m_lev*8 - 4; //Max HP
 				mtmp->mhp = mtmp->mhpmax;

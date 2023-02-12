@@ -445,7 +445,7 @@ const char *drop_fmt, *drop_arg, *hold_msg;
 {
 	char buf[BUFSZ];
 
-	if (!Blind) obj->dknown = 1;	/* maximize mergibility */
+	if (!Blind || (obj->oclass == SCROLL_CLASS && check_oprop(obj, OPROP_TACTB))) obj->dknown = 1;	/* maximize mergibility */
 	if (obj->oartifact) {
 	    /* place_object may change these */
 	    boolean crysknife = (obj->otyp == CRYSKNIFE);
@@ -862,6 +862,7 @@ carrying_readable_weapon()
 				otmp->oartifact == ART_PEN_OF_THE_VOID ||
 				otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD ||
 				otmp->oartifact == ART_ESSCOOAHLIPBOOURRR ||
+				otmp->oartifact == ART_RED_CORDS_OF_ILMATER ||
 				otmp->oartifact == ART_STAFF_OF_NECROMANCY
 			))
 		)
@@ -1242,6 +1243,9 @@ register const char *let,*word;
 		    otmp->dknown && objects[otyp].oc_name_known)
 		|| (!strncmp(word, "replace with", 12) &&
 		    otmp->otyp != HELLFIRE_COMPONENT)
+		|| (!strncmp(word, "replace with", 12)
+		    && otmp->otyp != HELLFIRE_COMPONENT
+			&& otmp->otyp != CLOCKWORK_COMPONENT)
 		|| (!strncmp(word, "salve", 5) && !salve_target(otmp))
 		|| ((!strcmp(word, "use or apply") ||
 			!strcmp(word, "untrap with")) &&
@@ -1257,6 +1261,8 @@ register const char *let,*word;
 		      otyp != FRAG_GRENADE &&
 		      otyp != GAS_GRENADE &&
 		      otyp != STICK_OF_DYNAMITE &&
+			  otmp->oartifact != ART_STAFF_OF_AESCULAPIUS &&
+			  otmp->oartifact != ART_ESSCOOAHLIPBOOURRR &&
 //endif
 		      !is_axe(otmp) && !is_pole(otmp) && 
 			  otyp != BULLWHIP && otyp != VIPERWHIP && otyp != FORCE_WHIP &&
@@ -1284,12 +1290,12 @@ register const char *let,*word;
 		     /* MRKR: mining helmets */
 		     (otmp->oclass == ARMOR_CLASS &&
 		      otyp != LANTERN_PLATE_MAIL &&
+		      otyp != EILISTRAN_ARMOR &&
 		      otyp != DWARVISH_HELM &&
 		      otyp != DROVEN_CLOAK &&
 			  otyp != GNOMISH_POINTY_HAT &&
 			  otmp->oartifact != ART_AEGIS &&
-			  otmp->oartifact != ART_STAFF_OF_AESCULAPIUS &&
-			  otmp->oartifact != ART_ESSCOOAHLIPBOOURRR
+			  otmp->oartifact != ART_RED_CORDS_OF_ILMATER
 			  ) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)
 				&& otyp != CATAPSI_VORTEX && otyp != ANTIMAGIC_RIFT
@@ -2229,7 +2235,7 @@ struct obj *obj;
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this candle", MENU_UNSELECTED);
 	else if (obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
-			obj->otyp == LANTERN)
+			obj->otyp == MAGIC_LAMP || obj->otyp == LANTERN_PLATE_MAIL)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this light source", MENU_UNSELECTED);
 	else if (obj->otyp == POT_OIL && objects[obj->otyp].oc_name_known)
@@ -2290,6 +2296,9 @@ struct obj *obj;
 	else if (obj->otyp == DROVEN_CLOAK)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Spin out or sweep up a web", MENU_UNSELECTED);
+	else if (obj->otyp == EILISTRAN_ARMOR)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Recharge armor or switch arms on/off", MENU_UNSELECTED);
 	else if (obj->oartifact == ART_AEGIS)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Change Aegis' form", MENU_UNSELECTED);
@@ -2747,8 +2756,8 @@ winid *datawin;
 		{
 			// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
 			struct weapon_dice wdice[2];
-			(void)dmgval_core(&wdice[0], FALSE, obj, otyp);	// small dice
-			(void)dmgval_core(&wdice[1], TRUE, obj, otyp);		// large dice
+			(void)dmgval_core(&wdice[0], FALSE, obj, otyp, &youmonst);	// small dice
+			(void)dmgval_core(&wdice[1], TRUE, obj, otyp, &youmonst);		// large dice
 
 			Sprintf(buf, "Damage: ");
 

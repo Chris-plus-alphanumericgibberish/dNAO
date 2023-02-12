@@ -196,6 +196,14 @@ OBJECT:'(',"sack", contained
 OBJECT:'(',"blindfold", contained
 OBJECT:'/',random, contained
 OBJECT:'/',random, contained
+CONTAINER:'`',"statue",(37,16),uncursed,"Poro Aulon",1
+OBJECT:'#',"blessed +1 silver eilistran armor", contained
+OBJECT:'#',"blessed +1 silver faceless helm", contained
+OBJECT:'#',"blessed +1 silver saber", contained
+OBJECT:'#',"blessed +1 silver saber", contained
+OBJECT:'#',"blessed +1 silver saber", contained
+OBJECT:'#',"blessed +1 silver saber", contained
+
 # Stairs
 STAIR:(37,9),down
 STAIR:(55,14),down
@@ -248,8 +256,16 @@ OBJECT:'$',random,contained
 # Leaders
 MONSTER:'h',"Shuushar the Enlightened",(43,10),peaceful
 MONSTER:'@',"Sir Aljanor",(44,11),peaceful
+CONTAINER:'(',"box",(44,11)
+OBJECT:'[',random,contained
+OBJECT:'[',random,contained
+OBJECT:')',random,contained
 MONSTER:'@',"Sister T'eirastra",(42,11),peaceful
-# intern guards for the audience chamber
+CONTAINER:'(',"sack",(42,11)
+OBJECT:'#',"tactile spellbook",contained
+OBJECT:'#',"tactile scroll",contained
+OBJECT:'#',"tactile scroll",contained
+# Guards for the audience chamber
 MONSTER:'@',"nurse",(43,09),peaceful
 MONSTER:'@',"Alliance vanguard",(44,10),peaceful
 MONSTER:'@',"Alliance vanguard",(44,12),peaceful
@@ -1048,15 +1064,15 @@ MAP
 8                  .      ..           ........ ...         .         .      
 9                  .     .........       ...........        ...........      
 0                 ..     .....   ..... .............                         
-1                 ..     ....  .         ... .......       .............     
-2                ..       ... . .      ......... ..              ..          
-3      .          ..      ..   .        ........ ..             ...          
-4      ..        ..          . . .         .....                ..           
-5       ..      ...                                             .            
-6       ......... ..                          .             .....            
-7       ...                                                 .                
-8       ...    ................             .................                
-9      ....    ..............................................                
+1                 ..     ....  .         ... .......       ..........        
+2                ..       ... . .      ......... ..              ....        
+3      .          ..      ..   .        ........ ..            ......        
+4      ..        ..          . . .         .....               .             
+5       ..      ...                                            . .       ..  
+6       ......... ..                          .                . .       ... 
+7       ...                                                    . .       ... 
+8       ...    ................             ...              ... .       ..  
+9      ....    .................................................             
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 #0         1         2         3         4         5         6         7        
@@ -1152,15 +1168,15 @@ MAP
 8   }.....}}       .    }}..}}+}+}}...}........}...}}      }.}}}}+}}}}.}     
 9   }.....}}       .    }.........}+}}}}}...........}      }...........}     
 0   }.....}}      ..    }.....}+}.....+.............}      }}}}}}+}}}}}}     
-1   }}...}}       ..    }....}}.}}}}+}}}}...}.......}      .............     
-2    }}+}}       ..     }}...}...}....}.........}..}}            ..          
-3      .          ..     }..}}}.}}}..}}}........}..}            ...          
-4      ..        ..      }}}}.+.+.}}}} }}}}.....}}}}            ..           
-5       ..      ...         }}}}}}}       }}}}+}}               .            
-6       ......... ..                         }.}            .....            
-7       ...       H                          }+}            .                
-8       ...    ................             .................                
-9      ....    ..............................................                
+1   }}...}}       ..    }....}}.}}}}+}}}}...}.......}      .........         
+2    }}+}}       ..     }}...}...}....}.........}..}}           ....         
+3      .          ..     }..}}}.}}}..}}}........}..}           .....         
+4      ..        ..      }}}}.+.+.}}}} }}}}.....}}}}           .}}}}}}}}}}}}}
+5       ..      ...         }}}}}}}       }}}}+}}              .}.S.........}
+6       ......... ..                         }.}               .+.}.........}
+7       ...       H                          }+}               .+.}.........}
+8       ...    ................             ...              ...}.S.........}
+9      ....    .................................................}}}}}}}}}}}}}
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 #0         1         2         3         4         5         6         7        
@@ -1196,6 +1212,9 @@ OBJECT:'`',"boulder",(63,06) [skipcheck]
 DOOR:locked,(65,06)
 DOOR:locked,(64,08)
 DOOR:locked,(64,10)
+
+DOOR:locked,(63,16)
+DOOR:locked,(63,17)
 
 # Monsters
 MONSTER: '#', "zombified hedrow warrior", (05,07)
@@ -1260,6 +1279,23 @@ MONSTER: '#', "drow captain cordyceps", (61,06)
 OBJECT:'\\',"bed",(61,06)
 MONSTER: 'P', "green slime", (67,06)
 MONSTER: 'b', "gelatinous cube", (66,06)
+
+REGION:(66,15,74,18),lit,"temple"
+ALTAR:(67,16),neutral,altar,"_Pen'a"
+CONTAINER:'`',"statue",(74,18),uncursed,"Panakeian Archon",5
+CONTAINER:'`',"statue",(74,15),uncursed,"Iksh'na Deva",5
+
+CONTAINER:'(',"box",(67,17)
+OBJECT:'"',"amulet of life saving",contained
+OBJECT:'#',"3 tactile resistance",contained
+OBJECT:'#',"tactile scroll",contained
+OBJECT:'#',"tactile scroll",contained
+OBJECT:'#',"tactile scroll",contained
+OBJECT:'#',"tactile detect treasure",contained
+OBJECT:'#',"tactile spellbook",contained
+OBJECT:'#',"tactile spellbook",contained
+OBJECT:'#',"tactile spellbook",contained
+
 #
 #	The "goal" level for the quest.
 #

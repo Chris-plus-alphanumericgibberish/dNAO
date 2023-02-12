@@ -2937,6 +2937,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 				You("drain the ink from the %s.", xname(otmp));
 				costly_cancel(otmp);
 	    	    otmp->otyp = SCR_BLANK_PAPER;
+				remove_oprop(otmp, OPROP_TACTB);
 	    	    otmp->spe = 0;
 	    	    otmp->ovar1 = 0;
 				lesshungry(5*INC_BASE_NUTRITION);
@@ -2953,6 +2954,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    	    if(otmp->spestudied > MAX_SPELL_STUDY){
 					otmp->otyp = SPE_BLANK_PAPER;
 					otmp->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+					remove_oprop(otmp, OPROP_TACTB);
 				}
 				lesshungry(5*INC_BASE_NUTRITION);
 				flags.botl = 1;

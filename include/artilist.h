@@ -7,8 +7,8 @@
 
 #include "macromagic.h"
 /* we need to set these *before* makedefs.c or else it won't be getting the right number of arguments */
-#define PROPS(...) {FIRST_EIGHT(dummy, ##__VA_ARGS__, 0,0,0,0,0,0,0,0)}
-#define FIRST_EIGHT(dummy, a1, a2, a3, a4, a5, a6, a7, a8, ...) a1, a2, a3, a4, a5, a6, a7, a8
+#define PROPS(...) {FIRST_TEN(dummy, ##__VA_ARGS__, 0,0,0,0,0,0,0,0,0,0)}
+#define FIRST_TEN(dummy, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, ...) a1, a2, a3, a4, a5, a6, a7, a8, a9, a10
 
 #define NO_MONS()									 0,   0,   0,   0,   0,   0,   0,   0
 //#define MONS(mt, mfm, mft, mfb, mfg, mfr, mfv)		mt, mfm, mft, mff, mfb, mfg, mfr, mfv
@@ -2170,7 +2170,7 @@ A("The Eyes of the Overworld",		LENSES,				(const char *)0,
 	A_NEUTRAL, PM_MONK, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
-	PROPS(BLIND_RES, XRAY_VISION), (ARTP_FORCESIGHT),
+	PROPS(BLIND_RES, XRAY_VISION, GAZE_RES), (ARTP_FORCESIGHT),
 	PROPS(ANTIMAGIC), NOFLAG,
 	ENLIGHTENING, NOFLAG
 	),
@@ -2370,12 +2370,44 @@ A("The Cloak of the Consort",		DROVEN_CLOAK,		(const char *)0,
 /*Needs encyc entry*/
 A("Esscooahlipboourrr",			DOUBLE_SWORD,					"tentacle-auraed shackle-wrapped %s",
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_S, (ARTG_NOGEN|ARTG_MAJOR|ARTG_FXALGN),
+	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
-	ATTK(AD_PHYS, 20, 10), (ARTA_DRAIN),
+	ATTK(AD_PHYS, 20, 10), NOFLAG,
 	PROPS(DRAIN_RES, SEARCHING), (ARTP_SEEK),
 	PROPS(), NOFLAG,
 	LOOT_SELF, NOFLAG
+	),
+
+A("The Robe of Closed Eyes",				ROBE,			"shut-eye-patterned %s",
+	4000L, LEATHER, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_C, (ARTG_NOGEN),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(INVIS, GAZE_RES), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
+/*Needs encyc entry*/
+A("The Red Cords of Ilmater",		HAND_WRAPS,	"pair of red cords",
+	1000L, CLOTH, MZ_DEFAULT, WT_DEFAULT,
+	A_LAWFUL, NON_PM, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_MAJOR),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(FREE_ACTION, STONE_RES), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
+/*Needs encyc entry*/
+A("The Crown of the Percipient",				HELM_OF_BRILLIANCE,	(const char *)0,
+	1000L, FLESH, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(DETECT_MONSTERS, DRAIN_RES, STONE_RES, FIRE_RES, COLD_RES, SHOCK_RES, HALLUC_RES, SLEEP_RES, BLOCK_CONFUSION), NOFLAG,
+	PROPS(ANTIMAGIC), NOFLAG,
+	ENLIGHTENING, NOFLAG
 	),
 
 /*Needs encyc entry*/

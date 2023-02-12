@@ -811,7 +811,7 @@ boolean chatting;
 	//Faction and special abilities adjustment
 	if(mtmp->mtyp == PM_RHYMER && !mtmp->mspec_used)
 		soundtype = MS_SONG;
-	else if(mtmp->mfaction == QUEST_FACTION)
+	else if(mtmp->mfaction == QUEST_FACTION && mtmp->mtyp != PM_SIR_ALJANOR)
 		soundtype = MS_GUARDIAN;
 	else if(mtmp->mtyp == urole.guardnum)
 		soundtype = MS_GUARDIAN;
@@ -1224,8 +1224,7 @@ asGuardian:
 				}
 				ix = mtmp ? rnd((int)mtmp->m_lev) : rnd(10);
 				if(Antimagic) ix = (ix + 1) / 2;
-				if(Half_spell_damage) ix = (ix+1) / 2;
-				if(u.uvaul_duration) ix = (ix + 1) / 2;
+				ix = reduce_dmg(&youmonst,ix,FALSE,TRUE);
 				make_confused(HConfusion + ix*10, FALSE);
 				make_stunned(HStun + ix*5, FALSE);
 				make_hallucinated(HHallucination + ix*15, FALSE, 0L);
@@ -1701,8 +1700,7 @@ asGuardian:
 								if(Shock_resistance) dmg = d(min(MAX_BONUS_DICE, mtmp->m_lev/3)+10,4);
 							break;
 						}
-						if(Half_spell_damage) dmg /= 2;
-						if(u.uvaul_duration) dmg /= 2;
+						dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
 						if(dmg) dmg = min(dmg,Upolyd ? (u.mh - 1) : (u.uhp - 1));
 						if(dmg) mdamageu(mtmp,dmg);
 					}
@@ -2159,6 +2157,133 @@ humanoid_sound:
 							Sprintf(msgbuff, talkabt, !rn2(5) ? "ley lines" : !rn2(4) ? "tectonophysics" : !rn2(3) ? "special relativity" : !rn2(2) ? "archaeology" : rn2(5) ? "the collective unconscious" : rn2(10) ? "her recurring dreams" : "her darkest nightmares");
 						}
 						pline_msg = msgbuff;
+					}
+				break;
+				case PM_PEN_A_MENDICANT:
+				case PM_MENDICANT_SPROW:
+				case PM_MENDICANT_DRIDER:
+					if(!u.uevent.qcompleted){
+						switch(rn2(6)){
+							case 0:
+								verbl_msg = "The ruling houses are fleeing the city.";
+							break;
+							case 1:
+								verbl_msg = "The surfacers pushed back the demons, but now the kuo toa are attacking!";
+							break;
+							case 2:
+								verbl_msg = "Pen'a whispers that Lolth sacrificed the city to the demon lords.";
+							break;
+							case 3:
+								verbl_msg = "The surfacers have occupied this level, but that doesn't help the commoners below.";
+							break;
+							case 4:
+								verbl_msg = "The dwarf-giant slavers have taken much of the lower levels.";
+							break;
+							case 5:
+								verbl_msg = "The surfacers are right to be afraid. If we fail here, no one will be safe.";
+							break;
+						}
+					}
+					else {
+						switch(rn2(6)){
+							case 0:
+								verbl_msg = "We must not let the ruling houses reclaim the city.";
+							break;
+							case 1:
+								verbl_msg = "Pen'a whispers that a demon lord drove the kuo toa against us.";
+							break;
+							case 2:
+								verbl_msg = "Lolth is a blight upon the world. We must be free of her.";
+							break;
+							case 3:
+								verbl_msg = "Holy be the alliance of Pen'a and Ilmater.";
+							break;
+							case 4:
+								verbl_msg = "The dwarf-giants still hold much of the lower levels.";
+							break;
+							case 5:
+								verbl_msg = "Lolth has ceded the city by her actions. For the safety of the surface and the dark she must never regain it.";
+							break;
+						}
+					}
+				break;
+				case PM_SISTER_T_EIRASTRA:
+					if(!quest_status.got_quest){
+						verbl_msg = flags.female ? "I'm glad you returned whole, little sister. You must speak to Shuushar."
+												 : "I'm glad you returned whole, little brother. You must speak to Shuushar.";
+					}
+					else if(!u.uevent.qcompleted){
+						switch(rn2(6)){
+							case 0:
+								verbl_msg = flags.female ? "Be safe, little sister."
+														 : "Be safe, little brother.";
+							break;
+							case 1:
+								verbl_msg = "Remember your studies, and you will prevail!";
+							break;
+							case 2:
+								verbl_msg = "The perversion of the Ana'auo shames us all.";
+							break;
+							case 3:
+								verbl_msg = "You will face many foes. Consider well the strengths of each!";
+							break;
+							case 4:
+								verbl_msg = "Sight beyond sight.";
+							break;
+							case 5:
+								verbl_msg = flags.female ? "The plague grows worse as we speak.  Hurry, little sister."
+														 : "The plague grows worse as we speak.  Hurry, little brother.";
+							break;
+						}
+					}
+					else {
+						if(!u.uhave.amulet){
+							verbl_msg = flags.female ? "Greetings, little sister. How fare you on your quest for the Amulet?"
+													 : "Greetings, little brother. How fare you on your quest for the Amulet?";
+						}
+						else {
+							com_pager(226);
+						}
+					}
+				break;
+				case PM_SIR_ALJANOR:
+					if(!u.uevent.qcompleted){
+						switch(rn2(5)){
+							case 0:
+								verbl_msg = "I've taken charge of this expeditionary force.";
+							break;
+							case 1:
+								verbl_msg = "The demonic incursion has been delt with, but now something drives these kuo-toa against us.";
+							break;
+							case 2:
+								verbl_msg = "I'm sure Lolth regrets that her slavers took me alive.";
+							break;
+							case 3:
+								verbl_msg = "We've occupied as much of the city as possible. Tyr shall send aid!";
+							break;
+							case 4:
+								verbl_msg = "We must drive the dwarf-giant slavers out of the city!";
+							break;
+						}
+					}
+					else {
+						switch(rn2(5)){
+							case 0:
+								verbl_msg = "We must work together to save all our peoples!";
+							break;
+							case 1:
+								verbl_msg = "I think a demon lord was behind the attacks.";
+							break;
+							case 2:
+								verbl_msg = "By my honor as a knight of Tyr, God of Justice, Lolth will not have this city!";
+							break;
+							case 3:
+								verbl_msg = "We're holding as much of the city as possible. Tyr shall send aid!";
+							break;
+							case 4:
+								verbl_msg = "We must drive the dwarf-giant slavers out of the city!";
+							break;
+						}
 					}
 				break;
 				case PM_ALIDER:
@@ -4795,6 +4920,7 @@ int tx,ty;
 					pline("\"Your contribution is appreciated. Now don't bother me.\"");
 					o->otyp = SPE_BLANK_PAPER;
 					o->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+					remove_oprop(o, OPROP_TACTB);
 					newsym(tx,ty);
 					bindspirit(ep->ward_id);
 					u.sealTimeout[PAIMON-FIRST_SEAL] = moves + bindingPeriod;

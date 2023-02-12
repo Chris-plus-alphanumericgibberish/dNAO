@@ -2163,7 +2163,7 @@ are to vist %H.
 "We're holding as much of the city as possible. Ilmater shall send aid!"
 %E
 %Cp Dhl 00014
-"The dwarf-giants have taken much of the lower levels."
+"The dwarf-giants still hold much of the lower levels."
 %E
 %Cc Dhl 00015
 You approach the strange purple frog-creature. He is unlike any
@@ -2325,8 +2325,8 @@ shackles. Your heart sinks as you recognize the melted
 remnants of the Ana'auo.
 
 As you pick up the swordstaff, though, you feel its healing
-begin to warm your soul. You breathe a sigh of relief as it
-does, for it seems the Ana'auo still functions despite
+begin to warm your soul. You breathe a sigh of relief,
+for it seems the Ana'auo still functions despite
 the frightful, half-seen muatations wrought upon it by 
 the imaginations of the kuo toa.
 %E
@@ -8979,4 +8979,16 @@ Annulus from wherever it ended up, and use it against
 Ilsensine in the past.
 
 "So, you know.  Good luck."
+%E
+%Cc - 00226
+"You have it!  You have recovered the Amulet of Yendor!
+Now attend to me, little %s, and I will tell you what must be done:
+
+"The Amulet has within it magic, the capability to transport you to
+the Astral Plane, where the High Altar of %d resides.
+
+"To activate this magic, you must travel upwards as far as you can.
+When you reach the temple, sacrifice the Amulet to %d.
+
+"Thus will you fulfill your destiny."
 %E

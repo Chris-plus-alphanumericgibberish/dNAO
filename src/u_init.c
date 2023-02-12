@@ -3246,6 +3246,11 @@ register struct trobj *trop;
 					obj->obj_color = CLR_WHITE;
 				}
 			}
+			if(Role_if(PM_HEALER) && Race_if(PM_DROW)){
+				if(obj->oclass == SPBOOK_CLASS){
+					add_oprop(obj, OPROP_TACTB);
+				}
+			}
 #ifdef GOLDOBJ
 		}
 #endif

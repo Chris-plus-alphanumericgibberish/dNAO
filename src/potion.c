@@ -2463,6 +2463,7 @@ boolean amnesia;
 			    bill_dummy_object(obj);
 			}
 			obj->otyp = SCR_BLANK_PAPER;
+			remove_oprop(obj, OPROP_TACTB);
 			obj->spe = 0;
 			obj->oward = 0;
 			used = TRUE;
@@ -2486,6 +2487,7 @@ boolean amnesia;
 			    }
 			    obj->otyp = SPE_BLANK_PAPER;
 				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+				remove_oprop(obj, OPROP_TACTB);
 			}
 			used = TRUE;
 		}

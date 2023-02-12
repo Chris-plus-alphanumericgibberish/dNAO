@@ -42,7 +42,8 @@
 #define SICK						1 + CONFUSION
 #define BLINDED						1 + SICK
 #define BLIND_RES					1 + BLINDED
-#define SLEEPING					1 + BLIND_RES
+#define GAZE_RES					1 + BLIND_RES
+#define SLEEPING					1 + GAZE_RES
 #define WOUNDED_LEGS				1 + SLEEPING
 #define STONED						1 + WOUNDED_LEGS
 #define GOLDED						1 + STONED
