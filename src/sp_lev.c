@@ -1922,6 +1922,16 @@ default_case:
 		    break;
 		}
 		remove_object(otmp);
+		if(container->otyp == ICE_BOX && !age_is_relative(otmp)){
+		/* stop any corpse timeouts when frozen */
+			otmp->age = 0L;
+			if (otmp->otyp == CORPSE && otmp->timed) {
+				long rot_alarm = stop_timer(ROT_CORPSE, otmp->timed);
+				stop_corpse_timers(otmp);
+				/* mark a non-reviving corpse as such */
+				if (rot_alarm) otmp->norevive = 1;
+			}
+		}
 		(void) add_to_container(container, otmp);
 		goto o_done;		/* don't stack, but do other cleanup */
 	    /* container */
