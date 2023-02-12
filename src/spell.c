@@ -4580,7 +4580,12 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		} else if (
 			!(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT && spellev(spell) <= (u.uinsight*2)/11+1) && 
 			!(spellid(spell) == SPE_LIGHTNING_STORM && uarmh && uarmh->oartifact == ART_STORMHELM) &&
-			!(spellid(spell) == SPE_FIREBALL && uarmh && check_oprop(uarmh, OPROP_BLAST)) &&
+			!(spellid(spell) == SPE_DRAIN_LIFE && uwep && uwep->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO) &&
+			!(spellid(spell) == SPE_FIREBALL && (Fire_crystal || (uarmh && check_oprop(uarmh, OPROP_BLAST)))) &&
+			!(spellid(spell) == SPE_CONE_OF_COLD && Water_crystal) &&
+			!(spellid(spell) == SPE_LIGHTNING_BOLT && Air_crystal) &&
+			!(spellid(spell) == SPE_DIG && Earth_crystal) &&
+			!((spellid(spell) == SPE_HASTE_SELF || spellid(spell) == SPE_EXTRA_HEALING) && Black_crystal) &&
 			!((spellid(spell) == SPE_FORCE_BOLT || spellid(spell) == SPE_MAGIC_MISSILE) && 
 				uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
 		) {
