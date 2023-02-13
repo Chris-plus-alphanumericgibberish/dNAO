@@ -826,6 +826,7 @@ init_dungeons()		/* initialize the "dungeon" structs */
 	struct proto_dungeon pd;
 	struct level_map *lev_map;
 	struct version_info vers_info;
+	boolean quest_i;
 	
 	pd.n_levs = pd.n_brs = 0;
 
