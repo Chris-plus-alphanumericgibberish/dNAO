@@ -530,7 +530,10 @@ register struct obj *obj;
 		Strcpy(buf, aname);
 
 	if (obj->oartifact) {
-		pline_The("artifact seems to resist the attempt.");
+		if(obj->known)
+			pline_The("artifact seems to resist the attempt.");
+		else
+			pline_The("object seems to resist the attempt.");
 		return;
 	} else if (restrict_name(obj, buf) || art_already_exists_byname(obj->otyp, buf)) {
 		int n = rn2((int)strlen(buf));
