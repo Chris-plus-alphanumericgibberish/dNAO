@@ -1456,7 +1456,7 @@ update_externally_granted_spells()
 	if(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_PERCIPIENT){
 		for (i = 0; i < MAXSPELL; i++) {
 			if (spellid(i) != NO_SPELL) {
-				if (spl_book[i].sp_know < 1 && spl_book[i].sp_lev <= (u.uinsight*2)/11+1)
+				if (spl_book[i].sp_lev <= (u.uinsight*2)/11+1)
 					spellext(i) = TRUE;
 			}
 		}
