@@ -12123,6 +12123,10 @@ int faction;
 	if(is_drow(ptr) && ptr->mtyp != PM_CHANGED && ptr->mtyp != PM_WARRIOR_CHANGED){
 		if(curhouse) {
 			out_faction = curhouse;
+		} else if(ptr->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH
+			|| ptr->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION
+		){
+			out_faction = Y_CULT_SYMBOL;
 		} else if(ptr->mtyp == PM_PEN_A_MENDICANT || ptr->mtyp == PM_MENDICANT_DRIDER 
 			|| ptr->mtyp == PM_MENDICANT_SPROW || ptr->mtyp == PM_SISTER_T_EIRASTRA
 			|| ptr->mtyp == PM_IKSH_NA_DEVA
