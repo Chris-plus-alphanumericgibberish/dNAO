@@ -345,6 +345,7 @@ char *pname;		/* caller-supplied output buffer */
 	const char *what = Hallucination ? rndmonnam() : mon->data->mname;
 	int align = (get_mx(mon, MX_EPRI) ? EPRI(mon)->shralign : get_mx(mon, MX_EMIN) ? EMIN(mon)->min_align : 0);
 	int godnum = (get_mx(mon, MX_EPRI) ? EPRI(mon)->godnum : get_mx(mon, MX_EMIN) ? EMIN(mon)->godnum : GOD_NONE);
+	const char *godnm = godname(godnum);
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
@@ -377,13 +378,15 @@ char *pname;		/* caller-supplied output buffer */
 			Strcat(pname, "a whole faith");
 //			Strcat(pname, "?");
 		} else {
-	 		Strcat(pname, godname(godnum));
+	 		Strcat(pname, godnm);
 		}
 		return(pname);
 	}
 	Strcat(pname, what);
-	Strcat(pname, " of ");
-	Strcat(pname, godname(godnum));
+	if(!strstr(what,godnm)){
+		Strcat(pname, " of ");
+		Strcat(pname, godnm);
+	}
 	return(pname);
 }
 
