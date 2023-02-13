@@ -43,6 +43,8 @@ const struct propname {
     { VOMITING, "vomiting" },
     { GLIB, "slippery fingers" },
     { WOUNDED_LEGS, "wounded legs" },
+	{ BLIND_RES, "immune to blinding" },
+	{ GAZE_RES, "immune to gazes" },
 	{ SLEEPING, "sleeping" },
     { TELEPORT, "teleporting" },
     { POLYMORPH, "polymorphing" },
