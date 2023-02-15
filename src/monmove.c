@@ -781,6 +781,10 @@ boolean digest_meal;
 		mon->mhp -= 1;
 		return;
 	}
+	if(mon->mtyp == PM_CYCLOPS && !mon_has_arti(mon, 0) && mon->mhp > 1){
+		mon->mhp -= 1;
+		return;
+	}
 	/* Clouds on Lolth's level deal damage */
 	if(Is_lolth_level(&u.uz) && levl[mon->mx][mon->my].typ == CLOUD){
 		if (!(nonliving(mon->data) || breathless_mon(mon))){
