@@ -3389,7 +3389,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	// monsters trapped in vivisection traps are excluded
 	// shackled monsters aren't a threat
-	if(nonthreat(mdef)){
+	if(nonthreat(magr) || nonthreat(mdef)){
 		return 0L;
 	}
 	// must be in range to attack mdef
