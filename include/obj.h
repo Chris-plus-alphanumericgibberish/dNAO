@@ -1116,7 +1116,10 @@ struct obj {
 #define arm_blocks_upper_body(onum)		(objects[onum].oc_dtyp&UPPER_TORSO_DR)
 #define arm_blocks_lower_body(onum)		(objects[onum].oc_dtyp&LOWER_TORSO_DR)
 
-#define is_magic_obj(obj)		(objects[(obj)->otyp].oc_magic || ((is_enchantable(obj)) && (obj)->spe > 0))
+#define is_magic_obj(obj)		(objects[(obj)->otyp].oc_magic \
+								|| ((is_enchantable(obj)) && (obj)->spe > 0)\
+								|| ((obj)->oartifact)\
+								)
 
 #define is_cha_otyp(onum)	(onum == NOBLE_S_DRESS\
 							|| onum == GENTLEWOMAN_S_DRESS\
