@@ -6012,6 +6012,9 @@ struct monst *magr;
 	else if(pa->mtyp == PM_MOONSHADOW){
 		spellnum = STARFALL;
 	}
+	else if(pa->mtyp == PM_PYROCLASTIC_VORTEX){
+		spellnum = rn2(3) ? PYRO_STORM : rn2(2) ? MON_POISON_GAS : GOD_RAY;
+	}
 	else if(pa->mtyp == PM_DAO_LAO_GUI_MONK){
 		spellnum = rn2(3) ? RAIN : rn2(3) ? LIGHTNING : HAIL_FLURY;
 		frequency_decrease = FALSE;

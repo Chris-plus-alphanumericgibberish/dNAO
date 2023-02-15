@@ -432,8 +432,10 @@
 #define STEAM_GEYSER           BLOOD_RAIN+1
 //90
 #define MOTHER_S_GAZE          STEAM_GEYSER+1
+#define PYRO_STORM             MOTHER_S_GAZE+1
+#define GOD_RAY                PYRO_STORM+1
 
-#define MON_LASTSPELL          MOTHER_S_GAZE
+#define MON_LASTSPELL          GOD_RAY
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1
