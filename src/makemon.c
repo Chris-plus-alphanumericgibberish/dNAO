@@ -6493,6 +6493,7 @@ int mmflags;
 			}
 		 }
 		} else if(mm == PM_MAD_GRAZI){
+			coord cc;
 			mongets(mtmp, QUARTERSTAFF, mkobjflags);
 			otmp = mongets(mtmp, CLOAK, mkobjflags);
 			if(otmp)
@@ -6500,7 +6501,11 @@ int mmflags;
 			mongets(mtmp, GLOVES, mkobjflags);
 			mongets(mtmp, HIGH_BOOTS, mkobjflags);
 			mongets(mtmp, LEATHER_HELM, mkobjflags);
-			mongets(mtmp, CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
+			otmp = mongets(mtmp, CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
+			if(otmp){
+				enexto(&cc, mtmp->mx, mtmp->my, (struct permonst *)0);
+				x_uses_crystal_skull(&otmp, mtmp, &cc);
+			}
 			if(check_insight() || check_insight())
 				set_template(mtmp, MOLY_TEMPLATE);
 		} else if((mm == PM_MIND_FLAYER || mm == PM_MASTER_MIND_FLAYER)){
@@ -12119,6 +12124,9 @@ int faction;
 	
 	if(Infuture)
 		return 0;
+
+	if(ptr->mtyp == PM_MAD_GRAZI)
+		out_faction = Y_CULT_SYMBOL;
 
 	if(is_drow(ptr) && ptr->mtyp != PM_CHANGED && ptr->mtyp != PM_WARRIOR_CHANGED){
 		if(curhouse) {
