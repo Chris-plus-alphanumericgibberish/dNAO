@@ -3241,7 +3241,8 @@ coord *cc;
 		}
 		mark_mon_as_summoned(mtmp, master, ESUMMON_PERMANENT, 0);
 		mtmp->mextra_p->esum_p->sm_o_id = obj->o_id;
-		//After being marked as summoning, extract invalid items from skull and add to inventory.
+		//After being marked as summoned, extract invalid items from skull and add to inventory.
+		// These objects are "really there"/will remain after the monster is defeated.
 		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
 			if(oinv->otyp == TREPHINATION_KIT || ensouled_item(oinv)){
 				obj_extract_self(oinv);
