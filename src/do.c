@@ -1754,9 +1754,12 @@ final_level()
 /*		for(host = 0; host < 10; host++ )*/ (void) makemon(&mons[PM_FALLEN_ANGEL], u.ux, u.uy, MM_ADJACENTOK);
 	}
 	/* create a guardian angel next to player, if worthy */
-	if (Conflict) {
-	    pline(
-	     "A voice booms: \"Thy desire for conflict shall be fulfilled!\"");
+	if (Conflict || u.ualign.type == A_VOID || u.ualign.type == A_NONE) {
+		if(Conflict)
+			pline(
+			 "A voice booms: \"Thy desire for conflict shall be fulfilled!\"");
+		else
+			pline("A voice booms: \"Die, heretic!\"");
 	    for (i = rnd(4); i > 0; --i) {
 		mm.x = u.ux;
 		mm.y = u.uy;
