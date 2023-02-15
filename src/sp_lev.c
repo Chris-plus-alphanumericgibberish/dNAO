@@ -1147,7 +1147,56 @@ struct mkroom	*croom;
 		else {
 			mon = makemon(&mons[asylum_types[rn2(SIZE(asylum_types))]], otmp->ox, otmp->oy, NO_MINVENT);
 			if(mon){
-				mon->mcrazed = 1;
+				switch(rn2(16)){
+					case 0:
+						mon->mcrazed = 1;
+					break;
+					case 1:
+						mon->mfrigophobia = 1;
+					break;
+					case 2:
+						mon->mcannibal = 1;
+					break;
+					case 3:
+						mon->msuicide = 1;
+					break;
+					case 4:
+						mon->mnudist = 1;
+					break;
+					case 5:
+						mon->mophidio = 1;
+					break;
+					case 6:
+						mon->mentomo = 1;
+					break;
+					case 7:
+						mon->mthalasso = 1;
+					break;
+					case 8:
+						mon->mhelmintho = 1;
+					break;
+					case 9:
+						mon->mparanoid = 1;
+					break;
+					case 10:
+						mon->mtalons = 1;
+					break;
+					case 11:
+						mon->mdreams = 1;
+					break;
+					case 12:
+						mon->msciaphilia = 1;
+					break;
+					case 13:
+						mon->mforgetful = 1;
+					break;
+					case 14:
+						mon->mapostasy = 1;
+					break;
+					case 15:
+						mon->mtoobig = 1;
+					break;
+				}
 				mon->msleeping = 1;
 				tmpo = mongets(mon, STRAITJACKET, NO_MKOBJ_FLAGS);
 				if(tmpo){
