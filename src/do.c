@@ -954,12 +954,15 @@ dodown()
 					if (Is_hell3(&u.uz) && !(u.ux == xupstair && u.uy == yupstair)){
 						pline("These stairs are fake!");
 						levl[u.ux][u.uy].typ = ROOM;
+						newsym(u.ux, u.uy);
 					} else {
 						if(levl[u.ux][u.uy].ladder != LA_DOWN){
 							pline("These stairs don't go down!");
 						}
 						else {
 							pline("These stairs have been blocked by rubble!");
+							levl[u.ux][u.uy].typ = ROOM;
+							newsym(u.ux, u.uy);
 						}
 					}
 				}
@@ -1044,6 +1047,8 @@ doup()
 				}
 				else {
 					pline("These stairs have been blocked by rubble!");
+					levl[u.ux][u.uy].typ = ROOM;
+					newsym(u.ux, u.uy);
 				}
 			}
 			else You_cant("go up here.");
