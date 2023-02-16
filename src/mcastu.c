@@ -320,32 +320,31 @@ int spellnum;
 int mid;
 boolean hostile;
 {
-	if(!hostile)
-		return PSI_BOLT;
-     switch (spellnum % 18) {
+    switch (spellnum) {
+     case 18:
      case 17:
        return MON_WARP;
      case 16:
      case 14:
-	return PSI_BOLT;
+	return PAIN_BOLT;
     case 13:
     case 12:
 	return VULNERABILITY;
     case 11:
     case 9:
-	return NIGHTMARE;
+	return !hostile ? PSI_BOLT : NIGHTMARE;
     case 8:
     case 7:
-	return PARALYZE;
+	return mid%3 ? PARALYZE : BARF_BOLT;
     case 6:
     case 4:
-	return STUN_YOU;
+	return !hostile ? PSI_BOLT : mid%5 ? STUN_YOU : SAN_BOLT;
     case 3:
     case 2:
-	return CONFUSE_YOU;
+	return !hostile ? PSI_BOLT : mid%7 ? CONFUSE_YOU : BABBLE_BOLT;
     case 1:
     case 0:
-    default:/*5,10,15,18+*/
+    default:/*5,10,15,19+*/
 	return PSI_BOLT;
     }
 }
@@ -1777,6 +1776,11 @@ const char * spellname[] =
 	"EARTH_CRACK",
 	"AURA_BOLT",
 	"RAIN",
+	"PAIN_BOLT",
+	"SAN_BOLT",
+	"DOUBT_BOLT",
+	"BARF_BOLT",
+	"BABBLE_BOLT",
 };
 
 
@@ -2546,6 +2550,137 @@ int tary;
 		}
 		else if (canseemon(mdef)) {
 			pline("%s winces%s", Monnam(mdef), (dmg <= 5) ? "." : "!");
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case PAIN_BOLT:
+	case SAN_BOLT:
+	case DOUBT_BOLT:
+	case BARF_BOLT:
+	case BABBLE_BOLT:
+		/* needs direct target */
+		if (!foundem) {
+			impossible("No mdef for mind-bolt");
+			return MM_MISS;
+		}
+		if ((!youdef && mindless_mon(mdef)) || Catapsi) {
+			return MM_MISS;
+		}
+		dmg = (dmg + 1) / 2;
+		if (dmg > 75)
+			dmg = 75;
+
+		/* calculate resistance */
+		if ((!youdef && resist(mdef, 0, 0, FALSE))) {
+			shieldeff(x(mdef), y(mdef));
+			dmg = (dmg + 1) / 2;
+		}
+		if(Half_spel(mdef))
+			dmg = (dmg + 1) / 2;
+		/* message */
+		if (youdef) {
+			if (dmg <= 5)
+				You("get a %sache.", body_part(HEAD));
+			else if (dmg <= 10)
+				Your("brain is on fire!");
+			else if (dmg <= 20)
+				Your("%s suddenly aches painfully!", body_part(HEAD));
+			else{
+				Your("%s suddenly aches very painfully!", body_part(HEAD));
+			}
+		}
+		if(spell == PAIN_BOLT){
+			if (youdef) {
+				if (!is_silent(mdef->data)){
+					You("%s from the pain!", humanoid_torso(mdef->data) ? "scream" : "shriek");
+				}
+				else {
+					You("writhe in pain!");
+				}
+				HScreaming += (dmg+9)/10;
+			}
+			else {
+				if (!is_silent_mon(mdef)){
+					if (canseemon(mdef))
+						pline("%s %s in pain!", Monnam(mdef), humanoid_torso(mdef->data) ? "screams" : "shrieks");
+					else You_hear("%s %s in pain!", mdef->mtame ? noit_mon_nam(mdef) : mon_nam(mdef), humanoid_torso(mdef->data) ? "screaming" : "shrieking");
+				}
+				else {
+					if (canseemon(mdef))
+						pline("%s writhes in pain!", Monnam(mdef));
+				}
+				mdef->movement -= 6+(dmg+9)/10;
+			}
+		}
+		else if(spell == SAN_BOLT){
+			if (youdef) {
+				pline("Your buried fears surface!");
+				//Note: San damage is *increased* by your drunkard score
+				//  Finally a case where you SHOULD lay off the sauce!
+				if(save_vs_sanloss())
+					change_usanity(-1*((dmg+u.udrunken)/20), FALSE);
+				else
+					change_usanity(-1*((dmg+u.udrunken)/10), TRUE);
+			}
+			else {
+				if (canseemon(mdef))
+					pline("%s staggers!", Monnam(mdef));
+				mdef->mconf = TRUE;
+				if(rn2(dmg) > mdef->m_lev)
+					mdef->mcrazed = TRUE;
+			}
+		}
+		else if(spell == DOUBT_BOLT){
+			if (youdef) {
+				pline("You suffer a violent conflict of faith!");
+				HDoubt += dmg;
+			}
+			else {
+				if (canseemon(mdef))
+					pline("%s falters!", Monnam(mdef));
+				mdef->mdoubt = TRUE;
+				if(rn2(dmg) > mdef->m_lev)
+					mdef->mapostasy = TRUE;
+			}
+		}
+		else if(spell == BARF_BOLT){
+			if (youdef) {
+				pline("Revolting sensations assail you!");
+				if(!Vomiting && !(inediate(youracedata) && !uandroid && !Race_if(PM_INCANTIFIER)))
+					make_vomiting(Vomiting+15+d(5,4), TRUE);
+			}
+			else {
+				if (canseemon(mdef))
+					pline("%s shakes %s %s!", Monnam(mdef), mhis(mdef), mbodypart(mdef, HEAD));
+				mdef->movement -= (dmg+19)/20;
+				if(rn2(dmg) > mdef->m_lev/3 && !(inediate(mdef->data) && !is_android(mdef->data) && mdef->mtyp != PM_INCANTIFIER)){
+					if(canseemon(mdef))
+						pline("%s vomits!", Monnam(mdef));
+					mdef->mcanmove = 0;
+					if ((mdef->mfrozen + 3) > 127)
+						mdef->mfrozen = 127;
+					else mdef->mfrozen += 3;
+				}
+			}
+		}
+		else if(spell == BABBLE_BOLT){
+			if (youdef) {
+				pline("Your thoughts fade, and you babble in confusion!");
+				if(!Fixed_abil && ACURR(A_INT) > 3){
+					adjattrib(A_INT, -1, FALSE);
+					exercise(A_WIS, FALSE);
+					exercise(A_CHA, FALSE);
+				}
+				damage_spells(dmg/10);
+				HBabble += dmg;
+			}
+			else {
+				if (canseemon(mdef))
+					pline("%s falters!", Monnam(mdef));
+				mdef->mspec_used += dmg;
+				mdef->mconf = TRUE;
+			}
 		}
 		/* deal damage */
 		return xdamagey(magr, mdef, attk, dmg);
@@ -5520,8 +5655,11 @@ int tary;
 
 	case MAKE_WEB:
 		if (!youdef) {
-			/* only written vs player */
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
+			struct trap * ttmp;
+			if ((ttmp = maketrap(mdef->mx, mdef->my, WEB))) {
+				mintrap(mdef);
+				newsym(mdef->mx, mdef->my);
+			}
 		}
 		else
 		{
@@ -5537,6 +5675,24 @@ int tary;
 						rn2(2) ? "Ungoliant" : "Arachne");
 					else verbalize("Struggle all you might, but it will get thee nowhere.");
 				}
+				stop_occupation();
+			}
+		}
+		return MM_HIT;
+		case MON_SPE_BEARTRAP:
+		if (!youdef) {
+			struct trap * ttmp;
+			if ((ttmp = maketrap(mdef->mx, mdef->my, BEAR_TRAP))) {
+				mintrap(mdef);
+				newsym(mdef->mx, mdef->my);
+			}
+		}
+		else
+		{
+			struct trap * ttmp;
+			if ((ttmp = maketrap(u.ux, u.uy, BEAR_TRAP))) {
+				dotrap(ttmp, 0);
+				newsym(u.ux, u.uy);
 				stop_occupation();
 			}
 		}
@@ -5572,6 +5728,11 @@ int spellnum;
 	switch (spellnum)
 	{
 	case PSI_BOLT:
+	case PAIN_BOLT:
+	case SAN_BOLT:
+	case DOUBT_BOLT:
+	case BARF_BOLT:
+	case BABBLE_BOLT:
 	case OPEN_WOUNDS:
 	case MAGIC_MISSILE:
 	case CONE_OF_COLD:
@@ -5721,6 +5882,7 @@ int spellnum;
 	case STERILITY_CURSE:
 	case PUNISH:
 	case INCARCERATE:
+	case MON_SPE_BEARTRAP:
 	case DARKNESS:
 	case MAKE_WEB:
 	case MON_CANCEL:

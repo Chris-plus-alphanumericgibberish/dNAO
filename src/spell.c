@@ -1057,6 +1057,17 @@ age_spells()
 	return;
 }
 
+void
+damage_spells(dmg)
+int dmg;
+{
+	int i;
+	for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++)
+	    if (spellknow(i)){
+			ndecrnknow(i, dmg);
+		}
+}
+
 /*
  * Return TRUE if a spell was picked, with the spell index in the return
  * parameter.  Otherwise return FALSE.

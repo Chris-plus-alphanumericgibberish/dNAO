@@ -426,8 +426,15 @@
 #define EARTH_CRACK            STARFALL+1
 #define MON_AURA_BOLT          EARTH_CRACK+1
 #define RAIN                   MON_AURA_BOLT+1
+#define PAIN_BOLT              RAIN+1
+#define SAN_BOLT               PAIN_BOLT+1
+//90
+#define DOUBT_BOLT             SAN_BOLT+1
+#define BARF_BOLT              DOUBT_BOLT+1
+#define BABBLE_BOLT            BARF_BOLT+1
+#define MON_SPE_BEARTRAP       BABBLE_BOLT+1
 
-#define MON_LASTSPELL          RAIN
+#define MON_LASTSPELL          MON_SPE_BEARTRAP
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1
