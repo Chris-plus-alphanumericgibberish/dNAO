@@ -1062,6 +1062,17 @@ age_spells()
 	return;
 }
 
+void
+damage_spells(dmg)
+int dmg;
+{
+	int i;
+	for (i = 0; i < MAXSPELL && spellid(i) != NO_SPELL; i++)
+	    if (spellknow(i)){
+			ndecrnknow(i, dmg);
+		}
+}
+
 /*
  * Return TRUE if a spell was picked, with the spell index in the return
  * parameter.  Otherwise return FALSE.
@@ -1790,7 +1801,7 @@ STATIC_OVL void
 cast_mass_healing(otmp)
 struct obj * otmp;
 {
-	int radius = 2 + P_SKILL(P_HEALING_SPELL) + Spellboost;
+	int radius = 2 + P_SKILL(P_HEALING_SPELL) + !!Spellboost;
 	do_clear_area(u.ux, u.uy, radius, cast_extra_healing_at, (genericptr_t)otmp);
 }
 

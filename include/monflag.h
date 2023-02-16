@@ -432,8 +432,15 @@
 #define STEAM_GEYSER           BLOOD_RAIN+1
 //90
 #define MOTHER_S_GAZE          STEAM_GEYSER+1
+#define PAIN_BOLT              MOTHER_S_GAZE+1
+#define SAN_BOLT               PAIN_BOLT+1
+#define DOUBT_BOLT             SAN_BOLT+1
+#define BARF_BOLT              DOUBT_BOLT+1
+//95
+#define BABBLE_BOLT            BARF_BOLT+1
+#define MON_SPE_BEARTRAP       BABBLE_BOLT+1
 
-#define MON_LASTSPELL          MOTHER_S_GAZE
+#define MON_LASTSPELL          MON_SPE_BEARTRAP
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

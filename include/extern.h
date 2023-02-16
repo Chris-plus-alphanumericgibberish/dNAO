@@ -2770,6 +2770,7 @@ E void NDECL(run_maintained_spells);
 E void FDECL(book_disappears, (struct obj *));
 E void FDECL(book_substitution, (struct obj *,struct obj *));
 E void NDECL(age_spells);
+E void FDECL(damage_spells, (int));
 E int NDECL(docast);
 E boolean FDECL(tt_findadjacent, (coord *, struct monst *));
 E int NDECL(spiritDsize);

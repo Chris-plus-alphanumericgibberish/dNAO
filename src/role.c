@@ -2342,6 +2342,9 @@ int newgame;
 			mons[urole.guardnum].mflagst |= (MT_PEACEFUL);
 			mons[urole.guardnum].mflagst &= ~(MT_WAITFORU|MT_COVETOUS);
 		}
+		if(Race_if(PM_DROW) && (Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || Role_if(PM_WIZARD))){
+			mons[PM_HEDROW_MASTER_WIZARD].msound = MS_GUARDIAN; /*:( :(*/
+		}
 	}
 
 	/* Fix up the quest nemesis */
