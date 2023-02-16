@@ -1039,7 +1039,7 @@ int mkflags;
 							PM_EMBRACED_DROWESS, PM_EMBRACED_DROWESS, PM_NURSE, 
 							
 							PM_GYNOID, PM_GYNOID, PM_GYNOID, PM_OPERATOR, PM_GYNOID, PM_GYNOID, PM_GYNOID, PM_OPERATOR, PM_ANDROID,
-							PM_MYRKALFAR_WARRIOR, PM_MYRKALFAR_WARRIOR, PM_DWARF, PM_DWARF, PM_HUMAN, PM_HUMAN, 
+							PM_MYRKALFAR_WARRIOR, PM_MYRKALFAR_WARRIOR, PM_DWARF_WARRIOR, PM_DWARF_WARRIOR, PM_HUMAN, PM_HUMAN, 
 							PM_INCANTIFIER, PM_INCANTIFIER 
 						};
 						skull = ROLL_FROM(skulls);
@@ -1051,7 +1051,7 @@ int mkflags;
 							PM_EMBRACED_DROWESS, PM_EMBRACED_DROWESS, 
 							
 							PM_MYRKALFR, PM_MYRKALFR, PM_ELF, PM_ELF, 
-							PM_MYRKALFAR_WARRIOR, PM_MYRKALFAR_WARRIOR, PM_DWARF, PM_DWARF, PM_HUMAN, PM_HUMAN, 
+							PM_MYRKALFAR_WARRIOR, PM_MYRKALFAR_WARRIOR, PM_DWARF_WARRIOR, PM_DWARF_WARRIOR, PM_HUMAN, PM_HUMAN, 
 							PM_INCANTIFIER, PM_INCANTIFIER 
 						};
 						skull = ROLL_FROM(skulls);
@@ -1081,6 +1081,8 @@ int mkflags;
 						mon->m_lev = 10;
 						mon->mhp = mon->mhpmax = d(10, 8);
 					}
+					if(quest_faction(mon))
+						set_faction(mon, 0);
 					for(oinv = mon->minvent; oinv; oinv = mon->minvent){
 						mon->misc_worn_check &= ~oinv->owornmask;
 						update_mon_intrinsics(mon, oinv, FALSE, FALSE);
