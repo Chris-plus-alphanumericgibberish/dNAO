@@ -2002,13 +2002,17 @@ default_case:
 	}
 #endif
 	/* statues placed on top of existing statue traps replace the statue there and attach itself to the trap */
+	/*  I like the statues on Oona's level, so manually except that level.  */
 	if (otmp->otyp == STATUE) {
 		struct trap * ttmp = t_at(x, y);
 		struct obj * statue;
+		struct obj * nobj;
 		if (ttmp && ttmp->ttyp == STATUE_TRAP) {
-			for (statue = level.objects[x][y]; statue; statue = statue->nobj)
-				if (statue->o_id == ttmp->statueid)
+			for (statue = level.objects[x][y]; statue; statue = nobj){
+				nobj = statue->nobj;
+				if (statue->o_id == ttmp->statueid && !on_level(&u.uz, &towertop_level))
 					delobj(statue);
+			}
 			ttmp->statueid = otmp->o_id;
 		}
 	}
