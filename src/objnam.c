@@ -856,7 +856,6 @@ struct obj *obj;
 char *buf;
 {
 	boolean iscrys = (obj->otyp == CRYSKNIFE);
-	if (!is_damageable(obj) && obj->otyp != MASK && !iscrys) return;
 
 	/* food uses oeroded to determine if it is rotten -- do not show this */
 	if (obj->oclass == FOOD_CLASS)
