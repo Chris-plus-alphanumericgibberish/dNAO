@@ -1932,6 +1932,8 @@ boolean tinitial, tfrom_file;
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_ATTACKS);
 			else if (!strncmpi(op, "summary",    l= 7))
 				ADD_REMOVE_SECTION(POKEDEX_SHOW_CRITICAL);
+			else if (!strncmpi(op, "wards",    l= 5))
+				ADD_REMOVE_SECTION(POKEDEX_SHOW_WARDS);
 			else
 				badoption(opts);
 #undef ADD_REMOVE_SECTION

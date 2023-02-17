@@ -25,6 +25,7 @@ STATIC_DCL char * get_mb_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_ma_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mv_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mg_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_mw_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_speed_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_description_of_attack_type(uchar);
 STATIC_DCL char * get_description_of_damage_type(uchar);
@@ -1832,6 +1833,35 @@ char * get_mg_description_of_monster_type(struct monst * mtmp, char * descriptio
 }
 
 char *
+get_mw_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	strcat(description, "Wards: ");
+	int many = 0;
+	many = append(description, (u.wardsknown & WARD_HEPTAGRAM) && !heptUnwardable(mtmp) && heptWarded(mtmp->data)								, "heptagram"			, many);
+	many = append(description, (u.wardsknown & WARD_GORGONEION) && !gorgUnwardable(mtmp) && gorgWarded(mtmp->data)								, "gorgoneion"			, many);
+	many = append(description, (u.wardsknown & WARD_ACHERON) && !standardUnwardable(mtmp) && circleWarded(mtmp->data)							, "circle of acheron"	, many);
+	many = append(description, (u.wardsknown & WARD_PENTAGRAM) && !standardUnwardable(mtmp) && pentWarded(mtmp->data)							, "pentagram"			, many);
+	many = append(description, (u.wardsknown & WARD_HEXAGRAM) && !(standardUnwardable(mtmp) || mtmp->mpeaceful) && hexWarded(mtmp->data)		, "hexagram"			, many);
+	many = append(description, (u.wardsknown & WARD_HAMSA) && !standardUnwardable(mtmp) && hamWarded(mtmp->data)								, "hamsa"				, many);
+	many = append(description, (u.wardsknown & WARD_ELDER_SIGN) && !standardUnwardable(mtmp) && (mtmp->data->mflagsw&MW_ELDER_SIGN)				, "elder sign"			, many);
+	many = append(description, (u.wardsknown & WARD_ELDER_SIGN) && !standardUnwardable(mtmp) && (mtmp->data->mflagsw&MW_EYE_OF_YGG)				, "eye of yggdrasil"	, many);
+	many = append(description, (u.wardsknown & WARD_EYE) && !standardUnwardable(mtmp) && (mtmp->data->mflagsw&MW_ELDER_EYE_ELEM)				, "elder elemental eye"	, many);
+	many = append(description, (u.wardsknown & WARD_EYE) && !standardUnwardable(mtmp) && (mtmp->data->mflagsw&MW_ELDER_EYE_ENERGY)				, "4-fold elemental eye", many);
+	many = append(description, (u.wardsknown & WARD_EYE) && !standardUnwardable(mtmp) && (mtmp->data->mflagsw&MW_ELDER_EYE_PLANES)				, "7-fold elemental eye", many);
+	many = append(description, (u.wardsknown & WARD_QUEEN) && !standardUnwardable(mtmp) && queenWarded(mtmp->data)								, "scion queen mother"	, many);
+	many = append(description, (u.wardsknown & WARD_CAT_LORD) && !(standardUnwardable(mtmp) || catWardInactive) && catWarded(mtmp->data)		, "cat lord"			, many);
+	many = append(description, (u.wardsknown & WARD_GARUDA) && !standardUnwardable(mtmp) && wingWarded(mtmp->data)								, "wings of garuda"		, many);
+	many = append(description, (u.wardsknown & WARD_YELLOW) && !yellowUnwardable(mtmp) && yellowWarded(mtmp->data)								, "yellow sign"		, many);
+	many = append(description, (u.wardsknown & WARD_TOUSTEFNA) && !standardUnwardable(mtmp) && touWarded(mtmp->data)							, "toustefna stave"		, many);
+	many = append(description, (u.wardsknown & WARD_DREPRUN) && !standardUnwardable(mtmp) && dreWarded(mtmp->data)								, "dreprun stave"		, many);
+	many = append(description, (u.wardsknown & WARD_VEIOISTAFUR) && !standardUnwardable(mtmp) && veiWarded(mtmp->data)							, "veioistafur stave"	, many);
+	many = append(description, (u.wardsknown & WARD_THJOFASTAFUR) && !standardUnwardable(mtmp) && thjWarded(mtmp->data)							, "thjofastafur stave"	, many);
+	strcat(description, ". ");
+	return description;
+}
+
+char *
 get_speed_description_of_monster_type(struct monst * mtmp, char * description)
 {
 	int speed = mtmp->data->mmove;
@@ -2254,6 +2284,11 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			temp_buf[0] = '\0';
 			strcat(description, "\n");
 			strcat(description, get_ma_description_of_monster_type(mtmp, temp_buf));
+		}
+		if (iflags.pokedex & POKEDEX_SHOW_WARDS){
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mw_description_of_monster_type(mtmp, temp_buf));
 		}
 		if (iflags.pokedex & POKEDEX_SHOW_ATTACKS){
 			strcat(description, "\n");

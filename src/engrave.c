@@ -3490,18 +3490,18 @@ int floorID;
 	case ELDER_SIGN:
 		strcpy(name, " Elder Sign");
 		strcpy(strokes, " 6, 12, 8, 8, 8, 8");
-		strcpy(warded, " 1-fold: b, j, m, p, w, y, P, U, ;, mind flayer");
-		strcpy(warded2,"         deep one, deeper one, byakhee, nightgaunt");
-		strcpy(warded3," 6-fold: deepest one, master mind flayer");
+		strcpy(warded, " 1-fold: many weaker blobby, aquatic, and eldritch monsters");
+		strcpy(warded2," 6-fold: many stronger blobby, aquatic, and eldritch monsters");
+		strcpy(warded3,"         Check the pokedex for specific guidance.");
 		strcpy(reinforce, " 6-fold");
 		strcpy(secondary, " Wards against more monsters at maximum reinforcement.");
 		break;
 	case ELDER_ELEMENTAL_EYE:
 		strcpy(name, " Elder Elemental Eye");
 		strcpy(strokes, " 5");
-		strcpy(warded, " 1-fold: spheres, v, E, F, X");
-		strcpy(warded2," 4-fold: y, D, N, undead, metroids");
-		strcpy(warded3," 7-fold: A, K, i, &, autons");
+		strcpy(warded, " 1-fold: elemental and fungoid creatures");
+		strcpy(warded2," 4-fold: dragons, undead, and energetic creatures");
+		strcpy(warded3," 7-fold: planar creatures (see pokedex for specific guidance)");
 		strcpy(reinforce, " 7-fold");
 		strcpy(secondary, " Wards against more monsters as it is reinforced.");
 		break;

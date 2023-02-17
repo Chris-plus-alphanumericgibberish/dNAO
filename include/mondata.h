@@ -1400,6 +1400,8 @@
 			data->mtyp == PM_CHOKHMAH_SEPHIRAH \
 		))
 
+#define yellowUnwardable(mtmp)	(standardUnwardable(mtmp) || mtmp->mpeaceful || (mtmp->mtyp == PM_STRANGER) || (mtmp->mtyp == PM_ELDER_PRIEST) || (has_template(mtmp, YELLOW_TEMPLATE)))
+
 #define	yellowWarded(data)	(!heptWarded(data) && !is_undead(data) && !is_were(data) && !is_primordial(data) )
 
 #endif /* MONDATA_H */

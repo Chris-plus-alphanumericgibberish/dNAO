@@ -329,8 +329,8 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data)) return FALSE;
+	else if(standardUnwardable(mtmp))
+		return FALSE;
 	return 	hamWarded(mtmp->data);
 }
 
@@ -421,13 +421,8 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->isgd || mtmp->iswiz || 
-			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
-			is_rider(mtmp->data) ||
-			(mtmp->mtyp == PM_STRANGER) ||
-			(has_template(mtmp, YELLOW_TEMPLATE)) ||
-			(mtmp->mtyp == PM_ELDER_PRIEST)
-		) return FALSE;
+	else if(yellowUnwardable(mtmp))
+		return FALSE;
 	if(yellowWarded(mtmp->data)){
 			mtmp->mcrazed = 1;
 			return !rn2(10);
