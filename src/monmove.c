@@ -309,7 +309,7 @@ struct monst *mtmp;
 			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
 			(mtmp->mtyp == PM_ASMODEUS && rn2(9))
 		) return FALSE;
-	return ((mtmp->data->mflagsw&MW_ELDER_EYE_ELEM) || (complete >= 4 && (mtmp->data->mflagsw&MW_ELDER_EYE_ENERGY)));
+	return ((mtmp->data->mflagsw&MW_ELDER_EYE_ELEM) || (complete >= 4 && (mtmp->data->mflagsw&MW_ELDER_EYE_ENERGY)) || (complete >= 7 && (mtmp->data->mflagsw&MW_ELDER_EYE_PLANES)));
 }
 
 boolean
@@ -394,7 +394,7 @@ struct monst *mtmp;
 		newsym(mtmp->mx, mtmp->my);
 		return FALSE;
 	}
-	return d(1,100) <= 33*complete && !gorgWarded(mtmp->data);
+	return d(1,100) <= 33*complete && gorgWarded(mtmp->data);
 }
 
 boolean
