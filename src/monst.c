@@ -4561,7 +4561,7 @@ struct permonst _mons2[] = {
 	SIZ(2000, 500, MS_GROWL, MZ_LARGE), 0, 0,
 	0 /*MM*/, MT_ANIMAL|MT_MAGIVORE|MT_HOSTILE /*MT*/, 0 /*MF*/,
 	MB_ANIMAL|MB_LONGHEAD /*MB*/, MG_INFRAVISIBLE /*MG*/,
-	MA_ANIMAL /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, CLR_BLUE),
+	MA_ANIMAL|MA_INSECTOID /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, CLR_BLUE),
 /*
  * Snakes
  */
