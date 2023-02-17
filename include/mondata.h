@@ -1279,5 +1279,127 @@
 	(Role_if(PM_HEALER) && (!nonliving((mon)->data) || has_blood_mon(mon))) || \
 	(ublindf && ublindf->otyp == ANDROID_VISOR))
 
+#define standardUnwardable(mtmp) (mtmp->isshk || mtmp->iswiz || is_rider(mtmp->data))
+
+#define catWardInactive ( 	(mvitals[PM_KITTEN].mvflags & G_GENOD || mvitals[PM_KITTEN].died >= 120) && \
+				(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && \
+				(mvitals[PM_LARGE_CAT].mvflags & G_GENOD || mvitals[PM_LARGE_CAT].died >= 120) \
+			)
+
+#define	wingWarded(data)	(data->mlet == S_COCKATRICE \
+			|| data->mlet == S_RODENT \
+			|| data->mlet == S_NAGA \
+			|| data->mlet == S_SNAKE \
+			|| data->mlet == S_LIZARD \
+			|| data->mtyp == PM_TOVE \
+			|| data->mtyp == PM_KRAKEN \
+		)
+
+#define	catWarded(data)	(is_bird(data) \
+			|| is_bat(data) \
+			|| data->mlet == S_RODENT \
+			|| data->mlet == S_SNAKE \
+			|| data->mlet == S_SPIDER \
+			|| data->mlet == S_EEL \
+			|| data->mlet == S_LIZARD \
+			|| data->mtyp == PM_TOVE \
+		)
+
+#define	touWarded(data)	(data->mlet == S_DOG || data->mlet == S_FELINE)
+
+#define	dreWarded(data)	(is_bird(data)\
+			|| is_bat(data) \
+			|| data->mlet == S_QUADRUPED \
+			|| data->mlet == S_UNICORN \
+		)
+
+#define	veiWarded(data)	(data->mlet == S_EEL)
+
+#define	thjWarded(data)	(data->mlet == S_LEPRECHAUN \
+			|| data->mlet == S_NYMPH \
+			|| is_thief(data) \
+		)
+
+#define	queenWarded(data)	(data->mlet == S_ANT \
+			|| data->mlet == S_XAN \
+			|| data->mlet == S_SPIDER \
+			|| data->mlet == S_RUSTMONST \
+		)
+
+#define	eeyeWarded(data)	( \
+			jsjk;sfdlksakslakldskkflskals \
+		)
+
+#define	hamWarded(data)	(is_auton(data) \
+			|| data->mtyp == PM_FLOATING_EYE \
+			|| data->mtyp == PM_BEHOLDER \
+			|| data->mtyp == PM_APHANACTONAN_ASSESSOR \
+			|| data->mtyp == PM_EYE_OF_DOOM \
+			|| data->mtyp == PM_MANY_EYED_SEEKER \
+			|| data->mtyp == PM_GROTESQUE_PEEPER \
+			|| data->mtyp == PM_JRT_NETJER \
+			|| data->mtyp == PM_YOCHLOL \
+			|| data->mtyp == PM_TRUTH_SEER \
+			|| data->mtyp == PM_DREAM_EATER \
+			|| data->mtyp == PM_PARASITIZED_DOLL \
+		)
+
+#define	hexWarded(data)	((is_minion(data) \
+			|| data->mtyp == PM_HELL_HOUND \
+			|| data->mtyp == PM_HELL_HOUND_PUP \
+			|| data->mtyp == PM_EYE_OF_DOOM \
+			|| data->mtyp == PM_SON_OF_TYPHON \
+			|| is_golem(data) \
+			|| is_angel(data) \
+			|| is_keter(data) \
+			|| data->mlet == S_QUANTMECH \
+			|| data->mlet == S_IMP \
+			|| is_demon(data) \
+		) && !( \
+			(data->mtyp == PM_CHOKHMAH_SEPHIRAH) || \
+			(data->mtyp == PM_ELDER_PRIEST) || \
+			(data->mtyp == PM_GREAT_CTHULHU) \
+		))
+
+#define	pentWarded(data)	((is_demon(data) \
+			|| data->mtyp == PM_HELL_HOUND \
+			|| data->mtyp == PM_HELL_HOUND_PUP \
+			|| data->mtyp == PM_GARGOYLE \
+			|| data->mtyp == PM_WINGED_GARGOYLE \
+			|| data->mtyp == PM_DJINNI \
+			|| data->mtyp == PM_SANDESTIN \
+			|| data->mtyp == PM_SALAMANDER \
+			|| data->mlet == S_ELEMENTAL \
+			|| data->mlet == S_IMP \
+		) && !( \
+			(data->mtyp == PM_CHOKHMAH_SEPHIRAH) || \
+			(data->mtyp == PM_ELDER_PRIEST) || \
+			(data->mtyp == PM_GREAT_CTHULHU) \
+		))
+
+#define	circleWarded(data)	((data->mtyp == PM_CERBERUS || is_undead(data)) \
+			&& !(mtmp->mtyp == PM_MAANZECORIAN))
+
+#define gorgUnwardable(mtmp)	(standardUnwardable(mtmp) || is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL)
+
+#define	gorgWarded(data)	(!mindless(data) \
+			&& !is_great_old_one(data) \
+			&& (data->mtyp != PM_CHOKHMAH_SEPHIRAH) \
+			&& (data->mtyp != PM_ELDER_PRIEST) \
+			&& (data->mtyp != PM_LUGRIBOSSK) \
+			&& (data->mtyp != PM_MAANZECORIAN) \
+		)
+
+#define heptUnwardable(mtmp)	(standardUnwardable(mtmp) || mtmp->isgd || is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL || mtmp->mpeaceful)
+
+#define	heptWarded(data)	(( !(is_human(data) || is_elf(data) \
+			|| is_drow(data) || is_dwarf(data) \
+			|| is_gnome(data) || is_orc(data)) \
+			|| is_undead(data) || is_were(data) \
+		) && !( \
+			data->mtyp == PM_CHOKHMAH_SEPHIRAH \
+		))
+
+#define	yellowWarded(data)	(!heptWarded(data) && !is_undead(data) && !is_were(data) && !is_primordial(data) )
 
 #endif /* MONDATA_H */

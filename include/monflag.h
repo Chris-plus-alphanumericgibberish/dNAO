@@ -291,6 +291,9 @@
 //Monster Warded
 #define MW_ELDER_SIGN		0x00000001L	/* by the elder sign */
 #define MW_EYE_OF_YGG		0x00000002L	/* by the fully-reinforced elder sign */
+#define MW_ELDER_EYE_ELEM	0x00000004L	/* by the basic elder elemental eye */
+#define MW_ELDER_EYE_ENERGY	0x00000008L	/* by the 4-level elder eye */
+#define MW_ELDER_EYE_PLANES	0x00000010L	/* by the 7-level elder eye */
 
 
 /* for mons[].geno (constant during game) */

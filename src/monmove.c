@@ -230,15 +230,9 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data)) return FALSE;
-	return 	mtmp->data->mlet == S_COCKATRICE ||
-			mtmp->data->mlet == S_RODENT ||
-			mtmp->data->mlet == S_NAGA ||
-			mtmp->data->mlet == S_SNAKE ||
-			mtmp->data->mlet == S_LIZARD ||
-			mtmp->mtyp == PM_TOVE ||
-			mtmp->mtyp == PM_KRAKEN;
+	if(standardUnwardable(mtmp))
+		return FALSE;
+	return 	wingWarded(mtmp->data);
 }
 
 boolean
@@ -247,66 +241,49 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data) ||
-			( 	(mvitals[PM_KITTEN].mvflags & G_GENOD || mvitals[PM_KITTEN].died >= 120) && 
-				(mvitals[PM_HOUSECAT].mvflags & G_GENOD || mvitals[PM_HOUSECAT].died >= 120) && 
-				(mvitals[PM_LARGE_CAT].mvflags & G_GENOD || mvitals[PM_LARGE_CAT].died >= 120)
-			)
-		) return FALSE;
-	else if(mtmp->data->mlet == S_FELINE
-			){ /* && mvitals[PM_KITTEN].died == 0*/
-				mtmp->mpeaceful = TRUE;
-				mtmp->mhp = mtmp->mhpmax;
-			}
-	return 	is_bird(mtmp->data) ||
-			is_bat(mtmp->data) ||
-			mtmp->data->mlet == S_RODENT ||
-			mtmp->data->mlet == S_SNAKE ||
-			mtmp->data->mlet == S_SPIDER ||
-			mtmp->data->mlet == S_EEL ||
-			mtmp->data->mlet == S_LIZARD ||
-			mtmp->mtyp == PM_TOVE;
+	if(standardUnwardable(mtmp) || catWardInactive)
+		return FALSE;
+	else if(mtmp->data->mlet == S_FELINE){ /* && mvitals[PM_KITTEN].died == 0*/
+		mtmp->mpeaceful = TRUE;
+		mtmp->mhp = mtmp->mhpmax;
+		newsym(mtmp->mx, mtmp->my);
+		return FALSE;
+	}
+	return 	catWarded(mtmp->data);
 }
 
 boolean
 scaryTou(mtmp)
 struct monst *mtmp;
 {
-	if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data)) return FALSE;
-	return 	mtmp->data->mlet == S_DOG ||
-			mtmp->data->mlet == S_FELINE;
+	if(standardUnwardable(mtmp))
+			return FALSE;
+	return 	touWarded(mtmp->data);
 }
 
 boolean
 scaryDre(mtmp)
 struct monst *mtmp;
 {
-	if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data)) return FALSE;
-	return 	is_bird(mtmp->data) ||
-			is_bat(mtmp->data) ||
-			mtmp->data->mlet == S_QUADRUPED ||
-			mtmp->data->mlet == S_UNICORN;
+	if(standardUnwardable(mtmp))
+		return FALSE;
+	return 	dreWarded(mtmp->data);
 }
 boolean
 scaryVei(mtmp)
 struct monst *mtmp;
 {
-	if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data)) return FALSE;
-	return 	mtmp->data->mlet == S_EEL;
+	if(standardUnwardable(mtmp))
+		return FALSE;
+	return 	veiWarded(mtmp->data);
 }
 boolean
 scaryThj(mtmp)
 struct monst *mtmp;
 {
-	if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data)) return FALSE;
-	return 	mtmp->data->mlet == S_LEPRECHAUN ||
-			mtmp->data->mlet == S_NYMPH ||
-			is_thief(mtmp->data);
+	if(standardUnwardable(mtmp))
+		return FALSE;
+	return 	thjWarded(mtmp->data);
 }
 
 boolean
@@ -315,12 +292,9 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data)) return FALSE;
-	return 	mtmp->data->mlet == S_ANT ||
-			mtmp->data->mlet == S_XAN ||
-			mtmp->data->mlet == S_SPIDER ||
-			mtmp->data->mlet == S_RUSTMONST;
+	if(standardUnwardable(mtmp))
+		return FALSE;
+	return 	queenWarded(mtmp->data);
 }
 
 boolean
@@ -329,37 +303,13 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data) ||
-			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
-			(mtmp->mtyp == PM_ELDER_PRIEST) ||
-			(mtmp->mtyp == PM_GREAT_CTHULHU) ||
+	if(standardUnwardable(mtmp) ||
 			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
 			(mtmp->mtyp == PM_DEMOGORGON && rn2(3)) ||
 			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
 			(mtmp->mtyp == PM_ASMODEUS && rn2(9))
 		) return FALSE;
-	return 	mtmp->mtyp == PM_FREEZING_SPHERE ||
-			mtmp->mtyp == PM_FLAMING_SPHERE ||
-			mtmp->mtyp == PM_SHOCKING_SPHERE ||
-			mtmp->data->mlet == S_FUNGUS ||
-			mtmp->mtyp == PM_ZUGGTMOY ||
-			mtmp->data->mlet == S_VORTEX ||
-			mtmp->data->mlet == S_ELEMENTAL ||
-			mtmp->data->mlet == S_XORN ||
-			(mtmp->data->mlet == S_LIGHT && complete >= 4) ||
-			(mtmp->data->mlet == S_DRAGON && complete >= 4) ||
-			(mtmp->data->mlet == S_NAGA && complete >= 4) ||
-			(is_undead(mtmp->data) && complete >= 4) ||
-			(mtmp->data->mlet == S_TRAPPER && complete >= 4  && /*This one means "is a metroid", which are being counted as energions for this*/
-				mtmp->mtyp != PM_TRAPPER &&
-				mtmp->mtyp != PM_LURKER_ABOVE) ||
-			(is_angel(mtmp->data) && complete == 7) ||
-			(is_keter(mtmp->data) && complete == 7) ||
-			(is_demon(mtmp->data) && complete == 7) ||
-			(is_auton(mtmp->data) && complete == 7) ||
-			(mtmp->data->mlet == S_IMP && complete == 7)
-			;			
+	return ((mtmp->data->mflagsw&MW_ELDER_EYE_ELEM) || (complete >= 4 && (mtmp->data->mflagsw&MW_ELDER_EYE_ENERGY)));
 }
 
 boolean
@@ -368,8 +318,9 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz) return FALSE;
-	return ((mtmp->data->mflagsw&MW_ELDER_SIGN) || (complete >= 6 && (mtmp->data->mflagsw&MW_EYE_OF_YGG))) && (mtmp->mtyp != PM_DEMOGORGON || !rn2(3));
+	if(standardUnwardable(mtmp) || (mtmp->mtyp == PM_DEMOGORGON && rn2(3)))
+		return FALSE;
+	return ((mtmp->data->mflagsw&MW_ELDER_SIGN) || (complete >= 6 && (mtmp->data->mflagsw&MW_EYE_OF_YGG)));
 }
 
 boolean
@@ -380,38 +331,22 @@ struct monst *mtmp;
 	if(complete <= 0) return FALSE;
 	else if(mtmp->isshk || mtmp->iswiz || 
 			is_rider(mtmp->data)) return FALSE;
-	return 	is_auton(mtmp->data) ||
-			mtmp->mtyp == PM_FLOATING_EYE || 
-			mtmp->mtyp == PM_BEHOLDER;
-
+	return 	hamWarded(mtmp->data);
 }
+
 boolean
 scaryHex(complete, mtmp)
 int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || mtmp->mpeaceful || 
-			is_rider(mtmp->data) ||
-			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
-			(mtmp->mtyp == PM_ELDER_PRIEST) ||
-			(mtmp->mtyp == PM_GREAT_CTHULHU) ||
+	else if(standardUnwardable(mtmp) || mtmp->mpeaceful || 
 			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
 			(mtmp->mtyp == PM_DEMOGORGON && rn2(3)) ||
 			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
 			(mtmp->mtyp == PM_ASMODEUS && complete <= d(1,8))
 		) return FALSE;
-	return 	(is_minion(mtmp->data) ||
-			mtmp->mtyp == PM_HELL_HOUND || 
-			mtmp->mtyp == PM_HELL_HOUND_PUP ||
-			mtmp->mtyp == PM_EYE_OF_DOOM ||
-			mtmp->mtyp == PM_SON_OF_TYPHON ||
-			is_golem(mtmp->data) ||
-			is_angel(mtmp->data) ||
-			is_keter(mtmp->data) ||
-			mtmp->data->mlet == S_QUANTMECH ||
-			mtmp->data->mlet == S_IMP ||
-			is_demon(mtmp->data));
+	return 	hexWarded(mtmp->data);
 }
 
 boolean
@@ -420,26 +355,13 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_rider(mtmp->data) ||
-			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
-			(mtmp->mtyp == PM_ELDER_PRIEST) ||
-			(mtmp->mtyp == PM_GREAT_CTHULHU) ||
+	else if(standardUnwardable(mtmp) || 
 			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
 			(mtmp->mtyp == PM_DEMOGORGON && rn2(3)) ||
 			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
 			(mtmp->mtyp == PM_ASMODEUS && !rn2(9))
 		) return FALSE;
-	return 	(is_demon(mtmp->data) || 
-			mtmp->mtyp == PM_HELL_HOUND ||
-			mtmp->mtyp == PM_HELL_HOUND_PUP ||
-			mtmp->mtyp == PM_GARGOYLE || 
-			mtmp->mtyp == PM_WINGED_GARGOYLE ||
-			mtmp->mtyp == PM_DJINNI ||
-			mtmp->mtyp == PM_SANDESTIN ||
-			mtmp->mtyp == PM_SALAMANDER ||
-			mtmp->data->mlet == S_ELEMENTAL ||
-			mtmp->data->mlet == S_IMP);
+	return 	pentWarded(mtmp->data);
 }
 
 boolean
@@ -448,11 +370,9 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
-			mtmp->mtyp == PM_MAANZECORIAN ||
-			is_rider(mtmp->data)) return FALSE;
-	return mtmp->mtyp == PM_CERBERUS || is_undead(mtmp->data);
+	else if(standardUnwardable(mtmp))
+		return FALSE;
+	return circleWarded(mtmp->data);
 }
 
 boolean
@@ -461,24 +381,20 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->iswiz || 
-			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
-			is_rider(mtmp->data)) return FALSE;
-	else if(mtmp->data->mlet == S_SNAKE){
-				mtmp->mpeaceful = TRUE;
-			}
-	return d(1,100) <= 33*complete && 
-			(!is_golem(mtmp->data)) &&
-			(mtmp->mtyp != PM_CHOKHMAH_SEPHIRAH) &&
-			(mtmp->mtyp != PM_ELDER_PRIEST) &&
-			(mtmp->mtyp != PM_GREAT_CTHULHU) &&
-			(mtmp->mtyp != PM_LUGRIBOSSK) &&
-			(mtmp->mtyp != PM_MAANZECORIAN) &&
-			(mtmp->mtyp != PM_CHAOS || rn2(2)) &&
-			(mtmp->mtyp != PM_DEMOGORGON || !rn2(3)) &&
-			(mtmp->mtyp != PM_LAMASHTU || !rn2(3)) &&
-			(mtmp->mtyp != PM_ASMODEUS || !rn2(9));
-	
+	else if(gorgUnwardable(mtmp) 
+		|| (mtmp->mtyp == PM_CHAOS && rn2(2))
+		|| (mtmp->mtyp == PM_DEMOGORGON && rn2(3))
+		|| (mtmp->mtyp == PM_LAMASHTU && rn2(3))
+		|| (mtmp->mtyp == PM_ASMODEUS && rn2(9))
+	)
+		return FALSE;
+	else if(mtmp->data->mlet == S_SNAKE && mvitals[PM_MEDUSA].killed == 0){
+		mtmp->mpeaceful = TRUE;
+		mtmp->mhp = mtmp->mhpmax;
+		newsym(mtmp->mx, mtmp->my);
+		return FALSE;
+	}
+	return d(1,100) <= 33*complete && !gorgWarded(mtmp->data);
 }
 
 boolean
@@ -487,11 +403,7 @@ int complete;
 struct monst *mtmp;
 {
 	if(complete <= 0) return FALSE;
-	else if(mtmp->isshk || mtmp->isgd || mtmp->iswiz || 
-			mtmp->data->mlet == S_HUMAN || mtmp->mpeaceful ||
-			is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
-			is_rider(mtmp->data) ||
-			(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) ||
+	else if(heptUnwardable(mtmp) ||
 			(mtmp->mtyp == PM_ELDER_PRIEST && complete <= d(2,4)+2) ||
 			(mtmp->mtyp == PM_GREAT_CTHULHU && complete <= d(2,4)+2) ||
 			(mtmp->mtyp == PM_CHAOS && rn2(2)) ||
@@ -499,11 +411,10 @@ struct monst *mtmp;
 			(mtmp->mtyp == PM_LAMASHTU && rn2(3)) ||
 			(mtmp->mtyp == PM_ASMODEUS && complete <= d(1,10))
 		) return FALSE;
-	return( !(is_human(mtmp->data) || is_elf(mtmp->data) || is_dwarf(mtmp->data) ||
-		  is_gnome(mtmp->data) || is_orc(mtmp->data)) || 
-		  is_undead(mtmp->data) || is_were(mtmp->data));
+	return heptWarded(mtmp->data);
 	
 }
+
 boolean
 scaryYellow(complete, mtmp)
 int complete;
@@ -517,15 +428,13 @@ struct monst *mtmp;
 			(has_template(mtmp, YELLOW_TEMPLATE)) ||
 			(mtmp->mtyp == PM_ELDER_PRIEST)
 		) return FALSE;
-	if((is_human(mtmp->data) || is_elf(mtmp->data) || is_dwarf(mtmp->data) ||
-		  is_gnome(mtmp->data) || is_orc(mtmp->data)) && 
-		  !is_undead(mtmp->data) && 
-		  !is_were(mtmp->data)){
+	if(yellowWarded(mtmp->data)){
 			mtmp->mcrazed = 1;
 			return !rn2(10);
 	}
 	return FALSE;
 }
+
 boolean
 scaryItem(mtmp)
 struct monst *mtmp;

@@ -546,8 +546,9 @@ E NEARDATA struct permonst upermonst;	/* init'd in decl.c,
 					 */
 
 E NEARDATA struct mvitals {
-	uchar	born;
-	uchar	died;
+	uchar	born; /*How many of this monster have been created in a way that respects extinction*/
+	uchar	died; /*How many of this monster have died of any cause*/
+	uchar	killed; /*How many of this monster have died at the PC's hands*/
 	long long mvflags;
 	int	san_lost;
 	int	insight_gained;

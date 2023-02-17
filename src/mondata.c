@@ -267,6 +267,7 @@ int template;
 		ptr->mflagsg |= (MG_RPIERCE | MG_RBLUNT);
 		ptr->mflagsg &= ~(MG_RSLASH | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		ptr->mflagsw |= (MW_ELDER_EYE_ENERGY);
 		
 		/*Undead are against natural law*/
 		if(ptr->maligntyp > 0)
@@ -307,6 +308,7 @@ int template;
 		ptr->mflagsg |= (MG_RPIERCE | MG_RSLASH);
 		ptr->mflagsg &= ~(MG_RBLUNT | MG_INFRAVISIBLE);
 		ptr->mflagsa |= (MA_UNDEAD);
+		ptr->mflagsw |= (MW_ELDER_EYE_ENERGY);
 
 		/*Undead are against natural law*/
 		if(ptr->maligntyp > 0)
@@ -373,6 +375,7 @@ int template;
 		ptr->mflagsb |= (MB_NOEYES);
 		//Note: Plant, NOT Undead. It's a living zombie. Also less resistant to damage
 		ptr->mflagsa |= (MA_PLANT);
+		ptr->mflagsw |= MW_ELDER_EYE_ELEM;
 		
 		/*Zuggtmoy's spores are against natural law*/
 		if(ptr->maligntyp > 0)
@@ -420,12 +423,14 @@ int template;
 		ptr->mflagsa |= (MA_UNDEAD | MA_VAMPIRE);
 		/* resists: */
 		ptr->mresists |= (MR_SLEEP | MR_POISON);	/* individual monsters gain cold res at mlev >= 10 */
+		ptr->mflagsw |= (MW_ELDER_EYE_ENERGY);
 		break;
 	case ILLUMINATED:
 		/* flags: */
 		ptr->mflagsg |= (MG_HATESUNHOLY);
 		ptr->mflagsg &= ~(MG_HATESHOLY);
 		ptr->mflagsa |= (MA_MINION);
+		ptr->mflagsw |= (MW_ELDER_EYE_PLANES);
 		break;
 	case PSEUDONATURAL:
 		/* flags */
@@ -611,6 +616,7 @@ int template;
 		ptr->mresists |= (MR_ACID|MR_FIRE|MR_COLD|MR_POISON|MR_STONE|MR_SICK);
 		/* misc: */
 		ptr->msound = MS_SILENT;
+		ptr->mflagsw |= (MW_ELDER_SIGN);
 		break;
 	case YELLOW_TEMPLATE:
 		ptr->nac += 2;
@@ -650,6 +656,9 @@ int template;
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
 		ptr->mflagsa |= (MA_UNDEAD);
 		ptr->mflagsv |= (MV_TELEPATHIC);
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
 		// ptr->mcolor = CLR_YELLOW;
 		break;
 	case MAD_TEMPLATE:
@@ -722,6 +731,7 @@ int template;
 			ptr->dac += 6;
 			ptr->pac += 6;
 			ptr->hdr += 6;
+			ptr->mflagsw |= MW_ELDER_EYE_PLANES;
 		break;
 		case PLAGUE_TEMPLATE:
 			ptr->mflagst &= ~(MT_HOSTILE);

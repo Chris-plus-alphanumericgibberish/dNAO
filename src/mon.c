@@ -6110,7 +6110,9 @@ cleanup:
 		aggravate();
 	}
 	/* give experience points */
-	tmp = experience(mtmp, (int)mvitals[mndx].died + 1);
+	if (mvitals[tmp].killed < 255)
+		mvitals[tmp].killed++; /*The kills the player specifically has been responsible for*/
+	tmp = experience(mtmp, (int)mvitals[mndx].killed);
 	more_experienced(tmp, 0);
 	newexplevel();		/* will decide if you go up */
 	if(!u.veil && !mvitals[mndx].insightkill){
