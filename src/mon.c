@@ -3935,9 +3935,24 @@ boolean
 plague_victim_on_level()
 {
 	struct monst *mon;
+	struct obj *obj;
 	for(mon = fmon; mon; mon = mon->nmon)
-		if(has_template(mon, PLAGUE_TEMPLATE))
+		if(has_template(mon, PLAGUE_TEMPLATE) && !DEADMONSTER(mon))
 			return TRUE;
+
+	int owhere = ((1 << OBJ_FLOOR) |
+				(1 << OBJ_INVENT) |
+				(1 << OBJ_MINVENT) |
+				(1 << OBJ_BURIED) |
+				// (1 << OBJ_CONTAINED) |
+				(1 << OBJ_INTRAP));
+
+	for (obj = start_all_items(&owhere); obj; obj = next_all_items(&owhere)) {
+		if(Is_real_container(obj) && obj->spe == 9){
+			end_all_items();
+			return TRUE;
+		}
+	}
 	return FALSE;
 }
 
@@ -3963,19 +3978,60 @@ random_plague_victim()
 	struct monst *mon;
 	int count = 0;
 	for(mon = fmon; mon; mon = mon->nmon)
-		if(has_template(mon, PLAGUE_TEMPLATE))
+		if(has_template(mon, PLAGUE_TEMPLATE) && !DEADMONSTER(mon))
 			count++;
-	if(!count)
-		return (struct monst *) 0;
 
-	count = rn2(count);
-	for(mon = fmon; mon; mon = mon->nmon)
-		if(has_template(mon, PLAGUE_TEMPLATE)){
-			if(!count)
-				return mon;
-			else count--;
-		}
+	if(count){
+		count = rn2(count);
+		for(mon = fmon; mon; mon = mon->nmon)
+			if(has_template(mon, PLAGUE_TEMPLATE) && !DEADMONSTER(mon)){
+				if(!count)
+					return mon;
+				else count--;
+			}
+	}
+
 	return (struct monst *) 0;
+}
+
+struct obj *
+random_sacked_victim()
+{
+	struct obj *obj;
+	int count = 0;
+	int owhere = ((1 << OBJ_FLOOR) |
+				(1 << OBJ_INVENT) |
+				(1 << OBJ_MINVENT) |
+				(1 << OBJ_BURIED) |
+				// (1 << OBJ_CONTAINED) |
+				(1 << OBJ_INTRAP));
+
+	for (obj = start_all_items(&owhere); obj; obj = next_all_items(&owhere)) {
+		if(Is_real_container(obj) && obj->spe == 9)
+			count++;
+	}
+
+	if(count){
+		count = rn2(count);
+		owhere = ((1 << OBJ_FLOOR) |
+				(1 << OBJ_INVENT) |
+				(1 << OBJ_MINVENT) |
+				(1 << OBJ_BURIED) |
+				// (1 << OBJ_CONTAINED) |
+				(1 << OBJ_INTRAP));
+
+		for (obj = start_all_items(&owhere); obj; obj = next_all_items(&owhere)) {
+			if(Is_real_container(obj) && obj->spe == 9){
+				if(!count){
+					end_all_items();
+					return obj;
+				}
+				else count--;
+			}
+		}
+	}
+
+	return (struct obj *) 0;
 }
 
 void
@@ -4162,22 +4218,36 @@ struct monst *mtmp;
 			break;
 		case LSVD_ASC:{
 			struct monst *victim = random_plague_victim();
+			struct obj *sacked_victim = 0;
 			if(!victim)
+				sacked_victim = random_sacked_victim();
+
+			if(!victim && !sacked_victim)
 				break; //???
+
 			/* message */
 			if (couldsee(mtmp->mx, mtmp->my) || couldsee(victim->mx, victim->my)) {
 				messaged = TRUE;
 				pline("But wait...");
-				pline("A glowing mist rises from %s and flows to %s!",
-					mon_nam(victim), mon_nam(mtmp));
+				if(victim)
+					pline("A glowing mist rises from %s and flows to %s!",
+						mon_nam(victim), mon_nam(mtmp));
+				else
+					pline("A glowing mist gathers around %s!", mon_nam(mtmp));
+
 				if (mon_attacktype(mtmp, AT_EXPL)
 					|| mon_attacktype(mtmp, AT_BOOM))
 					pline("%s reconstitutes!", Monnam(mtmp));
 				else
 					pline("%s looks much better!", Monnam(mtmp));
-				if(canseemon(victim))
-					pline("%s dies of %s illness!", Monnam(victim), mhis(victim));
-				mondied(victim);
+				if(victim){
+					if(canseemon(victim))
+						pline("%s dies of %s illness!", Monnam(victim), mhis(victim));
+					mondied(victim);
+				}
+				else if(sacked_victim){
+					kill_giants_sack(sacked_victim);
+				}
 			}
 			break;
 		}

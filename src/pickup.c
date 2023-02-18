@@ -2589,7 +2589,7 @@ boolean past;
 			PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE
 		};
 
-		victim = makemon(&mons[ROLL_FROM(drow_plague_types)], box->ox, box->oy, NO_MM_FLAGS);
+		victim = makemon(&mons[ROLL_FROM(drow_plague_types)], box->ox, box->oy, MM_ADJACENTOK);
 	}
 	else {
 		int plague_types[] = {
@@ -2614,7 +2614,7 @@ boolean past;
 			PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN
 		};
 
-		victim = makemon(&mons[ROLL_FROM(plague_types)], box->ox, box->oy, NO_MM_FLAGS);
+		victim = makemon(&mons[ROLL_FROM(plague_types)], box->ox, box->oy, MM_ADJACENTOK);
 	}
 	if(victim){
 		struct obj *nobj;
@@ -2645,6 +2645,101 @@ boolean past;
 		set_malign(victim);
 	} else {
 		pline(past ? "But the sack was now empty." : "But the sack is now empty.");
+	}
+    box->owt = weight(box);
+    return;
+}
+
+void
+kill_giants_sack(box)
+struct obj *box;
+{
+    struct monst *victim;
+    xchar ox, oy;
+	struct obj *corpse;
+
+    box->spe = 0;		/* box->owt will be updated below */
+    if (get_obj_location(box, &ox, &oy, 0))
+		box->ox = ox, box->oy = oy;	/* in case it's being carried */
+	if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+		int drow_plague_types[] = {
+			PM_DWARF_QUEEN, PM_DWARF_KING, 
+			PM_ORC_CAPTAIN, PM_JUSTICE_ARCHON, PM_SHIELD_ARCHON, PM_SWORD_ARCHON,
+			PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, 
+			PM_LILLEND, PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN,
+			PM_SPROW, PM_DRIDER, PM_PRIESTESS_OF_GHAUNADAUR,
+			PM_NURSE,
+			PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+			PM_ANULO, PM_ANULO,
+			PM_DROW_CAPTAIN, PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_DROW_MATRON,
+			PM_DROW_CAPTAIN, PM_HEDROW_WARRIOR, PM_HEDROW_WIZARD, PM_DROW_MATRON, PM_UNEARTHLY_DROW, PM_HEDROW_BLADEMASTER,
+			PM_HEDROW_MASTER_WIZARD, PM_STJARNA_ALFR, PM_PEN_A_MENDICANT, PM_MENDICANT_SPROW, PM_MENDICANT_DRIDER,
+			PM_YOCHLOL, PM_LILITU, PM_MARILITH,
+			PM_ALLIANCE_VANGUARD, PM_PAGE, PM_DWARF_WARRIOR,
+			PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE
+		};
+
+		victim = makemon(&mons[ROLL_FROM(drow_plague_types)], box->ox, box->oy, MM_ADJACENTOK);
+	}
+	else {
+		int plague_types[] = {
+			PM_DWARF_LORD, PM_DWARF_CLERIC, PM_DWARF_QUEEN, PM_DWARF_KING, 
+			PM_DEEP_ONE, PM_WINGED_KOBOLD,
+			PM_DEMINYMPH, PM_THRIAE, 
+			PM_ORC_CAPTAIN, PM_JUSTICE_ARCHON, PM_SHIELD_ARCHON, PM_SWORD_ARCHON,
+			PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA, 
+			PM_LILLEND, PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN,
+			PM_CENTAUR_CHIEFTAIN,
+			PM_DRIDER, PM_FORMIAN_CRUSHER, PM_FORMIAN_TASKMASTER,
+			PM_MYRMIDON_YPOLOCHAGOS, PM_MYRMIDON_LOCHAGOS,
+			PM_GNOME_KING, PM_GNOME_QUEEN,
+			PM_HILL_GIANT, PM_MINOTAUR, PM_MINOTAUR_PRIESTESS,
+			PM_VAMPIRE, PM_VAMPIRE_LORD, PM_VAMPIRE_LADY,
+			PM_NURSE, PM_WATCH_CAPTAIN, 
+			PM_GREY_ELF, PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
+			PM_DROW_MATRON,
+			PM_HORNED_DEVIL, PM_SUCCUBUS, PM_INCUBUS, PM_ERINYS, PM_VROCK, PM_BARBED_DEVIL,
+			PM_LILITU,
+			PM_BARBARIAN, PM_HALF_DRAGON, PM_BARD, PM_HEALER, PM_RANGER, PM_VALKYRIE,
+			PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN
+		};
+
+		victim = makemon(&mons[ROLL_FROM(plague_types)], box->ox, box->oy, MM_ADJACENTOK);
+	}
+	if(victim){
+		struct obj *nobj;
+		struct obj *obj;
+		for(obj = victim->minvent; obj; obj = nobj){
+			nobj = obj->nobj;
+			victim->misc_worn_check &= ~obj->owornmask;
+			update_mon_intrinsics(victim, obj, FALSE, FALSE);
+			if (obj->owornmask & W_WEP){
+				setmnotwielded(victim,obj);
+				MON_NOWEP(victim);
+			}
+			if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(victim,obj);
+				MON_NOSWEP(victim);
+			}
+			obj->owornmask = 0L;
+			obj_extract_self(obj);
+			add_to_container(box, obj);
+		}
+		obj = mksobj(SHACKLES, NO_MKOBJ_FLAGS);
+		if(obj)
+			add_to_container(box, obj);
+		//Note: these are "fresh" so they don't take the 1/3rd penalty to level
+		set_template(victim, PLAGUE_TEMPLATE);
+		victim->mpeaceful = 1;
+		set_malign(victim);
+		if(!(mons[victim->mtyp].geno & (G_NOCORPSE))){
+			corpse = mkcorpstat(CORPSE, victim, (struct permonst *)0, box->ox, box->oy, FALSE);
+			if(corpse){
+				obj_extract_self(corpse);
+				add_to_container(box, corpse);
+			}
+		}
+		mongone(victim);
 	}
     box->owt = weight(box);
     return;

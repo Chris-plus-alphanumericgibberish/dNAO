@@ -2197,6 +2197,7 @@ E void FDECL(open_sarcophagus, (struct obj *, BOOLEAN_P));
 E void FDECL(open_crazy_box, (struct obj *, BOOLEAN_P));
 E boolean FDECL(open_madstuff_box, (struct obj *, BOOLEAN_P));
 E void FDECL(open_giants_sack, (struct obj *, BOOLEAN_P));
+E void FDECL(kill_giants_sack, (struct obj *));
 #ifdef GOLDOBJ
 E int FDECL(collect_obj_classes,
 	(char *,struct obj *,BOOLEAN_P,boolean FDECL((*),(OBJ_P)), int *));
