@@ -7800,6 +7800,8 @@ mksgardenstatueat(x,y)
 	t = t_at(x, y);
 	if(!t || t->ttyp == STATUE_TRAP){
 		otmp = mksobj_at(STATUE, x, y, MKOBJ_ARTIF);
+		otmp->corpsenm = rndshape((void *) 0); //Allows for mildly out of depth monsters
+		fix_object(otmp);
 		if(otmp){
 			if(t && t->ttyp != MAGIC_PORTAL)
 				deltrap(t);
@@ -7819,6 +7821,7 @@ mksgarden()
 {
 	register struct mkroom *sroom;
 	register int x, y;
+	struct obj *otmp;
 	for(sroom = &rooms[level.flags.sp_lev_nroom]; ; sroom++){
 		if(sroom->hx < 0) return;  /* from mkshop: Signifies out of rooms? */
 		if(sroom - rooms >= nroom) {
@@ -7842,12 +7845,16 @@ mksgarden()
 	}
 	
 	for(x = sroom->lx+1; x <= sroom->hx-1; x++) {
-		mksobj_at(FIGURINE, x, sroom->hy-1, MKOBJ_ARTIF);
-		mksobj_at(FIGURINE, x, sroom->ly+1, MKOBJ_ARTIF);
+		otmp = mksobj_at(FIGURINE, x, sroom->hy-1, MKOBJ_ARTIF);
+		otmp->corpsenm = rndshape((void *) 0); //Allows for mildly out of depth monsters
+		otmp = mksobj_at(FIGURINE, x, sroom->ly+1, MKOBJ_ARTIF);
+		otmp->corpsenm = rndshape((void *) 0); //Allows for mildly out of depth monsters
 	}
 	for(y = (sroom->ly)+2; y <= (sroom->hy)-2; y++) {
-		mksobj_at(FIGURINE, sroom->hx-1, y, MKOBJ_ARTIF);
-		mksobj_at(FIGURINE, sroom->lx+1, y, MKOBJ_ARTIF);
+		otmp = mksobj_at(FIGURINE, sroom->hx-1, y, MKOBJ_ARTIF);
+		otmp->corpsenm = rndshape((void *) 0); //Allows for mildly out of depth monsters
+		otmp = mksobj_at(FIGURINE, sroom->lx+1, y, MKOBJ_ARTIF);
+		otmp->corpsenm = rndshape((void *) 0); //Allows for mildly out of depth monsters
 	}
 }
 
