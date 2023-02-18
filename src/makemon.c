@@ -6493,6 +6493,7 @@ int mmflags;
 			}
 		 }
 		} else if(mm == PM_MAD_GRAZI){
+			coord cc;
 			mongets(mtmp, QUARTERSTAFF, mkobjflags);
 			otmp = mongets(mtmp, CLOAK, mkobjflags);
 			if(otmp)
@@ -6500,7 +6501,11 @@ int mmflags;
 			mongets(mtmp, GLOVES, mkobjflags);
 			mongets(mtmp, HIGH_BOOTS, mkobjflags);
 			mongets(mtmp, LEATHER_HELM, mkobjflags);
-			mongets(mtmp, CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
+			otmp = mongets(mtmp, CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
+			if(otmp){
+				enexto(&cc, mtmp->mx, mtmp->my, (struct permonst *)0);
+				x_uses_crystal_skull(&otmp, mtmp, &cc);
+			}
 			otmp = mongets(mtmp, TREPHINATION_KIT, mkobjflags);
 			if(otmp)
 				set_material_gm(otmp, GLASS);
@@ -12123,6 +12128,9 @@ int faction;
 	if(Infuture)
 		return 0;
 
+	if(ptr->mtyp == PM_MAD_GRAZI)
+		out_faction = Y_CULT_SYMBOL;
+
 	if(is_drow(ptr) && ptr->mtyp != PM_CHANGED && ptr->mtyp != PM_WARRIOR_CHANGED){
 		if(curhouse) {
 			out_faction = curhouse;
@@ -12970,6 +12978,10 @@ int faction;
 					for(num = rn1(10,10); num >= 0; num--) makemon_full(&mons[PM_DEEP_ONE], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 				}
 			}
+			if(mndx == PM_CYCLOPS){
+				mtmp->mhpmax = (mtmp->mhpmax+2)/3;
+				mtmp->mhp = mtmp->mhpmax;
+			}
 		break;
 		case S_HUMAN:
 			if(!(mmflags & MM_NOGROUP)){
@@ -13013,6 +13025,10 @@ int faction;
 						m_initlgrp(mtmp, mtmp->mx, mtmp->my);
 					}
 				}
+			}
+			if(mndx == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				mtmp->mhpmax = (mtmp->mhpmax+2)/3;
+				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;
 		case S_HUMANOID:
@@ -15014,6 +15030,7 @@ struct monst *mtmp, *victim;
 			ptr->mtyp == PM_SHOGGOTH
 		) hp_threshold *= 3;
 	    else if (ptr->mtyp == PM_RAZORVINE) hp_threshold *= .5;
+	    else if (ptr->mtyp == PM_CYCLOPS || ptr->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) hp_threshold = (hp_threshold+2)/3;
 		else if(ptr->mtyp == PM_CHAOS) hp_threshold = mtmp->data->mlevel * 2200/16;
 		else if(ptr->mtyp == PM_KARY__THE_FIEND_OF_FIRE) hp_threshold = mtmp->data->mlevel * 770/12;
 		else if(ptr->mtyp == PM_LICH__THE_FIEND_OF_EARTH) hp_threshold = mtmp->data->mlevel * 550/11;

@@ -2231,7 +2231,6 @@ the Ana'auo, and put an end to this monstrosity. Be careful."
 %E
 %Cp Dhl 00027
 "Be pure, my %S."
-%o."
 %E
 %Cp Dhl 00028
 "Remember your studies, and you will prevail!"

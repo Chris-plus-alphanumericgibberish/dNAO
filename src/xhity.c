@@ -14340,8 +14340,12 @@ int vis;						/* True if action is at all visible to the player */
 					else 
 						basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON) + ACURR(A_CHA)) / 15);
 				}
-				else
-					basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON)) / 15);
+				else {
+					if(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
+						basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON)) / 15) + weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)/2;
+					else
+						basedmg = rnd((ACURRSTR + ACURR(A_DEX) + ACURR(A_CON)) / 15);
+				}
 			}
 			else
 				basedmg = 1;

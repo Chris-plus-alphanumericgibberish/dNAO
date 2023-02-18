@@ -246,12 +246,14 @@ on_ground(otyp)
 {
 	register struct obj *otmp;
 
-	for (otmp = fobj; otmp; otmp = otmp->nobj)
+	for (otmp = fobj; otmp; otmp = otmp->nobj){
 	    if (otyp) {
-		if (otmp->otyp == otyp)
-		    return(otmp);
-	    } else if (is_quest_artifact(otmp))
-		return(otmp);
+			if (otmp->otyp == otyp)
+				return(otmp);
+	    }
+		else if (is_quest_artifact(otmp))
+			return(otmp);
+	}
 	return((struct obj *)0);
 }
 
@@ -339,24 +341,23 @@ strategy(mtmp)
 	if(u.uevent.invoked) {		/* priorities change once gate opened */
 
 	    if((strat = target_on(MT_WANTSARTI, mtmp)) != STRAT_NONE)
-		return(strat);
+			return(strat);
 	    if((strat = target_on(MT_WANTSBOOK, mtmp)) != STRAT_NONE)
-		return(strat);
+			return(strat);
 	    if((strat = target_on(MT_WANTSBELL, mtmp)) != STRAT_NONE)
-		return(strat);
+			return(strat);
 	    if((strat = target_on(MT_WANTSCAND, mtmp)) != STRAT_NONE)
-		return(strat);
+			return(strat);
 	} else {
 
 	    if((strat = target_on(MT_WANTSBOOK, mtmp)) != STRAT_NONE)
-		return(strat);
+			return(strat);
 	    if((strat = target_on(MT_WANTSBELL, mtmp)) != STRAT_NONE)
-		return(strat);
+			return(strat);
 	    if((strat = target_on(MT_WANTSCAND, mtmp)) != STRAT_NONE)
-		return(strat);
-	    if((strat = target_on(MT_WANTSARTI, mtmp)) != STRAT_NONE){
-		return(strat);
-		}
+			return(strat);
+	    if((strat = target_on(MT_WANTSARTI, mtmp)) != STRAT_NONE)
+			return(strat);
 	}
 	return(dstrat);
 }

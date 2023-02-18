@@ -2348,9 +2348,10 @@ int newgame;
 	}
 
 	/* Fix up the quest nemesis */
-	if (urole.neminum != NON_PM && 
-		!(Race_if(PM_DWARF) && (Role_if(PM_KNIGHT) || Role_if(PM_NOBLEMAN))) && 
-		!(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && flags.initgend)
+	if (urole.neminum != NON_PM
+		 && !(Race_if(PM_DWARF) && (Role_if(PM_KNIGHT) || Role_if(PM_NOBLEMAN)))
+		 && !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && flags.initgend)
+		 && !(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
 	) {
 	    mons[urole.neminum].msound = MS_NEMESIS;
 	    mons[urole.neminum].mflagst &= ~(MT_PEACEFUL);

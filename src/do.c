@@ -954,12 +954,15 @@ dodown()
 					if (Is_hell3(&u.uz) && !(u.ux == xupstair && u.uy == yupstair)){
 						pline("These stairs are fake!");
 						levl[u.ux][u.uy].typ = ROOM;
+						newsym(u.ux, u.uy);
 					} else {
 						if(levl[u.ux][u.uy].ladder != LA_DOWN){
 							pline("These stairs don't go down!");
 						}
 						else {
 							pline("These stairs have been blocked by rubble!");
+							levl[u.ux][u.uy].typ = ROOM;
+							newsym(u.ux, u.uy);
 						}
 					}
 				}
@@ -1044,6 +1047,8 @@ doup()
 				}
 				else {
 					pline("These stairs have been blocked by rubble!");
+					levl[u.ux][u.uy].typ = ROOM;
+					newsym(u.ux, u.uy);
 				}
 			}
 			else You_cant("go up here.");
@@ -1749,9 +1754,12 @@ final_level()
 /*		for(host = 0; host < 10; host++ )*/ (void) makemon(&mons[PM_FALLEN_ANGEL], u.ux, u.uy, MM_ADJACENTOK);
 	}
 	/* create a guardian angel next to player, if worthy */
-	if (Conflict) {
-	    pline(
-	     "A voice booms: \"Thy desire for conflict shall be fulfilled!\"");
+	if (Conflict || u.ualign.type == A_VOID || u.ualign.type == A_NONE) {
+		if(Conflict)
+			pline(
+			 "A voice booms: \"Thy desire for conflict shall be fulfilled!\"");
+		else
+			pline("A voice booms: \"Die, heretic!\"");
 	    for (i = rnd(4); i > 0; --i) {
 		mm.x = u.ux;
 		mm.y = u.uy;

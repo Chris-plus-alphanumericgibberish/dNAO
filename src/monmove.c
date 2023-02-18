@@ -611,6 +611,10 @@ boolean digest_meal;
 		mon->mhp -= 1;
 		return;
 	}
+	if(mon->mtyp == PM_CYCLOPS && !mon_has_arti(mon, 0) && mon->mhp > 1){
+		mon->mhp -= 1;
+		return;
+	}
 	/*Degen from drowning in blood*/
 	if(mon->mbdrown > 0){
 		mon->mbdrown--;

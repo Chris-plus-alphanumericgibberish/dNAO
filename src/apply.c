@@ -3242,7 +3242,8 @@ coord *cc;
 		}
 		mark_mon_as_summoned(mtmp, master, ESUMMON_PERMANENT, 0);
 		mtmp->mextra_p->esum_p->sm_o_id = obj->o_id;
-		//After being marked as summoning, extract invalid items from skull and add to inventory.
+		//After being marked as summoned, extract invalid items from skull and add to inventory.
+		// These objects are "really there"/will remain after the monster is defeated.
 		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
 			if(oinv->otyp == TREPHINATION_KIT || ensouled_item(oinv)){
 				obj_extract_self(oinv);
@@ -8630,6 +8631,7 @@ doapply()
 			obj->altmode = AD_FIRE;
 			You("set %s to heat.", yname(obj));
 		}
+		res = MOVE_PARTIAL;
 	break;
 	case MASS_SHADOW_PISTOL:
 		res = use_massblaster(obj);
@@ -8645,6 +8647,7 @@ doapply()
 		} else {
 			obj->altmode = WP_MODE_AUTO;
 		}
+		res = MOVE_PARTIAL;
 		
 		You("switch %s to %s mode.", yname(obj), 
 			((obj->altmode == WP_MODE_SINGLE) ? "semi-automatic" : 
@@ -8654,6 +8657,7 @@ doapply()
 	case BFG:
 		if (obj->altmode == WP_MODE_AUTO) obj-> altmode = WP_MODE_BURST;
 		else obj->altmode = WP_MODE_AUTO;
+		res = MOVE_PARTIAL;
 		You("switch %s to %s mode.", yname(obj), 
 			(obj->altmode ? "burst" : "full automatic"));
 		break;
@@ -8661,6 +8665,7 @@ doapply()
 	case SUBMACHINE_GUN:
 		if (obj->altmode == WP_MODE_AUTO) obj-> altmode = WP_MODE_SINGLE;
 		else obj->altmode = WP_MODE_AUTO;
+		res = MOVE_PARTIAL;
 		You("switch %s to %s mode.", yname(obj), 
 			(obj->altmode ? "semi-automatic" : "full automatic"));
 		break;
@@ -8669,7 +8674,11 @@ doapply()
 		if (!obj->oarmed) {
 			You("arm %s.", yname(obj));
 			arm_bomb(obj, TRUE);
-		} else pline("It's already armed!");
+			res = MOVE_PARTIAL;
+		} else {
+			pline("It's already armed!");
+			res = MOVE_CANCELLED;
+		}
 		break;
 	case STICK_OF_DYNAMITE:
 		light_cocktail(obj);

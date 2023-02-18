@@ -3389,7 +3389,7 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	// monsters trapped in vivisection traps are excluded
 	// shackled monsters aren't a threat
-	if(nonthreat(mdef)){
+	if(nonthreat(magr) || nonthreat(mdef)){
 		return 0L;
 	}
 	// must be in range to attack mdef
@@ -3444,8 +3444,15 @@ struct monst * mdef;	/* another monster which is next to it */
 	) {
 		return 0L;
 	}
-	// queast leaders should generally not be in danger
+	// quest leaders should generally not be in danger
 	if(!Role_if(PM_ANACHRONONAUT) && mdef->m_id == quest_status.leader_m_id){
+		return 0L;
+	}
+	// quest friendlies shouldn't attack your pets
+	if((quest_faction(magr) || quest_faction(mdef))
+		&& magr->mpeaceful && mdef->mpeaceful
+		&& (magr->mtame || mdef->mtame)
+	){
 		return 0L;
 	}
 	// Slime remnants attack everything not of the same peacefulness as them

@@ -1178,7 +1178,7 @@ void
 calc_total_maxen()
 {
 	int en;
-	en = u.uenrolled + (u.ulevel*ACURR(A_CON))/4;
+	en = u.uenrolled + (u.ulevel*ACURR(A_INT))/4;
 	
 	if(active_glyph(FORMLESS_VOICE))
 		en *= 1.3;

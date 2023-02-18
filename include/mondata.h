@@ -575,7 +575,8 @@
 #define	is_star_blades_mon(mon)	(is_star_blades_mtyp((mon)->data) || ((mon)->mtyp == PM_PORO_AULON && (mon)->mhp<(mon)->mhpmax/2))
 #define	is_storm_mtyp(ptr)	((ptr)->mtyp == PM_DAO_LAO_GUI_MONK)
 #define	is_level_storm_mtyp(ptr)	((ptr)->mtyp == PM_CAILLEA_ELADRIN || (ptr)->mtyp == PM_MOONSHADOW\
-							 || (ptr)->mtyp == PM_GHAELE_ELADRIN || (ptr)->mtyp == PM_LUMINOUS_CLOUD)
+							 || (ptr)->mtyp == PM_GHAELE_ELADRIN || (ptr)->mtyp == PM_LUMINOUS_CLOUD\
+							 || (ptr)->mtyp == PM_PYROCLASTIC_VORTEX)
 #define	is_storm_mon(mon)	((is_level_storm_mtyp((mon)->data) && (mon)->m_lev >= 20) || is_storm_mtyp((mon)->data))
 
 #define goat_monster(ptr) (In_lost_cities(&u.uz) ? lost_cities_goat_monster(ptr) : always_goat_monster(ptr))
@@ -1127,7 +1128,7 @@
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 (mon)->mtyp == PM_PAGE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
 #define mon_turn_undead(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || \
-						 (mon)->mtyp == PM_PYROCLASTIC_VORTEX || (mon)->mtyp == PM_BRIGHID_ELADRIN || \
+						 (mon)->mtyp == PM_BRIGHID_ELADRIN || \
 						 (mon)->mtyp == PM_DRACAE_ELADRIN || \
 						 (mon)->mtyp == PM_KUKER || (mon)->mtyp == PM_SHIELD_ARCHON || \
 						 (mon)->mtyp == PM_MONADIC_DEVA || \

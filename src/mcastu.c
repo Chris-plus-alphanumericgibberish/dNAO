@@ -1953,6 +1953,8 @@ const char * spellname[] =
 	//95
 	"BABBLE_BOLT",
 	"MON_SPE_BEARTRAP",
+	"PYRO_STORM",
+	"GOD_RAY",
 };
 
 
@@ -3512,6 +3514,109 @@ int tary;
 
 			/* player cold madness*/
 			if (youdef) roll_frigophobia();
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case PYRO_STORM:
+		if (!foundem) {
+			impossible("pyroclastic storm with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			int pdmg = d(2,12);	/* physical */
+			int fdmg = d(2,12);	/* fire */
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("Burning rocks pummel %s from all sides!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+
+			/* calculate physical damage */
+			pdmg = reduce_dmg(mdef,pdmg,TRUE,FALSE);
+			/* apply average DR */
+			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
+			if (pdmg < 1)
+				pdmg = 1;
+
+			/* calculate fire damage */
+			if (Fire_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				fdmg = 0;
+			}
+			else {
+				fdmg = reduce_dmg(mdef,fdmg,FALSE,TRUE);
+			}
+			if (!UseInvFire_res(mdef)) {
+				destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				if (!rn2(6)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(10)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			}
+
+			/* sum damage components to override dmg */
+			dmg = pdmg + fdmg;
+
+			/* other effects */
+			if (youdef) {
+				burn_away_slime();
+				melt_frozen_air();
+			}
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case GOD_RAY:
+		if (!foundem) {
+			impossible("god ray with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			int hdmg = d(6,7);	/* holy damage */
+			int ldmg = d(1,7);	/* lightning */
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("Holy light shines down on %s from above!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+
+			if(mdef->data->mlet == S_TROLL){
+				pline("The sunlight strikes %s!",
+					youdef ? "you" : mon_nam(mdef));
+				if (Stone_res(mdef)) pline("But %s %s even slow down!", youdef ? "you" : mon_nam(mdef), youdef ? "don't" : "doesn't");
+				if (youdef)
+					instapetrify("Holy sunlight");
+				else if(!Stone_res(mdef) && !munstone(mdef, youagr))
+					minstapetrify(mdef, youagr);
+				if (!Stone_res(mdef)) {
+					if (*hp(mdef) > 0)
+						return MM_DEF_LSVD;
+					else
+						return MM_DEF_DIED;
+				}
+			}
+			else if(mdef->mtyp == PM_GREMLIN || mdef->mtyp == PM_HUNTING_HORROR){
+				pline("The sunlight sears %s!",
+					youdef ? "you" : mon_nam(mdef));
+				hdmg += *hp(mdef);
+			}
+			else if(hates_holy_mon(mdef)){
+				hdmg = reduce_dmg(mdef,hdmg,FALSE,TRUE);
+			}
+			else hdmg = 0;
+
+			/* calculate lightning damage */
+			if (Shock_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				ldmg = 0;
+			}
+			else {
+				ldmg = reduce_dmg(mdef,ldmg,FALSE,TRUE);
+			}
+			if (!UseInvShock_res(mdef)) {
+				destroy_item(mdef, WAND_CLASS, AD_ELEC);
+				destroy_item(mdef, RING_CLASS, AD_ELEC);
+			}
+
+			/* sum damage components to override dmg */
+			dmg = hdmg + ldmg;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -5968,6 +6073,8 @@ int spellnum;
 	case BLOOD_RAIN:
 	case HAIL_FLURY:
 	case ICE_STORM:
+	case PYRO_STORM:
+	case GOD_RAY:
 	case DEATH_TOUCH:
 	case PLAGUE:
 	case FILTH:

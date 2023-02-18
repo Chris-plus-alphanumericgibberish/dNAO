@@ -94,7 +94,8 @@ dosit()
 	        You("sit down.");
 			dotrap(trap, FORCEBUNGLE);
 	    }
-	} else if (is_lava(u.ux, u.uy)) {
+	}
+	else if (is_lava(u.ux, u.uy)) {
 
 	    /* must be WWalking */
 	    You(sit_message, "lava");
