@@ -6501,6 +6501,9 @@ int mmflags;
 			mongets(mtmp, HIGH_BOOTS, mkobjflags);
 			mongets(mtmp, LEATHER_HELM, mkobjflags);
 			mongets(mtmp, CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
+			otmp = mongets(mtmp, TREPHINATION_KIT, mkobjflags);
+			if(otmp)
+				set_material_gm(otmp, GLASS);
 			if(check_insight() || check_insight())
 				set_template(mtmp, MOLY_TEMPLATE);
 		} else if((mm == PM_MIND_FLAYER || mm == PM_MASTER_MIND_FLAYER)){
