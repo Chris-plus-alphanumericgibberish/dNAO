@@ -3192,7 +3192,7 @@ register int held;
 	struct obj *u_gold = (struct obj *)0;
 #endif
 	boolean one_by_one, allflag, quantum_cat = FALSE,
-		loot_out = FALSE, loot_in = FALSE;
+		loot_out = FALSE, loot_in = FALSE, tip_over = FALSE;
 	char select[MAXOCLASSES+1];
 	char qbuf[BUFSZ], emptymsg[BUFSZ], pbuf[QBUFSZ];
 	long loss = 0L;
@@ -3227,24 +3227,24 @@ register int held;
 			observe_quantum_cat(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 			used = 1;
 			quantum_cat = TRUE;	/* for adjusting "it's empty" message */
-		}else if(obj->spe == 4){
+		} else if(obj->spe == 4){
 			open_coffin(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 			return MOVE_STANDARD;
-		}else if(obj->spe == 5){
+		} else if(obj->spe == 5){
 			open_sarcophagus(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 			return MOVE_STANDARD;
-		}else if(obj->spe == 6 && u.uinsight >= 10){
+		} else if(obj->spe == 6 && u.uinsight >= 10){
 			open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
 			return MOVE_STANDARD;
-		}else if(obj->spe == 7){
+		} else if(obj->spe == 7){
 			// Madman reclaims their stuff. Contents handled by the level loader.
 			//FALSE: the box was not destroyed. Use present tense.
 			if(open_madstuff_box(obj, FALSE)){
 				return MOVE_STANDARD;
 			}
-		}else if(obj->spe == 8){
+		} else if(obj->spe == 8){
 			// Nothing. Fulvous desk spawns monsters.
-		}else if(obj->spe == 9){
+		} else if(obj->spe == 9){
 			open_giants_sack(obj, FALSE); //FALSE: not destroyed
 			return MOVE_STANDARD;
 		}
@@ -3279,34 +3279,45 @@ register int held;
 	    Sprintf(eos(qbuf), "%s?",
 		    safe_qbuf(qbuf, 1, yname(obj), ysimple_name(obj), "it"));
 	    if (flags.menu_style != MENU_TRADITIONAL) {
-		if (flags.menu_style == MENU_FULL) {
-		    int t;
-		    char menuprompt[BUFSZ];
-		    boolean outokay = (cnt != 0);
+			if (flags.menu_style == MENU_FULL) {
+				int t;
+				char menuprompt[BUFSZ];
+				boolean outokay = (cnt != 0);
 #ifndef GOLDOBJ
-		    boolean inokay = (invent != 0) || (u.ugold != 0);
+				boolean inokay = (invent != 0) || (u.ugold != 0);
 #else
-		    boolean inokay = (invent != 0);
+				boolean inokay = (invent != 0);
 #endif
-		    if (!outokay && !inokay) {
-			pline("%s", emptymsg);
-			You("don't have anything to put in.");
-			return used ? MOVE_STANDARD : MOVE_CANCELLED;
-		    }
-		    menuprompt[0] = '\0';
-		    if (!cnt) Sprintf(menuprompt, "%s ", emptymsg);
-		    Strcat(menuprompt, "Do what?");
-		    t = in_or_out_menu(menuprompt, current_container, outokay, inokay);
-		    if (t <= 0) return MOVE_CANCELLED;
-		    loot_out = (t & 0x01) != 0;
-		    loot_in  = (t & 0x02) != 0;
-		} else {	/* MENU_COMBINATION or MENU_PARTIAL */
-		    loot_out = (yn_function(qbuf, "ynq", 'n') == 'y');
-		}
-		if (loot_out) {
-		    add_valid_menu_class(0);	/* reset */
-		    used |= menu_loot(0, current_container, FALSE) > 0;
-		}
+				if (!outokay && !inokay) {
+					pline("%s", emptymsg);
+					You("don't have anything to put in.");
+					return used ? MOVE_STANDARD : MOVE_CANCELLED;
+				}
+				menuprompt[0] = '\0';
+				if (!cnt) Sprintf(menuprompt, "%s ", emptymsg);
+				Strcat(menuprompt, "Do what?");
+				t = in_or_out_menu(menuprompt, current_container, outokay, inokay);
+				if (t <= 0) return MOVE_CANCELLED;
+				loot_out = (t & 0x01) != 0;
+				loot_in  = (t & 0x02) != 0;
+				tip_over  = (t & 0x04) != 0;
+			} else {	/* MENU_COMBINATION or MENU_PARTIAL */
+				loot_out = (yn_function(qbuf, "ynq", 'n') == 'y');
+			}
+			if (tip_over) {
+				tipcontainer(current_container);
+				if(current_container->oartifact == ART_ESSCOOAHLIPBOOURRR)
+					current_container->age = monstermoves + rnz(100);
+				used |= MOVE_STANDARD;
+			}
+			if (loot_out) {
+				int sub_used;
+				add_valid_menu_class(0);	/* reset */
+				sub_used = menu_loot(0, current_container, FALSE) > 0;
+				if(sub_used && current_container->oartifact == ART_ESSCOOAHLIPBOOURRR)
+					current_container->age = monstermoves + rnz(100);
+				used |= sub_used;
+			}
 	    } else {
 		/* traditional code */
 ask_again2:
@@ -3353,10 +3364,11 @@ ask_again2:
 	}
 
 #ifndef GOLDOBJ
-	if (!invent && u.ugold == 0) {
+	if (!invent && u.ugold == 0)
 #else
-	if (!invent) {
+	if (!invent)
 #endif
+	{
 	    /* nothing to put in, but some feedback is necessary */
 	    You("don't have anything to put in.");
 	    return used ? MOVE_STANDARD : MOVE_CANCELLED;
@@ -3403,24 +3415,25 @@ ask_again2:
 #endif
 	    add_valid_menu_class(0);	  /* reset */
 	    if (flags.menu_style != MENU_TRADITIONAL) {
-		used |= menu_loot(0, current_container, TRUE) > 0;
+			used |= menu_loot(0, current_container, TRUE) > 0;
 	    } else {
-		/* traditional code */
-		menu_on_request = 0;
-		if (query_classes(select, &one_by_one, &allflag, "put in",
-				   invent, FALSE,
+			/* traditional code */
+			menu_on_request = 0;
+			if (query_classes(select, &one_by_one, &allflag, "put in",
+					   invent, FALSE,
 #ifndef GOLDOBJ
-				   (u.ugold != 0L),
+					(u.ugold != 0L),
 #endif
-				   &menu_on_request)) {
-		    (void) askchain((struct obj **)&invent,
-				    (one_by_one ? (char *)0 : select), allflag,
-				    in_container, ck_bag, 0, "nodot");
-		    used = 1;
-		} else if (menu_on_request < 0) {
-		    used |= menu_loot(menu_on_request,
-				      current_container, TRUE) > 0;
-		}
+					&menu_on_request)
+			) {
+				(void) askchain((struct obj **)&invent,
+						(one_by_one ? (char *)0 : select), allflag,
+						in_container, ck_bag, 0, "nodot");
+				used = 1;
+			} else if (menu_on_request < 0) {
+				used |= menu_loot(menu_on_request,
+						  current_container, TRUE) > 0;
+			}
 	    }
 	}
 
@@ -3542,7 +3555,7 @@ boolean outokay, inokay;
     menu_item *pick_list;
     char buf[BUFSZ];
     int n;
-    const char *menuselector = iflags.lootabc ? "abc" : "oib";
+    const char *menuselector = iflags.lootabc ? "abcd" : "oibt";
 
     any.a_void = 0;
     win = create_nhwindow(NHW_MENU);
@@ -3564,6 +3577,12 @@ boolean outokay, inokay;
 	any.a_int = 3;
 	add_menu(win, NO_GLYPH, &any, *menuselector, 0, ATR_NONE,
 			"Both of the above", MENU_UNSELECTED);
+    }
+    menuselector++;
+    if (outokay) {
+	any.a_int = 4;
+	add_menu(win, NO_GLYPH, &any, *menuselector, 0, ATR_NONE,
+			"Tip out all contents", MENU_UNSELECTED);
     }
     end_menu(win, prompt);
     n = select_menu(win, PICK_ONE, &pick_list);
@@ -3875,6 +3894,7 @@ struct obj *box; /* or bag */
 		pline("You can't tip something bolted down!");
 		return;
 	}
+	char yourbuf[BUFSZ];
 	if (box->olocked) {
 		pline("It's locked.");
 	} else if (box->otrapped) {
@@ -3910,13 +3930,54 @@ struct obj *box; /* or bag */
 		if (maybeshopgoods && !box->no_charge)
 			subfrombill(box, shop_keeper(*in_rooms(ox, oy, SHOPBASE)));
 	} else if (box->otyp == BOX && box->spe == 1) {
-		char yourbuf[BUFSZ];
-
 		observe_quantum_cat(box, TRUE);
 		if (!Has_contents(box)) /* evidently a live cat came out */
 			/* container type of "large box" is inferred */
 			pline("%sbox is now empty.", Shk_Your(yourbuf, box));
 		else /* holds cat corpse */
+			empty_it = TRUE;
+	} else if(Is_real_container(box) && box->spe == 4){
+		open_coffin(box, FALSE); //FALSE: the box was not destroyed. Use present tense.
+
+		if (!Has_contents(box))
+			pline("%scoffin is now empty.", Shk_Your(yourbuf, box));
+		else
+			empty_it = TRUE;
+	} else if(Is_real_container(box) && box->spe == 5){
+		open_sarcophagus(box, FALSE); //FALSE: the box was not destroyed. Use present tense.
+
+		if (!Has_contents(box))
+			pline("%ssarcophagus is now empty.", Shk_Your(yourbuf, box));
+		else
+			empty_it = TRUE;
+	} else if(Is_real_container(box) && box->spe == 6 && u.uinsight >= 10){
+		open_crazy_box(box, TRUE);
+
+		if (!Has_contents(box))
+			pline("%s%s is now empty.", Shk_Your(yourbuf, box), simple_typename(box->otyp));
+		else
+			empty_it = TRUE;
+	} else if(Is_real_container(box) && box->spe == 7){
+		// Madman reclaims their stuff. Contents handled by the level loader.
+		//FALSE: the box was not destroyed. Use present tense.
+		open_madstuff_box(box, TRUE);
+
+		if (!Has_contents(box))
+			pline("%s%s is now empty.", Shk_Your(yourbuf, box), simple_typename(box->otyp));
+		else
+			empty_it = TRUE;
+	} else if(Is_real_container(box) && box->spe == 8){
+		// Nothing. Fulvous desk spawns monsters.
+		if (!Has_contents(box))
+			pline("It's empty.");
+		else
+			empty_it = TRUE;
+	} else if(Is_real_container(box) && box->spe == 9){
+		open_giants_sack(box, TRUE);
+
+		if (!Has_contents(box))
+			pline("%s%s is now empty.", Shk_Your(yourbuf, box), simple_typename(box->otyp));
+		else
 			empty_it = TRUE;
 	} else if (!Has_contents(box)) {
 		pline("It's empty.");

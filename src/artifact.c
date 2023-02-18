@@ -6845,8 +6845,8 @@ arti_invoke(obj)
 	    break;
 	  }
 	case LOOT_SELF:
-		if(!use_container(obj, TRUE)){
-			obj->age = 0;
+		obj->age = 0; //Age will be reset in loot container for Esscoo only
+		if(use_container(obj, TRUE) == MOVE_CANCELLED){
 			return MOVE_CANCELLED;
 		}
 	break;
