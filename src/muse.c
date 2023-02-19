@@ -2297,7 +2297,7 @@ skipmsg:
 	case MUSE_WAN_SPEED_MONSTER:
 		mzapmsg(mtmp, otmp, TRUE);
 		otmp->spe--;
-		mon_adjust_speed(mtmp, 1, otmp);
+		mon_adjust_speed(mtmp, 1, otmp, TRUE);
 		return 2;
 	case MUSE_POT_SPEED:
 		mquaffmsg(mtmp, otmp);
@@ -2305,7 +2305,7 @@ skipmsg:
 		   different methods of maintaining speed ratings:
 		   player's character becomes "very fast" temporarily;
 		   monster becomes "one stage faster" permanently */
-		mon_adjust_speed(mtmp, 1, otmp);
+		mon_adjust_speed(mtmp, 1, otmp, TRUE);
 		if (!otmp->oartifact)
 			m_useup(mtmp, otmp);
 		return 2;
@@ -3063,7 +3063,7 @@ boolean stoning;
 
     /* give a "<mon> is slowing down" message and also remove
        intrinsic speed (comparable to similar effect on the hero) */
-    mon_adjust_speed(mon, -3, (struct obj *)0);
+    mon_adjust_speed(mon, -3, (struct obj *)0, TRUE);
 
     if (canseemon(mon)) {
 	long save_quan = obj->quan;

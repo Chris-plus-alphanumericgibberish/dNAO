@@ -1625,7 +1625,7 @@ boolean your_fault;
 		break;
 	case POT_SPEED:
 		angermon = FALSE;
-		mon_adjust_speed(mon, 1, obj);
+		mon_adjust_speed(mon, 1, obj, TRUE);
 		break;
 	case POT_BLINDNESS:
 		if(haseyes(mon->data)) {

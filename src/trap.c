@@ -2696,7 +2696,7 @@ boolean byplayer;
 
 	/* give a "<mon> is slowing down" message and also remove
 	   intrinsic speed (comparable to similar effect on the hero) */
-	mon_adjust_speed(mon, -3, (struct obj *)0);
+	mon_adjust_speed(mon, -3, (struct obj *)0, TRUE);
 
 	if (cansee(mon->mx, mon->my))
 		pline("%s turns to stone.", Monnam(mon));
@@ -2720,7 +2720,7 @@ int byplayer;
 
 	/* give a "<mon> is slowing down" message and also remove
 	   intrinsic speed (comparable to similar effect on the hero) */
-	mon_adjust_speed(mon, -3, (struct obj *)0);
+	mon_adjust_speed(mon, -3, (struct obj *)0, TRUE);
 
 	if (cansee(mon->mx, mon->my))
 		pline("%s turns to gold.", Monnam(mon));
@@ -2738,7 +2738,7 @@ boolean byplayer;
 {
 	/* give a "<mon> is slowing down" message and also remove
 	   intrinsic speed (comparable to similar effect on the hero) */
-	mon_adjust_speed(mon, -3, (struct obj *)0);
+	mon_adjust_speed(mon, -3, (struct obj *)0, TRUE);
 
 	if (cansee(mon->mx, mon->my))
 		pline("%s turns to glass.", Monnam(mon));

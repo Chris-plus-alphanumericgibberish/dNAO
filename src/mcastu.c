@@ -4641,7 +4641,7 @@ int tary;
 			HFast |= INTRINSIC;
 		}
 		else {
-			mon_adjust_speed(magr, 1, (struct obj *)0);
+			mon_adjust_speed(magr, 1, (struct obj *)0, TRUE);
 		}
 		return MM_HIT;
 
@@ -4661,7 +4661,7 @@ int tary;
 					dist2(tarx, tary, cmon->mx, cmon->my) <= 3 * 3 + 1
 					)
 				{
-					mon_adjust_speed(cmon, 1, (struct obj *)0);
+					mon_adjust_speed(cmon, 1, (struct obj *)0, TRUE);
 				}
 			}
 			/* include player, if yours or tame */

@@ -278,7 +278,7 @@ makedog()
 	if(pettype == PM_KNIGHT){
 		struct obj *obj;
 		mtmp->m_lev = 1;
-		mon_adjust_speed(mtmp, -1, (struct obj *) 0);
+		mon_adjust_speed(mtmp, -1, (struct obj *) 0, FALSE);
 		obj = mongets(mtmp, CRAM_RATION, MKOBJ_NOINIT);
 		if(obj){
 			obj->quan = 3;

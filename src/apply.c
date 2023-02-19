@@ -1230,7 +1230,7 @@ int spiritseal;
 			default:
 				break;
 			case 1:
-				mon_adjust_speed(mtmp, 2, (struct obj *)0);
+				mon_adjust_speed(mtmp, 2, (struct obj *)0, TRUE);
 				break;
 			case 2: /* no explanation; it just happens... */
 				nomovemsg = "";
@@ -3734,7 +3734,7 @@ struct obj *hypo;
 				}
 			break;
 			case POT_SPEED:
-				mon_adjust_speed(mtarg, 1, amp);
+				mon_adjust_speed(mtarg, 1, amp, TRUE);
 			break;
 			case POT_GAIN_ENERGY:
 				if(amp->cursed){

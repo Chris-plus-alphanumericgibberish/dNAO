@@ -280,7 +280,7 @@ struct obj *otmp;
 	case WAN_SLOW_MONSTER:
 	case SPE_SLOW_MONSTER:
 		if (!resist(mtmp, otmp->oclass, 0, TELL)) {
-			mon_adjust_speed(mtmp, -1, otmp);
+			mon_adjust_speed(mtmp, -1, otmp, TRUE);
 			m_dowear(mtmp, FALSE); /* might want speed boots */
 			if (u.uswallow && (mtmp == u.ustuck) &&
 			    is_whirly(mtmp->data)) {
@@ -292,7 +292,7 @@ struct obj *otmp;
 		break;
 	case WAN_SPEED_MONSTER:
 		if (!resist(mtmp, otmp->oclass, 0, TELL)) {
-			mon_adjust_speed(mtmp, 1, otmp);
+			mon_adjust_speed(mtmp, 1, otmp, TRUE);
 			m_dowear(mtmp, FALSE); /* might want speed boots */
 		} else if(cansee(mtmp->mx,mtmp->my)) shieldeff(mtmp->mx, mtmp->my);
 		break;
@@ -879,7 +879,7 @@ boolean dolls;
 				       NO_MINVENT|MM_NOWAIT);
 			if (mtmp) {
 				mtmp->mhp = mtmp->mhpmax = 100;
-				mon_adjust_speed(mtmp, 2, (struct obj *)0); /* MFAST */
+				mon_adjust_speed(mtmp, 2, (struct obj *)0, TRUE); /* MFAST */
 			}
 		} else {
 		    if (get_ox(obj, OX_EMON)) {

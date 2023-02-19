@@ -13318,7 +13318,7 @@ int faction;
 		break;
 		case S_BAT:
 			if (Inhell && is_bat(ptr))
-			    mon_adjust_speed(mtmp, 2, (struct obj *)0);
+			    mon_adjust_speed(mtmp, 2, (struct obj *)0, FALSE);
 
 			if (mndx == PM_CHIROPTERAN && (mmflags & MM_BIGGROUP) && !(mmflags & MM_NOGROUP)) {
 				tmpm = makemon_full(&mons[PM_WARBAT], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
@@ -14698,7 +14698,7 @@ struct monst *mtmp;
 	}
 	if(mtmp->mtyp == PM_REBEL_RINGLEADER){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 15){
 			give_mintrinsic(mtmp, COLD_RES);
@@ -14729,13 +14729,13 @@ struct monst *mtmp;
 	}
 	if(mon_anachrononaut(mtmp)){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_barbarian(mtmp)){
 		give_mintrinsic(mtmp, POISON_RES);
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 15){
 			give_mintrinsic(mtmp, STEALTH);
@@ -14751,7 +14751,7 @@ struct monst *mtmp;
 	}
 	if(mon_caveman(mtmp)){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_convict(mtmp)){
@@ -14767,7 +14767,7 @@ struct monst *mtmp;
 		give_mintrinsic(mtmp, DRAIN_RES);
 		give_mintrinsic(mtmp, SICK_RES);
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 9){
 			give_mintrinsic(mtmp, POISON_RES);
@@ -14775,7 +14775,7 @@ struct monst *mtmp;
 	}
 	if(mon_knight(mtmp)){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_monk(mtmp)){
@@ -14832,7 +14832,7 @@ struct monst *mtmp;
 			give_mintrinsic(mtmp, STEALTH);
 		}
 		if(mtmp->m_lev >= 11){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_priest(mtmp)){
@@ -14871,7 +14871,7 @@ struct monst *mtmp;
 	if(mon_valkyrie(mtmp)){
 		give_mintrinsic(mtmp, STEALTH);
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0);
+			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_wizard(mtmp)){

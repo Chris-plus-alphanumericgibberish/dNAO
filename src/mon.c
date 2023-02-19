@@ -7466,7 +7466,7 @@ int damtype, dam;
     }
     if (slow) {
 	if (mon->mspeed != MSLOW)
-	    mon_adjust_speed(mon, -1, (struct obj *)0);
+	    mon_adjust_speed(mon, -1, (struct obj *)0, TRUE);
     }
     if (heal) {
 	if (mon->mhp < mon->mhpmax) {

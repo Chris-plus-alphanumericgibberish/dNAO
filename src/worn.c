@@ -306,10 +306,11 @@ struct monst *mon;
 }
 
 void
-mon_adjust_speed(mon, adjust, obj)
+mon_adjust_speed(mon, adjust, obj, verbose)
 struct monst *mon;
 int adjust;	/* positive => increase speed, negative => decrease */
 struct obj *obj;	/* item to make known if effect can be seen */
+boolean verbose;
 {
     boolean give_msg = !in_mklev, petrify = FALSE;
     unsigned int oldspeed = mon->mspeed;
@@ -353,18 +354,22 @@ struct obj *obj;	/* item to make known if effect can be seen */
 	if (petrify) {
 	    /* mimic the player's petrification countdown; "slowing down"
 	       even if fast movement rate retained via worn speed boots */
-	    if (flags.verbose) pline("%s is slowing down.", Monnam(mon));
+	    if (flags.verbose && verbose) pline("%s is slowing down.", Monnam(mon));
 	} else if (adjust > 0 || mon->mspeed == MFAST)
 	    if (is_weeping(mon->data)) {
-		pline("%s is suddenly changing positions %sfaster.", Monnam(mon), howmuch);
+		if(verbose)
+			pline("%s is suddenly changing positions %sfaster.", Monnam(mon), howmuch);
 	    } else {
-		pline("%s is suddenly moving %sfaster.", Monnam(mon), howmuch);
+		if(verbose)
+			pline("%s is suddenly moving %sfaster.", Monnam(mon), howmuch);
 	    }
 	else
 	    if (is_weeping(mon->data)) {
-		pline("%s is suddenly changing positions %sslower.", Monnam(mon), howmuch);
+		if(verbose)
+			pline("%s is suddenly changing positions %sslower.", Monnam(mon), howmuch);
 	    } else {
-		pline("%s seems to be moving %sslower.", Monnam(mon), howmuch);
+		if(verbose)
+			pline("%s seems to be moving %sslower.", Monnam(mon), howmuch);
 	    }
 
 	/* might discover an object if we see the speed change happen, but
@@ -497,7 +502,7 @@ boolean on, silently;
 			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
 			boolean save_in_mklev = in_mklev;
 			if (silently) in_mklev = TRUE;
-			mon_adjust_speed(mon, 0, obj);
+			mon_adjust_speed(mon, 0, obj, TRUE);
 			in_mklev = save_in_mklev;
 			
 			break;
@@ -547,7 +552,7 @@ boolean on, silently;
 				mon->mextrinsics[(which-1)/32] &= ~(1 << (which-1)%32);
 				boolean save_in_mklev = in_mklev;
 				if (silently) in_mklev = TRUE;
-				mon_adjust_speed(mon, 0, obj);
+				mon_adjust_speed(mon, 0, obj, TRUE);
 				in_mklev = save_in_mklev;
 				break;
 				}

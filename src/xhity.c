@@ -5071,7 +5071,7 @@ boolean ranged;
 			else {
 				unsigned int oldspeed = mdef->mspeed;
 
-				mon_adjust_speed(mdef, -1, (struct obj *)0);
+				mon_adjust_speed(mdef, -1, (struct obj *)0, TRUE);
 				mdef->mstrategy &= ~STRAT_WAITFORU;
 				if (mdef->mspeed != oldspeed && canseemon(mdef))
 					pline("%s slows down.", Monnam(mdef));
@@ -11813,7 +11813,7 @@ int vis;
 				mon_nam(mdef)
 				);
 
-			mon_adjust_speed(mdef, -1, (struct obj *)0);
+			mon_adjust_speed(mdef, -1, (struct obj *)0, TRUE);
 			mdef->mstrategy &= ~STRAT_WAITFORU;
 			if (mdef->mspeed != oldspeed && vis&VIS_MDEF)
 				pline("%s slows down.", Monnam(mdef));
