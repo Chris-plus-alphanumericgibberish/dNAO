@@ -2396,7 +2396,7 @@ A("The Red Cords of Ilmater",		HAND_WRAPS,	"pair of red cords",
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(FREE_ACTION, STONE_RES), NOFLAG,
-	PROPS(), NOFLAG,
+	PROPS(DRAIN_RES), NOFLAG,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 

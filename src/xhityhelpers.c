@@ -1456,6 +1456,8 @@ struct obj * otmp;
 			dmg += vd(2, 10); // Crackling holy energy
 		else if (otmp->oartifact == ART_GODHANDS)
 			dmg += 7;
+		else if (otmp->oartifact == ART_RED_CORDS_OF_ILMATER)
+			dmg += 7;
 		else if (otmp->oartifact == ART_JINJA_NAGINATA)
 			dmg += vd(1, 12);
 		else if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)
