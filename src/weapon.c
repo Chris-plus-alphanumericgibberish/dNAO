@@ -3633,10 +3633,10 @@ int wep_type;
 		}
 	}
 	
-	if(weapon && weapon->otyp == SCALPEL && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
+	if(weapon && (weapon->otyp == SCALPEL || weapon->otyp == UNICORN_HORN) && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
 		/* weapon skills and misc skills */
 		switch (P_SKILL(P_HEALING_SPELL)) {
-			default: impossible("scalpel handeling weapon_hit_bonus: bad skill %d", skill);
+			default: impossible("healer weapon handeling weapon_hit_bonus: bad skill %d", skill);
 				/* fall through */
 			case P_ISRESTRICTED:
 			case P_UNSKILLED:
@@ -3835,10 +3835,10 @@ int wep_type;
 		// }
 	}
 	
-	if(weapon && weapon->otyp == SCALPEL && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
+	if(weapon && (weapon->otyp == SCALPEL || weapon->otyp == UNICORN_HORN) && Role_if(PM_HEALER) && weapon == uwep && !u.twoweap){
 		/* weapon skills and misc skills */
 		switch (P_SKILL(P_HEALING_SPELL)) {
-			default: impossible("scalpel handeling weapon_dam_bonus: bad skill %d", skill);
+			default: impossible("healer weapon handeling weapon_dam_bonus: bad skill %d", skill);
 				/* fall through */
 			case P_ISRESTRICTED:
 			case P_UNSKILLED:
