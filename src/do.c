@@ -152,7 +152,7 @@ const char *verb;
 	/* make sure things like water_damage() have no pointers to follow */
 	obj->nobj = obj->nexthere = (struct obj *)0;
 
-	if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[x][y].typ == AIR){
+	if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[x][y].typ == AIR && obj != uball && obj != uchain){
 		add_to_migration(obj);
 		obj->ox = u.uz.dnum;
 		obj->oy = qlocate_level.dlevel+1;
