@@ -790,6 +790,18 @@ Armor_on()
 		ABON(A_CHA) += 2;
 		flags.botl = 1;
 	}
+	else if(uarm->otyp == RED_DRAGON_SCALES || uarm->otyp == RED_DRAGON_SCALE_MAIL){
+		if(!Blind)
+			pline("Wings of shimmering heat sprout from your back!");
+		else
+			pline("Your back feels warm.");
+	}
+	else if(uarm->otyp == EILISTRAN_ARMOR){
+		if(!Blind)
+			pline("Faint luminous wings blossom from the armor's wing-rerebraces!");
+		else
+			pline("The armor hums faintly.");
+	}
 	if(arti_lighten(uarm, FALSE)) inv_weight();
     return 0;
 }
@@ -828,6 +840,18 @@ Armor_off()
 	}
 	else Armor_gone_or_off_abon();
 
+	if(uarm->otyp == RED_DRAGON_SCALES || uarm->otyp == RED_DRAGON_SCALE_MAIL){
+		if(!Blind)
+			pline("The wings of heat wither and vanish.");
+		else
+			pline("Your back no longer feels warm.");
+	}
+	else if(uarm->otyp == EILISTRAN_ARMOR){
+		if(!Blind)
+			pline("The luminous wings retract into the armor's wing-rerebraces.");
+		else
+			pline("The armor ceases humming.");
+	}
     setworn((struct obj *)0, W_ARM);
 	if(checkweight) inv_weight();
     cancelled_don = FALSE;
