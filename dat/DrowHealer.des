@@ -301,6 +301,17 @@ OBJECT:'\\',"bedroll",(32,16),uncursed,3
 OBJECT:'\\',"bedroll",(33,16),uncursed,3
 OBJECT:'\\',"bedroll",(34,16),uncursed,3
 
+CONTAINER:'(',"box",(34,15)
+OBJECT:'#',"uncursed color_white towel",contained
+OBJECT[50%]:'#',"uncursed color_white towel",contained
+OBJECT[50%]:'#',"uncursed color_white towel",contained
+OBJECT:'!',"water",contained,uncursed,0
+OBJECT:'!',"water",contained,uncursed,0
+OBJECT[50%]:'!',"water",contained,uncursed,0
+OBJECT:'!',"healing",contained,uncursed,0
+OBJECT[50%]:'!',"healing",contained,uncursed,0
+OBJECT[50%]:'!',"restore ability",contained,uncursed,0
+
 OBJECT: '_', "chain", (29,00)
 OBJECT: '_', "chain", (33,00)
 OBJECT: '_', "chain", (29,04)
