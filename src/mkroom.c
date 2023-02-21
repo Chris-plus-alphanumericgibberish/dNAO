@@ -3786,12 +3786,12 @@ mkpluvillage()
 		if(okspot && accessible){
 			good = TRUE;
 			//Clear village green
-			for(i=sizebig1;i<(sizetot-sizebig2);i++) 
+			for(i=sizebig1;i<(sizetot-sizebig2)+1;i++) 
 				for(j=1;j<10;j++){
 					levl[x+i][y+j].typ = HWALL;
 					if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
 				}
-			for(i=sizebig1;i<(sizetot-sizebig2);i++) 
+			for(i=sizebig1;i<(sizetot-sizebig2)+1;i++) 
 				for(j=1;j<10;j++){
 					levl[x+i][y+j].typ = GRASS;
 					levl[x+i][y+j].lit = 1;
