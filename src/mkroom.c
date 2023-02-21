@@ -69,6 +69,7 @@ STATIC_DCL void NDECL(mkisland);
 STATIC_DCL void NDECL(mkriver);
 STATIC_DCL void NDECL(mkneuriver);
 STATIC_DCL void NDECL(mkforest12river);
+STATIC_DCL void FDECL(mkneucell, (int,int,struct obj *,int,int));
 STATIC_DCL void FDECL(liquify, (int,int,int));
 STATIC_DCL void FDECL(neuliquify, (int, int, int));
 STATIC_DCL void FDECL(chaliquify, (int, int, int));
@@ -2541,8 +2542,6 @@ mkfishinghut(left)
 			makemon(&mons[PM_DEEP_ONE], x+rnd(2), y+rnd(2), MM_ADJACENTOK);
 		}
 		
-		wallification(x, y, x+3, y+3);
-		
 		pathto = rn2(pathto);
 		if(left){
 			if(isok(x+1,y-1) && levl[x+1][y-1].typ == PUDDLE && !(pathto--)) 
@@ -2679,8 +2678,6 @@ mkpluhomestead()
 		for(;i>0;i--){
 			makemon(&mons[PM_PLUMACH_RILMANI], x+rnd(3), y+rnd(3), MM_ADJACENTOK);
 		}
-		
-		wallification(x, y, x+4, y+4);
 		
 		pathto = rn2(pathto);
 		if(isok(x+2,y-1) && levl[x+2][y-1].typ == GRASS && !(pathto--))
@@ -3827,7 +3824,7 @@ mkpluvillage()
 			levl[x][y+3].typ = TLCORNER;
 			levl[x][y+3].lit = 1;
 			
-			switch(rn2(7)){
+			switch(rn2(8)){
 				case 0: //Random store
 					for(i=1;i<sizebig1;i++){
 						for(j=1+3;j<4+3;j++){
@@ -3914,6 +3911,24 @@ mkpluvillage()
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
 				break;
+				case 7:{//prison
+					struct obj *chest;
+					for(i=1;i<sizebig1;i++){
+						for(j=1+3;j<4+3;j++){
+							levl[x+i][y+j].typ = ROOM;
+							levl[x+i][y+j].lit = 1;
+						}
+					}
+					chest = mksobj_at(CHEST, x+1,y+5, NO_MKOBJ_FLAGS);
+					makemon(&mons[PM_CUPRILACH_RILMANI], x+1,y+5, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					for(i=1;i<sizebig1;i+=2){
+						mkneucell(x+i,y+3,chest,0,1);
+						mkneucell(x+i,y+7,chest,0,-1);
+					}
+					flood_fill_rm(x+1, y+5,
+						  nroom+ROOMOFFSET, TRUE, TRUE);
+					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+				}break;
 			}
 			add_door(x+sizebig1,y+5,&rooms[roomtypb]);
 			fill_room(&rooms[roomtypb], FALSE);
@@ -4008,8 +4023,7 @@ mkpluvillage()
 			levl[x+sizetot+1-sizebig2][y+3].typ = TLCORNER;
 			levl[x+sizetot+1-sizebig2][y+3].lit = 1;		
 			
-			// switch(rn2(6)){
-			switch(rn2(7)){
+			switch(rn2(8)){
 				case 0: //Shop
 					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
 						for(j=1+3;j<4+3;j++){
@@ -4097,6 +4111,24 @@ mkpluvillage()
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, OROOM, TRUE);
 				break;
+				case 7:{//prison
+					struct obj *chest;
+					for(i=sizetot+1-sizebig2+1;i<sizetot+1;i++){
+						for(j=1+3;j<4+3;j++){
+							levl[x+i][y+j].typ = ROOM;
+							levl[x+i][y+j].lit = 1;
+						}
+					}
+					chest = mksobj_at(CHEST, x+sizetot,y+5, NO_MKOBJ_FLAGS);
+					makemon(&mons[PM_CUPRILACH_RILMANI], x+1,y+5, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					for(i=sizetot;i>=sizetot+1-sizebig2+1;i-=2){
+						mkneucell(x+i,y+3,chest,0,1);
+						mkneucell(x+i,y+7,chest,0,-1);
+					}
+					flood_fill_rm(x+sizetot-1, y+5,
+						  nroom+ROOMOFFSET, TRUE, TRUE);
+					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+				}break;
 			}
 			add_door(x+sizetot+1-sizebig2,y+5,&rooms[roomtypb]);
 			fill_room(&rooms[roomtypb], FALSE);
@@ -4291,9 +4323,6 @@ mkferrufort()
 			for(i=5;i<wallrange-5;i++)
 				for(j=5;j<wallrange-5;j++)
 					levl[x+i][y+j].typ = GRASS;
-			
-			//Make the walls look pretty
-			wallification(x, y, x+wallrange-1, y+wallrange-1);
 			
 			//place outer door
 			if(rn2(2)){
@@ -5646,6 +5675,7 @@ place_neutral_features()
 		for(; n > 0; n--)
 			mkpluhomestead();
 	} 
+	wallification(1, 0, COLNO - 1, ROWNO - 1);
 }
 
 void
@@ -6175,6 +6205,27 @@ int sx,sy;
 								};
 			mtyp = ROLL_FROM(prisoners);
 		}break;
+		case PM_AURUMACH_RILMANI:{
+			int prisoners[] = {
+									//Non-true-neutral outsiders
+									PM_JUSTICE_ARCHON, PM_SHIELD_ARCHON, PM_SWORD_ARCHON,
+									PM_ARCADIAN_AVENGER, PM_PORO_AULON,
+									PM_MOVANIC_DEVA, PM_MONADIC_DEVA, PM_ASTRAL_DEVA,
+									PM_LILLEND, 
+									PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, 
+									PM_FORMIAN_CRUSHER, 
+									PM_HORNED_DEVIL, PM_ERINYS, PM_BARBED_DEVIL, PM_BONE_DEVIL, PM_ICE_DEVIL,
+									PM_SUCCUBUS, PM_INCUBUS, PM_VROCK, PM_DAUGHTER_OF_BEDLAM, PM_UNEARTHLY_DROW, PM_LILITU, PM_NALFESHNEE, PM_MARILITH,
+
+									//Non-neutral adventurers
+									PM_ARCHEOLOGIST, PM_ARCHEOLOGIST, PM_BARBARIAN, PM_BARBARIAN, PM_BARD, PM_BARD,
+									PM_KNIGHT, PM_KNIGHT, PM_MADMAN, PM_MADWOMAN, PM_PIRATE, PM_PIRATE,
+									PM_NOBLEMAN, PM_NOBLEWOMAN, PM_RANGER, PM_RANGER, PM_ROGUE, PM_ROGUE,
+									PM_VALKYRIE, PM_VALKYRIE, PM_SAMURAI, PM_SAMURAI,
+									PM_DEMINYMPH
+								};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
 		case PM_OGRE_KING:{
 			int prisoners[] = {
 									PM_ELF_LORD, PM_ELF_LADY, PM_ELVENKING, PM_ELVENQUEEN,
@@ -6372,6 +6423,61 @@ int dx,dy;
 	levl[sx-dx][sy-dy].typ = IRONBARS;
 	unblock_point(sx,sy);
 	mon = prisoner(kingtype, sx, sy);
+	if(mon){
+		for(obj = mon->minvent; obj; obj = mon->minvent){
+			mon->misc_worn_check &= ~obj->owornmask;
+			update_mon_intrinsics(mon, obj, FALSE, FALSE);
+			if (obj->owornmask & W_WEP){
+				setmnotwielded(mon,obj);
+				MON_NOWEP(mon);
+			}
+			if (obj->owornmask & W_SWAPWEP){
+				setmnotwielded(mon,obj);
+				MON_NOSWEP(mon);
+			}
+			obj->owornmask = 0L;
+			obj_extract_self(obj);
+			add_to_container(chest, obj);
+		}
+		(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+		mon->entangled = SHACKLES;
+	}
+}
+
+STATIC_OVL void
+mkneucell(sx, sy, chest, dx, dy)
+int sx,sy;
+struct obj *chest;
+int dx,dy;
+{
+	struct monst *mon;
+	struct obj *obj;
+	int i;
+	int j;
+	for(i = sx-1; i < sx+2; i++){
+		for(j = sy-1; j < sy+2; j++){
+			if(!isok(i,j))
+				return;
+		}
+	}
+	for(i = sx-1; i < sx+2; i++){
+		for(j = sy-1; j < sy+2; j++){
+			levl[i][j].typ = VWALL;
+			levl[i][j].lit = FALSE;
+			block_point(i,j);
+			if(m_at(i, j)) rloc(m_at(i, j), TRUE);
+		}
+	}
+	levl[sx][sy].typ = CORR;
+	unblock_point(sx,sy);
+
+	levl[sx-dx][sy-dy].typ = IRONBARS;
+	unblock_point(sx-dx,sy-dy);
+
+	levl[sx+dx][sy+dy].typ = DOOR;
+	levl[sx+dx][sy+dy].doormask = D_LOCKED;
+
+	mon = prisoner(PM_AURUMACH_RILMANI, sx, sy);
 	if(mon){
 		for(obj = mon->minvent; obj; obj = mon->minvent){
 			mon->misc_worn_check &= ~obj->owornmask;
@@ -6803,7 +6909,7 @@ struct mkroom *sroom;
 		  level.flags.has_court = 1;
 
 		  sy = sroom->ly -2;
-		  for(sx = sroom->lx+1; sx <= sroom->hx-1; sx++){
+		  if(!In_outlands(&u.uz)) for(sx = sroom->lx+1; sx <= sroom->hx-1; sx++){
 			if(!isok(sx, sy))
 				break;//Won't get any less off the map.
 			if(cell_spot(sx, sy) && rn2(4)){
