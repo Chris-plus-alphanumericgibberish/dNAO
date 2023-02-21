@@ -2523,13 +2523,13 @@ mkfishinghut(left)
 				}
 				if(!rn2(9)) mksobj_at(POT_BOOZE, x+1, y+1, NO_MKOBJ_FLAGS);
 				if(!rn2(9)) mksobj_at(CRAM_RATION, x+1, y+1, NO_MKOBJ_FLAGS);
-				if(!rn2(100)){
+				if(!rn2(20)){
 					otmp = mkobj(AMULET_CLASS, TRUE);
 					set_material_gm(otmp, GOLD);
 					otmp->owt = weight(otmp);
 					place_object(otmp, x+i, y+j);
 				}
-				if(!rn2(100)){
+				if(!rn2(40)){
 					otmp = mksobj(find_gcirclet(), NO_MKOBJ_FLAGS);
 					set_material_gm(otmp, GOLD);
 					otmp->owt = weight(otmp);
