@@ -9912,6 +9912,9 @@ boolean goodequip;
 		case S_IMP:
 			imp_initinv(mtmp, mkobjflags, faction, goodequip);
 		break;
+		case S_UMBER:
+			umber_initinv(mtmp, mkobjflags, faction, goodequip);
+		break;
 		case S_ANT:
 			if(In_law(&u.uz)){
 				//Civilized ants
