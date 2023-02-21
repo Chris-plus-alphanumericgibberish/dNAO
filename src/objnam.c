@@ -3756,6 +3756,7 @@ int wishflags;
 		thjofastafur = FALSE,
 		lolth_symbol = FALSE,
 		sizewished = FALSE;
+	int item_color = -1;
 	int objsize = (from_user ? youracedata->msize : MZ_MEDIUM);
 	long bodytype = 0L;
 	unsigned long int oprop_list[OPROP_LISTSIZE] = {0};
@@ -3891,6 +3892,36 @@ int wishflags;
 			thjofastafur = TRUE;
 		} else if(!strncmpi(bp, "lolth_symbol ", l=13)){
 			lolth_symbol = TRUE;
+		} else if(!strncmpi(bp, "color_black ", l=12)){
+			item_color = CLR_BLACK;
+		} else if(!strncmpi(bp, "color_red ", l=10)){
+			item_color = CLR_RED;
+		} else if(!strncmpi(bp, "color_green ", l=12)){
+			item_color = CLR_GREEN;
+		} else if(!strncmpi(bp, "color_brown ", l=12)){
+			item_color = CLR_BROWN;
+		} else if(!strncmpi(bp, "color_blue ", l=11)){
+			item_color = CLR_BLUE;
+		} else if(!strncmpi(bp, "color_magenta ", l=14)){
+			item_color = CLR_MAGENTA;
+		} else if(!strncmpi(bp, "color_cyan ", l=11)){
+			item_color = CLR_CYAN;
+		} else if(!strncmpi(bp, "color_gray ", l=11)){
+			item_color = CLR_GRAY;
+		} else if(!strncmpi(bp, "color_orange ", l=13)){
+			item_color = CLR_ORANGE;
+		} else if(!strncmpi(bp, "color_bright_green ", l=19)){
+			item_color = CLR_BRIGHT_GREEN;
+		} else if(!strncmpi(bp, "color_yellow ", l=13)){
+			item_color = CLR_YELLOW;
+		} else if(!strncmpi(bp, "color_bright_blue ", l=18)){
+			item_color = CLR_BRIGHT_BLUE;
+		} else if(!strncmpi(bp, "color_bright_magenta ", l=21)){
+			item_color = CLR_BRIGHT_MAGENTA;
+		} else if(!strncmpi(bp, "color_bright_cyan ", l=18)){
+			item_color = CLR_BRIGHT_CYAN;
+		} else if(!strncmpi(bp, "color_white ", l=12)){
+			item_color = CLR_WHITE;
 		} else if(!strncmpi(bp, "engraved ", l=9)){
 			/*This modifier does nothing, really, but people should be allowed to write it.*/;
 		} else if(!strncmpi(bp, "carved ", l=7)){
@@ -5496,7 +5527,11 @@ typfnd:
 		}
 	}
 
-	
+	// CLR_BLACK is 0
+	if(item_color > -1 && wizwish){
+		otmp->obj_color = item_color;
+	}
+
 	if(otmp->otyp == SCR_WARD){
 		/* Can wish for a scroll of any ward, including heptagram. You are spending a wish, after all.*/
 		if(heptagram) otmp->oward = HEPTAGRAM;

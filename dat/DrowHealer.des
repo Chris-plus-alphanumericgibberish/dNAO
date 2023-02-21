@@ -188,12 +188,12 @@ CONTAINER:'`',"statue", (38,17),"ninja",5
 OBJECT:')',"broadsword", contained
 OBJECT:')',"wakizashi", contained
 OBJECT:'#',"15 poisoned daggers", contained
-OBJECT:'[',"gloves", contained
-OBJECT:'[',"studded leather armor", contained
-OBJECT:'[',"elven boots", contained
+OBJECT:'#',"color_black leather gloves", contained
+OBJECT:'#',"color_black studded leather armor", contained
+OBJECT:'#',"color_black elven boots", contained
 OBJECT:'(',"lock pick", contained
-OBJECT:'(',"sack", contained
-OBJECT:'(',"blindfold", contained
+OBJECT:'#',"color_black sack", contained
+OBJECT:'#',"color_black blindfold", contained
 OBJECT:'/',random, contained
 OBJECT:'/',random, contained
 CONTAINER:'`',"statue",(37,16),uncursed,"Poro Aulon",1
@@ -524,6 +524,7 @@ OBJECT[10%]:'#',"gemstone amulet",contained
 OBJECT[50%]:'#',"gemstone band",contained
 OBJECT:'*',"chunk of fossil dark",contained
 OBJECT:'\\',"expensive bed",(37,10)
+
 OBJECT:'_', "chain", (31,02), uncursed,+1
 
 # Random traps
@@ -1283,7 +1284,15 @@ MONSTER: 'b', "gelatinous cube", (66,06)
 REGION:(66,15,74,18),lit,"temple"
 ALTAR:(67,16),neutral,altar,"_Pen'a"
 CONTAINER:'`',"statue",(74,18),uncursed,"Panakeian Archon",5
+OBJECT:'#',"blessed color_blue robe",contained
+OBJECT:'#',"blessed color_bright_blue waistcloth",contained
+OBJECT:'#',"blessed color_bright_blue blindfold",contained
+
 CONTAINER:'`',"statue",(74,15),uncursed,"Iksh'na Deva",5
+OBJECT:'#',"blessed color_blue robe",contained
+OBJECT:'#',"blessed color_bright_blue waistcloth",contained
+OBJECT:'#',"blessed color_bright_blue blindfold",contained
+
 
 CONTAINER:'(',"box",(67,17)
 OBJECT:'"',"amulet of life saving",contained

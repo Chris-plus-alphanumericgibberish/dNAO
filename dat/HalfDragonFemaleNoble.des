@@ -413,8 +413,8 @@ PORTAL:(23,03,23,03),(00,00,00,00),"qstlb"
 #
 OBJECT:'?',"resistance",(40,15)
 OBJECT:'?',"resistance",(40,15)
-OBJECT:'#',"+5 large victorian underwear",(40,15)
-OBJECT:'#',"+5 large gentlewoman's dress",(40,15)
+OBJECT:'#',"+5 color_white large victorian underwear",(40,15)
+OBJECT:'#',"+5 color_white large gentlewoman's dress",(40,15)
 OBJECT:'#',"+5 large silver gauntlets",(40,15)
 OBJECT:'#',"+5 large silver band",(40,15)
 OBJECT:'#',"+5 yorshka's spear",(40,15)
