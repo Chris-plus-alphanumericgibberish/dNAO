@@ -1780,6 +1780,8 @@ get_ma_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, (ptr->mflagsa & MA_ET)			, "alien"				, many);
 	many = append(description, (ptr->mflagsa & MA_G_O_O)		, "great old one"		, many);
 	many = append(description, (ptr->mflagsa & MA_XORN)			, "xorn"				, many);
+	if(!many)
+		strcat(description, "sui generis");
 	strcat(description, ". ");
 	return description;
 }
@@ -1857,6 +1859,8 @@ get_mw_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, (u.wardsknown & WARD_DREPRUN) && !standardUnwardable(mtmp) && dreWarded(mtmp->data)								, "dreprun stave"		, many);
 	many = append(description, (u.wardsknown & WARD_VEIOISTAFUR) && !standardUnwardable(mtmp) && veiWarded(mtmp->data)							, "veioistafur stave"	, many);
 	many = append(description, (u.wardsknown & WARD_THJOFASTAFUR) && !standardUnwardable(mtmp) && thjWarded(mtmp->data)							, "thjofastafur stave"	, many);
+	if(!many)
+		strcat(description, "none known");
 	strcat(description, ". ");
 	return description;
 }
