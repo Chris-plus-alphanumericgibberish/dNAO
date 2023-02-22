@@ -927,7 +927,7 @@ struct mkroom	*croom;
 		if(m->align != -12)
 			mtmp = mk_roamer(pm, alignment, x, y, m->peaceful);
 		else if(PM_ARCHEOLOGIST <= m->id && m->id <= PM_WIZARD)
-				 mtmp = mk_mplayer(pm, x, y, FALSE);
+				 mtmp = mk_mplayer(pm, x, y, NO_MM_FLAGS);
 		else mtmp = makemon(pm, x, y, NO_MM_FLAGS);
 	}
 	if (mtmp) {

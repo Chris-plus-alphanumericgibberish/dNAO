@@ -436,13 +436,17 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 
 
 struct monst *
-mk_mplayer(ptr, x, y, special)
+mk_mplayer(ptr, x, y, flags)
 register struct permonst *ptr;
 xchar x, y;
-register boolean special;
+long flags;
 {
+	boolean special = (flags&MM_GOODEQUIP) == MM_GOODEQUIP;
 	register struct monst *mtmp;
 	char nam[PL_NSIZ];
+
+	flags &= ~MM_GOODEQUIP;
+	flags |= NO_MINVENT;
 
 	//if ptr is null don't make a monster
 	if(!ptr)
@@ -455,9 +459,7 @@ register boolean special;
 	if(MON_AT(x, y))
 		(void) rloc(m_at(x, y), FALSE); /* insurance */
 
-	if(!In_endgame(&u.uz)) special = FALSE;
-
-	if ((mtmp = makemon(ptr, x, y, NO_MM_FLAGS)) != 0) {
+	if ((mtmp = makemon(ptr, x, y, flags)) != 0) {
 	    int quan;
 	    struct obj *otmp;
 		int weapon, secweapon, rweapon, rwammo, armor, shirt, cloak, helm, boots, gloves, shield, tool;
@@ -687,7 +689,7 @@ boolean special;
 		/* if pos not found in 50 tries, don't bother to continue */
 		if(tryct > 50) return;
 
-		(void) mk_mplayer(&mons[pm], (xchar)x, (xchar)y, special);
+		(void) mk_mplayer(&mons[pm], (xchar)x, (xchar)y, special ? MM_GOODEQUIP : NO_MM_FLAGS);
 		num--;
 	}
 }

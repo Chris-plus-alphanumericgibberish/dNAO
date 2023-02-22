@@ -12395,8 +12395,8 @@ int faction;
 			//That failed, return to the default way of handling things
 			ptr = (struct permonst *)0;
 			x = y = 0;
-		} else if(PM_ARCHEOLOGIST <= monsndx(ptr) && monsndx(ptr) <= PM_WIZARD && !(mmflags & MM_EDOG)){
-			return mk_mplayer(ptr, x, y, FALSE);
+		} else if(is_mplayer(ptr) && !(mmflags & MM_EDOG)){
+			return mk_mplayer(ptr, x, y, NO_MM_FLAGS);
 		}
 	}
 	
@@ -12418,8 +12418,8 @@ int faction;
 		if(tryct >= 400){
 			return((struct monst *)0);
 		}
-		if(ptr && PM_ARCHEOLOGIST <= monsndx(ptr) && monsndx(ptr) <= PM_WIZARD && !(mmflags & MM_EDOG)){
-			return mk_mplayer(ptr, x, y, FALSE);
+		if(ptr && is_mplayer(ptr) && !(mmflags & MM_EDOG)){
+			return mk_mplayer(ptr, x, y, NO_MM_FLAGS);
 		}
 	} else if (byyou && !in_mklev) {
 		coord bypos;
