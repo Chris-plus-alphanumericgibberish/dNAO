@@ -2286,6 +2286,10 @@ humanoid_sound:
 						}
 					}
 				break;
+				case PM_IKSH_NA_DEVA:
+					Sprintf(msgbuff, talkabt, !rn2(4) ? "the virtues of poverty" : !rn2(3) ? "the voices of stones" : rn2(2) ? "lights in the dark" : "stars in the deep");
+					pline_msg = msgbuff;
+				break;
 				case PM_ALIDER:
 					if(Race_if(PM_ANDROID))
 						verbl_msg = freedAlider[rn2(SIZE(freedAlider))];

@@ -1747,6 +1747,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_MDWP;
 		attk->damd += 10;
 	}
+	/* Iksh'na devas upgrade their weapon attack at max level. This may be switched back later if they're cancelled. */
+	if(pa->mtyp == PM_IKSH_NA_DEVA && mlev(magr) >= 30 && attk->aatyp == AT_WEAP && *indexnum == 0){
+		attk->aatyp = AT_DEVA;
+	}
 	/* Grue does not make its later attacks if its square is lit */
 	if (pa->mtyp == PM_GRUE &&
 		!by_the_book &&

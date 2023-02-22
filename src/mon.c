@@ -24,6 +24,7 @@ STATIC_DCL boolean FDECL(restrap,(struct monst *));
 STATIC_DCL int FDECL(scent_callback,(genericptr_t, int, int));
 STATIC_DCL void FDECL(dead_familiar,(long));
 STATIC_DCL void FDECL(clothes_bite_mon,(struct monst *));
+STATIC_DCL void FDECL(emit_healing, (struct monst *));
 int scentgoalx, scentgoaly;
 
 #ifdef OVL2
@@ -1563,7 +1564,7 @@ struct monst *mon;
 	if(u.ustuck == mon && mmove < 12 && mon->data->mlet == S_VORTEX){
 		mmove *= 2;
 	}
-	
+
 	if(isdark(mon->mx, mon->my) && mon->mtyp == PM_GRUE){
 		mmove *= 2;
 	}
@@ -1681,7 +1682,11 @@ struct monst *mtmp;
 	if (mtmp->cham && !rn2(6))
 	    (void) newcham(mtmp, NON_PM, FALSE, FALSE);
 	were_change(mtmp);
-	
+
+	if(mtmp->mtyp == PM_IKSH_NA_DEVA && mtmp->mhp*2 < mtmp->mhpmax && !rn2(4) && !hates_holy_mon(mtmp))
+		emit_healing(mtmp);
+		
+
 	if(!mtmp->mcansee && (mtmp->mtyp == PM_SHOGGOTH || mtmp->mtyp == PM_PRIEST_OF_GHAUNADAUR)){
 		if(canspotmon(mtmp)) pline("%s forms new eyes!",Monnam(mtmp));
 		mtmp->mblinded = 1;
@@ -9522,6 +9527,78 @@ struct monst *mon;
 	for(otmp = mon->minvent; otmp && !DEADMONSTER(mon); otmp = otmp->nobj){
 		if(otmp->olarva && otmp->owornmask)
 			held_item_bites(mon, otmp);
+	}
+}
+
+STATIC_OVL void
+emit_healing(mon)
+struct monst *mon;
+{
+	int heal_amnt = (*hpmax(mon) - *hp(mon))/4;
+	int dmg;
+
+	if(!heal_amnt)
+		return;
+
+	if(canseemon(mon))
+		pline("%s bleeds holy starlight!", Monnam(mon));
+
+	if(mon == &youmonst)
+		healup(heal_amnt, 0, FALSE, FALSE);
+	else
+		mon->mhp = min(mon->mhpmax, mon->mhp+heal_amnt);
+
+	heal_amnt /= 8;
+	
+	if(!heal_amnt)
+		return;
+
+	struct monst *mtmp;
+	for(int i = mon->mx-1; i < mon->mx+2; i++){
+		for(int j = mon->my-1; j < mon->my+2; j++){
+			if(isok(i,j)){
+				mtmp = m_u_at(i,j);
+				if(mtmp == mon)
+					continue;
+				if(mtmp == &youmonst){
+					if(hates_holy(youracedata) || hates_silver(youracedata)){
+						You("are seared by the %s!", hates_silver(youracedata) ? "silver starlight" : "holy energy");
+						dmg = 0;
+						if(hates_holy(youracedata))
+							dmg += heal_amnt;
+						if(hates_silver(youracedata))
+							dmg += rnd(20);
+						dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
+						losehp(dmg, "holy healing light", KILLED_BY);
+					}
+					else {
+						healup(heal_amnt, 0, FALSE, FALSE);
+					}
+				}
+				else if(mtmp && !DEADMONSTER(mtmp)){
+					if(hates_holy_mon(mtmp) || hates_silver(mtmp->data)){
+						dmg = 0;
+						if(hates_holy_mon(mtmp))
+							dmg += heal_amnt;
+						if(hates_silver(mtmp->data))
+							dmg += rnd(20);
+						dmg = reduce_dmg(mtmp,dmg,FALSE,TRUE);
+						if(canseemon(mtmp) && dmg)
+							pline("%s is seared by the %s!", Monnam(mtmp), hates_silver(mtmp->data) ? "silver starlight" : "holy energy");
+						mtmp->mhp -= dmg;
+						if(mtmp->mhp < 1){
+							grow_up(mon,mtmp);
+							mondied(mtmp);
+						}
+					}
+					else if(mtmp->mhp < mtmp->mhpmax){
+						if(canspotmon(mtmp))
+							pline("%s looks better!", Monnam(mtmp));
+						mtmp->mhp = min(mtmp->mhpmax, mtmp->mhp+heal_amnt);
+					}
+				}
+			}
+		}
 	}
 }
 
