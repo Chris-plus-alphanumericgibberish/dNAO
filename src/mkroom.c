@@ -6368,7 +6368,12 @@ int sx,sy;
 	}
 	if(mtyp != NON_PM){
 		int equipLevel = ((kingtype == PM_TITAN || kingtype == PM_EMBRACED_DROWESS || kingtype == PM_AVATAR_OF_LOLTH || kingtype == PM_DEEPEST_ONE || kingtype == PM_ORC_OF_THE_AGES_OF_STARS) ? MM_GOODEQUIP : 0);
-		mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+		if(is_mplayer(&mons[mtyp])){
+			mon = mk_mplayer(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+		}
+		else {
+			mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+		}
 		if(mon){
 			if(mon->mtyp == PM_SURYA_DEVA){
 				struct monst *blade;
