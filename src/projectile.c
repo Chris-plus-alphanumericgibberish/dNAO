@@ -331,6 +331,9 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		return MM_MISS;
 	}
 
+	if(!thrownobj->dknown && cansee(initx, inity)){
+		thrownobj->dknown = 1;
+	}
 	/* set projectile glyph to show */
 	tmp_at(DISP_FLASH, obj_to_glyph(thrownobj));
 
@@ -508,6 +511,11 @@ move_projectile:
 			range--;
 			bhitpos.x += dx;
 			bhitpos.y += dy;
+			if(!thrownobj->dknown && cansee(bhitpos.x, bhitpos.y)){
+				thrownobj->dknown = 1;
+				tmp_at(DISP_END, 0);
+				tmp_at(DISP_FLASH, obj_to_glyph(thrownobj));
+			}
 			tmp_at(bhitpos.x, bhitpos.y);
 			if (cansee(bhitpos.x, bhitpos.y))
 				delay_output();
