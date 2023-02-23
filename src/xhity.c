@@ -661,33 +661,9 @@ int tary;
 					otmp = (struct obj *) 0;
 				}
 				else {
-					/* randomly(ish) from inventory */
-					int wcount = 0;	// valid weapons so far
-					// loop through attacker's inv to find next allowable weapon to hit with
-					for (otmp = (youagr ? invent : magr->minvent); otmp; otmp = otmp->nobj){
-						if ((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-							|| (otmp->otyp == CHAIN && pa->mtyp == PM_CATHEZAR)
-							)																	// valid weapon
-							&& !(otmp->oartifact && !always_twoweapable_artifact(otmp))			// ok artifact
-							&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
-							&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
-							&& (!youagr || otmp->owt <= max(10, P_SKILL(P_TWO_WEAPON_COMBAT)*10))// not too heavy
-							&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
-							&& !(is_ammo(otmp) || (is_bad_melee_pole(otmp) && !melee_polearms(pa)) || is_missile(otmp))	// not unsuitable for melee (ammo, polearm, missile)
-							&& !otmp->owornmask)												// not worn
-						{
-							/* we have a potential weapon */
-							if (wcount == marinum) {
-								// found the next weapon, exit loop
-								marinum++;
-								break;
-							}
-							else {
-								// not the next weapon, continue looping
-								wcount++;
-							}
-						}
-					}
+					/* from inventory */
+					otmp = get_mariwep(magr, pa, marinum);
+					marinum++;
 				}
 				if((mariarm&(SUBOUT_MARIARM1|SUBOUT_MARIARM2)) != (subout&(SUBOUT_MARIARM1|SUBOUT_MARIARM2))){
 					struct obj *armor = (youagr ? uarm : which_armor(magr, W_ARM));;

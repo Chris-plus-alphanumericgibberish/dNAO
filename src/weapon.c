@@ -1301,6 +1301,7 @@ int x;
 int spot;
 {
 	struct obj *otmp, *obest = 0;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI); //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 	    if (otmp->otyp == x &&
@@ -1316,7 +1317,8 @@ int spot;
 			(spot!=W_WEP || (!bimanual(otmp, mtmp->data) || ((mtmp->misc_worn_check & W_ARMS) == 0 && !MON_SWEP(mtmp) && strongmonst(mtmp->data)))) &&
 			/* never unsuitable for offhand wielding */
 			(spot!=W_SWAPWEP || (!(otmp->owornmask & (W_WEP)) && (!otmp->cursed || is_weldproof_mon(mtmp)) && !bimanual(otmp, mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0 && 
-				( (otmp->owt <= (30 + (mtmp->m_lev/5)*5)) 
+				( (otmp->owt <= (30 + (mtmp->m_lev/5)*5))
+				|| (marilith && ok_mariwep(otmp, mtmp, mtmp->data, FALSE))
 				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_CATHEZAR) 
 				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_FIERNA)
 				|| (otmp->otyp == HEAVY_IRON_BALL && mtmp->mtyp == PM_WARDEN_ARIANNA)
@@ -4077,6 +4079,73 @@ aeshbon()
 	}
 	return bonus;
 }
+
+boolean
+ok_mariwep(otmp, magr, pa, youagr)
+struct obj *otmp;
+struct monst *magr;
+struct permonst *pa;
+boolean youagr;
+{
+	return ((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
+			|| (otmp->otyp == CHAIN && pa->mtyp == PM_CATHEZAR)
+			)																	// valid weapon
+			&& !(otmp->oartifact && !always_twoweapable_artifact(otmp))			// ok artifact
+			&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
+			&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
+			&& (!youagr || otmp->owt <= max(10, P_SKILL(P_TWO_WEAPON_COMBAT)*10))// not too heavy
+			&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
+			&& !(is_ammo(otmp) || (is_bad_melee_pole(otmp) && !melee_polearms(pa)) || is_missile(otmp))	// not unsuitable for melee (ammo, polearm, missile)
+			&& !otmp->owornmask);												// not worn
+}
+
+struct obj *
+get_mariwep(magr, pa, marinum)
+struct monst *magr;
+struct permonst *pa;
+int marinum;
+{
+	struct obj *otmp;
+	boolean youagr = magr == &youmonst;
+	int wcount = 0;	// valid weapons so far
+	// loop through attacker's inv to find next allowable weapon to hit with
+	for (otmp = (youagr ? invent : magr->minvent); otmp; otmp = otmp->nobj){
+		if (ok_mariwep(otmp, magr, pa, youagr)){
+			/* we have a potential weapon */
+			if (wcount == marinum && youagr) {
+				// found the next weapon, exit loop
+				return otmp;
+			}
+			else {
+				// not the next weapon, continue looping
+				wcount++;
+			}
+		}
+	}
+	wcount -= marinum;
+	//Not enough
+	if(wcount < 1)
+		return (struct obj *)0;
+
+	//Get the nth-from-the-last valid weapon
+	for (otmp = (youagr ? invent : magr->minvent); otmp; otmp = otmp->nobj){
+		if (ok_mariwep(otmp, magr, pa, youagr)){
+			/* we have a potential weapon */
+			if (wcount <= 1) {
+				// found the next weapon, exit loop
+				return otmp;
+			}
+			else {
+				// not the next weapon, continue looping
+				wcount--;
+			}
+		}
+	}
+
+	return otmp;
+
+}
+
 
 #endif /* OVLB */
 

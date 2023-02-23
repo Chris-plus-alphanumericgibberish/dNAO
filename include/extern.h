@@ -3220,6 +3220,8 @@ E void FDECL(skill_add, (const struct def_skill *));
 E void FDECL(skill_up, (const struct def_skill *));
 E const char * FDECL(P_NAME, (int));
 E int NDECL(aeshbon);
+E boolean FDECL(ok_mariwep, (struct obj *, struct monst *, struct permonst *, boolean));
+E struct obj * FDECL(get_mariwep, (struct monst *, struct permonst *, int));
 
 /* ### were.c ### */
 
