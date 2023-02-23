@@ -2141,6 +2141,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			{ AT_CLAW, AD_SQUE, 4, 8, 0, 0, 1 },
 			{ AT_CLAW, AD_SQUE, 4, 8, 0, 1, 0 },
 			{ AT_REND, AD_SHRD, 3, 12 },
+			{ AT_HUGS, AD_PHYS, 3, 4 },
 			{ AT_HITS, AD_TSMI, 0, 0 },
 			{ AT_MAGC, AD_CLRC, 2, 8 },
 			{ AT_NONE, AD_MROT, 0, 0 }
