@@ -94,7 +94,7 @@ unsigned gpflags;
 	}
 	if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[x][y].typ == AIR){
 		if(mtmp){
-			return mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION);
+			return mtmp == &youmonst ? (Flying || Levitation) : (mon_resistance(mtmp,FLYING) || mon_resistance(mtmp,LEVITATION));
 		}
 		else return FALSE;
 	}
