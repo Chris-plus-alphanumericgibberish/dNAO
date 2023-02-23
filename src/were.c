@@ -20,6 +20,9 @@ register struct monst *mon;
 		&& !(mon->mtyp == PM_LURKING_HAND || mon->mtyp == PM_BLASPHEMOUS_HAND)
 	) return;
 
+	if(u.ustuck == mon && u.uswallow)
+		return;
+
 	if(mon->mtyp == PM_NOVIERE_ELADRIN && !is_pool(mon->mx, mon->my, FALSE)) return;
 	
 	if (humanoid_torso(mon->data)) {
