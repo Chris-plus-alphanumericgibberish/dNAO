@@ -1974,6 +1974,20 @@ struct obj *obj;
 		if (!species_resists_acid(mon) || !species_resists_poison(mon))
 			score += 5;
 		break;
+	case MUMMY_WRAPPING:
+	case PRAYER_WARDED_WRAPPING:
+		if (mon->data->mlet == S_MUMMY)
+			score += 30;
+		else if (mon->mtame && mon->minvis && !See_invisible_old)
+			score += 10;
+		else if (mon->minvis)
+			score += -5;
+		break;
+		/* armor */
+	case EILISTRAN_ARMOR:
+		score += 10;
+		break;
+		/* facewear */
 	case LIVING_MASK:
 		score += 3;
 		break;
@@ -1983,15 +1997,6 @@ struct obj *obj;
 	case ANDROID_VISOR:
 		if(is_android(mon)) score += 4;
 		score += 1;
-		break;
-	case MUMMY_WRAPPING:
-	case PRAYER_WARDED_WRAPPING:
-		if (mon->data->mlet == S_MUMMY)
-			score += 30;
-		else if (mon->mtame && mon->minvis && !See_invisible_old)
-			score += 10;
-		else if (mon->minvis)
-			score += -5;
 		break;
 	}
 
