@@ -55,12 +55,12 @@ MONSTER[50%]: 'F', random, random
 MONSTER[50%]: 'F', random, random
 MONSTER[50%]: 'F', random, random
 
-MONSTER[50%]: '#', "houseless drow infectee", random
-MONSTER[50%]: '#', "houseless drow infectee", random
-MONSTER[50%]: '#', "houseless drow infectee", random
-MONSTER[50%]: '#', "houseless drow infectee", random
-MONSTER[50%]: '#', "sprow infectee", random
-MONSTER[50%]: '#', "drider infectee", random
+MONSTER[50%]: '#', "hostile houseless drow infectee", random
+MONSTER[50%]: '#', "hostile houseless drow infectee", random
+MONSTER[50%]: '#', "hostile houseless drow infectee", random
+MONSTER[50%]: '#', "hostile houseless drow infectee", random
+MONSTER[50%]: '#', "hostile sprow infectee", random
+MONSTER[50%]: '#', "hostile drider infectee", random
 
 MONSTER[50%]: 's', random, random
 MONSTER[50%]: 's', random, random
