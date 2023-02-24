@@ -144,7 +144,6 @@ OBJECT:')',"two-handed sword", contained, blessed, +6
 OBJECT:')',"short sword", contained
 OBJECT:'[',"chain mail", contained, blessed, +3
 OBJECT:'[',"high boots", contained
-OBJECT:'%',"food ration", contained
 OBJECT:'(',"torch", contained, blessed, +3
 OBJECT:'$',random, (36,16)
 CONTAINER:'`',"statue", (36,17),"apprentice witch",1
@@ -155,14 +154,6 @@ OBJECT:'[',"plain dress", contained, blessed, +2
 OBJECT:'[',"leather armor", contained, blessed, +2
 OBJECT:'[',"cloak of magic resistance", contained, blessed, +2
 OBJECT:'[',"witch hat", contained, blessed, +2
-OBJECT:'+',"force bolt", contained
-OBJECT:'+',"jumping", contained
-OBJECT:'+',"cure blindness", contained
-OBJECT:'+',"stone to flesh", contained
-OBJECT:'?',random, contained
-OBJECT:'?',random, contained
-OBJECT:'=',random, contained
-OBJECT:'=',random, contained
 OBJECT:'$',random, (37,15)
 OBJECT:'$',random, (37,16)
 OBJECT:'!',random, (37,16)
@@ -176,13 +167,6 @@ CONTAINER:'`',"statue", (38,15),"stjarna-alfr",5
 OBJECT:'#',"+1 blessed mithril elven mace", contained
 OBJECT:'[',"robe", contained
 OBJECT:'[',"buckler", contained
-OBJECT:'+',"protection", contained, blessed, 0
-OBJECT:'+',"detect monsters", contained, blessed, 0
-OBJECT:'+',random, contained, blessed, 0
-OBJECT:'+',random, contained, blessed, 0
-OBJECT:'#',"4 blessed waters", contained
-OBJECT:'%',"clove of garlic", contained
-OBJECT:'%',"sprig of wolfsbane", contained
 OBJECT:'$',random, (38,16)
 CONTAINER:'`',"statue", (38,17),"ninja",5
 OBJECT:')',"broadsword", contained
@@ -191,11 +175,6 @@ OBJECT:'#',"15 poisoned daggers", contained
 OBJECT:'#',"color_black leather gloves", contained
 OBJECT:'#',"color_black studded leather armor", contained
 OBJECT:'#',"color_black elven boots", contained
-OBJECT:'(',"lock pick", contained
-OBJECT:'#',"color_black sack", contained
-OBJECT:'#',"color_black blindfold", contained
-OBJECT:'/',random, contained
-OBJECT:'/',random, contained
 CONTAINER:'`',"statue",(37,16),uncursed,"Poro Aulon",1
 OBJECT:'#',"blessed +1 silver eilistran armor", contained
 OBJECT:'#',"blessed +1 silver faceless helm", contained
