@@ -163,8 +163,8 @@ OBJECT:random,random, (37,16)
 OBJECT:random,random, (37,16)
 OBJECT:random,random, (37,16)
 OBJECT:'$',random, (37,17)
-CONTAINER:'`',"statue", (38,15),"stjarna-alfr",5
-OBJECT:'#',"+1 blessed mithril elven mace", contained
+CONTAINER:'`',"statue", (38,15),"madwoman",5
+OBJECT:'#',"+1 blessed silver morning star", contained
 OBJECT:'[',"robe", contained
 OBJECT:'[',"buckler", contained
 OBJECT:'$',random, (38,16)
