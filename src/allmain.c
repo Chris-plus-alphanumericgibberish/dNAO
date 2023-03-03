@@ -2235,7 +2235,7 @@ karemade:
 							}
 						}
 				}
-				if(roll_madness(MAD_REACHER) && check_insight() && !DimensionalLock){
+				if(flat_mad_turn(MAD_REACHER) && check_insight() && !DimensionalLock){
 					struct monst* mtmp;
 					boolean messaged = FALSE;
 					for(int i = 0; i < 7; i++){
