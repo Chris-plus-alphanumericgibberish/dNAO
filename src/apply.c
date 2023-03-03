@@ -3225,7 +3225,15 @@ coord *cc;
 				otmp->recharged = max(1, otmp->recharged);
 				otmp->spe = 0;
 			}
-			mpickobj(mtmp,otmp);
+			//If the item was not merged, check if anything special should be done with it (like equipping a saddle)
+			if(!mpickobj(mtmp,otmp)){
+				if(otmp->otyp == SADDLE && !(mtmp->misc_worn_check&W_SADDLE) && can_saddle(mtmp)){
+					mtmp->misc_worn_check |= W_SADDLE;
+					otmp->owornmask = W_SADDLE;
+					otmp->leashmon = mtmp->m_id;
+					update_mon_intrinsics(mtmp, otmp, TRUE, FALSE);
+				}
+			}
 		}
 		m_level_up_intrinsic(mtmp);
 		if(master == &youmonst || master->mtame){
