@@ -139,21 +139,7 @@ ENDMAP
 #0         1         2         3         4         5         6         7        
 # Dungeon Description
 
-CONTAINER:'`',"statue", (36,15),"barbarian",1
-OBJECT:')',"two-handed sword", contained, blessed, +6
-OBJECT:')',"short sword", contained
-OBJECT:'[',"chain mail", contained, blessed, +3
-OBJECT:'[',"high boots", contained
-OBJECT:'(',"torch", contained, blessed, +3
 OBJECT:'$',random, (36,16)
-CONTAINER:'`',"statue", (36,17),"apprentice witch",1
-OBJECT:')',"rapier", contained, blessed, +2
-OBJECT:')',"athame", contained, blessed, -1
-OBJECT:'[',"stilettos", contained, blessed, +2
-OBJECT:'[',"plain dress", contained, blessed, +2
-OBJECT:'[',"leather armor", contained, blessed, +2
-OBJECT:'[',"cloak of magic resistance", contained, blessed, +2
-OBJECT:'[',"witch hat", contained, blessed, +2
 OBJECT:'$',random, (37,15)
 OBJECT:'$',random, (37,16)
 OBJECT:'!',random, (37,16)
@@ -163,18 +149,7 @@ OBJECT:random,random, (37,16)
 OBJECT:random,random, (37,16)
 OBJECT:random,random, (37,16)
 OBJECT:'$',random, (37,17)
-CONTAINER:'`',"statue", (38,15),"madwoman",5
-OBJECT:'#',"+1 blessed silver morning star", contained
-OBJECT:'[',"robe", contained
-OBJECT:'[',"buckler", contained
 OBJECT:'$',random, (38,16)
-CONTAINER:'`',"statue", (38,17),"ninja",5
-OBJECT:')',"broadsword", contained
-OBJECT:')',"wakizashi", contained
-OBJECT:'#',"15 poisoned daggers", contained
-OBJECT:'#',"color_black leather gloves", contained
-OBJECT:'#',"color_black studded leather armor", contained
-OBJECT:'#',"color_black elven boots", contained
 CONTAINER:'`',"statue",(37,16),uncursed,"Poro Aulon",1
 OBJECT:'#',"blessed +1 silver eilistran armor", contained
 OBJECT:'#',"blessed +1 silver faceless helm", contained
@@ -182,6 +157,10 @@ OBJECT:'#',"blessed +1 silver saber", contained
 OBJECT:'#',"blessed +1 silver saber", contained
 OBJECT:'#',"blessed +1 silver saber", contained
 OBJECT:'#',"blessed +1 silver saber", contained
+
+MONSTER: 'i', "manes", (37,17)
+MONSTER: 'i', "manes", (37,16)
+MONSTER: 'i', "manes", (36,15)
 
 # Stairs
 STAIR:(37,9),down
