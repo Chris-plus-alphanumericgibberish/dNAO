@@ -2903,6 +2903,7 @@ E void FDECL(begin_burn, (struct obj *));
 E void FDECL(end_burn, (struct obj *, BOOLEAN_P));
 E void FDECL(lightsaber_deactivate, (struct obj *, BOOLEAN_P));
 E void NDECL(do_storms);
+E struct obj * FDECL(update_skull_mon, (struct monst *, struct obj *));
 E void FDECL(desummon_mon, (genericptr_t, long));
 E void FDECL(cleanup_msummon, (genericptr_t, long));
 E void FDECL(desummon_obj, (genericptr_t, long));

@@ -2536,6 +2536,82 @@ do_storms()
 }
 #endif /* OVL1 */
 
+struct obj *
+update_skull_mon(mon, obj)
+struct monst *mon;
+struct obj *obj;
+{
+	if(!get_mx(mon, MX_ESUM) || !mon->mextra_p->esum_p->sm_o_id){
+		impossible("Monster %s to update skull stats, but doesn't have an item id set!", noit_mon_nam(mon));
+		return obj;
+	}
+	
+	if(!obj){
+		obj = find_oid(mon->mextra_p->esum_p->sm_o_id);
+	}
+
+	//Not an error, the skull may have been destroyed or left on another level or be otherwise unfindable.
+	if(!obj){
+		return obj;
+	}
+
+	if(mon->mextra_p->esum_p->sm_o_id != obj->o_id){
+		impossible("Monster %s to update skull stats, but given wrong item %s!", noit_mon_nam(mon), xname(obj));
+		return obj;
+	}
+
+	if(!get_ox(obj, OX_EMON)){
+		impossible("Monster %s to update skull stats, but item %s has no attached monster!", noit_mon_nam(mon), xname(obj));
+		return obj;
+	}
+
+	if(big_to_little(mon->mtyp) == big_to_little(EMON(obj)->mtyp)){
+		EMON(obj)->data = mon->data;
+		EMON(obj)->mhpmax = mon->mhpmax;
+		EMON(obj)->mhp = mon->mhpmax;
+		EMON(obj)->m_lev = mon->m_lev;
+		for(int i = 0; i < MPROP_SIZE; i++){
+			EMON(obj)->mintrinsics[i] = mon->mintrinsics[i];
+		}
+		EMON(obj)->acurr = mon->acurr;
+		EMON(obj)->aexe = mon->aexe;
+		EMON(obj)->abon = mon->abon;
+		EMON(obj)->amax = mon->amax;
+		EMON(obj)->atemp = mon->atemp;
+		EMON(obj)->atime = mon->atime;
+		EMON(obj)->female = mon->female;
+	}
+	EMON(obj)->mcrazed = mon->mcrazed;
+	EMON(obj)->mnotlaugh = mon->mnotlaugh;
+	EMON(obj)->mlaughing = mon->mlaughing;
+	EMON(obj)->mdoubt = mon->mdoubt;
+	
+	EMON(obj)->menvy = mon->menvy;
+	EMON(obj)->msanctity = mon->msanctity;
+	EMON(obj)->mgluttony = mon->mgluttony;
+	EMON(obj)->mfrigophobia = mon->mfrigophobia;
+	EMON(obj)->mrage = mon->mrage;
+	EMON(obj)->margent = mon->margent;
+	EMON(obj)->msuicide = mon->msuicide;
+	EMON(obj)->mophidio = mon->mophidio;
+	EMON(obj)->marachno = mon->marachno;
+	EMON(obj)->mentomo = mon->mentomo;
+	EMON(obj)->mthalasso = mon->mthalasso;
+	EMON(obj)->mhelmintho = mon->mhelmintho;
+	EMON(obj)->mparanoid = mon->mparanoid;
+	EMON(obj)->mtalons = mon->mtalons;
+	EMON(obj)->mdreams = mon->mdreams;
+	EMON(obj)->msciaphilia = mon->msciaphilia;
+	EMON(obj)->mapostasy = mon->mapostasy;
+	EMON(obj)->mtoobig = mon->mtoobig;
+	EMON(obj)->mrotting = mon->mrotting;
+	EMON(obj)->mspores = mon->mspores;
+	
+	
+	EMON(obj)->encouraged = mon->encouraged;
+	EMON(obj)->mtrapseen = mon->mtrapseen;
+	EMON(obj)->mfaction = mon->mfaction;
+}
 
 /* callback procs to desummon monsters/objects */
 void
@@ -2559,6 +2635,11 @@ long timeout;
 		mon->mextra_p->esum_p->sm_o_id = 0;
 	}
 
+	/* Update crystal skull if it has one. Find the skull in the update function. */
+	if(get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->sm_o_id){
+		update_skull_mon(mon, (struct obj *) 0);
+	}
+
 	/* special case for vexing orbs -- awful */
 	if (mon->mtyp == PM_VEXING_ORB) {
 		boolean monmoving = flags.mon_moving;
@@ -2574,6 +2655,7 @@ long timeout;
 		monvanished(mon);
 	}
 }
+
 void
 cleanup_msummon(arg, timeout)
 genericptr_t arg;
@@ -2583,41 +2665,13 @@ long timeout;
 	/* if we are stopping the timer because mon died or vanished, reduce tax on summoner */
 	if (get_mx(mon, MX_ESUM) && DEADMONSTER(mon) && mon->mextra_p->esum_p->summoner) {
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
-		if(mon->mextra_p->esum_p->sm_o_id){
-			struct obj *obj = find_oid(mon->mextra_p->esum_p->sm_o_id);
-			if(obj){
-				if(get_ox(obj, OX_EMON)){
-					if(big_to_little(mon->mtyp) == big_to_little(EMON(obj)->mtyp)){
-						EMON(obj)->data = mon->data;
-						EMON(obj)->mhpmax = mon->mhpmax;
-						EMON(obj)->mhp = mon->mhpmax;
-						EMON(obj)->m_lev = mon->m_lev;
-						for(int i = 0; i < MPROP_SIZE; i++){
-							EMON(obj)->mintrinsics[i] = mon->mintrinsics[i];
-						}
-						EMON(obj)->acurr = mon->acurr;
-						EMON(obj)->aexe = mon->aexe;
-						EMON(obj)->abon = mon->abon;
-						EMON(obj)->amax = mon->amax;
-						EMON(obj)->atemp = mon->atemp;
-						EMON(obj)->atime = mon->atime;
-						EMON(obj)->female = mon->female;
-					}
-					EMON(obj)->mcrazed = mon->mcrazed;
-					EMON(obj)->mnotlaugh = mon->mnotlaugh;
-					EMON(obj)->mlaughing = mon->mlaughing;
-					EMON(obj)->mdoubt = mon->mdoubt;
-					
-					EMON(obj)->menvy = mon->menvy;
-					EMON(obj)->msanctity = mon->msanctity;
-					
-					EMON(obj)->encouraged = mon->encouraged;
-					EMON(obj)->mtrapseen = mon->mtrapseen;
-				}
-			}
-		}
+	}
+	/* Update crystal skull if it has one. Find the skull in the update function. */
+	if(get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->sm_o_id){
+		update_skull_mon(mon, (struct obj *) 0);
 	}
 }
+
 void
 desummon_obj(arg, timeout)
 genericptr_t arg;

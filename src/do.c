@@ -745,6 +745,7 @@ struct obj *obj;
 			nmon = mtmp->nmon;
 			if(!DEADMONSTER(mtmp) && get_mx(mtmp, MX_ESUM)){
 				if(mtmp->mextra_p->esum_p->sm_o_id == obj->o_id){
+					update_skull_mon(mtmp, obj);
 					monvanished(mtmp);
 				}
 			}
