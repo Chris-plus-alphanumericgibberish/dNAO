@@ -3416,6 +3416,7 @@ E boolean FDECL(wearing_dragon_armor, (struct monst *, int));
 E int FDECL(hit_with_cclaw, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_iwarp, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_rblood, (struct monst *,struct obj *, int, int, int, struct attack *));
+E int FDECL(hit_with_dance, (struct monst *,struct obj *, int, int, int, struct attack *));
 
 /* ### zap.c ### */
 

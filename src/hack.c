@@ -1300,6 +1300,10 @@ domove()
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 					result |= hit_with_rblood(&youmonst, otmp, x, y, 0, attk);
 				}
+				/* Dancers hit additional targets */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(&youmonst)){
+					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);
+				}
 				
 				attk = mon_get_attacktype(&youmonst, AT_XWEP, &attkbuff);
 				otmp = uswapwep;

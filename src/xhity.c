@@ -780,6 +780,10 @@ int tary;
 					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 						result |= hit_with_rblood(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 					}
+					/* Dancers hit additional targets */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(magr->data)){
+						result |= hit_with_dance(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
+					}
 					/* AT_DEVA considerations -- either stop looping or decrease to-hit */
 					if (devaloop) {
 						if (result == MM_MISS || result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))

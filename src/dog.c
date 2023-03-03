@@ -683,8 +683,7 @@ long nmv;		/* number of moves */
 	/* check to see if it would have died as a pet; if so, go wild instead
 	 * of dying the next time we call dog_move()
 	 */
-	if (get_mx(mtmp, MX_EDOG) && (carnivorous(mtmp->data) || herbivorous(mtmp->data))
-	){
+	if (get_mx(mtmp, MX_EDOG) && (carnivorous(mtmp->data) || herbivorous(mtmp->data))){
 	    struct edog *edog = EDOG(mtmp);
 		if(!(In_quest(&u.uz) && 
 			 ((Is_qtown(&u.uz) && !flags.stag) || 
