@@ -55,9 +55,10 @@ void NDECL(monst_init);
 #define ATTK(at,ad,n,d) {at,ad,n,d,0,0,0,0}
 #define ATTK_LEV(at,ad,n,d, lev) {at,ad,n,d,lev,0,0,0}
 #define ATTK_INS(at,ad,n,d, ins) {at,ad,n,d,0,0,0,ins}
+#define ATTK_INS_LEV(at,ad,n,d, ins, lev) {at,ad,n,d,lev,0,0,ins}
 #define OFFHND_ATTK(at,ad,n,d) {at,ad,n,d,0,1,0,0}
 #define OFFHND_ATTK_LEV(at,ad,n,d, lev) {at,ad,n,d,lev,1,0,0}
-#define OFFHND_ATTK_INS(at,ad,n,d, lev) {at,ad,n,d,0,1,0,ins}
+#define OFFHND_ATTK_INS(at,ad,n,d, ins) {at,ad,n,d,0,1,0,ins}
 #define POLYWEP_ATTK(at,ad,n,d) {at,ad,n,d,0,0,1,0}
 #define NO_ATTK {0,0,0,0,0,0,0,0}
 #define A(...) {FIRST_TEN(dummy, ##__VA_ARGS__, NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK,NO_ATTK)}
@@ -2523,12 +2524,12 @@ then fill new spaces with our spawn!
 	DEF(DEX_AC(4), SPE_DR(2)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 8), ATTK_LEV(AT_XSPR, AD_STAR, 4, 8, 18),
 	  ATTK_INS(AT_MAGC, AD_CLRC, 0, 0, 11),
-	  ATTK_INS(AT_GAZE, AD_RGAZ, 4, 6, 77), ATTK_INS(AT_GAZE, AD_RGAZ, 4, 6, 88),
-	  ATTK_INS(AT_NONE, AD_PLYS, 3, 5, 66)
+	  ATTK_INS(AT_GAZE, AD_RGAZ, 4, 6, 55), ATTK_INS_LEV(AT_GAZE, AD_RGAZ, 4, 6, 55, 30),
+	  ATTK_INS(AT_NONE, AD_PLYS, 3, 5, 33)
 	),
 	SIZ(WT_GIGANTIC, 400, MS_CUSS, MZ_HUMAN),
 	MR_MAGIC|MR_COLD|MR_FIRE|MR_ELEC|MR_SLEEP, MR_SLEEP,
-	MM_FLY|MM_FLOAT /*MM*/, MT_STALK|MT_COLLECT /*MT*/, MF_MARTIAL_S|MF_BAB_HALF|MF_LEVEL_30 /*MF*/,
+	MM_FLY|MM_FLOAT /*MM*/, MT_STALK|MT_COLLECT /*MT*/, MF_MARTIAL_S|MF_BAB_HALF|MF_LEVEL_45 /*MF*/,
 	MB_STRONG|MB_HUMANOID /*MB*/, MG_INSIGHT|MG_NOPOLY|MG_INFRAVISIBLE|MG_NASTY|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
 	MA_MINION|MA_DROW /*MA*/,  MV_SEE_INVIS|MV_DARKSIGHT /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, CLR_BRIGHT_BLUE),
 	

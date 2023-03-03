@@ -1728,7 +1728,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->damd += 10;
 	}
 	/* Iksh'na devas upgrade their weapon attack at max level. This may be switched back later if they're cancelled. */
-	if(pa->mtyp == PM_IKSH_NA_DEVA && mlev(magr) >= 30 && attk->aatyp == AT_WEAP && *indexnum == 0){
+	if(pa->mtyp == PM_IKSH_NA_DEVA && mlev(magr) >= 45 && attk->aatyp == AT_WEAP && *indexnum == 0){
 		attk->aatyp = AT_DEVA;
 	}
 	/* Grue does not make its later attacks if its square is lit */
@@ -16848,7 +16848,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					}
 					break;
 				case AD_PLYS:
-					if (pd->mlet == S_EYE) {	/* assumed to be gaze */
+					if (pd->mlet == S_EYE || pd->mtyp == PM_IKSH_NA_DEVA) {	/* assumed to be gaze */
 						/* the eye can't be blinded */
 						if (youdef ? Blind : is_blind(mdef)) {
 							if (youagr && pd->mtyp == PM_FLOATING_EYE) {
