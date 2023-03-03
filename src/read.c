@@ -910,8 +910,11 @@ struct obj *scroll;
 				pline("Suddenly, the glyphs glow in rainbow hues and escape from the fracturing disk!");
 				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
 				know_random_obj(objcount);
-				change_uinsight(1);
-				more_experienced(d(objcount+1, 100), 0);
+				if(!u.uinsight || !rn2(u.uinsight)){
+					change_uinsight(1);
+					objcount++;
+				}
+				more_experienced(d(objcount, 100), 0);
 				newexplevel();
 			}
 		}
@@ -941,11 +944,14 @@ struct obj *scroll;
 				know_random_obj(effectcount);
 
 				//Insight
-				effectcount = rnd(8);
+				effectcount = 1;
+				for(rolls = rnd(8); rolls > 0; rolls--){
+					if(!u.uinsight || !rn2(u.uinsight))
+						effectcount++;
+				}
 				xp += d(effectcount,100);
 				change_uinsight(effectcount);
-				change_usanity(-1*d(8,8),TRUE);
-				
+
 				for(rolls = d(1,4); rolls > 0; rolls--){
 					switch(rnd(4)){
 						case 1:
@@ -990,6 +996,9 @@ struct obj *scroll;
 				}
 				more_experienced(xp, 0);
 				newexplevel();
+
+				//Sanity
+				change_usanity(-1*d(8,8),TRUE);
 			}
 		}
 	} else if(scroll->otyp >= ANTI_CLOCKWISE_METAMORPHOSIS_G && scroll->otyp <= ORRERY_GLYPH) {
