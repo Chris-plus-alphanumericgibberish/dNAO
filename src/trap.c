@@ -3878,7 +3878,7 @@ register int n;
 			killer = antimagic_killer;
 			done(DIED);
 		}
-		u.uenbonus += u.uen;
+		u.uenbonus += u.uen/3;
 		calc_total_maxen();
 		u.uen = 0;
 	}
