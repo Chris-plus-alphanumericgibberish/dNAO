@@ -14985,6 +14985,14 @@ struct monst *mtmp, *victim;
 				}
 			}
 		}
+		// Also get insight from pets killing insight mons.
+		if(!u.veil && mtmp->mtame && canspotmon(victim) && !mvitals[monsndx(victim->data)].insightkill && yields_insight(victim->data)){
+			mvitals[monsndx(victim->data)].insightkill = TRUE;
+			uchar insight = u_insight_gain(victim);
+			mvitals[monsndx(victim->data)].insight_gained += insight;
+			change_uinsight(insight);
+			// change_usanity(u_sanity_gain(victim), FALSE); //Isn't as reasuring as doing it yourself
+		}
 		// mtmp killed a mummy and suffers from its curse.
 		if(attacktype_fordmg(victim->data, AT_NONE, AD_MROT)){
 			mummy_curses_x(victim, mtmp);
