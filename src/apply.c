@@ -3202,7 +3202,7 @@ coord *cc;
 			mtmp = christen_monst(mtmp, ONAME(obj));
 		mtmp->movement = NORMAL_SPEED;
 		add_mx(mtmp, MX_ESUM);
-		// start_timer(master == &youmonst ? min(u.uinsight, 100) : 100, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mtmp);
+		start_timer(ESUMMON_PERMANENT, TIMER_MONSTER, DESUMMON_MON, (genericptr_t)mtmp);
 		for(oinv = obj->cobj; oinv; oinv = oinv->nobj){
 			//Invalid items that are in the skull (possibly as a result of special cases) are skipped and handled later.
 			if(oinv->otyp == TREPHINATION_KIT || ensouled_item(oinv))
