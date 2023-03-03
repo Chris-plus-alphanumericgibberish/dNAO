@@ -2631,6 +2631,7 @@ int hv_id;
 		case VN_APOCALYPSE:
 		case VN_HARROWER:
 		case VN_MAD_ANGEL:
+		case VN_JRT:
 			give_angel_vault_trophy();
 		case VN_N_PIT_FIEND:
 			give_devil_vault_trophy();

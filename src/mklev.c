@@ -2102,6 +2102,7 @@ int x, y, hv_id;
 		case VN_APOCALYPSE:
 		case VN_HARROWER:
 		case VN_MAD_ANGEL:
+		case VN_JRT:
 			mid = PM_ANGEL;
 		break;
 		case VN_N_PIT_FIEND:
