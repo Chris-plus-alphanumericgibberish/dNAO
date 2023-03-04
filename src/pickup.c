@@ -2130,12 +2130,13 @@ struct obj *cont;
 struct obj *newobj;
 {
 	long weight = newobj->owt;
+	long weight_lim = 1000;
 	if(Is_container(newobj))
 		return TRUE;
 	for(struct obj *otmp = cont->cobj; otmp; otmp = otmp->nobj){
-		weight += otmp->owt;
+		weight += objects[otmp->otyp].oc_weight;
 	}
-	return weight > 1000;
+	return weight > weight_lim;
 }
 
 STATIC_OVL boolean
