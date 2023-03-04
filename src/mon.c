@@ -1685,7 +1685,7 @@ struct monst *mtmp;
 	    (void) newcham(mtmp, NON_PM, FALSE, FALSE);
 	were_change(mtmp);
 
-	if(mtmp->mtyp == PM_IKSH_NA_DEVA && mtmp->mhp*2 < mtmp->mhpmax && !rn2(4) && !hates_holy_mon(mtmp))
+	if(mtmp->mtyp == PM_IKSH_NA_DEVA && !mtmp->mcan && mtmp->mhp*2 < mtmp->mhpmax && !rn2(4) && !hates_holy_mon(mtmp))
 		emit_healing(mtmp);
 		
 
