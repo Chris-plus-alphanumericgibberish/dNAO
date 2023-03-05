@@ -6653,8 +6653,8 @@ arti_invoke(obj)
 	int summons[10] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_STALKER, 
 					  PM_ICE_VORTEX, PM_ENERGY_VORTEX, PM_STEAM_VORTEX, 
 					  PM_FIRE_VORTEX, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL};
-	int windpets[8] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_ICE_PARAELEMENTAL, PM_ICE_VORTEX,
-					   PM_ENERGY_VORTEX, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL};
+	int windpets[9] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_ICE_PARAELEMENTAL, PM_ICE_VORTEX,
+					   PM_ENERGY_VORTEX, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL, PM_COUATL};
 	coord cc;
 	int n, damage, time = MOVE_STANDARD;
 	struct permonst *pm;
@@ -8063,9 +8063,10 @@ arti_invoke(obj)
 					cast_protection();
 					if(!DimensionalLock) while(n--) {
 						pm = &mons[summons[d(1,7)]];
-						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+						mtmp = makemon(pm, u.ux, u.uy, MM_ESUM|MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
 						if(mtmp){
 							initedog(mtmp);
+							mark_mon_as_summoned(mtmp, &youmonst, ESUMMON_PERMANENT, 0);
 							if(u.ulevel > 12) mtmp->m_lev += u.ulevel / 3;
 							mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
 							mtmp->mhp =  mtmp->mhpmax;
@@ -8092,9 +8093,10 @@ arti_invoke(obj)
 					healup(maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp), 0, TRUE, TRUE); //heal spell
 					if(!DimensionalLock) while(n--) {
 						pm = &mons[summons[d(1,6)+3]];
-						mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+						mtmp = makemon(pm, u.ux, u.uy, MM_ESUM|MM_EDOG|MM_ADJACENTOK);
 						if(mtmp){
 							initedog(mtmp);
+							mark_mon_as_summoned(mtmp, &youmonst, ESUMMON_PERMANENT, 0);
 							mtmp->m_lev += 7;
 							if(u.ulevel > 12) mtmp->m_lev += u.ulevel / 3;
 							mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
@@ -8129,17 +8131,36 @@ arti_invoke(obj)
 			pline("You call upon the minions of Quetzalcoatl!");
 			int n = u.ulevel/5 + 1;
 			if(dog_limit() < n) n = dog_limit();
-			if(DimensionalLock)
+
+			if(DimensionalLock){
 				pline("%s", nothing_happens);
+				obj->age = 0;
+				return MOVE_CANCELLED;
+			}
+
+			pline("Where do you want to summon minions?");
+			cc.x = u.ux;
+			cc.y = u.uy;
+			if (getpos(&cc, TRUE, "the desired position") < 0) {
+				pline1(Never_mind);
+				obj->age = 0;
+				return MOVE_CANCELLED;
+			}
+			if (!cansee(cc.x, cc.y) || distu(cc.x, cc.y) >= 32) {
+				You("feel a light breeze.");
+				obj->age = 0;
+				return MOVE_INSTANT;
+			}
 			else while(n--) {
 				pm = &mons[windpets[d(1,8)]];
-				mtmp = makemon(pm, u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
+				mtmp = makemon(pm, cc.x, cc.y, MM_EDOG|MM_ESUM|MM_ADJACENTOK);
 				if(mtmp){
 					initedog(mtmp);
+					mark_mon_as_summoned(mtmp, &youmonst, ESUMMON_PERMANENT, 0);
 					mtmp->m_lev += 7;
 					if(u.ulevel > 12) mtmp->m_lev += u.ulevel / 3;
 					mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
-					mtmp->mhp =  mtmp->mhpmax;
+					mtmp->mhp = mtmp->mhpmax;
 				}
 			}
 		break;
