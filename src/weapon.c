@@ -3434,8 +3434,14 @@ int wep_type;
 			case P_MASTER:			maxweight = 50; break;
 			case P_GRAND_MASTER:	maxweight = 60; break;
 		}
-		if (youracedata->msize > MZ_MEDIUM)
-			maxweight *= 1+(youracedata->msize - MZ_MEDIUM);
+		int wielder_size = (youracedata->msize - MZ_MEDIUM);
+
+		if (Role_if(PM_CAVEMAN))
+			wielder_size += 1;
+		if (u.sealsActive&SEAL_YMIR)
+			wielder_size += 1;
+		if (wielder_size > 0)
+			maxweight *= 1+wielder_size;
 
 		if (wep_type == P_BARE_HANDED_COMBAT) {
 			bonus -= abs(bonus * 2 / 3);
