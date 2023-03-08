@@ -569,8 +569,12 @@ mhurtle(mon, dx, dy, range, huge)
 	/* Is the monster stuck or too heavy to push?
 	 * (very large monsters have too much inertia, even floaters and flyers)
 	 * (certain effects are able to move very large monsters)
+	 * (but not long worms, hurtling them causes wormholes :D)
 	 */
-	if ((!huge && mon->data->msize >= MZ_HUGE) || mon == u.ustuck || mon->mtrapped)
+	if ((!huge && mon->data->msize >= MZ_HUGE)
+		|| mon == u.ustuck || mon->mtrapped
+		|| is_longworm(mon->data)
+	)
 	    return;
 
     /* Make sure dx and dy are [-1,0,1] */
