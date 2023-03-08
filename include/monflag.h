@@ -447,11 +447,13 @@
 //95
 #define BABBLE_BOLT            BARF_BOLT+1
 #define MON_SPE_BEARTRAP       BABBLE_BOLT+1
-
 #define PYRO_STORM             MON_SPE_BEARTRAP+1
 #define GOD_RAY                PYRO_STORM+1
+#define MON_RED_WORD           GOD_RAY+1
+//100
+#define HYPNOTIC_COLORS        MON_RED_WORD+1
 
-#define MON_LASTSPELL          GOD_RAY
+#define MON_LASTSPELL          HYPNOTIC_COLORS
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

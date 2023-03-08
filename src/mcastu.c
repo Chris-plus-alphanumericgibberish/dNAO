@@ -544,6 +544,12 @@ unsigned int type;
 				return SUMMON_DEVIL;
 				break;
 			}
+		break;
+		case PM_PRIESTESS:
+			if(has_template(mtmp, MISTWEAVER)){
+				return !rn2(7) ? HYPNOTIC_COLORS : MON_RED_WORD;
+			}
+		break;
        }
     }//50% favored spells
 	
@@ -559,7 +565,7 @@ unsigned int type;
 			return FIRE_PILLAR;
 			break;
 			default://5, 6
-			return PSI_BOLT;
+			return BARF_BOLT;
 			break;
 			case 4:
 			return OPEN_WOUNDS;
@@ -580,7 +586,7 @@ unsigned int type;
 	case PM_ALIGNED_PRIEST:
 	case PM_HIGH_PRIEST:
 	case PM_ARCH_PRIEST:
-		quake = TRUE; //Casts earthquake instead of tremor
+		quake = !mtmp->mtame; //Casts earthquake instead of tremor
 	break;
 	case PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH:
 		switch(rn2(6)){
@@ -1448,7 +1454,7 @@ unsigned int type;
 	   break;
        case PM_GOOD_NEIGHBOR:
 			switch(rnd(12)){
-				case 1: return PSI_BOLT;
+				case 1: return DOUBT_BOLT;
 				case 2: return EVIL_EYE;
 				case 3: return CURSE_ITEMS;
 				case 4: return ACID_RAIN;
@@ -1527,15 +1533,17 @@ unsigned int type;
 			}
 	   break;
     case PM_BLESSED:
-		switch(rnd(8)){
+		switch(rnd(10)){
 			case 1: return OPEN_WOUNDS;
-			case 2: return PSI_BOLT;
+			case 2: return SAN_BOLT;
 			case 3: return ICE_STORM;
 			case 4: return ACID_RAIN;
 			case 5: return GEYSER;
 			case 6: return SUMMON_YOUNG;
 			case 7: return MASS_CURE_CLOSE;
 			case 8: return LIGHTNING;
+			case 9: return rn2(10) ? GOD_RAY : DISINTEGRATION;
+			case 10: return MON_RED_WORD;
 		}
 	break;
 	case PM_SHOGGOTH:
@@ -1955,6 +1963,9 @@ const char * spellname[] =
 	"MON_SPE_BEARTRAP",
 	"PYRO_STORM",
 	"GOD_RAY",
+	"MON_RED_WORD",
+	//100
+	"HYPNOTIC_COLORS",
 };
 
 
@@ -2153,7 +2164,12 @@ int tary;
 
 	/* print spell-cast message */
 	if (spellnum) {
-		if ((youagr || (youdef && !is_undirected_spell(spellnum) && cansee(tarx, tary)) || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
+		if ((youagr || (youdef && !is_undirected_spell(spellnum) && cansee(tarx, tary)) || canspotmon(magr))
+			&& magr->mtyp != PM_HOUND_OF_TINDALOS
+			&& spellnum != MOTHER_S_GAZE
+			&& spellnum != MON_RED_WORD
+			&& spellnum != HYPNOTIC_COLORS
+		) {
 			if (is_undirected_spell(spellnum) || notarget || (!foundem && distmin(x(mdef), y(mdef), tarx, tary) > 2))
 				buf[0] = '\0';
 			else
@@ -2278,7 +2294,9 @@ int tary;
 
 		/* if there's no target where we're casting, fail */
 		if (!foundem) {
-			if ((youagr || youdef || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
+			if ((youagr || youdef || canspotmon(magr)) 
+				&& magr->mtyp != PM_HOUND_OF_TINDALOS
+			)	{
 				pline("%s cast%s a spell at %s!",
 					youagr ? "You" : canseemon(magr) ? Monnam(magr) : "Something",
 					youagr ? "" : "s",
@@ -3062,7 +3080,7 @@ int tary;
 			if(youdef || cansee(mdef->mx, mdef->my))
 				pline("A disintegration beam shines down on %s from above!",
 					youdef ? "you" : mon_nam(mdef));
-			struct attack disintegrate = {AT_BEAM, AD_DISN, magr->mtyp == PM_PARASITIZED_EMBRACED_ALIDER ? 4 : 3, 1};
+			struct attack disintegrate = {AT_BEAM, AD_DISN, magr->mtyp == PM_BLESSED ? 7 : magr->mtyp == PM_PARASITIZED_EMBRACED_ALIDER ? 4 : 3, 1};
 			//xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
 			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj **)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
 		}
@@ -4354,6 +4372,37 @@ int tary;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
+	case MON_RED_WORD:
+		if(youdef){
+			// if(!deaf){
+			// }
+			// else 
+			if(u.ufirst_know){
+				pline("%s whispers the red truth to you. You already know!", Monnam(magr));
+				return MM_MISS;
+			}
+			else {
+				pline("%s whispers a dreadful secret to you! Your mind blanks in self-defense!", Monnam(magr));
+			}
+			int discomfort = u_clothing_discomfort();
+			if(discomfort > 0){
+				pline("Your clothing fills you with horror!");
+				change_usanity(-discomfort, TRUE);
+				HPanicking += discomfort;
+			}
+		}
+		else if(canseemon(magr)){
+			pline("%s whispers %s to %s.", Monnam(magr), u.ufirst_know ? "the red truth" : "some secret", mon_nam(mdef));
+
+			if(is_deaf(mdef) || resist(mdef, '\0', 0, 0))
+				return MM_MISS;
+			mdef->mcrazed = TRUE;
+			mdef->mflee = TRUE;
+			mdef->mdisrobe = TRUE;
+			mon_throw_armor(mdef);
+		}
+		return MM_HIT;
+
 //////////////////////////////////////////////////////////////////////////////////////
 // AOE OFFENSE
 //////////////////////////////////////////////////////////////////////////////////////
@@ -4470,6 +4519,41 @@ int tary;
 			}
 		}
 		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0) | ((magr && DEADMONSTER(magr)) ? MM_AGR_DIED : 0);
+
+	case HYPNOTIC_COLORS:{
+		struct attack gaze = {AT_WDGZ, AD_PLYS, 2, 6};
+		int subresult = 0;
+		int result = 0;
+		struct monst *nmon;
+		int dx;
+		int dy;
+		if(canseemon(magr))
+			pline("%s eye-studded tentacles flash with hypnotic colors!", s_suffix(Monnam(magr))); //Assumes mistweaver
+		for(mdef = fmon; mdef; mdef = nmon){
+			nmon = mdef->nmon;
+			if(!mm_aggression(magr, mdef) || !mon_can_see_mon(mdef, magr))
+				continue;
+			subresult = xgazey(magr, mdef, &gaze, 0);
+			if(subresult & MM_HIT){
+				dx = x(magr) - x(mdef);
+				dy = y(magr) - y(mdef);
+				if(canseemon(mdef))
+					pline("%s stumbles towards %s, mesmerized.", Monnam(mdef), mon_nam(magr));
+				mhurtle(mdef, sgn(dx), sgn(dy), 1, TRUE);
+			}
+		}
+		if(!magr->mpeaceful && canseemon(magr)){
+			subresult = xgazey(magr, &youmonst, &gaze, 0);
+			if(subresult & MM_HIT){
+				dx = x(magr) - u.ux;
+				dy = y(magr) - u.uy;
+				pline("Mesmerized, you stumble towards %s!", mhim(magr));
+				hurtle(sgn(dx), sgn(dy), 1, FALSE, FALSE);
+			}
+		}
+			
+		return subresult;
+	}
 
 //////////////////////////////////////////////////////////////////////////////////////
 // CLOUDS
@@ -6113,6 +6197,7 @@ int spellnum;
 	case MON_THUNDAGA:
 	case MON_FLARE:
 	case PRISMATIC_SPRAY:
+	case HYPNOTIC_COLORS:
 	case MON_POISON_GAS:
 	case SOLID_FOG:
 	case EARTHQUAKE:
@@ -6214,6 +6299,7 @@ int spellnum;
 	case DARKNESS:
 	case MAKE_WEB:
 	case MON_CANCEL:
+	case MON_RED_WORD:
 		return TRUE;
 	default:
 		break;
@@ -6327,8 +6413,8 @@ int tary;
 		&& !clearline)
 		return TRUE;
 
-	/* don't cast drain life, death touch if not in melee range */
-	if ((spellnum == DRAIN_LIFE || spellnum == DEATH_TOUCH)
+	/* don't cast drain life, death touch, whisper word if not in melee range */
+	if ((spellnum == DRAIN_LIFE || spellnum == DEATH_TOUCH || spellnum == MON_RED_WORD)
 		&& !(dist2(x(magr), y(magr), tarx, tary) <= 2))
 		return TRUE;
 
@@ -6345,6 +6431,15 @@ int tary;
 	/* don't cast invisibility when already invisible */
 	if (spellnum == DISAPPEAR
 		&& (youagr ? (HInvis&(INTRINSIC)) : (magr->minvis || magr->invis_blkd)))
+		return TRUE;
+
+	/* don't cast red word if target is already disrobed/disrobing */
+	if (spellnum == MON_RED_WORD
+		&& (youdef ? 
+			(u.ufirst_know || !(uarmh || uarmc || uarm || uarmu || uarmg || uarmf || uamul || ublindf || uleft || uright))
+			: (!(mdef->misc_worn_check&(W_ARMOR|W_AMUL|W_TOOL)) || mdef->mdisrobe)
+			)
+	)
 		return TRUE;
 	/* peaceful monsters won't cast invisibility if you can't see invisible,
 	 * same as when monsters drink potions of invisibility.  This doesn't
