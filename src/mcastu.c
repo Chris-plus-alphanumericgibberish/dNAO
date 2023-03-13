@@ -4736,7 +4736,6 @@ int tary;
 			if (!magr->perminvis) magr->minvis = 0;
 			if (magr->permspeed == MSLOW) magr->permspeed = 0;
 			set_mcan(magr, FALSE);
-			magr->mcrazed = 0;
 			magr->mberserk = 0;
 			magr->mdisrobe = 0;
 			magr->mcansee = 1;
