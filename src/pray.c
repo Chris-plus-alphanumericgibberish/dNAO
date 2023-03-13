@@ -3236,17 +3236,20 @@ int eatflag;
 }
 
 STATIC_OVL int
-fire_rider(otmp)
+fire_rider(otmp, offering)
 struct obj *otmp;
+boolean offering;
 {
 	int cn = otmp->corpsenm;
 	struct monst *revived = 0;
 	if(is_rider(&mons[otmp->corpsenm])){
 		pline("A pulse of darkness radiates from %s!", the(xname(otmp)));
 		revived = revive(otmp, FALSE);
-		//Grows angry at you, but doesn't actually smite you.
-		godlist[GOD_THE_SILVER_FLAME].anger++;
-		gods_angry(GOD_THE_SILVER_FLAME);
+		if(offering){
+			//Grows angry at you, but doesn't actually smite you.
+			godlist[GOD_THE_SILVER_FLAME].anger++;
+			gods_angry(GOD_THE_SILVER_FLAME);
+		}
 	}
 	if(revived)
 		return TRUE;
@@ -4002,9 +4005,10 @@ int eatflag;
 	return;
 }
 void
-flame_consume(mtmp, otmp)
+flame_consume(mtmp, otmp, offering)
 struct monst *mtmp;
 struct obj *otmp;
+boolean offering;
 {
     int value = 0;
 	struct permonst *ptr = mtmp ? mtmp->data : otmp ? &mons[otmp->corpsenm] : 0;
@@ -4015,13 +4019,22 @@ struct obj *otmp;
 		return;
 	}
 	
-	if(otmp && fire_rider(otmp)){
+	if(otmp && fire_rider(otmp, offering)){
 		//otmp is now gone, and rider may have printed messages
 		return;
 	}
 
 	if(otmp && otmp->otyp == AMULET_OF_YENDOR){
 		pline("The Amulet proves fireproof.");
+		return;
+	}
+
+	//A monster may be using a silver flame weapon.
+	if(!offering){
+		if(otmp){
+			if (carried(otmp)) useup(otmp);
+			else useupf(otmp, 1L);
+		}
 		return;
 	}
 

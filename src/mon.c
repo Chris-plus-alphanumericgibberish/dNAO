@@ -1700,6 +1700,7 @@ struct monst *mtmp;
 	//No point in checking it before setting it.
 	mtmp->mgoatmarked = FALSE;
 	mtmp->mflamemarked = FALSE;
+	mtmp->myoumarked = FALSE;
 	
 	/* gradually time out temporary problems */
 	if (mtmp->mblinded && !--mtmp->mblinded)
@@ -6137,9 +6138,9 @@ xkilled(mtmp, dest)
 		}
 		if(mtmp->mflamemarked){
 			if(mtmp->data->geno&G_NOCORPSE)
-				flame_consume(mtmp, (struct obj *) 0);
+				flame_consume(mtmp, (struct obj *) 0, mtmp->myoumarked);
 			else if(corpse){
-				flame_consume((struct monst *) 0, corpse);
+				flame_consume((struct monst *) 0, corpse, mtmp->myoumarked);
 				corpse = (struct obj *)0; //corpse pointer is now stale
 			}
 		}
@@ -6148,7 +6149,7 @@ xkilled(mtmp, dest)
 			if(goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
 				goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
 			} else if(mtmp->mgoatmarked && !Infuture){
-				goat_eat(corpse, GOAT_EAT_MARKED); //Goat eat tries *really* hard to destroy whatever you give it.
+				goat_eat(corpse, mtmp->myoumarked ? GOAT_EAT_MARKED : GOAT_EAT_PASSIVE); //Goat eat tries *really* hard to destroy whatever you give it.
 			} else goat_seenonce = FALSE;
 			corpse = (struct obj *)0; //corpse pointer is now stale
 		}

@@ -5068,10 +5068,16 @@ boolean printmessages; /* print generic elemental damage messages */
 		break;
 	}
 	
-	if(goatweaponturn && !youdef && youagr && !is_rider(mdef->data))
-		mdef->mgoatmarked = TRUE;
-	if(check_oprop(otmp, OPROP_SFLMW) && !youdef && youagr && sflm_target(mdef))
+	if(check_oprop(otmp, OPROP_SFLMW) && !youdef && sflm_target(mdef)){
 		mdef->mflamemarked = TRUE;
+		if(youagr)
+			mdef->myoumarked = TRUE;
+	}
+	else if(goatweaponturn && !youdef && !is_rider(mdef->data)){
+		mdef->mgoatmarked = TRUE;
+		if(youagr)
+			mdef->myoumarked = TRUE;
+	}
 	
 	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW) || goatweaponturn == AD_FIRE){
 		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR) && printmessages) {	/* only artifacts message */

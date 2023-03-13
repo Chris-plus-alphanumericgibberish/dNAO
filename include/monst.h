@@ -196,6 +196,7 @@ struct monst {
 	Bitfield(mspores,1); /* monster is being consumed by Zuggutmoy's spores */ /*121*/
 	Bitfield(mformication,1); /* monster is covered in imaginary insects */ /*123*/
 	Bitfield(mscorpions,1); /* monster is covered in stinging scorpions */ /*124*/
+	Bitfield(myoumarked,1); /* monster was marked for cult sacrifice on your behalf */ /*125*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	

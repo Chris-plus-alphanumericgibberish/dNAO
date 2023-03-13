@@ -2338,7 +2338,7 @@ E const char *FDECL(gtitle, (ALIGNTYP_P));
 E void FDECL(altar_wrath, (int,int));
 E int FDECL(candle_on_altar, (struct obj *));
 E void FDECL(goat_eat, (struct obj *, int));
-E void FDECL(flame_consume, (struct monst *, struct obj *));
+E void FDECL(flame_consume, (struct monst *, struct obj *, boolean));
 E void FDECL(bokrug_offer, (struct obj *));
 E boolean FDECL(goat_mouth_at, (int, int));
 E boolean FDECL(bokrug_idol_at, (int, int));
