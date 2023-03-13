@@ -1664,7 +1664,7 @@ struct monst *mon;
 	if(!old) return FALSE; //Shouldn't occur since we already checked this, but perhaps remove_armor will support welded armor.
 
 	if(seen)
-		pline("%s removes %s.", Monnam(mon), distant_name(old, doname));
+		pline("%s frantically removes %s.", Monnam(mon), distant_name(old, doname));
 	do {
 		tarx = rn2(17)-8+mon->mx;
 		tary = rn2(17)-8+mon->my;
