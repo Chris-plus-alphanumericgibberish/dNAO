@@ -2265,6 +2265,11 @@ int mat;
 	
 	obj->obj_material = mat; //Set material
 	
+	if(obj->oeroded && !is_rustprone(obj) && !is_flammable(obj) && !is_evaporable(obj))
+		obj->oeroded = 0;
+	if(obj->oeroded2 && !is_rottable(obj) && !is_corrodeable(obj))
+		obj->oeroded2 = 0;
+	
 	/* cover special properties of materials like shadowsteel timer and gemstone type */
 	handle_material_specials(obj, oldmat, obj->obj_material);
 
