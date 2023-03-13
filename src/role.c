@@ -2504,6 +2504,8 @@ give_quest_trophy()
 		achieve.trophies |= GNO_RAN_QUEST;
 	else if(urole.neminum == PM_DOCTOR_ARCHER)
 		achieve.trophies |= MAD_QUEST;
+	else if(urole.neminum == PM_MASTER_KAEN)
+		achieve.trophies |= MONK_QUEST;
 	else if(urole.neminum == PM_CYCLOPS)
 		achieve.trophies |= HEA_QUEST;
 	else if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)

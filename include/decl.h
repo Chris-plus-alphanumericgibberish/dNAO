@@ -764,7 +764,8 @@ struct u_achieve {
 #define	BOKRUG_QUEST	0x1L << 48
 #define	HEA_QUEST		0x1L << 49
 #define	DRO_HEA_QUEST	0x1L << 50
-#define ACHIEVE_NUMBER	51
+#define	MONK_QUEST		0x1L << 51
+#define ACHIEVE_NUMBER	52
 };
 
 E struct u_achieve achieve;
