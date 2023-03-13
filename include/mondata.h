@@ -668,6 +668,35 @@
 #define is_render(mtyp)		(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
 #define banish_kill(mtyp)	(is_render(mtyp))
 
+#define mon_insane(mtmp)	(mtmp->mcrazed \
+							 || mtmp->mberserk \
+							 || mtmp->mdisrobe \
+							 || mtmp->mdoubt \
+							 || mtmp->msanctity \
+							 || mtmp->mgluttony \
+							 || mtmp->mfrigophobia \
+							 || mtmp->mcannibal \
+							 || mtmp->mrage \
+							 || mtmp->margent \
+							 || mtmp->msuicide \
+							 || mtmp->mnudist \
+							 || mtmp->mophidio \
+							 || mtmp->marachno \
+							 || mtmp->mentomo \
+							 || mtmp->mthalasso \
+							 || mtmp->mhelmintho \
+							 || mtmp->mparanoid \
+							 || mtmp->mtalons \
+							 || mtmp->mdreams \
+							 || mtmp->msciaphilia \
+							 || mtmp->mforgetful \
+							 || mtmp->mapostasy \
+							 || mtmp->mtoobig \
+							 || mtmp->mrotting \
+							 || mtmp->mtame_colony \
+							 || mtmp->mformication \
+							 || mtmp->mscorpions)
+
 #define has_sunflask(mtyp)	(mtyp == PM_UNDEAD_KNIGHT || mtyp == PM_WARRIOR_OF_SUNLIGHT\
 							 || mtyp == PM_UNDEAD_MAIDEN || mtyp == PM_KNIGHT_OF_THE_PRINCESS_S_GUARD\
 							 || mtyp == PM_BLUE_SENTINEL || mtyp == PM_DARKMOON_KNIGHT\

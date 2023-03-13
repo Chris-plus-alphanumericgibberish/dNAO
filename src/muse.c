@@ -2157,11 +2157,11 @@ struct monst *mtmp;
 		}
 		nomore(MUSE_SCR_AMNESIA);
 		nomore(MUSE_POT_AMNESIA);
-		if((mtmp->mcrazed || mtmp->mberserk) && (obj->otyp == SCR_AMNESIA)) {
+		if(mon_insane(mtmp) && (obj->otyp == SCR_AMNESIA)) {
 			m.misc = obj;
 			m.has_misc = MUSE_SCR_AMNESIA;
 		}
-		if(!nomouth && (mtmp->mcrazed || mtmp->mberserk) && (obj->otyp == POT_AMNESIA)) {
+		if(!nomouth && mon_insane(mtmp) && (obj->otyp == POT_AMNESIA)) {
 			m.misc = obj;
 			m.has_misc = MUSE_POT_AMNESIA;
 		}
@@ -2337,10 +2337,35 @@ museamnesia:
 				untame(mtmp, 1);
 				mtmp->mferal = 0;
 			}
+			mtmp->seenmadnesses = 0;
 			mtmp->mcrazed = 0;
 			mtmp->mberserk = 0;
 			mtmp->mdisrobe = 0;
 			mtmp->mdoubt = 0;
+			mtmp->msanctity = 0;
+			mtmp->mgluttony = 0;
+			mtmp->mfrigophobia = 0;
+			mtmp->mcannibal = 0;
+			mtmp->mrage = 0;
+			mtmp->margent = 0;
+			mtmp->msuicide = 0;
+			mtmp->mnudist = 0;
+			mtmp->mophidio = 0;
+			mtmp->marachno = 0;
+			mtmp->mentomo = 0;
+			mtmp->mthalasso = 0;
+			mtmp->mhelmintho = 0;
+			mtmp->mparanoid = 0;
+			mtmp->mtalons = 0;
+			mtmp->mdreams = 0;
+			mtmp->msciaphilia = 0;
+			mtmp->mforgetful = 0;
+			mtmp->mapostasy = 0;
+			mtmp->mtoobig = 0;
+			mtmp->mrotting = 0;
+			mtmp->mtame_colony = 0;
+			mtmp->mformication = 0;
+			mtmp->mscorpions = 0;
 		} else {
 			if (vismon) pline("%s looks angry and confused!", Monnam(mtmp));
 			untame(mtmp, 0);
