@@ -2179,11 +2179,11 @@ int oldmat, newmat;
 	/* set random gemstone type for valid gemstone objects */
 	if (!obj->sub_material && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS) {
 		do{
-			obj->sub_material = MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1);
+			set_submat(obj, MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1));
 		} while (obj->sub_material == OBSIDIAN);
 	}
 	else if (oldmat == GEMSTONE && newmat != GEMSTONE && obj->oclass != GEM_CLASS) {
-		obj->sub_material = 0;	/* and reset if changing away from gemstone*/
+		set_submat(obj, 0);	/* and reset if changing away from gemstone*/
 	}
 }
 

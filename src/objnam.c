@@ -5594,8 +5594,7 @@ typfnd:
 			maybe_set_material(otmp, mat);	// always limited by allowable random materials, but ignore normal probabilities
 		/* set gemtype, if specified and allowable*/
 		if (mat == GEMSTONE && otmp->oclass != GEM_CLASS && gemtype) {
-			otmp->sub_material = gemtype;
-			set_object_color(otmp);
+			set_submat(otmp, gemtype);
 		}
 
 	}

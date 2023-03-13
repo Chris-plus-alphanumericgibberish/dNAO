@@ -1568,6 +1568,21 @@ struct obj *otmp;
 }
 
 void
+set_submat(otmp, submat)
+struct obj *otmp;
+int submat;
+{
+	/* should never happen */
+	if (!otmp)
+	{
+		impossible("object_color called with no object");
+		return;
+	}
+	otmp->sub_material = submat;
+	object_color(otmp);
+}
+
+void
 fix_object(otmp)
 	struct obj *otmp;
 {

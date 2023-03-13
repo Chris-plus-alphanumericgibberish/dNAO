@@ -2040,6 +2040,7 @@ E int NDECL(dodiscovered);
 E void FDECL(set_isamusei_color, (struct obj *));
 E void FDECL(set_object_color, (struct obj *));
 E int FDECL(object_color, (struct obj *));
+E void FDECL(set_submat, (struct obj *, int));
 E void FDECL(fix_object, (struct obj *));
 
 /* ### objects.c ### */
