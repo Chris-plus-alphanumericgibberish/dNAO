@@ -1996,6 +1996,7 @@ int tary;
 	int result = 0;
 	int spellnum = 0;
 	int chance = 0;
+	int spell_skill = 0;
 	char buf[BUFSZ];
 
 	/* things that block monster spells from even being attempted */
@@ -2143,10 +2144,43 @@ int tary;
 		else if(!youdef && !(mdef && mdef->mdoubt))
 			force_fail = TRUE;
 	}
-
+	
+	spell_skill = mlev(magr) * 2;
+	if(youagr){
+		int delta = NightmareAware_Insanity;
+		if(u.umadness&MAD_RAGE && !BlockableClearThoughts){
+			spell_skill = spell_skill*delta/100;
+		}
+		if((u.umadness&MAD_FORMICATION || u.umadness&MAD_SCORPIONS) && !BlockableClearThoughts){
+			spell_skill = spell_skill*(delta/2)/100;
+		}
+		if(u.umadness&MAD_SCIAPHILIA && !BlockableClearThoughts && unshadowed_square(u.ux, u.uy)){
+			spell_skill = spell_skill*delta/100;
+		}
+		if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
+			int discomfort = u_clothing_discomfort();
+			if (discomfort) {
+				spell_skill = spell_skill*((discomfort * delta)/10)/100;
+			} else {
+				if (!uwep && !uarms) {
+					//Bonus, not reduced by ClearThoughts+Nightmare combo
+					spell_skill += Insanity/10;
+				}
+			}
+		}
+	}
+	else {
+		if(magr->mformication || magr->mscorpions)
+			spell_skill /= 2;
+		if(magr->msciaphilia && unshadowed_square(x(magr), y(magr)))
+			spell_skill /= 2;
+		if(magr->mnudist && magr->misc_worn_check)
+			spell_skill /= 2;
+	}
+	
 	/* failure chance determined, check if attack fumbles */
 	if (force_fail 
-		|| rn2(mlev(magr) * 2) < chance
+		|| rn2(spell_skill) < chance
 		|| (magr->mtoobig && magr->m_lev < rnd(100))
 		|| (magr->msciaphilia && magr->m_lev < rnd(100) && unshadowed_square(magr->mx, magr->my))
 	) {

@@ -356,6 +356,9 @@ struct monst * magr;
 		impossible("calculating player's polearm range with m_pole_range?");
 		return 8;
 	}
+	
+	if(magr->mformication || magr->mscorpions)
+		return 4;
 
 	switch (m_martial_skill(magr->data)) {
 		case P_EXPERT:	return 8;

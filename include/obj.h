@@ -533,6 +533,7 @@ struct obj {
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
+			 otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA || \
 			 otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS || \
 			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_OSE) ||\
 			 otmp->obj_material == MERCURIAL || \
@@ -621,6 +622,7 @@ struct obj {
 			  (check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15) || \
 			  (otmp)->oartifact==ART_SOL_VALTIVA || \
 			  (otmp)->oartifact==ART_SHADOWLOCK || \
+			  ((otmp)->oartifact==ART_GOLDEN_SWORD_OF_Y_HA_TALLA && (otmp)->otyp == BULLWHIP) || \
 			  (otmp)->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
 			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovar1_seals&SEAL_MARIONETTE ) \
 			 ))
@@ -635,6 +637,7 @@ struct obj {
 									(otmp)->oartifact == ART_SOL_VALTIVA ||\
 									(otmp)->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||\
 									(otmp)->oartifact == ART_SHADOWLOCK ||\
+									(otmp)->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA ||\
 									(otmp)->oartifact == ART_PEN_OF_THE_VOID\
 								) && is_pole(otmp))
 #define is_spear(otmp)	(otmp->oclass == WEAPON_CLASS && \

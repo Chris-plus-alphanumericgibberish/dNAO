@@ -2606,6 +2606,8 @@ struct obj *obj;
 	EMON(obj)->mtoobig = mon->mtoobig;
 	EMON(obj)->mrotting = mon->mrotting;
 	EMON(obj)->mspores = mon->mspores;
+	EMON(obj)->mformication = mon->mformication;
+	EMON(obj)->mscorpions = mon->mscorpions;
 	
 	
 	EMON(obj)->encouraged = mon->encouraged;

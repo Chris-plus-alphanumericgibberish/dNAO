@@ -5331,7 +5331,7 @@ boolean printmessages; /* print generic elemental damage messages */
 					experts += 2;
 			}
 		}
-		else if(m_martial_skill(magr->data) == P_EXPERT){
+		else if(m_martial_skill(magr->data) == P_EXPERT && !magr->mformication && !magr->mscorpions){
 			experts = 10;
 		}
 		/* Masamune rewards skill */
@@ -6429,6 +6429,42 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 		}
 	}
+	
+	if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA){
+		if(u.uinsight > 8){
+			extern const int clockwisex[8];
+			extern const int clockwisey[8];
+			int nx, ny;
+			if(otmp->otyp != BULLWHIP || !rn2(4)){
+				if(youdef && (Blind_telepat || !rn2(5))){
+					*truedmgptr += d(2,2)+d(1,4);
+				}
+				else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
+					*truedmgptr += d(2,2)+d(1,4);
+				}
+			}
+			for(int i = 0, j = rn2(8); i<8; i++,j++){
+				nx = x(mdef) + clockwisex[j%8];
+				ny = y(mdef) + clockwisey[j%8];
+				if(!isok(nx,ny))
+					continue;
+				if(m_u_at(nx,ny) != 0)
+					continue;
+				//The world around the target warps into giant stinging scorpion tails
+				if(u.uinsight > 64 || u.uinsight > rnd(64))
+					*plusdmgptr += d(1,8);
+			}
+		}
+		if(u.uinsight > 64 && (otmp->otyp == BULLWHIP || !rn2(4))){
+			if(youdef){
+				u.umadness |= MAD_SCORPIONS;
+			}
+			else {
+				mdef->mscorpions = TRUE;
+			}
+		}
+	}
+	
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************

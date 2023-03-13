@@ -1660,6 +1660,9 @@ mcalcdistress()
 	/* regenerate hit points */
 	mon_regen(mtmp, FALSE);
 	clothes_bite_mon(mtmp);
+	if(mtmp->mscorpions){
+		phantom_scorpions_sting(mtmp);
+	}
 
 	timeout_problems(mtmp);
 	
@@ -9601,6 +9604,71 @@ struct monst *mon;
 				}
 			}
 		}
+	}
+}
+
+void
+phantom_scorpions_sting(mdef)
+struct monst *mdef;
+{
+	long slotvar = 0;
+	long depthvar = 0;
+	int damage = 0;
+	int dmg;
+	int i = 0;
+	if(mdef == &youmonst){
+		i = ((NightmareAware_Insanity*NightmareAware_Insanity) + 999)/1000;
+		if(i < 1)
+			i = 1;
+	}
+	else {
+		i = mdef->m_lev/10;
+		if(insightful(mdef->data))
+			i /= 2;
+		if(i < 1)
+			i = 1;
+	}
+	
+	for(; i > 0; i--){
+		/*pick a slot*/
+		slotvar = 0x1<<rn2(5);
+
+		/*pick a depth*/
+		depthvar = rn2(3) ? W_ARMC : rn2(2) ? W_ARM : W_SKIN;
+		
+		dmg = d(1,4); //d(1,2) + d(1,2)
+		if(mdef == &youmonst){
+			// Your("%s bite%s you!", xname(obj), obj->quan == 1 ? "s":"");
+			// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
+			dmg -= roll_udr_detail((struct monst *)0, slotvar, depthvar);
+			// pline("damage post DR: %d", damage);
+		}
+		else {
+			// pline("damage pre DR: %d", damage);
+			dmg -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, depthvar);
+			// pline("damage post DR: %d", damage);
+		}
+		if(dmg < 1)
+			dmg = 1;
+		damage += dmg;
+	}
+
+	damage = reduce_dmg(mdef,damage,TRUE,TRUE);
+
+	if(mdef == &youmonst){
+		You("are stung by phantom scorpions!");
+		losehp(damage, "a swarm of illusory scorpions", KILLED_BY);
+		poisoned("scorpion stings", A_STR, "poisoned illusory scorpion stings", 8, FALSE);
+	}
+	else {
+		if(!Poison_res(mdef)){
+			if(!rn2(8))
+				damage += 80;
+			else damage += rn1(10,6);
+		}
+		if(m_losehp(mdef, damage, FALSE, "swarm of scorpions")); //died
+		else if (canseemon(mdef))
+			pline("%s is stung by phantom scorpions.", Monnam(mdef));
 	}
 }
 

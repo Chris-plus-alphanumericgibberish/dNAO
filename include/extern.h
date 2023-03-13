@@ -1812,6 +1812,7 @@ E void FDECL(remove_monster, (int, int));
 E void FDECL(held_item_bites, (struct monst *, struct obj *));
 E boolean FDECL(likes_obj, (struct monst *, struct obj *));
 E boolean FDECL(can_equip, (struct monst *, struct obj *));
+E void FDECL(phantom_scorpions_sting, (struct monst *));
 
 /* ### monst.c ### */
 

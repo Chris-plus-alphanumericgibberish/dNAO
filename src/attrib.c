@@ -1496,6 +1496,10 @@ long int madness;
 	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
 	
+	//Scorpions duplicates the effects of formications.
+	if(madness == MAD_FORMICATION && (u.umadness&MAD_SCORPIONS))
+		madness = MAD_SCORPIONS;
+	
 	if(!(u.umadness&madness))
 		return 0;
 	
@@ -1723,12 +1727,17 @@ struct monst *mon;
 					if(madflag == MAD_DELUSIONS
 					 || madflag == MAD_REAL_DELUSIONS
 					 || madflag == MAD_SPIRAL
-					 || madflag == MAD_FORMICATION
 					){
 						mon->mcrazed = 1;
 					}
 					else if(madflag == MAD_SANCTITY){
 						mon->msanctity = 1;
+					}
+					else if(madflag == MAD_FORMICATION){
+						mon->mformication = 1;
+					}
+					else if(madflag == MAD_SCORPIONS){
+						mon->mscorpions = 1;
 					}
 					else if(madflag == MAD_SPORES){
 						mon->mspores = 1;

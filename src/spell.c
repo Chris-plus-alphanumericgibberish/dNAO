@@ -6134,7 +6134,7 @@ int spell;
 		if(u.umadness&MAD_RAGE && !BlockableClearThoughts){
 			chance -= delta;
 		}
-		if(u.umadness&MAD_FORMICATION && !BlockableClearThoughts){
+		if((u.umadness&MAD_FORMICATION || u.umadness&MAD_SCORPIONS) && !BlockableClearThoughts){
 			chance -= delta/2;
 		}
 		if(u.umadness&MAD_SCIAPHILIA && !BlockableClearThoughts && unshadowed_square(u.ux, u.uy)){

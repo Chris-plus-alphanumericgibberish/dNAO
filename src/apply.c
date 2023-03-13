@@ -4385,6 +4385,7 @@ struct obj *obj;
     int rx, ry, proficient, res = MOVE_CANCELLED;
     const char *msg_slipsfree = "The whip slips free.";
     const char *msg_snap = "Snap!";
+	boolean ranged = FALSE;
 
     if (obj != uwep) {
 	if (!wield_tool(obj, "lash")) return MOVE_CANCELLED;
@@ -4408,6 +4409,25 @@ struct obj *obj;
 		return MOVE_STANDARD;
 	}
     mtmp = m_at(rx, ry);
+	if(obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && ZAP_POS(levl[rx][ry].typ)){
+		if(u.utrap && u.utraptype == TT_PIT){
+			if(!mtmp && !IS_FURNITURE(levl[rx][ry].typ) && !boulder_at(rx, ry)){
+				rx = rx + u.dx;
+				ry = ry + u.dy;
+				ranged = TRUE;
+			}
+		}
+		else if(!mtmp){
+			rx = rx + u.dx;
+			ry = ry + u.dy;
+			ranged = TRUE;
+		}
+		if (!isok(rx,ry)) {
+			pline("%s",msg_snap);
+			return MOVE_STANDARD;
+		}
+		mtmp = m_at(rx, ry);
+	}
 
     /* proficiency check */
     proficient = P_SKILL(P_WHIP)-P_UNSKILLED;
@@ -4491,10 +4511,11 @@ struct obj *obj;
 
 		if (mtmp) {
 			if (bigmonst(mtmp->data)) {
-			wrapped_what = strcpy(buf, mon_nam(mtmp));
+				wrapped_what = strcpy(buf, mon_nam(mtmp));
 			} else if (proficient) {
-			if (attack2(mtmp)) return MOVE_ATTACKED;
-			else pline("%s", msg_snap);
+				struct attack attk = {AT_WEAP, AD_PHYS, 0, 0};
+				if (ranged ? (xmeleehity(&youmonst, mtmp, &attk, &otmp, -1, 0, TRUE) != MM_AGR_DIED) : attack2(mtmp)) return MOVE_ATTACKED;
+				else pline("%s", msg_snap);
 			}
 		}
 		if (!wrapped_what) {
@@ -4623,8 +4644,9 @@ struct obj *obj;
 			stumble_onto_mimic(mtmp);
 			else You("flick your whip towards %s.", mon_nam(mtmp));
 			if (proficient) {
-			if (attack2(mtmp)) return MOVE_ATTACKED;
-			else pline("%s", msg_snap);
+				struct attack attk = {AT_WEAP, AD_PHYS, 0, 0};
+				if (ranged ? (xmeleehity(&youmonst, mtmp, &attk, &otmp, -1, 0, TRUE) != MM_AGR_DIED) : attack2(mtmp)) return MOVE_ATTACKED;
+				else pline("%s", msg_snap);
 			}
 		}
 

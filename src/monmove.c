@@ -1100,6 +1100,12 @@ register struct monst *mtmp;
 	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
 	if (mtmp->menvy && !rn2(999)) mtmp->menvy = 0;
 	if (mtmp->mdoubt && !rn2(300)) mtmp->mdoubt = 0;
+	if (mtmp->mscorpions && !rn2(20)) mtmp->mscorpions = 0;
+	
+	if(mtmp->msleeping && (mtmp->mformication || mtmp->mscorpions) && rn2(mtmp->m_lev)){
+		//Awakens from the bugs. High level is good for it here.
+		mtmp->msleeping = 0;
+	}
 
 	if (mtmp->mcrazed){
 		if(!rn2(4)){

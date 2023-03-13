@@ -3413,7 +3413,9 @@ int *shield_margin;
 		/* monster-only accuracy bonuses */
 		else {
 			/* martial-trained foes are accurate */
-			switch(m_martial_skill(pa)) {
+			if(magr->mformication || magr->mscorpions)
+				bons_acc -= 2;
+			else switch(m_martial_skill(pa)) {
 			case P_UNSKILLED: bons_acc += 0; break;
 			case P_BASIC:     bons_acc += 1; break;
 			case P_SKILLED:   bons_acc += 2; break;
@@ -5482,7 +5484,7 @@ boolean ranged;
 				}
 				else {
 					/* 9/10 odds of small bonus damage */
-			if (rn2((attk->adtyp != AD_SVPN || Poison_res(mdef)) ? 10 : 5))
+					if (rn2((attk->adtyp != AD_SVPN || Poison_res(mdef)) ? 10 : 5))
 						mdef->mhp -= rn1(10, 6);	/* note that this is BONUS damage */
 					/* 1/10 of deadly */
 					else {
@@ -13010,7 +13012,8 @@ int vis;						/* True if action is at all visible to the player */
 			precision_mult += max(P_SKILL(objects[launcher->otyp].oc_skill) - 2, 0);
 		}
 		else {
-			precision_mult += max(m_martial_skill(magr->data)-2, 0);
+			if(!magr->mformication && !magr->mscorpions)
+				precision_mult += max(m_martial_skill(magr->data)-2, 0);
 		}
 		
 		/* gnomes get bonus +1 mult */

@@ -2423,6 +2423,14 @@ karemade:
 				}
 			}
 			
+			if(u.umadness&MAD_SCORPIONS){
+				change_usanity(-1, FALSE);
+				phantom_scorpions_sting(&youmonst);
+				if(!rn2(20)){
+					u.umadness &= ~MAD_SCORPIONS;
+				}
+			}
+			
 			if(!rn2(8) && !flaming(youracedata) && roll_madness(MAD_COLD_NIGHT)){
 				if(u.usanity <= 88 && !rn2(11)){
 					if(!Breathless && !Blind)

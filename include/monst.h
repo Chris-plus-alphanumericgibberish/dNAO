@@ -194,6 +194,8 @@ struct monst {
 	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*119*/
 	Bitfield(mflamemarked,1); /* monster was damaged by a silver flame weapon and will be sacced if they die */ /*120*/
 	Bitfield(mspores,1); /* monster is being consumed by Zuggutmoy's spores */ /*121*/
+	Bitfield(mformication,1); /* monster is covered in imaginary insects */ /*123*/
+	Bitfield(mscorpions,1); /* monster is covered in stinging scorpions */ /*124*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	

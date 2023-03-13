@@ -1758,6 +1758,8 @@ int shotlimit;
 		int magr_wepskill;
 		if (youagr)
 			magr_wepskill = P_SKILL(weapon_type((launcher && launcher->oartifact != ART_PEN_OF_THE_VOID) ? launcher : ammo));
+		else if(magr->mformication || magr->mscorpions)
+			magr_wepskill = P_UNSKILLED;
 		else
 			magr_wepskill = m_martial_skill(magr->data);
 

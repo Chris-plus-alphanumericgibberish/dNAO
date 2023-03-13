@@ -1147,7 +1147,7 @@ struct mkroom	*croom;
 		else {
 			mon = makemon(&mons[asylum_types[rn2(SIZE(asylum_types))]], otmp->ox, otmp->oy, NO_MINVENT);
 			if(mon){
-				switch(rn2(16)){
+				switch(rn2(17)){
 					case 0:
 						mon->mcrazed = 1;
 					break;
@@ -1195,6 +1195,9 @@ struct mkroom	*croom;
 					break;
 					case 15:
 						mon->mtoobig = 1;
+					break;
+					case 16:
+						mon->mformication = 1;
 					break;
 				}
 				mon->msleeping = 1;
