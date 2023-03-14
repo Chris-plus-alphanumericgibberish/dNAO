@@ -15240,7 +15240,7 @@ struct monst *mtmp, *victim;
 				if(Role_if(PM_BARD) && canseemon(mtmp)){
 					u.pethped = TRUE;
 				}
-				if(get_mx(mtmp, MX_EDOG) && (!EDOG(mtmp)->waspeaceful || mtmp->mpeacetime)){
+				if(get_mx(mtmp, MX_EDOG) && (!EDOG(mtmp)->waspeaceful || mtmp->mpeacetime) && !EDOG(mtmp)->dominated){
 					int roll = 950;
 					roll -= ACURR(A_CHA)*10;
 					switch(P_SKILL(P_BEAST_MASTERY)){
