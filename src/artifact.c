@@ -2206,10 +2206,7 @@ struct obj *obj;
 	int wt = -1;
 
 	if (artiweight == WT_DEFAULT) {
-		/* use default; take material into consideration */
 		wt = baseweight;
-		if(obj->obj_material != objects[obj->otyp].oc_material)
-			wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
 	}
 	else if (artiweight == WT_SPECIAL) {
 		/* it needs special handling here */
@@ -2234,7 +2231,6 @@ struct obj *obj;
 			break;
 		case ART_GREEN_DRAGON_CRESCENT_BLAD:
 			wt = 2*objects[NAGINATA].oc_weight;
-			wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
 			break;
 		case ART_AEGIS:
 			wt = objects[CLOAK].oc_weight;
@@ -2250,6 +2246,7 @@ struct obj *obj;
 			break;
 		default:
 			impossible("unhandled special artifact weight for %d", obj->oartifact);
+			wt = baseweight;
 			break;
 		}
 	}

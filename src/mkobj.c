@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "prop.h"
+#include "artifact.h"
 
 STATIC_DCL void FDECL(mkbox_cnts,(struct obj *));
 STATIC_DCL void FDECL(obj_timer_checks,(struct obj *, XCHAR_P, XCHAR_P, int));
@@ -2592,13 +2593,16 @@ weight(obj)
 register struct obj *obj;
 {
 	int wt = objects[obj->otyp].oc_weight;
-	if (obj->otyp == MAGIC_CHEST && obj->obolted) wt = 99999;	/* impossibly heavy */
+	int base_mat = (obj->oartifact && artilist[obj->oartifact].material != MT_DEFAULT && artilist[obj->oartifact].weight != WT_DEFAULT) ? artilist[obj->oartifact].material : objects[obj->otyp].oc_material;
+
+	if (obj->otyp == MAGIC_CHEST && obj->obolted) return 99999;	/* impossibly heavy */
 
 	if (obj->oartifact)
 		wt = artifact_weight(obj);
-	else if(obj->obj_material != objects[obj->otyp].oc_material) {
+
+	if(obj->obj_material != base_mat) {
 		/* do not apply this to artifacts; those are handled in artifact_weight() */
-		wt = wt * materials[obj->obj_material].density / materials[objects[obj->otyp].oc_material].density;
+		wt = wt * materials[obj->obj_material].density / materials[base_mat].density;
 	}
 	
 	if(obj->otyp == MOON_AXE && obj->oartifact != ART_SCEPTRE_OF_LOLTH){
