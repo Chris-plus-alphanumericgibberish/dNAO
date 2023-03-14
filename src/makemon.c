@@ -500,7 +500,7 @@ boolean goodequip;
 	struct obj *otmp;
 	struct permonst *ptr = mtmp->data;
 	int cnt;
-	if (ptr->mtyp == PM_MINOTAUR) {
+	if (ptr->mtyp == PM_MINOTAUR && !(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)) {
 		if (!rn2(3) || (in_mklev && Is_earthlevel(&u.uz)))
 		(void) mongets(mtmp, WAN_DIGGING, mkobjflags);
 	} else if(ptr->mtyp == PM_DEEPEST_ONE
@@ -722,6 +722,8 @@ boolean goodequip;
 			fix_object(otmp);
 			(void) mpickobj(mtmp, otmp);
 		}
+	} else if (In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) {
+		if(!rn2(4)) mongets(mtmp, CLUB, mkobjflags);
 	} else if (is_giant(ptr) && intelligent_mon(mtmp)) {
 		for (cnt = rn2((int)(mtmp->m_lev / 2)); cnt; cnt--) {
 		otmp = mksobj(rnd_class(DILITHIUM_CRYSTAL,LUCKSTONE-1), mkobjflags|MKOBJ_NOINIT);
@@ -2521,6 +2523,12 @@ boolean goodequip;
 					(void) mongets(mtmp, BODYGLOVE, mkobjflags);
 					(void) mongets(mtmp, RAYGUN, mkobjflags);
 				}
+			} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				otmp = mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+				if(otmp)
+					otmp->oeroded3 = 1;
+				if (goodequip || !rn2(4)) (void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+				(void)mongets(mtmp, ELVEN_DAGGER, mkobjflags);
 			}
 			else {
 				if (goodequip || rn2(2))
@@ -6958,6 +6966,12 @@ int mmflags;
 					if(is_prince(ptr) || (is_lord(ptr) && !rn2(3))) (void)mongets(mtmp, DWARVISH_MITHRIL_COAT, mkobjflags);
 					else (void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 				}
+			} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				otmp = mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
+				if(otmp)
+					otmp->oeroded3 = 1;
+				if (goodequip || rn2(7)) (void)mongets(mtmp, SHOES, mkobjflags);
+				(void)mongets(mtmp, DAGGER, mkobjflags);
 			} else {
 				if (goodequip || rn2(7)) (void)mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
 				if (goodequip || rn2(7)) (void)mongets(mtmp, SHOES, mkobjflags);
@@ -7427,6 +7441,151 @@ int mmflags;
 					set_material_gm(otmp, BONE);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
+				} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+					switch(rn2(13)){
+						case 0:
+							mtmp->mvar_deminymph_role = PM_BARBARIAN;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, KNIFE, mkobjflags);
+						break;
+						case 1:
+							mtmp->mvar_deminymph_role = PM_BARD;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, ELVEN_DAGGER, mkobjflags);
+						break;
+						case 2:
+							mtmp->mvar_deminymph_role = PM_HEALER;
+							mtmp->mcansee = 0;
+							mtmp->mblinded = 0;
+							otmp = mongets(mtmp, SHOES, mkobjflags);
+							if(otmp){
+								set_material_gm(otmp, CLOTH);
+								otmp->obj_color = CLR_BLUE;
+							}
+							otmp = mongets(mtmp, WAISTCLOTH, mkobjflags);
+							if(otmp)
+								otmp->obj_color = CLR_BRIGHT_BLUE;
+							otmp = mongets(mtmp, DROVEN_CLOAK, mkobjflags);
+							if(otmp)
+								otmp->obj_color = CLR_BLUE;
+							otmp = mongets(mtmp, KHAKKHARA, mkobjflags);
+							MAYBE_MERC(otmp)
+							otmp = mksobj(SCALPEL, mkobjflags|MKOBJ_ARTIF);
+							set_material_gm(otmp, OBSIDIAN_MT);
+						break;
+						case 3:
+							mtmp->mvar_deminymph_role = PM_KNIGHT;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, DAGGER, mkobjflags);
+						break;
+						case 4:
+							mtmp->mvar_deminymph_role = PM_MONK;
+							otmp = mongets(mtmp, ROBE, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, HAND_WRAPS, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+						break;
+						case 5:{
+							long long oprop;
+							mtmp->mvar_deminymph_role = PM_HUNTER;
+							switch(rnd(20)){
+								case 1:
+									oprop = OPROP_LIVEW;
+								break;
+								default:
+									oprop = 0;
+								break;
+							}
+							otmp = mksobj(BESTIAL_CLAW, mkobjflags|MKOBJ_NOINIT);
+							add_oprop(otmp, oprop);
+							MAYBE_MERC(otmp)
+							(void) mpickobj(mtmp, otmp);
+							mtmp->mcrazed = TRUE;
+							otmp = mongets(mtmp, ROBE, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+						}break;
+						case 6:
+							mtmp->mvar_deminymph_role = PM_NOBLEMAN;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, KNIFE, mkobjflags);
+						break;
+						case 7:
+							mtmp->mvar_deminymph_role = PM_PRIEST;
+							otmp = mongets(mtmp, ROBE, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, CLUB, mkobjflags);
+						break;
+						case 8:
+							mtmp->mvar_deminymph_role = PM_RANGER;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, KNIFE, mkobjflags);
+						break;
+						case 9:
+							mtmp->mvar_deminymph_role = PM_ROGUE;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, DAGGER, mkobjflags);
+						break;
+						case 10:
+							mtmp->mvar_deminymph_role = PM_SAMURAI;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, KNIFE, mkobjflags);
+						break;
+						case 11:
+							mtmp->mvar_deminymph_role = PM_TOURIST;
+							otmp = mongets(mtmp, HAWAIIAN_SHIRT, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, HAWAIIAN_SHORTS, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+						break;
+						case 12:
+							mtmp->mvar_deminymph_role = PM_WIZARD;
+							otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, SPE_BLANK_PAPER, mkobjflags);
+						break;
+					}
 				} else switch(rn2(16)){
 					//Archeologist
 					case 0:
@@ -12027,6 +12186,10 @@ boolean randmonst;
 		}
 		/* in the Elf quest against the Necromancer, the "PM_ELF" enemies are meant to be groups of elf zombies. */
 		else if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER && ptr->mtyp == PM_ELF){
+			mkmon_template = ZOMBIFIED;
+		}
+		/* Zombie mindflayers in the DroHea quest */
+		else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && (ptr->mtyp == PM_MIND_FLAYER || ptr->mtyp == PM_MASTER_MIND_FLAYER)){
 			mkmon_template = ZOMBIFIED;
 		}
 		/* Echo is always given the skeleton template */
