@@ -4865,6 +4865,7 @@ register struct monst *mtmp;
 	|| mtmp->mtyp == PM_BLASPHEMOUS_LURKER
 	|| mtmp->mtyp == PM_BLESSED
 	|| mtmp->mtyp == PM_MOUTH_OF_THE_GOAT
+	|| mtmp->mtyp == PM_APHANACTONAN_ASSESSOR
 	){
 		if(mvitals[PM_GOOD_NEIGHBOR].died
 		&& mvitals[PM_HMNYW_PHARAOH].died
@@ -4872,6 +4873,7 @@ register struct monst *mtmp;
 		&& mvitals[PM_BLASPHEMOUS_LURKER].died
 		&& mvitals[PM_BLESSED].died
 		&& mvitals[PM_MOUTH_OF_THE_GOAT].died
+		&& mvitals[PM_APHANACTONAN_ASSESSOR].died
 		)
 			give_nightmare_hunter_trophy();
 	}

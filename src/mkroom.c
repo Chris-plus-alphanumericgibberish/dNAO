@@ -5726,7 +5726,7 @@ place_law_features()
 {
 	int n;
 	if(Is_path(&u.uz)){
-		int cutoff = rn2(9);
+		int cutoff = (on_level(&path3_level,&u.uz) && is_june()) ? min_ints(3, rn2(9)): rn2(9);
 		for(n = 4; n > 0; n--)
 			mkaph(cutoff >= n);
 		if(!rn2(10)){
