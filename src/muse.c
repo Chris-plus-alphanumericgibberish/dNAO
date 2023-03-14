@@ -2363,7 +2363,6 @@ museamnesia:
 			mtmp->mapostasy = 0;
 			mtmp->mtoobig = 0;
 			mtmp->mrotting = 0;
-			mtmp->mtame_colony = 0;
 			mtmp->mformication = 0;
 			mtmp->mscorpions = 0;
 		} else {

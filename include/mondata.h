@@ -693,7 +693,6 @@
 							 || mtmp->mapostasy \
 							 || mtmp->mtoobig \
 							 || mtmp->mrotting \
-							 || mtmp->mtame_colony \
 							 || mtmp->mformication \
 							 || mtmp->mscorpions)
 
