@@ -8115,8 +8115,8 @@ struct obj *obj;
 		if(damage < 1)
 			damage = 1;
 
-		if(Half_phys(mdef)) damage = (damage+1)/2;
-	
+		damage = reduce_dmg(mdef,damage,TRUE,FALSE);
+
 		mdef->mhp -= damage;
 		if(mdef->mhp < 1){
 			mondied(mdef);
