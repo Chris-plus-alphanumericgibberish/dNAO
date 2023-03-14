@@ -1031,8 +1031,8 @@ int mkflags;
 				struct obj * otmp2;
 				struct obj * oinv;
 				int skull;
-				int template;
-				int extra_flags;
+				int template = 0;
+				int extra_flags = 0;
 				if(Infuture){
 					if(Race_if(PM_ANDROID)){
 						int skulls[] = {PM_DWARF_KING, PM_DWARF_QUEEN, PM_GITHYANKI_PIRATE, PM_DEMINYMPH, PM_MORDOR_MARSHAL, PM_MOUNTAIN_CENTAUR, PM_DRIDER, 
