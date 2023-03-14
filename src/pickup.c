@@ -2909,23 +2909,28 @@ boolean past;
 		case PM_HUMAN:
 		case PM_VAMPIRE:
 		case PM_INCANTIFIER:
-		case PM_GNOME:
 			if(flags.initgend){
 				expert_weapon_skill(P_DAGGER);
 				free_skill_up(P_DAGGER);
+				skilled_weapon_skill(P_SHORT_SWORD);
+				free_skill_up(P_SHORT_SWORD);
 				skilled_weapon_skill(P_TWO_WEAPON_COMBAT);
 			}
 			else {
 				expert_weapon_skill(P_SABER);
 				free_skill_up(P_SABER);
 			}
-			if(Race_if(PM_GNOME)){
-				knows_object(GNOMISH_POINTY_HAT);
-				knows_object(AKLYS);
-				knows_object(DWARVISH_HELM);
-				knows_object(DWARVISH_MATTOCK);
-				knows_object(DWARVISH_CLOAK);
-			}
+		break;
+		case PM_GNOME:
+			expert_weapon_skill(P_BROAD_SWORD);
+			free_skill_up(P_BROAD_SWORD);
+			expert_weapon_skill(P_BEAST_MASTERY);
+			free_skill_up(P_BEAST_MASTERY);
+			knows_object(GNOMISH_POINTY_HAT);
+			knows_object(AKLYS);
+			knows_object(DWARVISH_HELM);
+			knows_object(DWARVISH_MATTOCK);
+			knows_object(DWARVISH_CLOAK);
 		break;
 		case PM_DWARF:
 			expert_weapon_skill(P_PICK_AXE);

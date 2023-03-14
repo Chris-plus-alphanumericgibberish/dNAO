@@ -88,6 +88,7 @@ enum {
 	OPROP_TDTHW,
 	OPROP_SFUWW,
 	OPROP_TACTB,
+	OPROP_INSTW,
 	MAX_OPROP
 };
 
@@ -127,7 +128,7 @@ struct obj {
 #define FIGURINE_MALE	0x02
 #define FIGURINE_FEMALE	0x04
 #define FIGURINE_FLAGS	0x07
-#define FIGURINE_PSEUDO	0x1<<3
+#define FIGURINE_PSEUDO	(0x07+1)
 
 #define check_fig_template(spe_val, fig_temp)	((spe_val&~(FIGURINE_FLAGS)) == (fig_temp))
 	char	oclass;		/* object class */
@@ -530,6 +531,7 @@ struct obj {
 			 rakuyo_prop(otmp) || \
 			 otmp->otyp == PINCER_STAFF || \
 			 check_oprop(otmp,OPROP_GSSDW) || \
+			 check_oprop(otmp,OPROP_INSTW) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \

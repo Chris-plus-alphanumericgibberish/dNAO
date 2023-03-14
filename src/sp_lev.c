@@ -1678,6 +1678,15 @@ default_case:
 					default_add_2(GNOMISH_POINTY_HAT);
 					default_add_2(AKLYS);
 				}
+				if(urace.malenum == PM_HUMAN){
+					if(flags.initgend){
+						default_add_2(BLADE_OF_MERCY);
+						set_material_gm(stuff, COPPER);
+					}
+					else {
+						default_add_2(RAKUYO);
+					}
+				}
 			break;
 			case PM_HALF_DRAGON:
 				if(flags.initgend){
@@ -1845,6 +1854,12 @@ default_case:
 				fix_object(stuff);
 				add_to_container(otmp, stuff);
 				
+				stuff = mksobj(WAISTCLOTH, MKOBJ_NOINIT);
+				size_items_to_pc(stuff);
+				stuff->obj_color = CLR_WHITE;
+				stuff->spe = 2;
+				add_to_container(otmp, stuff);
+
 				stuff = mksobj(ROBE, MKOBJ_NOINIT);
 				size_items_to_pc(stuff);
 				stuff->obj_color = CLR_BRIGHT_BLUE;
@@ -1879,17 +1894,78 @@ default_case:
 			add_oprop(stuff, OPROP_COLDW);
 			add_to_container(otmp, stuff);
 
+			stuff = mksobj(DIAMOND, MKOBJ_NOINIT);
+			stuff->quan = d(1,3);
+			fix_object(stuff);
+			add_to_container(otmp, stuff);
+
 			for(int i = d(3,3); i > 0; i--){
 				stuff = mksobj(FIGURINE, MKOBJ_NOINIT);
 				stuff->corpsenm = ROLL_FROM(stars);
+				if(stuff->corpsenm == PM_MOTE_OF_LIGHT)
+					stuff->spe |= FIGURINE_LOYAL|FIGURINE_PSEUDO;
+				else stuff->spe |= FIGURINE_LOYAL;
+				stuff->objsize = MZ_TINY;
+				set_material_gm(stuff, GEMSTONE);
+				set_submat(stuff, DIAMOND);
 				fix_object(stuff);
 				add_to_container(otmp, stuff);
 			}
 
-			stuff = mksobj(FIGURINE, MKOBJ_NOINIT);
-			stuff->corpsenm = PM_BALL_OF_RADIANCE;
+			stuff = mksobj(CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
+			stuff->objsize = MZ_TINY;
+			int armors[] = {CRYSTAL_BOOTS, GAUNTLETS_OF_POWER, CRYSTAL_PLATE_MAIL, CLOAK_OF_MAGIC_RESISTANCE, CRYSTAL_HELM, SHIELD_OF_REFLECTION, CRYSTAL_SWORD};
+			struct obj *armor;
+			for(int i =  0; i < SIZE(armors); i++){
+				armor = mksobj(armors[i], MKOBJ_NOINIT);
+				armor->objsize = MZ_TINY;
+				if(armor->otyp == CLOAK_OF_MAGIC_RESISTANCE){
+					set_material_gm(armor, VEGGY);
+					switch(rn2(4)){
+						case 0:
+							armor->obj_color = CLR_YELLOW;
+						break;
+						case 1:
+							armor->obj_color = CLR_RED;
+						break;
+						case 2:
+							armor->obj_color = CLR_BRIGHT_MAGENTA;
+						break;
+						case 3:
+							armor->obj_color = CLR_BLUE;
+						break;
+					}
+				}
+				else {
+					set_material_gm(armor, GEMSTONE);
+					set_submat(armor, DIAMOND);
+				}
+				if(armor->otyp == CRYSTAL_SWORD){
+					add_oprop(armor, OPROP_MAGCW);
+					add_oprop(armor, OPROP_INSTW);
+				}
+				fix_object(armor);
+				add_to_container(stuff, armor);
+			}
 			fix_object(stuff);
-			stuff->spe = FIGURINE_LOYAL|FIGURINE_PSEUDO;
+			add_to_container(otmp, stuff);
+		}
+		if(urace.malenum == PM_VAMPIRE){
+			stuff = mksobj(LIFELESS_DOLL, NO_MKOBJ_FLAGS);
+			add_to_container(otmp, stuff);
+
+			stuff = mksobj(PLAIN_DRESS, MKOBJ_NOINIT);
+			add_to_container(otmp, stuff);
+
+			stuff = mksobj(CLOAK, MKOBJ_NOINIT);
+			set_material_gm(stuff, CLOTH);
+			add_to_container(otmp, stuff);
+
+			stuff = mksobj(LOW_BOOTS, MKOBJ_NOINIT);
+			add_to_container(otmp, stuff);
+
+			stuff = mksobj(GLOVES, MKOBJ_NOINIT);
+			set_material_gm(stuff, CLOTH);
 			add_to_container(otmp, stuff);
 		}
 	}

@@ -1030,6 +1030,8 @@ int mkflags;
 				struct obj * otmp2;
 				struct obj * oinv;
 				int skull;
+				int template;
+				int extra_flags;
 				if(Infuture){
 					if(Race_if(PM_ANDROID)){
 						int skulls[] = {PM_DWARF_KING, PM_DWARF_QUEEN, PM_GITHYANKI_PIRATE, PM_DEMINYMPH, PM_MORDOR_MARSHAL, PM_MOUNTAIN_CENTAUR, PM_DRIDER, 
@@ -1061,6 +1063,11 @@ int mkflags;
 					skull = PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION;
 					mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born = 1;
 				}
+				else if(Role_if(PM_MADMAN) && Race_if(PM_GNOME) && on_level(&u.uz, &nemesis_level) && in_mklev){
+					skull = PM_COURE_ELADRIN;
+					template = PSEUDONATURAL;
+					extra_flags = NO_MINVENT;
+				}
 				else {
 					int skulls[] = {PM_DWARF_KING, PM_DWARF_QUEEN, PM_MAID, 
 						PM_GITHYANKI_PIRATE, PM_DEMINYMPH, PM_MORDOR_ORC_ELITE, PM_MORDOR_MARSHAL,
@@ -1074,8 +1081,10 @@ int mkflags;
 					};
 					skull = ROLL_FROM(skulls);
 				}
-				mon = makemon(&mons[skull], 0, 0, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+				mon = makemon(&mons[skull], 0, 0, MM_ADJACENTOK|MM_NOCOUNTBIRTH|extra_flags);
 				if(mon){
+					if(template)
+						set_template(mon, template);
 					if(mon->m_lev < 10){
 						mon->m_lev = 10;
 						mon->mhp = mon->mhpmax = d(10, 8);
@@ -1162,12 +1171,23 @@ int mkflags;
 			if(otmp->otyp == BROKEN_ANDROID || otmp->otyp == BROKEN_GYNOID || otmp->otyp == LIFELESS_DOLL){
 				struct monst * mon;
 				struct obj * otmp2;
-				mon = makemon(&mons[otmp->corpsenm], 0, 0, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+				int tame = 0;
+				if(Role_if(PM_MADMAN) && on_level(&u.uz, &nemesis_level) && in_mklev){
+					tame = MM_EDOG;
+				}
+				mon = makemon(&mons[otmp->corpsenm], 0, 0, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|tame);
 				if(mon){
+					if(tame){
+						initedog(mon);
+						EDOG(mon)->loyal = TRUE;
+					}
 					otmp2 = save_mtraits(otmp, mon);
-					mongone(mon);
 					if(otmp2)
 						otmp = otmp2;
+					if(mon->m_insight_level){
+						otmp->ovar1_insightlevel = mon->m_insight_level;
+					}
+					mongone(mon);
 				}
 			}
 			break;
