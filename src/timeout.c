@@ -2613,6 +2613,7 @@ struct obj *obj;
 	EMON(obj)->encouraged = mon->encouraged;
 	EMON(obj)->mtrapseen = mon->mtrapseen;
 	EMON(obj)->mfaction = mon->mfaction;
+	return obj;
 }
 
 /* callback procs to desummon monsters/objects */
