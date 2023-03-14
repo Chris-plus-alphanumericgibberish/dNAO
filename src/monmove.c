@@ -1343,7 +1343,7 @@ register struct monst *mtmp;
 		|| (mdat->msound == MS_APOC && !mtmp->mspec_used)
 	) m_respond(mtmp);
 
-	if(!mtmp->mblinded) for (gazemon = fmon; gazemon; gazemon = nxtmon){
+	if(!mtmp->mblinded && !mon_resistance(mtmp, GAZE_RES)) for (gazemon = fmon; gazemon; gazemon = nxtmon){
 		nxtmon = gazemon->nmon;
 		if(DEADMONSTER(gazemon))
 			continue;
@@ -1358,9 +1358,6 @@ register struct monst *mtmp;
 			if (hideablewidegaze(gazemon->data) && hiddenwidegaze(gazemon))
 				continue;
 
-			if(mon_resistance(mtmp, GAZE_RES))
-				continue;
-			
 			if (controlledwidegaze(gazemon->data)
 				&& !mm_aggression(gazemon, mtmp)
 			) continue;
