@@ -6205,14 +6205,12 @@ cleanup:
 	tmp = experience(mtmp, (int)mvitals[mndx].killed);
 	more_experienced(tmp, 0);
 	newexplevel();		/* will decide if you go up */
-	if(!u.veil && !mvitals[mndx].insightkill){
+	if(!u.veil && !mvitals[mndx].insightkill && yields_insight(mtmp->data)){
 		mvitals[mndx].insightkill = TRUE;
-		if(yields_insight(mtmp->data)){
-			uchar insight = u_insight_gain(mtmp);
-			mvitals[monsndx(mtmp->data)].insight_gained += insight;
-			change_uinsight(insight);
-			change_usanity(u_sanity_gain(mtmp), FALSE);
-		}
+		uchar insight = u_insight_gain(mtmp);
+		mvitals[monsndx(mtmp->data)].insight_gained += insight;
+		change_uinsight(insight);
+		change_usanity(u_sanity_gain(mtmp), FALSE);
 	}
 
 	/* adjust alignment points */

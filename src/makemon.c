@@ -12911,14 +12911,16 @@ int faction;
 //	    mtmp->mhpmax = mtmp->mhp = 2*(ptr->mlevel - 6);
 	    mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
 	    // mtmp->m_lev = mtmp->mhp / 4;	/* approximation */
+	} else if (has_template(mtmp, PSEUDONATURAL) || has_template(mtmp, MOLY_TEMPLATE)) {
+		mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
 	} else if (is_ancient(mtmp) || is_tannin(mtmp)) {
 		mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
+	} else if (!mtmp->m_lev) {
+	    mtmp->mhpmax = mtmp->mhp = rnd(4);
 	} else if (ptr->mlet == S_DRAGON && mndx >= PM_GRAY_DRAGON) {
 	    /* adult dragons */
 	    mtmp->mhpmax = mtmp->mhp = (int) (In_endgame(&u.uz) ?
 		(8 * mtmp->m_lev) : (4 * mtmp->m_lev + d((int)mtmp->m_lev, 4)));
-	} else if (!mtmp->m_lev) {
-	    mtmp->mhpmax = mtmp->mhp = rnd(4);
 	} else {
 		if(Infuture){
 			mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - 1;

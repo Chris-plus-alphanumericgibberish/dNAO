@@ -451,6 +451,7 @@ int template;
 		ptr->mflagsf |= MF_MARTIAL_E;
 		ptr->mflagsf &= ~(MF_BAB_HALF);
 		ptr->mflagsf |= MF_BAB_FULL;
+		ptr->mflagsg |= (MG_INSIGHT|MG_SANLOSS);
 		/*Pseudonaturals have tentacles, which changes their grasp situation.*/
 		if(ptr->mflagsb&MB_NOLIMBS){
 			ptr->mflagsb &= ~MB_NOLIMBS;
@@ -464,6 +465,7 @@ int template;
 			ptr->mflagsw |= MW_ELDER_SIGN;
 		}
 		ptr->mflagsb |= MB_ACID|MB_POIS;
+		ptr->mlevel *= 1.5;
 		break;
 	case TOMB_HERD:
 		/* flags: */
@@ -474,7 +476,8 @@ int template;
 		ptr->mflagsm |= (MM_TENGTPORT|MM_AMPHIBIOUS|MM_BREATHLESS|MM_TPORT|MM_TPORT_CNTRL|MM_WEBRIP);
 		ptr->mflagst &= ~(MT_MINDLESS|MT_HERBIVORE|MT_METALLIVORE);
 		ptr->mflagst |= (MT_HOSTILE|MT_ANIMAL|MT_CARNIVORE|MT_TRAITOR);
-		ptr->mflagsg &= ~(MG_INFRAVISIBLE);
+		ptr->mflagsg &= ~(MG_INFRAVISIBLE|MG_RBLUNT);
+		ptr->mflagsg |= (MG_VBLUNT|MG_SANLOSS);
 		ptr->mflagsb &= ~(MB_UNSOLID|MB_OVIPAROUS|MB_ACID|MB_POIS|MB_POIS|MB_TOSTY|MB_HALUC|MB_INSUBSTANTIAL);
 		ptr->mflagsb |= (MB_INDIGESTIBLE|MB_THICK_HIDE|MB_STRONG);
 
@@ -504,6 +507,8 @@ int template;
 		/* defense: */
 		ptr->dac += 4;
 		ptr->hdr = 0; //Exposed brain
+		ptr->mflagst &= ~(MT_ANIMAL|MT_MINDLESS);
+		ptr->mflagsg |= (MG_INSIGHT|MG_SANLOSS);
 		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
 			ptr->mflagsw |= MW_ELDER_SIGN;
 		}
@@ -537,6 +542,7 @@ int template;
 		ptr->mflagst |= (MT_CARNIVORE);
 		ptr->mflagsv |= (MV_ECHOLOCATE|MV_SCENT);
 		ptr->mflagsa |= (MA_ANIMAL|MA_PLANT|MA_PRIMORDIAL);
+		ptr->mflagsg |= (MG_INSIGHT|MG_SANLOSS);
 		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
 			ptr->mflagsw |= MW_ELDER_SIGN;
 		}
@@ -593,7 +599,7 @@ int template;
 		ptr->mflagsm |= (MM_AMORPHOUS|MM_SWIM|MM_AMPHIBIOUS);
 		ptr->mflagst |= (MT_OMNIVORE | MT_MINDLESS | MT_HOSTILE | MT_STALK);
 		ptr->mflagst &= ~(MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL);
-		ptr->mflagsg |= (MG_VSLASH|MG_REGEN); //|MG_SANLOSS
+		ptr->mflagsg |= (MG_VSLASH|MG_REGEN|MG_SANLOSS);
 		ptr->mflagsg &= ~(MG_RBLUNT|MG_PNAME);
 		ptr->mflagsa |= (MA_PRIMORDIAL|MA_AQUATIC);
 		ptr->mflagsb |= (MB_NOLIMBS|MB_ACID|MB_POIS|MB_STRONG);
