@@ -503,14 +503,6 @@ boolean goodequip;
 	if (ptr->mtyp == PM_MINOTAUR) {
 		if (!rn2(3) || (in_mklev && Is_earthlevel(&u.uz)))
 		(void) mongets(mtmp, WAN_DIGGING, mkobjflags);
-	} else if(ptr->mtyp == PM_HILL_GIANT){
-		if(In_quest(&u.uz) && urole.neminum == PM_CYCLOPS && in_mklev){
-			otmp = mongets(mtmp, SACK, NO_MKOBJ_FLAGS);
-			if(otmp){
-				otmp->spe = 9; //plague victim
-				fix_object(otmp);
-			}
-		}
 	} else if(ptr->mtyp == PM_DEEPEST_ONE
 		|| ptr->mtyp == PM_FATHER_DAGON
 		|| ptr->mtyp == PM_MOTHER_HYDRA) {
@@ -737,6 +729,14 @@ boolean goodequip;
 		otmp->owt = weight(otmp);
 		(void) mpickobj(mtmp, otmp);
 		}
+		if(ptr->mtyp == PM_HILL_GIANT && In_quest(&u.uz) && urole.neminum == PM_CYCLOPS && in_mklev){
+			otmp = mongets(mtmp, SACK, NO_MKOBJ_FLAGS);
+			if(otmp){
+				otmp->spe = 9; //plague victim
+				fix_object(otmp);
+			}
+		}
+
 		if(ptr->mtyp == PM_GIANT || ptr->mtyp == PM_STONE_GIANT || ptr->mtyp == PM_HILL_GIANT){
 			if(!rn2(4)) mongets(mtmp, CLUB, mkobjflags);
 		} else if(ptr->mtyp == PM_FIRE_GIANT){
