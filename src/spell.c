@@ -4449,10 +4449,10 @@ int spell;
 			u.ufirst_life_timeout = moves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
 		break;
 		case APPLE_WORD:
-			You("preach dreadful knowledge!");
+			You("speak the dreadful truth!");
 			for(sy = 0; sy < ROWNO; sy++){
 				for(sx = 0; sx < COLNO; sx++){
-					if(isok(sx,sy) && couldsee(sx,sy) && (mon = m_at(sx, sy)) && !resist(mon, '\0', 0, NOTELL)){
+					if(isok(sx,sy) && couldsee(sx,sy) && (mon = m_at(sx, sy)) && !is_deaf(mon) && !resist(mon, '\0', 0, NOTELL)){
 						if(!mon->mpeaceful){
 							mon->mcrazed = TRUE;
 							mon->mflee = TRUE;
@@ -6146,7 +6146,7 @@ int spell;
 				chance -= (discomfort * delta)/10;
 			} else {
 				if (!uwep && !uarms) {
-					//Not reduced by ClearThoughts+Nightmare combo
+					//Bonus, not reduced by ClearThoughts+Nightmare combo
 					chance += Insanity/10;
 				}
 			}
