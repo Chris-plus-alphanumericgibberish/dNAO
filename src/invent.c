@@ -5681,7 +5681,8 @@ u_clothing_discomfort()
 	}
 	if(uarmc){
 		count+=3;
-		if(uarmc->otyp == MUMMY_WRAPPING 
+		if(uarmc->otyp == MUMMY_WRAPPING
+			|| uarmc->otyp == PRAYER_WARDED_WRAPPING
 			|| uarmc->otyp == WHITE_FACELESS_ROBE
 			|| uarmc->otyp == BLACK_FACELESS_ROBE
 			|| uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE
