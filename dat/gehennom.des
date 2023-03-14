@@ -3374,14 +3374,14 @@ RANDOM_PLACES: (11,05), (11,15), (64,15), (64,05)
 MONSTER:'&',"Asmodeus", (39,10)
 #Aesmadeva and the Ashmadia, Dicefreaks....Good name for a rock band?
 MONSTER:'&',"nessian pit fiend", (39,10), "Aesmadeva, the Ninth Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the First Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the Second Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the Third Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the Fourth Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the Fifth Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the Sixth Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the Seventh Ashmade"
-MONSTER:'&',"pit fiend", (39,10), "the Eighth Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The First Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The Second Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The Third Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The Fourth Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The Fifth Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The Sixth Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The Seventh Ashmade"
+MONSTER:'&',"pit fiend", (39,10), "The Eighth Ashmade"
 
 MONSTER:'i',"legion devil captain", place[0]
 MONSTER:'&',"pit fiend", place[0]

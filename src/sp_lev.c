@@ -932,7 +932,21 @@ struct mkroom	*croom;
 	}
 	if (mtmp) {
 	    /* handle specific attributes for some special monsters */
-	    if (m->name.str && !parsed) mtmp = christen_monst(mtmp, m->name.str);
+	    if (m->name.str && !parsed){
+			mtmp = christen_monst(mtmp, m->name.str);
+			//Semiunique demons
+			if(In_hell(&u.uz)){
+				if(lev_limit_45(mtmp->data))
+					mtmp->m_lev = 45;
+				else if(lev_limit_30(mtmp->data))
+					mtmp->m_lev = 30;
+				else
+					mtmp->m_lev = 3*mtmp->data->mlevel/2;
+				
+				mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data);
+				mtmp->mhp = mtmp->mhpmax;
+			}
+		}
 
 	    /*
 	     * This is currently hardwired for mimics only.  It should
