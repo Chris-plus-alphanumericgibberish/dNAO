@@ -3782,7 +3782,8 @@ struct zapdata * zapdata;
 			)
 			dmg /= 2;
 	}
-
+	if(dmg < 1)
+		dmg = 1;
 	/* madness damage reductions */
 	if (mdef && youagr) {
 		if (mdef->female && humanoid_torso(mdef->data) && roll_madness(MAD_SANCTITY)){
