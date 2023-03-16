@@ -72,6 +72,8 @@ int adtyp, ztyp;
 		case AD_SLEE: return "sleep ray";
 		case AD_DEAD: return "death ray";
 		case AD_ELEC: return "lightning bolt";
+		case AD_HOLY: return "holy missile";
+		case AD_UNHY: return "unholy missile";
 		default:      impossible("unknown wand damage type in flash_type: %d", adtyp);
 			return "NaN ray";
 		}
@@ -2393,6 +2395,13 @@ register struct obj *wand;
 		wand->age = max(wand->age-10000, 0);
 		return 1;
 	}
+	else if(wand->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(wand, IEA_BOLTS)){
+		if(!wand->owornmask || u.uen < 10)
+			return 0;
+		u.uen -= 10;
+		flags.botl = TRUE;
+		return 1;
+	}
 	return 0;
 }
 
@@ -2494,7 +2503,7 @@ struct obj *otmp;
 	useup(otmp);
 }
 
-static NEARDATA const char zap_syms[] = { WAND_CLASS, TOOL_CLASS, 0 };
+static NEARDATA const char zap_syms[] = { ARMOR_CLASS, WAND_CLASS, TOOL_CLASS, 0 };
 
 int
 dozap()
@@ -2659,7 +2668,29 @@ boolean ordinary;
 			pline("Idiot!  You've shot yourself!");
 		    }
 		    break;
-
+		case IMPERIAL_ELVEN_GAUNTLETS:
+			if(u.ualign.record > 3){
+				damage = d(1,8);
+				if(hates_holy(youracedata))
+					damage *= 2;
+				pline("Idiot!  You've shot yourself!");
+			}
+			else if(u.ualign.record < -3){
+				damage = d(1,8);
+				if(hates_unholy(youracedata))
+					damage *= 2;
+				pline("Idiot!  You've shot yourself!");
+			}
+			else {
+				if(Antimagic) {
+					shieldeff(u.ux, u.uy);
+					pline_The("missiles bounce!");
+				} else {
+					damage = d(1,4);
+					pline("Idiot!  You've shot yourself!");
+				}
+			}
+		break;
 		case WAN_POLYMORPH:
 		    if (!Unchanging)
 		    	makeknown(WAN_POLYMORPH);
@@ -3279,6 +3310,25 @@ register struct	obj	*obj;
 		
 	    if (otyp == WAN_DIGGING || otyp == SPE_DIG)
 			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
+		else if(otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(obj, IEA_BOLTS)){
+			basiczap(&zapdat, 0, ZAP_WAND, 1);
+			zapdat.damn = max(1, P_SKILL(P_WAND_POWER));
+			zapdat.affects_floor = FALSE;
+			if(u.ualign.record > 3){
+				zapdat.damd = 8;
+				zapdat.adtyp = AD_HOLY;
+			}
+			else if(u.ualign.record < -3){
+				zapdat.damd = 8;
+				zapdat.adtyp = AD_UNHY;
+			}
+			else {
+				zapdat.damd = 4;
+				zapdat.adtyp = AD_MAGM;
+			}
+			use_skill(P_WAND_POWER, 1);
+			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, range, &zapdat);
+		}
 	    else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_ACID_SPLASH){
 			basiczap(&zapdat, spell_adtype(otyp), ZAP_SPELL, u.ulevel / 2 + 1);
 			/* some spells are special */

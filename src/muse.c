@@ -1158,7 +1158,7 @@ struct monst *mtmp;
 	    if(mon_valkyrie(mtmp) && obj->oartifact == ART_MJOLLNIR && !obj->cursed && mtmp->misc_worn_check & W_ARMG) {
 			struct obj *otmp;
 			for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
-				if (otmp->owornmask & W_ARMG && otmp->otyp == GAUNTLETS_OF_POWER){
+				if (otmp->owornmask & W_ARMG && (otmp->otyp == GAUNTLETS_OF_POWER || (otmp->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(otmp, IEA_GOPOWER)))){
 					m.offensive = obj;
 					m.has_offense = MUSE_MJOLLNIR;
 			break;

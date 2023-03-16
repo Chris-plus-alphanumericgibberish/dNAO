@@ -704,6 +704,8 @@ HELM(("elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 1, 10,   5, 9, 3, 0, WOOD, HI_WOOD),
 HELM(("high-elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 1, 15,   5, 8, 4, 0, MITHRIL, HI_MITHRIL, O_MATSPEC(UNIDED)),
+HELM(("imperial elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0, 0, 30, 900, 8, 4, 2, WOOD, CLR_BRIGHT_GREEN),
 HELM(("droven helm", "spider-shaped helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 1, 20,   5, 8, 4, 0, SHADOWSTEEL, CLR_BLACK),
 HELM(("plasteel helm", "white skull helm", "skull helm"), /*Needs encyc entry*//*Needs tile*/
@@ -779,6 +781,8 @@ SUIT(("lantern plate mail", "glass-set plate mail"),
 	0, 0,   MZ_HUGE,  ARMSZ_HEAVY,  0,  5, 225,  650,  5, 6, 3, IRON, HI_METAL),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5, 110, 1200,  3, 7, 3, MITHRIL, HI_MITHRIL),
+SUIT(("imperial elven armor", "runed plate mail"), /*Needs encyc entry*/
+	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5, 110, 9000,  4, 6, 3, WOOD, CLR_BRIGHT_GREEN),
 SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5,  85, 2000,  3, 7, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/
@@ -983,6 +987,8 @@ GLOVES(("harmonium gauntlets", "red-lacquered hooked gauntlets", "hooked gauntle
 		0, 0,  0, 2, 40,  1, 9, 4, 0, METAL, CLR_RED),
 GLOVES(("high-elven gauntlets", "runed gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 2, 15, 50, 8, 4, 0, MITHRIL, HI_MITHRIL),
+GLOVES(("imperial elven gauntlets", "runed gauntlets"), /*Needs encyc entry*//*Needs tile*/
+		0, 0,  0, 2, 15,900, 8, 4, 2, WOOD, CLR_BRIGHT_GREEN),
 GLOVES(("plasteel gauntlets", "hard white gauntlets", "gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 2, 15, 50,  8, 3, 0, PLASTIC, CLR_WHITE),
 GLOVES(("gloves", "old gloves"),
@@ -1017,6 +1023,8 @@ BOOTS(("high boots", "jackboots"),
 		0, 0,  15, 2, 20, 12, 10, 2, 0, LEATHER, HI_LEATHER),
 BOOTS(("heeled boots", "tall boots"),
 		1, 0,   0, 2, 20, 12, 10, 2, 0, LEATHER, CLR_BLACK),
+BOOTS(("imperial elven boots", "runed armored boots"),
+		0, 0,   0, 2, 25,900,  8, 3, 0, WOOD, CLR_BRIGHT_GREEN, O_POWER(STEALTH)),
 BOOTS(("crystal boots", "boots"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,   0, 2, 60,300,  8, 4, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 /* With shuffled appearances... */

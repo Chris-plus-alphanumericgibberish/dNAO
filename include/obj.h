@@ -89,6 +89,7 @@ enum {
 	OPROP_SFUWW,
 	OPROP_TACTB,
 	OPROP_INSTW,
+	OPROP_ELFLW,
 	MAX_OPROP
 };
 
@@ -344,6 +345,7 @@ struct obj {
 	/* Ampule type for hypospray ampules */
 	/* Engraving for rings */
 	/* doll's tear */
+	/* Upgrades made to imperial elven armor */
 #define obj_type_uses_ovar1(otmp) (\
 	   (otmp)->otyp == VIPERWHIP \
 	|| (otmp)->otyp == MOON_AXE \
@@ -360,12 +362,78 @@ struct obj {
 	|| (otmp)->oclass == RING_CLASS \
 	|| (otmp)->otyp == DOLL_S_TEAR \
 	|| (otmp)->otyp == PINCER_STAFF \
+	|| is_imperial_elven_armor(otmp) \
 	)
 #define ECLIPSE_MOON	0
 #define CRESCENT_MOON	1
 #define HALF_MOON		2
 #define GIBBOUS_MOON	3
 #define FULL_MOON	 	4
+
+#define check_imp_mod(obj, prop) ((obj)->ovar1&(prop))
+#define add_imp_mod(obj, prop) ((obj)->ovar1 |= (prop))
+//Body
+///Ring
+#define IEA_FIXED_ABIL	0x0000000000000001L
+///Ring
+#define IEA_FAST_HEAL	0x0000000000000002L
+///Shield or amulet
+#define IEA_REFLECTING	0x0000000000000004L
+///Amulet
+#define IEA_SICK_RES	0x0000000000000008L
+///Cloak
+#define IEA_HALF_PHDAM	0x0000000000000010L
+///Cloak?
+#define IEA_HALF_SPDAM	0x0000000000000020L
+///Cloak
+#define IEA_DISPLACED	0x0000000000000040L
+///Cloak or ring
+#define IEA_INVIS		0x0000000000000080L
+
+#define IEA_BODY_MASK	(IEA_FIXED_ABIL|IEA_FAST_HEAL|IEA_REFLECTING|IEA_SICK_RES|IEA_HALF_PHDAM|IEA_HALF_SPDAM|IEA_DISPLACED|IEA_INVIS)
+//Gauntlet
+///Water walking boots
+#define IEA_SWIMMING	0x0000000000000100L
+///gauntlets of power
+#define IEA_GOPOWER		0x0000000000000200L
+///gauntlets of dexterity
+#define IEA_GODEXTERITY	0x0000000000000400L
+///Ring
+#define IEA_INC_DAM		0x0000000000000800L
+///Wand MM
+#define IEA_BOLTS		0x0000000000001000L
+
+#define IEA_GLOVE_MASK	(IEA_SWIMMING|IEA_GOPOWER|IEA_GODEXTERITY|IEA_INC_DAM|IEA_BOLTS)
+
+//Boots
+#define IEA_FLYING		0x0000000000002000L
+#define IEA_JUMPING		0x0000000000004000L
+///Boots or Wand or ring
+#define IEA_FAST		0x0000000000008000L
+///Wand or ring
+#define IEA_TELEPORT	0x0000000000010000L
+//Boots
+#define IEA_KICKING		0x0000000001000000L
+
+#define IEA_BOOT_MASK	(IEA_FLYING|IEA_JUMPING|IEA_FAST|IEA_TELEPORT|IEA_KICKING)
+
+//Helm
+///Amulet
+#define IEA_NOBREATH	0x0000000000020000L
+///Wand of draining
+#define IEA_LIFESENSE	0x0000000000040000L
+///Ring
+#define IEA_SEE_INVIS	0x0000000000080000L
+///Helm
+#define IEA_TELEPAT		0x0000000000100000L
+///Crystal
+#define IEA_BLIND_RES	0x0000000000200000L
+///Ring
+#define IEA_INC_ACC		0x0000000000400000L
+///Ring
+#define IEA_TELE_CNTRL	0x0000000000800000L
+
+#define IEA_HELM_MASK	(IEA_NOBREATH|IEA_LIFESENSE|IEA_SEE_INVIS|IEA_TELEPAT|IEA_BLIND_RES|IEA_INC_ACC|IEA_TELE_CNTRL)
 
 	/* Songs that the Singing Sword has heard */
 	/* Spirits bound into the Pen of the Void */
@@ -532,6 +600,7 @@ struct obj {
 			 otmp->otyp == PINCER_STAFF || \
 			 check_oprop(otmp,OPROP_GSSDW) || \
 			 check_oprop(otmp,OPROP_INSTW) || \
+			 check_oprop(otmp,OPROP_ELFLW) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
@@ -569,6 +638,10 @@ struct obj {
 		typ == BODYGLOVE ||\
 		typ == PLASTEEL_GAUNTLETS ||\
 		typ == PLASTEEL_BOOTS ||\
+		typ == IMPERIAL_ELVEN_HELM ||\
+		typ == IMPERIAL_ELVEN_GAUNTLETS ||\
+		typ == IMPERIAL_ELVEN_ARMOR ||\
+		typ == IMPERIAL_ELVEN_BOOTS ||\
 		(typ >= SENSOR_PACK && typ <= HYPOSPRAY_AMPULE) ||\
 		typ == BULLET_FABBER ||\
 		typ == PROTEIN_PILL\
@@ -878,7 +951,57 @@ struct obj {
 				|| (otmp)->otyp == ELVEN_CLOAK\
 				|| (otmp)->otyp == ELVEN_SHIELD\
 				|| (otmp)->otyp == ELVEN_TOGA\
+				|| is_imperial_elven_armor(otmp)\
 				|| (otmp)->otyp == ELVEN_BOOTS)
+#define is_imperial_elven_armor(otmp)	((otmp)->otyp == IMPERIAL_ELVEN_HELM \
+				|| (otmp)->otyp == IMPERIAL_ELVEN_GAUNTLETS \
+				|| (otmp)->otyp == IMPERIAL_ELVEN_ARMOR \
+				|| (otmp)->otyp == IMPERIAL_ELVEN_BOOTS)
+#define carrying_imperial_elven_armor()	(carrying(IMPERIAL_ELVEN_HELM)\
+				|| carrying(IMPERIAL_ELVEN_GAUNTLETS)\
+				|| carrying(IMPERIAL_ELVEN_ARMOR)\
+				|| carrying(IMPERIAL_ELVEN_BOOTS)\
+				)
+#define helm_upgrade_obj(obj)	(((obj)->otyp == AMULET_OF_MAGICAL_BREATHING \
+								|| (obj)->otyp == WAN_DRAINING \
+								|| (obj)->otyp == RIN_SEE_INVISIBLE \
+								|| (obj)->otyp == HELM_OF_TELEPATHY \
+								|| (obj)->otyp == AMULET_OF_ESP \
+								|| (obj)->otyp == CRYSTAL_HELM \
+								|| (obj)->otyp == RIN_INCREASE_ACCURACY \
+								|| (obj)->otyp == RIN_TELEPORT_CONTROL \
+								) && objects[(obj)->otyp].oc_name_known)
+#define gauntlets_upgrade_obj(obj)	(((obj)->otyp ==  WATER_WALKING_BOOTS\
+								|| (obj)->otyp == GAUNTLETS_OF_POWER \
+								|| (obj)->otyp == GAUNTLETS_OF_DEXTERITY \
+								|| (obj)->otyp == RIN_INCREASE_DAMAGE \
+								|| (obj)->otyp == WAN_MAGIC_MISSILE \
+								) && objects[(obj)->otyp].oc_name_known)
+#define armor_upgrade_obj(obj)	(((obj)->otyp == RIN_SUSTAIN_ABILITY \
+								|| (obj)->otyp == RIN_REGENERATION \
+								|| (obj)->otyp == AMULET_OF_REFLECTION \
+								|| (obj)->otyp == SHIELD_OF_REFLECTION \
+								|| (obj)->otyp == JUMPING_BOOTS \
+								|| (obj)->otyp == AMULET_VERSUS_SICKNESS \
+								|| (obj)->otyp == HEALER_UNIFORM \
+								|| (obj)->otyp == CLOAK_OF_PROTECTION \
+								|| (obj)->otyp == CLOAK_OF_MAGIC_RESISTANCE \
+								|| (obj)->otyp == ORIHALCYON_GAUNTLETS \
+								|| (obj)->otyp == CLOAK_OF_DISPLACEMENT \
+								|| (obj)->otyp == CLOAK_OF_INVISIBILITY \
+								|| (obj)->otyp == RIN_INVISIBILITY \
+								|| (obj)->otyp == WAN_MAKE_INVISIBLE \
+								) && objects[(obj)->otyp].oc_name_known)
+#define boots_upgrade_obj(obj)	(((obj)->otyp == FLYING_BOOTS \
+								|| (obj)->otyp == JUMPING_BOOTS \
+								|| (obj)->otyp == SPEED_BOOTS \
+								|| (obj)->otyp == KICKING_BOOTS \
+								|| (obj)->otyp == WAN_SPEED_MONSTER \
+								|| (obj)->otyp == RIN_ALACRITY \
+								|| (obj)->otyp == WAN_TELEPORTATION \
+								|| (obj)->otyp == RIN_TELEPORTATION \
+								) && objects[(obj)->otyp].oc_name_known)
+
 #define is_orcish_armor(otmp)	((otmp)->otyp == ORCISH_HELM\
 				|| (otmp)->otyp == ORCISH_CHAIN_MAIL\
 				|| (otmp)->otyp == ORCISH_RING_MAIL\

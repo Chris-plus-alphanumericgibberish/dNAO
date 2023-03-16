@@ -2629,7 +2629,7 @@ register struct monst *mtmp;
 	underarmor = which_armor(mtmp, W_ARMU);
 	boots = which_armor(mtmp, W_ARMF);
 	
-	if(gloves && gloves->otyp == GAUNTLETS_OF_POWER){
+	if(gloves && (gloves->otyp == GAUNTLETS_OF_POWER || (gloves->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(gloves, IEA_GOPOWER)))){
 		carcap = 25L*(25L + 11L) + 50L;
 	} else if(strongmonst(mdat)){
 		carcap = 25L*(18L + 11L) + 50L;

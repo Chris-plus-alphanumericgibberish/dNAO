@@ -12,6 +12,7 @@ static const char tools[] = { COIN_CLASS, CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, 
 static const char tools_too[] = { COIN_CLASS, ALL_CLASSES, SCOIN_CLASS, TOOL_CLASS, POTION_CLASS,
 				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
 static const char apply_armor[] = { ARMOR_CLASS, 0 };
+static const char imperial_repairs[] = { AMULET_CLASS, ARMOR_CLASS, RING_CLASS, WAND_CLASS, 0 };
 static const char apply_corpse[] = { FOOD_CLASS, 0 };
 static const char chain_class[] = { CHAIN_CLASS, 0 };
 static const char apply_all[] = { ALL_CLASSES, CHAIN_CLASS, 0 };
@@ -7847,6 +7848,196 @@ resizeArmor()
 	return MOVE_STANDARD;
 }
 
+#define STANDARD_UPGRADE(prop, subsystem) \
+	if(check_imp_mod(arm, prop)){ \
+		pline("You've already repaired the %s.", subsystem); \
+		return MOVE_CANCELLED; \
+	} \
+	else { \
+		pline("You repair the %s.", subsystem); \
+		add_imp_mod(arm, prop); \
+		useup(upitm); \
+		return MOVE_STANDARD; \
+	}
+
+
+STATIC_OVL int
+upgradeImpArmor()
+{
+	struct obj *upitm;
+	struct obj *arm = getobj(apply_armor, "armor piece to repair");
+	if(!arm){
+		return MOVE_CANCELLED;
+	}
+	if(!is_imperial_elven_armor(arm)){
+		pline("That doesn't look like a piece of imperial armor.");
+		return MOVE_CANCELLED;
+	}
+	if(arm->owornmask){
+		You("will need to take that off to repair it.");
+		return MOVE_CANCELLED;
+	}
+	switch(arm->otyp){
+		case IMPERIAL_ELVEN_HELM:
+			upitm = getobj(imperial_repairs, "repair the helm with");
+			if(!upitm || !helm_upgrade_obj(upitm)){
+				pline("Never mind.");
+				return MOVE_CANCELLED;
+			}
+			if(upitm->owornmask){
+				pline("You're still using that.");
+				return MOVE_CANCELLED;
+			}
+			switch(upitm->otyp){
+				case AMULET_OF_MAGICAL_BREATHING:
+					STANDARD_UPGRADE(IEA_NOBREATH, "life-support subsystem")
+				break;
+				case WAN_DRAINING:
+					STANDARD_UPGRADE(IEA_LIFESENSE, "life-sign detector")
+				break;
+				case RIN_SEE_INVISIBLE:
+					STANDARD_UPGRADE(IEA_SEE_INVIS, "crystal eye sensor")
+				break;
+				case HELM_OF_TELEPATHY:
+				case AMULET_OF_ESP:
+					STANDARD_UPGRADE(IEA_TELEPAT, "extrasensory perception subsystem")
+				break;
+				case CRYSTAL_HELM:
+					STANDARD_UPGRADE(IEA_BLIND_RES, "visor")
+				break;
+				case RIN_INCREASE_ACCURACY:
+					STANDARD_UPGRADE(IEA_INC_ACC, "targetting subsystem")
+				break;
+				case RIN_TELEPORT_CONTROL:
+					STANDARD_UPGRADE(IEA_TELE_CNTRL, "teleportation control subsystem")
+				break;
+				default:
+					impossible("Unknown repair component, sorry :(.");
+					return MOVE_CANCELLED;
+				break;
+			}
+		break;
+		case IMPERIAL_ELVEN_GAUNTLETS:
+			upitm = getobj(imperial_repairs, "repair the gauntlets with");
+			if(!upitm || !gauntlets_upgrade_obj(upitm)){
+				pline("Never mind.");
+				return MOVE_CANCELLED;
+			}
+			if(upitm->owornmask){
+				pline("You're still using that.");
+				return MOVE_CANCELLED;
+			}
+			switch(upitm->otyp){
+				case WATER_WALKING_BOOTS:
+					STANDARD_UPGRADE(IEA_SWIMMING, "swimming webs")
+				break;
+				case GAUNTLETS_OF_POWER:
+					STANDARD_UPGRADE(IEA_GOPOWER, "power subsystem")
+				break;
+				case GAUNTLETS_OF_DEXTERITY:
+					STANDARD_UPGRADE(IEA_GODEXTERITY, "dexterity subsystem")
+				break;
+				case RIN_INCREASE_DAMAGE:
+					STANDARD_UPGRADE(IEA_INC_DAM, "microtargetting subsystem")
+				break;
+				case WAN_MAGIC_MISSILE:
+					STANDARD_UPGRADE(IEA_BOLTS, "missile projectors")
+				break;
+				default:
+					impossible("Unknown repair component, sorry :(.");
+					return MOVE_CANCELLED;
+				break;
+			}
+		break;
+		case IMPERIAL_ELVEN_ARMOR:
+			upitm = getobj(imperial_repairs, "repair the armor with");
+			if(!upitm || !armor_upgrade_obj(upitm)){
+				pline("Never mind.");
+				return MOVE_CANCELLED;
+			}
+			if(upitm->owornmask){
+				pline("You're still using that.");
+				return MOVE_CANCELLED;
+			}
+			switch(upitm->otyp){
+				case RIN_SUSTAIN_ABILITY:
+					STANDARD_UPGRADE(IEA_FIXED_ABIL, "stasis subsystem")
+				break;
+				case RIN_REGENERATION:
+					STANDARD_UPGRADE(IEA_FAST_HEAL, "medical subsystem")
+				break;
+				case AMULET_OF_REFLECTION:
+				case SHIELD_OF_REFLECTION:
+				case JUMPSUIT:
+					STANDARD_UPGRADE(IEA_REFLECTING, "reflective chestplate")
+				break;
+				case AMULET_VERSUS_SICKNESS:
+				case HEALER_UNIFORM:
+					STANDARD_UPGRADE(IEA_SICK_RES, "sealed bodyglove")
+				break;
+				case CLOAK_OF_PROTECTION:
+					STANDARD_UPGRADE(IEA_HALF_PHDAM, "ballistic base layer")
+				break;
+				case CLOAK_OF_MAGIC_RESISTANCE:
+				case ORIHALCYON_GAUNTLETS:
+					STANDARD_UPGRADE(IEA_HALF_SPDAM, "dispersive underlayer")
+				break;
+				case CLOAK_OF_DISPLACEMENT:
+					STANDARD_UPGRADE(IEA_DISPLACED, "holographic projector")
+				break;
+				case CLOAK_OF_INVISIBILITY:
+				case RIN_INVISIBILITY:
+				case WAN_MAKE_INVISIBLE:
+					STANDARD_UPGRADE(IEA_INVIS, "active camouflage system")
+				break;
+				default:
+					impossible("Unknown repair component, sorry :(.");
+					return MOVE_CANCELLED;
+				break;
+			}
+		break;
+		case IMPERIAL_ELVEN_BOOTS:
+			upitm = getobj(imperial_repairs, "repair the boots with");
+			if(!upitm || !boots_upgrade_obj(upitm)){
+				pline("Never mind.");
+				return MOVE_CANCELLED;
+			}
+			if(upitm->owornmask){
+				pline("You're still using that.");
+				return MOVE_CANCELLED;
+			}
+			switch(upitm->otyp){
+				case FLYING_BOOTS:
+					STANDARD_UPGRADE(IEA_FLYING, "flight subsystem")
+				break;
+				case JUMPING_BOOTS:
+					STANDARD_UPGRADE(IEA_JUMPING, "jump jets")
+				break;
+				case WAN_SPEED_MONSTER:
+				case RIN_ALACRITY:
+				case SPEED_BOOTS:
+					STANDARD_UPGRADE(IEA_FAST, "speed boosters")
+				break;
+				case WAN_TELEPORTATION:
+				case RIN_TELEPORTATION:
+					STANDARD_UPGRADE(IEA_TELEPORT, "blink subsystem")
+				break;
+				case KICKING_BOOTS:
+					STANDARD_UPGRADE(IEA_KICKING, "concussive impactors")
+				break;
+				default:
+					impossible("Unknown repair component, sorry :(.");
+					return MOVE_CANCELLED;
+				break;
+			}
+		break;
+		default:
+			impossible("Unknown armor piece?");
+			return MOVE_CANCELLED;
+		break;
+	}
+}
+
 STATIC_OVL int
 doUseUpgradeKit(optr)
 struct obj **optr;
@@ -7857,7 +8048,7 @@ struct obj **optr;
 	char all_classes[MAXOCLASSES] = {0};
 	for(int i = 1; i < MAXOCLASSES; i++)
 		all_classes[i-1] = i;
-	if(uclockwork)
+	if(uclockwork){
 		if (yn("Make an upgrade to yourself?") == 'y'){
 			long upgrade = upgradeMenu();
 			switch(upgrade){
@@ -7985,6 +8176,16 @@ struct obj **optr;
 				break;
 			}
 		}
+	}
+	else if(carrying_imperial_elven_armor()){
+		if (yn("Repair your imperial armor?") == 'y'){
+			if (upgradeImpArmor() != MOVE_CANCELLED){
+				useup(obj);
+				*optr = 0;
+				return MOVE_STANDARD;
+			}
+		}
+	}
 	if (yn("Resize a piece of armor?") == 'y'){
 		if (resizeArmor() != MOVE_CANCELLED){
 			useup(obj);

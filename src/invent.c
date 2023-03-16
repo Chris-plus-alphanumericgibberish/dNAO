@@ -1201,7 +1201,7 @@ register const char *let,*word;
 		|| (!strcmp(word, "trephinate") && !(otmp->otyp == CRYSTAL_SKULL))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
 		|| (!strcmp(word, "zap") &&
-		    (otmp->oclass == TOOL_CLASS && otmp->otyp != ROD_OF_FORCE))
+		    ((otmp->oclass == TOOL_CLASS && otmp->otyp != ROD_OF_FORCE) || (otmp->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(otmp, IEA_BOLTS))))
 		|| (!strcmp(word, "inject") && !(otmp->otyp == HYPOSPRAY_AMPULE && otmp->spe > 0))
 		|| (!strcmp(word, "give the tear to") &&
 			!(otmp->otyp == BROKEN_ANDROID && otmp->ovar1_insightlevel == 0) &&
@@ -1341,6 +1341,16 @@ register const char *let,*word;
 			!sflm_smeltable_mithril(otmp))
 		|| (!strcmp(word, "burn in the silver flame") && 
 			!(otmp->blessed || otmp->cursed))
+		|| (!strcmp(word, "armor piece to repair") &&
+		    (!is_imperial_elven_armor(otmp)))
+		|| (!strcmp(word, "repair the helm with") &&
+		    (!helm_upgrade_obj(otmp)))
+		|| (!strcmp(word, "repair the gauntlets with") &&
+		    (!gauntlets_upgrade_obj(otmp)))
+		|| (!strcmp(word, "repair the armor with") &&
+		    (!armor_upgrade_obj(otmp)))
+		|| (!strcmp(word, "repair the boots with") &&
+		    (!boots_upgrade_obj(otmp)))
 		|| (!strcmp(word, "upgrade your stove with") &&
 		    (otyp != TINNING_KIT))
 		|| (!strcmp(word, "upgrade your switch with") &&
@@ -3857,6 +3867,7 @@ winid *datawin;
 		otyp == CRYSTAL_HELM ||
 		otyp == PONTIFF_S_CROWN ||
 		otyp == FACELESS_HELM ||
+		otyp == IMPERIAL_ELVEN_HELM ||
 		otyp == WHITE_FACELESS_ROBE ||
 		otyp == BLACK_FACELESS_ROBE ||
 		otyp == SMOKY_VIOLET_FACELESS_ROBE)		OBJPUTSTR("Covers the face entirely.");

@@ -146,6 +146,82 @@ int otyp;
 				break;
 			}
 		}
+		if(!got_prop && obj && is_imperial_elven_armor(obj)){
+			switch(cur_prop){
+				case MAGICAL_BREATHING:
+					if(check_imp_mod(obj, IEA_NOBREATH))
+						got_prop = TRUE;
+				break;
+				case LIFESENSE:
+					if(check_imp_mod(obj, IEA_LIFESENSE))
+						got_prop = TRUE;
+				break;
+				case SEE_INVIS:
+					if(check_imp_mod(obj, IEA_SEE_INVIS))
+						got_prop = TRUE;
+				break;
+				case TELEPAT:
+					if(check_imp_mod(obj, IEA_TELEPAT))
+						got_prop = TRUE;
+				break;
+				case BLIND_RES:
+					if(check_imp_mod(obj, IEA_BLIND_RES))
+						got_prop = TRUE;
+				break;
+				case TELEPORT_CONTROL:
+					if(check_imp_mod(obj, IEA_TELE_CNTRL))
+						got_prop = TRUE;
+				break;
+				case FIXED_ABIL:
+					if(check_imp_mod(obj, IEA_FIXED_ABIL))
+						got_prop = TRUE;
+				break;
+				case REFLECTING:
+					if(check_imp_mod(obj, IEA_REFLECTING))
+						got_prop = TRUE;
+				break;
+				case SICK_RES:
+					if(check_imp_mod(obj, IEA_SICK_RES))
+						got_prop = TRUE;
+				break;
+				case HALF_PHDAM:
+					if(check_imp_mod(obj, IEA_HALF_PHDAM))
+						got_prop = TRUE;
+				break;
+				case HALF_SPDAM:
+					if(check_imp_mod(obj, IEA_HALF_SPDAM))
+						got_prop = TRUE;
+				break;
+				case DISPLACED:
+					if(check_imp_mod(obj, IEA_DISPLACED))
+						got_prop = TRUE;
+				break;
+				case INVIS:
+					if(check_imp_mod(obj, IEA_INVIS))
+						got_prop = TRUE;
+				break;
+				case SWIMMING:
+					if(check_imp_mod(obj, IEA_SWIMMING))
+						got_prop = TRUE;
+				break;
+				case FLYING:
+					if(check_imp_mod(obj, IEA_FLYING))
+						got_prop = TRUE;
+				break;
+				case JUMPING:
+					if(check_imp_mod(obj, IEA_JUMPING))
+						got_prop = TRUE;
+				break;
+				case FAST:
+					if(check_imp_mod(obj, IEA_FAST))
+						got_prop = TRUE;
+				break;
+				case TELEPORT:
+					if(check_imp_mod(obj, IEA_TELEPORT))
+						got_prop = TRUE;
+				break;
+			}
+		}
 		// if we've got the property, add it to the array
 		if (got_prop)
 		{

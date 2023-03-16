@@ -1275,11 +1275,13 @@ struct monst *mon;
 			tmp += u.ulevel/3;
 			if(tmp > 18) tmp = STR19(tmp);
 		}
-		if ((armg && armg->otyp == GAUNTLETS_OF_POWER) || 
-			(wep && wep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
-			(wep && wep->oartifact == ART_PEN_OF_THE_VOID && wep->ovar1_seals&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
-			(wep && wep->oartifact == ART_STORMBRINGER) ||
-			(wep && wep->oartifact == ART_OGRESMASHER) ||
+		if ((armg && (armg->otyp == GAUNTLETS_OF_POWER || (armg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(armg, IEA_GOPOWER)))) || 
+			(wep &&((wep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
+					 (wep->oartifact == ART_PEN_OF_THE_VOID && wep->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
+					 (wep->oartifact == ART_STORMBRINGER) ||
+					 (wep->oartifact == ART_OGRESMASHER)
+			)) ||
+			// (swapwep && swapwep->oartifact == ART_STORMBRINGER) ||
 			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||
 			(arms && arms->oartifact == ART_GOLDEN_KNIGHT)
 		) return(125);
@@ -1302,7 +1304,7 @@ struct monst *mon;
 			(armg && armg->oartifact == ART_GODHANDS)
 		) return(25);
 		if (
-			(armg && armg->oartifact == ART_PREMIUM_HEART)
+			(armg && (armg->oartifact == ART_PREMIUM_HEART || (armg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(armg, IEA_GODEXTERITY))))
 		) tmp += armg->spe;
 		if(is_player && Race_if(PM_ORC)){
 			tmp += u.ulevel/3;

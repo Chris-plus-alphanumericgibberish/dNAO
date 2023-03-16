@@ -704,6 +704,11 @@ boolean digest_meal;
 		}
 		if(mon_resistance(mon,REGENERATION))
 			mon->mhp+=1;
+		struct obj *arm = which_armor(mon, W_ARM);
+		// regeneration tech
+		if (arm && arm->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(arm, IEA_FAST_HEAL)){
+			mon->mhp+=1;
+		}
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING && !mindless_mon(mon) && !is_deaf(mon) && mon->mtame)
 			mon->mhp += 1;
 	}

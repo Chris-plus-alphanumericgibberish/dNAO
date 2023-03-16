@@ -314,6 +314,10 @@ dig()
 
 	bonus = 10 + rn2(5) + abon() +
 			   digitem->spe - greatest_erosion(digitem) + u.udaminc + aeshbon();
+
+	if(uarmg && uarmg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(uarmg, IEA_INC_DAM))
+		bonus += uarmg->spe;
+
 	if (Race_if(PM_DWARF))
 	    bonus *= 2;
 	if (digitem->oartifact == ART_GREAT_CLAWS_OF_URDLEN)

@@ -129,6 +129,7 @@ Boots_on()
 		}
 		break;
 	case ELVEN_BOOTS:
+	case IMPERIAL_ELVEN_BOOTS:
 		if (!oldprop && !HStealth && !BStealth) {
 			makeknown(uarmf->otyp);
 			You("walk very quietly.");
@@ -185,6 +186,7 @@ Boots_off()
 		}
 		break;
 	case ELVEN_BOOTS:
+	case IMPERIAL_ELVEN_BOOTS:
 		if (!oldprop && !HStealth && !BStealth && !cancelled_don) {
 			makeknown(otyp);
 			You("sure are noisy.");
@@ -379,6 +381,7 @@ Helmet_on()
 	case ARCHAIC_HELM:
 	case LEATHER_HELM:
 	case HIGH_ELVEN_HELM:
+	case IMPERIAL_ELVEN_HELM:
 	case DWARVISH_HELM:
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
@@ -485,6 +488,7 @@ Helmet_off()
 	case ARCHAIC_HELM:
 	case LEATHER_HELM:
 	case HIGH_ELVEN_HELM:
+	case IMPERIAL_ELVEN_HELM:
 	case DWARVISH_HELM:
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
@@ -561,6 +565,7 @@ Gloves_on()
 	case GLOVES:
 	case LONG_GLOVES:
 	case HIGH_ELVEN_GAUNTLETS:
+	case IMPERIAL_ELVEN_GAUNTLETS:
 	case GAUNTLETS:
 	case HARMONIUM_GAUNTLETS:
 	case ARCHAIC_GAUNTLETS:
@@ -597,6 +602,7 @@ Gloves_off()
 	case GLOVES:
 	case LONG_GLOVES:
 	case HIGH_ELVEN_GAUNTLETS:
+	case IMPERIAL_ELVEN_GAUNTLETS:
 	case GAUNTLETS:
 	case HARMONIUM_GAUNTLETS:
 	case ARCHAIC_GAUNTLETS:

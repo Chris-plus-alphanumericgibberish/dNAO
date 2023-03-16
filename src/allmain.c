@@ -918,6 +918,10 @@ you_regen_hp()
 	if (Regeneration){
 		perX += HEALCYCLE;
 	}
+	// regeneration tech
+	if (uarm && uarm->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(uarm, IEA_FAST_HEAL)){
+		perX += u.ulevel;
+	}
 	// Corruption thought
 	if(active_glyph(CORRUPTION) && (*hp < (*hpmax)*.3)){
 		perX += HEALCYCLE;

@@ -2945,11 +2945,9 @@ boolean past;
 			knows_object(DWARVISH_ROUNDSHIELD);
 		break;
 		case PM_ELF:
-			expert_weapon_skill(P_BOW);
-			free_skill_up(P_BOW);
-			expert_weapon_skill(P_SCIMITAR);
-			free_skill_up(P_SCIMITAR);
-			skilled_weapon_skill(P_BROAD_SWORD);
+			expert_weapon_skill(P_BROAD_SWORD);
+			skilled_weapon_skill(P_SHIELD);
+			expert_weapon_skill(P_WAND_POWER);
 			knows_object(ELVEN_SHORT_SWORD);
 			knows_object(ELVEN_ARROW);
 			knows_object(ELVEN_BOW);

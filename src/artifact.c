@@ -2127,6 +2127,7 @@ struct obj *obj;
     return (obj && (
 		(obj->oartifact && arti_attack_prop(obj, ARTA_SHINING)) ||
 		(is_lightsaber(obj) && litsaber(obj)) ||
+		(check_oprop(obj, OPROP_ELFLW) && u.uinsight >= 22) ||
 		(check_oprop(obj, OPROP_PHSEW)) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
@@ -4047,14 +4048,16 @@ char *type;			/* blade, staff, etc */
 /* returns FALSE if no bonus damage was applicable */
 /* Just do bonus damage, don't make any modifications to the defender */
 boolean
-oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr)
+oproperty_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr)
 struct obj * otmp;
+struct monst * magr;
 struct monst * mdef;
 int basedmg;
 int * plusdmgptr;
 int * truedmgptr;
 {
 	boolean youdef = (mdef == &youmonst);
+	boolean youagr = (magr == &youmonst);
 	struct permonst * pd = (youdef ? youracedata : mdef->data);
 	int original_plusdmgptr = *plusdmgptr;
 	int original_truedmgptr = *truedmgptr;
@@ -4126,6 +4129,71 @@ int * truedmgptr;
 			if(otmp->spe > 0)
 				*truedmgptr += d(1, otmp->spe);
 		}
+	}
+	if(check_oprop(otmp, OPROP_ELFLW)){
+		int level = u.uinsight >= 33 ? 2 : u.uinsight >= 11 ? 1 : 0;
+		int bonus = 0;
+		if(youagr){
+			if(u.ualign.record < -3){
+				bonus += d(level ? 2 : 1, 8);
+				if(level > 1)
+					bonus += otmp->spe;
+				if(youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))){
+					bonus *= 2;
+				}
+			}
+			else if(u.ualign.record > 3){
+				bonus += d(level ? 2 : 1, 8);
+				if(level > 1)
+					bonus += otmp->spe;
+				if(youdef ? (hates_holy(youracedata)) : (hates_holy_mon(mdef))){
+					bonus *= 2;
+				}
+			}
+			else {
+				bonus += d(level ? 2 : 1, 4);
+				if(youdef ? (hates_unblessed(youracedata)) : (hates_unblessed_mon(mdef))){
+					bonus *= 4;
+					if(level > 1)
+						bonus += 2*otmp->spe;
+				}
+			}
+		}
+		else if(magr){
+			if(hates_holy_mon(magr) || is_unholy_mon(magr)){
+				bonus += d(level ? 2 : 1, 8);
+				if(level > 1)
+					bonus += otmp->spe;
+				if(youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))){
+					bonus *= 2;
+				}
+			}
+			else if(hates_unholy_mon(magr) || is_holy_mon(magr)){
+				bonus += d(level ? 2 : 1, 8);
+				if(level > 1)
+					bonus += otmp->spe;
+				if(youdef ? (hates_holy(youracedata)) : (hates_holy_mon(mdef))){
+					bonus *= 2;
+				}
+			}
+			else {
+				bonus += d(level ? 2 : 1, 4);
+				if(youdef ? (hates_unblessed(youracedata)) : (hates_unblessed_mon(mdef))){
+					bonus *= 4;
+					if(level > 1)
+						bonus += 2*otmp->spe;
+				}
+			}
+		}
+		else {
+			bonus += d(level ? 2 : 1, 4);
+			if(youdef ? (hates_unblessed(youracedata)) : (hates_unblessed_mon(mdef))){
+				bonus *= 4;
+				if(level > 1)
+					bonus += 2*otmp->spe;
+			}
+		}
+		*truedmgptr += bonus;
 	}
 	if(is_undead(pd) && check_oprop(otmp, OPROP_TDTHW)){
 		*truedmgptr += basedmg + d(2,7);
@@ -4677,7 +4745,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	if (oartifact)
 		spec_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 	if (!check_oprop(otmp, OPROP_NONE))
-		oproperty_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
+		oproperty_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr);
 	
 	/* this didn't trigger spec_dbon_applies, but still needs to happen later */
 	if (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON)
@@ -5117,6 +5185,34 @@ boolean printmessages; /* print generic elemental damage messages */
 	    if (youdef && Slimed) burn_away_slime();
 	    if (youdef && FrozenAir) melt_frozen_air();
 	}
+	if(check_oprop(otmp, OPROP_ELFLW)){
+		static boolean suddenly = TRUE;
+		if(u.uinsight >= 56 && 
+			(yellow_monster(mdef) || mdef->mfaction == YELLOW_FACTION)
+		){
+			/*Note: magic green flames, damage through fire res but still check invent fire res to see if inventory should burn*/
+			if(printmessages){
+				pline_The("%schartreuse-flamed %s %s %s!",
+					suddenly ? "suddenly-" : "",
+					wepdesc,
+					vtense(wepdesc,
+						is_watery(pd) ? "partly vaporize" :
+						"burn"),
+					hittee);
+				*messaged = TRUE;
+				suddenly = FALSE;
+			}
+			*truedmgptr += d(2, 8) + otmp->spe;
+			if(!UseInvFire_res(mdef)){
+				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			}
+			if (youdef && Slimed) burn_away_slime();
+			if (youdef && FrozenAir) melt_frozen_air();
+		}
+		else suddenly = TRUE;
+	}
 	if ((attacks(AD_COLD, otmp)  && !(
 			/* exceptions */
 			(oartifact && arti_struct->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves)
@@ -5262,9 +5358,10 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 	}
 		//sunlight code adapted from Sporkhack
-	if ((pd->mtyp == PM_GREMLIN || pd->mtyp == PM_HUNTING_HORROR) && arti_bright(otmp))
-	{
-		wepdesc = artilist[oartifact].name;
+	if ((pd->mtyp == PM_GREMLIN || pd->mtyp == PM_HUNTING_HORROR)
+		&& (arti_bright(otmp) || (check_oprop(otmp, OPROP_ELFLW) && u.uinsight >= 33 && u.ualign.record > 3))
+	){
+		wepdesc = oartifact ? artilist[oartifact].name : simple_typename(otmp->otyp);
 		/* Sunlight kills gremlins */
 		if (vis&VIS_MAGR && vis&VIS_MDEF) {
 			pline("%s sunlight sears %s!", s_suffix(wepdesc), hittee);
@@ -5279,9 +5376,10 @@ boolean printmessages; /* print generic elemental damage messages */
 			return MM_DEF_LSVD;
 		}
 	}
-	if ((pd->mlet == S_TROLL) && arti_bright(otmp))
-	{
-		wepdesc = artilist[oartifact].name;
+	if ((pd->mlet == S_TROLL)
+		&& (arti_bright(otmp) || (check_oprop(otmp, OPROP_ELFLW) && u.uinsight >= 33 && u.ualign.record > 3))
+	){
+		wepdesc = oartifact ? artilist[oartifact].name : simple_typename(otmp->otyp);
 		/* Sunlight turns trolls to stone (Middle-earth) */
 		if (pd->mlet == S_TROLL &&
 			!munstone(mdef, TRUE)) {
@@ -6468,6 +6566,10 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 	}
 	
+	if(check_oprop(otmp, OPROP_ELFLW) && u.uinsight >= 33 && u.ualign.record > 3 && u.uinsight > rn2(333)){
+		/* cancel_monst handles resistance */
+		cancel_monst(mdef, otmp, youagr, FALSE, FALSE, FALSE);
+	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************

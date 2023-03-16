@@ -7,7 +7,7 @@
 
 #define is_bigfoot(x)	((x) == &mons[PM_SASQUATCH])
 #define martial()	(martial_bonus() || is_bigfoot(youracedata) || \
-		(uarmf && uarmf->otyp == KICKING_BOOTS))
+		(uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING)))))
 
 static NEARDATA struct rm *maploc;
 static NEARDATA const char *gate_str;
@@ -806,7 +806,7 @@ int dx, dy;
 	y = u.uy + dy;
 
 	/* KMH -- Kicking boots always succeed */
-	if (uarmf && uarmf->otyp == KICKING_BOOTS)
+	if (uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING))))
 	    avrg_attrib = 99;
 	else
 	    avrg_attrib = (ACURRSTR+ACURR(A_DEX)+ACURR(A_CON))/3;

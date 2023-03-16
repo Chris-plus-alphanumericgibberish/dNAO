@@ -2551,7 +2551,7 @@ struct obj *otmp;
 	mwp = MON_WEP(mon);
 	mswp = MON_SWEP(mon);
 	
-	if(arm && arm->otyp == GAUNTLETS_OF_POWER)
+	if(arm && (arm->otyp == GAUNTLETS_OF_POWER || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GOPOWER))))
 		bonus += 8;
 	
 	if(otmp){
@@ -2586,7 +2586,7 @@ struct obj *otmp;
 			arm = which_armor(mon, W_ARMG);
 			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
 			else if(arm 
-			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART)
+			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GODEXTERITY)))
 			) bonus += (arm->spe)/2;
 //			else bonus += ; Something with dex ac?  That would be a bad idea.
 			
@@ -2602,7 +2602,7 @@ struct obj *otmp;
 			arm = which_armor(mon, W_ARMG);
 			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
 			else if(arm 
-			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART)
+			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GODEXTERITY)))
 			) bonus += (arm->spe)/2;
 		}
 		
@@ -2613,7 +2613,7 @@ struct obj *otmp;
 			arm = which_armor(mon, W_ARMG);
 			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
 			else if(arm 
-			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART)
+			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GODEXTERITY)))
 			) bonus += (arm->spe)/2;
 //			else bonus += ; Something with dex ac?  That would be a bad idea.
 			arm = which_armor(mon, W_ARMH);

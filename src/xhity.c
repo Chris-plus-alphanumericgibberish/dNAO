@@ -3358,7 +3358,7 @@ int *shield_margin;
 			if (!thrown || !launcher || objects[launcher->otyp].oc_skill == P_SLING){
 				/* firing ranged attacks without a laucher (ex manticore tail spikes) can use STR */
 				/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
-				if (youagr && hmoncode & HMON_KICKED && uarmf && uarmf->otyp == KICKING_BOOTS)
+				if (youagr && hmoncode & HMON_KICKED && uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING))))
 					override_str = 125;	/* 25 STR */
 				bons_acc += abon();
 				override_str = 0;
@@ -3379,6 +3379,8 @@ int *shield_margin;
 				bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
 			/* intrinsic accuracy bonuses */
 			bons_acc += u.uhitinc;
+			if(uarmg && uarmg->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(uarmg, IEA_INC_ACC))
+				bons_acc += uarmg->spe;
 			/* Malphas' bonus accuracy from having nearby crows -- btw Chris this is horribly named */
 			bons_acc += u.spiritAttk;
 			/* Uur (active) */
@@ -3445,8 +3447,12 @@ int *shield_margin;
 					bons_acc += 11;
 				else if (otmp->otyp == GAUNTLETS_OF_DEXTERITY || otmp->oartifact == ART_PREMIUM_HEART)
 					bons_acc += otmp->spe;
-				if (otmp->otyp == GAUNTLETS_OF_POWER)
+				if (otmp->otyp == GAUNTLETS_OF_POWER || (otmp->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(otmp, IEA_GOPOWER)))
 					bons_acc += 3;
+			}
+			if ((otmp = which_armor(magr, W_ARMH))) {
+				if(otmp && otmp->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(otmp, IEA_INC_ACC))
+					bons_acc += otmp->spe;
 			}
 			if(magr->msciaphilia && unshadowed_square(magr->mx, magr->my)){
 				bons_acc -= min(20, magr->m_lev);
@@ -3542,6 +3548,7 @@ int *shield_margin;
 				case GLOVES:
 				case GAUNTLETS_OF_DEXTERITY:
 				case HIGH_ELVEN_GAUNTLETS:
+				case IMPERIAL_ELVEN_GAUNTLETS:
 					break;
 				default:
 					impossible("Unknown type of gloves (%d)", gloves->otyp);
@@ -7747,7 +7754,8 @@ boolean ranged;
 					);
 			}
 		} else if (otmp && is_hard(otmp) && 
-			(FacelessHelm(otmp) || rn2(8))
+			((FacelessHelm(otmp) && (otmp->otyp != IMPERIAL_ELVEN_HELM || check_imp_mod(otmp, IEA_BLIND_RES)))
+			|| rn2(8))
 		){
 			if (youdef) {
 				/* not body_part(HEAD) */
@@ -14339,7 +14347,7 @@ int vis;						/* True if action is at all visible to the player */
 				basedmg = 1;
 			/* martial players are much better at kicking */
 			if (youagr){
-				if(martial_bonus() || (uarmf && uarmf->otyp == KICKING_BOOTS))
+				if(martial_bonus() || (uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING)))))
 					basedmg += rn2(ACURR(A_DEX)/2 + 1);
 				if(youracedata->mtyp == PM_SASQUATCH)
 					basedmg += rn2(ACURR(A_CON)/2 + 1);
@@ -14350,7 +14358,7 @@ int vis;						/* True if action is at all visible to the player */
 		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 		if (otmp) {
 			basedmg += otmp->spe;
-			if (otmp->otyp == KICKING_BOOTS)
+			if (otmp->otyp == KICKING_BOOTS || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING)))
 				basedmg += rnd(6) + rnd(5) + (bigmonst(pd) ? 0 : 1);
 			if (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS){
 				basedmg += rnd(bigmonst(pd) ? 2 : 6);
@@ -14465,12 +14473,21 @@ int vis;						/* True if action is at all visible to the player */
 				if (youagr) {
 					bonsdmg += u.udaminc;
 					bonsdmg += aeshbon();
+					
+					if(uarmg && uarmg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(uarmg, IEA_INC_DAM))
+						bonsdmg += uarmg->spe;
 
 					/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
 					if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
 						if (ACURR(A_INT) == 25) bonsdmg += 8;
 						else bonsdmg += max(0, (ACURR(A_INT) - 10) / 2);
 					}
+				}
+				//Monster specific bonuses
+				else if(magr){
+					struct obj *arm = which_armor(magr, W_ARMG);
+					if(arm && arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_INC_DAM))
+						bonsdmg += arm->spe;
 				}
 
 #define dbonus(wep) (youagr ? dbon((wep)) : m_dbon(magr, (wep)))
@@ -14499,7 +14516,7 @@ int vis;						/* True if action is at all visible to the player */
 					/* properly-used ranged attacks othersied get STR bonus */
 					else {
 						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
-						if (hmoncode & HMON_KICKED && youagr && uarmf && uarmf->otyp == KICKING_BOOTS)
+						if (hmoncode & HMON_KICKED && youagr && uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING))))
 							override_str = 125;	/* 25 STR */
 						bonsdmg += dbonus(weapon);
 						override_str = 0;
@@ -14844,7 +14861,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
-			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS))) || 
+			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING))))) || 
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp)) ||
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && check_oprop(otmp, OPROP_FLAYW))
 			)

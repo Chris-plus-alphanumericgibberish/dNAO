@@ -2305,7 +2305,7 @@ struct obj *obj;		/* aatyp == AT_WEAP, AT_SPIT */
 	    o = (mdef == &youmonst) ? invent : mdef->minvent;
 	    for ( ; o; o = o->nobj){
 			if ((o->owornmask & W_ARMH) &&
-				(o->otyp == find_vhelm() || o->otyp == CRYSTAL_HELM || o->otyp == PLASTEEL_HELM || o->otyp == PONTIFF_S_CROWN || o->otyp == FACELESS_HELM)
+				(o->otyp == find_vhelm() || o->otyp == CRYSTAL_HELM || o->otyp == PLASTEEL_HELM || o->otyp == PONTIFF_S_CROWN || o->otyp == FACELESS_HELM || (o->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(o, IEA_BLIND_RES)))
 			) return FALSE;
 			if ((o->owornmask & W_ARMC) &&
 				(o->otyp == WHITE_FACELESS_ROBE
@@ -3105,7 +3105,7 @@ struct monst *mon;
 	struct obj *weap = MON_WEP(mon);
 	struct obj *xweap = MON_SWEP(mon);
 	
-	if(gloves && gloves->otyp == GAUNTLETS_OF_POWER)
+	if(gloves && (gloves->otyp == GAUNTLETS_OF_POWER || (gloves->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(gloves, IEA_GOPOWER))))
 		return 25L;
 	//else
 	if(weap){

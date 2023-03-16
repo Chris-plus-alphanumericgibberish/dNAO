@@ -6028,8 +6028,17 @@ int spell;
 
 	if (uarmh && !Role_if(PM_MONK)) {
 		//Something up with madmen and this, it doesn't affect much.
-		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE && !check_oprop(uarmh, OPROP_BRIL))
-			splcaster += casting_stat == A_CHA ? urole.spelarmr : uarmhbon;
+		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE && !check_oprop(uarmh, OPROP_BRIL)){
+			if(casting_stat == A_CHA){
+				splcaster += FacelessHelm(uarmh) ? 4*urole.spelarmr : 
+							 (uarmh->otyp == find_gcirclet()) ? urole.spelarmr/2 : 
+							 uarmh->otyp == ORCISH_HELM ? urole.spelarmr :
+							 2*urole.spelarmr;
+			}
+			else {
+				splcaster += uarmhbon;
+			}
+		}
 	}
 
 	if (uarmg) {

@@ -1495,6 +1495,8 @@ boolean adjective;
 	case GOLD:
 		if(obj->otyp == APHANACTONAN_RECORD || obj->otyp == APHANACTONAN_ARCHIVE)
 			return (adjective ? "golden-red" : "red gold");
+		else if (adjective && check_oprop(obj, OPROP_ELFLW))
+			return u.uinsight >= 33 ? "radiant" : u.uinsight >= 11 ? "incandescent" : "luminous";
 		else return (adjective ? "golden" : "gold");
 	case PLATINUM:
 		if(check_oprop(obj,  OPROP_SFLMW))
