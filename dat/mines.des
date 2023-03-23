@@ -763,6 +763,9 @@ OBJECT:'*',random,random
 OBJECT:'*',random,random
 OBJECT:'(',random,random
 OBJECT:'(',random,random
+OBJECT:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -885,6 +888,9 @@ OBJECT:'*',random,random
 OBJECT:'*',random,random
 OBJECT:'(',random,random
 OBJECT:'(',random,random
+OBJECT:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -987,6 +993,9 @@ OBJECT:'+',random,random
 OBJECT:'+',random,random
 OBJECT:'+',random,random
 OBJECT:'+',random,random
+OBJECT:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -1139,6 +1148,9 @@ OBJECT:'`',"statue",(38,15),"orc shaman",1
 OBJECT:'(',"box",(61,4)
 OBJECT:'(',"box",(62,4)
 OBJECT:'(',"box",(63,4)
+OBJECT:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
+OBJECT[50%]:'(',"upgrade kit",random
 ALTAR:(48,2),noalign,shrine
 ALTAR:(48,16),noalign,shrine
 ALTAR:(56,9),noalign,shrine
