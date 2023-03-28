@@ -329,6 +329,7 @@ struct obj {
 #define ovar1_acidSplashDamage ovar1
 #define ovar1_corpseRumorCooldown ovar1
 #define ovar1_secretsSecret ovar1
+#define ovar1_iea_upgrades ovar1
 
 #define ovar1_gober ovar1
 #define ovar1_seals ovar1
@@ -370,70 +371,44 @@ struct obj {
 #define GIBBOUS_MOON	3
 #define FULL_MOON	 	4
 
-#define check_imp_mod(obj, prop) ((obj)->ovar1&(prop))
-#define add_imp_mod(obj, prop) ((obj)->ovar1 |= (prop))
-//Body
-///Ring
-#define IEA_FIXED_ABIL	0x0000000000000001L
-///Ring
-#define IEA_FAST_HEAL	0x0000000000000002L
-///Shield or amulet
-#define IEA_REFLECTING	0x0000000000000004L
-///Amulet
-#define IEA_SICK_RES	0x0000000000000008L
-///Cloak
-#define IEA_HALF_PHDAM	0x0000000000000010L
-///Cloak?
-#define IEA_HALF_SPDAM	0x0000000000000020L
-///Cloak
-#define IEA_DISPLACED	0x0000000000000040L
-///Cloak or ring
-#define IEA_INVIS		0x0000000000000080L
+#define check_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades&(prop))
+#define add_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades |= (prop))
 
-#define IEA_BODY_MASK	(IEA_FIXED_ABIL|IEA_FAST_HEAL|IEA_REFLECTING|IEA_SICK_RES|IEA_HALF_PHDAM|IEA_HALF_SPDAM|IEA_DISPLACED|IEA_INVIS)
-//Gauntlet
-///Water walking boots
-#define IEA_SWIMMING	0x0000000000000100L
-///gauntlets of power
-#define IEA_GOPOWER		0x0000000000000200L
-///gauntlets of dexterity
-#define IEA_GODEXTERITY	0x0000000000000400L
-///Ring
-#define IEA_INC_DAM		0x0000000000000800L
-///Wand MM
-#define IEA_BOLTS		0x0000000000001000L
+#define IEA_FIXED_ABIL	0x00000001L
+#define IEA_FAST_HEAL	0x00000002L
+#define IEA_REFLECTING	0x00000004L
+#define IEA_SICK_RES	0x00000008L
+#define IEA_HALF_PHDAM	0x00000010L
+#define IEA_HALF_SPDAM	0x00000020L
+#define IEA_DISPLACED	0x00000040L
+#define IEA_INVIS		0x00000080L
+#define IEA_SWIMMING	0x00000100L
+#define IEA_GOPOWER		0x00000200L
+#define IEA_GODEXTERITY	0x00000400L
+#define IEA_INC_DAM		0x00000800L
+#define IEA_BOLTS		0x00001000L
+#define IEA_FLYING		0x00002000L
+#define IEA_JUMPING		0x00004000L
+#define IEA_FAST		0x00008000L
+#define IEA_TELEPORT	0x00010000L
+#define IEA_NOBREATH	0x00020000L
+#define IEA_LIFESENSE	0x00040000L
+#define IEA_SEE_INVIS	0x00080000L
+#define IEA_TELEPAT		0x00100000L
+#define IEA_BLIND_RES	0x00200000L
+#define IEA_INC_ACC		0x00400000L
+#define IEA_TELE_CNTRL	0x00800000L
+#define IEA_KICKING		0x01000000L
+#define IEA_PROT_SHAPE	0x02000000L
+#define IEA_DEFLECTION	0x04000000L
+#define IEA_STRANGLE	0x08000000L
 
-#define IEA_GLOVE_MASK	(IEA_SWIMMING|IEA_GOPOWER|IEA_GODEXTERITY|IEA_INC_DAM|IEA_BOLTS)
+#define IEA_HELM_MASK	(IEA_NOBREATH|IEA_LIFESENSE|IEA_SEE_INVIS|IEA_TELEPAT|IEA_BLIND_RES|IEA_INC_ACC|IEA_TELE_CNTRL|IEA_PROT_SHAPE)
+#define IEA_BODY_MASK	(IEA_FLYING|IEA_FIXED_ABIL|IEA_FAST_HEAL|IEA_REFLECTING|IEA_SICK_RES|IEA_HALF_PHDAM|IEA_HALF_SPDAM|IEA_DISPLACED|IEA_INVIS|IEA_DEFLECTION)
+#define IEA_GLOVE_MASK	(IEA_SWIMMING|IEA_GOPOWER|IEA_GODEXTERITY|IEA_INC_DAM|IEA_BOLTS|IEA_STRANGLE)
+#define IEA_BOOT_MASK	(IEA_JUMPING|IEA_FAST|IEA_TELEPORT|IEA_KICKING)
 
-//Boots
-#define IEA_FLYING		0x0000000000002000L
-#define IEA_JUMPING		0x0000000000004000L
-///Boots or Wand or ring
-#define IEA_FAST		0x0000000000008000L
-///Wand or ring
-#define IEA_TELEPORT	0x0000000000010000L
-//Boots
-#define IEA_KICKING		0x0000000001000000L
 
-#define IEA_BOOT_MASK	(IEA_FLYING|IEA_JUMPING|IEA_FAST|IEA_TELEPORT|IEA_KICKING)
-
-//Helm
-///Amulet
-#define IEA_NOBREATH	0x0000000000020000L
-///Wand of draining
-#define IEA_LIFESENSE	0x0000000000040000L
-///Ring
-#define IEA_SEE_INVIS	0x0000000000080000L
-///Helm
-#define IEA_TELEPAT		0x0000000000100000L
-///Crystal
-#define IEA_BLIND_RES	0x0000000000200000L
-///Ring
-#define IEA_INC_ACC		0x0000000000400000L
-///Ring
-#define IEA_TELE_CNTRL	0x0000000000800000L
-
-#define IEA_HELM_MASK	(IEA_NOBREATH|IEA_LIFESENSE|IEA_SEE_INVIS|IEA_TELEPAT|IEA_BLIND_RES|IEA_INC_ACC|IEA_TELE_CNTRL)
 
 	/* Songs that the Singing Sword has heard */
 	/* Spirits bound into the Pen of the Void */
@@ -970,15 +945,19 @@ struct obj {
 								|| (obj)->otyp == CRYSTAL_HELM \
 								|| (obj)->otyp == RIN_INCREASE_ACCURACY \
 								|| (obj)->otyp == RIN_TELEPORT_CONTROL \
+								|| (obj)->otyp == RIN_PROTECTION_FROM_SHAPE_CHAN \
 								) && objects[(obj)->otyp].oc_name_known)
 #define gauntlets_upgrade_obj(obj)	(((obj)->otyp ==  WATER_WALKING_BOOTS\
 								|| (obj)->otyp == GAUNTLETS_OF_POWER \
 								|| (obj)->otyp == GAUNTLETS_OF_DEXTERITY \
 								|| (obj)->otyp == RIN_INCREASE_DAMAGE \
 								|| (obj)->otyp == WAN_MAGIC_MISSILE \
+								|| (obj)->otyp == AMULET_OF_STRANGULATION \
 								) && objects[(obj)->otyp].oc_name_known)
-#define armor_upgrade_obj(obj)	(((obj)->otyp == RIN_SUSTAIN_ABILITY \
+#define armor_upgrade_obj(obj)	(((obj)->otyp == FLYING_BOOTS \
+								|| (obj)->otyp == RIN_SUSTAIN_ABILITY \
 								|| (obj)->otyp == RIN_REGENERATION \
+								|| (obj)->otyp == AMULET_OF_WOUND_CLOSURE \
 								|| (obj)->otyp == AMULET_OF_REFLECTION \
 								|| (obj)->otyp == SHIELD_OF_REFLECTION \
 								|| (obj)->otyp == JUMPING_BOOTS \
@@ -991,9 +970,9 @@ struct obj {
 								|| (obj)->otyp == CLOAK_OF_INVISIBILITY \
 								|| (obj)->otyp == RIN_INVISIBILITY \
 								|| (obj)->otyp == WAN_MAKE_INVISIBLE \
+								|| (obj)->otyp == RIN_PROTECTION \
 								) && objects[(obj)->otyp].oc_name_known)
-#define boots_upgrade_obj(obj)	(((obj)->otyp == FLYING_BOOTS \
-								|| (obj)->otyp == JUMPING_BOOTS \
+#define boots_upgrade_obj(obj)	(((obj)->otyp == JUMPING_BOOTS \
 								|| (obj)->otyp == SPEED_BOOTS \
 								|| (obj)->otyp == KICKING_BOOTS \
 								|| (obj)->otyp == WAN_SPEED_MONSTER \
@@ -1299,6 +1278,8 @@ struct obj {
 								||otyp == AMULET_VERSUS_CURSES \
 								||otyp == AMULET_OF_ESP \
 								||otyp == AMULET_VERSUS_POISON \
+								||otyp == AMULET_OF_WOUND_CLOSURE \
+								||otyp == AMULET_VERSUS_EVIL_EYES \
 								)
 
 /* helpers, simple enough to be macros */

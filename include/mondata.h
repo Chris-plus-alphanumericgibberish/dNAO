@@ -428,11 +428,48 @@
 				 (ptr)->mtyp == PM_PHASE_SPIDER ||\
 				 (ptr)->mtyp == PM_MIRKWOOD_ELDER \
 				 ))
-#define is_rat(ptr)		((ptr)->mtyp == PM_SEWER_RAT || \
+#define is_rat(ptr)		((ptr)->mlet == S_RODENT && ( \
+				 (ptr)->mtyp == PM_SEWER_RAT || \
 				 (ptr)->mtyp == PM_GIANT_RAT || \
 				 (ptr)->mtyp == PM_RABID_RAT || \
 				 (ptr)->mtyp == PM_ENORMOUS_RAT || \
-				 (ptr)->mtyp == PM_RODENT_OF_UNUSUAL_SIZE)
+				 (ptr)->mtyp == PM_RODENT_OF_UNUSUAL_SIZE))
+#define is_basic_worm(ptr)	((ptr)->mlet == S_WORM && (\
+				 (ptr)->mtyp == PM_DARK_WORM ||\
+				 (ptr)->mtyp == PM_BABY_LONG_WORM ||\
+				 (ptr)->mtyp == PM_BABY_PURPLE_WORM ||\
+				 (ptr)->mtyp == PM_LONG_WORM ||\
+				 (ptr)->mtyp == PM_PURPLE_WORM \
+				 ))
+#define is_wormy_thing(ptr)	(((ptr)->mlet == S_EEL && (\
+				 (ptr)->mtyp == PM_GIANT_EEL ||\
+				 (ptr)->mtyp == PM_ELECTRIC_EEL ||\
+				 (ptr)->mtyp == PM_KRAKEN \
+				)) || ((ptr)->mlet == S_SPIDER && (\
+				 (ptr)->mtyp == PM_CENTIPEDE \
+				)) || ((ptr)->mlet == S_SNAKE && (\
+				 (ptr)->mtyp == PM_GARTER_SNAKE ||\
+				 (ptr)->mtyp == PM_SNAKE ||\
+				 (ptr)->mtyp == PM_WATER_MOCCASIN ||\
+				 (ptr)->mtyp == PM_PIT_VIPER ||\
+				 (ptr)->mtyp == PM_PYTHON ||\
+				 (ptr)->mtyp == PM_COBRA ||\
+				 (ptr)->mtyp == PM_DAUGHTER_OF_NAUNET \
+				 ))\
+			)
+#define is_wormy_dragon(ptr)	((ptr)->mlet == S_DRAGON && (\
+				 (ptr)->mtyp == PM_GRAY_DRAGON ||\
+				 (ptr)->mtyp == PM_SILVER_DRAGON ||\
+				 (ptr)->mtyp == PM_SHIMMERING_DRAGON ||\
+				 (ptr)->mtyp == PM_WHITE_DRAGON ||\
+				 (ptr)->mtyp == PM_ORANGE_DRAGON ||\
+				 (ptr)->mtyp == PM_BLACK_DRAGON ||\
+				 (ptr)->mtyp == PM_BLUE_DRAGON ||\
+				 (ptr)->mtyp == PM_GREEN_DRAGON ||\
+				 (ptr)->mtyp == PM_RED_DRAGON ||\
+				 (ptr)->mtyp == PM_DEEP_DRAGON ||\
+				 (ptr)->mtyp == PM_YELLOW_DRAGON\
+				 ))
 #define is_dragon(ptr)		(((ptr)->mflagsa & MA_DRAGON) != 0L)
 #define is_true_dragon(ptr)		((monsndx(ptr) >= PM_BABY_GRAY_DRAGON && monsndx(ptr) <= PM_YELLOW_DRAGON) || \
 								(ptr)->mtyp == PM_PLATINUM_DRAGON || (ptr)->mtyp == PM_CHROMATIC_DRAGON)

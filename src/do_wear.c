@@ -2145,6 +2145,10 @@ struct obj * otmp;
 	// visored helm's bonus IS affected by mat and erosion
 	if (otmp->otyp == find_vhelm()) def += 1;
 	
+	// Ditto the bonus for repairing the visor of an IEHelm
+	if (otmp->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(otmp, IEA_BLIND_RES))
+		def += 1;
+	
 	// add material bonus
 	def += material_def_bonus(otmp, def, TRUE);
 
@@ -2175,6 +2179,10 @@ struct obj * otmp;
 			spemult *= 2;
 
 		def += (otmp->spe * spemult + 0) / 2;
+		
+		//Full spe bonus to AC on top of normal 1/2 bonus.
+		if(otmp->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_DEFLECTION))
+			def += otmp->spe;
 	}
 
 	// artifact bonus def
@@ -2229,6 +2237,10 @@ struct obj * otmp;
 	// visored helm's bonus IS affected by mat and erosion
 	if (otmp->otyp == find_vhelm()) def += 1;
 	
+	// Ditto the bonus for repairing the visor of an IEHelm
+	if (otmp->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(otmp, IEA_BLIND_RES))
+		def += 1;
+
 	// add material bonus
 	def += material_def_bonus(otmp, def, FALSE);
 

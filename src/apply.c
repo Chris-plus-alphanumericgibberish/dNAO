@@ -7893,10 +7893,10 @@ upgradeImpArmor()
 					STANDARD_UPGRADE(IEA_NOBREATH, "life-support subsystem")
 				break;
 				case WAN_DRAINING:
-					STANDARD_UPGRADE(IEA_LIFESENSE, "life-sign detector")
+					STANDARD_UPGRADE(IEA_LIFESENSE, "life-sign sensor")
 				break;
 				case RIN_SEE_INVISIBLE:
-					STANDARD_UPGRADE(IEA_SEE_INVIS, "crystal eye sensor")
+					STANDARD_UPGRADE(IEA_SEE_INVIS, "crystal eye")
 				break;
 				case HELM_OF_TELEPATHY:
 				case AMULET_OF_ESP:
@@ -7910,6 +7910,9 @@ upgradeImpArmor()
 				break;
 				case RIN_TELEPORT_CONTROL:
 					STANDARD_UPGRADE(IEA_TELE_CNTRL, "teleportation control subsystem")
+				break;
+				case RIN_PROTECTION_FROM_SHAPE_CHAN:
+					STANDARD_UPGRADE(IEA_PROT_SHAPE, "self-bored lens")
 				break;
 				default:
 					impossible("Unknown repair component, sorry :(.");
@@ -7932,16 +7935,19 @@ upgradeImpArmor()
 					STANDARD_UPGRADE(IEA_SWIMMING, "swimming webs")
 				break;
 				case GAUNTLETS_OF_POWER:
-					STANDARD_UPGRADE(IEA_GOPOWER, "power subsystem")
+					STANDARD_UPGRADE(IEA_GOPOWER, "power servos")
 				break;
 				case GAUNTLETS_OF_DEXTERITY:
-					STANDARD_UPGRADE(IEA_GODEXTERITY, "dexterity subsystem")
+					STANDARD_UPGRADE(IEA_GODEXTERITY, "dexterity servos")
 				break;
 				case RIN_INCREASE_DAMAGE:
-					STANDARD_UPGRADE(IEA_INC_DAM, "microtargetting subsystem")
+					STANDARD_UPGRADE(IEA_INC_DAM, "microtargetting servos")
 				break;
 				case WAN_MAGIC_MISSILE:
 					STANDARD_UPGRADE(IEA_BOLTS, "missile projectors")
+				break;
+				case AMULET_OF_STRANGULATION:
+					STANDARD_UPGRADE(IEA_STRANGLE, "grappling servos")
 				break;
 				default:
 					impossible("Unknown repair component, sorry :(.");
@@ -7960,10 +7966,14 @@ upgradeImpArmor()
 				return MOVE_CANCELLED;
 			}
 			switch(upitm->otyp){
+				case FLYING_BOOTS:
+					STANDARD_UPGRADE(IEA_FLYING, "moth wings")
+				break;
 				case RIN_SUSTAIN_ABILITY:
 					STANDARD_UPGRADE(IEA_FIXED_ABIL, "stasis subsystem")
 				break;
 				case RIN_REGENERATION:
+				case AMULET_OF_WOUND_CLOSURE:
 					STANDARD_UPGRADE(IEA_FAST_HEAL, "medical subsystem")
 				break;
 				case AMULET_OF_REFLECTION:
@@ -7990,6 +8000,9 @@ upgradeImpArmor()
 				case WAN_MAKE_INVISIBLE:
 					STANDARD_UPGRADE(IEA_INVIS, "active camouflage system")
 				break;
+				case RIN_PROTECTION:
+					STANDARD_UPGRADE(IEA_DEFLECTION, "deflectors")
+				break;
 				default:
 					impossible("Unknown repair component, sorry :(.");
 					return MOVE_CANCELLED;
@@ -8007,9 +8020,6 @@ upgradeImpArmor()
 				return MOVE_CANCELLED;
 			}
 			switch(upitm->otyp){
-				case FLYING_BOOTS:
-					STANDARD_UPGRADE(IEA_FLYING, "flight subsystem")
-				break;
 				case JUMPING_BOOTS:
 					STANDARD_UPGRADE(IEA_JUMPING, "jump jets")
 				break;

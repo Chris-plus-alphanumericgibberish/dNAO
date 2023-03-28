@@ -3685,6 +3685,9 @@ char *in_buff;
 			else if (!strncmpi(bufp, "cranium ", l = 8)) {
 				undeadtype = CRANIUM_RAT;
 			}
+			else if (!strncmpi(bufp, "psurlon ", l = 8)) {
+				undeadtype = PSURLON;
+			}
 			else if (!strncmpi(bufp, "mistweaver ", l = 11)) {
 				undeadtype = MISTWEAVER;
 			}
@@ -3749,6 +3752,8 @@ char *in_buff;
 				undeadtype = YITH;
 			else if (!strncmpi(p, "cranium",	7))
 				undeadtype = CRANIUM_RAT;
+			else if (!strncmpi(p, "psurlon",	7))
+				undeadtype = PSURLON;
 			else if (!strncmpi(p, "mistweaver", 10))
 				undeadtype = MISTWEAVER;
 			else if (!strncmpi(p, "worldshaper", 11))
@@ -3759,6 +3764,8 @@ char *in_buff;
 				undeadtype = SPORE_ZOMBIE;
 			else if (!strncmpi(p, "cordyceps",	9))
 				undeadtype = CORDYCEPS;
+			else if (!strncmpi(p, "finger",	6))
+				undeadtype = PSURLON;
 			else if (!strncmpi(p, "plague-victim",	13))
 				undeadtype = PLAGUE_TEMPLATE;
 			else

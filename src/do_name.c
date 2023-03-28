@@ -943,6 +943,7 @@ boolean full;
 		else if (full && template == PLAGUE_TEMPLATE)	Sprintf(buf2, "%s, plague victim", buf);
 		else if (full && template == SPORE_ZOMBIE)		Sprintf(buf2, "%s, spore infectee", buf);
 		else if (full && template == CORDYCEPS)			Sprintf(buf2, "%s's sporulating corpse", buf);
+		else if (full && template == PSURLON)			Sprintf(buf2, "%s the finger", buf);
 		else											Strcpy(buf2, buf);
 	}
 	else {
@@ -972,6 +973,7 @@ boolean full;
 		else if (full && template == PLAGUE_TEMPLATE)	Sprintf(buf2, "%s plague-victim", buf);
 		else if (full && template == SPORE_ZOMBIE)		Sprintf(buf2, "%s infectee", buf);
 		else if (full && template == CORDYCEPS)			Sprintf(buf2, "%s cordyceps", buf);
+		else if (full && template == PSURLON)			Sprintf(buf2, "%s finger", buf);
 		else											Strcpy(buf2, buf);
 	}
 

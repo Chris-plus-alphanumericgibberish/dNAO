@@ -550,6 +550,18 @@ qt_montype()
 		if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
 			return (&mons[qpm]);
 		return (mkclass(S_DEMON, G_HELL));
+	} else if(Role_if(PM_MADMAN) && (u.uz.dlevel >= qlocate_level.dlevel)){
+		int qpm;
+		if(rn2(5)){
+			qpm = PM_LARGE_CAT;
+			if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+				return (&mons[qpm]);
+			return (mkclass(S_WORM, G_NOHELL));
+		}
+		qpm = PM_CONTAMINATED_PATIENT;
+		if (qpm != NON_PM && rn2(5) && !(mvitals[qpm].mvflags & G_GONE && !In_quest(&u.uz)))
+			return (&mons[qpm]);
+		return (mkclass(S_BAT, G_NOHELL|G_HELL));
 	} else if(Role_if(PM_MONK)){
 		int qpm;
 		int monks_of_kaen[] = {PM_XORN_MONK, PM_DAO_LAO_GUI_MONK, PM_ZHI_REN_MONK, PM_XUENU_MONK};

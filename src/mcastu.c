@@ -370,6 +370,10 @@ unsigned int type;
 		}
 	}
 	boolean quake = FALSE;
+	if(has_template(mtmp, PSURLON)){
+		if(rn2(2))
+			return CRUSH_BOLT;
+	}
 	//50% favored spells
     if (rn2(2)) {
        switch(monsndx(mtmp->data)) {
@@ -1966,6 +1970,7 @@ const char * spellname[] =
 	"MON_RED_WORD",
 	//100
 	"HYPNOTIC_COLORS",
+	"CRUSH_BOLT",
 };
 
 
@@ -2091,11 +2096,18 @@ int tary;
 		!is_aoe_attack_spell(spellnum)) {
 		/* message */
 		if ((youagr || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
-			pline("%s cast%s a spell at %s!",
-				youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
-				youagr ? "" : "s",
-				levl[tarx][tary].typ == WATER
-				? "empty water" : "thin air");
+			if(attk->adtyp == AD_PSON){
+				pline("%s concentrate%s.",
+					youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+					youagr ? "" : "s");
+			}
+			else {
+				pline("%s cast%s a spell at %s!",
+					youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+					youagr ? "" : "s",
+					levl[tarx][tary].typ == WATER
+					? "empty water" : "thin air");
+			}
 		}
 		/* monsters figure out you aren't there */
 		if (!youagr && youdef) {
@@ -2204,23 +2216,30 @@ int tary;
 			&& spellnum != MON_RED_WORD
 			&& spellnum != HYPNOTIC_COLORS
 		) {
-			if (is_undirected_spell(spellnum) || notarget || (!foundem && distmin(x(mdef), y(mdef), tarx, tary) > 2))
-				buf[0] = '\0';
-			else
-			{
-				Sprintf(buf, " at %s",
-					youdef
-					? ( (Displaced && (!foundem)) ?
-						"your displaced image" :
-						(!foundem) ?
-						"a spot near you" :
-						"you")
-					: (canspotmon(mdef) ? mon_nam(mdef) : "something"));
+			if(attk->adtyp == AD_PSON){
+				pline("%s concentrate%s.",
+					youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+					youagr ? "" : "s");
 			}
-			pline("%s cast%s a spell%s!",
-				youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
-				youagr ? "" : "s",
-				buf);
+			else {
+				if (is_undirected_spell(spellnum) || notarget || (!foundem && distmin(x(mdef), y(mdef), tarx, tary) > 2))
+					buf[0] = '\0';
+				else
+				{
+					Sprintf(buf, " at %s",
+						youdef
+						? ( (Displaced && (!foundem)) ?
+							"your displaced image" :
+							(!foundem) ?
+							"a spot near you" :
+							"you")
+						: (canspotmon(mdef) ? mon_nam(mdef) : "something"));
+				}
+				pline("%s cast%s a spell%s!",
+					youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+					youagr ? "" : "s",
+					buf);
+			}
 		}
 	}
 	
@@ -2330,22 +2349,36 @@ int tary;
 		if (!foundem) {
 			if ((youagr || youdef || canspotmon(magr)) 
 				&& magr->mtyp != PM_HOUND_OF_TINDALOS
-			)	{
-				pline("%s cast%s a spell at %s!",
-					youagr ? "You" : canseemon(magr) ? Monnam(magr) : "Something",
-					youagr ? "" : "s",
-					levl[tarx][tary].typ == WATER
-					? "empty water" : "thin air");
+			) {
+				if(attk->adtyp == AD_PSON){
+					pline("%s concentrate%s.",
+						youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+						youagr ? "" : "s");
+				}
+				else {
+					pline("%s cast%s a spell at %s!",
+						youagr ? "You" : canseemon(magr) ? Monnam(magr) : "Something",
+						youagr ? "" : "s",
+						levl[tarx][tary].typ == WATER
+						? "empty water" : "thin air");
+				}
 			}
 			return MM_MISS;
 		}
 		/* otherwise, print a spellcasting message */
 		else {
 			if ((youagr || youdef || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS) {
-				pline("%s cast%s a spell at %s!",
-					youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
-					youagr ? "" : "s",
-					youdef ? "you" : (canspotmon(mdef) ? mon_nam(mdef) : "something"));
+				if(attk->adtyp == AD_PSON){
+					pline("%s concentrate%s.",
+						youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+						youagr ? "" : "s");
+				}
+				else {
+					pline("%s cast%s a spell at %s!",
+						youagr ? "You" : canspotmon(magr) ? Monnam(magr) : "Something",
+						youagr ? "" : "s",
+						youdef ? "you" : (canspotmon(mdef) ? mon_nam(mdef) : "something"));
+				}
 			}
 		}
 
@@ -2779,6 +2812,7 @@ int tary;
 	case DOUBT_BOLT:
 	case BARF_BOLT:
 	case BABBLE_BOLT:
+	case CRUSH_BOLT:
 		/* needs direct target */
 		if (!foundem) {
 			impossible("No mdef for mind-bolt");
@@ -2894,6 +2928,36 @@ int tary;
 				}
 				damage_spells(dmg/10);
 				HBabble += dmg;
+			}
+			else {
+				if (canseemon(mdef))
+					pline("%s falters!", Monnam(mdef));
+				mdef->mspec_used += dmg;
+				mdef->mconf = TRUE;
+			}
+		}
+		else if(spell == CRUSH_BOLT){
+			if (youdef) {
+				int stat = ACURR(A_INT) <= ACURR(A_CHA) ? A_CHA : A_INT;
+				stat = ACURR(stat) <= ACURR(A_WIS) ? A_WIS : stat;
+				pline("Your mind is being crushed!");
+				if(!Fixed_abil){
+					adjattrib(stat, -1, FALSE);
+					exercise(A_INT, FALSE);
+					exercise(A_WIS, FALSE);
+					exercise(A_CHA, FALSE);
+					check_brainlessness();
+				}
+				if(save_vs_sanloss())
+					change_usanity(-1*(25-ACURR(stat))/2, FALSE);
+				else
+					change_usanity(-1*(25-ACURR(stat)), TRUE);
+				if(stat == A_INT)
+					damage_spells(dmg/10);
+				else if(stat == A_WIS)
+					drain_en(dmg);
+				else if(stat == A_CHA)
+					HBabble += dmg;
 			}
 			else {
 				if (canseemon(mdef))
@@ -6173,6 +6237,7 @@ int spellnum;
 	case DOUBT_BOLT:
 	case BARF_BOLT:
 	case BABBLE_BOLT:
+	case CRUSH_BOLT:
 	case OPEN_WOUNDS:
 	case MAGIC_MISSILE:
 	case CONE_OF_COLD:

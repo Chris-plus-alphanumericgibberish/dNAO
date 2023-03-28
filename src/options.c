@@ -1541,6 +1541,8 @@ char * str;
 		template = YITH;
 	else if (strstri(s_temp, "crani") == s_temp)
 		template = CRANIUM_RAT;
+	else if (strstri(s_temp, "psurlon") == s_temp)
+		template = PSURLON;
 	else if (strstri(s_temp, "mistweaver") == s_temp)
 		template = MISTWEAVER;
 	else if (strstri(s_temp, "deloused") == s_temp)

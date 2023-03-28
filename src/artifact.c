@@ -4754,7 +4754,10 @@ boolean printmessages; /* print generic elemental damage messages */
 
 	/* EXTERNAL damage sources -- explosions and the like, primarily */
 	/* knockback effect */
-	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4)) || arti_attack_prop(otmp, ARTA_KNOCKBACKX)) && !(
+	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4))
+		|| arti_attack_prop(otmp, ARTA_KNOCKBACKX)
+		|| (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING) && check_imp_mod(otmp, IEA_JUMPING))
+	) && !(
 		/* exclusions below */
 		(oartifact == ART_TOBIUME) /* Tobiume only does the knockback if mdef is nearly dead */
 		))
@@ -4956,7 +4959,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 
 	/* The Grappler's Grasp has a chance to begin grapples.  */
-	if (oartifact == ART_GRAPPLER_S_GRASP) {
+	if (oartifact == ART_GRAPPLER_S_GRASP || (otmp->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(otmp, IEA_STRANGLE))) {
 		/* check if we can begin a grapple -- Damage is done by adding an AT_HUGS to your attack chain, NOT here. */
 		if ((youagr || youdef) && !u.ustuck && !sticks(mdef))
 		{

@@ -220,6 +220,10 @@ int otyp;
 					if(check_imp_mod(obj, IEA_TELEPORT))
 						got_prop = TRUE;
 				break;
+				case PROT_FROM_SHAPE_CHANGERS:
+					if(check_imp_mod(obj, IEA_PROT_SHAPE))
+						got_prop = TRUE;
+				break;
 			}
 		}
 		// if we've got the property, add it to the array

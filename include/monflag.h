@@ -452,8 +452,9 @@
 #define MON_RED_WORD           GOD_RAY+1
 //100
 #define HYPNOTIC_COLORS        MON_RED_WORD+1
+#define CRUSH_BOLT             HYPNOTIC_COLORS+1
 
-#define MON_LASTSPELL          HYPNOTIC_COLORS
+#define MON_LASTSPELL          CRUSH_BOLT
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

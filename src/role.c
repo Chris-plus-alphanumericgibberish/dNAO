@@ -274,7 +274,8 @@ struct Role roles[] = {
 	"Mad", "Archer Asylum", "the ground floor",
 	PM_MADMAN, PM_MADWOMAN, NON_PM,
 	PM_CASSILDA_THE_IRON_MAIDEN, PM_PATIENT, PM_DOCTOR_ARCHER,
-	PM_ENORMOUS_RAT, PM_CONTAMINATED_PATIENT, S_RODENT, S_BAT,
+	PM_ENORMOUS_RAT, PM_CONTAMINATED_PATIENT, S_RODENT, S_WORM,
+	//Switches to PM_LARGE_CAT, PM_CONTAMINATED_PATIENT, S_WORM, S_BAT from locate level onwards
 	ART_STAR_OF_HYPERNOTUS,
 	MA_HUMAN|MA_DWARF|MA_GNOME|MA_ORC|MA_ELF|MA_VAMPIRE|MA_DRAGON|MA_FEY, ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
@@ -284,7 +285,7 @@ struct Role roles[] = {
 	/* Init   Lower  Higher */
 	{ 12, 0,  0, 8,  0, 1 },	/* Hit points */
 	{  4, 3,  0, 1,  2, 4 },14,	/* Energy */
-	10, 8,-2, 2, 20, A_CHA, SPE_CONFUSE_MONSTER, -24
+	0, 3,-2, 2, 10, A_CHA, SPE_CONFUSE_MONSTER, -24
 },
 	// "The Silver Fire", "_The Fury", "The Shadow",	/* Sorta-eberron */
 	// "_The Inheritor", "_The Dawnflower", "_The Everbloom",	/* Sorta-glorion */

@@ -276,7 +276,7 @@ struct monst {
 #define	M_BLACK_WEB		13	/* Zombie with a shadow blade attack */
 #define	M_GREAT_WEB		14	/* Has a stronger shadow blade attack */
 #define	SLIME_REMNANT	15	/* slimey, like an ancient of corruption */
-#define	YELLOW_TEMPLATE	16	/* causes sleep and damages sanity (unimplemented) */
+#define	YELLOW_TEMPLATE	16	/* causes sleep and damages sanity */
 #define	DREAM_LEECH		17	/* sucks mental atributes */
 #define	MAD_TEMPLATE	18	/* mad angel template */
 #define	FALLEN_TEMPLATE	19	/* fallen angel template */
@@ -287,7 +287,8 @@ struct monst {
 #define PLAGUE_TEMPLATE	24	/* suffering from a life-drain plague, cure to recruit */
 #define SPORE_ZOMBIE	25	/* fungus zombie */
 #define CORDYCEPS		26	/* spore shedder */
-#define MAXTEMPLATE	CORDYCEPS
+#define PSURLON			27	/* psychic worm */
+#define MAXTEMPLATE	PSURLON
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */

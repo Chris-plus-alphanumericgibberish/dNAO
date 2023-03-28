@@ -1196,21 +1196,18 @@ struct mkroom	*croom;
 						mon->mtalons = 1;
 					break;
 					case 11:
-						mon->mdreams = 1;
-					break;
-					case 12:
 						mon->msciaphilia = 1;
 					break;
-					case 13:
+					case 12:
 						mon->mforgetful = 1;
 					break;
-					case 14:
+					case 13:
 						mon->mapostasy = 1;
 					break;
-					case 15:
+					case 14:
 						mon->mtoobig = 1;
 					break;
-					case 16:
+					case 15:
 						mon->mformication = 1;
 					break;
 				}
@@ -1232,6 +1229,7 @@ struct mkroom	*croom;
 			PM_VAMPIRE_LORD, PM_VAMPIRE_LADY, PM_HALF_DRAGON, PM_HALF_DRAGON,
 			PM_YUKI_ONNA, PM_DEMINYMPH, 
 			PM_PRIESTESS, 
+			PM_WITCH, 
 			PM_COILING_BRAWN, PM_FUNGAL_BRAIN
 			};
 		struct monst *mon;
@@ -1250,6 +1248,13 @@ struct mkroom	*croom;
 					set_template(mon, MISTWEAVER);
 					set_faction(mon, GOATMOM_FACTION);
 					mon->m_insight_level = min(insight, u.uinsight);
+					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					mon->entangled = SHACKLES;
+					mk_mplayer(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
+					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
+					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
+				break;
+				case PM_WITCH:
 					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
 					mon->entangled = SHACKLES;
 					mk_mplayer(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
@@ -1884,6 +1889,7 @@ default_case:
 			stuff->spe = 2;
 			set_material_gm(stuff, GOLD);
 			add_oprop(stuff, OPROP_ELFLW);
+			add_oprop(stuff, OPROP_WRTHW);
 			add_to_container(otmp, stuff);
 
 			stuff = mksobj(IMPERIAL_ELVEN_BOOTS, MKOBJ_NOINIT);

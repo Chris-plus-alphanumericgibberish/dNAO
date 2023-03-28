@@ -2961,6 +2961,25 @@ boolean past;
 			knows_object(ELVEN_SHIELD);
 			knows_object(ELVEN_BOOTS);
 			knows_object(ELVEN_CLOAK);
+			//The PC was actually lawful, and changes back if they are uncrowned and still their starting alignment
+			if(u.ugodbase[UGOD_CURRENT] == u.ugodbase[UGOD_ORIGINAL] && !u.uevent.uhand_of_elbereth){
+				/* The player wears a helm of opposite alignment? */
+				if (uarmh && uarmh->otyp == HELM_OF_OPPOSITE_ALIGNMENT)
+					u.ugodbase[UGOD_ORIGINAL] = u.ugodbase[UGOD_CURRENT] = GOD_ZO_KALAR;
+				else {
+					u.ualign.god = u.ugodbase[UGOD_ORIGINAL] = u.ugodbase[UGOD_CURRENT] = GOD_ZO_KALAR;
+					u.ualign.type = A_LAWFUL;
+				}
+				You("have a sudden sense of returning to an old direction.");
+				flags.initalign = 0;
+				flags.botl = TRUE;
+				change_luck(-3);
+				u.ublesscnt += 300;
+				u.lastprayed = moves;
+				u.reconciled = REC_NONE;
+				u.lastprayresult = PRAY_CONV;
+				adjalign(-1*u.ualign.record);
+			}
 		break;
 		case PM_DROW:
 			if(flags.initgend){

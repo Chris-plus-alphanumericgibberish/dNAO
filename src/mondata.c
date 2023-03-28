@@ -509,6 +509,27 @@ int template;
 		ptr->hdr = 0; //Exposed brain
 		ptr->mflagst &= ~(MT_ANIMAL|MT_MINDLESS);
 		ptr->mflagsg |= (MG_INSIGHT|MG_SANLOSS);
+		ptr->mflagsv |= MV_TELEPATHIC;
+		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
+			ptr->mflagsw |= MW_ELDER_SIGN;
+		}
+		break;
+	case PSURLON:
+		ptr->pac += 6;
+		ptr->spe_hdr += 6;
+		ptr->spe_bdr += 6;
+		ptr->spe_gdr += 6;
+		ptr->spe_ldr += 6;
+		ptr->spe_fdr += 6;
+		ptr->mflagst &= ~(MT_ANIMAL|MT_MINDLESS);
+		ptr->mflagst |= (MT_HOSTILE|MT_GREEDY|MT_JEWELS|MT_COLLECT|MT_TRAITOR|MT_OMNIVORE);
+		ptr->mflagsg |= (MG_NASTY|MG_INSIGHT|MG_SANLOSS);
+		ptr->mflagsb &= ~(MB_NOLIMBS|MB_NOHANDS|MB_ANIMAL);
+		ptr->mflagsb |= MB_HUMANOID|MB_SLITHY;
+		ptr->mflagsv |= MV_TELEPATHIC|MV_NORMAL;
+		ptr->mflagsa |= MA_ET|MA_G_O_O;
+		if(!(ptr->mflagsm&MM_TUNNEL) && !(ptr->mflagsm&MM_WALLWALK))
+			ptr->mflagsm |= (MM_TUNNEL|MM_NEEDPICK);
 		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
 			ptr->mflagsw |= MW_ELDER_SIGN;
 		}
@@ -761,6 +782,8 @@ int template;
 	/* adjust attacks in the permonst */
 	extern struct attack noattack;
 	boolean special = FALSE;
+	boolean special_2 = FALSE;
+	boolean special_3 = FALSE;
 	struct attack * attk;
 	boolean insert;
 	int i, j;
@@ -918,12 +941,12 @@ int template;
 			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
 		}
 		/* some templates want to adjust existing attacks, or add additional attacks */
-#define insert_okay (!special && (is_null_attk(attk) || \
-	((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
-	&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
+#define insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || \
+		((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
+			&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
 	&& (insert = TRUE))
-#define end_insert_okay (!special && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
-#define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;i++;}
+#define end_insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
+#define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;insert=FALSE;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((template == ZOMBIFIED || template == SKELIFIED || template == MINDLESS) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
@@ -932,8 +955,8 @@ int template;
 			) && (insert = TRUE)
 			)
 		){
-			maybe_insert()
-				attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
+			maybe_insert();
+			attk->aatyp = !nolimbs(ptr) ? AT_CLAW : AT_BITE;
 			attk->adtyp = AD_PHYS;
 			attk->damn = ptr->mlevel / 10 + (template == ZOMBIFIED ? 1 : 2);
 			attk->damd = max(ptr->msize * 2, 4);
@@ -941,7 +964,7 @@ int template;
 
 		/* skeletons get a paralyzing touch */
 		if (template == SKELIFIED && (
-			insert_okay
+			insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -954,7 +977,7 @@ int template;
 		
 		/* vitreans get a cold touch */
 		if (template == CRYSTALFIED && (
-			insert_okay
+			insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -965,7 +988,7 @@ int template;
 			special = TRUE;
 		}
 		if (template == MISTWEAVER && (
-			end_insert_okay
+			end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -982,7 +1005,7 @@ int template;
 			attk->adtyp == AD_SQUE ||
 			attk->adtyp == AD_SAMU
 			))
-			|| insert_okay
+			|| insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1005,7 +1028,7 @@ int template;
 		/* vampires' bites are vampiric: pt 2: primary bites*/
 		if (template == VAMPIRIC && (
 			attk->aatyp == AT_BITE
-			|| (insert_okay && !nomouth(ptr->mtyp))
+			|| (insert_okay(special) && !nomouth(ptr->mtyp))
 			)
 		){
 			maybe_insert();
@@ -1028,7 +1051,7 @@ int template;
 		/* infectees' bites are sickening: pt 2: primary bites*/
 		if (template == SPORE_ZOMBIE && (
 			attk->aatyp == AT_BITE
-			|| (insert_okay && !nomouth(ptr->mtyp))
+			|| (insert_okay(special) && !nomouth(ptr->mtyp))
 			)
 		){
 			maybe_insert();
@@ -1041,7 +1064,7 @@ int template;
 		/* pseudonatural's bites become int-draining tentacles */
 		if (template == PSEUDONATURAL && (
 			(attk->aatyp == AT_BITE)
-			|| insert_okay
+			|| insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1084,7 +1107,7 @@ int template;
 		}
 		/* tomb herd also gets an abduction attack */
 		if (template == TOMB_HERD && (
-			insert_okay
+			insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1096,7 +1119,7 @@ int template;
 		}
 		/* yith gain spellcasting */
 		if (template == YITH && (
-			end_insert_okay
+			end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1108,7 +1131,41 @@ int template;
 		}
 		/* cranium rats gain psionic spellcasting */
 		if (template == CRANIUM_RAT && (
-			end_insert_okay
+			attk->aatyp == AT_MAGC || end_insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_MAGC;
+			attk->adtyp = AD_PSON;
+			attk->damn = 0;
+			attk->damd = 15;
+			special = TRUE;
+		}
+		/* psurlons have hands and psionic spellcasting */
+		if (template == PSURLON && (
+			attk->aatyp == AT_WEAP || insert_okay(special_2)
+			)
+		){
+			maybe_insert();
+			attk->aatyp = AT_WEAP;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1;
+			attk->damd = ptr->msize+1;
+			special_2 = TRUE;
+		}
+		if (template == PSURLON && (
+			attk->aatyp == AT_XWEP || insert_okay(special_3)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_XWEP;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1;
+			attk->damd = ptr->msize+1;
+			special_3 = TRUE;
+		}
+		if (template == PSURLON && (
+			attk->aatyp == AT_MAGC || end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1120,7 +1177,7 @@ int template;
 		}
 		/* monsters that have mastered the black web gain shadow blades */
 		if (template == M_BLACK_WEB && (
-			insert_okay
+			insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1131,7 +1188,7 @@ int template;
 			special = TRUE;
 		}
 		if (template == M_GREAT_WEB && (
-			insert_okay
+			insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1164,7 +1221,7 @@ int template;
 			attk->damd = max(ptr->msize * 2, 4);
 		}
 		if (template == SLIME_REMNANT && (
-			end_insert_okay
+			end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1179,7 +1236,7 @@ int template;
 			attk->damd += 2;
 		}
 		if (template == YELLOW_TEMPLATE && (
-			end_insert_okay
+			end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1190,7 +1247,7 @@ int template;
 			special = TRUE;
 		}
 		if (template == DREAM_LEECH && (
-			end_insert_okay
+			end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1206,7 +1263,7 @@ int template;
 			attk->damd += 4;
 		}
 		if (template == FALLEN_TEMPLATE && (
-			end_insert_okay
+			end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1217,7 +1274,7 @@ int template;
 			special = TRUE;
 		}
 		if (template == MOLY_TEMPLATE && (
-			end_insert_okay
+			end_insert_okay(special)
 			))
 		{
 			maybe_insert();
@@ -1295,6 +1352,9 @@ int mtyp;
 	case CRANIUM_RAT:
 		/* is a rodent */
 		return is_rat(ptr);
+	case PSURLON:
+		/* is a basic worm */
+		return is_basic_worm(ptr);
 	case MISTWEAVER:
 		/* could be a worshipper of the Goat */
 		return !(nonliving(ptr) || is_whirly(ptr) || noncorporeal(ptr));

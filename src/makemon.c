@@ -4151,6 +4151,43 @@ boolean goodequip;
 }
 
 STATIC_OVL void
+worm_initweap(mtmp, mkobjflags, faction, goodequip)
+register struct monst *mtmp;
+int mkobjflags;
+int faction;
+boolean goodequip;
+{
+	int mm = mtmp->mtyp;
+	int chance;
+	struct permonst *ptr = mtmp->data;
+	struct obj *otmp;
+	
+	if(has_template(mtmp, PSURLON)){
+		mongets(mtmp, QUARTERSTAFF, NO_MKOBJ_FLAGS);
+	}
+}
+
+STATIC_OVL void
+worm_initinv(mtmp, mkobjflags, faction, goodequip)
+register struct monst *mtmp;
+int mkobjflags;
+int faction;
+boolean goodequip;
+{
+	int mm = mtmp->mtyp;
+	int chance;
+	struct permonst *ptr = mtmp->data;
+	struct obj *otmp;
+
+	if(has_template(mtmp, PSURLON)){
+		otmp = mongets(mtmp, ROBE, NO_MKOBJ_FLAGS);
+		if(otmp){
+			otmp->obj_color = !rn2(3) ? CLR_BLUE : rn2(2) ? CLR_RED : CLR_MAGENTA;
+		}
+	}
+}
+
+STATIC_OVL void
 m_initweap(mtmp, mkobjflags, faction, goodequip, mmflags)
 register struct monst *mtmp;
 int mkobjflags;
@@ -4193,6 +4230,9 @@ int mmflags;
 		break;
 	    case S_ELEMENTAL:
 			elemental_initweap(mtmp, mkobjflags, faction, goodequip);
+		break;
+	    case S_WORM:
+			worm_initweap(mtmp, mkobjflags, faction, goodequip);
 		break;
 	    case S_HUMAN:
 			human_initweap(mtmp, mkobjflags, faction, goodequip);
@@ -10074,6 +10114,9 @@ boolean goodequip;
 		case S_UMBER:
 			umber_initinv(mtmp, mkobjflags, faction, goodequip);
 		break;
+		case S_WORM:
+			worm_initinv(mtmp, mkobjflags, faction, goodequip);
+		break;
 		case S_ANT:
 			if(In_law(&u.uz)){
 				//Civilized ants
@@ -12214,6 +12257,16 @@ boolean randmonst;
 		/* on the Plane of Earth, Mahadevae are Worldshapers, capable of travelling through the rock */
 		else if(Is_earthlevel(&u.uz) && ptr->mtyp == PM_MAHADEVA) {
 			mkmon_template = WORLD_SHAPER;
+		}
+		/* the worm-entity has it out for mad elves for some reason */
+		else if(((Role_if(PM_MADMAN) && Race_if(PM_ELF)) || Infuture || check_insight()) && is_basic_worm(ptr) && roll_generic_flat_madness(TRUE)){
+			mkmon_template = PSURLON;
+		}
+		else if(((Role_if(PM_MADMAN) && Race_if(PM_ELF)) || Infuture || (randmonst && check_insight())) && is_wormy_thing(ptr) && roll_generic_madness(TRUE)){
+			mkmon_template = PSURLON;
+		}
+		else if(((Role_if(PM_MADMAN) && Race_if(PM_ELF)) || Infuture || check_insight()) && is_wormy_dragon(ptr) && roll_generic_flat_madness(TRUE) && check_insight() && randmonst){
+			mkmon_template = PSURLON;
 		}
 		/* insight check: making pseudonatural creatures out of anything reasonable */
 		else if(randmonst && can_undead(ptr) && check_insight()){

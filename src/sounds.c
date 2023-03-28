@@ -2080,7 +2080,22 @@ humanoid_sound:
 	    else{
 			const char *talkabt = "talks about %s.";
 			const char *discuss = "discusses %s.";
-			switch (monsndx(ptr)) {
+			if((ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
+				&& has_template(mtmp, MISTWEAVER)
+			){
+				switch(rn2(3)){
+					case 0:
+						verbl_msg = "Ia! Shub-Niggurath! The Goat with a Thousand Young!";
+					break;
+					case 1:
+						verbl_msg = "Abundance to the Black Goat of the Woods!";
+					break;
+					case 2:
+						verbl_msg = "From the wells of night to the gulfs of space, and from the gulfs of space to the wells of night, ever Their praises!";
+					break;
+				}
+			}
+			else switch (monsndx(ptr)) {
 				case PM_VALAVI:
 					Sprintf(msgbuff, talkabt, rn2(2) ? "herding" : rn2(2) ? "carpentry" : rn2(10) ? "pottery" : "delicious sawdust recipes");
 					pline_msg = msgbuff;

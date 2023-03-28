@@ -2396,9 +2396,10 @@ register struct obj *wand;
 		return 1;
 	}
 	else if(wand->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(wand, IEA_BOLTS)){
-		if(!wand->owornmask || u.uen < 10)
+		int encost = u.twoweap ? 20 : 10;
+		if(!wand->owornmask || u.uen < encost)
 			return 0;
-		u.uen -= 10;
+		u.uen -= encost;
 		flags.botl = TRUE;
 		return 1;
 	}
@@ -2670,13 +2671,13 @@ boolean ordinary;
 		    break;
 		case IMPERIAL_ELVEN_GAUNTLETS:
 			if(u.ualign.record > 3){
-				damage = d(1,8);
+				damage = d(max(1, 1+(obj->spe+1)/2),8);
 				if(hates_holy(youracedata))
 					damage *= 2;
 				pline("Idiot!  You've shot yourself!");
 			}
 			else if(u.ualign.record < -3){
-				damage = d(1,8);
+				damage = d(max(1, 1+(obj->spe+1)/2),8);
 				if(hates_unholy(youracedata))
 					damage *= 2;
 				pline("Idiot!  You've shot yourself!");
@@ -2686,7 +2687,7 @@ boolean ordinary;
 					shieldeff(u.ux, u.uy);
 					pline_The("missiles bounce!");
 				} else {
-					damage = d(1,4);
+				damage = d(max(1, 1+(obj->spe+1)/2),4);
 					pline("Idiot!  You've shot yourself!");
 				}
 			}
@@ -3312,15 +3313,19 @@ register struct	obj	*obj;
 			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
 		else if(otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(obj, IEA_BOLTS)){
 			basiczap(&zapdat, 0, ZAP_WAND, 1);
-			zapdat.damn = max(1, P_SKILL(P_WAND_POWER));
+			zapdat.damn = max(1, P_SKILL(P_WAND_POWER)+(obj->spe+1)/2);
+			if(u.twoweap)
+				zapdat.damn *= 2;
 			zapdat.affects_floor = FALSE;
 			if(u.ualign.record > 3){
 				zapdat.damd = 8;
 				zapdat.adtyp = AD_HOLY;
+				zapdat.phase_armor = TRUE;
 			}
 			else if(u.ualign.record < -3){
 				zapdat.damd = 8;
 				zapdat.adtyp = AD_UNHY;
+				zapdat.phase_armor = TRUE;
 			}
 			else {
 				zapdat.damd = 4;

@@ -1095,18 +1095,20 @@ RING(("protection from shape changers", "black signet"), {PROT_FROM_SHAPE_CHANGE
 		AMULET_CLASS, prob, 0, 20, 150, {0}, {0}, 0, 0, 0, 20, HI_METAL, __VA_ARGS__ )
 
 AMULET(("amulet of drain resistance",  "warped"),     {DRAIN_RES},         60),
-AMULET(("amulet of ESP",               "circular"),   {TELEPAT},          130),
+AMULET(("amulet of ESP",               "circular"),   {TELEPAT},          100),
 AMULET(("amulet of life saving",       "spherical"),  {LIFESAVED},         70),
-AMULET(("amulet of strangulation",     "oval"),       {STRANGLED},        100),
-AMULET(("amulet of restful sleep",     "triangular"), {SLEEPING},         100),
-AMULET(("amulet versus poison",        "pyramidal"),  {POISON_RES},       130),
+AMULET(("amulet of strangulation",     "oval"),       {STRANGLED},         90),
+AMULET(("amulet of restful sleep",     "triangular"), {SLEEPING},          90),
+AMULET(("amulet versus poison",        "pyramidal"),  {POISON_RES},       100),
 AMULET(("amulet versus sickness",      "teardrop"),   {SICK_RES},          25),
-AMULET(("amulet of change",            "square"),     {0},                110),
+AMULET(("amulet of change",            "square"),     {0},                100),
 AMULET(("amulet versus curses",        "convex"),     {0},                 55),/*Needs tile*/
 AMULET(("amulet of unchanging",        "concave"),    {UNCHANGING},        45),
 AMULET(("amulet of nullify magic",     "pentagonal"), {NULLMAGIC},         45),/*Needs tile*/
 AMULET(("amulet of reflection",        "hexagonal"),  {REFLECTING},        70),
 AMULET(("amulet of magical breathing", "octagonal"),  {MAGICAL_BREATHING}, 60),
+AMULET(("amulet of wound closure", 	   "cardioid"),   {REGENERATION},      30),/*Needs tile*/
+AMULET(("amulet versus evil eyes", 	   "oblong"),     {GAZE_RES},          60),/*Needs tile*/
 
 AMULET(("cheap plastic imitation of the Amulet of Yendor", "Amulet of Yendor"), {0}, 0,
 	O_USKWN(1), O_MAGIC(0), O_MAT(PLASTIC), O_COST(20), O_NUT(1)),
