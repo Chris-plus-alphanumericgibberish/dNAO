@@ -32,7 +32,7 @@ struct q_score {			/* Quest "scorecard" */
 	Bitfield(leader_is_dead,1);
 	Bitfield(second_thoughts,1); /*turned stag AFTER completing version 1 of the quest*/
 	/*22*/
-	Bitfield(time_on_home,8);
+	int time_on_home;
 #define	MAX_HOME_TIMER 255
 /* Note: should be > 1 (urrent 70->6 */
 #define	ANA_HOME_PROB (70 - (quest_status.time_on_home+1)/4)
