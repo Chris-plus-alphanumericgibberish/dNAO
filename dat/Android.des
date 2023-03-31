@@ -465,11 +465,15 @@ MONSTER:'h',"mind flayer",random
 MONSTER:'h',"mind flayer",random
 MONSTER:'h',"mind flayer",random
 
-MONSTER:'w',"long worm",random
-MONSTER:'w',"long worm",random
-MONSTER:'w',"long worm",random
-MONSTER:'w',"long worm",random
-MONSTER:'w',"long worm",random
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
 
 MONSTER:'{',"razorvine",random
 MONSTER:'{',"razorvine",random
@@ -478,6 +482,15 @@ MONSTER:'{',"razorvine",random
 MONSTER:'{',"razorvine",random
 MONSTER:'{',"razorvine",random
 MONSTER:'{',"razorvine",random
+
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
 
 OBJECT:'[',"plasteel helm",random
 OBJECT:'[',"plasteel helm",random
@@ -910,6 +923,12 @@ MONSTER: '\'', "semblance", random
 MONSTER: '\'', "semblance", random
 MONSTER: '\'', "semblance", random
 MONSTER: '\'', "semblance", random
+
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+
+MONSTER: '#', "psurlon purple worm", random
 
 # MONSTER: 'U', "umber hulk", random
 # MONSTER: 'U', "umber hulk", random

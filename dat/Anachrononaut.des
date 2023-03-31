@@ -652,6 +652,15 @@ MONSTER:'{',"razorvine",random
 MONSTER:'{',"razorvine",random
 MONSTER:'{',"razorvine",random
 
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+MONSTER:'#',"cranium rodent of unusual size",random
+
 # MONSTER:'w',"purple worm",random
 # MONSTER:'w',"purple worm",random
 # MONSTER:'w',"purple worm",random
@@ -1117,6 +1126,12 @@ MONSTER: '\'', "semblance", random
 MONSTER: '\'', "semblance", random
 MONSTER: '\'', "semblance", random
 MONSTER: '\'', "semblance", random
+
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+MONSTER: '#', "psurlon long worm", random
+
+MONSTER: '#', "psurlon purple worm", random
 
 # MONSTER: 'U', "umber hulk", random
 # MONSTER: 'U', "umber hulk", random
