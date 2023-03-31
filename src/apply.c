@@ -5897,12 +5897,6 @@ struct obj *obj;
 		pline1(nothing_happens);
 		return FALSE;
 	}
-	if (obj->spe <= 0){
-		pline1(nothing_happens);
-		pline("The ring crumbles to dust!");
-		useupall(obj);
-		return FALSE;
-	}
 	if (!(obj->owornmask & W_RING)) {
 		if (objects[RIN_WISHES].oc_name_known)
 			You_feel("that you should be wearing %s.", the(xname(obj)));
@@ -5968,11 +5962,6 @@ struct obj *obj;
 	else
 	{
 		pline1(nothing_happens);
-	}
-	if (obj->spe <= 0)
-	{
-		pline("The ring crumbles to dust!");
-		useupall(obj);
 	}
 	return madewish;
 }
@@ -7871,6 +7860,10 @@ upgradeImpArmor()
 	}
 	if(!is_imperial_elven_armor(arm)){
 		pline("That doesn't look like a piece of imperial armor.");
+		return MOVE_CANCELLED;
+	}
+	if(check_imp_mod(arm, IEA_NOUPGRADES)){
+		pline("This less-sophisticated armor may lack certain functions, but that is not the result of damage.");
 		return MOVE_CANCELLED;
 	}
 	if(arm->owornmask){

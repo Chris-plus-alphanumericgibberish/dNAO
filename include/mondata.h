@@ -658,6 +658,11 @@
 									|| (ptr)->mtyp == PM_COILING_BRAWN \
 									|| (ptr)->mtyp == PM_FUNGAL_BRAIN \
 									|| (ptr)->mtyp == PM_STRANGER \
+									|| (ptr)->mtyp == PM_SUZERAIN \
+									|| (ptr)->mtyp == PM_FLAXEN_STARSHADOW \
+									|| (ptr)->mtyp == PM_FLAXEN_STAR_PHANTOM \
+									|| (ptr)->mtyp == PM_PUPPET_EMPEROR_XELETH \
+									|| (ptr)->mtyp == PM_PUPPET_EMPRESS_XEDALLI \
 								  )
 
 #define yellow_monster(mon) (\

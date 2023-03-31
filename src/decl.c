@@ -349,7 +349,8 @@ const struct material materials[] = {
 	{OBSIDIAN_MT,	CLR_BLACK,		 60,/*old:  26*/		 20,		4,				2,			3	},
 	{SALT,			CLR_WHITE,		 60,/*old:  21*/		 15,		4,				2,			3	},
 	{SHADOWSTEEL,	CLR_BLACK,		 30,/*old:  27*/		 50,		6,				4,			5	},
-	{MERCURIAL,		HI_SILVER,		100,/*old: 135*/		150,		5,				4,			4	}
+	{MERCURIAL,		HI_SILVER,		100,/*old: 135*/		150,		5,				4,			4	},
+	{FIRMAMENT,		CLR_BLACK,		 50,/*old:  27*/		300,	   10,			   10,		   10	}
 };
 
 /* Vision */

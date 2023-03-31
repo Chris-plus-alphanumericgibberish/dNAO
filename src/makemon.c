@@ -955,6 +955,18 @@ boolean goodequip;
 		(void) mpickobj(mtmp, otmp);
 		return;//no random stuff!
 	}
+	else if(mm == PM_STRANGER){
+		otmp = mongets(mtmp, SHEPHERD_S_CROOK, MKOBJ_NOINIT);
+		otmp->spe = 5;
+		otmp->obj_color = CLR_YELLOW;
+	}
+	else if(mm == PM_SUZERAIN){
+		otmp = mongets(mtmp, SHEPHERD_S_CROOK, MKOBJ_NOINIT);
+		otmp->spe = 5;
+		set_material_gm(otmp, MINERAL);
+		set_submat(otmp, SUBMAT_MARBLE);
+		otmp->obj_color = CLR_YELLOW;
+	}
 	else if(mm == PM_SILENT_ONE){
 		otmp = mksobj(QUARTERSTAFF, mkobjflags);
 		bless(otmp);
@@ -2463,6 +2475,75 @@ boolean goodequip;
 		} else if(mm == PM_ELVENQUEEN && In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && urole.neminum == PM_NECROMANCER && in_mklev){
 			(void)mongets(mtmp, SHACKLES, mkobjflags);
 			mtmp->entangled = SHACKLES;
+		} else if(mm == PM_STAR_ELF){
+			int armors[] = {IMPERIAL_ELVEN_BOOTS, IMPERIAL_ELVEN_GAUNTLETS, IMPERIAL_ELVEN_ARMOR, IMPERIAL_ELVEN_HELM};
+			long upgrades[] = {IEA_NOUPGRADES, //boots
+							   IEA_NOUPGRADES|IEA_GODEXTERITY, //gloves
+							   IEA_NOUPGRADES|IEA_SICK_RES, //armor
+							   IEA_NOUPGRADES|IEA_NOBREATH|IEA_BLIND_RES|IEA_INC_ACC}; // helm
+			for(int i = 0; i < SIZE(armors); i++){
+				otmp = mongets(mtmp, armors[i], mkobjflags);
+				if(otmp){
+					otmp->ovar1_iea_upgrades = upgrades[i];
+				}
+			}
+			mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+			if(rn2(3)){
+				mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+				mongets(mtmp, ELVEN_DAGGER, mkobjflags);
+				otmp = mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
+			}
+			else {
+				mongets(mtmp, ELVEN_BOW, mkobjflags);
+				m_initthrow(mtmp, ELVEN_ARROW, 12, mkobjflags);
+				otmp = mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
+			}
+			if(otmp){
+				set_material_gm(otmp, rn2(10) ? METAL : GOLD);
+			}
+		} else if(mm == PM_PUPPET_EMPEROR_XELETH || mm == PM_PUPPET_EMPRESS_XEDALLI){
+			int armors[] = {IMPERIAL_ELVEN_BOOTS, IMPERIAL_ELVEN_GAUNTLETS, IMPERIAL_ELVEN_ARMOR, IMPERIAL_ELVEN_HELM};
+			long upgrades[] = {IEA_BOOT_MASK,IEA_GLOVE_MASK,IEA_BODY_MASK,IEA_HELM_MASK};
+			for(int i = 0; i < SIZE(armors); i++){
+				otmp = mongets(mtmp, armors[i], MKOBJ_NOINIT);
+				if(otmp){
+					add_oprop(otmp, OPROP_CURS);
+					add_oprop(otmp, OPROP_BYAK);
+					curse(otmp);
+					otmp->spe = 5;
+					set_material_gm(otmp, GOLD);
+					fix_object(otmp);
+					otmp->obj_color = CLR_YELLOW;
+					otmp->ovar1_iea_upgrades = upgrades[i];
+				}
+			}
+			otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, MKOBJ_NOINIT);
+			if(otmp){
+				otmp->oeroded3 = 1;
+				otmp->obj_color = CLR_YELLOW;
+			}
+			otmp = mongets(mtmp, AMULET_OF_WOUND_CLOSURE, MKOBJ_NOINIT);
+			if(otmp){
+				set_material_gm(otmp, GOLD);
+			}
+			otmp = mongets(mtmp, mm == PM_PUPPET_EMPEROR_XELETH ? BODYGLOVE : PLAIN_DRESS, MKOBJ_NOINIT);
+			if(otmp){
+				otmp->spe = 3;
+			}
+			otmp = mongets(mtmp, ELVEN_SICKLE, MKOBJ_NOINIT);
+			if(otmp){
+				otmp->spe = 5;
+				add_oprop(otmp, OPROP_ELFLW);
+				add_oprop(otmp, OPROP_WRTHW);
+				add_oprop(otmp, OPROP_BYAK);
+				curse(otmp);
+				set_material_gm(otmp, GOLD);
+			}
+			otmp = mongets(mtmp, ELVEN_SHIELD, MKOBJ_NOINIT);
+			if(otmp){
+				otmp->spe = 5;
+				set_material_gm(otmp, GOLD);
+			}
 		} else if(In_mordor_quest(&u.uz) 
 			&& !In_mordor_forest(&u.uz)
 			&& !Is_ford_level(&u.uz)
@@ -3861,6 +3942,66 @@ boolean goodequip;
 			case 4: (void) mongets(mtmp, POT_HEALING, mkobjflags);
 			case 5: (void) mongets(mtmp, POT_EXTRA_HEALING, mkobjflags);
 		}
+	} else if (mtmp->mtyp == PM_STRANGER) {
+		otmp = mongets(mtmp, ROBE, MKOBJ_NOINIT);\
+		if(otmp){
+			set_material_gm(otmp, LEATHER);
+			add_oprop(otmp, OPROP_MAGC);
+			add_oprop(otmp, OPROP_CURS);
+			fix_object(otmp);
+			otmp->obj_color = CLR_YELLOW;
+			otmp->spe = 5;
+		}
+
+		otmp = mongets(mtmp, AMULET_OF_WOUND_CLOSURE, MKOBJ_NOINIT);\
+		if(otmp){
+			set_material_gm(otmp, GOLD);
+			fix_object(otmp);
+			otmp->oward = YELLOW_SIGN;
+		}
+
+		if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+			otmp = mksartifact(ART_STAR_EMPEROR_S_RING);
+			otmp->spe = 2;
+			mpickobj(mtmp, otmp);
+		}
+
+#ifndef GOLDOBJ
+		mtmp->mgold = (long)rn1(500,5000);
+		u.spawnedGold += mtmp->mgold;
+#else
+		mkmonmoney(mtmp,(long)rn1(500,5000));
+#endif
+	} else if (mtmp->mtyp == PM_SUZERAIN) {
+		otmp = mongets(mtmp, CLOAK_OF_PROTECTION, MKOBJ_NOINIT);
+		if(otmp){
+			set_material_gm(otmp, LEATHER);
+			add_oprop(otmp, OPROP_MAGC);
+			add_oprop(otmp, OPROP_CURS);
+			fix_object(otmp);
+			otmp->obj_color = CLR_YELLOW;
+			otmp->spe = 5;
+		}
+
+		otmp = mongets(mtmp, AMULET_OF_WOUND_CLOSURE, MKOBJ_NOINIT);
+		if(otmp){
+			set_material_gm(otmp, GOLD);
+			fix_object(otmp);
+			otmp->oward = YELLOW_SIGN;
+		}
+
+		otmp = mongets(mtmp, FACELESS_HELM, MKOBJ_NOINIT);
+		if(otmp){
+			set_material_gm(otmp, BONE);
+			otmp->spe = 5;
+		}
+
+#ifndef GOLDOBJ
+		mtmp->mgold = (long)rn1(500,5000);
+		u.spawnedGold += mtmp->mgold;
+#else
+		mkmonmoney(mtmp,(long)rn1(500,5000));
+#endif
 	} else if (ptr->msound == MS_PRIEST ||
 		quest_mon_represents_role(ptr,PM_PRIEST)
 	) {
@@ -12483,6 +12624,7 @@ struct monst * mon;
 		out_faction = SEROPAENES_FACTION;
 	else if((In_quest(&u.uz) && Role_if(PM_MADMAN) && !peaceful)
 		|| yellow_monster(mon)
+		|| (mon->mtyp == PM_STAR_ELF && Role_if(PM_MADMAN))
 	)
 		out_faction = YELLOW_FACTION;
 	else if(Is_knox(&u.uz))
@@ -14680,6 +14822,7 @@ static const int futureZombies[] = {
 						PM_GREEN_ELF,
 						PM_GREY_ELF,
 						PM_HIGH_ELF,
+						PM_STAR_ELF,
 						//Gnomes
 						PM_GNOME,
 						PM_GNOME_LORD,

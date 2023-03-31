@@ -410,6 +410,7 @@ extern struct artifact * artilist;
 #define INVULNERABILITY	(LAST_PROP+86)
 #define IBITE_ARM		(LAST_PROP+87)
 #define LOOT_SELF		(LAST_PROP+88)
+#define IMPERIAL_RING	(LAST_PROP+89)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

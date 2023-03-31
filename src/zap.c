@@ -74,6 +74,7 @@ int adtyp, ztyp;
 		case AD_ELEC: return "lightning bolt";
 		case AD_HOLY: return "holy missile";
 		case AD_UNHY: return "unholy missile";
+		case AD_STAR: return "stream of silver stars";
 		default:      impossible("unknown wand damage type in flash_type: %d", adtyp);
 			return "NaN ray";
 		}
@@ -2403,6 +2404,13 @@ register struct obj *wand;
 		flags.botl = TRUE;
 		return 1;
 	}
+	else if(wand->oartifact == ART_STAR_EMPEROR_S_RING){
+		if(!wand->owornmask || u.uen < 15)
+			return 0;
+		u.uen -= 15;
+		flags.botl = TRUE;
+		return 1;
+	}
 	return 0;
 }
 
@@ -2504,7 +2512,7 @@ struct obj *otmp;
 	useup(otmp);
 }
 
-static NEARDATA const char zap_syms[] = { ARMOR_CLASS, WAND_CLASS, TOOL_CLASS, 0 };
+static NEARDATA const char zap_syms[] = { ARMOR_CLASS, WAND_CLASS, TOOL_CLASS, RING_CLASS, 0 };
 
 int
 dozap()
@@ -3332,6 +3340,14 @@ register struct	obj	*obj;
 				zapdat.adtyp = AD_MAGM;
 			}
 			use_skill(P_WAND_POWER, 1);
+			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, range, &zapdat);
+		}
+		else if(obj->oartifact == ART_STAR_EMPEROR_S_RING){
+			basiczap(&zapdat, AD_STAR, ZAP_WAND, wand_damage_die(P_SKILL(P_WAND_POWER)));
+			zapdat.unreflectable = ZAP_REFL_NEVER;
+			zapdat.damd = 8;
+			zapdat.affects_floor = FALSE;
+			use_skill(P_WAND_POWER, 3);
 			zap(&youmonst, u.ux, u.uy, u.dx, u.dy, range, &zapdat);
 		}
 	    else if (otyp >= SPE_MAGIC_MISSILE && otyp <= SPE_ACID_SPLASH){

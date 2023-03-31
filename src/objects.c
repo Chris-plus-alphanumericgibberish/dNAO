@@ -1056,7 +1056,7 @@ BOOTS(("flying boots", "snow boots"),
 		DEF_BLINDNAME(names, "ring"), \
 		BITS(0,0,spec,0,mgc,spec,0,0,MZ_TINY,0,HARDGEM(mohs),0,0,P_NONE,metal,0), \
 		power, RING_CLASS, 0, 0, 3, cost, {0}, {0}, 0, 0, 0, 15, color,__VA_ARGS__ )
-RING(("wishes", "black"),                {0},                  500, 1, 1, 4, PLATINUM, CLR_BLACK, O_NOWISH(1)),
+RING(("wishes", "black"),                {0},                  500, 1, 1, 4, FIRMAMENT, CLR_BLACK, O_NOWISH(1)),
 RING(("adornment", "wooden"),            {ADORNED},           100, 1, 1, 2, WOOD, HI_WOOD),
 RING(("gain strength", "granite"),       {0},                  150, 1, 1, 7, MINERAL, HI_MINERAL),
 RING(("gain constitution", "opal"),      {0},                  150, 1, 1, 7, GEMSTONE,  CLR_WHITE),

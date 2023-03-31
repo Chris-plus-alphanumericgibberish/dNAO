@@ -730,7 +730,7 @@ add_movement_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (obj->olarva && !is_hard(obj)){
+	if ((obj->olarva || obj->obyak || check_oprop(obj, OPROP_BYAK)) && !is_hard(obj)){
 		if(!obj->owornmask || obj->where != OBJ_INVENT)
 			Strcat(buf, "writhing ");
 	}
@@ -741,9 +741,13 @@ add_biting_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (obj->olarva && !is_hard(obj)){
+	if (obj->olarva){
 		if(obj->owornmask && obj->where == OBJ_INVENT)
 			Strcat(buf, "gnawing ");
+	}
+	if (obj->obyak || check_oprop(obj, OPROP_BYAK)){
+		if(obj->owornmask && obj->where == OBJ_INVENT)
+			Strcat(buf, "stinging ");
 	}
 }
 
@@ -897,15 +901,15 @@ char *buf;
 			Strcat(buf, "tattered ");
 		}
 	}
-	if (obj->olarva && is_hard(obj)) {
-		switch (obj->oeroded2) {
+	if ((obj->olarva || obj->obyak || check_oprop(obj, OPROP_BYAK)) && obj->where == OBJ_INVENT) {
+		switch (min(3, obj->olarva+obj->obyak)) {
 		case 2:	Strcat(buf, "very "); break;
 		case 3:	Strcat(buf, "thoroughly "); break;
 		}
 		Strcat(buf, "larvae-riddled ");
 	}
-	if (obj->odead_larva) {
-		switch (obj->oeroded2) {
+	if (obj->odead_larva && obj->where == OBJ_INVENT) {
+		switch (obj->odead_larva) {
 		case 2:	Strcat(buf, "very "); break;
 		case 3:	Strcat(buf, "thoroughly "); break;
 		}
@@ -1563,6 +1567,8 @@ boolean adjective;
 			return "onyx";
 		else if (obj->oartifact == ART_DRAGONHEAD_SHIELD)
 			return "stone dragon scales";
+		else if (obj->sub_material == SUBMAT_MARBLE)
+			return "marble";
 		/* ceramic wand is handled already */
 		else if (obj->oclass == ARMOR_CLASS || obj->oclass == TILE_CLASS || obj->otyp == MASK)
 			return "ceramic";
@@ -1579,6 +1585,8 @@ boolean adjective;
 		if(obj->where == OBJ_MINVENT || obj->where == OBJ_INVENT)
 			return (adjective ? (is_streaming_merc(obj) ? "streaming" : is_kinstealing_merc(obj) ? "kinstealing" : "chained") : "chaos stuff");
 		return (adjective ? "melting" : "chaos stuff");
+	case FIRMAMENT:
+		return objects[obj->otyp].oc_name_known ? "firmament" : "glittering dark ceramic";
 	default:
 		return (adjective ? "mysterious" : "an enigma in solid form");
 	}

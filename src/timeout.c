@@ -2708,7 +2708,11 @@ long timeout;
 		otmp->olarva--;
 		otmp->odead_larva = min(3, otmp->odead_larva + 1);
 	}
-	if(otmp->olarva > 0) {
+	if(otmp->obyak > 0){
+		otmp->obyak--;
+		otmp->odead_larva = min(3, otmp->odead_larva + 1);
+	}
+	if(otmp->olarva > 0 || otmp->obyak > 0) {
 		start_timer(4+d(2,4), TIMER_OBJECT, LARVAE_DIE, arg);
 	}
 }

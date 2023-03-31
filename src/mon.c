@@ -1840,6 +1840,7 @@ movemon()
 	if(mtmp->m_insight_level > u.uinsight
 	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 	  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
+	  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 	){
 		insight_vanish(mtmp);
 		continue;
@@ -4096,11 +4097,12 @@ struct monst *mtmp;
 #define LSVD_ILU 0x0040	/* illuminated */
 #define LSVD_FRC 0x0080	/* fractured kamerel */
 #define LSVD_NBW 0x0100	/* nitocris's black wraps */
-#define LSVD_PLY 0x0200	/* polypoids */
-#define LSVD_NIT 0x0400	/* Nitocris becoming a ghoul */
-#define LSVD_KAM 0x0800	/* kamerel becoming fractured */
-#define LSVD_ALA 0x1000	/* alabaster decay */
-#define LSVD_FLS 0x2000	/* God of flesh claims body */
+#define LSVD_YEL 0x0200	/* Cannot die unless on the Astral Plane */
+#define LSVD_PLY 0x0400	/* polypoids */
+#define LSVD_NIT 0x0800	/* Nitocris becoming a ghoul */
+#define LSVD_KAM 0x1000	/* kamerel becoming fractured */
+#define LSVD_ALA 0x2000	/* alabaster decay */
+#define LSVD_FLS 0x4000	/* God of flesh claims body */
 #define LSVDLAST LSVD_FLS	/* last lifesaver */
 
 	/* set to kill */
@@ -4145,6 +4147,8 @@ struct monst *mtmp;
 		lifesavers |= LSVD_ASC;
 	if (allied_iaso_on_level(mtmp))
 		lifesavers |= LSVD_IAS;
+	if ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && !on_level(&astral_level, &u.uz))
+		lifesavers |= LSVD_YEL;
 
 	/* some lifesavers do NOT work on stone/gold/glass-ing */
 	if (stoned || golded || glassed)
@@ -4432,6 +4436,16 @@ struct monst *mtmp;
 				pline("A glowing halo forms over %s!",
 					mon_nam(mtmp));
 			}
+			break;
+		case LSVD_YEL:
+			/* message */
+			if (couldsee(mtmp->mx, mtmp->my)) {
+				messaged = TRUE;
+				pline("But wait...");
+				pline("A sickly yellow aura forms around %s!",
+					mon_nam(mtmp));
+			}
+			mtmp->mvar_yellow_lifesaved = TRUE;
 			break;
 		case LSVD_ILU:
 			/* normally has only a 1/3 chance of losing its lifesaving ability */
@@ -4815,6 +4829,9 @@ register struct monst *mtmp;
 	}
 	if(mtmp->mtyp == PM_BLASPHEMOUS_LURKER){
 		u.umadness |= MAD_REACHER;
+	}
+	if(mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI){
+		makemon(&mons[PM_SUZERAIN], 0, 0, MM_ADJACENTOK);
 	}
 #ifdef RECORD_ACHIEVE
 	if(mtmp->mtyp == PM_LUCIFER){
@@ -8093,33 +8110,66 @@ struct obj *obj;
 		}
 	}
 	
-	dd = 1 + obj->olarva;
-	nd = max(1, (objects[obj->otyp].oc_size + obj->objsize - MZ_MEDIUM));
-	
-	damage = d(nd,dd);
-	if(mdef == &youmonst){
-		Your("%s bite%s you!", xname(obj), obj->quan == 1 ? "s":"");
-		// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
-		damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
-		// pline("damage post DR: %d", damage);
-		if(damage < 1)
-			damage = 1;
-		damage = reduce_dmg(mdef,damage,TRUE,FALSE);
-	
-		losehp(damage, "their clothes", KILLED_BY);
+	if(obj->olarva){
+		dd = 1 + obj->olarva;
+		nd = max(1, (objects[obj->otyp].oc_size + obj->objsize - MZ_MEDIUM));
+		
+		damage = d(nd,dd);
+		if(mdef == &youmonst){
+			Your("%s bite%s you!", xname(obj), obj->quan == 1 ? "s":"");
+			// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
+			damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			// pline("damage post DR: %d", damage);
+			if(damage < 1)
+				damage = 1;
+			damage = reduce_dmg(mdef,damage,TRUE,FALSE);
+		
+			losehp(damage, "their clothes", KILLED_BY);
+		}
+		else {
+			// pline("damage pre DR: %d", damage);
+			damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			// pline("damage post DR: %d", damage);
+			if(damage < 1)
+				damage = 1;
+
+			damage = reduce_dmg(mdef,damage,TRUE,FALSE);
+
+			mdef->mhp -= damage;
+			if(mdef->mhp < 1){
+				mondied(mdef);
+			}
+		}
 	}
-	else {
-		// pline("damage pre DR: %d", damage);
-		damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
-		// pline("damage post DR: %d", damage);
-		if(damage < 1)
-			damage = 1;
+	if((obj->obyak || check_oprop(obj, OPROP_BYAK)) && (mdef == &youmonst || !yellow_monster(mdef))){
+		nd = max(1, (objects[obj->otyp].oc_size + obj->objsize - MZ_MEDIUM));
+		nd *= check_oprop(obj, OPROP_BYAK) ? 3 : obj->obyak;
+		
+		damage = d(nd,2) + nd*2;
+		if(mdef == &youmonst){
+			Your("%s bite%s and sting%s you!", xname(obj), obj->quan == 1 ? "s":"", obj->quan == 1 ? "s":"");
+			// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
+			damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			// pline("damage post DR: %d", damage);
+			if(damage < 1)
+				damage = 1;
+			damage = reduce_dmg(mdef,damage,TRUE,FALSE);
+		
+			losehp(damage, "their clothes", KILLED_BY);
+		}
+		else {
+			// pline("damage pre DR: %d", damage);
+			damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			// pline("damage post DR: %d", damage);
+			if(damage < 1)
+				damage = 1;
 
-		damage = reduce_dmg(mdef,damage,TRUE,FALSE);
+			damage = reduce_dmg(mdef,damage,TRUE,FALSE);
 
-		mdef->mhp -= damage;
-		if(mdef->mhp < 1){
-			mondied(mdef);
+			mdef->mhp -= damage;
+			if(mdef->mhp < 1){
+				mondied(mdef);
+			}
 		}
 	}
 }
@@ -8215,7 +8265,7 @@ struct obj *obj;
 			}
 		}
 		if(obj->olarva < 3){
-			if(!obj->olarva) start_timer(4+d(2,4), TIMER_OBJECT, LARVAE_DIE, (genericptr_t)obj);
+			if(!obj->olarva && !obj->obyak) start_timer(4+d(2,4), TIMER_OBJECT, LARVAE_DIE, (genericptr_t)obj);
 			obj->olarva++;
 			return TRUE;
 		}
@@ -9531,7 +9581,7 @@ struct monst *mon;
 {
 	struct obj *otmp;
 	for(otmp = mon->minvent; otmp && !DEADMONSTER(mon); otmp = otmp->nobj){
-		if(otmp->olarva && otmp->owornmask)
+		if((otmp->olarva || otmp->obyak || check_oprop(otmp, OPROP_BYAK)) && otmp->owornmask)
 			held_item_bites(mon, otmp);
 	}
 }

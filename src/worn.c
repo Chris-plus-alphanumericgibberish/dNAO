@@ -1663,6 +1663,9 @@ outer_break:
 	    update_mon_intrinsics(mon, old, FALSE, creation);
 	mon->misc_worn_check |= flag;
 	best->owornmask |= flag;
+	if(check_oprop(best, OPROP_CURS)){
+		curse(best);
+	}
 	update_mon_intrinsics(mon, best, TRUE, creation);
 	/* if couldn't see it but now can, or vice versa, */
 	if (!creation && (unseen ^ !canseemon(mon))) {

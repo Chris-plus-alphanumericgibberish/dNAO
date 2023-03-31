@@ -892,6 +892,9 @@ boolean portal;
 			mtmp->mtyp == PM_CENTER_OF_ALL || 
 			mtmp->mtyp == PM_HUNGRY_DEAD ||
 			mtmp->mtyp == PM_STRANGER ||
+			mtmp->mtyp == PM_SUZERAIN ||
+			mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH ||
+			mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI ||
 			mtmp->mtame
 		) {
 			if (mtmp->mleashed) {

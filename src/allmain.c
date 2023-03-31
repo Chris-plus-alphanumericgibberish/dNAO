@@ -41,6 +41,7 @@ STATIC_DCL void FDECL(good_neighbor_visible, (struct monst *));
 STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
 STATIC_DCL void FDECL(goat_sacrifice, (struct monst *));
 STATIC_DCL void FDECL(palid_stranger, (struct monst *));
+STATIC_DCL void FDECL(sib_follow, (struct monst *));
 
 #ifdef OVL0
 
@@ -468,7 +469,7 @@ clothes_bite_you()
 	struct obj * uequip[] = WORN_SLOTS;
 	int i;
 	for (i = 0; i < SIZE(uequip); i++) {
-		if (uequip[i] && (uequip[i]->olarva)) {
+		if (uequip[i] && (uequip[i]->olarva || uequip[i]->obyak || check_oprop(uequip[i], OPROP_BYAK))) {
 			held_item_bites(&youmonst, uequip[i]);
 			if(multi >= 0) {
 				if (occupation)
@@ -1477,6 +1478,7 @@ moveloop()
 			if(mtmp->m_insight_level > u.uinsight
 			  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 			  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
+			  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 			){
 				insight_vanish(mtmp);
 				continue;
@@ -1560,6 +1562,7 @@ moveloop()
 				if(mtmp->m_insight_level > u.uinsight
 				  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 				  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
+				  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 				){
 					insight_vanish(mtmp);
 					continue;
@@ -2929,6 +2932,7 @@ karemade:
 		if(mtmp->m_insight_level > u.uinsight
 		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 		  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
+		  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 		){
 			insight_vanish(mtmp);
 			continue;
@@ -4432,6 +4436,8 @@ struct monst *mon;
 		goat_sacrifice(mon);
 	else if(mon->mtyp == PM_STRANGER)
 		palid_stranger(mon);
+	else if(mon->mtyp == PM_PUPPET_EMPEROR_XELETH || mon->mtyp == PM_PUPPET_EMPRESS_XEDALLI)
+		sib_follow(mon);
 }
 
 static int goatkids[] = {PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN, 
@@ -5104,6 +5110,56 @@ struct monst *mon;
 				}
 			}
 		}
+	}
+}
+
+STATIC_OVL
+void
+sib_follow(mon)
+struct monst *mon;
+{
+	struct obj *otmp, *otmp2;
+	struct monst *mtmp, *mtmp0 = 0, *mtmp2;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	/* Will eventually follow between branches */
+	if(mon->mux != u.uz.dnum){
+		if(!rn2(555))
+			mon->mux = u.uz.dnum;
+		return;
+	}
+	pline("ping");
+	/* Follows between levels */
+	if(mon->muy != u.uz.dlevel){
+		if(!rn2(55)){
+			if(mon->muy > u.uz.dlevel)
+				mon->muy--;
+			else if(mon->muy < u.uz.dlevel)
+				mon->muy++;
+		}
+		return;
+	}
+	/* Arrives from other levels (and from death) and appears as soon as you gain enough insight */
+	if(mon->m_insight_level <= u.uinsight && (!mon->mvar_yellow_lifesaved || !rn2(55))){
+		mon->mvar_yellow_lifesaved = FALSE;
+		for(mtmp = migrating_mons; mtmp; mtmp = mtmp2){
+			mtmp2 = mtmp->nmon;
+			if (mtmp == mon) {
+				mtmp->mtrack[0].x = MIGR_RANDOM;
+				if(!mtmp0)
+					migrating_mons = mtmp->nmon;
+				else
+					mtmp0->nmon = mtmp->nmon;
+				mon_arrive(mtmp, FALSE);
+				mtmp->msleeping = mtmp->mtame = mtmp->mpeaceful = 0;
+				set_malign(mtmp);
+				break;
+			} else
+				mtmp0 = mtmp;
+		}
+		return;
 	}
 }
 
@@ -5948,11 +6004,24 @@ struct monst *magr;
 	
 	// get attack from statblock
 	attk = mon_get_attacktype(magr, AT_ESPR, &attkbuff);
+	if(!attk && youagr && uring_art(ART_STAR_EMPEROR_S_RING)){
+		attkbuff.aatyp = AT_ESPR;
+		attkbuff.adtyp = AD_STAR;
+		attkbuff.damn = 4;
+		attkbuff.damd = 4;
+		attk = &attkbuff;
+	}
 	if(!attk)
 		return;
 	// count attacks in statblock (assumes that all of these attacks are equals! If this is not true, this will need to be adjusted)
 	n = mon_count_attacktype(magr, AT_ESPR);
-	
+	if(youagr && uring_art(ART_STAR_EMPEROR_S_RING)){
+		n += u.ulevel/10;
+	}
+	//Possible there are no attacks due to star ring etc.
+	if(!n)
+		return;
+
 	for(j=8*n;j>=1;j--){
 		ax = x(magr)+clockwisex[(i+j)%8];
 		ay = y(magr)+clockwisey[(i+j)%8];

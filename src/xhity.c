@@ -2261,15 +2261,29 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			(attk->aatyp == AT_MARI && !is_android(youracedata))	/* (andr/gyn)oids' mari attacks are psi-held, not actual arms */
 			){
 			/* replace the attack */
-			attk->aatyp = AT_SRPR;
+			attk->aatyp = attk->aatyp == AT_WEAP ? AT_SRPR : 
+						  attk->aatyp == AT_XWEP ? AT_XSPR : AT_MSPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 4;
 			attk->damd = 8;
 
 			/* this is applied to all acceptable attacks; no subout marker is necessary */
+		}
+	}
+	else if (youagr && uring_art(ART_STAR_EMPEROR_S_RING) && !by_the_book){
+		if ((attk->aatyp == AT_WEAP && !uwep) ||
+			(attk->aatyp == AT_XWEP && !uswapwep && u.twoweap) ||
+			(attk->aatyp == AT_MARI && !is_android(youracedata))	/* (andr/gyn)oids' mari attacks are psi-held, not actual arms */
+			){
+			/* replace the attack */
+			attk->aatyp = attk->aatyp == AT_WEAP ? AT_SRPR : 
+						  attk->aatyp == AT_XWEP ? AT_XSPR : AT_MSPR;
+			attk->adtyp = AD_STAR;
+			attk->damn = 4;
+			attk->damd = 8;
+			/* this is applied to all acceptable attacks; no subout marker is necessary */
 		}	
 	}
-	
 	/* the bestial claw combined with the beast's embrace (or insanity for monsters) allows for a powerful extra claw attk */
 	{
 	struct obj * otmp = (youagr ? uwep : MON_WEP(magr));

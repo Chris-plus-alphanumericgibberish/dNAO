@@ -148,6 +148,14 @@ Boots_on()
 		break;
 	default: impossible(unknown_type, c_boots, uarmf->otyp);
     }
+	if(check_oprop(uarmf, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarmh, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarmh, "glow"), hcolor(NH_BLACK));
+		curse(uarmh);
+	}
     return 0;
 }
 
@@ -285,6 +293,15 @@ Cloak_on()
 		ABON(A_CHA) += 1;
 		flags.botl = 1;
     }
+	if(check_oprop(uarmc, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarmc, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarmc, "glow"), hcolor(NH_BLACK));
+		curse(uarmc);
+	}
+
     /* racial armor bonus */
 	if(arti_lighten(uarmc, FALSE)) inv_weight();
 	
@@ -457,6 +474,14 @@ Helmet_on()
 		vision_full_recalc = 1;	/* recalc vision limits */
 		flags.botl = 1;
 	}
+	if(check_oprop(uarmh, OPROP_CURS) && uarmh->otyp != HELM_OF_OPPOSITE_ALIGNMENT && uarmh->otyp != DUNCE_CAP){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarmh, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarmh, "glow"), hcolor(NH_BLACK));
+		curse(uarmh);
+	}
 
     return 0;
 }
@@ -586,6 +611,16 @@ Gloves_on()
 		break;
 	default: impossible(unknown_type, c_gloves, uarmg->otyp);
     }
+
+	if(check_oprop(uarmg, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarmg, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarmg, "glow"), hcolor(NH_BLACK));
+		curse(uarmg);
+	}
+
     return 0;
 }
 
@@ -672,6 +707,15 @@ Shield_on()
 	default: impossible(unknown_type, c_shield, uarms->otyp);
     }
 */
+	if(check_oprop(uarms, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarms, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarms, "glow"), hcolor(NH_BLACK));
+		curse(uarms);
+	}
+
     return 0;
 }
 
@@ -726,6 +770,15 @@ Shirt_on()
 		ABON(A_CHA) += 1;
 		flags.botl = 1;
 	}
+	if(check_oprop(uarmu, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarmu, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarmu, "glow"), hcolor(NH_BLACK));
+		curse(uarmu);
+	}
+
 	if(arti_lighten(uarmu, FALSE)) inv_weight();
     return 0;
 }
@@ -808,6 +861,15 @@ Armor_on()
 		else
 			pline("The armor hums faintly.");
 	}
+	if(check_oprop(uarm, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarm, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarm, "glow"), hcolor(NH_BLACK));
+		curse(uarm);
+	}
+
 	if(arti_lighten(uarm, FALSE)) inv_weight();
     return 0;
 }
@@ -937,6 +999,14 @@ Amulet_on()
 	case AMULET_OF_YENDOR:
 		break;
     }
+	if(check_oprop(uamul, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uamul, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uamul, "glow"), hcolor(NH_BLACK));
+		curse(uamul);
+	}
 }
 
 void
@@ -1115,6 +1185,14 @@ register struct obj *obj;
 		}
 		break;
     }
+	if(check_oprop(obj, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(obj, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(obj, "glow"), hcolor(NH_BLACK));
+		curse(obj);
+	}
 }
 
 STATIC_OVL void
@@ -1279,6 +1357,14 @@ register struct obj *otmp;
 	}
 	if (!Unchanging && otmp->otyp == MASK && otmp->oartifact == ART_MIRRORED_MASK && otmp->corpsenm != NON_PM) {
 		activate_mirrored_mask(otmp);
+	}
+	if(check_oprop(otmp, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(otmp, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(otmp, "glow"), hcolor(NH_BLACK));
+		curse(otmp);
 	}
 }
 
@@ -2772,6 +2858,12 @@ int depth;
 		&& (slot & (ARM_DR | HEAD_DR))
 	){
 		bas_udr += 3;
+	}
+	/* Wearing the Star Emperor's ring adds up to +3 magical DR to the head */
+	if(uring_art(ART_STAR_EMPEROR_S_RING)
+		&& (slot&HEAD_DR)
+	){
+		bas_udr += u.ulevel/10;
 	}
 	/* Vaul is not randomized, and contributes to magical DR */
 	if (u.uvaul) {

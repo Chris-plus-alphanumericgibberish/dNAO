@@ -1661,8 +1661,17 @@ misc_levelport:
 	    You("enter what seems to be an older, more primitive world.");
 #endif
 	/* Final confrontation */
-	if (In_endgame(&u.uz) && newdungeon && u.uhave.amulet)
-		resurrect();
+	if (In_endgame(&u.uz) && newdungeon && u.uhave.amulet){
+		if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+			makemon(&mons[flags.initgend ? PM_PUPPET_EMPEROR_XELETH : PM_PUPPET_EMPRESS_XEDALLI], u.ux, u.uy, MM_ADJACENTOK);
+			verbalize("Why won't you JUST. STAY. DEAD!?");
+			makemon(&mons[PM_FLAXEN_STAR_PHANTOM], u.ux, u.uy, MM_ADJACENTOK);
+			makemon(&mons[PM_FLAXEN_STARSHADOW], u.ux, u.uy, MM_ADJACENTOK);
+			makemon(&mons[PM_FLAXEN_STARSHADOW], u.ux, u.uy, MM_ADJACENTOK);
+		}
+		else
+			resurrect();
+	}
 	if (newdungeon && In_V_tower(&u.uz) && In_hell(&u.uz0))
 		pline_The("heat and smoke are gone.");
 
@@ -1753,6 +1762,33 @@ final_level()
 		(void) makemon(&mons[PM_ANCIENT_OF_DEATH], u.ux, u.uy, MM_ADJACENTOK);
 		(void) makemon(&mons[PM_ANCIENT_OF_ICE], u.ux, u.uy, MM_ADJACENTOK);
 /*		for(host = 0; host < 10; host++ )*/ (void) makemon(&mons[PM_FALLEN_ANGEL], u.ux, u.uy, MM_ADJACENTOK);
+	}
+	if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 	}
 	/* create a guardian angel next to player, if worthy */
 	if (Conflict || u.ualign.type == A_VOID || u.ualign.type == A_NONE) {

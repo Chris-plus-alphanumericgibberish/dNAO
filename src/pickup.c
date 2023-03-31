@@ -2074,6 +2074,12 @@ dopetequip()
 		mtmp->misc_worn_check |= flag;
 		otmp->owornmask |= flag;
 		update_mon_intrinsics(mtmp, otmp, TRUE, FALSE);
+		if(check_oprop(otmp, OPROP_CURS)){
+			if (!Blind && canseemon(mtmp))
+				pline("%s %s for a moment.",
+					  Tobjnam(otmp, "glow"), hcolor(NH_BLACK));
+			curse(otmp);
+		}
 		/* if couldn't see it but now can, or vice versa, */
 		if (unseen ^ !canseemon(mtmp)) {
 			if (mtmp->minvis && !See_invisible(mtmp->mx,mtmp->my)) {

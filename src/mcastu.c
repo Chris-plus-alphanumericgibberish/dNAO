@@ -655,6 +655,47 @@ unsigned int type;
 				return CURE_SELF;
 		}
 	break;
+	case PM_SUZERAIN:
+		switch (clrc_spell_power % 18) {
+			case 17:
+				return ARROW_RAIN;
+			case 16:
+				return SUMMON_ALIEN;
+			// case 15:
+				//Cure
+			case 14:
+				return PLAGUE;
+			case 13:
+				return EARTHQUAKE;
+			case 12:
+				return rn2(2) ? GEYSER : ACID_RAIN;
+			case 11:
+				return TURN_TO_STONE;
+			// case 10:
+				//Cure
+			case 9:
+				return DROP_BOULDER;
+			case 8:
+				return DRAIN_LIFE;
+			case 7:
+				return MUMMY_CURSE;
+			case 6:
+				return YELLOW_DEAD;
+			// case 5:
+				//Cure
+			case 4:
+				return NIGHTMARE;
+			case 3:
+				return VULNERABILITY;
+			case 2:
+				return PAIN_BOLT;
+			case 1:
+				return OPEN_WOUNDS;
+			//case "0", "5", "10", "15"
+			default:
+				return CURE_SELF;
+		}
+	break;
 	case PM_DWARF_CLERIC:
 	case PM_DWARF_QUEEN:
 		switch (rnd(4)) {
@@ -3157,6 +3198,9 @@ int tary;
 			otmp->quan = min(dmn, 16);
 			otmp->owt = weight(otmp);
 			otmp->spe = 0;
+			if(magr && magr->mtyp == PM_SUZERAIN){
+				add_oprop(otmp, OPROP_LESSER_FLAYW);
+			}
 
 			/* call projectile() to shoot fire all the weapons */
 			m_shot.n = otmp->quan;

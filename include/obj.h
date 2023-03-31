@@ -90,6 +90,8 @@ enum {
 	OPROP_TACTB,
 	OPROP_INSTW,
 	OPROP_ELFLW,
+	OPROP_CURS,
+	OPROP_BYAK,
 	MAX_OPROP
 };
 
@@ -182,6 +184,7 @@ struct obj {
 	Bitfield(oerodeproof,1); /* erodeproof weapon/armor */
 	Bitfield(olarva,2);	/* object has been partially brought to life */
 	Bitfield(odead_larva,2);	/* object was partially brought to life, but died again */
+	Bitfield(obyak,2);	/* object has been partially brought to life (as byakhee larva)*/
 	Bitfield(olocked,1);	/* object is locked */
 #define oarmed olocked
 #define odrained olocked	/* drained corpse */
@@ -218,7 +221,10 @@ struct obj {
 	/* 15 free bits in this field, I think -CM */
 	
 	int obj_material;		/*Object material (from lookup table)*/
-	int sub_material;		/*Sub-material (currently, gemstone object id)*/
+	int sub_material;		/*Sub-material*/
+		/*For gemstone mat, gemstone object id*/
+		/*For mineral */
+#define SUBMAT_MARBLE 1
 	int obj_color;
 	union {
 		long bodytypeflag;	/* MB tag(s) this item goes with. Overloaded with wrathdata */
@@ -403,6 +409,7 @@ struct obj {
 #define IEA_DEFLECTION	0x04000000L
 #define IEA_STRANGLE	0x08000000L
 
+#define IEA_NOUPGRADES	0x80000000L
 #define IEA_HELM_MASK	(IEA_NOBREATH|IEA_LIFESENSE|IEA_SEE_INVIS|IEA_TELEPAT|IEA_BLIND_RES|IEA_INC_ACC|IEA_TELE_CNTRL|IEA_PROT_SHAPE)
 #define IEA_BODY_MASK	(IEA_FLYING|IEA_FIXED_ABIL|IEA_FAST_HEAL|IEA_REFLECTING|IEA_SICK_RES|IEA_HALF_PHDAM|IEA_HALF_SPDAM|IEA_DISPLACED|IEA_INVIS|IEA_DEFLECTION)
 #define IEA_GLOVE_MASK	(IEA_SWIMMING|IEA_GOPOWER|IEA_GODEXTERITY|IEA_INC_DAM|IEA_BOLTS|IEA_STRANGLE)

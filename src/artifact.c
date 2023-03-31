@@ -12110,6 +12110,8 @@ do_passive_attacks()
 		dosnake(&youmonst);
 	if(is_tailslap_mtyp(youracedata))
 		dotailslap(&youmonst);
+	if(uring_art(ART_STAR_EMPEROR_S_RING))
+		dostarblades(&youmonst);
 	//Note: The player never gets Eladrin vines, starblades, or storms
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
