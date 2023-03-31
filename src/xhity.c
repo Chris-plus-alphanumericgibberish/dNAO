@@ -2432,6 +2432,21 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				|| attk->aatyp == AT_LRCH
 			))
 		)) ||
+		/* If player is wearing a faceless helm */
+		(youagr && 
+			(
+			 (uarmh && FacelessHelm(uarmh)) ||
+			 (uarmc && FacelessCloak(uarmc))
+			) && (
+			attk->aatyp == AT_BITE
+		)) ||
+		/* If monster is stuck in a straitjacket */
+		(!youagr && 
+			(
+			 covered_face_mon(magr)
+			) && (
+			attk->aatyp == AT_BITE
+		)) ||
 		/* Illurien can only engulf targets she is stuck to */
 		(youdef && mdef && pa->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES && attk->aatyp == AT_ENGL && (u.ustuck != magr)) ||
 		/* Rend attacks only happen if the previous two attacks hit */

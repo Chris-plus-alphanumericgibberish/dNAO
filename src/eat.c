@@ -2738,12 +2738,12 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 		return MOVE_CANCELLED;
 	}
 
-	if (uarmh && FacelessHelm(uarmh)){
+	if (uarmh && FacelessHelm(uarmh) && ((uarmh->cursed && !Weldproof) || !freehand())){
 		pline("The %s covers your whole face.", xname(uarmh));
 		display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 		return MOVE_CANCELLED;
 	}
-	if (uarmc && FacelessCloak(uarmc)){
+	if (uarmc && FacelessCloak(uarmc) && ((uarmc->cursed && !Weldproof) || !freehand())){
 		pline("The %s covers your whole face.", xname(uarmc));
 		display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 		return MOVE_CANCELLED;

@@ -2120,12 +2120,12 @@ doputon()
 			You_cant("wear that!");
 			return MOVE_CANCELLED;
 		}
-		if (uarmh && FacelessHelm(uarmh) && uarmh->cursed && !Weldproof){
+		if (uarmh && FacelessHelm(uarmh) && ((uarmh->cursed && !Weldproof) || !freehand())){
 			pline("The %s covers your whole face. You need to remove it first.", xname(uarmh));
 			display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 			return 0;
 		}
-		if (uarmc && FacelessCloak(uarmc) && uarmc->cursed && !Weldproof){
+		if (uarmc && FacelessCloak(uarmc) && ((uarmc->cursed && !Weldproof) || !freehand())){
 			pline("The %s covers your whole face. You need to remove it first.", xname(uarmc));
 			display_nhwindow(WIN_MESSAGE, TRUE);    /* --More-- */
 			return 0;
