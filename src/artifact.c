@@ -6732,7 +6732,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			flags.botl = 1;
 	}
 	//Sleeping weapons put targets to sleep
-	if(attacks(AD_SLEE, otmp)){
+	if(attacks(AD_SLEE, otmp) && !rn2(2)){
 		if (youdef) {
 			fall_asleep(-rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), TRUE);
 			if (Blind) You("are put to sleep!");
