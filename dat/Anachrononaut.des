@@ -994,6 +994,49 @@ OBJECT:'(',"hypospray ampule",random
 OBJECT:'(',"hypospray ampule",random
 OBJECT:'(',"hypospray ampule",random
 
+GEOMETRY:center,center
+#0         1         2         3         4         5         6         7     
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0...........................................................................
+1...........................................................................
+2....................................------.................................
+3.........................................|.................................
+4----.......----..................|.     ....................---.........---
+5|.............|...............|..|.     ....|...............|.............|
+6|..---------.............--|..|..|.     ....|..|.......|...|-..--------...|
+7|..|.......|...-|.|-.......-|.|..|... ...|..|.|-.......-|.|-...|.......|..|
+8|..|.     .|....-|-....#....-||..----+----..||-.... ....-|-....|.     .|..|
+9|....      +.....+....###....||.............||....   ....+.....+      .|..|
+0|....     .|....-|-....#....-|--|.........|--|-.... ....-|-....|.     .|..|
+1|..........|...-|-|-.......-|...-|---+---|-...|-.......-|-|-...........|..|
+2|....-------..-|---|---+---|....|-.......-|....|.--+---|---|-..----...--..|
+3|- . . . . . .|- . . . . . . . |-. . # . .-| . . . . . . . -|- . . . . . .|
+4--.-.-.-.-.-.---.-.-.-.-.-.-.-.|....###....|.-.-.-.-.|.-.-.---.-.-.-.-.-.---
+5-- . . . . . . . . . . . . . . |-. . # . .-| . . . . . . . . . . . . . . . -
+6--.-.-.-.-.-.-.-.-.-.-.-.-.|.-.-|---------|-.-.|.-.-.-.-.-.-.-.-.-.-.-.-.-.-
+7-- . . . . . . . . . . . . . . . | - + - | . . . . . . . . . . . . . . . . -
+8--.-.-.-.-.-.-.-.-.-.-.-.-.--|---------------|.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
+9-- . . . . . . . . . . . . . --. . . . . . .-- . . . . . . . . . . . . . . -
+0----------------------------------------------------------------------------
+ENDMAP
+
+OBJECT:'#',"color_white thoroughly rotted imperial elven helm",random
+OBJECT[75%]:'#',"color_bright_green thoroughly rotted imperial elven helm",random
+OBJECT[10%]:'#',"color_orange thoroughly rotted imperial elven helm",random
+
+OBJECT:'#',"color_bright_green thoroughly rotted imperial elven armor",random
+OBJECT[75%]:'#',"color_orange thoroughly rotted imperial elven armor",random
+OBJECT[10%]:'#',"color_gray thoroughly rotted imperial elven armor",random
+
+OBJECT:'#',"color_red thoroughly rotted imperial elven gauntlets",random
+OBJECT[75%]:'#',"color_gray thoroughly rotted imperial elven gauntlets",random
+OBJECT[10%]:'#',"color_bright_green thoroughly rotted imperial elven gauntlets",random
+
+OBJECT:'#',"color_bright_green thoroughly rotted imperial elven boots",random
+OBJECT[75%]:'#',"color_gray thoroughly rotted imperial elven boots",random
+OBJECT[10%]:'#',"color_red thoroughly rotted imperial elven boots",random
+
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
