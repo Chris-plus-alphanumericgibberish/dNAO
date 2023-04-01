@@ -2967,6 +2967,12 @@ boolean past;
 			knows_object(ELVEN_SHIELD);
 			knows_object(ELVEN_BOOTS);
 			knows_object(ELVEN_CLOAK);
+			knows_object(IMPERIAL_ELVEN_BOOTS);
+			knows_object(IMPERIAL_ELVEN_ARMOR);
+			knows_object(IMPERIAL_ELVEN_GAUNTLETS);
+			knows_object(IMPERIAL_ELVEN_HELM);
+			You("vaguely recall how to perform field repairs on imperial elven armor.");
+			u.uiearepairs = TRUE;
 			//The PC was actually lawful, and changes back if they are uncrowned and still their starting alignment
 			if(u.ugodbase[UGOD_CURRENT] == u.ugodbase[UGOD_ORIGINAL] && !u.uevent.uhand_of_elbereth){
 				/* The player wears a helm of opposite alignment? */

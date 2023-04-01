@@ -695,11 +695,11 @@ STATIC_OVL void
 break_armor()
 {
     register struct obj *otmp;
-
+#define special_armor(a) (a->oartifact || is_imperial_elven_armor(a))
 	if ((otmp = uarm) != 0) {
 		if(!arm_size_fits(youracedata,otmp) || !arm_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)){
 			if (donning(otmp)) cancel_don();
-			if(otmp->oartifact || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)){
+			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)){
 				Your("armor falls around you!");
 				(void) Armor_gone();
 				dropx(otmp);
@@ -716,7 +716,7 @@ break_armor()
 				|| !shirt_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)
 		){
 			if (donning(otmp)) cancel_don();
-			if(otmp->oartifact || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)) {
+			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)) {
 				Your("%s falls off!", cloak_simple_name(otmp));
 				(void) Cloak_off();
 				dropx(otmp);
@@ -732,7 +732,7 @@ break_armor()
 				|| !shirt_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)
 		){
 			if (donning(otmp)) cancel_don();
-			if(otmp->oartifact || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)) {
+			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)) {
 				Your("shirt falls off!");
 				(void) Shirt_off();
 		// setworn((struct obj *)0, otmp->owornmask & W_ARMU);

@@ -3041,6 +3041,36 @@ boolean goodequip;
 			if(otmp) otmp->spe = 3;
 			otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags|MKOBJ_NOINIT);
 			if(otmp) otmp->spe = 3;
+
+			if(Race_if(PM_ELF) && Role_if(PM_MADMAN)){
+				otmp = mksobj_at(IMPERIAL_ELVEN_BOOTS, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
+				set_material_gm(otmp, WOOD);
+				if(is_flammable(otmp))
+					otmp->oeroded = 3;
+				if(is_rottable(otmp))
+					otmp->oeroded2 = 1;
+
+				otmp = mksobj_at(IMPERIAL_ELVEN_ARMOR, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
+				set_material_gm(otmp, WOOD);
+				if(is_flammable(otmp))
+					otmp->oeroded = 3;
+				if(is_rottable(otmp))
+					otmp->oeroded2 = 1;
+
+				otmp = mksobj_at(IMPERIAL_ELVEN_GAUNTLETS, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
+				set_material_gm(otmp, WOOD);
+				if(is_flammable(otmp))
+					otmp->oeroded = 3;
+				if(is_rottable(otmp))
+					otmp->oeroded2 = 1;
+
+				otmp = mksobj_at(IMPERIAL_ELVEN_HELM, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
+				set_material_gm(otmp, WOOD);
+				if(is_flammable(otmp))
+					otmp->oeroded = 3;
+				if(is_rottable(otmp))
+					otmp->oeroded2 = 1;
+			}
 		} else if (mm == PM_PATIENT){
 			otmp = mongets(mtmp, STRAITJACKET, mkobjflags);
 			if(otmp) curse(otmp);

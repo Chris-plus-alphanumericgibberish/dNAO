@@ -1809,6 +1809,21 @@ default_case:
 				}
 			break;
 			case PM_ELF:
+				stuff = mksobj(ELVEN_BROADSWORD, MKOBJ_NOINIT);
+				stuff->spe = 2;
+				set_material_gm(stuff, GOLD);
+				add_oprop(stuff, OPROP_ELFLW);
+				add_oprop(stuff, OPROP_WRTHW);
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
+				set_material_gm(stuff, WOOD);
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
+				set_material_gm(stuff, WOOD);
+				add_to_container(otmp, stuff);
+
 				if(flags.initgend){
 					default_add(PLAIN_DRESS);
 					stuff->obj_color = rn2(2) ? CLR_YELLOW : CLR_BRIGHT_GREEN;
@@ -1879,38 +1894,6 @@ default_case:
 				stuff->obj_color = CLR_ORANGE;
 				add_to_container(otmp, stuff);
 			break;
-		}
-		if(urace.malenum == PM_ELF){
-			stuff = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
-			set_material_gm(stuff, WOOD);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(ELVEN_BROADSWORD, MKOBJ_NOINIT);
-			stuff->spe = 2;
-			set_material_gm(stuff, GOLD);
-			add_oprop(stuff, OPROP_ELFLW);
-			add_oprop(stuff, OPROP_WRTHW);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(IMPERIAL_ELVEN_BOOTS, MKOBJ_NOINIT);
-			if(is_flammable(stuff))
-				stuff->oeroded = 3;
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(IMPERIAL_ELVEN_ARMOR, MKOBJ_NOINIT);
-			if(is_flammable(stuff))
-				stuff->oeroded = 3;
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(IMPERIAL_ELVEN_GAUNTLETS, MKOBJ_NOINIT);
-			if(is_flammable(stuff))
-				stuff->oeroded = 3;
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(IMPERIAL_ELVEN_HELM, MKOBJ_NOINIT);
-			if(is_flammable(stuff))
-				stuff->oeroded = 3;
-			add_to_container(otmp, stuff);
 		}
 		if(urace.malenum == PM_GNOME){
 			int stars[] = {PM_YELLOW_LIGHT, PM_YELLOW_LIGHT, PM_BLACK_LIGHT, PM_MOTE_OF_LIGHT, PM_TINY_BEING_OF_LIGHT};

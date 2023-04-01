@@ -2162,8 +2162,19 @@ humanoid_sound:
 					verbl_msg = "Aloha.";
 				break;
 				case PM_LADY_CONSTANCE:
-					if(!u.uevent.qcompleted)
-						verbl_msg = "There's a strange woman in the observation ward. She's asking for you....";
+					if(!u.uevent.qcompleted){
+						if(!quest_status.fakeleader_greet_1){
+							verbl_msg = "You're back! There's a strange woman in the observation ward. She's asking for you....";
+							quest_status.fakeleader_greet_1 = TRUE;
+						}
+						else if(Race_if(PM_ELF) && !quest_status.fakeleader_greet_2){
+							verbl_msg = "I was able to find the armor you talked about. Do you... still remember it?";
+							quest_status.fakeleader_greet_2 = TRUE;
+						}
+						else {
+							verbl_msg = "Have you talked to that strange woman in the observation ward?";
+						}
+					}
 					else {
 						if(!rn2(2)){
 							Sprintf(msgbuff, discuss, !rn2(5) ? "Fiore's dagger techniques" : !rn2(4) ? "mentalism" : !rn2(3) ? "theosophy" : rn2(2) ? "the occult" : "your recent dreams");

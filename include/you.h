@@ -470,7 +470,8 @@ struct you {
 #define RITUAL_DONE		(RITUAL_CHAOS|RITUAL_NEUTRAL|RITUAL_LAW)
 #define HI_RITUAL_DONE	(RITUAL_HI_CHAOS|RITUAL_HI_NEUTRAL|RITUAL_HI_LAW)
 	Bitfield(peaceful_pets,1);	/* pets don't attack peaceful monsters */
-	/* 12 free bits */
+	Bitfield(uiearepairs,1);	/* Knows how to repair Imperial Elven Armor */
+	/* 11 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */
