@@ -13103,7 +13103,7 @@ int faction;
 		mtmp->m_insight_level = 40;
 
 	else if(mtmp->mtyp == PM_APHANACTONAN_AUDIENT)
-		mtmp->m_insight_level = rnd(16);
+		mtmp->m_insight_level = rn2(5)+rnd(3)*rnd(4);
 	else if(mtmp->mtyp == PM_APHANACTONAN_ASSESSOR)
 		mtmp->m_insight_level = 16+d(4,4);
 	
