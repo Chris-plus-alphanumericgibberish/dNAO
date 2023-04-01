@@ -424,11 +424,14 @@ singing_pets_effect()
 
     if (song_being_played() == SNG_NONE) return 0;
     if (monstermoves != petsing_lastcheck) {
-	petsing_lastcheck = monstermoves;
-	petsing = 0;
-	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
-	    if (mtmp->mtame)
-			petsing += pet_can_sing(mtmp, TRUE);
+		petsing_lastcheck = monstermoves;
+		petsing = 0;
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(DEADMONSTER(mtmp))
+				continue;
+			if (mtmp->mtame)
+				petsing += pet_can_sing(mtmp, TRUE);
+		}
     }
 
     return petsing;
@@ -441,12 +444,15 @@ counter_singing_effect()
 
     if (song_being_played() == SNG_NONE) return 0;
     if (monstermoves != monsing_lastcheck) {
-	monsing_lastcheck = monstermoves;
-	monsing = 0;
-	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon)
-	    if (!mtmp->mtame)
-			monsing += mon_can_counter_sing(mtmp,TRUE);
-    }
+		monsing_lastcheck = monstermoves;
+		monsing = 0;
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(DEADMONSTER(mtmp))
+				continue;
+			if (!mtmp->mtame)
+				monsing += mon_can_counter_sing(mtmp,TRUE);
+		}
+	}
 
     return monsing;
 }
