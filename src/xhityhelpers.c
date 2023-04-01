@@ -1784,6 +1784,9 @@ struct obj * weapon;
 		if (check_oprop(weapon, OPROP_SFLMW))
 			return 2;
 
+		if (weapon->oartifact == ART_GRAYSWANDIR) /* Grayswandir can interact with phantoms */
+			return 2;
+
 		if (hatesobjdmg(mdef, weapon))
 			return 1;
 
