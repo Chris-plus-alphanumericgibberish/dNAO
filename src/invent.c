@@ -1253,8 +1253,6 @@ register const char *let,*word;
 		|| (!strncmp(word, "rub on the stone", 16) &&
 		    *let == GEM_CLASS &&	/* using known touchstone */
 		    otmp->dknown && objects[otyp].oc_name_known)
-		|| (!strncmp(word, "replace with", 12) &&
-		    otmp->otyp != HELLFIRE_COMPONENT)
 		|| (!strncmp(word, "replace with", 12)
 		    && otmp->otyp != HELLFIRE_COMPONENT
 			&& otmp->otyp != CLOCKWORK_COMPONENT)
