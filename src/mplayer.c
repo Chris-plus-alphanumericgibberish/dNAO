@@ -456,7 +456,7 @@ long flags;
 	if(!is_mplayer(ptr))
 		return((struct monst *)0);
 
-	if(MON_AT(x, y))
+	if(MON_AT(x, y) && !(flags&MM_ADJACENTOK))
 		(void) rloc(m_at(x, y), FALSE); /* insurance */
 
 	if ((mtmp = makemon(ptr, x, y, flags)) != 0) {
