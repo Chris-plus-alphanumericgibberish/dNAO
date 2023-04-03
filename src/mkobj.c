@@ -159,6 +159,16 @@ static const struct icp elven_materials[] = {
 	{  5, GOLD }
 };
 
+/* for eilistran armor */
+static const struct icp eli_materials[] = {
+	{600, SILVER },
+	{300, PLATINUM },
+	{ 50, MITHRIL },
+	{ 25, GLASS },
+	{ 13, GEMSTONE },
+	{ 12, MINERAL }
+};
+
 /* for weapons of droven make -- armor is all shadowsteel */
 static const struct icp droven_materials[] = {
 	{900, 0 }, /* use base material */
@@ -2131,7 +2141,10 @@ struct obj* obj;
     }
     else if (obj->oclass == WEAPON_CLASS || is_weptool(obj)
              || obj->oclass == ARMOR_CLASS) {
-        if (default_material == IRON || default_material == METAL) {
+        if (obj->otyp == EILISTRAN_ARMOR) {
+            return eli_materials;
+        }
+        else if (default_material == IRON || default_material == METAL) {
             return metal_materials;
         }
         else if (default_material == WOOD) {
