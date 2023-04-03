@@ -2465,7 +2465,7 @@ struct monst * mtmp;
 		return TRUE;
 	/* or if wearing the Grappler's Grasp */
 	struct obj * gloves = ((mtmp == &youmonst) ? uarmg : which_armor(mtmp, W_ARMG));
-	if (gloves && gloves->oartifact == ART_GRAPPLER_S_GRASP)
+	if (gloves && (gloves->oartifact == ART_GRAPPLER_S_GRASP || (gloves->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(gloves, IEA_STRANGLE))))
 		return TRUE;
 
 	return FALSE;
