@@ -2876,7 +2876,7 @@ int vis;
 	}
 	
 	//Star spawn bypass most helmets.
-	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_VEIL_RENDER) && obj && obj->oartifact != ART_APOTHEOSIS_VEIL)
+	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_DREAM_EATER || magr->mtyp == PM_VEIL_RENDER) && obj && obj->oartifact != ART_APOTHEOSIS_VEIL)
 		return FALSE;
 
 	if (obj && (
@@ -7779,7 +7779,7 @@ boolean ranged;
 
 		/* protected by helmets */
 		otmp = (youdef ? uarmh : which_armor(mdef, W_ARMH));
-		if((pa->mtyp == PM_STAR_SPAWN || pa->mtyp == PM_VEIL_RENDER) && otmp && is_hard(otmp) && otmp->oartifact != ART_APOTHEOSIS_VEIL){
+		if((pa->mtyp == PM_STAR_SPAWN || pa->mtyp == PM_DREAM_EATER || pa->mtyp == PM_VEIL_RENDER) && otmp && is_hard(otmp) && otmp->oartifact != ART_APOTHEOSIS_VEIL){
 			if (youdef) {
 				pline("%s somehow reaches right past your helmet!", Monnam(magr));
 			}
@@ -11669,11 +11669,14 @@ int vis;
 			else {
 				pline("%s %s confuses you!",
 					s_suffix(Monnam(magr)),
-					((is_uvuudaum(pa) || attk->adtyp == AD_WISD) ? "form" : "gaze")
+					(attk->aatyp == AT_WDGZ) ? "form" : "gaze"
 					);
 			}
 			make_confused(HConfusion + dmg, FALSE);
 			stop_occupation();
+			if(youdef && attk->aatyp == AT_WDGZ && rn2(100) < Insanity){
+				change_usanity(-rnd(4), TRUE);
+			}
 		}
 		else
 		{
