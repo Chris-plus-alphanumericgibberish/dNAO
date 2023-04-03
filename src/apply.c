@@ -4019,8 +4019,13 @@ struct obj *hypo;
 					else u.uhunger += 50 + rnd(50);
 					
 					newuhs(FALSE);
-				} else
+				} else {
+					if(Role_if(PM_MADMAN)){
+						You_feel("ashamed of wiping your own memory.");
+						u.hod += amp->cursed ? 5 : 2;
+					}
 					exercise(A_WIS, FALSE);
+				}
 
 				//All amnesia causes you to forget your crisis of faith
 				if(Doubt)

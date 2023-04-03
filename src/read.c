@@ -2464,7 +2464,29 @@ struct obj	*sobj;
 			pline("Who was that Maud person anyway?");
 		else
 			pline("Thinking of Maud you forget everything else.");
-		exercise(A_WIS, FALSE);
+		/* Blessed amnesia makes you forget lycanthropy, sickness */
+		if (sobj->blessed) {
+			if (u.ulycn >= LOW_PM && !Race_if(PM_HUMAN_WEREWOLF)) {
+				You("forget your affinity to %s!",
+						makeplural(mons[u.ulycn].mname));
+				if (youmonst.data->mtyp == u.ulycn)
+					you_unwere(FALSE);
+				u.ulycn = NON_PM;	/* cure lycanthropy */
+			}
+			make_sick(0L, (char *) 0, TRUE, SICK_ALL);
+
+			/* You feel refreshed */
+			if(Race_if(PM_INCANTIFIER)) u.uen += 50 + rnd(50);
+			else u.uhunger += 50 + rnd(50);
+			
+			newuhs(FALSE);
+		} else {
+			if(Role_if(PM_MADMAN)){
+				You_feel("ashamed of wiping your own memory.");
+				u.hod += sobj->cursed ? 5 : 2;
+			}
+			exercise(A_WIS, FALSE);
+		}
 		break;
 	case SCR_FIRE:{
 		/*

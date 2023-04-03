@@ -3686,8 +3686,13 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 						u.uen += engain;
 					} else u.uhunger += 50 + rnd(50);
 					newuhs(FALSE);
-				} else
+				} else {
+					if(Role_if(PM_MADMAN)){
+						You_feel("ashamed of wiping your own memory.");
+						u.hod += otmp->cursed ? 5 : 2;
+					}
 					exercise(A_WIS, FALSE);
+				}
 			}
 			if((otmp->opoisoned & OPOISON_ACID) && !Acid_resistance){
 				You("have a very bad case of stomach acid."); /* not body_part() */
