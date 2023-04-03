@@ -3981,6 +3981,7 @@ int eatflag;
 		}
 		return;
 	}
+	else u.shubbie_atten = 1;
 
 	/* at this point, gain credit */
 
