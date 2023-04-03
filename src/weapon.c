@@ -2546,11 +2546,13 @@ abon()		/* attack bonus for strength & dexterity */
 	else if (str < STR18(100)) sbon = 2;
 	else sbon = 3;
 
-	if (dex < 4) return(sbon-3);
-	else if (dex < 6) return(sbon-2);
-	else if (dex < 8) return(sbon-1);
-	else if (dex < 14) return(sbon);
-	else return(sbon + dex-14);
+	if (dex < 4) sbon = (sbon-3);
+	else if (dex < 6) sbon = (sbon-2);
+	else if (dex < 8) sbon = (sbon-1);
+	else if (dex < 14);//Nothing
+	else sbon = (sbon + dex-14);
+
+	return sbon;
 }
 
 #endif /* OVL0 */
