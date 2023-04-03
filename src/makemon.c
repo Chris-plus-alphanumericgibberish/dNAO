@@ -12685,9 +12685,14 @@ struct monst * mon;
 		|| (mon->mtyp == PM_STAR_ELF && Role_if(PM_MADMAN))
 	)
 		out_faction = YELLOW_FACTION;
-	else if(Is_knox(&u.uz))
+	else if(Is_knox(&u.uz) || Is_sanctum(&u.uz))
 		out_faction = YENDORIAN_FACTION;
-	else if((In_quest(&u.uz) || Is_stronghold(&u.uz) || u.uz.dnum == temple_dnum || u.uz.dnum == tower_dnum || Is_astralevel(&u.uz)) && !peaceful)
+	else if((In_quest(&u.uz) 
+		|| Is_stronghold(&u.uz)
+		|| u.uz.dnum == temple_dnum
+		|| u.uz.dnum == tower_dnum
+		|| Is_astralevel(&u.uz)
+	) && !peaceful)
 		out_faction = YENDORIAN_FACTION;
 
 	else if(In_quest(&u.uz) && mon->mtyp == urole.guardnum)
