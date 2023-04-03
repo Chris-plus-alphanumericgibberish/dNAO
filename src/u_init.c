@@ -402,6 +402,11 @@ static struct trobj Madman[] = {
 	{ POT_BOOZE, 0, POTION_CLASS, 2, 0 },
 	{ 0, 0, 0, 0, 0 }
 };
+static struct trobj Ironmask[] = {
+	{ FACELESS_HELM, 0, ARMOR_CLASS, 1, OBJ_CURSED },
+	{ RIN_SLOW_DIGESTION, 0, RING_CLASS, 1, OBJ_CURSED },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj Noble[] = {
 	{ RAPIER, 2, WEAPON_CLASS, 1, UNDEF_BLESS },
 #define NOB_SHIRT	1
@@ -2142,6 +2147,9 @@ u_init()
 		u.veil = FALSE;
 		u.umaniac = TRUE;
         ini_inv(Madman);
+		if(Race_if(PM_VAMPIRE)){
+			ini_inv(Ironmask);
+		}
         knows_object(SKELETON_KEY);
         knows_object(POT_BOOZE);
         knows_object(POT_SLEEPING);
@@ -2994,6 +3002,9 @@ register struct trobj *trop;
 			if(obj->otyp == SEISMIC_HAMMER && Role_if(PM_ANACHRONONAUT) && Race_if(PM_DWARF)){
 				set_material_gm(obj, MITHRIL);
 			}
+			if(obj->otyp == FACELESS_HELM && Role_if(PM_MADMAN)){
+				set_material_gm(obj, IRON);
+			}
 			
 			/* Don't start with +0 or negative rings */
 			if (objects[obj->otyp].oc_charged && obj->spe <= 0)
@@ -3266,6 +3277,10 @@ register struct trobj *trop;
 
 		if(obj->otyp == AMULET_OF_NULLIFY_MAGIC && (Role_if(PM_ANACHRONONAUT) || Role_if(PM_MADMAN)) && !uamul){
 			setworn(obj, W_AMUL);
+		}
+
+		if(obj->oclass == RING_CLASS && Role_if(PM_MADMAN) && !uright){
+			setworn(obj, W_RINGR);
 		}
 		
 		if(obj->otyp == MASK && !ublindf){
