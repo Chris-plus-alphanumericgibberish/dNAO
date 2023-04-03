@@ -5313,6 +5313,17 @@ boolean printmessages; /* print generic elemental damage messages */
 			*messaged = TRUE;
 		}
 	}
+	if (attacks(AD_HOLY, otmp)){
+		if (attacks(AD_HOLY, otmp) && (vis&VIS_MAGR) && printmessages) {
+			pline_The("holy %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"sear"),
+				hittee, !spec_dbon_applies ? '.' : '!');
+			*messaged = TRUE;
+		}
+	}
 	if (attacks(AD_BLUD, otmp)){
 		if (vis&VIS_MAGR && printmessages) {
 			pline_The("bloodstained %s %s %s%c",
