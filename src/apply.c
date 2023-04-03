@@ -5724,7 +5724,7 @@ use_doll(obj)
 			res = MOVE_STANDARD;
 			if(!Blind)
 				pline("The many-armed doll begins dancing!");
-			give_intrinsic(DESTRUCTION, 8L);
+			give_intrinsic(DESTRUCTION, 64L);
 			if(!Blind)
 				pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
 			else pline("The little doll vanishes.");
