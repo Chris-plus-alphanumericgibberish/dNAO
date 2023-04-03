@@ -272,16 +272,31 @@ struct obj * obj;
 int otyp;
 int oartifact;
 {
+	int attackmask = WHACK;
 	if (obj)
 	{
 		otyp = obj->otyp;
 		oartifact = obj->oartifact;
 	}
-
-	int attackmask = objects[otyp].oc_dtyp;
+	
+	if(otyp && (
+		objects[otyp].oc_class == WEAPON_CLASS
+		|| (objects[otyp].oc_class == TOOL_CLASS && objects[otyp].oc_skill != P_NONE)
+	)){
+		attackmask = objects[otyp].oc_dtyp;
+	}
 	if (oartifact == ART_IBITE_ARM){
 		//No claws! Just a flabby hand.
 		attackmask = WHACK;
+	}
+	if(oartifact == ART_JIN_GANG_ZUO){
+		attackmask = WHACK;
+	}
+	if(otyp == WIND_AND_FIRE_WHEELS){
+		attackmask = PIERCE|SLASH;
+	}
+	if(otyp == STILETTOS){
+		attackmask = PIERCE;
 	}
 
 	/* catch special cases */
@@ -294,14 +309,19 @@ int oartifact;
 	}
 	if (   oartifact == ART_ROGUE_GEAR_SPIRITS
 		|| oartifact == ART_DURIN_S_AXE
-		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
-		|| (obj && check_oprop(obj, OPROP_SPIKED) && !litsaber(obj))
-		|| (obj && !litsaber(obj) && is_kinstealing_merc(obj))
-		){
+		|| oartifact == ART_GREAT_CLAWS_OF_URDLEN
+		|| oartifact == ART_SHIELD_OF_THE_RESOLUTE_HEA
+		|| oartifact == ART_PREMIUM_HEART
+		|| (obj && ((otyp == KAMEREL_VAJRA && !litsaber(obj))
+		|| 		   (check_oprop(obj, OPROP_SPIKED) && !litsaber(obj))
+		|| 		   (!litsaber(obj) && is_kinstealing_merc(obj))
+		))){
 		attackmask |= PIERCE;
 	}
 	if (   oartifact == ART_LIECLEAVER
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
+		|| oartifact == ART_GREAT_CLAWS_OF_URDLEN
+		|| oartifact == ART_CLAWS_OF_THE_REVENANCER
 		|| (obj && check_oprop(obj, OPROP_BLADED) && !litsaber(obj))
 		|| (obj && !litsaber(obj) && is_streaming_merc(obj))
 		){
@@ -593,8 +613,9 @@ struct monst *magr;
 		/* other various artifacts and objects */
 		if (obj->oartifact == ART_VORPAL_BLADE
 			|| obj->oartifact == ART_SNICKERSNEE
-			|| obj->oartifact == ART_DURIN_S_AXE)
-		{
+			|| obj->oartifact == ART_DURIN_S_AXE
+			|| obj->oartifact == ART_RUYI_JINGU_BANG
+		){
 			ocn += 1;						// roll two oc dice
 		}
 		else if (obj->oartifact == ART_FLUORITE_OCTAHEDRON)
@@ -1368,7 +1389,7 @@ struct monst *mtmp;
 static NEARDATA const int rwep[] =
 {	
 	RAZOR_WIRE/*damage plus lost turns*/, 
-	IRON_BANDS/*lost turns*/, 
+	BANDS/*lost turns*/, 
 	ROPE_OF_ENTANGLING/*lost turns*/, 
 	LOADSTONE/*1d30 plus weight*/, 
 // #ifdef FIREARMS
@@ -3444,7 +3465,7 @@ int wep_type;
 			bonus -= abs(bonus * 2 / 3);
 			/* additional penalty for over-weight offhand weapons */
 			if (uswapwep && uswapwep->owt > maxweight && !(
-				(uwep && (uwep->otyp == STILETTOS)) ||
+				(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS)) ||
 				(uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) ||
 				(uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
 				))
@@ -3751,7 +3772,7 @@ int wep_type;
 			bonus -= skill;
 			/* additional penalty for over-weight offhand weapons */
 			if (uswapwep && uswapwep->owt > maxweight && !(
-					(uwep && (uwep->otyp == STILETTOS)) ||
+					(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS)) ||
 					(uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER) ||
 					(uswapwep->oartifact == ART_FRIEDE_S_SCYTHE)
 				))

@@ -1231,9 +1231,7 @@ boolean telekinesis;
 	return -1;
     }
     if (obj->otyp == LOADSTONE
-		 || (obj->otyp == ROPE_OF_ENTANGLING && obj->spe == 1)
-		 || (obj->otyp == IRON_BANDS && obj->spe == 1)
-		 || (obj->otyp == RAZOR_WIRE && obj->spe == 1)
+		 || (obj->o_id == u.uentangled_oid)
 	     || (is_boulder(obj) && (throws_rocks(youracedata) || (u.sealsActive&SEAL_YMIR))))
 	return 1;		/* lift regardless of current situation */
 
@@ -2624,8 +2622,8 @@ boolean past;
 		victim = makemon(&mons[ROLL_FROM(plague_types)], box->ox, box->oy, MM_ADJACENTOK);
 	}
 	if(victim){
-		struct obj *nobj;
-		for(struct obj *obj = victim->minvent; obj; obj = nobj){
+		struct obj *nobj, *obj;
+		for(obj = victim->minvent; obj; obj = nobj){
 			nobj = obj->nobj;
 			victim->misc_worn_check &= ~obj->owornmask;
 			update_mon_intrinsics(victim, obj, FALSE, FALSE);
@@ -2644,8 +2642,11 @@ boolean past;
 			else
 				add_to_container(box, obj);
 		}
-		(void)mongets(victim, SHACKLES, NO_MKOBJ_FLAGS);
-		victim->entangled = SHACKLES;
+		obj = mongets(victim, SHACKLES, NO_MKOBJ_FLAGS);
+		if(obj){
+			victim->entangled_otyp = SHACKLES;
+			victim->entangled_oid = obj->o_id;
+		}
 		//Note: these are "fresh" so they don't take the 1/3rd penalty to level
 		set_template(victim, PLAGUE_TEMPLATE);
 		victim->mpeaceful = 1;

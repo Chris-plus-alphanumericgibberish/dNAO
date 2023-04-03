@@ -1025,6 +1025,8 @@ BOOTS(("heeled boots", "tall boots"),
 		1, 0,   0, 2, 20, 12, 10, 2, 0, LEATHER, CLR_BLACK),
 BOOTS(("imperial elven boots", "runed armored boots"),
 		0, 0,   0, 2, 25,900,  8, 3, 0, WOOD, CLR_BRIGHT_GREEN, O_POWER(STEALTH)),
+BOOTS(("wind and fire wheels", "bladed disks"),
+		0, 0,   0, 2, 25,900, 10, 0, 0, IRON, HI_METAL),
 BOOTS(("crystal boots", "boots"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,   0, 2, 60,300,  8, 4, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 /* With shuffled appearances... */
@@ -1840,7 +1842,7 @@ CHAINCORPSE(("lifeless doll"),   750, WOOD, CLR_BRIGHT_MAGENTA), /*Needs encyc e
 	CHAIN(names,DMG(D(4)),DMG(D(4)),200,120,0,0,dtyp,mat,color,O_MERGE(0),__VA_ARGS__)
 
 CHAINROPE(("rope of entangling"),   B, VEGGY, CLR_BROWN),	/*Needs encyc entry*/
-CHAINROPE(("iron bands"),           B, IRON,  HI_METAL),	/*Needs encyc entry*/
+CHAINROPE(("bands"),           		B, IRON,  HI_METAL, O_MATSPEC(IDED|UNIDED)),	/*Needs encyc entry*/
 CHAINROPE(("razor wire"),           S, METAL, HI_METAL),	/*Needs encyc entry*/
 CHAINROPE(("shackles"),             B, IRON,  HI_METAL),	/*Needs encyc entry*/
 

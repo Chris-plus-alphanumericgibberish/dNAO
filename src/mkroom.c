@@ -1423,8 +1423,11 @@ mklolthcell()
 								mpickobj(warden, obj);
 							}
 						}
-						(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-						mon->entangled = SHACKLES;
+						obj = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+						if(obj){
+							mon->entangled_otyp = SHACKLES;
+							mon->entangled_oid = obj->o_id;
+						}
 					}
 				}
 			}
@@ -6444,8 +6447,11 @@ int dx,dy;
 			obj_extract_self(obj);
 			add_to_container(chest, obj);
 		}
-		(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-		mon->entangled = SHACKLES;
+		obj = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+		if(obj){
+			mon->entangled_otyp = SHACKLES;
+			mon->entangled_oid = obj->o_id;
+		}
 	}
 }
 
@@ -6499,8 +6505,11 @@ int dx,dy;
 			obj_extract_self(obj);
 			add_to_container(chest, obj);
 		}
-		(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-		mon->entangled = SHACKLES;
+		obj = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+		if(obj){
+			mon->entangled_otyp = SHACKLES;
+			mon->entangled_oid = obj->o_id;
+		}
 	}
 }
 

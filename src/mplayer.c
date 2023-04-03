@@ -650,8 +650,11 @@ long flags;
 					otmp->oeroded3 = 1;
 				}
 			}
-			(void)mongets(mtmp, SHACKLES, NO_MKOBJ_FLAGS);
-			mtmp->entangled = SHACKLES;
+			otmp = mongets(mtmp, SHACKLES, NO_MKOBJ_FLAGS);
+			if(otmp){
+				mtmp->entangled_otyp = SHACKLES;
+				mtmp->entangled_oid = otmp->o_id;
+			}
 		}
 	}
 

@@ -1036,6 +1036,32 @@ domove()
 	    return;
 	}
 	
+	if(u.uentangled_oid){
+		//Any movement attempt (whether true move or bump attack) tries to break the entangling item.
+		if(!ubreak_entanglement()){
+			if(u.uentangled_otyp == RAZOR_WIRE){
+				int dmg = d(1,6);
+				int beat;
+				if(hates_silver(youracedata) && entangle_material(&youmonst, SILVER))
+					dmg += rnd(20);
+				if(hates_iron(youracedata) && (entangle_material(&youmonst, IRON) || entangle_material(&youmonst, GREEN_STEEL)))
+					dmg += rnd(u.ulevel);
+				if(hates_unholy(youracedata) && entangle_material(&youmonst, GREEN_STEEL))
+					dmg += d(2,9);
+				beat = entangle_beatitude(&youmonst, -1);
+				if(hates_unholy(youracedata) && beat)
+					dmg += beat == 2 ? d(2,9) : rnd(9);
+				beat = entangle_beatitude(&youmonst, 0);
+				if(hates_unblessed(youracedata) && beat)
+					dmg += beat == 2 ? d(2,8) : rnd(8);
+				beat = entangle_beatitude(&youmonst, 1);
+				if(hates_holy(youracedata) && beat)
+					dmg += beat == 2 ? rnd(20) : rnd(4);
+				losehp(dmg, "being sliced to ribbons by razor wire", KILLED_BY);
+			}
+		}
+	}
+	
 	if(u.uswallow) {
 		if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20){
 			You("pass right through %s!", mon_nam(u.ustuck));
@@ -1342,6 +1368,11 @@ domove()
 		You("are rooted %s.",
 		    Levitation || Weightless || Is_waterlevel(&u.uz) ?
 		    "in place" : "to the ground");
+		nomul(0, NULL);
+		return;
+	}
+	if(u.uentangled_oid){
+		You("struggle against your bindings!");
 		nomul(0, NULL);
 		return;
 	}

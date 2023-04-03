@@ -679,6 +679,7 @@ struct obj {
 			  (check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15) || \
 			  (otmp)->oartifact==ART_SOL_VALTIVA || \
 			  (otmp)->oartifact==ART_SHADOWLOCK || \
+			  (otmp)->oartifact==ART_RUYI_JINGU_BANG || \
 			  ((otmp)->oartifact==ART_GOLDEN_SWORD_OF_Y_HA_TALLA && (otmp)->otyp == BULLWHIP) || \
 			  (otmp)->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
 			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovar1_seals&SEAL_MARIONETTE ) \
@@ -694,6 +695,7 @@ struct obj {
 									(otmp)->oartifact == ART_SOL_VALTIVA ||\
 									(otmp)->oartifact == ART_DEATH_SPEAR_OF_KEPTOLO ||\
 									(otmp)->oartifact == ART_SHADOWLOCK ||\
+									(otmp)->oartifact == ART_RUYI_JINGU_BANG ||\
 									(otmp)->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA ||\
 									(otmp)->oartifact == ART_PEN_OF_THE_VOID\
 								) && is_pole(otmp))
@@ -858,7 +860,7 @@ struct obj {
 #define is_bullet(otmp)	((otmp)->oclass == WEAPON_CLASS && \
 			 objects[(otmp)->otyp].oc_skill == -P_FIREARM)
 //#endif
-#define is_monk_weapon(otmp)	((otmp)->oclass == WEAPON_CLASS && (\
+#define is_monk_weapon(otmp)	(((otmp)->oclass == WEAPON_CLASS && (\
 			 (otmp)->otyp == QUARTERSTAFF\
 			 || (otmp)->otyp == KHAKKHARA\
 			 || (otmp)->otyp == DOUBLE_SWORD\
@@ -868,7 +870,9 @@ struct obj {
 			 || (otmp)->otyp == BESTIAL_CLAW\
 			 || (otmp)->otyp == SHURIKEN\
 			 || (otmp)->otyp == KATAR\
-			 ))
+			 ))\
+			 || (otmp)->otyp == WIND_AND_FIRE_WHEELS\
+			 )
 
 /* multistriking() is 0-based so that only actual multistriking weapons return multistriking!=0 */
 #define multistriking(otmp)	(!(otmp) ? 0 : \
@@ -884,7 +888,7 @@ struct obj {
 	((otmp) == uwep && martial_bonus() && (otmp)->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && !uarms && !(u.twoweap && uswapwep)) ? 1 : \
 	0)
 /*  */
-#define is_multi_hit(otmp)	(multistriking(otmp) || multi_ended(otmp))
+#define is_multi_hit(otmp)	(multistriking(otmp) || multi_ended(otmp) || otmp->otyp == STILETTOS || otmp->otyp == WIND_AND_FIRE_WHEELS)
 /* if weapon should use unarmed skill */
 #define martial_aid(otmp)	((is_lightsaber((otmp)) && !litsaber((otmp)) && (otmp)->otyp != KAMEREL_VAJRA) || \
 							(valid_weapon((otmp)) && objects[(otmp)->otyp].oc_skill == P_BARE_HANDED_COMBAT))

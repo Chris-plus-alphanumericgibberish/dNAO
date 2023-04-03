@@ -1262,7 +1262,7 @@
 #define stationary(ptr)		((ptr)->mflagsm & MM_STATIONARY)
 #define sessile(ptr)		((ptr)->mmove == 0)
 
-#define straitjacketed_mon(mon) (which_armor(mon, W_ARM) && which_armor(mon, W_ARM)->otyp == STRAITJACKET && which_armor(mon, W_ARM)->cursed)
+#define straitjacketed_mon(mon) (mon->entangled_oid || (which_armor(mon, W_ARM) && which_armor(mon, W_ARM)->otyp == STRAITJACKET && which_armor(mon, W_ARM)->cursed))
 #define shackled_arms_mon(mon) (which_armor(mon, W_ARMG) && which_armor(mon, W_ARMG)->otyp == SHACKLES && which_armor(mon, W_ARMG)->cursed)
 #define covered_face_mon(mon) ((which_armor(mon, W_ARMH) && FacelessHelm(which_armor(mon, W_ARMH))) || \
 							   (which_armor(mon, W_ARMC) && FacelessCloak(which_armor(mon, W_ARMC))) \

@@ -2820,6 +2820,10 @@ boolean narrow_only;
 			if (!hates_holy_mon(mdef) && !hates_unholy_mon(mdef))
 				return FALSE;
 		break;
+		case AD_HOLY:
+			if (hates_unholy_mon(mdef))
+				return FALSE;
+		break;
 		default:
 			impossible("Weird weapon special attack: (%d).", weap->adtyp);
 		}
@@ -3116,10 +3120,11 @@ int * truedmgptr;
 				multiplier = 2;
 		}
 		/* some artifacts are 3x damage, or add 2dX damage */
-		if (double_bonus_damage_artifact(otmp->oartifact) ||
-			(otmp->oartifact == ART_FROST_BRAND && species_resists_fire(mon) && spec_dbon_applies) ||
-			(otmp->oartifact == ART_FIRE_BRAND && species_resists_cold(mon) && spec_dbon_applies)
-			)
+		if (double_bonus_damage_artifact(otmp->oartifact)
+			|| (otmp->oartifact == ART_FROST_BRAND && species_resists_fire(mon) && spec_dbon_applies)
+			|| (otmp->oartifact == ART_FIRE_BRAND && species_resists_cold(mon) && spec_dbon_applies)
+			|| (attacks(AD_HOLY, otmp) && hates_holy_mon(mon) && spec_dbon_applies)
+		)
 			multiplier *= 2;
 		/* lightsabers add 3dX damage (but do not multiply multiplicative bonus damage) */
 		if (damd && (is_lightsaber(otmp) && litsaber(otmp)))
@@ -6857,6 +6862,7 @@ arti_invoke(obj)
 		oart->inv_prop == LORDLY ||
 		oart->inv_prop == ANNUL ||
 		oart->inv_prop == VOID_CHIME ||
+		oart->inv_prop == CHANGE_SIZE ||
 		oart->inv_prop == SEVENFOLD
 	))
 		obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
@@ -9204,6 +9210,63 @@ arti_invoke(obj)
 			adjalign(-3);
 			u.uluck -= 3;
 	    }break;
+        case CHANGE_SIZE: {
+			winid tmpwin;
+			anything any;
+			menu_item *selected;
+			int n;
+
+			any.a_void = 0;         /* zero out all bits */
+			tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+			
+			any.a_int = 1;
+			add_menu(tmpwin, NO_GLYPH, &any, 't', 0, ATR_NONE, "Tiny.", MENU_UNSELECTED);
+			any.a_int++;
+			add_menu(tmpwin, NO_GLYPH, &any, 's', 0, ATR_NONE, "Small.", MENU_UNSELECTED);
+			any.a_int++;
+			add_menu(tmpwin, NO_GLYPH, &any, 'm', 0, ATR_NONE, "Medium.", MENU_UNSELECTED);
+			any.a_int++;
+			add_menu(tmpwin, NO_GLYPH, &any, 'l', 0, ATR_NONE, "Large.", MENU_UNSELECTED);
+			any.a_int++;
+			add_menu(tmpwin, NO_GLYPH, &any, 'h', 0, ATR_NONE, "Huge.", MENU_UNSELECTED);
+			any.a_int++;
+			add_menu(tmpwin, NO_GLYPH, &any, 'g', 0, ATR_NONE, "Gigantic.", MENU_UNSELECTED);
+
+			end_menu(tmpwin, "Become what size?");
+			n = select_menu(tmpwin, PICK_ONE, &selected);
+
+			if(n > 0){
+				n = selected[0].item.a_int;
+				free(selected);
+			}
+			destroy_nhwindow(tmpwin);
+			if(!n){
+				return MOVE_CANCELLED;
+			}
+			
+			switch(n){
+				case 1:
+					set_obj_size(obj, MZ_TINY);
+				break;
+				case 2:
+					set_obj_size(obj, MZ_SMALL);
+				break;
+				case 3:
+					set_obj_size(obj, MZ_MEDIUM);
+				break;
+				case 4:
+					set_obj_size(obj, MZ_LARGE);
+				break;
+				case 5:
+					set_obj_size(obj, MZ_HUGE);
+				break;
+				case 6:
+					set_obj_size(obj, MZ_GIGANTIC);
+				break;
+			}
+			pline("%s complies.", The(xname(obj)));
+		}break;
         case SMITE: {
           if(uwep && uwep == obj){
             /*if(ugod_is_angry()){
@@ -9983,6 +10046,49 @@ arti_invoke(obj)
 			doliving_ibite_arm(&youmonst, obj, TRUE);
 			time = MOVE_PARTIAL;
 		break;
+        case SNARE_WEAPONS:{
+			struct monst *mtmp;
+			struct obj *otmp, *nobj;
+			long unwornmask;
+			You("throw the snare into the air!");
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+				if(couldsee(mtmp->mx, mtmp->my) && !mtmp->mpeaceful && !resist(mtmp, WEAPON_CLASS, 0, NOTELL)){
+					for (otmp = mtmp->minvent; otmp; otmp = nobj) {
+						nobj = otmp->nobj;
+						/* Not clothing */
+						if(otmp->owornmask && !(otmp->owornmask&(W_WEP|W_SWAPWEP)))
+							continue;
+						if(mtmp->entangled_oid == otmp->o_id)
+							continue;
+						/* take the object away from the monster */
+						obj_extract_self(otmp);
+						if ((unwornmask = otmp->owornmask) != 0L) {
+							mtmp->misc_worn_check &= ~unwornmask;
+							if (otmp->owornmask & W_WEP) {
+								setmnotwielded(mtmp,otmp);
+								MON_NOWEP(mtmp);
+							}
+							if (otmp->owornmask & W_SWAPWEP){
+								setmnotwielded(mtmp,otmp);
+								MON_NOSWEP(mtmp);
+							}
+							otmp->owornmask = 0L;
+						}
+						update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);
+						if(!Blind) pline("The snare sucks up %s %s and drops it to the %s.",
+							  s_suffix(mon_nam(mtmp)), xname(otmp), surface(u.ux, u.uy));
+						dropy(otmp);
+						/* more take-away handling, after theft message */
+						if (unwornmask & W_WEP || unwornmask & W_SWAPWEP) {		/* stole wielded weapon */
+							possibly_unwield(mtmp, FALSE);
+						}
+					}
+					//Has already failed a resist check
+					set_mcan(mtmp, TRUE);
+					mtmp->mspec_used = 8;
+				}
+			}
+		}break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!

@@ -533,33 +533,36 @@ boolean digest_meal;
 	    if (mon->meating) mon->meating--;
 	}
 
-	/* Razor wire deals damage */
-	if(mon->entangled == RAZOR_WIRE){
-		int beat;
-		mon->mhp -= rnd(6);
-		if(hates_silver(mon->data) && entangle_material(mon, SILVER))
-			mon->mhp -= rnd(20);
-		if(hates_iron(mon->data) && (entangle_material(mon, IRON) || entangle_material(mon, GREEN_STEEL)))
-			mon->mhp -= rnd(mon->m_lev);
-		if(hates_unholy_mon(mon) && entangle_material(mon, GREEN_STEEL))
-			mon->mhp -= d(2,9);
-		beat = entangle_beatitude(mon, -1);
-		if(hates_unholy_mon(mon) && beat)
-			mon->mhp -= beat == 2 ? d(2,9) : rnd(9);
-		beat = entangle_beatitude(mon, 0);
-		if(hates_unblessed_mon(mon) && beat)
-			mon->mhp -= beat == 2 ? d(2,8) : rnd(8);
-		beat = entangle_beatitude(mon, 1);
-		if(hates_holy_mon(mon) && beat)
-			mon->mhp -= beat == 2 ? rnd(20) : rnd(4);
-		if(mon->mhp <= 0){
-			mon->mhp = 0;
-			if(canspotmon(mon))
-				pline("%s is sliced to ribbons in %s struggles!", Monnam(mon), hisherits(mon));
-			mondied(mon);
-			if(DEADMONSTER(mon))
-				return; //Didn't lifesave
+	if(mon->entangled_oid){
+		/* Razor wire deals damage */
+		if(mon->entangled_otyp == RAZOR_WIRE){
+			int beat;
+			mon->mhp -= rnd(6);
+			if(hates_silver(mon->data) && entangle_material(mon, SILVER))
+				mon->mhp -= rnd(20);
+			if(hates_iron(mon->data) && (entangle_material(mon, IRON) || entangle_material(mon, GREEN_STEEL)))
+				mon->mhp -= rnd(mon->m_lev);
+			if(hates_unholy_mon(mon) && entangle_material(mon, GREEN_STEEL))
+				mon->mhp -= d(2,9);
+			beat = entangle_beatitude(mon, -1);
+			if(hates_unholy_mon(mon) && beat)
+				mon->mhp -= beat == 2 ? d(2,9) : rnd(9);
+			beat = entangle_beatitude(mon, 0);
+			if(hates_unblessed_mon(mon) && beat)
+				mon->mhp -= beat == 2 ? d(2,8) : rnd(8);
+			beat = entangle_beatitude(mon, 1);
+			if(hates_holy_mon(mon) && beat)
+				mon->mhp -= beat == 2 ? rnd(20) : rnd(4);
+			if(mon->mhp <= 0){
+				mon->mhp = 0;
+				if(canspotmon(mon))
+					pline("%s is sliced to ribbons in %s struggles!", Monnam(mon), hisherits(mon));
+				mondied(mon);
+				if(DEADMONSTER(mon))
+					return; //Didn't lifesave
+			}
 		}
+		entangle_effects(mon);
 	}
 	/* Clouds on Lolth's level deal damage */
 	if(Is_lolth_level(&u.uz) && levl[mon->mx][mon->my].typ == CLOUD){

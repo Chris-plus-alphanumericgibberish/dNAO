@@ -1148,7 +1148,7 @@ boolean called;
 
 		if (maybe_append_injury_desc(mtmp, buf)) name_at_start = FALSE;
 
-		if(mtmp->entangled == SHACKLES){
+		if(mtmp->entangled_otyp == SHACKLES){
 			Strcat(buf, "shackled ");
 		}
 		if(is_drow(mdat)){
@@ -1212,7 +1212,7 @@ boolean called;
 			}
 			if (maybe_append_injury_desc(mtmp, buf)) name_at_start = FALSE;
 
-			if(mtmp->entangled == SHACKLES){
+			if(mtmp->entangled_otyp == SHACKLES){
 				Strcat(buf, "shackled ");
 			}
 			if(is_drow(mdat)){
@@ -1252,7 +1252,7 @@ boolean called;
 			name_at_start = TRUE;
 			if (maybe_append_injury_desc(mtmp, buf))
 				name_at_start = FALSE;
-			if(mtmp->entangled == SHACKLES){
+			if(mtmp->entangled_otyp == SHACKLES){
 				Strcat(buf, "shackled ");
 				name_at_start = FALSE;
 			}
@@ -1275,7 +1275,7 @@ boolean called;
 
 		if (maybe_append_injury_desc(mtmp, buf)) name_at_start = FALSE;
 
-		if(mtmp->entangled == SHACKLES){
+		if(mtmp->entangled_otyp == SHACKLES){
 			Strcat(buf, "shackled ");
 		}
 		if(is_drow(mdat)){

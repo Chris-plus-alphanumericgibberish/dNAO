@@ -5009,7 +5009,8 @@ int type;
 		otmp->oeroded = 1;
 		fix_object(otmp);
 		(void) mpickobj(mon, otmp);
-		mon->entangled = SHACKLES;
+		mon->entangled_otyp = SHACKLES;
+		mon->entangled_oid = otmp->o_id;
 		mon->movement = 0;
 	}
 	else if(mon->mtyp == PM_PARASITIZED_DOLL){
@@ -5512,7 +5513,8 @@ int damage, tell;
 			}
 		break;	
 	    case WEAPON_CLASS:  /* artifact */
-			alev = 20;
+	    case CHAIN_CLASS:  /* artifact */
+			alev = 45;
 			if(!flags.mon_moving){
 				LUCK_MODIFIER
 			}

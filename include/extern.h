@@ -2995,6 +2995,7 @@ E void FDECL(unshackle_mon, (struct monst *));
 E void FDECL(dowebgush, (int,int,int));
 E void FDECL(webgush, (int,int,genericptr_t));
 E int NDECL(ubreak_entanglement);
+E void FDECL(entangle_effects, (struct monst *));
 E int NDECL(uescape_entanglement);
 
 /* ### u_init.c ### */

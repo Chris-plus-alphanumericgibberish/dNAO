@@ -558,7 +558,7 @@ pick_lock(pick_p) /* pick a lock with a given object */
 			&& mtmp->m_ap_type != M_AP_FURNITURE
 			&& mtmp->m_ap_type != M_AP_OBJECT) {
 
-			if (mtmp->entangled == SHACKLES){
+			if (mtmp->entangled_otyp == SHACKLES){
 				unshackle_mon(mtmp);
 				return MOVE_STANDARD;	/* that was quick -- we don't have full handling for this yet */
 			}

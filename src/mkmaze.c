@@ -709,7 +709,7 @@ fixup_special()
 				break;
 		}
 		if(chest) for(mon = fmon; mon; mon = mon->nmon){
-			if(mon->entangled != SHACKLES)
+			if(mon->entangled_otyp != SHACKLES)
 				continue;
 			for(obj = mon->minvent; obj; obj = nobj){
 				nobj = obj->nobj;
@@ -746,7 +746,7 @@ fixup_special()
 				break;
 		}
 		if(chest) for(mon = fmon; mon; mon = mon->nmon){
-			if(mon->entangled != SHACKLES)
+			if(mon->entangled_otyp != SHACKLES)
 				continue;
 			for(obj = mon->minvent; obj; obj = nobj){
 				nobj = obj->nobj;

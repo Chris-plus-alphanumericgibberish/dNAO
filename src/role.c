@@ -243,7 +243,7 @@ struct Role roles[] = {
 	{"Student of Winds",  0},
 	{"Student of Fire",   0},
 	{"Master",            0} },
-	GOD_SHAN_LAI_CHING, GOD_CHIH_SUNG_TZU, GOD_HUAN_TI, /* Chinese */
+	GOD_PRINCE_NEZHA, GOD_LAOZI, GOD_THE_HUNSHI_SIHOU, /* Chinese */
 	"Mon", "the Monastery of Chan-Sune",
 	  "the Monastery of the Earth-Lord",
 	PM_MONK, NON_PM, NON_PM,

@@ -1215,6 +1215,16 @@ A("Godhands",					GAUNTLETS_OF_POWER,				(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
+A("The Wrappings of the Sacred Fist",	HAND_WRAPS,		"prayer-warded wraps",
+	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_D, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_HOLY, 8, 0), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	FAST_TURNING, (ARTI_PLUSSEV)
+	),
+
 /* permanently polymorphs you into a death knight when you die -- does not work for monsters */
 A("The Helm of Undeath",			WAR_HAT,				(const char *)0,
 	2500L, BONE, MZ_DEFAULT, WT_DEFAULT,
@@ -1757,6 +1767,36 @@ A("Poseidon's Trident",				TRIDENT,				(const char *)0,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	WATER, NOFLAG
+	),
+
+A("Feng Huo Lun",				WIND_AND_FIRE_WHEELS,				"flaming %s",
+	4500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_LAWFUL, PM_MONK, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
+	NO_MONS(),
+	ATTK(AD_FIRE, 1, 0), NOFLAG,
+	PROPS(FAST, FLYING), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+A("Jin Gang Zuo",				BANDS,				"hoop",
+	4500L, GEMSTONE, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_MONK, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
+	NO_MONS(),
+	NO_ATTK(), ARTA_RETURNING,
+	PROPS(), NOFLAG,
+	PROPS(FIRE_RES, WATERPROOF), NOFLAG,
+	SNARE_WEAPONS, NOFLAG
+	),
+
+A("Ruyi Jingu Bang",				QUARTERSTAFF,				"golden-hooped %s",
+	4500L, IRON, MZ_DEFAULT, WT_DEFAULT,
+	A_CHAOTIC, PM_MONK, NON_PM, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
+	NO_MONS(),
+	ATTK(AD_PHYS, 1, 0), ARTA_RETURNING,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	CHANGE_SIZE, NOFLAG
 	),
 
 A("The Sickle of Thunderblasts",				SICKLE,				(const char *)0,
@@ -3348,17 +3388,6 @@ A("The Booze of the Drunken Master",	POT_BOOZE,		(const char *)0,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	FIRE_BLAST, NOFLAG
-	),
-
-/* TODO 2x damage against undead/demons */
-A("The Wrappings of the Sacred Fist",	GLOVES,			(const char *)0,
-	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, PM_MONK, NON_PM, NO_TIER, (ARTG_NOGEN|ARTG_NOWISH),
-	NO_MONS(),
-	NO_ATTK(), NOFLAG,
-	PROPS(), NOFLAG,
-	PROPS(), NOFLAG,
-	FAST_TURNING, (ARTI_PLUSSEV)
 	),
 
 /* TODO jumping while wielded */

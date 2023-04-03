@@ -1119,7 +1119,7 @@ OBJECT:'#',"blessed +3 cloth shoes", contained
 OBJECT:'#',"mithril armored boots", contained
 
 CONTAINER: '(', "chest"  , (55,09)
-OBJECT:'_',"iron bands", contained
+OBJECT:'_',"bands", contained
 OBJECT:'#',"fixed holy-armor woolen cloth robe", contained
 OBJECT:'#',"tiny lenses", contained
 OBJECT:'#',"elven cloak", contained

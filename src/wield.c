@@ -113,7 +113,7 @@ register struct obj *obj;
 				&& obj->otyp != AKLYS
 				&& !check_oprop(obj, OPROP_CCLAW)
 				)) :
-				!is_weptool(obj);
+				!(is_weptool(obj) || obj->otyp == WIND_AND_FIRE_WHEELS);
 	} else
 		unweapon = TRUE;	/* for "bare hands" message */
         if (!restoring) {
@@ -504,7 +504,7 @@ const char *verb;	/* "rub",&c */
     }
 	if(Straitjacketed){
 	    pline(
-	     "Since your %s are trapped in a straitjacket, you cannot %s %s %s.",
+	     "Since your %s are bound, you cannot %s %s %s.",
 		  makeplural(body_part(HAND)), verb, more_than_1 ? "those" : "that", xname(obj));
 		return FALSE;
 	}
@@ -561,7 +561,7 @@ test_twoweapon()
 			body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
 	}
 	/* Objects must not be non-weapons */
-	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS))) {
+	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS))) {
 		otmp = NOT_WEAPON(uwep) ? uwep : uswapwep;
 		pline("%s %s.", Yname2(otmp),
 		    is_plural(otmp) ? "aren't weapons" : "isn't a weapon");
@@ -810,7 +810,9 @@ register int amount;
 	int otyp = STRANGE_OBJECT;
 	int safelim;
 
-	if(!uwep || (uwep->oclass != WEAPON_CLASS && !is_weptool(uwep))) {
+	if(!uwep || (uwep->oclass != WEAPON_CLASS && !is_weptool(uwep)
+				&& uwep->otyp != STILETTOS && uwep->otyp != WIND_AND_FIRE_WHEELS
+	)) {
 		char buf[BUFSZ];
 
 		Sprintf(buf, "Your %s %s.", makeplural(body_part(HAND)),

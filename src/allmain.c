@@ -575,6 +575,12 @@ boolean affect_game_state;
 						artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod += NORMAL_SPEED/6;
 					}
 				}
+				if(uarmf && uarmf->oartifact == ART_FENG_HUO_LUN){
+					MOVECOST(NORMAL_SPEED - artinstance[ART_FENG_HUO_LUN].LeagueMod);
+					if(affect_game_state && artinstance[ART_FENG_HUO_LUN].LeagueMod < NORMAL_SPEED/2){
+						artinstance[ART_FENG_HUO_LUN].LeagueMod += NORMAL_SPEED/4;
+					}
+				}
 			}
 #undef MOVECOST
 			break;
@@ -682,7 +688,12 @@ you_calc_movement()
 		|| (Race_if(PM_HALF_DRAGON) && Humanoid_half_dragon(urole.malenum))
 	)) moveamt = 12;
 	else moveamt = youmonst.data->mmove;
-	if(uarmf && uarmf->otyp == STILETTOS && !Flying && !Levitation) moveamt = (moveamt*5)/6;
+	if(uarmf && !Flying && !Levitation){
+		if(uarmf->otyp == STILETTOS)
+			moveamt = (moveamt*5)/6;
+		else if(uarmf->otyp == WIND_AND_FIRE_WHEELS)
+			moveamt = (moveamt+1)/2;
+	}
 	
 	if(u.sealsActive&SEAL_EURYNOME && IS_PUDDLE_OR_POOL(levl[u.ux][u.uy].typ)){
 		if (Very_fast) {	/* speed boots or potion */
@@ -1508,6 +1519,7 @@ moveloop()
 			if(uandroid && u.ucspeed == HIGH_CLOCKSPEED)
 				u.ucspeed = NORM_CLOCKSPEED;
 			artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod = 0;
+			artinstance[ART_FENG_HUO_LUN].LeagueMod = 0;
 		}
 		
 	    do { /* hero can't move this turn loop */
@@ -1821,28 +1833,30 @@ moveloop()
 						mtmp->movement = 0;
 						continue;
 					}
-					if(mtmp->entangled){
-						if(mtmp->entangled == SHACKLES){
+					if(mtmp->entangled_oid){
+						if(mtmp->entangled_otyp == SHACKLES){
 							mtmp->mhp = min(mtmp->mhp, mtmp->mhpmax/2+1);
 							mtmp->movement = 0;
 							continue;
 						}
-						else if(mtmp->entangled == MUMMY_WRAPPING){
+						else if(mtmp->entangled_otyp == MUMMY_WRAPPING){
 							if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->otyp == MUMMY_WRAPPING){
 								if(canseemon(mtmp)) pline("%s struggles against %s wrappings", Monnam(mtmp), hisherits(mtmp));
 								mtmp->movement = 0;
 								continue;
 							} else {
-								mtmp->entangled = 0;
+								mtmp->entangled_otyp = 0;
+								mtmp->entangled_oid = 0;
 							}
 						}
-						else if(mtmp->entangled == PRAYER_WARDED_WRAPPING){
+						else if(mtmp->entangled_otyp == PRAYER_WARDED_WRAPPING){
 							if(which_armor(mtmp, W_ARMC) && which_armor(mtmp, W_ARMC)->otyp == PRAYER_WARDED_WRAPPING){
 								if(canseemon(mtmp)) pline("%s struggles against %s wrappings", Monnam(mtmp), hisherits(mtmp));
 								mtmp->movement = 0;
 								continue;
 							} else {
-								mtmp->entangled = 0;
+								mtmp->entangled_otyp = 0;
+								mtmp->entangled_oid = 0;
 							}
 						}
 						else if(!mbreak_entanglement(mtmp)){
@@ -2487,31 +2501,9 @@ karemade:
 				cthulhu_mind_blast();
 			}
 			
-			if(u.uentangled){ //Note: the normal speed calculations include important hunger modifiers, so just calculate speed then 0 it out if needed.
-				if(!ubreak_entanglement()){
-					youmonst.movement = 0;
-					if(u.uentangled == RAZOR_WIRE){
-						int dmg = d(1,6);
-						int beat;
-						if(hates_silver(youracedata) && entangle_material(&youmonst, SILVER))
-							dmg += rnd(20);
-						if(hates_iron(youracedata) && (entangle_material(&youmonst, IRON) || entangle_material(&youmonst, GREEN_STEEL)))
-							dmg += rnd(u.ulevel);
-						if(hates_unholy(youracedata) && entangle_material(&youmonst, GREEN_STEEL))
-							dmg += d(2,9);
-						beat = entangle_beatitude(&youmonst, -1);
-						if(hates_unholy(youracedata) && beat)
-							dmg += beat == 2 ? d(2,9) : rnd(9);
-						beat = entangle_beatitude(&youmonst, 0);
-						if(hates_unblessed(youracedata) && beat)
-							dmg += beat == 2 ? d(2,8) : rnd(8);
-						beat = entangle_beatitude(&youmonst, 1);
-						if(hates_holy(youracedata) && beat)
-							dmg += beat == 2 ? rnd(20) : rnd(4);
-						losehp(dmg, "being sliced to ribbons by razor wire", KILLED_BY);
-					}
-					uescape_entanglement();
-				}
+			if(u.uentangled_oid){ //Note: the normal speed calculations include important hunger modifiers, so just calculate speed then 0 it out if needed.
+				entangle_effects(&youmonst);
+				uescape_entanglement();
 			}
 			
 		    settrack();
@@ -4531,7 +4523,8 @@ struct monst *mon;
 				mtmp->mstun = 0;
 				mtmp->mconf = 0;
 				mtmp->mtrapped = 0;
-				mtmp->entangled = 0;
+				mtmp->entangled_otyp = 0;
+				mtmp->entangled_oid = 0;
 			}
 		}
 		xlocale += rn2(3) - 1;
@@ -4606,7 +4599,8 @@ struct monst *mon;
 			mtmp->mstun = 0;
 			mtmp->mconf = 0;
 			mtmp->mtrapped = 0;
-			mtmp->entangled = 0;
+			mtmp->entangled_otyp = 0;
+			mtmp->entangled_oid = 0;
 			
 			break; //ends the loop
 		}
@@ -4677,7 +4671,8 @@ struct monst *mon;
 					mtmp->mstun = 0;
 					mtmp->mconf = 0;
 					mtmp->mtrapped = 0;
-					mtmp->entangled = 0;
+					mtmp->entangled_otyp = 0;
+					mtmp->entangled_oid = 0;
 				}
 			}
 		}
@@ -4807,7 +4802,8 @@ struct monst *mon;
 				mtmp->mstun = 0;
 				mtmp->mconf = 0;
 				mtmp->mtrapped = 0;
-				mtmp->entangled = 0;
+				mtmp->entangled_otyp = 0;
+				mtmp->entangled_oid = 0;
 			}
 		}
 	}

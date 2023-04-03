@@ -100,6 +100,9 @@ Boots_on()
 		ABON(A_CHA) += 2;
 		flags.botl = 1;
 	}
+	else if(uarmf->otyp == WIND_AND_FIRE_WHEELS){
+		if(!Flying && !Levitation) pline("You've heard myths of a god riding these through the sky, but this doesn't seem very practical.");
+	}
 	oldprop = (u.uprops[objects[uarmf->otyp].oc_oprop[0]].extrinsic & ~WORN_BOOTS);
 
     switch(uarmf->otyp) {
@@ -115,6 +118,7 @@ Boots_on()
 	case KICKING_BOOTS:
 	case HARMONIUM_BOOTS:
 	case STILETTOS:
+	case WIND_AND_FIRE_WHEELS:
 		break;
 	case WATER_WALKING_BOOTS:
 		if (u.uinwater) spoteffects(TRUE);
@@ -222,6 +226,7 @@ Boots_off()
 	case KICKING_BOOTS:
 	case HARMONIUM_BOOTS:
 	case STILETTOS:
+	case WIND_AND_FIRE_WHEELS:
 		break;
 	default: impossible(unknown_type, c_boots, otyp);
     }

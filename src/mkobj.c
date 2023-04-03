@@ -2198,8 +2198,11 @@ int oldmat, newmat;
 		stop_timer(LIGHT_DAMAGE, obj->timed);
 	}
 	/* set random gemstone type for valid gemstone objects */
-	if (!obj->sub_material && newmat == GEMSTONE && oldmat != GEMSTONE && obj->oclass != GEM_CLASS) {
-		do{
+	if (newmat == GEMSTONE && obj->oclass != GEM_CLASS && (obj->sub_material < MAGICITE_CRYSTAL || obj->sub_material > LAST_GEM || oldmat != GEMSTONE)) {
+		if(obj->oartifact == ART_JIN_GANG_ZUO){
+			set_submat(obj, DIAMOND);
+		}
+		else do{
 			set_submat(obj, MAGICITE_CRYSTAL + rn2(LAST_GEM - MAGICITE_CRYSTAL + 1));
 		} while (obj->sub_material == OBSIDIAN);
 	}
@@ -2496,7 +2499,7 @@ int mat;
 		// case CHAIN:
 			// obj->otyp = ;
 		// break;
-		// case IRON_BANDS:
+		// case BANDS:
 			// obj->otyp = ;
 		// break;
 	}

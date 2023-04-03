@@ -765,6 +765,9 @@ int dx, dy;
 	} else if (u.uinwater && !rn2(2)) {
 		Your("slow motion kick doesn't hit anything.");
 		no_kick = TRUE;
+	} else if (u.uentangled_oid) {
+		You_cant("move your %s!", body_part(LEG));
+		no_kick = TRUE;
 	} else if (u.utrap) {
 		switch (u.utraptype) {
 		    case TT_PIT:

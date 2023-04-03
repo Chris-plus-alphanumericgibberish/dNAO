@@ -206,9 +206,10 @@ struct monst {
 	int encouraged;	/* affected by Encourage song */
 #define BASE_DOG_ENCOURAGED_MAX		7
 	
-	int entangled;/* The monster is entangled, and in what? */
-#define imprisoned(mon)	((mon)->entangled == SHACKLES || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
-#define noactions(mon)	((mon)->entangled || imprisoned(mon))
+	int entangled_otyp;/* The monster is entangled, and in what? */
+	long entangled_oid;/* The monster is entangled, and in what? */
+#define imprisoned(mon)	((mon)->entangled_otyp == SHACKLES || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
+#define noactions(mon)	((mon)->entangled_oid || imprisoned(mon))
 #define nonthreat(mon)	(imprisoned(mon) || has_template(mon, PLAGUE_TEMPLATE))
 #define helpless(mon) (mon->msleeping || !(mon->mcanmove) || !(mon->mnotlaugh) || noactions(mon))	
 #define helpless_still(mon) (mon->msleeping || !(mon->mcanmove) || noactions(mon))	

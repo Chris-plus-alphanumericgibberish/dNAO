@@ -4156,12 +4156,13 @@ void
 unshackle_mon(mtmp)
 struct monst * mtmp;
 {
-	if (!mtmp || mtmp->entangled != SHACKLES) {
+	if (!mtmp || mtmp->entangled_otyp != SHACKLES) {
 		impossible("%s not shackled?", m_monnam(mtmp));
 		return;
 	}
 
-	mtmp->entangled = 0;
+	mtmp->entangled_otyp = 0;
+	mtmp->entangled_oid = 0;
 	You("unlock the shackles imprisoning %s.", mon_nam(mtmp));
 	if (mtmp->mtame){
 		verbalize("Thank you for rescuing me!");
@@ -4770,8 +4771,8 @@ struct obj * tool;
 		    }
 		}
 	} /* end if */
-	else if((mtmp = m_at(x,y)) && mtmp->entangled){
-		if(mtmp->entangled == SHACKLES){
+	else if((mtmp = m_at(x,y)) && mtmp->entangled_oid){
+		if(mtmp->entangled_otyp == SHACKLES){
 			unshackle_mon(mtmp);
 		}
 		else {
@@ -4779,14 +4780,15 @@ struct obj * tool;
 			You("disentangle %s.", mon_nam(mtmp));
 			for(obj = mtmp->minvent; obj; obj = nobj){
 				nobj = obj->nobj;
-				if(obj->otyp == mtmp->entangled && obj->spe == 1){
+				if(obj->o_id == mtmp->entangled_oid){
 					obj->spe = 0;
 					obj_extract_self(obj);
 					place_object(obj, mtmp->mx, mtmp->my);
 					stackobj(obj);
 				}
 			}
-			mtmp->entangled = 0;
+			mtmp->entangled_otyp = 0;
+			mtmp->entangled_oid = 0;
 		}
 		return MOVE_STANDARD;
 	}
@@ -5374,35 +5376,52 @@ ubreak_entanglement()
 {
 	struct obj *obj;
 	int breakcheck = (youracedata->msize*ATTRSCALE + ACURRSTR);
-	if(u.uentangled == ROPE_OF_ENTANGLING){
+	if(u.uentangled_otyp == ROPE_OF_ENTANGLING){
 		if(breakcheck*2 <= rn2(100*ATTRSCALE))
 			return FALSE;
-	} else if(u.uentangled == IRON_BANDS){
+	} else if(u.uentangled_otyp == BANDS){
 		if(ACURRSTR < 15 && youracedata->msize != MZ_GIGANTIC) return FALSE;
 		if(breakcheck <= rn2(200*ATTRSCALE))
 			return FALSE;
-	} else if(u.uentangled == RAZOR_WIRE){
+	} else if(u.uentangled_otyp == RAZOR_WIRE){
 		if(breakcheck <= rn2(100*ATTRSCALE))
 			return FALSE;
 	} else {
-		u.uentangled = 0;
+		u.uentangled_oid = 0;
+		u.uentangled_otyp = 0;
 		return TRUE;
 	}
 	for(obj = invent; obj; obj = obj->nobj){
-		if(obj->otyp == u.uentangled && obj->spe == 1){
+		if(obj->o_id == u.uentangled_oid && !obj->oartifact){
 			You("break the restraining %s!", xname(obj));
 			useup(obj);
 			break;
 		}
 	}
 	for(obj = invent; obj; obj = obj->nobj){
-		if(obj->otyp == u.uentangled && obj->spe == 1){
+		if(obj->o_id == u.uentangled_oid){
 			return FALSE;
 		}
 	}
 	// else
-	u.uentangled = 0;
+	u.uentangled_oid = 0;
+	u.uentangled_otyp = 0;
 	return TRUE;
+}
+
+void
+entangle_effects(mdef)
+struct monst *mdef;
+{
+	struct obj *obj;
+	boolean youdef = mdef == &youmonst;
+	int entangle_oid = youdef ? u.uentangled_oid : mdef->entangled_oid;
+	for(obj = youdef ? invent : mdef->minvent; obj; obj = obj->nobj){
+		if(obj->o_id == entangle_oid){
+			if(obj->oartifact == ART_JIN_GANG_ZUO)
+				cancel_monst(mdef, obj, FALSE, FALSE, FALSE, 0);
+		}
+	}
 }
 
 int
@@ -5414,33 +5433,38 @@ uescape_entanglement()
 		struct obj *nobj;
 		for(obj = invent; obj; obj = nobj){
 			nobj = obj->nobj;
-			if(obj->otyp == u.uentangled && obj->spe == 1){
+			if(obj->o_id == u.uentangled_oid){
 				You("slip loose from the entangling %s!", xname(obj));
 				obj->spe = 0;
 				obj_extract_self(obj);
 				dropy(obj);
 			}
 		}
-		u.uentangled = 0;
+		u.uentangled_oid = 0;
+		u.uentangled_otyp = 0;
 		return TRUE;
 	}
 	obj = outermost_armor(&youmonst);
 	if(obj && (obj->greased || obj->otyp == OILSKIN_CLOAK));//Slip free
-	else if(u.uentangled == ROPE_OF_ENTANGLING){
+	else if(u.uentangled_otyp == ROPE_OF_ENTANGLING){
 		if(escapecheck <= rn2(20*ATTRSCALE)+rn2(20*ATTRSCALE))
 			return FALSE;
-	} else if(u.uentangled == IRON_BANDS){
+	} else if(u.uentangled_otyp == BANDS){
 		if(escapecheck <= rn2(20*ATTRSCALE))
 			return FALSE;
-	} else if(u.uentangled == RAZOR_WIRE){
+	} else if(u.uentangled_otyp == RAZOR_WIRE){
 		if(escapecheck <= rn2(20*ATTRSCALE)+rn2(20*ATTRSCALE))
 			return FALSE;
 	} else {
-		u.uentangled = 0;
+		u.uentangled_oid = 0;
+		u.uentangled_otyp = 0;
 		return TRUE;
 	}
 	for(obj = invent; obj; obj = obj->nobj){
-		if(obj->otyp == u.uentangled && obj->spe == 1){
+		if(obj->o_id == u.uentangled_oid){
+			//Very hard to escape from the diamond snare
+			if(obj->oartifact == ART_JIN_GANG_ZUO && rn2(20))
+				break;
 			You("slip loose from the entangling %s!", xname(obj));
 			obj->spe = 0;
 			obj_extract_self(obj);
@@ -5456,12 +5480,13 @@ uescape_entanglement()
 		}
 	}
 	for(obj = invent; obj; obj = obj->nobj){
-		if(obj->otyp == u.uentangled && obj->spe == 1){
+		if(obj->o_id == u.uentangled_oid){
 			return FALSE;
 		}
 	}
 	// else
-	u.uentangled = 0;
+	u.uentangled_oid = 0;
+	u.uentangled_otyp = 0;
 	return TRUE;
 }
 

@@ -572,7 +572,8 @@ struct you {
 	int		last_used_movement;	/* Partial action: last used turn segment */
 	int 	ustdy;		/* to record extra damage to be dealt due to having been studied */
 	int 	uencouraged;/* to record the buff from tame encouragement songs */
-	int		uentangled; /* to record the otyp of an item entangling you */
+	int		uentangled_otyp; /* to record the otyp of an item entangling you */
+	long	uentangled_oid; /* to record the oid of the item entangling you */
 	long int spawnedGold; /* to record total amount of gold spawned in a game */
 	int 	usanity;	/* to record level of sanity */
 	unsigned long long int 	umadness;	/* to afflictions */

@@ -1248,15 +1248,21 @@ struct mkroom	*croom;
 					set_template(mon, MISTWEAVER);
 					set_faction(mon, GOATMOM_FACTION);
 					mon->m_insight_level = min(insight, u.uinsight);
-					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-					mon->entangled = SHACKLES;
+					tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					if(tmpo){
+						mon->entangled_otyp = SHACKLES;
+						mon->entangled_oid = tmpo->o_id;
+					}
 					mk_mplayer(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
 					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 				break;
 				case PM_WITCH:
-					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-					mon->entangled = SHACKLES;
+					tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					if(tmpo){
+						mon->entangled_otyp = SHACKLES;
+						mon->entangled_oid = tmpo->o_id;
+					}
 					mk_mplayer(&mons[PM_HEALER], otmp->ox, otmp->oy, MM_ADJACENTOK);
 					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
 					makemon(&mons[PM_NURSE], otmp->ox, otmp->oy, MM_ADJACENTOK);
@@ -1286,8 +1292,11 @@ default_case:
 							mon->msleeping = 1;
 						break;
 						default:
-							(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-							mon->entangled = SHACKLES;
+							tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+							if(tmpo){
+								mon->entangled_otyp = SHACKLES;
+								mon->entangled_oid = tmpo->o_id;
+							}
 							if(!rn2(10)){
 								struct monst *mtmp;
 								struct obj *meqp;
@@ -1389,8 +1398,11 @@ default_case:
 			mon = makemon(&mons[skeleton_types[rn2(SIZE(skeleton_types))]], otmp->ox, otmp->oy, NO_MINVENT|MM_NOCOUNTBIRTH);
 			if(mon){
 				set_template(mon, SKELIFIED);
-				(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-				mon->entangled = SHACKLES;
+				tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+				if(tmpo){
+					mon->entangled_otyp = SHACKLES;
+					mon->entangled_oid = tmpo->o_id;
+				}
 				mon->mcrazed = 1;
 				mon->msleeping = 1;
 			}
@@ -1505,10 +1517,14 @@ default_case:
 				};
 				
 				struct monst *mon;
+				struct obj *tmpo;
 				mon = makemon(&mons[ROLL_FROM(sacc_types)], otmp->ox, otmp->oy, NO_MM_FLAGS);
 				if(mon){
-					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-					mon->entangled = SHACKLES;
+					tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					if(tmpo){
+						mon->entangled_otyp = SHACKLES;
+						mon->entangled_oid = tmpo->o_id;
+					}
 					//Note: these are "fresh" so they don't take the 1/3rd penalty to level
 					set_template(mon, PLAGUE_TEMPLATE);
 					mon->mpeaceful = 1;
@@ -1524,10 +1540,14 @@ default_case:
 				};
 				
 				struct monst *mon;
+				struct obj *tmpo;
 				mon = makemon(&mons[ROLL_FROM(prison2_types)], otmp->ox, otmp->oy, MM_GOODEQUIP);
 				if(mon){
-					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-					mon->entangled = SHACKLES;
+					tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					if(tmpo){
+						mon->entangled_otyp = SHACKLES;
+						mon->entangled_oid = tmpo->o_id;
+					}
 					//Note: these are "fresh" so they don't take the 1/3rd penalty to level
 					set_template(mon, PLAGUE_TEMPLATE);
 					mon->mpeaceful = 1;
@@ -1557,6 +1577,7 @@ default_case:
 				};
 				
 				struct monst *mon;
+				struct obj *tmpo;
 				if(rn2(3)){
 					mon = makemon_full(&mons[ROLL_FROM(drowplague3_types)], otmp->ox, otmp->oy, NO_MM_FLAGS, PLAGUE_TEMPLATE, -1);
 				}
@@ -1564,8 +1585,11 @@ default_case:
 					mon = makemon_full(&mons[ROLL_FROM(plague3_types)], otmp->ox, otmp->oy, NO_MM_FLAGS, PLAGUE_TEMPLATE, -1);
 				}
 				if(mon){
-					(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-					mon->entangled = SHACKLES;
+					tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+					if(tmpo){
+						mon->entangled_otyp = SHACKLES;
+						mon->entangled_oid = tmpo->o_id;
+					}
 					mon->mpeaceful = 1;
 					set_malign(mon);
 				}
@@ -1576,6 +1600,7 @@ default_case:
 			int mtyp;
 			boolean polyps;
 			struct monst *mon;
+			struct obj *tmpo;
 			int prisoners[] = {
 								PM_ELF_LORD, PM_ELF_LADY, PM_GREY_ELF, PM_GREY_ELF,
 								PM_HEDROW_BLADEMASTER, PM_DROW_CAPTAIN, PM_DROW_MATRON, PM_UNEARTHLY_DROW,
@@ -1624,8 +1649,11 @@ default_case:
 				mongets(mon, MASK, NO_MKOBJ_FLAGS);
 			}
 			if(mon){
-				(void)mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
-				mon->entangled = SHACKLES;
+				tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+				if(tmpo){
+					mon->entangled_otyp = SHACKLES;
+					mon->entangled_oid = tmpo->o_id;
+				}
 			}
 		}
 	}

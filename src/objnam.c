@@ -1872,7 +1872,7 @@ boolean with_price;
 				(typ == BODYGLOVE && !nn) ||
 				/* depends on order of dragon scales */
 				(typ >= GRAY_DRAGON_SCALES && typ <= YELLOW_DRAGON_SCALES) ||
-				(typ == IRON_BANDS)
+				(typ == BANDS)
 				) {
 				Strcat(buf, "set of ");
 			}
@@ -2349,14 +2349,15 @@ weapon:
 
 				if ((bimanual(obj, obj->where == OBJ_MINVENT ? obj->ocarry->data : youracedata)
 				 && !(obj->where != OBJ_MINVENT && u.twoweap && (obj->oartifact == ART_PROFANED_GREATSCYTHE || obj->oartifact == ART_LIFEHUNT_SCYTHE)))
-					|| (u.twoweap && obj->otyp == STILETTOS))
+					|| (u.twoweap && (obj->otyp == STILETTOS || obj->otyp == WIND_AND_FIRE_WHEELS))
+				)
 					hand_s = makeplural(hand_s);
 				Sprintf(eos(buf), " (weapon in %s)", hand_s);
 			}
 		}
 		if (obj->owornmask & W_SWAPWEP) {
 			const char *hand_s = obj->where == OBJ_MINVENT ? mbodypart(obj->ocarry, HAND) : body_part(HAND);
-			if (mcarried(obj) || (u.twoweap && !(uwep && uwep->otyp == STILETTOS)))	// Monsters twoweaponing stilettos would give a bad message, but they can't even wield stilettos right now...
+			if (mcarried(obj) || (u.twoweap && !(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS))))	// Monsters twoweaponing stilettos would give a bad message, but they can't even wield stilettos right now...
 				Sprintf(eos(buf), " (wielded in other %s)",
 				hand_s);
 			else
@@ -3468,6 +3469,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-6, "Thorns") || /* artifact */
 			   !BSTRCMPI(bp, p-9, "Soul Lens") || /* artifact */
 			   !BSTRCMPI(bp, p-19, "Seal of the Spirits") || /* artifact */
+			   !BSTRCMPI(bp, p-20, "wind and fire wheels") || /* boots. Yeah. */
 			   !BSTRCMPI(bp, p-10, "eucalyptus") ||
 #ifdef WIZARD
 			   !BSTRCMPI(bp, p-9, "iron bars") ||
@@ -4160,7 +4162,7 @@ int wishflags;
 		} else if (!strncmpi(bp, "iron ", l=5) && strncmpi(bp, "iron skull cap", 14)
 			&& strncmpi(bp, "iron shoes", 10) && strncmpi(bp, "iron golem", 10)
 			&& strncmpi(bp, "iron ring", 9) && strncmpi(bp, "iron hook", 9) && strncmpi(bp, "iron wand", 9)
-			&& strncmpi(bp, "iron wand", 9) && strncmpi(bp, "iron bands", 10)
+			&& strncmpi(bp, "iron wand", 9)
 			&& strncmpi(bp, "Iron Ball of Levitation", 23) && strncmpi(bp, "Iron Spoon of Liberation", 24)
 			) {
 			mat = IRON;

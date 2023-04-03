@@ -1312,6 +1312,24 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			*thrownobj_p = NULL;
 			result |= MM_HIT;
 		}
+		else if(!(youdef ? u.uentangled_oid : mdef->entangled_oid) && (thrownobj->otyp == ROPE_OF_ENTANGLING || thrownobj->otyp == BANDS || thrownobj->otyp == RAZOR_WIRE)){
+			if(youdef){
+				u.uentangled_oid = thrownobj->o_id;
+				u.uentangled_otyp = thrownobj->otyp;
+			}
+			else {
+				mdef->entangled_otyp = thrownobj->otyp;
+				mdef->entangled_oid = thrownobj->o_id;
+				mdef->movement = 0;
+			}
+
+			if(youdef)
+				pickup_object(thrownobj, 1, TRUE);
+			else
+				mpickobj(mdef, thrownobj);
+			*thrownobj_p = NULL;
+			result |= MM_HIT;
+		}
 		/* general case */
 		else {
 			/* projectiles other than magic stones

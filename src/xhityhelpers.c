@@ -1474,7 +1474,7 @@ struct obj * otmp;
 		else if (otmp->otyp == KHAKKHARA)
 			ndice = khakharadice;
 		/* gold has a particular affinity to blessings and curses */
-		if (otmp->obj_material == GOLD &&
+		if ((otmp->obj_material == GOLD || otmp->oartifact == ART_RUYI_JINGU_BANG) &&
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			diesize = 20;
 		}

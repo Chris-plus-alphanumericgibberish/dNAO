@@ -2238,7 +2238,7 @@ struct obj	*sobj;
 		}
 	    break;
 	case SCR_ENCHANT_WEAPON:
-		if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep))
+		if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS)
 			&& confused && uwep->oartifact != ART_ROD_OF_SEVEN_PARTS) {
 		/* read text for the rod of seven parts may lead players to think they need to errode-proof it.
 			Since this is a logical deduction, it is not penalized. CM */

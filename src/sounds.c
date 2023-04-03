@@ -747,7 +747,7 @@ boolean chatting;
 					Monnam(mtmp), (is_animal(mtmp->data) || mindless_mon(mtmp) ? "its" : hisherits(mtmp))
 				);
 		}
-		else if(mtmp->entangled == SHACKLES){
+		else if(mtmp->entangled_otyp == SHACKLES){
 			if(chatting && canspotmon(mtmp))
 				pline("%s is unconscious.",  Monnam(mtmp));
 		}
@@ -3162,7 +3162,7 @@ int dz;
 					Monnam(mtmp), (is_animal(mtmp->data) || mindless_mon(mtmp) ? "its" : hisherits(mtmp))
 				);
 		}
-		else if(mtmp->entangled == SHACKLES){
+		else if(mtmp->entangled_otyp == SHACKLES){
 			if(canspotmon(mtmp))
 				pline("%s is unconscious.",  Monnam(mtmp));
 		}

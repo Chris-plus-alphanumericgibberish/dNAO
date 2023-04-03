@@ -411,6 +411,8 @@ extern struct artifact * artilist;
 #define IBITE_ARM		(LAST_PROP+87)
 #define LOOT_SELF		(LAST_PROP+88)
 #define IMPERIAL_RING	(LAST_PROP+89)
+#define SNARE_WEAPONS	(LAST_PROP+90)
+#define CHANGE_SIZE		(LAST_PROP+91)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
@@ -612,6 +614,7 @@ extern struct artifact * artilist;
                 ((m) == ART_FIRE_BRAND && (u.brand_otyp == STRANGE_OBJECT || u.brand_otyp == GAUNTLETS)) ||\
                 ((m) == ART_FROST_BRAND && (u.brand_otyp == STRANGE_OBJECT || u.brand_otyp == GAUNTLETS)) ||\
                 (m) == ART_STORMHELM ||\
+                (m) == ART_WRAPPINGS_OF_THE_SACRED_FI ||\
                 (m) == ART_APOTHEOSIS_VEIL ||\
                 (m) == ART_HELM_OF_UNDEATH ||\
                 (m) == ART_HELPING_HAND ||\

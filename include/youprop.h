@@ -649,6 +649,6 @@
 
 #define BConfStun	(EBConfStun || HBConfStun)
 
-#define Straitjacketed	(uarm && uarm->otyp == STRAITJACKET && uarm->cursed)
+#define Straitjacketed	(u.uentangled_oid || (uarm && uarm->otyp == STRAITJACKET && uarm->cursed))
 
 #endif /* YOUPROP_H */

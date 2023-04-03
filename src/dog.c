@@ -618,7 +618,7 @@ long nmv;		/* number of moves */
 
 	if(noactions(mtmp)){
 		int i;
-		for(i = imv; i > 0 && mtmp->entangled; i--){
+		for(i = imv; i > 0 && mtmp->entangled_oid; i--){
 			mbreak_entanglement(mtmp);
 			mescape_entanglement(mtmp);
 		}

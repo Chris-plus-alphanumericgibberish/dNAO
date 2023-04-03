@@ -560,6 +560,10 @@ void
 freeinv_core(obj)
 struct obj *obj;
 {
+	if(u.uentangled_oid == obj->o_id){
+		u.uentangled_oid = 0;
+		u.uentangled_otyp = 0;
+	}
 	if (obj->oclass == COIN_CLASS) {
 #ifndef GOLDOBJ
 		u.ugold -= obj->quan;
@@ -631,6 +635,10 @@ void
 m_freeinv(obj)
 struct obj* obj;
 {
+	if(obj->ocarry->entangled_oid == obj->o_id){
+		obj->ocarry->entangled_oid = 0;
+		obj->ocarry->entangled_otyp = 0;
+	}
 	extract_nobj(obj, &obj->ocarry->minvent);
 	update_mon_intrinsics(obj->ocarry, obj, FALSE, FALSE);
 	return;
@@ -1156,7 +1164,7 @@ register const char *let,*word;
 		|| (usegold && otmp->invlet == GOLD_SYM)
 #endif
 		|| (useboulder && is_boulder(otmp))
-		|| (usethrowing && (otmp->otyp == ROPE_OF_ENTANGLING || otmp->otyp == IRON_BANDS || otmp->otyp == RAZOR_WIRE))
+		|| (usethrowing && (otmp->otyp == ROPE_OF_ENTANGLING || otmp->otyp == BANDS || otmp->otyp == RAZOR_WIRE))
 		|| (usemirror && otmp->otyp == MIRROR)
 		) {
 		register int otyp = otmp->otyp;
@@ -3843,6 +3851,7 @@ winid *datawin;
 		oartifact == ART_STAFF_OF_NECROMANCY ||
 		oartifact == ART_TREASURY_OF_PROTEUS ||
 		oartifact == ART_TENTACLE_ROD ||
+		oartifact == ART_WRAPPINGS_OF_THE_SACRED_FI ||
 		oartifact == ART_MAGICBANE)			OBJPUTSTR("Protects your inventory from being cursed.");
 
 	/* Effects based on the base description of the item -- only one will apply, so an if-else chain is appropriate */
@@ -5772,7 +5781,7 @@ int material;
 	if(curarm && curarm->obj_material == material && !hasshirt && !marm_blocks_ub)
 		count++;
 
-	if(mon->entangled && !hasshirt && !marm_blocks_ub && !which_armor(mon, W_ARMC) && entangle_material(mon, material))
+	if(mon->entangled_oid && !hasshirt && !marm_blocks_ub && !which_armor(mon, W_ARMC) && entangle_material(mon, material))
 		count++;
 
 	curarm = which_armor(mon, W_TOOL);
@@ -5835,7 +5844,7 @@ int bcu;
 	if(curarm && bcu(curarm) == bcu && !hasshirt && !marm_blocks_ub)
 		count++;
 
-	if(mon->entangled && !hasshirt && !marm_blocks_ub && !which_armor(mon, W_ARMC) && entangle_beatitude(mon, bcu))
+	if(mon->entangled_oid && !hasshirt && !marm_blocks_ub && !which_armor(mon, W_ARMC) && entangle_beatitude(mon, bcu))
 		count++;
 
 	curarm = which_armor(mon, W_TOOL);
@@ -5876,7 +5885,7 @@ int material;
 		count++;
 	if(uamul && uamul->obj_material == material && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)))
 		count++;
-	if(u.uentangled && !uarmu && !uarm && !(uarm && arm_blocks_upper_body(uarm->otyp)) && entangle_material(&youmonst, material))
+	if(u.uentangled_oid && !uarmu && !uarm && !(uarm && arm_blocks_upper_body(uarm->otyp)) && entangle_material(&youmonst, material))
 		count++;
 	if(ublindf && ublindf->obj_material == material)
 		count++;
@@ -5917,7 +5926,7 @@ int bcu;
 		count++;
 	if(uamul && bcu(uamul) == bcu && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)))
 		count++;
-	if(u.uentangled && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc && entangle_beatitude(&youmonst, bcu))
+	if(u.uentangled_oid && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc && entangle_beatitude(&youmonst, bcu))
 		count++;
 	if(ublindf && bcu(ublindf) == bcu)
 		count++;

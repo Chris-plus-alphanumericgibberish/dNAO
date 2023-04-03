@@ -1674,7 +1674,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		/* this compensates for some player-role-monsters having AT_WEAP+AT_XWEP and some not. */
 		/* if the player IS polymorphed, they are limited to their polyform's attacks */
 		/* some things give the player additional weapon attacks; they can reset SUBOUT_XWEP to allow another offhand hit if unpoly'd */
-		if (!by_the_book && *indexnum > 0 && u.twoweap) {
+		/* stilettos and wind and fire wheels add extra damage instead */
+		if (!by_the_book && *indexnum > 0 && u.twoweap
+			&& !(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS))
+		) {
 			/* follow a weapon attack with an offhand attack */
 			if (prev_attack.aatyp == AT_WEAP && attk->aatyp != AT_XWEP
 				&& !((*subout) & SUBOUT_XWEP)
@@ -3737,6 +3740,8 @@ int *shield_margin;
 				wtype = P_MACE;
 			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
 				wtype = P_MACE;
+			else if (weapon && weapon->otyp == WIND_AND_FIRE_WHEELS)
+				wtype = P_BOOMERANG;
 			else
 				wtype = weapon_type(weapon);
 
@@ -3996,6 +4001,8 @@ boolean ranged;
 			weapon->ostriking = 0;
 			int attempts = rn2(multistriking(weapon) + 1) + multi_ended(weapon);	/* ex: multistriking == 2 for 1-3 hits.*/
 			int subroll;
+			if(u.twoweap && (weapon->otyp == STILETTOS || weapon->otyp == WIND_AND_FIRE_WHEELS))
+				attempts++;
 			for (; attempts && weapon->ostriking < 7; attempts--) {
 				if (accuracy > (subroll = rnd(20)) || subroll == 1)
 					weapon->ostriking++;
@@ -10412,7 +10419,9 @@ boolean verbose;
 		if (uamul && (uamul->otyp == AMULET_VERSUS_CURSES)) {
 			if(verbose) You(mal_aura, "your amulet");
 			return TRUE;
-		} else if (uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING || uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)) {
+		} else if ((uarmc && (uarmc->otyp == PRAYER_WARDED_WRAPPING || uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_))
+				|| (uarmg && (uarmg->oartifact == ART_WRAPPINGS_OF_THE_SACRED_FI))
+		) {
 			if(verbose) You(mal_aura, "your wrappings");
 			return TRUE;
 		} else if (uwep && (uwep->oartifact == ART_MAGICBANE)) {
@@ -14260,6 +14269,12 @@ int vis;						/* True if action is at all visible to the player */
 					basedmg += rnd(bigmonst(pd) ? 2 : 6) + weapon->spe;
 				break;
 
+			case WIND_AND_FIRE_WHEELS:
+				basedmg = rnd(bigmonst(pd) ? 9 : 14) + weapon->spe + (youagr ? dbon(weapon) : 0);
+				if (youagr && u.twoweap)
+					basedmg += rnd(bigmonst(pd) ? 9 : 14) + weapon->spe;
+				break;
+
 			default:
 				basedmg = weapon->owt / 100;
 				if (basedmg < 1) basedmg = 1;
@@ -14387,10 +14402,14 @@ int vis;						/* True if action is at all visible to the player */
 		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 		if (otmp) {
 			basedmg += otmp->spe;
-			if (otmp->otyp == KICKING_BOOTS || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING)))
+			if (otmp->otyp == KICKING_BOOTS || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING))){
 				basedmg += rnd(6) + rnd(5) + (bigmonst(pd) ? 0 : 1);
+			}
 			if (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS){
 				basedmg += rnd(bigmonst(pd) ? 2 : 6);
+			}
+			if (otmp->otyp == WIND_AND_FIRE_WHEELS){
+				basedmg += rnd(bigmonst(pd) ? 9 : 14);
 			}
 
 			basedmg = max(basedmg, 1);
@@ -14830,18 +14849,11 @@ int vis;						/* True if action is at all visible to the player */
 		}
 		else if (unarmed_punch) {
 			//Can always whack someone
-			attackmask |= WHACK;
-
+			attackmask = WHACK;
 			/* gloves */
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
-
-			if (otmp && (otmp->oartifact == ART_GREAT_CLAWS_OF_URDLEN || otmp->oartifact == ART_SHIELD_OF_THE_RESOLUTE_HEA || otmp->oartifact == ART_PREMIUM_HEART || check_oprop(otmp, OPROP_SPIKED))){
-				//Digging claws, or heart-shaped bit
-				attackmask |= PIERCE;
-			}
-			if (otmp && (otmp->oartifact == ART_GREAT_CLAWS_OF_URDLEN || otmp->oartifact == ART_CLAWS_OF_THE_REVENANCER || check_oprop(otmp, OPROP_BLADED))){
-				attackmask |= SLASH;
-			}
+			if(otmp)
+				attackmask = attack_mask(otmp, 0, 0);
 
 			if (/* claw attacks are slashing (even while wearing gloves?) */
 				(attk && attk->aatyp == AT_CLAW) ||
@@ -14862,14 +14874,12 @@ int vis;						/* True if action is at all visible to the player */
 			}
 		}
 		else if (unarmed_kick) {
+			//Can always whack someone
+			attackmask = WHACK;
+
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
-			attackmask |= WHACK;
-			if(otmp && check_oprop(otmp, OPROP_BLADED)){
-				attackmask |= SLASH;
-			}
-			if(otmp && check_oprop(otmp, OPROP_SPIKED)){
-				attackmask |= PIERCE;
-			}
+			if(otmp)
+				attackmask = attack_mask(otmp, 0, 0);
 		}
 		else {
 			/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */
@@ -14890,7 +14900,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
-			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING))))) || 
+			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == WIND_AND_FIRE_WHEELS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING))))) || 
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp)) ||
 			(otmp && (valid_weapon_attack || invalid_weapon_attack) && check_oprop(otmp, OPROP_FLAYW))
 			)
@@ -17844,6 +17854,8 @@ monk_aura_bolt()
 	struct zapdata zapdat = { 0 };
 	basiczap(&zapdat, u.ualign.record < -3 ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
 	zapdat.damd = 4;
+	if(uarmg && uarmg->oartifact == ART_WRAPPINGS_OF_THE_SACRED_FI)
+		zapdat.damd *= 2;
 	zapdat.affects_floor = FALSE;
 	zapdat.phase_armor = TRUE;
 	//Currently these cook off without the player's explicit say-so

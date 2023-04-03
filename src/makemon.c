@@ -2473,8 +2473,11 @@ boolean goodequip;
 				bless(otmp);
 			}
 		} else if(mm == PM_ELVENQUEEN && In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && urole.neminum == PM_NECROMANCER && in_mklev){
-			(void)mongets(mtmp, SHACKLES, mkobjflags);
-			mtmp->entangled = SHACKLES;
+			otmp = mongets(mtmp, SHACKLES, mkobjflags);
+			if(otmp){
+				mtmp->entangled_otyp = SHACKLES;
+				mtmp->entangled_oid = otmp->o_id;
+			}
 		} else if(mm == PM_STAR_ELF){
 			int armors[] = {IMPERIAL_ELVEN_BOOTS, IMPERIAL_ELVEN_GAUNTLETS, IMPERIAL_ELVEN_ARMOR, IMPERIAL_ELVEN_HELM};
 			long upgrades[] = {IEA_NOUPGRADES, //boots
@@ -2550,8 +2553,11 @@ boolean goodequip;
 			&& !In_mordor_fields(&u.uz)
 			&& in_mklev
 		){
-			(void)mongets(mtmp, SHACKLES, mkobjflags);
-			mtmp->entangled = SHACKLES;
+			otmp = mongets(mtmp, SHACKLES, mkobjflags);
+			if(otmp){
+				mtmp->entangled_otyp = SHACKLES;
+				mtmp->entangled_oid = otmp->o_id;
+			}
 			return;
 		} else {
 			if(Infuture){
@@ -4828,8 +4834,11 @@ int mmflags;
 				&& !In_mordor_fields(&u.uz)
 				&& in_mklev
 			){
-				(void)mongets(mtmp, SHACKLES, mkobjflags);
-				mtmp->entangled = SHACKLES;
+				otmp = mongets(mtmp, SHACKLES, mkobjflags);
+				if(otmp){
+					mtmp->entangled_otyp = SHACKLES;
+					mtmp->entangled_oid = otmp->o_id;
+				}
 				return;
 			}
 /*			if(ptr->mtyp == PM_DESTROYER){
@@ -6256,8 +6265,11 @@ int mmflags;
 				&& !In_mordor_fields(&u.uz)
 				&& in_mklev
 			){
-				(void)mongets(mtmp, SHACKLES, mkobjflags);
-				mtmp->entangled = SHACKLES;
+				otmp = mongets(mtmp, SHACKLES, mkobjflags);
+				if(otmp){
+					mtmp->entangled_otyp = SHACKLES;
+					mtmp->entangled_oid = otmp->o_id;
+				}
 				return;
 			}
 		    switch (rn2(3)) {
@@ -7075,16 +7087,22 @@ int mmflags;
 			(void)mongets(mtmp, rn2(3) ? POT_CONFUSION : rn2(2) ? POT_PARALYSIS : POT_HEALING, mkobjflags);
 		} else if (is_dwarf(ptr)) { //slightly rearanged code so more dwarves get helms -D_E
 			if(mm == PM_DWARF_KING && In_quest(&u.uz) && u.uz.dlevel == nemesis_level.dlevel && urole.neminum == PM_NECROMANCER && in_mklev){
-				(void)mongets(mtmp, SHACKLES, mkobjflags);
-				mtmp->entangled = SHACKLES;
+				otmp = mongets(mtmp, SHACKLES, mkobjflags);
+				if(otmp){
+					mtmp->entangled_otyp = SHACKLES;
+					mtmp->entangled_oid = otmp->o_id;
+				}
 			} else if(In_mordor_quest(&u.uz)
 				&& !In_mordor_forest(&u.uz)
 				&& !Is_ford_level(&u.uz)
 				&& !In_mordor_fields(&u.uz)
 				&& in_mklev
 			){
-				(void)mongets(mtmp, SHACKLES, mkobjflags);
-				mtmp->entangled = SHACKLES;
+				otmp = mongets(mtmp, SHACKLES, mkobjflags);
+				if(otmp){
+					mtmp->entangled_otyp = SHACKLES;
+					mtmp->entangled_oid = otmp->o_id;
+				}
 				return;
 			}
 			if(Infuture){
@@ -9617,8 +9635,11 @@ int mmflags;
 					&& !In_mordor_fields(&u.uz)
 					&& in_mklev
 				){
-					(void)mongets(mtmp, SHACKLES, mkobjflags);
-					mtmp->entangled = SHACKLES;
+					otmp = mongets(mtmp, SHACKLES, mkobjflags);
+					if(otmp){
+						mtmp->entangled_otyp = SHACKLES;
+						mtmp->entangled_oid = otmp->o_id;
+					}
 					mtmp->m_lev = 14;
 					mtmp->mhpmax = 7*8 + d(7,8);
 					mtmp->mhp = mtmp->mhpmax;
@@ -9635,14 +9656,16 @@ int mmflags;
 					set_material_gm(otmp, IRON);
 					(void) mpickobj(mtmp, otmp);
 					mongets(mtmp, LONG_SWORD, mkobjflags);
-					// mongets(mtmp, IRON_BANDS, mkobjflags);
+					if(Inhell || goodequip || !rn2(9))
+						mongets(mtmp, BANDS, mkobjflags);
 				} else if(chance >= 6){
 					mongets(mtmp, HELMET, mkobjflags);
 					mongets(mtmp, CHAIN_MAIL, mkobjflags);
 					mongets(mtmp, GLOVES, mkobjflags);
 					mongets(mtmp, HIGH_BOOTS, mkobjflags);
 					mongets(mtmp, TWO_HANDED_SWORD, mkobjflags);
-					// mongets(mtmp, ROPE_OF_ENTANGLING, mkobjflags);
+					if(Inhell || goodequip || !rn2(9))
+						mongets(mtmp, ROPE_OF_ENTANGLING, mkobjflags);
 				} else if(chance >= 3){
 					mongets(mtmp, LEATHER_HELM, mkobjflags);
 					mongets(mtmp, LEATHER_ARMOR, mkobjflags);
@@ -9652,7 +9675,8 @@ int mmflags;
 					mongets(mtmp, STILETTO, mkobjflags);
 					mongets(mtmp, BOW, mkobjflags);
 					m_initthrow(mtmp, ARROW, 20, mkobjflags);
-					// mongets(mtmp, ROPE_OF_ENTANGLING, mkobjflags);
+					if(Inhell || goodequip || !rn2(9))
+						mongets(mtmp, ROPE_OF_ENTANGLING, mkobjflags);
 				} else {
 					mongets(mtmp, find_gcirclet(), mkobjflags);
 					mongets(mtmp, GENTLEWOMAN_S_DRESS, mkobjflags);
@@ -9663,7 +9687,8 @@ int mmflags;
 					(void) mpickobj(mtmp, otmp);
 					mongets(mtmp, CRYSTAL_GAUNTLETS, mkobjflags);
 					mongets(mtmp, STILETTO, mkobjflags);
-					// mongets(mtmp, RAZOR_WIRE, mkobjflags);
+					if(Inhell || goodequip || !rn2(9))
+						mongets(mtmp, RAZOR_WIRE, mkobjflags);
 				}
 			}break;
 		    case PM_BARBED_DEVIL:
@@ -11361,8 +11386,11 @@ boolean goodequip;
 					&& !In_mordor_fields(&u.uz)
 					&& in_mklev
 				){
-					(void)mongets(mtmp, SHACKLES, mkobjflags);
-					mtmp->entangled = SHACKLES;
+					otmp = mongets(mtmp, SHACKLES, mkobjflags);
+					if(otmp){
+						mtmp->entangled_otyp = SHACKLES;
+						mtmp->entangled_oid = otmp->o_id;
+					}
 					return;
 				} //else
 				otmp = mongets(mtmp, rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
