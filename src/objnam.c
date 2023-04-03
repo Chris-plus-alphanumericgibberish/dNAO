@@ -4819,6 +4819,7 @@ int wishflags;
 	   strncmpi(bp, "glamdring", 9) && 
 	   strncmpi(bp, "plasteel armor", 14) &&
 	   strncmpi(bp, "eilistran armor", 15) &&
+	   strncmpi(bp, "imperial elven armor", 20) &&
 	   strncmpi(bp, "armor of erebor", 15) && 
 	   strncmpi(bp, "armor of khazad-dum", 19) && 
 	   strncmpi(bp, "black dress", 11) && 
