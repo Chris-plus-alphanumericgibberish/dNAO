@@ -1575,7 +1575,7 @@ int submat;
 	/* should never happen */
 	if (!otmp)
 	{
-		impossible("object_color called with no object");
+		impossible("set_submat called with no object");
 		return;
 	}
 	otmp->sub_material = submat;
