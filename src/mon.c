@@ -6597,10 +6597,10 @@ register struct monst *mtmp;
 {
 	struct attack gaze_mem;
 	struct attack *gaze = mon_get_attacktype(mtmp, AT_WDGZ, &gaze_mem);
-	 if(gaze) {
-		if (Gaze_immune)
+	if(gaze) {
+		if (!Gaze_immune)
 			(void) xgazey(mtmp, &youmonst, gaze, -1);
-	 }
+	}
 }
 
 #endif /* OVLB */
