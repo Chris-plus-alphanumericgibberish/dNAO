@@ -5126,7 +5126,7 @@ struct monst *mon;
 			mon->mux = u.uz.dnum;
 		return;
 	}
-	pline("ping");
+
 	/* Follows between levels */
 	if(mon->muy != u.uz.dlevel){
 		if(!rn2(55)){
