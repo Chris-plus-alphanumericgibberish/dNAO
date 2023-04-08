@@ -16,6 +16,8 @@ STATIC_DCL int FDECL(disturb,(struct monst *));
 STATIC_DCL void FDECL(distfleeck,(struct monst *,int *,int *,int *));
 STATIC_DCL int FDECL(m_arrival, (struct monst *));
 STATIC_DCL void FDECL(watch_on_duty,(struct monst *));
+void FDECL(ford_rises,(struct monst *));
+boolean FDECL(check_shore,(int, int));
 
 #endif /* OVL0 */
 #ifdef OVLB
@@ -995,11 +997,8 @@ register struct monst *mtmp;
 		}
 	}
 	if(mdat->mtyp == PM_FORD_GUARDIAN){
-		if(!rn2(8) && distmin(mtmp->mux, mtmp->muy, mtmp->mx, mtmp->my) < 4 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 4 && !(mtmp->mstrategy&STRAT_WAITFORU)){
-			int i = rnd(4);
-			pline("The waters of the ford rise to the aid of the guardian!");
-			for(; i > 0; i--)
-				makemon(&mons[PM_FORD_ELEMENTAL], mtmp->mx, mtmp->my, NO_MINVENT|MM_ADJACENTOK);
+		if(!rn2(2) && distmin(mtmp->mux, mtmp->muy, mtmp->mx, mtmp->my) < 4 && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 4 && !(mtmp->mstrategy&STRAT_WAITFORU)){
+			ford_rises(mtmp);
 		}
 	}
 	if(mdat->mtyp == PM_LEGION){
@@ -2155,6 +2154,101 @@ register struct monst *mtmp;
 	    cuss(mtmp);
 
 	return(tmp == 2);
+}
+
+boolean
+check_shore(x,y)
+int x;
+int y;
+{
+	int i;
+	for(i = 1; i < 2; i++){
+		if(isok(x+i,y+i) && !is_pool(x+i,y+i,FALSE) && ZAP_POS(levl[x+i][y+i].typ))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+void
+ford_rises(guardian)
+struct monst *guardian;
+{
+	int elm = rnd(4);
+	int n = 0, i, cn;
+	int lim_x, lim;
+	int high_box_x, high_box_y;
+	int low_box_x, low_box_y;
+	int c, cx, cy;
+
+#define	CHECK_COUNT	if(isok(cx, cy) && is_pool(cx, cy, TRUE)){\
+				if(check_shore(cx, cy))\
+					n++;\
+			}
+
+	for(i = 1; i < 5 || (i < COLNO/2 && n < elm); i++){
+		high_box_x = guardian->mx + i;
+		high_box_y = guardian->my + i;
+		low_box_x = guardian->mx - i;
+		low_box_y = guardian->my - i;
+		for(c = -i; c <= i; c++){
+			cx = low_box_x;
+			cy = guardian->my+c;
+			CHECK_COUNT
+
+			cx = high_box_x;
+			cy = guardian->my+c;
+			CHECK_COUNT
+
+			cx = guardian->mx+c;
+			cy = low_box_y;
+			CHECK_COUNT
+
+			cx = guardian->mx+c;
+			cy = high_box_y;
+			CHECK_COUNT
+		}
+	}
+	if(!n)
+		return;
+
+#define	CHECK_SPAWN	if(isok(cx, cy) && is_pool(cx, cy, TRUE)){\
+				if(check_shore(cx, cy)){\
+					if(!cn){\
+						makemon(&mons[PM_FORD_ELEMENTAL], cx, cy, NO_MINVENT|MM_ADJACENTOK);\
+						i = COLNO;/*break out of outer loop*/\
+						break;\
+					}\
+					else cn--;\
+				}\
+			}
+
+	pline("The waters of the ford rise to the aid of the guardian!");
+	for(; elm > 0; elm--){
+		cn = rn2(n);
+		for(i = 1; i < COLNO/2; i++){
+			high_box_x = guardian->mx + i;
+			high_box_y = guardian->my + i;
+			low_box_x = guardian->mx - i;
+			low_box_y = guardian->my - i;
+			for(c = -i; c <= i; c++){
+				cx = low_box_x;
+				cy = guardian->my+c;
+				CHECK_SPAWN
+
+				cx = high_box_x;
+				cy = guardian->my+c;
+				CHECK_SPAWN
+
+				cx = guardian->mx+c;
+				cy = low_box_y;
+				CHECK_SPAWN
+
+				cx = guardian->mx+c;
+				cy = high_box_y;
+				CHECK_SPAWN
+			}
+		}
+	}
 }
 
 static NEARDATA const char practical[] = { WEAPON_CLASS, ARMOR_CLASS, GEM_CLASS, FOOD_CLASS, 0 };
