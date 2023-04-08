@@ -1042,6 +1042,8 @@ boolean goodequip;
 		set_material_gm(otmp, IRON);
 		add_oprop(otmp, OPROP_UNHY);
 		add_oprop(otmp, OPROP_UNHYW);
+		add_oprop(otmp, OPROP_HOLY);
+		add_oprop(otmp, OPROP_HOLYW);
 		curse(otmp);
 		otmp->spe = 4;
 		(void) mpickobj(mtmp, otmp);
@@ -1053,6 +1055,8 @@ boolean goodequip;
 		set_material_gm(otmp, IRON);
 		add_oprop(otmp, OPROP_UNHY);
 		add_oprop(otmp, OPROP_UNHYW);
+		add_oprop(otmp, OPROP_HOLY);
+		add_oprop(otmp, OPROP_HOLYW);
 		curse(otmp);
 		otmp->spe = 4;
 		(void) mpickobj(mtmp, otmp);
@@ -3639,6 +3643,7 @@ boolean goodequip;
 				set_material_gm(otmp, IRON);
 				add_oprop(otmp, OPROP_BLADED);
 				add_oprop(otmp, OPROP_UNHYW);
+				add_oprop(otmp, OPROP_HOLYW);
 				(void) mpickobj(mtmp,otmp);
 			}
 			else {
@@ -3647,6 +3652,7 @@ boolean goodequip;
 				set_material_gm(otmp, IRON);
 				add_oprop(otmp, OPROP_SPIKED);
 				add_oprop(otmp, OPROP_LESSER_UNHYW);
+				add_oprop(otmp, OPROP_LESSER_HOLYW);
 				(void) mpickobj(mtmp,otmp);
 			}
 		}
