@@ -1776,7 +1776,7 @@ A("Feng Huo Lun",				WIND_AND_FIRE_WHEELS,				"flaming %s",
 	ATTK(AD_FIRE, 1, 0), NOFLAG,
 	PROPS(FAST, FLYING), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
 A("Jin Gang Zuo",				BANDS,				"hoop",
