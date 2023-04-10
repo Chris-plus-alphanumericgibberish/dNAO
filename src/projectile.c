@@ -2191,6 +2191,10 @@ dofire()
 		/* Throw wielded weapon -- mainhand only */
 		if ((uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep)))) && (
 			(uwep->oartifact == ART_KHAKKHARA_OF_THE_MONKEY) ||
+			(uwep->oartifact == ART_RUYI_JINGU_BANG) ||
+			(uwep->oartifact == ART_SICKLE_OF_THUNDERBLASTS) ||
+			(uwep->oartifact == ART_AMHIMITL) ||
+			(uwep->oartifact == ART_SICKLE_MOON) ||
 			check_oprop(uwep, OPROP_RETRW) ||
 			(uwep->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE) && ACURR(A_STR) == STR19(25)) ||
 			(uwep->oartifact == ART_ANNULUS && (uwep->otyp == CHAKRAM || uwep->otyp == LIGHTSABER)) ||
