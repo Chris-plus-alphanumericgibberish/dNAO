@@ -453,6 +453,17 @@ struct monst *magr;
 			ocn = 1;
 			ocd = (large ? 2 : 4);
 		}
+		else if (otyp == WIND_AND_FIRE_WHEELS)
+		{
+			if(large){
+				ocn = 1;
+				ocd = 9;
+			}
+			else {
+				ocn = 1;
+				ocd = 14;
+			}
+		}
 		else if (otyp == MOON_AXE)
 		{
 			/*

@@ -12975,6 +12975,7 @@ int vis;						/* True if action is at all visible to the player */
 				|| check_oprop(weapon, OPROP_BLADED)
 				|| check_oprop(weapon, OPROP_SPIKED)
 				|| weapon->oartifact == ART_WAND_OF_ORCUS
+				|| weapon->otyp == WIND_AND_FIRE_WHEELS
 			) &&
 			/* being used with an attack action, or no attack action (which implies an oddly-launched object, like a falling boulder or something) */
 			(!attk || weapon_aatyp(attk->aatyp)) &&
@@ -14270,12 +14271,6 @@ int vis;						/* True if action is at all visible to the player */
 				basedmg = rnd(bigmonst(pd) ? 2 : 6) + weapon->spe + (youagr ? dbon(weapon) : 0);
 				if (youagr && u.twoweap)
 					basedmg += rnd(bigmonst(pd) ? 2 : 6) + weapon->spe;
-				break;
-
-			case WIND_AND_FIRE_WHEELS:
-				basedmg = rnd(bigmonst(pd) ? 9 : 14) + weapon->spe + (youagr ? dbon(weapon) : 0);
-				if (youagr && u.twoweap)
-					basedmg += rnd(bigmonst(pd) ? 9 : 14) + weapon->spe;
 				break;
 
 			default:
