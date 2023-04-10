@@ -976,7 +976,7 @@ SHIELD(("stone dragon shield"),
 GLOVES(("crystal gauntlets", "gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 2, 20, 400, 8, 4, 0, GLASS, HI_GLASS, O_MATSPEC(UNIDED)),
 GLOVES(("gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		1, 0,  4, 2, 25, 10, 8, 4, 0, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
+		1, 0,  4, 2, 25, 10, 8, 4, 1, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
 GLOVES(("archaic gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		1, 0,  0, 2, 25, 10, 8, 3, 0, COPPER, HI_COPPER),
 GLOVES(("long gloves"),
@@ -988,7 +988,7 @@ GLOVES(("harmonium gauntlets", "red-lacquered hooked gauntlets", "hooked gauntle
 GLOVES(("high-elven gauntlets", "runed gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 2, 15, 50, 8, 4, 0, MITHRIL, HI_MITHRIL),
 GLOVES(("imperial elven gauntlets", "runed gauntlets"), /*Needs encyc entry*//*Needs tile*/
-		0, 0,  0, 2, 15,900, 8, 4, 2, WOOD, CLR_BRIGHT_GREEN),
+		0, 0,  0, 2, 15,900, 8, 4, 1, WOOD, CLR_BRIGHT_GREEN),
 GLOVES(("plasteel gauntlets", "hard white gauntlets", "gauntlets"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 2, 15, 50,  8, 3, 0, PLASTIC, CLR_WHITE),
 GLOVES(("gloves", "old gloves"),
@@ -1024,7 +1024,7 @@ BOOTS(("high boots", "jackboots"),
 BOOTS(("heeled boots", "tall boots"),
 		1, 0,   0, 2, 20, 12, 10, 2, 0, LEATHER, CLR_BLACK),
 BOOTS(("imperial elven boots", "runed armored boots"),
-		0, 0,   0, 2, 25,900,  8, 3, 0, WOOD, CLR_BRIGHT_GREEN, O_POWER(STEALTH)),
+		0, 0,   0, 2, 25,900,  8, 3, 1, WOOD, CLR_BRIGHT_GREEN, O_POWER(STEALTH)),
 BOOTS(("wind and fire wheels", "bladed disks"),
 		0, 0,   0, 2, 25,900, 10, 0, 0, IRON, HI_METAL),
 BOOTS(("crystal boots", "boots"), /*Needs encyc entry*//*Needs tile*/
