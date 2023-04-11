@@ -2682,7 +2682,7 @@ winid *datawin;
 	/* Object classes currently with no special messages here: amulets. */
 	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill) || otyp == HEAVY_IRON_BALL || olet == GEM_CLASS || oartifact == ART_WAND_OF_ORCUS) {
 		int mask = attack_mask(obj, otyp, oartifact);
-		boolean otyp_is_blaster = (otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
+		boolean otyp_is_blaster = (otyp == CARCOSAN_STING || otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
 		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) && !otyp_is_blaster);
 
 		/* print type */
@@ -2730,7 +2730,7 @@ winid *datawin;
 			/* special cases */
 			if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovar1_seals & SEAL_EVE))
 				Strcpy(eos(buf)-1, ", and launcher.");
-			if (oartifact == ART_LIECLEAVER || oartifact == ART_ROGUE_GEAR_SPIRITS || oartifact == ART_WAND_OF_ORCUS)
+			if (oartifact == ART_LIECLEAVER || oartifact == ART_ROGUE_GEAR_SPIRITS || oartifact == ART_WAND_OF_ORCUS || otyp == CARCOSAN_STING)
 				Sprintf(eos(buf)-1, ", and %smelee weapon.", buf2);
 			OBJPUTSTR(buf);
 			printed_type = TRUE;
@@ -2769,6 +2769,7 @@ winid *datawin;
 		/* Does not apply for launchers. */
 		/* the melee-weapon artifact launchers need obj to exist because dmgval_core needs obj to find artifact. */
 		if ((!otyp_is_launcher && !otyp_is_blaster) || (
+			(otyp == CARCOSAN_STING) ||
 			(obj && oartifact == ART_LIECLEAVER) ||
 			(obj && oartifact == ART_WAND_OF_ORCUS) ||
 			(obj && oartifact == ART_ROGUE_GEAR_SPIRITS)

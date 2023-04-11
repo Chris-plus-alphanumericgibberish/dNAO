@@ -453,6 +453,16 @@ struct monst *magr;
 			ocn = 1;
 			ocd = (large ? 2 : 4);
 		}
+		else if (otyp == CARCOSAN_STING)
+		{
+			ocn = 1;
+			ocd = 3;
+			if(u.uinsight >= 25){
+				bonn = 1;
+				bond = 5;
+				spe_mult += 1;
+			}
+		}
 		else if (otyp == WIND_AND_FIRE_WHEELS)
 		{
 			if(large){
@@ -1481,7 +1491,8 @@ struct obj *otmp;
 		if(wep->otyp == otmp->otyp) return dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp);
 		
 		if(wep->otyp == ARM_BLASTER) return FALSE;
-		if(wep->otyp == HAND_BLASTER) return (otmp->otyp == ARM_BLASTER && otmp->ovar1_charges > 0);
+		if(wep->otyp == CARCOSAN_STING) return (otmp->otyp == ARM_BLASTER && otmp->ovar1_charges > 0);
+		if(wep->otyp == HAND_BLASTER) return ((otmp->otyp == ARM_BLASTER || otmp->otyp == CARCOSAN_STING) && otmp->ovar1_charges > 0);
     }
     
     if (((strongmonst(mtmp->data) && (mtmp->misc_worn_check & W_ARMS) == 0) || !bimanual(otmp,mtmp->data)) && 
@@ -1557,6 +1568,10 @@ register struct monst *mtmp;
 	)){
 		return propellor;
 	} else if(!bigmonst(mtmp->data) && (propellor = m_carrying_charged(mtmp, HAND_BLASTER)) && !(
+		((otmp = MON_WEP(mtmp)) && otmp->cursed && otmp != propellor && mtmp->weapon_check == NO_WEAPON_WANTED)// || (mtmp->combat_mode == HNDHND_MODE)
+	)){
+		return propellor;
+	} else if((propellor = m_carrying_charged(mtmp, CARCOSAN_STING)) && !(
 		((otmp = MON_WEP(mtmp)) && otmp->cursed && otmp != propellor && mtmp->weapon_check == NO_WEAPON_WANTED)// || (mtmp->combat_mode == HNDHND_MODE)
 	)){
 		return propellor;
@@ -2323,6 +2338,7 @@ register struct monst *mon;
 				if (/* fixme: cannot twoweapon 2x arm blasters or 2x hand blasters */
 					((tobj = m_carrying_charged(mon, ARM_BLASTER)) && tobj != MON_WEP(mon)) ||
 					((tobj = m_carrying_charged(mon, HAND_BLASTER)) && tobj != MON_WEP(mon)) ||
+					((tobj = m_carrying_charged(mon, CARCOSAN_STING)) && tobj != MON_WEP(mon)) ||
 					/* bullets */
 					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET)) &&
 						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP))) ||
@@ -3325,6 +3341,9 @@ struct obj *obj;
 	}
 	else if(obj->oartifact == ART_WAND_OF_ORCUS){
 		type = P_MACE;
+	}
+	else if(obj->otyp == CARCOSAN_STING){
+		type = P_DAGGER;
 	}
 	else if(obj->oartifact == ART_MASAMUNE){
 		for(int skl = P_FIRST_WEAPON; skl <= P_LAST_WEAPON; skl++){

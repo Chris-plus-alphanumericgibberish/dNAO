@@ -6587,6 +6587,21 @@ boolean printmessages; /* print generic elemental damage messages */
 		/* cancel_monst handles resistance */
 		cancel_monst(mdef, otmp, youagr, FALSE, FALSE, FALSE);
 	}
+
+	//Also does the bolt (when it hits as a launcher)
+	if(otmp->otyp == CARCOSAN_STING){
+		if(u.uinsight >= 25){
+			struct obj *arm = some_armor(mdef);
+			if(arm){
+				add_byakhee_to_obj(arm);
+			}
+		}
+		if(youdef)
+			make_stunned(HStun + d(1,3), FALSE);
+		else
+			mdef->mconf = TRUE;
+	}
+
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************

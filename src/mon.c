@@ -8077,6 +8077,7 @@ struct obj *obj;
 	int nd;
 	int dd;
 	int damage;
+	boolean vis = mdef != &youmonst && canseemon(mdef);
 	if(obj->owornmask){
 		/*Count raised bits*/
 		if(objects[obj->otyp].oc_class == ARMOR_CLASS)
@@ -8137,7 +8138,17 @@ struct obj *obj;
 
 			mdef->mhp -= damage;
 			if(mdef->mhp < 1){
+				pline("%s is killed by %s %s!", mon_nam(mdef), mhis(mdef), simple_typename(obj->otyp));
 				mondied(mdef);
+			}
+			else {
+				static long mid = 0, move = 0;
+				
+				if(mdef->m_id != mid || move != monstermoves){
+					pline("%s is bitten by %s clothes!", mon_nam(mdef), mhis(mdef));
+					mid = mdef->m_id;
+					move = monstermoves;
+				}
 			}
 		}
 	}
@@ -8168,9 +8179,23 @@ struct obj *obj;
 
 			mdef->mhp -= damage;
 			if(mdef->mhp < 1){
+				pline("%s is killed by %s %s!", mon_nam(mdef), mhis(mdef), simple_typename(obj->otyp));
 				mondied(mdef);
 			}
+			else {
+				pline("%s is stung by %s %s!", mon_nam(mdef), mhis(mdef), simple_typename(obj->otyp));
+			}
 		}
+	}
+}
+
+void
+add_byakhee_to_obj(obj)
+struct obj *obj;
+{
+	if(obj->obyak < 3){
+		if(!obj->olarva && !obj->obyak) start_timer(4+d(2,4), TIMER_OBJECT, LARVAE_DIE, (genericptr_t)obj);
+		obj->obyak++;
 	}
 }
 

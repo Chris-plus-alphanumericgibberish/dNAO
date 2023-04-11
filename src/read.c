@@ -1376,6 +1376,11 @@ int curse_bless;
 				else obj->ovar1_charges = 80L + rn2(20);
 			}
 		break;
+	    case CARCOSAN_STING:
+			if(is_blessed) obj->ovar1_charges = 50L;
+			else if(is_cursed) obj->ovar1_charges = 5L;
+			else obj->ovar1_charges = 20L + d(5,5);
+		break;
 	    case MASS_SHADOW_PISTOL:
 			if(is_blessed) obj->ovar1_charges = 1000L;
 			else if(is_cursed) obj->ovar1_charges = 100L;

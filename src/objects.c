@@ -586,6 +586,7 @@ GUN(("long gun", "unfamiliar long gun"),              0,    MZ_HUGE, 0,  30,  15
 GUN(("heavy gun", "unfamiliar heavy gun"),            0,    MZ_HUGE, 0, 100, 2000, 20,  8, -4, WP_BULLET, IRON, P_FIREARM, HI_METAL, O_NOWISH(1)),/*Needs tile*/
 GUN(("hand blaster", "hard black handmirror", "hard handmirror"), 0,  MZ_MEDIUM, 0,   2, 1000, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK, O_MAGIC(1)), /*Needs tile*/
 GUN(("arm blaster",  "hard white bracer", "hard bracer"),         0,   MZ_LARGE, 0,   8, 4500, 15,  6,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE, O_MAGIC(1)), /*Needs tile*/
+GUN(("carcosan sting", "curved dagger"),              0,   MZ_SMALL, 0,  10, 5000,  8, 1, 0, WP_BLASTER, GOLD, P_FIREARM, HI_GOLD, O_MATSPEC(NIDED)), /*Needs tile*/
  /*Needs encyc entry*/
 GUN(("mass-shadow pistol",  "rectangular device"),                0,  MZ_MEDIUM, 0,   4, 4500, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_GRAY, O_MAGIC(1)), /*Needs tile*/
 GUN(("cutting laser","hard tan lozenge", "hard lozenge"),         0,   MZ_SMALL, 0,   1, 1000,  3, -1,  3,WP_BLASTER, PLASTIC, P_FIREARM, CLR_YELLOW, O_MAGIC(1)), /*Needs tile*/
@@ -619,6 +620,9 @@ BULLET(("blaster bolt", "ruby bolt", "bolt"),
 BULLET(("heavy blaster bolt", "scarlet bolt", "bolt"),
 	DMG(D(3, 10), F(10)), DMG(D(3, 12), F(12)),
 	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E,   METAL, -P_FIREARM, CLR_ORANGE),/*Needs tile*/
+BULLET(("carcosan bolt", "golden bolt", "bolt"),
+	DMG(D(1, 5), F(5)), DMG(D(1, 5), F(5)),
+	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E|P,   METAL, -P_FIREARM, CLR_YELLOW),/*Needs tile*/
 BULLET(("laser beam", "green bolt", "bolt"),
 	DMG(D(3, 1), F(10)), DMG(D(3, 1), F(10)),
 	0,    MZ_TINY, 0,  1,   0, 0, WP_BLASTER,   E|S, METAL, -P_FIREARM, CLR_BRIGHT_GREEN),/*Needs tile*/

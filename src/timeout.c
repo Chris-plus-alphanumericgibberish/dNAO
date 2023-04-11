@@ -2709,8 +2709,18 @@ long timeout;
 		otmp->odead_larva = min(3, otmp->odead_larva + 1);
 	}
 	if(otmp->obyak > 0){
+		xchar x = 0, y = 0;
 		otmp->obyak--;
-		otmp->odead_larva = min(3, otmp->odead_larva + 1);
+		get_obj_location(otmp, &x, &y, INTRAP_TOO);
+		if(x || y){
+			struct monst *mtmp = makemon(&mons[PM_STRANGE_LARVA], x, y, MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+			if(mtmp){
+				mtmp->mvar_tanninType = PM_BYAKHEE;
+			}
+		}
+		else {
+			otmp->odead_larva = min(3, otmp->odead_larva + 1);
+		}
 	}
 	if(otmp->olarva > 0 || otmp->obyak > 0) {
 		start_timer(4+d(2,4), TIMER_OBJECT, LARVAE_DIE, arg);

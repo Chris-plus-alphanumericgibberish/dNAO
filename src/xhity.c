@@ -7115,6 +7115,52 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
+	case AD_BYAK:{
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		
+		struct obj *otmp = some_armor(mdef);
+		if(otmp){
+			add_byakhee_to_obj(otmp);
+		}
+		else {
+			if(youagr ? flags.female : magr->female){
+				otmp = mksobj_at(EGG, x(mdef), y(mdef), MKOBJ_NOINIT);
+				if(otmp){
+					otmp->spe = youagr; //yours?
+					otmp->quan = 1;
+					otmp->owt = weight(otmp);
+					otmp->corpsenm = PM_BYAKHEE;
+					attach_egg_hatch_timeout(otmp);
+				}
+			}
+			else {
+				struct monst *larva = makemon(&mons[PM_STRANGE_LARVA], x(mdef), y(mdef), MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|(youagr ? MM_EDOG : 0));
+				if(larva){
+					larva->mvar_tanninType = PM_BYAKHEE;
+					if(youagr){
+						initedog(larva);
+					}
+					else if(magr->mpeaceful){
+						larva->mpeaceful = TRUE;
+						set_faction(larva, magr->mfaction);
+					}
+					else {
+						larva->mpeaceful = FALSE;
+						set_faction(larva, magr->mfaction);
+					}
+					newsym(larva->mx, larva->my);
+					set_malign(larva);
+				}
+			}
+		}
+
+		/* make physical attack without hitmsg */
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+	}
 	case AD_STDY:
 		/* study before doing the attack */
 		if (notmcan) {

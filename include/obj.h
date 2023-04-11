@@ -580,6 +580,7 @@ struct obj {
 			 is_rakuyo(otmp) ||\
 			 rakuyo_prop(otmp) || \
 			 otmp->otyp == PINCER_STAFF || \
+			 otmp->otyp == CARCOSAN_STING || \
 			 check_oprop(otmp,OPROP_GSSDW) || \
 			 check_oprop(otmp,OPROP_INSTW) || \
 			 check_oprop(otmp,OPROP_ELFLW) || \
