@@ -2956,218 +2956,6 @@ winid *datawin;
 			if (buf[0] != '\0')
 				OBJPUTSTR(buf);
 		}
-		/* object properties (objects only) */
-		if(!check_oprop(obj, OPROP_NONE)){
-			/* holy/unholy bonus damage */
-			buf[0] = '\0';
-			ADDCLASSPROP(check_oprop(obj, OPROP_HOLYW) && obj->blessed, "holy");
-			ADDCLASSPROP(check_oprop(obj, OPROP_UNHYW) && obj->cursed, "unholy");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals double %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_HOLYW) && obj->blessed, "holy");
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_UNHYW) && obj->cursed, "unholy");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 2d6 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			/* simple damage properties */
-			buf[0] = '\0';
-			ADDCLASSPROP(check_oprop(obj, OPROP_FIREW), "fire");
-			ADDCLASSPROP(check_oprop(obj, OPROP_COLDW), "cold");
-			ADDCLASSPROP(check_oprop(obj, OPROP_WATRW), "water");
-			ADDCLASSPROP(check_oprop(obj, OPROP_ELECW), "lightning");
-			ADDCLASSPROP(check_oprop(obj, OPROP_ACIDW) || goatweaponturn == AD_EACD, "acid");
-			ADDCLASSPROP(goatweaponturn == AD_STDY, "study");
-			ADDCLASSPROP(check_oprop(obj, OPROP_MAGCW), "magic");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals double %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			
-			if (goatweaponturn == AD_DRST)
-			{
-				Sprintf(buf2, "Deals double poison damage plus 4d4 physical.");
-				OBJPUTSTR(buf2);
-			}
-			
-			if (check_oprop(obj, OPROP_MORTW))
-			{
-				Sprintf(buf2, "Drains 1d2 levels from living intelligent targets.");
-				OBJPUTSTR(buf2);
-			}
-
-			if (check_oprop(obj, OPROP_TDTHW))
-			{
-				Sprintf(buf2, "Deals double damage plus 2d7 to undead.");
-				OBJPUTSTR(buf2);
-			}
-
-			if (check_oprop(obj, OPROP_SFUWW))
-			{
-				Sprintf(buf2, "Deals double disintegration damage to spiritual beings.");
-				OBJPUTSTR(buf2);
-			}
-
-			ADDCLASSPROP(check_oprop(obj, OPROP_PSIOW), "psionic");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals double-plus-enchantment %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			/* simple lesser damage properties */
-			buf[0] = '\0';
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_FIREW), "fire");
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_COLDW), "cold");
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_WATRW), "water");
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ELECW), "lightning");
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ACIDW), "acid");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 2d6 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			
-			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_FIREW), "fire");
-			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_COLDW), "cold");
-			ADDCLASSPROP(check_oprop(obj, OPROP_OONA_ELECW), "lightning");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 1d8 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			
-			ADDCLASSPROP(goatweaponturn == AD_COLD, "cold");
-			ADDCLASSPROP(goatweaponturn == AD_ELEC, "lightning");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 3d8 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			
-			ADDCLASSPROP(goatweaponturn == AD_FIRE, "fire");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 3d10 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			
-			ADDCLASSPROP(goatweaponturn == AD_ACID, "acid");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 4d4 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_MAGCW), "magic");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 3d4 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_PSIOW), "psionic");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 2d12 bonus %s damage.", buf);
-				OBJPUTSTR(buf2);
-			}
-			/* alignment damage properties */
-			buf[0] = '\0';
-			ADDCLASSPROP(check_oprop(obj, OPROP_ANARW), "lawful and neutral creatures");
-			ADDCLASSPROP(check_oprop(obj, OPROP_CONCW), "lawful and chaotic creatures");
-			ADDCLASSPROP(check_oprop(obj, OPROP_AXIOW), "neutral and chaotic creatures");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals double damage to %s.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ANARW), "lawful and neutral creatures");
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_CONCW), "lawful and chaotic creatures");
-			ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_AXIOW), "neutral and chaotic creatures");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 2d6 bonus damage to %s.", buf);
-				OBJPUTSTR(buf2);
-			}
-			buf[0] = '\0';
-			ADDCLASSPROP((check_oprop(obj, OPROP_OONA_FIREW) || check_oprop(obj, OPROP_OONA_COLDW) || check_oprop(obj, OPROP_OONA_ELECW)), "neutral and chaotic creatures");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Deals 1d8 bonus damage to %s.", buf);
-				OBJPUTSTR(buf2);
-			}
-			if (check_oprop(obj, OPROP_OCLTW))
-			{
-				Sprintf(buf2, "Deals bonus magic damage and extra damage to divine minions.");
-				OBJPUTSTR(buf2);
-			}
-			/* other stuff
-			 */
-			buf[0] = '\0';
-			ADDCLASSPROP((check_oprop(obj, OPROP_DEEPW) && obj->spe < 8), "telepathically lashes out");
-			ADDCLASSPROP((check_oprop(obj, OPROP_VORPW)), "is vorpal");
-			ADDCLASSPROP((check_oprop(obj, OPROP_MORGW)), "inflicts unhealing wounds while cursed");
-			ADDCLASSPROP((check_oprop(obj, OPROP_FLAYW)), "destroys armor");
-			ADDCLASSPROP((check_oprop(obj, OPROP_RETRW)), "returns when thrown");
-			if (buf[0] != '\0')
-			{
-				buf[0] = buf[0] + 'A' - 'a';
-				Sprintf(buf2, "%s.", buf);
-				OBJPUTSTR(buf2);
-			}
-		}
-		/* other artifact weapon effects */
-		if (oartifact) {
-			register const struct artifact *oart = &artilist[oartifact];
-			buf[0] = '\0';
-			//ADDCLASSPROP((oart->aflags&ARTA_DEXPL), "weapon dice explode");
-			ADDCLASSPROP((oart->aflags&ARTA_DLUCK), "luck-biased");
-			ADDCLASSPROP((oart->aflags&ARTA_POIS), "always poisoned");
-			ADDCLASSPROP((oart->aflags&ARTA_SILVER), "silvered");
-			ADDCLASSPROP((oart->aflags&ARTA_VORPAL), "vorpal");
-			ADDCLASSPROP((oart->aflags&ARTA_CANCEL), "canceling");
-			ADDCLASSPROP((oart->aflags&ARTA_MAGIC), "magic-flourishing");
-			ADDCLASSPROP((oart->aflags&ARTA_DRAIN), "draining");
-			//ADDCLASSPROP((oart->aflags&ARTA_BRIGHT), " /* turns gremlins to dust and trolls to stone */");
-			ADDCLASSPROP((oart->aflags&ARTA_BLIND), "blinding");
-			ADDCLASSPROP((oart->aflags&ARTA_SHINING), "armor-phasing");
-			ADDCLASSPROP((oart->aflags&ARTA_SHATTER), "shattering");
-			ADDCLASSPROP((oart->aflags&ARTA_DISARM), "disarming");
-			ADDCLASSPROP((oart->aflags&ARTA_STEAL), "theiving");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), "fire exploding");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), "cold exploding");
-			ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), "shock exploding");
-			ADDCLASSPROP((oart->aflags&(ARTA_KNOCKBACK|ARTA_KNOCKBACKX)), "kinetic");
-			if (buf[0] != '\0')
-			{
-				Sprintf(buf2, "Attacks are %s.", buf);
-				OBJPUTSTR(buf2);
-			}
-			/* other stuff
-			 */
-			buf[0] = '\0';
-			ADDCLASSPROP((oart->aflags&ARTA_RETURNING), "returns when thrown");
-			ADDCLASSPROP((oart->aflags&ARTA_HASTE), "hastens the wielder's attacks");
-			if (buf[0] != '\0')
-			{
-				buf[0] = buf[0] + 'A' - 'a';
-				Sprintf(buf2, "%s.", buf);
-				OBJPUTSTR(buf2);
-			}
-		}
 		/* other weapon special effects */
 		if(obj){
 			if(obj->otyp == TORCH){
@@ -3297,6 +3085,218 @@ winid *datawin;
 				sitoa(hitbon),
 				(hitbon >= 0 ? "bonus" : "penalty"));
 			OBJPUTSTR(buf);
+		}
+	}
+	/* object properties (objects only) */
+	if(!check_oprop(obj, OPROP_NONE)){
+		/* holy/unholy bonus damage */
+		buf[0] = '\0';
+		ADDCLASSPROP(check_oprop(obj, OPROP_HOLYW) && obj->blessed, "holy");
+		ADDCLASSPROP(check_oprop(obj, OPROP_UNHYW) && obj->cursed, "unholy");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals double %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_HOLYW) && obj->blessed, "holy");
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_UNHYW) && obj->cursed, "unholy");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 2d6 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		/* simple damage properties */
+		buf[0] = '\0';
+		ADDCLASSPROP(check_oprop(obj, OPROP_FIREW), "fire");
+		ADDCLASSPROP(check_oprop(obj, OPROP_COLDW), "cold");
+		ADDCLASSPROP(check_oprop(obj, OPROP_WATRW), "water");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ELECW), "lightning");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ACIDW) || goatweaponturn == AD_EACD, "acid");
+		ADDCLASSPROP(goatweaponturn == AD_STDY, "study");
+		ADDCLASSPROP(check_oprop(obj, OPROP_MAGCW), "magic");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals double %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		
+		if (goatweaponturn == AD_DRST)
+		{
+			Sprintf(buf2, "Deals double poison damage plus 4d4 physical.");
+			OBJPUTSTR(buf2);
+		}
+		
+		if (check_oprop(obj, OPROP_MORTW))
+		{
+			Sprintf(buf2, "Drains 1d2 levels from living intelligent targets.");
+			OBJPUTSTR(buf2);
+		}
+
+		if (check_oprop(obj, OPROP_TDTHW))
+		{
+			Sprintf(buf2, "Deals double damage plus 2d7 to undead.");
+			OBJPUTSTR(buf2);
+		}
+
+		if (check_oprop(obj, OPROP_SFUWW))
+		{
+			Sprintf(buf2, "Deals double disintegration damage to spiritual beings.");
+			OBJPUTSTR(buf2);
+		}
+
+		ADDCLASSPROP(check_oprop(obj, OPROP_PSIOW), "psionic");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals double-plus-enchantment %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		/* simple lesser damage properties */
+		buf[0] = '\0';
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_FIREW), "fire");
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_COLDW), "cold");
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_WATRW), "water");
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ELECW), "lightning");
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ACIDW), "acid");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 2d6 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		
+		ADDCLASSPROP(check_oprop(obj, OPROP_OONA_FIREW), "fire");
+		ADDCLASSPROP(check_oprop(obj, OPROP_OONA_COLDW), "cold");
+		ADDCLASSPROP(check_oprop(obj, OPROP_OONA_ELECW), "lightning");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 1d8 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		
+		ADDCLASSPROP(goatweaponturn == AD_COLD, "cold");
+		ADDCLASSPROP(goatweaponturn == AD_ELEC, "lightning");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 3d8 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		
+		ADDCLASSPROP(goatweaponturn == AD_FIRE, "fire");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 3d10 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		
+		ADDCLASSPROP(goatweaponturn == AD_ACID, "acid");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 4d4 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_MAGCW), "magic");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 3d4 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_PSIOW), "psionic");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 2d12 bonus %s damage.", buf);
+			OBJPUTSTR(buf2);
+		}
+		/* alignment damage properties */
+		buf[0] = '\0';
+		ADDCLASSPROP(check_oprop(obj, OPROP_ANARW), "lawful and neutral creatures");
+		ADDCLASSPROP(check_oprop(obj, OPROP_CONCW), "lawful and chaotic creatures");
+		ADDCLASSPROP(check_oprop(obj, OPROP_AXIOW), "neutral and chaotic creatures");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals double damage to %s.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_ANARW), "lawful and neutral creatures");
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_CONCW), "lawful and chaotic creatures");
+		ADDCLASSPROP(check_oprop(obj, OPROP_LESSER_AXIOW), "neutral and chaotic creatures");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 2d6 bonus damage to %s.", buf);
+			OBJPUTSTR(buf2);
+		}
+		buf[0] = '\0';
+		ADDCLASSPROP((check_oprop(obj, OPROP_OONA_FIREW) || check_oprop(obj, OPROP_OONA_COLDW) || check_oprop(obj, OPROP_OONA_ELECW)), "neutral and chaotic creatures");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Deals 1d8 bonus damage to %s.", buf);
+			OBJPUTSTR(buf2);
+		}
+		if (check_oprop(obj, OPROP_OCLTW))
+		{
+			Sprintf(buf2, "Deals bonus magic damage and extra damage to divine minions.");
+			OBJPUTSTR(buf2);
+		}
+		/* other stuff
+		 */
+		buf[0] = '\0';
+		ADDCLASSPROP((check_oprop(obj, OPROP_DEEPW) && obj->spe < 8), "telepathically lashes out");
+		ADDCLASSPROP((check_oprop(obj, OPROP_VORPW)), "is vorpal");
+		ADDCLASSPROP((check_oprop(obj, OPROP_MORGW)), "inflicts unhealing wounds while cursed");
+		ADDCLASSPROP((check_oprop(obj, OPROP_FLAYW)), "destroys armor");
+		ADDCLASSPROP((check_oprop(obj, OPROP_RETRW)), "returns when thrown");
+		if (buf[0] != '\0')
+		{
+			buf[0] = buf[0] + 'A' - 'a';
+			Sprintf(buf2, "%s.", buf);
+			OBJPUTSTR(buf2);
+		}
+	}
+	/* other artifact weapon effects */
+	if (oartifact) {
+		register const struct artifact *oart = &artilist[oartifact];
+		buf[0] = '\0';
+		//ADDCLASSPROP((oart->aflags&ARTA_DEXPL), "weapon dice explode");
+		ADDCLASSPROP((oart->aflags&ARTA_DLUCK), "luck-biased");
+		ADDCLASSPROP((oart->aflags&ARTA_POIS), "always poisoned");
+		ADDCLASSPROP((oart->aflags&ARTA_SILVER), "silvered");
+		ADDCLASSPROP((oart->aflags&ARTA_VORPAL), "vorpal");
+		ADDCLASSPROP((oart->aflags&ARTA_CANCEL), "canceling");
+		ADDCLASSPROP((oart->aflags&ARTA_MAGIC), "magic-flourishing");
+		ADDCLASSPROP((oart->aflags&ARTA_DRAIN), "draining");
+		//ADDCLASSPROP((oart->aflags&ARTA_BRIGHT), " /* turns gremlins to dust and trolls to stone */");
+		ADDCLASSPROP((oart->aflags&ARTA_BLIND), "blinding");
+		ADDCLASSPROP((oart->aflags&ARTA_SHINING), "armor-phasing");
+		ADDCLASSPROP((oart->aflags&ARTA_SHATTER), "shattering");
+		ADDCLASSPROP((oart->aflags&ARTA_DISARM), "disarming");
+		ADDCLASSPROP((oart->aflags&ARTA_STEAL), "theiving");
+		ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), "fire exploding");
+		ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), "cold exploding");
+		ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), "shock exploding");
+		ADDCLASSPROP((oart->aflags&(ARTA_KNOCKBACK|ARTA_KNOCKBACKX)), "kinetic");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Attacks are %s.", buf);
+			OBJPUTSTR(buf2);
+		}
+		/* other stuff
+		 */
+		buf[0] = '\0';
+		ADDCLASSPROP((oart->aflags&ARTA_RETURNING), "returns when thrown");
+		ADDCLASSPROP((oart->aflags&ARTA_HASTE), "hastens the wielder's attacks");
+		if (buf[0] != '\0')
+		{
+			buf[0] = buf[0] + 'A' - 'a';
+			Sprintf(buf2, "%s.", buf);
+			OBJPUTSTR(buf2);
 		}
 	}
 	if (olet == ARMOR_CLASS) {
