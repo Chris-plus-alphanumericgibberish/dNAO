@@ -584,8 +584,8 @@ GUN(("handgun", "unfamiliar handgun"),                0,   MZ_SMALL, 0,  12,  10
 GUN(("gun", "unfamiliar gun"),                        0,  MZ_MEDIUM, 0,  25,  250, 10,  3, -1, WP_BULLET, IRON, P_FIREARM, HI_METAL, O_NOWISH(1)),/*Needs tile*/
 GUN(("long gun", "unfamiliar long gun"),              0,    MZ_HUGE, 0,  30,  150, 22, -1,  1, WP_BULLET, IRON, P_FIREARM, HI_METAL, O_NOWISH(1)),/*Needs tile*/
 GUN(("heavy gun", "unfamiliar heavy gun"),            0,    MZ_HUGE, 0, 100, 2000, 20,  8, -4, WP_BULLET, IRON, P_FIREARM, HI_METAL, O_NOWISH(1)),/*Needs tile*/
-GUN(("hand blaster", "hard black handmirror", "hard handmirror"), 0,  MZ_MEDIUM, 0,   2, 1000, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK, O_MAGIC(1)), /*Needs tile*/
-GUN(("arm blaster",  "hard white bracer", "hard bracer"),         0,   MZ_LARGE, 0,   8, 4500, 15,  6,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE, O_MAGIC(1)), /*Needs tile*/
+GUN(("hand blaster", "hard black handmirror", "hard handmirror"), 0,  MZ_MEDIUM, 0,   2, 1000, 10,  1, -5,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BLACK, O_MAGIC(1)), /*Needs tile*/
+GUN(("arm blaster",  "hard white bracer", "hard bracer"),         0,   MZ_LARGE, 0,   8, 4500, 15,  6, -5,WP_BLASTER, PLASTIC, P_FIREARM, CLR_WHITE, O_MAGIC(1)), /*Needs tile*/
 GUN(("carcosan sting", "curved dagger"),              0,   MZ_SMALL, 0,  10, 5000,  8, 1, 0, WP_BLASTER, GOLD, P_FIREARM, HI_GOLD, O_MATSPEC(NIDED)), /*Needs tile*/
  /*Needs encyc entry*/
 GUN(("mass-shadow pistol",  "rectangular device"),                0,  MZ_MEDIUM, 0,   4, 4500, 10,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_GRAY, O_MAGIC(1)), /*Needs tile*/
