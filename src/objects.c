@@ -708,7 +708,7 @@ HELM(("elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 1, 10,   5, 9, 3, 0, WOOD, HI_WOOD),
 HELM(("high-elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 1, 15,   5, 8, 4, 0, MITHRIL, HI_MITHRIL, O_MATSPEC(UNIDED)),
-HELM(("imperial elven helm", "runed helm"), /*Needs encyc entry*//*Needs tile*/
+HELM(("imperial elven helm", "runed faceless helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 0, 30, 900, 8, 4, 2, WOOD, CLR_BRIGHT_GREEN),
 HELM(("droven helm", "spider-shaped helm"), /*Needs encyc entry*//*Needs tile*/
 		0, 0,  0, 1, 20,   5, 8, 4, 0, SHADOWSTEEL, CLR_BLACK),
