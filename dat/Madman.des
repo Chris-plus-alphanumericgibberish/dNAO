@@ -581,6 +581,8 @@ ENDMAP
 # Dungeon Description
 REGION:(00,00,74,19),lit,"ordinary"
 # Stairs
+STAIR:(28,17),up
+STAIR:levregion(43,01,45,17),(0,0,0,0),down
 
 # Non diggable walls
 NON_DIGGABLE:(00,00,74,19)
