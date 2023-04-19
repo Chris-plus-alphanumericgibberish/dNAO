@@ -131,7 +131,7 @@ register xchar x, y;
 		clumsy = TRUE;
 doit:
 	//You("kick %s.", mon_nam(mon));
-	if(!is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+	if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
 	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
 	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 	   mon->data->mmove >= 12) {
@@ -189,7 +189,7 @@ struct monst *mon;
 	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
 		clumsy = TRUE;
 	//You("kick %s.", mon_nam(mon));
-	if(!is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+	if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
 	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
 	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 	   mon->data->mmove >= 12) {
@@ -255,7 +255,7 @@ bird_kick_monsters()
 			 && !(Stone_resistance || uarmf))
 				continue;
 			//You("kick %s.", mon_nam(mon));
-			if(!is_blind(mon) && !mon->mtrapped && !thick_skinned(mon->data) &&
+			if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
 			   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
 			   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
 			   mon->data->mmove >= 12) {

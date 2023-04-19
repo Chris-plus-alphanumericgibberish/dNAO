@@ -815,7 +815,7 @@ boolean portal;
 					else pline("%s seems very disoriented for a moment.", Monnam(mtmp));
 				}
 				stay_behind = TRUE;
-			} else if (mtmp->mtame && mtmp->mtrapped && mtmp != u.usteed) {
+			} else if (mtmp->mtame && (mtmp->mtrapped || mtmp->entangled_oid) && mtmp != u.usteed) {
 				if (canspotmon(mtmp))
 					pline("%s is still trapped.", Monnam(mtmp));
 				stay_behind = TRUE;

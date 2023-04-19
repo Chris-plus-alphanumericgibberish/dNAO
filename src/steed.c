@@ -299,7 +299,7 @@ mount_steed(mtmp, force)
 		
 	    You_cant("mount %s while %s's trapped in %s.",
 		     mon_nam(mtmp), mhe(mtmp),
-		     an(defsyms[trap_to_defsym(t->ttyp)].explanation));
+		    t ? an(defsyms[trap_to_defsym(t->ttyp)].explanation) : "something");
 	    return (FALSE);
 	}
 	

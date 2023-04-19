@@ -1371,8 +1371,14 @@ domove()
 		nomul(0, NULL);
 		return;
 	}
-	if(u.uentangled_oid){
+	if(u.uentangled_oid && !u.usteed){
 		You("struggle against your bindings!");
+		nomul(0, NULL);
+		return;
+	}
+	if(u.usteed && u.usteed->entangled_oid){
+		pline("Your steed struggles against its bindings!");
+		flags.move |= MOVE_CANCELLED;
 		nomul(0, NULL);
 		return;
 	}
