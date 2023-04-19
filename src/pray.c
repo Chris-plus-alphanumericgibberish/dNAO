@@ -3748,7 +3748,7 @@ commune_with_silver_flame()
 			if(otmp){
 				if(sflm_mortalable(otmp)){
 					cost = 50;
-					pline("The silver light is focused by your mirror!");
+					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_MORTW);
 					u.uartisval += TIER_B; /*Theory: Life drain is actually not all that powerful, but the Wizard and his summons are still affected. */
 				}
@@ -3761,7 +3761,7 @@ commune_with_silver_flame()
 			if(otmp){
 				if(sflm_truedeathable(otmp)){
 					cost = 50;
-					pline("The silver light is focused by your mirror!");
+					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_TDTHW);
 					u.uartisval += TIER_A; /*Theory: Nasty stuff like liches and pharaohs is affected, plus it deals a lot of damage to them. */
 				}
@@ -3774,7 +3774,7 @@ commune_with_silver_flame()
 			if(otmp){
 				if(sflm_unworthyable(otmp)){
 					cost = 50;
-					pline("The silver light is focused by your mirror!");
+					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_SFUWW);
 					u.uartisval += TIER_S; /*Theory: This specifically affects the nastiest late game enemies. */
 				}
