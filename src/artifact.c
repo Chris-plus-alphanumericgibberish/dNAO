@@ -8032,7 +8032,7 @@ arti_invoke(obj)
 					exercise(A_WIS, TRUE);
 					otmp = mksobj(FOOD_RATION, NO_MKOBJ_FLAGS);
 					hold_another_object(otmp, "Suddenly %s out.",
-				       aobjnam(otmp, "fall"), (const char *)0);
+				       an(aobjnam(otmp, "fall")), (const char *)0);
 					obj->spe--; // lose charge
 					pline("Your weapon has become more flawed.");
 				} else pline("Your weapon rattles faintly.");
