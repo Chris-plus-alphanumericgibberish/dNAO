@@ -7451,6 +7451,41 @@ int mmflags;
 				}
 				if(ptr->mtyp == PM_THRIAE)
 				(void)mongets(mtmp, (rn2(2) ? FLUTE : HARP), mkobjflags);
+			} else if(ptr->mtyp == PM_CARCOSAN_COURTIER){
+				int chance = rn2(40);
+				if(chance == 0){
+					mongets(mtmp, ISAMUSEI, mkobjflags);
+				}
+				else if(chance < 4){
+					mongets(mtmp, BROADSWORD, mkobjflags);
+				}
+				else if(chance < 10){
+					mongets(mtmp, RAPIER, mkobjflags);
+				}
+				else {
+					mongets(mtmp, STILETTO, mkobjflags);
+				}
+				mongets(mtmp, CARCOSAN_STING, mkobjflags);
+				chance = rn2(20);
+				if(chance == 0){
+					mongets(mtmp, ARCHAIC_BOOTS, mkobjflags);
+					mongets(mtmp, ARCHAIC_GAUNTLETS, mkobjflags);
+					mongets(mtmp, ARCHAIC_PLATE_MAIL, mkobjflags);
+				}
+				else if(chance < 5){
+					mongets(mtmp, rn2(2) ? SHOES : STILETTOS, mkobjflags);
+					mongets(mtmp, rn2(2) ? NOBLE_S_DRESS : CONSORT_S_SUIT, mkobjflags);
+					mongets(mtmp, rn2(2) ? GAUNTLETS : LONG_GLOVES, mkobjflags);
+				}
+				else if(chance < 10){
+					mongets(mtmp, ELVEN_TOGA, mkobjflags);
+				}
+				else {
+					mongets(mtmp, rn2(2) ? SHOES : STILETTOS, mkobjflags);
+					mongets(mtmp, rn2(2) ? GENTLEMAN_S_SUIT : GENTLEWOMAN_S_DRESS, mkobjflags);
+					mongets(mtmp, rn2(2) ? RUFFLED_SHIRT : VICTORIAN_UNDERWEAR, mkobjflags);
+				}
+				mongets(mtmp, MASK, mkobjflags);
 			} else if(ptr->mtyp == PM_INTONER){
 				int intoner_color = HI_GLASS;
 				switch(rn2(6)){
@@ -14006,8 +14041,8 @@ int faction;
 	}
 	/* Delusions madness can hide the appearance of a monster */
 	if (roll_madness(MAD_DELUSIONS) && mtmp->m_ap_type == M_AP_NOTHING && !(
-			mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS))
-	{
+			mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS)
+	){
 		struct permonst *delusion = rndmonst();
 		if(delusion){
 			mtmp->m_ap_type = M_AP_MONSTER;
@@ -15767,6 +15802,12 @@ int mkobjflags;
 				}
 			}
 		}
+		if(mtmp->mtyp == PM_CARCOSAN_COURTIER){
+			if(is_metallic(otmp) || otmp->obj_material == SHADOWSTEEL)
+				set_material_gm(otmp, GOLD);
+			otmp->obj_color = CLR_YELLOW;
+		}
+
 		if (is_mplayer(mtmp->data) && is_sword(otmp)) {
 			otmp->spe = (3 + rn2(4));
 		}

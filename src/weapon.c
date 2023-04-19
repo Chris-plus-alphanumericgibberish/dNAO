@@ -2693,6 +2693,16 @@ struct obj *otmp;
 			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
 				bonus += (arm->spe)/2;
 		}
+		if(check_oprop(otmp, OPROP_ELFLW)){
+			//Cha counts for half and Int and Wis count for half
+			arm = which_armor(mon, W_ARMH);
+			if(arm){
+				if(arm->otyp == HELM_OF_BRILLIANCE && arm->otyp == find_gcirclet())
+					bonus += (arm->spe);
+				else if(arm->otyp == HELM_OF_BRILLIANCE || arm->otyp == find_gcirclet())
+					bonus += (arm->spe)/2;
+			}
+		}
 	}
 	return bonus;
 }
@@ -2779,6 +2789,12 @@ struct obj *otmp;
 			bonus /= 2;
 			if(ACURR(A_WIS) == 25) bonus += 8;
 			else bonus += (ACURR(A_WIS)-10)/2;
+		}
+		if(check_oprop(otmp, OPROP_ELFLW)){
+			if(ACURR(A_CHA) == 25) bonus += 8;
+			else bonus += (ACURR(A_CHA)-10)/2;
+			if((ACURR(A_WIS)+ACURR(A_INT)) == 50) bonus += 8;
+			else bonus += (ACURR(A_WIS)+ACURR(A_INT)-20)/4;
 		}
 		if(otmp->oartifact == ART_IBITE_ARM && u.umaniac){
 			//Combine mechanics: Gets a bonus from your bare-handed stuff.

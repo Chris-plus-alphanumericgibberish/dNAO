@@ -7886,6 +7886,10 @@ upgradeImpArmor()
 				pline("You're still using that.");
 				return MOVE_CANCELLED;
 			}
+			if(upitm->oartifact){
+				pline("It resists the attempt!");
+				return MOVE_CANCELLED;
+			}
 			switch(upitm->otyp){
 				case AMULET_OF_MAGICAL_BREATHING:
 					STANDARD_UPGRADE(IEA_NOBREATH, "life-support subsystem")
@@ -7928,6 +7932,10 @@ upgradeImpArmor()
 				pline("You're still using that.");
 				return MOVE_CANCELLED;
 			}
+			if(upitm->oartifact){
+				pline("It resists the attempt!");
+				return MOVE_CANCELLED;
+			}
 			switch(upitm->otyp){
 				case WATER_WALKING_BOOTS:
 					STANDARD_UPGRADE(IEA_SWIMMING, "swimming webs")
@@ -7961,6 +7969,10 @@ upgradeImpArmor()
 			}
 			if(upitm->owornmask){
 				pline("You're still using that.");
+				return MOVE_CANCELLED;
+			}
+			if(upitm->oartifact){
+				pline("It resists the attempt!");
 				return MOVE_CANCELLED;
 			}
 			switch(upitm->otyp){
@@ -8001,6 +8013,9 @@ upgradeImpArmor()
 				case RIN_PROTECTION:
 					STANDARD_UPGRADE(IEA_DEFLECTION, "deflectors")
 				break;
+				case ELVEN_MITHRIL_COAT:
+					STANDARD_UPGRADE(IEA_MITHRIL, "mithril articulations")
+				break;
 				default:
 					impossible("Unknown repair component, sorry :(.");
 					return MOVE_CANCELLED;
@@ -8015,6 +8030,10 @@ upgradeImpArmor()
 			}
 			if(upitm->owornmask){
 				pline("You're still using that.");
+				return MOVE_CANCELLED;
+			}
+			if(upitm->oartifact){
+				pline("It resists the attempt!");
 				return MOVE_CANCELLED;
 			}
 			switch(upitm->otyp){

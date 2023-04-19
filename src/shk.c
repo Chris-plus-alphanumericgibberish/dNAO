@@ -5471,15 +5471,15 @@ shk_armor_works(slang, shkp)
 				 verbalize("They'll call you the man of stainless steel!");
 
 			/* Costs more the more rusty it is (oeroded 0-3) */
-			charge = 300 * (obj->oeroded+1);
-			if (obj->oeroded > 2) verbalize("Yikes!  This thing's a mess!");
+			charge = 300 * (obj->oeroded + obj->oeroded2 + 1);
+			if ((obj->oeroded + obj->oeroded2) > 2) verbalize("Yikes!  This thing's a mess!");
 
 			/* Artifacts cost more to deal with */
 			/* KMH -- Avoid floating-point */
 			if (obj->oartifact) charge = charge * 3 / 2;
 			
 			/* Smooth out the charge a bit */
-			shk_smooth_charge(&charge, 100, 1000);
+			shk_smooth_charge(&charge, 100, 2000);
 
 			if (shk_offer_price(slang, charge, shkp) == FALSE) return;
 
@@ -5490,6 +5490,7 @@ shk_armor_works(slang, shkp)
 				You("mistake your %s for a pot and...", xname(obj));
 
 			obj->oeroded = 0;
+			obj->oeroded2 = 0;
 			obj->rknown = TRUE;
 			obj->oerodeproof = TRUE;
 			break;

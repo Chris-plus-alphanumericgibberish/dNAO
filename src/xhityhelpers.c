@@ -807,6 +807,9 @@ struct attack *mattk;
 		else if (mattk->adtyp == AD_STAR){
 			return "starlight rapier";
 		}
+		else if (mattk->adtyp == AD_BSTR){
+			return "blackstar rapier";
+		}
 		else if (mattk->adtyp == AD_MOON){
 			return "moonlight rapier";
 		}
@@ -1195,6 +1198,7 @@ struct obj * weapon;
 		|| attk->adtyp == AD_BLUD
 		|| attk->adtyp == AD_MERC
 		|| attk->adtyp == AD_STAR
+		|| attk->adtyp == AD_BSTR
 		|| attk->adtyp == AD_MOON
 		|| attk->adtyp == AD_HOLY
 		|| attk->adtyp == AD_UNHY

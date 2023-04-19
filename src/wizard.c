@@ -800,7 +800,7 @@ yellow_nasty()
     coord bypos;
 	tmp = (u.ulevel > 3) ? u.ulevel/3 : 1; /* just in case -- rph */
 	for(i = rnd(tmp); i > 0; --i){
-		switch(rn2(10)){
+		switch(rn2(11)){
 			case 0:
 				makeindex = PM_BYAKHEE;
 				maketemplate = 0;
@@ -861,6 +861,12 @@ yellow_nasty()
 				bypos.x = u.ux;
 				bypos.y = u.uy;
 			break;
+			case 10:
+				makeindex = PM_CARCOSAN_COURTIER;
+				maketemplate = 0;
+				bypos.x = u.ux;
+				bypos.y = u.uy;
+			break;
 		}
 		if ((mtmp = makemon(&mons[makeindex],
 					bypos.x, bypos.y, 0)) != 0);
@@ -870,7 +876,7 @@ yellow_nasty()
 			set_template(mtmp, maketemplate);
 		if(mtmp->m_lev < 15){
 			mtmp->m_lev = 15;
-			mtmp->mhpmax = d(15,8);
+			mtmp->mhpmax = d(15,hd_size(mtmp->data));
 			mtmp->mhp = mtmp->mhpmax;
 		}
 		mtmp->msleeping = 0;
@@ -922,7 +928,7 @@ yellow_dead()
 		set_template(mtmp, maketemplate);
 	if(mtmp->m_lev < 15){
 		mtmp->m_lev = 15;
-		mtmp->mhpmax = d(15,8);
+		mtmp->mhpmax = d(15,hd_size(mtmp->data));
 		mtmp->mhp = mtmp->mhpmax;
 	}
 	mtmp->msleeping = 0;

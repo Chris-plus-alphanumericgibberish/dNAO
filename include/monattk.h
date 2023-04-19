@@ -229,11 +229,12 @@
 #define AD_HLUH     149 /* Holy/Unholy energy (MM-stype damage not resisted by MR and doubled against both holy- and unholy-haters) */
 #define AD_TSMI     150 /* Tentacles Steal Magic Items */
 #define AD_BYAK     151 /* Byakhee eggs */
+#define AD_BSTR		152 /* Black star rapier */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	152
+#define AD_DUNSTAN	153
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

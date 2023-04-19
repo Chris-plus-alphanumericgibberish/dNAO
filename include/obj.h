@@ -408,10 +408,11 @@ struct obj {
 #define IEA_PROT_SHAPE	0x02000000L
 #define IEA_DEFLECTION	0x04000000L
 #define IEA_STRANGLE	0x08000000L
+#define IEA_MITHRIL		0x10000000L
 
 #define IEA_NOUPGRADES	0x80000000L
 #define IEA_HELM_MASK	(IEA_NOBREATH|IEA_LIFESENSE|IEA_SEE_INVIS|IEA_TELEPAT|IEA_BLIND_RES|IEA_INC_ACC|IEA_TELE_CNTRL|IEA_PROT_SHAPE)
-#define IEA_BODY_MASK	(IEA_FLYING|IEA_FIXED_ABIL|IEA_FAST_HEAL|IEA_REFLECTING|IEA_SICK_RES|IEA_HALF_PHDAM|IEA_HALF_SPDAM|IEA_DISPLACED|IEA_INVIS|IEA_DEFLECTION)
+#define IEA_BODY_MASK	(IEA_FLYING|IEA_FIXED_ABIL|IEA_FAST_HEAL|IEA_REFLECTING|IEA_SICK_RES|IEA_HALF_PHDAM|IEA_HALF_SPDAM|IEA_DISPLACED|IEA_INVIS|IEA_DEFLECTION|IEA_MITHRIL)
 #define IEA_GLOVE_MASK	(IEA_SWIMMING|IEA_GOPOWER|IEA_GODEXTERITY|IEA_INC_DAM|IEA_BOLTS|IEA_STRANGLE)
 #define IEA_BOOT_MASK	(IEA_JUMPING|IEA_FAST|IEA_TELEPORT|IEA_KICKING)
 
@@ -927,7 +928,7 @@ struct obj {
 								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
 								|| (otmp)->otyp == HARMONIUM_BOOTS)
 
-#define is_light_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT)
+#define is_light_armor(otmp)	(check_imp_mod(otmp, IEA_MITHRIL) || objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT)
 #define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM)
 
 #define is_elven_armor(otmp)	((otmp)->otyp == ELVEN_HELM\
@@ -983,6 +984,7 @@ struct obj {
 								|| (obj)->otyp == RIN_INVISIBILITY \
 								|| (obj)->otyp == WAN_MAKE_INVISIBLE \
 								|| (obj)->otyp == RIN_PROTECTION \
+								|| (obj)->otyp == ELVEN_MITHRIL_COAT \
 								) && objects[(obj)->otyp].oc_name_known)
 #define boots_upgrade_obj(obj)	(((obj)->otyp == JUMPING_BOOTS \
 								|| (obj)->otyp == SPEED_BOOTS \

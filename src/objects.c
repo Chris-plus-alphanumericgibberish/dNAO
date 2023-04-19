@@ -786,7 +786,7 @@ SUIT(("lantern plate mail", "glass-set plate mail"),
 SUIT(("high-elven plate", "runed plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5, 110, 1200,  3, 7, 3, MITHRIL, HI_MITHRIL),
 SUIT(("imperial elven armor", "runed plate mail"), /*Needs encyc entry*/
-	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5, 110, 9000,  4, 6, 3, WOOD, CLR_BRIGHT_GREEN),
+	0, 0,   MZ_HUGE, ARMSZ_HEAVY,  0,  5, 110, 9000,  4, 6, 3, WOOD, CLR_BRIGHT_GREEN),
 SUIT(("droven plate mail", "crested black plate", "crested plate mail"), /*Needs encyc entry*/
 	0, 0,   MZ_HUGE, ARMSZ_MEDIUM,  0,  5,  85, 2000,  3, 7, 3, SHADOWSTEEL, CLR_BLACK),
 SUIT(("elven toga"), /*Needs encyc entry*//*Needs tile*/

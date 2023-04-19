@@ -1156,7 +1156,8 @@ struct mkroom	*croom;
 					}
 				break;
 			}
-			set_faction(mon, YELLOW_FACTION);
+			if(mon)
+				set_faction(mon, YELLOW_FACTION);
 		}
 		else {
 			mon = makemon(&mons[asylum_types[rn2(SIZE(asylum_types))]], otmp->ox, otmp->oy, NO_MINVENT);

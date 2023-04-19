@@ -741,6 +741,14 @@ struct monst *mon;
 	else{
 		base -= mon->data->nac;
 	}
+	if(mon->mtyp == PM_CARCOSAN_COURTIER){
+		if(u.uinsight < 25){
+			base -= u.uinsight/5;
+		}
+		else {
+			base -= 5;
+		}
+	}
 	if(!mon->mcan){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
@@ -939,6 +947,14 @@ struct monst *mon;
 	}
 	else {
 		base -= mon->data->nac;
+	}
+	if(mon->mtyp == PM_CARCOSAN_COURTIER){
+		if(u.uinsight < 25){
+			base -= u.uinsight/5;
+		}
+		else {
+			base -= 5;
+		}
 	}
 	if(!mon->mcan){
 		base -= mon->data->pac;
@@ -1376,6 +1392,14 @@ int depth;
 		slotnatdr = slotnatdr*mon->mhp/mon->mhpmax;
 	}
 	nat_mdr += slotnatdr;
+	if(mon->mtyp == PM_CARCOSAN_COURTIER){
+		if(u.uinsight < 25){
+			nat_mdr += u.uinsight/5;
+		}
+		else {
+			nat_mdr += 5;
+		}
+	}
 	if (!mon->mcan) {
 		switch (slot)
 		{

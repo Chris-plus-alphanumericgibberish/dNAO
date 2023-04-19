@@ -2953,7 +2953,9 @@ boolean past;
 		break;
 		case PM_ELF:
 			expert_weapon_skill(P_BROAD_SWORD);
+			free_skill_up(P_BROAD_SWORD);
 			skilled_weapon_skill(P_SHIELD);
+			free_skill_up(P_SHIELD);
 			expert_weapon_skill(P_WAND_POWER);
 			knows_object(ELVEN_SHORT_SWORD);
 			knows_object(ELVEN_ARROW);
@@ -2992,6 +2994,12 @@ boolean past;
 				u.reconciled = REC_NONE;
 				u.lastprayresult = PRAY_CONV;
 				adjalign(-1*u.ualign.record);
+				if(godlist[u.ualign.god].anger) {
+					pline("%s seems %s.", u_gname(),
+					  Hallucination ? "groovy" : "mollified");
+					godlist[u.ualign.god].anger = 0;
+					if ((int)u.uluck < 0) u.uluck = 0;
+				}
 			}
 		break;
 		case PM_DROW:

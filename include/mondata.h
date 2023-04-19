@@ -113,7 +113,7 @@
 #define is_commander(ptr)		(((ptr)->mflagsg & MG_COMMANDER) != 0L)
 /*#define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L) when did this get duplicated???*/
 #define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L)
-#define nomouth(mtyp)			(mtyp==PM_NIGHTGAUNT || mtyp==PM_STRANGER)
+#define nomouth(mtyp)			(mtyp==PM_NIGHTGAUNT || mtyp==PM_STRANGER || mtyp==PM_SUZERAIN || mtyp==PM_CARCOSAN_COURTIER)
 #define goodsmeller(ptr)		(((ptr)->mflagsv & MV_SCENT) != 0L)
 #define is_tracker(ptr)			(((ptr)->mflagsg & MG_TRACKER) != 0L)
 #define eyecount(ptr)			(!haseyes(ptr) ? 0 : \
@@ -125,7 +125,7 @@
 #define nolimbs(ptr)		(((ptr)->mflagsb & MB_NOLIMBS) == MB_NOLIMBS)
 #define nofeet(ptr)			((ptr)->mflagsb & MB_NOFEET)
 #define nogloves(ptr)		(nohands(ptr) || ((ptr)->mflagsb & MB_NOGLOVES))
-#define noshield(ptr)		(nogloves(ptr) && !allow_shield(ptr))
+#define noshield(ptr)		((nogloves(ptr) && !allow_shield(ptr)) || ptr->mtyp == PM_CARCOSAN_COURTIER)
 #define notake(ptr)		(((ptr)->mflagst & MT_NOTAKE) != 0L)
 #define has_head(ptr)		(((ptr)->mflagsb & MB_NOHEAD) == 0L)
 #define has_head_mon(mon) ((mon == &youmonst) ? (has_head(youracedata)) : (has_head((mon)->data)))
@@ -608,7 +608,7 @@
 #define	is_tailslap_mon(mon)	(is_tailslap_mtyp((mon)->data))
 
 #define	is_vines_mon(mon)	((mon)->mtyp == PM_GAE_ELADRIN && (mon)->m_lev >= 20)
-#define	is_star_blades_mtyp(ptr)	((ptr)->mtyp == PM_COURE_ELADRIN || (ptr)->mtyp == PM_MOTE_OF_LIGHT || (ptr)->mtyp == PM_IASOIAN_ARCHON)
+#define	is_star_blades_mtyp(ptr)	((ptr)->mtyp == PM_COURE_ELADRIN || (ptr)->mtyp == PM_FLAXEN_STARSHADOW || (ptr)->mtyp == PM_MOTE_OF_LIGHT || (ptr)->mtyp == PM_IASOIAN_ARCHON)
 #define	is_star_blades_mon(mon)	(is_star_blades_mtyp((mon)->data) || ((mon)->mtyp == PM_PORO_AULON && (mon)->mhp<(mon)->mhpmax/2))
 #define	is_storm_mtyp(ptr)	((ptr)->mtyp == PM_DAO_LAO_GUI_MONK)
 #define	is_level_storm_mtyp(ptr)	((ptr)->mtyp == PM_CAILLEA_ELADRIN || (ptr)->mtyp == PM_MOONSHADOW\
@@ -1475,7 +1475,7 @@
 			data->mtyp == PM_CHOKHMAH_SEPHIRAH \
 		))
 
-#define yellowUnwardable(mtmp)	(standardUnwardable(mtmp) || mtmp->mpeaceful || (mtmp->mtyp == PM_STRANGER) || (mtmp->mtyp == PM_ELDER_PRIEST) || (has_template(mtmp, YELLOW_TEMPLATE)))
+#define yellowUnwardable(mtmp)	(standardUnwardable(mtmp) || mtmp->mpeaceful || (mtmp->mtyp == PM_STRANGER) || (mtmp->mtyp == PM_SUZERAIN) || (mtmp->mtyp == PM_ELDER_PRIEST) || (has_template(mtmp, YELLOW_TEMPLATE)))
 
 #define	yellowWarded(data)	(!heptWarded(data) && !is_undead(data) && !is_were(data) && !is_primordial(data) )
 

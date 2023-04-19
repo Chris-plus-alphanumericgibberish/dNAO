@@ -92,6 +92,7 @@ int
 Boots_on()
 {
     long oldprop;
+    long oldprop_spd;
     if (!uarmf) return 0;
 	adj_abon(uarmf, uarmf->spe);
  	if(uarmf->otyp == STILETTOS) {
@@ -104,6 +105,7 @@ Boots_on()
 		if(!Flying && !Levitation) pline("You've heard myths of a god riding these through the sky, but this doesn't seem very practical.");
 	}
 	oldprop = (u.uprops[objects[uarmf->otyp].oc_oprop[0]].extrinsic & ~WORN_BOOTS);
+	oldprop_spd = (u.uprops[FAST].extrinsic & ~WORN_BOOTS);
 
     switch(uarmf->otyp) {
 	case LOW_BOOTS:
@@ -138,6 +140,12 @@ Boots_on()
 			makeknown(uarmf->otyp);
 			You("walk very quietly.");
 		}
+		if(uarmf->otyp == IMPERIAL_ELVEN_BOOTS && !oldprop_spd && !(HFast & TIMEOUT)){
+			if(check_imp_mod(uarmf, IEA_FAST)){
+				You_feel("yourself speed up%s.",
+					(oldprop || HFast) ? " a bit more" : "");
+			}
+		}
 		break;
 	case FUMBLE_BOOTS:
 		if (!oldprop && !(HFumbling & ~TIMEOUT))
@@ -168,6 +176,7 @@ Boots_off()
 {
     int otyp = uarmf->otyp;
     long oldprop = u.uprops[objects[otyp].oc_oprop[0]].extrinsic & ~WORN_BOOTS;
+    long oldprop_spd = u.uprops[FAST].extrinsic & WORN_BOOTS;
 
 	if (!cancelled_don) adj_abon(uarmf, -uarmf->spe);
 
@@ -202,6 +211,12 @@ Boots_off()
 		if (!oldprop && !HStealth && !BStealth && !cancelled_don) {
 			makeknown(otyp);
 			You("sure are noisy.");
+		}
+		if(otyp == IMPERIAL_ELVEN_BOOTS && !Very_fast && !cancelled_don){
+			if(oldprop_spd){
+				You_feel("yourself slow down%s.",
+					Fast ? " a bit" : "");
+			}
 		}
 		break;
 	case FUMBLE_BOOTS:
@@ -866,6 +881,10 @@ Armor_on()
 		else
 			pline("The armor hums faintly.");
 	}
+	else if(uarm->otyp == IMPERIAL_ELVEN_ARMOR){
+		if(check_imp_mod(uarm, IEA_FLYING))
+			pline("The armor spreads its moth wings!");
+	}
 	if(check_oprop(uarm, OPROP_CURS)){
 		if (Blind)
 		pline("%s for a moment.", Tobjnam(uarm, "vibrate"));
@@ -924,6 +943,10 @@ Armor_off()
 			pline("The luminous wings retract into the armor's wing-rerebraces.");
 		else
 			pline("The armor ceases humming.");
+	}
+	else if(uarm->otyp == IMPERIAL_ELVEN_ARMOR){
+		if(check_imp_mod(uarm, IEA_FLYING))
+			pline("The armor folds its moth wings.");
 	}
     setworn((struct obj *)0, W_ARM);
 	if(checkweight) inv_weight();
@@ -2239,7 +2262,7 @@ struct obj * otmp;
 	// Ditto the bonus for repairing the visor of an IEHelm
 	if (otmp->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(otmp, IEA_BLIND_RES))
 		def += 1;
-	
+
 	// add material bonus
 	def += material_def_bonus(otmp, def, TRUE);
 
@@ -2249,6 +2272,10 @@ struct obj * otmp;
 	// cloak of protection's magic is not reduced by erosion or multiplied by mat
 	if (otmp->otyp == CLOAK_OF_PROTECTION)
 		def += 2;
+	// The mithril lames of an IEArmor are not affected by material or erosion
+	if (otmp->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_MITHRIL))
+		def += 1;
+	
 	// combat boots
 	if (otmp->otyp == find_cboots()) def += 1;
 	// circlet
@@ -2341,6 +2368,11 @@ struct obj * otmp;
 	// cloak of protection's magic is not reduced by erosion or multiplied by mat
 	if (otmp->otyp == CLOAK_OF_PROTECTION)
 		def += 2;
+
+	// The mithril lames of an IEArmor are not affected by material or erosion
+	if (otmp->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_MITHRIL))
+		def += 1;
+
 	// padded gloves
 	if (otmp->otyp == find_pgloves()) def += 1;
 	// gold circlet
@@ -2612,11 +2644,11 @@ base_uac()
 		if(dexbonus < -5)
 			dexbonus = -5;
 		
-		if(dexbonus > 0 && uarm){
+		if(dexbonus > 0 && uarm && !is_light_armor(uarm)){
 			if(is_medium_armor(uarm))
-					dexbonus = (int)(dexbonus/2);
-			else if(!is_light_armor(uarm))
-					dexbonus = 0;
+				dexbonus = (int)(dexbonus/2);
+			else
+				dexbonus = 0;
 		}
 	}
 	uac -= dexbonus;

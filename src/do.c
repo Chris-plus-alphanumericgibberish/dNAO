@@ -1773,15 +1773,9 @@ final_level()
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
-
-		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
-		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
-		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
-		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
-
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
@@ -1789,6 +1783,23 @@ final_level()
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_FLAXEN_STARSHADOW], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_CARCOSAN_COURTIER], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_CARCOSAN_COURTIER], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_CARCOSAN_COURTIER], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_CARCOSAN_COURTIER], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_CARCOSAN_COURTIER], 0, 0, MM_ADJACENTOK);
 	}
 	/* create a guardian angel next to player, if worthy */
 	if (Conflict || u.ualign.type == A_VOID || u.ualign.type == A_NONE) {

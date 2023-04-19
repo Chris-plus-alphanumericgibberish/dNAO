@@ -5675,9 +5675,10 @@ u_clothing_discomfort()
 	}
 	if(uarm){
 		count++;
-		if(is_medium_armor(uarm))
+		if(is_light_armor(uarm));//+0
+		else if(is_medium_armor(uarm))
 			count++;
-		else if(!is_light_armor(uarm))
+		else
 			count += 2;//Not medium or light, so heavy
 	}
 	else if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){

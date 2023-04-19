@@ -1734,6 +1734,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(pa->mtyp == PM_IKSH_NA_DEVA && mlev(magr) >= 45 && attk->aatyp == AT_WEAP && *indexnum == 0){
 		attk->aatyp = AT_DEVA;
 	}
+	/* Carcosan courtiers gain extra dice on their tentacles. */
+	if(pa->mtyp == PM_CARCOSAN_COURTIER && attk->aatyp == AT_TENT && u.uinsight > 5){
+		if(u.uinsight < 25){
+			attk->damn = u.uinsight/5;
+		}
+		else {
+			attk->damn = 5;
+		}
+	}
 	/* Grue does not make its later attacks if its square is lit */
 	if (pa->mtyp == PM_GRUE &&
 		!by_the_book &&
@@ -2640,6 +2649,7 @@ struct attack *attk;
 					verb = "slash";
 					ending = (attk->adtyp == AD_SHDW) ? " with bladed shadows!" :
 						(attk->adtyp == AD_STAR) ? " with a starlight rapier!" :
+						(attk->adtyp == AD_BSTR) ? " with a black-star rapier!" :
 						(attk->adtyp == AD_MOON) ? " with a moonlight rapier!" :
 						(attk->adtyp == AD_HOLY) ? " with a holy light-beam!" :
 						(attk->adtyp == AD_UNHY) ? " with a unholy light-blade!" :
@@ -4440,6 +4450,7 @@ boolean ranged;
 	case AD_HODS:	/* should be deprecated in favour of just physical damage */
 	case AD_SHDW:	/* poisoned, phases (blade of shadow) */
 	case AD_STAR:	/* silvered, phases (silver starlight rapier) */
+	case AD_BSTR:	/* phases (black-star rapier) */
 	case AD_MOON:	/* silvered, phases (silver moonlight rapier) */
 	case AD_BLUD:	/* bloodied, phases (blade of blood) */
 	case AD_MERC:	/* poisoned, cold, phases (blade of mercury) */
@@ -4459,6 +4470,21 @@ boolean ranged;
 				extrahit > 1 ? "s" : "",
 				extrahit < 3 ? "." : extrahit < 7 ? "!" : "!!");
 			dohitmsg = FALSE;
+		}
+		/* special effects of black star rapiers */
+		if(attk->adtyp == AD_BSTR){
+			if(youdef || !resist(mdef, WEAPON_CLASS, 0, TRUE)){
+				*hp(mdef) -= *hp(mdef)/5; /*Percentage based damage, will not kill*/
+			}
+			if (youdef) {
+				if (rndcurse())
+					You_feel("as if you need some help.");
+				stop_occupation();
+			}
+			else {
+				if (mrndcurse(mdef) && (youagr || canseemon(mdef)))
+					You_feel("as though %s needs some help.", mon_nam(mdef));
+			}
 		}
 		/* hit with [weapon] */
 		result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis);
@@ -7719,7 +7745,7 @@ boolean ranged;
 		/* maybe print glowy message */
 		if (!Blind && (youdef || canseemon(mdef))){
 			const char * glow = ((pa->mtyp == PM_SWORD_ARCHON || pa->mtyp == PM_BAEL) ?
-				"faintly blue" : "sickly green");
+				"faintly blue" : (pa->mtyp == PM_FLAXEN_STARSHADOW || pa->mtyp == PM_FLAXEN_STAR_PHANTOM) ? "bilious yellow" : "sickly green");
 			if (youdef)
 				You("glow %s!", glow);
 			else
@@ -13406,6 +13432,14 @@ int vis;						/* True if action is at all visible to the player */
 			seardmg += rnd(20);
 		}
 	}
+	else if(attk && (
+		attk->adtyp == AD_BSTR
+	)){
+		if (hates_unholy_mon(mdef) && !(youdef && u.sealsActive&SEAL_EDEN)) {
+			unholyobj |= W_SKIN;
+			seardmg += d(5,5);
+		}
+	}
 	/* weapons/armor */
 	else if (otmp &&
 		// if using a weapon, only check that weapon (probably moot)
@@ -15386,6 +15420,10 @@ int vis;						/* True if action is at all visible to the player */
 			if (attk && attk->adtyp == AD_STAR)
 			{
 				Strcat(buf, "starlight rapier");
+			}
+			else if (attk && attk->adtyp == AD_BSTR)
+			{
+				Strcat(buf, "black-star rapier");
 			}
 			else if (attk && attk->adtyp == AD_MOON)
 			{
