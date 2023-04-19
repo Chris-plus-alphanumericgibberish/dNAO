@@ -1019,6 +1019,12 @@ boolean dofull;
 				Strcat(buf, "silver-feather-encrusted ");
 		}
 		
+		if (check_oprop(obj, OPROP_WRTHW) && obj->known)
+			Strcat(buf, "wrathful ");
+		
+		if (check_oprop(obj, OPROP_ELFLW))
+			Strcat(buf, u.uinsight >= 33 ? "radiant " : u.uinsight >= 11 ? "incandescent " : "luminous ");
+
 		if (check_oprop(obj, OPROP_WATRW))
 			Strcat(buf, "misty ");
 		if (check_oprop(obj, OPROP_LESSER_WATRW))
@@ -1083,9 +1089,6 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_LESSER_MORGW) && obj->known && obj->cursed)
 			Strcat(buf, "morgul-shard ");
 		
-		if (check_oprop(obj, OPROP_WRTHW) && obj->known)
-			Strcat(buf, "wrathful ");
-		
 		if (check_oprop(obj, OPROP_FLAYW) && obj->known)
 			Strcat(buf, "flaying ");
 		if (check_oprop(obj, OPROP_LESSER_FLAYW) && obj->known)
@@ -1096,6 +1099,7 @@ boolean dofull;
 		
 		if (check_oprop(obj, OPROP_GSSDW))
 			Strcat(buf, u.uinsight >= 50 ? "rushing " : u.uinsight >= 25 ? "flowing " : "rippling ");
+
 		if (check_oprop(obj, OPROP_BRIL) && !obj->known)
 			Strcat(buf, "ornate ");
 		
@@ -1501,8 +1505,6 @@ boolean adjective;
 	case GOLD:
 		if(obj->otyp == APHANACTONAN_RECORD || obj->otyp == APHANACTONAN_ARCHIVE)
 			return (adjective ? "golden-red" : "red gold");
-		else if (adjective && check_oprop(obj, OPROP_ELFLW))
-			return u.uinsight >= 33 ? "radiant" : u.uinsight >= 11 ? "incandescent" : "luminous";
 		else return (adjective ? "golden" : "gold");
 	case PLATINUM:
 		if(check_oprop(obj,  OPROP_SFLMW))
