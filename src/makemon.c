@@ -6925,7 +6925,6 @@ int mmflags;
 			if(!rn2(40)){
 				otmp = mksobj(TWO_HANDED_SWORD, mkobjflags);
 				set_material_gm(otmp, SILVER);
-				add_oprop(otmp, OPROP_PSIOW);
 				add_oprop(otmp, OPROP_VORPW);
 				add_oprop(otmp, OPROP_GSSDW);
 				otmp->spe = 5;

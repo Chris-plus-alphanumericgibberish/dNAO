@@ -1094,6 +1094,8 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_LIVEW) && u.uinsight >= 40)
 			Strcat(buf, "living ");
 		
+		if (check_oprop(obj, OPROP_GSSDW))
+			Strcat(buf, u.uinsight >= 50 ? "rushing " : u.uinsight >= 25 ? "flowing " : "rippling ");
 		if (check_oprop(obj, OPROP_BRIL) && !obj->known)
 			Strcat(buf, "ornate ");
 		

@@ -1771,7 +1771,6 @@ default_case:
 					stuff = mksobj(TWO_HANDED_SWORD, mkobjflags);
 					size_items_to_pc(stuff);
 					set_material_gm(stuff, SILVER);
-					add_oprop(stuff, OPROP_PSIOW);
 					add_oprop(stuff, OPROP_VORPW);
 					add_oprop(stuff, OPROP_GSSDW);
 					stuff->spe = 3;

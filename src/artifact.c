@@ -4257,6 +4257,27 @@ int * truedmgptr;
 		if (check_oprop(otmp, OPROP_LESSER_PSIOW))
 			*truedmgptr += d(2, 12);
 	}
+	if(check_oprop(otmp, OPROP_GSSDW)){
+		int power = youagr ? u.uinsight : magr ? magr->m_lev : 0;
+		//"Crit" chance
+		if(power > 0){
+			int multiplier = power >= 50 ? 3 : power >= 25 ? 2 : 1; 
+			int chance = power >= 50 ? 5 : power >= 25 ? 10 : 20; 
+			if(!rn2(chance))
+			*truedmgptr += multiplier*basedmg;
+		}
+		//Bonus psychic damage (More reliable than regular psychic damage)
+		if(youdef || !mindless_mon(mdef)){
+			if (power >= 30)
+				*truedmgptr += d(2, 12);
+			else if (power >= 20)
+				*truedmgptr += d(2, 10);
+			else if (power >= 10)
+				*truedmgptr += d(2, 8);
+			else
+				*truedmgptr += d(2, 6);
+		}
+	}
 	if(check_oprop(otmp, OPROP_DEEPW)){
 		if(otmp->spe < 8){
 		if(youdef && (Blind_telepat || !rn2(5)))

@@ -2671,7 +2671,7 @@ struct obj *otmp;
 				bonus += (arm->spe)/2;
 		}
 		
-		if(otmp->oartifact == ART_VELKA_S_RAPIER){
+		if(otmp->oartifact == ART_VELKA_S_RAPIER || (mon->m_lev > 0 && check_oprop(otmp, OPROP_GSSDW))){
 			bonus /= 2;
 			//Int only
 			arm = which_armor(mon, W_ARMH);
@@ -2776,7 +2776,7 @@ struct obj *otmp;
 			else bonus += (ACURR(A_INT)-10)/2;
 		}
 
-		if(otmp->oartifact == ART_VELKA_S_RAPIER){
+		if(otmp->oartifact == ART_VELKA_S_RAPIER || (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW))){
 			bonus /= 2;
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
