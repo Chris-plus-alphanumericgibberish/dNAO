@@ -2077,13 +2077,17 @@ humanoid_sound:
 				doname(comp), (const char *)0);
 			break;
 		}
-	    else{
+	    else {
 			const char *talkabt = "talks about %s.";
 			const char *discuss = "discusses %s.";
 			if((ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
 				&& has_template(mtmp, MISTWEAVER)
 			){
-				switch(rn2(3)){
+				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE) && !u.shubbie_atten){
+					godlist[GOD_THE_BLACK_MOTHER].anger = 0;
+					u.shubbie_atten = 1;
+				}
+				switch(rn2(7)){
 					case 0:
 						verbl_msg = "Ia! Shub-Niggurath! The Goat with a Thousand Young!";
 					break;
@@ -2092,6 +2096,16 @@ humanoid_sound:
 					break;
 					case 2:
 						verbl_msg = "From the wells of night to the gulfs of space, and from the gulfs of space to the wells of night, ever Their praises!";
+					break;
+					case 3:
+						verbl_msg = "May Her eyes guide you.";
+					break;
+					case 4:
+						verbl_msg = "Gof'nn hupadgh Shub-Niggurath!";
+					break;
+					case 5:
+					case 6:
+						verbl_msg = "Ia!";
 					break;
 				}
 			}

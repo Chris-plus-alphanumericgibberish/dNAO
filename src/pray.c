@@ -930,9 +930,9 @@ int godnum;
 	    if (Luck > 10 && u.ualign.record >= PIOUS && !u.uevent.uhand_of_elbereth && u.uevent.qcompleted){
 			gcrownu();
 		}
-		else if(Pantheon_if(PM_VALKYRIE) && u.ualign.record >= PIOUS 
+		else if((God_if(GOD_ODIN) || God_if(GOD_TYR)) && u.ualign.record >= PIOUS 
 			&& uwep && is_spear(uwep) && !uwep->oartifact && uwep->spe >= 5 
-			&& !art_already_exists(ART_GUNGNIR) && (galign(godnum) == A_LAWFUL || galign(godnum) == A_NEUTRAL)
+			&& !art_already_exists(ART_GUNGNIR)
 		){
 			pline("Secret runes are engraved on your %s.", xname(uwep));
 			oname(uwep, artilist[ART_GUNGNIR].name);

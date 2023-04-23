@@ -2946,7 +2946,7 @@ register struct trobj *trop;
 
 			if(obj->otyp == POT_BLOOD) 
 				obj->corpsenm = PM_HUMAN;
-			if(obj->oclass == WEAPON_CLASS || obj->oclass == ARMOR_CLASS)
+			if(obj->oclass == WEAPON_CLASS || obj->oclass == ARMOR_CLASS || is_weptool(obj))
 				set_obj_size(obj, youracedata->msize);
 			if(obj->oclass == ARMOR_CLASS){
 				set_obj_shape(obj, youracedata->mflagsb);

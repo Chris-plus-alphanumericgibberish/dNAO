@@ -531,7 +531,7 @@ A("The Golden Sword of Y'ha-Talla",			SCIMITAR,	"scorpion-bladed %s",
 /* adds sneak attacks "from behind" (allowing sneak attacks for anyone, and increasing damage for rogues/etc) */
 A("Spineseeker",		SHORT_SWORD,					(const char *)0,
 	1200L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, NON_PM, NON_PM, TIER_D, (ARTG_GIFT),
+	A_CHAOTIC, NON_PM, NON_PM, TIER_F, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 6), NOFLAG,
 	PROPS(STEALTH), NOFLAG,
@@ -2752,7 +2752,7 @@ A("The Tsurugi of Muramasa",		TSURUGI,			(const char *)0,
 
 #ifdef TOURIST
 A("The Platinum Yendorian Express Card",		CREDIT_CARD,			(const char *)0,
-	7000L, MT_DEFAULT, MZ_DEFAULT, PLATINUM,
+	7000L, PLATINUM, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_TOURIST, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), (ARTA_SILVER),

@@ -1052,7 +1052,8 @@ register struct monst *mtmp;
 	if(mdat->mtyp == PM_CENTER_OF_ALL 
 		&& !mtmp->mtame 
 		&& !Is_astralevel(&u.uz)
-		&& (near_capacity()>SLT_ENCUMBER || u.ulevel < 14 || mtmp->mpeaceful) 
+		&& (near_capacity()>UNENCUMBERED || u.ulevel < 14 || mtmp->mpeaceful) 
+		&& (near_capacity()>SLT_ENCUMBER || u.uinsight < 2 || (u.uinsight < 32 && !rn2(u.uinsight))) 
 		&& (near_capacity()>MOD_ENCUMBER || !rn2(4))
 	){
 		int nlev;

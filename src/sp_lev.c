@@ -1954,8 +1954,8 @@ default_case:
 				stuff = mksobj(FIGURINE, MKOBJ_NOINIT);
 				stuff->corpsenm = ROLL_FROM(stars);
 				if(stuff->corpsenm == PM_MOTE_OF_LIGHT)
-					stuff->spe |= FIGURINE_LOYAL|FIGURINE_PSEUDO;
-				else stuff->spe |= FIGURINE_LOYAL;
+					stuff->spe = FIGURINE_LOYAL|FIGURINE_PSEUDO;
+				else stuff->spe = FIGURINE_LOYAL;
 				stuff->objsize = MZ_TINY;
 				set_material_gm(stuff, GEMSTONE);
 				set_submat(stuff, DIAMOND);

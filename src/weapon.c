@@ -1464,6 +1464,7 @@ static NEARDATA const int pwep[] =
 	ELVEN_LANCE, /*1d8/1d8*/
 	BEC_DE_CORBIN, /*1d8/1d6*/
 	GLAIVE, /*1d6/1d10*/
+    DISKOS/*1d6/1d8*/,
 	FAUCHARD, /*1d6/1d8*/
 	LANCE, /*1d6/1d8*/
 	PARTISAN, /*1d6/1d6*/
@@ -2801,6 +2802,9 @@ struct obj *otmp;
 			if(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
 				bonus += rnd(ACURR(A_CHA)/5 + weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2);
 		}
+	}
+	else if(u.umaniac && weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0){
+		bonus += min_ints(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT), (ACURR(A_CHA)-9)/2);
 	}
 	
 	return bonus;

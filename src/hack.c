@@ -1146,6 +1146,7 @@ domove()
 		}
 		if(!isok(x, y)) {
 			nomul(0, NULL);
+			flags.move |= MOVE_CANCELLED;
 			return;
 		}
 		if (((trap = t_at(x, y)) && trap->tseen) ||

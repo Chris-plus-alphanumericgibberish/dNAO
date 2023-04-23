@@ -164,6 +164,8 @@ extern struct Role roles[];	/* table of available roles */
 extern struct Role urole;
 #define Role_if(X)	(urole.malenum == (X))
 #define Pantheon_if(X)	(flags.racial_pantheon != 0 ? flags.racial_pantheon == (X) : roles[flags.pantheon].malenum == (X))
+#define God_if(X)	(u.ualign.god == (X))
+#define Holiness_if(X)	(gholiness(u.ualign.god) == (X))
 #define Role_switch	(urole.malenum)
 /* also used to see if you're allowed to eat cats and dogs */
 #define CANNIBAL_ALLOWED() (Role_if(PM_CAVEMAN) || Race_if(PM_ORC) || \
