@@ -2542,7 +2542,6 @@ boolean goodequip;
 				otmp->spe = 5;
 				add_oprop(otmp, OPROP_ELFLW);
 				add_oprop(otmp, OPROP_WRTHW);
-				add_oprop(otmp, OPROP_BYAK);
 				curse(otmp);
 				set_material_gm(otmp, GOLD);
 			}
