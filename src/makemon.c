@@ -2614,7 +2614,7 @@ boolean goodequip;
 					(void) mongets(mtmp, BODYGLOVE, mkobjflags);
 					(void) mongets(mtmp, RAYGUN, mkobjflags);
 				}
-			} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+			} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !in_mklev){
 				otmp = mongets(mtmp, ELVEN_CLOAK, mkobjflags);
 				if(otmp)
 					otmp->oeroded3 = 1;
@@ -2638,7 +2638,7 @@ boolean goodequip;
 					if (mm == PM_ELF_LORD) {
 						(void)mongets(mtmp, CRYSTAL_SWORD, mkobjflags);
 					}
-				} 
+				}
 				else switch (rn2(3)) {
 				case 0:
 					if (!rn2(4)) (void)mongets(mtmp, ELVEN_SHIELD, mkobjflags);
@@ -7200,7 +7200,7 @@ int mmflags;
 					if(is_prince(ptr) || (is_lord(ptr) && !rn2(3))) (void)mongets(mtmp, DWARVISH_MITHRIL_COAT, mkobjflags);
 					else (void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
 				}
-			} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+			} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !in_mklev){
 				otmp = mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
 				if(otmp)
 					otmp->oeroded3 = 1;
@@ -7710,7 +7710,7 @@ int mmflags;
 					set_material_gm(otmp, BONE);
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
-				} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				} else if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !in_mklev){
 					switch(rn2(13)){
 						case 0:
 							mtmp->mvar_deminymph_role = PM_BARBARIAN;
