@@ -2069,6 +2069,10 @@ struct obj* obj;
 	case BROKEN_ANDROID:
 	case BROKEN_GYNOID:
 	case WRITING_DESK:
+	case BLASTER_BOLT:
+	case HEAVY_BLASTER_BOLT:
+	case LASER_BEAM:
+	case CARCOSAN_BOLT:
 		return NULL;
 		/* Any other cases for specific object types go here. */
 	case SARCOPHAGUS:
@@ -2104,6 +2108,8 @@ struct obj* obj;
 	case FROST_HORN:
 	case HORN_OF_PLENTY:
 		return horn_materials;
+	case EILISTRAN_ARMOR:
+		return eli_materials;
 	default:
 		break;
 	}
@@ -2141,10 +2147,7 @@ struct obj* obj;
     }
     else if (obj->oclass == WEAPON_CLASS || is_weptool(obj)
              || obj->oclass == ARMOR_CLASS) {
-        if (obj->otyp == EILISTRAN_ARMOR) {
-            return eli_materials;
-        }
-        else if (default_material == IRON || default_material == METAL) {
+        if (default_material == IRON || default_material == METAL) {
             return metal_materials;
         }
         else if (default_material == WOOD) {
