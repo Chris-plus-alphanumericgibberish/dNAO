@@ -1053,7 +1053,7 @@ register struct monst *mtmp;
 		&& !mtmp->mtame 
 		&& !Is_astralevel(&u.uz)
 		&& (near_capacity()>UNENCUMBERED || u.ulevel < 14 || mtmp->mpeaceful) 
-		&& (near_capacity()>SLT_ENCUMBER || u.uinsight < 2 || (u.uinsight < 32 && !rn2(u.uinsight))) 
+		&& (near_capacity()>SLT_ENCUMBER || mtmp->mpeaceful || u.uinsight < 2 || (u.uinsight < 32 && !rn2(u.uinsight))) 
 		&& (near_capacity()>MOD_ENCUMBER || !rn2(4))
 	){
 		int nlev;
