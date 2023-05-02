@@ -203,6 +203,7 @@ DOOR:locked,(60,16)
 CONTAINER:'(',"chest",(37,10)
 OBJECT:'[',"high boots",contained
 OBJECT:'#',"fixed lolth_symbol droven plate mail",contained
+OBJECT:'#',"eilistraee_symbol cloak of magic resistance",contained
 OBJECT:'#',"magic-resistant droven cloak",contained
 OBJECT:'"',"amulet of life saving",contained
 OBJECT:'#',"fixed droven helm",contained
@@ -591,6 +592,14 @@ OBJECT:'(',"box",(71,14)
 
 MONSTER: '#', "drow matron-mother cordyceps", (73,16)
 OBJECT:'\\',"expensive bed",(73,16)
+CONTAINER:'(',"box",(73,16)
+OBJECT:'[',"high boots",contained
+OBJECT:'#',"fixed lolth_symbol noble's dress",contained
+OBJECT:'#',"magic-resistant droven cloak",contained
+OBJECT:'"',"amulet of reflection",contained
+OBJECT:'#',"fixed droven helm",contained
+OBJECT:'#',"8000 $",contained
+OBJECT:'$',random,contained
 
 OBJECT:'\\',"bed",(61,07)
 OBJECT:'(',"writing desk",(59,07)
@@ -742,6 +751,10 @@ OBJECT:'\\',"expensive bed",(05,05)
 OBJECT:'\\',"bed",(03,09)
 
 ALTAR:(02,09),neutral,altar,"_Kiaransali"
+OBJECT:'#',"+4 silver shoes",(02,09)
+OBJECT:'#',"+4 silver gauntlets of dexterity",(02,09)
+OBJECT:'#',"+4 silver magic-resistant kiaransali_symbol ornate ring mail",(02,09)
+OBJECT:'#',"+4 silver band",(02,09)
 MONSTER: '#', "zombified master mind flayer", (02,09)
 
 MONSTER: 'h', "duergar debilitator", (24,04)
@@ -809,6 +822,15 @@ MONSTER: '@', "anulo dancer", (60,15)
 MONSTER: '@', "anulo dancer", (60,14)
 MONSTER[50%]: '@', "anulo dancer", (59,14)
 MONSTER[50%]: '@', "anulo dancer", (59,15)
+
+ALTAR:(55,14),law,altar,"_Eilistraee"
+
+OBJECT:'$',random,(65,16)
+CONTAINER:'(',"sack",(65,16)
+OBJECT:'(',"unicorn horn",contained
+OBJECT:'#',"glass amulet of life saving",contained
+OBJECT:'#',"eilistraee_symbol cloak of magic resistance",contained
+
 
 MONSTER[50%]: '@', "anulo", (04,13)
 OBJECT:'\\',"bedroll",(04,13)
@@ -1265,6 +1287,7 @@ OBJECT:'#',"blessed color_bright_blue blindfold",contained
 
 CONTAINER:'(',"box",(67,17)
 OBJECT:'"',"amulet of life saving",contained
+OBJECT:'(',"unicorn horn",contained
 OBJECT:'#',"3 tactile resistance",contained
 OBJECT:'#',"tactile scroll",contained
 OBJECT:'#',"tactile scroll",contained

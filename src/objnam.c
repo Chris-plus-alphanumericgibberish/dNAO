@@ -3771,6 +3771,8 @@ int wishflags;
 		veioistafur = FALSE,
 		thjofastafur = FALSE,
 		lolth_symbol = FALSE,
+		kiaransali_symbol = FALSE,
+		eilistraee_symbol = FALSE,
 		sizewished = FALSE;
 	int item_color = -1;
 	int objsize = (from_user ? youracedata->msize : MZ_MEDIUM);
@@ -3908,6 +3910,10 @@ int wishflags;
 			thjofastafur = TRUE;
 		} else if(!strncmpi(bp, "lolth_symbol ", l=13)){
 			lolth_symbol = TRUE;
+		} else if(!strncmpi(bp, "kiaransali_symbol ", l=18)){
+			kiaransali_symbol = TRUE;
+		} else if(!strncmpi(bp, "eilistraee_symbol ", l=18)){
+			eilistraee_symbol = TRUE;
 		} else if(!strncmpi(bp, "color_black ", l=12)){
 			item_color = CLR_BLACK;
 		} else if(!strncmpi(bp, "color_red ", l=10)){
@@ -5540,6 +5546,14 @@ typfnd:
 		else if(thjofastafur && wizwish)	otmp->oward = THJOFASTAFUR; /*can't be wished for*/
 		else if(lolth_symbol && wizwish){/*can't be wished for*/
 			otmp->oward = LOLTH_SYMBOL;
+			otmp->ohaluengr = TRUE;
+		}
+		else if(kiaransali_symbol && wizwish){/*can't be wished for*/
+			otmp->oward = KIARANSALEE_SYMBOL;
+			otmp->ohaluengr = TRUE;
+		}
+		else if(eilistraee_symbol && wizwish){/*can't be wished for*/
+			otmp->oward = EILISTRAEE_SYMBOL;
 			otmp->ohaluengr = TRUE;
 		}
 	}
