@@ -12724,13 +12724,16 @@ struct monst * mon;
 		|| (mon->mtyp == PM_STAR_ELF && Role_if(PM_MADMAN))
 	)
 		out_faction = YELLOW_FACTION;
-	else if(Is_knox(&u.uz) || Is_sanctum(&u.uz))
+	else if(Is_knox(&u.uz)
+		|| Is_sanctum(&u.uz)
+		|| In_moloch_temple(&u.uz)
+	)
 		out_faction = YENDORIAN_FACTION;
 	else if((In_quest(&u.uz) 
 		|| Is_stronghold(&u.uz)
-		|| u.uz.dnum == temple_dnum
-		|| u.uz.dnum == tower_dnum
+		|| In_tower(&u.uz)
 		|| Is_astralevel(&u.uz)
+		|| Is_peanut(&u.uz)
 	) && !peaceful)
 		out_faction = YENDORIAN_FACTION;
 
