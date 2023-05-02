@@ -12205,7 +12205,7 @@ dosymbiotic_equip()
 		doliving(&youmonst, uarms);
 	if(uarm && ((check_oprop(uarm, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarm) ))
 		doliving(&youmonst, uarm);
-	if(uarmh && ((check_oprop(uarm, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarmh) ))
+	if(uarmh && ((check_oprop(uarmh, OPROP_LIVEW) && u.uinsight >= 40) || is_living_artifact(uarmh) ))
 		doliving(&youmonst, uarmh);
 	
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
