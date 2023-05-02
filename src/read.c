@@ -509,7 +509,7 @@ doread()
 	} else if(scroll->oclass == ARMOR_CLASS
 		&& is_readable_armor(scroll)
 	){
-		pline("There is %s engraved on the armor.",fetchHaluWard((int)scroll->oward));
+		pline("There is %s %s on the %s.",fetchHaluWard((int)scroll->oward), hard_mat(scroll->obj_material) ? "engraved" : "embroidered", distant_name(scroll, xname));
 		if(!scroll->ohaluengr){
 			if( !(u.wardsknown & get_wardID(scroll->oward)) ){
 				You("have learned a new warding sign!");
