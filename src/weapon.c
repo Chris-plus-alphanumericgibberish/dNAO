@@ -2671,13 +2671,20 @@ struct obj *otmp;
 			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
 				bonus += (arm->spe)/2;
 		}
-		
+
 		if(otmp->oartifact == ART_VELKA_S_RAPIER || (mon->m_lev > 0 && check_oprop(otmp, OPROP_GSSDW))){
 			bonus /= 2;
 			//Int only
 			arm = which_armor(mon, W_ARMH);
 			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
 				bonus += (arm->spe)/2;
+		}
+
+		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
+			//Wis only
+			arm = which_armor(mon, W_ARMH);
+			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
+				bonus += (arm->spe)/4;
 		}
 
 		if(is_mercy_blade(otmp)){
@@ -2781,6 +2788,10 @@ struct obj *otmp;
 			bonus /= 2;
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
+		}
+		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
+			if(ACURR(A_WIS) == 25) bonus += 4;
+			else bonus += (ACURR(A_WIS)-10)/4;
 		}
 		if(is_mercy_blade(otmp)){
 			if(ACURR(A_INT) == 25) bonus += 4;

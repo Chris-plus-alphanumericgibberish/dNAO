@@ -2205,14 +2205,13 @@ A("The Staff of Aesculapius",		QUARTERSTAFF,		"serpent-entwined staff",
 	HEALING, NOFLAG
 	),
 
-/* only gives double spell damage for knights */
 A("The Magic Mirror of Merlin",		MIRROR,				(const char *)0,
 	1500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_LAWFUL, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(), NOFLAG,
-	PROPS(ANTIMAGIC, TELEPAT), NOFLAG,
+	PROPS(ANTIMAGIC, TELEPAT, SPELLBOOST), NOFLAG,
 	NOINVOKE, (ARTI_SPEAK)
 	),
 

@@ -231,7 +231,7 @@ struct obj *otmp;
 {
 	boolean wake = TRUE;	/* Most 'zaps' should wake monster */
 	boolean reveal_invis = FALSE;
-	boolean dbldam = !flags.mon_moving && ((Role_if(PM_KNIGHT) && u.uhave.questart) || Spellboost);
+	boolean dbldam = !flags.mon_moving && Spellboost;
 	int dmg, otyp = otmp->otyp;
 	const char *zap_type_text = "spell";
 	struct obj *obj;

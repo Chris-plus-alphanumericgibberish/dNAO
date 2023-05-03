@@ -934,6 +934,10 @@ you_regen_hp()
 	if (uarm && uarm->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(uarm, IEA_FAST_HEAL)){
 		perX += u.ulevel;
 	}
+	// regeneration weapon
+	if (uwep && uwep->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
+		perX += HEALCYCLE/2;
+	}
 	// Corruption thought
 	if(active_glyph(CORRUPTION) && (*hp < (*hpmax)*.3)){
 		perX += HEALCYCLE;
