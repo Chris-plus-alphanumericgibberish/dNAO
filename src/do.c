@@ -746,7 +746,13 @@ struct obj *obj;
 			if(!DEADMONSTER(mtmp) && get_mx(mtmp, MX_ESUM)){
 				if(mtmp->mextra_p->esum_p->sm_o_id == obj->o_id){
 					update_skull_mon(mtmp, obj);
-					monvanished(mtmp);
+					if(!get_mx(mtmp, MX_ESUM))
+						impossible("Non-summoned skull monster in obj_no_longer_held");
+					else {
+						int dur = timer_duration_remaining(get_timer(mtmp->timed, DESUMMON_MON));
+						mtmp->mextra_p->esum_p->permanent = 0;
+						abjure_summon(mtmp, dur);
+					}
 				}
 			}
 		}
