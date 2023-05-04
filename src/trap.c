@@ -94,7 +94,7 @@ boolean candestroy;
 				return TRUE;
 			case 2:
 				item = (victim == &youmonst) ? uarms : which_armor(victim, W_ARMS);
-				if (!burn_dmg(item, "wooden shield")) continue;
+				if (!burn_dmg(item, "shield")) continue;
 				break;
 			case 3:
 				item = (victim == &youmonst) ? uarmg : which_armor(victim, W_ARMG);
