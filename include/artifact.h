@@ -303,6 +303,7 @@ struct artinstance{
 #define IMAlitness avar1
 #define LeagueMod avar1
 #define Esscoo_mid avar1
+#define uconstel_pets avar1
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2

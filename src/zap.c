@@ -5610,6 +5610,7 @@ allow_artwish()
 	//if(u.ulevel >= 7) n++;		// enough levels to be intimidating to marids/djinni
 	n += (u.uevent.utook_castle & ARTWISH_EARNED);	// sitting on the castle throne
 	n += (u.uevent.uunknowngod & ARTWISH_EARNED);	// sacrificing five artifacts to the priests of the unknown god
+	n += (u.uevent.uconstellation & ARTWISH_SPENT);	// got an extra bonus artwish from the imperial elven ring
 
 	n -= u.uconduct.wisharti;	// how many artifacts the player has wished for
 

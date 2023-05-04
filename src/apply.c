@@ -3228,7 +3228,7 @@ coord *cc;
 			}
 			//If the item was not merged, check if anything special should be done with it (like equipping a saddle)
 			if(!mpickobj(mtmp,otmp)){
-				if(otmp->otyp == SADDLE && !(mtmp->misc_worn_check&W_SADDLE) && can_saddle(mtmp)){
+				if(otmp->otyp == SADDLE && !(mtmp->misc_worn_check&W_SADDLE) && can_saddle(mtmp, otmp)){
 					mtmp->misc_worn_check |= W_SADDLE;
 					otmp->owornmask = W_SADDLE;
 					otmp->leashmon = mtmp->m_id;
@@ -5885,12 +5885,111 @@ use_doll(obj)
 }
 
 boolean
-use_ring_of_wishes(obj)
+wish_imperial(obj)
+struct obj *obj;
+{
+	struct monst * mtmp;
+	boolean madewish = FALSE;
+	if (!DimensionalLock && !(mtmp = makemon(&mons[flags.female ? PM_STAR_EMPRESS : PM_STAR_EMPEROR], u.ux, u.uy, MM_NOCOUNTBIRTH))){
+		pline1(nothing_happens);
+	}
+	else
+	{
+		if (!Blind) {
+			pline("%s descends in a rain of stars!", Amonnam(mtmp));
+			pline("%s speaks.", Monnam(mtmp));
+		}
+		else {
+			You("smell clean air.");
+			pline("%s speaks.", Something);
+		}
+		verbalize("I will grant one wish!");
+		int artwishes = u.uconduct.wisharti;
+		if (makewish(WISH_VERBOSE | (!(u.uevent.uconstellation & ARTWISH_SPENT) ? WISH_ARTALLOW : 0 ))) {
+			obj->spe--;
+			madewish = TRUE;
+		}
+		if (u.uconduct.wisharti > artwishes) {
+			/* made artifact wish */
+			u.uevent.uconstellation |= ARTWISH_SPENT;
+		}
+
+		mongone(mtmp);
+
+		if (!objects[RIN_WISHES].oc_name_known) {
+			makeknown(RIN_WISHES);
+			more_experienced(0, 10);
+		}
+	}
+	return madewish;
+}
+
+boolean
+wish_standard(obj)
 struct obj *obj;
 {
 	struct monst * mtmp;
 	struct monst * mtmp2 = (struct monst*)0;
 	struct monst * mtmp3 = (struct monst*)0;
+	boolean madewish = FALSE;
+	if (!(mtmp = makemon(&mons[PM_DJINNI], u.ux, u.uy, NO_MM_FLAGS))){
+		pline1(nothing_happens);
+	}
+	else
+	{
+		if (!DimensionalLock) {
+			if ((u.uevent.utook_castle & ARTWISH_EARNED) && !(u.uevent.utook_castle & ARTWISH_SPENT))
+				mtmp2 = makemon(&mons[PM_PSYCHOPOMP], u.ux, u.uy, NO_MM_FLAGS);
+			if ((u.uevent.uunknowngod & ARTWISH_EARNED) && !(u.uevent.uunknowngod & ARTWISH_SPENT))
+				mtmp3 = makemon(&mons[PM_PRIEST_OF_AN_UNKNOWN_GOD], u.ux, u.uy, NO_MM_FLAGS);
+		}
+
+		if (!Blind) {
+			pline("%s appears in a cloud of smoke!", Amonnam(mtmp));
+			if (mtmp2 || mtmp3)
+				pline("It is accompanied by %s%s%s.",
+				mtmp2 ? a_monnam(mtmp2) : "",
+				(mtmp2 && mtmp3) ? " and " : "",
+				mtmp3 ? a_monnam(mtmp3) : "");
+			pline("%s speaks.", Monnam(mtmp));
+		}
+		else {
+			You("smell acrid fumes.");
+			pline("%s speaks.", Something);
+		}
+		verbalize("I am the djinni of the ring.  I will grant one wish!");
+		int artwishes = u.uconduct.wisharti;
+		if (makewish(WISH_VERBOSE | (DimensionalLock ? 0 :allow_artwish()))) {
+			obj->spe--;
+			madewish = TRUE;
+		}
+		if (u.uconduct.wisharti > artwishes) {
+			/* made artifact wish */
+			if (mtmp2) {
+				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+				u.uevent.utook_castle |= ARTWISH_SPENT;
+			}
+			else if (mtmp3) {
+				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+				u.uevent.uunknowngod |= ARTWISH_SPENT;
+			}
+		}
+		mongone(mtmp);
+		if (mtmp2)	mongone(mtmp2);
+		if (mtmp3)	mongone(mtmp3);
+
+		if (!objects[RIN_WISHES].oc_name_known) {
+			makeknown(RIN_WISHES);
+			more_experienced(0, 10);
+		}
+	}
+	return madewish;
+}
+
+boolean
+use_ring_of_wishes(obj)
+struct obj *obj;
+{
 	boolean madewish = FALSE;
 
 	if (obj->otyp != RIN_WISHES)
@@ -5912,57 +6011,10 @@ struct obj *obj;
 
 	if (obj->spe > 0)
 	{
-		if (!(mtmp = makemon(&mons[PM_DJINNI], u.ux, u.uy, NO_MM_FLAGS))){
-			pline1(nothing_happens);
-		}
+		if(obj->oartifact == ART_STAR_EMPEROR_S_RING)
+			madewish = wish_imperial(obj);
 		else
-		{
-			if (!DimensionalLock) {
-				if ((u.uevent.utook_castle & ARTWISH_EARNED) && !(u.uevent.utook_castle & ARTWISH_SPENT))
-					mtmp2 = makemon(&mons[PM_PSYCHOPOMP], u.ux, u.uy, NO_MM_FLAGS);
-				if ((u.uevent.uunknowngod & ARTWISH_EARNED) && !(u.uevent.uunknowngod & ARTWISH_SPENT))
-					mtmp3 = makemon(&mons[PM_PRIEST_OF_AN_UNKNOWN_GOD], u.ux, u.uy, NO_MM_FLAGS);
-			}
-
-			if (!Blind) {
-				pline("%s appears in a cloud of smoke!", Amonnam(mtmp));
-				if (mtmp2 || mtmp3)
-					pline("It is accompanied by %s%s%s.",
-					mtmp2 ? a_monnam(mtmp2) : "",
-					(mtmp2 && mtmp3) ? " and " : "",
-					mtmp3 ? a_monnam(mtmp3) : "");
-				pline("%s speaks.", Monnam(mtmp));
-			}
-			else {
-				You("smell acrid fumes.");
-				pline("%s speaks.", Something);
-			}
-			verbalize("I am the djinni of the ring.  I will grant one wish!");
-			int artwishes = u.uconduct.wisharti;
-			if (makewish(WISH_VERBOSE | (DimensionalLock ? 0 :allow_artwish()))) {
-				obj->spe--;
-				madewish = TRUE;
-			}
-			if (u.uconduct.wisharti > artwishes) {
-				/* made artifact wish */
-				if (mtmp2) {
-					pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
-					u.uevent.utook_castle |= ARTWISH_SPENT;
-				}
-				else if (mtmp3) {
-					pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
-					u.uevent.uunknowngod |= ARTWISH_SPENT;
-				}
-			}
-			mongone(mtmp);
-			if (mtmp2)	mongone(mtmp2);
-			if (mtmp3)	mongone(mtmp3);
-
-			if (!objects[RIN_WISHES].oc_name_known) {
-				makeknown(RIN_WISHES);
-				more_experienced(0, 10);
-			}
-		}
+			madewish = wish_standard(obj);
 	}
 	else
 	{

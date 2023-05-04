@@ -3715,6 +3715,9 @@ char *in_buff;
 			else if (!strncmpi(bufp, "psurlon ", l = 8)) {
 				undeadtype = PSURLON;
 			}
+			else if (!strncmpi(bufp, "constellation ", l = 14)) {
+				undeadtype = CONSTELLATION;
+			}
 			else if (!strncmpi(bufp, "mistweaver ", l = 11)) {
 				undeadtype = MISTWEAVER;
 			}
@@ -3781,6 +3784,8 @@ char *in_buff;
 				undeadtype = CRANIUM_RAT;
 			else if (!strncmpi(p, "psurlon",	7))
 				undeadtype = PSURLON;
+			else if (!strncmpi(p, "constellation",	13))
+				undeadtype = CONSTELLATION;
 			else if (!strncmpi(p, "mistweaver", 10))
 				undeadtype = MISTWEAVER;
 			else if (!strncmpi(p, "worldshaper", 11))
@@ -3864,7 +3869,7 @@ char *in_buff;
 		if (ma_require || mg_restrict || gen_restrict){
 			i = 0;
 			if (monclass != MAXMCLASSES)
-				while ((!(ma_require && (whichpm->mflagsa & ma_require)) ||
+				while ((!(!ma_require || (whichpm->mflagsa & ma_require)) ||
 						(whichpm->mflagsg & mg_restrict) ||
 						(whichpm->geno & gen_restrict)) && i < 100)
 					{
@@ -3875,7 +3880,7 @@ char *in_buff;
 					}
 			else
 			{
-				if (!(ma_require && (whichpm->mflagsa & ma_require)) ||
+				if (!(!ma_require || (whichpm->mflagsa & ma_require)) ||
 					(whichpm->mflagsg & mg_restrict) ||
 					(whichpm->geno & gen_restrict))
 				{

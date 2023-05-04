@@ -776,6 +776,32 @@ int template;
 			ptr->msound = (ptr->msound == MS_SILENT) ? MS_SILENT : MS_COUGH;
 			ptr->mresists &= ~(MR_POISON|MR_DRAIN|MR_SICK|MR_MAGIC);
 		break;
+	case CONSTELLATION:
+			ptr->geno |= (G_NOCORPSE);
+			ptr->nac = 0;
+			ptr->hdr = 0;
+			ptr->bdr = 0;
+			ptr->gdr = 0;
+			ptr->ldr = 0;
+			ptr->fdr = 0;
+			//Monsters that can move get faster, to at least normal speed
+			if(ptr->mmove){
+				ptr->mmove += 4;
+				if(ptr->mmove < 12)
+					ptr->mmove = 12;
+			}
+			ptr->msound = MS_SILENT;
+			ptr->mresists = MR_ALL|MR_MAGIC;
+			ptr->mflagsm |= MM_FLY|MM_BREATHLESS|MM_FLOAT;
+			ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_CARNIVORE | MT_HERBIVORE | MT_TRAITOR);
+			ptr->mflagst |= MT_WANDER|MT_STALK|MT_HOSTILE|MT_MINDLESS;
+			ptr->mflagsb |= MB_UNSOLID|MB_INSUBSTANTIAL;
+			ptr->mflagsg &= ~(MG_PNAME);
+			ptr->mflagsg |= MG_NASTY|MG_HATESUNHOLY;
+			ptr->mflagsa = MA_ET;
+			ptr->mflagsv = MV_DETECTION|MV_OMNI;
+			ptr->mflagsw = MW_ELDER_EYE_PLANES;
+		break;
 	}
 #undef MT_ITEMS
 
@@ -887,6 +913,22 @@ int template;
 			attk[j] = noattack;
 		}
 
+		/* some templates completely skip specific attacks */
+		while ((template == CONSTELLATION) &&
+			(
+			attk->aatyp == AT_SPIT
+			|| attk->aatyp == AT_ENGL
+			|| attk->aatyp == AT_GAZE
+			|| attk->aatyp == AT_ARRW
+			|| attk->aatyp == AT_VINE
+			)
+		){
+			/* shift all further attacks forwards one slot, and make last one all 0s */
+			for (j = 0; j < (NATTK - i - 1); j++)
+				attk[j] = attk[j + 1];
+			attk[j] = noattack;
+		}
+
 		/* some templates alter damage types */
 		if (template == POISON_TEMPLATE){
 			if(ptr->mtyp == PM_JRT_NETJER){
@@ -903,6 +945,34 @@ int template;
 			else if(attk->adtyp == AD_PHYS && (attk->aatyp || attk->damn || attk->damd))
 				attk->adtyp = AD_DRCO;
 			//Note: also affects AD_MOON, but this must be handled after the phase of moon code in xhity.
+		}
+
+		/* some templates alter attacks */
+		if (template == CONSTELLATION){
+			if(attk->aatyp == AT_SRPR || attk->aatyp == AT_WEAP){
+				attk->aatyp = AT_SRPR;
+				attk->adtyp = AD_STAR;
+				attk->damn = 4;
+				attk->damd = 8;
+			}
+			else if(attk->aatyp == AT_XSPR || attk->aatyp == AT_XWEP){
+				attk->aatyp = AT_XSPR;
+				attk->adtyp = AD_STAR;
+				attk->damn = 4;
+				attk->damd = 8;
+			}
+			else if(attk->aatyp == AT_MSPR || attk->aatyp == AT_MARI){
+				attk->aatyp = AT_MSPR;
+				attk->adtyp = AD_STAR;
+				attk->damn = 4;
+				attk->damd = 8;
+			}
+			else if(attk->aatyp == AT_DSPR || attk->aatyp == AT_DEVA){
+				attk->aatyp = AT_DSPR;
+				attk->adtyp = AD_STAR;
+				attk->damn = 4;
+				attk->damd = 8;
+			}
 		}
 
 		/* if creatures don't have eyes, some gaze attacks are impossible */

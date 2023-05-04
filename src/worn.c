@@ -2029,16 +2029,16 @@ boolean polyspot;
 		}
 	}
 #ifdef STEED
-	if (!can_saddle(mon)) {
-	    if ((otmp = which_armor(mon, W_SADDLE)) != 0) {
+	otmp = which_armor(mon, W_SADDLE);
+	if (otmp && !can_saddle(mon, otmp)) {
 		if (polyspot) bypass_obj(otmp);
 		m_lose_armor(mon, otmp);
 		if (vis)
 		    pline("%s saddle falls off.", s_suffix(Monnam(mon)));
-	    }
 	    if (mon == u.usteed)
-		goto noride;
-	} else if (mon == u.usteed && !can_ride(mon)) {
+			goto noride;
+	}
+	else if (mon == u.usteed && !can_ride(mon)) {
 	noride:
 	    You("can no longer ride %s.", mon_nam(mon));
 	    if (touch_petrifies(u.usteed->data) &&

@@ -168,7 +168,7 @@
 #define is_silver(ptr)	((ptr)->mtyp == PM_ARGENACH_RILMANI || \
 				 (ptr)->mtyp == PM_AMM_KAMEREL || \
 				 (ptr)->mtyp == PM_ARGENTUM_GOLEM)
-#define is_silver_mon(mon)	(is_silver((mon)->data))
+#define is_silver_mon(mon)	(is_silver((mon)->data) || has_template(mon, CONSTELLATION))
 #define is_stone(ptr)	((ptr)->mtyp == PM_DUST_VORTEX || \
 				 (ptr)->mtyp == PM_EARTH_ELEMENTAL || \
 				 (ptr)->mtyp == PM_TERRACOTTA_SOLDIER || \

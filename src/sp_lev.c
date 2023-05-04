@@ -1852,6 +1852,11 @@ default_case:
 				set_material_gm(stuff, WOOD);
 				add_to_container(otmp, stuff);
 
+				stuff = mksobj(SADDLE, MKOBJ_ARTIF);
+				set_material_gm(stuff, WOOD);
+				add_oprop(otmp, OPROP_PHSEW);
+				add_to_container(otmp, stuff);
+
 				if(flags.initgend){
 					default_add(PLAIN_DRESS);
 					stuff->obj_color = rn2(2) ? CLR_YELLOW : CLR_BRIGHT_GREEN;

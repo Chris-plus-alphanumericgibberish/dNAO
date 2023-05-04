@@ -1543,6 +1543,8 @@ char * str;
 		template = CRANIUM_RAT;
 	else if (strstri(s_temp, "psurlon") == s_temp)
 		template = PSURLON;
+	else if (strstri(s_temp, "constellation") == s_temp)
+		template = CONSTELLATION;
 	else if (strstri(s_temp, "mistweaver") == s_temp)
 		template = MISTWEAVER;
 	else if (strstri(s_temp, "deloused") == s_temp)

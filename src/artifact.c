@@ -6908,6 +6908,7 @@ arti_invoke(obj)
 		oart->inv_prop == ANNUL ||
 		oart->inv_prop == VOID_CHIME ||
 		oart->inv_prop == CHANGE_SIZE ||
+		oart->inv_prop == IMPERIAL_RING ||
 		oart->inv_prop == SEVENFOLD
 	))
 		obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
@@ -10091,6 +10092,63 @@ arti_invoke(obj)
 			doliving_ibite_arm(&youmonst, obj, TRUE);
 			time = MOVE_PARTIAL;
 		break;
+        case IMPERIAL_RING:{
+			if(obj->spe <= 0 && artinstance[obj->oartifact].uconstel_pets >= 2){
+				pline("Nothing happens!");
+				break;
+			}
+			winid tmpwin;
+			anything any;
+			menu_item *selected;
+			int n;
+
+			any.a_void = 0;         /* zero out all bits */
+			tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+			
+			any.a_int = 1;
+			if(obj->spe > 0)
+				add_menu(tmpwin, NO_GLYPH, &any, 'a', 0, ATR_NONE, "Make Wish", MENU_UNSELECTED);
+			any.a_int++; //Advance to next option anyway
+			if(artinstance[obj->oartifact].uconstel_pets < 2)
+				add_menu(tmpwin, NO_GLYPH, &any, 'b', 0, ATR_NONE, "Summon Constellation", MENU_UNSELECTED);
+
+			end_menu(tmpwin, "Call upon the stars?");
+			n = select_menu(tmpwin, PICK_ONE, &selected);
+
+			if(n > 0){
+				n = selected[0].item.a_int;
+				free(selected);
+			}
+			destroy_nhwindow(tmpwin);
+			if(!n){
+				return MOVE_CANCELLED;
+			}
+
+			if(n == 1){
+				use_ring_of_wishes(obj);
+			}
+			else if(n == 2){
+				if(artinstance[obj->oartifact].uconstel_pets < 2){
+					struct monst *mtmp;
+					mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, 0, MG_NOWISH|MG_NOTAME, G_UNIQ, (char *)0);
+					if (!mtmp) {
+						pline("Perhaps try summoning something else?");
+					}
+					else {
+						set_template(mtmp, CONSTELLATION);
+						EDOG(mtmp)->loyal = 1;
+						if(!Blind)
+							pline("Motes of light condense into %s.", mon_nam(mtmp));
+						artinstance[obj->oartifact].uconstel_pets++;
+					}
+				}
+				else pline("Nothing happens!");
+			}
+			else {
+				pline1(Never_mind);
+			}
+		}break;
         case SNARE_WEAPONS:{
 			struct monst *mtmp;
 			struct obj *otmp, *nobj;

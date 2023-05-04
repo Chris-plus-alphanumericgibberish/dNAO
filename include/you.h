@@ -67,8 +67,9 @@ struct u_event {
 #define ARTWISH_SPENT	2
 	Bitfield(ascended,1);			/*32 has offered the Amulet */
 	Bitfield(knoxmade,1);			/*33 Portal to Ludios has been made in the main dungeon, teleport ok */
+	Bitfield(uconstellation, 2);	/*35 has earned the star emperor ring wish, used artifact wish */
 	
-	Bitfield(padding,10);			/*43 reseve another bitfield in event. */
+	Bitfield(padding,10);			/*45 reseve another bitfield in event. */
 };
 
 /* KMH, conduct --

@@ -38,8 +38,9 @@ rider_cant_reach()
 
 /* Can this monster wear a saddle? */
 boolean
-can_saddle(mtmp)
+can_saddle(mtmp, otmp)
 	struct monst *mtmp;
+	struct obj *otmp;
 {
 	struct permonst *ptr = mtmp->data;
 
@@ -51,8 +52,9 @@ can_saddle(mtmp)
 			) && 
 			(ptr->msize >= MZ_MEDIUM) &&
 			!(humanoid(ptr) && ptr->mtyp != PM_SPROW) &&
-			!amorphous(ptr) && !noncorporeal(ptr) &&
-			!is_whirly(ptr) && !unsolid(ptr));
+			!amorphous(ptr) && !is_whirly(ptr) && 
+			((otmp && check_oprop(otmp, OPROP_PHSEW)) || !(noncorporeal(ptr) || unsolid(ptr)))
+			);
 }
 
 
@@ -120,7 +122,7 @@ use_saddle(otmp)
 	    pline("I think %s would mind.", mon_nam(mtmp));
 	    return 1;
 	}
-	if (!can_saddle(mtmp)) {
+	if (!can_saddle(mtmp, otmp)) {
 		You_cant("saddle such a creature.");
 		return 1;
 	}
@@ -315,7 +317,7 @@ mount_steed(mtmp, force)
 	    You_cant("ride that creature while under water.");
 	    return (FALSE);
 	}
-	if (!can_saddle(mtmp) || !can_ride(mtmp)) {
+	if (!can_saddle(mtmp, otmp) || !can_ride(mtmp)) {
 	    You_cant("ride such a creature.");
 	    return (0);
 	}
