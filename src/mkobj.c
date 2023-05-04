@@ -3049,7 +3049,7 @@ place_object(otmp, x, y)
 register struct obj *otmp;
 int x, y;
 {
-    register struct obj *otmp2 = level.objects[x][y];
+    register struct obj *otmp2;
 
     if (otmp->where != OBJ_FREE)
 	panic("place_object: obj not free");
@@ -3057,13 +3057,14 @@ int x, y;
     obj_no_longer_held(otmp);
     if (is_boulder(otmp)) block_point(x,y);	/* vision */
 
+	otmp2 = level.objects[x][y];//Special effects of obj_no_longer_held may change level.objects[x][y]
     /* obj goes under boulders */
     if (otmp2 && is_boulder(otmp2)) {
-	otmp->nexthere = otmp2->nexthere;
-	otmp2->nexthere = otmp;
+		otmp->nexthere = otmp2->nexthere;
+		otmp2->nexthere = otmp;
     } else {
-	otmp->nexthere = otmp2;
-	level.objects[x][y] = otmp;
+		otmp->nexthere = otmp2;
+		level.objects[x][y] = otmp;
     }
 
     /* set the new object's location */
