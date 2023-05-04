@@ -133,6 +133,7 @@ static struct Bool_Opt
 #endif
 	{"hilite_hidden_stairs",    &iflags.hilite_hidden_stairs, TRUE, SET_IN_GAME},	/*WC*/
 	{"hilite_obj_piles",    &iflags.hilite_obj_piles, FALSE, SET_IN_GAME},	/*WC*/
+	{"default_template_hilite", &iflags.default_template_hilite, TRUE, SET_IN_FILE },
 	{"dnethack_start_text",    &iflags.dnethack_start_text, TRUE, DISP_IN_GAME},
 	{"artifact_descriptors",    &iflags.artifact_descriptors, FALSE, SET_IN_GAME},
 	{"force_artifact_names",    &iflags.force_artifact_names, TRUE, SET_IN_GAME},
@@ -767,7 +768,63 @@ initoptions()
 	} else
 #endif
 		read_config_file((char *)0);
+	if(iflags.default_template_hilite){
+		if(!(iflags.monstertemplate[ZOMBIFIED-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[ZOMBIFIED-1].bg = CLR_GREEN;
+			iflags.monstertemplate[ZOMBIFIED-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
 
+		if(!(iflags.monstertemplate[SKELIFIED-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[SKELIFIED-1].bg = CLR_GREEN;
+			iflags.monstertemplate[SKELIFIED-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
+
+		if(!(iflags.monstertemplate[CRYSTALFIED-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[CRYSTALFIED-1].bg = CLR_GREEN;
+			iflags.monstertemplate[CRYSTALFIED-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
+
+		if(!(iflags.monstertemplate[FRACTURED-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[FRACTURED-1].bg = CLR_GREEN;
+			iflags.monstertemplate[FRACTURED-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
+
+		if(!(iflags.monstertemplate[TOMB_HERD-1].set&MONSTERTEMPLATE_FOREGROUND)){
+			iflags.monstertemplate[TOMB_HERD-1].fg = CLR_GRAY;
+		}
+		if(!(iflags.monstertemplate[TOMB_HERD-1].set&MONSTERTEMPLATE_SYMBOL)){
+			iflags.monstertemplate[TOMB_HERD-1].symbol = '`';
+		}
+		iflags.monstertemplate[TOMB_HERD-1].set |= MONSTERTEMPLATE_FOREGROUND|MONSTERTEMPLATE_SYMBOL;
+
+		if(!(iflags.monstertemplate[YELLOW_TEMPLATE-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[YELLOW_TEMPLATE-1].bg = CLR_GREEN;
+			iflags.monstertemplate[YELLOW_TEMPLATE-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
+
+		if(!(iflags.monstertemplate[DREAM_LEECH-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[DREAM_LEECH-1].bg = CLR_GREEN;
+			iflags.monstertemplate[DREAM_LEECH-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
+
+		if(!(iflags.monstertemplate[MOLY_TEMPLATE-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[MOLY_TEMPLATE-1].bg = CLR_GREEN;
+			iflags.monstertemplate[MOLY_TEMPLATE-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
+
+		if(!(iflags.monstertemplate[SPORE_ZOMBIE-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[SPORE_ZOMBIE-1].bg = CLR_GREEN;
+			iflags.monstertemplate[SPORE_ZOMBIE-1].set |= MONSTERTEMPLATE_BACKGROUND;
+		}
+
+		if(!(iflags.monstertemplate[CORDYCEPS-1].set&MONSTERTEMPLATE_SYMBOL)){
+			iflags.monstertemplate[CORDYCEPS-1].symbol = 'F';
+		}
+		if(!(iflags.monstertemplate[CORDYCEPS-1].set&MONSTERTEMPLATE_BACKGROUND)){
+			iflags.monstertemplate[CORDYCEPS-1].bg = CLR_GREEN;
+		}
+		iflags.monstertemplate[CORDYCEPS-1].set |= MONSTERTEMPLATE_BACKGROUND|MONSTERTEMPLATE_SYMBOL;
+	}
 	(void)fruitadd(pl_fruit);
 	/* Remove "slime mold" from list of object names; this will	*/
 	/* prevent it from being wished unless it's actually present	*/
