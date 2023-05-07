@@ -9857,7 +9857,7 @@ arti_invoke(obj)
 				obj->age = monstermoves;
 				return MOVE_CANCELLED;
 			}
-#define astel_blast(x, y, size) explode(x, y, AD_MAGM, WAND_CLASS, (d(1, 12) + uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, size + !!Double_spell_size)
+#define astel_blast(x, y, size) if (isok(x, y)) explode(x, y, AD_MAGM, WAND_CLASS, (d(1, 12) + uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, size + !!Double_spell_size)
 			if (!getdir((char *)0)) { //Oh, getdir must set the .d_ variables below.
 			    /* getdir cancelled, just do the nondirectional scroll */
 				obj->age = 0;

@@ -2882,6 +2882,9 @@ winid *datawin;
 			case ART_GIANTSLAYER:
 				Strcat(buf, "damage to large creatures.");
 				break;
+			case ART_FALLINGSTAR_MANDIBLES:
+				Strcat(buf, "magic damage, doubled against those who came from the stars.");
+				break;
 			default:
 				if (oart->adtyp == AD_PHYS && !(oart->aflags&ARTA_HATES))
 				{
