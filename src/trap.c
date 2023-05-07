@@ -23,7 +23,7 @@ STATIC_DCL int FDECL(disarm_magic_trap, (struct trap *));
 STATIC_DCL int FDECL(disarm_landmine, (struct trap *));
 STATIC_DCL int FDECL(disarm_squeaky_board, (struct trap *));
 STATIC_DCL int FDECL(disarm_shooting_trap, (struct trap *));
-STATIC_DCL int FDECL(try_lift, (struct monst *, struct trap *, int, BOOLEAN_P));
+STATIC_DCL boolean FDECL(try_lift, (struct monst *, struct trap *, int, BOOLEAN_P));
 STATIC_DCL int FDECL(help_monster_out, (struct monst *, struct trap *));
 STATIC_DCL boolean FDECL(thitm, (struct monst *,int,BOOLEAN_P));
 STATIC_DCL int FDECL(mkroll_launch,
@@ -4366,7 +4366,7 @@ struct trap *ttmp;
 
 /* Is the weight too heavy?
  * Formula as in near_capacity() & check_capacity() */
-STATIC_OVL int
+STATIC_OVL boolean
 try_lift(mtmp, ttmp, wt, stuff)
 struct monst *mtmp;
 struct trap *ttmp;
@@ -4384,11 +4384,11 @@ boolean stuff;
 			mtmp->mpeaceful = 1;
 			set_malign(mtmp);		/* reset alignment */
 			pline("%s thinks it was nice of you to try.", Monnam(mtmp));
-			return MOVE_INSTANT;
+			return FALSE;
 	    }
-	    return MOVE_CANCELLED;
+	    return FALSE;
 	}
-	return MOVE_STANDARD;
+	return TRUE;
 }
 
 /* Help trapped monster (out of a (spiked) pit) */
@@ -4468,12 +4468,14 @@ struct trap *ttmp;
 
 	/* is the monster too heavy? */
 	wt = inv_weight() + mtmp->data->cwt;
-	if (try_lift(mtmp, ttmp, wt, FALSE) != MOVE_CANCELLED) return MOVE_STANDARD;
+	if (!try_lift(mtmp, ttmp, wt, FALSE))
+		return MOVE_STANDARD;
 
 	/* is the monster with inventory too heavy? */
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj)
 		wt += otmp->owt;
-	if (try_lift(mtmp, ttmp, wt, TRUE) != MOVE_CANCELLED) return MOVE_STANDARD;
+	if (!try_lift(mtmp, ttmp, wt, TRUE))
+		return MOVE_STANDARD;
 
 	You("pull %s out of the pit.", mon_nam(mtmp));
 	mtmp->mtrapped = 0;
