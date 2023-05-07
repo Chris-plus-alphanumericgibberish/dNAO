@@ -5440,6 +5440,80 @@ boolean invoked;
 }
 
 void
+doliving_fallingstar(magr, wep, invoked)
+struct monst *magr;
+struct obj *wep;
+boolean invoked;
+{
+	int x = x(magr), y = y(magr);
+	int i, j;
+	int delta = 1;
+	struct attack symbiote = { AT_HITS, AD_PHYS, 4, wep->spe/2};
+	struct monst *mdef;
+	boolean youdef, youagr = (magr == &youmonst);
+	boolean peaceSafe = youagr || magr->mpeaceful;
+	boolean message = TRUE;
+	
+	if(youagr){
+		if(wep == uwep) delta = 3; 
+	}
+	else {
+		if(wep == MON_WEP(magr)) delta = 3;
+	}
+	
+	if (!invoked && u.uinsight < rnd(100)) return;
+	
+	for(i = x-delta; i <= x+delta; i++)
+		for(j = y-delta; j <= y+delta; j++){
+			if(!isok(i,j))
+				continue;
+			if(i == x && j == y)
+				continue;
+			
+			if((!invoked && rn2(10)) || (invoked && !message && rn2(4)))
+				continue;
+			
+			mdef = m_u_at(i,j);
+			if(!mdef || DEADMONSTER(mdef))
+				continue;
+			youdef = (mdef == &youmonst);
+			
+			if(peaceSafe && (youdef || mdef->mpeaceful))
+				continue;
+			if(!peaceSafe && youdef && !mdef->mpeaceful)
+				continue;
+
+			if(!youdef && nonthreat(mdef))
+				continue;
+			
+			if ((youdef && (Flying || Levitation)) || (!youdef && (mon_resistance(mdef,FLYING) || mon_resistance(mdef,LEVITATION))))
+				continue;
+			
+			//Note: petrifying targets are safe, attacked by spikes from ground, this shouldn't trigger passives?
+			if(mdef->mtyp == PM_PALE_NIGHT) continue;
+			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
+				if (message){
+					message = FALSE;
+					pline("Pointed rocks erupt from the ground around you!");
+				}
+				xmeleehity(magr, mdef, &symbiote, (struct obj **)0, 0, 0, FALSE);
+				if(DEADMONSTER(magr))
+					return; //oops!
+			}
+			
+			if(u.uinsight >= 50 && invoked && !rn2(4)){
+				pline("A torrent of energy erupts from the jaws!");
+				struct zapdata beam;
+				basiczap(&beam, AD_MAGM, ZAP_BREATH, 6);
+				beam.unreflectable = ZAP_REFL_NEVER;
+				beam.no_bounce = TRUE;
+				zap(magr, x(magr), y(magr), sgn(x(mdef) - x(magr)), sgn(y(mdef) - y(magr)), BOLT_LIM, &beam);
+				return;
+			}
+		}
+}
+
+void
 doliving_healing_armor(magr, wep, invoked)
 struct monst *magr;
 struct obj *wep;
@@ -5586,6 +5660,8 @@ struct obj *wep;
 		doliving_esscoo(magr, wep, FALSE);
 	else if(wep->oartifact == ART_CROWN_OF_THE_PERCIPIENT)
 		doliving_percipient(magr, wep, FALSE);
+	else if(wep->oartifact == ART_FALLINGSTAR_MANDIBLES)
+		doliving_fallingstar(magr, wep, FALSE);
 	else doliving_single_attack(magr, wep);
 }
 
