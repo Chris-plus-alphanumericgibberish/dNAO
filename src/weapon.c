@@ -183,7 +183,7 @@ struct monst *magr;
 		ptr = youracedata;
 	
 	if (Is_weapon || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)){
-		if(Race_if(PM_ORC) && otmp == uwep){
+		if(youagr && Race_if(PM_ORC) && otmp == uwep){
 			tmp += max((u.ulevel+2)/3, otmp->spe);
 		} else {
 			tmp += otmp->spe;
