@@ -448,6 +448,10 @@ static const char *haluMesg[] = {
 		"Your true face... What kind of... face is it? I wonder... The face under the mask... Is that... your true face?",
 		"You've met with a terrible fate, haven't you?",
 	"So I really am just a failure!", /*Breath of the Wild*/
+
+	"This land is peaceful, its inhabitants kind.", /* Dark Souls */
+	"Long may the sun shine!", /* Dark Souls 3 */
+
 	"Why are you sad?", /*Blood-C*/
 	"Only accurate information has practical application.", /* not sure where this originated, possibly Aron Ra?*/
 	"We will come for you again  When you are alone  In the dark  Without your sword", /*Jake Wyatt's Necropolis*/
@@ -4077,7 +4081,9 @@ static const char *epitaphs[] = {
 	"Did you see him passing by?", /* Dark Souls 3 */
 		"The world began without knowledge, and without knowledge will it end.",
 		"Fear not the dark, my friend. And let the feast begin.",
-	
+
+	"Let the winds lift you, to a higher place.", /* Elden Ring */
+
 	"For every hero commemorated, a thousand martyrs die unmourned and unremembered.", /*Warhammer 40k*/
 	
 	"FIQ:  One step from divinity.",
