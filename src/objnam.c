@@ -1537,7 +1537,7 @@ boolean adjective;
 			int gemtype = (obj->oclass == GEM_CLASS) ? obj->otyp : obj->sub_material;
 
 			if (!objects[gemtype].oc_name_known) {
-				char str[BUFSZ];
+				static char str[BUFSZ];
 				char * s = str;	/* locally re-define s to be a non-const char*, to use Sprintf */
 				Sprintf(s, (adjective ? "%s gem" : "%s gemstone"), (char*)OBJ_DESCR(objects[gemtype]));
 				return (const char *)s;
