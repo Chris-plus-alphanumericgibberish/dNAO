@@ -1945,11 +1945,13 @@ shk_other_services()
 			add_menu(tmpwin, NO_GLYPH, &any , 'p', 0, ATR_NONE,
 				"Poison", MENU_UNSELECTED);
 	}
-  
   	/* Armor-works */
 	if ((ESHK(shkp)->services & (SHK_SPECIAL_A|SHK_SPECIAL_B))
 			 &&(ESHK(shkp)->shoptype == ARMORSHOP
 			   || ESHK(shkp)->shoptype == CERAMICSHOP
+			   || ESHK(shkp)->shoptype == SANDWALKER
+			   || ESHK(shkp)->shoptype == NAIADSHOP
+			   || ESHK(shkp)->shoptype == PETSHOP
 			   )
 	) {
 		any.a_int = 5;

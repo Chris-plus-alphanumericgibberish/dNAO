@@ -914,7 +914,9 @@ struct monst *shk;
 	if ((ESHK(shk)->shoptype == WEAPONSHOP) ||
 		(ESHK(shk)->shoptype == SANDWALKER) ||
 		(ESHK(shk)->shoptype == ARMORSHOP) ||
+		(ESHK(shk)->shoptype == PETSHOP) ||
 		(ESHK(shk)->shoptype == CERAMICSHOP) ||
+		(ESHK(shk)->shoptype == NAIADSHOP) ||
 		(ESHK(shk)->shoptype == WANDSHOP) ||
 		(ESHK(shk)->shoptype == TOOLSHOP) ||
 		(ESHK(shk)->shoptype == CANDLESHOP) ||
