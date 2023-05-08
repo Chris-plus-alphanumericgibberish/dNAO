@@ -3366,10 +3366,10 @@ boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 	timer_element * tm;
 	struct esum * esum;
 	for (tm = timer_base; tm; tm = tm->next) {
-		if (tm->timeout > monstermoves && (
+		if (
 			(tm->func_index == DESUMMON_MON && (((struct monst *)tm->arg)->mextra_p) && (esum = ((struct monst *)tm->arg)->mextra_p->esum_p) && (mon == esum->summoner)) ||
 			(tm->func_index == DESUMMON_OBJ && (((struct obj   *)tm->arg)->oextra_p) && (esum = ((struct obj   *)tm->arg)->oextra_p->esum_p) && (mon == esum->summoner))
-			))
+			)
 		{
 			/* exception 1: summoned pets may follow the player between levels */
 			if ((tm->func_index == DESUMMON_MON) && (mon == &youmonst)) {
