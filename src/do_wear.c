@@ -5501,7 +5501,7 @@ boolean invoked;
 					return; //oops!
 			}
 			
-			if(u.uinsight >= 50 && invoked && !rn2(4)){
+			if(u.uinsight >= 50 && invoked && !rn2(4) && m_online(magr, mdef, x(mdef), y(mdef), TRUE, TRUE)){
 				pline("A torrent of energy erupts from the jaws!");
 				struct zapdata beam;
 				basiczap(&beam, AD_MAGM, ZAP_BREATH, 6);
