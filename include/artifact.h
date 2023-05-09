@@ -414,6 +414,7 @@ extern struct artifact * artilist;
 #define IMPERIAL_RING	(LAST_PROP+89)
 #define SNARE_WEAPONS	(LAST_PROP+90)
 #define CHANGE_SIZE		(LAST_PROP+91)
+#define WAVES_DARKNESS	(LAST_PROP+92)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
@@ -479,7 +480,7 @@ extern struct artifact * artilist;
 /* artifact has no specific material or size, eg "silver Grimtooth" */
 #define is_malleable_artifact(a) (is_nameable_artifact((a)) || (a) == &artilist[ART_EXCALIBUR] || (a) == &artilist[ART_GUNGNIR] || (a) == &artilist[ART_DIRGE])
 
-#define is_living_artifact(obj) ((obj)->oartifact == ART_TENTACLE_ROD || (obj)->oartifact == ART_DRAGONHEAD_SHIELD || (obj)->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING || (obj)->oartifact == ART_RITUAL_RINGED_SPEAR || (obj)->oartifact == ART_RINGED_BRASS_ARMOR || (obj)->oartifact == ART_IBITE_ARM || (obj)->oartifact == ART_ESSCOOAHLIPBOOURRR || (obj)->oartifact == ART_CROWN_OF_THE_PERCIPIENT)
+#define is_living_artifact(obj) ((obj)->oartifact == ART_TENTACLE_ROD || (obj)->oartifact == ART_DRAGONHEAD_SHIELD || (obj)->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING || (obj)->oartifact == ART_RITUAL_RINGED_SPEAR || (obj)->oartifact == ART_RINGED_BRASS_ARMOR || (obj)->oartifact == ART_IBITE_ARM || (obj)->oartifact == ART_ESSCOOAHLIPBOOURRR || (obj)->oartifact == ART_CROWN_OF_THE_PERCIPIENT || (obj)->oartifact == ART_FALLINGSTAR_MANDIBLES)
 #define is_bloodthirsty_artifact(obj) (arti_is_prop(obj, ARTI_BLOODTHRST) && roll_generic_flat_madness(FALSE))
 
 #define is_mastery_artifact_nameable(a) (\

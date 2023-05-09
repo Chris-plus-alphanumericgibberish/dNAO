@@ -632,6 +632,7 @@ E void FDECL(doliving_mad_king, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_spear, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ringed_armor, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_ibite_arm, (struct monst *, struct obj *, boolean));
+E void FDECL(doliving_fallingstar, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_healing_armor, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_armor_salve, (struct monst *, struct obj *));
 E void FDECL(dotsmi_theft, (struct monst *, struct monst *, struct obj *, struct obj *));

@@ -4718,8 +4718,12 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	}
 
 	if(otmp->otyp == PINCER_STAFF && u.uinsight >= 10){
-		if(otmp->ovar1_pincerTarget == mdef->m_id)
+		if(otmp->ovar1_pincerTarget == mdef->m_id){
 			*plusdmgptr += basedmg;
+			if (u.uinsight >= 20 && otmp->oartifact && otmp->oartifact == ART_FALLINGSTAR_MANDIBLES && !Magic_res(mdef)){
+				*truedmgptr += reduce_dmg(mdef, d(1, 12), FALSE, TRUE);
+			}
+		}
 		else otmp->ovar1_pincerTarget = mdef->m_id;
 	}
 }
@@ -5444,6 +5448,13 @@ boolean printmessages; /* print generic elemental damage messages */
 		if (Hallucination) You("flame the nasty troll!");  //trollsbane hits monsters that pop in to ruin your day.
 		*truedmgptr += d(2, 20) + 2 * otmp->spe; //boosts power better than demonbane hitting silver hating.
 	}
+	
+	if (youagr && is_alien(pd) && oartifact == ART_FALLINGSTAR_MANDIBLES)
+	{
+		*truedmgptr += basedmg;
+	}
+	
+	
 	if (arti_attack_prop(otmp, ARTA_BLIND) && !resists_blnd(mdef) && !rn2(3)) {
 		long rnd_tmp;
 		wepdesc = "brilliant light";
@@ -9895,6 +9906,47 @@ arti_invoke(obj)
 				do_bloodletter(obj);
 			}
 
+		break;
+		case WAVES_DARKNESS:
+			if (!uwep || uwep != obj){
+				You_feel("that you should be wielding %s.", the(xname(obj)));
+				obj->age = monstermoves;
+				return MOVE_CANCELLED;
+			}
+#define astel_blast(x, y, size) if (isok(x, y)) explode(x, y, AD_MAGM, WAND_CLASS, (d(1, 12) + uwep->spe) * ((Double_spell_size) ? 3 : 2) / 2, EXPL_CYAN, size + !!Double_spell_size)
+			if (!getdir((char *)0)) { //Oh, getdir must set the .d_ variables below.
+			    /* getdir cancelled, just do the nondirectional scroll */
+				obj->age = 0;
+				break;
+			}
+			else if(u.dx && !u.dy) {
+				pline("%d %d", u.dx, u.dy);
+				astel_blast(u.ux+u.dx, u.uy-1, 1);
+				astel_blast(u.ux+u.dx, u.uy, 1);
+				astel_blast(u.ux+u.dx, u.uy+1, 1);
+			}
+			else if(!u.dx && u.dy) {
+				astel_blast(u.ux-1, u.uy+u.dy, 1);
+				astel_blast(u.ux, u.uy+u.dy, 1);
+				astel_blast(u.ux+1, u.uy+u.dy, 1);
+			}
+			else if(u.dx && u.dy) {
+				astel_blast(u.ux, u.uy+u.dy, 1);
+				astel_blast(u.ux+u.dx, u.uy+u.dy, 1);
+				astel_blast(u.ux+u.dx, u.uy, 1);
+			}
+			else if(u.dz > 0){
+				astel_blast(u.ux, u.uy, 0);
+				astel_blast(u.ux, u.uy, 1);
+				astel_blast(u.ux, u.uy, 2);
+			}
+			else if(u.dz < 0){
+				doliving_fallingstar(&youmonst, obj, TRUE);
+			} else {
+				pline("%s", nothing_happens);
+				obj->age = 0;
+			}
+#undef astel_blast
 		break;
 		case SEVEN_LEAGUE_STEP:
 			if (obj != uarmf) {

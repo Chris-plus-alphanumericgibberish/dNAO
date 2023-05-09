@@ -783,6 +783,22 @@ A("Bloodletter",	MORNING_STAR,				(const char *)0,
 	BLOODLETTER, (ARTI_PLUSTEN)
 	),
 
+/* astel's head on a stick */
+/* pincer staff that's dubiously alive and shoots explosions, rocks and lasers */
+/* invoke to throw some magical explosions at things adjacent or around you, dealing 3d12+3xspe. invoke up triggers living effects */
+/* also does 2x base to is_aliens, an extra 1d12 magic on grabbed targets above 20 insight */
+/* as living when wielded, above 40 insight is alive, randomly (insight > d100) throws 4d(spe/2) rocks at non-flying targets within 3 tiles occasionally */
+/* as an invoke, can end rock attacks with a 6d6 magic beam towards that target, doesn't bounce/can't reflect. only possible when invoked */
+A("Fallingstar Mandibles",	PINCER_STAFF,				(const char *)0,
+	4000L, MT_DEFAULT, MZ_LARGE, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_B, (ARTG_INHER),
+	NO_MONS(),
+	ATTK(AD_MAGM, 12, 12), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	WAVES_DARKNESS, (ARTI_PLUSTEN)
+	),
+
 /*Needs encyc entry*/
 A("The Silence Glaive",	GLAIVE,							(const char *)0,
 	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
