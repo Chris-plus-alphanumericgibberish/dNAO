@@ -2005,8 +2005,8 @@ int effect_num;
 			break;
 		case SEDU_PUNISH:
 			punish((struct obj *)0);
-			punish((struct obj *)0);
-			punish((struct obj *)0);
+			if(Punished)
+				uball->owt = min(uball->owt+320, 1600);
 			verbalize("Stay here.");
 			break;
 		case SEDU_JEALOUS:
