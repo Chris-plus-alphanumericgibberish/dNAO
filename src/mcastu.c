@@ -6100,7 +6100,7 @@ int tary;
 			if (u.ualign.record <= 1 || !rn2(min(u.ualign.record, 20))){
 				if (!Punished) {
 					punish((struct obj *)0);
-					if (is_prince(magr->data)) uball->owt += 160;
+					if (is_prince(magr->data) && Punished) uball->owt += 160;
 				}
 				else {
 					Your("iron ball gets heavier!");
@@ -6178,7 +6178,7 @@ int tary;
 				case 2:
 					if (!Punished) {
 						punish((struct obj *)0);
-						if (is_prince(magr->data)) uball->owt += 160;
+						if (is_prince(magr->data) && Punished) uball->owt += 160;
 					}
 					else {
 						Your("iron ball gets heavier!");
