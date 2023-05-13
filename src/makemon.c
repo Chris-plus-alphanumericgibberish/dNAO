@@ -13535,10 +13535,8 @@ int faction;
 			}
 		break;
 		case S_GNOME:
-			if(mndx == PM_CLOCKWORK_SOLDIER || mndx == PM_CLOCKWORK_DWARF || 
-			   mndx == PM_FABERGE_SPHERE || mndx == PM_FIREWORK_CART || 
-			   mndx == PM_JUGGERNAUT || mndx == PM_ID_JUGGERNAUT
-			) mtmp->mvar_vector = rn2(8);
+			if(is_vectored_mtyp(mndx))
+				mtmp->mvar_vector = rn2(8);
 			
 			if(mndx == PM_ID_JUGGERNAUT) {
 				mtmp->perminvis = TRUE;

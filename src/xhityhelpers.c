@@ -82,11 +82,7 @@ boolean active;
 		return FALSE;
 
 	/* limited attack angles (monster-agressor only) */
-	if (!youagr && (
-		pa->mtyp == PM_CLOCKWORK_SOLDIER || pa->mtyp == PM_CLOCKWORK_DWARF ||
-		pa->mtyp == PM_FABERGE_SPHERE || pa->mtyp == PM_FIREWORK_CART ||
-		pa->mtyp == PM_JUGGERNAUT || pa->mtyp == PM_ID_JUGGERNAUT))
-	{
+	if (!youagr && is_vectored_mtyp(pa->mtyp)){
 		if (x(magr) + xdir[(int)magr->mvar1] != tarx ||
 			y(magr) + ydir[(int)magr->mvar1] != tary)
 			return FALSE;

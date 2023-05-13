@@ -7652,10 +7652,7 @@ struct obj **optr;
 			mm->mhp = mm->mhpmax;
 			mm->mtame = 10;
 			mm->mpeaceful = 1;
-			if ((u.dx || u.dy) && (mm->mtyp == PM_CLOCKWORK_SOLDIER || mm->mtyp == PM_CLOCKWORK_DWARF ||
-				mm->mtyp == PM_FABERGE_SPHERE || mm->mtyp == PM_FIREWORK_CART ||
-				mm->mtyp == PM_JUGGERNAUT || mm->mtyp == PM_ID_JUGGERNAUT)
-				){
+			if ((u.dx || u.dy) && is_vectored_mtyp(mm->mtyp)){
 				mm->mvar_vector = -1;
 				while (xdir[(int)(++mm->mvar_vector)] != u.dx || ydir[(int)mm->mvar_vector] != u.dy);
 			}

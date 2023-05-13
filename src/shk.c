@@ -3853,9 +3853,7 @@ register struct monst *shkp;
 
 	if((udist = distu(omx,omy)) < 3 &&
 		((shkp->mtyp != PM_GRID_BUG && shkp->mtyp != PM_BEBELITH) || (omx==u.ux || omy==u.uy)) &&
-		((shkp->mtyp != PM_CLOCKWORK_SOLDIER && shkp->mtyp != PM_CLOCKWORK_DWARF && 
-		   shkp->mtyp != PM_FABERGE_SPHERE && shkp->mtyp != PM_FIREWORK_CART && 
-		   shkp->mtyp != PM_JUGGERNAUT && shkp->mtyp != PM_ID_JUGGERNAUT) ||
+		(!is_vectored_mtyp(shkp->mtyp) ||
 			(omx + xdir[(int)shkp->mvar_vector] == u.ux && 
 			   omy + ydir[(int)shkp->mvar_vector] == u.uy 
 			)

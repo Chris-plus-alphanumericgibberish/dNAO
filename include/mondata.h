@@ -1253,6 +1253,13 @@
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_WIZARD)) || \
 						 (mon)->mtyp == PM_APPRENTICE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_WIZARD))
 
+#define is_vectored_mtyp(mtyp)	(is_random_vectored_mtyp(mtyp) || is_guided_vectored_mtyp(mtyp))
+
+#define is_random_vectored_mtyp(mtyp)	((mtyp) == PM_CLOCKWORK_SOLDIER || (mtyp) == PM_CLOCKWORK_DWARF || \
+				   (mtyp) == PM_FABERGE_SPHERE || (mtyp) == PM_FIREWORK_CART)
+
+#define is_guided_vectored_mtyp(mtyp)	((mtyp) == PM_JUGGERNAUT || (mtyp) == PM_ID_JUGGERNAUT)
+
 #define likes_swamp(ptr)	((ptr)->mlet == S_PUDDING || \
 				 (ptr)->mlet == S_FUNGUS || \
 				 (ptr)->mtyp == PM_OCHRE_JELLY)

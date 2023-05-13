@@ -3158,12 +3158,11 @@ nexttry:
 #endif
 	       ))
 			continue;
-		if(mdat->mtyp == PM_CLOCKWORK_SOLDIER || mdat->mtyp == PM_CLOCKWORK_DWARF || 
-		   mdat->mtyp == PM_FABERGE_SPHERE || mdat->mtyp == PM_FIREWORK_CART || 
-		   mdat->mtyp == PM_JUGGERNAUT || mdat->mtyp == PM_ID_JUGGERNAUT
-		) if(x + xdir[(int)mon->mvar_vector] != nx || 
+		if(is_vectored_mtyp(mdat->mtyp)){
+			if(x + xdir[(int)mon->mvar_vector] != nx || 
 			   y + ydir[(int)mon->mvar_vector] != ny 
 			) continue;
+		}
 		if(mon->mfrigophobia && ntyp == ICE)
 			continue;
 		if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && ntyp == AIR
@@ -3752,9 +3751,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		u.ukinghill)
 	    return ALLOW_M|ALLOW_TM;
 	else if (mdef->mtyp != PM_TINKER_GNOME && mdef->mtyp != PM_HOOLOOVOO && 
-			(magr->mtyp == PM_CLOCKWORK_SOLDIER || magr->mtyp == PM_CLOCKWORK_DWARF || 
-			 magr->mtyp == PM_FABERGE_SPHERE || magr->mtyp == PM_FIREWORK_CART || 
-			 magr->mtyp == PM_JUGGERNAUT || magr->mtyp == PM_ID_JUGGERNAUT))
+		is_vectored_mtyp(magr->mtyp))
 	    return ALLOW_M|ALLOW_TM;
 	/* Various other combinations such as dog vs cat, cat vs rat, and
 	   elf vs orc have been suggested.  For the time being we don't
