@@ -1586,7 +1586,7 @@ dosacrifice()
     int pm;
     aligntyp altaralign = (a_align(u.ux,u.uy));
 	int altargod = god_at_altar(u.ux, u.uy);
-    if (!on_altar() || u.uswallow) {
+    if (!on_altar() || (u.uswallow && u.ustuck->mtyp != PM_MOUTH_OF_THE_GOAT)) {
 		You("are not standing on an altar.");
 		return MOVE_CANCELLED;
     }
@@ -3960,6 +3960,8 @@ int eatflag;
 		}
 		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 			if(mtmp->mfaction == GOATMOM_FACTION){
+				if(u.ustuck == mtmp)
+					expels(mtmp, mtmp->data, TRUE);
 				mtmp->mpeaceful = 1;
 				set_malign(mtmp);
 				newsym(mtmp->mx, mtmp->my);
