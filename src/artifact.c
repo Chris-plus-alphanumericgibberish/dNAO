@@ -4458,9 +4458,9 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	if (otmp->otyp == TORCH && otmp->lamplit) {
 		if (!Fire_res(mdef)) {
 			if (species_resists_cold(mdef))
-				(*truedmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				(*truedmgptr) += 3 * (rnd(10) + otmp->spe) / 2;
 			else
-				(*truedmgptr) += rnd(6) + otmp->spe;
+				(*truedmgptr) += rnd(10) + otmp->spe;
 		}
 		if (!UseInvFire_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
@@ -4471,17 +4471,17 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 	if (otmp->otyp == MAGIC_TORCH && otmp->lamplit){
 		if (!Fire_res(mdef)) {
 			if (species_resists_cold(mdef))
-				(*truedmgptr) += 3 * (rnd(4) + 2*otmp->spe) / 2;
+				(*truedmgptr) += 3 * (rnd(8) + 2*otmp->spe) / 2;
 			else
-				(*truedmgptr) += rnd(4) + 2*otmp->spe;
+				(*truedmgptr) += rnd(8) + 2*otmp->spe;
 		}
 	}
 	if (otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
 		if (!Cold_res(mdef)) {
 			if (species_resists_fire(mdef))
-				(*truedmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				(*truedmgptr) += 3 * (rnd(10) + otmp->spe) / 2;
 			else
-				(*truedmgptr) += rnd(6) + otmp->spe;
+				(*truedmgptr) += rnd(10) + otmp->spe;
 		}
 		if (!UseInvCold_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -4491,9 +4491,9 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 
 		if (!Shock_res(mdef) || !Acid_res(mdef)) {
 			if (!Shock_res(mdef) && !Acid_res(mdef))
-				(*truedmgptr) += 3 * (rnd(6) + otmp->spe) / 2;
+				(*truedmgptr) += 3 * (rnd(10) + otmp->spe) / 2;
 			else
-				(*truedmgptr) += rnd(6) + otmp->spe;
+				(*truedmgptr) += rnd(10) + otmp->spe;
 		}
 		if (!UseInvShock_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
