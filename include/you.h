@@ -63,11 +63,11 @@ struct u_event {
 	Bitfield(uaxus_foe,1);			/*27 enemy of the modrons */
 	Bitfield(utook_castle, 2);		/*29 sat on the castle throne, used artifact wish */
 	Bitfield(uunknowngod, 2);		/*31 given five artifacts to the priests of the unknown god, used artifact wish */
+	Bitfield(uconstellation, 2);	/*33 has earned the star emperor ring wish, used artifact wish */
 #define ARTWISH_EARNED	1
 #define ARTWISH_SPENT	2
-	Bitfield(ascended,1);			/*32 has offered the Amulet */
-	Bitfield(knoxmade,1);			/*33 Portal to Ludios has been made in the main dungeon, teleport ok */
-	Bitfield(uconstellation, 2);	/*35 has earned the star emperor ring wish, used artifact wish */
+	Bitfield(ascended,1);			/*34 has offered the Amulet */
+	Bitfield(knoxmade,1);			/*35 Portal to Ludios has been made in the main dungeon, teleport ok */
 	
 	Bitfield(padding,10);			/*45 reseve another bitfield in event. */
 };
