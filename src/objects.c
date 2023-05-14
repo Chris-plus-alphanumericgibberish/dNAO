@@ -189,7 +189,7 @@ PROJECTILE(("crossbow bolt"),
 		1, 55, 1, 2,  0, IRON,   -P_CROSSBOW, HI_METAL),
 PROJECTILE(("droven bolt", "crossbow bolt"), /*Needs encyc entry*/
 		DMG(D(9), F(1)), DMG(D(6), F(1)),
-		0,  0, 1, 2,  2, OBSIDIAN_MT, -P_CROSSBOW, CLR_BLACK, O_MATSPEC(UNIDED)),
+		0,  0, 1, 2,  8, OBSIDIAN_MT, -P_CROSSBOW, CLR_BLACK, O_MATSPEC(UNIDED)),
 
 WEAPON(("dart"),
 	DMG(D(3)), DMG(D(2)),
