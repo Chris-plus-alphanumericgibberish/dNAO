@@ -190,13 +190,14 @@ struct monst {
 	Bitfield(mspores,1); /* monster is being consumed by Zuggutmoy's spores */ /*118*/
 	Bitfield(mformication,1); /* monster is covered in imaginary insects */ /*119*/
 	Bitfield(mscorpions,1); /* monster is covered in stinging scorpions */ /*120*/
+	Bitfield(mamnesia,1); /* monster is about to forget it hates the PC */ /*121*/
 	
-	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*121*/
+	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*122*/
 #define DEADMONSTER_DEAD	0x1
 #define DEADMONSTER_PURGE	0x2
 #define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->deadmonster)
-	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*123*/
-	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*124*/
+	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*124*/
+	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*125*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	

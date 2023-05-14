@@ -15819,8 +15819,7 @@ int vis;						/* True if action is at all visible to the player */
 				else {
 					if (canseemon(mdef) && (mdef->mtame || !mdef->mpeaceful))
 						pline("%s looks around as if awakening from a dream.", Monnam(mdef));
-					mdef->mtame = FALSE;
-					mdef->mpeaceful = TRUE;
+					mdef->mamnesia = TRUE;
 				}
 				break;
 			case OPOISON_HALLU:

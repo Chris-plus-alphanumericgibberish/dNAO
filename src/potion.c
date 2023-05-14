@@ -1773,14 +1773,16 @@ boolean your_fault;
 		    break;
 		default:
 		    if (mon->data->msound == MS_NEMESIS && canseemon(mon)
-				    && your_fault)
-			pline("%s curses your ancestors!", Monnam(mon));
+				    && your_fault
+			){
+				pline("%s curses your ancestors!", Monnam(mon));
+			}
 		    else if (mon->isshk) {
-			angermon = FALSE;
-			if (canseemon(mon))
-			    pline("%s looks at you curiously!", 
-					    Monnam(mon));
-			make_happy_shk(mon, FALSE);
+				angermon = FALSE;
+				if (canseemon(mon))
+					pline("%s looks at you curiously!", 
+							Monnam(mon));
+				mon->mamnesia = TRUE;
 		    } else if (!is_covetous(mon->data) &&
 				    !resist(mon, POTION_CLASS, 0, 0)) {
 				angermon = FALSE;
@@ -1792,8 +1794,7 @@ boolean your_fault;
 					} else
 						pline("%s looks bewildered!", Monnam(mon));
 				}
-				mon->mpeaceful = TRUE;
-				mon->mtame = FALSE;	
+				mon->mamnesia = TRUE;
 		    }
 		    break;
 		}

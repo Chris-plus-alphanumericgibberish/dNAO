@@ -1502,6 +1502,17 @@ moveloop()
 				delouse_tame(mtmp);
 				continue;
 			}
+			if(mtmp->mamnesia){
+				if(mtmp->isshk){
+					make_happy_shk(mtmp, FALSE);
+				}
+				else {
+					mtmp->mpeaceful = TRUE;
+					mtmp->mtame = FALSE;
+				}
+				mtmp->mamnesia = FALSE;
+				newsym(mtmp->mx, mtmp->my);
+			}
 			if (!DEADMONSTER(mtmp)
 				&& mon_attacktype(mtmp, AT_WDGZ)
 				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
@@ -1586,6 +1597,17 @@ moveloop()
 				if(has_template(mtmp, DELOUSED)){
 					delouse_tame(mtmp);
 					continue;
+				}
+				if(mtmp->mamnesia){
+					if(mtmp->isshk){
+						make_happy_shk(mtmp, FALSE);
+					}
+					else {
+						mtmp->mpeaceful = TRUE;
+						mtmp->mtame = FALSE;
+					}
+					mtmp->mamnesia = FALSE;
+					newsym(mtmp->mx, mtmp->my);
 				}
 				if (mtmp->minvis){
 					newsym(mtmp->mx, mtmp->my);
@@ -2935,6 +2957,17 @@ karemade:
 		if(has_template(mtmp, DELOUSED)){
 			delouse_tame(mtmp);
 			continue;
+		}
+		if(mtmp->mamnesia){
+			if(mtmp->isshk){
+				make_happy_shk(mtmp, FALSE);
+			}
+			else {
+				mtmp->mpeaceful = TRUE;
+				mtmp->mtame = FALSE;
+			}
+			mtmp->mamnesia = FALSE;
+			newsym(mtmp->mx, mtmp->my);
 		}
 		if (mtmp->minvis){
 			newsym(mtmp->mx, mtmp->my);

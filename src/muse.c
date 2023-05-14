@@ -2334,6 +2334,7 @@ museamnesia:
 			if(!otmp->blessed){
 				untame(mtmp, 1);
 				mtmp->mferal = 0;
+				mtmp->mpeaceful = TRUE;
 			}
 			mtmp->seenmadnesses = 0;
 			mtmp->mcrazed = 0;
