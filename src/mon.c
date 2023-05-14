@@ -4619,7 +4619,7 @@ register struct monst *mtmp;
 	else if (mtmp->mtyp == PM_ANUBAN_JACKAL)
 		set_mon_data(mtmp, PM_ANUBITE);
 
-	if(mtmp->mtyp == PM_WITCH_S_FAMILIAR){
+	if(mtmp->mtyp == PM_WITCH_S_FAMILIAR && mtmp->mvar_witchID){
 		dead_familiar(mtmp->mvar_witchID);
 	}
 

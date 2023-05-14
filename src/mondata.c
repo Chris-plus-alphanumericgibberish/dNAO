@@ -99,6 +99,121 @@ int mtyp;
 	return;
 }
 
+void
+update_mon_mvar(mon, oldpm, newpm)
+struct monst *mon;
+int oldpm;
+int newpm;
+{
+	//set mvar1
+	if(is_vectored_mtyp(newpm)){
+		if(!is_vectored_mtyp(oldpm))
+			mon->mvar_vector = rn2(8);
+		//else same as old
+	}
+	else if(is_half_dragon(&mons[newpm])){
+		if(!is_half_dragon(&mons[oldpm])){
+			static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
+			mon->mvar_hdBreath = half_dragon_types[rn2(6)];
+		}
+	}
+	else if(is_boreal_dragoon(&mons[newpm])){
+		if(!is_boreal_dragoon(&mons[oldpm])){
+			static const int boreal_dragon_types[] = { AD_COLD, AD_FIRE, AD_MAGM, AD_PHYS };
+			if (!mon->mvar_hdBreath)
+				mon->mvar_hdBreath = boreal_dragon_types[rn2(4)];
+		}
+	}
+	else if(has_sunflask(newpm)){
+		if(!has_sunflask(oldpm)){
+			mon->mvar_flask_charges = MAX_FLASK_CHARGES(mon);
+		}
+	}
+	else switch(newpm){
+		case PM_PALE_NIGHT:
+			mon->mvar_paleWarning = 0;
+		break;
+		case PM_WITCH_S_FAMILIAR:
+			if(oldpm != PM_WITCH_S_FAMILIAR)
+				mon->mvar_witchID = 0;
+		break;
+		case PM_DANCING_BLADE:
+			if(oldpm != PM_DANCING_BLADE)
+				mon->mvar_suryaID = 0;
+		break;
+		case PM_BLOB_OF_PRESERVED_ORGANS:
+			if(oldpm != PM_BLOB_OF_PRESERVED_ORGANS)
+				mon->mvar_huskID = 0;
+		break;
+		case PM_ALABASTER_MUMMY:
+			if(oldpm != PM_ALABASTER_MUMMY){
+				switch(rnd(6)){
+					case 1:
+						mon->mvar_syllable = SYLLABLE_OF_STRENGTH__AESH;
+					break;
+					case 2:
+						mon->mvar_syllable = SYLLABLE_OF_GRACE__UUR;
+					break;
+					case 3:
+						mon->mvar_syllable = SYLLABLE_OF_LIFE__HOON;
+					break;
+					case 4:
+						mon->mvar_syllable = SYLLABLE_OF_SPIRIT__VAUL;
+						give_mintrinsic(mon, DISPLACED);
+					break;
+					case 5:
+						mon->mvar_syllable = SYLLABLE_OF_POWER__KRAU;
+					break;
+					case 6:
+						mon->mvar_syllable = SYLLABLE_OF_THOUGHT__NAEN;
+					break;
+				}
+			}
+		break;
+		case PM_LICH__THE_FIEND_OF_EARTH:
+		case PM_KARY__THE_FIEND_OF_FIRE:
+		case PM_KRAKEN__THE_FIEND_OF_WATER:
+		case PM_TIAMAT__THE_FIEND_OF_WIND:
+		case PM_CHAOS:
+			mon->mvar_spList_1 = 0;
+		break;
+		case PM_DREAD_SERAPH:
+			mon->mvar_dreadPrayer_cooldown = 0;
+		break;
+		case PM_DRACAE_ELADRIN:{
+			struct permonst *ptr = mkclass(S_CHA_ANGEL, G_PLANES);
+			if(ptr)
+				mon->mvar_dracaePreg = monsndx(ptr);
+		}
+		break;
+		case PM_LIVING_DOLL:
+			mon->mvar_dollTypes = init_doll_sales();
+		break;
+		case PM_STRANGE_LARVA:
+			mon->mvar_tanninType = rn2(10) ? PM_ANCIENT_NUPPERIBO : rn2(5) ? PM_BYAKHEE : PM_MARILITH;
+		break;
+		case PM_DEMINYMPH:
+			mon->mvar_deminymph_role = PM_CAVEMAN;
+		break;
+		default:
+			//mon->mvar_ancient_breath_cooldown = 0;
+			//mon->mvar_yellow_lifesaved = FALSE;
+			mon->mvar1 = 0;
+		break;
+	}
+
+	mon->mvar2 = 0;
+	// mvar_dracaePregTimer = 0
+	// mvar_spList_2 = 0
+	// mvar_dreadPrayer_progress = 0
+	// mvar_attack_pm = 0
+
+	// mvar_conversationTracker = 0
+	// mvar_lifesigns = 0 /*Note: lifesigns are 0ed */
+
+	mon->mvar3 = 0;
+}
+
 /*
  * Safely sets mon->data from an existing data pointer.
  * Calling `set_mon_data_core(mon, mon->data)` is always ok.
@@ -119,56 +234,58 @@ struct permonst * ptr;
 		mon->mintrinsics[i] = 0;
 	}
 
+	/*Updates monster mvar*/
+	if(mon->mtyp != ptr->mtyp)
+		update_mon_mvar(mon, mon->mtyp, ptr->mtyp);
+
 	/* resistances */
 	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
+	/*
+		Store half dragon breath type in mvar_hdBreath
+	*/
 	if(is_half_dragon(ptr)){
-		/*
-			Store half dragon breath type in mvar_hdBreath
-		*/
-		if(is_half_dragon(ptr)){
-			static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
-			if (!mon->mvar_hdBreath)
-				mon->mvar_hdBreath = half_dragon_types[rn2(6)];
-			switch (mon->mvar_hdBreath){
-				case AD_COLD:
-					mon->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
-				break;
-				case AD_FIRE:
-					mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
-				break;
-				case AD_SLEE:
-					mon->mintrinsics[(SLEEP_RES-1)/32] |= (1 << (SLEEP_RES-1)%32);
-				break;
-				case AD_ELEC:
-					mon->mintrinsics[(SHOCK_RES-1)/32] |= (1 << (SHOCK_RES-1)%32);
-				break;
-				case AD_DRST:
-					mon->mintrinsics[(POISON_RES-1)/32] |= (1 << (POISON_RES-1)%32);
-				break;
-				case AD_ACID:
-					mon->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
-				break;
-				case AD_MAGM:
-					mon->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
-				break;
-			}
-		} else if(is_boreal_dragoon(ptr)){
-			static const int boreal_dragon_types[] = { AD_COLD, AD_FIRE, AD_MAGM, AD_PHYS };
-			if (!mon->mvar_hdBreath)
-				mon->mvar_hdBreath = boreal_dragon_types[rn2(4)];
-			switch (mon->mvar_hdBreath){
-				case AD_COLD:
-					mon->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
-				break;
-				case AD_FIRE:
-					mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
-				break;
-				case AD_MAGM:
-					mon->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
-				break;
-				case AD_PHYS:
-				break;
-			}
+		static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
+		if (!mon->mvar_hdBreath)
+			mon->mvar_hdBreath = half_dragon_types[rn2(6)];
+		switch (mon->mvar_hdBreath){
+			case AD_COLD:
+				mon->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
+			break;
+			case AD_FIRE:
+				mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
+			break;
+			case AD_SLEE:
+				mon->mintrinsics[(SLEEP_RES-1)/32] |= (1 << (SLEEP_RES-1)%32);
+			break;
+			case AD_ELEC:
+				mon->mintrinsics[(SHOCK_RES-1)/32] |= (1 << (SHOCK_RES-1)%32);
+			break;
+			case AD_DRST:
+				mon->mintrinsics[(POISON_RES-1)/32] |= (1 << (POISON_RES-1)%32);
+			break;
+			case AD_ACID:
+				mon->mintrinsics[(ACID_RES-1)/32] |= (1 << (ACID_RES-1)%32);
+			break;
+			case AD_MAGM:
+				mon->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
+			break;
+		}
+	} else if(is_boreal_dragoon(ptr)){
+		static const int boreal_dragon_types[] = { AD_COLD, AD_FIRE, AD_MAGM, AD_PHYS };
+		if (!mon->mvar_hdBreath)
+			mon->mvar_hdBreath = boreal_dragon_types[rn2(4)];
+		switch (mon->mvar_hdBreath){
+			case AD_COLD:
+				mon->mintrinsics[(COLD_RES-1)/32] |= (1 << (COLD_RES-1)%32);
+			break;
+			case AD_FIRE:
+				mon->mintrinsics[(FIRE_RES-1)/32] |= (1 << (FIRE_RES-1)%32);
+			break;
+			case AD_MAGM:
+				mon->mintrinsics[(ANTIMAGIC-1)/32] |= (1 << (ANTIMAGIC-1)%32);
+			break;
+			case AD_PHYS:
+			break;
 		}
 	}
 #define set_mintrinsic(ptr_condition, intrinsic) \
