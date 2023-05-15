@@ -673,7 +673,10 @@ int godnum;
 	    		!(EDisint_resistance & W_ARM) && !uarmc)
 		(void) destroy_arm(uarm);
 #ifdef TOURIST
-	    if (uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc) (void) destroy_arm(uarmu);
+	    if (uarmu && 
+			!(EReflecting & W_ARMU) && !(EDisint_resistance & W_ARMU) &&
+			!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc
+		) (void) destroy_arm(uarmu);
 #endif
 	    if (!Disint_resistance)
 		fry_by_god(godnum);
@@ -1585,6 +1588,7 @@ dosacrifice()
     int value = 0;
     int pm;
     aligntyp altaralign = (a_align(u.ux,u.uy));
+	char buf[BUFSZ];
 	int altargod = god_at_altar(u.ux, u.uy);
     if (!on_altar() || (u.uswallow && u.ustuck->mtyp != PM_MOUTH_OF_THE_GOAT)) {
 		You("are not standing on an altar.");
@@ -1685,7 +1689,6 @@ dosacrifice()
 				exercise(A_WIS, TRUE);
 			} else if ((u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) || altaralign != A_CHAOTIC) {
 				if((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM)){
-					char buf[BUFSZ];
 					Sprintf(buf, "You feel a deep sense of kinship to %s!  Sacrifice %s anyway?",
 						the(xname(otmp)), (otmp->quan == 1L) ? "it" : "one");
 					if (yn_function(buf,ynchars,'n')=='n') return MOVE_CANCELLED;
@@ -2041,7 +2044,8 @@ dosacrifice()
 				u.lastprayed = moves;
 				u.lastprayresult = PRAY_ANGER;
 				u.reconciled = REC_NONE;
-				pline("%s rejects your sacrifice!", a_gname());
+				Strcpy(buf, a_gname());
+				pline("%s rejects your sacrifice!", upstart(buf));
 				godvoice(altargod, "Suffer, infidel!");
 				change_luck(-5);
 				(void) adjattrib(A_WIS, -2, TRUE);

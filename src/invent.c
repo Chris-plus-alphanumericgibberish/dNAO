@@ -3812,6 +3812,7 @@ winid *datawin;
 			case FREE_ACTION:
 			case FIXED_ABIL:
 			case CLEAR_THOUGHTS:
+			case MAGICAL_BREATHING:
 				confers = "Confers";
 				break;
 			default:

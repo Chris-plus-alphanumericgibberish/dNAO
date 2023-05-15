@@ -868,7 +868,7 @@ char *buf;
 	if (obj->oclass == POTION_CLASS && obj->odiluted)
 		Strcat(buf, "diluted ");
 
-	if (obj->oeroded && !iscrys) {
+	if (obj->oeroded) {
 		switch (obj->oeroded) {
 		case 2:	Strcat(buf, "very "); break;
 		case 3:	Strcat(buf, "thoroughly "); break;
@@ -878,13 +878,14 @@ char *buf;
 			is_evaporable(obj) ? "tenuous " :
 			is_flammable(obj) ? "burnt " : "eroded ");
 	}
-	if (obj->oeroded2 && !iscrys) {
+	if (obj->oeroded2) {
 		switch (obj->oeroded2) {
 		case 2:	Strcat(buf, "very "); break;
 		case 3:	Strcat(buf, "thoroughly "); break;
 		}
-		Strcat(buf, is_corrodeable(obj) ? "corroded " :
-			"rotted ");
+		Strcat(buf,
+			is_corrodeable(obj) ? "corroded " :
+			is_rottable(obj) ? "rotted " : "eroded ");
 	}
 	if (obj->oeroded3) {
 		if(is_hard(obj)){

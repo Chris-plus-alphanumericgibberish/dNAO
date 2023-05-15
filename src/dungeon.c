@@ -1260,6 +1260,21 @@ Is_branchlev(lev)
 	return (branch *) 0;
 }
 
+d_level *
+branchlev_other_end(bptr, lev)
+branch * bptr;
+d_level * lev;
+{
+	d_level * other_end;
+	if (bptr->end1.dnum == lev->dnum && bptr->end1.dlevel == lev->dlevel)
+		other_end = &(bptr->end2);
+	else if (bptr->end2.dnum == lev->dnum && bptr->end2.dlevel == lev->dlevel)
+		other_end = &(bptr->end1);
+	else
+		other_end = (d_level *)0;
+	return other_end;
+}
+
 /* goto the next level (or appropriate dungeon) */
 void
 next_level(at_stairs)
@@ -2880,10 +2895,10 @@ boolean printdun;
 				Sprintf(eos(buf), " [Third Abyss]");
 			}
 		}
-		else if(In_outlands(&u.uz)){
-			if(dunlev(&u.uz) == 1) Sprintf(eos(buf)," [Gatetown]");
-			else if(dunlev(&u.uz) == 6) Sprintf(eos(buf)," [Spire]");
-			else if(dunlev(&u.uz) == 7) Sprintf(eos(buf)," [Sum of All]");
+		else if(In_outlands(&mptr->lev)){
+			if(dunlev(&mptr->lev) == 1) Sprintf(eos(buf)," [Gatetown]");
+			else if(dunlev(&mptr->lev) == 6) Sprintf(eos(buf)," [Spire]");
+			else if(dunlev(&mptr->lev) == 7) Sprintf(eos(buf)," [Sum of All]");
 		}
 	}
 

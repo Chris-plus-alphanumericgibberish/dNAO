@@ -2777,6 +2777,8 @@ int tary;
 		impossible("cast_spell() called with no caster");
 		return MM_MISS;
 	}
+	if (spell_would_be_useless(magr, mdef, spell, tarx, tary))
+		return MM_MISS;
 
 	/*debug*/
 	//if (wizard) {

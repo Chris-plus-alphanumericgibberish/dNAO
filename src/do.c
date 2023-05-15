@@ -978,7 +978,7 @@ dodown()
 			}
 		}
 	}
-	if(u.ustuck) {
+	if(u.ustuck && (u.uswallow || !sticks(&youmonst))) {
 		You("are %s, and cannot go down.",
 			!u.uswallow ? "being held" : is_animal(u.ustuck->data) ?
 			"swallowed" : "engulfed");
@@ -1071,7 +1071,7 @@ doup()
 		return MOVE_CANCELLED;
 	} else
 #endif
-	if(u.ustuck) {
+	if(u.ustuck && (u.uswallow || !sticks(&youmonst))) {
 		You("are %s, and cannot go up.",
 			!u.uswallow ? "being held" : is_animal(u.ustuck->data) ?
 			"swallowed" : "engulfed");
@@ -2049,29 +2049,8 @@ int different;
 			else
 				pline("%s rises from the dead!", chewed ?
 					Adjmonnam(mtmp, "bite-covered") : Monnam(mtmp));
-			if(level.objects[ox][oy] && !mtmp->menvy){
-				struct obj *cur;
-				struct obj *nobj;
-				for(cur = level.objects[ox][oy]; cur; cur = nobj){
-					nobj = cur->nexthere;
-					/* Monsters don't pick up your ball and chain */
-					if(cur == uball || cur == uchain)
-						continue;
-
-					/* Monsters don't pick up bolted magic chests */
-					if(cur->otyp == MAGIC_CHEST && cur->obolted)
-						continue;
-
-					if(likes_obj(mtmp, cur) || can_equip(mtmp, cur)){
-						obj_extract_self(cur);
-						mpickobj(mtmp, cur);
-					}
-				}
-				m_dowear(mtmp, TRUE);
-				init_mon_wield_item(mtmp);
-				m_level_up_intrinsic(mtmp);
-			}
 		}
+		start_timer(0, TIMER_MONSTER, REVIVE_PICKUP, (genericptr_t)mtmp);
 		break;
 
 	    case OBJ_MINVENT:		/* probably a nymph's */
@@ -2145,6 +2124,44 @@ long timeout;
     }
 }
 
+/* 
+ * Monster picks up and equips all items it likes/can wear on its square.
+ * For use with reviving, so this only happens when timers run, so *after*
+ * all bhito effects finish in the case of a wand affecting a rider corpse
+ */
+void
+revive_mon_pickup(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct monst *mtmp = (struct monst *) arg;
+
+	if (timeout != monstermoves)
+		return;
+
+	if(level.objects[mtmp->mx][mtmp->my] && !mtmp->menvy){
+		struct obj *cur;
+		struct obj *nobj;
+		for(cur = level.objects[mtmp->mx][mtmp->my]; cur; cur = nobj){
+			nobj = cur->nexthere;
+			/* Monsters don't pick up your ball and chain */
+			if(cur == uball || cur == uchain)
+				continue;
+
+			/* Monsters don't pick up bolted magic chests */
+			if(cur->otyp == MAGIC_CHEST && cur->obolted)
+				continue;
+
+			if(likes_obj(mtmp, cur) || can_equip(mtmp, cur)){
+				obj_extract_self(cur);
+				mpickobj(mtmp, cur);
+			}
+		}
+		m_dowear(mtmp, TRUE);
+		init_mon_wield_item(mtmp);
+		m_level_up_intrinsic(mtmp);
+	}
+}
 
 static const int molds[] = 
 {

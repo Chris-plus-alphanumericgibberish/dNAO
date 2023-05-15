@@ -2062,7 +2062,8 @@ meatmetal(mtmp)
 	    if (mtmp->mtyp == PM_RUST_MONSTER && !is_rustprone(otmp))
 		continue;
 	    if (is_metallic(otmp) && !obj_resists(otmp, 0, 95) &&
-		touch_artifact(otmp, mtmp, FALSE)) {
+			touch_artifact(otmp, mtmp, FALSE) && !(otmp->otyp == MAGIC_CHEST && otmp->obolted)
+			) {
 		if (mtmp->mtyp == PM_RUST_MONSTER && otmp->oerodeproof) {
 		    if (canseemon(mtmp) && flags.verbose) {
 			pline("%s eats %s!",

@@ -6040,7 +6040,7 @@ int sx,sy;
 	int i,j;
 	for(i=sx-1;i<sx+2;i++)
 		for(j=sy-1;j<sy+2;j++){
-			if(!isok(i,j) || !(IS_ROCK(levl[i][j].typ) || IS_WALL(levl[i][j].typ))){
+			if(!isok(i,j) || !(IS_ROCK(levl[i][j].typ) || IS_WALL(levl[i][j].typ)) || t_at(i,j)){
 				return FALSE;
 			}
 		}

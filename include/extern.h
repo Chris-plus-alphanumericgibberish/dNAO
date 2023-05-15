@@ -498,6 +498,7 @@ E void FDECL(schedule_goto, (d_level *,BOOLEAN_P,BOOLEAN_P,int,
 E void NDECL(deferred_goto);
 E boolean FDECL(revive_corpse, (struct obj *, int));
 E void FDECL(revive_mon, (genericptr_t, long));
+E void FDECL(revive_mon_pickup, (genericptr_t, long));
 E void FDECL(moldy_corpse, (genericptr_t, long));
 E void FDECL(slimy_corpse, (genericptr_t, long));
 E void FDECL(shady_corpse, (genericptr_t, long));
@@ -729,6 +730,7 @@ E void NDECL(init_dungeons);
 E s_level *FDECL(find_level, (const char *));
 E s_level *FDECL(Is_special, (d_level *));
 E branch *FDECL(Is_branchlev, (d_level *));
+E d_level *FDECL(branchlev_other_end, (branch *, d_level *));
 E int FDECL(ledger_no, (d_level *));
 E int NDECL(maxledgerno);
 E schar FDECL(depth, (d_level *));
@@ -2386,6 +2388,7 @@ E void NDECL(clearpriests);
 
 /* ### projectile.c ### */
 
+E void FDECL(interrupt_multishot, (struct obj *, struct obj *));
 E int FDECL(projectile, (struct monst *, struct obj *, void *, int, int, int, int, int, int, int, boolean, boolean, boolean));
 E void FDECL(hitfloor2, (struct monst *, struct obj **, struct obj *, boolean, boolean));
 E boolean FDECL(xbreathey, (struct monst *, struct attack *, int, int));

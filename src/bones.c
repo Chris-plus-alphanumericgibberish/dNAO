@@ -10,6 +10,7 @@ extern char bones[];	/* from files.c */
 extern long bytes_counted;
 #endif
 
+STATIC_DCL boolean FDECL(no_bones_level_core, (d_level *, boolean));
 STATIC_DCL boolean FDECL(no_bones_level, (d_level *));
 STATIC_DCL void FDECL(goodfruit, (int));
 STATIC_DCL void FDECL(resetobjs,(struct obj *,BOOLEAN_P));
@@ -17,22 +18,33 @@ STATIC_DCL void FDECL(drop_upon_death, (struct monst *, struct obj *, int, int))
 STATIC_DCL void FDECL(sanitize_name, (char *namebuf));
 
 STATIC_OVL boolean
-no_bones_level(lev)
+no_bones_level_core(lev, recursed)
 d_level *lev;
+boolean recursed;
 {
 	extern d_level save_dlevel;		/* in do.c */
 	s_level *sptr;
+	branch * bptr;
 
 	if (ledger_no(&save_dlevel)) assign_level(lev, &save_dlevel);
 
 	return (boolean)(((sptr = Is_special(lev)) != 0 && !sptr->boneid)
 		|| !dungeons[lev->dnum].boneid
-		   /* no bones on the last or multiway branch levels */
-		   /* in any dungeon (level 1 isn't multiway).       */
-		|| Is_botlevel(lev) || (Is_branchlev(lev) && lev->dlevel > 1)
+			/* no bones in the branch level TO the Quest (because this portal can be voided) */
+		|| (!recursed && (bptr = Is_branchlev(lev)) && In_quest(branchlev_other_end(bptr, lev)))
+			/* no bones in a branch level if the other end is nobones */
+		|| (!recursed && (bptr = Is_branchlev(lev)) && no_bones_level_core(branchlev_other_end(bptr, lev), TRUE))
 		   /* no bones in the invocation level               */
 		|| (In_hell(lev) && lev->dlevel == dunlevs_in_dungeon(lev) - 1)
 		);
+}
+
+/* wrapper for no_bones_level_core, so that it and only it can recursively call itself with recursed = TRUE */
+STATIC_OVL boolean
+no_bones_level(lev)
+d_level * lev;
+{
+	return no_bones_level_core(lev, FALSE);
 }
 
 /* Call this function for each fruit object saved in the bones level: it marks
@@ -374,11 +386,6 @@ can_make_bones()
 	    return FALSE;		/* no bones for specific levels */
 	if (u.uswallow) {
 	    return FALSE;		/* no bones when swallowed */
-	}
-	if (!Is_branchlev(&u.uz)) {
-	    /* no bones on non-branches with portals */
-	    for(ttmp = ftrap; ttmp; ttmp = ttmp->ntrap)
-		if (ttmp->ttyp == MAGIC_PORTAL) return FALSE;
 	}
 
 	if(depth(&u.uz) <= 0 ||		/* bulletproofing for endgame */
