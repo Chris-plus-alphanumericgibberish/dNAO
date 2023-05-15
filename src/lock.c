@@ -435,7 +435,7 @@ pick_lock(pick_p) /* pick a lock with a given object */
 		return MOVE_CANCELLED;
 	}
 	if(!freehand()){
-		You_cant("hold %s -- you have no free hands!", doname(pick));
+		You_cant("hold %s -- you have no free %s!", doname(pick), makeplural(body_part(HAND)));
 		return MOVE_CANCELLED;
 	}
 
@@ -867,7 +867,7 @@ int x, y;
 	    return MOVE_CANCELLED;
 	}
 	if(!freehand()){
-	    You_cant("open anything -- you have no free hands!");
+	    You_cant("open anything -- you have no free %s!", makeplural(body_part(HAND)));
 		return MOVE_CANCELLED;
 	}
 
@@ -980,7 +980,7 @@ doclose()		/* try to close a door */
 	    return MOVE_CANCELLED;
 	}
 	if(!freehand()){
-	    You_cant("close anything -- you have no free hands!");
+	    You_cant("close anything -- you have no free %s!", makeplural(body_part(HAND)));
 		return MOVE_CANCELLED;
 	}
 
