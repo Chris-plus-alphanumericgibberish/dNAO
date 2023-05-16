@@ -2461,6 +2461,22 @@ Goodbye()
 
 #ifdef RECORD_ACHIEVE
 void
+add_imp_record(prop)
+long prop;
+{
+	int i, count = 0;
+	achieve.iea_flags |= prop;
+	for(i=0; i<63; i++){
+		if(achieve.iea_flags & (0x1L<<i)){
+			count++;
+		}
+	}
+	if(count >= 15){
+		achieve.trophies |= IEA_UPGRADES;
+	}
+}
+
+void
 give_quest_trophy()
 {
 	if(urole.neminum == PM_MINION_OF_HUHETOTL)

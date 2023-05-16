@@ -2825,6 +2825,7 @@ boolean dumping;
 	CHECK_ACHIEVE(QUITE_MAD,"Quite Mad: Suffered six madnesses")
 	CHECK_ACHIEVE(TOTAL_DRUNK,"Booze Hound")
 	CHECK_ACHIEVE(BOKRUG_QUEST,"Detestable gods: Completed Bokrug's ascension ritual")
+	CHECK_ACHIEVE(IEA_UPGRADES,": 15+ upgrades on a set of imperial elven armor")
 		
 #undef	CHECK_ACHIEVE
 	}

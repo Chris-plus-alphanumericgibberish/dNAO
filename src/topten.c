@@ -1162,6 +1162,7 @@ char *achieveXbuff;
 	CHECK_ACHIEVE(QUITE_MAD,"quite_mad")
 	CHECK_ACHIEVE(TOTAL_DRUNK,"booze_hound")
 	CHECK_ACHIEVE(BOKRUG_QUEST,"bokrug_ascension")
+	CHECK_ACHIEVE(IEA_UPGRADES,"iea_upgraded")
 }
 #undef CHECK_ACHIEVE
 #endif

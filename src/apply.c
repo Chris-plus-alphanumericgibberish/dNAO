@@ -7899,6 +7899,7 @@ resizeArmor()
 	else { \
 		pline("You repair the %s.", subsystem); \
 		add_imp_mod(arm, prop); \
+		add_imp_record(prop);\
 		useup(upitm); \
 		return MOVE_STANDARD; \
 	}

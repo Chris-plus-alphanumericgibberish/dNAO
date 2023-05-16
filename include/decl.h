@@ -713,6 +713,7 @@ struct u_achieve {
 		Bitfield(killed_asmodeus,1);		/* Bragging rights */
 		Bitfield(killed_demogorgon,1);		/* Bragging rights */
 		unsigned long long	trophies;	/* Flags for Junethack trophies */
+		unsigned long iea_flags;	/* IEA flags for Junethack trophy */
 #define	ARC_QUEST		0x1L << 0
 #define	CAV_QUEST		0x1L << 1
 #define	CON_QUEST		0x1L << 2
@@ -765,7 +766,8 @@ struct u_achieve {
 #define	HEA_QUEST		0x1L << 49
 #define	DRO_HEA_QUEST	0x1L << 50
 #define	MONK_QUEST		0x1L << 51
-#define ACHIEVE_NUMBER	52
+#define	IEA_UPGRADES	0x1L << 52
+#define ACHIEVE_NUMBER	53
 };
 
 E struct u_achieve achieve;

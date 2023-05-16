@@ -2556,6 +2556,7 @@ E const char *NDECL(Goodbye);
 E char *FDECL(build_plselection_prompt, (char *, int, int, int, int, int));
 E char *FDECL(root_plselection_prompt, (char *, int, int, int, int, int));
 #ifdef RECORD_ACHIEVE
+E void FDECL(add_imp_record, (long));
 E void NDECL(give_quest_trophy);
 E void NDECL(give_ascension_trophy);
 E void NDECL(give_lamashtu_trophy);
