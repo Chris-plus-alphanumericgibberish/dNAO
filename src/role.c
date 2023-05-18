@@ -2466,7 +2466,7 @@ long prop;
 {
 	int i, count = 0;
 	achieve.iea_flags |= prop;
-	for(i=0; i<63; i++){
+	for(i=0; i<64; i++){
 		if(achieve.iea_flags & (0x1L<<i)){
 			count++;
 		}
