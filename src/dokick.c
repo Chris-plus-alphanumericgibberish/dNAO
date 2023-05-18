@@ -143,6 +143,8 @@ doit:
 		    return;
 		} else if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= 0){
 			coord mm;
+			char buffnam[BUFSZ];
+			Sprintf(buffnam, "%s", Monnam(mon));
 			if(mon_resistance(mon,TELEPORT))
 				mnexto(mon);
 			else if(enexto(&mm, mon->mx, mon->my, mon->data) && abs(mm.x - mon->mx) <= 1 && abs(mm.y - mon->my) <= 1)
@@ -154,7 +156,7 @@ doit:
 					unmap_object(x, y);
 					newsym(x, y);
 				}
-				pline("%s %s, %s evading your %skick.", Monnam(mon),
+				pline("%s %s, %s evading your %skick.", buffnam,
 					(mon_resistance(mon,TELEPORT) ? "teleports" :
 					 mon_resistance(mon,LEVITATION) ? "floats" :
 					 mon_resistance(mon,FLYING) ? "swoops" :
