@@ -16126,7 +16126,7 @@ struct monst *mtmp;
 	} else if (always_hostile(mtmp->data)) {
 		int absmal = abs(mal);
 		if (coaligned)
-			mtmp->malign = 0;
+			mtmp->malign = (!mtmp->mpeaceful && murderable_mon(mtmp)) ? 1 : 0;
 		else
 			mtmp->malign = max(5,absmal);
 	} else if (coaligned) {
