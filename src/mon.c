@@ -1696,6 +1696,10 @@ struct monst *mtmp;
 		if(canspotmon(mtmp)) pline("%s forms new eyes!",Monnam(mtmp));
 		mtmp->mblinded = 1;
 	}
+	if(!mtmp->mcansee && (mtmp->mtyp == PM_BLASPHEMOUS_LURKER || mtmp->mtyp == PM_LURKING_ONE)){
+		if(canspotmon(mtmp)) pline("%s opens more eyes!",Monnam(mtmp));
+		mtmp->mblinded = 1;
+	}
 	
 	//No point in checking it before setting it.
 	mtmp->mgoatmarked = FALSE;
