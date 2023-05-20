@@ -4430,6 +4430,8 @@ sense_nearby_monsters()
 				if(!(mvitals[monsndx(mtmp->data)].seen)){
 					mvitals[monsndx(mtmp->data)].seen = TRUE;
 					if(Role_if(PM_TOURIST)){
+						if(mtmp->mtyp == PM_STAR_ELF)
+							u.uiearepairs = TRUE;
 						more_experienced(experience(mtmp,0),0);
 						newexplevel();
 					}

@@ -2002,6 +2002,12 @@ u_init()
 		knows_object(LIGHTSABER);
 		knows_object(BEAMSWORD);
 		knows_object(DOUBLE_LIGHTSABER);
+		//Anas are trained in this I guess. Damaged armor can be found in the quest and it's useless if the PC doesn't know how to fix it.
+		u.uiearepairs = TRUE;
+		knows_object(IMPERIAL_ELVEN_BOOTS);
+		knows_object(IMPERIAL_ELVEN_ARMOR);
+		knows_object(IMPERIAL_ELVEN_GAUNTLETS);
+		knows_object(IMPERIAL_ELVEN_HELM);
 		if(Race_if(PM_DWARF)){
 			u.ualign.type = A_CHAOTIC;
 			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
