@@ -2072,16 +2072,16 @@ struct monst *mtmp;
 			m.has_misc = MUSE_MASK;
 		}
 		nomore(MUSE_POT_GAIN_ENERGY);
-		if(!nomouth && obj->otyp == POT_GAIN_ENERGY && (!obj->cursed ||
-			    (!mtmp->isgd && !mtmp->isshk && !mtmp->ispriest))) {
+		if(!nomouth && (mtmp->mcan || (mtmp->mhp <= .5*(mtmp->mhpmax) && mtmp->mspec_used > 2)) && obj->otyp == POT_GAIN_ENERGY) {
 			m.misc = obj;
 			m.has_misc = MUSE_POT_GAIN_ENERGY;
 		}
-		nomore(MUSE_POT_GAIN_ABILITY);
-		if(!nomouth && (mtmp->mcan || (mtmp->mhp <= .5*(mtmp->mhpmax) && mtmp->mspec_used > 2)) && obj->otyp == POT_GAIN_ABILITY) {
-			m.misc = obj;
-			m.has_misc = MUSE_POT_GAIN_ABILITY;
-		}
+		// nomore(MUSE_POT_GAIN_ABILITY);
+		// if(!nomouth && obj->otyp == POT_GAIN_ABILITY && (!obj->cursed ||
+			    // (!mtmp->isgd && !mtmp->isshk && !mtmp->ispriest))) {
+			// m.misc = obj;
+			// m.has_misc = MUSE_POT_GAIN_ABILITY;
+		// }
 		nomore(MUSE_BULLWHIP);
 		if((obj->otyp == BULLWHIP || obj->otyp == VIPERWHIP || obj->otyp == FORCE_WHIP) 
 			&& (MON_WEP(mtmp) == obj || MON_SWEP(mtmp) == obj) &&
