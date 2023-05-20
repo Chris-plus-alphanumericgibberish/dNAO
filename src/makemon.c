@@ -16112,6 +16112,12 @@ struct monst *mtmp;
 	coaligned = (sgn(mal) == sgn(u.ualign.type));
 	if (mtmp->mtyp == urole.ldrnum) {
 		mtmp->malign = -20;
+	} else if (mtmp->mtyp == PM_BLASPHEMOUS_LURKER) {
+		// The Blasphemous Lurker always anomalously counts as a co-aligned priest.
+		mtmp->malign = -15;
+	} else if (mtmp->mtyp == PM_BLASPHEMOUS_HAND || mtmp->mtyp == PM_LURKING_HAND) {
+		// The Blasphemous Lurker always anomalously counts as a co-aligned priest.
+		mtmp->malign = -5;
 	} else if (mal == A_NONE) {
 		if (mtmp->mpeaceful)
 			mtmp->malign = 0;

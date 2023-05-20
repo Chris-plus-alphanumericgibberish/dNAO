@@ -6188,7 +6188,10 @@ cleanup:
 	   u.ualign.type != A_CHAOTIC) {
 		HTelepat &= ~INTRINSIC;
 		change_luck(-2);
-		You("murderer!");
+		if(mtmp->mtyp == PM_BLASPHEMOUS_LURKER)
+			You("...murderer!?");
+		else
+			You("murderer!");
 		if(u.ualign.type == A_LAWFUL){
 			u.hod += 10;
 			u.ualign.sins += 5;
