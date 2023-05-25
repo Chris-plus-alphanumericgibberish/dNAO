@@ -662,7 +662,8 @@ boolean digest_meal;
 					healup += 3;
 				else if((!mon->mcan && free_android(mtmp->data))
 					|| mtmp->mtyp == PM_MYRKALFR || mtmp->mtyp == PM_MYRKALFAR_WARRIOR
-					|| mtmp->mtyp == PM_ARCADIAN_AVENGER
+					|| mtmp->mtyp == PM_ARCADIAN_AVENGER || mtmp->mtyp == PM_PORO_AULON
+					|| mtmp->mfaction == EILISTRAEE_SYMBOL
 					|| (mtmp->mtyp == PM_ELVENKING && mtmp->mfaction == QUEST_FACTION)
 					|| (is_drow(mtmp->data) && mtmp->mtame && mon->mtame)
 				)
@@ -1590,7 +1591,7 @@ register struct monst *mtmp;
 		return 0;
 	}
 
-	if(mtmp->mtyp == PM_PORO_AULON
+	if((mtmp->mtyp == PM_PORO_AULON || mtmp->mtyp == PM_ALIDER)
 		&& !mtmp->mcan && !mtmp->mspec_used
 		&& !(noactions(mtmp))
 		&& !(mindless_mon(mtmp))
