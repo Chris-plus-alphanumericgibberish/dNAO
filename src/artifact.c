@@ -4292,6 +4292,10 @@ int * truedmgptr;
 			bmod = (otmp->wrathdata&0x3L)+1;
 			*plusdmgptr += bmod*basedmg / 4;
 		}
+		if(magr){
+			bmod = min_ints(4, (*hpmax(magr)-*hp(magr)+mlev(magr))*4/(*hpmax(magr)));
+			*plusdmgptr += bmod*basedmg / 4;
+		}
 	}
 	if(youdef ? (u.ualign.type != A_CHAOTIC) : (sgn(mdef->data->maligntyp) >= 0)){
 		if(check_oprop(otmp, OPROP_ANARW))
