@@ -2083,11 +2083,16 @@ humanoid_sound:
 			if((ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
 				&& has_template(mtmp, MISTWEAVER)
 			){
-				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE) && !u.shubbie_atten){
-					godlist[GOD_THE_BLACK_MOTHER].anger = 0;
-					u.shubbie_atten = 1;
+				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+					if(!u.shubbie_atten){
+						godlist[GOD_THE_BLACK_MOTHER].anger = 0;
+						u.shubbie_atten = 1;
+					}
+					if(godlist[GOD_THE_BLACK_MOTHER].anger == 0){
+						pacify_goat_faction();
+					}
 				}
-				switch(rn2(7)){
+				switch(rn2(10)){
 					case 0:
 						verbl_msg = "Ia! Shub-Niggurath! The Goat with a Thousand Young!";
 					break;
@@ -2106,6 +2111,15 @@ humanoid_sound:
 					case 5:
 					case 6:
 						verbl_msg = "Ia!";
+					break;
+					case 7:
+						verbl_msg = "Solve et coagula!";
+					break;
+					case 8:
+						verbl_msg = "We stand on the brink of a strange world.";
+					break;
+					case 9:
+						verbl_msg = "She shall spawn and spawn again!";
 					break;
 				}
 			}
