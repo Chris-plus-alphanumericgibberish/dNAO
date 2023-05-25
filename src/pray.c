@@ -1581,6 +1581,27 @@ lawful_god_gives_angel()
 	god_gives_pet(align_to_god(A_LAWFUL));
 }
 
+void
+pacify_goat_faction()
+{
+	struct monst *mtmp;
+	for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
+		if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT || has_template(mtmp, MISTWEAVER))){
+			mtmp->mpeaceful = 1;
+			set_malign(mtmp);
+		}
+	}
+	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+		if(mtmp->mfaction == GOATMOM_FACTION){
+			if(u.ustuck == mtmp)
+				expels(mtmp, mtmp->data, TRUE);
+			mtmp->mpeaceful = 1;
+			set_malign(mtmp);
+			newsym(mtmp->mx, mtmp->my);
+		}
+	}
+}
+
 int
 dosacrifice()
 {
@@ -3955,22 +3976,7 @@ int eatflag;
 
 	/* direct offerings make all goat-aligned creatures on the level peaceful. This intentionally happens before the holy-symbol check. */
 	if(eatflag == GOAT_EAT_OFFERED) {
-		struct monst *mtmp;
-		for(mtmp = migrating_mons; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel && (mtmp->mtyp == PM_BLESSED || mtmp->mtyp == PM_MOUTH_OF_THE_GOAT || has_template(mtmp, MISTWEAVER))){
-				mtmp->mpeaceful = 1;
-				set_malign(mtmp);
-			}
-		}
-		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
-			if(mtmp->mfaction == GOATMOM_FACTION){
-				if(u.ustuck == mtmp)
-					expels(mtmp, mtmp->data, TRUE);
-				mtmp->mpeaceful = 1;
-				set_malign(mtmp);
-				newsym(mtmp->mx, mtmp->my);
-			}
-		}
+		pacify_goat_faction();
 	}
 	/* the player must carry a holy symbol to gain credit. Chance to give one, if missing. return early */
 	if(!has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){

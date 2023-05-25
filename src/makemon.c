@@ -14006,7 +14006,7 @@ int faction;
 	if (mitem) (void) mongets(mtmp, mitem, mkobjflags);
 	
 	if(in_mklev) {
-		if(((is_ndemon(ptr)) ||
+		if(((is_normal_demon(ptr)) ||
 		    (mndx == PM_WUMPUS) ||
 		    (mndx == PM_LONG_WORM) ||
 		    (mndx == PM_GIANT_EEL)) && !u.uhave.amulet && rn2(5))

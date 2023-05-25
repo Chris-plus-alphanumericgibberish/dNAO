@@ -1021,7 +1021,7 @@ struct monst * mon;
 				verbalize("You're such a %s; I wish...",
 					flags.female ? "sweet lady" : "nice guy");
 				/* unbind Enki. (unless you refused a demon lord) */
-				if (!is_ndemon(mon->data))
+				if (is_normal_demon(mon->data))
 					if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
 			break;
 	}

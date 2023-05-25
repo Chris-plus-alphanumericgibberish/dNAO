@@ -867,11 +867,11 @@
 #define nospellcooldowns_mon(mtmp)	(nospellcooldowns((mtmp)->data) || (is_alabaster_mummy((mtmp)->data) && (mtmp)->mvar_syllable == SYLLABLE_OF_THOUGHT__NAEN))
 #define is_lord(ptr)		(((ptr)->mflagsg & MG_LORD) != 0L)
 #define is_prince(ptr)		(((ptr)->mflagsg & MG_PRINCE) != 0L)
-#define is_ndemon(ptr)		(is_demon(ptr) && \
+#define is_normal_demon(ptr)		(is_demon(ptr) && \
 				 (((ptr)->mflagsg & (MG_LORD|MG_PRINCE)) == 0L))
 #define is_dlord(ptr)		(is_demon(ptr) && is_lord(ptr))
 #define is_dprince(ptr)		(is_demon(ptr) && is_prince(ptr))
-#define is_dnoble(ptr)		(is_demon(ptr) && (is_lord(pa) || is_prince(pa)))
+#define is_dnoble(ptr)		(is_demon(ptr) && (is_lord(ptr) || is_prince(ptr)))
 #define is_minion(ptr)		((ptr)->mflagsa & MA_MINION)
 #define likes_gold(ptr)		(((ptr)->mflagst & MT_GREEDY) != 0L)
 #define likes_gems(ptr)		(((ptr)->mflagst & MT_JEWELS) != 0L)

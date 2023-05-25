@@ -2328,6 +2328,7 @@ E void FDECL(gods_angry,(int));
 E void FDECL(gods_upset,(int));
 E void FDECL(angrygods,(int));
 E boolean NDECL(maybe_god_gives_gift);
+E void NDECL(pacify_goat_faction);
 E int NDECL(dosacrifice);
 E void FDECL(at_your_feet, (const char *));
 E boolean FDECL(can_pray, (BOOLEAN_P));

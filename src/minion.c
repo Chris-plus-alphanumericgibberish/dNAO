@@ -62,12 +62,12 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	} else if (is_dprince(ptr) || (ptr->mtyp == PM_WIZARD_OF_YENDOR)) {
 	    dtype = (!rn2(20)) ? dprince(ptr, atyp) :
 				 (!rn2(4)) ? dlord(ptr, atyp) : ndemon(atyp);
-	    cnt = (!rn2(4) && is_ndemon(&mons[dtype])) ? 2 : 1;
+	    cnt = (!rn2(4) && is_normal_demon(&mons[dtype])) ? 2 : 1;
 	} else if (is_dlord(ptr)) {
 	    dtype = (!rn2(50)) ? dprince(ptr, atyp) :
 				 (!rn2(20)) ? dlord(ptr, atyp) : ndemon(atyp);
-	    cnt = (!rn2(4) && is_ndemon(&mons[dtype])) ? 2 : 1;
-	} else if (is_ndemon(ptr)) {
+	    cnt = (!rn2(4) && is_normal_demon(&mons[dtype])) ? 2 : 1;
+	} else if (is_normal_demon(ptr)) {
 	    dtype = (!rn2(20) && Inhell) ? dlord(ptr, atyp) :
 				 ((mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? ndemon(atyp) : monsndx(ptr);
 	    cnt = 1;
@@ -683,7 +683,7 @@ aligntyp atyp;
 	
 	for (tryct = 0; tryct < 20; tryct++) {
 	    ptr = mkclass(S_DEMON, G_NOHELL|G_HELL);
-	    if (ptr && is_ndemon(ptr) &&
+	    if (ptr && is_normal_demon(ptr) &&
 		    (atyp == A_NONE || sgn(ptr->maligntyp) == sgn(atyp)))
 		return(monsndx(ptr));
 	}
