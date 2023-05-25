@@ -3547,7 +3547,8 @@ maid_clean(mon, obj)
  * The input obj may be deleted in the process.
  * Based on the implementation of add_to_container.
  */
-struct obj *add_to_magic_chest(struct obj *obj,int key)
+struct obj *
+add_to_magic_chest(struct obj *obj,int key)
 {
     struct obj *otmp;
 
@@ -3588,6 +3589,7 @@ add_to_container(container, obj)
     obj->ocontainer = container;
     obj->nobj = container->cobj;
     container->cobj = obj;
+	container->owt = weight(container);
     return (obj);
 }
 
