@@ -500,6 +500,7 @@ struct obj {
 #define SPEC_BONUS		0x0000040L
 #define SPEC_DESTRUCTOR	0x0000080L
 #define SPEC_MARIONETTE	0x0000100L
+#define SPEC_HYPO		0x0000200L
 
 // flags for use with readobjnam()
 #define WISH_QUIET      0x0000001L

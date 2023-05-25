@@ -1011,6 +1011,7 @@ struct monst *magr;
 	int spe_mult = 1;			// enchantment spe_mult
 	struct permonst *ptr;		// defender's permonst
 	struct weapon_dice wdice;	// weapon dice of otmp
+	boolean affect_state = !(spec&SPEC_HYPO);	// hit is not hypothetical and so should affect game state
 	boolean Is_weapon = (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)), youdefend = mon == &youmonst;
 	boolean add_dice = TRUE;	// should dmgval_core() be called to add damage? Overridden (to false) by some special cases.
 	// if (!mon) ptr = &mons[NUMMONS];
@@ -1112,7 +1113,7 @@ struct monst *magr;
 	case DOUBLE_LIGHTSABER:
 	case ROD_OF_FORCE:
 		// drain charge on lightsabers
-		if (litsaber(otmp) && !((otmp->oartifact == ART_ATMA_WEAPON && otmp == uwep && !Drain_resistance) ||
+		if (affect_state && litsaber(otmp) && !((otmp->oartifact == ART_ATMA_WEAPON && otmp == uwep && !Drain_resistance) ||
 			otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC))
 		{
 			otmp->age -= 100;
@@ -1127,7 +1128,8 @@ struct monst *magr;
 		{
 			wdice.oc_damd += 3 * (otmp->spe);
 			// drain charge on future-tech powered weapons
-			otmp->ovar1_charges--;
+			if(affect_state)
+				otmp->ovar1_charges--;
 		}
 		break;
 	case VIBROBLADE:
@@ -1143,7 +1145,7 @@ struct monst *magr;
 	case FORCE_SWORD:
 	case FORCE_WHIP:
 		// drain charge on future-tech powered weapons
-		if (otmp->ovar1_charges)
+		if (affect_state && otmp->ovar1_charges)
 			otmp->ovar1_charges--;
 		break;
 	case DOUBLE_FORCE_BLADE:
@@ -1158,7 +1160,7 @@ struct monst *magr;
 			spe_mult *= 2;
 	    }
 		// drain charge on future-tech powered weapons
-		if (otmp->ovar1_charges)
+		if (affect_state && otmp->ovar1_charges)
 			otmp->ovar1_charges--;
 		break;
 	}
@@ -1207,7 +1209,7 @@ struct monst *magr;
 
 	/* lightsaber forms */
 	if (is_lightsaber(otmp) && (otmp == uwep || (u.twoweap && otmp == uswapwep))){
-		if (activeFightingForm(FFORM_MAKASHI) && otmp == uwep && !u.twoweap){
+		if (activeFightingForm(FFORM_MAKASHI) && affect_state && otmp == uwep && !u.twoweap){
 			switch (min(P_SKILL(P_MAKASHI), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
 				if (mon->ustdym<5) mon->ustdym += 1;
@@ -1376,7 +1378,7 @@ int spot;
 			(mtmp->misc_worn_check & W_ARMG || !hates_unblessed_mon(mtmp) || (is_unholy(otmp) || otmp->blessed))
 		){
 			if (!obest ||
-				(dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(obest, 0 /*zeromonst*/,0, mtmp))
+				(dmgval(otmp, 0 /*zeromonst*/, SPEC_HYPO, mtmp) > dmgval(obest, 0 /*zeromonst*/, SPEC_HYPO, mtmp))
 				/*
 				(is_bludgeon(otmp) ? 
 					(otmp->spe - greatest_erosion(otmp) > obest->spe - greatest_erosion(obest)):
@@ -1400,7 +1402,7 @@ struct monst *mtmp;
 		    (!otmp->oartifact || touch_artifact(otmp, mtmp, FALSE)))
             {
 	        if (!obest ||
-		    dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(obest, 0 /*zeromonst*/,0, mtmp))
+		    dmgval(otmp, 0 /*zeromonst*/, SPEC_HYPO, mtmp) > dmgval(obest, 0 /*zeromonst*/, SPEC_HYPO, mtmp))
 		    obest = otmp;
 		}
 	}
@@ -1489,7 +1491,7 @@ struct obj *otmp;
         if (throws_rocks(mtmp->data) &&  is_boulder(wep)) return FALSE;
         if (throws_rocks(mtmp->data) && is_boulder(otmp)) return TRUE;
 		
-		if(wep->otyp == otmp->otyp) return dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp);
+		if(wep->otyp == otmp->otyp) return dmgval(otmp, 0 /*zeromonst*/, SPEC_HYPO, mtmp) > dmgval(wep, 0 /*zeromonst*/, SPEC_HYPO, mtmp);
 		
 		if(wep->otyp == ARM_BLASTER) return FALSE;
 		if(wep->otyp == CARCOSAN_STING) return (otmp->otyp == ARM_BLASTER && otmp->ovar1_charges > 0);
@@ -1519,7 +1521,7 @@ struct obj *otmp;
         if ( wep &&
              wep->otyp == rwep[i] &&
            !(otmp->otyp == rwep[i] &&
-	     (dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp))))
+	     (dmgval(otmp, 0 /*zeromonst*/, SPEC_HYPO, mtmp) > dmgval(wep, 0 /*zeromonst*/, SPEC_HYPO, mtmp))))
 	    return FALSE;
         if (otmp->otyp == rwep[i]) return TRUE;
     }
@@ -1928,7 +1930,7 @@ struct obj *otmp;
         if ( wep &&
 	     wep->otyp == hwep[i] &&
            !(otmp->otyp == hwep[i] &&
-	     dmgval(otmp, 0 /*zeromonst*/, 0, mtmp) > dmgval(wep, 0 /*zeromonst*/, 0, mtmp)))
+	     dmgval(otmp, 0 /*zeromonst*/, SPEC_HYPO, mtmp) > dmgval(wep, 0 /*zeromonst*/, SPEC_HYPO, mtmp)))
 	    return FALSE;
         if (otmp->otyp == hwep[i]) return TRUE;
     }
