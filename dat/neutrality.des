@@ -2051,7 +2051,7 @@ MONSTER[50%]:random,random,random
 # A few statues
 CONTAINER:'`',"statue",(05,04),"oread",1
 CONTAINER:'`',"statue",(07,04),"dryad",1
-CONTAINER:'`',"statue",(06,01),"god",1,"Shub-Niggurath, Black Goat of the woods with a thousand young"
+CONTAINER:'`',"statue",(06,01),"god",1,"Shub-Nugganoth, Black Goat of the woods with a thousand young"
 OBJECT:'#',"blessed four-headed +3 poison-secreting living bone viperwhip",contained
 OBJECT:'#',"blessed four-headed +3 poison-secreting living bone viperwhip",contained
 OBJECT:'#',"blessed four-headed +3 poison-secreting living bone viperwhip",contained

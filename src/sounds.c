@@ -2094,7 +2094,7 @@ humanoid_sound:
 				}
 				switch(rn2(10)){
 					case 0:
-						verbl_msg = "Ia! Shub-Niggurath! The Goat with a Thousand Young!";
+						verbl_msg = "Ia! Shub-Nugganoth! The Goat with a Thousand Young!";
 					break;
 					case 1:
 						verbl_msg = "Abundance to the Black Goat of the Woods!";
@@ -2106,7 +2106,7 @@ humanoid_sound:
 						verbl_msg = "May Her eyes guide you.";
 					break;
 					case 4:
-						verbl_msg = "Gof'nn hupadgh Shub-Niggurath!";
+						verbl_msg = "Gof'nn hupadgh Shub-Nugganoth!";
 					break;
 					case 5:
 					case 6:
