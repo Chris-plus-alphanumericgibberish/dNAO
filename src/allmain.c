@@ -4264,6 +4264,9 @@ printAttacks(buf, ptr)
 		"level-based damage",	/*147*/
 		"severe poison",		/*148*/
 		"corrupted holy energy",/*149*/
+		"magic-item-stealing",	/*150*/
+		"byakhee larvae",		/*151*/
+		"black-star",			/*152*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */
