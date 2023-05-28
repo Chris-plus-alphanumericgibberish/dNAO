@@ -2959,6 +2959,7 @@ boolean past;
 			skilled_weapon_skill(P_RIDING);
 			free_skill_up(P_RIDING);
 			expert_weapon_skill(P_WAND_POWER);
+			skilled_weapon_skill(P_FIREARM);
 			knows_object(ELVEN_SHORT_SWORD);
 			knows_object(ELVEN_ARROW);
 			knows_object(ELVEN_BOW);
