@@ -1663,18 +1663,32 @@ domove()
 	    if (mtmp->m_ap_type) seemimic(mtmp);
 
 	    if (mtmp->mtrapped &&
-		    (trap = t_at(mtmp->mx, mtmp->my)) != 0 &&
-		    (trap->ttyp == PIT || trap->ttyp == SPIKED_PIT) &&
-		    boulder_at(trap->tx, trap->ty)) {
-		/* can't swap places with pet pinned in a pit by a boulder */
-		u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
+		    (trap = t_at(mtmp->mx, mtmp->my)) != 0 && ((
+				(trap->ttyp == PIT || trap->ttyp == SPIKED_PIT) &&
+				boulder_at(trap->tx, trap->ty)
+			) || (
+				(trap->ttyp == VIVI_TRAP)
+			)
+		)) {
+			/* can't swap places with pet pinned in a pit by a boulder, or one stuck in an essence trap */
+			u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
 	    } else if (u.ux0 != x && u.uy0 != y &&
 		       bad_rock(mtmp, x, u.uy0) &&
 		       bad_rock(mtmp, u.ux0, y) &&
-		       (bigmonst(mtmp->data) || (curr_mon_load(mtmp) > 600))) {
-		/* can't swap places when pet won't fit thru the opening */
-		u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
-		You("stop.  %s won't fit through.", upstart(y_monnam(mtmp)));
+		       (bigmonst(mtmp->data) || (curr_mon_load(mtmp) > 600))
+		){
+			/* can't swap places when pet won't fit thru the opening */
+			u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
+			You("stop.  %s won't fit through.", upstart(y_monnam(mtmp)));
+	    } else if (mtmp->mpeaceful && !mtmp->mtame
+		    && (!goodpos(u.ux0, u.uy0, mtmp, 0)
+			|| t_at(u.ux0, u.uy0) != NULL
+			|| mtmp->m_id == quest_status.leader_m_id)
+		) {
+			u.ux = u.ux0, u.uy = u.uy0; /* didn't move after all */
+			You("stop. %s doesn't want to swap places.",
+				upstart(y_monnam(mtmp)));
+
 	    } else if (mtmp->mpeaceful && !mtmp->mtame
 		    && (!goodpos(u.ux0, u.uy0, mtmp, 0)
 			|| t_at(u.ux0, u.uy0) != NULL
