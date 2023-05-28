@@ -1591,7 +1591,7 @@ register struct monst *mtmp;
 		return 0;
 	}
 
-	if((mtmp->mtyp == PM_PORO_AULON || mtmp->mtyp == PM_ALIDER)
+	if((mtmp->mtyp == PM_PORO_AULON || mtmp->mtyp == PM_ALIDER || mtmp->mtyp == PM_OONA)
 		&& !mtmp->mcan && !mtmp->mspec_used
 		&& !(noactions(mtmp))
 		&& !(mindless_mon(mtmp))
