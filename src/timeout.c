@@ -2196,8 +2196,8 @@ struct obj * obj;
 	case BEAMSWORD:
 		if (obj->cobj && obj->cobj->oartifact == obj->oartifact && arti_light(obj->cobj))
 			radius = (obj->cobj->blessed ? 3 : (obj->cobj->cursed ? 1 : 2));
-		else if (obj->cobj && (obj->cobj->otyp == JET || obj->cobj->otyp == BLACK_OPAL))
-			radius = 0; // jet is "mirrored", black opal is "smoke"
+		else if (obj->cobj && (obj->cobj->otyp == JET || obj->cobj->otyp == BLACK_OPAL || obj->cobj->otyp == CATAPSI_VORTEX))
+			radius = 0; // jet is "mirrored", black opal is "smoke", catapsi is "cloud"
 		else radius = 1;
 		break;
 	case ROD_OF_FORCE:

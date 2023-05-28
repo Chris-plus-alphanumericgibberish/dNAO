@@ -757,7 +757,10 @@ struct obj {
 							&& (otmp)->oartifact != ART_ANNULUS\
 							&& (otmp)->oartifact != ART_INFINITY_S_MIRRORED_ARC\
 							)
-#define valid_focus_gem(otmp) ((otmp)->oclass == GEM_CLASS && ((otmp)->otyp < LUCKSTONE || (otmp)->otyp == CHUNK_OF_FOSSIL_DARK))
+#define valid_focus_gem(otmp) ((otmp)->oclass == GEM_CLASS && ((otmp)->otyp < LUCKSTONE \
+								|| (otmp)->otyp == CHUNK_OF_FOSSIL_DARK \
+								|| (otmp)->otyp == CATAPSI_VORTEX \
+								|| (otmp)->otyp == ANTIMAGIC_RIFT))
 #define is_vibroweapon(otmp) (force_weapon(otmp) || \
 							  is_vibrosword(otmp) || \
 							  otmp->otyp == VIBROBLADE || \
@@ -1180,7 +1183,7 @@ struct obj {
 #define Is_darklight_source(otmp) ((otmp)->otyp == SHADOWLANDER_S_TORCH || \
 			 (otmp)->otyp == CHUNK_OF_FOSSIL_DARK ||\
 			 ((otmp)->otyp == DWARVISH_HELM && (otmp)->ovar1_darklight) ||\
-			 (is_lightsaber(otmp) && otmp->cobj && otmp->cobj->otyp == CHUNK_OF_FOSSIL_DARK))
+			 (is_lightsaber(otmp) && otmp->cobj && (otmp->cobj->otyp == CHUNK_OF_FOSSIL_DARK || otmp->cobj->otyp == ANTIMAGIC_RIFT)))
 // NOT an exhaustive list, but this SHOULD be everything that would fall under snuff_lit
 // and shouldn't be put out by darkness spells
 #define Darkness_cant_snuff(otmp) (Is_darklight_source(otmp) || \

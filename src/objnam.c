@@ -103,8 +103,8 @@ NEARDATA struct colorTextClr LightsaberColor[] = {
 	{"",CLR_WHITE},						/*salt*/
 	{"",CLR_RED},						/*silver slingstone*/
 	{"",CLR_RED},						/*rock*/
-	{"",CLR_BLACK},						/*antimagic rift*/
-	{"",CLR_GRAY}						/*catapsi vortex*/
+	{"coruscating black",CLR_BLACK},	/*antimagic rift*/
+	{"coruscating tornado",CLR_GRAY}	/*catapsi vortex*/
 };
 
 STATIC_OVL char *SaberHilts[] = {
