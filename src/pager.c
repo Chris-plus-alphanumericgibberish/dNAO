@@ -2334,6 +2334,12 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 				strcat(description, main_temp_buf);
 			} while (!((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0));		/* no more attacks */
 		}
+		if(wizard){
+			strcat(description, "Faction (debug-mode-only): ");
+			sprintf(temp_buf, "%d", mtmp->mfaction);
+			strcat(description, temp_buf);
+			strcat(description, "\n");
+		}
 	}
 	return description;
 }
