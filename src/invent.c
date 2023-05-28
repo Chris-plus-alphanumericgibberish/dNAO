@@ -2758,6 +2758,9 @@ winid *datawin;
 					default:
 						Strcpy(buf2, ".");
 				}
+				if(obj->otyp == CARCOSAN_STING){
+					Strcpy(buf2, " at range, and your dagger skill in melee.");
+				}
 				Strcat(buf, buf2);
 			} else {
 				Sprintf(buf, "Uses the %s skill.", P_NAME(abs(oc.oc_skill)));

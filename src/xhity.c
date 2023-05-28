@@ -157,6 +157,8 @@ struct monst * mdef;
 			if (uwep){
 				if (uwep->oartifact == ART_LIECLEAVER)
 					You("begin slashing monsters with your %s.", aobjnam(uwep, (char *)0));
+				else if (uwep->otyp == CARCOSAN_STING)
+					You("begin stabbing monsters with your %s.", aobjnam(uwep, (char *)0));
 				else You("begin bashing monsters with your %s.",
 					aobjnam(uwep, (char *)0));
 			}
@@ -3752,6 +3754,8 @@ int *shield_margin;
 				wtype = P_MACE;
 			else if (weapon && weapon->otyp == WIND_AND_FIRE_WHEELS)
 				wtype = P_BOOMERANG;
+			else if (weapon && weapon->otyp == CARCOSAN_STING)
+				wtype = P_DAGGER;
 			else
 				wtype = weapon_type(weapon);
 
@@ -13057,7 +13061,9 @@ int vis;						/* True if action is at all visible to the player */
 			check_oprop(weapon, OPROP_BLADED) ||
 			check_oprop(weapon, OPROP_SPIKED) ||
 			weapon->oartifact == ART_LIECLEAVER ||
-			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS) &&
+			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS ||
+			weapon->otyp == CARCOSAN_STING
+			) &&
 			/* isn't a misused polearm */
 			(!is_bad_melee_pole(weapon) ||
 			thrust ||
@@ -14675,6 +14681,8 @@ int vis;						/* True if action is at all visible to the player */
 				wtype = P_BARE_HANDED_COMBAT;
 			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
 				wtype = P_SCIMITAR;
+			else if (weapon && weapon->otyp == CARCOSAN_STING)
+				wtype = P_DAGGER;
 			else if (weapon && weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
 				wtype = P_PICK_AXE;
 			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))

@@ -8147,14 +8147,14 @@ struct obj *obj;
 
 			mdef->mhp -= damage;
 			if(mdef->mhp < 1){
-				pline("%s is killed by %s %s!", mon_nam(mdef), mhis(mdef), simple_typename(obj->otyp));
+				pline("%s is killed by %s %s!", Monnam(mdef), mhis(mdef), simple_typename(obj->otyp));
 				mondied(mdef);
 			}
 			else {
 				static long mid = 0, move = 0;
 				
 				if(mdef->m_id != mid || move != monstermoves){
-					pline("%s is bitten by %s clothes!", mon_nam(mdef), mhis(mdef));
+					pline("%s is bitten by %s clothes!", Monnam(mdef), mhis(mdef));
 					mid = mdef->m_id;
 					move = monstermoves;
 				}
@@ -8188,11 +8188,11 @@ struct obj *obj;
 
 			mdef->mhp -= damage;
 			if(mdef->mhp < 1){
-				pline("%s is killed by %s %s!", mon_nam(mdef), mhis(mdef), simple_typename(obj->otyp));
+				pline("%s is killed by %s %s!", Monnam(mdef), mhis(mdef), simple_typename(obj->otyp));
 				mondied(mdef);
 			}
 			else {
-				pline("%s is stung by %s %s!", mon_nam(mdef), mhis(mdef), simple_typename(obj->otyp));
+				pline("%s is stung by %s %s!", Monnam(mdef), mhis(mdef), simple_typename(obj->otyp));
 			}
 		}
 	}

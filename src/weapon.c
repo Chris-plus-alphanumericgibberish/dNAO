@@ -298,6 +298,9 @@ int oartifact;
 	if(otyp == STILETTOS){
 		attackmask = PIERCE;
 	}
+	if(otyp == CARCOSAN_STING){
+		attackmask = PIERCE;
+	}
 
 	/* catch special cases */
 	if (   oartifact == ART_YORSHKA_S_SPEAR
@@ -1740,6 +1743,7 @@ static const NEARDATA short hwep[] = {
 	  WAKIZASHI/*1d8/1d6*/,
 	  KHOPESH,/*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
+	  CARCOSAN_STING/*1d3+1d5/1d3+1d5*/, 
 	  MACE/*1d6+1/1d6*/, 
 	  MAGIC_TORCH/*1d8/1d4*/, 
 	  ELVEN_SHORT_SWORD/*1d7/1d7*/, 
@@ -1855,6 +1859,7 @@ static const NEARDATA short hpwep[] = {
 	  KHOPESH,/*1d8/1d6*/
 	  BEC_DE_CORBIN, /*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
+	  CARCOSAN_STING/*1d3+1d5/1d3+1d5*/, 
 	  MACE/*1d6+1/1d6*/, 
 	  MAGIC_TORCH/*1d8/1d4*/, 
 	  GLAIVE, /*1d6/1d10*/
@@ -3374,9 +3379,6 @@ struct obj *obj;
 	}
 	else if(obj->oartifact == ART_WAND_OF_ORCUS){
 		type = P_MACE;
-	}
-	else if(obj->otyp == CARCOSAN_STING){
-		type = P_DAGGER;
 	}
 	else if(obj->oartifact == ART_MASAMUNE){
 		for(int skl = P_FIRST_WEAPON; skl <= P_LAST_WEAPON; skl++){
