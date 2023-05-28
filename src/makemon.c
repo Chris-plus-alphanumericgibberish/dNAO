@@ -12715,7 +12715,7 @@ struct monst * mon;
 	
 	if(Infuture && !peaceful)
 		out_faction = ILSENSINE_FACTION;
-	else if(is_mind_flayer(mon->data))
+	else if(is_mind_flayer(mon->data) || Is_lethe_manse(&u.uz))
 		out_faction = ILSENSINE_FACTION;
 	else if(In_quest(&u.uz) && Role_if(PM_EXILE) && !peaceful)
 		out_faction = SEROPAENES_FACTION;

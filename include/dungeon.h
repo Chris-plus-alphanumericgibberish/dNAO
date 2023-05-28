@@ -164,6 +164,7 @@ typedef struct branch {
 #define In_depths(x)		((x)->dnum == rlyeh_dnum)
 #define Is_gatetown(x)		(on_level(x,&gatetown_level))
 #define Is_bridge_temple(x)		(on_level(x,&bridge_temple))
+#define Is_lethe_manse(x)		((x)->dnum == bridge_temple.dnum && (x)->dlevel == (bridge_temple.dlevel-1))
 #define Is_sumall(x)		(on_level(x,&sum_of_all_level))
 #define Is_rlyeh(x)			(on_level(x, &rlyeh_level))
 #define Is_spire(x)			(on_level(x, &spire_level))
