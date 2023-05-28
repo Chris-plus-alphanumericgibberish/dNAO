@@ -105,15 +105,11 @@ register struct obj *obj;
 		if(obj->oclass == ARMOR_CLASS) return TRUE;
 		if(obj->oclass == TOOL_CLASS && is_weptool(obj)) return TRUE;
 	}
-	if(obj->oclass == SCROLL_CLASS && obj->otyp != SCR_BLANK_PAPER && obj->otyp != SCR_GOLD_SCROLL_OF_LAW && 
-#ifdef MAIL
-		obj->otyp != SCR_MAIL && 
-#endif
-		!obj->oartifact) return TRUE;
-	if(obj->oclass == SPBOOK_CLASS && obj->otyp != SPE_BLANK_PAPER && !obj->oartifact) return TRUE;
-	if(obj->oclass == AMULET_CLASS && obj->spe >= 0 && !obj->oartifact) return TRUE;
-	if(obj->oclass == RING_CLASS && obj->spe >= 0 && !obj->oartifact) return TRUE;
-	if(obj->oclass == WAND_CLASS && obj->spe > 0 && obj->otyp != WAN_NOTHING) return TRUE;
+	if(obj->oclass == SCROLL_CLASS && objects[obj->otyp].oc_magic && !obj->oartifact) return TRUE;
+	if(obj->oclass == SPBOOK_CLASS && objects[obj->otyp].oc_magic && !obj->oartifact) return TRUE;
+	if(obj->oclass == AMULET_CLASS && obj->spe >= 0 && objects[obj->otyp].oc_magic && !obj->oartifact) return TRUE;
+	if(obj->oclass == RING_CLASS && obj->spe >= 0 && objects[obj->otyp].oc_magic && !obj->oartifact) return TRUE;
+	if(obj->oclass == WAND_CLASS && obj->spe > 0 && objects[obj->otyp].oc_magic) return TRUE;
 	if(obj->otyp == CORPSE && (obj->corpsenm == PM_AOA || obj->corpsenm == PM_AOA_DROPLET || obj->corpsenm == PM_NEWT)) return TRUE;
 	if(obj->otyp == TIN && (!obj->known || obj->corpsenm == PM_AOA || obj->corpsenm == PM_AOA_DROPLET || obj->corpsenm == PM_NEWT)) return TRUE;
 	
