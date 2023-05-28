@@ -4987,7 +4987,7 @@ the Planes of the Elements, to achieve this goal.
 %Cc Mon 00001
 You approach %H on the isolated path you have grown to 
 know so well.  As you get closer you notice that the lights are all dim,
-even in the library!  The %l would never stand for that in a 
+even in the library!  %lC would never stand for that in a 
 normal situation.  Knowing something is very wrong you stride forward with 
 grace and determination.
 %E
@@ -5004,7 +5004,7 @@ Again you are on the path to %H. You know this could be the last time.
 "%pC, only you can help. %dC has let it be known."
 %E
 %Cp Mon 00007
-"Welcome back %s. Please see the %l as soon as possible."
+"Welcome back %s. Please see %l as soon as possible."
 %E
 %Cp Mon 00008
 "Your return is a sign from %d that all is not lost."
