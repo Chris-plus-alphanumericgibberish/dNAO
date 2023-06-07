@@ -4044,7 +4044,7 @@ resFlags(buf, rflags)
 		"[[level drain]]",
 		"[[disease]]"
 	};
-	// Sprintf(buf,""); //What was this for?
+	buf[0] = '\0'; //Empty buffer (contains previous monster's resistances)
 	for(i = 0; i<10; i++){
 		if(rflags & (1 << i)){
 			if(!b){
