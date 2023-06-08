@@ -5550,7 +5550,7 @@ of Lolth?"
 you have the required abilities to seize this chance."
 %E
 %Cp Ndr 00016
-"Once again you kneel before me, %p.  Are you ready know?"
+"Once again you kneel before me, %p.  Are you ready now?"
 %E
 %Cp Ndr 00017
 "Ah, back again, %p?  I will determine your readiness..."
