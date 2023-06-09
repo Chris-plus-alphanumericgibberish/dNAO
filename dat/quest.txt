@@ -2883,7 +2883,7 @@ prefer the Crescent Blade of Eilistraee?"
 # assumes Crescent Blade
 %Cc Dro 00183
 "This blade was forged by Eilistraee as a weapon against her
-mother, Lolth.  It's pale moon-fires pass through armor, and
+mother, Lolth.  Its pale moon-fires pass through armor, and
 it can cleave even the head of a goddess from her shoulders."
 %E
 %Cp Dro 00190
