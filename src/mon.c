@@ -4247,7 +4247,7 @@ struct monst *mtmp;
 				break; //???
 
 			/* message */
-			if (couldsee(mtmp->mx, mtmp->my) || couldsee(victim->mx, victim->my)) {
+			if (!Blind && (couldsee(mtmp->mx, mtmp->my) || (victim && couldsee(victim->mx, victim->my)))) {
 				messaged = TRUE;
 				pline("But wait...");
 				if(victim)
@@ -4261,14 +4261,14 @@ struct monst *mtmp;
 					pline("%s reconstitutes!", Monnam(mtmp));
 				else
 					pline("%s looks much better!", Monnam(mtmp));
-				if(victim){
-					if(canseemon(victim))
-						pline("%s dies of %s illness!", Monnam(victim), mhis(victim));
-					mondied(victim);
-				}
-				else if(sacked_victim){
-					kill_giants_sack(sacked_victim);
-				}
+			}
+			if(victim){
+				if(canseemon(victim))
+					pline("%s dies of %s illness!", Monnam(victim), mhis(victim));
+				mondied(victim);
+			}
+			else if(sacked_victim){
+				kill_giants_sack(sacked_victim);
 			}
 			break;
 		}
