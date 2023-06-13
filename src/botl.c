@@ -559,34 +559,24 @@ bot2()
   }
 #endif
 
-	if(uclockwork){
-		if(strcmp(ca_hu_stat[u.uhs], "        ")) {
+/** Delayed instadeaths **/
+  if(Stoned || Golded)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-    	  add_colored_text(ca_hu_stat[u.uhs], newbot2);
+      add_colored_text("Stone", newbot2);
 #else
-		  Sprintf(nb = eos(nb), " %s", ca_hu_stat[u.uhs]);
+  Strcat(nb = eos(nb), " Stone");
 #endif
-		}
-	} else{
-	  if(strcmp(hu_stat[u.uhs], "        ")) {
+  if(Slimed)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-	      add_colored_text(hu_stat[u.uhs], newbot2);
+      add_colored_text("Slime", newbot2);
 #else
-		  Sprintf(nb = eos(nb), " %s", hu_stat[u.uhs]);
+  Strcat(nb = eos(nb), " Slime");
 #endif
-	  }
-	}
-  if(Invulnerable)
+  if(FrozenAir || Strangled || BloodDrown)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Invl", newbot2);
+      add_colored_text("Sufct", newbot2);
 #else
-  Strcat(nb = eos(nb), " Invl");
-#endif
-  if(Confusion && !StumbleBlind)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Conf", newbot2);
-#else
-  Strcat(nb = eos(nb), " Conf");
+	Sprintf(nb = eos(nb), " Sufct");
 #endif
   if(Sick) {
       if (u.usick_type & SICK_VOMITABLE)
@@ -602,6 +592,38 @@ bot2()
       Strcat(nb = eos(nb), " Ill");
 #endif
   }
+/** Hunger **/
+  if(uclockwork){
+    if(strcmp(ca_hu_stat[u.uhs], "        ")) {
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text(ca_hu_stat[u.uhs], newbot2);
+#else
+      Sprintf(nb = eos(nb), " %s", ca_hu_stat[u.uhs]);
+#endif
+    }
+  } else {
+    if(strcmp(hu_stat[u.uhs], "        ")) {
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text(hu_stat[u.uhs], newbot2);
+#else
+      Sprintf(nb = eos(nb), " %s", hu_stat[u.uhs]);
+#endif
+    }
+  }
+/** Encumbrance **/
+  if(cap > UNENCUMBERED)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text(enc_stat[cap], newbot2);
+#else
+  Sprintf(nb = eos(nb), " %s", enc_stat[cap]);
+#endif
+/** Other status effects **/
+  if(Invulnerable)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Invl", newbot2);
+#else
+  Strcat(nb = eos(nb), " Invl");
+#endif
   if(Blind && !StumbleBlind)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Blind", newbot2);
@@ -613,6 +635,18 @@ bot2()
       add_colored_text("Stun", newbot2);
 #else
   Strcat(nb = eos(nb), " Stun");
+#endif
+  if(Confusion && !StumbleBlind)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Conf", newbot2);
+#else
+  Strcat(nb = eos(nb), " Conf");
+#endif
+  if(Hallucination)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Hallu", newbot2);
+#else
+  Strcat(nb = eos(nb), " Hallu");
 #endif
 /** Insanity messages **/
   if(Panicking)
@@ -651,13 +685,7 @@ bot2()
 #else
   Strcat(nb = eos(nb), " Faint");
 #endif
-
-  if(Hallucination)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Hallu", newbot2);
-#else
-  Strcat(nb = eos(nb), " Hallu");
-#endif
+/** Less important **/
   if(Levitation)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Lev", newbot2);
@@ -676,36 +704,6 @@ bot2()
      add_colored_text("Ride", newbot2);
 #else
   Strcat(nb = eos(nb), " Ride", newbot2);
-#endif
-  if(Stoned)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Stone", newbot2);
-#else
-  Strcat(nb = eos(nb), " Stone");
-#endif
-  if(Golded)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Gold", newbot2);
-#else
-  Strcat(nb = eos(nb), " Gold");
-#endif
-  if(Slimed)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Slime", newbot2);
-#else
-  Strcat(nb = eos(nb), " Slime");
-#endif
-  if(FrozenAir || Strangled || BloodDrown)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Sufct", newbot2);
-#else
-	Sprintf(nb = eos(nb), " Sufct");
-#endif
-  if(cap > UNENCUMBERED)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text(enc_stat[cap], newbot2);
-#else
-  Sprintf(nb = eos(nb), " %s", enc_stat[cap]);
 #endif
 #ifdef DUMP_LOG
 }
