@@ -67,14 +67,15 @@ unsigned gpflags;
 			if(mtmp == &youmonst && level.flags.lethe)
 				return FALSE;
 			if (mtmp == &youmonst)
-				return !!(Breathless);	/* not Amphibious -- teleporting into 3Dwater with limited breath can be very dangerous */
+				/* not Amphibious -- teleporting into 3Dwater with limited breath can be very dangerous */
+				return !!(Breathless && Waterproof && !(u.sealsActive&SEAL_OSE));
 			else return (mon_resistance(mtmp,SWIMMING) || breathless_mon(mtmp) || amphibious_mon(mtmp));
 	    } else if (is_pool(x,y, FALSE) && !ignorewater) {
 			if(mtmp == &youmonst && level.flags.lethe)
 				return !!(Levitation || Flying || Wwalking);
 			if (mtmp == &youmonst)
 				return !!(Levitation || Flying || Wwalking ||
-						Swimming || Amphibious);
+					  (Swimming || Amphibious) && Waterproof && !(u.sealsActive&SEAL_OSE));
 			else	return (mon_resistance(mtmp,FLYING) || breathless_mon(mtmp) || mon_resistance(mtmp,SWIMMING) ||
 								is_clinger(mdat) || amphibious_mon(mtmp));
 	    } else if (mdat->mlet == S_EEL && !ignorewater && rn2(13)) {
