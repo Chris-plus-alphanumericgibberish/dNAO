@@ -658,6 +658,37 @@ bot2()
 #else
   Strcat(nb = eos(nb), " Hallu");
 #endif
+  if(Levitation)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Lev", newbot2);
+#else
+  Strcat(nb = eos(nb), " Lev", newbot2);
+#endif
+  /* flying and levitation are mutually exclusive */
+  if(Flying && !Levitation)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+     add_colored_text("Fly", newbot2);
+#else
+  Strcat(nb = eos(nb), " Fly", newbot2);
+#endif
+  if(u.usteed)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+     add_colored_text("Ride", newbot2);
+#else
+  Strcat(nb = eos(nb), " Ride", newbot2);
+#endif
+  if(Stoned)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Stone", newbot2);
+#else
+  Strcat(nb = eos(nb), " Stone");
+#endif
+  if(Golded)
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+      add_colored_text("Gold", newbot2);
+#else
+  Strcat(nb = eos(nb), " Gold");
+#endif
   if(Slimed)
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
       add_colored_text("Slime", newbot2);
