@@ -1311,6 +1311,17 @@ struct obj {
 			|| otmp->oeroded3 > 0\
 			)
 
+/* Potentially required for ascension, shouldn't fail resist checks or be put in containers. */
+#define is_asc_obj(obj)	((obj)->otyp == AMULET_OF_YENDOR || \
+		   (obj)->otyp == CANDELABRUM_OF_INVOCATION || \
+		   (obj)->otyp == BELL_OF_OPENING || \
+		   (obj)->oartifact == ART_SILVER_KEY || \
+		   ((obj)->oartifact >= ART_FIRST_KEY_OF_LAW && (obj)->oartifact <= ART_THIRD_KEY_OF_NEUTRALITY) || \
+		   (obj)->oartifact == ART_PEN_OF_THE_VOID || \
+		   (obj)->oartifact == ART_ANNULUS || \
+		   (obj)->otyp == SPE_BOOK_OF_THE_DEAD \
+		)
+
 /* Flags for get_obj_location(). */
 #define CONTAINED_TOO	0x1
 #define BURIED_TOO	0x2

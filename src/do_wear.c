@@ -5172,7 +5172,7 @@ struct obj *artifact;
 	int ox = 0, oy = 0;
 	for(obj = inventory; obj; obj = nobj){
 		nobj = obj->where == OBJ_FLOOR ? obj->nexthere : obj->nobj;
-		if(is_magic_obj(obj) && (n > 0 || !rn2(5))){
+		if(is_magic_obj(obj) && !is_asc_obj(obj) && (n > 0 || !rn2(5))){
 			n--;
 			taken++;
 			if((obj->owornmask&W_WEP) || ((obj->owornmask&W_SWAPWEP) && (!youdef || u.twoweap)))

@@ -1386,15 +1386,9 @@ obj_resists(obj, ochance, achance)
 struct obj *obj;
 int ochance, achance;	/* percent chance for ordinary objects, artifacts */
 {
-	if (obj->otyp == AMULET_OF_YENDOR ||
-	    obj->otyp == SPE_BOOK_OF_THE_DEAD ||
-	    obj->otyp == CANDELABRUM_OF_INVOCATION ||
-	    obj->otyp == BELL_OF_OPENING ||
-	    obj->oartifact == ART_SILVER_KEY ||
-	    (obj->oartifact >= ART_FIRST_KEY_OF_LAW && obj->oartifact <= ART_THIRD_KEY_OF_NEUTRALITY) ||
-	    obj->oartifact == ART_PEN_OF_THE_VOID ||
-	    obj->oartifact == ART_ANNULUS ||
-	    (obj->otyp == CORPSE && is_rider(&mons[obj->corpsenm]))) {
+	if (is_asc_obj(obj) ||
+	    (obj->otyp == CORPSE && is_rider(&mons[obj->corpsenm]))
+	) {
 		return TRUE;
 	} else {
 		int chance = rn2(100);

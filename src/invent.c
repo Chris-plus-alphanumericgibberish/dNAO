@@ -672,14 +672,7 @@ register struct obj *obj;
 {
 	boolean update_map;
 
-	if (obj->otyp == AMULET_OF_YENDOR ||
-			obj->otyp == CANDELABRUM_OF_INVOCATION ||
-			obj->otyp == BELL_OF_OPENING ||
-			obj->oartifact == ART_SILVER_KEY ||
-			obj->oartifact == ART_PEN_OF_THE_VOID ||
-			obj->oartifact == ART_ANNULUS ||
-			(obj->oartifact >= ART_FIRST_KEY_OF_LAW && obj->oartifact <= ART_THIRD_KEY_OF_NEUTRALITY) ||
-			obj->otyp == SPE_BOOK_OF_THE_DEAD) {
+	if (is_asc_obj(obj)) {
 		/* player might be doing something stupid, but we
 		 * can't guarantee that.  assume special artifacts
 		 * are indestructible via drawbridges, and exploding
