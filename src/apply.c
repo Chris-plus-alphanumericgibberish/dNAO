@@ -973,7 +973,7 @@ struct obj **obj_p;
 			if (vis){
 				signs_mirror();
 			}
-			if(u.uinsight >= 20 && !obj->oartifact){
+			if(u.uinsight >= 10 && !obj->oartifact){
 				// if(wizard)
 					// pline("silver flame d: %d, l: %d, x:%d, y:%d", u.silver_flame_z.dnum, u.silver_flame_z.dlevel, u.s_f_x, u.s_f_y);
 				if(u.uz.dnum == u.silver_flame_z.dnum){
