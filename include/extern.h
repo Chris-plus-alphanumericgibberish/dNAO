@@ -273,7 +273,7 @@ E const char *FDECL(rank_of, (int,SHORT_P,BOOLEAN_P));
 E void NDECL(bot);
 #ifdef DUMP_LOG
 E void FDECL(bot1str, (char *));
-E void FDECL(bot2str, (char *));
+E void FDECL(bot2str, (char *, boolean, int));
 #endif
 
 /* ### cmd.c ### */

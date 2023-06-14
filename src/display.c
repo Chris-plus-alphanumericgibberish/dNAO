@@ -1683,7 +1683,7 @@ int style;
 	bot1str(buf);
 	ptr = (char *) compress_str((const char *) buf);
 	dump("", ptr);
-	bot2str(buf);
+	bot2str(buf, FALSE, 0);
 	dump("", buf);
 	dump("", "");
 	dump("", "");
@@ -1702,7 +1702,7 @@ int style;
 	bot1str(buf);
 	ptr = (char *) compress_str((const char *) buf);
 	dump("", ptr);
-	bot2str(buf);
+	bot2str(buf, FALSE, 0);
 	dump("", buf);
     }
 }

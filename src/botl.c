@@ -20,6 +20,24 @@ const char * const enc_stat[] = {
 	"Overloaded"
 };
 
+const char * const enc_stat_abbrev1[] = {
+	"",
+	"Burden",
+	"Stress",
+	"Strain",
+	"Overtax",
+	"Overload"
+};
+
+const char * const enc_stat_abbrev2[] = {
+	"",
+	"Brd",
+	"Strs",
+	"Strn",
+	"Ovtx",
+	"Ovld"
+};
+
 STATIC_DCL void NDECL(bot1);
 STATIC_DCL void NDECL(bot2);
 #endif /* OVL0 */
@@ -119,36 +137,35 @@ apply_color_option(color_option, newbot2, statusline)
 }
 
 void
-add_colored_text(text, newbot2)
-     const char *text;
-     char *newbot2;
+add_colored_text(const char *hilite, const char *text, char *newbot2, boolean terminal_output)
 {
     char *nb;
     struct color_option color_option;
+    int maxlength = (terminal_output ? min(MAXCO, CO) : MAXCO) - 1;
 
     if (*text == '\0') return;
 
     /* don't add anything if it can't be displayed.
      * Otherwise the color of invisible text may bleed into
      * the statusline. */
-    if (strlen(newbot2) >= min(MAXCO, CO)-1) return;
+    if (strlen(newbot2) >= maxlength) return;
 
-    if (!iflags.use_status_colors) {
-	Sprintf(nb = eos(newbot2), " %s", text);
+    if (!iflags.use_status_colors || !terminal_output) {
+	Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), " %s", text);
 	return;
     }
 
-    Strcat(nb = eos(newbot2), " ");
+    Strncat(nb = eos(newbot2), " ", MAXCO - strlen(newbot2));
     curs(WIN_STATUS, 1, 1);
     putstr(WIN_STATUS, 0, newbot2);
 
-    Strcat(nb = eos(nb), text);
+    Strncat(nb = eos(nb), text, MAXCO - strlen(newbot2));
     curs(WIN_STATUS, 1, 1);
-    color_option = text_color_of(text, text_colors);
+    color_option = text_color_of(hilite, text_colors);
     start_color_option(color_option);
     /* Trim the statusline to always have the end color
      * to have effect. */
-    newbot2[max(0, min(MAXCO, CO)-1)] = '\0';
+    newbot2[max(0, maxlength)] = '\0';
     putstr(WIN_STATUS, 0, newbot2);
     end_color_option(color_option);
 }
@@ -485,17 +502,8 @@ char *buf;
 	return ret;
 }
 
-#ifdef DUMP_LOG
-void bot2str(newbot2)
-char* newbot2;
-#else
-STATIC_OVL void
-bot2()
-#endif
+void bot2str(char *newbot2, boolean terminal_output, int abbrev)
 {
-#ifndef DUMP_LOG
-	char  newbot2[MAXCO];
-#endif
 	register char *nb;
 	int hp, hpmax;
 	int cap = near_capacity();
@@ -559,161 +567,82 @@ bot2()
   }
 #endif
 
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+#define status_effect(str1, str2, str3) \
+  add_colored_text((str1), abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), newbot2, terminal_output)
+#else
+#define status_effect(str1, str2, str3) \
+  Snprintf(nb = eos(nb), MAXCO - strlen(newbot2), " %s", abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1))
+#endif
 /** Delayed instadeaths **/
   if(Stoned || Golded)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Stone", newbot2);
-#else
-  Strcat(nb = eos(nb), " Stone");
-#endif
+    status_effect("Stone", "Ston", "Sto");
   if(Slimed)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Slime", newbot2);
-#else
-  Strcat(nb = eos(nb), " Slime");
-#endif
+    status_effect("Slime", "Slim", "Slm");
   if(FrozenAir || Strangled || BloodDrown)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Sufct", newbot2);
-#else
-	Sprintf(nb = eos(nb), " Sufct");
-#endif
+    status_effect("Sufct", "Sfct", "Sfc");
   if(Sick) {
-      if (u.usick_type & SICK_VOMITABLE)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-	  add_colored_text("FoodPois", newbot2);
-#else
-      Strcat(nb = eos(nb), " FoodPois");
-#endif
-      if (u.usick_type & SICK_NONVOMITABLE)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-	  add_colored_text("Ill", newbot2);
-#else
-      Strcat(nb = eos(nb), " Ill");
-#endif
+    if (u.usick_type & SICK_VOMITABLE)
+      status_effect("FoodPois", "Fpois", "Poi");
+    if (u.usick_type & SICK_NONVOMITABLE)
+      status_effect("Ill", "Ill", "Ill");
   }
 /** Hunger **/
-  if(uclockwork){
-    if(strcmp(ca_hu_stat[u.uhs], "        ")) {
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text(ca_hu_stat[u.uhs], newbot2);
-#else
-      Sprintf(nb = eos(nb), " %s", ca_hu_stat[u.uhs]);
-#endif
-    }
-  } else {
-    if(strcmp(hu_stat[u.uhs], "        ")) {
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text(hu_stat[u.uhs], newbot2);
-#else
-      Sprintf(nb = eos(nb), " %s", hu_stat[u.uhs]);
-#endif
-    }
-  }
+  if(uclockwork)
+    status_effect(ca_hu_stat[u.uhs], ca_hu_stat[u.uhs], ca_hu_stat[u.uhs]);
+  else
+    status_effect(hu_stat[u.uhs], hu_stat[u.uhs], hu_stat[u.uhs]);
 /** Encumbrance **/
   if(cap > UNENCUMBERED)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text(enc_stat[cap], newbot2);
-#else
-  Sprintf(nb = eos(nb), " %s", enc_stat[cap]);
-#endif
+    status_effect(enc_stat[cap], enc_stat_abbrev1[cap], enc_stat_abbrev2[cap]);
 /** Other status effects **/
   if(Invulnerable)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Invl", newbot2);
-#else
-  Strcat(nb = eos(nb), " Invl");
-#endif
+    status_effect("Invl", "Invl", "In");
   if(Blind && !StumbleBlind)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Blind", newbot2);
-#else
-  Strcat(nb = eos(nb), " Blind");
-#endif
+    status_effect("Blind", "Blnd", "Bl");
   if(Stunned && !StaggerShock)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Stun", newbot2);
-#else
-  Strcat(nb = eos(nb), " Stun");
-#endif
+    status_effect("Stun", "Stun", "St");
   if(Confusion && !StumbleBlind)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Conf", newbot2);
-#else
-  Strcat(nb = eos(nb), " Conf");
-#endif
+    status_effect("Conf", "Cnf", "Cf");
   if(Hallucination)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Hallu", newbot2);
-#else
-  Strcat(nb = eos(nb), " Hallu");
-#endif
+    status_effect("Hallu", "Hal", "Hl");
 /** Insanity messages **/
   if(Panicking)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Panic", newbot2);
-#else
-  Strcat(nb = eos(nb), " Panic");
-#endif
+    status_effect("Panic", "Pnc", "Pnc");
   if(StumbleBlind)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Stmblng", newbot2);
-#else
-  Strcat(nb = eos(nb), " Stmblng");
-#endif
+    status_effect("Stmblng", "Stmbl", "Stm");
   if(StaggerShock)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Stggrng", newbot2);
-#else
-  Strcat(nb = eos(nb), " Stggrng");
-#endif
+    status_effect("Stggrng", "Stggr", "Stg");
   if(Babble)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Babble", newbot2);
-#else
-  Strcat(nb = eos(nb), " Babble");
-#endif
+    status_effect("Babble", "Babl", "Bbl");
   if(Screaming)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Scream", newbot2);
-#else
-  Strcat(nb = eos(nb), " Scream");
-#endif
+    status_effect("Scream", "Scrm", "Scr");
   if(FaintingFits)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Faint", newbot2);
-#else
-  Strcat(nb = eos(nb), " Faint");
-#endif
+    status_effect("Faint", "Fnt", "Fnt");
 /** Less important **/
   if(Levitation)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-      add_colored_text("Lev", newbot2);
-#else
-  Strcat(nb = eos(nb), " Lev", newbot2);
-#endif
+    status_effect("Lev", "Lev", "Lv");
   /* flying and levitation are mutually exclusive */
   if(Flying && !Levitation)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-     add_colored_text("Fly", newbot2);
-#else
-  Strcat(nb = eos(nb), " Fly", newbot2);
-#endif
+    status_effect("Fly", "Fly", "Fl");
   if(u.usteed)
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-     add_colored_text("Ride", newbot2);
-#else
-  Strcat(nb = eos(nb), " Ride", newbot2);
-#endif
-#ifdef DUMP_LOG
+    status_effect("Ride", "Rid", "Rd");
+#undef status_effect
 }
+
 STATIC_OVL void
 bot2()
 {
 	char newbot2[MAXCO];
-	bot2str(newbot2);
+	int abbrev = 0;
+	for (;;) {
+		bot2str(newbot2, FALSE, abbrev);
+		if (abbrev >= 2 || strlen(newbot2) < min(MAXCO-1, CO))
+			break;
+		abbrev++;
+	}
+	bot2str(newbot2, TRUE, abbrev);
 	int save_botlx = flags.botlx;
-#endif
 	curs(WIN_STATUS, 1, 1);
 	putstr(WIN_STATUS, 0, newbot2);
 	flags.botlx = save_botlx;
