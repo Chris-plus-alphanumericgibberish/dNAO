@@ -7372,7 +7372,7 @@ arti_invoke(obj)
 					else if(obj->otyp == CLOAK) You("display the cloak's clasp to %s.", mon_nam(mtmp));
 					else You("display it to %s.", mon_nam(mtmp)); //Shouldn't be used
 					
-					if (!resists_ston(mtmp) && (rn2(100)>(mtmp->data->mr/2))){
+					if (!resists_ston(mtmp) && (mtmp->mcan || rn2(100)>(mtmp->data->mr/2))){
 						minstapetrify(mtmp, youattack);
 					}
 					else {
