@@ -882,6 +882,7 @@
 				 (ptr)->mtyp == PM_GIANT_SPIDER || (ptr)->mtyp == PM_PHASE_SPIDER || \
 				 (ptr)->mtyp == PM_MIRKWOOD_SPIDER || (ptr)->mtyp == PM_MIRKWOOD_ELDER || \
 				 (ptr)->mtyp == PM_SPROW || (ptr)->mtyp == PM_DRIDER || (ptr)->mtyp == PM_ALIDER || \
+				 (ptr)->mtyp == PM_MENDICANT_SPROW || (ptr)->mtyp == PM_MENDICANT_DRIDER || \
 				 (ptr)->mtyp == PM_EDDERKOP || \
 				 (ptr)->mtyp == PM_AVATAR_OF_LOLTH || (ptr)->mtyp == PM_DROW_MUMMY)
 #define is_unicorn(ptr)		((ptr)->mlet == S_UNICORN && likes_gems(ptr))
