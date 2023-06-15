@@ -1732,8 +1732,9 @@ static const NEARDATA short hwep[] = {
 	  CROW_QUILL/*1d8/1d8*/,
 	  BLADE_OF_MERCY/*1d6+1/1d8+1*/, 
 	  RAKUYO_SABER/*1d8/1d8*/,
+	  PINCER_STAFF/*1d6+2/2d6+1*/, 
+	  TRIDENT/*1d8+1/3d6*/, 
 	  SABER/*1d8/1d8*/,
-	  TRIDENT/*1d6+1/3d4*/, 
 	  NAGINATA, /*1d8/1d10*/
 	  LONG_SWORD/*1d8/1d12*/,
 	  FLAIL/*1d6+1/2d4*/, 
@@ -1846,8 +1847,9 @@ static const NEARDATA short hpwep[] = {
 	  CROW_QUILL/*1d8/1d8*/,
 	  BLADE_OF_MERCY/*1d6+1/1d8+1*/, 
 	  RAKUYO_SABER/*1d8/1d8*/,
+	  PINCER_STAFF/*1d6+2/2d6+1*/, 
+	  TRIDENT/*1d8+2/3d6*/, 
 	  SABER/*1d8/1d8*/,
-	  TRIDENT/*1d6+1/3d4*/, 
 	  NAGINATA, /*1d8/1d10*/
 	  LONG_SWORD/*1d8/1d12*/,
 	  FLAIL/*1d6+1/2d4*/, 
@@ -1964,6 +1966,7 @@ register struct monst *mtmp;
 			|| (rakuyo_prop(otmp) && u.uinsight >= 20) //Note: Rakuyo-ness is accidently caught by OPROP_
 			|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
 			|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+			|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
 	))
 		return otmp;
 	
@@ -1979,6 +1982,7 @@ register struct monst *mtmp;
 				|| (rakuyo_prop(otmp) && u.uinsight >= 20)
 				|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
 				|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+				|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
 			) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
@@ -2038,6 +2042,7 @@ register struct monst *mtmp;
 		|| (rakuyo_prop(otmp) && u.uinsight >= 20)
 		|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
 		|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+		|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
 	))
 		return otmp;
 	
@@ -2055,6 +2060,7 @@ register struct monst *mtmp;
 				|| (rakuyo_prop(otmp) && u.uinsight >= 20)
 				|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
 				|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+				|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
 			) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
