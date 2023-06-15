@@ -492,8 +492,9 @@ qt_montype()
 				else return &mons[PM_DEEPEST_ONE];
 			break;
 			case 6:
-				if(rn2(4)) return &mons[PM_PHANTASM];
-				else if(rn2(4)) return &mons[PM_NEVERWAS];
+				if(rn2(3)) return &mons[PM_PHANTASM];
+				else if(rn2(3)) return &mons[PM_NEVERWAS];
+				else if(rn2(3)) return &mons[PM_CARCOSAN_COURTIER];
 				else if(rn2(3)) return &mons[PM_INTONER];
 				else return &mons[PM_BLACK_FLOWER];
 			break;
