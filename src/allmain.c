@@ -1495,8 +1495,10 @@ moveloop()
 			  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 			  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 			){
-				insight_vanish(mtmp);
-				continue;
+				if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+					insight_vanish(mtmp);
+					continue;
+				}
 			}
 			if(has_template(mtmp, DELOUSED)){
 				delouse_tame(mtmp);
@@ -1591,8 +1593,10 @@ moveloop()
 				  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 				  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 				){
-					insight_vanish(mtmp);
-					continue;
+					if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+						insight_vanish(mtmp);
+						continue;
+					}
 				}
 				if(has_template(mtmp, DELOUSED)){
 					delouse_tame(mtmp);
@@ -2951,8 +2955,10 @@ karemade:
 		  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 		  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 		){
-			insight_vanish(mtmp);
-			continue;
+			if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+				insight_vanish(mtmp);
+				continue;
+			}
 		}
 		if(has_template(mtmp, DELOUSED)){
 			delouse_tame(mtmp);
