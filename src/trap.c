@@ -4631,7 +4631,7 @@ struct obj * tool;
 			else if(yn("Attempt to remove the fang?")=='y'){
 				/* Don't really want the solution to be wages of sloth */
 				if(TimeStop){
-					pline("The flesh around %s wound is too unyielding in your accelerated time frame.", s_suffix(Monnam(mtmp)));
+					pline("The flesh around %s wound is too unyielding in your accelerated time frame.", s_suffix(mon_nam(mtmp)));
 				}
 				else {
 					int res = you_remove_jrt_fang(mtmp, tool);
