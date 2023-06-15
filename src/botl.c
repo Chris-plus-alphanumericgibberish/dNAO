@@ -588,10 +588,12 @@ void bot2str(char *newbot2, boolean terminal_output, int abbrev)
       status_effect("Ill", "Ill", "Ill");
   }
 /** Hunger **/
-  if(uclockwork)
-    status_effect(ca_hu_stat[u.uhs], ca_hu_stat[u.uhs], ca_hu_stat[u.uhs]);
-  else
-    status_effect(hu_stat[u.uhs], hu_stat[u.uhs], hu_stat[u.uhs]);
+  if(u.uhs != NOT_HUNGRY) {
+    if(uclockwork)
+      status_effect(ca_hu_stat[u.uhs], ca_hu_stat[u.uhs], ca_hu_stat[u.uhs]);
+    else
+      status_effect(hu_stat[u.uhs], hu_stat[u.uhs], hu_stat[u.uhs]);
+  }
 /** Encumbrance **/
   if(cap > UNENCUMBERED)
     status_effect(enc_stat[cap], enc_stat_abbrev1[cap], enc_stat_abbrev2[cap]);
