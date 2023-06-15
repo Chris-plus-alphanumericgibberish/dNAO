@@ -1833,6 +1833,29 @@ moveloop()
 				/* Loyal monsters slowly recover tameness */
 				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && !(moves%100))
 					mtmp->mtame++;
+				/* Beast masters slowly improve tameness */
+				if(mtmp->mtame && !(moves%1000)){
+					if(P_SKILL(P_BEAST_MASTERY)>P_UNSKILLED){
+						if(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal){
+							if(mtmp->mtame < 5+P_SKILL(P_BEAST_MASTERY)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+						else {
+							if(mtmp->mtame < P_SKILL(P_BEAST_MASTERY)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+					}
+					if(u.usteed == mtmp && P_SKILL(P_RIDING)>P_UNSKILLED){
+						if(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal){
+							if(mtmp->mtame < 5+P_SKILL(P_RIDING)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+						else {
+							if(mtmp->mtame < P_SKILL(P_RIDING)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+					}
+				}
 				/* Dominated monsters stay tame */
 				if(mtmp->mtame && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated)
 					mtmp->mtame = 100;
