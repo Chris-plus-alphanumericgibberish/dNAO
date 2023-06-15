@@ -2064,6 +2064,30 @@ boolean goodequip;
 			(void)mongets(mtmp, DROVEN_CROSSBOW, mkobjflags);
 			m_initthrow(mtmp, DROVEN_BOLT, 24, mkobjflags);
 		}
+		else if(mm == PM_ANULO){
+			(void) mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+			(void) mongets(mtmp, LOW_BOOTS, mkobjflags);
+		}
+		else if(mm == PM_ANULO_DANCER){
+			otmp = mongets(mtmp, WAISTCLOTH, mkobjflags);
+			if(otmp){
+				otmp->ohaluengr = TRUE;
+				otmp->oward = curhouse;
+			}
+			if(!rn2(4)){
+				(void) mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
+			}
+			else {
+				otmp = mongets(mtmp, SABER, mkobjflags);
+				if(otmp){
+					set_material_gm(otmp, SILVER);
+				}
+				otmp = mongets(mtmp, SABER, mkobjflags);
+				if(otmp){
+					set_material_gm(otmp, SILVER);
+				}
+			}
+		}
 		else {
 			otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
 			otmp->ohaluengr = TRUE;
@@ -7242,6 +7266,72 @@ int mmflags;
 					if(is_prince(ptr) || (is_lord(ptr) && !rn2(3))) (void)mongets(mtmp, DWARVISH_MITHRIL_COAT, mkobjflags);
 					else (void)mongets(mtmp, CHAIN_MAIL, mkobjflags);
 				}
+			}
+		}
+		else if(is_kuo_toa(ptr)){
+			if(mm == PM_KUO_TOA_WHIP){
+				if(!rn2(3)){
+					otmp = mongets(mtmp, PINCER_STAFF, mkobjflags);
+					if(otmp){
+						otmp->spe = rnd(7);
+						otmp->objsize = MZ_MEDIUM;
+						fix_object(otmp);
+					}
+				}
+				else if(rn2(2)){
+					if(!rn2(10)){
+						otmp = mongets(mtmp, VIPERWHIP, mkobjflags);
+						if(otmp){
+							otmp->spe = rnd(7);
+							otmp->opoisoned = rn2(2) ? OPOISON_HALLU : OPOISON_BASIC;
+							otmp->opoisonchrgs = 3;
+							set_material_gm(otmp, IRON);
+							otmp->oerodeproof = TRUE;
+							otmp->objsize = MZ_MEDIUM;
+							fix_object(otmp);
+						}
+					}
+					else {
+						otmp = mongets(mtmp, rn2(3) ? QUARTERSTAFF : KHAKKHARA, mkobjflags);
+						if(otmp)
+							otmp->spe = rnd(7);
+					}
+				}
+				else {
+					otmp = mongets(mtmp, !rn2(3) ? DOUBLE_SWORD : SPEAR, mkobjflags);
+					if(otmp){
+						if(rn2(10)){
+							set_material_gm(otmp, WOOD);
+							otmp->opoisoned = rn2(2) ? OPOISON_HALLU : OPOISON_BASIC;
+						}
+						else {
+							set_material_gm(otmp, IRON);
+							otmp->oeroded = 3;
+						}
+						otmp->spe = rnd(7);
+					}
+				}
+				if(goodequip || !rn2(4))
+					mongets(mtmp, !rn2(10) ? RAZOR_WIRE : ROPE_OF_ENTANGLING, mkobjflags);
+				mongets(mtmp, rn2(3) ? POT_HALLUCINATION : POT_BOOZE, mkobjflags);
+			}
+			else {
+				otmp = mongets(mtmp, SPEAR, mkobjflags);
+				if(otmp){
+					if(rn2(10)){
+						set_material_gm(otmp, WOOD);
+						otmp->opoisoned = OPOISON_BASIC;
+					}
+					else {
+						set_material_gm(otmp, IRON);
+						otmp->oeroded = 3;
+					}
+					otmp->spe = rnd(7);
+				}
+				if(goodequip || !rn2(10))
+					mongets(mtmp, ROPE_OF_ENTANGLING, mkobjflags);
+				if(!rn2(10))
+					mongets(mtmp, rn2(3) ? POT_BOOZE : POT_HALLUCINATION, mkobjflags);
 			}
 		}
 		break;
