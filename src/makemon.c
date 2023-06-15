@@ -8124,6 +8124,8 @@ int mmflags;
 								otmp->spe = 2+rn2(3);
 								set_material_gm(otmp, GOLD);
 								(void) mpickobj(mtmp, otmp);
+								if(!rn2(20))
+									mongets(mtmp, CARCOSAN_STING, mkobjflags|MKOBJ_ARTIF);
 								otmp = mksobj(VICTORIAN_UNDERWEAR, mkobjflags|MKOBJ_ARTIF);
 								otmp->spe = 0+rn2(4);
 								otmp->obj_color = CLR_YELLOW;
