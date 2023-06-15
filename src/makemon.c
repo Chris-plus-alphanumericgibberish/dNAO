@@ -1490,16 +1490,10 @@ boolean goodequip;
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_SEYLL_AUZKOVYN){
 			/*Plate Mail*/
-			otmp = mksobj(ELVEN_MITHRIL_COAT, mkobjflags);
+			otmp = mksobj(EILISTRAN_ARMOR, mkobjflags);
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
-			otmp->spe = 0;
-			(void) mpickobj(mtmp, otmp);
-			/*Dress*/
-			otmp = mksobj(VICTORIAN_UNDERWEAR, mkobjflags);
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->oerodeproof = TRUE;
+			set_material_gm(otmp, MITHRIL);
 			otmp->spe = 0;
 			(void) mpickobj(mtmp, otmp);
 			/*Ring*/
@@ -1526,6 +1520,29 @@ boolean goodequip;
 			otmp->blessed = TRUE;
 			otmp->cursed = FALSE;
 			otmp->oerodeproof = TRUE;
+			otmp->spe = 0;
+			(void) mpickobj(mtmp, otmp);
+			/*shield*/
+			otmp = mksobj(ELVEN_SHIELD, mkobjflags);
+			set_material_gm(otmp, MITHRIL);
+			otmp->objsize = MZ_SMALL;
+			fix_object(otmp);
+			otmp->blessed = TRUE;
+			otmp->cursed = FALSE;
+			otmp->spe = 0;
+			(void) mpickobj(mtmp, otmp);
+			/*daggers*/
+			otmp = mksobj(STILETTO, mkobjflags);
+			set_material_gm(otmp, MITHRIL);
+			otmp->blessed = TRUE;
+			otmp->cursed = FALSE;
+			otmp->spe = 0;
+			(void) mpickobj(mtmp, otmp);
+			/*daggers*/
+			otmp = mksobj(STILETTO, mkobjflags);
+			set_material_gm(otmp, MITHRIL);
+			otmp->blessed = TRUE;
+			otmp->cursed = FALSE;
 			otmp->spe = 0;
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_DARUTH_XAXOX){
