@@ -1831,7 +1831,7 @@ moveloop()
 				/* Spot the monster for sanity purposes */
 				spot_monster(mtmp);
 				/* Loyal monsters slowly recover tameness */
-				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && (!moves%100))
+				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && !(moves%100))
 					mtmp->mtame++;
 				/* Dominated monsters stay tame */
 				if(mtmp->mtame && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated)
