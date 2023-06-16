@@ -127,7 +127,7 @@ void
 apply_color_option(color_option, newbot2, statusline)
      struct color_option color_option;
      const char *newbot2;
-     int statusline; /* apply color on this statusline: 1 or 2 */
+     int statusline; /* apply color on this statusline: 1, 2, or 3 */
 {
     if (!iflags.use_status_colors || !iflags.use_color) return;
     curs(WIN_STATUS, 1, statusline-1);
@@ -137,7 +137,8 @@ apply_color_option(color_option, newbot2, statusline)
 }
 
 void
-add_colored_text(const char *hilite, const char *text, char *newbot2, boolean terminal_output)
+add_colored_text(const char *hilite, const char *text, char *newbot2,
+                 boolean terminal_output, int statusline, boolean first)
 {
     char *nb;
     struct color_option color_option;
@@ -151,16 +152,16 @@ add_colored_text(const char *hilite, const char *text, char *newbot2, boolean te
     if (strlen(newbot2) >= maxlength) return;
 
     if (!iflags.use_status_colors || !terminal_output) {
-	Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), " %s", text);
+	Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s" : " %s", text);
 	return;
     }
 
-    Strncat(nb = eos(newbot2), " ", MAXCO - strlen(newbot2));
-    curs(WIN_STATUS, 1, 1);
+    Strncat(nb = eos(newbot2), first ? "" : " ", MAXCO - strlen(newbot2));
+    curs(WIN_STATUS, 1, statusline-1);
     putstr(WIN_STATUS, 0, newbot2);
 
     Strncat(nb = eos(nb), text, MAXCO - strlen(newbot2));
-    curs(WIN_STATUS, 1, 1);
+    curs(WIN_STATUS, 1, statusline-1);
     color_option = text_color_of(hilite, text_colors);
     start_color_option(color_option);
     /* Trim the statusline to always have the end color
@@ -502,77 +503,24 @@ char *buf;
 	return ret;
 }
 
-void bot2str(char *newbot2, boolean terminal_output, int abbrev)
+void
+do_statuseffects(char *newbot2, boolean terminal_output, int abbrev, int statusline)
 {
-	register char *nb;
-	int hp, hpmax;
-	int cap = near_capacity();
+  register char *nb = eos(newbot2);
+  int cap = near_capacity();
+  boolean first = statusline == 3; /* first text shown on line */
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-        int save_botlx = flags.botlx;
-#endif
-
-	hp = Upolyd ? u.mh : u.uhp;
-	hpmax = Upolyd ? u.mhmax : u.uhpmax;
-
-        if(hp < 0) hp = 0;
-        (void) describe_level(newbot2);
-        Sprintf(nb = eos(newbot2), "%c:%-2ld", oc_syms[COIN_CLASS],
-#ifndef GOLDOBJ
-                u.ugold
+#define status_effect(str1, str2, str3)                                 \
+  (add_colored_text((str1),                                             \
+                    abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), \
+                    newbot2, terminal_output, statusline, first),       \
+   first = FALSE)
 #else
-                money_cnt(invent)
-#endif
-		);
-
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-        Strcat(nb = eos(newbot2), " HP:");
-        curs(WIN_STATUS, 1, 1);
-        putstr(WIN_STATUS, 0, newbot2);
-        flags.botlx = 0;
-
-        Sprintf(nb = eos(nb), "%d(%d)", hp, hpmax);
-        apply_color_option(percentage_color_of(hp, hpmax, hp_colors), newbot2, 2);
-#else
-        Sprintf(nb = eos(nb), " HP:%d(%d)", hp, hpmax);
-#endif
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-        Strcat(nb = eos(nb), " Pw:");
-        curs(WIN_STATUS, 1, 1);
-        putstr(WIN_STATUS, 0, newbot2);
-
-        Sprintf(nb = eos(nb), "%d(%d)", u.uen, u.uenmax);
-        apply_color_option(percentage_color_of(u.uen, u.uenmax, pw_colors), newbot2, 2);
-#else
-        Sprintf(nb = eos(nb), " Pw:%d(%d)", u.uen, u.uenmax);
-#endif
-        Sprintf(nb = eos(nb), " Br:%d", u.divetimer);
-        Sprintf(nb = eos(nb), " AC:%-2d", (u.uac + u.ustdy));
-        Sprintf(nb = eos(nb), " DR:%-2d", u.udr - u.ustdy);
-	if (Upolyd)
-		Sprintf(nb = eos(nb), " HD:%d", mons[u.umonnum].mlevel);
-#ifdef EXP_ON_BOTL
-	else if(flags.showexp)
-		Sprintf(nb = eos(nb), " Xp:%u/%-1ld", u.ulevel,u.uexp);
-#endif
-	else
-		Sprintf(nb = eos(nb), " Exp:%u", u.ulevel);
-
-	if(flags.time)
-	    Sprintf(nb = eos(nb), " T:%ld", iflags.mod_turncount ? moves%10 : moves);
-#ifdef REALTIME_ON_BOTL
-  if(iflags.showrealtime) {
-    time_t currenttime = get_realtime();
-    Sprintf(nb = eos(nb), " %ld:%2.2ld", currenttime / 3600,
-                                         (currenttime % 3600) / 60);
-  }
-#endif
-
-#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-#define status_effect(str1, str2, str3) \
-  add_colored_text((str1), abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), newbot2, terminal_output)
-#else
-#define status_effect(str1, str2, str3) \
-  Snprintf(nb = eos(nb), MAXCO - strlen(newbot2), " %s", abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1))
+#define status_effect(str1, str2, str3)                                 \
+  (Snprintf(nb = eos(nb), MAXCO - strlen(newbot2),                      \
+            first ? "%s" : " %s",                                       \
+            abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1)),      \
+   first = FALSE)
 #endif
 /** Delayed instadeaths **/
   if(Stoned || Golded)
@@ -632,21 +580,116 @@ void bot2str(char *newbot2, boolean terminal_output, int abbrev)
 #undef status_effect
 }
 
+void
+bot2str(char *newbot2, boolean terminal_output, int abbrev, boolean dumplog)
+{
+	register char *nb;
+	int hp, hpmax;
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+        int save_botlx = flags.botlx;
+#endif
+
+	hp = Upolyd ? u.mh : u.uhp;
+	hpmax = Upolyd ? u.mhmax : u.uhpmax;
+
+        if(hp < 0) hp = 0;
+        (void) describe_level(newbot2);
+        Sprintf(nb = eos(newbot2), "%c:%-2ld", oc_syms[COIN_CLASS],
+#ifndef GOLDOBJ
+                u.ugold
+#else
+                money_cnt(invent)
+#endif
+		);
+
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+        Strcat(nb = eos(newbot2), " HP:");
+        curs(WIN_STATUS, 1, 1);
+        putstr(WIN_STATUS, 0, newbot2);
+        flags.botlx = 0;
+
+        Sprintf(nb = eos(nb), "%d(%d)", hp, hpmax);
+        apply_color_option(percentage_color_of(hp, hpmax, hp_colors), newbot2, 2);
+#else
+        Sprintf(nb = eos(nb), " HP:%d(%d)", hp, hpmax);
+#endif
+#if defined(STATUS_COLORS) && defined(TEXTCOLOR)
+        Strcat(nb = eos(nb), " Pw:");
+        curs(WIN_STATUS, 1, 1);
+        putstr(WIN_STATUS, 0, newbot2);
+
+        Sprintf(nb = eos(nb), "%d(%d)", u.uen, u.uenmax);
+        apply_color_option(percentage_color_of(u.uen, u.uenmax, pw_colors), newbot2, 2);
+#else
+        Sprintf(nb = eos(nb), " Pw:%d(%d)", u.uen, u.uenmax);
+#endif
+        Sprintf(nb = eos(nb), " Br:%d", u.divetimer);
+        Sprintf(nb = eos(nb), " AC:%-2d", (u.uac + u.ustdy));
+        Sprintf(nb = eos(nb), " DR:%-2d", u.udr - u.ustdy);
+	if (Upolyd)
+		Sprintf(nb = eos(nb), " HD:%d", mons[u.umonnum].mlevel);
+#ifdef EXP_ON_BOTL
+	else if(flags.showexp)
+		Sprintf(nb = eos(nb), " Xp:%u/%-1ld", u.ulevel,u.uexp);
+#endif
+	else
+		Sprintf(nb = eos(nb), " Exp:%u", u.ulevel);
+
+	if(flags.time)
+	    Sprintf(nb = eos(nb), " T:%ld", iflags.mod_turncount ? moves%10 : moves);
+#ifdef REALTIME_ON_BOTL
+  if(iflags.showrealtime) {
+    time_t currenttime = get_realtime();
+    Sprintf(nb = eos(nb), " %ld:%2.2ld", currenttime / 3600,
+                                         (currenttime % 3600) / 60);
+  }
+#endif
+  if (!dumplog && (LI <= 24 || iflags.statuslines <= 2))
+    do_statuseffects(newbot2, terminal_output, abbrev, 2);
+}
+
 STATIC_OVL void
 bot2()
 {
 	char newbot2[MAXCO];
 	int abbrev = 0;
 	for (;;) {
-		bot2str(newbot2, FALSE, abbrev);
+		bot2str(newbot2, FALSE, abbrev, FALSE);
 		if (abbrev >= 2 || strlen(newbot2) < min(MAXCO-1, CO))
 			break;
 		abbrev++;
 	}
-	bot2str(newbot2, TRUE, abbrev);
+	bot2str(newbot2, TRUE, abbrev, FALSE);
 	int save_botlx = flags.botlx;
 	curs(WIN_STATUS, 1, 1);
 	putstr(WIN_STATUS, 0, newbot2);
+	flags.botlx = save_botlx;
+}
+
+void
+bot3str(char *newbot3, boolean terminal_output, int abbrev)
+{
+	newbot3[0] = '\0';      /* so eos() works */
+	do_statuseffects(newbot3, terminal_output, abbrev, 3);
+}
+
+void
+bot3()
+{
+	char newbot3[MAXCO];
+	int abbrev = 0;
+	if (LI <= 24 || iflags.statuslines <= 2)
+		return;
+	for (;;) {
+		bot3str(newbot3, FALSE, abbrev);
+		if (abbrev >= 2 || strlen(newbot3) < min(MAXCO-1, CO))
+			break;
+		abbrev++;
+	}
+	bot3str(newbot3, TRUE, abbrev);
+	int save_botlx = flags.botlx;
+	curs(WIN_STATUS, 1, 2);
+	putstr(WIN_STATUS, 0, newbot3);
 	flags.botlx = save_botlx;
 }
 
@@ -659,6 +702,7 @@ bot()
 	}
 	bot1();
 	bot2();
+	bot3();
 	flags.botl = flags.botlx = 0;
 }
 
@@ -667,6 +711,7 @@ force_bot()
 {
 	bot1();
 	bot2();
+	bot3();
 	flags.botl = flags.botlx = 0;
 	return MOVE_CANCELLED;
 }
