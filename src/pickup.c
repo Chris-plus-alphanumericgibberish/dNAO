@@ -1867,11 +1867,17 @@ gotit:
 				/*no message*/;
 			else {
 				pline("A broken-off fang is embedded in %s chest. It seems to have pierced %s heart!", s_suffix(mon_nam(mtmp)), mhis(mtmp));
-				if(!helpless_still(mtmp)){
+				if(!helpless_still(mtmp) && !TimeStop){
 					pline("%s moves to quickly for you to grasp the fang.", Monnam(mtmp));
 				}
 				else if(yn("Attempt to remove the fang?")=='y'){
-					timepassed = you_remove_jrt_fang(mtmp, (struct obj *)0);
+					/* Don't really want the solution to be wages of sloth */
+					if(TimeStop){
+						pline("The flesh around %s wound is too unyielding in your accelerated time frame.", s_suffix(mon_nam(mtmp)));
+					}
+					else {
+						timepassed = you_remove_jrt_fang(mtmp, (struct obj *)0);
+					}
 				}
 			}
 		}
