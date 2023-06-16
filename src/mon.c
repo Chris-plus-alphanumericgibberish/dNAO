@@ -1643,7 +1643,7 @@ mcalcdistress()
 		create_gas_cloud(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, rnd(3), rnd(3)+1, FALSE);
 	}
 	
-	if(mtmp->mtyp == PM_FIRST_WRAITHWORM && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 6){
+	if(mtmp->mtyp == PM_FIRST_WRAITHWORM && !mtmp->mcan && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 6){
 		struct monst *tmpm;
 		You("are thrown by a blast of wind!");
 		hurtle(rn2(3)-1, rn2(3)-1, rnd(6), FALSE, TRUE);
