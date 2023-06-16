@@ -823,7 +823,7 @@ boolean dolls;
 		xchar x, y;
 		int wasfossil = (obj->otyp == FOSSIL);
 		
-		if(montype == PM_CHANGED || montype == PM_WARRIOR_CHANGED)
+		if(is_changed_mtyp(montype))
 			return (struct monst *) 0; //Can't revive these corpses, the main part of the monster vaporized.
 		
 		if (obj->where == OBJ_CONTAINED) {

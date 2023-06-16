@@ -1101,6 +1101,8 @@
 		&& !is_naturally_unalive(mtmp->data)\
 		)
 
+#define is_changed_mtyp(mtyp)	(mtyp == PM_CHANGED || mtyp == PM_WARRIOR_CHANGED || mtyp == PM_TWITCHING_FOUR_ARMED_CHANGED || mtyp == PM_CLAIRVOYANT_CHANGED)
+
 #define nonliving(ptr)	(is_unalive(ptr) || is_undead(ptr) || \
 				 (ptr)->mtyp == PM_MANES \
 				)

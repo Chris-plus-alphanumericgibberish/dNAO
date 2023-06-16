@@ -635,7 +635,7 @@ boolean digest_meal;
 		return;
 	}
 	/*The Changed degenerate due to damage*/
-	if(mon->mhp < mon->mhpmax/2 && (mon->mtyp == PM_CHANGED || mon->mtyp == PM_WARRIOR_CHANGED)){
+	if(mon->mhp < mon->mhpmax/2 && is_changed_mtyp(mon->mtyp)){
 		mon->mhp -= 1;
 		create_gas_cloud(mon->mx+rn2(3)-1, mon->my+rn2(3)-1, rnd(3), rnd(3)+1, FALSE);
 		if(mon->mhp <= 0){

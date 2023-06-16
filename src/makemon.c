@@ -12780,7 +12780,7 @@ int faction;
 	if(ptr->mtyp == PM_MAD_GRAZI)
 		out_faction = Y_CULT_SYMBOL;
 
-	if(is_drow(ptr) && ptr->mtyp != PM_CHANGED && ptr->mtyp != PM_WARRIOR_CHANGED){
+	if(is_drow(ptr) && !is_changed_mtyp(ptr->mtyp)){
 		if(curhouse) {
 			out_faction = curhouse;
 		} else if(ptr->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH
