@@ -4358,6 +4358,19 @@ printAttacks(buf, ptr)
 				damageKey[((int)attk->adtyp)]
 			);
 		}
+		if(attk->lev_req > 0 || attk->ins_req > 0){
+			Sprintf(eos(buf), " (");
+				if(attk->lev_req > 0){
+					Sprintf(eos(buf), "level %d+", attk->lev_req);
+				}
+				if(attk->lev_req > 0 && attk->ins_req > 0){
+					Sprintf(eos(buf), " and ");
+				}
+				if(attk->ins_req > 0){
+					Sprintf(eos(buf), "%d+ [[insight]]", attk->ins_req);
+				}
+			Sprintf(eos(buf), ")");
+		}
 	}
 	return;
 }
