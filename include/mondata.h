@@ -559,6 +559,7 @@
 								(ptr)->mtyp == PM_BRIMSTONE_ESSENCE ||\
 								(ptr)->mtyp == PM_HYDRARGYRUMACH_RILMANI ||\
 								(ptr)->mtyp == PM_CENTER_OF_ALL ||\
+								(ptr)->mtyp == PM_ADAMACH ||\
 								(ptr)->mtyp == PM_AURUMACH_RILMANI\
 							)
 #define is_deva(ptr)		((ptr)->mlet == S_NEU_ANGEL)
