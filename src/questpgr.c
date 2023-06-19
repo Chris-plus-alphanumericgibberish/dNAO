@@ -1141,6 +1141,8 @@ neutral_montype()
 					return &mons[PM_CUPRILACH_RILMANI];
 				if(chance < 60 && !toostrong(PM_FERRUMACH_RILMANI, diff))
 					return &mons[PM_FERRUMACH_RILMANI];
+				if(chance < 70)
+					return mkclass(S_GOLEM, G_NOHELL);
 				return &mons[PM_PLUMACH_RILMANI];
 			break;
 			case 2:
@@ -1155,6 +1157,8 @@ neutral_montype()
 				return &mons[PM_SHATTERED_ZIGGURAT_CULTIST];
 			break;
 			case 4:
+				if(on_level(&spire_level, &u.uz) && !rn2(4))
+					return mkclass(S_GOLEM, G_NOHELL);
 				return &mons[PM_PLAINS_CENTAUR];
 			break;
 		}
@@ -1170,6 +1174,8 @@ neutral_montype()
 			return &mons[PM_CUPRILACH_RILMANI];
 		if(chance < 65 && !toostrong(PM_FERRUMACH_RILMANI, diff))
 			return &mons[PM_FERRUMACH_RILMANI];
+		if(chance < 75)
+			return mkclass(S_GOLEM, G_NOHELL);
 		return &mons[PM_PLUMACH_RILMANI];
 	}
 	if(on_level(&rlyeh_level,&u.uz)){
