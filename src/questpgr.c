@@ -1140,7 +1140,7 @@ neutral_montype()
 				if(chance < 30 && !toostrong(PM_CUPRILACH_RILMANI, diff))
 					return &mons[PM_CUPRILACH_RILMANI];
 				if(chance < 60 && !toostrong(PM_FERRUMACH_RILMANI, diff))
-					return &mons[PM_CUPRILACH_RILMANI];
+					return &mons[PM_FERRUMACH_RILMANI];
 				return &mons[PM_PLUMACH_RILMANI];
 			break;
 			case 2:
@@ -1169,7 +1169,7 @@ neutral_montype()
 		if(chance < 35 && !toostrong(PM_CUPRILACH_RILMANI, diff))
 			return &mons[PM_CUPRILACH_RILMANI];
 		if(chance < 65 && !toostrong(PM_FERRUMACH_RILMANI, diff))
-			return &mons[PM_CUPRILACH_RILMANI];
+			return &mons[PM_FERRUMACH_RILMANI];
 		return &mons[PM_PLUMACH_RILMANI];
 	}
 	if(on_level(&rlyeh_level,&u.uz)){
