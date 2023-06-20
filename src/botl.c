@@ -644,7 +644,7 @@ bot2str(char *newbot2, boolean terminal_output, int abbrev, boolean dumplog)
                                          (currenttime % 3600) / 60);
   }
 #endif
-  if (!dumplog && (LI <= 24 || iflags.statuslines <= 2))
+  if (!dumplog && (LI <= ROWNO+3 || iflags.statuslines <= 2))
     do_statuseffects(newbot2, terminal_output, abbrev, 2);
 }
 
@@ -678,7 +678,7 @@ bot3()
 {
 	char newbot3[MAXCO];
 	int abbrev = 0;
-	if (LI <= 24 || iflags.statuslines <= 2)
+	if (LI <= ROWNO+3 || iflags.statuslines <= 2)
 		return;
 	for (;;) {
 		bot3str(newbot3, FALSE, abbrev);
