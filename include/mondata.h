@@ -319,7 +319,7 @@
 #define herbivorous(ptr)	(((ptr)->mflagst & MT_HERBIVORE) != 0L)
 #define metallivorous(ptr)	(((ptr)->mflagst & MT_METALLIVORE) != 0L)
 #define magivorous(ptr)		(((ptr)->mflagst & MT_MAGIVORE) != 0L)
-#define polyok(ptr)			(((ptr)->mflagsg & MG_NOPOLY) == 0L)
+#define polyok(ptr)			((((ptr)->mflagsg & MG_NOPOLY) == 0L) && (G_C_INST((ptr)->geno) <= u.uinsight))
 #define is_Rebel(ptr)		((ptr)->mtyp == PM_REBEL_RINGLEADER ||\
 							 (ptr)->mtyp == PM_ADVENTURING_WIZARD ||\
 							 (ptr)->mtyp == PM_MILITANT_CLERIC ||\
