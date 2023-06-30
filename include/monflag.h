@@ -298,9 +298,11 @@
 
 /* for mons[].geno (constant during game) */
 #define G_NON_GEN_CORPSE	(G_SPCORPSE|G_NOCORPSE)		/* nongenerated corpse */
-#define G_SPCORPSE	0x00010000		/* Corpse is special, and should be non-wishable */
-#define G_INST20	0x00008000		/* generates only if you have 20 insight */
-#define G_INST10	0x00004000		/* generates only if you have 10 insight */
+#define G_DEPTHS	0x00200000		/* generated only in the lost cities/depths */
+#define G_SPCORPSE	0x00100000		/* Corpse is special, and should be non-wishable */
+#define G_INSTMSK	0x000FC000		/* mask for insight (five bits, 0 to 63), 11111100000000000000 */
+#define	G_S_INST(x)	(x<<14)
+#define	G_C_INST(x)	((x&G_INSTMSK)>>14)
 #define G_UNIQ		0x00002000		/* generated only once */
 #define G_PLANES	0x00001000		/* generated only in planes */
 #define G_NOHELL	0x00000800		/* not generated in "hell" */

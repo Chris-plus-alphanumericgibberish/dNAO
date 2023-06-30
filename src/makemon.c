@@ -14395,12 +14395,15 @@ int mndx;
 {
 	if (mons[mndx].geno & (G_NOGEN | G_UNIQ)) return TRUE;
 	if (mvitals[mndx].mvflags & G_GONE && !In_quest(&u.uz)) return TRUE;
+	if (G_C_INST(mons[mndx].geno) > u.uinsight) return TRUE;
 	if (Inhell)
-		return((mons[mndx].geno & G_PLANES) != 0);
+		return((mons[mndx].geno & (G_PLANES|G_DEPTHS)) != 0);
 	else if (In_endgame(&u.uz))
-		return((mons[mndx].geno & G_HELL) != 0);
+		return((mons[mndx].geno & (G_HELL|G_DEPTHS)) != 0);
+	else if (In_depths(&u.uz))
+		return((mons[mndx].geno & (G_HELL|G_DEPTHS)) != 0);
 	else
-		return((mons[mndx].geno & (G_HELL|G_PLANES)) != 0);
+		return((mons[mndx].geno & (G_HELL|G_PLANES|G_DEPTHS)) != 0);
 }
 
 /*
@@ -14793,7 +14796,7 @@ rndmonst()
 		if (elemlevel && wrong_elem_type(ptr)) continue;
 		if (uncommon(mndx)) continue;
 		if (Inhell && (ptr->geno & G_NOHELL)) continue;
-		if (!In_endgame(&u.uz) && ((ptr->geno & (G_PLANES|G_HELL|G_NOHELL)) == G_PLANES)) continue;
+		if (!In_endgame(&u.uz) && ((ptr->geno & (G_PLANES|G_HELL|G_DEPTHS|G_NOHELL)) == G_PLANES)) continue;
 		ct = (int)(ptr->geno & G_FREQ) + align_shift(ptr);
 		if (ct < 0 || ct > 127)
 		    panic("rndmonst: bad count [#%d: %d]", mndx, ct);
@@ -14981,7 +14984,7 @@ char	class;
 int	spc;
 {
 	register int	first, last, num = 0;
-	int maxmlev, mask = (G_PLANES | G_NOHELL | G_HELL | G_NOGEN | G_UNIQ) & ~spc;
+	int maxmlev, mask = (G_DEPTHS | G_PLANES | G_NOHELL | G_HELL | G_NOGEN | G_UNIQ) & ~spc;
 	int freq;
 	
 	if(class == S_DRAGON)
@@ -15015,29 +15018,39 @@ int	spc;
  *			mons[] array.
  */
 	for (first = LOW_PM; first < SPECIAL_PM; first++)
-	    if (mons[first].mlet == class && !(mons[first].geno & mask)) break;
+	    if (mons[first].mlet == class
+			&& !(mons[first].geno & mask)
+			&& (G_C_INST(mons[first].geno) <= u.uinsight)
+		) break;
 	if (first == SPECIAL_PM) return (struct permonst *) 0;
 
 	for (last = first;
-		last < SPECIAL_PM && mons[last].mlet == class; last++)
-	    if (!(mvitals[last].mvflags & G_GONE && !In_quest(&u.uz)) && !(mons[last].geno & mask)
-					&& !is_placeholder(&mons[last])) {
-		/* consider it */
-		if(num && toostrong(last, maxmlev) && monstr[last] != monstr[last-1]) break;
-		freq = (mons[last].geno & G_FREQ);
-		if(!freq)
-			freq++;
-		num += freq;
+		last < SPECIAL_PM && mons[last].mlet == class; last++
+	){
+	    if (!(mvitals[last].mvflags & G_GONE && !In_quest(&u.uz))
+			&& !(mons[last].geno & mask)
+			&& !is_placeholder(&mons[last])
+			&& (G_C_INST(mons[last].geno) <= u.uinsight)
+		) {
+			/* consider it */
+			if(num && toostrong(last, maxmlev) && monstr[last] != monstr[last-1]) break;
+			freq = (mons[last].geno & G_FREQ);
+			if(!freq)
+				freq++;
+			num += freq;
 	    }
+	}
 
 	if(!num) return((struct permonst *) 0);
 
 /*	Assumption #2:	monsters of a given class are presented in ascending
  *			order of strength.
  */
-	for(num = rnd(num); num > 0; first++)
-	    if (!(mvitals[first].mvflags & G_GONE && !In_quest(&u.uz)) && !(mons[first].geno & mask)
-					&& !is_placeholder(&mons[first])
+	for(num = rnd(num); num > 0; first++){
+	    if (!(mvitals[first].mvflags & G_GONE && !In_quest(&u.uz))
+			&& !(mons[first].geno & mask)
+			&& !is_placeholder(&mons[first])
+			&& (G_C_INST(mons[first].geno) <= u.uinsight)
 		) {
 			/* skew towards lower value monsters at lower exp. levels */
 			freq = (mons[first].geno & G_FREQ);
@@ -15050,6 +15063,7 @@ int	spc;
 					num--;
 			}
 	    }
+	}
 	first--; /* correct off-by-one error (it will definitely enter the loop, so it will definitely increment first before noticing that num is now <= 0) */
 
 	return(&mons[first]);
