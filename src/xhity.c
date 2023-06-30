@@ -10499,6 +10499,10 @@ boolean verbose;
 	struct obj *otmp;
 	static const char mal_aura[] = "feel a malignant aura surround %s.";
 	if(mon == &youmonst){
+		if (youracedata->mtyp == PM_PARASITIC_WALL_HUGGER){
+			if(verbose) You(mal_aura, "your bloated body");
+			return TRUE;
+		}
 		if (uamul && (uamul->otyp == AMULET_VERSUS_CURSES)) {
 			if(verbose) You(mal_aura, "your amulet");
 			return TRUE;
@@ -10592,6 +10596,10 @@ boolean verbose;
 	else {
 		static const char mons_item_mal_aura[] = "feel a malignant aura surround %s %s.";
 		boolean visible = canseemon(mon);
+		if (mon->mtyp == PM_PARASITIC_WALL_HUGGER){
+			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "bloated body");
+			return TRUE;
+		}
 		if(has_template(mon, ILLUMINATED)){
 			if(visible && verbose) You("feel a malignant aura burn away in the Light.");
 			return TRUE;

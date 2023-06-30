@@ -776,6 +776,32 @@ register struct monst *mtmp;
 				mongone(mon);
 			}
 		break;
+	    case PM_PARASITIZED_KNIGHT:
+			obj = mksobj_at(SUNLIGHT_MAGGOT, x, y, MKOBJ_NOINIT);
+			if(mtmp->mpetitioner 
+				&& !is_rider(mtmp->data) 
+			) //u.uevent.invoked || 
+				break;
+			if(rn2(4)){
+				struct obj *otmp = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
+				otmp->corpsenm = PM_ZOMBIE;
+				fix_object(otmp);
+			}
+			else {
+				mon = makemon(&mons[PM_KNIGHT], x, y, MM_EDOG | MM_ADJACENTOK | NO_MINVENT | MM_NOCOUNTBIRTH);
+				if (mon){
+					initedog(mon);
+					mon->mtame = 10;
+					mon->mpeaceful = 1;
+					mon->mconf = 1;
+					EDOG(mon)->waspeaceful = TRUE;
+					mon->mpeacetime = 0;
+					mon->female = mtmp->female;
+					mkcorpstat(CORPSE, mon, (struct permonst *)0, x, y, FALSE);
+					mongone(mon);
+				}
+			}
+		break;
 	    case PM_LIVING_DOLL:
 		    obj = mkcorpstat(LIFELESS_DOLL, KEEPTRAITS(mtmp) ? mtmp : 0,
 				     mdat, x, y, TRUE);
@@ -3058,6 +3084,24 @@ struct obj *otmp;
 	return(TRUE);
 }
 
+boolean
+wall_adjacent(x,y)
+int x;
+int y;
+{
+	for(int i = x-1; i < x+2; i++){
+		for(int j = y-1; j < y+2; j++){
+			if(isok(i,j) && (
+				IS_ROCK(levl[i][j].typ)
+				|| (levl[i][j].typ == IRONBARS)
+				|| (levl[i][j].typ == DRAWBRIDGE_UP)
+				|| (levl[i][j].typ == DOOR)
+			)) return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 /* return number of acceptable neighbour positions */
 int
 mfndpos(mon, poss, info, flag)
@@ -3193,6 +3237,10 @@ nexttry:
 		if(mdat->mtyp == PM_HOOLOOVOO && 
 			IS_WALL(levl[mon->mx][mon->my].typ) &&
 			!IS_WALL(levl[nx][ny].typ)
+		) continue;
+		if(mdat->mtyp == PM_PARASITIC_WALL_HUGGER && 
+			wall_adjacent(mon->mx, mon->my) &&
+			!wall_adjacent(nx, ny)
 		) continue;
 		//Weeping angels should avoid stepping into corredors, where they can be forced into a standoff.
 		if(quantumlock && IS_ROOM(levl[mon->mx][mon->my].typ) && !IS_ROOM(ntyp) ) continue;

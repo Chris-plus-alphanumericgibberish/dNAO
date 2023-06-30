@@ -1614,7 +1614,7 @@ struct monst *mon;
 	}
 	else if (is_helmet(obj) && !is_hat(obj)){
 		//Check that the monster can actually have armor that fits it.
-		if(!has_head(ptr)){
+		if(!has_head(ptr) || nohat(ptr)){
 			return;
 		}
 		set_obj_shape(obj, ptr->mflagsb);
