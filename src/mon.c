@@ -3109,6 +3109,20 @@ int y;
 	return FALSE;
 }
 
+boolean
+space_adjacent(x,y)
+int x;
+int y;
+{
+	for(int i = x-1; i < x+2; i++){
+		for(int j = y-1; j < y+2; j++){
+			if(isok(i,j) && (ZAP_POS(levl[i][j].typ))) 
+				return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 /* return number of acceptable neighbour positions */
 int
 mfndpos(mon, poss, info, flag)
@@ -3241,9 +3255,9 @@ nexttry:
 		if(madjacent && distmin(nx, ny, madjacent->mx, madjacent->my) > 1 && 
 			dist2(nx, ny, madjacent->mx, madjacent->my) >= dist2(mon->mx, mon->my, madjacent->mx, madjacent->my) &&
 			!(m_at(nx, ny) && distmin(nx, ny, madjacent->mx, madjacent->my) <= 2)) continue;
-		if(mdat->mtyp == PM_HOOLOOVOO && 
-			IS_WALL(levl[mon->mx][mon->my].typ) &&
-			!IS_WALL(levl[nx][ny].typ)
+		if(mdat->mtyp == PM_HOOLOOVOO
+			&& (IS_ROCK(levl[mon->mx][mon->my].typ) && space_adjacent(mon->mx,mon->my))
+			&& !(IS_ROCK(levl[nx][ny].typ) && space_adjacent(nx,ny))
 		) continue;
 		if(mdat->mtyp == PM_PARASITIC_WALL_HUGGER && 
 			wall_adjacent(mon->mx, mon->my) &&
