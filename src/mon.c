@@ -3249,6 +3249,10 @@ nexttry:
 			wall_adjacent(mon->mx, mon->my) &&
 			!wall_adjacent(nx, ny)
 		) continue;
+		if(mdat->mtyp == PM_PARASITIC_WALL_HUGGER && 
+			wall_adjacent(mon->mx, mon->my) &&
+			!wall_adjacent(nx, ny)
+		) continue;
 		//Weeping angels should avoid stepping into corredors, where they can be forced into a standoff.
 		if(quantumlock && IS_ROOM(levl[mon->mx][mon->my].typ) && !IS_ROOM(ntyp) ) continue;
 		
