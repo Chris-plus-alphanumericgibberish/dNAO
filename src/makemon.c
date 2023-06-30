@@ -1231,6 +1231,13 @@ boolean goodequip;
 		(void)mongets(mtmp, GLOVES, mkobjflags);
 		(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
 	}
+	else if(ptr->mtyp == PM_PARASITIZED_KNIGHT){
+		(void)mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+		(void)mongets(mtmp, PLATE_MAIL, mkobjflags);
+		(void)mongets(mtmp, GAUNTLETS, mkobjflags);
+		(void)mongets(mtmp, KITE_SHIELD, mkobjflags);
+		(void)mongets(mtmp, LONG_SWORD, mkobjflags);
+	}
 	else if(ptr->mtyp == PM_AZTEC_WARRIOR) {
 		otmp = mksobj(TORCH, mkobjflags|MKOBJ_NOINIT);
 		otmp->age = (long) rn1(500,1000);
@@ -13947,6 +13954,12 @@ int faction;
 				if(!(mmflags & MM_NOGROUP)){
 					for(num = d(2,3); num >= 0; num--)
 						makemon_full(&mons[PM_CHUUL], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+				}
+			}
+			else if(mndx == PM_PARASITIC_WALL_HUGGER){
+				if(!(mmflags & MM_NOGROUP)){
+					for(num = d(3,2); num >= 0; num--)
+						makemon_full(&mons[PM_PARASITIZED_KNIGHT], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 				}
 			}
 			else if(mndx == PM_UVUUDAUM){
