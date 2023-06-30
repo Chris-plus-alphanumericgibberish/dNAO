@@ -1269,6 +1269,7 @@
 				 (ptr)->mlet == S_FUNGUS || \
 				 (ptr)->mtyp == PM_OCHRE_JELLY)
 #define stationary_mon(mon)		(stationary((mon)->data) || \
+	((mon)->mtyp == PM_ETHEREAL_FILCHER && (mon)->mcan) || \
 	((mon) != &youmonst ? (which_armor((mon), W_ARMF) && which_armor((mon), W_ARMF)->otyp == SHACKLES && which_armor((mon), W_ARMF)->cursed) :\
 	(uarmf && uarmf->otyp == SHACKLES && uarmf->cursed)))
 #define stationary(ptr)		((ptr)->mflagsm & MM_STATIONARY)
