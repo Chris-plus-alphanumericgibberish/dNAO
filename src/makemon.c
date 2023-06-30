@@ -13332,6 +13332,15 @@ int faction;
 		mtmp->m_insight_level = 20+rn2(21);
 	else if(mtmp->mtyp == PM_BLASPHEMOUS_LURKER)
 		mtmp->m_insight_level = 40;
+	else if(mtmp->mtyp == PM_HUNTING_HORROR)
+		mtmp->m_insight_level = 0;
+	else if(mtmp->mtyp == PM_SWIRLING_MIST
+		 || mtmp->mtyp == PM_DUST_STORM
+		 || mtmp->mtyp == PM_ICE_STORM
+		 || mtmp->mtyp == PM_THUNDER_STORM
+		 || mtmp->mtyp == PM_FIRE_STORM
+	)
+		mtmp->m_insight_level = 0;
 	else if(mtmp->mtyp == PM_PARASITIZED_DOLL)
 		mtmp->m_insight_level = rnd(20);
 	else if(mtmp->mtyp == PM_LIVING_DOLL){
