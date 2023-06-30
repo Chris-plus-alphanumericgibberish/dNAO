@@ -3537,7 +3537,7 @@ struct obj *sensor;
 					for(; pobj; pobj = pobj->nexthere){
 						/* target object has now been "seen (up close)" */
 						pobj->dknown = 1;
-						if (Is_container(pobj) || pobj->otyp == STATUE) {
+						if (Is_container(pobj) || pobj->otyp == STATUE || (pobj->otyp == CRYSTAL_SKULL && u.uinsight >= 20)) {
 							if (!pobj->cobj)
 							pline("%s empty.", Tobjnam(pobj, "are"));
 							else {
@@ -3558,7 +3558,7 @@ struct obj *sensor;
 					for(; pobj; pobj = pobj->nexthere){
 						/* target object has now been "seen (up close)" */
 						pobj->dknown = 1;
-						if (Is_container(pobj) || pobj->otyp == STATUE) {
+						if (Is_container(pobj) || pobj->otyp == STATUE || (pobj->otyp == CRYSTAL_SKULL && u.uinsight >= 20)) {
 							if (!pobj->cobj)
 							pline("%s empty.", Tobjnam(pobj, "are"));
 							else {

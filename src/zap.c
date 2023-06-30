@@ -2110,7 +2110,7 @@ struct obj *obj, *otmp;
 		res = !obj->dknown;
 		/* target object has now been "seen (up close)" */
 		obj->dknown = 1;
-		if (Is_container(obj) || obj->otyp == STATUE) {
+		if (Is_container(obj) || obj->otyp == STATUE || (obj->otyp == CRYSTAL_SKULL && u.uinsight >= 20)) {
 		    if (!obj->cobj)
 			pline("%s empty.", Tobjnam(obj, "are"));
 		    else {
@@ -2127,7 +2127,7 @@ struct obj *obj, *otmp;
 	case WAN_STRIKING:
 	case SPE_FORCE_BOLT:
 	case ROD_OF_FORCE:
-		if (is_boulder(obj) || obj->otyp == STATUE)
+		if (is_boulder(obj) || obj->otyp == STATUE || (obj->otyp == CRYSTAL_SKULL && u.uinsight >= 20))
 			break_boulder(obj);
 		else {
 			if (!flags.mon_moving)
