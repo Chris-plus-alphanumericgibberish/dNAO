@@ -596,6 +596,7 @@
 #define	is_goat_tentacle_mtyp(ptr)	((ptr)->mtyp == PM_DARK_YOUNG \
 									|| (ptr)->mtyp == PM_MOTHERING_MASS \
 									|| (ptr)->mtyp == PM_BLESSED \
+									|| (ptr)->mtyp == PM_PARASITIC_WALL_HUGGER \
 									|| (ptr)->mtyp == PM_SWIRLING_MIST \
 									|| (ptr)->mtyp == PM_DUST_STORM \
 									|| (ptr)->mtyp == PM_ICE_STORM \
