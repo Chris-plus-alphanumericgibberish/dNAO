@@ -1599,6 +1599,10 @@ struct monst *mon;
 		mmove = mmove*12/7;
 	}
 	
+	if(mon->mcan && mon->mtyp == PM_ETHEREAL_FILCHER){
+		mmove = mmove/2;
+	}
+	
 	if(mon->mtyp == PM_PYTHON && !no_upos(mon) && 
 		dist2(mon->mx, mon->my, mon->mux, mon->muy) <= 8)
 		mmove *= 4;
@@ -3077,6 +3081,9 @@ struct obj *otmp;
 
 	/* nymphs deal in stolen merchandise, but not boulders or statues */
 	if (mdat->mlet == S_NYMPH)
+		return (boolean)(otmp->oclass != ROCK_CLASS);
+	/* ditto filchers */
+	if (mdat->mtyp == PM_ETHEREAL_FILCHER)
 		return (boolean)(otmp->oclass != ROCK_CLASS);
 
 	if (curr_mon_load(mtmp) + newload > max_mon_load(mtmp)) return FALSE;

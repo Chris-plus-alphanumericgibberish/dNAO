@@ -7281,7 +7281,10 @@ boolean ranged;
 							}
 							monflee(magr, 0, FALSE, FALSE);
 						}
-						return MM_AGR_STOP;
+						if(magr->mtyp == PM_ETHEREAL_FILCHER)
+							return MM_HIT;
+						else
+							return MM_AGR_STOP;
 					}
 				}
 				break;
