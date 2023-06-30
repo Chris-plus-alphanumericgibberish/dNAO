@@ -426,6 +426,7 @@ Helmet_on()
 	case HELM_OF_DRAIN_RESISTANCE:
 	case HARMONIUM_HELM:
 	case HELM_OF_BRILLIANCE:
+	case SUNLIGHT_MAGGOT:
 		break;
 	case CORNUTHAUM:
 		/* people think marked wizards know what they're talking
@@ -538,6 +539,7 @@ Helmet_off()
 	case GNOMISH_POINTY_HAT:
 	case ORCISH_HELM:
 	case HARMONIUM_HELM:
+	case SUNLIGHT_MAGGOT:
 	    break;
 	case DUNCE_CAP:
 	    flags.botl = 1;
@@ -1795,6 +1797,10 @@ boolean noisy;
 			if(!has_head_mon(&youmonst) && !hat){
 				if (noisy)
 				You("don't have a head.");
+				err++;
+			} else if(nohat(youracedata)){
+				if (noisy)
+				You("can't wear a helm or hat.");
 				err++;
 			} else if(!helm_match(youracedata,otmp) && !hat){
 				if (noisy)
