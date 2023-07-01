@@ -1716,6 +1716,7 @@ E void FDECL(set_faction, (struct monst *, int));
 E void FDECL(set_template, (struct monst *, int));
 E boolean FDECL(mtemplate_accepts_mtyp, (int, int));
 E struct permonst * FDECL(permonst_of, (int, int));
+E struct attack *FDECL(permonst_dmgtype, (struct permonst *,int));
 E struct attack *FDECL(attacktype_fordmg, (struct permonst *,int,int));
 E boolean FDECL(at_least_one_attack, (struct monst *));
 E boolean FDECL(attacktype, (struct permonst *,int));

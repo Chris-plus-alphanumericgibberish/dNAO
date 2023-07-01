@@ -1967,6 +1967,12 @@ movemon()
 			stackobj(egg);
 		}
 	}
+
+	if(mtmp->mtyp == PM_GRAY_DEVOURER && mtmp->mtame && !rn2(13) && base_casting_stat() == A_CHA){
+		if(canspotmon(mtmp))
+			pline("%s shakes off your control!", Monnam(mtmp));
+		untame(mtmp, FALSE);
+	}
 	
 	if(mtmp->mtyp == PM_CROW_WINGED_HALF_DRAGON && mtmp->mtame && !EDOG(mtmp)->loyal && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
 		EDOG(mtmp)->loyal = 1;
@@ -3584,6 +3590,13 @@ struct monst * mdef;	/* another monster which is next to it */
 	// like to eat shriekers, so attack the latter when feasible
 	if (ma->mtyp == PM_PURPLE_WORM && md->mtyp == PM_SHRIEKER) {
 		return ALLOW_M|ALLOW_TM;
+	}
+	// gray devourers eat psions
+	if(ma->mtyp == PM_GRAY_DEVOURER){
+		struct attack * aptr;
+		aptr = permonst_dmgtype(md, AD_PSON);
+		if(aptr || has_mind_blast_mon(mdef))
+			return ALLOW_M|ALLOW_TM;
 	}
 	// ghouls attack gugs (who can retaliate, but won't initiate)
 	if (ma->mtyp == PM_GHOUL && md->mtyp == PM_GUG) {

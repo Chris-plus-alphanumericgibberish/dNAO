@@ -16259,6 +16259,8 @@ register struct permonst *ptr;
 		return TRUE;
 	if (ptr->msound == MS_NEMESIS)	return FALSE;
 	
+	if (ptr->mtyp == PM_GRAY_DEVOURER && base_casting_stat() == A_CHA)	return FALSE;
+
 	if (always_peaceful(ptr)) return TRUE;
 	if(!u.uevent.invoked && mndx==PM_UVUUDAUM && !Infuture) return TRUE;
 	
