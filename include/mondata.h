@@ -969,6 +969,7 @@
 				 ((ptr)->mtyp == PM_FIRE_ELEMENTAL ||\
 				  (ptr)->mtyp == PM_FLAMING_ORB || \
 				  (ptr)->mtyp == PM_CANDLE_TREE || \
+				  (ptr)->mtyp == PM_PARASITIZED_KNIGHT || \
 				  (ptr)->mtyp == PM_DANCING_FLAME ||\
 				  (ptr)->mtyp == PM_COTERIE_OF_MOTES ||\
 				  (ptr)->mtyp == PM_BALL_OF_RADIANCE) ? 2 : \
