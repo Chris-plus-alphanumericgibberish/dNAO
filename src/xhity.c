@@ -3543,6 +3543,9 @@ int *shield_margin;
 					bons_acc -= uwep->spe + 1;
 				}
 			}
+			/* Priests of Asmodeus */
+			if(flags.spriest_level && is_demon(magr->data) && is_lawful_mon(magr) && !magr->mpeaceful)
+				bons_acc += 9;
 			/* trapped */
 			if (magr->mtrapped)
 				bons_acc -= 2;
@@ -14641,6 +14644,9 @@ int vis;						/* True if action is at all visible to the player */
 					bonsdmg -= (uwep->spe + 1);
 			}
 		}
+		/* Priests of Asmodeus */
+		if(magr && flags.spriest_level && is_demon(magr->data) && is_lawful_mon(magr) && !magr->mpeaceful)
+			bonsdmg += 9;
 		/* Dahlver Nar gives bonus damage to unarmed punches */
 		if (youagr && unarmed_punch && u.specialSealsActive&SEAL_DAHLVER_NAR) {
 			bonsdmg += d(2, 6) + min(u.ulevel / 2, (u.uhpmax - u.uhp) / 10);

@@ -3252,7 +3252,7 @@ FLAGS: noteleport,hardfloor,nommap,shortsighted
 
 GEOMETRY: right,center
 
-#0          1         2   	 3	     4	   5		 6	     7
+#0          1        2         3         4         5         6         7      
 #01234567890123456789012345678901234567890123456789012345678901234567890123456
 MAP
 0----------------------------------------------------------------------------
@@ -3277,6 +3277,11 @@ MAP
 9|  S          |     |..................................|     |          S  |
 0----------------------------------------------------------------------------
 ENDMAP
+
+MONSTER:'S',"serpent priest",(23,02)
+MONSTER:'S',"serpent priest",(52,02)
+MONSTER:'S',"serpent priest",(23,18)
+MONSTER:'S',"serpent priest",(52,18)
 
 MONSTER:'&',"nessian pit fiend",random
 MONSTER:'&',"nessian pit fiend",random
