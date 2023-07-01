@@ -161,6 +161,8 @@ struct flag {
 	boolean goldka_level;		/* the current level has a gold kamerel golem on it */
 
 	boolean silence_level;		/* the current level has an avatar of The Silence on it */
+
+	boolean spriest_level;		/* the current level has a priest of the serpent on it */
 	boolean made_first;			/* the first word slab has been created */
 	boolean made_divide;		/* the dividing word slab has been created */
 	boolean made_life;			/* the nurturing word slab has been created */

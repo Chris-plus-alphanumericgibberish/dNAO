@@ -1799,6 +1799,7 @@ moveloop()
 			flags.walky_level=0;
 			flags.shade_level=0;
 			flags.yello_level = 0;
+			flags.spriest_level = 0;
 		    for (mtmp = fmon; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
 				/* check for bad swap weapons */
@@ -2009,6 +2010,7 @@ moveloop()
 				if(mtmp->mtyp == PM_ORCUS || mtmp->mtyp == PM_NAZGUL) flags.shade_level=1;
 				if(mtmp->mtyp == PM_STRANGER) flags.yello_level=1;
 				if(mtmp->mtyp == PM_SUZERAIN) flags.yello_level=1;
+				if(mtmp->mtyp == PM_SERPENT_PRIEST) flags.spriest_level=1;
 				if(mtmp->mtyp == PM_HMNYW_PHARAOH) dark_pharaoh_visible(mtmp);
 				if(mtmp->mtyp == PM_GOOD_NEIGHBOR) good_neighbor_visible(mtmp);
 				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || Infuture)){
