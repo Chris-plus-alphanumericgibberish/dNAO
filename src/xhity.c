@@ -1732,6 +1732,16 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_MDWP;
 		attk->damd += 10;
 	}
+	/* charybdisone switch to water damage after dragging target in close */
+	else if (pa->mtyp == PM_CHARYBDISONE
+		&& mdef && distmin(x(magr),y(magr), x(mdef),y(mdef)) <= 1
+		&& attk->adtyp == AD_PULL
+	){
+		attk->aatyp = AT_TENT;
+		attk->adtyp = AD_WET;
+		attk->damn += 2;
+		attk->damd += 2;
+	}
 	/* Iksh'na devas upgrade their weapon attack at max level. This may be switched back later if they're cancelled. */
 	if(pa->mtyp == PM_IKSH_NA_DEVA && mlev(magr) >= 45 && attk->aatyp == AT_WEAP && *indexnum == 0){
 		attk->aatyp = AT_DEVA;
