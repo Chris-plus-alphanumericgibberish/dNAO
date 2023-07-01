@@ -8135,7 +8135,7 @@ boolean ranged;
 		/* is the player stuck to the other creature? */
 		if (notmcan || (u.ustuck == mtmp)) {
 			/* if not attached to anything, attempt to attach to the other creature*/
-			if (!u.ustuck && (!rn2(10) || attk->aatyp == AT_HUGS)) {
+			if (!u.ustuck && (rn2(4) || attk->aatyp == AT_TUCH || attk->aatyp == AT_HUGS || attk->aatyp == AT_TENT)) {
 				if (slips_free(magr, mdef, attk, vis)) {
 					/* message was printed (if visible) */
 					/* nothing happens */
@@ -8148,6 +8148,21 @@ boolean ranged;
 						pline("%s grab%s %s!",
 							(youagr ? "You" : Monnam(mtmp)),
 							(youagr ? "" : "s"),
+							(youagr ? mon_nam(mtmp) : "you")
+							);
+					}
+					else if (attk->aatyp == AT_TUCH) {
+						pline("%s stick%s to %s!",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "s"),
+							(youagr ? mon_nam(mtmp) : "you")
+							);
+					}
+					else if (attk->aatyp == AT_TENT) {
+						pline("%s swing%s %s tentacles around %s!",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "s"),
+							(youagr ? "your" : "its"),
 							(youagr ? mon_nam(mtmp) : "you")
 							);
 					}
