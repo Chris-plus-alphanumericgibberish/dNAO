@@ -1999,6 +1999,19 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		else if(youdef && magr != u.ustuck)
 			GETNEXT
 	}
+	/*Skip grey devourer second and third jaws vs. non-psionics*/
+	if(pa->mtyp == PM_GRAY_DEVOURER && attk->aatyp == AT_BITE && attk->adtyp != AD_PHYS){
+		if(youdef || !mdef){
+			if(base_casting_stat() != A_CHA)
+				GETNEXT
+		}
+		else {
+			struct attack * aptr;
+			aptr = permonst_dmgtype(mdef->data, AD_PSON);
+			if(!(aptr || has_mind_blast_mon(mdef)))
+				GETNEXT
+		}
+	}
 	/* Nitocris uses clerical spells while wearing their Wrappings */
 	if(!by_the_book && pa->mtyp == PM_NITOCRIS){
 		if (attk->aatyp == AT_MAGC){

@@ -2049,6 +2049,21 @@ int atyp, dtyp;
     return (struct attack *)0;
 }
 
+struct attack *
+permonst_dmgtype(ptr, dtyp)
+struct permonst *ptr;
+int dtyp;
+{
+    struct attack *a;
+
+    for (a = &ptr->mattk[0]; a < &ptr->mattk[NATTK]; a++){
+		if ((dtyp == AD_ANY || a->adtyp == dtyp)) 
+			return a;
+	}
+
+    return (struct attack *)0;
+}
+
 boolean
 at_least_one_attack(magr)
 struct monst *magr;

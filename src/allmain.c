@@ -2002,6 +2002,7 @@ moveloop()
 					flags.silence_level=1;
 					losepw(3);
 				}
+				if(mtmp->mtyp == PM_GRAY_DEVOURER && Catapsi < 13) incr_itimeout(&Catapsi, 13-Catapsi);
 				if(mtmp->mtyp == PM_ZUGGTMOY) flags.spore_level=1;
 				if(mtmp->mtyp == PM_JUIBLEX) flags.slime_level=1;
 				if(mtmp->mtyp == PM_PALE_NIGHT || mtmp->mtyp == PM_DREAD_SERAPH || mtmp->mtyp == PM_LEGION) flags.walky_level=1;
