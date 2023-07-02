@@ -2996,7 +2996,10 @@ int dmg;				/* damage to deal */
 	if (*hp(mdef) < 1) {
 		return (MM_HIT|MM_DEF_DIED);
 	}
-
+	/* brainblooms replicate */
+	if(!youdef && magr && mdef && magr->mtyp == PM_BRAINBLOSSOM_PATCH && !mindless_mon(mdef)){
+		mdef->brainblooms = 1;
+	}
 	/* debug */
 	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
 		pline("(dmg = %d)", dmg);
