@@ -2023,6 +2023,10 @@ int different;
 				Your("weapon goes slimy.");
 				pline("%s slips out of your grasp!", Monnam(mtmp));
 		    }
+		    else if (different==GROW_BBLOOM) {
+				Your("weapon sprouts flowers.");
+				pline("%s pushes out of your grasp!", Monnam(mtmp));
+		    }
 		    else if (different==REVIVE_ZOMBIE || different==REVIVE_YELLOW) {
 				pline_The("%s rises from the dead!", cname);
 				pline("%s writhes out of your grasp!", Monnam(mtmp));
@@ -2046,6 +2050,9 @@ int different;
 		    else if (different==GROW_SLIME)
 				pline("%s leaks from a putrefying corpse!",
 				  Amonnam(mtmp));
+		    else if (different==GROW_BBLOOM)
+				pline("%s sprouts from a corpse!",
+				  Amonnam(mtmp));
 		    else if (different==REVIVE_ZOMBIE || different==REVIVE_YELLOW)
 				pline("%s rises from the dead!",
 				  Amonnam(mtmp));
@@ -2068,6 +2075,7 @@ int different;
 			      mon_nam(mcarry), different ? "a corpse" : an(cname),
 			      different==GROW_MOLD ? "goes moldy" : 
 			      different==GROW_SLIME ? "putrefies" : 
+			      different==GROW_BBLOOM ? "sprouts" : 
 			      different==REVIVE_ZOMBIE ? "rises from the dead" : 
 			      different==REVIVE_YELLOW ? "rises from the dead" : 
 			      different==REVIVE_SHADE ? "dissolves into shadow" : 
@@ -2212,10 +2220,19 @@ long timeout;
 	/* Turn the corpse into a mold corpse if molds are available */
 	oldtyp = body->corpsenm;
 
-	/* Weight towards non-motile fungi.
-	 */
-	//	fruitadd("slime mold");
-	pmtype = molds[rn2(SIZE(molds))];
+	struct monst *attchmon = 0;
+	if(get_ox(body, OX_EMON)) attchmon = EMON(body);
+	if(attchmon && attchmon->brainblooms){
+		pmtype = PM_BRAINBLOSSOM_PATCH;
+		rem_ox(body, OX_EMON);
+		attchmon = 0;
+	}
+	else {
+		/* Weight towards non-motile fungi.
+		 */
+		//	fruitadd("slime mold");
+		pmtype = molds[rn2(SIZE(molds))];
+	}
 
 	/* [ALI] Molds don't grow in adverse conditions.  If it ever
 	 * becomes possible for molds to grow in containers we should
@@ -2251,7 +2268,7 @@ long timeout;
 			if (body->where == OBJ_INVENT)
 				body->quan++;
 			oldquan = body->quan;
-			if (revive_corpse(body, GROW_MOLD)) {
+			if (revive_corpse(body, (pmtype == PM_BRAINBLOSSOM_PATCH) ? GROW_BBLOOM : GROW_MOLD)) {
 				if (oldquan != 1) {		/* Corpse still valid */
 					body->corpsenm = oldtyp;
 					if (body->where == OBJ_INVENT) {

@@ -1401,6 +1401,7 @@ FOOD(("orange"),                 10,   MZ_TINY,  1,  2, 0, VEGGY,  80, CLR_ORANG
 FOOD(("pear"),                   10,   MZ_TINY,  1,  2, 0, VEGGY,  50, CLR_BRIGHT_GREEN),
 FOOD(("melon"),                  10,  MZ_SMALL,  1,  5, 0, VEGGY, 100, CLR_BRIGHT_GREEN),
 FOOD(("banana"),                 10,   MZ_TINY,  1,  2, 0, VEGGY,  80, CLR_YELLOW),
+FOOD(("brainroot"),               0,  MZ_SMALL,  4, 30, 0, VEGGY, 600, CLR_ORANGE),
 FOOD(("carrot"),                 15,   MZ_TINY,  1,  2, 0, VEGGY,  50, CLR_ORANGE),
 /*:and ends here*/
 FOOD(("sprig of wolfsbane"),      7,   MZ_TINY,  1,  1, 0, VEGGY,  40, CLR_GREEN),

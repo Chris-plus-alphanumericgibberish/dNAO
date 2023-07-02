@@ -2535,6 +2535,20 @@ register struct obj *otmp;
 			make_confused(HConfusion + d(10, 20),FALSE);
 		}
 		break;
+	    case BRAINROOT:
+			if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained <= 0){
+				pline("Alien impulses assault your mind!");
+				mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained++;
+				change_uinsight(1);
+				make_hallucinated(HHallucination + 200,FALSE,0L);
+			}
+			else pline("Alien impulses intrude upon your mind.");
+			make_confused(HConfusion + d(10, 20),FALSE);
+			givit(TELEPAT, &mons[PM_BRAINBLOSSOM_PATCH], 600, FALSE);
+			if(!rn2(10)){
+				adjattrib(!rn2(3) ? A_INT : rn2(2) ? A_WIS : A_CHA, 1, 0);
+			}
+		break;
 	    case EGG:
 		if (otmp->corpsenm != NON_PM && touch_petrifies(&mons[otmp->corpsenm])) {
 		    if (!Stone_resistance &&

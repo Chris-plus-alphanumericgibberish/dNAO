@@ -2622,6 +2622,12 @@ long timeout;	/* unused */
 			u.shubbie_devotion += 30;
 		}
 	}
+	if(obj->otyp == BRAINROOT){
+		struct monst *mon = makemon(&mons[PM_BRAINBLOSSOM_PATCH], obj->ox, obj->oy, MM_NOCOUNTBIRTH);
+		if(mon && canspotmon(mon)){
+			pline("%s grows back from the roots!", Monnam(mon));
+		}
+	}
 	obj_extract_self(obj);
 	obfree(obj, (struct obj *) 0);
 }

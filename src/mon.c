@@ -241,6 +241,7 @@ STATIC_VAR int cham_to_pm[] = {
 			 ((mon)->ispolyp) ||			\
 			 ((mon)->zombify) ||			\
 			 ((mon)->mspores) ||			\
+			 ((mon)->brainblooms) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_KNIGHT) ||			\
 			 ((mon)->mtyp == PM_WARRIOR_OF_SUNLIGHT) ||			\
 			 ((mon)->mtyp == PM_UNDEAD_MAIDEN) ||			\
@@ -1003,7 +1004,15 @@ register struct monst *mtmp;
 				break;
 			obj = mksobj_at(CORPSE, x, y, MKOBJ_NOINIT);
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
-			fix_object(obj);		break;
+			fix_object(obj);
+		break;
+	    case PM_BRAINBLOSSOM_PATCH:
+			obj = mksobj_at(BRAINROOT, x, y, MKOBJ_NOINIT);
+			if(obj)
+				bury_an_obj(obj);
+			obj = (struct obj *)0;
+			goto default_1;
+		break;
 	    case PM_DANCING_BLADE:
 			obj = mksobj_at(TWO_HANDED_SWORD, x, y, MKOBJ_NOINIT);
 			obj->blessed = TRUE;
@@ -3659,6 +3668,19 @@ struct monst * mdef;	/* another monster which is next to it */
 	// dreadblossoms attack almost anything
 	if(ma->mtyp == PM_DREADBLOSSOM_SWARM &&
 		!(is_fey(md) || is_plant(md))
+	) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	// brainblossoms attack almost anything (and vice versa)
+	if(ma->mtyp == PM_BRAINBLOSSOM_PATCH &&
+		!mindless_mon(mdef) &&
+		!(is_fey(md) || is_plant(md))
+	) {
+		return ALLOW_M|ALLOW_TM;
+	}
+	if(md->mtyp == PM_BRAINBLOSSOM_PATCH &&
+		!mindless_mon(magr) &&
+		!(is_fey(ma) || is_plant(ma))
 	) {
 		return ALLOW_M|ALLOW_TM;
 	}

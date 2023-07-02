@@ -24,6 +24,7 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define	REVIVE_ZOMBIE	4
 #define	REVIVE_SHADE	5
 #define	REVIVE_YELLOW	6
+#define	GROW_BBLOOM		7
 /*
  * Timeout functions.  Add a define here, then put it in the table
  * in timeout.c.  "One more level of indirection will fix everything."
