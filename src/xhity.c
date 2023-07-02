@@ -3985,7 +3985,7 @@ boolean ranged;
 		domissmsg = FALSE;
 	}
 	/* mindless monsters and soul blades */
-	if (!miss && !youdef && spirit_rapier_at(attk->aatyp) && attk->adtyp == AD_PSON && mindless_mon(mdef)) {
+	if (!miss && spirit_rapier_at(attk->aatyp) && attk->adtyp == AD_PSON && ((!youdef && mindless_mon(mdef)) || Catapsi)) {
 		/* Print message */
 		if (vis&VIS_MAGR) {
 			Sprintf(buf, "%s", ((!weapon || valid_weapon(weapon)) ? "attack" : cxname(weapon)));
@@ -4936,7 +4936,7 @@ boolean ranged;
 			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* active? */
-		if (notmcan && (youdef || !mindless_mon(mdef))) {
+		if (notmcan && (youdef || !mindless_mon(mdef)) && !Catapsi) {
 			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 			/* print message */
 			if (youdef) {

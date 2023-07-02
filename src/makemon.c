@@ -11653,7 +11653,7 @@ boolean goodequip;
 			}
 		break;
 	    case S_QUANTMECH:
-		if (!rn2(20)) {
+		if (ptr->mtyp == PM_QUANTUM_MECHANIC && !rn2(20)) {
 			otmp = mksobj(BOX, mkobjflags|MKOBJ_NOINIT);
 			otmp->spe = 1; /* flag for special box */
 			otmp->owt = weight(otmp);
@@ -11661,12 +11661,14 @@ boolean goodequip;
 		}
 		break;
 	    case S_LEPRECHAUN:
+			if(ptr->mtyp == PM_LEPRECHAUN){
 #ifndef GOLDOBJ
-		mtmp->mgold = (long) d(level_difficulty(), 30);
-		u.spawnedGold += mtmp->mgold;
+				mtmp->mgold = (long) d(level_difficulty(), 30);
+				u.spawnedGold += mtmp->mgold;
 #else
-		mkmonmoney(mtmp, (long) d(level_difficulty(), 30));
+				mkmonmoney(mtmp, (long) d(level_difficulty(), 30));
 #endif
+			}
 		break;
 		case S_LAW_ANGEL:
 		case S_NEU_ANGEL:
@@ -13981,8 +13983,9 @@ int faction;
 			}
 		break;
 		case S_LEPRECHAUN:
-			mtmp->msleeping = 1;
-			break;
+			if(mndx == PM_LEPRECHAUN)
+				mtmp->msleeping = 1;
+		break;
 		case S_JABBERWOCK:
 		case S_NYMPH:
 			if (rn2(5) && !u.uhave.amulet 

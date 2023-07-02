@@ -605,6 +605,7 @@ struct obj * obj;
 		arti_light(obj) ||							/* artifact lightsource */
 		obj->otyp == POT_STARLIGHT ||				/* always lit potion */
 		obj->otyp == CHUNK_OF_FOSSIL_DARK ||		/* always dark rock */
+		obj->otyp == SUNLIGHT_MAGGOT ||				/* always lit hat */
 		(obj->otyp == SUNROD && obj->lamplit)		/* chemical reaction cannot be snuffed */
 		);
 }

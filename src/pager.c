@@ -1714,6 +1714,7 @@ get_mb_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, nogloves(ptr)			, "handless"				, many);
 	many = append(description, nolimbs(ptr)				, "limbless"				, many);
 	many = append(description, !has_head(ptr)			, "headless"				, many);
+	many = append(description, has_head(ptr) && nohat(ptr), "can't wear helms"		, many);
 	many = append(description, has_horns(ptr)			, "has horns"				, many);
 	many = append(description, is_whirly(ptr)			, "whirly"					, many);
 	many = append(description, flaming(ptr)				, "flaming"					, many);

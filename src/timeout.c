@@ -2159,6 +2159,7 @@ struct obj * obj;
 		break;
 	case GNOMISH_POINTY_HAT:
 	case POT_STARLIGHT:
+	case SUNLIGHT_MAGGOT:
 		radius = 2;
 		break;
 	case CHUNK_OF_FOSSIL_DARK:
@@ -2366,6 +2367,7 @@ begin_burn(obj)
 		obj->otyp != CANDLE_OF_INVOCATION &&
 		obj->otyp != MAGIC_TORCH &&
 		obj->otyp != POT_STARLIGHT && 
+		obj->otyp != SUNLIGHT_MAGGOT && 
 		obj->otyp != CHUNK_OF_FOSSIL_DARK && 
 		!artifact_light(obj) && 
 		!arti_light(obj) && 
@@ -2443,6 +2445,7 @@ end_burn(obj, timer_attached)
 		|| obj->otyp == CANDLE_OF_INVOCATION
 		|| obj->otyp == MAGIC_TORCH
 		|| obj->otyp == POT_STARLIGHT
+		|| obj->otyp == SUNLIGHT_MAGGOT
 		|| obj->otyp == CHUNK_OF_FOSSIL_DARK
 		|| artifact_light(obj)
 		|| arti_light(obj)

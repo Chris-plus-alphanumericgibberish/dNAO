@@ -5074,10 +5074,8 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 			else {
 				struct attack * aptr;
-				aptr = attacktype_fordmg(mdef->data, AT_MAGC, AD_PSON);
-				if(!aptr)
-					aptr = attacktype_fordmg(mdef->data, AT_MMGC, AD_PSON);
-				if(aptr){
+				aptr = permonst_dmgtype(mdef->data, AD_PSON);
+				if(aptr || has_mind_blast_mon(mdef)){
 					cancel_monst(mdef, otmp->cobj, youagr, FALSE, FALSE, 0);
 				}
 			}
@@ -5090,9 +5088,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 			else {
 				struct attack * aptr;
-				aptr = attacktype_fordmg(mdef->data, AT_MAGC, AD_SPEL);
-				if(!aptr)
-					aptr = attacktype_fordmg(mdef->data, AT_MMGC, AD_SPEL);
+				aptr = permonst_dmgtype(mdef->data, AD_SPEL);
 				if(aptr){
 					cancel_monst(mdef, otmp->cobj, youagr, FALSE, FALSE, 0);
 				}

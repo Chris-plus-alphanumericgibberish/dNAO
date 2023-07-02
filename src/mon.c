@@ -1706,6 +1706,7 @@ mcalcdistress()
 	if(mtmp->mvermin){
 		int damage = d(10,10);
 		damage -= avg_mdr(mtmp);
+		damage = reduce_dmg(mtmp, damage, TRUE, FALSE);
 		if(damage > 0)
 			m_losehp(mtmp, damage, FALSE, "swarming vermin");
 	}
@@ -8644,7 +8645,7 @@ struct monst *mon;
 				distance = (int)sqrt(distance);
 				//0, 1, 2, 3, 4, 5
 				//0, 0, 1, 2, 4, 8
-				if(distance < 5){
+				if(distance < 6){
 					damage = d(dice[distance],10);
 					if(damage > mon->mvar_vermiurge)
 						damage = mon->mvar_vermiurge;
@@ -8654,10 +8655,12 @@ struct monst *mon;
 						if(canspotmon(tmpm)){
 							pline("%s is stung%s by swarming vermin!",
 								Monnam(tmpm),
-								damage >= tmpm->mhp ? "to death" : ""
+								damage >= tmpm->mhp ? " to death" : ""
 							);
 						}
 						mon->mvar_vermiurge -= damage;
+						//Reduce after charging vermin
+						damage = reduce_dmg(tmpm, damage, TRUE, FALSE);
 						tmpm->mhp -= damage;
 						if(tmpm->mhp <= 0){
 							grow_up(mon,tmpm);
@@ -8675,7 +8678,7 @@ struct monst *mon;
 			distance = (int)sqrt(distance);
 			//0, 1, 2, 3, 4, 5
 			//0, 0, 1, 2, 4, 8
-			if(distance < 5){
+			if(distance < 6){
 				damage = d(dice[distance],10);
 				if(damage > mon->mvar_vermiurge)
 					damage = mon->mvar_vermiurge;
@@ -8684,6 +8687,8 @@ struct monst *mon;
 					damage = min(damage, uhp());
 					You("are stung by swarming vermin!");
 					mon->mvar_vermiurge -= damage;
+					//Reduce after charging vermin
+					damage = reduce_dmg(&youmonst, damage, TRUE, FALSE);
 					losehp(damage,"swarming vermin",KILLED_BY);
 				}
 				// else continue
