@@ -12063,7 +12063,10 @@ read_lost(VOID_ARGS)
 			You("learn the name \"%s\" while studying the book.",sealNames[i]);
 			artiptr->spestudied++;
 			u.veil = FALSE;
-			change_uinsight(1);
+			if(!u.uboln || !rn2(u.uboln)){
+				change_uinsight(1);
+			}
+			u.uboln++;
 			if(u.usanity < 100 && rnd(30) < ACURR(A_WIS))
 				change_usanity(1, FALSE);
 		}
