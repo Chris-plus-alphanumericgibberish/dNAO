@@ -916,20 +916,20 @@ MONSTER: 'U', "elder brain", (07,09), hostile
 MONSTER: 'U', "elder brain", (37,05), hostile
 MONSTER: 'U', "elder brain", (67,09), hostile
 
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
 
 MONSTER: 'h', "mind flayer", random
 MONSTER: 'h', "mind flayer", random
@@ -1084,13 +1084,13 @@ ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012
 #0         1         2         3         4         5         6         7     
 
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
-MONSTER: '@', "mindless thrall", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
+MONSTER: '#', "hostile trooper husk", random
 
 MONSTER: '\'', "brain golem", random
 MONSTER: '\'', "brain golem", random

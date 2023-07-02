@@ -3907,7 +3907,7 @@ char *in_buff;
 createmon:
 		for (i = 0; i <= (allow_multi ? multi : 0); i++) {
 			if (monclass != MAXMCLASSES && !(ma_require || mg_restrict || gen_restrict))
-				whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES);
+				whichpm = mkclass(monclass, G_NOHELL | G_HELL | G_PLANES | G_DEPTHS);
 
 			int mm_flags = NO_MM_FLAGS;
 			if (maketame)
@@ -3927,8 +3927,11 @@ createmon:
 				}
 				else if (makepeaceful)
 					mtmp->mpeaceful = 1;
-				else if (makehostile)
+				else if (makehostile){
 					mtmp->mpeaceful = 0;
+					if(Infuture)
+						set_faction(mtmp, ILSENSINE_FACTION);
+				}
 				set_malign(mtmp);
 
 				if (makesummoned)
