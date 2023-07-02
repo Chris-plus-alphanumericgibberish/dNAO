@@ -407,7 +407,7 @@
 #define is_ettin(ptr)		((ptr)->mtyp == PM_ETTIN)
 #define is_human(ptr)		(((ptr)->mflagsa & MA_HUMAN) != 0L)
 #define is_untamable(ptr)	(((ptr)->mflagsg & MG_NOTAME) != 0L)
-#define is_unwishable(ptr)	((((ptr)->mflagsg & MG_NOWISH) != 0L) || ((((ptr)->mflagsg&MG_FUTURE_WISH) != 0L) && !Role_if(PM_TOURIST)))
+#define is_unwishable(ptr)	((((ptr)->mflagsg & MG_NOWISH) != 0L) || (G_C_INST((ptr)->geno) > u.uinsight) || ((((ptr)->mflagsg&MG_FUTURE_WISH) != 0L) && !Role_if(PM_TOURIST)))
 #define is_fungus(ptr)		((ptr)->mlet == S_FUNGUS)
 #define is_migo(ptr)		((ptr)->mtyp == PM_MIGO_WORKER ||\
 							 (ptr)->mtyp == PM_MIGO_SOLDIER ||\
