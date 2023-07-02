@@ -3537,6 +3537,8 @@ int *shield_margin;
 			}
 			/* Bard */
 			bons_acc += magr->encouraged;
+			if(magr->mtyp == PM_LUCKSUCKER)
+				bons_acc += magr->mvar_lucksucker;
 			/* Singing Sword */
 			if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(magr) && !is_deaf(magr)){
 				if (uwep->osinging == OSING_DIRGE && !magr->mtame){
@@ -4423,6 +4425,7 @@ boolean ranged;
 		case AD_DISE:
 		case AD_POSN:
 		case AD_DARK:
+		case AD_LUCK:
 			/* make a 0 damage physical attack 
 			 * This prints hitmsg and applies on-hit effects of any weapon
 			 */
@@ -9280,6 +9283,37 @@ boolean ranged;
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 		break;
+	case AD_LUCK:
+		//Use encouragement code to give monster target a -1
+		if (!youdef){
+			if(vis&VIS_MAGR && magr->mtyp == PM_LUCKSUCKER){
+				pline("%s sucks %s luck!", Monnam(magr), s_suffix(mon_nam(mdef)));
+				magr->encouraged = min(magr->encouraged+1,+13);
+			}
+			mdef->encouraged = max(mdef->encouraged-1,-13);
+		}
+		else {
+			/* assumes you are defending */
+			if(magr->mtyp == PM_LUCKSUCKER)
+				pline("%s sucks your luck!", Monnam(magr));
+
+			/* misc protections */
+			if ((uwep && !uwep->cursed && confers_luck(uwep)) ||
+				(stone_luck(TRUE) > 0 && rn2(4))) {
+				pline("Luckily, you are not affected.");
+			}
+			else {
+				int old_luck = u.uluck;
+				You_feel("your luck running out.");
+				change_luck(-1 * dmg);
+				if(magr->mtyp == PM_LUCKSUCKER)
+					magr->mvar_lucksucker += old_luck - u.uluck;
+			}
+			stop_occupation();
+		}
+		alt_attk.adtyp = AD_PHYS;
+		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
+		break;
 //////////////////////////////////////////////////////////////
 // NOT IMPLEMENTED FOR XMELEEHURTY
 //////////////////////////////////////////////////////////////
@@ -9305,7 +9339,6 @@ boolean ranged;
 	case AD_CLRC:
 	case AD_SPEL:
 		/* gaze only, AT_GAZE or AT_WDGZ */
-	case AD_LUCK:
 	case AD_SSUN:
 	case AD_SPOR:
 	case AD_BLNK:
@@ -14642,6 +14675,8 @@ int vis;						/* True if action is at all visible to the player */
 			bonsdmg += u.uencouraged;
 		else if (magr){
 			bonsdmg += magr->encouraged;
+			if(magr->mtyp == PM_LUCKSUCKER)
+				bonsdmg += magr->mvar_lucksucker;
 			if(magr->mtame){
 				if(uring_art(ART_NARYA))
 					bonsdmg += narya();
