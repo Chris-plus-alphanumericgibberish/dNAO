@@ -515,12 +515,14 @@ MONSTER:'@',"trooper",(16,08)
 MONSTER:'@',"trooper",(16,09)
 
 MONSTER:'@',"trooper",(16,10)
-MONSTER:'@',"trooper",(16,11)
-MONSTER:'@',"trooper",(17,12)
+
+MONSTER:'h',"dwarf warrior",(16,11)
 MONSTER:'@',"trooper",(16,12)
-MONSTER:'@',"trooper",(18,13)
 MONSTER:'@',"trooper",(17,13)
 MONSTER:'@',"trooper",(16,13)
+MONSTER:'@',"trooper",(18,14)
+MONSTER:'@',"trooper",(17,14)
+MONSTER:'@',"trooper",(16,14)
 
 
 MONSTER:'@',"trooper",(46,10)
