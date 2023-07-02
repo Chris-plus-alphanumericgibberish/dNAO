@@ -13863,14 +13863,15 @@ int faction;
 					// else for(num = 6; num >= 0; num--) makemon_full(&mons[PM_METROID], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 			}
 		break;
-//		case S_VAMPIRE:
-//			{
-//				if(mndx == PM_STAR_VAMPIRE){
-//				    mtmp->minvis = TRUE;
-//				    mtmp->perminvis = TRUE;
-//				}
-//			}
-//		break;
+		case S_VAMPIRE:
+			{
+				if(mndx == PM_STAR_VAMPIRE){
+				    mtmp->minvis = TRUE;
+				    mtmp->perminvis = TRUE;
+				    mtmp->mvar_star_vampire_blood = 0;
+				}
+			}
+		break;
 		case S_BLOB:
 			if (mndx == PM_SHOGGOTH || mndx == PM_PRIEST_OF_GHAUNADAUR || mndx == PM_MOTHERING_MASS){
 				mtmp->mhpmax = 3*mtmp->mhpmax;

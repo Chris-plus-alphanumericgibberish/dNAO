@@ -344,6 +344,7 @@ struct monst {
 #define MAX_FLASK_CHARGES(mtmp) (mtmp->m_lev/3)
 #define	mvar_yellow_lifesaved	mvar1
 #define	mvar_vermiurge	mvar1
+#define	mvar_star_vampire_blood	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2

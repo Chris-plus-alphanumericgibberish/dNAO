@@ -1037,6 +1037,18 @@ register struct monst *mtmp;
 			}
 		}
 	}
+	if(mtmp->mtyp == PM_STAR_VAMPIRE){
+		if(mtmp->mvar_star_vampire_blood > 0){
+			mtmp->mvar_star_vampire_blood--;
+			mtmp->mhp += 20;
+			mtmp->mhp = min(mtmp->mhp, mtmp->mhpmax);
+		}
+		if(mtmp->mvar_star_vampire_blood <= 0 && !mtmp->perminvis){
+			mtmp->minvis = TRUE;
+			mtmp->perminvis = TRUE;
+			newsym(mtmp->mx,mtmp->my);
+		}
+	}
 	if (mtmp->mstrategy & STRAT_ARRIVE){
 	    int res = m_arrival(mtmp);
 	    if (res >= 0) return res;
