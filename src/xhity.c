@@ -5700,7 +5700,25 @@ boolean ranged;
 			/* drain life! */
 			if (youdef) {
 				/* the player has a handy level-drain function */
+				if(magr->mtyp == PM_STAR_VAMPIRE && !youagr){
+					if(rn2(2)){
+						losexp("life force drain", FALSE, FALSE, FALSE);
+						magr->mvar_star_vampire_blood += 10;
+					}
+					if(rn2(2)){
+						losexp("life force drain", FALSE, FALSE, FALSE);
+						magr->mvar_star_vampire_blood += 10;
+					}
+				}
 				losexp("life force drain", TRUE, FALSE, FALSE);
+				if(magr->mtyp == PM_STAR_VAMPIRE && !youagr){
+					magr->mvar_star_vampire_blood += 10;
+					if(magr->perminvis){
+						magr->minvis = FALSE;
+						magr->perminvis = FALSE;
+						newsym(magr->mx,magr->my);
+					}
+				}
 			}
 			else {
 				/* print message first -- this should happen before the victim is drained/dies */

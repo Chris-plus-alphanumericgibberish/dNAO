@@ -3768,7 +3768,7 @@ char *in_buff;
 				else
 					q[-1] = ' ';
 			}
-			else if (!strncmpi(p, "vampire",	7))
+			else if (!strncmpi(p, "vampire_template",	16))
 				undeadtype = VAMPIRIC;
 			else if (!strncmpi(p, "pseudonatural",	13))
 				undeadtype = PSEUDONATURAL;
