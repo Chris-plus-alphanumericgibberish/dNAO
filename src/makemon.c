@@ -2556,6 +2556,34 @@ boolean goodequip;
 			if(otmp){
 				set_material_gm(otmp, rn2(10) ? METAL : GOLD);
 			}
+		} else if(mm == PM_STAR_EMPEROR || mm == PM_STAR_EMPRESS){
+			int armors[] = {IMPERIAL_ELVEN_BOOTS, IMPERIAL_ELVEN_GAUNTLETS, IMPERIAL_ELVEN_ARMOR, IMPERIAL_ELVEN_HELM};
+			long upgrades[] = {IEA_FAST|IEA_KICKING, //boots
+							   IEA_GOPOWER|IEA_GODEXTERITY|IEA_INC_DAM|IEA_STRANGLE, //gloves
+							   IEA_FLYING|IEA_FAST_HEAL|IEA_SICK_RES|IEA_MITHRIL, //armor
+							   IEA_NOBREATH|IEA_BLIND_RES|IEA_INC_ACC}; // helm
+			for(int i = 0; i < SIZE(armors); i++){
+				otmp = mongets(mtmp, armors[i], mkobjflags);
+				if(otmp){
+					otmp->ovar1_iea_upgrades = upgrades[i];
+				}
+			}
+			mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+			if(rn2(3)){
+				mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+				mongets(mtmp, ELVEN_DAGGER, mkobjflags);
+				otmp = mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
+			}
+			else {
+				mongets(mtmp, ELVEN_BOW, mkobjflags);
+				m_initthrow(mtmp, ELVEN_ARROW, 12, mkobjflags);
+				otmp = mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
+			}
+			if(otmp){
+				set_material_gm(otmp, GOLD);
+				add_oprop(otmp, OPROP_ELFLW);
+				add_oprop(otmp, OPROP_WRTHW);
+			}
 		} else if(mm == PM_PUPPET_EMPEROR_XELETH || mm == PM_PUPPET_EMPRESS_XEDALLI){
 			int armors[] = {IMPERIAL_ELVEN_BOOTS, IMPERIAL_ELVEN_GAUNTLETS, IMPERIAL_ELVEN_ARMOR, IMPERIAL_ELVEN_HELM};
 			long upgrades[] = {IEA_BOOT_MASK,IEA_GLOVE_MASK,IEA_BODY_MASK,IEA_HELM_MASK};
@@ -7020,7 +7048,45 @@ int mmflags;
 		    otmp = mongets(mtmp, rn2(11) ? ROBE : CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
 			if(otmp) otmp->obj_color = CLR_ORANGE;
 		} else if (is_duergar(ptr)) {//Note Duergars are dwarves, so do this case first
-			if(mm == PM_DUERGAR_STONEGUARD){
+			if(mm == PM_DUERGAR_DEEPKING){
+				otmp = mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
+				if(otmp){
+					if(otmp->obj_material == LEATHER){
+						if(!rn2(4))
+							otmp->obj_color = CLR_MAGENTA;
+					}
+					else
+						otmp->obj_color = CLR_GRAY;
+				}
+				otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+				if(otmp)
+					set_material_gm(otmp, IRON);
+				otmp = mongets(mtmp, TWO_HANDED_SWORD, mkobjflags);
+				if(otmp)
+					set_material_gm(otmp, IRON);
+				otmp = mongets(mtmp, DAGGER, mkobjflags);
+				if(otmp){
+					set_material_gm(otmp, IRON);
+					otmp->quan = rnd(5);
+					fix_object(otmp);
+				}
+				otmp = mksobj(DWARVISH_HELM, mkobjflags);
+				otmp->ovar1_darklight = TRUE;
+				set_material_gm(otmp, GOLD);
+				otmp->spe = 5;
+				(void) mpickobj(mtmp, otmp);
+				if (levl[mtmp->mx][mtmp->my].lit) {
+					begin_burn(otmp);
+				}
+				otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+				if(otmp)
+					set_material_gm(otmp, IRON);
+				otmp = mongets(mtmp, GAUNTLETS, mkobjflags);
+				if(otmp)
+					set_material_gm(otmp, IRON);
+				
+			}
+			else if(mm == PM_DUERGAR_STONEGUARD){
 				otmp = mongets(mtmp, DWARVISH_CLOAK, mkobjflags);
 				if(otmp){
 					if(otmp->obj_material == LEATHER){

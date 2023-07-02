@@ -382,6 +382,8 @@
 							 (ptr)->mtyp == PM_DEMONIC_BLACK_WIDOW)
 #define is_duergar(ptr)		((ptr)->mtyp == PM_DUERGAR ||\
 							 (ptr)->mtyp == PM_GIANT_DUERGAR ||\
+							 (ptr)->mtyp == PM_DUERGAR_DEEPKING||\
+							 (ptr)->mtyp == PM_GIANT_DEEPKING ||\
 							 (ptr)->mtyp == PM_DUERGAR_STONEGUARD ||\
 							 (ptr)->mtyp == PM_GIANT_STONEGUARD ||\
 							 (ptr)->mtyp == PM_DUERGAR_DEBILITATOR ||\
