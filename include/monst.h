@@ -190,6 +190,7 @@ struct monst {
 	Bitfield(mspores,1); /* monster is being consumed by Zuggutmoy's spores */ /*118*/
 	Bitfield(mformication,1); /* monster is covered in imaginary insects */ /*119*/
 	Bitfield(mscorpions,1); /* monster is covered in stinging scorpions */ /*120*/
+	Bitfield(mvermin,1); /* monster is swarmed by stinging vermin */ /*120*/
 	Bitfield(mamnesia,1); /* monster is about to forget it hates the PC */ /*121*/
 	
 	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*122*/
@@ -342,6 +343,7 @@ struct monst {
 #define	mvar_flask_charges	mvar1
 #define MAX_FLASK_CHARGES(mtmp) (mtmp->m_lev/3)
 #define	mvar_yellow_lifesaved	mvar1
+#define	mvar_vermiurge	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2

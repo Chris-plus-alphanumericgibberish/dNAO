@@ -1637,6 +1637,9 @@ struct monst *mon;
 		case PM_WALKING_DELIRIUM:
 			u.umadness |= MAD_DELUSIONS;
 		break;
+		case PM_VERMIURGE:
+			u.umadness |= MAD_VERMIN;//You are stung by vermin
+		break;
 		case PM_AKKABISH_TANNIN:
 			u.umadness |= MAD_FORMICATION;
 		break;
@@ -1812,6 +1815,9 @@ struct monst *mon;
 					}
 					else if(madflag == MAD_FRENZY){
 						mon->mhp = 1;
+					}
+					else if(madflag == MAD_VERMIN){
+						mon->mvermin = 1;
 					}
 					// MAD_HOST:
 					// MAD_COLD_NIGHT:

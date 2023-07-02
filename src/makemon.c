@@ -13528,6 +13528,10 @@ int faction;
 		makemon_set_monster_faction(mtmp);
 	
 	switch(ptr->mlet) {
+		case S_ANT:
+			if(mtmp->mtyp == PM_VERMIURGE)
+				mtmp->mvar_vermiurge = 1000;
+		break;
 		case S_MIMIC:
 			set_mimic_sym(mtmp);
 			break;
@@ -14345,7 +14349,7 @@ int mndx;
 		: mndx == PM_OMEGA_METROID ? 12 : mndx == PM_METROID_QUEEN ? 3 : mndx == PM_ARGENTUM_GOLEM ? 8 
 		: mndx == PM_ALHOON ? 2 : mndx == PM_CENTER_OF_ALL ? 1 : mndx == PM_SOLDIER ? 250
 		: mndx == PM_ANCIENT_OF_ICE ? 8 : mndx == PM_ANCIENT_OF_DEATH ? 4
-		: mndx == PM_SOLDIER_ANT ? 250 : MAXMONNO); 
+		: mndx == PM_SOLDIER_ANT ? 250 : mndx == PM_VERMIURGE ? 7 : MAXMONNO); 
 }
 
 /* used for wand/scroll/spell of create monster */

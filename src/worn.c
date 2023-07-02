@@ -754,6 +754,8 @@ struct monst *mon;
 		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
 			base -= (32-u.uinsight)/2;
 	}
+	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
+		base -= min(mon->mvar_vermiurge/10, 20);
 	
 	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
 	else if(mon->mtyp == PM_PALE_NIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);

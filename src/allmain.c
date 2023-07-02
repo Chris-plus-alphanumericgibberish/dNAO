@@ -2550,7 +2550,17 @@ karemade:
 					explode_yours(u.ux, u.uy, AD_EELC, MON_EXPLODE, d(4,8),EXPL_BBLUE,2,FALSE);
 				nomul(0, NULL);
 			}
-			
+
+			if(!rn2(10) && NightmareAware_Insanity >= 10 && roll_madness(MAD_VERMIN)){
+				int damage = d(NightmareAware_Insanity/10, 10);
+				damage -= u.udr;
+				if(damage > 0){
+					You("are stung by swarming vermin!");
+					losehp(damage,"swarming vermin",KILLED_BY);
+				}
+				nomul(0, NULL);
+			}
+
 			//Aprox one check per five monster-gen periods, or one per five while sleeping (averages one additional blast per sleep, so it's really bad.
 			if(!Inhell && (u.usleep || !rn2(70)) && !rn2(5) && roll_madness(MAD_DREAMS)){
 				cthulhu_mind_blast();
