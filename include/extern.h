@@ -1776,6 +1776,7 @@ E long FDECL(mon_con, (struct monst *));
 E boolean FDECL(hiddenwidegaze, (struct monst *));
 E int FDECL(hd_size, (struct permonst *));
 E void FDECL(do_ancient_breaths, (struct monst *));
+E void FDECL(do_auras, (struct monst *));
 
 /* ### monmove.c ### */
 

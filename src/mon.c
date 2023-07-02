@@ -1686,12 +1686,19 @@ mcalcdistress()
 	
 	/* do special once-per-global turn effects */
 	do_ancient_breaths(mtmp);
+	do_auras(mtmp);
 	
 	/* regenerate hit points */
 	mon_regen(mtmp, FALSE);
 	clothes_bite_mon(mtmp);
 	if(mtmp->mscorpions){
 		phantom_scorpions_sting(mtmp);
+	}
+	if(mtmp->mvermin){
+		int damage = d(10,10);
+		damage -= avg_mdr(mtmp);
+		if(damage > 0)
+			m_losehp(mtmp, damage, FALSE, "swarming vermin");
 	}
 
 	timeout_problems(mtmp);
@@ -8588,6 +8595,78 @@ int damage;
 			nomul(0, NULL); //Interrupt
 		}
 	}
+}
+
+void
+do_auras(mon)
+struct monst *mon;
+{
+	if(mon->mtyp == PM_VERMIURGE){
+		int distance = 0, damage = 0;
+		static const int dice[] = {10,10,9,8,6,2};
+		if(!mon->mcan)
+			mon->mvar_vermiurge += 100;
+		if(mon->mvar_vermiurge > 1000)
+			mon->mvar_vermiurge = 1000;
+		for(struct monst *tmpm = fmon; tmpm && mon->mvar_vermiurge > 0; tmpm = tmpm->nmon){
+			if(!DEADMONSTER(tmpm)
+				&& tmpm->mtyp != PM_VERMIURGE
+				&& (tmpm->mpeaceful != mon->mpeaceful || mm_aggression(mon, tmpm))
+				&& clear_path(tmpm->mx,tmpm->my,mon->mx,mon->my)
+				&& !nonthreat(tmpm)
+			){
+				distance = dist2(tmpm->mx,tmpm->my,mon->mx,mon->my);
+				distance = (int)sqrt(distance);
+				//0, 1, 2, 3, 4, 5
+				//0, 0, 1, 2, 4, 8
+				if(distance < 5){
+					damage = d(dice[distance],10);
+					if(damage > mon->mvar_vermiurge)
+						damage = mon->mvar_vermiurge;
+					damage -= avg_mdr(tmpm);
+					if(damage > 0){
+						damage = min(damage, tmpm->mhp);
+						if(canspotmon(tmpm)){
+							pline("%s is stung%s by swarming vermin!",
+								Monnam(tmpm),
+								damage >= tmpm->mhp ? "to death" : ""
+							);
+						}
+						mon->mvar_vermiurge -= damage;
+						tmpm->mhp -= damage;
+						if(tmpm->mhp <= 0){
+							grow_up(mon,tmpm);
+							mondied(tmpm);
+						}
+					}
+					// else continue
+				}
+				// else continue
+			}
+			// else continue
+		}
+		if(!mon->mpeaceful && couldsee(mon->mx,mon->my)){
+			distance = dist2(u.ux,u.uy,mon->mx,mon->my);
+			distance = (int)sqrt(distance);
+			//0, 1, 2, 3, 4, 5
+			//0, 0, 1, 2, 4, 8
+			if(distance < 5){
+				damage = d(dice[distance],10);
+				if(damage > mon->mvar_vermiurge)
+					damage = mon->mvar_vermiurge;
+				damage -= u.udr;
+				if(damage > 0){
+					damage = min(damage, uhp());
+					You("are stung by swarming vermin!");
+					mon->mvar_vermiurge -= damage;
+					losehp(damage,"swarming vermin",KILLED_BY);
+				}
+				// else continue
+			}
+			// else continue
+		}
+	}
+
 }
 
 void

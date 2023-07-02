@@ -42,7 +42,10 @@
 
 #define vulnerable_mask(mask)	((!((mask)&SLASH)+!((mask)&PIERCE)+!((mask)&WHACK)) == 1)
 
-#define resists_poly(ptr)	(((ptr)->geno&G_UNIQ) || is_weeping(ptr) || is_yochlol(ptr))
+#define resists_poly(ptr)	(((ptr)->geno&G_UNIQ) \
+							|| is_weeping(ptr) \
+							|| (ptr)->mtyp == PM_VERMIURGE \
+							|| is_yochlol(ptr))
 
 #define resists_confusion(ptr)	(((ptr)->geno&G_UNIQ) || is_weeping(ptr) || is_yochlol(ptr))
 
