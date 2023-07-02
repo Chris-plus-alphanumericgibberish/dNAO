@@ -2555,6 +2555,7 @@ karemade:
 			if(!rn2(10) && NightmareAware_Insanity >= 10 && roll_madness(MAD_VERMIN)){
 				int damage = d(NightmareAware_Insanity/10, 10);
 				damage -= u.udr;
+				damage = reduce_dmg(&youmonst, damage, TRUE, FALSE);
 				if(damage > 0){
 					You("are stung by swarming vermin!");
 					losehp(damage,"swarming vermin",KILLED_BY);

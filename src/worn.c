@@ -965,6 +965,8 @@ struct monst *mon;
 		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
 			base -= (32-u.uinsight)/2;
 	}
+	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
+		base -= min(mon->mvar_vermiurge/10, 20);
 	
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base -= u.chokhmah;
