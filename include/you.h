@@ -624,6 +624,8 @@ struct you {
 	uchar 	wimage;		/* to record if you have the image of a Weeping Angel in your mind */
 	int 	umorgul;	/* to record the number of morgul wounds */
 	int 	utaneggs;	/* tannin eggs */
+	int		udisks;		/* to record how many aphanactonan disks you've read */
+	int		uboln;		/* to record how many spirits you've gained from the boln */
 	int uinvault;
 	struct monst *ustuck;
 	boolean petattacked;

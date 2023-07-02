@@ -910,10 +910,11 @@ struct obj *scroll;
 				pline("Suddenly, the glyphs glow in rainbow hues and escape from the fracturing disk!");
 				pline("Some of the glyphs get trapped in your %s!", (eyecount(youracedata) == 1) ? body_part(EYE) : makeplural(body_part(EYE)));
 				know_random_obj(objcount);
-				if(!u.uinsight || !rn2(u.uinsight)){
+				if(!u.udisks || !rn2(u.udisks)){
 					change_uinsight(1);
 					objcount++;
 				}
+				u.udisks++;
 				more_experienced(d(objcount, 100), 0);
 				newexplevel();
 			}
@@ -946,8 +947,9 @@ struct obj *scroll;
 				//Insight
 				effectcount = 1;
 				for(rolls = rnd(8); rolls > 0; rolls--){
-					if(!u.uinsight || !rn2(u.uinsight))
+					if(!u.udisks || !rn2(u.udisks))
 						effectcount++;
+					u.udisks++;
 				}
 				xp += d(effectcount,100);
 				change_uinsight(effectcount);
