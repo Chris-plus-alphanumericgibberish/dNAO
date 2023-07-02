@@ -2459,6 +2459,9 @@ not_special:
 #endif
 			appr = -1;
 
+		if(monsndx(ptr) == PM_LUCKSUCKER && (appr == 1) && mtmp->mvar_lucksucker > 0 && u.uluck < mtmp->mvar_lucksucker)
+			appr = -1;
+
 		/* monsters can track you */
 		if (!should_see && (goodsmeller(ptr) || (mtmp)->mcansee)) {
 			register coord *cp;

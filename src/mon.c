@@ -6116,7 +6116,10 @@ xkilled(mtmp, dest)
 			}
 		}
 	}
-	
+	if(mtmp->mtyp == PM_LUCKSUCKER && mtmp->mvar_lucksucker){
+		You_feel("your luck return!");
+		change_luck(mtmp->mvar_lucksucker);
+	}
 	if (dest & 1) {
 		static boolean sflm_message = FALSE;
 	    const char *verb = banish_kill(mtmp->mtyp) ? "banish" : (mtmp->mflamemarked && !Infuture) ? "burn" : nonliving(mtmp->data) ? "destroy" : "kill";
