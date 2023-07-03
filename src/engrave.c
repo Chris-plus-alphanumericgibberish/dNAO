@@ -350,6 +350,7 @@ static const char *haluMesg[] = {
 	"Do not call up any that you can not put down.", /*HP Lovecraft*/
 		"That is not dead, that can eternal lie,",
 		"for with strange aeons even death may die.",
+		"After summer is winter, after winter summer.",
 	"All the world will be your enemy, Prince With A Thousand Enemies...", /*Watership Down*/
 		"...and when they catch you they will kill you...",
 		"but first they must catch you.",
