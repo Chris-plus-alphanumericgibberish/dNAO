@@ -15983,7 +15983,13 @@ register struct permonst *ptr;
 	
 	if(Race_if(PM_CLOCKWORK_AUTOMATON) && (mndx == PM_TINKER_GNOME || mndx == PM_HOOLOOVOO) ) return TRUE;
 	
-	if(mndx == PM_CENTER_OF_ALL && !u.uevent.sum_entered ) return TRUE;
+	if(mndx == PM_CENTER_OF_ALL){
+		if(In_endgame(&u.uz) || u.uinsight > 8)
+			return FALSE;
+		else if(!u.uevent.sum_entered)
+			return TRUE;
+		//else fall through
+	}
 	
 	if(goat_monster(ptr) && u.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger) return TRUE;
 	
