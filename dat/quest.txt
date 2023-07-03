@@ -1378,18 +1378,18 @@ Again, and you think possibly for the last time, you stand before
 ....
 %E
 %Cc Bin 00015
-For the second time in your life, you stand above the strange mumified 
+For the second time in your life, you stand above the strange mummified 
 corpse that lies alone in the ruined library.
 
 You feel something reaching out to you, as though across an infinite
 distance.
 %E
 %Cp Bin 00016
-You stand again above the mumified corpse, and again you feel something
+You stand again above the mummified corpse, and again you feel something
 reach for you within your mind.
 %E
 %Cp Bin 00017
-You stand again above the mumified corpse, and again you feel something
+You stand again above the mummified corpse, and again you feel something
 reach for you within your mind.
 %E
 %Cc Bin 00018
