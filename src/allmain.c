@@ -5163,14 +5163,14 @@ struct monst *mon;
 	ylocale = mon->mtrack[1].y;
 	/* Will eventually follow between branches */
 	if(mon->mux != u.uz.dnum){
-		if(!rn2(555))
+		if(!rn2(55))
 			mon->mux = u.uz.dnum;
 		return;
 	}
 
 	/* Follows between levels */
 	if(mon->muy != u.uz.dlevel){
-		if(!rn2(55)){
+		if(!rn2(5)){
 			if(mon->muy > u.uz.dlevel)
 				mon->muy--;
 			else if(mon->muy < u.uz.dlevel)
