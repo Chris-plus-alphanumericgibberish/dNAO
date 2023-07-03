@@ -5890,7 +5890,7 @@ struct obj *obj;
 {
 	struct monst * mtmp;
 	boolean madewish = FALSE;
-	if (!DimensionalLock && !(mtmp = makemon(&mons[flags.female ? PM_STAR_EMPRESS : PM_STAR_EMPEROR], u.ux, u.uy, MM_NOCOUNTBIRTH))){
+	if (DimensionalLock || !(mtmp = makemon(&mons[flags.female ? PM_STAR_EMPRESS : PM_STAR_EMPEROR], u.ux, u.uy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT))){
 		pline1(nothing_happens);
 	}
 	else
