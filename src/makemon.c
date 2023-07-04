@@ -4905,18 +4905,32 @@ int mmflags;
 				(void)mongets(mtmp, SHORT_SWORD, mkobjflags);
 				return;//no random stuff
 			} else if(ptr->mtyp == PM_JUSTICE_ARCHON){
-				(void) mongets(mtmp, GENTLEWOMAN_S_DRESS, mkobjflags);
-				
-				(void) mongets(mtmp, HELMET, mkobjflags);
-				
-				(void) mongets(mtmp, GAUNTLETS, mkobjflags);
-				
-				otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
-				if(otmp) set_material_gm(otmp, IRON);
-				
-				(void) mongets(mtmp, LONG_SWORD, mkobjflags);
+				if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && In_quest(&u.uz)){
+					otmp = mongets(mtmp, WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						otmp->oeroded3 = 1;
+						otmp->obj_color = CLR_RED;
+					}
+					otmp = mongets(mtmp, HAND_WRAPS, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						otmp->oeroded3 = 1;
+						otmp->obj_color = CLR_RED;
+					}
+				}
+				else {
+					(void) mongets(mtmp, GENTLEWOMAN_S_DRESS, mkobjflags);
+					
+					(void) mongets(mtmp, HELMET, mkobjflags);
+					
+					(void) mongets(mtmp, GAUNTLETS, mkobjflags);
+					
+					otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+					if(otmp) set_material_gm(otmp, IRON);
+					
+					(void) mongets(mtmp, LONG_SWORD, mkobjflags);
 
-				(void) mongets(mtmp, KITE_SHIELD, mkobjflags);
+					(void) mongets(mtmp, KITE_SHIELD, mkobjflags);
+				}
 			} else if(ptr->mtyp == PM_SWORD_ARCHON){
 					//Nothing
 			} else if(ptr->mtyp == PM_SHIELD_ARCHON){
@@ -11437,8 +11451,20 @@ boolean goodequip;
 						mtmp->entangled_oid = otmp->o_id;
 					}
 					return;
-				} //else
-				otmp = mongets(mtmp, rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
+				}
+				else if(urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && In_quest(&u.uz)){
+					otmp = mongets(mtmp, WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						otmp->oeroded3 = 1;
+						otmp->obj_color = CLR_RED;
+					}
+					otmp = mongets(mtmp, HAND_WRAPS, mkobjflags|MKOBJ_NOINIT);
+					if(otmp){
+						otmp->oeroded3 = 1;
+						otmp->obj_color = CLR_RED;
+					}
+				}
+				else otmp = mongets(mtmp, rn2(3) ? ROBE : WAISTCLOTH, mkobjflags|MKOBJ_NOINIT);
 				if(otmp) otmp->oerodeproof = TRUE;
 			} else if(ptr->mtyp == PM_IASOIAN_ARCHON){
 				if(In_quest(&u.uz) 
