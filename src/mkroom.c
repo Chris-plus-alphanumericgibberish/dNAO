@@ -99,7 +99,7 @@ STATIC_OVL int
 int_sqrt(num)
 int num;
 {
-	return((boolean)( sqrt(num) ));
+	return((int)( sqrt(num) ));
 }
 
 /* Returns true if room has both an X and Y size of at least x. */
