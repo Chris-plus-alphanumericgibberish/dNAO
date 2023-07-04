@@ -1070,7 +1070,7 @@ int mkflags;
 					}
 				}
 				// else if(In_quest(&u.uz) && Role_if(PM_HEALER) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born == 0){
-				else if(Role_if(PM_HEALER) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born == 0){
+				else if(In_quest(&u.uz) && Is_nemesis(&u.uz) && Role_if(PM_HEALER) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born == 0){
 					skull = PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION;
 					mvitals[PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION].born = 1;
 				}
