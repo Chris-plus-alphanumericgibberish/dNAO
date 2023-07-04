@@ -14630,7 +14630,7 @@ rndmonst()
 	    if ((ct -= (int)rndmonst_state.mchoices[mndx]) <= 0) break;
 
 	if (mndx == SPECIAL_PM || uncommon(mndx)) {	/* shouldn't happen */
-	    impossible("rndmonst: bad `mndx' [#%d]", mndx);
+	    impossible("rndmonst: bad 'mndx' [#%d]", mndx);
 	    return (struct permonst *)0;
 	}
 	return &mons[mndx];
