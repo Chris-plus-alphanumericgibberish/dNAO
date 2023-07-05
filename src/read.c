@@ -2971,6 +2971,7 @@ struct obj	*sobj;
 		 pline("It's meaning is clear in your mind, and the pronunciation obvious.");
 		 known = TRUE; //id the scroll
 		 more_experienced(777,0);//the knowledge from the scroll transfers to you.
+		 newexplevel();
 		 if (Upolyd) {// the lawful energies rebuild your body
 			u.mh += u.ualign.record;
 			if(u.mhmax < u.mh)
