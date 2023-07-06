@@ -1221,6 +1221,7 @@ int curse_bless;
 		stripspe(obj);
 	    } else {
 		int lim = (obj->otyp == WAN_WISHING) ? 3 :
+			(obj->otyp == WAN_MAGIC_MISSILE) ? 110 :
 			(objects[obj->otyp].oc_dir != NODIR) ? 8 : 15;
 
 		n = (lim == 3) ? 3 : rn1(5, lim + 1 - 5);
