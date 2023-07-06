@@ -2720,7 +2720,7 @@ struct attack *attk;
 		case AT_OBIT:
 			pline("%s %s bites %s!",
 				(youagr ? "Your" : s_suffix(Monnam(magr))),
-				(attk->adtyp == AD_MAGM ? "skirt" : magr->mtyp == PM_MEDUSA ? "hair" : "canopy"),
+				(attk->adtyp == AD_MAGM ? "skirt" : magr->mtyp == PM_MEDUSA ? "hair" : magr->mtyp == PM_HYGIEIAN_ARCHON ? "snake" : magr->mtyp == PM_ANCIENT_NAGA ? "canopy" : "snake head"),
 				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr))
 				);
 			break;
