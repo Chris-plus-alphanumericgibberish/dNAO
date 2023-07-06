@@ -57,7 +57,7 @@ register struct permonst *ptr;
 		case PM_ICE_PARAELEMENTAL: return Is_waterlevel(&u.uz);
 	}
 	else if((ptr->mlet == S_CHA_ANGEL || ptr->mlet == S_NEU_ANGEL || ptr->mlet == S_LAW_ANGEL ) && is_minion(ptr))
-		return Is_astralevel(&u.uz);
+		return Is_astralevel(&u.uz) && u.uinsight >= 7;
 	return FALSE;
 }
 
@@ -4833,6 +4833,7 @@ int mmflags;
 	    case S_CHA_ANGEL:
 		{
 		int spe2;
+		boolean endgame_equip = goodequip || (In_endgame(&u.uz) && rn2(7) < u.uinsight);
 			if(In_mordor_quest(&u.uz) 
 				&& !In_mordor_forest(&u.uz)
 				&& !Is_ford_level(&u.uz)
@@ -4986,7 +4987,7 @@ int mmflags;
 					else {
 						add_oprop(otmp, OPROP_AXIOW);
 					}
-					if(In_endgame(&u.uz) || goodequip){
+					if(endgame_equip){
 						add_oprop(otmp, rn2(7) ? OPROP_FIREW : OPROP_ELECW);
 					}
 				}
@@ -5041,7 +5042,7 @@ int mmflags;
 					set_template(mtmp, PLAGUE_TEMPLATE);
 				}
 				else {
-					if(In_endgame(&u.uz) || goodequip){
+					if(endgame_equip){
 #define HOLY_PANAKEIAN_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
 			if(otmp){\
 				add_oprop(otmp, OPROP_HOLY);\
@@ -5073,7 +5074,7 @@ int mmflags;
 					set_template(mtmp, PLAGUE_TEMPLATE);
 				}
 				else {
-					if(In_endgame(&u.uz) || goodequip){
+					if(endgame_equip){
 #define HOLY_HYGIEIAN_ARMOR(item) otmp = mongets(mtmp, item, mkobjflags);\
 			if(otmp){\
 				set_material_gm(otmp, SILVER);\
@@ -5110,7 +5111,7 @@ int mmflags;
 				}
 			} else if(ptr->mtyp == PM_PORO_AULON){
 				int mat = rn2(3) ? SILVER : PLATINUM;
-				if(In_endgame(&u.uz) || goodequip){
+				if(endgame_equip){
 					otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
 					if(otmp) set_material_gm(otmp, mat);
 					otmp = mongets(mtmp, !rn2(3) ? GAUNTLETS_OF_POWER : GAUNTLETS, mkobjflags);
@@ -5124,7 +5125,7 @@ int mmflags;
 					otmp = mongets(mtmp, SABER, mkobjflags);
 					if(otmp){
 						set_material_gm(otmp, mat);
-						if(In_endgame(&u.uz) || goodequip){
+						if(endgame_equip){
 							add_oprop(otmp, OPROP_FIREW);
 						}
 					}
@@ -5134,7 +5135,7 @@ int mmflags;
 				if(otmp){
 					spe2 = rn2(4);
 					otmp->spe = max(otmp->spe, spe2);
-					if(In_endgame(&u.uz) || goodequip || !rn2(20)){
+					if(endgame_equip || !rn2(20)){
 						add_oprop(otmp, OPROP_FIREW);
 					}
 					else if(!rn2(4)){
@@ -5320,7 +5321,7 @@ int mmflags;
 
 				int mat = 0;
 				int stone = 0;
-				switch(((In_endgame(&u.uz) || goodequip) && !rn2(4)) ? 0 : rn2(20)){
+				switch((endgame_equip && !rn2(4)) ? 0 : rn2(20)){
 				case 0:
 				mat = !rn2(5) ? GEMSTONE : !rn2(4) ? OBSIDIAN_MT : GLASS;
 				if(mat == GEMSTONE)
@@ -5682,7 +5683,7 @@ int mmflags;
 					
 					lama_count++;
 				}
-				else if((In_endgame(&u.uz) || goodequip)){
+				else if(endgame_equip){
 					const int generic_nasties[] = {
 						PM_BLACK_DRAGON, PM_COCKATRICE, PM_STORM_GIANT,
 						PM_MINOTAUR, PM_UMBER_HULK, PM_MASTER_MIND_FLAYER,
@@ -5877,7 +5878,7 @@ int mmflags;
 					(void) mpickobj(mtmp, otmp);
 				}
 				//Generic angel armor
-				if(Inhell || In_endgame(&u.uz) || goodequip){
+				if(Inhell || endgame_equip){
 					if(rn2(3)){
 						otmp = mongets(mtmp, rn2(2) ? PLATE_MAIL : rn2(2) ? SCALE_MAIL : BANDED_MAIL, mkobjflags);
 						if(otmp) set_material_gm(otmp, SILVER);
@@ -15797,7 +15798,7 @@ int mkobjflags;
 			otmp->blessed = TRUE;
 			if (otmp->spe < 0) otmp->spe *= -1;
 			otmp->oerodeproof = TRUE;
-			if(In_endgame(&u.uz) || (mkobjflags&MKOBJ_GOODEQUIP)){
+			if((In_endgame(&u.uz) && rn2(7) < u.uinsight) || (mkobjflags&MKOBJ_GOODEQUIP)){
 				if(otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS || is_weptool(otmp)){
 					int min = 3;
 					if(Is_astralevel(&u.uz)){
