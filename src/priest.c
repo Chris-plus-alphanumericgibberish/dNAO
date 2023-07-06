@@ -349,7 +349,7 @@ char *pname;		/* caller-supplied output buffer */
 
 	Strcpy(pname, "the ");
 	if (mon->minvis) Strcat(pname, "invisible ");
-	if ((mon->ispriest && !&mons[PM_HIGH_SHAMAN]) || mon->mtyp == PM_ALIGNED_PRIEST || mon->mtyp == PM_ANGEL)
+	if ((mon->ispriest && mon->mtyp != PM_HIGH_SHAMAN) || mon->mtyp == PM_ALIGNED_PRIEST || mon->mtyp == PM_ANGEL)
 	{
 		if (mon->mtame && mon->mtyp == PM_ANGEL)
 			Strcat(pname, "guardian ");
