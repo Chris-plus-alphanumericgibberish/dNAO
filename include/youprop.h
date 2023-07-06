@@ -651,4 +651,19 @@
 
 #define Straitjacketed	(u.uentangled_oid || (uarm && uarm->otyp == STRAITJACKET && uarm->cursed))
 
+#define ELBERETH_HIGH_POWER	(Race_if(PM_ELF) \
+								|| (u.ugodbase[UGOD_CURRENT] >= GOD_OROME && u.ugodbase[UGOD_CURRENT] <= GOD_LORIEN) \
+								|| u.ugodbase[UGOD_CURRENT] == GOD_PEN_A \
+								|| u.ugodbase[UGOD_CURRENT] == GOD_EILISTRAEE \
+								)
+
+#define LOLTH_HIGH_POWER	(((Holiness_if(UNHOLY_HOLINESS)\
+									&& u.ugodbase[UGOD_CURRENT] != GOD_GHAUNADAUR \
+									&& u.ugodbase[UGOD_CURRENT] != GOD_EDDERGUD \
+									&& u.ugodbase[UGOD_CURRENT] != GOD_ILSENSINE \
+								) \
+								|| u.ugodbase[UGOD_CURRENT] == GOD_PEN_A \
+								|| u.ugodbase[UGOD_CURRENT] == GOD_THE_DEEP_BLUE_SEA \
+								) && Race_if(PM_DROW) && !flags.stag)
+
 #endif /* YOUPROP_H */

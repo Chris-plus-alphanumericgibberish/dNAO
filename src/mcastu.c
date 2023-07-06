@@ -6505,8 +6505,8 @@ int tary;
 		&& (is_directed_attack_spell(spellnum) || is_debuff_spell(spellnum))	/* only affects directed and debuff spells */
 		&& !Infuture) /* does not work in Ana quest */
 	{
-		if ((sengr_at("Elbereth", tarx, tary) && !Race_if(PM_DROW))
-			|| (sengr_at("Lolth", tarx, tary) && Race_if(PM_DROW) && (mlev(magr) < u.ulevel || u.ualign.record-- > 0)))
+		if ((sengr_at("Elbereth", tarx, tary) && (!Race_if(PM_DROW) || ELBERETH_HIGH_POWER))
+			|| (sengr_at("Lolth", tarx, tary) && LOLTH_HIGH_POWER && (mlev(magr) < u.ulevel || u.ualign.record-- > 0)))
 		{
 			return TRUE;
 		}
