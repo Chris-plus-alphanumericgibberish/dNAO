@@ -586,6 +586,10 @@ fixup_special()
 			place_chaos_forest_features();
 		}
 	}
+	/*Elf huts on elf shared home*/
+	if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER){
+		place_elfquest_forest_features();
+	}
 	/* NEUTRAL QUEST: various features */
 	if (In_outlands(&u.uz)){
 		if (!(u.uz.dlevel == spire_level.dlevel || Is_gatetown(&u.uz) || Is_sumall(&u.uz)))

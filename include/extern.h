@@ -1589,6 +1589,7 @@ E struct obj * FDECL(mkhellvaultitem,(int));
 E void FDECL(mkhellvaultitem_cnt,(struct obj *, int, boolean));
 E void NDECL(place_lolth_vaults);
 E void NDECL(place_chaos_forest_features);
+E void NDECL(place_elfquest_forest_features);
 E void NDECL(place_drow_healer_features);
 E void NDECL(place_law_features);
 E void NDECL(place_neutral_features);
