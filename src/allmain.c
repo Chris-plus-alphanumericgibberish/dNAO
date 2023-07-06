@@ -970,7 +970,7 @@ you_regen_hp()
 
 		// CON bonus (while in natural form)
 		if (!Upolyd)
-			reglevel += ((int)ACURR(A_CON) - 10) / 2;
+			reglevel += ((int)ACURR(A_CON) - 10);
 		// minimum 1
 		if (reglevel < 1)
 			reglevel = 1;
@@ -1121,7 +1121,7 @@ you_regen_pw()
 	if (wtcap < MOD_ENCUMBER &&		// not overly encumbered
 		!Race_if(PM_INCANTIFIER)	// not an incantifier
 		) {
-		int reglevel = u.ulevel + (((int)ACURR(A_WIS)) - 10) / 2;
+		int reglevel = u.ulevel + (((int)ACURR(A_WIS)) - 10);
 		// level + WISmod minimum 1
 		if (reglevel < 1)
 			reglevel = 1;
@@ -1151,7 +1151,10 @@ you_regen_pw()
 			reglevel *= 2;
 			reglevel += 8;
 		}
-		if (Role_if(PM_WIZARD))   reglevel += 10;
+		if (Role_if(PM_WIZARD)){
+			reglevel *= 2;
+			reglevel += 10;
+		}
 		if (Role_if(PM_MADMAN))   reglevel += 9;
 		if (Role_if(PM_HEALER))   reglevel += 6;
 		if (Role_if(PM_PRIEST))   reglevel += 6;
