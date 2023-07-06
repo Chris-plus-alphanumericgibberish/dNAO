@@ -1118,9 +1118,7 @@ you_regen_pw()
 	int perX = 0;
 
 	// natural power regeneration
-	if (wtcap < MOD_ENCUMBER &&		// not overly encumbered
-		!Race_if(PM_INCANTIFIER)	// not an incantifier
-		) {
+	if (wtcap < MOD_ENCUMBER) {	// not overly encumbered
 		int reglevel = u.ulevel + (((int)ACURR(A_WIS)) - 10);
 		// level + WISmod minimum 1
 		if (reglevel < 1)
