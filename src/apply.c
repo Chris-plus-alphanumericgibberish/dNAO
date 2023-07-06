@@ -1767,12 +1767,17 @@ struct obj *obj;
 					pline("Your staff touches it!");
 				map_invisible(u.ux+u.dx,u.uy+u.dy);
 			}
-			if(rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)){
-				struct monst *newmon = tamedog_core(mon, (struct obj *)0, TRUE);
-				if(newmon){
-					mon = newmon;
-					newsym(mon->mx, mon->my);
-					pline("%s is very grateful!", Monnam(mon));
+			if(!mon->mtame && rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)){
+				pline("%s is very grateful!", Monnam(mon));
+				mon->mpeaceful = TRUE;
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Turn %s away from your party?", mhim(mon));
+				if(yn(qbuf) != 'y'){
+					struct monst *newmon = tamedog_core(mon, (struct obj *)0, TRUE);
+					if(newmon){
+						mon = newmon;
+						newsym(mon->mx, mon->my);
+					}
 				}
 			}
 		}
