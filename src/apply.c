@@ -6193,8 +6193,9 @@ struct obj *obj;
 				consumed = TRUE;
 			}
 			break;
-		case SUMMON_SERVANT:
-			mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, MA_MINION | MA_DEMON | MA_FEY | MA_PRIMORDIAL, MG_NOWISH | MG_NOTAME, G_UNIQ, (char *)0);
+		case SUMMON_SERVANT:{
+			long futurewishflag = Role_if(PM_TOURIST) ? 0 : MG_FUTURE_WISH;
+			mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, MA_MINION | MA_DEMON | MA_FEY | MA_PRIMORDIAL, MG_NOWISH | MG_NOTAME | futurewishflag, G_UNIQ, (char *)0);
 			if (!mtmp) {
 				pline("Perhaps try summoning something else?");
 				consumed = FALSE;
@@ -6204,6 +6205,7 @@ struct obj *obj;
 				consumed = TRUE;
 			}
 			break;
+		}
 		case SUMMON_DEMON_LORD:
 			choice = do_demon_lord_summon_menu();
 			if (!choice){

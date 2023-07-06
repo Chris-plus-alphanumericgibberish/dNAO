@@ -10272,7 +10272,8 @@ arti_invoke(obj)
 			else if(n == 2){
 				if(artinstance[obj->oartifact].uconstel_pets < 2){
 					struct monst *mtmp;
-					mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, 0, MG_NOWISH|MG_NOTAME, G_UNIQ, (char *)0);
+					long futurewishflag = Role_if(PM_TOURIST) ? 0 : MG_FUTURE_WISH;
+					mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, 0, MG_NOWISH|MG_NOTAME|futurewishflag, G_UNIQ, (char *)0);
 					if (!mtmp) {
 						pline("Perhaps try summoning something else?");
 					}
