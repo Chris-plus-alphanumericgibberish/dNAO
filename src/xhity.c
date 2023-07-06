@@ -12180,21 +12180,27 @@ int vis;
 			return MM_MISS;
 		/* no effect on monsters */
 		//Use encouragement code to give monster target a -1
-		if (!youdef)
-			return MM_MISS;
-		/* assumes you are defending */
-		pline("%s glares ominously at you!", Monnam(magr));
-
-		/* misc protections */
-		if ((uwep && !uwep->cursed && confers_luck(uwep)) ||
-			(stone_luck(TRUE) > 0 && rn2(4))) {
-			pline("Luckily, you are not affected.");
+		if (!youdef){
+			if(vis&VIS_MAGR){
+				pline("%s glares ominously at %s!", Monnam(magr), mon_nam(mdef));
+			}
+			mdef->encouraged = max(mdef->encouraged-1,-13);
 		}
 		else {
-			You_feel("your luck running out.");
-			change_luck(-1 * dmg);
+			/* assumes you are defending */
+			pline("%s glares ominously at you!", Monnam(magr));
+
+			/* misc protections */
+			if ((uwep && !uwep->cursed && confers_luck(uwep)) ||
+				(stone_luck(TRUE) > 0 && rn2(4))) {
+				pline("Luckily, you are not affected.");
+			}
+			else {
+				You_feel("your luck running out.");
+				change_luck(-1 * dmg);
+			}
+			stop_occupation();
 		}
-		stop_occupation();
 		break;
 
 		/* weeping angel gaze */
