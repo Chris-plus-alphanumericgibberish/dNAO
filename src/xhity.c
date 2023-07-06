@@ -1883,6 +1883,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 
+	if(magr->mtyp == PM_AVATAR_OF_LOLTH && attk->adtyp == AD_SSEX && (magr->mcan || Protection_from_shape_changers)){
+		GETNEXT
+	}
 	/* Alabaster mummies:
 	 * Spell glyphs result in spellcasting,
 	 * Physical glyphs result in melee,
@@ -2156,7 +2159,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		};
 		// first index -- determine which attack form
 		if (*indexnum == 0){
-			if (rn2(2)){		// 1/2 of marilith-hands
+			if (!magr->mcan && !Protection_from_shape_changers && rn2(2)){		// 1/2 of marilith-hands
 				*subout |= SUBOUT_LOLTH1;
 			}
 			//else;				// 1/2 of normal

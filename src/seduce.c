@@ -132,9 +132,9 @@ struct monst * mon;
 	}
 
 	/* monster may be worn out (with an exception for the avatar of lolth?) */
-	if ((mon->mcan || mon->mspec_used) && !(
+	if (mon->mcan || (mon->mspec_used && !(
 		mon->mtyp == PM_AVATAR_OF_LOLTH
-	)) {
+	))) {
 		/* message */
 		if (mon->mtyp == PM_INCUBUS || mon->mtyp == PM_SUCCUBUS) {
 			pline("%s acts as though %s has got a %sheadache.",
