@@ -5827,6 +5827,9 @@ int floorID;
 	case BUER:
 		u.umartial = TRUE;
 		break;
+	case DANTALION:
+		u.uiearepairs = TRUE;
+		break;
 	case ENKI:
 		HSwimming |= INTRINSIC;
 		break;
