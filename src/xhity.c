@@ -12671,7 +12671,7 @@ boolean printmessages;
 	/* otyp */
 	if (spec_prop_otyp(otmp)) {	
 		tmpplusdmg = tmptruedmg = 0;
-		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
+		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt, printmessages);
 		*plusdmgptr += tmpplusdmg;
 		*truedmgptr += tmptruedmg;
 		if ((result & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_STOP)) || (result == MM_MISS))
