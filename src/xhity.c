@@ -2231,8 +2231,12 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 
 	/* Some armor can insert attacks */
+	/* Warn address doesn't like is_null_attk() with a local variable structs*/
+#pragma GCC diagnostic ignored "-Waddress"
+	boolean prevattacknull = is_null_attk(&prev_attack);
+#pragma GCC diagnostic pop
 	if ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
-		&& (is_null_attk(&prev_attack) || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP || prev_attack.aatyp == AT_MARI)
+		&& (prevattacknull || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP || prev_attack.aatyp == AT_MARI)
 		&& ((*subout&(SUBOUT_MARIARM1|SUBOUT_MARIARM2)) != (SUBOUT_MARIARM1|SUBOUT_MARIARM2))
 	){
 		struct obj * otmp = (youagr ? uarm : which_armor(magr, W_ARM));
