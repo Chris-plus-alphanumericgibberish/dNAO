@@ -444,6 +444,7 @@ static struct Comp_Opt
 #ifdef MSDOS
 	{ "soundcard", "type of sound card to use", 20, SET_IN_FILE },
 #endif
+	{ "statuslines", "number of status lines (2 or 3)", 20, SET_IN_GAME },
 	{ "suppress_alert", "suppress alerts about version-specific features",
 						8, SET_IN_GAME },
 	{ "tile_width", "width of tiles", 20, DISP_IN_GAME},	/*WC*/
@@ -656,6 +657,7 @@ initoptions()
 #endif
 	iflags.menu_headings = ATR_INVERSE;
 	iflags.attack_mode = ATTACK_MODE_CHAT;
+	iflags.statuslines = 3;
 
 	/* Use negative indices to indicate not yet selected */
 	flags.initrole = -1;
@@ -2915,6 +2917,26 @@ goodfruit:
         }
 
 
+	fullname = "statuslines";
+	if (match_optname(opts, fullname, sizeof("statuslines")-1, TRUE)) {
+		op = string_for_opt(opts, negated);
+		if (negated) bad_negation(fullname, FALSE);
+		else {
+		    if (!initial)
+		        need_redraw = TRUE;
+		    iflags.statuslines = atoi(op);
+		    if (iflags.statuslines > 3) {
+		        iflags.statuslines = 3;
+		        badoption(opts);
+		    } else if (iflags.statuslines < 2) {
+		        iflags.statuslines = 2;
+		        badoption(opts);
+		    }
+		}
+		return;
+	}
+
+
 #ifdef SORTLOOT
 	fullname = "sortloot";
 	if (match_optname(opts, fullname, 4, TRUE)) {
@@ -4551,6 +4573,8 @@ char *buf;
 	else if (!strcmp(optname, "soundcard"))
 		Sprintf(buf, "%s", to_be_done);
 #endif
+	else if (!strcmp(optname, "statuslines"))
+		Sprintf(buf, "%d", iflags.statuslines);
 	else if (!strcmp(optname, "suppress_alert")) {
 	    if (flags.suppress_alert == 0L)
 		Strcpy(buf, none);

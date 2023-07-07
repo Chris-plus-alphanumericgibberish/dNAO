@@ -272,6 +272,9 @@ typedef xchar	boolean;		/* 0 or 1 */
 #define Sprintf  (void) sprintf
 #define Strcat   (void) strcat
 #define Strcpy   (void) strcpy
+#define Snprintf (void) snprintf
+#define Strncat  (void) strncat
+#define Strncpy  (void) strncpy
 #ifdef NEED_VARARGS
 #define Vprintf  (void) vprintf
 #define Vfprintf (void) vfprintf
@@ -321,14 +324,16 @@ struct version_info {
  * than COLNO
  *
  * longest practical second status line at the moment is
- *	Astral Plane $:12345 HP:700(700) Pw:111(111) AC:-127 Xp:30/123456789
- *	T:123456 Satiated Conf FoodPois Ill Blind Stun Hallu Overloaded
- * -- or somewhat over 130 characters
+ *	Astral Plane $:123456 HP:1234(1234) Pw:1234(1234) Br:8 AC:-127
+ *	DR:127 Xp:30/123456789 T:123456 Stone Slime Sufct FoodPois Ill
+ *	Satiated Overloaded Blind Stun Conf Hallu Babble Scream Fly
+ *	Ride
+ * -- or about 190 characters
  */
-#if COLNO <= 140
-#define MAXCO 160
+#if COLNO <= 160
+#define MAXCO 200
 #else
-#define MAXCO (COLNO+20)
+#define MAXCO (COLNO+40)
 #endif
 
 #define MAXNROFROOMS	40	/* max number of rooms per level */

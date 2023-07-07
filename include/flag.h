@@ -365,6 +365,7 @@ struct instance_flags {
     boolean invweight;
 	boolean quick_m_abilities;
 	boolean default_template_hilite;
+	int statuslines;
 
 	int pokedex;	/* default monster stats to show in the pokedex */
 /*

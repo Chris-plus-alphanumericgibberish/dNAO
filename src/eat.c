@@ -65,22 +65,22 @@ STATIC_OVL boolean force_save_hs = FALSE;
 
 const char *hu_stat[] = {
 	"Satiated",
-	"        ",
-	"Hungry  ",
-	"Weak    ",
+	"",
+	"Hungry",
+	"Weak",
 	"Fainting",
-	"Fainted ",
-	"Starved "
+	"Fainted",
+	"Starved"
 };
 
 const char *ca_hu_stat[] = {
 	"OvrWound",
-	"        ",
-	"Waning  ",
-	"Unwound ",
+	"",
+	"Waning",
+	"Unwound",
 	"Slipping",
-	"Slipped ",
-	"Stopped "
+	"Slipped",
+	"Stopped"
 };
 
 #endif /* OVLB */
