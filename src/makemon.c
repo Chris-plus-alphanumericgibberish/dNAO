@@ -432,8 +432,81 @@ boolean goodequip;
 }
 
 STATIC_OVL void
+yochlol_initinv(mtmp, mkobjflags, faction, goodequip)
+struct monst *mtmp;
+int mkobjflags;
+int faction;
+boolean goodequip;
+{
+	struct obj *otmp;
+	/*weapon*/
+	otmp = mksobj(RAPIER, mkobjflags);
+	set_material_gm(otmp, OBSIDIAN_MT);
+	otmp->blessed = TRUE;
+	otmp->cursed = FALSE;
+	otmp->oerodeproof = TRUE;
+	otmp->spe = 2;
+	(void) mpickobj(mtmp, otmp);
+	/*Plate Mail*/
+	otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
+	otmp->ohaluengr = TRUE;
+	otmp->oward = LOLTH_SYMBOL;
+	otmp->blessed = TRUE;
+	otmp->cursed = FALSE;
+	otmp->spe = 2;
+	(void) mpickobj(mtmp, otmp);
+	/*Dress*/
+	otmp = mksobj(PLAIN_DRESS, mkobjflags);
+	otmp->blessed = TRUE;
+	otmp->cursed = FALSE;
+	otmp->oerodeproof = TRUE;
+	otmp->spe = 2;
+	(void) mpickobj(mtmp, otmp);
+	/*Ring*/
+	otmp = mksobj(find_signet_ring(), mkobjflags);
+	otmp->ohaluengr = TRUE;
+	otmp->oward = curhouse;
+	(void) mpickobj(mtmp, otmp);
+	/*Cloak*/
+	otmp = mksobj(CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
+	otmp->blessed = TRUE;
+	otmp->cursed = FALSE;
+	otmp->oerodeproof = TRUE;
+	otmp->spe = 0;
+	(void) mpickobj(mtmp, otmp);
+	/*Helm*/
+	otmp = mksobj(DROVEN_HELM, mkobjflags);
+	otmp->blessed = TRUE;
+	otmp->cursed = FALSE;
+	otmp->oerodeproof = TRUE;
+	otmp->spe = 0;
+	(void) mpickobj(mtmp, otmp);
+	/*boots*/
+	otmp = mksobj(GAUNTLETS, mkobjflags);
+	set_material_gm(otmp, SHADOWSTEEL);
+	otmp->blessed = TRUE;
+	otmp->cursed = FALSE;
+	otmp->oerodeproof = TRUE;
+	otmp->spe = 0;
+	(void) mpickobj(mtmp, otmp);
+	/*boots*/
+	otmp = mksobj(HIGH_BOOTS, mkobjflags);
+	otmp->blessed = TRUE;
+	otmp->cursed = FALSE;
+	otmp->oerodeproof = TRUE;
+	otmp->spe = 0;
+	(void) mpickobj(mtmp, otmp);
+	if ((int) mtmp->m_lev > rn2(75))
+		(void) mongets(mtmp, rnd_offensive_item(mtmp), mkobjflags);
+	if ((int) mtmp->m_lev > rn2(50))
+		(void) mongets(mtmp, rnd_defensive_item(mtmp), mkobjflags);
+	if ((int) mtmp->m_lev > rn2(100))
+		(void) mongets(mtmp, rnd_misc_item(mtmp), mkobjflags);
+}
+
+STATIC_OVL void
 golem_initinv(mtmp, mkobjflags, faction, goodequip)
-register struct monst *mtmp;
+struct monst *mtmp;
 int mkobjflags;
 int faction;
 boolean goodequip;
@@ -1630,64 +1703,6 @@ boolean goodequip;
 			otmp->spe = 5;
 			add_oprop(otmp, OPROP_BLADED);
 			set_material_gm(otmp, OBSIDIAN_MT);
-			(void) mpickobj(mtmp, otmp);
-		} else if(is_yochlol(mtmp->data)){
-			/*weapon*/
-			otmp = mksobj(RAPIER, mkobjflags);
-			set_material_gm(otmp, OBSIDIAN_MT);
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->oerodeproof = TRUE;
-			otmp->spe = 2;
-			(void) mpickobj(mtmp, otmp);
-			/*Plate Mail*/
-			otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
-			otmp->ohaluengr = TRUE;
-			otmp->oward = LOLTH_SYMBOL;
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->spe = 2;
-			(void) mpickobj(mtmp, otmp);
-			/*Dress*/
-			otmp = mksobj(PLAIN_DRESS, mkobjflags);
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->oerodeproof = TRUE;
-			otmp->spe = 2;
-			(void) mpickobj(mtmp, otmp);
-			/*Ring*/
-			otmp = mksobj(find_signet_ring(), mkobjflags);
-			otmp->ohaluengr = TRUE;
-			otmp->oward = curhouse;
-			(void) mpickobj(mtmp, otmp);
-			/*Cloak*/
-			otmp = mksobj(CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->oerodeproof = TRUE;
-			otmp->spe = 0;
-			(void) mpickobj(mtmp, otmp);
-			/*Helm*/
-			otmp = mksobj(DROVEN_HELM, mkobjflags);
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->oerodeproof = TRUE;
-			otmp->spe = 0;
-			(void) mpickobj(mtmp, otmp);
-			/*boots*/
-			otmp = mksobj(GAUNTLETS, mkobjflags);
-			set_material_gm(otmp, SHADOWSTEEL);
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->oerodeproof = TRUE;
-			otmp->spe = 0;
-			(void) mpickobj(mtmp, otmp);
-			/*boots*/
-			otmp = mksobj(HIGH_BOOTS, mkobjflags);
-			otmp->blessed = TRUE;
-			otmp->cursed = FALSE;
-			otmp->oerodeproof = TRUE;
-			otmp->spe = 0;
 			(void) mpickobj(mtmp, otmp);
 		} else if(mm == PM_HEDROW_MASTER_WIZARD){
 			otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
@@ -14293,9 +14308,14 @@ int faction;
 	}
 	
 	if (allow_minvent) {
-	    if(is_armed_mon(mtmp))
-			m_initweap(mtmp, mkobjflags, faction, goodequip, mmflags);	/* equip with weapons / armor */
-	    m_initinv(mtmp, mkobjflags, faction, goodequip);  /* add on a few special items incl. more armor */
+		if(is_yochlol(mtmp->data)){
+			yochlol_initinv(mtmp, mkobjflags, faction, goodequip, mmflags);
+		}
+		else {
+			if(is_armed_mon(mtmp))
+				m_initweap(mtmp, mkobjflags, faction, goodequip, mmflags);	/* equip with weapons / armor */
+			m_initinv(mtmp, mkobjflags, faction, goodequip);  /* add on a few special items incl. more armor */
+		}
 	    m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
 		m_level_up_intrinsic(mtmp);
