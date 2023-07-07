@@ -368,6 +368,10 @@ register struct obj *obj;
 	register boolean ideed = TRUE;
 
 	You("drop %s down the drain.", doname(obj));
+	if(obj->oartifact){
+		pline("But it seems to expand as if falls, and doesn't fit!");
+		goto giveback;
+	}
 	obj->in_use = TRUE;	/* block free identification via interrupt */
 	switch(obj->otyp) {	/* effects that can be noticed without eyes */
 		case RIN_WISHES:
