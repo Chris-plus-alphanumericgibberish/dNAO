@@ -1013,7 +1013,7 @@ boolean ranged;
 	if(mtmp->mtame && mtmp2->mpeaceful && !u.uevent.uaxus_foe && mtmp2->mtyp == PM_AXUS)
 		return FALSE;
 	
-	if(mtmp->mtame && mtmp2->mpeaceful && is_metroid(mtmp2->data) && is_metroid(mtmp2->data))
+	if(mtmp->mtame && mtmp2->mpeaceful && is_metroid(mtmp->data) && is_metroid(mtmp2->data))
 		return FALSE;
 	
 	if(mtmp->mhp < 100 && attacktype_fordmg(mtmp2->data, AT_BOOM, AD_MAND))
