@@ -577,7 +577,7 @@ by turning the power of the Bell of Opening upon itself,
 creating a door through the universe through which even
 the great Grey Thought Entity Ilsensine may be ejected.
 
-"You must not loose it or fail to take it with you to
+"You must not lose it or fail to take it with you to
 the Astral Plane, or all our struggles will have been
 for naught."
 %E
@@ -1378,18 +1378,18 @@ Again, and you think possibly for the last time, you stand before
 ....
 %E
 %Cc Bin 00015
-For the second time in your life, you stand above the strange mumified 
+For the second time in your life, you stand above the strange mummified 
 corpse that lies alone in the ruined library.
 
 You feel something reaching out to you, as though across an infinite
 distance.
 %E
 %Cp Bin 00016
-You stand again above the mumified corpse, and again you feel something
+You stand again above the mummified corpse, and again you feel something
 reach for you within your mind.
 %E
 %Cp Bin 00017
-You stand again above the mumified corpse, and again you feel something
+You stand again above the mummified corpse, and again you feel something
 reach for you within your mind.
 %E
 %Cc Bin 00018
@@ -2133,7 +2133,7 @@ succeed.
 %E
 %Cp Dhl 00003
 You have the oddest feeling that this may be the last time you
-are to vist %H.
+are to visit %H.
 %E
 %Cp Dhl 00005
 "We were sent by the surface alliance to investigate the Underdark disturbance"
@@ -2380,7 +2380,7 @@ Once again, you stand outside %H.
 %E
 %Cp Dro 00003
 You have the oddest feeling that this may be the last time you
-are to vist %H.
+are to visit %H.
 %E
 %Cp Dro 00005
 "You have been granted an audience with %l.  Don't keep her waiting!"
@@ -2408,7 +2408,7 @@ Those failed priestesses have little respect for their betters!"
 "%lC certainly saw to those pale-elf loving freaks."
 %E
 %Cp Dro 00013
-"I hope you taught those acursed driders some respect!"
+"I hope you taught those accursed driders some respect!"
 %E
 %Cp Dro 00014
 "Hail Lolth!"
@@ -2812,7 +2812,7 @@ home base of the rebellion against the clergy of Lolth.
 "I'll kill you and anyone who ever gave you shelter!"
 %E
 %Cp Dro 00167
-"Your fate will be wispered of for generations to come!"
+"Your fate will be whispered of for generations to come!"
 %E
 %Cp Dro 00168
 "You, a hero?  Don't make me laugh!  You killed two of your sisters,
@@ -2883,7 +2883,7 @@ prefer the Crescent Blade of Eilistraee?"
 # assumes Crescent Blade
 %Cc Dro 00183
 "This blade was forged by Eilistraee as a weapon against her
-mother, Lolth.  It's pale moon-fires pass through armor, and
+mother, Lolth.  Its pale moon-fires pass through armor, and
 it can cleave even the head of a goddess from her shoulders."
 %E
 %Cp Dro 00190
@@ -4156,7 +4156,7 @@ Once again, you stand outside %H.
 %E
 %Cp Hdr 00003
 You have the oddest feeling that this may be the last time you
-are to vist %H.
+are to visit %H.
 %E
 %Cp Hdr 00005
 "You have been granted an audience with %l.  Don't keep her waiting!"
@@ -4184,7 +4184,7 @@ The failed priestesses have been attacking any who pass near their domain!"
 "Tower Xaxox was once a school devoted to alienism."
 %E
 %Cp Hdr 00013
-"I hope you taught those acursed driders some respect!"
+"I hope you taught those accursed driders some respect!"
 %E
 %Cp Hdr 00014
 "%lC certainly saw to those black-web heretics!"
@@ -5497,7 +5497,7 @@ UNUSED
 #	Drow Noble quest
 #
 %Cc Ndr 00001
-You arrive in familiar surroundings. You're house's fortress is 
+You arrive in familiar surroundings. Your house's fortress is
 close before you.  
 
 The psychic call of your mother rings loud in your mind.
@@ -5507,13 +5507,13 @@ Once again, you stand outside %H.
 %E
 %Cp Ndr 00003
 You have the oddest feeling that this may be the last time you
-are to vist %H.
+are to visit %H.
 %E
 %Cp Ndr 00005
 "Oh, %pC!  You're back.  Well, %l wanted to speak with you."
 %E
 %Cp Ndr 00006
-"Oh, its you.  I thought you died in that dungeon."
+"Oh, it's you.  I thought you died in that dungeon."
 %E
 %Cp Ndr 00007
 "The life-cavern colony went silent cycles ago."
@@ -5547,10 +5547,10 @@ of Lolth?"
 "%pC!  I am glad %d returned you to me.
 
 "A great opportunity lies before us.  But first, I must see if 
-you have the required abilities to sieze this chance."
+you have the required abilities to seize this chance."
 %E
 %Cp Ndr 00016
-"Once again you kneel before me, %p.  Are you ready know?"
+"Once again you kneel before me, %p.  Are you ready now?"
 %E
 %Cp Ndr 00017
 "Ah, back again, %p?  I will determine your readiness..."
@@ -5748,7 +5748,7 @@ Once again, you stand outside %H.
 %E
 %Cp Nhd 00003
 You have the oddest feeling that this may be the last time you
-are to vist %H.
+are to visit %H.
 %E
 %Cp Nhd 00005
 "%n?  I've heard she's taken refuge with the followers of Ver'tas."
@@ -6478,7 +6478,7 @@ to quickly return to %H and find %l.
 %Cc Pir 00080
 A great crack opens below %n, and a huge, flaming hand 
 reaches out to seize his wispy form. He curses ye:
-    NO! I won't die here, %p! It is ye who's soul will feed 
+    NO! I won't die here, %p! It is ye whose soul will feed
     the Devil! I am king of all the oceans, I cannot be killed!
     I will haunt ye until %d betrays ye!
 %E

@@ -4445,15 +4445,17 @@ boolean lethal;
 	in_conflict = FALSE;
 }
 
-/* prints no hitmessages (only "blinded by the flash"?) */
+/*  */
 void
-otyp_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll)
+otyp_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt, printmessages)
 struct monst *magr, *mdef;
 struct obj *otmp;
 int basedmg;
 int * plusdmgptr;
 int * truedmgptr;
 int dieroll; /* needed for Magicbane and vorpal blades */
+boolean * hittxt;
+boolean printmessages;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -4508,7 +4510,10 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		}
 		if (!resists_blnd(mdef)) {
 			if (youdef) {
-				You("are blinded by the flash!");
+				if(printmessages){
+					You("are blinded by the sun-bright rod!");
+					*hittxt = TRUE;
+				}
 				make_blinded((long)d(1, 50), FALSE);
 				if (!Blind) Your1(vision_clears);
 			}
@@ -4535,7 +4540,10 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 		}
 		if (!resists_blnd(mdef)) {
 			if (youdef) {
-				You("are blinded by the flash!");
+				if(printmessages){
+					You("are blinded by the flashing blade!");
+					*hittxt = TRUE;
+				}
 				make_blinded((long)d(1, 50), FALSE);
 				if (!Blind) Your1(vision_clears);
 			}
@@ -4729,6 +4737,29 @@ int dieroll; /* needed for Magicbane and vorpal blades */
 			}
 		}
 		else otmp->ovar1_pincerTarget = mdef->m_id;
+		if(u.uinsight >= 50){
+			struct obj *armor = some_armor(mdef);
+			if(!armor){
+				*plusdmgptr += basedmg;
+			}
+			else if(!obj_resists(armor, 20, 80)){
+				obj_extract_and_unequip_self(armor);
+				if(youdef){
+					if(printmessages){
+						pline("The grasping staff tears off your %s", simple_typename(armor->otyp));
+						*hittxt = TRUE;
+					}
+					dropy(armor);
+				}
+				else {
+					if(printmessages && canspotmon(mdef)){
+						pline("The grasping staff tears off %s %s", s_suffix(mon_nam(mdef)), simple_typename(armor->otyp));
+						*hittxt = TRUE;
+					}
+					mdrop_obj(mdef,armor,FALSE);
+				}
+			}
+		}
 	}
 }
 
@@ -10237,7 +10268,8 @@ arti_invoke(obj)
 			else if(n == 2){
 				if(artinstance[obj->oartifact].uconstel_pets < 2){
 					struct monst *mtmp;
-					mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, 0, MG_NOWISH|MG_NOTAME, G_UNIQ, (char *)0);
+					long futurewishflag = Role_if(PM_TOURIST) ? 0 : MG_FUTURE_WISH;
+					mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, 0, MG_NOWISH|MG_NOTAME|futurewishflag, G_UNIQ, (char *)0);
 					if (!mtmp) {
 						pline("Perhaps try summoning something else?");
 					}
@@ -12198,7 +12230,7 @@ arti_poly_contents(obj)
 			delobj(dobj);
 			dobj = 0;
 		}
-		if(!obj_resists(otmp, 0, 95)){
+		if(!obj_resists(otmp, 0, 100)){
 			/* KMH, conduct */
 			u.uconduct.polypiles++;
 			/* any saved lock context will be dangerously obsolete */

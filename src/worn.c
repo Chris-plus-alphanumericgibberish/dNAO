@@ -1047,6 +1047,8 @@ struct monst *mon;
 		register int mondodgeac = mon->data->dac;
 		if(u.ustuck == mon)
 			mondodgeac = -5;
+		else if(mon->permspeed == MSLOW)
+			mondodgeac = min(0, mondodgeac);
 		if ((mondodgeac < 0)						/* penalties have full effect */
 			|| (!armor)								/* no armor = max mobility */
 			|| (armor && is_light_armor(armor))		/* light armor is also fine  */

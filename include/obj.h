@@ -820,6 +820,7 @@ struct obj {
 						  (otmp)->otyp == SET_OF_CROW_TALONS || \
 						  (otmp)->otyp == ISAMUSEI || \
 						  (otmp)->otyp == DISKOS || \
+						  (otmp)->otyp == PINCER_STAFF || \
 						  is_mercy_blade(otmp) || \
 						  (otmp)->otyp == KAMEREL_VAJRA)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)

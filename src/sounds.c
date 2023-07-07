@@ -186,7 +186,7 @@ static const char *embracedAlider[] = {
 };
 
 static const char *freedAlider[] = {
-	"We fought valiently, but we were overrun by the forces of Ilsensine.",
+	"We fought valiantly, but we were overrun by the forces of Ilsensine.",
 	"I have seen the flowers at the end of time.",
 	"Ilsensine controls the future, the whole universe is her body.",
 	"The Hero must have failed. We must use the Annulus against Ilsensine.",
@@ -5826,6 +5826,9 @@ int floorID;
 	{
 	case BUER:
 		u.umartial = TRUE;
+		break;
+	case DANTALION:
+		u.uiearepairs = TRUE;
 		break;
 	case ENKI:
 		HSwimming |= INTRINSIC;

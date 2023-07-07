@@ -713,7 +713,7 @@ break_armor()
 	}
 	if ((otmp = uarmc) != 0) {
 		if(abs(otmp->objsize - youracedata->msize) > 1
-				|| !shirt_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)
+				 || is_whirly(youracedata) || noncorporeal(youracedata)
 		){
 			if (donning(otmp)) cancel_don();
 			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)) {
@@ -745,8 +745,13 @@ break_armor()
 		}
     }
 	if ((otmp = uarmh) != 0){
-		if(!helm_match(youracedata, uarmh) || !helm_size_fits(youracedata, uarmh)
-			|| is_whirly(youracedata) || noncorporeal(youracedata)
+		boolean hat = is_hat(otmp);
+		if((!helm_match(youracedata, uarmh) && !hat)
+			|| (!has_head_mon(&youmonst) && !hat)
+			|| !helm_size_fits(youracedata, uarmh)
+			|| (has_horns(youracedata) && !(otmp->otyp == find_gcirclet() || is_flimsy(otmp)))
+			|| is_whirly(youracedata)
+			|| noncorporeal(youracedata)
 		) {
 			if (donning(otmp)) cancel_don();
 			Your("helmet falls to the %s!", surface(u.ux, u.uy));
@@ -761,7 +766,12 @@ break_armor()
 		}
     }
 	if ((otmp = uarmg) != 0) {
-		if(nogloves(youracedata) || nolimbs(youracedata) || boots_size_fits(youracedata, otmp) || is_whirly(youracedata) || noncorporeal(youracedata)){
+		if(nogloves(youracedata) 
+			|| nolimbs(youracedata) 
+			|| youracedata->msize != otmp->objsize
+			|| is_whirly(youracedata)
+			|| noncorporeal(youracedata)
+		){
 			if (donning(otmp)) cancel_don();
 			/* Drop weapon along with gloves */
 			You("drop your gloves%s!", uwep ? " and weapon" : "");
@@ -779,7 +789,12 @@ break_armor()
 		}
 	}
 	if ((otmp = uarmf) != 0) {
-		if(noboots(youracedata) || !humanoid(youracedata) || youracedata->msize != otmp->objsize || is_whirly(youracedata) || noncorporeal(youracedata)){
+		if(noboots(youracedata)
+			|| (!humanoid(youracedata) && !can_wear_boots(youracedata))
+			|| !boots_size_fits(youracedata, otmp)
+			|| is_whirly(youracedata)
+			|| noncorporeal(youracedata)
+		){
 			if (donning(otmp)) cancel_don();
 			if (is_whirly(youracedata))
 				Your("boots fall away!");

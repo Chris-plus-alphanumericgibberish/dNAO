@@ -415,14 +415,19 @@ struct obj *otmp;
 			if(canseemon(mtmp))
 				pline("%s is no longer sick!", Monnam(mtmp));
 			set_template(mtmp, 0);
-			if(rnd(!always_hostile(mtmp->data) ? 12 : 20) < ACURR(A_CHA)){
-			struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
-			if(newmon){
-				mtmp = newmon;
-				newsym(mtmp->mx, mtmp->my);
+			if(!mtmp->mtame && rnd(!always_hostile(mtmp->data) ? 12 : 20) < ACURR(A_CHA)){
 				pline("%s is very grateful!", Monnam(mtmp));
+				mtmp->mpeaceful = TRUE;
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Turn %s away from your party?", mhim(mtmp));
+				if(yn(qbuf) != 'y'){
+					struct monst *newmon = tamedog_core(mtmp, (struct obj *)0, TRUE);
+					if(newmon){
+						mtmp = newmon;
+						newsym(mtmp->mx, mtmp->my);
+					}
+				}
 			}
-		}
 		}
 	    if (mtmp->mtyp != PM_PESTILENCE) {
 			char hurtmonbuf[BUFSZ];
@@ -2088,7 +2093,7 @@ struct obj *obj, *otmp;
 		if (obj->otyp == WAN_POLYMORPH ||
 			obj->otyp == SPE_POLYMORPH ||
 			obj->otyp == POT_POLYMORPH ||
-			obj_resists(obj, 0, 95)) {
+			obj_resists(obj, 0, 100)) {
 		    res = 0;
 		    break;
 		}

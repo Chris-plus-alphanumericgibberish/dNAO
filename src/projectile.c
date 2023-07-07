@@ -1330,7 +1330,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			*thrownobj_p = NULL;
 			result |= MM_HIT;
 		}
-		else if(!(youdef ? u.uentangled_oid : mdef->entangled_oid) && (thrownobj->otyp == ROPE_OF_ENTANGLING || thrownobj->otyp == BANDS || thrownobj->otyp == RAZOR_WIRE)){
+		else if(!(youdef ? u.uentangled_oid : (mdef->entangled_oid || DEADMONSTER(mdef))) && (thrownobj->otyp == ROPE_OF_ENTANGLING || thrownobj->otyp == BANDS || thrownobj->otyp == RAZOR_WIRE)){
 			if(youdef){
 				u.uentangled_oid = thrownobj->o_id;
 				u.uentangled_otyp = thrownobj->otyp;
@@ -1788,7 +1788,7 @@ int shotlimit;
 		(skill == P_DART) ||
 		(skill == P_SHURIKEN) ||
 		(skill == P_BOOMERANG) ||
-		(ammo->otyp == SICKLE) ||
+		(ammo->otyp == ELVEN_SICKLE) ||
 		(ammo->oartifact == ART_AMHIMITL)
 		) {
 		/* Skill based bonus */

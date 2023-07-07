@@ -17,20 +17,20 @@ MAP
 0TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 1TTTTTTT,,,,,T,,,TTTT,,,TTT,,,,TTTTTTTTT,,,TTTT,TT,,,TTTT,,,,,,TTTTT,T,,,,,,T
 2TT,,,,,,,,TT,,,,,,TT,,TT,,,,,,,,,,,,,,,,,,,,,,,,,T,,,TTTT,,,,,,TT,,,T,,T,,,T
-3TT,,,TT,,,,T,,,T,,,,,,,,,,,,TTTTTTTTTTTTTTTTTTT,,,,,,,TTT,,,T,,T,,,T,,,TT,,T
+3TT,,,TT,,,,T,,,T,,,,,,,,,,,,TTTTTTTTTTTTTTTTTTT,,,,,,TTTT,,,T,,T,,,T,,,TT,,T
 4T,,TTT,,,,,,,T,,T,,,TT,,,,TT,,,,,,,,,,,,,,,,,,,TT,,T,TTTT,,TT,,T,,,,,,,,,,TT
 5T,,,T,,,,,TTT,,,TTT,,T,,,T,,,,}}}}}}},}}}}}}},,,,T,,TTTTT,,TTT,,,,,TTT,,,TTT
 6TT,,,TT,,TTTTT,,,TT,,,,,,T,,}}}|----T,T----|}}},,T,,,TTT,,,TTT,,,TTTTTTTTTTT
 7TTT,,,TT,TTTTTT,,,,T,,,,,T,}}|--T,,,,,,,,,T--|}},T,,,,T,,,TTTT,,TTT,,,,TTTTT
-8TT,T,,,T,,TTT,,T,,,,,T,,,T,}|-T,,T,,,,,,,T,,T-|},T,,,,,,,,TTTTT,,,,,,,,,,,TT
-9TT,,T,T,,,,T,,,,,,,TT,,,,T,}|T,,,,,,,,,,,,,,,T|},T,,T,,,,,TTTTT,,,,,,,,,,,,T
-0T,,,T,,,,,,T,,,,,,,T,,,,,T,,,,,,,,,,,,,,,,,,,,,,,T,,TT,,,TTTTT,,,,,,,,,,,,,T
+8TT,T,,,T,TTTTT,T,,,,,T,,,T,}|-T,,T,,,,,,,T,,T-|},T,,,,,,,,TTTTT,,,,,,,,,,,TT
+9TT,,T,T,,TTTTT,,,,,TT,,,,T,}|T,,,,,,,,,,,,,,,T|},T,,T,,,,,TTTTT,,,,,,,,,,,,T
+0T,,,T,,,,,TTT,,,,,,T,,,,,T,,,,,,,,,,,,,,,,,,,,,,,T,,TT,,,TTTTT,,,,,,,,,,,,,T
 1T,,TTT,TT,,,T,,,,TTT,T,,,T,}|T,,,,,,,,,,,,,,,T|},T,TTT,,,TTTTTT,,,,,,,,,,,,T
 2T,TT,,,,,T,,,,,,,,T,,T,,,T,}|-T,,T,,,,,,,T,,T-|},T,T,,,,,TTTT,TTT,,,,,,,,,TT
 3TTT,,,,,,,T,,T,,,,,,,,T,,T,}}|--T,,,,,,,,,T--|}},T,,,,,,TTT,T,,,TTTT,,,,TTTT
-4TTT,,,,,,,T,,TT,,,,,,,,,,T,,}}}|----T,T----|}}},,T,,,,,TTTT,,,,,,T,,TTT,,,TT
+4TTT,,,,,,,T,,TT,,,,,,,,,,T,,}}}|----T,T----|}}},,T,,,,TTTTT,,,,,,T,,TTT,,,TT
 5TT,,,,,,,,,T,,,TT,,,,T,,,T,,,,}}}}}}},}}}}}}},,,,T,,,,TTTT,,TT,,,T,,,,,,,,TT
-6TTT,,,,,,,TT,,,T,,,,TTT,,,TT,,,,,,,,,,,,,,,,,,,TT,,,,TTTTTT,TT,,T,,,,,,,,,,T
+6TTT,,,,,,,TT,,,T,,,TTTT,,,TT,,,,,,,,,,,,,,,,,,,TT,,,,TTTTTT,TT,,T,,,,,,,,,,T
 7TTTTT,,,TTTT,T,,,T,TTTTT,,,,TTTTTTTTTTTTTTTTTTT,,,,,TTTTTTT,TTT,T,,,TT,,,,TT
 8TTTTTTTTTTTTT,TTTTTTTTT,TT,,,,,,,,,,,,,,,,,,,,,,,TT,TTTTTTTT,,,,,,TTTTTT,TTT
 9TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
@@ -377,7 +377,7 @@ OBJECT:'#',"+3 blessed elven boots",contained
 OBJECT:'#',"+3 blessed high-elven gauntlets",contained
 OBJECT:'#',"+3 blessed reflective high-elven plate",contained
 OBJECT:'#',"+3 holy-armor dragonhide prayer-warded elven cloak",contained
-OBJECT:'#',"+3 blessed high-elven helm",contained
+OBJECT:'#',"+3 blessed ornate high-elven helm",contained
 OBJECT:'#',"+3 holy-armor elven shield",contained
 OBJECT:'#',"+3 holy-weapon wrathful mithril elven broadsword",contained
 
@@ -425,6 +425,31 @@ OBJECT: '_', "chain", (35,14)
 OBJECT: '_', "chain", (39,14)
 OBJECT: '_', "chain", (41,14)
 OBJECT: '_', "chain", (43,12)
+
+OBJECT: '*', "vital soulstone", (36,07) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (35,07) [skipcheck]
+OBJECT: '*', "vital soulstone", (34,07) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (33,07) [skipcheck]
+OBJECT: '*', "vital soulstone", (32,07) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (32,08) [skipcheck]
+OBJECT: '*', "vital soulstone", (32,09) [skipcheck]
+
+OBJECT: '*', "spiritual soulstone", (32,11) [skipcheck]
+OBJECT: '*', "vital soulstone", (32,13) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (34,13) [skipcheck]
+OBJECT: '*', "vital soulstone", (36,13) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (38,13) [skipcheck]
+OBJECT: '*', "vital soulstone", (40,13) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (42,13) [skipcheck]
+OBJECT: '*', "vital soulstone", (42,11) [skipcheck]
+
+OBJECT: '*', "spiritual soulstone", (42,09) [skipcheck]
+OBJECT: '*', "vital soulstone", (42,08) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (42,07) [skipcheck]
+OBJECT: '*', "vital soulstone", (41,07) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (40,07) [skipcheck]
+OBJECT: '*', "vital soulstone", (39,07) [skipcheck]
+OBJECT: '*', "spiritual soulstone", (38,07) [skipcheck]
 
 # Random monsters.
 MONSTER:'W',"Necromancer",(37,10),hostile

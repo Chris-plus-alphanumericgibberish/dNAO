@@ -1893,6 +1893,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 
+	if(magr->mtyp == PM_AVATAR_OF_LOLTH && attk->adtyp == AD_SSEX && (magr->mcan || Protection_from_shape_changers)){
+		GETNEXT
+	}
 	/* Alabaster mummies:
 	 * Spell glyphs result in spellcasting,
 	 * Physical glyphs result in melee,
@@ -2179,7 +2182,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		};
 		// first index -- determine which attack form
 		if (*indexnum == 0){
-			if (rn2(2)){		// 1/2 of marilith-hands
+			if (!magr->mcan && !Protection_from_shape_changers && rn2(2)){		// 1/2 of marilith-hands
 				*subout |= SUBOUT_LOLTH1;
 			}
 			//else;				// 1/2 of normal
@@ -2251,8 +2254,12 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 
 	/* Some armor can insert attacks */
+	/* Warn address doesn't like is_null_attk() with a local variable structs*/
+#pragma GCC diagnostic ignored "-Waddress"
+	boolean prevattacknull = is_null_attk(&prev_attack);
+#pragma GCC diagnostic pop
 	if ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
-		&& (is_null_attk(&prev_attack) || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP || prev_attack.aatyp == AT_MARI)
+		&& (prevattacknull || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP || prev_attack.aatyp == AT_MARI)
 		&& ((*subout&(SUBOUT_MARIARM1|SUBOUT_MARIARM2)) != (SUBOUT_MARIARM1|SUBOUT_MARIARM2))
 	){
 		struct obj * otmp = (youagr ? uarm : which_armor(magr, W_ARM));
@@ -2743,7 +2750,7 @@ struct attack *attk;
 		case AT_OBIT:
 			pline("%s %s bites %s!",
 				(youagr ? "Your" : s_suffix(Monnam(magr))),
-				(attk->adtyp == AD_MAGM ? "skirt" : magr->mtyp == PM_MEDUSA ? "hair" : "canopy"),
+				(attk->adtyp == AD_MAGM ? "skirt" : magr->mtyp == PM_MEDUSA ? "hair" : magr->mtyp == PM_HYGIEIAN_ARCHON ? "snake" : magr->mtyp == PM_ANCIENT_NAGA ? "canopy" : "snake head"),
 				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr))
 				);
 			break;
@@ -12286,21 +12293,27 @@ int vis;
 			return MM_MISS;
 		/* no effect on monsters */
 		//Use encouragement code to give monster target a -1
-		if (!youdef)
-			return MM_MISS;
-		/* assumes you are defending */
-		pline("%s glares ominously at you!", Monnam(magr));
-
-		/* misc protections */
-		if ((uwep && !uwep->cursed && confers_luck(uwep)) ||
-			(stone_luck(TRUE) > 0 && rn2(4))) {
-			pline("Luckily, you are not affected.");
+		if (!youdef){
+			if(vis&VIS_MAGR){
+				pline("%s glares ominously at %s!", Monnam(magr), mon_nam(mdef));
+			}
+			mdef->encouraged = max(mdef->encouraged-1,-13);
 		}
 		else {
-			You_feel("your luck running out.");
-			change_luck(-1 * dmg);
+			/* assumes you are defending */
+			pline("%s glares ominously at you!", Monnam(magr));
+
+			/* misc protections */
+			if ((uwep && !uwep->cursed && confers_luck(uwep)) ||
+				(stone_luck(TRUE) > 0 && rn2(4))) {
+				pline("Luckily, you are not affected.");
+			}
+			else {
+				You_feel("your luck running out.");
+				change_luck(-1 * dmg);
+			}
+			stop_occupation();
 		}
-		stop_occupation();
 		break;
 
 		/* weeping angel gaze */
@@ -12771,7 +12784,7 @@ boolean printmessages;
 	/* otyp */
 	if (spec_prop_otyp(otmp)) {	
 		tmpplusdmg = tmptruedmg = 0;
-		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll);
+		otyp_hit(magr, mdef, otmp, basedmg, &tmpplusdmg, &tmptruedmg, dieroll, hittxt, printmessages);
 		*plusdmgptr += tmpplusdmg;
 		*truedmgptr += tmptruedmg;
 		if ((result & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_STOP)) || (result == MM_MISS))

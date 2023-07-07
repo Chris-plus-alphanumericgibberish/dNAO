@@ -154,7 +154,7 @@ E void FDECL(undiscover_artifact, (int));
 E boolean FDECL(undiscovered_artifact, (int));
 E int FDECL(disp_artifact_discoveries, (winid));
 E void FDECL(otyp_hit, (struct monst *,struct monst *,
-				struct obj *,int, int *,int*, int));
+				struct obj *,int, int *,int*, int, boolean *, boolean));
 E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
 				struct obj *,struct obj*,int,int*,int*,int,boolean*,boolean));
 E int NDECL(doinvoke);
@@ -273,7 +273,8 @@ E const char *FDECL(rank_of, (int,SHORT_P,BOOLEAN_P));
 E void NDECL(bot);
 #ifdef DUMP_LOG
 E void FDECL(bot1str, (char *));
-E void FDECL(bot2str, (char *));
+E void FDECL(bot2str, (char *, boolean, int, boolean));
+E void FDECL(bot3str, (char *, boolean, int));
 #endif
 
 /* ### cmd.c ### */
@@ -1589,6 +1590,7 @@ E struct obj * FDECL(mkhellvaultitem,(int));
 E void FDECL(mkhellvaultitem_cnt,(struct obj *, int, boolean));
 E void NDECL(place_lolth_vaults);
 E void NDECL(place_chaos_forest_features);
+E void NDECL(place_elfquest_forest_features);
 E void NDECL(place_drow_healer_features);
 E void NDECL(place_law_features);
 E void NDECL(place_neutral_features);

@@ -1767,12 +1767,17 @@ struct obj *obj;
 					pline("Your staff touches it!");
 				map_invisible(u.ux+u.dx,u.uy+u.dy);
 			}
-			if(rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)){
-				struct monst *newmon = tamedog_core(mon, (struct obj *)0, TRUE);
-				if(newmon){
-					mon = newmon;
-					newsym(mon->mx, mon->my);
-					pline("%s is very grateful!", Monnam(mon));
+			if(!mon->mtame && rnd(!always_hostile(mon->data) ? 12 : 20) < ACURR(A_CHA)){
+				pline("%s is very grateful!", Monnam(mon));
+				mon->mpeaceful = TRUE;
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Turn %s away from your party?", mhim(mon));
+				if(yn(qbuf) != 'y'){
+					struct monst *newmon = tamedog_core(mon, (struct obj *)0, TRUE);
+					if(newmon){
+						mon = newmon;
+						newsym(mon->mx, mon->my);
+					}
 				}
 			}
 		}
@@ -5890,7 +5895,7 @@ struct obj *obj;
 {
 	struct monst * mtmp;
 	boolean madewish = FALSE;
-	if (!DimensionalLock && !(mtmp = makemon(&mons[flags.female ? PM_STAR_EMPRESS : PM_STAR_EMPEROR], u.ux, u.uy, MM_NOCOUNTBIRTH))){
+	if (DimensionalLock || !(mtmp = makemon(&mons[flags.female ? PM_STAR_EMPRESS : PM_STAR_EMPEROR], u.ux, u.uy, MM_ADJACENTOK|MM_NOCOUNTBIRTH|NO_MINVENT))){
 		pline1(nothing_happens);
 	}
 	else
@@ -6188,8 +6193,9 @@ struct obj *obj;
 				consumed = TRUE;
 			}
 			break;
-		case SUMMON_SERVANT:
-			mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, MA_MINION | MA_DEMON | MA_FEY | MA_PRIMORDIAL, MG_NOWISH | MG_NOTAME, G_UNIQ, (char *)0);
+		case SUMMON_SERVANT:{
+			long futurewishflag = Role_if(PM_TOURIST) ? 0 : MG_FUTURE_WISH;
+			mtmp = create_particular(u.ux, u.uy, MT_DOMESTIC, 0, FALSE, MA_MINION | MA_DEMON | MA_FEY | MA_PRIMORDIAL, MG_NOWISH | MG_NOTAME | futurewishflag, G_UNIQ, (char *)0);
 			if (!mtmp) {
 				pline("Perhaps try summoning something else?");
 				consumed = FALSE;
@@ -6199,6 +6205,7 @@ struct obj *obj;
 				consumed = TRUE;
 			}
 			break;
+		}
 		case SUMMON_DEMON_LORD:
 			choice = do_demon_lord_summon_menu();
 			if (!choice){

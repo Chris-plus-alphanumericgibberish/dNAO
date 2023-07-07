@@ -1460,10 +1460,10 @@ unsigned int type;
 				return PARALYZE;
 				break;
 				case 2:
-				return CURSE_ITEMS;
+				return (!quest_status.offered_artifact ? CURSE_ITEMS : EVIL_EYE);
 				break;
 				case 1:
-				return PSI_BOLT;
+				return OPEN_WOUNDS;
 				break;
 			}
        case PM_SHUUSHAR_THE_ENLIGHTENED:
@@ -6012,17 +6012,11 @@ int tary;
 		}
 		return MM_HIT;
 
-	case EVIL_EYE:
-		if (!youdef) {
-			/* only makes sense vs player */
-			return cast_spell(magr, mdef, attk, PSI_BOLT, tarx, tary);
-		}
-		else {
-			struct attack evilEye = { AT_GAZE, AD_LUCK, 1, 4 };
-			(void)xgazey(magr, mdef, &evilEye, -1);
-		}
+	case EVIL_EYE:{
+		struct attack evilEye = { AT_GAZE, AD_LUCK, 1, 4 };
+		(void)xgazey(magr, mdef, &evilEye, -1);
 		return MM_HIT;
-
+	}
 	case CURSE_ITEMS:
 		if (!mdef) {
 			impossible("curse items with no target?");
@@ -6505,8 +6499,8 @@ int tary;
 		&& (is_directed_attack_spell(spellnum) || is_debuff_spell(spellnum))	/* only affects directed and debuff spells */
 		&& !Infuture) /* does not work in Ana quest */
 	{
-		if ((sengr_at("Elbereth", tarx, tary) && !Race_if(PM_DROW))
-			|| (sengr_at("Lolth", tarx, tary) && Race_if(PM_DROW) && (mlev(magr) < u.ulevel || u.ualign.record-- > 0)))
+		if ((sengr_at("Elbereth", tarx, tary) && (!Race_if(PM_DROW) || ELBERETH_HIGH_POWER))
+			|| (sengr_at("Lolth", tarx, tary) && LOLTH_HIGH_POWER && (mlev(magr) < u.ulevel || u.ualign.record-- > 0)))
 		{
 			return TRUE;
 		}

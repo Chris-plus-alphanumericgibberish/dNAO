@@ -77,7 +77,11 @@ suit or piece of armor
 	Lying there on the mud mortally wounded, I learned what true armor 
 	class was that day."
 	 	[ When Help Collides, by J. D. Berry ]
-aclys
+adamach
+	The listener.
+	The salt of creation.
+	The banisher of Their harbinger.
+	The first of the Rilmani.
 aglaope
 siren
 	In Greek mythology, the Sirens were three dangerous bird-women, 
@@ -96,11 +100,6 @@ siren
 	Peisinoe, Aglaope, and Thelxiepeia or Parthenope, Ligeia, and 
 	Leucosia.
 		[ http://en.wikipedia.org/wiki/Siren ]
-aklys
-	A short studded or spiked club attached to a cord allowing
-	it to be drawn back to the wielder after having been thrown.
-	It should not be confused with the atlatl, which is a device
-	used to throw spears for longer distances.
 ~agate ring
 agate*
 	Translucent, cryptocrystalline variety of quartz and a subvariety
@@ -111,6 +110,13 @@ agate*
 	An agate's banding forms as silica from solution is slowly deposited
 	into cavities and veins in older rock.
 		[ The Columbia Encyclopedia, Sixth Edition ]
+aclys
+aklys
+	A short studded or spiked club attached to a cord allowing
+	it to be drawn back to the wielder after having been thrown.
+	It should not be confused with the atlatl, which is a device
+	used to throw spears for longer distances.
+
 aleax
 	Said to be a doppelganger sent to inflict divine punishment
 	for alignment violations.
@@ -442,7 +448,60 @@ arcadian avenger
 	They approach combat in a methodical, detached way, 
 	weighing each foe's strengths and weaknesses before 
 	attacking.
+~justice archon
 *archon
+	Archons are the predominant inhabitants of the heavens.
+	However unusual their appearance, they are not generally
+	evil.  They are beings at peace with themselves and their
+	surroundings.
+justice archon
+	Behold my servant, whom I uphold, my chosen, in whom my soul delights; 
+	I have put my Spirit upon him; he will bring forth justice to the nations.
+		[ Isaiah 42:1, English Standard Version of the Bible ]
+
+	Archons are the predominant inhabitants of the heavens.
+	However unusual their appearance, they are not generally
+	evil.  They are beings at peace with themselves and their
+	surroundings.
+sword archon
+	For though we live in the world, we do not wage war as the world does. 
+	The weapons we fight with are not the weapons of the world. On the contrary, 
+	they have divine power to demolish strongholds.
+		[ 2 Corinthians 10:3-4, New International Version of the Bible ]
+
+	Archons are the predominant inhabitants of the heavens.
+	However unusual their appearance, they are not generally
+	evil.  They are beings at peace with themselves and their
+	surroundings.
+trumpet archon
+	The seventh angel sounded his trumpet, and there were loud voices in heaven, 
+	which said: “The kingdom of the world has become the kingdom of our Lord 
+	and of his Messiah, and he will reign for ever and ever.”
+		[ Revelation 11:15, New International Version of the Bible ]
+
+	Archons are the predominant inhabitants of the heavens.
+	However unusual their appearance, they are not generally
+	evil.  They are beings at peace with themselves and their
+	surroundings.
+warden archon
+	Therefore for Spirits I am so farre from denying their existence, that 
+	I could easily beleeve, that not onely whole Countries, but particular persons 
+	have their Tutelary, and Guardian Angels: It is not a new opinion of the Church 
+	of Rome, but an old one of Pythagoras and Plato; there is no heresie in it, and 
+	if not manifestly defin'd in Scripture, yet is it an opinion of a good and 
+	wholesome use in the course and actions of a mans life, and would serve as an 
+	Hypothesis to salve many doubts, whereof common Philosophy affordeth no solution[...]
+		[ Religio Medici, by Sir Thomas Browne ]
+
+	Archons are the predominant inhabitants of the heavens.
+	However unusual their appearance, they are not generally
+	evil.  They are beings at peace with themselves and their
+	surroundings.
+throne archon
+	...quis custodiet ipsos custodes?
+	(Who will guard the guards themselves?)
+		[ Satires, by Juvenal ]
+
 	Archons are the predominant inhabitants of the heavens.
 	However unusual their appearance, they are not generally
 	evil.  They are beings at peace with themselves and their
@@ -3969,6 +4028,15 @@ grimlock
 	render them extremely vulnerable to loud noises, however.
 		[ Adapted from Dungeons and Dragons 2nd Edition 
 			Complete Monstrous Manual ]
+grimtooth
+	Elves. Dwarves. Men. All cruel beyond measure, all poisoned 
+	with a hatred true and ancient. Likewise shall we hate them 
+	and poison them in turn - for every harm they do us, with the 
+	grim curved blade of our wrath shall we avenge, smash them, 
+	smite them twofold.
+
+	Let them hate us, but we will teach them a new kind of fear, 
+	whose name even the least among us shall know and know well.
 gug
 	It was a paw, fully two feet and a half across, and equipped 
 	with formidable talons. Alter it came another paw, and after 
@@ -4034,7 +4102,7 @@ angled pole*
 	known as the hand of Fatima, so named to commemorate 
 	Muhammad's daughter Fatima Zahra. Levantine Christians call it
 	the hand of Mary, for the mother of Jesus.
-		[ Wikipedia ]
+		[ Wikipedia, the free encyclopedia ]
 	
 	A hamsa mark may be drawn in 10 strokes, making it fairly quick
 	to engrave; however, additional pairs after the first must be
@@ -6635,6 +6703,16 @@ ninja
 	Ninja are the spy-assassins of Japan. They are quick and
 	stealthy, though not as strong as fighters. Their characteristic
 	weapon is the deadly shuriken or throwing-star.
+nightmare
+	By a route obscure and lonely,   
+	Haunted by ill angels only,
+	Where an Eidolon, named NIGHT,   
+	On a black throne reigns upright,
+	I have reached these lands but newly   
+	From an ultimate dim Thule--
+	From a wild weird clime that lieth, sublime,
+	Out of SPACE -- Out of TIME. 
+		[ Dream-Land, by Edgar Allen Poe ]
 ninja-to
 	A Japanese broadsword.
 *nkia
@@ -6938,72 +7016,6 @@ pear
 	can't find out what it is like unless you can get to that
 	country and taste it for yourself.
 		[ The Last Battle, by C.S. Lewis ]
-phantom fungus
-	A phantom fungus is a tripedal carnivorous plant that roams the
-	vast and deep underground caverns of the world. It wanders in
-	search of food, using its rootlike feet to detect movement along
-	the cavern floors and the sensitive tendrils surrounding its
-	mouth to pinpoint prey.
-	
-	The maw with which a phantom fungus attacks prey is lined with
-	row upon row of sharp, jagged teeth that resemble pointed rocks
-	more than actual fangs. This "mouth" is not used to feed, however,
-	and does not attach to a digestive tract-it is nothing more than
-	a gaping natural weapon. When a phantom fungus feeds, it does so
-	by squatting down on its prey and infesting the corpse with
-	thousands of feeding filaments that burrow through dead flesh to
-	siphon away nutrients.
-		[ Pathfinder RPG ]
-phase spider
-	Sometimes confused with neogi or driders and called planar
-	spiders on some worlds of the Prime, phase spiders are intelligent
-	web-spinners with a raised thorax and a humanlike
-	head. What really makes phase spiders stand out is their
-	enviable ability to phase back and forth between a plane and
-	the plane's Border.
-	
-	Unknown to most creatures, phase spiders possess
-	large web habitats on the Ethereal (both in the Deep and on
-	the Border) and only appear on other planes while hunting
-	for food. Some phase spiders do live mostly on material
-	planes, but these spiders are the exception, not the rule. Like
-	many more familiar cultures, Ethereally-based phase spiders
-	are not a cohesive race, but instead exist in separate clutches
-	(tribes), each of which claims various Prime territories as its
-	sole hunting ground. Sometimes disparate phase spider
-	clutches cooperate, but sometimes they come into conflict
-	over temtorial disputes.
-		[ A Guide to the Ethereal Plane, by Bruce R. Cordell ]
-polymorph trap
-	One morning, as Gregor Samsa was waking up from anxious dreams,
-	he discovered that in bed he had been changed into a monstrous 
-	verminous bug. He lay on his armour-hard back and saw, as he 
-	lifted his head up a little, his brown, arched abdomen divided 
-	up into rigid bow-like sections. From this height the blanket, 
-	just about ready to slide off completely, could hardly stay in 
-	place. His numerous legs, pitifully thin in comparison to the 
-	rest of his circumference, flickered helplessly before his eyes.
-		[ The Metamorphosis, by Franz Kafka, translated by Ian Johnston ]
-preservative engine
-	An invention of the School of Hellfire in the eight circle of Hell.
-	Designed to ward off the rending claws of certain demons, only a few
-	prototypes have thus-far been completed, and many of those have been
-	lost. When set to high intensity, also protects one's possessions
-	against many forms of energy-based damage.
-pyrolisk
-	At first glance around the corner, I thought it was another 
-	cockatrice. I had encountered the wretched creatures two or
-	three times since leaving the open area. I quickly ducked my 
-	head back and considered what to do next. My heart had begun
-	to thump audibly as I patted my pack to make sure I still had 
-	the dead lizards at close reach. A check of my attire showed
-	no obvious holes or damage. I had to keep moving. One deep
-	breath, and a count of three, two, one, and around the corner 
-	I bolted. But it was no cockatrice! I felt a sudden intense 
-	searing of the skin around my face, and flames began to leap
-	from my pack. I tossed it to the ground, and quickly retreated
-	back, around that corner, desperately striving to get out of 
-	its sight.
 *orb of fate
 orb of fate
 	Some say that Odin himself created this ancient crystal ball,
@@ -7042,6 +7054,7 @@ orcus
 ~orcish ranger
 ~orcish rogue
 ~orcish wizard
+~orc of the ages of stars
 orc*
 * orc
 	Orcs, bipeds with a humanoid appearance, are related to the
@@ -7059,6 +7072,23 @@ orc*
 	hunting for them.  There is nothing a horde of orcs cannot
 	use.
 		[ het Boek van de Regels; Het Oog des Meesters ]
+orc of the ages of stars
+	But of those hapless who were snared by Melkor little is known 
+	of a certainty.	[...] Yet this is held true by the wise of Eressëa: 
+	that all those of the Quendi that came into the hands of Melkor, 
+	ere Utumno was broken, were put there in prison, and by slow arts 
+	of cruelty and wickedness were corrupted and enslaved. Thus 
+	did Melkor breed the hideous race of the Orkor in envy and mockery 
+	of the Eldar, of whom they were afterwards the bitterest foes. For 
+	the Orkor had life and multiplied after the manner of the Children 
+	of Ilúvatar; and naught that had life of its own, nor the semblance 
+	thereof, could ever Melkor make since his rebellion in the Ainulindalë 
+	before the Beginning: so say the wise. And deep in their dark hearts 
+	the Orkor loathed the Master whom they served in fear, the maker only 
+	of their misery. This maybe was the vilest deed of Melkor and the most 
+	hateful to Eru.
+		[ Morgoth's Ring, by J.R.R. Tolkien,
+			edited by Christopher Tolkien ]
 ochre jelly
 	An ochre jelly resembles a giant amoeba, consisting of a thick, porous, golden 
 	sludge. It lurks in dungeons, slowly sludging its way along floors, walls and 
@@ -7123,7 +7153,7 @@ orpheus
 	anxiety, as soon as he reached the upper world, he turned to
 	look at her, forgetting that both needed to be in the upper
 	world, and she vanished for the second time, but now forever.
-	       [ http://en.wikipedia.org/wiki/Orpheus ]
+	       [ Wikipedia, the free encyclopedia ]
 osaku
 	The osaku is a small tool for picking locks.
 owlbear
@@ -7256,6 +7286,42 @@ pelias
 		[ Gd Tak `Gar (The Things Tak Wrote),
 			translated by Sir T. D. J. Pratchett,
 			available from Unseen University Press for AM$8 ]
+phantom fungus
+	A phantom fungus is a tripedal carnivorous plant that roams the
+	vast and deep underground caverns of the world. It wanders in
+	search of food, using its rootlike feet to detect movement along
+	the cavern floors and the sensitive tendrils surrounding its
+	mouth to pinpoint prey.
+	
+	The maw with which a phantom fungus attacks prey is lined with
+	row upon row of sharp, jagged teeth that resemble pointed rocks
+	more than actual fangs. This "mouth" is not used to feed, however,
+	and does not attach to a digestive tract-it is nothing more than
+	a gaping natural weapon. When a phantom fungus feeds, it does so
+	by squatting down on its prey and infesting the corpse with
+	thousands of feeding filaments that burrow through dead flesh to
+	siphon away nutrients.
+		[ Pathfinder RPG ]
+phase spider
+	Sometimes confused with neogi or driders and called planar
+	spiders on some worlds of the Prime, phase spiders are intelligent
+	web-spinners with a raised thorax and a humanlike
+	head. What really makes phase spiders stand out is their
+	enviable ability to phase back and forth between a plane and
+	the plane's Border.
+	
+	Unknown to most creatures, phase spiders possess
+	large web habitats on the Ethereal (both in the Deep and on
+	the Border) and only appear on other planes while hunting
+	for food. Some phase spiders do live mostly on material
+	planes, but these spiders are the exception, not the rule. Like
+	many more familiar cultures, Ethereally-based phase spiders
+	are not a cohesive race, but instead exist in separate clutches
+	(tribes), each of which claims various Prime territories as its
+	sole hunting ground. Sometimes disparate phase spider
+	clutches cooperate, but sometimes they come into conflict
+	over temtorial disputes.
+		[ A Guide to the Ethereal Plane, by Bruce R. Cordell ]
 pick*ax*
 broad pick
 	The mine is full of holes;
@@ -7412,6 +7478,16 @@ user
 	Might just kill you.
 		[ It's a Jungle Out There, by Randy Newman ]
 #			[ theme song from "Monk" ]
+polymorph trap
+	One morning, as Gregor Samsa was waking up from anxious dreams,
+	he discovered that in bed he had been changed into a monstrous 
+	verminous bug. He lay on his armour-hard back and saw, as he 
+	lifted his head up a little, his brown, arched abdomen divided 
+	up into rigid bow-like sections. From this height the blanket, 
+	just about ready to slide off completely, could hardly stay in 
+	place. His numerous legs, pitifully thin in comparison to the 
+	rest of his circumference, flickered helplessly before his eyes.
+		[ The Metamorphosis, by Franz Kafka, translated by Ian Johnston ]
 pony
 		Hey! now! Come hoy now! Whither do you wander?
 		Up, down, near or far, here, there or yonder?
@@ -7484,6 +7560,12 @@ pray*
 	Whatever a man prays for, he prays for a miracle. Every prayer
 	reduces itself to this: Great God, grant that twice two be not four.
 		[ Ivan Sergeyevich Urgenev ]
+preservative engine
+	An invention of the School of Hellfire in the eight circle of Hell.
+	Designed to ward off the rending claws of certain demons, only a few
+	prototypes have thus-far been completed, and many of those have been
+	lost. When set to high intensity, also protects one's possessions
+	against many forms of energy-based damage.
 ~priest of an unknown god
 ~priest of Ghaunadaur
 ~priestess of Ghaunadaur
@@ -8093,6 +8175,7 @@ the drowned
 		and that shining city has long since drowned 
 		beneath the uncaring ocean.
 ~lightsaber
+~saber-toothed cat
 *saber
 *sabre
 	Flashed all their sabres bare,
@@ -8109,6 +8192,13 @@ the drowned
 	Not the six hundred.
 		[ The Charge of the Light Brigade,
 		  by Alfred, Lord Tennyson ]
+saber-toothed cat
+	The saber-toothed tiger, a common term for a member of the
+	genus Smilodon, is perhaps the most well-known of the
+	saber-toothed cats.  Notable for the long, dagger-like fangs
+	from which the name of the genus is derived, these apex predators
+	stalked mammoths, bison, and other large herbivores across the
+	plains of prehistoric North America
 saddle
 *black web entity
 	The horseman serves the horse,
@@ -8397,6 +8487,15 @@ shark
 	that no other creature in nature could make -- a bomb from
 	the depths.
 		[ Close to Shore, by Michael Capuzzo ]
+lamb
+sheep
+	A Wolf, wanting lamb for his dinner,
+	Growled out “Lamb you wronged me, you sinner;”
+	Bleated Lamb – “Nay, not true!”
+	Answered Wolf – “Then ’twas Ewe…
+	Ewe or lamb; you will serve for my dinner.”
+		[ Retelling of Aesop's The Wolf and the Lamb
+			from The Baby's Own Aesop, by W.J. Linton ]
 shield of the resolute heart
 	The wind is in the sky, 
 	and the stars are in the heavens,

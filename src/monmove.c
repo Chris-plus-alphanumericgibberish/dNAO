@@ -456,7 +456,7 @@ struct monst *mtmp;
 {
   if(Infuture) return FALSE;
   if(u.ualign.type == A_VOID) return FALSE;
-  if((Race_if(PM_DROW)) && !flags.stag){
+  if(LOLTH_HIGH_POWER){
 	if (mtmp->isshk || mtmp->isgd || mtmp->iswiz || is_blind(mtmp) ||
 	    mtmp->mpeaceful || mtmp->data->mlet == S_HUMAN || 
 	    (is_rider(mtmp->data))
@@ -477,7 +477,7 @@ scaryElb(mtmp)
 struct monst *mtmp;
 {
   if(Infuture) return FALSE;
-  if(Race_if(PM_ELF)){
+  if(ELBERETH_HIGH_POWER){
 	if (mtmp->isshk || mtmp->isgd || mtmp->iswiz || is_blind(mtmp) ||
 	    mtmp->mpeaceful || mtmp->data->mlet == S_HUMAN || 
 	    is_lminion(mtmp) || mtmp->mtyp == PM_ANGEL ||
@@ -502,8 +502,6 @@ struct monst *mtmp;
 	return (boolean) mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE 
 				|| mtmp->data->mlet == S_TROLL || mtmp->mtyp == PM_NAZGUL;
   }
-	
-
 }
 #endif /* OVL2 */
 #ifdef OVL0

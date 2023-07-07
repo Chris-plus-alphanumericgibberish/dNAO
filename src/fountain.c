@@ -372,7 +372,7 @@ register struct obj *obj;
 
 		if (u.ualign.type != A_LAWFUL) {
 			/* Ha!  Trying to cheat her. */
-			pline("A freezing mist rises from the water and envelopes the sword.");
+			pline("A freezing mist rises from the water and envelops the sword.");
 			pline_The("fountain disappears!");
 			curse(obj);
 			if (obj->spe > -6 && !rn2(3)) obj->spe--;

@@ -235,14 +235,14 @@ struct monst *mon;
 	struct permonst *olddata = mon->data;
 	struct obj *otmp;
 
+	if(nonthreat(mon))
+		return;
+	
 	pm = counter_were(monsndx(mon->data));
 	if(!pm) {
 	    impossible("unknown lycanthrope %s.", mon->data->mname);
 	    return;
 	}
-	
-	if(is_heladrin(mon->data) && nonthreat(mon))
-		return;
 	
 	if(mon == u.ustuck && u.uswallow)
 		expels(mon, mon->data, TRUE);

@@ -207,6 +207,7 @@ OBJECT:'#',"eilistraee_symbol cloak of magic resistance",contained
 OBJECT:'#',"magic-resistant droven cloak",contained
 OBJECT:'"',"amulet of life saving",contained
 OBJECT:'#',"fixed droven helm",contained
+OBJECT:'/',"striking",contained
 OBJECT:'?',"resistance",contained
 OBJECT:'?',"resistance",contained
 OBJECT:'?',"resistance",contained
@@ -476,6 +477,7 @@ STAIR:(06,09),down
 
 CONTAINER:'(',"chest",(37,10)
 OBJECT:'(',"sack",contained
+OBJECT:'/',"striking",contained
 OBJECT:'#',"jewel",contained
 OBJECT:'#',"jewel",contained
 OBJECT[90%]:'#',"jewel",contained
@@ -824,12 +826,21 @@ MONSTER[50%]: '@', "anulo dancer", (59,14)
 MONSTER[50%]: '@', "anulo dancer", (59,15)
 
 ALTAR:(55,14),law,altar,"_Eilistraee"
+MONSTER: '#', "anulo dancer plague-victim", (57,14)
 
 OBJECT:'$',random,(65,16)
 CONTAINER:'(',"sack",(65,16)
 OBJECT:'(',"unicorn horn",contained
-OBJECT:'#',"glass amulet of life saving",contained
+OBJECT:'#',"fixed glass amulet of life saving",contained
 OBJECT:'#',"eilistraee_symbol cloak of magic resistance",contained
+OBJECT:'#',"blessed fixed +1 glass crystal helm",contained
+OBJECT:'#',"blessed fixed +1 glass eilistran armor",contained
+OBJECT:'#',"blessed fixed +1 glass crystal gauntlets",contained
+OBJECT:'#',"blessed fixed +1 glass saber",contained
+OBJECT:'#',"blessed fixed +1 glass saber",contained
+OBJECT:'#',"blessed fixed +1 glass saber",contained
+OBJECT:'#',"blessed fixed +1 glass saber",contained
+OBJECT:'#',"consecrated flaming +1 silver high-elven warsword",contained
 
 
 MONSTER[50%]: '@', "anulo", (04,13)
@@ -1068,6 +1079,12 @@ MAP
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 #0         1         2         3         4         5         6         7        
+MONSTER:'#',"houseless drow plague-victim",(17,01)
+OBJECT:'(',"sack",(16,01)
+OBJECT:'=',"levitation",contained
+OBJECT:'!',"levitation",contained
+OBJECT:'!',"levitation",contained
+OBJECT:'!',"levitation",contained
 
 MONSTER:'h',"duergar",random
 MONSTER:'h',"duergar",random
@@ -1274,9 +1291,11 @@ MONSTER: 'b', "gelatinous cube", (66,06)
 
 REGION:(66,15,74,18),lit,"temple"
 ALTAR:(67,16),neutral,altar,"_Pen'a"
+MONSTER: '#', "mendicant drider plague-victim", (68,16)
+
 CONTAINER:'`',"statue",(74,18),uncursed,"Panakeian Archon",5
-OBJECT:'#',"blessed color_blue robe",contained
-OBJECT:'#',"blessed color_bright_blue waistcloth",contained
+OBJECT:'#',"blessed large color_blue cloth robe",contained
+OBJECT:'#',"blessed large color_bright_blue cloth waistcloth",contained
 OBJECT:'#',"blessed color_bright_blue blindfold",contained
 
 CONTAINER:'`',"statue",(74,15),uncursed,"Iksh'na Deva",5
@@ -1288,6 +1307,7 @@ OBJECT:'#',"blessed color_bright_blue blindfold",contained
 CONTAINER:'(',"box",(67,17)
 OBJECT:'"',"amulet of life saving",contained
 OBJECT:'(',"unicorn horn",contained
+OBJECT:'(',"unicorn horn",contained
 OBJECT:'#',"3 tactile resistance",contained
 OBJECT:'#',"tactile scroll",contained
 OBJECT:'#',"tactile scroll",contained
@@ -1296,6 +1316,7 @@ OBJECT:'#',"tactile detect treasure",contained
 OBJECT:'#',"tactile spellbook",contained
 OBJECT:'#',"tactile spellbook",contained
 OBJECT:'#',"tactile spellbook",contained
+OBJECT:'#',"blessed color_bright_blue cloth saddle",contained
 
 #
 #	The "goal" level for the quest.
@@ -1336,6 +1357,42 @@ OBJECT:'#',"tenuous +3 shadowsteel gauntlets of power",contained
 OBJECT:'#',"tattered magic-resistant +3 droven cloak",contained
 OBJECT:')',"viperwhip",contained,uncursed,+3
 OBJECT:'#',"uncursed silver +3 droven short sword",contained
+
+CONTAINER:'(',"chest",(21,05)
+OBJECT:'#',"small silver +3 khakkhara",contained
+OBJECT:'#',"small silver +3 khakkhara",contained
+OBJECT:'#',"small silver +3 khakkhara",contained
+OBJECT:'#',"small silver +3 khakkhara",contained
+OBJECT:'$',random,contained
+OBJECT:'$',random,contained
+OBJECT:'$',random,contained
+OBJECT:'#',"jewel",contained
+OBJECT:'#',"jewel",contained
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+OBJECT:')',"scimitar",contained
+OBJECT:')',"scimitar",contained
+OBJECT:')',"scimitar",contained
+OBJECT:')',"scimitar",contained
+OBJECT:')',"scimitar",contained
+OBJECT:'(',random,contained
+OBJECT:'(',random,contained
+OBJECT:'(',random,contained
+OBJECT:'(',random,contained
+OBJECT:'(',random,contained
+OBJECT:'(',random,contained
+OBJECT:')',random,contained
+OBJECT:')',random,contained
+OBJECT:')',random,contained
+OBJECT:')',random,contained
+OBJECT:')',random,contained
+OBJECT:')',random,contained
+OBJECT:random,random,contained
+OBJECT:random,random,contained
+OBJECT:random,random,contained
+OBJECT:random,random,contained
+OBJECT:random,random,contained
+OBJECT:random,random,contained
 
 # Plague victims (placed via level loader)
 OBJECT: '_', "chain", random, uncursed, 2
@@ -1388,13 +1445,14 @@ OBJECT:'%',"corpse",random,"hedrow blademaster",0
 OBJECT:'%',"corpse",random,"hedrow blademaster",0
 OBJECT:'%',"corpse",random,"hedrow blademaster",0
 
-MONSTER:'h',"kuo toa whip",random
-MONSTER:'h',"kuo toa",random
-MONSTER:'h',"kuo toa",random
-MONSTER:'h',"kuo toa",random
-MONSTER:'h',"kuo toa",random
-MONSTER:'h',"kuo toa",random
-MONSTER:'h',"kuo toa",random
+OBJECT:'#',"blessed holy-armor color_red magic-resistant tattered +7 cloth band",random
+OBJECT:'[',"lantern plate mail",random
+OBJECT:'[',"gauntlets",random
+OBJECT:'[',"armored boots",random
+OBJECT:'[',"kite shield",random
+
+MONSTER:'#',"sword archon plague-victim",(35,09)
+MONSTER:'#',"justice archon plague-victim",(34,10)
 
 MONSTER:'h',"kuo toa whip",random
 MONSTER:'h',"kuo toa",random
@@ -1403,6 +1461,8 @@ MONSTER:'h',"kuo toa",random
 MONSTER:'h',"kuo toa",random
 MONSTER:'h',"kuo toa",random
 MONSTER:'h',"kuo toa",random
+MONSTER:'#',"hostile mindless justice archon",(36,08)
+MONSTER:'#',"hostile mindless white unicorn",(36,08)
 
 MONSTER:'h',"kuo toa whip",random
 MONSTER:'h',"kuo toa",random
@@ -1411,6 +1471,17 @@ MONSTER:'h',"kuo toa",random
 MONSTER:'h',"kuo toa",random
 MONSTER:'h',"kuo toa",random
 MONSTER:'h',"kuo toa",random
+MONSTER:'#',"hostile mindless justice archon",(36,08)
+MONSTER:'#',"hostile mindless white unicorn",(36,08)
+
+MONSTER:'h',"kuo toa whip",random
+MONSTER:'h',"kuo toa",random
+MONSTER:'h',"kuo toa",random
+MONSTER:'h',"kuo toa",random
+MONSTER:'h',"kuo toa",random
+MONSTER:'h',"kuo toa",random
+MONSTER:'h',"kuo toa",random
+MONSTER:'#',"hostile white unicorn cordyceps",(36,08)
 
 MONSTER:'U',"chuul",random
 MONSTER:'U',"chuul",random

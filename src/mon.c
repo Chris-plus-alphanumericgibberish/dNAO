@@ -2120,7 +2120,7 @@ meatmetal(mtmp)
 						otmp; otmp = otmp->nexthere) {
 	    if (mtmp->mtyp == PM_RUST_MONSTER && !is_rustprone(otmp))
 		continue;
-	    if (is_metallic(otmp) && !obj_resists(otmp, 0, 95) &&
+	    if (is_metallic(otmp) && !obj_resists(otmp, 0, 100) &&
 			touch_artifact(otmp, mtmp, FALSE) && !(otmp->otyp == MAGIC_CHEST && otmp->obolted)
 			) {
 		if (mtmp->mtyp == PM_RUST_MONSTER && otmp->oerodeproof) {
@@ -2461,7 +2461,7 @@ meatobj(mtmp)		/* for gelatinous cubes */
 	/* Engulfs others, except huge rocks and metal attached to player */
 	for (otmp = level.objects[mtmp->mx][mtmp->my]; otmp; otmp = otmp2) {
 	    otmp2 = otmp->nexthere;
-	    if (is_organic(otmp) && !obj_resists(otmp, 0, 95) &&
+	    if (is_organic(otmp) && !obj_resists(otmp, 0, 100) &&
 		    touch_artifact(otmp, mtmp, FALSE)) {
 		if (otmp->otyp == CORPSE && touch_petrifies(&mons[otmp->corpsenm]) &&
 			!resists_ston(mtmp))

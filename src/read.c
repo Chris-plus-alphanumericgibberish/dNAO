@@ -1223,6 +1223,7 @@ int curse_bless;
 		stripspe(obj);
 	    } else {
 		int lim = (obj->otyp == WAN_WISHING) ? 3 :
+			(obj->otyp == WAN_MAGIC_MISSILE) ? 110 :
 			(objects[obj->otyp].oc_dir != NODIR) ? 8 : 15;
 
 		n = (lim == 3) ? 3 : rn1(5, lim + 1 - 5);
@@ -2973,6 +2974,7 @@ struct obj	*sobj;
 		 pline("It's meaning is clear in your mind, and the pronunciation obvious.");
 		 known = TRUE; //id the scroll
 		 more_experienced(777,0);//the knowledge from the scroll transfers to you.
+		 newexplevel();
 		 if (Upolyd) {// the lawful energies rebuild your body
 			u.mh += u.ualign.record;
 			if(u.mhmax < u.mh)

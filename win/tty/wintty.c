@@ -892,7 +892,7 @@ tty_create_nhwindow(type)
 	newwin->maxcol = newwin->cols = 0;
 	break;
     case NHW_STATUS:
-	/* status window, 2 lines long, full width, bottom of screen */
+	/* status window, 3 lines long, full width, bottom of screen */
 	newwin->offx = 0;
 #if defined(USE_TILES) && defined(MSDOS)
 	if (iflags.grmode) {
@@ -900,7 +900,7 @@ tty_create_nhwindow(type)
 	} else
 #endif
 	newwin->offy = min((int)ttyDisplay->rows-2, ROWNO+1);
-	newwin->rows = newwin->maxrow = 2;
+	newwin->rows = newwin->maxrow = 3;
 	newwin->cols = newwin->maxcol = min(ttyDisplay->cols, MAXCO);
 	break;
     case NHW_MAP:
