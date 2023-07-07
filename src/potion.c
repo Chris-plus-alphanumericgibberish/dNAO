@@ -2773,7 +2773,7 @@ dodip()
 		    obj->otyp == SPE_POLYMORPH ||
 		    obj == uball || obj == uskin ||
 			obj_resists(polypotion(obj) ?
-				potion : obj, 0, 95)) {
+				potion : obj, 0, 100)) {
 			pline1(nothing_happens);
 	    } else {
 	    	boolean was_wep = FALSE, was_swapwep = FALSE, was_quiver = FALSE;
