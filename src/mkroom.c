@@ -3402,41 +3402,46 @@ int x, y, w;
 			mon = makemon(&mons[mtyp], x, y, NO_MM_FLAGS);
 			if(mon){
 				set_faction(mon, 0);
-				mon->mpeaceful = FALSE;
-				set_malign(mon);
-				if(!rn2(3))
+				if(!rn2(3)){
 					set_template(mon, PLAGUE_TEMPLATE);
-				else switch(rn2(10)){
-					case 0:
-					mon->mcrazed = TRUE;
-					break;
-					case 1:
-					mon->mcannibal = TRUE;
-					break;
-					case 2:
-					mon->mgluttony = TRUE;
-					break;
-					case 3:
-					mon->mrage = TRUE;
-					break;
-					case 4:
-					mon->margent = TRUE;
-					break;
-					case 5:
-					mon->msuicide = TRUE;
-					break;
-					case 6:
-					mon->mnudist = TRUE;
-					break;
-					case 7:
-					mon->mparanoid = TRUE;
-					break;
-					case 8:
-					mon->mforgetful = TRUE;
-					break;
-					case 9:
-					mon->mapostasy = TRUE;
-					break;
+					mon->mpeaceful = TRUE;
+					set_malign(mon);
+				}
+				else {
+					mon->mpeaceful = FALSE;
+					set_malign(mon);
+					switch(rn2(10)){
+						case 0:
+						mon->mcrazed = TRUE;
+						break;
+						case 1:
+						mon->mcannibal = TRUE;
+						break;
+						case 2:
+						mon->mgluttony = TRUE;
+						break;
+						case 3:
+						mon->mrage = TRUE;
+						break;
+						case 4:
+						mon->margent = TRUE;
+						break;
+						case 5:
+						mon->msuicide = TRUE;
+						break;
+						case 6:
+						mon->mnudist = TRUE;
+						break;
+						case 7:
+						mon->mparanoid = TRUE;
+						break;
+						case 8:
+						mon->mforgetful = TRUE;
+						break;
+						case 9:
+						mon->mapostasy = TRUE;
+						break;
+					}
 				}
 			}
 		break;

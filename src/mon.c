@@ -1643,7 +1643,7 @@ mcalcdistress()
 		create_gas_cloud(mtmp->mx+rn2(3)-1, mtmp->my+rn2(3)-1, rnd(3), rnd(3)+1, FALSE);
 	}
 	
-	if(mtmp->mtyp == PM_FIRST_WRAITHWORM && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 6){
+	if(mtmp->mtyp == PM_FIRST_WRAITHWORM && !mtmp->mcan && distmin(u.ux, u.uy, mtmp->mx, mtmp->my) < 6){
 		struct monst *tmpm;
 		You("are thrown by a blast of wind!");
 		hurtle(rn2(3)-1, rn2(3)-1, rnd(6), FALSE, TRUE);
@@ -1846,8 +1846,10 @@ movemon()
 	  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 	  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 	){
-		insight_vanish(mtmp);
-		continue;
+		if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+			insight_vanish(mtmp);
+			continue;
+		}
 	}
     if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[mtmp->mx][mtmp->my].typ == AIR
 		&& !mon_resistance(mtmp,FLYING)

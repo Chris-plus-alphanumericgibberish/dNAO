@@ -559,6 +559,7 @@
 								(ptr)->mtyp == PM_BRIMSTONE_ESSENCE ||\
 								(ptr)->mtyp == PM_HYDRARGYRUMACH_RILMANI ||\
 								(ptr)->mtyp == PM_CENTER_OF_ALL ||\
+								(ptr)->mtyp == PM_ADAMACH ||\
 								(ptr)->mtyp == PM_AURUMACH_RILMANI\
 							)
 #define is_deva(ptr)		((ptr)->mlet == S_NEU_ANGEL)
@@ -882,6 +883,7 @@
 				 (ptr)->mtyp == PM_GIANT_SPIDER || (ptr)->mtyp == PM_PHASE_SPIDER || \
 				 (ptr)->mtyp == PM_MIRKWOOD_SPIDER || (ptr)->mtyp == PM_MIRKWOOD_ELDER || \
 				 (ptr)->mtyp == PM_SPROW || (ptr)->mtyp == PM_DRIDER || (ptr)->mtyp == PM_ALIDER || \
+				 (ptr)->mtyp == PM_MENDICANT_SPROW || (ptr)->mtyp == PM_MENDICANT_DRIDER || \
 				 (ptr)->mtyp == PM_EDDERKOP || \
 				 (ptr)->mtyp == PM_AVATAR_OF_LOLTH || (ptr)->mtyp == PM_DROW_MUMMY)
 #define is_unicorn(ptr)		((ptr)->mlet == S_UNICORN && likes_gems(ptr))
@@ -1099,6 +1101,8 @@
 		&& !has_template(mtmp, FRACTURED)\
 		&& !is_naturally_unalive(mtmp->data)\
 		)
+
+#define is_changed_mtyp(mtyp)	(mtyp == PM_CHANGED || mtyp == PM_WARRIOR_CHANGED || mtyp == PM_TWITCHING_FOUR_ARMED_CHANGED || mtyp == PM_CLAIRVOYANT_CHANGED)
 
 #define nonliving(ptr)	(is_unalive(ptr) || is_undead(ptr) || \
 				 (ptr)->mtyp == PM_MANES \

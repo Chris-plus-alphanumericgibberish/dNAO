@@ -920,7 +920,7 @@ struct Race android =
 	MA_CLOCK, 0, MA_ORC,
 	/*  Str    Int Wis Dex Con Cha */
 	{    3,     3,  3,  3,  3,  3 },
-	{   20,    18, 16, 22, 22, 18 },
+	{   STR19(20),    18, 16, 22, 22, 18 },
 	/* Init   Lower  Higher */
 	{  2, 0,  1, 3,  1, 0 },	/* Hit points */
 	{  1, 0,  1, 0,  1, 0 },	/* Energy */

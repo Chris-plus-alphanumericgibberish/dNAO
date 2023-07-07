@@ -1496,8 +1496,10 @@ moveloop()
 			  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 			  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 			){
-				insight_vanish(mtmp);
-				continue;
+				if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+					insight_vanish(mtmp);
+					continue;
+				}
 			}
 			if(has_template(mtmp, DELOUSED)){
 				delouse_tame(mtmp);
@@ -1592,8 +1594,10 @@ moveloop()
 				  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 				  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 				){
-					insight_vanish(mtmp);
-					continue;
+					if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+						insight_vanish(mtmp);
+						continue;
+					}
 				}
 				if(has_template(mtmp, DELOUSED)){
 					delouse_tame(mtmp);
@@ -1828,8 +1832,31 @@ moveloop()
 				/* Spot the monster for sanity purposes */
 				spot_monster(mtmp);
 				/* Loyal monsters slowly recover tameness */
-				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && (!moves%100))
+				if(mtmp->mtame && mtmp->mtame < 5 && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal && !(moves%100))
 					mtmp->mtame++;
+				/* Beast masters slowly improve tameness */
+				if(mtmp->mtame && !(moves%1000)){
+					if(P_SKILL(P_BEAST_MASTERY)>P_UNSKILLED){
+						if(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal){
+							if(mtmp->mtame < 5+P_SKILL(P_BEAST_MASTERY)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+						else {
+							if(mtmp->mtame < P_SKILL(P_BEAST_MASTERY)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+					}
+					if(u.usteed == mtmp && P_SKILL(P_RIDING)>P_UNSKILLED){
+						if(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->loyal){
+							if(mtmp->mtame < 5+P_SKILL(P_RIDING)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+						else {
+							if(mtmp->mtame < P_SKILL(P_RIDING)-P_UNSKILLED)
+								mtmp->mtame++;
+						}
+					}
+				}
 				/* Dominated monsters stay tame */
 				if(mtmp->mtame && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated)
 					mtmp->mtame = 100;
@@ -2952,8 +2979,10 @@ karemade:
 		  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 		  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 		){
-			insight_vanish(mtmp);
-			continue;
+			if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+				insight_vanish(mtmp);
+				continue;
+			}
 		}
 		if(has_template(mtmp, DELOUSED)){
 			delouse_tame(mtmp);
@@ -4329,6 +4358,19 @@ printAttacks(buf, ptr)
 				attk->damd,
 				damageKey[((int)attk->adtyp)]
 			);
+		}
+		if(attk->lev_req > 0 || attk->ins_req > 0){
+			Sprintf(eos(buf), " (");
+				if(attk->lev_req > 0){
+					Sprintf(eos(buf), "level %d+", attk->lev_req);
+				}
+				if(attk->lev_req > 0 && attk->ins_req > 0){
+					Sprintf(eos(buf), " and ");
+				}
+				if(attk->ins_req > 0){
+					Sprintf(eos(buf), "%d+ [[insight]]", attk->ins_req);
+				}
+			Sprintf(eos(buf), ")");
 		}
 	}
 	return;

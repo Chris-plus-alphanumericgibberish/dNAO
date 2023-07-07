@@ -2479,7 +2479,7 @@ A("The Crown of the Percipient",				HELM_OF_BRILLIANCE,	(const char *)0,
 /*Needs encyc entry*/
 A("Painting Fragment",	SCR_BLANK_PAPER,				"scroll fragment",
 	200L, CLOTH, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, PM_NOBLEMAN, PM_HALF_DRAGON, TIER_F, (ARTG_NOGEN|ARTG_NOWISH),
+	A_NONE, PM_NOBLEMAN, PM_HALF_DRAGON, TIER_F, (ARTG_NOGEN|ARTG_NOWISH|ARTG_NOCNT),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(), NOFLAG,

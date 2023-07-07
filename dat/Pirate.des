@@ -553,36 +553,36 @@ ENDMAP
 CONTAINER:'(',"chest",(35,08)
 OBJECT:'$',random,contained
 OBJECT:'$',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
+OBJECT:'#',"jewel",contained
+OBJECT:'#',"jewel",contained
 OBJECT:'*',random,contained
 OBJECT:'*',random,contained
 CONTAINER:'(',"chest",(36,07)
 OBJECT:'$',random,contained
 OBJECT:'$',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
+OBJECT:'#',"jewel",contained
+OBJECT:'#',"jewel",contained
 OBJECT:'*',random,contained
 OBJECT:'*',random,contained
 CONTAINER:'(',"chest",(36,08)
 OBJECT:'$',random,contained
 OBJECT:'$',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
+OBJECT:'#',"jewel",contained
+OBJECT:'#',"jewel",contained
 OBJECT:'*',random,contained
 OBJECT:'*',random,contained
 CONTAINER:'(',"chest",(36,09)
 OBJECT:'$',random,contained
 OBJECT:'$',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
+OBJECT:'#',"jewel",contained
+OBJECT:'#',"jewel",contained
 OBJECT:'*',random,contained
 OBJECT:'*',random,contained
 CONTAINER:'(',"chest",(37,08)
 OBJECT:'$',random,contained
 OBJECT:'$',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
+OBJECT:'#',"jewel",contained
+OBJECT:'#',"jewel",contained
 OBJECT:'*',random,contained
 OBJECT:'*',random,contained
 
@@ -616,16 +616,16 @@ OBJECT:')',random,random
 OBJECT:')',random,random
 OBJECT:')',random,random
 
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
-OBJECT:'*',random,contained
+OBJECT:'#',"jewel",random
+OBJECT:'#',"jewel",random
+OBJECT:'#',"jewel",random
+OBJECT:'#',"jewel",random
+OBJECT:'#',"jewel",random
+OBJECT:'*',random,random
+OBJECT:'*',random,random
+OBJECT:'*',random,random
+OBJECT:'*',random,random
+OBJECT:'*',random,random
 
 OBJECT:'$',random,random
 OBJECT:'$',random,random
@@ -635,9 +635,6 @@ OBJECT:'$',random,random
 OBJECT:'$',random,random
 OBJECT:'$',random,random
 OBJECT:'$',random,random
-
-CONTAINER:'(',"chest",(35,08)
-OBJECT:'$',random,contained
 
 GEOMETRY:center,center
 #0         1         2   	   3	     4		   5		 6	       7
