@@ -2906,6 +2906,8 @@ mktowntree()
 		levl[x+1][y+1].typ = TREE;
 		levl[x+1][y+1].looted = 0;
 		if(m_at(x+1, y+1)) rloc(m_at(x+1, y+1), TRUE);
+		while(level.objects[x+1][y+1])
+			rloco(level.objects[x+1][y+1]);
 	}
 }
 
