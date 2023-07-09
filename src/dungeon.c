@@ -2834,6 +2834,8 @@ boolean printdun;
 				Sprintf(eos(buf), " [Minauros]");
 			} else if(Is_belial_level(&mptr->lev)){
 				Sprintf(eos(buf), " [Phlegethos]");
+			} else if(Is_chromatic_level(&mptr->lev)){
+				Sprintf(eos(buf), " [Dragon Caves]");
 			} else {
 				Sprintf(eos(buf), " [Upper Hell]");
 			}

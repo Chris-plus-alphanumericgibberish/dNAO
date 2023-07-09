@@ -337,6 +337,8 @@ outgmaster()
 #define GLIMPSE_POLYP 3
 #define GLIPMSE_CHAOS 4
 #define GLIMPSE_OOONA 5
+#define GLIMPSE_ABYSS 6
+#define GLIMPSE_HELLL 7
 
 int
 doconsult(oracl)
@@ -518,6 +520,18 @@ register struct monst *oracl;
 					'i', 0, ATR_NONE, buf,
 					MENU_UNSELECTED);
 
+				Sprintf(buf, "Knowledge of the Layers of the Abyss");
+				any.a_int = GLIMPSE_ABYSS;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					'a', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
+				Sprintf(buf, "Knowledge of the Lords of the Nine Hells");
+				any.a_int = GLIMPSE_HELLL;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					'h', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
 				end_menu(tmpwin, "What glimpses dost thou ask for?");
 
 				how = PICK_ONE;
@@ -527,7 +541,7 @@ register struct monst *oracl;
 					n = selected[0].item.a_int;
 					free(selected);
 				}
-				else n = rnd(5);
+				else n = rnd(7);
 				switch (n){
 					case GLIMPSE_ELDRN:
 						switch(dungeon_topology.alt_tulani){
@@ -587,6 +601,115 @@ register struct monst *oracl;
 						else if (u.oonaenergy == AD_ELEC)
 							pline("They say meeting Oona can be a bit of a shock...");
 					break;
+					case GLIMPSE_ABYSS:
+						if (rn2(3)){
+							switch (dungeon_topology.brine_variant){ // demo, dagon, lamashtu
+								case DEMOGORGON_LEVEL:
+									pline("They say that a closed drawbridge should be left well enough alone.");
+								break;
+								case DAGON_LEVEL:
+									pline("They say that the darkest depths hide the most dangerous foes.");
+								break;
+								case LAMASHTU_LEVEL:
+									pline("They say that the depths of the Abyss can drive even the brightest lights to madness.");
+								break;
+								break;
+									pline("unknown or un-initialized hell1");
+								break;
+							}
+						} else if (rn2(2)) {
+							switch (dungeon_topology.abyss_variant){ // juib, zugg, yeen, baph, pale night, kostch
+								case JUIBLEX_LEVEL:
+									pline("They say the Father of Slimes will always save his children from calamity.");
+								break;
+								case ZUGGTMOY_LEVEL:
+									if (Hallucination) pline("Can you feel your heart burning? Can you feel the struggle within?");
+									else pline("They say that even decay itself is a form of life.");
+								break;
+								case YEENOGHU_LEVEL:
+									pline("They say that even the most savage of butchers have those they bow to.");
+								break;
+								case BAPHOMET_LEVEL:
+									pline("They say that the most twisted labyrinths trap the angriest denizens.");
+								break;
+								case NIGHT_LEVEL:
+									pline("They say that sometimes, it's best to not look beyond the veil.");
+								break;
+								case KOSTCH_LEVEL:
+									pline("They say that fury doesn't always burn hot.");
+								break;
+								default:
+									pline("unknown or un-initialized hell2");
+								break;
+							}
+						} else {
+							switch (dungeon_topology.abys2_variant){ // orcus, mal, grazzt, lolth
+								case ORCUS_LEVEL:
+									if(u.sealsActive&SEAL_TENEBROUS) {
+										if (u.ufirst_light) pline("They see that if Creation began with light, then darkness will persist at the end of all things.");
+										else pline("They say that the Word that echoes around you lives on.");
+									}
+									else pline("They say that death is only a temporary setback to some denizens of the Abyss.");
+								break;
+								case MALCANTHET_LEVEL:
+									pline("They say that despite its looks, paradise is only paradise to some.");
+								break;
+								case GRAZ_ZT_LEVEL:
+									pline("They say that the most self indulgent tend to be jealous lovers.");
+								break;
+								case LOLTH_LEVEL:
+									if (u.ualign.god == GOD_LOLTH) pline("The symbol you bear has been more common around here lately.");
+									else pline("They say that not only demons haunt the depths of the Abyss, but divine power as well.");
+								break;
+									pline("unknown or un-initialized hell1");
+								break;
+							}
+						}
+					break;
+					case GLIMPSE_HELLL:
+						if (rn2(2)){
+							switch (dungeon_topology.hell1_variant){ // bael, dis, mammon, belial
+								case BAEL_LEVEL:
+									pline("They say that not only minotaurs can be found at the centers of mazes.");
+								break;
+								case CHROMA_LEVEL:
+									pline("They say that if you're lucky, not only demons can be found in the Abyss.");
+								break;
+								case DISPATER_LEVEL:
+									pline("They say that the Iron City is ruled with an iron fist.");
+								break;
+								case MAMMON_LEVEL:
+									pline("They say that sometimes, the filthiest muck hides the greatest riches.");
+								break;
+								case BELIAL_LEVEL:
+									pline("They say the scorching heats of Gehennom have been worse recently.");
+								break;
+									pline("unknown or un-initialized hell1");
+								break;
+							}
+						} else {
+							switch (dungeon_topology.hell2_variant){ // levi, lilith, baalze, meph
+								case LEVIATHAN_LEVEL:
+									pline("They say that sometimes, it's best to leave frozen foes alone.");
+								break;
+								case LILITH_LEVEL:
+									pline("They say that the only thing worse than an evil witch is a whole coven of them.");
+								break;
+								case BAALZEBUB_LEVEL:
+									pline("They say that the harder they fall, the more dangerous they are.");
+								break;
+								case MEPHISTOPHELES_LEVEL:
+									pline("They say that sculptures made of ice are sometimes more lifelike than ones made of stone.");
+								break;
+								default:
+									pline("unknown or un-initialized hell2");
+								break;
+							}
+						}
+					break;
+					default:
+						impossible("Oracle rolled a non-existent dungeon hint? :(");
+					break;
 				}
 
 				if (!u.uevent.major_oracle){
@@ -617,5 +740,6 @@ register struct monst *oracl;
 #undef GLIMPSE_POLYP
 #undef GLIPMSE_CHAOS
 #undef GLIMPSE_OOONA
-
+#undef GLIMPSE_ABYSS
+#undef GLIMPSE_HELLL
 /*rumors.c*/
