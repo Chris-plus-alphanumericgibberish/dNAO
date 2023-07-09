@@ -1435,9 +1435,26 @@ register const char *s;
 	if(*s) {
 	    if(sp && sp->rndlevs){
 			levvar = rnd((int) sp->rndlevs);
-			/* special case -- chalev should always use the corresponding level */
+			/* special cases -- 
+			 * chalev should always use the corresponding level
+			 * hell/abyss floors are set at game start for oracle sneak peeks
+			 * medusa & grue are still random as of right now, as is sea
+			*/
 			if (!strcmp(sp->proto, "chalev"))
 				levvar = chaos_dvariant + 1;
+			else if (Is_hell1(&u.uz))
+				levvar = dungeon_topology.hell1_variant;
+			else if (Is_hell2(&u.uz))
+				levvar = dungeon_topology.hell2_variant;
+			else if (Is_abyss1(&u.uz))
+				levvar = dungeon_topology.abyss_variant;
+			else if (Is_abyss2(&u.uz))
+				levvar = dungeon_topology.abys2_variant;
+			else if (Is_abyss3(&u.uz))
+				levvar = dungeon_topology.brine_variant;
+			
+			if (dungeon_topology.hell1_variant == CHROMA_LEVEL) levvar = BAEL_LEVEL;
+			
 			Sprintf(protofile, "%s-%d", s, levvar);
 		}
 	    else Strcpy(protofile, s);
@@ -1462,16 +1479,6 @@ register const char *s;
 //	pline("%d", levvar);
 	if (Is_challenge_level(&u.uz)){
 		dungeon_topology.challenge_variant = levvar;
-	} else if(Is_hell1(&u.uz)){
-		dungeon_topology.hell1_variant = levvar;
-	} else if(Is_hell2(&u.uz)){
-		dungeon_topology.hell2_variant = levvar;
-	} else if(Is_abyss1(&u.uz)){
-		dungeon_topology.abyss_variant = levvar;
-	} else if(Is_abyss2(&u.uz)){
-		dungeon_topology.abys2_variant = levvar;
-	} else if(Is_abyss3(&u.uz)){
-		dungeon_topology.brine_variant = levvar;
 	} else if(In_sea(&u.uz)){
 		dungeon_topology.sea_variant = levvar;
 	}
@@ -1484,8 +1491,9 @@ register const char *s;
 		} else if(Is_arcadiadonjon(&u.uz)){
 			Strcpy(protofile, "towrtob");
 		}
-	} 
-	if(Is_hell1(&u.uz) && !Role_if(PM_CAVEMAN) && dungeon_topology.hell1_variant == BAEL_LEVEL && rn2(2)){
+	}
+	
+	if(Is_hell1(&u.uz) && dungeon_topology.hell1_variant == CHROMA_LEVEL){
 			Strcpy(protofile, "hell-a");
 	}
 	/* quick hack for Binders entering Astral -- change the gods out before loading the level, so that
