@@ -1539,8 +1539,10 @@ struct obj * otmp;
 			diesize = 24;
 		else if (otmp->oartifact == ART_MIRROR_BRAND)
 			ndice = 2;
-		else if (otmp->oartifact == ART_GRAYSWANDIR)
+		else if (otmp->oartifact == ART_GRAYSWANDIR){
 			ndice = 3;
+			diesize = 9;
+		}
 		
 		if (otmp->otyp == KHAKKHARA)
 			ndice *= khakharadice;
@@ -1550,8 +1552,10 @@ struct obj * otmp;
 	}
 
 	if (hates_lawful_mon(mdef) &&
-		otmp->obj_material == PLATINUM &&
-		!(is_lightsaber(otmp) && litsaber(otmp))
+		((otmp->obj_material == PLATINUM &&
+		!(is_lightsaber(otmp) && litsaber(otmp)))
+		|| otmp->oartifact == ART_GRAYSWANDIR
+		)
 	) {
 		/* default: 1d5 */
 		ndice = 1;
@@ -1567,6 +1571,8 @@ struct obj * otmp;
 		
 		if (otmp->otyp == KHAKKHARA)
 			ndice *= khakharadice;
+		if (otmp->oartifact == ART_GRAYSWANDIR)
+			dmg += 9;
 		/* calculate */
 		if (ndice)
 			dmg += vd(ndice, diesize);
