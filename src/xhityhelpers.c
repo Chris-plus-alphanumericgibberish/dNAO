@@ -1595,7 +1595,21 @@ struct obj * otmp;
 		if (ndice)
 			dmg += vd(ndice, diesize);
 	}
-
+	if(otmp->oartifact == ART_LOLTH_S_FANG){
+		//Cross-aligned
+		if(!hates_lawful_mon(mdef)){
+			dmg += vd(1, 8);
+		}
+		if(!is_drow(pd)){
+			dmg += vd(1, 8);
+		}
+		if(!mdef->female){
+			dmg += vd(1, 8);
+		}
+		if(!(is_primordial(pd) || is_great_old_one(pd))){
+			dmg += vd(1, 8);
+		}
+	}
 	/* the Rod of Seven Parts gets a bonus vs holy and unholy when uncursed */
 	if (otmp->oartifact == ART_ROD_OF_SEVEN_PARTS
 		&& !otmp->blessed && !otmp->cursed

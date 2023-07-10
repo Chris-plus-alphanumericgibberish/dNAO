@@ -2103,7 +2103,7 @@ A("The Webweaver's Crook",			FAUCHARD,			(const char *)0,
 /* needs encyc entry */
 /* Hedrow crowning gift, chaotic or neutral */
 A("Lolth's Fang",					DROVEN_SHORT_SWORD,	"silver-edged %s",
-	8000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	8000L, CHITIN, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, NON_PM, PM_DROW, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),
 	ATTK(AD_ACID, 10, 10), (ARTA_POIS|ARTA_SILVER),
