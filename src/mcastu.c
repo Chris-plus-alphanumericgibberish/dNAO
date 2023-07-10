@@ -1207,6 +1207,7 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_GLASYA:
 	case PM_COUATL:
 		switch(rn2(3)){
 			case 0:
