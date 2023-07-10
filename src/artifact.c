@@ -5070,6 +5070,23 @@ boolean printmessages; /* print generic elemental damage messages */
 		else mdef->mspec_used = max(mdef->mspec_used + 1, 1);
 	}
 
+	/* dirge drains pw */
+	if (oartifact == ART_DIRGE){
+		if (youdef){
+			if(hates_unholy(youracedata) && !hates_holy(youracedata)){
+				if(dieroll == 1)
+					losepw(666);
+				else
+					losepw(66);
+			}
+		}
+		else if (hates_unholy_mon(mdef) && !hates_holy_mon(mdef)){
+			if(dieroll == 1)
+				set_mcan(mdef, TRUE);
+			mdef->mspec_used += 6;
+		}
+	}
+
 	/* Liecleaver does NOT double the damage of fired bolts */
 	if (oartifact == ART_LIECLEAVER && (otmp != msgr)) {
 		/* reduce bonus damage by 1x basedmg to negate previous doubling */
