@@ -2011,7 +2011,7 @@ moveloop()
 				if(mtmp->mtyp == PM_ORCUS || mtmp->mtyp == PM_NAZGUL) flags.shade_level=1;
 				if(mtmp->mtyp == PM_STRANGER) flags.yello_level=1;
 				if(mtmp->mtyp == PM_SUZERAIN) flags.yello_level=1;
-				if(mtmp->mtyp == PM_SERPENT_PRIEST) flags.spriest_level=1;
+				if(mtmp->mtyp == PM_SERPENT_PRIEST || mtmp->mtyp == PM_FEATHERY_SERPENT_PRIESTESS) flags.spriest_level=1;
 				if(mtmp->mtyp == PM_HMNYW_PHARAOH) dark_pharaoh_visible(mtmp);
 				if(mtmp->mtyp == PM_GOOD_NEIGHBOR) good_neighbor_visible(mtmp);
 				if(mtmp->mtyp == PM_DREAD_SERAPH && (mtmp->mstrategy & STRAT_WAITMASK) && (u.uevent.invoked || Infuture)){
