@@ -3124,6 +3124,8 @@ int * truedmgptr;
 			|| (attacks(AD_HOLY, otmp) && hates_holy_mon(mon) && spec_dbon_applies)
 		)
 			multiplier *= 2;
+		if(otmp->oartifact == ART_SILVER_STARLIGHT)
+			multiplier *= 4;
 		/* lightsabers add 3dX damage (but do not multiply multiplicative bonus damage) */
 		if (damd && (is_lightsaber(otmp) && litsaber(otmp)))
 			multiplier *= 3;

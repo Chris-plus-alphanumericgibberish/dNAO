@@ -2833,7 +2833,7 @@ winid *datawin;
 				if (oart->damage > 1)
 				{
 					Sprintf(buf, "Deals %dd%d bonus ",
-						((obj && is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
+						((obj && obj->oartifact == ART_SILVER_STARLIGHT) ? 4 : (obj && is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
 						oart->damage);
 				}
 				else
