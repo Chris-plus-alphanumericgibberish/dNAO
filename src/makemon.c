@@ -442,8 +442,8 @@ boolean goodequip;
 	/*weapon*/
 	otmp = mksobj(RAPIER, mkobjflags);
 	set_material_gm(otmp, OBSIDIAN_MT);
-	otmp->blessed = TRUE;
-	otmp->cursed = FALSE;
+	otmp->blessed = FALSE;
+	otmp->cursed = TRUE;
 	otmp->oerodeproof = TRUE;
 	otmp->spe = 2;
 	(void) mpickobj(mtmp, otmp);
@@ -451,14 +451,14 @@ boolean goodequip;
 	otmp = mksobj(DROVEN_CHAIN_MAIL, mkobjflags);
 	otmp->ohaluengr = TRUE;
 	otmp->oward = LOLTH_SYMBOL;
-	otmp->blessed = TRUE;
-	otmp->cursed = FALSE;
+	otmp->blessed = FALSE;
+	otmp->cursed = TRUE;
 	otmp->spe = 2;
 	(void) mpickobj(mtmp, otmp);
 	/*Dress*/
 	otmp = mksobj(PLAIN_DRESS, mkobjflags);
-	otmp->blessed = TRUE;
-	otmp->cursed = FALSE;
+	otmp->blessed = FALSE;
+	otmp->cursed = TRUE;
 	otmp->oerodeproof = TRUE;
 	otmp->spe = 2;
 	(void) mpickobj(mtmp, otmp);
@@ -469,32 +469,32 @@ boolean goodequip;
 	(void) mpickobj(mtmp, otmp);
 	/*Cloak*/
 	otmp = mksobj(CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
-	otmp->blessed = TRUE;
-	otmp->cursed = FALSE;
+	otmp->blessed = FALSE;
+	otmp->cursed = TRUE;
 	otmp->oerodeproof = TRUE;
 	otmp->spe = 0;
 	(void) mpickobj(mtmp, otmp);
 	/*Helm*/
 	otmp = mksobj(DROVEN_HELM, mkobjflags);
-	otmp->blessed = TRUE;
-	otmp->cursed = FALSE;
+	otmp->blessed = FALSE;
+	otmp->cursed = TRUE;
 	otmp->oerodeproof = TRUE;
-	otmp->spe = 0;
+	otmp->spe = 2;
 	(void) mpickobj(mtmp, otmp);
 	/*boots*/
 	otmp = mksobj(GAUNTLETS, mkobjflags);
 	set_material_gm(otmp, SHADOWSTEEL);
-	otmp->blessed = TRUE;
-	otmp->cursed = FALSE;
+	otmp->blessed = FALSE;
+	otmp->cursed = TRUE;
 	otmp->oerodeproof = TRUE;
-	otmp->spe = 0;
+	otmp->spe = 2;
 	(void) mpickobj(mtmp, otmp);
 	/*boots*/
 	otmp = mksobj(HIGH_BOOTS, mkobjflags);
-	otmp->blessed = TRUE;
-	otmp->cursed = FALSE;
+	otmp->blessed = FALSE;
+	otmp->cursed = TRUE;
 	otmp->oerodeproof = TRUE;
-	otmp->spe = 0;
+	otmp->spe = 2;
 	(void) mpickobj(mtmp, otmp);
 	if ((int) mtmp->m_lev > rn2(75))
 		(void) mongets(mtmp, rnd_offensive_item(mtmp), mkobjflags);
