@@ -1327,10 +1327,14 @@ char *buf;
 			Strcat(buf, "blood-drenched ");
 	}
 	if (obj->otyp == ISAMUSEI){
-		if(u.uinsight >= 45)
+		if(u.uinsight >= 70)
 			Strcat(buf, "circular ");
+		else if(u.uinsight >= 57)
+			Strcat(buf, "tredecile ");
+		else if(u.uinsight >= 45)
+			Strcat(buf, "crossed ");
 		else if(u.uinsight >= 22)
-			Strcat(buf, "twisting ");
+			Strcat(buf, "reflected ");
 	}
 	if (obj->otyp == CLUB && check_oprop(obj, OPROP_CCLAW)){
 		if(u.uinsight >= 30)

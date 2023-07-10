@@ -2691,6 +2691,119 @@ struct attack * attk;
 			}
 		}
 	}
+	if(u.uinsight >= 57){
+		//45 degree rotation
+		nx = sgn(dx+dy);
+		ny = sgn(dy-dx);
+		if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+			struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+									u.uswallow ? u.ustuck : 
+									(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+									(struct monst *)0;
+			if (mdef2 
+				&& (!DEADMONSTER(mdef2))
+				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+					(youagr && !mdef2->mpeaceful))
+			) { //Can hit a worm multiple times
+				int vis2 = VIS_NONE;
+				if(youagr || canseemon(magr))
+					vis2 |= VIS_MAGR;
+				if(mdef2 == &youmonst || canseemon(mdef2))
+					vis2 |= VIS_MDEF;
+				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+			}
+		}
+		//-45 degree rotation
+		nx = sgn(dx-dy);
+		ny = sgn(dx+dy);
+		if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+			struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+									u.uswallow ? u.ustuck : 
+									(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+									(struct monst *)0;
+			if (mdef2 
+				&& (!DEADMONSTER(mdef2))
+				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+					(youagr && !mdef2->mpeaceful))
+			) { //Can hit a worm multiple times
+				int vis2 = VIS_NONE;
+				if(youagr || canseemon(magr))
+					vis2 |= VIS_MAGR;
+				if(mdef2 == &youmonst || canseemon(mdef2))
+					vis2 |= VIS_MDEF;
+				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+			}
+		}
+	}
+	if(u.uinsight >= 70){
+		//135 degree rotation
+		//x = xcos0 - ysin0
+		//x = x*(-0.7) - y*(0.7)
+		//y = xsin0 + ycos0
+		//y = x*(0.7) + y*(-0.7)
+		nx = sgn(-dx-dy);
+		ny = sgn(dx-dy);
+		if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+			struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+									u.uswallow ? u.ustuck : 
+									(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+									(struct monst *)0;
+			if (mdef2 
+				&& (!DEADMONSTER(mdef2))
+				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+					(youagr && !mdef2->mpeaceful))
+			) { //Can hit a worm multiple times
+				int vis2 = VIS_NONE;
+				if(youagr || canseemon(magr))
+					vis2 |= VIS_MAGR;
+				if(mdef2 == &youmonst || canseemon(mdef2))
+					vis2 |= VIS_MDEF;
+				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+			}
+		}
+		//-135 degree rotation
+		//x = xcos0 - ysin0
+		//x = x*(-0.7) - y*(-0.7)
+		//y = ysin0 + ycos0
+		//y = x*(-0.7) + y*(-0.7)
+		//-45 degree rotation
+		nx = sgn(-dx+dy);
+		ny = sgn(-dx-dy);
+		if (isok(x(magr) + nx, y(magr) + ny) && !(result&(MM_AGR_DIED|MM_AGR_STOP))){
+			struct monst *mdef2 = !youagr ? m_u_at(x(magr) + nx, y(magr) + ny) : 
+									u.uswallow ? u.ustuck : 
+									(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+									(struct monst *)0;
+			if (mdef2 
+				&& (!DEADMONSTER(mdef2))
+				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+					(youagr && !mdef2->mpeaceful))
+			) { //Can hit a worm multiple times
+				int vis2 = VIS_NONE;
+				if(youagr || canseemon(magr))
+					vis2 |= VIS_MAGR;
+				if(mdef2 == &youmonst || canseemon(mdef2))
+					vis2 |= VIS_MDEF;
+				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+			}
+		}
+	}
 	return result;
 }
 
