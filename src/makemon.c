@@ -13417,6 +13417,8 @@ int faction;
 		mtmp->m_insight_level = 40;
 	else if(mtmp->mtyp == PM_HUNTING_HORROR)
 		mtmp->m_insight_level = 0;
+	else if(mtmp->mtyp == PM_ALKILITH)
+		mtmp->m_insight_level = 66;
 	else if(mtmp->mtyp == PM_SWIRLING_MIST
 		 || mtmp->mtyp == PM_DUST_STORM
 		 || mtmp->mtyp == PM_ICE_STORM
@@ -14466,7 +14468,8 @@ int mndx;
 		: mndx == PM_OMEGA_METROID ? 12 : mndx == PM_METROID_QUEEN ? 3 : mndx == PM_ARGENTUM_GOLEM ? 8 
 		: mndx == PM_ALHOON ? 2 : mndx == PM_CENTER_OF_ALL ? 1 : mndx == PM_SOLDIER ? 250
 		: mndx == PM_ANCIENT_OF_ICE ? 8 : mndx == PM_ANCIENT_OF_DEATH ? 4
-		: mndx == PM_SOLDIER_ANT ? 250 : mndx == PM_VERMIURGE ? 7 : MAXMONNO); 
+		: mndx == PM_SOLDIER_ANT ? 250 : mndx == PM_VERMIURGE ? 7
+		: mndx == PM_ALKILITH ? 6 : MAXMONNO); 
 }
 
 /* used for wand/scroll/spell of create monster */

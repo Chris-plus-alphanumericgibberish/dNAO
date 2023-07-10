@@ -8696,7 +8696,44 @@ struct monst *mon;
 			// else continue
 		}
 	}
-
+	if(mon->mtyp == PM_ALKILITH){
+		struct monst *mtmp;
+		int xlocale = mon->mx, ylocale = mon->my;
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(mon->mpeaceful && mtmp->mpeaceful)
+				continue;
+			if(hates_holy_mon(mtmp) || taxes_sanity(mtmp->data))
+				continue;
+			if(dist2(xlocale, ylocale, mtmp->mx, mtmp->my) <= 36){
+				if(!resist(mtmp, 0, 0, FALSE)){
+					if(canspotmon(mtmp)){
+						pline("%s staggers!", Monnam(mtmp));
+						mon->mconf = TRUE;
+					}
+				}
+			}
+		}
+		if(!mon->mpeaceful){
+			if(dist2(xlocale, ylocale, u.ux, u.uy) <= 36){
+				if(!save_vs_sanloss()){
+					if(canspotmon(mon))
+						You_hear("%s buzzing!", mon_nam(mon));
+					else You_hear("a strange buzzing!");
+					change_usanity(-1, !save_vs_sanloss()); //Second save to avoid minor madness check
+				}
+			}
+			if(!rn2(66)){
+				struct permonst *ptr = mkclass(rn2(2) ? S_DEMON : S_IMP, G_HELL);
+				if(ptr){
+					mtmp = makemon(ptr, xlocale, ylocale, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					if(mtmp){
+						mtmp->mpeaceful = 0;
+						set_malign(mtmp);
+					}
+				}
+			}
+		}
+	}
 }
 
 void
