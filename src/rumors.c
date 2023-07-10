@@ -602,7 +602,7 @@ register struct monst *oracl;
 							pline("They say meeting Oona can be a bit of a shock...");
 					break;
 					case GLIMPSE_ABYSS:
-						if (rn2(3)){
+						if (!rn2(3)){
 							switch (dungeon_topology.brine_variant){ // demo, dagon, lamashtu
 								case DEMOGORGON_LEVEL:
 									pline("They say that a closed drawbridge should be left well enough alone.");
@@ -623,7 +623,10 @@ register struct monst *oracl;
 									pline("They say the Father of Slimes will always save his children from calamity.");
 								break;
 								case ZUGGTMOY_LEVEL:
-									if (Hallucination) pline("Can you feel your heart burning? Can you feel the struggle within?");
+									if (Hallucination || \
+										(!ClearThoughts && u.umadness&MAD_SPORES && !Race_if(PM_ANDROID) && !Race_if(PM_CLOCKWORK_AUTOMATON))
+										)
+											pline("Can you feel your heart burning? Can you feel the struggle within?");
 									else pline("They say that even decay itself is a form of life.");
 								break;
 								case YEENOGHU_LEVEL:
