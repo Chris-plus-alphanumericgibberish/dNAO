@@ -6883,7 +6883,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			else You("are put to sleep by %s!", mon_nam(magr));
 		}
 		else {
-			if (sleep_monst(mdef, rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), -1)) {
+			if (sleep_monst(mdef, rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), 0)) {
 				pline("%s falls asleep!",
 					Monnam(mdef));
 				mdef->mstrategy &= ~STRAT_WAITFORU;

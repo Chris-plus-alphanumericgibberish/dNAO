@@ -7953,6 +7953,7 @@ boolean verbose;
 	}
 	if(healing < 1)
 		healing = 1;
+	*hp += healing;
 	if(*hp > *max)
 		*hp = *max;
 }

@@ -720,6 +720,13 @@ nh_timeout()
 			upp->intrinsic++;
 			You("form new eyes.");
 		}
+		if((youracedata->mtyp == PM_BLASPHEMOUS_LURKER || youracedata->mtyp == PM_LURKING_ONE) && upp - u.uprops == BLINDED
+			&&  upp->intrinsic & TIMEOUT
+		){
+			upp->intrinsic &= ~TIMEOUT;
+			upp->intrinsic++;
+			You("open more eyes.");
+		}
 		if (!(upp->intrinsic & TIMEOUT_INF)
 			&& (upp->intrinsic & TIMEOUT)
 			&& !(--upp->intrinsic & TIMEOUT)	/* decremented here */

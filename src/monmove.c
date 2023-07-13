@@ -1492,7 +1492,7 @@ register struct monst *mtmp;
 					continue;
 				if(!isok(x, y))
 					continue;
-				patient = m_at(x,y);
+				patient = m_u_at(x,y);
 				if(!patient)
 					continue;
 				if(patient == &youmonst){
@@ -1526,9 +1526,7 @@ register struct monst *mtmp;
 				y = mtmp->my+(j+rot)%3;
 				if(!isok(x, y))
 					continue;
-				if(u.ux == x && u.uy == y)
-					repairee = &youmonst;
-				else repairee = m_at(x,y);
+				repairee = m_u_at(x,y);
 				if(!repairee)
 					continue;
 				if(repairee == &youmonst){

@@ -4266,6 +4266,8 @@ boolean ranged;
 	struct obj * otmp;
 	struct monst * mtmp;
 	char buf[BUFSZ];
+	int damn = attk->damn;
+	int damd = attk->damd;
 	
 	/* Monsters with physical attack scaling treat the physical damage component of their attacks much like spellcasting damage */
 	/*  This represents skill, so the player doesn't get the bonus. */
@@ -4277,11 +4279,11 @@ boolean ranged;
 			flatdmg += d(min(MAX_BONUS_DICE, mlev(magr)/3), attk->damd <= 1 ? 6 : attk->damd);
 		}
 		else {
-			attk->damn += min(MAX_BONUS_DICE, mlev(magr)/3);
-			if(attk->damn < 1)
-				attk->damn = 1;
-			if(attk->damd <= 1)
-				attk->damd = 6;
+			damn += min(MAX_BONUS_DICE, mlev(magr)/3);
+			if(damn < 1)
+				damn = 1;
+			if(damd <= 1)
+				damd = 6;
 		}
 	}
 	
@@ -4289,8 +4291,13 @@ boolean ranged;
 	if (flatdmg >= 0) {
 		dmg = flatdmg;
 	}
-	else if (attk->damn && attk->damd) {
-		dmg = d((int)attk->damn, (int)attk->damd);
+	else if (damn && damd) {
+		dmg = d(damn, damd);
+	}
+	else if(damd && attk->adtyp != AD_PHYS){
+		damn = min(MAX_BONUS_DICE, mlev(magr)/3);
+		if(damn < 1) damn = 1;
+		dmg = d(damn, damd);
 	}
 	else {
 		dmg = 0;
@@ -5050,7 +5057,7 @@ boolean ranged;
 				if (canseemon(mdef) && !is_blind(mdef))
 					pline("%s is blinded!", Monnam(mdef));
 
-				int rnd_tmp = d((int)attk->damn, (int)attk->damd);
+				int rnd_tmp = d(damn, damd);
 				if ((rnd_tmp += mdef->mblinded) > 127) rnd_tmp = 127;
 				mdef->mblinded = rnd_tmp;
 				mdef->mcansee = 0;

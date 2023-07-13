@@ -51,7 +51,8 @@ TRAP: "spiked pit",(06,05)
 # the treasure chamber!  There were more than enough candles for the Candelabrum here
 OBJECT[50%]:'(',"wax candle",(52,3)
 CONTAINER:'(',"chest",(52,3)
-GOLD: random, (52,3) GOLD: random, (52,3) OBJECT: random, random,contained
+GOLD: random, (52,3) GOLD: random, (52,3)
+OBJECT: random, random,contained
 OBJECT: random, random,contained
 OBJECT: random, random,contained
 #OBJECT:'(',"wax candle",(53,3)

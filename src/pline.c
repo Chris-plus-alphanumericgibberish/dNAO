@@ -674,7 +674,7 @@ ustatusline()
 	}
 	if (Stunned)		Strcat(info, ", stunned");
 	if (u.ustdy > 0)	  Sprintf(eos(info), ", weakened (%d)", u.ustdy);
-	if (u.uencouraged > 0)	  Sprintf(eos(info), ", morale (%d)", u.uencouraged);
+	if (u.uencouraged != 0)	  Sprintf(eos(info), ", morale (%d)", u.uencouraged);
 #ifdef STEED
 	if (!u.usteed)
 #endif
