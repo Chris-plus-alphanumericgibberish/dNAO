@@ -2114,10 +2114,10 @@ A("Lolth's Fang",					DROVEN_SHORT_SWORD,	"silver-edged %s",
 
 /* needs encyc entry */
 /* Drow crowning gift, chaotic */
-A("The Web of Lolth",				ELVEN_MITHRIL_COAT,	"silver-starred %s",
+A("The Web of Lolth",				ELVEN_TOGA,	"silver-starred %s",
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_CHAOTIC, NON_PM, PM_DROW, TIER_B, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
-	MONS(vsMA(MA_ELF)),
+	MONS(vsMA(MA_ELF|MA_MINION|MA_DEMON)),
 	NO_ATTK(), (ARTA_SILVER),
 	PROPS(WARN_OF_MON, DRAIN_RES, SPELLBOOST), NOFLAG,
 	PROPS(ANTIMAGIC), NOFLAG,

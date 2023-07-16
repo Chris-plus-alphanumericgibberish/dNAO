@@ -2331,6 +2331,9 @@ struct obj * otmp;
 	case ART_ARMOR_OF_KHAZAD_DUM:
 		def += 4;
 		break;
+	case ART_WEB_OF_LOLTH:
+		def += 4;
+		break;
 	case ART_CLAWS_OF_THE_REVENANCER:
 		def += 5;
 		break;
@@ -2425,6 +2428,9 @@ struct obj * otmp;
 		break;
 	case ART_ARMOR_OF_KHAZAD_DUM:
 		def += 4;
+		break;
+	case ART_WEB_OF_LOLTH:
+		def += 8;
 		break;
 	case ART_AEGIS:
 		def += 1;//3 total, Same as Cloak of protection

@@ -2938,7 +2938,7 @@ winid *datawin;
 					case ART_CLARENT:					Strcat(buf, "the thick-skinned");							break;
 					case ART_SCEPTRE_OF_MIGHT:			Strcat(buf, "cross-aligned.");								break;
 					case ART_IRON_BALL_OF_LEVITATION:	Strcat(buf, "cross-aligned.");								break;
-					case ART_WEB_OF_LOLTH:				Strcat(buf, "elves.");										break;
+					case ART_WEB_OF_LOLTH:				Strcat(buf, "elves, demons, and godly minions.");			break;
 					case ART_MITRE_OF_HOLINESS:			Strcat(buf, "undead.");										break;
 					case ART_ICONOCLAST:				Strcat(buf, "humans, elves, dwarves, and gnomes.");			break;
 					case ART_SCOURGE_OF_LOLTH:			Strcat(buf, "elves.");										break;
