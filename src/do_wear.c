@@ -4559,11 +4559,15 @@ struct obj *wep;
 		pline("The Mad King blesses %s!", mon_nam(magr));
 	
 	if(youagr){
-		u.ustdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
-		u.uencouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		if(u.uencouraged < 8*(8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep)))){
+			u.ustdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+			u.uencouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		}
 	} else {
-		magr->mstdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
-		magr->encouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		if(8 + wep->spe + mon_weapon_dam_bonus(magr->data, wep, weapon_type(wep))){
+			magr->mstdy -= 8 + wep->spe + mon_weapon_dam_bonus(magr->data, wep, weapon_type(wep));
+			magr->encouraged += 8 + wep->spe + mon_weapon_dam_bonus(magr->data, wep, weapon_type(wep));
+		}
 	}
 }
 

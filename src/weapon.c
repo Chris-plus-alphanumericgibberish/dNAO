@@ -3759,6 +3759,24 @@ int wep_type;
  * Treat restricted weapons as unskilled.
  */
 int
+mon_weapon_dam_bonus(pa, weapon, wep_type)
+struct permonst *pa;
+struct obj *weapon;
+int wep_type;
+{
+	int skill = m_martial_skill(pa);
+	switch(skill){
+		case P_BASIC:
+			return 1;
+		case P_SKILLED:
+			return 2;
+		case P_EXPERT:
+			return 5;
+	}
+	return 0;
+}
+
+int
 weapon_dam_bonus(weapon, wep_type)
 struct obj *weapon;
 int wep_type;
