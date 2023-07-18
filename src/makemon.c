@@ -4056,7 +4056,7 @@ boolean goodequip;
 		} else
 		   if (ptr->mtyp == PM_WATCHMAN && rn2(3))
 			(void) mongets(mtmp, WHISTLE, mkobjflags);
-	} else if (ptr->mtyp == PM_SHOPKEEPER) {
+	} else if (ptr->mtyp == PM_SHOPKEEPER || ptr->mtyp == PM_HUMAN_SMITH) {
 		(void) mongets(mtmp,SKELETON_KEY, mkobjflags);
 		if(Infuture){
 			(void) mongets(mtmp, SHOTGUN, mkobjflags);
@@ -12658,6 +12658,7 @@ xchar x, y;	/* clone's preferred location or 0 (near mon) */
 	m2->isshk = FALSE;		// MX_ESHK
 	m2->ispriest = FALSE;	// MX_EPRI
 	m2->isgd = FALSE;		// MX_EVGD
+							// MX_ESMT
 
 	/* handle monster lightsources */
 	if (emits_light_mon(m2))
@@ -13377,6 +13378,10 @@ int faction;
 		}
 	}
 	set_mon_data(mtmp, mndx);
+
+	if(!get_mx(mtmp, MX_ESUM) && intelligent_mon(mtmp) && is_smith_mtyp(mtmp->mtyp)){
+		add_mx(mtmp, MX_ESMT);
+	}
 	
 	ABASE_MON(A_STR, mtmp) = d(3,6);
 	if(strongmonst(mtmp->data)) ABASE_MON(A_STR, mtmp) += 10;

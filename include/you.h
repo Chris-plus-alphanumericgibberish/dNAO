@@ -859,6 +859,7 @@ struct you {
 	/* 	Variable that checks if the Wizard has increased the weight of the amulet */
 	boolean uleadamulet;
 	/*Ugly extra artifact variables workaround.  Spaghetti code alert!*/
+	char dracae_pets; /*How many pets have been incarnated by a dracae this game.*/
 	int goldkamcount_tame; /*number of tame golden kamerel following you around*/
 	int voidChime;
 	long rangBell; /*Turn last rang bell of opening on*/

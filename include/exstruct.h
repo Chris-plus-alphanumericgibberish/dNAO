@@ -166,4 +166,32 @@ struct evgd {
 
 #define EVGD(mon)	((mon)->mextra_p->evgd_p)
 
+struct esmt {
+	int smith_mtyp;
+	int smith_bone_stockpile;
+	int smith_iron_stockpile;
+	int smith_green_steel_stockpile;
+	int smith_metal_stockpile;
+	int smith_bronze_stockpile;
+	int smith_silver_stockpile;
+	int smith_gold_stockpile;
+	int smith_platinum_stockpile;
+	int smith_lead_stockpile;
+	int smith_mithril_stockpile;
+	int smith_plastic_stockpile;
+	int smith_stone_stockpile;
+	int smith_obsidian_stockpile;
+	int smith_shadow_stockpile;
+	int smith_mercurial_stockpile;
+	int smith_biomass_stockpile;
+
+	schar frgroom;		/* index in rooms */
+	coord frgpos;		/* position of forge */
+	d_level frglevel;	/* level (& dungeon) of forge */
+	boolean pbanned;	/* player banned by priest */
+};
+
+#define HAS_ESMT(mon)	((mon) && (mon)->mextra_p && (mon)->mextra_p->esmt_p)
+#define ESMT(mon)	((mon)->mextra_p->esmt_p)
+
 #endif /* EXSTRUCT_H */

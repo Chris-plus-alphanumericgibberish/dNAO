@@ -16,7 +16,8 @@ struct mx_table {
 	{MX_EPRI, sizeof(struct epri)},
 	{MX_ESHK, sizeof(struct eshk)},
 	{MX_ESUM, sizeof(struct esum)},
-	{MX_EVGD, sizeof(struct evgd)}
+	{MX_EVGD, sizeof(struct evgd)},
+	{MX_ESMT, sizeof(struct esmt)}
 };
 
 /* add one component to mon */

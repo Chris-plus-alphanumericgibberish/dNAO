@@ -2384,7 +2384,6 @@ int mat;
 		case LEATHER_HELM:
 		case ARCHAIC_HELM:
 		case DROVEN_HELM:
-		case HARMONIUM_HELM:			/* irreversible, metal */
 //		case PLASTEEL_HELM:				/* has a unique function of shape -- needs a generic version? */
 //		case CRYSTAL_HELM:				/* has a unique function of shape -- needs a generic version? */
 			if (mat == LEATHER)			obj->otyp = LEATHER_HELM;
@@ -2404,7 +2403,6 @@ int mat;
 		case GAUNTLETS:
 		case ARCHAIC_GAUNTLETS:
 		case PLASTEEL_GAUNTLETS:		/* irreversible, plastic */
-		case HARMONIUM_GAUNTLETS:		/* irreversible, metal */
 		case ORIHALCYON_GAUNTLETS:		/* irreversible, metal */
 			if		(mat == DRAGON_HIDE)obj->otyp = (is_hard(obj) ? GAUNTLETS : GLOVES);
 			else if	(mat == LEATHER
@@ -2425,13 +2423,16 @@ int mat;
 		case ARCHAIC_BOOTS:
 		case HIGH_BOOTS:
 		case PLASTEEL_BOOTS:			/* irreversible, plastic */
-		case HARMONIUM_BOOTS:			/* irreversible, metal */
-			if		(mat == DRAGON_HIDE)obj->otyp = (is_hard(obj) ? ARMORED_BOOTS : HIGH_BOOTS);
-			else if	(mat >= WOOD){		
-				if(obj->otyp != ARMORED_BOOTS && 
-					obj->otyp != ARCHAIC_BOOTS
-				) obj->otyp = ARMORED_BOOTS;
-			} else						obj->otyp = HIGH_BOOTS;
+			if(mat == DRAGON_HIDE)
+				obj->otyp = (is_hard(obj) ? ARMORED_BOOTS : HIGH_BOOTS);
+			else if(hard_mat(mat) != is_hard(obj)){
+				if(hard_mat(mat)){
+					if(obj->otyp != ARMORED_BOOTS && 
+						obj->otyp != ARCHAIC_BOOTS
+					) obj->otyp = ARMORED_BOOTS;
+				} else
+					obj->otyp = HIGH_BOOTS;
+			}
 		break;
 		/* shoes */
 		case SHOES:
@@ -2463,7 +2464,6 @@ int mat;
 //			else;
 //				// fall through
 		case SCALE_MAIL:
-		case HARMONIUM_SCALE_MAIL:		/* irreversible, metal */
 		case STUDDED_LEATHER_ARMOR:		/* irreversible, leather */
 		case LEATHER_ARMOR:				/* irreversible, leather */
 			obj->otyp = SCALE_MAIL;
@@ -2477,7 +2477,6 @@ int mat;
 		case PLATE_MAIL:
 		case PLASTEEL_ARMOR:			/* irreversible, plastic */
 		case DROVEN_PLATE_MAIL:			/* irreversible, shadowsteel */
-		case HARMONIUM_PLATE:			/* irreversible, metal */
 			obj->otyp = PLATE_MAIL;
 		break;
 		/* long swords */

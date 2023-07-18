@@ -15,7 +15,8 @@
 #define MX_ESHK 5
 #define MX_ESUM 6
 #define MX_EVGD 7
-#define NUM_MX 8
+#define MX_ESMT 8
+#define NUM_MX 9
 
 /* container for all mextra */
 union mextra {
@@ -29,6 +30,7 @@ union mextra {
 		struct eshk * eshk_p;
 		struct esum * esum_p;
 		struct evgd * evgd_p;
+		struct esmt * esmt_p;
 	};
 };
 

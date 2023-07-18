@@ -1201,6 +1201,15 @@ register const char *let,*word;
 		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES || otmp->otyp == SUNGLASSES))
 		|| (!strcmp(word, "trephinate") && !(otmp->otyp == CRYSTAL_SKULL))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
+		|| (!strcmp(word, "contribute for scrap iron") && otmp->obj_material != IRON)
+		|| (!strcmp(word, "contribute for scrap green steel") && otmp->obj_material != GREEN_STEEL)
+		|| (!strcmp(word, "contribute for scrap bronze") && otmp->obj_material != COPPER)
+		|| (!strcmp(word, "contribute for scrap silver") && otmp->obj_material != SILVER)
+		|| (!strcmp(word, "contribute for scrap gold") && otmp->obj_material != GOLD)
+		|| (!strcmp(word, "contribute for scrap lead") && otmp->obj_material != LEAD)
+		|| (!strcmp(word, "contribute for scrap mithril") && otmp->obj_material != MITHRIL)
+		|| (!strcmp(word, "contribute for scrap fossil dark") && otmp->obj_material != SHADOWSTEEL && otmp->otyp != CHUNK_OF_FOSSIL_DARK)
+		|| (!strcmp(word, "contribute for scrap platinum") && otmp->obj_material != PLATINUM)
 		|| (!strcmp(word, "zap") &&
 		    !(otmp->oclass == WAND_CLASS 
 				|| (otmp->oclass == TOOL_CLASS && otmp->otyp == ROD_OF_FORCE)

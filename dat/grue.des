@@ -107,7 +107,7 @@ OBJECT:'#',"uncharged lantern",(62,18)
 CONTAINER:'(',"sack",(62,18)
 OBJECT:'#',"+2 blessed wrathful silver elven broadsword",contained
 OBJECT:'(',"magic torch",contained
-OBJECT:'#',"platinum bar",contained
+OBJECT:'#',"large platinum bar",contained
 
 # Warning
 ENGRAVING:(08,10), dust, "BEWARE OF GRUE"
@@ -274,7 +274,7 @@ OBJECT:'#',"uncharged lantern",(67,17)
 CONTAINER:'(',"sack",(67,17)
 OBJECT:'#',"+2 blessed wrathful silver elven broadsword",contained
 OBJECT:'(',"magic torch",contained
-OBJECT:'#',"platinum bar",contained
+OBJECT:'#',"large platinum bar",contained
 
 # Non diggable walls
 NON_DIGGABLE:(00,00,75,20)

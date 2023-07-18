@@ -2503,7 +2503,7 @@ register struct monst *shkp;	/* if angry, impose a surcharge */
 	else if (ACURR(A_CHA) < 11)	tmp += tmp / 3L;
 	if (tmp <= 0L) tmp = 1L;
 	/* anger surcharge should match rile_shk's */
-	if (shkp && ESHK(shkp)->surcharge) tmp += (tmp + 2L) / 3L;
+	if (shkp && shkp->isshk && ESHK(shkp)->surcharge) tmp += (tmp + 2L) / 3L;
 	return tmp;
 }
 #endif /*OVL3*/
@@ -5758,6 +5758,11 @@ shk_obj_match(obj, shkp)
 	struct obj *obj;
 	struct monst *shkp;
 {
+	if(is_smith_mon(shkp) && 
+		(obj->oclass == WEAPON_CLASS || obj->oclass == ARMOR_CLASS || obj->oclass == TOOL_CLASS)
+	){
+		return TRUE;
+	}
 	/* object matches type of shop? */
 	return(saleable(shkp, obj));
 }
@@ -5776,7 +5781,9 @@ shk_offer_price(slang, charge, shkp)
 	struct monst *shkp;
 {
 	char sbuf[BUFSZ];
-	long credit = ESHK(shkp)->credit;
+	long credit = 0;
+	if(shkp->isshk)
+		credit = ESHK(shkp)->credit;
 
 	/* Ask y/n if player wants to pay */
         Sprintf(sbuf, "It'll cost you %ld zorkmid%s.  Interested?",
@@ -5803,7 +5810,8 @@ shk_offer_price(slang, charge, shkp)
 	}
 
 	/* Charge the customer */
-	charge = check_credit (charge, shkp); /* Deduct the credit first */
+	if(shkp->isshk)
+		charge = check_credit (charge, shkp); /* Deduct the credit first */
 
 #ifndef GOLDOBJ
 	u.ugold -= charge;
@@ -5998,6 +6006,1203 @@ struct monst *mon;
 	if(u.specialSealsActive&SEAL_NUMINA) count++;
 //	if(u.specialSealsActive&SEAL_UNKNOWN_GOD) count++;
 	return count;
+}
+
+int
+pick_object(example, simple_list, extended_simple_list, extended_allowed_list, mat)
+struct obj *example;
+int *simple_list;
+int *extended_simple_list, *extended_allowed_list;
+int mat;
+{
+	int i, n;
+	int unduplicatable_otyps[] = {
+		CRYSTAL_SWORD, OILSKIN_CLOAK, LIVING_ARMOR, BARNACLE_ARMOR,
+		LANTERN_PLATE_MAIL,
+		DWARVISH_MITHRIL_COAT, ELVEN_MITHRIL_COAT,
+		CRYSTAL_HELM, CRYSTAL_PLATE_MAIL, CRYSTAL_SHIELD, CRYSTAL_GAUNTLETS, CRYSTAL_BOOTS, 
+		FANG_OF_APEP, MIRRORBLADE, 
+		RUNESWORD, CLAWED_HAND, KAMEREL_VAJRA,
+		LIVING_MASK,
+		UNIVERSAL_KEY, CREDIT_CARD, LANTERN, OIL_LAMP, 
+		EXPENSIVE_CAMERA, MIRROR, PURIFIED_MIRROR, R_LYEHIAN_FACEPLATE,
+		LENSES, SUNGLASSES, STETHOSCOPE, TINNING_KIT, UPGRADE_KIT, CAN_OF_GREASE,
+		HOLY_SYMBOL_OF_THE_BLACK_MOTHE, LAND_MINE, HOOK, OILSKIN_SACK,
+		TORCH, SHADOWLANDER_S_TORCH, SUNROD, 
+		0
+	};
+	if(example){
+		int *list_list[3] = {simple_list, extended_simple_list, extended_allowed_list};
+		int li;
+		int *curlist;
+		for(li = 0; li < SIZE(list_list); li++){
+			curlist = list_list[li];
+			for(i = 0; curlist[i]; i++){
+				if(curlist[i] == example->otyp)
+					return example->otyp;
+			}
+		}
+		//If a normally unduplicatable object is specifically allowed, it is allowed.
+		for(i = 0; unduplicatable_otyps[i]; i++){
+			if(unduplicatable_otyps[i] == example->otyp)
+				return 0;
+		}
+		if(is_insight_weapon(example) || is_future_otyp(example->otyp) 
+			|| ensouled_item(example) || objects[example->otyp].oc_magic
+			|| is_firearm(example) || is_harmonium_armor(example)
+			|| Is_dragon_armor(example)
+		){
+			return 0;
+		}
+		//material incompatibilities. Shadowstuff and dragon hide are compatable with everything. Otherwise hadness must match.
+		if(mat != SHADOWSTEEL && mat != DRAGON_HIDE
+			&& (hard_mat(objects[example->otyp].oc_material) != hard_mat(mat))
+		)
+			return 0;
+		return example->otyp;
+	}
+	else {
+		char c = 'a';
+		winid tmpwin;
+		anything any;
+		menu_item *selected;
+
+		any.a_void = 0;         /* zero out all bits */
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+
+		int *list_list[2] = {simple_list, extended_simple_list};
+		int li;
+		int *curlist;
+		for(li = 0; li < SIZE(list_list); li++){
+			curlist = list_list[li];
+			for(i = 0; curlist[i]; i++){
+				any.a_int = curlist[i];
+				add_menu(tmpwin, NO_GLYPH, &any , c, 0, ATR_NONE,
+					 obj_descr[curlist[i]].oc_name, MENU_UNSELECTED);
+				if(c == 'z'){
+					c = 'A';
+				}
+				else if(c == 'Z'){
+					c = 'a';
+				}
+				else c++;
+			}
+		}
+		end_menu(tmpwin, "Items Available:");
+		n = select_menu(tmpwin, PICK_ONE, &selected);
+		if(n <= 0){
+			return -1;
+		}
+		destroy_nhwindow(tmpwin);
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return -1;
+}
+
+int
+pickwep(example, extended_simple_list, extended_allowed_list, mat)
+struct obj *example;
+int *extended_simple_list, *extended_allowed_list;
+int mat;
+{
+	int simple_otyps[] = 
+		{
+			0
+		};
+	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, mat);
+}
+
+int
+pickarmor(example, extended_simple_list, extended_allowed_list, mat)
+struct obj *example;
+int *extended_simple_list, *extended_allowed_list;
+int mat;
+{
+	int simple_otyps[] = 
+		{ 0 };
+	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, mat);
+}
+
+//Pick ring: smiths can't make rings
+//Pick amulet: smiths can't make amulets
+
+int
+picktool(example, extended_simple_list, extended_allowed_list, mat)
+struct obj *example;
+int *extended_simple_list, *extended_allowed_list;
+int mat;
+{
+	int simple_otyps[] = 
+		{0};
+	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, mat);
+}
+
+//Pick food: smiths can't make food
+//Pick potion: smiths can't make potions
+//Pick scroll: smiths can't make scrolls
+//Pick tile: smiths can't make tiles
+//Pick spellbook: smiths can't make spellbooks
+//Pick wand: smiths can't make wands
+//Pick coin: smiths can't make coins
+//Pick gem: smiths can't make gems
+//Pick misc object: smiths can't make misc objects
+//Pick chain: smiths can't make misc chains?
+
+int
+pickeladrin()
+{
+	int i, n;
+	int elist[] = {
+		PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN,
+		PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN,
+		PM_TULANI_ELADRIN, PM_GAE_ELADRIN, 
+		PM_BRIGHID_ELADRIN, PM_UISCERRE_ELADRIN, PM_CAILLEA_ELADRIN,
+		0
+	};
+	char c = 'a';
+	winid tmpwin;
+	anything any;
+	menu_item *selected;
+
+	any.a_void = 0;         /* zero out all bits */
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+
+	for(i = 0; elist[i]; i++){
+		any.a_int = elist[i];
+		add_menu(tmpwin, NO_GLYPH, &any , c, 0, ATR_NONE,
+			 mons[elist[i]].mname, MENU_UNSELECTED);
+		if(c == 'z'){
+			c = 'A';
+		}
+		else if(c == 'Z'){
+			c = 'a';
+		}
+		else c++;
+	}
+	end_menu(tmpwin, "Followers Available:");
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	if(n <= 0){
+		return -1;
+	}
+	destroy_nhwindow(tmpwin);
+	int picked = selected[0].item.a_int;
+	free(selected);
+	return picked;
+}
+
+STATIC_OVL void
+smith_resizeArmor(smith, otmp)
+	struct monst *smith;
+	struct obj *otmp;
+{
+	struct permonst *ptr = 0;
+	struct monst *mtmp;
+	int rx, ry;
+	
+	if (Is_dragon_scales(otmp)){
+		verbalize("Dragon scales cannot be resized.");
+		return;
+	}
+
+    if (getdir("Resize armor to fit what creature? (in what direction)")) {
+
+#ifdef STEED
+		if (u.usteed && u.dz > 0) ptr = u.usteed->data;
+		else 
+#endif
+		if(u.dz){
+			verbalize("I don't think anybody's there.");
+		} else if (u.dx == 0 && u.dy == 0) {
+			ptr = youracedata;
+		} else {
+			rx = u.ux+u.dx; ry = u.uy+u.dy;
+			mtmp = m_at(rx, ry);
+			if(!mtmp){
+				verbalize("I don't think anybody's there.");
+			}
+			else
+				ptr = mtmp->data;
+		}
+	}
+	if(ptr){
+		// change shape
+		if (is_shirt(otmp) || is_suit(otmp)){
+			//Check that the monster can actually have armor that fits it.
+			if(!(ptr->mflagsb&MB_BODYTYPEMASK)){
+				verbalize("I can't figure out how to make it fit.");
+				return;
+			}
+			set_obj_shape(otmp, ptr->mflagsb);
+		}
+		else if (is_helmet(otmp) && !is_hat(otmp)){
+			//Check that the monster can actually have armor that fits it.
+			if(!has_head(ptr)){
+				verbalize("No head!");
+				return;
+			}
+			set_obj_shape(otmp, ptr->mflagsb);
+		}
+		
+		// change size (AFTER shape, because this may be aborted during that step.
+		otmp->objsize = ptr->msize;
+		if(ptr->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && is_boots(otmp))
+			otmp->objsize++;
+	}
+	else {
+		// verbalize("How big shall I make it?");
+		winid tmpwin;
+		anything any;
+		menu_item *selected;
+		int n;
+
+		any.a_void = 0;         /* zero out all bits */
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+
+		any.a_int = MZ_TINY+1;
+		add_menu(tmpwin, NO_GLYPH, &any , 't', 0, ATR_NONE,
+			 "Tiny.", MENU_UNSELECTED);
+		any.a_int = MZ_SMALL+1;
+		add_menu(tmpwin, NO_GLYPH, &any , 's', 0, ATR_NONE,
+			 "Small.", MENU_UNSELECTED);
+		any.a_int = MZ_MEDIUM+1;
+		add_menu(tmpwin, NO_GLYPH, &any , 'm', 0, ATR_NONE,
+			 "Medium.", MENU_UNSELECTED);
+		any.a_int = MZ_LARGE+1;
+		add_menu(tmpwin, NO_GLYPH, &any , 'l', 0, ATR_NONE,
+			 "Large.", MENU_UNSELECTED);
+		any.a_int = MZ_HUGE+1;
+		add_menu(tmpwin, NO_GLYPH, &any , 'h', 0, ATR_NONE,
+			 "Huge.", MENU_UNSELECTED);
+		any.a_int = MZ_GIGANTIC+1;
+		add_menu(tmpwin, NO_GLYPH, &any , 'g', 0, ATR_NONE,
+			 "Gigantic.", MENU_UNSELECTED);
+
+		end_menu(tmpwin, "What size shall I make it?");
+		n = select_menu(tmpwin, PICK_ONE, &selected);
+		if(n > 0){
+			otmp->objsize = selected[0].item.a_int-1;
+			free(selected);
+		}
+		destroy_nhwindow(tmpwin);
+
+		//
+		if(is_shirt(otmp) || is_suit(otmp)){
+			tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+
+			any.a_long = MB_HUMANOID;
+			add_menu(tmpwin, NO_GLYPH, &any , 'h', 0, ATR_NONE,
+				 "Humanoid.", MENU_UNSELECTED);
+			any.a_long = MB_ANIMAL;
+			add_menu(tmpwin, NO_GLYPH, &any , 'b', 0, ATR_NONE,
+				 "Barded.", MENU_UNSELECTED);
+			any.a_long = MB_SLITHY;
+			add_menu(tmpwin, NO_GLYPH, &any , is_shirt(otmp) ? 't' : 's', 0, ATR_NONE,
+				 is_shirt(otmp) ? "Tubular." : "Segmented.", MENU_UNSELECTED);
+			if(otmp->otyp == BODYGLOVE || (is_suit(otmp) && !(otmp->otyp == ELVEN_TOGA || is_dress(otmp->otyp)))){
+				any.a_long = MB_SNAKELEG;
+				add_menu(tmpwin, NO_GLYPH, &any , 'l', 0, ATR_NONE,
+					 "Snake-leg.", MENU_UNSELECTED);
+				any.a_long = MB_CENTAUR;
+				add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
+					 "Centauroid.", MENU_UNSELECTED);
+			}
+			any.a_long = MB_ANIMAL | MB_SLITHY;
+			add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+				 "Snakeback.", MENU_UNSELECTED);
+
+			end_menu(tmpwin, "What shape shall I make it?");
+
+			n = select_menu(tmpwin, PICK_ONE, &selected);
+			if(n > 0){
+				set_obj_shape(otmp, selected[0].item.a_long);
+				free(selected);
+			}
+			destroy_nhwindow(tmpwin);
+		}
+		else if(is_helmet(otmp) && !is_hat(otmp)){
+			tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+
+			any.a_int = 1;
+			add_menu(tmpwin, NO_GLYPH, &any , 'h', 0, ATR_NONE,
+				 "Humanoid.", MENU_UNSELECTED);
+			any.a_int = 2;
+			add_menu(tmpwin, NO_GLYPH, &any , 'b', 0, ATR_NONE,
+				 "Barded.", MENU_UNSELECTED);
+			any.a_int = 3;
+			add_menu(tmpwin, NO_GLYPH, &any , 'n', 0, ATR_NONE,
+				 "Snake-neck.", MENU_UNSELECTED);
+
+			end_menu(tmpwin, "What shape shall I make it?");
+
+			n = select_menu(tmpwin, PICK_ONE, &selected);
+			if(n > 0){
+				set_obj_shape(otmp, selected[0].item.a_int == 1 ? 0 : selected[0].item.a_int == 1 ? MB_LONGHEAD : MB_LONGNECK);
+				free(selected);
+			}
+			destroy_nhwindow(tmpwin);
+		}
+	}
+	fix_object(otmp);
+}
+
+void
+oona_smithy(smith)
+struct monst *smith;
+{
+	winid tmpwin;
+	anything any;
+	menu_item *selected;
+	int otyp = -1;
+	int n;
+	int oona_basic_armor[] =
+		{BUCKLER, EILISTRAN_ARMOR, HARMONIUM_BOOTS,HARMONIUM_GAUNTLETS, HARMONIUM_HELM, HARMONIUM_PLATE,  
+			HARMONIUM_SCALE_MAIL, KITE_SHIELD, WATER_WALKING_BOOTS,  
+			0
+		};
+	int oona_basic_tools[] = {BOX, PICK_AXE, LOCK_PICK, SKELETON_KEY, UPGRADE_KIT, 0};
+	int oona_basic_weapons[] = {ARROW, ATLATL, AXE, BATTLE_AXE, BOW, BROADSWORD, BULLWHIP, 
+			CLUB, CROSSBOW, CROSSBOW_BOLT, DAGGER, DART, FLAIL, GLAIVE, JAVELIN, 
+			KNIFE, LANCE, LONG_SWORD, MACE, SABER, SCIMITAR, SCYTHE, SICKLE, 
+			SHORT_SWORD, SPEAR, STILETTO, RAPIER, TRIDENT, TWO_HANDED_SWORD, 
+			QUARTERSTAFF,
+			0
+		};
+	int oona_advanced_armor[] = {CORNUTHAUM, DUNCE_CAP, GAUNTLETS_OF_FUMBLING, GAUNTLETS_OF_POWER, GAUNTLETS_OF_DEXTERITY, 
+								HELM_OF_BRILLIANCE, HELM_OF_OPPOSITE_ALIGNMENT, HELM_OF_TELEPATHY, HELM_OF_DRAIN_RESISTANCE, 
+								SHIELD_OF_REFLECTION, 
+								SPEED_BOOTS, JUMPING_BOOTS, KICKING_BOOTS, FUMBLE_BOOTS, FLYING_BOOTS };
+	int oona_advanced_tools[] = { 0 };
+	int oona_advanced_weapons[] = {0};
+	struct obj *example = 0;
+	
+	if(!smith->mtame){
+		verbalize("I don't do that kind of thing anymore.");
+		return;
+	}
+
+	any.a_void = 0;         /* zero out all bits */
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	
+	char sbuf[BUFSZ];
+	if(ESMT(smith)->smith_platinum_stockpile > 1000){
+		any.a_int = 1;
+		add_menu(tmpwin, NO_GLYPH, &any , 'a', 0, ATR_NONE,
+			 "Ask for some armor.", MENU_UNSELECTED);
+		any.a_int = 2;
+		add_menu(tmpwin, NO_GLYPH, &any , 't', 0, ATR_NONE,
+			 "Ask for a tool.", MENU_UNSELECTED);
+		any.a_int = 3;
+		add_menu(tmpwin, NO_GLYPH, &any , 'w', 0, ATR_NONE,
+			 "Ask for a weapon.", MENU_UNSELECTED);
+		any.a_int = 4;
+		add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
+			 "Ask for a copy of an item.", MENU_UNSELECTED);
+		// any.a_int = 5;
+		// add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+			 // "Ask her to build a new follower.", MENU_UNSELECTED);
+		any.a_int = 6;
+		add_menu(tmpwin, NO_GLYPH, &any , 'p', 0, ATR_NONE,
+			 "Contribute some platinum.", MENU_UNSELECTED);
+		Sprintf(sbuf, "Services Available:");
+	}
+	else {
+		any.a_int = 6;
+		add_menu(tmpwin, NO_GLYPH, &any , 'p', 0, ATR_NONE,
+			 "Contribute some platinum.", MENU_UNSELECTED);
+		Sprintf(sbuf, "I need to rebuild my stock of platinum!");
+	}
+	end_menu(tmpwin, sbuf);
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	if(n <= 0){
+		pline("Never mind.");
+		return;
+	}
+	destroy_nhwindow(tmpwin);
+	int picked = selected[0].item.a_int;
+	free(selected);
+	switch(picked){
+		case 1:
+d_armor:
+			otyp = pickarmor(example, oona_basic_armor, oona_advanced_armor, PLATINUM);
+		break;
+		case 2:
+d_tool:
+			otyp = picktool(example, oona_basic_tools, oona_advanced_tools, PLATINUM);
+		break;
+		case 3:
+d_weapon:
+			otyp = pickwep(example, oona_basic_weapons, oona_advanced_weapons, PLATINUM);
+		break;
+		case 4:{
+			const char smith_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
+			example = getobj(smith_classes, "show to the smith");
+			if(!example)
+				otyp = -1;
+			else switch(example->oclass){
+				case WEAPON_CLASS:
+					goto d_weapon;
+				case ARMOR_CLASS:
+					goto d_armor;
+				case TOOL_CLASS:
+					goto d_tool;
+				default:
+					otyp = 0;
+			}
+		}break;
+		// case 5:{
+			// if(!smith->mtame || !get_mx(smith, MX_EDOG) || EDOG(smith)->dracae_pets >= dog_limit()/2){
+				// verbalize("There are no additional followers for me to incarnate.");
+				// return;
+			// }
+			// int mtyp = pickeladrin();
+			// if(mtyp < 0)
+				// return;
+			// int cost = (int) mons[mtyp].cnutrit ? mons[mtyp].cnutrit : mons[mtyp].msize*1500 + 1000;
+			// cost += cost/10;
+			// if(ESMT(smith)->smith_platinum_stockpile < cost){
+				// pline("I don't have enough biomass to incarnate such a being.");
+				// return;
+			// }
+			// int x = smith->mx;
+			// int y = smith->my;
+			// struct monst *mtmp;
+			// rloc(smith, TRUE);
+			// mtmp = makemon(&mons[mtyp], x, y, NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG);
+			// if(mtmp){
+				// ESMT(smith)->smith_platinum_stockpile -= cost;
+				// EDOG(smith)->dracae_pets++;
+				// initedog(mtmp);
+				// EDOG(mtmp)->loyal = 1;
+				// mtmp->m_lev = u.ulevel;
+				// mtmp->mtame = 10;
+				// mtmp->mpeaceful = 1;
+				// mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
+				// mtmp->mhp = mtmp->mhpmax;
+				// dracae_eladrin_spawn_equip(mtmp, mtmp->mtyp);
+				// verbalize("%s's here.", SheHeIt(mtmp));
+				// m_dowear(mtmp, TRUE);
+				// m_level_up_intrinsic(mtmp);
+			// }
+			// return;
+		// }break;
+		case 6:{
+			struct obj *resource;
+			resource = getobj(identify_types, "contribute for scrap platinum");
+			if(!resource){
+				pline("Never mind.");
+				return;
+			}
+			if(resource->obj_material == PLATINUM && !resource->oartifact && !get_ox(resource, OX_ESUM)){
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Melt %s for platinum?", xname(resource));
+				if(yn(qbuf) == 'y'){
+					ESMT(smith)->smith_platinum_stockpile += resource->owt;
+					useupall(resource);
+				}
+			}
+			else if(resource->obj_material == BONE || resource->obj_material == MINERAL){
+				if(rn2(10))
+					verbalize("I don't see why you would think I could use that.");
+				else verbalize("I suppose you think you're funny.");
+			}
+			else verbalize("That doesn't seem suitable to me.");
+			return;
+		}break;
+	}
+	if(otyp == 0){
+		verbalize("I can't make that.");
+		return;
+	}
+	else if(otyp == -1){
+		pline("Never mind.");
+		return;
+	}
+
+	struct obj *obj = mksobj(otyp, MKOBJ_NOINIT);
+	set_material_gm(obj, objects[otyp].oc_material);
+	bless(obj);
+
+	set_material(obj, PLATINUM);
+	if(otyp == MASK){
+		if(example)
+			obj->corpsenm = example->corpsenm;
+		else obj->corpsenm = rndmonnum();
+	}
+	else if(objects[otyp].oc_class == WEAPON_CLASS || is_weptool(obj)){
+		any.a_void = 0;         /* zero out all bits */
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+
+		any.a_int = OPROP_OONA_FIREW;
+		add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+			 "Fire.", MENU_UNSELECTED);
+		any.a_int = OPROP_OONA_COLDW;
+		add_menu(tmpwin, NO_GLYPH, &any , 'i', 0, ATR_NONE,
+			 "Ice.", MENU_UNSELECTED);
+		any.a_int = OPROP_OONA_ELECW;
+		add_menu(tmpwin, NO_GLYPH, &any , 'e', 0, ATR_NONE,
+			 "Electricity.", MENU_UNSELECTED);
+
+		end_menu(tmpwin, "What element shall I align it to?");
+		n = select_menu(tmpwin, PICK_ONE, &selected);
+		if(n > 0){
+			destroy_nhwindow(tmpwin);
+			add_oprop(obj, selected[0].item.a_int);
+			free(selected);
+		}
+		else {
+			add_oprop(obj, !rn2(3) ? OPROP_OONA_ELECW : rn2(2) ? OPROP_OONA_COLDW : OPROP_OONA_FIREW);
+		}
+		fix_object(obj);
+	}
+	else if(objects[otyp].oc_class == ARMOR_CLASS){
+		int element = 0;
+		if(yn("Size it to a particular creature?")=='y')
+			smith_resizeArmor(smith, obj);
+		else {
+			//sized for you
+			obj->objsize = youracedata->msize;
+			set_obj_shape(obj, youracedata->mflagsb);
+		}
+		any.a_void = 0;         /* zero out all bits */
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+
+		any.a_int = OPROP_FIRE;
+		add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+			 "Fire.", MENU_UNSELECTED);
+		any.a_int = OPROP_COLD;
+		add_menu(tmpwin, NO_GLYPH, &any , 'i', 0, ATR_NONE,
+			 "Ice.", MENU_UNSELECTED);
+		any.a_int = OPROP_ELEC;
+		add_menu(tmpwin, NO_GLYPH, &any , 'e', 0, ATR_NONE,
+			 "Electricity.", MENU_UNSELECTED);
+
+		end_menu(tmpwin, "What element shall I align it to?");
+		n = select_menu(tmpwin, PICK_ONE, &selected);
+		if(n > 0){
+			destroy_nhwindow(tmpwin);
+			element = selected[0].item.a_int;
+			free(selected);
+		}
+		else {
+			element = !rn2(3) ? OPROP_ELEC : rn2(2) ? OPROP_COLD : OPROP_FIRE;
+		}
+		fix_object(obj);
+		if(is_gloves(obj) || is_boots(obj)){
+			if(element == OPROP_FIRE){
+				add_oprop(obj, OPROP_OONA_FIREW);
+			}
+			else if(element == OPROP_COLD){
+				add_oprop(obj, OPROP_OONA_COLDW);
+			}
+			else if(element == OPROP_ELEC){
+				add_oprop(obj, OPROP_OONA_ELECW);
+			}
+			else {
+				add_oprop(obj, !rn2(3) ? OPROP_OONA_ELECW : rn2(2) ? OPROP_OONA_COLDW : OPROP_OONA_FIREW);
+			}
+		}
+		add_oprop(obj, element);
+		if(!is_harmonium_armor(obj))
+			add_oprop(obj, OPROP_AXIO);
+	}
+	verbalize("It's done.");
+	int cost = (int) obj->owt;
+	if(objects[obj->otyp].oc_magic){
+		cost += 100;
+		cost *= 2;
+	}
+	cost += cost/10;
+	ESMT(smith)->smith_platinum_stockpile -= cost;
+	if(wizard)
+		pline("cost: %d, remaining: %d", cost, ESMT(smith)->smith_platinum_stockpile);
+
+	hold_another_object(obj, "Oops!  You drop %s!",
+				      doname(obj), (const char *)0);
+}
+
+void
+dracae_smithy(smith)
+struct monst *smith;
+{
+	winid tmpwin;
+	anything any;
+	menu_item *selected;
+	int otyp = -1;
+	int n;
+	int dracae_basic_weapons[] = {ARROW, ATLATL, AXE, BATTLE_AXE, BOW, BROADSWORD, BULLWHIP, CLUB, CROSSBOW, CROSSBOW_BOLT, DAGGER, DART, 
+			FLAIL, GLAIVE, JAVELIN, KNIFE, LANCE, LONG_SWORD, MACE, 
+			RAPIER, SABER, SCIMITAR, SCYTHE, SHORT_SWORD, SICKLE, SPEAR, STILETTO, TRIDENT, TWO_HANDED_SWORD,
+			QUARTERSTAFF,
+			0
+		};
+	int dracae_basic_armor[] = 
+		{ARMORED_BOOTS, BANDED_MAIL, BUCKLER, CLOAK, GAUNTLETS, PLAIN_DRESS, PLATE_MAIL,  
+			KITE_SHIELD, SPLINT_MAIL, SCALE_MAIL, WAISTCLOTH,  
+			0, 0, 0
+		};
+	int dracae_basic_tools[] = {BLINDFOLD, BOX, LOCK_PICK, PICK_AXE, SACK, 0, 0};
+	int dracae_advanced_armor[] = {OILSKIN_CLOAK, 0, 0, 0};
+	int dracae_advanced_tools[] = {ARMOR_SALVE, OILSKIN_SACK, UNICORN_HORN, OIL_LAMP, CAN_OF_GREASE, LIVING_MASK, 0};
+	int empty_list[] = {0};
+	struct obj *example = 0;
+	if(!smith->mtame){
+		verbalize("I have no use for gold.");
+		return;
+	}
+	if(dungeon_topology.d_chaos_dvariant == MITHARDIR){
+		dracae_basic_armor[SIZE(dracae_basic_armor)-3] = LIVING_ARMOR;
+		dracae_basic_armor[SIZE(dracae_basic_armor)-2] = BARNACLE_ARMOR;
+		dracae_basic_tools[SIZE(dracae_basic_tools)-2] = LIVING_MASK;
+		dracae_advanced_tools[SIZE(dracae_advanced_tools)-2] = 0;
+	}
+	else {
+		dracae_advanced_armor[SIZE(dracae_advanced_armor)-3] = LIVING_ARMOR;
+		dracae_advanced_armor[SIZE(dracae_advanced_armor)-2] = BARNACLE_ARMOR;
+	}
+
+	any.a_void = 0;         /* zero out all bits */
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+
+	char sbuf[BUFSZ];
+	if(ESMT(smith)->smith_biomass_stockpile > 5000){
+		any.a_int = 1;
+		add_menu(tmpwin, NO_GLYPH, &any , 'a', 0, ATR_NONE,
+			 "Ask for some armor.", MENU_UNSELECTED);
+		any.a_int = 2;
+		add_menu(tmpwin, NO_GLYPH, &any , 't', 0, ATR_NONE,
+			 "Ask for a tool.", MENU_UNSELECTED);
+		any.a_int = 3;
+		add_menu(tmpwin, NO_GLYPH, &any , 'w', 0, ATR_NONE,
+			 "Ask for a weapon.", MENU_UNSELECTED);
+		any.a_int = 4;
+		add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
+			 "Ask for a copy of an item.", MENU_UNSELECTED);
+		any.a_int = 5;
+		add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+			 "Ask her to incarnate a new follower.", MENU_UNSELECTED);
+		any.a_int = 6;
+		add_menu(tmpwin, NO_GLYPH, &any , 'b', 0, ATR_NONE,
+			 "Contribute some biomass.", MENU_UNSELECTED);
+		Sprintf(sbuf, "Services Available:");
+	}
+	else {
+		any.a_int = 6;
+		add_menu(tmpwin, NO_GLYPH, &any , 'b', 0, ATR_NONE,
+			 "Contribute some biomass.", MENU_UNSELECTED);
+		Sprintf(sbuf, "I need to rebuild my stock of biomass!");
+	}
+	end_menu(tmpwin, sbuf);
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	if(n <= 0){
+		pline("Never mind.");
+		return;
+	}
+	destroy_nhwindow(tmpwin);
+	int picked = selected[0].item.a_int;
+	free(selected);
+	switch(picked){
+		case 1:
+d_armor:
+			otyp = pickarmor(example, dracae_basic_armor, dracae_advanced_armor, DRAGON_HIDE);
+		break;
+		case 2:
+d_tool:
+			otyp = picktool(example, dracae_basic_tools, dracae_advanced_tools, DRAGON_HIDE);
+		break;
+		case 3:
+d_weapon:
+			otyp = pickwep(example, dracae_basic_weapons, empty_list, DRAGON_HIDE);
+		break;
+		case 4:{
+			const char smith_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
+			example = getobj(smith_classes, "show to the smith");
+			if(!example)
+				otyp = -1;
+			else switch(example->oclass){
+				case WEAPON_CLASS:
+					goto d_weapon;
+				case ARMOR_CLASS:
+					goto d_armor;
+				case TOOL_CLASS:
+					goto d_tool;
+				default:
+					otyp = 0;
+			}
+		}break;
+		case 5:{
+			if(!smith->mtame || u.dracae_pets >= dog_limit()/2){
+				verbalize("There are no additional followers for me to incarnate.");
+				return;
+			}
+			int mtyp = pickeladrin();
+			if(mtyp < 0)
+				return;
+			int cost = (int) mons[mtyp].cnutrit ? mons[mtyp].cnutrit : mons[mtyp].msize*1500 + 1000;
+			cost += cost/10;
+			if(ESMT(smith)->smith_biomass_stockpile < cost){
+				pline("I don't have enough biomass to incarnate such a being.");
+				return;
+			}
+			int x = smith->mx;
+			int y = smith->my;
+			struct monst *mtmp;
+			rloc(smith, TRUE);
+			mtmp = makemon(&mons[mtyp], x, y, NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG);
+			if(mtmp){
+				ESMT(smith)->smith_biomass_stockpile -= cost;
+				u.dracae_pets++;
+				initedog(mtmp);
+				EDOG(mtmp)->loyal = 1;
+				mtmp->m_lev = u.ulevel;
+				mtmp->mtame = 10;
+				mtmp->mpeaceful = 1;
+				mtmp->mhpmax = (mtmp->m_lev * hd_size(mtmp->data)) - hd_size(mtmp->data)/2;
+				mtmp->mhp = mtmp->mhpmax;
+				dracae_eladrin_spawn_equip(mtmp, mtmp->mtyp);
+				verbalize("%s's here.", SheHeIt(mtmp));
+				m_dowear(mtmp, TRUE);
+				m_level_up_intrinsic(mtmp);
+			}
+			return;
+		}break;
+		case 6:{
+			const char food_class[] = { FOOD_CLASS, 0 };
+			struct obj *food;
+			food = getobj(food_class, "feed biomass to dracae");
+			if(!food){
+				pline("Never mind.");
+				return;
+			}
+			if(is_edible_mon(smith, food) && !food->oartifact && !get_ox(food, OX_ESUM)){
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Feed %s to %s for biomass?", xname(food), mon_nam(smith));
+				if(yn(qbuf) == 'y'){
+					ESMT(smith)->smith_biomass_stockpile += (food->otyp == CORPSE) ? mons[food->corpsenm].cnutrit : (int) objects[food->otyp].oc_nutrition;
+					useup(food);
+				}
+			}
+			else verbalize("That doesn't seem very edible to me.");
+			return;
+		}break;
+	}
+	if(otyp == 0){
+		verbalize("I can't make that.");
+		return;
+	}
+	else if(otyp == -1){
+		pline("Never mind.");
+		return;
+	}
+
+	struct obj *obj = mksobj(otyp, MKOBJ_NOINIT);
+	set_material_gm(obj, objects[otyp].oc_material);
+	bless(obj);
+	if(otyp == UNICORN_HORN){
+		//Pass
+	}
+	else if(otyp == ARMOR_SALVE){
+		obj->spe = rn1(3,3);
+	}
+	else if(otyp == CAN_OF_GREASE){
+		obj->spe = rnd(25);
+		set_material(obj, SHELL_MAT);
+	}
+	else if(otyp == MASK){
+		if(example)
+			obj->corpsenm = example->corpsenm;
+		else obj->corpsenm = rndmonnum();
+		set_material(obj, SHELL_MAT);
+	}
+	else if(objects[otyp].oc_class == WEAPON_CLASS || is_weptool(obj)){
+		set_material(obj, DRAGON_HIDE);
+		if(yn("Shall I imbue it with an extra holy essence?")=='y'){
+			add_oprop(obj, OPROP_HOLYW);
+			add_oprop(obj, OPROP_LESSER_ACIDW);
+		}
+		else {
+			add_oprop(obj, OPROP_ACIDW);
+			if(has_template(smith, ILLUMINATED))
+				add_oprop(obj, OPROP_LESSER_HOLYW);
+		}
+		fix_object(obj);
+	}
+	else if(hard_mat(objects[otyp].oc_material)){
+		set_material(obj, SHELL_MAT);
+	}
+	else {
+		if(objects[otyp].oc_material == CLOTH)
+			set_material(obj, LEATHER);
+		else
+			set_material(obj, DRAGON_HIDE);
+	}
+	if(objects[otyp].oc_class == ARMOR_CLASS){
+		if(yn("Size it to a particular creature?")=='y')
+			smith_resizeArmor(smith, obj);
+		else {
+			//sized for you
+			obj->objsize = youracedata->msize;
+			set_obj_shape(obj, youracedata->mflagsb);
+		}
+		add_oprop(obj, OPROP_HOLY);
+		if(is_gloves(obj) || is_boots(obj)){
+			if(yn("Shall I imbue it with an extra holy essence?")=='y'){
+				add_oprop(obj, OPROP_HOLYW);
+				add_oprop(obj, OPROP_LESSER_ACIDW);
+			}
+			else {
+				add_oprop(obj, OPROP_ACIDW);
+				if(has_template(smith, ILLUMINATED))
+					add_oprop(obj, OPROP_LESSER_HOLYW);
+			}
+		}
+	}
+	verbalize("It's done.");
+	int cost = (int) objects[otyp].oc_nutrition*10;
+	cost = cost*obj->owt/objects[otyp].oc_weight;
+	cost += cost/10;
+	ESMT(smith)->smith_biomass_stockpile -= cost;
+	if(wizard)
+		pline("cost: %d, remaining: %d", cost, ESMT(smith)->smith_biomass_stockpile);
+	place_object(obj, smith->mx, smith->my);
+	rloc(smith, TRUE);
+}
+
+void
+generic_smithy(smith, basic_armor, advanced_armor, basic_tool, advanced_tool, basic_weapon, advanced_weapon, smithResource, resourceString, mat, threshold)
+struct monst *smith;
+int *basic_armor, *advanced_armor;
+int *basic_tool, *advanced_tool;
+int *basic_weapon, *advanced_weapon;
+int *smithResource;
+char *resourceString;
+int mat;
+int threshold;
+{
+	winid tmpwin;
+	anything any;
+	menu_item *selected;
+	int otyp = -1;
+	int n;
+	struct obj *example = 0;
+	char buffer[BUFSZ] = {0};
+
+	any.a_void = 0;         /* zero out all bits */
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	
+	char sbuf[BUFSZ];
+	if(*smithResource > threshold){
+		any.a_int = 1;
+		add_menu(tmpwin, NO_GLYPH, &any , 'a', 0, ATR_NONE,
+			 "Ask for some armor.", MENU_UNSELECTED);
+		any.a_int = 2;
+		add_menu(tmpwin, NO_GLYPH, &any , 't', 0, ATR_NONE,
+			 "Ask for a tool.", MENU_UNSELECTED);
+		any.a_int = 3;
+		add_menu(tmpwin, NO_GLYPH, &any , 'w', 0, ATR_NONE,
+			 "Ask for a weapon.", MENU_UNSELECTED);
+		any.a_int = 4;
+		add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
+			 "Ask for a copy of an item.", MENU_UNSELECTED);
+		any.a_int = 6;
+		Sprintf(buffer, "Contribute some %s.", resourceString);
+		add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
+			 buffer, MENU_UNSELECTED);
+		Sprintf(sbuf, "Services Available:");
+	}
+	else {
+		any.a_int = 6;
+		Sprintf(buffer, "Contribute some %s.", resourceString);
+		add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
+			 buffer, MENU_UNSELECTED);
+		Sprintf(sbuf, "I need to rebuild my stock of %s!", resourceString);
+	}
+	end_menu(tmpwin, sbuf);
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	if(n <= 0){
+		pline("Never mind.");
+		return;
+	}
+	destroy_nhwindow(tmpwin);
+	int picked = selected[0].item.a_int;
+	free(selected);
+	switch(picked){
+		case 1:
+d_armor:
+			otyp = pickarmor(example, basic_armor, advanced_armor, mat);
+		break;
+		case 2:
+d_tool:
+			otyp = picktool(example, basic_tool, advanced_tool, mat);
+		break;
+		case 3:
+d_weapon:
+			otyp = pickwep(example, basic_weapon, advanced_weapon, mat);
+		break;
+		case 4:{
+			const char smith_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
+			example = getobj(smith_classes, "show to the smith");
+			if(!example)
+				otyp = -1;
+			else switch(example->oclass){
+				case WEAPON_CLASS:
+					goto d_weapon;
+				case ARMOR_CLASS:
+					goto d_armor;
+				case TOOL_CLASS:
+					goto d_tool;
+				default:
+					otyp = 0;
+			}
+		}break;
+		case 6:{
+			struct obj *resource;
+			Sprintf(buffer, "contribute for scrap %s", resourceString);
+			resource = getobj(identify_types, buffer);
+			if(!resource){
+				pline("Never mind.");
+				return;
+			}
+			//NOT SUMMONED
+			if(mat == MITHRIL && resource->otyp == CHUNK_OF_UNREFINED_MITHRIL){
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Refine %s into mithril?", xname(resource));
+				if(yn(qbuf) == 'y'){
+					*smithResource += 1000;
+					useup(resource);
+				}
+			}
+			else if(mat == SHADOWSTEEL && resource->otyp == CHUNK_OF_FOSSIL_DARK){
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Refine %s?", xname(resource));
+				if(yn(qbuf) == 'y'){
+					*smithResource += 1000;
+					useup(resource);
+				}
+			}
+			else if(resource->obj_material == mat && !resource->oartifact && !get_ox(resource, OX_ESUM)){
+				char qbuf[BUFSZ];
+				Sprintf(qbuf, "Melt %s for %s?", xname(resource), resourceString);
+				if(yn(qbuf) == 'y'){
+					*smithResource += resource->owt;
+					useupall(resource);
+				}
+			}
+			else verbalize("That doesn't seem suitable to me.");
+			return;
+		}break;
+	}
+	if(otyp == 0){
+		verbalize("I can't make that.");
+		return;
+	}
+	else if(otyp == -1){
+		pline("Never mind.");
+		return;
+	}
+
+	struct obj *obj = mksobj(otyp, MKOBJ_NOINIT);
+	set_material_gm(obj, objects[otyp].oc_material);
+	uncurse(obj);
+
+	set_material(obj, mat);
+	if(otyp == MASK){
+		if(example)
+			obj->corpsenm = example->corpsenm;
+		else obj->corpsenm = rndmonnum();
+	}
+	else if(objects[otyp].oc_class == ARMOR_CLASS){
+		int element = 0;
+		if(yn("Size it to a particular creature?")=='y')
+			smith_resizeArmor(smith, obj);
+		else {
+			//sized for you
+			obj->objsize = youracedata->msize;
+			set_obj_shape(obj, youracedata->mflagsb);
+		}
+		fix_object(obj);
+	}
+	// Make shadowsteel stuff fixed
+	if(mat == SHADOWSTEEL){
+		obj->oerodeproof = TRUE;
+	}
+	// Non-tame smiths will charge for their services
+	if(!smith->mtame){
+		/* Init your name */
+		char *slang;
+		if (humanoid_upperbody(youracedata) != humanoid_upperbody(smith->data))
+			slang = "ugly";
+		else
+			slang = (flags.female) ? "lady" : "buddy";
+
+		int price = get_cost(obj, smith);
+		if (shk_offer_price(slang, price, smith) == FALSE){
+			obfree(obj, (struct obj *)0);
+			return;
+		}
+	}
+	
+	verbalize("It's done.");
+	int cost = (int) obj->owt;
+	if(objects[obj->otyp].oc_magic){
+		cost += 100;
+		cost *= 2;
+	}
+	cost += cost/10;
+	*smithResource -= cost;
+	if(wizard)
+		pline("cost: %d, remaining: %d", cost, *smithResource);
+
+	hold_another_object(obj, "Oops!  You drop %s!",
+				      doname(obj), (const char *)0);
+}
+
+void
+goblin_smithy(smith)
+struct monst *smith;
+{
+	int basic_weapons[] = { ORCISH_ARROW, ORCISH_SPEAR, ORCISH_DAGGER, ORCISH_SHORT_SWORD, ORCISH_BOW, 0 };
+	int advanced_weapons[] = {0};
+	int basic_armor[] = { ORCISH_HELM, ORCISH_CHAIN_MAIL, ORCISH_RING_MAIL, ORCISH_SHIELD, 0 };
+	int advanced_armor[] = {0};
+	int basic_tools[] = { BOX, LOCK_PICK, 0 };
+	int advanced_tools[] = {0};
+
+	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
+}
+
+void
+dwarf_ironsmithy(smith)
+struct monst *smith;
+{
+	int basic_weapons[] = { ATGEIR, AKLYS, AXE, BATTLE_AXE, DAGGER, DART, DWARVISH_MATTOCK, DWARVISH_SHORT_SWORD, DWARVISH_SPEAR, JAVELIN, WAR_HAMMER, 0 };
+	int advanced_weapons[] = {0};
+	int basic_armor[] = { CHAIN_MAIL, DWARVISH_HELM, DWARVISH_ROUNDSHIELD, GAUNTLETS, SHOES, 0 };
+	int advanced_armor[] = { 0 };
+	int basic_tools[] = { BOX, LOCK_PICK, MASK, OIL_LAMP, PICK_AXE, SKELETON_KEY, 0 };
+	int advanced_tools[] = { SADDLE, 0 };
+
+	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
+}
+
+void
+dwarf_silversmithy(smith)
+struct monst *smith;
+{
+	int basic_weapons[] = {ATGEIR, DART, DWARVISH_SPEAR, JAVELIN, MOON_AXE, MORNING_STAR, 0};
+	int advanced_weapons[] = { 0 };
+	int basic_armor[] = { DWARVISH_HELM, KICKING_BOOTS, 0 };
+	int advanced_armor[] = { SHIELD_OF_REFLECTION, 0 };
+	int basic_tools[] = { BUGLE, DRUM, FLUTE, HARP, TOOLED_HORN, 0 };
+	int advanced_tools[] = {0};
+
+	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_silver_stockpile), "silver", SILVER, 750);
+}
+
+void
+dwarf_smithy(smith)
+struct monst *smith;
+{
+	if(yn("Commission silverwork?") == 'y'){
+		dwarf_silversmithy(smith);
+	}
+	else {
+		dwarf_ironsmithy(smith);
+	}
+}
+
+void
+mithril_smithy(smith)
+struct monst *smith;
+{
+	int basic_weapons[] = { ELVEN_ARROW, ELVEN_BOW, ELVEN_BROADSWORD, ELVEN_DAGGER, ELVEN_LANCE, ELVEN_MACE,
+							ELVEN_SHORT_SWORD, ELVEN_SICKLE, ELVEN_SPEAR, HIGH_ELVEN_WARSWORD, 
+							0 };
+	int advanced_weapons[] = { ATHAME, 0 };
+	int basic_armor[] = { ELVEN_HELM, ELVEN_BOOTS, ELVEN_MITHRIL_COAT, ELVEN_SHIELD, HIGH_ELVEN_HELM, HIGH_ELVEN_PLATE, HIGH_ELVEN_GAUNTLETS, 0 };
+	int advanced_armor[] = { DWARVISH_MITHRIL_COAT, 0 };
+	int basic_tools[] = { BOX, LOCK_PICK, MASK, OIL_LAMP, PICK_AXE, SKELETON_KEY, UPGRADE_KIT, BELL, BUGLE, DRUM, FLUTE, HARP, TOOLED_HORN, 0 };
+	int advanced_tools[] = { 0 };
+
+	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_mithril_stockpile), "mithril", MITHRIL, 300);
+}
+
+void
+shadow_smithy(smith)
+struct monst *smith;
+{
+	int basic_weapons[] = { DROVEN_CROSSBOW, 0 };
+	int advanced_weapons[] = { PINCER_STAFF, DISKOS, MIRRORBLADE, BLADE_OF_MERCY, RAKUYO, ISAMUSEI, BREAKING_WHEEL, BESTIAL_CLAW, CARCOSAN_STING, 0 };
+	int basic_armor[] = { ARMORED_BOOTS, DROVEN_CHAIN_MAIL, DROVEN_HELM, DROVEN_PLATE_MAIL, GAUNTLETS, NOBLE_S_DRESS, 0 };
+	int advanced_armor[] = { DUNCE_CAP, HELM_OF_BRILLIANCE, HELM_OF_OPPOSITE_ALIGNMENT, HELM_OF_TELEPATHY, HELM_OF_DRAIN_RESISTANCE,
+							 GAUNTLETS_OF_FUMBLING, GAUNTLETS_OF_POWER, GAUNTLETS_OF_DEXTERITY, SPEED_BOOTS, 
+							 WATER_WALKING_BOOTS, JUMPING_BOOTS, ELVEN_BOOTS, KICKING_BOOTS, FUMBLE_BOOTS, 
+							 FLYING_BOOTS, 0 };
+	int basic_tools[] = { MASK, UPGRADE_KIT, 0 };
+	int advanced_tools[] = { 0 };
+
+	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_shadow_stockpile), "fossil dark", SHADOWSTEEL, 300);
+}
+
+void
+human_smithy(smith)
+struct monst *smith;
+{
+	int basic_weapons[] = { ARROW, AXE, BOW, BROADSWORD, CROSSBOW, CROSSBOW_BOLT, DAGGER, FLAIL, GLAIVE, JAVELIN, LANCE, 
+							LONG_SWORD, MACE, RAPIER, SCIMITAR, SCYTHE, SHORT_SWORD, SICKLE, SPEAR,
+							TRIDENT, TWO_HANDED_SWORD, 0 };
+	int advanced_weapons[] = {0};
+	int basic_armor[] = { ARMORED_BOOTS, BANDED_MAIL, BUCKLER, CHAIN_MAIL, HELMET, KITE_SHIELD, GAUNTLETS, PLATE_MAIL, 
+						  RING_MAIL, SCALE_MAIL, SPLINT_MAIL, TOWER_SHIELD, 0 };
+	int advanced_armor[] = {0};
+	int basic_tools[] = { BOX, LOCK_PICK, MASK, OIL_LAMP, PICK_AXE, SKELETON_KEY, 0 };
+	int advanced_tools[] = {0};
+
+	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
+}
+
+void
+smithy_services(smith)
+struct monst *smith;
+{
+	switch(ESMT(smith)->smith_mtyp){
+		case PM_OONA:
+			oona_smithy(smith);
+		break;
+		case PM_DRACAE_ELADRIN:
+			dracae_smithy(smith);
+		break;
+		case PM_GOBLIN_SMITH:
+			goblin_smithy(smith);
+		break;
+		case PM_DWARF_SMITH:
+			dwarf_smithy(smith);
+		break;
+		case PM_MITHRIL_SMITH:
+			mithril_smithy(smith);
+		break;
+		case PM_SHADOWSMITH:
+			shadow_smithy(smith);
+		break;
+		case PM_HUMAN_SMITH:
+			human_smithy(smith);
+		break;
+		default:
+			impossible("bad smith");
+			// generic_smithy(smith);
+		break;
+	}
 }
 
 #endif /* OVLB */

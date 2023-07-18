@@ -758,6 +758,8 @@ struct mkroom	*sroom;
 
 	switch(sroom->rtype){
 		default: shkdat = &mons[PM_SHOPKEEPER]; break;
+		case ARMORSHOP:
+		case WEAPONSHOP: shkdat = &mons[rn2(3) ? PM_SHOPKEEPER : PM_HUMAN_SMITH]; break;
 		case JELLYSHOP: shkdat = &mons[PM_THRIAE]; break;
 		case ACIDSHOP: shkdat = &mons[PM_FORMIAN_TASKMASTER]; break;
 		case PETSHOP: shkdat = &mons[PM_FORMIAN_TASKMASTER]; break;
