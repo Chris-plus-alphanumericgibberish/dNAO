@@ -13381,6 +13381,8 @@ int faction;
 
 	if(!get_mx(mtmp, MX_ESUM) && intelligent_mon(mtmp) && is_smith_mtyp(mtmp->mtyp)){
 		add_mx(mtmp, MX_ESMT);
+		if(is_smith_mon(mtmp))
+			ESMT(mtmp)->smith_mtyp = mtmp->mtyp; //In case the monster is later polymorphed
 	}
 	
 	ABASE_MON(A_STR, mtmp) = d(3,6);
