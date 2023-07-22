@@ -417,6 +417,16 @@ dodrink()
 	}
 #endif
 
+    /* Or a forge? */
+    if (IS_FORGE(levl[u.ux][u.uy].typ)
+        /* not as low as floor level but similar restrictions apply */
+        && can_reach_floor()
+	) {
+        if (yn("Drink from the forge?") == 'y') {
+            drinkforge();
+            return 1;
+        }
+    }
 	/* Or are you surrounded by water? */
 	if (Underwater || IS_PUDDLE(levl[u.ux][u.uy].typ) ||
 			(is_pool(u.ux,u.uy, FALSE) && Wwalking)) {
@@ -2629,14 +2639,28 @@ dodip()
 	if (IS_FOUNTAIN(here)) {
 #ifdef PARANOID
 		Sprintf(qbuf, "Dip %s into the fountain?", the(xname(obj)));
-		if(yn(qbuf) == 'y') {
+		if(yn(qbuf) == 'y')
 #else
-		if(yn("Dip it into the fountain?") == 'y') {
+		if(yn("Dip it into the fountain?") == 'y')
 #endif
+		{
 			dipfountain(obj);
 			return MOVE_STANDARD;
 		}
-	} else if (is_pool(u.ux,u.uy, TRUE)) {
+	}
+	if (IS_FORGE(here)) {
+#ifdef PARANOID
+		Sprintf(qbuf, "Dip %s into the forge?", the(xname(obj)));
+		if(yn(qbuf) == 'y')
+#else
+		if(yn("Dip it into the forge?") == 'y')
+#endif
+		{
+			dipforge(obj);
+			return MOVE_STANDARD;
+		}
+	}
+	else if (is_pool(u.ux,u.uy, TRUE)) {
 		tmp = waterbody_name(u.ux,u.uy);
 #ifdef PARANOID
 		Sprintf(qbuf, "Dip %s into the %s?", the(xname(obj)), tmp);

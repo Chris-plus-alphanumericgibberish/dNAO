@@ -2488,6 +2488,7 @@ d_level *lev;
 
 #define INTEREST(feat) \
 	((feat).nfount) || \
+	((feat).nforge) || \
 	((feat).nsink) || \
 	((feat).ngrave) || \
 	((feat).nthrone) || \
@@ -2615,6 +2616,9 @@ recalc_mapseen()
 				break;
 			case FOUNTAIN:
 				mptr->feat.nfount = min(mptr->feat.nfount + 1, 3);
+				break;
+			case FORGE:
+				mptr->feat.nforge = min(mptr->feat.nforge + 1, 3);
 				break;
 			case GRAVE:
 				mptr->feat.ngrave = min(mptr->feat.ngrave + 1, 3);
@@ -2936,6 +2940,7 @@ boolean printdun;
 			Sprintf(eos(buf), " to %s", align_gname(u.ualign.type));
 
 		ADDNTOBUF("fountain", mptr->feat.nfount)
+		ADDNTOBUF("forge", mptr->feat.nforge)
 		ADDNTOBUF("sink", mptr->feat.nsink)
 		if(mptr->feat.nmorgue){
 			ADDNTOBUF("graveyard", mptr->feat.nmorgue)

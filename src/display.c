@@ -1782,6 +1782,7 @@ back_to_glyph(x,y)
 	    idx = (ptr->ladder & LA_DOWN) ? S_dnladder : S_upladder;
 	    break;
 	case FOUNTAIN:		idx = S_fountain; break;
+	case FORGE:		idx = S_forge; break;
 	case SINK:		idx = S_sink;     break;
 	case ALTAR:		idx = S_altar;    break;
 	case GRAVE:		idx = S_grave;    break;
@@ -1914,7 +1915,7 @@ static const char *type_names[MAX_TYPE] = {
 	"DBWALL",	"SDOOR",	"SCORR",	"POOL",
 	"MOAT",		"WATER",	"DRAWBRIDGE_UP","LAVAPOOL",
 	"DEADTREE", "DOOR",		"CORR",		"ROOM",		"STAIRS",
-	"LADDER",	"FOUNTAIN",	"THRONE",	"SINK",
+	"LADDER",	"FOUNTAIN",	"FORGE",	"THRONE",	"SINK",
 	"ALTAR",	"ICE",		"GRASS",	"SOIL",	"SAND",	
 	"DRAWBRIDGE_DOWN","AIR", "CLOUD", "FOG", "DUST_CLOUD", "PUDDLE"
 };

@@ -1540,6 +1540,10 @@ struct monst *mon;
 			if (cansee(x,y))
 				pline_The("fountain falls into a chasm.");
 			goto do_pit;
+		  case FORGE : /* Make the forge disappear */
+			if (cansee(x,y))
+				pline_The("forge falls into a chasm.");
+			goto do_pit;
 #ifdef SINKS
 		  case SINK :
 			if (cansee(x,y))

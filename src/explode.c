@@ -324,7 +324,15 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 		case AD_MAGM: str = "magical blast";
 			break;
 		case AD_EFIR:
-		case AD_FIRE: str = (olet != BURNING_OIL ? olet != SCROLL_CLASS ? "fireball" : "tower of flame" : "burning oil");
+		case AD_FIRE:
+			if(olet == FORGE_EXPLODE)
+				str = "exploding forge";
+			else if(olet == BURNING_OIL)
+				str = "burning oil";
+			else if(olet == SCROLL_CLASS)
+				str = "tower of flame";
+			else
+				str = "fireball";
 			break;
 		case AD_COLD: str = "ball of cold";
 			break;
@@ -794,6 +802,13 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			    if (str != killer_buf && !generic)
 				Strcpy(killer_buf, str);
 			    killer_format = KILLED_BY_AN;
+			} else if (olet == FORGE_EXPLODE) {
+			    killer_format = KILLED_BY_AN;
+			    Strcpy(killer_buf, str);
+			} else if (olet != SCROLL_CLASS && yours) {
+			    killer_format = NO_KILLER_PREFIX;
+			    Sprintf(killer_buf, "caught %sself in %s own %s",
+				    uhim(), uhis(), str);
 			} else if (olet != SCROLL_CLASS && yours) {
 			    killer_format = NO_KILLER_PREFIX;
 			    Sprintf(killer_buf, "caught %sself in %s own %s",

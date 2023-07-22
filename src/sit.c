@@ -183,6 +183,17 @@ dosit()
 
 	    You(sit_message, "ladder");
 
+	} else if (IS_FORGE(typ)) {
+		You(sit_message, "forge");
+		burn_away_slime();
+		melt_frozen_air();
+		if (likes_fire(youmonst.data) || Fire_resistance) {
+			pline_The("forge feels nice and cozy.");
+			return 1;
+		}
+		pline("Argh!  This forge is hot!");
+		losehp(d(4, 4), /* lava damage */
+			"sitting on a forge", KILLED_BY);
 	} else if (is_ice(u.ux, u.uy)) {
 
 	    You(sit_message, defsyms[S_ice].explanation);

@@ -1314,6 +1314,8 @@ register int x, y;
 	    return "headstone";
 	else if(IS_FOUNTAIN(levl[x][y].typ))
 	    return "fountain";
+	else if(IS_FORGE(levl[x][y].typ))
+	    return "forge";
 	else if(IS_PUDDLE(levl[x][y].typ))
 	    return "muddy floor";
 	else if ((IS_ROOM(lev->typ) && !Is_earthlevel(&u.uz)) ||

@@ -3226,28 +3226,57 @@ domagictrap()
  * Return number of objects destroyed. --ALI
  */
 int
-fire_damage(chain, force, here, x, y)
+fire_damage_chain(chain, force, here, x, y)
 struct obj *chain;
 boolean force, here;
 xchar x, y;
 {
+    struct obj *obj, *nobj;
+	int num = 0;
+
+    /* erode_obj() relies on bhitpos if target objects aren't carried by
+       the hero or a monster, to check visibility controlling feedback */
+    bhitpos.x = x, bhitpos.y = y;
+
+	for (obj = chain; obj; obj = nobj) {
+		nobj = here ? obj->nexthere : obj->nobj;
+		if (fire_damage(obj, force, x, y))
+			num++;
+	}
+    if (num && (Blind && !couldsee(x, y)))
+        You("smell smoke.");
+    return num;
+}
+
+int
+fire_damage(obj, force, x, y)
+struct obj *obj;
+boolean force;
+xchar x, y;
+{
     int chance;
-    struct obj *obj, *otmp, *nobj, *ncobj;
-    int retval = 0;
+    struct obj *otmp, *ncobj;
     int in_sight = !Blind && couldsee(x, y);	/* Don't care if it's lit */
     int dindx;
 
-    for (obj = chain; obj; obj = nobj) {
-	nobj = here ? obj->nexthere : obj->nobj;
-
 	/* object might light in a controlled manner */
 	if (catch_lit(obj))
-	    continue;
+		return FALSE;
+
+	 /* special BotD feedback - should it be the "dark red" message?*/
+	if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
+		if (in_sight)
+			pline("Smoke rises from %s.", the(xname(obj)));
+		return FALSE;
+	}
+
+	if (!is_flammable(obj) || obj->oerodeproof)
+		return FALSE;
 
 	if (Is_container(obj)) {
 	    switch (obj->otyp) {
 	    case ICE_BOX:
-		continue;		/* Immune */
+		return FALSE;		/* Immune */
 		/*NOTREACHED*/
 		break;
 	    case CHEST:
@@ -3262,20 +3291,23 @@ xchar x, y;
 		break;
 	    }
 	    if (!force && (Luck + 5) > rn2(chance))
-		continue;
+			return FALSE;
 	    /* Container is burnt up - dump contents out */
-	    if (in_sight) pline("%s catches fire and burns.", Yname2(obj));
+	    if (in_sight)
+			pline("%s catches fire and burns.", Yname2(obj));
 	    if (Has_contents(obj)) {
-		if (in_sight) pline("Its contents fall out.");
-		for (otmp = obj->cobj; otmp; otmp = ncobj) {
-		    ncobj = otmp->nobj;
-		    obj_extract_self(otmp);
-		    if (!flooreffects(otmp, x, y, ""))
-			place_object(otmp, x, y);
-		}
+			if (in_sight) pline("Its contents fall out.");
+			for (otmp = obj->cobj; otmp; otmp = ncobj) {
+				ncobj = otmp->nobj;
+				obj_extract_self(otmp);
+				if (!flooreffects(otmp, x, y, ""))
+					place_object(otmp, x, y);
+			}
 	    }
+		if(obj->where != OBJ_FREE)
+			obj_extract_and_unequip_self(obj);
 	    delobj(obj);
-	    retval++;
+	    return TRUE;
 	} else if (!force && (Luck + 5) > rn2(20)) {
 	    /*  chance per item of sustaining damage:
 	     *	max luck (full moon):	 5%
@@ -3283,41 +3315,42 @@ xchar x, y;
 	     *	avg luck (Luck==0):	75%
 	     *	awful luck (Luck<-4):  100%
 	     */
-	    continue;
+	    return FALSE;
 	} else if (obj->oclass == SCROLL_CLASS || obj->oclass == SPBOOK_CLASS) {
 	    if (obj->otyp == SCR_FIRE || obj->otyp == SCR_RESISTANCE || obj->otyp == SPE_FIREBALL || obj->oartifact)
-		continue;
-	    if (obj->otyp == SPE_BOOK_OF_THE_DEAD) {
-		if (in_sight) pline("Smoke rises from %s.", the(xname(obj)));
-		continue;
-	    }
+			return FALSE;
 	    dindx = (obj->oclass == SCROLL_CLASS) ? 2 : 3;
 	    if (in_sight)
-		pline("%s %s.", Yname2(obj), (obj->quan > 1) ?
-		      destroy_strings[dindx*3 + 1] : destroy_strings[dindx*3]);
+			pline("%s %s.", Yname2(obj), (obj->quan > 1) ?
+				  destroy_strings[dindx*3 + 1] : destroy_strings[dindx*3]);
+
+		if(obj->where != OBJ_FREE)
+			obj_extract_and_unequip_self(obj);
 	    delobj(obj);
-	    retval++;
+	    return TRUE;
 	} else if (obj->oclass == POTION_CLASS) {
 	    dindx = 1;
 	    if (in_sight)
-		pline("%s %s.", Yname2(obj), (obj->quan > 1) ?
-		      destroy_strings[dindx*3 + 1] : destroy_strings[dindx*3]);
+			pline("%s %s.", Yname2(obj), (obj->quan > 1) ?
+				  destroy_strings[dindx*3 + 1] : destroy_strings[dindx*3]);
+
+		if(obj->where != OBJ_FREE)
+			obj_extract_and_unequip_self(obj);
 	    delobj(obj);
-	    retval++;
-	} else if (is_flammable(obj) && obj->oeroded < MAX_ERODE &&
-		   !(obj->oerodeproof || (obj->blessed && rnl(100) < 25))) {
+	    return TRUE;
+	} else if (obj->oeroded < MAX_ERODE &&
+		!(obj->blessed && rnl(100) < 25)
+	) {
 	    if (in_sight) {
 		pline("%s %s%s.", Yname2(obj), otense(obj, "burn"),
 		      obj->oeroded+1 == MAX_ERODE ? " completely" :
 		      obj->oeroded ? " further" : "");
 	    }
 	    obj->oeroded++;
+		return TRUE;
 	}
-    }
 
-    if (retval && !in_sight)
-	You("smell smoke.");
-    return retval;
+    return FALSE;
 }
 
 /* returns TRUE if obj is destroyed */
@@ -5368,6 +5401,64 @@ burn_stuff:
 		burnarmor(&youmonst, TRUE);
 	}
     return(FALSE);
+}
+
+/* obj has been thrown or dropped into lava; damage is worse than mere fire */
+boolean
+lava_damage(obj, x, y)
+struct obj *obj;
+xchar x, y;
+{
+    int otyp = obj->otyp, oart = obj->oartifact;
+
+    /* the Amulet, invocation items, and Rider corpses are never destroyed
+       (let Book of the Dead fall through to fire_damage() to get feedback) */
+    if (obj_resists(obj, 0, 100) && otyp != SPE_BOOK_OF_THE_DEAD)
+        return FALSE;
+    /* destroy liquid (venom), wax, veggy, flesh, paper (except for scrolls
+       and books--let fire damage deal with them), cloth, leather, wood, bone
+       unless it's inherently or explicitly fireproof or contains something;
+       note: potions are glass so fall through to fire_damage() and boil */
+    if (is_flammable(obj)
+        /* assumes oerodeproof isn't overloaded for some other purpose on
+           non-eroding items */
+        && !obj->oerodeproof
+        /* fire_damage() knows how to deal with containers and contents */
+        && !Has_contents(obj)
+	) {
+        if (cansee(x, y)) {
+            /* this feedback is pretty clunky and can become very verbose
+               when former contents of a burned container get here via
+               flooreffects() */
+            // if (obj == thrownobj || obj == kickedobj)
+                // pline("%s %s up!", is_plural(obj) ? "They" : "It",
+                      // otense(obj, "burn"));
+            if (IS_FORGE(levl[u.ux][u.uy].typ)) {
+                if (((obj->owornmask & W_ARM) && (obj == uarm))
+                    || ((obj->owornmask & W_ARMC) && (obj == uarmc))
+                    || ((obj->owornmask & W_ARMU) && (obj == uarmu))
+                    || ((obj->owornmask & W_ARMG) && (obj == uarmg))
+                    || ((obj->owornmask & W_ARMH) && (obj == uarmh))
+                    || ((obj->owornmask & W_ARMF) && (obj == uarmf))
+                    || ((obj->owornmask & W_ARMS) && (obj == uarms))
+				) {
+                    You("were still wearing your %s!", xname(obj));
+                    losehp(d(6, 6),
+                           "dipping a worn object into a forge", KILLED_BY);
+                }
+                /* use the() to properly handle artifacts */
+                pline_The("molten lava in the forge incinerates %s.",
+                          the(xname(obj)));
+            } else
+                You("see %s hit lava and burn up!", the(xname(obj)));
+        }
+		if(obj->where != OBJ_FREE)
+			obj_extract_and_unequip_self(obj);
+		delobj(obj);
+        return TRUE;
+    }
+
+    return fire_damage(obj, TRUE, x, y);
 }
 
 #define ATTRSCALE 4

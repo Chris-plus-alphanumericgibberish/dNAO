@@ -1538,7 +1538,7 @@ register struct monst *mtmp;
 				pline("%s burns slightly.", Monnam(mtmp));
 			}
 			if (mtmp->mhp > 0) {
-			(void) fire_damage(mtmp->minvent, FALSE, FALSE,
+			(void) fire_damage_chain(mtmp->minvent, FALSE, FALSE,
 							mtmp->mx, mtmp->my);
 			(void) rloc(mtmp, TRUE);
 			return 0;

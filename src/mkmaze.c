@@ -1357,6 +1357,8 @@ int attempts;
 			/* probabilities here are deflated from makelevel() */
 			if (!rn2(20))
 				mkfeature(FOUNTAIN, FALSE, r);
+			if (!rn2(60))
+				mkfeature(FORGE, FALSE, r);
 			if (!rn2(80))
 				mkfeature(SINK, FALSE, r);
 			if (!rn2(100))

@@ -3255,6 +3255,9 @@ click_to_cmd(x, y, mod)
             if(IS_FOUNTAIN(levl[u.ux][u.uy].typ) || IS_SINK(levl[u.ux][u.uy].typ)) {
                 cmd[0]=mod == CLICK_1 ? 'q' : M('d');
                 return cmd;
+            } else if(IS_FORGE(levl[u.ux][u.uy].typ)) {
+                cmd[0]=M('d');
+                return cmd;
             } else if(IS_THRONE(levl[u.ux][u.uy].typ)) {
                 cmd[0]=M('s');
                 return cmd;

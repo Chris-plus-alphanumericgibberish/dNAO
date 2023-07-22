@@ -212,6 +212,7 @@ extern drawbridge *tmpdb[];
 extern walk *tmpwalk[];
 extern gold *tmpgold[];
 extern fountain *tmpfountain[];
+extern forge *tmpforge[];
 extern sink *tmpsink[];
 extern pool *tmppool[];
 extern engraving *tmpengraving[];
@@ -223,7 +224,7 @@ extern int n_olist, n_mlist, n_plist;
 extern unsigned int nlreg, nreg, ndoor, ntrap, nmons, nobj;
 extern unsigned int ndb, nwalk, npart, ndig, npass, nlad, nstair;
 extern unsigned int naltar, ncorridor, nrooms, ngold, nengraving;
-extern unsigned int nfountain, npool, nsink;
+extern unsigned int nfountain, nforge, npool, nsink;
 
 extern unsigned int max_x_map, max_y_map;
 
@@ -542,6 +543,7 @@ char c;
 		  case 'S'  : return(SDOOR);
 		  case 'H'  : return(SCORR);
 		  case '{'  : return(FOUNTAIN);
+		  case 'O'  : return(FORGE);
 		  case '\\' : return(THRONE);
 		  case 'K'  :
 #ifdef SINKS
@@ -866,6 +868,15 @@ store_part()
 	}
 	nfountain = 0;
 
+	/* The forges */
+
+	if ((tmppart[npart]->nforge = nforge) != 0) {
+		tmppart[npart]->forges = NewTab(forge, nforge);
+		for(i=0;i<nforge;i++)
+		    tmppart[npart]->forges[i] = tmpforge[i];
+	}
+	nforge = 0;
+
 	/* the traps */
 
 	if ((tmppart[npart]->ntrap = ntrap) != 0) {
@@ -962,6 +973,15 @@ store_room()
 		    tmproom[nrooms]->fountains[i] = tmpfountain[i];
 	}
 	nfountain = 0;
+
+	/* The forges */
+
+	if ((tmproom[nrooms]->nforge = nforge) != 0) {
+		tmproom[nrooms]->forges = NewTab(forge, nforge);
+		for(i=0;i<nforge;i++)
+		    tmproom[nrooms]->forges[i] = tmpforge[i];
+	}
+	nforge = 0;
 
 	/* The sinks */
 
@@ -1379,6 +1399,15 @@ specialmaze *maze;
 	    if (pt->nfountain > 0)
 		    Free(pt->fountains);
 
+	    /* The forges */
+	    Write(fd, &(pt->nforge), sizeof(pt->nforge));
+	    for(j=0;j<pt->nforge;j++) {
+		Write(fd, pt->forges[j], sizeof(forge));
+		Free(pt->forges[j]);
+	    }
+	    if (pt->nforge > 0)
+		    Free(pt->forges);
+
 	    /* The traps */
 	    Write(fd, &(pt->ntrap), sizeof(pt->ntrap));
 	    for(j=0;j<pt->ntrap;j++) {
@@ -1489,6 +1518,11 @@ splev *lev;
 		for(j=0;j<pt->nfountain;j++)
 			Write(fd, pt->fountains[j], sizeof(fountain));
 
+		/* The forges */
+		Write(fd, &(pt->nforge), sizeof(pt->nforge));
+		for(j=0;j<pt->nforge;j++)
+			Write(fd, pt->forges[j], sizeof(forge));
+
 		/* The sinks */
 		Write(fd, &(pt->nsink), sizeof(pt->nsink));
 		for(j=0;j<pt->nsink;j++)
@@ -1565,6 +1599,11 @@ splev *lev;
 			while(j--)
 				Free(r->fountains[j]);
 			Free(r->fountains);
+		}
+		if ((j = r->nforge) != 0) {
+			while(j--)
+				Free(r->forges[j]);
+			Free(r->forges);
 		}
 		if ((j = r->nsink) != 0) {
 			while(j--)

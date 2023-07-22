@@ -702,9 +702,11 @@ struct obj {
 									(otmp)->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA ||\
 									(otmp)->oartifact == ART_PEN_OF_THE_VOID\
 								) && is_pole(otmp))
-#define is_spear(otmp)	(otmp->oclass == WEAPON_CLASS && \
+#define is_spear(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 objects[otmp->otyp].oc_skill == P_SPEAR)
-#define is_farm(otmp)	(otmp->oclass == WEAPON_CLASS && \
+#define is_hammer(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
+			 objects[otmp->otyp].oc_skill == P_HAMMER)
+#define is_farm(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 objects[otmp->otyp].oc_skill == P_HARVEST)
 #define is_launcher(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 ((objects[otmp->otyp].oc_skill >= P_BOW && \

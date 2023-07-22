@@ -5170,6 +5170,14 @@ srch:
 			*wishreturn = WISH_SUCCESS;
 			return(&zeroobj);
 		}
+		if (!BSTRCMPI(bp, p - 5, "forge")) {
+			levl[u.ux][u.uy].typ = FORGE;
+			level.flags.nforges++;
+			pline("A forge.");
+			newsym(u.ux, u.uy);
+			*wishreturn = WISH_SUCCESS;
+			return(&zeroobj);
+		}
 		if(!BSTRCMP(bp, p-6, "throne")) {
 			levl[u.ux][u.uy].typ = THRONE;
 			pline("A throne.");

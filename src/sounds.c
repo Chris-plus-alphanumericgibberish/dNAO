@@ -267,6 +267,12 @@ dosounds()
 	};
 	You_hear1(fountain_msg[rn2(3)+hallu]);
     }
+	if (level.flags.nforges && !rn2(300)) {
+		static const char *const forge_msg[3] = {
+			"a slow bubbling.", "crackling flames.", "chestnuts roasting on an open fire.",
+		};
+		You_hear1(forge_msg[rn2(2) + hallu]);
+	}
 #ifdef SINK
     if (level.flags.nsinks && !rn2(300)) {
 	static const char * const sink_msg[3] = {

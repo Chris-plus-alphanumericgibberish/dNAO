@@ -557,6 +557,7 @@ E const char *NDECL(rndcolor);
 #ifdef REINCARNATION
 E const char *NDECL(roguename);
 #endif
+E const char *FDECL(hliquid, (const char *));
 E char *FDECL(coyotename, (struct monst *,char *));
 
 /* ### do_wear.c ### */
@@ -1042,6 +1043,9 @@ E void FDECL(gush, (int,int,genericptr_t));
 E void FDECL(dryup, (XCHAR_P,XCHAR_P, BOOLEAN_P));
 E void NDECL(drinkfountain);
 E void FDECL(dipfountain, (struct obj *));
+E void FDECL(breakforge, (int, int));
+E void NDECL(drinkforge);
+E void FDECL(dipforge, (struct obj *));
 #ifdef SINKS
 E void FDECL(breaksink, (int,int));
 E void NDECL(drinksink);
@@ -2984,7 +2988,9 @@ E void FDECL(m_float_up, (struct monst *, boolean));
 E void FDECL(fill_pit, (int,int));
 E int FDECL(float_down, (long, long));
 E void FDECL(m_float_down, (struct monst *, boolean));
-E int FDECL(fire_damage, (struct obj *,BOOLEAN_P,BOOLEAN_P,XCHAR_P,XCHAR_P));
+E int FDECL(fire_damage_chain, (struct obj *,BOOLEAN_P,BOOLEAN_P,XCHAR_P,XCHAR_P));
+E int FDECL(fire_damage, (struct obj *,BOOLEAN_P,XCHAR_P,XCHAR_P));
+E boolean FDECL(lava_damage, (struct obj *,XCHAR_P,XCHAR_P));
 E boolean FDECL(water_damage, (struct obj *, BOOLEAN_P, BOOLEAN_P, uchar, struct monst *));
 E boolean NDECL(drown);
 E int NDECL(dodeepswim);

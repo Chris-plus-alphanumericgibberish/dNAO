@@ -139,6 +139,10 @@ typedef struct {
 
 typedef struct {
 	xchar x, y;
+} forge;
+
+typedef struct {
+	xchar x, y;
 } sink;
 
 typedef struct {
@@ -188,6 +192,8 @@ typedef struct {
 	engraving **engravings;
 	char nfountain;
 	fountain **fountains;
+	char nforge;
+	forge **forges;
 } mazepart;
 
 typedef struct {
@@ -222,6 +228,8 @@ typedef struct _room {
 	engraving **engravings;
 	char nfountain;
 	fountain **fountains;
+	char nforge;
+	forge **forges;
 	char nsink;
 	sink **sinks;
 	char npool;

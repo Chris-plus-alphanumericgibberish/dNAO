@@ -4678,6 +4678,8 @@ char *buf;
 		dfeature = "open drawbridge portcullis",  cmap = -1;
 	} else if (IS_FOUNTAIN(ltyp))
 	    cmap = S_fountain;				/* "fountain" */
+	else if (IS_FORGE(ltyp))
+	    cmap = S_forge;				/* "forge" */
 	else if (IS_THRONE(ltyp))
 	    cmap = S_throne;				/* "opulent throne" */
 	else if (is_lava(x,y))

@@ -264,6 +264,7 @@ extern NEARDATA struct colorTextClr LightsaberColor[];
 
 #define BURNING_OIL	(MAXOCLASSES+1) /* Can be used as input to explode. */
 #define MON_EXPLODE	(MAXOCLASSES+2) /* Exploding monster (e.g. gas spore) */
+#define FORGE_EXPLODE	(MAXOCLASSES+3) /* Exploding forge */
 
 #if 0	/* moved to decl.h so that makedefs.c won't see them */
 extern const char def_oc_syms[MAXOCLASSES];	/* default class symbols */
