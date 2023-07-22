@@ -846,7 +846,7 @@
 #define hates_holy_mon(mon)	((mon) == &youmonst ? hates_holy(youracedata) : hates_holy((mon)->data))
 #define hates_holy(ptr)		(is_demon(ptr) || is_undead(ptr) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
 #define hates_unholy(ptr)	((ptr->mflagsg&MG_HATESUNHOLY) != 0)
-#define hates_unholy_mon(mon)	((mon) == &youmonst ? hates_unblessed(youracedata) : hates_unholy((mon)->data))
+#define hates_unholy_mon(mon)	((mon) == &youmonst ? hates_unholy(youracedata) : hates_unholy((mon)->data))
 #define hates_unblessed(ptr)	((ptr->mflagsg&MG_HATESUNBLESSED) != 0)
 #define hates_unblessed_mon(mon)	((mon) == &youmonst ? hates_unblessed(youracedata) : hates_unblessed((mon)->data))
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)
