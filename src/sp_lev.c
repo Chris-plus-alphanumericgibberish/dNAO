@@ -1866,6 +1866,9 @@ default_case:
 				set_material_gm(stuff, WOOD);
 				add_to_container(otmp, stuff);
 
+				stuff = mksobj(SCR_ENCHANT_ARMOR, MKOBJ_NOINIT);
+				add_to_container(otmp, stuff);
+
 				stuff = mksobj(SADDLE, MKOBJ_ARTIF);
 				set_material_gm(stuff, WOOD);
 				add_oprop(stuff, OPROP_PHSEW);
