@@ -8711,11 +8711,11 @@ struct monst *mon;
 				continue;
 			if(hates_holy_mon(mtmp) || taxes_sanity(mtmp->data))
 				continue;
-			if(dist2(xlocale, ylocale, mtmp->mx, mtmp->my) <= 36){
+			if(!mtmp->mconf && dist2(xlocale, ylocale, mtmp->mx, mtmp->my) <= 36){
 				if(!resist(mtmp, 0, 0, FALSE)){
 					if(canspotmon(mtmp)){
 						pline("%s staggers!", Monnam(mtmp));
-						mon->mconf = TRUE;
+						mtmp->mconf = TRUE;
 					}
 				}
 			}
