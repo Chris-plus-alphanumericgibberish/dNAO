@@ -2476,7 +2476,7 @@ fill_dungeon_of_ill_regard(){
 					i++;\
 				}\
 				if(i < PM_LONG_WORM_TAIL){\
-					mon = makemon(&mons[i], x, y, NO_MINVENT|MM_IGNOREWATER);\
+					mon = makemon(&mons[i], x, y, NO_MINVENT|MM_IGNOREWATER|MM_NOGROUP);\
 					trap = maketrap(x, y, VIVI_TRAP);\
 					trap->tseen = TRUE;\
 					if(!mon) impossible("bad monster placement at %d, %d.", x, y);\
