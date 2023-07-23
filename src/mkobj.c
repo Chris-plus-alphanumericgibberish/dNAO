@@ -3026,7 +3026,19 @@ register struct obj *otmp;
 	int otyp = otmp->otyp;
 	int omat = otmp->obj_material;
 
-	if (item_has_property(otmp, FIRE_RES) || otyp == WAN_FIRE)
+	/* Candles can be burned, but they're not flammable in the sense that
+	 * they can't get fire damage and it makes no sense for them to be
+	 * fireproofed.
+	 */
+	if (Is_candle(otmp))
+		return FALSE;
+
+	if (item_has_property(otmp, FIRE_RES) || otyp == WAN_FIRE
+	 || otyp == SCR_FIRE || otyp == SCR_RESISTANCE || otyp == SPE_FIREBALL || otyp == FIRE_HORN
+	)
+		return FALSE;
+
+	if (otyp == SPE_BOOK_OF_THE_DEAD)
 		return FALSE;
 
 	return((boolean)((omat <= CHITIN && omat != LIQUID) || omat == PLASTIC));
