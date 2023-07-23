@@ -4045,7 +4045,7 @@ boolean ranged;
 			hit = TRUE;
 		}
 		
-		if ((accuracy > dieroll || dieroll == 1) && !miss) {
+		if ((accuracy > dieroll || (dieroll == 1 && accuracy > -10)) && !miss) {
 			hit = TRUE;
 		}
 		/* multistriking weapons need to determine how many hit, and set ostriking */
@@ -4099,7 +4099,7 @@ boolean ranged;
 		if (attk->aatyp == AT_HITS && !miss) {
 			hit = TRUE;
 		}
-		if ((accuracy > dieroll) && !miss) {
+		if ((accuracy > dieroll || (dieroll == 1 && accuracy > -10)) && !miss) {
 			hit = TRUE;
 		}
 		break;

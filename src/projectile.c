@@ -1298,7 +1298,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	if (miss_via_insubstantial(magr, mdef, attkp, thrownobj, vis)) {
 		/* message already printed by miss_via_insubstantial */;
 	}
-	else if (accuracy > dieroll || dieroll == 1)
+	else if (accuracy > dieroll || (dieroll == 1 && accuracy > -10))
 	{
 		/* hit */
 		/* (player-only) exercise dex */

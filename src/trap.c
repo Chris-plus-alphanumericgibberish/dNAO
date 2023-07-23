@@ -1792,7 +1792,8 @@ int style;
 			}
 			/* boulder may hit creature */
 			int dieroll = rnd(20);
-			if (tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, 0, (int *) 0) > dieroll || dieroll == 1) {
+			int hitvalu = tohitval((struct monst *)0, mtmp, (struct attack *)0, singleobj, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, 0, (int *) 0);
+			if (hitvalu > dieroll || (dieroll == 1 && hitvalu > -10)) {
 				struct obj ** sobj_p = &singleobj;
 				hmon_with_trap(mtmp, sobj_p, trap, HMON_PROJECTILE|HMON_FIRED, dieroll);
 				if(!(*sobj_p)) used_up = TRUE;
@@ -1807,7 +1808,8 @@ int style;
 			if (!Invulnerable){
 				/* boulder may hit you */
 				int dieroll = rnd(20);
-				if (tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, 0, (int *) 0) > dieroll || dieroll == 1) {
+				int hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, singleobj, trap, HMON_PROJECTILE|HMON_FIRED|HMON_TRAP, 0, (int *) 0);
+				if (hitvalu > dieroll || (dieroll == 1 && hitvalu > -10)) {
 					killer = "rolling boulder trap";
 					killer_format = KILLED_BY_AN;
 					struct obj ** sobj_p = &singleobj;

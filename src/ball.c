@@ -603,7 +603,8 @@ drag:
 		You("are jerked back by the iron ball!");
 		if ((victim = m_at(uchain->ox, uchain->oy)) != 0) {
 			int dieroll = rnd(20);
-			if (tohitval((struct monst *)0, victim, (struct attack *)0, uball, (void *)0, HMON_PROJECTILE|HMON_FIRED, 0, (int *) 0) > dieroll || dieroll == 1)
+			int hitvalu = tohitval((struct monst *)0, victim, (struct attack *)0, uball, (void *)0, HMON_PROJECTILE|HMON_FIRED, 0, (int *) 0);
+			if (hitvalu > dieroll || (dieroll == 1 && hitvalu > -10))
 				(void)hmon_with_unowned_obj(victim, &uball, dieroll);
 		    else
 				miss(xname(uball), victim);
