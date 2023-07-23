@@ -369,7 +369,8 @@
 #define ETelepat		u.uprops[TELEPAT].extrinsic
 #define Blind_telepat		(HTelepat || ETelepat || \
 				 species_is_telepathic(youracedata))
-#define Unblind_telepat		(ETelepat)
+#define Unblind_telepat		(ETelepat || (Blind_telepat && uarmh && uarmh->oartifact == ART_ENFORCED_MIND))
+#define Tele_blind		(!Blind_telepat && uarmh && uarmh->oartifact == ART_ENFORCED_MIND)
 
 #define HWarning		u.uprops[WARNING].intrinsic
 #define EWarning		u.uprops[WARNING].extrinsic

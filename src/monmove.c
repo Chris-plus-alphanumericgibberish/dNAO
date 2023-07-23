@@ -1801,7 +1801,7 @@ register struct monst *mtmp;
 		if (mtmp->mpeaceful && !mtmp->mberserk &&
 		    (!Conflict || resist(mtmp, RING_CLASS, 0, 0))){
 			if(!reducedFlayerMessages) pline("It feels quite soothing.");
-		} else {
+		} else if (!Tele_blind){
 			register boolean m_sen = tp_sensemon(mtmp);
 
 			if(mdat->mtyp == PM_ELDER_BRAIN){

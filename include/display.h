@@ -24,14 +24,14 @@
  * Returns true if the hero can sense the given monster.  This includes
  * monsters that are hiding or mimicing other monsters.
  */
+
+#define etele_dist ((uarmh && uarmh->oartifact == ART_ENFORCED_MIND) ? (BOLT_LIM * BOLT_LIM * 4) : (BOLT_LIM * BOLT_LIM))
 #define tp_sensemon(mon) (	/* The hero can always sense a monster IF:  */\
     (!mindless_mon(mon)) &&	/* 1. the monster has a brain to sense AND  */\
       ((Blind && Blind_telepat) ||	/* 2a. hero is blind and telepathic OR	    */\
 				/* 2b. hero is using a telepathy inducing   */\
 				/*	 object and in range		    */\
-      (Unblind_telepat &&					      \
-	(distu(mon->mx, mon->my) <= (BOLT_LIM * BOLT_LIM))))		      \
-)
+      (Unblind_telepat && (distu(mon->mx, mon->my) <= etele_dist))))
 
 #define sensemon(mon) (tp_sensemon(mon) || Detect_monsters || MATCH_WARN_OF_MON(mon) || sense_by_scent(mon))
 
