@@ -1561,15 +1561,15 @@ POTION(("blood", "blood-red"),            0, 18, 50,  CLR_RED, O_USKWN(1)),	/* e
 	GOLD_DISK(("aphanactonan record",  "disk"), CLR_ORANGE, 80, MZ_MEDIUM),
 	GOLD_DISK(("aphanactonan archive",  "disk"), CLR_ORANGE, 800, MZ_LARGE),
 #undef GOLD_DISK
-#define METALIC_SLAB(names, clr,...) OBJECT( \
+#define METALLIC_SLAB(names, clr,...) OBJECT( \
 		DEF_BLINDNAME(names, "slab"), BITS(0,0,0,0,1,0,1,1,MZ_HUGE,0,0,0,0,P_NONE,METAL, IDED|UNIDED), {0}, \
 		TILE_CLASS, 0, 0, 300, 3000, {0}, {0}, 0, 0, 0, 6, clr, __VA_ARGS__)
 	/* Fixed descriptions (also, artifact base-items only) *//*Needs encyc entry*/
-	METALIC_SLAB(("First Word",  "blinding glyph"), CLR_YELLOW),
-	METALIC_SLAB(("Dividing Word",  "cerulean glyph"), HI_ZAP),
-	METALIC_SLAB(("Nurturing Word",  "verdant glyph"), CLR_GREEN),
-	METALIC_SLAB(("Word of Knowledge",  "crimson glyph"), CLR_RED),
-#undef METALIC_SLAB
+	METALLIC_SLAB(("First Word",  "blinding glyph"), CLR_YELLOW),
+	METALLIC_SLAB(("Dividing Word",  "cerulean glyph"), HI_ZAP),
+	METALLIC_SLAB(("Nurturing Word",  "verdant glyph"), CLR_GREEN),
+	METALLIC_SLAB(("Word of Knowledge",  "crimson glyph"), CLR_RED),
+#undef METALLIC_SLAB
 
 /* spellbooks ... */
 #define SPELL(names,sub,prob,level,mgc,dir,color,...) OBJECT( \
