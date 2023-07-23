@@ -2470,7 +2470,12 @@ int damtype, dam;
 	 * have a monster-specific slow/haste so there is no way to
 	 * restore the old velocity once they are back to human.
 	 */
-	if (u.umonnum != PM_FLESH_GOLEM && u.umonnum != PM_IRON_GOLEM && u.umonnum != PM_GREEN_STEEL_GOLEM && u.umonnum != PM_CHAIN_GOLEM && u.umonnum != PM_ARGENTUM_GOLEM)
+	if (u.umonnum != PM_FLESH_GOLEM
+	 && u.umonnum != PM_IRON_GOLEM
+	 && u.umonnum != PM_GREEN_STEEL_GOLEM
+	 && u.umonnum != PM_CHAIN_GOLEM
+	 && u.umonnum != PM_ARGENTUM_GOLEM
+	)
 		return;
 	switch (damtype) {
 		case AD_EELC:
