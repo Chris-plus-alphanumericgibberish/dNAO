@@ -577,9 +577,11 @@ exerchk()
 		 //	[MRS 92/10/28 - Treat Wisdom specially for balance.]
 		// if(rn2(AVAL) > ((i != A_WIS) ? abs(AEXE(i)*2/3) : abs(AEXE(i))))
 		    // continue;
-		if(!(ABASE(i) < AMAX(i) && !(i == A_STR && u.uhs >= 3) && AEXE(i) >= 0) && rn2(AVAL) > (abs(AEXE(i)*2/3)) )
+		if(i == A_STR && u.uhs >= 3 && AEXE(i) >= 0)
+			continue;
+		if(!(ABASE(i) < AMAX(i) && AEXE(i) >= 0) && rn2(AVAL) > (abs(AEXE(i)*2/3)) )
 		    continue;
-		mod_val = sgn(AEXE(i));
+		mod_val = AEXE(i) ? sgn(AEXE(i)) : 1;
 
 #ifdef DEBUG
 		pline("exerchk: changing %d.", i);
