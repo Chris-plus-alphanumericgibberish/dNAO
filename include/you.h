@@ -524,7 +524,8 @@ struct you {
 	int uhp_real, uhpmax_real, uhprolled_real, uhpbonus_real, uhpmod_real;
 	int uen_real, uenmax_real, uenrolled_real, uenbonus_real;
 	int ugifts;			/* number of artifacts bestowed */
-	int uartisval;		/* approximate strength of artifacts and gifts bestowed and wished for */
+	int uartisval;		/* approximate strength of artifacts bestowed and wished for */
+	int ucultsval;		/* approximate strength of wished artifacts and gifts bestowed */
 	int ublessed, ublesscnt;	/* blessing/duration from #pray */
 	long usaccredit;		/* credit towards next gift */
 	boolean cult_atten[MAX_CULTS];	/* for having started with a cult */

@@ -3414,8 +3414,8 @@ commune_with_goat()
 	/* if you are devout enough (total accumulated credit), allow selecting permanent boons and boost the power of regular ones */
 	/* devotion required increases as per standard gift giving formula */
 	if(wizard)
-		pline("boon threshold: %d", 25*(10 + (u.uartisval * u.uartisval * 2 / 25)));
-	boolean greater_boon = u.shubbie_devotion > 25*(10 + (u.uartisval * u.uartisval * 2 / 25));
+		pline("boon threshold: %d", 25*(10 + (u.ucultsval * u.ucultsval * 2 / 25)));
+	boolean greater_boon = u.shubbie_devotion > 25*(10 + (u.ucultsval * u.ucultsval * 2 / 25));
 	struct obj * otmp = (struct obj *)0;
 	int menu_result = dogoat_menu(greater_boon);
 	int i;
@@ -3493,7 +3493,7 @@ commune_with_goat()
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
 				u.ugifts++;
-				u.uartisval += TIER_B;
+				u.ucultsval += TIER_B;
 			}
 			else {
 				cost = 0;
@@ -3513,7 +3513,7 @@ commune_with_goat()
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
 				u.ugifts++;
-				u.uartisval += TIER_S;
+				u.ucultsval += TIER_S;
 			}
 			else {
 				cost = 0;
@@ -3527,7 +3527,7 @@ commune_with_goat()
 			dropy(otmp);
 			at_your_feet("An object");
 			u.ugifts++;
-			u.uartisval += TIER_A;
+			u.ucultsval += TIER_A;
 			break;
 
 		default:
@@ -3670,8 +3670,8 @@ commune_with_silver_flame()
 	/* if you are devout enough (total accumulated credit), allow selecting permanent boons and boost the power of regular ones */
 	/* devotion required increases as per standard gift giving formula */
 	if(wizard)
-		pline("boon threshold: %d", 25*(10 + (u.uartisval * u.uartisval * 2 / 25)));
-	boolean greater_boon = u.silver_devotion > 25*(10 + (u.uartisval * u.uartisval * 2 / 25));
+		pline("boon threshold: %d", 25*(10 + (u.ucultsval * u.ucultsval * 2 / 25)));
+	boolean greater_boon = u.silver_devotion > 25*(10 + (u.ucultsval * u.ucultsval * 2 / 25));
 	struct obj * otmp = (struct obj *)0;
 	int menu_result = dosflm_menu(greater_boon);
 	int i;
@@ -3742,7 +3742,7 @@ commune_with_silver_flame()
 					cost = 50;
 					You("melt %s to a mirror finish.", doname(otmp));
 					add_oprop(otmp, OPROP_REFL);
-					u.uartisval += TIER_B; /*Theory: You now want reflection in the asc kit to deal with holy missiles, so the ability to add it to anything is pretty great. */
+					u.ucultsval += TIER_B; /*Theory: You now want reflection in the asc kit to deal with holy missiles, so the ability to add it to anything is pretty great. */
 				}
 				else pline("Nothing happens.");
 			}
@@ -3757,8 +3757,8 @@ commune_with_silver_flame()
 					add_oprop(otmp, OPROP_CGLZ);
 					/*Theory: You need 4-5 of these, which adds to TIER_A. */
 					if(arm_blocks_upper_body(otmp->otyp))
-						u.uartisval += TIER_D;
-					else u.uartisval += TIER_F;
+						u.ucultsval += TIER_D;
+					else u.ucultsval += TIER_F;
 				}
 				else pline("Nothing happens.");
 			}
@@ -3775,7 +3775,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_MORTW);
-					u.uartisval += TIER_B; /*Theory: Life drain is actually not all that powerful, but the Wizard and his summons are still affected. */
+					u.ucultsval += TIER_B; /*Theory: Life drain is actually not all that powerful, but the Wizard and his summons are still affected. */
 				}
 				else pline("Nothing happens.");
 			}
@@ -3788,7 +3788,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_TDTHW);
-					u.uartisval += TIER_A; /*Theory: Nasty stuff like liches and pharaohs is affected, plus it deals a lot of damage to them. */
+					u.ucultsval += TIER_A; /*Theory: Nasty stuff like liches and pharaohs is affected, plus it deals a lot of damage to them. */
 				}
 				else pline("Nothing happens.");
 			}
@@ -3801,7 +3801,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_SFUWW);
-					u.uartisval += TIER_S; /*Theory: This specifically affects the nastiest late game enemies. */
+					u.ucultsval += TIER_S; /*Theory: This specifically affects the nastiest late game enemies. */
 				}
 				else pline("Nothing happens.");
 			}

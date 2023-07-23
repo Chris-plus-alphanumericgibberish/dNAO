@@ -5748,9 +5748,11 @@ typfnd:
 			if(!wizwish){
 				u.uconduct.wisharti++;	/* KMH, conduct */
 
-				/* characters other than priests also have their god's likelyhood to grant artifacts decreased */
-				if(!Role_if(PM_PRIEST))
+				/* characters other than priests also have their god's likelyhood to grant artifacts decreased, as well as future cult gifts made more rare */
+				if(!Role_if(PM_PRIEST)){
 					u.uartisval += arti_value(otmp);
+					u.ucultsval += arti_value(otmp);
+				}
 			}
 		}
 	}

@@ -1707,6 +1707,7 @@ u_init()
 	// u.ublessed = 0;				/* not worthy yet */
 	// u.ugifts   = 0;				/* no divine gifts bestowed */
 	// u.uartisval = 0;			/* no artifacts directly acquired */
+	// u.ucultsval = 0;			/* no boons directly acquired */
 	// u.ucarinc = 0;
 	// u.uacinc = 0;
 // // ifdef ELBERETH
