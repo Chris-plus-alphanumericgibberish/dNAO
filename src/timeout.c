@@ -29,7 +29,7 @@ const struct propname {
     int prop_num;
     const char *prop_name;
 } propertynames[] = {
-    { SANCTUARY, "sactuary" },
+    { SANCTUARY, "sanctuary" },
     { STONED, "petrifying" },
     { FROZEN_AIR, "frozen air" },
     { SLIMED, "becoming slime" },

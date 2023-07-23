@@ -3843,7 +3843,7 @@ int tx,ty;
 				}
 				pline("A hand of worn and broken clockwork on a rusted metal arm reaches into the seal.");
 				pline("The hand gently touches the %s%s, then rests on the seal's surface as its unseen owner shifts his weight onto that arm.", prefix, xname(o));
-				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metalic armature.");
+				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metallic armature.");
 				pline("A voice speaks to you, as the immobile white face weeps tears of black oil onto the %s.", surface(tx,ty));
 				pline("*I am Astaroth, the Clockmaker. You shall be my instrument, to repair this broken world.*");
 				bindspirit(ep->ward_id);
@@ -3855,7 +3855,7 @@ int tx,ty;
 			else if(uwep && (uwep->spe<0 || uwep->oeroded || uwep->oeroded2) && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 				pline("A hand of worn and broken clockwork on a rusted metal arm reaches into the seal.");
 				pline("The hand slowly stretches out towards you, then rests on the seal's surface as its unseen owner shifts his weight onto that arm.");
-				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metalic armature.");
+				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metallic armature.");
 				pline("A voice speaks to you, as the immobile white face studies you and weeps tears of black oil.");
 				pline("*I am Astaroth, the Clockmaker. You shall hold my instrument, to repair this broken world.*");
 				uwep->ovar1_seals |= SEAL_ASTAROTH;

@@ -3851,7 +3851,7 @@ her into hollow oblivion!"
 "My knights will break you, like they did that foolish crow!"
 %E
 %Cc Hdf 00070
-As you pick up this metalic scepter, a blade of magic ice
+As you pick up this metallic scepter, a blade of magic ice
 springs from the end. The designs on the scepter match the
 carvings on the cathedral's ruined stonework, but the truth
 of the matter is lost like snow on the wind.

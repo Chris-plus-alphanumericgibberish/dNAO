@@ -518,10 +518,10 @@
 
 #define HSanctuary	u.uprops[SANCTUARY].intrinsic
 #define ESanctuary	u.uprops[SANCTUARY].extrinsic
-#define Sactuary	(HSanctuary || ESanctuary)
+#define Sanctuary	(HSanctuary || ESanctuary)
 	/* Get wet, may go under surface */
 
-#define	Invulnerable	(Sactuary || u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
+#define	Invulnerable	(Sanctuary || u.uinvulnerable || u.spiritPColdowns[PWR_PHASE_STEP] >= moves + 20)
 
 #define Breathless		(HMagical_breathing || EMagical_breathing || \
 				 breathless(youracedata))

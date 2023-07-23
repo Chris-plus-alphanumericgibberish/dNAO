@@ -1807,7 +1807,7 @@ signs_enlightenment()
 	if(u.sealsActive&SEAL_AMON && !Invis){
 //		if(!(uarmh && is_metallic(uarmh))){
 		putstr(en_win, 0, "You have a pair of large ram's horns.");
-//		} else putstr(en_win, 0, "Your ram's horns have fused with your helm, taking on a metalic hue.");
+//		} else putstr(en_win, 0, "Your ram's horns have fused with your helm, taking on a metallic hue.");
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ANDREALPHUS && !Invis && !(levl[u.ux][u.uy].lit == 0 && !(viz_array[u.uy][u.ux]&TEMP_LIT1 && !(viz_array[u.uy][u.ux]&TEMP_DRK3)))){
@@ -2346,7 +2346,7 @@ signs_mirror()
 	if(u.sealsActive&SEAL_AMON && !Invis){
 		if(!(uarmh && is_metallic(uarmh))){
 			putstr(en_win, 0, "You have a pair of large ram's horns.");
-		} else putstr(en_win, 0, "Your ram's horns have fused with your helm, taking on a metalic hue.");
+		} else putstr(en_win, 0, "Your ram's horns have fused with your helm, taking on a metallic hue.");
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ANDREALPHUS && !Invis && (dimness(u.ux, u.uy) <= 0)) {

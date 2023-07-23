@@ -1009,7 +1009,7 @@ char * yogTitles[] =  {
 	", the gate",
 	", the knower of the gate",
 	", the key and the guardian of the gate",
-	", the key and the hate",
+	", the key and the gate",
 	", the past, present, and future",
 	", the opener of the way",
 	", the lurker at the threshold",
