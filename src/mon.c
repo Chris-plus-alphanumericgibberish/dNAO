@@ -1698,8 +1698,10 @@ mcalcdistress()
 	}
 	
 	/* do special once-per-global turn effects */
-	do_ancient_breaths(mtmp);
-	do_auras(mtmp);
+	if(!noactions(mtmp)){
+		do_ancient_breaths(mtmp);
+		do_auras(mtmp);
+	}
 	
 	/* regenerate hit points */
 	mon_regen(mtmp, FALSE);
