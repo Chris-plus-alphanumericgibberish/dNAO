@@ -7927,8 +7927,9 @@ boolean ranged;
 				pline("%s somehow reaches right past your helmet!", Monnam(magr));
 			}
 			else if (vis) {
-				pline("%s somehow reach right past %s helmet!",
+				pline("%s somehow reach%s right past %s helmet!",
 					(youagr ? "You" : s_suffix(Monnam(magr))),
+					(youagr ? "" : "es"),
 					s_suffix(mon_nam(mdef))
 					);
 			}
