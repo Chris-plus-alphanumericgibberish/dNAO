@@ -1637,6 +1637,10 @@ struct monst *mon;
      *	     MFAST's `+ 2' prevents hasted speed 1 from becoming a no-op;
      *	     both adjustments have negligible effect on higher speeds.
      */
+	//Intrinsic-ish fast speed, stacks with monster extrinsic speed
+	//	Probably a bit better than player speed.
+	if (mon_resistance(mon, FAST))
+		mmove += (mmove+2)/3;
     if (mon->mspeed == MSLOW)
 	mmove = (2 * mmove + 1) / 3;
     else if (mon->mspeed == MFAST)
