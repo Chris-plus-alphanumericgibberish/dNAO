@@ -1126,7 +1126,6 @@ as_extra_healing:
 		exercise(A_CON, TRUE);
 		break;
 	case POT_GOAT_S_MILK:
-		You_feel("completely healed.");
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
 		if(otmp->cursed){
 			pline("Yecch! That was vile!");
@@ -1135,6 +1134,7 @@ as_extra_healing:
 				"spoiled milk", TRUE, SICK_VOMITABLE);
 			break;
 		} else {
+			You_feel("completely healed.");
 			healup(enhanced ? 800 : 400, 
 					!(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (4+4*bcsign(otmp)),
 					TRUE, TRUE);
@@ -1142,8 +1142,9 @@ as_extra_healing:
 		/* Restore lost levels */
 		if (u.ulevel < u.ulevelmax) {
 			if(otmp->blessed){
-				while(u.ulevel < u.ulevelmax)
-					pluslvl(FALSE);
+				pluslvl(FALSE);
+				if(u.ulevel < u.ulevelmax)
+					u.uexp = newuexp(u.ulevel) - 1;
 			} else {
 				pluslvl(FALSE);
 			}
