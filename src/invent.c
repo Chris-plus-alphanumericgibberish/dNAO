@@ -2922,7 +2922,7 @@ winid *datawin;
 					{
 					case ART_ORCRIST:					Strcat(buf, "orcs and demons.");							break;
 					case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
-					case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, dwarves, and angels.");			break;
+					case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, and dwarves.");					break;
 					case ART_CARNWENNAN:				Strcat(buf, "fey and magic-item users.");					break;
 					case ART_SLAVE_TO_ARMOK:			Strcat(buf, "nobility, elves, orcs, and the innocent.");	break;
 					case ART_CLAIDEAMH:					Strcat(buf, "those bound by iron and ancient laws.");		break;
