@@ -8685,6 +8685,8 @@ boolean ranged;
 			else {
 				pline("%s is crushing you!", Monnam(magr));
 			}
+			burn_away_slime();
+			melt_frozen_air();
 		}
 		else if(youagr){
 			if(u.ustuck != mdef ){
