@@ -109,6 +109,7 @@ E void FDECL(copy_oprop_list, (struct obj *, unsigned long int *));
 E const char *FDECL(artifact_name, (const char *,short *, int *));
 E boolean FDECL(art_already_exists, (int));
 E boolean FDECL(art_already_exists_byname, (int,const char *));
+E void FDECL(flag_existance, (int, int));
 E void FDECL(artifact_exists, (struct obj *,const char *,BOOLEAN_P));
 E struct obj * FDECL(mksartifact, (int));
 E void FDECL(get_art_property_list, (int *, int, BOOLEAN_P));

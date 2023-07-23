@@ -1844,23 +1844,32 @@ const char * artiname;
 }
 
 void
-artifact_exists(otmp, name, mod)
-register struct obj *otmp;
-register const char *name;
-register boolean mod;
+flag_existance(m, mod)
+int m;
+int mod;
 {
-	register const struct artifact *a;
+	artinstance[m].exists = mod;
+}
+
+void
+artifact_exists(otmp, name, mod)
+struct obj *otmp;
+const char *name;
+boolean mod;
+{
+	const struct artifact *a;
 
 	if (otmp && *name)
 	    for (a = artilist+1; a->otyp; a++)
 		if ((a->otyp == otmp->otyp || (is_malleable_artifact(a) && artitypematch(a, otmp))) && !strcmp(a->name, name)) {
-		    register int m = a - artilist;
+		    int m = a - artilist;
 		    otmp->oartifact = (mod ? m : 0);
 		    otmp->age = 0;
 		    if(otmp->otyp == RIN_INCREASE_DAMAGE) otmp->spe = 0;
 			/* for "summoned" temporary artifacts, artinstance things are skipped, such as declaring the artifact extant */
 			if (!get_ox(otmp, OX_ESUM)) {
-				artinstance[m].exists = mod;
+				flag_existance(m, mod);
+				// artinstance[m].exists = mod;
 				if(otmp->oartifact == ART_ROD_OF_SEVEN_PARTS){
 					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPkills = 7;//number of hits untill you gain a +
 					artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights = 0;//number of flights remaining
