@@ -303,10 +303,6 @@ boolean ghostly;
 		if (mtmp->data) {
 			set_mon_data(mtmp, mtmp->mtyp);
 		}
-		if (get_mx(mtmp, MX_EHOR)) {
-			EHOR(mtmp)->basehorrordata.mname = mons[EHOR(mtmp)->basehorrordata.mtyp].mname;
-			EHOR(mtmp)->currhorrordata.mname = mons[EHOR(mtmp)->currhorrordata.mtyp].mname;
-		}
 		if (ghostly) {
 			int mndx = monsndx(mtmp->data);
 			if (propagate(mndx, TRUE, ghostly) == 0) {
