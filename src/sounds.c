@@ -72,7 +72,7 @@ static const char *buerTitles[] = {
 	"the wandering sage",
 	"the forsaken sage",
 	"the banished sage",
-	"interent teacher",
+	"itinerant teacher",
 	"fallen of heaven",
 	"risen of hell",
 	"from beyond the fixed stars",
@@ -1931,6 +1931,7 @@ asGuardian:
 				u.uencouraged = min_ints(Insanity/5+1, u.uencouraged+rnd(Insanity/5+1));
 				exercise(A_INT, TRUE);
 				exercise(A_WIS, TRUE);
+				exercise(A_CHA, TRUE);
 			} else if(!mtmp->mpeaceful){
 				aggravate();
 			}
@@ -2086,7 +2087,7 @@ humanoid_sound:
 	    else {
 			const char *talkabt = "talks about %s.";
 			const char *discuss = "discusses %s.";
-			if((ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
+			if((ptr->mtyp == PM_ITINERANT_PRIESTESS || ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
 				&& has_template(mtmp, MISTWEAVER)
 			){
 				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
@@ -2098,7 +2099,7 @@ humanoid_sound:
 						pacify_goat_faction();
 					}
 				}
-				switch(rn2(10)){
+				switch(rn2(14)){
 					case 0:
 						verbl_msg = "Ia! Shub-Nugganoth! The Goat with a Thousand Young!";
 					break;
@@ -2126,6 +2127,18 @@ humanoid_sound:
 					break;
 					case 9:
 						verbl_msg = "She shall spawn and spawn again!";
+					break;
+					case 10:
+						verbl_msg = "May Her light shine upon you!";
+					break;
+					case 11:
+						verbl_msg = "Neither man nor beast.";
+					break;
+					case 12:
+						verbl_msg = "Neither the living nor the dead.";
+					break;
+					case 13:
+						verbl_msg = "All things are mingled.";
 					break;
 				}
 			}
@@ -5418,6 +5431,20 @@ int tx,ty;
 			} else You("try to think of the last place you saw a black web....");
 		} else pline("You can't feel the spirit.");
 	}break;
+	case YOG_SOTHOTH:{
+		if(u.sealTimeout[BLACK_WEB-FIRST_SEAL] < moves){
+			struct trap *t = t_at(tx,ty);
+			if((t && (t->ttyp == MAGIC_PORTAL || t->ttyp == LEVEL_TELEP || t->ttyp == TELEP_TRAP)) 
+			|| carrying_art(ART_SILVER_KEY)
+			){
+				You("percieve a great BEING beyond the gate, and it addresses you with waves of thunderous and burning power.");
+				You("are smote and changed by the unendurable violence of its voice!");
+				exercise(A_CON, FALSE);
+				bindspirit(ep->ward_id);
+				u.sealTimeout[YOG_SOTHOTH-FIRST_SEAL] = moves + bindingPeriod;
+			} else You("need a gateway....");
+		} else pline("You can't feel the spirit.");
+	}break;
 	case NUMINA:{
 		//Spirit requires that its seal be drawn by a level 30 Binder.
 		//There is no binding period.
@@ -5574,6 +5601,10 @@ int floorID;
 		break;
 	case BLACK_WEB:
 		break;
+	case YOG_SOTHOTH:
+		propchain[i++] = BLOODSENSE;
+		propchain[i++] = PROT_FROM_SHAPE_CHANGERS;
+		break;
 	case NUMINA:
 		propchain[i++] = BLOCK_CONFUSION;
 		propchain[i++] = DETECT_MONSTERS;
@@ -5711,6 +5742,9 @@ int floorID;
 	case MISKA:
 		skillchain[i++] = P_TWO_WEAPON_COMBAT;
 		break; 
+	case YOG_SOTHOTH:
+		skillchain[i++] = P_FIREARM;
+		break;
 	case NUDZIRATH:
 	case ALIGNMENT_THING:
 	case UNKNOWN_GOD:
@@ -5766,6 +5800,7 @@ int floorID;
 		floorID == MISKA ||
 		floorID == NUDZIRATH ||
 		floorID == ALIGNMENT_THING ||
+		floorID == YOG_SOTHOTH ||
 		floorID == UNKNOWN_GOD
 		) {
 		spirit_type = ALIGN_SPIRIT;

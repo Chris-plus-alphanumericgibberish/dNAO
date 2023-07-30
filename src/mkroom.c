@@ -29,6 +29,7 @@ STATIC_DCL struct monst *FDECL(prisoner,(int, int, int));
 STATIC_DCL void NDECL(mktemple);
 STATIC_DCL void NDECL(mkkamereltowers);
 STATIC_DCL void NDECL(mkminorspire);
+STATIC_DCL void NDECL(mksentenelclearing);
 STATIC_DCL void NDECL(mkfishingvillage);
 STATIC_DCL void NDECL(mkpluhomestead);
 STATIC_DCL void FDECL(mkpluroom, (int));
@@ -2393,6 +2394,110 @@ mkminorspire()
 	}
 }
 
+int yog_list[] = {PM_KOBOLD_SHAMAN, PM_ORC_SHAMAN, PM_GNOMISH_WIZARD, PM_HEDROW_WIZARD, PM_DWARF_CLERIC, PM_ELF_LADY};
+
+STATIC_OVL
+void
+mksentenelclearing()
+{
+	int x,y,ix, iy, tries=0;
+	int i,j, c;
+	boolean good=FALSE, okspot;
+	struct obj *otmp;
+	struct monst *mtmp;
+	while(!good && tries < 50){
+		x = rn2(COLNO-8)+4;
+		y = rn2(ROWNO-7)+3;
+		tries++;
+		okspot = TRUE;
+		for(i=-6;i<6 && okspot;i++)
+			for(j=-6;j<6 && okspot;j++){
+				if(!isok(x+i,y+j))
+					okspot = FALSE;
+				else if(
+				 levl[x+i][y+j].typ == CORR
+				 || levl[x+i][y+j].typ == ROOM
+				 || IS_WALL(levl[x+i][y+j].typ)
+				)
+					okspot = FALSE;
+			}
+		if(okspot){
+			good = TRUE;
+		} else continue;
+		
+		ix = x;
+		iy = y;
+		for(i=-10;i<=10;i++){
+			for(j=-10;j<=10;j++){
+				if(isok(ix+i,iy+j) && dist2(ix, iy, ix+i, iy+j)<105){
+					if(levl[ix+i][iy+j].typ == TREE
+					   && (dist2(ix, iy, ix+i, iy+j)) < (rnd(8)*rnd(8)+36)
+					)
+						levl[ix+i][iy+j].typ = GRASS;
+					levl[ix+i][iy+j].lit = 1;
+				}
+			}
+		}
+		for(i=-6;i<=6;i++){
+			for(j=-6;j<=6;j++){
+				if(isok(ix+i,iy+j) && dist2(ix, iy, ix+i, iy+j)<41){
+					if((levl[ix+i][iy+j].typ == TREE 
+							|| levl[ix+i][iy+j].typ == GRASS
+							|| levl[ix+i][iy+j].typ == PUDDLE
+						)
+						&& (dist2(ix, iy, ix+i, iy+j)) < (rnd(5)*rnd(5)+18)
+					)
+						levl[ix+i][iy+j].typ = SOIL;
+					levl[ix+i][iy+j].lit = 1;
+				}
+			}
+		}
+#define MAKE_STANDING_STONE(a, b) mksobj_at(BOULDER, a, b, NO_MKOBJ_FLAGS);\
+								   levl[a][b].lit = 1;\
+								   levl[a][b].typ = VWALL;\
+								   levl[a][b].wall_info = W_NONDIGGABLE;\
+								   if(m_at(a, b)) rloc(m_at(a, b), TRUE);\
+								   if(t_at(a, b)) rloc_trap(t_at(a, b));
+		MAKE_STANDING_STONE(x-1, y-2);
+		MAKE_STANDING_STONE(x+1, y-2);
+		MAKE_STANDING_STONE(x-1, y+2);
+		MAKE_STANDING_STONE(x+1, y+2);
+		MAKE_STANDING_STONE(x-3, y);
+		MAKE_STANDING_STONE(x+3, y);
+#define MAKE_YOG_CULTIST(a, b) mtmp = makemon(&mons[ROLL_FROM(yog_list)], a, b, NO_MINVENT);\
+				if(mtmp){\
+					if(mtmp->m_lev < 14)\
+						mtmp->m_lev = 14;\
+					mtmp->mhpmax = d(mtmp->m_lev, hd_size(mtmp->data));\
+					mongets(mtmp, WITCH_HAT, NO_MKOBJ_FLAGS);\
+					mongets(mtmp, !rn2(20) ? CLOAK_OF_MAGIC_RESISTANCE : CLOAK, NO_MKOBJ_FLAGS);\
+					mongets(mtmp, QUARTERSTAFF, NO_MKOBJ_FLAGS);\
+					mtmp->msleeping = TRUE;\
+					set_faction(mtmp, YOG_FACTION);\
+					if(u.yog_sothoth_atten){\
+						mtmp->mpeaceful = TRUE;\
+						set_malign(mtmp);\
+					}\
+				}
+		MAKE_YOG_CULTIST(x-3, y-1);
+		MAKE_YOG_CULTIST(x-3, y+1);
+		MAKE_YOG_CULTIST(x+3, y-1);
+		MAKE_YOG_CULTIST(x+3, y+1);
+		MAKE_YOG_CULTIST(x, y-3);
+		MAKE_YOG_CULTIST(x, y+3);
+		if(m_at(x, y))
+			rloc(m_at(x, y), TRUE);
+		if(t_at(x, y))
+			rloc_trap(t_at(x, y));
+		if(levl[x][y].typ == MOAT || levl[x][y].typ == POOL)
+			levl[x][y].typ = SOIL;
+
+		struct trap *ttmp = maketrap(x, y, LEVEL_TELEP);
+		if(ttmp)
+			ttmp->special = TRUE;
+	}
+}
+
 STATIC_OVL
 void
 mkfishingvillage()
@@ -3205,8 +3310,9 @@ int x, y, w;
 		if(mon){
 			while((obj = mon->minvent)){
 				obj_extract_and_unequip_self(obj);
-				place_object(obj, x, y);
-				rloco(obj);
+				obj->ox = x;
+				obj->oy = y;
+				randomly_place_obj(obj);
 			}
 			obj = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
 			if(obj){
@@ -5842,6 +5948,10 @@ place_neutral_features()
 		for(; n > 0; n--)
 			mkpluhomestead();
 	} 
+
+	if(!rn2(20)){
+		mksentenelclearing();
+	}
 	wallification(1, 0, COLNO - 1, ROWNO - 1);
 }
 

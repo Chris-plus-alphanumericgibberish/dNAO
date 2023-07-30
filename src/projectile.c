@@ -733,6 +733,131 @@ int dy;							/* */
 }
 
 /*
+ * do_digging_impact()
+ *
+ * Called when a digging-mpact weapon interacts with terrain by iron bars or some non-ZAP_POS.
+ */
+void
+do_digging_impact(magr, weapon, x, y)
+struct monst * magr;			/* Creature responsible for the projectile. Might not exist. */
+struct obj * weapon;
+int x;							/* */
+int y;							/* */
+{
+	boolean youagr = (magr && (magr == &youmonst));
+	struct rm *room = &levl[x][y];
+	boolean shopdoor = FALSE, shopwall = FALSE;
+
+	/* Doors (but not artifact doors) */
+	if ((closed_door(x, y) || room->typ == SDOOR) &&
+		!artifact_door(x, y)) 
+	{
+		/* message */
+		if (cansee(x, y))
+			pline("The door crumbles!");
+		/* check shops */
+		if (*in_rooms(x, y, SHOPBASE)) {
+			add_damage(x, y, (youagr ? 400L : 0L));
+			shopwall = TRUE;
+		}
+		/* anger watch */
+		if (youagr)
+			watch_dig((struct monst *)0, x, y, TRUE);
+		/* create doorway */
+		room->typ = DOOR;
+		room->doormask = D_NODOOR;
+		/* update vision */
+		unblock_point(x, y);
+		if (!Blind && cansee(x, y))
+			newsym(x, y);
+	}
+	/* Walls */
+	else if (IS_WALL(room->typ) && may_dig(x, y)) {
+		struct obj * otmp;	/* newly-created rocks */
+		/* message */
+		if (cansee(x, y))
+			pline("The wall crumbles!");
+		/* check shops */
+		if (*in_rooms(x, y, SHOPBASE)) {
+			add_damage(x, y, youagr ? 200L : 0L);
+			shopwall = TRUE;
+		}
+		/* anger watch */
+		if (youagr)
+			watch_dig((struct monst *)0, x, y, TRUE);
+		/* create opening */
+		if (level.flags.is_cavernous_lev && !in_town(x, y)) {
+			room->typ = CORR;
+		}
+		else {
+			room->typ = DOOR;
+			room->doormask = D_NODOOR;
+		}
+		/* create rocks */
+		otmp = mksobj_at(ROCK, x, y, NO_MKOBJ_FLAGS);
+		otmp->quan = 20L + rnd(20);
+		otmp->owt = weight(otmp);
+		/* update vision */
+		unblock_point(x, y);
+		if (!Blind && cansee(x, y))
+			newsym(x, y);
+	}
+	/* Rock (laser cutter only) */
+	else if (isok(x, y) && IS_ROCK(room->typ) && may_dig(x, y)) {
+		struct obj *otmp;	/* newly-created rocks */
+		/* message */
+		if (cansee(x, y))
+			pline("The stone crumbles!");
+		/* check shops */
+		if (*in_rooms(x, y, SHOPBASE)) {
+			add_damage(x, y, youagr ? 200L : 0L);
+			shopwall = TRUE;
+		}
+		/* anger watch */
+		if (youagr)
+			watch_dig((struct monst *)0, x, y, TRUE);
+		/* create opening */
+		room->typ = CORR;
+		/* create rocks */
+		otmp = mksobj_at(ROCK, x, y, NO_MKOBJ_FLAGS);
+		otmp->quan = 20L + rnd(20);
+		otmp->owt = weight(otmp);
+		/* update vision */
+		unblock_point(x, y);
+		if (!Blind && cansee(x, y))
+			newsym(x, y);
+	}
+	// /* Iron Bars (laser cutter only) */
+	// else if (isok(x, y) && (room->typ == IRONBARS) && 
+		// (thrownobj->otyp == LASER_BEAM)
+		// ) {
+		// int numbars;
+		// struct obj *otmp;
+		// /* message */
+		// if (cansee(x, y))
+			// pline("The %s cuts through the bars!", xname(thrownobj));
+		// /* create opening */
+		// room->typ = CORR;
+		// /* create iron bars */
+		// for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
+			// otmp = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
+			// set_material_gm(otmp, IRON);
+			// otmp->spe = 0;
+			// otmp->cursed = otmp->blessed = FALSE;
+		// }
+		// /* update vision */
+		// if (!Blind && cansee(newx, newy))
+			// newsym(newx, newy);
+	// }
+
+	/* if you damaged a shop, add to bill */
+	if (youagr && (shopdoor || shopwall))
+		pay_for_damage("blast into", FALSE);
+
+	return;
+}
+
+/*
  * destroy_projectile()
  *
  * Call this when the projectile should immediately cease to exist. Possibly explosively.

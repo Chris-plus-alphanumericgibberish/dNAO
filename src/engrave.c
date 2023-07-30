@@ -3749,7 +3749,6 @@ const char * prompt;
 
 		Sprintf(buf, "Known Seals");
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-
 		/* regular seals */
 		for (i = 0; i < (QUEST_SPIRITS - FIRST_SEAL); i++){
 			seal_flag = 0x1L << i;

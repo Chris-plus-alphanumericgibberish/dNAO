@@ -76,7 +76,7 @@ const char * const objexplain[] = {	/* these match def_oc_syms, above */
 	"iron chain",
 	"splash of venom",
 	"broken tile or slab",
-	"bed",
+	"bed or chair",
 	"strange coin"
 };
 
@@ -101,7 +101,7 @@ const char * const oclass_names[] = {
 	"chains",
 	"venoms",
 	"tiles",
-	"beds",
+	"furnature",
 	"strange coins"
 };
 

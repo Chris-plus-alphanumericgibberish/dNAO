@@ -3579,7 +3579,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 				}
 			}
 		} else if(youdefend){
-			if(!(u.sealsActive&SEAL_ANDROMALIUS)){
+			if(!(u.sealsActive&SEAL_ANDROMALIUS) && !check_mutation(TENDRIL_HAIR)){
 				bufO[0] = '\0';
 				switch(steal(magr, bufO, FALSE, FALSE)){
 				  case -1:
@@ -4254,6 +4254,53 @@ int * truedmgptr;
 			break;
 		}
 	}
+	if(check_oprop(otmp, OPROP_SOTHW)){
+		switch(soth_weapon_damage_turn(otmp)){
+			// case AD_STTP:
+			// break;
+			// case AD_VAMP:
+			// break;
+			case AD_FIRE:
+				*truedmgptr += rnd(6);
+				if(!Fire_res(mdef)){
+					*truedmgptr += rnd(6);
+				}
+			break;
+			// case AD_POLY:
+				// //None
+			// break;
+			case AD_DESC:
+				if (nonliving(pd) || is_anhydrous(pd)){
+					//no effect
+					break;
+				}
+				if (is_watery(pd)){
+					*truedmgptr += basedmg;
+					heal(magr, min(*hp(mdef), basedmg));
+					if(youagr && !youdef)
+						yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50));
+				}
+				else {
+					*truedmgptr += basedmg/2;
+					heal(magr, min(*hp(mdef), basedmg/2));
+					if(youagr && !youdef)
+						yog_credit(mdef->data->cnutrit/500);
+				}
+			break;
+			case AD_DRST:
+				if(!Poison_res(mdef) && (youdef ? !Breathless : !breathless_mon(mdef))){
+					*truedmgptr += d(1,6);
+				}
+			break;
+			case AD_MAGM:
+				if(!Magic_res(mdef)){
+					*truedmgptr += max_ints(d(4,4) + otmp->spe, 1);
+				}
+			break;
+			// case AD_MADF:
+			// break;
+		}
+	}
 	//Psionic does slightly buffed damage, but triggers less frequently
 	// Buffed vs. telepathic beings
 	if(youdef && (Blind_telepat || !rn2(5))){
@@ -4453,6 +4500,79 @@ boolean lethal;
 		}
 	}
 
+	in_conflict = FALSE;
+}
+
+void
+mindstealer_conflict(mdef, magr)
+struct monst *mdef;
+struct monst *magr;
+{
+	int x, y, cx, cy, count = 0;
+	struct monst *target;
+	struct monst *targets[8];
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	boolean youdef = (mdef == &youmonst);
+	boolean youagr = (magr == &youmonst);
+	boolean youtar;
+	static boolean in_conflict = FALSE;
+	
+	if(in_conflict)
+		return;
+
+	in_conflict = TRUE;
+	
+	x = x(mdef);
+	y = y(mdef);
+	for(int i = 0; i < 8; i++){
+		cx = x + clockwisex[i];
+		cy = y + clockwisey[i];
+		if(!isok(cx, cy))
+			continue;
+		target = m_u_at(cx, cy);
+		if(!target)
+			continue;
+
+		if(target == mdef || target == magr)
+			continue;
+
+		youtar = (target == &youmonst);
+
+		if(youtar){
+			if(youagr)
+				continue;
+			else if(magr->mpeaceful)
+				continue;
+		}
+
+		if(DEADMONSTER(target))
+			continue;
+
+
+		if(	(youagr && target->mpeaceful)
+			|| (youdef && !target->mpeaceful)
+			|| (youtar && magr->mpeaceful)
+			|| (!youagr && !youdef && !youtar && (magr->mpeaceful == target->mpeaceful))
+		)
+			continue;
+
+		if(!youtar && nonthreat(target))
+			continue;
+
+		targets[count++] = target;
+	}
+	if(count){
+		target = targets[rn2(count)];
+		if(youdef){
+			flags.forcefight = TRUE;
+			xattacky(mdef, target, x(target), y(target));
+			flags.forcefight = FALSE;
+		}
+		else {
+			xattacky(mdef, target, x(target), y(target));
+		}
+	}
 	in_conflict = FALSE;
 }
 
@@ -4796,6 +4916,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	int oartifact = otmp->oartifact;
 	
 	int goatweaponturn = 0;
+	int sothweaponturn = 0;
 
 	char hittee[BUFSZ];
 	static const char you[] = "you";
@@ -4812,6 +4933,8 @@ boolean printmessages; /* print generic elemental damage messages */
 	
 	if(check_oprop(otmp,OPROP_GOATW))
 		goatweaponturn = goat_weapon_damage_turn(otmp);
+	if(check_oprop(otmp,OPROP_SOTHW))
+		sothweaponturn = soth_weapon_damage_turn(otmp);
 	
 #define currdmg (basedmg + *plusdmgptr + *truedmgptr)
 
@@ -5271,7 +5394,13 @@ boolean printmessages; /* print generic elemental damage messages */
 			mdef->myoumarked = TRUE;
 	}
 	
-	if (attacks(AD_FIRE, otmp) || check_oprop(otmp,OPROP_FIREW) || check_oprop(otmp,OPROP_OONA_FIREW) || check_oprop(otmp,OPROP_LESSER_FIREW) || goatweaponturn == AD_FIRE){
+	if (attacks(AD_FIRE, otmp)
+		|| check_oprop(otmp,OPROP_FIREW)
+		|| check_oprop(otmp,OPROP_OONA_FIREW)
+		|| check_oprop(otmp,OPROP_LESSER_FIREW)
+		|| goatweaponturn == AD_FIRE
+		|| sothweaponturn == AD_FIRE
+	){
 		if (attacks(AD_FIRE, otmp) && (vis&VIS_MAGR) && printmessages) {	/* only artifacts message */
 			pline_The("fiery %s %s %s%c",
 				wepdesc,
@@ -5343,7 +5472,11 @@ boolean printmessages; /* print generic elemental damage messages */
 	if ((attacks(AD_COLD, otmp)  && !(
 			/* exceptions */
 			(oartifact && arti_struct->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves)
-		)) || check_oprop(otmp,OPROP_COLDW) || check_oprop(otmp,OPROP_OONA_COLDW) || check_oprop(otmp,OPROP_LESSER_COLDW) || goatweaponturn == AD_COLD
+		)) 
+		|| check_oprop(otmp,OPROP_COLDW)
+		|| check_oprop(otmp,OPROP_OONA_COLDW) 
+		|| check_oprop(otmp,OPROP_LESSER_COLDW) 
+		|| goatweaponturn == AD_COLD
 	){
 		if (attacks(AD_COLD, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("ice-cold %s %s %s%c",
@@ -5372,7 +5505,12 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 		}
 	}
-	if (attacks(AD_ELEC, otmp) || check_oprop(otmp,OPROP_ELECW) || check_oprop(otmp,OPROP_OONA_ELECW) || check_oprop(otmp,OPROP_LESSER_ELECW) || goatweaponturn == AD_ELEC){
+	if (attacks(AD_ELEC, otmp)
+		|| check_oprop(otmp,OPROP_ELECW)
+		|| check_oprop(otmp,OPROP_OONA_ELECW)
+		|| check_oprop(otmp,OPROP_LESSER_ELECW)
+		|| goatweaponturn == AD_ELEC
+	){
 		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("%s %s %s%c",
 				wepdesc,
@@ -5385,7 +5523,12 @@ boolean printmessages; /* print generic elemental damage messages */
 			if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 		}
 	}
-	if (attacks(AD_ACID, otmp) || check_oprop(otmp,OPROP_ACIDW) || check_oprop(otmp,OPROP_LESSER_ACIDW) || goatweaponturn == AD_EACD || goatweaponturn == AD_ACID){
+	if (attacks(AD_ACID, otmp)
+		|| check_oprop(otmp,OPROP_ACIDW)
+		|| check_oprop(otmp,OPROP_LESSER_ACIDW)
+		|| goatweaponturn == AD_EACD
+		|| goatweaponturn == AD_ACID
+	){
 		if (attacks(AD_ACID, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("foul %s %s %s%c",
 				wepdesc,
@@ -5811,7 +5954,7 @@ boolean printmessages; /* print generic elemental damage messages */
 				}
 			}
 		}
-		else if (youdef && !(u.sealsActive&SEAL_ANDROMALIUS)){
+		else if (youdef && !(u.sealsActive&SEAL_ANDROMALIUS) && !check_mutation(TENDRIL_HAIR)){
 			char buf[BUFSZ];
 			buf[0] = '\0';
 			steal(magr, buf, TRUE, FALSE);
@@ -6574,9 +6717,39 @@ boolean printmessages; /* print generic elemental damage messages */
 		} else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))){
 			int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
 
-			*truedmgptr += d(2, 4)*mult;
+			if(otmp->otyp == CLAWED_HAND && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_WAVE)
+				*truedmgptr += d(6, 6)*mult;
+			else
+				*truedmgptr += d(2, 4)*mult;
 		}
-
+		
+		if(is_human(pd)){
+			*truedmgptr += rnd(10);
+			if(is_mercenary(pd) || is_lord(pd) || is_prince(pd) || attacktype_fordmg(pd, AT_MAGC, AD_CLRC) || attacktype_fordmg(pd, AT_MMGC, AD_CLRC)){
+				mdef->mibitemarked = TRUE;
+				if(youagr)
+					mdef->myoumarked = TRUE;
+			}
+		}
+		if(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
+			if(is_unalive(pd)){
+				*truedmgptr += basedmg;
+			}
+		}
+		if(otmp->otyp == CLAWED_HAND && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REVOKE){
+			struct obj *stolen;
+			if(!youdef){
+				if(mdef->minvent){
+					stolen = mdef->minvent;
+					do {
+						obj_extract_and_unequip_self(stolen);
+						dropy(stolen);
+					} while((stolen = mdef->minvent) && !resist(mdef, WEAPON_CLASS, 0, NOTELL));
+					
+				}
+			}
+		}
+		
 		//Torch effects when the moon is gibbous
 		if((phase_of_the_moon() == 3 || phase_of_the_moon() == 5) && otmp->otyp == CLAWED_HAND){
 			if(!Fire_res(mdef)){
@@ -6725,7 +6898,151 @@ boolean printmessages; /* print generic elemental damage messages */
 		else
 			mdef->mconf = TRUE;
 	}
+	if(sothweaponturn) switch(sothweaponturn){
+		case AD_STTP:
+			if(youdef ? !Teleport_control : !mon_resistance(mdef, TELEPORT_CONTROL)){
+				if(!Teleport_control){
+					struct obj *armor = some_armor(mdef);
+					if (armor)
+						teleport_arm(armor, mdef);
+					else
+						*truedmgptr += basedmg;
+				}
+			}
+		break;
+		case AD_VAMP:
+			if(has_blood_mon(mdef)){
+				if (youdef) {
+					Your("blood is being drained!");
+				}
+				/* aggressor lifesteals by dmg dealt */
+				heal(magr, min(basedmg, *hp(mdef)));
+				if(youagr && !youdef){
+					yog_credit(mdef->data->cnutrit/500);
+				}
+				if(!Drain_res(mdef) && !rn2(3)){
+					if(youagr && !youdef){
+						yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50));
+					}
+					if(youdef){
+						losexp("blood drain", TRUE, FALSE, FALSE);
+					}
+					else {
+						if(vis&VIS_MDEF)
+							pline("%s suddenly seems weaker!", Monnam(mdef));
+						if(mlev(mdef) == 0)
+							*truedmgptr += basedmg + *hp(mdef);
+						else {
+							int drain = rnd(hd_size(mdef->data));
+							/* drain stats */
+							mdef->m_lev--;
+							mdef->mhpmax = max(mdef->mhpmax - drain, 1);
+							mdef->mhp = min(mdef->mhpmax, mdef->mhp);
+							*truedmgptr += drain;
+						}
+					}
+				}
+			}
+		break;
+		case AD_FIRE:
+			if (youdef) {
+				if (!Antimagic) {
+					HPanicking += 3;
+					if (magr && magr == u.ustuck && sticks(&youmonst)) {
+						u.ustuck = (struct monst *)0;
+						You("release %s!", mon_nam(magr));
+					}
+					*truedmgptr += d(2,6);
+				}
+			} else if(!mindless_mon(mdef)){
+				if (!resist(mdef, WEAPON_CLASS, 0, NOTELL)){
+					*truedmgptr += d(2,6);
+					monflee(mdef, 3, FALSE, (mdef->mhp > *truedmgptr));
+				}
+			}
+		break;
+		case AD_POLY:{
+			int weaktyp = big_to_little(mdef->mtyp);
+			if(weaktyp != mdef->mtyp && !resist(mdef, WEAPON_CLASS, 0, FALSE)){
+				newcham(mdef, weaktyp, FALSE, TRUE);
+			}
+		}break;
+		// case AD_DESC:
+		// break;
+		case AD_DRST:
+			if(!Poison_res(mdef)){
+				if(haseyes(pd)){
+					if(youdef){
+						int numeyes = eyecount(youracedata);
+						Your("%s sting%s!",
+							 (numeyes == 1) ? body_part(EYE) : makeplural(body_part(EYE)),
+							 (numeyes == 1) ? "s" : "");
+						make_blinded(basedmg, FALSE);
+					}
+					else {
+						mdef->mcansee = 0;
+						mdef->mblinded = max(mdef->mblinded, 3);
+					}
+				}
 
+				if(youdef && !Breathless && !inediate(pd)){
+					make_vomiting(Vomiting+15+d(5,4), TRUE);
+				}
+				else if(!youdef && !breathless_mon(mdef) && (!inediate(pd) || is_android(mdef->data) || mdef->mtyp == PM_INCANTIFIER) && !resist(mdef, WEAPON_CLASS, 0, FALSE)){
+					if(canseemon(mdef)){
+						if(is_android(mdef->data))
+							pline("%s retches!", Monnam(mdef));
+						else if(mdef->mtyp == PM_INCANTIFIER)
+							pline("%s pukes up a rainbow!", Monnam(mdef));
+						else pline("%s vomits!", Monnam(mdef));
+					}
+					mdef->mcanmove = 0;
+					if ((mdef->mfrozen + 3) > 127)
+						mdef->mfrozen = 127;
+					else mdef->mfrozen += 3;
+				}
+			}
+		break;
+		// case AD_MAGM:
+		// break;
+		case AD_MADF:{
+			boolean affected = FALSE;
+			if(youdef){
+				if(!save_vs_sanloss()){
+					change_usanity(-1*basedmg, TRUE);
+					affected = TRUE;
+				}
+			}
+			else if(youagr){
+				if(!mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || tp_sensemon(mdef) || !rn2(5)) && roll_generic_madness(FALSE)){
+					//reset seen madnesses
+					mdef->seenmadnesses = 0L;
+					you_inflict_madness(mdef);
+					affected = TRUE;
+				}
+			}
+			else {
+				if(!mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
+					if(!resist(mdef, WEAPON_CLASS, 0, FALSE))
+						mdef->mcrazed = TRUE;
+					affected = TRUE;
+				}
+			}
+			if(affected){
+				if(!Fire_res(mdef)){
+					*truedmgptr += d(2,6);
+				}
+				if (!UseInvFire_res(mdef)) {
+					if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+					if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+					if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+				}
+				if(!Magic_res(mdef)){
+					*truedmgptr += max_ints(d(4,4) + otmp->spe, 1);
+				}
+			}
+		}break;
+	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
@@ -6887,9 +7204,9 @@ boolean printmessages; /* print generic elemental damage messages */
 	//Sleeping weapons put targets to sleep
 	if(attacks(AD_SLEE, otmp) && !rn2(2)){
 		if (youdef) {
-			fall_asleep(-rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), TRUE);
 			if (Blind) You("are put to sleep!");
 			else You("are put to sleep by %s!", mon_nam(magr));
+			fall_asleep(-rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), TRUE);
 		}
 		else {
 			if (sleep_monst(mdef, rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), 0)) {
@@ -6915,6 +7232,214 @@ boolean printmessages; /* print generic elemental damage messages */
 static NEARDATA const char recharge_type[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
 static NEARDATA const char invoke_types[] = { ALL_CLASSES, 0 };
 		/* #invoke: an "ugly check" filters out most objects */
+
+
+int
+ibite_upgrade_menu(obj)
+struct obj *obj;
+{
+
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	if(!(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_WAVE)){
+		Sprintf(buf, "Improved water attack");
+		any.a_int = IPROP_WAVE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	if(!(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REVOKE)){
+		Sprintf(buf, "Revoke target equipment");
+		any.a_int = IPROP_REVOKE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	if(!(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY)){
+		Sprintf(buf, "Destroy the nonliving");
+		any.a_int = IPROP_DESTROY;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	if(!(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_TELEPORT)){
+		Sprintf(buf, "Enable teleportation");
+		any.a_int = IPROP_TELEPORT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	if(!(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_LEVELPORT)){
+		Sprintf(buf, "Enable level teleportation");
+		any.a_int = IPROP_LEVELPORT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	if(!(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_BRANCHPORT)){
+		Sprintf(buf, "Enable branch teleportation");
+		any.a_int = IPROP_BRANCHPORT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	if(!(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT)){
+		Sprintf(buf, "Make reflective");
+		any.a_int = IPROP_REFLECT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	end_menu(tmpwin, "What upgrade?");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	int picked;
+	if(n > 0){
+		picked = selected[0].item.a_int;
+		free(selected);
+	}
+	else return MOVE_CANCELLED;
+
+	artinstance[ART_IBITE_ARM].IbiteUpgrades |= picked;
+	if(picked == IPROP_REFLECT)
+		EReflecting |= W_WEP;
+	artinstance[ART_IBITE_ARM].IbiteFavor -= 25*(10 + (artinstance[ART_IBITE_ARM].IbiteBoons * artinstance[ART_IBITE_ARM].IbiteBoons * 2 / 25));
+	artinstance[ART_IBITE_ARM].IbiteBoons += TIER_C;
+	return MOVE_STANDARD;
+}
+
+int
+ibite_arm_menu(obj)
+struct obj *obj;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Do what?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	if(wizard)
+		pline("%ld needed, %ld available", 25*(10 + (artinstance[ART_IBITE_ARM].IbiteBoons * artinstance[ART_IBITE_ARM].IbiteBoons * 2 / 25)),
+	artinstance[ART_IBITE_ARM].IbiteFavor);
+	
+	if(artinstance[ART_IBITE_ARM].IbiteFavor > 25*(10 + (artinstance[ART_IBITE_ARM].IbiteBoons * artinstance[ART_IBITE_ARM].IbiteBoons * 2 / 25))){
+		Sprintf(buf, "Strengthen the arm");
+		any.a_int = -1;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	if(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_TELEPORT && !notel_level()){
+		Sprintf(buf, "Teleport");
+		any.a_int = IPROP_TELEPORT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+	if(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_LEVELPORT){
+		Sprintf(buf, "Level-teleport");
+		any.a_int = IPROP_LEVELPORT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+	if(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_BRANCHPORT){
+		Sprintf(buf, "Branch-teleport");
+		any.a_int = IPROP_BRANCHPORT;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+	if(u.uinsight >= 60){
+		Sprintf(buf, "Raise ibite mob");
+		any.a_int = -2;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+
+	end_menu(tmpwin, "The Arm looks somehow attentive...");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	int picked;
+	if(n > 0){
+		picked = selected[0].item.a_int;
+		free(selected);
+	}
+	else return MOVE_CANCELLED;
+
+	switch (picked) {
+		case -1:
+			return ibite_upgrade_menu(obj);
+
+		case IPROP_TELEPORT:
+			if(tele())
+				return MOVE_STANDARD;
+			else return MOVE_CANCELLED;
+
+		case IPROP_LEVELPORT:
+			if(level_tele())
+				return MOVE_STANDARD;
+			else return MOVE_CANCELLED;
+
+		case IPROP_BRANCHPORT:
+			if(branch_tele())
+				return MOVE_STANDARD;
+			else return MOVE_CANCELLED;
+
+		case -2:
+			doibite_ghosts(&youmonst, obj);
+			return MOVE_STANDARD;
+	}
+	impossible("bad menu option in ibite_arm_menu");
+	return MOVE_CANCELLED;
+}
 
 int
 doinvoke()
@@ -7082,67 +7607,25 @@ arti_invoke(obj)
 	    break;
 	  }
 	case LEV_TELE:
-	    level_tele();
+	    if(!level_tele())
+			goto nothing_special;
 	    break;
-	case CREATE_PORTAL: {
-	    int i, num_ok_dungeons, last_ok_dungeon = 0;
-	    d_level newlev;
-	    extern int n_dgns; /* from dungeon.c */
-	    winid tmpwin = create_nhwindow(NHW_MENU);
-	    anything any;
-
-	    any.a_void = 0;	/* set all bits to zero */
-	    start_menu(tmpwin);
-	    /* use index+1 (cant use 0) as identifier */
-	    for (i = num_ok_dungeons = 0; i < n_dgns; i++) {
-		if (!dungeons[i].dunlev_ureached) continue;
-		any.a_int = i+1;
-		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
-			 dungeons[i].dname, MENU_UNSELECTED);
-		num_ok_dungeons++;
-		last_ok_dungeon = i;
-	    }
-	    end_menu(tmpwin, "Open a portal to which dungeon?");
-	    if (num_ok_dungeons > 1) {
-		/* more than one entry; display menu for choices */
-		menu_item *selected;
-		int n;
-
-		n = select_menu(tmpwin, PICK_ONE, &selected);
-		if (n <= 0) {
-		    destroy_nhwindow(tmpwin);
-		    goto nothing_special;
+	case CREATE_PORTAL:
+		if(obj->oartifact == ART_SILVER_KEY && IS_ALTAR(levl[u.ux][u.uy].typ) && god_at_altar(u.ux, u.uy) == GOD_YOG_SOTHOTH){
+			if(yn("Travel to the Gate of the Silver Key?") == 'y'){
+				/*With appologies to "Through the Gates of the Silver Key" by H. P. Lovecraft. */
+				pline("You have come to a place and a time where place and time have no meaning.");
+				pline("There is no distinction between your past and present selves, just as there is no distinction between your future and present. There is only the immutable %s.", plname);
+				pline("Light filters down from a sky of no color in baffling, contradictory directions, and plays almost sentiently over a line of gigantic hexagonal pedestals.");
+				pline("Surmounting these pedestals are cloaked, ill-defined Shapes, and another Shape, too, which occupies no pedestal.");
+				pline("It speaks to you without sound or language, and you find yourself back where you started!");
+				pline("A seal is engraved into your mind!");
+				u.specialSealsKnown |= SEAL_YOG_SOTHOTH;
+			}
 		}
-		i = selected[0].item.a_int - 1;
-		free((genericptr_t)selected);
-	    } else
-		i = last_ok_dungeon;	/* also first & only OK dungeon */
-	    destroy_nhwindow(tmpwin);
-
-	    /*
-	     * i is now index into dungeon structure for the new dungeon.
-	     * Find the closest level in the given dungeon, open
-	     * a use-once portal to that dungeon and go there.
-	     * The closest level is either the entry or dunlev_ureached.
-	     */
-	    newlev.dnum = i;
-	    if(dungeons[i].depth_start >= depth(&u.uz))
-		newlev.dlevel = dungeons[i].entry_lev;
-	    else
-		newlev.dlevel = dungeons[i].dunlev_ureached;
-	    if(u.uhave.amulet || In_endgame(&u.uz) || In_endgame(&newlev) ||
-	       newlev.dnum == u.uz.dnum) {
-		You_feel("very disoriented for a moment.");
-	    } else {
-		if(u.usteed && mon_has_amulet(u.usteed)){
-			dismount_steed(DISMOUNT_VANISHED);
-		}
-		if(!Blind) You("are surrounded by a shimmering sphere!");
-		else You_feel("weightless for a moment.");
-		goto_level(&newlev, FALSE, FALSE, FALSE);
-	    }
+		else if(!branch_tele())
+			goto nothing_special;
 	    break;
-	  }
 	case LOOT_SELF:
 		obj->age = 0; //Age will be reset in loot container for Esscoo only
 		if(use_container(obj, TRUE) == MOVE_CANCELLED){
@@ -7274,9 +7757,8 @@ arti_invoke(obj)
 			}
 			else tele();//hungerless teleport
 		} else {
-			obj_extract_self(obj);
-			dropy(obj);
-			rloco(obj);
+			obj_extract_and_unequip_self(obj);
+			randomly_place_obj(obj);
 			pline("%s teleports without you.",xname(obj));
 		}
 	break;
@@ -10253,9 +10735,7 @@ arti_invoke(obj)
 			make_invulnerable(HSanctuary + 3, TRUE);
 			break;
         case IBITE_ARM:
-			You("wake the severed arm.");
-			doliving_ibite_arm(&youmonst, obj, TRUE);
-			time = MOVE_PARTIAL;
+			time = ibite_arm_menu(obj);
 		break;
         case IMPERIAL_RING:{
 			if(obj->spe <= 0 && artinstance[obj->oartifact].uconstel_pets >= 2){
@@ -12484,6 +12964,12 @@ do_passive_attacks()
 	
 	if(is_goat_tentacle_mtyp(youracedata))
 		dogoat();
+	if(u.specialSealsActive&SEAL_YOG_SOTHOTH){
+		if(!doyog(&youmonst)){
+			if(check_mutation(TWIN_MIND) && roll_generic_madness(FALSE))
+				dotwin_cast(&youmonst);
+		}
+	}
 	if(is_snake_bite_mtyp(youracedata))
 		dosnake(&youmonst);
 	if(is_tailslap_mtyp(youracedata))
@@ -12500,6 +12986,8 @@ do_passive_attacks()
 				dogoat_mon(mtmp);
 			if(is_snake_bite_mon(mtmp))
 				dosnake(mtmp);
+			if(mtmp->mtyp == PM_TWIN_SIBLING)
+				doyog(mtmp);
 			if(is_tailslap_mon(mtmp))
 				dotailslap(mtmp);
 			if(is_vines_mon(mtmp))
@@ -12916,6 +13404,24 @@ struct obj *obj;
 			}
 	}
 	return AD_EACD;
+}
+
+int
+soth_weapon_damage_turn(obj)
+struct obj *obj;
+{
+	unsigned long int hashed = hash((unsigned long) (monstermoves/100 + obj->o_id + hash(OPROP_SOTHW)));
+	switch(hashed%8){
+		case 0: return AD_STTP;
+		case 1: return AD_VAMP;
+		case 2: return AD_FIRE;
+		case 3: return AD_POLY;
+		case 4: return AD_DESC;
+		case 5: return AD_DRST;
+		case 6: return AD_MAGM;
+		case 7: return AD_MADF;
+	}
+	return AD_MAGM;
 }
 
 void

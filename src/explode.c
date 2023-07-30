@@ -360,6 +360,8 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			break;
 		case AD_WET: str = "wall of water";
 			break;
+		case AD_MADF: str = "magenta fireball";
+			break;
 		default:
 			impossible("unaccounted-for explosion damage type in do_explode: %d", adtyp);
 			str = "404 BLAST NOT FOUND";
@@ -381,6 +383,9 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			case AD_EFIR:
 			case AD_FIRE:
 				explmask = !!Fire_resistance;
+				break;
+			case AD_MADF:
+				explmask = (Fire_resistance && Antimagic);
 				break;
 			case AD_ECLD:
 			case AD_COLD:
@@ -447,6 +452,9 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			case AD_EFIR:
 			case AD_FIRE:
 				explmask |= resists_fire(mtmp);
+				break;
+			case AD_MADF:
+				explmask |= (resists_fire(mtmp) && resists_magm(mtmp));
 				break;
 			case AD_ECLD:
 			case AD_COLD:
@@ -578,6 +586,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 				      Monnam(u.ustuck),
 				      (adtyp == AD_EFIR) ? "heartburn" :
 				      (adtyp == AD_FIRE) ? "heartburn" :
+				      (adtyp == AD_MADF) ? "heartburn" :
 				      (adtyp == AD_ECLD) ? "chilly" :
 				      (adtyp == AD_COLD) ? "chilly" :
 				      (adtyp == AD_DISN) ? "perforated" :
@@ -598,6 +607,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 				      Monnam(u.ustuck),
 				      (adtyp == AD_EFIR) ? "toasted" :
 				      (adtyp == AD_FIRE) ? "toasted" :
+				      (adtyp == AD_MADF) ? "toasted" :
 				      (adtyp == AD_ECLD) ? "chilly" :
 				      (adtyp == AD_COLD) ? "chilly" :
 				      (adtyp == AD_DISN) ? "perforated" :
@@ -625,6 +635,34 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			idamnonres += destroy_item(mtmp, POTION_CLASS, (int) adtyp);
 			idamnonres += destroy_item(mtmp, WAND_CLASS, (int) adtyp);
 			idamnonres += destroy_item(mtmp, RING_CLASS, (int) adtyp);
+			if(adtyp == AD_MADF && !Fire_res(mtmp)){
+				destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+				destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
+				idamnonres += destroy_item(mtmp, POTION_CLASS, AD_FIRE);
+			}
+		}
+
+		//Share madness
+		if(adtyp == AD_MADF){
+			if(yours && mtmp == &youmonst); //Can't share madness with self
+			else if(mtmp == &youmonst){
+				if(!save_vs_sanloss()){
+					change_usanity(-1*d(3,6), TRUE);
+				}
+			}
+			else if(yours){
+				if(!mindless_mon(mtmp) && (mon_resistance(mtmp,TELEPAT) || tp_sensemon(mtmp) || !rn2(5)) && roll_generic_madness(FALSE)){
+					//reset seen madnesses
+					mtmp->seenmadnesses = 0L;
+					you_inflict_madness(mtmp);
+				}
+			}
+			else {
+				if(!mindless_mon(mtmp) && (mon_resistance(mtmp,TELEPAT) || !rn2(5))){
+					if(!resist(mtmp, '\0', 0, FALSE))
+						mtmp->mcrazed = TRUE;
+				}
+			}
 		}
 
 		if (area->locations[i].shielded) {
@@ -682,7 +720,9 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 
 			if (resists_cold(mtmp) && (adtyp == AD_FIRE || adtyp == AD_EFIR))
 				mdam *= 2;
-			else if (resists_fire(mtmp) && adtyp == (adtyp == AD_COLD || adtyp == AD_ECLD))
+			else if (resists_fire(mtmp) && (adtyp == AD_COLD || adtyp == AD_ECLD))
+				mdam *= 2;
+			else if (resists_cold(mtmp) && !resists_fire(mtmp) && adtyp == AD_MADF)
 				mdam *= 2;
 			else if (Dark_vuln(mtmp) && adtyp == AD_DARK)
 				mdam *= 2;
@@ -749,7 +789,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			damu += u.ulevel;
 		}
 		/* do property damage first, in case we end up leaving bones */
-		if (adtyp == AD_FIRE || adtyp == AD_EFIR){
+		if (adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF){
 			burn_away_slime();
 			melt_frozen_air();
 		}
@@ -759,7 +799,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 		} else {
 			damu = reduce_dmg(&youmonst,damu,TRUE,FALSE);
 		}
-		if (adtyp == AD_FIRE || adtyp == AD_EFIR) (void) burnarmor(&youmonst, FALSE);
+		if (adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF) (void) burnarmor(&youmonst, FALSE);
 		if(uhurt == 2){
 			destroy_item(&youmonst, SCROLL_CLASS, (int) adtyp);
 			destroy_item(&youmonst, SPBOOK_CLASS, (int) adtyp);
@@ -823,14 +863,14 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			killer = killer_buf;
 			/* Known BUG: BURNING suppresses corpse in bones data,
 			   but done does not handle killer reason correctly */
-			done((adtyp == AD_FIRE || adtyp == AD_EFIR) ? BURNING : DIED);
+			done((adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF) ? BURNING : DIED);
 		    }
 		}
 		if(uhurt == 2) exercise(A_STR, FALSE);
 	}
 
 	if (shopdamage) {
-		pay_for_damage((adtyp == AD_FIRE || adtyp == AD_EFIR) ? "burn away" :
+		pay_for_damage((adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF) ? "burn away" :
 			       (adtyp == AD_COLD || adtyp == AD_ECLD) ? "shatter" :
 			       adtyp == AD_DISN ? "disintegrate" : "destroy",
 			       FALSE);
@@ -1349,6 +1389,7 @@ int adtyp;
 			return EXPL_FROSTY;
 		case AD_EELC:
 		case AD_ELEC:
+		case AD_MADF:
 			return EXPL_MAGICAL;
 		case AD_DISE:
 		case AD_DRST:

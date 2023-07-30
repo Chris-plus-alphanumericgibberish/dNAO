@@ -5949,6 +5949,11 @@ struct monst *mon;
 		if(u.specialSealsActive&SEAL_MISKA && !Invis && u.ulevel >= 10) count++;
 		if(u.specialSealsActive&SEAL_NUDZIRATH) count++;
 		// if(u.specialSealsActive&SEAL_BLACK_WEB);
+		if(u.specialSealsActive&SEAL_YOG_SOTHOTH && !Invis && (
+			(!uarmc && ((!uarm && (!uarmu || !arm_blocks_lower_body(uarmu->otyp))) || !uarmf))
+			|| (check_mutation(YOG_GAZE_2) && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != SUNGLASSES && ublindf->otyp != LIVING_MASK))
+			|| (moves <= u.yogAttack+5)
+		)) count++;
 		// if(u.specialSealsActive&SEAL_NUMINA);
 	}
 	return count;
@@ -6002,6 +6007,12 @@ struct monst *mon;
 		if(u.specialSealsActive&SEAL_COUNCIL && !(Blind || (ublindf && !(ublindf->otyp == LENSES || ublindf->otyp == LIVING_MASK)))) count++;
 		if(u.specialSealsActive&SEAL_ALIGNMENT_THING) count++;
 		if(u.specialSealsActive&SEAL_BLACK_WEB && !Invis && (dimness(u.ux, u.uy) <= 0)) count++;
+		if(u.specialSealsActive&SEAL_YOG_SOTHOTH && !Invis && (
+			(uarmc && ((!uarm && (!uarmu || !arm_blocks_lower_body(uarmu->otyp))) || !uarmf))
+			|| (check_mutation(YOG_GAZE_1) && !check_mutation(YOG_GAZE_2) && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != LIVING_MASK))
+		)
+		 && (moves > u.yogAttack+5)
+		) count++;//Otherwise counted with the far signs
 	}
 	if(u.specialSealsActive&SEAL_NUMINA) count++;
 //	if(u.specialSealsActive&SEAL_UNKNOWN_GOD) count++;

@@ -1535,8 +1535,12 @@ int mkflags;
 				otmp->owt = weight(otmp);
 			}
 			break;
-		case COIN_CLASS:
 		case BED_CLASS:
+			if(otmp->otyp == BERGONIC_CHAIR){
+				otmp->spe = d(3,3);
+			}
+			break;
+		case COIN_CLASS:
 		case TILE_CLASS:
 		case SCOIN_CLASS:
 			break;	/* do nothing */
