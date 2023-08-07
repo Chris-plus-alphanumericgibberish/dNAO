@@ -911,7 +911,7 @@ int template;
 			ptr->mresists = MR_ALL|MR_MAGIC;
 			ptr->mflagsm |= MM_FLY|MM_BREATHLESS|MM_FLOAT;
 			ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_CARNIVORE | MT_HERBIVORE | MT_TRAITOR);
-			ptr->mflagst |= MT_WANDER|MT_STALK|MT_HOSTILE|MT_MINDLESS;
+			ptr->mflagst |= MT_WANDER|MT_STALK|MT_HOSTILE;
 			ptr->mflagsb |= MB_UNSOLID|MB_INSUBSTANTIAL;
 			ptr->mflagsg &= ~(MG_PNAME);
 			ptr->mflagsg |= MG_NASTY|MG_HATESUNHOLY;
