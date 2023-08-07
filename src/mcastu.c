@@ -6535,6 +6535,14 @@ int tary;
 	if ((spellnum == EARTHQUAKE || spellnum == TREMOR || spellnum == EARTH_CRACK) && In_endgame(&u.uz))
 		return TRUE;
 
+	/* earthquake should never be cast by a priest in their own temple (or presumably around it), since they wouldn't want to mess it up
+	 * this does assume that the priest hasn't left that level for some reason but who cares
+	 * could also check histemple_at for tremor etc. to see if target is there, but that can still overlap with the temple
+	 * note - if a monster has ispriest set, it has a shrine, see exstruct.h
+	*/
+	if ((spellnum == EARTHQUAKE || spellnum == TREMOR || spellnum == EARTH_CRACK) && !youagr && magr->ispriest)
+		return TRUE;
+
 	/* don't do strangulation if there's no room in player's inventory */
 	if (spellnum == STRANGLE && 
 		(youdef && inv_cnt() == 52 && (!uamul || uamul->oartifact || uamul->otyp == AMULET_OF_YENDOR)))

@@ -1546,12 +1546,22 @@ struct monst *mon;
 				pline_The("kitchen sink falls into a chasm.");
 			goto do_pit;
 #endif
+
+		  /* altars being removed by eq is honestly more problematic than it should be
+		   * this is also helped by temple priests not casting eq, but then
+		   * non-temple aligned priests in places like temple of moloch still do it,
+		   * or any potential clerical casters summoned by the altar/the priest
+		   * and it's easier to just disable this all together
+		   */
+
+		  /*
 		  case ALTAR :
 			if (Is_astralevel(&u.uz) || Is_sanctum(&u.uz) || (Role_if(PM_EXILE) && Is_nemesis(&u.uz))) break;
 
 			if (cansee(x,y))
 				pline_The("altar falls into a chasm.");
 			goto do_pit;
+		  */
 		  case GRAVE :
 			if (cansee(x,y))
 				pline_The("headstone topples into a chasm.");
