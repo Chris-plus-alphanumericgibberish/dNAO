@@ -2019,6 +2019,9 @@ boolean with_price;
 				else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
 				else Strcat(buf, "Fluorite Octahedron");
 			}
+			else if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_LANCE_OF_LONGINUS) && (obj->otyp == SCALPEL || obj->otyp == LIGHTSABER)){
+				Strcat(buf, "Lancet of Longinus");
+			}
 			else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
 				Strcat(buf, ONAME(obj) + 4);
 			else

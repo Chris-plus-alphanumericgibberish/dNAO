@@ -830,7 +830,7 @@ struct obj * otmp;
 		if (a->gflags & ARTG_NOGEN && !(otmp->otyp == SPE_SECRETS))
 			continue;
 		/* must match otyp (or be acceptable) */
-		if (!artitypematch(a, otmp))
+		if (!artitypematch(a, otmp) && ((a) == &artilist[ART_LANCE_OF_LONGINUS]) && otmp->otyp != SPEAR)
 			continue;
 		/* Fire Brand and Frost Brand can generate out of MANY otypes, so decrease their odds of being chosen at random */
 		/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
@@ -1853,7 +1853,7 @@ register boolean mod;
 
 	if (otmp && *name)
 	    for (a = artilist+1; a->otyp; a++)
-		if ((a->otyp == otmp->otyp || (is_malleable_artifact(a) && artitypematch(a, otmp))) && !strcmp(a->name, name)) {
+		if ((a->otyp == otmp->otyp || ((is_malleable_artifact(a) || a == &artilist[ART_LANCE_OF_LONGINUS]) && artitypematch(a, otmp))) && !strcmp(a->name, name)) {
 		    register int m = a - artilist;
 		    otmp->oartifact = (mod ? m : 0);
 		    otmp->age = 0;
