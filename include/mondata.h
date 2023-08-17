@@ -304,6 +304,7 @@
 							 freezing(ptr) || burning(ptr))
 #define hideablewidegaze(ptr)	((ptr)->mtyp == PM_MEDUSA || \
 								 (ptr)->mtyp == PM_GREAT_CTHULHU || \
+								 (ptr)->mtyp == PM_STAR_SPAWN || \
 								 (ptr)->mtyp == PM_DAGON || \
 								 (ptr)->mtyp == PM_PALE_NIGHT || \
 								 (ptr)->mtyp == PM_OBOX_OB || \
