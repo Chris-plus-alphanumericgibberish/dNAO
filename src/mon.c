@@ -3036,7 +3036,7 @@ struct monst *looker;
 	if(earthsense(looker->data) && !(Flying || Levitation|| unsolid(youracedata) || Stealth)){
 		return TRUE;
 	}
-	if (mon_resistance(looker, TELEPAT)) {/* player always has a mind? */
+	if (mon_resistance(looker, TELEPAT) && !Tele_blind) {/* player always has a mind? */
 		return TRUE;
 	}
 	if(goodsmeller(looker->data) && distmin(u.ux, u.uy, looker->mx, looker->my) <= 6){
@@ -4713,8 +4713,10 @@ register struct monst *mtmp;
 		 * the m_detach or there will be relmon problems later */
 		if(!grddead(mtmp)) return;
 	}
-	lifesaved_monster(mtmp);
-	if (mtmp->mhp > 0) return;
+	if (!DEADMONSTER(mtmp)) {
+		lifesaved_monster(mtmp);
+		if (mtmp->mhp > 0) return;
+	}
 	/* we did not lifesave */
 	mtmp->deadmonster |= DEADMONSTER_DEAD;
 	mtmp->mbdrown = 0;
@@ -8614,7 +8616,7 @@ int damage;
 		}
 	}
 	if(primary != &youmonst && !origin->mpeaceful){
-		if (tp_sensemon(origin) || (Blind_telepat && rn2(2)) || !rn2(10)) {
+		if (!Tele_blind && (tp_sensemon(origin) || (Blind_telepat && rn2(2)) || !rn2(10))) {
 			int dmg;
 			//Note: You "hear" it in your mind, not with your ears, so You_hear() is wrong.
 			You("hear a terrible scream!");

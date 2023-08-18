@@ -2289,9 +2289,9 @@ makecorpse:			if (mons[obj->corpsenm].geno &
 			}
 			(void) get_obj_location(obj, &oox, &ooy, 0);
 			refresh_x = oox; refresh_y = ooy;
-			mon = makemon(&mons[obj->corpsenm],
-				      oox, ooy, NO_MM_FLAGS);
+			mon = make_familiar(obj, oox, ooy, FALSE);
 			if (mon) {
+				(void) stop_timer(FIG_TRANSFORM, obj->timed);
 			    delobj(obj);
 			    if (cansee(mon->mx, mon->my))
 				pline_The("figurine animates!");

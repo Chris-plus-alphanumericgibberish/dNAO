@@ -4541,7 +4541,7 @@ struct obj *tool;
 		}
 		else if(mtmp->mhp > (dmg = d(10,4))){
 			You("teleport the fang out of %s heart, but are unable to provide proper medical care afterwards.", s_suffix(mon_nam(mtmp)));
-			pline("Luckly, %s survives the process!", mhe(mtmp));
+			pline("Luckily, %s survives the process!", mhe(mtmp));
 			set_template(mtmp, 0);
 			mtmp->mhp -= dmg;
 			if(rnd(20) > (ACURR(A_CHA)+2)){
@@ -4587,7 +4587,7 @@ struct obj *tool;
 		}
 		else if(mtmp->mhp > (dmg = d(20,4))){
 			You("extract the fang from %s heart without providing medical care.", s_suffix(mon_nam(mtmp)));
-			pline("Luckly, %s survives the process!", mhe(mtmp));
+			pline("Luckily, %s survives the process!", mhe(mtmp));
 			set_template(mtmp, 0);
 			mtmp->mhp -= dmg;
 			if(rnd(20) > ACURR(A_CHA)){

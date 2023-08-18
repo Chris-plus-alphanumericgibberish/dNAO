@@ -1274,6 +1274,21 @@ A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
 	ENLIGHTENING, (ARTI_PLUSSEV)
 	),
 
+/*
+ * does not give telepathy. if you have telepathy, turns it to active and boosts doubles range 
+ * if you don't have telepathy, nullifies mind blasts and any psychic damage
+ * makes monsters within your extrinsic telepathy range treated as if they WERE telepathic (does not include cross-level, only in your range)
+ */
+A("Enforced Mind",				HELM_OF_TELEPATHY,			(const char *)0,
+	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_LAWFUL, NON_PM, NON_PM, TIER_C, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(BLOCK_CONFUSION), NOFLAG,
+	PROPS(SLEEP_RES), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
+	),
+
 /*Needs encyc entry*/
 /* Doubles gold found in the dungeon when worn. */
 /* Also gives +1d6 physical damage to attacks when worn. */

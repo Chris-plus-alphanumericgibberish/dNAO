@@ -725,7 +725,7 @@ boolean dumping;
 			enl_msg("You ", "wish", "wished", " to stand in partially illuminated areas, suffering reduced accuracy and sometimes failing to cast spells if not");
 		}
 		if (u.umadness&MAD_FORGETFUL){
-			enl_msg("Your mind ", "is", "was", " disolving");
+			enl_msg("Your mind ", "is", "was", " dissolving");
 		}
 		if (u.umadness&MAD_TOO_BIG){
 			enl_msg("", "It's", "It was", " too big");
@@ -1293,7 +1293,7 @@ resistances_enlightenment()
 			messaged++;
 		}
 		if (u.umadness&MAD_THALASSOPHOBIA){
-			putstr(en_win, 0, "You have an irrational fear of sea-monsters.");
+			putstr(en_win, 0, "You have an irrational fear of sea monsters.");
 			messaged++;
 		}
 		if (u.umadness&MAD_PARANOIA){
@@ -1349,7 +1349,7 @@ resistances_enlightenment()
 			putstr(en_win, 0, "You are fascinated by the dancing shadows.");
 		}
 		if (u.umadness&MAD_FORGETFUL){
-			putstr(en_win, 0, "Your mind is disolving.");
+			putstr(en_win, 0, "Your mind is dissolving.");
 		}
 		if (u.umadness&MAD_TOO_BIG){
 			putstr(en_win, 0, "It's too BIG!");

@@ -2639,6 +2639,10 @@ base_uac()
 			dexbonus += max((int)( (ACURR(A_WIS)-1)/2 - 5 ),0) + (int)(u.ulevel/6 + 1);
 			if(Confusion && u.udrunken>u.ulevel) dexbonus += u.udrunken/9+1;
 		}
+		
+		if (uarmh && uarmh->oartifact == ART_ENFORCED_MIND){
+			dexbonus += max((int)((ACURR(A_CHA)-11)/2), 0);
+		}
 		/*Corsets suck*/
 		if(uarmu && uarmu->otyp == VICTORIAN_UNDERWEAR){
 			uac += 2; //flat penalty. Something in the code "corrects" ac values >10, this is a kludge.
