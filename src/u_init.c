@@ -3018,6 +3018,12 @@ register struct trobj *trop;
 			if(obj->otyp == GAUNTLETS && Role_if(PM_ANACHRONONAUT)){
 				set_material_gm(obj, COPPER);
 			}
+			if(obj->otyp == HELMET && Role_if(PM_ANACHRONONAUT)){
+				set_material_gm(obj, COPPER);
+			}
+			if(obj->otyp == ARMORED_BOOTS && Role_if(PM_ANACHRONONAUT)){
+				set_material_gm(obj, COPPER);
+			}
 			if(obj->otyp == GAUNTLETS && Race_if(PM_CHIROPTERAN)){
 				set_material_gm(obj, LEATHER);
 			}
