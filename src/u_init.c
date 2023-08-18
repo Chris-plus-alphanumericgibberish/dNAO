@@ -2803,6 +2803,16 @@ u_init()
 	u.silver_flame_z.dnum = u.uz.dnum;
 	u.silver_flame_z.dlevel = rn2(dunlevs_in_dungeon(&u.uz)) + dungeons[u.uz.dnum].depth_start;
 
+	dungeon_topology.hell1_variant = rnd(BELIAL_LEVEL); // bael, dis, mammon, belial + later chance of chromatic dragon for non-cav
+	dungeon_topology.hell2_variant = rnd(MEPHISTOPHELES_LEVEL); // levi, lilth, baalze, meph
+	dungeon_topology.abyss_variant = rnd(KOSTCH_LEVEL); // juib, zugg, yeen, baph, pale night, kostch
+	dungeon_topology.abys2_variant = rnd(LOLTH_LEVEL); // orcus, mal, grazzt, lolth
+	dungeon_topology.brine_variant = rnd(LAMASHTU_LEVEL); // demo, dagon, lamashtu
+	
+	if(!Role_if(PM_CAVEMAN) && dungeon_topology.hell1_variant == BAEL_LEVEL && rn2(2)){
+		dungeon_topology.hell1_variant = CHROMA_LEVEL;
+	}
+
 	int common_caste = 0;
 	switch(rn2(6)){
 		case 0:
