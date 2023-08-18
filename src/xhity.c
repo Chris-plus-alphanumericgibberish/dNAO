@@ -11238,7 +11238,7 @@ int vis;
 		vis = getvis(magr, mdef, 0, 0);
 
 	/* Hamsa ward protects from gazes */
-	if (ward_at(x(mdef), y(mdef) == HAMSA))
+	if (ward_at(x(mdef), y(mdef)) == HAMSA)
 		return MM_MISS;
 	/* at the very least, all gaze attacks need a clear line of sight */
 	if (!clear_path(x(magr), y(magr), x(mdef), y(mdef)))
