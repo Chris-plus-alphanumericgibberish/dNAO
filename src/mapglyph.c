@@ -123,7 +123,7 @@ unsigned int *obgcolor;
      */
     if ((offset = (glyph - GLYPH_WARNING_OFF)) >= 0) {	/* a warning flash */
     	ch = warnsyms[offset];
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 # ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS)
 	    color = NO_COLOR;
@@ -538,7 +538,7 @@ unsigned int *obgcolor;
 			obj_color(offset);
 		/* shift out the 4 bits of color to leave the otyp */
 		offset = offset >> 4;
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE || offset == MASS_OF_STUFF) && iflags.bouldersym) ch = iflags.bouldersym;
 		else ch = get_objsym(offset);
 
@@ -548,7 +548,7 @@ unsigned int *obgcolor;
 		    special |= MG_OBJPILE;
 		}
     } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) {	/* mon ridden */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = get_monsym(offset);
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS)
@@ -561,7 +561,7 @@ unsigned int *obgcolor;
 	    mon_color(offset);
 	    special |= MG_RIDDEN;
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = get_objsym(CORPSE);
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color)
@@ -576,7 +576,7 @@ unsigned int *obgcolor;
 	    special |= MG_OBJPILE;
 	}
     } else if ((offset = (glyph - GLYPH_DETECT_OFF)) >= 0) {	/* mon detect */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = get_monsym(offset);
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS)
@@ -588,7 +588,7 @@ unsigned int *obgcolor;
 	/* is_reverse = TRUE; */
 	    special |= MG_DETECT;
     } else if ((offset = (glyph - GLYPH_INVIS_OFF)) >= 0) {	/* invisible */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = DEF_INVISIBLE;
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS)
@@ -598,7 +598,7 @@ unsigned int *obgcolor;
 	    invis_color(offset);
 	    special |= MG_INVIS;
     } else if ((offset = (glyph - GLYPH_MTEMPLATE_OFF)) >= 0) {	/* a templated monster */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = monsyms[(int)mons[offset % NUMMONS].mlet];
 		int template = (glyph - GLYPH_MTEMPLATE_OFF) / NUMMONS + 1;
 
@@ -617,7 +617,7 @@ unsigned int *obgcolor;
 		else
 	    	mtemplate_color(offset % NUMMONS);
     } else if ((offset = (glyph - GLYPH_PEACE_OFF)) >= 0) {	/* a peaceful monster */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = monsyms[(int)mons[offset].mlet];
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS)
@@ -627,7 +627,7 @@ unsigned int *obgcolor;
 	    peace_color(offset);
 	    special |= MG_PEACE;
     } else if ((offset = (glyph - GLYPH_PET_OFF)) >= 0) {	/* a pet */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = monsyms[(int)mons[offset].mlet];
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS)
@@ -637,7 +637,7 @@ unsigned int *obgcolor;
 	    pet_color(offset);
 	    special |= MG_PET;
     } else {							/* a monster */
-		if (On_stairs(x,y) && levl[x][y].seenv) special |= MG_STAIRS;
+		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
 		ch = get_monsym(glyph);
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
