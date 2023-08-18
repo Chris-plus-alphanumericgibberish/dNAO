@@ -5857,7 +5857,7 @@ int tary;
 					else if (canseemon(mdef))
 						pline("%s weapon is damaged!", s_suffix(Monnam(mdef)));
 				}
-				else if (youdef && (rn2(3) && magr->data->maligntyp < 0) && !Hallucination) {
+				else if (youdef && (rn2(3) && is_chaotic_mon(magr)) && !Hallucination) {
 					if (malediction)
 						verbalize("%s, your %s broken!", plname, aobjnam(otmp, "are"));
 					Your("%s to pieces in your %s!", aobjnam(otmp, "shatter"), hands);
