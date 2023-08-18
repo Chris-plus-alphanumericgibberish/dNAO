@@ -6109,7 +6109,9 @@ boolean inc_penalties;
 		if(OLD_P_SKILL(P_SHIEN) >= P_SKILLED) curskill++;
 		if(OLD_P_SKILL(P_SHIEN) >= P_EXPERT) curskill++;
 	}
-	
+
+	curskill = min(curskill, maxskill);
+
 	if(Air_crystal){
 		if(WIND_SKILL(p_skill))
 			INCR_CURSKILL;
@@ -6150,9 +6152,7 @@ boolean inc_penalties;
 			delta = 1; /* Want Should have SOME effect */
 		curskill = max(curskill - delta, P_UNSKILLED);
 	}
-	
-	curskill = min(curskill, maxskill);
-	
+
 	return curskill;
 }
 
