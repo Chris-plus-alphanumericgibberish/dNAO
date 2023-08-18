@@ -1990,6 +1990,7 @@ struct monst *mtmp;
 #define MUSE_POT_AMNESIA 13
 #define MUSE_POT_GAIN_ABILITY 14
 #define MUSE_MASK 15
+#define MUSE_POT_HOLY 16
 
 boolean
 find_misc(mtmp)
@@ -2150,6 +2151,22 @@ struct monst *mtmp;
 			    {
 			        m.misc = obj;
 			        m.has_misc = MUSE_SCR_REMOVE_CURSE;
+			    } 
+			}
+		}
+		nomore(MUSE_POT_HOLY);
+		if(obj->otyp == POT_WATER && obj->blessed)
+		{
+                        register struct obj *otmp;
+			for (otmp = mtmp->minvent;
+			     otmp; otmp = otmp->nobj)
+			{
+			    if (otmp->cursed && 
+			        (otmp->otyp == LOADSTONE ||
+				 otmp->owornmask))
+			    {
+			        m.misc = obj;
+			        m.has_misc = MUSE_POT_HOLY;
 			    } 
 			}
 		}
@@ -2526,6 +2543,31 @@ museamnesia:
 				/* the monster thinks its weapon is uncursed now, which might not be true */
 				if (obj == MON_WEP(mtmp))
 					mtmp->weapon_check = NEED_WEAPON;
+			}
+		    }
+		}
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
+	    return 0;
+	case MUSE_POT_HOLY:
+		{
+		    register struct obj *obj;
+		    for (obj = mtmp->minvent; obj; obj = obj->nobj)
+		    {
+			if (obj->cursed && (obj->owornmask || obj->otyp == LOADSTONE)){
+				if (canseemon(mtmp))
+				{
+					pline("%s dips %s %s into %s.",
+						Monnam(mtmp),
+						mhis(mtmp),
+						xname(obj),
+						xname(otmp)
+					);
+				}
+			    uncurse(obj);
+				if (obj == MON_WEP(mtmp))
+					mtmp->weapon_check = NEED_WEAPON;
+				break;
 			}
 		    }
 		}
