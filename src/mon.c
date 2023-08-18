@@ -4713,8 +4713,10 @@ register struct monst *mtmp;
 		 * the m_detach or there will be relmon problems later */
 		if(!grddead(mtmp)) return;
 	}
-	lifesaved_monster(mtmp);
-	if (mtmp->mhp > 0) return;
+	if (!DEADMONSTER(mtmp)) {
+		lifesaved_monster(mtmp);
+		if (mtmp->mhp > 0) return;
+	}
 	/* we did not lifesave */
 	mtmp->deadmonster |= DEADMONSTER_DEAD;
 	mtmp->mbdrown = 0;
