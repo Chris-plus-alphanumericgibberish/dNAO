@@ -1641,6 +1641,8 @@ char *buf;
 			return;
 	}
 force_add_material_name:
+	if (check_oprop(obj, OPROP_ELFLW))
+		return;
 	/* add on the adjective form of the object's material */
 	Strcat(buf, material_name(obj, TRUE));
 	Strcat(buf, " ");
