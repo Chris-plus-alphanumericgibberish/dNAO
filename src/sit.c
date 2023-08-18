@@ -189,7 +189,7 @@ dosit()
 		melt_frozen_air();
 		if (likes_fire(youmonst.data) || Fire_resistance) {
 			pline_The("forge feels nice and cozy.");
-			return 1;
+			return MOVE_STANDARD;
 		}
 		pline("Argh!  This forge is hot!");
 		losehp(d(4, 4), /* lava damage */
