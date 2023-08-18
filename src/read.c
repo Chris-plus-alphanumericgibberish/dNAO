@@ -3018,7 +3018,7 @@ struct obj	*sobj;
 		else if(u.ualign.type == A_NEUTRAL || (u.ualign.type == A_LAWFUL && u.ualign.record > 0)){
 		 pline("It's meaning is unclear, and you think you didn't pronounce it quite right.");
 		 if (u.uswallow) {
-			if(u.ustuck->data->maligntyp < A_NEUTRAL) monflee(u.ustuck, 7, FALSE, FALSE);
+			if(is_chaotic_mon(u.ustuck)) monflee(u.ustuck, 7, FALSE, FALSE);
 	break;
 		 }//else:
 	     for (i = -bd; i <= bd; i++) for(j = -bd; j <= bd; j++) {
