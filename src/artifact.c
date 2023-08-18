@@ -3525,7 +3525,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		and = TRUE;
 	}
 	if (pen->ovar1_seals&SEAL_OSE){
-		if(youdefend && (Blind_telepat || !rn2(5))) *dmgptr += d(dnum,15);
+		if(youdefend && !Tele_blind && (Blind_telepat || !rn2(5))) *dmgptr += d(dnum,15);
 		else if(!youdefend && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))) *dmgptr += d(dnum,15);
 	} // nvPh - telepathy
 	if (pen->ovar1_seals&SEAL_OTIAX){
@@ -4256,7 +4256,7 @@ int * truedmgptr;
 	}
 	//Psionic does slightly buffed damage, but triggers less frequently
 	// Buffed vs. telepathic beings
-	if(youdef && (Blind_telepat || !rn2(5))){
+	if(youdef && !Tele_blind && (Blind_telepat || !rn2(5))){
 		if (check_oprop(otmp, OPROP_PSIOW))
 			*truedmgptr += basedmg + otmp->spe;
 		if (check_oprop(otmp, OPROP_LESSER_PSIOW))
@@ -4291,7 +4291,7 @@ int * truedmgptr;
 	}
 	if(check_oprop(otmp, OPROP_DEEPW)){
 		if(otmp->spe < 8){
-		if(youdef && (Blind_telepat || !rn2(5)))
+		if(youdef && !Tele_blind && (Blind_telepat || !rn2(5)))
 			*truedmgptr += d(1, 15 - (otmp->spe) * 2);
 		else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5)))
 			*truedmgptr += d(1, 15 - (otmp->spe) * 2);
@@ -6678,7 +6678,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			extern const int clockwisey[8];
 			int nx, ny;
 			if(otmp->otyp != BULLWHIP || !rn2(4)){
-				if(youdef && (Blind_telepat || !rn2(5))){
+				if(youdef && !Tele_blind && (Blind_telepat || !rn2(5))){
 					*truedmgptr += d(2,2)+d(1,4);
 				}
 				else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
@@ -12801,7 +12801,7 @@ int spe;
 		pline("You hear a creaking in the sky.");
 		break;
 	}
-	if (Unblind_telepat || (Blind_telepat && Blind) || (Blind_telepat && rn2(2)) || !rn2(10)) {
+	if (!Tele_blind && (Unblind_telepat || (Blind_telepat && Blind) || (Blind_telepat && rn2(2)) || !rn2(10))) {
 		pline("It locks on to your %s!",
 			(Unblind_telepat || (Blind_telepat && Blind)) ? "telepathy" :
 			Blind_telepat ? "latent telepathy" : "mind");

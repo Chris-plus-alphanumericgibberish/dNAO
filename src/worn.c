@@ -105,6 +105,8 @@ int otyp;
 		while(objects[otyp].oc_oprop[j] && !got_prop) {
 			if (objects[otyp].oc_oprop[j] == cur_prop)
 				got_prop = TRUE;
+			if (obj && obj->oartifact == ART_ENFORCED_MIND && cur_prop == TELEPAT)
+				got_prop = FALSE;
 			j++;
 		}
 

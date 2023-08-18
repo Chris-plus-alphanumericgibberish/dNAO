@@ -1267,9 +1267,11 @@ struct monst *mon;
 		if(arm && (arm->otyp == PLAIN_DRESS || arm->otyp == NOBLE_S_DRESS)){
 			tmp += arm->spe;
 		}
-
 		if(wep && wep->oartifact == ART_SODE_NO_SHIRAYUKI){
 			tmp += wep->spe;
+		}
+		if(uarmh && uarmh->oartifact == ART_ENFORCED_MIND){
+			tmp += uarmh->spe;
 		}
 	}
 	if (x == A_STR) {
