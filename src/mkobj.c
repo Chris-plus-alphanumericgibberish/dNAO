@@ -1425,8 +1425,6 @@ int mkflags;
 		case WAND_CLASS:
 			if (otmp->otyp == WAN_WISHING)
 				otmp->spe = rnd(3);
-			else if(otmp->otyp == WAN_MAGIC_MISSILE)
-				otmp->spe = rn1(80, 31);
 			else
 				otmp->spe = rn1(5, (objects[otmp->otyp].oc_dir == NODIR) ? 11 : 4);
 			blessorcurse(otmp, 17);

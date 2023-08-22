@@ -3555,6 +3555,24 @@ winid *datawin;
 			OBJPUTSTR(buf);
 			printed_type = TRUE;
 		}
+		if (obj) {
+			int freechance = 100 - zapcostchance(obj, &youmonst);
+			if (freechance > 0) {
+				Sprintf(buf, "You have a %d%% chance not to use a charge each zap.", freechance);
+				OBJPUTSTR(buf);
+			}
+		}
+		else {
+			struct obj * fakeobj = mksobj(otyp, MKOBJ_NOINIT);
+			fakeobj->oartifact = oartifact;
+
+			int freechance = 100 - zapcostchance(fakeobj, (struct monst *)0);
+			if (freechance > 0) {
+				Sprintf(buf, "%d%% chance not to use a charge each zap.", freechance);
+				OBJPUTSTR(buf);
+			}
+			delobj(fakeobj);
+		}
 	}
 	if (olet == RING_CLASS) {
 		if (oc.oc_charged && otyp != RIN_WISHES)

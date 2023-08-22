@@ -615,7 +615,8 @@ struct monst *mtmp;
 		       || mtmp->isgd || mtmp->ispriest) return 2;
 		m_flee(mtmp);
 		mzapmsg(mtmp, otmp, TRUE);
-		otmp->spe--;
+		if (rn2(100) < zapcostchance(otmp, mtmp))
+			otmp->spe--;
 		how = WAN_TELEPORTATION;
 mon_tele:
 		if (tele_restrict(mtmp)) {	/* mysterious force... */
@@ -642,7 +643,8 @@ mon_tele:
 	case MUSE_WAN_TELEPORTATION:
 		zap_oseen = oseen;
 		mzapmsg(mtmp, otmp, FALSE);
-		otmp->spe--;
+		if (rn2(100) < zapcostchance(otmp, mtmp))
+			otmp->spe--;
 		m_using = TRUE;
 		mbhit(mtmp,rn1(8,6),mbhitm,bhito,otmp);
 		/* monster learns that teleportation isn't useful here */
@@ -689,7 +691,8 @@ mon_tele:
 
 		m_flee(mtmp);
 		mzapmsg(mtmp, otmp, FALSE);
-		otmp->spe--;
+		if (rn2(100) < zapcostchance(otmp, mtmp))
+			otmp->spe--;
 		if (oseen) makeknown(WAN_DIGGING);
 		if (IS_FURNITURE(levl[mtmp->mx][mtmp->my].typ) ||
 		    IS_DRAWBRIDGE(levl[mtmp->mx][mtmp->my].typ) ||
@@ -724,7 +727,8 @@ mon_tele:
 	case MUSE_WAN_CREATE_MONSTER:
 		if(DimensionalLock){
 			mzapmsg(mtmp, otmp, FALSE);
-			otmp->spe--;
+			if (rn2(100) < zapcostchance(otmp, mtmp))
+				otmp->spe--;
 			if (oseen)
 				pline("Nothing happens.");
 			return 2;
@@ -737,7 +741,8 @@ mon_tele:
 
 			if (!enexto(&cc, mtmp->mx, mtmp->my, pm)) return 0;
 			mzapmsg(mtmp, otmp, FALSE);
-			otmp->spe--;
+			if (rn2(100) < zapcostchance(otmp, mtmp))
+				otmp->spe--;
 			mon = makemon((struct permonst *)0, cc.x, cc.y, NO_MM_FLAGS);
 			if (mon && canspotmon(mon) && oseen)
 				makeknown(WAN_CREATE_MONSTER);
@@ -1559,7 +1564,8 @@ struct monst *mtmp;
 	case MUSE_WAN_LIGHTNING:
 	case MUSE_WAN_MAGIC_MISSILE:
 		mzapmsg(mtmp, otmp, FALSE);
-		otmp->spe--;
+		if (rn2(100) < zapcostchance(otmp, mtmp))
+			otmp->spe--;
 		if (oseen) makeknown(otmp->otyp);
 		m_using = TRUE;
 		
@@ -1595,7 +1601,8 @@ struct monst *mtmp;
 	case MUSE_WAN_CANCELLATION:  /* Lethe */
 		zap_oseen = oseen;
 		mzapmsg(mtmp, otmp, FALSE);
-		otmp->spe--;
+		if (rn2(100) < zapcostchance(otmp, mtmp))
+			otmp->spe--;
 		m_using = TRUE;
 		mbhit(mtmp,rn1(8,6),mbhitm,bhito,otmp);
 		m_using = FALSE;
@@ -2272,7 +2279,8 @@ skipmsg:
 	case MUSE_POT_INVISIBILITY:
 		if (otmp->otyp == WAN_MAKE_INVISIBLE) {
 		    mzapmsg(mtmp, otmp, TRUE);
-		    otmp->spe--;
+			if (rn2(100) < zapcostchance(otmp, mtmp))
+				otmp->spe--;
 		} else
 		    mquaffmsg(mtmp, otmp);
 		/* format monster's name before altering its visibility */
@@ -2294,7 +2302,8 @@ skipmsg:
 		return 2;
 	case MUSE_WAN_SPEED_MONSTER:
 		mzapmsg(mtmp, otmp, TRUE);
-		otmp->spe--;
+		if (rn2(100) < zapcostchance(otmp, mtmp))
+			otmp->spe--;
 		mon_adjust_speed(mtmp, 1, otmp, TRUE);
 		return 2;
 	case MUSE_POT_SPEED:
@@ -2378,7 +2387,8 @@ museamnesia:
 		return 2;
 	case MUSE_WAN_POLYMORPH:
 		mzapmsg(mtmp, otmp, TRUE);
-		otmp->spe--;
+		if (rn2(100) < zapcostchance(otmp, mtmp))
+			otmp->spe--;
 		if(!resists_poly(mtmp->data)) newcham(mtmp, NON_PM, TRUE, FALSE);
 		if (oseen) makeknown(WAN_POLYMORPH);
 		return 2;
