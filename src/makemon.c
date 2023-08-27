@@ -2339,7 +2339,7 @@ boolean goodequip;
 			}
 		} else if(mm == PM_MYRKALFAR_WARRIOR){
 			mtmp->m_lev += rn2(6);
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			otmp = mksobj(SNIPER_RIFLE, mkobjflags);
 			otmp->spe = 4;
 			otmp->cursed = FALSE; //Either uncurses or has no effect.
@@ -2400,7 +2400,7 @@ boolean goodequip;
 			}
 		} else if(mm == PM_MYRKALFAR_MATRON){
 			mtmp->m_lev += rn2(6);
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			struct obj *gem;
 			give_mintrinsic(mtmp, TELEPAT);
 			otmp = mksobj(ARM_BLASTER, mkobjflags);
@@ -2474,7 +2474,7 @@ boolean goodequip;
 		} else if(Infuture && mm == PM_ELVENKING){ /* Give the elvenking in the quest a special setup */
 			struct obj *gem;
 			mtmp->m_lev += 7;
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			
 			give_mintrinsic(mtmp, TELEPAT);
 			give_mintrinsic(mtmp, REGENERATION);
@@ -2848,7 +2848,7 @@ boolean goodequip;
 			(void)mongets(mtmp, FEDORA, mkobjflags);
 		} else if (mm == PM_TROOPER){
 			mtmp->m_lev += rn2(6);
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			if(!rn2(10)){
 				otmp = mksobj(ARM_BLASTER, mkobjflags);
 				if(otmp){
@@ -4783,7 +4783,7 @@ int mmflags;
 						(void) mpickobj(mtmp, otmp);
 					} else { //Fighter driver
 						mtmp->m_lev += 3;
-						mtmp->mhpmax += d(3,8);
+						mtmp->mhpmax += d(3,hd_size(mtmp->data));
 						mtmp->mhp = mtmp->mhpmax;
 						mtmp->mspeed = MFAST;
 						mtmp->permspeed = MFAST;
@@ -4832,7 +4832,7 @@ int mmflags;
 				} else {
 					if(rn2(10)){ //Wizard driver
 						mtmp->m_lev += 3;
-						mtmp->mhpmax += d(3,8);
+						mtmp->mhpmax += d(3,hd_size(mtmp->data));
 						mtmp->mhp = mtmp->mhpmax;
 						otmp = mksobj(MIRROR, mkobjflags|MKOBJ_NOINIT);
 						otmp->objsize = MZ_SMALL;
@@ -4868,7 +4868,7 @@ int mmflags;
 						(void) mpickobj(mtmp, otmp);
 					} else { //Wizard leader
 						mtmp->m_lev += 7;
-						mtmp->mhpmax += d(7,8);
+						mtmp->mhpmax += d(7,hd_size(mtmp->data));
 						mtmp->mhp = mtmp->mhpmax;
 						otmp = mksobj(MIRROR, mkobjflags|MKOBJ_NOINIT);
 						otmp->objsize = MZ_SMALL;
@@ -6930,7 +6930,7 @@ int mmflags;
 					give_mintrinsic(mtmp, POISON_RES);
 					give_mintrinsic(mtmp, REGENERATION);
 					mtmp->m_lev += 6;
-					mtmp->mhpmax = mtmp->m_lev*8-1;
+					mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data)-1;
 					mtmp->mhp = mtmp->mhpmax;
 					otmp = mksobj(DOUBLE_LIGHTSABER, mkobjflags);
 					otmp->oerodeproof = 1;
@@ -6985,7 +6985,7 @@ int mmflags;
 					struct obj *gem;
 					give_mintrinsic(mtmp, POISON_RES);
 					mtmp->m_lev += 2;
-					mtmp->mhpmax = mtmp->m_lev*8-1;
+					mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data)-1;
 					mtmp->mhp = mtmp->mhpmax;
 					otmp = mksobj(LIGHTSABER, mkobjflags);
 					otmp->oerodeproof = 1;
@@ -7256,7 +7256,7 @@ int mmflags;
 			if(Infuture){
 				if(in_mklev){
 					mtmp->m_lev += 20;
-					mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+					mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 					otmp = mksobj(ARM_BLASTER, mkobjflags);
 					if(otmp){
 						otmp->spe = 0;
@@ -13554,7 +13554,7 @@ int faction;
 		(8 * mtmp->m_lev) : (4 * mtmp->m_lev + d((int)mtmp->m_lev, 4)));
 	} else {
 		if(Infuture){
-			mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - 1;
+			mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*hd_size(mtmp->data) - 1;
 		} else {
 		    mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
 		    if (is_home_elemental(ptr))
@@ -13756,7 +13756,7 @@ int faction;
 				mtmp->mcansee = 0;
 				mtmp->mblinded = 0;
 			} else if(mndx == PM_KUKER){ 
-				mtmp->mhpmax = mtmp->m_lev*8 - 4; //Max HP
+				mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - hd_size(mtmp->data)/2; //Max HP
 				mtmp->mhp = mtmp->mhpmax;
 			}
 

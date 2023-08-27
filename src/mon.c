@@ -9046,7 +9046,7 @@ struct monst *mtmp;
 				set_template(tmpm, SLIME_REMNANT);
 				grow_up(mtmp,tmpm);
 				tmpm->m_lev = max(1, max(tmpm->m_lev, tmpm->data->mlevel));
-				tmpm->mhp = tmpm->mhpmax = tmpm->m_lev*8;
+				tmpm->mhp = tmpm->mhpmax = tmpm->m_lev*hd_size(tmpm->data);
 				if(mtmp->mtame){
 					tmpm->mpeaceful = 1;
 				} else {
