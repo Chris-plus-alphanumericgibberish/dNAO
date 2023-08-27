@@ -1092,6 +1092,7 @@ int aatyp;
 	case AT_STNG:
 	case AT_ENGL:
 	case AT_TENT:
+	case AT_TONG:
 	default:
 		w_mask = 0L;		/* no defense available */
 		break;
@@ -2534,6 +2535,9 @@ struct attack * attk;
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 		}
+		if(otmp->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
+			do_digging_impact(magr, otmp, tarx + dx, tary + dy);
+		}
 	}
 	if(u.uinsight >= 30){
 		//45 degree rotation
@@ -2561,6 +2565,9 @@ struct attack * attk;
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 			}
 		}
+		if(otmp->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
+			do_digging_impact(magr, otmp, x(magr) + nx, y(magr) + ny);
+		}
 		//-45 degree rotation
 		nx = sgn(dx-dy);
 		ny = sgn(dx+dy);
@@ -2585,6 +2592,9 @@ struct attack * attk;
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 			}
+		}
+		if(otmp->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
+			do_digging_impact(magr, otmp, x(magr) + nx, y(magr) + ny);
 		}
 	}
 	otmp->otyp = CLUB;

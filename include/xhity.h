@@ -68,5 +68,6 @@
 #define SUBOUT_LOLTH1	0x0800	/* Lolth's 8 arm attack chain */
 #define SUBOUT_MARIARM1	0x1000	/* Mechanical armor attack 1 */
 #define SUBOUT_MARIARM2	0x2000	/* Mechanical armor attack 2 */
+#define SUBOUT_SHUBTONG	0x4000	/* Mind-stealing tongue attack */
 
 #endif

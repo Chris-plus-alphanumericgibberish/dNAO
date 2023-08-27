@@ -14116,8 +14116,9 @@ int faction;
 			    mtmp->perminvis = TRUE;
 				otmp = oname(otmp, artiname(ART_THIRD_KEY_OF_CHAOS));
 				if(otmp->oartifact){
-					place_object(otmp, mtmp->mx, mtmp->my);
-					rloco(otmp);
+					otmp->ox = mtmp->mx;
+					otmp->oy = mtmp->my;
+					randomly_place_obj(otmp);
 				} else {
 					obfree(otmp, (struct obj *) 0);
 				}
@@ -15910,6 +15911,8 @@ struct monst *mtmp, *victim;
 			// max_increase = max((hp_threshold + 1) - mtmp->mhpmax, 0);
 	    // cur_increase = (max_increase > 0) ? rn2(max_increase)+1 : 0;
 		int xp_threshold = victim->m_lev + d(2,5);
+		if(mtmp->mtyp == PM_TWIN_SIBLING && mtmp->m_lev < u.ulevel)
+			xp_threshold = mtmp->m_lev + 1;
 		if(Role_if(PM_HEALER))
 			xp_threshold += heal_mlevel_bonus();
 		if(uring_art(ART_LOMYA))
@@ -16372,11 +16375,6 @@ register struct permonst *ptr;
 	
 	if(goat_monster(ptr) && u.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger) return TRUE;
 	
-	//The painting is normally peaceful
-	if(In_quest(&u.uz) && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
-		return((boolean)(!!rn2(6 + (u.ualign.record < -5 ? -5 : u.ualign.record))));
-	}
-
 	if(Race_if(PM_DROW) && 
 		((ual == A_CHAOTIC && (!Role_if(PM_NOBLEMAN) || flags.initgend)) || (ual == A_NEUTRAL && !flags.initgend)) && /*Males can be neutral or chaotic, but a chaotic male nobleman converted to a different god*/
 		mndx == PM_AVATAR_OF_LOLTH && 
@@ -16414,6 +16412,15 @@ register struct permonst *ptr;
 	if (ptr->msound == MS_NEMESIS)	return FALSE;
 	
 	if (ptr->mtyp == PM_GRAY_DEVOURER && base_casting_stat() == A_CHA)	return FALSE;
+	
+	//As a foulness shall ye know Them.
+	if(goodsmeller(ptr) && u.specialSealsActive&SEAL_YOG_SOTHOTH)
+		return FALSE;
+	
+	//The painting is normally peaceful
+	if(In_quest(&u.uz) && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
+		return((boolean)(!!rn2(6 + (u.ualign.record < -5 ? -5 : u.ualign.record))));
+	}
 
 	if (always_peaceful(ptr)) return TRUE;
 	if(!u.uevent.invoked && mndx==PM_UVUUDAUM && !Infuture) return TRUE;

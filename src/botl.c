@@ -231,6 +231,8 @@ rank_of(lev, monnum, female)
 		monnum = PM_WIZARD;
 	if(monnum == PM_HALF_DRAGON)
 		monnum = PM_BARBARIAN;
+	if(monnum == PM_ITINERANT_PRIESTESS)
+		monnum = PM_PRIESTESS;
 
 	/* Find the role */
 	if(Role_if(monnum)) role = &urole;

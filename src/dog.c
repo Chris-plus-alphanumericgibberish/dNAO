@@ -380,6 +380,9 @@ losedogs()
 		if (mtmp->mux == u.uz.dnum && mtmp->muy == u.uz.dlevel 
 			&& mtmp->m_insight_level <= u.uinsight
 		    && !(mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+		    && !(mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
+		    && !((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
+		    && !(mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
 		) {
 			mon_extract_from_list(mtmp, &migrating_mons);
 		    mon_arrive(mtmp, FALSE);
@@ -835,8 +838,11 @@ boolean portal;
 							: "Its");
 					m_unleash(mtmp, FALSE);
 				}
+				if(mtmp->mtyp == PM_TWIN_SIBLING)
+					migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_EXACT_XY, (coord *)0);
 				continue;
 			}
+			mtmp->mwait = 0L; //No longer waiting
 			if (mtmp->isshk)
 				set_residency(mtmp, TRUE);
 
@@ -895,6 +901,7 @@ boolean portal;
 			mtmp->mtyp == PM_SUZERAIN ||
 			mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH ||
 			mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI ||
+			mtmp->mtyp == PM_TWIN_SIBLING ||
 			mtmp->mtame
 		) {
 			if (mtmp->mleashed) {

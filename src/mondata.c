@@ -198,6 +198,10 @@ int newpm;
 		default:
 			//mon->mvar_ancient_breath_cooldown = 0;
 			//mon->mvar_yellow_lifesaved = FALSE;
+			//mon->mvar_twin_lifesaved = FALSE;
+			//mon->mvar_witchID = 0;
+			//mon->mvar_suryaID = 0;
+			//mon->mvar_huskID = 0;
 			mon->mvar1 = 0;
 		break;
 	}
@@ -691,7 +695,7 @@ int template;
 		AVG_DR(ldr)
 		AVG_DR(gdr)
 		AVG_DR(fdr)
-		if(ptr->mtyp == PM_PRIESTESS){
+		if(ptr->mtyp == PM_ITINERANT_PRIESTESS){
 			AVG_AC(dac)
 			AVG_AC(pac)
 			ptr->spe_bdr += 4;

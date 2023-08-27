@@ -3863,95 +3863,127 @@ register struct obj *otmp;
 }
 
 int
-teleport_arm(atmp)
-register struct obj *atmp;
+teleport_arm(atmp, mdef)
+struct obj *atmp;
+struct monst *mdef;
 {
-	register struct obj *otmp;
+	struct obj *otmp;
 #define TELEPORT_ARM(o) ((otmp = (o)) != 0 && \
 			(!atmp || atmp == otmp) && \
 			(!obj_resists(otmp, 66, 90)))
-
-	if (TELEPORT_ARM(uarmc)) {
-		if (donning(otmp)) cancel_don();
-		Your("%s vanishes!",
-		     cloak_simple_name(uarmc));
-		(void) Cloak_off();
-		obj_extract_self(otmp);
-		dropy(otmp);
-		rloco(otmp);
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your cloak!");
-			HPanicking += 1+rnd(6);
+	if(!mdef || mdef == &youmonst){
+		if (TELEPORT_ARM(uarmc)) {
+			if (donning(otmp)) cancel_don();
+			Your("%s vanishes!",
+				 cloak_simple_name(uarmc));
+			(void) Cloak_off();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your cloak!");
+				HPanicking += 1+rnd(6);
+			}
+		} else if (TELEPORT_ARM(uarm)) {
+			if (donning(otmp)) cancel_don();
+			Your("armor vanishes!");
+			(void) Armor_gone();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your armor!");
+				HPanicking += 1+rnd(6);
+			}
+		} else if (TELEPORT_ARM(uarmu)) {
+			if (donning(otmp)) cancel_don();
+			Your("underclothes vanish!");
+			(void) Shirt_off();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your underclothes!");
+				HPanicking += 1+rnd(6);
+			}
+		} else if (TELEPORT_ARM(uarmh)) {
+			if (donning(otmp)) cancel_don();
+			Your("helmet vanishes!");
+			(void) Helmet_off();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your helmet!");
+				HPanicking += 1+rnd(6);
+			}
+		} else if (TELEPORT_ARM(uarmg)) {
+			if (donning(otmp)) cancel_don();
+			Your("gloves vanish!");
+			(void) Gloves_off();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			selftouch("You");
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your gloves!");
+				HPanicking += 1+rnd(6);
+			}
+		} else if (TELEPORT_ARM(uarmf)) {
+			if (donning(otmp)) cancel_don();
+			Your("boots vanish!");
+			(void) Boots_off();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your boots!");
+				HPanicking += 1+rnd(6);
+			}
+		} else if (TELEPORT_ARM(uarms)) {
+			if (donning(otmp)) cancel_don();
+			Your("shield vanishes!");
+			(void) Shield_off();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your shield!");
+				HPanicking += 1+rnd(6);
+			}
+		} else {
+			return 0;		/* could not destroy anything */
 		}
-	} else if (TELEPORT_ARM(uarm)) {
-		if (donning(otmp)) cancel_don();
-		Your("armor vanishes!");
-		(void) Armor_gone();
-		obj_extract_self(otmp);
-		dropy(otmp);
-		rloco(otmp);
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your armor!");
-			HPanicking += 1+rnd(6);
+	}
+	else { //mdef isn't 0 and isn't you
+		if(atmp){
+			if(!obj_resists(atmp, 66, 90)){
+				obj_extract_and_unequip_self(atmp);
+				atmp->ox = mdef->mx;
+				atmp->oy = mdef->my;
+				randomly_place_obj(atmp);
+			}
 		}
-	} else if (TELEPORT_ARM(uarmu)) {
-		if (donning(otmp)) cancel_don();
-		Your("underclothes vanish!");
-		(void) Shirt_off();
-		obj_extract_self(otmp);
-		dropy(otmp);
-		rloco(otmp);
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your underclothes!");
-			HPanicking += 1+rnd(6);
+		else if(((otmp = which_armor(mdef, W_ARMC)) && !obj_resists(otmp, 66, 90))
+			|| ((otmp = which_armor(mdef, W_ARM)) && !obj_resists(otmp, 66, 90))
+			|| ((otmp = which_armor(mdef, W_ARMU)) && !obj_resists(otmp, 66, 90))
+			|| ((otmp = which_armor(mdef, W_ARMH)) && !obj_resists(otmp, 66, 90))
+			|| ((otmp = which_armor(mdef, W_ARMG)) && !obj_resists(otmp, 66, 90))
+			|| ((otmp = which_armor(mdef, W_ARMF)) && !obj_resists(otmp, 66, 90))
+			|| ((otmp = which_armor(mdef, W_ARMS)) && !obj_resists(otmp, 66, 90))
+		) {
+			obj_extract_and_unequip_self(otmp);
+			otmp->ox = mdef->mx;
+			otmp->oy = mdef->my;
+			randomly_place_obj(otmp);
 		}
-	} else if (TELEPORT_ARM(uarmh)) {
-		if (donning(otmp)) cancel_don();
-		Your("helmet vanishes!");
-		(void) Helmet_off();
-		obj_extract_self(otmp);
-		dropy(otmp);
-		rloco(otmp);
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your helmet!");
-			HPanicking += 1+rnd(6);
-		}
-	} else if (TELEPORT_ARM(uarmg)) {
-		if (donning(otmp)) cancel_don();
-		Your("gloves vanish!");
-		(void) Gloves_off();
-		obj_extract_self(otmp);
-		dropy(otmp);
-		rloco(otmp);
-		selftouch("You");
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your gloves!");
-			HPanicking += 1+rnd(6);
-		}
-	} else if (TELEPORT_ARM(uarmf)) {
-		if (donning(otmp)) cancel_don();
-		Your("boots vanish!");
-		(void) Boots_off();
-		obj_extract_self(otmp);
-		dropy(otmp);
-		rloco(otmp);
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your boots!");
-			HPanicking += 1+rnd(6);
-		}
-	} else if (TELEPORT_ARM(uarms)) {
-		if (donning(otmp)) cancel_don();
-		Your("shield vanishes!");
-		(void) Shield_off();
-		obj_extract_self(otmp);
-		dropy(otmp);
-		rloco(otmp);
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your shield!");
-			HPanicking += 1+rnd(6);
-		}
-	} else {
-		return 0;		/* could not destroy anything */
 	}
 
 #undef TELEPORT_ARM
@@ -5115,7 +5147,130 @@ break_outer_loop:
 			spelltype = FIRE_PILLAR;
 		break;
 	}
-	cast_spell(magr, mdef, &symbiote, spelltype, i, j);
+	cast_spell(magr, mdef, &symbiote, spelltype, x(mdef), y(mdef));
+}
+
+void
+dotwin_cast(magr)
+struct monst *magr;
+{
+	int x = x(magr), y = y(magr);
+	int i, j;
+	struct monst *mdef;
+	int	targets = 0;
+	struct attack symbiote = { AT_MAGC, AD_SPEL, 6, 6 };
+	boolean youdef, youagr = (magr == &youmonst);
+	boolean peaceSafe = youagr || magr->mpeaceful;
+	int range = 3;
+	
+	for(i = x-range; i <= x+range; i++)
+		for(j = y-range; j <= y+range; j++){
+			if(!isok(i,j))
+				continue;
+			if(i == x && j == y)
+				continue;
+			mdef = m_u_at(i,j);
+			if(!mdef || DEADMONSTER(mdef))
+				continue;
+			youdef = (mdef == &youmonst);
+			if(peaceSafe && (youdef || mdef->mpeaceful))
+				continue;
+			if(!peaceSafe && youdef && !mdef->mpeaceful)
+				continue;
+
+			if(!youdef && nonthreat(mdef))
+				continue;
+
+			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
+				targets++;
+			}
+		}
+
+	if(!targets)
+		return;
+	targets = rn2(targets);
+	
+	for(i = x-range; i <= x+range; i++)
+		for(j = y-range; j <= y+range; j++){
+			if(!isok(i,j))
+				continue;
+			if(i == x && j == y)
+				continue;
+			mdef = m_u_at(i,j);
+			if(!mdef || DEADMONSTER(mdef))
+				continue;
+			if(peaceSafe && (mdef == &youmonst || mdef->mpeaceful))
+				continue;
+			if(!peaceSafe && mdef != &youmonst && !mdef->mpeaceful)
+				continue;
+
+			if(!youdef && nonthreat(mdef))
+				continue;
+
+			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
+				if(targets)
+					targets--;
+				else
+					goto break_outer_loop;
+			}
+		}
+break_outer_loop:
+	if(!mdef)
+		return; //Shouldn't happen, but....
+	int spelltype;
+	if(youagr || canseemon(magr)){
+		if(youagr)
+			pline("Your chanting tentacles cast a spell!");
+		else
+			pline("%s chanting tentacles cast a spell!", s_suffix(Monnam(magr)));
+	}
+	switch(rnd(mlev(magr))){
+		case 30:
+		case 29:
+			spelltype = TURN_TO_STONE;
+			break;
+		case 28:
+		case 27:
+			spelltype = DEATH_TOUCH;
+			break;
+		case 26:
+		case 25:
+			spelltype = LIGHTNING;
+			break;
+		case 24:
+		case 23:
+		case 22:
+			spelltype = DESTRY_ARMR;
+			break;
+		case 21:
+		case 20:
+		case 19:
+			spelltype = DRAIN_ENERGY;
+			break;
+		case 18:
+		case 17:
+		case 16:
+			spelltype = BARF_BOLT;
+			break;
+		case 15:
+		case 14:
+		case 13:
+			if(!(HFast&INTRINSIC)){
+				spelltype = HASTE_SELF;
+				break;
+			}
+		case 12:
+		case 11:
+		case 10:
+			if(*hp(&youmonst) != *hpmax(&youmonst)){
+				spelltype = CURE_SELF;
+				break;
+			}
+		default:
+			spelltype = PSI_BOLT;
+			break;
+	}
+	cast_spell(magr, mdef, &symbiote, spelltype, x(mdef), y(mdef));
 }
 
 void

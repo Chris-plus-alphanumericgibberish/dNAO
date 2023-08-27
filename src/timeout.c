@@ -620,6 +620,8 @@ nh_timeout()
 			}
 		}
 	}
+	if(u.spirit[ALIGN_SPIRIT] == SEAL_YOG_SOTHOTH && carrying_art(ART_SILVER_KEY))
+		u.spiritT[ALIGN_SPIRIT]++;
 	if(!u.voidChime){
 		while(u.spirit[0] && u.spiritT[0] < moves) unbind(u.spirit[0],0);
 		if(u.spiritTineB && u.spiritTineTB < moves) unbind(u.spiritTineB,0);
@@ -1011,6 +1013,13 @@ boolean wakeup_msg;
 	/*Adjust Android timeouts*/
 	u.nextsleep = max(u.nextsleep, monstermoves);
 	u.lastslept = monstermoves;
+	struct obj *puzzle;
+	if(u.uhyperborean_steps < 6 && (puzzle = get_most_complete_puzzle())){
+		u.puzzle_time = 6*(1+puzzle->ovar1_puzzle_steps)*(27-ACURR(A_INT))/2;
+		if(ESleeping)
+			u.puzzle_time = (u.puzzle_time + 1)/2; //Restful sleep
+		Your("%s begin working the disks and pegs of %s!", makeplural(body_part(FINGER)), the(xname(puzzle)));
+	}
 	/* early wakeup from combat won't be possible until next monster turn */
 	u.usleep = monstermoves;
 	nomovemsg = wakeup_msg ? "You wake up." : You_can_move_again;

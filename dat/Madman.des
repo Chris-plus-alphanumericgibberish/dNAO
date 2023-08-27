@@ -140,15 +140,15 @@ MAP
 0                         -------------------                                
 1                        #S...|..|..|..|..|.|                                
 2                         |.F+|F+|+F|F+|+F|.|                                
-3                         |.F.............+.|                                
-4                         |-|.............|-|                                
-5                         |.F..----+----..+.|                                
-6                         |.+..|.......|..F.|                                
-7                         |-|..|.......|..|-|   -----                        
-8                         |.+..|..FFF..|..F.|   |-#-|                        
-9                         |.F..+..F.F..+..+.|   |###|                        
-0                         |-|..|..FFF..|..|-|   |-#-|                        
-1                         |.F..|.......|..+.|   -----                        
+3                     --- |.F.............+.|                                
+4                    |-.-||-|.............|-|                                
+5                    |...||.F..----+----..+.|                                
+6                    |-.-||.+..|.......|..F.|                                
+7                     -+- |-|..|.......|..|-|   -----                        
+8                    |-#--|.+..|..FFF..|..F.|   |-#-|                        
+9                    |####+.F..+..F.F..+..+.|   |###|                        
+0                    |-#--|-|..|..FFF..|..|-|   |-#-|                        
+1                     --- |.F..|.......|..+.|   -----                        
 2                         |.+..|.......|..F.|                                
 3                         |-|..----+----..|-|                                
 4                         |.+.............F.|                                
@@ -177,7 +177,7 @@ LADDER:(50,09),down
 MONSTER:'@',"Stranger",(48,09),hostile
 OBJECT:'"',"amulet versus curses",(48,09),blessed,0,"The Star of Hypernotus"
 
-MONSTER:'@',"priestess",(42,01), peaceful
+MONSTER:'@',"itinerant priestess",(42,01), peaceful
 OBJECT:'(', "doll of mollification",(42,01)
 OBJECT:'(', "holy symbol of the black mother",(42,01)
 OBJECT:'\\', "bedroll",(42,01)
@@ -199,11 +199,18 @@ OBJECT:'[',"gentlewoman's dress",contained,uncursed, 2
 OBJECT:'[',"victorian underwear",contained,uncursed, 2
 OBJECT:'[',"long gloves",contained,uncursed, 2
 OBJECT:'#',"uncursed +2 silver shoes",contained
+OBJECT:'?',"antimagic",contained,uncursed,0
 OBJECT:'\\',"bed",(39,17)
 OBJECT:'(',"writing desk",(40,17)
+OBJECT:'\\',"bed",(21,05)
+OBJECT:'\\',"Bergonic chair",(23,05)
+#OBJECT:'(',"chest",(23,05)
+CONTAINER:'(',"writing desk",(22,04)
+OBJECT:'!',"sleeping",contained
+OBJECT:'!',"sleeping",contained
+OBJECT:'(',"Hyperborean dial",(21,05)
 
 MONSTER:'@',"patient",(26,05)
-MONSTER:'@',"patient",(26,09)
 MONSTER:'@',"patient",(26,11)
 MONSTER:'@',"patient",(26,15)
 
@@ -253,6 +260,9 @@ DOOR:locked,(27,12)
 DOOR:locked,(27,08)
 DOOR:locked,(27,06)
 
+DOOR:locked,(25,09)
+DOOR:locked,(22,07)
+
 #
 #	The "locate" level for the quest.
 #
@@ -272,7 +282,7 @@ MAP
 2               |,,,,,,,,,|....|.......|....+,,,,,,,,,,|                     
 3               |,,,,,,,,,|....----+----....|,,,,,,,,,,|                     
 4               |,,,,,,,,,|---###########---|,,,,,,,,,,|                     
-5               |,,,,,,,,,|..+#----+----#+..|,,,,,,,,,,|                     
+5               |,,,,,,e,,|..+#----+----#+..|,,,,,,,,,,|                     
 6               |,,,,,,,,,F..|#|e,,,,,e|#|..F,,,-----,,|                     
 7               |,,,,,,,,,|---#|,,,,,,,|#---|,,-------,|                     
 8               |,,,,,,,,,|..|#|,,tPPT,|#|..|,,||   ||,|                     

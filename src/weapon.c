@@ -286,8 +286,10 @@ int oartifact;
 		attackmask = objects[otyp].oc_dtyp;
 	}
 	if (oartifact == ART_IBITE_ARM){
-		//No claws! Just a flabby hand.
-		attackmask = WHACK;
+		if(check_mutation(SHUB_CLAWS))
+			attackmask |= WHACK; //Keep the claws
+		else
+			attackmask = WHACK; //No claws! Just a flabby hand.
 	}
 	if(oartifact == ART_JIN_GANG_ZUO){
 		attackmask = WHACK;
@@ -898,6 +900,12 @@ struct monst *magr;
 	/* the Tentacle Rod gets no damage from enchantment */
 	if (obj && obj->oartifact == ART_TENTACLE_ROD)
 		spe_mult = 0;
+
+	/* the Ibite Arm gets more reliable dice (but doesn't scale them both with size) */
+	if (obj && obj->oartifact == ART_IBITE_ARM) {
+		ocn *= 2;
+		ocd = (ocd+1)/2;
+	}
 
 	/* safety checks */
 	/* we need at least one main die */
@@ -2615,8 +2623,12 @@ struct obj *otmp;
 	mwp = MON_WEP(mon);
 	mswp = MON_SWEP(mon);
 	
-	if(arm && (arm->otyp == GAUNTLETS_OF_POWER || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GOPOWER))))
-		bonus += 8;
+	if(arm){
+		if(arm->otyp == GAUNTLETS_OF_POWER || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GOPOWER)))
+			bonus += 8;
+		if(is_lawful_mon(mon) && check_oprop(arm, OPROP_RWTH))
+			bonus += 4;
+	}	
 	
 	if(otmp){
 		if((bimanual(otmp,mon->data)||
@@ -2831,6 +2843,9 @@ struct obj *otmp;
 		bonus += min_ints(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT), (ACURR(A_CHA)-9)/2);
 	}
 	
+	if(uarmg && bonus > 1 && check_oprop(uarmg, OPROP_RWTH) && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL)
+		bonus *= .5;
+	
 	return bonus;
 }
 
@@ -2906,6 +2921,27 @@ int skill;
      *	master -> grand master	3
      */
     return (tmp + 1) / 2;
+}
+
+/*
+ * Reset all trained skills to 0 so the player can respec their character.
+ */
+
+void
+reset_skills()
+{
+	int skill;
+	for(int i = u.skills_advanced-1; i >= 0; i--){
+		skill = u.skill_record[i];
+		if (OLD_P_SKILL(skill) <= P_UNSKILLED)
+			impossible("reset_skills skill already at minimum (%d)", skill);
+		else {
+			OLD_P_SKILL(skill)--;
+			u.weapon_slots += slots_required(skill);
+		}
+	}
+	u.skills_advanced = 0;
+	enhance_weapon_skill();
 }
 
 /* return true if this skill can be advanced */

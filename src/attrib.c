@@ -1119,6 +1119,10 @@ calc_total_maxhp()
 	int rawmax;
 	int maxbonus;
 	int adjbonus;
+	int uhpbonus = u.uhpbonus;
+	if(check_mutation(SHUB_RADIANCE))
+		uhpbonus -= Insanity;
+
 	if (Upolyd) {
 		ulev = (int)(mons[u.umonnum].mlevel);
 		hp = &u.mh;
@@ -1133,7 +1137,7 @@ calc_total_maxhp()
 		hpcap = 24 + 2*maxhp(1);
 	}
 	
-	if(u.uhpbonus > 0){
+	if(uhpbonus > 0){
 		rawmax = *hprolled + ulev*conplus(ACURR(A_CON));
 		
 		/*Calculate Metamorphosis *before* the max bonus is determined*/
@@ -1149,7 +1153,7 @@ calc_total_maxhp()
 			rawmax = rawmax + (rawmax * u.uhpmultiplier / 10); /*Multiplier is in units of tenths*/
 		
 		if(maxbonus > 0){
-			adjbonus = round(2.0*maxbonus/(1+exp(-(4.0/(2.0*maxbonus))*u.uhpbonus)) - maxbonus);
+			adjbonus = round(2.0*maxbonus/(1+exp(-(4.0/(2.0*maxbonus))*uhpbonus)) - maxbonus);
 		}
 		else adjbonus = 0;
 		
@@ -1165,7 +1169,7 @@ calc_total_maxhp()
 		if(u.uhpmultiplier)
 			rawmax = rawmax + (rawmax * u.uhpmultiplier / 10); /*Multiplier is in units of tenths*/
 		
-		*hpmax = rawmax + u.uhpbonus + u.uhpmod;
+		*hpmax = rawmax + uhpbonus + u.uhpmod;
 	}
 	
 	if(*hpmax < 1) *hpmax = 1;
@@ -1180,6 +1184,10 @@ void
 calc_total_maxen()
 {
 	int en;
+	int uenbonus = u.uenbonus;
+	if(check_mutation(SHUB_RADIANCE))
+		uenbonus += Insanity;
+
 	en = u.uenrolled + (u.ulevel*ACURR(A_INT))/4;
 	
 	if(active_glyph(FORMLESS_VOICE))
@@ -1188,7 +1196,7 @@ calc_total_maxen()
 	if(u.uenmultiplier)
 		en = en + (en * u.uhpmultiplier / 10); /*Multiplier is in units of tenths*/
 	
-	u.uenmax = en + u.uenbonus;
+	u.uenmax = en + uenbonus;
 	
 	if(u.uenmax < 0) u.uenmax = 0;
 	// *hpmax += min(nxtra, max(0, 6*nxtra/5 - 6*nxtra*(*hpmax)*(*hpmax)/(5*hpcap*hpcap)));
@@ -1415,6 +1423,8 @@ boolean check;
 		}
 		nomul(0, NULL);
 	}
+	calc_total_maxen();
+	calc_total_maxhp();
 }
 
 void
@@ -1732,7 +1742,10 @@ struct monst *mon;
 		for(madflag = 0x1L; madflag <= LAST_MADNESS; madflag = madflag << 1){
 			if(u.umadness&madflag && !(mon->seenmadnesses&madflag) && roll_generic_madness(FALSE)){
 				mon->seenmadnesses |= madflag;
-				if(d(2,u.ulevel) > mon->m_lev){
+				if(d(2,u.ulevel) >= mon->m_lev){
+					if(u.specialSealsActive&SEAL_YOG_SOTHOTH){
+						yog_credit(mon->m_lev);
+					}
 					if(madflag == MAD_DELUSIONS
 					 || madflag == MAD_REAL_DELUSIONS
 					 || madflag == MAD_SPIRAL

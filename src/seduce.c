@@ -185,7 +185,7 @@ struct monst * mon;
 			badeffect = TRUE;
 		}
 	}
-	else if (u.ualign.type == A_CHAOTIC)
+	else if (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE)
 		adjalign(1);
 
 	/* select sedu effect */
@@ -833,7 +833,7 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	mayberem_common(obj, str, !(rn2(20) < ACURR(A_CHA)));
+	mayberem_common(obj, str, !(rn2(20) < (ACURR(A_CHA) + check_mutation(TENDRIL_HAIR) ? 10 : 0)));
 }
 
 STATIC_OVL void
@@ -842,7 +842,7 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	mayberem_common(obj, str, !(rn2(60) < ACURR(A_CHA)));
+	mayberem_common(obj, str, !(rn2(60) < (ACURR(A_CHA) + check_mutation(TENDRIL_HAIR) ? 30 : 0)));
 }
 
 STATIC_OVL void
@@ -851,7 +851,7 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	mayberem_common(obj, str, helpless || !(rn2(60) < ACURR(A_CHA)));
+	mayberem_common(obj, str, helpless || !(rn2(60) < (ACURR(A_CHA) + check_mutation(TENDRIL_HAIR) ? 30 : 0)));
 }
 
 STATIC_OVL void

@@ -187,6 +187,7 @@ struct monst *mtmp;
 boolean domsg;
 {
     int r = 0;
+	boolean plural = FALSE;
 
     if (song_being_played() == SNG_NONE) return 0;
     if (mtmp->mtemplate == ZOMBIFIED
@@ -212,13 +213,17 @@ boolean domsg;
 		&& (mtmp->data->mlet == S_NYMPH || is_elf(mtmp->data)
 			|| mtmp->data->mlet == S_CHA_ANGEL
 			|| mtmp->mtyp == PM_ANGEL
+			|| mtmp->mtyp == PM_ITINERANT_PRIESTESS
 			|| mtmp->data->mlet == S_NYMPH)
 		&& !(is_drow(mtmp->data) || mtmp->mtyp == PM_WEEPING_ANGEL || mtmp->mtyp == PM_OONA)
 		&& (mtmp->mhp*2 > mtmp->mhpmax))
 		    r = max(10,(mtmp->data->mlet == S_NYMPH ? mtmp->m_lev*2 : mtmp->m_lev));
 	    /* parrots (and other birds?) sing along flutes */
-	    if ((instr_otyp == FLUTE)
-		&& (mtmp->mtyp == PM_PARROT || mtmp->data->mlet == S_CHA_ANGEL)
+	    else if ((instr_otyp == FLUTE)
+		&& (mtmp->mtyp == PM_PARROT 
+			|| mtmp->data->mlet == S_CHA_ANGEL
+			|| mtmp->mtyp == PM_ITINERANT_PRIESTESS
+		)
 		&& (mtmp->mhp*2 > mtmp->mhpmax))
 		    r = max(10,(mtmp->data->mlet == S_NYMPH ? mtmp->m_lev*2 : mtmp->m_lev));
 	    /* undeads sing along horns */
@@ -237,36 +242,66 @@ boolean domsg;
 			 || (mtmp->mtyp == PM_TRUMPET_ARCHON && MON_WEP(mtmp) && !mtmp->mcan)
 			 || mtmp->data->mlet == S_GIANT))
 		    r = max(10, mtmp->m_lev);
+
+		if(has_template(mtmp, MISTWEAVER)){
+			r += r/5;
+			plural = TRUE;
+		}
     }
 
     if (domsg && (r > 0)){
 		if (canseemon(mtmp)) {
-			if (mtmp->mtyp == PM_LILLEND)
-				pline("%s's lovely voice sings your song!", Monnam(mtmp));
-			else if (is_bardmon(mtmp->data))
+			if (mtmp->mtyp == PM_LILLEND){
+				pline("%s's lovely %s your song!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
+			else if (is_bardmon(mtmp->data)){
 				pline("%s skillfully sings along with your song!", Monnam(mtmp));
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
 			else if (mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_DEMON 
-				|| mtmp->data->mlet == S_VAMPIRE)
-				pline("%s's dreadful voice chants your song!", Monnam(mtmp));
+				|| mtmp->data->mlet == S_VAMPIRE
+			){
+				pline("%s's dreadful %s your song!", Monnam(mtmp), plural ? "voices chant" : "voice chants");
+			}
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE
 					 || mtmp->mtyp == PM_OONA 
-			)
+			){
 				pline("%s mourns while you play!", Monnam(mtmp));
-			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN)
+			}
+			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN){
 				pline("%s caws and croaks while you play!", Monnam(mtmp));
-			else if (mtmp->mtyp == PM_PARROT)
+			}
+			else if (mtmp->mtyp == PM_PARROT){
 				pline("%s whistles while you play!", Monnam(mtmp));
-			else if (mtmp->data->mlet == S_NYMPH)
-				pline("%s's charming voice sings along!", Monnam(mtmp));
-			else if (mtmp->data->mlet == S_CENTAUR)
-				pline("%s's strong voice sings along!", Monnam(mtmp));
-			else if ((mtmp->mtyp == PM_TRUMPET_ARCHON && MON_WEP(mtmp) && !mtmp->mcan))
+			}
+			else if (mtmp->data->mlet == S_NYMPH){
+				pline("%s's charming %s along!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
+			else if (mtmp->data->mlet == S_CENTAUR){
+				pline("%s's strong %s along!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
+			else if ((mtmp->mtyp == PM_TRUMPET_ARCHON && MON_WEP(mtmp) && !mtmp->mcan)){
 				pline("%s plays along on %s trumpet!", Monnam(mtmp), hisherits(mtmp));
-			else if (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT)
-				pline("%s shouts!", Monnam(mtmp));
-			else
+			}
+			else if (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT){
+				if(plural)
+					pline("%s many mouths shout!", s_suffix(Monnam(mtmp)));
+				else
+					pline("%s shouts!", Monnam(mtmp));
+			}
+			else {
 				pline("%s sings while you play!", Monnam(mtmp));
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
 		} else {
 			if (mtmp->mtyp == PM_LILLEND)
 				You_hear("a lovely voice singing your song!");
@@ -303,6 +338,7 @@ struct monst *mtmp;
 boolean domsg;
 {
     int r = 0;
+	boolean plural = FALSE;
 
     if (song_being_played() == SNG_NONE) return 0;
     if (mtmp->mtemplate == ZOMBIFIED
@@ -352,35 +388,64 @@ boolean domsg;
 		else if (instr_otyp != DRUM 
 			 && (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT))
 			r = (instr_otyp == HARP || instr_otyp == FLUTE) ? -2*(mtmp->m_lev) : -1*(mtmp->m_lev);
+
+		if(has_template(mtmp, MISTWEAVER)){
+			r -= r/5;
+			plural = TRUE;
+		}
     }
 
     if (domsg && (r < 0)){
 		if (canseemon(mtmp)) {
-			if(mtmp->mtyp == PM_DREAD_SERAPH)
-				pline("%s's terrible voice sings in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->mtyp == PM_LILLEND)
-				pline("%s's lovely voice sings in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->mtyp == PM_AGLAOPE)
-				pline("%s's mocking voice sings in opposition to your song!", Monnam(mtmp));
+			if(mtmp->mtyp == PM_DREAD_SERAPH){
+				pline("%s's terrible %s in opposition to your song!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+			}
+			else if (mtmp->mtyp == PM_LILLEND){
+				pline("%s's lovely %s in opposition to your song!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
+			else if (mtmp->mtyp == PM_AGLAOPE){
+				pline("%s's mocking %s in opposition to your song!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+			}
 			else if (mtmp->data->mlet == S_LICH || mtmp->data->mlet == S_DEMON 
-				|| mtmp->data->mlet == S_VAMPIRE)
-				pline("%s's dreadful voice chants in opposition to your song!", Monnam(mtmp));
+				|| mtmp->data->mlet == S_VAMPIRE
+			){
+				pline("%s's dreadful %s in opposition to your song!", Monnam(mtmp), plural ? "voices chant" : "voice chants");
+			}
 			else if (mtmp->data->mlet == S_MUMMY || mtmp->data->mlet == S_GHOST
 					 || mtmp->data->mlet == S_WRAITH || mtmp->data->mlet == S_SHADE
-					 || mtmp->mtyp == PM_OONA)
+					 || mtmp->mtyp == PM_OONA
+			){
 				pline("%s wails in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN)
+			}
+			else if (mtmp->mtyp == PM_CROW || mtmp->mtyp == PM_RAVEN){
 				pline("%s caws and croaks in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->mtyp == PM_PARROT)
+			}
+			else if (mtmp->mtyp == PM_PARROT){
 				pline("%s squawks in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->data->mlet == S_NYMPH)
-				pline("%s's charming voice sings in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->data->mlet == S_CENTAUR)
-				pline("%s's strong voice sings in opposition to your song!", Monnam(mtmp));
-			else if (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT)
-				pline("%s shouts down your song!", Monnam(mtmp));
-			else
+			}
+			else if (mtmp->data->mlet == S_NYMPH){
+				pline("%s's charming %s in opposition to your song!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
+			else if (mtmp->data->mlet == S_CENTAUR && !is_drow(mtmp->data)){
+				pline("%s's strong %s in opposition to your song!", Monnam(mtmp), plural ? "voices sing" : "voice sings");
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
+			else if (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT){
+				if(plural)
+					pline("%s many mouths shout down your song!", s_suffix(Monnam(mtmp)));
+				else
+					pline("%s shouts down your song!", Monnam(mtmp));
+			}
+			else {
 				pline("%s sings in opposition to your song!", Monnam(mtmp));
+				if(plural)
+					pline("%s many mouths sing in harmony!", HisHerIts(mtmp));
+			}
 		} else {
 			if(mtmp->mtyp == PM_DREAD_SERAPH)
 				You_hear("a terrible voice singing in opposition to your song!");
@@ -401,7 +466,7 @@ boolean domsg;
 				You_hear("something squak in opposition to your song!");
 			else if (mtmp->data->mlet == S_NYMPH)
 				You_hear("a charming voice singing in opposition to your song!");
-			else if (mtmp->data->mlet == S_CENTAUR)
+			else if (mtmp->data->mlet == S_CENTAUR && !is_drow(mtmp->data))
 				You_hear("a strong voice sing in opposition to your song!");
 			else if (mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE || mtmp->data->mlet == S_GIANT)
 				You_hear("something shouting down your song!");
