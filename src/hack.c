@@ -1316,7 +1316,7 @@ domove()
 			struct obj *otmp;
 			attk = mon_get_attacktype(&youmonst, AT_WEAP, &attkbuff);
 			otmp = uwep;
-			do{
+			if(attk) do {
 				/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && check_oprop(otmp, OPROP_CCLAW)){
 					result |= hit_with_cclaw(&youmonst, otmp, x, y, 0, attk);
@@ -1334,10 +1334,12 @@ domove()
 					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);
 				}
 				
+				if(!u.twoweap)
+					break;
 				attk = mon_get_attacktype(&youmonst, AT_XWEP, &attkbuff);
 				otmp = uswapwep;
 				i++;
-			} while(i < 2);
+			} while(i < 2 && attk);
 		}
 		// unmap_object(x, y); /* known empty -- remove 'I' if present */
 		if (glyph_is_invisible(levl[x][y].glyph)) {
