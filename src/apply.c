@@ -1126,6 +1126,7 @@ struct obj **obj_p;
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
 		if (mon_reflects(mtmp, "The gaze is reflected away by %s %s!"))
 			return MOVE_STANDARD;
+		minstapetrify(mtmp, TRUE);
 	} else if(!mtmp->mcan && !mtmp->minvis &&
 					mtmp->mtyp == PM_FLOATING_EYE && 
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
