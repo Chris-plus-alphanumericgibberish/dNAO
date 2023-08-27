@@ -3278,10 +3278,10 @@ MAP
 0----------------------------------------------------------------------------
 ENDMAP
 
-MONSTER:'S',"serpent priest",(23,02)
+MONSTER:'S',"feathery serpent priestess",(23,02)
 MONSTER:'S',"serpent priest",(52,02)
 MONSTER:'S',"serpent priest",(23,18)
-MONSTER:'S',"serpent priest",(52,18)
+MONSTER:'S',"feathery serpent priestess",(52,18)
 
 MONSTER:'&',"nessian pit fiend",random
 MONSTER:'&',"nessian pit fiend",random
