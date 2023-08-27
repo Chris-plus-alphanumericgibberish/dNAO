@@ -3033,6 +3033,11 @@ karemade:
 				newsym(mtmp->mx,mtmp->my);
 			}
 		}
+		if(mtmp->m_ap_type == M_AP_MONSTER && (BlockableClearThoughts || (!mtmp->iswiz && !(u.umadness&MAD_DELUSIONS)))){
+			mtmp->m_ap_type = M_AP_NOTHING;
+			mtmp->mappearance = 0;
+			newsym(mtmp->mx, mtmp->my);
+		}
 		if(mtmp->m_insight_level > u.uinsight
 		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 		  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)

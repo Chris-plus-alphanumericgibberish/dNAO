@@ -434,7 +434,10 @@ boolean with_you;
 	fmon = mtmp;
 	if (mtmp->isshk)
 	    set_residency(mtmp, FALSE);
-
+	if(mtmp->m_ap_type == M_AP_MONSTER && (BlockableClearThoughts || (!mtmp->iswiz && !(u.umadness&MAD_DELUSIONS)))){
+		mtmp->m_ap_type = M_AP_NOTHING;
+		mtmp->mappearance = 0;
+	}
 	num_segs = mtmp->wormno;
 	/* baby long worms have no tail so don't use is_longworm() */
 	if ((mtmp->mtyp == PM_LONG_WORM) &&
@@ -603,6 +606,11 @@ struct monst *mtmp;
 long nmv;		/* number of moves */
 {
 	int imv = 0;	/* avoid zillions of casts and lint warnings */
+	if(mtmp->m_ap_type == M_AP_MONSTER && (BlockableClearThoughts || (!mtmp->iswiz && !(u.umadness&MAD_DELUSIONS)))){
+		mtmp->m_ap_type = M_AP_NOTHING;
+		mtmp->mappearance = 0;
+		newsym(mtmp->mx, mtmp->my);
+	}
 	if(imprisoned(mtmp)) return;
 
 #if defined(DEBUG) || defined(BETA)
