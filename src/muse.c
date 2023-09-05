@@ -1999,6 +1999,7 @@ struct monst *mtmp;
 #define MUSE_POT_GAIN_ABILITY 14
 #define MUSE_MASK 15
 #define MUSE_POT_HOLY 16
+#define MUSE_SCR_DESTROY_ARMOR 17
 
 boolean
 find_misc(mtmp)
@@ -2177,6 +2178,17 @@ struct monst *mtmp;
 			        m.has_misc = MUSE_POT_HOLY;
 			    } 
 			}
+		}
+		nomore(MUSE_SCR_DESTROY_ARMOR);
+		if(obj->otyp == SCR_DESTROY_ARMOR)
+		{
+			register struct obj *otmp;
+			otmp = which_armor(mtmp, W_ARM);
+			if (otmp->cursed && otmp->otyp == STRAITJACKET)
+			{
+				m.misc = obj;
+				m.has_misc = MUSE_SCR_DESTROY_ARMOR;
+			} 
 		}
 		nomore(MUSE_SCR_AMNESIA);
 		nomore(MUSE_POT_AMNESIA);
@@ -2582,6 +2594,36 @@ museamnesia:
 		if (!otmp->oartifact)
 			m_useup(mtmp, otmp);
 	    return 0;
+	case MUSE_SCR_DESTROY_ARMOR:{
+		struct obj *obj;
+		obj = which_armor(mtmp, W_ARM);
+		mreadmsg(mtmp, otmp);
+		if(obj && !obj->oartifact){
+			if(mtmp->mconf){
+				if (canseemon(mtmp)){
+					pline("%s %s glows %s!", s_suffix(Monnam(mtmp)), xname(obj), hcolor(NH_PURPLE));
+				}
+				obj->oerodeproof = otmp->cursed;
+			}
+			else if(obj->cursed && otmp->cursed){
+				if (canseemon(mtmp)){
+					pline("%s looks uncomfortable.", Monnam(mtmp));
+				}
+				if(obj->spe > -7)
+					obj->spe--;
+				mtmp->mstun = TRUE;
+			}
+			else {
+				if (canseemon(mtmp)){
+					pline("%s %s turns to dust!", s_suffix(Monnam(mtmp)), xname(obj));
+				}
+				m_useup(mtmp, obj);
+			}
+		}
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
+	    return 0;
+	}
 	case MUSE_MASK:{
 		int pm = otmp->corpsenm;
 		if(canseemon(mtmp))
