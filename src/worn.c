@@ -2364,6 +2364,13 @@ long timeout;
 			if(flags.run) nomul(0, NULL);
 			return;
 		}
+
+		/* artifacts are durable - they will never evaporate entirely, though they're not immune to degrading */
+		if (obj->oartifact) {
+			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
+			return;
+		}
+
 	    if (flags.verbose && !isarmor) {
 			char *name = obj->otyp == CORPSE ? corpse_xname(obj, FALSE) : xname(obj);
 			Your("%s%s%s %s away%c",
