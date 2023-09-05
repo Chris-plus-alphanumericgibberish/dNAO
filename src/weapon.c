@@ -254,7 +254,7 @@ struct monst *magr;
 	if (otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE){
 		if(youagr && u.uinsight){
 			tmp += rnd(min(u.uinsight, mlev(magr)));
-		} else if(magr && yields_insight(magr->data)) {
+		} else if(magr && insightful(magr->data)) {
 			tmp += rnd(mlev(magr));
 		}
 	}
