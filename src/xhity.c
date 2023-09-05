@@ -781,6 +781,15 @@ int tary;
 					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 						result |= hit_with_rblood(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 					}
+					/* Mercurial weapons may hit additional targets */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && is_streaming_merc(otmp)){
+						if(magr && mlev(magr) > 20 && (
+							(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+							|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+						)){
+							result |= hit_with_streaming(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
+						}
+					}
 					/* Dancers hit additional targets */
 					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(magr->data)){
 						result |= hit_with_dance(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
@@ -15121,7 +15130,7 @@ int vis;						/* True if action is at all visible to the player */
 
 		/* get attackmask */
 		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
-			attackmask = attack_mask(weapon, 0, 0);
+			attackmask = attack_mask(weapon, 0, 0, magr);
 			otmp = weapon;
 		}
 		else if (unarmed_punch) {
@@ -15130,7 +15139,7 @@ int vis;						/* True if action is at all visible to the player */
 			/* gloves */
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if(otmp)
-				attackmask = attack_mask(otmp, 0, 0);
+				attackmask = attack_mask(otmp, 0, 0, magr);
 
 			if (/* claw attacks are slashing (even while wearing gloves?) */
 				(attk && attk->aatyp == AT_CLAW) ||
@@ -15160,7 +15169,7 @@ int vis;						/* True if action is at all visible to the player */
 
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 			if(otmp)
-				attackmask = attack_mask(otmp, 0, 0);
+				attackmask = attack_mask(otmp, 0, 0, magr);
 		}
 		else {
 			/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */

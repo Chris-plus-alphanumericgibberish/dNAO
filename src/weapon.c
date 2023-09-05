@@ -258,7 +258,11 @@ struct monst *magr;
 			tmp += rnd(mlev(magr));
 		}
 	}
-
+	
+	if(otmp->obj_material == MERCURIAL){
+		tmp += otmp->spe; //Doubles to-hit bonus from enchantment.
+	}
+	
 	return tmp;
 }
 
@@ -267,11 +271,13 @@ struct monst *magr;
  * 
  */
 int
-attack_mask(obj, otyp, oartifact)
+attack_mask(obj, otyp, oartifact, magr)
 struct obj * obj;
 int otyp;
 int oartifact;
+struct monst *magr;
 {
+	boolean youagr = magr == &youmonst;
 	int attackmask = WHACK;
 	if (obj)
 	{
@@ -310,6 +316,12 @@ int oartifact;
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
 		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
 		){
+		attackmask |= WHACK;
+	}
+	if(obj && magr && !litsaber(obj) && is_chained_merc(obj) && (
+		(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+	)){
 		attackmask |= WHACK;
 	}
 	if (   oartifact == ART_ROGUE_GEAR_SPIRITS

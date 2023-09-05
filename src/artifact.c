@@ -4399,6 +4399,104 @@ int * truedmgptr;
 	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
 }
 
+/* special damage bonus */
+/* returns FALSE if no bonus damage was applicable */
+/* Just do bonus damage, don't make any modifications to the defender */
+boolean
+material_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr, dieroll)
+struct obj * otmp;
+struct monst * magr;
+struct monst * mdef;
+int basedmg;
+int * plusdmgptr;
+int * truedmgptr;
+int dieroll;
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pd = (youdef ? youracedata : mdef->data);
+	int original_plusdmgptr = *plusdmgptr;
+	int original_truedmgptr = *truedmgptr;
+	
+	if(otmp->obj_material == MERCURIAL && magr && mlev(magr) > 20 && (
+		(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+	)){
+		if(is_streaming_merc(otmp)){
+			int abil[] = {A_INT, A_WIS, A_CHA};
+			int i = 0;
+			boolean notResisted = TRUE;
+			int dsize;
+			for(i = 0; i < SIZE(abil); i++){
+				switch(hash((unsigned long) (nonce + otmp->o_id + youmonst.movement))%4){
+					case 0:
+						if(Fire_res(mdef))
+							notResisted = FALSE;
+					break;
+					case 1:
+						if(Cold_res(mdef))
+							notResisted = FALSE;
+					break;
+					case 2:
+						if(Shock_res(mdef))
+							notResisted = FALSE;
+					break;
+					case 3:
+						if(Acid_res(mdef))
+							notResisted = FALSE;
+					break;
+				}
+				if(youagr){
+					if(ACURR(abil[i]) >= 15){
+						if(ACURR(abil[i]) >= 25)
+							dsize = (u.uinsight + u.usanity)/10;
+						else if(ACURR(abil[i]) >= 18)
+							dsize = (u.uinsight + u.usanity)/20;
+						else /*>= 15*/
+							dsize = (u.uinsight + u.usanity)/40;
+						
+						*truedmgptr += rnd(dsize);
+					}
+				}
+				else {
+					*truedmgptr += d(1, mlev(magr)/5);
+				}
+			}
+		}
+		else if(is_chained_merc(otmp)){
+			if(youdef){
+				if(u.uen > 0){
+					u.uen -= youagr ? u.uinsight/10 : mlev(magr)/10;
+					flags.botl = 1;
+				}
+				if((dieroll == 1 && (youagr ? u.uinsight : mlev(magr)) >= 40) || u.uen < 0){
+					if(u.uen > 0){
+						u.uen = max(u.uen-400, 0);
+						flags.botl = 1;
+					}
+				}
+			}
+			else {
+				mdef->mspec_used += rnd(youagr ? u.uinsight/10 : mlev(magr)/10);
+				if(dieroll == 1 && (youagr ? u.uinsight : mlev(magr)) >= 40)
+					set_mcan(mdef, TRUE);
+			}
+			int wt = youagr ? inv_weight() : curr_mon_load(magr);
+			if(wt >= 160){
+				wt /= 160;
+				if(wt > 80)
+					wt = 80;
+				*plusdmgptr += rnd(wt);
+			}
+		}
+		else if(is_kinstealing_merc(otmp)){
+			//
+		}
+	}
+
+	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
+}
+
 void
 mercy_blade_conflict(mdef, magr, spe, lethal)
 struct monst *mdef;
@@ -4917,6 +5015,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	
 	int goatweaponturn = 0;
 	int sothweaponturn = 0;
+	int mercweaponslice[3] = {0};
 
 	char hittee[BUFSZ];
 	static const char you[] = "you";
@@ -4935,6 +5034,11 @@ boolean printmessages; /* print generic elemental damage messages */
 		goatweaponturn = goat_weapon_damage_turn(otmp);
 	if(check_oprop(otmp,OPROP_SOTHW))
 		sothweaponturn = soth_weapon_damage_turn(otmp);
+	if(otmp->obj_material == MERCURIAL){
+		mercweaponslice[0] = merc_weapon_damage_slice(otmp, magr, A_INT);
+		mercweaponslice[1] = merc_weapon_damage_slice(otmp, magr, A_WIS);
+		mercweaponslice[2] = merc_weapon_damage_slice(otmp, magr, A_CHA);
+	}
 	
 #define currdmg (basedmg + *plusdmgptr + *truedmgptr)
 
@@ -4943,6 +5047,8 @@ boolean printmessages; /* print generic elemental damage messages */
 		spec_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr);
 	if (!check_oprop(otmp, OPROP_NONE))
 		oproperty_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr);
+	if (otmp->obj_material == MERCURIAL)
+		material_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr, dieroll);
 	
 	/* this didn't trigger spec_dbon_applies, but still needs to happen later */
 	if (dieroll <= 2 && youagr && otmp->oclass == SPBOOK_CLASS && (u.sealsActive&SEAL_PAIMON)
@@ -5393,7 +5499,73 @@ boolean printmessages; /* print generic elemental damage messages */
 		if(youagr)
 			mdef->myoumarked = TRUE;
 	}
-	
+	if (mercweaponslice[0] || mercweaponslice[1] || mercweaponslice[2]){
+		int fire_count = 0;
+		int cold_count = 0;
+		int shock_count = 0;
+		int acid_count = 0;
+		for(int i = 0; i < 3; i++){
+			switch(mercweaponslice[i]){
+				case AD_FIRE:
+					fire_count++;
+				break;
+				case AD_COLD:
+					cold_count++;
+				break;
+				case AD_ELEC:
+					shock_count++;
+				break;
+				case AD_ACID:
+					acid_count++;
+				break;
+			}
+		}
+		pline_The("%s %s %s %s%c",
+			u.uinsight > 20 ? "many-colored" : "paper-thin",
+			wepdesc,
+			vtense(wepdesc, "hit"),
+			hittee, !spec_dbon_applies ? '.' : '!');
+		*messaged = TRUE;
+		if(fire_count){
+			if(!UseInvFire_res(mdef)){
+				if (!rn2(6-fire_count)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(6-fire_count)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+				if (!rn2(6-fire_count)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
+		if(cold_count){
+			if (!UseInvCold_res(mdef)){
+				if (!rn2(5-cold_count)) destroy_item(mdef, POTION_CLASS, AD_COLD);
+			}
+		}
+		if(shock_count){
+			if (!UseInvShock_res(mdef)){
+				if (!rn2(5-shock_count)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+				if (!rn2(5-shock_count)) destroy_item(mdef, RING_CLASS, AD_ELEC);
+			}
+		}
+		if(acid_count){
+			if(!UseInvAcid_res(mdef)){
+				if (rn2(5-acid_count)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
+	}
+	else if(is_chained_merc(otmp)){
+		pline_The("%s %s %s %s%c",
+	u.uinsight > 20 ? "dense" : "shimmering",
+			wepdesc,
+			vtense(wepdesc, "hit"),
+			hittee, !spec_dbon_applies ? '.' : '!');
+		*messaged = TRUE;
+	}
+	else if(is_kinstealing_merc(otmp)){
+		pline_The("%s %s %s %s%c",
+			u.uinsight > 20 ? "grasping" : "jagged",
+			wepdesc,
+			vtense(wepdesc, "hit"),
+			hittee, !spec_dbon_applies ? '.' : '!');
+		*messaged = TRUE;
+	}
 	if (attacks(AD_FIRE, otmp)
 		|| check_oprop(otmp,OPROP_FIREW)
 		|| check_oprop(otmp,OPROP_OONA_FIREW)
@@ -6701,6 +6873,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		if(i > 0)
 			*truedmgptr += i;
 	}
+
 	if(otmp->oartifact == ART_IBITE_ARM){
 		struct obj *cloak = which_armor(mdef, W_ARMC);
 
@@ -7057,6 +7230,173 @@ boolean printmessages; /* print generic elemental damage messages */
 				}
 			}
 		}break;
+	}
+
+	if(is_kinstealing_merc(otmp) && (
+		(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+	)){
+		int target;
+		// Level drain
+		target = youagr ? (NightmareAware_Insanity + ACURR(A_CON)) : mlev(magr);
+		target -= mlev(mdef);
+		if(!Drain_res(mdef) && rnd(100) < target){
+			if(youdef)
+				losexp("life drainage", FALSE, FALSE, FALSE);
+			else {
+				int drain = rnd(hd_size(mdef->data));
+				*hpmax(mdef) = max(1, *hpmax(mdef) - drain);
+				*hp(mdef) = max(1, *hp(mdef) - drain);
+				if (mdef->m_lev > 0)
+					mdef->m_lev--;
+			}
+		}
+		target = youagr ? (Insanity + ACURR(A_STR)) : mlev(magr);
+		target -= mlev(mdef);
+		if(rnd(100) < target && !check_res_engine(mdef, AD_SHRD)){
+			struct obj *obj = some_armor(mdef);
+			int i;
+			if (obj){
+				if(!((youdef && Preservation)
+					|| (!youdef && mon_resistance(mdef, PRESERVATION))
+				)){
+					// if (vis) {
+						// pline("%s slices %s armor!",
+							// The(xname(msgr)),
+							// (youdef ? "your" : s_suffix(mon_nam(mdef)))
+							// );
+						// *messaged = TRUE;
+					// }
+					if(youagr){
+						i = rnd(2*count_madnesses()+1);
+					}
+					else i = rnd(3);
+
+					for (; i>0; i--){
+						if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
+							damage_item(obj);
+							// if (!i && vis) {
+								// pline("%s %s less effective.",
+									// (youdef ? "Your" : s_suffix(Monnam(mdef))),
+									// aobjnam(obj, "seem")
+									// );
+							// }
+						}
+						else if (!obj->oartifact){
+							claws_destroy_marm(mdef, obj);
+							obj = some_armor(mdef);
+							if(!obj)
+								i = 0;
+						}
+					}
+				}
+			}
+		}
+		// Theft
+		target = youagr ? (u.uinsight + ACURR(A_DEX)) : mlev(magr);
+		target -= mlev(mdef);
+		if(rnd(100) < target){
+			if (youagr){
+				if (mdef->minvent){
+					struct obj *otmp2;
+					long unwornmask = 0L;
+
+					/* Don't steal worn items, and downweight wielded items */
+					if ((otmp2 = mdef->minvent) != 0) {
+						while (otmp2 &&
+							otmp2->owornmask&W_ARMOR &&
+							!((otmp2->owornmask&W_WEP) && !rn2(10))
+							) otmp2 = otmp2->nobj;
+					}
+
+					/* Still has handling for worn items, in case that changes */
+					if (otmp2 != 0){
+						/* take the object away from the monster */
+						if (otmp2->quan > 1L){
+							otmp2 = splitobj(otmp2, 1L);
+							obj_extract_self(otmp2);
+						}
+						else {
+							obj_extract_and_unequip_self(otmp2);
+							if ((unwornmask = otmp2->owornmask) != 0L) {
+								mdef->misc_worn_check &= ~unwornmask;
+								if (otmp2->owornmask & W_WEP) {
+									setmnotwielded(mdef, otmp2);
+									MON_NOWEP(mdef);
+								}
+								if (otmp2->owornmask & W_SWAPWEP) {
+									setmnotwielded(mdef,otmp2);
+									MON_NOSWEP(mdef);
+								}
+								otmp2->owornmask = 0L;
+								update_mon_intrinsics(mdef, otmp2, FALSE, FALSE);
+							}
+						}
+						(void)dropy(otmp2);
+						(void)pickup(2);
+						/* more take-away handling, after theft message */
+						if (unwornmask & W_WEP) {		/* stole wielded weapon */
+							possibly_unwield(mdef, FALSE);
+						}
+						else if (unwornmask & W_ARMG) {	/* stole worn gloves */
+							mselftouch(mdef, (const char *)0, TRUE);
+							if (mdef->mhp <= 0)	/* it's now a statue */
+								return MM_DEF_DIED; /* monster is dead */
+						}
+					}
+				}
+			}
+			else if (youdef){
+				if(!(u.sealsActive&SEAL_ANDROMALIUS) && !check_mutation(TENDRIL_HAIR)){
+					char buf[BUFSZ];
+					buf[0] = '\0';
+					steal(magr, buf, TRUE, FALSE);
+				}
+			}
+			else {
+				struct obj *obj;
+				/* find an object to steal, non-cursed if magr is tame */
+				for (obj = mdef->minvent; obj; obj = obj->nobj)
+					if (!magr->mtame || !obj->cursed)
+						break;
+
+				if (obj) {
+					char buf[BUFSZ], onambuf[BUFSZ], mdefnambuf[BUFSZ];
+
+					/* make a special x_monnam() call that never omits
+					   the saddle, and save it for later messages */
+					Strcpy(mdefnambuf, x_monnam(mdef, ARTICLE_THE, (char *)0, 0, FALSE));
+#ifdef STEED
+					if (u.usteed == mdef &&
+						obj == which_armor(mdef, W_SADDLE))
+						/* "You can no longer ride <steed>." */
+						dismount_steed(DISMOUNT_POLY);
+#endif
+					obj_extract_self(obj);
+					if (obj->owornmask) {
+						mdef->misc_worn_check &= ~obj->owornmask;
+						if (obj->owornmask & W_WEP)
+							setmnotwielded(mdef, obj);
+						obj->owornmask = 0L;
+						update_mon_intrinsics(mdef, obj, FALSE, FALSE);
+					}
+					/* add_to_minv() might free obj [if it merges] */
+					// if (vis)
+						// Strcpy(onambuf, doname(obj));
+					// (void)add_to_minv(magr, obj);
+					// if (vis) {
+						// Strcpy(buf, Monnam(magr));
+						// pline("%s steals %s from %s!", buf,
+							// onambuf, mdefnambuf);
+					// }
+					possibly_unwield(mdef, FALSE);
+					mdef->mstrategy &= ~STRAT_WAITFORU;
+					mselftouch(mdef, (const char *)0, FALSE);
+					if (mdef->mhp <= 0)
+						return MM_DEF_DIED;
+				}
+			}
+		}
 	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
@@ -13437,6 +13777,39 @@ struct obj *obj;
 		case 7: return AD_MADF;
 	}
 	return AD_MAGM;
+}
+
+int
+merc_weapon_damage_slice(otmp, magr, stat)
+struct obj *otmp;
+struct monst *magr;
+int stat;
+{
+	boolean youagr = (magr == &youmonst);
+	if(mlev(magr) <= 20)
+		return 0;
+	if(is_streaming_merc(otmp)){
+		if(youagr){
+			if(u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE)
+				return 0;
+			if(u.uinsight <= 20 || ACURR(stat) < 15)
+				return 0;
+		}
+		else {
+			if(!is_chaotic_mon(magr))
+				return 0;
+			if(!insightful(magr->data))
+				return 0;
+		}
+		unsigned long int hashed = hash((unsigned long) (nonce + otmp->o_id + youmonst.movement + stat));
+		switch(hashed%4){
+			case 0: return AD_FIRE;
+			case 1: return AD_COLD;
+			case 2: return AD_ELEC;
+			case 3: return AD_ACID;
+		}
+	}
+	return 0;
 }
 
 void

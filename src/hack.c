@@ -1329,6 +1329,12 @@ domove()
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 					result |= hit_with_rblood(&youmonst, otmp, x, y, 0, attk);
 				}
+				/* Streaming mercurial weapons hit an aditional target if your insight is high enough */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && is_streaming_merc(otmp)){
+					if(mlev(&youmonst) > 20 && (u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))){
+						result |= hit_with_streaming(&youmonst, otmp, x, y, 0, attk);
+					}
+				}
 				/* Dancers hit additional targets */
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(&youmonst)){
 					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);

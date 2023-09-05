@@ -164,8 +164,8 @@
 #define Punished		(uball)
 
 #define	Insanity	 (100 - u.usanity)
-#define NightmareAware_Sanity ((Nightmare && ClearThoughts) ? (u.usanity + 4*Insanity/5) : u.usanity)
-#define NightmareAware_Insanity ((Nightmare && ClearThoughts) ? (Insanity/5) : Insanity)
+#define NightmareAware_Sanity ((Nightmare && ClearThoughts) ? (u.usanity + 4*Insanity/5) : ClearThoughts ? (u.usanity + 9*Insanity/10) : u.usanity)
+#define NightmareAware_Insanity ((Nightmare && ClearThoughts) ? (Insanity/5) : ClearThoughts ? Insanity/10 : Insanity)
 
 #define	FacelessHelm(obj) ((obj)->otyp == PLASTEEL_HELM || (obj)->otyp == CRYSTAL_HELM || (obj)->otyp == PONTIFF_S_CROWN || (obj)->otyp == FACELESS_HELM || (obj)->otyp == IMPERIAL_ELVEN_HELM)
 #define	FacelessCloak(obj) ((obj)->otyp == WHITE_FACELESS_ROBE || (obj)->otyp == BLACK_FACELESS_ROBE || (obj)->otyp == SMOKY_VIOLET_FACELESS_ROBE)

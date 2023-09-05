@@ -1502,6 +1502,18 @@ int clearable;
 }
 
 int
+count_madnesses()
+{
+	int count = 0;
+	int i;
+	for(i=0; i < 32; i++){
+		if(u.umadness&(0x1L<<i))
+			count++;
+	}
+	return 0;
+}
+
+int
 roll_madness(madness)
 long int madness;
 {

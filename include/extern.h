@@ -150,6 +150,7 @@ E int FDECL(touch_artifact, (struct obj *,struct monst *, int));
 E int FDECL(spec_abon, (struct obj *,struct monst *, boolean));
 E boolean FDECL(spec_dbon, (struct obj *,struct monst *,int,int*,int*));
 E boolean FDECL(oproperty_dbon, (struct obj *, struct monst *, struct monst *, int, int*, int*));
+E boolean FDECL(material_dbon, (struct obj *, struct monst *, struct monst *, int, int*, int*, int));
 E void FDECL(mercy_blade_conflict, (struct monst *, struct monst *, int, boolean));
 E void FDECL(mindstealer_conflict, (struct monst *, struct monst *));
 E int FDECL(spec_applies, (struct obj *,struct monst *, boolean));
@@ -185,6 +186,7 @@ E int FDECL(oresist_disintegration, (struct obj *));
 E int FDECL(wrath_target, (struct obj *, struct monst *));
 E int FDECL(goat_weapon_damage_turn, (struct obj *));
 E int FDECL(soth_weapon_damage_turn, (struct obj *));
+E int FDECL(merc_weapon_damage_slice, (struct obj *, struct monst *, int));
 E void FDECL(activate_mirrored_mask, (struct obj *));
 E int FDECL(infinity_s_mirrored_arc_litness, (struct obj *));
 
@@ -218,6 +220,7 @@ E void FDECL(change_uinsight, (int));
 E boolean NDECL(check_insight);
 E int FDECL(roll_generic_madness, (int));
 E int FDECL(roll_generic_flat_madness, (int));
+E int NDECL(count_madnesses);
 E int FDECL(roll_madness, (long int));
 E int FDECL(mad_turn, (long int));
 E int FDECL(flat_mad_turn, (long int));
@@ -3222,7 +3225,7 @@ E int NDECL(dosuspend);
 /* ### weapon.c ### */
 
 E int FDECL(hitval, (struct obj *,struct monst *,struct monst *));
-E int FDECL(attack_mask, (struct obj *, int, int));
+E int FDECL(attack_mask, (struct obj *, int, int, struct monst *));
 E int FDECL(dmgval_core, (struct weapon_dice *, boolean, struct obj *, int, struct monst *));
 E int FDECL(weapon_dmg_roll, (struct weapon_dice *, boolean));
 E int FDECL(weapon_die_roll, (int, int, struct weapon_dice *, boolean));
@@ -3461,6 +3464,7 @@ E int FDECL(hit_with_cclaw, (struct monst *,struct obj *, int, int, int, struct 
 E int FDECL(hit_with_iwarp, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_rblood, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_dance, (struct monst *,struct obj *, int, int, int, struct attack *));
+E int FDECL(hit_with_streaming, (struct monst *,struct obj *, int, int, int, struct attack *));
 
 /* ### zap.c ### */
 
