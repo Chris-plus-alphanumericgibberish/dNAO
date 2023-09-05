@@ -183,6 +183,7 @@ static int p_type;
 #define TROUBLE_STUNNED		      (-13)
 #define TROUBLE_CONFUSED	      (-14)
 #define TROUBLE_HALLUCINATION	  (-15)
+#define TROUBLE_ENERGYMOD	      (-16)
 
 /* We could force rehumanize of polyselfed people, but we can't tell
    unintentional shape changes from the other kind. Oh well.
@@ -233,6 +234,7 @@ in_trouble()
 	if(u.umorgul && on_altar()) return(TROUBLE_MORGUL);
 	if(u.umummyrot && on_altar()) return(TROUBLE_MROT);
 	if(u.uhpmod < -18 && on_altar()) return(TROUBLE_HPMOD);
+	if(u.uenbonus < -18 && on_altar()) return(TROUBLE_ENERGYMOD);
 	if(u.ulycn >= LOW_PM) return(TROUBLE_LYCANTHROPE);
 	if(near_capacity() >= EXT_ENCUMBER && AMAX(A_STR)-ABASE(A_STR) > 3)
 		return(TROUBLE_COLLAPSING);
@@ -519,6 +521,11 @@ register int trouble;
 			You_feel("restored to health.");
 		    u.uhpmod = max(u.uhpmod, 0);
 		    calc_total_maxhp();
+		    break;
+	    case TROUBLE_ENERGYMOD:
+			You_feel("charged up.");
+		    u.uenbonus = max(u.uenbonus, 0);
+		    calc_total_maxen();
 		    break;
 	    case TROUBLE_LYCANTHROPE:
 		    you_unwere(TRUE);
