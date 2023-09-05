@@ -2373,9 +2373,8 @@ int tary;
 			angrygods(GOD_LOLTH);
 			result = MM_HIT;
 		}
-		// !!!
-		/* generally: cast the spell */
-		result = cast_spell(magr, mdef, attk, spellnum, tarx, tary);
+		else /* generally: cast the spell */
+			result = cast_spell(magr, mdef, attk, spellnum, tarx, tary);
 	}
 	else if (!notarget || youagr) {
 		/* no spell selected; this probably means we have an elemental spell to cast */
