@@ -2731,6 +2731,7 @@ E char *FDECL(Shk_Your, (char *,struct obj *));
 E void FDECL(makeketer, (coord *));
 E int FDECL(countFarSigns, (struct monst *));
 E int FDECL(countCloseSigns, (struct monst *));
+E void FDECL(smithy_services, (struct monst *));
 
 /* ### shknam.c ### */
 
