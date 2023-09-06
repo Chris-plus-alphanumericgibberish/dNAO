@@ -1944,9 +1944,10 @@ int id;
 	otmp->owornmask = obj->owornmask;
 no_unwear:
 
-	if (obj_location == OBJ_FLOOR && is_boulder(obj) &&
-		!is_boulder(otmp))
+	if (obj_location == OBJ_FLOOR && is_boulder(obj) && !is_boulder(otmp))
 	    unblock_point(obj->ox, obj->oy);
+	else if (obj_location == OBJ_FLOOR && obj->otyp != BOULDER && otmp->otyp == BOULDER)
+		block_point(obj->ox, obj->oy);
 
 	/* copy OX structures */
 	mov_all_ox(obj, otmp);
@@ -3139,7 +3140,7 @@ struct obj *obj;	/* wand or spell */
 	case SPE_WIZARD_LOCK:
 	    /* down at open bridge or up or down at open portcullis */
 	    if ((levl[x][y].typ == DRAWBRIDGE_DOWN) ? (u.dz > 0) :
-			(is_drawbridge_wall(x,y) && !is_db_wall(x,y)) &&
+			(is_drawbridge_wall(x,y) >= 0 && !is_db_wall(x,y)) &&
 		    find_drawbridge(&xx, &yy)) {
 		if (!striking)
 		    close_drawbridge(xx, yy);

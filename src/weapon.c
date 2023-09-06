@@ -1296,9 +1296,6 @@ struct monst *magr;
 		if (tmp < 0)
 			tmp = 0;
 	}
-	/* Flaying weapons don't damage armored foes */
-	if ((check_oprop(otmp, OPROP_FLAYW) || check_oprop(otmp, OPROP_LESSER_FLAYW)) && mon && some_armor(mon))
-		tmp = 1;
 	/* Smaug gets stabbed */
 	if(is_stabbing(otmp) && ptr->mtyp == PM_SMAUG)
 		tmp += rnd(20);
