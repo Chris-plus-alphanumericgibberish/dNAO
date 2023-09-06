@@ -5553,6 +5553,8 @@ struct monst *magr;
 			continue;
 		if(youdef && (magr->mpeaceful))
 			continue;
+		if(youdef && Invulnerable)
+			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
@@ -5639,6 +5641,8 @@ struct monst *magr;
 		if(youagr && (mdef->mpeaceful))
 			continue;
 		if(youdef && (magr->mpeaceful))
+			continue;
+		if(youdef && Invulnerable)
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
@@ -6003,6 +6007,8 @@ struct monst *magr;
 			continue;
 		if(youdef && (magr->mpeaceful))
 			continue;
+		if(youdef && Invulnerable)
+			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
@@ -6086,6 +6092,8 @@ struct monst *magr;
 			continue;
 		if(youdef && (magr->mpeaceful))
 			continue;
+		if(youdef && Invulnerable)
+			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
@@ -6159,6 +6167,8 @@ struct monst *magr;
 		if(youagr && (mdef->mpeaceful))
 			continue;
 		if(youdef && (magr->mpeaceful))
+			continue;
+		if(youdef && Invulnerable)
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
@@ -6234,6 +6244,8 @@ struct monst *magr;
 			continue;
 		if(youdef && (magr->mpeaceful))
 			continue;
+		if(youdef && Invulnerable)
+			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
 
@@ -6305,6 +6317,8 @@ struct monst *magr;
 		if(youagr && (mdef->mpeaceful))
 			continue;
 		if(youdef && (magr->mpeaceful))
+			continue;
+		if(youdef && Invulnerable)
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
@@ -6390,6 +6404,8 @@ struct monst *magr;
 		if(youagr && (mdef->mpeaceful))
 			continue;
 		if(youdef && (magr->mpeaceful))
+			continue;
+		if(youdef && Invulnerable)
 			continue;
 		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;

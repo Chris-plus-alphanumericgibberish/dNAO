@@ -13304,6 +13304,9 @@ do_passive_attacks()
 {
 	struct monst *mtmp;
 	struct obj *armor;
+	if(Invulnerable)
+		return;
+
 	if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
 		if(!ClearThoughts){
 			pline("Lashing tentacles erupt from your brain!");
