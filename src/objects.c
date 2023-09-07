@@ -1126,6 +1126,7 @@ AMULET(("Amulet of Yendor", "Amulet of Yendor"), {0}, 0, /* note: description ==
 
 /* tools ... */
 /* tools with weapon characteristics come last */
+/* torches are mergeable */
 #define TOOL(names,kn,size,mrg,mgc,chg,prob,wt,cost,mat,color,...) \
 	OBJECT( names, \
 		BITS(kn,mrg,chg,0,mgc,chg,0,0,size,0,0,0,0,P_NONE,mat,0), \
@@ -1141,6 +1142,13 @@ AMULET(("Amulet of Yendor", "Amulet of Yendor"), {0}, 0, /* note: description ==
 		BITS(kn,0,1,chg,mgc,1,0,0,size,0,0,0,typ,sub,mat,0), \
 		{0}, TOOL_CLASS, prob, 0, \
 		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
+#define TORCH(names,sdam,ldam,kn,size,mgc,chg,prob,wt,cost,hitbon,typ,sub,mat,clr,...) \
+	OBJECT( names, \
+		BITS(kn,1,1,chg,mgc,1,0,0,size,0,0,0,typ,sub,mat,0), \
+		{0}, TOOL_CLASS, prob, 0, \
+		wt, cost, sdam, ldam, hitbon, WP_GENERIC, 0, wt, clr, __VA_ARGS__)
+
+
 /* containers */
 CONTAINER(("box"),             1,   MZ_HUGE, 0, 0,  30, 350,   8, WOOD, HI_WOOD),
 CONTAINER(("sarcophagus"),             1,   MZ_HUGE, 0, 0,  0, 3500,   8, GOLD, HI_GOLD),
@@ -1315,16 +1323,16 @@ WEPTOOL(("seismic hammer", "dull metallic hammer"),/*Needs encyc entry*/
 /*
  * Torches work as clubs
  */
-WEPTOOL(("torch"),/*Needs encyc entry*/
+TORCH(("torch"),/*Needs encyc entry*/
 	DMG(D(3)), DMG(D(2)),
 	1,  MZ_SMALL, 0, 0, 15, 10,   5,  0, B,   P_CLUB, WOOD, HI_WOOD),
-WEPTOOL(("magic torch", "torch"),/*Needs encyc entry*/
+TORCH(("magic torch", "torch"),/*Needs encyc entry*/
 	DMG(D(6)), DMG(D(3)),
 	0,  MZ_SMALL, 1, 0,  0, 10, 500,  1, B,   P_CLUB, BONE, CLR_WHITE, O_MATSPEC(UNIDED)),
-WEPTOOL(("shadowlander's torch", "black torch", "torch"),/*Needs encyc entry*/
+TORCH(("shadowlander's torch", "black torch", "torch"),/*Needs encyc entry*/
 	DMG(D(3)), DMG(D(2)),
 	0,  MZ_SMALL, 0, 0, 10, 10,  50,  0, B,   P_CLUB, WOOD, CLR_BLACK),
-WEPTOOL(("sunrod", "rod"),/*Needs encyc entry*/
+TORCH(("sunrod", "rod"),/*Needs encyc entry*/
 	DMG(D(3)), DMG(D(2)),
 	1,  MZ_SMALL, 0, 0,  5, 20,  50,  0, B,   P_MACE, GOLD, HI_GOLD, O_MATSPEC(UNIDED)),
 /* 

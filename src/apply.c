@@ -1940,8 +1940,13 @@ struct obj *obj;
 		fix_object(dagger);
 		
 		if (obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER){
-			artifact_exists(dagger, artiname(ART_BLADE_DANCER_S_DAGGER), FALSE);
-			dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
+			if (!art_already_exists(ART_BLADE_DANCER_S_DAGGER)){
+				artifact_exists(dagger, artiname(ART_BLADE_DANCER_S_DAGGER), FALSE);
+				dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
+			} else {
+				dagger->oartifact = 0;
+				rem_ox(dagger, OX_ENAM);
+			}
 		}
 
 		dagger = hold_another_object(dagger, "You drop %s!",
@@ -1962,6 +1967,11 @@ struct obj *obj;
 			pline("They don't fit together!");
 			return MOVE_CANCELLED;
 		}
+
+		if (uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER){
+			flag_existance(ART_BLADE_DANCER_S_DAGGER, FALSE);
+		}
+
 		if (u.twoweap) {
 			u.twoweap = 0;
 			update_inventory();
