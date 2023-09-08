@@ -9975,7 +9975,7 @@ int mmflags;
 						mtmp->entangled_oid = otmp->o_id;
 					}
 					mtmp->m_lev = 14;
-					mtmp->mhpmax = 7*8 + d(7,8);
+					mtmp->mhpmax = 7*hd_size(mtmp->data) + d(7,hd_size(mtmp->data));
 					mtmp->mhp = mtmp->mhpmax;
 					return;
 				}
@@ -13540,23 +13540,23 @@ int faction;
 	     * way to fit in the 50..127 positive range of a signed character
 	     * above the 1..49 that indicate "normal" monster levels */
 //	    mtmp->mhpmax = mtmp->mhp = 2*(ptr->mlevel - 6);
-	    mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
+	    mtmp->mhpmax = mtmp->mhp = max(4, hd_size(ptr)*(ptr->mlevel));
 	    // mtmp->m_lev = mtmp->mhp / 4;	/* approximation */
 	} else if (has_template(mtmp, PSEUDONATURAL) || has_template(mtmp, MOLY_TEMPLATE)) {
-		mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
+		mtmp->mhpmax = mtmp->mhp = max(4, hd_size(ptr)*(ptr->mlevel));
 	} else if (is_ancient(mtmp) || is_tannin(mtmp)) {
-		mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
+		mtmp->mhpmax = mtmp->mhp = max(4, hd_size(ptr)*(ptr->mlevel));
 	} else if (!mtmp->m_lev) {
-	    mtmp->mhpmax = mtmp->mhp = rnd(4);
+	    mtmp->mhpmax = mtmp->mhp = rnd(hd_size(ptr)/2);
 	} else if (ptr->mlet == S_DRAGON && mndx >= PM_GRAY_DRAGON) {
 	    /* adult dragons */
 	    mtmp->mhpmax = mtmp->mhp = (int) (In_endgame(&u.uz) ?
-		(8 * mtmp->m_lev) : (4 * mtmp->m_lev + d((int)mtmp->m_lev, 4)));
+		(hd_size(ptr) * mtmp->m_lev) : (hd_size(ptr)/2 * mtmp->m_lev + d((int)mtmp->m_lev, hd_size(ptr)/2)));
 	} else {
 		if(Infuture){
 			mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*hd_size(mtmp->data) - 1;
 		} else {
-		    mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
+		    mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, hd_size(ptr));
 		    if (is_home_elemental(ptr))
 			mtmp->mhpmax = (mtmp->mhp *= 3);
 		}
@@ -13623,7 +13623,7 @@ int faction;
 		}
 		if (plslvl) {
 			mtmp->m_lev += plslvl;
-			mtmp->mhpmax += d(plslvl, 8);
+			mtmp->mhpmax += d(plslvl, hd_size(mtmp->data));
 			mtmp->mhp = mtmp->mhpmax;
 		}
 		/* update symbol */
@@ -13750,7 +13750,7 @@ int faction;
 				mtmp->mhp = mtmp->mhpmax;
 			} else if(ptr->mtyp == PM_HARROWER_OF_ZARIEL){
 				mtmp->m_lev *= 1.5;
-				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
+				mtmp->mhpmax = max(4, hd_size(mtmp->data)*mtmp->m_lev);
 				mtmp->mhp = mtmp->mhpmax;
 			} else if(mndx == PM_IKSH_NA_DEVA){
 				mtmp->mcansee = 0;
@@ -13763,7 +13763,7 @@ int faction;
 			if(in_mklev && is_angel(mtmp->data) && Is_demogorgon_level(&u.uz)){
 				set_template(mtmp, MAD_TEMPLATE);
 				mtmp->m_lev += (mtmp->data->mlevel)/2;
-				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
+				mtmp->mhpmax = max(4, hd_size(mtmp->data)*mtmp->m_lev);
 				mtmp->mhp = mtmp->mhpmax;
 			}
 
@@ -14105,9 +14105,9 @@ int faction;
 			}
 			else if(mndx == PM_UVUUDAUM){
 				mtmp->m_lev = 38;
-				mtmp->mhpmax = d(38, 8);
-				if(mtmp->mhpmax < 38*4.5)
-					mtmp->mhpmax = (int)(38*4.5);
+				mtmp->mhpmax = d(38, hd_size(mtmp->data));
+				if(mtmp->mhpmax < 38*hd_size(mtmp->data)/2)
+					mtmp->mhpmax = (int)(38*hd_size(mtmp->data)/2);
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			else if(mndx == PM_ASPECT_OF_THE_SILENCE){
@@ -14204,7 +14204,7 @@ int faction;
 		case S_ZOMBIE:
 			if (mndx == PM_DREAD_SERAPH){
 				mtmp->m_lev = max(mtmp->m_lev,30);
-				mtmp->mhpmax = 4*8*mtmp->m_lev;
+				mtmp->mhpmax = 4*hd_size(mtmp->data)*mtmp->m_lev;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;
@@ -15922,7 +15922,7 @@ struct monst *mtmp, *victim;
 				pline("Warm light shines on %s", mon_nam(mtmp));
 			mtmp->mvar_flask_charges++;
 		}
-		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
+		if(mtmp->mhpmax < hp_threshold-hd_size(mtmp->data) || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
 			max_increase = 1;
 			cur_increase = 1;
 			if(mtmp->mtame){
@@ -15979,7 +15979,7 @@ struct monst *mtmp, *victim;
 	    /* a gain level potion or wraith corpse; always go up a level
 	       unless already at maximum (30 is player limt, so assume it is
 		   the inate limit of gain level potions) */
-	    max_increase = cur_increase = rnd(8);
+	    max_increase = cur_increase = rnd(hd_size(mtmp->data));
 	    hp_threshold = 0;	/* smaller than `mhpmax + max_increase' */
 	    lev_limit = max(30, mtmp->m_lev);
 	}
@@ -16027,7 +16027,7 @@ struct monst *mtmp, *victim;
 	}
 //	if( !(monsndx(mtmp)<PM_DJINNI && monsndx(mtmp)>PM_BALROG) ){
 		// Some High level stuff is higher than this.
-		// if (mtmp->mhpmax > 50*8) mtmp->mhpmax = 50*8;	  /* absolute limit */
+		// if (mtmp->mhpmax > 50*hd_size(mtmp->data)) mtmp->mhpmax = 50*hd_size(mtmp->data);	  /* absolute limit */
 		// if (mtmp->mhp > mtmp->mhpmax) mtmp->mhp = mtmp->mhpmax;
 //	}
 	return ptr;
