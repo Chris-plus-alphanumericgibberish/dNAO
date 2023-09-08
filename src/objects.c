@@ -594,13 +594,13 @@ GUN(("cutting laser","hard tan lozenge", "hard lozenge"),         0,   MZ_SMALL,
 GUN(("raygun", "hard handle ending in glassy disks"), 0,  MZ_MEDIUM, 0,   8, 3000, 15,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BRIGHT_CYAN, O_MAGIC(1)), /*Needs tile*/
 BULLET(("bullet", "pellet"),
 	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
-	0,    MZ_TINY, 0,  1,   5, 0,  WP_BULLET,   P,   METAL, -P_FIREARM, HI_METAL),/*Needs tile*/
+	0,    MZ_TINY, 0,  1,   5, 0,  WP_BULLET,   P,   LEAD, -P_FIREARM, HI_METAL),/*Needs tile*/
 BULLET(("silver bullet", "silver pellet"),
 	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,  15, 0,  WP_BULLET,   P,  SILVER, -P_FIREARM, HI_SILVER),/*Needs tile*/
 BULLET(("shotgun shell", "red tube", "tube"),
 	DMG(D(2, 12), F(4)), DMG(D(2, 6), F(4)),
-	0,    MZ_TINY, 0,  1,  10,10,   WP_SHELL,   S,   METAL, -P_FIREARM, CLR_RED),/*Needs tile*/
+	0,    MZ_TINY, 0,  1,  10,10,   WP_SHELL,   S,   LEAD, -P_FIREARM, CLR_RED),/*Needs tile*/
 BULLET(("frag grenade", "green spheroid", "spheroid"),
 	DMG(D(2)), DMG(D(2)),
 	0,   MZ_SMALL, 0,  5, 350, 0, WP_GRENADE,   B,    IRON, -P_FIREARM, CLR_GREEN),/*Needs tile*/

@@ -255,14 +255,21 @@ hack_artifacts()
 		artilist[ART_ROBE_OF_CLOSED_EYES].gflags &= ~ARTG_NOGEN;
 	}
 	
+	/* fem hlf nob, or fem hlf without a first gift, always get Lifehunt Scythe */
+	/* previously overrode all other first gifts, but now that fem hlf nob exists only overrides no first gift */
+	boolean first_gift_found = FALSE;
 	if(Race_if(PM_HALF_DRAGON) && flags.initgend){
 		int i;
-		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++)
-			if(artilist[i].role == Role_switch)
-				artilist[i].role = NON_PM;
-		
-		artilist[ART_LIFEHUNT_SCYTHE].role = Role_switch;
-		artilist[ART_LIFEHUNT_SCYTHE].alignment = alignmnt;
+		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++){
+			if(artilist[i].role == Role_switch){
+				if (Role_if(PM_NOBLEMAN)) artilist[i].role = NON_PM;
+				else {first_gift_found = TRUE; break; }
+			}
+		}
+		if (!first_gift_found){
+			artilist[ART_LIFEHUNT_SCYTHE].role = Role_switch;
+			artilist[ART_LIFEHUNT_SCYTHE].alignment = alignmnt;
+		}
 	}
 	
 	/* Fix up the crown */

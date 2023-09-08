@@ -3468,9 +3468,12 @@ int tx,ty;
 			int curx, cury;
 			char altarfound=0;
 			//Amon can't be invoked on levels with altars, and in fact doing so causes imediate level loss, as for a broken taboo.
-			for(curx=1;curx < COLNO;curx++)
-				for(cury=1;cury < ROWNO;cury++)
-					if(IS_ALTAR(levl[curx][cury].typ)){ altarfound=1; cury=ROWNO; curx=COLNO;}//end search
+			for(curx=1;curx < COLNO;curx++){
+				for(cury=1;cury < ROWNO;cury++){
+					if(IS_ALTAR(levl[curx][cury].typ)) { altarfound = 1; break; }
+				}
+				if (altarfound == 1) break;
+			}//end search
 			
 			if(!altarfound){
 				pline("A golden flame roars suddenly to life within the seal, throwning the world into a stark relief of hard-edged shadows and brilliant light.");
@@ -3504,11 +3507,11 @@ int tx,ty;
 			else{
 				Your("mind's eye is blinded by a flame blasting through an altar.");
 				losexp("shredding of the soul",TRUE,TRUE,TRUE);
-				if(in_rooms(tx, ty, TEMPLE)){
+				if(in_rooms(curx, cury, TEMPLE)){
 //					struct monst *priest = findpriest(roomno);
 					//invoking Amon inside a temple angers the resident deity
-					altar_wrath(tx, ty);
-					angrygods(god_at_altar(tx, ty));
+					altar_wrath(curx, cury);
+					angrygods(god_at_altar(curx, cury));
 				}
 				u.sealTimeout[AMON-FIRST_SEAL] = moves + bindingPeriod; // invoking amon on a level with an altar still triggers the binding period.
 			}
