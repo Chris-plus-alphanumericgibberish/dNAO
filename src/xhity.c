@@ -874,7 +874,7 @@ int tary;
 				/* make the attack */
 				bhitpos.x = tarx; bhitpos.y = tary;
 				result = xmeleehity(magr, mdef, attk, (struct obj **)0, vis, tohitmod, ranged);
-				dopassive_local = TRUE;
+				if (!spirit_rapier_at(attk->aatyp) || attk->adtyp == AD_MERC) dopassive_local = TRUE;
 				/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 				if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
 					wakeup2(mdef, youagr);
@@ -16460,7 +16460,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	
 	/* passives NOT from a creature's attacks */
 	/* per-attack */
-	if (attk) {
+	if (attk && (!spirit_rapier_at(attk->aatyp) || attk->adtyp == AD_MERC)) {
 		/* Iris unbinds on attacking a reflective creature */
 		if (youagr && u.sealsActive&SEAL_IRIS &&
 			!(result&MM_DEF_DIED) &&

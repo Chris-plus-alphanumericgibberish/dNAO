@@ -6024,13 +6024,7 @@ boolean inc_penalties;
 	else if(u.specialSealsActive&SEAL_NUMINA) maxskill = max(P_SKILLED,maxskill);
 	
 	if(roleSkill(p_skill)) maxskill = min(maxskill + 1, P_EXPERT);
-	
-	if(p_skill >= P_SHII_CHO && p_skill <= P_JUYO){
-		if(uwep && is_lightsaber(uwep)) maxskill = min(maxskill, P_SKILL(weapon_type(uwep)));
-		else if(uswapwep && is_lightsaber(uswapwep)) maxskill = min(maxskill, P_SKILL(weapon_type(uswapwep)));
-		else maxskill = P_UNSKILLED;
-	}
-	
+
 	if(Air_crystal){
 		if(WIND_SKILL(p_skill))
 			INCR_MAXSKILL;

@@ -1507,7 +1507,7 @@ int godnum;
     int mtyp=NON_PM, mlev, num = 0, first, last;
 	struct monst *mon = (struct monst *)0;
 	
-	mlev = level_difficulty();
+	mlev = (level_difficulty() + u.ulevel)/2 + (P_SKILL(P_BEAST_MASTERY)*3)/2;
 	
 	for (first = 0; minions[first] != NON_PM; first++)
 	    if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz)) && monstr[minions[first]] > mlev-5) break;
@@ -3011,7 +3011,10 @@ int godnum;
 	const char *what = (const char *)0;
 	int i, ii, lim, timeout;
 	
-	if (rnl((30 + u.ulevel)*10) < 10) god_gives_pet(godnum);
+	/* up to +25 for a bard with expert beast mastery */
+	/* that's around 1/12 chance of pet for lvl 15 bards, 1/8 with 13 luck  */
+	int pet_class_bonus = ((Role_if(PM_BARD) || Role_if(PM_HEALER)) ? 15 : 0) + min(P_SKILL(P_BEAST_MASTERY)-1, 0)*5;
+	if (rnl(30 + u.ulevel)*10 < (15 + pet_class_bonus)) god_gives_pet(godnum);
 	else {
 		switch (rn2(6)) {
 			case 0: // randomly increment an ability score
