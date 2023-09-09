@@ -1337,6 +1337,23 @@ see_traps()
 }
 
 /*
+ * Update hallucinated altars.
+ */
+void
+see_altars()
+{
+	int x, y;
+	struct rm* lev;
+	clear_glyph_buffer();
+	for (x = 1; x < COLNO; x++) {
+		lev = &levl[x][0];
+		for (y = 0; y < ROWNO; y++, lev++)
+			if (lev->glyph == cmap_to_glyph(S_altar))
+				show_glyph(x,y,lev->glyph);
+    }
+}
+
+/*
  * Put the cursor on the hero.  Flush all accumulated glyphs before doing it.
  */
 void
@@ -1776,11 +1793,17 @@ back_to_glyph(x,y)
 	case POOL:
 	case MOAT:		idx = S_pool;	  break;
 	case STAIRS:
-	    idx = (ptr->ladder & LA_DOWN) ? S_dnstair : S_upstair;
-	    break;
+		if (x == sstairs.sx && y == sstairs.sy && sstairs.u_traversed)
+			idx = (ptr->ladder & LA_DOWN) ? S_brdnstair : S_brupstair;
+		else
+			idx = (ptr->ladder & LA_DOWN) ? S_dnstair : S_upstair;
+		break;
 	case LADDER:
-	    idx = (ptr->ladder & LA_DOWN) ? S_dnladder : S_upladder;
-	    break;
+		if (x == sstairs.sx && y == sstairs.sy && sstairs.u_traversed)
+			idx = (ptr->ladder & LA_DOWN) ? S_brdnladder : S_brupladder;
+		else
+			idx = (ptr->ladder & LA_DOWN) ? S_dnladder : S_upladder;
+		break;
 	case FOUNTAIN:		idx = S_fountain; break;
 	case FORGE:		idx = S_forge; break;
 	case SINK:		idx = S_sink;     break;

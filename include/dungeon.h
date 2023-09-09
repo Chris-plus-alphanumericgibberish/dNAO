@@ -37,6 +37,7 @@ typedef struct stairway {	/* basic stairway identifier */
 	xchar	sx, sy;		/* x / y location of the stair */
 	d_level tolev;		/* where does it go */
 	char	up;		/* what type of stairway (up/down) */
+	boolean u_traversed;
 } stairway;
 
 /* level region types */
@@ -237,6 +238,7 @@ typedef struct branch {
 #define Is_sunkcity(x)	(In_sea(x) && dungeon_topology.sea_variant == SUNKEN_CITY_LEVEL)
 #define Is_peanut(x)	(In_sea(x) && dungeon_topology.sea_variant == PEANUT_ISLAND_LEVEL)
 #define In_moloch_temple(x)	((x)->dnum == temple_dnum)
+#define In_lost_tomb(x)		((x)->dnum == tomb_dnum)
 #define Inhell			In_hell(&u.uz)	/* now gehennom */
 #define Infuture		(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
 #define In_endgame(x)		((x)->dnum == astral_level.dnum)

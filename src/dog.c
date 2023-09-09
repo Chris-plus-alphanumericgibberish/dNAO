@@ -1616,7 +1616,7 @@ boolean is_summoned;
     initedog(mon);
     newsym(mon->mx, mon->my);
     mon->mpeaceful = 1;
-	EDOG(mon)->loyal;
+	EDOG(mon)->loyal = 1;
     set_malign(mon);
     mon->mtame = 10;
     /* this section names the creature "of ______" */

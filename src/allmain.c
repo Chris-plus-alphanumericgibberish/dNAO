@@ -3056,6 +3056,7 @@ karemade:
 			see_monsters();
 			see_objects();
 			see_traps();
+			see_altars();
 			if (u.uswallow) swallowed(0);
 		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || NightmareAware_Sanity < 100 || oldsanity < 100) {
 	     	see_monsters();
@@ -3104,6 +3105,7 @@ karemade:
 			see_monsters();
 			see_objects();
 			see_traps();
+			see_altars();
 			if (u.uswallow) swallowed(0);
 		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || NightmareAware_Sanity < 100 || oldsanity < 100) {
 	     	see_monsters();
@@ -3574,40 +3576,27 @@ do_positionbar()
 {
 	static char pbar[COLNO];
 	char *p;
-	
+
+#define cmap_at_stair(stair) glyph_to_cmap(level.locations[stair.sx][stair.sy].glyph) 
 	p = pbar;
 	/* up stairway */
-	if (upstair.sx &&
-	   (glyph_to_cmap(level.locations[upstair.sx][upstair.sy].glyph) ==
-	    S_upstair ||
- 	    glyph_to_cmap(level.locations[upstair.sx][upstair.sy].glyph) ==
-	    S_upladder)) {
+	if (upstair.sx && (cmap_at_stair(upstair) == S_upstair || cmap_at_stair(upstair) == S_upladder)) {
 		*p++ = '<';
 		*p++ = upstair.sx;
 	}
-	if (sstairs.sx &&
-	   (glyph_to_cmap(level.locations[sstairs.sx][sstairs.sy].glyph) ==
-	    S_upstair ||
- 	    glyph_to_cmap(level.locations[sstairs.sx][sstairs.sy].glyph) ==
-	    S_upladder)) {
+	if (sstairs.sx && (cmap_at_stair(sstairs) == S_upstair || cmap_at_stair(sstairs) == S_upladder) 
+		|| cmap_at_stair(sstairs) == S_brupstair)) {
 		*p++ = '<';
 		*p++ = sstairs.sx;
 	}
 
 	/* down stairway */
-	if (dnstair.sx &&
-	   (glyph_to_cmap(level.locations[dnstair.sx][dnstair.sy].glyph) ==
-	    S_dnstair ||
- 	    glyph_to_cmap(level.locations[dnstair.sx][dnstair.sy].glyph) ==
-	    S_dnladder)) {
+	if (dnstair.sx && (cmap_at_stair(dnstair) == S_dnstair || cmap_at_stair(dnstair) == S_dnladder)) {
 		*p++ = '>';
 		*p++ = dnstair.sx;
 	}
-	if (sstairs.sx &&
-	   (glyph_to_cmap(level.locations[sstairs.sx][sstairs.sy].glyph) ==
-	    S_dnstair ||
- 	    glyph_to_cmap(level.locations[sstairs.sx][sstairs.sy].glyph) ==
-	    S_dnladder)) {
+	if (sstairs.sx && (cmap_at_stair(sstairs) == S_dnstair || cmap_at_stair(sstairs) == S_dnladder) 
+		|| cmap_at_stair(sstairs) == S_brdnstair)) {
 		*p++ = '>';
 		*p++ = sstairs.sx;
 	}

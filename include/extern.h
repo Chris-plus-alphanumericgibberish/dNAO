@@ -457,6 +457,7 @@ E void NDECL(see_monsters);
 E void NDECL(set_mimic_blocking);
 E void NDECL(see_objects);
 E void NDECL(see_traps);
+E void NDECL(see_altars);
 E void NDECL(curs_on_u);
 E int NDECL(doredraw);
 E void NDECL(docrt);

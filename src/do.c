@@ -1429,99 +1429,109 @@ remake:
 	    u_on_newpos(ttrap->tx, ttrap->ty);
 	} else if (at_stairs && !In_endgame(&u.uz)) {
 	    if (up) {
-		if (at_ladder) {
-		    u_on_newpos(xdnladder, ydnladder);
-		} else {
-		    if (newdungeon) {
-			if (Is_stronghold(&u.uz)) {
-			    register xchar x, y;
+			if (at_ladder) {
+				dnladder.u_traversed = TRUE;
+				u_on_newpos(xdnladder, ydnladder);
+			} else {
+				if (newdungeon) {
+					sstairs.u_traversed = TRUE;
+					if (Is_stronghold(&u.uz)) {
+					register xchar x, y;
 
-			    do {
-				x = (COLNO - 2 - rnd(5));
-				y = rn1(ROWNO - 4, 3);
-			    } while(occupied(x, y) ||
-				    IS_WALL(levl[x][y].typ));
-			    u_on_newpos(x, y);
-			} else u_on_sstairs();
-		    } else u_on_dnstairs();
-		}
-		/* Remove bug which crashes with levitation/punishment  KAA */
-		if (Punished && !Levitation) {
-			pline("With great effort you climb the %s.",
-				at_ladder ? "ladder" : "stairs");
-		} else if (at_ladder)
-		    You("climb up the ladder.");
-	    } else {	/* down */
-		if (at_ladder) {
-		    u_on_newpos(xupladder, yupladder);
-		} else {
-		    if (newdungeon) u_on_sstairs();
-		    else u_on_upstairs();
-		}
-		if (u.dz && Flying)
-		    You("fly down along the %s.",
-			at_ladder ? "ladder" : "stairs");
-		else if (u.dz &&
-#ifdef CONVICT
-		    (near_capacity() > UNENCUMBERED || (Punished &&
-		    ((uwep != uball) || ((P_SKILL(P_FLAIL) < P_BASIC))
-            || !Role_if(PM_CONVICT)))
-		     || Fumbling)
-#else
-		    (near_capacity() > UNENCUMBERED || Punished || Fumbling)
-#endif /* CONVICT */
-		) {
-		    You("fall down the %s.", at_ladder ? "ladder" : "stairs");
-		    if (Punished) {
-			drag_down();
-			ballrelease(FALSE);
-		    }
-			if(((uwep && is_lightsaber(uwep) && litsaber(uwep))) ||
-				(uswapwep && is_lightsaber(uswapwep) && litsaber(uswapwep) && u.twoweap)
-			){
-				boolean mainsaber = (uwep && is_lightsaber(uwep) && litsaber(uwep));
-				boolean mainsaber_locked = (uwep && (uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC || uwep->otyp == KAMEREL_VAJRA));
-				boolean secsaber = (uswapwep && is_lightsaber(uswapwep) && litsaber(uswapwep) && u.twoweap);
-				boolean secsaber_locked = (uswapwep && (uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC || uswapwep->otyp == KAMEREL_VAJRA));
-				if((mainsaber &&  mainsaber_locked)
-					|| (secsaber && secsaber_locked)
-				){
-					int lrole = rnl(20);
-					if(lrole+5 < ACURR(A_DEX)){
-						You("roll and dodge your tumbling energy sword%s.", (mainsaber && secsaber) ? "s" : "");
-					} else {
-						You("come into contact with your energy sword%s.", (mainsaber && secsaber && (lrole >= ACURR(A_DEX) || (mainsaber_locked && secsaber_locked))) ? "s" : "");
-						if(mainsaber && (mainsaber_locked || lrole >= ACURR(A_DEX)))
-							losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
-						if(secsaber && (secsaber_locked || lrole >= ACURR(A_DEX)))
-							losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
-					}
-					if(mainsaber && !mainsaber_locked)
-						lightsaber_deactivate(uwep, TRUE);
-					if(secsaber && !secsaber_locked)
-						lightsaber_deactivate(uswapwep, TRUE);
+					do {
+						x = (COLNO - 2 - rnd(5));
+						y = rn1(ROWNO - 4, 3);
+					} while(occupied(x, y) ||
+						IS_WALL(levl[x][y].typ));
+						u_on_newpos(x, y);
+					} else u_on_sstairs();
 				} else {
-					if(rnl(20) < ACURR(A_DEX)){
-						You("hurriedly deactivate your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
-					} else {
-						You("come into contact with your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
-						if(mainsaber) losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
-						if(secsaber) losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
-					}
-					if(mainsaber) lightsaber_deactivate(uwep, TRUE);
-					if(secsaber) lightsaber_deactivate(uswapwep, TRUE);
+					dnstair.u_traversed = TRUE;
+					u_on_dnstairs();
 				}
 			}
-#ifdef STEED
-		    /* falling off steed has its own losehp() call */
-		    if (u.usteed)
-			dismount_steed(DISMOUNT_FELL);
-		    else
-#endif
-			losehp(rnd(3), "falling downstairs", KILLED_BY);
-		    selftouch("Falling, you");
-		} else if (u.dz && at_ladder)
-		    You("climb down the ladder.");
+			/* Remove bug which crashes with levitation/punishment  KAA */
+			if (Punished && !Levitation) {
+				pline("With great effort you climb the %s.",
+				at_ladder ? "ladder" : "stairs");
+			} else if (at_ladder)
+				You("climb up the ladder.");
+	    } else {	/* down */
+			if (at_ladder) {
+				upladder.u_traversed = TRUE;
+				u_on_newpos(xupladder, yupladder);
+			} else {
+				if (newdungeon) {
+					sstairs.u_traversed = TRUE;
+					u_on_sstairs();
+				} else {
+					upstair.u_traversed = TRUE;
+					u_on_upstairs();
+				}
+			}
+			if (u.dz && Flying)
+				You("fly down along the %s.",
+				at_ladder ? "ladder" : "stairs");
+			else if (u.dz &&
+	#ifdef CONVICT
+				(near_capacity() > UNENCUMBERED || (Punished &&
+				((uwep != uball) || ((P_SKILL(P_FLAIL) < P_BASIC))
+				|| !Role_if(PM_CONVICT)))
+				 || Fumbling)
+	#else
+				(near_capacity() > UNENCUMBERED || Punished || Fumbling)
+	#endif /* CONVICT */
+			) {
+				You("fall down the %s.", at_ladder ? "ladder" : "stairs");
+				if (Punished) {
+				drag_down();
+				ballrelease(FALSE);
+				}
+				if(((uwep && is_lightsaber(uwep) && litsaber(uwep))) ||
+					(uswapwep && is_lightsaber(uswapwep) && litsaber(uswapwep) && u.twoweap)
+				){
+					boolean mainsaber = (uwep && is_lightsaber(uwep) && litsaber(uwep));
+					boolean mainsaber_locked = (uwep && (uwep->oartifact == ART_INFINITY_S_MIRRORED_ARC || uwep->otyp == KAMEREL_VAJRA));
+					boolean secsaber = (uswapwep && is_lightsaber(uswapwep) && litsaber(uswapwep) && u.twoweap);
+					boolean secsaber_locked = (uswapwep && (uswapwep->oartifact == ART_INFINITY_S_MIRRORED_ARC || uswapwep->otyp == KAMEREL_VAJRA));
+					if((mainsaber &&  mainsaber_locked)
+						|| (secsaber && secsaber_locked)
+					){
+						int lrole = rnl(20);
+						if(lrole+5 < ACURR(A_DEX)){
+							You("roll and dodge your tumbling energy sword%s.", (mainsaber && secsaber) ? "s" : "");
+						} else {
+							You("come into contact with your energy sword%s.", (mainsaber && secsaber && (lrole >= ACURR(A_DEX) || (mainsaber_locked && secsaber_locked))) ? "s" : "");
+							if(mainsaber && (mainsaber_locked || lrole >= ACURR(A_DEX)))
+								losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
+							if(secsaber && (secsaber_locked || lrole >= ACURR(A_DEX)))
+								losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
+						}
+						if(mainsaber && !mainsaber_locked)
+							lightsaber_deactivate(uwep, TRUE);
+						if(secsaber && !secsaber_locked)
+							lightsaber_deactivate(uswapwep, TRUE);
+					} else {
+						if(rnl(20) < ACURR(A_DEX)){
+							You("hurriedly deactivate your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
+						} else {
+							You("come into contact with your energy sword%s.", (mainsaber && secsaber) ? "s" : "");
+							if(mainsaber) losehp(dmgval(uwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
+							if(secsaber) losehp(dmgval(uswapwep,&youmonst,0,&youmonst), "falling downstairs with a lit lightsaber", KILLED_BY);
+						}
+						if(mainsaber) lightsaber_deactivate(uwep, TRUE);
+						if(secsaber) lightsaber_deactivate(uswapwep, TRUE);
+					}
+				}
+				/* falling off steed has its own losehp() call */
+				if (u.usteed)
+					dismount_steed(DISMOUNT_FELL);
+				else
+					losehp(rnd(3), "falling downstairs", KILLED_BY);
+
+				selftouch("Falling, you");
+			} else if (u.dz && at_ladder)
+				You("climb down the ladder.");
 	    }
 	} else {	/* trap door or level_tele or In_endgame */
 misc_levelport:

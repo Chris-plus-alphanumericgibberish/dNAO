@@ -252,6 +252,10 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'>', "staircase down",	C(CLR_GRAY)},	/* dnstair */
 	{'<', "ladder up",	C(CLR_BROWN)},	/* upladder */
 	{'>', "ladder down",	C(CLR_BROWN)},	/* dnladder */
+	{'<', "branch staircase up",	C(CLR_YELLOW)},	/* brupstair */
+	{'>', "branch staircase down",	C(CLR_YELLOW)},	/* brdnstair */
+	{'<', "branch ladder up",	C(CLR_YELLOW)},	/* brupladder */
+	{'>', "branch ladder down",	C(CLR_YELLOW)},	/* brdnladder */
 	{'_', "altar",		C(CLR_GRAY)},	/* altar */
 	{'|', "grave",      C(CLR_GRAY)},   /* grave */
 	{'+', "hellish seal",      C(CLR_BRIGHT_MAGENTA)},   /* seal */
@@ -383,6 +387,8 @@ static glyph_t ibm_graphics[MAXPCHARS] = {
 	0xb1,	/* S_litcorr:	meta-1, medium shading */
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
 	g_FILLER(S_upladder),
 	g_FILLER(S_dnladder),
 	g_FILLER(S_altar),
@@ -500,6 +506,8 @@ static glyph_t dec_graphics[MAXPCHARS] = {
 	g_FILLER(S_litcorr),
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
 	0xf9,	/* S_upladder:	meta-y, greater-than-or-equals */
 	0xfa,	/* S_dnladder:	meta-z, less-than-or-equals */
 	g_FILLER(S_altar),	/* 0xc3, \E)3: meta-C, dagger */
@@ -615,6 +623,8 @@ static glyph_t mac_graphics[MAXPCHARS] = {
 	g_FILLER(S_litcorr),
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
 	g_FILLER(S_upladder),
 	g_FILLER(S_dnladder),
 	g_FILLER(S_altar),
@@ -732,6 +742,8 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	g_FILLER(S_litcorr),
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
 	0x2264,	/* S_upladder:	LESS-THAN OR EQUAL TO */
 	0x2265,	/* S_dnladder:	GREATER-THAN OR EQUAL TO */
 	0x03A9,	/* S_altar:	GREEK CAPITAL LETTER OMEGA */
@@ -1094,7 +1106,7 @@ boolean is_rlevel;
 				) {
 # endif
 	    showsyms[S_vodoor]  = showsyms[S_hodoor]  = showsyms[S_ndoor] = '+';
-	    showsyms[S_upstair] = showsyms[S_dnstair] = '%';
+	    showsyms[S_upstair] = showsyms[S_dnstair] = showsyms[S_brupstair] = showsyms[S_brdnstair] = '%';
 # ifdef ASCIIGRAPH
 	} else {
 	    /* a la EPYX Rogue */
@@ -1119,6 +1131,8 @@ boolean is_rlevel;
 	    showsyms[S_litcorr] = 0xb2;
 	    showsyms[S_upstair] = 0xf0; /* Greek Xi */
 	    showsyms[S_dnstair] = 0xf0;
+	    showsyms[S_brupstair] = 0xf0;
+	    showsyms[S_brdnstair] = 0xf0;
 #ifndef MSWIN_GRAPHICS
 	    showsyms[S_arrow_trap] = 0x04; /* diamond (cards) */
 	    showsyms[S_dart_trap] = 0x04;

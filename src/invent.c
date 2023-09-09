@@ -4710,11 +4710,15 @@ char *buf;
 		}
 	    dfeature = altbuf;
 	} else if ((x == xupstair && y == yupstair) ||
-		 (x == sstairs.sx && y == sstairs.sy && sstairs.up))
+		 (x == sstairs.sx && y == sstairs.sy && sstairs.up && !sstairs.u_traversed))
 	    cmap = S_upstair;				/* "staircase up" */
+	else if (x == sstairs.sx && y == sstairs.sy && sstairs.up && sstairs.u_traversed)
+	    cmap = S_brupstair;				/* "staircase up" */
 	else if ((x == xdnstair && y == ydnstair) ||
-		 (x == sstairs.sx && y == sstairs.sy && !sstairs.up))
+		 (x == sstairs.sx && y == sstairs.sy && !sstairs.up && !sstairs.u_traversed))
 	    cmap = S_dnstair;				/* "staircase down" */
+	else if (x == sstairs.sx && y == sstairs.sy && !sstairs.up && sstairs.u_traversed)
+	    cmap = S_brdnstair;	
 	else if (x == xupladder && y == yupladder)
 	    cmap = S_upladder;				/* "ladder up" */
 	else if (x == xdnladder && y == ydnladder)
