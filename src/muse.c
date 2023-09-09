@@ -2184,7 +2184,7 @@ struct monst *mtmp;
 		{
 			register struct obj *otmp;
 			otmp = which_armor(mtmp, W_ARM);
-			if (otmp->cursed && otmp->otyp == STRAITJACKET)
+			if (otmp && otmp->cursed && otmp->otyp == STRAITJACKET)
 			{
 				m.misc = obj;
 				m.has_misc = MUSE_SCR_DESTROY_ARMOR;
