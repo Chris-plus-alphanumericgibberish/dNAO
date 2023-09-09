@@ -14990,6 +14990,8 @@ int vis;						/* True if action is at all visible to the player */
 				if (otmp->oartifact)
 					artif_hit = TRUE;
 			}
+			if(!fired && otmp->otyp == CARCOSAN_STING && otmp->ovar1_charges < 95)
+				otmp->ovar1_charges += rnd(5);
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
 		if (fired && launcher && valid_weapon_attack) {
