@@ -4361,6 +4361,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "apodictic ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_AXIOW);
 
+		} else if (!strncmpi(bp, "flowing ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_GSSDW);
+
 		} else if (!strncmpi(bp, "flaming ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_FIREW);
 		} else if (!strncmpi(bp, "forge-hot ", l=10)) {

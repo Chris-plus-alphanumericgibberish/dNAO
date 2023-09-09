@@ -568,6 +568,29 @@ struct monst *magr;
 					flat = 0;
 				}
 			}
+			/* Flowing sword: Rapidly-moving blade does extra damage, especially vs. large monsters */
+			if (obj && check_oprop(obj, OPROP_GSSDW)){
+				int *modnum;
+				if(large){
+					modnum = &dmod;
+				}
+				else {
+					modnum = &flat;
+				}
+				if(magr == &youmonst || (!magr && obj->where == OBJ_INVENT)){
+					*modnum += u.uinsight/10;
+					if (((moves)*(u.uinsight % 10)) / 10 > ((moves - 1)*(u.uinsight % 10)) / 10)
+						*modnum += 1;
+				}
+				else if(magr){
+					if(insightful(magr->data)){
+						*modnum += mlev(magr)/10;
+						if (((moves)*(mlev(magr) % 10)) / 10 > ((moves - 1)*(mlev(magr) % 10)) / 10)
+							*modnum += 1;
+					}
+				}
+			}
+
 			if (obj->obj_material != objects[obj->otyp].oc_material){
 				/* if something is made of an especially effective material 
 				 * and it normally isn't, it gets a dmod bonus 
@@ -2716,6 +2739,19 @@ struct obj *otmp;
 			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
 				bonus += (arm->spe)/2;
 		}
+		if(check_oprop(otmp, OPROP_GSSDW) && insightful(mon->data) && mlev(mon) >= 10){
+			if(mon->data->mlet == S_NYMPH)
+				bonus += 4;
+			arm = which_armor(mon, W_ARMH);
+			if(arm && arm->otyp == find_gcirclet())
+				bonus += arm->spe/2;
+			arm = which_armor(mon, W_ARM);
+			if(arm && (is_dress(arm->otyp) || arm->otyp == ELVEN_TOGA))
+				bonus += arm->spe/2;
+			arm = which_armor(mon, W_ARMU);
+			if(arm && (is_dress(arm->otyp) || arm->otyp == RUFFLED_SHIRT))
+				bonus += arm->spe/2;
+		}
 
 		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
 			//Wis only
@@ -2825,6 +2861,10 @@ struct obj *otmp;
 			bonus /= 2;
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
+		}
+		if(check_oprop(otmp, OPROP_GSSDW) && u.uinsight >= 10){
+			if(ACURR(A_CHA) == 25) bonus += min_ints(NightmareAware_Sanity/10, 8);
+			else bonus += min_ints(NightmareAware_Sanity/10, (ACURR(A_CHA)-10)/2);
 		}
 		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
 			if(ACURR(A_WIS) == 25) bonus += 4;
