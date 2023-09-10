@@ -95,6 +95,7 @@ int adtyp, ztyp;
 		case AD_UNHY: return "unholy missile";
 		case AD_HLUH: return "corrupted missile";
 		case AD_DISN: return "disintegration ray";
+		case AD_MADF: return "burst of magenta fire";
 		default:      impossible("unknown spell damage type in flash_type: %d", adtyp);
 			return "cube of questions";
 		}
@@ -187,7 +188,8 @@ int adtyp;
 	case AD_MAGM:
 	case AD_SLEE:
 		return CLR_BRIGHT_BLUE;
-		//	return CLR_BRIGHT_MAGENTA;
+	case AD_MADF:
+		return CLR_BRIGHT_MAGENTA;
 		//	return CLR_BRIGHT_CYAN;
 	case AD_ECLD:
 	case AD_COLD:
@@ -3224,7 +3226,10 @@ struct obj *obj;	/* wand or spell */
 				
 				if (ttmp->tseen) {
 					You("disarm a %s.", 
-					defsyms[trap_to_defsym(ttmp->ttyp)].explanation);
+						defsyms[trap_to_defsym(ttmp->ttyp)].explanation);
+					//Charitably assume that if the PC doesn't know the trap is there, this was an accident.
+					if(u.specialSealsActive&SEAL_YOG_SOTHOTH)
+						unbind(SEAL_SPECIAL|SEAL_YOG_SOTHOTH, TRUE);
 				}
 				deltrap(ttmp);
 				}
@@ -3778,6 +3783,8 @@ struct zapdata * zapdata;
 		dmg = 0;
 		impossible("zap with no damage?");
 	}
+	if(zapdata->bonus > 0)
+		dmg += zapdata->bonus;
 
 	/* damage bonuses */
 	if (magr && zapdata->ztyp == ZAP_SPELL) {
@@ -3846,6 +3853,7 @@ int ndice;
 	zapdat->adtyp = adtyp;
 	zapdat->damd = 6;
 	zapdat->damn = ndice;
+	zapdat->bonus = 0;
 	zapdat->ztyp = ztyp;
 	zapdat->affects_floor = 1;
 	zapdat->directly_hits = 1;
@@ -4413,6 +4421,56 @@ struct zapdata * zapdata;
 			if (!rn2(6)) (void)destroy_item(mdef, POTION_CLASS, AD_FIRE);
 			if (!rn2(6)) erode_obj(youdef ? uwep : MON_WEP(mdef), TRUE, TRUE);
 			if (!rn2(6)) erode_armor(mdef, TRUE);
+		}
+		/* deal damage */
+		return xdamagey(magr, mdef, &attk, dmg);
+
+	case AD_MADF:
+		/* check resist / weakness */
+		if (Fire_res(mdef) && Magic_res(mdef)) {
+			doshieldeff = TRUE;
+			if (youdef)
+				addmsg("You don't feel hot!");
+			dmg = 0;
+		}
+		else if (Fire_res(mdef)) {
+			dmg -= dmg/2;
+		}
+		else if (species_resists_cold(mdef)) {
+			dmg *= 1.5;
+		}
+		domsg();
+		golemeffects(mdef, AD_FIRE, svddmg);
+		/* damage inventory */
+		if (!UseInvFire_res(mdef)) {
+			burnarmor(mdef, FALSE);
+			if (!rn2(3)) (void)destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			if (!rn2(3)) (void)destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+			if (!rn2(5)) (void)destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+		}
+		/* other */
+		if (youdef) {
+			burn_away_slime();
+			melt_frozen_air();
+		}
+		if(magr == mdef); //You can't share your madness with yourself
+		else if(youdef){
+			if(!save_vs_sanloss()){
+				change_usanity(-1*d(3,6), TRUE);
+			}
+		}
+		else if(youagr || magr->mtyp == PM_TWIN_SIBLING){
+			if(!mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || tp_sensemon(mdef) || !rn2(5)) && roll_generic_madness(FALSE)){
+				//reset seen madnesses
+				mdef->seenmadnesses = 0L;
+				you_inflict_madness(mdef);
+			}
+		}
+		else {
+			if(!mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
+				if(!resist(mdef, '\0', 0, FALSE))
+					mdef->mcrazed = TRUE;
+			}
 		}
 		/* deal damage */
 		return xdamagey(magr, mdef, &attk, dmg);
@@ -5108,7 +5166,7 @@ boolean *shopdamage;
 	struct rm *lev = &levl[x][y];
 	int rangemod = 0;
 
-	if(adtyp == AD_FIRE) {
+	if(adtyp == AD_FIRE || adtyp == AD_MADF) {
 	    struct trap *t = t_at(x, y);
 
 	    if (t && t->ttyp == WEB && !Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)) {
@@ -5244,6 +5302,7 @@ boolean *shopdamage;
 		    goto def_case;
 		switch(adtyp) {
 		case AD_FIRE:
+		case AD_MADF:
 		    new_doormask = D_NODOOR;
 		    see_txt = "The door is consumed in flames!";
 		    sense_txt = "smell smoke.";
@@ -5295,7 +5354,7 @@ boolean *shopdamage;
 		}
 	}
 
-	if(OBJ_AT(x, y) && adtyp == AD_FIRE)
+	if(OBJ_AT(x, y) && (adtyp == AD_FIRE || adtyp == AD_MADF))
 		if (burn_floor_paper(x, y, FALSE, yours) && couldsee(x, y)) {
 		    newsym(x,y);
 		    You("%s of smoke.",

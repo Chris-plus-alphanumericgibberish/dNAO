@@ -690,6 +690,7 @@ boolean digest_meal;
 		} else {
 			perX += mon->m_lev;
 		}
+		perX = hd_size(mon->data)*perX/8;
 		//Worn Vilya bonus ranges from (penalty) to +7 HP per 10 turns
 		if(uring_art(ART_VILYA)){
 			perX += heal_vilya()*HEALCYCLE/10;
@@ -707,6 +708,8 @@ boolean digest_meal;
 			}
 		}
 		if(mon_resistance(mon,REGENERATION))
+			mon->mhp+=1;
+		if(mon->mtyp == PM_TWIN_SIBLING && check_mutation(CRAWLING_FLESH))
 			mon->mhp+=1;
 		struct obj *arm = which_armor(mon, W_ARM);
 		// regeneration tech
@@ -1510,6 +1513,40 @@ register struct monst *mtmp;
 						continue;
 					if(patient->mhp < patient->mhpmax){
 						nurse_heal(mtmp, patient, canseemon(mtmp) || canseemon(patient));
+						return 0;
+					}
+				}
+			}
+		}
+	}
+	
+	if (mtmp->mtyp == PM_ITINERANT_PRIESTESS && u.uinsight >= 40 && !straitjacketed_mon(mtmp)){
+		struct monst *patient = 0;
+		int i, j, x, y, rot = rn2(3);
+		for(i = -1; i < 2; i++){
+			for(j = -1; j < 2; j++){
+				x = mtmp->mx+(i);
+				y = mtmp->my+(j);
+				if(mtmp->mx == x && mtmp->my == y)
+					continue;
+				if(!isok(x, y))
+					continue;
+				patient = m_u_at(x,y);
+				if(!patient)
+					continue;
+				if(patient == &youmonst){
+					if(!mtmp->mpeaceful || nonliving(youracedata) || hates_holy(youracedata))
+						continue;
+					if((Upolyd && u.mh < u.mhmax) || (!Upolyd && u.uhp < u.uhpmax)){
+						itiner_heal(mtmp, patient, TRUE);
+						return 0;
+					}
+				}
+				else {
+					if(nonliving(patient->data) || patient->mpeaceful != mtmp->mpeaceful || hates_holy_mon(patient))
+						continue;
+					if(patient->mhp < patient->mhpmax){
+						itiner_heal(mtmp, patient, canseemon(mtmp) || canseemon(patient));
 						return 0;
 					}
 				}

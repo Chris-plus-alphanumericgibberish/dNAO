@@ -263,11 +263,15 @@ struct monst *magr;
 	if (otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE){
 		if(youagr && u.uinsight){
 			tmp += rnd(min(u.uinsight, mlev(magr)));
-		} else if(magr && yields_insight(magr->data)) {
+		} else if(magr && insightful(magr->data)) {
 			tmp += rnd(mlev(magr));
 		}
 	}
-
+	
+	if(otmp->obj_material == MERCURIAL){
+		tmp += otmp->spe; //Doubles to-hit bonus from enchantment.
+	}
+	
 	return tmp;
 }
 
@@ -276,11 +280,13 @@ struct monst *magr;
  * 
  */
 int
-attack_mask(obj, otyp, oartifact)
+attack_mask(obj, otyp, oartifact, magr)
 struct obj * obj;
 int otyp;
 int oartifact;
+struct monst *magr;
 {
+	boolean youagr = magr == &youmonst;
 	int attackmask = WHACK;
 	if (obj)
 	{
@@ -295,8 +301,10 @@ int oartifact;
 		attackmask = objects[otyp].oc_dtyp;
 	}
 	if (oartifact == ART_IBITE_ARM){
-		//No claws! Just a flabby hand.
-		attackmask = WHACK;
+		if(check_mutation(SHUB_CLAWS))
+			attackmask |= WHACK; //Keep the claws
+		else
+			attackmask = WHACK; //No claws! Just a flabby hand.
 	}
 	if(oartifact == ART_JIN_GANG_ZUO){
 		attackmask = WHACK;
@@ -317,6 +325,12 @@ int oartifact;
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
 		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
 		){
+		attackmask |= WHACK;
+	}
+	if(obj && magr && !litsaber(obj) && is_chained_merc(obj) && (
+		(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+	)){
 		attackmask |= WHACK;
 	}
 	if (   oartifact == ART_ROGUE_GEAR_SPIRITS
@@ -563,6 +577,29 @@ struct monst *magr;
 					flat = 0;
 				}
 			}
+			/* Flowing sword: Rapidly-moving blade does extra damage, especially vs. large monsters */
+			if (obj && check_oprop(obj, OPROP_GSSDW)){
+				int *modnum;
+				if(large){
+					modnum = &dmod;
+				}
+				else {
+					modnum = &flat;
+				}
+				if(magr == &youmonst || (!magr && obj->where == OBJ_INVENT)){
+					*modnum += u.uinsight/10;
+					if (((moves)*(u.uinsight % 10)) / 10 > ((moves - 1)*(u.uinsight % 10)) / 10)
+						*modnum += 1;
+				}
+				else if(magr){
+					if(insightful(magr->data)){
+						*modnum += mlev(magr)/10;
+						if (((moves)*(mlev(magr) % 10)) / 10 > ((moves - 1)*(mlev(magr) % 10)) / 10)
+							*modnum += 1;
+					}
+				}
+			}
+
 			if (obj->obj_material != objects[obj->otyp].oc_material){
 				/* if something is made of an especially effective material 
 				 * and it normally isn't, it gets a dmod bonus 
@@ -907,6 +944,12 @@ struct monst *magr;
 	/* the Tentacle Rod gets no damage from enchantment */
 	if (obj && obj->oartifact == ART_TENTACLE_ROD)
 		spe_mult = 0;
+
+	/* the Ibite Arm gets more reliable dice (but doesn't scale them both with size) */
+	if (obj && obj->oartifact == ART_IBITE_ARM) {
+		ocn *= 2;
+		ocd = (ocd+1)/2;
+	}
 
 	/* safety checks */
 	/* we need at least one main die */
@@ -2621,8 +2664,12 @@ struct obj *otmp;
 	mwp = MON_WEP(mon);
 	mswp = MON_SWEP(mon);
 	
-	if(arm && (arm->otyp == GAUNTLETS_OF_POWER || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GOPOWER))))
-		bonus += 8;
+	if(arm){
+		if(arm->otyp == GAUNTLETS_OF_POWER || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GOPOWER)))
+			bonus += 8;
+		if(is_lawful_mon(mon) && check_oprop(arm, OPROP_RWTH))
+			bonus += 4;
+	}	
 	
 	if(otmp){
 		if((bimanual(otmp,mon->data)||
@@ -2697,6 +2744,19 @@ struct obj *otmp;
 			arm = which_armor(mon, W_ARMH);
 			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
 				bonus += (arm->spe)/2;
+		}
+		if(check_oprop(otmp, OPROP_GSSDW) && insightful(mon->data) && mlev(mon) >= 10){
+			if(mon->data->mlet == S_NYMPH)
+				bonus += 4;
+			arm = which_armor(mon, W_ARMH);
+			if(arm && arm->otyp == find_gcirclet())
+				bonus += arm->spe/2;
+			arm = which_armor(mon, W_ARM);
+			if(arm && (is_dress(arm->otyp) || arm->otyp == ELVEN_TOGA))
+				bonus += arm->spe/2;
+			arm = which_armor(mon, W_ARMU);
+			if(arm && (is_dress(arm->otyp) || arm->otyp == RUFFLED_SHIRT))
+				bonus += arm->spe/2;
 		}
 
 		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
@@ -2808,6 +2868,10 @@ struct obj *otmp;
 			if(ACURR(A_INT) == 25) bonus += 8;
 			else bonus += (ACURR(A_INT)-10)/2;
 		}
+		if(check_oprop(otmp, OPROP_GSSDW) && u.uinsight >= 10){
+			if(ACURR(A_CHA) == 25) bonus += min_ints(NightmareAware_Sanity/10, 8);
+			else bonus += min_ints(NightmareAware_Sanity/10, (ACURR(A_CHA)-10)/2);
+		}
 		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
 			if(ACURR(A_WIS) == 25) bonus += 4;
 			else bonus += (ACURR(A_WIS)-10)/4;
@@ -2836,6 +2900,9 @@ struct obj *otmp;
 	else if(u.umaniac && weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0){
 		bonus += min_ints(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT), (ACURR(A_CHA)-9)/2);
 	}
+	
+	if(uarmg && bonus > 1 && check_oprop(uarmg, OPROP_RWTH) && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL)
+		bonus *= .5;
 	
 	return bonus;
 }
@@ -2912,6 +2979,27 @@ int skill;
      *	master -> grand master	3
      */
     return (tmp + 1) / 2;
+}
+
+/*
+ * Reset all trained skills to 0 so the player can respec their character.
+ */
+
+void
+reset_skills()
+{
+	int skill;
+	for(int i = u.skills_advanced-1; i >= 0; i--){
+		skill = u.skill_record[i];
+		if (OLD_P_SKILL(skill) <= P_UNSKILLED)
+			impossible("reset_skills skill already at minimum (%d)", skill);
+		else {
+			OLD_P_SKILL(skill)--;
+			u.weapon_slots += slots_required(skill);
+		}
+	}
+	u.skills_advanced = 0;
+	enhance_weapon_skill();
 }
 
 /* return true if this skill can be advanced */

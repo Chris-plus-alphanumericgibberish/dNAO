@@ -319,7 +319,8 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 	break;
 	case PM_PRIEST:
 	case PM_PRIESTESS:
-		if(Role_if(PM_MADMAN) && In_quest(&u.uz) && ptr->mtyp == PM_PRIESTESS){
+	case PM_ITINERANT_PRIESTESS:
+		if(Role_if(PM_MADMAN) && In_quest(&u.uz) && ptr->mtyp == PM_ITINERANT_PRIESTESS){
 			*armor = STRAITJACKET;
 			*cloak = ROBE;
 		}
@@ -637,9 +638,9 @@ long flags;
 			}
 		}
 
-		if(Role_if(PM_MADMAN) && In_quest(&u.uz) && mtmp->mtyp == PM_PRIESTESS){
-			mtmp->m_lev = 20;
-			mtmp->mhpmax = d(20, 6) + 40;
+		if(Role_if(PM_MADMAN) && In_quest(&u.uz) && mtmp->mtyp == PM_ITINERANT_PRIESTESS){
+			mtmp->m_lev = 10;
+			mtmp->mhpmax = d(10, 4) + 40;
 			mtmp->mhp = mtmp->mhpmax;
 			mtmp->m_insight_level = 10;
 			set_template(mtmp, MISTWEAVER);

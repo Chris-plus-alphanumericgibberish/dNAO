@@ -282,7 +282,7 @@ struct monst *mtmp;
 				if (obj->otyp == UNICORN_HORN && !obj->cursed)
 				break;
 	    }
-	    if (obj || is_unicorn(mtmp->data) || mtmp->mtyp == PM_KI_RIN) {
+	    if (obj || is_unicorn(mtmp->data) || mtmp->mtyp == PM_KI_RIN || (mtmp->mtyp == PM_ITINERANT_PRIESTESS && !straitjacketed_mon(mtmp))) {
 			m.defensive = obj;
 			m.has_defense = MUSE_UNICORN_HORN;
 			return TRUE;
@@ -586,6 +586,14 @@ struct monst *mtmp;
 		if (vismon) {
 		    if (otmp)
 			pline("%s %s a unicorn horn!", Monnam(mtmp), is_weeping(mtmp->data) ? "is using" : "uses");
+		    else if(mtmp->mtyp == PM_ITINERANT_PRIESTESS && !straitjacketed_mon(mtmp)){
+				if(u.uinsight < 40){
+					pline("A glow issues from somewhere around %s torso, but trying to see the exact source gives you a %sache!", s_suffix(mon_nam(mtmp)), body_part(HEAD));
+				}
+				else {
+					pline_The("fingertip of %s third hand glows!", s_suffix(mon_nam(mtmp)));
+				}
+			}
 		    else
 			pline_The("tip of %s's horn glows!", mon_nam(mtmp));
 		}
@@ -1990,6 +1998,8 @@ struct monst *mtmp;
 #define MUSE_POT_AMNESIA 13
 #define MUSE_POT_GAIN_ABILITY 14
 #define MUSE_MASK 15
+#define MUSE_POT_HOLY 16
+#define MUSE_SCR_DESTROY_ARMOR 17
 
 boolean
 find_misc(mtmp)
@@ -2152,6 +2162,33 @@ struct monst *mtmp;
 			        m.has_misc = MUSE_SCR_REMOVE_CURSE;
 			    } 
 			}
+		}
+		nomore(MUSE_POT_HOLY);
+		if(obj->otyp == POT_WATER && obj->blessed)
+		{
+                        register struct obj *otmp;
+			for (otmp = mtmp->minvent;
+			     otmp; otmp = otmp->nobj)
+			{
+			    if (otmp->cursed && 
+			        (otmp->otyp == LOADSTONE ||
+				 otmp->owornmask))
+			    {
+			        m.misc = obj;
+			        m.has_misc = MUSE_POT_HOLY;
+			    } 
+			}
+		}
+		nomore(MUSE_SCR_DESTROY_ARMOR);
+		if(obj->otyp == SCR_DESTROY_ARMOR)
+		{
+			register struct obj *otmp;
+			otmp = which_armor(mtmp, W_ARM);
+			if (otmp && otmp->cursed && otmp->otyp == STRAITJACKET)
+			{
+				m.misc = obj;
+				m.has_misc = MUSE_SCR_DESTROY_ARMOR;
+			} 
 		}
 		nomore(MUSE_SCR_AMNESIA);
 		nomore(MUSE_POT_AMNESIA);
@@ -2532,6 +2569,61 @@ museamnesia:
 		if (!otmp->oartifact)
 			m_useup(mtmp, otmp);
 	    return 0;
+	case MUSE_POT_HOLY:
+		{
+		    register struct obj *obj;
+		    for (obj = mtmp->minvent; obj; obj = obj->nobj)
+		    {
+			if (obj->cursed && (obj->owornmask || obj->otyp == LOADSTONE)){
+				if (canseemon(mtmp))
+				{
+					pline("%s dips %s %s into %s.",
+						Monnam(mtmp),
+						mhis(mtmp),
+						xname(obj),
+						xname(otmp)
+					);
+				}
+			    uncurse(obj);
+				if (obj == MON_WEP(mtmp))
+					mtmp->weapon_check = NEED_WEAPON;
+				break;
+			}
+		    }
+		}
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
+	    return 0;
+	case MUSE_SCR_DESTROY_ARMOR:{
+		struct obj *obj;
+		obj = which_armor(mtmp, W_ARM);
+		mreadmsg(mtmp, otmp);
+		if(obj && !obj->oartifact){
+			if(mtmp->mconf){
+				if (canseemon(mtmp)){
+					pline("%s %s glows %s!", s_suffix(Monnam(mtmp)), xname(obj), hcolor(NH_PURPLE));
+				}
+				obj->oerodeproof = otmp->cursed;
+			}
+			else if(obj->cursed && otmp->cursed){
+				if (canseemon(mtmp)){
+					pline("%s looks uncomfortable.", Monnam(mtmp));
+				}
+				if(obj->spe > -7)
+					obj->spe--;
+				mtmp->mstun = TRUE;
+			}
+			else {
+				if (canseemon(mtmp)){
+					pline("%s %s turns to dust!", s_suffix(Monnam(mtmp)), xname(obj));
+				}
+				m_useup(mtmp, obj);
+			}
+		}
+		if (!otmp->oartifact)
+			m_useup(mtmp, otmp);
+	    return 0;
+	}
 	case MUSE_MASK:{
 		int pm = otmp->corpsenm;
 		if(canseemon(mtmp))

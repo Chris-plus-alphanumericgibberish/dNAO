@@ -198,6 +198,10 @@ int newpm;
 		default:
 			//mon->mvar_ancient_breath_cooldown = 0;
 			//mon->mvar_yellow_lifesaved = FALSE;
+			//mon->mvar_twin_lifesaved = FALSE;
+			//mon->mvar_witchID = 0;
+			//mon->mvar_suryaID = 0;
+			//mon->mvar_huskID = 0;
 			mon->mvar1 = 0;
 		break;
 	}
@@ -691,7 +695,7 @@ int template;
 		AVG_DR(ldr)
 		AVG_DR(gdr)
 		AVG_DR(fdr)
-		if(ptr->mtyp == PM_PRIESTESS){
+		if(ptr->mtyp == PM_ITINERANT_PRIESTESS){
 			AVG_AC(dac)
 			AVG_AC(pac)
 			ptr->spe_bdr += 4;
@@ -3458,25 +3462,34 @@ int
 hd_size(ptr)
 struct permonst *ptr;
 {
+	int size = 8;
 	if(ptr->mtyp == PM_ZHI_REN_MONK)
-		return 4;
-	return 8;
-	
-	// switch(ptr->msize){
-		// case MZ_TINY:
-			// return 4;
-		// case MZ_SMALL:
-			// return 6;
-		// case MZ_MEDIUM:
-			// return 8;
-		// case MZ_LARGE:
-			// return 10;
-		// case MZ_HUGE:
-			// return 12;
-		// case MZ_GIGANTIC:
-			// return 20;
-	// }
+		size = 4;
 	// return 8;
+	switch(ptr->msize){
+		case MZ_TINY:
+			size = 4;
+		break;
+		case MZ_SMALL:
+			size = 6;
+		break;
+		case MZ_MEDIUM:
+			size = 8;
+		break;
+		case MZ_LARGE:
+			size = 10;
+		break;
+		case MZ_HUGE:
+			size = 12;
+		break;
+		case MZ_GIGANTIC:
+			size = 20;
+		break;
+	}
+	if(centauroid(ptr)){
+		size += 2;
+	}
+	return size;
 }
 
 #endif /* OVLB */

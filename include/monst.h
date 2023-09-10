@@ -200,6 +200,7 @@ struct monst {
 	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*124*/
 	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*125*/
 	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*126*/
+	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*127*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -262,6 +263,7 @@ struct monst {
 #define	ILSENSINE_FACTION	FACTION_PADDING+8	/* Ilsensine's faction, not allied with the Yendorian faction despite filling the same role */
 #define	SEROPAENES_FACTION	FACTION_PADDING+9	/* Binder quest faction, not allied with the Yendorian faction despite filling the same role */
 #define	YELLOW_FACTION	    FACTION_PADDING+10	/* Hastur faction, not the same as the Yendorian faction, despite filling the same role in the Madman quest */
+#define	YOG_FACTION	    	FACTION_PADDING+11	/* Yog-Sothoth faction */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
@@ -344,6 +346,7 @@ struct monst {
 #define	mvar_flask_charges	mvar1
 #define MAX_FLASK_CHARGES(mtmp) (mtmp->m_lev/3)
 #define	mvar_yellow_lifesaved	mvar1
+#define	mvar_twin_lifesaved	mvar1
 #define	mvar_lucksucker	mvar1
 #define	mvar_vermiurge	mvar1
 #define	mvar_star_vampire_blood	mvar1

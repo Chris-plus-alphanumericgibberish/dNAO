@@ -1284,6 +1284,8 @@ TOOL(("doll's tear",   "milky gemstone", "gem"),/*Needs encyc entry*/
 								0,   MZ_TINY, 0, 1, 0,   0,  1,8000, GEMSTONE, CLR_WHITE),
 TOOL(("holy symbol of the black mother", "tarnished triple goat-head"), /*Needs encyc entry*/
 								0,   MZ_TINY, 0, 1, 0,   0, 50,8000, SILVER, CLR_BLACK),
+TOOL(("Hyperborean dial", "silvery mechanism"), /*Needs encyc entry*/
+								0,   MZ_SMALL, 0, 1, 0,   0, 66,8000, METAL, HI_SILVER),
 TOOL(("magic marker"), 1,   MZ_TINY, 0, 1, 1,  15,  2,  50, PLASTIC, CLR_RED),
 /* traps */
 TOOL(("land mine",(char *)0),     1,  MZ_LARGE, 0, 0, 0,   0,300, 180, IRON, CLR_RED),
@@ -1475,6 +1477,7 @@ POTION(("acid", "white"),                 0, 32, 250, CLR_WHITE),
 POTION(("oil", "murky"),                  0, 30, 250, CLR_BROWN),
 POTION(("amnesia", "sparkling"),          1, 8,  100, CLR_CYAN),
 POTION(("goat's milk", "black"),          1, 0,  900, CLR_BLACK),
+POTION(("primordial waters", "clear"),    1, 0,  900, CLR_CYAN),
 POTION(("space mead", "golden"),          1, 0,  900, CLR_YELLOW),
 POTION(("starlight", "dimly-shining"),    1, 4,  250, CLR_BRIGHT_CYAN),
 POTION(("water", "clear"),                0, 80, 100, CLR_CYAN),
@@ -1810,6 +1813,8 @@ OBJECT(("bedroll"), BITS(1,0,0,0,0,0,0,0,MZ_SMALL,1,0,0,0,P_NONE,CLOTH,0), {0},	
 		BED_CLASS,   100, 0, 60,  100, DMG(D(2)), DMG(D(2)), 0, 0, 0, 2000, CLR_GREEN),
 OBJECT(("gurney"), BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,1,0,0,0,P_NONE,METAL,0), {0},		/*Needs encyc entry*/
 		BED_CLASS,     0, 0, 60,  100, DMG(D(4)), DMG(D(4)), 0, 0, 0, 2000, CLR_WHITE),
+OBJECT(("Bergonic chair", "strange chair"), BITS(0,0,0,0,0,0,0,0,MZ_LARGE,1,0,0,0,P_NONE,METAL,0), {0},		/*Needs encyc entry*/
+		BED_CLASS,     0, 0, 60,  100, DMG(D(4)), DMG(D(4)), 0, 0, 0, 2000, HI_ZAP),
 
 #ifdef CONVICT
 OBJECT(("heavy iron ball"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,0,0,WHACK,P_FLAIL,IRON,0), {0},

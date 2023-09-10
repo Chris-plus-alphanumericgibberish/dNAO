@@ -47,6 +47,7 @@
 #define resists_poly(ptr)	(((ptr)->geno&G_UNIQ) \
 							|| is_weeping(ptr) \
 							|| (ptr)->mtyp == PM_VERMIURGE \
+							|| (ptr)->mtyp == PM_TWIN_SIBLING \
 							|| is_yochlol(ptr))
 
 #define resists_confusion(ptr)	(((ptr)->geno&G_UNIQ) || is_weeping(ptr) || is_yochlol(ptr))
@@ -300,6 +301,7 @@
 #define species_teleports(ptr)			(((ptr)->mflagsm & MM_TPORT) != 0L)
 #define species_controls_teleports(ptr)	(((ptr)->mflagsm & MM_TPORT_CNTRL) != 0L)
 #define species_is_telepathic(ptr)		(((ptr)->mflagsv & MV_TELEPATHIC) != 0L)
+#define species_blind_telepathic(ptr)	(!haseyes(ptr) || !((ptr)->mflagsv&(MV_NORMAL|MV_INFRAVISION|MV_DARKSIGHT|MV_LOWLIGHT2|MV_LOWLIGHT3|MV_CATSIGHT|MV_EXTRAMISSION)))
 #define is_armed(ptr)		(attacktype(ptr, AT_WEAP) || attacktype(ptr, AT_XWEP) || attacktype(ptr, AT_MARI) || attacktype(ptr, AT_DEVA))
 #define is_armed_mon(mon)	(mon_attacktype(mon, AT_WEAP) || mon_attacktype(mon, AT_XWEP) || mon_attacktype(mon, AT_MARI) || mon_attacktype(mon, AT_DEVA))
 #define crpsdanger(ptr)		(acidic(ptr) || poisonous(ptr) ||\
@@ -652,6 +654,7 @@
 									|| (ptr)->mtyp == PM_PLAINS_CENTAUR \
 									|| (ptr)->mtyp == PM_FOREST_CENTAUR \
 									|| (ptr)->mtyp == PM_MOUNTAIN_CENTAUR \
+									|| (ptr)->mtyp == PM_CENTAUR_CHIEFTAIN \
 									|| (ptr)->mtyp == PM_QUICKLING \
 									|| (ptr)->mtyp == PM_NAIAD \
 									|| (ptr)->mtyp == PM_DRYAD \
@@ -874,7 +877,7 @@
 #define type_is_pname(ptr)	(((ptr)->mflagsg & MG_PNAME) != 0L)
 #define is_thief(ptr)		( dmgtype(ptr, AD_SGLD)  || dmgtype(ptr, AD_SITM) || dmgtype(ptr, AD_SEDU) )
 #define is_magical(ptr)		( attacktype(ptr, AT_MMGC) || attacktype(ptr, AT_MAGC) )
-#define nospellcooldowns(ptr)	(((ptr)->mflagsg & MG_NOSPELLCOOLDOWN) != 0L)
+#define nospellcooldowns(ptr)	((((ptr)->mflagsg & MG_NOSPELLCOOLDOWN) != 0L) || ((ptr)->mtyp == PM_TWIN_SIBLING && check_mutation(SHUB_RADIANCE)))
 #define nospellcooldowns_mon(mtmp)	(nospellcooldowns((mtmp)->data) || (is_alabaster_mummy((mtmp)->data) && (mtmp)->mvar_syllable == SYLLABLE_OF_THOUGHT__NAEN))
 #define is_lord(ptr)		(((ptr)->mflagsg & MG_LORD) != 0L)
 #define is_prince(ptr)		(((ptr)->mflagsg & MG_PRINCE) != 0L)
@@ -1049,6 +1052,7 @@
 				 || (ptr)->mtyp == PM_MADWOMAN \
 				 || (ptr)->mtyp == PM_MAD_SEER \
 				 || (ptr)->mtyp == PM_CLAIRVOYANT_CHANGED \
+				 || ((ptr)->mtyp == PM_TWIN_SIBLING && check_mutation(TWIN_DREAMS)) \
 				)
 
 #define insightful(ptr)	(yields_insight(ptr) \
@@ -1229,6 +1233,7 @@
 #define mon_healing_turn(mon)	((mon)->mtyp == PM_DRACAE_ELADRIN)
 #define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_MASTER_KAEN || (mon)->mtyp == PM_ABBOT || \
 						 (mon)->mtyp == PM_XORN_MONK || (mon)->mtyp == PM_DAO_LAO_GUI_MONK || (mon)->mtyp == PM_ZHI_REN_MONK || \
+						 (mon)->mtyp == PM_ITINERANT_PRIESTESS || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_MONK)) || \
 						 (mon)->mtyp == PM_XUENU_MONK || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_MONK))
 #define mon_madman(mon)	((mon)->mtyp == PM_MADMAN || (mon)->mtyp == PM_MADWOMAN || (mon)->mtyp == PM_CASSILDA_THE_IRON_MAIDEN || \
@@ -1238,7 +1243,7 @@
 #define mon_pirate(mon)	((mon)->mtyp == PM_PIRATE || (mon)->mtyp == PM_MAYOR_CUMMERBUND || (mon)->mtyp == PM_BLACKBEARD_S_GHOST || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_PIRATE)) || \
 						 (mon)->mtyp == PM_PIRATE_BROTHER || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_PIRATE))
-#define mon_priest(mon)	((mon)->mtyp == PM_PRIEST || (mon)->mtyp == PM_PRIESTESS ||\
+#define mon_priest(mon)	((mon)->mtyp == PM_PRIEST || (mon)->mtyp == PM_PRIESTESS || (mon)->mtyp == PM_ITINERANT_PRIESTESS ||\
 						 (mon)->mtyp == PM_ECLAVDRA || (mon)->mtyp == PM_GALADRIEL || (mon)->mtyp == PM_MOTHER ||\
 						 (mon)->mtyp == PM_DROW_NOVICE || (mon)->mtyp == PM_ARCH_PRIEST || (mon)->mtyp == PM_SEYLL_AUZKOVYN || \
 						 (mon)->mtyp == PM_A_SALOM || (mon)->mtyp == PM_DROW_MATRON_MOTHER || (mon)->mtyp == PM_HIGH_ELF || \
@@ -1289,7 +1294,7 @@
 #define stationary(ptr)		((ptr)->mflagsm & MM_STATIONARY)
 #define sessile(ptr)		((ptr)->mmove == 0)
 
-#define straitjacketed_mon(mon) (mon->entangled_oid || (which_armor(mon, W_ARM) && which_armor(mon, W_ARM)->otyp == STRAITJACKET && which_armor(mon, W_ARM)->cursed))
+#define straitjacketed_mon(mon) (mon->entangled_oid || shackled_arms_mon(mon) || (which_armor(mon, W_ARM) && which_armor(mon, W_ARM)->otyp == STRAITJACKET && which_armor(mon, W_ARM)->cursed))
 #define shackled_arms_mon(mon) (which_armor(mon, W_ARMG) && which_armor(mon, W_ARMG)->otyp == SHACKLES && which_armor(mon, W_ARMG)->cursed)
 #define covered_face_mon(mon) ((which_armor(mon, W_ARMH) && FacelessHelm(which_armor(mon, W_ARMH))) || \
 							   (which_armor(mon, W_ARMC) && FacelessCloak(which_armor(mon, W_ARMC))) \

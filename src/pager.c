@@ -2205,6 +2205,7 @@ get_description_of_attack_type(uchar id)
 	case AT_KICK: return "kick";
 	case AT_BUTT: return "head butt";
 	case AT_TAIL: return "tail slap";
+	case AT_TONG: return "tongue";
 	case AT_TUCH: return "touch";
 	case AT_STNG: return "sting";
 	case AT_HUGS: return "crushing bearhug";
@@ -2377,6 +2378,7 @@ get_description_of_damage_type(uchar id)
 	case AD_BLAS: return "blasphemy";
 	case AD_SESN: return "four seasons";
 	case AD_POLN: return "pollen";
+	case AD_FATK: return "forces target to attack";
 	case AD_DUNSTAN: return "stones throw themselves at target";
 	case AD_IRIS: return "iridescent tentacles";
 	case AD_NABERIUS: return "tarnished bloody fangs";
@@ -2421,6 +2423,7 @@ get_description_of_damage_type(uchar id)
 	case AD_HLUH: return "corrupted holy energy";
 	case AD_TSMI: return "magic-item-stealing tentacles";
 	case AD_BYAK: return "byakhee eggs";
+	case AD_UNRV: return "unnerving";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

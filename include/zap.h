@@ -14,6 +14,7 @@ struct zapdata {
 #define ZAP_RAYGUN	4
 	int damn;				/* number of dice */
 	int damd;				/* size of dice */
+	int bonus;
 	int flat;				/* alternative to damn and damd -- flat damage to deal */
 
 	Bitfield(always_hits, 1);	/* cannot miss */

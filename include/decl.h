@@ -527,6 +527,7 @@ E NEARDATA struct obj *billobjs;
 E NEARDATA struct obj zeroobj;		/* init'd and defined in decl.c */
 E NEARDATA anything zeroany;   /* init'd and defined in decl.c */
 
+#include "mutations.h"
 #include "you.h"
 E NEARDATA struct you u;
 

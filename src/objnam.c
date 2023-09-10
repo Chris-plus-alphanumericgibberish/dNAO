@@ -1074,6 +1074,36 @@ boolean dofull;
 			}
 		}
 		
+		if (check_oprop(obj, OPROP_SOTHW)){
+			switch(soth_weapon_damage_turn(obj)){
+				case AD_STTP:
+					Strcat(buf, "starry ");
+				break;
+				case AD_VAMP:
+					Strcat(buf, "grasping ");
+				break;
+				case AD_FIRE:
+					Strcat(buf, "groaning ");
+				break;
+				case AD_POLY:
+					Strcat(buf, "bubbling ");
+				break;
+				case AD_DESC:
+					Strcat(buf, "auroral ");
+				break;
+				case AD_DRST:
+					Strcat(buf, "stinking ");
+				break;
+				case AD_MAGM:
+					if(obj->oartifact != ART_ANNULUS || !litsaber(obj))
+						Strcat(buf, "cerulean ");
+				break;
+				case AD_MADF:
+					Strcat(buf, "magenta-burning ");
+				break;
+			}
+		}
+		
 		if (check_oprop(obj, OPROP_MAGCW))
 			Strcat(buf, "sparkling ");
 		if (check_oprop(obj, OPROP_LESSER_MAGCW))
@@ -4352,6 +4382,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "apodictic ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_AXIOW);
 
+		} else if (!strncmpi(bp, "flowing ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_GSSDW);
+
 		} else if (!strncmpi(bp, "flaming ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_FIREW);
 		} else if (!strncmpi(bp, "forge-hot ", l=10)) {
@@ -4401,6 +4434,9 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "drooling ", l=9) || !strncmpi(bp, "lashing ", l=8) || !strncmpi(bp, "staring ", l=8) || !strncmpi(bp, "stormwrapped ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_GOATW);
+
+		} else if (!strncmpi(bp, "sothoth_weapon ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_SOTHW);
 
 		} else if (!strncmpi(bp, "tactile ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_TACTB);

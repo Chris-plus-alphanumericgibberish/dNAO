@@ -2,7 +2,9 @@
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
+#include <math.h>
 #include "hack.h"
+#include "xhity.h"
 
 #ifdef OVL1
 #endif /*OVL1*/
@@ -1314,7 +1316,7 @@ domove()
 			struct obj *otmp;
 			attk = mon_get_attacktype(&youmonst, AT_WEAP, &attkbuff);
 			otmp = uwep;
-			do{
+			if(attk) do {
 				/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && check_oprop(otmp, OPROP_CCLAW)){
 					result |= hit_with_cclaw(&youmonst, otmp, x, y, 0, attk);
@@ -1327,15 +1329,23 @@ domove()
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 					result |= hit_with_rblood(&youmonst, otmp, x, y, 0, attk);
 				}
+				/* Streaming mercurial weapons hit an aditional target if your insight is high enough */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && is_streaming_merc(otmp)){
+					if(mlev(&youmonst) > 20 && (u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))){
+						result |= hit_with_streaming(&youmonst, otmp, x, y, 0, attk);
+					}
+				}
 				/* Dancers hit additional targets */
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(&youmonst)){
 					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);
 				}
 				
+				if(!u.twoweap)
+					break;
 				attk = mon_get_attacktype(&youmonst, AT_XWEP, &attkbuff);
 				otmp = uswapwep;
 				i++;
-			} while(i < 2);
+			} while(i < 2 && attk);
 		}
 		// unmap_object(x, y); /* known empty -- remove 'I' if present */
 		if (glyph_is_invisible(levl[x][y].glyph)) {
@@ -2613,6 +2623,7 @@ nomul(nval, txt)
 	if(multi < nval) return;	/* This is a bug fix by ab@unido */
 	u.uinvulnerable = FALSE;	/* Kludge to avoid ctrl-C bug -dlc */
 	u.usleep = 0;
+	u.puzzle_time = 0;
 	if(!flags.forcefight) multi = nval;
 	flags.travel = iflags.travel1 = flags.mv = flags.run = 0;
 	if (txt && txt[0])
@@ -2632,7 +2643,43 @@ const char *msg_override;
 	else if (!nomovemsg) nomovemsg = You_can_move_again;
 	if (*nomovemsg) pline1(nomovemsg);
 	nomovemsg = 0;
+	struct obj *puzzle = get_most_complete_puzzle();
+	if(puzzle){
+		if(u.puzzle_time && (monstermoves - u.usleep) >= u.puzzle_time){
+			int difficulty = puzzle->ovar1_puzzle_steps + 1;
+			difficulty *= 6;
+			if(objects[HYPERBOREAN_DIAL].oc_name_known)
+				difficulty -= 6;
+			difficulty -= u.uinsight;
+			difficulty -= ACURR(A_INT);
+			if(rnd(20) >= difficulty && !(u.veil && puzzle->ovar1_puzzle_steps >= 5)){
+				if(u.uhyperborean_steps < 6){
+					if(puzzle->ovar1_puzzle_steps == u.uhyperborean_steps){
+						more_experienced(6*pow(10,u.uhyperborean_steps), 0);
+						newexplevel();
+						u.uhyperborean_steps++;
+						if(u.uhyperborean_steps == 6){
+							You("have solved the sixth and final ring of %s!", the(xname(puzzle)));
+							/*With appologies to "Through the Gates of the Silver Key" and "The Dunwich Horror" by H. P. Lovecraft. */
+							pline("The hexagonal pegs are now oddly arranged, seeming to follow the symmetries of some cosmic geometry quite unknown to Earth.");
+							pline("You have the faintest sense, as though from a memory within a dream, of strange shapes surmounting hexagonal pillars, and a voice that spoke without speaking.");
+							pline("A seal is engraved into your mind!");
+							u.specialSealsKnown |= SEAL_YOG_SOTHOTH;
+						}
+						else {
+							You("have solved the next ring of %s!", the(xname(puzzle)));
+						}
+					}
+					else You("have solved the next ring of %s.", the(xname(puzzle)));
+					puzzle->ovar1_puzzle_steps++;
+				}
+			}
+			else You("haven't made any headway on the puzzle.");
+		}
+		else You("awaken before you can make any serious attempt on the puzzle.");
+	}
 	u.usleep = 0;
+	u.puzzle_time = 0;
 	if (afternmv) (*afternmv)();
 	afternmv = 0;
 }
@@ -2837,6 +2884,11 @@ weight_cap()
 
 		/* these carrcap modifiers only make sense if you have feet on the ground */
 		if (boots && boots->otyp == find_hboots()) carrcap += 100;
+		
+		if (boots && check_oprop(boots, OPROP_RBRD)
+			&& u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL
+		)
+			carrcap += max(200, maxcap/5);
 		
 		if (!u.usteed && !Flying) {
 			if(EWounded_legs & LEFT_SIDE) carrcap -= 100;

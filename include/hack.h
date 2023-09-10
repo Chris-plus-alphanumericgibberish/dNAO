@@ -148,6 +148,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 					(u.sealsActive&SEAL_ANDROMALIUS && is_thief((mon)->data)) || \
 					(u.sealsActive&SEAL_TENEBROUS && !nonliving(mon->data)) || \
 					(mon->mtame && beastMateryRadius(mon)) || \
+					(mon->mtyp == PM_TWIN_SIBLING) || \
 					(Upolyd && youmonst.data->mtyp == PM_SHARK && has_blood((mon)->data) && \
 						(mon)->mhp < (mon)->mhpmax && is_pool(u.ux, u.uy, TRUE) && is_pool((mon)->mx, (mon)->my, TRUE)) || \
 					(u.specialSealsActive&SEAL_ACERERAK && is_undead(mon->data)) || \
@@ -316,36 +317,6 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define EXPL_RED	12
 #define EXPL_CYAN	13
 #define EXPL_MAX	14
-
-/* Macros for messages referring to hands, eyes, feet, etc... */
-#define ARM 0
-#define EYE 1
-#define FACE 2
-#define FINGER 3
-#define FINGERTIP 4
-#define FOOT 5
-#define HAND 6
-#define HANDED 7
-#define HEAD 8
-#define LEG 9
-#define LIGHT_HEADED 10
-#define NECK 11
-#define SPINE 12
-#define TOE 13
-#define HAIR 14
-#define BLOOD 15
-#define LUNG 16
-#define NOSE 17
-#define STOMACH 18
-#define HEART 19
-#define BODY_SKIN 20
-#define BODY_FLESH 21
-#define BEAT 22
-#define BONES 23
-#define EAR 24
-#define EARS 25
-#define CREAK 26
-#define CRACK 27
 
 #define BALL_IN_MON	(u.uswallow && uball && uball->where == OBJ_FREE)
 #define CHAIN_IN_MON	(u.uswallow && uchain && uchain->where == OBJ_FREE)

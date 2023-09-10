@@ -21,6 +21,7 @@ struct trap {
 				 when you untrap a monster.  It would be too
 				 easy to make a monster peaceful if you could
 				 set a trap for it and then untrap it. */
+	Bitfield(special,1);
 	
 	union { /* extra data for specific traps */
 		/* rolling boulder */
