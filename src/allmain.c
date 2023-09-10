@@ -3053,10 +3053,10 @@ karemade:
 	if(!flags.mv || Blind || oldBlind != (!!Blind)) {
 	    /* redo monsters if hallu or wearing a helm of telepathy */
 	    if (Hallucination) {	/* update screen randomly */
+			see_altars();
 			see_monsters();
 			see_objects();
 			see_traps();
-			see_altars();
 			if (u.uswallow) swallowed(0);
 		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || NightmareAware_Sanity < 100 || oldsanity < 100) {
 	     	see_monsters();
@@ -3102,10 +3102,10 @@ karemade:
 	if(!flags.mv || LightBlind || oldLightBlind != (!!LightBlind)) {
 	    /* redo monsters if hallu or wearing a helm of telepathy */
 	    if (Hallucination) {	/* update screen randomly */
+			see_altars();
 			see_monsters();
 			see_objects();
 			see_traps();
-			see_altars();
 			if (u.uswallow) swallowed(0);
 		} else if (Unblind_telepat || goodsmeller(youracedata) || Warning || Warn_of_mon || NightmareAware_Sanity < 100 || oldsanity < 100) {
 	     	see_monsters();

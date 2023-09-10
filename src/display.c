@@ -1348,9 +1348,9 @@ see_altars()
 	for (x = 1; x < COLNO; x++) {
 		lev = &levl[x][0];
 		for (y = 0; y < ROWNO; y++, lev++)
-			if (lev->glyph == cmap_to_glyph(S_altar))
+			if (lev->glyph != cmap_to_glyph(S_stone))
 				show_glyph(x,y,lev->glyph);
-    }
+	}
 }
 
 /*

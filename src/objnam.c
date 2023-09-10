@@ -2230,8 +2230,6 @@ weapon:
 			}
 			break;
 		case TOOL_CLASS:
-			if (obj->oartifact == ART_MIRRORED_MASK)
-				Sprintf(eos(buf), " (%s)", obj->corpsenm != NON_PM ? mons[obj->corpsenm].mname : "blank");
 			if (obj->owornmask & (W_TOOL /* blindfold */
 #ifdef STEED
 				| W_SADDLE

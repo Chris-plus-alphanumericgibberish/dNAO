@@ -2799,7 +2799,7 @@ u_init()
 
 	u.oonaenergy = !rn2(3) ? AD_FIRE : rn2(2) ? AD_COLD : AD_ELEC;
 	u.ring_wishes = -1;
-	dungeon_topology.alt_tower = !rn2(8);
+	dungeon_topology.alt_tower = 1;//!rn2(8);
 	
 	u.silver_flame_z.dnum = u.uz.dnum;
 	u.silver_flame_z.dlevel = rn2(dunlevs_in_dungeon(&u.uz)) + dungeons[u.uz.dnum].depth_start;
