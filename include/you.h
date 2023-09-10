@@ -648,7 +648,7 @@ struct you {
 	int divetimer;			/* how long you can stay under water */
 	
 	int role_variant;	/*Records what variant of your role you are.*/
-
+	boolean uavoid_passives;
 	int umystic;	/*Monk mystic attacks active*/	
 #define monk_style_active(style) (u.umystic & (1 << (style-1)))
 #define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1 << (style-1)))

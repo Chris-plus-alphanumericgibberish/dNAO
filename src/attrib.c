@@ -1874,11 +1874,23 @@ void
 setFightingForm(fform)
 int fform;
 {
-	int i;
+	int i, first, last;
 	if(fform > LAST_FFORM || fform < 0)
 		impossible("Attempting to set fighting form number %d?", fform);
 	
-	for(i=0; i < FFORM_LISTSIZE; i++)
+	if (fform >= FIRST_LS_FFORM && fform <= LAST_LS_FFORM){
+		first = FIRST_LS_FFORM;
+		last = LAST_LS_FFORM;
+	} else if (fform >= FIRST_KNI_FFORM && fform <= LAST_KNI_FFORM){
+		first = FIRST_KNI_FFORM;
+		last = LAST_KNI_FFORM;
+	} else {
+		first = 0;
+		last = FFORM_LISTSIZE*32;
+	}
+
+	/* this code assumes that each batch of 32 fighting forms are mutually exclusive, but not with other batches of 32 */
+	for(i=first/32; i <= last/32; i++)
 		u.fightingForm[i] = 0L;
 
 	u.fightingForm[(fform-1)/32] |= (0x1L << ((fform-1)%32));
@@ -1941,6 +1953,20 @@ int fform;
 		case FFORM_JUYO:
 			return P_JUYO;
 		break;
+		case FFORM_SHIELD_BASH:
+			return P_SHIELD_BASH;
+		break;
+		case FFORM_GREAT_WEP:
+			return P_GREAT_WEP;
+		break;
+		case FFORM_HALF_SWORD:
+			return P_HALF_SWORD;
+		break;
+		case FFORM_KNI_SACRED:
+		case FFORM_KNI_RUNIC:
+		case FFORM_KNI_ELDRITCH:
+			return P_KNI_ADVANCED;
+		break;
 		default:
 			impossible("Attempting to get skill of fighting form number %d?", fform);
 			return P_NONE;
@@ -1962,6 +1988,12 @@ int fform;
 		case FFORM_SHIEN:    return "Shien";
 		case FFORM_JUYO:     return "Juyo";
 		case FFORM_NIMAN:    return "Niman";
+		case FFORM_SHIELD_BASH:	return "Shield Bash";
+		case FFORM_GREAT_WEP:	return "Great Weapon Fighting";
+		case FFORM_HALF_SWORD:	return "Half-sword style";
+		case FFORM_KNI_SACRED:	return "Sacred style";
+		case FFORM_KNI_RUNIC:	return "Runic style";
+		case FFORM_KNI_ELDRITCH:return "Eldritch style";
 		default:
 			impossible("bad fform %d", fform);
 	}
@@ -1990,6 +2022,7 @@ int fform;
 		/* always available */
 		case NO_FFORM:
 		case FFORM_SHII_CHO:
+		case FFORM_KNI_SACRED:
 			return FALSE;
 		/* blocked by heavy armor */
 		case FFORM_MAKASHI:
@@ -2003,7 +2036,18 @@ int fform;
 			return (uarm && !(is_light_armor(uarm)));
 		/* blocked by metal armor */
 		case FFORM_NIMAN:
+		case FFORM_KNI_ELDRITCH:
 			return (uarm && (is_metallic(uarm)));
+		/* requires longsword */
+		case FFORM_HALF_SWORD:
+		case FFORM_KNI_RUNIC:
+			return (uwep && uwep->otyp == LONG_SWORD);
+		/* requires shield */
+		case FFORM_SHIELD_BASH:
+			return (!!uarms);
+		/* requires two-handed weapon */
+		case FFORM_GREAT_WEP:
+			return (uwep && bimanual(uwep, youracedata));
 		default:
 			impossible("Attempting to get blockage of fighting form number %d?", fform);
 			break;

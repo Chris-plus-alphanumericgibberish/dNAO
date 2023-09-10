@@ -1670,6 +1670,7 @@ u_init()
 	(void) memset((genericptr_t)&u, 0, sizeof(u));
 	u.ustuck = (struct monst *)0;
 
+	u.uavoid_passives = 0; // don't start out using only starblades lol
 	u.umystic = ~0; //By default, all monk style attacks are active
 
 	u.summonMonster = FALSE;

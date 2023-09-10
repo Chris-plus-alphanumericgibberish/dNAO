@@ -45,8 +45,12 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_SHIEN				(-24)
 #define PN_NIMAN				(-25)
 #define PN_JUYO					(-26)
-#define PN_WAND_DAMAGE			(-27)
-#define PN_SHIELD				(-28)
+#define PN_SHIELD_BASH			(-27)
+#define PN_GREAT_WEP			(-28)
+#define PN_HALF_SWORD			(-29)
+#define PN_KNI_ADVANCED			(-30)
+#define PN_WAND_DAMAGE			(-31)
+#define PN_SHIELD				(-32)
 
 #define holy_damage(mon)	((mon == &youmonst) ? \
 							hates_holy(youracedata) :\
@@ -86,6 +90,7 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	PN_BEAST_MASTERY,
 	PN_SHII_CHO, PN_MAKASHI, PN_SORESU, PN_ATARU,
 	PN_DJEM_SO, PN_SHIEN, PN_NIMAN, PN_JUYO,
+	PN_SHIELD_BASH, PN_GREAT_WEP, PN_HALF_SWORD, PN_KNI_ADVANCED,
 #ifdef STEED
 	PN_RIDING
 #endif
@@ -122,6 +127,10 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
     "form V: Shien",
     "form VI: Niman",
     "form VII: Juyo",
+	"shield bashing",
+	"great weapon fighting",
+	"half-sword style",
+	"advanced knightly styles",
     "wand damage",
     "shield",
 };

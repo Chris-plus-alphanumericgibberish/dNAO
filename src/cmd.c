@@ -127,6 +127,8 @@ STATIC_PTR int NDECL(domonability);
 STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(doMysticForm);
+STATIC_PTR int NDECL(doLightsaberForm);
+STATIC_PTR int NDECL(doKnightForm);
 STATIC_PTR int NDECL(dofightingform);
 STATIC_PTR int NDECL(dooverview_or_wiz_where);
 STATIC_PTR int NDECL(doclearinvissyms);
@@ -918,7 +920,7 @@ doMysticForm()
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
-	Sprintf(buf,	"Known Moves");
+	Sprintf(buf,	"Known Techniques");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	if(monk_style_active(DIVE_KICK)) {
 		Sprintf(buf,	"Dive Kick (active)");
@@ -970,7 +972,7 @@ doMysticForm()
 		incntlet, 0, ATR_NONE, buf,
 		MENU_UNSELECTED);
 	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	end_menu(tmpwin,	"Choose fighting style:");
+	end_menu(tmpwin,	"Toggle mystic techniques:");
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
@@ -987,63 +989,69 @@ doMysticForm()
 }
 
 int
-dofightingform()
+doLightsaberForm()
 {
 	winid tmpwin;
-	int n, how;
+	int n, how, i;
 	char buf[BUFSZ];
 	char incntlet = 'a';
 	menu_item *selected;
 	anything any;
+	boolean remotely_competent = FALSE;
+	int curskill;
 
-	if(Role_if(PM_MONK) && !((uwep && is_lightsaber(uwep)) || (u.twoweap && uswapwep && is_lightsaber(uswapwep)))){
-		return doMysticForm();
-	}	
-	
-	if(!(uwep && is_lightsaber(uwep))){
-		pline("You don't know any special fighting styles for use in this situation.");
-		return MOVE_CANCELLED;
-	}
-	
-	if(P_SKILL(weapon_type(uwep)) < P_BASIC){
-		pline("You must have at least some basic skill in the use of your weapon before you can employ special fighting styles.");
-		return MOVE_CANCELLED;
+	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
+		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+			remotely_competent = TRUE;
 	}
 
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
-	
-	Sprintf(buf,	"Known Forms");
+
+	Sprintf(buf,	"Known Lightsaber Forms");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 
-	int i;
-	for (i = FFORM_SHII_CHO; i <= LAST_FFORM; i++) {
-		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC) {
-			boolean active = selectedFightingForm(i);
-			boolean blocked = blockedFightingForm(i);
+	if (remotely_competent){
+		for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
+			curskill = P_SKILL(getFightingFormSkill(i));
+			if (curskill >= P_BASIC) {
+				boolean active = selectedFightingForm(i);
+				boolean blocked = blockedFightingForm(i);
 
-			Strcpy(buf, nameOfFightingForm(i));
-			if (active && blocked)
-				Strcat(buf, " (selected; blocked by armor)");
-			else if (active)
-				Strcat(buf, " (active)");
-			else if (blocked)
-				Strcat(buf, " (blocked by armor)");		
+				Strcpy(buf, nameOfFightingForm(i));
+				Strcat(buf, " (");
+				Strcat(buf, (curskill >= P_EXPERT) ? "expert" : ((curskill >= P_SKILLED) ? "skilled" : "basic"));
+				if (active && blocked)
+					Strcat(buf, ", selected; blocked by armor");
+				else if (active)
+					Strcat(buf, ", active");
+				else if (blocked)
+					Strcat(buf, ", blocked by armor");
+				Strcat(buf, ")");
 
-			any.a_int = i;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+				any.a_int = i;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					incntlet, 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+				incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+			}
 		}
+	} else {
+		Strcpy(buf, nameOfFightingForm(FFORM_SHII_CHO));
+		Strcat(buf, " (unskilled, active due to lack of alternatives)");
+		any.a_int = FFORM_SHII_CHO;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	end_menu(tmpwin,	"Choose fighting style:");
+	end_menu(tmpwin,	"Choose preferred lightsaber form:");
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
-	
+
 	if(n <= 0 || selectedFightingForm(selected[0].item.a_int)){
 		if(n>0) free(selected);
 		return MOVE_CANCELLED;
@@ -1052,6 +1060,193 @@ dofightingform()
 		free(selected);
 		return MOVE_INSTANT;
 	}
+}
+
+int doKnightForm()
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+	boolean remotely_competent = FALSE;
+	int curskill;
+
+	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+			remotely_competent = TRUE;
+	}
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf,	"Known Knightly Styles");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+		curskill = P_SKILL(getFightingFormSkill(i));
+		if (curskill >= P_BASIC) {
+			boolean active = selectedFightingForm(i);
+			boolean blocked = blockedFightingForm(i);
+
+			Strcpy(buf, nameOfFightingForm(i));
+			Strcat(buf, " (");
+			Strcat(buf, (curskill >= P_EXPERT) ? "expert" : ((curskill >= P_SKILLED) ? "skilled" : "basic"));
+			if (active && blocked)
+				Strcat(buf, ", selected; blocked by armor");
+			else if (active)
+				Strcat(buf, ", active");
+			else if (blocked)
+				Strcat(buf, ", blocked by armor");
+			Strcat(buf, ")");
+
+			any.a_int = i;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+		}
+	}
+	end_menu(tmpwin,	"Choose preferred fighting style:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if(n <= 0 || selectedFightingForm(selected[0].item.a_int)){
+		if(n>0) free(selected);
+		return MOVE_CANCELLED;
+	} else {
+		setFightingForm(selected[0].item.a_int);
+		free(selected);
+		return MOVE_INSTANT;
+	}
+}
+
+int
+dofightingform()
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	/* lotsa shit to go "yo do we have a starblade" */
+	/* copied wholesale from the same usage in mondata.c*/
+	struct attack *attk;
+	struct attack prev_attk = {0};
+	int	indexnum = 0, subout = 0, tohitmod = 0, res[4];
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+
+	/* to track whether or not we have a certain kind of style available*/
+	boolean monk_forms, lightsaber_forms, knight_forms, avoid_passives;
+	monk_forms = lightsaber_forms = knight_forms = avoid_passives = FALSE;
+
+	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
+	if(Role_if(PM_MONK))
+		monk_forms = TRUE;
+	/*if(Role_if(PM_KNIGHT))
+		knight_forms = TRUE;*/
+	if((uwep && is_lightsaber(uwep)) || (uswapwep && is_lightsaber(uswapwep)))
+		lightsaber_forms = TRUE;
+	if (u.uavoid_passives)
+		avoid_passives = TRUE;
+	else {
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
+			!is_null_attk(attk);
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod)
+		){
+			if(no_contact_attk(attk)) avoid_passives = TRUE;
+		}
+	}
+
+	/* next, forms trained are shown, even if inapplicable at the moment*/
+	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
+		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+			lightsaber_forms = TRUE;
+	}
+
+	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+			knight_forms = TRUE;
+	}
+
+	/*
+	 * if we don't have any forms or only have one form set, don't bother with a menu.
+	 * note that if we have passive attacks at all, we want the menu, and if we have
+	 * only passives then we still want a menu (or a y/n, but i already wrote the menu)
+	*/
+
+	if (!monk_forms && !lightsaber_forms && !knight_forms && !avoid_passives){
+		pline("You don't know any special fighting styles for use in this situation.");
+		return MOVE_CANCELLED;
+	}
+	else if (monk_forms && !lightsaber_forms && !knight_forms && !avoid_passives)
+		return doMysticForm();
+	else if (!monk_forms && lightsaber_forms && !knight_forms && !avoid_passives)
+		return doLightsaberForm();
+	else if (!monk_forms && !lightsaber_forms && knight_forms && !avoid_passives)
+		return doKnightForm();
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	if (monk_forms) {
+		any.a_int = 1;
+		add_menu(tmpwin, NO_GLYPH, &any, 'm', 0, ATR_NONE, "Select Mystic Forms", MENU_UNSELECTED);
+	}
+	if (lightsaber_forms) {
+		any.a_int = 2;
+		add_menu(tmpwin, NO_GLYPH, &any, 'l', 0, ATR_NONE, "Select Lightsaber Forms", MENU_UNSELECTED);
+	}
+	if (knight_forms) {
+		any.a_int = 3;
+		add_menu(tmpwin, NO_GLYPH, &any, 'k', 0, ATR_NONE, "Select Knightly Forms", MENU_UNSELECTED);
+	}
+	if (avoid_passives) {
+		any.a_int = 4;
+		if (!u.uavoid_passives) Strcpy(buf, "Only make passive-safe attacks");
+		else Strcpy(buf, "Allow passive-unsafe attacks");
+
+		add_menu(tmpwin, NO_GLYPH, &any, 'p', 0, ATR_NONE, buf, MENU_UNSELECTED);
+	}
+
+	end_menu(tmpwin, "Adjust fighting styles:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if(n <= 0){
+		return MOVE_CANCELLED;
+	} else {
+		n = selected[0].item.a_int;
+		free(selected);
+	}
+
+	switch (n){
+		case 1:
+			return doMysticForm();
+		case 2:
+			return doLightsaberForm();
+		case 3:
+			return doKnightForm();
+		case 4:
+			u.uavoid_passives = !u.uavoid_passives;
+			return MOVE_INSTANT;
+		default:
+			impossible("unknown fighting form set %d", n);
+			return MOVE_CANCELLED;
+	}
+	return MOVE_CANCELLED;
 }
 
 int

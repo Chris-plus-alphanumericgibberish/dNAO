@@ -263,6 +263,9 @@
 #define real_spell_adtyp(adtyp) \
 	((adtyp) == AD_SPEL || (adtyp) == AD_CLRC || (adtyp) == AD_PSON)
 
+#define no_contact_attk(attk) (\
+	(spirit_rapier_at(attk->aatyp) && attk->adtyp != AD_MERC) || \
+	attk->aatyp == AT_WISP || attk->aatyp == AT_HITS)
 /*
  *  Monster to monster attacks.  When a monster attacks another (mattackm),
  *  any or all of the following can be returned.  See mattackm() for more
