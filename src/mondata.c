@@ -3489,6 +3489,12 @@ struct permonst *ptr;
 	if(centauroid(ptr)){
 		size += 2;
 	}
+	if(is_elf(ptr)){
+		size += 3;
+	}
+	else if(is_drow(ptr)){
+		size += 2;
+	}
 	return size;
 }
 
