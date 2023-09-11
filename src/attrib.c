@@ -577,9 +577,11 @@ exerchk()
 		 //	[MRS 92/10/28 - Treat Wisdom specially for balance.]
 		// if(rn2(AVAL) > ((i != A_WIS) ? abs(AEXE(i)*2/3) : abs(AEXE(i))))
 		    // continue;
-		if(!(ABASE(i) < AMAX(i) && !(i == A_STR && u.uhs >= 3) && AEXE(i) >= 0) && rn2(AVAL) > (abs(AEXE(i)*2/3)) )
+		if(i == A_STR && u.uhs >= 3 && AEXE(i) >= 0)
+			continue;
+		if(!(ABASE(i) < AMAX(i) && AEXE(i) >= 0) && rn2(AVAL) > (abs(AEXE(i)*2/3)) )
 		    continue;
-		mod_val = sgn(AEXE(i));
+		mod_val = AEXE(i) ? sgn(AEXE(i)) : 1;
 
 #ifdef DEBUG
 		pline("exerchk: changing %d.", i);
@@ -1117,6 +1119,10 @@ calc_total_maxhp()
 	int rawmax;
 	int maxbonus;
 	int adjbonus;
+	int uhpbonus = u.uhpbonus;
+	if(check_mutation(SHUB_RADIANCE))
+		uhpbonus -= Insanity;
+
 	if (Upolyd) {
 		ulev = (int)(mons[u.umonnum].mlevel);
 		hp = &u.mh;
@@ -1131,7 +1137,7 @@ calc_total_maxhp()
 		hpcap = 24 + 2*maxhp(1);
 	}
 	
-	if(u.uhpbonus > 0){
+	if(uhpbonus > 0){
 		rawmax = *hprolled + ulev*conplus(ACURR(A_CON));
 		
 		/*Calculate Metamorphosis *before* the max bonus is determined*/
@@ -1147,7 +1153,7 @@ calc_total_maxhp()
 			rawmax = rawmax + (rawmax * u.uhpmultiplier / 10); /*Multiplier is in units of tenths*/
 		
 		if(maxbonus > 0){
-			adjbonus = round(2.0*maxbonus/(1+exp(-(4.0/(2.0*maxbonus))*u.uhpbonus)) - maxbonus);
+			adjbonus = round(2.0*maxbonus/(1+exp(-(4.0/(2.0*maxbonus))*uhpbonus)) - maxbonus);
 		}
 		else adjbonus = 0;
 		
@@ -1163,7 +1169,7 @@ calc_total_maxhp()
 		if(u.uhpmultiplier)
 			rawmax = rawmax + (rawmax * u.uhpmultiplier / 10); /*Multiplier is in units of tenths*/
 		
-		*hpmax = rawmax + u.uhpbonus + u.uhpmod;
+		*hpmax = rawmax + uhpbonus + u.uhpmod;
 	}
 	
 	if(*hpmax < 1) *hpmax = 1;
@@ -1178,6 +1184,10 @@ void
 calc_total_maxen()
 {
 	int en;
+	int uenbonus = u.uenbonus;
+	if(check_mutation(SHUB_RADIANCE))
+		uenbonus += Insanity;
+
 	en = u.uenrolled + (u.ulevel*ACURR(A_INT))/4;
 	
 	if(active_glyph(FORMLESS_VOICE))
@@ -1186,7 +1196,7 @@ calc_total_maxen()
 	if(u.uenmultiplier)
 		en = en + (en * u.uhpmultiplier / 10); /*Multiplier is in units of tenths*/
 	
-	u.uenmax = en + u.uenbonus;
+	u.uenmax = en + uenbonus;
 	
 	if(u.uenmax < 0) u.uenmax = 0;
 	// *hpmax += min(nxtra, max(0, 6*nxtra/5 - 6*nxtra*(*hpmax)*(*hpmax)/(5*hpcap*hpcap)));
@@ -1265,9 +1275,11 @@ struct monst *mon;
 		if(arm && (arm->otyp == PLAIN_DRESS || arm->otyp == NOBLE_S_DRESS)){
 			tmp += arm->spe;
 		}
-
 		if(wep && wep->oartifact == ART_SODE_NO_SHIRAYUKI){
 			tmp += wep->spe;
+		}
+		if(uarmh && uarmh->oartifact == ART_ENFORCED_MIND){
+			tmp += uarmh->spe;
 		}
 	}
 	if (x == A_STR) {
@@ -1411,6 +1423,8 @@ boolean check;
 		}
 		nomul(0, NULL);
 	}
+	calc_total_maxen();
+	calc_total_maxhp();
 }
 
 void
@@ -1484,6 +1498,18 @@ int clearable;
 
 	if(usan < rnd(100))
 		return 1;
+	return 0;
+}
+
+int
+count_madnesses()
+{
+	int count = 0;
+	int i;
+	for(i=0; i < 32; i++){
+		if(u.umadness&(0x1L<<i))
+			count++;
+	}
 	return 0;
 }
 
@@ -1728,7 +1754,10 @@ struct monst *mon;
 		for(madflag = 0x1L; madflag <= LAST_MADNESS; madflag = madflag << 1){
 			if(u.umadness&madflag && !(mon->seenmadnesses&madflag) && roll_generic_madness(FALSE)){
 				mon->seenmadnesses |= madflag;
-				if(d(2,u.ulevel) > mon->m_lev){
+				if(d(2,u.ulevel) >= mon->m_lev){
+					if(u.specialSealsActive&SEAL_YOG_SOTHOTH){
+						yog_credit(mon->m_lev);
+					}
 					if(madflag == MAD_DELUSIONS
 					 || madflag == MAD_REAL_DELUSIONS
 					 || madflag == MAD_SPIRAL

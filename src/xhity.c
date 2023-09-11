@@ -13,7 +13,6 @@ STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, b
 STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
-STATIC_DCL void FDECL(heal, (struct monst *, int));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
@@ -782,6 +781,15 @@ int tary;
 					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 						result |= hit_with_rblood(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 					}
+					/* Mercurial weapons may hit additional targets */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && is_streaming_merc(otmp)){
+						if(magr && mlev(magr) > 20 && (
+							(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+							|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+						)){
+							result |= hit_with_streaming(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
+						}
+					}
 					/* Dancers hit additional targets */
 					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(magr->data)){
 						result |= hit_with_dance(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
@@ -843,6 +851,7 @@ int tary;
 		case AT_STNG:	// 
 		case AT_BUTT:	// 
 		case AT_TAIL:	// 
+		case AT_TONG:	// 
 		case AT_TENT:	// 
 		case AT_WHIP:	// 
 		case AT_VINE:	// uses touch accuracy
@@ -1755,6 +1764,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damn = 5;
 		}
 	}
+	/* Dunwich horror can't cast if you don't have the correct mutation */
+	if(pa->mtyp == PM_TWIN_SIBLING && !check_mutation(TWIN_MIND) && attk->aatyp == AT_MAGC){
+		GETNEXT
+	}
 	/* Grue does not make its later attacks if its square is lit */
 	if (pa->mtyp == PM_GRUE &&
 		!by_the_book &&
@@ -2281,6 +2294,20 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 
+	if ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
+		&& (prevattacknull || prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP || prev_attack.aatyp == AT_MARI)
+		&& !(*subout&SUBOUT_SHUBTONG)
+	){
+		if(youagr && check_mutation(MIND_STEALER) && !nomouth(youracedata->mtyp)){
+			attk->aatyp = AT_TONG;
+			attk->adtyp = AD_FATK;
+			attk->damn = 1;
+			attk->damd = 4;
+			fromlist = FALSE;
+			*subout |= SUBOUT_SHUBTONG;
+		}
+	}
+
 	/*Weapon user, not as good without*/
 	if (pa->mtyp == PM_DAO_LAO_GUI_MONK && attk->aatyp == AT_WEAP && (
 		 (youagr && !uwep) ||
@@ -2460,14 +2487,14 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		)) ||
 		/* If monster is stuck in a straitjacket */
 		(!youagr && 
-			( straitjacketed_mon(magr) || shackled_arms_mon(magr) ) && 
+			( straitjacketed_mon(magr) ) && 
 			!((*subout)&(SUBOUT_BAEL1|SUBOUT_BAEL2)) && (
 			attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_WHIP
 			|| attk->aatyp == AT_HODS || attk->aatyp == AT_MMGC 
 			/* "Deva" rapiers are assumed to be the Masked Queen's lower arms, and "Energy" rapiers just sorta float or something */
 			|| attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR || attk->aatyp == AT_MSPR
 			|| attk->aatyp == AT_DEVA || attk->aatyp == AT_5SQR || attk->aatyp == AT_MARI
-			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON) ||
+			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON && !(magr->mtyp == PM_ITINERANT_PRIESTESS && has_template(magr, MISTWEAVER))) ||
 			(humanoid(pa) && (
 				attk->aatyp == AT_CLAW
 				/* Note: Dream-leech "touch" attacks are the dream leeches eating your brain like a 'flayer */
@@ -2761,6 +2788,28 @@ struct attack *attk;
 				((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr)),
 				(youagr ? "your" : mhis(magr))
 				);
+			break;
+		case AT_TONG:
+			if(attk->adtyp == AD_FATK){
+				pline("%s slip%s %s needle-thin %s into %s %s through %s %s!",
+					(youagr ? "You" : Monnam(magr)),
+					(youagr ? "" : "s"),
+					(youagr ? "your" : mhis(magr)),
+					(youagr ? body_part(TONGUE) : mbodypart(mdef, TONGUE)),
+					(youagr ? mhis(mdef) : "your"),
+					(youagr ? body_part(BRAIN) : mbodypart(mdef, BRAIN)),
+					(youagr ? mhis(mdef) : "your"),
+					(youagr ? body_part(EAR) : mbodypart(mdef, EAR))
+					);
+			}
+			else {
+				pline("%s lash%s %s with %s tongue!",
+					(youagr ? "You" : Monnam(magr)),
+					(youagr ? "" : "s"),
+					((youdef && !youagr) ? "you" : mon_nam_too(mdef, magr)),
+					(youagr ? "your" : mhis(magr))
+					);
+			}
 			break;
 		case AT_WBIT:
 			pline("%s waist-wolf bites %s!",
@@ -4045,7 +4094,7 @@ boolean ranged;
 			hit = TRUE;
 		}
 		
-		if ((accuracy > dieroll || dieroll == 1) && !miss) {
+		if ((accuracy > dieroll || (dieroll == 1 && accuracy > -10)) && !miss) {
 			hit = TRUE;
 		}
 		/* multistriking weapons need to determine how many hit, and set ostriking */
@@ -4079,6 +4128,7 @@ boolean ranged;
 	case AT_STNG:
 	case AT_BUTT:
 	case AT_TAIL:
+	case AT_TONG:
 	case AT_TENT:
 	case AT_WHIP:
 	case AT_VINE:	// uses touch accuracy
@@ -4099,7 +4149,7 @@ boolean ranged;
 		if (attk->aatyp == AT_HITS && !miss) {
 			hit = TRUE;
 		}
-		if ((accuracy > dieroll) && !miss) {
+		if ((accuracy > dieroll || (dieroll == 1 && accuracy > -10)) && !miss) {
 			hit = TRUE;
 		}
 		break;
@@ -5031,6 +5081,38 @@ boolean ranged;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
+	case AD_FATK:{
+		boolean exit = FALSE;
+		if(!youdef && mindless_mon(mdef))
+			return MM_MISS;
+		/* print a basic hit message */
+		if (vis && dohitmsg) {
+			xyhitmsg(magr, mdef, originalattk);
+		}
+		mindstealer_conflict(mdef, magr);
+		if(DEADMONSTER(mdef)){
+			result |= MM_DEF_DIED;
+			exit = TRUE;
+		}
+		else if(MIGRATINGMONSTER(mdef)){
+			result |= MM_AGR_STOP;
+			exit = TRUE;
+		}
+
+		if(DEADMONSTER(magr)){
+			result |= MM_AGR_DIED;
+			exit = TRUE;
+		}
+		else if(MIGRATINGMONSTER(magr)){
+			result |= MM_AGR_STOP;
+			exit = TRUE;
+		}
+		if(exit)
+			return result;
+
+		return xdamagey(magr, mdef, attk, dmg);
+	}
+
 //////////////////////////////////////////////////////////////
 // PHYSICAL DAMAGE BEFORE NON-LETHAL SPECIAL EFFECTS
 //////////////////////////////////////////////////////////////
@@ -5654,6 +5736,9 @@ boolean ranged;
 				heal(magr, min(dmg, *hp(mdef)));
 			}
 
+			if(((youagr && u.specialSealsActive&SEAL_YOG_SOTHOTH) || pa->mtyp == PM_TWIN_SIBLING) && !youdef){
+				yog_credit(mdef->data->cnutrit/500);
+			}
 			/* Player vampires are smart enough not to feed while
 			   biting if they might have trouble getting it down */
 			if (youagr && !Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
@@ -5689,6 +5774,9 @@ boolean ranged;
 				(void)split_mon(magr, 0);
 			}
 
+			if(attk->adtyp == AD_VAMP && (youagr || pa->mtyp == PM_TWIN_SIBLING) && !youdef && u.specialSealsActive&SEAL_YOG_SOTHOTH){
+				yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50));
+			}
 			/* metroids gain life (but not the player) */
 			if (!youagr && is_metroid(pa)) {
 				*hpmax(magr) += d(1, 4);
@@ -6516,6 +6604,12 @@ boolean ranged;
 						break;
 					case AT_TAIL:
 						pline("%s scales catch on %s armor!",
+							(youagr ? "Your" : s_suffix(Monnam(magr))),
+							(youdef ? "your" : s_suffix(mon_nam(mdef)))
+							);
+						break;
+					case AT_TONG:
+						pline("%s tongue catches on %s armor!",
 							(youagr ? "Your" : s_suffix(Monnam(magr))),
 							(youdef ? "your" : s_suffix(mon_nam(mdef)))
 							);
@@ -7554,12 +7648,11 @@ boolean ranged;
 		if (vis && dohitmsg) {
 			xyhitmsg(magr, mdef, originalattk);
 		}
-		/* only implemented vs player */
-		if (youdef) {
-			otmp = some_armor(&youmonst);
-			if (otmp)
-				teleport_arm(otmp);
-		}
+
+		otmp = some_armor(mdef);
+		if (otmp)
+			teleport_arm(otmp, mdef);
+
 		alt_attk.adtyp = AD_PHYS;
 		return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 
@@ -7927,8 +8020,9 @@ boolean ranged;
 				pline("%s somehow reaches right past your helmet!", Monnam(magr));
 			}
 			else if (vis) {
-				pline("%s somehow reach right past %s helmet!",
+				pline("%s somehow reach%s right past %s helmet!",
 					(youagr ? "You" : s_suffix(Monnam(magr))),
+					(youagr ? "" : "es"),
 					s_suffix(mon_nam(mdef))
 					);
 			}
@@ -8685,6 +8779,8 @@ boolean ranged;
 			else {
 				pline("%s is crushing you!", Monnam(magr));
 			}
+			burn_away_slime();
+			melt_frozen_air();
 		}
 		else if(youagr){
 			if(u.ustuck != mdef ){
@@ -9203,7 +9299,7 @@ boolean ranged;
 				int hungr = rn1(40, 40);
 				morehungry(hungr*get_uhungersizemod());
 				//heal by the amount of HP it would heal by resting for that nutr worth of turns
-				heal(magr, (mlev(magr)*hungr / 30));
+				heal(magr, (mlev(magr)*hungr / HEALCYCLE));
 			}
 		}
 		else {
@@ -10519,7 +10615,7 @@ int vis;
 					);
 			}
 			/* heal from damage dealt*/
-			heal(mdef, min(*hp(mdef), dmg));
+			heal(magr, min(*hp(mdef), dmg));
 		}
 		/* deal damage */
 		result = xdamagey(magr, mdef, attk, dmg);
@@ -10644,36 +10740,7 @@ boolean verbose;
 				return TRUE;
 			}
 		}
-		int curse_glazed = 0;
-		//Head
-		otmp = uarmh;
-		if(otmp && check_oprop(otmp, OPROP_CGLZ))
-			curse_glazed++;
-		//upper body
-		if((otmp = uarm) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = uarmc) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = uarmu) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
-			curse_glazed++;
-
-		//lower body
-		if((otmp = uarm) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = uarmc) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = uarmu) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
-			curse_glazed++;
-
-		//gloves
-		if((otmp = uarmg) && check_oprop(otmp, OPROP_CGLZ))
-			curse_glazed++;
-
-		//feet
-		if((otmp = uarmf) && check_oprop(otmp, OPROP_CGLZ))
-			curse_glazed++;
-
-		if(rnd(5) <= curse_glazed){
+		if(uarm && check_oprop(uarm, OPROP_CGLZ)){
 			if(verbose)
 				You_feel("a malignant aura burn in the silver light.");
 			return TRUE;
@@ -10739,34 +10806,10 @@ boolean verbose;
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "languid tentacles");
 			return TRUE;
 		}
-		int curse_glazed = 0;
-		//Head - what if has no head etc?
-		otmp = which_armor(mon, W_ARMH);
-		if(otmp && check_oprop(otmp, OPROP_CGLZ))
-			curse_glazed++;
-		//upper body
-		if((otmp = which_armor(mon, W_ARM)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = which_armor(mon, W_ARMC)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = which_armor(mon, W_ARMU)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp))
-			curse_glazed++;
-
-		//lower body
-		if((otmp = which_armor(mon, W_ARM)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = which_armor(mon, W_ARMC)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
-			curse_glazed++;
-		else if((otmp = which_armor(mon, W_ARMU)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_lower_body(otmp->otyp))
-			curse_glazed++;
-
-		//gloves
-		if((otmp = which_armor(mon, W_ARMG)) && check_oprop(otmp, OPROP_CGLZ))
-			curse_glazed++;
-
-		//feet
-		if((otmp = which_armor(mon, W_ARMF)) && check_oprop(otmp, OPROP_CGLZ))
-			curse_glazed++;
+		//curse proof glaze
+		if((otmp = which_armor(mon, W_ARM)) && check_oprop(otmp, OPROP_CGLZ) && arm_blocks_upper_body(otmp->otyp)){
+			return TRUE;
+		}
 
 		for(otmp = mon->minvent; otmp; otmp=otmp->nobj)
 			if(otmp->oartifact == ART_TREASURY_OF_PROTEUS)
@@ -11144,6 +11187,7 @@ boolean * needs_uncancelled;
 	case AD_SSEX:
 	case AD_SEDU:
 	case AD_VAMP:
+	case AD_UNRV:
 		maybeset(needs_magr_eyes, TRUE);
 		maybeset(needs_mdef_eyes, TRUE);
 		break;
@@ -11235,7 +11279,7 @@ int vis;
 		vis = getvis(magr, mdef, 0, 0);
 
 	/* Hamsa ward protects from gazes */
-	if (ward_at(x(mdef), y(mdef) == HAMSA))
+	if (ward_at(x(mdef), y(mdef)) == HAMSA)
 		return MM_MISS;
 	/* at the very least, all gaze attacks need a clear line of sight */
 	if (!clear_path(x(magr), y(magr), x(mdef), y(mdef)))
@@ -12291,6 +12335,25 @@ int vis;
 		}
 		else
 			return MM_MISS;
+		break;
+
+		/* unnerve (bad moral) */
+	case AD_UNRV:
+		{
+			int * moral = (youdef ? &(u.uencouraged) : &(mdef->encouraged));
+
+			if (dmg > -1*(*moral)) {	// reduce message spam by only showing when study is actually increased
+				if(youdef){
+					pline("%s looks unnervingly familliar!", Monnam(magr));
+				}
+				else if(vis&VIS_MAGR){
+					pline("%s looks unnerved.", Monnam(mdef));
+				}
+				//else no message
+				/* add to moral */
+				*moral = max(-dmg, *moral-dmg);
+			}
+		}
 		break;
 
 		/* luck drain */
@@ -14508,7 +14571,7 @@ int vis;						/* True if action is at all visible to the player */
 		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0, magr);
 		/* determine unarmedMult */
 		if (youagr) {
-			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : (!gloves && u.sealsActive&SEAL_ECHIDNA) ? 2 : 1;
+			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : ((!gloves && u.sealsActive&SEAL_ECHIDNA) || check_mutation(SHUB_CLAWS)) ? 2 : 1;
 		}
 		else {
 			unarmedMult = 1;
@@ -14927,6 +14990,8 @@ int vis;						/* True if action is at all visible to the player */
 				if (otmp->oartifact)
 					artif_hit = TRUE;
 			}
+			if(!fired && otmp->otyp == CARCOSAN_STING && otmp->ovar1_charges < 95)
+				otmp->ovar1_charges += rnd(5);
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
 		if (fired && launcher && valid_weapon_attack) {
@@ -15067,7 +15132,7 @@ int vis;						/* True if action is at all visible to the player */
 
 		/* get attackmask */
 		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
-			attackmask = attack_mask(weapon, 0, 0);
+			attackmask = attack_mask(weapon, 0, 0, magr);
 			otmp = weapon;
 		}
 		else if (unarmed_punch) {
@@ -15076,7 +15141,7 @@ int vis;						/* True if action is at all visible to the player */
 			/* gloves */
 			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
 			if(otmp)
-				attackmask = attack_mask(otmp, 0, 0);
+				attackmask = attack_mask(otmp, 0, 0, magr);
 
 			if (/* claw attacks are slashing (even while wearing gloves?) */
 				(attk && attk->aatyp == AT_CLAW) ||
@@ -15084,6 +15149,10 @@ int vis;						/* True if action is at all visible to the player */
 				(youagr && (Race_if(PM_HALF_DRAGON) || (!Upolyd && Race_if(PM_CHIROPTERAN))))
 				)
 				attackmask |= SLASH;
+
+			if (youagr && check_mutation(SHUB_CLAWS))
+				attackmask |= SLASH|PIERCE;
+
 			if (/* claw attacks are slashing (even while wearing gloves?) */
 				(youagr && u.sealsActive&SEAL_EURYNOME)
 			){
@@ -15102,7 +15171,7 @@ int vis;						/* True if action is at all visible to the player */
 
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
 			if(otmp)
-				attackmask = attack_mask(otmp, 0, 0);
+				attackmask = attack_mask(otmp, 0, 0, magr);
 		}
 		else {
 			/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */

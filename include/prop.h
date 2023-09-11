@@ -165,6 +165,7 @@ struct prop {
 #	define W_RINGR	    0x00040000L /* Right ring */
 #	define W_RING	    (W_RINGL | W_RINGR)
 #	define W_TOOL	    0x00080000L /* Eyewear */
+#	define W_ACCESSORY	    (W_AMUL | W_RING| W_TOOL)
 #ifdef STEED
 #	define W_SADDLE     0x00100000L	/* KMH -- For riding monsters */
 #endif
@@ -173,7 +174,7 @@ struct prop {
 #	define W_SPIRIT		0x00800000L	/* Bound spirit */
 #	define W_GLYPH		0x01000000L	/* Active thought-glyph */
 #	define W_SKIN		I_SPECIAL	/* merged into skin */
-#	define W_WORN	     (W_ARMOR | W_AMUL | W_RING | W_TOOL)
+#	define W_WORN	     (W_ARMOR | W_ACCESSORY)
 
 	/*** Property is blocked by an object ***/
 	long blocked;					/* Same assignments as extrinsic */

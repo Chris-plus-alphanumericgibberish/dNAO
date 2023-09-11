@@ -180,6 +180,7 @@ typedef struct branch {
 #define Is_dis_level(x)		(on_level(x, &hell1_level) && dungeon_topology.hell1_variant == DISPATER_LEVEL)
 #define Is_mammon_level(x)	(on_level(x, &hell1_level) && dungeon_topology.hell1_variant == MAMMON_LEVEL)
 #define Is_belial_level(x)	(on_level(x, &hell1_level) && dungeon_topology.hell1_variant == BELIAL_LEVEL)
+#define Is_chromatic_level(x)	(on_level(x, &hell1_level) && dungeon_topology.hell1_variant == CHROMA_LEVEL)
 #define Is_hell2(x)			(on_level(x, &hell2_level))
 #define Is_leviathan_level(x)	(on_level(x, &hell2_level) && dungeon_topology.hell2_variant == LEVIATHAN_LEVEL)
 #define Is_lilith_level(x)		(on_level(x, &hell2_level) && dungeon_topology.hell2_variant == LILITH_LEVEL)
@@ -317,6 +318,7 @@ struct linfo {
 typedef struct mapseen_feat {
 	/* feature knowledge that must be calculated from levl array */
 	Bitfield(nfount, 2);
+	Bitfield(nforge, 2);
 	Bitfield(nsink, 2);
 	Bitfield(naltar, 2);
 	Bitfield(msalign, 3); /* corresponds to MSA_* above */

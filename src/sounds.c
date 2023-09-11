@@ -72,7 +72,7 @@ static const char *buerTitles[] = {
 	"the wandering sage",
 	"the forsaken sage",
 	"the banished sage",
-	"interent teacher",
+	"itinerant teacher",
 	"fallen of heaven",
 	"risen of hell",
 	"from beyond the fixed stars",
@@ -267,6 +267,12 @@ dosounds()
 	};
 	You_hear1(fountain_msg[rn2(3)+hallu]);
     }
+	if (level.flags.nforges && !rn2(300)) {
+		static const char *const forge_msg[3] = {
+			"a slow bubbling.", "crackling flames.", "chestnuts roasting on an open fire.",
+		};
+		You_hear1(forge_msg[rn2(2) + hallu]);
+	}
 #ifdef SINK
     if (level.flags.nsinks && !rn2(300)) {
 	static const char * const sink_msg[3] = {
@@ -1925,6 +1931,7 @@ asGuardian:
 				u.uencouraged = min_ints(Insanity/5+1, u.uencouraged+rnd(Insanity/5+1));
 				exercise(A_INT, TRUE);
 				exercise(A_WIS, TRUE);
+				exercise(A_CHA, TRUE);
 			} else if(!mtmp->mpeaceful){
 				aggravate();
 			}
@@ -2080,7 +2087,7 @@ humanoid_sound:
 	    else {
 			const char *talkabt = "talks about %s.";
 			const char *discuss = "discusses %s.";
-			if((ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
+			if((ptr->mtyp == PM_ITINERANT_PRIESTESS || ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
 				&& has_template(mtmp, MISTWEAVER)
 			){
 				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
@@ -2092,7 +2099,7 @@ humanoid_sound:
 						pacify_goat_faction();
 					}
 				}
-				switch(rn2(10)){
+				switch(rn2(14)){
 					case 0:
 						verbl_msg = "Ia! Shub-Nugganoth! The Goat with a Thousand Young!";
 					break;
@@ -2120,6 +2127,64 @@ humanoid_sound:
 					break;
 					case 9:
 						verbl_msg = "She shall spawn and spawn again!";
+					break;
+					case 10:
+						verbl_msg = "May Her light shine upon you!";
+					break;
+					case 11:
+						verbl_msg = "Neither man nor beast.";
+					break;
+					case 12:
+						verbl_msg = "Neither the living nor the dead.";
+					break;
+					case 13:
+						verbl_msg = "All things are mingled.";
+					break;
+				}
+			}
+			else if(ptr->mtyp == PM_DARK_YOUNG){
+				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+					if(!u.shubbie_atten){
+						godlist[GOD_THE_BLACK_MOTHER].anger = 0;
+						u.shubbie_atten = 1;
+					}
+					if(godlist[GOD_THE_BLACK_MOTHER].anger == 0){
+						pacify_goat_faction();
+					}
+				}
+				switch(rn2(14)){
+					case 0:
+						verbl_msg = "Ia! Shub-Nugganoth!";
+					break;
+					case 1:
+						verbl_msg = "Y'ai 'ng'ngah, Yog-Sothoth h'ee - l'geb f'ai throdog uaaah!";
+					break;
+					case 2:
+						verbl_msg = "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn.";
+					break;
+					case 3:
+						//Extracted from Notebook found in a Deserted House (Robert Bloch)
+						verbl_msg = "Ia Shub-Nugganoth! R'lyeh nb'shoggoth!";
+					break;
+					case 4:
+						verbl_msg = "Gof'nn hupadgh Shub-Nugganoth!";
+					break;
+					case 5:
+					case 6:
+						verbl_msg = "Ia!";
+					break;
+					case 7:
+						//These three are from the Burrowers Beneath, not by Lovecraft
+						verbl_msg = "Ya na kadishtu nilgh'ri stell'bsna Nyogtha.";
+					break;
+					case 8:
+						verbl_msg = "K'yarnak phlegethor l'ebumna syha'h n'ghft.";
+					break;
+					case 9:
+						verbl_msg = "Ya hai kadishtu ep r'luh-eeh Nyogtha eeh.";
+					break;
+					default:
+						pline_msg = "mumbles incoherently.";
 					break;
 				}
 			}
@@ -3837,7 +3902,7 @@ int tx,ty;
 				}
 				pline("A hand of worn and broken clockwork on a rusted metal arm reaches into the seal.");
 				pline("The hand gently touches the %s%s, then rests on the seal's surface as its unseen owner shifts his weight onto that arm.", prefix, xname(o));
-				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metalic armature.");
+				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metallic armature.");
 				pline("A voice speaks to you, as the immobile white face weeps tears of black oil onto the %s.", surface(tx,ty));
 				pline("*I am Astaroth, the Clockmaker. You shall be my instrument, to repair this broken world.*");
 				bindspirit(ep->ward_id);
@@ -3849,7 +3914,7 @@ int tx,ty;
 			else if(uwep && (uwep->spe<0 || uwep->oeroded || uwep->oeroded2) && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 				pline("A hand of worn and broken clockwork on a rusted metal arm reaches into the seal.");
 				pline("The hand slowly stretches out towards you, then rests on the seal's surface as its unseen owner shifts his weight onto that arm.");
-				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metalic armature.");
+				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metallic armature.");
 				pline("A voice speaks to you, as the immobile white face studies you and weeps tears of black oil.");
 				pline("*I am Astaroth, the Clockmaker. You shall hold my instrument, to repair this broken world.*");
 				uwep->ovar1_seals |= SEAL_ASTAROTH;
@@ -5412,6 +5477,20 @@ int tx,ty;
 			} else You("try to think of the last place you saw a black web....");
 		} else pline("You can't feel the spirit.");
 	}break;
+	case YOG_SOTHOTH:{
+		if(u.sealTimeout[BLACK_WEB-FIRST_SEAL] < moves){
+			struct trap *t = t_at(tx,ty);
+			if((t && (t->ttyp == MAGIC_PORTAL || t->ttyp == LEVEL_TELEP || t->ttyp == TELEP_TRAP)) 
+			|| carrying_art(ART_SILVER_KEY)
+			){
+				You("percieve a great BEING beyond the gate, and it addresses you with waves of thunderous and burning power.");
+				You("are smote and changed by the unendurable violence of its voice!");
+				exercise(A_CON, FALSE);
+				bindspirit(ep->ward_id);
+				u.sealTimeout[YOG_SOTHOTH-FIRST_SEAL] = moves + bindingPeriod;
+			} else You("need a gateway....");
+		} else pline("You can't feel the spirit.");
+	}break;
 	case NUMINA:{
 		//Spirit requires that its seal be drawn by a level 30 Binder.
 		//There is no binding period.
@@ -5568,6 +5647,10 @@ int floorID;
 		break;
 	case BLACK_WEB:
 		break;
+	case YOG_SOTHOTH:
+		propchain[i++] = BLOODSENSE;
+		propchain[i++] = PROT_FROM_SHAPE_CHANGERS;
+		break;
 	case NUMINA:
 		propchain[i++] = BLOCK_CONFUSION;
 		propchain[i++] = DETECT_MONSTERS;
@@ -5705,6 +5788,9 @@ int floorID;
 	case MISKA:
 		skillchain[i++] = P_TWO_WEAPON_COMBAT;
 		break; 
+	case YOG_SOTHOTH:
+		skillchain[i++] = P_FIREARM;
+		break;
 	case NUDZIRATH:
 	case ALIGNMENT_THING:
 	case UNKNOWN_GOD:
@@ -5760,6 +5846,7 @@ int floorID;
 		floorID == MISKA ||
 		floorID == NUDZIRATH ||
 		floorID == ALIGNMENT_THING ||
+		floorID == YOG_SOTHOTH ||
 		floorID == UNKNOWN_GOD
 		) {
 		spirit_type = ALIGN_SPIRIT;
@@ -6103,7 +6190,9 @@ boolean inc_penalties;
 		if(OLD_P_SKILL(P_SHIEN) >= P_SKILLED) curskill++;
 		if(OLD_P_SKILL(P_SHIEN) >= P_EXPERT) curskill++;
 	}
-	
+
+	curskill = min(curskill, maxskill);
+
 	if(Air_crystal){
 		if(WIND_SKILL(p_skill))
 			INCR_CURSKILL;
@@ -6144,9 +6233,7 @@ boolean inc_penalties;
 			delta = 1; /* Want Should have SOME effect */
 		curskill = max(curskill - delta, P_UNSKILLED);
 	}
-	
-	curskill = min(curskill, maxskill);
-	
+
 	return curskill;
 }
 

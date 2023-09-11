@@ -1085,7 +1085,7 @@ You have an odd feeling this may be the last time you ever come here.
 We are hopeless..."
 %E
 %Cp Brd 00007
-"Hurry, %p!  %lC are waiting for you!!"
+"Hurry, %p!  %lC is waiting for you!!"
 %E
 %Cp Brd 00008
 "%ns minions attacked us without warning!"
@@ -1143,7 +1143,7 @@ for you will demand at least %Ra. Go, now, train yourself in
 the arts you learned here, and return when you become more experienced."
 %E
 %Cc Brd 00020
-"What is that, %p? You had deviated from the paths of %d?
+"What is that, %p? You have deviated from the paths of %d?
 
 "Remember what I taught you: music is a gift from the gods.
 If you can not harmonize yourself with %d, you will not be able
@@ -1408,18 +1408,18 @@ You reach out as well, and together you bridge the distance.
 A bloody form now hangs before you, a form that may once have been
 a man, now savaged by great beasts. So violent was the attack that
 the beasts' teeth were torn from their sockets, and lodged in the
-man's skin. The shear variety of teeth bears mute witness to the
+man's skin. The sheer variety of teeth bears mute witness to the
 number of assailants that dogged the man.
 
 The thousand whisperers speak as one: "Dahlver-Nar; Dahlver of the
 teeth; the first to listen, the first to speak. Dahlver-Nar, of
 the Gates of Teeth, who built the way through which we reach."
 
-The bloody form moans in pain and paws at it's ruined, 
+The bloody form moans in pain and paws at its ruined, 
 toothless mouth with its ruined, tooth-torn hands.
 
 "Another now seeks to close those Gates. A mortal man, who died
-and yet walked on, who moulderd to dust, and yet thought on.
+and yet walked on, who mouldered to dust, and yet thought on.
 Acererak the Devourer, Acererak the skull; who lives and stands
 and thinks now on both sides of the Gates, who has but to bite
 down, to cut off the breeze through which we talk, to sever 
@@ -1578,7 +1578,7 @@ For some reason, you think that this may be the last time you will
 enter %H.
 %E
 %Cp Cav 00005
-"We have not been able to gather as much food since the Giants sealed
+"We have not been able to gather as much food since the Dragons sealed
 off our access to the outer world."
 %E
 %Cp Cav 00006
@@ -2136,7 +2136,7 @@ You have the oddest feeling that this may be the last time you
 are to visit %H.
 %E
 %Cp Dhl 00005
-"We were sent by the surface alliance to investigate the Underdark disturbance"
+"We were sent by the surface alliance to investigate the Underdark disturbance."
 %E
 %Cp Dhl 00006
 "The demonic incursion has been delt with, but now something drives these kuo-toa against you."
@@ -2188,17 +2188,17 @@ our last meeting?"
 with you and your skills have improved."
 %E
 %Cc Dhl 00018
-"You have become polluted my %S.
+"You have become polluted by %S.
 
-"The cadence has turned away from you. Begon from this place,
+"The cadence has turned away from you. Begone from this place,
 inflict no more harm on your %shood. Lolth will be happy to
 hear that you are once again practicing your arts on the
 unsuspecting, but I hope you will someday find forgiveness."
 %E
 %Cc Dhl 00019
 "Alas, %p, you are yet too inexperienced to deal with the rigors
-of such a task.  You must be able to draw on the knowledge of botany,
-vetenary, and alchemy before I can send you on this quest with good
+of such a task.  You must be able to draw on the knowledge of anatomy,
+botany, and alchemy before I can send you on this quest with good
 conscience.
 
 "Return when you wear %Ra's caduceus."
@@ -2589,7 +2589,7 @@ She shivers for a moment longer, then lies still.
 %E
 %Cc Dro 00081
 "%pC!  You have destroyed the foul heretics!  I only wish %n 
-had been taken alive, I would have liked to ... instruct her as to 
+had been taken alive, I would have liked to... instruct her as to 
 the error of her ways.
 
 "Your name will be entered in the annals of Lolth, and the tale of how
@@ -3219,7 +3219,7 @@ When Durin woke and walked alone."
 "War is gathering."
 %E
 %Cp Dnb 00014
-"Is that truely %o that I see you carrying?"
+"Is that truly %o that I see you carrying?"
 %E
 %Cc Dnb 00015
 "%pC!  Thank %d you have been called back.
@@ -3314,7 +3314,7 @@ Moria."
 %E
 %Cc Dnb 00035
 You find that the Gate-stream has been dammed, turning the 
-shallow  valley before the Walls of Moria into a dark still 
+shallow valley before the Walls of Moria into a dark still 
 lake. Neither sky nor sun is reflected on its sullen 
 surface.
 
@@ -3475,7 +3475,7 @@ monstrous spiders that live there."
 "So, tell us how you entered %i, in case some new evil arises there."
 %E
 %Cp Elf 00014
-"Is that truely %o that I see you carrying?"
+"Is that truly %o that I see you carrying?"
 %E
 %Cc Elf 00015
 "%pC!  You have returned!  Thank %d.
@@ -3818,7 +3818,7 @@ her into hollow oblivion!"
 "Stand and fight, or flee forever coward!"
 %E
 %Cp Hdf 00053
-"Give back my scepter, vermine!"
+"Give back my scepter, vermin!"
 %E
 %Cp Hdf 00060
 "Perish!"
@@ -3851,7 +3851,7 @@ her into hollow oblivion!"
 "My knights will break you, like they did that foolish crow!"
 %E
 %Cc Hdf 00070
-As you pick up this metalic scepter, a blade of magic ice
+As you pick up this metallic scepter, a blade of magic ice
 springs from the end. The designs on the scepter match the
 carvings on the cathedral's ruined stonework, but the truth
 of the matter is lost like snow on the wind.
@@ -3959,8 +3959,8 @@ arts on the unsuspecting."
 %E
 %Cc Hea 00019
 "Alas, %p, you are yet too inexperienced to deal with the rigors
-of such a task.  You must be able to draw on the knowledge of botany,
-vetenary, and alchemy before I can send you on this quest with good
+of such a task.  You must be able to draw on the knowledge of anatomy,
+botany, and alchemy before I can send you on this quest with good
 conscience.
 
 "Return when you wear %Ra's caduceus."
@@ -4249,7 +4249,7 @@ teachings accross the Underdark.  Already we have been
 attacked by his followers, who bear a black-web sigil
 as a token of their treachery.
 
-"You have been choosen as Lolth's instrument in this.
+"You have been chosen as Lolth's instrument in this.
 Travel to the surface of the world, locate Tower
 Xaxox near Firestorm Peak, and bring justice to Daruth
 before he can endanger more of your brothers with his
@@ -4409,7 +4409,7 @@ in for the centuries of his absense.  Little is known about the creation
 of this artifact, though it seems related to the black web symbol used
 by his followers.
 
-"Would you like to use this armor in your quest, or would you 
+"Would you like to use this cloak in your quest, or would you 
 prefer the mithril coat, Spidersilk?"
 %E
 # assumes Spidersilk
@@ -4644,7 +4644,7 @@ Once again, you have returned to Tower Xaxox.
 "I'll kill you and anyone who ever gave you shelter!"
 %E
 %Cp Hdr 00167
-"Your fate will be wispered of for generations to come!"
+"Your fate will be whispered of for generations to come!"
 %E
 %Cp Hdr 00168
 "Your actions have disgraced your house!"
@@ -5236,7 +5236,7 @@ in this life, but I hope to at %ds feet."
 %Cc Mad 00001
 For a moment, you feel your grip on reality waver.
 Why are you back in the escape tunnel beneath 
-%H!? Did you ever truely leave? 
+%H!? Did you ever truly leave? 
 But wait, the portal you went through is still
 here.  You had heard your old savior 
 Lady Constance, who helped you escape the 
@@ -5311,7 +5311,7 @@ the yellow dream?"
 %E
 %Cc Mad 00018
 "The King has swallowed you, and you will die
-among the Lost. Begon before you consume your
+among the Lost. Begone before you consume your
 former compatriots!"
 %E
 %Cc Mad 00019
@@ -5456,7 +5456,7 @@ You have settled up with your old Doctor,
 but strangely the oppressive yellow taint
 does not fade away.
 
-If anything, the fulvous presure grows stronger
+If anything, the fulvous pressure grows stronger
 as the life fades from %n!
 %E
 %Cc Mad 00081
@@ -5540,7 +5540,7 @@ that quite a bit, now."
 you tried to make would just stick a dagger in your back.)"
 %E
 %Cp Ndr 00014
-"Is that truely %o that I see you carrying?  YOU are the favored
+"Is that truly %o that I see you carrying?  YOU are the favored
 of Lolth?"
 %E
 %Cc Ndr 00015
@@ -5965,7 +5965,7 @@ you come back?
 %E
 %Cc Nhd 00070
 %oC is heavy with the weight of memories.  It is possible you can
-salvage something of you house with this.
+salvage something of your house with this.
 
 You must now return with it without delay.  The girl's life may
 depend on your haste.
@@ -5998,7 +5998,7 @@ efforts.
 "Take %o with you, on your quest for
 the Amulet.
 
-"Goodbye, F- Farewell"
+"Goodbye, F- Farewell!"
 %E
 %Cc Nhd 00082
 "You must go, now!
@@ -6026,7 +6026,7 @@ efforts.
 "Take %o with you, on your quest for
 the Amulet.
 
-"Thank you, F- Farewell"
+"Thank you, F- Farewell!"
 %E
 #
 #       Noble
@@ -6040,7 +6040,7 @@ the comforts of home. But wait! What are those banners in the distance?
 Once again, you return to %H.
 %E
 %Cp Nob 00003
-Again you return to %H.  You fear the rebelion may soon overwhelm
+Again you return to %H.  You fear the rebellion may soon overwhelm
 the keep.
 %E
 %Cp Nob 00005
@@ -6118,7 +6118,7 @@ five of swords.
 "With her stolen authority, %n raised
 a peasant revolt and routed your army."
 
-%lC gathers up the cards, suffles the deck, and
+%lC gathers up the cards, shuffles the deck, and
 resumes drawing. Again, the first card is the zero of trumps,
 this time followed by the three and seven of wands, the
 queen and ten of swords, and finally the ten of trumps.

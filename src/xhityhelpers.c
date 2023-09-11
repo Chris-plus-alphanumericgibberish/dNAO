@@ -1092,6 +1092,7 @@ int aatyp;
 	case AT_STNG:
 	case AT_ENGL:
 	case AT_TENT:
+	case AT_TONG:
 	default:
 		w_mask = 0L;		/* no defense available */
 		break;
@@ -2534,6 +2535,9 @@ struct attack * attk;
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 		}
+		if(otmp->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
+			do_digging_impact(magr, otmp, tarx + dx, tary + dy);
+		}
 	}
 	if(u.uinsight >= 30){
 		//45 degree rotation
@@ -2561,6 +2565,9 @@ struct attack * attk;
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 			}
 		}
+		if(otmp->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
+			do_digging_impact(magr, otmp, x(magr) + nx, y(magr) + ny);
+		}
 		//-45 degree rotation
 		nx = sgn(dx-dy);
 		ny = sgn(dx+dy);
@@ -2585,6 +2592,9 @@ struct attack * attk;
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 			}
+		}
+		if(otmp->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
+			do_digging_impact(magr, otmp, x(magr) + nx, y(magr) + ny);
 		}
 	}
 	otmp->otyp = CLUB;
@@ -2948,5 +2958,81 @@ struct attack * attk;
 	}
 	return result;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/* Mercurial weapons may strike behind primary target if the wielder is powerful enough */
+/////////////////////////////////////////////////////////////////////////////////////////
+int
+hit_with_streaming(magr, otmp, tarx, tary, tohitmod, attk)
+struct monst * magr;
+struct obj * otmp;
+int tarx;
+int tary;
+int tohitmod;
+struct attack * attk;
+{
+	int subresult = 0;
+	boolean youagr = magr == &youmonst;
+	/* try to find direction (u.dx and u.dy may be incorrect) */
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	int nx, ny;
+	int result = 0;
+	if(!(isok(tarx - dx, tary - dy) &&
+		x(magr) == tarx - dx &&
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if (isok(tarx + dx, tary + dy)){
+		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+								u.uswallow ? u.ustuck : 
+								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+								(struct monst *)0;
+		if (mdef2 
+			&& (!DEADMONSTER(mdef2))
+			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+				(youagr && !mdef2->mpeaceful))
+		){ //Can hit a worm multiple times
+			int vis2 = VIS_NONE;
+			if(youagr || canseemon(magr))
+				vis2 |= VIS_MAGR;
+			if(mdef2 == &youmonst || canseemon(mdef2))
+				vis2 |= VIS_MDEF;
+			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		}
+	}
+	if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && (youagr ? (u.uinsight > 60) : (mlev(magr) > 30)) && isok(tarx + 2*dx, tary + 2*dy)){
+		tarx += dx;
+		tary += dy;
+		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+								u.uswallow ? u.ustuck : 
+								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+								(struct monst *)0;
+		if (mdef2 
+			&& (!DEADMONSTER(mdef2))
+			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+				(youagr && !mdef2->mpeaceful))
+		){ //Can hit a worm multiple times
+			int vis2 = VIS_NONE;
+			if(youagr || canseemon(magr))
+				vis2 |= VIS_MAGR;
+			if(mdef2 == &youmonst || canseemon(mdef2))
+				vis2 |= VIS_MDEF;
+			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		}
+	}
+	return result;
+}
+
 
 

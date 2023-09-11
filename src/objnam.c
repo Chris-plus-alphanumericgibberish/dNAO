@@ -1020,7 +1020,7 @@ boolean dofull;
 				Strcat(buf, "silver-feather-encrusted ");
 		}
 		
-		if (check_oprop(obj, OPROP_WRTHW) && obj->known)
+		if (check_oprop(obj, OPROP_WRTHW) && obj->known && !check_oprop(obj, OPROP_ELFLW))
 			Strcat(buf, "wrathful ");
 		
 		if (check_oprop(obj, OPROP_ELFLW))
@@ -1070,6 +1070,36 @@ boolean dofull;
 				break;
 				default:
 					Strcat(buf, "stormwrapped ");
+				break;
+			}
+		}
+		
+		if (check_oprop(obj, OPROP_SOTHW)){
+			switch(soth_weapon_damage_turn(obj)){
+				case AD_STTP:
+					Strcat(buf, "starry ");
+				break;
+				case AD_VAMP:
+					Strcat(buf, "grasping ");
+				break;
+				case AD_FIRE:
+					Strcat(buf, "groaning ");
+				break;
+				case AD_POLY:
+					Strcat(buf, "bubbling ");
+				break;
+				case AD_DESC:
+					Strcat(buf, "auroral ");
+				break;
+				case AD_DRST:
+					Strcat(buf, "stinking ");
+				break;
+				case AD_MAGM:
+					if(obj->oartifact != ART_ANNULUS || !litsaber(obj))
+						Strcat(buf, "cerulean ");
+				break;
+				case AD_MADF:
+					Strcat(buf, "magenta-burning ");
 				break;
 			}
 		}
@@ -1641,6 +1671,8 @@ char *buf;
 			return;
 	}
 force_add_material_name:
+	if (check_oprop(obj, OPROP_ELFLW))
+		return;
 	/* add on the adjective form of the object's material */
 	Strcat(buf, material_name(obj, TRUE));
 	Strcat(buf, " ");
@@ -4332,6 +4364,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "apodictic ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_AXIOW);
 
+		} else if (!strncmpi(bp, "flowing ", l=8)) {
+			add_oprop_list(oprop_list, OPROP_GSSDW);
+
 		} else if (!strncmpi(bp, "flaming ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_FIREW);
 		} else if (!strncmpi(bp, "forge-hot ", l=10)) {
@@ -4381,6 +4416,9 @@ int wishflags;
 
 		} else if (!strncmpi(bp, "drooling ", l=9) || !strncmpi(bp, "lashing ", l=8) || !strncmpi(bp, "staring ", l=8) || !strncmpi(bp, "stormwrapped ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_GOATW);
+
+		} else if (!strncmpi(bp, "sothoth_weapon ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_SOTHW);
 
 		} else if (!strncmpi(bp, "tactile ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_TACTB);
@@ -5173,6 +5211,14 @@ srch:
 			*wishreturn = WISH_SUCCESS;
 			return(&zeroobj);
 		}
+		if (!BSTRCMPI(bp, p - 5, "forge")) {
+			levl[u.ux][u.uy].typ = FORGE;
+			level.flags.nforges++;
+			pline("A forge.");
+			newsym(u.ux, u.uy);
+			*wishreturn = WISH_SUCCESS;
+			return(&zeroobj);
+		}
 		if(!BSTRCMP(bp, p-6, "throne")) {
 			levl[u.ux][u.uy].typ = THRONE;
 			pline("A throne.");
@@ -5743,9 +5789,11 @@ typfnd:
 			if(!wizwish){
 				u.uconduct.wisharti++;	/* KMH, conduct */
 
-				/* characters other than priests also have their god's likelyhood to grant artifacts decreased */
-				if(!Role_if(PM_PRIEST))
+				/* characters other than priests also have their god's likelyhood to grant artifacts decreased, as well as future cult gifts made more rare */
+				if(!Role_if(PM_PRIEST)){
 					u.uartisval += arti_value(otmp);
+					u.ucultsval += arti_value(otmp);
+				}
 			}
 		}
 	}

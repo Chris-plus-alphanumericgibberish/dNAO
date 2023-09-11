@@ -84,6 +84,9 @@ enum {
 	OPROP_BLAST,
 	OPROP_BRIL,
 	OPROP_CGLZ,
+	OPROP_RWTH,
+	OPROP_RBRD,
+	OPROP_SLIF,
 	OPROP_MORTW,
 	OPROP_TDTHW,
 	OPROP_SFUWW,
@@ -336,6 +339,7 @@ struct obj {
 #define ovar1_corpseRumorCooldown ovar1
 #define ovar1_secretsSecret ovar1
 #define ovar1_iea_upgrades ovar1
+#define ovar1_puzzle_steps ovar1
 
 #define ovar1_gober ovar1
 #define ovar1_seals ovar1
@@ -658,15 +662,28 @@ struct obj {
 				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW) && !check_oprop((otmp), OPROP_LESSER_ACIDW))
 #define goat_droolable(otmp) (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
 				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW))
+#define yog_magicable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp))\
+				&& !(otmp)->oartifact	\
+				&& !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_ACIDW) && !check_oprop((otmp), OPROP_LESSER_MAGCW))
+#define yog_windowable(otmp) (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
+				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW))
 #define sflm_able(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
-				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
+				&& (((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
+					|| ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT)))
 #define sflm_offerable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
-				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
+				&& (((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
+					|| ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT))\
 				&& !check_oprop(otmp, OPROP_SFLMW))
 #define sflm_mirrorable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_suit(otmp) || is_shield(otmp))\
 				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
 				&& !check_oprop(otmp, OPROP_REFL))
-#define sflm_glazeable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || (otmp)->oclass == ARMOR_CLASS)\
+#define sflm_glazeable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_SUIT)\
+				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
+#define sflm_wrathable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_GLOVES)\
+				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
+#define sflm_burdenable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_BOOTS)\
+				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
+#define sflm_lifeable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_HELM)\
 				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
 #define sflm_smeltable_silver(otmp)	(is_metallic(otmp) && (otmp)->obj_material != SILVER)
 #define sflm_smeltable_platinum(otmp)	(is_metallic(otmp) && (otmp)->obj_material != PLATINUM)
@@ -703,9 +720,11 @@ struct obj {
 									(otmp)->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA ||\
 									(otmp)->oartifact == ART_PEN_OF_THE_VOID\
 								) && is_pole(otmp))
-#define is_spear(otmp)	(otmp->oclass == WEAPON_CLASS && \
+#define is_spear(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 objects[otmp->otyp].oc_skill == P_SPEAR)
-#define is_farm(otmp)	(otmp->oclass == WEAPON_CLASS && \
+#define is_hammer(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
+			 objects[otmp->otyp].oc_skill == P_HAMMER)
+#define is_farm(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 objects[otmp->otyp].oc_skill == P_HARVEST)
 #define is_launcher(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 ((objects[otmp->otyp].oc_skill >= P_BOW && \

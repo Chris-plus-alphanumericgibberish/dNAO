@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "artifact.h"
+#include "xhity.h"
 
 int NDECL(dohomesit);
 
@@ -117,6 +118,9 @@ dosit()
 			You("sit on the desk chair.");
 			pline("It's reasonably comfortable.");
 		}
+	    else if (obj->otyp == BERGONIC_CHAIR){
+			return sit_bergonic(obj);
+		}
 	    else if (obj->otyp == EXPENSIVE_BED || obj->otyp == BED || obj->otyp == BEDROLL || obj->otyp == GURNEY){
 			if(obj->otyp == EXPENSIVE_BED){
 				You("climb into the bed.");
@@ -124,9 +128,9 @@ dosit()
 			else {
 				You("sit on the %s.", obj->otyp == BED ? "bed" : obj->otyp == BEDROLL ? "bedroll" : obj->otyp == GURNEY ? "gurney" : "unidentified bedlike object");
 			}
-			if(u.nextsleep <= monstermoves || obj->otyp == EXPENSIVE_BED){
+			if((u.nextsleep <= monstermoves && !(obj->otyp == BEDROLL && obj->nexthere)) || obj->otyp == EXPENSIVE_BED){
 				if(yn("Take a nap?") == 'y'){
-					u.nextsleep = moves+rnz(100);
+					u.nextsleep = moves+rnz(100)+180;
 					u.lastslept = moves;
 					fall_asleep(-rn1(180, 180), TRUE);
 				}
@@ -183,6 +187,17 @@ dosit()
 
 	    You(sit_message, "ladder");
 
+	} else if (IS_FORGE(typ)) {
+		You(sit_message, "forge");
+		burn_away_slime();
+		melt_frozen_air();
+		if (likes_fire(youmonst.data) || Fire_resistance) {
+			pline_The("forge feels nice and cozy.");
+			return MOVE_STANDARD;
+		}
+		pline("Argh!  This forge is hot!");
+		losehp(d(4, 4), /* lava damage */
+			"sitting on a forge", KILLED_BY);
 	} else if (is_ice(u.ux, u.uy)) {
 
 	    You(sit_message, defsyms[S_ice].explanation);
@@ -303,6 +318,11 @@ dosit()
 					  (Shock_resistance) ? "n" : " massive");
 				losehp(Shock_resistance ? rnd(6) : rnd(30),
 					   "electric chair", KILLED_BY_AN);
+				/* damage inventory */
+				if (!UseInvShock_res(&youmonst)){
+					if (!rn2(5)) (void) destroy_item(&youmonst, RING_CLASS, AD_ELEC);
+					if (!rn2(5)) (void) destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+				}
 				exercise(A_CON, FALSE);
 				break;
 				case 4:
@@ -494,6 +514,107 @@ dosit()
 		There("are no seats in here!");
 	else
 		pline("Having fun sitting on the %s?", surface(u.ux,u.uy));
+	return MOVE_STANDARD;
+}
+
+int
+sit_bergonic(chair)
+struct obj *chair;
+{
+	You("sit on %s.", the(xname(chair)));
+	if(chair->spe <= 0){
+		pline("It's reasonably comfortable.");
+	}
+	else {
+		chair->spe--;
+		pline("The chair's electrodes stick into your %s.", body_part(HEAD));
+		losehp(reduce_dmg(&youmonst, d(2,4), TRUE, FALSE), "electrodes", KILLED_BY);
+		pline("A%s electric shock shoots through your body!",
+			  (Shock_resistance) ? "n" : " massive");
+		losehp(Shock_resistance ? rnd(6) : rnd(30),
+			   "electric chair", KILLED_BY_AN);
+		/* damage inventory */
+		if (!UseInvShock_res(&youmonst)){
+			if (!rn2(5)) (void) destroy_item(&youmonst, RING_CLASS, AD_ELEC);
+			if (!rn2(5)) (void) destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
+		}
+		exercise(A_CON, FALSE);
+		switch(rn2(12)){
+			case 0:
+			case 10:
+				pline("That stimulated your mind!");
+				//Note: 2/3rds int, otherwise 50/50 wis/cha
+				(void) adjattrib(rn2(3) ? A_INT : rn2(2) ? A_WIS : A_CHA, 1, FALSE);
+			break;
+			case 1:
+			case 11:
+				pline("That fried your mind!");
+				//Note: 2/3rds wis, otherwise 50/50 int/cha
+				(void) adjattrib(rn2(3) ? A_WIS : rn2(2) ? A_INT : A_CHA, -1, FALSE);
+				make_confused(HConfusion+d(10,10), FALSE);
+			break;
+			case 2:
+				pline("That was mind-expending!");
+				if (!BClairvoyant)
+					do_vicinity_map(u.ux,u.uy);
+				/* at present, only one thing blocks clairvoyance */
+				else if (uarmh && uarmh->otyp == CORNUTHAUM)
+					You("sense a pointy hat on top of your %s.",
+					body_part(HEAD));
+				incr_itimeout(&HClairvoyant, rn1(500,500));
+			break;
+			case 3:
+				pline("That was an enlightening experience!");
+				(void)doenlightenment();
+			break;
+			case 4:
+				pline("Your make some insightful connections!");
+				if (invent) {
+					/* rn2(5) agrees w/seffects() */
+					identify_pack(rn2(5));
+				}
+				know_random_obj(2 + rn2(3) + rn2(5));
+			break;
+			case 5:
+				pline("Your mind broadcasts maddening dreams!");
+				aggravate();
+			break;
+			case 6:
+				pline("The chairs electrodes glow red-hot!");
+				/* damage inventory */
+				if (!UseInvFire_res(&youmonst)){
+					destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+					if (!rn2(6)) destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+					if (!rn2(10)) destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+				}
+				if(!Fire_resistance)
+					losehp(rnd(20), "red-hot electrodes", KILLED_BY);
+				/* other effects */
+				burn_away_slime();
+				melt_frozen_air();
+			break;
+			case 7:
+				if(uarmh && uarmh->spe < 5){
+					pline("Your %s vibrates slightly.", xname(uarmh));
+					uarmh->spe++;
+					adj_abon(uarmh, 1);
+				}
+				else {
+					pline("Your fore%s tingles for a moment.", body_part(HEAD));
+				}
+			break;
+			case 8:
+			{
+				int duration = rn1(200, 200);
+				pline("You fall into a nightmare-filled slumber!");
+				fall_asleep(-duration, TRUE);
+				make_confused(HConfusion + duration-10, FALSE);
+				make_hallucinated(HHallucination + duration-10, FALSE, 0L);
+				
+			}
+			break;
+		}
+	}
 	return MOVE_STANDARD;
 }
 

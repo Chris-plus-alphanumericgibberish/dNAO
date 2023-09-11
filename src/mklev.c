@@ -952,6 +952,7 @@ clear_level_structures()
 	level.damagelist = (struct damage *)0;
 
 	level.flags.nfountains = 0;
+	level.flags.nforges = 0;
 	level.flags.nsinks = 0;
 	
 	level.flags.goldkamcount_hostile = 0;
@@ -1291,6 +1292,9 @@ skip0:
 		if(!rn2(60)) {
 		    if(mkfeature(SINK, FALSE, croom))
 				x -= 20;
+		}
+		if(!rn2(40)) {
+		    mkfeature(FORGE, FALSE, croom);
 		}
 
 		if (x < 2) x = 2;
@@ -2009,6 +2013,13 @@ struct mkroom *croom;
 		/* Is it a "blessed" fountain? (affects drinking from fountain) */
 		if (!rn2(7)) levl[m.x][m.y].blessedftn = 1;
 		level.flags.nfountains++;
+		break;
+	case FORGE:
+		/* Put a fountain at m.x, m.y */
+		levl[m.x][m.y].typ = FORGE;
+		/* Is it a "blessed" forge? (affects drinking from forge) */
+		// if (!rn2(7)) levl[m.x][m.y].blessedftn = 1;
+		level.flags.nforges++;
 		break;
 	case SINK:
 		/* Put a sink at m.x, m.y */

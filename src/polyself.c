@@ -1646,6 +1646,11 @@ domindblast()
 {
 	struct monst *mtmp, *nmon;
 	int dice = 1, mfdmg;
+	int twin_dice = 0;
+	int round_dice;
+	boolean hit;
+	boolean twin = (check_mutation(TWIN_DREAMS) && u.specialSealsActive&SEAL_YOG_SOTHOTH) && (Role_if(PM_MADMAN) || has_mind_blast(youracedata));
+	boolean twinround;
 
 	if (u.uen < 10) {
 	    You("concentrate but lack the energy to maintain doing so.");
@@ -1656,6 +1661,11 @@ domindblast()
 
 	if(Role_if(PM_MADMAN))
 		dice += u.ulevel/14;
+	if(check_mutation(TWIN_DREAMS) && u.specialSealsActive&SEAL_YOG_SOTHOTH)
+		twin_dice += (u.ulevel+7)/14;
+	
+	if(!twin)
+		dice += twin_dice;
 
 	You("concentrate.");
 	pline("A wave of psychic energy pours out.");
@@ -1671,24 +1681,35 @@ domindblast()
 			continue;
 		if(mindless_mon(mtmp))
 			continue;
-		u_sen = (mon_resistance(mtmp,TELEPAT) && is_blind(mtmp)) || rlyehiansight(mtmp->data);
-		if (u_sen || (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10)) {
+		twinround = twin;
+		round_dice = dice;
+		u_sen = (mon_resistance(mtmp,TELEPAT) && (is_blind(mtmp) || species_blind_telepathic(mtmp->data))) || rlyehiansight(mtmp->data);
+		hit = u_sen || (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10);
+		if(!hit && twinround){
+			twinround = FALSE;
+			//reroll
+			hit = (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10);
+		}
+		if (hit) {
 			You("lock in on %s %s.", s_suffix(mon_nam(mtmp)),
 				u_sen ? "telepathy" :
 				mon_resistance(mtmp,TELEPAT) ? "latent telepathy" :
 				"mind");
-			mfdmg = d(dice, 15);
+			if(twinround)
+				round_dice += twin_dice;
+
+			mfdmg = d(round_dice, 15);
 			mtmp->mhp -= mfdmg;
 			mtmp->mstrategy &= ~STRAT_WAITFORU;
 			if (mtmp->mhp <= 0)
 				killed(mtmp);
 			else {
 				
-				if(dice >= 3){
+				if(round_dice >= 3){
 					mtmp->mstdy = max(mfdmg, mtmp->mstdy);
 					mtmp->encouraged = min(-1*mfdmg, mtmp->encouraged);
 				}
-				if(dice >= 5){
+				if(round_dice >= 5){
 					mtmp->mstun = 1;
 					mtmp->mconf = 1;
 				}
@@ -2063,7 +2084,8 @@ int part;
 		"spine",		"toe",		"hair", 		"blood",
 		"lung",			"nose", 	"stomach",		"heart",
 		"skin",			"flesh",	"beat",			"bones",
-		"ear", 			"ears",		"creak",		"crack"},
+		"ear", 			"ears",		"tongue",		"brain",
+		"creak",		"crack"},
 	*uvuudaum_parts[] = { 
 		"arm",			"eye",		"headspike",	"finger",
 		"fingertip",	"hand",		"hand",			"handed", 
@@ -2071,7 +2093,8 @@ int part;
 		"spine",		"finger",	"headspike", 	"ichor",
 		"pore",			"pore", 	"stomach",		"heart",
 		"skin",			"flesh",	"beat",			"bones",
-		"clairaudience", "clairaudience", "creak",	"crack"},
+		"clairaudience", "clairaudience","fingertip","brain",
+		"creak",	"crack"},
 	*clockwork_parts[] = { 
 		"arm", 			"photoreceptor",	"face",			"grasping digit",
 		"digit-tip",	"foot",				"manipulator",	"manipulatored",
@@ -2079,7 +2102,8 @@ int part;
 		"chassis",		"toe",				"doll-hair",	"oil",
 		"gear",			"chemoreceptor",	"keyhole",		"mainspring",
 		"foil skin",	"brass structure",	"tick",			"armature",
-		"phonoreceptor","phonoreceptors",	"creak",		"bend"},
+		"phonoreceptor","phonoreceptors",	"spring",		"card deck",
+		"creak",		"bend"},
 	*doll_parts[] = { 
 		"arm", 			"glass eye",		"face",			"finger",
 		"fingertip",	"foot",				"hand",			"handed",
@@ -2087,7 +2111,8 @@ int part;
 		"trunk",		"toe",				"doll-hair",	"ichor",
 		"lip",			"nose",				"wood",			"wood",
 		"painted skin",	"wood",				"...it doesn't sound like much", "wood",
-		"ear",			"ears",				"creak",		"crack"},
+		"ear",			"ears",				"cloth tongue",	"seawater",
+		"creak",		"crack"},
 	*android_parts[] = { 
 		"arm", 			"photoreceptor",	"face",			"finger",
 		"fingertip",	"foot",				"hand",			"handed",
@@ -2095,7 +2120,8 @@ int part;
 		"dorsal wiring","toe",				"doll-hair",	"oily red liquid",
 		"vocal pump",	"chemoreceptor",	"black box",	"heart",
 		"cosmetic layer","plasteel",		"pump",			"armature",
-		"phonoreceptor","phonoreceptors",	"flex",			"crack"},
+		"phonoreceptor","phonoreceptors",	"wire",			"CPU housing",
+		"flex",			"crack"},
 	*assessor_parts[] = {
 		"arm", 			"eye", 				"central eye", 	"grasping digit",
 		"digit-tip",	"foot",				"manipulator",	"manipulatored",
@@ -2103,7 +2129,8 @@ int part;
 		"chassis", 		"toe", 				"topspike",		"oil",
 		"valve",		"olfactory nerve",	"gearbox",		"eternal core",
 		"armor",		"brass structure",	"tick",			"armature",
-		"phonoreceptor","phonoreceptors",	"creak",		"bend"},
+		"phonoreceptor","phonoreceptors",	"tongue",		"brain",
+		"creak",		"bend"},
 	*audient_parts[] = {
 		"distal limb",	"photoreceptor",	"front",		"articulated distal spike",
 		"spike-tip",	"ventral needle",	"distal spike",	"spiked",
@@ -2111,7 +2138,8 @@ int part;
 		"chassis",		"needle-tip",		"spores",		"oil",
 		"gear",			"gill",				"hyphal network","eternal core",
 		"armor",		"brass structure",	"tick",			"armature",
-		"phonoreceptor horn","phonoreceptor horn","creak",	"bend"},
+		"phonoreceptor horn","phonoreceptor horn","hypha",	"stolon",
+		"creak",	"bend"},
 	*jelly_parts[] = {
 		"pseudopod",		"dark spot",		"front",		"pseudopod extension",
 		"pseudopod extremity","pseudopod root", "grasp", 		"grasped", 
@@ -2119,7 +2147,8 @@ int part;
 		"centriole",		"pseudopod extremity","ripples",	"plasm",
 		"tiny cilia",		"chemosensor",		"vacuoles",		"cytoskeletal structure",
 		"membrane",			"cortex",			"shift",		"cytoskeletal filaments",
-		"membrane",			"membrane",			"creak",		"crack" },
+		"membrane",			"membrane",			"pseudopod",	"nucleus",
+		"creak",			"crack" },
 	*animal_parts[] = {
 		"forelimb", 		"eye", 				"face", 		"foreclaw",
 		"claw tip",			"rear claw", 		"foreclaw", 	"clawed", 
@@ -2127,7 +2156,8 @@ int part;
 		"spine", 			"rear claw tip",	"fur", 			"blood", 
 		"lung", 			"nose", 			"stomach",		"heart",
 		"skin",				"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",		"crack" },
+		"ear",				"ears",				"tongue",		"brain",
+		"creak",			"crack" },
 	*insect_parts[] = { 
 		"forelimb",			"compound eye",		"face",			"foreclaw",
 		"claw tip",			"rear claw", 		"foreclaw", 	"clawed", 
@@ -2135,7 +2165,8 @@ int part;
 		"notochord", 		"rear claw tip",	"setae", 		"haemolymph", 
 		"spriacle", 		"antenna", 			"stomach",		"dorsal vessel",
 		"exoskeleton",		"chitin",			"pulse",		"apodeme",
-		"tympanum",			"tympana",			"creak",		"tear" },
+		"tympanum",			"tympana",			"haustellum",	"brain",
+		"creak",		"tear" },
 	*bird_parts[] = { 
 		"wing", 			"eye", 				"face", 		"wing", 
 		"wing tip",			"foot", 			"wing", 		"winged", 
@@ -2143,7 +2174,8 @@ int part;
 		"spine", 			"toe",				"feathers", 	"blood",
 		"lung", 			"bill", 			"stomach",		"heart",
 		"skin",				"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",		"crack" },
+		"ear",				"ears",				"tongue",		"brain",
+		"creak",			"crack" },
 	*horse_parts[] = {
 		"foreleg", 			"eye", 				"face", 		"forehoof",
 		"hoof tip",			"rear hoof", 		"foreclaw", 	"hooved", 
@@ -2151,7 +2183,8 @@ int part;
 		"backbone", 		"rear hoof tip",	"mane", 		"blood", 
 		"lung", 			"nose", 			"stomach",		"heart",
 		"skin",				"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",		"crack"},
+		"ear",				"ears",				"tongue",		"brain",
+		"creak",			"crack"},
 	*sphere_parts[] = { 
 		"appendage", 		"optic nerve", 		"body", 		"tentacle", 
 		"tentacle tip", 	"lower appendage",	"tentacle",		"tentacled",
@@ -2159,7 +2192,8 @@ int part;
 		"body", 			"lower tentacle tip","surface",		"life force",
 		"retina",			"olfactory nerve",	"interior",		"core",
 		"surface",			"subsurface layers","pulse",		"auras",
-		"tympanic membrane","tympanic membranes","flicker",		"blink out"},
+		"tympanic membrane","tympanic membranes","tentacle",	"brain",
+		"flicker",			"blink out"},
 	*spore_parts[] = { 
 		"stalk", 			"visual area", 		"front", 		"stalk", 
 		"stalk tip", 		"stalk",			"stalk",		"stalked",
@@ -2167,7 +2201,8 @@ int part;
 		"body", 			"stalk tip",		"surface",		"sap",
 		"lip",				"lip",				"interior",		"spores",
 		"annulus",			"flesh",			"...they don't sound like much","cells",
-		"tympanic area",	"tympanic area",	"flex",			"crack"},
+		"tympanic area",	"tympanic area",	"hypha",		"spore",
+		"flex",				"crack"},
 	*fungus_parts[] = {
 		"mycelium", 		"visual area", 		"front", 					"hypha",
 		"hypha", 			"root", 			"strand", 					"stranded",
@@ -2175,7 +2210,8 @@ int part;
 		"root", 			"rhizome tip",		"spores", 					"juice", 
 		"gill", 			"gill", 			"interior",					"hyphal network",
 		"cuticle",			"flesh",			"...it doesn't sound like much","hyphae",
-		"tympanic area",	"tympanic area",	"stretch",					"tear" },
+		"tympanic area",	"tympanic area",	"hypha",					"stolon",
+		"stretch",					"tear" },
 	*tree_parts[] = { 
 		"limb", 	"visual area",	"front",						"leaf",
 		"leaftip",	"taproot",		"twig",							"twigged",
@@ -2183,7 +2219,8 @@ int part;
 		"heartwood","root-tip", 	"leaves", 						"sap",
 		"stoma", 	"stoma",		"xylem",						"phloem",
 		"bark", 	"sapwood",		"...it doesn't sound like much","wood",
-		"tympanic area","tympanic area","creak",					"crack" },
+		"tympanic area","tympanic area","tendril",					"apical meristem",
+		"creak",	"crack" },
 	*vipertree_parts[] = { 
 		"coil", 	"eye",			"face",				"mouth",
 		"fang",		"taproot",		"viper head",		"headed",
@@ -2191,7 +2228,8 @@ int part;
 		"heartwood","root-tip", 	"scales", 			"blood",
 		"lung", 	"nose",			"stomach",			"heart",
 		"scales", 	"sapwood",		"beat",				"wood",
-		"ear",		"ears",			"creak",			"crack" },
+		"ear",		"ears",			"forked tongue",	"apical brain",
+		"creak",	"crack" },
 	*blackflower_parts[] = {
 		"arm",			"blank eye",	"face",			"finger",
 		"fingertip",	"petal"			"hand",			"handed", 
@@ -2199,7 +2237,8 @@ int part;
 		"spine",		"petal-tip", 	"hair", 		"pale fluid",
 		"lung",			"nose", 		"stomach",		"heart",
 		"skin",			"flesh",		"beat",			"bones",
-		"ear",			"ears",			"creak",		"crack" },
+		"ear",			"ears",			"tongue",		"brain",
+		"creak",		"crack" },
 	*plant_parts[] = {
 		"shoot", 		"visual area",	"front",						"leaf",
 		"leaftip",		"lateral root",	"twig",							"twigged",
@@ -2207,7 +2246,8 @@ int part;
 		"vascular tissue","root-tip", 	"leaves", 						"sap",
 		"stoma", 		"stoma",		"xylem",						"phloem",
 		"epidermis",	"flesh",		"...it doesn't sound like much","stem",
-		"tympanic area","tympanic area","stretch",						"tear" },
+		"tympanic area","tympanic area","tendril",						"apical bud",
+		"stretch",		"tear" },
 	*mandrake_parts[] = { 
 		"arm-root", 	"eye spot",		"root-face",					"arm-root tip",
 		"arm-root hair","leg-root tip",	"arm-root end",					"rooted",
@@ -2215,7 +2255,8 @@ int part;
 		"spine",		"leg-root hair","apical bud", 					"bloody sap",
 		"stoma", 		"nose spots",	"xylem",						"phloem",
 		"epidermis",	"flesh",		"...it doesn't sound like much","stem",
-		"ear spot",		"ear spots",	"stretch",						"tear" },
+		"ear spot",		"ear spots",	"tendril",						"apical bud",
+		"stretch",		"tear" },
 	*willow_parts[] = { 
 		"limb", 	"visual area",	"front",						"leaf",
 		"leaftip",	"taproot",		"twig",							"twigged",
@@ -2223,7 +2264,8 @@ int part;
 		"spine",	"root-tip", 	"leaves", 						"blood",
 		"stoma", 	"stoma",		"xylem",						"phloem",
 		"bark", 	"flesh",		"...it doesn't sound like much","wood",
-		"tympanic area","tympanic area","creak",					"crack" },
+		"tympanic area","tympanic area","tendril",					"brain",
+		"creak",	"crack" },
 	*birch_parts[] = { 
 		"limb", 		"eye",			"face",			"thorn",
 		"thorn-tip",	"crawling-root","scaffold",		"scaffolded",
@@ -2231,7 +2273,8 @@ int part;
 		"spine",		"root-tip", 	"hair", 		"sap",
 		"lung", 		"nose",			"stomach",		"heart",
 		"bark", 		"sapwood",		"beat",			"wood",
-		"ear",			"ears",			"creak",		"crack" },
+		"ear",			"ears",			"tongue",		"brain",
+		"creak",		"crack" },
 	*vortex_parts[] = {
 		"region",			"eye",				"front",		"minor current",
 		"minor current",	"lower current",	"swirl",		"swirled",
@@ -2239,7 +2282,8 @@ int part;
 		"currents",			"edge",				"currents",		"life force",
 		"center",			"leading edge", 	"interior",		"core",
 		"vaporous currents","subsurface currents","pulse",		"currents",
-		"vapor",			"vapor",			"weaken",		"falter" },
+		"vapor",			"vapor",			"swirl",		"core",
+		"weaken",		"falter" },
 	*snake_parts[] = {
 		"vestigial limb", 	"eye",				"face",			"large scale",
 		"large scale tip",	"rear region",		"scale gap",	"scale gapped",
@@ -2247,7 +2291,8 @@ int part;
 		"length",			"rear scale",		"scales",		"blood",
 		"lung",				"forked tongue",	"stomach",		"heart",
 		"scales",			"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",		"crack" },
+		"ear",				"ears",				"forked tongue","brain",
+		"creak",		"crack" },
 	*naunet_parts[] = {
 		"watery tentacles", "eye",				"face",			"tentacle",
 		"tentacle tip",		"rear region",		"tentacle",		"tentacled",
@@ -2255,7 +2300,8 @@ int part;
 		"length",			"rear surface",		"watery surface","blood",
 		"foamy depths",		"forked tongue",	"hungry depths","swirling depths",
 		"watery surface",	"waters",			"flow",			"waters",
-		"ear",				"ears",				"bubble",		"boil" },
+		"ear",				"ears",				"forked tongue","brain",
+		"bubble",		"boil" },
 	*fish_parts[] = {
 		"fin",				"eye",				"premaxillary",	"pelvic axillary",
 		"pelvic fin",		"anal fin",			"pectoral fin", "finned",
@@ -2263,7 +2309,8 @@ int part;
 		"dorsal fin",		"caudal fin",		"scales",		"blood",
 		"gill",				"nostril",			"stomach",		"heart",
 		"scales",			"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",		"crack" },
+		"ear",				"ears",				"tongue",		"brain",
+		"creak",		"crack" },
 	*snakeleg_humanoid_parts[] = {
 		"arm",				"eye",				"face",			"finger",
 		"fingertip",		"serpentine lower body","hand",		"handed", 
@@ -2271,7 +2318,8 @@ int part;
 		"spine",			"tail-tip",			"hair",			"blood",
 		"lung",				"nose", 			"stomach",		"heart",
 		"scales",			"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",		"crack" },
+		"ear",				"ears",				"tongue",		"brain",
+		"creak",		"crack" },
 	*dracae_parts[] = {
 		"arm",				"eye",				"face",			"finger",
 		"claw tip",			"gooey proleg",		"hand",			"handed", 
@@ -2279,7 +2327,8 @@ int part;
 		"notochord",		"tentacle-tip",		"tendrils",		"sol",
 		"spongiform jelly",	"chemopores", 		"vacuoles",		"heart",
 		"mucous membrane",	"protoplasm",		"beat",			"cytoskeletal filaments",
-		"tympanic membrane","tympanic membranes","creak",		"crack" },
+		"tympanic membrane","tympanic membranes","tongue",		"brain",
+		"creak",		"crack" },
 	*centauroid_parts[] = {
 		"arm", 				"eye", 				"face", 		"finger",
 		"fingertip", 		"hoof", 			"hand", 		"handed",
@@ -2287,7 +2336,8 @@ int part;
 		"spine", 			"hoof-nail", 		"hair",			"blood", 
 		"lung", 			"nose", 			"stomach",		"heart",
 		"skin",				"flesh",			"beat",			"bones",
-		"ear",				"ears",				"creak",		"crack" };
+		"ear",				"ears",				"tongue",		"brain",
+		"creak",		"crack" };
 	/* claw attacks are overloaded in mons[]; most humanoids with
 	   such attacks should still reference hands rather than claws */
 	static const char not_claws[] = {
@@ -2470,7 +2520,12 @@ int damtype, dam;
 	 * have a monster-specific slow/haste so there is no way to
 	 * restore the old velocity once they are back to human.
 	 */
-	if (u.umonnum != PM_FLESH_GOLEM && u.umonnum != PM_IRON_GOLEM && u.umonnum != PM_GREEN_STEEL_GOLEM && u.umonnum != PM_CHAIN_GOLEM && u.umonnum != PM_ARGENTUM_GOLEM)
+	if (u.umonnum != PM_FLESH_GOLEM
+	 && u.umonnum != PM_IRON_GOLEM
+	 && u.umonnum != PM_GREEN_STEEL_GOLEM
+	 && u.umonnum != PM_CHAIN_GOLEM
+	 && u.umonnum != PM_ARGENTUM_GOLEM
+	)
 		return;
 	switch (damtype) {
 		case AD_EELC:

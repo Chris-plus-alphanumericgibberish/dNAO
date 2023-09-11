@@ -104,6 +104,21 @@ static const char *goattitles[] = {
     "the Fecund Darkness",
 };
 
+char * yogtitles[] =  {
+	"the key",
+	"the gate",
+	"the knower of the gate",
+	"the key and the guardian of the gate",
+	"the key and the gate",
+	"the past, present, and future",
+	"the opener of the way",
+	"the lurker at the threshold",
+	"the all-in-one",
+	"the one-in-all",
+	"the BEING",
+	"Yog-Sothoth",
+};
+
 /* values calculated when prayer starts, and used when completed */
 static int p_god;
 static int p_trouble;
@@ -168,6 +183,7 @@ static int p_type;
 #define TROUBLE_STUNNED		      (-13)
 #define TROUBLE_CONFUSED	      (-14)
 #define TROUBLE_HALLUCINATION	  (-15)
+#define TROUBLE_ENERGYMOD	      (-16)
 
 /* We could force rehumanize of polyselfed people, but we can't tell
    unintentional shape changes from the other kind. Oh well.
@@ -218,6 +234,7 @@ in_trouble()
 	if(u.umorgul && on_altar()) return(TROUBLE_MORGUL);
 	if(u.umummyrot && on_altar()) return(TROUBLE_MROT);
 	if(u.uhpmod < -18 && on_altar()) return(TROUBLE_HPMOD);
+	if(u.uenbonus < -18 && on_altar()) return(TROUBLE_ENERGYMOD);
 	if(u.ulycn >= LOW_PM) return(TROUBLE_LYCANTHROPE);
 	if(near_capacity() >= EXT_ENCUMBER && AMAX(A_STR)-ABASE(A_STR) > 3)
 		return(TROUBLE_COLLAPSING);
@@ -504,6 +521,11 @@ register int trouble;
 			You_feel("restored to health.");
 		    u.uhpmod = max(u.uhpmod, 0);
 		    calc_total_maxhp();
+		    break;
+	    case TROUBLE_ENERGYMOD:
+			You_feel("charged up.");
+		    u.uenbonus = max(u.uenbonus, 0);
+		    calc_total_maxen();
 		    break;
 	    case TROUBLE_LYCANTHROPE:
 		    you_unwere(TRUE);
@@ -3290,6 +3312,7 @@ boolean offering;
 #define GOATBOON_ACID	6
 #define GOATBOON_DROOL	7
 #define GOATBOON_RED_WORD	8
+#define GOATBOON_MUTATE	9
 int
 dogoat_menu(greater_boon)
 boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
@@ -3335,6 +3358,16 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 	add_menu(tmpwin, NO_GLYPH, &any,
 		inclet++, 0, ATR_NONE, buf,
 		MENU_UNSELECTED);
+
+	if(u.shubbie_mutagen >= (u.shubbie_mutations+2)*(u.shubbie_mutations+3)/2){
+		Sprintf(buf, "her Change");
+		any.a_int = GOATBOON_MUTATE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+	
 	/* the following boons are permanent boosters, and so require devotion */
 	if (greater_boon) {
 
@@ -3354,12 +3387,12 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 			Sprintf(buf, "her Knowledge");
 			any.a_int = GOATBOON_RED_WORD;
 			add_menu(tmpwin, NO_GLYPH, &any,
-				inclet++, 0, ATR_NONE, buf,
+				inclet, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
+		inclet++;
 
 	}
-	
 	end_menu(tmpwin, "You have the Goat's attention...");
 
 	how = PICK_ONE;
@@ -3373,11 +3406,68 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 	return 0;
 }
 
+boolean
+shub_nugganoth_mutation()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Pick mutation:");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	int mut;
+	int i;
+	extern const int shubbie_mutation_list[];
+	extern const struct mutationtype mutationtypes[];
+	for (mut = 0; shubbie_mutation_list[mut]; mut++){
+		if(!check_mutation(shubbie_mutation_list[mut])) for (i = 0; mutationtypes[i].mutation; i++){
+			if(shubbie_mutation_list[mut] == mutationtypes[i].mutation){
+				any.a_int = shubbie_mutation_list[mut];
+				add_menu(tmpwin, NO_GLYPH, &any,
+					inclet, 0, ATR_NONE, mutationtypes[i].name,
+					MENU_UNSELECTED);
+				break; //break out of inner loop
+			}
+		}
+		if(inclet == 'z')
+			inclet = 'A';
+		else
+			inclet++;
+	}
+	end_menu(tmpwin, "Your body is dissolving....");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	int picked;
+	if(n > 0){
+		picked = selected[0].item.a_int;
+		free(selected);
+	}
+	else return FALSE;
+
+	pline("Your body solidifies.");
+	confer_mutation(picked);
+	u.shubbie_mutations++;
+	return TRUE;
+}
+
 int
 commune_with_goat()
 {
 	const char * goatname = goattitles[rn2(SIZE(goattitles))];
 	const char blessable_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
+	int cultsval = Role_if(PM_MADMAN) ? 7*u.ucultsval/10 : u.ucultsval;
 
 	/* you must be an active cultist */
 	if (!u.shubbie_atten) {
@@ -3414,8 +3504,8 @@ commune_with_goat()
 	/* if you are devout enough (total accumulated credit), allow selecting permanent boons and boost the power of regular ones */
 	/* devotion required increases as per standard gift giving formula */
 	if(wizard)
-		pline("boon threshold: %d", 25*(10 + (u.uartisval * u.uartisval * 2 / 25)));
-	boolean greater_boon = u.shubbie_devotion > 25*(10 + (u.uartisval * u.uartisval * 2 / 25));
+		pline("boon threshold: %d", 25*(10 + (cultsval * cultsval * 2 / 25)));
+	boolean greater_boon = u.shubbie_devotion > 25*(10 + (cultsval * cultsval * 2 / 25));
 	struct obj * otmp = (struct obj *)0;
 	int menu_result = dogoat_menu(greater_boon);
 	int i;
@@ -3493,7 +3583,7 @@ commune_with_goat()
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
 				u.ugifts++;
-				u.uartisval += TIER_B;
+				u.ucultsval += TIER_B;
 			}
 			else {
 				cost = 0;
@@ -3513,7 +3603,7 @@ commune_with_goat()
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
 				u.ugifts++;
-				u.uartisval += TIER_S;
+				u.ucultsval += TIER_S;
 			}
 			else {
 				cost = 0;
@@ -3527,7 +3617,14 @@ commune_with_goat()
 			dropy(otmp);
 			at_your_feet("An object");
 			u.ugifts++;
-			u.uartisval += TIER_A;
+			u.ucultsval += TIER_A;
+			break;
+
+		case GOATBOON_MUTATE:
+			cost = 0;
+			if(shub_nugganoth_mutation()){
+				cost = 50;
+			}
 			break;
 
 		default:
@@ -3553,6 +3650,9 @@ commune_with_goat()
 #define FLAMEBOON_BURN_UNDEATH	9
 #define FLAMEBOON_BURN_SPIRIT	10
 #define FLAMEBOON_BURN_BEATITUDE	11
+#define FLAMEBOON_SHARE_BURDENS	12
+#define FLAMEBOON_RIGHTEOUS_WRATH	13
+#define FLAMEBOON_PRESERVE_LIFE	14
 int
 dosflm_menu(greater_boon)
 boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
@@ -3625,6 +3725,21 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 		add_menu(tmpwin, NO_GLYPH, &any,
 			inclet++, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
+		Sprintf(buf, "Focus the light to reveal righteous wrath");
+		any.a_int = FLAMEBOON_RIGHTEOUS_WRATH;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Focus the light to share burdens");
+		any.a_int = FLAMEBOON_SHARE_BURDENS;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Focus the light to preserve life");
+		any.a_int = FLAMEBOON_PRESERVE_LIFE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
 	}
 	
 	end_menu(tmpwin, "You stare into the silver flame...");
@@ -3643,6 +3758,7 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 int
 commune_with_silver_flame()
 {
+	int cultsval = Role_if(PM_MADMAN) ? 7*u.ucultsval/10 : u.ucultsval;
 	/* you must be an active cultist (redirects to mirror if you haven't, so this shouldn't actually happen) */
 	if (!u.silver_atten) {
 		pline1(nothing_happens);
@@ -3670,8 +3786,8 @@ commune_with_silver_flame()
 	/* if you are devout enough (total accumulated credit), allow selecting permanent boons and boost the power of regular ones */
 	/* devotion required increases as per standard gift giving formula */
 	if(wizard)
-		pline("boon threshold: %d", 25*(10 + (u.uartisval * u.uartisval * 2 / 25)));
-	boolean greater_boon = u.silver_devotion > 25*(10 + (u.uartisval * u.uartisval * 2 / 25));
+		pline("boon threshold: %d", 25*(10 + (cultsval * cultsval * 2 / 25)));
+	boolean greater_boon = u.silver_devotion > 25*(10 + (cultsval * cultsval * 2 / 25));
 	struct obj * otmp = (struct obj *)0;
 	int menu_result = dosflm_menu(greater_boon);
 	int i;
@@ -3742,7 +3858,7 @@ commune_with_silver_flame()
 					cost = 50;
 					You("melt %s to a mirror finish.", doname(otmp));
 					add_oprop(otmp, OPROP_REFL);
-					u.uartisval += TIER_B; /*Theory: You now want reflection in the asc kit to deal with holy missiles, so the ability to add it to anything is pretty great. */
+					u.ucultsval += TIER_B; /*Theory: You now want reflection in the asc kit to deal with holy missiles, so the ability to add it to anything is pretty great. */
 				}
 				else pline("Nothing happens.");
 			}
@@ -3755,10 +3871,7 @@ commune_with_silver_flame()
 					cost = 25;
 					You("add a curse-proof glaze to %s.", doname(otmp));
 					add_oprop(otmp, OPROP_CGLZ);
-					/*Theory: You need 4-5 of these, which adds to TIER_A. */
-					if(arm_blocks_upper_body(otmp->otyp))
-						u.uartisval += TIER_D;
-					else u.uartisval += TIER_F;
+					u.ucultsval += TIER_B;
 				}
 				else pline("Nothing happens.");
 			}
@@ -3775,7 +3888,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_MORTW);
-					u.uartisval += TIER_B; /*Theory: Life drain is actually not all that powerful, but the Wizard and his summons are still affected. */
+					u.ucultsval += TIER_B; /*Theory: Life drain is actually not all that powerful, but the Wizard and his summons are still affected. */
 				}
 				else pline("Nothing happens.");
 			}
@@ -3788,7 +3901,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_TDTHW);
-					u.uartisval += TIER_A; /*Theory: Nasty stuff like liches and pharaohs is affected, plus it deals a lot of damage to them. */
+					u.ucultsval += TIER_A; /*Theory: Nasty stuff like liches and pharaohs is affected, plus it deals a lot of damage to them. */
 				}
 				else pline("Nothing happens.");
 			}
@@ -3801,7 +3914,46 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_SFUWW);
-					u.uartisval += TIER_S; /*Theory: This specifically affects the nastiest late game enemies. */
+					u.ucultsval += TIER_S; /*Theory: This specifically affects the nastiest late game enemies. */
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_RIGHTEOUS_WRATH:
+			otmp = getobj(sflm_classes, "reveal righteous wrath");
+			if(otmp){
+				if(sflm_wrathable(otmp)){
+					cost = 50;
+					pline("The silver light within %s is focused by your mirror!", doname(otmp));
+					add_oprop(otmp, OPROP_RWTH);
+					u.ucultsval += TIER_B; /*Theory: This is not very much extra damage, but does stack with the weapon. */
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_SHARE_BURDENS:
+			otmp = getobj(sflm_classes, "share burdens");
+			if(otmp){
+				if(sflm_burdenable(otmp)){
+					cost = 50;
+					pline("The silver light within %s is focused by your mirror!", doname(otmp));
+					add_oprop(otmp, OPROP_RBRD);
+					u.ucultsval += TIER_B; /*Theory: This is not very much extra carry cap and requires you to wear metal boots, which are rarely what you want. */
+				}
+				else pline("Nothing happens.");
+			}
+			break;
+
+		case FLAMEBOON_PRESERVE_LIFE:
+			otmp = getobj(sflm_classes, "preserve life");
+			if(otmp){
+				if(sflm_lifeable(otmp)){
+					cost = 50;
+					pline("The silver light within %s is focused by your mirror!", doname(otmp));
+					add_oprop(otmp, OPROP_SLIF);
+					u.ucultsval += TIER_A; /*Theory: This probably stacks with your existing helm and frees up the amulet slot (perhaps for vs. curses). */
 				}
 				else pline("Nothing happens.");
 			}
@@ -3812,6 +3964,372 @@ commune_with_silver_flame()
 		pline("The silver light recedes.");
 
 	u.silver_credit -= cost;
+	change_usanity(-cost/2, TRUE);
+	
+	return MOVE_STANDARD;
+}
+
+/* must be non-zero */
+#define YOGBOON_WATERS	1
+#define YOGBOON_TELEP_CURSED	2
+#define YOGBOON_MEMORY	3
+#define YOGBOON_COMPANION	4
+#define YOGBOON_REVIVE	5
+
+#define YOGBOON_MAGIC	6
+#define YOGBOON_WINDOW	7
+#define YOGBOON_TWIN	8
+#define YOGBOON_MUTATE	9
+
+int
+doyog_menu(greater_boon)
+boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Ask for what?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	Sprintf(buf, "the primordial waters");
+	any.a_int = YOGBOON_WATERS;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	Sprintf(buf, "escape from curses");
+	any.a_int = YOGBOON_TELEP_CURSED;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		inclet++, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	
+	if(spellid(0) != NO_SPELL){
+		Sprintf(buf, "the return of memory");
+		any.a_int = YOGBOON_MEMORY;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+
+	/* validate that you have at least one binding to refresh */
+	if (((u.spirit[QUEST_SPIRIT] && u.spiritT[QUEST_SPIRIT] > 0)
+		||(u.spirit[ALIGN_SPIRIT] && u.spiritT[ALIGN_SPIRIT] > 0)
+		|| u.sealCounts)
+	) {
+		Sprintf(buf, "continued companionship");
+		any.a_int = YOGBOON_COMPANION;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	
+	struct monst *twin = mtyp_on_migrating(PM_TWIN_SIBLING);
+	// Whether moving, waiting, or dead.
+	if(twin){
+		Sprintf(buf, "the return of your twin");
+		any.a_int = YOGBOON_REVIVE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+
+	if(u.yog_sothoth_mutagen >= ((u.yog_sothoth_mutations+2)*(u.yog_sothoth_mutations+2))){
+		Sprintf(buf, "change");
+		any.a_int = YOGBOON_MUTATE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	inclet++;
+	
+	/* the following boons are permanent boosters, and so require devotion */
+	if (greater_boon) {
+
+		Sprintf(buf, "the minor stars");
+		any.a_int = YOGBOON_MAGIC;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+
+		Sprintf(buf, "windows to other places");
+		any.a_int = YOGBOON_WINDOW;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+
+		if (!flags.made_twin) {
+			Sprintf(buf, "your twin sibling");
+			any.a_int = YOGBOON_TWIN;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		inclet++;
+	}
+	end_menu(tmpwin, "You have Yog-Sothoth's attention...");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
+}
+
+boolean
+yog_sothoth_mutation()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Pick mutation:");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	int mut;
+	int i;
+	extern const int yog_mutation_list[];
+	extern const struct mutationtype mutationtypes[];
+	for (mut = 0; yog_mutation_list[mut]; mut++){
+		if(yog_mutation_list[mut] == YOG_GAZE_1 && check_mutation(YOG_GAZE_2))
+			continue; //Don't update letter.
+		if(yog_mutation_list[mut] == YOG_GAZE_2 && !check_mutation(YOG_GAZE_1))
+			continue; //Don't update letter.
+		if(!check_mutation(yog_mutation_list[mut])) for (i = 0; mutationtypes[i].mutation; i++){
+			if(yog_mutation_list[mut] == mutationtypes[i].mutation){
+				any.a_int = yog_mutation_list[mut];
+				add_menu(tmpwin, NO_GLYPH, &any,
+					inclet, 0, ATR_NONE, mutationtypes[i].name,
+					MENU_UNSELECTED);
+				break; //break out of inner loop
+			}
+		}
+		if(inclet == 'z')
+			inclet = 'A';
+		else
+			inclet++;
+	}
+	end_menu(tmpwin, "The angle through your body is shifting...");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	int picked;
+	if(n > 0){
+		picked = selected[0].item.a_int;
+		free(selected);
+	}
+	else return FALSE;
+	
+	pline("The angle through your body has shifted.");
+	confer_mutation(picked);
+	u.yog_sothoth_mutations++;
+	return TRUE;
+}
+
+int
+commune_with_yog()
+{
+	const char * yogname = yogtitles[rn2(SIZE(yogtitles))];
+	const char blessable_classes[] = { WEAPON_CLASS, TOOL_CLASS, ARMOR_CLASS, 0 };
+	int cultsval = Role_if(PM_MADMAN) ? 7*u.ucultsval/10 : u.ucultsval;
+
+	/* not in the Future */
+	if (Infuture) {
+		You("only draw It's attention!");
+		aggravate();
+		return MOVE_STANDARD;
+	}
+	/* in good standing */
+	if (godlist[GOD_YOG_SOTHOTH].anger) {
+		You_feel("a fraction of %s %s.",
+			s_suffix(yogname),
+			godlist[GOD_YOG_SOTHOTH].anger > 6 ? "wrath" :
+			godlist[GOD_YOG_SOTHOTH].anger > 3 ? "anger" :
+			                                     "displeasure");
+		return MOVE_STANDARD;
+	}
+	/* you are now an active cultist */
+	u.yog_sothoth_atten = TRUE;
+
+	/* must have accumulated enough cult credit */
+	if (u.yog_sothoth_credit < 50) {
+		/* not enough credit, give a message based on how much you have */
+		You_feel("a %s of %s attention.",
+			(u.yog_sothoth_credit < 25 ? "ripple" : "wave"),
+			s_suffix(yogname)
+			);
+		/* taxes sanity! (a tiny bit) */
+		change_usanity(-6, TRUE);
+		return MOVE_STANDARD;
+	}
+
+	/* if you are devout enough (total accumulated credit), allow selecting permanent boons and boost the power of regular ones */
+	/* devotion required increases as per standard gift giving formula */
+	if(wizard)
+		pline("boon threshold: %d", 25*(10 + (cultsval * cultsval * 2 / 25)));
+	boolean greater_boon = u.yog_sothoth_devotion > 25*(10 + (cultsval * cultsval * 2 / 25));
+	struct obj * otmp = (struct obj *)0;
+	int menu_result = doyog_menu(greater_boon);
+	int i;
+	int cost = 0;	/* credit and sanity/2 cost for the chosen boon */
+
+	switch (menu_result) {
+		case YOGBOON_WATERS:
+			cost = 25;
+			/* as the potion */
+			otmp = mksobj(POT_PRIMORDIAL_WATERS, MKOBJ_NOINIT);
+			otmp->blessed = otmp->cursed = 0;
+			otmp->quan = 20L;			/* do not let useup get it */
+			otmp->blessed = greater_boon;
+			(void) peffects(otmp, TRUE);
+			obfree(otmp, (struct obj *)0);	/* now, get rid of it */
+			break;
+
+		case YOGBOON_TELEP_CURSED:{
+			cost = 10;
+			struct obj *otmp;
+			struct obj *nobj;
+			for(otmp = invent; otmp; otmp = nobj){
+				nobj = otmp->nobj;
+				if((otmp->owornmask || otmp->otyp == LOADSTONE) && otmp->cursed){
+					obj_extract_and_unequip_self(otmp);
+					Your("%s is teleported to the %s at your %s.", xname(otmp), surface(u.ux, u.uy), makeplural(body_part(FOOT)));
+					dropy(otmp);
+				}
+			}
+		}break;
+
+		case YOGBOON_MEMORY:{
+			cost = 50;
+			pline("The angle through your mind is tweaked!");
+			for (i = 0; i < MAXSPELL; i++)  {
+				if (spellid(i) != NO_SPELL)  {
+					spl_book[i].sp_know = min(spl_book[i].sp_know + KEEN/10, KEEN);
+					exercise(A_WIS,TRUE);
+					exercise(A_INT,TRUE);
+				}
+			}
+			
+		}break;
+
+		case YOGBOON_COMPANION:{
+			cost = 50;
+			pline("The angle through your soul is tweaked!");
+			for(i=0;i<QUEST_SPIRIT && u.spirit[i];i++){
+				u.spiritT[i] = min(u.spiritT[i]+1000, monstermoves + 5000);
+			}
+			if(u.spiritT[QUEST_SPIRIT] > 0)
+				u.spiritT[QUEST_SPIRIT] = min(u.spiritT[QUEST_SPIRIT]+1000, monstermoves + 5000);
+			if(u.spiritT[ALIGN_SPIRIT] > 0)
+				u.spiritT[ALIGN_SPIRIT] = min(u.spiritT[ALIGN_SPIRIT]+1000, monstermoves + 5000);
+			
+		}break;
+
+		case YOGBOON_MAGIC:
+			cost = 25;
+			/* gives your wielded (nonartifact) weapon the Lesser magic property */
+			otmp = getobj(blessable_classes, "reveal the Minor Stars");
+			if(otmp && yog_magicable(otmp)) {
+				if(!Blind) pline("The weapon begins to glitter!");
+				add_oprop(otmp, OPROP_LESSER_MAGCW);
+				otmp->oeroded = 0;
+				otmp->oeroded2 = 0;
+				otmp->oerodeproof = 1;
+				u.ugifts++;
+				u.ucultsval += TIER_B;
+			}
+			else {
+				cost = 0;
+			}
+			break;
+
+		case YOGBOON_WINDOW:
+			cost = 40;
+
+			/* gives your wielded weapon the Yog Sothoth property, which does various +dmg effects and sometimes gives favor */
+			otmp = getobj(blessable_classes, "show distant vistas");
+			if(otmp && yog_windowable(otmp)){
+				if(!Blind) pline("Your weapon becomes a window to distant vistas!");
+				remove_oprop(otmp, OPROP_LESSER_MAGCW);
+				add_oprop(otmp, OPROP_SOTHW);
+				otmp->oeroded = 0;
+				otmp->oeroded2 = 0;
+				otmp->oerodeproof = 1;
+				u.ugifts++;
+				u.ucultsval += TIER_S;
+			}
+			else {
+				cost = 0;
+			}
+			break;
+
+		case YOGBOON_TWIN:{
+			struct monst *twin;
+			cost = 50;
+			twin = makemon(&mons[PM_TWIN_SIBLING], u.ux, u.uy, MM_ADJACENTOK|MM_EDOG);
+			if (twin){
+				initedog(twin);
+				twin->m_lev = u.ulevel / 2 + 1;
+				twin->mhpmax = (twin->m_lev * hd_size(twin->data)) - hd_size(twin->data)/2;
+				twin->mhp = twin->mhpmax;
+				twin->mtame = 10;
+				twin->mpeaceful = 1;
+				if(get_mx(twin, MX_EDOG))
+					EDOG(twin)->loyal = TRUE;
+				twin->mpeaceful = 1;
+				flags.made_twin = TRUE;
+			}
+			u.ucultsval += TIER_S;
+			break;
+		}
+		case YOGBOON_REVIVE:{
+			struct monst *twin = mtyp_on_migrating(PM_TWIN_SIBLING);
+			if(twin){
+				twin->mvar_twin_lifesaved = FALSE;
+				twin->mwait = 0;
+				twin->mux = u.uz.dnum;
+				twin->muy = u.uz.dlevel;
+				twin->mtrack[0].x = MIGR_RANDOM;
+				mon_arrive_on_level(twin);
+			}
+			break;
+		}
+		case YOGBOON_MUTATE:
+			cost = 0;
+			if(yog_sothoth_mutation()){
+				cost = 50;
+			}
+			break;
+
+		default:
+			pline("The connection fades.");
+			break;
+	}
+
+	u.yog_sothoth_credit -= cost;
 	change_usanity(-cost/2, TRUE);
 	
 	return MOVE_STANDARD;
@@ -3981,7 +4499,7 @@ int eatflag;
 	/* the player must carry a holy symbol to gain credit. Chance to give one, if missing. return early */
 	if(!has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
 		struct obj *otmp;
-		if(u.shubbie_atten ? !rn2(10+u.ugifts) : !rn2(4)){
+		if(!u.shubbie_atten ? !rn2(10+u.ugifts) : !rn2(4)){
 			otmp = mksobj(HOLY_SYMBOL_OF_THE_BLACK_MOTHE, MKOBJ_NOINIT);
 			dropy(otmp);
 			at_your_feet("An object");
@@ -4017,6 +4535,7 @@ int eatflag;
 	}
 	return;
 }
+
 void
 flame_consume(mtmp, otmp, offering)
 struct monst *mtmp;
@@ -4114,6 +4633,51 @@ boolean offering;
 	value = max(1, value * dim_return_factor / (dim_return_factor + u.silver_credit));
 	u.silver_credit += value;
 	u.silver_devotion += value;
+	return;
+}
+
+void
+yog_credit(value)
+int value;
+{
+	//May be zero if draining a small monster etc.
+	if(!value)
+		return;
+
+	if(u.ualign.type != A_NEUTRAL && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
+		adjalign(-value);
+		godlist[u.ualign.god].anger += 1;
+		(void) adjattrib(A_CHA, -1, TRUE);
+		if (!Inhell) angrygods(u.ualign.god);
+		change_luck(-1);
+	}
+
+	/* anger must be paid off before credit can be built, return early */
+	if(godlist[GOD_YOG_SOTHOTH].anger) {
+		if (rn2(MAXVALUE) < value) {
+			godlist[GOD_YOG_SOTHOTH].anger--;
+			if (godlist[GOD_YOG_SOTHOTH].anger == 0)
+				You_feel("appeased, for some reason.");
+		}
+		return;
+	}
+
+	/* at this point, gain credit */
+
+	/* credit gain suffers diminishing returns, less harshly if you are high level */
+	int dim_return_factor = max(1, u.ulevel);
+	if (wizard) {
+		/* debug */
+		pline("YogCredit = %ld [+%ld base %d], YogDevotion = %ld",
+			u.yog_sothoth_credit + max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit)),
+			max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit)),
+			value,
+			u.yog_sothoth_devotion + max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit))
+			);
+	}
+	value = max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit));
+	u.yog_sothoth_credit += value;
+	u.yog_sothoth_devotion += value;
 	return;
 }
 

@@ -83,6 +83,7 @@ E struct dgn_topology {		/* special dungeon levels for speed */
 #define DISPATER_LEVEL	2
 #define MAMMON_LEVEL	3
 #define BELIAL_LEVEL	4
+#define CHROMA_LEVEL	5
 	d_level	d_hell2_level;
 	int		hell2_variant;
 #define LEVIATHAN_LEVEL	1
@@ -526,6 +527,7 @@ E NEARDATA struct obj *billobjs;
 E NEARDATA struct obj zeroobj;		/* init'd and defined in decl.c */
 E NEARDATA anything zeroany;   /* init'd and defined in decl.c */
 
+#include "mutations.h"
 #include "you.h"
 E NEARDATA struct you u;
 

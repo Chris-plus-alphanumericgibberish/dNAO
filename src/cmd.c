@@ -132,6 +132,8 @@ STATIC_PTR int NDECL(dooverview_or_wiz_where);
 STATIC_PTR int NDECL(doclearinvissyms);
 # ifdef WIZARD
 STATIC_PTR int NDECL(wiz_bind);
+STATIC_PTR int NDECL(wiz_mutate);
+STATIC_PTR int NDECL(wiz_cult);
 STATIC_PTR int NDECL(wiz_mk_mapglyphdump);
 STATIC_PTR int NDECL(wiz_wish);
 STATIC_PTR int NDECL(wiz_identify);
@@ -151,6 +153,7 @@ STATIC_PTR int NDECL(wiz_show_wmodes);
 STATIC_PTR int NDECL(wiz_showkills);	/* showborn patch */
 STATIC_PTR int NDECL(wiz_setinsight);
 STATIC_PTR int NDECL(wiz_setsanity);
+STATIC_PTR int FDECL(getvalue, (const char *));
 #ifdef SHOW_BORN
 extern void FDECL(list_vanquished, (int, BOOLEAN_P)); /* showborn patch */
 #endif /* SHOW_BORN */
@@ -598,7 +601,10 @@ boolean you_abilities;
 	if (mon_abilities && youracedata->mlet == S_NYMPH){
 		add_ability('I', "Remove an iron ball", MATTK_REMV);
 	}
-	if (mon_abilities && (is_mind_flayer(youracedata) || Role_if(PM_MADMAN)) && !Catapsi){
+	if (mon_abilities && (is_mind_flayer(youracedata)
+			|| Role_if(PM_MADMAN)
+			|| (check_mutation(TWIN_DREAMS) && u.specialSealsActive&SEAL_YOG_SOTHOTH)
+	) && !Catapsi){
 		add_ability('m', "Emit a mind blast", MATTK_MIND);
 	}
 	if (you_abilities && !mon_abilities){
@@ -1186,6 +1192,266 @@ wiz_bind()
 
 
 STATIC_PTR int
+wiz_mutate()
+{
+	if (wizard) {
+		winid tmpwin;
+		int n, how;
+		char buf[BUFSZ];
+		menu_item *selected;
+		char inclet = 'a';
+		anything any;
+
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
+
+		Sprintf(buf, "Pick mutation:");
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		*buf = '\0';
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+		
+		int mut;
+		int i;
+		extern const int shubbie_mutation_list[];
+		extern const struct mutationtype mutationtypes[];
+		for (i = 0; mutationtypes[i].mutation; i++){
+			any.a_int = mutationtypes[i].mutation;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, mutationtypes[i].name,
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+		}
+		end_menu(tmpwin, "You prepare to wizard your body....");
+
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
+		int picked;
+		if(n > 0){
+			picked = selected[0].item.a_int;
+			free(selected);
+		}
+		else return MOVE_CANCELLED;
+		
+		confer_mutation(picked);
+		return MOVE_CANCELLED;
+	}
+	else
+		pline("Unavailable command.");
+	return MOVE_CANCELLED;
+}
+
+#define GAIN_SHUB_ATTEN	1
+#define GAIN_FLAM_ATTEN	2
+#define GAIN_YOG_ATTEN	3
+#define SET_SHUB_FAVOR	4
+#define SET_FLAM_FAVOR	5
+#define SET_YOG_FAVOR	6
+#define SET_SHUB_MUT	7
+#define SET_YOG_MUT		8
+#define SET_SHUB_DEVOTION	9
+#define SET_FLAM_DEVOTION	10
+#define SET_YOG_DEVOTION	11
+
+STATIC_PTR int
+wiz_cult()
+{
+	if (wizard) {
+		winid tmpwin;
+		int n, how;
+		char buf[BUFSZ];
+		menu_item *selected;
+		char inclet = 'a';
+		anything any;
+
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		any.a_void = 0;		/* zero out all bits */
+		
+		if(!u.shubbie_atten){
+			any.a_int = GAIN_SHUB_ATTEN;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Activate Shub-Nugganoth cult.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+		}
+		else {
+			any.a_int = SET_SHUB_FAVOR;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Shub-Nugganoth favor.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+
+			any.a_int = SET_SHUB_DEVOTION;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Shub-Nugganoth devotion.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+
+			any.a_int = SET_SHUB_MUT;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Shub-Nugganoth mutagen.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+		}
+		if(!u.silver_atten){
+			any.a_int = GAIN_FLAM_ATTEN;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Activate Silver Flame cult.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+		}
+		else {
+			any.a_int = SET_FLAM_FAVOR;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Silver Flame favor.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+
+			any.a_int = SET_FLAM_DEVOTION;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Silver Flame devotion.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+		}
+		if(!u.yog_sothoth_atten){
+			any.a_int = GAIN_YOG_ATTEN;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Activate Yog-Sothoth cult.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+		}
+		else {
+			any.a_int = SET_YOG_FAVOR;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Yog-Sothoth favor.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+
+			any.a_int = SET_YOG_DEVOTION;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Yog-Sothoth devotion.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+
+			any.a_int = SET_YOG_MUT;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet, 0, ATR_NONE, "Set Yog-Sothoth mutagen.",
+				MENU_UNSELECTED);
+			if(inclet == 'z')
+				inclet = 'A';
+			else
+				inclet++;
+		}
+
+		end_menu(tmpwin, "Select one:");
+
+		how = PICK_ONE;
+		n = select_menu(tmpwin, how, &selected);
+		destroy_nhwindow(tmpwin);
+		int picked;
+		if(n > 0){
+			picked = selected[0].item.a_int;
+			free(selected);
+		}
+		else return MOVE_CANCELLED;
+		struct obj *icon;
+		int newfavor;
+#define set_value(str, val)					newfavor = getvalue(str);\
+				if(newfavor < 0){\
+					pline1(Never_mind);\
+				}\
+				else {\
+					val = newfavor;\
+				}
+
+
+		switch(picked){
+			case GAIN_SHUB_ATTEN:
+				u.shubbie_atten = TRUE;
+				icon = mksobj(HOLY_SYMBOL_OF_THE_BLACK_MOTHE, MKOBJ_NOINIT);
+				icon = hold_another_object(icon, "You drop %s!",
+							  doname(icon), (const char *)0); /*shouldn't merge, but may drop*/
+			break;
+			case GAIN_FLAM_ATTEN:
+				u.silver_atten = TRUE;
+				icon = mksobj(PURIFIED_MIRROR, MKOBJ_NOINIT);
+				icon = hold_another_object(icon, "You drop %s!",
+							  doname(icon), (const char *)0); /*shouldn't merge, but may drop*/
+			break;
+			case GAIN_YOG_ATTEN:
+				u.yog_sothoth_atten = TRUE;
+				pline("A seal is engraved into your mind!");
+				u.specialSealsKnown |= SEAL_YOG_SOTHOTH;
+			break;
+			case SET_SHUB_FAVOR:
+				set_value("Set Shub-Nuganoth favor to what?", u.shubbie_credit);
+			break;
+			case SET_SHUB_DEVOTION:
+				set_value("Set Shub-Nuganoth devotion to what?", u.shubbie_devotion);
+			break;
+			case SET_SHUB_MUT:
+				set_value("Set Shub-Nuganoth mutagen to what?", u.shubbie_mutagen);
+			break;
+			case SET_FLAM_FAVOR:
+				set_value("Set Silver Flame favor to what?", u.silver_credit);
+			break;
+			case SET_FLAM_DEVOTION:
+				set_value("Set Silver Flame devotion to what?", u.silver_devotion);
+			break;
+			case SET_YOG_FAVOR:
+				set_value("Set Yog-Sothoth favor to what?", u.yog_sothoth_credit);
+			break;
+			case SET_YOG_DEVOTION:
+				set_value("Set Yog-Sothoth devotion to what?", u.yog_sothoth_devotion);
+			break;
+			case SET_YOG_MUT:
+				set_value("Set Yog-Sothoth mutagen to what?", u.yog_sothoth_mutagen);
+			break;
+		}
+		return MOVE_CANCELLED;
+	}
+	else
+		pline("Unavailable command.");
+	return MOVE_CANCELLED;
+}
+
+
+STATIC_PTR int
 wiz_mk_mapglyphdump()
 {
 #ifdef MAPDUMP_FN
@@ -1575,6 +1841,7 @@ STATIC_PTR int wiz_setinsight()
 	change_uinsight(newval - u.uinsight);
 	return MOVE_INSTANT;
 }
+
 STATIC_PTR int wiz_setsanity()
 {
 	char buf[BUFSZ];
@@ -1593,6 +1860,26 @@ STATIC_PTR int wiz_setsanity()
 	}
 	change_usanity(newval - u.usanity, FALSE);
 	return MOVE_INSTANT;
+}
+
+STATIC_PTR
+int getvalue(str)
+const char *str;
+{
+	char buf[BUFSZ];
+	int newval;
+	int ret;
+
+	getlin(str, buf);
+
+	(void)mungspaces(buf);
+	if (buf[0] == '\033' || buf[0] == '\0') ret = 0;
+	else ret = sscanf(buf, "%d", &newval);
+
+	if (ret != 1) {
+		return -1;
+	}
+	return newval;
 }
 
 #endif /* WIZARD */
@@ -1883,6 +2170,8 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #where */
 	{(char *)0, (char *)0, donull, TRUE}, /* #tests */
 	{(char *)0, (char *)0, donull, TRUE}, /* #wizbind */
+	{(char *)0, (char *)0, donull, TRUE}, /* #wizmutate */
+	{(char *)0, (char *)0, donull, TRUE}, /* #wizcult */
 #endif
 	{(char *)0, (char *)0, donull, TRUE}	/* sentinel */
 };
@@ -1912,6 +2201,8 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"setinsight", "sets your insight value", wiz_setinsight, IFBURIED, AUTOCOMPLETE },
 	{"setsanity", "sets your sanity value", wiz_setsanity, IFBURIED, AUTOCOMPLETE },
 	{"wizbind", "grants knowledge of all seals and binds one", wiz_bind, IFBURIED, AUTOCOMPLETE},
+	{"wizcult", "manipulate cult variables", wiz_cult, IFBURIED, AUTOCOMPLETE},
+	{"wizmutate", "applies a mutation", wiz_mutate, IFBURIED, AUTOCOMPLETE},
 	{"dump_map", "dump map glyphs into a file", wiz_mk_mapglyphdump, IFBURIED, AUTOCOMPLETE},
 #ifdef DEBUG
 	{"wizdebug", "wizard debug command", wiz_debug_cmd, IFBURIED, AUTOCOMPLETE},
@@ -3254,6 +3545,9 @@ click_to_cmd(x, y, mod)
             /* here */
             if(IS_FOUNTAIN(levl[u.ux][u.uy].typ) || IS_SINK(levl[u.ux][u.uy].typ)) {
                 cmd[0]=mod == CLICK_1 ? 'q' : M('d');
+                return cmd;
+            } else if(IS_FORGE(levl[u.ux][u.uy].typ)) {
+                cmd[0]=M('d');
                 return cmd;
             } else if(IS_THRONE(levl[u.ux][u.uy].typ)) {
                 cmd[0]=M('s');

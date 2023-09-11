@@ -4,6 +4,8 @@
 
 #include <math.h>
 #include "hack.h"
+#include "artifact.h"
+
 void FDECL(mon_block_extrinsic, (struct monst *, struct obj *, int, boolean, boolean));
 boolean FDECL(mon_gets_extrinsic, (struct monst *, int, struct obj *));
 STATIC_DCL void FDECL(update_mon_intrinsic, (struct monst *,struct obj *,int,BOOLEAN_P,BOOLEAN_P));
@@ -105,6 +107,8 @@ int otyp;
 		while(objects[otyp].oc_oprop[j] && !got_prop) {
 			if (objects[otyp].oc_oprop[j] == cur_prop)
 				got_prop = TRUE;
+			if (obj && obj->oartifact == ART_ENFORCED_MIND && cur_prop == TELEPAT)
+				got_prop = FALSE;
 			j++;
 		}
 
@@ -135,13 +139,17 @@ int otyp;
 			case REFLECTING:
 				if (check_oprop(obj, OPROP_REFL))
 					got_prop = TRUE;
+				else if (obj->oartifact == ART_IBITE_ARM &&
+					(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT)
+				)
+					got_prop = TRUE;
 				break;
 			case DISINT_RES:
 				if (check_oprop(obj, OPROP_DISN))
 					got_prop = TRUE;
 				break;
 			case LIFESAVED:
-				if (check_oprop(obj, OPROP_LIFE))
+				if (check_oprop(obj, OPROP_LIFE) || check_oprop(obj, OPROP_SLIF))
 					got_prop = TRUE;
 				break;
 			}
@@ -247,7 +255,7 @@ long mask;
 	register const struct worn *wp;
 	register struct obj *oobj;
 	register int p;
-	
+
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){
 		if(obj->ovar1_seals && !Role_if(PM_EXILE)){

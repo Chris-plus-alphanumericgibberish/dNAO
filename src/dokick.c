@@ -700,6 +700,7 @@ char *buf;
 	else if (IS_ROCK(maploc->typ)) what = "a rock";
 	else if (IS_THRONE(maploc->typ)) what = "a throne";
 	else if (IS_FOUNTAIN(maploc->typ)) what = "a fountain";
+	else if (IS_FORGE(maploc->typ)) what = "a forge";
 	else if (IS_GRAVE(maploc->typ)) what = "a headstone";
 #ifdef SINKS
 	else if (IS_SINK(maploc->typ)) what = "a sink";
@@ -1035,6 +1036,35 @@ int dx, dy;
 			wake_nearby();
 		    return MOVE_STANDARD;
 		}
+		if (IS_FORGE(maploc->typ)) {
+            // if (Levitation) 3.7 improvement?
+                // goto dumb;
+            You("kick %s.", (Blind ? something : "the forge"));
+            if (!rn2(3))
+                goto ouch;
+            if (rn2(3)){
+				if(uarmf){
+					if (fire_damage(uarmf, FALSE, u.ux, u.uy)) {
+						pline("Molten lava from the forge splashes onto your boots.");
+					}
+					if(is_metallic(uarmf) && !Fire_resistance){
+						losehp(d(2,8), "red hot boots", KILLED_BY);
+					}
+				}
+				else {
+					pline("Molten lava from the forge splashes onto your %s.", body_part(FOOT));
+					if(Fire_resistance){
+						pline("This is fine.");
+					}
+					else {
+						pline("It burns!");
+						losehp(d(6,6), "splash of molten lava", KILLED_BY_AN);
+					}
+				}
+			}
+            exercise(A_DEX, TRUE);
+            return 1;
+        }
 		if(IS_GRAVE(maploc->typ) || maploc->typ == IRONBARS)
 		    goto ouch;
 		if(IS_TREE(maploc->typ)) {

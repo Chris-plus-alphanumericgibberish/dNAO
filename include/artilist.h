@@ -156,7 +156,7 @@ A("The Marauder's Map",	SCR_MAGIC_MAPPING,				"parchment scroll",
  */
 A("Orcrist",			ELVEN_BROADSWORD,				(const char *)0,
 	2000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, NON_PM, PM_ELF, TIER_C, (ARTG_NAME|ARTG_INHER),
+	A_CHAOTIC, NON_PM, PM_ELF, TIER_C, (ARTG_NAME|ARTG_INHER|ARTG_NOGEN),
 	MONS(vsMA(MA_ORC | MA_DEMON)),
 	ATTK(AD_PHYS, 10, 0), (ARTA_HATES),
 	PROPS(), NOFLAG,
@@ -205,7 +205,7 @@ A("Carnwennan",			DAGGER,							(const char *)0,
 /*two handed, so no twoweaponing.*/
 A("Slave to Armok",		DWARVISH_MATTOCK,				(const char *)0,
 	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_LAWFUL, NON_PM, PM_DWARF, TIER_F, (ARTG_NAME),
+	A_LAWFUL, NON_PM, PM_DWARF, TIER_F, (ARTG_NAME|ARTG_NOGEN),
 	MONS(vsMT(MT_PEACEFUL), vsMG(MG_LORD|MG_PRINCE), vsMA(MA_ELF | MA_ORC)),
 	ATTK(AD_PHYS, 5, 0), (ARTA_HATES),
 	PROPS(), NOFLAG,
@@ -1272,6 +1272,21 @@ A("Apotheosis Veil",				CRYSTAL_HELM,			(const char *)0,
 	PROPS(SEE_INVIS, DRAIN_RES, EXTRAMISSION), NOFLAG,
 	PROPS(), NOFLAG,
 	ENLIGHTENING, (ARTI_PLUSSEV)
+	),
+
+/*
+ * does not give telepathy. if you have telepathy, turns it to active and boosts doubles range 
+ * if you don't have telepathy, nullifies mind blasts and any psychic damage
+ * makes monsters within your extrinsic telepathy range treated as if they WERE telepathic (does not include cross-level, only in your range)
+ */
+A("Enforced Mind",				HELM_OF_TELEPATHY,			(const char *)0,
+	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_LAWFUL, NON_PM, NON_PM, TIER_C, NOFLAG,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(BLOCK_CONFUSION), NOFLAG,
+	PROPS(SLEEP_RES), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
 /*Needs encyc entry*/
@@ -2468,7 +2483,7 @@ A("The Red Cords of Ilmater",		HAND_WRAPS,	"pair of red cords",
 /*Needs encyc entry*/
 A("The Crown of the Percipient",				HELM_OF_BRILLIANCE,	(const char *)0,
 	1000L, FLESH, MZ_DEFAULT, WT_DEFAULT,
-	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	A_NEUTRAL, PM_HEALER, PM_DROW, TIER_S, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(DETECT_MONSTERS, DRAIN_RES, STONE_RES, FIRE_RES, COLD_RES, SHOCK_RES, HALLUC_RES, SLEEP_RES, BLOCK_CONFUSION), NOFLAG,
@@ -2527,7 +2542,7 @@ A("Yorshka's Spear",				SPEAR,				(const char *)0,
 /*Needs encyc entry*/
 A("Dragonhead Shield",		STONE_DRAGON_SHIELD,					"stone dragon head",
 	4000L, MINERAL, MZ_HUGE, WT_DEFAULT,
-	A_LAWFUL, PM_NOBLEMAN, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	A_LAWFUL, PM_NOBLEMAN, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(COLD_RES, DISINT_RES, STONE_RES), NOFLAG,
@@ -2538,7 +2553,7 @@ A("Dragonhead Shield",		STONE_DRAGON_SHIELD,					"stone dragon head",
 /*Needs encyc entry*/
 A("Crucifix of the Mad King",		HALBERD,					(const char *)0,
 	4000L, METAL, MZ_LARGE, WT_DEFAULT,
-	A_NEUTRAL, PM_NOBLEMAN, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	A_NEUTRAL, PM_NOBLEMAN, NON_PM, TIER_D, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	ATTK(AD_DARK, 1, 10), NOFLAG,
 	PROPS(), NOFLAG,
@@ -2549,7 +2564,7 @@ A("Crucifix of the Mad King",		HALBERD,					(const char *)0,
 /*Needs encyc entry*/
 A("Ringed Brass Armor",		PLATE_MAIL,					"molten-ringed brass %s",
 	4000L, COPPER, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(), NOFLAG,
@@ -2560,7 +2575,7 @@ A("Ringed Brass Armor",		PLATE_MAIL,					"molten-ringed brass %s",
 /*Needs encyc entry*/
 A("Ritual Ringed Spear",		SPEAR,					"molten-ringed spear",
 	4000L, OBSIDIAN_MT, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	A_CHAOTIC, PM_NOBLEMAN, NON_PM, TIER_C, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(), NOFLAG,

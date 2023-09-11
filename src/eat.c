@@ -213,7 +213,7 @@ register struct obj *obj;
 	/* a sheaf of straw is VEGGY, but only edible for herbivorous animals */
 	if ((obj->otyp == ROPE_OF_ENTANGLING || obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT) 
 		&& herbivorous(youracedata)
-		&& (obj->obj_material == VEGGY || obj->obj_material == FLESH)
+		&& (obj->obj_material == VEGGY)
 	) return !carnivorous(youracedata);
 	
 	if (herbivorous(youracedata) && is_veggy(obj))
@@ -231,6 +231,9 @@ register struct obj *obj;
 		  has_blood(&mons[obj->corpsenm]) && (!obj->odrained ||
 		  obj->oeaten > drainlevel(obj)));
 
+	if (carnivorous(youracedata) && (obj->obj_material == FLESH)) 
+		return TRUE;
+	
      /* return((boolean)(!!index(comestibles, obj->oclass))); */
 	return (boolean)(obj->oclass == FOOD_CLASS && (obj->obj_material == VEGGY || obj->obj_material == FLESH || obj->otyp == TIN));
 }

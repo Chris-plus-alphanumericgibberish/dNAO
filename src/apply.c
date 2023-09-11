@@ -1126,6 +1126,7 @@ struct obj **obj_p;
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
 		if (mon_reflects(mtmp, "The gaze is reflected away by %s %s!"))
 			return MOVE_STANDARD;
+		minstapetrify(mtmp, TRUE);
 	} else if(!mtmp->mcan && !mtmp->minvis &&
 					mtmp->mtyp == PM_FLOATING_EYE && 
 					ward_at(mtmp->mx,mtmp->my) != HAMSA) {
@@ -4604,7 +4605,7 @@ struct obj *obj;
 				int hitu, hitvalu;
 				int dieroll;
 				hitvalu = tohitval((struct monst *)0, &youmonst, (struct attack *)0, otmp, (void *)0, HMON_PROJECTILE, 8, (int *) 0);
-				if(hitvalu > (dieroll = rnd(20)) || dieroll == 1) {
+				if(hitvalu > (dieroll = rnd(20)) || (dieroll == 1 && hitvalu > -10)) {
 					boolean wepgone = FALSE;
 					pline_The("%s hits you as you try to snatch it!" the(onambuf));
 					hmon_general((struct monst *)0, &youmonst, (struct attack *)0, &otmp, (void *)0, HMON_PROJECTILE,
@@ -9010,6 +9011,32 @@ doapply()
 	case UPGRADE_KIT:
 		res = doUseUpgradeKit(&obj);
 		check_loadout_trophy();
+	break;
+	case HYPERBOREAN_DIAL:
+		if(obj->ovar1_puzzle_steps < u.uhyperborean_steps){
+			pline("You are able to solve the current disk of the puzzle.");
+			obj->ovar1_puzzle_steps++;
+			if(obj->ovar1_puzzle_steps == 6){
+				pline("You have completed this puzzle as well.");
+			}
+			return MOVE_STANDARD;
+		}
+		if(obj->ovar1_puzzle_steps == 0){
+			pline("This strange mechanism has a number of freely rotating disks and pegs that pop up and down.");
+			if(ACURR(A_INT) > 13)
+				pline("It seems to be some sort of puzzle, but you aren't able to make any progress!");
+		}
+		else if(obj->ovar1_puzzle_steps == 1){
+			pline("While you were sleeping, you seem to have solved part of the puzzle.");
+			pline("One ring has locked into place, and a hexagonal peg projects from the front face.");
+		}
+		else if(obj->ovar1_puzzle_steps < 6){
+			pline("Your sleeping mind has completed %ld rings of the puzzle.", obj->ovar1_puzzle_steps);
+		}
+		else {
+			pline("The puzzle is complete. All rings have locked into place, and six hexagonal pegs project from the front.");
+		}
+		return MOVE_CANCELLED;
 	break;
 	default:
 		/* Pole-weapons can strike at a distance */

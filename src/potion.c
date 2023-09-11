@@ -417,6 +417,16 @@ dodrink()
 	}
 #endif
 
+    /* Or a forge? */
+    if (IS_FORGE(levl[u.ux][u.uy].typ)
+        /* not as low as floor level but similar restrictions apply */
+        && can_reach_floor()
+	) {
+        if (yn("Drink from the forge?") == 'y') {
+            drinkforge();
+            return 1;
+        }
+    }
 	/* Or are you surrounded by water? */
 	if (Underwater || IS_PUDDLE(levl[u.ux][u.uy].typ) ||
 			(is_pool(u.ux,u.uy, FALSE) && Wwalking)) {
@@ -484,7 +494,7 @@ boolean force;
 {
 	int retval;
 
-	if(!force && otmp->otyp == POT_GOAT_S_MILK && u.veil){
+	if(!force && (otmp->otyp == POT_GOAT_S_MILK || otmp->otyp == POT_PRIMORDIAL_WATERS) && u.veil){
 		You("feel reality threatening to slip away from the mere scent of the potion!");
 		if (yn("Are you sure you want to drink it?") != 'y'){
 			return(0);
@@ -652,7 +662,7 @@ boolean force;
 			}
 			unkn++;
 			if(is_undead(youracedata) || is_demon(youracedata) ||
-					u.ualign.type == A_CHAOTIC) {
+					(u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE)) {
 				if(otmp->blessed) {
 				pline("This burns like acid!");
 				exercise(A_CON, FALSE);
@@ -1116,8 +1126,8 @@ as_extra_healing:
 		exercise(A_CON, TRUE);
 		break;
 	case POT_GOAT_S_MILK:
-		You_feel("completely healed.");
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
+		u.shubbie_mutagen++;
 		if(otmp->cursed){
 			pline("Yecch! That was vile!");
 			losehp(40, "spoiled milk", KILLED_BY);
@@ -1125,6 +1135,7 @@ as_extra_healing:
 				"spoiled milk", TRUE, SICK_VOMITABLE);
 			break;
 		} else {
+			You_feel("completely healed.");
 			healup(enhanced ? 800 : 400, 
 					!(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (4+4*bcsign(otmp)),
 					TRUE, TRUE);
@@ -1132,8 +1143,9 @@ as_extra_healing:
 		/* Restore lost levels */
 		if (u.ulevel < u.ulevelmax) {
 			if(otmp->blessed){
-				while(u.ulevel < u.ulevelmax)
-					pluslvl(FALSE);
+				pluslvl(FALSE);
+				if(u.ulevel < u.ulevelmax)
+					u.uexp = newuexp(u.ulevel) - 1;
 			} else {
 				pluslvl(FALSE);
 			}
@@ -1259,7 +1271,6 @@ as_extra_healing:
 			u.uenbonus += (otmp->cursed) ? -num : num;
 			calc_total_maxen();
 			u.uen += (otmp->cursed) ? -100 : (otmp->blessed) ? 200 : 100;
-			if(u.uenmax <= 0) u.uenmax = 0;
 			if(u.uen > u.uenmax) u.uen = u.uenmax;
 			if(u.uen <= 0 && !Race_if(PM_INCANTIFIER)) u.uen = 0;
 			flags.botl = 1;
@@ -1321,6 +1332,43 @@ as_extra_healing:
 		if (Golded) fix_petrification();
 		unkn++; /* holy/unholy water can burn like acid too */
 		break;
+	case POT_PRIMORDIAL_WATERS:{
+		u.yog_sothoth_mutagen++;
+		if (Acid_resistance)
+			pline("This tastes like water.");
+		else {
+			pline("This burns%s!", otmp->blessed ? " a little" :
+					otmp->cursed ? " a lot" : " like acid");
+			losehp(d(otmp->cursed ? 2 : 1, otmp->blessed ? 4 : 8),
+					"primordial water", KILLED_BY);
+			exercise(A_CON, FALSE);
+		}
+		if (Stoned) fix_petrification();
+		if (Golded) fix_petrification();
+
+		int num;
+		num = rnd(5) + 5 * otmp->blessed + 1;
+		if(otmp->cursed)
+			num = -num;
+		if(num < 0)
+			u.uenbonus += num;
+		else if(u.uenbonus < 0)
+			u.uenbonus = min(0, u.uenbonus + num);
+		calc_total_maxen();
+		u.uen += (otmp->cursed) ? -100 : (otmp->blessed) ? 200 : 100;
+		if(u.uenmax <= 0) u.uenmax = 0;
+		if(u.uen > u.uenmax) u.uen = u.uenmax;
+		if(u.uen <= 0 && !Race_if(PM_INCANTIFIER)) u.uen = 0;
+		flags.botl = 1;
+		if(!otmp->cursed) exercise(A_WIS, TRUE);
+		if(!otmp->cursed) exercise(A_INT, TRUE);
+		if(!otmp->cursed) exercise(A_CHA, TRUE);
+		//Doing the print last causes the bottom line update to show the changed energy scores.
+		if(otmp->cursed)
+			You_feel("lackluster.");
+		else
+			pline("Magical energies course through your body.");
+		}break;
 	case POT_POLYMORPH:
 		You_feel("a little %s.", Hallucination ? "normal" : "strange");
 		if (!Unchanging) polyself(FALSE);
@@ -1815,6 +1863,22 @@ boolean your_fault;
 			    monkilled(mon, "", AD_ACID);
 		    }
 		}
+		break;
+	case POT_PRIMORDIAL_WATERS:
+		if (!resists_acid(mon) && !resist(mon, POTION_CLASS, 0, NOTELL)) {
+		    pline("%s %s in pain!", Monnam(mon),
+			  is_silent_mon(mon) ? "writhes" : "shrieks");
+		    mon->mhp -= d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    if (mon->mhp < 1) {
+			if (your_fault)
+			    killed(mon);
+			else
+			    monkilled(mon, "", AD_ACID);
+		    }
+		}
+		mon->mspec_used = 0;
+		if(mon->mcan)
+			set_mcan(mon, FALSE);
 		break;
 	case POT_BLOOD:{
 		int mtyp = obj->corpsenm;
@@ -2629,14 +2693,28 @@ dodip()
 	if (IS_FOUNTAIN(here)) {
 #ifdef PARANOID
 		Sprintf(qbuf, "Dip %s into the fountain?", the(xname(obj)));
-		if(yn(qbuf) == 'y') {
+		if(yn(qbuf) == 'y')
 #else
-		if(yn("Dip it into the fountain?") == 'y') {
+		if(yn("Dip it into the fountain?") == 'y')
 #endif
+		{
 			dipfountain(obj);
 			return MOVE_STANDARD;
 		}
-	} else if (is_pool(u.ux,u.uy, TRUE)) {
+	}
+	if (IS_FORGE(here)) {
+#ifdef PARANOID
+		Sprintf(qbuf, "Dip %s into the forge?", the(xname(obj)));
+		if(yn(qbuf) == 'y')
+#else
+		if(yn("Dip it into the forge?") == 'y')
+#endif
+		{
+			dipforge(obj);
+			return MOVE_STANDARD;
+		}
+	}
+	else if (is_pool(u.ux,u.uy, TRUE)) {
 		tmp = waterbody_name(u.ux,u.uy);
 #ifdef PARANOID
 		Sprintf(qbuf, "Dip %s into the %s?", the(xname(obj)), tmp);

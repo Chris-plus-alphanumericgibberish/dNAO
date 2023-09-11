@@ -2339,7 +2339,7 @@ boolean goodequip;
 			}
 		} else if(mm == PM_MYRKALFAR_WARRIOR){
 			mtmp->m_lev += rn2(6);
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			otmp = mksobj(SNIPER_RIFLE, mkobjflags);
 			otmp->spe = 4;
 			otmp->cursed = FALSE; //Either uncurses or has no effect.
@@ -2400,7 +2400,7 @@ boolean goodequip;
 			}
 		} else if(mm == PM_MYRKALFAR_MATRON){
 			mtmp->m_lev += rn2(6);
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			struct obj *gem;
 			give_mintrinsic(mtmp, TELEPAT);
 			otmp = mksobj(ARM_BLASTER, mkobjflags);
@@ -2474,7 +2474,7 @@ boolean goodequip;
 		} else if(Infuture && mm == PM_ELVENKING){ /* Give the elvenking in the quest a special setup */
 			struct obj *gem;
 			mtmp->m_lev += 7;
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			
 			give_mintrinsic(mtmp, TELEPAT);
 			give_mintrinsic(mtmp, REGENERATION);
@@ -2848,7 +2848,7 @@ boolean goodequip;
 			(void)mongets(mtmp, FEDORA, mkobjflags);
 		} else if (mm == PM_TROOPER){
 			mtmp->m_lev += rn2(6);
-			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+			mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 			if(!rn2(10)){
 				otmp = mksobj(ARM_BLASTER, mkobjflags);
 				if(otmp){
@@ -4783,7 +4783,7 @@ int mmflags;
 						(void) mpickobj(mtmp, otmp);
 					} else { //Fighter driver
 						mtmp->m_lev += 3;
-						mtmp->mhpmax += d(3,8);
+						mtmp->mhpmax += d(3,hd_size(mtmp->data));
 						mtmp->mhp = mtmp->mhpmax;
 						mtmp->mspeed = MFAST;
 						mtmp->permspeed = MFAST;
@@ -4832,7 +4832,7 @@ int mmflags;
 				} else {
 					if(rn2(10)){ //Wizard driver
 						mtmp->m_lev += 3;
-						mtmp->mhpmax += d(3,8);
+						mtmp->mhpmax += d(3,hd_size(mtmp->data));
 						mtmp->mhp = mtmp->mhpmax;
 						otmp = mksobj(MIRROR, mkobjflags|MKOBJ_NOINIT);
 						otmp->objsize = MZ_SMALL;
@@ -4868,7 +4868,7 @@ int mmflags;
 						(void) mpickobj(mtmp, otmp);
 					} else { //Wizard leader
 						mtmp->m_lev += 7;
-						mtmp->mhpmax += d(7,8);
+						mtmp->mhpmax += d(7,hd_size(mtmp->data));
 						mtmp->mhp = mtmp->mhpmax;
 						otmp = mksobj(MIRROR, mkobjflags|MKOBJ_NOINIT);
 						otmp->objsize = MZ_SMALL;
@@ -6930,7 +6930,7 @@ int mmflags;
 					give_mintrinsic(mtmp, POISON_RES);
 					give_mintrinsic(mtmp, REGENERATION);
 					mtmp->m_lev += 6;
-					mtmp->mhpmax = mtmp->m_lev*8-1;
+					mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data)-1;
 					mtmp->mhp = mtmp->mhpmax;
 					otmp = mksobj(DOUBLE_LIGHTSABER, mkobjflags);
 					otmp->oerodeproof = 1;
@@ -6985,7 +6985,7 @@ int mmflags;
 					struct obj *gem;
 					give_mintrinsic(mtmp, POISON_RES);
 					mtmp->m_lev += 2;
-					mtmp->mhpmax = mtmp->m_lev*8-1;
+					mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data)-1;
 					mtmp->mhp = mtmp->mhpmax;
 					otmp = mksobj(LIGHTSABER, mkobjflags);
 					otmp->oerodeproof = 1;
@@ -7256,7 +7256,7 @@ int mmflags;
 			if(Infuture){
 				if(in_mklev){
 					mtmp->m_lev += 20;
-					mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*8 - 1;
+					mtmp->mhp = mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - 1;
 					otmp = mksobj(ARM_BLASTER, mkobjflags);
 					if(otmp){
 						otmp->spe = 0;
@@ -9975,7 +9975,7 @@ int mmflags;
 						mtmp->entangled_oid = otmp->o_id;
 					}
 					mtmp->m_lev = 14;
-					mtmp->mhpmax = 7*8 + d(7,8);
+					mtmp->mhpmax = 7*hd_size(mtmp->data) + d(7,hd_size(mtmp->data));
 					mtmp->mhp = mtmp->mhpmax;
 					return;
 				}
@@ -13381,6 +13381,8 @@ int faction;
 
 	if(!get_mx(mtmp, MX_ESUM) && intelligent_mon(mtmp) && is_smith_mtyp(mtmp->mtyp)){
 		add_mx(mtmp, MX_ESMT);
+		if(is_smith_mon(mtmp))
+			ESMT(mtmp)->smith_mtyp = mtmp->mtyp; //In case the monster is later polymorphed
 	}
 	
 	ABASE_MON(A_STR, mtmp) = d(3,6);
@@ -13538,23 +13540,23 @@ int faction;
 	     * way to fit in the 50..127 positive range of a signed character
 	     * above the 1..49 that indicate "normal" monster levels */
 //	    mtmp->mhpmax = mtmp->mhp = 2*(ptr->mlevel - 6);
-	    mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
+	    mtmp->mhpmax = mtmp->mhp = max(4, hd_size(ptr)*(ptr->mlevel));
 	    // mtmp->m_lev = mtmp->mhp / 4;	/* approximation */
 	} else if (has_template(mtmp, PSEUDONATURAL) || has_template(mtmp, MOLY_TEMPLATE)) {
-		mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
+		mtmp->mhpmax = mtmp->mhp = max(4, hd_size(ptr)*(ptr->mlevel));
 	} else if (is_ancient(mtmp) || is_tannin(mtmp)) {
-		mtmp->mhpmax = mtmp->mhp = max(4, 8*(ptr->mlevel));
+		mtmp->mhpmax = mtmp->mhp = max(4, hd_size(ptr)*(ptr->mlevel));
 	} else if (!mtmp->m_lev) {
-	    mtmp->mhpmax = mtmp->mhp = rnd(4);
+	    mtmp->mhpmax = mtmp->mhp = rnd(hd_size(ptr)/2);
 	} else if (ptr->mlet == S_DRAGON && mndx >= PM_GRAY_DRAGON) {
 	    /* adult dragons */
 	    mtmp->mhpmax = mtmp->mhp = (int) (In_endgame(&u.uz) ?
-		(8 * mtmp->m_lev) : (4 * mtmp->m_lev + d((int)mtmp->m_lev, 4)));
+		(hd_size(ptr) * mtmp->m_lev) : (hd_size(ptr)/2 * mtmp->m_lev + d((int)mtmp->m_lev, hd_size(ptr)/2)));
 	} else {
 		if(Infuture){
-			mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*8 - 1;
+			mtmp->mhpmax = mtmp->mhp = mtmp->m_lev*hd_size(mtmp->data) - 1;
 		} else {
-		    mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, 8);
+		    mtmp->mhpmax = mtmp->mhp = d((int)mtmp->m_lev, hd_size(ptr));
 		    if (is_home_elemental(ptr))
 			mtmp->mhpmax = (mtmp->mhp *= 3);
 		}
@@ -13621,7 +13623,7 @@ int faction;
 		}
 		if (plslvl) {
 			mtmp->m_lev += plslvl;
-			mtmp->mhpmax += d(plslvl, 8);
+			mtmp->mhpmax += d(plslvl, hd_size(mtmp->data));
 			mtmp->mhp = mtmp->mhpmax;
 		}
 		/* update symbol */
@@ -13748,20 +13750,20 @@ int faction;
 				mtmp->mhp = mtmp->mhpmax;
 			} else if(ptr->mtyp == PM_HARROWER_OF_ZARIEL){
 				mtmp->m_lev *= 1.5;
-				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
+				mtmp->mhpmax = max(4, hd_size(mtmp->data)*mtmp->m_lev);
 				mtmp->mhp = mtmp->mhpmax;
 			} else if(mndx == PM_IKSH_NA_DEVA){
 				mtmp->mcansee = 0;
 				mtmp->mblinded = 0;
 			} else if(mndx == PM_KUKER){ 
-				mtmp->mhpmax = mtmp->m_lev*8 - 4; //Max HP
+				mtmp->mhpmax = mtmp->m_lev*hd_size(mtmp->data) - hd_size(mtmp->data)/2; //Max HP
 				mtmp->mhp = mtmp->mhpmax;
 			}
 
 			if(in_mklev && is_angel(mtmp->data) && Is_demogorgon_level(&u.uz)){
 				set_template(mtmp, MAD_TEMPLATE);
 				mtmp->m_lev += (mtmp->data->mlevel)/2;
-				mtmp->mhpmax = max(4, 8*mtmp->m_lev);
+				mtmp->mhpmax = max(4, hd_size(mtmp->data)*mtmp->m_lev);
 				mtmp->mhp = mtmp->mhpmax;
 			}
 
@@ -13790,6 +13792,9 @@ int faction;
 					if (mndx == PM_DROW_MATRON){
 						tmpm = makemon_full(&mons[PM_HEDROW_WARRIOR], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 						if(tmpm) m_initlgrp(tmpm, mtmp->mx, mtmp->my);
+					} else if (mndx == PM_DROW_CAPTAIN){
+						tmpm = makemon_full(&mons[PM_HEDROW_WARRIOR], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+						if(tmpm) m_initsgrp(tmpm, mtmp->mx, mtmp->my);
 					} else if (mndx == PM_DOKKALFAR_ETERNAL_MATRIARCH){
 						if(Infuture){
 							tmpm = makemon_full(&mons[PM_EMBRACED_DROWESS], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
@@ -14100,9 +14105,9 @@ int faction;
 			}
 			else if(mndx == PM_UVUUDAUM){
 				mtmp->m_lev = 38;
-				mtmp->mhpmax = d(38, 8);
-				if(mtmp->mhpmax < 38*4.5)
-					mtmp->mhpmax = (int)(38*4.5);
+				mtmp->mhpmax = d(38, hd_size(mtmp->data));
+				if(mtmp->mhpmax < 38*hd_size(mtmp->data)/2)
+					mtmp->mhpmax = (int)(38*hd_size(mtmp->data)/2);
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			else if(mndx == PM_ASPECT_OF_THE_SILENCE){
@@ -14111,8 +14116,9 @@ int faction;
 			    mtmp->perminvis = TRUE;
 				otmp = oname(otmp, artiname(ART_THIRD_KEY_OF_CHAOS));
 				if(otmp->oartifact){
-					place_object(otmp, mtmp->mx, mtmp->my);
-					rloco(otmp);
+					otmp->ox = mtmp->mx;
+					otmp->oy = mtmp->my;
+					randomly_place_obj(otmp);
 				} else {
 					obfree(otmp, (struct obj *) 0);
 				}
@@ -14198,7 +14204,7 @@ int faction;
 		case S_ZOMBIE:
 			if (mndx == PM_DREAD_SERAPH){
 				mtmp->m_lev = max(mtmp->m_lev,30);
-				mtmp->mhpmax = 4*8*mtmp->m_lev;
+				mtmp->mhpmax = 4*hd_size(mtmp->data)*mtmp->m_lev;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;
@@ -15531,7 +15537,8 @@ struct monst *mtmp;
 	}
 	if(mtmp->mtyp == PM_REBEL_RINGLEADER){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 15){
 			give_mintrinsic(mtmp, COLD_RES);
@@ -15554,6 +15561,12 @@ struct monst *mtmp;
 			give_mintrinsic(mtmp, FIRE_RES);
 		}
 	}
+	if(mtmp->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION){
+		if(mtmp->m_lev >= 7){
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+		}
+	}
 	if(mon_archeologist(mtmp)){
 		give_mintrinsic(mtmp, STEALTH);
 		if(mtmp->m_lev >= 10){
@@ -15562,13 +15575,15 @@ struct monst *mtmp;
 	}
 	if(mon_anachrononaut(mtmp)){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_barbarian(mtmp)){
 		give_mintrinsic(mtmp, POISON_RES);
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 15){
 			give_mintrinsic(mtmp, STEALTH);
@@ -15584,7 +15599,8 @@ struct monst *mtmp;
 	}
 	if(mon_caveman(mtmp)){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_convict(mtmp)){
@@ -15600,7 +15616,8 @@ struct monst *mtmp;
 		give_mintrinsic(mtmp, DRAIN_RES);
 		give_mintrinsic(mtmp, SICK_RES);
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 9){
 			give_mintrinsic(mtmp, POISON_RES);
@@ -15608,7 +15625,8 @@ struct monst *mtmp;
 	}
 	if(mon_knight(mtmp)){
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_monk(mtmp)){
@@ -15665,7 +15683,8 @@ struct monst *mtmp;
 			give_mintrinsic(mtmp, STEALTH);
 		}
 		if(mtmp->m_lev >= 11){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_priest(mtmp)){
@@ -15704,7 +15723,8 @@ struct monst *mtmp;
 	if(mon_valkyrie(mtmp)){
 		give_mintrinsic(mtmp, STEALTH);
 		if(mtmp->m_lev >= 7){
-			mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_wizard(mtmp)){
@@ -15891,6 +15911,8 @@ struct monst *mtmp, *victim;
 			// max_increase = max((hp_threshold + 1) - mtmp->mhpmax, 0);
 	    // cur_increase = (max_increase > 0) ? rn2(max_increase)+1 : 0;
 		int xp_threshold = victim->m_lev + d(2,5);
+		if(mtmp->mtyp == PM_TWIN_SIBLING && mtmp->m_lev < u.ulevel)
+			xp_threshold = mtmp->m_lev + 1;
 		if(Role_if(PM_HEALER))
 			xp_threshold += heal_mlevel_bonus();
 		if(uring_art(ART_LOMYA))
@@ -15900,7 +15922,7 @@ struct monst *mtmp, *victim;
 				pline("Warm light shines on %s", mon_nam(mtmp));
 			mtmp->mvar_flask_charges++;
 		}
-		if(mtmp->mhpmax < hp_threshold-8 || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
+		if(mtmp->mhpmax < hp_threshold-hd_size(mtmp->data) || mtmp->m_lev < xp_threshold){ /*allow monsters to quickly gain hp up to around their HP limit*/
 			max_increase = 1;
 			cur_increase = 1;
 			if(mtmp->mtame){
@@ -15957,7 +15979,7 @@ struct monst *mtmp, *victim;
 	    /* a gain level potion or wraith corpse; always go up a level
 	       unless already at maximum (30 is player limt, so assume it is
 		   the inate limit of gain level potions) */
-	    max_increase = cur_increase = rnd(8);
+	    max_increase = cur_increase = rnd(hd_size(mtmp->data));
 	    hp_threshold = 0;	/* smaller than `mhpmax + max_increase' */
 	    lev_limit = max(30, mtmp->m_lev);
 	}
@@ -16005,7 +16027,7 @@ struct monst *mtmp, *victim;
 	}
 //	if( !(monsndx(mtmp)<PM_DJINNI && monsndx(mtmp)>PM_BALROG) ){
 		// Some High level stuff is higher than this.
-		// if (mtmp->mhpmax > 50*8) mtmp->mhpmax = 50*8;	  /* absolute limit */
+		// if (mtmp->mhpmax > 50*hd_size(mtmp->data)) mtmp->mhpmax = 50*hd_size(mtmp->data);	  /* absolute limit */
 		// if (mtmp->mhp > mtmp->mhpmax) mtmp->mhp = mtmp->mhpmax;
 //	}
 	return ptr;
@@ -16353,11 +16375,6 @@ register struct permonst *ptr;
 	
 	if(goat_monster(ptr) && u.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger) return TRUE;
 	
-	//The painting is normally peaceful
-	if(In_quest(&u.uz) && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
-		return((boolean)(!!rn2(6 + (u.ualign.record < -5 ? -5 : u.ualign.record))));
-	}
-
 	if(Race_if(PM_DROW) && 
 		((ual == A_CHAOTIC && (!Role_if(PM_NOBLEMAN) || flags.initgend)) || (ual == A_NEUTRAL && !flags.initgend)) && /*Males can be neutral or chaotic, but a chaotic male nobleman converted to a different god*/
 		mndx == PM_AVATAR_OF_LOLTH && 
@@ -16395,6 +16412,15 @@ register struct permonst *ptr;
 	if (ptr->msound == MS_NEMESIS)	return FALSE;
 	
 	if (ptr->mtyp == PM_GRAY_DEVOURER && base_casting_stat() == A_CHA)	return FALSE;
+	
+	//As a foulness shall ye know Them.
+	if(goodsmeller(ptr) && u.specialSealsActive&SEAL_YOG_SOTHOTH)
+		return FALSE;
+	
+	//The painting is normally peaceful
+	if(In_quest(&u.uz) && Race_if(PM_HALF_DRAGON) && Role_if(PM_NOBLEMAN) && flags.initgend && u.uevent.qcompleted){
+		return((boolean)(!!rn2(6 + (u.ualign.record < -5 ? -5 : u.ualign.record))));
+	}
 
 	if (always_peaceful(ptr)) return TRUE;
 	if(!u.uevent.invoked && mndx==PM_UVUUDAUM && !Infuture) return TRUE;

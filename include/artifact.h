@@ -304,13 +304,24 @@ struct artinstance{
 #define LeagueMod avar1
 #define Esscoo_mid avar1
 #define uconstel_pets avar1
+#define IbiteUpgrades avar1
+#define	IPROP_WAVE		0x00000001L
+#define	IPROP_REVOKE	0x00000002L
+#define	IPROP_DESTROY	0x00000004L
+#define	IPROP_TELEPORT	0x00000008L
+#define	IPROP_LEVELPORT	0x00000010L
+#define	IPROP_BRANCHPORT	0x00000020L
+#define	IPROP_REFLECT	0x00000040L
+#define	ALL_IPROP		(0x0000000FL|IPROP_LEVELPORTIPROP_BRANCHPORT|IPROP_REFLECT)
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2
 #define RRSlunar avar2
 #define PlagueDoOnHit avar2
+#define IbiteFavor avar2
 	long avar3;
 #define SnSd3 avar3
+#define IbiteBoons avar3
 	long avar4;
 #define SnSd3duration avar4
 };

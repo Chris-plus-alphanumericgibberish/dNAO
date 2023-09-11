@@ -1866,6 +1866,9 @@ default_case:
 				set_material_gm(stuff, WOOD);
 				add_to_container(otmp, stuff);
 
+				stuff = mksobj(SCR_ENCHANT_ARMOR, MKOBJ_NOINIT);
+				add_to_container(otmp, stuff);
+
 				stuff = mksobj(SADDLE, MKOBJ_ARTIF);
 				set_material_gm(stuff, WOOD);
 				add_oprop(stuff, OPROP_PHSEW);
@@ -2321,6 +2324,8 @@ create_altar(a, croom)
 
 	if (oldtyp == FOUNTAIN)
 	    level.flags.nfountains--;
+	else if (oldtyp == FORGE)
+	    level.flags.nforges--;
 	else if (oldtyp == SINK)
 	    level.flags.nsinks--;
 
@@ -2396,6 +2401,8 @@ int		typ;
 	levl[x][y].typ = typ;
 	if (typ == FOUNTAIN)
 	    level.flags.nfountains++;
+	else if (typ == FORGE)
+	    level.flags.nforges++;
 	else if (typ == SINK)
 	    level.flags.nsinks++;
 }
@@ -2864,6 +2871,11 @@ int n;
 			    Free(r->fountains[j]);
 			Free(r->fountains);
 		}
+		if ((j = r->nforge) != 0) {
+			while(j--)
+			    Free(r->forges[j]);
+			Free(r->forges);
+		}
 		if ((j = r->nsink) != 0) {
 			while(j--)
 			    Free(r->sinks[j]);
@@ -2949,6 +2961,9 @@ room *r, *pr;
 		for(i = 0; i<r->nfountain; i++)
 		    create_feature(r->fountains[i]->x, r->fountains[i]->y,
 				   aroom, FOUNTAIN);
+		for(i = 0; i<r->nforge; i++)
+		    create_feature(r->forges[i]->x, r->forges[i]->y,
+				   aroom, FORGE);
 		for(i = 0; i<r->naltar; i++)
 		    create_altar(r->altars[i], aroom);
 		for(i = 0; i<r->ndoor; i++)
@@ -3248,6 +3263,17 @@ dlb *fd;
 				sizeof(fountain), fd);
 		}
 
+		/* read the forges */
+		Fread((genericptr_t) &r->nforge, 1,
+			sizeof(r->nforge), fd);
+		if ((n = r->nforge) != 0)
+		    r->forges = NewTab(forge, n);
+		while (n--) {
+			r->forges[(int)n] = New(forge);
+			Fread((genericptr_t) r->forges[(int)n], 1,
+				sizeof(forge), fd);
+		}
+
 		/* read the sinks */
 		Fread((genericptr_t) &r->nsink, 1, sizeof(r->nsink), fd);
 		if ((n = r->nsink) != 0)
@@ -3422,6 +3448,7 @@ dlb *fd;
     altar   tmpaltar;
     gold    tmpgold;
     fountain tmpfountain;
+    forge tmpforge;
     engraving tmpengraving;
     xchar   mustfill[(MAXNROFROOMS+1)*2];
     struct trap *badtrap;
@@ -3881,6 +3908,15 @@ dlb *fd;
 
 		create_feature(tmpfountain.x, tmpfountain.y,
 			       (struct mkroom *)0, FOUNTAIN);
+	}
+
+	Fread((genericptr_t) &n, 1, sizeof(n), fd);
+						/* Number of forges */
+	while (n--) {
+		Fread((genericptr_t)&tmpforge, 1, sizeof(tmpforge), fd);
+
+		create_feature(tmpforge.x, tmpforge.y,
+			       (struct mkroom *)0, FORGE);
 	}
 
 	Fread((genericptr_t) &n, 1, sizeof(n), fd);

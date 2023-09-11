@@ -15,6 +15,7 @@
 #include "dungeon.h"
 #include "obj.h"
 #include "monst.h"
+#include "mutations.h"
 #include "you.h"
 #include "flag.h"
 #include "dlb.h"

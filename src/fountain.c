@@ -9,8 +9,10 @@
 STATIC_DCL void NDECL(dowatersnakes);
 STATIC_DCL void NDECL(dowaterdemon);
 STATIC_DCL void NDECL(dowaternymph);
+STATIC_DCL void NDECL(dolavademon);
 STATIC_PTR void FDECL(gush, (int,int,genericptr_t));
 STATIC_DCL void NDECL(dofindgem);
+STATIC_DCL void FDECL(blowupforge, (int, int));
 
 void
 floating_above(what)
@@ -63,6 +65,33 @@ dowaterdemon() /* Water demon */
 	}
     } else
 	pline_The("fountain bubbles furiously for a moment, then calms.");
+}
+
+/* Lava Demon */
+STATIC_OVL void
+dolavademon()
+{
+    struct monst *mtmp;
+
+    if (!(mvitals[PM_LAVA_DEMON].mvflags & G_GONE)) {
+        if ((mtmp = makemon(&mons[PM_LAVA_DEMON], u.ux, u.uy,
+                            MM_ADJACENTOK)) != 0) {
+            if (!Blind)
+                You("summon %s!", a_monnam(mtmp));
+            else
+                You_feel("the temperature rise significantly.");
+
+            /* Give those on low levels a (slightly) better chance of survival
+             */
+            if (rnd(100) > (80 + level_difficulty())) {
+                pline("Freed from the depths of Gehennom, %s offers to aid you in your quest!",
+                      mhe(mtmp));
+                (void) tamedog_core(mtmp, (struct obj *) 0, TRUE);
+            } else if (t_at(mtmp->mx, mtmp->my))
+                (void) mintrap(mtmp);
+        }
+    } else
+        pline_The("forge violently spews lava for a moment, then settles.");
 }
 
 STATIC_OVL void
@@ -190,6 +219,153 @@ boolean isyou;
 		
 		if(isyou && u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
 	}
+}
+
+void
+dipforge(obj)
+register struct obj *obj;
+{
+	if (Levitation) {
+		floating_above("forge");
+		return;
+	}
+
+	burn_away_slime();
+	melt_frozen_air();
+
+	/* Dipping something you're still wearing into a forge filled with
+	 * lava, probably not the smartest thing to do. This is gonna hurt.
+	 * Non-metallic objects are handled by lava_damage().
+	 */
+	if (is_metallic(obj) && (obj->owornmask & (W_ARMOR | W_ACCESSORY))) {
+		if (!Fire_resistance) {
+			You("dip your worn %s into the forge.  You burn yourself!",
+				xname(obj));
+			if (!rn2(3))
+				You("may want to remove your %s first...",
+					xname(obj));
+			losehp(d(2, 8),
+				   "dipping a worn object into a forge", KILLED_BY);
+		}
+		else {
+			You("dip your worn %s into the forge.  This is fine.",
+				xname(obj));
+			if (!rn2(3))
+				You("may want to remove your %s first...",
+					xname(obj));
+		}
+		return;
+	}
+
+	/* If punished and wielding a hammer, there's a good chance
+	 * you can use a forge to free yourself */
+	if (Punished && obj->otyp == HEAVY_IRON_BALL) {
+		if ((uwep && !is_hammer(uwep)) || !uwep) { /* sometimes drop a hint */
+			if (!rn2(4))
+				pline("You'll need a hammer to be able to break the chain.");
+			goto result;
+		} else if (uwep && is_hammer(uwep)) {
+			You("place the ball and chain inside the forge.");
+			pline("Raising your %s, you strike the chain...",
+				  xname(uwep));
+			if (!rn2((P_SKILL(P_HAMMER) < P_SKILLED) ? 8 : 2)
+				&& Luck >= 0) { /* training up hammer skill pays off */
+				pline("The chain breaks free!");
+				unpunish();
+			} else {
+				pline("Clang!");
+			}
+		}
+		return;
+	}
+
+result:
+	switch (rnd(30)) {
+	case 6:
+	case 7:
+	case 8:
+	case 9: /* Strange feeling */
+		pline("A weird sensation runs up your %s.", body_part(ARM));
+		break;
+	case 10:
+	case 11:
+	case 12:
+	case 13:
+	case 14:
+	case 15:
+	case 16:
+	case 17:
+	case 18:
+		if (!is_metallic(obj))
+			goto lava;
+		Your("%s glows briefly from the heat.", xname(obj));
+
+		// /* TODO: perhaps our hero needs to wield some sort of tool to
+		   // successfully reforge an object? */
+		// if (is_metallic(obj) && Luck >= 0) {
+			// if (greatest_erosion(obj) > 0) {
+				// if (!Blind)
+					// You("successfully reforge your %s, repairing some of the damage.",
+						// xname(obj));
+				// if (obj->oeroded > 0)
+					// obj->oeroded--;
+				// if (obj->oeroded2 > 0)
+					// obj->oeroded2--;
+			// } else {
+				// if (!Blind) {
+					// Your("%s glows briefly from the heat, but looks reforged and as new as ever.",
+						 // xname(obj));
+				// }
+			// }
+		// }
+		break;
+	case 19:
+	case 20:
+		if (!is_metallic(obj))
+			goto lava;
+		You_feel("a sudden wave of heat.");
+
+		// if (!obj->blessed && is_metallic(obj) && Luck > 5) {
+			// bless(obj);
+			// if (!Blind) {
+				// Your("%s glows blue for a moment.",
+					 // xname(obj));
+			// }
+		// } else {
+			// You_feel("a sudden wave of heat.");
+		// }
+		break;
+	case 21: /* Lava Demon */
+		if (!rn2(8))
+			dolavademon();
+		else
+			pline_The("forge violently spews lava for a moment, then settles.");
+		break;
+	case 22:
+		if (Luck < 0) {
+			blowupforge(u.ux, u.uy);
+			/* Avoid destroying the same item twice (lava_damage) */
+			return;
+		} else {
+			pline("Molten lava surges up and splashes all over you!");
+			if(!Fire_resistance)
+				losehp(d(6, 6), "dipping into a forge", KILLED_BY);
+		}
+		break;
+	case 23:
+	case 24:
+	case 25:
+	case 26:
+	case 27:
+	case 28:
+	case 29:
+	case 30: /* Strange feeling */
+		You_feel("a sudden flare of heat.");
+		break;
+	}
+lava:
+	lava_damage(obj, u.ux, u.uy);
+	update_inventory();
 }
 
 void
@@ -497,6 +673,84 @@ register struct obj *obj;
 	}
 	update_inventory();
 	dryup(u.ux, u.uy, TRUE);
+}
+
+void
+breakforge(x, y)
+int x, y;
+{
+    if (cansee(x, y) || (x == u.ux && y == u.uy))
+        pline_The("forge splits in two as molten lava rushes forth!");
+    levl[x][y].doormask = 0;
+    levl[x][y].typ = LAVAPOOL;
+    newsym(x, y);
+    level.flags.nforges--;
+}
+
+void
+blowupforge(x, y)
+int x, y;
+{
+    if (cansee(x, y) || (x == u.ux && y == u.uy))
+        pline_The("forge rumbles, then explodes!  Molten lava splashes everywhere!");
+    levl[x][y].typ = ROOM, levl[x][y].flags = 0;
+    levl[x][y].doormask = 0;
+    newsym(x, y);
+    level.flags.nforges--;
+    explode(u.ux, u.uy, AD_FIRE, FORGE_EXPLODE, d(6,6), EXPL_FIERY, 1);
+}
+
+//Note: used in EvilHack if a forge is used up by forging magic or artifacts
+
+void
+coolforge(x, y)
+int x, y;
+{
+    if (cansee(x, y) || (x == u.ux && y == u.uy))
+        pline_The("lava in the forge cools and solidifies.");
+    levl[x][y].typ = ROOM, levl[x][y].flags = 0;
+    levl[x][y].doormask = 0;
+    newsym(x, y);
+    level.flags.nforges--;
+}
+
+void
+drinkforge()
+{
+    if (Levitation) {
+        floating_above("forge");
+        return;
+    }
+
+    if (!likes_fire(youmonst.data)) {
+        pline("Molten lava incinerates its way down your gullet...");
+        losehp(Upolyd ? u.mh : u.uhp, "trying to drink molten lava", KILLED_BY);
+        return;
+    }
+    burn_away_slime();
+	melt_frozen_air();
+    switch(rn2(20)) {
+    case 0:
+        pline("You drink some molten lava.  Mmmmm mmm!");
+		if(!Race_if(PM_INCANTIFIER))
+			lesshungry(rnd(50));
+        break;
+    case 1:
+        breakforge(u.ux, u.uy);
+        break;
+    case 2:
+    case 3:
+        pline_The("%s moves as though of its own will!", hliquid("lava"));
+        if ((mvitals[PM_FIRE_ELEMENTAL].mvflags & G_GONE)
+            || !makemon(&mons[PM_FIRE_ELEMENTAL], u.ux, u.uy, MM_ADJACENTOK)
+		)
+            pline("But it settles down.");
+        break;
+    default:
+        pline("You take a sip of molten lava.");
+		if(!Race_if(PM_INCANTIFIER))
+			lesshungry(rnd(5));
+    }
 }
 
 #ifdef SINKS

@@ -1271,6 +1271,8 @@ boolean called;
 	    Strcpy(pbuf, rank_of((int)mtmp->m_lev,
 				 monsndx(mdat),
 				 (boolean)mtmp->female));
+		if(mdat->mtyp == PM_ITINERANT_PRIESTESS)
+			Strcat(buf, "itinerant ");
 	    Strcat(buf, lcase(pbuf));
 		append_template_desc(mtmp, buf, FALSE, TRUE);
 	    name_at_start = FALSE;
@@ -1462,7 +1464,7 @@ char *
 mon_nam(mtmp)
 register struct monst *mtmp;
 {
-	return(x_monnam(mtmp, ARTICLE_THE, (char *)0,
+	return(x_monnam(mtmp, mtmp->mtyp == PM_TWIN_SIBLING ? ARTICLE_YOUR : ARTICLE_THE, (char *)0,
 		M_HAS_NAME(mtmp) ? SUPPRESS_SADDLE : 0, FALSE));
 }
 
@@ -1474,7 +1476,7 @@ char *
 noit_mon_nam(mtmp)
 register struct monst *mtmp;
 {
-	return(x_monnam(mtmp, ARTICLE_THE, (char *)0,
+	return(x_monnam(mtmp, mtmp->mtyp == PM_TWIN_SIBLING ? ARTICLE_YOUR : ARTICLE_THE, (char *)0,
 		M_HAS_NAME(mtmp) ? (SUPPRESS_SADDLE|SUPPRESS_IT) :
 		    SUPPRESS_IT, FALSE));
 }
@@ -1487,7 +1489,7 @@ char *
 noit_nohalu_mon_nam(mtmp)
 register struct monst *mtmp;
 {
-	return(x_monnam(mtmp, ARTICLE_THE, (char *)0,
+	return(x_monnam(mtmp, mtmp->mtyp == PM_TWIN_SIBLING ? ARTICLE_YOUR : ARTICLE_THE, (char *)0,
 		M_HAS_NAME(mtmp) ? (SUPPRESS_SADDLE|SUPPRESS_IT|SUPPRESS_HALLUCINATION) :
 		    SUPPRESS_IT|SUPPRESS_HALLUCINATION, FALSE));
 }
@@ -2113,6 +2115,24 @@ rndcolor()
 	int k = rn2(CLR_MAX);
 	return Hallucination ? hcolor((char *)0) : (k == NO_COLOR) ?
 		"colorless" : c_obj_colors[k];
+}
+
+static NEARDATA const char *const hliquids[] = {
+	"yoghurt", "oobleck", "clotted blood", "diluted water", "purified water",
+	"instant coffee", "tea", "herbal infusion", "liquid rainbow",
+	"creamy foam", "mulled wine", "bouillon", "nectar", "grog", "flubber",
+	"ketchup", "slow light", "oil", "vinaigrette", "liquid crystal", "honey",
+	"caramel sauce", "ink", "aqueous humour", "milk substitute",
+	"fruit juice", "glowing lava", "gastric acid", "mineral water",
+	"cough syrup", "quicksilver", "sweet vitriol", "grey goo", "pink slime",
+};
+
+const char *
+hliquid(liquidpref)
+const char *liquidpref;
+{
+	return (Hallucination || !liquidpref) ? hliquids[rn2(SIZE(hliquids))]
+										  : liquidpref;
 }
 
 /* Aliases for road-runner nemesis
