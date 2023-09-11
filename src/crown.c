@@ -287,7 +287,10 @@ gcrownu()
 			Strcpy(buf, crowndata->announcement);
 		}
 		/* speak it! */
-		godvoice(hand_of_elbereth[u.uevent.uhand_of_elbereth].godnum, buf);
+		if (hand_of_elbereth[u.uevent.uhand_of_elbereth].godnum != GOD_NONE)
+			godvoice(hand_of_elbereth[u.uevent.uhand_of_elbereth].godnum, buf);
+		else
+			godvoice(u.ualign.god, buf);
 	}
 
 	/* livelog your crowning */

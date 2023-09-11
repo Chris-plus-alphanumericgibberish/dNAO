@@ -2370,6 +2370,32 @@ bhitpile(obj,fhito,tx,ty)
 #endif /*OVLB*/
 #ifdef OVL1
 
+/* returns an int from 0-100 meaning chance to use a charge when zapping
+ * 100 => always uses a charge
+ * 0   => never uses a charge
+ * 
+ * if (rn2(100) < zapcost(wand, magr)) spe--;
+ */
+int
+zapcostchance(wand, magr)
+struct obj * wand;		/* wand being zapped */
+struct monst * magr;	/* creature zapping the wand (if any) */
+{
+	int base;	/* base chance */
+	switch (wand->otyp)
+	{
+	case WAN_MAGIC_MISSILE:
+		base = 10;
+		break;
+	
+	default:
+		base = 100;
+		break;
+	}
+
+	return base;
+}
+
 /*
  * zappable - returns 1 if zap is available, 0 otherwise.
  *	      it removes a charge from the wand if zappable.
@@ -2388,7 +2414,9 @@ register struct obj *wand;
 			return 0;
 		if(wand->spe == 0)
 			You("wrest one last charge from the worn-out wand.");
-		wand->spe--;
+
+		if (rn2(100) < zapcostchance(wand, &youmonst))
+			wand->spe--;
 		return 1;
 	}
 	else if(wand->otyp == ROD_OF_FORCE){
