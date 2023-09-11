@@ -85,6 +85,10 @@ int mtyp;
 			ptr->mname = EHOR(mon)->randname;
 			bas->mname = EHOR(mon)->randname;
 		}
+		else {
+			ptr->mname = mons[ptr->mtyp].mname;
+			bas->mname = mons[bas->mtyp].mname;
+		}
 		/* adjust permonst if needed */
 		if (mon != &youmonst && templated(mon))
 			set_template_data(bas, ptr, get_template(mon));
