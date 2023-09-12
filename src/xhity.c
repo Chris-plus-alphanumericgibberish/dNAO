@@ -572,7 +572,7 @@ int tary;
 
 		/* Generalized offhand attack when not allowed */
 		if ((attk->offhand) && (						// offhand attack
-				(youagr && (uarms || (uwep && bimanual(uwep, youracedata)))) ||					// player attacking with shield
+				(youagr && ((uarms && !activeFightingForm(FFORM_SHIELD_BASH)) || (uwep && bimanual(uwep, youracedata)))) ||	// player attacking with shield
 				(!youagr && (which_armor(magr, W_ARMS) || (MON_WEP(magr) && bimanual(MON_WEP(magr), pa))))	// monster attacking with shield
 				)
 			) {
@@ -635,7 +635,7 @@ int tary;
 			}
 			/* 2: Offhand attack when not allowed */
 			if ((aatyp == AT_XWEP || aatyp == AT_XSPR) && (	// offhand attack
-					(youagr && !u.twoweap) ||				// player attacking and choosing not to twoweapon
+					(youagr && !(u.twoweap || activeFightingForm(FFORM_SHIELD_BASH))) ||				// player attacking and choosing not to twoweapon
 					(!youagr && (which_armor(magr, W_ARMS) || (MON_WEP(magr) && bimanual(MON_WEP(magr), pa))))	// monster attacking and cannot twoweapon (wearing shield)
 					)
 				) {
@@ -657,7 +657,7 @@ int tary;
 			}
 			else if (aatyp == AT_XWEP) {
 				/* offhand */
-				otmp = (youagr) ? uswapwep : MON_SWEP(magr);
+				otmp = (youagr) ? (u.twoweap ? uswapwep : uarms) : MON_SWEP(magr);
 			}
 			else if (aatyp == AT_MARI) {
 				if(youagr && !uwep && !(u.twoweap && uswapwep)){
@@ -1689,7 +1689,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		/* if the player IS polymorphed, they are limited to their polyform's attacks */
 		/* some things give the player additional weapon attacks; they can reset SUBOUT_XWEP to allow another offhand hit if unpoly'd */
 		/* stilettos and wind and fire wheels add extra damage instead */
-		if (!by_the_book && *indexnum > 0 && u.twoweap
+		if (!by_the_book && *indexnum > 0 && (u.twoweap || activeFightingForm(FFORM_SHIELD_BASH))
 			&& !(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS))
 		) {
 			/* follow a weapon attack with an offhand attack */
@@ -3931,6 +3931,8 @@ int *shield_margin;
 	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && (melee || thrust)) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(weapon && arti_shining(weapon)) ||
+		(melee && youagr && weapon && weapon->otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD)
+			&& FightingFormSkillLevel(FFORM_HALF_SWORD) >= P_BASIC) ||
 		(melee && attk->aatyp == AT_TUCH) ||
 		(melee && attk->aatyp == AT_VINE) ||
 		(melee && spirit_rapier_at(attk->aatyp)) ||
@@ -13291,6 +13293,9 @@ int vis;						/* True if action is at all visible to the player */
 			/* Spellbooks are weapons if you have Paimon bound */
 			else if (melee && weapon && weapon->oclass == SPBOOK_CLASS && youagr && u.sealsActive&SEAL_PAIMON)
 				valid_weapon_attack = TRUE;
+			/* shield bashes are possibly if and only if using the style (youagr only) */
+			else if (melee && weapon && is_shield(weapon) && youagr && activeFightingForm(FFORM_SHIELD_BASH))
+				valid_weapon_attack = TRUE;
 			else
 				invalid_weapon_attack = TRUE;
 		}
@@ -13839,6 +13844,8 @@ int vis;						/* True if action is at all visible to the player */
 			else
 				poisons |= OPOISON_BASIC;
 		}
+		if (youagr && poisonedobj == uwep && activeFightingForm(FFORM_KNI_ELDRITCH) && u.ueldritch_style == AD_DRST)
+			poisons |= OPOISON_BASIC;
 	}
 	/* All AD_SHDW attacks are poisoned as well */
 	if (attk && attk->adtyp == AD_SHDW) {
@@ -14740,6 +14747,8 @@ int vis;						/* True if action is at all visible to the player */
 	phase_armor = (
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
+		(youagr && weapon && weapon->otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD)
+			&& FightingFormSkillLevel(FFORM_HALF_SWORD) >= P_BASIC) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp != AD_BLUD && originalattk->adtyp != AD_WET) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
@@ -14811,6 +14820,47 @@ int vis;						/* True if action is at all visible to the player */
 					
 					if(uarmg && uarmg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(uarmg, IEA_INC_DAM))
 						bonsdmg += uarmg->spe;
+
+					/* to make half-sword style actually useful to enhance, give it bonus precision damage*/
+					if (weapon && weapon->otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD) && !noanatomy(pd)){
+						if (FightingFormSkillLevel(FFORM_HALF_SWORD) >= P_BASIC)
+							bonsdmg += d(max(1, FightingFormSkillLevel(FFORM_HALF_SWORD)-1), 6); // 1d6-3d6 at basic-expert, not bad for 'free'
+						use_skill(P_HALF_SWORD, 1);
+					}
+
+					/* due to lack of a nicer place, check for eldritch style bonuses here*/
+#define eld_bon_dice ((FightingFormSkillLevel(FFORM_KNI_ELDRITCH) >= P_EXPERT) ? 6 : (FightingFormSkillLevel(FFORM_KNI_ELDRITCH) >= P_SKILLED ? 3 : 1))
+#define eld_bon_size ((u.ueldritch_style == SPE_FINGER_OF_DEATH) ? 13 : (\
+		 (u.ueldritch_style == SPE_FIRE_STORM || u.ueldritch_style == SPE_BLIZZARD || u.ueldritch_style == SPE_LIGHTNING_STORM) ? 8 : 6))
+					if (weapon && activeFightingForm(FFORM_KNI_ELDRITCH)){
+						if (FightingFormSkillLevel(FFORM_KNI_ELDRITCH) >= P_BASIC){
+							boolean resist_check = FALSE;
+							int spell_id;
+							if (u.ueldritch_style == SPE_FIREBALL || u.ueldritch_style == SPE_FIRE_STORM)
+								resist_check = Fire_res(mdef);
+							else if (u.ueldritch_style == SPE_CONE_OF_COLD || u.ueldritch_style == SPE_BLIZZARD)
+								resist_check = Cold_res(mdef);
+							else if (u.ueldritch_style == SPE_LIGHTNING_BOLT || u.ueldritch_style == SPE_LIGHTNING_STORM)
+								resist_check = Shock_res(mdef);
+							else if (u.ueldritch_style == SPE_ACID_SPLASH)
+								resist_check = Acid_res(mdef);
+							else if (u.ueldritch_style == SPE_POISON_SPRAY)
+								resist_check = Poison_res(mdef);
+							else if (u.ueldritch_style == SPE_FINGER_OF_DEATH)
+								resist_check = Dark_res(mdef);
+
+							for (spell_id = 0; spell_id < MAXSPELL; spell_id++)
+								if (spellid(spell_id) == u.ueldritch_style)
+									break;
+							if (spell_id < MAXSPELL && percent_success(spell_id) > rn2(100)){
+								if (!resist_check && u.uen >= objects[u.ueldritch_style].oc_level){
+									bonsdmg += d(eld_bon_dice, eld_bon_size);
+									u.uen -= objects[u.ueldritch_style].oc_level;
+								}
+							}
+						}
+						use_skill(P_KNI_ADVANCED, 1);
+					}
 
 					/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
 					if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
@@ -14888,6 +14938,8 @@ int vis;						/* True if action is at all visible to the player */
 				wtype = P_PICK_AXE;
 			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
 				wtype = P_MACE;
+			else if (weapon && is_shield(weapon) && activeFightingForm(FFORM_SHIELD_BASH))
+				wtype = P_SHIELD_BASH;
 			else if (weapon && (!valid_weapon(weapon) || is_launcher(weapon))){
 				if (weapon && check_oprop(weapon, OPROP_BLADED))
 					wtype = P_AXE;
@@ -14933,6 +14985,8 @@ int vis;						/* True if action is at all visible to the player */
 
 			/* now, train skills */
 			use_skill((melee && u.twoweap) ? P_TWO_WEAPON_COMBAT : wtype, 1);
+			if (weapon && bimanual(weapon, youracedata) && activeFightingForm(FFORM_GREAT_WEP))
+				use_skill(P_GREAT_WEP, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(P_SHII_CHO, 1);

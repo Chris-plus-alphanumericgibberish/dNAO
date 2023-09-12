@@ -2575,7 +2575,7 @@ donull()
 {
 	static long lastreped = -13;//hacky way to tell if the player has recently tried repairing themselves
 	u.unull = TRUE;
-	
+
 	if(uclockwork){
 		if(!Upolyd && u.uhp<u.uhpmax){
 			if(lastreped < monstermoves-13) You("attempt to make repairs.");

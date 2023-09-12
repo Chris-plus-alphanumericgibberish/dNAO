@@ -344,6 +344,10 @@ struct monst *magr;
 		))){
 		attackmask |= PIERCE;
 	}
+	if (youagr && otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD)){
+		attackmask = PIERCE; // only thrusting
+	}
+
 	if (   oartifact == ART_LIECLEAVER
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
 		|| oartifact == ART_GREAT_CLAWS_OF_URDLEN
@@ -436,12 +440,13 @@ struct monst *magr;
 	boolean lucky;
 	boolean exploding;
 	int explode_amt;
+	int ignore_rolls;
 	if (obj && (!valid_weapon(obj) || is_launcher(obj))){
 		struct weapon_dice nulldice = {0};
 		*wdice = nulldice;
 		ocn = wdice->oc_damn = 1;
 		ocd = wdice->oc_damd = 2;
-		bonn = bond = flat = lucky = exploding = explode_amt = 0;
+		bonn = bond = flat = lucky = exploding = explode_amt = ignore_rolls = 0;
 	}
 	else {
 		/* grab dice from the objclass definition */
@@ -454,6 +459,7 @@ struct monst *magr;
 		lucky =     	(wdice->lucky);
 		exploding = 	(wdice->exploding);
 		explode_amt =   (wdice->explode_amt);
+		ignore_rolls =   (wdice->ignore_rolls);
 	}
 
 	/* set dmod, if possible*/
@@ -513,6 +519,14 @@ struct monst *magr;
 			ocd = max(4 + 2 * obj->ovar1_moonPhase + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1_moonPhase <= 4)
 			if (!large && obj->ovar1_moonPhase == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
 				ocd = max(12 + 2 * dmod, 2);
+		}
+
+		/* shield bash skill buffs shield damage to d4/6/8 with skill, affected by dmod */
+		if (is_shield(obj) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)){
+			ocn = 1;
+			ocd = max(2, 2 * FightingFormSkillLevel(FFORM_SHIELD_BASH)); // 2-8 for unskilled-expert
+		} else if (magr == &youmonst && bimanual(obj, youracedata) && activeFightingForm(FFORM_GREAT_WEP)){
+			ignore_rolls = max(0, FightingFormSkillLevel(FFORM_GREAT_WEP) - 1); // 0-3 for unskilled-expert
 		}
 
 		if (otyp == HEAVY_IRON_BALL) {
@@ -984,6 +998,7 @@ struct monst *magr;
 	(wdice->lucky)       = lucky;
 	(wdice->exploding)   = exploding;
 	(wdice->explode_amt) = explode_amt;
+	(wdice->ignore_rolls) = ignore_rolls;
 	return spe_mult;
 }
 
@@ -1015,6 +1030,7 @@ struct weapon_dice * wdie;
 boolean youdef;
 {
 	int tmp = 0;
+	int igrolls = wdie->ignore_rolls;
 
 	/* verify there are appropriate dice to roll */
 	if (!n)
@@ -1027,25 +1043,29 @@ boolean youdef;
 	/* determine function to use */
 	if (!wdie->exploding && !wdie->lucky) {
 		/* standard dice */
-		tmp += d(n, x);
+		tmp += d(n, x-igrolls);
+		tmp += n*igrolls;
 	}
 	else if (wdie->exploding && !wdie->lucky) {
 		/* exploding non-lucky dice */
-		tmp += exploding_d(n, x, wdie->explode_amt);
+		/* great weapon fighting is a LARGE buff to these. possibly too strong */
+		tmp += exploding_d(n, x-igrolls, wdie->explode_amt);
+		tmp += n*igrolls;
 	}
 	else if (!wdie->exploding && wdie->lucky) {
 		/* lucky non-exploding dice */
 		int i;
 		for (i = n; i; i--)
 		{
-			tmp += youdef ?
-				(rnl(x) + 1) :
-				(x - rnl(x));
+			tmp += youdef ? (rnl(x-igrolls) + igrolls + 1) : (x - rnl(x-igrolls));
 		}
 	}
 	else if (wdie->exploding && wdie->lucky) {
 		/* EXTEMELY POTENT exploding lucky dice */
-		tmp += (youdef ? unlucky_exploding_d : lucky_exploding_d)(n, x, wdie->explode_amt);
+		/* going to be honest - no CLUE what the distr with GWF turned on does,
+		 * but if you manage to get that, it's probably stupid or deserved */
+		tmp += (youdef ? unlucky_exploding_d : lucky_exploding_d)(n, x-igrolls, wdie->explode_amt);
+		tmp += n*igrolls;
 	}
 	return tmp;
 }
@@ -1334,9 +1354,37 @@ struct monst *magr;
 		}
 	}
 
+	/*
+	 * shield bash morale damage
+	 * morale damag values _should_ be reasonable?
+	 * idk, I think with endgame dps builds you mostly kill things in <5 turns, so you're not really hitting max stacks.
+	 * plus, since this prevents you from running extra holy damage or smth
+	 * it also seems pretty reasonable vs. like demon lords/similar - anything that lives to -15 hits hard enough to deserve it
+	 */
+	if (is_shield(otmp) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)){
+		switch (FightingFormSkillLevel(FFORM_SHIELD_BASH)){
+			case P_ISRESTRICTED:
+			case P_UNSKILLED:
+				if (mon->encouraged > 0) mon->encouraged -= 1;
+			break;
+			case P_BASIC:
+				if (mon->encouraged > -5) mon->encouraged -= 1;
+			break;
+			case P_SKILLED:
+				if (mon->encouraged > -10) mon->encouraged -= 2;
+			break;
+			case P_EXPERT:
+				if (mon->encouraged > -15) mon->encouraged -= 3;
+			break;
+		}
+	}
+
+
 	/* enchantment damage */
-	if ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp) || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM))
-	{
+	if ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp)
+		|| (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)
+		|| (is_shield(otmp) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH))
+	){
 		int dambon = otmp->spe;
 		/* player orcs can use their level as their weapon's enchantment */
 		if (otmp->where == OBJ_INVENT && Race_if(PM_ORC))
@@ -3451,6 +3499,8 @@ struct obj *obj;
 #endif /* CONVICT */
     if ((obj->otyp == CHAIN) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
         return objects[obj->otyp].oc_skill;
+    if (is_shield(obj) && activeFightingForm(FFORM_SHIELD_BASH))
+        return P_SHIELD_BASH; // not P_SHIELD, that's for defensive uses
 	if (obj->oclass != WEAPON_CLASS && obj->oclass != TOOL_CLASS &&
 	    obj->oclass != GEM_CLASS && obj->oartifact != ART_WAND_OF_ORCUS)
 		/* Not a weapon, weapon-tool, or ammo */

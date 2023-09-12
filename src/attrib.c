@@ -2049,6 +2049,9 @@ int fform;
 		case FFORM_SHII_CHO:
 		case FFORM_KNI_SACRED:
 			return FALSE;
+		/* affected by spell success rate, handled elsewhere */
+		case FFORM_KNI_ELDRITCH:
+			return FALSE;
 		/* blocked by heavy armor */
 		case FFORM_MAKASHI:
 		case FFORM_SORESU:
@@ -2061,18 +2064,19 @@ int fform;
 			return (uarm && !(is_light_armor(uarm)));
 		/* blocked by metal armor */
 		case FFORM_NIMAN:
-		case FFORM_KNI_ELDRITCH:
-			return (uarm && (is_metallic(uarm)));
-		/* requires longsword */
+			return (uarm && (metal_blocks_spellcasting(uarm)));
+		/* requires longsword and free hand */
 		case FFORM_HALF_SWORD:
+			return !(uwep && uwep->otyp == LONG_SWORD && !uarms && !(u.twoweap && !bimanual(uwep, youracedata)));
+		/* require longsword*/
 		case FFORM_KNI_RUNIC:
-			return (uwep && uwep->otyp == LONG_SWORD);
+			return !(uwep && uwep->otyp == LONG_SWORD);
 		/* requires shield */
 		case FFORM_SHIELD_BASH:
-			return (!!uarms);
+			return (!uarms);
 		/* requires two-handed weapon */
 		case FFORM_GREAT_WEP:
-			return (uwep && bimanual(uwep, youracedata));
+			return !(uwep && bimanual(uwep, youracedata));
 		default:
 			impossible("Attempting to get blockage of fighting form number %d?", fform);
 			break;

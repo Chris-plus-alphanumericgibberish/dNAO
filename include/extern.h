@@ -2831,6 +2831,7 @@ E void FDECL(losespells, (int));
 E int NDECL(throwgaze);
 E int NDECL(dovspell);
 E int NDECL(base_casting_stat);
+E int FDECL(percent_success, (int));
 E void FDECL(initialspell, (struct obj *));
 E void FDECL(initialforgotwizardspells, (int));
 E void FDECL(initialforgotpriestspells, (int));

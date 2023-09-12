@@ -1007,7 +1007,7 @@ doLightsaberForm()
 	int curskill;
 
 	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
-		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+		if (FightingFormSkillLevel(i) >= P_BASIC)
 			remotely_competent = TRUE;
 	}
 
@@ -1020,7 +1020,7 @@ doLightsaberForm()
 
 	if (remotely_competent){
 		for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
-			curskill = P_SKILL(getFightingFormSkill(i));
+			curskill = FightingFormSkillLevel(i);
 			if (curskill >= P_BASIC) {
 				boolean active = selectedFightingForm(i);
 				boolean blocked = blockedFightingForm(i);
@@ -1068,6 +1068,92 @@ doLightsaberForm()
 	}
 }
 
+int doEldritchKniForm()
+{
+	winid tmpwin;
+	int n, how, i, j, damagetype, success_odds, spell_id;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+	boolean remotely_competent = FALSE;
+	int curskill = FightingFormSkillLevel(FFORM_KNI_ELDRITCH);;
+	int spell_list[] = {0, SPE_FIREBALL, SPE_FIRE_STORM, SPE_CONE_OF_COLD, SPE_BLIZZARD,
+		SPE_LIGHTNING_BOLT, SPE_LIGHTNING_STORM, SPE_ACID_SPLASH, SPE_POISON_SPRAY, SPE_FINGER_OF_DEATH, 0};
+
+	for (i = 1; spell_list[i]; i++)
+		for (j = 0; j < MAXSPELL; j++)
+			if (spellid(j) == spell_list[i] && spellknow(j) > 0)
+				remotely_competent = TRUE;
+
+	if (!remotely_competent){
+		pline("You don't know any appropriate spells!");
+		return MOVE_CANCELLED;
+	} else {
+		setFightingForm(FFORM_KNI_ELDRITCH);
+	}
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Known Eldritch Styles");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+	for (i = 1; spell_list[i]; i++) {
+		for (spell_id = 0; spell_id < MAXSPELL; spell_id++)
+			if (spellid(spell_id) == spell_list[i])
+				break;
+
+		if (spell_id >= MAXSPELL || spellknow(spell_id) <= 0)
+			continue;
+
+		success_odds = percent_success(spell_id);
+
+		Strcpy(buf, spellname(spell_id));
+		Strcat(buf, " (");
+		if (success_odds <= 0)
+			Strcat(buf, "impossible");
+		else if (success_odds < 25)
+			Strcat(buf, "very difficult");
+		else if (success_odds < 50)
+			Strcat(buf, "difficult");
+		else if (success_odds < 75)
+			Strcat(buf, "moderate");
+		else if (success_odds < 95)
+			Strcat(buf, "easy");
+		else
+			Strcat(buf, "trivial");
+		Strcat(buf, ")");
+
+		any.a_int = i;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+
+	end_menu(tmpwin, "Choose preferred eldritch style:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if(n <= 0 ){
+		return MOVE_CANCELLED;
+	} else {
+		if (spell_list[selected[0].item.a_int] == u.ueldritch_style){
+			free(selected);
+			return MOVE_CANCELLED;
+		} else {
+			u.ueldritch_style = spell_list[selected[0].item.a_int];
+			free(selected);
+			return MOVE_INSTANT;
+		}
+	}
+	return MOVE_CANCELLED;
+}
+
 int doKnightForm()
 {
 	winid tmpwin;
@@ -1078,9 +1164,10 @@ int doKnightForm()
 	anything any;
 	boolean remotely_competent = FALSE;
 	int curskill;
+	char* block_reason;
 
 	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
-		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+		if (FightingFormSkillLevel(i) >= P_BASIC)
 			remotely_competent = TRUE;
 	}
 
@@ -1088,24 +1175,41 @@ int doKnightForm()
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 
-	Sprintf(buf,	"Known Knightly Styles");
+	Sprintf(buf, "Known Knightly Styles");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 
+
 	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
-		curskill = P_SKILL(getFightingFormSkill(i));
-		if (curskill >= P_BASIC) {
+		curskill = FightingFormSkillLevel(i);
+		/* knight forms are shown if unskilled but not restricted, since training involves starting from unskilled */
+		if (curskill >= P_UNSKILLED) {
 			boolean active = selectedFightingForm(i);
 			boolean blocked = blockedFightingForm(i);
 
 			Strcpy(buf, nameOfFightingForm(i));
 			Strcat(buf, " (");
-			Strcat(buf, (curskill >= P_EXPERT) ? "expert" : ((curskill >= P_SKILLED) ? "skilled" : "basic"));
-			if (active && blocked)
-				Strcat(buf, ", selected; blocked by armor");
+			Strcat(buf, (curskill >= P_EXPERT) ? "expert" : ((curskill >= P_SKILLED) ? "skilled" :
+				((curskill >= P_BASIC) ? "basic" : "unskilled")));
+
+			if (i == FFORM_SHIELD_BASH)
+				block_reason = "lack of a shield";
+			else if (i == FFORM_HALF_SWORD || i == FFORM_KNI_RUNIC)
+				block_reason = "lack of a longsword";
+			else if (i == FFORM_GREAT_WEP)
+				block_reason = "lack of a two-handed weapon";
+			else if (i == FFORM_KNI_ELDRITCH)
+				block_reason = "your metallic armor";
+
+			if (active && blocked){
+				Strcat(buf, ", selected; blocked by ");
+				Strcat(buf, block_reason);
+			}
 			else if (active)
 				Strcat(buf, ", active");
-			else if (blocked)
-				Strcat(buf, ", blocked by armor");
+			else if (blocked){
+				Strcat(buf, ", blocked by ");
+				Strcat(buf, block_reason);
+			}
 			Strcat(buf, ")");
 
 			any.a_int = i;	/* must be non-zero */
@@ -1115,14 +1219,23 @@ int doKnightForm()
 			incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 		}
 	}
-	end_menu(tmpwin,	"Choose preferred fighting style:");
+	end_menu(tmpwin, "Choose preferred fighting style:");
 
 	how = PICK_ONE;
 	n = select_menu(tmpwin, how, &selected);
 	destroy_nhwindow(tmpwin);
 
-	if(n <= 0 || selectedFightingForm(selected[0].item.a_int)){
-		if(n>0) free(selected);
+	if(n <= 0){
+		return MOVE_CANCELLED;
+	} else if ((selected[0].item.a_int == FFORM_HALF_SWORD || activeFightingForm(FFORM_HALF_SWORD)) &&
+				(!freehand() || (uwep && uwep->otyp == LONG_SWORD && welded(uwep)))){
+		pline("You need a free hand to adjust your grip!");
+		return MOVE_CANCELLED;
+	} else if (selected[0].item.a_int == FFORM_KNI_ELDRITCH){
+		free(selected);
+		return doEldritchKniForm();
+	} else if (selectedFightingForm(selected[0].item.a_int)) {
+		free(selected);
 		return MOVE_CANCELLED;
 	} else {
 		setFightingForm(selected[0].item.a_int);
@@ -1158,8 +1271,8 @@ dofightingform()
 	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
 	if(Role_if(PM_MONK))
 		monk_forms = TRUE;
-	/*if(Role_if(PM_KNIGHT))
-		knight_forms = TRUE;*/
+	if(Role_if(PM_KNIGHT))
+		knight_forms = TRUE;
 	if((uwep && is_lightsaber(uwep)) || (uswapwep && is_lightsaber(uswapwep)))
 		lightsaber_forms = TRUE;
 	if (u.uavoid_passives)
@@ -1175,12 +1288,12 @@ dofightingform()
 
 	/* next, forms trained are shown, even if inapplicable at the moment*/
 	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
-		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+		if (FightingFormSkillLevel(i) >= P_BASIC)
 			lightsaber_forms = TRUE;
 	}
 
 	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
-		if (P_SKILL(getFightingFormSkill(i)) >= P_BASIC)
+		if (FightingFormSkillLevel(i) >= P_BASIC)
 			knight_forms = TRUE;
 	}
 

@@ -86,6 +86,8 @@
 #define Antimagic		(EAntimagic || HAntimagic || \
 						(u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						&& which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
+						(activeFightingForm(FFORM_KNI_RUNIC) && FightingFormSkillLevel(FFORM_KNI_RUNIC) >= P_BASIC && \
+								uwep && uwep->otyp == LONG_SWORD) ||\
 						Nullmagic ||\
 				 (Upolyd && resists_magm(&youmonst)))
 

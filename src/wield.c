@@ -150,11 +150,10 @@ boolean quietly;	/* hide the basic message saying what you are now wielding */
 		mons[wep->corpsenm].mname, makeplural(body_part(HAND)));
 	    Sprintf(kbuf, "%s corpse", an(mons[wep->corpsenm].mname));
 	    instapetrify(kbuf);
-	} else if (uarms && bimanual(wep,youracedata))
-	    You("cannot wield a two-handed %s while wearing a shield.",
-		is_sword(wep) ? "sword" :
-		    wep->otyp == BATTLE_AXE ? "axe" : "weapon");
-	else if (wep->otyp == ARM_BLASTER && uarmg && is_metallic(uarmg))
+	} else if (uarms && bimanual(wep,youracedata)){
+		char* term = is_sword(wep) ? "sword" : wep->otyp == BATTLE_AXE ? "axe" : "weapon";
+	    You("cannot wield %s in both hands while wearing a shield.", an(term));
+	} else if (wep->otyp == ARM_BLASTER && uarmg && is_metallic(uarmg))
 		You("cannot fit the bracer over such bulky, rigid gloves.");
 	else if (wep->oartifact == ART_KUSANAGI_NO_TSURUGI && !(u.ulevel >= 30 || u.uhave.amulet)) {
 	    pline("Only a Shogun, or a bearer of the Amulet of Yendor, is truly worthy of wielding this sword.");
@@ -587,6 +586,8 @@ test_twoweapon()
 		You_cant("fight two-handed with this.");
 	}
 	/* cannot be wearing a shield */
+	else if (uarms && activeFightingForm(FFORM_SHIELD_BASH))
+		You("are already using a shield to bash enemies.");
 	else if (uarms)
 		You_cant("use two weapons while wearing a shield.");
 	/* cannot fit armblaster over metal gloves */
@@ -975,6 +976,10 @@ struct permonst * ptr;
 	/* Some creatures are specifically always able to wield any weapon in one hand */
 	if (ptr && always_one_hand_mtyp(ptr))
 		return FALSE;
+
+	/* half-sword style requires both hands on the sword, regardless of size */
+	if (ptr == youracedata && otmp->otyp == LONG_SWORD && selectedFightingForm(FFORM_HALF_SWORD))
+		return TRUE;
 
 	/* get object size */
 	size_mod = objects[otmp->otyp].oc_size - MZ_MEDIUM;

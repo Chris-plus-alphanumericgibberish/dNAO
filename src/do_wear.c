@@ -1819,10 +1819,9 @@ boolean noisy;
 			if (noisy) already_wearing(an(c_shield));
 			err++;
 		} else if (uwep && bimanual(uwep,youracedata)) {
+			const char *term = is_sword(uwep) ? c_sword : (uwep->otyp == BATTLE_AXE) ? c_axe : c_weapon;
 			if (noisy) 
-			You("cannot wear a shield while wielding a two-handed %s.",
-				is_sword(uwep) ? c_sword :
-				(uwep->otyp == BATTLE_AXE) ? c_axe : c_weapon);
+			You("cannot wear a shield while wielding %s in both hands.", an(term));
 			err++;
 		} else if (u.twoweap) {
 			if (noisy)

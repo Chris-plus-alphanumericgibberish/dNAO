@@ -1221,6 +1221,14 @@ static const struct def_skill Skill_K[] = {
     { P_NONE, 0 }
 };
 
+static const struct def_skill Skill_Kni_Forms[] = {
+    { P_SHIELD_BASH, P_EXPERT },
+    { P_GREAT_WEP, P_EXPERT },
+    { P_HALF_SWORD, P_EXPERT },
+    { P_KNI_ADVANCED, P_EXPERT },
+    { P_NONE, 0 }
+};
+
 static const struct def_skill Skill_Mon[] = {
     { P_QUARTERSTAFF, P_EXPERT },    { P_SPEAR, P_BASIC },
     { P_SHURIKEN, P_EXPERT },		{ P_HARVEST, P_EXPERT },
@@ -2255,6 +2263,8 @@ u_init()
 		HJumping |= FROMOUTSIDE;
 		if(Race_if(PM_DWARF)) skill_init(Skill_DwaNob);
 		else skill_init(Skill_K);
+
+		skill_add(Skill_Kni_Forms);
 		break;
 	case PM_MONK:
 		u.umartial = TRUE;

@@ -21,6 +21,7 @@ struct weapon_dice {
 	Bitfield(lucky, 1);			/* use luck-biased dice (rnl()) */
 	Bitfield(exploding, 1);		/* use exploding dice */
 	Bitfield(explode_amt, 3);	/* additional amount to increase roll by when dice explode */
+	Bitfield(ignore_rolls, 2);	/* rolls to ignore */
 };
 
 /* definition of a class of objects */
