@@ -6104,7 +6104,7 @@ boolean inc_penalties;
 	} else if(spiritSkill(p_skill)) maxskill = max(P_EXPERT,maxskill);
 	else if(u.specialSealsActive&SEAL_NUMINA) maxskill = max(P_SKILLED,maxskill);
 	
-	if(roleSkill(p_skill)) maxskill = min(maxskill + 1, P_EXPERT);
+	//if(roleSkill(p_skill)) maxskill = P_EXPERT;
 
 	if(Air_crystal){
 		if(WIND_SKILL(p_skill))
@@ -6174,9 +6174,9 @@ boolean inc_penalties;
 		curskill += 1;
 	}
 	
-	// if(roleSkill(p_skill)){
-		// curskill = min(curskill+1, P_EXPERT);
-	// }
+	/*if(roleSkill(p_skill)){
+		curskill = min(curskill+1, P_UNSKILLED);
+	}*/
 	
 	if(p_skill == P_SHIEN){
 		if(OLD_P_SKILL(P_DJEM_SO) >= P_SKILLED) curskill++;
@@ -6247,10 +6247,22 @@ int p_skill;
 	return (P_SKILL(p_skill) == P_ISRESTRICTED);
 }
 
+/*
+ * this has been co-opted into meaning
+ * "skill unlocked by specific role under specific circumstances"
+ */
 boolean
 roleSkill(p_skill)
 int p_skill;
 {
+	if (Role_if(PM_KNIGHT)){
+		if (p_skill == P_KNI_SACRED)
+			return TRUE;
+		if (p_skill == P_KNI_ELDRITCH)
+			return TRUE;
+		if (p_skill == P_KNI_RUNIC)
+			return TRUE;
+	}
 	return FALSE;
 }
 

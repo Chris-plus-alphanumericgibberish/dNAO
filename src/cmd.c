@@ -1124,6 +1124,9 @@ int doEldritchKniForm()
 			Strcat(buf, "easy");
 		else
 			Strcat(buf, "trivial");
+
+		if (u.ueldritch_style == spell_list[i])
+			Strcat(buf, ", active");
 		Strcat(buf, ")");
 
 		any.a_int = i;	/* must be non-zero */
@@ -1181,43 +1184,56 @@ int doKnightForm()
 
 	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
 		curskill = FightingFormSkillLevel(i);
+		if (curskill == P_ISRESTRICTED)
+			continue;
+
 		/* knight forms are shown if unskilled but not restricted, since training involves starting from unskilled */
-		if (curskill >= P_UNSKILLED) {
-			boolean active = selectedFightingForm(i);
-			boolean blocked = blockedFightingForm(i);
+		boolean active = selectedFightingForm(i);
+		boolean blocked = blockedFightingForm(i);
 
-			Strcpy(buf, nameOfFightingForm(i));
-			Strcat(buf, " (");
-			Strcat(buf, (curskill >= P_EXPERT) ? "expert" : ((curskill >= P_SKILLED) ? "skilled" :
-				((curskill >= P_BASIC) ? "basic" : "unskilled")));
+		Strcpy(buf, nameOfFightingForm(i));
+		Strcat(buf, " (");
+		if (fake_skill(getFightingFormSkill(i)))
+			Strcat(buf, "trained");
+		else if (curskill == P_UNSKILLED)
+			Strcat(buf, "unskilled");
+		else if (curskill == P_BASIC)
+			Strcat(buf, "basic");
+		else if (curskill == P_SKILLED)
+			Strcat(buf, "skilled");
+		else if (curskill == P_EXPERT)
+			Strcat(buf, "expert");
 
-			if (i == FFORM_SHIELD_BASH)
-				block_reason = "lack of a shield";
-			else if (i == FFORM_HALF_SWORD || i == FFORM_KNI_RUNIC)
-				block_reason = "lack of a longsword";
-			else if (i == FFORM_GREAT_WEP)
-				block_reason = "lack of a two-handed weapon";
-			else if (i == FFORM_KNI_ELDRITCH)
-				block_reason = "your metallic armor";
-
-			if (active && blocked){
-				Strcat(buf, ", selected; blocked by ");
-				Strcat(buf, block_reason);
-			}
-			else if (active)
-				Strcat(buf, ", active");
-			else if (blocked){
-				Strcat(buf, ", blocked by ");
-				Strcat(buf, block_reason);
-			}
-			Strcat(buf, ")");
-
-			any.a_int = i;	/* must be non-zero */
-			add_menu(tmpwin, NO_GLYPH, &any,
-				incntlet, 0, ATR_NONE, buf,
-				MENU_UNSELECTED);
-			incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+		if (i == FFORM_SHIELD_BASH)
+			block_reason = "lack of a shield";
+		else if (i == FFORM_KNI_RUNIC)
+			block_reason = "lack of a longsword";
+		else if (i == FFORM_HALF_SWORD){
+			if (uwep && uwep->otyp != LONG_SWORD) block_reason = "lack of a longsword";
+			else block_reason = "lack of a free hand";
 		}
+		else if (i == FFORM_GREAT_WEP)
+			block_reason = "lack of a two-handed weapon";
+		else if (i == FFORM_KNI_ELDRITCH)
+			block_reason = "your metallic armor";
+
+		if (active && blocked){
+			Strcat(buf, ", selected; blocked by ");
+			Strcat(buf, block_reason);
+		}
+		else if (active)
+			Strcat(buf, ", active");
+		else if (blocked){
+			Strcat(buf, ", blocked by ");
+			Strcat(buf, block_reason);
+		}
+		Strcat(buf, ")");
+
+		any.a_int = i;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
 	end_menu(tmpwin, "Choose preferred fighting style:");
 

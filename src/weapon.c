@@ -48,9 +48,11 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_SHIELD_BASH			(-27)
 #define PN_GREAT_WEP			(-28)
 #define PN_HALF_SWORD			(-29)
-#define PN_KNI_ADVANCED			(-30)
-#define PN_WAND_DAMAGE			(-31)
-#define PN_SHIELD				(-32)
+#define PN_KNI_SACRED			(-30)
+#define PN_KNI_ELDRITCH			(-31)
+#define PN_KNI_RUNIC			(-32)
+#define PN_WAND_DAMAGE			(-33)
+#define PN_SHIELD				(-34)
 
 #define holy_damage(mon)	((mon == &youmonst) ? \
 							hates_holy(youracedata) :\
@@ -90,7 +92,8 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	PN_BEAST_MASTERY,
 	PN_SHII_CHO, PN_MAKASHI, PN_SORESU, PN_ATARU,
 	PN_DJEM_SO, PN_SHIEN, PN_NIMAN, PN_JUYO,
-	PN_SHIELD_BASH, PN_GREAT_WEP, PN_HALF_SWORD, PN_KNI_ADVANCED,
+	PN_SHIELD_BASH, PN_GREAT_WEP, PN_HALF_SWORD,
+	PN_KNI_SACRED, PN_KNI_ELDRITCH, PN_KNI_RUNIC,
 #ifdef STEED
 	PN_RIDING
 #endif
@@ -130,7 +133,9 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
 	"shield bashing",
 	"great weapon fighting",
 	"half-sword style",
-	"advanced knightly styles",
+	"sacred weapon techniques",
+	"eldritch weapon techniques",
+	"runic weapon techniques",
     "wand damage",
     "shield",
 };
@@ -525,7 +530,7 @@ struct monst *magr;
 		if (is_shield(obj) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)){
 			ocn = 1;
 			ocd = max(2, 2 * FightingFormSkillLevel(FFORM_SHIELD_BASH)); // 2-8 for unskilled-expert
-		} else if (magr == &youmonst && bimanual(obj, youracedata) && activeFightingForm(FFORM_GREAT_WEP)){
+		} else if (magr == &youmonst && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(obj, youracedata) || u_can_bimanual(obj))) {
 			ignore_rolls = max(0, FightingFormSkillLevel(FFORM_GREAT_WEP) - 1); // 0-3 for unskilled-expert
 		}
 
@@ -2720,23 +2725,16 @@ struct obj *otmp;
 	}	
 	
 	if(otmp){
-		if((bimanual(otmp,mon->data)||
-				(otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
-			) && !arms && !mswp
-		) bonus *= 2;
-		else if(otmp->otyp == FORCE_SWORD && !arms && !mswp)
-			bonus *= 2;
-		else if(otmp->otyp == DISKOS && !arms && !mswp)
-			bonus *= 2;
-		else if(is_spear(otmp) && !arms && !mswp)
-			bonus *= 1.5;
-		else if(otmp->otyp == ISAMUSEI && !arms && !mswp)
-			bonus *= 1.5;
-		else if(otmp->otyp == KATANA && !arms && !mswp)
-			bonus *= 1.5;
-		else if(is_vibrosword(otmp) && !arms && !mswp)
-			bonus *= 1.5;
-		
+		if (!arms && !mswp){
+			if(bimanual(otmp,mon->data))
+				bonus *= 2;
+			else if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
+				bonus *= 2;
+			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
+				bonus *= 2;
+			else if (is_spear(otmp) || otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
+				bonus *= 1.5;
+		}
 		if(otmp==mwp 
 		&& (is_rapier(otmp) || is_rakuyo(otmp)
 			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1_lightsaberHandle == 0)
@@ -2865,14 +2863,13 @@ struct obj *otmp;
 	}
 	if(otmp){
 		if (!uarms && !u.twoweap) {
-			if (bimanual(otmp, youracedata) ||
-				(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0))
+			if(bimanual(otmp, youracedata))
 				bonus *= 2;
-			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == ROD_OF_FORCE || weapon_type(otmp) == P_QUARTERSTAFF)
+			else if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
 				bonus *= 2;
-			else if (otmp->otyp == KATANA || otmp->otyp == LONG_SWORD)
-				bonus *= 1.5;
-			else if (is_vibrosword(otmp))
+			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
+				bonus *= 2;
+			else if (is_spear(otmp) || otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
 				bonus *= 1.5;
 		}
 		
@@ -3140,6 +3137,16 @@ void dump_weapon_skill()
 	enhance_skill(TRUE);
 }
 
+boolean
+fake_skill(skill)
+int skill;
+{
+	if (skill == P_KNI_RUNIC || skill == P_HALF_SWORD)
+		return TRUE;
+
+	return FALSE;
+}
+
 int enhance_skill(boolean want_dump)
 /* This is the original enhance_weapon_skill() function slightly modified
  * to write the skills to the dump file. I added the wrapper functions just
@@ -3250,6 +3257,7 @@ int enhance_skill(boolean want_dump)
 #endif
 
 		if (P_RESTRICTED(i)) continue;
+		if (fake_skill(i)) continue; // pseudo skill for form check purposes
 		/*
 		 * Sigh, this assumes a monospaced font unless
 		 * iflags.menu_tab_sep is set in which case it puts
@@ -3344,6 +3352,21 @@ int skill;
 		OLD_P_SKILL(skill) = P_UNSKILLED;
 		OLD_P_MAX_SKILL(skill) = P_BASIC;
 		P_ADVANCE(skill) = 0;
+    }
+}
+
+/*
+ * Change from unrestricted to restricted, allowing P_BASIC as max.  This
+ * function may be called with with P_NONE.  Used in pray.c.
+ */
+void
+restrict_weapon_skill(skill)
+int skill;
+{
+    if (skill < P_NUM_SKILLS && !OLD_P_RESTRICTED(skill)) {
+		OLD_P_SKILL(skill) = P_ISRESTRICTED;
+		OLD_P_MAX_SKILL(skill) = P_ISRESTRICTED;
+		//P_ADVANCE(skill) = 0; don't lose progress
     }
 }
 
@@ -3466,20 +3489,22 @@ int n;	/* number of slots to lose; normally one */
     int skill;
 
     while (--n >= 0) {
-	/* deduct first from unused slots, then from last placed slot, if any */
-	if (u.weapon_slots) {
-	    u.weapon_slots--;
-	} else if (u.skills_advanced) {
-	    skill = u.skill_record[--u.skills_advanced];
-	    if (OLD_P_SKILL(skill) <= P_UNSKILLED)
-		panic("lose_weapon_skill (%d)", skill);
-	    OLD_P_SKILL(skill)--;	/* drop skill one level */
-	    /* Lost skill might have taken more than one slot; refund rest. */
-	    u.weapon_slots = slots_required(skill) - 1;
-	    /* It might now be possible to advance some other pending
-	       skill by using the refunded slots, but giving a message
-	       to that effect would seem pretty confusing.... */
-	}
+		/* deduct first from unused slots, then from last placed slot, if any */
+		if (u.weapon_slots) {
+			u.weapon_slots--;
+		} else if (u.skills_advanced) {
+			skill = u.skill_record[--u.skills_advanced];
+			if (fake_skill(skill))
+				continue;
+			if (OLD_P_SKILL(skill) <= P_UNSKILLED)
+				panic("lose_weapon_skill (%d)", skill);
+			OLD_P_SKILL(skill)--;	/* drop skill one level */
+			/* Lost skill might have taken more than one slot; refund rest. */
+			u.weapon_slots = slots_required(skill) - 1;
+			/* It might now be possible to advance some other pending
+			   skill by using the refunded slots, but giving a message
+			   to that effect would seem pretty confusing.... */
+		}
     }
 }
 

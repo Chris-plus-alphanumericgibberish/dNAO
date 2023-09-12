@@ -103,9 +103,12 @@
 #define P_SHIELD_BASH	(P_SHII_CHO + 8)
 #define P_GREAT_WEP 	(P_SHII_CHO + 9)
 #define P_HALF_SWORD	(P_SHII_CHO + 10)
-#define P_KNI_ADVANCED	(P_SHII_CHO + 11)
+#define P_KNI_SACRED	(P_SHII_CHO + 11)
+#define P_KNI_ELDRITCH	(P_SHII_CHO + 12)
+#define P_KNI_RUNIC		(P_SHII_CHO + 13)
 
-#define P_RIDING			(P_KNI_ADVANCED + 1)	/* How well you control your steed */
+#define P_RIDING			(P_KNI_RUNIC + 1)	/* How well you control your steed */
+
 #define P_LAST_H_TO_H		P_RIDING
 #define P_FIRST_H_TO_H		P_BARE_HANDED_COMBAT
 
@@ -133,12 +136,12 @@
 #define FFORM_GREAT_WEP		2 + 32
 #define FFORM_HALF_SWORD 	3 + 32
 #define FFORM_KNI_SACRED	4 + 32
-#define FFORM_KNI_RUNIC		5 + 32
-#define FFORM_KNI_ELDRITCH	6 + 32
+#define FFORM_KNI_ELDRITCH	5 + 32
+#define FFORM_KNI_RUNIC		6 + 32
 #define FIRST_KNI_FFORM		FFORM_SHIELD_BASH
-#define LAST_KNI_FFORM		FFORM_KNI_ELDRITCH
+#define LAST_KNI_FFORM		FFORM_KNI_RUNIC
 
-#define LAST_FFORM		FFORM_KNI_ELDRITCH
+#define LAST_FFORM		FFORM_KNI_RUNIC
 
 #define FightingFormSkillLevel(i)	P_SKILL(getFightingFormSkill(i))
 /*

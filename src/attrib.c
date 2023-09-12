@@ -942,6 +942,19 @@ int oldlevel, newlevel;
 			lose_weapon_skill(skillslots);
 		}
 	}
+	int message = 0;
+	if ((oldlevel >= 14 && newlevel < 14) || (newlevel >= 14 && oldlevel < 14)){
+		for (int i = 0; i < P_NUM_SKILLS; i++) {
+			if (roleSkill(i)){
+				message = oldlevel - newlevel;
+				if (oldlevel > newlevel) restrict_weapon_skill(i);
+				else expert_weapon_skill(i);
+			}
+	    }
+		if (message != 0){
+			You_feel("your skills %s!", (message > 0) ? "slipping away" : "increasing");
+		}
+	}
 }
 
 
@@ -1988,9 +2001,11 @@ int fform;
 			return P_HALF_SWORD;
 		break;
 		case FFORM_KNI_SACRED:
+			return P_KNI_SACRED;
 		case FFORM_KNI_RUNIC:
+			return P_KNI_RUNIC;
 		case FFORM_KNI_ELDRITCH:
-			return P_KNI_ADVANCED;
+			return P_KNI_ELDRITCH;
 		break;
 		default:
 			impossible("Attempting to get skill of fighting form number %d?", fform);
@@ -2046,9 +2061,10 @@ int fform;
 	switch (fform) {
 		/* always available */
 		case NO_FFORM:
+			return FALSE;
 		case FFORM_SHII_CHO:
 		case FFORM_KNI_SACRED:
-			return FALSE;
+			return (FightingFormSkillLevel(fform) > P_ISRESTRICTED);
 		/* affected by spell success rate, handled elsewhere */
 		case FFORM_KNI_ELDRITCH:
 			return FALSE;
@@ -2070,13 +2086,13 @@ int fform;
 			return !(uwep && uwep->otyp == LONG_SWORD && !uarms && !(u.twoweap && !bimanual(uwep, youracedata)));
 		/* require longsword*/
 		case FFORM_KNI_RUNIC:
-			return !(uwep && uwep->otyp == LONG_SWORD);
+			return !(uwep && uwep->otyp == LONG_SWORD && FightingFormSkillLevel(fform) > P_ISRESTRICTED);
 		/* requires shield */
 		case FFORM_SHIELD_BASH:
 			return (!uarms);
 		/* requires two-handed weapon */
 		case FFORM_GREAT_WEP:
-			return !(uwep && bimanual(uwep, youracedata));
+			return !(uwep && (bimanual(uwep, youracedata) || u_can_bimanual(uwep)));
 		default:
 			impossible("Attempting to get blockage of fighting form number %d?", fform);
 			break;

@@ -949,6 +949,25 @@ register struct obj *obj;
 }
 
 boolean
+u_can_bimanual(otmp)
+struct obj * otmp;
+{
+	if (uarms || u.twoweap)
+		return FALSE;
+
+	if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
+		return TRUE;
+	if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
+		return TRUE;
+	if (is_spear(otmp))
+		return TRUE;
+	if (otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
+		return TRUE;
+
+	return FALSE;
+}
+
+boolean
 bimanual(otmp, ptr)
 struct obj * otmp;
 struct permonst * ptr;

@@ -1225,7 +1225,6 @@ static const struct def_skill Skill_Kni_Forms[] = {
     { P_SHIELD_BASH, P_EXPERT },
     { P_GREAT_WEP, P_EXPERT },
     { P_HALF_SWORD, P_EXPERT },
-    { P_KNI_ADVANCED, P_EXPERT },
     { P_NONE, 0 }
 };
 
