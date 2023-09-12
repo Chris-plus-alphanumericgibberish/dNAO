@@ -4499,7 +4499,7 @@ struct obj *obj;
 			return MOVE_STANDARD;
 			}
 		}
-		dam = rnd(2) + dbon(obj) + obj->spe;
+		dam = rnd(2) + dbon(obj, &youmonst) + obj->spe;
 		if (dam <= 0) dam = 1;
 		You("hit your %s with your whip.", body_part(FOOT));
 		Sprintf(buf, "killed %sself with %s whip", uhim(), uhis());
@@ -4742,7 +4742,7 @@ struct obj *obj;
 
     } else if ((!u.dx && !u.dy) || (u.dz > 0)) {
 		int dam;
-		dam = rnd(4) + dbon(obj) + obj->spe;
+		dam = rnd(4) + dbon(obj, &youmonst) + obj->spe;
 		if (dam <= 0) dam = 1;
 		You("hit your %s with your nunchaku.", body_part((u.dz > 0) ? FOOT : HAND));
 		Sprintf(buf, "killed %sself with %s whip", uhim(), uhis());

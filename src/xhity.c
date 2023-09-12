@@ -14560,7 +14560,7 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 
 			case STILETTOS:
-				basedmg = rnd(bigmonst(pd) ? 2 : 6) + weapon->spe + (youagr ? dbon(weapon) : 0);
+				basedmg = rnd(bigmonst(pd) ? 2 : 6) + weapon->spe + dbon(weapon, magr);
 				if (youagr && u.twoweap)
 					basedmg += rnd(bigmonst(pd) ? 2 : 6) + weapon->spe;
 				break;
@@ -14878,13 +14878,12 @@ int vis;						/* True if action is at all visible to the player */
 						bonsdmg += arm->spe;
 				}
 
-#define dbonus(wep) (youagr ? dbon((wep)) : m_dbon(magr, (wep)))
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
 				if (natural_strike || unarmed_punch || unarmed_kick || melee || thrust) {
 					boolean usewep = (weapon && (melee || thrust) && !martial_aid(weapon));
-					int tmp = dbonus(usewep ? weapon : (struct obj *)0);
+					int tmp = dbon(usewep ? weapon : (struct obj *)0, magr);
 					/* greatly reduced STR damage for offhand attacks */
 					if (attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI)
 						tmp = min(0, tmp);
@@ -14894,10 +14893,10 @@ int vis;						/* True if action is at all visible to the player */
 				{
 					/* slings get STR bonus */
 					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bonsdmg += dbonus(launcher);
+						bonsdmg += dbon(launcher, magr);
 					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bonsdmg += dbonus(launcher) * 2;
+						bonsdmg += dbon(launcher, magr) * 2;
 					/* other launchers get no STR bonus */
 					else if (launcher)
 						bonsdmg += 0;
@@ -14906,11 +14905,10 @@ int vis;						/* True if action is at all visible to the player */
 						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
 						if (hmoncode & HMON_KICKED && youagr && uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING))))
 							override_str = 125;	/* 25 STR */
-						bonsdmg += dbonus(weapon);
+						bonsdmg += dbon(weapon, magr);
 						override_str = 0;
 					}
 				}
-#undef dbonus
 
 			} else if (trap){
 				/* some traps deal increased damage */
@@ -14989,7 +14987,7 @@ int vis;						/* True if action is at all visible to the player */
 			/* now, train skills */
 			use_skill((melee && u.twoweap) ? P_TWO_WEAPON_COMBAT : wtype, 1);
 
-			if (weapon && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(weapon, youracedata) || u_can_bimanual(weapon)))
+			if (weapon && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(weapon, youracedata) || bimanual_mod(weapon, &youmonst) > 1))
 				use_skill(P_GREAT_WEP, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
@@ -18278,7 +18276,7 @@ struct monst *mdef;
 	if(!tmp)
 		return; //Too light to do damage :(
 	if (!DEADMONSTER(mdef) && tmp) {
-		int nd = dbon((struct obj *)0);
+		int nd = dbon((struct obj *)0, &youmonst);
 		nd = max(nd, 1);
 		xdamagey(&youmonst, mdef, (struct attack *)0, d(nd,tmp));
 	}

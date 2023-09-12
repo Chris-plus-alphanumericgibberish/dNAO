@@ -948,23 +948,44 @@ register struct obj *obj;
 	obj->owornmask = savewornmask;
 }
 
-boolean
-u_can_bimanual(otmp)
+/*
+ * hand & a half weapons, or bonus strength dmg weapons in general.
+ * basically, can this be two-handed if we have a free hand, for the purposes of extra str bonus
+ * return str multiplier
+ */
+double
+bimanual_mod(otmp, mon)
 struct obj * otmp;
+struct monst * mon;
 {
-	if (uarms || u.twoweap)
-		return FALSE;
+	boolean youagr = (mon == &youmonst);
+	struct obj *arms = (youagr ? uarms : which_armor(mon, W_ARMS));
+	struct obj *swapwep = (youagr ? uswapwep : MON_SWEP(mon));
+
+	if (arms)
+		return 1;
+
+	/* monsters don't have a concept of swapwep outside two-weaponing,
+	 * I believe, so assume if MON_SWEP then it's two-weaponing */
+	if ((youagr && u.twoweap) || (!youagr && swapwep))
+		return 1;
+
+	if (bimanual(otmp, (youagr ? youracedata : mon->data)))
+		return 2;
 
 	if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
-		return TRUE;
-	if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
-		return TRUE;
-	if (is_spear(otmp))
-		return TRUE;
-	if (otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
-		return TRUE;
+		return 2;
 
-	return FALSE;
+	if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
+		return 2.5;
+
+	if (is_spear(otmp))
+		return 1.5;
+
+	if (otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
+		return 1.5;
+	
+	return 1;
 }
 
 boolean

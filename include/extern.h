@@ -3243,8 +3243,7 @@ E void FDECL(setmwielded, (struct monst *, struct obj *, long));
 E void FDECL(setmnotwielded, (struct monst *, struct obj *));
 E void FDECL(init_mon_wield_item, (struct monst *));
 E int NDECL(abon);
-E int FDECL(dbon, (struct obj *));
-E int FDECL(m_dbon, (struct monst *, struct obj *));
+E int FDECL(dbon, (struct obj *, struct monst *));
 E void NDECL(reset_skills);
 E boolean FDECL(fake_skill, (int));
 E int NDECL(enhance_weapon_skill);
@@ -3306,7 +3305,7 @@ E void FDECL(erode_obj, (struct obj *,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(chwepon, (struct obj *,int));
 E int FDECL(welded, (struct obj *));
 E void FDECL(weldmsg, (struct obj *));
-E boolean FDECL(u_can_bimanual, (struct obj *));
+E double FDECL(bimanual_mod, (struct obj *, struct monst *));
 E boolean FDECL(bimanual, (struct obj *, struct permonst *));
 
 /* ### windows.c ### */

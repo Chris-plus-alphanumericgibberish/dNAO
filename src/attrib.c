@@ -2092,7 +2092,7 @@ int fform;
 			return (!uarms);
 		/* requires two-handed weapon */
 		case FFORM_GREAT_WEP:
-			return !(uwep && (bimanual(uwep, youracedata) || u_can_bimanual(uwep)));
+			return !(uwep && (bimanual(uwep, youracedata) || bimanual_mod(uwep, &youmonst) > 1));
 		default:
 			impossible("Attempting to get blockage of fighting form number %d?", fform);
 			break;

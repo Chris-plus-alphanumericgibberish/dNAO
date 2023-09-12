@@ -530,7 +530,7 @@ struct monst *magr;
 		if (is_shield(obj) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)){
 			ocn = 1;
 			ocd = max(2, 2 * FightingFormSkillLevel(FFORM_SHIELD_BASH)); // 2-8 for unskilled-expert
-		} else if (magr == &youmonst && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(obj, youracedata) || u_can_bimanual(obj))) {
+		} else if (magr == &youmonst && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(obj, youracedata) || bimanual_mod(obj, &youmonst) > 1)) {
 			ignore_rolls = max(0, FightingFormSkillLevel(FFORM_GREAT_WEP) - 1); // 0-3 for unskilled-expert
 		}
 
@@ -2701,255 +2701,141 @@ abon()		/* attack bonus for strength & dexterity */
 #endif /* OVL0 */
 #ifdef OVL1
 
-int
-m_dbon(mon, otmp)		/* damage bonus for a monster's strength, only checks GoP */
-struct monst *mon;
+int dbon(otmp, mtmp)
 struct obj *otmp;
+struct monst *mtmp;
 {
-	int bonus = 0;
-	struct obj *arm;
-	struct obj *arms;
-	struct obj *mwp;
-	struct obj *mswp;
+	boolean youagr = mtmp == &youmonst;
+	if (youagr) mtmp = (struct monst *) 0;
+
+	struct obj *armg = (youagr ? uarmg : which_armor(mtmp, W_ARMG));
+	int bare_bonus = weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT);
+	int damage_bon = 0;
 	
-	arm = which_armor(mon, W_ARMG);
-	arms = which_armor(mon, W_ARMS);
-	mwp = MON_WEP(mon);
-	mswp = MON_SWEP(mon);
-	
-	if(arm){
-		if(arm->otyp == GAUNTLETS_OF_POWER || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GOPOWER)))
-			bonus += 8;
-		if(is_lawful_mon(mon) && check_oprop(arm, OPROP_RWTH))
-			bonus += 4;
-	}	
-	
-	if(otmp){
-		if (!arms && !mswp){
-			if(bimanual(otmp,mon->data))
-				bonus *= 2;
-			else if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
-				bonus *= 2;
-			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
-				bonus *= 2;
-			else if (is_spear(otmp) || otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
-				bonus *= 1.5;
-		}
-		if(otmp==mwp 
-		&& (is_rapier(otmp) || is_rakuyo(otmp)
-			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1_lightsaberHandle == 0)
-			|| otmp->otyp == SET_OF_CROW_TALONS
-			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
-			|| is_mercy_blade(otmp)
-		)){
-			if(is_rakuyo(otmp))
-				bonus = 0;
-			else bonus /= 2; /*Half strength bonus/penalty*/
-			
-			arm = which_armor(mon, W_ARMG);
-			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
-			else if(arm 
-			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GODEXTERITY)))
-			) bonus += (arm->spe)/2;
-//			else bonus += ; Something with dex ac?  That would be a bad idea.
-			
-			if(is_rakuyo(otmp))
-				bonus *= 2;
-		}
-		
-		if(otmp->oartifact == ART_YORSHKA_S_SPEAR){
-			//Wis and dex both (str bonus is not reduced)
-			arm = which_armor(mon, W_ARMH);
-			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
-				bonus += (arm->spe)/2;
-			arm = which_armor(mon, W_ARMG);
-			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
-			else if(arm 
-			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GODEXTERITY)))
-			) bonus += (arm->spe)/2;
-		}
-		
-		if(otmp->oartifact == ART_FRIEDE_S_SCYTHE){
-			//Int and Dex
-			bonus /= 2; /*Half strength bonus/penalty*/
-			
-			arm = which_armor(mon, W_ARMG);
-			if(arm && arm->oartifact == ART_GODHANDS) bonus += 8;
-			else if(arm 
-			&& (arm->otyp == GAUNTLETS_OF_DEXTERITY || arm->oartifact == ART_PREMIUM_HEART || (arm->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(arm, IEA_GODEXTERITY)))
-			) bonus += (arm->spe)/2;
-//			else bonus += ; Something with dex ac?  That would be a bad idea.
-			arm = which_armor(mon, W_ARMH);
-			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
-				bonus += (arm->spe)/2;
-		}
+	int str, dex, con, itl, wis, cha;
+	int strbon, dexbon, conbon, intbon, wisbon, chabon;
+	boolean half_str;
 
-		if(otmp->oartifact == ART_VELKA_S_RAPIER || (mon->m_lev > 0 && check_oprop(otmp, OPROP_GSSDW))){
-			bonus /= 2;
-			//Int only
-			arm = which_armor(mon, W_ARMH);
-			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
-				bonus += (arm->spe)/2;
-		}
-		if(check_oprop(otmp, OPROP_GSSDW) && insightful(mon->data) && mlev(mon) >= 10){
-			if(mon->data->mlet == S_NYMPH)
-				bonus += 4;
-			arm = which_armor(mon, W_ARMH);
-			if(arm && arm->otyp == find_gcirclet())
-				bonus += arm->spe/2;
-			arm = which_armor(mon, W_ARM);
-			if(arm && (is_dress(arm->otyp) || arm->otyp == ELVEN_TOGA))
-				bonus += arm->spe/2;
-			arm = which_armor(mon, W_ARMU);
-			if(arm && (is_dress(arm->otyp) || arm->otyp == RUFFLED_SHIRT))
-				bonus += arm->spe/2;
-		}
+	str = acurr(A_STR, mtmp);
+	dex = acurr(A_DEX, mtmp);
+	con = acurr(A_CON, mtmp);
+	itl = acurr(A_INT, mtmp);
+	wis = acurr(A_WIS, mtmp);
+	cha = acurr(A_WIS, mtmp);
 
-		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
-			//Wis only
-			arm = which_armor(mon, W_ARMH);
-			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
-				bonus += (arm->spe)/4;
-		}
+	/* please remove fractional strength already */
+	if (youagr){
+		if (str < 6) 				strbon = str - 6;
+		else if (str < 16)			strbon= 0;
+		else if (str < 18)			strbon= 1;
+		else if (str < STR18(25))	strbon = 2;		/* up to 18/25 */
+		else if (str < STR18(50))	strbon = 3;		/* up to 18/50 */
+		else if (str < STR18(75))	strbon = 4;		/* up to 18/75 */
+		else if (str < STR18(100))	strbon = 5;		/* up to 18/99 */
+		else if (str < STR19(22))	strbon = 6;
+		else if (str < STR19(25))	strbon = 7;
+		else 						strbon = 8;		/* equal to 25 */
 
-		if(is_mercy_blade(otmp)){
-			//Int only
-			arm = which_armor(mon, W_ARMH);
-			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
-				bonus += (arm->spe)/4;
-		}
+		if(u.umadness&MAD_RAGE && !BlockableClearThoughts)
+			strbon += (Insanity)/10;
+	} else {
+		strbon = (str == 25) ? 8 : ((str-10)/2);
+	}
+	strbon *= bimanual_mod(otmp, (youagr) ? &youmonst : mtmp);
 
-		if(check_oprop(otmp, OPROP_OCLTW)){
-			bonus /= 2;
-			//Wis only
-			arm = which_armor(mon, W_ARMH);
-			if(arm && arm->otyp == HELM_OF_BRILLIANCE)
-				bonus += (arm->spe)/2;
+	dexbon = (dex == 25) ? 8 : ((dex-10)/2);
+	conbon = (con == 25) ? 8 : ((con-10)/2);
+	intbon = (itl == 25) ? 8 : ((itl-10)/2);
+	wisbon = (wis == 25) ? 8 : ((wis-10)/2);
+	chabon = (cha == 25) ? 8 : ((cha-10)/2);
+
+	if (!otmp){
+		if (youagr && u.umaniac && bare_bonus > 0)
+			return min_ints(bare_bonus, chabon);
+		else
+			return 0;
+	}
+	/* all of these ifs should almost always fire, it's for readability */
+	/* if two bonus sources can stack, they're in separate ifs so they can both fire*/
+	if (dexbon){
+		if (is_rakuyo(otmp)){
+			strbon = 0;
+			damage_bon += dexbon * 2;
+		} else if (is_rapier(otmp) || is_mercy_blade(otmp) || otmp->otyp == SET_OF_CROW_TALONS ||
+				(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0)){
+			half_str = TRUE;
+			damage_bon += dexbon;
 		}
-		if(check_oprop(otmp, OPROP_ELFLW)){
-			//Cha counts for half and Int and Wis count for half
-			arm = which_armor(mon, W_ARMH);
-			if(arm){
-				if(arm->otyp == HELM_OF_BRILLIANCE && arm->otyp == find_gcirclet())
-					bonus += (arm->spe);
-				else if(arm->otyp == HELM_OF_BRILLIANCE || arm->otyp == find_gcirclet())
-					bonus += (arm->spe)/2;
-			}
+		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_YORSHKA_S_SPEAR || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
+			if (otmp->oartifact != ART_YORSHKA_S_SPEAR) half_str = TRUE;
+			damage_bon += dexbon * 2;
 		}
 	}
-	return bonus;
-}
 
-int
-dbon(otmp)		/* damage bonus for strength */
-struct obj *otmp;
-{
-	int str = ACURR(A_STR);
-	int bonus = 0;
-	
-	if (str < 6) bonus = -6+str;
-	else if (str < 16) bonus = 0;
-	else if (str < 18) bonus = 1;
-	else if (str < STR18(25)) bonus = 2;		/* up to 18/25 */
-	else if (str < STR18(50)) bonus = 3;		/* up to 18/50 */
-	else if (str < STR18(75)) bonus = 4;		/* up to 18/75 */
-	else if (str < STR18(100)) bonus = 5;		/* up to 18/99 */
-	else if (str < STR19(22)) bonus = 6;
-	else if (str < STR19(25)) bonus = 7;
-	else /*  str ==25*/bonus = 8;
-	
-	if(u.umadness&MAD_RAGE && !BlockableClearThoughts){
-		bonus += (Insanity)/10;
+	if (conbon){
+		// no conbon items yet
 	}
-	if(otmp){
-		if (!uarms && !u.twoweap) {
-			if(bimanual(otmp, youracedata))
-				bonus *= 2;
-			else if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
-				bonus *= 2;
-			else if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
-				bonus *= 2;
-			else if (is_spear(otmp) || otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
-				bonus *= 1.5;
-		}
-		
-		if(otmp==uwep 
-		&& (is_rapier(otmp) || is_rakuyo(otmp)
-			|| (otmp->otyp == LIGHTSABER && otmp->oartifact != ART_ANNULUS && otmp->ovar1_lightsaberHandle == 0)
-			|| otmp->otyp == SET_OF_CROW_TALONS
-			|| otmp->oartifact == ART_LIFEHUNT_SCYTHE
-			|| is_mercy_blade(otmp)
-		)){
-			if(is_rakuyo(otmp))
-				bonus = 0;
-			else bonus /= 2; /*Half strength bonus/penalty*/
-			
-			if(ACURR(A_DEX) == 25) bonus += 8;
-			else bonus += (ACURR(A_DEX)-10)/2;
-			
-			if(is_rakuyo(otmp))
-				bonus *= 2;
-		}
 
-		if(otmp->oartifact == ART_YORSHKA_S_SPEAR){
-			if(ACURR(A_WIS) == 25) bonus += 8;
-			else bonus += (ACURR(A_WIS)-10)/2;
-			if(ACURR(A_DEX) == 25) bonus += 8;
-			else bonus += (ACURR(A_DEX)-10)/2;
+	if (intbon){
+		if (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW)){
+			half_str = TRUE;
+			damage_bon += intbon;
 		}
-
-		if(otmp->oartifact == ART_FRIEDE_S_SCYTHE){
-			bonus /= 2; /*Half strength bonus/penalty*/
-			
-			if(ACURR(A_DEX) == 25) bonus += 8;
-			else bonus += (ACURR(A_DEX)-10)/2;
-			
-			if(ACURR(A_INT) == 25) bonus += 8;
-			else bonus += (ACURR(A_INT)-10)/2;
+		if (otmp->oartifact == ART_VELKA_S_RAPIER || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
+			half_str = TRUE;
+			damage_bon += intbon;
 		}
-
-		if(otmp->oartifact == ART_VELKA_S_RAPIER || (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW))){
-			bonus /= 2;
-			if(ACURR(A_INT) == 25) bonus += 8;
-			else bonus += (ACURR(A_INT)-10)/2;
+		if (is_mercy_blade(otmp)){
+			half_str = TRUE;
+			damage_bon += intbon/2;
 		}
-		if(check_oprop(otmp, OPROP_GSSDW) && u.uinsight >= 10){
-			if(ACURR(A_CHA) == 25) bonus += min_ints(NightmareAware_Sanity/10, 8);
-			else bonus += min_ints(NightmareAware_Sanity/10, (ACURR(A_CHA)-10)/2);
-		}
-		if(otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
-			if(ACURR(A_WIS) == 25) bonus += 4;
-			else bonus += (ACURR(A_WIS)-10)/4;
-		}
-		if(is_mercy_blade(otmp)){
-			if(ACURR(A_INT) == 25) bonus += 4;
-			else bonus += (ACURR(A_INT)-10)/4;
-		}
-		if(check_oprop(otmp, OPROP_OCLTW)){
-			bonus /= 2;
-			if(ACURR(A_WIS) == 25) bonus += 8;
-			else bonus += (ACURR(A_WIS)-10)/2;
-		}
-		if(check_oprop(otmp, OPROP_ELFLW)){
-			if(ACURR(A_CHA) == 25) bonus += 8;
-			else bonus += (ACURR(A_CHA)-10)/2;
-			if((ACURR(A_WIS)+ACURR(A_INT)) == 50) bonus += 8;
-			else bonus += (ACURR(A_WIS)+ACURR(A_INT)-20)/4;
-		}
-		if(otmp->oartifact == ART_IBITE_ARM && u.umaniac){
-			//Combine mechanics: Gets a bonus from your bare-handed stuff.
-			if(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
-				bonus += rnd(ACURR(A_CHA)/5 + weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2);
+		if (check_oprop(otmp, OPROP_ELFLW)){
+			damage_bon += intbon/2;
 		}
 	}
-	else if(u.umaniac && weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0){
-		bonus += min_ints(weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT), (ACURR(A_CHA)-9)/2);
+
+	if (wisbon){
+		if (otmp->oartifact == ART_YORSHKA_S_SPEAR){
+			damage_bon += wisbon;
+		}
+		if (check_oprop(otmp, OPROP_OCLTW)){
+			half_str = TRUE;
+			damage_bon += wisbon;
+		}
+		if (otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
+			half_str = TRUE;
+			damage_bon += wisbon/2;
+		}
+		if (check_oprop(otmp, OPROP_ELFLW)){
+			damage_bon += wisbon/2;
+		}
 	}
-	
-	if(uarmg && bonus > 1 && check_oprop(uarmg, OPROP_RWTH) && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL)
-		bonus *= .5;
-	
-	return bonus;
+
+	if (chabon){
+		if (check_oprop(otmp, OPROP_ELFLW)){
+			damage_bon += chabon/2;
+		}
+		if (otmp->oartifact == ART_IBITE_ARM){
+			if(bare_bonus > 0) damage_bon += cha/5 + bare_bonus*2;
+		}
+	}
+
+	if (damage_bon && armg && check_oprop(armg, OPROP_RWTH) && (
+			(youagr && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL) ||
+			(!youagr && is_lawful_mon(mtmp))))
+		damage_bon = damage_bon * 3 / 2;
+
+	if (half_str) strbon /= 2;
+
+	damage_bon += strbon;
+	pline("str %d", strbon);
+	pline("dex %d", dexbon);
+	pline("cha %d", conbon);
+	pline("int %d", intbon);
+	pline("wis %d", wisbon);
+	pline("cha %d", chabon);
+
+	return damage_bon;
 }
 
 /* copy the skill level name into the given buffer */
