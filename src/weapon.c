@@ -2721,26 +2721,23 @@ struct monst *mtmp;
 	con = acurr(A_CON, mtmp);
 	itl = acurr(A_INT, mtmp);
 	wis = acurr(A_WIS, mtmp);
-	cha = acurr(A_WIS, mtmp);
+	cha = acurr(A_CHA, mtmp);
 
 	/* please remove fractional strength already */
-	if (youagr){
-		if (str < 6) 				strbon = str - 6;
-		else if (str < 16)			strbon= 0;
-		else if (str < 18)			strbon= 1;
-		else if (str < STR18(25))	strbon = 2;		/* up to 18/25 */
-		else if (str < STR18(50))	strbon = 3;		/* up to 18/50 */
-		else if (str < STR18(75))	strbon = 4;		/* up to 18/75 */
-		else if (str < STR18(100))	strbon = 5;		/* up to 18/99 */
-		else if (str < STR19(22))	strbon = 6;
-		else if (str < STR19(25))	strbon = 7;
-		else 						strbon = 8;		/* equal to 25 */
+	if (str < 6) 				strbon = str - 6;
+	else if (str < 16)			strbon= 0;
+	else if (str < 18)			strbon= 1;
+	else if (str < STR18(25))	strbon = 2;		/* up to 18/25 */
+	else if (str < STR18(50))	strbon = 3;		/* up to 18/50 */
+	else if (str < STR18(75))	strbon = 4;		/* up to 18/75 */
+	else if (str < STR18(100))	strbon = 5;		/* up to 18/99 */
+	else if (str < STR19(22))	strbon = 6;
+	else if (str < STR19(25))	strbon = 7;
+	else 						strbon = 8;		/* equal to 25 */
 
-		if(u.umadness&MAD_RAGE && !BlockableClearThoughts)
-			strbon += (Insanity)/10;
-	} else {
-		strbon = (str == 25) ? 8 : ((str-10)/2);
-	}
+	if(youagr && u.umadness&MAD_RAGE && !BlockableClearThoughts)
+		strbon += (Insanity)/10;
+
 	strbon *= bimanual_mod(otmp, (youagr) ? &youmonst : mtmp);
 
 	dexbon = (dex == 25) ? 8 : ((dex-10)/2);

@@ -965,6 +965,9 @@ struct monst * mon;
 	if (arms)
 		return 1;
 
+	if (!otmp)
+		return 1;
+
 	/* monsters don't have a concept of swapwep outside two-weaponing,
 	 * I believe, so assume if MON_SWEP then it's two-weaponing */
 	if ((youagr && u.twoweap) || (!youagr && swapwep))
