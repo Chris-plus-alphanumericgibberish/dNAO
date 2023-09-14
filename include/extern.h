@@ -1133,6 +1133,7 @@ E char *FDECL(eos, (char *));
 E void FDECL(sanitizestr, (char *));
 E char *FDECL(strkitten, (char *,CHAR_P));
 E char *FDECL(s_suffix, (const char *));
+E char *FDECL(ing_suffix, (const char *));
 E char *FDECL(xcrypt, (const char *,char *));
 E boolean FDECL(onlyspace, (const char *));
 E char *FDECL(tabexpand, (char *));

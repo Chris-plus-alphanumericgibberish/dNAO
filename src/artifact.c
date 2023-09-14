@@ -11252,6 +11252,10 @@ nothing_special:
 	    else
 		Your("body seems to unfade...");
 	    break;
+	case WWALKING:
+		if (on) You_feel("more buoyant!");
+		else You_feel("heavier!");
+		break;
 #ifdef BARD
 	    /*
 	case HARMONIZE:
