@@ -484,7 +484,11 @@ void do_floorname() {
         /* increased chance for fake monster */
         unames[3] = unames[2];
         /* traditional */
+#ifdef REINCARNATION
         unames[4] = roguename();
+#else
+        unames[4] = unames[2];
+#endif
         /* silly */
         unames[5] = "Wibbly Wobbly";
         pline("%s %s to call you \"%s.\"",
