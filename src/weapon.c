@@ -2701,7 +2701,8 @@ abon()		/* attack bonus for strength & dexterity */
 #endif /* OVL0 */
 #ifdef OVL1
 
-int dbon(otmp, mtmp)
+int
+dbon(otmp, mtmp)
 struct obj *otmp;
 struct monst *mtmp;
 {
@@ -2825,13 +2826,6 @@ struct monst *mtmp;
 	if (half_str) strbon /= 2;
 
 	damage_bon += strbon;
-	pline("str %d", strbon);
-	pline("dex %d", dexbon);
-	pline("cha %d", conbon);
-	pline("int %d", intbon);
-	pline("wis %d", wisbon);
-	pline("cha %d", chabon);
-
 	return damage_bon;
 }
 
