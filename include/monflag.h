@@ -133,10 +133,9 @@
 #define MT_TRAITOR		0x00800000L	/* slash'em tag. */
 #define MT_NOTAKE		0x01000000L	/* doesn't pick up items. */
 #define MT_METALLIVORE	0x02000000L	/* eats metal. */
-
 #define MT_MAGIVORE		0x04000000L	/* eats magic */
-
 #define MT_BOLD			0x08000000L	/* recovers from fear quickly */
+#define MT_DETACHED		0x10000000L	/* detached from purpose/subsumed but intelligent, mindless but with muse roughly */
 
 #define MT_OMNIVORE		(MT_CARNIVORE|MT_HERBIVORE)	/* eats both */
 #define MT_MAID		(MT_MAGIC|MT_COLLECT|MT_JEWELS|MT_GREEDY)	/* tiddies up the dungeon */

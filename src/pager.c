@@ -1674,9 +1674,10 @@ get_mt_description_of_monster_type(struct monst * mtmp, char * description)
 
 	many = append(description, bold(ptr)				, "fearless"					, many);
 	many = append(description, hides_under(ptr)			, "hides"						, many);
-	many = append(description, is_hider(ptr)			, "camoflauged"					, many);
+	many = append(description, is_hider(ptr)			, "camouflaged"					, many);
 	many = append(description, notake(ptr)				, "doesn't pick up items"		, many);
 	many = append(description, mindless_mon(mtmp)		, "mindless"					, many);
+	many = append(description, detached_from_purpose_mon(mtmp), "detached from original purpose", many);
 	many = append(description, is_animal(ptr)			, "animal minded"				, many);
 	eats = appendgroup(description, carnivorous(ptr)	, "eats",	"meat"				, many, eats);
 	eats = appendgroup(description, herbivorous(ptr)	, "eats",	"veggies"			, many, eats);

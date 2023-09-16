@@ -919,7 +919,7 @@ int template;
 			ptr->mresists = MR_ALL|MR_MAGIC;
 			ptr->mflagsm |= MM_FLY|MM_BREATHLESS|MM_FLOAT;
 			ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_CARNIVORE | MT_HERBIVORE | MT_TRAITOR);
-			ptr->mflagst |= MT_WANDER|MT_STALK|MT_HOSTILE|MT_MINDLESS;
+			ptr->mflagst |= MT_WANDER|MT_STALK|MT_HOSTILE|MT_DETACHED;
 			ptr->mflagsb |= MB_UNSOLID|MB_INSUBSTANTIAL;
 			ptr->mflagsg &= ~(MG_PNAME);
 			ptr->mflagsg |= MG_NASTY|MG_HATESUNHOLY;
@@ -1993,9 +1993,11 @@ int level_bonus;
 		if (horror->mflagst & MT_NOTAKE)
 			horror->mflagst &= ~MT_MAID;
 		if (horror->mflagst & MT_MINDLESS)
-			horror->mflagst &= ~MT_ANIMAL;
+			horror->mflagst &= ~(MT_ANIMAL | MT_DETACHED);
+		if (horror->mflagst & MT_DETACHED)
+			horror->mflagst &= ~(MT_MINDLESS | MT_ANIMAL);
 		if (horror->mflagst & MT_ANIMAL)
-			horror->mflagst &= ~MT_MINDLESS;
+			horror->mflagst &= ~(MT_MINDLESS | MT_DETACHED);
 		if (horror->mflagsb & MB_MALE)
 			horror->mflagsb &= ~(MB_FEMALE | MB_NEUTER);
 		if (horror->mflagsb & MB_FEMALE)
