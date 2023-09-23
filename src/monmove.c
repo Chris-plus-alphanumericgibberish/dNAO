@@ -1594,8 +1594,8 @@ register struct monst *mtmp;
 
 
 	if (can_recharge_mon(mtmp) && !mtmp->mcan && !mtmp->mspec_used && !(noactions(mtmp)) && !(mindless_mon(mtmp)) && !rn2(20)){
-		struct obj * rechargee;
-		struct obj * otmp;
+		struct obj * rechargee = (struct obj *) 0;
+		struct obj * otmp = (struct obj *) 0;
 		if (MON_WEP(mtmp) && can_be_recharged(MON_WEP(mtmp)))
 			rechargee = MON_WEP(mtmp);
 		else if (MON_SWEP(mtmp) && can_be_recharged(MON_SWEP(mtmp)))
