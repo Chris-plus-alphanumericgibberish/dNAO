@@ -830,7 +830,7 @@ struct obj * otmp;
 		if (a->gflags & ARTG_NOGEN && !(otmp->otyp == SPE_SECRETS))
 			continue;
 		/* must match otyp (or be acceptable) */
-		if (!artitypematch(a, otmp) && ((a) == &artilist[ART_LANCE_OF_LONGINUS]) && otmp->otyp != SPEAR)
+		if (!artitypematch(a, otmp) && ((a) == &artilist[ART_LANCE_OF_LONGINUS]))
 			continue;
 		/* Fire Brand and Frost Brand can generate out of MANY otypes, so decrease their odds of being chosen at random */
 		/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
@@ -1811,6 +1811,13 @@ int *artinum;
 		*otyp = artilist[ART_FLUORITE_OCTAHEDRON].otyp;
 		if(artinum) *artinum = ART_FLUORITE_OCTAHEDRON;
 		return artilist[ART_FLUORITE_OCTAHEDRON].name;
+	}
+	aname = "Lancet of Longinus";
+	if(!strcmpi(name, aname)) {
+		if (Role_if(PM_TOURIST)) *otyp = LIGHTSABER;
+		else *otyp = SCALPEL;
+		if(artinum) *artinum = ART_LANCE_OF_LONGINUS;
+		return artilist[ART_LANCE_OF_LONGINUS].name;
 	}
     return (char *)0;
 }

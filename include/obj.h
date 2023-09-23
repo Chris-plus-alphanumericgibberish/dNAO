@@ -538,7 +538,7 @@ struct obj {
 #define artitypematch(a, o) (( (a)->otyp ) == BEAMSWORD ? ((o)->otyp==BROADSWORD) : \
 							( (a)->otyp ) == UNIVERSAL_KEY ? ((o)->otyp==SKELETON_KEY) : \
 							( (a)->otyp ) == ROUNDSHIELD ? ((o)->otyp==DWARVISH_ROUNDSHIELD) : \
-							( (a) == &artilist[ART_LANCE_OF_LONGINUS] ) ? ((o)->otyp==SCALPEL||((o)->otyp==LIGHTSABER&&(o)->objsize<MZ_SMALL)) : \
+							( (a) == &artilist[ART_LANCE_OF_LONGINUS] ) ? ((o)->otyp==SCALPEL||(o)->otyp==LIGHTSABER) : \
 							( (a) == &artilist[ART_GUNGNIR] ) ? (is_spear(o)) : \
 							( (a) == &artilist[ART_SINGING_SWORD] ) ? ((o)->otyp == LONG_SWORD || (o)->otyp == RAPIER || (o)->otyp == SABER) : \
 							( (a) == &artilist[ART_DIRGE] ) ? (o->oclass == WEAPON_CLASS || is_weptool(o)) : \

@@ -622,6 +622,9 @@ const char *name;
 					if (obj->otyp != u.brand_otyp)
 						obj = poly_obj(obj, u.brand_otyp);
 				}
+				else if ((a != &artilist[ART_LANCE_OF_LONGINUS]) && obj->otyp == LIGHTSABER){
+					set_obj_size(obj, MZ_TINY);
+				}
 				else if (obj->otyp != a->otyp && !is_malleable_artifact(a) && (a != &artilist[ART_LANCE_OF_LONGINUS])) {
 					obj = poly_obj(obj, a->otyp);
 				}
