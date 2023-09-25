@@ -2002,8 +2002,10 @@ int fform;
 		break;
 		case FFORM_KNI_SACRED:
 			return P_KNI_SACRED;
+		break;
 		case FFORM_KNI_RUNIC:
 			return P_KNI_RUNIC;
+		break;
 		case FFORM_KNI_ELDRITCH:
 			return P_KNI_ELDRITCH;
 		break;
@@ -2064,7 +2066,7 @@ int fform;
 			return FALSE;
 		case FFORM_SHII_CHO:
 		case FFORM_KNI_SACRED:
-			return (FightingFormSkillLevel(fform) > P_ISRESTRICTED);
+			return (FightingFormSkillLevel(fform) <= P_ISRESTRICTED);
 		/* affected by spell success rate, handled elsewhere */
 		case FFORM_KNI_ELDRITCH:
 			return FALSE;
