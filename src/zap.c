@@ -5693,6 +5693,7 @@ allow_artwish()
 {
 	int n = 1;
 	
+	n -= flags.descendant; 			// 'used' their first on their inheritance
 	// n += u.uevent.qcalled;		// reaching the main dungeon branch of the quest
 	//if(u.ulevel >= 7) n++;		// enough levels to be intimidating to marids/djinni
 	n += (u.uevent.utook_castle & ARTWISH_EARNED);	// sitting on the castle throne

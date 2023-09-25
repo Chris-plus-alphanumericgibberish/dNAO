@@ -202,6 +202,7 @@ struct flag {
 	int	 initrace;	/* starting race      (index into races[])   */
 	int	 initgend;	/* starting gender    (index into genders[]) */
 	int	 initalign;	/* starting alignment (index into aligns[])  */
+	int	 descendant;	/* start as descendant */
 	int	 chaosvar;	/* Set chaos variant */
 	int	 randomall;	/* randomly assign everything not specified */
 	int	 pantheon;	/* deity selection for priest character */

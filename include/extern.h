@@ -2583,8 +2583,8 @@ E void NDECL(rigid_role_checks);
 E void NDECL(plnamesuffix);
 E const char *FDECL(Hello, (struct monst *));
 E const char *NDECL(Goodbye);
-E char *FDECL(build_plselection_prompt, (char *, int, int, int, int, int));
-E char *FDECL(root_plselection_prompt, (char *, int, int, int, int, int));
+E char *FDECL(build_plselection_prompt, (char *, int, int, int, int, int, int));
+E char *FDECL(root_plselection_prompt, (char *, int, int, int, int, int, int));
 #ifdef RECORD_ACHIEVE
 E void FDECL(add_imp_record, (long));
 E void NDECL(give_quest_trophy);

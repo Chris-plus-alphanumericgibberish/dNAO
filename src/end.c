@@ -466,7 +466,7 @@ register struct monst *mtmp;
 			u.ugrave_arise = PM_BROKEN_SHADOW;
 		else if (mtmp->data->mlet == S_MUMMY && urace.mummynum != NON_PM)
 			u.ugrave_arise = urace.mummynum;
-		else if ((mtmp->data->mlet == S_VAMPIRE || has_template(mtmp, VAMPIRIC)) && (Race_if(PM_HUMAN) || Race_if(PM_INHERITOR)))
+		else if ((mtmp->data->mlet == S_VAMPIRE || has_template(mtmp, VAMPIRIC)) && (Race_if(PM_HUMAN)))
 			u.ugrave_arise = PM_VAMPIRE;
 		else if (mtmp->mtyp == PM_GHOUL || mtmp->mtyp == PM_GNOLL_GHOUL)
 			u.ugrave_arise = PM_GHOUL;

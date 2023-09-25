@@ -662,6 +662,7 @@ initoptions()
 	/* Use negative indices to indicate not yet selected */
 	flags.initrole = -1;
 	flags.initrace = -1;
+	flags.descendant = -1;
 	flags.initgend = -1;
 	flags.initalign = -1;
 
@@ -2575,6 +2576,12 @@ goodfruit:
 			else
 				flags.female = flags.initgend;
 		}
+		return;
+	}
+
+	if (match_optname(opts, "descendant", 4, FALSE)) {
+		if (negated) flags.descendant = 0;
+		else flags.descendant = 1;
 		return;
 	}
 

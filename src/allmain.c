@@ -28,7 +28,7 @@ STATIC_DCL void NDECL(printBodies);
 STATIC_DCL void NDECL(printSanAndInsight);
 STATIC_DCL void FDECL(printAttacks, (char *,struct permonst *));
 STATIC_DCL void FDECL(resFlags, (char *,unsigned int));
-STATIC_DCL int NDECL(do_inheritor_menu);
+STATIC_DCL int NDECL(do_inheritance_menu);
 STATIC_DCL void FDECL(spot_monster, (struct monst *));
 STATIC_DCL void NDECL(sense_nearby_monsters);
 STATIC_DCL void NDECL(cthulhu_mind_blast);
@@ -3495,26 +3495,39 @@ newgame()
 	if(Darksight) litroom(FALSE,NULL);
 	/* Success! */
 	welcome(TRUE);
-	if(Race_if(PM_INHERITOR)){
+	if(flags.descendant){
 		int inherited;
 		struct obj *otmp;
-		do{inherited = do_inheritor_menu();}while(!inherited);
+		do {
+			inherited = do_inheritance_menu();
+		} while(!inherited);
+
+		u.inherited = inherited;
+
+		/* fix up artifact a little so we can use it fine */
+		/* the alignment check should be unnecessary, but otherwise this prevents intelligents from evading */
+		if (!Role_if(artilist[inherited].role)) artilist[inherited].role = ROLE_NONE;
+		if (!Pantheon_if(artilist[inherited].role)) artilist[inherited].role = ROLE_NONE;
+		if (!Race_if(artilist[inherited].race)) artilist[inherited].race = ROLE_NONE;
+		if (artilist[inherited].alignment != u.ualign.type) artilist[inherited].alignment = A_NONE;
+		hack_artifacts();
+
 		otmp = mksobj((int)artilist[inherited].otyp, MKOBJ_NOINIT);
 	    otmp = oname(otmp, artilist[inherited].name);
 		expert_weapon_skill(weapon_type(otmp));
 		discover_artifact(inherited);
 		fully_identify_obj(otmp);
+
 	    otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
 				       The(aobjnam(otmp, "slip")), (const char *)0);
 		if(otmp->oclass == WEAPON_CLASS)
 			expert_weapon_skill(objects[otmp->otyp].oc_skill);
-	    // otmp->oartifact = inherited;
 	}
 	return;
 }
 
 STATIC_OVL int
-do_inheritor_menu()
+do_inheritance_menu()
 {
 	winid tmpwin;
 	int n, how, i;
@@ -3531,10 +3544,8 @@ do_inheritor_menu()
 	{
 		// if ((artilist[i].spfx2) && artilist[i].spfx && artilist[i].spfx)
 		if(artilist[i].gflags&ARTG_INHER
-		&& !Role_if(artilist[i].role)
-		&& !Pantheon_if(artilist[i].role)
-		&& (artilist[i].alignment == A_NONE
-			|| artilist[i].alignment == u.ualign.type)
+		&& !Role_if(artilist[i].role) && !Pantheon_if(artilist[i].role)
+		&& (artilist[i].alignment == A_NONE || artilist[i].alignment == u.ualign.type)
 		){
 			Sprintf(buf, "%s", artilist[i].name);
 			any.a_int = i;	/* must be non-zero */
@@ -3582,9 +3593,9 @@ boolean new_game;	/* false => restoring an old game */
 	     currentgend != flags.initgend))
 	Sprintf(eos(buf), " %s", genders[currentgend].adj);
 
-    pline(new_game ? "%s %s, welcome to dNetHack!  You are a%s %s %s."
-		   : "%s %s, the%s %s %s, welcome back to dNetHack!",
-	  Hello((struct monst *) 0), plname, buf, urace.adj,
+    pline(new_game ? "%s %s, welcome to dNetHack!  You are a%s %s%s %s."
+		   : "%s %s, the%s %s%s %s, welcome back to dNetHack!",
+	  Hello((struct monst *) 0), plname, buf, urace.adj, (flags.descendant) ? " descendant" : "",
 	  (currentgend && urole.name.f) ? urole.name.f : urole.name.m);
 	if(iflags.dnethack_start_text){
 	pline("Press Ctrl^W or type #ward to engrave a warding sign.");

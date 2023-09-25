@@ -819,21 +819,6 @@ const struct Race races[] = {
 	NORMALNIGHTVIS
 	//Note: Bonus to all spells.
 },
-{	"Inheritor", "human", "humanity", "Inh",
-	{"man", "woman"},
-	PM_INHERITOR, NON_PM, PM_HUMAN_MUMMY, PM_HUMAN,
-	ROLE_MALE|ROLE_FEMALE |
-	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
-	/*MA_HUMAN disabled*/ 0, 0, MA_GNOME|MA_ORC|MA_ELF,
-	/*    Str     Int Wis Dex Con Cha */
-	{      3,      3,  3,  3,  3,  3 },
-	{ STR18(100), 18, 18, 18, 18, 18 },
-	/* Init   Lower  Higher */
-	{  2, 0,  0, 2,  1, 0 },	/* Hit points */
-	{  1, 0,  2, 0,  2, 0 },		/* Energy */
-	NORMALNIGHTVIS,
-	SPE_ABJURATION, -20
-},
 {	"orc", "orcish", "orcdom", "Orc",
 	{0, 0},
 	PM_ORC, NON_PM, PM_ORC_MUMMY, PM_ORC,
@@ -1544,7 +1529,8 @@ rigid_role_checks()
 #define BP_GEND		1
 #define BP_RACE		2
 #define BP_ROLE		3
-#define NUM_BP		4
+#define BP_DESC		4
+#define NUM_BP		5
 
 STATIC_VAR char pa[NUM_BP], post_attribs;
 
@@ -1590,9 +1576,9 @@ int racenum;
 }
 
 char *
-root_plselection_prompt(suppliedbuf, buflen, rolenum, racenum, gendnum, alignnum)
+root_plselection_prompt(suppliedbuf, buflen, rolenum, racenum, descendantnum, gendnum, alignnum)
 char *suppliedbuf;
-int buflen, rolenum, racenum, gendnum, alignnum;
+int buflen, rolenum, racenum, descendantnum, gendnum, alignnum;
 {
 	int k, gendercount = 0, aligncount = 0;
 	char buf[BUFSZ];
@@ -1686,8 +1672,18 @@ int buflen, rolenum, racenum, gendnum, alignnum;
 		pa[BP_RACE] = 1;
 		post_attribs++;
 	}
-	/* <your lawful female gnomish> || <your lawful female gnome> */
 
+	/* <your lawful female gnomish> || <your lawful female gnome> */
+	if (descendantnum > 0) {
+		if (donefirst) Strcat(buf, " ");
+		Strcat(buf, "descendant");
+		donefirst = TRUE;
+	} else if (descendantnum < 0) { // if zeroed, pretend it doesn't exist
+		pa[BP_DESC] = 1;
+		post_attribs++;
+	}
+
+	/* <your lawful female gnomish descendant> || <your lawful female gnome descendant> */
 	if (validrole(rolenum)) {
 		if (donefirst) Strcat(buf, " ");
 		if (gendnum != ROLE_NONE) {
@@ -1725,9 +1721,9 @@ int buflen, rolenum, racenum, gendnum, alignnum;
 }
 
 char *
-build_plselection_prompt(buf, buflen, rolenum, racenum, gendnum, alignnum)
+build_plselection_prompt(buf, buflen, rolenum, racenum, descendantnum, gendnum, alignnum)
 char *buf;
-int buflen, rolenum, racenum, gendnum, alignnum;
+int buflen, rolenum, racenum, descendantnum, gendnum, alignnum;
 {
 	const char *defprompt = "Shall I pick a character for you? [ynq] ";
 	int num_post_attribs = 0;
@@ -1745,7 +1741,7 @@ int buflen, rolenum, racenum, gendnum, alignnum;
 	/* <your> */
 
 	(void)  root_plselection_prompt(eos(tmpbuf), buflen - strlen(tmpbuf),
-					rolenum, racenum, gendnum, alignnum);
+					rolenum, racenum, descendantnum, gendnum, alignnum);
 	Sprintf(buf, "%s", s_suffix(tmpbuf));
 
 	/* buf should now be:
@@ -1773,6 +1769,10 @@ int buflen, rolenum, racenum, gendnum, alignnum;
 			(void) promptsep(eos(buf), num_post_attribs);
 			Strcat(buf, "alignment");
 		}
+		if (pa[BP_DESC]) {
+			(void) promptsep(eos(buf), num_post_attribs);
+			Strcat(buf, "inheritance");
+		}
 	}
 	Strcat(buf, " for you? [ynq] ");
 	return buf;
@@ -1782,6 +1782,7 @@ int buflen, rolenum, racenum, gendnum, alignnum;
 #undef BP_GEND
 #undef BP_RACE
 #undef BP_ROLE
+#undef BP_DESC
 #undef NUM_BP
 
 void
