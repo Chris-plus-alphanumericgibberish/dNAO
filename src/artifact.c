@@ -13335,7 +13335,7 @@ do_passive_attacks()
 	if(uring_art(ART_STAR_EMPEROR_S_RING))
 		dostarblades(&youmonst);
 	//Note: The player never gets Eladrin vines, starblades, or storms
-	
+	flags.mon_moving = TRUE;
 	for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
 		if(DEADMONSTER(mtmp))
 			continue;
@@ -13365,6 +13365,7 @@ do_passive_attacks()
 			donachash(mtmp);
 		}
 	}
+	flags.mon_moving = FALSE;
 }
 
 void
