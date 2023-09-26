@@ -2066,7 +2066,7 @@ boolean goodequip;
 				if(otmp) otmp->corpsenm = ROLL_FROM(y_cult_masks);
 			}
 		} else if(mm == PM_DROW_MATRON || mm == PM_DROW_MATRON_MOTHER || is_yochlol(mtmp->data)){
-			otmp = mksobj(DROVEN_PLATE_MAIL, mkobjflags);
+			otmp = mksobj(rn2(8) ? DROVEN_PLATE_MAIL : NOBLE_S_DRESS, mkobjflags);
 			otmp->ohaluengr = TRUE;
 			otmp->oward = LOLTH_SYMBOL;
 			(void) mpickobj(mtmp, otmp);
