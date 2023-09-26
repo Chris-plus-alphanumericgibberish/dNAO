@@ -28,6 +28,7 @@ STATIC_DCL void NDECL(printBodies);
 STATIC_DCL void NDECL(printSanAndInsight);
 STATIC_DCL void FDECL(printAttacks, (char *,struct permonst *));
 STATIC_DCL void FDECL(resFlags, (char *,unsigned int));
+STATIC_DCL int FDECL(find_preset_inherited, (char *));
 STATIC_DCL int NDECL(do_inheritance_menu);
 STATIC_DCL void FDECL(spot_monster, (struct monst *));
 STATIC_DCL void NDECL(sense_nearby_monsters);
@@ -3496,26 +3497,25 @@ newgame()
 	/* Success! */
 	welcome(TRUE);
 	if(flags.descendant){
-		int inherited;
 		struct obj *otmp;
-		do {
-			inherited = do_inheritance_menu();
-		} while(!inherited);
+		int inher_arti = find_preset_inherited(inherited);
 
-		u.inherited = inherited;
+		while (!inher_arti) inher_arti = do_inheritance_menu();
+
+		u.inherited = inher_arti;
 
 		/* fix up artifact a little so we can use it fine */
 		/* the alignment check should be unnecessary, but otherwise this prevents intelligents from evading */
-		if (!Role_if(artilist[inherited].role)) artilist[inherited].role = ROLE_NONE;
-		if (!Pantheon_if(artilist[inherited].role)) artilist[inherited].role = ROLE_NONE;
-		if (!Race_if(artilist[inherited].race)) artilist[inherited].race = ROLE_NONE;
-		if (artilist[inherited].alignment != u.ualign.type) artilist[inherited].alignment = A_NONE;
+		if (!Role_if(artilist[inher_arti].role)) artilist[inher_arti].role = ROLE_NONE;
+		if (!Pantheon_if(artilist[inher_arti].role)) artilist[inher_arti].role = ROLE_NONE;
+		if (!Race_if(artilist[inher_arti].race)) artilist[inher_arti].race = ROLE_NONE;
+		if (artilist[inher_arti].alignment != u.ualign.type) artilist[inher_arti].alignment = A_NONE;
 		hack_artifacts();
 
-		otmp = mksobj((int)artilist[inherited].otyp, MKOBJ_NOINIT);
-	    otmp = oname(otmp, artilist[inherited].name);
+		otmp = mksobj((int)artilist[inher_arti].otyp, MKOBJ_NOINIT);
+	    otmp = oname(otmp, artilist[inher_arti].name);
 		expert_weapon_skill(weapon_type(otmp));
-		discover_artifact(inherited);
+		discover_artifact(inher_arti);
 		fully_identify_obj(otmp);
 
 	    otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
@@ -3525,6 +3525,30 @@ newgame()
 	}
 	return;
 }
+
+STATIC_OVL int
+find_preset_inherited(name)
+	char * name;
+{
+	int i;
+	char * aname;
+
+	if(!strncmpi(name, "the ", 4)) name += 4;
+	for (i = 1; i<=NROFARTIFACTS; i++)
+	{
+		if(artilist[i].gflags&ARTG_INHER
+		&& !Role_if(artilist[i].role) && !Pantheon_if(artilist[i].role)
+		&& !(urole.questarti == i)
+		&& (artilist[i].alignment == A_NONE || artilist[i].alignment == u.ualign.type)
+		){
+			aname = artilist[i].name;
+			if(!strncmpi(aname, "the ", 4)) aname += 4;
+			if(!strcmpi(name, aname)) return i;
+		}
+	}
+	return 0;
+}
+
 
 STATIC_OVL int
 do_inheritance_menu()
@@ -3545,6 +3569,7 @@ do_inheritance_menu()
 		// if ((artilist[i].spfx2) && artilist[i].spfx && artilist[i].spfx)
 		if(artilist[i].gflags&ARTG_INHER
 		&& !Role_if(artilist[i].role) && !Pantheon_if(artilist[i].role)
+		&& !(urole.questarti == i)
 		&& (artilist[i].alignment == A_NONE || artilist[i].alignment == u.ualign.type)
 		){
 			Sprintf(buf, "%s", artilist[i].name);
