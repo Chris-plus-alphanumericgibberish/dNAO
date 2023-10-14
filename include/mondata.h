@@ -1316,6 +1316,7 @@
 				 (ptr)->mlet == S_LIGHT ||            \
 				 (ptr)->mlet == S_PLANT ||            \
 				 is_fern_spore(ptr) ||                \
+				 (ptr)->mtyp == PM_GAS_SPORE ||         \
 				 is_elemental_sphere(ptr) ||          \
 				 is_gizmo(ptr) ||                     \
 				 (is_clockwork(ptr) &&                \
