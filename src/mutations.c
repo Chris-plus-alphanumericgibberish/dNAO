@@ -28,7 +28,7 @@ const struct mutationtype mutationtypes[] =
 	{ TENDRIL_HAIR, -1, "hairlike tendrils", "Your body is covered with hairlike tentrils." },
 	{ SHIFTING_MIND, -1, "shifting mind", "Your mind has shifted."},
 	{ SHUB_CLAWS, HAND, "pointed claws", "Your fingernails can fuse into your fingers and transform into long claws."},
-	{ MIND_STEALER, TONGUE, "mind-stealing tongue", "Your long thin tongue can slip into other's thoughts."},
+	{ MIND_STEALER, TONGUE, "mind-stealing tongue", "Your long thin tongue can slip into others' thoughts."},
 	{ YOG_GAZE_1, EYE, "eyes of Yog-Sothoth", "Your eyes burn with magenta fire."},
 	{ YOG_GAZE_2, EYE, "frenzy of Yog-Sothoth", "Your eyes blaze with magenta fire."},
 	{ TWIN_MIND, -1, "chanting tentacles", "Your waist-tentacles chant strange spells."},

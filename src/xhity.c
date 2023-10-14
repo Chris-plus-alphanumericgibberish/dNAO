@@ -2796,10 +2796,10 @@ struct attack *attk;
 					(youagr ? "" : "s"),
 					(youagr ? "your" : mhis(magr)),
 					(youagr ? body_part(TONGUE) : mbodypart(mdef, TONGUE)),
-					(youagr ? mhis(mdef) : "your"),
-					(youagr ? body_part(BRAIN) : mbodypart(mdef, BRAIN)),
-					(youagr ? mhis(mdef) : "your"),
-					(youagr ? body_part(EAR) : mbodypart(mdef, EAR))
+					(youdef ? "your" : mhis(mdef)),
+					(youdef ? body_part(BRAIN) : mbodypart(mdef, BRAIN)),
+					(youdef ? "your" : mhis(mdef)),
+					(youdef ? body_part(EAR) : mbodypart(mdef, EAR))
 					);
 			}
 			else {

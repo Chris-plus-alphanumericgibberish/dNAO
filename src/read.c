@@ -446,11 +446,11 @@ doread()
 		return MOVE_READ;
 	} else if(scroll->otyp == MISOTHEISTIC_FRAGMENT){
 		if (Blind) {
-			pline("Some mysterious force holds these mirrored fragments together in a rough aproximation of a pyramid.");
+			pline("Some mysterious force holds these mirrored fragments together in a rough approximation of a pyramid.");
 			You_cant("see the fragments!");
 			return MOVE_STANDARD;
 		} else {
-			pline("Some mysterious force holds these mirrored fragments together in a rough aproximation of a pyramid.");
+			pline("Some mysterious force holds these mirrored fragments together in a rough approximation of a pyramid.");
 			You("are not reflected in the shards.");
 			You("have the unnerving feeling that there is something inside the pyramid, barely hidden from view.");
 			/*Note: this is intended to work for any PC, not just Binders */
