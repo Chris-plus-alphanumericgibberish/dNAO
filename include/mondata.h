@@ -262,8 +262,11 @@
 #define is_silent(ptr)		((ptr)->msound == MS_SILENT)
 #define is_silent_mon(mon)	(is_silent((mon)->data))
 #define unsolid(ptr)		(((ptr)->mflagsb & MB_UNSOLID) != 0L)
-#define mindless(ptr)		(((ptr)->mflagst & MT_MINDLESS) != 0L || on_level(&valley_level, &u.uz))
+#define mindless(ptr)		(((ptr)->mflagst & MT_MINDLESS) != 0L || ((ptr)->mflagst & MT_DETACHED) != 0L || on_level(&valley_level, &u.uz))
 #define mindless_mon(mon)		(mon && mindless((mon)->data))
+#define detached_from_purpose(ptr) (((ptr)->mflagst & MT_DETACHED) != 0)
+#define detached_from_purpose_mon(mon) (mon && detached_from_purpose((mon)->data))
+#define mindless_muse_mon(mon)	(mindless_mon(mon) && !(!on_level(&valley_level, &u.uz) && detached_from_purpose_mon(mon)))
 #define intelligent_mon(mon)	(!mindless_mon(mon) && !is_animal((mon)->data))
 #define murderable_mon(mon)	((mon) && ((intelligent_mon(mon) && always_peaceful((mon)->data) && !always_hostile_mon(mon)) || (mon)->isshk || (mon)->isgd || (mon)->ispriest))
 
