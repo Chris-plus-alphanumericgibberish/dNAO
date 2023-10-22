@@ -346,6 +346,7 @@ struct you {
 	int protean; /* counter for the auto-polypiling power of the pirate treasure*/
 	int uhouse; /* drow house info */
 	int start_house; /* starting drow house info */
+	int inherited; /* what you inherited at the start, if anything */
 	struct prop uprops[LAST_PROP+1];
 	int rift_count;
 	int vortex_count;

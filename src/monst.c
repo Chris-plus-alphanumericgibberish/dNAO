@@ -5701,14 +5701,6 @@ struct permonst _mons2[] = {
 	0 /*MM*/, MT_OMNIVORE|MT_COLLECT /*MT*/, MF_MARTIAL_B /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, MG_NOWISH|MG_INFRAVISIBLE /*MG*/,
 	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, HI_DOMESTIC),
-    MON("inheritor", S_HUMAN,//2
-	LVL(0, 12, 0, 0),  G_NOGEN,		/* for corpses */
-	DEF(NAT_AC(0)),
-	A(ATTK(AT_WEAP, AD_PHYS, 1, 6)),
-	SIZ(WT_HUMAN, 400, MS_HUMANOID, MZ_HUMAN), 0, 0,
-	0 /*MM*/, MT_OMNIVORE|MT_COLLECT /*MT*/, MF_MARTIAL_B|MF_LEVEL_30 /*MF*/,
-	MB_HUMANOID|MB_STRONG /*MB*/, MG_NOWISH|MG_INFRAVISIBLE /*MG*/,
-	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, HI_DOMESTIC),
     MON("peasant", S_HUMAN,//3 /*Needs encyc entry*/
 	LVL(1, 10, 0, 1),  G_NOGEN,
 	DEF(NAT_AC(0)),

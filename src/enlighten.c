@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "mutations.h"
+#include "artifact.h"
 
 STATIC_DCL void FDECL(enlght_line, (const char *,const char *,const char *, boolean));
 STATIC_DCL void FDECL(put_or_dump, (const char *, boolean));
@@ -203,6 +204,12 @@ minimal_enlightenment()
 	/* Starting alignment */
 	Sprintf(buf, fmtstr, "alignment", align_str(galign(u.ugodbase[UGOD_ORIGINAL])));
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+
+	/* Starting inheritance */
+	if (flags.descendant){
+		Sprintf(buf, fmtstr, "inheritance", artilist[u.inherited].name);
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+	}
 
 	/* Current name, race, role, gender */
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", FALSE);

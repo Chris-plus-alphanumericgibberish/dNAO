@@ -1758,7 +1758,9 @@ u_init()
 	
 	u.uhouse = 0;
 	u.start_house = 0;
-	
+
+	u.inherited = 0;
+
 	u.uaesh = 0;
 	u.uaesh_duration = 0;
 	u.ukrau = 0;

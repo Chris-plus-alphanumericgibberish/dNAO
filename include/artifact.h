@@ -22,7 +22,7 @@
 #define ARTG_NOWISH		0x0002L /* cannot be wished for */
 #define ARTG_NAME		0x0004L /* can be #named */
 #define ARTG_GIFT		0x0008L /* favoured early gift for a player */
-#define ARTG_INHER		0x0010L /* allowable for an Inheritor to start with */
+#define ARTG_INHER		0x0010L /* allowable for a descendant to start with as inheritance */
 #define ARTG_MAJOR		0x0020L /* artifact evades the grasp of the unworthy */
 #define ARTG_NOCNT		0x0040L /* should not be sacrificable to Priests of an Unknown God ??? */
 #define ARTG_FXALGN		0x0080L /* doesn't change alignment to match a role's */

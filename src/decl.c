@@ -241,6 +241,8 @@ NEARDATA struct obj zeroobj = DUMMY;
 /* used to zero out union any */
 NEARDATA anything zeroany = (anything) 0;
 
+NEARDATA char inherited[PL_PSIZ] = DUMMY;
+
 /* originally from dog.c */
 NEARDATA char dogname[PL_PSIZ] = DUMMY;
 NEARDATA char catname[PL_PSIZ] = DUMMY;
