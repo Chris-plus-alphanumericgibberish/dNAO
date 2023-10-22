@@ -136,6 +136,56 @@ getpos_prevmon()
 }
 
 
+void
+auto_describe(int cx, int cy)
+{
+    coord cc;
+    int sym = 0, glyph;
+    char tmpbuf[BUFSZ], out_str[LONGBUFSZ];
+	out_str[0] = 0;
+    const char *firstmatch = "unknown";
+	boolean force_defsyms;
+
+    cc.x = cx;
+    cc.y = cy;
+	
+	glyph = glyph_at(cc.x,cc.y);
+	if (glyph_is_cmap(glyph)) {
+		if (iflags.UTF8graphics) {
+			/* Temporary workaround as NetHack can't yet
+			 * display UTF-8 glyphs on the topline */
+			force_defsyms = TRUE;
+			sym = defsyms[glyph_to_cmap(glyph)].sym;
+		} else {
+			sym = showsyms[glyph_to_cmap(glyph)];
+		}
+	} else if (glyph_is_trap(glyph)) {
+		sym = showsyms[trap_to_defsym(glyph_to_trap(glyph))];
+	} else if (glyph_is_object(glyph)) {
+		sym = oc_syms[(int)objects[glyph_to_obj(glyph)].oc_class];
+		if (sym == '`' && iflags.bouldersym && ((int)glyph_to_obj(glyph) == BOULDER || (int)glyph_to_obj(glyph) == MASS_OF_STUFF))
+			sym = iflags.bouldersym;
+	} else if (glyph_is_monster(glyph)) {
+		/* takes care of pets, detected, ridden, and regular mons */
+		sym = monsyms[(int)mons[glyph_to_mon(glyph)].mlet];
+	} else if (glyph_is_swallow(glyph)) {
+		sym = showsyms[glyph_to_swallow(glyph)+S_sw_tl];
+	} else if (glyph_is_invisible(glyph)) {
+		sym = DEF_INVISIBLE;
+	} else if (glyph_is_warning(glyph)) {
+		sym = glyph_to_warning(glyph);
+		sym = warnsyms[sym];
+	} else {
+		impossible("do_look:  bad glyph %d at (%d,%d)",
+						glyph, (int)cc.x, (int)cc.y);
+		sym = ' ';
+	}
+    do_look_letter(sym, TRUE, TRUE, force_defsyms, cc, out_str, firstmatch);
+	if (out_str[0]) pline("%s", out_str);\
+	else pline("no out str :(");
+	flush_screen(1);
+}
+
 int
 getpos(cc, force, goal)
 coord *cc;
@@ -166,6 +216,9 @@ const char *goal;
     lock_mouse_cursor(TRUE);
 #endif
     for (;;) {
+	if (iflags.autodescribe) {
+		auto_describe(cx, cy);
+	}
 	c = nh_poskey(&tx, &ty, &sidx);
 	if (c == '\033') {
 	    cx = cy = -10;

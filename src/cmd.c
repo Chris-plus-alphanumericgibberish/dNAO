@@ -2212,6 +2212,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"map", "do magic mapping", wiz_map, IFBURIED},
 	{"genesis", "create monster", wiz_genesis, IFBURIED},
 	{"killall", "kill all creatures on level", wiz_kill_all, IFBURIED, AUTOCOMPLETE },
+	{"terrain", "display level terrain", doterrain, IFBURIED, AUTOCOMPLETE },
 	{"identify", "identify items in pack", wiz_identify, IFBURIED},
 	{"levelport", "to trans-level teleport", wiz_level_tele, IFBURIED},
 	{"wish", "make wish", wiz_wish, IFBURIED, AUTOCOMPLETE},
