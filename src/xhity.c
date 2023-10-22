@@ -567,9 +567,12 @@ int tary;
 				(cloak && FacelessCloak(cloak)))
 				continue;
 		}
+		/* avoid making unsafe attacks if you choose not to */
+		if (youagr && u.uavoid_passives && !no_contact_attk(attk)) continue;
+
 		/* Generalized offhand attack when not allowed */
 		if ((attk->offhand) && (						// offhand attack
-				(youagr && (uarms || (uwep && bimanual(uwep, youracedata)))) ||					// player attacking with shield
+				(youagr && ((uarms && !activeFightingForm(FFORM_SHIELD_BASH)) || (uwep && bimanual(uwep, youracedata)))) ||	// player attacking with shield
 				(!youagr && (which_armor(magr, W_ARMS) || (MON_WEP(magr) && bimanual(MON_WEP(magr), pa))))	// monster attacking with shield
 				)
 			) {
@@ -632,7 +635,7 @@ int tary;
 			}
 			/* 2: Offhand attack when not allowed */
 			if ((aatyp == AT_XWEP || aatyp == AT_XSPR) && (	// offhand attack
-					(youagr && !u.twoweap) ||				// player attacking and choosing not to twoweapon
+					(youagr && !(u.twoweap || activeFightingForm(FFORM_SHIELD_BASH))) ||				// player attacking and choosing not to twoweapon
 					(!youagr && (which_armor(magr, W_ARMS) || (MON_WEP(magr) && bimanual(MON_WEP(magr), pa))))	// monster attacking and cannot twoweapon (wearing shield)
 					)
 				) {
@@ -654,7 +657,7 @@ int tary;
 			}
 			else if (aatyp == AT_XWEP) {
 				/* offhand */
-				otmp = (youagr) ? uswapwep : MON_SWEP(magr);
+				otmp = (youagr) ? (u.twoweap ? uswapwep : uarms) : MON_SWEP(magr);
 			}
 			else if (aatyp == AT_MARI) {
 				if(youagr && !uwep && !(u.twoweap && uswapwep)){
@@ -883,7 +886,7 @@ int tary;
 				/* make the attack */
 				bhitpos.x = tarx; bhitpos.y = tary;
 				result = xmeleehity(magr, mdef, attk, (struct obj **)0, vis, tohitmod, ranged);
-				dopassive_local = TRUE;
+				if (!no_contact_attk(attk)) dopassive_local = TRUE;
 				/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 				if (youdef || (!(result&MM_DEF_DIED) && (result || (!mdef->msleeping && mdef->mcanmove))))
 					wakeup2(mdef, youagr);
@@ -1686,7 +1689,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		/* if the player IS polymorphed, they are limited to their polyform's attacks */
 		/* some things give the player additional weapon attacks; they can reset SUBOUT_XWEP to allow another offhand hit if unpoly'd */
 		/* stilettos and wind and fire wheels add extra damage instead */
-		if (!by_the_book && *indexnum > 0 && u.twoweap
+		if (!by_the_book && *indexnum > 0 && (u.twoweap || activeFightingForm(FFORM_SHIELD_BASH))
 			&& !(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS))
 		) {
 			/* follow a weapon attack with an offhand attack */
@@ -3928,6 +3931,7 @@ int *shield_margin;
 	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && (melee || thrust)) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(weapon && arti_shining(weapon)) ||
+		(melee && youagr && weapon && weapon->otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD)) ||
 		(melee && attk->aatyp == AT_TUCH) ||
 		(melee && attk->aatyp == AT_VINE) ||
 		(melee && spirit_rapier_at(attk->aatyp)) ||
@@ -13288,6 +13292,9 @@ int vis;						/* True if action is at all visible to the player */
 			/* Spellbooks are weapons if you have Paimon bound */
 			else if (melee && weapon && weapon->oclass == SPBOOK_CLASS && youagr && u.sealsActive&SEAL_PAIMON)
 				valid_weapon_attack = TRUE;
+			/* shield bashes are possibly if and only if using the style (youagr only) */
+			else if (melee && weapon && is_shield(weapon) && youagr && activeFightingForm(FFORM_SHIELD_BASH))
+				valid_weapon_attack = TRUE;
 			else
 				invalid_weapon_attack = TRUE;
 		}
@@ -13835,6 +13842,10 @@ int vis;						/* True if action is at all visible to the player */
 				poisons |= OPOISON_FILTH;
 			else
 				poisons |= OPOISON_BASIC;
+		}
+		if (youagr && poisonedobj == uwep && activeFightingForm(FFORM_KNI_ELDRITCH)){
+			if (u.ueldritch_style == SPE_POISON_SPRAY) poisons |= OPOISON_BASIC;
+			if (u.ueldritch_style == SPE_ACID_SPLASH) poisons |= OPOISON_ACID;
 		}
 	}
 	/* All AD_SHDW attacks are poisoned as well */
@@ -14549,7 +14560,7 @@ int vis;						/* True if action is at all visible to the player */
 				break;
 
 			case STILETTOS:
-				basedmg = rnd(bigmonst(pd) ? 2 : 6) + weapon->spe + (youagr ? dbon(weapon) : 0);
+				basedmg = rnd(bigmonst(pd) ? 2 : 6) + weapon->spe + dbon(weapon, magr);
 				if (youagr && u.twoweap)
 					basedmg += rnd(bigmonst(pd) ? 2 : 6) + weapon->spe;
 				break;
@@ -14737,6 +14748,7 @@ int vis;						/* True if action is at all visible to the player */
 	phase_armor = (
 		(weapon && arti_shining(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
+		(youagr && weapon && weapon->otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD)) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp != AD_BLUD && originalattk->adtyp != AD_WET) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
@@ -14809,6 +14821,50 @@ int vis;						/* True if action is at all visible to the player */
 					if(uarmg && uarmg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(uarmg, IEA_INC_DAM))
 						bonsdmg += uarmg->spe;
 
+					/* due to lack of a nicer place, check for eldritch style bonuses here*/
+#define eld_bon_dice ((FightingFormSkillLevel(FFORM_KNI_ELDRITCH) >= P_EXPERT) ? 6 : (FightingFormSkillLevel(FFORM_KNI_ELDRITCH) >= P_SKILLED ? 3 : 1))
+#define eld_bon_size ((u.ueldritch_style == SPE_FINGER_OF_DEATH) ? 13 : (\
+		 (u.ueldritch_style == SPE_FIRE_STORM || u.ueldritch_style == SPE_BLIZZARD || u.ueldritch_style == SPE_LIGHTNING_STORM) ? 8 : 6))
+					if (weapon && weapon == uwep && activeFightingForm(FFORM_KNI_ELDRITCH)){
+						boolean resist_check = FALSE;
+						char *verb = "";
+						int spell_id;
+						if (u.ueldritch_style == SPE_FIREBALL || u.ueldritch_style == SPE_FIRE_STORM){
+							verb = "burn";
+							resist_check = Fire_res(mdef);
+						} else if (u.ueldritch_style == SPE_CONE_OF_COLD || u.ueldritch_style == SPE_BLIZZARD){
+							verb = "freeze";
+							resist_check = Cold_res(mdef);
+						} else if (u.ueldritch_style == SPE_LIGHTNING_BOLT || u.ueldritch_style == SPE_LIGHTNING_STORM){
+							verb = "shock";
+							resist_check = Shock_res(mdef);
+						} else if (u.ueldritch_style == SPE_ACID_SPLASH){
+							verb = "befoul";
+							resist_check = Acid_res(mdef);
+						} else if (u.ueldritch_style == SPE_POISON_SPRAY){
+							verb = "poison";
+							resist_check = Poison_res(mdef);
+						} else if (u.ueldritch_style == SPE_FINGER_OF_DEATH){
+							verb = "sap the life from";
+							resist_check = Dark_res(mdef);
+						}
+
+						for (spell_id = 0; spell_id < MAXSPELL; spell_id++)
+							if (spellid(spell_id) == u.ueldritch_style)
+								break;
+
+						if (spell_id < MAXSPELL && percent_success(spell_id) > rn2(100) && !resist_check){
+							if (FightingFormSkillLevel(FFORM_KNI_ELDRITCH) >= P_BASIC){
+								if (u.uen >= objects[u.ueldritch_style].oc_level){
+									bonsdmg += d(eld_bon_dice, eld_bon_size);
+									u.uen -= objects[u.ueldritch_style].oc_level;
+									pline("Eldritch energies %s %s!", verb, mon_nam(mdef));
+								}
+							}
+							use_skill(P_KNI_ELDRITCH, 1);
+						}
+					}
+
 					/* when bound, Dantalion gives bonus "precision" damage based on INT; 1x for all melee and ranged */
 					if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
 						if (ACURR(A_INT) == 25) bonsdmg += 8;
@@ -14822,13 +14878,12 @@ int vis;						/* True if action is at all visible to the player */
 						bonsdmg += arm->spe;
 				}
 
-#define dbonus(wep) (youagr ? dbon((wep)) : m_dbon(magr, (wep)))
 				/* If you throw using a propellor, you don't get a strength
 				* bonus but you do get an increase-damage bonus.
 				*/
 				if (natural_strike || unarmed_punch || unarmed_kick || melee || thrust) {
 					boolean usewep = (weapon && (melee || thrust) && !martial_aid(weapon));
-					int tmp = dbonus(usewep ? weapon : (struct obj *)0);
+					int tmp = dbon(usewep ? weapon : (struct obj *)0, magr);
 					/* greatly reduced STR damage for offhand attacks */
 					if (attk->aatyp == AT_XWEP || attk->aatyp == AT_MARI)
 						tmp = min(0, tmp);
@@ -14838,10 +14893,10 @@ int vis;						/* True if action is at all visible to the player */
 				{
 					/* slings get STR bonus */
 					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
-						bonsdmg += dbonus(launcher);
+						bonsdmg += dbon(launcher, magr);
 					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
-						bonsdmg += dbonus(launcher) * 2;
+						bonsdmg += dbon(launcher, magr) * 2;
 					/* other launchers get no STR bonus */
 					else if (launcher)
 						bonsdmg += 0;
@@ -14850,11 +14905,10 @@ int vis;						/* True if action is at all visible to the player */
 						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
 						if (hmoncode & HMON_KICKED && youagr && uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING))))
 							override_str = 125;	/* 25 STR */
-						bonsdmg += dbonus(weapon);
+						bonsdmg += dbon(weapon, magr);
 						override_str = 0;
 					}
 				}
-#undef dbonus
 
 			} else if (trap){
 				/* some traps deal increased damage */
@@ -14885,6 +14939,8 @@ int vis;						/* True if action is at all visible to the player */
 				wtype = P_PICK_AXE;
 			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
 				wtype = P_MACE;
+			else if (weapon && is_shield(weapon) && activeFightingForm(FFORM_SHIELD_BASH))
+				wtype = P_SHIELD_BASH;
 			else if (weapon && (!valid_weapon(weapon) || is_launcher(weapon))){
 				if (weapon && check_oprop(weapon, OPROP_BLADED))
 					wtype = P_AXE;
@@ -14930,6 +14986,9 @@ int vis;						/* True if action is at all visible to the player */
 
 			/* now, train skills */
 			use_skill((melee && u.twoweap) ? P_TWO_WEAPON_COMBAT : wtype, 1);
+
+			if (weapon && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(weapon, youracedata) || bimanual_mod(weapon, &youmonst) > 1))
+				use_skill(P_GREAT_WEP, 1);
 
 			if (melee && weapon && is_lightsaber(weapon) && litsaber(weapon) && P_SKILL(wtype) >= P_BASIC){
 				use_skill(P_SHII_CHO, 1);
@@ -15192,11 +15251,12 @@ int vis;						/* True if action is at all visible to the player */
 		}
 
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
-			(unarmed_kick && !(otmp && (otmp->otyp == STILETTOS || otmp->otyp == WIND_AND_FIRE_WHEELS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING))))) || 
-			(otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp)) ||
-			(otmp && (valid_weapon_attack || invalid_weapon_attack) && check_oprop(otmp, OPROP_FLAYW))
-			)
-		){
+			(unarmed_kick && !(youagr && !Upolyd && Race_if(PM_CLOCKWORK_AUTOMATON)) && !(otmp && (
+				otmp->otyp == STILETTOS || otmp->otyp == WIND_AND_FIRE_WHEELS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS 
+				|| is_metallic(otmp) || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING))))
+			) || (otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp))
+			))
+		{
 			if(otmp && otmp->oartifact == ART_IBITE_ARM){
 				if(otmp->otyp == CLAWED_HAND); /*Ghost hand doesn't notice it's too soft to harm the target*/
 				else {
@@ -16525,7 +16585,8 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	
 	/* passives NOT from a creature's attacks */
 	/* per-attack */
-	if (attk) {
+	/* no-contact attacks are excluded from this even when they _maybe_ shouldn't be. counters yes, iris no? */
+	if (attk && !no_contact_attk(attk)) {
 		/* Iris unbinds on attacking a reflective creature */
 		if (youagr && u.sealsActive&SEAL_IRIS &&
 			!(result&MM_DEF_DIED) &&
@@ -18215,7 +18276,7 @@ struct monst *mdef;
 	if(!tmp)
 		return; //Too light to do damage :(
 	if (!DEADMONSTER(mdef) && tmp) {
-		int nd = dbon((struct obj *)0);
+		int nd = dbon((struct obj *)0, &youmonst);
 		nd = max(nd, 1);
 		xdamagey(&youmonst, mdef, (struct attack *)0, d(nd,tmp));
 	}

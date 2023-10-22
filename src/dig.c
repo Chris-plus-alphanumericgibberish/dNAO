@@ -1990,7 +1990,7 @@ struct obj *obj;
 		char buf[BUFSZ];
 		int dam;
 
-		dam = rnd(2) + dbon(obj) + obj->spe;
+		dam = rnd(2) + dbon(obj, &youmonst) + obj->spe;
 		if (dam <= 0) dam = 1;
 		You("hit yourself with %s.", yname(obj));
 		Sprintf(buf, "%s own %s", uhis(),

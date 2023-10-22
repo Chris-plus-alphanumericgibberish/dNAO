@@ -538,6 +538,7 @@ struct obj {
 #define artitypematch(a, o) (( (a)->otyp ) == BEAMSWORD ? ((o)->otyp==BROADSWORD) : \
 							( (a)->otyp ) == UNIVERSAL_KEY ? ((o)->otyp==SKELETON_KEY) : \
 							( (a)->otyp ) == ROUNDSHIELD ? ((o)->otyp==DWARVISH_ROUNDSHIELD) : \
+							( (a) == &artilist[ART_LANCE_OF_LONGINUS] ) ? ((o)->otyp==SCALPEL||(o)->otyp==LIGHTSABER) : \
 							( (a) == &artilist[ART_GUNGNIR] ) ? (is_spear(o)) : \
 							( (a) == &artilist[ART_SINGING_SWORD] ) ? ((o)->otyp == LONG_SWORD || (o)->otyp == RAPIER || (o)->otyp == SABER) : \
 							( (a) == &artilist[ART_DIRGE] ) ? (o->oclass == WEAPON_CLASS || is_weptool(o)) : \
@@ -1199,6 +1200,13 @@ struct obj {
 #define Is_candle(otmp) (otmp->otyp == TALLOW_CANDLE || \
 			 otmp->otyp == WAX_CANDLE || \
 			 otmp->otyp == CANDLE_OF_INVOCATION)
+
+#define Is_torch(otmp) (otmp->otyp == TORCH || \
+			 otmp->otyp == MAGIC_TORCH || \
+			 otmp->otyp == SHADOWLANDER_S_TORCH || \
+			 otmp->otyp == SUNROD)
+
+
 #define MAX_OIL_IN_FLASK 400	/* maximum amount of oil in a potion of oil */
 #define Is_darklight_source(otmp) ((otmp)->otyp == SHADOWLANDER_S_TORCH || \
 			 (otmp)->otyp == CHUNK_OF_FOSSIL_DARK ||\

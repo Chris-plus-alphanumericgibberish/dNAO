@@ -7,3 +7,21 @@ You can play dNethack online using SSH or HTTPS:
 * https://www.hardfought.org/nethack/ (servers in USA, UK, and AUS)
 * https://ascension.run/ (located in Germany)
 * if other servers decide to host dNethack, they will be listed here: https://nethackwiki.com/wiki/Public_server
+
+Setting up dNetHack:
+
+dNetHack is currently only supported on Unix, including WSL for Windows, with no plans to change this for the foreseeable future.
+
+For compiling on Windows:
+* Download Windows Subsystem for Linux (WSL)
+* Open the Terminal in WSL. (Just clicking on the shortcut opens the terminal)
+* Navigate (using `ls` and `cd`) to where you want to install dNAO
+* Install git: `apt-get git`
+* Download the version of dNAO you want with git: `git clone https://github.com/Chris-plus-alphanumericgibberish/dNAO.git` will get you whatever is the master branch (at the time of writing, currently `compat-3.22.0`)
+* Install the following using `apt-get install <XXXX>`: `bison`, `build-essential`, `libncurses5-dev`, `flex`
+* Build & install by typing `make install`
+* Navigate to the newly-created dnethackdir directory: `cd dnethackdir`
+* Run by typing `./dnethack`. Wizard mode is `./dnethack -d -u wizard`
+* If you want an rc file (to have custom options and use things like menucolours and autopickup exceptions), edit it via `nano ~/.dnethackrc` (or your preferred text editor)
+
+For Unix, the same steps apply minus installing WSL. 

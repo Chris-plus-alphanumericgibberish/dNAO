@@ -2041,10 +2041,6 @@ boolean silently;
 		if(uskin->otyp == MASK) {
 			otmp_p = &ublindf;
 			msg = "Your mask unmelds from your face.";
-			if (uskin->oartifact == ART_MIRRORED_MASK) {
-				uskin->corpsenm = NON_PM;
-				uskin->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
-			}
 		}
 		else if(uskin->otyp == LEO_NEMAEUS_HIDE){
 			otmp_p = &uarmc;

@@ -1271,7 +1271,11 @@ register int after;	/* this is extra fast monster movement */
 		if (m_carrying(mtmp, SKELETON_KEY)||m_carrying(mtmp, UNIVERSAL_KEY)) allowflags |= UNLOCKDOOR;
 	}
 	if (species_busts_doors(mtmp->data)) allowflags |= BUSTDOOR;
-	if (tunnels(mtmp->data)) allowflags |= ALLOW_DIG;
+	if (tunnels(mtmp->data)
+#ifdef REINCARNATION
+	    && !Is_rogue_level(&u.uz)	/* same restriction as m_move() */
+#endif
+		) allowflags |= ALLOW_DIG;
 	cnt = mfndpos(mtmp, poss, info, allowflags);
 
 	/* Normally dogs don't step on cursed items, but if they have no

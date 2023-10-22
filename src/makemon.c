@@ -12833,7 +12833,10 @@ boolean randmonst;
 			mkmon_template = MOLY_TEMPLATE;
 		}
 		/* most general case at bottom -- creatures randomly being zombified */
-		else if(randmonst && can_undead(ptr) && !Is_rogue_level(&u.uz)
+		else if(randmonst && can_undead(ptr)
+#ifdef REINCARNATION
+			&& !Is_rogue_level(&u.uz)
+#endif
 			&& !Infuture
 		){
 			if(In_mines(&u.uz)){
@@ -13385,23 +13388,28 @@ int faction;
 			ESMT(mtmp)->smith_mtyp = mtmp->mtyp; //In case the monster is later polymorphed
 	}
 	
-	ABASE_MON(A_STR, mtmp) = d(3,6);
-	if(strongmonst(mtmp->data)) ABASE_MON(A_STR, mtmp) += 10;
-	ABASE_MON(A_DEX, mtmp) = d(3,6);
-	if(is_elf(mtmp->data) && ABASE_MON(A_STR, mtmp) > ABASE_MON(A_DEX, mtmp)){
-		short swap = ABASE_MON(A_STR, mtmp);
-		ABASE_MON(A_STR, mtmp) = ABASE_MON(A_DEX, mtmp);
-		ABASE_MON(A_DEX, mtmp) = swap;
-	}
-	// mtmp->mcon = d(3,6);
-	//More tightly constrain to "average"
+	ABASE_MON(A_STR, mtmp) = 7 + d(1,6);
+	if (strongmonst(mtmp->data)) ABASE_MON(A_STR, mtmp) = STR19(18);
+	if (throws_rocks(mtmp->data)) ABASE_MON(A_STR, mtmp) = STR19(25);
+
+	ABASE_MON(A_DEX, mtmp) = 7 + d(1,6);
+	ABASE_MON(A_DEX, mtmp) = max(3, min(25, ABASE_MON(A_DEX, mtmp) + mtmp->data->dac*2));
+
 	ABASE_MON(A_CON, mtmp) = 7 + d(1,6);
-	if(is_animal(mtmp->data)) ABASE_MON(A_INT, mtmp) = 3;
-	else if(mindless_mon(mtmp)) ABASE_MON(A_INT, mtmp) = 0;
-	else if(is_magical(mtmp->data)) ABASE_MON(A_INT, mtmp) = 13+rnd(5);
+	if (is_animal(mtmp->data)) ABASE_MON(A_INT, mtmp) = 3;
+	else if (mindless_mon(mtmp)) ABASE_MON(A_INT, mtmp) = 0;
+	else if (attacktype_fordmg(mtmp->data, AT_MAGC, AD_SPEL) ||
+			attacktype_fordmg(mtmp->data, AT_MMGC, AD_SPEL)) ABASE_MON(A_INT, mtmp) = 13+rnd(5);
 	else ABASE_MON(A_INT, mtmp) = d(3,6);
-	ABASE_MON(A_WIS, mtmp) = d(3,6);
-	ABASE_MON(A_CHA, mtmp) = d(3,6);
+
+	if (attacktype_fordmg(mtmp->data, AT_MAGC, AD_CLRC) ||
+		attacktype_fordmg(mtmp->data, AT_MMGC, AD_CLRC) || is_angel(mtmp->data)) ABASE_MON(A_WIS, mtmp) = 13+rnd(5);
+	else ABASE_MON(A_WIS, mtmp) = 7 + d(1,6);
+
+	if (attacktype_fordmg(mtmp->data, AT_MAGC, AD_PSON) ||
+		attacktype_fordmg(mtmp->data, AT_MMGC, AD_PSON)) ABASE_MON(A_CHA, mtmp) = 13+rnd(5);
+	else ABASE_MON(A_CHA, mtmp) = 7 + d(1,6);
+
 	if(mtmp->data->mlet == S_NYMPH){
 		if(mtmp->mtyp == PM_DEMINYMPH) ABASE_MON(A_CHA, mtmp) = (ABASE_MON(A_CHA, mtmp) + 25)/2;
 		else ABASE_MON(A_CHA, mtmp) = 25;
@@ -14891,9 +14899,10 @@ rndmonst()
 			}
 		}
 	}
+#ifdef REINCARNATION
 	if(Is_rogue_level(&u.uz))
 		return roguemonst();
-
+#endif
 	if (rndmonst_state.choice_count < 0) {	/* need to recalculate */
 	    int zlevel, minmlev, maxmlev;
 	    boolean elemlevel;

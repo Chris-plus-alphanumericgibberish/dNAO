@@ -925,7 +925,7 @@ int oldlevel, newlevel;
 		int skillslots;
 	    if (newlevel > oldlevel){
 			skillslots = newlevel - oldlevel;
-			if(Race_if(PM_HUMAN) || Race_if(PM_INHERITOR) || Race_if(PM_ANDROID)){
+			if(Race_if(PM_HUMAN) || Race_if(PM_ANDROID)){
 				if(!(skillslots%2)) skillslots *= 1.5;
 				else if(!(newlevel%2)) skillslots = skillslots*1.5 + 1;
 				else skillslots *= 1.5;
@@ -934,12 +934,25 @@ int oldlevel, newlevel;
 		}
 	    else{
 			skillslots = oldlevel - newlevel;
-			if(Race_if(PM_HUMAN) || Race_if(PM_INHERITOR) || Race_if(PM_ANDROID)){
+			if(Race_if(PM_HUMAN) || Race_if(PM_ANDROID)){
 				if(!(skillslots%2)) skillslots *= 1.5;
 				else if(!(oldlevel%2)) skillslots = skillslots*1.5 + 1;
 				else skillslots *= 1.5;
 			}
 			lose_weapon_skill(skillslots);
+		}
+	}
+	int message = 0;
+	if ((oldlevel >= 14 && newlevel < 14) || (newlevel >= 14 && oldlevel < 14)){
+		for (int i = 0; i < P_NUM_SKILLS; i++) {
+			if (roleSkill(i)){
+				message = oldlevel - newlevel;
+				if (oldlevel > newlevel) restrict_weapon_skill(i);
+				else expert_weapon_skill(i);
+			}
+	    }
+		if (message != 0){
+			You_feel("your skills %s!", (message > 0) ? "slipping away" : "increasing");
 		}
 	}
 }
@@ -1899,11 +1912,23 @@ void
 setFightingForm(fform)
 int fform;
 {
-	int i;
+	int i, first, last;
 	if(fform > LAST_FFORM || fform < 0)
 		impossible("Attempting to set fighting form number %d?", fform);
 	
-	for(i=0; i < FFORM_LISTSIZE; i++)
+	if (fform >= FIRST_LS_FFORM && fform <= LAST_LS_FFORM){
+		first = FIRST_LS_FFORM;
+		last = LAST_LS_FFORM;
+	} else if (fform >= FIRST_KNI_FFORM && fform <= LAST_KNI_FFORM){
+		first = FIRST_KNI_FFORM;
+		last = LAST_KNI_FFORM;
+	} else {
+		first = 0;
+		last = FFORM_LISTSIZE*32;
+	}
+
+	/* this code assumes that each batch of 32 fighting forms are mutually exclusive, but not with other batches of 32 */
+	for(i=first/32; i <= last/32; i++)
 		u.fightingForm[i] = 0L;
 
 	u.fightingForm[(fform-1)/32] |= (0x1L << ((fform-1)%32));
@@ -1966,6 +1991,24 @@ int fform;
 		case FFORM_JUYO:
 			return P_JUYO;
 		break;
+		case FFORM_SHIELD_BASH:
+			return P_SHIELD_BASH;
+		break;
+		case FFORM_GREAT_WEP:
+			return P_GREAT_WEP;
+		break;
+		case FFORM_HALF_SWORD:
+			return P_HALF_SWORD;
+		break;
+		case FFORM_KNI_SACRED:
+			return P_KNI_SACRED;
+		break;
+		case FFORM_KNI_RUNIC:
+			return P_KNI_RUNIC;
+		break;
+		case FFORM_KNI_ELDRITCH:
+			return P_KNI_ELDRITCH;
+		break;
 		default:
 			impossible("Attempting to get skill of fighting form number %d?", fform);
 			return P_NONE;
@@ -1987,6 +2030,12 @@ int fform;
 		case FFORM_SHIEN:    return "Shien";
 		case FFORM_JUYO:     return "Juyo";
 		case FFORM_NIMAN:    return "Niman";
+		case FFORM_SHIELD_BASH:	return "Shield Bash";
+		case FFORM_GREAT_WEP:	return "Great Weapon Fighting";
+		case FFORM_HALF_SWORD:	return "Half-sword style";
+		case FFORM_KNI_SACRED:	return "Sacred style";
+		case FFORM_KNI_RUNIC:	return "Runic style";
+		case FFORM_KNI_ELDRITCH:return "Eldritch style";
 		default:
 			impossible("bad fform %d", fform);
 	}
@@ -2014,7 +2063,12 @@ int fform;
 	switch (fform) {
 		/* always available */
 		case NO_FFORM:
+			return FALSE;
 		case FFORM_SHII_CHO:
+		case FFORM_KNI_SACRED:
+			return (FightingFormSkillLevel(fform) <= P_ISRESTRICTED);
+		/* affected by spell success rate, handled elsewhere */
+		case FFORM_KNI_ELDRITCH:
 			return FALSE;
 		/* blocked by heavy armor */
 		case FFORM_MAKASHI:
@@ -2028,7 +2082,19 @@ int fform;
 			return (uarm && !(is_light_armor(uarm)));
 		/* blocked by metal armor */
 		case FFORM_NIMAN:
-			return (uarm && (is_metallic(uarm)));
+			return (uarm && (metal_blocks_spellcasting(uarm)));
+		/* requires longsword and free hand */
+		case FFORM_HALF_SWORD:
+			return !(uwep && uwep->otyp == LONG_SWORD && !uarms && !(u.twoweap && !bimanual(uwep, youracedata)));
+		/* require longsword*/
+		case FFORM_KNI_RUNIC:
+			return !(uwep && uwep->otyp == LONG_SWORD && FightingFormSkillLevel(fform) > P_ISRESTRICTED);
+		/* requires shield */
+		case FFORM_SHIELD_BASH:
+			return (!uarms);
+		/* requires two-handed weapon */
+		case FFORM_GREAT_WEP:
+			return !(uwep && (bimanual(uwep, youracedata) || bimanual_mod(uwep, &youmonst) > 1));
 		default:
 			impossible("Attempting to get blockage of fighting form number %d?", fform);
 			break;

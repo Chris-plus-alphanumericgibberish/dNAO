@@ -1221,6 +1221,13 @@ static const struct def_skill Skill_K[] = {
     { P_NONE, 0 }
 };
 
+static const struct def_skill Skill_Kni_Forms[] = {
+    { P_SHIELD_BASH, P_EXPERT },
+    { P_GREAT_WEP, P_EXPERT },
+    { P_HALF_SWORD, P_EXPERT },
+    { P_NONE, 0 }
+};
+
 static const struct def_skill Skill_Mon[] = {
     { P_QUARTERSTAFF, P_EXPERT },    { P_SPEAR, P_BASIC },
     { P_SHURIKEN, P_EXPERT },		{ P_HARVEST, P_EXPERT },
@@ -1670,6 +1677,7 @@ u_init()
 	(void) memset((genericptr_t)&u, 0, sizeof(u));
 	u.ustuck = (struct monst *)0;
 
+	u.uavoid_passives = 0; // don't start out using only starblades lol
 	u.umystic = ~0; //By default, all monk style attacks are active
 
 	u.summonMonster = FALSE;
@@ -1750,7 +1758,9 @@ u_init()
 	
 	u.uhouse = 0;
 	u.start_house = 0;
-	
+
+	u.inherited = 0;
+
 	u.uaesh = 0;
 	u.uaesh_duration = 0;
 	u.ukrau = 0;
@@ -2254,6 +2264,8 @@ u_init()
 		HJumping |= FROMOUTSIDE;
 		if(Race_if(PM_DWARF)) skill_init(Skill_DwaNob);
 		else skill_init(Skill_K);
+
+		skill_add(Skill_Kni_Forms);
 		break;
 	case PM_MONK:
 		u.umartial = TRUE;
@@ -2798,7 +2810,7 @@ u_init()
 
 	u.oonaenergy = !rn2(3) ? AD_FIRE : rn2(2) ? AD_COLD : AD_ELEC;
 	u.ring_wishes = -1;
-	dungeon_topology.alt_tower = !rn2(8);
+	dungeon_topology.alt_tower = 1;//!rn2(8);
 	
 	u.silver_flame_z.dnum = u.uz.dnum;
 	u.silver_flame_z.dlevel = rn2(dunlevs_in_dungeon(&u.uz)) + dungeons[u.uz.dnum].depth_start;

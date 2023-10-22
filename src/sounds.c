@@ -3527,9 +3527,12 @@ int tx,ty;
 			int curx, cury;
 			char altarfound=0;
 			//Amon can't be invoked on levels with altars, and in fact doing so causes imediate level loss, as for a broken taboo.
-			for(curx=1;curx < COLNO;curx++)
-				for(cury=1;cury < ROWNO;cury++)
-					if(IS_ALTAR(levl[curx][cury].typ)){ altarfound=1; cury=ROWNO; curx=COLNO;}//end search
+			for(curx=1;curx < COLNO;curx++){
+				for(cury=1;cury < ROWNO;cury++){
+					if(IS_ALTAR(levl[curx][cury].typ)) { altarfound = 1; break; }
+				}
+				if (altarfound == 1) break;
+			}//end search
 			
 			if(!altarfound){
 				pline("A golden flame roars suddenly to life within the seal, throwning the world into a stark relief of hard-edged shadows and brilliant light.");
@@ -3563,11 +3566,11 @@ int tx,ty;
 			else{
 				Your("mind's eye is blinded by a flame blasting through an altar.");
 				losexp("shredding of the soul",TRUE,TRUE,TRUE);
-				if(in_rooms(tx, ty, TEMPLE)){
+				if(in_rooms(curx, cury, TEMPLE)){
 //					struct monst *priest = findpriest(roomno);
 					//invoking Amon inside a temple angers the resident deity
-					altar_wrath(tx, ty);
-					angrygods(god_at_altar(tx, ty));
+					altar_wrath(curx, cury);
+					angrygods(god_at_altar(curx, cury));
 				}
 				u.sealTimeout[AMON-FIRST_SEAL] = moves + bindingPeriod; // invoking amon on a level with an altar still triggers the binding period.
 			}
@@ -6101,14 +6104,8 @@ boolean inc_penalties;
 	} else if(spiritSkill(p_skill)) maxskill = max(P_EXPERT,maxskill);
 	else if(u.specialSealsActive&SEAL_NUMINA) maxskill = max(P_SKILLED,maxskill);
 	
-	if(roleSkill(p_skill)) maxskill = min(maxskill + 1, P_EXPERT);
-	
-	if(p_skill >= P_SHII_CHO && p_skill <= P_JUYO){
-		if(uwep && is_lightsaber(uwep)) maxskill = min(maxskill, P_SKILL(weapon_type(uwep)));
-		else if(uswapwep && is_lightsaber(uswapwep)) maxskill = min(maxskill, P_SKILL(weapon_type(uswapwep)));
-		else maxskill = P_UNSKILLED;
-	}
-	
+	//if(roleSkill(p_skill)) maxskill = P_EXPERT;
+
 	if(Air_crystal){
 		if(WIND_SKILL(p_skill))
 			INCR_MAXSKILL;
@@ -6177,9 +6174,9 @@ boolean inc_penalties;
 		curskill += 1;
 	}
 	
-	// if(roleSkill(p_skill)){
-		// curskill = min(curskill+1, P_EXPERT);
-	// }
+	/*if(roleSkill(p_skill)){
+		curskill = min(curskill+1, P_UNSKILLED);
+	}*/
 	
 	if(p_skill == P_SHIEN){
 		if(OLD_P_SKILL(P_DJEM_SO) >= P_SKILLED) curskill++;
@@ -6250,10 +6247,22 @@ int p_skill;
 	return (P_SKILL(p_skill) == P_ISRESTRICTED);
 }
 
+/*
+ * this has been co-opted into meaning
+ * "skill unlocked by specific role under specific circumstances"
+ */
 boolean
 roleSkill(p_skill)
 int p_skill;
 {
+	if (Role_if(PM_KNIGHT)){
+		if (p_skill == P_KNI_SACRED)
+			return TRUE;
+		if (p_skill == P_KNI_ELDRITCH)
+			return TRUE;
+		if (p_skill == P_KNI_RUNIC)
+			return TRUE;
+	}
 	return FALSE;
 }
 

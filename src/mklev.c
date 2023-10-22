@@ -1004,7 +1004,7 @@ clear_level_structures()
 	init_rect();
 	init_vault();
 	xdnstair = ydnstair = xupstair = yupstair = 0;
-	sstairs.sx = sstairs.sy = 0;
+	sstairs.sx = sstairs.sy = sstairs.u_traversed = 0;
 	xdnladder = ydnladder = xupladder = yupladder = 0;
 	made_branch = FALSE;
 	clear_regions();
@@ -1748,6 +1748,7 @@ xchar x, y;	/* location */
 	} else if (make_stairs) {
 	    sstairs.sx = x;
 	    sstairs.sy = y;
+		if (!u.uz.dnum && u.uz.dlevel == 1) sstairs.u_traversed = TRUE;
 	    sstairs.up = (char) on_level(&br->end1, &u.uz) ?
 					    br->end1_up : !br->end1_up;
 	    assign_level(&sstairs.tolev, dest);

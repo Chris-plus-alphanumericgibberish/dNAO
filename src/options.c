@@ -210,6 +210,7 @@ static struct Bool_Opt
 	{"paranoid_hit", &iflags.paranoid_hit, FALSE, SET_IN_GAME},
 	{"paranoid_quit", &iflags.paranoid_quit, FALSE, SET_IN_GAME},
 	{"paranoid_remove", &iflags.paranoid_remove, FALSE, SET_IN_GAME},
+	{"paranoid_swim", &iflags.paranoid_swim, TRUE, SET_IN_GAME},
 #endif
 	{"perm_invent", &flags.perm_invent, FALSE, SET_IN_GAME},
        {"pickup_thrown", &iflags.pickup_thrown, FALSE, SET_IN_GAME},
@@ -367,6 +368,8 @@ static struct Comp_Opt
 	{ "gender",   "your starting gender (male or female)",
 						8, DISP_IN_GAME },
 	{ "horsename", "the name of your (first) horse (e.g., horsename:Silver)",
+						PL_PSIZ, DISP_IN_GAME },
+	{ "inherited",  "the name of your chosen inherited artifact (e.g., inherited:Dirge)",
 						PL_PSIZ, DISP_IN_GAME },
 	{ "hp_notify_fmt", "hp_notify format string", 20, SET_IN_GAME },
 	{ "map_mode", "map display mode under Windows", 20, DISP_IN_GAME },	/*WC*/
@@ -662,6 +665,7 @@ initoptions()
 	/* Use negative indices to indicate not yet selected */
 	flags.initrole = -1;
 	flags.initrace = -1;
+	flags.descendant = -1;
 	flags.initgend = -1;
 	flags.initalign = -1;
 
@@ -2578,6 +2582,21 @@ goodfruit:
 		return;
 	}
 
+	if (match_optname(opts, "descendant", 4, FALSE)) {
+		if (negated) flags.descendant = 0;
+		else flags.descendant = 1;
+		return;
+	}
+
+	fullname = "inherited";
+	if (match_optname(opts, fullname, 3, TRUE)) {
+		if (negated) bad_negation(fullname, FALSE);
+		else if ((op = string_for_env_opt(fullname, opts, FALSE)) != 0)
+			nmcpy(inherited, op, PL_PSIZ);
+		sanitizestr(inherited);
+		return;
+	}
+
 	/* altkeyhandler:string */
 	fullname = "altkeyhandler";
 	if (match_optname(opts, fullname, 4, TRUE)) {
@@ -2920,6 +2939,9 @@ goodfruit:
 	fullname = "statuslines";
 	if (match_optname(opts, fullname, sizeof("statuslines")-1, TRUE)) {
 		op = string_for_opt(opts, negated);
+		if(!op){
+			return;
+		}
 		if (negated) bad_negation(fullname, FALSE);
 		else {
 		    if (!initial)
@@ -4409,6 +4431,8 @@ char *buf;
 #endif
 	else if (!strcmp(optname, "hp_notify_fmt"))
 		Sprintf(buf, "%s", iflags.hp_notify_fmt ? iflags.hp_notify_fmt : "[HP%c%a=%h]" );
+	else if (!strcmp(optname, "inherited"))
+		Sprintf(buf, "%s", inherited[0] ? inherited : none );
 	else if (!strcmp(optname, "dungeon"))
 		Sprintf(buf, "%s", to_be_done);
 	else if (!strcmp(optname, "effects"))

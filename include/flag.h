@@ -202,6 +202,7 @@ struct flag {
 	int	 initrace;	/* starting race      (index into races[])   */
 	int	 initgend;	/* starting gender    (index into genders[]) */
 	int	 initalign;	/* starting alignment (index into aligns[])  */
+	int	 descendant;	/* start as descendant */
 	int	 chaosvar;	/* Set chaos variant */
 	int	 randomall;	/* randomly assign everything not specified */
 	int	 pantheon;	/* deity selection for priest character */
@@ -344,6 +345,7 @@ struct instance_flags {
 	boolean  paranoid_hit;  /* Ask for 'yes' when hitting peacefuls */
 	boolean  paranoid_quit; /* Ask for 'yes' when quitting */
 	boolean  paranoid_remove; /* Always show menu for 'T' and 'R' */
+	boolean  paranoid_swim; /* Require 'm' prefix to move into water/lava/air unless it's safe */
 #endif
 #ifdef USE_TILES
 	boolean  vt_nethack;

@@ -30,7 +30,6 @@ STATIC_DCL boolean FDECL(spiritLets, (char *, int));
 STATIC_DCL int FDECL(dospiritmenu, (int, int *, int));
 STATIC_DCL boolean FDECL(dospellmenu, (int,int *));
 STATIC_DCL void FDECL(describe_spell, (int));
-STATIC_DCL int FDECL(percent_success, (int));
 STATIC_DCL int NDECL(throwspell);
 STATIC_DCL void NDECL(cast_protection);
 STATIC_DCL void NDECL(cast_abjuration);
@@ -5882,7 +5881,7 @@ base_casting_stat()
 	return stat;
 }
 
-STATIC_OVL int
+int
 percent_success(spell)
 int spell;
 {
@@ -6060,11 +6059,11 @@ int spell;
 
 	if (uarm){
 		if(arm_blocks_upper_body(uarm->otyp)){
-			if ((is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) && !check_oprop(uarm, OPROP_BRIL))
+			if (metal_blocks_spellcasting(uarm))
 				splcaster += casting_stat == A_CHA ? uarmgbon : urole.spelarmr;
 		}
 		else {
-			if ((is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) && !check_oprop(uarm, OPROP_BRIL))
+			if (metal_blocks_spellcasting(uarm))
 				splcaster += uarmfbon;
 		}
 
@@ -6074,11 +6073,11 @@ int spell;
 	
 	if (uarmu){
 		if(arm_blocks_upper_body(uarmu->otyp)){
-			if (is_metallic(uarmu) && !check_oprop(uarmu, OPROP_BRIL))
+			if (metal_blocks_spellcasting(uarmu))
 				splcaster += casting_stat == A_CHA ? uarmgbon : urole.spelarmr;
 		}
 		else {
-			if (is_metallic(uarmu) && !check_oprop(uarmu, OPROP_BRIL))
+			if (metal_blocks_spellcasting(uarmu))
 				splcaster += uarmfbon;
 		}
 	}
@@ -6090,17 +6089,16 @@ int spell;
 			splcaster -= 2;
 		if (uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE)
 			splcaster -= 4;
-		if (uarmc->otyp == ROBE)
-			splcaster -= (urole.spelarmr
-			* ((uarmc->oartifact) ? 2 : 1)
-			/ ((uarm && (is_metallic(uarm) || uarm->oartifact == ART_DRAGON_PLATE) && !check_oprop(uarm, OPROP_BRIL)) ? 2 : 1));
-		if (is_metallic(uarmc) && !check_oprop(uarmc, OPROP_BRIL))
+		if (uarmc->otyp == ROBE){
+			splcaster -= (urole.spelarmr * ((uarmc->oartifact) ? 2 : 1) / ((metal_blocks_spellcasting(uarm)) ? 2 : 1));
+		}
+		if (metal_blocks_spellcasting(uarmc))
 			splcaster += uarmfbon;
 	}
 
 	if (uarmh && !Role_if(PM_MONK)) {
 		//Something up with madmen and this, it doesn't affect much.
-		if (is_metallic(uarmh) && uarmh->otyp != HELM_OF_BRILLIANCE && (uarmh->otyp != HELM_OF_TELEPATHY && casting_stat == A_CHA) && !check_oprop(uarmh, OPROP_BRIL)){
+		if (metal_blocks_spellcasting(uarmh)){
 			if(casting_stat == A_CHA){
 				splcaster += FacelessHelm(uarmh) ? 4*urole.spelarmr : 
 							 (uarmh->otyp == find_gcirclet()) ? urole.spelarmr/2 : 
@@ -6118,13 +6116,13 @@ int spell;
 			if(is_hard(uarmg) && uarmg->oartifact != ART_PREMIUM_HEART && uarmg->oartifact != ART_GODHANDS)
 				splcaster += uarmgbon;
 		}
-		else if (is_metallic(uarmg) && !check_oprop(uarmg, OPROP_BRIL)){
+		else if (metal_blocks_spellcasting(uarmg)){
 			splcaster += casting_stat == A_CHA ? uarmfbon : uarmgbon;
 		}
 	}
 
 	if (uarmf && !Role_if(PM_MONK)) {
-		if (is_metallic(uarmf) && !check_oprop(uarmf, OPROP_BRIL))
+		if (metal_blocks_spellcasting(uarmf))
 			splcaster += uarmfbon;
 	}
 
@@ -6193,7 +6191,7 @@ int spell;
 	 * to cast a spell.  The penalty is not quite so bad for the
 	 * player's role-specific spell.
 	 */
-	if (uarms && casting_stat != A_CHA && (is_metallic(uarms) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
+	if (uarms && casting_stat != A_CHA && ((metal_blocks_spellcasting(uarms)) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
 		if (spellid(spell) == urole.spelspec) {
 			chance /= 2;
 		} else {

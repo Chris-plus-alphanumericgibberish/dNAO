@@ -487,7 +487,7 @@ curses_choose_character()
 #endif
 
     prompt = build_plselection_prompt(pbuf, QBUFSZ, flags.initrole,
-                                      flags.initrace, flags.initgend,
+                                      flags.initrace, flags.descendant, flags.initgend,
                                       flags.initalign);
 
     /* This part is irritating: we have to strip the choices off of
@@ -837,6 +837,41 @@ curses_choose_character()
             if (sel < 0)
                 sel = randalign(flags.initrole, flags.initrace);
             flags.initalign = sel;
+        }
+    }
+
+	/* Select descendant status, if necessary */
+    if (flags.descendant < 0){
+		if (flags.descendant == ROLE_RANDOM || flags.randomall) {
+           flags.descendant = 0; // never randomly roll descendant
+        } else {
+            /* Always 2 options - yn */
+            choices = (const char **) alloc(sizeof (char *) * (3));
+            pickmap = (int *) alloc(sizeof (int) * (3));
+			char * terms[] = {"Inherit from a past adventurer (start with an heirloom artifact, consuming an artifact wish)",
+								"No past inheritance", '\0'};
+
+            for (i = 0; i < 2; i++) {
+				choices[i] = terms[i];
+				pickmap[i] = i;
+            }
+            choices[i] = (const char *) 0;
+
+			sel = curses_character_dialog(choices, "Choose one of the following inheritances:");
+            if (sel >= 0) sel = pickmap[sel];
+            else if (sel == ROLE_NONE) {        /* Quit */
+                clearlocks();
+                curses_bail(0);
+            }
+
+			/* invert y/n for the sanity for putting "yes" as the first option, but 0 as the default */
+			if (sel == 0) sel = 1;
+			else if (sel == 1) sel = 0;
+			else if (sel == ROLE_RANDOM) sel = rn2(2);
+
+            flags.descendant = sel;
+            free(choices);
+            free(pickmap);
         }
     }
 }

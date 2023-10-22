@@ -389,7 +389,7 @@ tty_player_selection()
 	)) {
 	    int echoline;
 	    char *prompt = build_plselection_prompt(pbuf, QBUFSZ, flags.initrole,
-				flags.initrace, flags.initgend, flags.initalign);
+				flags.initrace, flags.descendant, flags.initgend, flags.initalign);
 
 	    tty_putstr(BASE_WINDOW, 0, "");
 	    echoline = wins[BASE_WINDOW]->cury;
@@ -420,7 +420,7 @@ give_up:	/* Quit */
 	}
 
 	(void)  root_plselection_prompt(plbuf, QBUFSZ - 1,
-			flags.initrole, flags.initrace, flags.initgend, flags.initalign);
+			flags.initrole, flags.initrace, flags.descendant, flags.initgend, flags.initalign);
 
 	/* Select a role, if necessary */
 	/* we'll try to be compatible with pre-selected race/gender/alignment,
@@ -489,7 +489,7 @@ give_up:	/* Quit */
 		free((genericptr_t) selected),	selected = 0;
 	    }
 	    (void)  root_plselection_prompt(plbuf, QBUFSZ - 1,
-			flags.initrole, flags.initrace, flags.initgend, flags.initalign);
+			flags.initrole, flags.initrace, flags.descendant, flags.initgend, flags.initalign);
 	}
 	
 	/* Select a race, if necessary */
@@ -560,9 +560,8 @@ give_up:	/* Quit */
 		flags.initrace = k;
 	    }
 	    (void)  root_plselection_prompt(plbuf, QBUFSZ - 1,
-			flags.initrole, flags.initrace, flags.initgend, flags.initalign);
+			flags.initrole, flags.initrace, flags.descendant, flags.initgend, flags.initalign);
 	}
-
 	/* Select a gender, if necessary */
 	/* force compatibility with role/race, try for compatibility with
 	 * pre-selected alignment */
@@ -632,7 +631,7 @@ give_up:	/* Quit */
 		flags.initgend = k;
 	    }
 	    (void)  root_plselection_prompt(plbuf, QBUFSZ - 1,
-			flags.initrole, flags.initrace, flags.initgend, flags.initalign);
+			flags.initrole, flags.initrace, flags.descendant, flags.initgend, flags.initalign);
 	}
 
 	/* Select an alignment, if necessary */
@@ -705,6 +704,46 @@ give_up:	/* Quit */
 		flags.initalign = k;
 	    }
 	}
+
+	/* Select descendant status, if necessary */
+	if (flags.descendant < 0) {
+	    if (pick4u == 'y' || flags.descendant == ROLE_RANDOM || flags.randomall) {
+			flags.descendant = rn2(2);
+	    } else {	/* pick4u == 'n' */
+		tty_clear_nhwindow(BASE_WINDOW);
+		tty_putstr(BASE_WINDOW, 0, "Choosing inheritance");
+		win = create_nhwindow(NHW_MENU);
+		start_menu(win);
+		any.a_void = 0;         /* zero out all bits */
+
+		any.a_int = 2;
+		add_menu(win, NO_GLYPH, &any , 'y', 0, ATR_NONE,
+			"Inherit from a past adventurer (start with an heirloom artifact, consuming an artifact wish)", MENU_UNSELECTED);
+
+		any.a_int = 1;
+		add_menu(win, NO_GLYPH, &any , 'n', 0, ATR_NONE, "No past inheritance", MENU_UNSELECTED);
+
+		any.a_int = rn2(2)+1;
+		add_menu(win, NO_GLYPH, &any , '*', 0, ATR_NONE, "Random", MENU_UNSELECTED);
+
+		any.a_int = 4;
+		add_menu(win, NO_GLYPH, &any , 'q', 0, ATR_NONE, "Quit", MENU_UNSELECTED);
+
+		Sprintf(pbuf, "Pick the inheritance of your %s", plbuf);
+		end_menu(win, pbuf);
+		n = select_menu(win, PICK_ONE, &selected);
+		destroy_nhwindow(win);
+		if (n != 1 || selected[0].item.a_int == any.a_int)
+			goto give_up;		/* Selected quit */
+
+		k = selected[0].item.a_int - 1;
+		free((genericptr_t) selected),	selected = 0;
+		flags.descendant = k;
+	    }
+	    (void)  root_plselection_prompt(plbuf, QBUFSZ - 1,
+			flags.initrole, flags.initrace, flags.descendant, flags.initgend, flags.initalign);
+	}
+
 	/* Success! */
 	in_character_selection = FALSE;
 	tty_display_nhwindow(BASE_WINDOW, FALSE);

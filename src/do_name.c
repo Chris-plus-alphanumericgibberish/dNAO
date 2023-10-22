@@ -241,34 +241,17 @@ const char *goal;
 		    if (c == defsyms[sidx].sym || c == (int)showsyms[sidx])
 			matching[sidx] = (char) ++k;
 		if (k) {
-		    for (pass = 0; pass <= 1; pass++) {
+		    for (pass = 0; pass <= 3; pass++) {
 			/* pass 0: just past current pos to lower right;
 			   pass 1: upper left corner to current pos */
-			lo_y = (pass == 0) ? cy : 0;
-			hi_y = (pass == 0) ? ROWNO - 1 : cy;
+			lo_y = (pass % 2 == 0) ? cy : 0;
+			hi_y = (pass % 2 == 0) ? ROWNO - 1 : cy;
 			for (ty = lo_y; ty <= hi_y; ty++) {
-			    lo_x = (pass == 0 && ty == lo_y) ? cx + 1 : 1;
-			    hi_x = (pass == 1 && ty == hi_y) ? cx : COLNO - 1;
+			    lo_x = (pass % 2 == 0 && ty == lo_y) ? cx + 1 : 1;
+			    hi_x = (pass % 2 == 1 && ty == hi_y) ? cx : COLNO - 1;
 				for (tx = lo_x; tx <= hi_x; tx++) {
 					/* look at dungeon feature, not at user-visible glyph */
-					k = back_to_glyph(tx, ty);
-					/* uninteresting background glyph */
-					if (glyph_is_cmap(k) &&
-						(IS_DOOR(levl[tx][ty].typ) || /* monsters mimicking a door */
-							glyph_to_cmap(k) == S_drkroom ||
-							glyph_to_cmap(k) == S_litroom ||
-							glyph_to_cmap(k) == S_drkgrass ||
-							glyph_to_cmap(k) == S_litgrass ||
-							glyph_to_cmap(k) == S_drksoil ||
-							glyph_to_cmap(k) == S_litsoil ||
-							glyph_to_cmap(k) == S_drksand ||
-							glyph_to_cmap(k) == S_litsand ||
-							glyph_to_cmap(k) == S_brightrm ||
-							glyph_to_cmap(k) == S_corr ||
-							glyph_to_cmap(k) == S_litcorr)) {
-						/* what the user remembers to be at tx,ty */
-						k = glyph_at(tx, ty);
-					}
+					k = pass < 2 ? back_to_glyph(tx, ty) : glyph_at(tx, ty);
 					/* TODO: - open doors are only matched with '-' */
 					/* should remembered or seen items be matched? */
 					if (glyph_is_cmap(k) &&
@@ -484,7 +467,11 @@ void do_floorname() {
         /* increased chance for fake monster */
         unames[3] = unames[2];
         /* traditional */
+#ifdef REINCARNATION
         unames[4] = roguename();
+#else
+        unames[4] = unames[2];
+#endif
         /* silly */
         unames[5] = "Wibbly Wobbly";
         pline("%s %s to call you \"%s.\"",
@@ -622,7 +609,10 @@ const char *name;
 					if (obj->otyp != u.brand_otyp)
 						obj = poly_obj(obj, u.brand_otyp);
 				}
-				else if (obj->otyp != a->otyp && !is_malleable_artifact(a)) {
+				else if ((a != &artilist[ART_LANCE_OF_LONGINUS]) && obj->otyp == LIGHTSABER){
+					set_obj_size(obj, MZ_TINY);
+				}
+				else if (obj->otyp != a->otyp && !is_malleable_artifact(a) && (a != &artilist[ART_LANCE_OF_LONGINUS])) {
 					obj = poly_obj(obj, a->otyp);
 				}
 			}
@@ -678,6 +668,8 @@ const char *name;
 			obj->objsize = artilist[obj->oartifact].size;
 		else if(is_malleable_artifact(&artilist[obj->oartifact]))
 			;//keep current/default size
+		else if(obj->oartifact == ART_LANCE_OF_LONGINUS && obj->otyp == LIGHTSABER)
+			obj->objsize = MZ_TINY; // force it to be a proper lancet
 		else
 			obj->objsize = MZ_MEDIUM;
 		
@@ -724,6 +716,10 @@ const char *name;
 			obj->obj_color = CLR_MAGENTA;
 		}
 		
+		if ((is_lightsaber(obj) || obj->oartifact == ART_ANNULUS) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->age == 0){
+			obj->age = (long)rn1(50000, 100000);
+		}
+
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
 		else if (Role_if(PM_PRIEST) && obj->oartifact == ART_MITRE_OF_HOLINESS)

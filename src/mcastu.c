@@ -5163,6 +5163,7 @@ int tary;
 			return MM_MISS;
 		}
 		else {
+			if (DimensionalLock) return MM_MISS;
 			/* full uvm / mvm / mvu allowed */
 			int sphere;
 			/* For a change, let's not assume the spheres are together. : ) */

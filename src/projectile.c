@@ -675,7 +675,7 @@ int dy;							/* */
 			newsym(newx, newy);
 	}
 	/* Rock (laser cutter only) */
-	else if (isok(newx, newy) && IS_ROCK(room->typ) && may_dig(newx, newy) &&
+	else if (isok(newx, newy) && (IS_ROCK(room->typ) && !IS_TREES(room->typ)) && may_dig(newx, newy) &&
 		(thrownobj->otyp == LASER_BEAM)
 		) {
 		struct obj *otmp;	/* newly-created rocks */
@@ -697,6 +697,34 @@ int dy;							/* */
 		otmp->quan = 20L + rnd(20);
 		otmp->owt = weight(otmp);
 		/* update vision */
+		unblock_point(newx, newy);
+		if (!Blind && cansee(newx, newy))
+			newsym(newx, newy);
+	} else if (isok(newx, newy) && IS_TREES(room->typ) && may_dig(newx, newy) && (thrownobj->otyp == LASER_BEAM)) {
+		int numsticks;
+		struct obj *staff;
+		/* message */
+		if (cansee(newx, newy))
+			pline("The %s cuts the %swood into chunks!", xname(thrownobj), IS_DEADTREE(room->typ) ? "petrified " : "");
+
+		if (!(room->looted & TREE_LOOTED) && !rn2(5)){
+			if(!In_neu(&u.uz) && u.uz.dnum != chaos_dnum && !Is_medusa_level(&u.uz) &&
+					!(In_quest(&u.uz) && (Role_if(PM_NOBLEMAN) || Race_if(PM_DROW) ||
+					(Race_if(PM_ELF) && (Role_if(PM_RANGER) || Role_if(PM_PRIEST) || Role_if(PM_NOBLEMAN) || Role_if(PM_WIZARD)))
+					)) && u.uz.dnum != tower_dnum)
+				(void) rnd_treefruit_at(newx, newy);
+		}
+
+		for(numsticks = d(2,4)-1; numsticks > 0; numsticks--){
+			staff = mksobj_at(rn2(2) ? QUARTERSTAFF : CLUB, newx, newy, MKOBJ_NOINIT);
+			if (IS_DEADTREE(room->typ)) set_material_gm(staff, MINERAL);
+			else set_material_gm(staff, WOOD);
+			staff->spe = 0;
+			staff->cursed = staff->blessed = FALSE;
+		}
+		if(!flags.mon_moving && u.sealsActive&SEAL_EDEN) unbind(SEAL_EDEN,TRUE);
+
+		room->typ = SOIL;
 		unblock_point(newx, newy);
 		if (!Blind && cansee(newx, newy))
 			newsym(newx, newy);

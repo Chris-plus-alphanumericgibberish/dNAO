@@ -16,7 +16,7 @@ static boolean FDECL(wishymatch, (const char *,const char *,BOOLEAN_P));
 #endif
 static char *NDECL(nextobuf);
 static void FDECL(add_erosion_words, (struct obj *, char *));
-char * doxname(struct obj *, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P);
+char * doxname(struct obj *, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P);
 #ifdef SORTLOOT
 char * FDECL(xname2, (struct obj *,BOOLEAN_P));
 boolean FDECL(an_bool, (const char *));
@@ -603,7 +603,7 @@ char *
 xname(obj)
 register struct obj *obj;
 {
-	return doxname(obj, FALSE, FALSE, FALSE);
+	return doxname(obj, FALSE, FALSE, FALSE, FALSE);
 }
 
 static void
@@ -1393,6 +1393,25 @@ char *buf;
 		else if(!u.veil)
 			Strcat(buf, "twinkling ");
 	}
+
+	if (obj->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE){
+		if (u.shubbie_credit < 50)
+			return;
+		else if (u.shubbie_devotion < 25*(10 + (u.ucultsval * u.ucultsval * 2 / 25)))
+			Strcat(buf, "glistening ");
+		else
+			Strcat(buf, "drooling ");
+	}
+
+	if (obj->otyp == PURIFIED_MIRROR){
+		if (u.silver_credit < 50)
+			return;
+		else if (u.silver_devotion < 25*(10 + (u.ucultsval * u.ucultsval * 2 / 25)))
+			Strcat(buf, "glinting ");
+		else
+			Strcat(buf, "shining ");
+	}
+
 }
 
 static void
@@ -1723,11 +1742,12 @@ char *buf;
  * "a cursed -1 lightning bladed kamerel vajra"
  */
 char *
-doxname(obj, dofull, ignore_oquan, with_price)
+doxname(obj, dofull, ignore_oquan, with_price, getting_obj_base_desc)
 struct obj * obj;
 boolean dofull;
 boolean ignore_oquan;
 boolean with_price;
+boolean getting_obj_base_desc;
 {
 	register char *buf;
 	register int typ = obj->otyp;
@@ -1739,7 +1759,6 @@ boolean with_price;
 	register const char *un = ocl->oc_uname;		/* what you have named the otyp */
 	char tbuf[BUFSZ];
 	const struct artifact *oart = 0;
-	static int getting_obj_base_desc = 0;
 	if (obj && obj->oartifact) oart = &artilist[(obj)->oartifact];
 
 	buf = nextobuf() + PREFIX;	/* leave room for "17 -3 " */
@@ -1767,7 +1786,6 @@ boolean with_price;
 	if (Role_if(PM_PRIEST)) obj->bknown = TRUE;
 	if (u.sealsActive&SEAL_ANDROMALIUS) obj->sknown = TRUE;
 	//if (obj_is_pname(obj)) goto nameit;
-
 	if (!getting_obj_base_desc) {
 		if (dofull) add_determiner_words(obj, buf);	// quantity or "a" or "the"
 		/* general descriptors */
@@ -1793,12 +1811,10 @@ boolean with_price;
 	
 	if (obj->oartifact && !(is_lightsaber(obj) && obj->cobj && obj->cobj->oartifact == obj->oartifact) && undiscovered_artifact(obj->oartifact) && oart->desc && !getting_obj_base_desc) {
 		if (strstri(oart->desc, "%s")) {
-			getting_obj_base_desc = TRUE;
 			char * buf2 = nextobuf();
 			if (obj->oartifact == ART_STAR_OF_HYPERNOTUS) Sprintf(buf2, oart->desc, (objects[obj->sub_material].oc_name_known) ? OBJ_NAME(objects[obj->sub_material]) : "stone");
-			else Sprintf(buf2, oart->desc, xname(obj));
+			else Sprintf(buf2, oart->desc, xname_bland(obj)); /* gets just base obj desc no modifiers */
 			Strcat(buf, buf2);
-			getting_obj_base_desc = FALSE;
 		}
 		else {
 			Strcat(buf, oart->desc);
@@ -2051,6 +2067,9 @@ boolean with_price;
 				else if (obj->quan > 1) Strcat(buf, "Fluorite Octahedra");
 				else Strcat(buf, "Fluorite Octahedron");
 			}
+			else if (obj_is_pname(obj) && obj->known && (obj->oartifact == ART_LANCE_OF_LONGINUS) && (obj->otyp == SCALPEL || obj->otyp == LIGHTSABER)){
+				Strcat(buf, "Lancet of Longinus");
+			}
 			else if (obj_is_pname(obj) && obj->known && !strncmpi(ONAME(obj), "the ", 4))
 				Strcat(buf, ONAME(obj) + 4);
 			else
@@ -2244,8 +2263,6 @@ weapon:
 			}
 			break;
 		case TOOL_CLASS:
-			if (obj->oartifact == ART_MIRRORED_MASK)
-				Sprintf(eos(buf), " (%s)", obj->corpsenm != NON_PM ? mons[obj->corpsenm].mname : "blank");
 			if (obj->owornmask & (W_TOOL /* blindfold */
 #ifdef STEED
 				| W_SADDLE
@@ -2443,7 +2460,14 @@ xname2(obj, ignore_oquan)
 register struct obj *obj;
 boolean ignore_oquan;
 {
-	return doxname(obj, FALSE, ignore_oquan, FALSE);
+	return doxname(obj, FALSE, ignore_oquan, FALSE, FALSE);
+}
+
+char *
+xname_bland(obj)
+register struct obj *obj;
+{
+	return doxname(obj, FALSE, FALSE, FALSE, TRUE);
 }
 
 /* xname() output augmented for multishot missile feedback */
@@ -2489,7 +2513,7 @@ doname_base(obj, with_price)
 register struct obj *obj;
 boolean with_price;
 {
-	return doxname(obj, TRUE, FALSE, with_price);
+	return doxname(obj, TRUE, FALSE, with_price, FALSE);
 }
 
 /** Wrapper function for vanilla behaviour. */

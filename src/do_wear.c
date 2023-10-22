@@ -990,10 +990,6 @@ Amulet_on()
 		    Slimed = 0;
 		    flags.botl = 1;
 		}
-		if (Upolyd && uskin && uskin->oartifact == ART_MIRRORED_MASK) {
-			You("shudder!");
-			rehumanize();
-		}
 		break;
 	case AMULET_OF_CHANGE:
 	    {
@@ -1063,9 +1059,6 @@ Amulet_off()
 		break;
 	case AMULET_OF_UNCHANGING:
 		setworn((struct obj *)0, W_AMUL);
-		if (!Unchanging && ublindf && ublindf->otyp == MASK && ublindf->oartifact == ART_MIRRORED_MASK && ublindf->corpsenm != NON_PM) {
-			activate_mirrored_mask(ublindf);
-		}
 		return;
 	case AMULET_OF_MAGICAL_BREATHING:
 		if (Underwater) {
@@ -1384,9 +1377,6 @@ register struct obj *otmp;
 	    if (Blind_telepat || Infravision) see_monsters();
 	    vision_full_recalc = 1;	/* recalc vision limits */
 	    flags.botl = 1;
-	}
-	if (!Unchanging && otmp->otyp == MASK && otmp->oartifact == ART_MIRRORED_MASK && otmp->corpsenm != NON_PM) {
-		activate_mirrored_mask(otmp);
 	}
 	if(check_oprop(otmp, OPROP_CURS)){
 		if (Blind)
@@ -1829,10 +1819,9 @@ boolean noisy;
 			if (noisy) already_wearing(an(c_shield));
 			err++;
 		} else if (uwep && bimanual(uwep,youracedata)) {
+			const char *term = is_sword(uwep) ? c_sword : (uwep->otyp == BATTLE_AXE) ? c_axe : c_weapon;
 			if (noisy) 
-			You("cannot wear a shield while wielding a two-handed %s.",
-				is_sword(uwep) ? c_sword :
-				(uwep->otyp == BATTLE_AXE) ? c_axe : c_weapon);
+			You("cannot wear a shield while wielding %s in both hands.", an(term));
 			err++;
 		} else if (u.twoweap) {
 			if (noisy)

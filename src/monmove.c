@@ -1585,55 +1585,47 @@ register struct monst *mtmp;
 			}
 		}
 	}
-	
-	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR || mtmp->mtyp == PM_ALIDER ||
-		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR)
-		&& MON_WEP(mtmp)
-		&& (is_vibroweapon(MON_WEP(mtmp)) || is_blaster(MON_WEP(mtmp)))
-		&& MON_WEP(mtmp)->ovar1_charges <= 0
-		&& (!(MON_WEP(mtmp)->otyp == HAND_BLASTER || MON_WEP(mtmp)->otyp == ARM_BLASTER) || MON_WEP(mtmp)->recharged < 4)
-		&& !mtmp->mcan && !mtmp->mspec_used
-		&& !(noactions(mtmp))
-		&& !(mindless_mon(mtmp))
-		&& !rn2(20)
-	){
-		if(canspotmon(mtmp)){
-			if(mtmp->mtyp == PM_ALIDER) pline("%s performs a ritual of recharging.",Monnam(mtmp));
-			else pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
-		}
-		if(MON_WEP(mtmp)->otyp == MASS_SHADOW_PISTOL){
-			MON_WEP(mtmp)->ovar1_charges = 800L + rn2(200);
-		} else if(MON_WEP(mtmp)->otyp == RAYGUN){
-			if(Role_if(PM_ANACHRONONAUT) || Role_if(PM_TOURIST))
-				MON_WEP(mtmp)->ovar1_charges = (8 + rn2(8))*10L;
-			else MON_WEP(mtmp)->ovar1_charges = 2+rnd(5)*2;
-		} else {
-			MON_WEP(mtmp)->ovar1_charges =80L + rn2(20);
-		}
-		if(MON_WEP(mtmp)->recharged < 7) MON_WEP(mtmp)->recharged++;
-		mtmp->mspec_used = 10;
-		return 0;
-	}
 
-	if((mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR || mtmp->mtyp == PM_ALIDER ||
-		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR)
-		&& MON_WEP(mtmp)
-		&& (is_lightsaber(MON_WEP(mtmp)) && MON_WEP(mtmp)->oartifact != ART_INFINITY_S_MIRRORED_ARC && MON_WEP(mtmp)->otyp != KAMEREL_VAJRA)
-		&& MON_WEP(mtmp)->age <= 0
-		&& (!(MON_WEP(mtmp)->otyp == HAND_BLASTER || MON_WEP(mtmp)->otyp == ARM_BLASTER) || MON_WEP(mtmp)->recharged < 4)
-		&& !mtmp->mcan && !mtmp->mspec_used
-		&& !(noactions(mtmp))
-		&& !(mindless_mon(mtmp))
-		&& !rn2(20)
-	){
-		if(canspotmon(mtmp)){
-			if(mtmp->mtyp == PM_ALIDER) pline("%s performs a ritual of recharging.",Monnam(mtmp));
-			else pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
+#define can_recharge_mon(mtmp) (mtmp && (mtmp->mtyp == PM_ANDROID || mtmp->mtyp == PM_GYNOID || mtmp->mtyp == PM_OPERATOR || mtmp->mtyp == PM_ALIDER ||\
+		mtmp->mtyp == PM_PARASITIZED_ANDROID || mtmp->mtyp == PM_PARASITIZED_GYNOID || mtmp->mtyp == PM_PARASITIZED_OPERATOR))
+#define ovar1_rechargeable(otmp) (otmp && (is_vibroweapon(otmp) || is_blaster(otmp)) && otmp->ovar1_charges <= 0 && (!(otmp->otyp == HAND_BLASTER || otmp->otyp == ARM_BLASTER) || otmp->recharged < 4))
+#define age_rechargeable(otmp) (otmp && is_lightsaber(otmp) && otmp->age <= 0 && otmp->oartifact != ART_INFINITY_S_MIRRORED_ARC && otmp->otyp != KAMEREL_VAJRA)
+#define can_be_recharged(otmp) (ovar1_rechargeable(otmp) || age_rechargeable(otmp))
+
+
+	if (can_recharge_mon(mtmp) && !mtmp->mcan && !mtmp->mspec_used && !(noactions(mtmp)) && !(mindless_mon(mtmp)) && !rn2(20)){
+		struct obj * rechargee = (struct obj *) 0;
+		struct obj * otmp = (struct obj *) 0;
+		if (MON_WEP(mtmp) && can_be_recharged(MON_WEP(mtmp)))
+			rechargee = MON_WEP(mtmp);
+		else if (MON_SWEP(mtmp) && can_be_recharged(MON_SWEP(mtmp)))
+			rechargee = MON_SWEP(mtmp);
+		else {
+			for(otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+				if (can_be_recharged(otmp)) {
+					rechargee = otmp;
+					break;
+				}
+			}
 		}
-		MON_WEP(mtmp)->age = 75000;
-		if(MON_WEP(mtmp)->recharged < 7) MON_WEP(mtmp)->recharged++;
-		mtmp->mspec_used = 10;
-		return 0;
+		if (rechargee){
+			if(canspotmon(mtmp)){
+				if(mtmp->mtyp == PM_ALIDER) pline("%s performs a ritual of recharging.",Monnam(mtmp));
+				else pline("%s uses %s on-board recharger.",Monnam(mtmp), hisherits(mtmp));
+			}
+			if (age_rechargeable(rechargee)){
+				rechargee->age = 75000;
+			} else if(rechargee->otyp == MASS_SHADOW_PISTOL){
+				rechargee->ovar1_charges = 800L + rn2(200);
+			} else if(rechargee->otyp == RAYGUN){
+				rechargee->ovar1_charges = (8 + rn2(8))*10L;
+			} else {
+				rechargee->ovar1_charges = 80L + rn2(20);
+			}
+			if(rechargee->recharged < 7) rechargee->recharged++;
+			mtmp->mspec_used = 10;
+			return 0;
+		}
 	}
 
 	if((mtmp->mtyp == PM_PORO_AULON || mtmp->mtyp == PM_ALIDER || mtmp->mtyp == PM_OONA)

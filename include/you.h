@@ -327,6 +327,17 @@ struct you {
 
 #define FFORM_LISTSIZE	(LAST_FFORM/32 + 1)
 	unsigned long int fightingForm[FFORM_LISTSIZE];/* special properties */
+	int ueldritch_style;
+	boolean uavoid_passives;
+	int umystic;	/*Monk mystic attacks active*/
+#define monk_style_active(style) (u.umystic & (1 << (style-1)))
+#define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1 << (style-1)))
+
+#define DIVE_KICK 1
+#define AURA_BOLT 2
+#define BIRD_KICK 3
+#define METODRIVE 4
+#define PUMMEL    5
 	// long laststruck;
 	long lastmoved;
 	long lastcast;
@@ -335,6 +346,7 @@ struct you {
 	int protean; /* counter for the auto-polypiling power of the pirate treasure*/
 	int uhouse; /* drow house info */
 	int start_house; /* starting drow house info */
+	int inherited; /* what you inherited at the start, if anything */
 	struct prop uprops[LAST_PROP+1];
 	int rift_count;
 	int vortex_count;
@@ -654,17 +666,6 @@ struct you {
 	int divetimer;			/* how long you can stay under water */
 	
 	int role_variant;	/*Records what variant of your role you are.*/
-
-	int umystic;	/*Monk mystic attacks active*/	
-#define monk_style_active(style) (u.umystic & (1 << (style-1)))
-#define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1 << (style-1)))
-
-#define DIVE_KICK 1
-#define AURA_BOLT 2
-#define BIRD_KICK 3
-#define METODRIVE 4
-#define PUMMEL    5
-
 	long	wardsknown;	/* known wards */
 #define	WARD_ELBERETH		(0x1L<<0)
 #define WARD_HEPTAGRAM		(0x1L<<1)

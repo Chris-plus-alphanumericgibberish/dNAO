@@ -187,7 +187,6 @@ E int FDECL(wrath_target, (struct obj *, struct monst *));
 E int FDECL(goat_weapon_damage_turn, (struct obj *));
 E int FDECL(soth_weapon_damage_turn, (struct obj *));
 E int FDECL(merc_weapon_damage_slice, (struct obj *, struct monst *, int));
-E void FDECL(activate_mirrored_mask, (struct obj *));
 E int FDECL(infinity_s_mirrored_arc_litness, (struct obj *));
 
 /* ### astar.c ### */
@@ -464,6 +463,7 @@ E void NDECL(see_monsters);
 E void NDECL(set_mimic_blocking);
 E void NDECL(see_objects);
 E void NDECL(see_traps);
+E void NDECL(see_altars);
 E void NDECL(curs_on_u);
 E int NDECL(doredraw);
 E void NDECL(docrt);
@@ -1133,6 +1133,7 @@ E char *FDECL(eos, (char *));
 E void FDECL(sanitizestr, (char *));
 E char *FDECL(strkitten, (char *,CHAR_P));
 E char *FDECL(s_suffix, (const char *));
+E char *FDECL(ing_suffix, (const char *));
 E char *FDECL(xcrypt, (const char *,char *));
 E boolean FDECL(onlyspace, (const char *));
 E char *FDECL(tabexpand, (char *));
@@ -2101,6 +2102,7 @@ E char *FDECL(doname_with_price, (struct obj *));
 E boolean FDECL(not_fully_identified, (struct obj *));
 E char *FDECL(corpse_xname, (struct obj *,BOOLEAN_P));
 E char *FDECL(cxname, (struct obj *));
+E char *FDECL(xname_bland, (struct obj *));
 #ifdef SORTLOOT
 E char *FDECL(cxname2, (struct obj *));
 #endif
@@ -2583,8 +2585,8 @@ E void NDECL(rigid_role_checks);
 E void NDECL(plnamesuffix);
 E const char *FDECL(Hello, (struct monst *));
 E const char *NDECL(Goodbye);
-E char *FDECL(build_plselection_prompt, (char *, int, int, int, int, int));
-E char *FDECL(root_plselection_prompt, (char *, int, int, int, int, int));
+E char *FDECL(build_plselection_prompt, (char *, int, int, int, int, int, int));
+E char *FDECL(root_plselection_prompt, (char *, int, int, int, int, int, int));
 #ifdef RECORD_ACHIEVE
 E void FDECL(add_imp_record, (long));
 E void NDECL(give_quest_trophy);
@@ -2830,6 +2832,7 @@ E void FDECL(losespells, (int));
 E int NDECL(throwgaze);
 E int NDECL(dovspell);
 E int NDECL(base_casting_stat);
+E int FDECL(percent_success, (int));
 E void FDECL(initialspell, (struct obj *));
 E void FDECL(initialforgotwizardspells, (int));
 E void FDECL(initialforgotpriestspells, (int));
@@ -3241,9 +3244,9 @@ E void FDECL(setmwielded, (struct monst *, struct obj *, long));
 E void FDECL(setmnotwielded, (struct monst *, struct obj *));
 E void FDECL(init_mon_wield_item, (struct monst *));
 E int NDECL(abon);
-E int FDECL(dbon, (struct obj *));
-E int FDECL(m_dbon, (struct monst *, struct obj *));
+E int FDECL(dbon, (struct obj *, struct monst *));
 E void NDECL(reset_skills);
+E boolean FDECL(fake_skill, (int));
 E int NDECL(enhance_weapon_skill);
 E int FDECL(skill_dam_bonus, (int));
 E void FDECL(gm_weapon_skill, (int));
@@ -3252,6 +3255,7 @@ E void FDECL(free_skill_up, (int));
 E void NDECL(dump_weapon_skill);
 #endif
 E void FDECL(unrestrict_weapon_skill, (int));
+E void FDECL(restrict_weapon_skill, (int));
 E void FDECL(expert_weapon_skill, (int));
 E void FDECL(skilled_weapon_skill, (int));
 E void FDECL(use_skill, (int,int));
@@ -3302,6 +3306,7 @@ E void FDECL(erode_obj, (struct obj *,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(chwepon, (struct obj *,int));
 E int FDECL(welded, (struct obj *));
 E void FDECL(weldmsg, (struct obj *));
+E double FDECL(bimanual_mod, (struct obj *, struct monst *));
 E boolean FDECL(bimanual, (struct obj *, struct permonst *));
 
 /* ### windows.c ### */

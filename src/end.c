@@ -466,7 +466,7 @@ register struct monst *mtmp;
 			u.ugrave_arise = PM_BROKEN_SHADOW;
 		else if (mtmp->data->mlet == S_MUMMY && urace.mummynum != NON_PM)
 			u.ugrave_arise = urace.mummynum;
-		else if ((mtmp->data->mlet == S_VAMPIRE || has_template(mtmp, VAMPIRIC)) && (Race_if(PM_HUMAN) || Race_if(PM_INHERITOR)))
+		else if ((mtmp->data->mlet == S_VAMPIRE || has_template(mtmp, VAMPIRIC)) && (Race_if(PM_HUMAN)))
 			u.ugrave_arise = PM_VAMPIRE;
 		else if (mtmp->mtyp == PM_GHOUL || mtmp->mtyp == PM_GNOLL_GHOUL)
 			u.ugrave_arise = PM_GHOUL;
@@ -1070,10 +1070,6 @@ int how;
 					is_undead(youracedata)
 			)) {
 				You_feel("a curse fall upon your soul!");
-				if (Upolyd && uskin && uskin->oartifact == ART_MIRRORED_MASK) {
-					pline("Your mask falls to pieces!");
-					useup(uskin);
-				}
 				polymon(PM_DEATH_KNIGHT);
 				HUnchanging |= FROMOUTSIDE;
 				lsvd = LSVD_DTHK;

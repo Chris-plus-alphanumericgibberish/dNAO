@@ -1592,6 +1592,60 @@ domove()
 		}
 	    return;
 	}
+
+#ifdef PARANOID
+	/* credit - Ron Nazarov via IRC/discord, applied with some minor changes*/
+	/* If no 'm' prefix and paranoid_swim enabled, don't allow dangerous moves.  */
+	if (iflags.paranoid_swim && (!flags.nopick || flags.run)) {
+		static int last_messaged;
+
+	    /* Almost the same conditions as teleportation, except
+	     * that lava is allowed if you have wwalking and fireproof
+	     * boots and your steed matters.
+	     */
+	    boolean safe_air = Levitation || Flying;
+	    boolean safe_inwater = (Amphibious || Swimming)
+		&& !(u.sealsActive&SEAL_OSE) && Waterproof && !level.flags.lethe &&
+		/* If you try to ride into water while riding a non-flying steed, you'll fall off.  */
+		(!u.usteed || (amphibious_mon(u.usteed) && mon_resistance(u.usteed, FLYING)));
+
+		/* wwalking has to be visible, to prevent identifying via a message prompt
+		 * assumes that HWWalking is known always - i.e. level-up (monk) or similar where it messages
+		 * checks extrinsic from carry/invoke artifacts as well, but not worn :( those are W_WORN not W_ART(I)
+		 * this also assumes the only "object" that grants ww is ww boots
+		 */
+		boolean ww_boots = (uarmf && uarmf->otyp == WATER_WALKING_BOOTS && objects[WATER_WALKING_BOOTS].oc_name_known);
+		boolean visible_ww = ww_boots || u.sealsActive&SEAL_EURYNOME || HWwalking ||
+			(u.uprops[WWALKING].extrinsic & W_ARTI) || (u.uprops[WWALKING].extrinsic & W_ART) ||
+			(uleft && uleft->oartifact == ART_NENYA) || (uright && uright->oartifact == ART_NENYA);
+
+	    /* Going into 3D water with limited breath can be dangerous. */
+	    boolean safe_3dwater = safe_inwater && Breathless;
+	    boolean safe_water = safe_inwater || safe_air || (!u.usteed && visible_ww);
+	    boolean safe_lava = safe_air ||	(!u.usteed &&
+			(likes_lava(youracedata) || (visible_ww && Fire_resistance && (!uarmf || uarmf->oerodeproof || !is_flammable(uarmf)))));
+
+	    if ((!safe_air && levl[x][y].typ == AIR && levl[u.ux][u.uy].typ != AIR) ||
+			(!safe_water && is_pool(x, y, FALSE) && !is_pool(u.ux, u.uy, FALSE)) ||
+			(!safe_3dwater && is_3dwater(x, y) && !is_3dwater(u.ux, u.uy)) ||
+			(!safe_lava && is_lava(x, y) && !is_lava(u.ux, u.uy))
+		){
+			You("avoid %s into the %s.", ing_suffix(locomotion(&youmonst, "step")), levl[x][y].typ == AIR ? "open air" : waterbody_name(x, y));
+
+			if (!last_messaged || (moves - last_messaged) >= 11)
+				last_messaged = moves;
+
+			if (last_messaged >= moves){
+				pline("(Use 'm' prefix to step in if you really want to.)");
+				last_messaged = moves - 1;
+			}
+
+			flags.move |= MOVE_CANCELLED;
+			nomul(0, NULL);
+			return;
+	    }
+	}
+#endif
 	
 	/* Move ball and chain.  */
 	if (Punished){
@@ -1678,15 +1732,15 @@ domove()
 				boulder_at(trap->tx, trap->ty)
 			) || (
 				(trap->ttyp == VIVI_TRAP)
-			)
-		)) {
+			))
+		) {
 			/* can't swap places with pet pinned in a pit by a boulder, or one stuck in an essence trap */
 			u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
 	    } else if (u.ux0 != x && u.uy0 != y &&
 		       bad_rock(mtmp, x, u.uy0) &&
 		       bad_rock(mtmp, u.ux0, y) &&
 		       (bigmonst(mtmp->data) || (curr_mon_load(mtmp) > 600))
-		){
+		) {
 			/* can't swap places when pet won't fit thru the opening */
 			u.ux = u.ux0,  u.uy = u.uy0;	/* didn't move after all */
 			You("stop.  %s won't fit through.", upstart(y_monnam(mtmp)));
@@ -1702,63 +1756,104 @@ domove()
 	    } else if (mtmp->mpeaceful && !mtmp->mtame
 		    && (!goodpos(u.ux0, u.uy0, mtmp, 0)
 			|| t_at(u.ux0, u.uy0) != NULL
-			|| mtmp->m_id == quest_status.leader_m_id
-		       )) {
-		u.ux = u.ux0, u.uy = u.uy0; /* didn't move after all */
-		You("stop. %s doesn't want to swap places.",
-			upstart(y_monnam(mtmp)));
+			|| mtmp->m_id == quest_status.leader_m_id)
+		) {
+			u.ux = u.ux0, u.uy = u.uy0; /* didn't move after all */
+			You("stop. %s doesn't want to swap places.",
+				upstart(y_monnam(mtmp)));
 
 	    } else {
-		/* if trapped, there's a chance the pet goes wild */
-		if (mtmp->mtrapped) {
-		    abuse_dog(mtmp);
-		}
-		char pnambuf[BUFSZ];
+			char pnambuf[BUFSZ];
+			extern const int clockwisex[8];
+			extern const int clockwisey[8];
+			int newx = 0;
+			int newy = 0;
 
-		/* save its current description in case of polymorph */
-		Strcpy(pnambuf, y_monnam(mtmp));
-		mtmp->mtrapped = 0;
-		remove_monster(x, y);
-		place_monster(mtmp, u.ux0, u.uy0);
-		newsym(x, y);
-		newsym(u.ux0, u.uy0);
+			/* goodpos for pet? otherwise we shunt somewhere else
+			 * pet knowledge of pets checks tseen / searching. polytraps and */
 
-		/* check for displacing it into pools and traps */
-		trap = t_at(u.ux0, u.uy0);
-		int switchcase = minliquid(mtmp) ? 2 : mintrap(mtmp);
-		switch (switchcase) {
-		case 0:
-		    You("%s %s.", mtmp->mpeaceful ? "displaced" : "frightened",
-			pnambuf);
-		    break;
-		case 1:		/* trapped */
-		case 3:		/* changed levels */
-		    /* there's already been a trap message, reinforce it */
-			if(!(switchcase == 3 && trap->ttyp == MAGIC_PORTAL)){
-			    abuse_dog(mtmp);
-			    adjalign(-3);
+			boolean pet_goodpos = goodpos(u.ux0, u.uy0, mtmp, 0);
+			
+			if (trap = t_at(x, y) != NULL && (trap->tseen || mon_resistance(mtmp, SEARCHING)) &&
+				!(trap->ttyp == MAGIC_PORTAL || trap->ttyp == POLY_TRAP))
+					pet_goodpos = FALSE;
+
+			/* save its current description in case of polymorph */
+			Strcpy(pnambuf, y_monnam(mtmp));
+
+			int i = rnd(8), j;
+#define tmpx clockwisex[(i + j) % 8] + x
+#define tmpy clockwisey[(i + j) % 8] + y
+			if (!pet_goodpos){
+				/* clear for goodpos */
+				u.ux = u.ux0, u.uy = u.uy0;
+				for (j = 8; j >= 1; j--){
+					if (!goodpos(tmpx, tmpy, mtmp, 0))
+						continue;
+					
+					trap = t_at(tmpx, tmpy);
+					if (trap != NULL && ((trap && trap->tseen) || mon_resistance(mtmp, SEARCHING)))
+						continue;
+
+					newx = tmpx;
+					newy = tmpy;
+					break;
+				}
+			} else {
+				newx = u.ux0;
+				newy = u.uy0;
 			}
-		    break;
-		case 2:
-		    /* it may have drowned or died.  that's no way to
-		     * treat a pet!  your god gets angry.
-		     */
-		    if (rn2(4)) {
-			You_feel("guilty about losing your pet like this.");
-			godlist[u.ualign.god].anger++;
-			adjalign(-15);
-		    }
-
-		    /* you killed your pet by direct action.
-		     * minliquid and mintrap don't know to do this
-		     */
-		    u.uconduct.killer++;
-			if(mtmp->mtyp == PM_CROW && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
-		    break;
-		default:
-		    pline("that's strange, unknown mintrap result!");
-		    break;
-		}
+#undef tmpx
+#undef tmpy
+			if (newx && newy){
+				u.ux = x, u.uy = y; /* re-move, cleared to check goodpos */
+				mtmp->mtrapped = 0;
+				remove_monster(x, y);
+				place_monster(mtmp, newx, newy);
+				newsym(newx, newy);
+				newsym(x, y);
+				newsym(u.ux0, u.uy0);
+			}
+			
+			if (mtmp->mx == x && mtmp->my == y){
+				You("stop. %s doesn't want to swap places.", upstart(y_monnam(mtmp)));
+			} else {
+				/* check for displacing it into pools and traps. 
+				 * pools should never happen due to goodpos - but just in case, not removing handling */
+				trap = t_at(u.ux0, u.uy0);
+				int switchcase = minliquid(mtmp) ? 2 : mintrap(mtmp);
+				switch (switchcase) {
+					case 0:
+						You("%s %s.", mtmp->mpeaceful ? "displaced" : "frightened", pnambuf);
+						break;
+					case 1:		/* trapped */
+					case 3:		/* changed levels */
+						/* there's already been a trap message, reinforce it */
+						if(!(switchcase == 3 && trap->ttyp == MAGIC_PORTAL)){
+							abuse_dog(mtmp);
+							adjalign(-3);
+						}
+						break;
+					case 2:
+						/* it may have drowned or died.  that's no way to
+						 * treat a pet!  your god gets angry.
+						 */
+						if (rn2(4)) {
+							You_feel("guilty about losing your pet like this.");
+							godlist[u.ualign.god].anger++;
+							adjalign(-15);
+						}
+						/* you killed your pet by direct action.
+						 * minliquid and mintrap don't know to do this
+						 */
+						u.uconduct.killer++;
+						if(mtmp->mtyp == PM_CROW && u.sealsActive&SEAL_MALPHAS) unbind(SEAL_MALPHAS,TRUE);
+						break;
+					default:
+						pline("that's strange, unknown mintrap result!");
+						break;
+				}
+			}
 	    }
 	}
 

@@ -22,7 +22,7 @@
 #define ARTG_NOWISH		0x0002L /* cannot be wished for */
 #define ARTG_NAME		0x0004L /* can be #named */
 #define ARTG_GIFT		0x0008L /* favoured early gift for a player */
-#define ARTG_INHER		0x0010L /* allowable for an Inheritor to start with */
+#define ARTG_INHER		0x0010L /* allowable for a descendant to start with as inheritance */
 #define ARTG_MAJOR		0x0020L /* artifact evades the grasp of the unworthy */
 #define ARTG_NOCNT		0x0040L /* should not be sacrificable to Priests of an Unknown God ??? */
 #define ARTG_FXALGN		0x0080L /* doesn't change alignment to match a role's */
@@ -417,15 +417,14 @@ extern struct artifact * artilist;
 #define RINGED_ARMOR    (LAST_PROP+81)
 #define BLOODLETTER     (LAST_PROP+82)
 #define SEVEN_LEAGUE_STEP   (LAST_PROP+83)
-#define CAPTURE_REFLECTION  (LAST_PROP+84)
-#define DETESTATION  	(LAST_PROP+85)
-#define INVULNERABILITY	(LAST_PROP+86)
-#define IBITE_ARM		(LAST_PROP+87)
-#define LOOT_SELF		(LAST_PROP+88)
-#define IMPERIAL_RING	(LAST_PROP+89)
-#define SNARE_WEAPONS	(LAST_PROP+90)
-#define CHANGE_SIZE		(LAST_PROP+91)
-#define WAVES_DARKNESS	(LAST_PROP+92)
+#define DETESTATION  	(LAST_PROP+84)
+#define INVULNERABILITY	(LAST_PROP+85)
+#define IBITE_ARM		(LAST_PROP+86)
+#define LOOT_SELF		(LAST_PROP+87)
+#define IMPERIAL_RING	(LAST_PROP+88)
+#define SNARE_WEAPONS	(LAST_PROP+89)
+#define CHANGE_SIZE		(LAST_PROP+90)
+#define WAVES_DARKNESS	(LAST_PROP+91)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

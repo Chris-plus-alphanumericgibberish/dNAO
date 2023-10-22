@@ -112,6 +112,7 @@ ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 #          1         2         3         4         5         6         7    7
 # Dungeon Description
+RANDOM_PLACES:(2,16),(5,17),(7,15),(9,16),(11,15)
 REGION:(01,01,13,07),lit,"ordinary"
 REGION:(02,15,11,17),lit,"ordinary"
 REGION:(62,01,74,09),lit,"ordinary"
@@ -254,6 +255,8 @@ OBJECT: '_', "chain", (10,17)
 OBJECT: '_', "chain", (10,17)
 OBJECT: '0', "heavy iron ball", (10,17)
 OBJECT: '_', "chain", (11,17)
+# pre-placed inherited artifact
+OBJECT: '_', "chain", place[0], uncursed, 0, "Inherited"
 
 
 #

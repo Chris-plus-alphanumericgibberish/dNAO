@@ -135,9 +135,9 @@ NEARDATA struct dig_info digging;
 
 NEARDATA dungeon dungeons[MAXDUNGEON];	/* ini'ed by init_dungeon() */
 NEARDATA s_level *sp_levchn;
-NEARDATA stairway upstair = { 0, 0 }, dnstair = { 0, 0 };
-NEARDATA stairway upladder = { 0, 0 }, dnladder = { 0, 0 };
-NEARDATA stairway sstairs = { 0, 0 };
+NEARDATA stairway upstair = { 0, 0, 0, 0}, dnstair = { 0, 0, 0, 0};
+NEARDATA stairway upladder = { 0, 0, 0, 0}, dnladder = { 0, 0, 0, 0};
+NEARDATA stairway sstairs = { 0, 0, 0, 0};
 NEARDATA dest_area updest = { 0, 0, 0, 0, 0, 0, 0, 0 };
 NEARDATA dest_area dndest = { 0, 0, 0, 0, 0, 0, 0, 0 };
 NEARDATA coord inv_pos = { 0, 0 };
@@ -240,6 +240,8 @@ NEARDATA struct obj zeroobj = DUMMY;
 
 /* used to zero out union any */
 NEARDATA anything zeroany = (anything) 0;
+
+NEARDATA char inherited[PL_PSIZ] = DUMMY;
 
 /* originally from dog.c */
 NEARDATA char dogname[PL_PSIZ] = DUMMY;

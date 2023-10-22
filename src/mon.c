@@ -3775,7 +3775,11 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 	
 	/* undead vs civs */
-	if(!(In_cha(&u.uz) || Is_rogue_level(&u.uz))){
+	if(!(In_cha(&u.uz)
+#ifdef REINCARNATION
+		|| Is_rogue_level(&u.uz)
+#endif
+	)){
 		if(!(magr->mpeaceful && mdef->mpeaceful && is_undead(youracedata))){
 			if(mm_undead(magr) && 
 				(!is_witch_mon(mdef) && mdef->mtyp != PM_WITCH_S_FAMILIAR && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef) && mdef->mfaction != YELLOW_FACTION)
@@ -6124,7 +6128,7 @@ struct monst *mtmp;
 	if (mtmp->data->msize < MZ_HUMAN && typ != FOOD_RATION
 		&& typ != LEASH
 		&& typ != FIGURINE
-		&& (otmp->owt > 3 || objects[typ].oc_size > MZ_MEDIUM)
+		&& (otmp->owt > 30 || objects[typ].oc_size > MZ_MEDIUM)
 		&& !is_divider(mtmp->data)
 	) {
 		delobj(otmp);

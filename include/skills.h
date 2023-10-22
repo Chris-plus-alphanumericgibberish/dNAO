@@ -87,24 +87,29 @@
 
 /* Other types of combat */
 #define P_BARE_HANDED_COMBAT	(P_LAST_SPELL + 1)
-#define P_MARTIAL_ARTS		P_BARE_HANDED_COMBAT	/* Role distinguishes */
-#define P_TWO_WEAPON_COMBAT	(P_LAST_SPELL + 2)	/* Finally implemented */
-#define P_SHIELD	(P_LAST_SPELL + 3)	/* Finally implemented */
-#define P_BEAST_MASTERY	(P_LAST_SPELL + 4)	/* Finally implemented */
-#define P_SHII_CHO	(P_LAST_SPELL + 5)
-#define P_MAKASHI	(P_SHII_CHO + 1)
-#define P_SORESU	(P_SHII_CHO + 2)
-#define P_ATARU		(P_SHII_CHO + 3)
-#define P_DJEM_SO	(P_SHII_CHO + 4)
-#define P_SHIEN		(P_SHII_CHO + 5)
-#define P_NIMAN		(P_SHII_CHO + 6)
-#define P_JUYO		(P_SHII_CHO + 7)
-#ifdef STEED
-#define P_RIDING		(P_SHII_CHO + 8)	/* How well you control your steed */
+#define P_MARTIAL_ARTS			P_BARE_HANDED_COMBAT	/* Role distinguishes */
+#define P_TWO_WEAPON_COMBAT		(P_LAST_SPELL + 2)
+#define P_SHIELD				(P_LAST_SPELL + 3)
+#define P_BEAST_MASTERY			(P_LAST_SPELL + 4)
+
+#define P_SHII_CHO		(P_LAST_SPELL + 5)
+#define P_MAKASHI		(P_SHII_CHO + 1)
+#define P_SORESU		(P_SHII_CHO + 2)
+#define P_ATARU			(P_SHII_CHO + 3)
+#define P_DJEM_SO		(P_SHII_CHO + 4)
+#define P_SHIEN			(P_SHII_CHO + 5)
+#define P_NIMAN			(P_SHII_CHO + 6)
+#define P_JUYO			(P_SHII_CHO + 7)
+#define P_SHIELD_BASH	(P_SHII_CHO + 8)
+#define P_GREAT_WEP 	(P_SHII_CHO + 9)
+#define P_HALF_SWORD	(P_SHII_CHO + 10)
+#define P_KNI_SACRED	(P_SHII_CHO + 11)
+#define P_KNI_ELDRITCH	(P_SHII_CHO + 12)
+#define P_KNI_RUNIC		(P_SHII_CHO + 13)
+
+#define P_RIDING			(P_KNI_RUNIC + 1)	/* How well you control your steed */
+
 #define P_LAST_H_TO_H		P_RIDING
-#else
-#define P_LAST_H_TO_H		P_TWO_WEAPON_COMBAT
-#endif
 #define P_FIRST_H_TO_H		P_BARE_HANDED_COMBAT
 
 #define P_NUM_SKILLS		(P_LAST_H_TO_H+1)
@@ -113,7 +118,9 @@
 #define martial_bonus()	(u.umartial || Earth_crystal)
 
 /* Fighting form IDs */
+/* each batch of 32 is mutually exclusive, but not with other batches */
 #define NO_FFORM		0
+
 #define FFORM_SHII_CHO	1
 #define FFORM_MAKASHI	2
 #define FFORM_SORESU	3
@@ -122,7 +129,19 @@
 #define FFORM_SHIEN		6
 #define FFORM_NIMAN		7
 #define FFORM_JUYO		8
-#define LAST_FFORM		FFORM_JUYO
+#define FIRST_LS_FFORM	FFORM_SHII_CHO
+#define LAST_LS_FFORM	FFORM_JUYO
+
+#define FFORM_SHIELD_BASH 	1 + 32
+#define FFORM_GREAT_WEP		2 + 32
+#define FFORM_HALF_SWORD 	3 + 32
+#define FFORM_KNI_SACRED	4 + 32
+#define FFORM_KNI_ELDRITCH	5 + 32
+#define FFORM_KNI_RUNIC		6 + 32
+#define FIRST_KNI_FFORM		FFORM_SHIELD_BASH
+#define LAST_KNI_FFORM		FFORM_KNI_RUNIC
+
+#define LAST_FFORM		FFORM_KNI_RUNIC
 
 #define FightingFormSkillLevel(i)	P_SKILL(getFightingFormSkill(i))
 /*

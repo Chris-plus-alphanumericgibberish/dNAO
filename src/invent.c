@@ -2169,7 +2169,7 @@ ddoinv()
 				winid datawin = create_nhwindow(NHW_MENU);
 				putstr(datawin, ATR_NONE, doname(otmp));
 				describe_item(otmp, otmp->otyp, otmp->oartifact, &datawin);
-				checkfile(xname(otmp), 0, FALSE, TRUE, &datawin);
+				checkfile(xname_bland(otmp), 0, FALSE, TRUE, &datawin);
 				display_nhwindow(datawin, TRUE);
 				destroy_nhwindow(datawin);
 				return MOVE_INSTANT;
@@ -2611,7 +2611,7 @@ struct obj *obj;
 		winid datawin = create_nhwindow(NHW_MENU);
 		putstr(datawin, ATR_NONE, doname(obj));
 		describe_item(obj, obj->otyp, obj->oartifact, &datawin);
-		checkfile(xname(obj), 0, FALSE, TRUE, &datawin);
+		checkfile(xname_bland(obj), 0, FALSE, TRUE, &datawin);
 		display_nhwindow(datawin, TRUE);
 		destroy_nhwindow(datawin);
 		return 0;
@@ -4780,11 +4780,15 @@ char *buf;
 		}
 	    dfeature = altbuf;
 	} else if ((x == xupstair && y == yupstair) ||
-		 (x == sstairs.sx && y == sstairs.sy && sstairs.up))
+		 (x == sstairs.sx && y == sstairs.sy && sstairs.up && !sstairs.u_traversed))
 	    cmap = S_upstair;				/* "staircase up" */
+	else if (x == sstairs.sx && y == sstairs.sy && sstairs.up && sstairs.u_traversed)
+	    cmap = S_brupstair;				/* "staircase up" */
 	else if ((x == xdnstair && y == ydnstair) ||
-		 (x == sstairs.sx && y == sstairs.sy && !sstairs.up))
+		 (x == sstairs.sx && y == sstairs.sy && !sstairs.up && !sstairs.u_traversed))
 	    cmap = S_dnstair;				/* "staircase down" */
+	else if (x == sstairs.sx && y == sstairs.sy && !sstairs.up && sstairs.u_traversed)
+	    cmap = S_brdnstair;	
 	else if (x == xupladder && y == yupladder)
 	    cmap = S_upladder;				/* "ladder up" */
 	else if (x == xdnladder && y == ydnladder)
@@ -5057,7 +5061,10 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 
 	/* allow candle merging only if their ages are close */
 	/* see begin_burn() for a reference for the magic "25" */
-	if (Is_candle(obj) && obj->age/25 != otmp->age/25)
+	if ((Is_candle(obj) || Is_torch(obj)) && obj->age/25 != otmp->age/25)
+	    return(FALSE);
+
+	if (obj->otyp == SUNROD && obj->lamplit)
 	    return(FALSE);
 
 	if (obj->oartifact && obj->age/25 != otmp->age/25)

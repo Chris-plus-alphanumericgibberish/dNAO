@@ -2648,7 +2648,7 @@ register struct obj *obj;
 			difsize = abs(difsize)+1;
 			if(obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS) wt = wt/(difsize);
 			else wt = wt/(difsize*difsize);
-			if (wt < 1) wt = 1;
+			if (wt < 1 && wt != artifact_weight(obj)) wt = 1;
 		}
 	}
 	
@@ -2718,7 +2718,7 @@ register struct obj *obj;
 		return (int)((obj->quan + 50L) / 100L);
 	else if (obj->otyp == HEAVY_IRON_BALL && obj->owt != 0)
 		return((int)(obj->owt));	/* kludge for "very" heavy iron ball */
-	return(wt ? wt*(int)obj->quan : ((int)obj->quan + 1)>>1);
+	return((wt || obj->oartifact) ? wt*(int)obj->quan : ((int)obj->quan + 1)>>1);
 }
 
 static int treefruits[] = {APPLE,ORANGE,PEAR,BANANA,EUCALYPTUS_LEAF};

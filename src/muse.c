@@ -262,7 +262,7 @@ struct monst *mtmp;
 	boolean immobile = (mtmp->data->mmove == 0);
 	int fraction;
 
-	if (is_animal(mtmp->data) || mindless_mon(mtmp))
+	if (is_animal(mtmp->data) && mindless_muse_mon(mtmp))
 		return FALSE;
 	if(dist2(x, y, mtmp->mux, mtmp->muy) > 25 || (mtmp->mux == 0 && mtmp->muy == 0))
 		return FALSE;
@@ -1033,7 +1033,7 @@ struct monst *mtmp;
 	int difficulty = monstr[(monsndx(pm))];
 	int trycnt = 0;
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || nohands(mtmp->data)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_muse_mon(mtmp) || nohands(mtmp->data)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 
@@ -1146,7 +1146,7 @@ struct monst *mtmp;
 
 	m.offensive = (struct obj *)0;
 	m.has_offense = 0;
-	if (is_animal(mtmp->data) || mindless_mon(mtmp) ||
+	if (is_animal(mtmp->data) || mindless_muse_mon(mtmp) ||
 	    nohands(mtmp->data))
 		return FALSE;
 	if (target == &youmonst){
@@ -1832,7 +1832,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))], diesize;
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || nohands(mtmp->data) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_muse_mon(mtmp) || nohands(mtmp->data) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	if (difficulty > 7 && !rn2(35)) return WAN_DEATH;
@@ -1871,7 +1871,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_muse_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	if (difficulty > 7 && !rn2(35)) return rnd(20) > 10 ? WAN_DRAINING : WAN_DEATH;
@@ -1921,7 +1921,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_muse_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(6)) {
@@ -1943,7 +1943,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_muse_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(6)) {
@@ -1965,7 +1965,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_muse_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST || pm->mlet == S_SHADE || pm->mlet == S_KETER
 		) return 0;
 	switch (rnd(16)) {
@@ -2028,7 +2028,7 @@ struct monst *mtmp;
 	
 	m.misc = (struct obj *)0;
 	m.has_misc = 0;
-	if (is_animal(mdat) || mindless_mon(mtmp))
+	if (is_animal(mdat) || mindless_muse_mon(mtmp))
 		return FALSE;
 	if (u.uswallow && stuck) return FALSE;
 
@@ -2704,7 +2704,7 @@ struct monst *mtmp;
 	struct permonst *pm = mtmp->data;
 	int difficulty = monstr[(monsndx(pm))];
 
-	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_mon(mtmp) || get_mx(mtmp, MX_ESUM)
+	if(is_animal(pm) || mon_attacktype(mtmp, AT_EXPL) || mindless_muse_mon(mtmp) || get_mx(mtmp, MX_ESUM)
 			|| pm->mlet == S_GHOST
 			|| pm->mlet == S_SHADE
 			|| pm->mlet == S_KETER
@@ -2829,7 +2829,7 @@ struct obj *obj;
 	int typ = obj->otyp;
 
 	if (is_animal(mon->data) ||
-		mindless_mon(mon) ||
+		mindless_muse_mon(mon) ||
 		mon->mtyp == PM_SHADE ||
 		mon->mtyp == PM_BROKEN_SHADOW ||
 		mon->mtyp == PM_GHOST)	/* don't loot bones piles */
