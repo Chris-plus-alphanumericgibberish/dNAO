@@ -23,6 +23,7 @@
 
 #include "sp_lev.h"
 #include "rect.h"
+#include "artifact.h"
 
 extern void FDECL(mkmap, (lev_init *));
 
@@ -1693,6 +1694,13 @@ default_case:
 					stuff->spe = 2;\
 					size_items_to_pc(stuff)\
 					add_to_container(otmp, stuff);
+
+		if(flags.descendant){
+			struct obj* stuff = mksobj((int)artilist[u.inherited].otyp, MKOBJ_NOINIT);
+			stuff = oname(stuff, artilist[u.inherited].name);
+			add_to_container(otmp, stuff);
+		}
+
 		switch(urace.malenum){
 			default:
 			case PM_HUMAN:
