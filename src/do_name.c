@@ -241,34 +241,17 @@ const char *goal;
 		    if (c == defsyms[sidx].sym || c == (int)showsyms[sidx])
 			matching[sidx] = (char) ++k;
 		if (k) {
-		    for (pass = 0; pass <= 1; pass++) {
+		    for (pass = 0; pass <= 3; pass++) {
 			/* pass 0: just past current pos to lower right;
 			   pass 1: upper left corner to current pos */
-			lo_y = (pass == 0) ? cy : 0;
-			hi_y = (pass == 0) ? ROWNO - 1 : cy;
+			lo_y = (pass % 2 == 0) ? cy : 0;
+			hi_y = (pass % 2 == 0) ? ROWNO - 1 : cy;
 			for (ty = lo_y; ty <= hi_y; ty++) {
-			    lo_x = (pass == 0 && ty == lo_y) ? cx + 1 : 1;
-			    hi_x = (pass == 1 && ty == hi_y) ? cx : COLNO - 1;
+			    lo_x = (pass % 2 == 0 && ty == lo_y) ? cx + 1 : 1;
+			    hi_x = (pass % 2 == 1 && ty == hi_y) ? cx : COLNO - 1;
 				for (tx = lo_x; tx <= hi_x; tx++) {
 					/* look at dungeon feature, not at user-visible glyph */
-					k = back_to_glyph(tx, ty);
-					/* uninteresting background glyph */
-					if (glyph_is_cmap(k) &&
-						(IS_DOOR(levl[tx][ty].typ) || /* monsters mimicking a door */
-							glyph_to_cmap(k) == S_drkroom ||
-							glyph_to_cmap(k) == S_litroom ||
-							glyph_to_cmap(k) == S_drkgrass ||
-							glyph_to_cmap(k) == S_litgrass ||
-							glyph_to_cmap(k) == S_drksoil ||
-							glyph_to_cmap(k) == S_litsoil ||
-							glyph_to_cmap(k) == S_drksand ||
-							glyph_to_cmap(k) == S_litsand ||
-							glyph_to_cmap(k) == S_brightrm ||
-							glyph_to_cmap(k) == S_corr ||
-							glyph_to_cmap(k) == S_litcorr)) {
-						/* what the user remembers to be at tx,ty */
-						k = glyph_at(tx, ty);
-					}
+					k = pass < 2 ? back_to_glyph(tx, ty) : glyph_at(tx, ty);
 					/* TODO: - open doors are only matched with '-' */
 					/* should remembered or seen items be matched? */
 					if (glyph_is_cmap(k) &&
