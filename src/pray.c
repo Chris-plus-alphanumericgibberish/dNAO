@@ -4714,7 +4714,7 @@ int fd;
 	godlist = malloc(sizeof(struct god) * (MAX_GOD+1));
 	mread(fd, (genericptr_t) godlist, sizeof(struct god) * (MAX_GOD+1));
 	/* fix name pointers -- assumes that god names do NOT get changed during the game */
-	for (i=1; i<MAX_GOD; i++)
+	for (i=1; i<MAX_GOD+1; i++)
 		godlist[i].name = base_godlist[i].name;
 }
 
