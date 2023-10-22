@@ -76,6 +76,7 @@ static void FDECL(shk_weapon_works, (char *, struct monst *));
 static void FDECL(shk_armor_works, (char *, struct monst *));
 static void FDECL(shk_charge, (char *, struct monst *));
 static void FDECL(shk_guide, (char *, struct monst *));
+static void FDECL(shk_wind, (char *, struct monst *));
 static boolean FDECL(shk_obj_match, (struct obj *, struct monst *));
 static boolean FDECL(shk_offer_price, (char *, long, struct monst *));
 static void FDECL(shk_smooth_charge, (int *, int, int));
@@ -1867,30 +1868,8 @@ shk_other_services()
 		return;
 	}
 	
-	if(uclockwork && yn("Shall I wind your mainspring?") == 'y'){
-		struct obj *key;
-		int turns = 0;
-		char class_list[MAXOCLASSES+2];
-		static const char tools[] = { TOOL_CLASS, 0 };
-
-		
-		Strcpy(class_list, tools);
-		key = getobj(class_list, "wind with");
-		if (!key){
-			pline1(Never_mind);
-			return;
-		}
-		turns = ask_turns(shkp, 0, 1);
-		if(!turns){
-			pline1(Never_mind);
-			return;
-		}
-		start_clockwinding(key, shkp, turns);
-		return;
-	}
-	
 	/* Do you want to use other services */
-	if (yn("Do you wish to try our other services?") != 'y' ) return;
+	if (yn("What can I help you with today?") != 'y' ) return;
 
 	if (!ESHK(shkp)->services) return;
 
@@ -1979,6 +1958,12 @@ shk_other_services()
 				"Guide to portal", MENU_UNSELECTED);
 	}
 	
+	if(uclockwork){
+		any.a_int = 8;
+		add_menu(tmpwin, NO_GLYPH, &any , 'm', 0, ATR_NONE,
+				"Wind mainspring", MENU_UNSELECTED);
+	}
+
 	end_menu(tmpwin, "Services Available:");
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
@@ -2010,6 +1995,9 @@ shk_other_services()
 	                break;
 	        case 7:
 	                shk_guide(slang, shkp);
+	                break;
+	        case 8:
+	                shk_wind(slang, shkp);
 	                break;
 	        default:
 	                pline ("Unknown Service");
@@ -5745,6 +5733,38 @@ shk_guide(slang, shkp)
 	if (shk_offer_price(slang, charge, shkp) == FALSE) return;
 
 	trap_detect((struct obj *)0);
+}
+
+/*
+** FUNCTION shk_wind
+**
+** Wind a clockwork's mainspring
+*/
+static void
+shk_wind(slang, shkp)
+	char *slang; /* unused but kept for consistency*/
+	struct monst *shkp;
+{
+	struct obj *key;
+	int turns = 0;
+	char class_list[MAXOCLASSES+2];
+	static const char tools[] = { TOOL_CLASS, 0 };
+
+	Strcpy(class_list, tools);
+	key = getobj(class_list, "wind with");
+	if (!key){
+		pline1(Never_mind);
+		return;
+	}
+
+	turns = ask_turns(shkp, 0, 1);
+	if(!turns){
+		pline1(Never_mind);
+		return;
+	}
+
+	start_clockwinding(key, shkp, turns);
+	return;
 }
 
 
