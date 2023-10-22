@@ -9,7 +9,6 @@
 #include "artifact.h"
 #include "xhity.h"
 
-
 #ifndef NO_SIGNAL
 #include <signal.h>
 #endif
@@ -3514,16 +3513,20 @@ newgame()
 		if (artilist[inher_arti].alignment != u.ualign.type) artilist[inher_arti].alignment = A_NONE;
 		hack_artifacts();
 
-		otmp = mksobj((int)artilist[inher_arti].otyp, MKOBJ_NOINIT);
-	    otmp = oname(otmp, artilist[inher_arti].name);
-		expert_weapon_skill(weapon_type(otmp));
-		discover_artifact(inher_arti);
-		fully_identify_obj(otmp);
-
-	    otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
-				       The(aobjnam(otmp, "slip")), (const char *)0);
-		if(otmp->oclass == WEAPON_CLASS)
-			expert_weapon_skill(objects[otmp->otyp].oc_skill);
+		if (!Role_if(PM_MADMAN)){
+			otmp = mksobj((int)artilist[inher_arti].otyp, MKOBJ_NOINIT);
+			/* please do not have any artifacts where the otyp in artilist is not the same as the practical otyp after onaming */
+			expert_weapon_skill(weapon_type(otmp));
+			discover_artifact(inher_arti);
+			if (!Role_if(PM_CONVICT)){
+				otmp = oname(otmp, artilist[inher_arti].name);
+				fully_identify_obj(otmp);
+				otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
+						   The(aobjnam(otmp, "slip")), (const char *)0);
+			} else {
+				delobj(otmp);
+			}
+		}
 	}
 	return;
 }
@@ -3543,7 +3546,7 @@ find_preset_inherited(name)
 		&& !(urole.questarti == i)
 		&& (artilist[i].alignment == A_NONE || artilist[i].alignment == u.ualign.type)
 		){
-			aname = artilist[i].name;
+			aname = (char *)artilist[i].name;
 			if(!strncmpi(aname, "the ", 4)) aname += 4;
 			if(!strcmpi(name, aname)) return i;
 		}

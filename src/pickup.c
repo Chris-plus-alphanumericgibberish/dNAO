@@ -2904,6 +2904,17 @@ boolean past;
 	struct obj *otmp;
 	for(otmp = box->cobj; otmp; otmp = otmp->nobj)
 		knows_object(otmp->otyp);
+
+	if (flags.descendant){
+		for(otmp = box->cobj; otmp; otmp = otmp->nobj){
+			if(otmp->oartifact == u.inherited){
+				expert_weapon_skill(weapon_type(otmp));
+				discover_artifact(u.inherited);
+				break;
+			}
+		}
+	}
+
 	switch(urace.malenum){
 		default:
 		case PM_HALF_DRAGON:

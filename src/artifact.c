@@ -683,7 +683,7 @@ struct obj *otmp;	/* existing object; ignored if alignment specified */
 aligntyp alignment;	/* target alignment, or A_NONE */
 {
 	int arti;
-	boolean by_align = (alignment != A_NONE);
+	boolean by_align = (alignment != (aligntyp)A_NONE);
 	
 	/* get an artifact */
 	if (by_align)
@@ -837,7 +837,7 @@ struct obj * otmp;
 		if (a->gflags & ARTG_NOGEN && !(otmp->otyp == SPE_SECRETS))
 			continue;
 		/* must match otyp (or be acceptable) */
-		if (!artitypematch(a, otmp) && ((a) == &artilist[ART_LANCE_OF_LONGINUS]))
+		if (!artitypematch(a, otmp))
 			continue;
 		/* Fire Brand and Frost Brand can generate out of MANY otypes, so decrease their odds of being chosen at random */
 		/* if one's been generated, the other HAS to be the same otyp, so no penalty is needed */
@@ -13191,8 +13191,8 @@ int distance;
 //For use with the level editor and elsewhere
 struct obj *
 minor_artifact(otmp, name)
-struct obj *otmp;	/* existing object; ignored if alignment specified */
-char *name;	/* target alignment, or A_NONE */
+struct obj *otmp;	/* existing object; used if not name */
+char *name;	/* target name or ""*/
 {
 	if(!strcmp(name,  "Mistlight")){
 		if(!rn2(4)) otmp->otyp = LONG_SWORD;
@@ -13214,8 +13214,14 @@ char *name;	/* target alignment, or A_NONE */
 				add_oprop(otmp, OPROP_WATRW);
 			break;
 		}
+	} else if (!strcmp(name,  "Inherited")){
+		if (flags.descendant){
+			otmp->otyp = (int)artilist[u.inherited].otyp;
+			otmp = oname(otmp, artilist[u.inherited].name);
+		} else {
+			rem_ox(otmp, OX_ENAM);
+		}
 	}
-	fix_object(otmp);
 	return otmp;
 }
 
