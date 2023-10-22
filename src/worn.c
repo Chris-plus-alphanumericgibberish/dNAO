@@ -2263,7 +2263,8 @@ long timeout;
  	xchar x = 0, y = 0;
 	boolean on_floor = obj->where == OBJ_FLOOR,
 		in_invent = obj->where == OBJ_INVENT,
-		in_trap = obj->where == OBJ_INTRAP;
+		in_trap = obj->where == OBJ_INTRAP,
+		in_container = obj->where == OBJ_CONTAINED;
 	
 	if(obj->shopOwned){
 		start_timer(1, TIMER_OBJECT,
@@ -2337,7 +2338,7 @@ long timeout;
 			deltrap(obj->otrap);	/* deltrap deletes contained objects as well */
 		}
 	}
-	else if (in_invent) {
+	else if (in_invent || in_container) {
 //		pline("object in invent");
 		int armpro = 0;
 		boolean isarmor = obj == uarm || obj == uarmc || obj == uarms || obj == uarmh || 
@@ -2354,14 +2355,20 @@ long timeout;
 		}
 		
 		if ((!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark()))
-		  || ((rn2(3) < armpro) && rn2(50))
-		){
+			|| ((rn2(3) < armpro) && rn2(50)) || in_container)
+		{
 			if(obj->oeroded && obj->oerodeproof && 
-				(!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark())))
+				((!u.uswallow ? (dimness(u.ux, u.uy) > 0) : (uswallow_indark())) || in_container))
 				obj->oeroded--;
 			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
 			return;
 		}
+
+		if (in_container){
+			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
+			return;
+		}
+
 		if(obj->oeroded < 2){
 			obj->oeroded++;
 			Your("%s degrade%s.",xname(obj),(obj->quan > 1L ? "" : "s"));
@@ -2370,11 +2377,18 @@ long timeout;
 			if(flags.run) nomul(0, NULL);
 			return;
 		}
+
+		/* artifacts are durable - they will never evaporate entirely, though they're not immune to degrading */
+		if (obj->oartifact) {
+			start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
+			return;
+		}
+
 	    if (flags.verbose && !isarmor) {
 			char *name = obj->otyp == CORPSE ? corpse_xname(obj, FALSE) : xname(obj);
 			Your("%s%s%s %s away%c",
-				 obj == uwep ? "wielded " : nul, name, obj->otyp == NOBLE_S_DRESS ? "'s armored plates" : "",
-				 obj->otyp == NOBLE_S_DRESS ? "evaporate" : otense(obj, "evaporate"), obj == uwep ? '!' : '.');
+				obj == uwep ? "wielded " : nul, name, obj->otyp == NOBLE_S_DRESS ? "'s armored plates" : "",
+				obj->otyp == NOBLE_S_DRESS ? "evaporate" : otense(obj, "evaporate"), obj == uwep ? '!' : '.');
 	    }
 	    if (obj == uwep) {
 			uwepgone();	/* now bare handed */
@@ -2519,7 +2533,12 @@ long timeout;
 				m_useup(obj->ocarry, obj);
 			}
 		}
+	} else {
+		/* otherwise timer stops and never restarts */
+		start_timer(1, TIMER_OBJECT, LIGHT_DAMAGE, (genericptr_t)obj);
+		return;
 	}
+
 	if (on_floor) newsym(x, y);
 	else if (in_invent) update_inventory();
 }

@@ -112,6 +112,7 @@ register struct obj *obj;
 	if(obj->oclass == WAND_CLASS && obj->spe > 0 && objects[obj->otyp].oc_magic) return TRUE;
 	if(obj->otyp == CORPSE && (obj->corpsenm == PM_AOA || obj->corpsenm == PM_AOA_DROPLET || obj->corpsenm == PM_NEWT)) return TRUE;
 	if(obj->otyp == TIN && (!obj->known || obj->corpsenm == PM_AOA || obj->corpsenm == PM_AOA_DROPLET || obj->corpsenm == PM_NEWT)) return TRUE;
+	if(obj->otyp == MAGIC_WHISTLE) return TRUE;
 	
 	return FALSE;
 }
@@ -2934,15 +2935,21 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			break;
 			case TOOL_CLASS:
 				u.uconduct.food++;
-				curspe = otmp->spe;
-	    	    (void) drain_item(otmp);
-				if(curspe > otmp->spe){
-					You("drain the %s%s.", xname(otmp),otmp->spe!=0 ? "":" dry");
-					lesshungry(5*INC_BASE_NUTRITION);
-					flags.botl = 1;
+				if (otmp->otyp == MAGIC_WHISTLE){
+					poly_obj(otmp, WHISTLE);
+					You("drain the %s of its magic.", xname(otmp));
 				} else {
-					pline("The %s resists your attempt to drain its magic.", xname(otmp));
+					curspe = otmp->spe;
+					(void) drain_item(otmp);
+					if(curspe > otmp->spe){
+						You("drain the %s%s.", xname(otmp),otmp->spe!=0 ? "":" dry");
+
+					} else {
+						pline("The %s resists your attempt to drain its magic.", xname(otmp));
+					}
 				}
+				lesshungry(5*INC_BASE_NUTRITION);
+				flags.botl = 1;
 			break;
 			case SCROLL_CLASS:
 				if(otmp->oartifact) break; //redundant check

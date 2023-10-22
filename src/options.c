@@ -2920,6 +2920,9 @@ goodfruit:
 	fullname = "statuslines";
 	if (match_optname(opts, fullname, sizeof("statuslines")-1, TRUE)) {
 		op = string_for_opt(opts, negated);
+		if(!op){
+			return;
+		}
 		if (negated) bad_negation(fullname, FALSE);
 		else {
 		    if (!initial)

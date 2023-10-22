@@ -2062,6 +2062,10 @@ struct obj	*sobj;
 		} else {	/* armor and scroll both cursed */
 		    Your("%s %s.", xname(otmp), otense(otmp, "vibrate"));
 		    if (otmp->spe >= -6) otmp->spe--;
+			if (otmp->spe >= -6) {
+				otmp->spe += -1;
+				adj_abon(otmp, -1);
+			}
 		    make_stunned(HStun + rn1(10, 10), TRUE);
 		}
 	    }

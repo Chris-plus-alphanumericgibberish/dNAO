@@ -1941,8 +1941,13 @@ struct obj *obj;
 		fix_object(dagger);
 		
 		if (obj->oartifact && obj->oartifact == ART_BLADE_SINGER_S_SABER){
-			artifact_exists(dagger, artiname(ART_BLADE_DANCER_S_DAGGER), FALSE);
-			dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
+			if (!art_already_exists(ART_BLADE_DANCER_S_DAGGER)){
+				artifact_exists(dagger, artiname(ART_BLADE_DANCER_S_DAGGER), FALSE);
+				dagger = oname(dagger, artiname(ART_BLADE_DANCER_S_DAGGER));
+			} else {
+				dagger->oartifact = 0;
+				rem_ox(dagger, OX_ENAM);
+			}
 		}
 
 		dagger = hold_another_object(dagger, "You drop %s!",
@@ -1963,6 +1968,11 @@ struct obj *obj;
 			pline("They don't fit together!");
 			return MOVE_CANCELLED;
 		}
+
+		if (uswapwep->oartifact && uswapwep->oartifact == ART_BLADE_DANCER_S_DAGGER){
+			flag_existance(ART_BLADE_DANCER_S_DAGGER, FALSE);
+		}
+
 		if (u.twoweap) {
 			u.twoweap = 0;
 			update_inventory();
@@ -4489,7 +4499,7 @@ struct obj *obj;
 			return MOVE_STANDARD;
 			}
 		}
-		dam = rnd(2) + dbon(obj) + obj->spe;
+		dam = rnd(2) + dbon(obj, &youmonst) + obj->spe;
 		if (dam <= 0) dam = 1;
 		You("hit your %s with your whip.", body_part(FOOT));
 		Sprintf(buf, "killed %sself with %s whip", uhim(), uhis());
@@ -4732,7 +4742,7 @@ struct obj *obj;
 
     } else if ((!u.dx && !u.dy) || (u.dz > 0)) {
 		int dam;
-		dam = rnd(4) + dbon(obj) + obj->spe;
+		dam = rnd(4) + dbon(obj, &youmonst) + obj->spe;
 		if (dam <= 0) dam = 1;
 		You("hit your %s with your nunchaku.", body_part((u.dz > 0) ? FOOT : HAND));
 		Sprintf(buf, "killed %sself with %s whip", uhim(), uhis());

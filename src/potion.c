@@ -344,6 +344,7 @@ long mask;	/* nonzero if resistance status should change by mask */
 		see_monsters();
 		see_objects();
 		see_traps();
+		see_altars();
 	    }
 
 	    /* for perm_inv and anything similar

@@ -1604,7 +1604,7 @@ A("The Mirrored Mask",				MASK,					(const char *)0,
 	NO_ATTK(), NOFLAG,
 	PROPS(REFLECTING, HALF_SPDAM), NOFLAG,
 	PROPS(), NOFLAG,
-	CAPTURE_REFLECTION, NOFLAG
+	NOINVOKE, NOFLAG
 	),
 
 /* reflects projectiles and counterattacks, and doubles your multishot when carried in swapwep or wielded */

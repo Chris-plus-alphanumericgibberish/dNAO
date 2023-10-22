@@ -255,14 +255,21 @@ hack_artifacts()
 		artilist[ART_ROBE_OF_CLOSED_EYES].gflags &= ~ARTG_NOGEN;
 	}
 	
+	/* fem hlf nob, or fem hlf without a first gift, always get Lifehunt Scythe */
+	/* previously overrode all other first gifts, but now that fem hlf nob exists only overrides no first gift */
+	boolean first_gift_found = FALSE;
 	if(Race_if(PM_HALF_DRAGON) && flags.initgend){
 		int i;
-		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++)
-			if(artilist[i].role == Role_switch)
-				artilist[i].role = NON_PM;
-		
-		artilist[ART_LIFEHUNT_SCYTHE].role = Role_switch;
-		artilist[ART_LIFEHUNT_SCYTHE].alignment = alignmnt;
+		for(i = 0; i < ART_ROD_OF_SEVEN_PARTS; i++){
+			if(artilist[i].role == Role_switch){
+				if (Role_if(PM_NOBLEMAN)) artilist[i].role = NON_PM;
+				else {first_gift_found = TRUE; break; }
+			}
+		}
+		if (!first_gift_found){
+			artilist[ART_LIFEHUNT_SCYTHE].role = Role_switch;
+			artilist[ART_LIFEHUNT_SCYTHE].alignment = alignmnt;
+		}
 	}
 	
 	/* Fix up the crown */
@@ -7863,9 +7870,8 @@ arti_invoke(obj)
 		oart->inv_prop == ANNUL ||
 		oart->inv_prop == ALTMODE || 
 		oart->inv_prop == LORDLY ||
-		oart->inv_prop == DETESTATION ||
-		(oart->inv_prop == CAPTURE_REFLECTION && obj == uskin))
-	) {
+		oart->inv_prop == DETESTATION
+	)) {
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
 			You_hear("the sounds of hurried preparation.");
@@ -10889,45 +10895,6 @@ arti_invoke(obj)
 			if(obj->oartifact == ART_SEVEN_LEAGUE_BOOTS)
 				artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod = 10;
 			break;
-		case CAPTURE_REFLECTION:
-			if(obj != ublindf && obj != uskin && obj != uwep) {
-				You_feel("that you should be holding %s.", the(xname(obj)));
-				obj->age = monstermoves;
-				return MOVE_CANCELLED;
-			}
-			if(Upolyd && obj == uskin) {
-				/* revert */
-				rehumanize();
-			}
-			else {
-				/* steal a face */
-				if(getdir((char *)0)) {
-					struct monst *mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
-					if (mtmp && !DEADMONSTER(mtmp)) {
-						/* attempt to take monster */
-						int threshold = mtmp->mhpmax / 3 + u.ulevel;
-
-						if (resists_poly(mtmp->data)) threshold /= 2;
-						if (is_rider(mtmp->data)) threshold = 0;
-
-						if (mtmp->mhp < threshold) {
-							/* take the monster */
-							xkilled(mtmp, 3);
-							obj->corpsenm = mtmp->mtyp;
-							/* keep consistent with on-wear code in do_wear.c */
-							if (obj == ublindf && !Unchanging) {
-								activate_mirrored_mask(obj);
-							}
-						}
-						else {
-							/* resisted */
-							pline("%s resists!", Monnam(mtmp));
-							obj->age = monstermoves;	// but does use your turn
-						}
-					}
-				}
-			}
-			break;
         case DETESTATION:
 			obj->age = 0L;
 			if(!Pantheon_if(PM_MADMAN) || u.uevent.uhand_of_elbereth){
@@ -13764,6 +13731,7 @@ struct obj *obj;
 	return AD_EACD;
 }
 
+
 int
 soth_weapon_damage_turn(obj)
 struct obj *obj;
@@ -13814,19 +13782,6 @@ int stat;
 	}
 	return 0;
 }
-
-void
-activate_mirrored_mask(obj)
-struct obj * obj;
-{
-	polymon(obj->corpsenm);
-	u.mtimedone = 5 + (u.ulevel * 30) / max(1, 10 + mons[obj->corpsenm].mlevel - u.ulevel);
-	if (!polyok(&mons[obj->corpsenm])) u.mtimedone /= 3;
-	uskin = obj;
-	ublindf = (struct obj *)0;
-	uskin->owornmask |= W_SKIN;
-}
-
 /* returns the current litness of IMA, recalculating it if possible
  * Returns a value from 0 to 3; 0 being unlit and 3 being most-lit.
  */
