@@ -1592,6 +1592,60 @@ domove()
 		}
 	    return;
 	}
+
+#ifdef PARANOID
+	/* credit - Ron Nazarov via IRC/discord, applied with some minor changes*/
+	/* If no 'm' prefix and paranoid_swim enabled, don't allow dangerous moves.  */
+	if (iflags.paranoid_swim && (!flags.nopick || flags.run)) {
+		static int last_messaged;
+
+	    /* Almost the same conditions as teleportation, except
+	     * that lava is allowed if you have wwalking and fireproof
+	     * boots and your steed matters.
+	     */
+	    boolean safe_air = Levitation || Flying;
+	    boolean safe_inwater = (Amphibious || Swimming)
+		&& !(u.sealsActive&SEAL_OSE) && Waterproof && !level.flags.lethe &&
+		/* If you try to ride into water while riding a non-flying steed, you'll fall off.  */
+		(!u.usteed || (amphibious_mon(u.usteed) && mon_resistance(u.usteed, FLYING)));
+
+		/* wwalking has to be visible, to prevent identifying via a message prompt
+		 * assumes that HWWalking is known always - i.e. level-up (monk) or similar where it messages
+		 * checks extrinsic from carry/invoke artifacts as well, but not worn :( those are W_WORN not W_ART(I)
+		 * this also assumes the only "object" that grants ww is ww boots
+		 */
+		boolean ww_boots = (uarmf && uarmf->otyp == WATER_WALKING_BOOTS && objects[WATER_WALKING_BOOTS].oc_name_known);
+		boolean visible_ww = ww_boots || u.sealsActive&SEAL_EURYNOME || HWwalking ||
+			(u.uprops[WWALKING].extrinsic & W_ARTI) || (u.uprops[WWALKING].extrinsic & W_ART) ||
+			(uleft && uleft->oartifact == ART_NENYA) || (uright && uright->oartifact == ART_NENYA);
+
+	    /* Going into 3D water with limited breath can be dangerous. */
+	    boolean safe_3dwater = safe_inwater && Breathless;
+	    boolean safe_water = safe_inwater || safe_air || (!u.usteed && visible_ww);
+	    boolean safe_lava = safe_air ||	(!u.usteed &&
+			(likes_lava(youracedata) || (visible_ww && Fire_resistance && (!uarmf || uarmf->oerodeproof || !is_flammable(uarmf)))));
+
+	    if ((!safe_air && levl[x][y].typ == AIR && levl[u.ux][u.uy].typ != AIR) ||
+			(!safe_water && is_pool(x, y, FALSE) && !is_pool(u.ux, u.uy, FALSE)) ||
+			(!safe_3dwater && is_3dwater(x, y) && !is_3dwater(u.ux, u.uy)) ||
+			(!safe_lava && is_lava(x, y) && !is_lava(u.ux, u.uy))
+		){
+			You("avoid %s into the %s.", ing_suffix(locomotion(&youmonst, "step")), levl[x][y].typ == AIR ? "open air" : waterbody_name(x, y));
+
+			if (!last_messaged || (moves - last_messaged) >= 11)
+				last_messaged = moves;
+
+			if (last_messaged >= moves){
+				pline("(Use 'm' prefix to step in if you really want to.)");
+				last_messaged = moves - 1;
+			}
+
+			flags.move |= MOVE_CANCELLED;
+			nomul(0, NULL);
+			return;
+	    }
+	}
+#endif
 	
 	/* Move ball and chain.  */
 	if (Punished){
