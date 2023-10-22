@@ -494,7 +494,7 @@ getchain(s)
 
 	if(strlen(s)) {
 
-	    for(i = n_levs - tmpdungeon[n_dgns].levels + 1; i <= n_levs; i++)
+	    for(i = n_levs - tmpdungeon[n_dgns].levels; i <= n_levs; i++)
 		if(!strcmp(tmplevel[i].name, s)) return i;
 
 	    yyerror("Can't locate the specified chain level.");
