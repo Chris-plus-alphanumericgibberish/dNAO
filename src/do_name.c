@@ -609,7 +609,10 @@ const char *name;
 					if (obj->otyp != u.brand_otyp)
 						obj = poly_obj(obj, u.brand_otyp);
 				}
-				else if (obj->otyp != a->otyp && !is_malleable_artifact(a)) {
+				else if ((a != &artilist[ART_LANCE_OF_LONGINUS]) && obj->otyp == LIGHTSABER){
+					set_obj_size(obj, MZ_TINY);
+				}
+				else if (obj->otyp != a->otyp && !is_malleable_artifact(a) && (a != &artilist[ART_LANCE_OF_LONGINUS])) {
 					obj = poly_obj(obj, a->otyp);
 				}
 			}
@@ -665,6 +668,8 @@ const char *name;
 			obj->objsize = artilist[obj->oartifact].size;
 		else if(is_malleable_artifact(&artilist[obj->oartifact]))
 			;//keep current/default size
+		else if(obj->oartifact == ART_LANCE_OF_LONGINUS && obj->otyp == LIGHTSABER)
+			obj->objsize = MZ_TINY; // force it to be a proper lancet
 		else
 			obj->objsize = MZ_MEDIUM;
 		
@@ -711,6 +716,10 @@ const char *name;
 			obj->obj_color = CLR_MAGENTA;
 		}
 		
+		if ((is_lightsaber(obj) || obj->oartifact == ART_ANNULUS) && obj->oartifact != ART_INFINITY_S_MIRRORED_ARC && obj->age == 0){
+			obj->age = (long)rn1(50000, 100000);
+		}
+
 		/* body type */
 		if (is_malleable_artifact(&artilist[obj->oartifact])); //keep current/default body type
 		else if (Role_if(PM_PRIEST) && obj->oartifact == ART_MITRE_OF_HOLINESS)
