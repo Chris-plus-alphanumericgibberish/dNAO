@@ -980,7 +980,7 @@ struct monst * mon;
 		return 2;
 
 	if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
-		return 2.5;
+		return 2;
 
 	if (is_spear(otmp))
 		return 1.5;
