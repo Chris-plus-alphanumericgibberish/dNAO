@@ -5758,6 +5758,16 @@ retry:
 		if (++tries < 5)
 			goto retry;
 	}
+	if (wishreturn & WISH_ARTEXISTS)
+	{
+		/* wish was read as an artifact that has already been generated */
+		if (wishflags & WISH_VERBOSE)
+			verbalize("Such an artifact already has been created.");
+		else
+			pline("You cannot wish for an existing artifact.");
+		if (++tries < 5)
+			goto retry;
+	}
 	if (wishreturn & WISH_SUCCESS)
 	{
 		/* an allowable wish was read */
