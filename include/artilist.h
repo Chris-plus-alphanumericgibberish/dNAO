@@ -1687,6 +1687,17 @@ A("Clarent",						LONG_SWORD,				(const char *)0,
 	LEADERSHIP, (ARTI_DIG)
 	),
 
+/* sdice are a copy of ldice, ocn +=1  */
+A("The Dark Claymore",						TWO_HANDED_SWORD,				(const char *)0,
+	4000L, OBSIDIAN_MT, MZ_LARGE, WT_DEFAULT,
+	A_CHAOTIC, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	NO_MONS(),
+	ATTK(AD_DARK, 1, 6), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /*Needs encyc entry*/
 A("Reaver",							SCIMITAR,				(const char *)0,
 	6000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
