@@ -1695,7 +1695,7 @@ A("The Dark Claymore",						TWO_HANDED_SWORD,				(const char *)0,
 	ATTK(AD_DARK, 1, 6), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	LEADERSHIP, NOFLAG
 	),
 
 /*Needs encyc entry*/
