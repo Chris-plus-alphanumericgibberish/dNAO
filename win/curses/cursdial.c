@@ -388,7 +388,8 @@ curses_ext_cmd()
             break;
         }
 
-        if ((letter == '\b') || (letter == KEY_BACKSPACE)) {
+        /* \177 is delete */
+        if ((letter == '\b') || (letter == KEY_BACKSPACE) || (letter == '\177')) {
             if (prompt_width == 0) {
                 ret = -1;
                 break;

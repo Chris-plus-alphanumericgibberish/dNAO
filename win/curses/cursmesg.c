@@ -475,6 +475,7 @@ curses_message_win_getline(const char *prompt, char *answer, int buffer)
             return;
         case '\b':
         case KEY_BACKSPACE:
+        case '\177':            /* delete */
             if (len < 1) {
                 len = 1;
                 mx = promptx;
