@@ -15194,7 +15194,7 @@ int vis;						/* True if action is at all visible to the player */
 			dr = (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
 		}
 		else {
-			dr = (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+			dr = (youdef ? roll_udr(magr, attk->aatyp) : roll_mdr(mdef, magr, attk->aatyp));
 		}
 		
 		//Give spears a slight advantage vs. armor.
@@ -17082,7 +17082,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					}
 				}
 				/* damage (reduced by DR, half-phys damage, min 1) */
-				dmg -= (youagr ? roll_udr(mdef) : roll_mdr(magr, mdef));
+				dmg -= (youagr ? roll_udr(mdef, passive->aatyp) : roll_mdr(magr, mdef, passive->aatyp));
 				if (dmg < 1)
 					dmg = 1;
 				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
@@ -17364,7 +17364,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				case AD_PHYS:
 					/* no message */
 					/* damage (reduced by DR, half-phys damage, min 1) */
-					dmg -= (youagr ? roll_udr(mdef) : roll_mdr(magr, mdef));
+					dmg -= (youagr ? roll_udr(mdef, passive->aatyp) : roll_mdr(magr, mdef, passive->aatyp));
 					if (dmg < 1)
 						dmg = 1;
 					dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);

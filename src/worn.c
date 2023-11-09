@@ -1221,21 +1221,25 @@ struct monst *mon;
 }
 
 int
-roll_mdr(mon, magr)
+roll_mdr(mon, magr, aatyp)
 struct monst *mon;
 struct monst *magr;
+uchar aatyp;
 {
-	return roll_mdr_detail(mon, magr, 0, 0);
+	return roll_mdr_detail(mon, magr, 0, 0, aatyp);
 }
 
 int
-roll_mdr_detail(mon, magr, slot, depth)
+roll_mdr_detail(mon, magr, slot, depth, aatyp)
 struct monst *mon;
 struct monst *magr;
 int slot;
 int depth;
+uchar aatyp;
 {
 	int base, nat_dr, armac;
+	boolean youagr = (magr == &youmonst);
+	struct obj *magr_helm = magr ? (youagr ? uarmh : which_armor(magr, W_ARMH)) : NULL;
 	
 	if(!slot) switch(rn2(7)){
 		case 0:
@@ -1260,7 +1264,7 @@ int depth;
 	mon_slot_dr(mon, magr, slot, &base, &armac, &nat_dr, depth);
 
 	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
-	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU || magr->mtyp == PM_DREAM_EATER || magr->mtyp == PM_VEIL_RENDER || (magr->mtyp == PM_LADY_CONSTANCE && !rn2(2)) || mad_monster_turn(magr, MAD_NON_EUCLID))){
+	if(magr && (is_extradimensional(magr) || (aatyp == AT_BUTT && magr_helm && magr_helm->oartifact == ART_APOTHEOSIS_VEIL))){
 		armac = 0;
 		if(undiffed_innards(mon->data))
 			nat_dr /= 2;
@@ -1392,7 +1396,7 @@ int depth;
 	}
 	/* Hod Sephirah OVERRIDE other arm_mdr sources with the player's total DR (regardless of who's attacking them) */
 	if (mon->mtyp == PM_HOD_SEPHIRAH) {
-		arm_mdr = slot_udr(slot, magr, 0);
+		arm_mdr = slot_udr(slot, magr, 0, AT_ANY);
 	}
 	/* Natural DR */
 	int slotnatdr;

@@ -2775,7 +2775,7 @@ int tary;
 				int i;
 				/* reduce by DR */
 				for (i = dmn / 3; i > 0; i--) {
-					dmg -= (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+					dmg -= (youdef ? roll_udr(magr, attk->aatyp) : roll_mdr(mdef, magr, attk->aatyp));
 				}
 				/* deals silver-hating damage */
 				if (hates_silver((youdef ? youracedata : mdef->data))) {
@@ -4447,7 +4447,7 @@ int tary;
 				if (youagr || youdef || canseemon(mdef))
 					pline("%s %s pierced by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
-				dmg = d(n, 20) - (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+				dmg = d(n, 20) - (youdef ? roll_udr(magr, attk->aatyp) : roll_mdr(mdef, magr, attk->aatyp));
 				if(dmg < 1)
 					dmg = 1;
 				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
@@ -4550,7 +4550,7 @@ int tary;
 				if (youagr || youdef || canseemon(mdef))
 					pline("%s %s slashed by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
-				dmg = d(2, 12) - (youdef ? roll_udr(magr) : roll_mdr(mdef, magr));
+				dmg = d(2, 12) - (youdef ? roll_udr(magr, attk->aatyp) : roll_mdr(mdef, magr, attk->aatyp));
 				if(dmg < 1)
 					dmg = 1;
 				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);

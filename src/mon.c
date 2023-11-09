@@ -8016,9 +8016,9 @@ boolean verbose;
 	}
 	healing += d(2+max(0, nurse->m_lev - 9)/3,6); //Note, nurses start at 11th level, healers 10th.
 	if(targ == &youmonst){
-		healing -= roll_udr(nurse);
+		healing -= roll_udr(nurse, AT_ANY);
 	} else {
-		healing -= roll_mdr(targ, nurse);
+		healing -= roll_mdr(targ, nurse, AT_ANY);
 	}
 	if(healing < 1)
 		healing = 1;
@@ -8374,7 +8374,7 @@ struct obj *obj;
 		if(mdef == &youmonst){
 			Your("%s bite%s you!", xname(obj), obj->quan == 1 ? "s":"");
 			// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
-			damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask, AT_ANY);
 			// pline("damage post DR: %d", damage);
 			if(damage < 1)
 				damage = 1;
@@ -8384,7 +8384,7 @@ struct obj *obj;
 		}
 		else {
 			// pline("damage pre DR: %d", damage);
-			damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask, AT_ANY);
 			// pline("damage post DR: %d", damage);
 			if(damage < 1)
 				damage = 1;
@@ -8415,7 +8415,7 @@ struct obj *obj;
 		if(mdef == &youmonst){
 			Your("%s bite%s and sting%s you!", xname(obj), obj->quan == 1 ? "s":"", obj->quan == 1 ? "s":"");
 			// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
-			damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			damage -= roll_udr_detail((struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask, AT_ANY);
 			// pline("damage post DR: %d", damage);
 			if(damage < 1)
 				damage = 1;
@@ -8425,7 +8425,7 @@ struct obj *obj;
 		}
 		else {
 			// pline("damage pre DR: %d", damage);
-			damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask);
+			damage -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, (is_dress(obj->otyp) && slotvar != UPPER_TORSO_DR) ? W_ARM : obj->owornmask, AT_ANY);
 			// pline("damage post DR: %d", damage);
 			if(damage < 1)
 				damage = 1;
@@ -10084,12 +10084,12 @@ struct monst *mdef;
 		if(mdef == &youmonst){
 			// Your("%s bite%s you!", xname(obj), obj->quan == 1 ? "s":"");
 			// pline("damage pre DR: %d, slotvar: %ld, wornmask: %ld", damage, slotvar, obj->owornmask);
-			dmg -= roll_udr_detail((struct monst *)0, slotvar, depthvar);
+			dmg -= roll_udr_detail((struct monst *)0, slotvar, depthvar, AT_ANY);
 			// pline("damage post DR: %d", damage);
 		}
 		else {
 			// pline("damage pre DR: %d", damage);
-			dmg -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, depthvar);
+			dmg -= roll_mdr_detail(mdef, (struct monst *)0, slotvar, depthvar, AT_ANY);
 			// pline("damage post DR: %d", damage);
 		}
 		if(dmg < 1)
