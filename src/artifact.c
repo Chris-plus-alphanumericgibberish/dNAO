@@ -5710,7 +5710,9 @@ boolean printmessages; /* print generic elemental damage messages */
 		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("%s %s %s%c",
 				wepdesc,
-				vtense(wepdesc, "hit"),
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"tase"),
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}

@@ -13056,6 +13056,7 @@ int vis;						/* True if action is at all visible to the player */
 	boolean invalid_weapon_attack = FALSE;
 	boolean unarmed_punch = FALSE;
 	boolean unarmed_kick = FALSE;
+	boolean unarmed_butt = FALSE;
 	boolean natural_strike = FALSE;
 	boolean ulightsaberhit = FALSE;
 
@@ -13312,6 +13313,11 @@ int vis;						/* True if action is at all visible to the player */
 		/* monsdmg == 0 for a player's basic kick, monsdmg == -1 for a player's clumsy kick -- different from a horse's kick! */
 		else if (attk->aatyp == AT_KICK && melee)
 			unarmed_kick = TRUE;
+		/* unlike kicks and weapon attacks, player headbutts get monsdmg and only use basedmg for enchantment */
+		else if (attk->aatyp == AT_BUTT && melee) {
+			unarmed_butt = TRUE;
+			natural_strike = TRUE;
+		}
 		/* mercurial blades aren't spiritual rapiers */
 		else if (attk->adtyp == AD_MERC && melee)
 			fake_valid_weapon_attack = TRUE;
@@ -13623,6 +13629,7 @@ int vis;						/* True if action is at all visible to the player */
 		break;
 	case W_ARMH:
 		otmp = (youagr ? uarmh : which_armor(magr, slot));
+		unarmed_butt = TRUE;
 		break;
 	case W_WEP:
 		otmp = weapon;
@@ -13707,8 +13714,8 @@ int vis;						/* True if action is at all visible to the player */
 				seardmg += rnd(20);
 			}
 			// no jade monsters (yet)
-			else if (youagr && unarmed_punch && u.sealsActive&SEAL_EDEN) {
-				/* Eden's silver hull, for the player attacking with bared hands */
+			else if (youagr && (unarmed_punch || unarmed_kick || unarmed_butt) && u.sealsActive&SEAL_EDEN) {
+				/* Eden's silver hull, for the player attacking with bared hands, feet, or head */
 				silverobj |= W_SKIN;
 				seardmg += rnd(20);
 			}
@@ -14112,7 +14119,8 @@ int vis;						/* True if action is at all visible to the player */
 	/* case 2: invalid melee weapon */
 	/* case 3: unarmed punch */
 	/* case 4: unarmed kick */
-	/* case 5: none of the above */
+	/* case 5: unarmed headbutt */
+	/* case 6: none of the above */
 	if (valid_weapon_attack) {
 		/* note: dmgval() includes enchantment and erosion of weapon */
 		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_MARIONETTE) ||
@@ -14713,6 +14721,13 @@ int vis;						/* True if action is at all visible to the player */
 		if (monsdmg == -1)
 			basedmg /= 2;
 	}
+	else if (unarmed_butt) {
+		/* helm enchantment increases headbutt damage */
+		otmp = (youagr ? uarmh : which_armor(magr, W_ARMH));
+		if (otmp) {
+			basedmg += otmp->spe;
+		}
+	}
 	else {
 		basedmg = 0;
 	}
@@ -15032,7 +15047,7 @@ int vis;						/* True if action is at all visible to the player */
 	}
 	/* ARTIFACT HIT BLOCK */
 	/* this must come after skills are trained, as this can kill the defender and cause a return */
-	if (valid_weapon_attack || unarmed_punch || unarmed_kick)
+	if (valid_weapon_attack || unarmed_punch || unarmed_kick || unarmed_butt)
 	{
 		int returnvalue = 0;
 		boolean artif_hit = FALSE;
@@ -15096,6 +15111,19 @@ int vis;						/* True if action is at all visible to the player */
 			//Monsters have extra damage for their attacks, it makes sense to treat it as part of the unarmed damage.
 			int unarmed_basedmg = basedmg + ((youagr && !natural_strike) ? 0 : monsdmg);
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
+			if (otmp) {
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, unarmed_basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
+					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
+			}
+		}
+		/* unarmed headbutts proc effects of worn helms */
+		if (unarmed_butt) {
+			//Monsters have extra damage for their attacks, it makes sense to treat it as part of the unarmed damage.
+			int unarmed_basedmg = basedmg + ((youagr && !natural_strike) ? 0 : monsdmg);
+			otmp = (youagr ? uarmh : which_armor(magr, W_ARMH));
 			if (otmp) {
 				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, unarmed_basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE);
 				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD)))
