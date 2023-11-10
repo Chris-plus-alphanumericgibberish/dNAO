@@ -2708,8 +2708,8 @@ winid *datawin;
 		int mask = attack_mask(obj, otyp, oartifact, &youmonst);
 		boolean otyp_is_blaster = (otyp == CARCOSAN_STING || otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
 		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) && !otyp_is_blaster);
-		/* armor doesn't have base damage, but can have artifact bonus damage */
-		boolean artidmg_only = olet == ARMOR_CLASS;
+		/* armor and rings don't have meaningful base damage, but can have artifact bonus damage */
+		boolean artidmg_only = olet == ARMOR_CLASS || olet == RING_CLASS;
 
 		/* print type */
 		if (!printed_type && !artidmg_only) {
@@ -2934,6 +2934,10 @@ winid *datawin;
 					case AD_DARK: Strcat(buf, "dark damage."); break;
 					case AD_BLUD: Strcat(buf, "blood damage."); break;
 					case AD_HOLY: Strcat(buf, "holy damage."); break;
+					case AD_STDY: Strcat(buf, "study damage."); break;
+					case AD_HLUH: Strcat(buf, "corrupted holy damage."); break;
+					case AD_STAR: Strcat(buf, "silver damage."); break;
+					case AD_SLEE: Strcat(buf, "sleep damage."); break;
 						break;
 					}
 				}
