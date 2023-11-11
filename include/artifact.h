@@ -401,7 +401,7 @@ extern struct artifact * artilist;
 #define COLLECT_TAX     (LAST_PROP+65)
 #define ALTMODE         (LAST_PROP+66)
 #define AEGIS           (LAST_PROP+67)
-#define WATER           (LAST_PROP+68)
+#define CREATE_POOL     (LAST_PROP+68)
 #define SINGING         (LAST_PROP+69)
 #define WIND_PETS	    (LAST_PROP+70)
 #define DEATH_TCH       (LAST_PROP+71)

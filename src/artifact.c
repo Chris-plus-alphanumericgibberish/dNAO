@@ -8300,7 +8300,7 @@ arti_invoke(obj)
 			}
 		}
 	break;
-	case WATER:
+	case CREATE_POOL:
 		{
 			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));

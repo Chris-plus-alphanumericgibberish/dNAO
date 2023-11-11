@@ -1827,7 +1827,7 @@ A("Poseidon's Trident",				TRIDENT,				(const char *)0,
 	ATTK(AD_PHYS, 3, 0), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	WATER, NOFLAG
+	CREATE_POOL, NOFLAG
 	),
 
 A("Feng Huo Lun",				WIND_AND_FIRE_WHEELS,				"flaming %s",
