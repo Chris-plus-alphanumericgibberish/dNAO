@@ -5066,8 +5066,8 @@ struct obj *wep;
 	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	
-	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
-		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+	for(i = x-BOLT_LIM; i <= x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j <= y+BOLT_LIM; j++){
 			if(!isok(i,j))
 				continue;
 			if(i == x && j == y)
@@ -5093,8 +5093,8 @@ struct obj *wep;
 		return;
 	targets = rn2(targets);
 	
-	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
-		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+	for(i = x-BOLT_LIM; i <= x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j <= y+BOLT_LIM; j++){
 			if(!isok(i,j))
 				continue;
 			if(i == x && j == y)
