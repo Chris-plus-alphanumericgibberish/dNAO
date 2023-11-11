@@ -6124,7 +6124,7 @@ struct monst *mtmp;
 	if (mtmp->data->msize < MZ_HUMAN && typ != FOOD_RATION
 		&& typ != LEASH
 		&& typ != FIGURINE
-		&& (otmp->owt > 3 || objects[typ].oc_size > MZ_MEDIUM)
+		&& (otmp->owt > max(3, mtmp->data->cwt/10) || objects[typ].oc_size > MZ_MEDIUM)
 		&& !is_divider(mtmp->data)
 	) {
 		delobj(otmp);
