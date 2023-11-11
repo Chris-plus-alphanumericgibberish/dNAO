@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "artifact.h"
+#include "xhity.h"
 
 /* "an uncursed greased partly eaten guardian naga hatchling [corpse]" */
 #define PREFIX	125	/* (56) */
@@ -3349,6 +3350,7 @@ STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 	{ "dragon scale mail",
 			ARMOR_CLASS,  GRAY_DRAGON_SCALE_MAIL, YELLOW_DRAGON_SCALE_MAIL },
 	{ "sword",	WEAPON_CLASS, SHORT_SWORD,    KATANA },
+	{ "melee",	WEAPON_CLASS, SPEAR,    KATAR },
 //#ifdef FIREARMS
 	{ "firearm", 	WEAPON_CLASS, PISTOL, AUTO_SHOTGUN },
 	{ "gun", 	WEAPON_CLASS, PISTOL, AUTO_SHOTGUN },
