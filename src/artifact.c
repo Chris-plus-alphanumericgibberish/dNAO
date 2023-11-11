@@ -4663,12 +4663,18 @@ struct monst *magr;
 	if(count){
 		target = targets[rn2(count)];
 		if(youdef){
+			int temp_encouraged = u.uencouraged;
+			u.uencouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5);
 			flags.forcefight = TRUE;
 			xattacky(mdef, target, x(target), y(target));
 			flags.forcefight = FALSE;
+			u.uencouraged = temp_encouraged;
 		}
 		else {
+			int temp_encouraged = mdef->encouraged;
+			mdef->encouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5);
 			xattacky(mdef, target, x(target), y(target));
+			mdef->encouraged = temp_encouraged;
 		}
 	}
 	in_conflict = FALSE;
