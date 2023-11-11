@@ -86,8 +86,9 @@ static const struct crowning hand_of_elbereth[] = {
 {GOD_GWYN__LORD_OF_SUNLIGHT,     ART_DRAGONHEAD_SHIELD,			"the Dragon-slayer of Gwyn",			dub_thee_the,							became_the	},
 {GOD_GWYNEVERE__PRINCESS_OF_SUN, ART_CRUCIFIX_OF_THE_MAD_KING,	"the Guardian of the Old Lords",		dub_thee_the,							became_the	},
 {GOD_DARK_SUN_GWYNDOLIN,         ART_RINGED_BRASS_ARMOR,		"the Darkmoon Champion",				dub_thee_the,							became_the	},
-	/* Knight -- lawful only */
+	/* Knight -- lawful and chaotic  */
 {GOD_LUGH,                       ART_CLARENT,					"the King of the Angles",				dub_thee,								"crowned %s"	},
+{GOD_MANANNAN_MAC_LIR,                       ART_DARK_CLAYMORE,					"the Warrior of the Sea",				dub_thee,								"crowned %s"	},
 	/* Pirate -- all alignments are identical */
 {GOD_THE_LORD,                   ART_REAVER,					"the Pirate King",						(const char *)0,						became_the	},
 {GOD_THE_DEEP_BLUE_SEA,          ART_REAVER,					"the Pirate King",						(const char *)0,						became_the	},

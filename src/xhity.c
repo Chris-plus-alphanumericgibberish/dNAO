@@ -1154,6 +1154,9 @@ int tary;
 			/* the player cannot cast AT_MMGC (monster-only-magic) */
 			if (youagr && aatyp == AT_MMGC)
 				continue;
+			/* the player can opt-out of monster spellcasting, to save pw or not wake things up or w/e */
+			if (youagr && u.uavoid_msplcast)
+				continue;
 			/* Demogorgon casts spells less frequently in melee range */
 			if (pa->mtyp == PM_DEMOGORGON && !ranged && rn2(6) && !(youagr || magr->mflee))
 				continue;

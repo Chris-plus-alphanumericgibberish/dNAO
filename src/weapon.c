@@ -466,10 +466,16 @@ struct monst *magr;
 		explode_amt =   (wdice->explode_amt);
 		ignore_rolls =   (wdice->ignore_rolls);
 	}
-
 	/* set dmod, if possible*/
 	if (obj){
 		dmod = obj->objsize - MZ_MEDIUM;
+
+		/* Use ldice for small cases as well and add 1 to ocn */
+		if(obj->oartifact == ART_DARK_CLAYMORE){
+			ocn = objects[otyp].oc_wldam.oc_damn + 1;
+			ocd = objects[otyp].oc_wldam.oc_damd;
+		}
+
 		if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
 			dmod += 2;
 		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
