@@ -2159,7 +2159,7 @@ struct monst *mtmp;
 			m.has_misc = MUSE_POT_POLYMORPH;
 		}
 		nomore(MUSE_SCR_REMOVE_CURSE);
-		if(obj->otyp == SCR_REMOVE_CURSE)
+		if(obj->otyp == SCR_REMOVE_CURSE && !is_weldproof_mon(mtmp))
 		{
                         register struct obj *otmp;
 			for (otmp = mtmp->minvent;
@@ -2175,7 +2175,7 @@ struct monst *mtmp;
 			}
 		}
 		nomore(MUSE_POT_HOLY);
-		if(obj->otyp == POT_WATER && obj->blessed)
+		if(obj->otyp == POT_WATER && obj->blessed && !is_weldproof_mon(mtmp))
 		{
                         register struct obj *otmp;
 			for (otmp = mtmp->minvent;
