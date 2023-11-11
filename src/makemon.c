@@ -13422,6 +13422,8 @@ int faction;
 	if(is_eladrin(ptr) && mtmp->m_lev <= u.ulevel){
 		int delta = (u.ulevel - mtmp->m_lev) + 1;
 		mtmp->m_lev += rnd(delta*2) - delta;
+		if(mtmp->m_lev < 1)
+			mtmp->m_lev = 1;
 	}
 	
 	mtmp->m_insight_level = 0;
