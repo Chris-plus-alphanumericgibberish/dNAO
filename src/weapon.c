@@ -1292,7 +1292,7 @@ struct monst *magr;
 		}
 		else if (activeFightingForm(FFORM_DJEM_SO) && mon->mattackedu){
 			int sbon = ACURR(A_STR);
-			if (sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
+			if (sbon >= STR19(19)) sbon -= 20; //remove percentile adjustment
 			else if (sbon > 18) sbon = 18; //remove percentile adjustment
 			//else it is fine as is.
 			sbon = (sbon + 2) / 3; //1-9
@@ -4010,7 +4010,7 @@ int wep_type;
 			}
 			if(mcount > 1){
 				int sbon = ACURR(A_STR);
-				if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
+				if(sbon >= STR19(19)) sbon -= 20; //remove percentile adjustment
 				else if(sbon > 18) sbon = 18; //remove percentile adjustment
 				//else it is fine as is.
 				sbon = (sbon+2)/3; //1-9

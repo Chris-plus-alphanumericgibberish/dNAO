@@ -566,7 +566,7 @@ int dmg;
 			if(uwep){
 				n--;
 				You_feel("the tentacles wrap around your weapon.");
-				if( d(1,130) > ACURR(A_STR)){
+				if( d(1,50) > ACURR(A_STR)){
 					pline("The tentacles yank your weapon out of your grasp!");
 					otmp = uwep;
 					uwepgone();
@@ -589,7 +589,7 @@ int dmg;
 				n--;
 				if(!slips_free(mon, &youmonst,  &handshit, -1)){
 					You_feel("the tentacles squirm into your gloves.");
-					if( (d(1,40) <= ACURR(A_STR) || uwep)){
+					if( (d(1,30) <= ACURR(A_STR) || uwep)){
 						if(!Preservation){
 							pline("The tentacles begin to tear at your gloves!");
 							if(uarmg->spe > 1){
@@ -623,7 +623,7 @@ int dmg;
 			if(uarms){
 				n--;
 				You_feel("the tentacles wrap around your shield.");
-				if( d(1,150) > ACURR(A_STR)){
+				if( d(1,80) > ACURR(A_STR)){
 					pline("The tentacles pull your shield out of your grasp!");
 					otmp = uarms;
 					if (donning(otmp)) cancel_don();

@@ -1385,7 +1385,7 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 		    else if (str < 12) u.utrap = rn1(4,2);
 		    else if (str < 15) u.utrap = rn1(2,2);
 		    else if (str < 18) u.utrap = rnd(2);
-		    else if (str < 69) u.utrap = 1;
+		    else if (str < STR18(51)) u.utrap = 1;
 		    else {
 			u.utrap = 0;
 			if (webmsgok)

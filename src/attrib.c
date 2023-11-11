@@ -1296,8 +1296,8 @@ struct monst *mon;
 			// (swapwep && swapwep->oartifact == ART_STORMBRINGER) ||
 			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||
 			(arms && arms->oartifact == ART_GOLDEN_KNIGHT)
-		) return(125);
-		else return((schar)((tmp >= 125) ? 125 : (tmp <= 3) ? 3 : tmp));
+		) return(STR19(25));
+		else return((schar)((tmp >= STR19(25)) ? STR19(25) : (tmp <= 3) ? 3 : tmp));
 	} else if (x == A_CON) {
 		if (
 			(uwep && uwep->oartifact == ART_OGRESMASHER)

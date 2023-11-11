@@ -424,9 +424,9 @@ bot1()
 		Sprintf(nb = eos(nb),"%*s", i-j, " ");	/* pad with spaces */
 	if (ACURR(A_STR) > 18) {
 		if (ACURR(A_STR) > STR18(100))
-		    Sprintf(nb = eos(nb),"St:%2d ",ACURR(A_STR)-100);
+		    Sprintf(nb = eos(nb),"St:%2d ",ACURR(A_STR)-20);
 		else if (ACURR(A_STR) < STR18(100))
-		    Sprintf(nb = eos(nb), "St:18/%02d ",ACURR(A_STR)-18);
+		    Sprintf(nb = eos(nb), "St:18/%02d ",(ACURR(A_STR)-18)*5);
 		else
 		    Sprintf(nb = eos(nb),"St:18/** ");
 	} else
