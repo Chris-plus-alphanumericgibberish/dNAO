@@ -1678,6 +1678,7 @@ u_init()
 	u.ustuck = (struct monst *)0;
 
 	u.uavoid_passives = 0; // don't start out using only starblades lol
+	u.uavoid_msplcast = 0; // by default, allow mspellcasting
 	u.umystic = ~0; //By default, all monk style attacks are active
 
 	u.summonMonster = FALSE;

@@ -1274,15 +1274,13 @@ dofightingform()
 	/* copied wholesale from the same usage in mondata.c*/
 	struct attack *attk;
 	struct attack prev_attk = {0};
-	int	indexnum = 0, subout = 0, tohitmod = 0, res[4];
-	res[0] = MM_MISS;
-	res[1] = MM_MISS;
-	res[2] = MM_MISS;
-	res[3] = MM_MISS;
+	struct attack prev_attk2 = {0};
+	int	indexnum, subout, tohitmod, res[4];
+	indexnum = subout = tohitmod = 0;
 
 	/* to track whether or not we have a certain kind of style available*/
-	boolean monk_forms, lightsaber_forms, knight_forms, avoid_passives;
-	monk_forms = lightsaber_forms = knight_forms = avoid_passives = FALSE;
+	boolean monk_forms, lightsaber_forms, knight_forms, avoid_passives, avoid_msplcast;
+	monk_forms = lightsaber_forms = knight_forms = avoid_passives = avoid_msplcast = FALSE;
 
 	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
 	if(Role_if(PM_MONK))
@@ -1294,6 +1292,11 @@ dofightingform()
 	if (u.uavoid_passives)
 		avoid_passives = TRUE;
 	else {
+		indexnum = subout = tohitmod = 0;
+		res[0] = MM_MISS;
+		res[1] = MM_MISS;
+		res[2] = MM_MISS;
+		res[3] = MM_MISS;
 		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
 			!is_null_attk(attk);
 			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod)
@@ -1301,7 +1304,22 @@ dofightingform()
 			if(no_contact_attk(attk)) avoid_passives = TRUE;
 		}
 	}
-
+	if (u.uavoid_msplcast)
+		avoid_msplcast = TRUE;
+	else {
+		indexnum = subout = tohitmod = 0;
+		res[0] = MM_MISS;
+		res[1] = MM_MISS;
+		res[2] = MM_MISS;
+		res[3] = MM_MISS;
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod);
+			!is_null_attk(attk);
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod)
+		){
+			if(attk->aatyp == AT_MAGC) avoid_msplcast = TRUE;
+		}
+	}
+	
 	/* next, forms trained are shown, even if inapplicable at the moment*/
 	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
 		if (FightingFormSkillLevel(i) >= P_BASIC)
@@ -1318,16 +1336,16 @@ dofightingform()
 	 * note that if we have passive attacks at all, we want the menu, and if we have
 	 * only passives then we still want a menu (or a y/n, but i already wrote the menu)
 	*/
-
-	if (!monk_forms && !lightsaber_forms && !knight_forms && !avoid_passives){
+	#define uavoid (avoid_passives || avoid_msplcast)
+	if (!monk_forms && !lightsaber_forms && !knight_forms && !uavoid){
 		pline("You don't know any special fighting styles for use in this situation.");
 		return MOVE_CANCELLED;
 	}
-	else if (monk_forms && !lightsaber_forms && !knight_forms && !avoid_passives)
+	else if (monk_forms && !lightsaber_forms && !knight_forms && !uavoid)
 		return doMysticForm();
-	else if (!monk_forms && lightsaber_forms && !knight_forms && !avoid_passives)
+	else if (!monk_forms && lightsaber_forms && !knight_forms && !uavoid)
 		return doLightsaberForm();
-	else if (!monk_forms && !lightsaber_forms && knight_forms && !avoid_passives)
+	else if (!monk_forms && !lightsaber_forms && knight_forms && !uavoid)
 		return doKnightForm();
 
 	tmpwin = create_nhwindow(NHW_MENU);
@@ -1353,6 +1371,14 @@ dofightingform()
 
 		add_menu(tmpwin, NO_GLYPH, &any, 'p', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
+	
+	if (avoid_msplcast) {
+		any.a_int = 5;
+		if (!u.uavoid_msplcast) Strcpy(buf, "Avoid automatically casting spells when attacking");
+		else Strcpy(buf, "Allow the automatic casting of spells when attacking");
+
+		add_menu(tmpwin, NO_GLYPH, &any, 's', 0, ATR_NONE, buf, MENU_UNSELECTED);
+	}
 
 	end_menu(tmpwin, "Adjust fighting styles:");
 
@@ -1376,6 +1402,9 @@ dofightingform()
 			return doKnightForm();
 		case 4:
 			u.uavoid_passives = !u.uavoid_passives;
+			return MOVE_INSTANT;
+		case 5:
+			u.uavoid_msplcast = !u.uavoid_msplcast;
 			return MOVE_INSTANT;
 		default:
 			impossible("unknown fighting form set %d", n);
