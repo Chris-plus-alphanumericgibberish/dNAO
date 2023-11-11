@@ -411,7 +411,7 @@ struct obj *otmp;
 	case SPE_MASS_HEALING:{
 		int delta = mtmp->mhp;
 		const char *starting_word_ptr = injury_desc_word(mtmp);
-		int health = otyp == SPE_FULL_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
+		int health = otyp == SPE_FULL_HEALING ? (50*P_SKILL(P_HEALING_SPELL)) : (d(otyp == SPE_EXTRA_HEALING ? (6 + P_SKILL(P_HEALING_SPELL)) : 6, otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1));
 		reveal_invis = TRUE;
 		if(has_template(mtmp, PLAGUE_TEMPLATE) && otyp == SPE_FULL_HEALING){
 			if(canseemon(mtmp))
@@ -2875,12 +2875,16 @@ boolean ordinary;
 		case SPE_HEALING:
 		case SPE_EXTRA_HEALING:
 		case SPE_MASS_HEALING:
-		    healup((d((uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H) ?
-                  12 : 6, obj->otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1)),
+		{
+			int dice = (obj->otyp == SPE_EXTRA_HEALING) ? (6+P_SKILL(P_HEALING_SPELL)) : 6;
+			if(uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H)
+				dice *= 2;
+		    healup((d(dice, obj->otyp != SPE_HEALING ? 8 : 4) + 6*(P_SKILL(P_HEALING_SPELL)-1)),
 			   0, FALSE, (obj->otyp != SPE_HEALING));
 		    You_feel("%sbetter.",
-			obj->otyp != SPE_HEALING ? "much " : "");
+				obj->otyp != SPE_HEALING ? "much " : "");
 		    break;
+		}
 		case WAN_DARKNESS:	/* (broken wand) */
 		 /* assert( !ordinary ); */
 		    damage = d(obj->spe, 25);
