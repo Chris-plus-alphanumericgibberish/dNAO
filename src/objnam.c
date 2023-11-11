@@ -5775,6 +5775,11 @@ typfnd:
 
 			if (otmp->oartifact) {
 				isartifact = TRUE;
+			} else {
+				obfree(otmp, (struct obj *) 0);		// Is this necessary?
+				otmp = &zeroobj;					// Is this necessary?
+				*wishreturn = WISH_ARTEXISTS;
+				return &zeroobj;
 			}
 		}
 		/* if not artifact, use given name */
@@ -5816,17 +5821,6 @@ typfnd:
 					u.ucultsval += arti_value(otmp);
 				}
 			}
-		}
-	}
-	/* even more wishing abuse: if we tried to create an artifact but failed (it was already generated) we may need a new otyp */
-	else if (isartifact && !otmp->oartifact) {
-		switch (otmp->otyp) {
-		case BEAMSWORD:
-			otmp = poly_obj(otmp, BROADSWORD);
-			break;
-		case UNIVERSAL_KEY:
-			otmp = poly_obj(otmp, SKELETON_KEY);
-			break;
 		}
 	}
 
