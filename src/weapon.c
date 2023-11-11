@@ -2896,7 +2896,7 @@ struct obj *otmp;
 	}
 	
 	if(uarmg && bonus > 1 && check_oprop(uarmg, OPROP_RWTH) && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL)
-		bonus *= .5;
+		bonus *= 1.5;
 	
 	return bonus;
 }
