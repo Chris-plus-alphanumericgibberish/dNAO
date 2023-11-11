@@ -9047,6 +9047,13 @@ doapply()
 			res = use_pick_axe(obj);
 			break;
 		}
+		else if(
+		  (obj->oartifact == ART_SKY_REFLECTED && carrying_art(ART_SILVER_SKY)) ||
+		  (obj->oartifact == ART_SILVER_SKY && carrying_art(ART_SKY_REFLECTED))
+		){
+			res = merge_skies(&obj);
+			break;
+		}
 		pline("Sorry, I don't know how to use that.");
 	xit:
 		nomul(0, NULL);

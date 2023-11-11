@@ -189,6 +189,7 @@ E int FDECL(soth_weapon_damage_turn, (struct obj *));
 E int FDECL(merc_weapon_damage_slice, (struct obj *, struct monst *, int));
 E void FDECL(activate_mirrored_mask, (struct obj *));
 E int FDECL(infinity_s_mirrored_arc_litness, (struct obj *));
+E int FDECL(merge_skies, (struct obj **));
 
 /* ### astar.c ### */
 E boolean FDECL(path_exists, (int, int, int, int, long, int));

@@ -13657,7 +13657,7 @@ int vis;						/* True if action is at all visible to the player */
 				jadeobj |= slot;
 		}
 		if (hates_iron(pd) &&
-			otmp->obj_material == IRON &&
+			(otmp->obj_material == IRON || otmp->oartifact == ART_AMALGAMATED_SKIES || otmp->oartifact == ART_SKY_REFLECTED) &&
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			ironobj |= slot;
 		}
