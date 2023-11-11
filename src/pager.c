@@ -2383,7 +2383,7 @@ get_description_of_damage_type(uchar id)
 	case AD_DUNSTAN: return "stones throw themselves at target";
 	case AD_IRIS: return "iridescent tentacles";
 	case AD_NABERIUS: return "tarnished bloody fangs";
-	case AD_OTIAX: return "mist tendrals";
+	case AD_OTIAX: return "mist tendrils";
 	case AD_SIMURGH: return "thirty-colored feathers";
 	case AD_CMSL: return "cold missile";
 	case AD_FMSL: return "fire missile";

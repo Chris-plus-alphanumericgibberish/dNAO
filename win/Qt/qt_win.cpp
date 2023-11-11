@@ -2464,12 +2464,12 @@ void NetHackQtStatusWindow::updateStats()
 
     if (cursy != 0) return;    /* do a complete update when line 0 is done */
 
-    if (ACURR(A_STR) > 118) {
-	Sprintf(buf,"STR:%d",ACURR(A_STR)-100);
-    } else if (ACURR(A_STR)==118) {
+    if (ACURR(A_STR) > STR18(100)) {
+	Sprintf(buf,"STR:%d",ACURR(A_STR)-20);
+    } else if (ACURR(A_STR)==STR18(100)) {
 	Sprintf(buf,"STR:18/**");
     } else if(ACURR(A_STR) > 18) {
-	Sprintf(buf,"STR:18/%02d",ACURR(A_STR)-18);
+	Sprintf(buf,"STR:18/%02d",(ACURR(A_STR)-18)*5);
     } else {
 	Sprintf(buf,"STR:%d",ACURR(A_STR));
     }

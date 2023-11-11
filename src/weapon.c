@@ -1332,7 +1332,7 @@ struct monst *magr;
 		}
 		else if (activeFightingForm(FFORM_DJEM_SO) && mon->mattackedu){
 			int sbon = ACURR(A_STR);
-			if (sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
+			if (sbon >= STR19(19)) sbon -= 20; //remove percentile adjustment
 			else if (sbon > 18) sbon = 18; //remove percentile adjustment
 			//else it is fine as is.
 			sbon = (sbon + 2) / 3; //1-9
@@ -2823,7 +2823,6 @@ struct monst *mtmp;
 			if(bare_bonus > 0) damage_bon += cha/5 + bare_bonus*2;
 		}
 	}
-
 	if (damage_bon && armg && check_oprop(armg, OPROP_RWTH) && (
 			(youagr && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL) ||
 			(!youagr && is_lawful_mon(mtmp))))
@@ -3429,6 +3428,16 @@ struct obj *obj;
 	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD){
 		CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
 	}
+	else if(obj->oartifact == ART_SILVER_SKY){
+		CHECK_ALTERNATE_SKILL(P_TWO_HANDED_SWORD)
+		CHECK_ALTERNATE_SKILL(P_BROAD_SWORD)
+		CHECK_ALTERNATE_SKILL(P_SHORT_SWORD)
+	}
+	else if(obj->oartifact == ART_AMALGAMATED_SKIES){
+		CHECK_ALTERNATE_SKILL(P_LONG_SWORD)
+		CHECK_ALTERNATE_SKILL(P_BROAD_SWORD)
+		CHECK_ALTERNATE_SKILL(P_SHORT_SWORD)
+	}
 	else if(obj->oartifact == ART_TORCH_OF_ORIGINS){
 		type = P_CLUB;
 	}
@@ -3964,7 +3973,7 @@ int wep_type;
 			}
 			if(mcount > 1){
 				int sbon = ACURR(A_STR);
-				if(sbon >= STR19(19)) sbon -= 100; //remove percentile adjustment
+				if(sbon >= STR19(19)) sbon -= 20; //remove percentile adjustment
 				else if(sbon > 18) sbon = 18; //remove percentile adjustment
 				//else it is fine as is.
 				sbon = (sbon+2)/3; //1-9

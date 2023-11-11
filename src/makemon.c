@@ -14195,11 +14195,11 @@ int faction;
 		break;
 		case S_DRAGON:
 			if(mndx == PM_CHROMATIC_DRAGON){
-				mtmp->mhpmax = 3*mtmp->mhpmax;
+				mtmp->mhpmax = 3*mtmp->mhpmax/2;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 			else if(mndx == PM_PLATINUM_DRAGON){
-				mtmp->mhpmax = 3*mtmp->mhpmax;
+				mtmp->mhpmax = 3*mtmp->mhpmax/2;
 				mtmp->mhp = mtmp->mhpmax;
 			}
 		break;
@@ -15894,11 +15894,11 @@ struct monst *mtmp, *victim;
 			ptr->mtyp == PM_MOTHERING_MASS ||
 			ptr->mtyp == PM_DURIN_S_BANE ||
 			ptr->mtyp == PM_LUNGORTHIN ||
-			ptr->mtyp == PM_CHROMATIC_DRAGON ||
 			ptr->mtyp == PM_BOLG ||
 			ptr->mtyp == PM_PRIEST_OF_GHAUNADAUR ||
 			ptr->mtyp == PM_SHOGGOTH
 		) hp_threshold *= 3;
+	    else if (ptr->mtyp == PM_CHROMATIC_DRAGON || ptr->mtyp == PM_PLATINUM_DRAGON) hp_threshold *= 1.5;
 	    else if (ptr->mtyp == PM_RAZORVINE) hp_threshold *= .5;
 	    else if (ptr->mtyp == PM_CYCLOPS || ptr->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) hp_threshold = (hp_threshold+2)/3;
 		else if(ptr->mtyp == PM_CHAOS) hp_threshold = mtmp->data->mlevel * 2200/16;

@@ -659,6 +659,10 @@ const char *name;
 		if (obj->oartifact == ART_IBITE_ARM)
 			add_oprop(obj, OPROP_CCLAW);
 		
+		/* property */
+		if (obj->oartifact == ART_AMALGAMATED_SKIES || obj->oartifact == ART_SILVER_SKY)
+			add_oprop(obj, OPROP_GSSDW);
+		
 		/* symbol */
 		if (obj->oartifact == ART_LOMYA)
 			obj->oward = LOLTH_SYMBOL;

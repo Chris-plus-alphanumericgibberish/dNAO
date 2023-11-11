@@ -3491,7 +3491,7 @@ int *shield_margin;
 				/* firing ranged attacks without a laucher (ex manticore tail spikes) can use STR */
 				/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
 				if (youagr && hmoncode & HMON_KICKED && uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING))))
-					override_str = 125;	/* 25 STR */
+					override_str = STR19(25);	/* 25 STR */
 				bons_acc += abon();
 				override_str = 0;
 			}
@@ -6909,7 +6909,7 @@ boolean ranged;
 						You_feel("%s pull on your weapon!", mon_nam(magr));
 					}
 					/* 1d130 > STR */
-					if (d(1, 130) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
+					if (d(1, 50) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
 						if (youdef) {
 							if(uwep == uball){
 								pline("Fortunately, you are chained to your weapon!");
@@ -6982,7 +6982,7 @@ boolean ranged;
 						You_feel("%s pull on your gloves!", mon_nam(magr));
 					}
 					/* 1d40 > STR */
-					if (d(1, 40) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
+					if (d(1, 30) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
 						if (youdef) {
 							Your("gloves are sucked off!");
 							if (donning(otmp)) cancel_don();
@@ -7021,7 +7021,7 @@ boolean ranged;
 						You_feel("%s pull on your shield!", mon_nam(magr));
 					}
 					/* 1d150 > STR */
-					if (d(1, 150) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
+					if (d(1, 80) > (youdef ? ACURR(A_STR) : ACURR_MON(A_STR, mdef))){
 						if (youdef) {
 							Your("shield is sucked out of your grasp!");
 							if (donning(otmp)) cancel_don();
@@ -13667,7 +13667,7 @@ int vis;						/* True if action is at all visible to the player */
 				jadeobj |= slot;
 		}
 		if (hates_iron(pd) &&
-			otmp->obj_material == IRON &&
+			(otmp->obj_material == IRON || otmp->oartifact == ART_AMALGAMATED_SKIES || otmp->oartifact == ART_SKY_REFLECTED) &&
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			ironobj |= slot;
 		}
@@ -14907,7 +14907,7 @@ int vis;						/* True if action is at all visible to the player */
 					else {
 						/* hack: if wearing kicking boots, you effectively have 25 STR for kicked objects */
 						if (hmoncode & HMON_KICKED && youagr && uarmf && (uarmf->otyp == KICKING_BOOTS || (uarmf->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(uarmf, IEA_KICKING))))
-							override_str = 125;	/* 25 STR */
+							override_str = STR19(25);	/* 25 STR */
 						bonsdmg += dbon(weapon, magr);
 						override_str = 0;
 					}

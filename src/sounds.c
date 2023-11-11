@@ -5481,7 +5481,7 @@ int tx,ty;
 		} else pline("You can't feel the spirit.");
 	}break;
 	case YOG_SOTHOTH:{
-		if(u.sealTimeout[BLACK_WEB-FIRST_SEAL] < moves){
+		if(u.sealTimeout[YOG_SOTHOTH-FIRST_SEAL] < moves){
 			struct trap *t = t_at(tx,ty);
 			if((t && (t->ttyp == MAGIC_PORTAL || t->ttyp == LEVEL_TELEP || t->ttyp == TELEP_TRAP)) 
 			|| carrying_art(ART_SILVER_KEY)

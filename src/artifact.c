@@ -2296,6 +2296,8 @@ register const char *name;
 		 */
 	for (a = artilist+1; a->otyp; a++) {
 	    /* if (a->otyp != otmp->otyp) continue; */ //don't consider type anymore -CM
+		if(a == &artilist[ART_SKY_REFLECTED] && otmp->obj_material != MERCURIAL)
+			continue;
 	    aname = a->name;
 	    if (!strncmpi(aname, "the ", 4)) aname += 4;
 	    if (!strcmp(aname, name))
@@ -4677,12 +4679,18 @@ struct monst *magr;
 	if(count){
 		target = targets[rn2(count)];
 		if(youdef){
+			int temp_encouraged = u.uencouraged;
+			u.uencouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5);
 			flags.forcefight = TRUE;
 			xattacky(mdef, target, x(target), y(target));
 			flags.forcefight = FALSE;
+			u.uencouraged = temp_encouraged;
 		}
 		else {
+			int temp_encouraged = mdef->encouraged;
+			mdef->encouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5);
 			xattacky(mdef, target, x(target), y(target));
+			mdef->encouraged = temp_encouraged;
 		}
 	}
 	in_conflict = FALSE;
@@ -7877,8 +7885,11 @@ arti_invoke(obj)
 		oart->inv_prop == ANNUL ||
 		oart->inv_prop == ALTMODE || 
 		oart->inv_prop == LORDLY ||
-		oart->inv_prop == DETESTATION
-	)) {
+		oart->inv_prop == DETESTATION ||
+		oart->inv_prop == GITH_ART ||
+		oart->inv_prop == ZERTH_ART ||
+		oart->inv_prop == AMALGUM_ART
+	) {
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
 			You_hear("the sounds of hurried preparation.");
@@ -7905,6 +7916,9 @@ arti_invoke(obj)
 		oart->inv_prop == VOID_CHIME ||
 		oart->inv_prop == CHANGE_SIZE ||
 		oart->inv_prop == IMPERIAL_RING ||
+		oart->inv_prop == GITH_ART ||
+		oart->inv_prop == ZERTH_ART ||
+		oart->inv_prop == AMALGUM_ART ||
 		oart->inv_prop == SEVENFOLD
 	))
 		obj->age = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1));
@@ -8299,7 +8313,7 @@ arti_invoke(obj)
 			}
 		}
 	break;
-	case WATER:
+	case CREATE_POOL:
 		{
 			if (!(uwep && uwep == obj)) {
 				You_feel("that you should be wielding %s.", the(xname(obj)));
@@ -11167,6 +11181,13 @@ arti_invoke(obj)
 				}
 			}
 		}break;
+		case GITH_ART:{
+		}break;
+		case ZERTH_ART:{
+			pline("There are mantras wound around the grip.");
+		}break;
+		case AMALGUM_ART:{
+		}break;
 		default: pline("Program in dissorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
@@ -13830,6 +13851,58 @@ struct obj * obj;
 	}
 
 	return artinstance[ART_INFINITY_S_MIRRORED_ARC].IMAlitness;
+}
+
+int merge_skies(opptr)
+struct obj **opptr;
+{
+	struct obj *sky1 = *opptr;
+	int needed;
+	if(sky1->oartifact == ART_SILVER_SKY)
+		needed = ART_SKY_REFLECTED;
+	else
+		needed = ART_SILVER_SKY;
+	if(yn("Merge the two skies into one?") == 'y'){
+		struct obj *sky2;
+		struct obj *amalgam;
+		for(sky2 = invent; sky2; sky2 = sky2->nobj)
+			if(sky2->oartifact == needed)
+				break;
+		if(!sky2){
+			impossible("Missing second sky in merge_skies.");
+			return MOVE_CANCELLED;
+		}
+		amalgam = mksartifact(ART_AMALGAMATED_SKIES);
+		if(!amalgam || !amalgam->oartifact){
+			impossible("Make Amalgamated Skies failed in merge_skies.");
+			if(amalgam)
+				obfree(amalgam, (struct obj *)0);	/* now, get rid of it */
+			return MOVE_CANCELLED;
+		}
+		pline("%s and %s melt and disolve into each-other!", The(xname(sky1)), the(xname(sky2)));
+		//merge stats
+		amalgam->spe = max(sky1->spe, sky2->spe);
+		for(int prop = 1; prop < MAX_OPROP; prop++){
+			if(check_oprop(sky1, prop) || check_oprop(sky2, prop))
+				add_oprop(amalgam, prop);
+		}
+		if(sky1->blessed || sky2->blessed)
+			bless(amalgam);
+		else if(sky1->cursed || sky2->cursed)
+			curse(amalgam);
+		else{
+			amalgam->cursed = amalgam->blessed = FALSE;
+		}
+		if(sky1->ostolen || sky2->ostolen)
+			amalgam->ostolen = TRUE;
+		useupall(sky1);
+		useupall(sky2);
+		hold_another_object(amalgam, "You fumble and %s.",
+		   aobjnam(amalgam, "fall"), (const char *)0); //Should've just freed up two iniventory slots to add one new item, but....
+		*opptr = (struct obj *) 0;
+		return MOVE_STANDARD;
+	}
+	else return MOVE_CANCELLED;
 }
 
 /*artifact.c*/

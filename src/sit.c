@@ -139,7 +139,7 @@ dosit()
 				if(obj->otyp == BEDROLL && obj->nexthere)
 					pline("It's not very comfortable...");
 				else
-					pline("It's %scomfortable, but you're not tired.", obj->otyp == BED ? "" : "reasonably");
+					pline("It's %scomfortable, but you're not tired.", obj->otyp == BED ? "" : "reasonably ");
 			}
 		}
 	    else {

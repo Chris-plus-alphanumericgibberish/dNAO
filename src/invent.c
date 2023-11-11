@@ -1284,6 +1284,8 @@ register const char *let,*word;
 			  otmp->otyp != RAKUYO && otmp->otyp != RAKUYO_SABER && 
 			  otmp->otyp != BLADE_OF_MERCY && otmp->otyp != BLADE_OF_GRACE && 
 			  otmp->otyp != DOUBLE_FORCE_BLADE && otmp->otyp != FORCE_BLADE &&
+			  !(otmp->oartifact == ART_SKY_REFLECTED && carrying_art(ART_SILVER_SKY)) &&
+			  !(otmp->oartifact == ART_SILVER_SKY && carrying_art(ART_SKY_REFLECTED)) &&
 			  otmp->otyp != MASS_SHADOW_PISTOL
 			 ) ||
 			 (otmp->oclass == CHAIN_CLASS && 
@@ -2346,6 +2348,12 @@ struct obj *obj;
 	else if (obj->otyp == FORCE_SWORD)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Unlock your force whip", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_SILVER_SKY)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Merge skies", MENU_UNSELECTED);
+	else if (obj->oartifact == ART_SKY_REFLECTED)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Merge skies", MENU_UNSELECTED);
 	else if (obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH || obj->otyp == MAGIC_TORCH)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or snuff this torch", MENU_UNSELECTED);

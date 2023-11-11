@@ -716,6 +716,36 @@ A("The Lance of Longinus",		SPEAR,					(const char *)0,
 	WWALKING, NOFLAG
 	),
 
+A("The Silver Sky",		LONG_SWORD,					(const char *)0,
+	1500L, SILVER, MZ_MEDIUM, 75,
+	A_NONE, NON_PM, PM_GITHYANKI_PIRATE, TIER_B, (NOFLAG),
+	NO_MONS(),
+	ATTK(AD_PHYS, 1, 12), (ARTA_VORPAL),
+	PROPS(ANTIMAGIC), NOFLAG,
+	PROPS(), NOFLAG,
+	GITH_ART, NOFLAG
+	),
+
+A("The Sky Reflected",		BROADSWORD,					(const char *)0,
+	1500L, MERCURIAL, MZ_MEDIUM, WT_DEFAULT,
+	A_NONE, NON_PM, PM_GITHYANKI_PIRATE, TIER_B, (ARTG_NAME|ARTG_NOGEN),
+	NO_MONS(),
+	ATTK(AD_PHYS, 8, 1), NOFLAG,
+	PROPS(REFLECTING), NOFLAG,
+	PROPS(), NOFLAG,
+	ZERTH_ART, NOFLAG
+	),
+
+A("The Amalgamated Skies",		TWO_HANDED_SWORD,					(const char *)0,
+	1500L, MERCURIAL, MZ_LARGE, 150,
+	A_NONE, NON_PM, PM_GITHYANKI_PIRATE, TIER_S, (ARTG_NOGEN|ARTG_NOWISH),
+	NO_MONS(),
+	ATTK(AD_PHYS, 8, 12), (ARTA_SILVER|ARTA_VORPAL),
+	PROPS(FREE_ACTION, REFLECTING), NOFLAG,
+	PROPS(ANTIMAGIC), NOFLAG,
+	AMALGUM_ART, NOFLAG
+	),
+
 // /* still uses the old artifact structure */
 // /* TODO aggrevate 'f' */
 // A("The Pink Panther", DIAMOND,			0,			0,
@@ -1808,7 +1838,7 @@ A("Poseidon's Trident",				TRIDENT,				(const char *)0,
 	ATTK(AD_PHYS, 3, 0), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	WATER, NOFLAG
+	CREATE_POOL, NOFLAG
 	),
 
 A("Feng Huo Lun",				WIND_AND_FIRE_WHEELS,				"flaming %s",

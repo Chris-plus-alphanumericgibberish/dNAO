@@ -401,7 +401,7 @@ extern struct artifact * artilist;
 #define COLLECT_TAX     (LAST_PROP+65)
 #define ALTMODE         (LAST_PROP+66)
 #define AEGIS           (LAST_PROP+67)
-#define WATER           (LAST_PROP+68)
+#define CREATE_POOL     (LAST_PROP+68)
 #define SINGING         (LAST_PROP+69)
 #define WIND_PETS	    (LAST_PROP+70)
 #define DEATH_TCH       (LAST_PROP+71)
@@ -425,6 +425,9 @@ extern struct artifact * artilist;
 #define SNARE_WEAPONS	(LAST_PROP+89)
 #define CHANGE_SIZE		(LAST_PROP+90)
 #define WAVES_DARKNESS	(LAST_PROP+91)
+#define GITH_ART		(LAST_PROP+92)
+#define ZERTH_ART		(LAST_PROP+93)
+#define AMALGUM_ART		(LAST_PROP+94)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20
@@ -489,7 +492,7 @@ extern struct artifact * artilist;
 				)\
 			)
 /* artifact has no specific material or size, eg "silver Grimtooth" */
-#define is_malleable_artifact(a) (is_nameable_artifact((a)) || (a) == &artilist[ART_EXCALIBUR] || (a) == &artilist[ART_GUNGNIR] || (a) == &artilist[ART_DIRGE])
+#define is_malleable_artifact(a) (is_nameable_artifact((a)) || (a) == &artilist[ART_EXCALIBUR] || (a) == &artilist[ART_GUNGNIR] || (a) == &artilist[ART_DIRGE] || (a) == &artilist[ART_SKY_REFLECTED])
 
 #define is_living_artifact(obj) ((obj)->oartifact == ART_TENTACLE_ROD || (obj)->oartifact == ART_DRAGONHEAD_SHIELD || (obj)->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING || (obj)->oartifact == ART_RITUAL_RINGED_SPEAR || (obj)->oartifact == ART_RINGED_BRASS_ARMOR || (obj)->oartifact == ART_IBITE_ARM || (obj)->oartifact == ART_ESSCOOAHLIPBOOURRR || (obj)->oartifact == ART_CROWN_OF_THE_PERCIPIENT || (obj)->oartifact == ART_FALLINGSTAR_MANDIBLES)
 #define is_bloodthirsty_artifact(obj) (arti_is_prop(obj, ARTI_BLOODTHRST) && roll_generic_flat_madness(FALSE))

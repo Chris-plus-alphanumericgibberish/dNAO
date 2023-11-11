@@ -818,22 +818,6 @@ MAP
 0----------------------------------------------------------------------------
 ENDMAP
 
-OBJECT:'#',"color_white thoroughly rotted imperial elven helm",random
-OBJECT[75%]:'#',"color_bright_green thoroughly rotted imperial elven helm",random
-OBJECT[10%]:'#',"color_orange thoroughly rotted imperial elven helm",random
-
-OBJECT:'#',"color_bright_green thoroughly rotted imperial elven armor",random
-OBJECT[75%]:'#',"color_orange thoroughly rotted imperial elven armor",random
-OBJECT[10%]:'#',"color_gray thoroughly rotted imperial elven armor",random
-
-OBJECT:'#',"color_red thoroughly rotted imperial elven gauntlets",random
-OBJECT[75%]:'#',"color_gray thoroughly rotted imperial elven gauntlets",random
-OBJECT[10%]:'#',"color_bright_green thoroughly rotted imperial elven gauntlets",random
-
-OBJECT:'#',"color_bright_green thoroughly rotted imperial elven boots",random
-OBJECT[75%]:'#',"color_gray thoroughly rotted imperial elven boots",random
-OBJECT[10%]:'#',"color_red thoroughly rotted imperial elven boots",random
-
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -1116,17 +1100,17 @@ MAP
 1                    ---------...............---------                    
 2              -------...............................-------              
 3         ------.........---------S-----S---------.........------         
-4      ----........-------|######|.|###|.|######|-------........----      
-5    ---......------######S######|.--S--.|######S######------......---    
-6  ---.....----####S######|-------.......-------|######S####----.....---  
-7---.....---##S####---------........}}}........---------####S##---.....---
-8|.......|####------...............}}}}}...............------####|.......|
-9|.......|####S...................}}}.}}}...................S####|.......|
-0|.......|####------...............}}}}}...............------####|.......|
-1---.....---##S####---------........}}}........---------####S##---.....---
-2  ---.....----####S######|-------.......-------|######S####----.....---  
-3    ---......------######S######|.--S--.|######S######------......---    
-4      ----........-------|######|.|###|.|######|-------........----      
+4      ----........-------|      |.|   |.|      |-------........----      
+5    ---......------      S      |.--S--.|      S      ------......---    
+6  ---.....----    S      |-------.......-------|      S    ----.....---  
+7---.....---  S    ---------........}}}........---------    S  ---.....---
+8|.......|    ------...............}}}}}...............------    |.......|
+9|.......|    S...................}}} }}}...................S    |.......|
+0|.......|    ------...............}}}}}...............------    |.......|
+1---.....---  S    ---------........}}}........---------    S  ---.....---
+2  ---.....----    S      |-------.......-------|      S    ----.....---  
+3    ---......------      S      |.--S--.|      S      ------......---    
+4      ----........-------|      |.|   |.|      |-------........----      
 5         ------.........---------S-----S---------.........------         
 6              -------...............................-------              
 7                    ---------...............---------                    
@@ -1134,16 +1118,6 @@ MAP
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012
 #0         1         2         3         4         5         6         7     
-
-STAIR: (00,00,72,18),(09,04,63,14), up
-STAIR: (36,09,36,09),(0,0,0,0), down
-
-MONSTER: 'U', "elder brain", (36,09), hostile
-
-# MONSTER:'U',"uvuudaum",random
-# MONSTER:'U',"uvuudaum",random
-# MONSTER:'U',"uvuudaum",random
-
 
 OBJECT:'[',"plasteel helm",random
 OBJECT:'[',"plasteel helm",random
@@ -1238,6 +1212,155 @@ OBJECT:'(',"lightsaber",random
 OBJECT:'(',"lightsaber",random
 
 OBJECT:'(',"double lightsaber",random
+
+GEOMETRY:center,center
+#0         1         2         3         4         5         6         7     
+#0123456789012345678901234567890123456789012345678901234567890123456789012
+MAP
+0      ---------------       -----------------       ---------------      
+1      |..|...|......|--------               --------|......|...|..|      
+2      |..|...|---F---                               ---F---|...|..|      
+3      |..--F---         ---------S-----S---------         ---F--..|      
+4      -F--        -------|      | |   | |      |-------        --F-      
+5    ---      ------      S      | --S-- |      S      ------      ---    
+6  ---     ----    S      |-------       -------|      S    ----     ---  
+7---     ---  S    ---------                   ---------    S  ---     ---
+8|       |    ------                                   ------    |       |
+9|       |    S                                             S    |       |
+0|       |    ------                                   ------    |       |
+1---     ---  S    ---------                   ---------    S  ---     ---
+2  ---     ----    S      |-------       -------|      S    ----     ---  
+3    ---      ------      S      | --S-- |      S      ------      ---    
+4      -F--        -------|      | |   | |      |-------        --F-      
+5      |..--F---         ---------S-----S---------         ---F--..|      
+6      |..|...|---F---                               ---F---|...|..|      
+7      |..|...|......---------               ---------......|...|..|      
+8      ---------------       -----------------       ---------------      
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012
+#0         1         2         3         4         5         6         7     
+
+
+OBJECT:'#',"color_white thoroughly rotted imperial elven helm",random
+OBJECT[75%]:'#',"color_bright_green thoroughly rotted imperial elven helm",random
+OBJECT[10%]:'#',"color_orange thoroughly rotted imperial elven helm",random
+
+OBJECT:'#',"color_bright_green thoroughly rotted imperial elven armor",random
+OBJECT[75%]:'#',"color_orange thoroughly rotted imperial elven armor",random
+OBJECT[10%]:'#',"color_gray thoroughly rotted imperial elven armor",random
+
+OBJECT:'#',"color_red thoroughly rotted imperial elven gauntlets",random
+OBJECT[75%]:'#',"color_gray thoroughly rotted imperial elven gauntlets",random
+OBJECT[10%]:'#',"color_bright_green thoroughly rotted imperial elven gauntlets",random
+
+OBJECT:'#',"color_bright_green thoroughly rotted imperial elven boots",random
+OBJECT[75%]:'#',"color_gray thoroughly rotted imperial elven boots",random
+OBJECT[10%]:'#',"color_red thoroughly rotted imperial elven boots",random
+
+OBJECT:'#',"vorpal flowing silver two-handed sword",random
+OBJECT[75%]:'#',"vorpal flowing silver two-handed sword",random
+OBJECT[75%]:'#',"vorpal flowing silver two-handed sword",random
+OBJECT[10%]:'#',"vorpal flowing silver two-handed sword",random
+OBJECT[10%]:'#',"vorpal flowing silver two-handed sword",random
+
+OBJECT:'#',"vorpal flowing silver long sword",random
+OBJECT[75%]:'#',"vorpal flowing silver long sword",random
+OBJECT[10%]:'#',"vorpal flowing silver long sword",random
+
+OBJECT:'#',"mercurial katana",random
+OBJECT[75%]:'#',"mercurial sword",random
+OBJECT[10%]:'#',"mercurial sword",random
+OBJECT:'#',"mercurial melee",random
+OBJECT[75%]:'#',"mercurial melee",random
+OBJECT[10%]:'#',"mercurial melee",random
+OBJECT:'#',"mercurial melee",random
+OBJECT[75%]:'#',"mercurial melee",random
+OBJECT[10%]:'#',"mercurial melee",random
+
+OBJECT:'[',"droven helm",random
+OBJECT:'[',"droven helm",random
+
+OBJECT:'[',"droven plate mail",random
+OBJECT:'[',"droven plate mail",random
+
+OBJECT:'[',"noble's dress",random
+OBJECT:'[',"noble's dress",random
+
+OBJECT:'[',"droven chain mail",random
+OBJECT:'[',"droven chain mail",random
+
+OBJECT:'[',"droven cloak",random
+OBJECT:'[',"droven cloak",random
+OBJECT:'[',"droven cloak",random
+OBJECT:'[',"droven cloak",random
+OBJECT:'[',"droven cloak",random
+OBJECT:'[',"droven cloak",random
+
+OBJECT:')',"droven spear",random
+
+OBJECT:')',"viperwhip",random
+OBJECT:')',"viperwhip",random
+OBJECT:')',"viperwhip",random
+OBJECT:')',"viperwhip",random
+OBJECT:')',"viperwhip",random
+
+OBJECT:')',"khakkhara",random
+
+OBJECT:')',"droven dagger",random
+OBJECT:')',"droven dagger",random
+OBJECT:')',"droven dagger",random
+
+OBJECT:')',"droven short sword",random
+
+OBJECT:')',"droven lance",random
+
+OBJECT:'#',"silver rifle",random
+OBJECT:'#',"silver rifle",random
+OBJECT:'#',"shadowsteel rifle",random
+
+OBJECT:'#',"silver assault rifle",random
+OBJECT:'#',"silver assault rifle",random
+OBJECT:'#',"shadowsteel assault rifle",random
+
+OBJECT:'#',"silver sniper rifle",random
+OBJECT:'#',"silver sniper rifle",random
+OBJECT:'#',"shadowsteel sniper rifle",random
+
+GEOMETRY:center,center
+#0         1         2         3         4         5         6         7     
+#0123456789012345678901234567890123456789012345678901234567890123456789012
+MAP
+0                            -----------------                            
+1       HH HHH HHHHHH---------...............---------HHHHHH HHH HH       
+2       HH HHH ---F---...............................---F--- HHH HH       
+3       HH--F---.........---------S-----S---------.........---F--HH       
+4      -F--........-------|######|.|###|.|######|-------........--F-      
+5    ---......------######S######|.--S--.|######S######------......---    
+6  ---.....----####S######|-------.......-------|######S####----.....---  
+7---.....---##S####---------........}}}........---------####S##---.....---
+8|.......|####------...............}}}}}...............------####|.......|
+9|.......|####S...................}}}.}}}...................S####|.......|
+0|.......|####------...............}}}}}...............------####|.......|
+1---.....---##S####---------........}}}........---------####S##---.....---
+2  ---.....----####S######|-------.......-------|######S####----.....---  
+3    ---......------######S######|.--S--.|######S######------......---    
+4      -F--........-------|######|.|###|.|######|-------........--F-      
+5       HH--F---.........---------S-----S---------.........---F--HH       
+6       HH HHH ---F---...............................---F--- HHH HH       
+7       HH HHH HHHHHH---------...............---------HHHHHH HHH HH       
+8                            -----------------                            
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012
+#0         1         2         3         4         5         6         7     
+
+STAIR: (00,00,72,18),(09,04,63,14), up
+STAIR: (36,09,36,09),(0,0,0,0), down
+
+MONSTER: 'U', "elder brain", (36,09), hostile
+
+# MONSTER:'U',"uvuudaum",random
+# MONSTER:'U',"uvuudaum",random
+# MONSTER:'U',"uvuudaum",random
 
 
 OBJECT:random,random,random

@@ -1941,7 +1941,7 @@ int shotlimit;
 		(skill == P_DART) ||
 		(skill == P_SHURIKEN) ||
 		(skill == P_BOOMERANG) ||
-		(ammo->otyp == ELVEN_SICKLE) ||
+		is_sickle(ammo) ||
 		(ammo->oartifact == ART_AMHIMITL)
 		) {
 		/* Skill based bonus */
