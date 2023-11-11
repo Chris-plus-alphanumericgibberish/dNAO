@@ -6062,7 +6062,6 @@ struct monst *magr;
 	if(!attk){
 		if(youagr){
 			attk = &symbiote;
-			u.yogAttack = moves;
 		}
 		else return FALSE;
 	}
@@ -6101,6 +6100,9 @@ struct monst *magr;
 			continue;
 		if(!youdef && nonthreat(mdef))
 			continue;
+		if(youagr){
+			u.yogAttack = moves;
+		}
 
 		if(attk->aatyp != AT_MAGC && attk->aatyp != AT_GAZE){
 			if((touch_petrifies(mdef->data)
