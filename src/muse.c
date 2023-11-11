@@ -2084,6 +2084,10 @@ struct monst *mtmp;
 		if(obj->otyp == MASK && obj->corpsenm != NON_PM && mtmp->mtyp == PM_POLYPOID_BEING
 			&& !(mons[obj->corpsenm].geno&G_UNIQ)
 			&& !(is_horror(&mons[obj->corpsenm]))
+			&& !(is_great_old_one(&mons[obj->corpsenm]))
+			&& obj->corpsenm != PM_DREAD_SERAPH
+			&& obj->corpsenm != PM_ALIGNED_PRIEST
+			&& obj->corpsenm != PM_PRIEST_OF_AN_UNKNOWN_GOD
 			&& !obj->oartifact) {
 			m.misc = obj;
 			m.has_misc = MUSE_MASK;
