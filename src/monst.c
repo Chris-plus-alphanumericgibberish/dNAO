@@ -4670,7 +4670,7 @@ struct permonst _mons2[] = {
 	MB_OVIPAROUS|MB_SLITHY|MB_LONGHEAD|MB_POIS|MB_NOLIMBS /*MB*/, MG_TRACKER /*MG*/,
 	MA_REPTILIAN /*MA*/,  MV_NORMAL|MV_SCENT /*MV*/, 0 /*MW*/, CLR_BLUE),
     MON("serpent man of Yoth", S_SNAKE,//15 /*Needs tile*/
-	LVL(11, 6, 30, 0), (G_GENO|1),
+	LVL(11, 6, 30, 0), (G_GENO|G_S_INST(11)|1),
 	DEF(NAT_AC(10)),
 	A(ATTK(AT_BITE, AD_DRST, 2, 4),
 	  ATTK(AT_WEAP, AD_PHYS, 1, 4),
