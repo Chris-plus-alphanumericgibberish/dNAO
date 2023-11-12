@@ -181,8 +181,8 @@ auto_describe(int cx, int cy)
 		sym = ' ';
 	}
     do_look_letter(sym, TRUE, TRUE, force_defsyms, cc, out_str, firstmatch);
-	if (out_str[0]) pline("%s", out_str);\
-	else pline("no out str :(");
+	if (out_str[0]) pline("%s", out_str);
+	else impossible("no out str for do_look_letter on current terrain? sym %d", sym);
 	flush_screen(1);
 }
 
@@ -218,6 +218,7 @@ const char *goal;
     for (;;) {
 	if (iflags.autodescribe) {
 		auto_describe(cx, cy);
+		curs(WIN_MAP,cx,cy);
 	}
 	c = nh_poskey(&tx, &ty, &sidx);
 	if (c == '\033') {
