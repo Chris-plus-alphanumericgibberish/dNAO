@@ -7889,7 +7889,7 @@ arti_invoke(obj)
 		oart->inv_prop == GITH_ART ||
 		oart->inv_prop == ZERTH_ART ||
 		oart->inv_prop == AMALGUM_ART
-	) {
+	)) {
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
 			You_hear("the sounds of hurried preparation.");
