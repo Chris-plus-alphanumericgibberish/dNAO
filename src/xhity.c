@@ -18929,5 +18929,8 @@ boolean magical;
 		else
 			dmg = (dmg + 1) / 2;
 	}
+	/* Priests of Asmodeus */
+	if(mdef != &youmonst && flags.spriest_level && is_demon(mdef->data) && is_lawful_mon(mdef) && !mdef->mpeaceful)
+		dmg = (dmg + 1) / 2;
 	return dmg;
 }
