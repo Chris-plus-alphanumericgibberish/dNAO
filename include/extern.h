@@ -235,6 +235,7 @@ E schar FDECL(acurr, (int, struct monst *));
 E schar FDECL(acurr_player, (int));
 E schar FDECL(acurrstr, (int));
 E void FDECL(adjalign, (int));
+E void FDECL(unSetFightingForm, (int));
 E void FDECL(setFightingForm, (int));
 E boolean FDECL(activeFightingForm, (int));
 E boolean FDECL(selectedFightingForm, (int));

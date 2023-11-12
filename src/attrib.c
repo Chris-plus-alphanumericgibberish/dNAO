@@ -1909,7 +1909,7 @@ register int n;
 }
 
 void
-setFightingForm(fform)
+unSetFightingForm(fform)
 int fform;
 {
 	int i, first, last;
@@ -1931,6 +1931,14 @@ int fform;
 	for(i=first/32; i <= last/32; i++)
 		u.fightingForm[i] = 0L;
 
+}
+
+void
+setFightingForm(fform)
+int fform;
+{
+	/* this code assumes that each batch of 32 fighting forms are mutually exclusive, but not with other batches of 32 */
+	unSetFightingForm(fform);
 	u.fightingForm[(fform-1)/32] |= (0x1L << ((fform-1)%32));
 }
 

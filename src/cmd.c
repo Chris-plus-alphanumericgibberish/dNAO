@@ -1209,7 +1209,7 @@ int doKnightForm()
 		else if (i == FFORM_KNI_RUNIC)
 			block_reason = "lack of a longsword";
 		else if (i == FFORM_HALF_SWORD){
-			if (uwep && uwep->otyp != LONG_SWORD) block_reason = "lack of a longsword";
+			if (!uwep || uwep->otyp != LONG_SWORD) block_reason = "lack of a longsword";
 			else block_reason = "lack of a free hand";
 		}
 		else if (i == FFORM_GREAT_WEP)
@@ -1251,8 +1251,9 @@ int doKnightForm()
 		free(selected);
 		return doEldritchKniForm();
 	} else if (selectedFightingForm(selected[0].item.a_int)) {
+		unSetFightingForm(selected[0].item.a_int);
 		free(selected);
-		return MOVE_CANCELLED;
+		return MOVE_INSTANT;
 	} else {
 		setFightingForm(selected[0].item.a_int);
 		free(selected);
