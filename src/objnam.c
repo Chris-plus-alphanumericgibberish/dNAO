@@ -4263,7 +4263,7 @@ int wishflags;
 			&& strncmpi(bp, "silver spellbook", 16)
 			&& strncmpi(bp, "silver wand", 11) && strncmpi(bp, "silver slingstone", 17)
 			&& strncmpi(bp, "silver stone", 12) && strncmpi(bp, "Silver Key", 10)
-			&& strncmpi(bp, "Silver Starlight", 16)
+			&& strncmpi(bp, "Silver Starlight", 16) && strncmpi(bp, "Silver Sky", 10)
 		) {
 			mat = SILVER;
 		} else if ((!strncmpi(bp, "golden ", l=7) || !strncmpi(bp, "gold ", l=5))
