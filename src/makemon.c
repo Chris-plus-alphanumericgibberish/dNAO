@@ -28,7 +28,6 @@ STATIC_DCL int FDECL(align_shift, (struct permonst *));
 STATIC_DCL struct permonst * NDECL(roguemonst);
 STATIC_DCL boolean FDECL(wrong_elem_type, (struct permonst *));
 STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int, boolean, int));
-STATIC_DCL int FDECL(permonst_max_lev,(struct permonst *));
 #ifdef OVL1
 STATIC_DCL void FDECL(m_initinv,(struct monst *, int, int, boolean));
 #endif /* OVL1 */
@@ -16769,7 +16768,6 @@ init_doll_sales()
 	return dollTypes;
 }
 
-STATIC_OVL
 int
 permonst_max_lev(ptr)
 struct permonst *ptr;

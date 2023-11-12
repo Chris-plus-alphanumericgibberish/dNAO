@@ -1406,6 +1406,7 @@ E long NDECL(init_doll_sales);
 E boolean FDECL(propagate, (int, BOOLEAN_P,BOOLEAN_P));
 E boolean FDECL(mon_can_see_you, (struct monst *));
 E boolean FDECL(mon_can_see_mon, (struct monst *, struct monst *));
+E int FDECL(permonst_max_lev,(struct permonst *));
 E int FDECL(mon_max_lev,(struct monst *));
 
 /* ### mapglyph.c ### */
