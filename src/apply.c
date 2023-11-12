@@ -3255,7 +3255,7 @@ coord *cc;
 		m_level_up_intrinsic(mtmp);
 		if(master == &youmonst || master->mtame){
 			mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
-			if(mtmp && EDOG(mtmp)){
+			if(mtmp && get_mx(mtmp, MX_EDOG)){
 				EDOG(mtmp)->dominated = TRUE;
 				EDOG(mtmp)->hungrytime = monstermoves + 4500;
 			}
