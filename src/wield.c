@@ -979,7 +979,7 @@ struct monst * mon;
 	if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
 		return 2;
 
-	if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS)
+	if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS || otmp->otyp == ROD_OF_FORCE || (youagr && weapon_type(otmp) == P_QUARTERSTAFF))
 		return 2;
 
 	if (is_spear(otmp))
