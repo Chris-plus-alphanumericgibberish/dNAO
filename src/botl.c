@@ -138,7 +138,8 @@ apply_color_option(color_option, newbot2, statusline)
 
 void
 add_colored_text(const char *hilite, const char *text, char *newbot2,
-                 boolean terminal_output, int statusline, boolean first)
+                 boolean terminal_output, int statusline, boolean first,
+                 long duration)
 {
     char *nb;
     struct color_option color_option;
@@ -152,8 +153,11 @@ add_colored_text(const char *hilite, const char *text, char *newbot2,
     if (strlen(newbot2) >= maxlength) return;
 
     if (!iflags.use_status_colors || !terminal_output) {
-	Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s" : " %s", text);
-	return;
+        if (duration)
+            Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s:%ld" : " %s:%ld", text, duration);
+        else
+            Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s" : " %s", text);
+        return;
     }
 
     Strncat(nb = eos(newbot2), first ? "" : " ", MAXCO - strlen(newbot2));
@@ -161,6 +165,8 @@ add_colored_text(const char *hilite, const char *text, char *newbot2,
     putstr(WIN_STATUS, 0, newbot2);
 
     Strncat(nb = eos(nb), text, MAXCO - strlen(newbot2));
+    if (duration)
+        Snprintf(nb = eos(nb), MAXCO - strlen(newbot2), ":%ld", duration);
     curs(WIN_STATUS, 1, statusline-1);
     color_option = text_color_of(hilite, text_colors);
     start_color_option(color_option);
@@ -515,13 +521,25 @@ do_statuseffects(char *newbot2, boolean terminal_output, int abbrev, int statusl
 #define status_effect(str1, str2, str3)                                 \
   (add_colored_text((str1),                                             \
                     abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), \
-                    newbot2, terminal_output, statusline, first),       \
+                    newbot2, terminal_output, statusline, first, 0),    \
+   first = FALSE)
+#define status_effect_duration(str1, str2, str3, duration)              \
+  (add_colored_text((str1),                                             \
+                    abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), \
+                    newbot2, terminal_output, statusline, first,        \
+                    duration),                                          \
    first = FALSE)
 #else
 #define status_effect(str1, str2, str3)                                 \
   (Snprintf(nb = eos(nb), MAXCO - strlen(newbot2),                      \
             first ? "%s" : " %s",                                       \
             abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1)),      \
+   first = FALSE)
+#define status_effect_duration(str1, str2, str3, duration)		\
+  (Snprintf(nb = eos(nb), MAXCO - strlen(newbot2),                      \
+            first ? "%s:%ld" : " %s:%ld",				\
+            abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1),	\
+	    duration),							\
    first = FALSE)
 #endif
 /** Delayed instadeaths **/
@@ -579,7 +597,13 @@ do_statuseffects(char *newbot2, boolean terminal_output, int abbrev, int statusl
     status_effect("Fly", "Fly", "Fl");
   if(u.usteed)
     status_effect("Ride", "Rid", "Rd");
+/** Temporary effects with known duration **/
+  if (TimeStop)
+    status_effect_duration("TimeStop", "TStop", "TS", HTimeStop ? HTimeStop : ETimeStop);
+  if (BlowingWinds)
+    status_effect_duration("Lust", "Lust", "Lst", HBlowingWinds ? HBlowingWinds : EBlowingWinds);
 #undef status_effect
+#undef status_effect_duration
 }
 
 void
