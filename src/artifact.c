@@ -2225,7 +2225,7 @@ int
 artifact_weight(obj)
 struct obj *obj;
 {
-	if(!get_artifact(obj))
+	if(!obj->oartifact)
 		return -1;	// error
 	int baseweight = objects[obj->otyp].oc_weight;
 	int artiweight = get_artifact(obj)->weight;
