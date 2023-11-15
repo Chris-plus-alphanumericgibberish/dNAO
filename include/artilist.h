@@ -717,7 +717,7 @@ A("The Lance of Longinus",		SPEAR,					(const char *)0,
 	),
 
 A("The Silver Sky",		LONG_SWORD,					(const char *)0,
-	1500L, SILVER, MZ_MEDIUM, 75,
+	1500L, SILVER, MZ_MEDIUM, WT_DEFAULT,
 	A_NONE, NON_PM, PM_GITHYANKI_PIRATE, TIER_B, (NOFLAG),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 12), (ARTA_VORPAL),
