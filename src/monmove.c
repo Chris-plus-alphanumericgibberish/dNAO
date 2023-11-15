@@ -54,7 +54,7 @@ register struct monst *mtmp;
 {
 	int	x, y;
 
-	if (mtmp->mpeaceful && in_town(u.ux + u.dx, u.uy + u.dy) &&
+	if (mtmp->mpeaceful && !mtmp->mtame && in_town(u.ux + u.dx, u.uy + u.dy) &&
 		!is_blind(mtmp) && m_canseeu(mtmp) && !rn2(3)) {
 
 		//ifdef CONVICT
