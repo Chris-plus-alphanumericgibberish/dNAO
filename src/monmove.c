@@ -1431,6 +1431,7 @@ register struct monst *mtmp;
 		&& mdat->mtyp!=PM_LEGION /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
 		&& !(noactions(mtmp))
 		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
+		&& !(mtmp == u.usteed) /*Steeds can't use tactics*/
 	) (void) tactics(mtmp);
 	
 	if(mdat->mtyp == PM_GREAT_CTHULHU && !rn2(20)){
