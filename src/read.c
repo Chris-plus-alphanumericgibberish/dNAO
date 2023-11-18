@@ -1446,20 +1446,6 @@ int curse_bless;
 			else if(is_cursed) obj->spe = 0;
 			else obj->spe = rn1(12,12);
 		break;
-	    case TREPHINATION_KIT:
-		if (is_cursed) stripspe(obj);
-		else if (is_blessed) {
-		    obj->spe += rnd(3);
-		    p_glow2(obj, NH_BLUE);
-			if(obj->spe > 6)
-				obj->spe = 6;
-		} else {
-		    if (obj->spe < 5) {
-			obj->spe++;
-			p_glow1(obj);
-		    } else pline1(nothing_happens);
-		}
-		break;
 	    case CRYSTAL_BALL:
 		if (is_cursed) stripspe(obj);
 		else if (is_blessed) {
@@ -1503,6 +1489,7 @@ int curse_bless;
 	    case HORN_OF_PLENTY:
 	    case BAG_OF_TRICKS:
 	    case CAN_OF_GREASE:
+	    case TREPHINATION_KIT:
 		if (is_cursed) stripspe(obj);
 		else if (is_blessed) {
 		    if (obj->spe <= 10)
