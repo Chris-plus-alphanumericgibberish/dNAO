@@ -2085,6 +2085,7 @@ const char * spellname[] =
 	//100
 	"HYPNOTIC_COLORS",
 	"CRUSH_BOLT",
+	"MADF_BURST",
 };
 
 

@@ -26,6 +26,7 @@ STATIC_DCL char * get_ma_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mv_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mg_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mw_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_mf_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_speed_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_description_of_attack_type(uchar);
 STATIC_DCL char * get_description_of_damage_type(uchar);
@@ -2151,6 +2152,33 @@ char * get_mg_description_of_monster_type(struct monst * mtmp, char * descriptio
 }
 
 char *
+get_mf_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	strcat(description, "Martial Skill: ");
+	int many = 0;
+	char buff[BUFSZ] = {0};
+
+	Sprintf(buff, "can reach level %d", permonst_max_lev(ptr));
+	many = append(description, TRUE				, buff					, many);
+	
+	if(MON_BAB(mtmp) != 1)
+		Sprintf(buff, "recieves +%.2f to-hit per level", MON_BAB(mtmp));
+	else
+		Sprintf(buff, "recieves +1 to-hit per level");
+	many = append(description, TRUE				, buff					, many);
+
+	many = append(description, ptr->mflagsf&MF_MARTIAL_B				, "basic martial prowess"					, many);
+	many = append(description, ptr->mflagsf&MF_MARTIAL_S				, "skillful martial prowess"					, many);
+	many = append(description, ptr->mflagsf&MF_MARTIAL_E				, "expert martial prowess"					, many);
+
+	many = append(description, has_phys_scaling(ptr)			, "recieves bonus physical damage"			, many);
+
+	strcat(description, ". ");
+	return description;
+}
+
+char *
 get_mw_description_of_monster_type(struct monst * mtmp, char * description)
 {
 	struct permonst * ptr = mtmp->data;
@@ -2653,8 +2681,12 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 				strcat(main_temp_buf, "\n");
 				strcat(description, main_temp_buf);
 			} while (!((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0));		/* no more attacks */
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mf_description_of_monster_type(mtmp, temp_buf));
 		}
 		if(wizard){
+			strcat(description, "\n");
 			strcat(description, "Faction (debug-mode-only): ");
 			sprintf(temp_buf, "%d", mtmp->mfaction);
 			strcat(description, temp_buf);

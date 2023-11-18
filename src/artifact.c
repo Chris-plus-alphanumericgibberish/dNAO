@@ -962,8 +962,12 @@ int oprop;
 	}
 	
 	//May have changed mats/be ammo. Silver fire only works on some materials.
-	if((oprop == OPROP_SFLMW || oprop == OPROP_CGLZ || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW)
+	if((oprop == OPROP_SFLMW || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW)
 		&& !sflm_able(obj)
+	)
+		return FALSE;
+	if((oprop == OPROP_CGLZ || oprop == OPROP_RWTH || oprop == OPROP_RBRD || oprop == OPROP_SLIF)
+		&& !(obj->obj_material == SILVER || obj->obj_material == PLATINUM || obj->obj_material == MITHRIL)
 	)
 		return FALSE;
 
@@ -2221,7 +2225,7 @@ int
 artifact_weight(obj)
 struct obj *obj;
 {
-	if(!get_artifact(obj))
+	if(!obj->oartifact)
 		return -1;	// error
 	int baseweight = objects[obj->otyp].oc_weight;
 	int artiweight = get_artifact(obj)->weight;

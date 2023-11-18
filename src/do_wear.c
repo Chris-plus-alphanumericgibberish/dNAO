@@ -2871,11 +2871,16 @@ uchar aatyp;
 	struct obj * uarmor[] = ARMOR_SLOTS;
 	int i;
 	for (i = 0; i < SIZE(uarmor); i++) {
-		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dtyp & slot)) {
-			if(depth && higher_depth(uarmor[i]->owornmask, depth))
-				continue;
-			arm_udr += arm_dr_bonus(uarmor[i]);
-			if (magr) arm_udr += properties_dr(uarmor[i], agralign, agrmoral);
+		if (uarmor[i]){
+			if((objects[uarmor[i]->otyp].oc_dtyp & slot)) {
+				if(depth && higher_depth(uarmor[i]->owornmask, depth))
+					continue;
+				arm_udr += arm_dr_bonus(uarmor[i]);
+				if (magr) arm_udr += properties_dr(uarmor[i], agralign, agrmoral);
+			}
+			else if(uarmor[i]->otyp == CLOAK_OF_PROTECTION){
+				arm_udr += arm_dr_bonus(uarmor[i])/2; //Half protection in other slots (skin depth)
+			}
 		}
 	}
 	/* Tensa Zangetsu adds to worn armor */
@@ -5068,8 +5073,8 @@ struct obj *wep;
 	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	
-	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
-		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+	for(i = x-BOLT_LIM; i <= x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j <= y+BOLT_LIM; j++){
 			if(!isok(i,j))
 				continue;
 			if(i == x && j == y)
@@ -5095,8 +5100,8 @@ struct obj *wep;
 		return;
 	targets = rn2(targets);
 	
-	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
-		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+	for(i = x-BOLT_LIM; i <= x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j <= y+BOLT_LIM; j++){
 			if(!isok(i,j))
 				continue;
 			if(i == x && j == y)

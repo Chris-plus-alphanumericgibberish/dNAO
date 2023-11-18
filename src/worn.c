@@ -1143,6 +1143,9 @@ struct monst *mon;
 		base += 4;
 	}
 	
+	if(flags.spriest_level && is_demon(mon->data) && is_lawful_mon(mon) && !mon->mpeaceful)
+		base += 9;
+
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
 		if(Role_if(PM_HEALER))

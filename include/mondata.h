@@ -21,7 +21,7 @@
 #define mon_acquired_trinsic(mon,typ) (((mon)->acquired_trinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
 #define mon_resistance(mon,typ)	(mon_intrinsic(mon,typ) || mon_extrinsic(mon,typ) || (typ == SWIMMING && Is_waterlevel(&u.uz)) || \
 	(typ == TELEPORT && mad_monster_turn(mon, MAD_NON_EUCLID) && !(mon)->mpeaceful) || (typ == TELEPORT_CONTROL && mad_monster_turn(mon, MAD_NON_EUCLID)) || \
-	(typ == TELEPAT && mon != &youmonst && !mindless_mon(mon) && uarmh && uarmh->oartifact == ART_ENFORCED_MIND && distu((mon)->mx, (mon)->my) <= etele_dist))
+	(typ == TELEPAT && mon != &youmonst && !mindless((mon)->data) && uarmh && uarmh->oartifact == ART_ENFORCED_MIND && distu((mon)->mx, (mon)->my) <= etele_dist))
 
 #define species_resists_fire(mon)	(((mon)->data->mresists & MR_FIRE) != 0)
 #define species_resists_cold(mon)	(((mon)->data->mresists & MR_COLD) != 0)
