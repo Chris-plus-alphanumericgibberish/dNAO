@@ -955,6 +955,7 @@ int how;			/* type of query */
 	    pack++;
 	    if (invlet >= 'u') {
 		impossible("query_category: too many categories");
+		destroy_nhwindow(win);
 		return 0;
 	    }
 	} while (*pack);
