@@ -1041,7 +1041,10 @@ struct weapon_dice * wdie;
 boolean youdef;
 {
 	int tmp = 0;
-	int igrolls = wdie->ignore_rolls;
+	// on a d6 this is 3d
+	// 16%,33%,50% at i_r 1,2,3
+	// on a d6 this is 1/2/3 + d3, on a d10 its 1/3/5 + d5, d20 is 1/6/10 + d10, etc.
+	int igrolls = (x*wdie->ignore_rolls)/6;
 
 	/* verify there are appropriate dice to roll */
 	if (!n)
