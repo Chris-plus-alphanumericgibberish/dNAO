@@ -962,7 +962,9 @@ int oprop;
 	}
 	
 	//May have changed mats/be ammo. Silver fire only works on some materials.
-	if((oprop == OPROP_SFLMW || oprop == OPROP_CGLZ || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW)
+	if((oprop == OPROP_SFLMW || oprop == OPROP_CGLZ || oprop == OPROP_MORTW ||
+	    oprop == OPROP_TDTHW || oprop == OPROP_SFUWW || oprop == OPROP_RWTH ||
+	    oprop == OPROP_RBRD || oprop == OPROP_SLIF)
 		&& !sflm_able(obj)
 	)
 		return FALSE;
@@ -1001,7 +1003,7 @@ unsigned long int *oprop_list;
 
 #define ADD_WEAPON_ARMOR_OPROP(otmp, oproptoken) \
 	add_oprop(otmp, OPROP_##oproptoken);\
-	if(is_gloves(otmp) || is_boots(otmp)){\
+	if(is_weapon(otmp)){\
 		if(rn2(3))\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
 		else\
@@ -1011,7 +1013,7 @@ unsigned long int *oprop_list;
 #define ADD_WEAPON_ARMOR_OPROPS(otmp, oproptoken1, oproptoken2) \
 	add_oprop(otmp, OPROP_##oproptoken1);\
 	add_oprop(otmp, OPROP_##oproptoken2);\
-	if(is_gloves(otmp) || is_boots(otmp)){\
+	if(is_weapon(otmp)){\
 		if(rn2(3)){\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken1##W);\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken2##W);\
@@ -5708,7 +5710,9 @@ boolean printmessages; /* print generic elemental damage messages */
 		if (attacks(AD_ELEC, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("%s %s %s%c",
 				wepdesc,
-				vtense(wepdesc, "hit"),
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"tase"),
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}

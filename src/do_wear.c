@@ -2798,10 +2798,10 @@ find_dr()
 	int udr = 0, i;
 	
 	for(i = 0; i < 5; i++)
-		udr += slot_udr(1<<i,0, 0);
-	udr += slot_udr(UPPER_TORSO_DR,0, 0);
-	udr += slot_udr(LOWER_TORSO_DR,0, 0);
-	udr += max(slot_udr(UPPER_TORSO_DR,0, 0), slot_udr(ARM_DR,0, 0))*2;
+		udr += slot_udr(1<<i,0, 0, AT_ANY);
+	udr += slot_udr(UPPER_TORSO_DR,0, 0, AT_ANY);
+	udr += slot_udr(LOWER_TORSO_DR,0, 0, AT_ANY);
+	udr += max(slot_udr(UPPER_TORSO_DR,0, 0, AT_ANY), slot_udr(ARM_DR,0, 0, AT_ANY))*2;
 	udr /= 9;
 	if (udr > 127) udr = 127;	/* u.uac is an schar */
 	if(udr != u.udr){
@@ -2819,10 +2819,11 @@ find_dr()
  * Includes effectiveness vs magr (optional)
  */
 int
-slot_udr(slot, magr, depth)
+slot_udr(slot, magr, depth, aatyp)
 int slot;
 struct monst *magr;
 int depth;
+uchar aatyp;
 {
 	/* DR addition: bas + sqrt(nat^2 + arm^2) */
 	int bas_udr; /* base DR:    magical-ish   */
@@ -2832,6 +2833,10 @@ int depth;
 	bas_udr = base_udr();
 	nat_udr = base_nat_udr();
 	arm_udr = 0;
+
+	/* is it even possible for youagr to be true here? */
+	boolean youagr = (magr == &youmonst);
+	struct obj *magr_helm = magr ? (youagr ? uarmh : which_armor(magr, W_ARMH)) : NULL;
 
 	/* for use vs specific magr */
 	int agralign = 0;
@@ -2925,7 +2930,7 @@ int depth;
 		bas_udr += 3;
 	
 	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
-	if(magr && (magr->mtyp == PM_STAR_SPAWN || magr->mtyp == PM_GREAT_CTHULHU || magr->mtyp == PM_DREAM_EATER || magr->mtyp == PM_VEIL_RENDER || (magr->mtyp == PM_LADY_CONSTANCE && !rn2(2)) || mad_monster_turn(magr, MAD_NON_EUCLID))){
+	if(magr && (is_extradimensional(magr) || (aatyp == AT_BUTT && magr_helm && magr_helm->oartifact == ART_APOTHEOSIS_VEIL))){
 		arm_udr = 0;
 		if(undiffed_innards(youracedata))
 			nat_udr /= 2;
@@ -2950,17 +2955,19 @@ int depth;
 }
 
 int
-roll_udr(magr)
+roll_udr(magr, aatyp)
 struct monst *magr;
+uchar aatyp;
 {
-	return roll_udr_detail(magr, 0, 0);
+	return roll_udr_detail(magr, 0, 0, aatyp);
 }
 
 int
-roll_udr_detail(magr, slot, depth)
+roll_udr_detail(magr, slot, depth, aatyp)
 struct monst *magr;
 int slot;
 int depth;
+uchar aatyp;
 {
 	int udr;
 	int cap = 10;
@@ -2984,12 +2991,12 @@ int depth;
 		break;
 		case 7:
 		case 8:
-			if(slot_udr(UPPER_TORSO_DR, magr, 0) > slot_udr(ARM_DR, magr, 0))
+			if(slot_udr(UPPER_TORSO_DR, magr, 0, aatyp) > slot_udr(ARM_DR, magr, 0, aatyp))
 				slot = UPPER_TORSO_DR;
 			else slot = ARM_DR;
 		break;
 	}
-	udr = slot_udr(slot, magr, depth);
+	udr = slot_udr(slot, magr, depth, aatyp);
 	if(active_glyph(DEEP_SEA))
 		cap += 3;
 	//diminishing returns after 10 points of DR.

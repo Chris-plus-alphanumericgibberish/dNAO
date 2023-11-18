@@ -670,8 +670,8 @@ boolean digest_meal;
 					healup += 1;
 			}
 		}
-		if(mon->mtame || (Race_if(PM_DROW) && Role_if(PM_ANACHRONONAUT)))
-			healup += (!mon->mcan && Race_if(PM_ANDROID)) ? 3 : Race_if(PM_DROW) ? 2 : 1;
+		if(mon->mtame || (Race_if(PM_MYRKALFR) && Role_if(PM_ANACHRONONAUT)))
+			healup += (!mon->mcan && Race_if(PM_ANDROID)) ? 3 : Race_if(PM_MYRKALFR) ? 2 : 1;
 		if(mon->mcan) healup /= 2;
 		if(healup){
 			set_mcan(mon, FALSE);

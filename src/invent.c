@@ -2663,6 +2663,7 @@ winid *datawin;
 	int goatweaponturn = 0;
 	int sothweaponturn = 0;
 	boolean printed_type = FALSE;
+	boolean has_artidmg = oartifact && (artilist[oartifact].adtyp || artilist[oartifact].damage || artilist[oartifact].accuracy);
 	
 	if(check_oprop(obj,OPROP_GOATW))
 		goatweaponturn = goat_weapon_damage_turn(obj);
@@ -2703,13 +2704,15 @@ winid *datawin;
 	}
 
 	/* Object classes currently with no special messages here: amulets. */
-	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill) || otyp == HEAVY_IRON_BALL || olet == GEM_CLASS || oartifact == ART_WAND_OF_ORCUS) {
+	if (olet == WEAPON_CLASS || (olet == TOOL_CLASS && oc.oc_skill) || otyp == HEAVY_IRON_BALL || olet == GEM_CLASS || has_artidmg) {
 		int mask = attack_mask(obj, otyp, oartifact, &youmonst);
 		boolean otyp_is_blaster = (otyp == CARCOSAN_STING || otyp == HAND_BLASTER || otyp == ARM_BLASTER || otyp == MASS_SHADOW_PISTOL || otyp == CUTTING_LASER || otyp == RAYGUN);
 		boolean otyp_is_launcher = (((oc.oc_skill >= P_BOW && oc.oc_skill <= P_CROSSBOW) || otyp == ATLATL) && !otyp_is_blaster);
+		/* armor and rings don't have meaningful base damage, but can have artifact bonus damage */
+		boolean artidmg_only = olet == ARMOR_CLASS || olet == RING_CLASS;
 
 		/* print type */
-		if (!printed_type) {
+		if (!printed_type && !artidmg_only) {
 			buf2[0] = '\0';
 			int i;
 			static const char * damagetypes[] = { "blunt", "piercing", "slashing", "energy" };
@@ -2760,7 +2763,7 @@ winid *datawin;
 		}
 
 		/* what skill does it use? */
-		if (obj ? weapon_type(obj) : oc.oc_skill != P_NONE) {
+		if (obj ? weapon_type(obj) : oc.oc_skill != P_NONE && !artidmg_only) {
 			if (obj) {
 				Sprintf(buf, "Uses your %s skill", P_NAME(abs(weapon_type(obj))));
 				/* special cases */
@@ -2794,7 +2797,7 @@ winid *datawin;
 		/* weapon dice! */
 		/* Does not apply for launchers. */
 		/* the melee-weapon artifact launchers need obj to exist because dmgval_core needs obj to find artifact. */
-		if ((!otyp_is_launcher && !otyp_is_blaster) || (
+		if ((!otyp_is_launcher && !otyp_is_blaster && !artidmg_only) || (
 			(otyp == CARCOSAN_STING) ||
 			(obj && oartifact == ART_LIECLEAVER) ||
 			(obj && oartifact == ART_WAND_OF_ORCUS) ||
@@ -2852,7 +2855,7 @@ winid *datawin;
 			OBJPUTSTR(buf);
 		}
 		/* artifact bonus damage (artifacts only) */
-		if (oartifact && (artilist[oartifact].adtyp || artilist[oartifact].damage || artilist[oartifact].accuracy))
+		if (has_artidmg)
 		{
 			register const struct artifact *oart = &artilist[oartifact];
 			/* bonus damage, or double damage? We already checked that oart->attk exists */
@@ -2930,6 +2933,11 @@ winid *datawin;
 					case AD_STON: Strcat(buf, "petrifying damage."); break;
 					case AD_DARK: Strcat(buf, "dark damage."); break;
 					case AD_BLUD: Strcat(buf, "blood damage."); break;
+					case AD_HOLY: Strcat(buf, "holy damage."); break;
+					case AD_STDY: Strcat(buf, "study damage."); break;
+					case AD_HLUH: Strcat(buf, "corrupted holy damage."); break;
+					case AD_STAR: Strcat(buf, "silver damage."); break;
+					case AD_SLEE: Strcat(buf, "sleep damage."); break;
 						break;
 					}
 				}

@@ -1648,19 +1648,19 @@ udr_enlightenment()
 		Sprintf(mbuf, "You have no head; shots hit upper body.");
 		putstr(en_win, 0, mbuf);
 	} else {
-		dr = slot_udr(HEAD_DR, (struct monst *)0, 0);
+		dr = slot_udr(HEAD_DR, (struct monst *)0, 0, AT_ANY);
 		if(dr > cap)
 		Sprintf(mbuf, "Head Armor:       %d-%d", cap, dr);
 		else
 		Sprintf(mbuf, "Head Armor:       %d", dr);
 		putstr(en_win, 0, mbuf);
 	}
-	dr = slot_udr(UPPER_TORSO_DR, (struct monst *)0, 0);
+	dr = slot_udr(UPPER_TORSO_DR, (struct monst *)0, 0, AT_ANY);
 	if(dr > cap)
 		Sprintf(mbuf, "Upper Body Armor: %d-%d", cap, dr);
 	else
 		Sprintf(mbuf, "Upper Body Armor: %d", dr);
-	dr = slot_udr(LOWER_TORSO_DR, (struct monst *)0, 0);
+	dr = slot_udr(LOWER_TORSO_DR, (struct monst *)0, 0, AT_ANY);
 	putstr(en_win, 0, mbuf);
 	if(dr > cap)
 		Sprintf(mbuf, "Lower Body Armor: %d-%d", cap, dr);
@@ -1671,7 +1671,7 @@ udr_enlightenment()
 		Sprintf(mbuf, "You have no hands; shots hit upper body.");
 		putstr(en_win, 0, mbuf);
 	} else {
-		dr = slot_udr(ARM_DR, (struct monst *)0, 0);
+		dr = slot_udr(ARM_DR, (struct monst *)0, 0, AT_ANY);
 		if(dr > cap)
 		Sprintf(mbuf, "Hand Armor:       %d-%d", cap, dr);
 		else
@@ -1682,7 +1682,7 @@ udr_enlightenment()
 		Sprintf(mbuf, "You have no feet; shots hit lower body.");
 		putstr(en_win, 0, mbuf);
 	} else {
-		dr = slot_udr(LEG_DR, (struct monst *)0, 0);
+		dr = slot_udr(LEG_DR, (struct monst *)0, 0, AT_ANY);
 		if(dr > cap)
 		Sprintf(mbuf, "Foot Armor:       %d-%d", cap, dr);
 		else

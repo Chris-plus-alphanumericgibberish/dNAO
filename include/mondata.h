@@ -1080,6 +1080,14 @@
 				 (ptr)->mtyp == PM_GREAT_CTHULHU \
 				)
 
+#define is_extradimensional(ptr)	((ptr)->mtyp == PM_STAR_SPAWN || \
+					 (ptr)->mtyp == PM_GREAT_CTHULHU || \
+					 (ptr)->mtyp == PM_DREAM_EATER || \
+					 (ptr)->mtyp == PM_VEIL_RENDER || \
+					 ((ptr)->mtyp == PM_LADY_CONSTANCE && !rn2(2)) || \
+					 mad_monster_turn((ptr), MAD_NON_EUCLID) \
+					)
+
 #define is_android(ptr)	((ptr)->mtyp == PM_ANDROID || \
 				 (ptr)->mtyp == PM_GYNOID || \
 				 (ptr)->mtyp == PM_OPERATOR || \
