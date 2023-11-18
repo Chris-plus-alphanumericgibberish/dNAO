@@ -165,7 +165,7 @@ static const char *embracedPrisoners[] = {
 	"Lolth, help me!",
 	"I can't control my arms!",
 	"I can't stop!  Look out!!",
-	"Cut me loose, please!",
+	"Cut me lose, please!",
 	"It's so dark!",
 	"Free me!",
 	"Lolth, why have you forsaken me!?",
@@ -178,7 +178,7 @@ static const char *embracedAlider[] = {
 	"Mother, help me!",
 	"I can't control my arms!",
 	"I can't stop!  Look out!!",
-	"Cut me loose, please!",
+	"Cut me lose, please!",
 	"It's so dark!",
 	"Free me!",
 	"Kill me!  Please, just kill me...",
@@ -3240,10 +3240,7 @@ int dz;
 #endif
 					bless(uwep);
 					remove_oprop(uwep, OPROP_LESSER_HOLYW);
-					if(is_weapon(otmp))
-						add_oprop(uwep, OPROP_HOLYW);
-					if(otmp->oclass == ARMOR_CLASS)
-						add_oprop(uwep, OPROP_HOLY);
+					add_oprop(uwep, OPROP_HOLYW);
 					if(uwep->spe < 3)
 						uwep->spe = 3;
 					mongone(mtmp);
@@ -6456,8 +6453,7 @@ doblessmenu()
 			MENU_UNSELECTED);
 	}
 	incntlet++; //Advance anyway
-	if(uwep && ((is_weapon(uwep) && !check_oprop(uwep, OPROP_HOLYW)) ||
-		    (uwep->oclass == ARMOR_CLASS && !check_oprop(uwep, OPROP_HOLY)))){
+	if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || is_gloves(uwep)) && !check_oprop(uwep, OPROP_HOLYW)){
 		Sprintf(buf, "Sanctify your weapon");
 		any.a_int = SANCTIFY_WEP;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,

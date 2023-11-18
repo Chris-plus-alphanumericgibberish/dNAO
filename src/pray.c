@@ -3577,7 +3577,7 @@ commune_with_goat()
 
 		case GOATBOON_ACID:
 			cost = 25;
-			/* gives your wielded weapon the Acrid (+2d6 acid damage) property */
+			/* gives your wielded (nonartifact) weapon the Acrid (+2d6 acid damage) property */
 			otmp = getobj(blessable_classes, "give the Goat's bite");
 			if(otmp && goat_acidable(otmp)) {
 				if(!Blind) pline("Acid drips from your weapon!");
@@ -3600,6 +3600,7 @@ commune_with_goat()
 			otmp = getobj(blessable_classes, "give the Goat's hunger");
 			if(otmp && goat_droolable(otmp)){
 				if(!Blind) pline("...your %s %s drooling.", xname(otmp), vtense(xname(otmp), "are"));
+				remove_oprop(otmp, OPROP_LESSER_ACIDW);
 				add_oprop(otmp, OPROP_GOATW);
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
@@ -4252,7 +4253,7 @@ commune_with_yog()
 
 		case YOGBOON_MAGIC:
 			cost = 25;
-			/* gives your wielded weapon the Lesser magic property */
+			/* gives your wielded (nonartifact) weapon the Lesser magic property */
 			otmp = getobj(blessable_classes, "reveal the Minor Stars");
 			if(otmp && yog_magicable(otmp)) {
 				if(!Blind) pline("The weapon begins to glitter!");
@@ -4275,6 +4276,7 @@ commune_with_yog()
 			otmp = getobj(blessable_classes, "show distant vistas");
 			if(otmp && yog_windowable(otmp)){
 				if(!Blind) pline("Your weapon becomes a window to distant vistas!");
+				remove_oprop(otmp, OPROP_LESSER_MAGCW);
 				add_oprop(otmp, OPROP_SOTHW);
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
