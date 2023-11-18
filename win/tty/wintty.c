@@ -708,7 +708,7 @@ give_up:	/* Quit */
 	/* Select descendant status, if necessary */
 	if (flags.descendant < 0) {
 	    if (pick4u == 'y' || flags.descendant == ROLE_RANDOM || flags.randomall) {
-			flags.descendant = rn2(2);
+			flags.descendant = 0; // never randomly roll descendant
 	    } else {	/* pick4u == 'n' */
 		tty_clear_nhwindow(BASE_WINDOW);
 		tty_putstr(BASE_WINDOW, 0, "Choosing inheritance");

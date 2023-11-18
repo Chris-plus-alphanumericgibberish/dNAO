@@ -1375,96 +1375,72 @@ STATIC_OVL int
 do_look(quick)
     boolean quick;	/* use cursor && don't search for "more info" */
 {
-	char    out_str[LONGBUFSZ], look_buf[BUFSZ];
+	char out_str[LONGBUFSZ];
+	out_str[0] = 0;
     const char *x_str, *firstmatch = 0;
     struct permonst *pm = 0;
-    struct monst *mtmp = 0;
-    int     i, ans = 0;
     glyph_t sym;		/* typed symbol or converted glyph */
-    int	    found;		/* count of matching syms found */
-    coord   cc;			/* screen pos of unknown glyph */
-    boolean save_verbose;	/* saved value of flags.verbose */
     boolean from_screen;	/* question from the screen */
-    boolean force_defsyms;	/* force using glyphs from defsyms[].sym */
-    boolean need_to_look;	/* need to get explan. from glyph */
-    boolean hit_trap;		/* true if found trap explanation */
-    boolean hit_cloud;		/* true if found cloud explanation */
-    int skipped_venom;		/* non-zero if we ignored "splash of venom" */
-	int hallu_obj;		/* non-zero if found hallucinable object */
 	short otyp = STRANGE_OBJECT;	/* to pass to artifact_name */
 	int oartifact;					/* to pass to artifact_name */
-    static const char *mon_interior = "the interior of a monster";
+	int i, ans = 0;
+	coord   cc;			/* screen pos of unknown glyph */
+	boolean force_defsyms = FALSE;	/* force using glyphs from defsyms[].sym */
 
-    force_defsyms = FALSE;
     if (quick) {
-	from_screen = TRUE;	/* yes, we want to use the cursor */
+		from_screen = TRUE;	/* yes, we want to use the cursor */
     } else {
-	i = ynq("Specify unknown object by cursor?");
-	if (i == 'q') return MOVE_CANCELLED;
-	from_screen = (i == 'y');
+		i = ynq("Specify unknown object by cursor?");
+		if (i == 'q') return MOVE_CANCELLED;
+		from_screen = (i == 'y');
     }
 
     if (from_screen) {
-	cc.x = u.ux;
-	cc.y = u.uy;
-	sym = 0;		/* gcc -Wall lint */
-    } else {
-	getlin("Specify what? (type the word)", out_str);
-	if (out_str[0] == '\0' || out_str[0] == '\033')
-	    return MOVE_CANCELLED;
+		sym = 0;
+	} else {
+		getlin("Specify what? (type the word)", out_str);
+		if (out_str[0] == '\0' || out_str[0] == '\033')
+			return MOVE_CANCELLED;
 
-	if (out_str[1]) {	/* user typed in a complete string */
-		winid datawin = create_nhwindow(NHW_MENU);
-		// check if they specified a monster
-		int mntmp = NON_PM;
-		if ((mntmp = name_to_mon(out_str)) >= LOW_PM && !is_horror(&mons[mntmp])) {
-			char temp_buf[LONGBUFSZ];
-			strcat(out_str, "\n");
-			temp_buf[0] = '\0';
-			/* create a temporary mtmp to describe */
-			struct monst fake_mon = {0};
-			set_mon_data(&fake_mon, mntmp);
-			get_description_of_monster_type(&fake_mon, temp_buf);
-			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
-			pm = &mons[mntmp];
-			char * temp_print;
-			temp_print = strtok(out_str, "\n");
-			while (temp_print != NULL)
-			{
-				putstr(datawin, 0, temp_print);
-				temp_print = strtok(NULL, "\n");
+		if (out_str[1]) {	/* user typed in a complete string */
+			winid datawin = create_nhwindow(NHW_MENU);
+			// check if they specified a monster
+			int mntmp = NON_PM;
+			if ((mntmp = name_to_mon(out_str)) >= LOW_PM && !is_horror(&mons[mntmp])) {
+				char temp_buf[LONGBUFSZ];
+				strcat(out_str, "\n");
+				temp_buf[0] = '\0';
+				/* create a temporary mtmp to describe */
+				struct monst fake_mon = {0};
+				set_mon_data(&fake_mon, mntmp);
+				get_description_of_monster_type(&fake_mon, temp_buf);
+				(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
+				pm = &mons[mntmp];
+				char * temp_print;
+				temp_print = strtok(out_str, "\n");
+				while (temp_print != NULL)
+				{
+					putstr(datawin, 0, temp_print);
+					temp_print = strtok(NULL, "\n");
+				}
 			}
+			// check if they specified an artifact
+			else if ((x_str = artifact_name(out_str, &otyp, &oartifact))) {
+				putstr(datawin, 0, x_str);
+				describe_item(NULL, otyp, oartifact, &datawin);
+			}
+			// check encyclopedia
+			if(checkfile(out_str, pm, (mntmp==NON_PM && otyp==STRANGE_OBJECT), TRUE, &datawin) || mntmp != NON_PM || otyp != STRANGE_OBJECT)
+				display_nhwindow(datawin, TRUE);
+			destroy_nhwindow(datawin);
+			return MOVE_CANCELLED;
 		}
-		// check if they specified an artifact
-		else if ((x_str = artifact_name(out_str, &otyp, &oartifact))) {
-			putstr(datawin, 0, x_str);
-			describe_item(NULL, otyp, oartifact, &datawin);
-		}
-		// check encyclopedia
-	    if(checkfile(out_str, pm, (mntmp==NON_PM && otyp==STRANGE_OBJECT), TRUE, &datawin) || mntmp != NON_PM || otyp != STRANGE_OBJECT)
-			display_nhwindow(datawin, TRUE);
-		destroy_nhwindow(datawin);
-	    return MOVE_CANCELLED;
-	}
-	sym = out_str[0];
+		sym = out_str[0];
     }
 
-    /* Save the verbose flag, we change it later. */
-    save_verbose = flags.verbose;
-    flags.verbose = flags.verbose && !quick;
-    /*
-     * The user typed one letter, or we're identifying from the screen.
-     */
-    do {
-	/* Reset some variables. */
-	need_to_look = FALSE;
-	pm = (struct permonst *)0;
-	skipped_venom = 0;
-	hallu_obj = 0;
-	found = 0;
-	out_str[0] = '\0';
-
 	if (from_screen) {
+		cc.x = u.ux;
+		cc.y = u.uy;
 	    int glyph;	/* glyph at selected position */
 
 	    if (flags.verbose)
@@ -1475,8 +1451,7 @@ do_look(quick)
 
 	    ans = getpos(&cc, quick, what_is_an_unknown_object);
 	    if (ans < 0 || cc.x < 0) {
-		flags.verbose = save_verbose;
-		return MOVE_CANCELLED;	/* done */
+			return MOVE_CANCELLED;	/* done */
 	    }
 	    flags.verbose = FALSE;	/* only print long question once */
 
@@ -1514,6 +1489,74 @@ do_look(quick)
 	    }
 	}
 
+    /*
+     * The user typed one letter, or we're identifying from the screen.
+     */
+	do_look_letter(sym, from_screen, quick, force_defsyms, cc, out_str, firstmatch);
+	
+	/* Finally, print out our explanation. */
+	if (out_str[0]) {
+		winid datawin = create_nhwindow(NHW_MENU);
+		char * temp_print;
+		temp_print = strtok(out_str, "\n");
+		while (temp_print != NULL)
+		{
+			putstr(datawin, 0, temp_print);
+			temp_print = strtok(NULL, "\n");
+		}
+	    /* check the data file for information about this thing */
+	    if (ans != LOOK_QUICK && ans != LOOK_ONCE &&
+			(ans == LOOK_VERBOSE || (flags.help && !quick))) {
+		char temp_buf[BUFSZ];
+		Strcpy(temp_buf, level.flags.lethe //lethe
+					&& !strcmp(firstmatch, "water")?
+				"lethe" : firstmatch);
+		(void)checkfile(temp_buf, pm, FALSE, (boolean)(ans == LOOK_VERBOSE), &datawin);
+	    }
+		display_nhwindow(datawin, TRUE);
+		destroy_nhwindow(datawin);
+	} else {
+	    pline("I've never heard of such things.");
+	}
+	return MOVE_CANCELLED;
+}
+
+char*
+do_look_letter(sym, from_screen, quick, force_defsyms, cc, out_str, firstmatch)
+	glyph_t sym;
+	boolean from_screen;
+	boolean quick;
+	boolean force_defsyms;
+	coord cc;
+	char* out_str;
+	const char* firstmatch;
+{
+	char look_buf[BUFSZ];
+    const char *x_str = 0;
+    struct permonst *pm = 0;
+    struct monst *mtmp = 0;
+    int     i, ans = 0;
+    int	    found;		/* count of matching syms found */
+    boolean save_verbose;	/* saved value of flags.verbose */
+    boolean need_to_look;	/* need to get explan. from glyph */
+    boolean hit_trap;		/* true if found trap explanation */
+    boolean hit_cloud;		/* true if found cloud explanation */
+    int skipped_venom;		/* non-zero if we ignored "splash of venom" */
+	int hallu_obj;		/* non-zero if found hallucinable object */
+	short otyp = STRANGE_OBJECT;	/* to pass to artifact_name */
+    static const char *mon_interior = "the interior of a monster";
+
+	save_verbose = flags.verbose;
+    flags.verbose = flags.verbose && !quick;
+
+    do {
+	/* Reset some variables. */
+	need_to_look = FALSE;
+	pm = (struct permonst *)0;
+	skipped_venom = 0;
+	hallu_obj = 0;
+	found = 0;
+	out_str[0] = '\0';
 	/*
 	 * Check all the possibilities, saving all explanations in a buffer.
 	 * When all have been checked then the string is printed.
@@ -1727,37 +1770,16 @@ do_look(quick)
 		}
 	}
 
-	/* Finally, print out our explanation. */
+	/* Finally, return our explanation. */
 	if (found) {
-		winid datawin = create_nhwindow(NHW_MENU);
-		char * temp_print;
-		temp_print = strtok(out_str, "\n");
-		while (temp_print != NULL)
-		{
-			putstr(datawin, 0, temp_print);
-			temp_print = strtok(NULL, "\n");
-		}
-	    /* check the data file for information about this thing */
-	    if (found == 1 && ans != LOOK_QUICK && ans != LOOK_ONCE &&
-			(ans == LOOK_VERBOSE || (flags.help && !quick))) {
-		char temp_buf[BUFSZ];
-		Strcpy(temp_buf, level.flags.lethe //lethe
-					&& !strcmp(firstmatch, "water")?
-				"lethe" : firstmatch);
-		(void)checkfile(temp_buf, pm, FALSE, (boolean)(ans == LOOK_VERBOSE), &datawin);
-	    }
-		display_nhwindow(datawin, TRUE);
-		destroy_nhwindow(datawin);
-	} else {
-	    pline("I've never heard of such things.");
+		return out_str;
 	}
-
     } while (from_screen && !quick && ans != LOOK_ONCE);
 
-    flags.verbose = save_verbose;
-    return MOVE_CANCELLED;
-}
+	flags.verbose = save_verbose;
 
+    return 0;
+}
 
 int
 append(char * buf, int condition, char * text, boolean many)

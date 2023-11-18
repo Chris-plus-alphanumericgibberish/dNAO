@@ -6122,10 +6122,10 @@ int mat;
 		}
 		end_menu(tmpwin, "Items Available:");
 		n = select_menu(tmpwin, PICK_ONE, &selected);
+		destroy_nhwindow(tmpwin);
 		if(n <= 0){
 			return -1;
 		}
-		destroy_nhwindow(tmpwin);
 		int picked = selected[0].item.a_int;
 		free(selected);
 		return picked;
@@ -6216,10 +6216,10 @@ pickeladrin()
 	}
 	end_menu(tmpwin, "Followers Available:");
 	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
 	if(n <= 0){
 		return -1;
 	}
-	destroy_nhwindow(tmpwin);
 	int picked = selected[0].item.a_int;
 	free(selected);
 	return picked;
@@ -6452,11 +6452,11 @@ struct monst *smith;
 	}
 	end_menu(tmpwin, sbuf);
 	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
 	if(n <= 0){
 		pline("Never mind.");
 		return;
 	}
-	destroy_nhwindow(tmpwin);
 	int picked = selected[0].item.a_int;
 	free(selected);
 	switch(picked){
@@ -6735,11 +6735,11 @@ struct monst *smith;
 	}
 	end_menu(tmpwin, sbuf);
 	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
 	if(n <= 0){
 		pline("Never mind.");
 		return;
 	}
-	destroy_nhwindow(tmpwin);
 	int picked = selected[0].item.a_int;
 	free(selected);
 	switch(picked){
@@ -6961,11 +6961,11 @@ int threshold;
 	}
 	end_menu(tmpwin, sbuf);
 	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
 	if(n <= 0){
 		pline("Never mind.");
 		return;
 	}
-	destroy_nhwindow(tmpwin);
 	int picked = selected[0].item.a_int;
 	free(selected);
 	switch(picked){

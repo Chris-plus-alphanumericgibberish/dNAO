@@ -1041,7 +1041,10 @@ struct weapon_dice * wdie;
 boolean youdef;
 {
 	int tmp = 0;
-	int igrolls = wdie->ignore_rolls;
+	// on a d6 this is 3d
+	// 16%,33%,50% at i_r 1,2,3
+	// on a d6 this is 1/2/3 + d3, on a d10 its 1/3/5 + d5, d20 is 1/6/10 + d10, etc.
+	int igrolls = (x*wdie->ignore_rolls)/6;
 
 	/* verify there are appropriate dice to roll */
 	if (!n)
@@ -2755,72 +2758,71 @@ struct monst *mtmp;
 
 	if (!otmp){
 		if (youagr && u.umaniac && bare_bonus > 0)
-			return min_ints(bare_bonus, chabon);
-		else
-			return 0;
-	}
-	/* all of these ifs should almost always fire, it's for readability */
-	/* if two bonus sources can stack, they're in separate ifs so they can both fire*/
-	if (dexbon){
-		if (is_rakuyo(otmp)){
-			strbon = 0;
-			damage_bon += dexbon * 2;
-		} else if (is_rapier(otmp) || is_mercy_blade(otmp) || otmp->otyp == SET_OF_CROW_TALONS ||
-				(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0)){
-			half_str = TRUE;
-			damage_bon += dexbon;
+			damage_bon +=  min_ints(bare_bonus, chabon);
+	} else {
+		/* all of these ifs should almost always fire, it's for readability */
+		/* if two bonus sources can stack, they're in separate ifs so they can both fire*/
+		if (dexbon){
+			if (is_rakuyo(otmp)){
+				strbon = 0;
+				damage_bon += dexbon * 2;
+			} else if (is_rapier(otmp) || is_mercy_blade(otmp) || otmp->otyp == SET_OF_CROW_TALONS ||
+					(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0)){
+				half_str = TRUE;
+				damage_bon += dexbon;
+			}
+			if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_YORSHKA_S_SPEAR || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
+				if (otmp->oartifact != ART_YORSHKA_S_SPEAR) half_str = TRUE;
+				damage_bon += dexbon * 2;
+			}
 		}
-		if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_YORSHKA_S_SPEAR || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
-			if (otmp->oartifact != ART_YORSHKA_S_SPEAR) half_str = TRUE;
-			damage_bon += dexbon * 2;
-		}
-	}
 
-	if (conbon){
-		// no conbon items yet
-	}
+		if (conbon){
+			// no conbon items yet
+		}
 
-	if (intbon){
-		if (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW)){
-			half_str = TRUE;
-			damage_bon += intbon;
+		if (intbon){
+			if (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW)){
+				half_str = TRUE;
+				damage_bon += intbon;
+			}
+			if (otmp->oartifact == ART_VELKA_S_RAPIER || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
+				half_str = TRUE;
+				damage_bon += intbon;
+			}
+			if (is_mercy_blade(otmp)){
+				half_str = TRUE;
+				damage_bon += intbon/2;
+			}
+			if (check_oprop(otmp, OPROP_ELFLW)){
+				damage_bon += intbon/2;
+			}
 		}
-		if (otmp->oartifact == ART_VELKA_S_RAPIER || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
-			half_str = TRUE;
-			damage_bon += intbon;
-		}
-		if (is_mercy_blade(otmp)){
-			half_str = TRUE;
-			damage_bon += intbon/2;
-		}
-		if (check_oprop(otmp, OPROP_ELFLW)){
-			damage_bon += intbon/2;
-		}
-	}
 
-	if (wisbon){
-		if (otmp->oartifact == ART_YORSHKA_S_SPEAR){
-			damage_bon += wisbon;
+		if (wisbon){
+			if (otmp->oartifact == ART_YORSHKA_S_SPEAR){
+				damage_bon += wisbon;
+			}
+			if (check_oprop(otmp, OPROP_OCLTW)){
+				half_str = TRUE;
+				damage_bon += wisbon;
+			}
+			if (otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
+				half_str = TRUE;
+				damage_bon += wisbon/2;
+			}
+			if (check_oprop(otmp, OPROP_ELFLW)){
+				damage_bon += wisbon/2;
+			}
 		}
-		if (check_oprop(otmp, OPROP_OCLTW)){
-			half_str = TRUE;
-			damage_bon += wisbon;
-		}
-		if (otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
-			half_str = TRUE;
-			damage_bon += wisbon/2;
-		}
-		if (check_oprop(otmp, OPROP_ELFLW)){
-			damage_bon += wisbon/2;
-		}
-	}
 
-	if (chabon){
-		if (check_oprop(otmp, OPROP_ELFLW)){
-			damage_bon += chabon/2;
-		}
-		if (otmp->oartifact == ART_IBITE_ARM){
-			if(bare_bonus > 0) damage_bon += cha/5 + bare_bonus*2;
+		if (chabon){
+			if (check_oprop(otmp, OPROP_ELFLW)){
+				damage_bon += chabon/2;
+			}
+			if (otmp->oartifact == ART_IBITE_ARM){
+				if(bare_bonus > 0) damage_bon += cha/5 + bare_bonus*2;
+			}
 		}
 	}
 	if (damage_bon && armg && check_oprop(armg, OPROP_RWTH) && (

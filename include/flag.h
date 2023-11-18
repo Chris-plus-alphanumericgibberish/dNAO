@@ -374,6 +374,12 @@ struct instance_flags {
 	int statuslines;
 
 	int pokedex;	/* default monster stats to show in the pokedex */
+	
+	boolean save_uinwater; /* tracks if we're actually buried etc. for #terrain*/
+	boolean save_uburied;
+	boolean save_uswallow;
+	
+	boolean autodescribe;
 /*
  * Window capability support.
  */

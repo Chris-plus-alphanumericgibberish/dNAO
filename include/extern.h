@@ -398,6 +398,7 @@ E void FDECL(find_trap, (struct trap *));
 E int FDECL(dosearch0, (int));
 E int NDECL(dosearch);
 E void NDECL(sokoban_detect);
+E int NDECL(doterrain);
 
 /* ### dig.c ### */
 
@@ -2175,6 +2176,7 @@ E char *FDECL(dowhatdoes_core,(CHAR_P, char *));
 E int NDECL(dohelp);
 E int NDECL(dohistory);
 E boolean FDECL(checkfile, (char *,struct permonst *,BOOLEAN_P,BOOLEAN_P, winid*));
+E char *FDECL(do_look_letter, (glyph_t, BOOLEAN_P, BOOLEAN_P, BOOLEAN_P, coord, char *, const char *));
 
 /* ### pcmain.c ### */
 
