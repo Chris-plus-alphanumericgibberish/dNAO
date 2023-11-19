@@ -3240,7 +3240,10 @@ int dz;
 #endif
 					bless(uwep);
 					remove_oprop(uwep, OPROP_LESSER_HOLYW);
-					add_oprop(uwep, OPROP_HOLYW);
+					if(accepts_weapon_oprops(uwep))
+						add_oprop(uwep, OPROP_HOLYW);
+					if(uwep->oclass == ARMOR_CLASS)
+						add_oprop(uwep, OPROP_HOLY);
 					if(uwep->spe < 3)
 						uwep->spe = 3;
 					mongone(mtmp);
@@ -6453,7 +6456,8 @@ doblessmenu()
 			MENU_UNSELECTED);
 	}
 	incntlet++; //Advance anyway
-	if(uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep) || is_gloves(uwep)) && !check_oprop(uwep, OPROP_HOLYW)){
+	if(uwep && ((accepts_weapon_oprops(uwep) && !check_oprop(uwep, OPROP_HOLYW)) ||
+		    (uwep->oclass == ARMOR_CLASS && !check_oprop(uwep, OPROP_HOLY)))){
 		Sprintf(buf, "Sanctify your weapon");
 		any.a_int = SANCTIFY_WEP;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,

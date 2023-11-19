@@ -662,37 +662,28 @@ struct obj {
 #define goat_acidable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp))\
 				&& !(otmp)->oartifact	\
 				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW) && !check_oprop((otmp), OPROP_LESSER_ACIDW))
-#define goat_droolable(otmp) (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
-				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW))
+#define goat_droolable(otmp) (accepts_weapon_oprops(otmp) && !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW))
 #define yog_magicable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp))\
 				&& !(otmp)->oartifact	\
 				&& !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW) && !check_oprop((otmp), OPROP_LESSER_MAGCW))
-#define yog_windowable(otmp) (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
-				&& !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW))
-#define sflm_able(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
-				&& (((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
-					|| ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT)))
-#define sflm_offerable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp))\
-				&& (((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
-					|| ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT))\
-				&& !check_oprop(otmp, OPROP_SFLMW))
+#define yog_windowable(otmp) (accepts_weapon_oprops(otmp) && !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW))
+#define sflm_able(otmp)	(((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
+			 || ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT))
+#define sflm_offerable(otmp)	(accepts_weapon_oprops(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_SFLMW))
 #define sflm_mirrorable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_suit(otmp) || is_shield(otmp))\
-				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
-				&& !check_oprop(otmp, OPROP_REFL))
-#define sflm_glazeable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_SUIT)\
-				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
-#define sflm_wrathable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_GLOVES)\
-				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
-#define sflm_burdenable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_BOOTS)\
-				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
-#define sflm_lifeable(otmp)	(((otmp)->oclass == ARMOR_CLASS && objects[(otmp)->otyp].oc_armcat == ARM_HELM)\
-				&& ((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL))
+				 && sflm_able(otmp) && !check_oprop(otmp, OPROP_REFL))
+#define sflm_glazeable(otmp)	(is_suit(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_CGLZ) && !check_oprop(otmp, OPROP_BCRS))
+#define sflm_wrathable(otmp)	(is_gloves(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_RWTH))
+#define sflm_burdenable(otmp)	(is_boots(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_RBRD))
+#define sflm_lifeable(otmp)	(is_helmet(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_SLIF) && !check_oprop(otmp, OPROP_LIFE))
 #define sflm_smeltable_silver(otmp)	(is_metallic(otmp) && (otmp)->obj_material != SILVER)
 #define sflm_smeltable_platinum(otmp)	(is_metallic(otmp) && (otmp)->obj_material != PLATINUM)
 #define sflm_smeltable_mithril(otmp)	(is_metallic(otmp) && (otmp)->obj_material != MITHRIL)
 #define sflm_mortalable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_MORTW))
 #define sflm_truedeathable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_TDTHW))
 #define sflm_unworthyable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_SFUWW))
+/* Can accept weapon props.  Not necessarily a weapon that you wield. */
+#define accepts_weapon_oprops(otmp)	((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp) || is_helmet(otmp))
 #define is_pole(otmp)	(((otmp)->oclass == WEAPON_CLASS || \
 			(otmp)->oclass == TOOL_CLASS) && \
 			 (objects[(otmp)->otyp].oc_skill == P_POLEARMS || \

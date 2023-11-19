@@ -960,14 +960,12 @@ int oprop;
 		impossible("Attempting to check oprop number %d on %s?", oprop, doname(obj));
 		return FALSE;
 	}
-	
+
 	//May have changed mats/be ammo. Silver fire only works on some materials.
-	if((oprop == OPROP_SFLMW || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW)
-		&& !sflm_able(obj)
+	if((oprop == OPROP_SFLMW || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW
+	 || oprop == OPROP_CGLZ || oprop == OPROP_RWTH || oprop == OPROP_RBRD || oprop == OPROP_SLIF
 	)
-		return FALSE;
-	if((oprop == OPROP_CGLZ || oprop == OPROP_RWTH || oprop == OPROP_RBRD || oprop == OPROP_SLIF)
-		&& !(obj->obj_material == SILVER || obj->obj_material == PLATINUM || obj->obj_material == MITHRIL)
+		&& !sflm_able(obj)
 	)
 		return FALSE;
 
@@ -1005,7 +1003,7 @@ unsigned long int *oprop_list;
 
 #define ADD_WEAPON_ARMOR_OPROP(otmp, oproptoken) \
 	add_oprop(otmp, OPROP_##oproptoken);\
-	if(is_gloves(otmp) || is_boots(otmp)){\
+	if(accepts_weapon_oprops(otmp)){\
 		if(rn2(3))\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
 		else\
@@ -1015,7 +1013,7 @@ unsigned long int *oprop_list;
 #define ADD_WEAPON_ARMOR_OPROPS(otmp, oproptoken1, oproptoken2) \
 	add_oprop(otmp, OPROP_##oproptoken1);\
 	add_oprop(otmp, OPROP_##oproptoken2);\
-	if(is_gloves(otmp) || is_boots(otmp)){\
+	if(accepts_weapon_oprops(otmp)){\
 		if(rn2(3)){\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken1##W);\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken2##W);\
