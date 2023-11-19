@@ -1774,7 +1774,7 @@ domove()
 
 			boolean pet_goodpos = goodpos(u.ux0, u.uy0, mtmp, 0);
 			
-			if (trap = t_at(x, y) != NULL && (trap->tseen || mon_resistance(mtmp, SEARCHING)) &&
+			if ((trap = t_at(x, y)) != NULL && (trap->tseen || mon_resistance(mtmp, SEARCHING)) &&
 				!(trap->ttyp == MAGIC_PORTAL || trap->ttyp == POLY_TRAP))
 					pet_goodpos = FALSE;
 
