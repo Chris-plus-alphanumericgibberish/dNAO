@@ -659,12 +659,10 @@ struct obj {
 			 || (otmp)->otyp == ANTIMAGIC_RIFT\
 			 || (otmp)->otyp == CATAPSI_VORTEX\
 			)
-#define goat_acidable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp))\
-				&& !(otmp)->oartifact	\
+#define goat_acidable(otmp)	(accepts_weapon_oprops(otmp)\
 				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW) && !check_oprop((otmp), OPROP_LESSER_ACIDW))
 #define goat_droolable(otmp) (accepts_weapon_oprops(otmp) && !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW))
-#define yog_magicable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp))\
-				&& !(otmp)->oartifact	\
+#define yog_magicable(otmp)	(accepts_weapon_oprops(otmp)\
 				&& !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW) && !check_oprop((otmp), OPROP_LESSER_MAGCW))
 #define yog_windowable(otmp) (accepts_weapon_oprops(otmp) && !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW))
 #define sflm_able(otmp)	(((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
