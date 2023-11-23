@@ -5247,7 +5247,7 @@ int tx,ty;
 		if(u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn by a level 14+ Binder.
 			if(quest_status.got_quest && Role_if(PM_EXILE)){
-				pline("The bloody, tooth-torn corpse of Dahlver-Nar hanges over the seal.");
+				pline("The bloody, tooth-torn corpse of Dahlver-Nar hangs over the seal.");
 				pline("He moans and reaches out to you.");
 				bindspirit(ep->ward_id);
 				u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] = moves + bindingPeriod;
@@ -5258,7 +5258,7 @@ int tx,ty;
 		if(u.sealTimeout[ACERERAK-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn by a Binder who has killed him.
 			if(Role_if(PM_EXILE) && quest_status.killed_nemesis){
-				pline("A golden skull hanges over the seal.");
+				pline("A golden skull hangs over the seal.");
 				pline("\"I am Acererak. Long ago, I dared the Gates of Teeth.\"");
 				pline("\"Now I am trapped outside of time,");
 				pline("beyond life, motion, and thought.\"");
