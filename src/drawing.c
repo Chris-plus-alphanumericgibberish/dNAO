@@ -387,10 +387,12 @@ static glyph_t ibm_graphics[MAXPCHARS] = {
 	0xb1,	/* S_litcorr:	meta-1, medium shading */
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
-	g_FILLER(S_brupstair),
-	g_FILLER(S_brdnstair),
 	g_FILLER(S_upladder),
 	g_FILLER(S_dnladder),
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
+	g_FILLER(S_brupladder),
+	g_FILLER(S_brdnladder),
 	g_FILLER(S_altar),
 	g_FILLER(S_grave),
 	g_FILLER(S_seal),
@@ -506,10 +508,12 @@ static glyph_t dec_graphics[MAXPCHARS] = {
 	g_FILLER(S_litcorr),
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
-	g_FILLER(S_brupstair),
-	g_FILLER(S_brdnstair),
 	0xf9,	/* S_upladder:	meta-y, greater-than-or-equals */
 	0xfa,	/* S_dnladder:	meta-z, less-than-or-equals */
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
+	0xf9,	/* S_brupladder:	meta-y, greater-than-or-equals */
+	0xfa,	/* S_brdnladder:	meta-z, less-than-or-equals */
 	g_FILLER(S_altar),	/* 0xc3, \E)3: meta-C, dagger */
 	g_FILLER(S_grave),
 	g_FILLER(S_seal),
@@ -623,10 +627,12 @@ static glyph_t mac_graphics[MAXPCHARS] = {
 	g_FILLER(S_litcorr),
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
-	g_FILLER(S_brupstair),
-	g_FILLER(S_brdnstair),
 	g_FILLER(S_upladder),
 	g_FILLER(S_dnladder),
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
+	g_FILLER(S_brupladder),
+	g_FILLER(S_brdnladder),
 	g_FILLER(S_altar),
 	0xef,	/* S_grave:	same as open door */
 	g_FILLER(S_seal),
@@ -742,10 +748,12 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	g_FILLER(S_litcorr),
 	g_FILLER(S_upstair),
 	g_FILLER(S_dnstair),
-	g_FILLER(S_brupstair),
-	g_FILLER(S_brdnstair),
 	0x2264,	/* S_upladder:	LESS-THAN OR EQUAL TO */
 	0x2265,	/* S_dnladder:	GREATER-THAN OR EQUAL TO */
+	g_FILLER(S_brupstair),
+	g_FILLER(S_brdnstair),
+	0x2264,	/* S_brupladder:	LESS-THAN OR EQUAL TO */
+	0x2265,	/* S_brdnladder:	GREATER-THAN OR EQUAL TO */
 	0x03A9,	/* S_altar:	GREEK CAPITAL LETTER OMEGA */
 	0x2020,	/* S_grave:	DAGGER */
 	g_FILLER(S_seal),
