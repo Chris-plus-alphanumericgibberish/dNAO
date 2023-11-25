@@ -2357,6 +2357,14 @@ weapon:
 				if (obj->opoisoned & OPOISON_SILVER)  Strcat(buf, " (star-water injecting)");
 				if (obj->opoisoned & OPOISON_HALLU)  Strcat(buf, " (ergot injecting)");
 			}
+			if (obj->known && obj->oartifact &&
+				(oart->inv_prop == MORGOTH)
+				){
+				Sprintf(eos(buf), " (%s)",
+					objects[obj->otyp].oc_name_known
+					? OBJ_NAME(objects[obj->otyp])
+					: OBJ_DESCR(objects[obj->otyp]));
+			}
 			break;
 		case FOOD_CLASS:
 			if (obj->otyp == EGG) {

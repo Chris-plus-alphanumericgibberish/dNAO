@@ -428,6 +428,7 @@ extern struct artifact * artilist;
 #define GITH_ART		(LAST_PROP+92)
 #define ZERTH_ART		(LAST_PROP+93)
 #define AMALGUM_ART		(LAST_PROP+94)
+#define MORGOTH         (LAST_PROP+95)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

@@ -1579,7 +1579,7 @@ A("The Shard from Morgoth's Crown",	RIN_ADORNMENT,			"twisted band of jagged iro
 	ATTK(AD_HLUH, 7, 9), NOFLAG,
 	PROPS(SHOCK_RES), NOFLAG,
 	PROPS(ANTIMAGIC), NOFLAG,
-	NOINVOKE, NOFLAG
+	MORGOTH, NOFLAG
 	),
 
 /* The Alignment Keys.  Must be grouped together.  Some code in lock.c, artifact.h, and invent.c depends on the order. */

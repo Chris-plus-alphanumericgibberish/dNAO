@@ -197,7 +197,7 @@ shuffle_all()
 			if (oclass == POTION_CLASS)
 			    j -= 7;  /* primordial waters, goat's milk, space mead, water, starlight, amnesia, and blood have fixed descriptions */
 			if (oclass == RING_CLASS)
-				first += 1;	/* three wishes has a fixed description */
+				first += 2;	/* three wishes and nothing have fixed descriptions */
 			if (oclass == WAND_CLASS)
 			    first += 3;  /* light, darkness, and wishing have fixed descriptions */
 			else if (oclass == AMULET_CLASS ||

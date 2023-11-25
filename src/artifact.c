@@ -11200,7 +11200,23 @@ arti_invoke(obj)
 		}break;
 		case AMALGUM_ART:{
 		}break;
-		default: pline("Program in dissorder.  Artifact invoke property not recognized");
+		case MORGOTH:{
+			int base_otyp = find_good_iring();
+			int new_otyp = obj->otyp == base_otyp ? RIN_NOTHING : base_otyp;
+			boolean worn_left = obj == uleft;
+			boolean worn_right = obj == uright;
+			pline("%s suddenly seems much more %s.", artilist[obj->oartifact].name,
+			      new_otyp == RIN_NOTHING ? "boring" : "interesting");
+			if (worn_left || worn_right) Ring_off(obj);
+			obj->otyp = new_otyp;
+			if (worn_left || worn_right) {
+				setworn(obj, worn_left ? LEFT_RING : RIGHT_RING);
+				Ring_on(obj);
+			}
+			if (obj->otyp == RIN_NOTHING) makeknown(RIN_NOTHING);
+			obj->age = 0;
+		}break;
+		default: pline("Program in disorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
 
