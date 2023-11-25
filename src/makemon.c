@@ -2710,6 +2710,40 @@ boolean goodequip;
 				if (goodequip || !rn2(4)) (void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
 				(void)mongets(mtmp, ELVEN_DAGGER, mkobjflags);
 			}
+			else if(mm == PM_TREESINGER){
+				otmp = mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+				otmp = mongets(mtmp, ELVEN_TOGA, mkobjflags);
+
+				otmp = mongets(mtmp, ELVEN_HELM, mkobjflags);
+				set_material(otmp, WOOD);
+
+				otmp = mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+				set_material(otmp, WOOD);
+
+				otmp = mongets(mtmp, ELVEN_SPEAR, mkobjflags);
+				set_material(otmp, WOOD);
+				otmp = mongets(mtmp, ELVEN_SPEAR, mkobjflags);
+				set_material(otmp, WOOD);
+
+				otmp = mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
+				set_material(otmp, WOOD);
+
+				otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+			}
+			else if(mm == PM_MITHRIL_SMITH){
+				otmp = mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+
+				otmp = mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
+				set_material(otmp, MITHRIL);
+				otmp = mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
+				set_material(otmp, MITHRIL);
+				otmp = mongets(mtmp, HIGH_ELVEN_GAUNTLETS, mkobjflags);
+				set_material(otmp, MITHRIL);
+				otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+				set_material(otmp, MITHRIL);
+				otmp = mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
+				set_material(otmp, MITHRIL);
+			}
 			else {
 				if (goodequip || rn2(2))
 					(void) mongets(mtmp, (goodequip || rn2(2)) ? ELVEN_MITHRIL_COAT : ELVEN_CLOAK, mkobjflags);
@@ -4188,6 +4222,24 @@ boolean goodequip;
 			otmp->spe = -d(1,3);
 			otmp->oeroded3 = 3;
 			(void) mpickobj(mtmp,otmp);
+		}
+		else if( ptr->mtyp == PM_SHADOWSMITH ){
+			struct obj *otmp;
+			otmp = mongets(mtmp, DROVEN_PLATE_MAIL, NO_MKOBJ_FLAGS);
+			set_material(otmp, SHADOWSTEEL);
+			otmp->oerodeproof = TRUE;
+
+			otmp = mongets(mtmp, DROVEN_HELM, NO_MKOBJ_FLAGS);
+			set_material(otmp, SHADOWSTEEL);
+			otmp->oerodeproof = TRUE;
+
+			otmp = mongets(mtmp, GAUNTLETS, NO_MKOBJ_FLAGS);
+			set_material(otmp, SHADOWSTEEL);
+			otmp->oerodeproof = TRUE;
+
+			otmp = mongets(mtmp, ARMORED_BOOTS, NO_MKOBJ_FLAGS);
+			set_material(otmp, SHADOWSTEEL);
+			otmp->oerodeproof = TRUE;
 		}
 	} else if (ptr->mtyp == PM_HUMAN_WEREWOLF){
 		if (In_lost_cities(&u.uz)){
@@ -13383,8 +13435,30 @@ int faction;
 
 	if(!get_mx(mtmp, MX_ESUM) && intelligent_mon(mtmp) && is_smith_mtyp(mtmp->mtyp)){
 		add_mx(mtmp, MX_ESMT);
-		if(is_smith_mon(mtmp))
+		if(HAS_ESMT(mtmp))
 			ESMT(mtmp)->smith_mtyp = mtmp->mtyp; //In case the monster is later polymorphed
+		if(needs_forge_mon(mtmp)){
+			for(int ix = mtmp->mx-1; ix < mtmp->mx+2; ix++){
+				for(int iy = mtmp->my-1; iy < mtmp->my+2; iy++){
+					if(isok(ix, iy) && IS_FORGE(levl[ix][iy].typ)){
+						ESMT(mtmp)->frgpos.x = ix;
+						ESMT(mtmp)->frgpos.y = iy;
+						ESMT(mtmp)->frglevel = u.uz;
+					}
+				}
+			}
+		}
+		if(mtmp->mtyp == PM_TREESINGER){
+			for(int ix = mtmp->mx-1; ix < mtmp->mx+2; ix++){
+				for(int iy = mtmp->my-1; iy < mtmp->my+2; iy++){
+					if(isok(ix, iy) && levl[ix][iy].typ == TREE){
+						ESMT(mtmp)->frgpos.x = ix;
+						ESMT(mtmp)->frgpos.y = iy;
+						ESMT(mtmp)->frglevel = u.uz;
+					}
+				}
+			}
+		}
 	}
 	
 	ABASE_MON(A_STR, mtmp) = 7 + d(1,6);

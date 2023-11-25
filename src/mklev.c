@@ -1297,6 +1297,10 @@ skip0:
 		    mkfeature(FORGE, FALSE, croom);
 		}
 
+		if(!rn2(280)) {
+		    mkfeature(TREE, FALSE, croom);
+		}
+
 		if (x < 2) x = 2;
 #endif
 		if(!rn2(x))
@@ -2016,10 +2020,49 @@ struct mkroom *croom;
 		level.flags.nfountains++;
 		break;
 	case FORGE:
-		/* Put a fountain at m.x, m.y */
+		/* Put a forge at m.x, m.y */
 		levl[m.x][m.y].typ = FORGE;
-		/* Is it a "blessed" forge? (affects drinking from forge) */
-		// if (!rn2(7)) levl[m.x][m.y].blessedftn = 1;
+		if (!rn2(7)){
+			int pm = PM_HUMAN_SMITH;
+			struct monst *smith;
+			switch(rn2(7)){
+				case 0:
+				case 1:
+					pm = PM_GOBLIN_SMITH;
+				break;
+				case 2:
+				case 3:
+					pm = PM_DWARF_SMITH;
+				break;
+				case 4:
+				case 5:
+					pm = PM_HUMAN_SMITH;
+				case 6:
+				break;
+					pm = PM_MITHRIL_SMITH;
+				break;
+			}
+			smith = makemon(&mons[pm], m.x, m.y, NO_MM_FLAGS);
+			if(smith && HAS_ESMT(smith)){
+				ESMT(smith)->frgpos.x = m.x;
+				ESMT(smith)->frgpos.y = m.y;
+				ESMT(smith)->frglevel = u.uz;
+			}
+		}
+		level.flags.nforges++;
+		break;
+	case TREE:
+		/* Put a forge at m.x, m.y */
+		levl[m.x][m.y].typ = TREE;
+		{
+			struct monst *smith;
+			smith = makemon(&mons[PM_TREESINGER], m.x, m.y, MM_ADJACENTOK);
+			if(smith && HAS_ESMT(smith)){
+				ESMT(smith)->frgpos.x = m.x;
+				ESMT(smith)->frgpos.y = m.y;
+				ESMT(smith)->frglevel = u.uz;
+			}
+		}
 		level.flags.nforges++;
 		break;
 	case SINK:

@@ -577,7 +577,7 @@ OBJECT:'\\',"bed",(46,08)
 MONSTER: '#', "drow captain plague-victim", (48,11)
 OBJECT:'\\',"bed",(48,11)
 
-MONSTER: '#', "drow matron plague-victim", (49,03)
+MONSTER: '#', "shadowsmith plague-victim", (49,03)
 OBJECT:'\\',"expensive bed",(49,03)
 
 MONSTER: '@', "hedrow wizard", (44,18)

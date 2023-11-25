@@ -313,12 +313,12 @@ struct obj *obj;
 	    if(obj->otyp == CORPSE) {
 			mtmp->meating = 3 + (mons[obj->corpsenm].cwt >> 6);
 			nutrit = mons[obj->corpsenm].cnutrit;
-			if(mtmp->mtyp == PM_DRACAE_ELADRIN && is_smith_mon(mtmp))
+			if(mtmp->mtyp == PM_DRACAE_ELADRIN && HAS_ESMT(mtmp))
 				ESMT(mtmp)->smith_biomass_stockpile += nutrit;
 	    } else {
 			mtmp->meating = objects[obj->otyp].oc_delay;
 			nutrit = objects[obj->otyp].oc_nutrition;
-			if(mtmp->mtyp == PM_DRACAE_ELADRIN && is_smith_mon(mtmp))
+			if(mtmp->mtyp == PM_DRACAE_ELADRIN && HAS_ESMT(mtmp))
 				ESMT(mtmp)->smith_biomass_stockpile += nutrit;
 	    }
 	    switch(mtmp->data->msize) {

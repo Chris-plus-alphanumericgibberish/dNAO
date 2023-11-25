@@ -2313,6 +2313,38 @@ register struct monst *mtmp;
 	return(FALSE);
 }
 
+/*
+ * smith_move: return 1: moved  0: didn't  -1: let m_move do it  -2: died
+ */
+int
+smith_move(smith)
+register struct monst *smith;
+{
+	register xchar gx,gy,omx,omy;
+	schar temple;
+	boolean avoid = TRUE;
+
+	omx = smith->mx;
+	omy = smith->my;
+
+	if(!on_level(&(ESMT(smith)->frglevel), &u.uz))
+		return -1;
+
+	gx = ESMT(smith)->frgpos.x;
+	gy = ESMT(smith)->frgpos.y;
+
+	gx += rn1(3,-1);	/* mill around the altar */
+	gy += rn1(3,-1);
+
+	if(!smith->mpeaceful || smith->mtame || smith->mberserk ||
+	   (Conflict && !resist(smith, RING_CLASS, 0, 0))
+	)
+	   return -1;
+	else if(Invis) avoid = FALSE;
+
+	return(move_special(smith,FALSE,TRUE,FALSE,avoid,omx,omy,gx,gy));
+}
+
 /* Return values:
  * 0: did not move, but can still attack and do other stuff.
  * 1: moved, possibly can attack.
@@ -2427,6 +2459,14 @@ register int after;
 	/* and for the priest */
 	if(mtmp->ispriest) {
 	    mmoved = pri_move(mtmp);
+	    if(mmoved == -2) return(2);
+	    if(mmoved >= 0) goto postmov;
+	    mmoved = 0;
+	}
+
+	/* and for smiths */
+	if(HAS_ESMT(mtmp)) {
+	    mmoved = smith_move(mtmp);
 	    if(mmoved == -2) return(2);
 	    if(mmoved >= 0) goto postmov;
 	    mmoved = 0;

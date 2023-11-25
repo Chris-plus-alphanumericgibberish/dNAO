@@ -1292,8 +1292,8 @@
 #define is_guided_vectored_mtyp(mtyp)	((mtyp) == PM_JUGGERNAUT || (mtyp) == PM_ID_JUGGERNAUT)
 
 #define is_smith_mtyp(mtyp)	((mtyp) == PM_OONA || (mtyp) == PM_DRACAE_ELADRIN || (mtyp) == PM_GOBLIN_SMITH || (mtyp) == PM_DWARF_SMITH\
-							 || (mtyp) == PM_MITHRIL_SMITH || (mtyp) == PM_SHADOWSMITH || (mtyp) == PM_HUMAN_SMITH)
-#define is_smith_mon(mon)	(get_mx(mon, MX_ESMT))
+							 || (mtyp) == PM_MITHRIL_SMITH || (mtyp) == PM_SHADOWSMITH || (mtyp) == PM_HUMAN_SMITH || (mtyp) == PM_TREESINGER)
+#define needs_forge_mon(mon)	(!(ESMT(mon)->smith_mtyp == PM_OONA || ESMT(mon)->smith_mtyp == PM_DRACAE_ELADRIN || ESMT(mon)->smith_mtyp == PM_SHADOWSMITH))
 
 #define likes_swamp(ptr)	((ptr)->mlet == S_PUDDING || \
 				 (ptr)->mlet == S_FUNGUS || \

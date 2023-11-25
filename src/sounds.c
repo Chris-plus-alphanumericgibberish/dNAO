@@ -2657,7 +2657,7 @@ humanoid_sound:
     if (pline_msg) pline("%s %s", Monnam(mtmp), pline_msg);
     else if (verbl_msg) verbalize1(verbl_msg);
 
-	if(chatting && is_smith_mon(mtmp) && mtmp->mpeaceful){
+	if(chatting && HAS_ESMT(mtmp) && mtmp->mpeaceful){
 		char query[BUFSZ] = "";
 		if(mtmp->mtyp == PM_DRACAE_ELADRIN)
 			Sprintf(query, "Ask %s about incubation services?", mhim(mtmp));

@@ -4532,6 +4532,7 @@ humanoid
 	human settlements.
 # takes "human or elf or you" when specifying "@" as a dwarf, gnome or orc.
 human
+human smith
 chieftain
 guard
 ninja
@@ -9449,6 +9450,16 @@ tree
 	Poems are made by fools like me,
 	But only God can make a tree.
 		[ Trees, by Joyce Kilmer ]
+treesinger
+	I sang of leaves, of leaves of gold,
+		and leaves of gold there grew:
+	Of wind I sang, a wind there came
+		and in the branches blew.
+	Beyond the Sun, beyond the Moon,
+		the foam was on the Sea,
+	And by the strand of Ilmarin
+		there grew a golden Tree.
+		[ The Fellowship of the Ring, by J.R.R. Tolkien ]
 trilobite
 	Trilobite, any member of a group of extinct fossil arthropods
 	easily recognized by their distinctive three-lobed, three-
