@@ -2890,6 +2890,7 @@ static const char * const special_subjs[] = {
 	"amnesia",
 	"paralysis",
 	"dress",
+	"diskos",
 	0
 };
 
