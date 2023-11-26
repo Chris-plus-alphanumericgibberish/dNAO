@@ -4662,7 +4662,7 @@ struct obj * tool;
 		else {
 			pline("A broken-off fang is embedded in %s chest. It seems to have pierced %s heart!", s_suffix(mon_nam(mtmp)), mhis(mtmp));
 			if(!helpless_still(mtmp) && !TimeStop){
-				pline("%s moves to quickly for you to grasp the fang.", Monnam(mtmp));
+				pline("%s moves too quickly for you to grasp the fang.", Monnam(mtmp));
 			}
 			else if(yn("Attempt to remove the fang?")=='y'){
 				/* Don't really want the solution to be wages of sloth */
