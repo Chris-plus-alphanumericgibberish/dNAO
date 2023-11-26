@@ -1377,7 +1377,8 @@ do_look(quick)
 {
 	char out_str[LONGBUFSZ];
 	out_str[0] = 0;
-    const char *x_str, *firstmatch = 0;
+    const char *x_str = 0;
+	const char firstmatch[BUFSZ] = {0};
     struct permonst *pm = 0;
     glyph_t sym;		/* typed symbol or converted glyph */
     boolean from_screen;	/* question from the screen */
