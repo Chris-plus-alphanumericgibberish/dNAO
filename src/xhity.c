@@ -12489,7 +12489,8 @@ int vis;
 				change_usanity(-1*dmg, TRUE);
 				xdamagey(magr, mdef, attk, dmg*10);
 			}
-			u.umadness |= MAD_SPIRAL;
+			if(magr->mtyp == PM_GREAT_CTHULHU)
+				u.umadness |= MAD_SPIRAL;
 		}
 		break;
 
