@@ -30,7 +30,7 @@ struct crowning {
 };
 
 #define is_sarnath_god(godnum)	(godnum == GOD_TAMASH || godnum == GOD_LOBON || godnum == GOD_ZO_KALAR)
-#define hell_safe_prayer(p_god)	(galign(p_god) || p_god == GOD_LOLTH || (u.ualign.god == p_god && uarmh && uarmh->oartifact == ART_MITRE_OF_HOLINESS))
+#define hell_safe_prayer(p_god)	(galign(p_god) == A_VOID || p_god == GOD_LOLTH || (u.ualign.god == p_god && uarmh && uarmh->oartifact == ART_MITRE_OF_HOLINESS))
 
 
 #endif	/* GODS_H */
