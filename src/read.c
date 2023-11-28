@@ -3630,13 +3630,13 @@ char *in_buff;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
-	boolean maketame, makeloyal, makepeaceful, makehostile, makesummoned;
+	boolean maketame, makeloyal, makepeaceful, makehostile, makesummoned, makemale, makefemale;
 	int l = 0;
 
 	tries = 0;
 	do {
 	    which = urole.malenum;	/* an arbitrary index into mons[] */
-	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = FALSE;
+	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = makemale = makefemale = FALSE;
 		if(in_buff){
 			Sprintf(buf, "%s", in_buff);
 		}
@@ -3729,6 +3729,12 @@ char *in_buff;
 			}
 			else if (!strncmpi(bufp, "noequip ", l = 8)) {
 				noequip = TRUE;
+			}
+			else if (!strncmpi(bufp, "male ", l = 5)) {
+				makemale = TRUE;
+			}
+			else if (!strncmpi(bufp, "female ", l = 7)) {
+				makefemale = TRUE;
 			}
 			else
 				break;
@@ -3908,6 +3914,10 @@ createmon:
 				mm_flags |= MM_ESUM;
 			if (noequip)
 				mm_flags |= NO_MINVENT;
+			if (makemale)
+				mm_flags |= MM_MALE;
+			if (makefemale)
+				mm_flags |= MM_FEMALE;
 
 			mtmp = makemon_full(whichpm, x, y, mm_flags, undeadtype ? undeadtype : -1, -1);
 

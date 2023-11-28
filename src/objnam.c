@@ -3490,6 +3490,10 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
+			    !BSTRCMPI(bp, p-12, "vs evil eyes") ||
+			    !BSTRCMPI(bp, p-16, "versus evil eyes") ||
+			    !BSTRCMPI(bp, p-8, "vs gazes") ||
+			    !BSTRCMPI(bp, p-12, "versus gazes") ||
 			    !BSTRCMPI(bp, p-6, "scales") ||
 				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
 				!BSTRCMPI(bp, p-10, "Lost Names") || /* book */
@@ -3672,8 +3676,12 @@ struct alt_spellings {
 	{ "mattock", DWARVISH_MATTOCK },
 	{ "amulet of poison resistance", AMULET_VERSUS_POISON },
 	{ "amulet of curse resistance", AMULET_VERSUS_CURSES },
+	{ "amulet of gaze resistance", AMULET_VERSUS_EVIL_EYES },
 	{ "amulet vs poison", AMULET_VERSUS_POISON },
 	{ "amulet vs curses", AMULET_VERSUS_CURSES },
+	{ "amulet vs evil eyes", AMULET_VERSUS_EVIL_EYES },
+	{ "amulet vs gazes", AMULET_VERSUS_EVIL_EYES },
+	{ "amulet versus gazes", AMULET_VERSUS_EVIL_EYES },
 	{ "stone", ROCK },
 	{ "crystal", ROCK },
 #ifdef TOURIST
@@ -3838,7 +3846,9 @@ int wishflags;
 		lolth_symbol = FALSE,
 		kiaransali_symbol = FALSE,
 		eilistraee_symbol = FALSE,
-		sizewished = FALSE;
+		sizewished = FALSE,
+		male = FALSE,
+		female = FALSE;
 	int item_color = -1;
 	int objsize = (from_user ? youracedata->msize : MZ_MEDIUM);
 	long bodytype = 0L;
@@ -4583,6 +4593,10 @@ int wishflags;
 			mat = GEMSTONE; gemtype = AGATE;
 		} else if (!strncmpi(bp, "jade ", l=5) && strncmpi(bp, "jade ring", 9)) {
 			mat = GEMSTONE; gemtype = JADE;
+		} else if (!strncmpi(bp, "male ", l=5)) {
+			male = TRUE;
+		} else if (!strncmpi(bp, "female ", l=7)) {
+			female = TRUE;
 		} else
 			break;
 		bp += l;
@@ -5529,6 +5543,10 @@ typfnd:
 		case FIGURINE:
 			//if (!(mons[mntmp].geno & G_UNIQ) && !is_unwishable(&mons[mntmp]))
 			otmp->corpsenm = mntmp;
+			if (male && !female)
+				otmp->spe = FIGURINE_MALE;
+			if (female && !male)
+				otmp->spe = FIGURINE_FEMALE;
 			break;
 		case EGG:
 			mntmp = can_be_hatched(mntmp);
@@ -5549,6 +5567,10 @@ typfnd:
 			if (Has_contents(otmp) && verysmall(&mons[mntmp]))
 			    delete_contents(otmp);	/* no spellbook */
 			otmp->spe = ishistoric ? STATUE_HISTORIC : 0;
+			if (male && !female)
+				otmp->spe |= STATUE_MALE;
+			if (female && !male)
+				otmp->spe |= STATUE_FEMALE;			
 			break;
 		case FOSSIL:
 			if(wizwish)
