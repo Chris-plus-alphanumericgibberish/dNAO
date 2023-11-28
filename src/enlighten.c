@@ -99,7 +99,8 @@ char *outbuf;
 	}
 	bonus = (incamt > 0) ? "bonus" : "penalty";
 	/* "bonus to hit" vs "damage bonus" */
-	if (!strcmp(inctyp, "damage") || !strcmp(inctyp, "spell damage")) {
+	if (!strcmp(inctyp, "damage") || !strcmp(inctyp, "spell damage") ||
+	    !strcmp(inctyp, "AC") || !strcmp(inctyp, "protection")) {
 	    const char *ctmp = inctyp;
 	    inctyp = bonus;
 	    bonus = ctmp;
@@ -412,23 +413,12 @@ boolean dumping;
 		}
 	}
 	
-	/* note: piousness 20 matches MIN_QUEST_ALIGN (quest.h) */
-	if (u.ualign.record >= 20)	you_are("piously aligned");
-	else if (u.ualign.record > 13)	you_are("devoutly aligned");
-	else if (u.ualign.record > 8)	you_are("fervently aligned");
-	else if (u.ualign.record > 3)	you_are("stridently aligned");
-	else if (u.ualign.record == 3)	you_are("aligned");
-	else if (u.ualign.record > 0)	you_are("haltingly aligned");
-	else if (u.ualign.record == 0)	you_are("nominally aligned");
-	else if (u.ualign.record >= -3)	you_have("strayed");
-	else if (u.ualign.record >= -8)	you_have("sinned");
-	else you_have("transgressed");
+	if (final && flags.descendant) {
+		enl_msg("You ", "inherited ", "inherited ", artilist[u.inherited].name);
+	}
 	if (wizard || final) {
 		Sprintf(buf, "%ld gold ", u.spawnedGold);
 		enl_msg(buf, "has been", "was", " created");
-	}
-#ifdef WIZARD
-	if (wizard) {
 		Sprintf(buf, " %d", u.ualign.record);
 		enl_msg("Your alignment ", "is", "was", buf);
 		Sprintf(buf, " %d sins", u.ualign.sins);
@@ -454,24 +444,23 @@ boolean dumping;
 			Sprintf(buf, "%d chokhmah sephiroth ", u.chokhmah);
 			enl_msg(buf, "are", "were", " deployed");
 		}
-		if(u.ustdy){
-			Sprintf(buf, "%d weakness from being studied", u.ustdy);
-			you_have(buf);
-		}
-		if(u.sealCounts){
-			Sprintf(buf, "spirits bound: %d", u.sealCounts);
-			you_have(buf);
-		}
-		if(u.sealsActive){
-			Sprintf(buf, "seals active: %lx", u.sealsActive);
-			you_have(buf);
-		}
-		if(u.specialSealsActive){
-			Sprintf(buf, "special seals active: %lx", u.specialSealsActive);
-			you_have(buf);
-		}
+	} else {
+		/* note: piousness 20 matches MIN_QUEST_ALIGN (quest.h) */
+		if (u.ualign.record >= 20)	you_are("piously aligned");
+		else if (u.ualign.record > 13)	you_are("devoutly aligned");
+		else if (u.ualign.record > 8)	you_are("fervently aligned");
+		else if (u.ualign.record > 3)	you_are("stridently aligned");
+		else if (u.ualign.record == 3)	you_are("aligned");
+		else if (u.ualign.record > 0)	you_are("haltingly aligned");
+		else if (u.ualign.record == 0)	you_are("nominally aligned");
+		else if (u.ualign.record >= -3)	you_have("strayed");
+		else if (u.ualign.record >= -8)	you_have("sinned");
+		else you_have("transgressed");
 	}
-#endif
+	if(u.ustdy){
+		Sprintf(buf, "%d weakness from being studied", u.ustdy);
+		you_have(buf);
+	}
 	
 	if(u.sealsActive || u.specialSealsActive){
 		int i,j,numBound,numFound=0;
@@ -638,7 +627,7 @@ boolean dumping;
 	if(Doubt)
 		enl_msg("You ", "can't", "couldn't", " pray or use clerical magic");
 	/*** Madnesses ***/
-	if(NightmareAware_Sanity < 100 && !BlockableClearThoughts){
+	if((NightmareAware_Sanity < 100 && !BlockableClearThoughts) || final){
 		if (u.umadness&MAD_DELUSIONS){
 			you_have("a tendency to hallucinate, obscuring some monsters' true forms");
 		}
@@ -666,7 +655,7 @@ boolean dumping;
 			you_have("reduced AC, reduced spell success, and increased damage");
 		}
 		if (u.umadness&MAD_ARGENT_SHEEN){
-			enl_msg("Sometimes, monsters ", "will gain", "gained", "  reflection for a turn");
+			enl_msg("Sometimes, monsters ", "will gain", "gained", " reflection for a turn");
 			enl_msg("Sometimes, monsters ", "will take", "took", " reduced damage from your magic");
 			enl_msg("Sometimes, you ", "will stop", "stopped", " to admire yourself in mirrors, losing turns");
 			enl_msg("You ", "take", "took", " increased damage from male humanoids and centaurs");
@@ -943,6 +932,9 @@ boolean dumping;
 		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
 		if(u.phasengn) you_are("in phase mode");
 	}
+	/* exact uacinc is always shown because the player can always see their own AC */
+	if (u.uacinc)
+	    you_have(enlght_combatinc("AC", u.uacinc, 1, buf));
 	if (u.uhitinc || u.uuur_duration)
 	    you_have(enlght_combatinc("to hit", u.uhitinc + (u.uuur_duration ? 10 : 0), final, buf));
 	if (u.udaminc || (u.uaesh/3) || u.uaesh_duration)
@@ -969,10 +961,8 @@ boolean dumping;
 	    prot += u.uuur_duration ? 10 : 0;
 	    prot += (u.uvaul+4)/5;
 
-	    if (prot < 0)
-		you_are("ineffectively protected");
-	    else
-		you_are("protected");
+	    /* exact protection is always shown because the player can always see their own AC/DR */
+	    you_have(enlght_combatinc("protection", prot, 1, buf));
 	}
 	if (Protection_from_shape_changers)
 		you_are("protected from shape changers");

@@ -13645,8 +13645,8 @@ int faction;
 		}
 	}
 
-	if (is_female(ptr)) mtmp->female = TRUE;
-	else if (is_male(ptr)) mtmp->female = FALSE;
+	if (is_female(ptr) || ((mmflags & MM_FEMALE) && !(mmflags & MM_MALE))) mtmp->female = TRUE;
+	else if (is_male(ptr) || ((mmflags & MM_MALE) && !(mmflags & MM_FEMALE))) mtmp->female = FALSE;
 	else mtmp->female = rn2(2);	/* ignored for neuters */
 
 	// if (ptr->mtyp == urole.ldrnum)		/* leader knows about portal */
