@@ -2452,7 +2452,7 @@ your holy quest from %d:
 have been sending missionaries into the city, infecting
 our citizens with their debased teachings.
 
-"This outrage cannot be alowed to stand. Your mission is
+"This outrage cannot be allowed to stand. Your mission is
 to travel through %i and up to the surface,
 locate the grove of Eilistraee, and kill her heretic
 priestess.  Bring me %o, her unholy sword,
