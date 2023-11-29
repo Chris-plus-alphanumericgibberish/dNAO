@@ -10928,7 +10928,7 @@ arti_invoke(obj)
 				/* remove old name */
 				rem_ox(obj, OX_ENAM);
 			}
-			else if(!u.uevent.qcompleted){
+			else if(!u.uevent.qcompleted && Role_if(PM_MADMAN)){
 				pline("A throbbing yellow haze obscures your vision!");
 				You_cant("use this right now.");
 			}
