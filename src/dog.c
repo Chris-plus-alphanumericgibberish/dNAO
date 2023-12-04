@@ -107,6 +107,7 @@ boolean quietly;
 	struct permonst *pm;
 	struct monst *mtmp = 0;
 	int chance, trycnt = 100;
+	int mmflags = MM_EDOG|MM_IGNOREWATER;
 
 
 	do {
@@ -127,6 +128,12 @@ boolean quietly;
 					pline("... into a pile of dust.");
 				break;	/* mtmp is null */
 			}
+			if(otmp->spe&FIGURINE_MALE){
+				mmflags |= MM_MALE;
+			}
+			if(otmp->spe&FIGURINE_FEMALE){
+				mmflags |= MM_FEMALE;
+			}
 	    } else if (!rn2(3)) {
 			pm = &mons[pet_type()];
 	    } else {
@@ -140,7 +147,7 @@ boolean quietly;
 				continue;
 		}
 
-		mtmp = makemon(pm, x, y, MM_EDOG|MM_IGNOREWATER);
+		mtmp = makemon(pm, x, y, mmflags);
 		if (otmp && !mtmp) { /* monster was genocided or square occupied */
 			if (!quietly)
 			   pline_The("figurine writhes and then shatters into pieces!");
@@ -158,12 +165,6 @@ boolean quietly;
 	if (otmp) { /* figurine; resulting monster might not become a pet */
 		if(check_fig_template(otmp->spe, FIGURINE_PSEUDO)){
 			set_template(mtmp, PSEUDONATURAL);
-		}
-		if(otmp->spe&FIGURINE_MALE){
-			mtmp->female = FALSE;
-		}
-		if(otmp->spe&FIGURINE_FEMALE){
-			mtmp->female = TRUE;
 		}
 
 		if(otmp->spe&FIGURINE_LOYAL){

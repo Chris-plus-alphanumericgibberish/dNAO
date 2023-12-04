@@ -221,6 +221,8 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define MM_NOGROUP          0x0400    /* don't generate its normal accompanying groupmates */
 #define MM_BIGGROUP         0x0800    /* do generate its larger size of accompanying groupmates */
 #define MM_GOODEQUIP        0x1000    /* do generate its better equipment sets (planar equip for angels) */
+#define MM_MALE             0x2000    /* make monster male */
+#define MM_FEMALE           0x4000    /* make monster female */
 
 /* flags to control mksobj() et al */
 #define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */
