@@ -558,9 +558,9 @@ struct obj {
 									(u.brand_otyp == (o)->otyp)) : \
 							(a)->otyp == (o)->otyp)
 #define is_blade(otmp)	(otmp->oclass == WEAPON_CLASS && \
-			 (objects[otmp->otyp].oc_skill >= P_DAGGER && \
+			 ((objects[otmp->otyp].oc_skill >= P_DAGGER && \
 			 objects[otmp->otyp].oc_skill <= P_SABER) || \
-			 otmp->otyp == DOUBLE_SWORD)
+			 otmp->otyp == DOUBLE_SWORD))
 #define is_knife(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 (objects[otmp->otyp].oc_skill == P_DAGGER || \
 			 objects[otmp->otyp].oc_skill == P_KNIFE))
@@ -572,9 +572,9 @@ struct obj {
 			 (objects[otmp->otyp].oc_skill == P_PICK_AXE)) || \
 			  arti_digs(otmp))
 #define is_sword(otmp)	(otmp->oclass == WEAPON_CLASS && \
-			 (objects[otmp->otyp].oc_skill >= P_SHORT_SWORD && \
+			 ((objects[otmp->otyp].oc_skill >= P_SHORT_SWORD && \
 			 objects[otmp->otyp].oc_skill <= P_SABER) || \
-			 otmp->otyp == DOUBLE_SWORD)
+			 otmp->otyp == DOUBLE_SWORD))
 #define is_rapier(otmp)	(otmp->oclass == WEAPON_CLASS && (\
 			 otmp->otyp == RAPIER || \
 			 otmp->otyp == RAKUYO || \
