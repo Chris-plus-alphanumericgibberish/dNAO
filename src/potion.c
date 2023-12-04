@@ -753,7 +753,14 @@ boolean force;
 				pline("The fruits of civilization give you strength!");
 				u.uhp += u.ulevel*10;
 				if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
-				if(u.udrunken < u.ulevel*3) u.udrunken++; //Enki allows clockworks to benefit from booze quaffing
+				if(u.udrunken < u.ulevel*3){//Enki allows clockworks to benefit from booze quaffing
+					u.udrunken++;
+					change_usanity(5, FALSE);
+				} else {
+					if(u.usanity < 50){
+						change_usanity(min(5, 50 - u.usanity), FALSE);
+					}
+				}
 				check_drunkard_trophy();
 			}
 		} else { /* Note: Androids can get drunk */
@@ -767,13 +774,13 @@ boolean force;
 			}
 			if(u.udrunken < u.ulevel*3){
 				u.udrunken++;
-				check_drunkard_trophy();
 				change_usanity(5, FALSE);
 			} else {
 				if(u.usanity < 50){
 					change_usanity(min(5, 50 - u.usanity), FALSE);
 				}
 			}
+			check_drunkard_trophy();
 			if (!otmp->blessed)
 			    make_confused(itimeout_incr(HConfusion, d(3,8)), FALSE);
 			/* the whiskey makes us feel better */
