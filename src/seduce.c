@@ -990,7 +990,6 @@ struct monst * mon;
 		case PM_AVATAR_OF_LOLTH:
 				if(flags.female){
 					verbalize("You're such a sweet lady, I wish you were more open to new things...");
-					if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
 				} else {
 					verbalize("How dare you refuse me!");
 					return 0; /* don't fall down to the general "teleport and return 1" case */
