@@ -2124,8 +2124,10 @@ default_case:
 		delete_contents(otmp);
 		container = otmp;
 		break;
-	    /* nothing */
-	    case 0: break;
+	    /* neither container nor contained, reset container var */
+	    case 0:
+		container = (struct obj *)0;
+		break;
 
 	    default: impossible("containment type %d?", (int) o->containment);
 	}
