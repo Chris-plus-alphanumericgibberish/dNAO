@@ -730,7 +730,7 @@ boolean dumping;
 			enl_msg("You ", "are", "were", " distracted by invisible insects, lowering your skills and increasing spell failure");
 		}
 		if (u.umadness&MAD_HOST){
-			enl_msg("You ", "are", "were", " nausiated by the thing inside you, which sometimes makes you vomit");
+			enl_msg("You ", "are", "were", " nauseated by the thing inside you, which sometimes makes you vomit");
 		}
 		if (u.umadness&MAD_SCIAPHILIA){
 			enl_msg("You ", "wish", "wished", " to stand in partially illuminated areas, suffering reduced accuracy and sometimes failing to cast spells if not");
@@ -1355,7 +1355,7 @@ resistances_enlightenment()
 			putstr(en_win, 0, "You are distracted by the feeling of insects crawling over your body.");
 		}
 		if (u.umadness&MAD_HOST){
-			putstr(en_win, 0, "You are nausiated by the thing inside you.");
+			putstr(en_win, 0, "You are nauseated by the thing inside you.");
 		}
 		if (u.umadness&MAD_SCIAPHILIA){
 			putstr(en_win, 0, "You are fascinated by the dancing shadows.");
