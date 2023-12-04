@@ -4044,15 +4044,15 @@ struct obj *shield;
 	if(weight(shield) > (int)objects[BUCKLER].oc_weight){
 		switch(P_SKILL(P_SHIELD)){
 			case P_BASIC:	return 1;
-			case P_SKILLED:	return 2;
-			case P_EXPERT:	return 5;
+			case P_SKILLED:	return activeFightingForm(FFORM_SHIELD_BASH) ? 2 : 3;
+			case P_EXPERT:	return activeFightingForm(FFORM_SHIELD_BASH) ? 5 : 8;
 			default: return 0;
 		}
 	}
 	else {
 		switch(P_SKILL(P_SHIELD)){
 			case P_SKILLED:	return 1;
-			case P_EXPERT:	return 2;
+			case P_EXPERT:	return activeFightingForm(FFORM_SHIELD_BASH) ? 2 : 3;
 			default: return 0;
 		}
 	}
