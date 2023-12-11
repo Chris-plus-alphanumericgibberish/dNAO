@@ -1137,7 +1137,7 @@ asGuardian:
 	case MS_DREAD:{
 		struct monst *tmpm;
 		int ix, iy;
-		if(mtmp->mvar_dreadPrayer_cooldown >= moves && !mtmp->mdoubt && (
+		if(mtmp->mvar_dreadPrayer_cooldown < moves && !mtmp->mdoubt && (
 			mtmp->mhp < mtmp->mhpmax/4 || mtmp->mcrazed
 		)){
 			mtmp->mvar_dreadPrayer_cooldown = moves + rnz(350);
