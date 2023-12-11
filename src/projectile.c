@@ -2736,7 +2736,7 @@ boolean forcedestroy;
 	/* madness on losing an object */
 	if (takenfromyourinv && roll_madness(MAD_TALONS)) {
 		You("panic after throwing your property!");
-		nomul(-1 * rnd(6), "panic");
+		HPanicking += 1+rnd(6);
 	}
 
 	if(otyp == SHURIKEN && Role_if(PM_MONK))
