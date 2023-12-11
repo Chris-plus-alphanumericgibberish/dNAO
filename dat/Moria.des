@@ -456,14 +456,16 @@ OBJECT:'[',"dwarvish roundshield",contained
 OBJECT:'[',"plate mail",contained
 OBJECT:'[',"shoes",contained
 CONTAINER:'(',"chest",(69,18)
-OBJECT:'+',random,random
+OBJECT:'+',random,contained
 OBJECT:'?',"resistance",contained
-OBJECT:'*',random,random
-OBJECT:'*',random,random
-OBJECT:'*',random,random
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
+
 # Watcher
 MONSTER:';',"Watcher in the Water",(10,19),hostile
 
