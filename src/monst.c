@@ -5921,7 +5921,7 @@ struct permonst _mons2[] = {
 	DEF(NAT_AC(0)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 4)),
 	SIZ(400, 100, MS_SELL, MZ_SMALL), 0, 0,
-	0 /*MM*/, MT_PEACEFUL|MT_OMNIVORE|MT_COLLECT /*MT*/, 0 /*MF*/,
+	0 /*MM*/, MT_OMNIVORE|MT_COLLECT /*MT*/, 0 /*MF*/,
 	MB_HUMANOID /*MB*/, MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
 	MA_ORC /*MA*/,  MV_LOWLIGHT2 /*MV*/, 0 /*MW*/, HI_DOMESTIC),
     MON("dwarf smith", S_HUMANOID,//
