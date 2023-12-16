@@ -13869,6 +13869,11 @@ struct obj **opptr;
 	if(yn("Merge the two skies into one?") == 'y'){
 		struct obj *sky2;
 		struct obj *amalgam;
+		if(u.ulevel < 22){ //Less than rank 7
+			pline("The two swords ripple for a moment, then push each-other away!");
+			pline("It seems you are not powerful enough to merge them together.");
+			return MOVE_CANCELLED;
+		}
 		for(sky2 = invent; sky2; sky2 = sky2->nobj)
 			if(sky2->oartifact == needed)
 				break;
@@ -13880,7 +13885,7 @@ struct obj **opptr;
 		if(!amalgam || !amalgam->oartifact){
 			impossible("Make Amalgamated Skies failed in merge_skies.");
 			if(amalgam)
-				obfree(amalgam, (struct obj *)0);	/* now, get rid of it */
+				obfree(amalgam, (struct obj *)0);	/* get rid of the useless non-artifact */
 			return MOVE_CANCELLED;
 		}
 		pline("%s and %s melt and disolve into each-other!", The(xname(sky1)), the(xname(sky2)));
