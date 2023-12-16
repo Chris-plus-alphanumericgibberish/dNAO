@@ -117,6 +117,10 @@ DOOR:closed,(61,03)
 DOOR:closed,(66,02)
 DOOR:closed,(68,00)
 
+FORGE:(15,02)
+MONSTER:'h',"dwarf smith",(15,02),peaceful
+
+
 MAZE: "Dnb-loca", ' '
 FLAGS:hardfloor,noteleport
 
