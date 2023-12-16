@@ -8409,6 +8409,7 @@ arti_invoke(obj)
 						    map_invisible(bhitpos.x, bhitpos.y);
 						}
 					    resist(mtmp, WEAPON_CLASS, dmg, FALSE);
+						setmangry(mtmp);
 					}
 					bhitpile(pseudo,bhito,bhitpos.x,bhitpos.y);
 				    if(IS_DOOR(typ) || typ == SDOOR) {
