@@ -3244,6 +3244,86 @@ int left;
 
 STATIC_OVL
 void
+mkelfforge(background, foreground, left, mithril)
+int background;
+int foreground;
+int left;
+char mithril;
+{
+	int x,y,tries=0;
+	int i,j, pathto = 0;
+	boolean good=FALSE, okspot, accessible;
+	int size = 5;
+	while(!good && tries < 1500){
+		if(left){
+			x = rn2(COLNO/2);
+			y = rn2(ROWNO-3);
+		} else {
+			x = rn2(COLNO-10)+1;
+			y = rn2(ROWNO-3);
+		}
+		tries++;
+		okspot = TRUE;
+		accessible = FALSE;
+		for(i=0;i<size;i++)
+			for(j=0;j<size;j++){
+				if(!isok(x+i,y+j) || t_at(x+i, y+j) || !(levl[x+i][y+j].typ == background || IS_WALL(levl[x+i][y+j].typ)))
+					okspot = FALSE;
+			}
+		pathto = 0;
+		for(i = x+1; i < x+size-1; i++){
+			if(isok(i,y-1) && (levl[i][y-1].typ == foreground || levl[i][y-1].typ == ROOM)) pathto++;
+			if(isok(i,y+size) && (levl[i][y+size].typ == foreground || levl[i][y+size].typ == ROOM)) pathto++;
+		}
+		for(i = y+1; i < y+size-1; i++){
+			if(isok(x+size,i) && (levl[x+size][i].typ == foreground || levl[x+size][i].typ == ROOM)) pathto++;
+			if(isok(x-1,i) && (levl[x-1][i].typ == foreground || levl[x-1][i].typ == ROOM)) pathto++;
+		}
+		if(pathto) accessible = TRUE;
+		if(okspot && accessible){
+			good = TRUE;
+		} else continue;
+		
+		for(i=0;i<size;i++){
+			for(j=0;j<size;j++){
+				levl[x+i][y+j].typ = HWALL;
+				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+			}
+		}
+		for(i=1;i<size-1;i++){
+			for(j=1;j<size-1;j++){
+				levl[x+i][y+j].typ = mithril ? ROOM : GRASS;
+				// if(!rn2(3)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
+			}
+		}
+		if(mithril){
+			levl[x+(size)/2][y+(size)/2].typ = FORGE;
+			makemon(&mons[PM_MITHRIL_SMITH], x+(size)/2, y+(size)/2, NO_MM_FLAGS);
+		}
+		else {
+			levl[x+(size)/2][y+(size)/2].typ = TREE;
+			makemon(&mons[PM_TREESINGER], x+(size-2)/2, y+(size-2)/2, NO_MM_FLAGS);
+		}
+		// wallification(x, y, x+3, y+3);//Can be adjacent, do wallification after all huts placed
+		
+		pathto = rn2(pathto);
+		for(i = x+1; i < x+size-1 && pathto >= 0; i++){
+			if(isok(i,y-1) && (levl[i][y-1].typ == foreground || levl[i][y-1].typ == ROOM) && !(pathto--))
+				levl[i][y+0].typ = DOOR, levl[i][y+0].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			if(isok(i,y+size) && (levl[i][y+size].typ == foreground || levl[i][y+size].typ == ROOM) && !(pathto--))
+				levl[i][y+size-1].typ = DOOR, levl[i][y+size-1].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+		}
+		for(i = y+1; i < y+size-1 && pathto >= 0; i++){
+			if(isok(x+size,i) && (levl[x+size][i].typ == foreground || levl[x+size][i].typ == ROOM) && !(pathto--))
+				levl[x+size-1][i].typ = DOOR, levl[x+size-1][i].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			if(isok(x-1,i) && (levl[x-1][i].typ == foreground || levl[x-1][i].typ == ROOM) && !(pathto--))
+				levl[x+0][i].typ = DOOR, levl[x+0][i].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+		}
+	}
+}
+
+STATIC_OVL
+void
 mkelffountain()
 {
 	int x,y,tries=0;
@@ -5806,6 +5886,7 @@ place_elfquest_forest_features()
 		for(; i > 0; i--)
 			mkelfhut(TREE, GRASS, 0);
 		// i = rn2(3) ? 1 : d(1,3);
+		mkelfforge(TREE, GRASS, 0, TRUE);
 		i = 1;
 		for(; i > 0; i--)
 			mkelffountain();
@@ -5815,6 +5896,8 @@ place_elfquest_forest_features()
 		int i = rn2(4) + rn2(4);
 		for(; i > 0; i--)
 			mkelfhut(TREE, GRASS, 0);
+		if(rn2(3))
+			mkelfforge(TREE, GRASS, 0, FALSE);
 		for(i=rn1(20,20); i > 0; i--)
 			mktowntree();
 		wallification(1,0,COLNO-1,ROWNO-1);
@@ -5843,13 +5926,21 @@ place_chaos_forest_features()
 	if(In_mordor_forest(&u.uz)){
 		int i = 6 + d(2,6);
 		mkforest12river();
-		for(; i > 0; i--)
+		if(!rn2(10))
+			mkelfforge(TREE, SOIL, 0, TRUE);
+		for(; i > 0; i--){
 			mkelfhut(TREE, SOIL, 0);
+			if(!rn2(6))
+				mkelfforge(TREE, SOIL, 0, FALSE);
+		}
 		wallification(1,0,COLNO-1,ROWNO-1);
 	} else if(Is_ford_level(&u.uz)){
 		int i = 3 + d(2,3);
-		for(; i > 0; i--)
+		for(; i > 0; i--){
 			mkelfhut(TREE, SOIL, 1);
+			if(!rn2(6))
+				mkelfforge(TREE, SOIL, 1, FALSE);
+		}
 		i = 1 + d(3,4);
 		for(; i > 0; i--)
 			mkwraithclearing(1);
