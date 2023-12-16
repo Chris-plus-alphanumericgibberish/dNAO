@@ -736,6 +736,24 @@ boolean on, silently;
 		newsym(mon->mx, mon->my);
 }
 
+int
+shield_ac_mon(mon, obj)
+struct monst *mon;
+struct obj *obj;
+{
+	int shield_ac = 0;
+	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+	if(mon_knight(mon)){
+		if(mon->m_lev >= 28)
+			shield_ac += 8;
+		else if(mon->m_lev >= 14)
+			shield_ac += 3;
+		else
+			shield_ac += 1;
+	}
+	return shield_ac;
+}
+
 int 
 base_mac(mon)
 struct monst *mon;
@@ -930,7 +948,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -1040,7 +1058,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -1103,7 +1121,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
