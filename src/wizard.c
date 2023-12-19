@@ -1029,7 +1029,7 @@ yellow_smite()
 			if (Antimagic)
 				dmg = (dmg + 1) / 2;
 			dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
-			You_hear("Menacing laughter as the world blurs around you...");
+			You_hear("menacing laughter as the world blurs around you...");
 			make_confused(HConfusion + dmg * 10, FALSE);
 			make_stunned(HStun + dmg, FALSE);
 			make_hallucinated(HHallucination + dmg * 15, FALSE, 0L);
@@ -1064,8 +1064,8 @@ yellow_smite()
 						dmg = d(8, 8);
 					}
 					else {
-						killer_format = KILLED_BY_AN;
-						killer = "touch of death";
+						killer_format = KILLED_BY;
+						killer = "the yellow death";
 						dmg = *hp(&youmonst);
 					}
 				}
