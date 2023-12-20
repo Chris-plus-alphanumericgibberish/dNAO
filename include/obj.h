@@ -726,6 +726,11 @@ struct obj {
 #define is_launcher(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 ((objects[otmp->otyp].oc_skill >= P_BOW && \
 			 objects[otmp->otyp].oc_skill <= P_CROSSBOW) || otmp->otyp == ATLATL))
+#define is_melee_launcher(otmp)	(otmp->otyp == CARCOSAN_STING || \
+				otmp->oartifact == ART_LIECLEAVER || \
+				otmp->oartifact == ART_ROGUE_GEAR_SPIRITS  || \
+				check_oprop(otmp, OPROP_BLADED) || \
+				check_oprop(otmp, OPROP_SPIKED))
 #define is_ammo(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == GEM_CLASS) && \
 			 ((objects[otmp->otyp].oc_skill >= -P_CROSSBOW && \

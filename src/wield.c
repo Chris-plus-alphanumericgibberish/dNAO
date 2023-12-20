@@ -536,7 +536,7 @@ const char *verb;	/* "rub",&c */
 }
 
 /*Contains those parts of can_twoweapon() that DON'T change the game state.  Can be called anywhere the code needs to know if the player is capable of wielding two weapons*/
-#define NOT_WEAPON(obj) (obj && !is_weptool(obj) && obj->oclass != WEAPON_CLASS)
+#define NOT_WEAPON(obj) (obj && !is_weptool(obj) && obj->oclass != WEAPON_CLASS && obj->otyp != STILETTOS && obj->otyp != WIND_AND_FIRE_WHEELS && obj->oartifact != ART_WAND_OF_ORCUS)
 int
 test_twoweapon()
 {
@@ -560,7 +560,7 @@ test_twoweapon()
 			body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
 	}
 	/* Objects must not be non-weapons */
-	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS))) {
+	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep))) {
 		otmp = NOT_WEAPON(uwep) ? uwep : uswapwep;
 		pline("%s %s.", Yname2(otmp),
 		    is_plural(otmp) ? "aren't weapons" : "isn't a weapon");
@@ -580,8 +580,8 @@ test_twoweapon()
 	}
 	/* not a launcher (guns and blasters are ok) */
 	else if (
-		(uwep && is_launcher(uwep) && !is_firearm(uwep)) ||
-		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep)))
+		(uwep && is_launcher(uwep) && !is_firearm(uwep) && !is_melee_launcher(uwep)) ||
+		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep) && !is_melee_launcher(uswapwep)))
 	{
 		You_cant("fight two-handed with this.");
 	}
