@@ -14,6 +14,7 @@ STATIC_DCL void NDECL(resistances_enlightenment);
 STATIC_DCL void NDECL(signs_enlightenment);
 STATIC_DCL void NDECL(spirits_enlightenment);
 STATIC_DCL void NDECL(mutations_enlightenment);
+STATIC_DCL void NDECL(genocide_enlightenment);
 
 #define DOATTRIB_RESISTS	1
 #define DOATTRIB_ARMOR		2
@@ -21,6 +22,7 @@ STATIC_DCL void NDECL(mutations_enlightenment);
 #define DOATTRIB_BINDINGS	4
 #define DOATTRIB_SPIRITS	5
 #define DOATTRIB_MUTATIONS	6
+#define DOATTRIB_GENOCIDE	7
 
 /* -enlightenment and conduct- */
 static winid en_win;
@@ -101,7 +103,7 @@ char *outbuf;
 	/* "bonus to hit" vs "damage bonus" */
 	if (!strcmp(inctyp, "damage") || !strcmp(inctyp, "spell damage") ||
 	    !strcmp(inctyp, "AC") || !strcmp(inctyp, "protection") ||
-		!strcmp(inctyp, "morale")) {
+	    !strcmp(inctyp, "morale") || !strcmp(inctyp, "carry capacity")) {
 	    const char *ctmp = inctyp;
 	    inctyp = bonus;
 	    bonus = ctmp;
@@ -139,6 +141,8 @@ doattributes()
 		case DOATTRIB_MUTATIONS:
 			mutations_enlightenment();
 			break;
+		case DOATTRIB_GENOCIDE:
+			genocide_enlightenment();
 		default:
 			return MOVE_INSTANT;
 		}
@@ -238,6 +242,11 @@ minimal_enlightenment()
 
 	/* Current alignment */
 	Sprintf(buf, fmtstr, "alignment", align_str(u.ualign.type));
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+
+	/* Current experience level and experience points */
+	Sprintf(buf2, "%u/%-1ld", u.ulevel, u.uexp);
+	Sprintf(buf, fmtstr, "experience", buf2);
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	/* Deity list */
@@ -352,6 +361,14 @@ minimal_enlightenment()
 			'f', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 		//spirits_enlightenment();
+	}
+
+	if (num_genocides() != 0) {
+		Sprintf(buf, "Show genocided monsters.");
+		any.a_int = DOATTRIB_GENOCIDE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			 'g', 0, ATR_NONE, buf,
+			 MENU_UNSELECTED);
 	}
 
 	end_menu(tmpwin, "Base Attributes");
@@ -935,9 +952,11 @@ boolean dumping;
 		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
 		if(u.phasengn) you_are("in phase mode");
 	}
-	/* exact uacinc is always shown because the player can always see their own AC */
+	/* exact uacinc and ucarinc are always shown because the player can always see their own AC and carrycap */
 	if (u.uacinc)
 	    you_have(enlght_combatinc("AC", u.uacinc, 1, buf));
+	if (u.ucarinc)
+	    you_have(enlght_combatinc("carry capacity", u.ucarinc, 1, buf));
 	if (u.uhitinc || u.uuur_duration)
 	    you_have(enlght_combatinc("to hit", u.uhitinc + (u.uuur_duration ? 10 : 0), final, buf));
 	if (u.udaminc || (u.uaesh/3) || u.uaesh_duration)
@@ -2940,6 +2959,12 @@ mutations_enlightenment()
 	display_nhwindow(en_win, TRUE);
 	destroy_nhwindow(en_win);
 	return;
+}
+
+STATIC_OVL void
+genocide_enlightenment()
+{
+        list_genocided('y', FALSE, FALSE, FALSE);
 }
 
 /*enlighten.c*/
