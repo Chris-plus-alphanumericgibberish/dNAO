@@ -2058,10 +2058,10 @@ struct obj *otmp;
 {
 	switch(otmp->otyp) {
 	    case FOOD_RATION:
-		if(YouHunger <= 200)
+		if(YouHunger <= 200*get_uhungersizemod())
 		    pline(Hallucination ? "Oh wow, like, superior, man!" :
 			  "That food really hit the spot!");
-		else if(YouHunger <= get_uhungermax()/2 - 300) pline("That satiated your %s!",
+		else if(YouHunger <= get_uhungermax()/2 - 300*get_uhungersizemod()) pline("That satiated your %s!",
 						body_part(STOMACH));
 		break;
 	    case TRIPE_RATION:
@@ -4385,8 +4385,14 @@ sync_hunger()
 
 	if(is_fainted()) {
 		flags.soundok = 0;
-		if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/20), "fainted from lack of food");
-		else nomul(-10+( YouHunger/10), "fainted from lack of food");
+		if(get_uhungersizemod() > 1){
+			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/(20*get_uhungersizemod())), "fainted from lack of food");
+			else nomul(-10+( YouHunger/(10*get_uhungersizemod())), "fainted from lack of food");
+		}
+		else {
+			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/20), "fainted from lack of food");
+			else nomul(-10+( YouHunger/10), "fainted from lack of food");
+		}
 		nomovemsg = "You regain consciousness.";
 		afternmv = unfaint;
 	}
