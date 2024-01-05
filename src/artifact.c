@@ -8595,6 +8595,7 @@ arti_invoke(obj)
 				}
 				update_inventory();	/* spell may modify inventory */
 				losepw(energy);
+				obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 			}
 		}
 		obj->age = monstermoves + d(1,100);
