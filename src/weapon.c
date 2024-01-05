@@ -490,11 +490,11 @@ struct monst *magr;
 		else if (obj->oartifact == ART_WAND_OF_ORCUS) {
 			ocn = 1;
 			ocd = 4;
-			spe_mult = 0;	/* it's a wand */
+			spe_mult = 0;	/* it's a wand, spe is charges */
 		}
 		else if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) {
 			ocn = 1;
-			ocd = (large ? 2 : 4);
+			ocd = (large ? 3 : 6);
 		}
 		else if (otyp == CARCOSAN_STING)
 		{
