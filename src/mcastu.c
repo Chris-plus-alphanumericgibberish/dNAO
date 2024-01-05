@@ -2324,6 +2324,8 @@ int tary;
 		}
 	}
 	else {
+		if(magr->mrage && magr->mberserk)
+			spell_skill /= 2;
 		if(magr->mformication || magr->mscorpions)
 			spell_skill /= 2;
 		if(magr->msciaphilia && unshadowed_square(x(magr), y(magr)))
