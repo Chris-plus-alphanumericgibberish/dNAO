@@ -5862,7 +5862,7 @@ councilspirit(floorID)
 	/* Peacefully eject current crown spirit */
 	unbind(old_seal, FALSE);
 	/* it does not go on timeout */
-	u.sealTimeout[decode_sealID(old_seal)] = moves;
+	u.sealTimeout[decode_sealID(old_seal) - FIRST_SEAL] = moves;
 
 	/* set standard bound-spirit things */
 	u.sealsActive |= new_seal;
