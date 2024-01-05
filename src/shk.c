@@ -6484,7 +6484,6 @@ struct monst *smith;
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
 	if(n <= 0){
-		pline("Never mind.");
 		return;
 	}
 	int picked = selected[0].item.a_int;
@@ -6558,7 +6557,6 @@ d_weapon:
 			struct obj *resource;
 			resource = getobj(identify_types, "contribute for scrap platinum");
 			if(!resource){
-				pline("Never mind.");
 				return;
 			}
 			if(resource->obj_material == PLATINUM && !resource->oartifact && !get_ox(resource, OX_ESUM)){
@@ -6583,7 +6581,6 @@ d_weapon:
 		return;
 	}
 	else if(otyp == -1){
-		pline("Never mind.");
 		return;
 	}
 
@@ -6767,7 +6764,6 @@ struct monst *smith;
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
 	if(n <= 0){
-		pline("Never mind.");
 		return;
 	}
 	int picked = selected[0].item.a_int;
@@ -6842,7 +6838,6 @@ d_weapon:
 			struct obj *food;
 			food = getobj(food_class, "feed biomass to dracae");
 			if(!food){
-				pline("Never mind.");
 				return;
 			}
 			if(is_edible_mon(smith, food) && !food->oartifact && !get_ox(food, OX_ESUM)){
@@ -6862,7 +6857,6 @@ d_weapon:
 		return;
 	}
 	else if(otyp == -1){
-		pline("Never mind.");
 		return;
 	}
 
@@ -6993,7 +6987,6 @@ struct monst *smith;
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
 	if(n <= 0){
-		pline("Never mind.");
 		return;
 	}
 	int picked = selected[0].item.a_int;
@@ -7033,7 +7026,6 @@ d_weapon:
 		return;
 	}
 	else if(otyp == -1){
-		pline("Never mind.");
 		return;
 	}
 
@@ -7141,7 +7133,6 @@ int threshold;
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
 	if(n <= 0){
-		pline("Never mind.");
 		return;
 	}
 	int picked = selected[0].item.a_int;
@@ -7180,7 +7171,6 @@ d_weapon:
 			Sprintf(buffer, "contribute for scrap %s", resourceString);
 			resource = getobj(identify_types, buffer);
 			if(!resource){
-				pline("Never mind.");
 				return;
 			}
 			//NOT SUMMONED
@@ -7234,7 +7224,6 @@ d_weapon:
 		return;
 	}
 	else if(otyp == -1){
-		pline("Never mind.");
 		return;
 	}
 
