@@ -1269,6 +1269,7 @@ int doKnightForm()
 #define AVOID_MSPLCAST		0x010L
 #define AVOID_GRABATTK		0x020L
 #define AVOID_ENGLATTK		0x040L
+#define AVOID_UNSAFETOUCH	0x080L
 
 
 int
@@ -1282,7 +1283,8 @@ hasfightingforms(){
 	indexnum = subout = tohitmod = 0;
 	int i;
 
-	int formmask = 0x000L;
+	/* always shown */
+	int formmask = AVOID_UNSAFETOUCH;
 
 	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
 	if(Role_if(PM_MONK))
@@ -1321,7 +1323,7 @@ hasfightingforms(){
 			if(attk->aatyp == AT_MAGC) formmask |= AVOID_MSPLCAST;
 		}
 	}
-	if (u.uavoid_grabattk || sticks(&youmonst) || (uarmg && uarmg->oartifact == ART_GRAPPLER_S_GRASP))
+	if (u.uavoid_grabattk || sticks(&youmonst))
 		formmask |= AVOID_GRABATTK;
 
 	if (u.uavoid_englattk)
@@ -1368,22 +1370,6 @@ dofightingform()
 	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
 	int formmask = hasfightingforms();
 
-	/*
-	 * if we don't have any forms or only have one form set, don't bother with a menu.
-	 * note that if we have anything to avoid/allow, we want the menu, and if we have
-	 * avoids/allows then we still want a menu
-	*/
-	if (formmask == 0x000L){
-		pline("You don't know any special fighting styles for use in this situation.");
-		return MOVE_CANCELLED;
-	}
-	else if (formmask == MONK_FORMS)
-		return doMysticForm();
-	else if (formmask == LIGHTSABER_FORMS)
-		return doLightsaberForm();
-	else if (formmask == KNIGHT_FORMS)
-		return doKnightForm();
-
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
@@ -1428,6 +1414,13 @@ dofightingform()
 
 		add_menu(tmpwin, NO_GLYPH, &any, 'e', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
+	if (formmask & AVOID_UNSAFETOUCH) {
+		any.a_int = 8;
+		if (!u.uavoid_unsafetouch) Strcpy(buf, "Avoid directly touching potentially unsafe monsters");
+		else Strcpy(buf, "Allow directly touching potentally unsafe monsters");
+
+		add_menu(tmpwin, NO_GLYPH, &any, 't', 0, ATR_NONE, buf, MENU_UNSELECTED);
+	}
 
 	end_menu(tmpwin, "Adjust fighting styles:");
 
@@ -1461,6 +1454,9 @@ dofightingform()
 		case 7:
 			u.uavoid_englattk = !u.uavoid_englattk;
 			return MOVE_INSTANT;
+		case 8:
+			u.uavoid_unsafetouch = !u.uavoid_unsafetouch;
+			return MOVE_INSTANT;
 		default:
 			impossible("unknown fighting form set %d", n);
 			return MOVE_CANCELLED;
@@ -1475,6 +1471,7 @@ dofightingform()
 #undef AVOID_MSPLCAST
 #undef AVOID_GRABATTK
 #undef AVOID_ENGLATTK
+#undef AVOID_UNSAFETOUCH
 
 
 int

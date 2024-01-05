@@ -332,6 +332,7 @@ struct you {
 	Bitfield(uavoid_msplcast,1);
 	Bitfield(uavoid_grabattk,1);
 	Bitfield(uavoid_englattk,1);
+	Bitfield(uavoid_unsafetouch,1);
 	int umystic;	/*Monk mystic attacks active*/
 #define monk_style_active(style) (u.umystic & (1 << (style-1)))
 #define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1 << (style-1)))
