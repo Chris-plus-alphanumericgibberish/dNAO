@@ -7393,6 +7393,10 @@ struct monst *smith;
 {
 	switch(ESMT(smith)->smith_mtyp){
 		case PM_OONA:
+			if(smith->mcan){
+				pline("\"My magic is gone!\"");
+				return;
+			}
 			oona_smithy(smith);
 		break;
 		case PM_DRACAE_ELADRIN:
@@ -7408,6 +7412,10 @@ struct monst *smith;
 			mithril_smithy(smith);
 		break;
 		case PM_TREESINGER:
+			if(smith->mcan){
+				pline("\"My magic is gone!\"");
+				return;
+			}
 			treesinger_smithy(smith);
 		break;
 		case PM_SHADOWSMITH:
