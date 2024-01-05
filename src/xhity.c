@@ -6780,7 +6780,7 @@ boolean ranged;
 								(void)dropy(otmp);
 								if (roll_madness(MAD_TALONS)){
 									You("panic after having dropping your weapon!");
-									nomul(-1 * rnd(6), "panic");
+									HPanicking += 1+rnd(6);
 								}
 							}
 							else{
@@ -6800,7 +6800,7 @@ boolean ranged;
 						(void)dropy(otmp);
 						if (roll_madness(MAD_TALONS)){
 							You("panic after having your cloak taken!");
-							nomul(-1 * rnd(6), "panic");
+							HPanicking += 1+rnd(6);
 						}
 					}
 				}
@@ -6817,7 +6817,7 @@ boolean ranged;
 							(void)mpickobj(magr, otmp);
 							if (roll_madness(MAD_TALONS)){
 								You("panic after having your property stolen!");
-								nomul(-1 * rnd(6), "panic");
+								HPanicking += 1+rnd(6);
 							}
 						}
 					}
@@ -6832,7 +6832,7 @@ boolean ranged;
 							(void)dropy(otmp);
 							if (roll_madness(MAD_TALONS)){
 								You("panic after having your armor taken!");
-								nomul(-1 * rnd(6), "panic");
+								HPanicking += 1+rnd(6);
 							}
 						}
 					}
