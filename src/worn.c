@@ -1999,12 +1999,25 @@ boolean polyspot;
 				if (polyspot) bypass_obj(otmp);
 				m_lose_armor(mon, otmp);
 			} else {
-				if (vis)
-				pline("%s %s tears apart!", s_suffix(Monnam(mon)),
-					cloak_simple_name(otmp));
-				else
-				You_hear("a ripping sound.");
-				m_useup(mon, otmp);
+				if(otmp->otyp == MUMMY_WRAPPING || otmp->otyp == PRAYER_WARDED_WRAPPING){
+					if (vis)
+						pline("%s %s tears apart!", s_suffix(Monnam(mon)),
+							cloak_simple_name(otmp));
+					else
+						You_hear("a ripping sound.");
+					m_useup(mon, otmp);
+				}
+				else {
+					if (vis)
+						pline("%s %s pops open!", s_suffix(Monnam(mon)),
+							cloak_simple_name(otmp));
+					else
+						You_hear("a tearing sound.");
+					if(!otmp->oeroded3)
+						otmp->oeroded3 = 1;
+					if (polyspot) bypass_obj(otmp);
+					m_lose_armor(mon, otmp);
+				}
 			}
 		}
 	}
