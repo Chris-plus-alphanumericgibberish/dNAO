@@ -341,8 +341,13 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef))) :
+	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !canspotmon(mdef)) :
 		(magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
+	/* if TRUE, don't make direct contact attacks against unknown monsters that may or may not be fatal to self */
+	boolean be_safe_unknown = (mdef && youagr && u.uavoid_unsafetouch && !flags.forcefight &&
+		(!canspotmon(mdef) || Hallucination));
+#define skip_unsafe_attack(weapon) ((be_safe_unknown && !safe_attack(magr, mdef, attk, weapon, pa, NULL)) || \
+				    (be_safe && !safe_attack(magr, mdef, attk, weapon, pa, pd)))
 
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
@@ -682,7 +687,7 @@ int tary;
 				otmp = (youdef) ? uwep : MON_WEP(mdef);
 			}
 			/* don't make self-fatal attacks -- being at a range implies safety */
-			if (be_safe && !ranged && !safe_attack(magr, mdef, attk, otmp, pa, pd))
+			if (!ranged && skip_unsafe_attack(otmp))
 				continue;
 
 			/* make the attack */
@@ -872,7 +877,7 @@ int tary;
 			if (ranged)
 				continue;
 			/* don't make self-fatal attacks */
-			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
+			if (skip_unsafe_attack((struct obj *)0))
 				continue;
 			/* check for wild misses */
 			if (missedyou) {
@@ -909,7 +914,7 @@ int tary;
 			if (ranged)
 				continue;
 			/* don't make self-fatal attacks */
-			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
+			if (skip_unsafe_attack((struct obj *)0))
 				continue;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
@@ -1085,7 +1090,7 @@ int tary;
 		case AT_LRCH:	// range 2 touch
 		case AT_5SQR:	// range 5 touch
 			/* don't make attacks that will kill oneself */
-			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
+			if (skip_unsafe_attack((struct obj *)0))
 				continue;
 			/* must be in range */
 			if (distmin(x(magr), y(magr), tarx, tary) > 

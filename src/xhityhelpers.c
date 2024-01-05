@@ -1232,16 +1232,16 @@ struct permonst * pd;
 		return TRUE;
 
 	/* Touching is fatal */
-	if (touch_petrifies(pd) && !(Stone_res(magr))
+	if ((!pd || touch_petrifies(pd)) && !(Stone_res(magr))
 		&& badtouch(magr, mdef, attk, weapon)
 		)
 		return FALSE;	// don't attack
 
 	/* consuming the defender is fatal */
-	if ((is_deadly(pd) || 
+	if ((!pd || (is_deadly(pd) ||
 		((pd->mtyp == PM_GREEN_SLIME || pd->mtyp == PM_FLUX_SLIME) &&
 			!(Slime_res(magr)))
-		) && (
+		)) && (
 		((attk->aatyp == AT_BITE || attk->aatyp == AT_OBIT || attk->aatyp == AT_WBIT || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT) && is_vampire(pa)) ||
 		(attk->aatyp == AT_ENGL && attk->adtyp == AD_DGST)
 		))
