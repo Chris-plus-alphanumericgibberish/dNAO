@@ -3285,6 +3285,7 @@ E struct obj * FDECL(get_mariwep, (struct monst *, struct permonst *, int));
 E void FDECL(were_change, (struct monst *));
 E int FDECL(counter_were,(int));
 E int FDECL(transmitted_were, (int));
+E void FDECL(were_transform, (struct monst *, int));
 E void FDECL(new_were, (struct monst *));
 E int FDECL(were_summon, (struct monst *,int *,char *));
 E void NDECL(you_were);

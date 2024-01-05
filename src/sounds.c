@@ -49,6 +49,7 @@ const int nurseprices[] = {
 static const char *FDECL(DantalionRace,(int));
 int FDECL(dobinding,(int, int));
 int * FDECL(spirit_skills, (int));
+static int FDECL(doyochlolmenu, (struct monst *));
 static int NDECL(doblessmenu);
 static int NDECL(donursemenu);
 static int NDECL(dorendermenu);
@@ -766,16 +767,6 @@ boolean chatting;
 		return 0;
 	}
 	
-    /* presumably nearness and sleep checks have already been made */
-	if (!flags.soundok) return(0);
-	if (is_silent_mon(mtmp)){
-		if (chatting) {
-			pline("%s does not respond.", Monnam(mtmp));
-			return 1;
-		}
-		return(0);
-	}
-	
 	/* Make sure its your role's quest quardian; adjust if not */
 	if (ptr->msound == MS_GUARDIAN && ptr->mtyp != urole.guardnum && ptr->mtyp != PM_CELEBORN){
 		int mndx = monsndx(ptr);
@@ -789,6 +780,24 @@ boolean chatting;
 		ptr->msound != MS_INTONE && ptr->msound != MS_FLOWER && ptr->msound != MS_OONA
 	) map_invisible(mtmp->mx, mtmp->my);
 	mtmp->mnoise = TRUE;
+	
+	if(mtmp->mtame && is_yochlol(mtmp->data) && yn("(Ask to change form?)") == 'y'){
+		int pm = doyochlolmenu(mtmp);
+		if(pm){
+			were_transform(mtmp, pm);
+			return 1;
+		}
+	}
+	
+    /* presumably nearness and sleep checks have already been made */
+	if (!flags.soundok) return(0);
+	if (is_silent_mon(mtmp)){
+		if (chatting) {
+			pline("%s does not respond.", Monnam(mtmp));
+			return 1;
+		}
+		return(0);
+	}
 	
 	if(mtmp->ispriest){
 		priest_talk(mtmp);
@@ -6406,6 +6415,72 @@ const char* msg;
 }
 
 #endif /* USER_SOUNDS */
+
+STATIC_OVL int
+doyochlolmenu(mon)
+struct monst *mon;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Change to which form?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+	
+	if(mon->mtyp != PM_YOCHLOL){
+		Sprintf(buf, "Yochlol");
+		any.a_int = PM_YOCHLOL;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	if(mon->mtyp != PM_UNEARTHLY_DROW){
+		Sprintf(buf, "Drow");
+		any.a_int = PM_UNEARTHLY_DROW;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	if(mon->mtyp != PM_STINKING_CLOUD){
+		Sprintf(buf, "Cloud");
+		any.a_int = PM_STINKING_CLOUD;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	if(mon->mtyp != PM_DEMONIC_BLACK_WIDOW){
+		Sprintf(buf, "Spider");
+		any.a_int = PM_DEMONIC_BLACK_WIDOW;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	
+	end_menu(tmpwin, "Select form");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
+}
 
 STATIC_OVL int
 doblessmenu()
