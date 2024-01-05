@@ -6307,7 +6307,7 @@ boolean ranged;
 							while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
 								dmg--;
 								(void)adjattrib(A_WIS, -1, TRUE);
-								forget(10);	/* lose 10% of memory per point lost*/
+								forget(4);	/* lose 4% of memory per point lost*/
 								exercise(A_WIS, FALSE);
 							}
 							if (dmg > 0) {
@@ -7179,7 +7179,7 @@ boolean ranged;
 					while (ABASE(A_WIS) > ATTRMIN(A_WIS) && wisdmg > 0){
 						wisdmg--;
 						(void)adjattrib(A_WIS, -1, TRUE);
-						forget(10);
+						forget(4);
 						exercise(A_WIS, FALSE);
 					}
 					if (AMAX(A_WIS) > ATTRMIN(A_WIS) &&
@@ -8085,7 +8085,7 @@ boolean ranged;
 			else {
 				(void)adjattrib(A_INT, -dmg, FALSE);
 				while (dmg--){
-					forget(10);	/* lose 10% of memory per point lost*/
+					forget(4);	/* lose 4% of memory per point lost*/
 					exercise(A_WIS, FALSE);
 				}
 			}
@@ -12489,7 +12489,7 @@ int vis;
 				dmg--;
 				(void)adjattrib(A_WIS, -1, TRUE);
 				change_usanity(-1, FALSE);
-				forget(10);	/* lose 10% of memory per point lost*/
+				forget(4);	/* lose 4% of memory per point lost*/
 				exercise(A_WIS, FALSE);
 				/* Great Cthulhu permanently drains wisdom */
 				if ((pa->mtyp == PM_GREAT_CTHULHU) && (AMAX(A_WIS) > ATTRMIN(A_WIS)))

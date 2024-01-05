@@ -9338,7 +9338,7 @@ struct monst *mtmp;
 					(void)adjattrib(A_INT, -damage, FALSE);
 					int i = damage;
 					while (i--){
-						forget(10);	/* lose 10% of memory per point lost*/
+						forget(4);	/* lose 4% of memory per point lost*/
 						exercise(A_WIS, FALSE);
 					}
 					check_brainlessness();
