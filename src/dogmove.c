@@ -784,8 +784,10 @@ int udist;
 			*/
 		    if (edog->hungrytime < monstermoves + DOG_SATIATED || 
 				(!mindless_mon(mtmp) && 
-					((YouHunger < HUNGRY && edog->hungrytime < monstermoves + DOG_SATIATED/3) || 
-					(YouHunger < WEAK && edog->hungrytime < monstermoves))
+					(
+						(YouHunger > 150*get_uhungersizemod() && edog->hungrytime < monstermoves + DOG_SATIATED/3) ||
+						(YouHunger > 50*get_uhungersizemod() && edog->hungrytime < monstermoves)
+					)
 				)
 			) 
 #endif /* PET_SATIATION */
