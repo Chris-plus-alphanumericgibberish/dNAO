@@ -1237,6 +1237,22 @@ unsigned int type;
 				return CURE_SELF;
 		}
 	   break;
+	case PM_FIRRE_ELADRIN:
+			switch (rnd(6)) {
+				case 1:
+					return FIRE_PILLAR;
+				case 2:
+					return LIGHTNING;
+				case 3:
+					return PARALYZE;
+				case 4:
+					return CURE_SELF;
+				case 5:
+					return RECOVER;
+				case 6:
+					return MON_FIRA;
+			}
+	   break;
 	case PM_GAE_ELADRIN:
 		switch (rnd(4)) {
 			case 1:
