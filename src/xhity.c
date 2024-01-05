@@ -920,6 +920,9 @@ int tary;
 			/* ahazu protects the player from engulfing */
 			if (youdef && u.sealsActive&SEAL_AHAZU)
 				continue;
+			/* the player can out out of making engulf attacks */
+			if (youagr && u.uavoid_englattk)
+				continue;
 			/* check for wild misses */
 			if (missedyou) {
 				wildmiss(magr, attk, otmp, ranged);
@@ -4526,10 +4529,7 @@ boolean ranged;
 		&& attk->adtyp != AD_WRAP)
 	{
 		/* are grabs possible? */
-		if (!(youagr || youdef)
-			|| sticks(mdef)
-			)
-		{
+		if (!(youagr || youdef) || sticks(mdef) || (youagr && u.uavoid_grabattk)){
 			/* no grabs allowed, substitute basic claw attack */
 			alt_attk.aatyp = AT_CLAW;
 			return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
@@ -5359,7 +5359,8 @@ boolean ranged;
 			&& !(result & MM_AGR_DIED)
 			&& (youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
 			&& !u.ustuck							/* can't already be stuck */
-			&& !(sticks(magr) && sticks(mdef)))		/* creatures can't grab other grabbers (gameplay limitation)  */
+			&& !(sticks(magr) && sticks(mdef))		/* creatures can't grab other grabbers (gameplay limitation)  */
+			&& !(youagr && u.uavoid_grabattk))		/* the player can opt out of grabbing monsters */
 		{
 			if (pa->mtyp == PM_TOVE)
 				pline("%s %s much too slithy to stick to %s!",
@@ -6703,7 +6704,8 @@ boolean ranged;
 		if ((youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
 			&& !u.ustuck						/* can't already be stuck */
 			&& !(sticks(magr) && sticks(mdef))	/* grabbers can't grab other grabbers (gameplay limitation)  */
-			){
+			&& !(youagr && u.uavoid_grabattk)	/* the player can opt out of grabbing monsters */
+		){
 			if (pd->mtyp == PM_TOVE)
 			{
 				/* note: assumes player is either agr or def, vis is true */
@@ -8262,8 +8264,7 @@ boolean ranged;
 		 * If the player isn't involved,
 		 * or if either creature could be the one doing the grabbing,
 		 * substitute simple physical damage */
-		if (!(youagr || youdef)
-			|| (sticks(mdef))){
+		if (!(youagr || youdef) || (sticks(mdef)) || (youagr && u.uavoid_grabattk)){
 			/* make physical attack */
 			alt_attk.adtyp = AD_PHYS;
 			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
@@ -8791,7 +8792,7 @@ boolean ranged;
 		}
 		else if(youagr){
 			if(u.ustuck != mdef ){
-				if(!sticks(mdef)){
+				if(!sticks(mdef) && !(youagr && u.uavoid_grabattk)){
 					pline("You begin to ooze around %s!", mon_nam(mdef));
 					u.ustuck = magr;
 				}

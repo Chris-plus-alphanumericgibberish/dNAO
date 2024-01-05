@@ -1679,6 +1679,8 @@ u_init()
 
 	u.uavoid_passives = 0; // don't start out using only starblades lol
 	u.uavoid_msplcast = 0; // by default, allow mspellcasting
+	u.uavoid_grabattk = 0; // by default, allow grabbing attacks
+	u.uavoid_englattk = 0; // by default, allow engulfing attacks
 	u.umystic = ~0; //By default, all monk style attacks are active
 
 	u.summonMonster = FALSE;
