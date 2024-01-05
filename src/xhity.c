@@ -1788,8 +1788,19 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(magr->mapostasy && (attk->adtyp == AD_CLRC || attk->adtyp == AD_HOLY)){
 		GETNEXT
 	}
+	/* Shadowsmiths lose special attacks in the light */
+	if(magr->mtyp == PM_SHADOWSMITH && (magr->mcan || dimness(magr->mx,magr->my) <= 0)){
+		if(attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR){
+			if(attk->aatyp == AT_XSPR)
+				attk->offhand = 1;
+			attk->aatyp = AT_CLAW;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1;
+			attk->damd = 2;
+		}
+	}
 	/* Magic blade attacks are changed or lost if the creature is canceled */
-	if (magr->mcan) {
+	else if (magr->mcan) {
 		if(magr->mtyp == PM_ALIDER && magr->mcan && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP)){
 			attk->damn = 1;
 			attk->damd = 6;

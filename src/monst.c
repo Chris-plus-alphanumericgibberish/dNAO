@@ -5950,7 +5950,7 @@ struct permonst _mons2[] = {
 	MA_ELF /*MA*/,  MV_LOWLIGHT3|MV_SEE_INVIS /*MV*/, 0 /*MW*/, HI_DOMESTIC),
     MON("shadowsmith", S_HUMAN,//  /*Needs encyc entry*/
 	LVL(12, 12, 60, -9), (G_NOGEN),
-	DEF(SPE_AC(2)),
+	DEF(SPE_AC(8), SPE_DR(8)),
 	A(ATTK(AT_SRPR, AD_SHDW, 1, 8), ATTK(AT_MMGC, AD_CLRC, 0, 0)),
 	SIZ(WT_ELF, 350, MS_SELL, MZ_HUMAN), MR_SLEEP, MR_SLEEP,
 	0 /*MM*/, MT_OMNIVORE|MT_COLLECT|MT_PEACEFUL|MT_TRAITOR /*MT*/, MF_MARTIAL_S|MF_LEVEL_30 /*MF*/,

@@ -785,6 +785,32 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_SHADOWSMITH:
+		switch(clrc_spell_power){
+			default:
+				return OPEN_WOUNDS;
+			break;
+			case 0:
+			case 2:
+			case 4:
+				return BLIND_YOU;
+			break;
+			case 1:
+			case 3:
+			case 5:
+			case 7:
+				return DARKNESS;
+			break;
+			case 20:
+			case 22:
+			case 24:
+				return DRAIN_LIFE;
+			break;
+			case 29:
+				return DEATH_TOUCH;
+			break;
+		}
+	break;
 	case PM_WARRIOR_OF_SUNLIGHT:
 		switch (rn2(mtmp->m_lev-10)) {
 			default:/* 15 -> 19*/
@@ -2167,6 +2193,7 @@ int tary;
 		(u.uen < mlev(magr))
 		) : (
 		(magr->mcan) ||
+		(magr->mtyp == PM_SHADOWSMITH && dimness(magr->mx,magr->my) <= 0) ||
 		(magr->mspec_used && !nospellcooldowns_mon(magr)) ||
 		(mlev(magr) == 0) ||
 		(youdef && Invulnerable) ||

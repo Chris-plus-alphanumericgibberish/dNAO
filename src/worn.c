@@ -986,7 +986,7 @@ struct monst *mon;
 			base -= 5;
 		}
 	}
-	if(!mon->mcan){
+	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
 			base -= (32-u.uinsight)/2;
@@ -1203,7 +1203,7 @@ struct monst *mon;
 		base += 10;
 	
 
-	if(!mon->mcan){
+	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		int dr = 0;
 #define m_bdr mon->data->spe_bdr
 #define m_ldr mon->data->spe_ldr
@@ -1441,7 +1441,7 @@ int depth;
 			nat_mdr += 5;
 		}
 	}
-	if (!mon->mcan) {
+	if (!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)) {
 		switch (slot)
 		{
 		case UPPER_TORSO_DR: bas_mdr += mon->data->spe_bdr; break;

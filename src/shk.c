@@ -7422,6 +7422,14 @@ struct monst *smith;
 			treesinger_smithy(smith);
 		break;
 		case PM_SHADOWSMITH:
+			if(smith->mcan){
+				pline("\"My magic is gone!\"");
+				return;
+			}
+			if(dimness(smith->mx,smith->my) <= 0){
+				pline("\"This accursed light dispels my shadows!\"");
+				return;
+			}
 			shadow_smithy(smith);
 		break;
 		case PM_HUMAN_SMITH:
