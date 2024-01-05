@@ -4628,7 +4628,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		}
 		energy = spellenergy(spell);
 
-		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10 && spellid(spell) != SPE_DETECT_FOOD) {
+		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10*get_uhungersizemod() && spellid(spell) != SPE_DETECT_FOOD) {
 			You("are too hungry to cast that spell.");
 			return MOVE_CANCELLED;
 		} else if (ACURR(A_STR) < 4 && casting_stat != A_CHA)  {
