@@ -6867,12 +6867,12 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 
 	/* Reveal unworthy */
-	if (check_oprop(otmp, OPROP_SFUWW) && (is_minion(pd) || is_demon(pd))){
+	if (check_oprop(otmp, OPROP_SFUWW) && (is_minion(pd) || is_demon(pd) || (Drain_res(mdef) && (youdef ? Mortal_race : mortal_race(mdef))))){
 		struct obj *obj;
-		int i = basedmg;
+		int i = (basedmg+1)/2;
 		boolean printed = FALSE;
 		while((obj = some_armor(mdef)) && i > 0){
-			i-=3;
+			i-=1;
 			if(oresist_disintegration(obj))
 				continue;//May possibly sellect a different item next time.
 
@@ -6896,8 +6896,14 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 		}
 		//Note: i may be as low as -2.
-		if(i > 0)
-			*truedmgptr += i;
+		if(i > 0){
+			if(2*i >= basedmg)
+				*truedmgptr += 2*basedmg;
+			else
+				*truedmgptr += basedmg + 2*i;
+		}
+		else
+			*plusdmgptr += basedmg/2;
 	}
 
 	if(otmp->oartifact == ART_IBITE_ARM){
