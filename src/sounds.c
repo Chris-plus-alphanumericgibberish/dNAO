@@ -4275,7 +4275,7 @@ int tx,ty;
 				if(!Blind){
 					You("suddenly notice a monstrous nymph reclining in the center of the seal.");
 					pline("She is half a fair woman, with glancing eyes and fair cheeks,");
-					pline("and half again a terible dragon, with great scaly wings and serpent's tails where legs should be.");
+					pline("and half again a terrible dragon, with great scaly wings and serpent's tails where legs should be.");
 				}
 				if(u.sealCounts < numSlots){
 					pline("\"I am Echidna, %s.\"",echidnaTitles[rn2(SIZE(echidnaTitles))]);
