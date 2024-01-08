@@ -3645,7 +3645,7 @@ char *in_buff;
 			   buf);
 		}
 	    bufp = mungspaces(buf);
-	    if (*bufp == '\033') return (struct monst *)0;
+	    if (*bufp == '\033' || !strncmpi(bufp, "nothing", l = 7) || !strncmpi(bufp, "nil", l = 3)) return (struct monst *)0;
 
 		/* grab all prefixes -- this *requires* that NO monsters have a name overlapping with these prefixes! */
 		while (TRUE)
