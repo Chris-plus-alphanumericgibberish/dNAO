@@ -5983,13 +5983,18 @@ struct obj *obj;
 			/* made artifact wish */
 			if (mtmp2) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+				mongone(mtmp2);
+				mtmp2 = (struct monst*) 0;
 				u.uevent.utook_castle |= ARTWISH_SPENT;
 			}
 			else if (mtmp3) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+				mongone(mtmp3);
+				mtmp3 = (struct monst*) 0;
 				u.uevent.uunknowngod |= ARTWISH_SPENT;
 			}
 		}
+		pline("The djinni%s disappears with a puff of smoke.", (mtmp2 || mtmp3) ? " and their entourage" : "");
 		mongone(mtmp);
 		if (mtmp2)	mongone(mtmp2);
 		if (mtmp3)	mongone(mtmp3);
@@ -6042,6 +6047,7 @@ struct obj *obj;
 #define SUMMON_DJINNI		1
 #define SUMMON_SERVANT		2
 #define SUMMON_DEMON_LORD	3
+#define MISINPUT			4
 
 int
 do_candle_menu()
@@ -6073,6 +6079,13 @@ do_candle_menu()
 
 	Sprintf(buf, "Summon Demon Lord");
 	any.a_int = SUMMON_DEMON_LORD;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+
+	Sprintf(buf, "Abort Summoning");
+	any.a_int = MISINPUT;	/* must be non-zero */
 	add_menu(tmpwin, NO_GLYPH, &any,
 		incntlet, 0, ATR_NONE, buf,
 		MENU_UNSELECTED);
@@ -6186,22 +6199,31 @@ struct obj *obj;
 				}
 				verbalize("You have summoned me.  I will grant one wish!");
 				int artwishes = u.uconduct.wisharti;
-				makewish(allow_artwish() | WISH_VERBOSE);
+				consumed = makewish(allow_artwish() | WISH_VERBOSE);
+
 				if (u.uconduct.wisharti > artwishes) {
 					/* made artifact wish */
 					if (mtmp2) {
 						pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+						mongone(mtmp2);
+						mtmp2 = (struct monst*) 0;
 						u.uevent.utook_castle |= ARTWISH_SPENT;
 					}
 					else if (mtmp3) {
 						pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+						mongone(mtmp3);
+						mtmp3 = (struct monst*) 0;
 						u.uevent.uunknowngod |= ARTWISH_SPENT;
 					}
 				}
+				pline("The djinni%s disappears with a puff of smoke.", (mtmp2 || mtmp3) ? " and their entourage" : "");
 				mongone(mtmp);
 				if (mtmp2)	mongone(mtmp2);
 				if (mtmp3)	mongone(mtmp3);
-				consumed = TRUE;
+
+				if (!consumed){
+					pline("Perhaps try summoning something else?");
+				}
 			}
 			break;
 		case SUMMON_SERVANT:{
@@ -6241,6 +6263,8 @@ struct obj *obj;
 				consumed = TRUE;
 			}
 			break;
+		case MISINPUT:
+			return FALSE;
 		default:
 			consumed = FALSE;
 			break;
@@ -6258,6 +6282,7 @@ struct obj *obj;
 #undef SUMMON_DJINNI
 #undef SUMMON_SERVANT
 #undef SUMMON_DEMON_LORD
+#undef MISINPUT
 
 #define BY_OBJECT	((struct monst *)0)
 

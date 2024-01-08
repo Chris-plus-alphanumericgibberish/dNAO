@@ -5816,13 +5816,14 @@ typfnd:
 
 //redundant failsafe.  You can't wish for ANY quest artifacts
 // non-wishable artifacts should be marked as such.
+#define NOWISH (is_quest_artifact(otmp) || (artilist[otmp->oartifact].gflags&ARTG_NOWISH))
 // pre-determined if any artifact wish is allowed
-#define DENIED (is_quest_artifact(otmp) || (artilist[otmp->oartifact].gflags&ARTG_NOWISH) || !allow_artifact)
+#define NOJUICE (!allow_artifact)
 //Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
 #define MERCY (!touch_artifact(otmp, &youmonst, TRUE))
-		if (!wizwish && (DENIED || MERCY))
+		if (!wizwish && (NOWISH || MERCY || NOJUICE))
 		{
-			*wishreturn = (MERCY && !DENIED) ? WISH_MERCYRULE : WISH_DENIED;
+			*wishreturn = (NOWISH) ? WISH_DENIED : ((NOJUICE) ? WISH_OUTOFJUICE : WISH_MERCYRULE);
 			/* wish failed */
 			artifact_exists(otmp, ONAME(otmp), FALSE);	// Is this necessary?
 			obfree(otmp, (struct obj *) 0);		// Is this necessary?
