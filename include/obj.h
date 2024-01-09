@@ -740,7 +740,7 @@ struct obj {
 			   (ltmp->otyp == MASS_SHADOW_PISTOL && ltmp->cobj && (otmp->otyp == ltmp->cobj->otyp)) ||\
 			   (ltmp->otyp == ATLATL && is_spear(otmp)) ||\
 			   (\
-			    (otmp->objsize == (ltmp)->objsize || objects[(ltmp)->otyp].oc_skill == P_SLING) &&\
+			    (otmp->objsize == (ltmp)->objsize || objects[(ltmp)->otyp].oc_skill == P_SLING || (ltmp)->oartifact == ART_ROGUE_GEAR_SPIRITS) &&\
 			    (objects[(otmp)->otyp].w_ammotyp & objects[(ltmp)->otyp].w_ammotyp) && \
 			    (objects[(otmp)->otyp].oc_skill == -objects[(ltmp)->otyp].oc_skill)\
 			   )\
