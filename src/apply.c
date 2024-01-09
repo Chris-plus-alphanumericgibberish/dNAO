@@ -6132,6 +6132,9 @@ do_demon_lord_summon_menu()
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
 	}
+	if (incntlet == 'a'){
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, "There's nobody left to answer your summons!", MENU_UNSELECTED);
+	}
 
 	end_menu(tmpwin, "Which demon do you wish to summon?");
 
