@@ -1558,6 +1558,9 @@ int atype;
 	int spell = 0;
 	switch (atype)
 	{
+	case AD_HOLY:
+	case AD_UNHY:
+		return P_MARTIAL_ARTS;
 	case AD_MAGM:
 	case AD_FIRE:
 	case AD_COLD:
@@ -1565,8 +1568,6 @@ int atype;
 	case AD_DEAD:
 	case AD_DRLI:
 	case AD_STAR:
-	case AD_HOLY:
-	case AD_UNHY:
 	case AD_HLUH:
 	case AD_MADF:
 		return P_ATTACK_SPELL;

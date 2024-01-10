@@ -18123,7 +18123,6 @@ movement_combos()
 	if (Role_if(PM_MONK) && !Upolyd) {
 		int moveID = check_monk_move();
 		if (moveID != 0 && perform_monk_move(moveID)) {
-			u.uen -= 8;
 			nomul(0, NULL);
 			u.uattked = TRUE;
 			did_combo = TRUE;
@@ -18359,8 +18358,6 @@ int moveID;
 	if(!moveID)
 		return FALSE;
 	if(!monk_style_active(moveID)) return FALSE;
-	if(u.uen < 8)
-		return FALSE;
 	switch(moveID){
 		case DIVE_KICK:
 		if(Race_if(PM_CHIROPTERAN)){
