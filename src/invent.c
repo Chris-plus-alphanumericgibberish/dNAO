@@ -3434,7 +3434,7 @@ winid *datawin;
 			OBJPUTSTR("Holds enchantments well.");
 	}
 	/* Enchantment limit */
-	if (obj && arti_plusten(obj))
+	if (obj && is_plusten(obj))
 		OBJPUTSTR("Holds enchantments extremely well.");
 	if (olet == FOOD_CLASS) {
 		if (otyp == TIN) {
