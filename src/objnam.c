@@ -4454,6 +4454,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "sothoth_weapon ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_SOTHW);
 
+		} else if (!strncmpi(bp, "club_claw ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_CCLAW);
+
 		} else if (!strncmpi(bp, "tactile ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_TACTB);
 
