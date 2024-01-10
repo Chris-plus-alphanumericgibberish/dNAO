@@ -225,7 +225,7 @@
 						 ((ptr)->mtyp == PM_SHAMBLING_HORROR && u.shambin == 3) || \
 						 ((ptr)->mtyp == PM_STUMBLING_HORROR && u.stumbin == 3) || \
 						 ((ptr)->mtyp == PM_WANDERING_HORROR && u.wandein == 3) || \
-						 ((ptr)->mtyp == PM_NITOCRIS) || \
+						 ((ptr)->mtyp == PM_GHOUL_QUEEN_NITOCRIS) || \
 						 ((ptr)->mtyp == PM_PHARAOH) \
 						)
 #define skeleton_innards(ptr)	(((ptr)->mtyp == PM_SKELETON) || \
