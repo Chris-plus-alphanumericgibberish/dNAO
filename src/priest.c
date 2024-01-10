@@ -696,8 +696,6 @@ register struct monst *priest;
 	if(priest->mflee || (!priest->ispriest && coaligned && strayed)) {
 	    pline("%s doesn't want anything to do with you!",
 				Monnam(priest));
-	    priest->mpeaceful = 0;
-		newsym(priest->mx, priest->my);
 	    return;
 	}
 
@@ -716,7 +714,6 @@ register struct monst *priest;
 		priest->mfrozen = priest->msleeping = 0;
 		priest->mcanmove = 1;
 	    }
-	    priest->mpeaceful = 0;
 	    verbalize1(cranky_msg[rn2(3)]);
 	    return;
 	}
