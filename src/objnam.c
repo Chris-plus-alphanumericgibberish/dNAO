@@ -5813,26 +5813,21 @@ typfnd:
 	}
 	if (otmp->oartifact && from_user) {
 		/* check that they were allowed to wish for that artifact */
-		if (!wizwish
-			&& ((is_quest_artifact(otmp)						//redundant failsafe.  You can't wish for ANY quest artifacts
-			|| (artilist[otmp->oartifact].gflags&ARTG_NOWISH)	// non-wishable artifacts should be marked as such.
-			|| !touch_artifact(otmp, &youmonst, TRUE)			//Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
-			|| !allow_artifact									// pre-determined if any artifact wish is allowed
-			)))
-			// depreciated criteria:
-			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS) //No wishing for quest artifacts, unique monster artifacts, etc.
-			// (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
-			// (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
-			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
-			// (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
-			// (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
-			// (otmp->oartifact >= ART_STAFF_OF_THE_ARCHMAGI && otmp->oartifact <= ART_SNICKERSNEE)
+
+//redundant failsafe.  You can't wish for ANY quest artifacts
+// non-wishable artifacts should be marked as such.
+#define NOWISH (is_quest_artifact(otmp) || (artilist[otmp->oartifact].gflags&ARTG_NOWISH))
+// pre-determined if any artifact wish is allowed
+#define NOJUICE (!allow_artifact)
+//Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
+#define MERCY (!touch_artifact(otmp, &youmonst, TRUE))
+		if (!wizwish && (NOWISH || MERCY || NOJUICE))
 		{
+			*wishreturn = (NOWISH) ? WISH_DENIED : ((NOJUICE) ? WISH_OUTOFJUICE : WISH_MERCYRULE);
 			/* wish failed */
 			artifact_exists(otmp, ONAME(otmp), FALSE);	// Is this necessary?
 			obfree(otmp, (struct obj *) 0);		// Is this necessary?
 			otmp = &zeroobj;					// Is this necessary?
-			*wishreturn = WISH_DENIED;
 			return &zeroobj;
 		}
 		else {
