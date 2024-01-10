@@ -5762,6 +5762,26 @@ retry:
 		if (++tries < 5)
 			goto retry;
 	}
+	if (wishreturn & WISH_MERCYRULE)
+	{
+		/* wish was denied due to mercy rule - you couldn't even pick it up if it WAS granted */
+		if (wishflags & WISH_VERBOSE)
+			verbalize("Such an artifact would refuse to lend you aid.");
+		else
+			pline("You cannot wish for an artifact that would refuse you.");
+		if (++tries < 5)
+			goto retry;
+	}
+	if (wishreturn & WISH_OUTOFJUICE)
+	{
+		/* wish was read as an artifact and you're out of artifact wishes  */
+		if (wishflags & WISH_VERBOSE)
+			verbalize("Alone, such artifacts are beyond my power.");
+		else
+			pline("You cannot wish for an artifact right now.");
+		if (++tries < 5)
+			goto retry;
+	}
 	if (wishreturn & WISH_ARTEXISTS)
 	{
 		/* wish was read as an artifact that has already been generated */
@@ -5778,12 +5798,16 @@ retry:
 		if (wishflags & WISH_VERBOSE)
 			verbalize("Done.");
 	}
-	if ((tries == 5) && (wishreturn & (WISH_DENIED | WISH_FAILURE)))
+	if ((tries == 5) && !(wishreturn & (WISH_NOTHING | WISH_SUCCESS)))
 	{
-		/* no more tries, give a random item */
+		/* no more tries
+		 * removes vanilla behavior of random item
+		 * will still consume the wish for lamps/wands, will NOT for candles/rings
+		 * this is by-design, no real reason to punish the player,
+		 * mostly for if they didn't know that X thing was unwishable
+		 */
 		pline1(thats_enough_tries);
-		otmp = readobjnam((char *)0, &wishreturn, wishflags);
-		if (!otmp) return TRUE;	/* for safety; should never happen */
+		return FALSE;
 	}
 
 	/* KMH, conduct */

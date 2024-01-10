@@ -517,8 +517,9 @@ struct obj {
 #define WISH_SUCCESS	0x0000200L
 #define WISH_FAILURE	0x0000400L
 #define WISH_DENIED		0x0000800L
-#define WISH_ARTEXISTS		0x0001000L
-
+#define WISH_ARTEXISTS	0x0001000L
+#define WISH_MERCYRULE	0x0002000L
+#define WISH_OUTOFJUICE	0x0004000L
 
 
 
@@ -726,6 +727,11 @@ struct obj {
 #define is_launcher(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 ((objects[otmp->otyp].oc_skill >= P_BOW && \
 			 objects[otmp->otyp].oc_skill <= P_CROSSBOW) || otmp->otyp == ATLATL))
+#define is_melee_launcher(otmp)	(otmp->otyp == CARCOSAN_STING || \
+				otmp->oartifact == ART_LIECLEAVER || \
+				otmp->oartifact == ART_ROGUE_GEAR_SPIRITS  || \
+				check_oprop(otmp, OPROP_BLADED) || \
+				check_oprop(otmp, OPROP_SPIKED))
 #define is_ammo(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == GEM_CLASS) && \
 			 ((objects[otmp->otyp].oc_skill >= -P_CROSSBOW && \
@@ -740,7 +746,7 @@ struct obj {
 			   (ltmp->otyp == MASS_SHADOW_PISTOL && ltmp->cobj && (otmp->otyp == ltmp->cobj->otyp)) ||\
 			   (ltmp->otyp == ATLATL && is_spear(otmp)) ||\
 			   (\
-			    (otmp->objsize == (ltmp)->objsize || objects[(ltmp)->otyp].oc_skill == P_SLING) &&\
+			    (otmp->objsize == (ltmp)->objsize || objects[(ltmp)->otyp].oc_skill == P_SLING || (ltmp)->oartifact == ART_ROGUE_GEAR_SPIRITS) &&\
 			    (objects[(otmp)->otyp].w_ammotyp & objects[(ltmp)->otyp].w_ammotyp) && \
 			    (objects[(otmp)->otyp].oc_skill == -objects[(ltmp)->otyp].oc_skill)\
 			   )\

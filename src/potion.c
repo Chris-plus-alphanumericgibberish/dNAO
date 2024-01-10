@@ -3539,13 +3539,18 @@ register struct obj *obj;
 			/* made artifact wish */
 			if (mtmp2) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+				mongone(mtmp2);
+				mtmp2 = (struct monst*) 0;
 				u.uevent.utook_castle |= ARTWISH_SPENT;
 			}
 			else if (mtmp3) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+				mongone(mtmp3);
+				mtmp3 = (struct monst*) 0;
 				u.uevent.uunknowngod |= ARTWISH_SPENT;
 			}
 		}
+		pline("The djinni%s disappears with a puff of smoke.", (mtmp2 || mtmp3) ? " and their entourage" : "");
 		mongone(mtmp);
 		if (mtmp2)	mongone(mtmp2);
 		if (mtmp3)	mongone(mtmp3);
