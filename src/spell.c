@@ -4701,6 +4701,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 	skill = spell_skilltype(pseudo->otyp);
 	role_skill = P_SKILL(skill);
 	if(Spellboost) role_skill++;
+	if(Role_if(PM_WIZARD)) role_skill++;
 	
 	n = 0;
 	switch(pseudo->otyp)  {
@@ -4726,7 +4727,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 								n = 1;
 								dice = 12;
 								flat = u.ulevel/2 + spell_damage_bonus();
-								if(n < (role_skill-P_BASIC)){
+								if((role_skill-P_BASIC) > 0){
 									dice -= min(11, role_skill-P_BASIC);
 									flat += 6*min(11, role_skill-P_BASIC);
 								}
