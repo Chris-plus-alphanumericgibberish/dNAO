@@ -13267,11 +13267,7 @@ int vis;						/* True if action is at all visible to the player */
 			(!attk || weapon_aatyp(attk->aatyp)) &&
 			/* isn't a misused launcher */
 			(!is_launcher(weapon) ||
-			check_oprop(weapon, OPROP_BLADED) ||
-			check_oprop(weapon, OPROP_SPIKED) ||
-			weapon->oartifact == ART_LIECLEAVER ||
-			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS ||
-			weapon->otyp == CARCOSAN_STING
+			is_melee_launcher(weapon)
 			) &&
 			/* isn't a misused polearm */
 			(!is_bad_melee_pole(weapon) ||
