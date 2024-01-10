@@ -1348,53 +1348,49 @@ BOOLEAN_P tin, nobadeffects, drained;
 				pline("For some reason, that tasted bland.");
 			}
 		}
-		/* fall through to default case */
-	    default: {
-		register struct permonst *ptr = &mons[pm];
-		int i, count;
-
-		if (!nobadeffects && hallucinogenic(ptr)) {
-			pline ("Oh wow!  Great stuff!");
-			make_hallucinated(HHallucination + 200,FALSE,0L);
-		}
-		
-		if(!drained || !rn2(5)) if(is_giant(ptr)) gainstr((struct obj *)0, 0);
-
-		/* Check the monster for all of the intrinsics.  If this
-		 * monster can give more than one, pick one to try to give
-		 * from among all it can give.
-		 *
-		 * If a monster can give 4 intrinsics then you have
-		 * a 1/1 * 1/2 * 2/3 * 3/4 = 1/4 chance of getting the first,
-		 * a 1/2 * 2/3 * 3/4 = 1/4 chance of getting the second,
-		 * a 1/3 * 3/4 = 1/4 chance of getting the third,
-		 * and a 1/4 chance of getting the fourth.
-		 *
-		 * And now a proof by induction:
-		 * it works for 1 intrinsic (1 in 1 of getting it)
-		 * for 2 you have a 1 in 2 chance of getting the second,
-		 *	otherwise you keep the first
-		 * for 3 you have a 1 in 3 chance of getting the third,
-		 *	otherwise you keep the first or the second
-		 * for n+1 you have a 1 in n+1 chance of getting the (n+1)st,
-		 *	otherwise you keep the previous one.
-		 * Elliott Kleinrock, October 5, 1990
-		 */
-
-		 count = 0;	/* number of possible intrinsics */
-		 tmp = 0;	/* which one we will try to give */
-		 for (i = 1; i <= LAST_PROP; i++) {
-			if (intrinsic_possible(i, ptr)) {
-				count++;
-					if(u.sealsActive&SEAL_AHAZU) givit(i, ptr, (tin && ptr->cnutrit > 50) ? 45 : ptr->cnutrit*0.9, drained);
-					else givit(i, ptr, (tin && ptr->cnutrit > 50) ? 50 : ptr->cnutrit, drained);
-			}
-		 }
-
-		 /* if any found try to give them one */
-	    }
-	    break;
 	}
+	register struct permonst *ptr = &mons[pm];
+	int i, count;
+
+	if (!nobadeffects && hallucinogenic(ptr)) {
+		pline ("Oh wow!  Great stuff!");
+		make_hallucinated(HHallucination + 200,FALSE,0L);
+	}
+	
+	if(!drained || !rn2(5)) if(is_giant(ptr)) gainstr((struct obj *)0, 0);
+
+	/* Check the monster for all of the intrinsics.  If this
+	 * monster can give more than one, pick one to try to give
+	 * from among all it can give.
+	 *
+	 * If a monster can give 4 intrinsics then you have
+	 * a 1/1 * 1/2 * 2/3 * 3/4 = 1/4 chance of getting the first,
+	 * a 1/2 * 2/3 * 3/4 = 1/4 chance of getting the second,
+	 * a 1/3 * 3/4 = 1/4 chance of getting the third,
+	 * and a 1/4 chance of getting the fourth.
+	 *
+	 * And now a proof by induction:
+	 * it works for 1 intrinsic (1 in 1 of getting it)
+	 * for 2 you have a 1 in 2 chance of getting the second,
+	 *	otherwise you keep the first
+	 * for 3 you have a 1 in 3 chance of getting the third,
+	 *	otherwise you keep the first or the second
+	 * for n+1 you have a 1 in n+1 chance of getting the (n+1)st,
+	 *	otherwise you keep the previous one.
+	 * Elliott Kleinrock, October 5, 1990
+	 */
+
+	 count = 0;	/* number of possible intrinsics */
+	 tmp = 0;	/* which one we will try to give */
+	 for (i = 1; i <= LAST_PROP; i++) {
+		if (intrinsic_possible(i, ptr)) {
+			count++;
+				if(u.sealsActive&SEAL_AHAZU) givit(i, ptr, (tin && ptr->cnutrit > 50) ? 45 : ptr->cnutrit*0.9, drained);
+				else givit(i, ptr, (tin && ptr->cnutrit > 50) ? 50 : ptr->cnutrit, drained);
+		}
+	 }
+
+	 /* if any found try to give them one */
 
 	if (catch_lycanthropy && arti_worn_prop(uwep, ARTP_NOWERE)) {
 	    if (!touch_artifact(uwep, &youmonst, FALSE)) {
@@ -2062,10 +2058,10 @@ struct obj *otmp;
 {
 	switch(otmp->otyp) {
 	    case FOOD_RATION:
-		if(YouHunger <= 200)
+		if(YouHunger <= 200*get_uhungersizemod())
 		    pline(Hallucination ? "Oh wow, like, superior, man!" :
 			  "That food really hit the spot!");
-		else if(YouHunger <= get_uhungermax()/2 - 300) pline("That satiated your %s!",
+		else if(YouHunger <= get_uhungermax()/2 - 300*get_uhungersizemod()) pline("That satiated your %s!",
 						body_part(STOMACH));
 		break;
 	    case TRIPE_RATION:
@@ -4389,8 +4385,14 @@ sync_hunger()
 
 	if(is_fainted()) {
 		flags.soundok = 0;
-		if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/20), "fainted from lack of food");
-		else nomul(-10+( YouHunger/10), "fainted from lack of food");
+		if(get_uhungersizemod() > 1){
+			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/(20*get_uhungersizemod())), "fainted from lack of food");
+			else nomul(-10+( YouHunger/(10*get_uhungersizemod())), "fainted from lack of food");
+		}
+		else {
+			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/20), "fainted from lack of food");
+			else nomul(-10+( YouHunger/10), "fainted from lack of food");
+		}
 		nomovemsg = "You regain consciousness.";
 		afternmv = unfaint;
 	}

@@ -204,6 +204,8 @@ STAIR:(37,01),down
 # Artifact Door
 DOOR:locked,(09,04),1
 
+FORGE:(15,02)
+
 # Boulders
 OBJECT:'`',"boulder",(38,11)
 OBJECT:'`',"boulder",(36,12)

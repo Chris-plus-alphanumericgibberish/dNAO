@@ -668,7 +668,9 @@ struct obj {
 				&& !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW) && !check_oprop((otmp), OPROP_LESSER_MAGCW))
 #define yog_windowable(otmp) (accepts_weapon_oprops(otmp) && !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW))
 #define sflm_able(otmp)	(((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
-			 || ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT))
+			 || ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT)\
+			 || ((otmp)->oartifact == ART_AMALGAMATED_SKIES)\
+			 )
 #define sflm_offerable(otmp)	(accepts_weapon_oprops(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_SFLMW))
 #define sflm_mirrorable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_suit(otmp) || is_shield(otmp))\
 				 && sflm_able(otmp) && !check_oprop(otmp, OPROP_REFL))
@@ -676,9 +678,9 @@ struct obj {
 #define sflm_wrathable(otmp)	(is_gloves(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_RWTH))
 #define sflm_burdenable(otmp)	(is_boots(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_RBRD))
 #define sflm_lifeable(otmp)	(is_helmet(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_SLIF) && !check_oprop(otmp, OPROP_LIFE))
-#define sflm_smeltable_silver(otmp)	(is_metallic(otmp) && (otmp)->obj_material != SILVER)
-#define sflm_smeltable_platinum(otmp)	(is_metallic(otmp) && (otmp)->obj_material != PLATINUM)
-#define sflm_smeltable_mithril(otmp)	(is_metallic(otmp) && (otmp)->obj_material != MITHRIL)
+#define sflm_smeltable_silver(otmp)	(is_metallic(otmp) && (otmp)->obj_material != SILVER && (otmp)->obj_material != MERCURIAL && (otmp)->otyp != ORIHALCYON_GAUNTLETS)
+#define sflm_smeltable_platinum(otmp)	(is_metallic(otmp) && (otmp)->obj_material != PLATINUM && (otmp)->obj_material != MERCURIAL && (otmp)->otyp != ORIHALCYON_GAUNTLETS)
+#define sflm_smeltable_mithril(otmp)	(is_metallic(otmp) && (otmp)->obj_material != MITHRIL && (otmp)->obj_material != MERCURIAL && (otmp)->otyp != ORIHALCYON_GAUNTLETS)
 #define sflm_mortalable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_MORTW))
 #define sflm_truedeathable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_TDTHW))
 #define sflm_unworthyable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_SFUWW))
@@ -1059,6 +1061,8 @@ struct obj {
 				|| ((otmp)->oartifact == ART_BLADE_DANCER_S_DAGGER && uwep && uwep->oartifact==ART_SODE_NO_SHIRAYUKI)\
 				|| ((otmp)->oartifact == ART_FRIEDE_S_SCYTHE && uwep && is_farm(uwep))\
 				|| ((otmp)->oartifact == ART_FLUORITE_OCTAHEDRON && uwep && uwep->oartifact==ART_FLUORITE_OCTAHEDRON)\
+				|| ((otmp)->oartifact == ART_SILVER_SKY && uwep && uwep->oartifact==ART_SKY_REFLECTED)\
+				|| ((otmp)->oartifact == ART_SKY_REFLECTED && uwep && uwep->oartifact==ART_SILVER_SKY)\
 				|| ((otmp)->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE))\
 				|| ((otmp)->oartifact == ART_CLEAVER && Role_if(PM_BARBARIAN))\
 				|| ((otmp)->oartifact == ART_ATLANTEAN_ROYAL_SWORD && Role_if(PM_BARBARIAN))\

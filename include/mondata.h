@@ -818,6 +818,8 @@
 #define allow_shield(ptr)	(ptr->mtyp == PM_SCORPION\
 							|| ptr->mtyp == PM_YURIAN\
 							|| ptr->mtyp == PM_ZETA_METROID\
+							|| ptr->mtyp == PM_Y_CULTIST_MATRON\
+							|| ptr->mtyp == PM_Y_CULTIST_PATRON\
 							|| ptr->mtyp == PM_DEMOGORGON\
 							|| ptr->mtyp == PM_CHAIN_GOLEM\
 							|| ptr->mtyp == PM_SCORPIUS\

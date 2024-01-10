@@ -1408,8 +1408,10 @@ mineralize()
 		Is_rogue_level(&u.uz) ||
 #endif
 		level.flags.arboreal ||
-		((sp = Is_special(&u.uz)) != 0 && !Is_oracle_level(&u.uz)
-					&& (!In_mines_quest(&u.uz) || sp->flags.town)
+		((sp = Is_special(&u.uz)) != 0
+			&& !Is_oracle_level(&u.uz)
+			&& !(Is_nemesis(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+			&& (!In_mines_quest(&u.uz) || sp->flags.town)
 	    )) return;
 
 	/* basic level-related probabilities */
@@ -1421,9 +1423,12 @@ mineralize()
 
 	/* mines have ***MORE*** goodies - otherwise why mine? */
 	if (In_mines_quest(&u.uz)) {
+	    gemprob = goldprob*3 / 4;
+	    silverprob = goldprob*2;
 	    goldprob *= 2;
-	    gemprob *= 3;
-	    silverprob *= 4;
+	} else if (Is_nemesis(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) {
+	    silverprob = goldprob;
+	    darkprob = gemprob;
 	} else if (In_quest(&u.uz)) {
 	    goldprob /= 4;
 	    gemprob /= 6;
@@ -1436,7 +1441,19 @@ mineralize()
 	 * overhead from placing things in the floor chain prior to burial.
 	 */
 	for (x = 2; x < (COLNO - 2); x++)
-	  for (y = 1; y < (ROWNO - 1); y++)
+	  for (y = 1; y < (ROWNO - 1); y++){
+		if(levl[x][y].typ == ROOM){
+			if(Is_nemesis(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				if(!rn2(200)){
+					if ((otmp = mksobj(CHUNK_OF_FOSSIL_DARK, MKOBJ_NOINIT)) != 0) {
+						otmp->quan = 1L;
+						otmp->owt = weight(otmp);
+						otmp->ox = x,  otmp->oy = y;
+						add_to_buried(otmp);
+					}
+				}
+			}
+		}
 	    if (levl[x][y+1].typ != STONE) {	 /* <x,y> spot not eligible */
 		y += 2;		/* next two spots aren't eligible either */
 	    } else if (levl[x][y].typ != STONE) { /* this spot not eligible */
@@ -1496,6 +1513,7 @@ mineralize()
 		    }
 		}
 	    }
+	  }
 }
 
 

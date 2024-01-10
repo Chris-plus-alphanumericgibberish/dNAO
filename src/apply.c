@@ -2493,7 +2493,7 @@ int magic; /* 0=Physical, otherwise skill level */
 	} else if (!magic && near_capacity() > UNENCUMBERED) {
 		You("are carrying too much to jump!");
 		return MOVE_CANCELLED;
-	} else if (!magic && (YouHunger <= 100 || ACURR(A_STR) < 6)) {
+	} else if (!magic && (YouHunger <= 100*get_uhungersizemod() || ACURR(A_STR) < 6)) {
 		You("lack the strength to jump!");
 		return MOVE_CANCELLED;
 	} else if (Wounded_legs) {

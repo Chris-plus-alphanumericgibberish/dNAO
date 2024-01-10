@@ -3400,6 +3400,7 @@ register struct	obj	*obj;
 				zapdat.directly_hits = FALSE;
 				zapdat.affects_floor = FALSE;
 				zapdat.no_hit_wall = TRUE;
+				zapdat.damn *= 1.5;
 				break;
 			case SPE_ACID_SPLASH:
 				range = 1;
@@ -3827,8 +3828,7 @@ struct zapdata * zapdata;
 		}
 		if (youagr && u.ukrau_duration)
 			dmg *= 1.5;
-		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)
-			&& !(zapdata->explosive || zapdata->splashing)) {
+		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)) {
 			dmg *= 2;
 		}
 	}

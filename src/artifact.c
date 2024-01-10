@@ -6867,12 +6867,12 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 
 	/* Reveal unworthy */
-	if (check_oprop(otmp, OPROP_SFUWW) && (is_minion(pd) || is_demon(pd))){
+	if (check_oprop(otmp, OPROP_SFUWW) && (is_minion(pd) || is_demon(pd) || (Drain_res(mdef) && (youdef ? Mortal_race : mortal_race(mdef))))){
 		struct obj *obj;
-		int i = basedmg;
+		int i = (basedmg+1)/2;
 		boolean printed = FALSE;
 		while((obj = some_armor(mdef)) && i > 0){
-			i-=3;
+			i-=1;
 			if(oresist_disintegration(obj))
 				continue;//May possibly sellect a different item next time.
 
@@ -6896,8 +6896,14 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 		}
 		//Note: i may be as low as -2.
-		if(i > 0)
-			*truedmgptr += i;
+		if(i > 0){
+			if(2*i >= basedmg)
+				*truedmgptr += 2*basedmg;
+			else
+				*truedmgptr += basedmg + 2*i;
+		}
+		else
+			*plusdmgptr += basedmg/2;
 	}
 
 	if(otmp->oartifact == ART_IBITE_ARM){
@@ -8409,6 +8415,7 @@ arti_invoke(obj)
 						    map_invisible(bhitpos.x, bhitpos.y);
 						}
 					    resist(mtmp, WEAPON_CLASS, dmg, FALSE);
+						setmangry(mtmp);
 					}
 					bhitpile(pseudo,bhito,bhitpos.x,bhitpos.y);
 				    if(IS_DOOR(typ) || typ == SDOOR) {
@@ -8588,6 +8595,7 @@ arti_invoke(obj)
 				}
 				update_inventory();	/* spell may modify inventory */
 				losepw(energy);
+				obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 			}
 		}
 		obj->age = monstermoves + d(1,100);
@@ -13869,6 +13877,11 @@ struct obj **opptr;
 	if(yn("Merge the two skies into one?") == 'y'){
 		struct obj *sky2;
 		struct obj *amalgam;
+		if(u.ulevel < 22){ //Less than rank 7
+			pline("The two swords ripple for a moment, then push each-other away!");
+			pline("It seems you are not powerful enough to merge them together.");
+			return MOVE_CANCELLED;
+		}
 		for(sky2 = invent; sky2; sky2 = sky2->nobj)
 			if(sky2->oartifact == needed)
 				break;
@@ -13880,7 +13893,7 @@ struct obj **opptr;
 		if(!amalgam || !amalgam->oartifact){
 			impossible("Make Amalgamated Skies failed in merge_skies.");
 			if(amalgam)
-				obfree(amalgam, (struct obj *)0);	/* now, get rid of it */
+				obfree(amalgam, (struct obj *)0);	/* get rid of the useless non-artifact */
 			return MOVE_CANCELLED;
 		}
 		pline("%s and %s melt and disolve into each-other!", The(xname(sky1)), the(xname(sky2)));

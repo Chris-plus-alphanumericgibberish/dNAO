@@ -218,7 +218,7 @@ register struct monst *mon;
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
 	
-	if(is_eeladrin(mon->data))
+	if(is_eeladrin(mon->data) || (mon->mtyp != PM_UNEARTHLY_DROW && is_yochlol(mon->data)))
 		return (struct obj *)0; //Eladrin don't drop objects in their energy form.
 	
 	rwep = mon_attacktype(mon, AT_WEAP) ? propellor : &zeroobj;
@@ -784,8 +784,10 @@ int udist;
 			*/
 		    if (edog->hungrytime < monstermoves + DOG_SATIATED || 
 				(!mindless_mon(mtmp) && 
-					((YouHunger < HUNGRY && edog->hungrytime < monstermoves + DOG_SATIATED/3) || 
-					(YouHunger < WEAK && edog->hungrytime < monstermoves))
+					(
+						(YouHunger > 150*get_uhungersizemod() && edog->hungrytime < monstermoves + DOG_SATIATED/3) ||
+						(YouHunger > 50*get_uhungersizemod() && edog->hungrytime < monstermoves)
+					)
 				)
 			) 
 #endif /* PET_SATIATION */

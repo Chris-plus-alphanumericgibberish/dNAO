@@ -961,12 +961,16 @@ struct monst * mon;
 	boolean youagr = (mon == &youmonst);
 	struct obj *arms = (youagr ? uarms : which_armor(mon, W_ARMS));
 	struct obj *swapwep = (youagr ? uswapwep : MON_SWEP(mon));
+	
+	if (!otmp)
+		return 1;
+
+	if (otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS)
+		return 2;
 
 	if (arms)
 		return 1;
 
-	if (!otmp)
-		return 1;
 
 	/* monsters don't have a concept of swapwep outside two-weaponing,
 	 * I believe, so assume if MON_SWEP then it's two-weaponing */

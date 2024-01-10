@@ -16506,7 +16506,9 @@ register struct permonst *ptr;
 		return((boolean)(!!rn2(6 + (u.ualign.record < -5 ? -5 : u.ualign.record))));
 	}
 
-	if (always_peaceful(ptr)) return TRUE;
+	if((ptr->mtyp == PM_TREESINGER || ptr->mtyp == PM_MITHRIL_SMITH) && In_mordor_quest(&u.uz));//Not always peaceful
+	else if (always_peaceful(ptr)) return TRUE;
+	
 	if(!u.uevent.invoked && mndx==PM_UVUUDAUM && !Infuture) return TRUE;
 	
 	if(ual == A_VOID) return FALSE;

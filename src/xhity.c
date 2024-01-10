@@ -1788,8 +1788,19 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(magr->mapostasy && (attk->adtyp == AD_CLRC || attk->adtyp == AD_HOLY)){
 		GETNEXT
 	}
+	/* Shadowsmiths lose special attacks in the light */
+	if(magr->mtyp == PM_SHADOWSMITH && (magr->mcan || dimness(magr->mx,magr->my) <= 0)){
+		if(attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR){
+			if(attk->aatyp == AT_XSPR)
+				attk->offhand = 1;
+			attk->aatyp = AT_CLAW;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1;
+			attk->damd = 2;
+		}
+	}
 	/* Magic blade attacks are changed or lost if the creature is canceled */
-	if (magr->mcan) {
+	else if (magr->mcan) {
 		if(magr->mtyp == PM_ALIDER && magr->mcan && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP)){
 			attk->damn = 1;
 			attk->damd = 6;
@@ -6296,7 +6307,7 @@ boolean ranged;
 							while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
 								dmg--;
 								(void)adjattrib(A_WIS, -1, TRUE);
-								forget(10);	/* lose 10% of memory per point lost*/
+								forget(4);	/* lose 4% of memory per point lost*/
 								exercise(A_WIS, FALSE);
 							}
 							if (dmg > 0) {
@@ -6769,7 +6780,7 @@ boolean ranged;
 								(void)dropy(otmp);
 								if (roll_madness(MAD_TALONS)){
 									You("panic after having dropping your weapon!");
-									nomul(-1 * rnd(6), "panic");
+									HPanicking += 1+rnd(6);
 								}
 							}
 							else{
@@ -6789,7 +6800,7 @@ boolean ranged;
 						(void)dropy(otmp);
 						if (roll_madness(MAD_TALONS)){
 							You("panic after having your cloak taken!");
-							nomul(-1 * rnd(6), "panic");
+							HPanicking += 1+rnd(6);
 						}
 					}
 				}
@@ -6806,7 +6817,7 @@ boolean ranged;
 							(void)mpickobj(magr, otmp);
 							if (roll_madness(MAD_TALONS)){
 								You("panic after having your property stolen!");
-								nomul(-1 * rnd(6), "panic");
+								HPanicking += 1+rnd(6);
 							}
 						}
 					}
@@ -6821,7 +6832,7 @@ boolean ranged;
 							(void)dropy(otmp);
 							if (roll_madness(MAD_TALONS)){
 								You("panic after having your armor taken!");
-								nomul(-1 * rnd(6), "panic");
+								HPanicking += 1+rnd(6);
 							}
 						}
 					}
@@ -7168,7 +7179,7 @@ boolean ranged;
 					while (ABASE(A_WIS) > ATTRMIN(A_WIS) && wisdmg > 0){
 						wisdmg--;
 						(void)adjattrib(A_WIS, -1, TRUE);
-						forget(10);
+						forget(4);
 						exercise(A_WIS, FALSE);
 					}
 					if (AMAX(A_WIS) > ATTRMIN(A_WIS) &&
@@ -8074,7 +8085,7 @@ boolean ranged;
 			else {
 				(void)adjattrib(A_INT, -dmg, FALSE);
 				while (dmg--){
-					forget(10);	/* lose 10% of memory per point lost*/
+					forget(4);	/* lose 4% of memory per point lost*/
 					exercise(A_WIS, FALSE);
 				}
 			}
@@ -12478,7 +12489,7 @@ int vis;
 				dmg--;
 				(void)adjattrib(A_WIS, -1, TRUE);
 				change_usanity(-1, FALSE);
-				forget(10);	/* lose 10% of memory per point lost*/
+				forget(4);	/* lose 4% of memory per point lost*/
 				exercise(A_WIS, FALSE);
 				/* Great Cthulhu permanently drains wisdom */
 				if ((pa->mtyp == PM_GREAT_CTHULHU) && (AMAX(A_WIS) > ATTRMIN(A_WIS)))

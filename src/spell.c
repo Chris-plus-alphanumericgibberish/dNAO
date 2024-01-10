@@ -4628,7 +4628,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		}
 		energy = spellenergy(spell);
 
-		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10 && spellid(spell) != SPE_DETECT_FOOD) {
+		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10*get_uhungersizemod() && spellid(spell) != SPE_DETECT_FOOD) {
 			You("are too hungry to cast that spell.");
 			return MOVE_CANCELLED;
 		} else if (ACURR(A_STR) < 4 && casting_stat != A_CHA)  {
@@ -4706,22 +4706,30 @@ spelleffects(int spell, boolean atme, int spelltyp)
 	switch(pseudo->otyp)  {
 	case SPE_LIGHTNING_STORM:	color = EXPL_MAGICAL;
 								n = rnd(4) + 2;
+								if(n < (role_skill-P_BASIC+2))
+									n = role_skill-P_BASIC+2;
 								dice = 6;
 								flat = spell_damage_bonus();
 								rad = 1;
 								inacc = 3;
 								goto dothrowspell;
-	case SPE_BLIZZARD:			color = EXPL_FROSTY;
+	case SPE_FIRE_STORM:		color = EXPL_FIERY;
 								n = rnd(3) + 1;
+								if(n < (role_skill-P_BASIC))
+									n = role_skill-P_BASIC;
 								dice = 4;
 								flat = spell_damage_bonus();
 								rad = 1;
 								inacc = 1;
 								goto dothrowspell;
-	case SPE_FIRE_STORM:		color = EXPL_FIERY;
+	case SPE_BLIZZARD:			color = EXPL_FROSTY;
 								n = 1;
 								dice = 12;
 								flat = u.ulevel/2 + spell_damage_bonus();
+								if(n < (role_skill-P_BASIC)){
+									dice -= min(11, role_skill-P_BASIC);
+									flat += 6*min(11, role_skill-P_BASIC);
+								}
 								rad = 2;
 								inacc = 0;
 								goto dothrowspell;
@@ -4772,6 +4780,8 @@ dothrowspell:
 				}
 				else {
 					dam = d(dice, 6) + flat + rnd(u.ulevel);
+					if(Spellboost) dam *= 2;
+					if(u.ukrau_duration) dam *= 1.5;
 					explode(u.dx, u.dy, spell_adtype(pseudo->otyp), 0, dam, color, rad);
 				}
 			}

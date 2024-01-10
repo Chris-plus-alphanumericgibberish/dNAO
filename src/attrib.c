@@ -283,8 +283,7 @@ gainstr(otmp, incr)
 
 	if(incr) num = incr;
 	else {
-	    if(ABASE(A_STR) < 18) num = (rn2(4) ? 1 : rnd(6) );
-	    else if (ABASE(A_STR) < STR18(85)) num = rnd(10);
+	    if(ABASE(A_STR) < STR18(85)) num = (rn2(4) ? 1 : rnd(6) );
 	}
 	(void) adjattrib(A_STR, (otmp && otmp->cursed) ? -num : num, TRUE);
 }
@@ -469,9 +468,9 @@ exerper()
 	if(!(moves % 10)) {
 		/* Hunger Checks */
 
-		int hs = (YouHunger > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : 1000)) ? SATIATED :
-			 (YouHunger > 150) ? NOT_HUNGRY :
-			 (YouHunger > 50) ? HUNGRY :
+		int hs = (YouHunger > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : get_uhungermax()/2)) ? SATIATED :
+			 (YouHunger > 150*get_uhungersizemod()) ? NOT_HUNGRY :
+			 (YouHunger > 50*get_uhungersizemod()) ? HUNGRY :
 			 (YouHunger > 0) ? WEAK : FAINTING;
 
 #ifdef DEBUG

@@ -923,7 +923,6 @@ extern long int_spirits; /*Defined in sounds.c*/
 extern long wis_spirits; /*Defined in sounds.c*/
 extern boolean barrage; /*Defined in dothrow.c*/
 extern boolean onlykicks; /*Defined in dokick.c*/
-extern const char *Velka, *Moloch, *Morgoth, *MolochLieutenant, *Silence, *Chaos, *DeepChaos, *tVoid, *Demiurge, *Sophia, *Other, *BlackMother, *Nodens, *DreadFracture, *AllInOne; /*defined in pray*/
 #define Upolyd (u.umonnum != u.umonster)
 
 #endif	/* YOU_H */

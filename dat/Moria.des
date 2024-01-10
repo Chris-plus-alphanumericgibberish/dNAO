@@ -117,6 +117,10 @@ DOOR:closed,(61,03)
 DOOR:closed,(66,02)
 DOOR:closed,(68,00)
 
+FORGE:(15,02)
+MONSTER:'h',"dwarf smith",(15,02),peaceful
+
+
 MAZE: "Dnb-loca", ' '
 FLAGS:hardfloor,noteleport
 
@@ -456,14 +460,16 @@ OBJECT:'[',"dwarvish roundshield",contained
 OBJECT:'[',"plate mail",contained
 OBJECT:'[',"shoes",contained
 CONTAINER:'(',"chest",(69,18)
-OBJECT:'+',random,random
+OBJECT:'+',random,contained
 OBJECT:'?',"resistance",contained
-OBJECT:'*',random,random
-OBJECT:'*',random,random
-OBJECT:'*',random,random
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
+
 # Watcher
 MONSTER:';',"Watcher in the Water",(10,19),hostile
 

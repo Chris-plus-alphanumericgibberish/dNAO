@@ -47,22 +47,6 @@ static void FDECL(god_gives_benefit,(ALIGNTYP_P));
  *	responsible for the theft of the Amulet from Marduk, the Creator.
  *	Moloch is unaligned.
  */
-//definition of externs in you.h
-const char	*Velka = "Velka, Goddess of Sin";
-const char	*Moloch = "Moloch";
-const char	*Morgoth = "Melkor";
-const char	*MolochLieutenant = "Moloch, lieutenant of Melkor";
-const char	*Silence = "The Silence";
-const char	*Chaos = "Chaos";
-const char	*DeepChaos = "Chaos, with Cosmos in chains";
-const char	*tVoid = "the void";
-const char	*Demiurge = "Yaldabaoth";
-const char	*Sophia = "Pistis Sophia";
-const char	*Other = "an alien god";
-const char	*BlackMother = "the Black Mother";
-const char	*Nodens = "Nodens";
-const char	*DreadFracture = "the Dread Fracture";
-const char	*AllInOne = "Yog-Sothoth";
 
 static const char *godvoices[] = {
     "booms out",

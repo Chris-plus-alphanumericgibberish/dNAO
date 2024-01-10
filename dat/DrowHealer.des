@@ -1085,6 +1085,9 @@ OBJECT:'=',"levitation",contained
 OBJECT:'!',"levitation",contained
 OBJECT:'!',"levitation",contained
 OBJECT:'!',"levitation",contained
+OBJECT:'*',"chunk of fossil dark",random
+OBJECT[50%]:'*',"chunk of fossil dark",random
+OBJECT[10%]:'*',"chunk of fossil dark",random
 
 MONSTER:'h',"duergar",random
 MONSTER:'h',"duergar",random
@@ -1574,6 +1577,7 @@ MONSTER: 'h', "mind flayer", random
 ROOM: "ordinary" , unlit, random, random, random
 OBJECT: random, random, random
 OBJECT: random,random,random
+OBJECT:'*',"chunk of fossil dark",random
 MONSTER: 'h', "edderkop", random
 MONSTER: 'h', "edderkop", random
 MONSTER: 'h', "edderkop", random

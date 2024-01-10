@@ -736,6 +736,24 @@ boolean on, silently;
 		newsym(mon->mx, mon->my);
 }
 
+int
+shield_ac_mon(mon, obj)
+struct monst *mon;
+struct obj *obj;
+{
+	int shield_ac = 0;
+	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+	if(mon_knight(mon)){
+		if(mon->m_lev >= 28)
+			shield_ac += 8;
+		else if(mon->m_lev >= 14)
+			shield_ac += 3;
+		else
+			shield_ac += 1;
+	}
+	return shield_ac;
+}
+
 int 
 base_mac(mon)
 struct monst *mon;
@@ -930,7 +948,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -968,7 +986,7 @@ struct monst *mon;
 			base -= 5;
 		}
 	}
-	if(!mon->mcan){
+	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
 			base -= (32-u.uinsight)/2;
@@ -1040,7 +1058,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -1103,7 +1121,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -1185,7 +1203,7 @@ struct monst *mon;
 		base += 10;
 	
 
-	if(!mon->mcan){
+	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		int dr = 0;
 #define m_bdr mon->data->spe_bdr
 #define m_ldr mon->data->spe_ldr
@@ -1423,7 +1441,7 @@ int depth;
 			nat_mdr += 5;
 		}
 	}
-	if (!mon->mcan) {
+	if (!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)) {
 		switch (slot)
 		{
 		case UPPER_TORSO_DR: bas_mdr += mon->data->spe_bdr; break;
@@ -1981,12 +1999,25 @@ boolean polyspot;
 				if (polyspot) bypass_obj(otmp);
 				m_lose_armor(mon, otmp);
 			} else {
-				if (vis)
-				pline("%s %s tears apart!", s_suffix(Monnam(mon)),
-					cloak_simple_name(otmp));
-				else
-				You_hear("a ripping sound.");
-				m_useup(mon, otmp);
+				if(otmp->otyp == MUMMY_WRAPPING || otmp->otyp == PRAYER_WARDED_WRAPPING){
+					if (vis)
+						pline("%s %s tears apart!", s_suffix(Monnam(mon)),
+							cloak_simple_name(otmp));
+					else
+						You_hear("a ripping sound.");
+					m_useup(mon, otmp);
+				}
+				else {
+					if (vis)
+						pline("%s %s pops open!", s_suffix(Monnam(mon)),
+							cloak_simple_name(otmp));
+					else
+						You_hear("a tearing sound.");
+					if(!otmp->oeroded3)
+						otmp->oeroded3 = 1;
+					if (polyspot) bypass_obj(otmp);
+					m_lose_armor(mon, otmp);
+				}
 			}
 		}
 	}

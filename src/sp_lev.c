@@ -1996,6 +1996,8 @@ default_case:
 
 			stuff = mksobj(CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
 			stuff->objsize = MZ_TINY;
+			set_material_gm(stuff, GEMSTONE);
+			set_submat(stuff, DIAMOND);
 			int armors[] = {CRYSTAL_BOOTS, GAUNTLETS_OF_POWER, CRYSTAL_PLATE_MAIL, CLOAK_OF_MAGIC_RESISTANCE, CRYSTAL_HELM, SHIELD_OF_REFLECTION, CRYSTAL_SWORD};
 			struct obj *armor;
 			for(int i =  0; i < SIZE(armors); i++){

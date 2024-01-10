@@ -785,6 +785,32 @@ unsigned int type;
 			break;
 		}
 	break;
+	case PM_SHADOWSMITH:
+		switch(clrc_spell_power){
+			default:
+				return OPEN_WOUNDS;
+			break;
+			case 0:
+			case 2:
+			case 4:
+				return BLIND_YOU;
+			break;
+			case 1:
+			case 3:
+			case 5:
+			case 7:
+				return DARKNESS;
+			break;
+			case 20:
+			case 22:
+			case 24:
+				return DRAIN_LIFE;
+			break;
+			case 29:
+				return DEATH_TOUCH;
+			break;
+		}
+	break;
 	case PM_WARRIOR_OF_SUNLIGHT:
 		switch (rn2(mtmp->m_lev-10)) {
 			default:/* 15 -> 19*/
@@ -1210,6 +1236,22 @@ unsigned int type;
 			default:
 				return CURE_SELF;
 		}
+	   break;
+	case PM_FIRRE_ELADRIN:
+			switch (rnd(6)) {
+				case 1:
+					return FIRE_PILLAR;
+				case 2:
+					return LIGHTNING;
+				case 3:
+					return PARALYZE;
+				case 4:
+					return CURE_SELF;
+				case 5:
+					return RECOVER;
+				case 6:
+					return MON_FIRA;
+			}
 	   break;
 	case PM_GAE_ELADRIN:
 		switch (rnd(4)) {
@@ -2167,6 +2209,7 @@ int tary;
 		(u.uen < mlev(magr))
 		) : (
 		(magr->mcan) ||
+		(magr->mtyp == PM_SHADOWSMITH && dimness(magr->mx,magr->my) <= 0) ||
 		(magr->mspec_used && !nospellcooldowns_mon(magr)) ||
 		(mlev(magr) == 0) ||
 		(youdef && Invulnerable) ||
@@ -2297,6 +2340,8 @@ int tary;
 		}
 	}
 	else {
+		if(magr->mrage && magr->mberserk)
+			spell_skill /= 2;
 		if(magr->mformication || magr->mscorpions)
 			spell_skill /= 2;
 		if(magr->msciaphilia && unshadowed_square(x(magr), y(magr)))

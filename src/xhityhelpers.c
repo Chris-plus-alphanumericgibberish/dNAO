@@ -1477,6 +1477,17 @@ struct obj * otmp;
 				use_skill(P_KNI_SACRED, 1);
 			}
 		}
+		else if(otmp->where == OBJ_MINVENT){
+			struct monst *magr = otmp->ocarry;
+			if(magr && mon_knight(magr) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
+				if(mlev(magr) >= 28)
+					dmg += vd(6, 8);
+				else if(mlev(magr) >= 21)
+					dmg += vd(3, 8);
+				else 
+					dmg += vd(1, 8);
+			}
+		}
 
 		/* special cases that do affect dice */
 		if (otmp->oartifact == ART_AMHIMITL)
