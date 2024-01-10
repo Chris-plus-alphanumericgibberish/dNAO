@@ -6205,60 +6205,59 @@ mkshop()
 #ifndef MAC
 		ep = nh_getenv("SHOPTYPE");
 		if(ep){
-			if(*ep == 'z' || *ep == 'Z'){
-				mkzoo(ZOO);
+			switch(*ep){
+				case 'z':
+				case 'Z':
+					mkzoo(ZOO);
 				return;
-			}
-			if(*ep == 'm' || *ep == 'M'){
-				mkzoo(MORGUE);
+				case 'm':
+				case 'M':
+					mkzoo(MORGUE);
 				return;
-			}
-			if(*ep == 'b' || *ep == 'B'){
-				mkzoo(BEEHIVE);
+				case 'b':
+				case 'B':
+					mkzoo(BEEHIVE);
 				return;
-			}
-			if(*ep == 't' || *ep == 'T' || *ep == '\\'){
-				mkzoo(COURT);
+				case 't':
+				case 'T':
+				case '\\':
+					mkzoo(COURT);
 				return;
-			}
-			if(*ep == 's' || *ep == 'S'){
-				mkzoo(BARRACKS);
+				case 's':
+				case 'S':
+					mkzoo(BARRACKS);
 				return;
-			}
-			if(*ep == 'a' || *ep == 'A'){
-				mkzoo(ANTHOLE);
+				case 'a':
+				case 'A':
+					mkzoo(ANTHOLE);
 				return;
-			}
-			if(*ep == 'c' || *ep == 'C'){
-				mkzoo(COCKNEST);
+				case 'c':
+				case 'C':
+					mkzoo(COCKNEST);
 				return;
-			}
-			if(*ep == 'l' || *ep == 'L'){
-				mkzoo(LEPREHALL);
+				case 'l':
+				case 'L':
+					mkzoo(LEPREHALL);
 				return;
-			}
-			if(*ep == 'o' || *ep == 'O'){
-				mkpoolroom();
+				case 'o':
+				case 'O':
+					mkpoolroom();
 				return;
-			}
-			if(*ep == '_'){
-				mktemple();
+				case '_':
+					mktemple();
 				return;
-			}
-			if(*ep == 'n'){
-				mkgarden((struct mkroom *)0);
+				case 'n':
+					mkgarden((struct mkroom *)0);
 				return;
-			}
-			if(*ep == '\''){
-				mklibrary((struct mkroom *)0);
+				case '\'':
+					mklibrary((struct mkroom *)0);
 				return;
-			}
-			if(*ep == '}'){
-				mkswamp();
+				case '}':
+					mkswamp();
 				return;
-			}
-			if(*ep == 'w' || *ep == 'W'){
-				mkisland();
+				case 'w':
+				case 'W':
+					mkisland();
 				return;
 			}
 			/* note: shops >= UNIQUESHOP don't have valid class symbols, nor are generated randomly */
@@ -6268,6 +6267,8 @@ mkshop()
 				    goto gottype;
 			if(*ep == 'g' || *ep == 'G')
 				i = 0;
+			else if(*ep == 'u' || *ep == 'U')
+				i = 10;
 			else
 				i = -1;
 		}

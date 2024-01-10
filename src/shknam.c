@@ -256,39 +256,38 @@ const struct shclass shtypes[] = {
 #ifdef BARD
 	{"general store", GENERALSHOP, 41,
 #else
-	{"general store", GENERALSHOP, 44,
+	{"general store", GENERALSHOP, 44, //0
 #endif
 	    D_SHOP, {{100, RANDOM_CLASS}, {0, 0}, {0, 0}}, shkgeneral},
-	{"used armor dealership", ARMORSHOP, 14,
+	{"used armor dealership", ARMORSHOP, 14, //1
 	    D_SHOP, {{90, ARMOR_CLASS}, {10, WEAPON_CLASS}, {0, 0}},
 	     shkarmors},
-	{"second-hand bookstore", SCROLLSHOP, 10, D_SHOP,
+	{"second-hand bookstore", SCROLLSHOP, 10, D_SHOP, //2
 	    {{90, SCROLL_CLASS}, {10, SPBOOK_CLASS}, {0, 0}}, shkbooks},
-	{"liquor emporium", POTIONSHOP, 10, D_SHOP,
+	{"liquor emporium", POTIONSHOP, 10, D_SHOP, //3
 	    {{100, POTION_CLASS}, {0, 0}, {0, 0}}, shkliquors},
-	{"antique weapons outlet", WEAPONSHOP, 5, D_SHOP,
+	{"antique weapons outlet", WEAPONSHOP, 5, D_SHOP, //4
 	    {{90, WEAPON_CLASS}, {10, ARMOR_CLASS}, {0, 0}}, shkweapons},
-	{"delicatessen", FOODSHOP, 5, D_SHOP,
+	{"delicatessen", FOODSHOP, 5, D_SHOP, //5
 	    {{83, FOOD_CLASS}, {5, -POT_FRUIT_JUICE}, {4, -POT_BOOZE},
 	     {5, -POT_WATER}, {3, -ICE_BOX}}, shkfoods},
-	{"jewelers", RINGSHOP, 3, D_SHOP,
+	{"jewelers", RINGSHOP, 3, D_SHOP, //6
 	    {{85, RING_CLASS}, {10, GEM_CLASS}, {5, AMULET_CLASS}, {0, 0}},
 	    shkrings},
-	{"quality apparel and accessories", WANDSHOP, 3, D_SHOP,
+	{"quality apparel and accessories", WANDSHOP, 3, D_SHOP, //7
 	    {{90, WAND_CLASS}, {5, -GLOVES}, {5, -ELVEN_CLOAK}, {0, 0}},
 	     shkwands},
-	{"hardware store", TOOLSHOP, 3, D_SHOP,
+	{"hardware store", TOOLSHOP, 3, D_SHOP, //8
 	    {{100, TOOL_CLASS}, {0, 0}, {0, 0}}, shktools},
 	/* Actually shktools is ignored; the code specifically chooses a
 	 * random implementor name (along with candle shops having
 	 * random shopkeepers)
 	 */
-	{"rare books", BOOKSHOP, 3, D_SHOP,
+	{"rare books", BOOKSHOP, 3, D_SHOP, //9
 	    {{90, SPBOOK_CLASS}, {10, SCROLL_CLASS}, {0, 0}}, shkbooks},
 #ifdef BARD
-	{"music shop", MUSICSHOP, 3, D_SHOP,
-	    {{32, -FLUTE}, {32, -HARP}, {32, -DRUM}, 
-	     {2, -MAGIC_HARP}, {2, -MAGIC_FLUTE}},
+	{"music shop", MUSICSHOP, 3, D_SHOP, //10
+	    {{100, TOOL_CLASS}, {0, 0}},
 	     shkmusic},
 #endif
 	/* Shops below this point are "unique".  That is they must all have a
@@ -343,6 +342,18 @@ const struct shclass shtypes[] = {
 		},
 	shknaiad},
 	{(char *)0, 0, 0, 0, {{0, 0}, {0, 0}, {0, 0}}, 0}
+};
+
+const int music_instruments[][2] = {
+	{FLUTE, 4},
+	{MAGIC_FLUTE, 2},
+	{TOOLED_HORN, 5},
+	{FROST_HORN, 2},
+	{FIRE_HORN, 2},
+	{HARP, 4},
+	{MAGIC_HARP, 2},
+	{DRUM, 4},
+	{DRUM_OF_EARTHQUAKE, 2},
 };
 
 const int valavi_armors[] = {
@@ -482,6 +493,20 @@ int sx, sy;
 		atype = get_shop_item(shp - shtypes);
 		if (atype < 0){
 			curobj = mksobj_at(-atype, sx, sy, MKOBJ_ARTIF);
+		}
+		else if(shp->shoptype == MUSICSHOP && atype == TOOL_CLASS){
+			int chance = 0;
+			int i;
+			for(i=0; i<SIZE(music_instruments); i++)
+				chance += music_instruments[i][1];
+			chance = rn2(chance);
+			for(i=0; i<SIZE(music_instruments); i++){
+				if(chance >= music_instruments[i][1])
+					chance -= music_instruments[i][1];
+				else
+					break;
+			}
+			curobj = mksobj_at(music_instruments[i][0], sx, sy, MKOBJ_ARTIF);
 		}
 		else {
 			curobj = mkobj_at(atype, sx, sy, MKOBJ_ARTIF);
