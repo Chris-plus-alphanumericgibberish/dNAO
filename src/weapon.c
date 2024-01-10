@@ -925,7 +925,7 @@ struct monst *magr;
 		else {
 			/* equivalent to small mace */
 			ocn = 1;
-			ocd = 4;
+			ocd = 8;
 			flat = (large ? 0 : 1);
 		}
 	}
