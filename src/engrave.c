@@ -2321,6 +2321,18 @@ int mode;
 				mvitals[PM_ACERERAK].died > 0 && (otmp->ovar1_seals & SEAL_ANDREALPHUS)
 		) {
 			type = BURN;
+		} else if (is_lightsaber(otmp)) {
+			if (litsaber(otmp)) {
+				type = BURN;
+				/* currently the only weapon-class lightsaber */
+				if (!Blind && otmp->otyp == KAMEREL_VAJRA) {
+					Sprintf(post_engr_text,
+						"Lightning arcs from the %s.",
+						OBJ_DESCR(objects[otmp->otyp]));
+					doblind = TRUE;
+				}
+			}
+			else Your("%s is deactivated!", aobjnam(otmp,"are"));
 		} else if (is_blade(otmp)) {
 		    if ((int)otmp->spe > -3 
 			|| levl[u.ux][u.uy].typ == GRASS 

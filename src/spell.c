@@ -746,6 +746,8 @@ struct obj *spellbook;
 		if (RoSbook == READ_SPELL){
 			char qbuf[QBUFSZ];
 			Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
+			/* identify the book in case you learnt the spell from an artifact book or aphanactonan archive */
+			makeknown(booktype);
 
 			for (int i = 0; i < MAXSPELL; i++)
 				if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')

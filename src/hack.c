@@ -1604,6 +1604,8 @@ domove()
 	     * boots and your steed matters.
 	     */
 	    boolean safe_air = Levitation || Flying;
+	    /* The behaviour of air varies between different levels.  */
+	    boolean safe_air_level = In_endgame(&u.uz) || (In_FF_quest(&u.uz) && Is_chaos_level(&u.uz));
 	    boolean safe_inwater = (Amphibious || Swimming)
 		&& !(u.sealsActive&SEAL_OSE) && Waterproof && !level.flags.lethe &&
 		/* If you try to ride into water while riding a non-flying steed, you'll fall off.  */
@@ -1625,7 +1627,7 @@ domove()
 	    boolean safe_lava = safe_air ||	(!u.usteed &&
 			(likes_lava(youracedata) || (visible_ww && Fire_resistance && (!uarmf || uarmf->oerodeproof || !is_flammable(uarmf)))));
 
-	    if ((!safe_air && levl[x][y].typ == AIR && levl[u.ux][u.uy].typ != AIR) ||
+	    if ((!safe_air && !safe_air_level && levl[x][y].typ == AIR && levl[u.ux][u.uy].typ != AIR) ||
 			(!safe_water && is_pool(x, y, FALSE) && !is_pool(u.ux, u.uy, FALSE)) ||
 			(!safe_3dwater && is_3dwater(x, y) && !is_3dwater(u.ux, u.uy)) ||
 			(!safe_lava && is_lava(x, y) && !is_lava(u.ux, u.uy))
