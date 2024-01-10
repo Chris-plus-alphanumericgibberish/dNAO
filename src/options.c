@@ -1634,6 +1634,10 @@ char * str;
 		template = POISON_TEMPLATE;
 	else if (strstri(s_temp, "moly") == s_temp)
 		template = MOLY_TEMPLATE;
+	else if (strstri(s_temp, "cordyceps") == s_temp)
+		template = CORDYCEPS;
+	else if (strstri(s_temp, "spore") == s_temp)
+		template = SPORE_ZOMBIE;
 	else
 		return FALSE;
 

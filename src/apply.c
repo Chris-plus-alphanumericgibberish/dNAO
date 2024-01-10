@@ -935,7 +935,7 @@ struct obj **obj_p;
 					pline("%s", Hallucination ?
 						  "Yow!  The mirror stares back!" :
 						  "Yikes!  You've frozen yourself!");
-					nomul(-rnd((MAXULEV+6) - u.ulevel), "frozen by your own reflection");
+					nomul(-d(2,6), "frozen by your own reflection");
 					vis = FALSE;
 				}
 				else {
