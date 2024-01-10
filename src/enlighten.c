@@ -100,7 +100,8 @@ char *outbuf;
 	bonus = (incamt > 0) ? "bonus" : "penalty";
 	/* "bonus to hit" vs "damage bonus" */
 	if (!strcmp(inctyp, "damage") || !strcmp(inctyp, "spell damage") ||
-	    !strcmp(inctyp, "AC") || !strcmp(inctyp, "protection")) {
+	    !strcmp(inctyp, "AC") || !strcmp(inctyp, "protection") ||
+		!strcmp(inctyp, "morale")) {
 	    const char *ctmp = inctyp;
 	    inctyp = bonus;
 	    bonus = ctmp;
@@ -461,6 +462,8 @@ boolean dumping;
 		Sprintf(buf, "%d weakness from being studied", u.ustdy);
 		you_have(buf);
 	}
+	
+	if(u.uencouraged) you_have(enlght_combatinc("morale", u.uencouraged, 1, buf));
 	
 	if(u.sealsActive || u.specialSealsActive){
 		int i,j,numBound,numFound=0;

@@ -328,8 +328,10 @@ struct you {
 #define FFORM_LISTSIZE	(LAST_FFORM/32 + 1)
 	unsigned long int fightingForm[FFORM_LISTSIZE];/* special properties */
 	int ueldritch_style;
-	boolean uavoid_passives;
-	boolean uavoid_msplcast;
+	Bitfield(uavoid_passives,1);
+	Bitfield(uavoid_msplcast,1);
+	Bitfield(uavoid_grabattk,1);
+	Bitfield(uavoid_englattk,1);
 	int umystic;	/*Monk mystic attacks active*/
 #define monk_style_active(style) (u.umystic & (1 << (style-1)))
 #define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1 << (style-1)))
