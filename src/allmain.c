@@ -1552,10 +1552,16 @@ moveloop()
 			if(mtmp->mamnesia){
 				if(mtmp->isshk){
 					make_happy_shk(mtmp, FALSE);
+					ESHK(mtmp)->pbanned = FALSE;
+					ESHK(mtmp)->signspotted = 0;
 				}
 				else {
 					mtmp->mpeaceful = TRUE;
 					mtmp->mtame = FALSE;
+				}
+				if(mtmp->ispriest){
+					EPRI(mtmp)->pbanned = FALSE;
+					EPRI(mtmp)->signspotted = 0;
 				}
 				mtmp->mamnesia = FALSE;
 				newsym(mtmp->mx, mtmp->my);
@@ -1651,10 +1657,16 @@ moveloop()
 				if(mtmp->mamnesia){
 					if(mtmp->isshk){
 						make_happy_shk(mtmp, FALSE);
+						ESHK(mtmp)->pbanned = FALSE;
+						ESHK(mtmp)->signspotted = 0;
 					}
 					else {
 						mtmp->mpeaceful = TRUE;
 						mtmp->mtame = FALSE;
+					}
+					if(mtmp->ispriest){
+						EPRI(mtmp)->pbanned = FALSE;
+						EPRI(mtmp)->signspotted = 0;
 					}
 					mtmp->mamnesia = FALSE;
 					newsym(mtmp->mx, mtmp->my);
@@ -3056,10 +3068,16 @@ karemade:
 		if(mtmp->mamnesia){
 			if(mtmp->isshk){
 				make_happy_shk(mtmp, FALSE);
+				ESHK(mtmp)->pbanned = FALSE;
+				ESHK(mtmp)->signspotted = 0;
 			}
 			else {
 				mtmp->mpeaceful = TRUE;
 				mtmp->mtame = FALSE;
+			}
+			if(mtmp->ispriest){
+				EPRI(mtmp)->pbanned = FALSE;
+				EPRI(mtmp)->signspotted = 0;
 			}
 			mtmp->mamnesia = FALSE;
 			newsym(mtmp->mx, mtmp->my);

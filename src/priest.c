@@ -696,8 +696,6 @@ register struct monst *priest;
 	if(priest->mflee || (!priest->ispriest && coaligned && strayed)) {
 	    pline("%s doesn't want anything to do with you!",
 				Monnam(priest));
-	    priest->mpeaceful = 0;
-		newsym(priest->mx, priest->my);
 	    return;
 	}
 

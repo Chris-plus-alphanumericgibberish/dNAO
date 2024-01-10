@@ -1622,6 +1622,8 @@ forget_map(howmuch)
 {
 	register int zx, zy;
 
+	return; /* Disable amnesia interface screw */
+
 	if (In_sokoban(&u.uz))
 	    return;
 
@@ -1641,6 +1643,8 @@ void
 forget_traps()
 {
 	register struct trap *trap;
+
+	return; /* Disable amnesia interface screw */
 
 	/* forget all traps (except the one the hero is in :-) */
 	for (trap = ftrap; trap; trap = trap->ntrap)
@@ -1662,6 +1666,8 @@ forget_levels(percent)
 	int i, count;
 	xchar  maxl, this_lev;
 	int indices[MAXLINFO];
+
+	return; /* Disable amnesia interface screw */
 
 	if (percent == 0) return;
 
