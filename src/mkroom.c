@@ -7314,7 +7314,7 @@ struct mkroom *sroom;
 					break;
 					case 3:
 						otmp = mksobj_at(SLIME_MOLD, sx, sy, NO_MKOBJ_FLAGS);
-						otmp->spe = fruitadd("honey drop");
+						otmp->spe = fruitadd("honeydew");
 					break;
 					case 4:
 						otmp = mksobj_at(TIN, sx, sy, NO_MKOBJ_FLAGS);
