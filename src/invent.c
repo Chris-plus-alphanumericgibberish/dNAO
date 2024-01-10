@@ -3506,7 +3506,13 @@ winid *datawin;
 				case EGG:
 				case CREAM_PIE:
 				case CANDY_BAR:
+				case HONEYCOMB:
 				case LUMP_OF_ROYAL_JELLY:
+				case LUMP_OF_SOLDIER_S_JELLY:
+				case LUMP_OF_DANCER_S_JELLY:
+				case LUMP_OF_PHILOSOPHER_S_JELLY:
+				case LUMP_OF_PRIESTESS_S_JELLY:
+				case LUMP_OF_RHETOR_S_JELLY:
 					OBJPUTSTR("Is vegetarian but not vegan.");
 					break;
 				default:
