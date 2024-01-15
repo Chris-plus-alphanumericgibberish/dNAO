@@ -15202,6 +15202,9 @@ int vis;						/* True if action is at all visible to the player */
 		if (phase_armor){
 			dr = (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
 		}
+		else if(!attk){
+			dr = (youdef ? roll_udr(magr, AT_ANY) : roll_mdr(mdef, magr, AT_ANY));
+		}
 		else {
 			dr = (youdef ? roll_udr(magr, attk->aatyp) : roll_mdr(mdef, magr, attk->aatyp));
 		}
