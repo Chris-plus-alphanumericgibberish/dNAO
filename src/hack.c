@@ -1603,7 +1603,7 @@ domove()
 	     * that lava is allowed if you have wwalking and fireproof
 	     * boots and your steed matters.
 	     */
-	    boolean safe_air = Levitation || Flying;
+	    boolean safe_air = Levitation || Flying || Weightless || Is_astralevel(&u.uz);
 	    boolean safe_inwater = (Amphibious || Swimming)
 		&& !(u.sealsActive&SEAL_OSE) && Waterproof && !level.flags.lethe &&
 		/* If you try to ride into water while riding a non-flying steed, you'll fall off.  */
@@ -2739,7 +2739,7 @@ const char *msg_override;
 	if (*nomovemsg) pline1(nomovemsg);
 	nomovemsg = 0;
 	struct obj *puzzle = get_most_complete_puzzle();
-	if(puzzle){
+	if(puzzle && u.usleep){
 		if(u.puzzle_time && (monstermoves - u.usleep) >= u.puzzle_time){
 			int difficulty = puzzle->ovar1_puzzle_steps + 1;
 			difficulty *= 6;
