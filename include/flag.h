@@ -346,6 +346,7 @@ struct instance_flags {
 	boolean  paranoid_quit; /* Ask for 'yes' when quitting */
 	boolean  paranoid_remove; /* Always show menu for 'T' and 'R' */
 	boolean  paranoid_swim; /* Require 'm' prefix to move into water/lava/air unless it's safe */
+	boolean  no_forget_map; /* Require 'm' prefix to move into water/lava/air unless it's safe */
 #endif
 #ifdef USE_TILES
 	boolean  vt_nethack;

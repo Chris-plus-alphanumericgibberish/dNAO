@@ -1621,7 +1621,10 @@ forget_map(howmuch)
 	int howmuch;
 {
 	register int zx, zy;
-
+	
+	if(iflags.no_forget_map)
+		return;
+	
 	if (In_sokoban(&u.uz))
 	    return;
 
@@ -1664,6 +1667,9 @@ forget_levels(percent)
 	int indices[MAXLINFO];
 
 	if (percent == 0) return;
+
+	if(iflags.no_forget_map)
+		return;
 
 	if (percent <= 0 || percent > 100) {
 	    impossible("forget_levels: bad percent %d", percent);
@@ -1754,7 +1760,7 @@ int howmuch;
 	if (Punished) u.bc_felt = 0;	/* forget felt ball&chain */
 
 	forget_map(howmuch);
-	forget_traps();
+	// forget_traps();
 	
 	//Silently reduce the doubt timer (itimeout_incr handles negative timeouts)
 	if(HDoubt){

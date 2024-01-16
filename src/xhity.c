@@ -16133,7 +16133,7 @@ int vis;						/* True if action is at all visible to the player */
 					}
 					else {
 						forget(1);	/* lose 1% of memory per point lost*/
-						forget_traps();		/* lose memory of all traps*/
+						// forget_traps();		/* lose memory of all traps*/
 					}
 				}
 				else {

@@ -1614,7 +1614,7 @@ misc_levelport:
 
 	if (level_info[new_ledger].flags & FORGOTTEN) {
 	    forget_map(100);	/* forget the map */
-	    forget_traps();		/* forget all traps too */
+	    // forget_traps();		/* forget all traps too */
 	    familiar = TRUE;
 	    level_info[new_ledger].flags &= ~FORGOTTEN;
 	}
