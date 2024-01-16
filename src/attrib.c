@@ -1447,6 +1447,7 @@ int delta;
 		return;
 	if(discover || wizard)
 		pline("Insight change: %d + %d", u.uinsight, delta);
+	reset_rndmonst(NON_PM);
 	u.uinsight += delta;
 	if(u.uinsight < 0)
 		u.uinsight = 0;
