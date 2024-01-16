@@ -2201,6 +2201,7 @@ register struct obj *obj;
 		crystal_skull_overweight(current_container, obj)
 		|| obj->otyp == TREPHINATION_KIT
 		|| ensouled_item(obj)
+		|| get_ox(obj, OX_ESUM)
 		|| duplicate_item(current_container, obj)
 		)
 	) {
