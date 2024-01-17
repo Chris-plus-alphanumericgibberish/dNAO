@@ -941,18 +941,15 @@ int oldlevel, newlevel;
 			lose_weapon_skill(skillslots);
 		}
 	}
-	int message = 0;
-	if ((oldlevel >= 14 && newlevel < 14) || (newlevel >= 14 && oldlevel < 14)){
+	boolean message = FALSE;
+	if (newlevel >= 14 && oldlevel < 14){
 		for (int i = 0; i < P_NUM_SKILLS; i++) {
 			if (roleSkill(i)){
-				message = oldlevel - newlevel;
-				if (oldlevel > newlevel) restrict_weapon_skill(i);
-				else expert_weapon_skill(i);
+				message = TRUE;
+				expert_weapon_skill(i);
 			}
 	    }
-		if (message != 0){
-			You_feel("your skills %s!", (message > 0) ? "slipping away" : "increasing");
-		}
+		if (message) You_feel("like you've unlocked new potential!");
 	}
 }
 
