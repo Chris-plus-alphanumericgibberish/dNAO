@@ -454,6 +454,7 @@ int dmg;
 		}
 		if(!uarmc){
 		 if(uwep && uwep->oartifact==ART_TENSA_ZANGETSU){
+			n--;
 			You_feel("the tentacles tear uselessly at your regenerating shihakusho.");
 		 }
 		 else if(uarm && n){
