@@ -1003,7 +1003,7 @@ unsigned long int *oprop_list;
 
 #define ADD_WEAPON_ARMOR_OPROP(otmp, oproptoken) \
 	add_oprop(otmp, OPROP_##oproptoken);\
-	if(accepts_weapon_oprops(otmp)){\
+	if(accepts_weapon_oprops(otmp) || otmp->oclass == RING_CLASS){\
 		if(rn2(3))\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
 		else\
@@ -1013,7 +1013,7 @@ unsigned long int *oprop_list;
 #define ADD_WEAPON_ARMOR_OPROPS(otmp, oproptoken1, oproptoken2) \
 	add_oprop(otmp, OPROP_##oproptoken1);\
 	add_oprop(otmp, OPROP_##oproptoken2);\
-	if(accepts_weapon_oprops(otmp)){\
+	if(accepts_weapon_oprops(otmp) || otmp->oclass == RING_CLASS){\
 		if(rn2(3)){\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken1##W);\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken2##W);\
@@ -1031,7 +1031,7 @@ unsigned long int *oprop_list;
 		add_oprop(otmp, OPROP_LESSER_##oproptoken##W);
 
 #define ADD_WEAK_OR_STRONG_OPROPS(otmp, oproptoken1, oproptoken2) \
-	if(rn2(4)){\
+	if(otmp->oclass != RING_CLASS && rn2(4)){\
 		add_oprop(otmp, OPROP_##oproptoken1##W);\
 		add_oprop(otmp, OPROP_##oproptoken2##W);\
 	}\
@@ -1143,6 +1143,32 @@ struct obj *otmp;	/* existing object */
 			add_oprop(otmp, OPROP_PSECW);
 		}
 	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(!rn2(3)){
+			ADD_WEAPON_ARMOR_OPROPS(otmp, UNHY, HOLY);
+		}
+		if(rn2(3)) switch(rn2(4)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+		}
+		else if(rn2(3)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+		}
+		if(!rn2(8)){
+			add_oprop(otmp, OPROP_HEAL);
+		}
+	}
 	return otmp;
 }
 
@@ -1243,6 +1269,32 @@ struct obj *otmp;	/* existing object */
 		}
 		if(!rn2(20)){
 			add_oprop(otmp, OPROP_ASECW);
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(2)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		}
+		if(rn2(3)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+		}
+		if(rn2(3)) switch(rnd(3)){
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_LIFE);
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_HEAL);
 		}
 	}
 	return otmp;
@@ -1359,6 +1411,42 @@ struct obj *otmp;	/* existing object */
 			}
 		}
 	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(2)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		}
+		if(rn2(3)) switch(rnd(3)){
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+		}
+		else if(rn2(3)){
+			switch(rn2(3)){
+				case 0:
+					ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+				break;
+				case 1:
+					ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
+				break;
+				case 2:
+					ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+				break;
+			}
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_LIFE);
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_HEAL);
+		}
+	}
 	return otmp;
 }
 
@@ -1433,6 +1521,29 @@ struct obj *otmp;	/* existing object */
 			break;
 			case 7:
 				ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);
+			break;
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
 			break;
 		}
 	}
@@ -1533,6 +1644,29 @@ struct obj *otmp;	/* existing object */
 		}
 		if(!rn2(10)){
 			add_oprop(otmp, rn2(4) ? OPROP_SPIKED : OPROP_BLADED);
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+			break;
 		}
 	}
 	return otmp;
@@ -1717,6 +1851,52 @@ struct obj *otmp;	/* existing object */
 		break;
 		case 10:
 			ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+		break;
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		prop = rnd(13);
+		switch(prop)
+		{
+		case 1:
+			ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+		break;
+		case 2:
+			ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+		break;
+		case 3:
+			ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+		break;
+		case 4:
+			ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+		break;
+		case 5:
+			ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+		break;
+		case 6:
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+		break;
+		case 7:
+			ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
+		break;
+		case 8:
+			ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+		break;
+		case 9:
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		break;
+		case 10:
+			ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+		break;
+		case 11:
+			ADD_WEAK_OR_STRONG_OPROP(otmp, WATR);
+		break;
+		case 12:
+			ADD_WEAK_OR_STRONG_OPROP(otmp, PSIO);
+		break;
+		case 13:
+			add_oprop(otmp, OPROP_DRANW);
 		break;
 		}
 	}

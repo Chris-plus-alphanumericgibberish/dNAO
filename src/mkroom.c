@@ -490,9 +490,16 @@ mklolthvaultitem()
 		type = lolth_armor[rn2(SIZE(lolth_armor))];
 		sobj = TRUE;
 	}
-	else if(rn2(2)) {
+	else if(!rn2(3)) {
 		type = lolth_weapons[rn2(SIZE(lolth_weapons))];
 		sobj = TRUE;
+	}
+	else if(rn2(2)){
+		if(rn2(2)){
+			type = find_signet_ring();
+			sobj = TRUE;
+		}
+		else type = RING_CLASS;
 	}
 	else if(rn2(2))
 		type = SCOIN_CLASS;
