@@ -1940,7 +1940,19 @@ default_case:
 				stuff->spe = 2;
 				add_to_container(otmp, stuff);
 
-				default_add_2(TWO_HANDED_SWORD);
+				default_add_2(HIGH_ELVEN_WARSWORD);
+				set_material_gm(stuff, GREEN_STEEL);
+				add_oprop(stuff, OPROP_UNHYW);
+				add_oprop(stuff, OPROP_HOLYW);
+				add_oprop(stuff, OPROP_LIVEW);
+				add_oprop(stuff, OPROP_WRTHW);
+				add_oprop(stuff, OPROP_INSTW);
+
+				default_add_2(ORCISH_BOW);
+				add_oprop(stuff, OPROP_UNHYW);
+				add_oprop(stuff, OPROP_MORGW);
+				add_oprop(stuff, OPROP_VORPW);
+				add_oprop(stuff, OPROP_INSTW);
 			break;
 			case PM_YUKI_ONNA:
 				stuff = mksobj(SHOES, MKOBJ_NOINIT);

@@ -3059,6 +3059,7 @@ boolean past;
 			knows_object(find_signet_ring());
 		break;
 		case PM_ORC:
+			expert_weapon_skill(P_BOW);
 			expert_weapon_skill(P_SCIMITAR);
 			skilled_weapon_skill(P_TWO_HANDED_SWORD);
 			skilled_weapon_skill(P_RIDING);
@@ -3074,6 +3075,20 @@ boolean past;
 			knows_object(ORCISH_SHIELD);
 			knows_object(URUK_HAI_SHIELD);
 			knows_object(ORCISH_CLOAK);
+
+			knows_object(ELVEN_SHORT_SWORD);
+			knows_object(ELVEN_ARROW);
+			knows_object(ELVEN_BOW);
+			knows_object(ELVEN_SPEAR);
+			knows_object(ELVEN_DAGGER);
+			knows_object(ELVEN_BROADSWORD);
+			knows_object(ELVEN_MACE);
+			knows_object(ELVEN_LANCE);
+			knows_object(ELVEN_MITHRIL_COAT);
+			knows_object(ELVEN_HELM);
+			knows_object(ELVEN_SHIELD);
+			knows_object(ELVEN_BOOTS);
+			knows_object(ELVEN_CLOAK);
 		break;
 		case PM_YUKI_ONNA:
 			expert_weapon_skill(P_LONG_SWORD);
