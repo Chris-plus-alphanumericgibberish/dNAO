@@ -111,7 +111,7 @@ register struct obj *obj;
 #endif
 				&& !melee_polearms(youracedata)
 				&& obj->otyp != AKLYS
-				&& !check_oprop(obj, OPROP_CCLAW)
+				&& !is_cclub_able(obj)
 				)) :
 				!(is_weptool(obj) || obj->otyp == WIND_AND_FIRE_WHEELS);
 	} else

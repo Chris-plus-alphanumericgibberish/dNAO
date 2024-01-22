@@ -5057,7 +5057,7 @@ struct obj *wep;
 			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
 				wep->otyp = CLAWED_HAND;
 				xmeleehity(magr, mdef, &symbiote, &wep, -1, 0, FALSE);
-				wep->otyp = CLUB;
+				wep->otyp = wep->oartifact == ART_AMALGAMATED_SKIES ? TWO_HANDED_SWORD : CLUB;
 				if(DEADMONSTER(magr))
 					return; //oops!
 			}

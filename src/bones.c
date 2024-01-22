@@ -162,7 +162,7 @@ boolean restore;
 				    (mons[otmp->corpsenm].geno & G_UNIQ))
 				otmp->corpsenm = NON_PM;
 			} else if (otmp->otyp == CLAWED_HAND) {
-				otmp->otyp = CLUB;
+				otmp->otyp = otmp->oartifact == ART_AMALGAMATED_SKIES ? TWO_HANDED_SWORD : CLUB;
 			} else if (otmp->otyp == AMULET_OF_YENDOR) {
 			    /* no longer the real Amulet */
 			    otmp->otyp = FAKE_AMULET_OF_YENDOR;
