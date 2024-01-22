@@ -1673,6 +1673,39 @@ default_case:
 			}
 		}
 	}
+	if(otmp->otyp == CHAIN && otmp->spe == 1 && otmp->where == OBJ_FLOOR && Is_stronghold(&u.uz)){
+		struct obj *tmpo;
+		struct monst *mon;
+		mon = prisoner(PM_PSYCHOPOMP, otmp->ox, otmp->oy);
+		if(mon){
+			for(tmpo = fobj; tmpo; tmpo = tmpo->nobj){
+				if(tmpo->otyp == CHEST && (!tmpo->cobj || tmpo->cobj->otyp != RIN_WISHES)){
+					struct obj *obj;
+					for(obj = mon->minvent; obj; obj = mon->minvent){
+						mon->misc_worn_check &= ~obj->owornmask;
+						update_mon_intrinsics(mon, obj, FALSE, FALSE);
+						if (obj->owornmask & W_WEP){
+							setmnotwielded(mon,obj);
+							MON_NOWEP(mon);
+						}
+						if (obj->owornmask & W_SWAPWEP){
+							setmnotwielded(mon,obj);
+							MON_NOSWEP(mon);
+						}
+						obj->owornmask = 0L;
+						obj_extract_self(obj);
+						add_to_container(tmpo, obj);
+					}
+					break;
+				}
+			}
+			tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+			if(tmpo){
+				mon->entangled_otyp = SHACKLES;
+				mon->entangled_oid = tmpo->o_id;
+			}
+		}
+	}
 
 	// Madman's old stuff to reclaim
 	if(Is_real_container(otmp) && otmp->spe == 7){

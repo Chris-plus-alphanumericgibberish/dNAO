@@ -25,7 +25,6 @@ STATIC_DCL boolean FDECL(isbig, (struct mkroom *));
 STATIC_DCL int FDECL(int_sqrt, (int));
 STATIC_DCL boolean FDECL(issemispacious, (struct mkroom *));
 STATIC_DCL void NDECL(mkshop), FDECL(mkzoo,(int)), NDECL(mkswamp);
-STATIC_DCL struct monst *FDECL(prisoner,(int, int, int));
 STATIC_DCL void NDECL(mktemple);
 STATIC_DCL void NDECL(mkkamereltowers);
 STATIC_DCL void NDECL(mkminorspire);
@@ -6415,7 +6414,7 @@ int sx,sy;
 	return TRUE;
 }
 
-STATIC_OVL struct monst *
+struct monst *
 prisoner(kingtype, sx, sy)
 int kingtype;
 int sx,sy;
@@ -6780,6 +6779,41 @@ int sx,sy;
 			};
 			mtyp = ROLL_FROM(prisoners);
 		}break;
+		case PM_PSYCHOPOMP:{
+			int prisoners[] = {
+				PM_ELVENKING,
+				PM_ELVENQUEEN,
+				PM_UNEARTHLY_DROW,
+				PM_DROW_MATRON,
+				PM_ORC_OF_THE_AGES_OF_STARS,
+				PM_ORC_OF_THE_AGES_OF_STARS,
+				PM_DOKKALFAR_ETERNAL_MATRIARCH,
+				PM_DOKKALFAR_ETERNAL_MATRIARCH,
+				PM_BARBARIAN,
+				PM_HALF_DRAGON,
+				PM_HEALER,
+				PM_HEALER,
+				PM_KNIGHT,
+				PM_KNIGHT,
+				PM_MONK,
+				PM_MONK,
+				PM_NOBLEMAN,
+				PM_NOBLEWOMAN,
+				PM_PRIEST,
+				PM_PRIESTESS,
+				PM_RANGER,
+				PM_RANGER,
+				PM_ROGUE,
+				PM_ROGUE,
+				PM_SAMURAI,
+				PM_SAMURAI,
+				PM_VALKYRIE,
+				PM_WIZARD,
+				PM_DEMINYMPH,
+				PM_DEMINYMPH,
+			};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
 	}
 	if(mtyp == PM_DRACAE_ELADRIN){
 		if(dungeon_topology.eprecursor_typ != PRE_DRACAE){
@@ -6806,12 +6840,26 @@ int sx,sy;
 		}
 	}
 	if(mtyp != NON_PM){
-		int equipLevel = ((kingtype == PM_TITAN || kingtype == PM_EMBRACED_DROWESS || kingtype == PM_AVATAR_OF_LOLTH || kingtype == PM_DEEPEST_ONE || kingtype == PM_ORC_OF_THE_AGES_OF_STARS) ? MM_GOODEQUIP : 0);
-		if(is_mplayer(&mons[mtyp])){
-			mon = mk_mplayer(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+		if(kingtype == PM_PSYCHOPOMP){
+			if(is_mplayer(&mons[mtyp])){
+				mon = mk_mplayer(&mons[mtyp], sx, sy, MM_GOODEQUIP);
+			}
+			else {
+				mon = makemon(&mons[mtyp], sx, sy, MM_GOODEQUIP|MM_ENDGEQUIP);
+			}
 		}
 		else {
-			mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+			int equipLevel = ((kingtype == PM_TITAN
+				|| kingtype == PM_EMBRACED_DROWESS
+				|| kingtype == PM_AVATAR_OF_LOLTH
+				|| kingtype == PM_DEEPEST_ONE
+				|| kingtype == PM_ORC_OF_THE_AGES_OF_STARS) ? MM_GOODEQUIP : 0);
+			if(is_mplayer(&mons[mtyp])){
+				mon = mk_mplayer(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+			}
+			else {
+				mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+			}
 		}
 		if(mon){
 			if(mon->mtyp == PM_SURYA_DEVA){

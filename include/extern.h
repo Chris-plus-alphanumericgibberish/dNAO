@@ -1634,6 +1634,7 @@ E struct permonst *NDECL(mivaultmon);
 E void FDECL(save_rooms, (int));
 E void FDECL(rest_rooms, (int));
 E struct mkroom *FDECL(search_special, (SCHAR_P));
+E struct monst *FDECL(prisoner,(int, int, int));
 
 /* ### mon.c ### */
 

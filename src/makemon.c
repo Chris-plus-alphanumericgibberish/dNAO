@@ -27,9 +27,9 @@ STATIC_DCL int FDECL(align_shift, (struct permonst *));
 #endif /* OVL0 */
 STATIC_DCL struct permonst * NDECL(roguemonst);
 STATIC_DCL boolean FDECL(wrong_elem_type, (struct permonst *));
-STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int, boolean, int));
+STATIC_DCL void FDECL(m_initweap,(struct monst *, int, int, boolean, boolean, int));
 #ifdef OVL1
-STATIC_DCL void FDECL(m_initinv,(struct monst *, int, int, boolean));
+STATIC_DCL void FDECL(m_initinv,(struct monst *, int, int, boolean, boolean));
 #endif /* OVL1 */
 
 extern const int monstr[];
@@ -991,11 +991,12 @@ boolean goodequip;
 }
 
 STATIC_OVL void
-human_initweap(mtmp, mkobjflags, faction, goodequip)
+human_initweap(mtmp, mkobjflags, faction, goodequip, greatequip)
 register struct monst *mtmp;
 int mkobjflags;
 int faction;
 boolean goodequip;
+boolean greatequip;
 {
 	int mm = mtmp->mtyp;
 	int chance;
@@ -2743,6 +2744,72 @@ boolean goodequip;
 				set_material(otmp, MITHRIL);
 				otmp = mongets(mtmp, HIGH_ELVEN_WARSWORD, mkobjflags);
 				set_material(otmp, MITHRIL);
+			}
+			else if(greatequip){
+				otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+				if(otmp){
+					set_material_gm(otmp, MITHRIL);
+				}
+				(void) mongets(mtmp, HIGH_ELVEN_GAUNTLETS, mkobjflags);
+				(void) mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
+				otmp = mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+				if(otmp){
+					add_oprop(otmp, OPROP_MAGC);
+				}
+				(void) mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
+				(void)mongets(mtmp, (rn2(2) ? FLUTE : HARP), mkobjflags);
+				(void)mongets(mtmp, POT_STARLIGHT, mkobjflags);
+#define MK_SPECIAL(otmp) if(otmp && !otmp->oartifact){\
+	set_material_gm(otmp, MITHRIL);\
+	if(rn2(2)) otmp = mk_special(otmp);\
+	else if(rn2(4)) otmp = mk_minor_special(otmp);\
+}
+				switch (rn2(3)) {
+				case 0:
+					if (!rn2(4)){
+						otmp = mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+						if(otmp)
+							set_material_gm(otmp, MITHRIL);
+					}
+					else if (could_twoweap(ptr)){
+						otmp = mongets(mtmp, ELVEN_DAGGER, mkobjflags);
+						MK_SPECIAL(otmp)
+					}
+					otmp = mongets(mtmp, ELVEN_SHORT_SWORD, mkobjflags);
+					MK_SPECIAL(otmp)
+					(void)mongets(mtmp, ELVEN_BOW, mkobjflags);
+					m_initthrow(mtmp, ELVEN_ARROW, 12, mkobjflags);
+					break;
+				case 1:
+					otmp = mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
+					MK_SPECIAL(otmp)
+					if (rn2(2)){
+						otmp = mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+						if(otmp)
+							set_material_gm(otmp, MITHRIL);
+					}
+					else if (could_twoweap(ptr)){
+						otmp = mongets(mtmp, ELVEN_SHORT_SWORD, mkobjflags);
+						MK_SPECIAL(otmp)
+					}
+					break;
+				case 2:
+					otmp = mongets(mtmp, ELVEN_SPEAR, mkobjflags);
+					MK_SPECIAL(otmp)
+					otmp = mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+					if(otmp && !otmp->oartifact)
+						set_material_gm(otmp, MITHRIL);
+					break;
+				case 3:
+					otmp = mongets(mtmp, CRYSTAL_SWORD, mkobjflags);
+					if(otmp)
+						otmp->spe = rn1(4,4);
+					otmp = mongets(mtmp, CRYSTAL_SHIELD, mkobjflags);
+					if(otmp)
+						otmp->spe = rn1(4,4);
+					break;
+				}
+#undef MK_SPECIAL
 			}
 			else {
 				if (goodequip || rn2(2))
@@ -4511,12 +4578,15 @@ boolean goodequip;
 	}
 }
 
+#define MAYBE_MERC(otmp)	if(!rn2(100) || greatequip) set_material_gm(otmp, MERCURIAL);
+
 STATIC_OVL void
-m_initweap(mtmp, mkobjflags, faction, goodequip, mmflags)
+m_initweap(mtmp, mkobjflags, faction, goodequip, greatequip, mmflags)
 register struct monst *mtmp;
 int mkobjflags;
 int faction;
 boolean goodequip;
+boolean greatequip;
 int mmflags;
 {
 	struct permonst *ptr = mtmp->data;
@@ -4524,7 +4594,6 @@ int mmflags;
 	struct obj *otmp;
 	int chance = 0;
 
-#define MAYBE_MERC(otmp)	if(!rn2(100)) set_material_gm(otmp, MERCURIAL);
 #ifdef REINCARNATION
 	if (Is_rogue_level(&u.uz)) return;
 #endif
@@ -4559,7 +4628,7 @@ int mmflags;
 			worm_initweap(mtmp, mkobjflags, faction, goodequip);
 		break;
 	    case S_HUMAN:
-			human_initweap(mtmp, mkobjflags, faction, goodequip);
+			human_initweap(mtmp, mkobjflags, faction, goodequip, greatequip);
 		break;
 
 		break;
@@ -10667,11 +10736,12 @@ long amount;
 #endif
 
 STATIC_OVL void
-m_initinv(mtmp, mkobjflags, faction, goodequip)
+m_initinv(mtmp, mkobjflags, faction, goodequip, greatequip)
 register struct	monst	*mtmp;
 int mkobjflags;
 int faction;
 boolean goodequip;
+boolean greatequip;
 {
 	int cnt;
 	int chance;
@@ -13365,6 +13435,7 @@ int faction;
 	boolean allow_minvent = ((mmflags & NO_MINVENT) == 0);
 	boolean countbirth = ((mmflags & MM_NOCOUNTBIRTH) == 0 && !In_quest(&u.uz));
 	boolean goodequip = ((mmflags & MM_GOODEQUIP) != 0);
+	boolean greatequip = ((mmflags & MM_ENDGEQUIP) != 0);
 	boolean randmonst = !ptr;
 	boolean unsethouse = FALSE;
 	int mkobjflags = NO_MKOBJ_FLAGS | ((mmflags & MM_ESUM) ? MKOBJ_SUMMON : 0) | (goodequip ? MKOBJ_GOODEQUIP : 0);
@@ -14509,8 +14580,8 @@ int faction;
 		}
 		else {
 			if(is_armed_mon(mtmp))
-				m_initweap(mtmp, mkobjflags, faction, goodequip, mmflags);	/* equip with weapons / armor */
-			m_initinv(mtmp, mkobjflags, faction, goodequip);  /* add on a few special items incl. more armor */
+				m_initweap(mtmp, mkobjflags, faction, goodequip, greatequip, mmflags);	/* equip with weapons / armor */
+			m_initinv(mtmp, mkobjflags, faction, goodequip, greatequip);  /* add on a few special items incl. more armor */
 		}
 	    m_dowear(mtmp, TRUE);
 		init_mon_wield_item(mtmp);
@@ -16197,9 +16268,9 @@ int mkobjflags;
 				else if (roll < 100)
 					set_material(otmp, SILVER);
 
-				MAYBE_MERC(otmp)
-
-				if (rn2(100) < 15){
+				if(!rn2(100))
+					set_material_gm(otmp, MERCURIAL);
+				else if (rn2(100) < 15){
 					switch (rnd(8)){
 					case 1:
 						add_oprop(otmp, OPROP_FLAYW);
