@@ -2381,7 +2381,7 @@ get_description_of_damage_type(uchar id)
 	case AD_PSON: return "psionic";
 	case AD_GROW: return "grows brethren on death";
 	case AD_SOUL: return "strengthens brethren on death";
-	case AD_TENT: return "deadly tentacles (LarienTelrunya's bane)";
+	case AD_TENT: return "deadly tentacles";
 	case AD_JAILER: return "sets Lucifer to appear and drops third key of law when killed";
 	case AD_AXUS: return "fire-shock-drain-cold combo";
 	case AD_UNKNWN: return "Priest of an unknown God";
