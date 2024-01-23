@@ -5016,25 +5016,35 @@ boolean printmessages;
 		int bonus = 0;
 		//Holy/Unholy energy attack
 		if(u.uinsight >= 50){
-			bonus += d(2, (mdef && bigmonst(pd)) ? 
+			bonus += d(3, (mdef && bigmonst(pd)) ? 
 							objects[otmp->otyp].oc_wldam.oc_damd : 
 							objects[otmp->otyp].oc_wsdam.oc_damd);
-		} else if(u.uinsight >= 20){
-			bonus += rnd((mdef && bigmonst(pd)) ? 
-							objects[otmp->otyp].oc_wldam.oc_damd : 
-							objects[otmp->otyp].oc_wsdam.oc_damd);
-		}
-		if(u.uinsight >= 45){
 			bonus += (mdef && bigmonst(pd)) ? 
 						(objects[otmp->otyp].oc_wldam.oc_damd) : 
 						(objects[otmp->otyp].oc_wsdam.oc_damd);
-		} else {
-			bonus += (mdef && bigmonst(pd)) ? 
-						(objects[otmp->otyp].oc_wldam.oc_damd+1)/2 : 
-						(objects[otmp->otyp].oc_wsdam.oc_damd+1)/2;
+		} else if(u.uinsight >= 45){
+			bonus += d(3, (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
+		} else if(u.uinsight >= 20){
+			bonus += d(2, (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
+		} else { //>= 15
+			bonus += d(1, (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
 		}
 		if(mdef){
 			if(youagr){
+				int bonus_die = (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd;
+				if(u.ualign.record < -3 && Insanity > 50)
+					bonus += bonus_die*(50-u.usanity)/50;
+				else if(u.ualign.record > 3 && u.usanity > 90)
+					bonus += bonus_die*(10-Insanity)/10;
+
 				if(u.ualign.record < -3 && hates_unholy_mon(mdef))
 					bonus *= 2;
 				else if(u.ualign.record > 3 && hates_holy_mon(mdef))
