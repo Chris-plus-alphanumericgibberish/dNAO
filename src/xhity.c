@@ -3620,7 +3620,8 @@ int *shield_margin;
 					bons_acc += beastmastery(); // double for the beastmaster's duster
 			}
 			/* Bard */
-			bons_acc += magr->encouraged;
+			if(!(youdef && Nightmare && u.umadness&MAD_RAGE))
+				bons_acc += magr->encouraged;
 			if(magr->mtyp == PM_LUCKSUCKER)
 				bons_acc += magr->mvar_lucksucker;
 			/* Singing Sword */
@@ -14808,7 +14809,8 @@ int vis;						/* True if action is at all visible to the player */
 		if (youagr)
 			bonsdmg += u.uencouraged;
 		else if (magr){
-			bonsdmg += magr->encouraged;
+			if(!(youdef && Nightmare && u.umadness&MAD_RAGE))
+				bonsdmg += magr->encouraged;
 			if(magr->mtyp == PM_LUCKSUCKER)
 				bonsdmg += magr->mvar_lucksucker;
 			if(magr->mtame){

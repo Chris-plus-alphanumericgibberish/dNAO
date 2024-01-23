@@ -2899,7 +2899,8 @@ register int n;
 	flags.botl = 1;
 	//ifdef BARD
 	if (n > 0){
-		n += mtmp->encouraged;
+		if(!(Nightmare && u.umadness&MAD_RAGE))
+			n += mtmp->encouraged;
 		if(flags.spriest_level && is_demon(mtmp->data) && is_lawful_mon(mtmp) && !mtmp->mpeaceful)
 			n += 9;
 		if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(mtmp) && !is_deaf(mtmp)){
