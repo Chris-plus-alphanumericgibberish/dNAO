@@ -13022,6 +13022,17 @@ int faction;
 	if(ptr->mtyp == PM_MAD_GRAZI)
 		out_faction = Y_CULT_SYMBOL;
 
+	if(ptr->mtyp == PM_NAZGUL
+	 || ptr->mtyp == PM_NECROMANCER
+	 || ptr->mtyp == PM_MORDOR_ORC
+	 || ptr->mtyp == PM_MORDOR_ORC_ELITE
+	 || ptr->mtyp == PM_MORDOR_MARSHAL
+	 || ptr->mtyp == PM_MORDOR_SHAMAN
+	 || ptr->mtyp == PM_ANGBAND_ORC
+	 || ptr->mtyp == PM_ORC_OF_THE_AGES_OF_STARS
+	)
+		out_faction = NECROMANCY_FACTION;
+
 	if(is_drow(ptr) && !is_changed_mtyp(ptr->mtyp)){
 		if(curhouse) {
 			out_faction = curhouse;
@@ -13158,6 +13169,10 @@ struct monst * mon;
 		|| (mon->mtyp == PM_STAR_ELF && Role_if(PM_MADMAN))
 	)
 		out_faction = YELLOW_FACTION;
+	else if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER && !peaceful)
+		out_faction = NECROMANCY_FACTION;
+	else if(In_mordor_quest(&u.uz) && !peaceful)
+		out_faction = NECROMANCY_FACTION;
 	else if(Is_knox(&u.uz)
 		|| Is_sanctum(&u.uz)
 		|| In_moloch_temple(&u.uz)

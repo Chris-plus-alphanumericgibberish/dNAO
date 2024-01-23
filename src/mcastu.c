@@ -370,6 +370,9 @@ unsigned int type;
 		}
 	}
 	boolean quake = FALSE;
+	if(mtmp->mtyp == PM_ELVEN_WRAITH){
+		return mtmp->mvar_elfwraith_spell;
+	}
 	if(has_template(mtmp, PSURLON)){
 		if(rn2(2))
 			return CRUSH_BOLT;
@@ -2432,6 +2435,23 @@ int tary;
 		/* if attacking a displacement, monsters figure out you weren't there */
 		if (magr && youdef && (tarx != u.ux || tary != u.uy)) {
 			magr->mux = magr->muy = 0;
+		}
+	}
+	if(result == MM_HIT && magr && !youagr && magr->mfaction == NECROMANCY_FACTION && magr->mtyp != PM_ELVEN_WRAITH && u.uinsight >= 15 && spellnum && mdef){
+		struct monst *wraith = makemon(&mons[PM_ELVEN_WRAITH], magr->mx, magr->my, MM_ESUM|MM_ADJACENTOK|NO_MINVENT);
+		if(wraith){
+			mark_mon_as_summoned(wraith, magr, u.uinsight/5, 0);
+			wraith->m_insight_level = 15;
+			wraith->m_lev = magr->m_lev;
+			wraith->mpeaceful = magr->mpeaceful;
+			set_faction(wraith, NECROMANCY_FACTION);
+			if(wraith->m_lev > 0)
+				wraith->mhpmax = d(magr->m_lev, hd_size(wraith->data));
+			else
+				wraith->mhpmax = rnd((hd_size(wraith->data)+1)/2);
+			wraith->mhp = wraith->mhpmax;
+			wraith->mvar_elfwraith_target = youdef ? 0 : (long) mdef->m_id;
+			wraith->mvar_elfwraith_spell = spellnum;
 		}
 	}
 	return result;
@@ -4974,6 +4994,14 @@ int tary;
 			else {
 				if (canseemon(magr))
 					pline("%s looks better.", Monnam(magr));
+				if(magr->mtyp == PM_ELVEN_WRAITH
+					&& get_mx(magr, MX_ESUM)
+					&& magr->mextra_p->esum_p->summoner
+				){
+					*hp(magr->mextra_p->esum_p->summoner) += d(dmn, 8);
+					if (*hp(magr->mextra_p->esum_p->summoner) > *hpmax(magr->mextra_p->esum_p->summoner))
+						*hp(magr->mextra_p->esum_p->summoner) = *hpmax(magr->mextra_p->esum_p->summoner);
+				}
 				if(magr->mtyp == PM_CHAOS){
 					//Chaos could heal himself fully, but lets not do that.
 					*hp(magr) += 999;
@@ -6782,10 +6810,19 @@ int tary;
 		return TRUE;
 
 	/* don't cast healing when already healed */
-	if (spellnum == CURE_SELF
-		&& (*hp(magr) == *hpmax(magr)))
-		return TRUE;
-
+	if (spellnum == CURE_SELF){
+		if (*hp(magr) == *hpmax(magr)){
+			if(magr->mtyp == PM_ELVEN_WRAITH){
+				if(get_mx(magr, MX_ESUM)
+					&& magr->mextra_p->esum_p->summoner
+					&& *hp(magr->mextra_p->esum_p->summoner) == *hpmax(magr->mextra_p->esum_p->summoner)
+				)
+					return TRUE;
+			}
+			else return TRUE;
+		}
+	}
+	
 	/* don't cast recovery when stats are ok */
 	if (spellnum == RECOVER
 		&& !youagr && !(magr->mcan || magr->mcrazed || !magr->mcansee || !magr->mcanmove ||

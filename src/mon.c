@@ -3548,6 +3548,12 @@ struct monst * mdef;	/* another monster which is next to it */
 	if (magr->mstrategy & STRAT_WAITMASK) {
 		return 0L;
 	}
+	if(magr->mtyp == PM_ELVEN_WRAITH){
+		if(magr->mvar_elfwraith_target == (long) mdef->m_id)
+			return ALLOW_M | ALLOW_TM;
+		else
+			return 0L;
+	}
 	// Berserked creatures are effectively always conflicted, and aren't careful about anything unnecessary
 	if (magr->mberserk) {
 		return ALLOW_M | ALLOW_TM;
@@ -3687,6 +3693,8 @@ struct monst * mdef;	/* another monster which is next to it */
 	/* Various factions don't attack faction-mates */
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YENDORIAN_FACTION)
 		return FALSE;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == NECROMANCY_FACTION)
+		return FALSE;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == GOATMOM_FACTION)
 		return FALSE;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == QUEST_FACTION)
@@ -3781,11 +3789,11 @@ struct monst * mdef;	/* another monster which is next to it */
 	)){
 		if(!(magr->mpeaceful && mdef->mpeaceful && is_undead(youracedata))){
 			if(mm_undead(magr) && 
-				(!is_witch_mon(mdef) && mdef->mtyp != PM_WITCH_S_FAMILIAR && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef) && mdef->mfaction != YELLOW_FACTION)
+				(!is_witch_mon(mdef) && mdef->mtyp != PM_WITCH_S_FAMILIAR && !mdef->mpetitioner && !mm_undead(mdef) && !mindless_mon(mdef) && mdef->mfaction != NECROMANCY_FACTION && mdef->mfaction != YELLOW_FACTION)
 			){
 				return ALLOW_M|ALLOW_TM;
 			}
-			if((!is_witch_mon(magr) && magr->mtyp != PM_WITCH_S_FAMILIAR && !magr->mpetitioner && !mm_undead(magr) && !mindless_mon(magr) && magr->mfaction != YELLOW_FACTION)
+			if((!is_witch_mon(magr) && magr->mtyp != PM_WITCH_S_FAMILIAR && !magr->mpetitioner && !mm_undead(magr) && !mindless_mon(magr) && magr->mfaction != NECROMANCY_FACTION && magr->mfaction != YELLOW_FACTION)
 				&& mm_undead(mdef)
 			){
 				return ALLOW_M|ALLOW_TM;

@@ -500,7 +500,7 @@ struct monst *mtmp;
 		mtmp->mtyp == PM_MINOTAUR)
 		return(FALSE);
 	return (boolean) mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE 
-				|| mtmp->data->mlet == S_TROLL || mtmp->mtyp == PM_NAZGUL;
+				|| mtmp->data->mlet == S_TROLL || mtmp->mtyp == PM_ELVEN_WRAITH || mtmp->mtyp == PM_NAZGUL;
   }
 }
 #endif /* OVL2 */
