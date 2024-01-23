@@ -674,6 +674,18 @@ int mkflags;
 	otmp->oinvis = !rn2(1250);
 #endif
 	otmp->quan = is_multigen(otmp) ? ((long) rn1(4,4) + d(2,level_difficulty()+2)) : 1L;
+	if (is_rakuyo(otmp))
+		add_oprop(otmp, OPROP_RAKUW);
+	if (otmp->otyp == WHITE_VIBROSWORD
+		|| otmp->otyp == WHITE_VIBROSPEAR
+		|| otmp->otyp == WHITE_VIBROZANBATO
+		)
+		add_oprop(otmp, OPROP_HOLYW);
+	if (otmp->otyp == GOLD_BLADED_VIBROSWORD
+		|| otmp->otyp == GOLD_BLADED_VIBROSPEAR
+		|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
+		)
+		add_oprop(otmp, OPROP_UNHYW);
 	if (init) {
 		switch (let) {
 		case WEAPON_CLASS:
@@ -687,18 +699,6 @@ int mkflags;
 			}
 			else	blessorcurse(otmp, 10);
 
-			if (otmp->otyp == WHITE_VIBROSWORD
-				|| otmp->otyp == WHITE_VIBROSPEAR
-				|| otmp->otyp == WHITE_VIBROZANBATO
-				)
-				add_oprop(otmp, OPROP_HOLYW);
-			if (otmp->otyp == GOLD_BLADED_VIBROSWORD
-				|| otmp->otyp == GOLD_BLADED_VIBROSPEAR
-				|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
-				)
-				add_oprop(otmp, OPROP_UNHYW);
-			if (is_rakuyo(otmp))
-				add_oprop(otmp, OPROP_RAKUW);
 
 			if (is_vibroweapon(otmp)){
 				otmp->ovar1_charges = 80L + rnd(20);
