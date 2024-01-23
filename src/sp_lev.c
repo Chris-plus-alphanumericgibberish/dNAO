@@ -1065,8 +1065,11 @@ struct mkroom	*croom;
 			impossible("failed to create %s", o->name.str);
 			return;
 		}
-		else
+		else{
+			if(otmp == &zeroobj)
+				otmp = mkobj(RANDOM_CLASS, NO_MKOBJ_FLAGS); //Already existing artifact
 			place_object(otmp,x,y);
+		}
 	}
 	else
 	{
