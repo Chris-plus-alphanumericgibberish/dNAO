@@ -479,6 +479,29 @@ boolean dumping;
 		Sprintf(buf, "%d weakness from being studied", u.ustdy);
 		you_have(buf);
 	}
+	if (wizard) {
+		if(u.sealCounts){
+			Sprintf(buf, "spirits bound: %d", u.sealCounts);
+			you_have(buf);
+		}
+		if(u.sealsActive){
+			Sprintf(buf, "seals active: %lx", u.sealsActive);
+			you_have(buf);
+		}
+		if(u.specialSealsActive){
+			Sprintf(buf, "special seals active: %lx", u.specialSealsActive);
+			you_have(buf);
+		}
+		if(dungeon_topology.eprecursor_typ == PRE_DRACAE){
+			enl_msg("Eladrin precursors ", "are", "were", " Dracae Eladrin");
+		}
+		else if(dungeon_topology.eprecursor_typ == PRE_POLYP){
+			enl_msg("Eladrin precursors ", "are", "were", " Polypoid");
+		}
+		else {
+			enl_msg("Eladrin precursors ", "are", "were", " pretty normal");
+		}
+	}
 	
 	if(u.uencouraged) you_have(enlght_combatinc("morale", u.uencouraged, 1, buf));
 	
