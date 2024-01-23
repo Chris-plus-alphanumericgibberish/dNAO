@@ -3484,14 +3484,28 @@ int adtyp;
 {
     int hit_bon = 0;
     int dex = ACURR(A_DEX);
-
-	switch (P_SKILL(spell_skill_from_adtype(adtyp))) {
-	case P_ISRESTRICTED:
-	case P_UNSKILLED:   hit_bon = -4; break;
-	case P_BASIC:       hit_bon =  0; break;
-	case P_SKILLED:     hit_bon =  2; break;
-	case P_EXPERT:      hit_bon =  5; break;
-    }
+	int skill = P_SKILL(spell_skill_from_adtype(adtyp));
+	
+	if(skill == P_MARTIAL_ARTS){
+		switch (skill) {
+		case P_ISRESTRICTED: hit_bon = 0; break;
+		case P_UNSKILLED:    hit_bon = 2; break;
+		case P_BASIC:        hit_bon = 3; break;
+		case P_SKILLED:      hit_bon = 4; break;
+		case P_EXPERT:       hit_bon = 5; break;
+		case P_MASTER:       hit_bon = 7; break;
+		case P_GRAND_MASTER: hit_bon = 9; break;
+		}
+	}
+	else {
+		switch (skill) {
+		case P_ISRESTRICTED:
+		case P_UNSKILLED:   hit_bon = -4; break;
+		case P_BASIC:       hit_bon =  0; break;
+		case P_SKILLED:     hit_bon =  2; break;
+		case P_EXPERT:      hit_bon =  5; break;
+		}
+	}
 
     if (dex < 4)
 	hit_bon -= 3;
