@@ -5498,13 +5498,22 @@ int mmflags;
 				(void)mongets(mtmp, DWARVISH_SPEAR, mkobjflags);
 				(void)mongets(mtmp, DWARVISH_SHORT_SWORD, mkobjflags);
 			} else if(ptr->mtyp == PM_FIRRE_ELADRIN){
-				(void)mongets(mtmp, ELVEN_MITHRIL_COAT, mkobjflags);
-				(void)mongets(mtmp, ELVEN_SHIELD, mkobjflags);
-				(void)mongets(mtmp, ELVEN_CLOAK, mkobjflags);
-				(void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
-				(void)mongets(mtmp, ELVEN_HELM, mkobjflags);
-				(void)mongets(mtmp, ELVEN_SPEAR, mkobjflags);
-				(void)mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
+				if(rn2(2)){
+					(void)mongets(mtmp, ELVEN_MITHRIL_COAT, mkobjflags);
+					(void)mongets(mtmp, ELVEN_SHIELD, mkobjflags);
+					(void)mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+					(void)mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+					(void)mongets(mtmp, ELVEN_HELM, mkobjflags);
+					(void)mongets(mtmp, ELVEN_SPEAR, mkobjflags);
+					(void)mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
+				}
+				else {
+					(void)mongets(mtmp, rn2(2) ? STUDDED_LEATHER_ARMOR : LEATHER_ARMOR, mkobjflags);
+					(void)mongets(mtmp, LEATHER_HELM, mkobjflags);
+					(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
+					m_initthrow(mtmp, JAVELIN, 10, mkobjflags);
+					(void)mongets(mtmp, TWO_HANDED_SWORD, mkobjflags);
+				}
 			} else if(ptr->mtyp == PM_SHIERE_ELADRIN){
 				(void)mongets(mtmp, CRYSTAL_PLATE_MAIL, mkobjflags);
 				(void)mongets(mtmp, CRYSTAL_SHIELD, mkobjflags);
