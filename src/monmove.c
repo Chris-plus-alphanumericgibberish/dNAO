@@ -690,7 +690,7 @@ boolean digest_meal;
 		} else {
 			perX += mon->m_lev;
 		}
-		perX = hd_size(mon->data)*perX/8;
+		perX = hd_size(mon->data)*perX/8; //Adjust so that large and small monsters heal to full at about the same rate.
 		//Worn Vilya bonus ranges from (penalty) to +7 HP per 10 turns
 		if(uring_art(ART_VILYA)){
 			perX += heal_vilya()*HEALCYCLE/10;
