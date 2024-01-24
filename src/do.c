@@ -2012,6 +2012,9 @@ int different;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;
 		}
+		if(has_template(mtmp, SPORE_ZOMBIE) && Nightmare && u.umadness&MAD_SPORES && rn2(100) < Insanity){
+			mtmp->mpeaceful = TRUE;
+		}
 	}
 	if(different==REVIVE_YELLOW){
 		set_template(mtmp, YELLOW_TEMPLATE);
