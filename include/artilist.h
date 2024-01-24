@@ -3330,7 +3330,7 @@ A("The Declaration of the Apostate",SCR_REMOVE_CURSE,	(const char *)0,
 	PROPS(), NOFLAG,
 	UNBIND_SEALS, NOFLAG
 	),
-A("The Soul Lens",					LENSES,				(const char *)0,
+A("The Soul Lens",					SOUL_LENS,				(const char *)0,
 	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NONE, PM_EXILE, NON_PM, NO_TIER, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
