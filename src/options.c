@@ -198,7 +198,7 @@ static struct Bool_Opt
 	{"news", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
 	{"msg_wall_hits", &iflags.notice_walls, FALSE, SET_IN_GAME},
-	{"no_forget_map", &iflags.no_forget_map, FALSE, SET_IN_GAME},
+	{"block_forget_map", &iflags.no_forget_map, FALSE, SET_IN_GAME},
 	{"null", &flags.null, TRUE, SET_IN_GAME},
 	{"old_C_behaviour", &iflags.old_C_behaviour, FALSE, SET_IN_GAME},
 #ifdef MAC
