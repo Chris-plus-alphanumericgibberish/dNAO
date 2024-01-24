@@ -2452,7 +2452,11 @@ fill_dungeon_of_ill_regard(){
 		}
 	}
 	for(i = 0; i < PM_LONG_WORM_TAIL ; i++){
-		if(mons[i].geno&(G_NOGEN|G_UNIQ) || mvitals[i].mvflags&G_GONE || mons[i].mlet == S_PLANT)
+		if(mons[i].geno&(G_NOGEN|G_UNIQ)
+			|| mvitals[i].mvflags&G_GONE
+			|| mons[i].mlet == S_PLANT
+			|| G_C_INST(mons[i].geno) != 0
+		)
 			continue;
 		if(mons[i].maligntyp < -10)
 			strong++;
@@ -2479,8 +2483,8 @@ fill_dungeon_of_ill_regard(){
 #define LOOP_BODY	\
 			if(isok(x,y) && levl[x][y].typ == CORR){\
 				while(i < PM_LONG_WORM_TAIL \
-				&& (mons[i].maligntyp >= 0 || (mons[i].geno&(G_NOGEN|G_UNIQ)) || mvitals[i].mvflags&G_GONE || mons[i].mlet == S_PLANT || skips[j])){\
-					if(mons[i].maligntyp < 0 && !(mons[i].geno&(G_NOGEN|G_UNIQ)) && !(mvitals[i].mvflags&G_GONE) && mons[i].mlet != S_PLANT) j++;\
+				&& (mons[i].maligntyp >= 0 || (mons[i].geno&(G_NOGEN|G_UNIQ)) || G_C_INST(mons[i].geno) != 0 || mvitals[i].mvflags&G_GONE || mons[i].mlet == S_PLANT || skips[j])){\
+					if(mons[i].maligntyp < 0 && !(mons[i].geno&(G_NOGEN|G_UNIQ)) && G_C_INST(mons[i].geno) == 0 && !(mvitals[i].mvflags&G_GONE) && mons[i].mlet != S_PLANT) j++;\
 					i++;\
 				}\
 				if(i < PM_LONG_WORM_TAIL){\
