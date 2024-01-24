@@ -144,6 +144,8 @@ int pm;
 		case PM_MOONSHADOW:       return(PM_CAILLEA_ELADRIN);
 		case PM_DRACAE_ELADRIN:	  return(PM_MOTHERING_MASS);
 		case PM_MOTHERING_MASS:	  return(PM_DRACAE_ELADRIN);
+		case PM_LIGHT_ELF:	      return(PM_UNBODIED);
+		case PM_UNBODIED:	      return(PM_LIGHT_ELF);
 		case PM_GWYNHARWYF:		  return(PM_FURIOUS_WHIRLWIND);
 		case PM_FURIOUS_WHIRLWIND: return(PM_GWYNHARWYF);
 		case PM_ASCODEL:		  return(PM_BLOODY_SUNSET);
@@ -248,6 +250,14 @@ int pm;
 		new_light_source(LS_MONSTER, (genericptr_t)mon, emits_light_mon(mon));
 	}
 	newsym(mon->mx,mon->my);
+
+	if(mon->mtyp == PM_UNBODIED){
+		mon->m_insight_level = 15;
+	}
+	else if(mon->mtyp == PM_LIGHT_ELF){
+		mon->m_insight_level = 0;
+	}
+
 	if(is_eeladrin(mon->data) || (mon->mtyp != PM_UNEARTHLY_DROW && is_yochlol(mon->data))){
 		struct obj *mw_tmp = MON_WEP(mon);
 		struct obj *msw_tmp = MON_SWEP(mon);

@@ -40,6 +40,7 @@ STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh_visible, (struct monst *));
 STATIC_DCL void FDECL(good_neighbor_visible, (struct monst *));
 STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
+STATIC_DCL void FDECL(unbodied_heal, (struct monst *));
 STATIC_DCL void FDECL(goat_sacrifice, (struct monst *));
 STATIC_DCL void FDECL(palid_stranger, (struct monst *));
 STATIC_DCL void FDECL(sib_follow, (struct monst *));
@@ -4623,6 +4624,8 @@ struct monst *mon;
 		dark_pharaoh(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_POLYPOID_BEING)
 		polyp_pickup(mon);
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_UNBODIED)
+		unbodied_heal(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_ALKILITH)
 		alkilith_spawn(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_MOUTH_OF_THE_GOAT)
@@ -5168,6 +5171,71 @@ struct monst *mon;
 				}
 			}
 		}
+	}
+}
+
+STATIC_OVL
+void
+unbodied_heal(mon)
+struct monst *mon;
+{
+	struct obj *otmp, *otmp2;
+	register struct monst *mtmp, *mtmp0 = 0, *mtmp2;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	if(xyloc == MIGR_EXACT_XY){
+		if(mon->mhp == mon->mhpmax){
+			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+				mtmp2 = mtmp->nmon;
+				if (mtmp == mon) {
+					if(!mtmp0)
+						migrating_mons = mtmp->nmon;
+					else
+						mtmp0->nmon = mtmp->nmon;
+					mon_arrive(mtmp, FALSE);
+					break;
+				} else
+					mtmp0 = mtmp;
+			}
+			if(mtmp){
+				/*mtmp and mon *should* now be the same.  However, only do the polymorph if we have successfully removed the monster from the migrating chain and placed it!*/
+				int pm = counter_were(monsndx(mon->data));
+				if(!pm) {
+					impossible("unknown lycanthrope %s.", mon->data->mname);
+					return;
+				}
+				were_transform(mon, pm);
+			}
+		}
+		else if(!mon->mcan){
+			//Heal
+			int healing = d(10,6);
+			mon->mhp += healing;
+			//Will reappear next turn
+			if(mon->mhp > mon->mhpmax)
+				mon->mhp = mon->mhpmax;
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+				if(mon->mpeaceful == mtmp->mpeaceful && !mm_grudge(mon, mtmp)){
+					if(mtmp->mhp < mtmp->mhpmax && dist2(xlocale, ylocale, mtmp->mx, mtmp->my) <= 3*3 + 1){
+						mtmp->mhp += healing;
+						if(mtmp->mhp > mtmp->mhpmax)
+							mtmp->mhp = mtmp->mhpmax;
+						if(canseemon(mtmp))
+							pline("%s looks better!", Monnam(mtmp));
+					}
+				}
+			}
+			if (mon->mtame
+				&& (*hp(&youmonst) < *hpmax(&youmonst))
+				&& dist2(xlocale, ylocale, u.ux, u.uy) <= 3*3 + 1)
+			{
+				healup(healing, 0, FALSE, FALSE);
+				You("feel better.");
+			}
+		}
+		else mon->mhp++; //Won't go over mhpmax
 	}
 }
 

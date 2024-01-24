@@ -355,6 +355,7 @@
 							 (ptr)->mtyp == PM_UISCERRE_ELADRIN || \
 							 (ptr)->mtyp == PM_CAILLEA_ELADRIN || \
 							 (ptr)->mtyp == PM_DRACAE_ELADRIN || \
+							 (ptr)->mtyp == PM_LIGHT_ELF || \
 							 (ptr)->mtyp == PM_ALRUNES ||\
 							 (ptr)->mtyp == PM_GWYNHARWYF ||\
 							 (ptr)->mtyp == PM_ASCODEL ||\
@@ -376,6 +377,7 @@
 							 (ptr)->mtyp == PM_WATERSPOUT || \
 							 (ptr)->mtyp == PM_MOONSHADOW || \
 							 (ptr)->mtyp == PM_MOTHERING_MASS || \
+							 (ptr)->mtyp == PM_UNBODIED || \
 							 (ptr)->mtyp == PM_HATEFUL_WHISPERS ||\
 							 (ptr)->mtyp == PM_FURIOUS_WHIRLWIND ||\
 							 (ptr)->mtyp == PM_BLOODY_SUNSET ||\
@@ -973,6 +975,7 @@
 				  (ptr)->mtyp == PM_PARASITIZED_DOLL || \
 				  (ptr)->mtyp == PM_MOTE_OF_LIGHT || \
 				  (ptr)->mtyp == PM_BALL_OF_LIGHT || \
+				  (ptr)->mtyp == PM_LIGHT_ELF || \
 				  (ptr)->mtyp == PM_BLOODY_SUNSET || \
 				  (ptr)->mtyp == PM_BALL_OF_GOSSAMER_SUNLIGHT || \
 				  (ptr)->mtyp == PM_LUMINOUS_CLOUD || \
@@ -990,6 +993,7 @@
 				  (ptr)->mtyp == PM_COTERIE_OF_MOTES ||\
 				  (ptr)->mtyp == PM_BALL_OF_RADIANCE) ? 2 : \
 				 ((ptr)->mtyp == PM_THRONE_ARCHON ||\
+				  (ptr)->mtyp == PM_UNBODIED ||\
 				  (ptr)->mtyp == PM_BEAUTEOUS_ONE ||\
 				  (ptr)->mtyp == PM_DAO_LAO_GUI_MONK ||\
 				 (ptr)->mtyp == PM_ASPECT_OF_THE_SILENCE) ? 3 : \
@@ -1228,11 +1232,13 @@
 #define mon_undead_hunter(mon)	(((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_HUNTER))
 #define mon_knight(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || (mon)->mtyp == PM_SIR_GARLAND || \
 						 (mon)->mtyp == PM_GARLAND || (mon)->mtyp == PM_CELEBORN || (mon)->mtyp == PM_DANTRAG || \
+						 (mon)->mtyp == PM_LIGHT_ELF || (mon)->mtyp == PM_UNBODIED || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 (mon)->mtyp == PM_PAGE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
 #define mon_turn_undead(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || \
 						 (mon)->mtyp == PM_BRIGHID_ELADRIN || \
 						 (mon)->mtyp == PM_DRACAE_ELADRIN || \
+						 (mon)->mtyp == PM_LIGHT_ELF || (mon)->mtyp == PM_UNBODIED || \
 						 (mon)->mtyp == PM_KUKER || (mon)->mtyp == PM_SHIELD_ARCHON || \
 						 (mon)->mtyp == PM_MONADIC_DEVA || \
 						 (mon)->mtyp == PM_ALRUNES || (mon)->mtyp == PM_HATEFUL_WHISPERS || \
@@ -1243,7 +1249,7 @@
 						 (mon)->mtyp == PM_SIR_ALJANOR || (mon)->mtyp == PM_ALLIANCE_VANGUARD || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
-#define mon_healing_turn(mon)	((mon)->mtyp == PM_DRACAE_ELADRIN)
+#define mon_healing_turn(mon)	((mon)->mtyp == PM_DRACAE_ELADRIN || (mon)->mtyp == PM_UNBODIED)
 #define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_MASTER_KAEN || (mon)->mtyp == PM_ABBOT || \
 						 (mon)->mtyp == PM_XORN_MONK || (mon)->mtyp == PM_DAO_LAO_GUI_MONK || (mon)->mtyp == PM_ZHI_REN_MONK || \
 						 (mon)->mtyp == PM_ITINERANT_PRIESTESS || \

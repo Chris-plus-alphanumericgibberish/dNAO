@@ -2156,6 +2156,10 @@ struct obj *obj;
 	case SUNGLASSES:
 		score += 2;
 		break;
+	case SOUL_LENS:
+		if(mon->mtyp == PM_LIGHT_ELF)
+			score += 300;
+		break;
 	case ANDROID_VISOR:
 		if(is_android(mon)) score += 4;
 		score += 1;

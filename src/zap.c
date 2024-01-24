@@ -5601,7 +5601,7 @@ int damage, tell;
 		damage = 0;
 	/* attack level */
 	switch (oclass) {
-	    case WAND_CLASS:	
+	    case WAND_CLASS:
 			alev = 12;	 
 			if(!flags.mon_moving){
 				if(P_SKILL(P_WAND_POWER) > 1)

@@ -6146,6 +6146,23 @@ int spell;
 
 	if(u.sealsActive&SEAL_PAIMON) splcaster -= urole.spelarmr;
 	
+	if(ublindf && ublindf->otyp == SOUL_LENS){
+		if(u.ualign.record < 0 || ublindf->cursed){
+			if(casting_stat == A_CHA){
+				splcaster += urole.spelarmr;
+			}
+			else if(Role_if(PM_MONK))
+				splcaster += urole.spelarmr/2;
+		}
+		else if(u.ualign.record >= 20){
+			if(casting_stat == A_CHA){
+				splcaster -= urole.spelarmr;
+			}
+			else if(Role_if(PM_MONK))
+				splcaster -= urole.spelarmr/2;
+		}
+	}
+	
 	if(Race_if(PM_INCANTIFIER))
 		splcaster += max(-3*urole.spelarmr,urole.spelsbon);
 

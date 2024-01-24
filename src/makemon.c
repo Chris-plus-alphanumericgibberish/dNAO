@@ -5056,6 +5056,15 @@ int mmflags;
 					mtmp->entangled_otyp = SHACKLES;
 					mtmp->entangled_oid = otmp->o_id;
 				}
+				if(mtmp->mtyp == PM_LIGHT_ELF){
+					otmp = mongets(mtmp, SOUL_LENS, MKOBJ_NOINIT);
+					if(otmp){
+						m_dowear(mtmp, TRUE);
+						curse(otmp);
+						set_mcan(mtmp, TRUE);
+						mtmp->mcansee = FALSE;
+					}
+				}
 				return;
 			}
 /*			if(ptr->mtyp == PM_DESTROYER){
@@ -5762,6 +5771,60 @@ int mmflags;
 							fix_object(otmp);
 						}
 					}
+				}
+			} else if(ptr->mtyp == PM_LIGHT_ELF){
+				if(endgame_equip){
+					otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, GEMSTONE);
+					}
+					otmp = mongets(mtmp, HIGH_ELVEN_GAUNTLETS, mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, GEMSTONE);
+					}
+					otmp = mongets(mtmp, HIGH_ELVEN_PLATE, mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, GEMSTONE);
+					}
+					otmp = mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+					if(otmp){
+						add_oprop(otmp, OPROP_MAGC);
+					}
+					otmp = mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, GEMSTONE);
+					}
+					otmp = mongets(mtmp, (rn2(2) ? MAGIC_FLUTE : MAGIC_HARP), mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, GEMSTONE);
+					}
+					otmp = mongets(mtmp, SOUL_LENS, mkobjflags);
+					otmp = mongets(mtmp, ELVEN_SHORT_SWORD, mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, SILVER);
+						add_oprop(otmp, OPROP_WRTHW);
+						add_oprop(otmp, OPROP_HOLYW);
+						add_oprop(otmp, OPROP_LIVEW);
+						add_oprop(otmp, OPROP_INSTW);
+					}
+					otmp = mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
+					if(otmp){
+						set_material_gm(otmp, SILVER);
+						add_oprop(otmp, OPROP_WRTHW);
+						add_oprop(otmp, OPROP_HOLYW);
+						add_oprop(otmp, OPROP_LIVEW);
+						add_oprop(otmp, OPROP_INSTW);
+					}
+				}
+				else {
+					(void) mongets(mtmp, ELVEN_MITHRIL_COAT, mkobjflags);
+					(void) mongets(mtmp, ELVEN_CLOAK, mkobjflags);
+					(void) mongets(mtmp, HIGH_ELVEN_HELM, mkobjflags);
+					(void) mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+					(void) mongets(mtmp, (rn2(2) ? FLUTE : HARP), mkobjflags);
+					(void) mongets(mtmp, SOUL_LENS, MKOBJ_NOINIT);
+					mongets(mtmp, ELVEN_SHORT_SWORD, mkobjflags);
+					mongets(mtmp, ELVEN_BROADSWORD, mkobjflags);
 				}
 			} else if(ptr->mtyp == PM_POLYPOID_BEING){
 				int masktypes[] = {PM_ELVENKING, PM_ELVENQUEEN, PM_ALABASTER_ELF_ELDER, PM_GROVE_GUARDIAN, 
@@ -11518,7 +11581,6 @@ boolean greatequip;
 				otmp = mksobj(HIGH_ELVEN_WARSWORD, mkobjflags);
 				add_oprop(otmp, OPROP_WRTHW);
 				MAYBE_MERC(otmp)
-				otmp->objsize = MZ_LARGE;
 				otmp->blessed = TRUE;
 				otmp->cursed = FALSE;
 				otmp->spe = 9;
@@ -15956,6 +16018,15 @@ struct monst *mtmp;
 	if(mtmp->mtyp == PM_YUKI_ONNA){
 		if(mtmp->m_lev >= 11){
 			give_mintrinsic(mtmp, FIRE_RES);
+		}
+	}
+	if(mtmp->mtyp == PM_ORC_OF_THE_AGES_OF_STARS || mtmp->mtyp == PM_ANGBAND_ORC){
+		if(mtmp->m_lev >= 7){
+			give_mintrinsic(mtmp, FAST);
+			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, STEALTH);
 		}
 	}
 }

@@ -2662,13 +2662,17 @@ struct monst *mon;
 	if(mon_healing_turn(mon)){
 		if(canseemon(mon))
 			pline("%s shines with holy light!", Monnam(mon));
+		mon->mhp += d(10,6);
+		if(mon->mhp > mon->mhpmax)
+			mon->mhp = mon->mhpmax;
 	}
-	else
+	else {
 		pline("%s chants holy scripture.", Monnam(mon));
+		if(Misotheism){
+			pline("But nothing happens!");
+			return MOVE_CANCELLED;
+		}
 
-	if(Misotheism){
-		pline("But nothing happens!");
-		return MOVE_CANCELLED;
 	}
 
 	/* note: does not perform unturn_dead() on victims' inventories */
@@ -2697,10 +2701,10 @@ struct monst *mon;
 				if(mtmp->mtyp != PM_BANDERSNATCH) mtmp->mflee = 0;
 				mtmp->mfrozen = 0;
 				mtmp->mcanmove = 1;
-		    } else if (!resist(mtmp, '\0', 0, TELL)) {
+		    } else if (!resist(mtmp, WAND_CLASS, 0, TELL)) {
 				if(is_undead(mtmp->data)){
 					xlev = turn_level(mtmp);
-					if (mon->m_lev >= xlev && !resist(mtmp, '\0', 0, NOTELL)) {
+					if (mon->m_lev >= xlev && !resist(mtmp, WAND_CLASS, 0, NOTELL)) {
 						pline("%s is destroyed!", Monnam(mtmp));
 						grow_up(mon, mtmp);
 						monkilled(mtmp, (const char *)0, AD_SPEL);

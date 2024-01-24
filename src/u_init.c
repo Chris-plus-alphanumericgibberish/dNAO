@@ -2324,6 +2324,9 @@ u_init()
 		
 		if(Race_if(PM_ELF)){
 			ini_inv(Phial);
+			for(struct obj *otmp = invent; otmp; otmp = otmp->nobj){
+				bless(otmp);
+			}
 		} else if(Race_if(PM_DROW) && !flags.female){
 			ini_inv(BlackTorches);
 		}

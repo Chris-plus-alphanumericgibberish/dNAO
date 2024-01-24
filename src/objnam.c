@@ -3495,6 +3495,7 @@ const char *oldstr;
 			if (!BSTRCMP(bp, p-6, "gloves") ||
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-10, "sunglasses") ||
+			    !BSTRCMP(bp, p-9, "soul-lens") ||
 			    !BSTRCMPI(bp, p-8, "shackles") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
@@ -4529,6 +4530,9 @@ int wishflags;
 			&& strncmpi(bp, "living mask", 11) && strncmpi(bp, "living arm", 10)
 		) {
 			add_oprop_list(oprop_list, OPROP_LIVEW);
+
+		} else if (!strncmpi(bp, "insightful ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_INSTW);
 
 		} else if (!strncmpi(bp, "spiked ", l=7)) {
 			add_oprop_list(oprop_list, OPROP_SPIKED);

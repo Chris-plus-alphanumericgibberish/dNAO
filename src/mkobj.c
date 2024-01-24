@@ -169,6 +169,10 @@ static const struct icp eli_materials[] = {
 	{ 12, MINERAL }
 };
 
+static const struct icp lens_materials[] = {
+	{ 1000, GEMSTONE }
+};
+
 /* for weapons of droven make -- armor is all shadowsteel */
 static const struct icp droven_materials[] = {
 	{900, 0 }, /* use base material */
@@ -2120,6 +2124,8 @@ struct obj* obj;
 		return horn_materials;
 	case EILISTRAN_ARMOR:
 		return eli_materials;
+	case SOUL_LENS:
+		return lens_materials;
 	default:
 		break;
 	}
