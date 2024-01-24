@@ -3500,6 +3500,19 @@ uwep_skill_type()
 	return weapon_type(uwep);
 }
 
+int
+get_your_size()
+{
+	int wielder_size = (youracedata->msize - MZ_MEDIUM);
+
+	if (Role_if(PM_CAVEMAN))
+		wielder_size += 1;
+	if (u.sealsActive&SEAL_YMIR)
+		wielder_size += 1;
+
+	return wielder_size;
+}
+
 /*
  * Return hit bonus/penalty based on skill of weapon.
  * Treat restricted weapons as unskilled.
