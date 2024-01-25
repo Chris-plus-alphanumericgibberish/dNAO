@@ -7441,7 +7441,9 @@ boolean ranged;
 			switch (attk->adtyp) {
 			case AD_SITM:
 				if (!(u.sealsActive&SEAL_ANDROMALIUS)
-					&& notmcan){
+					&& !check_mutation(TENDRIL_HAIR)
+					&& notmcan
+				){
 					switch (steal(magr, buf, FALSE, TRUE))
 					{
 					case -1:
@@ -7574,6 +7576,7 @@ boolean ranged;
 			if(notmcan
 				&& !(pd->mlet == pa->mlet)
 				&& !(u.sealsActive&SEAL_ANDROMALIUS)
+				&& !check_mutation(TENDRIL_HAIR)
 			){
 				stealgold(magr);
 			}
