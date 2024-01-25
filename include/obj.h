@@ -229,10 +229,8 @@ struct obj {
 		/*For mineral */
 #define SUBMAT_MARBLE 1
 	int obj_color;
-	union {
-		long bodytypeflag;	/* MB tag(s) this item goes with. Overloaded with wrathdata */
-		long wrathdata;		/* MA flags this item is currently wrathful against. Overloaded with bodytypeflag; */
-	};
+	long bodytypeflag;	/* MB tag(s) this item goes with. */
+	long wrathdata;		/* MA flags this item is currently wrathful against. */
 	union {
 		int	corpsenm;		/* various:       type of corpse is mons[corpsenm] */
 		unsigned leashmon;	/* leash:         m_id of attached pet */
