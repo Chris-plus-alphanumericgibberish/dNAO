@@ -3513,6 +3513,36 @@ get_your_size()
 	return wielder_size;
 }
 
+int
+max_offhand_weight(){
+	/* Sporkhack:
+	 * Heavy things are hard to use in your offhand unless you're
+	 * very good at what you're doing.
+	 *
+	 * No real need to restrict unskilled here since knives and such
+	 * are very hard to find and people who are restricted can't
+	 * #twoweapon even at unskilled...
+	*/
+
+	int maxweight = 0;
+	switch (P_SKILL(P_TWO_WEAPON_COMBAT)) {
+		case P_ISRESTRICTED:
+		case P_UNSKILLED:		maxweight = 10; break;	 /* not silver daggers */
+		case P_BASIC:			maxweight = 20; break;	 /* daggers, crysknife, sickle, aklys, flail, bullwhip, unicorn horn */
+		case P_SKILLED:	 		maxweight = 30; break;	 /* shortswords and spears (inc silver), mace, club, lightsaber, grappling hook */
+		case P_EXPERT:			maxweight = 40; break;	 /* sabers and long swords, axe weighs 60, war hammer 50, pickaxe 80, beamsword */
+		case P_MASTER:			maxweight = 50; break;
+		case P_GRAND_MASTER:	maxweight = 60; break;
+		default: impossible("weapon_hit_bonus: bad skill %d", P_SKILL(P_TWO_WEAPON_COMBAT));
+	}
+
+	int wielder_size = get_your_size();
+
+	if (wielder_size > 0) maxweight *= 1+wielder_size;
+
+	return maxweight;
+}
+
 /*
  * Return hit bonus/penalty based on skill of weapon.
  * Treat restricted weapons as unskilled.
@@ -3523,7 +3553,7 @@ struct obj *weapon;
 int wep_type;
 {
 	int type, skill, bonus = 0, aumpenalty = 0;
-	unsigned int maxweight = 0;
+	int maxweight = max_offhand_weight();
 	static boolean twowepwarn = TRUE;
 	static boolean makashiwarn = TRUE;
 
@@ -3585,33 +3615,6 @@ int wep_type;
 		1W weapons -4 -4 +0 +2 +5      
 		2W weapons -6 -6 +0 +1 +2
 		*/
-
-		/* Sporkhack:
-		 * Heavy things are hard to use in your offhand unless you're
-		 * very good at what you're doing.
-		 *
-		 * No real need to restrict unskilled here since knives and such
-		 * are very hard to find and people who are restricted can't
-		 * #twoweapon even at unskilled...
-		 */
-		switch (P_SKILL(P_TWO_WEAPON_COMBAT)) {
-			default: impossible("weapon_hit_bonus: bad skill %d", P_SKILL(P_TWO_WEAPON_COMBAT));
-			case P_ISRESTRICTED:
-			case P_UNSKILLED:		maxweight = 10; break;	 /* not silver daggers */
-			case P_BASIC:			maxweight = 20; break;	 /* daggers, crysknife, sickle, aklys, flail, bullwhip, unicorn horn */
-			case P_SKILLED:	 		maxweight = 30; break;	 /* shortswords and spears (inc silver), mace, club, lightsaber, grappling hook */
-			case P_EXPERT:			maxweight = 40; break;	 /* sabers and long swords, axe weighs 60, war hammer 50, pickaxe 80, beamsword */
-			case P_MASTER:			maxweight = 50; break;
-			case P_GRAND_MASTER:	maxweight = 60; break;
-		}
-		int wielder_size = (youracedata->msize - MZ_MEDIUM);
-
-		if (Role_if(PM_CAVEMAN))
-			wielder_size += 1;
-		if (u.sealsActive&SEAL_YMIR)
-			wielder_size += 1;
-		if (wielder_size > 0)
-			maxweight *= 1+wielder_size;
 
 		if (wep_type == P_BARE_HANDED_COMBAT) {
 			bonus -= abs(bonus * 2 / 3);
@@ -4287,7 +4290,8 @@ boolean youagr;
 			&& !(otmp->oartifact && !always_twoweapable_artifact(otmp))			// ok artifact
 			&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
 			&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
-			&& (!youagr || otmp->owt <= max(10, P_SKILL(P_TWO_WEAPON_COMBAT)*10))// not too heavy
+			&& (!youagr || otmp->owt <= max_offhand_weight())// not too heavy
+			&& (!(otmp->cursed) || (youagr && Weldproof) || (!youagr && is_weldproof_mon(magr)))
 			&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
 			&& !(is_ammo(otmp) || (is_bad_melee_pole(otmp) && !melee_polearms(pa)) || is_missile(otmp))	// not unsuitable for melee (ammo, polearm, missile)
 			&& !otmp->owornmask);												// not worn
