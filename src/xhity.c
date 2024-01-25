@@ -1739,10 +1739,12 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 	/*Some attacks have level requirements*/
-	if(attk->lev_req > mlev(magr)){
+	/*The PC never gets level-gated monster attacks, they're assumed to represent something like a role*/
+	if(youagr || attk->lev_req > mlev(magr)){
 		GETNEXT
 	}
 	/*Some attacks have insight requirements*/
+	/*PCs can gain monster insight attacks, since insight is always about the PC's perceptions*/
 	if(attk->ins_req > u.uinsight){
 		GETNEXT
 	}
