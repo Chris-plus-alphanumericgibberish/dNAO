@@ -7131,7 +7131,8 @@ struct mkroom *sroom;
 							set_curhouse(mon->mfaction);
 						}
 						//Note: court monsters are always part of rodney's forces.
-						set_faction(mon, YENDORIAN_FACTION);
+						if(!mon->mfaction)
+							set_faction(mon, YENDORIAN_FACTION);
 						if(mon->mpeaceful){
 							mon->mpeaceful = 0;
 							set_malign(mon);
@@ -7212,7 +7213,8 @@ struct mkroom *sroom;
 				}
 				if (type==COURT) {
 					//Note: court monsters are always part of rodney's forces, even if they are angels.
-					set_faction(mon, YENDORIAN_FACTION);
+					if(!mon->mfaction)
+						set_faction(mon, YENDORIAN_FACTION);
 					if(mon->mpeaceful){
 						mon->mpeaceful = 0;
 						set_malign(mon);
