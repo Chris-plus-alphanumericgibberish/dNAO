@@ -13240,9 +13240,7 @@ struct monst * mon;
 		|| (mon->mtyp == PM_STAR_ELF && Role_if(PM_MADMAN))
 	)
 		out_faction = YELLOW_FACTION;
-	else if(In_quest(&u.uz) && urole.neminum == PM_NECROMANCER && !peaceful)
-		out_faction = NECROMANCY_FACTION;
-	else if(In_mordor_quest(&u.uz) && !peaceful)
+	else if((In_mordor_quest(&u.uz) || (In_quest(&u.uz) && urole.neminum == PM_NECROMANCER)) && (is_orc(mon->data) || is_undead(mon->data)))
 		out_faction = NECROMANCY_FACTION;
 	else if(Is_knox(&u.uz)
 		|| Is_sanctum(&u.uz)
