@@ -2655,7 +2655,9 @@ winid *datawin;
 	if (obj)
 	{
 		otyp = obj->otyp;
-		oartifact = obj->oartifact;
+		if(obj->known)
+			oartifact = obj->oartifact;
+		else oartifact = 0;
 	}
 	struct objclass oc = objects[otyp];
 	char olet = oc.oc_class;
