@@ -3352,6 +3352,41 @@ int degree;
 }
 
 void
+lose_skill(skill,degree)
+int skill;
+int degree;
+{
+	if(skill < 0) skill *= -1;
+	
+    if (skill == P_NONE)
+		return;
+
+	if(P_ADVANCE(skill) > degree)
+		P_ADVANCE(skill)-=degree;
+	else P_ADVANCE(skill) = 0;
+
+	boolean try_reduce = TRUE; //Don't get stuck in an infinite loop if skill's default value is > P_UNSKILLED
+	while(OLD_P_SKILL(skill) > P_UNSKILLED
+	 && P_ADVANCE(skill) < practice_needed_to_advance(OLD_P_SKILL(skill)-1)
+	 && try_reduce
+	) {
+		try_reduce = FALSE;
+		for(int i = u.skills_advanced-1; i >= 0; i--){
+			if(skill == u.skill_record[i]){
+				try_reduce = TRUE;
+				OLD_P_SKILL(skill)--;
+				u.weapon_slots += slots_required(skill);
+				for(int j = i+1; j < u.skills_advanced; j++, i++){
+					u.skill_record[i] = u.skill_record[j];
+				}
+				u.skills_advanced--;
+				break; //End outer skill-finding loop
+			}
+		}
+	}
+}
+
+void
 add_weapon_skill(n)
 int n;	/* number of slots to gain; normally one */
 {

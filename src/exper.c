@@ -214,6 +214,22 @@ more_experienced(exp, rexp)
 }
 
 void
+lose_experience(exp)
+	register int exp;
+{
+	if(!exp)
+		return;
+	u.uexp = max(u.uexp - exp, 0);
+	if(exp
+#ifdef SCORE_ON_BOTL
+	   || flags.showscore
+#endif
+	   ) flags.botl = 1;
+	if (u.ulevel > 1 && u.uexp < newuexp(u.ulevel-1))
+	    losexp("lost experience",FALSE,FALSE,FALSE);
+}
+
+void
 losexp(drainer,verbose,force,expdrain)		/* e.g., hit by drain life attack */
 const char *drainer;	/* cause of death, if drain should be fatal */
 boolean verbose; /* attack has custom notification */
