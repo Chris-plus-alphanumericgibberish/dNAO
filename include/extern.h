@@ -238,11 +238,14 @@ E void FDECL(adjalign, (int));
 E void FDECL(unSetFightingForm, (int));
 E void FDECL(setFightingForm, (int));
 E boolean FDECL(activeFightingForm, (int));
+E boolean FDECL(activeMentalEdge, (int));
 E boolean FDECL(selectedFightingForm, (int));
 E int FDECL(getFightingFormSkill, (int));
+E const char * FDECL(nameOfMentalEdge, (int));
 E const char * FDECL(nameOfFightingForm, (int));
 E void NDECL(validateLightsaberForm);
 E boolean FDECL(blockedFightingForm, (int));
+E boolean FDECL(blockedMentalEdge, (int));
 E int NDECL(uhp);
 E int NDECL(uhpmax);
 E void NDECL(check_brainlessness);
@@ -290,6 +293,7 @@ E void FDECL(bot3str, (char *, boolean, int));
 
 
 E char NDECL(randomkey);
+E int NDECL(doGithForm);
 #ifdef USE_TRAMPOLI
 E int NDECL(doextcmd);
 E int NDECL(domonability);

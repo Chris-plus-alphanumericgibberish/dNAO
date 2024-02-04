@@ -817,6 +817,21 @@ struct monst *mon;
 
 		if(uring_art(ART_NARYA) && def_narya())
 			base -= sgn(def_narya())*rnd(abs(def_narya()));
+
+		if(uwep){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+			}
+		}
+		if(uswapwep){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+			}
+		}
+		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+			base -= 1;
 	}
 
 	monwep = MON_WEP(mon);
@@ -1040,6 +1055,21 @@ struct monst *mon;
 
 		if(uring_art(ART_NARYA))
 			base -= def_narya();
+
+		if(uwep){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+			}
+		}
+		if(uswapwep){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+			}
+		}
+		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+			base -= 1;
 	}
 	
 	if(mon->mtyp == PM_HOD_SEPHIRAH){
@@ -1171,6 +1201,19 @@ struct monst *mon;
 
 		if(uring_art(ART_LOMYA))
 			base += def_lomya();
+
+		if(uwep){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base += u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+			}
+		}
+		if(uswapwep){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base += u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+			}
+		}
 	}
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;

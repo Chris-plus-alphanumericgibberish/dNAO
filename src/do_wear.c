@@ -2714,6 +2714,16 @@ find_ac()
 			else
 				uac -= 1+(uwep->spe)/2;
 		}
+		const struct artifact *weap = get_artifact(uwep);
+		if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+			uac -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe,0) : u.usanity < 90 ? 2+max(uwep->spe,0) : 5+max(uwep->spe,0);
+		}
+	}
+	if(uswapwep){
+		const struct artifact *weap = get_artifact(uswapwep);
+		if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+			uac -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+		}
 	}
 	if(Race_if(PM_HALF_DRAGON)){
 		//Some half dragons are more humanoid

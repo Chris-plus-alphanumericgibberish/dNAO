@@ -2975,6 +2975,10 @@ struct monst *looker;
 	if(distmin(looker->mx,looker->my,u.ux,u.uy) <= 1 && !rn2(8))
 		return TRUE;
 	
+	if(Invis && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_VILQUAR) && !resist(looker, '\0', 0, NOTELL)){
+		return FALSE;
+	}
+
 	/* Note: the player is never mindless */
 	/* R'lyehian psyichic sight, see minds, blocked by water */
 	if(rlyehiansight(looker->data)

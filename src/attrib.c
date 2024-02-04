@@ -7,6 +7,7 @@
 #include <limits.h>
 #include "math.h"
 #include "hack.h"
+#include "artifact.h"
 
 /* #define DEBUG */	/* uncomment for debugging info */
 
@@ -1233,6 +1234,10 @@ struct monst *mon;
 	struct obj *armh = (is_player ? uarmh : which_armor(mon, W_ARMH));
 	struct obj *wep = (is_player ? uwep : MON_WEP(mon));
 	struct obj *swapwep = (is_player ? uswapwep : MON_SWEP(mon));
+    const struct artifact *oart = (struct artifact *) 0;
+	if(wep){
+		oart = get_artifact(wep);
+	}
 	
 	int tmp;
 	if(is_player){
@@ -1299,6 +1304,7 @@ struct monst *mon;
 		if ((armg && (armg->otyp == GAUNTLETS_OF_POWER || (armg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(armg, IEA_GOPOWER)))) || 
 			(wep &&((wep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
 					 (wep->oartifact == ART_PEN_OF_THE_VOID && wep->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
+					 (oart && (oart->inv_prop == GITH_ART || oart->inv_prop == ZERTH_ART || oart->inv_prop == AMALGUM_ART) && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER) ||
 					 (wep->oartifact == ART_STORMBRINGER) ||
 					 (wep->oartifact == ART_OGRESMASHER)
 			)) ||
@@ -1947,6 +1953,13 @@ int fform;
 }
 
 boolean
+activeMentalEdge(fform)
+int fform;
+{
+	return (artinstance[ART_SILVER_SKY].GithStyle == fform && !blockedMentalEdge(fform));
+}
+
+boolean
 selectedFightingForm(fform)
 int fform;
 {
@@ -2021,6 +2034,7 @@ int fform;
 	}
 	return P_NONE; //Never reached
 }
+
 const char *
 nameOfFightingForm(fform)
 int fform;
@@ -2043,6 +2057,23 @@ int fform;
 		case FFORM_KNI_ELDRITCH:return "Eldritch style";
 		default:
 			impossible("bad fform %d", fform);
+	}
+	return "None";
+}
+
+const char *
+nameOfMentalEdge(edge)
+int edge;
+{
+	switch (edge)
+	{
+		case GSTYLE_PENETRATE: return "Penetrating Edge of Hatred";
+		case GSTYLE_COLD:  return "Cold Edge of Wrath";
+		case GSTYLE_DEFENSE:   return "Defensive Edge of Leadership";
+		case GSTYLE_ANTIMAGIC:    return "Anti-magic Edge of Serenity";
+		case GSTYLE_RESONANT:  return "Resonant Edge of Fellowship";
+		default:
+			impossible("bad gstyle %d", edge);
 	}
 	return "None";
 }
@@ -2105,6 +2136,48 @@ int fform;
 			break;
 	}
 	return FALSE;
+}
+
+boolean
+blockedMentalEdge(edge)
+int edge;
+{
+	boolean ok = FALSE;
+    const struct artifact *oart = (struct artifact *) 0;
+	if(uwep){
+		oart = get_artifact(uwep);
+		if(oart && (oart->inv_prop == GITH_ART || oart->inv_prop == AMALGUM_ART))
+			ok = TRUE;
+	}
+	if(uswapwep){
+		oart = get_artifact(uswapwep);
+		if(oart && (oart->inv_prop == GITH_ART || oart->inv_prop == AMALGUM_ART))
+			ok = TRUE;
+	}
+	if(!ok)
+		return TRUE;
+
+	switch(edge){
+		case GSTYLE_PENETRATE:
+			return u.usanity > 50 || u.ulevel < 14;
+		break;
+		case GSTYLE_COLD:
+			return u.usanity > 50 || u.ulevel < 14 || u.uinsight < 9;
+		break;
+		case GSTYLE_DEFENSE:
+			return u.usanity < 50 || u.ulevel < 14;
+		break;
+		case GSTYLE_ANTIMAGIC:
+			return u.usanity < 50 || u.ulevel < 14;
+		break;
+		case GSTYLE_RESONANT:
+			return u.usanity < 50 || u.ulevel < 30 || u.uinsight < 81;
+		break;
+		default:
+			impossible("Attempting to get blockage of mental edge number %d?", edge);
+		break;
+	}
+	return TRUE; // Should never be reached
 }
 
 #endif /* OVL2 */

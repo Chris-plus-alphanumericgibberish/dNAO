@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #include "hack.h"
+#include "artifact.h"
 #include "lev.h"
 #include "func_tab.h"
 /* #define DEBUG */	/* uncomment for debugging */
@@ -1158,7 +1159,8 @@ int doEldritchKniForm()
 	return MOVE_CANCELLED;
 }
 
-int doKnightForm()
+int
+doKnightForm()
 {
 	winid tmpwin;
 	int n, how, i;
@@ -1246,6 +1248,7 @@ int doKnightForm()
 		return MOVE_CANCELLED;
 	} else if ((selected[0].item.a_int == FFORM_HALF_SWORD || activeFightingForm(FFORM_HALF_SWORD)) &&
 				(!freehand() || (uwep && uwep->otyp == LONG_SWORD && welded(uwep)))){
+		free(selected);
 		pline("You need a free hand to adjust your grip!");
 		return MOVE_CANCELLED;
 	} else if (selected[0].item.a_int == FFORM_KNI_ELDRITCH){
@@ -1262,6 +1265,85 @@ int doKnightForm()
 	}
 }
 
+int
+doGithForm()
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+	int curskill;
+	char* block_reason;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Known Mental Edges");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+
+	for (i = FIRST_GSTYLE; i <= LAST_GSTYLE; i++) {
+		if (i == GSTYLE_RESONANT && (u.ulevel < 30 || u.uinsight < 81))
+			continue;
+		if (i == GSTYLE_COLD && u.uinsight < 9)
+			continue;
+
+		/* knight forms are shown if unskilled but not restricted, since training involves starting from unskilled */
+		boolean active = artinstance[ART_SILVER_SKY].GithStyle == i;
+		boolean blocked = blockedMentalEdge(i);
+
+		Strcpy(buf, nameOfMentalEdge(i));
+		Strcat(buf, " (");
+
+		if (i == GSTYLE_PENETRATE)
+			block_reason = "lack of hate";
+		else if (i == GSTYLE_COLD)
+			block_reason = "lack of wrath";
+		else
+			block_reason = "lack of mental discipline";
+
+		if (active && blocked){
+			Strcat(buf, "selected; blocked by ");
+			Strcat(buf, block_reason);
+		}
+		else if (active)
+			Strcat(buf, "active");
+		else if (blocked){
+			Strcat(buf, "blocked by ");
+			Strcat(buf, block_reason);
+		}
+		else
+			Strcat(buf, "ready");
+		Strcat(buf, ")");
+
+		any.a_int = i;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	end_menu(tmpwin, "Choose preferred mental edge:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if(n <= 0){
+		return MOVE_CANCELLED;
+	} else if (artinstance[ART_SILVER_SKY].GithStyle == selected[0].item.a_int) {
+		artinstance[ART_SILVER_SKY].GithStyle = 0;
+		free(selected);
+		return MOVE_INSTANT;
+	} else {
+		artinstance[ART_SILVER_SKY].GithStyle = selected[0].item.a_int;
+		free(selected);
+		return MOVE_INSTANT;
+	}
+}
+
 #define MONK_FORMS			0x001L
 #define LIGHTSABER_FORMS	0x002L
 #define KNIGHT_FORMS		0x004L
@@ -1270,6 +1352,7 @@ int doKnightForm()
 #define AVOID_GRABATTK		0x020L
 #define AVOID_ENGLATTK		0x040L
 #define AVOID_UNSAFETOUCH	0x080L
+#define GITH_FORMS			0x100L
 
 
 int
@@ -1342,6 +1425,19 @@ hasfightingforms(){
 		}
 	}
 	
+	if(u.ulevel >= 14){
+		if(uwep && uwep->oartifact){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)
+				formmask |= GITH_FORMS;
+		}
+		if(uswapwep && uswapwep->oartifact){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)
+				formmask |= GITH_FORMS;
+		}
+	}
+
 	/* next, forms trained are shown, even if inapplicable at the moment*/
 	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
 		if (FightingFormSkillLevel(i) >= P_BASIC)
@@ -1385,6 +1481,10 @@ dofightingform()
 	if (formmask & KNIGHT_FORMS) {
 		any.a_int = 3;
 		add_menu(tmpwin, NO_GLYPH, &any, 'k', 0, ATR_NONE, "Select Knightly Forms", MENU_UNSELECTED);
+	}
+	if (formmask & GITH_FORMS) {
+		any.a_int = 9;
+		add_menu(tmpwin, NO_GLYPH, &any, 'h', 0, ATR_NONE, "Select Mental Edge", MENU_UNSELECTED);
 	}
 	if (formmask & AVOID_PASSIVES) {
 		any.a_int = 4;
@@ -1457,6 +1557,8 @@ dofightingform()
 		case 8:
 			u.uavoid_unsafetouch = !u.uavoid_unsafetouch;
 			return MOVE_INSTANT;
+		case 9:
+			return doGithForm();
 		default:
 			impossible("unknown fighting form set %d", n);
 			return MOVE_CANCELLED;

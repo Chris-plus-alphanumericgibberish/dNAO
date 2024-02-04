@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "artifact.h"
 
 #include "xhity.h"
 
@@ -265,8 +266,12 @@ struct obj *otmp;
 		} else if (u.uswallow || otyp == WAN_STRIKING || rnd(20) < 10 + find_mac(mtmp) + 2*P_SKILL(otyp == SPE_FORCE_BOLT ? P_ATTACK_SPELL : P_WAND_POWER)) {
 			if(otyp == WAN_STRIKING || otyp == ROD_OF_FORCE) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER))-4,12);
 			else dmg = d(fblt_damage_die(P_SKILL(P_ATTACK_SPELL)),12);
-			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT && (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM))
-				dmg += d((u.ulevel+1)/2, 12);
+			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT){
+				if(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
+					dmg += d((u.ulevel+1)/2, 12);
+				if(u.ulevel == 30 && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_PATIENCE))
+					dmg += d(10, 12);
+			}
 			if(dbldam) dmg *= 2;
 			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 			if (otyp == SPE_FORCE_BOLT){
@@ -3393,6 +3398,8 @@ register struct	obj	*obj;
 			switch (otyp) {
 			case SPE_MAGIC_MISSILE:
 				zapdat.single_target = TRUE;
+				if(otyp == SPE_MAGIC_MISSILE && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH))
+					zapdat.damd += 2;
 				break;
 			case SPE_FIREBALL:
 				zapdat.explosive = TRUE;
@@ -5654,6 +5661,9 @@ int damage, tell;
 	if (dlev > 50) dlev = 50;
 	else if (dlev < 1) dlev = 1;
 	
+	if(mtmp->mtame && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+		dlev += 1;
+
 	int mons_mr = mtmp->data->mr;
 	if(mtmp->mcan){
 		if(mtmp->mtyp == PM_ALIDER)
@@ -5661,6 +5671,8 @@ int damage, tell;
 		else
 			mons_mr /= 2;
 	}
+	if(mtmp->mtame && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WILL)
+		mons_mr += 10;
 
 	if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) dlev+=u.chokhmah;
 	resisted = rn2(100 + alev - dlev) < mons_mr;

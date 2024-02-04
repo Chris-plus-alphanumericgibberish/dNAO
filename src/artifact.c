@@ -3194,7 +3194,7 @@ struct obj *otmp;
 struct monst *mon;
 boolean youagr;
 {
-	register const struct artifact *weap = get_artifact(otmp);
+	const struct artifact *weap = get_artifact(otmp);
 	int bonus = 0;
 	/* no need for an extra check for `NO_ATTK' because this will
 	   always return 0 for any artifact which has that attribute */
@@ -3206,6 +3206,9 @@ boolean youagr;
 	}
 	if(youagr && Role_if(PM_BARD)) //legend lore
 		bonus += 5;
+
+	if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == ZERTH_ART || weap->inv_prop == AMALGUM_ART) && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL))
+		bonus += otmp->spe+1;
 	
 	if(youagr && Role_if(PM_PRIEST)) return bonus + weap->accuracy; //priests always get the maximum to-hit bonus.
 	
@@ -3438,6 +3441,26 @@ winid tmpwin;		/* supplied by dodiscover() */
 
 #ifdef OVLB
 
+boolean
+near_yourteam(mon)
+struct monst *mon;
+{
+	struct monst *mnear;
+	for(int x = mon->mx-1; x < mon->mx+2; x++){
+		for(int y = mon->my-1; y < mon->my+2; y++){
+			if(!isok(x,y))
+				continue;
+			mnear = m_u_at(x, y);
+			if(!mnear)
+				continue;
+			if(mnear == &youmonst)
+				return TRUE;
+			if(mnear->mtame)
+				return TRUE;
+		}
+	}
+	return FALSE;
+}
 
 	/*
 	 * Magicbane's intrinsic magic is incompatible with normal
@@ -4273,6 +4296,7 @@ int * truedmgptr;
 	struct permonst * pd = (youdef ? youracedata : mdef->data);
 	int original_plusdmgptr = *plusdmgptr;
 	int original_truedmgptr = *truedmgptr;
+	const struct artifact *oart = get_artifact(otmp);
 	
 	if(!Fire_res(mdef)){
 		if(check_oprop(otmp, OPROP_FIREW))
@@ -4514,13 +4538,33 @@ int * truedmgptr;
 			*truedmgptr += d(2, 12);
 	}
 	if(check_oprop(otmp, OPROP_GSSDW)){
-		int power = youagr ? u.uinsight : magr ? magr->m_lev : 0;
+		int power = youagr ? min(u.uinsight, u.usanity) : magr ? magr->m_lev : 0;
 		//"Crit" chance
 		if(power > 0){
 			int multiplier = power >= 50 ? 3 : power >= 25 ? 2 : 1; 
-			int chance = power >= 50 ? 5 : power >= 25 ? 10 : 20; 
-			if(!rn2(chance))
-			*truedmgptr += multiplier*basedmg;
+			int chance = power >= 50 ? 4 : power >= 25 ? 3 : 2;
+			if(u.usanity > 80 &&(oart->inv_prop == GITH_ART || oart->inv_prop == ZERTH_ART || oart->inv_prop == AMALGUM_ART) && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)
+				chance += (u.usanity-81)/5;//0, 1, 2, or 3 starting at 81, 86, 91, 96
+			if(rn2(20) < chance){
+				*truedmgptr += multiplier*basedmg;
+				if(otmp->oartifact){
+					const struct artifact *weap = get_artifact(otmp);
+					if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_RESONANT)){
+						for(struct monst *tmon = fmon; tmon; tmon = tmon->nmon){
+							if(DEADMONSTER(tmon))
+								continue;
+							if(tmon->mtame){
+								tmon->movement += 12;
+								tmon->encouraged += u.usanity < 50 ? 0 : u.usanity < 75 ? 2 : u.usanity < 90 ? 5 : 8;
+							}
+							else if(near_yourteam(tmon)){
+								tmon->movement -= 12;
+								tmon->encouraged -= u.usanity < 50 ? 0 : u.usanity < 75 ? 2 : u.usanity < 90 ? 5 : 8;
+							}
+						}
+					}
+				}
+			}
 		}
 		//Bonus psychic damage (More reliable than regular psychic damage)
 		if(youdef || !mindless_mon(mdef)){
@@ -7160,6 +7204,38 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 		}
 	}
+
+	if(youagr && otmp->oartifact){
+		const struct artifact *weap = get_artifact(otmp);
+		if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)){
+			if(activeMentalEdge(GSTYLE_COLD)){
+				if(!Cold_res(mdef))
+					(*truedmgptr) += u.usanity > 50 ? 0 : u.usanity > 25 ? d(2,6) : u.usanity > 10 ? d(4,6) : d(6,6);
+				if(hates_unholy_mon(mdef))
+					(*truedmgptr) += u.usanity > 50 ? 0 : u.usanity > 25 ? d(1,9) : u.usanity > 10 ? d(2,9) : d(3,9);
+			}
+			if(activeMentalEdge(GSTYLE_ANTIMAGIC)){
+				int major_chance = u.usanity < 50 ? 0 : u.usanity < 75 ? 1 : u.usanity < 90 ? 2 : 5;
+				if(youdef){
+					if(u.uen > 0){
+						u.uen -= u.usanity/10;
+						flags.botl = 1;
+					}
+					if(rn2(20) < major_chance){
+						if(u.uen > 0){
+							u.uen = max(u.uen-400, 0);
+							flags.botl = 1;
+						}
+					}
+				}
+				else {
+					mdef->mspec_used += rnd(u.usanity/10);
+					if(rn2(20) < major_chance)
+						set_mcan(mdef, TRUE);
+				}
+			}
+		}
+	}
 	
 	if(otmp->oartifact == ART_ESSCOOAHLIPBOOURRR){
 		if(artinstance[otmp->oartifact].Esscoo_mid == mdef->m_id)
@@ -7810,6 +7886,83 @@ static NEARDATA const char recharge_type[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
 static NEARDATA const char invoke_types[] = { ALL_CLASSES, 0 };
 		/* #invoke: an "ugly check" filters out most objects */
 
+
+void
+zerth_mantras()
+{
+	pline("There are mantras wound around the grip.");
+	//Reign of Anger (MM)
+	if(ACURR(A_WIS) < 8 && ACURR(A_WIS)+ACURR(A_INT) > 21 && Insanity > 75 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH)){
+		// Modifies MM spell, +1 damage per die (implemented as +2 faces)
+		You("decipher a new mantra!");
+		pline("\"Greed and hates, pains and joys, jealousies and doubts. All of these fed on each other and the minds of the People were divided. In their division, the People were punished.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_WRATH;
+		more_experienced(300, 0);
+		newexplevel();
+	}
+	//Scripture of Steel (+1 to-hit and +1 to pet saves)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 23 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)){
+		You("decipher a new mantra!");
+		pline("\"*Know* that flesh cannot mark steel. *Know* that steel may mark flesh.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_STEEL;
+		more_experienced(600, 0);
+		newexplevel();
+	}
+	//Submerge the Will (Protection + Saves)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 27 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WILL)){
+		// Modifies protection spell, grants half magic damage while active, pets get +10 mr
+		You("decipher a new mantra!");
+		pline("\"Lashed upon the Pillars, Zerthimon moved his mind to a place where pain could not reach, leaving his body behind.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_WILL;
+		more_experienced(900, 0);
+		newexplevel();
+	}
+	//Vilquar's Eye (Blindness)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 29 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_VILQUAR)){
+		// Modifies invis effects, monsters must roll vs. resist to see you
+		You("decipher a new mantra!");
+		pline("\"Vilquar's eye was filled only with the reward he had been promised. He would see what he wished to see.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_VILQUAR;
+		more_experienced(1500, 0);
+		newexplevel();
+	}
+	//Power of One (Strength)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 31 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER)){
+		// Grants 25 str while wielded, bonus damage for pets
+		You("decipher a new mantra!");
+		pline("\"The strength of her *knowing* was so great, that all those that walked her path came to *know* themselves.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_POWER;
+		more_experienced(3000, 0);
+		newexplevel();
+	}
+	//Balance in All Things
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 34 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_BALANCE)){
+		// Modifies protection spell, monsters take damage when attacking
+		You("decipher a new mantra!");
+		pline("\"From the Separation of the People, came the *knowing* of Two Skies. From the *knowing* of Two Skies came the realization that hurting others, hurts oneself.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_BALANCE;
+		more_experienced(5000, 0);
+		newexplevel();
+	}
+	//Missile of Patience
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 37 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_PATIENCE)){
+		// Modifies Force Bolt
+		You("decipher a new mantra!");
+		pline("\"*Know* that the Rising of the People against the *illithid* was a thing built upon many turnings.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_PATIENCE;
+		more_experienced(8000, 0);
+		newexplevel();
+	}
+	//Zerthimon's Focus
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 40 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)){
+		// Modifies "crit" chance, proportional to sanity
+		You("decipher a new mantra!");
+		pline("\"A divided mind is one that does not *know* itself. When it is divided, it cleaves the body in two. When one has a single purpose, the body is strengthened. In *knowing* the self, grow strong.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_FOCUS;
+		more_experienced(16000, 0);
+		newexplevel();
+	}
+}
 
 int
 ibite_upgrade_menu(obj)
@@ -11384,11 +11537,11 @@ arti_invoke(obj)
 			}
 		}break;
 		case GITH_ART:{
+			doGithForm();
 		}break;
+		case AMALGUM_ART:
 		case ZERTH_ART:{
-			pline("There are mantras wound around the grip.");
-		}break;
-		case AMALGUM_ART:{
+			zerth_mantras();
 		}break;
 		case MORGOTH:{
 			int base_otyp = find_good_iring();
@@ -14102,7 +14255,7 @@ struct obj **opptr;
 				obfree(amalgam, (struct obj *)0);	/* get rid of the useless non-artifact */
 			return MOVE_CANCELLED;
 		}
-		pline("%s and %s melt and disolve into each-other!", The(xname(sky1)), the(xname(sky2)));
+		pline("%s and %s melt and dissolve into each-other!", The(xname(sky1)), the(xname(sky2)));
 		//merge stats
 		amalgam->spe = max(sky1->spe, sky2->spe);
 		for(int prop = 1; prop < MAX_OPROP; prop++){
