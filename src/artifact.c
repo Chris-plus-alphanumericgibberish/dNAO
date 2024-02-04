@@ -8855,6 +8855,7 @@ arti_invoke(obj)
 					obj->oeroded = 0;
 					obj->oeroded2= 0;
 					if(obj->spe < 3) obj->spe = 3;
+					if(obj->spe < u.ulevel/4) obj->spe = u.ulevel/4; //0 to 7
 					artinstance[obj->oartifact].SnSd3duration = monstermoves + (long) u.ulevel + obj->spe;
 				}
 			}
