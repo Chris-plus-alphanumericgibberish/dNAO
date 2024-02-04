@@ -2140,10 +2140,10 @@ dosacrifice()
 					if(u.ulevel > 20) summon_god_minion(altargod, FALSE);
 					if(u.ulevel >= 14) summon_god_minion(altargod, FALSE);
 					(void) summon_god_minion(altargod, TRUE);
+					/* anger priest; test handles bones files */
+					if((pri = findpriest(temple_occupied(u.urooms))) && !p_coaligned(pri))
+						angry_priest();
 				}
-				/* anger priest; test handles bones files */
-				if((pri = findpriest(temple_occupied(u.urooms))) && !p_coaligned(pri))
-					angry_priest();
 			} else {
 				pline("Unluckily, you feel the power of %s decrease.", u_gname());
 				change_luck(-1);
