@@ -707,7 +707,14 @@ give_up:	/* Quit */
 
 	/* Select descendant status, if necessary */
 	if (flags.descendant < 0) {
-	    if (pick4u == 'y' || flags.descendant == ROLE_RANDOM || flags.randomall) {
+	    if (pick4u == 'y' || flags.descendant == ROLE_RANDOM || flags.randomall
+			|| !(flags.initrole < 0 || roles[flags.initrole].malenum == PM_ARCHEOLOGIST || roles[flags.initrole].malenum == PM_CONVICT
+				 || roles[flags.initrole].malenum == PM_KNIGHT || roles[flags.initrole].malenum == PM_MADMAN
+				 || roles[flags.initrole].malenum == PM_NOBLEMAN || roles[flags.initrole].malenum == PM_PIRATE
+				 || roles[flags.initrole].malenum == PM_ROGUE || roles[flags.initrole].malenum == PM_SAMURAI
+				 || roles[flags.initrole].malenum == PM_TOURIST || flags.initrole == PM_VALKYRIE
+				)
+		) {
 			flags.descendant = 0; // never randomly roll descendant
 	    } else {	/* pick4u == 'n' */
 		tty_clear_nhwindow(BASE_WINDOW);
@@ -718,7 +725,7 @@ give_up:	/* Quit */
 
 		any.a_int = 2;
 		add_menu(win, NO_GLYPH, &any , 'y', 0, ATR_NONE,
-			"Inherit from a past adventurer (start with an heirloom artifact, consuming an artifact wish)", MENU_UNSELECTED);
+			"Inherit from a past adventurer (start with an heirloom artifact but low stats and dangerous foes)", MENU_UNSELECTED);
 
 		any.a_int = 1;
 		add_menu(win, NO_GLYPH, &any , 'n', 0, ATR_NONE, "No past inheritance", MENU_UNSELECTED);

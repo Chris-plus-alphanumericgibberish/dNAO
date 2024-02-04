@@ -194,6 +194,16 @@ more_experienced(exp, rexp)
 		exp *= 1.3;
 		rexp *= 1.3;
 	}
+	if(flags.descendant && flags.beginner){
+		if(Role_if(PM_CONVICT) || Role_if(PM_MADMAN)){
+			exp = (exp+1)/2;
+			rexp = (rexp+1)/2;
+		}
+		else {
+			exp = (exp+9)/10;
+			rexp = (rexp+9)/10;
+		}
+	}
 	if(u.ulevel < u.ulevelmax){
 		//if you have lost levels to level drain, gain XP at 5x rate.
 		//if you are about to regain the last drained level, gain at least the base xp total

@@ -2756,14 +2756,31 @@ u_init()
 		else
 			init_attr(55);
 	} else if(Race_if(PM_ORC)){
-		init_attr(55);
+		if(flags.descendant)
+			init_attr(45);
+		else
+			init_attr(55);
 	} else if (Race_if(PM_ANDROID)){
-		init_attr(95);
+		if(flags.descendant)
+			init_attr(75);
+		else
+			init_attr(95);
 	} else if (Role_if(PM_VALKYRIE)){
-		init_attr(85);
+		if(flags.descendant)
+			init_attr(70);
+		else
+			init_attr(85);
 	} else if (Race_if(PM_ELF)){
-		init_attr(80);
-	} else init_attr(75);	/* init attribute values */
+		if(flags.descendant)
+			init_attr(65);
+		else
+			init_attr(80);
+	} else {
+		if(flags.descendant)
+			init_attr(60);
+		else
+			init_attr(75);	/* init attribute values */
+	}
 	find_ac();				/* get initial ac value */
 	max_rank_sz();			/* set max str size for class ranks */
 /*
