@@ -532,6 +532,8 @@ mklolthvaultitem()
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
 				otmp->spe = max_ints(d(2,3), otmp->spe);
 		}
+		if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS) && rn2(5))
+			otmp->oerodeproof = TRUE;
 	} while (--try_limit > 0 &&
 	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
 
