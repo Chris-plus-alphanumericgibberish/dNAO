@@ -776,6 +776,12 @@ int y;							/* */
 	struct rm *room = &levl[x][y];
 	boolean shopdoor = FALSE, shopwall = FALSE;
 
+	if(youagr && !couldsee(x,y))
+		return;
+
+	if(!youagr && !clear_path(x(magr), y(magr), x, y))
+		return;
+
 	/* Doors (but not artifact doors) */
 	if ((closed_door(x, y) || room->typ == SDOOR) &&
 		!artifact_door(x, y)) 

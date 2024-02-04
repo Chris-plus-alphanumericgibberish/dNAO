@@ -2566,6 +2566,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -2597,6 +2598,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2625,6 +2627,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2681,6 +2684,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -2707,6 +2711,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2732,6 +2737,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2759,6 +2765,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2784,6 +2791,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2815,6 +2823,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2845,6 +2854,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2897,6 +2907,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -2911,7 +2922,9 @@ struct attack * attk;
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 		}
-		if(u.uinsight >= 40){
+		if(u.uinsight >= 40
+		  && ((youagr) ? couldsee(tarx + dx, tary + dy) : clear_path(magr->mx, magr->my, tarx + dx, tary + dy))
+		){
 			explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
 		}
 	}
@@ -2988,6 +3001,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -3043,6 +3057,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -3067,6 +3082,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -3120,6 +3136,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -3144,6 +3161,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
