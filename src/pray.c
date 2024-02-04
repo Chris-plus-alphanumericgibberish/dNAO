@@ -3624,7 +3624,7 @@ commune_with_goat()
 	}
 
 	u.shubbie_credit -= cost;
-	change_usanity(-cost/2, TRUE);
+	change_usanity(-(cost+4)/5, TRUE);
 	
 	return MOVE_STANDARD;
 }
@@ -3955,7 +3955,7 @@ commune_with_silver_flame()
 		pline("The silver light recedes.");
 
 	u.silver_credit -= cost;
-	change_usanity(-cost/2, TRUE);
+	change_usanity(-(cost+4)/5, TRUE);
 	
 	return MOVE_STANDARD;
 }
@@ -4173,7 +4173,7 @@ commune_with_yog()
 			s_suffix(yogname)
 			);
 		/* taxes sanity! (a tiny bit) */
-		change_usanity(-6, TRUE);
+		change_usanity(-1, TRUE);
 		return MOVE_STANDARD;
 	}
 
@@ -4321,7 +4321,7 @@ commune_with_yog()
 	}
 
 	u.yog_sothoth_credit -= cost;
-	change_usanity(-cost/2, TRUE);
+	change_usanity(-(cost+4)/5, TRUE);
 	
 	return MOVE_STANDARD;
 }
