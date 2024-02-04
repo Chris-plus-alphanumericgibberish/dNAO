@@ -17,7 +17,7 @@
 #define 	SANCTIFY_WEP	4
 
 #define		NURSE_FULL_HEAL			1
-#define		NURSE_TRANQUIZIZERS		2
+#define		NURSE_TRANQUILIZERS		2
 #define		NURSE_RESTORE_ABILITY	3
 #define		NURSE_FIX_MORGUL		4
 #define		NURSE_FIX_SICKNESS		5
@@ -6580,8 +6580,8 @@ donursemenu()
 		MENU_UNSELECTED);
 	incntlet++;
 	if(u.usanity < 100){
-		Sprintf(buf, "Something for my nerves ($%d)", nurseprices[NURSE_TRANQUIZIZERS]);
-		any.a_int = NURSE_TRANQUIZIZERS;	/* must be non-zero */
+		Sprintf(buf, "Something for my nerves ($%d)", nurseprices[NURSE_TRANQUILIZERS]);
+		any.a_int = NURSE_TRANQUILIZERS;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
@@ -6674,7 +6674,7 @@ struct monst *nurse;
 #else
 		gold = money_cnt(invent);
 #endif
-	if(service == NURSE_FULL_HEAL || service == NURSE_TRANQUIZIZERS){
+	if(service == NURSE_FULL_HEAL || service == NURSE_TRANQUILIZERS){
 		char inbuf[BUFSZ];
 		getlin("How many courses?", inbuf);
 		if (*inbuf == '\033') count = 1;
@@ -6703,7 +6703,7 @@ struct monst *nurse;
 			pline("%s doses you with healing medicine.", Monnam(nurse));
 			healup(400*count, 8*count, FALSE, TRUE);
 		break;
-		case NURSE_TRANQUIZIZERS:
+		case NURSE_TRANQUILIZERS:
 			pline("%s doses you with tranquilizers.", Monnam(nurse));
 			if(Sleep_resistance || Free_action)
 				You("yawn.");
