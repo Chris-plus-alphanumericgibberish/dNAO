@@ -713,6 +713,11 @@ const char *name;
 		if (obj->oartifact == ART_IBITE_ARM)
 			add_oprop(obj, OPROP_CCLAW);
 		
+		if (obj->oartifact == ART_AVENGER){
+			add_oprop(obj, OPROP_HOLYW);
+			add_oprop(obj, OPROP_UNHYW);
+		}
+		
 		/* property */
 		if (obj->oartifact == ART_AMALGAMATED_SKIES || obj->oartifact == ART_SILVER_SKY)
 			add_oprop(obj, OPROP_GSSDW);

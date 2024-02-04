@@ -3908,8 +3908,6 @@ boolean greatequip;
 			if(otmp->spe < 3) otmp->spe = 3;
 			set_material_gm(otmp, IRON);
 			otmp = oname(otmp, artiname(ART_AVENGER));
-			add_oprop(otmp, OPROP_HOLYW);
-			add_oprop(otmp, OPROP_UNHYW);
 			fix_object(otmp);
 			(void) mpickobj(mtmp, otmp);
 			(void) mongets(mtmp, HELMET, mkobjflags);
