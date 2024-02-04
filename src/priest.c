@@ -394,7 +394,7 @@ boolean
 p_coaligned(priest)
 struct monst *priest;
 {
-	return((boolean)(u.ualign.type == ((int)EPRI(priest)->shralign)));
+	return((boolean)(u.ualign.type == ((int)EPRI(priest)->shralign) && (!(EPRI(priest)->godnum) || u.ugodbase[UGOD_CURRENT] == EPRI(priest)->godnum)));
 }
 
 STATIC_OVL boolean
