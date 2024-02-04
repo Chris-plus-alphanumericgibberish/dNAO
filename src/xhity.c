@@ -4469,7 +4469,7 @@ boolean ranged;
 	 *	armor's special magic protection.  Otherwise just use !mtmp->mcan.
 	 */
 	armpro = magic_negation(mdef);
-	armuncancel = ((rn2(3) >= armpro) || !rn2(50));
+	armuncancel = ((rn2(3) >= armpro) || !rn2(10));
 	/* hack: elemental gaze attacks call this function with their AT_GAZE; we want that to ignore armor cancellation */
 	if (attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ)
 		armuncancel = TRUE;
