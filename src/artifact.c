@@ -4555,11 +4555,12 @@ int * truedmgptr;
 								continue;
 							if(tmon->mtame){
 								tmon->movement += 12;
-								tmon->encouraged += u.usanity < 50 ? 0 : u.usanity < 75 ? 2 : u.usanity < 90 ? 5 : 8;
+								tmon->encouraged = max_ints(u.usanity < 50 ? 0 : u.usanity < 75 ? 2 : u.usanity < 90 ? 5 : 8, tmon->encouraged);
 							}
 							else if(near_yourteam(tmon)){
-								tmon->movement -= 12;
-								tmon->encouraged -= u.usanity < 50 ? 0 : u.usanity < 75 ? 2 : u.usanity < 90 ? 5 : 8;
+								if(!resist(tmon, '\0', 0, NOTELL))
+									tmon->movement -= 12;
+								tmon->encouraged = min_ints(u.usanity < 50 ? 0 : u.usanity < 75 ? -2 : u.usanity < 90 ? -5 : -8, tmon->encouraged);
 							}
 						}
 					}
