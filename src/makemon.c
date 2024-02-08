@@ -16008,9 +16008,51 @@ struct monst *mtmp;
 		}
 	}
 	if(is_half_dragon(mtmp->data)){
+		if(mtmp->mvar_hdBreath == AD_ELEC){
+			give_mintrinsic(mtmp, BLIND_RES);
+		}
 		if(mtmp->m_lev >= 14){
 			give_mintrinsic(mtmp, FLYING);
 		}
+		if(mtmp->m_lev >= 15){
+			switch (mtmp->mvar_hdBreath){
+			case AD_COLD:
+				give_mintrinsic(mtmp, MAGICAL_BREATHING);
+				give_mintrinsic(mtmp, SWIMMING);
+				give_mintrinsic(mtmp, WATERPROOF);
+				break;
+			case AD_ACID:
+				give_mintrinsic(mtmp, STONE_RES);
+				break;
+			case AD_SLEE:
+				give_mintrinsic(mtmp, FREE_ACTION);
+				break;
+			case AD_DRST:
+				give_mintrinsic(mtmp, SICK_RES);
+				break;
+			case AD_ELEC:
+				give_mintrinsic(mtmp, FAST);
+				break;
+			case AD_MAGM:
+				give_mintrinsic(mtmp, HALF_SPDAM);
+				break;
+			case AD_DISN:
+				give_mintrinsic(mtmp, DRAIN_RES);
+				break;
+			}
+		}
+	}
+	if(mtmp->mtyp == PM_WHITE_DRAGON){
+		give_mintrinsic(mtmp, WATERPROOF);
+	}
+	if(mtmp->mtyp == PM_ORANGE_DRAGON || mtmp->mtyp == PM_PLATINUM_DRAGON){
+		give_mintrinsic(mtmp, FREE_ACTION);
+	}
+	if(mtmp->mtyp == PM_BLUE_DRAGON){
+		give_mintrinsic(mtmp, BLIND_RES);
+	}
+	if(mtmp->mtyp == PM_GRAY_DRAGON){
+		give_mintrinsic(mtmp, HALF_SPDAM);
 	}
 	if(mtmp->mtyp == PM_YUKI_ONNA){
 		if(mtmp->m_lev >= 11){
