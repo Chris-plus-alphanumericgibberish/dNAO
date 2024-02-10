@@ -2312,6 +2312,7 @@ E int FDECL(polymon, (int));
 E void NDECL(rehumanize);
 E int FDECL(dobreathe, (struct permonst *));
 E int NDECL(domakewhisperer);
+E int NDECL(dokiai);
 E int NDECL(doelementalbreath);
 E int NDECL(dospit);
 E int NDECL(doremove);

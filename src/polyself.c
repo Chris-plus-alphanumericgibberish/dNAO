@@ -943,7 +943,7 @@ domakewhisperer()
 	if(u.uinsight >= 20)
 		duration = 2*ACURR(A_CHA);
 	
-	u.whisperturn = moves+duration+14;
+	u.kiaiturn = moves+duration+14;
 	losepw(10+min(u.uinsight, 45));
 	flags.botl = 1;
 	
@@ -973,6 +973,27 @@ domakewhisperer()
 	EDOG(mtmp)->waspeaceful = TRUE;
 	mtmp->mpeacetime = 0;
 	return MOVE_STANDARD;
+}
+
+int
+dokiai()
+{
+	const char *petname;
+	struct monst *mtmp;
+	int duration;
+
+	pline("Hyah!");
+	song_noise(u.ulevel * 3);
+	duration = xlev_to_rank(u.ulevel);
+	if(ACURR(A_CHA) > 13){
+		duration += rnd(ACURR(A_CHA)-13);
+	}
+	u.uencouraged = max(duration, u.uencouraged);
+	incr_itimeout(&HAggravate_monster, duration*4);
+	u.kiaiturn = moves+duration*8+rnz(100);
+	flags.botl = 1;
+	
+	return MOVE_PARTIAL;
 }
 
 int

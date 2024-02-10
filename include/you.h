@@ -410,6 +410,7 @@ struct you {
 #define MATTK_U_MONST       28
 #define MATTK_U_ELMENTAL    29
 #define MATTK_WHISPER    	30
+#define MATTK_KI    		31
 
 	struct attribs	macurr,		/* for monster attribs */
 			mamax;		/* for monster attribs */
@@ -570,7 +571,9 @@ struct you {
 	long lastprayed;
 	long lastslept;
 	long nextsleep;
-	long whisperturn;
+	long role_technique_turn;
+#define whisperturn role_technique_turn
+#define kiaiturn role_technique_turn
 	int regen_blocked;
 	uchar lastprayresult, reconciled;
 #define	PRAY_NONE	0

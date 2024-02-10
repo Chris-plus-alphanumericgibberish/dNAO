@@ -650,6 +650,9 @@ boolean you_abilities;
 	if (Role_if(PM_MADMAN) && u.whisperturn < moves && !Catapsi && !DimensionalLock){
 		add_ability('W', "Call your whisperer", MATTK_WHISPER);
 	}
+	if (Role_if(PM_SAMURAI) && u.kiaiturn < moves && !Catapsi && u.uencouraged < xlev_to_rank(u.ulevel)){
+		add_ability('K', "Kiai shout", MATTK_KI);
+	}
 	if (you_abilities && spellid(0) != NO_SPELL) {
 		add_ability('z', "Cast spells", MATTK_U_SPELLS);
 	}
@@ -696,6 +699,7 @@ boolean you_abilities;
 	case MATTK_U_MONST: return domonability();
 	case MATTK_U_ELMENTAL: return doelementalbreath();
 	case MATTK_WHISPER: return domakewhisperer();
+	case MATTK_KI: return dokiai();
 
 	/* Monster (or monster-like) abilities */
 	case MATTK_BREATH: return dobreathe(youmonst.data);

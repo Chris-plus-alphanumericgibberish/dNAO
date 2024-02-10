@@ -3881,6 +3881,17 @@ int wep_type;
 	if(wep_type == P_AXE && Race_if(PM_DWARF) && ublindf && ublindf->oartifact == ART_WAR_MASK_OF_DURIN) bonus += 5;
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && type != P_TWO_WEAPON_COMBAT) bonus = max(bonus,0);
 	
+	if(weapon && weapon == uwep && Role_if(PM_SAMURAI) && !Upolyd && !u.twoweap && !u.usteed && !u.ustuck
+	  && ((u.dx == u.prev_dir.x && u.dy == u.prev_dir.y) || (u.dx == -1*u.prev_dir.x && u.dy == -1*u.prev_dir.y)) 
+	  && (weapon->oclass == WEAPON_CLASS || is_weptool(weapon)) 
+		&& (objects[weapon->otyp].oc_skill == P_LONG_SWORD || objects[weapon->otyp].oc_skill == P_TWO_HANDED_SWORD)
+	  && (bimanual(weapon, youracedata) || bimanual_mod(weapon, &youmonst) > 1)
+	){
+		if(bonus > 0)
+			bonus *= 2;
+		else bonus++;
+	}
+
     return bonus;
 }
 
@@ -4101,6 +4112,16 @@ int wep_type;
 	if(wep_type == P_AXE && Race_if(PM_DWARF) && ublindf && ublindf->oartifact == ART_WAR_MASK_OF_DURIN) bonus += 5;
 	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && type != P_TWO_WEAPON_COMBAT) bonus = max(bonus,0);
 	
+	if(weapon && weapon == uwep && Role_if(PM_SAMURAI) && !Upolyd && !u.twoweap && !u.usteed && !u.ustuck
+	  && (weapon->oclass == WEAPON_CLASS || is_weptool(weapon)) && objects[weapon->otyp].oc_skill == P_LONG_SWORD
+	  && (bimanual(weapon, youracedata) || bimanual_mod(weapon, &youmonst) > 1)
+	  && ((u.dx == u.prev_dir.x && u.dy == u.prev_dir.y) || (u.dx == -1*u.prev_dir.x && u.dy == -1*u.prev_dir.y)) 
+	){
+		if(bonus > 0)
+			bonus *= 2;
+		else bonus++;
+	}
+
 	return bonus;
 }
 
