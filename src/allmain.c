@@ -3494,28 +3494,7 @@ newgame()
 			com_pager(1);
 		}
 	}
-
-#ifdef INSURANCE
-	save_currentstate();
-#endif
-	program_state.something_worth_saving++;	/* useful data now exists */
-
-#if defined(RECORD_REALTIME) || defined(REALTIME_ON_BOTL)
-
-	/* Start the timer here */
-	realtime_data.realtime = (time_t)0L;
-
-#if defined(BSD) && !defined(POSIX_TYPES)
-	(void) time((long *)&realtime_data.restoretime);
-#else
-	(void) time(&realtime_data.restoretime);
-#endif
-
-#endif /* RECORD_REALTIME || REALTIME_ON_BOTL */
-
 	if(Darksight) litroom(FALSE,NULL);
-	/* Success! */
-	welcome(TRUE);
 	if(flags.descendant){
 		struct obj *otmp;
 		int inher_arti = find_preset_inherited(inherited);
@@ -3547,6 +3526,27 @@ newgame()
 			}
 		}
 	}
+
+#ifdef INSURANCE
+	save_currentstate();
+#endif
+	program_state.something_worth_saving++;	/* useful data now exists */
+
+#if defined(RECORD_REALTIME) || defined(REALTIME_ON_BOTL)
+
+	/* Start the timer here */
+	realtime_data.realtime = (time_t)0L;
+
+#if defined(BSD) && !defined(POSIX_TYPES)
+	(void) time((long *)&realtime_data.restoretime);
+#else
+	(void) time(&realtime_data.restoretime);
+#endif
+
+#endif /* RECORD_REALTIME || REALTIME_ON_BOTL */
+
+	/* Success! */
+	welcome(TRUE);
 	return;
 }
 
