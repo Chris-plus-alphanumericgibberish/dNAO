@@ -8247,6 +8247,7 @@ arti_invoke(obj)
 		oart->inv_prop == ALTMODE || 
 		oart->inv_prop == LORDLY ||
 		oart->inv_prop == DETESTATION ||
+		oart->inv_prop == THEFT_TYPE ||
 		oart->inv_prop == GITH_ART ||
 		oart->inv_prop == ZERTH_ART ||
 		oart->inv_prop == AMALGUM_ART
@@ -8277,6 +8278,7 @@ arti_invoke(obj)
 		oart->inv_prop == VOID_CHIME ||
 		oart->inv_prop == CHANGE_SIZE ||
 		oart->inv_prop == IMPERIAL_RING ||
+		oart->inv_prop == THEFT_TYPE ||
 		oart->inv_prop == GITH_ART ||
 		oart->inv_prop == ZERTH_ART ||
 		oart->inv_prop == AMALGUM_ART ||
