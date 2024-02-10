@@ -3594,7 +3594,6 @@ do_inheritance_menu()
 		if(artilist[i].gflags&ARTG_INHER
 		&& !Role_if(artilist[i].role) && !Pantheon_if(artilist[i].role)
 		&& !(urole.questarti == i)
-		&& (artilist[i].alignment == A_NONE || artilist[i].alignment == u.ualign.type)
 		){
 			Sprintf(buf, "%s", artilist[i].name);
 			any.a_int = i;	/* must be non-zero */
