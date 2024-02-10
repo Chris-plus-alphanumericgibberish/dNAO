@@ -882,7 +882,7 @@ SHIRT(("plain dress", "dress"), /*Needs encyc entry*/
 #endif
 /*Ruffled shirts are little different from other shirts*/
 SHIRT(("ruffled shirt"), /*Needs encyc entry*/
-	1, 0, MZ_MEDIUM,  0, 0,	 5,   2, 10, 0, 0, CLOTH, CLR_WHITE),
+	1, 0, MZ_MEDIUM,  0, 0,	 5,  200, 10, 0, 0, CLOTH, CLR_WHITE),
 /* victorian underwear, on the other hand, inflicts a penalty to AC but grants MC 3 */
 /* needs special case to be 'bulky' */
 SHIRT(("victorian underwear", "frilly dress"),
