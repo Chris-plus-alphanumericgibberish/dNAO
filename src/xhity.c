@@ -13910,22 +13910,19 @@ int vis;						/* True if action is at all visible to the player */
 					}
 				}
 				else {
-					You("dishonorably use a poisoned weapon!");
+					static long dishonorable_ninja = -100L;
+
+					if(dishonorable_ninja+100 < moves){
+						You("dishonorably use a poisoned weapon!");
+					}
+					dishonorable_ninja = moves;
 					adjalign(5);
 				}
 			}
-			else if ((u.ualign.type == A_LAWFUL) && !Race_if(PM_ORC) &&
-				!((Race_if(PM_DROW) && !flags.initgend &&
-						(Role_if(PM_PRIEST) || Role_if(PM_ROGUE) || Role_if(PM_RANGER) || Role_if(PM_WIZARD)))
-				  || (God_if(GOD_APOLLO))
-				  || (!Holiness_if(HOLY_HOLINESS))
-				  || (Race_if(PM_HALF_DRAGON) && flags.initgend && Role_if(PM_MADMAN))
-				) &&
-				(u.ualign.record > -10)
-				) {
+			else if ((u.ualign.type == A_LAWFUL) && (Pantheon_if(PM_KNIGHT) || Pantheon_if(PM_VALKYRIE)) && (u.ualign.record > -10)) {
 				You_feel("like an evil coward for using a poisoned weapon.");
-				adjalign(-2);//stiffer penalty
-				if (rn2(2)) u.hod++;
+				adjalign(-2); //stiffer penalty
+				u.hod++;
 			}
 		}
 
