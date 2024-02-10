@@ -554,11 +554,11 @@ boolean affect_game_state;
 
 			/* these only apply if you didn't attack this action */
 			if (!u.uattked) {
-				if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
+				if(uwep && uwep->oartifact == ART_TENSA_ZANGETSU && !flags.beginner){
 					MOVECOST(NORMAL_SPEED/12);
-				} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI){
+				} else if(uwep && uwep->oartifact == ART_SODE_NO_SHIRAYUKI && u.ulevel >= 14){
 					MOVECOST(NORMAL_SPEED/4);
-				} else if(uwep && uwep->oartifact == ART_TOBIUME){
+				} else if(uwep && uwep->oartifact == ART_TOBIUME && u.ulevel >= 14){
 					if (affect_game_state) {
 						if((HStealth&TIMEOUT) < 2)
 							set_itimeout(&HStealth, 2L);
@@ -754,7 +754,8 @@ you_calc_movement()
 	}
 	if (uwep && uwep->oartifact == ART_GARNET_ROD) moveamt += NORMAL_SPEED / 2;
 	if (uwep && uwep->oartifact == ART_TENSA_ZANGETSU){
-		moveamt += NORMAL_SPEED;
+		if(u.ulevel >= 14)
+			moveamt += NORMAL_SPEED;
 		if(artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe-- < 1){
 			if(ublindf && ublindf->otyp == MASK && ublindf->corpsenm != NON_PM && is_undead(&mons[ublindf->corpsenm])){
 				artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = mons[ublindf->corpsenm].mlevel;
