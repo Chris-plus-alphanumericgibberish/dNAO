@@ -7338,8 +7338,15 @@ boolean printmessages; /* print generic elemental damage messages */
 				if(m_u_at(nx,ny) != 0)
 					continue;
 				//The world around the target warps into giant stinging scorpion tails
-				if(u.uinsight > 64 || u.uinsight > rnd(64))
+				if(u.uinsight > 64 || u.uinsight > rnd(64)){
 					*plusdmgptr += d(1,8);
+					if(!Poison_res(mdef)){
+						if(!rn2(10))
+							*truedmgptr += 80;
+						else *truedmgptr += rnd(6);
+						
+					}
+				}
 			}
 		}
 		if(u.uinsight > 64 && (otmp->otyp == BULLWHIP || !rn2(4))){
