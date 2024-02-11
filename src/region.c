@@ -505,7 +505,7 @@ xchar x, y;
 	int i;
     for (i = 0; i < n_regions; i++) {
 		if (inside_region(regions[i], x, y) &&
-			regions[i]->arg.adtyp == AD_POSN
+			regions[i]->arg.adtyp == AD_DRST
 		) {
 			return TRUE;
 		}
@@ -963,7 +963,7 @@ genericptr_t p2;
     cloud_data = (struct region_arg *) &reg->arg;
     
     switch(cloud_data->adtyp){
-	case AD_POSN:
+	case AD_DRST:
 		return expire_gas_cloud(p1, p2);
 	case AD_DESC:
 		return expire_dust_cloud(p1, p2);
@@ -989,11 +989,14 @@ genericptr_t p2;
     NhRegion *reg;
     struct monst *mdef;
     struct region_arg *cloud_data;
+    struct attack attk;
+    int vis;
+    int result;
 
     reg = (NhRegion *) p1;
     cloud_data = (struct region_arg *) &reg->arg;
     switch(cloud_data->adtyp){
-	case AD_POSN:
+	case AD_DRST:
 		return inside_gas_cloud(p1, p2);
 	case AD_DESC:
 		return inside_dust_cloud(p1, p2);
@@ -1002,7 +1005,14 @@ genericptr_t p2;
     }
     /* If not a specially handled type, do generic handling */
     mdef = p2 ? (struct monst *) p2: &youmonst;
-    return FALSE;
+    boolean youdef = (mdef == &youmonst);
+    attk.aatyp = AT_ENGL;
+    attk.adtyp = cloud_data->adtyp;
+    attk.damn = cloud_data->damage;
+    attk.damd = 1;
+    vis = getvis((struct monst *) 0, mdef, 0, 0);
+    result = xengulfhurty((struct monst *) 0, mdef, &attk, vis);
+    return result & MM_DEF_DIED;
 }
 
 
@@ -1147,7 +1157,7 @@ boolean yours;
     NhRect tmprect;
     struct region_arg cloud_data;
     cloud_data.damage = damage;
-    cloud_data.adtyp = AD_POSN;
+    cloud_data.adtyp = AD_DRST;
 
     cloud = create_region((NhRect *) 0, 0);
     nrect = radius;
