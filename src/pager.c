@@ -736,8 +736,9 @@ lookat(x, y, buf, monbuf, shapebuff)
 			Sprintf(shapebuff, "%s%s%s", an(sizeStr[rn2(SIZE(sizeStr))]), headStr[rn2(SIZE(headStr))], bodyStr[rn2(SIZE(bodyStr))]);
 		}
 	}
-    }
-    else if (glyph_is_object(glyph)) {
+    } else if glyph_is_cloud(glyph) {
+	Sprintf(buf, "%s cloud", get_description_of_damage_type(glyph_to_cloud_type(glyph)));
+    } else if (glyph_is_object(glyph)) {
 	struct obj *otmp = 0;
 	boolean fakeobj = object_from_map(glyph, x, y, &otmp);
 
@@ -1477,6 +1478,8 @@ do_look(quick)
 	    } else if (glyph_is_monster(glyph)) {
 		/* takes care of pets, detected, ridden, and regular mons */
 		sym = monsyms[(int)mons[glyph_to_mon(glyph)].mlet];
+	    } else if (glyph_is_cloud(glyph)) {
+		sym = showsyms[S_cloud];
 	    } else if (glyph_is_swallow(glyph)) {
 		sym = showsyms[glyph_to_swallow(glyph)+S_sw_tl];
 	    } else if (glyph_is_invisible(glyph)) {

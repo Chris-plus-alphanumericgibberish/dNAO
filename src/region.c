@@ -1139,7 +1139,7 @@ boolean yours;
     cloud->expire_f = EXPIRE_GENERIC_CLOUD;
     cloud->arg = *cloud_data;
     cloud->visible = TRUE;
-    cloud->glyph = cmap_to_glyph(S_cloud);
+    cloud->glyph = cloud_to_glyph(cloud_data->adtyp);
     add_region(cloud);
     return cloud;
 
