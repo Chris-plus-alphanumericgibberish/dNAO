@@ -24,6 +24,7 @@ boolean	known;
 static NEARDATA const char readable[] =
 		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, 0 };
 static const char all_count[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
+static const int random_cloud_types[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_ACID};
 
 static void FDECL(wand_explode, (struct obj *));
 static void NDECL(do_class_genocide);
@@ -2793,7 +2794,14 @@ struct obj	*sobj;
 		    You("smell rotten eggs.");
 		    return 0;
 		}
-		(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj), 8+4*bcsign(sobj), TRUE);
+		if(confused){
+			struct region_arg cloud_data;
+			cloud_data.damage = 8+4*bcsign(sobj);
+			cloud_data.adtyp = random_cloud_types[rn2(SIZE(random_cloud_types))];
+			(void) create_generic_cloud(cc.x, cc.y, 3+bcsign(sobj), &cloud_data, TRUE);
+		} else {
+			(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj), 8+4*bcsign(sobj), TRUE);
+		}
 		break;
 	}
 	case SCR_ANTIMAGIC:{
