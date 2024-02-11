@@ -2,11 +2,11 @@ GAMEDIR = dnethackdir
 
 # gprof flags
 # CFLAGS = -pg
-CFLAGS = -g
+CFLAGS = -g3 -fsanitize=address
 
 # gprof flags
 # LDFLAGS += -pg -Wno-knr-promoted-parameter
-LDFLAGS += -Wno-knr-promoted-parameter
+LDFLAGS += -Wno-knr-promoted-parameter -fsanitize=address
 
 GAMELIBS = -lncurses -lm
 
