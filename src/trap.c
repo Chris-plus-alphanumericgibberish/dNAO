@@ -3841,8 +3841,14 @@ drown()
 	killer = (levl[u.ux][u.uy].typ == POOL || Is_medusa_level(&u.uz)) ?
 	    "pool of water" : "moat";
 	done(DROWNING);
+	//Survived in the water, no longer drowning. Return False since we're still swimming happily
+	if(u.divetimer > 0){
+		return FALSE;
+	}
+	//Probably impossible to go past this point as things currently stand.
+	// All forms of life saving refill the dive timer.
 	/* oops, we're still alive.  better get out of the water. */
-	while (!safe_teleds(TRUE)) {
+	while (!safe_teleds(TRUE) && u.divetimer <= 0) {
 		pline("You're still drowning.");
 		done(DROWNING);
 	}

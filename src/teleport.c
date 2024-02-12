@@ -71,6 +71,10 @@ unsigned gpflags;
 				return !!(Breathless && Waterproof && !(u.sealsActive&SEAL_OSE));
 			else return (mon_resistance(mtmp,SWIMMING) || breathless_mon(mtmp) || amphibious_mon(mtmp));
 	    } else if (is_pool(x,y, FALSE) && !ignorewater) {
+			//The water level has 3d water and "pools" of water lining the bubbles as the only terrain.
+			// Even if the pools wouldn't normally be considered OK, they have to be allowed as the only viable option.
+			if(Is_waterlevel(&u.uz))
+				return TRUE;
 			if(mtmp == &youmonst && level.flags.lethe)
 				return !!(Levitation || Flying || Wwalking);
 			if (mtmp == &youmonst)
