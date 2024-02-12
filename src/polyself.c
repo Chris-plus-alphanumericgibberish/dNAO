@@ -1230,7 +1230,7 @@ dodemonpet()
 	losepw(10);
 	flags.botl = 1;
 
-	i = (!is_demon(youracedata) || !rn2(6)) 
+	i = (is_demon(youracedata) && !rn2(6)) 
 	     ? ndemon(u.ualign.type) : NON_PM;
 	pm = i != NON_PM ? &mons[i] : youracedata;
 	if(pm->geno&G_UNIQ) {
