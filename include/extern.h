@@ -2574,6 +2574,7 @@ E int FDECL(rnz, (int));
 
 E boolean FDECL(validrole, (int));
 E boolean FDECL(validrace, (int, int));
+E boolean FDECL(validdescendant, (int));
 E boolean FDECL(validgend, (int, int, int));
 E boolean FDECL(validalign, (int, int, int));
 E int FDECL(randrole, (int));

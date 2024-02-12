@@ -707,14 +707,7 @@ give_up:	/* Quit */
 
 	/* Select descendant status, if necessary */
 	if (flags.descendant < 0) {
-	    if (pick4u == 'y' || flags.descendant == ROLE_RANDOM || flags.randomall
-			|| !(flags.initrole < 0 || roles[flags.initrole].malenum == PM_ARCHEOLOGIST || roles[flags.initrole].malenum == PM_CONVICT
-				 || roles[flags.initrole].malenum == PM_KNIGHT || roles[flags.initrole].malenum == PM_MADMAN
-				 || roles[flags.initrole].malenum == PM_NOBLEMAN || roles[flags.initrole].malenum == PM_PIRATE
-				 || roles[flags.initrole].malenum == PM_ROGUE || roles[flags.initrole].malenum == PM_SAMURAI
-				 || roles[flags.initrole].malenum == PM_TOURIST || flags.initrole == PM_VALKYRIE
-				)
-		) {
+	    if (pick4u == 'y' || flags.descendant == ROLE_RANDOM || flags.randomall || flags.initrole < 0 || !validdescendant(flags.initrole)) {
 			flags.descendant = 0; // never randomly roll descendant
 	    } else {	/* pick4u == 'n' */
 		tty_clear_nhwindow(BASE_WINDOW);

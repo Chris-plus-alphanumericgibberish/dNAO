@@ -1013,6 +1013,19 @@ validrace(rolenum, racenum)
 }
 
 
+boolean
+validdescendant(rolenum)
+	int rolenum;
+{
+	/* Assumes validrole */
+	return (rolenum >= 0 && rolenum < SIZE(roles)-1 &&
+		!(roles[flags.initrole].malenum == PM_ANACHRONONAUT
+			|| roles[flags.initrole].malenum == PM_EXILE
+			|| roles[flags.initrole].malenum == PM_CAVEMAN
+		));
+}
+
+
 int
 randrace(rolenum)
 	int rolenum;

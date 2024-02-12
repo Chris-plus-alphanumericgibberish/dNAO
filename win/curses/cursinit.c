@@ -842,14 +842,7 @@ curses_choose_character()
 
 	/* Select descendant status, if necessary */
     if (flags.descendant < 0){
-		if (flags.descendant == ROLE_RANDOM || flags.randomall
-			|| !(flags.initrole < 0 || roles[flags.initrole].malenum == PM_ARCHEOLOGIST || roles[flags.initrole].malenum == PM_CONVICT
-				 || roles[flags.initrole].malenum == PM_KNIGHT || roles[flags.initrole].malenum == PM_MADMAN
-				 || roles[flags.initrole].malenum == PM_NOBLEMAN || roles[flags.initrole].malenum == PM_PIRATE
-				 || roles[flags.initrole].malenum == PM_ROGUE || roles[flags.initrole].malenum == PM_SAMURAI
-				 || roles[flags.initrole].malenum == PM_TOURIST || flags.initrole == PM_VALKYRIE
-				)
-		) {
+		if (flags.descendant == ROLE_RANDOM || flags.randomall || flags.initrole < 0 || !validdescendant(flags.initrole)) {
            flags.descendant = 0; // never randomly roll descendant
         } else {
             /* Always 2 options - yn */
