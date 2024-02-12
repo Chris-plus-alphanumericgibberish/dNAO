@@ -19,6 +19,8 @@ static int max_regions = 0;
 
 #define NO_CALLBACK (-1)
 
+boolean FDECL(inside_generic_cloud, (genericptr,genericptr));
+boolean FDECL(expire_generic_cloud, (genericptr,genericptr));
 boolean FDECL(inside_gas_cloud, (genericptr,genericptr));
 boolean FDECL(expire_gas_cloud, (genericptr,genericptr));
 boolean FDECL(inside_fog_cloud, (genericptr,genericptr));
@@ -52,18 +54,10 @@ NhRegion *FDECL(create_force_field, (XCHAR_P,XCHAR_P,int,int));
 static void FDECL(reset_region_mids, (NhRegion *));
 
 static callback_proc callbacks[] = {
-#define INSIDE_GAS_CLOUD 0
-    inside_gas_cloud,
-#define EXPIRE_GAS_CLOUD 1
-    expire_gas_cloud, 
-#define INSIDE_FOG_CLOUD 2
-    inside_fog_cloud,
-#define EXPIRE_FOG_CLOUD 3
-    expire_fog_cloud,
-#define INSIDE_DUST_CLOUD 4
-    inside_dust_cloud,
-#define EXPIRE_DUST_CLOUD 5
-    expire_dust_cloud
+#define INSIDE_GENERIC_CLOUD 0
+    inside_generic_cloud,
+#define EXPIRE_GENERIC_CLOUD 1
+    expire_generic_cloud
 };
 
 /* Should be inlined. */
@@ -144,7 +138,8 @@ int nrect;
     reg->n_monst = 0;
     reg->max_monst = 0;
     reg->monsters = NULL;
-    reg->arg = NULL;
+    reg->arg.damage = 0;
+    reg->arg.adtyp = AD_PHYS;
     return reg;
 }
 
@@ -434,21 +429,17 @@ In_fog_cloud(mon)
 	struct monst *mon;
 {
 	register int i, j, k;
-	int f_indx;
 	/* Process regions */
 	if(mon == &youmonst){
 		for (i = 0; i < n_regions; i++) {
 			/* Check if player is inside region */
-			f_indx = regions[i]->inside_f;
-			if (f_indx == INSIDE_FOG_CLOUD && hero_inside(regions[i]))
+			if (regions[i]->arg.adtyp == AD_SLOW && hero_inside(regions[i]))
 			    return TRUE;
 		}
 	} else {
 		for (i = 0; i < n_regions; i++) {
 			/* Check if player is inside region */
-			f_indx = regions[i]->inside_f;
-			// if (f_indx == INSIDE_FOG_CLOUD && mon_in_region(regions[i], mon)){
-			if (f_indx == INSIDE_FOG_CLOUD && inside_region(regions[i], mon->mx, mon->my)){
+			if (regions[i]->arg.adtyp == AD_SLOW && inside_region(regions[i], mon->mx, mon->my)){
 			    return TRUE;
 			}
 		}
@@ -514,7 +505,7 @@ xchar x, y;
 	int i;
     for (i = 0; i < n_regions; i++) {
 		if (inside_region(regions[i], x, y) &&
-			regions[i]->inside_f == INSIDE_GAS_CLOUD
+			regions[i]->arg.adtyp == AD_DRST
 		) {
 			return TRUE;
 		}
@@ -528,7 +519,7 @@ xchar x, y;
 {
 	int i;
     for (i = 0; i < n_regions; i++) {
-		if (regions[i]->inside_f == INSIDE_FOG_CLOUD &&
+		if (regions[i]->arg.adtyp == AD_SLOW &&
 			inside_region(regions[i], x, y)
 		) {
 			return TRUE;
@@ -544,7 +535,7 @@ xchar x, y;
 	int i;
     for (i = 0; i < n_regions; i++) {
 		if (inside_region(regions[i], x, y) &&
-			regions[i]->inside_f == INSIDE_DUST_CLOUD
+			regions[i]->arg.adtyp == AD_DESC
 		) {
 			return TRUE;
 		}
@@ -742,7 +733,7 @@ int mode;
 	     sizeof (unsigned));
 	bwrite(fd, (genericptr_t) &regions[i]->visible, sizeof (boolean));
 	bwrite(fd, (genericptr_t) &regions[i]->glyph, sizeof (int));
-	bwrite(fd, (genericptr_t) &regions[i]->arg, sizeof (genericptr_t));
+	bwrite(fd, (genericptr_t) &regions[i]->arg, sizeof (struct region_arg));
     }
 
 skip_lots:
@@ -827,7 +818,7 @@ boolean ghostly; /* If a bones file restore */
 		  sizeof (unsigned));
 	mread(fd, (genericptr_t) &regions[i]->visible, sizeof (boolean));
 	mread(fd, (genericptr_t) &regions[i]->glyph, sizeof (int));
-	mread(fd, (genericptr_t) &regions[i]->arg, sizeof (genericptr_t));
+	mread(fd, (genericptr_t) &regions[i]->arg, sizeof (struct region_arg));
     }
     /* remove expired regions, do not trigger the expire_f callback (yet!);
        also update monster lists if this data is coming from a bones file */
@@ -959,6 +950,73 @@ boolean yours
  *								*
  *--------------------------------------------------------------*/
 
+boolean
+expire_generic_cloud(p1, p2)
+genericptr_t p1;
+genericptr_t p2;
+{
+    NhRegion *reg;
+    int damage;
+    struct region_arg *cloud_data;
+
+    reg = (NhRegion *) p1;
+    cloud_data = (struct region_arg *) &reg->arg;
+    
+    switch(cloud_data->adtyp){
+	case AD_DRST:
+		return expire_gas_cloud(p1, p2);
+	case AD_DESC:
+		return expire_dust_cloud(p1, p2);
+	case AD_SLOW:
+		return expire_fog_cloud(p1, p2);
+    }
+
+    damage = cloud_data->damage;
+    /* If it was a thick cloud, it dissipates a little first */
+    if (damage >= 5) {
+	damage /= 2;		/* It dissipates, let's do less damage */
+	cloud_data->damage = damage;
+	reg->ttl = 2;		/* Here's the trick : reset ttl */
+	return FALSE;		/* THEN return FALSE, means "still there" */
+    }
+    return TRUE;		/* OK, it's gone, you can free it! */
+}
+boolean
+inside_generic_cloud(p1, p2)
+genericptr_t p1;
+genericptr_t p2;
+{
+    NhRegion *reg;
+    struct monst *mdef;
+    struct region_arg *cloud_data;
+    struct attack attk;
+    int vis;
+    int result;
+
+    reg = (NhRegion *) p1;
+    cloud_data = (struct region_arg *) &reg->arg;
+    switch(cloud_data->adtyp){
+	case AD_DRST:
+		return inside_gas_cloud(p1, p2);
+	case AD_DESC:
+		return inside_dust_cloud(p1, p2);
+	case AD_SLOW:
+		return inside_fog_cloud(p1, p2);
+    }
+    /* If not a specially handled type, do generic handling */
+    mdef = p2 ? (struct monst *) p2: &youmonst;
+    boolean youdef = (mdef == &youmonst);
+    attk.aatyp = AT_ENGL;
+    attk.adtyp = cloud_data->adtyp;
+    attk.damn = cloud_data->damage;
+    attk.damd = 1;
+    vis = getvis((struct monst *) 0, mdef, 0, 0);
+    result = xengulfhurty((struct monst *) 0, mdef, &attk, vis);
+    return result & MM_DEF_DIED;
+}
+
+
+
 /*
  * Here is an example of an expire function that may prolong
  * region life after some mods...
@@ -970,20 +1028,21 @@ genericptr_t p2;
 {
     NhRegion *reg;
     int damage;
+    struct region_arg *cloud_data;
 
     reg = (NhRegion *) p1;
-    damage = (int)(intptr_t)reg->arg;
+    cloud_data = (struct region_arg *) &reg->arg;
+    damage = cloud_data->damage;
 
     /* If it was a thick cloud, it dissipates a little first */
     if (damage >= 5) {
 	damage /= 2;		/* It dissipates, let's do less damage */
-	reg->arg = (genericptr_t)(intptr_t)damage;
+	cloud_data->damage = damage;
 	reg->ttl = 2;		/* Here's the trick : reset ttl */
 	return FALSE;		/* THEN return FALSE, means "still there" */
     }
     return TRUE;		/* OK, it's gone, you can free it! */
 }
-
 boolean
 inside_gas_cloud(p1, p2)
 genericptr_t p1;
@@ -991,10 +1050,12 @@ genericptr_t p2;
 {
     NhRegion *reg;
     struct monst *mtmp;
-    int dam;
+    int damage;
+    struct region_arg *cloud_data;
 
     reg = (NhRegion *) p1;
-    dam = (int)(intptr_t)reg->arg;
+    cloud_data = (struct region_arg *) &reg->arg;
+    damage = cloud_data->damage;
     if (p2 == NULL) {		/* This means *YOU* Bozo! */
 		if (Invulnerable)
 			return FALSE;
@@ -1007,7 +1068,7 @@ genericptr_t p2;
 		if (!Poison_resistance) {
 			pline("%s is burning your %s!", Something, makeplural(body_part(LUNG)));
 			You("cough and spit blood!");
-			losehp(rnd(dam) + 5, "gas cloud", KILLED_BY_AN);
+			losehp(rnd(damage) + 5, "gas cloud", KILLED_BY_AN);
 			return FALSE;
 		} else {
 			You("cough!");
@@ -1029,7 +1090,7 @@ genericptr_t p2;
 			}
 			if (resists_poison(mtmp))
 				return FALSE;
-			mtmp->mhp -= rnd(dam) + 5;
+			mtmp->mhp -= rnd(damage) + 5;
 			if (mtmp->mhp <= 0) {
 				if (heros_fault(reg))
 					killed(mtmp);
@@ -1045,10 +1106,10 @@ genericptr_t p2;
 }
 
 NhRegion *
-create_gas_cloud(x, y, radius, damage, yours)
+create_generic_cloud(x, y, radius, cloud_data, yours)
 xchar x, y;
 int radius;
-int damage;
+struct region_arg *cloud_data;
 boolean yours;
 {
     NhRegion *cloud;
@@ -1074,9 +1135,52 @@ boolean yours;
 	if (yours)
 		set_heros_fault(cloud);		/* assume player has created it */
 	else clear_heros_fault(cloud);
-    cloud->inside_f = INSIDE_GAS_CLOUD;
-    cloud->expire_f = EXPIRE_GAS_CLOUD;
-    cloud->arg = (genericptr_t)(intptr_t)damage;
+    cloud->inside_f = INSIDE_GENERIC_CLOUD;
+    cloud->expire_f = EXPIRE_GENERIC_CLOUD;
+    cloud->arg = *cloud_data;
+    cloud->visible = TRUE;
+    cloud->glyph = cloud_to_glyph(cloud_data->adtyp);
+    add_region(cloud);
+    return cloud;
+
+}
+
+NhRegion *
+create_gas_cloud(x, y, radius, damage, yours)
+xchar x, y;
+int radius;
+int damage;
+boolean yours;
+{
+    NhRegion *cloud;
+    int i, nrect;
+    NhRect tmprect;
+    struct region_arg cloud_data;
+    cloud_data.damage = damage;
+    cloud_data.adtyp = AD_DRST;
+
+    cloud = create_region((NhRect *) 0, 0);
+    nrect = radius;
+    tmprect.lx = x;
+    tmprect.hx = x;
+    tmprect.ly = y - (radius - 1);
+    tmprect.hy = y + (radius - 1);
+    for (i = 0; i < nrect; i++) {
+	add_rect_to_reg(cloud, &tmprect);
+	tmprect.lx--;
+	tmprect.hx++;
+	tmprect.ly++;
+	tmprect.hy--;
+    }
+    cloud->ttl = rn1(3,4);
+	cloud->rx = x;
+	cloud->ry = y;
+	if (yours)
+		set_heros_fault(cloud);		/* assume player has created it */
+	else clear_heros_fault(cloud);
+    cloud->inside_f = INSIDE_GENERIC_CLOUD;
+    cloud->expire_f = EXPIRE_GENERIC_CLOUD;
+    cloud->arg = cloud_data;
     cloud->visible = TRUE;
     cloud->glyph = cmap_to_glyph(S_cloud);
     add_region(cloud);
@@ -1109,6 +1213,9 @@ boolean yours;
     NhRegion *cloud;
     int i, nrect;
     NhRect tmprect;
+    struct region_arg cloud_data;
+    cloud_data.damage = damage;
+    cloud_data.adtyp = AD_SLOW;
 
     cloud = create_region((NhRect *) 0, 0);
     nrect = radius;
@@ -1129,9 +1236,9 @@ boolean yours;
 	if (yours)
 		set_heros_fault(cloud);		/* assume player has created it */
 	else clear_heros_fault(cloud);
-    cloud->inside_f = INSIDE_FOG_CLOUD;
-    cloud->expire_f = EXPIRE_FOG_CLOUD;
-    cloud->arg = (genericptr_t)(intptr_t)damage;
+    cloud->inside_f = INSIDE_GENERIC_CLOUD;
+    cloud->expire_f = EXPIRE_GENERIC_CLOUD;
+    cloud->arg = cloud_data;
     cloud->visible = TRUE;
     cloud->glyph = cmap_to_glyph(S_fog);
     add_region(cloud);
@@ -1144,11 +1251,13 @@ genericptr_t p1;
 genericptr_t p2;
 {
     NhRegion *reg;
+    int nx, ny;
     int damage;
-	int nx, ny;
+    struct region_arg *cloud_data;
 
     reg = (NhRegion *) p1;
-    damage = (int)(intptr_t)reg->arg;
+    cloud_data = (struct region_arg *) &reg->arg;
+    damage = cloud_data->damage;
 	
 	nx = reg->rx - 1 + rn2(3);
 	ny = reg->ry - 1 + rn2(3);
@@ -1179,15 +1288,17 @@ genericptr_t p2;
 {
     NhRegion *reg;
     struct monst *mtmp;
-    int dam;
+    int damage;
+    struct region_arg *cloud_data;
 
     reg = (NhRegion *) p1;
-    dam = (int)(intptr_t)reg->arg;
+    cloud_data = (struct region_arg *) &reg->arg;
+    damage = cloud_data->damage;
     if (p2 == NULL) {		/* This means *YOU* Bozo! */
 		if (Invulnerable)
 			return FALSE;
 		if (youracedata->mtyp == PM_SENTINEL_OF_MITHARDIR){
-			healup(dam, 0, FALSE, FALSE);
+			healup(damage, 0, FALSE, FALSE);
 		}
 		if (nonliving(youracedata) || Breathless)
 			return FALSE;
@@ -1200,23 +1311,23 @@ genericptr_t p2;
 		}
 		if (!Blind)
 			make_blinded(1L, FALSE);
-		if(dam > 3 && !rn2(20) && !Sick_resistance){ //Only a large dust storm
+		if(damage > 3 && !rn2(20) && !Sick_resistance){ //Only a large dust storm
 			//Dormant spores
 			make_sick(Sick ? Sick/2L + 1L : ACURR(A_CON)*300L, //~3000 turns
 				"white spores", TRUE, SICK_NONVOMITABLE);
 			You("are covered with dust and can barely breathe!");
-			losehp(rnd(dam), "dust storm", KILLED_BY_AN);
+			losehp(rnd(damage), "dust storm", KILLED_BY_AN);
 			nomul(0, NULL);
 		} else if(!rn2(10) && !is_anhydrous(youracedata)){
 			//Salt
 			You("are covered with dust and can barely breathe!");
 			pline("Salt dust burns your %s!", makeplural(body_part(LUNG)));
 			You("cough and spit blood!");
-			losehp(rnd(dam)+5, "dust storm", KILLED_BY_AN);
+			losehp(rnd(damage)+5, "dust storm", KILLED_BY_AN);
 			nomul(0, NULL);
 		} else {
 			You("are covered with dust and can barely breathe!");
-			losehp(rnd(dam), "dust storm", KILLED_BY_AN);
+			losehp(rnd(damage), "dust storm", KILLED_BY_AN);
 			nomul(0, NULL);
 		}
 		return FALSE;
@@ -1224,7 +1335,7 @@ genericptr_t p2;
 		mtmp = (struct monst *) p2;
 
 		if (mtmp->mtyp == PM_SENTINEL_OF_MITHARDIR){
-			mtmp->mhp = min(mtmp->mhp+dam, mtmp->mhpmax);
+			mtmp->mhp = min(mtmp->mhp+damage, mtmp->mhpmax);
 		}
 		struct obj *otmp = which_armor(mtmp, W_ARMH);
 		
@@ -1242,7 +1353,7 @@ genericptr_t p2;
 				//Dormant spores
 				if (cansee(mtmp->mx, mtmp->my))
 					pline("%s looks sick!", Monnam(mtmp));
-				mtmp->mhp -= rnd(dam)+5+mtmp->m_lev;
+				mtmp->mhp -= rnd(damage)+5+mtmp->m_lev;
 				if (mtmp->mhp <= 0) {
 					if (heros_fault(reg))
 						killed(mtmp);
@@ -1256,7 +1367,7 @@ genericptr_t p2;
 				//Salt
 				if (cansee(mtmp->mx, mtmp->my))
 					pline("%s coughs!", Monnam(mtmp));
-				mtmp->mhp -= rnd(dam) + 5;
+				mtmp->mhp -= rnd(damage) + 5;
 				if (mtmp->mhp <= 0) {
 					if (heros_fault(reg))
 						killed(mtmp);
@@ -1269,7 +1380,7 @@ genericptr_t p2;
 			} else {
 				if (cansee(mtmp->mx, mtmp->my))
 					pline("%s struggles to breathe!", Monnam(mtmp));
-				mtmp->mhp -= rnd(dam);
+				mtmp->mhp -= rnd(damage);
 				if (mtmp->mhp <= 0) {
 					if (heros_fault(reg))
 						killed(mtmp);
@@ -1294,6 +1405,9 @@ int damage;
     NhRegion *cloud;
     int i, nrect;
     NhRect tmprect;
+    struct region_arg cloud_data;
+    cloud_data.damage = damage;
+    cloud_data.adtyp = AD_DESC;
 
     cloud = create_region((NhRect *) 0, 0);
     nrect = radius;
@@ -1312,9 +1426,9 @@ int damage;
 	cloud->rx = x;
 	cloud->ry = y;
 	clear_heros_fault(cloud);/* assumes never the player's fault */
-    cloud->inside_f = INSIDE_DUST_CLOUD;
-    cloud->expire_f = EXPIRE_DUST_CLOUD;
-    cloud->arg = (genericptr_t)(intptr_t)damage;
+    cloud->inside_f = INSIDE_GENERIC_CLOUD;
+    cloud->expire_f = EXPIRE_GENERIC_CLOUD;
+    cloud->arg = cloud_data;
     cloud->visible = TRUE;
     cloud->glyph = cmap_to_glyph(S_dust);
     add_region(cloud);

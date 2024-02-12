@@ -30,6 +30,11 @@ typedef boolean FDECL((*callback_proc), (genericptr_t, genericptr_t));
 #define set_heros_fault(r)	((r)->player_flags &= ~REG_NOT_HEROS)
 #define clear_heros_fault(r)	((r)->player_flags |= REG_NOT_HEROS)
 
+struct region_arg {
+	int damage;
+	uchar adtyp;	
+};
+
 typedef struct {
   NhRect bounding_box;		/* Bounding box of the region */
   NhRect *rects;		/* Rectangles composing the region */
@@ -61,7 +66,7 @@ typedef struct {
 
   boolean visible;		/* Is the region visible ? */
   int glyph;			/* Which glyph to use if visible */
-  genericptr_t arg;		/* Optional user argument (Ex: strength of
+  struct region_arg arg;		/* Optional user argument (Ex: strength of
 				   force field, damage of a fire zone, ...*/
 } NhRegion;
 
