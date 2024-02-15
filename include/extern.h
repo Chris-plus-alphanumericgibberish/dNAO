@@ -288,6 +288,9 @@ E void FDECL(bot1str, (char *));
 E void FDECL(bot2str, (char *, boolean, int, boolean));
 E void FDECL(bot3str, (char *, boolean, int));
 #endif
+E void FDECL(do_statuseffects, (char *, boolean, int, int));
+E long FDECL(get_status_duration, (long long));
+E long long NDECL(get_status_mask);
 
 /* ### cmd.c ### */
 

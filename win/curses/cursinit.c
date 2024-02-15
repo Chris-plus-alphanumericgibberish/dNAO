@@ -301,7 +301,9 @@ curses_create_main_windows()
         msg_vertical = TRUE;
 
     int statusheight = 3;
-    if (iflags.classic_status)
+    if (!iflags.classic_status && iflags.statuslines >= 4)
+        statusheight = 4;
+    if (iflags.classic_status && iflags.statuslines <= 2)
         statusheight = 2;
 
     /* Vertical windows have priority. Otherwise, priotity is:
