@@ -6,7 +6,7 @@
 #include "mutations.h"
 #include "artifact.h"
 
-STATIC_DCL void FDECL(enlght_line, (const char *,const char *,const char *, boolean));
+STATIC_DCL void FDECL(enlght_line, (const char *,const char *,const char *, boolean, long));
 STATIC_DCL void FDECL(put_or_dump, (const char *, boolean));
 STATIC_DCL char *FDECL(enlght_combatinc, (const char *,int,int,char *));
 STATIC_DCL int NDECL(minimal_enlightenment);
@@ -35,10 +35,13 @@ static const char
 	have_been[]  = "have been ",
 	have_never[] = "have never ", never[] = "never ";
 
-#define enl_msg(prefix,present,past,suffix) \
-			enlght_line(prefix, final ? past : present, suffix, dumping)
+#define enl_msg_duration(prefix,present,past,suffix,duration)			\
+	enlght_line(prefix, final ? past : present, suffix, dumping, duration)
+#define enl_msg(prefix,present,past,suffix)	\
+	enl_msg_duration(prefix,present,past,suffix,0)
 #define put_enl(msg) put_or_dump(msg, dumping) 
 #define you_are(attr)	enl_msg(You_,are,were,attr)
+#define you_are_duration(attr,duration)	enl_msg_duration(You_,are,were,attr,duration)
 #define you_have(attr)	enl_msg(You_,have,had,attr)
 #define you_can(attr)	enl_msg(You_,can,could,attr)
 #define you_have_been(goodthing) enl_msg(You_,have_been,were,goodthing)
@@ -46,13 +49,19 @@ static const char
 #define you_have_X(something)	enl_msg(You_,have,(const char *)"",something)
 
 static void
-enlght_line(start, middle, end, dumping)
+enlght_line(start, middle, end, dumping, duration)
 const char *start, *middle, *end;
 boolean dumping;
+long duration;
 {
 	char buf[BUFSZ];
 
-	Sprintf(buf, "%s%s%s.", start, middle, end);
+	if (duration & TIMEOUT)
+		Sprintf(buf, "%s%s%s (%ld turn%s left).",
+			start, middle, end, duration,
+			duration == 1 ? "" : "s");
+	else
+		Sprintf(buf, "%s%s%s.", start, middle, end);
 
 	put_or_dump(buf, dumping);
 }
@@ -567,9 +576,15 @@ boolean dumping;
 	if (Drain_resistance) you_are("level-drain resistant");
 	if (Antimagic) you_are("magic-protected");
 	if (Nullmagic) you_are("shrouded in anti-magic");
-	if (Deadmagic) you_are("in a dead-magic zone");
-	if (Catapsi) you_are("in a psionic storm");
-	if (Misotheism) you_are("in a divine-exclusion zone");
+	if (Deadmagic) you_are_duration("in a dead-magic zone", Deadmagic);
+	if (Catapsi) you_are_duration("in a psionic storm", Catapsi);
+	if (Misotheism) you_are_duration("in a divine-exclusion zone", Misotheism);
+	if (DimensionalLock)
+		enl_msg_duration("Summons ", "are", "were", " blocked", DimensionalLock);
+	if (TimeStop)
+		enl_msg_duration("Time ", "is", "was", " stopped", HTimeStop);
+	if (BlowingWinds)
+		enl_msg_duration("Hurricane-force winds ", "surround", "surrounded", " you", HBlowingWinds);
 	if (Waterproof) you_are("waterproof");
 	if (Stone_resistance)
 		you_are("petrification resistant");

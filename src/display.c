@@ -1687,6 +1687,9 @@ int style;
     /* D: botl.c has a closer approximation to the size, but we'll go with
      *    this */
     char buf[400], *ptr;
+    /* Make sure all status effects are shown in dump */
+    long long save_statuseffects = iflags.statuseffects;
+    iflags.statuseffects = ~0;
     if (style == 0) {
 	for (y = 0; y < ROWNO; y++) {
 	    lastc = 0;
@@ -1730,6 +1733,8 @@ int style;
 	bot3str(buf, FALSE, 0);
 	dump("", buf);
     }
+    /* Restore value of statuseffects option */
+    iflags.statuseffects = save_statuseffects;
 }
 #endif /* DUMP_LOG */
 

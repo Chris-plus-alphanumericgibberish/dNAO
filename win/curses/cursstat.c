@@ -964,7 +964,7 @@ curses_add_status(WINDOW *win, boolean align_right, boolean vertical,
         waddch(win, ' ');
 
     char buf[BUFSZ];
-    if (duration)
+    if (duration & TIMEOUT)
         Snprintf(buf, BUFSZ, "%s:%ld", str, duration);
     else
         Strncpy(buf, str, BUFSZ);

@@ -46,9 +46,9 @@ STATIC_DCL void NDECL(bot2);
 long get_status_duration(long long mask) {
 	switch (mask) {
 	case BL_MASK_TIMESTOP:
-		return HTimeStop ? HTimeStop : ETimeStop;
+		return HTimeStop;
 	case BL_MASK_LUST:
-		return HBlowingWinds ? HBlowingWinds : EBlowingWinds;
+		return HBlowingWinds;
 	case BL_MASK_DEADMAGC:
 		return Deadmagic;
 	case BL_MASK_MISO:
@@ -238,7 +238,7 @@ add_colored_text(const char *hilite, const char *text, char *newbot2,
     if (strlen(newbot2) >= maxlength) return;
 
     if (!iflags.use_status_colors || !terminal_output) {
-        if (duration)
+        if (duration & TIMEOUT)
             Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s:%ld" : " %s:%ld", text, duration);
         else
             Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s" : " %s", text);
@@ -628,7 +628,7 @@ do_statuseffects(char *newbot2, boolean terminal_output, int abbrev, int statusl
     struct status_effect status = status_effects[i];
     if (mask & status.mask & iflags.statuseffects) {
       long duration = get_status_duration(status.mask);
-      if (duration)
+      if (duration & TIMEOUT)
         status_effect_duration(status.name, status.abbrev1, status.abbrev2,
                                duration);
       else
