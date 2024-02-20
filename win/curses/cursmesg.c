@@ -469,6 +469,10 @@ curses_message_win_getline(const char *prompt, char *answer, int buffer)
             strncpy(answer, p_answer, buffer);
             strcpy(toplines, tmpbuf);
             mesg_add_line((char *) tmpbuf);
+            /* newline */
+            if (my >= maxy) scroll_window(MESSAGE_WIN);
+            else my++;
+            mx = border_space;
             free(tmpbuf);
             curs_set(orig_cursor);
             curses_toggle_color_attr(win, NONE, A_BOLD, OFF);
