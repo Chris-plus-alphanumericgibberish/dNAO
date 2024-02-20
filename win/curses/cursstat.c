@@ -200,12 +200,12 @@ print_statdiff(const char *append, nhstat *stat, int new, int type)
     wattron(win, attr);
     wprintw(win, "%s", append);
     if (type == STAT_STR && new > 18) {
-        if (new > 118)
-            wprintw(win, "%d", new - 100);
-        else if (new == 118)
+        if (new > STR18(100))
+            wprintw(win, "%d", new - 20);
+        else if (new == STR18(100))
             wprintw(win, "18/**");
         else
-            wprintw(win, "18/%02d", new - 18);
+            wprintw(win, "18/%02d", (new - 18)*5);
     } else
         wprintw(win, "%d", new);
 
