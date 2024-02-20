@@ -187,6 +187,11 @@ struct obj **potmp, **pobj;
 			    / (otmp->quan + obj->quan);
 
 		otmp->quan += obj->quan;
+
+		otmp->known |= obj->known;
+		otmp->dknown |= obj->dknown;
+		otmp->bknown |= obj->bknown;
+		otmp->rknown |= obj->rknown;
 #ifdef GOLDOBJ
                 /* temporary special case for gold objects!!!! */
 #endif
@@ -5026,10 +5031,7 @@ mergable(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	
 	if(obj->sknown || otmp->sknown) obj->sknown = otmp->sknown = 1;
 	
-	if(obj->known == otmp->known ||
-		!objects[otmp->otyp].oc_uses_known) {
-		return((boolean)(objects[obj->otyp].oc_merge));
-	} else return(FALSE);
+	return((boolean)(objects[obj->otyp].oc_merge));
 }
 
 boolean
@@ -5042,7 +5044,6 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 		(obj->ovar1 != otmp->ovar1 && obj->otyp != CORPSE && obj->otyp != FORCE_BLADE) ||
 		(obj->oward != otmp->oward) ||
 	    obj->spe != otmp->spe || obj->dknown != otmp->dknown ||
-	    (obj->bknown != otmp->bknown && !Role_if(PM_PRIEST)) ||
 	    obj->cursed != otmp->cursed || obj->blessed != otmp->blessed ||
 	    obj->no_charge != otmp->no_charge ||
 	    obj->obroken != otmp->obroken ||
@@ -5065,8 +5066,7 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	if (obj->nomerge || otmp->nomerge)
 		return FALSE;
 
-	if ((obj->oclass==WEAPON_CLASS || obj->oclass==ARMOR_CLASS) &&
-	    (obj->oerodeproof!=otmp->oerodeproof || obj->rknown!=otmp->rknown))
+	if ((obj->oclass==WEAPON_CLASS || obj->oclass==ARMOR_CLASS) && (obj->oerodeproof!=otmp->oerodeproof))
 	    return FALSE;
 
 	if (obj->oclass == FOOD_CLASS && (obj->oeaten != otmp->oeaten ||
