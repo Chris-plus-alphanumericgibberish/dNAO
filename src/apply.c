@@ -8291,7 +8291,7 @@ struct obj **optr;
 						// return MOVE_CANCELLED;
 					// }
 					You("use the components in the upgrade kit to increase the maximum tension in your mainspring.");
-					u.uhungermax += DEFAULT_HMAX;
+					u.uhungermax += DEFAULT_HMAX; // 2000 per, capped at 9 kits for 20,000 max
 					if(u.uhungermax >= DEFAULT_HMAX*10) u.clockworkUpgrades |= upgrade;
 					// useup(comp);
 					useup(obj);

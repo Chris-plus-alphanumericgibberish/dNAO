@@ -248,10 +248,10 @@ init_uhunger()
 	if(Race_if(PM_INCANTIFIER)){
 		u.uenbonus += 1800;
 		calc_total_maxen();
-		u.uen = u.uenmax*.45;
+		u.uen = get_satiationlimit()*0.9;
 	} else {
 		u.uhungermax = DEFAULT_HMAX;
-		u.uhunger = get_uhungermax()*.45;
+		u.uhunger = get_satiationlimit()*.9;
 	}
 	u.uhs = NOT_HUNGRY;
 }
@@ -260,10 +260,10 @@ void
 reset_uhunger()
 {
 	if(Race_if(PM_INCANTIFIER)){
-		u.uen = min(u.uen+400, u.uenmax*.45);
+		u.uen = min(u.uen+400, get_satiationlimit()*.9);
 		newuhs(TRUE);
 	} else {
-		u.uhunger = get_uhungermax()*.45;
+		u.uhunger = get_satiationlimit()*.9;
 		u.uhs = NOT_HUNGRY;
 	}
 }
@@ -272,14 +272,14 @@ boolean
 satiate_uhunger()
 {
 	if(Race_if(PM_INCANTIFIER)){
-		if(u.uen > min(u.uen+400, u.uenmax*.55))
+		if(u.uen > min(u.uen+400, get_satiationlimit()*11/10))
 			return FALSE;
-		u.uen = min(u.uen+400, u.uenmax*.55);
+		u.uen = min(u.uen+400, get_satiationlimit()*11/10);
 		newuhs(TRUE);
 	} else {
-		if(u.uhunger >= get_uhungermax()*.55)
+		if(u.uhunger >= get_satiationlimit()*11/10)
 			return FALSE;
-		u.uhunger = get_uhungermax()*.55;
+		u.uhunger = get_satiationlimit()*11/10;
 		u.uhs = NOT_HUNGRY;
 	}
 	return TRUE;
@@ -306,6 +306,27 @@ get_uhungermax()
 	//For gameplay reasons, Gnomes et al can overeat by the same amount as humans before choking
 
 	return hungermax;
+}
+
+int
+get_satiationlimit()
+{
+	int hungermax = get_uhungermax();
+
+	/* Satiation is special-cased for Clockworks and Incantifiers, 
+	 * since both of their hunger mechanics strongly incentize staying
+	 * near full. 
+	 * 3/4 max for incantifiers is around 1500/2000 to 3750/5000 (from xp1 to xp30)
+	 * 3/4 max for clockworks is 1500/2000 to 15000/20000 (from no to max upgrades)
+	 * This is applied AFTER any multiplicative changes to size, so polyselfed clockworks 
+	 * have something like 45,000/60,000 for huge forms or 90,000/120,000 for gigantic forms.
+	 * Wild.
+	 */
+	if (Race_if(PM_INCANTIFIER)) return max((u.uenmax*4)/5, 200);
+
+	if (uclockwork) return (hungermax*3)/4;
+
+	return hungermax/2;
 }
 
 static const struct { const char *txt; int nut; } tintxts[] = {
@@ -2061,7 +2082,7 @@ struct obj *otmp;
 		if(YouHunger <= 200*get_uhungersizemod())
 		    pline(Hallucination ? "Oh wow, like, superior, man!" :
 			  "That food really hit the spot!");
-		else if(YouHunger <= get_uhungermax()/2 - 300*get_uhungersizemod()) pline("That satiated your %s!",
+		else if(YouHunger <= get_satiationlimit() - 300*get_uhungersizemod()) pline("That satiated your %s!",
 						body_part(STOMACH));
 		break;
 	    case TRIPE_RATION:
@@ -2768,7 +2789,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	){
 		if(yn("Eat some of the grass growing here?") == 'y'){
 			You("eat some grass.");
-			if(u.uhunger < get_uhungermax() * 3/4 || yn_function("You feel awfully full, stop eating?",ynchars,'y') == 'n'){
+			if(u.uhunger < (uclockwork ? ((get_uhungermax()*7)/8) : ((get_uhungermax()*3)/4)) || yn_function("You feel awfully full, stop eating?",ynchars,'y') == 'n'){
 				lesshungry(objects[FOOD_RATION].oc_nutrition/objects[FOOD_RATION].oc_delay);
 			}
 			return MOVE_ATE;
@@ -3925,9 +3946,9 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if (Invulnerable) return;	/* you don't feel hungrier */
 	if(inediate(youracedata) && !uclockwork && !Race_if(PM_INCANTIFIER)){
 		//Gradually return to normal if you departed from normal as a result of polymorph.
-		if(u.uhunger < get_uhungermax()*.45)
+		if(u.uhunger < get_satiationlimit()*0.9)
 			u.uhunger++;
-		else if(u.uhunger > get_uhungermax()*.45)
+		else if(u.uhunger > get_satiationlimit()*0.9)
 			u.uhunger--;
 		newuhs(TRUE);
 		return;
@@ -4101,8 +4122,9 @@ register int num;
 	    /* Have lesshungry() report when you're nearly full so all eating
 	     * warns when you're about to choke.
 	     */
-	    if ((Race_if(PM_INCANTIFIER) && u.uen >= u.uenmax * 3/4) ||
-			(!Race_if(PM_INCANTIFIER) && u.uhunger >= get_uhungermax() * 3/4)) {
+	    if ((Race_if(PM_INCANTIFIER) && u.uen >= (get_uhungermax()*7)/8) ||
+			(uclockwork && u.uhunger >= (get_uhungermax()*7)/8) || 
+			(!Race_if(PM_INCANTIFIER) && !uclockwork && u.uhunger >= (get_uhungermax()*3)/4)) {
 			if (!victual.eating || (victual.eating && !victual.fullwarn)) {
 				if(!uclockwork){
 					pline("You're having a hard time getting all of it down.");
@@ -4347,7 +4369,7 @@ windclock()
     victual.mon = 0;
     return MOVE_FINISHED_OCCUPATION;
   }
-  else if (u.uhunger >= get_uhungermax() * 3/4 && !victual.fullwarn && !Race_if(PM_INCANTIFIER)) {
+  else if (u.uhunger >= (get_uhungermax()*3)/4 && !victual.fullwarn && !Race_if(PM_INCANTIFIER)) {
     pline("%s is having a hard time cranking the key.",Monnam(victual.mon));
     victual.fullwarn = TRUE;
   }
@@ -4409,7 +4431,7 @@ boolean incr;
 	int h = YouHunger;
      boolean clockwork = uclockwork;
 
-	newhs = (h > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : get_uhungermax()/2) ) ? SATIATED :
+	newhs = (h > get_satiationlimit()) ? SATIATED :
 		(h > 150*get_uhungersizemod()) ? NOT_HUNGRY :
 		(h > 50*get_uhungersizemod()) ? HUNGRY :
 		(h > 0) ? WEAK : FAINTING;
@@ -4533,7 +4555,7 @@ boolean incr;
 	          if (incr && occupation && occupation != windclock)
 	            stop_occupation();
 			  if(u.ucspeed == HIGH_CLOCKSPEED){
-				pline("There is no longer sufficient tension in your mainspring to maintain a high clock-speed");
+				pline("There is no longer sufficient tension in your mainspring to maintain a high clock-speed.");
 				u.ucspeed = NORM_CLOCKSPEED;
 			  }
 		break;
