@@ -2765,13 +2765,15 @@ karemade:
 					}
 					
 					if(u.utemp >= MELTING && !(HFire_resistance || u.sealsActive&SEAL_FAFNIR)){
-						You("are melting!");
+						Your("boiler is melting!");
 						losehp(u.ulevel, "melting from extreme heat", KILLED_BY);
 						if(u.utemp >= MELTED){
+							Your("boiler has melted to slag!");
 							if(Upolyd) losehp(u.mhmax*2, "melting to slag", KILLED_BY);
 							else { /* May have been rehumanized by previous damage. In that case, still die from left over bronze on your skin! */
-								if(uclockwork) losehp((Upolyd ? u.mhmax : u.uhpmax)*2, "melting to slag", KILLED_BY);
-								else if(!(HFire_resistance || u.sealsActive&SEAL_FAFNIR)) losehp((Upolyd ? u.mhmax : u.uhpmax)*2, "molten bronze", KILLED_BY);
+								losehp((Upolyd ? u.mhmax : u.uhpmax)*2, "melting to slag", KILLED_BY);
+								u.utemp = 19; // don't get stuck in a loop of permanently dying, clear temp & stove
+								u.ustove = 0; // this can still kill due to you taking damage, just no instadeath
 							}
 						}
 					}

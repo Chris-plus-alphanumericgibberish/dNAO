@@ -978,11 +978,17 @@ boolean dumping;
 			enl_msg("Your internal boiler ", "is", "was", " running rather hot");
 		else if (u.utemp < MELTING)
 			enl_msg("Your internal boiler ", "is", "was", " burning hot");
-		else if (u.utemp < MELTED)
-			enl_msg(Fire_resistance ? "Your thermal sinks " : "Your boiler ", "is", "was", Fire_resistance ? " nearly at capacity" : " melting to slag");
-		else 
-			enl_msg(Fire_resistance ? "Your thermal sinks " : "Your internal boiler ", "is", "was", Fire_resistance ? 
-				" are well beyond capacity, but miraculously intact" : " nothing but molten bronze");
+		else if (u.utemp < MELTED){
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " nearly at capacity");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " melting to slag");
+		} else {
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " well beyond capacity, but miraculously intact");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " nothing but molten bronze");
+		}
 		if (wizard) {
 			Sprintf(buf, " %d", u.utemp);
 			enl_msg("Your boiler temperature ", "is", "was", buf);

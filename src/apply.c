@@ -7769,7 +7769,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&PHASE_ENGINE) && !flags.beginner){
+	if(!(u.clockworkUpgrades&PHASE_ENGINE)){
 		Sprintf(buf, "phase engine");
 		any.a_int = 6;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -7777,7 +7777,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&MAGIC_FURNACE) && u.clockworkUpgrades&OIL_STOVE && !flags.beginner){
+	if(!(u.clockworkUpgrades&MAGIC_FURNACE) && u.clockworkUpgrades&OIL_STOVE){
 		Sprintf(buf, "magic furnace");
 		any.a_int = 7;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -7785,7 +7785,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&HELLFIRE_FURNACE) && u.clockworkUpgrades&OIL_STOVE && !flags.beginner){
+	if(!(u.clockworkUpgrades&HELLFIRE_FURNACE) && u.clockworkUpgrades&OIL_STOVE){
 		Sprintf(buf, "hellfire furnace");
 		any.a_int = 8;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -7793,7 +7793,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&SCRAP_MAW && !flags.beginner)){
+	if(!(u.clockworkUpgrades&SCRAP_MAW)){
 		Sprintf(buf, "scrap maw");
 		any.a_int = 9;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
