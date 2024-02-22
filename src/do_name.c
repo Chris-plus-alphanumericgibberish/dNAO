@@ -168,6 +168,8 @@ auto_describe(int cx, int cy)
 	} else if (glyph_is_monster(glyph)) {
 		/* takes care of pets, detected, ridden, and regular mons */
 		sym = monsyms[(int)mons[glyph_to_mon(glyph)].mlet];
+	} else if (glyph_is_cloud(glyph)) {
+		sym = showsyms[S_cloud];
 	} else if (glyph_is_swallow(glyph)) {
 		sym = showsyms[glyph_to_swallow(glyph)+S_sw_tl];
 	} else if (glyph_is_invisible(glyph)) {
