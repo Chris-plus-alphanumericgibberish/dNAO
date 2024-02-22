@@ -1273,8 +1273,56 @@ register struct obj *obj;
  * possibly carried by you or a monster
  */
 boolean
+drain_scorpion(obj)
+struct obj *obj;
+{
+	int cprops = 0;
+	int i;
+	long flag;
+	for (i = 0; i < 32; i++){
+		flag = 0x1L<<i;
+		if(check_carapace_mod(obj, flag))
+			cprops++;
+	}
+	if(!cprops)
+		return FALSE;
+	cprops = rn2(cprops);
+	for (i = 0; i < 32; i++){
+		flag = 0x1L<<i;
+		if(check_carapace_mod(obj, flag)){
+			if(!cprops)
+				break;
+			else cprops--;
+		}
+	}
+	int price = 1;
+	if(flag == CPROP_ILL_STING
+	 || flag == CPROP_CROWN
+	){
+		price = 3;
+	}
+	else if(flag == CPROP_PLATES
+	 || flag == CPROP_WHIPPING
+	 || flag == CPROP_SHIELDS
+	 || flag == CPROP_IMPURITY
+	 || flag == CPROP_SWIMMING
+	 || flag == CPROP_CLAWS
+	){
+		price = 2;
+	}
+	if(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel - price < 10)
+		return FALSE;
+
+	artinstance[ART_SCORPION_CARAPACE].CarapaceLevel -= price;
+	artinstance[ART_SCORPION_CARAPACE].CarapaceXP = newuexp(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel) - 1;
+	
+	obj->ovar1_carapace &= ~flag;
+	return TRUE;
+}
+
+boolean
 drain_item(obj)
-register struct obj *obj;
+struct obj *obj;
 {
 	boolean u_ring;
 
@@ -2162,6 +2210,8 @@ struct obj *obj, *otmp;
 	case SPE_DRAIN_LIFE:
 	case WAN_DRAINING:	/* KMH */
 		(void) drain_item(obj);
+		if(obj->oartifact == ART_SCORPION_CARAPACE)
+			drain_scorpion(obj);
 		break;
 	case WAN_TELEPORTATION:
 	case SPE_TELEPORT_AWAY:

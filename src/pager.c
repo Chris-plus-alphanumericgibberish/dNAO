@@ -7,6 +7,7 @@
 
 #include "hack.h"
 #include "dlb.h"
+#include "xhity.h"
 
 STATIC_DCL boolean FDECL(is_swallow_sym, (int));
 STATIC_DCL int FDECL(append_str, (char *, const char *));
@@ -2655,7 +2656,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			int res[4];
 			int indexnum = 0;
 			int tohitmod = 0;
-			int subout = 0;
+			int subout[SUBOUT_ARRAY_SIZE] = {0};
 			/* zero out res[] */
 			res[0] = MM_MISS;
 			res[1] = MM_MISS;
@@ -2663,7 +2664,7 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 			res[3] = MM_MISS;
 			do {
 				/* get next attack */
-				attk = getattk(mtmp, (struct monst *)0, res, &indexnum, &prev_attk, TRUE, &subout, &tohitmod);
+				attk = getattk(mtmp, (struct monst *)0, res, &indexnum, &prev_attk, TRUE, subout, &tohitmod);
 
 				main_temp_buf[0] = '\0';
 				get_description_of_attack(attk, temp_buf);

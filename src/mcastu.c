@@ -4287,9 +4287,9 @@ int tary;
 					/* instakill */
 					return ((*hp(mdef) > 0 ? MM_DEF_LSVD : MM_DEF_DIED) | MM_HIT);
 				}
-				//else damage
+				else dmg += rnd(12); //Else bonus damage
 			}
-			else return MM_MISS;
+			// else do the base damage
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 

@@ -322,6 +322,7 @@ struct artinstance{
 #define	ZPROP_BALANCE	0x00000020L
 #define	ZPROP_PATIENCE	0x00000040L
 #define	ZPROP_FOCUS		0x00000080L
+#define CarapaceXP avar1
 
 	long avar2;
 #define SnSd2 avar2
@@ -337,12 +338,18 @@ struct artinstance{
 #define	GSTYLE_RESONANT		5
 #define FIRST_GSTYLE		GSTYLE_PENETRATE
 #define LAST_GSTYLE			GSTYLE_RESONANT
+#define CarapaceLevel avar2
 
 	long avar3;
 #define SnSd3 avar3
 #define IbiteBoons avar3
+#define CarapacePoints avar3
 	long avar4;
 #define SnSd3duration avar4
+#define CarapaceAura avar4
+#define C_CROWN_AURA_ADD 10
+#define C_CROWN_AURA_DIVISOR 100
+#define C_CROWN_AURA_MAX 333
 };
 
 
@@ -448,6 +455,7 @@ extern struct artifact * artilist;
 #define ZERTH_ART		(LAST_PROP+93)
 #define AMALGUM_ART		(LAST_PROP+94)
 #define MORGOTH         (LAST_PROP+95)
+#define SCORPION_UPGRADES  (LAST_PROP+96)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

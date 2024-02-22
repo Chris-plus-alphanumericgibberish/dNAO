@@ -2822,6 +2822,8 @@ karemade:
 		     * Another possible result is rehumanization, which requires
 		     * that encumbrance and movement rate be recalculated.
 		     */
+			do_your_auras();
+			
 			you_regen_hp();
 			you_regen_pw();
 			you_regen_san();

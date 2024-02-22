@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "artifact.h"
 
 STATIC_DCL void NDECL(binderdown);
 STATIC_DCL int FDECL(enermod, (int));
@@ -213,6 +214,16 @@ more_experienced(exp, rexp)
 			u.uexp += exp*5;
 		}
 	} else u.uexp += exp;
+	if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE){
+		artinstance[ART_SCORPION_CARAPACE].CarapaceXP += exp;
+		if(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel < 29
+			&& newuexp(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel) <= artinstance[ART_SCORPION_CARAPACE].CarapaceXP
+		){
+			artinstance[ART_SCORPION_CARAPACE].CarapaceLevel++;
+			artinstance[ART_SCORPION_CARAPACE].CarapaceXP = min(artinstance[ART_SCORPION_CARAPACE].CarapaceXP, newuexp(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel) - 1);
+			artinstance[ART_SCORPION_CARAPACE].CarapacePoints++;
+		}
+	}
 	u.urexp += 4*exp + rexp;
 	if(exp
 #ifdef SCORE_ON_BOTL

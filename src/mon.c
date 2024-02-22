@@ -8788,15 +8788,15 @@ struct monst *mon;
 					damage -= avg_mdr(tmpm);
 					if(damage > 0){
 						damage = min(damage, tmpm->mhp);
+						mon->mvar_vermiurge -= damage;
+						//Reduce after charging vermin
+						damage = reduce_dmg(tmpm, damage, TRUE, FALSE);
 						if(canspotmon(tmpm)){
 							pline("%s is stung%s by swarming vermin!",
 								Monnam(tmpm),
 								damage >= tmpm->mhp ? " to death" : ""
 							);
 						}
-						mon->mvar_vermiurge -= damage;
-						//Reduce after charging vermin
-						damage = reduce_dmg(tmpm, damage, TRUE, FALSE);
 						tmpm->mhp -= damage;
 						if(tmpm->mhp <= 0){
 							grow_up(mon,tmpm);
@@ -8821,10 +8821,10 @@ struct monst *mon;
 				damage -= u.udr;
 				if(damage > 0){
 					damage = min(damage, uhp());
-					You("are stung by swarming vermin!");
 					mon->mvar_vermiurge -= damage;
 					//Reduce after charging vermin
 					damage = reduce_dmg(&youmonst, damage, TRUE, FALSE);
+					You("are stung by swarming vermin!");
 					losehp(damage,"swarming vermin",KILLED_BY);
 				}
 				// else continue

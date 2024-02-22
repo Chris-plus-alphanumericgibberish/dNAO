@@ -234,6 +234,43 @@ int otyp;
 				break;
 			}
 		}
+		//From scorpion carapace
+		if(obj->oartifact == ART_SCORPION_CARAPACE){
+			switch(cur_prop){
+				case SWIMMING:
+					if(check_carapace_mod(obj, CPROP_SWIMMING))
+						got_prop = TRUE;
+				break;
+				case WATERPROOF:
+					if(check_carapace_mod(obj, CPROP_SWIMMING))
+						got_prop = TRUE;
+				break;
+				case ACID_RES:
+					if(check_carapace_mod(obj, CPROP_ACID_RES))
+						got_prop = TRUE;
+				break;
+				case FIRE_RES:
+					if(check_carapace_mod(obj, CPROP_FIRE_RES))
+						got_prop = TRUE;
+				break;
+				case TELEPORT:
+					if(check_carapace_mod(obj, CPROP_TELEPORT))
+						got_prop = TRUE;
+				break;
+				case TELEPORT_CONTROL:
+					if(check_carapace_mod(obj, CPROP_TCONTROL))
+						got_prop = TRUE;
+				break;
+				case DRAIN_RES:
+					if(check_carapace_mod(obj, CPROP_DRAINRES))
+						got_prop = TRUE;
+				break;
+				case FLYING:
+					if(check_carapace_mod(obj, CPROP_WINGS))
+						got_prop = TRUE;
+				break;
+			}
+		}
 		// if we've got the property, add it to the array
 		if (got_prop)
 		{
@@ -1196,6 +1233,9 @@ struct monst *mon;
 
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
+		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
+			base += 3;
+		}
 		if(Role_if(PM_HEALER))
 			base += heal_mlevel_bonus();
 
@@ -1236,6 +1276,9 @@ struct monst *mon;
 	
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
+		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
+			base += 3;
+		}
 		if(Role_if(PM_HEALER))
 			base += heal_mlevel_bonus();
 

@@ -345,6 +345,7 @@ struct obj {
 #define ovar1_lifeDeath ovar1
 #define ovar1_artiTheftType ovar1
 #define ovar1_heard ovar1
+#define ovar1_carapace ovar1
 	/* Number of viperwhip heads */
 	/* Moon axe phase */
 	/* Acid venom non-1d6 damage */
@@ -378,6 +379,8 @@ struct obj {
 #define HALF_MOON		2
 #define GIBBOUS_MOON	3
 #define FULL_MOON	 	4
+
+#define check_carapace_mod(obj, prop) ((obj)->ovar1_carapace&(prop))
 
 #define check_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades&(prop))
 #define add_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades |= (prop))
@@ -436,6 +439,7 @@ struct obj {
 	|| (otmp)->oartifact == ART_NECRONOMICON \
 	|| (otmp)->oartifact == ART_BOOK_OF_LOST_NAMES \
 	|| (otmp)->oartifact == ART_BOOK_OF_INFINITE_SPELLS \
+	|| (otmp)->oartifact == ART_SCORPION_CARAPACE \
 	)
 #define OHEARD_FEAR		0x00000001L
 #define OHEARD_HEALING	0x00000002L
@@ -454,6 +458,23 @@ struct obj {
 #define OHEARD_LIFE		0x00004000L
 #define OHEARD_INSANE	0x00008000L
 #define OHEARD_CANCEL	0x00010000L
+
+#define	CPROP_HARD_SCALE	0x00000001L
+#define	CPROP_PLATES		0x00000002L
+#define	CPROP_FLEXIBLE		0x00000004L
+#define	CPROP_WHIPPING		0x00000008L
+#define	CPROP_ILL_STING		0x00000010L
+#define	CPROP_SWIMMING		0x00000020L
+#define	CPROP_ACID_RES		0x00000040L
+#define	CPROP_FIRE_RES		0x00000080L
+#define	CPROP_SHIELDS		0x00000100L
+#define	CPROP_TELEPORT		0x00000200L
+#define	CPROP_TCONTROL		0x00000400L
+#define	CPROP_DRAINRES		0x00000800L
+#define	CPROP_IMPURITY		0x00001000L
+#define	CPROP_WINGS			0x00002000L
+#define	CPROP_CLAWS			0x00004000L
+#define	CPROP_CROWN			0x00008000L
 
 	schar gifted; /*gifted is of type aligntyp.  For some reason aligntyp isn't being seen at compile*/
 	
@@ -957,7 +978,7 @@ struct obj {
 								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
 								|| (otmp)->otyp == HARMONIUM_BOOTS)
 
-#define is_light_armor(otmp)	(check_imp_mod(otmp, IEA_MITHRIL) || objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT)
+#define is_light_armor(otmp)	(((otmp)->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_MITHRIL)) || ((otmp)->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(otmp, CPROP_FLEXIBLE)) || objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT)
 #define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM)
 
 #define is_elven_armor(otmp)	((otmp)->otyp == ELVEN_HELM\

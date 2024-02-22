@@ -1687,6 +1687,7 @@ u_init()
 	u.summonMonster = FALSE;
 	u.uleadamulet = FALSE;
 	artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe = 1;
+	artinstance[ART_SCORPION_CARAPACE].CarapaceLevel = 10;
 	u.ucspeed = NORM_CLOCKSPEED;
 	u.voidChime = 0;
 	u.regifted = 0;

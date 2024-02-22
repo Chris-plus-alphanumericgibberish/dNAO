@@ -2109,12 +2109,12 @@ register struct monst *mtmp;
 		   or similar spells by the time you reach it */
 		if (dist2(mtmp->mx, mtmp->my, u.ux, u.uy) <= 49 && !mtmp->mspec_used) {
 		    struct attack *a;
-			int index = 0, subout = 0, tohitmod = 0;
+			int index = 0, subout[SUBOUT_ARRAY_SIZE] = {0}, tohitmod = 0;
 			int prev[4] = {0};
 			struct attack prev_attk = noattack;
 			
 			while(TRUE){
-				a = getattk(mtmp, &youmonst, prev, &index, &prev_attk, FALSE, &subout, &tohitmod);
+				a = getattk(mtmp, &youmonst, prev, &index, &prev_attk, FALSE, subout, &tohitmod);
 				if(a->aatyp == 0 && a->adtyp == 0 && a->damn == 0 && a->damd == 0)
 					break;
 				if ((a->aatyp == AT_MAGC || a->aatyp == AT_MMGC) && (a->adtyp == AD_SPEL || a->adtyp == AD_CLRC)) {

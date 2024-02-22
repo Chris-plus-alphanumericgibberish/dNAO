@@ -1081,15 +1081,15 @@ A("Soulmirror",						PLATE_MAIL,			(const char *)0,
 	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
-/* wearer gets a 1d4 poison sting */
+/* wearer gets a 1d4 poison sting, upgradeable by earning XP */
 A("The Scorpion Carapace",			SCALE_MAIL,			(const char *)0,
 	3000L, CHITIN, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_D, NOFLAG,
+	A_NONE, NON_PM, NON_PM, TIER_C, ARTG_INHER,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(POISON_RES), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, (ARTI_PLUSSEV)
+	SCORPION_UPGRADES, (ARTI_PLUSSEV)
 	),
 
 A("Mirrorbright",					ROUNDSHIELD,		(const char *)0,

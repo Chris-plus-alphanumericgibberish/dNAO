@@ -189,6 +189,7 @@ E int FDECL(soth_weapon_damage_turn, (struct obj *));
 E int FDECL(merc_weapon_damage_slice, (struct obj *, struct monst *, int));
 E int FDECL(infinity_s_mirrored_arc_litness, (struct obj *));
 E int FDECL(merge_skies, (struct obj **));
+E void NDECL(do_your_auras);
 
 /* ### astar.c ### */
 E boolean FDECL(path_exists, (int, int, int, int, long, int));
@@ -644,6 +645,7 @@ E int FDECL(tent_destroy_arm, (struct obj *));
 E void FDECL(adj_abon, (struct obj *,SCHAR_P));
 E int FDECL(properties_dr, (struct obj *,int,int));
 E void FDECL(dosymbiotic, (struct monst *, struct obj *));
+E void FDECL(doscorpion, (struct monst *, struct obj *));
 E void FDECL(doliving, (struct monst *, struct obj *));
 E void FDECL(doliving_dragonhead, (struct monst *, struct obj *, boolean));
 E void FDECL(doliving_mad_king, (struct monst *, struct obj *, boolean));
@@ -3420,6 +3422,9 @@ E int FDECL(dowrite, (struct obj *));
 
 /* ### xhity.c ### */
 
+E int FDECL(check_subout, (int *, int));
+E void FDECL(add_subout, (int *, int));
+E void FDECL(zero_subout, (int *));
 E int FDECL(getvis, (struct monst *, struct monst *, int, int));
 E boolean FDECL(attack2, (struct monst *));
 E int FDECL(xattacky, (struct monst *, struct monst *, int, int));

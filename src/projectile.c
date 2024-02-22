@@ -1583,7 +1583,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	{
 		/* miss */
 		/* train player's Shield skill if applicable */
-		if (youdef && uarms && (dieroll-accuracy <= shield_margin))
+		if (youdef && shield_margin > 0 && (dieroll-accuracy <= shield_margin))
 			use_skill(P_SHIELD, 1);
 		/* print missmsg */
 		if (vis) {

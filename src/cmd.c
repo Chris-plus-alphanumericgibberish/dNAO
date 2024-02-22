@@ -8,6 +8,7 @@
 #include "artifact.h"
 #include "lev.h"
 #include "func_tab.h"
+#include "xhity.h"
 /* #define DEBUG */	/* uncomment for debugging */
 
 /*
@@ -1366,8 +1367,8 @@ hasfightingforms(){
 	struct attack *attk;
 	struct attack prev_attk = {0};
 	struct attack prev_attk2 = {0};
-	int	indexnum, subout, tohitmod, res[4];
-	indexnum = subout = tohitmod = 0;
+	int	indexnum, subout[SUBOUT_ARRAY_SIZE]={0}, tohitmod, res[4];
+	indexnum = tohitmod = 0;
 	int i;
 
 	/* always shown */
@@ -1383,14 +1384,15 @@ hasfightingforms(){
 	if (u.uavoid_passives)
 		formmask |= AVOID_PASSIVES;
 	else {
-		indexnum = subout = tohitmod = 0;
+		indexnum = tohitmod = 0;
+		zero_subout(subout);
 		res[0] = MM_MISS;
 		res[1] = MM_MISS;
 		res[2] = MM_MISS;
 		res[3] = MM_MISS;
-		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod);
 			!is_null_attk(attk);
-			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod)
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
 		){
 			if(no_contact_attk(attk)) formmask |= AVOID_PASSIVES;
 		}
@@ -1398,14 +1400,15 @@ hasfightingforms(){
 	if (u.uavoid_msplcast)
 		formmask |= AVOID_MSPLCAST;
 	else {
-		indexnum = subout = tohitmod = 0;
+		indexnum = tohitmod = 0;
+		zero_subout(subout);
 		res[0] = MM_MISS;
 		res[1] = MM_MISS;
 		res[2] = MM_MISS;
 		res[3] = MM_MISS;
-		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod);
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, subout, &tohitmod);
 			!is_null_attk(attk);
-			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod)
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, subout, &tohitmod)
 		){
 			if(attk->aatyp == AT_MAGC) formmask |= AVOID_MSPLCAST;
 		}
@@ -1416,14 +1419,15 @@ hasfightingforms(){
 	if (u.uavoid_englattk)
 		formmask |= AVOID_ENGLATTK;
 	else {
-		indexnum = subout = tohitmod = 0;
+		indexnum = tohitmod = 0;
+		zero_subout(subout);
 		res[0] = MM_MISS;
 		res[1] = MM_MISS;
 		res[2] = MM_MISS;
 		res[3] = MM_MISS;
-		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod);
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, subout, &tohitmod);
 			!is_null_attk(attk);
-			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod)
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, subout, &tohitmod)
 		){
 			if(attk->aatyp == AT_ENGL) formmask |= AVOID_ENGLATTK;
 		}
