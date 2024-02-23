@@ -2080,7 +2080,7 @@ boolean mod;
 					artinstance[ART_SODE_NO_SHIRAYUKI].SnSd3duration = 0;//turn until which the weapon does full damage
 				}
 				if(otmp->oartifact == ART_SCORPION_CARAPACE){
-					artinstance[ART_SODE_NO_SHIRAYUKI].CarapaceLevel = 10;//Starts off at "10th level" Max upgrade points is therefor 20, and it takes a while to earn the first
+					artinstance[ART_SCORPION_CARAPACE].CarapaceLevel = 10;//Starts off at "10th level" Max upgrade points is therefor 20, and it takes a while to earn the first
 				}
 			}
 			if(otmp->oartifact && (get_artifact(otmp)->inv_prop == NECRONOMICON || get_artifact(otmp)->inv_prop == SPIRITNAMES)){
