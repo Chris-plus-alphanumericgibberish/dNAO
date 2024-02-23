@@ -3551,6 +3551,7 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-6, "talons") || /* set of knives */
 			   !BSTRCMPI(bp, p-6, "Thorns") || /* artifact */
 			   !BSTRCMPI(bp, p-9, "Soul Lens") || /* artifact */
+			   !BSTRCMPI(bp, p-9, "soul-lens") || /* item */
 			   !BSTRCMPI(bp, p-19, "Seal of the Spirits") || /* artifact */
 			   !BSTRCMPI(bp, p-20, "wind and fire wheels") || /* boots. Yeah. */
 			   !BSTRCMPI(bp, p-10, "eucalyptus") ||
