@@ -47,22 +47,6 @@ static void FDECL(god_gives_benefit,(ALIGNTYP_P));
  *	responsible for the theft of the Amulet from Marduk, the Creator.
  *	Moloch is unaligned.
  */
-//definition of externs in you.h
-const char	*Velka = "Velka, Goddess of Sin";
-const char	*Moloch = "Moloch";
-const char	*Morgoth = "Melkor";
-const char	*MolochLieutenant = "Moloch, lieutenant of Melkor";
-const char	*Silence = "The Silence";
-const char	*Chaos = "Chaos";
-const char	*DeepChaos = "Chaos, with Cosmos in chains";
-const char	*tVoid = "the void";
-const char	*Demiurge = "Yaldabaoth";
-const char	*Sophia = "Pistis Sophia";
-const char	*Other = "an alien god";
-const char	*BlackMother = "the Black Mother";
-const char	*Nodens = "Nodens";
-const char	*DreadFracture = "the Dread Fracture";
-const char	*AllInOne = "Yog-Sothoth";
 
 static const char *godvoices[] = {
     "booms out",
@@ -2156,10 +2140,10 @@ dosacrifice()
 					if(u.ulevel > 20) summon_god_minion(altargod, FALSE);
 					if(u.ulevel >= 14) summon_god_minion(altargod, FALSE);
 					(void) summon_god_minion(altargod, TRUE);
+					/* anger priest; test handles bones files */
+					if((pri = findpriest(temple_occupied(u.urooms))) && !p_coaligned(pri))
+						angry_priest();
 				}
-				/* anger priest; test handles bones files */
-				if((pri = findpriest(temple_occupied(u.urooms))) && !p_coaligned(pri))
-					angry_priest();
 			} else {
 				pline("Unluckily, you feel the power of %s decrease.", u_gname());
 				change_luck(-1);
@@ -2678,13 +2662,17 @@ struct monst *mon;
 	if(mon_healing_turn(mon)){
 		if(canseemon(mon))
 			pline("%s shines with holy light!", Monnam(mon));
+		mon->mhp += d(10,6);
+		if(mon->mhp > mon->mhpmax)
+			mon->mhp = mon->mhpmax;
 	}
-	else
+	else {
 		pline("%s chants holy scripture.", Monnam(mon));
+		if(Misotheism){
+			pline("But nothing happens!");
+			return MOVE_CANCELLED;
+		}
 
-	if(Misotheism){
-		pline("But nothing happens!");
-		return MOVE_CANCELLED;
 	}
 
 	/* note: does not perform unturn_dead() on victims' inventories */
@@ -2713,10 +2701,10 @@ struct monst *mon;
 				if(mtmp->mtyp != PM_BANDERSNATCH) mtmp->mflee = 0;
 				mtmp->mfrozen = 0;
 				mtmp->mcanmove = 1;
-		    } else if (!resist(mtmp, '\0', 0, TELL)) {
+		    } else if (!resist(mtmp, WAND_CLASS, 0, TELL)) {
 				if(is_undead(mtmp->data)){
 					xlev = turn_level(mtmp);
-					if (mon->m_lev >= xlev && !resist(mtmp, '\0', 0, NOTELL)) {
+					if (mon->m_lev >= xlev && !resist(mtmp, WAND_CLASS, 0, NOTELL)) {
 						pline("%s is destroyed!", Monnam(mtmp));
 						grow_up(mon, mtmp);
 						monkilled(mtmp, (const char *)0, AD_SPEL);
@@ -3577,7 +3565,7 @@ commune_with_goat()
 
 		case GOATBOON_ACID:
 			cost = 25;
-			/* gives your wielded weapon the Acrid (+2d6 acid damage) property */
+			/* gives your wielded (nonartifact) weapon the Acrid (+2d6 acid damage) property */
 			otmp = getobj(blessable_classes, "give the Goat's bite");
 			if(otmp && goat_acidable(otmp)) {
 				if(!Blind) pline("Acid drips from your weapon!");
@@ -3600,6 +3588,7 @@ commune_with_goat()
 			otmp = getobj(blessable_classes, "give the Goat's hunger");
 			if(otmp && goat_droolable(otmp)){
 				if(!Blind) pline("...your %s %s drooling.", xname(otmp), vtense(xname(otmp), "are"));
+				remove_oprop(otmp, OPROP_LESSER_ACIDW);
 				add_oprop(otmp, OPROP_GOATW);
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
@@ -3635,7 +3624,7 @@ commune_with_goat()
 	}
 
 	u.shubbie_credit -= cost;
-	change_usanity(-cost/2, TRUE);
+	change_usanity(-(cost+4)/5, TRUE);
 	
 	return MOVE_STANDARD;
 }
@@ -3966,7 +3955,7 @@ commune_with_silver_flame()
 		pline("The silver light recedes.");
 
 	u.silver_credit -= cost;
-	change_usanity(-cost/2, TRUE);
+	change_usanity(-(cost+4)/5, TRUE);
 	
 	return MOVE_STANDARD;
 }
@@ -4184,7 +4173,7 @@ commune_with_yog()
 			s_suffix(yogname)
 			);
 		/* taxes sanity! (a tiny bit) */
-		change_usanity(-6, TRUE);
+		change_usanity(-1, TRUE);
 		return MOVE_STANDARD;
 	}
 
@@ -4252,7 +4241,7 @@ commune_with_yog()
 
 		case YOGBOON_MAGIC:
 			cost = 25;
-			/* gives your wielded weapon the Lesser magic property */
+			/* gives your wielded (nonartifact) weapon the Lesser magic property */
 			otmp = getobj(blessable_classes, "reveal the Minor Stars");
 			if(otmp && yog_magicable(otmp)) {
 				if(!Blind) pline("The weapon begins to glitter!");
@@ -4275,6 +4264,7 @@ commune_with_yog()
 			otmp = getobj(blessable_classes, "show distant vistas");
 			if(otmp && yog_windowable(otmp)){
 				if(!Blind) pline("Your weapon becomes a window to distant vistas!");
+				remove_oprop(otmp, OPROP_LESSER_MAGCW);
 				add_oprop(otmp, OPROP_SOTHW);
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
@@ -4331,7 +4321,7 @@ commune_with_yog()
 	}
 
 	u.yog_sothoth_credit -= cost;
-	change_usanity(-cost/2, TRUE);
+	change_usanity(-(cost+4)/5, TRUE);
 	
 	return MOVE_STANDARD;
 }

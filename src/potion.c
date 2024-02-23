@@ -753,7 +753,14 @@ boolean force;
 				pline("The fruits of civilization give you strength!");
 				u.uhp += u.ulevel*10;
 				if (u.uhp > u.uhpmax) u.uhp = u.uhpmax;
-				if(u.udrunken < u.ulevel*3) u.udrunken++; //Enki allows clockworks to benefit from booze quaffing
+				if(u.udrunken < u.ulevel*3){//Enki allows clockworks to benefit from booze quaffing
+					u.udrunken++;
+					change_usanity(5, FALSE);
+				} else {
+					if(u.usanity < 50){
+						change_usanity(min(5, 50 - u.usanity), FALSE);
+					}
+				}
 				check_drunkard_trophy();
 			}
 		} else { /* Note: Androids can get drunk */
@@ -767,13 +774,13 @@ boolean force;
 			}
 			if(u.udrunken < u.ulevel*3){
 				u.udrunken++;
-				check_drunkard_trophy();
 				change_usanity(5, FALSE);
 			} else {
 				if(u.usanity < 50){
 					change_usanity(min(5, 50 - u.usanity), FALSE);
 				}
 			}
+			check_drunkard_trophy();
 			if (!otmp->blessed)
 			    make_confused(itimeout_incr(HConfusion, d(3,8)), FALSE);
 			/* the whiskey makes us feel better */
@@ -1174,7 +1181,7 @@ as_extra_healing:
 		exercise(A_STR, TRUE);
 		exercise(A_CON, TRUE);
 		//Makes you crazy
-		change_usanity(-1*rnd(20), FALSE);
+		change_usanity(-1*rnd(10), FALSE);
 		u.umadness |= MAD_GOAT_RIDDEN;
 		lift_veil();
 		break;
@@ -3532,13 +3539,18 @@ register struct obj *obj;
 			/* made artifact wish */
 			if (mtmp2) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+				mongone(mtmp2);
+				mtmp2 = (struct monst*) 0;
 				u.uevent.utook_castle |= ARTWISH_SPENT;
 			}
 			else if (mtmp3) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+				mongone(mtmp3);
+				mtmp3 = (struct monst*) 0;
 				u.uevent.uunknowngod |= ARTWISH_SPENT;
 			}
 		}
+		pline("The djinni%s disappears with a puff of smoke.", (mtmp2 || mtmp3) ? " and their entourage" : "");
 		mongone(mtmp);
 		if (mtmp2)	mongone(mtmp2);
 		if (mtmp3)	mongone(mtmp3);

@@ -577,7 +577,7 @@ OBJECT:'\\',"bed",(46,08)
 MONSTER: '#', "drow captain plague-victim", (48,11)
 OBJECT:'\\',"bed",(48,11)
 
-MONSTER: '#', "drow matron plague-victim", (49,03)
+MONSTER: '#', "shadowsmith plague-victim", (49,03)
 OBJECT:'\\',"expensive bed",(49,03)
 
 MONSTER: '@', "hedrow wizard", (44,18)
@@ -1080,11 +1080,14 @@ ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 #0         1         2         3         4         5         6         7        
 MONSTER:'#',"houseless drow plague-victim",(17,01)
-OBJECT:'(',"sack",(16,01)
+CONTAINER:'(',"sack",(16,01)
 OBJECT:'=',"levitation",contained
 OBJECT:'!',"levitation",contained
 OBJECT:'!',"levitation",contained
 OBJECT:'!',"levitation",contained
+OBJECT:'*',"chunk of fossil dark",random
+OBJECT[50%]:'*',"chunk of fossil dark",random
+OBJECT[10%]:'*',"chunk of fossil dark",random
 
 MONSTER:'h',"duergar",random
 MONSTER:'h',"duergar",random
@@ -1574,6 +1577,7 @@ MONSTER: 'h', "mind flayer", random
 ROOM: "ordinary" , unlit, random, random, random
 OBJECT: random, random, random
 OBJECT: random,random,random
+OBJECT:'*',"chunk of fossil dark",random
 MONSTER: 'h', "edderkop", random
 MONSTER: 'h', "edderkop", random
 MONSTER: 'h', "edderkop", random

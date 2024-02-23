@@ -25,7 +25,6 @@ STATIC_DCL boolean FDECL(isbig, (struct mkroom *));
 STATIC_DCL int FDECL(int_sqrt, (int));
 STATIC_DCL boolean FDECL(issemispacious, (struct mkroom *));
 STATIC_DCL void NDECL(mkshop), FDECL(mkzoo,(int)), NDECL(mkswamp);
-STATIC_DCL struct monst *FDECL(prisoner,(int, int, int));
 STATIC_DCL void NDECL(mktemple);
 STATIC_DCL void NDECL(mkkamereltowers);
 STATIC_DCL void NDECL(mkminorspire);
@@ -491,9 +490,16 @@ mklolthvaultitem()
 		type = lolth_armor[rn2(SIZE(lolth_armor))];
 		sobj = TRUE;
 	}
-	else if(rn2(2)) {
+	else if(!rn2(3)) {
 		type = lolth_weapons[rn2(SIZE(lolth_weapons))];
 		sobj = TRUE;
+	}
+	else if(rn2(2)){
+		if(rn2(2)){
+			type = find_signet_ring();
+			sobj = TRUE;
+		}
+		else type = RING_CLASS;
 	}
 	else if(rn2(2))
 		type = SCOIN_CLASS;
@@ -526,6 +532,8 @@ mklolthvaultitem()
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
 				otmp->spe = max_ints(d(2,3), otmp->spe);
 		}
+		if((otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS) && rn2(5))
+			otmp->oerodeproof = TRUE;
 	} while (--try_limit > 0 &&
 	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
 
@@ -3244,6 +3252,86 @@ int left;
 
 STATIC_OVL
 void
+mkelfforge(background, foreground, left, mithril)
+int background;
+int foreground;
+int left;
+char mithril;
+{
+	int x,y,tries=0;
+	int i,j, pathto = 0;
+	boolean good=FALSE, okspot, accessible;
+	int size = 5;
+	while(!good && tries < 1500){
+		if(left){
+			x = rn2(COLNO/2);
+			y = rn2(ROWNO-3);
+		} else {
+			x = rn2(COLNO-10)+1;
+			y = rn2(ROWNO-3);
+		}
+		tries++;
+		okspot = TRUE;
+		accessible = FALSE;
+		for(i=0;i<size;i++)
+			for(j=0;j<size;j++){
+				if(!isok(x+i,y+j) || t_at(x+i, y+j) || !(levl[x+i][y+j].typ == background || IS_WALL(levl[x+i][y+j].typ)))
+					okspot = FALSE;
+			}
+		pathto = 0;
+		for(i = x+1; i < x+size-1; i++){
+			if(isok(i,y-1) && (levl[i][y-1].typ == foreground || levl[i][y-1].typ == ROOM)) pathto++;
+			if(isok(i,y+size) && (levl[i][y+size].typ == foreground || levl[i][y+size].typ == ROOM)) pathto++;
+		}
+		for(i = y+1; i < y+size-1; i++){
+			if(isok(x+size,i) && (levl[x+size][i].typ == foreground || levl[x+size][i].typ == ROOM)) pathto++;
+			if(isok(x-1,i) && (levl[x-1][i].typ == foreground || levl[x-1][i].typ == ROOM)) pathto++;
+		}
+		if(pathto) accessible = TRUE;
+		if(okspot && accessible){
+			good = TRUE;
+		} else continue;
+		
+		for(i=0;i<size;i++){
+			for(j=0;j<size;j++){
+				levl[x+i][y+j].typ = HWALL;
+				if(m_at(x+i, y+j)) rloc(m_at(x+i, y+j), TRUE);
+			}
+		}
+		for(i=1;i<size-1;i++){
+			for(j=1;j<size-1;j++){
+				levl[x+i][y+j].typ = mithril ? ROOM : GRASS;
+				// if(!rn2(3)) mkobj_at((rn2(2) ? WEAPON_CLASS : rn2(2) ? TOOL_CLASS : ARMOR_CLASS), x+i, y+j, NO_MKOBJ_FLAGS);
+			}
+		}
+		if(mithril){
+			levl[x+(size)/2][y+(size)/2].typ = FORGE;
+			makemon(&mons[PM_MITHRIL_SMITH], x+(size)/2, y+(size)/2, NO_MM_FLAGS);
+		}
+		else {
+			levl[x+(size)/2][y+(size)/2].typ = TREE;
+			makemon(&mons[PM_TREESINGER], x+(size-2)/2, y+(size-2)/2, NO_MM_FLAGS);
+		}
+		// wallification(x, y, x+3, y+3);//Can be adjacent, do wallification after all huts placed
+		
+		pathto = rn2(pathto);
+		for(i = x+1; i < x+size-1 && pathto >= 0; i++){
+			if(isok(i,y-1) && (levl[i][y-1].typ == foreground || levl[i][y-1].typ == ROOM) && !(pathto--))
+				levl[i][y+0].typ = DOOR, levl[i][y+0].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			if(isok(i,y+size) && (levl[i][y+size].typ == foreground || levl[i][y+size].typ == ROOM) && !(pathto--))
+				levl[i][y+size-1].typ = DOOR, levl[i][y+size-1].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+		}
+		for(i = y+1; i < y+size-1 && pathto >= 0; i++){
+			if(isok(x+size,i) && (levl[x+size][i].typ == foreground || levl[x+size][i].typ == ROOM) && !(pathto--))
+				levl[x+size-1][i].typ = DOOR, levl[x+size-1][i].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+			if(isok(x-1,i) && (levl[x-1][i].typ == foreground || levl[x-1][i].typ == ROOM) && !(pathto--))
+				levl[x+0][i].typ = DOOR, levl[x+0][i].doormask = rn2(3) ? D_CLOSED : D_LOCKED;
+		}
+	}
+}
+
+STATIC_OVL
+void
 mkelffountain()
 {
 	int x,y,tries=0;
@@ -5806,6 +5894,7 @@ place_elfquest_forest_features()
 		for(; i > 0; i--)
 			mkelfhut(TREE, GRASS, 0);
 		// i = rn2(3) ? 1 : d(1,3);
+		mkelfforge(TREE, GRASS, 0, TRUE);
 		i = 1;
 		for(; i > 0; i--)
 			mkelffountain();
@@ -5815,6 +5904,8 @@ place_elfquest_forest_features()
 		int i = rn2(4) + rn2(4);
 		for(; i > 0; i--)
 			mkelfhut(TREE, GRASS, 0);
+		if(rn2(3))
+			mkelfforge(TREE, GRASS, 0, FALSE);
 		for(i=rn1(20,20); i > 0; i--)
 			mktowntree();
 		wallification(1,0,COLNO-1,ROWNO-1);
@@ -5843,13 +5934,21 @@ place_chaos_forest_features()
 	if(In_mordor_forest(&u.uz)){
 		int i = 6 + d(2,6);
 		mkforest12river();
-		for(; i > 0; i--)
+		if(!rn2(10))
+			mkelfforge(TREE, SOIL, 0, TRUE);
+		for(; i > 0; i--){
 			mkelfhut(TREE, SOIL, 0);
+			if(!rn2(6))
+				mkelfforge(TREE, SOIL, 0, FALSE);
+		}
 		wallification(1,0,COLNO-1,ROWNO-1);
 	} else if(Is_ford_level(&u.uz)){
 		int i = 3 + d(2,3);
-		for(; i > 0; i--)
+		for(; i > 0; i--){
 			mkelfhut(TREE, SOIL, 1);
+			if(!rn2(6))
+				mkelfforge(TREE, SOIL, 1, FALSE);
+		}
 		i = 1 + d(3,4);
 		for(; i > 0; i--)
 			mkwraithclearing(1);
@@ -6114,60 +6213,59 @@ mkshop()
 #ifndef MAC
 		ep = nh_getenv("SHOPTYPE");
 		if(ep){
-			if(*ep == 'z' || *ep == 'Z'){
-				mkzoo(ZOO);
+			switch(*ep){
+				case 'z':
+				case 'Z':
+					mkzoo(ZOO);
 				return;
-			}
-			if(*ep == 'm' || *ep == 'M'){
-				mkzoo(MORGUE);
+				case 'm':
+				case 'M':
+					mkzoo(MORGUE);
 				return;
-			}
-			if(*ep == 'b' || *ep == 'B'){
-				mkzoo(BEEHIVE);
+				case 'b':
+				case 'B':
+					mkzoo(BEEHIVE);
 				return;
-			}
-			if(*ep == 't' || *ep == 'T' || *ep == '\\'){
-				mkzoo(COURT);
+				case 't':
+				case 'T':
+				case '\\':
+					mkzoo(COURT);
 				return;
-			}
-			if(*ep == 's' || *ep == 'S'){
-				mkzoo(BARRACKS);
+				case 's':
+				case 'S':
+					mkzoo(BARRACKS);
 				return;
-			}
-			if(*ep == 'a' || *ep == 'A'){
-				mkzoo(ANTHOLE);
+				case 'a':
+				case 'A':
+					mkzoo(ANTHOLE);
 				return;
-			}
-			if(*ep == 'c' || *ep == 'C'){
-				mkzoo(COCKNEST);
+				case 'c':
+				case 'C':
+					mkzoo(COCKNEST);
 				return;
-			}
-			if(*ep == 'l' || *ep == 'L'){
-				mkzoo(LEPREHALL);
+				case 'l':
+				case 'L':
+					mkzoo(LEPREHALL);
 				return;
-			}
-			if(*ep == 'o' || *ep == 'O'){
-				mkpoolroom();
+				case 'o':
+				case 'O':
+					mkpoolroom();
 				return;
-			}
-			if(*ep == '_'){
-				mktemple();
+				case '_':
+					mktemple();
 				return;
-			}
-			if(*ep == 'n'){
-				mkgarden((struct mkroom *)0);
+				case 'n':
+					mkgarden((struct mkroom *)0);
 				return;
-			}
-			if(*ep == '\''){
-				mklibrary((struct mkroom *)0);
+				case '\'':
+					mklibrary((struct mkroom *)0);
 				return;
-			}
-			if(*ep == '}'){
-				mkswamp();
+				case '}':
+					mkswamp();
 				return;
-			}
-			if(*ep == 'w' || *ep == 'W'){
-				mkisland();
+				case 'w':
+				case 'W':
+					mkisland();
 				return;
 			}
 			/* note: shops >= UNIQUESHOP don't have valid class symbols, nor are generated randomly */
@@ -6177,6 +6275,8 @@ mkshop()
 				    goto gottype;
 			if(*ep == 'g' || *ep == 'G')
 				i = 0;
+			else if(*ep == 'u' || *ep == 'U')
+				i = 10;
 			else
 				i = -1;
 		}
@@ -6323,7 +6423,7 @@ int sx,sy;
 	return TRUE;
 }
 
-STATIC_OVL struct monst *
+struct monst *
 prisoner(kingtype, sx, sy)
 int kingtype;
 int sx,sy;
@@ -6688,6 +6788,41 @@ int sx,sy;
 			};
 			mtyp = ROLL_FROM(prisoners);
 		}break;
+		case PM_PSYCHOPOMP:{
+			int prisoners[] = {
+				PM_ELVENKING,
+				PM_ELVENQUEEN,
+				PM_UNEARTHLY_DROW,
+				PM_DROW_MATRON,
+				PM_ORC_OF_THE_AGES_OF_STARS,
+				PM_ORC_OF_THE_AGES_OF_STARS,
+				PM_DOKKALFAR_ETERNAL_MATRIARCH,
+				PM_DOKKALFAR_ETERNAL_MATRIARCH,
+				PM_BARBARIAN,
+				PM_HALF_DRAGON,
+				PM_HEALER,
+				PM_HEALER,
+				PM_KNIGHT,
+				PM_KNIGHT,
+				PM_MONK,
+				PM_MONK,
+				PM_NOBLEMAN,
+				PM_NOBLEWOMAN,
+				PM_PRIEST,
+				PM_PRIESTESS,
+				PM_RANGER,
+				PM_RANGER,
+				PM_ROGUE,
+				PM_ROGUE,
+				PM_SAMURAI,
+				PM_SAMURAI,
+				PM_VALKYRIE,
+				PM_WIZARD,
+				PM_DEMINYMPH,
+				PM_DEMINYMPH,
+			};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
 	}
 	if(mtyp == PM_DRACAE_ELADRIN){
 		if(dungeon_topology.eprecursor_typ != PRE_DRACAE){
@@ -6714,12 +6849,26 @@ int sx,sy;
 		}
 	}
 	if(mtyp != NON_PM){
-		int equipLevel = ((kingtype == PM_TITAN || kingtype == PM_EMBRACED_DROWESS || kingtype == PM_AVATAR_OF_LOLTH || kingtype == PM_DEEPEST_ONE || kingtype == PM_ORC_OF_THE_AGES_OF_STARS) ? MM_GOODEQUIP : 0);
-		if(is_mplayer(&mons[mtyp])){
-			mon = mk_mplayer(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+		if(kingtype == PM_PSYCHOPOMP){
+			if(is_mplayer(&mons[mtyp])){
+				mon = mk_mplayer(&mons[mtyp], sx, sy, MM_GOODEQUIP);
+			}
+			else {
+				mon = makemon(&mons[mtyp], sx, sy, MM_GOODEQUIP|MM_ENDGEQUIP);
+			}
 		}
 		else {
-			mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+			int equipLevel = ((kingtype == PM_TITAN
+				|| kingtype == PM_EMBRACED_DROWESS
+				|| kingtype == PM_AVATAR_OF_LOLTH
+				|| kingtype == PM_DEEPEST_ONE
+				|| kingtype == PM_ORC_OF_THE_AGES_OF_STARS) ? MM_GOODEQUIP : 0);
+			if(is_mplayer(&mons[mtyp])){
+				mon = mk_mplayer(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+			}
+			else {
+				mon = makemon(&mons[mtyp], sx, sy, NO_MM_FLAGS|equipLevel);
+			}
 		}
 		if(mon){
 			if(mon->mtyp == PM_SURYA_DEVA){
@@ -6984,7 +7133,8 @@ struct mkroom *sroom;
 							set_curhouse(mon->mfaction);
 						}
 						//Note: court monsters are always part of rodney's forces.
-						set_faction(mon, YENDORIAN_FACTION);
+						if(!mon->mfaction)
+							set_faction(mon, YENDORIAN_FACTION);
 						if(mon->mpeaceful){
 							mon->mpeaceful = 0;
 							set_malign(mon);
@@ -7065,7 +7215,8 @@ struct mkroom *sroom;
 				}
 				if (type==COURT) {
 					//Note: court monsters are always part of rodney's forces, even if they are angels.
-					set_faction(mon, YENDORIAN_FACTION);
+					if(!mon->mfaction)
+						set_faction(mon, YENDORIAN_FACTION);
 					if(mon->mpeaceful){
 						mon->mpeaceful = 0;
 						set_malign(mon);
@@ -7223,7 +7374,7 @@ struct mkroom *sroom;
 					break;
 					case 3:
 						otmp = mksobj_at(SLIME_MOLD, sx, sy, NO_MKOBJ_FLAGS);
-						otmp->spe = fruitadd("honey drop");
+						otmp->spe = fruitadd("honeydew");
 					break;
 					case 4:
 						otmp = mksobj_at(TIN, sx, sy, NO_MKOBJ_FLAGS);

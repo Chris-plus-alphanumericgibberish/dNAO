@@ -207,20 +207,23 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define NO_SPELL	0
 
 /* flags to control makemon() */
-#define NO_MM_FLAGS         0x0000    /* use this rather than plain 0 */
-#define NO_MINVENT          0x0001    /* suppress minvent when creating mon */
-#define MM_NOWAIT           0x0002    /* don't set STRAT_WAITMASK flags */
-#define MM_EDOG             0x0004    /* add edog structure */
-#define MM_ESUM             0x0008    /* add summon structure, inventory (if any) is marked as summoned. */
-#define MM_ANGRY            0x0010    /* monster is created angry */
-#define MM_NONAME           0x0020    /* monster is not christened */
-#define MM_NOCOUNTBIRTH     0x0040    /* don't increment born counter (for revival) */
-#define MM_IGNOREWATER      0x0080    /* ignore water when positioning */
-#define MM_ADJACENTOK       0x0100    /* it is acceptable to use adjacent coordinates */
-#define MM_ADJACENTSTRICT   0x0200    /* ...but only ONE removed.*/
-#define MM_NOGROUP          0x0400    /* don't generate its normal accompanying groupmates */
-#define MM_BIGGROUP         0x0800    /* do generate its larger size of accompanying groupmates */
-#define MM_GOODEQUIP        0x1000    /* do generate its better equipment sets (planar equip for angels) */
+#define NO_MM_FLAGS         0x00000000    /* use this rather than plain 0 */
+#define NO_MINVENT          0x00000001    /* suppress minvent when creating mon */
+#define MM_NOWAIT           0x00000002    /* don't set STRAT_WAITMASK flags */
+#define MM_EDOG             0x00000004    /* add edog structure */
+#define MM_ESUM             0x00000008    /* add summon structure, inventory (if any) is marked as summoned. */
+#define MM_ANGRY            0x00000010    /* monster is created angry */
+#define MM_NONAME           0x00000020    /* monster is not christened */
+#define MM_NOCOUNTBIRTH     0x00000040    /* don't increment born counter (for revival) */
+#define MM_IGNOREWATER      0x00000080    /* ignore water when positioning */
+#define MM_ADJACENTOK       0x00000100    /* it is acceptable to use adjacent coordinates */
+#define MM_ADJACENTSTRICT   0x00000200    /* ...but only ONE removed.*/
+#define MM_NOGROUP          0x00000400    /* don't generate its normal accompanying groupmates */
+#define MM_BIGGROUP         0x00000800    /* do generate its larger size of accompanying groupmates */
+#define MM_GOODEQUIP        0x00001000    /* do generate its better equipment sets (planar equip for angels) */
+#define MM_ENDGEQUIP        0x00002000    /* do generate endgame equipment */
+#define MM_MALE             0x00004000    /* make monster male */
+#define MM_FEMALE           0x00008000    /* make monster female */
 
 /* flags to control mksobj() et al */
 #define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */

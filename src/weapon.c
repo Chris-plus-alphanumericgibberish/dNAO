@@ -197,7 +197,7 @@ struct monst *magr;
 		ptr = youracedata;
 	
 	if (Is_weapon || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)){
-		if(youagr && Race_if(PM_ORC) && otmp == uwep){
+		if(youagr && Race_if(PM_ORC) && otmp->where == OBJ_INVENT){
 			tmp += max((u.ulevel+2)/3, otmp->spe);
 		} else {
 			tmp += otmp->spe;
@@ -490,11 +490,11 @@ struct monst *magr;
 		else if (obj->oartifact == ART_WAND_OF_ORCUS) {
 			ocn = 1;
 			ocd = 4;
-			spe_mult = 0;	/* it's a wand */
+			spe_mult = 0;	/* it's a wand, spe is charges */
 		}
 		else if (obj->oartifact == ART_ROGUE_GEAR_SPIRITS) {
 			ocn = 1;
-			ocd = (large ? 2 : 4);
+			ocd = (large ? 3 : 6);
 		}
 		else if (otyp == CARCOSAN_STING)
 		{
@@ -538,6 +538,12 @@ struct monst *magr;
 			ocd = max(2, 2 * FightingFormSkillLevel(FFORM_SHIELD_BASH)); // 2-8 for unskilled-expert
 		} else if (magr == &youmonst && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(obj, youracedata) || bimanual_mod(obj, &youmonst) > 1)) {
 			ignore_rolls = max(0, FightingFormSkillLevel(FFORM_GREAT_WEP) - 1); // 0-3 for unskilled-expert
+		}
+		
+		if(magr == &youmonst && obj->oartifact){
+			const struct artifact *weap = get_artifact(obj);
+			if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_PENETRATE))
+				ignore_rolls += u.usanity > 50 ? 0 : u.usanity > 25 ? 1 : u.usanity > 10 ? 2 : 3;
 		}
 
 		if (otyp == HEAVY_IRON_BALL) {
@@ -869,22 +875,22 @@ struct monst *magr;
 	case ROD_OF_FORCE:			spe_mult *= 2; ocn *= 2; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
 	case DISKOS:
 								if(u.uinsight >= 40){
-									ocn+=3;
-									flat+=ocd;
+									ocn+=1;
+									flat+=(ocd+1)/2;
 								} else if(u.uinsight >= 35){
-									ocn+=2;
-									flat+=ocd;
+									ocn+=1;
+									flat+=(ocd+3)/4;
 								} else if(u.uinsight >= 30){
-									ocn+=2;
-									flat+=3*ocd/4;
+									plus(1,3*ocd/4);
+									flat+=(ocd+3)/4;
 								} else if(u.uinsight >= 25){
-									ocn++;
-									flat+=3*ocd/4;
+									plus(1,(ocd+1)/2);
+									flat+=(ocd+3)/4;
 								} else if(u.uinsight >= 10){
-									ocn++;
-									flat+=ocd/2;
+									plus(1,(ocd+3)/4);
+									flat+=(ocd+3)/4;
 								} else if(u.uinsight >= 5){
-									flat+=ocd/2;
+									flat+=(ocd+3)/4;
 								}
 	break;
 	}
@@ -925,7 +931,7 @@ struct monst *magr;
 		else {
 			/* equivalent to small mace */
 			ocn = 1;
-			ocd = 4;
+			ocd = 8;
 			flat = (large ? 0 : 1);
 		}
 	}
@@ -1057,28 +1063,38 @@ boolean youdef;
 	/* determine function to use */
 	if (!wdie->exploding && !wdie->lucky) {
 		/* standard dice */
-		tmp += d(n, x-igrolls);
+		if(x-igrolls > 1)
+			tmp += d(n, x-igrolls);
 		tmp += n*igrolls;
 	}
 	else if (wdie->exploding && !wdie->lucky) {
 		/* exploding non-lucky dice */
 		/* great weapon fighting is a LARGE buff to these. possibly too strong */
-		tmp += exploding_d(n, x-igrolls, wdie->explode_amt);
+		if(x-igrolls > 1)
+			tmp += exploding_d(n, x-igrolls, wdie->explode_amt);
+		else igrolls = 2*x;
+
 		tmp += n*igrolls;
 	}
 	else if (!wdie->exploding && wdie->lucky) {
 		/* lucky non-exploding dice */
 		int i;
-		for (i = n; i; i--)
-		{
-			tmp += youdef ? (rnl(x-igrolls) + igrolls + 1) : (x - rnl(x-igrolls));
+		if(x-igrolls > 1){
+			for (i = n; i; i--)
+			{
+				tmp += youdef ? (rnl(x-igrolls) + igrolls + 1) : (x - rnl(x-igrolls));
+			}
 		}
+		else tmp += n*igrolls;
 	}
 	else if (wdie->exploding && wdie->lucky) {
 		/* EXTEMELY POTENT exploding lucky dice */
 		/* going to be honest - no CLUE what the distr with GWF turned on does,
 		 * but if you manage to get that, it's probably stupid or deserved */
-		tmp += (youdef ? unlucky_exploding_d : lucky_exploding_d)(n, x-igrolls, wdie->explode_amt);
+		if(x-igrolls > 1)
+			tmp += (youdef ? unlucky_exploding_d : lucky_exploding_d)(n, x-igrolls, wdie->explode_amt);
+		else igrolls = 10*x; //I think this is impossible, since this would be a Gith sword plus Fluorite Octet
+
 		tmp += n*igrolls;
 	}
 	return tmp;
@@ -3352,6 +3368,41 @@ int degree;
 }
 
 void
+lose_skill(skill,degree)
+int skill;
+int degree;
+{
+	if(skill < 0) skill *= -1;
+	
+    if (skill == P_NONE)
+		return;
+
+	if(P_ADVANCE(skill) > degree)
+		P_ADVANCE(skill)-=degree;
+	else P_ADVANCE(skill) = 0;
+
+	boolean try_reduce = TRUE; //Don't get stuck in an infinite loop if skill's default value is > P_UNSKILLED
+	while(OLD_P_SKILL(skill) > P_UNSKILLED
+	 && P_ADVANCE(skill) < practice_needed_to_advance(OLD_P_SKILL(skill)-1)
+	 && try_reduce
+	) {
+		try_reduce = FALSE;
+		for(int i = u.skills_advanced-1; i >= 0; i--){
+			if(skill == u.skill_record[i]){
+				try_reduce = TRUE;
+				OLD_P_SKILL(skill)--;
+				u.weapon_slots += slots_required(skill);
+				for(int j = i+1; j < u.skills_advanced; j++, i++){
+					u.skill_record[i] = u.skill_record[j];
+				}
+				u.skills_advanced--;
+				break; //End outer skill-finding loop
+			}
+		}
+	}
+}
+
+void
 add_weapon_skill(n)
 int n;	/* number of slots to gain; normally one */
 {
@@ -3500,6 +3551,49 @@ uwep_skill_type()
 	return weapon_type(uwep);
 }
 
+int
+get_your_size()
+{
+	int wielder_size = (youracedata->msize - MZ_MEDIUM);
+
+	if (Role_if(PM_CAVEMAN))
+		wielder_size += 1;
+	if (u.sealsActive&SEAL_YMIR)
+		wielder_size += 1;
+
+	return wielder_size;
+}
+
+int
+max_offhand_weight(){
+	/* Sporkhack:
+	 * Heavy things are hard to use in your offhand unless you're
+	 * very good at what you're doing.
+	 *
+	 * No real need to restrict unskilled here since knives and such
+	 * are very hard to find and people who are restricted can't
+	 * #twoweapon even at unskilled...
+	*/
+
+	int maxweight = 0;
+	switch (P_SKILL(P_TWO_WEAPON_COMBAT)) {
+		case P_ISRESTRICTED:
+		case P_UNSKILLED:		maxweight = 10; break;	 /* not silver daggers */
+		case P_BASIC:			maxweight = 20; break;	 /* daggers, crysknife, sickle, aklys, flail, bullwhip, unicorn horn */
+		case P_SKILLED:	 		maxweight = 30; break;	 /* shortswords and spears (inc silver), mace, club, lightsaber, grappling hook */
+		case P_EXPERT:			maxweight = 40; break;	 /* sabers and long swords, axe weighs 60, war hammer 50, pickaxe 80, beamsword */
+		case P_MASTER:			maxweight = 50; break;
+		case P_GRAND_MASTER:	maxweight = 60; break;
+		default: impossible("weapon_hit_bonus: bad skill %d", P_SKILL(P_TWO_WEAPON_COMBAT));
+	}
+
+	int wielder_size = get_your_size();
+
+	if (wielder_size > 0) maxweight *= 1+wielder_size;
+
+	return maxweight;
+}
+
 /*
  * Return hit bonus/penalty based on skill of weapon.
  * Treat restricted weapons as unskilled.
@@ -3510,7 +3604,7 @@ struct obj *weapon;
 int wep_type;
 {
 	int type, skill, bonus = 0, aumpenalty = 0;
-	unsigned int maxweight = 0;
+	int maxweight = max_offhand_weight();
 	static boolean twowepwarn = TRUE;
 	static boolean makashiwarn = TRUE;
 
@@ -3572,33 +3666,6 @@ int wep_type;
 		1W weapons -4 -4 +0 +2 +5      
 		2W weapons -6 -6 +0 +1 +2
 		*/
-
-		/* Sporkhack:
-		 * Heavy things are hard to use in your offhand unless you're
-		 * very good at what you're doing.
-		 *
-		 * No real need to restrict unskilled here since knives and such
-		 * are very hard to find and people who are restricted can't
-		 * #twoweapon even at unskilled...
-		 */
-		switch (P_SKILL(P_TWO_WEAPON_COMBAT)) {
-			default: impossible("weapon_hit_bonus: bad skill %d", P_SKILL(P_TWO_WEAPON_COMBAT));
-			case P_ISRESTRICTED:
-			case P_UNSKILLED:		maxweight = 10; break;	 /* not silver daggers */
-			case P_BASIC:			maxweight = 20; break;	 /* daggers, crysknife, sickle, aklys, flail, bullwhip, unicorn horn */
-			case P_SKILLED:	 		maxweight = 30; break;	 /* shortswords and spears (inc silver), mace, club, lightsaber, grappling hook */
-			case P_EXPERT:			maxweight = 40; break;	 /* sabers and long swords, axe weighs 60, war hammer 50, pickaxe 80, beamsword */
-			case P_MASTER:			maxweight = 50; break;
-			case P_GRAND_MASTER:	maxweight = 60; break;
-		}
-		int wielder_size = (youracedata->msize - MZ_MEDIUM);
-
-		if (Role_if(PM_CAVEMAN))
-			wielder_size += 1;
-		if (u.sealsActive&SEAL_YMIR)
-			wielder_size += 1;
-		if (wielder_size > 0)
-			maxweight *= 1+wielder_size;
 
 		if (wep_type == P_BARE_HANDED_COMBAT) {
 			bonus -= abs(bonus * 2 / 3);
@@ -3822,6 +3889,24 @@ int wep_type;
  * Treat restricted weapons as unskilled.
  */
 int
+mon_weapon_dam_bonus(pa, weapon, wep_type)
+struct permonst *pa;
+struct obj *weapon;
+int wep_type;
+{
+	int skill = m_martial_skill(pa);
+	switch(skill){
+		case P_BASIC:
+			return 1;
+		case P_SKILLED:
+			return 2;
+		case P_EXPERT:
+			return 5;
+	}
+	return 0;
+}
+
+int
 weapon_dam_bonus(weapon, wep_type)
 struct obj *weapon;
 int wep_type;
@@ -4026,15 +4111,15 @@ struct obj *shield;
 	if(weight(shield) > (int)objects[BUCKLER].oc_weight){
 		switch(P_SKILL(P_SHIELD)){
 			case P_BASIC:	return 1;
-			case P_SKILLED:	return 2;
-			case P_EXPERT:	return 5;
+			case P_SKILLED:	return activeFightingForm(FFORM_SHIELD_BASH) ? 2 : 3;
+			case P_EXPERT:	return activeFightingForm(FFORM_SHIELD_BASH) ? 5 : 8;
 			default: return 0;
 		}
 	}
 	else {
 		switch(P_SKILL(P_SHIELD)){
 			case P_SKILLED:	return 1;
-			case P_EXPERT:	return 2;
+			case P_EXPERT:	return activeFightingForm(FFORM_SHIELD_BASH) ? 2 : 3;
 			default: return 0;
 		}
 	}
@@ -4256,7 +4341,8 @@ boolean youagr;
 			&& !(otmp->oartifact && !always_twoweapable_artifact(otmp))			// ok artifact
 			&& (!bimanual(otmp, pa) || pa->mtyp == PM_GYNOID || pa->mtyp == PM_PARASITIZED_GYNOID)// not two-handed
 			&& (youagr || (otmp != MON_WEP(magr) && otmp != MON_SWEP(magr)))	// not wielded already (monster)
-			&& (!youagr || otmp->owt <= max(10, P_SKILL(P_TWO_WEAPON_COMBAT)*10))// not too heavy
+			&& (!youagr || otmp->owt <= max_offhand_weight())// not too heavy
+			&& (!(otmp->cursed) || (youagr && Weldproof) || (!youagr && is_weldproof_mon(magr)))
 			&& (!youagr || (otmp != uwep && (!u.twoweap || otmp != uswapwep)))	// not wielded already (player)
 			&& !(is_ammo(otmp) || (is_bad_melee_pole(otmp) && !melee_polearms(pa)) || is_missile(otmp))	// not unsuitable for melee (ammo, polearm, missile)
 			&& !otmp->owornmask);												// not worn

@@ -1614,7 +1614,7 @@ misc_levelport:
 
 	if (level_info[new_ledger].flags & FORGOTTEN) {
 	    forget_map(100);	/* forget the map */
-	    forget_traps();		/* forget all traps too */
+	    // forget_traps();		/* forget all traps too */
 	    familiar = TRUE;
 	    level_info[new_ledger].flags &= ~FORGOTTEN;
 	}
@@ -2011,6 +2011,9 @@ int different;
 		mtmp->zombify = 0;
 		if(mtmp->mpeaceful && !mtmp->mtame){
 			mtmp->mpeaceful = 0;
+		}
+		if(has_template(mtmp, SPORE_ZOMBIE) && Nightmare && u.umadness&MAD_SPORES && rn2(100) < Insanity){
+			mtmp->mpeaceful = TRUE;
 		}
 	}
 	if(different==REVIVE_YELLOW){

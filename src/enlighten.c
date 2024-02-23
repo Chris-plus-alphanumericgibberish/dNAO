@@ -14,6 +14,7 @@ STATIC_DCL void NDECL(resistances_enlightenment);
 STATIC_DCL void NDECL(signs_enlightenment);
 STATIC_DCL void NDECL(spirits_enlightenment);
 STATIC_DCL void NDECL(mutations_enlightenment);
+STATIC_DCL void NDECL(genocide_enlightenment);
 
 #define DOATTRIB_RESISTS	1
 #define DOATTRIB_ARMOR		2
@@ -21,6 +22,7 @@ STATIC_DCL void NDECL(mutations_enlightenment);
 #define DOATTRIB_BINDINGS	4
 #define DOATTRIB_SPIRITS	5
 #define DOATTRIB_MUTATIONS	6
+#define DOATTRIB_GENOCIDE	7
 
 /* -enlightenment and conduct- */
 static winid en_win;
@@ -99,7 +101,9 @@ char *outbuf;
 	}
 	bonus = (incamt > 0) ? "bonus" : "penalty";
 	/* "bonus to hit" vs "damage bonus" */
-	if (!strcmp(inctyp, "damage") || !strcmp(inctyp, "spell damage")) {
+	if (!strcmp(inctyp, "damage") || !strcmp(inctyp, "spell damage") ||
+	    !strcmp(inctyp, "AC") || !strcmp(inctyp, "protection") ||
+	    !strcmp(inctyp, "morale") || !strcmp(inctyp, "carry capacity")) {
 	    const char *ctmp = inctyp;
 	    inctyp = bonus;
 	    bonus = ctmp;
@@ -137,6 +141,8 @@ doattributes()
 		case DOATTRIB_MUTATIONS:
 			mutations_enlightenment();
 			break;
+		case DOATTRIB_GENOCIDE:
+			genocide_enlightenment();
 		default:
 			return MOVE_INSTANT;
 		}
@@ -236,6 +242,11 @@ minimal_enlightenment()
 
 	/* Current alignment */
 	Sprintf(buf, fmtstr, "alignment", align_str(u.ualign.type));
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
+
+	/* Current experience level and experience points */
+	Sprintf(buf2, "%u/%-1ld", u.ulevel, u.uexp);
+	Sprintf(buf, fmtstr, "experience", buf2);
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 
 	/* Deity list */
@@ -352,6 +363,14 @@ minimal_enlightenment()
 		//spirits_enlightenment();
 	}
 
+	if (num_genocides() != 0) {
+		Sprintf(buf, "Show genocided monsters.");
+		any.a_int = DOATTRIB_GENOCIDE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			 'g', 0, ATR_NONE, buf,
+			 MENU_UNSELECTED);
+	}
+
 	end_menu(tmpwin, "Base Attributes");
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
@@ -412,23 +431,12 @@ boolean dumping;
 		}
 	}
 	
-	/* note: piousness 20 matches MIN_QUEST_ALIGN (quest.h) */
-	if (u.ualign.record >= 20)	you_are("piously aligned");
-	else if (u.ualign.record > 13)	you_are("devoutly aligned");
-	else if (u.ualign.record > 8)	you_are("fervently aligned");
-	else if (u.ualign.record > 3)	you_are("stridently aligned");
-	else if (u.ualign.record == 3)	you_are("aligned");
-	else if (u.ualign.record > 0)	you_are("haltingly aligned");
-	else if (u.ualign.record == 0)	you_are("nominally aligned");
-	else if (u.ualign.record >= -3)	you_have("strayed");
-	else if (u.ualign.record >= -8)	you_have("sinned");
-	else you_have("transgressed");
+	if (final && flags.descendant) {
+		enl_msg("You ", "inherited ", "inherited ", artilist[u.inherited].name);
+	}
 	if (wizard || final) {
 		Sprintf(buf, "%ld gold ", u.spawnedGold);
 		enl_msg(buf, "has been", "was", " created");
-	}
-#ifdef WIZARD
-	if (wizard) {
 		Sprintf(buf, " %d", u.ualign.record);
 		enl_msg("Your alignment ", "is", "was", buf);
 		Sprintf(buf, " %d sins", u.ualign.sins);
@@ -454,10 +462,24 @@ boolean dumping;
 			Sprintf(buf, "%d chokhmah sephiroth ", u.chokhmah);
 			enl_msg(buf, "are", "were", " deployed");
 		}
-		if(u.ustdy){
-			Sprintf(buf, "%d weakness from being studied", u.ustdy);
-			you_have(buf);
-		}
+	} else {
+		/* note: piousness 20 matches MIN_QUEST_ALIGN (quest.h) */
+		if (u.ualign.record >= 20)	you_are("piously aligned");
+		else if (u.ualign.record > 13)	you_are("devoutly aligned");
+		else if (u.ualign.record > 8)	you_are("fervently aligned");
+		else if (u.ualign.record > 3)	you_are("stridently aligned");
+		else if (u.ualign.record == 3)	you_are("aligned");
+		else if (u.ualign.record > 0)	you_are("haltingly aligned");
+		else if (u.ualign.record == 0)	you_are("nominally aligned");
+		else if (u.ualign.record >= -3)	you_have("strayed");
+		else if (u.ualign.record >= -8)	you_have("sinned");
+		else you_have("transgressed");
+	}
+	if(u.ustdy){
+		Sprintf(buf, "%d weakness from being studied", u.ustdy);
+		you_have(buf);
+	}
+	if (wizard) {
 		if(u.sealCounts){
 			Sprintf(buf, "spirits bound: %d", u.sealCounts);
 			you_have(buf);
@@ -470,8 +492,18 @@ boolean dumping;
 			Sprintf(buf, "special seals active: %lx", u.specialSealsActive);
 			you_have(buf);
 		}
+		if(dungeon_topology.eprecursor_typ == PRE_DRACAE){
+			enl_msg("Eladrin precursors ", "are", "were", " Dracae Eladrin");
+		}
+		else if(dungeon_topology.eprecursor_typ == PRE_POLYP){
+			enl_msg("Eladrin precursors ", "are", "were", " Polypoid");
+		}
+		else {
+			enl_msg("Eladrin precursors ", "are", "were", " pretty normal");
+		}
 	}
-#endif
+	
+	if(u.uencouraged) you_have(enlght_combatinc("morale", u.uencouraged, 1, buf));
 	
 	if(u.sealsActive || u.specialSealsActive){
 		int i,j,numBound,numFound=0;
@@ -638,7 +670,7 @@ boolean dumping;
 	if(Doubt)
 		enl_msg("You ", "can't", "couldn't", " pray or use clerical magic");
 	/*** Madnesses ***/
-	if(NightmareAware_Sanity < 100 && !BlockableClearThoughts){
+	if((NightmareAware_Sanity < 100 && !BlockableClearThoughts) || final){
 		if (u.umadness&MAD_DELUSIONS){
 			you_have("a tendency to hallucinate, obscuring some monsters' true forms");
 		}
@@ -666,7 +698,7 @@ boolean dumping;
 			you_have("reduced AC, reduced spell success, and increased damage");
 		}
 		if (u.umadness&MAD_ARGENT_SHEEN){
-			enl_msg("Sometimes, monsters ", "will gain", "gained", "  reflection for a turn");
+			enl_msg("Sometimes, monsters ", "will gain", "gained", " reflection for a turn");
 			enl_msg("Sometimes, monsters ", "will take", "took", " reduced damage from your magic");
 			enl_msg("Sometimes, you ", "will stop", "stopped", " to admire yourself in mirrors, losing turns");
 			enl_msg("You ", "take", "took", " increased damage from male humanoids and centaurs");
@@ -741,7 +773,7 @@ boolean dumping;
 			enl_msg("You ", "are", "were", " distracted by invisible insects, lowering your skills and increasing spell failure");
 		}
 		if (u.umadness&MAD_HOST){
-			enl_msg("You ", "are", "were", " nausiated by the thing inside you, which sometimes makes you vomit");
+			enl_msg("You ", "are", "were", " nauseated by the thing inside you, which sometimes makes you vomit");
 		}
 		if (u.umadness&MAD_SCIAPHILIA){
 			enl_msg("You ", "wish", "wished", " to stand in partially illuminated areas, suffering reduced accuracy and sometimes failing to cast spells if not");
@@ -938,11 +970,39 @@ boolean dumping;
 		if(u.ucspeed==NORM_CLOCKSPEED) you_are("set to normal clockspeed");
 		if(u.ucspeed==SLOW_CLOCKSPEED) you_are("set to low clockspeed");
 		if(u.phasengn) you_are("in phase mode");
+		if (u.utemp < WARM)
+			enl_msg("Your internal boiler ", "is", "was", " under control");
+		else if (u.utemp < HOT)
+			enl_msg("Your internal boiler ", "is", "was", " running mildly warm");
+		else if (u.utemp < BURNING_HOT)
+			enl_msg("Your internal boiler ", "is", "was", " running rather hot");
+		else if (u.utemp < MELTING)
+			enl_msg("Your internal boiler ", "is", "was", " burning hot");
+		else if (u.utemp < MELTED){
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " nearly at capacity");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " melting to slag");
+		} else {
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " well beyond capacity, but miraculously intact");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " nothing but molten bronze");
+		}
+		if (wizard) {
+			Sprintf(buf, " %d", u.utemp);
+			enl_msg("Your boiler temperature ", "is", "was", buf);
+		}
 	}
 	if (uandroid){
 		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
 		if(u.phasengn) you_are("in phase mode");
 	}
+	/* exact uacinc and ucarinc are always shown because the player can always see their own AC and carrycap */
+	if (u.uacinc)
+	    you_have(enlght_combatinc("AC", u.uacinc, 1, buf));
+	if (u.ucarinc)
+	    you_have(enlght_combatinc("carry capacity", u.ucarinc, 1, buf));
 	if (u.uhitinc || u.uuur_duration)
 	    you_have(enlght_combatinc("to hit", u.uhitinc + (u.uuur_duration ? 10 : 0), final, buf));
 	if (u.udaminc || (u.uaesh/3) || u.uaesh_duration)
@@ -969,10 +1029,8 @@ boolean dumping;
 	    prot += u.uuur_duration ? 10 : 0;
 	    prot += (u.uvaul+4)/5;
 
-	    if (prot < 0)
-		you_are("ineffectively protected");
-	    else
-		you_are("protected");
+	    /* exact protection is always shown because the player can always see their own AC/DR */
+	    you_have(enlght_combatinc("protection", prot, 1, buf));
 	}
 	if (Protection_from_shape_changers)
 		you_are("protected from shape changers");
@@ -1112,6 +1170,26 @@ resistances_enlightenment()
 		if(u.ucspeed==NORM_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to normal speed.");
 		if(u.ucspeed==SLOW_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to low speed.");
 		if(u.phasengn) putstr(en_win, 0, "Your phase engine is activated.");
+		if (u.utemp < WARM)
+			putstr(en_win, 0, "Your internal boiler is under control.");
+		else if (u.utemp < HOT)
+			putstr(en_win, 0, "Your internal boiler is running mildly warm.");
+		else if (u.utemp < BURNING_HOT)
+			putstr(en_win, 0, "Your internal boiler is running rather hot.");
+		else if (u.utemp < MELTING)
+			putstr(en_win, 0, "Your internal boiler is burning hot!");
+		else if (u.utemp < MELTED){
+			if (Fire_resistance)
+				putstr(en_win, 0, "Your thermal sinks are nearly at capacity!");
+			else
+				putstr(en_win, 0, "Your internal boiler is melting to slag!");
+		}
+		else {
+			if (Fire_resistance)
+				putstr(en_win, 0, "Your thermal sinks are well beyond capacity, but miraculously intact!");
+			else // man, if you manage to see this one i'll be impressed
+				putstr(en_win, 0, "Your internal boiler is nothing but molten bronze.");
+		}
 	}
 	if (uandroid){
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "You are set to emergency speed.");
@@ -1365,7 +1443,7 @@ resistances_enlightenment()
 			putstr(en_win, 0, "You are distracted by the feeling of insects crawling over your body.");
 		}
 		if (u.umadness&MAD_HOST){
-			putstr(en_win, 0, "You are nausiated by the thing inside you.");
+			putstr(en_win, 0, "You are nauseated by the thing inside you.");
 		}
 		if (u.umadness&MAD_SCIAPHILIA){
 			putstr(en_win, 0, "You are fascinated by the dancing shadows.");
@@ -1705,11 +1783,15 @@ spirits_enlightenment()
 	putstr(en_win, 0, "Currently bound spirits:");
 	putstr(en_win, 0, "");
 
-#define addseal(id) do {if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
-	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
-		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+#define addseal(id) do {\
+	if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves){\
+		if (u.spiritT[id] == u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)])\
+			Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+				u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+		else Sprintf(buf, "  %-23s (duration:%ld, timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+				u.spiritT[id]-moves, u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); }\
 	else\
-	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
+		Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
 	putstr(en_win, 0, buf); } while (0)
 #define addpen(seal) do {\
 	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(seal) - (FIRST_SEAL)], \
@@ -2947,6 +3029,12 @@ mutations_enlightenment()
 	display_nhwindow(en_win, TRUE);
 	destroy_nhwindow(en_win);
 	return;
+}
+
+STATIC_OVL void
+genocide_enlightenment()
+{
+        list_genocided('y', FALSE, FALSE, FALSE);
 }
 
 /*enlighten.c*/

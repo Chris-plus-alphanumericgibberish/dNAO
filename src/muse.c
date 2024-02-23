@@ -2187,7 +2187,13 @@ struct monst *mtmp;
 			    {
 			        m.misc = obj;
 			        m.has_misc = MUSE_POT_HOLY;
-			    } 
+			    }
+				else if(mtmp->mtyp == PM_LIGHT_ELF && otmp->otyp == SOUL_LENS
+					&& !otmp->blessed && otmp->owornmask
+				) {
+			        m.misc = obj;
+			        m.has_misc = MUSE_POT_HOLY;
+				}
 			}
 		}
 		nomore(MUSE_SCR_DESTROY_ARMOR);
@@ -2588,7 +2594,10 @@ museamnesia:
 		    register struct obj *obj;
 		    for (obj = mtmp->minvent; obj; obj = obj->nobj)
 		    {
-			if (obj->cursed && (obj->owornmask || obj->otyp == LOADSTONE)){
+			if ((obj->cursed && (obj->owornmask || obj->otyp == LOADSTONE)) || (
+				mtmp->mtyp == PM_LIGHT_ELF && obj->otyp == SOUL_LENS
+					&& !obj->blessed && obj->owornmask
+			)){
 				if (canseemon(mtmp))
 				{
 					pline("%s dips %s %s into %s.",
@@ -2598,7 +2607,10 @@ museamnesia:
 						xname(otmp)
 					);
 				}
-			    uncurse(obj);
+				if(obj->cursed)
+					uncurse(obj);
+				else
+					bless(obj);
 				if (obj == MON_WEP(mtmp))
 					mtmp->weapon_check = NEED_WEAPON;
 				break;

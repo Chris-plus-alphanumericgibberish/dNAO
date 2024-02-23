@@ -26,6 +26,7 @@ STATIC_DCL char * get_ma_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mv_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mg_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_mw_description_of_monster_type(struct monst *, char *);
+STATIC_DCL char * get_mf_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_speed_description_of_monster_type(struct monst *, char *);
 STATIC_DCL char * get_description_of_attack_type(uchar);
 STATIC_DCL char * get_description_of_damage_type(uchar);
@@ -735,8 +736,9 @@ lookat(x, y, buf, monbuf, shapebuff)
 			Sprintf(shapebuff, "%s%s%s", an(sizeStr[rn2(SIZE(sizeStr))]), headStr[rn2(SIZE(headStr))], bodyStr[rn2(SIZE(bodyStr))]);
 		}
 	}
-    }
-    else if (glyph_is_object(glyph)) {
+    } else if glyph_is_cloud(glyph) {
+	Sprintf(buf, "%s cloud", get_description_of_damage_type(glyph_to_cloud_type(glyph)));
+    } else if (glyph_is_object(glyph)) {
 	struct obj *otmp = 0;
 	boolean fakeobj = object_from_map(glyph, x, y, &otmp);
 
@@ -1376,7 +1378,8 @@ do_look(quick)
 {
 	char out_str[LONGBUFSZ];
 	out_str[0] = 0;
-    const char *x_str, *firstmatch = 0;
+    const char *x_str = 0;
+	const char firstmatch[BUFSZ] = {0};
     struct permonst *pm = 0;
     glyph_t sym;		/* typed symbol or converted glyph */
     boolean from_screen;	/* question from the screen */
@@ -1385,6 +1388,7 @@ do_look(quick)
 	int i, ans = 0;
 	coord   cc;			/* screen pos of unknown glyph */
 	boolean force_defsyms = FALSE;	/* force using glyphs from defsyms[].sym */
+	boolean save_verbose = flags.verbose;
 
     if (quick) {
 		from_screen = TRUE;	/* yes, we want to use the cursor */
@@ -1474,6 +1478,8 @@ do_look(quick)
 	    } else if (glyph_is_monster(glyph)) {
 		/* takes care of pets, detected, ridden, and regular mons */
 		sym = monsyms[(int)mons[glyph_to_mon(glyph)].mlet];
+	    } else if (glyph_is_cloud(glyph)) {
+		sym = showsyms[S_cloud];
 	    } else if (glyph_is_swallow(glyph)) {
 		sym = showsyms[glyph_to_swallow(glyph)+S_sw_tl];
 	    } else if (glyph_is_invisible(glyph)) {
@@ -1517,6 +1523,7 @@ do_look(quick)
 	} else {
 	    pline("I've never heard of such things.");
 	}
+	flags.verbose = save_verbose;
 	return MOVE_CANCELLED;
 }
 
@@ -2151,6 +2158,33 @@ char * get_mg_description_of_monster_type(struct monst * mtmp, char * descriptio
 }
 
 char *
+get_mf_description_of_monster_type(struct monst * mtmp, char * description)
+{
+	struct permonst * ptr = mtmp->data;
+	strcat(description, "Martial Skill: ");
+	int many = 0;
+	char buff[BUFSZ] = {0};
+
+	Sprintf(buff, "can reach level %d", permonst_max_lev(ptr));
+	many = append(description, TRUE				, buff					, many);
+	
+	if(MON_BAB(mtmp) != 1)
+		Sprintf(buff, "recieves +%.2f to-hit per level", MON_BAB(mtmp));
+	else
+		Sprintf(buff, "recieves +1 to-hit per level");
+	many = append(description, TRUE				, buff					, many);
+
+	many = append(description, ptr->mflagsf&MF_MARTIAL_B				, "basic martial prowess"					, many);
+	many = append(description, ptr->mflagsf&MF_MARTIAL_S				, "skillful martial prowess"					, many);
+	many = append(description, ptr->mflagsf&MF_MARTIAL_E				, "expert martial prowess"					, many);
+
+	many = append(description, has_phys_scaling(ptr)			, "recieves bonus physical damage"			, many);
+
+	strcat(description, ". ");
+	return description;
+}
+
+char *
 get_mw_description_of_monster_type(struct monst * mtmp, char * description)
 {
 	struct permonst * ptr = mtmp->data;
@@ -2350,7 +2384,7 @@ get_description_of_damage_type(uchar id)
 	case AD_PSON: return "psionic";
 	case AD_GROW: return "grows brethren on death";
 	case AD_SOUL: return "strengthens brethren on death";
-	case AD_TENT: return "deadly tentacles (LarienTelrunya's bane)";
+	case AD_TENT: return "deadly tentacles";
 	case AD_JAILER: return "sets Lucifer to appear and drops third key of law when killed";
 	case AD_AXUS: return "fire-shock-drain-cold combo";
 	case AD_UNKNWN: return "Priest of an unknown God";
@@ -2653,8 +2687,12 @@ get_description_of_monster_type(struct monst * mtmp, char * description)
 				strcat(main_temp_buf, "\n");
 				strcat(description, main_temp_buf);
 			} while (!((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0));		/* no more attacks */
+			temp_buf[0] = '\0';
+			strcat(description, "\n");
+			strcat(description, get_mf_description_of_monster_type(mtmp, temp_buf));
 		}
 		if(wizard){
+			strcat(description, "\n");
 			strcat(description, "Faction (debug-mode-only): ");
 			sprintf(temp_buf, "%d", mtmp->mfaction);
 			strcat(description, temp_buf);

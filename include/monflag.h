@@ -456,8 +456,9 @@
 #define HYPNOTIC_COLORS        MON_RED_WORD+1
 #define CRUSH_BOLT             HYPNOTIC_COLORS+1
 #define MADF_BURST             CRUSH_BOLT+1
+#define HOLY_BOLT              MADF_BURST+1
 
-#define MON_LASTSPELL          MADF_BURST
+#define MON_LASTSPELL          HOLY_BOLT
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

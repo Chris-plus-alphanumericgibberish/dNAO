@@ -1232,16 +1232,16 @@ struct permonst * pd;
 		return TRUE;
 
 	/* Touching is fatal */
-	if (touch_petrifies(pd) && !(Stone_res(magr))
+	if ((!pd || touch_petrifies(pd)) && !(Stone_res(magr))
 		&& badtouch(magr, mdef, attk, weapon)
 		)
 		return FALSE;	// don't attack
 
 	/* consuming the defender is fatal */
-	if ((is_deadly(pd) || 
+	if ((!pd || (is_deadly(pd) ||
 		((pd->mtyp == PM_GREEN_SLIME || pd->mtyp == PM_FLUX_SLIME) &&
 			!(Slime_res(magr)))
-		) && (
+		)) && (
 		((attk->aatyp == AT_BITE || attk->aatyp == AT_OBIT || attk->aatyp == AT_WBIT || attk->aatyp == AT_LNCK || attk->aatyp == AT_5SBT) && is_vampire(pa)) ||
 		(attk->aatyp == AT_ENGL && attk->adtyp == AD_DGST)
 		))
@@ -1475,6 +1475,17 @@ struct obj * otmp;
 					u.uen -= 5;
 				}
 				use_skill(P_KNI_SACRED, 1);
+			}
+		}
+		else if(otmp->where == OBJ_MINVENT){
+			struct monst *magr = otmp->ocarry;
+			if(magr && mon_knight(magr) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
+				if(mlev(magr) >= 28)
+					dmg += vd(6, 8);
+				else if(mlev(magr) >= 21)
+					dmg += vd(3, 8);
+				else 
+					dmg += vd(1, 8);
 			}
 		}
 
@@ -2532,12 +2543,22 @@ struct attack * attk;
 	int dy = sgn(tary - y(magr));
 	int nx, ny;
 	int result = 0;
+	int merc_mult = 1;
 	if(!(isok(tarx - dx, tary - dy) &&
 		x(magr) == tarx - dx &&
 		y(magr) == tary - dy)
 	)
 		return result;
-
+	if(is_streaming_merc(otmp) && otmp->oartifact == ART_AMALGAMATED_SKIES && mlev(magr) > 20 && (
+		(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr)))
+	){
+		merc_mult++;
+		if((youagr ? (u.uinsight > 60) : (mlev(magr) > 30)))
+			merc_mult++;
+	}
+	dx *= merc_mult;
+	dy *= merc_mult;
 	if (isok(tarx + dx, tary + dy)){
 		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
 								u.uswallow ? u.ustuck : 
@@ -2545,6 +2566,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -2563,6 +2585,8 @@ struct attack * attk;
 			do_digging_impact(magr, otmp, tarx + dx, tary + dy);
 		}
 	}
+	dx /= merc_mult;
+	dy /= merc_mult;
 	if(u.uinsight >= 30){
 		//45 degree rotation
 		nx = sgn(dx+dy);
@@ -2574,6 +2598,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2602,6 +2627,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2621,7 +2647,7 @@ struct attack * attk;
 			do_digging_impact(magr, otmp, x(magr) + nx, y(magr) + ny);
 		}
 	}
-	otmp->otyp = CLUB;
+	otmp->otyp = otmp->oartifact == ART_AMALGAMATED_SKIES ? TWO_HANDED_SWORD : CLUB;
 	return result;
 }
 
@@ -2658,6 +2684,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -2684,6 +2711,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2709,6 +2737,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2736,6 +2765,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2761,6 +2791,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2792,6 +2823,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2822,6 +2854,7 @@ struct attack * attk;
 									(struct monst *)0;
 			if (mdef2 
 				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 					(youagr && !mdef2->mpeaceful))
@@ -2874,6 +2907,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -2888,7 +2922,9 @@ struct attack * attk;
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 		}
-		if(u.uinsight >= 40){
+		if(u.uinsight >= 40
+		  && ((youagr) ? couldsee(tarx + dx, tary + dy) : clear_path(magr->mx, magr->my, tarx + dx, tary + dy))
+		){
 			explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
 		}
 	}
@@ -2965,6 +3001,7 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -2988,7 +3025,7 @@ struct attack * attk;
 /* Mercurial weapons may strike behind primary target if the wielder is powerful enough */
 /////////////////////////////////////////////////////////////////////////////////////////
 int
-hit_with_streaming(magr, otmp, tarx, tary, tohitmod, attk)
+hit_with_cclaw_streaming(magr, otmp, tarx, tary, tohitmod, attk)
 struct monst * magr;
 struct obj * otmp;
 int tarx;
@@ -3003,19 +3040,24 @@ struct attack * attk;
 	int dy = sgn(tary - y(magr));
 	int nx, ny;
 	int result = 0;
+	
+	otmp->otyp = CLAWED_HAND;
+	
 	if(!(isok(tarx - dx, tary - dy) &&
 		x(magr) == tarx - dx &&
 		y(magr) == tary - dy)
 	)
 		return result;
-
-	if (isok(tarx + dx, tary + dy)){
+	if (isok(tarx + 2*dx, tary + 2*dy)){
+		tarx += dx;
+		tary += dy;
 		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
 								u.uswallow ? u.ustuck : 
 								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))
@@ -3040,6 +3082,86 @@ struct attack * attk;
 								(struct monst *)0;
 		if (mdef2 
 			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
+			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+				(youagr && !mdef2->mpeaceful))
+		){ //Can hit a worm multiple times
+			int vis2 = VIS_NONE;
+			if(youagr || canseemon(magr))
+				vis2 |= VIS_MAGR;
+			if(mdef2 == &youmonst || canseemon(mdef2))
+				vis2 |= VIS_MDEF;
+			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		}
+	}
+	otmp->otyp = otmp->oartifact == ART_AMALGAMATED_SKIES ? TWO_HANDED_SWORD : CLUB;
+	return result;
+}
+///////////////////////////////////////////////////////////////////////////////////////////
+/* Mercurial weapons may strike behind primary target if the wielder is powerful enough */
+/////////////////////////////////////////////////////////////////////////////////////////
+int
+hit_with_streaming(magr, otmp, tarx, tary, tohitmod, attk)
+struct monst * magr;
+struct obj * otmp;
+int tarx;
+int tary;
+int tohitmod;
+struct attack * attk;
+{
+	int subresult = 0;
+	boolean youagr = magr == &youmonst;
+	/* try to find direction (u.dx and u.dy may be incorrect) */
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	int nx, ny;
+	int result = 0;
+	if(u.uinsight >= 15 && otmp->oartifact != ART_AMALGAMATED_SKIES && is_cclub_able(otmp)){
+		return hit_with_cclaw_streaming(magr, otmp, tarx, tary, tohitmod, attk);
+	}
+	if(!(isok(tarx - dx, tary - dy) &&
+		x(magr) == tarx - dx &&
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if (isok(tarx + dx, tary + dy)){
+		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+								u.uswallow ? u.ustuck : 
+								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+								(struct monst *)0;
+		if (mdef2 
+			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
+			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+				(youagr && !mdef2->mpeaceful))
+		){ //Can hit a worm multiple times
+			int vis2 = VIS_NONE;
+			if(youagr || canseemon(magr))
+				vis2 |= VIS_MAGR;
+			if(mdef2 == &youmonst || canseemon(mdef2))
+				vis2 |= VIS_MDEF;
+			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		}
+	}
+	if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && (youagr ? (u.uinsight > 60) : (mlev(magr) > 30)) && isok(tarx + 2*dx, tary + 2*dy)){
+		tarx += dx;
+		tary += dy;
+		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+								u.uswallow ? u.ustuck : 
+								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+								(struct monst *)0;
+		if (mdef2 
+			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
 			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
 				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
 				(youagr && !mdef2->mpeaceful))

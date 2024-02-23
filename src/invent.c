@@ -1192,13 +1192,13 @@ register const char *let,*word;
 		    ((otmp->oclass == FOOD_CLASS && otmp->otyp != MEAT_RING) ||
 		    (otmp->oclass == TOOL_CLASS &&
 		     otyp != BLINDFOLD && otyp != MASK && otyp != R_LYEHIAN_FACEPLATE && 
-			 otyp != TOWEL && otyp != ANDROID_VISOR && otyp != LIVING_MASK && otyp != LENSES && otyp != SUNGLASSES) ||
+			 otyp != TOWEL && otyp != ANDROID_VISOR && otyp != LIVING_MASK && otyp != LENSES && otyp != SUNGLASSES && otyp != SOUL_LENS) ||
 			 (otmp->oclass == CHAIN_CLASS)
 			))
 		|| (!strcmp(word, "wield") &&
 		    ((otmp->oclass == TOOL_CLASS && !is_weptool(otmp)) ||
 			(otmp->oclass == CHAIN_CLASS && otmp->otyp != CHAIN)))
-		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES || otmp->otyp == SUNGLASSES))
+		|| (!strcmp(word, "resize") && !(otmp->oclass == ARMOR_CLASS || otmp->otyp == LENSES || otmp->otyp == SUNGLASSES || otmp->otyp == SOUL_LENS))
 		|| (!strcmp(word, "trephinate") && !(otmp->otyp == CRYSTAL_SKULL))
 		|| (!strcmp(word, "eat") && !is_edible(otmp))
 		|| (!strcmp(word, "contribute for scrap iron") && otmp->obj_material != IRON)
@@ -2560,6 +2560,10 @@ struct obj *obj;
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
 				"Put these lenses on", MENU_UNSELECTED);
+	    } else if (obj->otyp == SOUL_LENS) {
+		any.a_void = (genericptr_t)doputon;
+		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
+				"Put this lens on", MENU_UNSELECTED);
 	    } else if (obj->otyp == MASK || obj->otyp == LIVING_MASK) {
 		any.a_void = (genericptr_t)doputon;
 		add_menu(win, NO_GLYPH, &any, 'W', 0, ATR_NONE,
@@ -2651,7 +2655,9 @@ winid *datawin;
 	if (obj)
 	{
 		otyp = obj->otyp;
-		oartifact = obj->oartifact;
+		if(obj->known)
+			oartifact = obj->oartifact;
+		else oartifact = 0;
 	}
 	struct objclass oc = objects[otyp];
 	char olet = oc.oc_class;
@@ -3434,7 +3440,7 @@ winid *datawin;
 			OBJPUTSTR("Holds enchantments well.");
 	}
 	/* Enchantment limit */
-	if (obj && arti_plusten(obj))
+	if (obj && is_plusten(obj))
 		OBJPUTSTR("Holds enchantments extremely well.");
 	if (olet == FOOD_CLASS) {
 		if (otyp == TIN) {
@@ -3506,7 +3512,13 @@ winid *datawin;
 				case EGG:
 				case CREAM_PIE:
 				case CANDY_BAR:
+				case HONEYCOMB:
 				case LUMP_OF_ROYAL_JELLY:
+				case LUMP_OF_SOLDIER_S_JELLY:
+				case LUMP_OF_DANCER_S_JELLY:
+				case LUMP_OF_PHILOSOPHER_S_JELLY:
+				case LUMP_OF_PRIESTESS_S_JELLY:
+				case LUMP_OF_RHETOR_S_JELLY:
 					OBJPUTSTR("Is vegetarian but not vegan.");
 					break;
 				default:
@@ -3713,6 +3725,7 @@ winid *datawin;
 		case MASK:
 		case LENSES:
 		case SUNGLASSES:
+		case SOUL_LENS:
 		case LIVING_MASK:
 			subclass = "facial accessory";
 			break;

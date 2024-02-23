@@ -17,7 +17,7 @@
 #define 	SANCTIFY_WEP	4
 
 #define		NURSE_FULL_HEAL			1
-#define		NURSE_TRANQUIZIZERS		2
+#define		NURSE_TRANQUILIZERS		2
 #define		NURSE_RESTORE_ABILITY	3
 #define		NURSE_FIX_MORGUL		4
 #define		NURSE_FIX_SICKNESS		5
@@ -49,6 +49,7 @@ const int nurseprices[] = {
 static const char *FDECL(DantalionRace,(int));
 int FDECL(dobinding,(int, int));
 int * FDECL(spirit_skills, (int));
+static int FDECL(doyochlolmenu, (struct monst *));
 static int NDECL(doblessmenu);
 static int NDECL(donursemenu);
 static int NDECL(dorendermenu);
@@ -766,16 +767,6 @@ boolean chatting;
 		return 0;
 	}
 	
-    /* presumably nearness and sleep checks have already been made */
-	if (!flags.soundok) return(0);
-	if (is_silent_mon(mtmp)){
-		if (chatting) {
-			pline("%s does not respond.", Monnam(mtmp));
-			return 1;
-		}
-		return(0);
-	}
-	
 	/* Make sure its your role's quest quardian; adjust if not */
 	if (ptr->msound == MS_GUARDIAN && ptr->mtyp != urole.guardnum && ptr->mtyp != PM_CELEBORN){
 		int mndx = monsndx(ptr);
@@ -789,6 +780,24 @@ boolean chatting;
 		ptr->msound != MS_INTONE && ptr->msound != MS_FLOWER && ptr->msound != MS_OONA
 	) map_invisible(mtmp->mx, mtmp->my);
 	mtmp->mnoise = TRUE;
+	
+	if(mtmp->mtame && is_yochlol(mtmp->data) && yn("(Ask to change form?)") == 'y'){
+		int pm = doyochlolmenu(mtmp);
+		if(pm){
+			were_transform(mtmp, pm);
+			return 1;
+		}
+	}
+	
+    /* presumably nearness and sleep checks have already been made */
+	if (!flags.soundok) return(0);
+	if (is_silent_mon(mtmp)){
+		if (chatting) {
+			pline("%s does not respond.", Monnam(mtmp));
+			return 1;
+		}
+		return(0);
+	}
 	
 	if(mtmp->ispriest){
 		priest_talk(mtmp);
@@ -1137,7 +1146,7 @@ asGuardian:
 	case MS_DREAD:{
 		struct monst *tmpm;
 		int ix, iy;
-		if(mtmp->mvar_dreadPrayer_cooldown >= moves && !mtmp->mdoubt && (
+		if(mtmp->mvar_dreadPrayer_cooldown < moves && !mtmp->mdoubt && (
 			mtmp->mhp < mtmp->mhpmax/4 || mtmp->mcrazed
 		)){
 			mtmp->mvar_dreadPrayer_cooldown = moves + rnz(350);
@@ -2657,7 +2666,7 @@ humanoid_sound:
     if (pline_msg) pline("%s %s", Monnam(mtmp), pline_msg);
     else if (verbl_msg) verbalize1(verbl_msg);
 
-	if(chatting && is_smith_mon(mtmp) && mtmp->mpeaceful){
+	if(chatting && HAS_ESMT(mtmp) && mtmp->mpeaceful){
 		char query[BUFSZ] = "";
 		if(mtmp->mtyp == PM_DRACAE_ELADRIN)
 			Sprintf(query, "Ask %s about incubation services?", mhim(mtmp));
@@ -3240,9 +3249,9 @@ int dz;
 #endif
 					bless(uwep);
 					remove_oprop(uwep, OPROP_LESSER_HOLYW);
-					if(is_weapon(otmp))
+					if(accepts_weapon_oprops(uwep))
 						add_oprop(uwep, OPROP_HOLYW);
-					if(otmp->oclass == ARMOR_CLASS)
+					if(uwep->oclass == ARMOR_CLASS)
 						add_oprop(uwep, OPROP_HOLY);
 					if(uwep->spe < 3)
 						uwep->spe = 3;
@@ -4275,7 +4284,7 @@ int tx,ty;
 				if(!Blind){
 					You("suddenly notice a monstrous nymph reclining in the center of the seal.");
 					pline("She is half a fair woman, with glancing eyes and fair cheeks,");
-					pline("and half again a terible dragon, with great scaly wings and serpent's tails where legs should be.");
+					pline("and half again a terrible dragon, with great scaly wings and serpent's tails where legs should be.");
 				}
 				if(u.sealCounts < numSlots){
 					pline("\"I am Echidna, %s.\"",echidnaTitles[rn2(SIZE(echidnaTitles))]);
@@ -5247,7 +5256,7 @@ int tx,ty;
 		if(u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn by a level 14+ Binder.
 			if(quest_status.got_quest && Role_if(PM_EXILE)){
-				pline("The bloody, tooth-torn corpse of Dahlver-Nar hanges over the seal.");
+				pline("The bloody, tooth-torn corpse of Dahlver-Nar hangs over the seal.");
 				pline("He moans and reaches out to you.");
 				bindspirit(ep->ward_id);
 				u.sealTimeout[DAHLVER_NAR-FIRST_SEAL] = moves + bindingPeriod;
@@ -5258,7 +5267,7 @@ int tx,ty;
 		if(u.sealTimeout[ACERERAK-FIRST_SEAL] < moves){
 			//Spirit requires that his seal be drawn by a Binder who has killed him.
 			if(Role_if(PM_EXILE) && quest_status.killed_nemesis){
-				pline("A golden skull hanges over the seal.");
+				pline("A golden skull hangs over the seal.");
 				pline("\"I am Acererak. Long ago, I dared the Gates of Teeth.\"");
 				pline("\"Now I am trapped outside of time,");
 				pline("beyond life, motion, and thought.\"");
@@ -5967,7 +5976,7 @@ councilspirit(floorID)
 	/* Peacefully eject current crown spirit */
 	unbind(old_seal, FALSE);
 	/* it does not go on timeout */
-	u.sealTimeout[decode_sealID(old_seal)] = moves;
+	u.sealTimeout[decode_sealID(old_seal) - FIRST_SEAL] = moves;
 
 	/* set standard bound-spirit things */
 	u.sealsActive |= new_seal;
@@ -6408,6 +6417,72 @@ const char* msg;
 #endif /* USER_SOUNDS */
 
 STATIC_OVL int
+doyochlolmenu(mon)
+struct monst *mon;
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Change to which form?");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	incntlet = 'a';
+	
+	if(mon->mtyp != PM_YOCHLOL){
+		Sprintf(buf, "Yochlol");
+		any.a_int = PM_YOCHLOL;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	if(mon->mtyp != PM_UNEARTHLY_DROW){
+		Sprintf(buf, "Drow");
+		any.a_int = PM_UNEARTHLY_DROW;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	if(mon->mtyp != PM_STINKING_CLOUD){
+		Sprintf(buf, "Cloud");
+		any.a_int = PM_STINKING_CLOUD;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	if(mon->mtyp != PM_DEMONIC_BLACK_WIDOW){
+		Sprintf(buf, "Spider");
+		any.a_int = PM_DEMONIC_BLACK_WIDOW;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	incntlet++;
+	
+	end_menu(tmpwin, "Select form");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	if(n > 0){
+		int picked = selected[0].item.a_int;
+		free(selected);
+		return picked;
+	}
+	return 0;
+}
+
+STATIC_OVL int
 doblessmenu()
 {
 	winid tmpwin;
@@ -6456,7 +6531,7 @@ doblessmenu()
 			MENU_UNSELECTED);
 	}
 	incntlet++; //Advance anyway
-	if(uwep && ((is_weapon(uwep) && !check_oprop(uwep, OPROP_HOLYW)) ||
+	if(uwep && ((accepts_weapon_oprops(uwep) && !check_oprop(uwep, OPROP_HOLYW)) ||
 		    (uwep->oclass == ARMOR_CLASS && !check_oprop(uwep, OPROP_HOLY)))){
 		Sprintf(buf, "Sanctify your weapon");
 		any.a_int = SANCTIFY_WEP;	/* must be non-zero */
@@ -6505,8 +6580,8 @@ donursemenu()
 		MENU_UNSELECTED);
 	incntlet++;
 	if(u.usanity < 100){
-		Sprintf(buf, "Something for my nerves ($%d)", nurseprices[NURSE_TRANQUIZIZERS]);
-		any.a_int = NURSE_TRANQUIZIZERS;	/* must be non-zero */
+		Sprintf(buf, "Something for my nerves ($%d)", nurseprices[NURSE_TRANQUILIZERS]);
+		any.a_int = NURSE_TRANQUILIZERS;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			incntlet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
@@ -6599,7 +6674,7 @@ struct monst *nurse;
 #else
 		gold = money_cnt(invent);
 #endif
-	if(service == NURSE_FULL_HEAL || service == NURSE_TRANQUIZIZERS){
+	if(service == NURSE_FULL_HEAL || service == NURSE_TRANQUILIZERS){
 		char inbuf[BUFSZ];
 		getlin("How many courses?", inbuf);
 		if (*inbuf == '\033') count = 1;
@@ -6628,7 +6703,7 @@ struct monst *nurse;
 			pline("%s doses you with healing medicine.", Monnam(nurse));
 			healup(400*count, 8*count, FALSE, TRUE);
 		break;
-		case NURSE_TRANQUIZIZERS:
+		case NURSE_TRANQUILIZERS:
 			pline("%s doses you with tranquilizers.", Monnam(nurse));
 			if(Sleep_resistance || Free_action)
 				You("yawn.");

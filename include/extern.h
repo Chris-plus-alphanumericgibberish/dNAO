@@ -235,13 +235,17 @@ E schar FDECL(acurr, (int, struct monst *));
 E schar FDECL(acurr_player, (int));
 E schar FDECL(acurrstr, (int));
 E void FDECL(adjalign, (int));
+E void FDECL(unSetFightingForm, (int));
 E void FDECL(setFightingForm, (int));
 E boolean FDECL(activeFightingForm, (int));
+E boolean FDECL(activeMentalEdge, (int));
 E boolean FDECL(selectedFightingForm, (int));
 E int FDECL(getFightingFormSkill, (int));
+E const char * FDECL(nameOfMentalEdge, (int));
 E const char * FDECL(nameOfFightingForm, (int));
 E void NDECL(validateLightsaberForm);
 E boolean FDECL(blockedFightingForm, (int));
+E boolean FDECL(blockedMentalEdge, (int));
 E int NDECL(uhp);
 E int NDECL(uhpmax);
 E void NDECL(check_brainlessness);
@@ -289,6 +293,7 @@ E void FDECL(bot3str, (char *, boolean, int));
 
 
 E char NDECL(randomkey);
+E int NDECL(doGithForm);
 #ifdef USE_TRAMPOLI
 E int NDECL(doextcmd);
 E int NDECL(domonability);
@@ -830,6 +835,7 @@ E void NDECL(reset_uhunger);
 E boolean NDECL(satiate_uhunger);
 E double NDECL(get_uhungersizemod);
 E int NDECL(get_uhungermax);
+E int NDECL(get_satiationlimit);
 E int NDECL(Hear_again);
 E void NDECL(reset_eat);
 E int NDECL(doeat);
@@ -886,6 +892,7 @@ E void FDECL(do_containerconts, (struct obj *,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P,BOOL
 #endif
 E void FDECL(terminate, (int));
 E int NDECL(num_genocides);
+E void FDECL(list_genocided, (int,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
 
 /* ### engrave.c ### */
 
@@ -952,6 +959,7 @@ E long FDECL(newuexp, (int));
 E int FDECL(experience, (struct monst *,int));
 E int FDECL(ptrexperience, (struct permonst *));
 E void FDECL(more_experienced, (int,int));
+E void FDECL(lose_experience, (int));
 E void FDECL(losexp, (const char *,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
 E void NDECL(newexplevel);
 E void NDECL(binderup);
@@ -1407,6 +1415,7 @@ E long NDECL(init_doll_sales);
 E boolean FDECL(propagate, (int, BOOLEAN_P,BOOLEAN_P));
 E boolean FDECL(mon_can_see_you, (struct monst *));
 E boolean FDECL(mon_can_see_mon, (struct monst *, struct monst *));
+E int FDECL(permonst_max_lev,(struct permonst *));
 E int FDECL(mon_max_lev,(struct monst *));
 
 /* ### mapglyph.c ### */
@@ -1631,6 +1640,7 @@ E struct permonst *NDECL(mivaultmon);
 E void FDECL(save_rooms, (int));
 E void FDECL(rest_rooms, (int));
 E struct mkroom *FDECL(search_special, (SCHAR_P));
+E struct monst *FDECL(prisoner,(int, int, int));
 
 /* ### mon.c ### */
 
@@ -2525,6 +2535,7 @@ E NhRegion *FDECL(visible_region_at, (XCHAR_P,XCHAR_P));
 E void FDECL(show_region, (NhRegion*, XCHAR_P, XCHAR_P));
 E void FDECL(save_regions, (int,int));
 E void FDECL(rest_regions, (int,BOOLEAN_P));
+E NhRegion* FDECL(create_generic_cloud, (XCHAR_P, XCHAR_P, int, struct region_arg *, boolean));
 E NhRegion* FDECL(create_gas_cloud, (XCHAR_P, XCHAR_P, int, int, boolean));
 E NhRegion* FDECL(create_fog_cloud, (XCHAR_P, XCHAR_P, int, int, boolean));
 E NhRegion* FDECL(create_dust_cloud, (XCHAR_P, XCHAR_P, int, int));
@@ -3262,11 +3273,14 @@ E void FDECL(restrict_weapon_skill, (int));
 E void FDECL(expert_weapon_skill, (int));
 E void FDECL(skilled_weapon_skill, (int));
 E void FDECL(use_skill, (int,int));
+E void FDECL(lose_skill, (int,int));
 E void FDECL(add_weapon_skill, (int));
 E void FDECL(lose_weapon_skill, (int));
 E int FDECL(weapon_type, (struct obj *));
 E int NDECL(uwep_skill_type);
+E int NDECL(get_your_size);
 E int FDECL(weapon_hit_bonus, (struct obj *, int));
+E int FDECL(mon_weapon_dam_bonus, (struct permonst *, struct obj *, int));
 E int FDECL(weapon_dam_bonus, (struct obj *, int));
 E int FDECL(shield_skill, (struct obj *));
 E void FDECL(skill_init, (const struct def_skill *));
@@ -3282,6 +3296,7 @@ E struct obj * FDECL(get_mariwep, (struct monst *, struct permonst *, int));
 E void FDECL(were_change, (struct monst *));
 E int FDECL(counter_were,(int));
 E int FDECL(transmitted_were, (int));
+E void FDECL(were_transform, (struct monst *, int));
 E void FDECL(new_were, (struct monst *));
 E int FDECL(were_summon, (struct monst *,int *,char *));
 E void NDECL(you_were);
@@ -3418,6 +3433,7 @@ E int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struc
 E void FDECL(getgazeinfo, (int, int, struct permonst *, struct monst *, struct monst *, boolean *, boolean *, boolean *));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
+E int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 E void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 E int FDECL(hmon_with_unowned_obj, (struct monst *, struct obj **, int));

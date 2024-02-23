@@ -111,7 +111,7 @@ register struct obj *obj;
 #endif
 				&& !melee_polearms(youracedata)
 				&& obj->otyp != AKLYS
-				&& !check_oprop(obj, OPROP_CCLAW)
+				&& !is_cclub_able(obj)
 				)) :
 				!(is_weptool(obj) || obj->otyp == WIND_AND_FIRE_WHEELS);
 	} else
@@ -536,7 +536,7 @@ const char *verb;	/* "rub",&c */
 }
 
 /*Contains those parts of can_twoweapon() that DON'T change the game state.  Can be called anywhere the code needs to know if the player is capable of wielding two weapons*/
-#define NOT_WEAPON(obj) (obj && !is_weptool(obj) && obj->oclass != WEAPON_CLASS)
+#define NOT_WEAPON(obj) (obj && !is_weptool(obj) && obj->oclass != WEAPON_CLASS && obj->otyp != STILETTOS && obj->otyp != WIND_AND_FIRE_WHEELS && obj->oartifact != ART_WAND_OF_ORCUS)
 int
 test_twoweapon()
 {
@@ -560,7 +560,7 @@ test_twoweapon()
 			body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
 	}
 	/* Objects must not be non-weapons */
-	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) && !(uwep && (uwep->otyp == STILETTOS || uwep->otyp == WIND_AND_FIRE_WHEELS))) {
+	else if ((NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep))) {
 		otmp = NOT_WEAPON(uwep) ? uwep : uswapwep;
 		pline("%s %s.", Yname2(otmp),
 		    is_plural(otmp) ? "aren't weapons" : "isn't a weapon");
@@ -580,8 +580,8 @@ test_twoweapon()
 	}
 	/* not a launcher (guns and blasters are ok) */
 	else if (
-		(uwep && is_launcher(uwep) && !is_firearm(uwep)) ||
-		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep)))
+		(uwep && is_launcher(uwep) && !is_firearm(uwep) && !is_melee_launcher(uwep)) ||
+		(uswapwep && is_launcher(uswapwep) && !is_firearm(uswapwep) && !is_melee_launcher(uswapwep)))
 	{
 		You_cant("fight two-handed with this.");
 	}
@@ -961,12 +961,16 @@ struct monst * mon;
 	boolean youagr = (mon == &youmonst);
 	struct obj *arms = (youagr ? uarms : which_armor(mon, W_ARMS));
 	struct obj *swapwep = (youagr ? uswapwep : MON_SWEP(mon));
+	
+	if (!otmp)
+		return 1;
+
+	if (otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS)
+		return 2;
 
 	if (arms)
 		return 1;
 
-	if (!otmp)
-		return 1;
 
 	/* monsters don't have a concept of swapwep outside two-weaponing,
 	 * I believe, so assume if MON_SWEP then it's two-weaponing */

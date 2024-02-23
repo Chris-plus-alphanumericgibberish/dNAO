@@ -307,6 +307,8 @@
  *		The beam type is shifted over 2 positions and the direction
  *		is stored in the lower 2 bits.	Count: NUM_ZAP << 2
  *
+ * cloud	A unqiue cloud type
+ *
  * swallow	A set of eight for each monster.  The eight positions rep-
  *		resent those surrounding the hero.  The monster number is
  *		shifted over 3 positions and the swallow position is stored
@@ -317,6 +319,7 @@
  * The following are offsets used to convert to and from a glyph.
  */
 #define NUM_ZAP CLR_MAX	/* number of zap beam types */
+#define NUM_CLOUDS NUM_AD_TYPES	/* number of cloud display types */
 
 #define GLYPH_MON_OFF		0
 #define GLYPH_PET_OFF		(NUMMONS	+ GLYPH_MON_OFF)
@@ -330,7 +333,8 @@
 #define GLYPH_CMAP_OFF		((NUM_OBJECTS << 4)	+ GLYPH_OBJ_OFF)
 #define GLYPH_EXPLODE_OFF	((MAXPCHARS - MAXEXPCHARS) + GLYPH_CMAP_OFF)
 #define GLYPH_ZAP_OFF		((MAXEXPCHARS * EXPL_MAX) + GLYPH_EXPLODE_OFF)
-#define GLYPH_SWALLOW_OFF	((NUM_ZAP << 2) + GLYPH_ZAP_OFF)
+#define GLYPH_CLOUD_OFF		((NUM_ZAP << 2) + GLYPH_ZAP_OFF)
+#define GLYPH_SWALLOW_OFF	((NUM_CLOUDS) + GLYPH_CLOUD_OFF)
 #define GLYPH_WARNING_OFF	((NUMMONS << 3) + GLYPH_SWALLOW_OFF)
 #define MAX_GLYPH		(WARNCOUNT      + GLYPH_WARNING_OFF)
 
@@ -339,6 +343,7 @@
 #define GLYPH_INVISIBLE GLYPH_INVIS_OFF
 
 #define warning_to_glyph(mwarnlev) ((mwarnlev)+GLYPH_WARNING_OFF)
+#define cloud_to_glyph(adtyp) ((adtyp)+GLYPH_CLOUD_OFF)
 #define mon_to_glyph(mon) ((int) what_mon((mon)->mtyp, mon)+GLYPH_MON_OFF)
 #define detected_mon_to_glyph(mon) ((int) what_mon((mon)->mtyp, mon)+GLYPH_DETECT_OFF)
 #define ridden_mon_to_glyph(mon) ((int) what_mon((mon)->mtyp, mon)+GLYPH_RIDDEN_OFF)
@@ -401,6 +406,9 @@
 #define glyph_to_cmap(glyph)						\
 	(glyph_is_cmap(glyph) ? ((glyph) - GLYPH_CMAP_OFF) :		\
 	NO_GLYPH)
+#define glyph_to_cloud_type(glyph)						\
+	(glyph_is_cloud(glyph) ? (((glyph) - GLYPH_CLOUD_OFF)) : \
+	0)
 #define glyph_to_swallow(glyph)						\
 	(glyph_is_swallow(glyph) ? (((glyph) - GLYPH_SWALLOW_OFF) & 0x7) : \
 	0)
@@ -444,6 +452,8 @@
      (glyph) <	(GLYPH_CMAP_OFF+trap_to_defsym(1)+TRAPNUM))
 #define glyph_is_cmap(glyph)						\
     ((glyph) >= GLYPH_CMAP_OFF && (glyph) < (GLYPH_CMAP_OFF+MAXPCHARS))
+#define glyph_is_cloud(glyph)	\
+    ((glyph) >= GLYPH_CLOUD_OFF && (glyph) < (GLYPH_CLOUD_OFF + NUM_CLOUDS))
 #define glyph_is_swallow(glyph) \
     ((glyph) >= GLYPH_SWALLOW_OFF && (glyph) < (GLYPH_SWALLOW_OFF+(NUMMONS << 3)))
 #define glyph_is_warning(glyph)	\

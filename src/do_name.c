@@ -168,6 +168,8 @@ auto_describe(int cx, int cy)
 	} else if (glyph_is_monster(glyph)) {
 		/* takes care of pets, detected, ridden, and regular mons */
 		sym = monsyms[(int)mons[glyph_to_mon(glyph)].mlet];
+	} else if (glyph_is_cloud(glyph)) {
+		sym = showsyms[S_cloud];
 	} else if (glyph_is_swallow(glyph)) {
 		sym = showsyms[glyph_to_swallow(glyph)+S_sw_tl];
 	} else if (glyph_is_invisible(glyph)) {
@@ -713,6 +715,11 @@ const char *name;
 		if (obj->oartifact == ART_IBITE_ARM)
 			add_oprop(obj, OPROP_CCLAW);
 		
+		if (obj->oartifact == ART_AVENGER){
+			add_oprop(obj, OPROP_HOLYW);
+			add_oprop(obj, OPROP_UNHYW);
+		}
+		
 		/* property */
 		if (obj->oartifact == ART_AMALGAMATED_SKIES || obj->oartifact == ART_SILVER_SKY)
 			add_oprop(obj, OPROP_GSSDW);
@@ -979,9 +986,9 @@ boolean full;
 		else if (full && template == SKELIFIED) 		Sprintf(buf2, "%s's skeleton", buf);
 		else if (full && template == CRYSTALFIED)		Sprintf(buf2, "%s's vitrean", buf);
 		else if (full && template == MINDLESS) 			Sprintf(buf2, "%s's husk", buf);
-		else if (full && template == FRACTURED)			Sprintf(buf2, "%s, Witness of the Fracture", buf);
+		else if (full && template == FRACTURED)			Sprintf(buf2, "%s the Witness of the Fracture", buf);
 		else if (full && template == ILLUMINATED)		Sprintf(buf2, "%s the Illuminated", buf);
-		else if (full && template == VAMPIRIC)			Sprintf(buf2, "%s, vampire", buf);
+		else if (full && template == VAMPIRIC)			Sprintf(buf2, "%s the vampire", buf);
 		else if (full && template == PSEUDONATURAL)		Sprintf(buf2, "%s the Pseudonatural", buf);
 		else if (full && template == TOMB_HERD)			Sprintf(buf2, "%s of the Herd", buf);
 		else if (full && template == SLIME_REMNANT)		Sprintf(buf2, "slimy remnant of %s", buf);
@@ -991,11 +998,11 @@ boolean full;
 		else if (full && template == FALLEN_TEMPLATE)	Sprintf(buf2, "%s the fallen", buf);
 		else if (full && template == WORLD_SHAPER)		Sprintf(buf2, "%s the Worldshaper", buf);
 		else if (mtmp && template == MISTWEAVER) {
-				if (mtmp->female) 						Sprintf(buf2, "%s, Daughter of the Black Goat", buf);
-				else 									Sprintf(buf2, "%s, Child of the Black Goat", buf);
+				if (mtmp->female) 						Sprintf(buf2, "%s the Daughter of the Black Goat", buf);
+				else 									Sprintf(buf2, "%s the Child of the Black Goat", buf);
 		}
-		else if (full && template == PLAGUE_TEMPLATE)	Sprintf(buf2, "%s, plague victim", buf);
-		else if (full && template == SPORE_ZOMBIE)		Sprintf(buf2, "%s, spore infectee", buf);
+		else if (full && template == PLAGUE_TEMPLATE)	Sprintf(buf2, "%s the plague victim", buf);
+		else if (full && template == SPORE_ZOMBIE)		Sprintf(buf2, "%s the spore infectee", buf);
 		else if (full && template == CORDYCEPS)			Sprintf(buf2, "%s's sporulating corpse", buf);
 		else if (full && template == PSURLON)			Sprintf(buf2, "%s the finger", buf);
 		else if (full && template == CONSTELLATION)		Sprintf(buf2, "%s constellation", buf);

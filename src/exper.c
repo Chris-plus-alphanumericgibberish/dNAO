@@ -194,6 +194,16 @@ more_experienced(exp, rexp)
 		exp *= 1.3;
 		rexp *= 1.3;
 	}
+	if(flags.descendant && flags.beginner){
+		if(Role_if(PM_CONVICT) || Role_if(PM_MADMAN)){
+			exp = (exp+1)/2;
+			rexp = (rexp+1)/2;
+		}
+		else {
+			exp = (exp+9)/10;
+			rexp = (rexp+9)/10;
+		}
+	}
 	if(u.ulevel < u.ulevelmax){
 		//if you have lost levels to level drain, gain XP at 5x rate.
 		//if you are about to regain the last drained level, gain at least the base xp total
@@ -211,6 +221,22 @@ more_experienced(exp, rexp)
 	   ) flags.botl = 1;
 	if (u.urexp >= (Role_if(PM_WIZARD) ? 1000 : 2000))
 		flags.beginner = 0;
+}
+
+void
+lose_experience(exp)
+	register int exp;
+{
+	if(!exp)
+		return;
+	u.uexp = max(u.uexp - exp, 0);
+	if(exp
+#ifdef SCORE_ON_BOTL
+	   || flags.showscore
+#endif
+	   ) flags.botl = 1;
+	if (u.ulevel > 1 && u.uexp < newuexp(u.ulevel-1))
+	    losexp("lost experience",FALSE,FALSE,FALSE);
 }
 
 void

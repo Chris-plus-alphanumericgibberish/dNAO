@@ -144,6 +144,8 @@ int pm;
 		case PM_MOONSHADOW:       return(PM_CAILLEA_ELADRIN);
 		case PM_DRACAE_ELADRIN:	  return(PM_MOTHERING_MASS);
 		case PM_MOTHERING_MASS:	  return(PM_DRACAE_ELADRIN);
+		case PM_LIGHT_ELF:	      return(PM_UNBODIED);
+		case PM_UNBODIED:	      return(PM_LIGHT_ELF);
 		case PM_GWYNHARWYF:		  return(PM_FURIOUS_WHIRLWIND);
 		case PM_FURIOUS_WHIRLWIND: return(PM_GWYNHARWYF);
 		case PM_ASCODEL:		  return(PM_BLOODY_SUNSET);
@@ -228,12 +230,86 @@ int mtyp;
 }
 
 void
+were_transform(mon, pm)
+struct monst *mon;
+int pm;
+{
+	struct obj *otmp;
+	set_mon_data(mon, pm);
+	if (mon->msleeping || !mon->mcanmove) {
+	    /* transformation wakens and/or revitalizes */
+	    mon->msleeping = 0;
+	    mon->mfrozen = 0;	/* not asleep or paralyzed */
+	    mon->mcanmove = 1;
+	}
+	/* regenerate by 1/4 of the lost hit points */
+	mon->mhp += (mon->mhpmax - mon->mhp) / 4;
+	/* recheck if monster is a lightsource */
+	del_light_source(mon->light);
+	if (emits_light_mon(mon)) {
+		new_light_source(LS_MONSTER, (genericptr_t)mon, emits_light_mon(mon));
+	}
+	newsym(mon->mx,mon->my);
+
+	if(mon->mtyp == PM_UNBODIED){
+		mon->m_insight_level = 15;
+	}
+	else if(mon->mtyp == PM_LIGHT_ELF){
+		mon->m_insight_level = 0;
+	}
+
+	if(is_eeladrin(mon->data) || (mon->mtyp != PM_UNEARTHLY_DROW && is_yochlol(mon->data))){
+		struct obj *mw_tmp = MON_WEP(mon);
+		struct obj *msw_tmp = MON_SWEP(mon);
+		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
+			mon->misc_worn_check &= ~otmp->owornmask;
+			if (otmp->owornmask)
+				update_mon_intrinsics(mon, otmp, FALSE, FALSE);
+			otmp->owornmask = 0L;
+			if (otmp == mw_tmp){
+				setmnotwielded(mon, mw_tmp);
+				MON_NOWEP(mon);
+				mon->weapon_check = NO_WEAPON_WANTED;
+			}
+			if (otmp == msw_tmp){
+				setmnotwielded(mon, msw_tmp);
+				MON_NOSWEP(mon);
+				mon->weapon_check = NO_WEAPON_WANTED;
+			}
+		}
+		if(mon->mtyp == PM_ANCIENT_TEMPEST){
+			static int elemtypes[] = {PM_WATER_ELEMENTAL, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL, PM_ICE_PARAELEMENTAL};
+			struct monst *ltnt;
+			for(ltnt = fmon; ltnt; ltnt = ltnt->nmon)
+			if(ltnt->mtyp == PM_WIDE_CLUBBED_TENTACLE){
+				del_light_source(ltnt->light);
+				set_mon_data(ltnt, elemtypes[rn2(4)]);
+				newsym(ltnt->mx,ltnt->my);
+				if (emits_light_mon(ltnt))
+					new_light_source(LS_MONSTER, (genericptr_t)ltnt, emits_light_mon(ltnt));
+			}
+		}
+		m_dowear(mon, TRUE);
+		init_mon_wield_item(mon);
+	} else if(is_heladrin(mon->data) || mon->mtyp == PM_UNEARTHLY_DROW){
+		m_dowear(mon, TRUE);
+		init_mon_wield_item(mon);
+	} else if(is_duergar(mon)){
+		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
+			if(otmp->owornmask && !otmp->oartifact && !((is_weptool(otmp) || otmp->oclass == WEAPON_CLASS) && !check_oprop(otmp, OPROP_NONE))){
+				size_and_shape_to_fit(otmp, mon);
+			}
+		}
+		mon_break_armor(mon, FALSE);
+	} else mon_break_armor(mon, FALSE);
+	possibly_unwield(mon, FALSE);
+}
+
+void
 new_were(mon)
 struct monst *mon;
 {
 	int pm;
-	struct permonst *olddata = mon->data;
-	struct obj *otmp;
 
 	if(nonthreat(mon))
 		return;
@@ -269,66 +345,7 @@ struct monst *mon;
 			an(mons[pm].mname));
 	}
 
-	set_mon_data(mon, pm);
-	if (mon->msleeping || !mon->mcanmove) {
-	    /* transformation wakens and/or revitalizes */
-	    mon->msleeping = 0;
-	    mon->mfrozen = 0;	/* not asleep or paralyzed */
-	    mon->mcanmove = 1;
-	}
-	/* regenerate by 1/4 of the lost hit points */
-	mon->mhp += (mon->mhpmax - mon->mhp) / 4;
-	/* recheck if monster is a lightsource */
-	del_light_source(mon->light);
-	if (emits_light_mon(mon)) {
-		new_light_source(LS_MONSTER, (genericptr_t)mon, emits_light_mon(mon));
-	}
-	newsym(mon->mx,mon->my);
-	if(is_eeladrin(mon->data)){
-		struct obj *mw_tmp = MON_WEP(mon);
-		struct obj *msw_tmp = MON_SWEP(mon);
-		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-			mon->misc_worn_check &= ~otmp->owornmask;
-			if (otmp->owornmask)
-				update_mon_intrinsics(mon, otmp, FALSE, FALSE);
-			otmp->owornmask = 0L;
-			if (otmp == mw_tmp){
-				setmnotwielded(mon, mw_tmp);
-				MON_NOWEP(mon);
-				mon->weapon_check = NO_WEAPON_WANTED;
-			}
-			if (otmp == msw_tmp){
-				setmnotwielded(mon, msw_tmp);
-				MON_NOSWEP(mon);
-				mon->weapon_check = NO_WEAPON_WANTED;
-			}
-		}
-		if(mon->mtyp == PM_ANCIENT_TEMPEST){
-			static int elemtypes[] = {PM_WATER_ELEMENTAL, PM_AIR_ELEMENTAL, PM_LIGHTNING_PARAELEMENTAL, PM_ICE_PARAELEMENTAL};
-			struct monst *ltnt;
-			for(ltnt = fmon; ltnt; ltnt = ltnt->nmon)
-			if(ltnt->mtyp == PM_WIDE_CLUBBED_TENTACLE){
-				del_light_source(ltnt->light);
-				set_mon_data(ltnt, elemtypes[rn2(4)]);
-				newsym(ltnt->mx,ltnt->my);
-				if (emits_light_mon(ltnt))
-					new_light_source(LS_MONSTER, (genericptr_t)ltnt, emits_light_mon(ltnt));
-			}
-		}
-		m_dowear(mon, TRUE);
-		init_mon_wield_item(mon);
-	} else if(is_heladrin(mon->data)){
-		m_dowear(mon, TRUE);
-		init_mon_wield_item(mon);
-	} else if(is_duergar(mon)){
-		for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-			if(otmp->owornmask && !otmp->oartifact && !((is_weptool(otmp) || otmp->oclass == WEAPON_CLASS) && !check_oprop(otmp, OPROP_NONE))){
-				size_and_shape_to_fit(otmp, mon);
-			}
-		}
-		mon_break_armor(mon, FALSE);
-	} else mon_break_armor(mon, FALSE);
-	possibly_unwield(mon, FALSE);
+	were_transform(mon, pm);
 }
 
 int

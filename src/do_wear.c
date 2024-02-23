@@ -2031,7 +2031,9 @@ doputon()
 		Your("%s%s are full, and you're already wearing an amulet and %s.",
 			humanoid(youracedata) ? "ring-" : "",
 			makeplural(body_part(FINGER)),
-			(ublindf->otyp==LENSES || ublindf->otyp==SUNGLASSES) ? "some lenses" : (ublindf->otyp==MASK || ublindf->otyp==LIVING_MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE) ? "a mask" : "a blindfold");
+			(ublindf->otyp==LENSES || ublindf->otyp==SUNGLASSES) ? "some lenses"
+			: (ublindf->otyp==SOUL_LENS) ? "a lens"
+			: (ublindf->otyp==MASK || ublindf->otyp==LIVING_MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE) ? "a mask" : "a blindfold");
 		return MOVE_CANCELLED;
 	}
 	otmp = getobj(accessories, "put on");
@@ -2124,13 +2126,24 @@ doputon()
 			else if (ublindf->otyp == BLINDFOLD || ublindf->otyp == LIVING_MASK || ublindf->otyp == ANDROID_VISOR) {
 				if (otmp->otyp == LENSES || otmp->otyp == SUNGLASSES)
 					already_wearing2("lenses", "a blindfold");
+				else if(otmp->otyp == SOUL_LENS)
+					already_wearing2("a lens", "a blindfold");
 				else
 					already_wearing("a blindfold");
 			} else if (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES) {
 				if (otmp->otyp == BLINDFOLD || otmp->otyp == LIVING_MASK || otmp->otyp == ANDROID_VISOR)
 					already_wearing2("a blindfold", "some lenses");
+				else if (otmp->otyp == SOUL_LENS)
+					already_wearing2("a lense", "some lenses");
 				else
 					already_wearing("some lenses");
+			} else if (ublindf->otyp == SOUL_LENS) {
+				if (otmp->otyp == BLINDFOLD || otmp->otyp == LIVING_MASK || otmp->otyp == ANDROID_VISOR)
+					already_wearing2("a blindfold", "a lens");
+				else if (otmp->otyp == SOUL_LENS)
+					already_wearing("a lense");
+				else
+					already_wearing2("some lenses", "a lenses");
 			} else
 				already_wearing(something);
 			return MOVE_CANCELLED;
@@ -2138,7 +2151,8 @@ doputon()
 		if (otmp->otyp != MASK && otmp->otyp != R_LYEHIAN_FACEPLATE && 
 			otmp->otyp != BLINDFOLD && otmp->otyp != ANDROID_VISOR && 
 			otmp->otyp != TOWEL && otmp->otyp != LENSES && 
-			otmp->otyp != SUNGLASSES && otmp->otyp != LIVING_MASK
+			otmp->otyp != SUNGLASSES && otmp->otyp != LIVING_MASK &&
+			otmp->otyp != SOUL_LENS
 		) {
 			You_cant("wear that!");
 			return MOVE_CANCELLED;
@@ -2700,6 +2714,16 @@ find_ac()
 			else
 				uac -= 1+(uwep->spe)/2;
 		}
+		const struct artifact *weap = get_artifact(uwep);
+		if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+			uac -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe,0) : u.usanity < 90 ? 2+max(uwep->spe,0) : 5+max(uwep->spe,0);
+		}
+	}
+	if(uswapwep){
+		const struct artifact *weap = get_artifact(uswapwep);
+		if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+			uac -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+		}
 	}
 	if(Race_if(PM_HALF_DRAGON)){
 		//Some half dragons are more humanoid
@@ -2871,11 +2895,16 @@ uchar aatyp;
 	struct obj * uarmor[] = ARMOR_SLOTS;
 	int i;
 	for (i = 0; i < SIZE(uarmor); i++) {
-		if (uarmor[i] && (objects[uarmor[i]->otyp].oc_dtyp & slot)) {
-			if(depth && higher_depth(uarmor[i]->owornmask, depth))
-				continue;
-			arm_udr += arm_dr_bonus(uarmor[i]);
-			if (magr) arm_udr += properties_dr(uarmor[i], agralign, agrmoral);
+		if (uarmor[i]){
+			if((objects[uarmor[i]->otyp].oc_dtyp & slot)) {
+				if(depth && higher_depth(uarmor[i]->owornmask, depth))
+					continue;
+				arm_udr += arm_dr_bonus(uarmor[i]);
+				if (magr) arm_udr += properties_dr(uarmor[i], agralign, agrmoral);
+			}
+			else if(uarmor[i]->otyp == CLOAK_OF_PROTECTION){
+				arm_udr += arm_dr_bonus(uarmor[i])/2; //Half protection in other slots (skin depth)
+			}
 		}
 	}
 	/* Tensa Zangetsu adds to worn armor */
@@ -4603,11 +4632,15 @@ struct obj *wep;
 		pline("The Mad King blesses %s!", mon_nam(magr));
 	
 	if(youagr){
-		u.ustdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
-		u.uencouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		if(u.uencouraged < 8*(8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep)))){
+			u.ustdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+			u.uencouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		}
 	} else {
-		magr->mstdy -= 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
-		magr->encouraged += 8 + wep->spe + weapon_dam_bonus(wep, weapon_type(wep));
+		if(8 + wep->spe + mon_weapon_dam_bonus(magr->data, wep, weapon_type(wep))){
+			magr->mstdy -= 8 + wep->spe + mon_weapon_dam_bonus(magr->data, wep, weapon_type(wep));
+			magr->encouraged += 8 + wep->spe + mon_weapon_dam_bonus(magr->data, wep, weapon_type(wep));
+		}
 	}
 }
 
@@ -5048,7 +5081,7 @@ struct obj *wep;
 			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
 				wep->otyp = CLAWED_HAND;
 				xmeleehity(magr, mdef, &symbiote, &wep, -1, 0, FALSE);
-				wep->otyp = CLUB;
+				wep->otyp = wep->oartifact == ART_AMALGAMATED_SKIES ? TWO_HANDED_SWORD : CLUB;
 				if(DEADMONSTER(magr))
 					return; //oops!
 			}
@@ -5068,8 +5101,8 @@ struct obj *wep;
 	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	
-	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
-		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+	for(i = x-BOLT_LIM; i <= x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j <= y+BOLT_LIM; j++){
 			if(!isok(i,j))
 				continue;
 			if(i == x && j == y)
@@ -5095,8 +5128,8 @@ struct obj *wep;
 		return;
 	targets = rn2(targets);
 	
-	for(i = x-BOLT_LIM; i < x+BOLT_LIM; i++)
-		for(j = y-BOLT_LIM; j < y+BOLT_LIM; j++){
+	for(i = x-BOLT_LIM; i <= x+BOLT_LIM; i++)
+		for(j = y-BOLT_LIM; j <= y+BOLT_LIM; j++){
 			if(!isok(i,j))
 				continue;
 			if(i == x && j == y)

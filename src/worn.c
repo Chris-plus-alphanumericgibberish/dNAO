@@ -736,6 +736,24 @@ boolean on, silently;
 		newsym(mon->mx, mon->my);
 }
 
+int
+shield_ac_mon(mon, obj)
+struct monst *mon;
+struct obj *obj;
+{
+	int shield_ac = 0;
+	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+	if(mon_knight(mon)){
+		if(mon->m_lev >= 28)
+			shield_ac += 8;
+		else if(mon->m_lev >= 14)
+			shield_ac += 3;
+		else
+			shield_ac += 1;
+	}
+	return shield_ac;
+}
+
 int 
 base_mac(mon)
 struct monst *mon;
@@ -799,6 +817,21 @@ struct monst *mon;
 
 		if(uring_art(ART_NARYA) && def_narya())
 			base -= sgn(def_narya())*rnd(abs(def_narya()));
+
+		if(uwep){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+			}
+		}
+		if(uswapwep){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+			}
+		}
+		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+			base -= 1;
 	}
 
 	monwep = MON_WEP(mon);
@@ -930,7 +963,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -968,7 +1001,7 @@ struct monst *mon;
 			base -= 5;
 		}
 	}
-	if(!mon->mcan){
+	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
 			base -= (32-u.uinsight)/2;
@@ -1022,6 +1055,21 @@ struct monst *mon;
 
 		if(uring_art(ART_NARYA))
 			base -= def_narya();
+
+		if(uwep){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+			}
+		}
+		if(uswapwep){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base -= u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+			}
+		}
+		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+			base -= 1;
 	}
 	
 	if(mon->mtyp == PM_HOD_SEPHIRAH){
@@ -1040,7 +1088,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -1103,7 +1151,7 @@ struct monst *mon;
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
 	    if (obj->owornmask & mwflags){
 			if(is_shield(obj))
-				armac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
 		}
@@ -1143,6 +1191,9 @@ struct monst *mon;
 		base += 4;
 	}
 	
+	if(flags.spriest_level && is_demon(mon->data) && is_lawful_mon(mon) && !mon->mpeaceful)
+		base += 9;
+
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
 		if(Role_if(PM_HEALER))
@@ -1150,6 +1201,19 @@ struct monst *mon;
 
 		if(uring_art(ART_LOMYA))
 			base += def_lomya();
+
+		if(uwep){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base += u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+			}
+		}
+		if(uswapwep){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
+				base += u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+			}
+		}
 	}
 	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
@@ -1182,7 +1246,7 @@ struct monst *mon;
 		base += 10;
 	
 
-	if(!mon->mcan){
+	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		int dr = 0;
 #define m_bdr mon->data->spe_bdr
 #define m_ldr mon->data->spe_ldr
@@ -1420,7 +1484,7 @@ int depth;
 			nat_mdr += 5;
 		}
 	}
-	if (!mon->mcan) {
+	if (!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)) {
 		switch (slot)
 		{
 		case UPPER_TORSO_DR: bas_mdr += mon->data->spe_bdr; break;
@@ -1978,12 +2042,25 @@ boolean polyspot;
 				if (polyspot) bypass_obj(otmp);
 				m_lose_armor(mon, otmp);
 			} else {
-				if (vis)
-				pline("%s %s tears apart!", s_suffix(Monnam(mon)),
-					cloak_simple_name(otmp));
-				else
-				You_hear("a ripping sound.");
-				m_useup(mon, otmp);
+				if(otmp->otyp == MUMMY_WRAPPING || otmp->otyp == PRAYER_WARDED_WRAPPING){
+					if (vis)
+						pline("%s %s tears apart!", s_suffix(Monnam(mon)),
+							cloak_simple_name(otmp));
+					else
+						You_hear("a ripping sound.");
+					m_useup(mon, otmp);
+				}
+				else {
+					if (vis)
+						pline("%s %s pops open!", s_suffix(Monnam(mon)),
+							cloak_simple_name(otmp));
+					else
+						You_hear("a tearing sound.");
+					if(!otmp->oeroded3)
+						otmp->oeroded3 = 1;
+					if (polyspot) bypass_obj(otmp);
+					m_lose_armor(mon, otmp);
+				}
 			}
 		}
 	}
@@ -2121,6 +2198,10 @@ struct obj *obj;
 		break;
 	case SUNGLASSES:
 		score += 2;
+		break;
+	case SOUL_LENS:
+		if(mon->mtyp == PM_LIGHT_ELF)
+			score += 300;
 		break;
 	case ANDROID_VISOR:
 		if(is_android(mon)) score += 4;

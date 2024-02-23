@@ -169,6 +169,10 @@ static const struct icp eli_materials[] = {
 	{ 12, MINERAL }
 };
 
+static const struct icp lens_materials[] = {
+	{ 1000, GEMSTONE }
+};
+
 /* for weapons of droven make -- armor is all shadowsteel */
 static const struct icp droven_materials[] = {
 	{900, 0 }, /* use base material */
@@ -674,6 +678,18 @@ int mkflags;
 	otmp->oinvis = !rn2(1250);
 #endif
 	otmp->quan = is_multigen(otmp) ? ((long) rn1(4,4) + d(2,level_difficulty()+2)) : 1L;
+	if (is_rakuyo(otmp))
+		add_oprop(otmp, OPROP_RAKUW);
+	if (otmp->otyp == WHITE_VIBROSWORD
+		|| otmp->otyp == WHITE_VIBROSPEAR
+		|| otmp->otyp == WHITE_VIBROZANBATO
+		)
+		add_oprop(otmp, OPROP_HOLYW);
+	if (otmp->otyp == GOLD_BLADED_VIBROSWORD
+		|| otmp->otyp == GOLD_BLADED_VIBROSPEAR
+		|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
+		)
+		add_oprop(otmp, OPROP_UNHYW);
 	if (init) {
 		switch (let) {
 		case WEAPON_CLASS:
@@ -687,18 +703,6 @@ int mkflags;
 			}
 			else	blessorcurse(otmp, 10);
 
-			if (otmp->otyp == WHITE_VIBROSWORD
-				|| otmp->otyp == WHITE_VIBROSPEAR
-				|| otmp->otyp == WHITE_VIBROZANBATO
-				)
-				add_oprop(otmp, OPROP_HOLYW);
-			if (otmp->otyp == GOLD_BLADED_VIBROSWORD
-				|| otmp->otyp == GOLD_BLADED_VIBROSPEAR
-				|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
-				)
-				add_oprop(otmp, OPROP_UNHYW);
-			if (is_rakuyo(otmp))
-				add_oprop(otmp, OPROP_RAKUW);
 
 			if (is_vibroweapon(otmp)){
 				otmp->ovar1_charges = 80L + rnd(20);
@@ -926,10 +930,10 @@ int mkflags;
 			case TINNING_KIT:
 			case MAGIC_MARKER:	otmp->spe = rn1(70, 30);
 				break;
+			case TREPHINATION_KIT:
 			case CAN_OF_GREASE:	otmp->spe = rnd(25);
 				blessorcurse(otmp, 10);
 				break;
-			case TREPHINATION_KIT:
 			case CRYSTAL_BALL:	otmp->spe = rnd(5);
 				blessorcurse(otmp, 2);
 				break;
@@ -2120,6 +2124,8 @@ struct obj* obj;
 		return horn_materials;
 	case EILISTRAN_ARMOR:
 		return eli_materials;
+	case SOUL_LENS:
+		return lens_materials;
 	default:
 		break;
 	}

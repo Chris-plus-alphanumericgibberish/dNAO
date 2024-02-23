@@ -1297,6 +1297,10 @@ skip0:
 		    mkfeature(FORGE, FALSE, croom);
 		}
 
+		if(!rn2(280)) {
+		    mkfeature(TREE, FALSE, croom);
+		}
+
 		if (x < 2) x = 2;
 #endif
 		if(!rn2(x))
@@ -1403,10 +1407,8 @@ mineralize()
 #ifdef REINCARNATION
 		Is_rogue_level(&u.uz) ||
 #endif
-		level.flags.arboreal ||
-		((sp = Is_special(&u.uz)) != 0 && !Is_oracle_level(&u.uz)
-					&& (!In_mines_quest(&u.uz) || sp->flags.town)
-	    )) return;
+		level.flags.arboreal
+	) return;
 
 	/* basic level-related probabilities */
 	goldprob = 20 + depth(&u.uz) / 3;
@@ -1417,9 +1419,12 @@ mineralize()
 
 	/* mines have ***MORE*** goodies - otherwise why mine? */
 	if (In_mines_quest(&u.uz)) {
+	    gemprob = goldprob*3 / 4;
+	    silverprob = goldprob*2;
 	    goldprob *= 2;
-	    gemprob *= 3;
-	    silverprob *= 4;
+	} else if (Is_nemesis(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH) {
+	    silverprob = goldprob;
+	    darkprob = gemprob;
 	} else if (In_quest(&u.uz)) {
 	    goldprob /= 4;
 	    gemprob /= 6;
@@ -1432,66 +1437,80 @@ mineralize()
 	 * overhead from placing things in the floor chain prior to burial.
 	 */
 	for (x = 2; x < (COLNO - 2); x++)
-	  for (y = 1; y < (ROWNO - 1); y++)
+	  for (y = 1; y < (ROWNO - 1); y++){
+		if(levl[x][y].typ == ROOM){
+			if(Is_nemesis(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH){
+				if(!rn2(200)){
+					if ((otmp = mksobj(CHUNK_OF_FOSSIL_DARK, MKOBJ_NOINIT)) != 0) {
+						otmp->quan = 1L;
+						otmp->owt = weight(otmp);
+						otmp->ox = x,  otmp->oy = y;
+						add_to_buried(otmp);
+					}
+				}
+			}
+		}
 	    if (levl[x][y+1].typ != STONE) {	 /* <x,y> spot not eligible */
-		y += 2;		/* next two spots aren't eligible either */
+			y += 2;		/* next two spots aren't eligible either */
 	    } else if (levl[x][y].typ != STONE) { /* this spot not eligible */
-		y += 1;		/* next spot isn't eligible either */
-	    } else if (!(levl[x][y].wall_info & W_NONDIGGABLE) &&
+			y += 1;		/* next spot isn't eligible either */
+	    } else if (!(levl[x][y].wall_info & (W_NONPASSWALL|W_NONDIGGABLE)) &&
 		  levl[x][y-1].typ   == STONE &&
 		  levl[x+1][y-1].typ == STONE && levl[x-1][y-1].typ == STONE &&
 		  levl[x+1][y].typ   == STONE && levl[x-1][y].typ   == STONE &&
-		  levl[x+1][y+1].typ == STONE && levl[x-1][y+1].typ == STONE) {
-		if (rn2(1000) < goldprob) {
-		    if ((otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT)) != 0) {
-			otmp->ox = x,  otmp->oy = y;
-			otmp->quan = 1L + rnd(goldprob * 3);
-			u.spawnedGold += otmp->quan;
-			otmp->owt = weight(otmp);
-			if (!rn2(3)) add_to_buried(otmp);
-			else place_object(otmp, x, y);
-		    }
-		}
-		if (rn2(1000) < gemprob) {
-		    for (cnt = rnd(2 + dunlev(&u.uz) / 3); cnt > 0; cnt--)
-			if ((otmp = mkobj(GEM_CLASS, FALSE)) != 0) {
-			    if (otmp->otyp == ROCK) {
-				dealloc_obj(otmp);	/* discard it */
-			    } else {
+		  levl[x+1][y+1].typ == STONE && levl[x-1][y+1].typ == STONE
+		) {
+			if (rn2(1000) < goldprob) {
+				if ((otmp = mksobj(GOLD_PIECE, MKOBJ_NOINIT)) != 0) {
 				otmp->ox = x,  otmp->oy = y;
-				if (!rn2(3)) add_to_buried(otmp);
-				else place_object(otmp, x, y);
-			    }
-		    }
-		}
-		if (rn2(1000) < silverprob) {
-			if ((otmp = mksobj(SILVER_SLINGSTONE, MKOBJ_NOINIT)) != 0) {
-				otmp->quan = 1L + rn2(dunlev(&u.uz));
+				otmp->quan = 1L + rnd(goldprob * 3);
+				u.spawnedGold += otmp->quan;
 				otmp->owt = weight(otmp);
-				otmp->ox = x,  otmp->oy = y;
-				if (!rn2(3)) add_to_buried(otmp);
+				if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
 				else place_object(otmp, x, y);
-		    }
-		}
-		if (depth(&u.uz) > 14 && rn2(1000) < darkprob) {
-			if ((otmp = mksobj(CHUNK_OF_FOSSIL_DARK, MKOBJ_NOINIT)) != 0) {
-				otmp->quan = 1L;
-				otmp->owt = weight(otmp);
-				otmp->ox = x,  otmp->oy = y;
-				if (!rn2(3)) add_to_buried(otmp);
-				else place_object(otmp, x, y);
-		    }
-		}
-		if (depth(&u.uz) > 14 && rn2(1000) < fossilprob) {
-			if ((otmp = mksobj(FOSSIL, 0)) != 0) {
-				otmp->quan = 1L;
-				otmp->owt = weight(otmp);
-				otmp->ox = x,  otmp->oy = y;
-				if (!rn2(3)) add_to_buried(otmp);
-				else place_object(otmp, x, y);
-		    }
-		}
+				}
+			}
+			if (rn2(1000) < gemprob) {
+				for (cnt = rnd(2 + dunlev(&u.uz) / 3); cnt > 0; cnt--)
+				if ((otmp = mkobj(GEM_CLASS, FALSE)) != 0) {
+					if (otmp->otyp == ROCK) {
+					dealloc_obj(otmp);	/* discard it */
+					} else {
+					otmp->ox = x,  otmp->oy = y;
+					if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
+					else place_object(otmp, x, y);
+					}
+				}
+			}
+			if (rn2(1000) < silverprob) {
+				if ((otmp = mksobj(SILVER_SLINGSTONE, MKOBJ_NOINIT)) != 0) {
+					otmp->quan = 1L + rn2(dunlev(&u.uz));
+					otmp->owt = weight(otmp);
+					otmp->ox = x,  otmp->oy = y;
+					if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
+					else place_object(otmp, x, y);
+				}
+			}
+			if (depth(&u.uz) > 14 && rn2(1000) < darkprob) {
+				if ((otmp = mksobj(CHUNK_OF_FOSSIL_DARK, MKOBJ_NOINIT)) != 0) {
+					otmp->quan = 1L;
+					otmp->owt = weight(otmp);
+					otmp->ox = x,  otmp->oy = y;
+					if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
+					else place_object(otmp, x, y);
+				}
+			}
+			if (depth(&u.uz) > 14 && rn2(1000) < fossilprob) {
+				if ((otmp = mksobj(FOSSIL, 0)) != 0) {
+					otmp->quan = 1L;
+					otmp->owt = weight(otmp);
+					otmp->ox = x,  otmp->oy = y;
+					if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
+					else place_object(otmp, x, y);
+				}
+			}
 	    }
+	  }
 }
 
 
@@ -2016,10 +2035,49 @@ struct mkroom *croom;
 		level.flags.nfountains++;
 		break;
 	case FORGE:
-		/* Put a fountain at m.x, m.y */
+		/* Put a forge at m.x, m.y */
 		levl[m.x][m.y].typ = FORGE;
-		/* Is it a "blessed" forge? (affects drinking from forge) */
-		// if (!rn2(7)) levl[m.x][m.y].blessedftn = 1;
+		if (!rn2(7)){
+			int pm = PM_HUMAN_SMITH;
+			struct monst *smith;
+			switch(rn2(7)){
+				case 0:
+				case 1:
+					pm = PM_GOBLIN_SMITH;
+				break;
+				case 2:
+				case 3:
+					pm = PM_DWARF_SMITH;
+				break;
+				case 4:
+				case 5:
+					pm = PM_HUMAN_SMITH;
+				case 6:
+				break;
+					pm = PM_MITHRIL_SMITH;
+				break;
+			}
+			smith = makemon(&mons[pm], m.x, m.y, NO_MM_FLAGS);
+			if(smith && HAS_ESMT(smith)){
+				ESMT(smith)->frgpos.x = m.x;
+				ESMT(smith)->frgpos.y = m.y;
+				ESMT(smith)->frglevel = u.uz;
+			}
+		}
+		level.flags.nforges++;
+		break;
+	case TREE:
+		/* Put a forge at m.x, m.y */
+		levl[m.x][m.y].typ = TREE;
+		{
+			struct monst *smith;
+			smith = makemon(&mons[PM_TREESINGER], m.x, m.y, MM_ADJACENTOK);
+			if(smith && HAS_ESMT(smith)){
+				ESMT(smith)->frgpos.x = m.x;
+				ESMT(smith)->frgpos.y = m.y;
+				ESMT(smith)->frglevel = u.uz;
+			}
+		}
 		level.flags.nforges++;
 		break;
 	case SINK:

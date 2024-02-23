@@ -2357,6 +2357,14 @@ weapon:
 				if (obj->opoisoned & OPOISON_SILVER)  Strcat(buf, " (star-water injecting)");
 				if (obj->opoisoned & OPOISON_HALLU)  Strcat(buf, " (ergot injecting)");
 			}
+			if (obj->known && obj->oartifact &&
+				(oart->inv_prop == MORGOTH)
+				){
+				Sprintf(eos(buf), " (%s)",
+					objects[obj->otyp].oc_name_known
+					? OBJ_NAME(objects[obj->otyp])
+					: OBJ_DESCR(objects[obj->otyp]));
+			}
 			break;
 		case FOOD_CLASS:
 			if (obj->otyp == EGG) {
@@ -2890,6 +2898,7 @@ static const char * const special_subjs[] = {
 	"amnesia",
 	"paralysis",
 	"dress",
+	"diskos",
 	0
 };
 
@@ -3486,10 +3495,15 @@ const char *oldstr;
 			if (!BSTRCMP(bp, p-6, "gloves") ||
 			    !BSTRCMP(bp, p-6, "lenses") ||
 			    !BSTRCMP(bp, p-10, "sunglasses") ||
+			    !BSTRCMP(bp, p-9, "soul-lens") ||
 			    !BSTRCMPI(bp, p-8, "shackles") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
+			    !BSTRCMPI(bp, p-12, "vs evil eyes") ||
+			    !BSTRCMPI(bp, p-16, "versus evil eyes") ||
+			    !BSTRCMPI(bp, p-8, "vs gazes") ||
+			    !BSTRCMPI(bp, p-12, "versus gazes") ||
 			    !BSTRCMPI(bp, p-6, "scales") ||
 				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
 				!BSTRCMPI(bp, p-10, "Lost Names") || /* book */
@@ -3672,8 +3686,12 @@ struct alt_spellings {
 	{ "mattock", DWARVISH_MATTOCK },
 	{ "amulet of poison resistance", AMULET_VERSUS_POISON },
 	{ "amulet of curse resistance", AMULET_VERSUS_CURSES },
+	{ "amulet of gaze resistance", AMULET_VERSUS_EVIL_EYES },
 	{ "amulet vs poison", AMULET_VERSUS_POISON },
 	{ "amulet vs curses", AMULET_VERSUS_CURSES },
+	{ "amulet vs evil eyes", AMULET_VERSUS_EVIL_EYES },
+	{ "amulet vs gazes", AMULET_VERSUS_EVIL_EYES },
+	{ "amulet versus gazes", AMULET_VERSUS_EVIL_EYES },
 	{ "stone", ROCK },
 	{ "crystal", ROCK },
 #ifdef TOURIST
@@ -3838,7 +3856,9 @@ int wishflags;
 		lolth_symbol = FALSE,
 		kiaransali_symbol = FALSE,
 		eilistraee_symbol = FALSE,
-		sizewished = FALSE;
+		sizewished = FALSE,
+		male = FALSE,
+		female = FALSE;
 	int item_color = -1;
 	int objsize = (from_user ? youracedata->msize : MZ_MEDIUM);
 	long bodytype = 0L;
@@ -4263,7 +4283,7 @@ int wishflags;
 			&& strncmpi(bp, "silver spellbook", 16)
 			&& strncmpi(bp, "silver wand", 11) && strncmpi(bp, "silver slingstone", 17)
 			&& strncmpi(bp, "silver stone", 12) && strncmpi(bp, "Silver Key", 10)
-			&& strncmpi(bp, "Silver Starlight", 16)
+			&& strncmpi(bp, "Silver Starlight", 16) && strncmpi(bp, "Silver Sky", 10)
 		) {
 			mat = SILVER;
 		} else if ((!strncmpi(bp, "golden ", l=7) || !strncmpi(bp, "gold ", l=5))
@@ -4443,6 +4463,9 @@ int wishflags;
 		} else if (!strncmpi(bp, "sothoth_weapon ", l=15)) {
 			add_oprop_list(oprop_list, OPROP_SOTHW);
 
+		} else if (!strncmpi(bp, "club_claw ", l=10)) {
+			add_oprop_list(oprop_list, OPROP_CCLAW);
+
 		} else if (!strncmpi(bp, "tactile ", l=8)) {
 			add_oprop_list(oprop_list, OPROP_TACTB);
 
@@ -4507,6 +4530,9 @@ int wishflags;
 			&& strncmpi(bp, "living mask", 11) && strncmpi(bp, "living arm", 10)
 		) {
 			add_oprop_list(oprop_list, OPROP_LIVEW);
+
+		} else if (!strncmpi(bp, "insightful ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_INSTW);
 
 		} else if (!strncmpi(bp, "spiked ", l=7)) {
 			add_oprop_list(oprop_list, OPROP_SPIKED);
@@ -4583,6 +4609,10 @@ int wishflags;
 			mat = GEMSTONE; gemtype = AGATE;
 		} else if (!strncmpi(bp, "jade ", l=5) && strncmpi(bp, "jade ring", 9)) {
 			mat = GEMSTONE; gemtype = JADE;
+		} else if (!strncmpi(bp, "male ", l=5)) {
+			male = TRUE;
+		} else if (!strncmpi(bp, "female ", l=7)) {
+			female = TRUE;
 		} else
 			break;
 		bp += l;
@@ -5529,6 +5559,10 @@ typfnd:
 		case FIGURINE:
 			//if (!(mons[mntmp].geno & G_UNIQ) && !is_unwishable(&mons[mntmp]))
 			otmp->corpsenm = mntmp;
+			if (male && !female)
+				otmp->spe = FIGURINE_MALE;
+			if (female && !male)
+				otmp->spe = FIGURINE_FEMALE;
 			break;
 		case EGG:
 			mntmp = can_be_hatched(mntmp);
@@ -5549,6 +5583,10 @@ typfnd:
 			if (Has_contents(otmp) && verysmall(&mons[mntmp]))
 			    delete_contents(otmp);	/* no spellbook */
 			otmp->spe = ishistoric ? STATUE_HISTORIC : 0;
+			if (male && !female)
+				otmp->spe |= STATUE_MALE;
+			if (female && !male)
+				otmp->spe |= STATUE_FEMALE;			
 			break;
 		case FOSSIL:
 			if(wizwish)
@@ -5790,26 +5828,21 @@ typfnd:
 	}
 	if (otmp->oartifact && from_user) {
 		/* check that they were allowed to wish for that artifact */
-		if (!wizwish
-			&& ((is_quest_artifact(otmp)						//redundant failsafe.  You can't wish for ANY quest artifacts
-			|| (artilist[otmp->oartifact].gflags&ARTG_NOWISH)	// non-wishable artifacts should be marked as such.
-			|| !touch_artifact(otmp, &youmonst, TRUE)			//Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
-			|| !allow_artifact									// pre-determined if any artifact wish is allowed
-			)))
-			// depreciated criteria:
-			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS) //No wishing for quest artifacts, unique monster artifacts, etc.
-			// (otmp->oartifact && rn2((int)(u.uconduct.wisharti)) > 1) //Limit artifact wishes per game
-			// (otmp->oartifact >= ART_ITLACHIAYAQUE && otmp->oartifact <= ART_EYE_OF_THE_AETHIOPICA) || //no wishing for quest artifacts
-			// (otmp->oartifact >= ART_ROD_OF_SEVEN_PARTS && otmp->oartifact <= ART_SILVER_KEY) || //no wishing for alignment quest artifacts
-			// (otmp->oartifact >= ART_SWORD_OF_ERATHAOL && otmp->oartifact <= ART_HAMMER_OF_BARQUIEL) || //no wishing for angel artifacts
-			// (otmp->oartifact >= ART_GENOCIDE && otmp->oartifact <= ART_DOOMSCREAMER) || //no wishing for demon artifacts
-			// (otmp->oartifact >= ART_STAFF_OF_THE_ARCHMAGI && otmp->oartifact <= ART_SNICKERSNEE)
+
+//redundant failsafe.  You can't wish for ANY quest artifacts
+// non-wishable artifacts should be marked as such.
+#define NOWISH (is_quest_artifact(otmp) || (artilist[otmp->oartifact].gflags&ARTG_NOWISH))
+// pre-determined if any artifact wish is allowed
+#define NOJUICE (!allow_artifact)
+//Auto-fail a wish for an artifact you wouldn't be able to touch (mercy rule)
+#define MERCY (!touch_artifact(otmp, &youmonst, TRUE))
+		if (!wizwish && (NOWISH || MERCY || NOJUICE))
 		{
+			*wishreturn = (NOWISH) ? WISH_DENIED : ((NOJUICE) ? WISH_OUTOFJUICE : WISH_MERCYRULE);
 			/* wish failed */
 			artifact_exists(otmp, ONAME(otmp), FALSE);	// Is this necessary?
 			obfree(otmp, (struct obj *) 0);		// Is this necessary?
 			otmp = &zeroobj;					// Is this necessary?
-			*wishreturn = WISH_DENIED;
 			return &zeroobj;
 		}
 		else {

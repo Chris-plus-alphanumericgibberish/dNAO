@@ -264,6 +264,8 @@
 #define AD_CURS		AD_CLRC+6	/* random curse (ex. gremlin) */
 #define AD_SQUE		AD_CLRC+7	/* hits, may steal Quest Art or Amulet (Nemeses) */
 
+#define NUM_AD_TYPES AD_SQUE+1
+
 #define real_spell_adtyp(adtyp) \
 	((adtyp) == AD_SPEL || (adtyp) == AD_CLRC || (adtyp) == AD_PSON)
 

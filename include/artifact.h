@@ -313,12 +313,31 @@ struct artinstance{
 #define	IPROP_BRANCHPORT	0x00000020L
 #define	IPROP_REFLECT	0x00000040L
 #define	ALL_IPROP		(0x0000000FL|IPROP_LEVELPORTIPROP_BRANCHPORT|IPROP_REFLECT)
+#define ZerthUpgrades avar1
+#define	ZPROP_WRATH		0x00000001L
+#define	ZPROP_STEEL		0x00000002L
+#define	ZPROP_WILL		0x00000004L
+#define	ZPROP_VILQUAR	0x00000008L
+#define	ZPROP_POWER		0x00000010L
+#define	ZPROP_BALANCE	0x00000020L
+#define	ZPROP_PATIENCE	0x00000040L
+#define	ZPROP_FOCUS		0x00000080L
+
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2
 #define RRSlunar avar2
 #define PlagueDoOnHit avar2
 #define IbiteFavor avar2
+#define GithStyle avar2
+#define	GSTYLE_PENETRATE	1
+#define	GSTYLE_COLD			2
+#define	GSTYLE_DEFENSE		3
+#define	GSTYLE_ANTIMAGIC	4
+#define	GSTYLE_RESONANT		5
+#define FIRST_GSTYLE		GSTYLE_PENETRATE
+#define LAST_GSTYLE			GSTYLE_RESONANT
+
 	long avar3;
 #define SnSd3 avar3
 #define IbiteBoons avar3
@@ -428,6 +447,7 @@ extern struct artifact * artilist;
 #define GITH_ART		(LAST_PROP+92)
 #define ZERTH_ART		(LAST_PROP+93)
 #define AMALGUM_ART		(LAST_PROP+94)
+#define MORGOTH         (LAST_PROP+95)
 
 
 #define MASTERY_ARTIFACT_LEVEL 20

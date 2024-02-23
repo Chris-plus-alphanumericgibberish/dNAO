@@ -374,27 +374,27 @@ GEOMETRY:right,center
 #0         1         2   	   3	     4	       5		 6	       7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
-T,,,,,,,T
+0T,,,,,,,T
+1T,,,,,,,T
+2T,,,,,,,T
+3T,,,,,,,T
+4T,,,,,,,T
+5T,,,,,,,T
+6T,,,,,,,T
+7T,,,,,,,T
+8T,,,,,,,T
+9T,,,,,,,T
+0T,,,,,,,T
+1T,,,,,,,T
+2T,,,,,,,T
+3T,,,,,,,T
+4T,,,,,,,T
+5T,,,,,,,T
+6T,,,,,,,T
+7T,,,,,,,T
+8T,,,,,,,T
+9T,,,,,,,T
+0T,,,,,,,T
 ENDMAP
 #01234567890123456789012345678901234567890123456789012345678901234567890123456
 #0         1         2   	   3	     4	       5		 6	       7
@@ -404,10 +404,7 @@ MONSTER: '@', "Elvenqueen", (01,10)
 MONSTER: '@', "elf-lord", (01,10)
 MONSTER: '@', "elf-lady", (01,10)
 
-MONSTER: 'A', "Firre Eladrin", (01,08)
-MONSTER: 'A', "Firre Eladrin", (01,12)
-
-MONSTER: '@', "Grey-elf", (01,08)
+MONSTER: '@', "Grey-elf", (01,09)
 MONSTER: '@', "Grey-elf", (01,10)
 MONSTER: '@', "Grey-elf", (01,12)
 
@@ -435,7 +432,16 @@ MONSTER: '@', "Grey-elf", (01,03)
 MONSTER: '@', "Grey-elf", (01,03)
 MONSTER: '@', "Grey-elf", (01,03)
 
-MONSTER: 'W', "Nazgul", random
+MONSTER: '@', "Grey-elf", (01,19)
+MONSTER: '@', "Grey-elf", (01,19)
+MONSTER: '@', "Grey-elf", (01,19)
+
+MONSTER: '@', "Grey-elf", (01,01)
+MONSTER: '@', "Grey-elf", (01,01)
+MONSTER: '@', "Grey-elf", (01,01)
+
+MONSTER: 'W', "Nazgul", (07,01)
+MONSTER: 'o', "orc-captain", (07,20)
 MONSTER: 'W', "wraith", random
 MONSTER: 'W', "wraith", random
 MONSTER: 'W', "wraith", random
@@ -457,30 +463,40 @@ MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
 
 MONSTER[75%]: 'o', "orc-captain", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
 
 MONSTER[75%]: 'o', "orc-captain", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
 
 MONSTER[75%]: 'o', "orc-captain", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
 
 MONSTER[75%]: 'o', "orc-captain", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
 MONSTER: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
+MONSTER[50%]: 'o', "Mordor orc", random
 
 MONSTER: 'd', "warg", random
 MONSTER: 'd', "warg", random
@@ -745,6 +761,7 @@ MONSTER[75%]: 'A', "Coure Eladrin", random
 MONSTER[75%]: 'A', "Noviere Eladrin", random
 MONSTER[75%]: 'A', "Shiere Eladrin", random
 MONSTER[75%]: 'A', "Ghaele Eladrin", random
+MONSTER: 'A', "Light-elf", random
 
 MONSTER[75%]: '7', "Justice Archon", random
 MONSTER[75%]: '7', "Shield Archon", random
@@ -968,6 +985,9 @@ MONSTER:'O',"ogre",(65,12),asleep
 MONSTER:'o',"Mordor orc",(66,12),asleep
 MONSTER:'i',"tengu",(67,12),asleep
 
+FORGE:(41,04)
+MONSTER:'o',"goblin smith",(41,04)
+
 GEOMETRY:center,center
 #0         1         2   	   3	     4	       5		 6	       7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
@@ -1056,6 +1076,7 @@ OBJECT:')',"dwarvish short sword", random
 CONTAINER: '(', "chest", (22,03)
 OBJECT:'?',"charging", contained, cursed, 0
 OBJECT:'!',"full healing", contained, cursed, 0
+OBJECT:'!',"gain energy", contained, cursed, 0
 
 OBJECT:'[',"orcish cloak", (53,10), cursed, 2,"The Mantle of Wrath"
 
@@ -1068,6 +1089,7 @@ OBJECT:'#',"tiny cloth shemagh", contained
 OBJECT:'#',"blessed +3 flower-woven band", contained
 OBJECT:'#',"gemstone band", contained
 OBJECT:'[',"high-elven helm", contained
+OBJECT:'#',"diamond +3 elven helm", contained
 
 CONTAINER: '(', "chest"  , (24,04)
 OBJECT:'#',"color_black unholy-armor +4 iron plate mail", contained
@@ -1078,6 +1100,7 @@ OBJECT:'#',"tiny holy-armor +3 silver plate mail", contained
 OBJECT:'#',"tiny cloth jacket", contained
 OBJECT:'[',"elven toga", contained, blessed, +3
 OBJECT:'[',"high-elven plate", contained
+OBJECT:'#',"diamond +3 elven mithril-coat", contained
 
 CONTAINER: '(', "chest"  , (25,04)
 OBJECT:'#',"color_black unholy-armor unholy-weapon +4 iron gauntlets", contained
@@ -1087,6 +1110,7 @@ OBJECT:'#',"tiny holy-armor holy-weapon +3 silver gauntlets of power", contained
 OBJECT:'#',"tiny cloth gloves", contained
 OBJECT:'#',"blessed +3 cloth gloves", contained
 OBJECT:'[',"high-elven gauntlets", contained
+OBJECT:'#',"wrathful holy-armor holy-weapon +3 diamond gauntlets", contained
 
 CONTAINER: '(', "chest"  , (57,08)
 OBJECT:'#',"unholy-weapon red-hot +4 iron long sword", contained
@@ -1117,6 +1141,7 @@ OBJECT:'#',"tiny holy-armor holy-weapon +3 silver armored boots", contained
 OBJECT:'#',"tiny high boots", contained
 OBJECT:'#',"blessed +3 cloth shoes", contained
 OBJECT:'#',"mithril armored boots", contained
+OBJECT:'#',"wrathful holy-armor holy-weapon +3 diamond shoes", contained
 
 CONTAINER: '(', "chest"  , (55,09)
 OBJECT:'_',"bands", contained
@@ -1128,6 +1153,8 @@ OBJECT:'!',"starlight", contained, blessed, 0
 OBJECT:'(',"harp", contained
 OBJECT:'#',"blessed +3 cloth elven cloak", contained
 OBJECT:'#',"30 blessed fixed silver elven arrow", contained
+OBJECT:'#',"emerald magic harp", contained
+OBJECT:'#',"cloth magic-resistant elven cloak", contained
 
 CONTAINER: '(', "chest"  , (56,09)
 OBJECT:'#',"marilith mask", contained

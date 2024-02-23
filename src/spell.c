@@ -746,6 +746,8 @@ struct obj *spellbook;
 		if (RoSbook == READ_SPELL){
 			char qbuf[QBUFSZ];
 			Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
+			/* identify the book in case you learnt the spell from an artifact book or aphanactonan archive */
+			makeknown(booktype);
 
 			for (int i = 0; i < MAXSPELL; i++)
 				if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
@@ -1558,6 +1560,9 @@ int atype;
 	int spell = 0;
 	switch (atype)
 	{
+	case AD_HOLY:
+	case AD_UNHY:
+		return P_MARTIAL_ARTS;
 	case AD_MAGM:
 	case AD_FIRE:
 	case AD_COLD:
@@ -1565,8 +1570,6 @@ int atype;
 	case AD_DEAD:
 	case AD_DRLI:
 	case AD_STAR:
-	case AD_HOLY:
-	case AD_UNHY:
 	case AD_HLUH:
 	case AD_MADF:
 		return P_ATTACK_SPELL;
@@ -4628,7 +4631,7 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		}
 		energy = spellenergy(spell);
 
-		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10 && spellid(spell) != SPE_DETECT_FOOD) {
+		if (!Race_if(PM_INCANTIFIER) && u.uhunger <= 10*get_uhungersizemod() && spellid(spell) != SPE_DETECT_FOOD) {
 			You("are too hungry to cast that spell.");
 			return MOVE_CANCELLED;
 		} else if (ACURR(A_STR) < 4 && casting_stat != A_CHA)  {
@@ -4701,27 +4704,36 @@ spelleffects(int spell, boolean atme, int spelltyp)
 	skill = spell_skilltype(pseudo->otyp);
 	role_skill = P_SKILL(skill);
 	if(Spellboost) role_skill++;
+	if(Role_if(PM_WIZARD)) role_skill++;
 	
 	n = 0;
 	switch(pseudo->otyp)  {
 	case SPE_LIGHTNING_STORM:	color = EXPL_MAGICAL;
 								n = rnd(4) + 2;
+								if(n < (role_skill-P_BASIC+2))
+									n = role_skill-P_BASIC+2;
 								dice = 6;
 								flat = spell_damage_bonus();
 								rad = 1;
 								inacc = 3;
 								goto dothrowspell;
-	case SPE_BLIZZARD:			color = EXPL_FROSTY;
+	case SPE_FIRE_STORM:		color = EXPL_FIERY;
 								n = rnd(3) + 1;
+								if(n < (role_skill-P_BASIC))
+									n = role_skill-P_BASIC;
 								dice = 4;
 								flat = spell_damage_bonus();
 								rad = 1;
 								inacc = 1;
 								goto dothrowspell;
-	case SPE_FIRE_STORM:		color = EXPL_FIERY;
+	case SPE_BLIZZARD:			color = EXPL_FROSTY;
 								n = 1;
 								dice = 12;
 								flat = u.ulevel/2 + spell_damage_bonus();
+								if((role_skill-P_BASIC) > 0){
+									dice -= min(11, role_skill-P_BASIC);
+									flat += 6*min(11, role_skill-P_BASIC);
+								}
 								rad = 2;
 								inacc = 0;
 								goto dothrowspell;
@@ -4772,6 +4784,8 @@ dothrowspell:
 				}
 				else {
 					dam = d(dice, 6) + flat + rnd(u.ulevel);
+					if(Spellboost) dam *= 2;
+					if(u.ukrau_duration) dam *= 1.5;
 					explode(u.dx, u.dy, spell_adtype(pseudo->otyp), 0, dam, color, rad);
 				}
 			}
@@ -6132,6 +6146,23 @@ int spell;
 
 	if(u.sealsActive&SEAL_PAIMON) splcaster -= urole.spelarmr;
 	
+	if(ublindf && ublindf->otyp == SOUL_LENS){
+		if(u.ualign.record < 0 || ublindf->cursed){
+			if(casting_stat == A_CHA){
+				splcaster += urole.spelarmr;
+			}
+			else if(Role_if(PM_MONK))
+				splcaster += urole.spelarmr/2;
+		}
+		else if(u.ualign.record >= 20){
+			if(casting_stat == A_CHA){
+				splcaster -= urole.spelarmr;
+			}
+			else if(Role_if(PM_MONK))
+				splcaster -= urole.spelarmr/2;
+		}
+	}
+	
 	if(Race_if(PM_INCANTIFIER))
 		splcaster += max(-3*urole.spelarmr,urole.spelsbon);
 
@@ -6191,7 +6222,11 @@ int spell;
 	 * to cast a spell.  The penalty is not quite so bad for the
 	 * player's role-specific spell.
 	 */
-	if (uarms && casting_stat != A_CHA && ((metal_blocks_spellcasting(uarms)) || weight(uarms) > (int) objects[BUCKLER].oc_weight)) {
+	int size_adjust = get_your_size();
+	if(size_adjust < 1)
+		size_adjust = 1;
+	else size_adjust += 1;
+	if (uarms && casting_stat != A_CHA && ((metal_blocks_spellcasting(uarms)) || weight(uarms) > ((int) objects[BUCKLER].oc_weight)*size_adjust)) {
 		if (spellid(spell) == urole.spelspec) {
 			chance /= 2;
 		} else {

@@ -54,7 +54,7 @@ register struct monst *mtmp;
 {
 	int	x, y;
 
-	if (mtmp->mpeaceful && in_town(u.ux + u.dx, u.uy + u.dy) &&
+	if (mtmp->mpeaceful && !mtmp->mtame && in_town(u.ux + u.dx, u.uy + u.dy) &&
 		!is_blind(mtmp) && m_canseeu(mtmp) && !rn2(3)) {
 
 		//ifdef CONVICT
@@ -500,7 +500,7 @@ struct monst *mtmp;
 		mtmp->mtyp == PM_MINOTAUR)
 		return(FALSE);
 	return (boolean) mtmp->data->mlet == S_ORC || mtmp->data->mlet == S_OGRE 
-				|| mtmp->data->mlet == S_TROLL || mtmp->mtyp == PM_NAZGUL;
+				|| mtmp->data->mlet == S_TROLL || mtmp->mtyp == PM_ELVEN_WRAITH || mtmp->mtyp == PM_NAZGUL;
   }
 }
 #endif /* OVL2 */
@@ -690,7 +690,7 @@ boolean digest_meal;
 		} else {
 			perX += mon->m_lev;
 		}
-		perX = hd_size(mon->data)*perX/8;
+		perX = hd_size(mon->data)*perX/8; //Adjust so that large and small monsters heal to full at about the same rate.
 		//Worn Vilya bonus ranges from (penalty) to +7 HP per 10 turns
 		if(uring_art(ART_VILYA)){
 			perX += heal_vilya()*HEALCYCLE/10;
@@ -1431,6 +1431,7 @@ register struct monst *mtmp;
 		&& mdat->mtyp!=PM_LEGION /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
 		&& !(noactions(mtmp))
 		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
+		&& !(mtmp == u.usteed) /*Steeds can't use tactics*/
 	) (void) tactics(mtmp);
 	
 	if(mdat->mtyp == PM_GREAT_CTHULHU && !rn2(20)){
@@ -2312,6 +2313,38 @@ register struct monst *mtmp;
 	return(FALSE);
 }
 
+/*
+ * smith_move: return 1: moved  0: didn't  -1: let m_move do it  -2: died
+ */
+int
+smith_move(smith)
+register struct monst *smith;
+{
+	register xchar gx,gy,omx,omy;
+	schar temple;
+	boolean avoid = TRUE;
+
+	omx = smith->mx;
+	omy = smith->my;
+
+	if(!on_level(&(ESMT(smith)->frglevel), &u.uz))
+		return -1;
+
+	gx = ESMT(smith)->frgpos.x;
+	gy = ESMT(smith)->frgpos.y;
+
+	gx += rn1(3,-1);	/* mill around the altar */
+	gy += rn1(3,-1);
+
+	if(!smith->mpeaceful || smith->mtame || smith->mberserk ||
+	   (Conflict && !resist(smith, RING_CLASS, 0, 0))
+	)
+	   return -1;
+	else if(Invis) avoid = FALSE;
+
+	return(move_special(smith,FALSE,TRUE,FALSE,avoid,omx,omy,gx,gy));
+}
+
 /* Return values:
  * 0: did not move, but can still attack and do other stuff.
  * 1: moved, possibly can attack.
@@ -2426,6 +2459,14 @@ register int after;
 	/* and for the priest */
 	if(mtmp->ispriest) {
 	    mmoved = pri_move(mtmp);
+	    if(mmoved == -2) return(2);
+	    if(mmoved >= 0) goto postmov;
+	    mmoved = 0;
+	}
+
+	/* and for smiths */
+	if(HAS_ESMT(mtmp)) {
+	    mmoved = smith_move(mtmp);
 	    if(mmoved == -2) return(2);
 	    if(mmoved >= 0) goto postmov;
 	    mmoved = 0;

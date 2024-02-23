@@ -393,8 +393,9 @@ use_towel(obj)
 			      (old ? "has more" : "now has"));
 			make_blinded(Blinded + (long)u.ucreamed - old, TRUE);
 		    } else {
-			const char *what = (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES) ?
-					    "lenses" : (ublindf->otyp == MASK || ublindf->otyp == LIVING_MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE) ? "mask" : "blindfold";
+			const char *what = (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES) ? "lenses" 
+						: (ublindf->otyp == SOUL_LENS) ? "lens"
+						: (ublindf->otyp == MASK || ublindf->otyp == LIVING_MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE) ? "mask" : "blindfold";
 			if (ublindf->cursed) {
 			    You("push your %s %s.", what,
 				rn2(2) ? "cock-eyed" : "crooked");
@@ -935,7 +936,7 @@ struct obj **obj_p;
 					pline("%s", Hallucination ?
 						  "Yow!  The mirror stares back!" :
 						  "Yikes!  You've frozen yourself!");
-					nomul(-rnd((MAXULEV+6) - u.ulevel), "frozen by your own reflection");
+					nomul(-d(2,6), "frozen by your own reflection");
 					vis = FALSE;
 				}
 				else {
@@ -2493,7 +2494,7 @@ int magic; /* 0=Physical, otherwise skill level */
 	} else if (!magic && near_capacity() > UNENCUMBERED) {
 		You("are carrying too much to jump!");
 		return MOVE_CANCELLED;
-	} else if (!magic && (YouHunger <= 100 || ACURR(A_STR) < 6)) {
+	} else if (!magic && (YouHunger <= 100*get_uhungersizemod() || ACURR(A_STR) < 6)) {
 		You("lack the strength to jump!");
 		return MOVE_CANCELLED;
 	} else if (Wounded_legs) {
@@ -3255,7 +3256,7 @@ coord *cc;
 		m_level_up_intrinsic(mtmp);
 		if(master == &youmonst || master->mtame){
 			mtmp = tamedog_core(mtmp, (struct obj *)0, TRUE);
-			if(mtmp && EDOG(mtmp)){
+			if(mtmp && get_mx(mtmp, MX_EDOG)){
 				EDOG(mtmp)->dominated = TRUE;
 				EDOG(mtmp)->hungrytime = monstermoves + 4500;
 			}
@@ -5983,13 +5984,18 @@ struct obj *obj;
 			/* made artifact wish */
 			if (mtmp2) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+				mongone(mtmp2);
+				mtmp2 = (struct monst*) 0;
 				u.uevent.utook_castle |= ARTWISH_SPENT;
 			}
 			else if (mtmp3) {
 				pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+				mongone(mtmp3);
+				mtmp3 = (struct monst*) 0;
 				u.uevent.uunknowngod |= ARTWISH_SPENT;
 			}
 		}
+		pline("The djinni%s disappears with a puff of smoke.", (mtmp2 || mtmp3) ? " and their entourage" : "");
 		mongone(mtmp);
 		if (mtmp2)	mongone(mtmp2);
 		if (mtmp3)	mongone(mtmp3);
@@ -6042,6 +6048,7 @@ struct obj *obj;
 #define SUMMON_DJINNI		1
 #define SUMMON_SERVANT		2
 #define SUMMON_DEMON_LORD	3
+#define MISINPUT			4
 
 int
 do_candle_menu()
@@ -6073,6 +6080,13 @@ do_candle_menu()
 
 	Sprintf(buf, "Summon Demon Lord");
 	any.a_int = SUMMON_DEMON_LORD;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+	incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
+
+	Sprintf(buf, "Abort Summoning");
+	any.a_int = MISINPUT;	/* must be non-zero */
 	add_menu(tmpwin, NO_GLYPH, &any,
 		incntlet, 0, ATR_NONE, buf,
 		MENU_UNSELECTED);
@@ -6118,6 +6132,9 @@ do_demon_lord_summon_menu()
 				MENU_UNSELECTED);
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
+	}
+	if (incntlet == 'a'){
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, "There's nobody left to answer your summons!", MENU_UNSELECTED);
 	}
 
 	end_menu(tmpwin, "Which demon do you wish to summon?");
@@ -6186,22 +6203,31 @@ struct obj *obj;
 				}
 				verbalize("You have summoned me.  I will grant one wish!");
 				int artwishes = u.uconduct.wisharti;
-				makewish(allow_artwish() | WISH_VERBOSE);
+				consumed = makewish(allow_artwish() | WISH_VERBOSE);
+
 				if (u.uconduct.wisharti > artwishes) {
 					/* made artifact wish */
 					if (mtmp2) {
 						pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp2)));
+						mongone(mtmp2);
+						mtmp2 = (struct monst*) 0;
 						u.uevent.utook_castle |= ARTWISH_SPENT;
 					}
 					else if (mtmp3) {
 						pline("You feel %s presence fade.", s_suffix(mon_nam(mtmp3)));
+						mongone(mtmp3);
+						mtmp3 = (struct monst*) 0;
 						u.uevent.uunknowngod |= ARTWISH_SPENT;
 					}
 				}
+				pline("The djinni%s disappears with a puff of smoke.", (mtmp2 || mtmp3) ? " and their entourage" : "");
 				mongone(mtmp);
 				if (mtmp2)	mongone(mtmp2);
 				if (mtmp3)	mongone(mtmp3);
-				consumed = TRUE;
+
+				if (!consumed){
+					pline("Perhaps try summoning something else?");
+				}
 			}
 			break;
 		case SUMMON_SERVANT:{
@@ -6241,6 +6267,8 @@ struct obj *obj;
 				consumed = TRUE;
 			}
 			break;
+		case MISINPUT:
+			return FALSE;
 		default:
 			consumed = FALSE;
 			break;
@@ -6258,6 +6286,7 @@ struct obj *obj;
 #undef SUMMON_DJINNI
 #undef SUMMON_SERVANT
 #undef SUMMON_DEMON_LORD
+#undef MISINPUT
 
 #define BY_OBJECT	((struct monst *)0)
 
@@ -7740,7 +7769,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&PHASE_ENGINE) && !flags.beginner){
+	if(!(u.clockworkUpgrades&PHASE_ENGINE)){
 		Sprintf(buf, "phase engine");
 		any.a_int = 6;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -7748,7 +7777,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&MAGIC_FURNACE) && u.clockworkUpgrades&OIL_STOVE && !flags.beginner){
+	if(!(u.clockworkUpgrades&MAGIC_FURNACE) && u.clockworkUpgrades&OIL_STOVE){
 		Sprintf(buf, "magic furnace");
 		any.a_int = 7;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -7756,7 +7785,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&HELLFIRE_FURNACE) && u.clockworkUpgrades&OIL_STOVE && !flags.beginner){
+	if(!(u.clockworkUpgrades&HELLFIRE_FURNACE) && u.clockworkUpgrades&OIL_STOVE){
 		Sprintf(buf, "hellfire furnace");
 		any.a_int = 8;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -7764,7 +7793,7 @@ upgradeMenu()
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
-	if(!(u.clockworkUpgrades&SCRAP_MAW && !flags.beginner)){
+	if(!(u.clockworkUpgrades&SCRAP_MAW)){
 		Sprintf(buf, "scrap maw");
 		any.a_int = 9;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8262,7 +8291,7 @@ struct obj **optr;
 						// return MOVE_CANCELLED;
 					// }
 					You("use the components in the upgrade kit to increase the maximum tension in your mainspring.");
-					u.uhungermax += DEFAULT_HMAX;
+					u.uhungermax += DEFAULT_HMAX; // 2000 per, capped at 9 kits for 20,000 max
 					if(u.uhungermax >= DEFAULT_HMAX*10) u.clockworkUpgrades |= upgrade;
 					// useup(comp);
 					useup(obj);
@@ -8369,6 +8398,7 @@ doapply()
 	case ANDROID_VISOR:
 	case LENSES:
 	case SUNGLASSES:
+	case SOUL_LENS:
 	case LIVING_MASK:
 	case R_LYEHIAN_FACEPLATE:
 	case MASK:

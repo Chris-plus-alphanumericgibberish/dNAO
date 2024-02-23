@@ -16,7 +16,6 @@ STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack 
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int));
 STATIC_DCL void FDECL(add_silvered_art_sear_adjectives, (char *, struct obj*));
@@ -341,8 +340,13 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !(canseemon(mdef) || sensemon(mdef))) :
+	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !canspotmon(mdef)) :
 		(magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
+	/* if TRUE, don't make direct contact attacks against unknown monsters that may or may not be fatal to self */
+	boolean be_safe_unknown = (mdef && youagr && u.uavoid_unsafetouch && !flags.forcefight &&
+		(!canspotmon(mdef) || Hallucination));
+#define skip_unsafe_attack(weapon) ((be_safe_unknown && !safe_attack(magr, mdef, attk, weapon, pa, NULL)) || \
+				    (be_safe && !safe_attack(magr, mdef, attk, weapon, pa, pd)))
 
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
@@ -682,7 +686,7 @@ int tary;
 				otmp = (youdef) ? uwep : MON_WEP(mdef);
 			}
 			/* don't make self-fatal attacks -- being at a range implies safety */
-			if (be_safe && !ranged && !safe_attack(magr, mdef, attk, otmp, pa, pd))
+			if (!ranged && skip_unsafe_attack(otmp))
 				continue;
 
 			/* make the attack */
@@ -706,11 +710,11 @@ int tary;
 				boolean devaloop = (aatyp == AT_DEVA);
 				do {
 					bhitpos.x = tarx; bhitpos.y = tary;
-					if(ranged && otmp && check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15)
+					if(ranged && otmp && is_cclub_able(otmp) && u.uinsight >= 15)
 						otmp->otyp = CLAWED_HAND;
 					result = xmeleehity(magr, mdef, attk, &otmp, vis, tohitmod, ranged);
-					if(ranged && otmp && check_oprop(otmp, OPROP_CCLAW) && u.uinsight >= 15)
-						otmp->otyp = CLUB;
+					if(ranged && otmp && is_cclub_able(otmp) && u.uinsight >= 15)
+						otmp->otyp = otmp->oartifact == ART_AMALGAMATED_SKIES ? TWO_HANDED_SWORD : CLUB;
 					/* Marionette causes an additional weapon strike to a monster behind the original target */
 					/* this can attack peaceful/tame creatures without warning */
 					if (youagr && !ranged && u.sealsActive&SEAL_MARIONETTE && (result != MM_MISS))
@@ -734,6 +738,27 @@ int tary;
 								/* we aren't handling MM_AGR_DIED or MM_AGR_STOP; hopefully the attacker being a player covers those cases well enough */
 							}
 						}
+					}
+					/* Mercurial weapons may hit additional targets */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && is_streaming_merc(otmp)){
+						if(magr && mlev(magr) > 20 && (
+							(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+							|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+						)){
+							result |= hit_with_streaming(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
+						}
+					}
+					/* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
+						result |= hit_with_rblood(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
+					}
+					/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && is_cclub_able(otmp)){
+						result |= hit_with_cclaw(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
+					}
+					/* Isamusei hit additional targets, if your insight is high enough to percieve the distortions */
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 22 && otmp && otmp->otyp == ISAMUSEI){
+						result |= hit_with_iwarp(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 					}
 					/* Cleaving causes melee attacks to hit an additional neighboring monster */
 					if ((youagr && !ranged && Cleaving)
@@ -770,27 +795,6 @@ int tary;
 								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
 							}
-						}
-					}
-					/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && otmp->otyp == CLUB && check_oprop(otmp, OPROP_CCLAW)){
-						result |= hit_with_cclaw(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
-					}
-					/* Isamusei hit additional targets, if your insight is high enough to percieve the distortions */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 22 && otmp && otmp->otyp == ISAMUSEI){
-						result |= hit_with_iwarp(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
-					}
-					/* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
-						result |= hit_with_rblood(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
-					}
-					/* Mercurial weapons may hit additional targets */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && is_streaming_merc(otmp)){
-						if(magr && mlev(magr) > 20 && (
-							(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
-							|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
-						)){
-							result |= hit_with_streaming(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 						}
 					}
 					/* Dancers hit additional targets */
@@ -872,7 +876,7 @@ int tary;
 			if (ranged)
 				continue;
 			/* don't make self-fatal attacks */
-			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
+			if (skip_unsafe_attack((struct obj *)0))
 				continue;
 			/* check for wild misses */
 			if (missedyou) {
@@ -909,7 +913,7 @@ int tary;
 			if (ranged)
 				continue;
 			/* don't make self-fatal attacks */
-			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
+			if (skip_unsafe_attack((struct obj *)0))
 				continue;
 			/* cannot swallow huge or larger */
 			if (pd->msize >= MZ_HUGE)
@@ -919,6 +923,9 @@ int tary;
 				continue;
 			/* ahazu protects the player from engulfing */
 			if (youdef && u.sealsActive&SEAL_AHAZU)
+				continue;
+			/* the player can out out of making engulf attacks */
+			if (youagr && u.uavoid_englattk)
 				continue;
 			/* check for wild misses */
 			if (missedyou) {
@@ -1082,7 +1089,7 @@ int tary;
 		case AT_LRCH:	// range 2 touch
 		case AT_5SQR:	// range 5 touch
 			/* don't make attacks that will kill oneself */
-			if (be_safe && !safe_attack(magr, mdef, attk, (struct obj *)0, pa, pd))
+			if (skip_unsafe_attack((struct obj *)0))
 				continue;
 			/* must be in range */
 			if (distmin(x(magr), y(magr), tarx, tary) > 
@@ -1192,6 +1199,15 @@ int tary;
 		/* make per-attack counterattacks */
 		if (dopassive_local) {
 			dopassive = TRUE;
+			if(youdef && (result&MM_HIT) && u.uspellprot && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_BALANCE){
+				struct monst *mon;
+				for(int i = 0; i < 8; i++){
+					if(isok(x(mdef)+xdir[i], y(mdef)+ydir[i]) && (mon = m_at(x(mdef)+xdir[i], y(mdef)+ydir[i])) && !DEADMONSTER(mon) && !mon->mpeaceful)
+						xdamagey(mdef, mon, (struct attack *) 0, 8);
+				}
+				if(DEADMONSTER(magr))
+					result |= MM_AGR_DIED;
+			}
 			result = xpassivey(magr, mdef, attk, otmp, vis, result, pd, FALSE);
 		}
 
@@ -1731,10 +1747,12 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 	/*Some attacks have level requirements*/
-	if(attk->lev_req > mlev(magr)){
+	/*The PC never gets level-gated monster attacks, they're assumed to represent something like a role*/
+	if((youagr && attk->lev_req > 0) || attk->lev_req > mlev(magr)){
 		GETNEXT
 	}
 	/*Some attacks have insight requirements*/
+	/*PCs can gain monster insight attacks, since insight is always about the PC's perceptions*/
 	if(attk->ins_req > u.uinsight){
 		GETNEXT
 	}
@@ -1788,8 +1806,19 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(magr->mapostasy && (attk->adtyp == AD_CLRC || attk->adtyp == AD_HOLY)){
 		GETNEXT
 	}
+	/* Shadowsmiths lose special attacks in the light */
+	if(magr->mtyp == PM_SHADOWSMITH && (magr->mcan || dimness(magr->mx,magr->my) <= 0)){
+		if(attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR){
+			if(attk->aatyp == AT_XSPR)
+				attk->offhand = 1;
+			attk->aatyp = AT_CLAW;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1;
+			attk->damd = 2;
+		}
+	}
 	/* Magic blade attacks are changed or lost if the creature is canceled */
-	if (magr->mcan) {
+	else if (magr->mcan) {
 		if(magr->mtyp == PM_ALIDER && magr->mcan && (attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP)){
 			attk->damn = 1;
 			attk->damd = 6;
@@ -3599,9 +3628,12 @@ int *shield_margin;
 				bons_acc += beastmastery();
 				if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && is_animal(magr->data))
 					bons_acc += beastmastery(); // double for the beastmaster's duster
+				if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+					bons_acc += 1;
 			}
 			/* Bard */
-			bons_acc += magr->encouraged;
+			if(!(youdef && Nightmare && u.umadness&MAD_RAGE))
+				bons_acc += magr->encouraged;
 			if(magr->mtyp == PM_LUCKSUCKER)
 				bons_acc += magr->mvar_lucksucker;
 			/* Singing Sword */
@@ -3772,7 +3804,7 @@ int *shield_margin;
 						size_penalty = max(0, size_penalty-1);
 					if (u.sealsActive&SEAL_YMIR)
 						size_penalty = max(0, size_penalty-1);
-					if (check_oprop(weapon, OPROP_CCLAW))
+					if (is_cclub_able(weapon))
 						size_penalty = max(0, size_penalty-1);
 				}
 				
@@ -4436,7 +4468,7 @@ boolean ranged;
 	 *	armor's special magic protection.  Otherwise just use !mtmp->mcan.
 	 */
 	armpro = magic_negation(mdef);
-	armuncancel = ((rn2(3) >= armpro) || !rn2(50));
+	armuncancel = ((rn2(3) >= armpro) || !rn2(10));
 	/* hack: elemental gaze attacks call this function with their AT_GAZE; we want that to ignore armor cancellation */
 	if (attk->aatyp == AT_GAZE || attk->aatyp == AT_WDGZ)
 		armuncancel = TRUE;
@@ -4526,10 +4558,7 @@ boolean ranged;
 		&& attk->adtyp != AD_WRAP)
 	{
 		/* are grabs possible? */
-		if (!(youagr || youdef)
-			|| sticks(mdef)
-			)
-		{
+		if (!(youagr || youdef) || sticks(mdef) || (youagr && u.uavoid_grabattk)){
 			/* no grabs allowed, substitute basic claw attack */
 			alt_attk.aatyp = AT_CLAW;
 			return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
@@ -5359,7 +5388,8 @@ boolean ranged;
 			&& !(result & MM_AGR_DIED)
 			&& (youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
 			&& !u.ustuck							/* can't already be stuck */
-			&& !(sticks(magr) && sticks(mdef)))		/* creatures can't grab other grabbers (gameplay limitation)  */
+			&& !(sticks(magr) && sticks(mdef))		/* creatures can't grab other grabbers (gameplay limitation)  */
+			&& !(youagr && u.uavoid_grabattk))		/* the player can opt out of grabbing monsters */
 		{
 			if (pa->mtyp == PM_TOVE)
 				pline("%s %s much too slithy to stick to %s!",
@@ -6296,7 +6326,7 @@ boolean ranged;
 							while (!(ABASE(A_WIS) <= ATTRMIN(A_WIS)) && dmg > 0) {
 								dmg--;
 								(void)adjattrib(A_WIS, -1, TRUE);
-								forget(10);	/* lose 10% of memory per point lost*/
+								forget(4);	/* lose 4% of memory per point lost*/
 								exercise(A_WIS, FALSE);
 							}
 							if (dmg > 0) {
@@ -6703,7 +6733,8 @@ boolean ranged;
 		if ((youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
 			&& !u.ustuck						/* can't already be stuck */
 			&& !(sticks(magr) && sticks(mdef))	/* grabbers can't grab other grabbers (gameplay limitation)  */
-			){
+			&& !(youagr && u.uavoid_grabattk)	/* the player can opt out of grabbing monsters */
+		){
 			if (pd->mtyp == PM_TOVE)
 			{
 				/* note: assumes player is either agr or def, vis is true */
@@ -6769,7 +6800,7 @@ boolean ranged;
 								(void)dropy(otmp);
 								if (roll_madness(MAD_TALONS)){
 									You("panic after having dropping your weapon!");
-									nomul(-1 * rnd(6), "panic");
+									HPanicking += 1+rnd(6);
 								}
 							}
 							else{
@@ -6789,7 +6820,7 @@ boolean ranged;
 						(void)dropy(otmp);
 						if (roll_madness(MAD_TALONS)){
 							You("panic after having your cloak taken!");
-							nomul(-1 * rnd(6), "panic");
+							HPanicking += 1+rnd(6);
 						}
 					}
 				}
@@ -6806,7 +6837,7 @@ boolean ranged;
 							(void)mpickobj(magr, otmp);
 							if (roll_madness(MAD_TALONS)){
 								You("panic after having your property stolen!");
-								nomul(-1 * rnd(6), "panic");
+								HPanicking += 1+rnd(6);
 							}
 						}
 					}
@@ -6821,7 +6852,7 @@ boolean ranged;
 							(void)dropy(otmp);
 							if (roll_madness(MAD_TALONS)){
 								You("panic after having your armor taken!");
-								nomul(-1 * rnd(6), "panic");
+								HPanicking += 1+rnd(6);
 							}
 						}
 					}
@@ -7168,7 +7199,7 @@ boolean ranged;
 					while (ABASE(A_WIS) > ATTRMIN(A_WIS) && wisdmg > 0){
 						wisdmg--;
 						(void)adjattrib(A_WIS, -1, TRUE);
-						forget(10);
+						forget(4);
 						exercise(A_WIS, FALSE);
 					}
 					if (AMAX(A_WIS) > ATTRMIN(A_WIS) &&
@@ -7420,7 +7451,9 @@ boolean ranged;
 			switch (attk->adtyp) {
 			case AD_SITM:
 				if (!(u.sealsActive&SEAL_ANDROMALIUS)
-					&& notmcan){
+					&& !check_mutation(TENDRIL_HAIR)
+					&& notmcan
+				){
 					switch (steal(magr, buf, FALSE, TRUE))
 					{
 					case -1:
@@ -7553,6 +7586,7 @@ boolean ranged;
 			if(notmcan
 				&& !(pd->mlet == pa->mlet)
 				&& !(u.sealsActive&SEAL_ANDROMALIUS)
+				&& !check_mutation(TENDRIL_HAIR)
 			){
 				stealgold(magr);
 			}
@@ -8074,7 +8108,7 @@ boolean ranged;
 			else {
 				(void)adjattrib(A_INT, -dmg, FALSE);
 				while (dmg--){
-					forget(10);	/* lose 10% of memory per point lost*/
+					forget(4);	/* lose 4% of memory per point lost*/
 					exercise(A_WIS, FALSE);
 				}
 			}
@@ -8262,8 +8296,7 @@ boolean ranged;
 		 * If the player isn't involved,
 		 * or if either creature could be the one doing the grabbing,
 		 * substitute simple physical damage */
-		if (!(youagr || youdef)
-			|| (sticks(mdef))){
+		if (!(youagr || youdef) || (sticks(mdef)) || (youagr && u.uavoid_grabattk)){
 			/* make physical attack */
 			alt_attk.adtyp = AD_PHYS;
 			return xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
@@ -8791,7 +8824,7 @@ boolean ranged;
 		}
 		else if(youagr){
 			if(u.ustuck != mdef ){
-				if(!sticks(mdef)){
+				if(!sticks(mdef) && !(youagr && u.uavoid_grabattk)){
 					pline("You begin to ooze around %s!", mon_nam(mdef));
 					u.ustuck = magr;
 				}
@@ -9864,14 +9897,14 @@ int vis;
 
 int
 xengulfhurty(magr, mdef, attk, vis)
-struct monst * magr;
+struct monst * magr; /* May be NULL if being used for generic cloud damage handling (engulfed by a cloud) */
 struct monst * mdef;
 struct attack * attk;
 int vis;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pa = magr ? (youagr ? youracedata : magr->data) : (struct permonst *) 0;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	int result = MM_MISS;
 	int dmg = d(attk->damn, attk->damd);
@@ -9887,7 +9920,7 @@ int vis;
 		/* the most important and most special case */
 	case AD_DGST:
 		if (youdef) {
-			if (pa->mtyp == PM_METROID_QUEEN && !Drain_resistance) {
+			if (pa && pa->mtyp == PM_METROID_QUEEN && !Drain_resistance) {
 				losexp("life force drain", TRUE, FALSE, FALSE);
 				magr->mhpmax += d(1, 4);
 				magr->mhp += d(1, 6);
@@ -9907,7 +9940,7 @@ int vis;
 			}
 			else {
 				*hp(mdef) -= *hp(mdef)/(u.uswldtim+1); //Floored and current HP, so never fatal. 
-				pline("%s%s digests you!", Monnam(magr),
+				pline("%s%s digests you!", magr ? Monnam(magr): "Something",
 					(u.uswldtim == 2) ? " thoroughly" :
 					(u.uswldtim == 1) ? " utterly" : "");
 				exercise(A_STR, FALSE);
@@ -10017,7 +10050,7 @@ int vis;
 		}
 		else { //mvm
 			/* eating a Rider or its corpse is fatal */
-			if (is_rider(mdef->data)) {
+			if (is_rider(mdef->data) && magr) {
 				if (vis)
 					pline("%s %s!", Monnam(magr),
 					mdef->mtyp == PM_FAMINE ?
@@ -10036,7 +10069,7 @@ int vis;
 				}
 			}
 			else if(is_indigestible(mdef->data)){
-				if(canspotmon(magr) || canspotmon(mdef)){
+				if(magr && (canspotmon(magr) || canspotmon(mdef))){
 					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
 				}
 				dmg = 0;
@@ -10044,7 +10077,7 @@ int vis;
 			}
 			else if(is_delouseable(mdef->data)){
 				mdef = delouse(mdef, AD_DGST);
-				if(canspotmon(magr) || canspotmon(mdef)){
+				if(magr && (canspotmon(magr) || canspotmon(mdef))){
 					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
 				}
 				dmg = 0;
@@ -10065,7 +10098,7 @@ int vis;
 						dmg = mdef->mhpmax*(20-resist)/20;
 					if(dmg < mdef->mhp){
 						mdef->mhp -= dmg;//Will not kill defender
-						if(canspotmon(magr) || canspotmon(mdef)){
+						if(magr && (canspotmon(magr) || canspotmon(mdef))){
 							pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
 						}
 						dmg = 0;
@@ -10089,10 +10122,10 @@ int vis;
 				}
 
 				/* Is a corpse for nutrition possible?  It may kill magr */
-				if (!corpse_chance(mdef, magr, TRUE)) {
+				if (magr && !corpse_chance(mdef, magr, TRUE)) {
 					break;
 				}
-				if (*hp(magr) < 1) {
+				if (magr && *hp(magr) < 1) {
 					result |= MM_AGR_DIED;
 					break;
 				}
@@ -10101,7 +10134,7 @@ int vis;
 				* DGST monsters don't die from undead corpses
 				*/
 				int num = monsndx(mdef->data);
-				if (get_mx(magr, MX_EDOG) && 
+				if (magr && get_mx(magr, MX_EDOG) && 
 					!((mvitals[num].mvflags & G_NOCORPSE) || get_mx(mdef, MX_ESUM))) {
 					struct obj *virtualcorpse = mksobj(CORPSE, MKOBJ_NOINIT);
 					int nutrit;
@@ -10187,7 +10220,7 @@ int vis;
 		if (can_blnd(magr, mdef, attk->aatyp, (struct obj*)0)) {
 			if (youdef) {
 			
-				if (uarmh && uarmh->otyp == SHEMAGH && 
+				if (uarmh && uarmh->otyp == SHEMAGH && magr && 
 					(magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND || magr->mtyp == PM_PYROCLASTIC_VORTEX))
 				{
 					pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
@@ -10204,7 +10237,7 @@ int vis;
 			else {
 				struct obj *otmp = which_armor(mdef, W_ARMH);
 				
-				if (otmp && otmp->otyp == SHEMAGH && (magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND)){
+				if (otmp && otmp->otyp == SHEMAGH && magr && (magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND)){
 					if (vis&VIS_MDEF)
 						pline("The %s protects %s from the dust!", simple_typename(otmp->otyp), Monnam(mdef));
 				} else {
@@ -10261,9 +10294,11 @@ int vis;
 					/* KMH -- this is okay with unchanging */
 					rehumanize();
 					result = MM_DEF_LSVD;
-					magr->mhp = 1;
-					expels(magr, pa, FALSE);
-					pline("Rusting your iron body took a severe toll on the cloud!");
+					if(magr){
+						magr->mhp = 1;
+						expels(magr, pa, FALSE);
+						pline("Rusting your iron body took a severe toll on the cloud!");
+					}
 				}
 				else {
 					if (vis&VIS_MDEF) {
@@ -10280,7 +10315,9 @@ int vis;
 					else {
 						if (mdef->mtame && !vis && !youagr)
 							pline("May %s rust in peace.", mon_nam(mdef));
-						result = (MM_HIT | MM_DEF_DIED | (youagr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
+						result = (MM_HIT | MM_DEF_DIED);
+						if(magr)
+							result |= ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED);
 					}
 				}
 			}
@@ -10319,7 +10356,7 @@ int vis;
 		break;
 		/* basic damage engulf types */
 	case AD_PHYS:
-		if (pa->mtyp == PM_FOG_CLOUD || pa->mtyp == PM_STEAM_VORTEX) {
+		if (pa && (pa->mtyp == PM_FOG_CLOUD || pa->mtyp == PM_STEAM_VORTEX)) {
 			if (youdef) {
 				You("are laden with moisture and %s",
 					flaming(youracedata) ? "are smoldering out!" :
@@ -10342,7 +10379,7 @@ int vis;
 				}
 			}
 		}
-		else if (pa->mtyp == PM_DREADBLOSSOM_SWARM) {
+		else if (pa && pa->mtyp == PM_DREADBLOSSOM_SWARM) {
 			if (youdef) {
 				You("are sliced by the whirling stems!");
 				exercise(A_DEX, FALSE);
@@ -10410,7 +10447,7 @@ int vis;
 				dmg = 0;
 		}
 		/* message, special effects */
-		if (((attk->adtyp == AD_EELC) || (youagr || !magr->mcan)) &&
+		if (((attk->adtyp == AD_EELC) || (youagr || (!magr || !magr->mcan))) &&
 			(rn2(2) || !youdef || !u.uswallow))
 		{
 			/* message */
@@ -10427,9 +10464,9 @@ int vis;
 			}
 			/* destroy items */
 			if (!UseInvShock_res(mdef)){
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20) : !rn2(4))
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20) : !rn2(4))
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
 			}
 			/* golem effects */
@@ -10465,7 +10502,7 @@ int vis;
 				dmg = 0;
 		}
 		/* message, special effects */
-		if (((attk->adtyp == AD_ECLD) || (youagr || !magr->mcan)) &&
+		if (((attk->adtyp == AD_ECLD) || (youagr || (!magr || !magr->mcan))) &&
 			(rn2(2) || !youdef || !u.uswallow))
 		{
 			/* message */
@@ -10485,7 +10522,7 @@ int vis;
 			}
 			/* destroy items */
 			if (!UseInvCold_res(mdef)){
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20): !rn2(4))
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* golem effects */
@@ -10525,7 +10562,7 @@ int vis;
 		}
 		/* message, special effects */
 		/* This seems buggy mvm. They're really cold if YOU'RE swallowed! */
-		if (((attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR) || (youagr || !magr->mcan)) &&
+		if (((attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR) || (youagr || (!magr || !magr->mcan))) &&
 			(rn2(2) || !youdef || !u.uswallow))
 		{
 			/* message */
@@ -10553,11 +10590,11 @@ int vis;
 			}
 			/* destroy items */
 			if (!UseInvFire_res(mdef)) {
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20) : !rn2(4))
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20): !rn2(4))
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
-				if (mlev(magr) > rn2(25))
+				if (magr? mlev(magr) > rn2(25): !rn2(5))
 					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* golem effects */
@@ -10586,7 +10623,7 @@ int vis;
 			dmg *= 2;
 		}
 		/* message, special effects */
-		if (youagr || !magr->mcan){
+		if (youagr || (!magr || !magr->mcan)){
 			/* message */
 			if (vis&VIS_MDEF) {
 				if (dmg) {
@@ -10622,7 +10659,8 @@ int vis;
 					);
 			}
 			/* heal from damage dealt*/
-			heal(magr, min(*hp(mdef), dmg));
+			if(magr)
+				heal(magr, min(*hp(mdef), dmg));
 		}
 		/* deal damage */
 		result = xdamagey(magr, mdef, attk, dmg);
@@ -12478,7 +12516,7 @@ int vis;
 				dmg--;
 				(void)adjattrib(A_WIS, -1, TRUE);
 				change_usanity(-1, FALSE);
-				forget(10);	/* lose 10% of memory per point lost*/
+				forget(4);	/* lose 4% of memory per point lost*/
 				exercise(A_WIS, FALSE);
 				/* Great Cthulhu permanently drains wisdom */
 				if ((pa->mtyp == PM_GREAT_CTHULHU) && (AMAX(A_WIS) > ATTRMIN(A_WIS)))
@@ -12489,7 +12527,8 @@ int vis;
 				change_usanity(-1*dmg, TRUE);
 				xdamagey(magr, mdef, attk, dmg*10);
 			}
-			u.umadness |= MAD_SPIRAL;
+			if(magr->mtyp == PM_GREAT_CTHULHU)
+				u.umadness |= MAD_SPIRAL;
 		}
 		break;
 
@@ -13255,11 +13294,7 @@ int vis;						/* True if action is at all visible to the player */
 			(!attk || weapon_aatyp(attk->aatyp)) &&
 			/* isn't a misused launcher */
 			(!is_launcher(weapon) ||
-			check_oprop(weapon, OPROP_BLADED) ||
-			check_oprop(weapon, OPROP_SPIKED) ||
-			weapon->oartifact == ART_LIECLEAVER ||
-			weapon->oartifact == ART_ROGUE_GEAR_SPIRITS ||
-			weapon->otyp == CARCOSAN_STING
+			is_melee_launcher(weapon)
 			) &&
 			/* isn't a misused polearm */
 			(!is_bad_melee_pole(weapon) ||
@@ -14794,12 +14829,17 @@ int vis;						/* True if action is at all visible to the player */
 		if (youagr)
 			bonsdmg += u.uencouraged;
 		else if (magr){
-			bonsdmg += magr->encouraged;
+			if(!(youdef && Nightmare && u.umadness&MAD_RAGE))
+				bonsdmg += magr->encouraged;
 			if(magr->mtyp == PM_LUCKSUCKER)
 				bonsdmg += magr->mvar_lucksucker;
 			if(magr->mtame){
 				if(uring_art(ART_NARYA))
 					bonsdmg += narya();
+				if(!youdef && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER))
+					bonsdmg += 8;
+				if(!youdef && activeMentalEdge(GSTYLE_RESONANT))
+					bonsdmg += u.usanity < 50 ? 0 : u.usanity < 75 ? 2 : u.usanity < 90 ? 5 : 8;
 			}
 		}
 		/* Singing Sword -- only works when the player is wielding it >_> */
@@ -14907,7 +14947,7 @@ int vis;						/* True if action is at all visible to the player */
 						tmp = min(0, tmp);
 					bonsdmg += tmp;
 				}
-				else if (fired)
+				else if (fired || thrown)
 				{
 					/* slings get STR bonus */
 					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
@@ -15192,6 +15232,9 @@ int vis;						/* True if action is at all visible to the player */
 		int dr = 0;
 		if (phase_armor){
 			dr = (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
+		}
+		else if(!attk){
+			dr = (youdef ? roll_udr(magr, AT_ANY) : roll_mdr(mdef, magr, AT_ANY));
 		}
 		else {
 			dr = (youdef ? roll_udr(magr, attk->aatyp) : roll_mdr(mdef, magr, attk->aatyp));
@@ -16116,7 +16159,7 @@ int vis;						/* True if action is at all visible to the player */
 					}
 					else {
 						forget(1);	/* lose 1% of memory per point lost*/
-						forget_traps();		/* lose memory of all traps*/
+						// forget_traps();		/* lose memory of all traps*/
 					}
 				}
 				else {
@@ -18114,7 +18157,6 @@ movement_combos()
 	if (Role_if(PM_MONK) && !Upolyd) {
 		int moveID = check_monk_move();
 		if (moveID != 0 && perform_monk_move(moveID)) {
-			u.uen -= 8;
 			nomul(0, NULL);
 			u.uattked = TRUE;
 			did_combo = TRUE;
@@ -18350,8 +18392,6 @@ int moveID;
 	if(!moveID)
 		return FALSE;
 	if(!monk_style_active(moveID)) return FALSE;
-	if(u.uen < 8)
-		return FALSE;
 	switch(moveID){
 		case DIVE_KICK:
 		if(Race_if(PM_CHIROPTERAN)){
@@ -18552,7 +18592,7 @@ struct monst * mdef;
 		uwep->otyp = CLAWED_HAND;
 	res = xmeleehity(&youmonst, mdef, &basicattack, &uwep, vis, 0, TRUE);
 	if(check_oprop(uwep, OPROP_CCLAW))
-		uwep->otyp = CLUB;
+		uwep->otyp = uwep->oartifact == ART_AMALGAMATED_SKIES ? TWO_HANDED_SWORD : CLUB;
 	return res;
 }
 
@@ -18957,5 +18997,12 @@ boolean magical;
 		else
 			dmg = (dmg + 1) / 2;
 	}
+	if (mdef == &youmonst && u.uspellprot){
+		if(magical && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WILL)
+			dmg = (dmg + 1) / 2;
+	}
+	/* Priests of Asmodeus */
+	if(mdef != &youmonst && flags.spriest_level && is_demon(mdef->data) && is_lawful_mon(mdef) && !mdef->mpeaceful)
+		dmg = (dmg + 1) / 2;
 	return dmg;
 }

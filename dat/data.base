@@ -2143,6 +2143,32 @@ dagon
 	translucent.
 		[ Hordes of the Abyss,
 			by Ed Stark, James Jacobs, and Erik Mona ]
+dahlver-nar
+strange corpse
+	[...] Binder scholars know a different story—that Dahlver-Nar
+	was a powerful cleric who forsook his deity to pursue the power 
+	of pact magic. The fabled teeth of Dahlver-Nar, to which all 
+	the legends attribute miraculous powers, were neither his own nor
+	those of the dragon he battled. They were the teeth of beings 
+	that became vestiges after death, and they could grant abilities 
+	similar to those that the vestiges themselves imparted. Pact magic
+	treatises relate that Dahlver-Nar pulled out his own teeth and
+	replaced them with those of the vestiges, but that using them all 
+	drove him mad. What happened thereafter is a matter of debate, but 
+	the texts maintain that Dahlver-Nar eventually died, and the teeth 
+	were lost, divided up among the squabbling followers he had managed
+	to gain and then spread across the world. Today, Dahlver-Nar exists
+	as a vestige in his own right—perhaps brought to that state through
+	his close association with so many others.
+		[ Tome of Magic,
+			by Matthew Sernett et al. ]
+
+	Thirty-two horses on a red hill,
+	First they champ,
+	Then they stamp,
+	Then they stand still.    
+		[ Adapted from the Hobbit,
+			by J. R. R. Tolkien ]
 damned pirate
 	These memories were bought with the lives of good men
 	A price that I paid without scruple
@@ -3404,14 +3430,6 @@ flint*
 	An opal holds a fiery spark;
 	But a flint holds fire.
 		[ Precious Stones, by Christina Giorgina Rossetti ]
-floating eye
-	Floating eyes, not surprisingly, are large, floating eyeballs
-	which drift about the dungeon.  Though not dangerous in and
-	of themselves, their power to paralyse those who gaze at
-	their large eye in combat is widely feared.  Many are the
-	tales of those who struck a floating eye, were paralysed by
-	its mystic powers, and then nibbled to death by some other
-	creature that lurked around nearby.
 *flute
 	With this thou canst do mighty deeds
 	And change men's passions for thy needs:
@@ -4532,6 +4550,7 @@ humanoid
 	human settlements.
 # takes "human or elf or you" when specifying "@" as a dwarf, gnome or orc.
 human
+human smith
 chieftain
 guard
 ninja
@@ -7764,6 +7783,13 @@ serpent man of Yoth
 	and when he believes you will run. Surprise is the key to victory, and speed 
 	is the key to surprise. For the soldier, speed is life."
 		[ Lord of Chaos by Robert Jordan ]
+*starshadow
+*star-phantom
+	Strange is the night where black stars rise,
+	And strange moons circle through the skies,
+	But stranger still is
+		Lost Carcosa.
+	[ The King in Yellow, by Robert W. Chambers ]
 Stranger
 The Stranger
 	Camilla: You, sir, should unmask.
@@ -7775,7 +7801,7 @@ The Stranger
 	Stranger: I wear no mask.
 
 	Camilla: (Terrified, aside to Cassilda) No mask? No mask!
-		[ The King in Yellow by Robert Chambers ]
+		[ The King in Yellow by Robert W. Chambers ]
 quadruped
 	The woodlands and other regions are inhabited by multitudes
 	of four-legged creatures which cannot be simply classified.
@@ -8431,7 +8457,7 @@ veil-render
 		[ Bloodborne, by From Software ]
 
 	The hole in your room is a hole in you.
-	
+
 	You called me, so here I am. I know I shut you out sometimes
 	- I'm always glad to hear from you.
 		[ Control, by Remedy Entertainment ]
@@ -9449,6 +9475,16 @@ tree
 	Poems are made by fools like me,
 	But only God can make a tree.
 		[ Trees, by Joyce Kilmer ]
+treesinger
+	I sang of leaves, of leaves of gold,
+		and leaves of gold there grew:
+	Of wind I sang, a wind there came
+		and in the branches blew.
+	Beyond the Sun, beyond the Moon,
+		the foam was on the Sea,
+	And by the strand of Ilmarin
+		there grew a golden Tree.
+		[ The Fellowship of the Ring, by J.R.R. Tolkien ]
 trilobite
 	Trilobite, any member of a group of extinct fossil arthropods
 	easily recognized by their distinctive three-lobed, three-

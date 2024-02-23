@@ -173,6 +173,7 @@ boolean check_if_better;
 	     otmp->otyp == POT_BLINDNESS ||
 	     otmp->otyp == POT_CONFUSION ||
 	     otmp->otyp == POT_AMNESIA ||
+	     (otmp->otyp == POT_WATER && otmp->blessed) ||
 	     otmp->otyp == POT_ACID ||
 	     otmp->otyp == FROST_HORN ||
 	     otmp->otyp == FIRE_HORN ||
@@ -218,7 +219,7 @@ register struct monst *mon;
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
 	
-	if(is_eeladrin(mon->data))
+	if(is_eeladrin(mon->data) || (mon->mtyp != PM_UNEARTHLY_DROW && is_yochlol(mon->data)))
 		return (struct obj *)0; //Eladrin don't drop objects in their energy form.
 	
 	rwep = mon_attacktype(mon, AT_WEAP) ? propellor : &zeroobj;
@@ -313,14 +314,12 @@ struct obj *obj;
 	    if(obj->otyp == CORPSE) {
 			mtmp->meating = 3 + (mons[obj->corpsenm].cwt >> 6);
 			nutrit = mons[obj->corpsenm].cnutrit;
-			if(mtmp->mtyp == PM_DRACAE_ELADRIN && is_smith_mon(mtmp))
-				ESMT(mtmp)->smith_biomass_stockpile += nutrit;
 	    } else {
 			mtmp->meating = objects[obj->otyp].oc_delay;
 			nutrit = objects[obj->otyp].oc_nutrition;
-			if(mtmp->mtyp == PM_DRACAE_ELADRIN && is_smith_mon(mtmp))
-				ESMT(mtmp)->smith_biomass_stockpile += nutrit;
 	    }
+		if(mtmp->mtyp == PM_DRACAE_ELADRIN && HAS_ESMT(mtmp))
+			ESMT(mtmp)->smith_biomass_stockpile += nutrit;
 	    switch(mtmp->data->msize) {
 		case MZ_TINY: nutrit *= 8; break;
 		case MZ_SMALL: nutrit *= 6; break;
@@ -786,8 +785,10 @@ int udist;
 			*/
 		    if (edog->hungrytime < monstermoves + DOG_SATIATED || 
 				(!mindless_mon(mtmp) && 
-					((YouHunger < HUNGRY && edog->hungrytime < monstermoves + DOG_SATIATED/3) || 
-					(YouHunger < WEAK && edog->hungrytime < monstermoves))
+					(
+						(YouHunger > 150*get_uhungersizemod() && edog->hungrytime < monstermoves + DOG_SATIATED/3) ||
+						(YouHunger > 50*get_uhungersizemod() && edog->hungrytime < monstermoves)
+					)
 				)
 			) 
 #endif /* PET_SATIATION */

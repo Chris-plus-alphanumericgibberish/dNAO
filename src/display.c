@@ -1458,6 +1458,8 @@ show_glyph(x,y,glyph)
 	    text = "warning";		offset = glyph - GLYPH_WARNING_OFF;
 	} else if (glyph >= GLYPH_SWALLOW_OFF) {	/* swallow border */
 	    text = "swallow border";	offset = glyph - GLYPH_SWALLOW_OFF;
+	} else if (glyph >= GLYPH_CLOUD_OFF) {		/* cloud */
+	    text = "cloud";		offset = glyph - GLYPH_CLOUD_OFF;
 	} else if (glyph >= GLYPH_ZAP_OFF) {		/* zap beam */
 	    text = "zap beam";		offset = glyph - GLYPH_ZAP_OFF;
 	} else if (glyph >= GLYPH_EXPLODE_OFF) {	/* explosion */
@@ -1622,6 +1624,8 @@ int glyph;
     } else if ((offset = (glyph - GLYPH_SWALLOW_OFF)) >= 0) {	/* swallow */
 	/* see swallow_to_glyph() in display.c */
 	ch = (uchar) defsyms[S_sw_tl + (offset & 0x7)].sym;
+    } else if ((offset = (glyph - GLYPH_ZAP_OFF)) >= 0) {	/* cloud */
+	ch = defsyms[S_cloud].sym;
     } else if ((offset = (glyph - GLYPH_ZAP_OFF)) >= 0) {	/* zap beam */
 	/* see zapdir_to_glyph() in display.c */
 	ch = defsyms[S_vbeam + (offset & 0x3)].sym;

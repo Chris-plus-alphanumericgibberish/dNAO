@@ -590,6 +590,12 @@ do_statuseffects(char *newbot2, boolean terminal_output, int abbrev, int statusl
   if(FaintingFits)
     status_effect("Faint", "Fnt", "Fnt");
 /** Less important **/
+  if(u.ustuck) {
+    if(sticks(&youmonst) && !u.uswallow)
+      status_effect("UHold", "UHld", "UHd");
+    else
+      status_effect("Held", "Hld", "Hd");
+  }
   if(Levitation)
     status_effect("Lev", "Lev", "Lv");
   /* flying and levitation are mutually exclusive */

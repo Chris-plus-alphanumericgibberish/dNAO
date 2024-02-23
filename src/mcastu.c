@@ -370,6 +370,9 @@ unsigned int type;
 		}
 	}
 	boolean quake = FALSE;
+	if(mtmp->mtyp == PM_ELVEN_WRAITH){
+		return mtmp->mvar_elfwraith_spell;
+	}
 	if(has_template(mtmp, PSURLON)){
 		if(rn2(2))
 			return CRUSH_BOLT;
@@ -782,6 +785,32 @@ unsigned int type;
 			break;
 			case 1:
 			return AGGRAVATION;
+			break;
+		}
+	break;
+	case PM_SHADOWSMITH:
+		switch(clrc_spell_power){
+			default:
+				return OPEN_WOUNDS;
+			break;
+			case 0:
+			case 2:
+			case 4:
+				return BLIND_YOU;
+			break;
+			case 1:
+			case 3:
+			case 5:
+			case 7:
+				return DARKNESS;
+			break;
+			case 20:
+			case 22:
+			case 24:
+				return DRAIN_LIFE;
+			break;
+			case 29:
+				return DEATH_TOUCH;
 			break;
 		}
 	break;
@@ -1211,6 +1240,22 @@ unsigned int type;
 				return CURE_SELF;
 		}
 	   break;
+	case PM_FIRRE_ELADRIN:
+			switch (rnd(6)) {
+				case 1:
+					return FIRE_PILLAR;
+				case 2:
+					return LIGHTNING;
+				case 3:
+					return PARALYZE;
+				case 4:
+					return CURE_SELF;
+				case 5:
+					return RECOVER;
+				case 6:
+					return MON_FIRA;
+			}
+	   break;
 	case PM_GAE_ELADRIN:
 		switch (rnd(4)) {
 			case 1:
@@ -1255,6 +1300,31 @@ unsigned int type;
 				case 4: return MASS_CURE_CLOSE;
 				case 5: return DEATH_TOUCH;
 				case 6: return DRAIN_LIFE;
+			}
+	   break;
+	case PM_LIGHT_ELF:
+	case PM_UNBODIED:
+			switch (rnd(12)) {
+				default:
+					return HOLY_BOLT;
+				case 1:
+					return PSI_BOLT;
+				case 2:
+					return CURE_SELF;
+				case 3:
+					return PARALYZE;
+				case 4:
+					return CURE_SELF;
+				case 5:
+					return RECOVER;
+				case 6:
+					return GOD_RAY;
+				case 7:
+					return MASS_CURE_CLOSE;
+				case 8:
+					return SLEEP;
+				case 9:
+					return DISAPPEAR;
 			}
 	   break;
 	case PM_KUKER:
@@ -2085,6 +2155,8 @@ const char * spellname[] =
 	//100
 	"HYPNOTIC_COLORS",
 	"CRUSH_BOLT",
+	"MADF_BURST",
+	"HOLY_BOLT",
 };
 
 
@@ -2131,6 +2203,17 @@ int tary;
 		return MM_MISS;
 	if (attk->adtyp == AD_PSON && !youdef && (!mdef || mindless_mon(mdef)))
 		return MM_MISS;
+	if (magr->mtyp == PM_LIGHT_ELF){
+		struct obj *lens = which_armor(magr, W_TOOL);
+		if(!lens || lens->otyp != SOUL_LENS)
+			return MM_MISS;
+		if(lens->cursed){
+			set_mcan(magr, TRUE);
+			magr->mcansee = 0;
+			pline("%s yelps!", Monnam(magr));
+			return MM_MISS;
+		}
+	}
 
 	/* Attempt to find a spell to cast */
 	if (mlev(magr) > 0 && (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC || attk->adtyp == AD_PSON)) {
@@ -2166,6 +2249,7 @@ int tary;
 		(u.uen < mlev(magr))
 		) : (
 		(magr->mcan) ||
+		(magr->mtyp == PM_SHADOWSMITH && dimness(magr->mx,magr->my) <= 0) ||
 		(magr->mspec_used && !nospellcooldowns_mon(magr)) ||
 		(mlev(magr) == 0) ||
 		(youdef && Invulnerable) ||
@@ -2296,6 +2380,8 @@ int tary;
 		}
 	}
 	else {
+		if(magr->mrage && magr->mberserk)
+			spell_skill /= 2;
 		if(magr->mformication || magr->mscorpions)
 			spell_skill /= 2;
 		if(magr->msciaphilia && unshadowed_square(x(magr), y(magr)))
@@ -2386,6 +2472,23 @@ int tary;
 		/* if attacking a displacement, monsters figure out you weren't there */
 		if (magr && youdef && (tarx != u.ux || tary != u.uy)) {
 			magr->mux = magr->muy = 0;
+		}
+	}
+	if(result == MM_HIT && magr && !youagr && magr->mfaction == NECROMANCY_FACTION && magr->mtyp != PM_ELVEN_WRAITH && u.uinsight >= 15 && spellnum && mdef){
+		struct monst *wraith = makemon(&mons[PM_ELVEN_WRAITH], magr->mx, magr->my, MM_ESUM|MM_ADJACENTOK|NO_MINVENT);
+		if(wraith){
+			mark_mon_as_summoned(wraith, magr, u.uinsight/5, 0);
+			wraith->m_insight_level = 15;
+			wraith->m_lev = magr->m_lev;
+			wraith->mpeaceful = magr->mpeaceful;
+			set_faction(wraith, NECROMANCY_FACTION);
+			if(wraith->m_lev > 0)
+				wraith->mhpmax = d(magr->m_lev, hd_size(wraith->data));
+			else
+				wraith->mhpmax = rnd((hd_size(wraith->data)+1)/2);
+			wraith->mhp = wraith->mhpmax;
+			wraith->mvar_elfwraith_target = youdef ? 0 : (long) mdef->m_id;
+			wraith->mvar_elfwraith_spell = spellnum;
 		}
 	}
 	return result;
@@ -2962,17 +3065,14 @@ int tary;
 		if ((!youdef && mindless_mon(mdef)) || Catapsi) {
 			return MM_MISS;
 		}
+		if (dmg > 50)
+			dmg = 50;
 		/* calculate resistance */
 		if (Magic_res(mdef) || (!youdef && resist(mdef, 0, 0, FALSE))) {
 			shieldeff(x(mdef), y(mdef));
 			dmg = (dmg + 1) / 2;
-			if (dmg > 25)
-				dmg = 25;
 		}
-		else {
-			if (dmg > 50)
-				dmg = 50;
-		}
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 		/* message */
 		if (youdef) {
 			if (dmg <= 5)
@@ -2997,6 +3097,7 @@ int tary;
 	case BARF_BOLT:
 	case BABBLE_BOLT:
 	case CRUSH_BOLT:
+	case HOLY_BOLT:
 		/* needs direct target */
 		if (!foundem) {
 			impossible("No mdef for mind-bolt");
@@ -3008,24 +3109,53 @@ int tary;
 		dmg = (dmg + 1) / 2;
 		if (dmg > 75)
 			dmg = 75;
-
+		int dmg_base = dmg;
+		//Extra holy bolt damage, AFTER caping, ADDITIVE stacking
+		if(spell == HOLY_BOLT){
+			if(hates_holy_mon(mdef))
+				dmg += dmg_base;
+			if(is_orc(youdef ? youracedata : mdef->data))
+				dmg += dmg_base;
+			if(is_drow(youdef ? youracedata : mdef->data))
+				dmg += dmg_base;
+		}
 		/* calculate resistance */
 		if ((!youdef && resist(mdef, 0, 0, FALSE))) {
 			shieldeff(x(mdef), y(mdef));
 			dmg = (dmg + 1) / 2;
 		}
-		if(Half_spel(mdef))
+		if(Magic_res(mdef))
 			dmg = (dmg + 1) / 2;
+		dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+		if(spell == HOLY_BOLT){
+			if(is_elf(youdef ? youracedata : mdef->data))
+				dmg = (dmg + 1) / 2;
+		}
 		/* message */
 		if (youdef) {
-			if (dmg <= 5)
-				You("get a %sache.", body_part(HEAD));
-			else if (dmg <= 10)
-				Your("brain is on fire!");
-			else if (dmg <= 20)
-				Your("%s suddenly aches painfully!", body_part(HEAD));
-			else{
-				Your("%s suddenly aches very painfully!", body_part(HEAD));
+			if(spell == HOLY_BOLT){
+				Your("%s fills with holy light!", body_part(HEAD));
+				if (dmg <= 5)
+					You("get a %sache.", body_part(HEAD));
+				else if (dmg <= 10)
+					Your("%s is on fire!", body_part(BRAIN));
+				else if (dmg <= 20)
+					Your("%s aches painfully!", body_part(HEAD));
+				else if (dmg <= 75)
+					Your("%s aches very painfully!", body_part(HEAD));
+				else
+					You("are burning in the Light!");
+			}
+			else {
+				if (dmg <= 5)
+					You("get a %sache.", body_part(HEAD));
+				else if (dmg <= 10)
+					Your("%s is on fire!", body_part(BRAIN));
+				else if (dmg <= 20)
+					Your("%s suddenly aches painfully!", body_part(HEAD));
+				else{
+					Your("%s suddenly aches very painfully!", body_part(HEAD));
+				}
 			}
 		}
 		if(spell == PAIN_BOLT){
@@ -3150,6 +3280,29 @@ int tary;
 				mdef->mconf = TRUE;
 			}
 		}
+		else if(spell == HOLY_BOLT){
+			if(hates_holy_mon(mdef)){
+				cancel_monst(mdef, (struct obj	*)0, youagr, TRUE, FALSE,0);
+			}
+			if(dmg > 75){
+				if (youdef) {
+					if (!Blinded) {
+						if (Hallucination)
+							pline("Oh, bummer!  Can't see!");
+						else You("are blinded!");
+						make_blinded((long)dmg-75, FALSE);
+						if (!Blind) Your1(vision_clears);
+					}
+				}
+				else {
+					if (!mdef->mblinded && haseyes(mdef->data)) {
+						pline("%s goes blind!", Monnam(mdef));
+						mdef->mcansee = 0;
+						mdef->mblinded = min(dmg-75, 127);
+					}
+				}
+			}
+		}
 		/* deal damage */
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -3159,17 +3312,14 @@ int tary;
 			impossible("No mdef for open wounds");
 			return MM_MISS;
 		}
+		if (dmg > 60)
+			dmg = 60;
 		/* calculate resistance */
 		if (Magic_res(mdef) || (!youdef && resist(mdef, 0, 0, FALSE))) {
 			shieldeff(x(mdef), y(mdef));
 			dmg = (dmg + 1) / 2;
-			if (dmg > 30)
-				dmg = 30;
 		}
-		else {
-			if (dmg > 60)
-				dmg = 60;
-		}
+		dmg = reduce_dmg(mdef,dmg,TRUE,TRUE);
 		/* message */
 		if (youdef) {
 			if (dmg >= *hp(mdef)) {
@@ -3612,6 +3762,7 @@ int tary;
 			else {
 				/* check resistance and override damage */
 				dmg = d(8, 6);
+				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
 				if (Acid_res(mdef)) {
 					shieldeff(x(mdef), y(mdef));
 					if (youdef)
@@ -3665,6 +3816,8 @@ int tary;
 			else {
 				/* check resistance and override damage */
 				dmg = flaming(mdef->data) ? d(8, 6) : 0;
+				if(dmg)
+					dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 				if (!dmg) {
 					if (youdef)
 						pline("It feels mildly uncomfortable.");
@@ -3706,6 +3859,8 @@ int tary;
 			else {
 				/* check resistance and override damage */
 				dmg = flaming(mdef->data) ? d(8, 6) : 0;
+				if(dmg)
+					dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 				water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, WD_BLOOD, mdef);
 				if(youdef)
 					change_usanity(save_vs_sanloss() ? -1 : -1*d(2,6), TRUE);
@@ -4072,6 +4227,7 @@ int tary;
 				else {
 					if (rn2(mlev(magr)) > 12) {
 						dmg += *hp(smdef)/4;
+						dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 						if(youdef){
 							pline("The earth's maw chews you!");
 							killer_format = KILLED_BY;
@@ -4365,6 +4521,7 @@ int tary;
 					pline("%s %s seared by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n * 2, 20);
+				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 			}
 			else if (!Fire_res(mdef) && species_resists_cold(mdef)){
 				if (youagr || youdef || canseemon(mdef))
@@ -4928,6 +5085,14 @@ int tary;
 			else {
 				if (canseemon(magr))
 					pline("%s looks better.", Monnam(magr));
+				if(magr->mtyp == PM_ELVEN_WRAITH
+					&& get_mx(magr, MX_ESUM)
+					&& magr->mextra_p->esum_p->summoner
+				){
+					*hp(magr->mextra_p->esum_p->summoner) += d(dmn, 8);
+					if (*hp(magr->mextra_p->esum_p->summoner) > *hpmax(magr->mextra_p->esum_p->summoner))
+						*hp(magr->mextra_p->esum_p->summoner) = *hpmax(magr->mextra_p->esum_p->summoner);
+				}
 				if(magr->mtyp == PM_CHAOS){
 					//Chaos could heal himself fully, but lets not do that.
 					*hp(magr) += 999;
@@ -6736,10 +6901,19 @@ int tary;
 		return TRUE;
 
 	/* don't cast healing when already healed */
-	if (spellnum == CURE_SELF
-		&& (*hp(magr) == *hpmax(magr)))
-		return TRUE;
-
+	if (spellnum == CURE_SELF){
+		if (*hp(magr) == *hpmax(magr)){
+			if(magr->mtyp == PM_ELVEN_WRAITH){
+				if(get_mx(magr, MX_ESUM)
+					&& magr->mextra_p->esum_p->summoner
+					&& *hp(magr->mextra_p->esum_p->summoner) == *hpmax(magr->mextra_p->esum_p->summoner)
+				)
+					return TRUE;
+			}
+			else return TRUE;
+		}
+	}
+	
 	/* don't cast recovery when stats are ok */
 	if (spellnum == RECOVER
 		&& !youagr && !(magr->mcan || magr->mcrazed || !magr->mcansee || !magr->mcanmove ||

@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "artifact.h"
 
 #include "xhity.h"
 
@@ -265,8 +266,12 @@ struct obj *otmp;
 		} else if (u.uswallow || otyp == WAN_STRIKING || rnd(20) < 10 + find_mac(mtmp) + 2*P_SKILL(otyp == SPE_FORCE_BOLT ? P_ATTACK_SPELL : P_WAND_POWER)) {
 			if(otyp == WAN_STRIKING || otyp == ROD_OF_FORCE) dmg = d(wand_damage_die(P_SKILL(P_WAND_POWER))-4,12);
 			else dmg = d(fblt_damage_die(P_SKILL(P_ATTACK_SPELL)),12);
-			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT && (uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM))
-				dmg += d((u.ulevel+1)/2, 12);
+			if (!flags.mon_moving && otyp == SPE_FORCE_BOLT){
+				if(uwep && uwep->oartifact == ART_ANNULUS && uwep->otyp == CHAKRAM)
+					dmg += d((u.ulevel+1)/2, 12);
+				if(u.ulevel == 30 && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_PATIENCE))
+					dmg += d(10, 12);
+			}
 			if(dbldam) dmg *= 2;
 			if(!flags.mon_moving && Double_spell_size) dmg *= 1.5;
 			if (otyp == SPE_FORCE_BOLT){
@@ -3393,6 +3398,8 @@ register struct	obj	*obj;
 			switch (otyp) {
 			case SPE_MAGIC_MISSILE:
 				zapdat.single_target = TRUE;
+				if(otyp == SPE_MAGIC_MISSILE && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH))
+					zapdat.damd += 2;
 				break;
 			case SPE_FIREBALL:
 				zapdat.explosive = TRUE;
@@ -3400,6 +3407,7 @@ register struct	obj	*obj;
 				zapdat.directly_hits = FALSE;
 				zapdat.affects_floor = FALSE;
 				zapdat.no_hit_wall = TRUE;
+				zapdat.damn *= 1.5;
 				break;
 			case SPE_ACID_SPLASH:
 				range = 1;
@@ -3483,14 +3491,28 @@ int adtyp;
 {
     int hit_bon = 0;
     int dex = ACURR(A_DEX);
-
-	switch (P_SKILL(spell_skill_from_adtype(adtyp))) {
-	case P_ISRESTRICTED:
-	case P_UNSKILLED:   hit_bon = -4; break;
-	case P_BASIC:       hit_bon =  0; break;
-	case P_SKILLED:     hit_bon =  2; break;
-	case P_EXPERT:      hit_bon =  5; break;
-    }
+	int skill = P_SKILL(spell_skill_from_adtype(adtyp));
+	
+	if(skill == P_MARTIAL_ARTS){
+		switch (skill) {
+		case P_ISRESTRICTED: hit_bon = 0; break;
+		case P_UNSKILLED:    hit_bon = 2; break;
+		case P_BASIC:        hit_bon = 3; break;
+		case P_SKILLED:      hit_bon = 4; break;
+		case P_EXPERT:       hit_bon = 5; break;
+		case P_MASTER:       hit_bon = 7; break;
+		case P_GRAND_MASTER: hit_bon = 9; break;
+		}
+	}
+	else {
+		switch (skill) {
+		case P_ISRESTRICTED:
+		case P_UNSKILLED:   hit_bon = -4; break;
+		case P_BASIC:       hit_bon =  0; break;
+		case P_SKILLED:     hit_bon =  2; break;
+		case P_EXPERT:      hit_bon =  5; break;
+		}
+	}
 
     if (dex < 4)
 	hit_bon -= 3;
@@ -3827,8 +3849,7 @@ struct zapdata * zapdata;
 		}
 		if (youagr && u.ukrau_duration)
 			dmg *= 1.5;
-		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)
-			&& !(zapdata->explosive || zapdata->splashing)) {
+		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)) {
 			dmg *= 2;
 		}
 	}
@@ -4070,8 +4091,12 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 				case AD_DRST:
 					create_gas_cloud(sx, sy, 1, 8, youagr);
 					break;
-				default:
-					impossible("Unhandled gascloud-leaving zap adtyp %d", zapdata->adtyp);
+				default:{
+					struct region_arg cloud_data;
+					cloud_data.damage = 8;
+					cloud_data.adtyp = zapdata->adtyp;
+					create_generic_cloud(sx, sy, 1, &cloud_data, youagr);
+				}
 				}
 			}
 
@@ -5587,7 +5612,7 @@ int damage, tell;
 		damage = 0;
 	/* attack level */
 	switch (oclass) {
-	    case WAND_CLASS:	
+	    case WAND_CLASS:
 			alev = 12;	 
 			if(!flags.mon_moving){
 				if(P_SKILL(P_WAND_POWER) > 1)
@@ -5640,6 +5665,9 @@ int damage, tell;
 	if (dlev > 50) dlev = 50;
 	else if (dlev < 1) dlev = 1;
 	
+	if(mtmp->mtame && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+		dlev += 1;
+
 	int mons_mr = mtmp->data->mr;
 	if(mtmp->mcan){
 		if(mtmp->mtyp == PM_ALIDER)
@@ -5647,6 +5675,8 @@ int damage, tell;
 		else
 			mons_mr /= 2;
 	}
+	if(mtmp->mtame && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WILL)
+		mons_mr += 10;
 
 	if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH) dlev+=u.chokhmah;
 	resisted = rn2(100 + alev - dlev) < mons_mr;
@@ -5698,7 +5728,7 @@ allow_artwish()
 {
 	int n = 1;
 	
-	n -= flags.descendant; 			// 'used' their first on their inheritance
+	// n -= flags.descendant; 			// 'used' their first on their inheritance
 	// n += u.uevent.qcalled;		// reaching the main dungeon branch of the quest
 	//if(u.ulevel >= 7) n++;		// enough levels to be intimidating to marids/djinni
 	n += (u.uevent.utook_castle & ARTWISH_EARNED);	// sitting on the castle throne
@@ -5762,6 +5792,26 @@ retry:
 		if (++tries < 5)
 			goto retry;
 	}
+	if (wishreturn & WISH_MERCYRULE)
+	{
+		/* wish was denied due to mercy rule - you couldn't even pick it up if it WAS granted */
+		if (wishflags & WISH_VERBOSE)
+			verbalize("Such an artifact would refuse to lend you aid.");
+		else
+			pline("You cannot wish for an artifact that would refuse you.");
+		if (++tries < 5)
+			goto retry;
+	}
+	if (wishreturn & WISH_OUTOFJUICE)
+	{
+		/* wish was read as an artifact and you're out of artifact wishes  */
+		if (wishflags & WISH_VERBOSE)
+			verbalize("Alone, such artifacts are beyond my power.");
+		else
+			pline("You cannot wish for an artifact right now.");
+		if (++tries < 5)
+			goto retry;
+	}
 	if (wishreturn & WISH_ARTEXISTS)
 	{
 		/* wish was read as an artifact that has already been generated */
@@ -5778,12 +5828,16 @@ retry:
 		if (wishflags & WISH_VERBOSE)
 			verbalize("Done.");
 	}
-	if ((tries == 5) && (wishreturn & (WISH_DENIED | WISH_FAILURE)))
+	if ((tries == 5) && !(wishreturn & (WISH_NOTHING | WISH_SUCCESS)))
 	{
-		/* no more tries, give a random item */
+		/* no more tries
+		 * removes vanilla behavior of random item
+		 * will still consume the wish for lamps/wands, will NOT for candles/rings
+		 * this is by-design, no real reason to punish the player,
+		 * mostly for if they didn't know that X thing was unwishable
+		 */
 		pline1(thats_enough_tries);
-		otmp = readobjnam((char *)0, &wishreturn, wishflags);
-		if (!otmp) return TRUE;	/* for safety; should never happen */
+		return FALSE;
 	}
 
 	/* KMH, conduct */

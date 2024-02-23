@@ -6,7 +6,8 @@
 
 
 STATIC_DCL const char *NDECL(dev_name);
-STATIC_DCL void FDECL(get_mplname, (struct monst *, char *));
+STATIC_DCL void FDECL(get_mplname, (struct monst *, char *, boolean));
+STATIC_DCL void FDECL(get_mplname_culture, (struct monst *, char *));
 STATIC_DCL void FDECL(mk_mplayer_armor, (struct monst *, int));
 
 /* These are the names of those who
@@ -66,28 +67,491 @@ dev_name()
 }
 
 STATIC_OVL void
-get_mplname(mtmp, nam)
+get_mplname(mtmp, nam, endgame)
+register struct monst *mtmp;
+char *nam;
+boolean endgame;
+{
+	boolean fmlkind = is_female(mtmp->data);
+	if(endgame){
+		const char *devnam;
+
+		devnam = dev_name();
+		if (!devnam)
+			Strcpy(nam, fmlkind ? "Eve" : "Adam");
+		else if (fmlkind && !!strcmp(devnam, "Janet"))
+			Strcpy(nam, rn2(2) ? "Maud" : "Eve");
+		else Strcpy(nam, devnam);
+
+		if (fmlkind || !strcmp(nam, "Janet"))
+			mtmp->female = 1;
+		else
+			mtmp->female = 0;
+		Strcat(nam, " the ");
+		Strcat(nam, rank_of((int)mtmp->m_lev,
+					monsndx(mtmp->data),
+					(boolean)mtmp->female));
+	}
+	else {
+		get_mplname_culture(mtmp, nam);
+	}
+}
+
+STATIC_OVL void
+get_mplname_culture(mtmp, nam)
 register struct monst *mtmp;
 char *nam;
 {
-	boolean fmlkind = is_female(mtmp->data);
-	const char *devnam;
+	boolean fmlkind = mtmp->female;
+	const char *namelist;
+	switch(mtmp->mtyp){
+	case PM_ARCHEOLOGIST:{
+		//"Indiana Jones": US state followed by common name
+		const char *states[] = {
+			"Alabama", "Alaska", "Arizona", "Arkansas", 
+			"California", "Colorado", "Connecticut", 
+			"Delaware", "Florida", "Georgia", "Hawaii", 
+			"Idaho", "Illinois", "Indiana", "Iowa", 
+			"Kansas", "Kentucky", "Louisiana", 
+			"Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", 
+			"Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", 
+			"North Carolina", "North Dakota", 
+			"Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", 
+			"Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+		};
+		const char *masculine[] = {
+			// "Smith", "Johnson", "Williams", "Brown", "Jones"
+			"Smith", "John", "Will", "Brown", "Jones"
+		};
+		const char *feminine[] = {
+			// "Susan", "Jane", "Mary", "Babbs", "Jessica"
+			"Sue", "Jane", "Mary", "Babbs", "Jess"
+		};
+		sprintf(nam, "%s %s", ROLL_FROM(states), fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_ANACHRONONAUT:{
+		//Character names from the Terminator franchise
+		//Star Wars film names, avoiding Jedi names basically because Obi-Wan doesn't seem like it's mix and match well
+		//The two named characters from the Night Land
+		const char *masculine[] = {
+			"John", "Marcus", "Kyle", "Peter", "Ed", "Vukovich", "Miles", "Enrique",
+			
+			"Anakin", "Luke", "Han", "Raymus", "Wedge", "Biggs", "Owen", 
+			"Lando", "Bib", "Sio", "Poe", "Finn",
+			
+			"Aschoff"
+		};
+		const char *feminine[] = {
+			"Sarah", "Grace", "Cameron", "Catherine", "Jessica", "Kate",
+			
+			"Beru", "Leia", "Mon", "Oola", "Padme", "Sabe", "Shmi",
+			"Corde", "Dome", "Rey", "Rose",
 
-	devnam = dev_name();
-	if (!devnam)
-	    Strcpy(nam, fmlkind ? "Eve" : "Adam");
-	else if (fmlkind && !!strcmp(devnam, "Janet"))
-	    Strcpy(nam, rn2(2) ? "Maud" : "Eve");
-	else Strcpy(nam, devnam);
+			"Naani"
+		};
+		const char *family[] = {
+			"Write", "Harper", "Henry", "Weaver", "Connor", "Reese",
+			"Silberman","Traxler","Dyson","Salceda","Brewster",
+			
+			"Antilles", "Darklighter", "Lars", "Organa", "Solo",
+			"Skywalker", "Calrissian", "Fortuna", "Bibble", 
+			"Dameron"
+		};
+		sprintf(nam, "%s %s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine), ROLL_FROM(family));
+	}break;
+	case PM_BARBARIAN:{
+		//Hat tip: Characters of the Hyborian Age, hyboria.xoth.net
+		const char *masculine[] = {
+			"Abdashtarth", "Afari", "Ageera", "Aja", "Ajaga", 
+			"Ajonga", "Akhirom", "Akkutho", "Alafdhal", "Alcemides", 
+			"Almuric", "Altaro", "Amalric", "Amalric", "Amalric", 
+			"Amboola", "Amra", "Amurath, Shah", "Angharzeb", "Antar", 
+			"Aram Baksh", "Aratus", "Arbanus", "Arideus", "Arpello", 
+			"Arshak", "Arshak", "Artaban", "Arus", "Askia", "Astreas", 
+			"Atalis", "Athicus", "Attelius", "Aztrias Petanius", 
+			"Bajujh", "Balthus", "Bardiya", "Beloso", "Bhunda Chand", 
+			"Bit-Yakin", "Bombaata", "Bragi", "Bragoras", "Brant Drago", 
+			"Baal", "Baal-Pteor", "Chicmec", "Chiron", "Chunder Shan", 
+			"Codrus", "Constantius", "Ctesphon", "Dathan", "Dayuki", 
+			"Demetrio", "Demetrio", "Dexitheus", "Dion", "Dionus", 
+			"Dirk Strom", "Emilius Scavonus", "Enaro", "Epemitreus", 
+			"Epeus", "Escelan", "Farouz", "Fronto", "Galacus", "Galbro", 
+			"Gault Hagar", "Gebellez", "Ghaznavi", "Gilzan", "Gleg", 
+			"Gobir", "Gorm", "Gorulga", "Gotarza", "Gromel", "Gwarunga", 
+			"Hadrathus", "Hakhamalu", "Hakon Strom", "Hattusas", 
+			"Heimdul", "Horsa", "Hotep", "Imbalayo", "Ishbak", "Ivanos", 
+			"Jamal", "Jehungir", "Jehungir Agha", "Jelal Khan", "Joka", 
+			"Jungir Khan", "Kallian Publico", "Karanthes", "Karlus", 
+			"Keluka", "Keraspa", "Kerim Shah", "Khafra", "Khannon", 
+			"Khaza", "Khemsa", "Khosatral Khel", "Khosrun Khan", 
+			"Khossus", "Khumbanigash", "Khurum", "Kobad Shah", "Kordofo", 
+			"Krallides", "Kujala", "Kurush Khan", "Kutamun", "Mattenbaal", 
+			"Mazdak", "Moranthes", "Munthassem Khan", "Murilo", "Nabonidus", 
+			"Natohk", "Nestor", "N'Gora", "Nimed", "Niord", "Numa", "Numedides",
+			"N'Yaga", "Olgerd Vladislav", "Olmec", "Orastes", "Ortho", "Ostono",
+			"Otho Gorm", "Pallantides", "Pelias", "Petreus", "Posthumo", "Promero",
+			"Prospero", "Publio", "Publius", "Rammon", "Rinaldo", "Rustum", "Saidu",
+			"Sakumbe", "Sassan", "Sergius", "Servio", "Servius Galannus",
+			"Shaf Karaz", "Shevatas", "Shubba", "Shukeli", "Shupras", "Skelos",
+			"Soractus", "Strabonus", "Sumuabi", "Tachic", "Tananda", "Tarascus",
+			"Taurus", "Taurus", "Techotl", "Teyanoga", "Teyaspa", "Than", "Thasperas",
+			"Thespides", "Thespius", "Theteles", "Thoth-Amon", "Thothmekri",
+			"Thugra Khotan", "Thutmekri", "Thutothmes", "Tiberias", "Tiberias",
+			"Tiberio", "Tilutan", "Tito", "Tolkamec", "Topal", "Tothmekri",
+			"Totrasmek", "Tranicos", "Trocero", "Tsotha-Lanti", "Tubal", "Tuthamon",
+			"Tuthmes", "Ura", "Uriaz", "Valannus", "Valannus", "Valbroso", "Valenso",
+			"Valerian", "Valerius", "Valerius", "Vathelos", "Vilerus", "Vinashko",
+			"Virata", "Volmana", "Wulfhere", "Xaltotun", "Xatmec", "Yar Afzal",
+			"Yara", "Yasunga", "Yezdigerd", "Yildiz", "Zahak", "Zal", "Zang",
+			"Zapayo Da Kova", "Zaporavo", "Zarallo", "Zargheba", "Zingelito",
+			"Zlanath", "Zogar Sag", "Zorathus", "Zyras"
+		};
+		const char *feminine[] = {
+			"Akivasha", "Albiona", "Belesa", "Belit", "Catlaxoc",
+			"Chabela", "Diana", "Gitara", "Hildico", "Ilga", "Ivga",
+			"Jehnna", "Junia", "Kang Lou-Dze", "Khushia", "Kwarada", "Livia",
+			"Marala", "Muriela", "Nafertari", "Nanaia", "Natala", "Nzinga",
+			"Octavia", "Olivia", "Purasati", "Radegund", "Rann", "Rima",
+			"Roxana", "Rufia", "Salome", "Sancha", "Shanya", "Taramis",
+			"Thanara", "Tina", "Valeria", "Vammatar", "Vateesa", "Yasala",
+			"Yasmela", "Yasmina", "Yateli", "Yelaya", "Zelata", "Zenobia",
+			"Zeriti", "Zillah", "Zosara"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_HALF_DRAGON:{
+		//Some dragons (or more likely, types of "dragons") from around the world.
+		// h.t. wikipedia
+		const char *dragons[] = {
+			"Kirimu", "Bida", "Grootslang", "Monyohe", "Masingi",
+			"Tarasque", "Fernyiges", "Tarantasio", "Wawel",
+			"Illuyanka", "Lotan", "Zahhak", "Apalala",
+			"Kaliya", "Bakunawa","Panlong","Tatsu",
+			"Imoogi","Kihawahine","Gaasyendietha"
+		};
+		sprintf(nam, "%s", ROLL_FROM(dragons));
+	}break;
+	case PM_BARD:{
+		//The muses, pythagorean philosophers, and bards from the British isles
+		const char *masculine[] = {
+			"Pythagoras","Hesiod","Homer","Philolaus","Archytas",
+			"Amergin", "Domhnall", "Aneirin", "Taliesin"
+		};
+		const char *feminine[] = {
+			"Calliope", "Euterpe", "Terpsichore","Clio","Thalia",
+			"Melpomene","Polyhymnia","Erato","Urania","Aoide",
+			"Melete","Mneme"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_CAVEMAN:
+	case PM_CAVEWOMAN:{
+		//Names associated with the Epic of Gilgamesh, wikipedia
+		//Oldest known names (maybe)
+		const char *masculine[] = {
+			"Gilgamesh", "Enkidu", "Urshanabi", "Utanapishtim", "Shangashu", 
+			"Akka", "Birhurturra","Lugalgabagal","Sin-leqi-unninni","Ur-Nungal",
 
-	if (fmlkind || !strcmp(nam, "Janet"))
-	    mtmp->female = 1;
-	else
-	    mtmp->female = 0;
-	Strcat(nam, " the ");
-	Strcat(nam, rank_of((int)mtmp->m_lev,
-			    monsndx(mtmp->data),
-			    (boolean)mtmp->female));
+			"Kushim", "Gal-Sal", "En-pap"
+		};
+		const char *feminine[] = {
+			"Ninsun", "Shamhat", "Siduri", "Enmebaragesi", "Pestur",
+			
+			"Sukkalgir"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_CONVICT:{
+		//Waterdeep (And Neverwinter, oops)
+		const char *masculine[] = {
+			"Aarin", "Desther", "Fenthick", "Kurth", "Baram",
+			"Vengaul", "Floon", "Dalakhar", "Colstan","Marune",
+			"Rhinnom","Ahmaergo","Nar'l","Noska","Ott"
+			
+		};
+		const char *feminine[] = {
+			"Aribeth", "Sharwyn", "Nathyrra", "Aurora","Avaereene",
+			"Kerindra","Shindia","Arizza","Xibrindas","Nakoto"
+		};
+		const char *family[] = {
+			"Gend", "de Tylmarande", "Indelayne", "Moss","Bloodsail",
+			"Blagmaar", "Amcathra", "Cassalanter","Wand", "Rhuul",
+			"Lynnrenno","Dannihyr","Darkeyes","Ur'gray","Steeltoes"
+		};
+		sprintf(nam, "%s %s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine), ROLL_FROM(family));
+	}break;
+	case PM_EXILE:{
+		//Gnostics
+		const char *masculine[] = {
+			"Dositheos", "Simon", "Menander","Elkhasai",
+			"Seth","Valentinus","Basilides","Thomas",
+			"Marcion","Cerinthus",
+		};
+		const char *feminine[] = {
+			"Mary","Florence","Marcellina","Flora",
+			"Helena", "Philumena"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_HEALER:{
+		//Greek healers, h/t wikipedia
+		const char *masculine[] = {
+			"Herophilus","Aristotle","Theophrastus","Erasistratus",
+			"Galen","Dioscorides","Herodicus","Paean","Telesphorus"
+		};
+		const char *feminine[] = {
+			"Agnodice","Eileithyia","Epione","Aceso","Aegle"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_INCANTIFIER:{
+		//Planescape
+		const char *masculine[] = {
+			"Tivvum"
+		};
+		const char *feminine[] = {
+			"Alluvius"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_KNIGHT:{
+		/*Wikipedia's list of common knights of the round table, omitting Arther and Mordred.*/
+		const char *masculine[] = {
+			"Accolon", "Agloval", "Agravaine", "Bagdemagus", "Bedivere",
+			"Bors", "Brunor", "Cador", "Calogrenant", "Caradoc",
+			"Claudin", "Constantine", "Dagonet", "Daniel", "Dinadan",
+			"Ector", "Elyan", "Erec", "Esclabor", "Feirefiz",
+			"Gaheris", "Galahad", "Galehault", "Galeschin", "Gareth",
+			"Gawain", "Gingalain", "Gornemant", "Griflet", "Hector",
+			"Hoel", "Kay", "Lamorak", "Lancelot", "Lanval",
+			"Leodegrance", "Lionel", "Lucan", "Maleagant", "Morholt",
+			"Morien", "Palamedes", "Pelleas", "Pellinore", "Percival",
+			"Safir", "Sagramore", "Segwarides", "Tor", "Tristan",
+			"Urien", "Yvain"
+		};
+		const char *feminine[] = {
+			"Anna", "Amite",
+			"Blanchefleur", "Brangaine", "Caelia", "Creiddylad", 
+			"Dindrane", "Elaine of Astolat", "Elaine of Benoic",
+			"Elaine of Corbenic", "Elaine of Garlot",
+			"Elaine of Listenoise", "Elaine the Peerless",
+			"Enide", "Ettarre", "Evaine",
+			"Geraintdagger", "Guinevak",
+			"Heliabel", "Igraine", "Iseult", 
+			"Laudine", "Lunete", "Lynette", "Lyonesse",
+			"Morgause", "Morvydd",
+			"Olwen", "Orgeluse",
+			"Parcenet", "Ragnell",
+			"Viviane"
+		};
+		if(fmlkind){
+			sprintf(nam, "Dame %s", ROLL_FROM(feminine));
+		}
+		else {
+			sprintf(nam, "Sir %s", ROLL_FROM(masculine));
+		}
+	}break;
+	case PM_MONK:{
+		//Character names from Journey to the West, "transcribed" via Google Translate.
+		// Some include titles (or are titles)
+		const char *masculine[] = {
+			"Bajie", "Wujing", "Jinjie Shiba Gong", "Guzhi Gong",
+			"Lingkongzi", "Fuyun Sou", "Dabai Gui"
+		};
+		const char *feminine[] = {
+			"Cuilan", "Guowang", "De Yong Furen","Yutu Jing", "Su'e",
+			
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_MADMAN:
+	case PM_MADWOMAN:{
+		//Characters from Lovecraft et al.
+		const char *masculine[] = {
+			"Abdul","George", "Goodenough", "Henry", "Zadok","Atal",
+			"Barzai","Enoch","Randolph","Crom-Ya",
+			"Joseph","Danforth","Edward","Pickman",
+			"William","Walter","Gustaf","Klarkash-Ton",
+			"Kuranes","John","Raymond","Luveh-Keraphf",
+			"Obadiah","Nathaniel","T'yog","Ephraim",
+			"Charles","Dexter","Herbert"
+		};
+		const char *feminine[] = {
+			"Zee-liah", "Keziah","Abigail","Asenath","Lavinia",
+			"Lilith",
+			"Mary Emily", "Marie Anne", "Helena",
+			"Kassandra",
+		};
+		const char *family[] = {
+			"Akeley","Allen","Angell","Armitage","Atwood","Bowen",
+			"Carter","Curwen","Derby","Dyer","Gilman","Johansen",
+			"Legrasse","Marsh","Mason","Peaslee","Prinn","Waite",
+			"Ward","West","Whateley"
+		};
+		sprintf(nam, "%s %s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine), ROLL_FROM(family));
+	}break;
+	case PM_NOBLEWOMAN:
+	case PM_NOBLEMAN:{
+		//Romanian nobility/kings and queens
+		const char *masculine[] = {
+			"Nicolae","Vladislav","Radu","Dan","Vlad","Mihail",
+			"Alexandru","Mircea","Mihnea","Neagoe","Teodosie",
+			"Moise","Patrascu","Petru"
+		};
+		const char *feminine[] = {
+			"Margareta","Maria","Clara","Anna","Kalinikia","Anca",
+			"Cneajna","Neacsa","Justina","Rada","Catherine","Smaranda",
+			"Milica","Voica","Ruxandra","Zamfira","Stana","Chiajna","Jelena",
+			"Neaga"
+		};
+		const char *family[] = {
+			"Basarab","Bogdan-Musat","Caradja","Danesti","Draculesti",
+			"Dragos","Mavrogheni","Mocioni","Soldan", "Ypsilantis"
+		};
+		if(fmlkind){
+			sprintf(nam, "Lady %s %s", ROLL_FROM(feminine), ROLL_FROM(family));
+		}
+		else {
+			sprintf(nam, "Lord %s %s", ROLL_FROM(masculine), ROLL_FROM(family));
+		}
+	}break;
+	case PM_PRIEST:
+	case PM_PRIESTESS:{
+		//Medieval monks and nuns. h.t. wikipedia
+		const char *masculine[] = {
+			"Aelfwine", "Aelfwold", "Alan", "Aldhelm", "Aldred",
+			"Bercthun", "Billfrith", "Botwine", "Byrhtferth",
+			"Ceolwulf", "Eadberht", "Eadfirth", "Eata", "Henry",
+			"Fulk", "Folcard", "Geoffrey", "Gervase", "Gregory",
+			"Huna", "John", "Lantfred", "Lawrence", "Leofwynn",
+			"Odulf", "Osbern", "Reginald", "Richard", "Roger",
+			"Robert", "Symeon", "Tancred", "Torthred",
+			"Uthred", "William", "Wynthryth", "Ymar"
+		};
+		const char *feminine[] = {
+			"Agnes", "Angeline", "Anna", "Catherine", "Clare", "Juliana",
+			"Chiara", "Emilia", "Giovanna", "Humility", "Margaret",
+			"Michelina", "Giulia", "Elizabeth", "Stanislava", "Tova",
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_PIRATE:{
+		//Pirate names
+		const char *masculine[] = {
+			"Bartholomew Roberts", "Benjamin Hornigold", "Blackbeard",
+			"Calico Jack", "Charles Vane", "Cheung Po Tsai",
+			"Edward England", "Edward Low", "Henry Every",
+			"Howell Davis", "Paulsgrave Williams",
+			"Samuel Bellamy", "Stede Bonnet", "Thomas Tew",
+			"Turgut Reis", "William Kidd", "Emanuel Wynn",
+			"Peter Easton", "Richard Worley", "Christopher Contend",
+			"Christopher Moody"
+		};
+		const char *feminine[] = {
+			"Anne Bonny", "Grace O'Malley", "Mary Read", "Sayyida al Hurra",
+			"Ching Shih", "Jeanne de Clisson", "Elise Eskilsdotter",
+			"Mary Wolverston", "Dorothy Monk", "Elizabeth Patrickson",
+			"Neel Cuyper", "Ingela Gathenhielm", "Maria Lindsey",
+			"Mary Critchett"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_RANGER:{
+		//Off Aragorn's geneology. Only slightly a joke.
+		const char *masculine[] = {
+			"Arathorn","Arador","Argonui","Arassuil","Arahad","Aravorn",
+			"Aragost", "Araglas", "Aravir", "Aranuir", "Arahael", "Aranarth",
+			"Arvedui","Araphant","Araval","Arveleg","Argeleb","Arvegil","Araphor"
+		};
+		const char *feminine[] = {
+			"Gilraen","Ivorwen","Firiel","Silmarien","Nuneth","Erendis",
+			"Ailinel","Almiel","Ancalime"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_ROGUE:{
+		//Lankhmar. Can't find a good name list :(
+		const char *masculine[] = {
+			"Essidinix", "Vellix", "Hringorl", "Hor", "Harrax",
+			"Hrey", "Zax", "Effendrit", "Fissif", "Slevyas", "Krovas"
+		};
+		const char *feminine[] = {
+			"Mor", "Vlana", "Mara", "Ivrian", "Slivikin", "Alyx"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_SAMURAI:{
+		//h.t. wikipedia
+		const char *masculine[] = {
+			"Masakatsu", "Kagemori", "Terukage", "Mitsuhide", "Nobutomo",
+			"Murashige", "Yoshikage", "Narimasa", "Motochika",
+			"Ujisato", "Hideharu", "Tokimune", "Naotaka",
+			"Katsumoto", "Naozane", "Okimoto", "Nobutomo",
+			"Kiyomori", "Hideyori", "Sadamitsu", "Keisuke"
+		};
+		const char *feminine[] = {
+			"Kaihime", "Ginchiyo", "Tomoe", "Hangaku", "Tomiko",
+			"Yodo-dono", "Onamihime", "Teruko", "Tsuruhime",
+			"Rui", "Koto"
+		};
+		const char *family[] = {
+			"Genji", "Abe", "Ashina", "Bito", "Chiba", "Date", "Fuji", "Goto",
+			"Hachisuka", "Ichijo", "Kamiizumi", "Maeda", "Nagao", "Oda",
+			"Rokkaku", "Suda", "Todo", "Ukita", "Wakiya", "Yagyu"
+		};
+		sprintf(nam, "%s %s", ROLL_FROM(family), fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_TOURIST:{
+		//Diskworld
+		const char *masculine[] = {
+			"Bergholt Stuttley", "Hodgesaargh", "Trevor", "Tomjon", "Victor"
+		};
+		const char *feminine[] = {
+			"Christine","Juliet","Ginger"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	case PM_VALKYRIE:
+	case PM_AWAKENED_VALKYRIE:
+	case PM_TRANSCENDENT_VALKYRIE:{
+		const char *feminine[] = {
+			"Brynhildr", "Eir", "Geirahod", "Geiravor", "Geirdriful",
+			"Geironul", "Geirskogul", "Goll", "Gondul", "Gunnr",
+			"Herfjotur", "Herja", "Hladgudr svanhvit", "Hildr", "Hjalmthrimul",
+			"Hervor alvitr", "Hjorthrimul", "Hlokk", "Hrist", "Hrund",
+			"Kara", "Mist", "Olrun", "Randgrid", "Raogrior",
+			"Reginleif", "Rota", "Sanngridr", "Sigrdrifa", "Sigrun",
+			"Skalmold", "Skeggjold", "Skogul", "Skuld", "Sveid",
+			"Svipul", "Thogn", "Skogul", "Thrima", "Thrudr",
+		};
+		sprintf(nam, "%s", ROLL_FROM(feminine));
+	}break;
+	case PM_WORM_THAT_WALKS:{
+		const char *names[] = {
+			"Charnel Clay", "Myriad", "One-from-many", "Gravesoil", "Mind-gnawer"
+			"Nethermost", "Phagos", "Teeming Mind","Waxen",
+			
+			"Swarmsoul", "Creepclad", "Verminous Unity", "Creepcluster"
+		};
+		sprintf(nam, "%s", ROLL_FROM(names));
+	}break;
+	case PM_WIZARD:{
+		//Historical and mythical wizards, various web sources
+		const char *masculine[] = {
+			"Aleister", "Atlantes", "Cagliostro", "Cornelius", "Dee", "Eliphas", "Faust",
+			"Loew", "Prospero", "Seimei", "Trismegistus", "Vainamoinen"
+		};
+		const char *feminine[] = {
+			"Bradamante", "Circe", "Endor", "Medea", "Melissa", "Morgan",
+			"Sycorax"
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
+	default:
+		pline("Received %d.",monsndx(mtmp->data));
+		impossible("bad mplayer monster in culture name");
+		break;
+	}
 }
 
 STATIC_OVL void
@@ -443,10 +907,11 @@ xchar x, y;
 long flags;
 {
 	boolean special = (flags&MM_GOODEQUIP) == MM_GOODEQUIP;
+	boolean endgame = (flags&MM_ENDGEQUIP) == MM_ENDGEQUIP;
 	register struct monst *mtmp;
-	char nam[PL_NSIZ];
+	char nam[PL_NSIZ] = {0};
 
-	flags &= ~MM_GOODEQUIP;
+	flags &= ~(MM_GOODEQUIP|MM_ENDGEQUIP);
 	flags |= NO_MINVENT;
 
 	//if ptr is null don't make a monster
@@ -473,7 +938,7 @@ long flags;
 			give_mintrinsic(mtmp, POISON_RES);
 		}
 		
-		if(special){
+		if(endgame){
 			static int sweptyp[] = {
 				CRYSKNIFE, MOON_AXE, BATTLE_AXE, HIGH_ELVEN_WARSWORD,
 				SABER, CRYSTAL_SWORD, TWO_HANDED_SWORD,
@@ -496,7 +961,7 @@ long flags;
 	    mtmp->mhp = mtmp->mhpmax = d((int)mtmp->m_lev,10) +
 					(special ? (30 + rnd(30)) : 30);
 	    if(special) {
-	        get_mplname(mtmp, nam);
+	        get_mplname(mtmp, nam, endgame);
 	        mtmp = christen_monst(mtmp, nam);
 			/* that's why they are "stuck" in the endgame :-) */
 			(void)mongets(mtmp, FAKE_AMULET_OF_YENDOR, NO_MKOBJ_FLAGS);
@@ -512,7 +977,7 @@ long flags;
 			if (!rn2(3)) otmp->oerodeproof = 1;
 			else if (!rn2(2)) otmp->greased = 1;
 			if (special){
-				if(rn2(2)) otmp = mk_artifact(otmp, A_NONE);
+				if(endgame && rn2(2)) otmp = mk_artifact(otmp, A_NONE);
 				
 				if(!otmp->oartifact){//mk_artifact can fail, esp for odd base items
 					if(rn2(2)) otmp = mk_special(otmp);
@@ -533,7 +998,7 @@ long flags;
 			if (!rn2(3)) otmp->oerodeproof = 1;
 			else if (!rn2(2)) otmp->greased = 1;
 			if (special){
-				if(rn2(2)) otmp = mk_artifact(otmp, A_NONE);
+				if(endgame && rn2(2)) otmp = mk_artifact(otmp, A_NONE);
 				
 				if(!otmp->oartifact){//mk_artifact can fail, esp for odd base items
 					if(rn2(2)) otmp = mk_special(otmp);
@@ -551,8 +1016,14 @@ long flags;
 			otmp->spe = (special ? rn1(5,4) : rn2(4));
 			if (!rn2(3)) otmp->oerodeproof = 1;
 			else if (!rn2(2)) otmp->greased = 1;
-			if (special && rn2(2))
-				otmp = mk_artifact(otmp, A_NONE);
+			if (special){
+				if(endgame && rn2(2)) otmp = mk_artifact(otmp, A_NONE);
+				
+				if(!otmp->oartifact){//mk_artifact can fail, esp for odd base items
+					if(rn2(2)) otmp = mk_special(otmp);
+					else if(rn2(4)) otmp = mk_minor_special(otmp);
+				}
+			}
 			(void) mpickobj(mtmp, otmp);
 	    }
 

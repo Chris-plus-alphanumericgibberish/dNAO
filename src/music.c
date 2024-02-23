@@ -1922,6 +1922,9 @@ struct obj *instr;
     boolean ok;
 
 	instr_otyp = instr->otyp;
+
+	if(instr->oartifact == ART_SILVER_STARLIGHT) instr_otyp = MAGIC_FLUTE;
+
 	if(instr_otyp == MAGIC_HARP) instr_otyp = HARP;
 	else if(instr_otyp == MAGIC_FLUTE) instr_otyp = FLUTE;
 	else if(instr_otyp == FIRE_HORN) instr_otyp = TOOLED_HORN;

@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #include "hack.h"
+#include "artifact.h"
 #include "lev.h"
 #include "func_tab.h"
 /* #define DEBUG */	/* uncomment for debugging */
@@ -126,6 +127,7 @@ STATIC_PTR int NDECL(doability);
 STATIC_PTR int NDECL(domonability);
 STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
+STATIC_PTR int NDECL(hasfightingforms);
 STATIC_PTR int NDECL(doMysticForm);
 STATIC_PTR int NDECL(doLightsaberForm);
 STATIC_PTR int NDECL(doKnightForm);
@@ -585,7 +587,7 @@ boolean you_abilities;
 	if (you_abilities && (Role_if(PM_EXILE) || u.sealsActive || u.specialSealsActive)) {
 		add_ability('f', "Fire a spirit power", MATTK_U_SPIRITS);
 	}
-	if (you_abilities && uwep && is_lightsaber(uwep)) {	/* I can't wait until fighting forms are mainstream */
+	if (you_abilities && hasfightingforms() > 0) {	/* I can't wait until fighting forms are mainstream */
 		add_ability('F', "Pick a fighting form", MATTK_U_STYLE);
 	}
 	if (mon_abilities && attacktype(youracedata, AT_GAZE)){
@@ -1157,7 +1159,8 @@ int doEldritchKniForm()
 	return MOVE_CANCELLED;
 }
 
-int doKnightForm()
+int
+doKnightForm()
 {
 	winid tmpwin;
 	int n, how, i;
@@ -1209,7 +1212,7 @@ int doKnightForm()
 		else if (i == FFORM_KNI_RUNIC)
 			block_reason = "lack of a longsword";
 		else if (i == FFORM_HALF_SWORD){
-			if (uwep && uwep->otyp != LONG_SWORD) block_reason = "lack of a longsword";
+			if (!uwep || uwep->otyp != LONG_SWORD) block_reason = "lack of a longsword";
 			else block_reason = "lack of a free hand";
 		}
 		else if (i == FFORM_GREAT_WEP)
@@ -1245,20 +1248,210 @@ int doKnightForm()
 		return MOVE_CANCELLED;
 	} else if ((selected[0].item.a_int == FFORM_HALF_SWORD || activeFightingForm(FFORM_HALF_SWORD)) &&
 				(!freehand() || (uwep && uwep->otyp == LONG_SWORD && welded(uwep)))){
+		free(selected);
 		pline("You need a free hand to adjust your grip!");
 		return MOVE_CANCELLED;
 	} else if (selected[0].item.a_int == FFORM_KNI_ELDRITCH){
 		free(selected);
 		return doEldritchKniForm();
 	} else if (selectedFightingForm(selected[0].item.a_int)) {
+		unSetFightingForm(selected[0].item.a_int);
 		free(selected);
-		return MOVE_CANCELLED;
+		return MOVE_INSTANT;
 	} else {
 		setFightingForm(selected[0].item.a_int);
 		free(selected);
 		return MOVE_INSTANT;
 	}
 }
+
+int
+doGithForm()
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+	int curskill;
+	char* block_reason;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Known Mental Edges");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+
+	for (i = FIRST_GSTYLE; i <= LAST_GSTYLE; i++) {
+		if (i == GSTYLE_RESONANT && (u.ulevel < 30 || u.uinsight < 81))
+			continue;
+		if (i == GSTYLE_COLD && u.uinsight < 9)
+			continue;
+
+		/* knight forms are shown if unskilled but not restricted, since training involves starting from unskilled */
+		boolean active = artinstance[ART_SILVER_SKY].GithStyle == i;
+		boolean blocked = blockedMentalEdge(i);
+
+		Strcpy(buf, nameOfMentalEdge(i));
+		Strcat(buf, " (");
+
+		if (i == GSTYLE_PENETRATE)
+			block_reason = "lack of hate";
+		else if (i == GSTYLE_COLD)
+			block_reason = "lack of wrath";
+		else
+			block_reason = "lack of mental discipline";
+
+		if (active && blocked){
+			Strcat(buf, "selected; blocked by ");
+			Strcat(buf, block_reason);
+		}
+		else if (active)
+			Strcat(buf, "active");
+		else if (blocked){
+			Strcat(buf, "blocked by ");
+			Strcat(buf, block_reason);
+		}
+		else
+			Strcat(buf, "ready");
+		Strcat(buf, ")");
+
+		any.a_int = i;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+	end_menu(tmpwin, "Choose preferred mental edge:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if(n <= 0){
+		return MOVE_CANCELLED;
+	} else if (artinstance[ART_SILVER_SKY].GithStyle == selected[0].item.a_int) {
+		artinstance[ART_SILVER_SKY].GithStyle = 0;
+		free(selected);
+		return MOVE_INSTANT;
+	} else {
+		artinstance[ART_SILVER_SKY].GithStyle = selected[0].item.a_int;
+		free(selected);
+		return MOVE_INSTANT;
+	}
+}
+
+#define MONK_FORMS			0x001L
+#define LIGHTSABER_FORMS	0x002L
+#define KNIGHT_FORMS		0x004L
+#define AVOID_PASSIVES		0x008L
+#define AVOID_MSPLCAST		0x010L
+#define AVOID_GRABATTK		0x020L
+#define AVOID_ENGLATTK		0x040L
+#define AVOID_UNSAFETOUCH	0x080L
+#define GITH_FORMS			0x100L
+
+
+int
+hasfightingforms(){
+	/* lotsa shit to go "yo do we have a starblade" */
+	/* copied wholesale from the same usage in mondata.c*/
+	struct attack *attk;
+	struct attack prev_attk = {0};
+	struct attack prev_attk2 = {0};
+	int	indexnum, subout, tohitmod, res[4];
+	indexnum = subout = tohitmod = 0;
+	int i;
+
+	/* always shown */
+	int formmask = AVOID_UNSAFETOUCH;
+
+	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
+	if(Role_if(PM_MONK))
+		formmask |= MONK_FORMS;
+	if(Role_if(PM_KNIGHT))
+		formmask = KNIGHT_FORMS;
+	if((uwep && is_lightsaber(uwep)) || (uswapwep && is_lightsaber(uswapwep)))
+		formmask |= LIGHTSABER_FORMS;
+	if (u.uavoid_passives)
+		formmask |= AVOID_PASSIVES;
+	else {
+		indexnum = subout = tohitmod = 0;
+		res[0] = MM_MISS;
+		res[1] = MM_MISS;
+		res[2] = MM_MISS;
+		res[3] = MM_MISS;
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
+			!is_null_attk(attk);
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod)
+		){
+			if(no_contact_attk(attk)) formmask |= AVOID_PASSIVES;
+		}
+	}
+	if (u.uavoid_msplcast)
+		formmask |= AVOID_MSPLCAST;
+	else {
+		indexnum = subout = tohitmod = 0;
+		res[0] = MM_MISS;
+		res[1] = MM_MISS;
+		res[2] = MM_MISS;
+		res[3] = MM_MISS;
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod);
+			!is_null_attk(attk);
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod)
+		){
+			if(attk->aatyp == AT_MAGC) formmask |= AVOID_MSPLCAST;
+		}
+	}
+	if (u.uavoid_grabattk || sticks(&youmonst))
+		formmask |= AVOID_GRABATTK;
+
+	if (u.uavoid_englattk)
+		formmask |= AVOID_ENGLATTK;
+	else {
+		indexnum = subout = tohitmod = 0;
+		res[0] = MM_MISS;
+		res[1] = MM_MISS;
+		res[2] = MM_MISS;
+		res[3] = MM_MISS;
+		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod);
+			!is_null_attk(attk);
+			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod)
+		){
+			if(attk->aatyp == AT_ENGL) formmask |= AVOID_ENGLATTK;
+		}
+	}
+	
+	if(u.ulevel >= 14){
+		if(uwep && uwep->oartifact){
+			const struct artifact *weap = get_artifact(uwep);
+			if(weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)
+				formmask |= GITH_FORMS;
+		}
+		if(uswapwep && uswapwep->oartifact){
+			const struct artifact *weap = get_artifact(uswapwep);
+			if(weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)
+				formmask |= GITH_FORMS;
+		}
+	}
+
+	/* next, forms trained are shown, even if inapplicable at the moment*/
+	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
+		if (FightingFormSkillLevel(i) >= P_BASIC)
+			formmask |= LIGHTSABER_FORMS;
+	}
+
+	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+		if (FightingFormSkillLevel(i) >= P_BASIC)
+			formmask |= KNIGHT_FORMS;
+	}
+	
+	return formmask;
+}
+
 
 int
 dofightingform()
@@ -1270,114 +1463,63 @@ dofightingform()
 	menu_item *selected;
 	anything any;
 
-	/* lotsa shit to go "yo do we have a starblade" */
-	/* copied wholesale from the same usage in mondata.c*/
-	struct attack *attk;
-	struct attack prev_attk = {0};
-	struct attack prev_attk2 = {0};
-	int	indexnum, subout, tohitmod, res[4];
-	indexnum = subout = tohitmod = 0;
-
-	/* to track whether or not we have a certain kind of style available*/
-	boolean monk_forms, lightsaber_forms, knight_forms, avoid_passives, avoid_msplcast;
-	monk_forms = lightsaber_forms = knight_forms = avoid_passives = avoid_msplcast = FALSE;
-
 	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
-	if(Role_if(PM_MONK))
-		monk_forms = TRUE;
-	if(Role_if(PM_KNIGHT))
-		knight_forms = TRUE;
-	if((uwep && is_lightsaber(uwep)) || (uswapwep && is_lightsaber(uswapwep)))
-		lightsaber_forms = TRUE;
-	if (u.uavoid_passives)
-		avoid_passives = TRUE;
-	else {
-		indexnum = subout = tohitmod = 0;
-		res[0] = MM_MISS;
-		res[1] = MM_MISS;
-		res[2] = MM_MISS;
-		res[3] = MM_MISS;
-		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
-			!is_null_attk(attk);
-			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod)
-		){
-			if(no_contact_attk(attk)) avoid_passives = TRUE;
-		}
-	}
-	if (u.uavoid_msplcast)
-		avoid_msplcast = TRUE;
-	else {
-		indexnum = subout = tohitmod = 0;
-		res[0] = MM_MISS;
-		res[1] = MM_MISS;
-		res[2] = MM_MISS;
-		res[3] = MM_MISS;
-		for(attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod);
-			!is_null_attk(attk);
-			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk2, FALSE, &subout, &tohitmod)
-		){
-			if(attk->aatyp == AT_MAGC) avoid_msplcast = TRUE;
-		}
-	}
-	
-	/* next, forms trained are shown, even if inapplicable at the moment*/
-	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
-		if (FightingFormSkillLevel(i) >= P_BASIC)
-			lightsaber_forms = TRUE;
-	}
-
-	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
-		if (FightingFormSkillLevel(i) >= P_BASIC)
-			knight_forms = TRUE;
-	}
-
-	/*
-	 * if we don't have any forms or only have one form set, don't bother with a menu.
-	 * note that if we have passive attacks at all, we want the menu, and if we have
-	 * only passives then we still want a menu (or a y/n, but i already wrote the menu)
-	*/
-	#define uavoid (avoid_passives || avoid_msplcast)
-	if (!monk_forms && !lightsaber_forms && !knight_forms && !uavoid){
-		pline("You don't know any special fighting styles for use in this situation.");
-		return MOVE_CANCELLED;
-	}
-	else if (monk_forms && !lightsaber_forms && !knight_forms && !uavoid)
-		return doMysticForm();
-	else if (!monk_forms && lightsaber_forms && !knight_forms && !uavoid)
-		return doLightsaberForm();
-	else if (!monk_forms && !lightsaber_forms && knight_forms && !uavoid)
-		return doKnightForm();
+	int formmask = hasfightingforms();
 
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 
-	if (monk_forms) {
+	if (formmask & MONK_FORMS) {
 		any.a_int = 1;
 		add_menu(tmpwin, NO_GLYPH, &any, 'm', 0, ATR_NONE, "Select Mystic Forms", MENU_UNSELECTED);
 	}
-	if (lightsaber_forms) {
+	if (formmask & LIGHTSABER_FORMS) {
 		any.a_int = 2;
 		add_menu(tmpwin, NO_GLYPH, &any, 'l', 0, ATR_NONE, "Select Lightsaber Forms", MENU_UNSELECTED);
 	}
-	if (knight_forms) {
+	if (formmask & KNIGHT_FORMS) {
 		any.a_int = 3;
 		add_menu(tmpwin, NO_GLYPH, &any, 'k', 0, ATR_NONE, "Select Knightly Forms", MENU_UNSELECTED);
 	}
-	if (avoid_passives) {
+	if (formmask & GITH_FORMS) {
+		any.a_int = 9;
+		add_menu(tmpwin, NO_GLYPH, &any, 'h', 0, ATR_NONE, "Select Mental Edge", MENU_UNSELECTED);
+	}
+	if (formmask & AVOID_PASSIVES) {
 		any.a_int = 4;
 		if (!u.uavoid_passives) Strcpy(buf, "Only make passive-safe attacks");
 		else Strcpy(buf, "Allow passive-unsafe attacks");
 
 		add_menu(tmpwin, NO_GLYPH, &any, 'p', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
-	
-	if (avoid_msplcast) {
+	if (formmask & AVOID_MSPLCAST) {
 		any.a_int = 5;
 		if (!u.uavoid_msplcast) Strcpy(buf, "Avoid automatically casting spells when attacking");
 		else Strcpy(buf, "Allow the automatic casting of spells when attacking");
 
 		add_menu(tmpwin, NO_GLYPH, &any, 's', 0, ATR_NONE, buf, MENU_UNSELECTED);
+	}
+	if (formmask & AVOID_GRABATTK) {
+		any.a_int = 6;
+		if (!u.uavoid_grabattk) Strcpy(buf, "Avoid grabbing monsters when attacking");
+		else Strcpy(buf, "Allow grabbing monsters when attacking");
+
+		add_menu(tmpwin, NO_GLYPH, &any, 'g', 0, ATR_NONE, buf, MENU_UNSELECTED);
+	}
+	if (formmask & AVOID_ENGLATTK) {
+		any.a_int = 7;
+		if (!u.uavoid_englattk) Strcpy(buf, "Avoid engulfing monsters when attacking");
+		else Strcpy(buf, "Allow engulfing monsters when attacking");
+
+		add_menu(tmpwin, NO_GLYPH, &any, 'e', 0, ATR_NONE, buf, MENU_UNSELECTED);
+	}
+	if (formmask & AVOID_UNSAFETOUCH) {
+		any.a_int = 8;
+		if (!u.uavoid_unsafetouch) Strcpy(buf, "Avoid directly touching potentially unsafe monsters");
+		else Strcpy(buf, "Allow directly touching potentally unsafe monsters");
+
+		add_menu(tmpwin, NO_GLYPH, &any, 't', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
 
 	end_menu(tmpwin, "Adjust fighting styles:");
@@ -1406,12 +1548,33 @@ dofightingform()
 		case 5:
 			u.uavoid_msplcast = !u.uavoid_msplcast;
 			return MOVE_INSTANT;
+		case 6:
+			u.uavoid_grabattk = !u.uavoid_grabattk;
+			return MOVE_INSTANT;
+		case 7:
+			u.uavoid_englattk = !u.uavoid_englattk;
+			return MOVE_INSTANT;
+		case 8:
+			u.uavoid_unsafetouch = !u.uavoid_unsafetouch;
+			return MOVE_INSTANT;
+		case 9:
+			return doGithForm();
 		default:
 			impossible("unknown fighting form set %d", n);
 			return MOVE_CANCELLED;
 	}
 	return MOVE_CANCELLED;
 }
+
+#undef MONK_FORMS
+#undef LIGHTSABER_FORMS
+#undef KNIGHT_FORMS
+#undef AVOID_PASSIVES
+#undef AVOID_MSPLCAST
+#undef AVOID_GRABATTK
+#undef AVOID_ENGLATTK
+#undef AVOID_UNSAFETOUCH
+
 
 int
 dounmaintain()
@@ -3480,17 +3643,17 @@ register char *cmd;
 		return;		/* probably we just had an interrupt */
 	}
 	if (iflags.num_pad && iflags.num_pad_mode == 1) {
-		/* This handles very old inconsistent DOS/Windows behaviour
-		 * in a new way: earlier, the keyboard handler mapped these,
-		 * which caused counts to be strange when entered from the
-		 * number pad. Now do not map them until here. 
-		 */
+	/* This handles very old inconsistent DOS/Windows behaviour
+	 * in a new way: earlier, the keyboard handler mapped these,
+	 * which caused counts to be strange when entered from the
+	 * number pad. Now do not map them until here. 
+	 */
 		switch (*cmd) {
-		    case '5':       *cmd = 'g'; break;
-		    case M('5'):    *cmd = 'G'; break;
-		    case M('0'):    *cmd = 'I'; break;
-        	}
-        }
+			case '5':       *cmd = 'g'; break;
+			case M('5'):    *cmd = 'G'; break;
+			case M('0'):    *cmd = 'I'; break;
+		}
+	}
 	/* handle most movement commands */
 	do_walk = do_rush = prefix_seen = FALSE;
 	flags.travel = iflags.travel1 = 0;

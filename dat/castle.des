@@ -27,13 +27,13 @@ MAP
 2}|.....|-----------------------------------------------|.....|}
 3}|.....+...............................................+.....|}
 4}-------------------------------+-----------------------------}
-5}}}}}}|........|..........+...........|.......S.S.......|}}}}}}
-6.....}|........|..........|...........|.......|.|.......|}.....
+5}}}}}}|......F#|..........+.........F#|.......S.S.......|}}}}}}
+6.....}|......-F|..........|.........-F|.......|.|.......|}.....
 7.....}|........------------...........---------S---------}.....
 8.....}|...{....+..........+.........\.S.................+......
 9.....}|........------------...........---------S---------}.....
-0.....}|........|..........|...........|.......|.|.......|}.....
-1}}}}}}|........|..........+...........|.......S.S.......|}}}}}}
+0.....}|......-F|..........|.........-F|.......|.|.......|}.....
+1}}}}}}|......F#|..........+.........F#|.......S.S.......|}}}}}}
 2}-------------------------------+-----------------------------}
 3}|.....+...............................................+.....|}
 4}|.....|-----------------------------------------------|.....|}
@@ -187,30 +187,37 @@ MONSTER:';',"shark",(57,16)
 MONSTER:monster[0],random,(27,05)
 MONSTER:monster[1],random,(30,05)
 MONSTER:monster[2],random,(33,05)
-MONSTER:monster[3],random,(36,05)
+MONSTER:monster[3],random,(34,05)
 MONSTER:monster[4],random,(28,06)
 MONSTER:monster[5],random,(31,06)
 MONSTER:monster[6],random,(34,06)
-MONSTER:monster[7],random,(37,06)
+MONSTER:monster[7],random,(35,06)
 MONSTER:monster[8],random,(27,07)
 MONSTER:monster[9],random,(30,07)
 MONSTER:monster[0],random,(33,07)
-MONSTER:monster[1],random,(36,07)
+MONSTER:monster[1],random,(34,07)
 MONSTER:monster[2],random,(28,08)
 MONSTER:monster[3],random,(31,08)
 MONSTER:monster[4],random,(34,08)
 MONSTER:monster[5],random,(27,09)
 MONSTER:monster[6],random,(30,09)
 MONSTER:monster[7],random,(33,09)
-MONSTER:monster[8],random,(36,09)
+MONSTER:monster[8],random,(34,09)
 MONSTER:monster[9],random,(28,10)
 MONSTER:monster[0],random,(31,10)
 MONSTER:monster[1],random,(34,10)
-MONSTER:monster[2],random,(37,10)
+MONSTER:monster[2],random,(35,10)
 MONSTER:monster[3],random,(27,11)
 MONSTER:monster[4],random,(30,11)
 MONSTER:monster[5],random,(33,11)
-MONSTER:monster[6],random,(36,11)
+MONSTER:monster[6],random,(34,11)
+
+# Prisoners
+OBJECT:'_', "chain", (14,05), uncursed,+1
+OBJECT:'_', "chain", (14,11), uncursed,+1
+OBJECT:'_', "chain", (37,05), uncursed,+1
+OBJECT:'_', "chain", (37,11), uncursed,+1
+
 # MazeWalks
 MAZEWALK:(00,10),west
 MAZEWALK:(62,06),east
@@ -264,17 +271,17 @@ MAP
 1}-------------------------------------------------------------}
 2}|.....+...............................................+.....|}
 3}|.....|-----------------+-----------------------------|.....|}
-4}|.....|................|.|............................|.....|}
-5}-------.......----------+--+------------------........-------}
-6}}}}|.|........|..........|...|.......|....|..|.........|.|}}}}
-7...}|.|........|..........|...|.......|....|..|.........+.|}...
+4}|.....|#F..............|.|............................|.....|}
+5}-------F-.....----------+--+------------------........-------}
+6}}}}|.|........|..........|...|.....F#|....|..|.........|.|}}}}
+7...}|.|........|..........|...|.....-F|....|..|.........+.|}...
 8...}|.|........----------+|...|.......----+-..|.........|.|}...
 9...}|.+........+..........|.{.+.....\.S..S.+..|.........|.+}...
 0...}|.|........----------+|...|.......|..-+----.........|.|}...
-1...}|.|........|..........|...|.......|..|....|.........+.|}...
-2}}}}|.|........|..........|...|.......|..|....|.........|.|}}}}
-3}-------.......-------------+-------------+----........-------}
-4}|.....|.................................|.|...........|.....|}
+1...}|.|........|..........|...|.....-F|..|....|.........+.|}...
+2}}}}|.|........|..........|...|.....F#|..|....|.........|.|}}}}
+3}-------F-.....-------------+-------------+----........-------}
+4}|.....|#F...............................|.|...........|.....|}
 5}|.....|----------------------------------+------------|.....|}
 6}|.....+...............................................+.....|}
 7}|------------------------------------------------------------}
@@ -395,15 +402,15 @@ TRAP:"trap door",(57,09)
 TRAP:"trap door",(57,10)
 TRAP:"trap door",(57,11)
 # Soldiers guarding the entry hall
-MONSTER:'@',"soldier",(08,06)
-MONSTER:'@',"soldier",(09,05)
-MONSTER:'@',"soldier",(11,05)
-MONSTER:'@',"soldier",(12,06)
-MONSTER:'@',"soldier",(08,10)
-MONSTER:'@',"soldier",(09,11)
-MONSTER:'@',"soldier",(11,11)
-MONSTER:'@',"soldier",(12,10)
-MONSTER:'@',"lieutenant",(09,08)
+MONSTER:'@',"soldier",(08,07)
+MONSTER:'@',"soldier",(09,06)
+MONSTER:'@',"soldier",(11,06)
+MONSTER:'@',"soldier",(12,07)
+MONSTER:'@',"soldier",(08,11)
+MONSTER:'@',"soldier",(09,12)
+MONSTER:'@',"soldier",(11,12)
+MONSTER:'@',"soldier",(12,11)
+MONSTER:'@',"lieutenant",(09,09)
 
 MONSTER:'@',"soldier",(27,07)
 MONSTER:'@',"soldier",(28,11)
@@ -436,33 +443,40 @@ MONSTER:';',"shark",(57,00)
 # The throne room and the court monsters 31-37 06-12
 # MONSTER:'L',"death knight",(36,09),asleep,hostile
 
-MONSTER:monster[0],random,(37,06)
+MONSTER:monster[0],random,(35,06)
 MONSTER:monster[1],random,(31,06)
 MONSTER:monster[2],random,(33,06)
-MONSTER:monster[3],random,(36,06)
+MONSTER:monster[3],random,(34,06)
 MONSTER:monster[4],random,(28,07)
 MONSTER:monster[5],random,(31,07)
 MONSTER:monster[6],random,(34,07)
-MONSTER:monster[7],random,(37,07)
+MONSTER:monster[7],random,(35,07)
 MONSTER:monster[8],random,(32,08)
 MONSTER:monster[9],random,(31,08)
 MONSTER:monster[0],random,(33,08)
-MONSTER:monster[1],random,(36,08)
+MONSTER:monster[1],random,(34,08)
 MONSTER:monster[2],random,(32,09)
 MONSTER:monster[3],random,(31,09)
 MONSTER:monster[4],random,(34,09)
 MONSTER:monster[5],random,(32,10)
 MONSTER:monster[6],random,(31,10)
 MONSTER:monster[7],random,(33,10)
-MONSTER:monster[8],random,(36,10)
+MONSTER:monster[8],random,(34,10)
 MONSTER:monster[9],random,(32,11)
 MONSTER:monster[0],random,(31,11)
 MONSTER:monster[1],random,(34,11)
-MONSTER:monster[2],random,(37,11)
-MONSTER:monster[3],random,(37,12)
+MONSTER:monster[2],random,(35,11)
+MONSTER:monster[3],random,(35,12)
 MONSTER:monster[4],random,(31,12)
 MONSTER:monster[5],random,(33,12)
-MONSTER:monster[6],random,(36,12)
+MONSTER:monster[6],random,(34,12)
+
+# Prisoners
+OBJECT:'_', "chain", (08,04), uncursed,+1
+OBJECT:'_', "chain", (08,14), uncursed,+1
+OBJECT:'_', "chain", (37,06), uncursed,+1
+OBJECT:'_', "chain", (37,12), uncursed,+1
+
 # MazeWalks
 MAZEWALK:(00,10),west
 MAZEWALK:(62,08),east
@@ -523,9 +537,9 @@ MAP
 1 ....            ,,}T}}T,   ###      }|...|...|...|...|    ######    ....  
 2......    T,,,,T,,T}}}T ,T,  H  ,T,,}}--+---+---+---+--,  H ####   ##..{.. 
 3 ...    ,,,,,T,,,,,,}T ,,,,,T,,,,,,}},,,,,,,,,,,,,,,,,,,,T,      ###  ...  
-4 #      ,  T,,,,T,,,}|,,,T,,,,T,,,}},,T,,,,,,,,,T,,,,,,,,,  ,,   H         
-5 ##    ,T,,,,T,,,,,T}T T,,T,,,,,T}}T,,,,,,,,,,,,,,,T,,,    ,,,,, ,,        
-6  #   ,,,,T,,,,,T,,,}}T  ,,,,T,T}},},,,,,T,,,,,,,,,,,,TFT,,,,,,,,,,,       
+4 #      ,  T,,,,T,,,}|,,,T,,,,T,,,}},,T,,,,,,,,,T,,,,,,,,,  ,,   H     F   
+5 ##    ,T,,,,T,,,,,T}T T,,T,,,,,T}}T,,,,,,,,,,,,,,,T,,,    ,,,,, ,,  # #   
+6  #   ,,,,T,,,,,T,,,}}T  ,,,,T,T}},},,,,,T,,,,,,,,,,,,TFT,,,,,,,,,,, F     
 7....##,  ,,,,T,,,,,}T}}}T TT T ,},},},,,,,,,,,,,T,,,F T,,,,,,,T,,,,,,,|---|
 8....  ,, T,,   ,,,}}}}}}}}}}}}T ,,T,}T,,,,,,T,,,,,,,T,,,,,,,,,,,,,,,T,+...|
 9     ,T,,,T  }}}}}}}}}}}}}}}}}}TT  TT T ,,,,,,,,,,FT T,,,,,,,,,,,,,,,,|---|
@@ -535,9 +549,9 @@ MAP
 3-----S----------eeeeeeeeeeeeeeeeeeee}}}}w}w}w}}}}w},,,,,,,,,,,,,T,,,,,|---|
 4 |.......|..+..|eeeeeeeeeeeeeeeeeeeeeeee}w}}}}}}w}w}w},,,,T,,,,,,,,,,,+...|
 5 |.......|----.|eeeeeeeeee----eeeeee  eee }}}w}w}w}w}},,,,,,,,,,,,,,,,|---|
-6 |.......+.....|----------|..|            }ew}w}w}w}w.T,,,,,,T,,,,,,,,+...|
+6#F.......+.....|----------|..|            }ew}w}w}w}w.T,,,,,,T,,,,,,,,+...|
 7 |.......|----.|.+........+..S.  .......... }}}}}}}}  ,,,,,,,,,,,,T,,,|---|
-8 |...\...|..+....|   H    --S-...........    }}}}}}     ,,,,,,,,,,,,  H### 
+8#F...\...|..+....|   H    --S-...........    }}}}}}     ,,,,,,,,,,,,  H### 
 9 ---------..------#######   #                 }}}}                    #### 
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
@@ -702,15 +716,15 @@ MONSTER:'@',"samurai",(72,10),peaceful
 MONSTER:'@',"knight",(72,14),peaceful
 MONSTER:'@',"valkyrie",(72,16),peaceful
 # A few sheep and and a couple of goats
-#MONSTER:'q',"sheep",(46,05),peaceful
-#MONSTER:'q',"lamb",(47,06),peaceful
-#MONSTER:'q',"sheep",(47,04),peaceful
-#MONSTER:'q',"sheep",(54,06),peaceful
-#MONSTER:'q',"lamb",(53,05),peaceful
-#MONSTER:'q',"sheep",(56,04),peaceful
-#MONSTER:'q',"sheep",(57,05),peaceful
-#MONSTER:'q',"sheep",(55,06),peaceful
-#MONSTER:'q',"lamb",(57,08),peaceful
+MONSTER:'q',"sheep",(46,05),peaceful
+MONSTER:'q',"lamb",(47,06),peaceful
+MONSTER:'q',"sheep",(47,04),peaceful
+MONSTER:'q',"sheep",(53,06),peaceful
+MONSTER:'q',"lamb",(53,05),peaceful
+MONSTER:'q',"sheep",(56,04),peaceful
+MONSTER:'q',"sheep",(57,06),peaceful
+MONSTER:'q',"sheep",(55,06),peaceful
+MONSTER:'q',"lamb",(57,08),peaceful
 #MONSTER:'q',"goat",(59,17),peaceful
 #MONSTER:'q',"goat",(63,16),peaceful
 #MONSTER:'c',"chicken",(62,12),peaceful
@@ -750,6 +764,13 @@ MONSTER:monster[4],random,(08,14),asleep
 MONSTER:monster[5],random,(08,15),asleep
 MONSTER:monster[6],random,(08,16),asleep
 MONSTER:monster[7],random,(08,17),asleep
+
+# Prisoners
+OBJECT:'_', "chain", (00,16), uncursed,+1
+OBJECT:'_', "chain", (00,18), uncursed,+1
+OBJECT:'_', "chain", (69,05), uncursed,+1
+OBJECT:'_', "chain", (71,05), uncursed,+1
+
 # Custodians
 # MONSTER:'L',"master lich",(05,18),asleep,hostile
 OBJECT:'?',random,(05,18)
@@ -812,9 +833,9 @@ MAP
 5....}}}}}|..|.......|....|.....F..........|......|......|..|.}}
 6..|.}}}}}|..|}}}}...|....+.....+..........|....-S-S-....|..|.}}
 7..|..}}}}----}}}}}}}|....F.....|----------|....|...|....|---}}.
-8..|...}}}}}}}}}}}}}}|----|................|------S------|.|}}}.
-9..|.......}}}}}}}}}}}}}}}|................|...............+.##.
-0..|........--.----}}}}}}}|----+------+------S------S----|.|.}}.
+8..|...}}}}}}}}}}}}}}|-F-F|............|-|-|------S------|.|}}}.
+9..|.......}}}}}}}}}}}-#-#F............|#|#|...............+.##.
+0..|........--.----}}}----|----+------+-F-F--S------S----|.|.}}.
 1.------.....|....|-}}}}}}|.......|............|..S..S...|---}}.
 2.|....|--+--|....+.#####}|...{...|..........\.|..--|-...|..|.}}
 3.|....+...|......|-}}}}}}|.......|..........|-|....|....|..|.}}
@@ -989,7 +1010,14 @@ MONSTER:monster[0],random,(43,14)
 MONSTER:monster[3],random,(42,14)
 MONSTER:monster[4],random,(40,14)
 MONSTER:monster[5],random,(38,14)
-MONSTER:monster[6],random,(36,14)
+MONSTER:monster[6],random,(34,14)
+
+# Prisoners
+OBJECT:'_', "chain", (22,09), uncursed,+1
+OBJECT:'_', "chain", (24,09), uncursed,+1
+OBJECT:'_', "chain", (39,09), uncursed,+1
+OBJECT:'_', "chain", (41,09), uncursed,+1
+
 # MazeWalks
 MAZEWALK:(00,06),west
 MAZEWALK:(62,08),east
@@ -1054,18 +1082,18 @@ GEOMETRY:center,center
 #0         1         2   	   3	     4	       5		 6	       7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
-0-...}}}}}}.....}}}}}}}}}..............}}}}}}}}}}}}}}}}}}}}}}}}}
-1...}}----}}....}|------}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}..|------}
-2..}}--..--}}...}|.....|--------------------------------|.....|}
-3.}}--....--}}..}|.....+................................+.....|}
-4}}--......--}}}}|----------------+----------------------------}
-5}--........------}}}}}}}}}}|..........|.......S.S.......|}}}}}}
-6}-....{.....+..............+..........|.......|.|.......|}.....
+0-...}}}}}}}....}}}}}}}}}..............}}}}}}}}}}}}}}}}}}}}}}}}}
+1...}}----}}}...}|------}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}..|------}
+2..}}--..--}}}}}}|.....|--------------------------------|.....|}
+3.}}--....--}----|.....+................................+.....|}
+4}}--......--|#|#|----------------+----------------------------}
+5}--........--F-F-}}}}}}}}}}|........F#|.......S.S.......|}}}}}}
+6}-....{.....+..............+........-F|.......|.|.......|}.....
 7}-..........----------------..........---------S--------|}.....
 8}--........--}}}|..........+........\.S.................+......
 9}}--......--}}.}|..........|..........---------S--------|}.....
-0.}}--......|}..}|..........|..........|.......|.|.......|}.....
-1..}}--..---|}..}|..........|..........|.......S.S.......|}}}}}}
+0.}}--......|}..}|..........|........-F|.......|.|.......|}.....
+1..}}--..---|}..}|..........|........F#|.......S.S.......|}}}}}}
 2...}}----}}}}..}|----------------+----------------------------}
 3....}}}}}}.....}}}}|.....+.............................+.....|}
 4.............}}}}}}|.....|-----------------------------|.....|}
@@ -1208,30 +1236,37 @@ MONSTER:';',"shark",(58,16)
 MONSTER:monster[0],random,(28,05)
 MONSTER:monster[1],random,(30,05)
 MONSTER:monster[2],random,(33,05)
-MONSTER:monster[3],random,(36,05)
+MONSTER:monster[3],random,(34,05)
 MONSTER:monster[4],random,(28,06)
 MONSTER:monster[5],random,(31,06)
 MONSTER:monster[6],random,(34,06)
-MONSTER:monster[7],random,(37,06)
+MONSTER:monster[7],random,(35,06)
 MONSTER:monster[8],random,(28,07)
 MONSTER:monster[9],random,(30,07)
 MONSTER:monster[0],random,(33,07)
-MONSTER:monster[1],random,(36,07)
+MONSTER:monster[1],random,(34,07)
 MONSTER:monster[2],random,(28,08)
 MONSTER:monster[3],random,(31,08)
 MONSTER:monster[4],random,(34,08)
 MONSTER:monster[5],random,(28,09)
 MONSTER:monster[6],random,(30,09)
 MONSTER:monster[7],random,(33,09)
-MONSTER:monster[8],random,(36,09)
+MONSTER:monster[8],random,(34,09)
 MONSTER:monster[9],random,(28,10)
 MONSTER:monster[0],random,(31,10)
 MONSTER:monster[1],random,(34,10)
-MONSTER:monster[2],random,(37,10)
+MONSTER:monster[2],random,(35,10)
 MONSTER:monster[3],random,(28,11)
 MONSTER:monster[4],random,(30,11)
 MONSTER:monster[5],random,(33,11)
-MONSTER:monster[6],random,(36,11)
+MONSTER:monster[6],random,(34,11)
+
+# Prisoners
+OBJECT:'_', "chain", (13,04), uncursed,+1
+OBJECT:'_', "chain", (15,04), uncursed,+1
+OBJECT:'_', "chain", (37,05), uncursed,+1
+OBJECT:'_', "chain", (37,11), uncursed,+1
+
 # MazeWalks
 MAZEWALK:(00,14),west
 MAZEWALK:(62,06),east
@@ -1274,7 +1309,7 @@ REGION:(06,06,12,06),lit,"ordinary"
 ##
 
 MAZE:"castle-6",' '
-FLAGS: noteleport,lethe
+FLAGS: noteleport
 GEOMETRY:center,center
 #0         1         2   	   3	     4	       5		 6	       7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
@@ -1284,13 +1319,13 @@ MAP
 2 ... .}}|.....|-----------------------+-+---------------------|.....|}. ... 
 3 ..  .}}|.....+..................|.....|......................+.....|}. ..  
 4  # ..}}-------------------+----------+-+----------------------------}.  .  
-5 ## ...}}}}}}|........|..........+...........|.......S.S.......|}}}}}}..... 
-6 #   .......}|........|..........|...........|.......|.|.......|}...... ....
+5 ## ...}}}}}}|......F#|..........+.........F#|.......S.S.......|}}}}}}..... 
+6 #   .......}|......-F|..........|.........-F|.......|.|.......|}...... ....
 7... ........}|........------------...........---------S---------}......  ...
 8............}|...{....+..........+.........\.S.................+........ .. 
 9 ....  .....}|........------------...........---------S---------}.......... 
-0  ... ......}|........|..........|...........|.......|.|.......|}......  ...
-1 .....}}}}}}}|........|..........+...........|.......S.S.......|}}}}}}}}  ..
+0  ... ......}|......-F|..........|.........-F|.......|.|.......|}......  ...
+1 .....}}}}}}}|......F#|..........+.........F#|.......S.S.......|}}}}}}}}  ..
 2.....}}}-------------------+----------+-+----------------------------}}}}}}.
 3.}}}}}}}|.....+..................|.....|......................+.....|}}}}}}}
 4}}}}}}}}|.....|-----------------------+-+---------------------|.....|}}}}}}.
@@ -1469,30 +1504,37 @@ MONSTER:';',"shark",(64,16)
 MONSTER:monster[0],random,(34,05)
 MONSTER:monster[1],random,(37,05)
 MONSTER:monster[2],random,(40,05)
-MONSTER:monster[3],random,(43,05)
+MONSTER:monster[3],random,(41,05)
 MONSTER:monster[4],random,(35,06)
 MONSTER:monster[5],random,(38,06)
 MONSTER:monster[6],random,(41,06)
-MONSTER:monster[7],random,(44,06)
+MONSTER:monster[7],random,(42,06)
 MONSTER:monster[8],random,(34,07)
 MONSTER:monster[9],random,(37,07)
 MONSTER:monster[0],random,(40,07)
-MONSTER:monster[1],random,(43,07)
+MONSTER:monster[1],random,(41,07)
 MONSTER:monster[2],random,(35,08)
 MONSTER:monster[3],random,(38,08)
 MONSTER:monster[4],random,(41,08)
 MONSTER:monster[5],random,(34,09)
 MONSTER:monster[6],random,(37,09)
 MONSTER:monster[7],random,(40,09)
-MONSTER:monster[8],random,(43,09)
+MONSTER:monster[8],random,(41,09)
 MONSTER:monster[9],random,(35,10)
 MONSTER:monster[0],random,(38,10)
 MONSTER:monster[1],random,(41,10)
-MONSTER:monster[2],random,(44,10)
+MONSTER:monster[2],random,(42,10)
 MONSTER:monster[3],random,(34,11)
 MONSTER:monster[4],random,(37,11)
 MONSTER:monster[5],random,(40,11)
-MONSTER:monster[6],random,(43,11)
+MONSTER:monster[6],random,(41,11)
+
+# Prisoners
+OBJECT:'_', "chain", (21,05), uncursed,+1
+OBJECT:'_', "chain", (21,11), uncursed,+1
+OBJECT:'_', "chain", (44,05), uncursed,+1
+OBJECT:'_', "chain", (44,11), uncursed,+1
+
 # Non diggable walls
 NON_DIGGABLE:(08,00,68,16)
 # Subrooms:

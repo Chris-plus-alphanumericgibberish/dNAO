@@ -559,7 +559,10 @@ register struct monst *mtmp;
 
 	info[0] = 0;
 	//This comes up often enough for debug that it's worth it.
-	if (mtmp->female && !is_neuter(mtmp->data)) Strcat(info, ", female");
+	if (!is_neuter(mtmp->data)) {
+		if (mtmp->female) Strcat(info, ", female");
+		else Strcat(info, ", male");
+	}
 	if (mtmp->mtame) {	  Strcat(info, ", tame");
 #ifdef WIZARD
 	    if (wizard) {

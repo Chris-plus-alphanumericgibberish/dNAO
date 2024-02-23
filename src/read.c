@@ -24,6 +24,7 @@ boolean	known;
 static NEARDATA const char readable[] =
 		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, 0 };
 static const char all_count[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
+static const int random_cloud_types[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_ACID};
 
 static void FDECL(wand_explode, (struct obj *));
 static void NDECL(do_class_genocide);
@@ -1446,20 +1447,6 @@ int curse_bless;
 			else if(is_cursed) obj->spe = 0;
 			else obj->spe = rn1(12,12);
 		break;
-	    case TREPHINATION_KIT:
-		if (is_cursed) stripspe(obj);
-		else if (is_blessed) {
-		    obj->spe += rnd(3);
-		    p_glow2(obj, NH_BLUE);
-			if(obj->spe > 6)
-				obj->spe = 6;
-		} else {
-		    if (obj->spe < 5) {
-			obj->spe++;
-			p_glow1(obj);
-		    } else pline1(nothing_happens);
-		}
-		break;
 	    case CRYSTAL_BALL:
 		if (is_cursed) stripspe(obj);
 		else if (is_blessed) {
@@ -1503,6 +1490,7 @@ int curse_bless;
 	    case HORN_OF_PLENTY:
 	    case BAG_OF_TRICKS:
 	    case CAN_OF_GREASE:
+	    case TREPHINATION_KIT:
 		if (is_cursed) stripspe(obj);
 		else if (is_blessed) {
 		    if (obj->spe <= 10)
@@ -1634,7 +1622,10 @@ forget_map(howmuch)
 	int howmuch;
 {
 	register int zx, zy;
-
+	
+	if(iflags.no_forget_map)
+		return;
+	
 	if (In_sokoban(&u.uz))
 	    return;
 
@@ -1677,6 +1668,9 @@ forget_levels(percent)
 	int indices[MAXLINFO];
 
 	if (percent == 0) return;
+
+	if(iflags.no_forget_map)
+		return;
 
 	if (percent <= 0 || percent > 100) {
 	    impossible("forget_levels: bad percent %d", percent);
@@ -1767,7 +1761,7 @@ int howmuch;
 	if (Punished) u.bc_felt = 0;	/* forget felt ball&chain */
 
 	forget_map(howmuch);
-	forget_traps();
+	// forget_traps();
 	
 	//Silently reduce the doubt timer (itimeout_incr handles negative timeouts)
 	if(HDoubt){
@@ -2800,7 +2794,14 @@ struct obj	*sobj;
 		    You("smell rotten eggs.");
 		    return 0;
 		}
-		(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj), 8+4*bcsign(sobj), TRUE);
+		if(confused){
+			struct region_arg cloud_data;
+			cloud_data.damage = 8+4*bcsign(sobj);
+			cloud_data.adtyp = random_cloud_types[rn2(SIZE(random_cloud_types))];
+			(void) create_generic_cloud(cc.x, cc.y, 3+bcsign(sobj), &cloud_data, TRUE);
+		} else {
+			(void) create_gas_cloud(cc.x, cc.y, 3+bcsign(sobj), 8+4*bcsign(sobj), TRUE);
+		}
 		break;
 	}
 	case SCR_ANTIMAGIC:{
@@ -3643,13 +3644,13 @@ char *in_buff;
 	struct permonst *whichpm;
 	struct monst *mtmp = (struct monst *)0;
 	boolean madeany = FALSE;
-	boolean maketame, makeloyal, makepeaceful, makehostile, makesummoned;
+	boolean maketame, makeloyal, makepeaceful, makehostile, makesummoned, makemale, makefemale;
 	int l = 0;
 
 	tries = 0;
 	do {
 	    which = urole.malenum;	/* an arbitrary index into mons[] */
-	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = FALSE;
+	    maketame = makeloyal = makepeaceful = makehostile = makesummoned = makemale = makefemale = FALSE;
 		if(in_buff){
 			Sprintf(buf, "%s", in_buff);
 		}
@@ -3658,7 +3659,7 @@ char *in_buff;
 			   buf);
 		}
 	    bufp = mungspaces(buf);
-	    if (*bufp == '\033') return (struct monst *)0;
+	    if (*bufp == '\033' || !strncmpi(bufp, "nothing", l = 7) || !strncmpi(bufp, "nil", l = 3)) return (struct monst *)0;
 
 		/* grab all prefixes -- this *requires* that NO monsters have a name overlapping with these prefixes! */
 		while (TRUE)
@@ -3742,6 +3743,12 @@ char *in_buff;
 			}
 			else if (!strncmpi(bufp, "noequip ", l = 8)) {
 				noequip = TRUE;
+			}
+			else if (!strncmpi(bufp, "male ", l = 5)) {
+				makemale = TRUE;
+			}
+			else if (!strncmpi(bufp, "female ", l = 7)) {
+				makefemale = TRUE;
 			}
 			else
 				break;
@@ -3921,6 +3928,10 @@ createmon:
 				mm_flags |= MM_ESUM;
 			if (noequip)
 				mm_flags |= NO_MINVENT;
+			if (makemale)
+				mm_flags |= MM_MALE;
+			if (makefemale)
+				mm_flags |= MM_FEMALE;
 
 			mtmp = makemon_full(whichpm, x, y, mm_flags, undeadtype ? undeadtype : -1, -1);
 

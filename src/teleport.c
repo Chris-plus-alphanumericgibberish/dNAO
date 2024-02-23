@@ -805,7 +805,7 @@ dotele()
 #endif
 	    }
 
-	    if ((!Race_if(PM_INCANTIFIER) && u.uhunger <= 100) || ACURR(A_STR) < 6) {
+	    if ((!Race_if(PM_INCANTIFIER) && u.uhunger <= 100*get_uhungersizemod()) || ACURR(A_STR) < 6) {
 #ifdef WIZARD
 		if (!wizard) {
 #endif
@@ -1839,8 +1839,8 @@ boolean give_feedback;
 		You("are no longer inside %s!", mon_nam(mtmp));
 	    unstuck(mtmp);
 	    (void) rloc(mtmp, FALSE);
-	} else if (is_rider(mtmp->data) && rn2(13) &&
-		   enexto(&cc, u.ux, u.uy, mtmp->data)
+	} else if ((is_rider(mtmp->data) || (mon_resistance(mtmp, TELEPORT_CONTROL) && !mtmp->mflee))
+		&& rn2(13) && enexto(&cc, u.ux, u.uy, mtmp->data)
 	){
 		if(illrgrd && canspotmon(mtmp)) pline("%s vanishes out of the equipment that imprisons %s.", Monnam(mtmp), himherit(mtmp));
 	    rloc_to(mtmp, cc.x, cc.y);

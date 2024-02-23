@@ -1065,8 +1065,11 @@ struct mkroom	*croom;
 			impossible("failed to create %s", o->name.str);
 			return;
 		}
-		else
+		else{
+			if(otmp == &zeroobj)
+				otmp = mkobj(RANDOM_CLASS, NO_MKOBJ_FLAGS); //Already existing artifact
 			place_object(otmp,x,y);
+		}
 	}
 	else
 	{
@@ -1546,7 +1549,7 @@ default_case:
 					PM_SWORD_ARCHON, PM_TRUMPET_ARCHON, PM_PANAKEIAN_ARCHON, PM_HYGIEIAN_ARCHON,
 					PM_ASTRAL_DEVA, PM_GRAHA_DEVA,
 					PM_LILLEND,
-					PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIELD_ARCHON, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN
+					PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIELD_ARCHON, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, PM_LIGHT_ELF
 				};
 				
 				struct monst *mon;
@@ -1627,6 +1630,7 @@ default_case:
 								PM_ASTRAL_DEVA, PM_GRAHA_DEVA,
 								PM_LILLEND, PM_ALEAX,
 								PM_COURE_ELADRIN, PM_NOVIERE_ELADRIN, PM_BRALANI_ELADRIN, PM_FIRRE_ELADRIN, PM_SHIERE_ELADRIN, PM_GHAELE_ELADRIN, PM_TULANI_ELADRIN, PM_DRACAE_ELADRIN,
+								PM_LIGHT_ELF, PM_LIGHT_ELF,
 								PM_TITAN, 
 								PM_ERINYS, PM_LILITU, PM_DAUGHTER_OF_BEDLAM, PM_ICE_DEVIL, PM_MARILITH, PM_PIT_FIEND, PM_FALLEN_ANGEL
 							};
@@ -1670,6 +1674,39 @@ default_case:
 					mon->entangled_otyp = SHACKLES;
 					mon->entangled_oid = tmpo->o_id;
 				}
+			}
+		}
+	}
+	if(otmp->otyp == CHAIN && otmp->spe == 1 && otmp->where == OBJ_FLOOR && Is_stronghold(&u.uz)){
+		struct obj *tmpo;
+		struct monst *mon;
+		mon = prisoner(PM_PSYCHOPOMP, otmp->ox, otmp->oy);
+		if(mon){
+			for(tmpo = fobj; tmpo; tmpo = tmpo->nobj){
+				if(tmpo->otyp == CHEST && (!tmpo->cobj || tmpo->cobj->otyp != RIN_WISHES)){
+					struct obj *obj;
+					for(obj = mon->minvent; obj; obj = mon->minvent){
+						mon->misc_worn_check &= ~obj->owornmask;
+						update_mon_intrinsics(mon, obj, FALSE, FALSE);
+						if (obj->owornmask & W_WEP){
+							setmnotwielded(mon,obj);
+							MON_NOWEP(mon);
+						}
+						if (obj->owornmask & W_SWAPWEP){
+							setmnotwielded(mon,obj);
+							MON_NOSWEP(mon);
+						}
+						obj->owornmask = 0L;
+						obj_extract_self(obj);
+						add_to_container(tmpo, obj);
+					}
+					break;
+				}
+			}
+			tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
+			if(tmpo){
+				mon->entangled_otyp = SHACKLES;
+				mon->entangled_oid = tmpo->o_id;
 			}
 		}
 	}
@@ -1907,7 +1944,19 @@ default_case:
 				stuff->spe = 2;
 				add_to_container(otmp, stuff);
 
-				default_add_2(TWO_HANDED_SWORD);
+				default_add_2(HIGH_ELVEN_WARSWORD);
+				set_material_gm(stuff, GREEN_STEEL);
+				add_oprop(stuff, OPROP_UNHYW);
+				add_oprop(stuff, OPROP_HOLYW);
+				add_oprop(stuff, OPROP_LIVEW);
+				add_oprop(stuff, OPROP_WRTHW);
+				add_oprop(stuff, OPROP_INSTW);
+
+				default_add_2(ORCISH_BOW);
+				add_oprop(stuff, OPROP_UNHYW);
+				add_oprop(stuff, OPROP_MORGW);
+				add_oprop(stuff, OPROP_VORPW);
+				add_oprop(stuff, OPROP_INSTW);
 			break;
 			case PM_YUKI_ONNA:
 				stuff = mksobj(SHOES, MKOBJ_NOINIT);
@@ -1996,6 +2045,8 @@ default_case:
 
 			stuff = mksobj(CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
 			stuff->objsize = MZ_TINY;
+			set_material_gm(stuff, GEMSTONE);
+			set_submat(stuff, DIAMOND);
 			int armors[] = {CRYSTAL_BOOTS, GAUNTLETS_OF_POWER, CRYSTAL_PLATE_MAIL, CLOAK_OF_MAGIC_RESISTANCE, CRYSTAL_HELM, SHIELD_OF_REFLECTION, CRYSTAL_SWORD};
 			struct obj *armor;
 			for(int i =  0; i < SIZE(armors); i++){
@@ -2149,8 +2200,10 @@ default_case:
 		delete_contents(otmp);
 		container = otmp;
 		break;
-	    /* nothing */
-	    case 0: break;
+	    /* neither container nor contained, reset container var */
+	    case 0:
+		container = (struct obj *)0;
+		break;
 
 	    default: impossible("containment type %d?", (int) o->containment);
 	}

@@ -90,6 +90,8 @@ OBJECT:'%',"food ration",contained
 OBJECT:'%',"food ration",contained
 OBJECT:'%',"food ration",contained
 
+MONSTER:'@',"shadowsmith",random
+
 MONSTER:'@',"hedrow warrior",random
 MONSTER:'@',"hedrow warrior",random
 MONSTER:'@',"hedrow warrior",random

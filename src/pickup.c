@@ -1869,7 +1869,7 @@ gotit:
 			else {
 				pline("A broken-off fang is embedded in %s chest. It seems to have pierced %s heart!", s_suffix(mon_nam(mtmp)), mhis(mtmp));
 				if(!helpless_still(mtmp) && !TimeStop){
-					pline("%s moves to quickly for you to grasp the fang.", Monnam(mtmp));
+					pline("%s moves too quickly for you to grasp the fang.", Monnam(mtmp));
 				}
 				else if(yn("Attempt to remove the fang?")=='y'){
 					/* Don't really want the solution to be wages of sloth */
@@ -2201,6 +2201,7 @@ register struct obj *obj;
 		crystal_skull_overweight(current_container, obj)
 		|| obj->otyp == TREPHINATION_KIT
 		|| ensouled_item(obj)
+		|| get_ox(obj, OX_ESUM)
 		|| duplicate_item(current_container, obj)
 		)
 	) {
@@ -3058,6 +3059,7 @@ boolean past;
 			knows_object(find_signet_ring());
 		break;
 		case PM_ORC:
+			expert_weapon_skill(P_BOW);
 			expert_weapon_skill(P_SCIMITAR);
 			skilled_weapon_skill(P_TWO_HANDED_SWORD);
 			skilled_weapon_skill(P_RIDING);
@@ -3073,6 +3075,20 @@ boolean past;
 			knows_object(ORCISH_SHIELD);
 			knows_object(URUK_HAI_SHIELD);
 			knows_object(ORCISH_CLOAK);
+
+			knows_object(ELVEN_SHORT_SWORD);
+			knows_object(ELVEN_ARROW);
+			knows_object(ELVEN_BOW);
+			knows_object(ELVEN_SPEAR);
+			knows_object(ELVEN_DAGGER);
+			knows_object(ELVEN_BROADSWORD);
+			knows_object(ELVEN_MACE);
+			knows_object(ELVEN_LANCE);
+			knows_object(ELVEN_MITHRIL_COAT);
+			knows_object(ELVEN_HELM);
+			knows_object(ELVEN_SHIELD);
+			knows_object(ELVEN_BOOTS);
+			knows_object(ELVEN_CLOAK);
 		break;
 		case PM_YUKI_ONNA:
 			expert_weapon_skill(P_LONG_SWORD);

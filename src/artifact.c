@@ -960,11 +960,11 @@ int oprop;
 		impossible("Attempting to check oprop number %d on %s?", oprop, doname(obj));
 		return FALSE;
 	}
-	
+
 	//May have changed mats/be ammo. Silver fire only works on some materials.
-	if((oprop == OPROP_SFLMW || oprop == OPROP_CGLZ || oprop == OPROP_MORTW ||
-	    oprop == OPROP_TDTHW || oprop == OPROP_SFUWW || oprop == OPROP_RWTH ||
-	    oprop == OPROP_RBRD || oprop == OPROP_SLIF)
+	if((oprop == OPROP_SFLMW || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW
+	 || oprop == OPROP_CGLZ || oprop == OPROP_RWTH || oprop == OPROP_RBRD || oprop == OPROP_SLIF
+	)
 		&& !sflm_able(obj)
 	)
 		return FALSE;
@@ -1003,7 +1003,7 @@ unsigned long int *oprop_list;
 
 #define ADD_WEAPON_ARMOR_OPROP(otmp, oproptoken) \
 	add_oprop(otmp, OPROP_##oproptoken);\
-	if(is_weapon(otmp)){\
+	if(accepts_weapon_oprops(otmp) || otmp->oclass == RING_CLASS){\
 		if(rn2(3))\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
 		else\
@@ -1013,7 +1013,7 @@ unsigned long int *oprop_list;
 #define ADD_WEAPON_ARMOR_OPROPS(otmp, oproptoken1, oproptoken2) \
 	add_oprop(otmp, OPROP_##oproptoken1);\
 	add_oprop(otmp, OPROP_##oproptoken2);\
-	if(is_weapon(otmp)){\
+	if(accepts_weapon_oprops(otmp) || otmp->oclass == RING_CLASS){\
 		if(rn2(3)){\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken1##W);\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken2##W);\
@@ -1031,7 +1031,7 @@ unsigned long int *oprop_list;
 		add_oprop(otmp, OPROP_LESSER_##oproptoken##W);
 
 #define ADD_WEAK_OR_STRONG_OPROPS(otmp, oproptoken1, oproptoken2) \
-	if(rn2(4)){\
+	if(otmp->oclass != RING_CLASS && rn2(4)){\
 		add_oprop(otmp, OPROP_##oproptoken1##W);\
 		add_oprop(otmp, OPROP_##oproptoken2##W);\
 	}\
@@ -1143,6 +1143,32 @@ struct obj *otmp;	/* existing object */
 			add_oprop(otmp, OPROP_PSECW);
 		}
 	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(!rn2(3)){
+			ADD_WEAPON_ARMOR_OPROPS(otmp, UNHY, HOLY);
+		}
+		if(rn2(3)) switch(rn2(4)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+		}
+		else if(rn2(3)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+		}
+		if(!rn2(8)){
+			add_oprop(otmp, OPROP_HEAL);
+		}
+	}
 	return otmp;
 }
 
@@ -1243,6 +1269,32 @@ struct obj *otmp;	/* existing object */
 		}
 		if(!rn2(20)){
 			add_oprop(otmp, OPROP_ASECW);
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(2)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		}
+		if(rn2(3)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+		}
+		if(rn2(3)) switch(rnd(3)){
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_LIFE);
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_HEAL);
 		}
 	}
 	return otmp;
@@ -1359,6 +1411,42 @@ struct obj *otmp;	/* existing object */
 			}
 		}
 	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(2)){
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		}
+		if(rn2(3)) switch(rnd(3)){
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+		}
+		else if(rn2(3)){
+			switch(rn2(3)){
+				case 0:
+					ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+				break;
+				case 1:
+					ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
+				break;
+				case 2:
+					ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+				break;
+			}
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_LIFE);
+		}
+		if(!rn2(7)){
+			add_oprop(otmp, OPROP_HEAL);
+		}
+	}
 	return otmp;
 }
 
@@ -1433,6 +1521,29 @@ struct obj *otmp;	/* existing object */
 			break;
 			case 7:
 				ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);
+			break;
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
 			break;
 		}
 	}
@@ -1533,6 +1644,29 @@ struct obj *otmp;	/* existing object */
 		}
 		if(!rn2(10)){
 			add_oprop(otmp, rn2(4) ? OPROP_SPIKED : OPROP_BLADED);
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		if(rn2(4)) switch(rn2(6)){
+			case 0:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			break;
+			case 1:
+				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			break;
+			case 2:
+				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			break;
+			case 3:
+				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+			break;
+			case 4:
+				ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+			break;
+			case 5:
+				ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+			break;
 		}
 	}
 	return otmp;
@@ -1717,6 +1851,52 @@ struct obj *otmp;	/* existing object */
 		break;
 		case 10:
 			ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+		break;
+		}
+	}
+	/* ring props (stack with weapon) */
+	else if(otmp->oclass == RING_CLASS){
+		prop = rnd(13);
+		switch(prop)
+		{
+		case 1:
+			ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+		break;
+		case 2:
+			ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+		break;
+		case 3:
+			ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+		break;
+		case 4:
+			ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+		break;
+		case 5:
+			ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
+		break;
+		case 6:
+			ADD_WEAPON_ARMOR_OPROP(otmp, ANAR);
+		break;
+		case 7:
+			ADD_WEAPON_ARMOR_OPROP(otmp, CONC);
+		break;
+		case 8:
+			ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+		break;
+		case 9:
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+		break;
+		case 10:
+			ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);
+		break;
+		case 11:
+			ADD_WEAK_OR_STRONG_OPROP(otmp, WATR);
+		break;
+		case 12:
+			ADD_WEAK_OR_STRONG_OPROP(otmp, PSIO);
+		break;
+		case 13:
+			add_oprop(otmp, OPROP_DRANW);
 		break;
 		}
 	}
@@ -2223,7 +2403,7 @@ int
 artifact_weight(obj)
 struct obj *obj;
 {
-	if(!get_artifact(obj))
+	if(!obj->oartifact)
 		return -1;	// error
 	int baseweight = objects[obj->otyp].oc_weight;
 	int artiweight = get_artifact(obj)->weight;
@@ -3014,7 +3194,7 @@ struct obj *otmp;
 struct monst *mon;
 boolean youagr;
 {
-	register const struct artifact *weap = get_artifact(otmp);
+	const struct artifact *weap = get_artifact(otmp);
 	int bonus = 0;
 	/* no need for an extra check for `NO_ATTK' because this will
 	   always return 0 for any artifact which has that attribute */
@@ -3026,6 +3206,9 @@ boolean youagr;
 	}
 	if(youagr && Role_if(PM_BARD)) //legend lore
 		bonus += 5;
+
+	if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == ZERTH_ART || weap->inv_prop == AMALGUM_ART) && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL))
+		bonus += otmp->spe+1;
 	
 	if(youagr && Role_if(PM_PRIEST)) return bonus + weap->accuracy; //priests always get the maximum to-hit bonus.
 	
@@ -3258,6 +3441,26 @@ winid tmpwin;		/* supplied by dodiscover() */
 
 #ifdef OVLB
 
+boolean
+near_yourteam(mon)
+struct monst *mon;
+{
+	struct monst *mnear;
+	for(int x = mon->mx-1; x < mon->mx+2; x++){
+		for(int y = mon->my-1; y < mon->my+2; y++){
+			if(!isok(x,y))
+				continue;
+			mnear = m_u_at(x, y);
+			if(!mnear)
+				continue;
+			if(mnear == &youmonst)
+				return TRUE;
+			if(mnear->mtame)
+				return TRUE;
+		}
+	}
+	return FALSE;
+}
 
 	/*
 	 * Magicbane's intrinsic magic is incompatible with normal
@@ -4093,6 +4296,7 @@ int * truedmgptr;
 	struct permonst * pd = (youdef ? youracedata : mdef->data);
 	int original_plusdmgptr = *plusdmgptr;
 	int original_truedmgptr = *truedmgptr;
+	const struct artifact *oart = get_artifact(otmp);
 	
 	if(!Fire_res(mdef)){
 		if(check_oprop(otmp, OPROP_FIREW))
@@ -4334,13 +4538,34 @@ int * truedmgptr;
 			*truedmgptr += d(2, 12);
 	}
 	if(check_oprop(otmp, OPROP_GSSDW)){
-		int power = youagr ? u.uinsight : magr ? magr->m_lev : 0;
+		int power = youagr ? min(u.uinsight, u.usanity) : magr ? magr->m_lev : 0;
 		//"Crit" chance
 		if(power > 0){
 			int multiplier = power >= 50 ? 3 : power >= 25 ? 2 : 1; 
-			int chance = power >= 50 ? 5 : power >= 25 ? 10 : 20; 
-			if(!rn2(chance))
-			*truedmgptr += multiplier*basedmg;
+			int chance = power >= 50 ? 4 : power >= 25 ? 3 : 2;
+			if(u.usanity > 80 &&(oart->inv_prop == GITH_ART || oart->inv_prop == ZERTH_ART || oart->inv_prop == AMALGUM_ART) && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)
+				chance += (u.usanity-81)/5;//0, 1, 2, or 3 starting at 81, 86, 91, 96
+			if(rn2(20) < chance){
+				*truedmgptr += multiplier*basedmg;
+				if(otmp->oartifact){
+					const struct artifact *weap = get_artifact(otmp);
+					if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_RESONANT)){
+						for(struct monst *tmon = fmon; tmon; tmon = tmon->nmon){
+							if(DEADMONSTER(tmon))
+								continue;
+							if(tmon->mtame){
+								tmon->movement += 12;
+								tmon->encouraged = max_ints(u.usanity < 50 ? 0 : u.usanity < 75 ? 2 : u.usanity < 90 ? 5 : 8, tmon->encouraged);
+							}
+							else if(near_yourteam(tmon)){
+								if(!resist(tmon, '\0', 0, NOTELL))
+									tmon->movement -= 12;
+								tmon->encouraged = min_ints(u.usanity < 50 ? 0 : u.usanity < 75 ? -2 : u.usanity < 90 ? -5 : -8, tmon->encouraged);
+							}
+						}
+					}
+				}
+			}
 		}
 		//Bonus psychic damage (More reliable than regular psychic damage)
 		if(youdef || !mindless_mon(mdef)){
@@ -4836,25 +5061,35 @@ boolean printmessages;
 		int bonus = 0;
 		//Holy/Unholy energy attack
 		if(u.uinsight >= 50){
-			bonus += d(2, (mdef && bigmonst(pd)) ? 
+			bonus += d(3, (mdef && bigmonst(pd)) ? 
 							objects[otmp->otyp].oc_wldam.oc_damd : 
 							objects[otmp->otyp].oc_wsdam.oc_damd);
-		} else if(u.uinsight >= 20){
-			bonus += rnd((mdef && bigmonst(pd)) ? 
-							objects[otmp->otyp].oc_wldam.oc_damd : 
-							objects[otmp->otyp].oc_wsdam.oc_damd);
-		}
-		if(u.uinsight >= 45){
 			bonus += (mdef && bigmonst(pd)) ? 
 						(objects[otmp->otyp].oc_wldam.oc_damd) : 
 						(objects[otmp->otyp].oc_wsdam.oc_damd);
-		} else {
-			bonus += (mdef && bigmonst(pd)) ? 
-						(objects[otmp->otyp].oc_wldam.oc_damd+1)/2 : 
-						(objects[otmp->otyp].oc_wsdam.oc_damd+1)/2;
+		} else if(u.uinsight >= 45){
+			bonus += d(3, (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
+		} else if(u.uinsight >= 20){
+			bonus += d(2, (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
+		} else { //>= 15
+			bonus += d(1, (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd);
 		}
 		if(mdef){
 			if(youagr){
+				int bonus_die = (mdef && bigmonst(pd)) ? 
+							objects[otmp->otyp].oc_wldam.oc_damd : 
+							objects[otmp->otyp].oc_wsdam.oc_damd;
+				if(u.ualign.record < -3 && Insanity > 50)
+					bonus += bonus_die*(50-u.usanity)/50;
+				else if(u.ualign.record > 3 && u.usanity > 90)
+					bonus += bonus_die*(10-Insanity)/10;
+
 				if(u.ualign.record < -3 && hates_unholy_mon(mdef))
 					bonus *= 2;
 				else if(u.ualign.record > 3 && hates_holy_mon(mdef))
@@ -5288,7 +5523,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	/* The Grappler's Grasp has a chance to begin grapples.  */
 	if (oartifact == ART_GRAPPLER_S_GRASP || (otmp->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(otmp, IEA_STRANGLE))) {
 		/* check if we can begin a grapple -- Damage is done by adding an AT_HUGS to your attack chain, NOT here. */
-		if ((youagr || youdef) && !u.ustuck && !sticks(mdef))
+		if ((youagr || youdef) && !u.ustuck && !sticks(mdef) && !(youagr && u.uavoid_grabattk))
 		{
 			int newres = xmeleehurty(magr, mdef, &grapple, &grapple, &otmp, (youagr || youdef), 0, dieroll, -1, FALSE);
 
@@ -6867,12 +7102,12 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 
 	/* Reveal unworthy */
-	if (check_oprop(otmp, OPROP_SFUWW) && (is_minion(pd) || is_demon(pd))){
+	if (check_oprop(otmp, OPROP_SFUWW) && (is_minion(pd) || is_demon(pd) || (Drain_res(mdef) && (youdef ? Mortal_race : mortal_race(mdef))))){
 		struct obj *obj;
-		int i = basedmg;
+		int i = (basedmg+1)/2;
 		boolean printed = FALSE;
 		while((obj = some_armor(mdef)) && i > 0){
-			i-=3;
+			i-=1;
 			if(oresist_disintegration(obj))
 				continue;//May possibly sellect a different item next time.
 
@@ -6896,8 +7131,14 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 		}
 		//Note: i may be as low as -2.
-		if(i > 0)
-			*truedmgptr += i;
+		if(i > 0){
+			if(2*i >= basedmg)
+				*truedmgptr += 2*basedmg;
+			else
+				*truedmgptr += basedmg + 2*i;
+		}
+		else
+			*plusdmgptr += basedmg/2;
 	}
 
 	if(otmp->oartifact == ART_IBITE_ARM){
@@ -6961,6 +7202,38 @@ boolean printmessages; /* print generic elemental damage messages */
 				if (rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 				if (rn2(3)) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 				if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+		}
+	}
+
+	if(youagr && otmp->oartifact){
+		const struct artifact *weap = get_artifact(otmp);
+		if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)){
+			if(activeMentalEdge(GSTYLE_COLD)){
+				if(!Cold_res(mdef))
+					(*truedmgptr) += u.usanity > 50 ? 0 : u.usanity > 25 ? d(2,6) : u.usanity > 10 ? d(4,6) : d(6,6);
+				if(hates_unholy_mon(mdef))
+					(*truedmgptr) += u.usanity > 50 ? 0 : u.usanity > 25 ? d(1,9) : u.usanity > 10 ? d(2,9) : d(3,9);
+			}
+			if(activeMentalEdge(GSTYLE_ANTIMAGIC)){
+				int major_chance = u.usanity < 50 ? 0 : u.usanity < 75 ? 1 : u.usanity < 90 ? 2 : 5;
+				if(youdef){
+					if(u.uen > 0){
+						u.uen -= u.usanity/10;
+						flags.botl = 1;
+					}
+					if(rn2(20) < major_chance){
+						if(u.uen > 0){
+							u.uen = max(u.uen-400, 0);
+							flags.botl = 1;
+						}
+					}
+				}
+				else {
+					mdef->mspec_used += rnd(u.usanity/10);
+					if(rn2(20) < major_chance)
+						set_mcan(mdef, TRUE);
+				}
 			}
 		}
 	}
@@ -7615,6 +7888,83 @@ static NEARDATA const char invoke_types[] = { ALL_CLASSES, 0 };
 		/* #invoke: an "ugly check" filters out most objects */
 
 
+void
+zerth_mantras()
+{
+	pline("There are mantras wound around the grip.");
+	//Reign of Anger (MM)
+	if(ACURR(A_WIS) < 8 && ACURR(A_WIS)+ACURR(A_INT) > 21 && Insanity > 75 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH)){
+		// Modifies MM spell, +1 damage per die (implemented as +2 faces)
+		You("decipher a new mantra!");
+		pline("\"Greed and hates, pains and joys, jealousies and doubts. All of these fed on each other and the minds of the People were divided. In their division, the People were punished.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_WRATH;
+		more_experienced(300, 0);
+		newexplevel();
+	}
+	//Scripture of Steel (+1 to-hit and +1 to pet saves)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 23 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)){
+		You("decipher a new mantra!");
+		pline("\"*Know* that flesh cannot mark steel. *Know* that steel may mark flesh.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_STEEL;
+		more_experienced(600, 0);
+		newexplevel();
+	}
+	//Submerge the Will (Protection + Saves)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 27 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WILL)){
+		// Modifies protection spell, grants half magic damage while active, pets get +10 mr
+		You("decipher a new mantra!");
+		pline("\"Lashed upon the Pillars, Zerthimon moved his mind to a place where pain could not reach, leaving his body behind.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_WILL;
+		more_experienced(900, 0);
+		newexplevel();
+	}
+	//Vilquar's Eye (Blindness)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 29 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_VILQUAR)){
+		// Modifies invis effects, monsters must roll vs. resist to see you
+		You("decipher a new mantra!");
+		pline("\"Vilquar's eye was filled only with the reward he had been promised. He would see what he wished to see.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_VILQUAR;
+		more_experienced(1500, 0);
+		newexplevel();
+	}
+	//Power of One (Strength)
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 31 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER)){
+		// Grants 25 str while wielded, bonus damage for pets
+		You("decipher a new mantra!");
+		pline("\"The strength of her *knowing* was so great, that all those that walked her path came to *know* themselves.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_POWER;
+		more_experienced(3000, 0);
+		newexplevel();
+	}
+	//Balance in All Things
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 34 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_BALANCE)){
+		// Modifies protection spell, monsters take damage when attacking
+		You("decipher a new mantra!");
+		pline("\"From the Separation of the People, came the *knowing* of Two Skies. From the *knowing* of Two Skies came the realization that hurting others, hurts oneself.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_BALANCE;
+		more_experienced(5000, 0);
+		newexplevel();
+	}
+	//Missile of Patience
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 37 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_PATIENCE)){
+		// Modifies Force Bolt
+		You("decipher a new mantra!");
+		pline("\"*Know* that the Rising of the People against the *illithid* was a thing built upon many turnings.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_PATIENCE;
+		more_experienced(8000, 0);
+		newexplevel();
+	}
+	//Zerthimon's Focus
+	else if(ACURR(A_WIS)+ACURR(A_INT) > 40 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)){
+		// Modifies "crit" chance, proportional to sanity
+		You("decipher a new mantra!");
+		pline("\"A divided mind is one that does not *know* itself. When it is divided, it cleaves the body in two. When one has a single purpose, the body is strengthened. In *knowing* the self, grow strong.\"");
+		artinstance[ART_SKY_REFLECTED].ZerthUpgrades |= ZPROP_FOCUS;
+		more_experienced(16000, 0);
+		newexplevel();
+	}
+}
+
 int
 ibite_upgrade_menu(obj)
 struct obj *obj;
@@ -8080,7 +8430,13 @@ arti_invoke(obj)
 	    if (!otmp) goto nothing_special;
 	    otmp->blessed = obj->blessed;
 	    otmp->cursed = obj->cursed;
-	    otmp->bknown = obj->bknown;
+
+	    otmp->bknown |= obj->bknown;
+		otmp->known |= obj->known;
+		otmp->rknown |= obj->rknown;
+		otmp->dknown |= obj->dknown;
+		otmp->sknown |= obj->sknown;
+
 	    if (obj->blessed) {
 			if (otmp->spe < 0) otmp->spe = 0;
 			otmp->quan += rnd(10);
@@ -8409,6 +8765,7 @@ arti_invoke(obj)
 						    map_invisible(bhitpos.x, bhitpos.y);
 						}
 					    resist(mtmp, WEAPON_CLASS, dmg, FALSE);
+						setmangry(mtmp);
 					}
 					bhitpile(pseudo,bhito,bhitpos.x,bhitpos.y);
 				    if(IS_DOOR(typ) || typ == SDOOR) {
@@ -8505,6 +8862,7 @@ arti_invoke(obj)
 					obj->oeroded = 0;
 					obj->oeroded2= 0;
 					if(obj->spe < 3) obj->spe = 3;
+					if(obj->spe < u.ulevel/4) obj->spe = u.ulevel/4; //0 to 7
 					artinstance[obj->oartifact].SnSd3duration = monstermoves + (long) u.ulevel + obj->spe;
 				}
 			}
@@ -8588,6 +8946,7 @@ arti_invoke(obj)
 				}
 				update_inventory();	/* spell may modify inventory */
 				losepw(energy);
+				obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 			}
 		}
 		obj->age = monstermoves + d(1,100);
@@ -9943,7 +10302,12 @@ arti_invoke(obj)
 						if (!otmp) break;
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
-						otmp->bknown = obj->bknown;
+
+						otmp->bknown |= obj->bknown;
+						otmp->known |= obj->known;
+						otmp->rknown |= obj->rknown;
+						otmp->dknown |= obj->dknown;
+						otmp->sknown |= obj->sknown;
 						if (obj->blessed) {
 							if (otmp->spe < 0) otmp->spe = 0;
 							otmp->quan += rnd(10);
@@ -10069,7 +10433,11 @@ arti_invoke(obj)
 						otmp = mksobj(SILVER_BULLET, NO_MKOBJ_FLAGS);
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
-						otmp->bknown = obj->bknown;
+						otmp->bknown |= obj->bknown;
+						otmp->known |= obj->known;
+						otmp->rknown |= obj->rknown;
+						otmp->dknown |= obj->dknown;
+						otmp->sknown |= obj->sknown;
 						if (obj->blessed) {
 							if (otmp->spe < 0) otmp->spe = 0;
 							otmp->quan += 10+rnd(10);
@@ -10086,7 +10454,11 @@ arti_invoke(obj)
 						otmp = mksobj(ROCKET, NO_MKOBJ_FLAGS);
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
-						otmp->bknown = obj->bknown;
+						otmp->bknown |= obj->bknown;
+						otmp->known |= obj->known;
+						otmp->rknown |= obj->rknown;
+						otmp->dknown |= obj->dknown;
+						otmp->sknown |= obj->sknown;
 						if (obj->blessed) {
 							if (otmp->spe < 0) otmp->spe = 0;
 						} else if (obj->cursed) {
@@ -10928,7 +11300,7 @@ arti_invoke(obj)
 				/* remove old name */
 				rem_ox(obj, OX_ENAM);
 			}
-			else if(!u.uevent.qcompleted){
+			else if(!u.uevent.qcompleted && Role_if(PM_MADMAN)){
 				pline("A throbbing yellow haze obscures your vision!");
 				You_cant("use this right now.");
 			}
@@ -11186,13 +11558,29 @@ arti_invoke(obj)
 			}
 		}break;
 		case GITH_ART:{
+			doGithForm();
 		}break;
+		case AMALGUM_ART:
 		case ZERTH_ART:{
-			pline("There are mantras wound around the grip.");
+			zerth_mantras();
 		}break;
-		case AMALGUM_ART:{
+		case MORGOTH:{
+			int base_otyp = find_good_iring();
+			int new_otyp = obj->otyp == base_otyp ? RIN_NOTHING : base_otyp;
+			boolean worn_left = obj == uleft;
+			boolean worn_right = obj == uright;
+			pline("%s suddenly seems much more %s.", artilist[obj->oartifact].name,
+			      new_otyp == RIN_NOTHING ? "boring" : "interesting");
+			if (worn_left || worn_right) Ring_off(obj);
+			obj->otyp = new_otyp;
+			if (worn_left || worn_right) {
+				setworn(obj, worn_left ? LEFT_RING : RIGHT_RING);
+				Ring_on(obj);
+			}
+			if (obj->otyp == RIN_NOTHING) makeknown(RIN_NOTHING);
+			obj->age = 0;
 		}break;
-		default: pline("Program in dissorder.  Artifact invoke property not recognized");
+		default: pline("Program in disorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
 
@@ -13869,6 +14257,11 @@ struct obj **opptr;
 	if(yn("Merge the two skies into one?") == 'y'){
 		struct obj *sky2;
 		struct obj *amalgam;
+		if(u.ulevel < 22){ //Less than rank 7
+			pline("The two swords ripple for a moment, then push each-other away!");
+			pline("It seems you are not powerful enough to merge them together.");
+			return MOVE_CANCELLED;
+		}
 		for(sky2 = invent; sky2; sky2 = sky2->nobj)
 			if(sky2->oartifact == needed)
 				break;
@@ -13880,10 +14273,10 @@ struct obj **opptr;
 		if(!amalgam || !amalgam->oartifact){
 			impossible("Make Amalgamated Skies failed in merge_skies.");
 			if(amalgam)
-				obfree(amalgam, (struct obj *)0);	/* now, get rid of it */
+				obfree(amalgam, (struct obj *)0);	/* get rid of the useless non-artifact */
 			return MOVE_CANCELLED;
 		}
-		pline("%s and %s melt and disolve into each-other!", The(xname(sky1)), the(xname(sky2)));
+		pline("%s and %s melt and dissolve into each-other!", The(xname(sky1)), the(xname(sky2)));
 		//merge stats
 		amalgam->spe = max(sky1->spe, sky2->spe);
 		for(int prop = 1; prop < MAX_OPROP; prop++){

@@ -1065,6 +1065,7 @@ BOOTS(("flying boots", "snow boots"),
 		BITS(0,0,spec,0,mgc,spec,0,0,MZ_TINY,0,HARDGEM(mohs),0,0,P_NONE,metal,0), \
 		power, RING_CLASS, 0, 0, 3, cost, {0}, {0}, 0, 0, 0, 15, color,__VA_ARGS__ )
 RING(("wishes", "black"),                {0},                  500, 1, 1, 4, FIRMAMENT, CLR_BLACK, O_NOWISH(1)),
+RING(("nothing", "boring"),              {0},                 50, 0, 0, 0, IRON, HI_METAL, O_PROB(0)),
 RING(("adornment", "wooden"),            {ADORNED},           100, 1, 1, 2, WOOD, HI_WOOD),
 RING(("gain strength", "granite"),       {0},                  150, 1, 1, 7, MINERAL, HI_MINERAL),
 RING(("gain constitution", "opal"),      {0},                  150, 1, 1, 7, GEMSTONE,  CLR_WHITE),
@@ -1235,6 +1236,7 @@ TOOL(("sunglasses", "mirrored lenses"),/*Needs encyc entry*/
 TOOL(("blindfold"),    1,   MZ_TINY, 0, 0, 0,  45,  2,  20, CLOTH, CLR_GRAY),
 TOOL(("android visor", "black blindfold", "blindfold"), /*Needs encyc entry*/
 								0,   MZ_TINY, 0, 0, 0,   0,  2,  40, CLOTH, CLR_BLACK),
+TOOL(("soul-lens", "smooth-gemmed head-chain"),		0,   MZ_TINY, 0, 1, 0,   0,  3, 333, GLASS, HI_GOLD), /*Needs encyc entry*/
 TOOL(("towel"),        1,   MZ_TINY, 0, 0, 0,  45,  2,  50, CLOTH, CLR_MAGENTA),
 #ifdef STEED
 TOOL(("saddle"),       1,  MZ_LARGE, 0, 0, 0,   5,200, 150, LEATHER, HI_LEATHER),

@@ -7,6 +7,7 @@
 #include <limits.h>
 #include "math.h"
 #include "hack.h"
+#include "artifact.h"
 
 /* #define DEBUG */	/* uncomment for debugging info */
 
@@ -283,8 +284,7 @@ gainstr(otmp, incr)
 
 	if(incr) num = incr;
 	else {
-	    if(ABASE(A_STR) < 18) num = (rn2(4) ? 1 : rnd(6) );
-	    else if (ABASE(A_STR) < STR18(85)) num = rnd(10);
+	    if(ABASE(A_STR) < STR18(85)) num = (rn2(4) ? 1 : rnd(6) );
 	}
 	(void) adjattrib(A_STR, (otmp && otmp->cursed) ? -num : num, TRUE);
 }
@@ -469,9 +469,9 @@ exerper()
 	if(!(moves % 10)) {
 		/* Hunger Checks */
 
-		int hs = (YouHunger > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : 1000)) ? SATIATED :
-			 (YouHunger > 150) ? NOT_HUNGRY :
-			 (YouHunger > 50) ? HUNGRY :
+		int hs = (YouHunger > get_satiationlimit()) ? SATIATED :
+			 (YouHunger > 150*get_uhungersizemod()) ? NOT_HUNGRY :
+			 (YouHunger > 50*get_uhungersizemod()) ? HUNGRY :
 			 (YouHunger > 0) ? WEAK : FAINTING;
 
 #ifdef DEBUG
@@ -942,18 +942,15 @@ int oldlevel, newlevel;
 			lose_weapon_skill(skillslots);
 		}
 	}
-	int message = 0;
-	if ((oldlevel >= 14 && newlevel < 14) || (newlevel >= 14 && oldlevel < 14)){
+	boolean message = FALSE;
+	if (newlevel >= 14 && oldlevel < 14){
 		for (int i = 0; i < P_NUM_SKILLS; i++) {
 			if (roleSkill(i)){
-				message = oldlevel - newlevel;
-				if (oldlevel > newlevel) restrict_weapon_skill(i);
-				else expert_weapon_skill(i);
+				message = TRUE;
+				expert_weapon_skill(i);
 			}
 	    }
-		if (message != 0){
-			You_feel("your skills %s!", (message > 0) ? "slipping away" : "increasing");
-		}
+		if (message) You_feel("like you've unlocked new potential!");
 	}
 }
 
@@ -1237,6 +1234,10 @@ struct monst *mon;
 	struct obj *armh = (is_player ? uarmh : which_armor(mon, W_ARMH));
 	struct obj *wep = (is_player ? uwep : MON_WEP(mon));
 	struct obj *swapwep = (is_player ? uswapwep : MON_SWEP(mon));
+    const struct artifact *oart = (struct artifact *) 0;
+	if(wep){
+		oart = get_artifact(wep);
+	}
 	
 	int tmp;
 	if(is_player){
@@ -1303,6 +1304,7 @@ struct monst *mon;
 		if ((armg && (armg->otyp == GAUNTLETS_OF_POWER || (armg->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(armg, IEA_GOPOWER)))) || 
 			(wep &&((wep->oartifact == ART_SCEPTRE_OF_MIGHT) || 
 					 (wep->oartifact == ART_PEN_OF_THE_VOID && wep->ovar1&SEAL_YMIR && mvitals[PM_ACERERAK].died > 0) ||
+					 (oart && (oart->inv_prop == GITH_ART || oart->inv_prop == ZERTH_ART || oart->inv_prop == AMALGUM_ART) && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER) ||
 					 (wep->oartifact == ART_STORMBRINGER) ||
 					 (wep->oartifact == ART_OGRESMASHER)
 			)) ||
@@ -1448,6 +1450,7 @@ int delta;
 		return;
 	if(discover || wizard)
 		pline("Insight change: %d + %d", u.uinsight, delta);
+	reset_rndmonst(NON_PM);
 	u.uinsight += delta;
 	if(u.uinsight < 0)
 		u.uinsight = 0;
@@ -1879,8 +1882,8 @@ acurrstr(str)
 	int str;
 {
 	if (str <= 18) return((schar)str);
-	if (str <= 121) return((schar)(19 + str / 50)); /* map to 19-21 */
-	else return((schar)(str - 100));
+	if (str <= 38) return((schar)(18)); /* map to 18 */
+	return((schar)(str - 20));
 }
 
 #endif /* OVL0 */
@@ -1909,7 +1912,7 @@ register int n;
 }
 
 void
-setFightingForm(fform)
+unSetFightingForm(fform)
 int fform;
 {
 	int i, first, last;
@@ -1931,6 +1934,14 @@ int fform;
 	for(i=first/32; i <= last/32; i++)
 		u.fightingForm[i] = 0L;
 
+}
+
+void
+setFightingForm(fform)
+int fform;
+{
+	/* this code assumes that each batch of 32 fighting forms are mutually exclusive, but not with other batches of 32 */
+	unSetFightingForm(fform);
 	u.fightingForm[(fform-1)/32] |= (0x1L << ((fform-1)%32));
 }
 
@@ -1939,6 +1950,13 @@ activeFightingForm(fform)
 int fform;
 {
 	return (selectedFightingForm(fform) && !blockedFightingForm(fform));
+}
+
+boolean
+activeMentalEdge(fform)
+int fform;
+{
+	return (artinstance[ART_SILVER_SKY].GithStyle == fform && !blockedMentalEdge(fform));
 }
 
 boolean
@@ -2016,6 +2034,7 @@ int fform;
 	}
 	return P_NONE; //Never reached
 }
+
 const char *
 nameOfFightingForm(fform)
 int fform;
@@ -2038,6 +2057,23 @@ int fform;
 		case FFORM_KNI_ELDRITCH:return "Eldritch style";
 		default:
 			impossible("bad fform %d", fform);
+	}
+	return "None";
+}
+
+const char *
+nameOfMentalEdge(edge)
+int edge;
+{
+	switch (edge)
+	{
+		case GSTYLE_PENETRATE: return "Penetrating Edge of Hatred";
+		case GSTYLE_COLD:  return "Cold Edge of Wrath";
+		case GSTYLE_DEFENSE:   return "Defensive Edge of Leadership";
+		case GSTYLE_ANTIMAGIC:    return "Anti-magic Edge of Serenity";
+		case GSTYLE_RESONANT:  return "Resonant Edge of Fellowship";
+		default:
+			impossible("bad gstyle %d", edge);
 	}
 	return "None";
 }
@@ -2100,6 +2136,48 @@ int fform;
 			break;
 	}
 	return FALSE;
+}
+
+boolean
+blockedMentalEdge(edge)
+int edge;
+{
+	boolean ok = FALSE;
+    const struct artifact *oart = (struct artifact *) 0;
+	if(uwep){
+		oart = get_artifact(uwep);
+		if(oart && (oart->inv_prop == GITH_ART || oart->inv_prop == AMALGUM_ART))
+			ok = TRUE;
+	}
+	if(uswapwep){
+		oart = get_artifact(uswapwep);
+		if(oart && (oart->inv_prop == GITH_ART || oart->inv_prop == AMALGUM_ART))
+			ok = TRUE;
+	}
+	if(!ok)
+		return TRUE;
+
+	switch(edge){
+		case GSTYLE_PENETRATE:
+			return u.usanity > 50 || u.ulevel < 14;
+		break;
+		case GSTYLE_COLD:
+			return u.usanity > 50 || u.ulevel < 14 || u.uinsight < 9;
+		break;
+		case GSTYLE_DEFENSE:
+			return u.usanity < 50 || u.ulevel < 14;
+		break;
+		case GSTYLE_ANTIMAGIC:
+			return u.usanity < 50 || u.ulevel < 14;
+		break;
+		case GSTYLE_RESONANT:
+			return u.usanity < 50 || u.ulevel < 30 || u.uinsight < 81;
+		break;
+		default:
+			impossible("Attempting to get blockage of mental edge number %d?", edge);
+		break;
+	}
+	return TRUE; // Should never be reached
 }
 
 #endif /* OVL2 */

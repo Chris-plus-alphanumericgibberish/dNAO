@@ -40,6 +40,7 @@ STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh_visible, (struct monst *));
 STATIC_DCL void FDECL(good_neighbor_visible, (struct monst *));
 STATIC_DCL void FDECL(polyp_pickup, (struct monst *));
+STATIC_DCL void FDECL(unbodied_heal, (struct monst *));
 STATIC_DCL void FDECL(goat_sacrifice, (struct monst *));
 STATIC_DCL void FDECL(palid_stranger, (struct monst *));
 STATIC_DCL void FDECL(sib_follow, (struct monst *));
@@ -1552,10 +1553,16 @@ moveloop()
 			if(mtmp->mamnesia){
 				if(mtmp->isshk){
 					make_happy_shk(mtmp, FALSE);
+					ESHK(mtmp)->pbanned = FALSE;
+					ESHK(mtmp)->signspotted = 0;
 				}
 				else {
 					mtmp->mpeaceful = TRUE;
 					mtmp->mtame = FALSE;
+				}
+				if(mtmp->ispriest){
+					EPRI(mtmp)->pbanned = FALSE;
+					EPRI(mtmp)->signspotted = 0;
 				}
 				mtmp->mamnesia = FALSE;
 				newsym(mtmp->mx, mtmp->my);
@@ -1651,10 +1658,16 @@ moveloop()
 				if(mtmp->mamnesia){
 					if(mtmp->isshk){
 						make_happy_shk(mtmp, FALSE);
+						ESHK(mtmp)->pbanned = FALSE;
+						ESHK(mtmp)->signspotted = 0;
 					}
 					else {
 						mtmp->mpeaceful = TRUE;
 						mtmp->mtame = FALSE;
+					}
+					if(mtmp->ispriest){
+						EPRI(mtmp)->pbanned = FALSE;
+						EPRI(mtmp)->signspotted = 0;
 					}
 					mtmp->mamnesia = FALSE;
 					newsym(mtmp->mx, mtmp->my);
@@ -2424,15 +2437,14 @@ karemade:
 				if(moves%5 && roll_madness(MAD_SPIRAL))
 					change_usanity(-1, FALSE);
 			}
-			//Mind dissolution double trigger: lose 1d4 levels
-			if(u.ulevel > 1 && roll_madness(MAD_FORGETFUL) && roll_madness(MAD_FORGETFUL)){
+			//Mind dissolution xp loss
+			if(u.ulevel > 1 && u.umadness&MAD_FORGETFUL && !BlockableClearThoughts){
 				int i;
-				int pre_drain = u.ulevel;
-				for(i = rn2(4); i > 0 && u.ulevel > 2; i--){
-					losexp("mind dissolution",FALSE,TRUE,TRUE);
+				lose_experience(666*NightmareAware_Insanity*NightmareAware_Insanity/(100*100));
+				for(i = 1; i < P_NUM_SKILLS; i++){
+					if(roll_madness(MAD_FORGETFUL))
+						lose_skill(i,1);
 				}
-				losexp("mind dissolution",TRUE,TRUE,TRUE);
-				forget((pre_drain - u.ulevel) * 100/(pre_drain)); //drain some proportion of your memory
 			}
 			
 			if(mad_turn(MAD_HOST)){
@@ -2746,18 +2758,22 @@ karemade:
 					}
 				} else if(u.utemp) u.utemp--;
 				if(u.utemp > BURNING_HOT){
-					if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
-					if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
-					if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+					if (!InvFire_resistance){
+						if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
+						if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
+						if((u.utemp-5)*2 > rnd(10)) destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+					}
 					
 					if(u.utemp >= MELTING && !(HFire_resistance || u.sealsActive&SEAL_FAFNIR)){
-						You("are melting!");
+						Your("boiler is melting!");
 						losehp(u.ulevel, "melting from extreme heat", KILLED_BY);
 						if(u.utemp >= MELTED){
+							Your("boiler has melted to slag!");
 							if(Upolyd) losehp(u.mhmax*2, "melting to slag", KILLED_BY);
 							else { /* May have been rehumanized by previous damage. In that case, still die from left over bronze on your skin! */
-								if(uclockwork) losehp((Upolyd ? u.mhmax : u.uhpmax)*2, "melting to slag", KILLED_BY);
-								else if(!(HFire_resistance || u.sealsActive&SEAL_FAFNIR)) losehp((Upolyd ? u.mhmax : u.uhpmax)*2, "molten bronze", KILLED_BY);
+								losehp((Upolyd ? u.mhmax : u.uhpmax)*2, "melting to slag", KILLED_BY);
+								u.utemp = 19; // don't get stuck in a loop of permanently dying, clear temp & stove
+								u.ustove = 0; // this can still kill due to you taking damage, just no instadeath
 							}
 						}
 					}
@@ -3056,10 +3072,16 @@ karemade:
 		if(mtmp->mamnesia){
 			if(mtmp->isshk){
 				make_happy_shk(mtmp, FALSE);
+				ESHK(mtmp)->pbanned = FALSE;
+				ESHK(mtmp)->signspotted = 0;
 			}
 			else {
 				mtmp->mpeaceful = TRUE;
 				mtmp->mtame = FALSE;
+			}
+			if(mtmp->ispriest){
+				EPRI(mtmp)->pbanned = FALSE;
+				EPRI(mtmp)->signspotted = 0;
 			}
 			mtmp->mamnesia = FALSE;
 			newsym(mtmp->mx, mtmp->my);
@@ -3811,7 +3833,7 @@ printDPR(){
 	struct attack *attk;
 	rfile = fopen_datafile("MonDPR.tab", "w", SCOREPREFIX);
 	if (rfile) {
-		Sprintf(pbuf,"Number\tName\tclass\taverage\tmax\tper-hit avg\tper-hit max\tspeed\talignment\tunique?\n");
+		Sprintf(pbuf,"Number\tName\tclass\tdifficulty\taverage\tmax\tper-hit avg\tper-hit max\tspeed\talignment\tunique?\n");
 		fprintf(rfile, "%s", pbuf);
 		fflush(rfile);
 		for(j=0;j<NUMMONS;j++){
@@ -3837,7 +3859,7 @@ printDPR(){
 						maxperhit = attk->damn * attk->damd;
 				}
 			}
-			Sprintf(pbuf,"%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\n", j, mons[j].mname, mons[j].mlet,avdm, mdm, avgperhit, maxperhit, mons[j].mmove,ptr->maligntyp,(mons[j].geno&G_UNIQ) ? "unique":"");
+			Sprintf(pbuf,"%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\n", j, mons[j].mname, mons[j].mlet,monstr[j],avdm, mdm, avgperhit, maxperhit, mons[j].mmove,ptr->maligntyp,(mons[j].geno&G_UNIQ) ? "unique":"");
 			fprintf(rfile, "%s", pbuf);
 			fflush(rfile);
 		}
@@ -4605,6 +4627,8 @@ struct monst *mon;
 		dark_pharaoh(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_POLYPOID_BEING)
 		polyp_pickup(mon);
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_UNBODIED)
+		unbodied_heal(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_ALKILITH)
 		alkilith_spawn(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_MOUTH_OF_THE_GOAT)
@@ -5150,6 +5174,71 @@ struct monst *mon;
 				}
 			}
 		}
+	}
+}
+
+STATIC_OVL
+void
+unbodied_heal(mon)
+struct monst *mon;
+{
+	struct obj *otmp, *otmp2;
+	register struct monst *mtmp, *mtmp0 = 0, *mtmp2;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	if(xyloc == MIGR_EXACT_XY){
+		if(mon->mhp == mon->mhpmax){
+			for(mtmp = migrating_mons; mtmp; mtmp = mtmp2) {
+				mtmp2 = mtmp->nmon;
+				if (mtmp == mon) {
+					if(!mtmp0)
+						migrating_mons = mtmp->nmon;
+					else
+						mtmp0->nmon = mtmp->nmon;
+					mon_arrive(mtmp, FALSE);
+					break;
+				} else
+					mtmp0 = mtmp;
+			}
+			if(mtmp){
+				/*mtmp and mon *should* now be the same.  However, only do the polymorph if we have successfully removed the monster from the migrating chain and placed it!*/
+				int pm = counter_were(monsndx(mon->data));
+				if(!pm) {
+					impossible("unknown lycanthrope %s.", mon->data->mname);
+					return;
+				}
+				were_transform(mon, pm);
+			}
+		}
+		else if(!mon->mcan){
+			//Heal
+			int healing = d(10,6);
+			mon->mhp += healing;
+			//Will reappear next turn
+			if(mon->mhp > mon->mhpmax)
+				mon->mhp = mon->mhpmax;
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+				if(mon->mpeaceful == mtmp->mpeaceful && !mm_grudge(mon, mtmp)){
+					if(mtmp->mhp < mtmp->mhpmax && dist2(xlocale, ylocale, mtmp->mx, mtmp->my) <= 3*3 + 1){
+						mtmp->mhp += healing;
+						if(mtmp->mhp > mtmp->mhpmax)
+							mtmp->mhp = mtmp->mhpmax;
+						if(canseemon(mtmp))
+							pline("%s looks better!", Monnam(mtmp));
+					}
+				}
+			}
+			if (mon->mtame
+				&& (*hp(&youmonst) < *hpmax(&youmonst))
+				&& dist2(xlocale, ylocale, u.ux, u.uy) <= 3*3 + 1)
+			{
+				healup(healing, 0, FALSE, FALSE);
+				You("feel better.");
+			}
+		}
+		else mon->mhp++; //Won't go over mhpmax
 	}
 }
 

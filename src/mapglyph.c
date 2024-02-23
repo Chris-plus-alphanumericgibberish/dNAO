@@ -142,6 +142,15 @@ unsigned int *obgcolor;
 	else
 #endif
 	    mon_color(offset >> 3);
+    } else if ((offset = (glyph - GLYPH_CLOUD_OFF)) >= 0) {	/* zap beam */
+	/* see zapdir_to_glyph() in display.c */
+	ch = showsyms[S_cloud];
+#ifdef ROGUE_COLOR
+	if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color)
+	    color = NO_COLOR;
+	else
+#endif
+	color = iflags.use_color ? zap_glyph_color(offset) : NO_COLOR;
     } else if ((offset = (glyph - GLYPH_ZAP_OFF)) >= 0) {	/* zap beam */
 	/* see zapdir_to_glyph() in display.c */
 	ch = showsyms[S_vbeam + (offset & 0x3)];

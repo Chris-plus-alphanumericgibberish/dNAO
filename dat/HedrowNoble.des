@@ -441,6 +441,7 @@ DOOR:closed,(73,11)
 DOOR:closed,(73,13)
 
 MONSTER: '@', "drow matron-mother", (63,10), hostile
+MONSTER: '@', "shadowsmith", (62,08), hostile
 MONSTER: '@', "drow matron", (62,08), hostile
 MONSTER: '@', "drow matron", (62,08), hostile
 MONSTER: '@', "drow matron", (64,08), hostile

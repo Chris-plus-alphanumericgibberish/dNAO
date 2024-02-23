@@ -264,6 +264,7 @@ struct monst {
 #define	SEROPAENES_FACTION	FACTION_PADDING+9	/* Binder quest faction, not allied with the Yendorian faction despite filling the same role */
 #define	YELLOW_FACTION	    FACTION_PADDING+10	/* Hastur faction, not the same as the Yendorian faction, despite filling the same role in the Madman quest */
 #define	YOG_FACTION	    	FACTION_PADDING+11	/* Yog-Sothoth faction */
+#define	NECROMANCY_FACTION	FACTION_PADDING+12	/* Elf Necromacer's faction */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
@@ -350,11 +351,13 @@ struct monst {
 #define	mvar_lucksucker	mvar1
 #define	mvar_vermiurge	mvar1
 #define	mvar_star_vampire_blood	mvar1
+#define	mvar_elfwraith_target	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2
 #define	mvar_dreadPrayer_progress	mvar2
 #define	mvar_attack_pm	mvar2
+#define	mvar_elfwraith_spell	mvar2
 	long mvar3;
 #define	mvar_conversationTracker	mvar3
 #define	mvar_lifesigns	mvar3

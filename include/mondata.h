@@ -21,7 +21,7 @@
 #define mon_acquired_trinsic(mon,typ) (((mon)->acquired_trinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
 #define mon_resistance(mon,typ)	(mon_intrinsic(mon,typ) || mon_extrinsic(mon,typ) || (typ == SWIMMING && Is_waterlevel(&u.uz)) || \
 	(typ == TELEPORT && mad_monster_turn(mon, MAD_NON_EUCLID) && !(mon)->mpeaceful) || (typ == TELEPORT_CONTROL && mad_monster_turn(mon, MAD_NON_EUCLID)) || \
-	(typ == TELEPAT && mon != &youmonst && !mindless_mon(mon) && uarmh && uarmh->oartifact == ART_ENFORCED_MIND && distu((mon)->mx, (mon)->my) <= etele_dist))
+	(typ == TELEPAT && mon != &youmonst && !mindless((mon)->data) && uarmh && uarmh->oartifact == ART_ENFORCED_MIND && distu((mon)->mx, (mon)->my) <= etele_dist))
 
 #define species_resists_fire(mon)	(((mon)->data->mresists & MR_FIRE) != 0)
 #define species_resists_cold(mon)	(((mon)->data->mresists & MR_COLD) != 0)
@@ -225,7 +225,7 @@
 						 ((ptr)->mtyp == PM_SHAMBLING_HORROR && u.shambin == 3) || \
 						 ((ptr)->mtyp == PM_STUMBLING_HORROR && u.stumbin == 3) || \
 						 ((ptr)->mtyp == PM_WANDERING_HORROR && u.wandein == 3) || \
-						 ((ptr)->mtyp == PM_NITOCRIS) || \
+						 ((ptr)->mtyp == PM_GHOUL_QUEEN_NITOCRIS) || \
 						 ((ptr)->mtyp == PM_PHARAOH) \
 						)
 #define skeleton_innards(ptr)	(((ptr)->mtyp == PM_SKELETON) || \
@@ -330,7 +330,7 @@
 #define herbivorous(ptr)	(((ptr)->mflagst & MT_HERBIVORE) != 0L)
 #define metallivorous(ptr)	(((ptr)->mflagst & MT_METALLIVORE) != 0L)
 #define magivorous(ptr)		(((ptr)->mflagst & MT_MAGIVORE) != 0L)
-#define polyok(ptr)			((((ptr)->mflagsg & MG_NOPOLY) == 0L) && (G_C_INST((ptr)->geno) <= u.uinsight))
+#define polyok(ptr)			((((ptr)->mflagsg & MG_NOPOLY) == 0L) && (G_C_INST((ptr)->geno) <= u.uinsight) && !((((ptr)->mflagsg&MG_FUTURE_WISH) != 0L) && !Role_if(PM_TOURIST)))
 #define is_Rebel(ptr)		((ptr)->mtyp == PM_REBEL_RINGLEADER ||\
 							 (ptr)->mtyp == PM_ADVENTURING_WIZARD ||\
 							 (ptr)->mtyp == PM_MILITANT_CLERIC ||\
@@ -355,6 +355,7 @@
 							 (ptr)->mtyp == PM_UISCERRE_ELADRIN || \
 							 (ptr)->mtyp == PM_CAILLEA_ELADRIN || \
 							 (ptr)->mtyp == PM_DRACAE_ELADRIN || \
+							 (ptr)->mtyp == PM_LIGHT_ELF || \
 							 (ptr)->mtyp == PM_ALRUNES ||\
 							 (ptr)->mtyp == PM_GWYNHARWYF ||\
 							 (ptr)->mtyp == PM_ASCODEL ||\
@@ -376,6 +377,7 @@
 							 (ptr)->mtyp == PM_WATERSPOUT || \
 							 (ptr)->mtyp == PM_MOONSHADOW || \
 							 (ptr)->mtyp == PM_MOTHERING_MASS || \
+							 (ptr)->mtyp == PM_UNBODIED || \
 							 (ptr)->mtyp == PM_HATEFUL_WHISPERS ||\
 							 (ptr)->mtyp == PM_FURIOUS_WHIRLWIND ||\
 							 (ptr)->mtyp == PM_BLOODY_SUNSET ||\
@@ -818,6 +820,8 @@
 #define allow_shield(ptr)	(ptr->mtyp == PM_SCORPION\
 							|| ptr->mtyp == PM_YURIAN\
 							|| ptr->mtyp == PM_ZETA_METROID\
+							|| ptr->mtyp == PM_Y_CULTIST_MATRON\
+							|| ptr->mtyp == PM_Y_CULTIST_PATRON\
 							|| ptr->mtyp == PM_DEMOGORGON\
 							|| ptr->mtyp == PM_CHAIN_GOLEM\
 							|| ptr->mtyp == PM_SCORPIUS\
@@ -971,6 +975,7 @@
 				  (ptr)->mtyp == PM_PARASITIZED_DOLL || \
 				  (ptr)->mtyp == PM_MOTE_OF_LIGHT || \
 				  (ptr)->mtyp == PM_BALL_OF_LIGHT || \
+				  (ptr)->mtyp == PM_LIGHT_ELF || \
 				  (ptr)->mtyp == PM_BLOODY_SUNSET || \
 				  (ptr)->mtyp == PM_BALL_OF_GOSSAMER_SUNLIGHT || \
 				  (ptr)->mtyp == PM_LUMINOUS_CLOUD || \
@@ -988,6 +993,7 @@
 				  (ptr)->mtyp == PM_COTERIE_OF_MOTES ||\
 				  (ptr)->mtyp == PM_BALL_OF_RADIANCE) ? 2 : \
 				 ((ptr)->mtyp == PM_THRONE_ARCHON ||\
+				  (ptr)->mtyp == PM_UNBODIED ||\
 				  (ptr)->mtyp == PM_BEAUTEOUS_ONE ||\
 				  (ptr)->mtyp == PM_DAO_LAO_GUI_MONK ||\
 				 (ptr)->mtyp == PM_ASPECT_OF_THE_SILENCE) ? 3 : \
@@ -1226,11 +1232,13 @@
 #define mon_undead_hunter(mon)	(((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_HUNTER))
 #define mon_knight(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || (mon)->mtyp == PM_SIR_GARLAND || \
 						 (mon)->mtyp == PM_GARLAND || (mon)->mtyp == PM_CELEBORN || (mon)->mtyp == PM_DANTRAG || \
+						 (mon)->mtyp == PM_LIGHT_ELF || (mon)->mtyp == PM_UNBODIED || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 (mon)->mtyp == PM_PAGE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
 #define mon_turn_undead(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || \
 						 (mon)->mtyp == PM_BRIGHID_ELADRIN || \
 						 (mon)->mtyp == PM_DRACAE_ELADRIN || \
+						 (mon)->mtyp == PM_LIGHT_ELF || (mon)->mtyp == PM_UNBODIED || \
 						 (mon)->mtyp == PM_KUKER || (mon)->mtyp == PM_SHIELD_ARCHON || \
 						 (mon)->mtyp == PM_MONADIC_DEVA || \
 						 (mon)->mtyp == PM_ALRUNES || (mon)->mtyp == PM_HATEFUL_WHISPERS || \
@@ -1241,7 +1249,7 @@
 						 (mon)->mtyp == PM_SIR_ALJANOR || (mon)->mtyp == PM_ALLIANCE_VANGUARD || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
-#define mon_healing_turn(mon)	((mon)->mtyp == PM_DRACAE_ELADRIN)
+#define mon_healing_turn(mon)	((mon)->mtyp == PM_DRACAE_ELADRIN || (mon)->mtyp == PM_UNBODIED)
 #define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_MASTER_KAEN || (mon)->mtyp == PM_ABBOT || \
 						 (mon)->mtyp == PM_XORN_MONK || (mon)->mtyp == PM_DAO_LAO_GUI_MONK || (mon)->mtyp == PM_ZHI_REN_MONK || \
 						 (mon)->mtyp == PM_ITINERANT_PRIESTESS || \
@@ -1292,8 +1300,8 @@
 #define is_guided_vectored_mtyp(mtyp)	((mtyp) == PM_JUGGERNAUT || (mtyp) == PM_ID_JUGGERNAUT)
 
 #define is_smith_mtyp(mtyp)	((mtyp) == PM_OONA || (mtyp) == PM_DRACAE_ELADRIN || (mtyp) == PM_GOBLIN_SMITH || (mtyp) == PM_DWARF_SMITH\
-							 || (mtyp) == PM_MITHRIL_SMITH || (mtyp) == PM_SHADOWSMITH || (mtyp) == PM_HUMAN_SMITH)
-#define is_smith_mon(mon)	(get_mx(mon, MX_ESMT))
+							 || (mtyp) == PM_MITHRIL_SMITH || (mtyp) == PM_SHADOWSMITH || (mtyp) == PM_HUMAN_SMITH || (mtyp) == PM_TREESINGER)
+#define needs_forge_mon(mon)	(!(ESMT(mon)->smith_mtyp == PM_OONA || ESMT(mon)->smith_mtyp == PM_DRACAE_ELADRIN || ESMT(mon)->smith_mtyp == PM_SHADOWSMITH))
 
 #define likes_swamp(ptr)	((ptr)->mlet == S_PUDDING || \
 				 (ptr)->mlet == S_FUNGUS || \

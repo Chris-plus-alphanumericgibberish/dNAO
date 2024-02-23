@@ -454,6 +454,7 @@ int dmg;
 		}
 		if(!uarmc){
 		 if(uwep && uwep->oartifact==ART_TENSA_ZANGETSU){
+			n--;
 			You_feel("the tentacles tear uselessly at your regenerating shihakusho.");
 		 }
 		 else if(uarm && n){
@@ -833,7 +834,7 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	mayberem_common(obj, str, !(rn2(20) < (ACURR(A_CHA) + check_mutation(TENDRIL_HAIR) ? 10 : 0)));
+	mayberem_common(obj, str, !(rn2(20) < (ACURR(A_CHA) + (check_mutation(TENDRIL_HAIR) ? 10 : 0))));
 }
 
 STATIC_OVL void
@@ -842,7 +843,7 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	mayberem_common(obj, str, !(rn2(60) < (ACURR(A_CHA) + check_mutation(TENDRIL_HAIR) ? 30 : 0)));
+	mayberem_common(obj, str, !(rn2(60) < (ACURR(A_CHA) + (check_mutation(TENDRIL_HAIR) ? 30 : 0))));
 }
 
 STATIC_OVL void
@@ -851,7 +852,7 @@ register struct obj *obj;
 const char *str;
 boolean helpless;
 {
-	mayberem_common(obj, str, helpless || !(rn2(60) < (ACURR(A_CHA) + check_mutation(TENDRIL_HAIR) ? 30 : 0)));
+	mayberem_common(obj, str, helpless || !(rn2(60) < (ACURR(A_CHA) + (check_mutation(TENDRIL_HAIR) ? 30 : 0))));
 }
 
 STATIC_OVL void
@@ -990,7 +991,6 @@ struct monst * mon;
 		case PM_AVATAR_OF_LOLTH:
 				if(flags.female){
 					verbalize("You're such a sweet lady, I wish you were more open to new things...");
-					if(u.sealsActive&SEAL_ENKI) unbind(SEAL_ENKI,TRUE);
 				} else {
 					verbalize("How dare you refuse me!");
 					return 0; /* don't fall down to the general "teleport and return 1" case */
