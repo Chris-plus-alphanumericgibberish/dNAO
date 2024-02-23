@@ -216,7 +216,7 @@ more_experienced(exp, rexp)
 	} else u.uexp += exp;
 	if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE){
 		artinstance[ART_SCORPION_CARAPACE].CarapaceXP += exp;
-		if(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel < 29
+		if(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel < 30
 			&& newuexp(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel) <= artinstance[ART_SCORPION_CARAPACE].CarapaceXP
 		){
 			artinstance[ART_SCORPION_CARAPACE].CarapaceLevel++;
