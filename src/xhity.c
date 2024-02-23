@@ -14704,7 +14704,9 @@ int vis;						/* True if action is at all visible to the player */
 		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0, magr);
 		/* determine unarmedMult */
 		if (youagr) {
-			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : ((!gloves && u.sealsActive&SEAL_ECHIDNA) || check_mutation(SHUB_CLAWS)) ? 2 : 1;
+			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : u.sealsActive&SEAL_ECHIDNA ? 2 : 1;
+			if(check_mutation(SHUB_CLAWS))
+				unarmedMult++;
 		}
 		else {
 			unarmedMult = 1;
