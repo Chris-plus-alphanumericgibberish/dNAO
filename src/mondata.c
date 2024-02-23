@@ -3471,8 +3471,9 @@ struct permonst *ptr;
 	int size = 8;
 	if(ptr->mtyp == PM_ZHI_REN_MONK)
 		size = 4;
-	// return 8;
-	switch(ptr->msize){
+	else if(ptr->mtyp == PM_ANCIENT_OF_DEATH)
+		size = 20;
+	else switch(ptr->msize){
 		case MZ_TINY:
 			size = 4;
 		break;
@@ -3492,9 +3493,11 @@ struct permonst *ptr;
 			size = 20;
 		break;
 	}
-	if(centauroid(ptr)){
+
+	if(centauroid(ptr) && size < 20){
 		size += 2;
 	}
+
 	if(is_elf(ptr)){
 		size += 3;
 	}
