@@ -13920,11 +13920,16 @@ char *name;	/* target name or ""*/
 			break;
 		}
 	} else if (!strcmp(name,  "Inherited")){
+		rem_ox(otmp, OX_ENAM);
 		if (flags.descendant){
-			otmp->otyp = (int)artilist[u.inherited].otyp;
-			otmp = oname(otmp, artilist[u.inherited].name);
-		} else {
-			rem_ox(otmp, OX_ENAM);
+			struct obj *art;
+			art = mksartifact(u.inherited);
+			if(art){
+				discover_artifact(u.inherited);
+				fully_identify_obj(art);
+				place_object(art, otmp->ox, otmp->oy);
+			}
+			else impossible("Delayed inheritance failed in minor_artifact.");
 		}
 	}
 	return otmp;
