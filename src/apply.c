@@ -2621,7 +2621,8 @@ int magic; /* 0=Physical, otherwise skill level */
 	    teleds(cc.x, cc.y, TRUE);
 	    nomul(-1, "jumping around");
 	    nomovemsg = "";
-	    morehungry(max_ints(1, rnd(25) * get_uhungersizemod()));
+		if(!Role_if(PM_MONK))
+			morehungry(max_ints(1, rnd(25) * get_uhungersizemod()));
 	    return MOVE_STANDARD;
 	}
 }
