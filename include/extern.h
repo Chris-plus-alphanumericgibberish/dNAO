@@ -289,6 +289,9 @@ E void FDECL(bot1str, (char *));
 E void FDECL(bot2str, (char *, boolean, int, boolean));
 E void FDECL(bot3str, (char *, boolean, int));
 #endif
+E void FDECL(do_statuseffects, (char *, boolean, int, int));
+E long FDECL(get_status_duration, (long long));
+E long long NDECL(get_status_mask);
 
 /* ### cmd.c ### */
 
@@ -837,6 +840,7 @@ E void NDECL(reset_uhunger);
 E boolean NDECL(satiate_uhunger);
 E double NDECL(get_uhungersizemod);
 E int NDECL(get_uhungermax);
+E int NDECL(get_satiationlimit);
 E int NDECL(Hear_again);
 E void NDECL(reset_eat);
 E int NDECL(doeat);

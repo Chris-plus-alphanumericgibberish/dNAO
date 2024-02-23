@@ -6,7 +6,7 @@
 #include "mutations.h"
 #include "artifact.h"
 
-STATIC_DCL void FDECL(enlght_line, (const char *,const char *,const char *, boolean));
+STATIC_DCL void FDECL(enlght_line, (const char *,const char *,const char *, boolean, long));
 STATIC_DCL void FDECL(put_or_dump, (const char *, boolean));
 STATIC_DCL char *FDECL(enlght_combatinc, (const char *,int,int,char *));
 STATIC_DCL int NDECL(minimal_enlightenment);
@@ -35,10 +35,13 @@ static const char
 	have_been[]  = "have been ",
 	have_never[] = "have never ", never[] = "never ";
 
-#define enl_msg(prefix,present,past,suffix) \
-			enlght_line(prefix, final ? past : present, suffix, dumping)
+#define enl_msg_duration(prefix,present,past,suffix,duration)			\
+	enlght_line(prefix, final ? past : present, suffix, dumping, duration)
+#define enl_msg(prefix,present,past,suffix)	\
+	enl_msg_duration(prefix,present,past,suffix,0)
 #define put_enl(msg) put_or_dump(msg, dumping) 
 #define you_are(attr)	enl_msg(You_,are,were,attr)
+#define you_are_duration(attr,duration)	enl_msg_duration(You_,are,were,attr,duration)
 #define you_have(attr)	enl_msg(You_,have,had,attr)
 #define you_can(attr)	enl_msg(You_,can,could,attr)
 #define you_have_been(goodthing) enl_msg(You_,have_been,were,goodthing)
@@ -46,13 +49,19 @@ static const char
 #define you_have_X(something)	enl_msg(You_,have,(const char *)"",something)
 
 static void
-enlght_line(start, middle, end, dumping)
+enlght_line(start, middle, end, dumping, duration)
 const char *start, *middle, *end;
 boolean dumping;
+long duration;
 {
 	char buf[BUFSZ];
 
-	Sprintf(buf, "%s%s%s.", start, middle, end);
+	if (duration & TIMEOUT)
+		Sprintf(buf, "%s%s%s (%ld turn%s left).",
+			start, middle, end, duration,
+			duration == 1 ? "" : "s");
+	else
+		Sprintf(buf, "%s%s%s.", start, middle, end);
 
 	put_or_dump(buf, dumping);
 }
@@ -567,9 +576,15 @@ boolean dumping;
 	if (Drain_resistance) you_are("level-drain resistant");
 	if (Antimagic) you_are("magic-protected");
 	if (Nullmagic) you_are("shrouded in anti-magic");
-	if (Deadmagic) you_are("in a dead-magic zone");
-	if (Catapsi) you_are("in a psionic storm");
-	if (Misotheism) you_are("in a divine-exclusion zone");
+	if (Deadmagic) you_are_duration("in a dead-magic zone", Deadmagic);
+	if (Catapsi) you_are_duration("in a psionic storm", Catapsi);
+	if (Misotheism) you_are_duration("in a divine-exclusion zone", Misotheism);
+	if (DimensionalLock)
+		enl_msg_duration("Summons ", "are", "were", " blocked", DimensionalLock);
+	if (TimeStop)
+		enl_msg_duration("Time ", "is", "was", " stopped", HTimeStop);
+	if (BlowingWinds)
+		enl_msg_duration("Hurricane-force winds ", "surround", "surrounded", " you", HBlowingWinds);
 	if (Waterproof) you_are("waterproof");
 	if (Stone_resistance)
 		you_are("petrification resistant");
@@ -970,6 +985,29 @@ boolean dumping;
 		if(u.ucspeed==NORM_CLOCKSPEED) you_are("set to normal clockspeed");
 		if(u.ucspeed==SLOW_CLOCKSPEED) you_are("set to low clockspeed");
 		if(u.phasengn) you_are("in phase mode");
+		if (u.utemp < WARM)
+			enl_msg("Your internal boiler ", "is", "was", " under control");
+		else if (u.utemp < HOT)
+			enl_msg("Your internal boiler ", "is", "was", " running mildly warm");
+		else if (u.utemp < BURNING_HOT)
+			enl_msg("Your internal boiler ", "is", "was", " running rather hot");
+		else if (u.utemp < MELTING)
+			enl_msg("Your internal boiler ", "is", "was", " burning hot");
+		else if (u.utemp < MELTED){
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " nearly at capacity");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " melting to slag");
+		} else {
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " well beyond capacity, but miraculously intact");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " nothing but molten bronze");
+		}
+		if (wizard) {
+			Sprintf(buf, " %d", u.utemp);
+			enl_msg("Your boiler temperature ", "is", "was", buf);
+		}
 	}
 	if (uandroid){
 		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
@@ -1147,6 +1185,26 @@ resistances_enlightenment()
 		if(u.ucspeed==NORM_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to normal speed.");
 		if(u.ucspeed==SLOW_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to low speed.");
 		if(u.phasengn) putstr(en_win, 0, "Your phase engine is activated.");
+		if (u.utemp < WARM)
+			putstr(en_win, 0, "Your internal boiler is under control.");
+		else if (u.utemp < HOT)
+			putstr(en_win, 0, "Your internal boiler is running mildly warm.");
+		else if (u.utemp < BURNING_HOT)
+			putstr(en_win, 0, "Your internal boiler is running rather hot.");
+		else if (u.utemp < MELTING)
+			putstr(en_win, 0, "Your internal boiler is burning hot!");
+		else if (u.utemp < MELTED){
+			if (Fire_resistance)
+				putstr(en_win, 0, "Your thermal sinks are nearly at capacity!");
+			else
+				putstr(en_win, 0, "Your internal boiler is melting to slag!");
+		}
+		else {
+			if (Fire_resistance)
+				putstr(en_win, 0, "Your thermal sinks are well beyond capacity, but miraculously intact!");
+			else // man, if you manage to see this one i'll be impressed
+				putstr(en_win, 0, "Your internal boiler is nothing but molten bronze.");
+		}
 	}
 	if (uandroid){
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "You are set to emergency speed.");
@@ -1740,11 +1798,15 @@ spirits_enlightenment()
 	putstr(en_win, 0, "Currently bound spirits:");
 	putstr(en_win, 0, "");
 
-#define addseal(id) do {if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
-	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
-		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+#define addseal(id) do {\
+	if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves){\
+		if (u.spiritT[id] == u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)])\
+			Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+				u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+		else Sprintf(buf, "  %-23s (duration:%ld, timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+				u.spiritT[id]-moves, u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); }\
 	else\
-	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
+		Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
 	putstr(en_win, 0, buf); } while (0)
 #define addpen(seal) do {\
 	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(seal) - (FIRST_SEAL)], \

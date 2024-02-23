@@ -4,6 +4,7 @@
 #include "hack.h"
 #include "wincurs.h"
 #include "cursstat.h"
+#include "botl.h"
 
 /* Status window functions for curses interface */
 
@@ -17,7 +18,7 @@ typedef struct nhs {
 } nhstat;
 
 static attr_t get_trouble_color(const char *);
-static void draw_trouble_str(const char *);
+static void draw_trouble_str(const char *, const char *);
 static void print_statdiff(const char *append, nhstat *, int, int);
 static void get_playerrank(char *);
 static int hpen_color(boolean, int, int);
@@ -25,9 +26,9 @@ static void draw_bar(boolean, int, int, const char *);
 static void draw_horizontal(int, int, int, int);
 static void draw_horizontal_new(int, int, int, int);
 static void draw_vertical(int, int, int, int);
-static void curses_add_statuses(WINDOW *, boolean, boolean, int *, int *);
+static void curses_add_statuses(WINDOW *, boolean, boolean, int *, int *, boolean);
 static void curses_add_status(WINDOW *, boolean, boolean, int *, int *,
-                              const char *, int);
+                              const char *, const char *, long, boolean);
 static int decrement_highlight(nhstat *, boolean);
 
 #ifdef STATUS_COLORS
@@ -67,6 +68,8 @@ static nhstat prevscore;
 extern const char *hu_stat[];   /* from eat.c */
 extern const char *ca_hu_stat[];   /* from eat.c */
 extern const char *enc_stat[];  /* from botl.c */
+extern const char *enc_stat_abbrev1[]; /* from botl.c */
+extern const char *enc_stat_abbrev2[]; /* from botl.c */
 
 /* If the statuscolors patch isn't enabled, have some default colors for status problems
    anyway */
@@ -77,6 +80,7 @@ struct statcolor {
 };
 
 static const struct statcolor default_colors[] = {
+    /* Hunger */
     {"Satiated", CLR_YELLOW},
     {"Hungry", CLR_YELLOW},
     {"Weak", CLR_ORANGE},
@@ -87,25 +91,45 @@ static const struct statcolor default_colors[] = {
     {"Unwound", CLR_ORANGE},
     {"Slipping", CLR_BRIGHT_MAGENTA},
     {"Slipped", CLR_BRIGHT_MAGENTA},
+    /* Encumbrance */
     {"Burdened", CLR_RED},
     {"Stressed", CLR_RED},
     {"Strained", CLR_ORANGE},
     {"Overtaxed", CLR_ORANGE},
     {"Overloaded", CLR_BRIGHT_MAGENTA},
-    {"Conf", CLR_BRIGHT_BLUE},
-    {"Blind", CLR_BRIGHT_BLUE},
-    {"Stun", CLR_BRIGHT_BLUE},
-    {"Hallu", CLR_BRIGHT_BLUE},
-    {"Ill", CLR_BRIGHT_MAGENTA},
-    {"FoodPois", CLR_BRIGHT_MAGENTA},
+    /* Delayed instadeaths */
+    {"Stone", CLR_BRIGHT_MAGENTA},
     {"Slime", CLR_BRIGHT_MAGENTA},
     {"Sufct", CLR_BRIGHT_MAGENTA},
+    {"Ill", CLR_BRIGHT_MAGENTA},
+    {"FoodPois", CLR_BRIGHT_MAGENTA},
+    /* Other status effects */
+    {"Blind", CLR_BRIGHT_BLUE},
+    {"Stun", CLR_BRIGHT_BLUE},
+    {"Conf", CLR_BRIGHT_BLUE},
+    {"Hallu", CLR_BRIGHT_BLUE},
+    /* Insanity messages */
     {"Panic", CLR_BRIGHT_CYAN},
     {"Stmblng", CLR_BRIGHT_CYAN},
     {"Stggrng", CLR_BRIGHT_CYAN},
     {"Babble", CLR_BRIGHT_CYAN},
     {"Scream", CLR_BRIGHT_CYAN},
     {"Faint", CLR_BRIGHT_CYAN},
+    /* Less important */
+    {"Held", CLR_GREEN},
+    {"UHold", CLR_GREEN},
+    {"Lycn", CLR_GREEN},
+    {"Invl", CLR_GREEN},
+    {"Lev", CLR_GREEN},
+    {"Fly", CLR_GREEN},
+    {"Ride", CLR_GREEN},
+    /* Temporary effects with known duration */
+    {"TimeStop", CLR_BRIGHT_GREEN},
+    {"Lust", CLR_BRIGHT_GREEN},
+    {"DeadMagc", CLR_BRIGHT_GREEN},
+    {"Miso", CLR_BRIGHT_GREEN},
+    {"Catapsi", CLR_BRIGHT_GREEN},
+    {"DimLock", CLR_BRIGHT_GREEN},
     {NULL, NO_COLOR},
 };
 
@@ -200,12 +224,12 @@ print_statdiff(const char *append, nhstat *stat, int new, int type)
     wattron(win, attr);
     wprintw(win, "%s", append);
     if (type == STAT_STR && new > 18) {
-        if (new > 118)
-            wprintw(win, "%d", new - 100);
-        else if (new == 118)
+        if (new > STR18(100))
+            wprintw(win, "%d", new - 20);
+        else if (new == STR18(100))
             wprintw(win, "18/**");
         else
-            wprintw(win, "18/%02d", new - 18);
+            wprintw(win, "18/%02d", (new - 18)*5);
     } else
         wprintw(win, "%d", new);
 
@@ -213,11 +237,11 @@ print_statdiff(const char *append, nhstat *stat, int new, int type)
 }
 
 static void
-draw_trouble_str(const char *str)
+draw_trouble_str(const char *hilite, const char *str)
 {
     WINDOW *win = curses_get_nhwin(STATUS_WIN);
 
-    attr_t attr = get_trouble_color(str);
+    attr_t attr = get_trouble_color(hilite);
     wattron(win, attr);
     wprintw(win, "%s", str);
     wattroff(win, attr);
@@ -393,7 +417,9 @@ curses_update_stats(void)
     if (horiz) {
         /* correct y */
         int cy = 3;
-        if (iflags.classic_status)
+        if (!iflags.classic_status && iflags.statuslines >= 4)
+            cy = 4;
+        if (iflags.classic_status && iflags.statuslines <= 2)
             cy = 2;
 
         /* actual y (and x) */
@@ -566,7 +592,11 @@ draw_horizontal(int x, int y, int hp, int hpmax)
         Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
     }
-    curses_add_statuses(win, FALSE, FALSE, NULL, NULL);
+    if (iflags.statuslines >= 3) {
+        y++;
+        wmove(win, y, x);
+    }
+    curses_add_statuses(win, FALSE, FALSE, NULL, NULL, iflags.statuslines >= 3);
 }
 
 static void
@@ -676,7 +706,11 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
         Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
     }
-    curses_add_statuses(win, TRUE, FALSE, &x, &y);
+    if (iflags.statuslines >= 4) {
+        y++;
+        wmove(win, y, x);
+    }
+    curses_add_statuses(win, TRUE, FALSE, &x, &y, iflags.statuslines >= 4);
 
     /* Right-aligned attributes */
     int stat_length = 6; /* " Dx:xx" */
@@ -848,12 +882,12 @@ draw_vertical(int x, int y, int hp, int hpmax)
     }
 #endif /* SCORE_ON_BOTL */
 
-    curses_add_statuses(win, FALSE, TRUE, &x, &y);
+    curses_add_statuses(win, FALSE, TRUE, &x, &y, FALSE);
 }
 
 static void
 curses_add_statuses(WINDOW *win, boolean align_right,
-                    boolean vertical, int *x, int *y)
+                    boolean vertical, int *x, int *y, boolean first)
 {
     if (align_right) {
         /* Right-aligned statuses. Since add_status decrease one x more
@@ -868,63 +902,79 @@ curses_add_statuses(WINDOW *win, boolean align_right,
         *x = mx;
     }
 
-#define statprob(str, trouble)                                  \
-    curses_add_status(win, align_right, vertical, x, y, str, trouble)
+    /* Find out how much abbreviation is required to make it fit, if not using
+       vertical status. do_statuseffects (used by tty and dumplogs) can print to
+       a buffer without affecting the terminal unlike curses statusline code, so
+       call that to find the length. */
+    int abbrev = 0;
+    if (!vertical) {
+        int cx, cy, mx, my;
+        getyx(win, cy, cx);
+        getmaxyx(win, my, mx);
+        char buf[MAXCO];
+        for (;;) {
+            buf[0] = '\0';      /* so eos() works */
+            do_statuseffects(buf, FALSE, abbrev, first ? 3 : 2);
+            if (abbrev >= 2 || strlen(buf) < mx - cx)
+                break;
+            abbrev++;
+	}
+    }
 
-    /* Hunger */
-    statprob(u.uhs[uclockwork ? ca_hu_stat : hu_stat], u.uhs != 1); /* 1 is NOT_HUNGRY (not defined here) */
-
-    /* General troubles */
-    statprob("Conf",     Confusion);
-    statprob("Blind",    Blind);
-    statprob("Stun",     Stunned);
-    statprob("Hallu",    Hallucination);
-    statprob("Ill",      (u.usick_type & SICK_NONVOMITABLE));
-    statprob("FoodPois", (u.usick_type & SICK_VOMITABLE));
-    statprob("Slime",    Slimed);
-    statprob("Sufct",    (FrozenAir || Strangled || BloodDrown));
-    /* Insanity subtroubles */
-    statprob("Panic",    Panicking);
-    statprob("Stmblng",  StumbleBlind);
-    statprob("Stggrng",  StaggerShock);
-    statprob("Babble",   Babble);
-    statprob("Scream",   Screaming);
-    statprob("Faint",    FaintingFits);
-
-    /* Encumbrance */
-    int enc = near_capacity();
-    statprob(enc_stat[enc], enc > UNENCUMBERED);
-#undef statprob
+#define status_effect_duration(str1, str2, str3, duration)              \
+    (curses_add_status(win, align_right, vertical, x, y, str1,          \
+                       abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), \
+                       duration, first), first = FALSE)
+#define status_effect(str1, str2, str3) status_effect_duration(str1, str2, str3, 0)
+    long long mask = get_status_mask();
+    for (int i = 0; i < SIZE(status_effects); i++) {
+        struct status_effect status = status_effects[i];
+        if (mask & status.mask & iflags.statuseffects) {
+            long duration = get_status_duration(status.mask);
+            status_effect_duration(status.name, status.abbrev1, status.abbrev2, duration);
+        }
+        /* Add hunger and encumbrance after foodpois */
+        if (status.mask == BL_MASK_FOODPOIS) {
+            if (u.uhs != NOT_HUNGRY) {
+                if (uclockwork)
+                    status_effect(ca_hu_stat[u.uhs], ca_hu_stat[u.uhs], ca_hu_stat[u.uhs]);
+                else
+                    status_effect(hu_stat[u.uhs], hu_stat[u.uhs], hu_stat[u.uhs]);
+            }
+            int enc = near_capacity();
+            if (enc > UNENCUMBERED)
+                status_effect(enc_stat[enc], enc_stat_abbrev1[enc], enc_stat_abbrev2[enc]);
+        }
+    }
+#undef status_effect
+#undef status_effect_duration
 }
 
 static void
 curses_add_status(WINDOW *win, boolean align_right, boolean vertical,
-                  int *x, int *y, const char *str, int trouble)
+                  int *x, int *y, const char *hilite, const char *str,
+                  long duration, boolean first)
 {
     /* If vertical is TRUE here with no x/y, that's an error. But handle
        it gracefully since NH3 doesn't recover well in crashes. */
     if (!x || !y)
         vertical = FALSE;
 
-    if (!trouble)
-        return;
-
-    if (!vertical && !align_right)
+    if (!vertical && !align_right && !first)
         waddch(win, ' ');
 
-    /* For whatever reason, hunger states have trailing spaces. Get rid of them. */
     char buf[BUFSZ];
-    Strcpy(buf, str);
-    int i;
-    for (i = 0; (buf[i] != ' ' && buf[i] != '\0'); i++) ;
+    if (duration & TIMEOUT)
+        Snprintf(buf, BUFSZ, "%s:%ld", str, duration);
+    else
+        Strncpy(buf, str, BUFSZ);
 
-    buf[i] = '\0';
     if (align_right) {
         *x -= (strlen(buf) + 1); /* add spacing */
         wmove(win, *y, *x);
     }
 
-    draw_trouble_str(buf);
+    draw_trouble_str(hilite, buf);
 
     if (vertical) {
         wmove(win, *y, *x);

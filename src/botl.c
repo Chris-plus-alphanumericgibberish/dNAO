@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "botl.h"
 #ifdef TTY_GRAPHICS
 # include "wintty.h"
 #endif
@@ -41,6 +42,90 @@ const char * const enc_stat_abbrev2[] = {
 STATIC_DCL void NDECL(bot1);
 STATIC_DCL void NDECL(bot2);
 #endif /* OVL0 */
+
+long get_status_duration(long long mask) {
+	switch (mask) {
+	case BL_MASK_TIMESTOP:
+		return HTimeStop;
+	case BL_MASK_LUST:
+		return HBlowingWinds;
+	case BL_MASK_DEADMAGC:
+		return Deadmagic;
+	case BL_MASK_MISO:
+		return Misotheism;
+	case BL_MASK_CATAPSI:
+		return Catapsi;
+	case BL_MASK_DIMLOCK:
+		return DimensionalLock;
+	default:
+		return 0;
+	}
+}
+
+long long get_status_mask() {
+	long long mask = 0;
+	if(Stoned || Golded)
+		mask |= BL_MASK_STONE;
+	if(Slimed)
+		mask |= BL_MASK_SLIME;
+	if(FrozenAir || Strangled || BloodDrown)
+		mask |= BL_MASK_SUFCT;
+	if(Sick) {
+		if (u.usick_type & SICK_VOMITABLE)
+			mask |= BL_MASK_FOODPOIS;
+		if (u.usick_type & SICK_NONVOMITABLE)
+			mask |= BL_MASK_ILL;
+	}
+	if(Blind && !StumbleBlind)
+		mask |= BL_MASK_BLIND;
+	if(Stunned && !StaggerShock)
+		mask |= BL_MASK_STUN;
+	if(Confusion && !StumbleBlind)
+		mask |= BL_MASK_CONF;
+	if(Hallucination)
+		mask |= BL_MASK_HALLU;
+	if(Panicking)
+		mask |= BL_MASK_PANIC;
+	if(StumbleBlind)
+		mask |= BL_MASK_STMBLNG;
+	if(StaggerShock)
+		mask |= BL_MASK_STGGRNG;
+	if(Babble)
+		mask |= BL_MASK_BABBLE;
+	if(Screaming)
+		mask |= BL_MASK_SCREAM;
+	if(FaintingFits)
+		mask |= BL_MASK_FAINT;
+	if(u.ustuck) {
+		if(sticks(&youmonst) && !u.uswallow)
+			mask |= BL_MASK_UHOLD;
+		else
+			mask |= BL_MASK_HELD;
+	}
+	if(u.ulycn != NON_PM)
+		mask |= BL_MASK_LYCN;
+	if(Invulnerable)
+		mask |= BL_MASK_INVL;
+	if(Levitation)
+		mask |= BL_MASK_LEV;
+	else if(Flying)
+		mask |= BL_MASK_FLY;
+	if(u.usteed)
+		mask |= BL_MASK_RIDE;
+	if(TimeStop)
+		mask |= BL_MASK_TIMESTOP;
+	if(BlowingWinds)
+		mask |= BL_MASK_LUST;
+	if(Deadmagic)
+		mask |= BL_MASK_DEADMAGC;
+	if(Misotheism)
+		mask |= BL_MASK_MISO;
+	if(Catapsi)
+		mask |= BL_MASK_CATAPSI;
+	if(DimensionalLock)
+		mask |= BL_MASK_DIMLOCK;
+        return mask;
+}
 
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
 
@@ -153,7 +238,7 @@ add_colored_text(const char *hilite, const char *text, char *newbot2,
     if (strlen(newbot2) >= maxlength) return;
 
     if (!iflags.use_status_colors || !terminal_output) {
-        if (duration)
+        if (duration & TIMEOUT)
             Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s:%ld" : " %s:%ld", text, duration);
         else
             Snprintf(nb = eos(newbot2), MAXCO - strlen(newbot2), first ? "%s" : " %s", text);
@@ -517,18 +602,15 @@ do_statuseffects(char *newbot2, boolean terminal_output, int abbrev, int statusl
   register char *nb = eos(newbot2);
   int cap = near_capacity();
   boolean first = statusline == 3; /* first text shown on line */
+  long long mask = get_status_mask();
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
-#define status_effect(str1, str2, str3)                                 \
-  (add_colored_text((str1),                                             \
-                    abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), \
-                    newbot2, terminal_output, statusline, first, 0),    \
-   first = FALSE)
 #define status_effect_duration(str1, str2, str3, duration)              \
   (add_colored_text((str1),                                             \
                     abbrev == 2 ? (str3) : abbrev == 1 ? (str2) : (str1), \
                     newbot2, terminal_output, statusline, first,        \
                     duration),                                          \
    first = FALSE)
+#define status_effect(str1, str2, str3) status_effect_duration(str1, str2, str3, 0)
 #else
 #define status_effect(str1, str2, str3)                                 \
   (Snprintf(nb = eos(nb), MAXCO - strlen(newbot2),                      \
@@ -542,72 +624,28 @@ do_statuseffects(char *newbot2, boolean terminal_output, int abbrev, int statusl
 	    duration),							\
    first = FALSE)
 #endif
-/** Delayed instadeaths **/
-  if(Stoned || Golded)
-    status_effect("Stone", "Ston", "Sto");
-  if(Slimed)
-    status_effect("Slime", "Slim", "Slm");
-  if(FrozenAir || Strangled || BloodDrown)
-    status_effect("Sufct", "Sfct", "Sfc");
-  if(Sick) {
-    if (u.usick_type & SICK_VOMITABLE)
-      status_effect("FoodPois", "Fpois", "Poi");
-    if (u.usick_type & SICK_NONVOMITABLE)
-      status_effect("Ill", "Ill", "Ill");
+  for (int i = 0; i < SIZE(status_effects); i++) {
+    struct status_effect status = status_effects[i];
+    if (mask & status.mask & iflags.statuseffects) {
+      long duration = get_status_duration(status.mask);
+      if (duration & TIMEOUT)
+        status_effect_duration(status.name, status.abbrev1, status.abbrev2,
+                               duration);
+      else
+        status_effect(status.name, status.abbrev1, status.abbrev2);
+    }
+    /* Add hunger and encumbrance after foodpois */
+    if (status.mask == BL_MASK_FOODPOIS) {
+        if(u.uhs != NOT_HUNGRY) {
+          if(uclockwork)
+            status_effect(ca_hu_stat[u.uhs], ca_hu_stat[u.uhs], ca_hu_stat[u.uhs]);
+          else
+            status_effect(hu_stat[u.uhs], hu_stat[u.uhs], hu_stat[u.uhs]);
+        }
+        if(cap > UNENCUMBERED)
+          status_effect(enc_stat[cap], enc_stat_abbrev1[cap], enc_stat_abbrev2[cap]);
+    }
   }
-/** Hunger **/
-  if(u.uhs != NOT_HUNGRY) {
-    if(uclockwork)
-      status_effect(ca_hu_stat[u.uhs], ca_hu_stat[u.uhs], ca_hu_stat[u.uhs]);
-    else
-      status_effect(hu_stat[u.uhs], hu_stat[u.uhs], hu_stat[u.uhs]);
-  }
-/** Encumbrance **/
-  if(cap > UNENCUMBERED)
-    status_effect(enc_stat[cap], enc_stat_abbrev1[cap], enc_stat_abbrev2[cap]);
-/** Other status effects **/
-  if(Invulnerable)
-    status_effect("Invl", "Invl", "In");
-  if(Blind && !StumbleBlind)
-    status_effect("Blind", "Blnd", "Bl");
-  if(Stunned && !StaggerShock)
-    status_effect("Stun", "Stun", "St");
-  if(Confusion && !StumbleBlind)
-    status_effect("Conf", "Cnf", "Cf");
-  if(Hallucination)
-    status_effect("Hallu", "Hal", "Hl");
-/** Insanity messages **/
-  if(Panicking)
-    status_effect("Panic", "Pnc", "Pnc");
-  if(StumbleBlind)
-    status_effect("Stmblng", "Stmbl", "Stm");
-  if(StaggerShock)
-    status_effect("Stggrng", "Stggr", "Stg");
-  if(Babble)
-    status_effect("Babble", "Babl", "Bbl");
-  if(Screaming)
-    status_effect("Scream", "Scrm", "Scr");
-  if(FaintingFits)
-    status_effect("Faint", "Fnt", "Fnt");
-/** Less important **/
-  if(u.ustuck) {
-    if(sticks(&youmonst) && !u.uswallow)
-      status_effect("UHold", "UHld", "UHd");
-    else
-      status_effect("Held", "Hld", "Hd");
-  }
-  if(Levitation)
-    status_effect("Lev", "Lev", "Lv");
-  /* flying and levitation are mutually exclusive */
-  if(Flying && !Levitation)
-    status_effect("Fly", "Fly", "Fl");
-  if(u.usteed)
-    status_effect("Ride", "Rid", "Rd");
-/** Temporary effects with known duration **/
-  if (TimeStop)
-    status_effect_duration("TimeStop", "TStop", "TS", HTimeStop ? HTimeStop : ETimeStop);
-  if (BlowingWinds)
-    status_effect_duration("Lust", "Lust", "Lst", HBlowingWinds ? HBlowingWinds : EBlowingWinds);
 #undef status_effect
 #undef status_effect_duration
 }

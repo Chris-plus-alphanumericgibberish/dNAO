@@ -12,6 +12,7 @@ NEARDATA struct instance_flags iflags;	/* provide linkage */
 #else
 #include "hack.h"
 #include "tcap.h"
+#include "botl.h"
 #include <ctype.h>
 #endif
 #include <errno.h>
@@ -448,7 +449,8 @@ static struct Comp_Opt
 #ifdef MSDOS
 	{ "soundcard", "type of sound card to use", 20, SET_IN_FILE },
 #endif
-	{ "statuslines", "number of status lines (2 or 3)", 20, SET_IN_GAME },
+	{ "statuseffects", "status effects to show in the status line", 20, SET_IN_GAME },
+	{ "statuslines", "number of status lines (2, 3, or 4)", 20, SET_IN_GAME },
 	{ "suppress_alert", "suppress alerts about version-specific features",
 						8, SET_IN_GAME },
 	{ "tile_width", "width of tiles", 20, DISP_IN_GAME},	/*WC*/
@@ -661,7 +663,8 @@ initoptions()
 #endif
 	iflags.menu_headings = ATR_INVERSE;
 	iflags.attack_mode = ATTACK_MODE_CHAT;
-	iflags.statuslines = 3;
+	iflags.statuseffects = ~0;
+	iflags.statuslines = 4;
 
 	/* Use negative indices to indicate not yet selected */
 	flags.initrole = -1;
@@ -2941,6 +2944,46 @@ goodfruit:
         }
 
 
+	fullname = "statuseffects";
+	if (match_optname(opts, fullname, sizeof("statuseffects")-1, TRUE)) {
+		int l = 0;
+		boolean negative = FALSE;
+		boolean error = FALSE;
+		if (negated) {
+			iflags.statuseffects = 0;
+		}
+		else for (op = string_for_opt(opts, FALSE); op && *op; op += l) {
+			while (*op == ' ' || *op == ',')
+				op++;
+			if (op[0] == '!') {
+				negative = TRUE;
+				op++;
+			}
+			else {
+				negative = FALSE;
+			}
+			if (!strncmpi(op, "all", l=3)) {
+				iflags.statuseffects = negative ? 0 : ~0;
+				continue;
+			}
+			boolean exists = FALSE;
+			for (i = 0; i < SIZE(status_effects); i++) {
+				struct status_effect status = status_effects[i];
+				if (!strncmpi(op, status.name, l=strlen(status.name))) {
+					exists = TRUE;
+					if (!negative)
+						iflags.statuseffects |= status.mask;
+					else
+						iflags.statuseffects &= ~status.mask;
+					break;
+				}
+			}
+			if (!exists) error = TRUE;
+		}
+		if (error) badoption(opts);
+		return;
+	}
+
 	fullname = "statuslines";
 	if (match_optname(opts, fullname, sizeof("statuslines")-1, TRUE)) {
 		op = string_for_opt(opts, negated);
@@ -2952,10 +2995,7 @@ goodfruit:
 		    if (!initial)
 		        need_redraw = TRUE;
 		    iflags.statuslines = atoi(op);
-		    if (iflags.statuslines > 3) {
-		        iflags.statuslines = 3;
-		        badoption(opts);
-		    } else if (iflags.statuslines < 2) {
+		    if (iflags.statuslines < 2) {
 		        iflags.statuslines = 2;
 		        badoption(opts);
 		    }
@@ -3980,6 +4020,46 @@ boolean setinitial,setfromfile;
 			destroy_nhwindow(tmpwin);
 		}
 		retval = TRUE;
+	} else if (!strcmp(optname, "statuseffects")) {
+		char buf[BUFSZ];
+		menu_item *mode_pick = (menu_item *)0;
+		boolean done = FALSE;
+		/*
+		 * Refresh statusline so shown status conditions don't
+		 * end up desynced while in the menu. curses doesn't
+		 * update the statusline during the menu at all and
+		 * refreshing it each time is too slow because it
+		 * redraws everything (including drawing the map and
+		 * then overwriting it), so only do this for tty.
+		 */
+		boolean refresh_botl = !strcmp(windowprocs.name, "tty");
+
+		if (refresh_botl) bot();
+		while (!done){
+			tmpwin = create_nhwindow(NHW_MENU);
+			start_menu(tmpwin);
+			for (i = 0; i < SIZE(status_effects); i++) {
+				struct status_effect status = status_effects[i];
+				/* a-z then A-Z */
+				char letter = 'a' + i;
+				if (letter > 'z')
+					letter += 'A'-'z'-1;
+				Sprintf(buf, "%-11s (%s)", status.name, iflags.statuseffects & status.mask ? "on" : "off");
+				any.a_int = i + 1;
+				add_menu(tmpwin, NO_GLYPH, &any, letter, 0,
+					ATR_NONE, buf, MENU_UNSELECTED);
+			}
+			end_menu(tmpwin, "Toggle shown status effects on/off:");
+			if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
+				iflags.statuseffects ^= status_effects[mode_pick->item.a_int - 1].mask;
+				if (refresh_botl) bot();
+			}
+			else
+				done = TRUE;
+			free((genericptr_t)mode_pick);
+			destroy_nhwindow(tmpwin);
+		}
+		retval = TRUE;
 	} else if (!strcmp("wizlevelport", optname)) {
 		char buf[BUFSZ];
 		menu_item *pick = (menu_item *) 0;
@@ -4599,9 +4679,12 @@ char *buf;
 	else if (!strcmp(optname, "player_selection"))
 		Sprintf(buf, "%s", iflags.wc_player_selection ? "prompts" : "dialog");
 #ifdef MSDOS
-	else if (!strcmp(optname, "soundcard"))
+	else if (!strcmp(optname, "soundcard")) {
 		Sprintf(buf, "%s", to_be_done);
+	}
 #endif
+	else if (!strcmp(optname, "statuseffects"))
+		Sprintf(buf, "0x%llX", iflags.statuseffects);
 	else if (!strcmp(optname, "statuslines"))
 		Sprintf(buf, "%d", iflags.statuslines);
 	else if (!strcmp(optname, "suppress_alert")) {

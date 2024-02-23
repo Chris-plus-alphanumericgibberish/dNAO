@@ -497,7 +497,7 @@ exerper()
 	if(!(moves % 10)) {
 		/* Hunger Checks */
 
-		int hs = (YouHunger > (Race_if(PM_INCANTIFIER) ? max(u.uenmax/2,200) : get_uhungermax()/2)) ? SATIATED :
+		int hs = (YouHunger > get_satiationlimit()) ? SATIATED :
 			 (YouHunger > 150*get_uhungersizemod()) ? NOT_HUNGRY :
 			 (YouHunger > 50*get_uhungersizemod()) ? HUNGRY :
 			 (YouHunger > 0) ? WEAK : FAINTING;
@@ -1931,8 +1931,8 @@ acurrstr(str)
 	int str;
 {
 	if (str <= 18) return((schar)str);
-	if (str <= 41) return((schar)(19 + str / 10)); /* map to 19-21 */
-	else return((schar)(str - 20));
+	if (str <= 38) return((schar)(18)); /* map to 18 */
+	return((schar)(str - 20));
 }
 
 #endif /* OVL0 */

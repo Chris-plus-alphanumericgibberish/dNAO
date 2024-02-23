@@ -8719,7 +8719,13 @@ arti_invoke(obj)
 	    if (!otmp) goto nothing_special;
 	    otmp->blessed = obj->blessed;
 	    otmp->cursed = obj->cursed;
-	    otmp->bknown = obj->bknown;
+
+	    otmp->bknown |= obj->bknown;
+		otmp->known |= obj->known;
+		otmp->rknown |= obj->rknown;
+		otmp->dknown |= obj->dknown;
+		otmp->sknown |= obj->sknown;
+
 	    if (obj->blessed) {
 			if (otmp->spe < 0) otmp->spe = 0;
 			otmp->quan += rnd(10);
@@ -10585,7 +10591,12 @@ arti_invoke(obj)
 						if (!otmp) break;
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
-						otmp->bknown = obj->bknown;
+
+						otmp->bknown |= obj->bknown;
+						otmp->known |= obj->known;
+						otmp->rknown |= obj->rknown;
+						otmp->dknown |= obj->dknown;
+						otmp->sknown |= obj->sknown;
 						if (obj->blessed) {
 							if (otmp->spe < 0) otmp->spe = 0;
 							otmp->quan += rnd(10);
@@ -10711,7 +10722,11 @@ arti_invoke(obj)
 						otmp = mksobj(SILVER_BULLET, NO_MKOBJ_FLAGS);
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
-						otmp->bknown = obj->bknown;
+						otmp->bknown |= obj->bknown;
+						otmp->known |= obj->known;
+						otmp->rknown |= obj->rknown;
+						otmp->dknown |= obj->dknown;
+						otmp->sknown |= obj->sknown;
 						if (obj->blessed) {
 							if (otmp->spe < 0) otmp->spe = 0;
 							otmp->quan += 10+rnd(10);
@@ -10728,7 +10743,11 @@ arti_invoke(obj)
 						otmp = mksobj(ROCKET, NO_MKOBJ_FLAGS);
 						otmp->blessed = obj->blessed;
 						otmp->cursed = obj->cursed;
-						otmp->bknown = obj->bknown;
+						otmp->bknown |= obj->bknown;
+						otmp->known |= obj->known;
+						otmp->rknown |= obj->rknown;
+						otmp->dknown |= obj->dknown;
+						otmp->sknown |= obj->sknown;
 						if (obj->blessed) {
 							if (otmp->spe < 0) otmp->spe = 0;
 						} else if (obj->cursed) {

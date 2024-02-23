@@ -53,7 +53,7 @@ extern char *viz_rmax;			/* max could see indices */
 
 #define unshadowed_square(x,y)	((levl[x][y].lit && !(viz_array[y][x]&TEMP_DRKMASK)) || (!levl[x][y].lit && !(viz_array[y][x]&TEMP_LITMASK)))
 
-#define xrayrange()	((Xray_vision ? 3 : -1) + (u.sealsActive&SEAL_ORTHOS ? spiritDsize() + 1 : 0))
+#define xrayrange()	((Xray_vision ? 3 : -1) + ((Role_if(PM_MONK) && ublindf && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD) ? ((u.ulevel+1)/10) : 0)+ (u.sealsActive&SEAL_ORTHOS ? spiritDsize() + 1 : 0))
 #define xraydist() (xrayrange() < 0 ? -1 : xrayrange()*xrayrange())
 
 /*
