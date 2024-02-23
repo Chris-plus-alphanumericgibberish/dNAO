@@ -6983,6 +6983,7 @@ struct monst *smith;
 		 "Ask for a copy of an item.", MENU_UNSELECTED);
 	any.a_int = 5;
 
+	Sprintf(sbuf, "Services Available:");
 	end_menu(tmpwin, sbuf);
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
