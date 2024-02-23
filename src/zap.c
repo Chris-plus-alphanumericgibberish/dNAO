@@ -1281,7 +1281,7 @@ struct obj *obj;
 	long flag;
 	for (i = 0; i < 32; i++){
 		flag = 0x1L<<i;
-		if(check_carapace_mod(obj, flag))
+		if(check_carapace_mod(obj, flag) && !(flag == CPROP_HARD_SCALE && check_carapace_mod(obj, CPROP_PLATES)))
 			cprops++;
 	}
 	if(!cprops)
@@ -1289,7 +1289,7 @@ struct obj *obj;
 	cprops = rn2(cprops);
 	for (i = 0; i < 32; i++){
 		flag = 0x1L<<i;
-		if(check_carapace_mod(obj, flag)){
+		if(check_carapace_mod(obj, flag) && !(flag == CPROP_HARD_SCALE && check_carapace_mod(obj, CPROP_PLATES))){
 			if(!cprops)
 				break;
 			else cprops--;
