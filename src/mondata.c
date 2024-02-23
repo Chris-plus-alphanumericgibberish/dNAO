@@ -2389,6 +2389,7 @@ struct monst *mon;
 		|| youracedata->mtyp == PM_RED_DRAGON
 		|| is_rider(youracedata)
 		|| wearing_dragon_armor(mon, PM_RED_DRAGON)
+		|| (Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE && u.ulevel >= 15)
 		);
 	//else
 	return (Change_res(mon) || mon_resistance(mon, GOOD_HEALTH) || flaming(mon->data) 
@@ -2399,6 +2400,7 @@ struct monst *mon;
 		|| has_template(mon, SLIME_REMNANT)
 		|| is_rider(mon->data)
 		|| wearing_dragon_armor(mon, PM_RED_DRAGON)
+		|| (is_half_dragon(mon->data) && mon->mvar_hdBreath == AD_FIRE && mon->m_lev >= 15)
 		);
 }
 

@@ -2537,6 +2537,7 @@ E NhRegion *FDECL(visible_region_at, (XCHAR_P,XCHAR_P));
 E void FDECL(show_region, (NhRegion*, XCHAR_P, XCHAR_P));
 E void FDECL(save_regions, (int,int));
 E void FDECL(rest_regions, (int,BOOLEAN_P));
+E NhRegion* FDECL(create_generic_cloud, (XCHAR_P, XCHAR_P, int, struct region_arg *, boolean));
 E NhRegion* FDECL(create_gas_cloud, (XCHAR_P, XCHAR_P, int, int, boolean));
 E NhRegion* FDECL(create_fog_cloud, (XCHAR_P, XCHAR_P, int, int, boolean));
 E NhRegion* FDECL(create_dust_cloud, (XCHAR_P, XCHAR_P, int, int));
@@ -3438,6 +3439,7 @@ E int FDECL(xmeleehurty, (struct monst *, struct monst *, struct attack *, struc
 E void FDECL(getgazeinfo, (int, int, struct permonst *, struct monst *, struct monst *, boolean *, boolean *, boolean *));
 E int FDECL(xgazey, (struct monst *, struct monst *, struct attack *, int));
 E int FDECL(xengulfhity, (struct monst *, struct monst *, struct attack *, int));
+E int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 E void FDECL(passive_obj2, (struct monst *, struct monst *, struct obj *, struct attack *, struct attack *));
 E void FDECL(breakobj, (struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P, BOOLEAN_P));
 E int FDECL(hmon_with_unowned_obj, (struct monst *, struct obj **, int));

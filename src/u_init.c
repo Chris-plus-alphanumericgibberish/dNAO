@@ -2916,6 +2916,7 @@ u_init()
 			case 4:
 				flags.HDbreath = AD_ELEC;
 				HShock_resistance |= (FROMRACE|FROMOUTSIDE);
+				HBlind_res |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 5:
 				flags.HDbreath = AD_DRST;

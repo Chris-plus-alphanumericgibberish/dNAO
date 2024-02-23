@@ -4141,8 +4141,12 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 				case AD_DRST:
 					create_gas_cloud(sx, sy, 1, 8, youagr);
 					break;
-				default:
-					impossible("Unhandled gascloud-leaving zap adtyp %d", zapdata->adtyp);
+				default:{
+					struct region_arg cloud_data;
+					cloud_data.damage = 8;
+					cloud_data.adtyp = zapdata->adtyp;
+					create_generic_cloud(sx, sy, 1, &cloud_data, youagr);
+				}
 				}
 			}
 

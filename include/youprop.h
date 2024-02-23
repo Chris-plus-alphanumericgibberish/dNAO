@@ -27,6 +27,8 @@
 /*** Resistances to troubles ***/
 #define Oona_resistance	((u.oonaenergy == AD_FIRE ? Fire_resistance : u.oonaenergy == AD_COLD ? Cold_resistance : u.oonaenergy == AD_ELEC ? Shock_resistance : FALSE))
 /* With intrinsics and extrinsics */
+#define HNo_prop		u.uprops[NO_PROP].intrinsic
+
 #define HFire_resistance	u.uprops[FIRE_RES].intrinsic
 #define EFire_resistance	u.uprops[FIRE_RES].extrinsic
 #define Fire_resistance		(HFire_resistance || EFire_resistance || \
@@ -633,9 +635,9 @@
 						 && which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
 						species_reflects(&youmonst))
 
+#define HFree_action		u.uprops[FREE_ACTION].intrinsic
 #define EFree_action		u.uprops[FREE_ACTION].extrinsic
-
-#define Free_action		(EFree_action) /* [Tom] */
+#define Free_action		(HFree_action || EFree_action) /* [Tom] */
 
 #define Fixed_abil		(u.uprops[FIXED_ABIL].extrinsic)	/* KMH */
 

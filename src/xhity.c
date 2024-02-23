@@ -16,7 +16,6 @@ STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack 
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(xengulfhurty, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int));
 STATIC_DCL void FDECL(add_silvered_art_sear_adjectives, (char *, struct obj*));
@@ -9981,14 +9980,14 @@ int vis;
 
 int
 xengulfhurty(magr, mdef, attk, vis)
-struct monst * magr;
+struct monst * magr; /* May be NULL if being used for generic cloud damage handling (engulfed by a cloud) */
 struct monst * mdef;
 struct attack * attk;
 int vis;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
-	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct permonst * pa = magr ? (youagr ? youracedata : magr->data) : (struct permonst *) 0;
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	int result = MM_MISS;
 	int dmg = d(attk->damn, attk->damd);
@@ -10004,7 +10003,7 @@ int vis;
 		/* the most important and most special case */
 	case AD_DGST:
 		if (youdef) {
-			if (pa->mtyp == PM_METROID_QUEEN && !Drain_resistance) {
+			if (pa && pa->mtyp == PM_METROID_QUEEN && !Drain_resistance) {
 				losexp("life force drain", TRUE, FALSE, FALSE);
 				magr->mhpmax += d(1, 4);
 				magr->mhp += d(1, 6);
@@ -10024,7 +10023,7 @@ int vis;
 			}
 			else {
 				*hp(mdef) -= *hp(mdef)/(u.uswldtim+1); //Floored and current HP, so never fatal. 
-				pline("%s%s digests you!", Monnam(magr),
+				pline("%s%s digests you!", magr ? Monnam(magr): "Something",
 					(u.uswldtim == 2) ? " thoroughly" :
 					(u.uswldtim == 1) ? " utterly" : "");
 				exercise(A_STR, FALSE);
@@ -10134,7 +10133,7 @@ int vis;
 		}
 		else { //mvm
 			/* eating a Rider or its corpse is fatal */
-			if (is_rider(mdef->data)) {
+			if (is_rider(mdef->data) && magr) {
 				if (vis)
 					pline("%s %s!", Monnam(magr),
 					mdef->mtyp == PM_FAMINE ?
@@ -10153,7 +10152,7 @@ int vis;
 				}
 			}
 			else if(is_indigestible(mdef->data)){
-				if(canspotmon(magr) || canspotmon(mdef)){
+				if(magr && (canspotmon(magr) || canspotmon(mdef))){
 					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
 				}
 				dmg = 0;
@@ -10161,7 +10160,7 @@ int vis;
 			}
 			else if(is_delouseable(mdef->data)){
 				mdef = delouse(mdef, AD_DGST);
-				if(canspotmon(magr) || canspotmon(mdef)){
+				if(magr && (canspotmon(magr) || canspotmon(mdef))){
 					pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
 				}
 				dmg = 0;
@@ -10182,7 +10181,7 @@ int vis;
 						dmg = mdef->mhpmax*(20-resist)/20;
 					if(dmg < mdef->mhp){
 						mdef->mhp -= dmg;//Will not kill defender
-						if(canspotmon(magr) || canspotmon(mdef)){
+						if(magr && (canspotmon(magr) || canspotmon(mdef))){
 							pline("%s regurgitates %s.", Monnam(magr), mon_nam(mdef));
 						}
 						dmg = 0;
@@ -10206,10 +10205,10 @@ int vis;
 				}
 
 				/* Is a corpse for nutrition possible?  It may kill magr */
-				if (!corpse_chance(mdef, magr, TRUE)) {
+				if (magr && !corpse_chance(mdef, magr, TRUE)) {
 					break;
 				}
-				if (*hp(magr) < 1) {
+				if (magr && *hp(magr) < 1) {
 					result |= MM_AGR_DIED;
 					break;
 				}
@@ -10218,7 +10217,7 @@ int vis;
 				* DGST monsters don't die from undead corpses
 				*/
 				int num = monsndx(mdef->data);
-				if (get_mx(magr, MX_EDOG) && 
+				if (magr && get_mx(magr, MX_EDOG) && 
 					!((mvitals[num].mvflags & G_NOCORPSE) || get_mx(mdef, MX_ESUM))) {
 					struct obj *virtualcorpse = mksobj(CORPSE, MKOBJ_NOINIT);
 					int nutrit;
@@ -10304,7 +10303,7 @@ int vis;
 		if (can_blnd(magr, mdef, attk->aatyp, (struct obj*)0)) {
 			if (youdef) {
 			
-				if (uarmh && uarmh->otyp == SHEMAGH && 
+				if (uarmh && uarmh->otyp == SHEMAGH && magr && 
 					(magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND || magr->mtyp == PM_PYROCLASTIC_VORTEX))
 				{
 					pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
@@ -10321,7 +10320,7 @@ int vis;
 			else {
 				struct obj *otmp = which_armor(mdef, W_ARMH);
 				
-				if (otmp && otmp->otyp == SHEMAGH && (magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND)){
+				if (otmp && otmp->otyp == SHEMAGH && magr && (magr->mtyp == PM_DUST_VORTEX || magr->mtyp == PM_SINGING_SAND)){
 					if (vis&VIS_MDEF)
 						pline("The %s protects %s from the dust!", simple_typename(otmp->otyp), Monnam(mdef));
 				} else {
@@ -10378,9 +10377,11 @@ int vis;
 					/* KMH -- this is okay with unchanging */
 					rehumanize();
 					result = MM_DEF_LSVD;
-					magr->mhp = 1;
-					expels(magr, pa, FALSE);
-					pline("Rusting your iron body took a severe toll on the cloud!");
+					if(magr){
+						magr->mhp = 1;
+						expels(magr, pa, FALSE);
+						pline("Rusting your iron body took a severe toll on the cloud!");
+					}
 				}
 				else {
 					if (vis&VIS_MDEF) {
@@ -10397,7 +10398,9 @@ int vis;
 					else {
 						if (mdef->mtame && !vis && !youagr)
 							pline("May %s rust in peace.", mon_nam(mdef));
-						result = (MM_HIT | MM_DEF_DIED | (youagr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
+						result = (MM_HIT | MM_DEF_DIED);
+						if(magr)
+							result |= ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED);
 					}
 				}
 			}
@@ -10436,7 +10439,7 @@ int vis;
 		break;
 		/* basic damage engulf types */
 	case AD_PHYS:
-		if (pa->mtyp == PM_FOG_CLOUD || pa->mtyp == PM_STEAM_VORTEX) {
+		if (pa && (pa->mtyp == PM_FOG_CLOUD || pa->mtyp == PM_STEAM_VORTEX)) {
 			if (youdef) {
 				You("are laden with moisture and %s",
 					flaming(youracedata) ? "are smoldering out!" :
@@ -10459,7 +10462,7 @@ int vis;
 				}
 			}
 		}
-		else if (pa->mtyp == PM_DREADBLOSSOM_SWARM) {
+		else if (pa && pa->mtyp == PM_DREADBLOSSOM_SWARM) {
 			if (youdef) {
 				You("are sliced by the whirling stems!");
 				exercise(A_DEX, FALSE);
@@ -10527,7 +10530,7 @@ int vis;
 				dmg = 0;
 		}
 		/* message, special effects */
-		if (((attk->adtyp == AD_EELC) || (youagr || !magr->mcan)) &&
+		if (((attk->adtyp == AD_EELC) || (youagr || (!magr || !magr->mcan))) &&
 			(rn2(2) || !youdef || !u.uswallow))
 		{
 			/* message */
@@ -10544,9 +10547,9 @@ int vis;
 			}
 			/* destroy items */
 			if (!UseInvShock_res(mdef)){
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20) : !rn2(4))
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20) : !rn2(4))
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
 			}
 			/* golem effects */
@@ -10582,7 +10585,7 @@ int vis;
 				dmg = 0;
 		}
 		/* message, special effects */
-		if (((attk->adtyp == AD_ECLD) || (youagr || !magr->mcan)) &&
+		if (((attk->adtyp == AD_ECLD) || (youagr || (!magr || !magr->mcan))) &&
 			(rn2(2) || !youdef || !u.uswallow))
 		{
 			/* message */
@@ -10602,7 +10605,7 @@ int vis;
 			}
 			/* destroy items */
 			if (!UseInvCold_res(mdef)){
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20): !rn2(4))
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* golem effects */
@@ -10642,7 +10645,7 @@ int vis;
 		}
 		/* message, special effects */
 		/* This seems buggy mvm. They're really cold if YOU'RE swallowed! */
-		if (((attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR) || (youagr || !magr->mcan)) &&
+		if (((attk->adtyp == AD_EFIR || attk->adtyp == AD_ACFR) || (youagr || (!magr || !magr->mcan))) &&
 			(rn2(2) || !youdef || !u.uswallow))
 		{
 			/* message */
@@ -10670,11 +10673,11 @@ int vis;
 			}
 			/* destroy items */
 			if (!UseInvFire_res(mdef)) {
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20) : !rn2(4))
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
-				if (mlev(magr) > rn2(20))
+				if (magr ? mlev(magr) > rn2(20): !rn2(4))
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
-				if (mlev(magr) > rn2(25))
+				if (magr? mlev(magr) > rn2(25): !rn2(5))
 					destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
 			}
 			/* golem effects */
@@ -10703,7 +10706,7 @@ int vis;
 			dmg *= 2;
 		}
 		/* message, special effects */
-		if (youagr || !magr->mcan){
+		if (youagr || (!magr || !magr->mcan)){
 			/* message */
 			if (vis&VIS_MDEF) {
 				if (dmg) {
@@ -10739,7 +10742,8 @@ int vis;
 					);
 			}
 			/* heal from damage dealt*/
-			heal(magr, min(*hp(mdef), dmg));
+			if(magr)
+				heal(magr, min(*hp(mdef), dmg));
 		}
 		/* deal damage */
 		result = xdamagey(magr, mdef, attk, dmg);
