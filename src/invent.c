@@ -188,8 +188,8 @@ struct obj **potmp, **pobj;
 
 		otmp->quan += obj->quan;
 		
-		otmp->rknown |= obj->rknown
-		otmp->dknown |= obj->dknown
+		otmp->rknown |= obj->rknown;
+		otmp->dknown |= obj->dknown;
 #ifdef GOLDOBJ
                 /* temporary special case for gold objects!!!! */
 #endif
