@@ -187,6 +187,9 @@ struct obj **potmp, **pobj;
 			    / (otmp->quan + obj->quan);
 
 		otmp->quan += obj->quan;
+		
+		otmp->rknown |= obj->rknown
+		otmp->dknown |= obj->dknown
 #ifdef GOLDOBJ
                 /* temporary special case for gold objects!!!! */
 #endif
@@ -5066,7 +5069,7 @@ mergable_traits(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 		return FALSE;
 
 	if ((obj->oclass==WEAPON_CLASS || obj->oclass==ARMOR_CLASS) &&
-	    (obj->oerodeproof!=otmp->oerodeproof || obj->rknown!=otmp->rknown))
+	    (obj->oerodeproof!=otmp->oerodeproof))
 	    return FALSE;
 
 	if (obj->oclass == FOOD_CLASS && (obj->oeaten != otmp->oeaten ||
