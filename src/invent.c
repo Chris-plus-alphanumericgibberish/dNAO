@@ -1389,7 +1389,7 @@ register const char *let,*word;
 		|| (!strcmp(word, "build a phase engine with") &&
 		    (otyp != SUBETHAIC_COMPONENT))
 		|| (!strcmp(word, "build a magic furnace with") &&
-		    (otyp != CORPSE || otmp->corpsenm != PM_DISENCHANTER))
+		    (otyp != WAN_DRAINING))
 		|| (!strcmp(word, "build a hellfire furnace with") &&
 		    (otyp != HELLFIRE_COMPONENT))
 		|| (!strcmp(word, "build a scrap maw with") &&

@@ -8247,7 +8247,7 @@ struct obj **optr;
 				break;
 				case MAGIC_FURNACE:
 					comp = getobj(apply_corpse, "build a magic furnace with");
-					if(!comp || comp->otyp != CORPSE || comp->corpsenm != PM_DISENCHANTER){
+					if(!comp || comp->otyp != WAN_DRAINING){
 						pline("Never mind.");
 						return MOVE_CANCELLED;
 					}
