@@ -835,6 +835,7 @@ E void NDECL(reset_uhunger);
 E boolean NDECL(satiate_uhunger);
 E double NDECL(get_uhungersizemod);
 E int NDECL(get_uhungermax);
+E int NDECL(get_satiationlimit);
 E int NDECL(Hear_again);
 E void NDECL(reset_eat);
 E int NDECL(doeat);

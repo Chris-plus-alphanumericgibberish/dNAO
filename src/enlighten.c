@@ -970,6 +970,29 @@ boolean dumping;
 		if(u.ucspeed==NORM_CLOCKSPEED) you_are("set to normal clockspeed");
 		if(u.ucspeed==SLOW_CLOCKSPEED) you_are("set to low clockspeed");
 		if(u.phasengn) you_are("in phase mode");
+		if (u.utemp < WARM)
+			enl_msg("Your internal boiler ", "is", "was", " under control");
+		else if (u.utemp < HOT)
+			enl_msg("Your internal boiler ", "is", "was", " running mildly warm");
+		else if (u.utemp < BURNING_HOT)
+			enl_msg("Your internal boiler ", "is", "was", " running rather hot");
+		else if (u.utemp < MELTING)
+			enl_msg("Your internal boiler ", "is", "was", " burning hot");
+		else if (u.utemp < MELTED){
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " nearly at capacity");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " melting to slag");
+		} else {
+			if (Fire_resistance)
+				enl_msg("Your thermal sinks ", "are", "were", " well beyond capacity, but miraculously intact");
+			else
+				enl_msg("Your intenal boiler ", "is", "was", " nothing but molten bronze");
+		}
+		if (wizard) {
+			Sprintf(buf, " %d", u.utemp);
+			enl_msg("Your boiler temperature ", "is", "was", buf);
+		}
 	}
 	if (uandroid){
 		if(u.ucspeed==HIGH_CLOCKSPEED) you_are("set to emergency speed");
@@ -1147,6 +1170,26 @@ resistances_enlightenment()
 		if(u.ucspeed==NORM_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to normal speed.");
 		if(u.ucspeed==SLOW_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to low speed.");
 		if(u.phasengn) putstr(en_win, 0, "Your phase engine is activated.");
+		if (u.utemp < WARM)
+			putstr(en_win, 0, "Your internal boiler is under control.");
+		else if (u.utemp < HOT)
+			putstr(en_win, 0, "Your internal boiler is running mildly warm.");
+		else if (u.utemp < BURNING_HOT)
+			putstr(en_win, 0, "Your internal boiler is running rather hot.");
+		else if (u.utemp < MELTING)
+			putstr(en_win, 0, "Your internal boiler is burning hot!");
+		else if (u.utemp < MELTED){
+			if (Fire_resistance)
+				putstr(en_win, 0, "Your thermal sinks are nearly at capacity!");
+			else
+				putstr(en_win, 0, "Your internal boiler is melting to slag!");
+		}
+		else {
+			if (Fire_resistance)
+				putstr(en_win, 0, "Your thermal sinks are well beyond capacity, but miraculously intact!");
+			else // man, if you manage to see this one i'll be impressed
+				putstr(en_win, 0, "Your internal boiler is nothing but molten bronze.");
+		}
 	}
 	if (uandroid){
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "You are set to emergency speed.");
@@ -1740,11 +1783,15 @@ spirits_enlightenment()
 	putstr(en_win, 0, "Currently bound spirits:");
 	putstr(en_win, 0, "");
 
-#define addseal(id) do {if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves)\
-	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
-		u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+#define addseal(id) do {\
+	if(u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] > moves){\
+		if (u.spiritT[id] == u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)])\
+			Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+				u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
+		else Sprintf(buf, "  %-23s (duration:%ld, timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
+				u.spiritT[id]-moves, u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); }\
 	else\
-	Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
+		Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
 	putstr(en_win, 0, buf); } while (0)
 #define addpen(seal) do {\
 	Sprintf(buf, "  %-23s (timeout:%ld)", sealNames[decode_sealID(seal) - (FIRST_SEAL)], \

@@ -14947,7 +14947,7 @@ int vis;						/* True if action is at all visible to the player */
 						tmp = min(0, tmp);
 					bonsdmg += tmp;
 				}
-				else if (fired)
+				else if (fired || thrown)
 				{
 					/* slings get STR bonus */
 					if (launcher && objects[launcher->otyp].oc_skill == P_SLING)
