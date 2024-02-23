@@ -681,7 +681,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 		    }
 		    if (useemon && xraydist > 0 &&
 			    distu(mtmp->mx, mtmp->my) <= xraydist) {
-			/* Eyes of the Overworld */
+			/* Eye of the Overworld */
 			Strcat(monbuf, "astral vision");
 			if (ways_seen-- > 1) Strcat(monbuf, ", ");
 		    }

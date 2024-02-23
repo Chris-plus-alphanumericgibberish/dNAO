@@ -313,7 +313,7 @@ STAIR:(73,09),up
 # Altars
 ALTAR:(20,09),chaos,altar
 # Objects
-OBJECT:'(',"lenses",(20,09),blessed,0,"The Eyes of the Overworld"
+OBJECT:'(',"soul-lens",(20,09),blessed,0,"The Eye of the Overworld"
 # Kaen.
 MONSTER:'@',"Master Kaen",(20,10)
 

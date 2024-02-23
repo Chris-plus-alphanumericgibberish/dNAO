@@ -227,7 +227,7 @@ boolean talk;
 	int eyecnt;
 	char buf[BUFSZ];
 
-	/* we need to probe ahead in case the Eyes of the Overworld
+	/* we need to probe ahead in case the Eye of the Overworld
 	   are or will be overriding blindness */
 	u_could_see = !Blind;
 	Blinded = xtime ? 1L : 0L;
@@ -253,7 +253,7 @@ boolean talk;
 		    eyecnt = eyecount(youracedata);
 		    Your(eyemsg, (eyecnt == 1) ? buf : makeplural(buf),
 			 (eyecnt == 1) ? "itches" : "itch");
-		} else {	/* Eyes of the Overworld */
+		} else {	/* Eye of the Overworld */
 		    Your(vismsg, "brighten",
 			 Hallucination ? "sadder" : "normal");
 		}
@@ -279,7 +279,7 @@ boolean talk;
 		    eyecnt = eyecount(youracedata);
 		    Your(eyemsg, (eyecnt == 1) ? buf : makeplural(buf),
 			 (eyecnt == 1) ? "twitches" : "twitch");
-		} else {	/* Eyes of the Overworld */
+		} else {	/* Eye of the Overworld */
 		    Your(vismsg, "dim",
 			 Hallucination ? "happier" : "normal");
 		}

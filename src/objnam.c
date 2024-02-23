@@ -3429,7 +3429,7 @@ const char *oldstr;
 		(p = strstri(bp, " labelled ")) != 0 ||
 		(p = strstri(bp, " called ")) != 0) {
 		/* don't singularize these: */
-		if (!BSTRNCMPI(bp, p- 4, "Eyes of the Overworld", 21)
+		if (!BSTRNCMPI(bp, p- 4, "Eye of the Overworld", 20)
 			|| !BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21)
 			|| !BSTRNCMPI(bp, p- 5, "Claws of the Revenancer", 23)
 			|| !BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25)

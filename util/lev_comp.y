@@ -975,8 +975,11 @@ object_desc	: chance ':' object_c ',' o_name
 				else{
 					int token = get_object_id($5, $<i>3);
 					if (token == ERR)
+					{
 					yywarning(
 					"Illegal object name!  Making random object.");
+					yywarning($5);
+					}
 					else
 					tmpobj[nobj]->id = token;
 					Free($5);

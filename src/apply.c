@@ -5035,7 +5035,7 @@ coord *ccp;
 	    You(cant_see_spot);
 		ccp->x = 0; ccp->y = 0;
 	    return (res);
-	} else if (!couldsee(ccp->x, ccp->y)) { /* Eyes of the Overworld */
+	} else if (!couldsee(ccp->x, ccp->y)) { /* Eye of the Overworld */
 	    You(cant_reach);
 		ccp->x = 0; ccp->y = 0;
 	    return res;

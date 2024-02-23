@@ -324,7 +324,7 @@ hack_artifacts()
 	if (Role_if(PM_MONK)) {
 	    artilist[ART_GRANDMASTER_S_ROBE].alignment = alignmnt;
 
-	    artilist[ART_EYES_OF_THE_OVERWORLD].size = (&mons[urace.malenum])->msize;
+	    artilist[ART_EYE_OF_THE_OVERWORLD].size = (&mons[urace.malenum])->msize;
 	}
 
 	if(Role_if(PM_PRIEST)){

@@ -2287,7 +2287,7 @@ A("The Magic Mirror of Merlin",		MIRROR,				(const char *)0,
 	NOINVOKE, (ARTI_SPEAK)
 	),
 
-A("The Eyes of the Overworld",		LENSES,				(const char *)0,
+A("The Eye of the Overworld",		SOUL_LENS,				(const char *)0,
 	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
 	A_NEUTRAL, PM_MONK, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
 	NO_MONS(),

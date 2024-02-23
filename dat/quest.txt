@@ -4981,8 +4981,6 @@ the Planes of the Elements, to achieve this goal.
 #
 #       Monk
 #
-# The quest artifact is "The Eyes of the Overworld", hence needs
-# to be treated as plural by messages which use %o.
 #
 %Cc Mon 00001
 You approach %H on the isolated path you have grown to 
@@ -5101,7 +5099,7 @@ canyon. There will be many chances for ambushes!"
 "Remember your studies, and you will prevail!"
 %E
 %Cp Mon 00030
-"Acquire and wear %o if you can.  They will aid you
+"Acquire and wear %o if you can.  It will aid you
 against %n."
 %E
 %Cp Mon 00031
@@ -5179,9 +5177,9 @@ I will enjoy bringing your body back to him when I return!"
 %E
 %Cc Mon 00070
 When you touch %o your mind is jolted with awareness and
-understanding.  You can now see why %n stole them, and risked
-everything to keep them.  Silently you vow not to let them consume
-you as they did him.
+understanding.  You can now see why %n stole it, and risked
+everything to keep it.  Silently you vow not to let it consume
+you as it did him.
 
 You sense a message from %d.  Though not verbal, you
 get the impression that you must return to %l as soon
@@ -5203,11 +5201,11 @@ to honor you, but your quest for the Amulet is more pressing.  You have
 done the %shood a great service and we will remember you for it."
 
 "I know that %o is a great burden and temptation, but
-I can not accept responsibilty for them again.  I have failed in that charge
-once already.  You are far more capable that I, so you must keep them.  They
+I can not accept responsibilty for it again.  I have failed in that charge
+once already.  You are far more capable that I, so you must keep it.  They
 will aid you with the rest of your quest."
 
-"We hope to see you when your great quest is done. We will celebrate them."
+"We hope to see you when your great quest is done. We will celebrate then."
 
 "May %d ever guide your way."
 %E
@@ -5215,7 +5213,7 @@ will aid you with the rest of your quest."
 %lC studies %o for a moment,
 then returns his gaze to you.
 
-"%oC must remain with you.  Use them
+"%oC must remain with you.  Use it
 as you resume your search for the Amulet.
 %Z await your return through the magic portal
 that brought you here."

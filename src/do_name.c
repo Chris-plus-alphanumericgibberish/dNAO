@@ -765,6 +765,10 @@ const char *name;
 			obj->obj_color = CLR_BRIGHT_GREEN;
 			obj->oward = ELDER_SIGN;
 		}
+		else if(obj->oartifact == ART_EYE_OF_THE_OVERWORLD){
+			set_material_gm(obj, GEMSTONE);
+			obj->sub_material = MORGANITE;
+		}
 		else if(obj->oartifact == ART_IBITE_ARM){
 			obj->obj_color = CLR_BRIGHT_GREEN;
 		}

@@ -904,7 +904,7 @@ use_reach_attack()
 		    !canseemon(mtmp))) {
 	    You("won't hit anything if you can't see that spot.");
 	    return MOVE_CANCELLED;
-	} else if (!couldsee(cc.x, cc.y)) { /* Eyes of the Overworld */
+	} else if (!couldsee(cc.x, cc.y)) { /* Eye of the Overworld */
 	    You("can't reach that spot from here.");
 	    return MOVE_CANCELLED;
 	}

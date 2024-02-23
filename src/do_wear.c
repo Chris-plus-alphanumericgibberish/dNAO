@@ -1369,7 +1369,7 @@ register struct obj *otmp;
 	    if (Punished) set_bc(0);
 	} else if (already_blind && !Blind) {
 	    changed = TRUE;
-	    /* "You are now wearing the Eyes of the Overworld." */
+	    /* "You are now wearing the Eye of the Overworld." */
 	    You("can see!");
 	}
 	if (changed) {
@@ -1406,7 +1406,7 @@ register struct obj *otmp;
 		    You("still cannot see.");
 	    } else {
 		changed = TRUE;	/* !was_blind */
-		/* "You were wearing the Eyes of the Overworld." */
+		/* "You were wearing the Eye of the Overworld." */
 		You_cant("see anything now!");
 		/* set ball&chain variables before the hero goes blind */
 		if (Punished) set_bc(0);
