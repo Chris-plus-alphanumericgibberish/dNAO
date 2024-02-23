@@ -234,7 +234,7 @@ OBJECT:'*',random,contained
 OBJECT:'*',random,contained
 OBJECT:'*',random,contained
 OBJECT:'"',"amulet of magical breathing",contained
-OBJECT:'"',random,random
+OBJECT:'"',random,contained
 OBJECT:'=',random,contained
 OBJECT:'=',random,contained
 OBJECT[30%]:')',"saber", contained
