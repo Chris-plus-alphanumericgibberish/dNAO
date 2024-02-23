@@ -943,7 +943,7 @@ domakewhisperer()
 	if(u.uinsight >= 20)
 		duration = 2*ACURR(A_CHA);
 	
-	u.kiaiturn = moves+duration+14;
+	u.whisperturn = moves+duration+14;
 	losepw(10+min(u.uinsight, 45));
 	flags.botl = 1;
 	
