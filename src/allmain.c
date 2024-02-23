@@ -3511,19 +3511,27 @@ newgame()
 		if (!Pantheon_if(artilist[inher_arti].role)) artilist[inher_arti].role = ROLE_NONE;
 		if (!Race_if(artilist[inher_arti].race)) artilist[inher_arti].race = ROLE_NONE;
 		if (artilist[inher_arti].alignment != u.ualign.type) artilist[inher_arti].alignment = A_NONE;
+		artilist[inher_arti].gflags &= ~ARTG_GIFT;
+		artilist[inher_arti].gflags &= ~ARTG_NAME;
+		artilist[inher_arti].gflags |= ARTG_NOGEN;
+		artilist[inher_arti].gflags |= ARTG_NOWISH;
 		hack_artifacts();
 
 		if (!Role_if(PM_MADMAN)){
 			otmp = mksobj((int)artilist[inher_arti].otyp, MKOBJ_NOINIT);
 			/* please do not have any artifacts where the otyp in artilist is not the same as the practical otyp after onaming */
-			expert_weapon_skill(weapon_type(otmp));
 			discover_artifact(inher_arti);
 			if (!Role_if(PM_CONVICT)){
 				otmp = oname(otmp, artilist[inher_arti].name);
 				fully_identify_obj(otmp);
+				expert_weapon_skill(weapon_type(otmp));
 				otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
 						   The(aobjnam(otmp, "slip")), (const char *)0);
 			} else {
+				//Create without creating
+				otmp->oartifact = inher_arti;
+				expert_weapon_skill(weapon_type(otmp));
+				otmp->oartifact = 0;
 				delobj(otmp);
 			}
 		}
