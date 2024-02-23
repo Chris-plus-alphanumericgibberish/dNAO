@@ -2841,14 +2841,17 @@ struct monst *mtmp;
 			}
 		}
 	}
-	if (damage_bon && armg && check_oprop(armg, OPROP_RWTH) && (
-			(youagr && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL) ||
-			(!youagr && is_lawful_mon(mtmp))))
-		damage_bon = damage_bon * 3 / 2;
-
 	if (half_str) strbon /= 2;
 
 	damage_bon += strbon;
+
+	if (damage_bon && armg && check_oprop(armg, OPROP_RWTH) && (
+			(youagr && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL) ||
+			(!youagr && is_lawful_mon(mtmp)))
+	){
+		damage_bon = damage_bon * 3 / 2;
+	}
+
 	return damage_bon;
 }
 
