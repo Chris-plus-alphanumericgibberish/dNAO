@@ -5952,7 +5952,7 @@ boolean printmessages; /* print generic elemental damage messages */
 				wepdesc,
 				vtense(wepdesc,
 					!spec_dbon_applies ? "hit" :
-					"tase"),
+					"shock"),
 				hittee, !spec_dbon_applies ? '.' : '!');
 			*messaged = TRUE;
 		}
