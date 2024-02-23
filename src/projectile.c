@@ -3102,7 +3102,10 @@ int tary;
 	basiczap(&zapdata, typ, ZAP_BREATH, 0);
 
 	/* set dragonbreath if applicable*/
-	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ != AD_DISN)
+	if ((is_true_dragon(pa) ||
+	     (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14) ||
+	     (is_half_dragon(pa) && pa->mlevel >= 14))
+	    && typ != AD_DISN)
 		zapdata.unreflectable = ZAP_REFL_ADVANCED;
 
 	/* modify type and set range */
@@ -3119,13 +3122,20 @@ int tary;
 		range = jacket ? rn1(3, 3) : rn1(7, 7);
 
 	/* green dragon breath leaves clouds */
-	if ((is_true_dragon(pa) || (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14)) && typ == AD_DRST)
+	if ((is_true_dragon(pa) ||
+	     (youagr && Race_if(PM_HALF_DRAGON) && u.ulevel >= 14) ||
+	     (is_half_dragon(pa) && pa->mlevel >= 14))
+	    && typ == AD_DRST)
 		zapdata.leaves_clouds = TRUE;
 
 	/* set damage */
 	zapdata.damn = attk->damn + min(MAX_BONUS_DICE, (mlev(magr) / 3));
 	zapdata.damd = (attk->damd ? attk->damd : 6) * mult;
-	
+
+	/* handled in dobreathe for the player */
+	if (is_half_dragon(pa) && typ == AD_FIRE && pa->mlevel >= 14)
+		zapdata.damn += 2;
+
 	if(jacket){
 		zapdata.damn = zapdata.damn/2+1;
 		zapdata.damd = zapdata.damd/2+1;

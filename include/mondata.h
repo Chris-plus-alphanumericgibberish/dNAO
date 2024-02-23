@@ -487,10 +487,9 @@
 				 (ptr)->mtyp == PM_YELLOW_DRAGON\
 				 ))
 #define is_dragon(ptr)		(((ptr)->mflagsa & MA_DRAGON) != 0L)
-#define is_true_dragon(ptr)		((monsndx(ptr) >= PM_BABY_GRAY_DRAGON && monsndx(ptr) <= PM_YELLOW_DRAGON) || \
-								(ptr)->mtyp == PM_PLATINUM_DRAGON || (ptr)->mtyp == PM_CHROMATIC_DRAGON)
 #define is_true_adult_dragon(ptr)		((monsndx(ptr) >= PM_GRAY_DRAGON && monsndx(ptr) <= PM_YELLOW_DRAGON) || \
 								(ptr)->mtyp == PM_PLATINUM_DRAGON || (ptr)->mtyp == PM_CHROMATIC_DRAGON || (ptr)->mtyp == PM_IXOTH || (ptr)->mtyp == PM_SMAUG)
+#define is_true_dragon(ptr)		((monsndx(ptr) >= PM_BABY_GRAY_DRAGON && monsndx(ptr) <= PM_BABY_YELLOW_DRAGON) || is_true_adult_dragon(ptr))
 #define is_pseudodragon(ptr)	(monsndx(ptr) >= PM_TINY_PSEUDODRAGON && monsndx(ptr) <= PM_GIGANTIC_PSEUDODRAGON)
 #define is_bird(ptr)		(((ptr)->mflagsa & MA_AVIAN) != 0L)
 #define is_giant(ptr)		(((ptr)->mflagsa & MA_GIANT) != 0L)

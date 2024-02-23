@@ -5348,12 +5348,13 @@ boolean ranged;
 					You("%s.", chg ? "are freaked out" : "seem unaffected");
 				}
 			}
-			/* monsters get confused by AD_HALU */
-			else {
+			/* monsters get confused and berserked by AD_HALU */
+			else if (!mon_resistance(mdef, HALLUC_RES)) {
 				if (vis&VIS_MDEF)
 					pline("%s looks confused.", Monnam(mdef));
 
 				mdef->mconf = 1;
+				mdef->mberserk = 1;
 				mdef->mstrategy &= ~STRAT_WAITFORU;
 			}
 		}

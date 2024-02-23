@@ -3007,6 +3007,9 @@ weight_cap()
 	if(centauroid(mdat) || mdat->mtyp == PM_BLESSED){
 		carrcap *= 1.25;
 	}
+	if(Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE && u.ulevel >= 15){
+		carrcap *= 1.2;
+	}
 	if(arti_lighten(bodyarmor, FALSE)){
 		if(bodyarmor->blessed) carrcap *= 1.5;
 		else if(!bodyarmor->cursed) carrcap *= 1.25;

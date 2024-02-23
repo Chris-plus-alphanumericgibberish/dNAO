@@ -2764,6 +2764,10 @@ struct monst *mtmp;
 	if(youagr && u.umadness&MAD_RAGE && !BlockableClearThoughts)
 		strbon += (Insanity)/10;
 
+	if(youagr ? Race_if(PM_HALF_DRAGON) && flags.HDbreath == AD_FIRE && u.ulevel >= 15 :
+	   is_half_dragon(mtmp->data) && mtmp->mvar_hdBreath == AD_FIRE && mtmp->data->mlevel >= 15)
+		strbon += 2;
+
 	strbon *= bimanual_mod(otmp, (youagr) ? &youmonst : mtmp);
 
 	dexbon = (dex == 25) ? 8 : ((dex-10)/2);

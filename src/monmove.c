@@ -1673,18 +1673,30 @@ register struct monst *mtmp;
        !no_upos(mtmp) &&
 	   mtmp->mpeaceful && !mtmp->mtame && !u.uswallow) {
 		if (mtmp->mux != u.ux || mtmp->muy != u.uy) {
-			pline("%s whispers at thin air.",
-			    cansee(mtmp->mux, mtmp->muy) ? Monnam(mtmp) : "It");
+			pline("%s whispers at thin air.", Monnam(mtmp));
 
 			if (is_demon(youracedata)) {
 			  /* "Good hunting, brother" */
 			    if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
 			} else {
-			    mtmp->minvis = mtmp->perminvis = 0;
-			    /* Why?  For the same reason in real demon talk */
-			    pline("%s gets angry!", Amonnam(mtmp));
-			    mtmp->mpeaceful = 0;
-			    /* since no way is an image going to pay it off */
+			    char prompt[BUFSZ];
+			    Snprintf(prompt, BUFSZ, "Tell %s your real location?", mon_nam(mtmp));
+			    if (yn(prompt) == 'y') {
+				coord cc;
+				enexto(&cc, u.ux, u.uy, mtmp->data);
+			        rloc_to(mtmp, cc.x, cc.y);
+				mtmp->mux = u.ux;
+				mtmp->muy = u.uy;
+				if (demon_talk(mtmp)) return 1;
+			    } else {
+			        mtmp->minvis = mtmp->perminvis = 0;
+				/* Why?  For the same reason in real demon talk */
+				pline("%s gets angry!", Amonnam(mtmp));
+				mtmp->mpeaceful = 0;
+				set_malign(mtmp);
+				newsym(mtmp->mx, mtmp->my);
+				/* since no way is an image going to pay it off */
+			    }
 			}
 		} else if(demon_talk(mtmp)) return(1);	/* you paid it off */
 	}

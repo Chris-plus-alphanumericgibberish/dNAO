@@ -234,11 +234,11 @@
 #define Shattering		u.uprops[SHATTERING].intrinsic
 #define DimensionalLock	u.uprops[DIMENSION_LOCK].intrinsic
 
-/* Hallucination is solely a timeout; its resistance is extrinsic */
+/* Hallucination is solely a timeout; its resistance can be intrinsic or extrinsic */
 #define HHallucination		u.uprops[HALLUC].intrinsic
 #define HHalluc_resistance	u.uprops[HALLUC_RES].intrinsic
 #define EHalluc_resistance	u.uprops[HALLUC_RES].extrinsic
-#define Halluc_resistance	(EHalluc_resistance || \
+#define Halluc_resistance	(HHalluc_resistance || EHalluc_resistance || \
 				 (Upolyd && dmgtype(youmonst.data, AD_HALU)))
 #define Hallucination		(HHallucination && !Halluc_resistance)
 

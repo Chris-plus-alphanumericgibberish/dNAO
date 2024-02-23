@@ -113,7 +113,7 @@ const struct innate {
 
 	ran_abil[] = { {   1, &(HSearching), "", "" },
 		     {	 7, &(HStealth), "stealthy", "" },
-		     {	15, &(HSee_invisible), "", "" },
+		     {	15, &(HSee_invisible), "your vision sharpen", "your vision blur" },
 		     {	 0, 0, 0, 0 } },
 
 	rog_abil[] = { {	 1, &(HStealth), "", ""  },
@@ -178,12 +178,14 @@ const struct innate {
 
 	/* Not an actual intrinsic, handled elsewhere */
 	hlf_fire_abil[] = { {	15, &(HNo_prop), "slime resistant", "less slime resistant" },
+			  {	15, &(HNo_prop), "bigger and and stronger", "smaller and weaker" },
 			  {	 0, 0, 0, 0 } },
 
 	hlf_acid_abil[] = { {	15, &(HStone_resistance), "limber", "stiff" },
 			  {	 0, 0, 0, 0 } },
 
 	hlf_slee_abil[] = { {	15, &(HFree_action), "freed", "a loss of freedom" },
+			  {	15, &(HHalluc_resistance), "resistant to hallucinations", "less resistant to hallucinations" },
 			  {	 0, 0, 0, 0 } },
 
 	hlf_drst_abil[] = { {	15, &(HSick_resistance), "immunized", "immunocompromized" },
@@ -197,6 +199,10 @@ const struct innate {
 			  {	 0, 0, 0, 0 } },
 
 	hlf_disn_abil[] = { {	15, &(HDrain_resistance), "resistant to level drain", "less resistant to level drain" },
+			  {	 0, 0, 0, 0 } },
+
+	hlf_rbre_abil[] = { {	15, &(HDisplaced), "your scales shimmer and shift", "your scales cease to shimmer" },
+			  {	15, &(HSee_invisible), "your vision sharpen", "your vision blur" },
 			  {	 0, 0, 0, 0 } },
 
 	yki_abil[] = { {	1, &(HCold_resistance), "", "" },
@@ -915,6 +921,7 @@ int oldlevel, newlevel;
 		case AD_ELEC: sabil = hlf_elec_abil; break;
 		case AD_MAGM: sabil = hlf_magm_abil; break;
 		case AD_DISN: sabil = hlf_disn_abil; break;
+		case AD_RBRE: sabil = hlf_rbre_abil; break;
 		}
 	}
 
