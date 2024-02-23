@@ -3233,6 +3233,8 @@ get_premium_heart_multiplier()
 	if (Blind) multiplier++;
 	if (Stunned) multiplier++;
 	if (Confusion) multiplier++;
+	if (Doubt) multiplier++;
+	if (Punished) multiplier++;
 	if (Sick) multiplier++;
 	if (Stoned) multiplier++;
 	if (Golded) multiplier++;
