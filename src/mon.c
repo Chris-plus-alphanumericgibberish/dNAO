@@ -2753,6 +2753,9 @@ register struct monst *mtmp;
 	if(centauroid(mdat) || mdat->mtyp == PM_BLESSED){
 		carcap *= 1.25;
 	}
+	if(is_half_dragon(mdat) && mtmp->mvar_hdBreath == AD_FIRE && mdat->mlevel >= 15){
+		carcap *= 1.2;
+	}
 	if(arti_lighten(bodyarmor, FALSE)){
 		if(bodyarmor->blessed) carcap *= 1.5;
 		else if(!bodyarmor->cursed) carcap *= 1.25;

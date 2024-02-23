@@ -16026,6 +16026,7 @@ struct monst *mtmp;
 				break;
 			case AD_SLEE:
 				give_mintrinsic(mtmp, FREE_ACTION);
+				give_mintrinsic(mtmp, HALLUC_RES);
 				break;
 			case AD_DRST:
 				give_mintrinsic(mtmp, SICK_RES);
@@ -16039,13 +16040,21 @@ struct monst *mtmp;
 			case AD_DISN:
 				give_mintrinsic(mtmp, DRAIN_RES);
 				break;
+			case AD_RBRE:
+				give_mintrinsic(mtmp, SEE_INVIS);
+				give_mintrinsic(mtmp, DISPLACED);
+				break;
 			}
 		}
 	}
 	if(mtmp->mtyp == PM_WHITE_DRAGON){
 		give_mintrinsic(mtmp, WATERPROOF);
 	}
-	if(mtmp->mtyp == PM_ORANGE_DRAGON || mtmp->mtyp == PM_PLATINUM_DRAGON){
+	if(mtmp->mtyp == PM_ORANGE_DRAGON){
+		give_mintrinsic(mtmp, FREE_ACTION);
+		give_mintrinsic(mtmp, HALLUC_RES);
+	}
+	if (mtmp->mtyp == PM_PLATINUM_DRAGON){
 		give_mintrinsic(mtmp, FREE_ACTION);
 	}
 	if(mtmp->mtyp == PM_BLUE_DRAGON){

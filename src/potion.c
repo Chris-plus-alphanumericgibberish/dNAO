@@ -315,7 +315,7 @@ long mask;	/* nonzero if resistance status should change by mask */
 	    if (!xtime) EHalluc_resistance |= mask;
 	    else EHalluc_resistance &= ~mask;
 	} else {
-	    if (!EHalluc_resistance && (!!HHallucination != !!xtime))
+	    if (!Halluc_resistance && (!!HHallucination != !!xtime))
 		changed = TRUE;
 	    set_itimeout(&HHallucination, xtime);
 
@@ -1677,11 +1677,15 @@ boolean your_fault;
 		break;
 	case POT_PARALYSIS:
 		if (mon->mcanmove) {
-			mon->mcanmove = 0;
-			/* really should be rnd(5) for consistency with players
-			 * breathing potions, but...
-			 */
-			mon->mfrozen = rnd(25);
+			if (mon_resistance(mon, FREE_ACTION)) {
+				pline("%s stiffens momentarily.", Monnam(mon));
+			} else {
+				mon->mcanmove = 0;
+				/* really should be rnd(5) for consistency with players
+				 * breathing potions, but...
+				 */
+				mon->mfrozen = rnd(25);
+			}
 		}
 		break;
 	case POT_SPEED:
@@ -1689,12 +1693,19 @@ boolean your_fault;
 		mon_adjust_speed(mon, 1, obj, TRUE);
 		break;
 	case POT_BLINDNESS:
-		if(haseyes(mon->data)) {
+		if(!resists_blnd(mon)) {
 		    register int btmp = 64 + rn2(32) +
 			rn2(32) * !resist(mon, POTION_CLASS, 0, NOTELL);
 		    btmp += mon->mblinded;
 		    mon->mblinded = min(btmp,127);
 		    mon->mcansee = 0;
+		}
+		break;
+	case POT_HALLUCINATION:
+		if(!resist(mon, POTION_CLASS, 0, NOTELL) &&
+		   !mon_resistance(mon, HALLUC_RES)) {
+			mon->mconf = TRUE;
+			mon->mberserk = TRUE;
 		}
 		break;
 	case POT_WATER:

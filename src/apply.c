@@ -3740,7 +3740,7 @@ struct obj *hypo;
 				}
 			break;
 			case POT_BLINDNESS:
-				if(haseyes(mtarg->data)) {
+				if(!resists_blnd(mtarg)) {
 					register int btmp = rn1(200, 250 - 125 * bcsign(amp));
 					btmp += mtarg->mblinded;
 					mtarg->mblinded = min(btmp,127);
@@ -3748,16 +3748,23 @@ struct obj *hypo;
 				}
 			break;
 			case POT_HALLUCINATION:
-				if(!resist(mtarg, POTION_CLASS, 0, NOTELL)) 
-					mtarg->mstun = TRUE;
+				if(!resist(mtarg, POTION_CLASS, 0, NOTELL) &&
+				   !mon_resistance(mtarg, HALLUC_RES)) {
+					mtarg->mconf = TRUE;
+					mtarg->mberserk = TRUE;
+				}
 			case POT_CONFUSION:
 				if(!resist(mtarg, POTION_CLASS, 0, NOTELL)) 
 					mtarg->mconf = TRUE;
 			break;
 			case POT_PARALYSIS:
 				if (mtarg->mcanmove) {
-					mtarg->mcanmove = 0;
-					mtarg->mfrozen = rn1(10, 25 - 12*bcsign(amp));
+					if (mon_resistance(mtarg, FREE_ACTION)) {
+						pline("%s stiffens momentarily.", Monnam(mtarg));
+					} else {
+						mtarg->mcanmove = 0;
+						mtarg->mfrozen = rn1(10, 25 - 12*bcsign(amp));
+					}
 				}
 			break;
 			case POT_SPEED:

@@ -325,12 +325,12 @@ curses_str_remainder(const char *str, int width, int line_num)
     int last_space, count;
     char *retstr;
     int curline = 0;
-    int strsize = strlen(str);
+    int strsize = strlen(str) + 1;
     char substr[strsize];
     char curstr[strsize];
     char tmpstr[strsize];
 
-    strcpy(substr, str);
+    strncpy(substr, str, strsize);
 
     while (curline < line_num) {
         if (strlen(substr) == 0) {

@@ -907,6 +907,7 @@ struct permonst *mdat;
 		case AD_SLEE: mtyp = PM_ORANGE_DRAGON; break;
 		case AD_ACID: mtyp = PM_YELLOW_DRAGON; break;
 		case AD_RBRE: mtyp = PM_SHIMMERING_DRAGON; break;
+		case AD_DISN: mtyp = PM_BLACK_DRAGON;  break;
 		default:
 			impossible("bad HDbreath %d", flags.HDbreath);
 			return MOVE_CANCELLED;
@@ -916,6 +917,10 @@ struct permonst *mdat;
 
 		if (uarms && Dragon_armor_matches_mtyp(uarms, mtyp))
 			powermult += 50;
+
+		/* handled in xbreathey for monsters */
+		if (flags.HDbreath == AD_FIRE && u.ulevel >= 14)
+			mattk.damn += 2;
 	}
 	if(carrying_art(ART_DRAGON_S_HEART_STONE))
 		powermult *= 2;

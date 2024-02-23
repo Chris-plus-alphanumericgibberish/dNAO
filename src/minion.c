@@ -351,6 +351,7 @@ register struct monst *mtmp;
 	if (!demand) {		/* you have no gold */
 	    mtmp->mpeaceful = 0;
 	    set_malign(mtmp);
+	    newsym(mtmp->mx, mtmp->my);
 	    return 0;
 	} else {
 		if(mtmp->mtyp == PM_ASMODEUS && demand < 9000) demand = 9000 + rn2(1000);
@@ -374,6 +375,7 @@ register struct monst *mtmp;
 		pline("%s gets angry...", Amonnam(mtmp));
 		mtmp->mpeaceful = 0;
 		set_malign(mtmp);
+		newsym(mtmp->mx, mtmp->my);
 		return 0;
 	    }
 	}
