@@ -5976,6 +5976,7 @@ int spell;
 			 || spell_skilltype(spellid(spell)) == P_HEALING_SPELL
 			 || Role_if(PM_PRIEST)
 			 || Role_if(PM_MONK)
+			 || Role_if(PM_HEALER)
 			) cast_bon += 2;
 			if (uwep->oartifact)
 				cast_bon *= 2;
@@ -5990,6 +5991,7 @@ int spell;
 			if(spell_skilltype(spellid(spell)) == P_CLERIC_SPELL
 			 || spell_skilltype(spellid(spell)) == P_HEALING_SPELL
 			 || Role_if(PM_PRIEST)
+			 || Role_if(PM_HEALER)
 			) cast_bon += 2;
 			if (uwep->oartifact || objects[uwep->otyp].oc_unique)
 				cast_bon *= 2;
@@ -6001,8 +6003,10 @@ int spell;
 			|| uwep->oartifact == ART_ESSCOOAHLIPBOOURRR
 		) {	// tools of healing
 			cast_bon = 0;
-			if(spell_skilltype(spellid(spell)) == P_HEALING_SPELL)
-			cast_bon += 2;
+			if(spell_skilltype(spellid(spell)) == P_HEALING_SPELL
+			  || Role_if(PM_HEALER)
+			)
+				cast_bon += 2;
 			if (uwep->oartifact)
 				cast_bon *= 2;
 			splcaster -= urole.spelarmr * cast_bon / 3;
