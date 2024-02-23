@@ -2344,7 +2344,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			else {
 				add_subout(subout, SUBOUT_BARB1);
 			}
-			remove_subout(SUBOUT_XWEP);	/* allow another followup offhand attack if twoweaponing */
+			remove_subout(subout, SUBOUT_XWEP);	/* allow another followup offhand attack if twoweaponing */
 		}
 	}
 
@@ -16674,7 +16674,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	int newres;
 	int dmg;
 	int indexnum = 0;
-	int subout = 0;
+	int subout[SUBOUT_ARRAY_SIZE] = {0};
 	int tohitmod = 0;
 	int res[4];
 	long slot = 0L;
@@ -16716,7 +16716,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		res[1] = res[0];
 		res[0] = MM_MISS;
 		/* get next attack */
-		passive = getattk(mdef, magr, res, &indexnum, &prev_attk, FALSE, &subout, &tohitmod);
+		passive = getattk(mdef, magr, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod);
 		/* if we don't have a passive attack, continue */
 		if (is_null_attk(passive) || passive->aatyp != AT_NONE)
 			continue;
