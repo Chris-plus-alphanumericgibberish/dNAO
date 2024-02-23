@@ -18434,7 +18434,7 @@ struct monst *mdef;
 
 	/* do pit/hole digging after applying damage - holes can migrate monsters, and we cannot kill migrating monsters */
 	if (dodig) {
-		digfarhole(!chasm, x(mdef), y(mdef));
+		digfarhole(!chasm, x(mdef), y(mdef), FALSE);
 		chasm = t_at(x(mdef), y(mdef));
 		if (chasm){
 			if(chasm->ttyp == PIT && !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef)) {

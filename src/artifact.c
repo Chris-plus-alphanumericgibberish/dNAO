@@ -9637,7 +9637,7 @@ arti_invoke(obj)
 						int x, y;
 						x = u.ux + u.dx;
 						y = u.uy + u.dy;
-						if(isok(x, y) && digfarhole(TRUE, x, y)){
+						if(isok(x, y) && digfarhole(TRUE, x, y, TRUE)){
 							obj->spe--; // lose charge
 							pline("Your weapon has become more flawed.");
 						} else if( (d(1,20)-10) > 0 ){

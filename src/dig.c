@@ -2700,10 +2700,11 @@ long timeout;	/* unused */
 /* return TRUE if digging succeeded, FALSE otherwise */
 //digs a hole at the specified x and y.
 boolean
-digfarhole(pit_only, x, y)
+digfarhole(pit_only, x, y, yours)
 boolean pit_only;
 int x;
 int y;
+boolean yours;
 {
 	struct trap *ttmp = t_at(x, y);
 	struct rm *lev = &levl[x][y];
@@ -2759,11 +2760,11 @@ int y;
 		return TRUE;
 
 	} else if (IS_GRAVE(lev->typ)) {
-	    digactualhole(x, y, BY_YOU, PIT, FALSE, TRUE);
+	    digactualhole(x, y, yours ? BY_YOU : (struct monst *)0, PIT, FALSE, TRUE);
 	    dig_up_grave(x,y);
 	    return TRUE;
 	} else if (IS_SEAL(lev->typ)) {
-	    // digactualhole(x, y, BY_YOU, PIT, FALSE, TRUE);
+	    // digactualhole(x, y, yours ? BY_YOU : (struct monst *)0, PIT, FALSE, TRUE);
 	    break_seal(x,y);
 	    return TRUE;
 	} else if (lev->typ == DRAWBRIDGE_UP) {
@@ -2817,9 +2818,9 @@ int y;
 
 		/* finally we get to make a hole */
 		if (nohole || pit_only)
-			digactualhole(x, y, BY_YOU, PIT, FALSE, TRUE);
+			digactualhole(x, y, yours ? BY_YOU : (struct monst *)0, PIT, FALSE, TRUE);
 		else
-			digactualhole(x, y, BY_YOU, HOLE, FALSE, TRUE);
+			digactualhole(x, y, yours ? BY_YOU : (struct monst *)0, HOLE, FALSE, TRUE);
 
 		return TRUE;
 	}

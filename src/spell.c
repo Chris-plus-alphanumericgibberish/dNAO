@@ -2694,7 +2694,7 @@ spiriteffects(power, atme)
 			if(isok(u.ux+u.dx, u.uy+u.dy)) {
 				struct obj *otmp;
 				You("ask the earth to open.");
-				digfarhole(TRUE, u.ux+u.dx, u.uy+u.dy);
+				digfarhole(TRUE, u.ux+u.dx, u.uy+u.dy, TRUE);
 				otmp = mksobj(BOULDER, MKOBJ_NOINIT);
 				projectile(&youmonst, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
 				nomul(0, NULL);

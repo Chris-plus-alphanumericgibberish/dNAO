@@ -421,7 +421,7 @@ E boolean NDECL(openrocktrap);
 E boolean FDECL(opennewdoor, (int,int));
 E boolean FDECL(opentrapdoor, (BOOLEAN_P));
 E boolean FDECL(dighole, (BOOLEAN_P));
-E boolean FDECL(digfarhole, (BOOLEAN_P,int,int));
+E boolean FDECL(digfarhole, (BOOLEAN_P,int,int,boolean));
 E int FDECL(use_pick_axe, (struct obj *));
 E int FDECL(use_pick_axe2, (struct obj *));
 E boolean FDECL(mdig_tunnel, (struct monst *));
