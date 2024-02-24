@@ -1378,7 +1378,7 @@ hasfightingforms(){
 	if(Role_if(PM_MONK))
 		formmask |= MONK_FORMS;
 	if(Role_if(PM_KNIGHT))
-		formmask = KNIGHT_FORMS;
+		formmask |= KNIGHT_FORMS;
 	if((uwep && is_lightsaber(uwep)) || (uswapwep && is_lightsaber(uswapwep)))
 		formmask |= LIGHTSABER_FORMS;
 	if (u.uavoid_passives)
