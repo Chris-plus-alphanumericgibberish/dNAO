@@ -1250,8 +1250,7 @@
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
 #define mon_healing_turn(mon)	((mon)->mtyp == PM_DRACAE_ELADRIN || (mon)->mtyp == PM_UNBODIED)
-#define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_MASTER_KAEN || (mon)->mtyp == PM_ABBOT || \
-						 (mon)->mtyp == PM_XORN_MONK || (mon)->mtyp == PM_DAO_LAO_GUI_MONK || (mon)->mtyp == PM_ZHI_REN_MONK || \
+#define mon_monk(mon)	((mon)->mtyp == PM_MONK || (mon)->mtyp == PM_GRAND_MASTER || (mon)->mtyp == PM_ABBOT || \
 						 (mon)->mtyp == PM_ITINERANT_PRIESTESS || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_MONK)) || \
 						 (mon)->mtyp == PM_XUENU_MONK || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_MONK))
