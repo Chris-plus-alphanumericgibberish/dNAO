@@ -1356,8 +1356,7 @@ struct obj {
 								)
 
 /* helpers, simple enough to be macros */
-#define is_plural(o)	((o)->quan > 1 || \
-			 (o)->oartifact == ART_EYE_OF_THE_OVERWORLD)
+#define is_plural(o)	((o)->quan > 1)
 
 #define salve_target(otmp)	(\
 			((otmp->oclass == ARMOR_CLASS || otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && otmp->spe < 0)\
