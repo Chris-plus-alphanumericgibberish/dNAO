@@ -2925,73 +2925,74 @@ winid *datawin;
 				Strcat(buf, "magic damage, doubled against those who came from the stars.");
 				break;
 			default:
-				if (oart->adtyp == AD_PHYS && !(oart->aflags&ARTA_HATES))
-				{
-					Strcat(buf, "damage.");
-				}
-				else if (oart->adtyp != AD_PHYS)
-				{
+				if (oart->adtyp || oart->aflags&ARTA_HATES){
 					switch (oart->adtyp) {
-					case AD_FIRE: Strcat(buf, "fire damage."); break;
-					case AD_COLD: Strcat(buf, "cold damage."); break;
-					case AD_ELEC: Strcat(buf, "lightning damage."); break;
-					case AD_ACID: Strcat(buf, "acid damage."); break;
-					case AD_MAGM: Strcat(buf, "magic damage."); break;
-					case AD_DRST: Strcat(buf, "poison damage."); break;
-					case AD_DRLI: Strcat(buf, "life drain damage."); break;
-					case AD_STON: Strcat(buf, "petrifying damage."); break;
-					case AD_DARK: Strcat(buf, "dark damage."); break;
-					case AD_BLUD: Strcat(buf, "blood damage."); break;
-					case AD_HOLY: Strcat(buf, "holy damage."); break;
-					case AD_STDY: Strcat(buf, "study damage."); break;
-					case AD_HLUH: Strcat(buf, "corrupted holy damage."); break;
-					case AD_STAR: Strcat(buf, "silver damage."); break;
-					case AD_SLEE: Strcat(buf, "sleep damage."); break;
-						break;
+						case AD_FIRE: Strcat(buf, "fire damage"); break;
+						case AD_COLD: Strcat(buf, "cold damage"); break;
+						case AD_ELEC: Strcat(buf, "lightning damage"); break;
+						case AD_ACID: Strcat(buf, "acid damage"); break;
+						case AD_MAGM: Strcat(buf, "magic damage"); break;
+						case AD_DRST: Strcat(buf, "poison damage"); break;
+						case AD_DRLI: Strcat(buf, "life drain damage"); break;
+						case AD_STON: Strcat(buf, "petrifying damage"); break;
+						case AD_DARK: Strcat(buf, "dark damage"); break;
+						case AD_BLUD: Strcat(buf, "blood damage"); break;
+						case AD_HOLY: Strcat(buf, "holy damage"); break;
+						case AD_STDY: Strcat(buf, "study damage"); break;
+						case AD_HLUH: Strcat(buf, "corrupted holy damage"); break;
+						case AD_STAR: Strcat(buf, "silver damage"); break;
+						case AD_SLEE: Strcat(buf, "sleep damage"); break;
+						case AD_PHYS: Strcat(buf, "damage"); break;
+						default: break;
 					}
-				}
-				else if (oart->aflags & ARTA_HATES)
-				{
-					Strcat(buf, "damage to ");
-					/* SMOP: this should be made into a list somewhere and used for specific warning messages as well,
-					 * ie, "Warned of fey and magic-item users." instead of "warned of demiliches"
-					 */
-					switch (oartifact)
-					{
-					case ART_ORCRIST:					Strcat(buf, "orcs and demons.");							break;
-					case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
-					case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, and dwarves.");					break;
-					case ART_CARNWENNAN:				Strcat(buf, "fey and magic-item users.");					break;
-					case ART_SLAVE_TO_ARMOK:			Strcat(buf, "nobility, elves, orcs, and the innocent.");	break;
-					case ART_CLAIDEAMH:					Strcat(buf, "those bound by iron and ancient laws.");		break;
-					case ART_DRAGONLANCE:				Strcat(buf, "dragons.");									break;
-					case ART_NODENSFORK:				Strcat(buf, "the eldritch, the telepathic, the deep.");		break;
-					case ART_GAIA_S_FATE:				Strcat(buf, "things attuned to nature.");					break;
-					case ART_DEMONBANE:					Strcat(buf, "demons.");										break;
-					case ART_WEREBANE:					Strcat(buf, "were-beasts and demihumans.");					break;
-					case ART_GIANTSLAYER:				Strcat(buf, "giants.");										break;
-					case ART_VAMPIRE_KILLER:			Strcat(buf, "demons, were-beasts and the undead.");			break;
-					case ART_KINGSLAYER:				Strcat(buf, "lords and ladies and kings and queens.");		break;
-					case ART_PEACE_KEEPER:				Strcat(buf, "those that always seek violence.");			break;
-					case ART_OGRESMASHER:				Strcat(buf, "ogres.");										break;
-					case ART_TROLLSBANE:				Strcat(buf, "trolls and all who regenerate quickly.");		break;
-					case ART_MIRROR_BRAND:				Strcat(buf, "all lawful or chaotic");						break;
-					case ART_SUNSWORD:					Strcat(buf, "demons and the undead.");						break;
-					case ART_ATMA_WEAPON:				Strcat(buf, "worthy foes.");								break;
-					case ART_FUMA_ITTO_NO_KEN:			Strcat(buf, "cross-aligned.");								break;
-					case ART_ROD_OF_SEVEN_PARTS:		Strcat(buf, "any who stand against law.");					break;
-					case ART_WEREBUSTER:				Strcat(buf, "were-beasts.");								break;
-					case ART_BLACK_CRYSTAL:				Strcat(buf, "non-chaotics.");								break;
-					case ART_CLARENT:					Strcat(buf, "the thick-skinned");							break;
-					case ART_SCEPTRE_OF_MIGHT:			Strcat(buf, "cross-aligned.");								break;
-					case ART_IRON_BALL_OF_LEVITATION:	Strcat(buf, "cross-aligned.");								break;
-					case ART_WEB_OF_LOLTH:				Strcat(buf, "elves, demons, and godly minions.");			break;
-					case ART_MITRE_OF_HOLINESS:			Strcat(buf, "undead.");										break;
-					case ART_ICONOCLAST:				Strcat(buf, "humans, elves, dwarves, and gnomes.");			break;
-					case ART_SCOURGE_OF_LOLTH:			Strcat(buf, "elves.");										break;
-					default:
-						Strcat(buf, "hated foes.");
-						break;
+					if (!(oart->aflags&ARTA_HATES)){
+						Strcat(buf, ".");
+					} else {
+						Strcat(buf, " to ");
+						if (oart->aflags&ARTA_CROSSA){
+							Strcat(buf, "cross-aligned foes.");
+						} else {
+							/* SMOP: this should be made into a list somewhere and used for specific warning messages as well,
+							 * ie, "Warned of fey and magic-item users." instead of "warned of demiliches"
+							 */
+							switch (oartifact)
+							{
+							case ART_ORCRIST:					Strcat(buf, "orcs and demons.");							break;
+							case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
+							case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, and dwarves.");					break;
+							case ART_CARNWENNAN:				Strcat(buf, "fey and magic-item users.");					break;
+							case ART_SLAVE_TO_ARMOK:			Strcat(buf, "nobility, elves, orcs, and the innocent.");	break;
+							case ART_CLAIDEAMH:					Strcat(buf, "those bound by iron and ancient laws.");		break;
+							case ART_DRAGONLANCE:				Strcat(buf, "dragons.");									break;
+							case ART_NODENSFORK:				Strcat(buf, "the eldritch, the telepathic, the deep.");		break;
+							case ART_GAIA_S_FATE:				Strcat(buf, "things attuned to nature.");					break;
+							case ART_DEMONBANE:					Strcat(buf, "demons.");										break;
+							case ART_WEREBANE:					Strcat(buf, "were-beasts and demihumans.");					break;
+							case ART_GIANTSLAYER:				Strcat(buf, "giants.");										break;
+							case ART_VAMPIRE_KILLER:			Strcat(buf, "demons, were-beasts and the undead.");			break;
+							case ART_KINGSLAYER:				Strcat(buf, "lords and ladies and kings and queens.");		break;
+							case ART_PEACE_KEEPER:				Strcat(buf, "those that always seek violence.");			break;
+							case ART_OGRESMASHER:				Strcat(buf, "ogres.");										break;
+							case ART_TROLLSBANE:				Strcat(buf, "trolls and all who regenerate quickly.");		break;
+							case ART_MIRROR_BRAND:				Strcat(buf, "all lawful or chaotic");						break;
+							case ART_SUNSWORD:					Strcat(buf, "demons and the undead.");						break;
+							case ART_ATMA_WEAPON:				Strcat(buf, "worthy foes.");								break;
+							case ART_FUMA_ITTO_NO_KEN:			Strcat(buf, "cross-aligned.");								break;
+							case ART_ROD_OF_SEVEN_PARTS:		Strcat(buf, "any who stand against law.");					break;
+							case ART_WEREBUSTER:				Strcat(buf, "were-beasts.");								break;
+							case ART_BLACK_CRYSTAL:				Strcat(buf, "non-chaotics.");								break;
+							case ART_CLARENT:					Strcat(buf, "the thick-skinned");							break;
+							case ART_SCEPTRE_OF_MIGHT:			Strcat(buf, "cross-aligned.");								break;
+							case ART_IRON_BALL_OF_LEVITATION:	Strcat(buf, "cross-aligned.");								break;
+							case ART_WEB_OF_LOLTH:				Strcat(buf, "elves, demons, and godly minions.");			break;
+							case ART_MITRE_OF_HOLINESS:			Strcat(buf, "undead.");										break;
+							case ART_ICONOCLAST:				Strcat(buf, "humans, elves, dwarves, and gnomes.");			break;
+							case ART_SCOURGE_OF_LOLTH:			Strcat(buf, "elves.");										break;
+							default:
+								Strcat(buf, "hated foes.");
+								break;
+							}
+						}
 					}
 				}
 				else {
