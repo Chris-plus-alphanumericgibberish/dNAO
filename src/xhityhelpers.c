@@ -1731,7 +1731,7 @@ struct obj * weapon;
 			otmp = (struct obj *)0;
 			break;
 		}
-		if (otmp && arti_shining(otmp))
+		if (otmp && arti_phasing(otmp))
 			return 2;
 
 		/* Ghost that thinks it's alive and solid */
@@ -1831,7 +1831,7 @@ struct obj * weapon;
 	}
 	/* weapon */
 	else {
-		if (arti_shining(weapon))	/* why is this used for more things than artifacts? >_> */
+		if (arti_phasing(weapon))	/* why is this used for more things than artifacts? >_> */
 			return 2;
 
 		if (weapon->oartifact == ART_IBITE_ARM)	/* Ghost touch, not actually phasing */

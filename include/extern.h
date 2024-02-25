@@ -132,7 +132,7 @@ E boolean FDECL(arti_tentRod, (struct obj *));
 E boolean FDECL(arti_threeHead, (struct obj *));
 E boolean FDECL(arti_dluck, (struct obj *));
 E boolean FDECL(arti_dexpl, (struct obj *));
-E boolean FDECL(arti_shining, (struct obj *));
+E boolean FDECL(arti_phasing, (struct obj *));
 E boolean FDECL(arti_mandala, (struct obj *));
 E boolean FDECL(arti_lighten, (struct obj *, boolean));
 E boolean FDECL(arti_chawis, (struct obj *, boolean));

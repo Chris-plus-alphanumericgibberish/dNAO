@@ -3359,7 +3359,7 @@ winid *datawin;
 		ADDCLASSPROP((oart->aflags&ARTA_DRAIN), "draining");
 		//ADDCLASSPROP((oart->aflags&ARTA_BRIGHT), " /* turns gremlins to dust and trolls to stone */");
 		ADDCLASSPROP((oart->aflags&ARTA_BLIND), "blinding");
-		ADDCLASSPROP((oart->aflags&ARTA_SHINING), "armor-phasing");
+		ADDCLASSPROP((oart->aflags&ARTA_PHASING), "armor-phasing");
 		ADDCLASSPROP((oart->aflags&ARTA_SHATTER), "shattering");
 		ADDCLASSPROP((oart->aflags&ARTA_DISARM), "disarming");
 		ADDCLASSPROP((oart->aflags&ARTA_STEAL), "theiving");
