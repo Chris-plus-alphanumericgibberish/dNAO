@@ -1927,10 +1927,11 @@ boolean getting_obj_base_desc;
 			}
 			if ((typ == VICTORIAN_UNDERWEAR && nn) ||
 				(typ == JUMPSUIT && !nn) ||
-				(typ == BODYGLOVE && !nn) ||
+				(typ == BODYGLOVE && !nn)
 				/* depends on order of dragon scales */
-				(typ >= GRAY_DRAGON_SCALES && typ <= YELLOW_DRAGON_SCALES) ||
-				(typ == BANDS)
+				|| (typ >= GRAY_DRAGON_SCALES && typ <= YELLOW_DRAGON_SCALES)
+				|| (typ == BANDS)
+				|| (typ == SHACKLES)
 				) {
 				Strcat(buf, "set of ");
 			}
