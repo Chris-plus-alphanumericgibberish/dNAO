@@ -1831,6 +1831,7 @@ static const char * const bogusmons[] = {
 	"R. o. U. S.",		/* The Princess Bride */
 	"bear named Smokey",	/* "Only you can prevent forest fires!" */
 	"5.9176 pentranomeker worm", /* The Mimir, contributed by Joshua Jarvis */
+	"int64_t worm",				/* Noisytoot */
 	"andalite",					/* Animorphs */
 	"yithian", "elder thing", "old one", "great old one", "outer god", "other god", "elder god", /* Lovecraft */
 	"eyeless albino penguin", /* More Lovecraft */
