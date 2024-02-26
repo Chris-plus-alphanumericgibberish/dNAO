@@ -1931,8 +1931,8 @@ acurrstr(str)
 	int str;
 {
 	if (str <= 18) return((schar)str);
-	if (str <= 38) return((schar)(18)); /* map to 18 */
-	return((schar)(str - 20));
+	if (str <= 41) return((schar)(19 + str / 10)); /* map to 19-21 */
+	else return((schar)(str - 20));
 }
 
 #endif /* OVL0 */
