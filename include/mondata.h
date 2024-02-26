@@ -1229,10 +1229,14 @@
 #define mon_convict(mon)	((mon)->mtyp == PM_CONVICT || (mon)->mtyp == PM_ROBERT_THE_LIFER || (mon)->mtyp == PM_INMATE || \
 							 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_CONVICT)) || \
 							 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_CONVICT))
+#define mon_healer(mon)	((mon)->mtyp == PM_HEALER || (mon)->mtyp == PM_HIPPOCRATES || (mon)->mtyp == PM_ATTENDANT || \
+							 (mon)->mtyp == PM_SISTER_T_EIRASTRA || (mon)->mtyp == PM_PEN_A_MENDICANT || (mon)->mtyp == PM_MENDICANT_DRIDER || \
+							 (mon)->mtyp == PM_MENDICANT_SPROW || \
+							 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_HEALER)) || \
+							 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_HEALER))
 #define mon_undead_hunter(mon)	(((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_HUNTER))
 #define mon_knight(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || (mon)->mtyp == PM_SIR_GARLAND || \
 						 (mon)->mtyp == PM_GARLAND || (mon)->mtyp == PM_CELEBORN || (mon)->mtyp == PM_DANTRAG || \
-						 (mon)->mtyp == PM_LIGHT_ELF || (mon)->mtyp == PM_UNBODIED || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \
 						 (mon)->mtyp == PM_PAGE || ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_KNIGHT))
 #define mon_turn_undead(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || \

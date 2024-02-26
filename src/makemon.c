@@ -15776,7 +15776,6 @@ struct monst *mtmp;
 	if(mtmp->mtyp == PM_REBEL_RINGLEADER){
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 15){
 			give_mintrinsic(mtmp, COLD_RES);
@@ -15802,10 +15801,103 @@ struct monst *mtmp;
 	if(mtmp->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION){
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
+		}
+	}
+	if(mtmp->mtyp == PM_COURE_ELADRIN || mtmp->mtyp == PM_MOTE_OF_LIGHT){
+		if(mtmp->m_lev >= 5){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+		if(mtmp->m_lev >= 9){
+			give_mintrinsic(mtmp, SEARCHING);
+		}
+		if(mtmp->m_lev >= 11){
+			give_mintrinsic(mtmp, FIRE_RES);
+		}
+		if(mtmp->m_lev >= 13){
+			give_mintrinsic(mtmp, COLD_RES);
+		}
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, SHOCK_RES);
+		}
+		if(mtmp->m_lev >= 25){
+			give_mintrinsic(mtmp, DISINT_RES);
+		}
+		if(mtmp->m_lev >= 27){
+			give_mintrinsic(mtmp, STONE_RES);
+		}
+		if(mtmp->m_lev >= 29){
+			give_mintrinsic(mtmp, ANTIMAGIC);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, DRAIN_RES);
+		}
+	}
+	else if(mtmp->mtyp == PM_NOVIERE_ELADRIN || mtmp->mtyp == PM_WATER_DOLPHIN){
+		if(mtmp->m_lev >= 15){ //8 base +7
+			give_mintrinsic(mtmp, FAST);
+		}
+	}
+	else if(mtmp->mtyp == PM_BRALANI_ELADRIN || mtmp->mtyp == PM_SINGING_SAND){
+		if(mtmp->m_lev >= 17){ //10 base +7
+			give_mintrinsic(mtmp, FAST);
+		}
+	}
+	else if(mtmp->mtyp == PM_FIRRE_ELADRIN || mtmp->mtyp == PM_DANCING_FLAME){
+		if(mtmp->m_lev >= 15){
+			give_mintrinsic(mtmp, STEALTH);
+		}
+		if(mtmp->m_lev >= 27){ //10 base + 17
+			give_mintrinsic(mtmp, TELEPORT_CONTROL);
+		}
+	}
+	else if(mtmp->mtyp == PM_GHAELE_ELADRIN || mtmp->mtyp == PM_LUMINOUS_CLOUD){
+		if(mtmp->m_lev >= 22){ //15 base +7
+			give_mintrinsic(mtmp, FAST);
+		}
+	}
+	else if(mtmp->mtyp == PM_LIGHT_ELF || mtmp->mtyp == PM_UNBODIED){
+		if(mtmp->m_lev >= 19){ //12 base +7
+			give_mintrinsic(mtmp, FAST);
+		}
+		if(mtmp->m_lev >= 25){
+			give_mintrinsic(mtmp, DISINT_RES);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, DRAIN_RES);
+		}
+	}
+	else if(mtmp->mtyp == PM_TULANI_ELADRIN || mtmp->mtyp == PM_GAE_ELADRIN
+	 || mtmp->mtyp == PM_BRIGHID_ELADRIN || mtmp->mtyp == PM_UISCERRE_ELADRIN
+	 || mtmp->mtyp == PM_CAILLEA_ELADRIN
+	 || mtmp->mtyp == PM_BALL_OF_RADIANCE || mtmp->mtyp == PM_WARDEN_TREE
+	 || mtmp->mtyp == PM_PYROCLASTIC_VORTEX || mtmp->mtyp == PM_WATERSPOUT
+	 || mtmp->mtyp == PM_MOONSHADOW
+	){
+		if(mtmp->m_lev >= 25){
+			give_mintrinsic(mtmp, DISINT_RES);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, DRAIN_RES);
+		}
+	}
+	else if(mtmp->mtyp == PM_DRACAE_ELADRIN || mtmp->mtyp == PM_MOTHERING_MASS){
+		if(mtmp->m_lev >= 25){ //18 base +7
+			give_mintrinsic(mtmp, FAST);
+		}
+		if(mtmp->m_lev >= 23){
+			give_mintrinsic(mtmp, SICK_RES);
+		}
+		if(mtmp->m_lev >= 30){
+			give_mintrinsic(mtmp, DISINT_RES);
+		}
+	}
+	else if(mtmp->mtyp == PM_IKSH_NA_DEVA){
+		if(mtmp->m_lev >= 22){
+			give_mintrinsic(mtmp, FAST);
 		}
 	}
 	if(mon_archeologist(mtmp)){
+		give_mintrinsic(mtmp, FAST);
 		give_mintrinsic(mtmp, STEALTH);
 		if(mtmp->m_lev >= 10){
 			give_mintrinsic(mtmp, SEARCHING);
@@ -15814,14 +15906,12 @@ struct monst *mtmp;
 	if(mon_anachrononaut(mtmp)){
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_barbarian(mtmp)){
 		give_mintrinsic(mtmp, POISON_RES);
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 15){
 			give_mintrinsic(mtmp, STEALTH);
@@ -15838,10 +15928,10 @@ struct monst *mtmp;
 	if(mon_caveman(mtmp)){
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_convict(mtmp)){
+		give_mintrinsic(mtmp, SICK_RES);
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, POISON_RES);
 		}
@@ -15849,13 +15939,16 @@ struct monst *mtmp;
 			give_mintrinsic(mtmp, SEARCHING);
 		}
 	}
+	if(mon_healer(mtmp)){
+		give_mintrinsic(mtmp, POISON_RES);
+		give_mintrinsic(mtmp, SICK_RES);
+	}
 	if(mon_undead_hunter(mtmp)){
 		give_mintrinsic(mtmp, STEALTH);
 		give_mintrinsic(mtmp, DRAIN_RES);
 		give_mintrinsic(mtmp, SICK_RES);
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 		if(mtmp->m_lev >= 9){
 			give_mintrinsic(mtmp, POISON_RES);
@@ -15864,10 +15957,12 @@ struct monst *mtmp;
 	if(mon_knight(mtmp)){
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_monk(mtmp)){
+		give_mintrinsic(mtmp, FAST);
+		give_mintrinsic(mtmp, SLEEP_RES);
+		give_mintrinsic(mtmp, SEE_INVIS);
 		if(mtmp->m_lev >= 3){
 			give_mintrinsic(mtmp, POISON_RES);
 		}
@@ -15912,6 +16007,7 @@ struct monst *mtmp;
 		}
 	}
 	if(mon_madman(mtmp)){
+		give_mintrinsic(mtmp, TELEPAT);
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, SEARCHING);
 		}
@@ -15922,7 +16018,6 @@ struct monst *mtmp;
 		}
 		if(mtmp->m_lev >= 11){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_priest(mtmp)){
@@ -15946,6 +16041,7 @@ struct monst *mtmp;
 		}
 	}
 	if(mon_samurai(mtmp)){
+		give_mintrinsic(mtmp, FAST);
 		if(mtmp->m_lev >= 15){
 			give_mintrinsic(mtmp, STEALTH);
 		}
@@ -15959,10 +16055,10 @@ struct monst *mtmp;
 		}
 	}
 	if(mon_valkyrie(mtmp)){
+		give_mintrinsic(mtmp, COLD_RES);
 		give_mintrinsic(mtmp, STEALTH);
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
-			// mon_adjust_speed(mtmp, 1, (struct obj *) 0, FALSE);
 		}
 	}
 	if(mon_wizard(mtmp)){
