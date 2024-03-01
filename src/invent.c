@@ -2,6 +2,7 @@
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
+#include <math.h>
 #include "hack.h"
 #include "artifact.h"
 
@@ -2820,6 +2821,10 @@ winid *datawin;
 			int lspe_mult = dmgval_core(&wdice[1], TRUE, obj, otyp, &youmonst);		// large dice
 			int enc_bonus = (obj) ? (obj->spe) : 0;
 			if (otyp == CRYSTAL_SWORD) enc_bonus += enc_bonus / 3;
+			if (otyp == SEISMIC_HAMMER) {
+				wdice[0].oc_damd += 3*enc_bonus;
+				wdice[1].oc_damd += 3*enc_bonus;
+			}
 
 			Sprintf(buf, "Damage: ");
 
@@ -2999,24 +3004,26 @@ winid *datawin;
 
 		/* other weapon special effects */
 		if(obj){
+			int ldamd = objects[otyp].oc_wldam.oc_damd;
+			int sdamd = objects[otyp].oc_wsdam.oc_damd;
 			if(obj->otyp == TORCH){
-				Sprintf(buf2, "Deals 1d10%s bonus fire damage when lit.", (obj->spe ? sitoa(obj->spe) : ""));
+				Sprintf(buf2, "When lit, deals +1d10%s fire damage.", (obj->spe ? sitoa(obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == MAGIC_TORCH){
-				Sprintf(buf2, "Deals 1d8%s fire damage when lit.", (obj->spe ? sitoa(2*obj->spe) : ""));
+				Sprintf(buf2, "When lit, deals +1d8%s fire damage.", (obj->spe ? sitoa(2*obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == SHADOWLANDER_S_TORCH){
-				Sprintf(buf2, "Deals 1d10%s bonus cold damage when lit.", (obj->spe ? sitoa(obj->spe) : ""));
+				Sprintf(buf2, "When lit, deals +1d10%s cold damage.", (obj->spe ? sitoa(obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == SUNROD){
-				Sprintf(buf2, "Deals 1d10%s bonus lightning and acid damage when lit.", (obj->spe ? sitoa(obj->spe) : ""));
+				Sprintf(buf2, "When lit, deals +1d10%s lightning and acid damage and may blind struck targets.", (obj->spe ? sitoa(obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == KAMEREL_VAJRA){
-				Sprintf(buf2, "Deals 2d6 bonus lightning damage when lit, or 6d6 if wielded by an Ara Kamerel.");
+				Sprintf(buf2, "When lit, deals +2d6 lightning damage, or +6d6 if wielded by an Ara Kamerel, and may blind struck targets.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == VIPERWHIP && obj->ovar1_heads > 1){
@@ -3024,7 +3031,7 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == MIRRORBLADE){
-				Sprintf(buf2, "May use a weapon-wielding opponent's own weapon against them.");
+				Sprintf(buf2, "Uses a weapon-wielding opponent's own weapon against them, if their damage is higher.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == CRYSTAL_SWORD && obj->spe >= 3){
@@ -3032,16 +3039,88 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			if(force_weapon(obj)){
-				Sprintf(buf2, "When charged, deals an extra 1.5 dice of bonus energy damage.");
+				if (obj->otyp == FORCE_WHIP)
+					Sprintf(buf2, "When charged, deals +1d%d%s energy damage versus small and +2d%d%s versus large.",
+						sdamd, sitoa((sdamd+1)/2+2), ldamd, sitoa((ldamd+1)/2+2));
+				else
+					Sprintf(buf2, "When charged, deals +1d%d%s energy damage versus small and +1d%d%s versus large.",
+						sdamd, sitoa((sdamd+1)/2), ldamd, sitoa((ldamd+1)/2));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == DOUBLE_FORCE_BLADE){
-				Sprintf(buf2, "Deals double damage if wielded without an off-hand weapon, at the cost of an extra 1/4 move.");
+				Sprintf(buf2, "Doubles base damage if wielded without two-weaponing, at the cost of an extra 1/4 move.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == RAKUYO){
-				Sprintf(buf2, "Deals an extra 1d4%s vs small or 1d3%s vs large if wielded without an off-hand weapon, at the cost of an extra 1/4 move.", 
-					(obj->spe ? sitoa(obj->spe) : ""), (obj->spe ? sitoa(obj->spe) : ""));
+				Sprintf(buf2, "Deals +1d%d%s base damage vs small and +1d%d%s vs large if wielded without two-weaponing, at the cost of an extra 1/4 move.", 
+					(4 + 2*(obj->objsize - MZ_MEDIUM)), (obj->spe ? sitoa(obj->spe) : ""),
+					(3 + 2*(obj->objsize - MZ_MEDIUM)), (obj->spe ? sitoa(obj->spe) : ""));
+				OBJPUTSTR(buf2);
+			}
+			if(obj->otyp == DISKOS && u.uinsight >= 15){
+				int dice = (u.uinsight >= 45) ? 3 : ((u.uinsight >= 20) ? 2 : 1);
+				int lflat = (u.uinsight >= 50) ? ldamd : 0;
+				int sflat = (u.uinsight >= 50) ? sdamd : 0;
+
+				if(u.ualign.record < -3 && Insanity > 50){
+					lflat += ldamd*(50-u.usanity)/50;
+					sflat += sdamd*(50-u.usanity)/50;
+				}
+				else if(u.ualign.record > 3 && u.usanity > 90){
+					lflat += ldamd*(10-Insanity)/10;
+					sflat += sdamd*(10-Insanity)/10;
+				}
+
+				Sprintf(buf2, "Deals +%dd%d%s %senergy damage versus small and +%dd%d%s versus large.",
+					dice, sdamd, (sflat ? sitoa(sflat) : ""), (u.ualign.record < -3) ? "unholy " : ((u.ualign.record > 3) ? "holy " : ""), 
+					dice, ldamd, (lflat ? sitoa(lflat) : ""));
+				OBJPUTSTR(buf2);
+			}
+			if (is_mercy_blade(obj) & !u.veil){
+				Sprintf(buf2, "Deals extra damage scaled by insight%s, currently %d%% extra damage.",
+					(u.uinsight >= 25) ? " and charisma" : "",
+					(min(u.uinsight, 50) + ((u.uinsight >= 25) ? min((u.uinsight-25)/2, ACURR(A_CHA)) : 0))*2);
+				OBJPUTSTR(buf2);
+
+				if (u.uinsight >= 25){
+					Sprintf(buf2, "Lowers struck targets' morale based on your charisma, currently -%d per hit, capped at -%d.",
+						ACURR(A_CHA)/5, (obj->spe + ACURR(A_CHA)));
+					OBJPUTSTR(buf2);
+				}
+			}
+			if (obj->otyp == CROW_QUILL || obj->otyp == SET_OF_CROW_TALONS){
+				Sprintf(buf2, "Makes struck targets vulnerable, adding %d stacks per hit.", (obj->otyp == CROW_QUILL) ? 4 : 3);
+				OBJPUTSTR(buf2);
+			}
+			if (obj->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE)){
+				Sprintf(buf2, "Makes struck targets vulnerable, adding stacks equal to 10%% of damage, capped at %d (scaling inversely with insight).",
+					(int)(30*pow(.97, u.uinsight)));
+				OBJPUTSTR(buf2);
+			}
+			if (obj->otyp == ISAMUSEI){
+				int factor = 20;
+				if(u.uinsight >= 70){
+					factor = 4;
+				}
+				else if(u.uinsight >= 57){
+					factor = 5;
+				}
+				else if(u.uinsight >= 45){
+					factor = 6;
+				}
+				else if(u.uinsight >= 33){
+					factor = 8;
+				}
+				else if(u.uinsight >= 22){
+					factor = 10;
+				}
+				Sprintf(buf2, "Attempts to lower the target's current health by %d%% of its current value.", 100/factor);
+				OBJPUTSTR(buf2);
+			}
+			if (obj->otyp == PINCER_STAFF && u.uinsight >= 10){
+				Sprintf(buf2, "Deals double base damage %s%son consecutive attacks against the same target.",
+					(obj->oartifact == ART_FALLINGSTAR_MANDIBLES) ? "plus 1d12 magic damage " : "",
+					(u.uinsight >= 50) ? "and attempts to steal worn armor " : "");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->oartifact == ART_SILVER_STARLIGHT){
@@ -3049,7 +3128,8 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			if(obj->oartifact == ART_ATMA_WEAPON && !Drain_resistance){
-				Sprintf(buf2, "Scales base damage by your current health percentage.");
+				Sprintf(buf2, "Scales base damage by your current health percentage, currently %d%%.",
+					Upolyd ? (u.mh * 100) / u.mhmax : (u.uhp * 100) / u.uhpmax);
 				OBJPUTSTR(buf2);
 			}
 			if(fast_weapon(obj)){
@@ -3062,6 +3142,10 @@ winid *datawin;
 			}
 			if(dark_weapon(obj) && obj->spe >= 6){
 				Sprintf(buf2, "Deals 20%% extra damage to all targets when the wielder is at 30%% health or lower.");
+				OBJPUTSTR(buf2);
+			}
+			if(is_vibroweapon(obj)){
+				Sprintf(buf2, "Drains one charge per hit and deals less damage when uncharged.");
 				OBJPUTSTR(buf2);
 			}
 		}

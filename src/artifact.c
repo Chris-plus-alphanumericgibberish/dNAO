@@ -5163,8 +5163,8 @@ boolean printmessages;
 		}
 	}
 	if(otmp->otyp == BESTIAL_CLAW){
-		int insight_mod;
-		int studystack;
+		int insight_mod = 0;
+		int studystack = 0;
 		if(youagr){
 			if(active_glyph(BEASTS_EMBRACE))
 				insight_mod = 30*pow(.97,u.uinsight);
