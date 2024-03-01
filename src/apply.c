@@ -5157,7 +5157,7 @@ use_grapple (obj)
 	} else if (!cansee(cc.x, cc.y)) {
 	    You(cant_see_spot);
 	    return (res);
-	} else if (!couldsee(cc.x, cc.y)) { /* Eyes of the Overworld */
+	} else if (!couldsee(cc.x, cc.y)) { /* Eye of the Overworld */
 	    You(cant_reach);
 	    return res;
 	}
