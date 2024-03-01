@@ -3528,7 +3528,7 @@ spiriteffects(power, atme)
 					else break;
 				} 
 				struct attack basicattack = {
-					((uarmg && arti_shining(uarmg)) || u.sealsActive&SEAL_CHUPOCLOPS) ? AT_TUCH : AT_CLAW,
+					((uarmg && arti_phasing(uarmg)) || u.sealsActive&SEAL_CHUPOCLOPS) ? AT_TUCH : AT_CLAW,
 					AD_PHYS, 0, 0 };
 				
 				int dieroll = rnd(20);

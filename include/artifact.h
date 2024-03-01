@@ -41,7 +41,7 @@
 #define ARTA_DRAIN		0x00000800L /* drains levels from defender and heals attacker */
 #define ARTA_BRIGHT		0x00001000L /* turns gremlins to dust and trolls to stone */
 #define ARTA_BLIND		0x00002000L /* blinds defender */
-#define ARTA_SHINING	0x00004000L /* phases armor; can hit shades */
+#define ARTA_PHASING	0x00004000L /* phases armor; can hit shades */
 #define ARTA_SHATTER	0x00008000L /* shatter's defender's weapon */
 #define ARTA_DISARM		0x00010000L /* disarms opponent */
 #define ARTA_STEAL		0x00020000L /* steals item from defender */
