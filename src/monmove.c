@@ -1937,6 +1937,7 @@ register struct monst *mtmp;
 			if (mindless_mon(m2)) continue;
 			if (m2 == mtmp) continue;
 			if (m2->mstrategy&STRAT_WAITMASK) continue;
+			if (nonthreat(m2)) continue;
 			power = 0;
 			dmg = 0;
 			if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
