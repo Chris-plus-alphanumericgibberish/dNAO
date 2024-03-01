@@ -2814,8 +2814,9 @@ winid *datawin;
 			))
 		{
 			// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
+			// assumes spe_mult doesn't vary between small/large
 			struct weapon_dice wdice[2];
-			(void)dmgval_core(&wdice[0], FALSE, obj, otyp, &youmonst);	// small dice
+			int spe_mult = dmgval_core(&wdice[0], FALSE, obj, otyp, &youmonst);	// small dice
 			(void)dmgval_core(&wdice[1], TRUE, obj, otyp, &youmonst);		// large dice
 
 			Sprintf(buf, "Damage: ");
@@ -2862,6 +2863,27 @@ winid *datawin;
 			}
 			Strcat(buf, "large monsters.");
 			OBJPUTSTR(buf);
+
+			if (spe_mult != 1 && obj->oartifact != ART_WAND_OF_ORCUS){
+				Sprintf(buf, "Receives ");
+				switch (spe_mult){
+					case 0:
+						Strcat(buf, "no");
+					break;
+					case 2:
+						Strcat(buf, "double");
+					break;
+					case 3:
+						Strcat(buf, "triple");
+					break;
+					default:
+						Sprintf(buf2, "%dx", spe_mult);
+						Strcat(buf, buf2);
+					break;
+				}
+				Strcat(buf, " damage bonus from enchantment.");
+				OBJPUTSTR(buf);
+			}
 		}
 		/* artifact bonus damage (artifacts only) */
 		if (has_artidmg)
@@ -2925,84 +2947,75 @@ winid *datawin;
 				Strcat(buf, "magic damage, doubled against those who came from the stars.");
 				break;
 			default:
-				if (oart->adtyp || oart->aflags&ARTA_HATES){
-					switch (oart->adtyp) {
-						case AD_FIRE: Strcat(buf, "fire damage"); break;
-						case AD_COLD: Strcat(buf, "cold damage"); break;
-						case AD_ELEC: Strcat(buf, "lightning damage"); break;
-						case AD_ACID: Strcat(buf, "acid damage"); break;
-						case AD_MAGM: Strcat(buf, "magic damage"); break;
-						case AD_DRST: Strcat(buf, "poison damage"); break;
-						case AD_DRLI: Strcat(buf, "life drain damage"); break;
-						case AD_STON: Strcat(buf, "petrifying damage"); break;
-						case AD_DARK: Strcat(buf, "dark damage"); break;
-						case AD_BLUD: Strcat(buf, "blood damage"); break;
-						case AD_HOLY: Strcat(buf, "holy damage"); break;
-						case AD_STDY: Strcat(buf, "study damage"); break;
-						case AD_HLUH: Strcat(buf, "corrupted holy damage"); break;
-						case AD_STAR: Strcat(buf, "silver damage"); break;
-						case AD_SLEE: Strcat(buf, "sleep damage"); break;
-						case AD_PHYS: Strcat(buf, "damage"); break;
-						default: break;
-					}
-					if (!(oart->aflags&ARTA_HATES)){
-						Strcat(buf, ".");
-					} else {
-						Strcat(buf, " to ");
-						if (oart->aflags&ARTA_CROSSA){
-							Strcat(buf, "cross-aligned foes.");
-						} else {
-							/* SMOP: this should be made into a list somewhere and used for specific warning messages as well,
-							 * ie, "Warned of fey and magic-item users." instead of "warned of demiliches"
-							 */
-							switch (oartifact)
-							{
-							case ART_ORCRIST:					Strcat(buf, "orcs and demons.");							break;
-							case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
-							case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, and dwarves.");					break;
-							case ART_CARNWENNAN:				Strcat(buf, "fey and magic-item users.");					break;
-							case ART_SLAVE_TO_ARMOK:			Strcat(buf, "nobility, elves, orcs, and the innocent.");	break;
-							case ART_CLAIDEAMH:					Strcat(buf, "those bound by iron and ancient laws.");		break;
-							case ART_DRAGONLANCE:				Strcat(buf, "dragons.");									break;
-							case ART_NODENSFORK:				Strcat(buf, "the eldritch, the telepathic, the deep.");		break;
-							case ART_GAIA_S_FATE:				Strcat(buf, "things attuned to nature.");					break;
-							case ART_DEMONBANE:					Strcat(buf, "demons.");										break;
-							case ART_WEREBANE:					Strcat(buf, "were-beasts and demihumans.");					break;
-							case ART_GIANTSLAYER:				Strcat(buf, "giants.");										break;
-							case ART_VAMPIRE_KILLER:			Strcat(buf, "demons, were-beasts and the undead.");			break;
-							case ART_KINGSLAYER:				Strcat(buf, "lords and ladies and kings and queens.");		break;
-							case ART_PEACE_KEEPER:				Strcat(buf, "those that always seek violence.");			break;
-							case ART_OGRESMASHER:				Strcat(buf, "ogres.");										break;
-							case ART_TROLLSBANE:				Strcat(buf, "trolls and all who regenerate quickly.");		break;
-							case ART_MIRROR_BRAND:				Strcat(buf, "all lawful or chaotic");						break;
-							case ART_SUNSWORD:					Strcat(buf, "demons and the undead.");						break;
-							case ART_ATMA_WEAPON:				Strcat(buf, "worthy foes.");								break;
-							case ART_FUMA_ITTO_NO_KEN:			Strcat(buf, "cross-aligned.");								break;
-							case ART_ROD_OF_SEVEN_PARTS:		Strcat(buf, "any who stand against law.");					break;
-							case ART_WEREBUSTER:				Strcat(buf, "were-beasts.");								break;
-							case ART_BLACK_CRYSTAL:				Strcat(buf, "non-chaotics.");								break;
-							case ART_CLARENT:					Strcat(buf, "the thick-skinned");							break;
-							case ART_SCEPTRE_OF_MIGHT:			Strcat(buf, "cross-aligned.");								break;
-							case ART_IRON_BALL_OF_LEVITATION:	Strcat(buf, "cross-aligned.");								break;
-							case ART_WEB_OF_LOLTH:				Strcat(buf, "elves, demons, and godly minions.");			break;
-							case ART_MITRE_OF_HOLINESS:			Strcat(buf, "undead.");										break;
-							case ART_ICONOCLAST:				Strcat(buf, "humans, elves, dwarves, and gnomes.");			break;
-							case ART_SCOURGE_OF_LOLTH:			Strcat(buf, "elves.");										break;
-							default:
-								Strcat(buf, "hated foes.");
-								break;
-							}
-						}
-					}
+				switch (oart->adtyp) {
+					case AD_FIRE: Strcat(buf, "fire damage"); break;
+					case AD_COLD: Strcat(buf, "cold damage"); break;
+					case AD_ELEC: Strcat(buf, "lightning damage"); break;
+					case AD_ACID: Strcat(buf, "acid damage"); break;
+					case AD_MAGM: Strcat(buf, "magic damage"); break;
+					case AD_DRST: Strcat(buf, "poison damage"); break;
+					case AD_DRLI: Strcat(buf, "life drain damage"); break;
+					case AD_STON: Strcat(buf, "petrifying damage"); break;
+					case AD_DARK: Strcat(buf, "dark damage"); break;
+					case AD_BLUD: Strcat(buf, "blood damage"); break;
+					case AD_HOLY: Strcat(buf, "holy damage"); break;
+					case AD_STDY: Strcat(buf, "study damage"); break;
+					case AD_HLUH: Strcat(buf, "corrupted holy damage"); break;
+					case AD_STAR: Strcat(buf, "silver damage"); break;
+					case AD_SLEE: Strcat(buf, "sleep damage"); break;
+					case AD_PHYS: Strcat(buf, "damage"); break;
+					default: break;
 				}
-				else {
-					buf[0] = '\0';
+				if (oart->aflags&ARTA_HATES){
+					Strcat(buf, " to ");
+					/* SMOP: this should be made into a list somewhere and used for specific warning messages as well,
+					 * ie, "Warned of fey and magic-item users." instead of "warned of demiliches"
+					 * Update 2024 - flag_to_word(flag, cat) now exists, but it's missing a good way to handle msym
+					 * pluralizations and would lose the fun flavor-ish messages for things like nodens, etc.
+					 */
+
+					switch (oartifact){
+					case ART_ORCRIST:					Strcat(buf, "orcs and demons.");							break;
+					case ART_STING:						Strcat(buf, "orcs and spiders.");							break;
+					case ART_GRIMTOOTH:					Strcat(buf, "humans, elves, and dwarves.");					break;
+					case ART_CARNWENNAN:				Strcat(buf, "fey and magic-item users.");					break;
+					case ART_SLAVE_TO_ARMOK:			Strcat(buf, "nobility, elves, orcs, and the innocent.");	break;
+					case ART_CLAIDEAMH:					Strcat(buf, "those bound by iron and ancient laws.");		break;
+					case ART_DRAGONLANCE:				Strcat(buf, "dragons.");									break;
+					case ART_NODENSFORK:				Strcat(buf, "the eldritch, the telepathic, the deep.");		break;
+					case ART_GAIA_S_FATE:				Strcat(buf, "things attuned to nature.");					break;
+					case ART_DEMONBANE:					Strcat(buf, "demons.");										break;
+					case ART_WEREBANE:					Strcat(buf, "were-beasts and demihumans.");					break;
+					case ART_GIANTSLAYER:				Strcat(buf, "giants.");										break;
+					case ART_VAMPIRE_KILLER:			Strcat(buf, "demons, were-beasts and the undead.");			break;
+					case ART_KINGSLAYER:				Strcat(buf, "lords and ladies and kings and queens.");		break;
+					case ART_PEACE_KEEPER:				Strcat(buf, "those that always seek violence.");			break;
+					case ART_OGRESMASHER:				Strcat(buf, "ogres.");										break;
+					case ART_TROLLSBANE:				Strcat(buf, "trolls and all who regenerate quickly.");		break;
+					case ART_SUNSWORD:					Strcat(buf, "demons and the undead.");						break;
+					case ART_ATMA_WEAPON:				Strcat(buf, "worthy foes.");								break;
+					case ART_ROD_OF_SEVEN_PARTS:		Strcat(buf, "any who stand against law.");					break;
+					case ART_WEREBUSTER:				Strcat(buf, "were-beasts.");								break;
+					case ART_BLACK_CRYSTAL:				Strcat(buf, "non-chaotics.");								break;
+					case ART_CLARENT:					Strcat(buf, "the thick-skinned");							break;
+					case ART_WEB_OF_LOLTH:				Strcat(buf, "elves, demons, and godly minions.");			break;
+					case ART_MITRE_OF_HOLINESS:			Strcat(buf, "undead.");										break;
+					case ART_ICONOCLAST:				Strcat(buf, "humans, elves, dwarves, and gnomes.");			break;
+					case ART_SCOURGE_OF_LOLTH:			Strcat(buf, "elves.");										break;
+					default:
+						if (oart->aflags&ARTA_CROSSA) Strcat(buf, "cross-aligned foes.");
+						else Strcat(buf, "hated foes.");
+						break;
+					}
+				} else {
+					Strcat(buf, ".");
 				}
-				break;
+			break;
 			}
 			if (buf[0] != '\0')
 				OBJPUTSTR(buf);
 		}
+
 		/* other weapon special effects */
 		if(obj){
 			if(obj->otyp == TORCH){
@@ -3350,31 +3363,54 @@ winid *datawin;
 	if (oartifact) {
 		register const struct artifact *oart = &artilist[oartifact];
 		buf[0] = '\0';
-		//ADDCLASSPROP((oart->aflags&ARTA_DEXPL), "weapon dice explode");
-		ADDCLASSPROP((oart->aflags&ARTA_DLUCK), "luck-biased");
 		ADDCLASSPROP((oart->aflags&ARTA_POIS), "always poisoned");
 		ADDCLASSPROP((oart->aflags&ARTA_SILVER), "silvered");
 		ADDCLASSPROP((oart->aflags&ARTA_VORPAL), "vorpal");
 		ADDCLASSPROP((oart->aflags&ARTA_CANCEL), "canceling");
 		ADDCLASSPROP((oart->aflags&ARTA_MAGIC), "magic-flourishing");
 		ADDCLASSPROP((oart->aflags&ARTA_DRAIN), "draining");
-		//ADDCLASSPROP((oart->aflags&ARTA_BRIGHT), " /* turns gremlins to dust and trolls to stone */");
+		ADDCLASSPROP((oart->aflags&ARTA_BRIGHT), "illuminating");
 		ADDCLASSPROP((oart->aflags&ARTA_BLIND), "blinding");
 		ADDCLASSPROP((oart->aflags&ARTA_PHASING), "armor-phasing");
 		ADDCLASSPROP((oart->aflags&ARTA_SHATTER), "shattering");
 		ADDCLASSPROP((oart->aflags&ARTA_DISARM), "disarming");
-		ADDCLASSPROP((oart->aflags&ARTA_STEAL), "theiving");
-		ADDCLASSPROP((oart->aflags&(ARTA_EXPLFIRE|ARTA_EXPLFIREX)), "fire exploding");
-		ADDCLASSPROP((oart->aflags&(ARTA_EXPLCOLD|ARTA_EXPLCOLDX)), "cold exploding");
-		ADDCLASSPROP((oart->aflags&(ARTA_EXPLELEC|ARTA_EXPLELECX)), "shock exploding");
+		ADDCLASSPROP((oart->aflags&ARTA_STEAL), "thieving");
 		ADDCLASSPROP((oart->aflags&(ARTA_KNOCKBACK|ARTA_KNOCKBACKX)), "kinetic");
 		if (buf[0] != '\0')
 		{
 			Sprintf(buf2, "Attacks are %s.", buf);
 			OBJPUTSTR(buf2);
 		}
-		/* other stuff
-		 */
+
+		buf[0] = '\0';
+		ADDCLASSPROP((oart->aflags&ARTA_DLUCK), "luck-biased");
+		ADDCLASSPROP((oart->aflags&ARTA_DEXPL), "exploding");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Attacks use %s dice.", buf);
+			OBJPUTSTR(buf2);
+		}
+
+		buf[0] = '\0';
+		ADDCLASSPROP((oart->aflags&ARTA_EXPLFIRE), "fiery");
+		ADDCLASSPROP((oart->aflags&ARTA_EXPLCOLD), "freezing");
+		ADDCLASSPROP((oart->aflags&ARTA_EXPLELEC), "electrical");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Attacks may cause %s explosions.", buf);
+			OBJPUTSTR(buf2);
+		}
+
+		buf[0] = '\0';
+		ADDCLASSPROP((oart->aflags&ARTA_EXPLFIREX), "fiery");
+		ADDCLASSPROP((oart->aflags&ARTA_EXPLCOLDX), "freezing");
+		ADDCLASSPROP((oart->aflags&ARTA_EXPLELECX), "electrical");
+		if (buf[0] != '\0')
+		{
+			Sprintf(buf2, "Attacks cause %s explosions.", buf);
+			OBJPUTSTR(buf2);
+		}
+
 		buf[0] = '\0';
 		ADDCLASSPROP((oart->aflags&ARTA_RETURNING), "returns when thrown");
 		ADDCLASSPROP((oart->aflags&ARTA_HASTE), "hastens the wielder's attacks");

@@ -3051,8 +3051,7 @@ boolean narrow_only;
 		}
 		/* thinking */
 		if (weap->mflagst != 0L && ((ptr->mflagst & weap->mflagst) != 0L)) {
-			return 
-			TRUE;
+			return TRUE;
 		}
 		/* fighting */
 		if (weap->mflagsf != 0L && ((ptr->mflagsf & weap->mflagsf) != 0L)) {
