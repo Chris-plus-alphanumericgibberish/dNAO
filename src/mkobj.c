@@ -2264,6 +2264,8 @@ struct obj* obj;
 	random_mat_list = material_list(obj);
 	if (random_mat_list) {
 		int i = rnd(1000);
+		if(Is_rogue_level(&u.uz))
+			i = 1;//No fancy materials
 		while (i > 0) {
 			if (i <= random_mat_list->iprob)
 				break;
