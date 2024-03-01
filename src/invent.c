@@ -2814,10 +2814,12 @@ winid *datawin;
 			))
 		{
 			// note: dmgval_core can handle not being given an obj; it will attempt to use otyp instead
-			// assumes spe_mult doesn't vary between small/large
+			// impractical edge case for varying spe_mult with size
 			struct weapon_dice wdice[2];
 			int spe_mult = dmgval_core(&wdice[0], FALSE, obj, otyp, &youmonst);	// small dice
-			(void)dmgval_core(&wdice[1], TRUE, obj, otyp, &youmonst);		// large dice
+			int lspe_mult = dmgval_core(&wdice[1], TRUE, obj, otyp, &youmonst);		// large dice
+			int enc_bonus = (obj) ? (obj->spe) : 0;
+			if (otyp == CRYSTAL_SWORD) enc_bonus += enc_bonus / 3;
 
 			Sprintf(buf, "Damage: ");
 
@@ -2831,9 +2833,9 @@ winid *datawin;
 				Sprintf(buf2, "+%dd%d", wdice[0].bon_damn, wdice[0].bon_damd);
 				Strcat(buf, buf2);
 			}
-			if (wdice[0].flat)
+			if (wdice[0].flat || enc_bonus)
 			{
-				Sprintf(buf2, "%s", sitoa(wdice[0].flat));
+				Sprintf(buf2, "%s", sitoa(wdice[0].flat + enc_bonus*spe_mult));
 				Strcat(buf, buf2);
 			}
 			Strcat(buf, " versus small and ");
@@ -2854,36 +2856,15 @@ winid *datawin;
 					Sprintf(buf2, "+%dd%d", wdice[1].bon_damn, wdice[1].bon_damd);
 					Strcat(buf, buf2);
 				}
-				if (wdice[1].flat)
+				if (wdice[1].flat || enc_bonus)
 				{
-					Sprintf(buf2, "%s", sitoa(wdice[1].flat));
+					Sprintf(buf2, "%s", sitoa(wdice[1].flat + enc_bonus*lspe_mult));
 					Strcat(buf, buf2);
 				}
 				Strcat(buf, " versus ");
 			}
 			Strcat(buf, "large monsters.");
 			OBJPUTSTR(buf);
-
-			if (spe_mult != 1 && obj->oartifact != ART_WAND_OF_ORCUS){
-				Sprintf(buf, "Receives ");
-				switch (spe_mult){
-					case 0:
-						Strcat(buf, "no");
-					break;
-					case 2:
-						Strcat(buf, "double");
-					break;
-					case 3:
-						Strcat(buf, "triple");
-					break;
-					default:
-						Sprintf(buf2, "%dx", spe_mult);
-						Strcat(buf, buf2);
-					break;
-				}
-				Strcat(buf, " damage bonus from enchantment.");
-				OBJPUTSTR(buf);
-			}
 		}
 		/* artifact bonus damage (artifacts only) */
 		if (has_artidmg)
@@ -3019,23 +3000,23 @@ winid *datawin;
 		/* other weapon special effects */
 		if(obj){
 			if(obj->otyp == TORCH){
-				Sprintf(buf2, "Deals 1d6 + enchantment bonus fire damage when lit.");
+				Sprintf(buf2, "Deals 1d10%s bonus fire damage when lit.", (obj->spe ? sitoa(obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == MAGIC_TORCH){
-				Sprintf(buf2, "Deals 1d4 + double enchantment bonus fire damage when lit.");
+				Sprintf(buf2, "Deals 1d8%s fire damage when lit.", (obj->spe ? sitoa(2*obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == SHADOWLANDER_S_TORCH){
-				Sprintf(buf2, "Deals 1d6 + enchantment bonus cold damage when lit.");
+				Sprintf(buf2, "Deals 1d10%s bonus cold damage when lit.", (obj->spe ? sitoa(obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == SUNROD){
-				Sprintf(buf2, "Deals 1d6 + enchantment bonus lightning and acid damage when lit.");
+				Sprintf(buf2, "Deals 1d10%s bonus lightning and acid damage when lit.", (obj->spe ? sitoa(obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == KAMEREL_VAJRA){
-				Sprintf(buf2, "Deals 2d6 bonus lightning damage, or 6d6 if wielded by an Ara Kamerel.");
+				Sprintf(buf2, "Deals 2d6 bonus lightning damage when lit, or 6d6 if wielded by an Ara Kamerel.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == VIPERWHIP && obj->ovar1_heads > 1){
@@ -3047,11 +3028,11 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == CRYSTAL_SWORD && obj->spe >= 3){
-				Sprintf(buf2, "Deals an extra %d enchantment damage.", obj->spe/3);
+				Sprintf(buf2, "Adds an extra %s to enchantment for damage calculations.", sitoa(obj->spe/3));
 				OBJPUTSTR(buf2);
 			}
 			if(force_weapon(obj)){
-				Sprintf(buf2, "Deals 1.5 base-damage-dice bonus energy damage.");
+				Sprintf(buf2, "When charged, deals an extra 1.5 dice of bonus energy damage.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == DOUBLE_FORCE_BLADE){
@@ -3059,7 +3040,16 @@ winid *datawin;
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == RAKUYO){
-				Sprintf(buf2, "Deals an extra 1d4 vs small or 1d3 vs large and double enchantment damage if wielded without an off-hand weapon, at the cost of an extra 1/4 move.");
+				Sprintf(buf2, "Deals an extra 1d4%s vs small or 1d3%s vs large if wielded without an off-hand weapon, at the cost of an extra 1/4 move.", 
+					(obj->spe ? sitoa(obj->spe) : ""), (obj->spe ? sitoa(obj->spe) : ""));
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_SILVER_STARLIGHT){
+				Sprintf(buf2, "Deals an extra base die + 1d4 bonus precision damage.");
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_ATMA_WEAPON && !Drain_resistance){
+				Sprintf(buf2, "Scales base damage by your current health percentage.");
 				OBJPUTSTR(buf2);
 			}
 			if(fast_weapon(obj)){

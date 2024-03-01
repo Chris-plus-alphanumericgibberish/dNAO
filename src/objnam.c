@@ -1425,7 +1425,10 @@ char *buf;
 	else
 #endif
 	if (is_lightsaber(obj) && litsaber(obj) && obj->otyp != ROD_OF_FORCE){
-		Strcat(buf, lightsaber_colorText(obj));
+		if (obj->cobj)
+			Strcat(buf, lightsaber_colorText(obj->cobj));
+		else
+			Strcat(buf, lightsaber_colorText(obj));
 		if (!objects[obj->otyp].oc_name_known && strncmpi(eos(buf)-7, " bladed", 7))
 			Strcat(buf, " bladed");
 		Strcat(buf, " ");
