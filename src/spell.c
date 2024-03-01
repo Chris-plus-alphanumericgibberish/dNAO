@@ -6152,18 +6152,18 @@ int spell;
 	
 	if(ublindf && ublindf->otyp == SOUL_LENS){
 		if(u.ualign.record < 0 || ublindf->cursed){
-			if(casting_stat == A_CHA){
+			if(casting_stat == A_CHA || Race_if(PM_ELF)){
 				splcaster += urole.spelarmr;
 			}
 			else if(Role_if(PM_MONK))
-				splcaster += urole.spelarmr/2;
+				splcaster += ublindf->oartifact == ART_EYE_OF_THE_OVERWORLD ? urole.spelarmr : urole.spelarmr/2;
 		}
 		else if(u.ualign.record >= 20){
-			if(casting_stat == A_CHA){
+			if(casting_stat == A_CHA || Race_if(PM_ELF)){
 				splcaster -= urole.spelarmr;
 			}
 			else if(Role_if(PM_MONK))
-				splcaster -= urole.spelarmr/2;
+				splcaster -= ublindf->oartifact == ART_EYE_OF_THE_OVERWORLD ? urole.spelarmr : urole.spelarmr/2;
 		}
 	}
 	
