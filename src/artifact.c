@@ -14375,6 +14375,7 @@ int spe;
 		nmon2 = m2->nmon;
 		if (DEADMONSTER(m2)) continue;
 		if (mindless_mon(m2)) continue;
+		if (nonthreat(m2)) continue;
 		if ((mon_resistance(m2,TELEPAT) && (rn2(2) || m2->mblinded))
 			|| !rn2(10)
 		){
