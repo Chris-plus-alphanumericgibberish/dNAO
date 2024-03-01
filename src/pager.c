@@ -150,6 +150,8 @@ object_from_map(glyph, x, y, obj_p)
 #define MV_FLAG 4
 #define MG_FLAG 5
 #define MA_FLAG 6
+#define MF_FLAG 7
+#define MSYM	8
 
 char *
 flag_to_word(flag, category)
@@ -337,6 +339,20 @@ flag_to_word(flag, category)
 			case MA_XORN: return "xorns";
 		}
 	break;
+	case MF_FLAG:
+		switch (flag){
+			case MF_MARTIAL_B: return "basic martial skill";
+			case MF_MARTIAL_S: return "skilled martial skill";
+			case MF_MARTIAL_E: return "expert martial skill";
+			case MF_BAB_FULL: return "full base attack bonus";
+			case MF_BAB_HALF: return "half base attack bonus";
+			case MF_LEVEL_30: return "can reach level 30";
+			case MF_LEVEL_45: return "can reach level 45";
+			case MF_PHYS_SCALING: return "receives level-based bonus to physical damage";
+		}
+	break;
+	case MSYM:
+		return (char*)monexplain[flag];
 	default:
 		impossible("flag to words out of bounds?");
 	break;

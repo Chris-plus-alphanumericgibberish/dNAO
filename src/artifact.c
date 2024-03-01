@@ -2327,11 +2327,11 @@ struct obj *obj;
 }
 
 boolean
-arti_shining(obj)
+arti_phasing(obj)
 struct obj *obj;
 {
     return (obj && (
-		(obj->oartifact && arti_attack_prop(obj, ARTA_SHINING)) ||
+		(obj->oartifact && arti_attack_prop(obj, ARTA_PHASING)) ||
 		(is_lightsaber(obj) && litsaber(obj)) ||
 		(check_oprop(obj, OPROP_ELFLW) && u.uinsight >= 22) ||
 		(check_oprop(obj, OPROP_PHSEW)) ||
@@ -3051,8 +3051,7 @@ boolean narrow_only;
 		}
 		/* thinking */
 		if (weap->mflagst != 0L && ((ptr->mflagst & weap->mflagst) != 0L)) {
-			return 
-			TRUE;
+			return TRUE;
 		}
 		/* fighting */
 		if (weap->mflagsf != 0L && ((ptr->mflagsf & weap->mflagsf) != 0L)) {
@@ -6691,7 +6690,7 @@ boolean printmessages; /* print generic elemental damage messages */
 				armor = youdef ? uarms : which_armor(mdef, W_ARMS);
 				break;
 			}
-			if (arti_shining(otmp))
+			if (arti_phasing(otmp))
 				armor = (struct obj *)0;
 
 			/* damage, destroy armor */

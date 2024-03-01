@@ -2526,7 +2526,7 @@ base_uac()
 				uac -= u.uinsight - 10;
 		}
 		if(!flat_foot){
-			if((is_rapier(uwep) && arti_shining(uwep)) || 
+			if((is_rapier(uwep) && arti_phasing(uwep)) || 
 				(uwep->otyp == LIGHTSABER && litsaber(uwep) && uwep->oartifact != ART_ANNULUS && uwep->ovar1_lightsaberHandle == 0)
 					) uac -= max(
 						min(
@@ -2713,7 +2713,7 @@ find_ac()
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
 	
 	if(uwep){
-		if((is_rapier(uwep) && !arti_shining(uwep)))
+		if((is_rapier(uwep) && !arti_phasing(uwep)))
 			uac -= max(
 				min(
 				(ACURR(A_DEX)-13)/4,

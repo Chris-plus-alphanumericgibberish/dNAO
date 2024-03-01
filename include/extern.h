@@ -132,7 +132,7 @@ E boolean FDECL(arti_tentRod, (struct obj *));
 E boolean FDECL(arti_threeHead, (struct obj *));
 E boolean FDECL(arti_dluck, (struct obj *));
 E boolean FDECL(arti_dexpl, (struct obj *));
-E boolean FDECL(arti_shining, (struct obj *));
+E boolean FDECL(arti_phasing, (struct obj *));
 E boolean FDECL(arti_mandala, (struct obj *));
 E boolean FDECL(arti_lighten, (struct obj *, boolean));
 E boolean FDECL(arti_chawis, (struct obj *, boolean));
@@ -2179,6 +2179,7 @@ E boolean FDECL(parse_object_symbol, (const char *));
 E boolean FDECL(parse_symbol, (const char *));
 
 /* ### pager.c ### */
+E char *FDECL(flag_to_word, (unsigned long, int));
 E int NDECL(dowhatis);
 E int NDECL(doquickwhatis);
 E int NDECL(doidtrap);
