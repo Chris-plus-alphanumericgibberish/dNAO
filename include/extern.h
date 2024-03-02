@@ -3266,6 +3266,7 @@ E void FDECL(setmwielded, (struct monst *, struct obj *, long));
 E void FDECL(setmnotwielded, (struct monst *, struct obj *));
 E void FDECL(init_mon_wield_item, (struct monst *));
 E int NDECL(abon);
+E float FDECL(atr_dbon, (struct obj *, struct monst *, int));
 E int FDECL(dbon, (struct obj *, struct monst *));
 E void NDECL(reset_skills);
 E boolean FDECL(fake_skill, (int));

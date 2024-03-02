@@ -3220,6 +3220,29 @@ winid *datawin;
 				(hitbon >= 0 ? "bonus" : "penalty"));
 			OBJPUTSTR(buf);
 		}
+
+		/* Damage bonus from attributes */
+#define dbon_to_word(num) ((num == 0) ? "no " : ((num == 0.5) ? "half " : ((num == 1.5) ? "half again " : ((num == 2) ? "double " : "full "))))
+#define atr_to_word(atr) ((atr == A_STR) ? "strength" : ((atr == A_DEX) ? "dexterity" : ((atr == A_CON) ? "constitution" \
+						: ((atr == A_INT) ? "intelligence" : ((atr == A_WIS) ? "wisdom" : "charisma")))))
+		if (obj){
+			float atrdbon = 0;
+			boolean has_before = FALSE;
+			Sprintf(buf, "Gains ");
+			for (int i = A_STR; i < A_MAX; i++){
+				atrdbon = atr_dbon(obj, &youmonst, i);
+				if ((atrdbon == 0 && i == A_STR) || atrdbon > 0){
+					Sprintf(buf2, "%sbonus %sfrom %s, ", dbon_to_word(atrdbon), (has_before) ? "" : "damage ", atr_to_word(i));
+					Strcat(buf, buf2);
+					has_before = TRUE;
+				}
+			}
+			Sprintf(buf2, "currently %d.", dbon(obj, &youmonst));
+			Strcat(buf, buf2);
+			OBJPUTSTR(buf);
+		}
+#undef dbon_to_word
+#undef atr_to_word
 	}
 	/* object properties (objects only) */
 	if(!check_oprop(obj, OPROP_NONE)){

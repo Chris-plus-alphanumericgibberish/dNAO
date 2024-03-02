@@ -2726,28 +2726,103 @@ abon()		/* attack bonus for strength & dexterity */
 #endif /* OVL0 */
 #ifdef OVL1
 
+/*
+ * Specific modifier for that attribute for that otyp,
+ * written like this so it's usable for invent.c
+ */
+float
+atr_dbon(otmp, mtmp, atr)
+struct obj *otmp;
+struct monst *mtmp;
+int atr;
+{
+	float mod = 0;
+	switch (atr){
+		case A_STR:
+			mod = bimanual_mod(otmp, mtmp);
+
+			if (is_rakuyo(otmp))
+				return 0;
+
+			if (is_rapier(otmp) || is_mercy_blade(otmp) || otmp->otyp == SET_OF_CROW_TALONS ||
+				(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0))
+				mod = 0.5;
+
+			if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_VELKA_S_RAPIER ||
+				otmp->oartifact == ART_FRIEDE_S_SCYTHE || otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING)
+				mod = 0.5;
+
+			if (check_oprop(otmp, OPROP_OCLTW) || (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW)))
+				mod = 0.5;
+
+			return mod;
+		case A_DEX:
+			if (is_rakuyo(otmp))
+				return 2; // otherwise gets caught by rapiers
+
+			if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_YORSHKA_S_SPEAR ||
+				otmp->oartifact == ART_FRIEDE_S_SCYTHE)
+				mod += 2;
+
+			if (is_rapier(otmp) || is_mercy_blade(otmp) || otmp->otyp == SET_OF_CROW_TALONS ||
+				(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0))
+				mod += 1;
+
+			return mod;
+		case A_CON:
+			return mod;
+		case A_INT:
+			if (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW))
+				mod += 1;
+
+			if (otmp->oartifact == ART_VELKA_S_RAPIER || otmp->oartifact == ART_FRIEDE_S_SCYTHE)
+				mod += 1;
+
+			if (is_mercy_blade(otmp))
+				mod += 0.5;
+
+			if (check_oprop(otmp, OPROP_ELFLW))
+				mod += 0.5;
+
+			return mod;
+		case A_WIS:
+			if (otmp->oartifact == ART_YORSHKA_S_SPEAR)
+				mod += 1;
+
+			if (check_oprop(otmp, OPROP_OCLTW))
+				mod += 1;
+
+			if (otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING)
+				mod += 0.5;
+
+			if (check_oprop(otmp, OPROP_ELFLW))
+				mod += 0.5;
+
+			return mod;
+		case A_CHA:
+			if (check_oprop(otmp, OPROP_ELFLW))
+				mod += 0.5;
+			return mod;
+		default:
+			return mod;
+	}
+}
+
 int
 dbon(otmp, mtmp)
 struct obj *otmp;
 struct monst *mtmp;
 {
 	boolean youagr = mtmp == &youmonst;
-	if (youagr) mtmp = (struct monst *) 0;
 
 	struct obj *armg = (youagr ? uarmg : which_armor(mtmp, W_ARMG));
 	int bare_bonus = weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT);
 	int damage_bon = 0;
-	
-	int str, dex, con, itl, wis, cha;
-	int strbon, dexbon, conbon, intbon, wisbon, chabon;
-	boolean half_str;
 
-	str = acurr(A_STR, mtmp);
-	dex = acurr(A_DEX, mtmp);
-	con = acurr(A_CON, mtmp);
-	itl = acurr(A_INT, mtmp);
-	wis = acurr(A_WIS, mtmp);
-	cha = acurr(A_CHA, mtmp);
+	int str, stat;
+	int strbon, statbon;
+
+	str = acurr(A_STR, (youagr) ? ((struct monst *) 0) : mtmp);
 
 	/* please remove fractional strength already */
 	if (str < 6) 				strbon = str - 6;
@@ -2764,86 +2839,18 @@ struct monst *mtmp;
 	if(youagr && u.umadness&MAD_RAGE && !BlockableClearThoughts)
 		strbon += (Insanity)/10;
 
-	strbon *= bimanual_mod(otmp, (youagr) ? &youmonst : mtmp);
+	damage_bon = (int)(strbon * atr_dbon(otmp, mtmp, A_STR));
 
-	dexbon = (dex == 25) ? 8 : ((dex-10)/2);
-	conbon = (con == 25) ? 8 : ((con-10)/2);
-	intbon = (itl == 25) ? 8 : ((itl-10)/2);
-	wisbon = (wis == 25) ? 8 : ((wis-10)/2);
-	chabon = (cha == 25) ? 8 : ((cha-10)/2);
-
-	if (!otmp){
-		if (youagr && u.umaniac && bare_bonus > 0)
-			damage_bon +=  min_ints(bare_bonus, chabon);
+	if (otmp){
+		for (int i = A_DEX; i < A_MAX; i++){
+			stat = acurr(i, (youagr) ? ((struct monst *) 0) : mtmp);
+			statbon = (stat == 25) ? 8 : ((stat-10)/2);
+			damage_bon += (int)(statbon * atr_dbon(otmp, mtmp, i));
+		}
 	} else {
-		/* all of these ifs should almost always fire, it's for readability */
-		/* if two bonus sources can stack, they're in separate ifs so they can both fire*/
-		if (dexbon){
-			if (is_rakuyo(otmp)){
-				strbon = 0;
-				damage_bon += dexbon * 2;
-			} else if (is_rapier(otmp) || is_mercy_blade(otmp) || otmp->otyp == SET_OF_CROW_TALONS ||
-					(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0)){
-				half_str = TRUE;
-				damage_bon += dexbon;
-			}
-			if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_YORSHKA_S_SPEAR || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
-				if (otmp->oartifact != ART_YORSHKA_S_SPEAR) half_str = TRUE;
-				damage_bon += dexbon * 2;
-			}
-		}
-
-		if (conbon){
-			// no conbon items yet
-		}
-
-		if (intbon){
-			if (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW)){
-				half_str = TRUE;
-				damage_bon += intbon;
-			}
-			if (otmp->oartifact == ART_VELKA_S_RAPIER || otmp->oartifact == ART_FRIEDE_S_SCYTHE){
-				half_str = TRUE;
-				damage_bon += intbon;
-			}
-			if (is_mercy_blade(otmp)){
-				half_str = TRUE;
-				damage_bon += intbon/2;
-			}
-			if (check_oprop(otmp, OPROP_ELFLW)){
-				damage_bon += intbon/2;
-			}
-		}
-
-		if (wisbon){
-			if (otmp->oartifact == ART_YORSHKA_S_SPEAR){
-				damage_bon += wisbon;
-			}
-			if (check_oprop(otmp, OPROP_OCLTW)){
-				half_str = TRUE;
-				damage_bon += wisbon;
-			}
-			if (otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING){
-				half_str = TRUE;
-				damage_bon += wisbon/2;
-			}
-			if (check_oprop(otmp, OPROP_ELFLW)){
-				damage_bon += wisbon/2;
-			}
-		}
-
-		if (chabon){
-			if (check_oprop(otmp, OPROP_ELFLW)){
-				damage_bon += chabon/2;
-			}
-			if (otmp->oartifact == ART_IBITE_ARM){
-				if(bare_bonus > 0) damage_bon += cha/5 + bare_bonus*2;
-			}
-		}
+		if (youagr && u.umaniac && bare_bonus > 0)
+			damage_bon += min_ints(bare_bonus, (ACURR(A_CHA) == 25) ? 8 : ((ACURR(A_CHA)-10)/2));
 	}
-	if (half_str) strbon /= 2;
-
-	damage_bon += strbon;
 
 	if (damage_bon && armg && check_oprop(armg, OPROP_RWTH) && (
 			(youagr && u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL) ||
