@@ -2839,15 +2839,16 @@ struct monst *mtmp;
 	if(youagr && u.umadness&MAD_RAGE && !BlockableClearThoughts)
 		strbon += (Insanity)/10;
 
-	damage_bon = (int)(strbon * atr_dbon(otmp, mtmp, A_STR));
-
 	if (otmp){
+		damage_bon = (int)(strbon * atr_dbon(otmp, mtmp, A_STR));
 		for (int i = A_DEX; i < A_MAX; i++){
 			stat = acurr(i, (youagr) ? ((struct monst *) 0) : mtmp);
 			statbon = (stat == 25) ? 8 : ((stat-10)/2);
 			damage_bon += (int)(statbon * atr_dbon(otmp, mtmp, i));
 		}
 	} else {
+		damage_bon = strbon;
+
 		if (youagr && u.umaniac && bare_bonus > 0)
 			damage_bon += min_ints(bare_bonus, (ACURR(A_CHA) == 25) ? 8 : ((ACURR(A_CHA)-10)/2));
 	}

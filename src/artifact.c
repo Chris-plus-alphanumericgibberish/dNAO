@@ -9467,7 +9467,7 @@ arti_invoke(obj)
 			x=u.dx;y=u.dy;
 			getLoc = FALSE;
 		}
-		verbalize("Even Stars Fall");
+		verbalize("Even Stars Fall.");
 		for (; starfall > 0; starfall--){
 			if(getLoc){
 				x = rn2(COLNO-2)+1;

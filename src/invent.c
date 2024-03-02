@@ -3076,7 +3076,7 @@ winid *datawin;
 					dice, ldamd, (lflat ? sitoa(lflat) : ""));
 				OBJPUTSTR(buf2);
 			}
-			if (is_mercy_blade(obj) & !u.veil){
+			if(is_mercy_blade(obj) & !u.veil){
 				Sprintf(buf2, "Deals extra damage scaled by insight%s, currently %d%% extra damage.",
 					(u.uinsight >= 25) ? " and charisma" : "",
 					(min(u.uinsight, 50) + ((u.uinsight >= 25) ? min((u.uinsight-25)/2, ACURR(A_CHA)) : 0))*2);
@@ -3088,16 +3088,16 @@ winid *datawin;
 					OBJPUTSTR(buf2);
 				}
 			}
-			if (obj->otyp == CROW_QUILL || obj->otyp == SET_OF_CROW_TALONS){
+			if(obj->otyp == CROW_QUILL || obj->otyp == SET_OF_CROW_TALONS){
 				Sprintf(buf2, "Makes struck targets vulnerable, adding %d stacks per hit.", (obj->otyp == CROW_QUILL) ? 4 : 3);
 				OBJPUTSTR(buf2);
 			}
-			if (obj->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE)){
+			if(obj->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE)){
 				Sprintf(buf2, "Makes struck targets vulnerable, adding stacks equal to 10%% of damage, capped at %d (scaling inversely with insight).",
 					(int)(30*pow(.97, u.uinsight)));
 				OBJPUTSTR(buf2);
 			}
-			if (obj->otyp == ISAMUSEI){
+			if(obj->otyp == ISAMUSEI){
 				int factor = 20;
 				if(u.uinsight >= 70){
 					factor = 4;
@@ -3117,14 +3117,80 @@ winid *datawin;
 				Sprintf(buf2, "Attempts to lower the target's current health by %d%% of its current value.", 100/factor);
 				OBJPUTSTR(buf2);
 			}
-			if (obj->otyp == PINCER_STAFF && u.uinsight >= 10){
+			if(obj->otyp == PINCER_STAFF && u.uinsight >= 10){
 				Sprintf(buf2, "Deals double base damage %s%son consecutive attacks against the same target.",
 					(obj->oartifact == ART_FALLINGSTAR_MANDIBLES) ? "plus 1d12 magic damage " : "",
 					(u.uinsight >= 50) ? "and attempts to steal worn armor " : "");
 				OBJPUTSTR(buf2);
 			}
+			if(obj->oartifact == ART_ESSCOOAHLIPBOOURRR){
+				Sprintf(buf2, "Deals double base damage on consecutive attacks against the same target.");
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS){
+				Sprintf(buf2, "Gains +1 enchantment for every 7 kills, capped at %d.", min(u.ulevel/3, 7));
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_RUINOUS_DESCENT_OF_STARS){
+				if (u.uinsight >= 6){
+					Sprintf(buf2, "Deals +%dd6 fire damage, scaling with your insight.", min(6, u.uinsight/6));
+					OBJPUTSTR(buf2);
+				}
+				if (NightmareAware_Insanity >= 4){
+					Sprintf(buf2, "Deals +%dd%d acid damage, scaling with your missing sanity.",
+						ClearThoughts ? 1 : 2, min(12, NightmareAware_Insanity/4));
+					OBJPUTSTR(buf2);
+				}
+				if (u.uinsight >= 42){
+					Sprintf(buf2, "Randomly drops falling stars on a hit, causing up to %d physical & fiery explosions centered anywhere on the level.",
+						min(6, (u.uinsight - 36)/6));
+					OBJPUTSTR(buf2);
+				}
+			}
+			if(obj->oartifact == ART_ARYVELAHR_KERYM){
+				Sprintf(buf2, "Deals +2d10 damage to orcs, demons, drow, and the undead.");
+				OBJPUTSTR(buf2);
+			}
 			if(obj->oartifact == ART_SILVER_STARLIGHT){
 				Sprintf(buf2, "Deals an extra base die + 1d4 bonus precision damage.");
+				OBJPUTSTR(buf2);
+			}
+			if (obj->oartifact == ART_SHADOWLOCK){
+				Sprintf(buf2, "Deals +2d6%s cold damage, but also deals 4d6%s physical and 2d6%s cold damage to the wielder every hit.",
+					(obj->spe ? sitoa(obj->spe) : ""), (obj->spe ? sitoa(obj->spe) : ""), (obj->spe ? sitoa(obj->spe) : ""));
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_TROLLSBANE){
+				Sprintf(buf2, "Deals +2d20%s to covetous monsters.", (obj->spe ? sitoa(obj->spe*2) : ""));
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_MASAMUNE){
+				int experts = -2;
+				for(int skl = 1; skl < P_NUM_SKILLS; skl++){
+					if(P_SKILL(skl) >= P_EXPERT)
+						experts += 2;
+				}
+				Sprintf(buf2, "Deals +2 damage for every expert weapon skill past your first, currently %s.", sitoa(max(0, experts)));
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_KUSANAGI_NO_TSURUGI){
+				Sprintf(buf2, "Instantly kills struck elementals and vortices.");
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_GIANTSLAYER){
+				Sprintf(buf2, "Hamstrings giants & other boulder-throwers, reducing their speed by 6 movement points.");
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_TECPATL_OF_HUHETOTL){
+				Sprintf(buf2, "Drinks the blood of targets that have any, dealing +2d4 damage and potentially sacrificing slain foes.");
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_PLAGUE && monstermoves < artinstance[ART_PLAGUE].PlagueDuration){
+				Sprintf(buf2, "Terminally ill targets explode in a cloud of virulent toxins, damaging those around them.");
+				OBJPUTSTR(buf2);
+			}
+			if(obj->oartifact == ART_WEBWEAVER_S_CROOK){
+				Sprintf(buf2, "Traps struck targets in webs.");
 				OBJPUTSTR(buf2);
 			}
 			if(obj->oartifact == ART_ATMA_WEAPON && !Drain_resistance){
@@ -3176,7 +3242,7 @@ winid *datawin;
 					OBJPUTSTR("Coated with silver.");
 				}
 				else if (poisons == OPOISON_HALLU) {
-					OBJPUTSTR("Coated with hallucinogen.");
+					OBJPUTSTR("Coated with hallucinogens.");
 				}
 				/* general mash-em-together poison */
 				else {
