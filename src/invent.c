@@ -3455,6 +3455,24 @@ winid *datawin;
 			Sprintf(buf2, "%s.", buf);
 			OBJPUTSTR(buf2);
 		}
+
+		if (check_oprop(obj, OPROP_SFLMW))
+		{
+			Sprintf(buf2, "Offers slain targets to the Silver Flame.");
+			OBJPUTSTR(buf2);
+		}
+
+		if (check_oprop(obj, OPROP_GOATW))
+		{
+			Sprintf(buf2, "Feeds slain foes to the Black Mother.");
+			OBJPUTSTR(buf2);
+		}
+
+		if (check_oprop(obj, OPROP_SOTHW))
+		{
+			Sprintf(buf2, "Slakes the thirst of Yog-Sothoth.");
+			OBJPUTSTR(buf2);
+		}
 	}
 	/* other artifact weapon effects */
 	if (oartifact) {
