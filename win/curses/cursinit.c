@@ -40,16 +40,7 @@ typedef struct nhrgb_type {
     short b;
 } nhrgb;
 
-nhrgb orig_yellow;
-nhrgb orig_white;
 nhrgb orig_darkgray;
-nhrgb orig_hired;
-nhrgb orig_higreen;
-nhrgb orig_hiyellow;
-nhrgb orig_hiblue;
-nhrgb orig_himagenta;
-nhrgb orig_hicyan;
-nhrgb orig_hiwhite;
 
 /* Banners used for an optional ASCII splash screen */
 
@@ -389,77 +380,40 @@ curses_init_nhcolors()
 #ifdef TEXTCOLOR
     if (has_colors()) {
         use_default_colors();
-		int i, j;
-		int cnum = COLORS >= 16 ? 16 : 8;
-		int clr_remap[16] = {
-			COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
-			COLOR_BLUE,
-			COLOR_MAGENTA, COLOR_CYAN, -1, COLOR_WHITE,
-			COLOR_RED + 8, COLOR_GREEN + 8, COLOR_YELLOW + 8,
-			COLOR_BLUE + 8,
-			COLOR_MAGENTA + 8, COLOR_CYAN + 8, COLOR_WHITE + 8
-		};
-		/* standard colors */
-		for (i=0; i < cnum; i++) {
-			init_pair(i+1, clr_remap[i], -1);
-		}
-		/* with backgrounds */
-		for (i=0; i < cnum; i++) {
-			for (j=0; j < cnum; j++) {
-				if (i != j)
-					init_pair(j + i*cnum + cnum + 1, clr_remap[j], clr_remap[i]);
-				else
-					init_pair(j + i*cnum + cnum + 1, COLOR_BLACK, clr_remap[j]);
-			}
-		}
+        int i, j;
+        int cnum = COLORS >= 16 ? 16 : 8;
+        int clr_remap[16] = {
+            COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
+            COLOR_BLUE,
+            COLOR_MAGENTA, COLOR_CYAN, -1, COLOR_WHITE,
+            COLOR_RED + 8, COLOR_GREEN + 8, COLOR_YELLOW + 8,
+            COLOR_BLUE + 8,
+            COLOR_MAGENTA + 8, COLOR_CYAN + 8, COLOR_WHITE + 8
+        };
+        /* standard colors */
+        for (i=0; i < cnum; i++) {
+            init_pair(i+1, clr_remap[i], -1);
+        }
+        /* with backgrounds */
+        for (i=0; i < cnum; i++) {
+            for (j=0; j < cnum; j++) {
+                if (i != j)
+                    init_pair(j + i*cnum + cnum + 1, clr_remap[j], clr_remap[i]);
+                else
+                    init_pair(j + i*cnum + cnum + 1, COLOR_BLACK, clr_remap[j]);
+            }
+        }
 
         if (can_change_color()) {
-            /* Preserve initial terminal colors */
-            color_content(COLOR_YELLOW, &orig_yellow.r, &orig_yellow.g,
-                          &orig_yellow.b);
-            color_content(COLOR_WHITE, &orig_white.r, &orig_white.g,
-                          &orig_white.b);
-
-            /* Set colors to appear as NetHack expects */
-            init_color(COLOR_YELLOW, 500, 300, 0);
-            init_color(COLOR_WHITE, 600, 600, 600);
-            if (COLORS >= 16) {
-                /* Preserve initial terminal colors */
-                color_content(COLOR_RED + 8, &orig_hired.r,
-                              &orig_hired.g, &orig_hired.b);
-                color_content(COLOR_GREEN + 8, &orig_higreen.r,
-                              &orig_higreen.g, &orig_higreen.b);
-                color_content(COLOR_YELLOW + 8, &orig_hiyellow.r,
-                              &orig_hiyellow.g, &orig_hiyellow.b);
-                color_content(COLOR_BLUE + 8, &orig_hiblue.r,
-                              &orig_hiblue.g, &orig_hiblue.b);
-                color_content(COLOR_MAGENTA + 8, &orig_himagenta.r,
-                              &orig_himagenta.g, &orig_himagenta.b);
-                color_content(COLOR_CYAN + 8, &orig_hicyan.r,
-                              &orig_hicyan.g, &orig_hicyan.b);
-                color_content(COLOR_WHITE + 8, &orig_hiwhite.r,
-                              &orig_hiwhite.g, &orig_hiwhite.b);
-
-                /* Set colors to appear as NetHack expects */
-                init_color(COLOR_RED + 8, 1000, 500, 0);
-                init_color(COLOR_GREEN + 8, 0, 1000, 0);
-                init_color(COLOR_YELLOW + 8, 1000, 1000, 0);
-                init_color(COLOR_BLUE + 8, 0, 0, 1000);
-                init_color(COLOR_MAGENTA + 8, 1000, 0, 1000);
-                init_color(COLOR_CYAN + 8, 0, 1000, 1000);
-                init_color(COLOR_WHITE + 8, 1000, 1000, 1000);
 # ifdef USE_DARKGRAY
-                if (COLORS > 16) {
-                    color_content(CURSES_DARK_GRAY, &orig_darkgray.r,
-                                  &orig_darkgray.g, &orig_darkgray.b);
-                    init_color(CURSES_DARK_GRAY, 300, 300, 300);
-                    /* just override black colorpair entry here */
-                    init_pair(1, CURSES_DARK_GRAY, -1);
-                }
-# endif
-            } else {
-                /* Set flag to use bold for bright colors */
+            if (COLORS > 16) {
+                color_content(CURSES_DARK_GRAY, &orig_darkgray.r,
+                              &orig_darkgray.g, &orig_darkgray.b);
+                init_color(CURSES_DARK_GRAY, 300, 300, 300);
+                /* just override black colorpair entry here */
+                init_pair(1, CURSES_DARK_GRAY, -1);
             }
+# endif
         }
     }
 #endif
@@ -1136,30 +1090,12 @@ curses_cleanup()
 {
 #ifdef TEXTCOLOR
     if (has_colors() && can_change_color()) {
-        init_color(COLOR_YELLOW, orig_yellow.r, orig_yellow.g, orig_yellow.b);
-        init_color(COLOR_WHITE, orig_white.r, orig_white.g, orig_white.b);
-
-        if (COLORS >= 16) {
-            init_color(COLOR_RED + 8, orig_hired.r, orig_hired.g, orig_hired.b);
-            init_color(COLOR_GREEN + 8, orig_higreen.r, orig_higreen.g,
-                       orig_higreen.b);
-            init_color(COLOR_YELLOW + 8, orig_hiyellow.r,
-                       orig_hiyellow.g, orig_hiyellow.b);
-            init_color(COLOR_BLUE + 8, orig_hiblue.r, orig_hiblue.g,
-                       orig_hiblue.b);
-            init_color(COLOR_MAGENTA + 8, orig_himagenta.r,
-                       orig_himagenta.g, orig_himagenta.b);
-            init_color(COLOR_CYAN + 8, orig_hicyan.r, orig_hicyan.g,
-                       orig_hicyan.b);
-            init_color(COLOR_WHITE + 8, orig_hiwhite.r, orig_hiwhite.g,
-                       orig_hiwhite.b);
 # ifdef USE_DARKGRAY
-            if (COLORS > 16) {
-                init_color(CURSES_DARK_GRAY, orig_darkgray.r,
-                           orig_darkgray.g, orig_darkgray.b);
-            }
-# endif
+        if (COLORS > 16) {
+            init_color(CURSES_DARK_GRAY, orig_darkgray.r,
+                       orig_darkgray.g, orig_darkgray.b);
         }
+# endif
     }
 #endif
 }
