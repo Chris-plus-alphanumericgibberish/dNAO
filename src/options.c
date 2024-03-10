@@ -17,10 +17,6 @@ NEARDATA struct instance_flags iflags;	/* provide linkage */
 #endif
 #include <errno.h>
 
-#ifdef HAVE_SETLOCALE
-#include <locale.h>
-#endif
-
 #define WINTYPELEN 16
 
 #ifdef DEFAULT_WC_TILED_MAP
@@ -345,10 +341,11 @@ static struct Comp_Opt
 #ifdef DUMP_LOG
 	{ "dumpfile", "where to dump data (e.g., dumpfile:/tmp/dump.nh)",
 #ifdef DUMP_FN
-						PL_PSIZ, DISP_IN_GAME },
+						PL_PSIZ, DISP_IN_GAME
 #else
-						PL_PSIZ, SET_IN_GAME },
+						PL_PSIZ, SET_IN_GAME
 #endif
+	},
 #endif
 	{ "dungeon",  "the symbols to use in drawing the dungeon map",
 						MAXDCHARS+1, SET_IN_FILE },
@@ -741,14 +738,9 @@ initoptions()
 		switch_graphics(DEC_GRAPHICS);
 	}
 # endif
-#  ifdef HAVE_SETLOCALE
-	/* try to detect if a utf-8 locale is supported */
-	if (setlocale(LC_ALL, "") &&
-	    (opts = setlocale(LC_CTYPE, NULL)) &&
-	    ((strstri(opts, "utf8") != 0) || (strstri(opts, "utf-8") != 0))) {
+	if (iflags.supports_utf8) {
 		switch_graphics(UTF8_GRAPHICS);
 	}
-#  endif
 #endif /* UNIX || VMS */
 
 #ifdef MAC_GRAPHICS_ENV

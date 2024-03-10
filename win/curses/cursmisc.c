@@ -544,7 +544,7 @@ void
 curses_view_file(const char *filename, boolean must_exist)
 {
     winid wid;
-    anything *identifier;
+    anything identifier;
     char buf[BUFSZ];
     menu_item *selected = NULL;
     dlb *fp = dlb_fopen(filename, "r");
@@ -559,11 +559,10 @@ curses_view_file(const char *filename, boolean must_exist)
 
     wid = curses_get_wid(NHW_MENU);
     curses_create_nhmenu(wid);
-    identifier = malloc(sizeof (anything));
-    identifier->a_void = NULL;
+    identifier = zeroany;
 
     while (dlb_fgets(buf, BUFSZ, fp) != NULL) {
-        curses_add_menu(wid, NO_GLYPH, identifier, 0, 0, A_NORMAL, buf, FALSE);
+        curses_add_menu(wid, NO_GLYPH, &identifier, 0, 0, A_NORMAL, buf, FALSE);
     }
 
     dlb_fclose(fp);

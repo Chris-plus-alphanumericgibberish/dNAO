@@ -1022,16 +1022,19 @@ int gr_set_flag;
     iflags.IBMgraphics = FALSE;
     iflags.DECgraphics = FALSE;
     iflags.UTF8graphics = FALSE;
+#ifdef CURSES_GRAPHICS
+    iflags.cursesgraphics = FALSE;
+#endif
     switch (gr_set_flag) {
-	default:
-	case ASCII_GRAPHICS:
+    default:
+    case ASCII_GRAPHICS:
 	    assign_graphics((glyph_t *)0, 0, MAXPCHARS, 0);
 #ifdef PC9800
 	    if (ascgraphics_mode_callback) (*ascgraphics_mode_callback)();
 #endif
 	    break;
 #ifdef ASCIIGRAPH
-	case IBM_GRAPHICS:
+    case IBM_GRAPHICS:
 /*
  * Use the nice IBM Extended ASCII line-drawing characters (codepage 437).
  *
@@ -1040,39 +1043,39 @@ int gr_set_flag;
  * set the codepage to 437.
  */
 	    iflags.IBMgraphics = TRUE;
-	    iflags.DECgraphics = FALSE;
-#ifdef CURSES_GRAPHICS
-        iflags.cursesgraphics = FALSE;
-#endif
 	    assign_graphics(ibm_graphics, SIZE(ibm_graphics), MAXPCHARS, 0);
-		monsyms[S_LAW_ANGEL] = 0x8F;
-		monsyms[S_NEU_ANGEL] = 0x8E;
+	    /*
+	     * Special angel symbols disabled because they are broken:
+	     * they don't work if you start the game with IBMgraphics
+	     * and have the "monsters" option configured (but do if
+	     * you switch to IBMgraphics in-game), and aren't reset
+	     * when you switch away from IBMgraphics.
+	     *
+	     * monsyms[S_LAW_ANGEL] = 0x8F;
+	     * monsyms[S_NEU_ANGEL] = 0x8E;
+	     */
 #ifdef PC9800
 	    if (ibmgraphics_mode_callback) (*ibmgraphics_mode_callback)();
 #endif
 	    break;
 #endif /* ASCIIGRAPH */
 #ifdef TERMLIB
-	case DEC_GRAPHICS:
+    case DEC_GRAPHICS:
 /*
  * Use the VT100 line drawing character set.
  */
 	    iflags.DECgraphics = TRUE;
-	    iflags.IBMgraphics = FALSE;
-#ifdef CURSES_GRAPHICS
-        iflags.cursesgraphics = FALSE;
-#endif
 	    assign_graphics(dec_graphics, SIZE(dec_graphics), MAXPCHARS, 0);
 	    if (decgraphics_mode_callback) (*decgraphics_mode_callback)();
 	    break;
 #endif /* TERMLIB */
 #ifdef MAC_GRAPHICS_ENV
-	case MAC_GRAPHICS:
+    case MAC_GRAPHICS:
 	    assign_graphics(mac_graphics, SIZE(mac_graphics), MAXPCHARS, 0);
 	    break;
 #endif
 #ifdef UTF8_GLYPHS
-	case UTF8_GRAPHICS:
+    case UTF8_GRAPHICS:
 	    assign_graphics(utf8_graphics, SIZE(utf8_graphics), MAXPCHARS, 0);
 	    iflags.UTF8graphics = TRUE;
 	    break;
@@ -1080,12 +1083,10 @@ int gr_set_flag;
 #ifdef CURSES_GRAPHICS
     case CURS_GRAPHICS:
 	    assign_graphics((glyph_t *)0, 0, MAXPCHARS, 0);
-        iflags.cursesgraphics = TRUE;
-	    iflags.IBMgraphics = FALSE;
-	    iflags.DECgraphics = FALSE;
-        break;
+	    iflags.cursesgraphics = TRUE;
+	    break;
 #endif
-	}
+    }
     return;
 }
 

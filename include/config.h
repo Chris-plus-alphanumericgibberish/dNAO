@@ -293,7 +293,7 @@ typedef unsigned char	uchar;
 typedef long glyph_t;
 
 #define UTF8_GLYPHS	/* Allow UTF8 glyphs for monsters, objects and dungeon */
-/* #define HAVE_SETLOCALE */ /* Query locale, if UTF8 is supported? */
+#define HAVE_SETLOCALE /* Query locale, if UTF8 is supported? */
 
 /*
  * Various structures have the option of using bitfields to save space.

@@ -931,6 +931,10 @@ curses_init_options()
     switch_graphics(ASCII_GRAPHICS);
     if (iflags.IBMgraphics) {
         switch_graphics(IBM_GRAPHICS);
+#ifdef HAVE_SETLOCALE
+    } else if (iflags.supports_utf8 && !iflags.cursesgraphics) {
+        switch_graphics(UTF8_GRAPHICS);
+#endif
     } else if (iflags.cursesgraphics) {
         switch_graphics(CURS_GRAPHICS);
     } else {

@@ -448,3 +448,61 @@ error VA_DECL(const char *,s)
 	exit(EXIT_FAILURE);
 }
 #endif /* !__begui__ */
+
+#ifdef UTF8_GLYPHS
+void
+check_utf8_console(void)
+{
+    struct termios original;
+    /* store current tty settings */
+    if (tcgetattr(STDIN_FILENO, &original) == -1) {
+        perror("check_utf8_console get terminal settings");
+        exit(EXIT_FAILURE);
+    }
+
+    /* set minimal raw mode */
+    struct termios raw = original;
+    cfmakeraw(&raw);
+    raw.c_cc[VMIN] = 0;
+    raw.c_cc[VTIME] = 3; /* timeout of 0.3 seconds */
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) {
+        perror("check_utf8_console set raw mode");
+        exit(EXIT_FAILURE);
+    }
+
+    /* output the non-breaking space character twice in raw UTF-8 */
+    raw_print("\r\n\xc2\xa0\xc2\xa0");
+    /* request the terminal to report the cursor position */
+    raw_print("\x1b[6n");
+
+    /* parse terminal reply */
+    char c, previous_char = '\0';
+    while (read(STDIN_FILENO, &c, 1) == 1) {
+        /* skip everything until the row column separator */
+        if (previous_char == ';') {
+            /* column == 3 means UTF-8 is supported,
+             * non-supporting terminals will report the cursor position
+             * in column 5 */
+            iflags.supports_utf8 = c == '3' ? TRUE : FALSE;
+
+            /* disable read timeout */
+            raw.c_cc[VTIME] = 0;
+            if (tcgetattr(STDIN_FILENO, &raw) == -1) {
+                perror("check_utf8_console failed getting raw settings");
+                exit(EXIT_FAILURE);
+            }
+            if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) {
+                perror("check_utf8_console failed disabling timeout");
+                exit(EXIT_FAILURE);
+            }
+        }
+        previous_char = c;
+    }
+
+    /* restore previous terminal settings */
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &original) == -1) {
+        perror("check_utf8_console restore terminal settings");
+        exit(EXIT_FAILURE);
+    }
+}
+#endif

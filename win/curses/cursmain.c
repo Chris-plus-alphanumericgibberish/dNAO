@@ -6,6 +6,10 @@
 #include "color.h"
 #include "wincurs.h"
 
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif
+
 /* Public functions for curses NetHack interface */
 
 /* Interface definition, for windows.c */
@@ -89,6 +93,10 @@ curses_init_nhwindows(int *argcp, char **argv)
 {
 #ifdef PDCURSES
     char window_title[BUFSZ];
+#endif
+
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_CTYPE, "");
 #endif
 
 #ifdef XCURSES
