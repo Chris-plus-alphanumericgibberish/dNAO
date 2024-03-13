@@ -1863,7 +1863,7 @@ const char *str;
 
 	/* find dungeon feature */
 	for (i=0; i < MAXPCHARS; i++) {
-		if (!strcmpi(feature, defsyms[i].explanation)) {
+		if (!strcmpi(feature, symbol_names[i]) || !strcmpi(feature, defsyms[i].explanation)) {
 			assign_utf8graphics_symbol(i, num);
 			return TRUE;
 		}
