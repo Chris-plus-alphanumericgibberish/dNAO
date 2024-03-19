@@ -180,16 +180,16 @@ get_playerrank(char *rank)
     if (Upolyd) {
         int k = 0;
 
-        Strcpy(buf, mons[u.umonnum].mname);
+        Strncpy(buf, mons[u.umonnum].mname, BUFSZ);
         while(buf[k] != 0) {
             if ((k == 0 || (k > 0 && buf[k-1] == ' ')) &&
                 'a' <= buf[k] && buf[k] <= 'z')
                 buf[k] += 'A' - 'a';
             k++;
         }
-        Strcpy(rank, buf);
+        Strncpy(rank, buf, BUFSZ);
     } else
-        Strcpy(rank, rank_of(u.ulevel, Role_switch, flags.female));
+        Strncpy(rank, rank_of(u.ulevel, Role_switch, flags.female), BUFSZ);
 }
 
 /* Handles numerical stat changes of various kinds.
@@ -353,20 +353,29 @@ draw_bar(boolean is_hp, int cur, int max, const char *title)
 {
     WINDOW *win = curses_get_nhwin(STATUS_WIN);
 
+    char buf[BUFSZ];
+    if (title)
+        Strncpy(buf, title, BUFSZ);
+    else {
+        int len = 5;
+        snprintf(buf, BUFSZ, "%*d / %-*d", len, cur, len, max);
+#ifdef STATUS_COLORS
+        if (!iflags.hitpointbar) {
+            attr_t attr = hpen_color_attr(is_hp, cur, max);
+            wattron(win, attr);
+            wprintw(win, "%s", buf);
+            wattroff(win, attr);
+            return;
+        }
+#endif
+    }
+
 #ifdef STATUS_COLORS
     if (!iflags.hitpointbar) {
-        wprintw(win, "%s", !title ? "---" : title);
+        wprintw(win, "%s", buf);
         return;
     }
 #endif
-
-    char buf[BUFSZ];
-    if (title)
-        Strcpy(buf, title);
-    else {
-        int len = 5;
-        sprintf(buf, "%*d / %-*d", len, cur, len, max);
-    }
 
     /* Colors */
     attr_t fillattr, attr;
@@ -494,7 +503,9 @@ draw_horizontal(int x, int y, int hp, int hpmax)
     wmove(win, y, x);
 
     get_playerrank(rank);
-    sprintf(buf, "%s the %s", plname, rank);
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+    snprintf(buf, BUFSZ, "%s the %s", plname, rank);
+#pragma GCC diagnostic pop
 
     /* Use the title as HP bar (similar to hitpointbar) */
     draw_bar(TRUE, hp, hpmax, buf);
@@ -611,7 +622,7 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
 
     get_playerrank(rank);
     char race[BUFSZ];
-    Strcpy(race, urace.adj);
+    Strncpy(race, urace.adj, BUFSZ);
     race[0] = highc(race[0]);
     wprintw(win, "%s the %s %s%s%s", plname,
             (u.ualign.type == A_CHAOTIC ? "Chaotic" :
@@ -782,7 +793,9 @@ draw_vertical(int x, int y, int hp, int hpmax)
         while ((ranklen + namelen) > maxlen)
             ranklen--; /* Still doesn't fit, strip rank */
     }
-    sprintf(buf, "%-*s the %-*s", namelen, plname, ranklen, rank);
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+    snprintf(buf, BUFSZ, "%-*s the %-*s", namelen, plname, ranklen, rank);
+#pragma GCC diagnostic pop
     draw_bar(TRUE, hp, hpmax, buf);
     wmove(win, y++, x);
     wprintw(win, "%s", dungeons[u.uz.dnum].dname);
