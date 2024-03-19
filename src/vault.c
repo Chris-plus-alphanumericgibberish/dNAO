@@ -514,8 +514,8 @@ register struct monst *grd;
 			verbalize("You've been warned, knave!");
 			mnexto(grd);
 			levl[m][n].typ = egrd->fakecorr[0].ftyp;
-			newsym(m,n);
 			grd->mpeaceful = 0;
+			newsym(m,n);
 			return(-1);
 		}
 		/* not fair to get mad when (s)he's fainted or paralyzed */

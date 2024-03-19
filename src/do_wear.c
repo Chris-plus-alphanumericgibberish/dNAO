@@ -2348,7 +2348,7 @@ struct obj * otmp;
 		break;
 	case ART_SCORPION_CARAPACE:
 		if(check_carapace_mod(otmp, CPROP_PLATES))
-			def = 7;
+			def += 5;
 		else if(check_carapace_mod(otmp, CPROP_HARD_SCALE))
 			def += 1;//offsetting the chitin material
 		break;
@@ -2449,7 +2449,7 @@ struct obj * otmp;
 		break;
 	case ART_SCORPION_CARAPACE:
 		if(check_carapace_mod(otmp, CPROP_PLATES))
-			def = 7;
+			def += 5;
 		else if(check_carapace_mod(otmp, CPROP_HARD_SCALE))
 			def += 1;//offsetting the chitin material
 		break;
