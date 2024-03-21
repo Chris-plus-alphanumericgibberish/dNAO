@@ -2806,6 +2806,64 @@ docome()
 
 
 int
+doattack()
+{
+	struct monst *mtmp;
+	if (!getdir("Indicate pet that should engage in battle, or '.' for all.")) return MOVE_CANCELLED;
+	if(!(u.dx || u.dy)){
+		You("order all your pets to engage in battle.");
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(mtmp->mtame){
+				// if(mtmp->mretreat)
+					// mtmp->mretreat = 0;
+				// else
+					mtmp->mpassive = 0;
+			}
+		}
+	}
+	else if(isok(u.ux+u.dx, u.uy+u.dy)) {
+		mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
+		if(!mtmp){
+			pline("There is no target there.");
+			return MOVE_INSTANT;
+		}
+		if(mtmp->mtame){
+			// mtmp->mretreat = 0;
+			mtmp->mpassive = 0;
+			You("order %s to engage in battle.", mon_nam(mtmp));
+		}
+	} else pline("There is no target there.");
+	return MOVE_INSTANT;
+}
+
+
+int
+dopassive()
+{
+	struct monst *mtmp;
+	if (!getdir("Indicate pet that should not engage foes, or '.' for all.")) return MOVE_CANCELLED;
+	if(!(u.dx || u.dy)){
+		You("order all your pets not to engage foes.");
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(mtmp->mtame) mtmp->mpassive = 1;
+		}
+	}
+	else if(isok(u.ux+u.dx, u.uy+u.dy)) {
+		mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
+		if(!mtmp){
+			pline("There is no target there.");
+			return MOVE_INSTANT;
+		}
+		if(mtmp->mtame){
+			mtmp->mpassive = 1;
+			You("order %s not to engage foes.", mon_nam(mtmp));
+		}
+	} else pline("There is no target there.");
+	return MOVE_INSTANT;
+}
+
+
+int
 dodownboy()
 {
 	u.peaceful_pets = TRUE;

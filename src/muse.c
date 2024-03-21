@@ -333,7 +333,7 @@ struct monst *mtmp;
 		for(mtarg = fmon; mtarg; mtarg = mtarg->nmon){
 			if(DEADMONSTER(mtarg)) continue;
 			if(is_undead(mtarg->data) || is_demon(mtarg->data)) continue;
-			if(!mtmp->mtame != !mtarg->mtame || mtmp->mpeaceful != mtarg->mpeaceful || mm_grudge(mtmp, mtarg)) continue;
+			if(!mtmp->mtame != !mtarg->mtame || mtmp->mpeaceful != mtarg->mpeaceful || mm_grudge(mtmp, mtarg, FALSE)) continue;
 			if (!clear_path(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my) ||
 				dist2(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my) > range
 			) continue;

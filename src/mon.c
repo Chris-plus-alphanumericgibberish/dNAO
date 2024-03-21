@@ -3508,18 +3508,20 @@ mm_aggression(magr, mdef)
 struct monst * magr;	/* monster that is currently deciding where to move */
 struct monst * mdef;	/* another monster which is next to it */
 {
-	long res = mm_grudge(magr, mdef);
+	long res = mm_grudge(magr, mdef, TRUE);
 
 	// must be able to see mdef -- note that this has a 1/8 chance when adjacent even when totally blind!
-	if(res && mon_can_see_mon(magr, mdef))
+	if(res && mon_can_see_mon(magr, mdef)){
 		return res;
+	}
 	return 0L;
 }
 
 long
-mm_grudge(magr, mdef)
+mm_grudge(magr, mdef, actual)
 struct monst * magr;	/* monster that is currently deciding where to move */
 struct monst * mdef;	/* another monster which is next to it */
+boolean actual;			/* actual attack or faction check? */
 {
 	struct permonst *ma, *md;
 	ma = magr->data;
@@ -3542,13 +3544,35 @@ struct monst * mdef;	/* another monster which is next to it */
 	)){
 		return 0L;
 	}
+	if(actual
+		&& magr->mtame 
+		&& get_mx(magr, MX_EDOG)
+		&& ((monstermoves - EDOG(magr)->whistletime < 5)
+			|| magr->mpassive
+			// || magr->mretreat
+			)
+	){
+		return 0L;
+	}
+	//3/4 chance to avoid drawing attacks even from zombies etc.
+	if(actual
+		&& mdef->mtame 
+		&& get_mx(mdef, MX_EDOG)
+		&& ((monstermoves - EDOG(mdef)->whistletime < 5)
+			|| mdef->mpassive
+			// || mdef->mretreat
+			)
+		&& rn2(4)
+	){
+		return 0L;
+	}
 	// monsters trapped in vivisection traps are excluded
 	// shackled monsters aren't a threat
 	if(nonthreat(magr) || nonthreat(mdef)){
 		return 0L;
 	}
 	// must be in range to attack mdef
-	if (distmin(magr->mx, magr->my, mdef->mx, mdef->my) > BOLT_LIM) {
+	if (actual && distmin(magr->mx, magr->my, mdef->mx, mdef->my) > BOLT_LIM) {
 		return 0L;
 	}
 	// magr cannot be waiting
@@ -3600,7 +3624,7 @@ struct monst * mdef;	/* another monster which is next to it */
 		return 0L;
 	}
 	// careful around cockatrices
-	if (touch_petrifies(md) && !resists_ston(magr)
+	if (actual && touch_petrifies(md) && !resists_ston(magr)
 		&& !mindless(magr->data) && distmin(magr->mx, magr->my, mdef->mx, mdef->my) < 3 && !MON_WEP(magr)
 	) {
 		return 0L;
@@ -3666,10 +3690,10 @@ struct monst * mdef;	/* another monster which is next to it */
 	}
 #ifdef ATTACK_PETS
     // pets attack hostile monsters
-	if (magr->mtame && !mdef->mpeaceful && (magr->mhp > magr->mhpmax/2 || banish_kill(magr->mtyp)) && !magr->mflee)
+	if (magr->mtame && !mdef->mpeaceful && (!actual || magr->mhp > magr->mhpmax/2 || banish_kill(magr->mtyp)) && !magr->mflee)
 	    return ALLOW_M|ALLOW_TM;
 	// and vice versa, with some limitations that will help your pet survive
-	if (mdef->mtame && !magr->mpeaceful && (mdef->mhp > mdef->mhpmax/2 || banish_kill(mdef->mtyp)) && !mdef->meating && mdef != u.usteed && !mdef->mflee)
+	if (mdef->mtame && !magr->mpeaceful && (!actual || mdef->mhp > mdef->mhpmax/2 || banish_kill(mdef->mtyp)) && !mdef->meating && mdef != u.usteed && !mdef->mflee)
 	    return ALLOW_M|ALLOW_TM;
 #endif /* ATTACK_PETS */
 
@@ -3699,21 +3723,21 @@ struct monst * mdef;	/* another monster which is next to it */
 	
 	/* Various factions don't attack faction-mates */
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YENDORIAN_FACTION)
-		return FALSE;
+		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == NECROMANCY_FACTION)
-		return FALSE;
+		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == GOATMOM_FACTION)
-		return FALSE;
+		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == QUEST_FACTION)
-		return FALSE;
+		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == ILSENSINE_FACTION)
-		return FALSE;
+		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == SEROPAENES_FACTION)
-		return FALSE;
+		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YELLOW_FACTION)
-		return FALSE;
+		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YOG_FACTION)
-		return FALSE;
+		return 0L;
 	
 	// dreadblossoms attack almost anything
 	if(ma->mtyp == PM_DREADBLOSSOM_SWARM &&

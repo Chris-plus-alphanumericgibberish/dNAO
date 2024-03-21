@@ -2688,7 +2688,7 @@ struct monst *mon;
 			dist2(mon->mx,mon->my, mtmp->mx,mtmp->my) > range
 		) continue;
 		
-	    if (mm_grudge(mon, mtmp) && 
+	    if (mm_grudge(mon, mtmp, FALSE) && 
 			(is_undead(mtmp->data) ||
 				(is_demon(mtmp->data) && (mon->m_lev > (MAXULEV/2)))
 			)
@@ -2716,7 +2716,7 @@ struct monst *mon;
 		    }
 	    }
 		else if (mon_healing_turn(mon) && mtmp->mhp < mtmp->mhpmax 
-			&& !mon->mtame == !mtmp->mtame && mon->mpeaceful == mtmp->mpeaceful && !mm_grudge(mon, mtmp)
+			&& !mon->mtame == !mtmp->mtame && mon->mpeaceful == mtmp->mpeaceful && !mm_grudge(mon, mtmp, FALSE)
 			&& !(is_undead(mtmp->data) || is_demon(mtmp->data))
 		){
 			if(canseemon(mtmp))

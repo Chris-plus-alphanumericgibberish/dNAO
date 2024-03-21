@@ -8334,7 +8334,7 @@ int
 doapply()
 {
 	struct obj *obj;
-	register int res = MOVE_DEFAULT;
+	int res = MOVE_DEFAULT;
 	int waslabile = FALSE;
 	char class_list[MAXOCLASSES+2];
 
@@ -8495,6 +8495,7 @@ doapply()
 		break;
 	case WHISTLE:
 		use_whistle(obj);
+		res = MOVE_PARTIAL;
 		break;
 	case EUCALYPTUS_LEAF:
 		/* MRKR: Every Australian knows that a gum leaf makes an */

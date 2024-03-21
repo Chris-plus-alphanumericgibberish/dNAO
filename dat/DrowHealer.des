@@ -564,6 +564,7 @@ OBJECT:'\\',"bed",(43,02)
 MONSTER: '@', "hedrow blademaster", (42,03)
 OBJECT:'\\',"bed",(42,03)
 
+OBJECT: '(', "box", (41,08), uncursed, 0, "Inherited"
 OBJECT:'\\',"bed",(41,08)
 
 MONSTER: '@', "hedrow warrior", (45,08)

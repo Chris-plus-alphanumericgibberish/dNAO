@@ -1012,6 +1012,14 @@ boolean ranged;
 	
 	if(nonthreat(mtmp2)) return FALSE;
 	
+	if(mtmp->mhp*4 < mtmp->mhpmax && u.uhp*2 >= u.uhpmax)
+		return FALSE;
+	
+	if(get_mx(mtmp, MX_EDOG) && (monstermoves - EDOG(mtmp)->whistletime < 5))
+		return FALSE;
+
+	if(mtmp->mpassive)
+		return FALSE;
 	if(mtmp->mtame && u.peaceful_pets && mtmp2->mpeaceful)
 		return FALSE;
 

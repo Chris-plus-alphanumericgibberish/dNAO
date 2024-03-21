@@ -201,6 +201,7 @@ struct monst {
 	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*125*/
 	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*126*/
 	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*127*/
+	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*128*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	

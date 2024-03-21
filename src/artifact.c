@@ -4824,7 +4824,7 @@ boolean lethal;
 			mdef->encouraged = (youagr ? (u.uinsight + ACURR(A_CHA))/5 : magr->m_lev/5) + spe;
 			if(lethal)
 				pline("The blade lodges in %s %s!", s_suffix(mon_nam(mdef)), mbodypart(mdef, SPINE));
-			friendly_fire = !mm_grudge(mdef, target);
+			friendly_fire = !mm_grudge(mdef, target, FALSE);
 			result = xattacky(mdef, target, x(target), y(target));
 			if(friendly_fire && (result&(MM_DEF_DIED|MM_DEF_LSVD)) && !taxes_sanity(mdef->data) && !mindless_mon(mdef) && !resist(mdef, POTION_CLASS, 0, NOTELL)){
 				if (canseemon(mdef) && !lethal)
@@ -13926,7 +13926,12 @@ char *name;	/* target name or ""*/
 			if(art){
 				discover_artifact(u.inherited);
 				fully_identify_obj(art);
-				place_object(art, otmp->ox, otmp->oy);
+				if(Is_real_container(otmp)){
+					add_to_container(otmp, art);
+				}
+				else {
+					place_object(art, otmp->ox, otmp->oy);
+				}
 			}
 			else impossible("Delayed inheritance failed in minor_artifact.");
 		}
