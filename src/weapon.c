@@ -929,9 +929,9 @@ struct monst *magr;
 			}
 		}
 		else {
-			/* equivalent to small mace */
+			/* equivalent to small gold mace +1 for gold, -1 for size*/
 			ocn = 1;
-			ocd = 8;
+			ocd = 10;
 			flat = (large ? 0 : 1);
 		}
 	}
