@@ -103,7 +103,7 @@ static struct thoughtglyph thoughtglyphs[] =
 	{ BEAST_S_EMBRACE_GLYPH, NON_PM, BEASTS_EMBRACE,
 	0, 99, "A bestial figure takes refuge inside you." },
 
-	{ ORRERY_GLYPH, NON_PM, SIGHT,
+	{ ORRERY_GLYPH, PM_GROTESQUE_PEEPER, SIGHT,
 	16, 100, "Your brain blinks open. There is an eye within an eye within an eye within an...." }
 };
 
