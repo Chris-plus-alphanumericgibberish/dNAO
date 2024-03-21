@@ -16,6 +16,81 @@ MAP
                         # 
                    |----S---|           --------|
        |------|    |........|           |.......|
+       |  ....------........|------------.......|
+       |   ...+.............+...........+.......|
+       |   ...+.............+...........+.......|
+       |  ....------........|------------.......|
+       |------|    |........|           |.......|
+                   |---S----|           --------|
+                       #  
+                       #  
+                    |--.---|
+                    |......|
+                    |......|
+                    --------
+ENDMAP
+RANDOM_MONSTERS: 'Z','M'
+
+MONSTER: 'M', "priest mummy", (47,9)
+
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: '.',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'Z',random,random
+MONSTER: 'M',"soldier mummy",random
+MONSTER: 'M',"soldier mummy",random
+MONSTER: 'M',"soldier mummy",random
+MONSTER: 'M',"soldier mummy",random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+MONSTER: 'M',random,random
+
+
+GEOMETRY: center,center
+#0        1         2         3         4         5         6
+#1234567890123456789012345678901234567890123456789012345678901234567890
+MAP
+                    --------
+                    |......|
+                    |......|
+                    |---.--|
+                        # 
+                        # 
+                   |----S---|           --------|
+       |------|    |........|           |.......|
        |......------........|------------.......|
        |......+.............+...........+.......|
        |......+.............+...........+.......|
@@ -29,7 +104,6 @@ MAP
                     |......|
                     --------
 ENDMAP
-RANDOM_MONSTERS: 'Z','M'
 STAIR:(08,09),up
 BRANCH:(08,09,08,09),(0,0,0,0)
 DOOR: locked,(14,09)
@@ -100,51 +174,4 @@ OBJECT: random, random, contained
 OBJECT: random, random, contained
 OBJECT: '!', "water", contained,cursed,0
 OBJECT: '!', "water", contained,cursed,0
-MONSTER: 'M', "priest mummy", (47,9)
 OBJECT:'(',"magic chest",(47,11)
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: '.',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'Z',random,random
-MONSTER: 'M',"soldier mummy",random
-MONSTER: 'M',"soldier mummy",random
-MONSTER: 'M',"soldier mummy",random
-MONSTER: 'M',"soldier mummy",random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-MONSTER: 'M',random,random
-
-
