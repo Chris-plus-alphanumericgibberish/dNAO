@@ -1555,7 +1555,7 @@ long timeout;
 				|| obj->otyp == SUNROD
 				) {
 				/* get rid of candles and burning oil potions */
-				obj_extract_self(obj);
+				obj_extract_and_unequip_self(obj);
 				obfree(obj, (struct obj *)0);
 				obj = (struct obj *) 0;
 				//#ifdef FIREARMS
@@ -1572,7 +1572,7 @@ long timeout;
 					fix_object(obj);
 				}
 				else {
-					obj_extract_self(obj);
+					obj_extract_and_unequip_self(obj);
 					obfree(obj, (struct obj *)0);
 					obj = (struct obj *) 0;
 				}
@@ -1919,7 +1919,7 @@ long timeout;
 				break;	/* don't do other torch things */
 			}
 			else {
-				obj_extract_self(obj);
+				obj_extract_and_unequip_self(obj);
 				obfree(obj, (struct obj *)0);
 				obj = (struct obj *) 0;
 			}
@@ -1987,7 +1987,7 @@ long timeout;
 			}
 			end_burn(obj, FALSE);
 
-			obj_extract_self(obj);
+			obj_extract_and_unequip_self(obj);
 			obfree(obj, (struct obj *)0);
 			obj = (struct obj *) 0;
 		}
@@ -2061,7 +2061,7 @@ long timeout;
 				break;	/* don't do other torch things */
 			}
 			else {
-				obj_extract_self(obj);
+				obj_extract_and_unequip_self(obj);
 				obfree(obj, (struct obj *)0);
 				obj = (struct obj *) 0;
 			}
@@ -2711,7 +2711,7 @@ long timeout;
 	}
 	/* if in_use is set, then we know it'll be used up by the thing currently using it, and we'd be double-deleting it */
 	if (!otmp->in_use) {
-		obj_extract_self(otmp);
+		obj_extract_and_unequip_self(otmp);
 		newsym(otmp->ox, otmp->oy);
 		obfree(otmp, (struct obj *)0);
 	}
