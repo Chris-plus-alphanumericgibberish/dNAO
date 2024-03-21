@@ -16895,12 +16895,12 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 						newvis |= VIS_MAGR;
 
 					/* get 1st weapon attack defender has */
-					int subout2 = 0;
+					int subout2[SUBOUT_ARRAY_SIZE] = {0};
 					int indexnum2 = 0;
 					/* grab the first weapon attack mdef has, or else use a basic 1d4 attack */
 					do {
 						/* we'll ignore res[], tohitmod, and prev_attk, resusing them from earlier */
-						counter = getattk(mdef, magr, res, &indexnum2, &prev_attk, FALSE, &subout2, &tohitmod);
+						counter = getattk(mdef, magr, res, &indexnum2, &prev_attk, FALSE, subout2, &tohitmod);
 					} while (counter->aatyp != AT_WEAP && !is_null_attk(counter));
 					if (is_null_attk(counter))
 						counter = &basicattack;
