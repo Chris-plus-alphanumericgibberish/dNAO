@@ -2524,7 +2524,7 @@ u_init()
 			HTelepat |= FROMOUTSIDE;
 			skill_add(Skill_Elf_Ana);
 		}
-		if(Role_if(PM_ELF)){
+		if(Race_if(PM_ELF)){
 			u.ualign.type = A_NEUTRAL;
 			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 			flags.initalign = 1; // 1 == neutral
