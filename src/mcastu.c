@@ -2789,7 +2789,7 @@ int tary;
 			}
 			/* damage inventory */
 			if (!UseInvCold_res(mdef)){
-				destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
 			/* other effects */
 			if (youdef) {
