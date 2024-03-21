@@ -895,7 +895,7 @@ you_regen_hp()
 		morehungry(d(4,10)*10);
 		(*hp) += (*hpmax)/2;
 		struct monst *mon;
-		Your("flesh crawles!");
+		Your("flesh crawls!");
 		for(mon = fmon; mon; mon = mon->nmon){
 			if(!DEADMONSTER(mon) && mon_can_see_you(mon) && 
 				!insightful(mon->data) && 
