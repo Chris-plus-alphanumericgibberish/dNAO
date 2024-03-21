@@ -997,7 +997,7 @@ level_tele()
 				struct obj *pobj;
 				newlev =  newlev + dungeons[neutral_dnum].depth_start - 1;
 				for(pobj = invent; pobj; pobj=pobj->nobj){
-					if(pobj->oartifact == ART_SILVER_KEY){
+					if(pobj->oartifact == ART_SILVER_KEY || pobj->oartifact == ART_HAND_MIRROR_OF_CTHYLLA){
 						rangeRestricted = FALSE;
 						break;
 					}
