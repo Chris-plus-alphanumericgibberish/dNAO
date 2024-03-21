@@ -103,7 +103,8 @@ static const struct icp metal_materials[] = {
 	{  1, GOLD },
 	{  1, BONE },
 	{  1, GLASS },
-	{  1, PLATINUM }
+	{  1, PLATINUM },
+	{  0, 0 }
 };
 
 /* for objects which are normally wooden */
@@ -113,21 +114,24 @@ static const struct icp wood_materials[] = {
 	{  5, IRON },
 	{  3, BONE },
 	{  1, COPPER },
-	{  1, SILVER }
+	{  1, SILVER },
+	{  0, 0 }
 };
 
 /* for objects which are normally cloth */
 static const struct icp cloth_materials[] = {
     {800, CLOTH },
     {199, LEATHER },
-	{  1, DRAGON_HIDE }
+	{  1, DRAGON_HIDE },
+	{  0, 0 }
 };
 
 /* for objects which are normally leather */
 static const struct icp leather_materials[] = {
     {750, LEATHER },
     {240, CLOTH },
-	{ 10, DRAGON_HIDE }
+	{ 10, DRAGON_HIDE },
+	{  0, 0 }
 };
 
 /* for objects of dwarvish make */
@@ -138,7 +142,8 @@ static const struct icp dwarvish_materials[] = {
 	{ 20, SILVER },
 	{ 15, GOLD },
 	{ 10, PLATINUM },
-	{  5, GEMSTONE }
+	{  5, GEMSTONE },
+	{  0, 0 }
 };
 
 /* for objects of high-elven make (which is currently specified as elven equipment normally made of mithril) */
@@ -146,7 +151,8 @@ static const struct icp high_elven_materials[] = {
     {900, MITHRIL },
     { 60, SILVER },
     { 30, GOLD },
-	{ 10, GEMSTONE }
+	{ 10, GEMSTONE },
+	{  0, 0 }
 };
 /* for armor-y objects of elven make - no iron!
 * Does not cover clothy items; those use the regular cloth probs. */
@@ -156,7 +162,8 @@ static const struct icp elven_materials[] = {
 	{ 25, SILVER },
 	{ 15, COPPER },
 	{  5, BONE },
-	{  5, GOLD }
+	{  5, GOLD },
+	{  0, 0 }
 };
 
 /* for eilistran armor */
@@ -166,11 +173,13 @@ static const struct icp eli_materials[] = {
 	{ 50, MITHRIL },
 	{ 25, GLASS },
 	{ 13, GEMSTONE },
-	{ 12, MINERAL }
+	{ 12, MINERAL },
+	{  0, 0 }
 };
 
 static const struct icp lens_materials[] = {
-	{ 1000, GEMSTONE }
+	{ 1000, GEMSTONE },
+	{  0, 0 }
 };
 
 /* for weapons of droven make -- armor is all shadowsteel */
@@ -178,7 +187,8 @@ static const struct icp droven_materials[] = {
 	{900, 0 }, /* use base material */
 	{ 45, MITHRIL },
 	{ 45, SILVER },
-	{ 10, SHADOWSTEEL } /* shadowsteel was intended to be quite bad for weapons, at least given the techniques the drow know */
+	{ 10, SHADOWSTEEL }, /* shadowsteel was intended to be quite bad for weapons, at least given the techniques the drow know */
+	{  0, 0 }
 };
 
 /* for objects of orcish make */
@@ -189,7 +199,8 @@ static const struct icp orcish_materials[] = {
 	{ 20, LEAD },
 	{ 15, GOLD },
 	{  5, OBSIDIAN_MT },
-	{  1, GREEN_STEEL }
+	{  1, GREEN_STEEL },
+	{  0, 0 }
 };
 
 /* Reflectable items - for the shield of reflection; anything that can hold a
@@ -203,7 +214,8 @@ static const struct icp shiny_materials[] = {
 	{  5, GLASS },
 	{  3, MITHRIL },
 	{  3, METAL }, /* aluminum, or similar */
-	{  1, PLATINUM }
+	{  1, PLATINUM },
+	{  0, 0 }
 };
 
 /* for bells and other tools, especially instruments, which are normally copper
@@ -215,7 +227,8 @@ static const struct icp resonant_materials[] = {
 	{ 50, IRON },
 	{ 50, MITHRIL },
 	{ 30, GOLD },
-	{ 10, PLATINUM }
+	{ 10, PLATINUM },
+	{  0, 0 }
 };
 
 /* for horns, currently. */
@@ -226,7 +239,8 @@ static const struct icp horn_materials[] = {
 	{ 50, WOOD },
 	{ 50, SILVER },
 	{ 20, GOLD },
-	{ 10, DRAGON_HIDE }
+	{ 10, DRAGON_HIDE },
+	{  0, 0 }
 };
 
 /* hacks for specific objects... not great because it's a lot of data, but it's
@@ -240,7 +254,8 @@ static const struct icp bow_materials[] = {
     {  4, BONE },
     {  2, SILVER },
 	{  2, METAL },
-    {  1, GOLD }
+    {  1, GOLD },
+	{  0, 0 }
 };
 
 
@@ -2201,7 +2216,11 @@ int mat;
 		return;
 
 	int i = 1000;
-	while (random_mat_list->iclass != mat && i > 0) {
+	while (i > 0 && random_mat_list->iclass != mat) {
+		if(random_mat_list->iprob == 0){
+			impossible("maybe_set_material random_mat_list out-of-range.");
+			break;
+		}
 		i -= random_mat_list->iprob;
 		random_mat_list++;
 	}
@@ -2267,6 +2286,10 @@ struct obj* obj;
 		if(Is_rogue_level(&u.uz))
 			i = 1;//No fancy materials
 		while (i > 0) {
+			if(random_mat_list->iprob == 0){
+				impossible("init_obj_material random_mat_list out-of-range.");
+				break;
+			}
 			if (i <= random_mat_list->iprob)
 				break;
 			i -= random_mat_list->iprob;
@@ -2296,6 +2319,10 @@ struct obj * obj;
 		if (random_mat_list) {
 			int i = rnd(1000);
 			while (i > 0) {
+				if(random_mat_list->iprob == 0){
+					impossible("init_obj_material random_mat_list out-of-range.");
+					break;
+				}
 				if (i <= random_mat_list->iprob)
 					break;
 				i -= random_mat_list->iprob;
