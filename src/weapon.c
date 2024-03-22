@@ -2810,7 +2810,7 @@ struct monst *mtmp;
 				half_str = TRUE;
 				damage_bon += intbon;
 			}
-			if (is_mercy_blade(otmp)){
+			if (mercy_blade_prop(otmp)){
 				half_str = TRUE;
 				damage_bon += intbon/2;
 			}

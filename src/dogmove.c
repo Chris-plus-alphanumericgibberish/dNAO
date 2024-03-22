@@ -131,7 +131,7 @@ boolean check_if_better;
 		 (otmp->oartifact
 			|| !check_oprop(otmp, OPROP_NONE)
 			|| (rakuyo_prop(otmp) && u.uinsight >= 20)
-			|| (is_mercy_blade(otmp) && !u.veil)
+			|| (mercy_blade_prop(otmp) && !u.veil)
 			|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
 			|| (otmp->otyp == DISKOS && u.uinsight >= 10)
 		 ) ||

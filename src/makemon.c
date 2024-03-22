@@ -8702,14 +8702,18 @@ int mmflags;
 									if(rn2(3)){
 										otmp = mksobj(BLADE_OF_MERCY, mkobjflags|MKOBJ_ARTIF);
 										otmp->spe = 5;
+										MAYBE_MERC(otmp);
 										(void) mpickobj(mtmp, otmp);
 									}
 									else {
 										otmp = mksobj(BLADE_OF_PITY, mkobjflags|MKOBJ_ARTIF);
 										otmp->spe = 5;
+										MAYBE_MERC(otmp);
+										int mat = otmp->obj_material;
 										(void) mpickobj(mtmp, otmp);
 										otmp = mksobj(BLADE_OF_GRACE, mkobjflags|MKOBJ_ARTIF);
 										otmp->spe = 5;
+										set_material_gm(otmp, mat);
 										(void) mpickobj(mtmp, otmp);
 									}
 								}
@@ -8717,14 +8721,18 @@ int mmflags;
 									if(rn2(3)){
 										otmp = mksobj(RAKUYO, mkobjflags|MKOBJ_ARTIF);
 										otmp->spe = 5;
+										MAYBE_MERC(otmp);
 										(void) mpickobj(mtmp, otmp);
 									}
 									else {
 										otmp = mksobj(RAKUYO_DAGGER, mkobjflags|MKOBJ_ARTIF);
 										otmp->spe = 5;
+										MAYBE_MERC(otmp);
+										int mat = otmp->obj_material;
 										(void) mpickobj(mtmp, otmp);
 										otmp = mksobj(RAKUYO_SABER, mkobjflags|MKOBJ_ARTIF);
 										otmp->spe = 5;
+										set_material_gm(otmp, mat);
 										(void) mpickobj(mtmp, otmp);
 									}
 								}

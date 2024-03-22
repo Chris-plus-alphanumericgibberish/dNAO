@@ -95,6 +95,7 @@ enum {
 	OPROP_ELFLW,
 	OPROP_CURS,
 	OPROP_BYAK,
+	OPROP_MRCYW,
 	MAX_OPROP
 };
 
@@ -607,6 +608,7 @@ struct obj {
 			 otmp->otyp == BLADE_OF_GRACE || \
 			 otmp->otyp == BLADE_OF_PITY)
 #define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
+#define mercy_blade_prop(otmp)	(check_oprop(otmp, OPROP_MRCYW))
 #define is_insight_weapon(otmp) (is_cclub_able(otmp) || \
 			 is_rakuyo(otmp) ||\
 			 rakuyo_prop(otmp) || \
@@ -623,6 +625,7 @@ struct obj {
 			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_OSE) ||\
 			 otmp->obj_material == MERCURIAL || \
 			 is_mercy_blade(otmp) || \
+			 mercy_blade_prop(otmp) || \
 			 otmp->otyp == ISAMUSEI ||\
 			 otmp->otyp == DISKOS ||\
 			 otmp->otyp == BESTIAL_CLAW)
@@ -866,7 +869,6 @@ struct obj {
 						  (otmp)->otyp == ISAMUSEI || \
 						  (otmp)->otyp == DISKOS || \
 						  (otmp)->otyp == PINCER_STAFF || \
-						  is_mercy_blade(otmp) || \
 						  (otmp)->otyp == KAMEREL_VAJRA)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \
@@ -1066,6 +1068,7 @@ struct obj {
 								|| is_rakuyo(otmp)\
 								|| rakuyo_prop(otmp)\
 								|| is_mercy_blade(otmp)\
+								|| mercy_blade_prop(otmp)\
 								|| otmp->otyp == ISAMUSEI\
 								|| otmp->otyp == BESTIAL_CLAW\
 								|| check_oprop(otmp, OPROP_CCLAW)\
@@ -1082,6 +1085,7 @@ struct obj {
 								|| (otmp)->otyp == CLOAK_OF_PROTECTION)
 
 #define is_twoweapable_artifact(otmp) (always_twoweapable_artifact(otmp)\
+				|| ((otmp)->oartifact == uwep->oartifact)\
 				|| ((otmp)->oartifact == ART_CLARENT && uwep && uwep->oartifact==ART_EXCALIBUR)\
 				|| ((otmp)->oartifact == ART_FROST_BRAND && uwep && uwep->oartifact==ART_FIRE_BRAND)\
 				|| ((otmp)->oartifact == ART_FIRE_BRAND && uwep && uwep->oartifact==ART_FROST_BRAND)\
@@ -1091,6 +1095,8 @@ struct obj {
 				|| ((otmp)->oartifact == ART_FLUORITE_OCTAHEDRON && uwep && uwep->oartifact==ART_FLUORITE_OCTAHEDRON)\
 				|| ((otmp)->oartifact == ART_SILVER_SKY && uwep && uwep->oartifact==ART_SKY_REFLECTED)\
 				|| ((otmp)->oartifact == ART_SKY_REFLECTED && uwep && uwep->oartifact==ART_SILVER_SKY)\
+				|| ((otmp)->oartifact == ART_SKY_REFLECTED && uwep && uwep->oartifact==ART_AMALGAMATED_SKIES)\
+				|| ((otmp)->oartifact == ART_SILVER_SKY && uwep && uwep->oartifact==ART_AMALGAMATED_SKIES)\
 				|| ((otmp)->oartifact == ART_MJOLLNIR && Role_if(PM_VALKYRIE))\
 				|| ((otmp)->oartifact == ART_CLEAVER && Role_if(PM_BARBARIAN))\
 				|| ((otmp)->oartifact == ART_ATLANTEAN_ROYAL_SWORD && Role_if(PM_BARBARIAN))\

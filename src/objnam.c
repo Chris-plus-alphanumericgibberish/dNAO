@@ -1385,7 +1385,7 @@ char *buf;
 		else if(u.uinsight >= 5)
 			Strcat(buf, "spinning ");
 	}
-	if (is_mercy_blade(obj)){
+	if (mercy_blade_prop(obj)){
 		//Note: Brain fluid
 		if(u.uinsight >= 50)
 			Strcat(buf, "sticky ");

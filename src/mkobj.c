@@ -695,6 +695,8 @@ int mkflags;
 	otmp->quan = is_multigen(otmp) ? ((long) rn1(4,4) + d(2,level_difficulty()+2)) : 1L;
 	if (is_rakuyo(otmp))
 		add_oprop(otmp, OPROP_RAKUW);
+	if (is_mercy_blade(otmp))
+		add_oprop(otmp, OPROP_MRCYW);
 	if (otmp->otyp == WHITE_VIBROSWORD
 		|| otmp->otyp == WHITE_VIBROSPEAR
 		|| otmp->otyp == WHITE_VIBROZANBATO

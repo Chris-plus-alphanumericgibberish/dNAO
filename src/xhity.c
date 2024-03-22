@@ -13727,7 +13727,7 @@ int vis;						/* True if action is at all visible to the player */
 		}
 	}
 	/* Will eventually do a mercy blade attack after all messages are printed */
-	if(valid_weapon_attack && (melee || thrust) && !recursed && is_mercy_blade(weapon))
+	if(valid_weapon_attack && (melee || thrust) && !recursed && mercy_blade_prop(weapon))
 		mercy_blade = TRUE;
 	/* X-hating */
 	/* note: setting holyobj/etc affects messages later, but damage happens regardless of whether holyobj/etc is set correctly here */

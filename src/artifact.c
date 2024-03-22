@@ -4602,6 +4602,14 @@ int * truedmgptr;
 			*plusdmgptr += bmod*basedmg / 4;
 		}
 	}
+	if(mercy_blade_prop(otmp)){
+		if(!u.veil && !Magic_res(mdef)){
+			int mod = min(u.uinsight, 50);
+			if(youagr && u.uinsight > 25)
+				mod += min((u.uinsight-25)/2, ACURR(A_CHA));
+			*truedmgptr += basedmg*mod/50;
+		}
+	}
 	if(youdef ? (u.ualign.type != A_CHAOTIC) : (sgn(mdef->data->maligntyp) >= 0)){
 		if(check_oprop(otmp, OPROP_ANARW))
 			*truedmgptr += basedmg;
@@ -5108,27 +5116,6 @@ boolean printmessages;
 		}
 		bonus = reduce_dmg(mdef,bonus,FALSE,TRUE);
 		*truedmgptr += bonus;
-	}
-	if(is_mercy_blade(otmp)){
-		if(!u.veil && !Magic_res(mdef)){
-			int mod = min(u.uinsight, 50);
-			if(youagr && u.uinsight > 25)
-				mod += min((u.uinsight-25)/2, ACURR(A_CHA));
-			*truedmgptr += basedmg*mod/50;
-		}
-		if(u.uinsight >= 25 && !resist(mdef, youagr ? SPBOOK_CLASS : WEAPON_CLASS, 0, NOTELL)){
-			if(youdef){
-				if(u.uencouraged >= 0 && ACURR_MON(A_CHA, magr)/5 > 0)
-					You("feel a rush of irrational mercy!");
-				u.uencouraged = max(-1*(otmp->spe + ACURR_MON(A_CHA, magr)), u.uencouraged - ACURR_MON(A_CHA, magr)/5);
-			}
-			else if(youagr){
-				mdef->encouraged = max(-1*(otmp->spe + ACURR(A_CHA)), mdef->encouraged - ACURR(A_CHA)/5);
-			}
-			else {
-				mdef->encouraged = max(-1*(otmp->spe + ACURR_MON(A_CHA, mdef)), mdef->encouraged - ACURR_MON(A_CHA, magr)/5);
-			}
-		}
 	}
 	
 	if(pure_weapon(otmp) && otmp->spe >= 6){
@@ -7705,6 +7692,21 @@ boolean printmessages; /* print generic elemental damage messages */
 					if (mdef->mhp <= 0)
 						return MM_DEF_DIED;
 				}
+			}
+		}
+	}
+	if(mercy_blade_prop(otmp)){
+		if(u.uinsight >= 25 && !resist(mdef, youagr ? SPBOOK_CLASS : WEAPON_CLASS, 0, NOTELL)){
+			if(youdef){
+				if(u.uencouraged >= 0 && ACURR_MON(A_CHA, magr)/5 > 0)
+					You("feel a rush of irrational mercy!");
+				u.uencouraged = max(-1*(otmp->spe + ACURR_MON(A_CHA, magr)), u.uencouraged - ACURR_MON(A_CHA, magr)/5);
+			}
+			else if(youagr){
+				mdef->encouraged = max(-1*(otmp->spe + ACURR(A_CHA)), mdef->encouraged - ACURR(A_CHA)/5);
+			}
+			else {
+				mdef->encouraged = max(-1*(otmp->spe + ACURR_MON(A_CHA, mdef)), mdef->encouraged - ACURR_MON(A_CHA, magr)/5);
 			}
 		}
 	}
