@@ -341,7 +341,7 @@ typedef long glyph_t;
 #define REINCARNATION	/* Special Rogue-like levels */
 /* monsters & objects */
 /*define KOPS*/		/* Keystone Kops by Scott R. Turner */
-	/*They Kops have been removed and replaced with the Keter Sephiroth*/
+	/*The Kops have been removed and replaced with the Keter Sephiroth*/
 #define SEDUCE		/* Succubi/incubi seduction, by KAA, suggested by IM */
 #define STEED		/* Riding steeds */
 #define FIREARMS	/* KMH -- Guns and bullets */
