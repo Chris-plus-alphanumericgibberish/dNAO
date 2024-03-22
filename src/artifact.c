@@ -2335,6 +2335,7 @@ struct obj *obj;
 		(is_lightsaber(obj) && litsaber(obj)) ||
 		(check_oprop(obj, OPROP_ELFLW) && u.uinsight >= 22) ||
 		(check_oprop(obj, OPROP_PHSEW)) ||
+		(check_oprop(obj, OPROP_RLYHW) && u.uinsight >= 40) ||
 		((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && obj->lamplit)
 	));
 }
@@ -4540,6 +4541,25 @@ int * truedmgptr;
 			*truedmgptr += basedmg + otmp->spe;
 		if (check_oprop(otmp, OPROP_LESSER_PSIOW))
 			*truedmgptr += d(2, 12);
+	}
+	if(check_oprop(otmp, OPROP_RLYHW)){
+		int bonus = 0;
+		if(magr && (magr->mtyp == PM_LADY_CONSTANCE || is_mind_flayer(magr->data))){
+			if(mlev(magr)/10 > 1)
+				bonus = d(mlev(magr)/10, 15);
+			else
+				bonus = rnd(15);
+			bonus += otmp->spe;
+		}
+		if(u.uinsight >= 36){//Works on all monsters, even mindless ones
+			*truedmgptr += basedmg + otmp->spe + bonus;
+		}
+		else if(youdef && !Tele_blind && (Blind_telepat || u.uinsight >= 6 || !rn2(4))){
+			*truedmgptr += basedmg + otmp->spe + bonus;
+		}
+		else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || u.uinsight >= 6 || !rn2(4))){
+			*truedmgptr += basedmg + otmp->spe + bonus;
+		}
 	}
 	if(check_oprop(otmp, OPROP_GSSDW)){
 		int power = youagr ? min(u.uinsight, u.usanity) : magr ? magr->m_lev : 0;

@@ -1004,6 +1004,9 @@ boolean dofull;
 		if (check_oprop(obj, OPROP_LESSER_PSIOW)){
 			if (Blind_telepat) Strcat(buf, "rustling ");
 		}
+		if (check_oprop(obj, OPROP_RLYHW)){
+			if (Blind_telepat) Strcat(buf, "slithering ");
+		}
 		if (check_oprop(obj, OPROP_DEEPW)){
 			if (Blind_telepat && obj->spe < 8) Strcat(buf, "mumbling ");
 		}
@@ -4453,6 +4456,8 @@ int wishflags;
 			add_oprop_list(oprop_list, OPROP_PSIOW);
 		} else if (!strncmpi(bp, "rustling ", l=9)) {
 			add_oprop_list(oprop_list, OPROP_LESSER_PSIOW);
+		} else if (!strncmpi(bp, "slithering ", l=11)) {
+			add_oprop_list(oprop_list, OPROP_RLYHW);
 
 		} else if ((!strncmpi(bp, "deep ", l=5) && strncmpi(bp, "deep sea", 8) && strncmpi(bp, "deep dragon", 11)) || !strncmpi(bp, "mumbling ", l=9)) {
 			add_oprop_list(oprop_list, OPROP_DEEPW);

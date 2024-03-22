@@ -358,6 +358,7 @@ struct monst *magr;
 		|| oartifact == ART_GREAT_CLAWS_OF_URDLEN
 		|| oartifact == ART_CLAWS_OF_THE_REVENANCER
 		|| (obj && check_oprop(obj, OPROP_BLADED) && !litsaber(obj))
+		|| (obj && check_oprop(obj, OPROP_RLYHW) && u.uinsight >= 12)
 		|| (obj && !litsaber(obj) && is_streaming_merc(obj))
 		){
 		attackmask |= SLASH;
@@ -370,6 +371,7 @@ struct monst *magr;
 		|| oartifact == ART_FIRE_BRAND
 		|| oartifact == ART_FROST_BRAND
 		|| oartifact == ART_ARYFAERN_KERYM
+		|| (obj && check_oprop(obj, OPROP_RLYHW) && u.uinsight >= 24)
 		){
 		attackmask |= EXPLOSION;
 	}

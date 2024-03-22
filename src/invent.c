@@ -3079,6 +3079,8 @@ winid *datawin;
 				poisons |= OPOISON_SLEEP;
 			if (oartifact == ART_DIRGE)
 				poisons |= OPOISON_ACID;
+			if (check_oprop(obj, OPROP_RLYHW) && u.uinsight && rnd(u.uinsight) >= 44)
+				poisons |= OPOISON_ACID;
 			
 			if (poisons) {
 				/* special cases */

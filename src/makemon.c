@@ -636,8 +636,7 @@ boolean goodequip;
 		} else if(Infuture){
 			otmp = mksobj(QUARTERSTAFF, mkobjflags);
 			otmp->spe = 7;
-			add_oprop(otmp, OPROP_PSIOW);
-			add_oprop(otmp, OPROP_PHSEW);
+			add_oprop(otmp, OPROP_RLYHW);
 			add_oprop(otmp, OPROP_WATRW);
 			otmp->objsize = MZ_GIGANTIC;
 			set_material_gm(otmp, MINERAL);
@@ -3234,7 +3233,7 @@ boolean greatequip;
 				otmp->spe = 7;
 				set_material_gm(otmp, MINERAL);
 				add_oprop(otmp, OPROP_LESSER_WATRW);
-				add_oprop(otmp, OPROP_PSIOW);
+				add_oprop(otmp, OPROP_RLYHW);
 			}
 			otmp = mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags|MKOBJ_NOINIT);
 			if(otmp) otmp->spe = 3;

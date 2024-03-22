@@ -96,6 +96,7 @@ enum {
 	OPROP_CURS,
 	OPROP_BYAK,
 	OPROP_MRCYW,
+	OPROP_RLYHW,
 	MAX_OPROP
 };
 
@@ -617,6 +618,7 @@ struct obj {
 			 check_oprop(otmp,OPROP_GSSDW) || \
 			 check_oprop(otmp,OPROP_INSTW) || \
 			 check_oprop(otmp,OPROP_ELFLW) || \
+			 check_oprop(otmp,OPROP_RLYHW) || \
 			 otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD || \
 			 otmp->oartifact == ART_BLOODLETTER || \
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
