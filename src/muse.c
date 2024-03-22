@@ -282,7 +282,10 @@ struct monst *mtmp;
 				if (obj->otyp == UNICORN_HORN && !obj->cursed)
 				break;
 	    }
-	    if (obj || is_unicorn(mtmp->data) || mtmp->mtyp == PM_KI_RIN || (mtmp->mtyp == PM_ITINERANT_PRIESTESS && !straitjacketed_mon(mtmp))) {
+	    if (obj || is_unicorn(mtmp->data) || mtmp->mtyp == PM_KI_RIN
+		|| (mtmp->mtyp == PM_ITINERANT_PRIESTESS && !straitjacketed_mon(mtmp))
+		|| (is_render(mtmp->mtyp))
+		) {
 			m.defensive = obj;
 			m.has_defense = MUSE_UNICORN_HORN;
 			return TRUE;
@@ -585,7 +588,7 @@ struct monst *mtmp;
 	case MUSE_UNICORN_HORN:
 		if (vismon) {
 		    if (otmp)
-			pline("%s %s a unicorn horn!", Monnam(mtmp), is_weeping(mtmp->data) ? "is using" : "uses");
+				pline("%s %s a unicorn horn!", Monnam(mtmp), is_weeping(mtmp->data) ? "is using" : "uses");
 		    else if(mtmp->mtyp == PM_ITINERANT_PRIESTESS && !straitjacketed_mon(mtmp)){
 				if(u.uinsight < 40){
 					pline("A glow issues from somewhere around %s torso, but trying to see the exact source gives you a %sache!", s_suffix(mon_nam(mtmp)), body_part(HEAD));
@@ -594,8 +597,14 @@ struct monst *mtmp;
 					pline_The("fingertip of %s third hand glows!", s_suffix(mon_nam(mtmp)));
 				}
 			}
+		    else if(is_render(mtmp->mtyp)){
+				if(mtmp->mtyp == PM_VEIL_RENDER)
+					pline("Whispering surrounds %s head!", s_suffix(mon_nam(mtmp)));
+				else
+					You_hear("whispering");
+			}
 		    else
-			pline_The("tip of %s's horn glows!", mon_nam(mtmp));
+				pline_The("tip of %s's horn glows!", mon_nam(mtmp));
 		}
 		if (!mtmp->mcansee) {
 		    mtmp->mcansee = 1;
