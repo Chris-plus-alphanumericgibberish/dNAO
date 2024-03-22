@@ -6168,11 +6168,13 @@ boolean ranged;
 				/* you slimed it */
 				else if (youagr) {
 					You("turn %s into slime.", mon_nam(mdef));
-					(void)newcham(mdef, PM_GREEN_SLIME, FALSE, FALSE);
+					monslime(mdef);
+					if(mdef->mtyp != PM_GREEN_SLIME)
+						pline("...Or maybe not.");
 				}
 				/* monster slimed it */
 				else {
-					(void)newcham(mdef, PM_GREEN_SLIME, FALSE, vis);
+					monslime(mdef);
 					mdef->mstrategy &= ~STRAT_WAITFORU;
 				}
 			}
@@ -16791,7 +16793,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 							(void)newcham(mdef, PM_GREEN_SLIME, FALSE, FALSE);
 						}
 						else {
-							(void)newcham(mdef, PM_GREEN_SLIME, FALSE, vis);
+							monslime(mdef);
 							mdef->mstrategy &= ~STRAT_WAITFORU;
 						}
 					}

@@ -1681,6 +1681,7 @@ E void FDECL(spore_dies, (struct monst *));
 E void FDECL(mondied, (struct monst *));
 E void FDECL(monvanished, (struct monst *));
 E void FDECL(mongone, (struct monst *));
+E void FDECL(monslime, (struct monst *));
 E void FDECL(monstone, (struct monst *));
 E void FDECL(mongolded, (struct monst *));
 E void FDECL(monglassed, (struct monst *));

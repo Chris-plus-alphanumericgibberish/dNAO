@@ -744,7 +744,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			if(adtyp == AD_SLIM && !Slime_res(mtmp) &&
 				(!resists_acid(mtmp) ? (mtmp->mhp <= mdam*2) : (mtmp->mhp <= mdam))
 			){
-				(void)newcham(mtmp, PM_GREEN_SLIME, FALSE, canseemon(mtmp));
+				monslime(mtmp);
 				mtmp->mstrategy &= ~STRAT_WAITFORU;
 			} else {
 				mtmp->mhp -= mdam;

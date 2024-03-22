@@ -110,6 +110,18 @@ double x;
 	return x >= 0 ? sum : -sum;
 }
 
+STATIC_OVL void
+ara_died(mtmp)
+struct monst *mtmp;
+{
+	if(mtmp->mtame)
+		u.goldkamcount_tame++;
+	else if(mtmp->mpeaceful)
+		level.flags.goldkamcount_peace++;
+	else
+		level.flags.goldkamcount_hostile++;
+}
+
 void
 removeMonster(x,y)
 int x,y;
@@ -4864,12 +4876,7 @@ register struct monst *mtmp;
 			}
 	}
 	if(tmp == PM_ARA_KAMEREL && !has_template(mtmp, FRACTURED)){
-		if(mtmp->mtame)
-			u.goldkamcount_tame++;
-		else if(mtmp->mpeaceful)
-			level.flags.goldkamcount_peace++;
-		else
-			level.flags.goldkamcount_hostile++;
+		ara_died(mtmp);
 	}
 	if(tmp == PM_FATHER_DAGON){
 		u.uevent.ukilled_dagon = 1;
@@ -5679,6 +5686,21 @@ register struct monst *mdef;
 	// mdef->mgold = 0L;
 // #endif
 	m_detach(mdef, mdef->data);
+}
+
+void
+monslime(mdef)
+struct monst *mdef;
+{
+	int mhp = mdef->mhp;
+	lifesaved_monster(mdef);
+	if (mdef->mhp > 0)
+		return;
+	mdef->mhp = mhp;
+	if(mdef->mtyp == PM_ARA_KAMEREL && !has_template(mdef, FRACTURED)){
+		ara_died(mdef);
+	}
+	(void)newcham(mdef, PM_GREEN_SLIME, FALSE, canseemon(mdef));
 }
 
 /* drop a statue or rock and remove monster */
