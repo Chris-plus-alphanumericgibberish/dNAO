@@ -14781,7 +14781,7 @@ int mndx;
 	else if (In_endgame(&u.uz))
 		return((mons[mndx].geno & (G_HELL|G_DEPTHS)) != 0);
 	else if (In_depths(&u.uz))
-		return((mons[mndx].geno & (G_HELL|G_DEPTHS)) != 0);
+		return((mons[mndx].geno & (G_HELL|G_PLANES)) != 0);
 	else
 		return((mons[mndx].geno & (G_HELL|G_PLANES|G_DEPTHS)) != 0);
 }
