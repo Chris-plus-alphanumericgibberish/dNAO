@@ -481,8 +481,6 @@ typedef long glyph_t;
 
 #define BONES_POOL /* Multiple bones files per level */
 
-#define ADJSPLIT /* splittable #adjust - Sam Dennis, conditionalized by Jukka Lahtinen */
-
 /* End of Section 5 */
 
 #include "global.h"	/* Define everything else according to choices above */
