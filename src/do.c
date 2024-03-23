@@ -2576,91 +2576,49 @@ long timeout;
 int
 donull()
 {
-	static long lastreped = -13;//hacky way to tell if the player has recently tried repairing themselves
+	static long lastreped = -13; // counter to tell if you recently tried to repair yourself/meditate
 	u.unull = TRUE;
+	int regen = 0;
 
-	if(uclockwork){
-		if(!Upolyd && u.uhp<u.uhpmax){
+	int *hp = (Upolyd) ? (&u.mh) : (&u.uhp);
+	int *hpmax = (Upolyd) ? (&u.mhmax) : (&u.uhpmax);
+	
+	if ((*hp) < (*hpmax)){
+		if (uclockwork) {
 			if(lastreped < monstermoves-13) You("attempt to make repairs.");
-			if(!rn2(15-u.ulevel/2)){
-				u.uhp += rnd(10);
+			if(!rn2(15 - u.ulevel/2)){
+				(*hp) += rnd(10);
 				flags.botl = 1;
 			}
-			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
-				u.uhp++;
-			}
-			if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
 			lastreped = monstermoves;
-			if(u.uhp == u.uhpmax){
+			regen = 1;
+		} else if (uandroid && u.uen > 0) {
+			(*hp) += u.ulevel/6+1;
+			if(rn2(6) < u.ulevel%6) (*hp) += 1;
+			u.uen--;
+			flags.botl = 1;
+			regen = 1;
+		} 
+		if (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
+			(*hp) += 1;
+			regen = 2;
+		}
+
+		if ((*hp) >= (*hpmax) && regen > 0){
+			if(uclockwork && lastreped == monstermoves){
 				You("complete your repairs.");
 				lastreped = -13;
-				stop_occupation();
-				occupation = 0; /*redundant failsafe? why doesn't stop_occupation work?*/
-			}
-		} else if(Upolyd && u.mh<u.mhmax){
-			if(lastreped < monstermoves-100) You("attempt to make repairs.");
-			if(!rn2(15-u.ulevel/2)){
-				u.mh += rnd(10);
-				flags.botl = 1;
-			}
-			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
-				u.mh++;
-			}
-			if(u.mh > u.mhmax) u.mh = u.mhmax;
-			lastreped = monstermoves;
-			if(u.mh == u.mhmax){
-				You("complete your repairs.");
-				lastreped = -13;
-				stop_occupation();
-				occupation = 0; /*redundant failsafe? why doesn't stop_occupation work?*/
-			}
-		} else if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
-	} else if(uandroid){
-		if(!Upolyd && u.uhp<u.uhpmax && u.uen > 0){
-			u.uhp += u.ulevel/6+1;
-			if(rn2(6) < u.ulevel%6)
-				u.uhp++;
-			flags.botl = 1;
-			u.uen--;
-			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
-				u.uhp++;
-			}
-			if(u.uhp > u.uhpmax) u.uhp = u.uhpmax;
-			if(u.uhp == u.uhpmax){
+			} else if (uandroid && regen == 1){
 				You("finish regenerating.");
-				stop_occupation();
-				occupation = 0; /*redundant failsafe? why doesn't stop_occupation work?*/
+			} else if (regen == 2){
+				Your("sword hums contentedly.");
 			}
-		} else if(Upolyd && u.mh<u.mhmax && u.uen > 0){
-			u.mh += u.ulevel/3+1;
-			flags.botl = 1;
-			u.uen--;
-			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
-				u.uhp++;
-			}
-			if(u.mh > u.mhmax) u.mh = u.mhmax;
-			if(u.mh == u.mhmax){
-				You("finish regenerating.");
-				stop_occupation();
-				occupation = 0; /*redundant failsafe? why doesn't stop_occupation work?*/
-			}
-		} else if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
-	} else {
-		if(Role_if(PM_MONK)){
-			if(lastreped < monstermoves-13) You("meditate.");
-			lastreped = monstermoves;
+			stop_occupation();
+			(*hp) = (*hpmax);
 		}
-		else if(u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) unbind(SEAL_EURYNOME,TRUE);
-		
-		if(Upolyd && u.uhp<u.uhpmax){
-			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
-				u.mh++;
-			}
-		} else if(!Upolyd && u.uhp<u.uhpmax){
-			if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HEALING){
-				u.uhp++;
-			}
-		}
+	} else if (!Role_if(PM_MONK) && u.sealsActive&SEAL_EURYNOME && ++u.eurycounts>5) {
+		// monks meditate & fast, increasing pw regen and lowering hunger rate while they haven't moved
+		unbind(SEAL_EURYNOME,TRUE);
 	}
 	return MOVE_STANDARD;	/* Do nothing, but let other things happen */
 }

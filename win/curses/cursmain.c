@@ -290,6 +290,10 @@ curses_display_nhwindow(winid wid, BOOLEAN_P block)
 
     /* actually display the window */
     wnoutrefresh(curses_get_nhwin(wid));
+	if (curses_window_has_border(wid)) {
+		WINDOW *win = curses_get_nhwin(wid);
+		box(win, 0, 0);
+	}
     /* flush pending writes from other windows too */
     doupdate();
     if ((wid == MAP_WIN) && block) {

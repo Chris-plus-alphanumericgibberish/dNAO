@@ -5997,7 +5997,7 @@ struct permonst _mons2[] = {
 	SIZ(WT_HUMAN, 400, MS_GUARD, MZ_HUMAN), 0, 0,
 	MM_WALLWALK /*MM*/, MT_OMNIVORE|MT_PEACEFUL|MT_COLLECT /*MT*/, MF_MARTIAL_S /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, MG_NOWISH|MG_NOPOLY|MG_MERC|MG_INFRAVISIBLE /*MG*/,
-	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, CLR_BLUE),
+	MA_HUMAN /*MA*/,  MV_NORMAL|MV_SEE_INVIS /*MV*/, 0 /*MW*/, CLR_BLUE),
     MON("prisoner", S_HUMAN,//14
 	LVL(12, 12, 0, 0),  G_NOGEN,          /* for special levels */
 	DEF(NAT_AC(0)),

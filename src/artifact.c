@@ -5170,8 +5170,8 @@ boolean printmessages;
 		}
 	}
 	if(otmp->otyp == BESTIAL_CLAW){
-		int insight_mod;
-		int studystack;
+		int insight_mod = 0;
+		int studystack = 0;
 		if(youagr){
 			if(active_glyph(BEASTS_EMBRACE))
 				insight_mod = 30*pow(.97,u.uinsight);
@@ -9489,7 +9489,7 @@ arti_invoke(obj)
 			x=u.dx;y=u.dy;
 			getLoc = FALSE;
 		}
-		verbalize("Even Stars Fall");
+		verbalize("Even Stars Fall.");
 		for (; starfall > 0; starfall--){
 			if(getLoc){
 				x = rn2(COLNO-2)+1;

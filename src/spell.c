@@ -746,12 +746,14 @@ struct obj *spellbook;
 		if (RoSbook == READ_SPELL){
 			char qbuf[QBUFSZ];
 			Sprintf(qbuf, "You know \"%s\" quite well already. Try to refresh your memory anyway?", OBJ_NAME(objects[booktype]));
-			/* identify the book in case you learnt the spell from an artifact book or aphanactonan archive */
-			makeknown(booktype);
 
-			for (int i = 0; i < MAXSPELL; i++)
-				if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n')
+			for (int i = 0; i < MAXSPELL; i++){
+				if (spellid(i) == booktype && spellknow(i) > KEEN/10 && yn(qbuf) == 'n'){
+					/* identify the book in case you learnt the spell from an artifact book or aphanactonan archive */
+					makeknown(booktype);
 					return MOVE_CANCELLED;
+				}
+			}
 		}		
 		spellbook->in_use = TRUE;
 		
@@ -817,9 +819,10 @@ struct obj *spellbook;
 			You("begin to study the ward.");
 		else if (spellbook->otyp == SPE_BOOK_OF_THE_DEAD)
 			You("begin to recite the runes.");
-		else
+		else {
 			You("begin to memorize the runes.");
-			
+			makeknown(spellbook->otyp);
+		}
 	}
 
 	book = spellbook;
