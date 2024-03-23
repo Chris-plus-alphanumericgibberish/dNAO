@@ -1843,7 +1843,7 @@ register xchar x, y;
 		|| IS_FURNITURE(levl[x][y].typ)
 		|| IS_ROCK(levl[x][y].typ)
 		|| is_lava(x,y)
-		|| (is_pool(x,y, FALSE) && (!Is_waterlevel(&u.uz) || is_3dwater(x,y)))
+		|| is_pool(x,y, FALSE)
 		|| invocation_pos(x,y)
 		));
 }

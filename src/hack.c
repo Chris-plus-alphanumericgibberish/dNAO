@@ -2025,32 +2025,22 @@ stillinwater:;
 		} else if (!Wwalking && drown())
 		    return;
 	    } else if (IS_PUDDLE(levl[u.ux][u.uy].typ) && !Wwalking) {
-
-		/*You("%s through the shallow water.",
-		    verysmall(youmonst.data) ? "wade" : "splash");
-		if (!verysmall(youmonst.data) && !rn2(4)) wake_nearby();*/
-
-		if(u.umonnum == PM_GREMLIN)
-		    (void)split_mon(&youmonst, (struct monst *)0);
-		else if (is_iron(youracedata) &&
-			/* mud boots keep the feet dry */
-			(!uarmf || strncmp(OBJ_DESCR(objects[uarmf->otyp]), "mud ", 4))
-		) {
-		    int dam = rnd(6);
-		    Your("%s rust!", makeplural(body_part(FOOT)));
-		    if (u.mhmax > dam) u.mhmax -= dam;
-		    losehp(dam, "rusting away", KILLED_BY);
-		// } else if (is_longworm(youmonst.data)) { /* water is lethal to Shai-Hulud */
-		    // int dam = d(3,12);
-		    // if (u.mhmax > dam) u.mhmax -= (dam+1) / 2;
-	            // pline_The("water burns your flesh!");
-		    // losehp(dam,"contact with water",KILLED_BY);
-		}
-		if (verysmall(youmonst.data)) water_damage(invent, FALSE,FALSE,FALSE,(struct monst *) 0);
+			if(u.umonnum == PM_GREMLIN)
+				(void)split_mon(&youmonst, (struct monst *)0);
+			else if (is_iron(youracedata) &&
+				/* mud boots keep the feet dry */
+				(!uarmf || strncmp(OBJ_DESCR(objects[uarmf->otyp]), "mud ", 4))
+			) {
+				int dam = rnd(6);
+				Your("%s rust!", makeplural(body_part(FOOT)));
+				if (u.mhmax > dam) u.mhmax -= dam;
+				losehp(dam, "rusting away", KILLED_BY);
+			}
+			if (verysmall(youmonst.data)) water_damage(invent, FALSE,FALSE,FALSE,(struct monst *) 0);
 #ifdef STEED
-		if (!u.usteed)
+			if (!u.usteed && (is_rustprone(uarmf) && !uarmf->oerodeproof && uarmf->oeroded != MAX_ERODE))
 #endif
-			(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst, FALSE);
+				(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst, FALSE);
 	    }
 		if (uarmf && uarmf->oartifact == ART_FROST_TREADS
 			&& is_pool(u.ux, u.uy, TRUE) && !is_3dwater(u.ux, u.uy) && !Is_waterlevel(&u.uz)) {
@@ -2495,7 +2485,7 @@ dopickup()
 		return loot_mon(u.ustuck, &tmpcount, (boolean *)0);
 	    }
 	}
-	if(is_pool(u.ux, u.uy, FALSE) && !is_3dwater(u.ux, u.uy) && !Is_waterlevel(&u.uz)) {//pools (bubble interior) on water level are special
+	if(is_pool(u.ux, u.uy, FALSE) && !is_3dwater(u.ux, u.uy)) {
 	    if (Wwalking || mon_resistance(&youmonst,LEVITATION) || is_clinger(youracedata)
 			|| (Flying && !Breathless)) {
 		You("cannot dive into the water to pick things up.");

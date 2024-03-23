@@ -3209,7 +3209,7 @@ postmov:
 			(mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->msleeping && rn2(5)))
 		    mtmp->mundetected = (!is_underswimmer(ptr)) ?
 			OBJ_AT(mtmp->mx, mtmp->my) :
-			(is_pool(mtmp->mx, mtmp->my, FALSE) && !Is_waterlevel(&u.uz));
+			is_pool(mtmp->mx, mtmp->my, FALSE);
 		newsym(mtmp->mx, mtmp->my);
 	    }
 	    if (mtmp->isshk) {

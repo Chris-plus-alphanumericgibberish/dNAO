@@ -69,7 +69,7 @@ boolean pushing;
 {
 	if (!otmp || !is_boulder(otmp))
 	    impossible("Not a boulder?");
-	else if (!Is_waterlevel(&u.uz) && (is_pool(rx,ry, FALSE) || is_lava(rx,ry))) {
+	else if (is_pool(rx,ry, FALSE) || is_lava(rx,ry)) {
 	    boolean lava = is_lava(rx,ry), cubewater = is_3dwater(rx, ry), fills_up;
 	    const char *what = waterbody_name(rx,ry);
 	    schar ltyp = levl[rx][ry].typ;
