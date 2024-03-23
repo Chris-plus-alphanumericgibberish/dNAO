@@ -1757,9 +1757,9 @@ do_look_letter(sym, from_screen, quick, force_defsyms, cc, out_str, firstmatch)
 			(void)strncat(out_str, temp_buf, LONGBUFSZ - strlen(out_str) - 1);
 	    } else if (found > 1 || need_to_look) {
 
-		char monbuf[BUFSZ];
-		char shapebuf[BUFSZ];
-		char temp_buf[BUFSZ];
+		char monbuf[LONGBUFSZ];
+		char shapebuf[LONGBUFSZ];
+		char temp_buf[LONGBUFSZ];
 
 		mtmp = lookat(cc.x, cc.y, look_buf, monbuf, shapebuf);
 		firstmatch = look_buf;
