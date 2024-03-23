@@ -13596,8 +13596,10 @@ int faction;
 
 	if(!get_mx(mtmp, MX_ESUM) && intelligent_mon(mtmp) && is_smith_mtyp(mtmp->mtyp)){
 		add_mx(mtmp, MX_ESMT);
-		if(HAS_ESMT(mtmp))
+		if(HAS_ESMT(mtmp)){
 			ESMT(mtmp)->smith_mtyp = mtmp->mtyp; //In case the monster is later polymorphed
+			initialize_smith_stocks(mtmp);
+		}
 		if(needs_forge_mon(mtmp)){
 			for(int ix = mtmp->mx-1; ix < mtmp->mx+2; ix++){
 				for(int iy = mtmp->my-1; iy < mtmp->my+2; iy++){

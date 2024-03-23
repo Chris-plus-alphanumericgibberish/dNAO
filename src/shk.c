@@ -6442,7 +6442,10 @@ struct monst *smith;
 	int oona_advanced_tools[] = { 0 };
 	int oona_advanced_weapons[] = {0};
 	struct obj *example = 0;
-	
+	while(TRUE){
+	example = 0;
+	any.a_void = 0;
+	otyp = -1;
 	if(!smith->mtame){
 		verbalize("I don't do that kind of thing anymore.");
 		return;
@@ -6557,7 +6560,7 @@ d_weapon:
 			struct obj *resource;
 			resource = getobj(identify_types, "contribute for scrap platinum");
 			if(!resource){
-				return;
+				continue;
 			}
 			if(resource->obj_material == PLATINUM && !resource->oartifact && !get_ox(resource, OX_ESUM)){
 				char qbuf[BUFSZ];
@@ -6573,15 +6576,15 @@ d_weapon:
 				else verbalize("I suppose you think you're funny.");
 			}
 			else verbalize("That doesn't seem suitable to me.");
-			return;
+			continue;
 		}break;
 	}
 	if(otyp == 0){
 		verbalize("I can't make that.");
-		return;
+		continue;
 	}
 	else if(otyp == -1){
-		return;
+		continue;
 	}
 
 	struct obj *obj = mksobj(otyp, MKOBJ_NOINIT);
@@ -6686,6 +6689,7 @@ d_weapon:
 
 	hold_another_object(obj, "Oops!  You drop %s!",
 				      doname(obj), (const char *)0);
+	}
 }
 
 void
@@ -6713,6 +6717,10 @@ struct monst *smith;
 	int dracae_advanced_tools[] = {ARMOR_SALVE, OILSKIN_SACK, UNICORN_HORN, OIL_LAMP, CAN_OF_GREASE, LIVING_MASK, 0};
 	int empty_list[] = {0};
 	struct obj *example = 0;
+	while(TRUE){
+	example = 0;
+	any.a_void = 0;
+	otyp = -1;
 	if(!smith->mtame){
 		verbalize("I have no use for gold.");
 		return;
@@ -6800,16 +6808,16 @@ d_weapon:
 		case 5:{
 			if(!smith->mtame || u.dracae_pets >= dog_limit()/2){
 				verbalize("There are no additional followers for me to incarnate.");
-				return;
+				continue;
 			}
 			int mtyp = pickeladrin();
 			if(mtyp < 0)
-				return;
+				continue;
 			int cost = (int) mons[mtyp].cnutrit ? mons[mtyp].cnutrit : mons[mtyp].msize*1500 + 1000;
 			cost += cost/10;
 			if(ESMT(smith)->smith_biomass_stockpile < cost){
 				pline("I don't have enough biomass to incarnate such a being.");
-				return;
+				continue;
 			}
 			int x = smith->mx;
 			int y = smith->my;
@@ -6831,14 +6839,14 @@ d_weapon:
 				m_dowear(mtmp, TRUE);
 				m_level_up_intrinsic(mtmp);
 			}
-			return;
+			continue;
 		}break;
 		case 6:{
 			const char food_class[] = { FOOD_CLASS, 0 };
 			struct obj *food;
 			food = getobj(food_class, "feed biomass to dracae");
 			if(!food){
-				return;
+				continue;
 			}
 			if(is_edible_mon(smith, food) && !food->oartifact && !get_ox(food, OX_ESUM)){
 				char qbuf[BUFSZ];
@@ -6849,15 +6857,15 @@ d_weapon:
 				}
 			}
 			else verbalize("That doesn't seem very edible to me.");
-			return;
+			continue;
 		}break;
 	}
 	if(otyp == 0){
 		verbalize("I can't make that.");
-		return;
+		continue;
 	}
 	else if(otyp == -1){
-		return;
+		continue;
 	}
 
 	struct obj *obj = mksobj(otyp, MKOBJ_NOINIT);
@@ -6931,6 +6939,7 @@ d_weapon:
 		pline("cost: %d, remaining: %d", cost, ESMT(smith)->smith_biomass_stockpile);
 	place_object(obj, smith->mx, smith->my);
 	rloc(smith, TRUE);
+	}
 }
 
 void
@@ -6956,6 +6965,10 @@ struct monst *smith;
 	int treesinger_advanced_tools[] = {0};
 	int empty_list[] = {0};
 	struct obj *example = 0;
+	while(TRUE){
+	example = 0;
+	any.a_void = 0;
+	otyp = -1;
 	if(!(
 		(HAS_ESHK(smith) && inhishop(smith))
 		|| nearby_tree(smith->mx, smith->my)
@@ -7024,10 +7037,10 @@ d_weapon:
 	}
 	if(otyp == 0){
 		verbalize("I can't make that.");
-		return;
+		continue;
 	}
 	else if(otyp == -1){
-		return;
+		continue;
 	}
 
 	struct obj *obj = mksobj(otyp, MKOBJ_NOINIT);
@@ -7060,7 +7073,7 @@ d_weapon:
 		int price = get_cost(obj, smith);
 		if (shk_offer_price(slang, price, smith) == FALSE){
 			obfree(obj, (struct obj *)0);
-			return;
+			continue;
 		}
 	}
 	
@@ -7068,6 +7081,7 @@ d_weapon:
 
 	hold_another_object(obj, "Oops!  You drop %s!",
 				      doname(obj), (const char *)0);
+	}
 }
 
 void
@@ -7088,8 +7102,12 @@ int threshold;
 	int n;
 	struct obj *example = 0;
 	char buffer[BUFSZ] = {0};
-
-	any.a_void = 0;         /* zero out all bits */
+	while(TRUE){
+	buffer[0] = 0;
+	example = 0;
+	any.a_void = 0;
+	otyp = -1;
+	/* zero out all bits */
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	
@@ -7172,7 +7190,7 @@ d_weapon:
 			Sprintf(buffer, "contribute for scrap %s", resourceString);
 			resource = getobj(identify_types, buffer);
 			if(!resource){
-				return;
+				continue;
 			}
 			//NOT SUMMONED
 			if(resource->unpaid){
@@ -7217,15 +7235,15 @@ d_weapon:
 				}
 			}
 			else verbalize("That doesn't seem suitable to me.");
-			return;
+			continue;
 		}break;
 	}
 	if(otyp == 0){
 		verbalize("I can't make that.");
-		return;
+		continue;
 	}
 	else if(otyp == -1){
-		return;
+		continue;
 	}
 
 	struct obj *obj = mksobj(otyp, MKOBJ_NOINIT);
@@ -7265,7 +7283,7 @@ d_weapon:
 		int price = get_cost(obj, smith);
 		if (shk_offer_price(slang, price, smith) == FALSE){
 			obfree(obj, (struct obj *)0);
-			return;
+			continue;
 		}
 	}
 	
@@ -7282,6 +7300,7 @@ d_weapon:
 
 	hold_another_object(obj, "Oops!  You drop %s!",
 				      doname(obj), (const char *)0);
+	}
 }
 
 void
@@ -7432,6 +7451,44 @@ struct monst *smith;
 		break;
 		case PM_HUMAN_SMITH:
 			human_smithy(smith);
+		break;
+		default:
+			impossible("bad smith");
+			// generic_smithy(smith);
+		break;
+	}
+}
+
+void
+initialize_smith_stocks(smith)
+struct monst *smith;
+{
+	struct esmt *smth = ESMT(smith);
+	switch(ESMT(smith)->smith_mtyp){
+		case PM_OONA:
+			//Nothing
+		break;
+		case PM_DRACAE_ELADRIN:
+			//Nothing
+		break;
+		case PM_GOBLIN_SMITH:
+			smth->smith_iron_stockpile = 1000;
+		break;
+		case PM_DWARF_SMITH:
+			smth->smith_iron_stockpile = u.uz.dlevel > 14 ? 1000 : 0;
+			smth->smith_silver_stockpile = u.uz.dlevel > 14 ? 500 : 0;
+		break;
+		case PM_MITHRIL_SMITH:
+			smth->smith_silver_stockpile = 303;
+		break;
+		case PM_TREESINGER:
+			//Nothing
+		break;
+		case PM_SHADOWSMITH:
+			smth->smith_shadow_stockpile = 400;
+		break;
+		case PM_HUMAN_SMITH:
+			smth->smith_iron_stockpile = (u.uz.dlevel > 14 || smith->mtyp == PM_SHOPKEEPER) ? 1000 : 0;
 		break;
 		default:
 			impossible("bad smith");
